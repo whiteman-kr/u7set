@@ -569,8 +569,7 @@ void DialogOptions::createInterface()
 	setWindowFlags(Qt::Dialog | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Options.png"));
 
-	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
-
+	QRect screen = parentWidget()->screen()->availableGeometry();
 	setMinimumSize(static_cast<int>(screen.width() * 0.45), static_cast<int>(screen.height() * 0.3));
 	loadSettings();
 
@@ -589,6 +588,7 @@ void DialogOptions::createInterface()
 	m_pPropertyEditor = new ExtWidgets::PropertyEditor(this);
 	m_pPropertyEditor->setSplitterPosition(300);
 	m_pPropertyEditor->setReadOnly(false);
+	m_pPropertyEditor->hide();
 
 	connect(m_pPropertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &DialogOptions::onPropertyValueChanged);
 

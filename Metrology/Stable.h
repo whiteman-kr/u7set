@@ -81,6 +81,9 @@
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 
+#include <QRegularExpression>
+#include <QRegularExpressionValidator>
+
 // Qt widgets
 //
 
@@ -125,6 +128,8 @@
 #include <QTabWidget>
 #include <QTextEdit>
 #include <QTreeWidget>
+
+#include <QScreen>
 
 #ifdef _MSC_VER
 	#pragma warning(pop)

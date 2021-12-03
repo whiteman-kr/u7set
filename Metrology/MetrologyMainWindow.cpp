@@ -117,25 +117,25 @@ void MainWindow::createActions()
 	connect(m_pStartMeasureAction, &QAction::triggered, this, &MainWindow::onStartMeasure);
 
 	m_pStopMeasureAction = new QAction(tr("Stop"), this);
-	m_pStopMeasureAction->setShortcut(Qt::SHIFT + Qt::Key_F5);
+	m_pStopMeasureAction->setShortcut(QKeySequence{Qt::SHIFT | Qt::Key_F5});
 	m_pStopMeasureAction->setIcon(QIcon(":/icons/Stop.png"));
 	m_pStopMeasureAction->setToolTip(tr("To stop the measurement process"));
 	connect(m_pStopMeasureAction, &QAction::triggered, this, &MainWindow::onStopMeasure);
 
 	m_pExportMeasureAction = new QAction(tr("&Export ..."), this);
-	m_pExportMeasureAction->setShortcut(Qt::CTRL + Qt::Key_E);
+	m_pExportMeasureAction->setShortcut(QKeySequence{Qt::CTRL | Qt::Key_E});
 	m_pExportMeasureAction->setIcon(QIcon(":/icons/Export.png"));
 	m_pExportMeasureAction->setToolTip(tr("Export measurements"));
 	connect(m_pExportMeasureAction, &QAction::triggered, this, &MainWindow::onExportMeasure);
 
 	m_pPreviousSignalAction = new QAction(tr("Previous signal"), this);
-	m_pPreviousSignalAction->setShortcut(Qt::CTRL + Qt::Key_Left);
+	m_pPreviousSignalAction->setShortcut(QKeySequence{Qt::CTRL | Qt::Key_Left});
 	m_pPreviousSignalAction->setIcon(QIcon(":/icons/PreviousSignal.png"));
 	m_pPreviousSignalAction->setToolTip(tr("Select previous signal"));
 	connect(m_pPreviousSignalAction, &QAction::triggered, this, &MainWindow::previousMeasureSignal);
 
 	m_pNextSignalAction = new QAction(tr("Next signal"), this);
-	m_pNextSignalAction->setShortcut(Qt::CTRL + Qt::Key_Right);
+	m_pNextSignalAction->setShortcut(QKeySequence{Qt::CTRL | Qt::Key_Right});
 	m_pNextSignalAction->setIcon(QIcon(":/icons/NextSignal.png"));
 	m_pNextSignalAction->setToolTip(tr("Select next signal"));
 	connect(m_pNextSignalAction, &QAction::triggered, this, &MainWindow::nextMeasureSignal);
@@ -153,7 +153,7 @@ void MainWindow::createActions()
 	connect(m_pCopyCellMeasureAction, &QAction::triggered, this, &MainWindow::onCopyCellMeasure);
 
 	m_pRemoveMeasureAction = new QAction(tr("&Delete"), this);
-	m_pRemoveMeasureAction->setShortcut(Qt::CTRL + Qt::Key_Delete);
+	m_pRemoveMeasureAction->setShortcut(QKeySequence{Qt::CTRL | Qt::Key_Delete});
 	m_pRemoveMeasureAction->setIcon(QIcon(":/icons/Remove.png"));
 	m_pRemoveMeasureAction->setToolTip(tr("Delete the selected measurements"));
 	connect(m_pRemoveMeasureAction, &QAction::triggered, this, &MainWindow::onRemoveMeasure);
@@ -164,7 +164,7 @@ void MainWindow::createActions()
 	connect(m_pMeasurePropertyAction, &QAction::triggered, this, &MainWindow::onMeasureProperty);
 
 	m_pSelectAllMeasureAction = new QAction(tr("Select &All"), this);
-	m_pSelectAllMeasureAction->setShortcut(Qt::CTRL + Qt::Key_A);
+	m_pSelectAllMeasureAction->setShortcut(QKeySequence{Qt::CTRL | Qt::Key_A});
 	m_pSelectAllMeasureAction->setIcon(QIcon(":/icons/SelectAll.png"));
 	m_pSelectAllMeasureAction->setToolTip(tr("Select all measurements"));
 	connect(m_pSelectAllMeasureAction, &QAction::triggered, this, &MainWindow::onSelectAllMeasure);
@@ -234,13 +234,13 @@ void MainWindow::createActions()
 	connect(m_pCalibratorsAction, &QAction::triggered, this, &MainWindow::showCalibrators);
 
 	m_pShowCalculatorAction = new QAction(tr("Metrological &calculator ..."), this);
-	m_pShowCalculatorAction->setShortcut(Qt::ALT + Qt::Key_C);
+	m_pShowCalculatorAction->setShortcut(QKeySequence{Qt::ALT | Qt::Key_C});
 	m_pShowCalculatorAction->setIcon(QIcon(":/icons/Calculator.png"));
 	m_pShowCalculatorAction->setToolTip(tr("Calculator for converting metrological quantities"));
 	connect(m_pShowCalculatorAction, &QAction::triggered, this, &MainWindow::showCalculator);
 
 	m_pOptionsAction = new QAction(tr("&Options ..."), this);
-	m_pOptionsAction->setShortcut(Qt::CTRL + Qt::Key_O);
+	m_pOptionsAction->setShortcut(QKeySequence{Qt::CTRL | Qt::Key_O});
 	m_pOptionsAction->setIcon(QIcon(":/icons/Options.png"));
 	m_pOptionsAction->setToolTip(tr("Editing application settings"));
 	connect(m_pOptionsAction, &QAction::triggered, this, &MainWindow::showOptions);
@@ -380,8 +380,8 @@ bool MainWindow::createToolBars()
 		QLabel* pMeasureTimeoutLabel = new QLabel(m_pMeasureTimeoutToolBar);
 		QComboBox* pMeasureTimeoutList = new QComboBox(m_pMeasureTimeoutToolBar);
 		QLabel* pMeasureTimeoutUnitLabel = new QLabel(m_pMeasureTimeoutToolBar);
-		QRegExp rx("^[0-9]*[.]{1}[0-9]*$");
-		QValidator* validator = new QRegExpValidator(rx, m_pMeasureTimeoutToolBar);
+		QRegularExpression rx("^[0-9]*[.]{1}[0-9]*$");
+		QValidator* validator = new QRegularExpressionValidator(rx, m_pMeasureTimeoutToolBar);
 
 		m_pMeasureTimeoutToolBar->addWidget(pMeasureTimeoutLabel);
 		m_pMeasureTimeoutToolBar->addWidget(pMeasureTimeoutList);
@@ -542,7 +542,7 @@ void MainWindow::createPanels()
 		if (findAction != nullptr)
 		{
 			findAction->setText(tr("&Find ..."));
-			findAction->setShortcut(Qt::CTRL + Qt::Key_F);
+			findAction->setShortcut(QKeySequence{Qt::CTRL | Qt::Key_F});
 			findAction->setIcon(QIcon(":/icons/Find.png"));
 			findAction->setToolTip(tr("Find data in list of measurements"));
 
@@ -933,7 +933,7 @@ void MainWindow::loadOnToolBar_Connection()
 		QList<int> metrologyConnectionList = metrologyConnectionSet.values();
 		std::sort(metrologyConnectionList.begin(), metrologyConnectionList.end());
 
-		connectionCount = metrologyConnectionList.count();
+		connectionCount = static_cast<int>(metrologyConnectionList.count());
 		for(int index = 0; index < connectionCount; index++)
 		{
 			int connectionType = metrologyConnectionList.at(index);
@@ -2613,7 +2613,7 @@ QString MainWindow::configSocketConnectedStateStr()
 
 	connectedState = tr("Connected: %1 : %2\n\n").arg(configSocketAddress.addressStr()).arg(configSocketAddress.port());
 
-	int filesCount = m_pConfigSocket->loadedFiles().count();
+	int filesCount = static_cast<int>(m_pConfigSocket->loadedFiles().count());
 
 	connectedState.append(tr("Loaded files: %1").arg(filesCount));
 

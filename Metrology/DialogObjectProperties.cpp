@@ -68,7 +68,7 @@ void DialogProjectProperty::createPropertyList()
 	setWindowIcon(QIcon(":/icons/Property.png"));
 	setWindowTitle(tr("Property"));
 
-	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+	QRect screen = parentWidget()->screen()->availableGeometry();
 	setMinimumSize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.25));
 	resize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.25));
 	move(screen.center() - rect().center());
@@ -235,7 +235,7 @@ void DialogRackProperty::createPropertyList()
 	setWindowIcon(QIcon(":/icons/Property.png"));
 	setWindowTitle(tr("Property"));
 
-	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+	QRect screen = parentWidget()->screen()->availableGeometry();
 	setMinimumSize(static_cast<int>(screen.width() * 0.15), static_cast<int>(screen.height() * 0.15));
 	resize(static_cast<int>(screen.width() * 0.15), static_cast<int>(screen.height() * 0.15));
 	move(screen.center() - rect().center());
@@ -470,7 +470,7 @@ void DialogRackGroupProperty::createPropertyList()
 	setWindowIcon(QIcon(":/icons/Property.png"));
 	setWindowTitle(tr("Property - rack groups"));
 
-	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+	QRect screen = parentWidget()->screen()->availableGeometry();
 	setMinimumSize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.25));
 	resize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.25));
 	move(screen.center() - rect().center());
@@ -1318,9 +1318,9 @@ void DialogSignalProperty::createPropertyList()
 	setWindowIcon(QIcon(":/icons/Property.png"));
 	setWindowTitle(tr("Property"));
 
-	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+	QRect screen = parentWidget()->screen()->availableGeometry();
 	setMinimumSize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.25));
-	resize(static_cast<int>(screen.width() * 0.38), static_cast<int>(screen.height() * 0.25));
+	resize(static_cast<int>(screen.width() * 0.38), static_cast<int>(screen.height() * 0.52));
 	move(screen.center() - rect().center());
 
 	if (m_param.isValid() == false)
@@ -2012,9 +2012,9 @@ void DialogComparatorProperty::createPropertyList()
 	setWindowIcon(QIcon(":/icons/Property.png"));
 	setWindowTitle(tr("Property"));
 
-	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+	QRect screen = parentWidget()->screen()->availableGeometry();
 	setMinimumSize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.25));
-	resize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.25));
+	resize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.45));
 	move(screen.center() - rect().center());
 
 	setWindowTitle(tr("Property of comparator"));
@@ -2332,9 +2332,9 @@ void DialogMeasureProperty::createPropertyList()
 	setWindowIcon(QIcon(":/icons/Property.png"));
 	setWindowTitle(tr("Property"));
 
-	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
-	setMinimumSize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.26));
-	resize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.26));
+	QRect screen = parentWidget()->screen()->availableGeometry();
+	setMinimumSize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.25));
+	resize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.38));
 	move(screen.center() - rect().center());
 
 	if (m_pMeasurement == nullptr)

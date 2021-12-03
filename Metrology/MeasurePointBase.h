@@ -37,7 +37,7 @@ namespace Measure
 
 	const int PointSensorCount = 9;
 
-	#define ERR_POINT_SENSOR(sensor) (TO_INT(sensor) < 0 || TO_INT(sensor) >= Measure::PointSensorCount)
+	#define ERR_POINT_SENSOR(sensor) (static_cast<int>(sensor) < 0 || static_cast<int>(sensor) >= Measure::PointSensorCount)
 
 	QString PointSensorCaption(int sensor);
 

@@ -199,134 +199,134 @@ public:
 
 public:
 
-	void					clear();
+	void clear();
 
 	// Signals
 	//
-	int						signalCount() const;
-	void					clearSignalList();
+	int signalCount() const;
+	void clearSignalList();
 
-	int						appendSignal(const Metrology::SignalParam& param);
+	int appendSignal(const Metrology::SignalParam& param);
 
-	Metrology::Signal*		signalPtr(const QString& appSignalID);
-	Metrology::Signal*		signalPtr(const Hash& hash);
-	Metrology::Signal*		signalPtr(int index);
+	Metrology::Signal* signalPtr(const QString& appSignalID);
+	Metrology::Signal* signalPtr(const Hash& hash);
+	Metrology::Signal* signalPtr(int index);
 
-	Metrology::Signal		signal(const QString& appSignalID) const;
-	Metrology::Signal		signal(const Hash& hash) const;
-	Metrology::Signal		signal(int index) const;
+	Metrology::Signal signal(const QString& appSignalID) const;
+	Metrology::Signal signal(const Hash& hash) const;
+	Metrology::Signal signal(int index) const;
 
-	Metrology::SignalParam	signalParam(const QString& appSignalID) const;
-	Metrology::SignalParam	signalParam(const Hash& hash) const;
-	Metrology::SignalParam	signalParam(int index) const;
+	Metrology::SignalParam signalParam(const QString& appSignalID) const;
+	Metrology::SignalParam signalParam(const Hash& hash) const;
+	Metrology::SignalParam signalParam(int index) const;
 
-	void					setSignalParam(const QString& appSignalID, const Metrology::SignalParam& param);
-	void					setSignalParam(const Hash& hash, const Metrology::SignalParam& param);
-	void					setSignalParam(int index, const Metrology::SignalParam& param);
+	void setSignalParam(const QString& appSignalID, const Metrology::SignalParam& param);
+	void setSignalParam(const Hash& hash, const Metrology::SignalParam& param);
+	void setSignalParam(int index, const Metrology::SignalParam& param);
 
-	Metrology::SignalState	signalState(const QString& appSignalID) const;
-	Metrology::SignalState	signalState(const Hash& hash) const;
-	Metrology::SignalState	signalState(int index) const;
+	Metrology::SignalState signalState(const QString& appSignalID) const;
+	Metrology::SignalState signalState(const Hash& hash) const;
+	Metrology::SignalState signalState(int index) const;
 
-	void					setSignalState(const QString& appSignalID, const Metrology::SignalState& state);
-	void					setSignalState(const Hash& hash, const Metrology::SignalState& state);
-	void					setSignalState(int index, const Metrology::SignalState& state);
+	void setSignalState(const QString& appSignalID, const Metrology::SignalState& state);
+	void setSignalState(const Hash& hash, const Metrology::SignalState& state);
+	void setSignalState(int index, const Metrology::SignalState& state);
 
-	bool					enableForMeasure(Metrology::ConnectionType connectionType, Metrology::Signal& signal);
+	bool enableForMeasure(Metrology::ConnectionType connectionType, Metrology::Signal& signal);
 
 	// hashs for update signal state
 	//
-	int						hashForRequestStateCount() const;
-	Hash					hashForRequestState(int index);
+	int hashForRequestStateCount() const;
+	Hash hashForRequestState(int index);
 
-	void					appendHashForRequestState(const Hash& hash);
-	void					appendHashForRequestState(const std::set<Hash>& list);
-	void					removeLastHashForRequestState(int count);
+	void appendHashForRequestState(const Hash& hash);
+	void appendHashForRequestState(const std::set<Hash>& list);
+	void removeLastHashForRequestState(int count);
 
 	// racks for measure
 	//
-	RackBase&				racks() { return m_rackBase; }
+	RackBase& racks() { return m_rackBase; }
 
-	int						createRackListForMeasure(int measureKind, Metrology::ConnectionType connectionType);
-	void					clearRackListForMeasure();
+	int createRackListForMeasure(int measureKind, Metrology::ConnectionType connectionType);
+	void clearRackListForMeasure();
 
-	int						rackForMeasureCount() const;
-	Metrology::RackParam	rackForMeasure(int index) const;
+	int rackForMeasureCount() const;
+	Metrology::RackParam rackForMeasure(int index) const;
 
 	// module
 	//
-	QString					findAppSignalIDforSerialNo(const QString& moduleID);
+	QString findAppSignalIDforSerialNo(const QString& moduleID);
 
 	// signals for measure
 	//
-	void					initSignals();
-	void					initRackParam();
-	void					initConnectionSignals();
+	void initSignals();
+	void initRackParam();
+	void initConnectionSignals();
 
-	int						createSignalListForMeasure(int measureKind, Metrology::ConnectionType connectionType, int rackIndex);
-	void					clearSignalListForMeasure();
+	int createSignalListForMeasure(int measureKind, Metrology::ConnectionType connectionType, int rackIndex);
+	void clearSignalListForMeasure();
 
-	int						signalForMeasureCount() const;
-	MeasureSignal			signalForMeasure(int index) const;
-	bool					setSignalForMeasure(int index, const MeasureSignal& signal);
+	int signalForMeasureCount() const;
+	MeasureSignal signalForMeasure(int index) const;
+	bool setSignalForMeasure(int index, const MeasureSignal& signal);
 
 	// main signal for measure
 	//
-	MeasureSignal			activeSignal() const;
-	void					setActiveSignal(const MeasureSignal& signal);
-	void					clearActiveSignal();
+	MeasureSignal activeSignal() const;
+	void setActiveSignal(const MeasureSignal& signal);
+	void clearActiveSignal();
 
 	// other bases
 	//
-	TuningBase&				tuning() { return m_tuningBase; }								// sources and signals of tuning
-	Metrology::ConnectionBase& connections() { return m_connectionBase; }					// metrology connections
-	StatisticsBase&			statistics() { return m_statisticsBase; }						// statistics of measured signals
+	TuningBase& tuning() { return m_tuningBase; }								// sources and signals of tuning
+	Metrology::ConnectionBase& connections() { return m_connectionBase; }		// metrology connections
+	StatisticsBase& statistics() { return m_statisticsBase; }					// statistics of measured signals
 
 	// comparators
 	//
-	bool					loadComparatorsInSignal(const ComparatorSet& comparatorSet);
-	bool					initComparatorSignals(Metrology::ComparatorEx* pComparatorEx);
+	bool loadComparatorsInSignal(const ComparatorSet& comparatorSet);
+	bool initComparatorSignals(Metrology::ComparatorEx* pComparatorEx);
 
 private:
 
 	// all racks that received form CgfSrv
 	//
-	RackBase				m_rackBase;
+	RackBase m_rackBase;
 
 	// all signals that received form CgfSrv
 	//
-	mutable QMutex			m_signalMutex;
-	QHash<Hash, int>		m_signalHashList;
+	mutable QMutex m_signalMutex;
+	QHash<Hash, int> m_signalHashList;
 	std::vector<Metrology::Signal> m_signalList;
 
 	// list of hashes in order to receive signal state form AppDataSrv
 	//
-	mutable QMutex			m_stateMutex;
-	std::vector<Hash>		m_requestStateList;
+	mutable QMutex m_stateMutex;
+	std::vector<Hash> m_requestStateList;
 
 	// list of racks form CgfSrv in order to select signal for measure
 	//
-	mutable QMutex			m_rackMutex;
+	mutable QMutex m_rackMutex;
 	std::vector<Metrology::RackParam> m_rackList;
 
 	// list of signals for measure
 	//
-	mutable QMutex			m_signalMesaureMutex;
-	std::vector<MeasureSignal>	m_signalMeasureList;
+	mutable QMutex m_signalMesaureMutex;
+	std::vector<MeasureSignal> m_signalMeasureList;
 
 	// main signal that are measuring at the current moment
 	//
-	mutable QMutex			m_activeSignalMutex;
-	MeasureSignal			m_activeSignal;
+	mutable QMutex m_activeSignalMutex;
+	MeasureSignal m_activeSignal;
 
-	TuningBase				m_tuningBase;					// sources and signals of tuning that received form CgfSrv
-	Metrology::ConnectionBase m_connectionBase;				// metrology connections that received form CgfSrv
-	StatisticsBase			m_statisticsBase;				// statistics of measured signals
+	TuningBase m_tuningBase;						// sources and signals of tuning that received form CgfSrv
+	Metrology::ConnectionBase m_connectionBase;		// metrology connections that received form CgfSrv
+	StatisticsBase m_statisticsBase;				// statistics of measured signals
 
 signals:
 
-	void					activeSignalChanged(const MeasureSignal& signal);
-	void					signalParamChanged(const QString& appSignalID);
+	void activeSignalChanged(const MeasureSignal& signal);
+	void signalParamChanged(const QString& appSignalID);
 };
 
 // ==============================================================================================

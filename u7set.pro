@@ -3,8 +3,8 @@ TEMPLATE = subdirs
 CONFIG += ordered
 
 SUBDIRS += Protobuf \
-    	QScintilla/src/qscintilla.pro \
-        TrendView \
+    QScintilla/src/qscintilla.pro \
+    TrendView \
 	AppSignalLib \
 	UtilsLib \
 	OnlineLib \
@@ -18,22 +18,22 @@ SUBDIRS += Protobuf \
 	Builder \
 	BuilderConsole \
 	u7 \
-#        Metrology \
+    Metrology \
 #        BaseService \
-        ServiceControlManager \
+    ServiceControlManager \
 	ConfigurationService \
-        ArchivingService \
-        Monitor \
+    ArchivingService \
+    Monitor \
 	TuningService \
-        AppDataService \
+    AppDataService \
 	DiagDataService \
-        TuningClient \
-        mconf \
+    TuningClient \
+    mconf \
 	PacketSource \
 	PacketViewer \
 	UalTester \
-        SimulatorTests \
-        u7databaseTests
+    SimulatorTests \
+    u7databaseTests
 
 PacketSource.subdir = ./Tools/PacketSource
 PacketViewer.subdir = ./Tools/PacketViewer

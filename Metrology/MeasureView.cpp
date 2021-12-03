@@ -1030,14 +1030,14 @@ namespace Measure
 
 		// QChart
 		//
-		QtCharts::QChart* pChart = new QtCharts::QChart();
+		QChart* pChart = new QChart();
 		if (pChart == nullptr)
 		{
 			return;
 		}
 
 		pChart->setTitle(pLinearityMeasurement->customAppSignalID() + " - " + pLinearityMeasurement->caption());
-		pChart->setAnimationOptions(QtCharts::QChart::SeriesAnimations);
+		pChart->setAnimationOptions(QChart::SeriesAnimations);
 
 		// Add lines
 		//
@@ -1048,8 +1048,8 @@ namespace Measure
 			case ChartType::LinearityEl:
 			case ChartType::LinearityEn:
 				{
-					QtCharts::QLineSeries* pNominalSeries = new QtCharts::QLineSeries();
-					QtCharts::QLineSeries* pMeasureSeries = new QtCharts::QLineSeries();
+					QLineSeries* pNominalSeries = new QLineSeries();
+					QLineSeries* pMeasureSeries = new QLineSeries();
 
 					if (pNominalSeries == nullptr || pMeasureSeries == nullptr)
 					{
@@ -1062,8 +1062,8 @@ namespace Measure
 					pMeasureSeries->setColor(Qt::red);
 					pMeasureSeries->setName(tr("Measure"));
 
-					QtCharts::QLineSeries* pLowLimitlSeries = new QtCharts::QLineSeries();
-					QtCharts::QLineSeries* pHighLimitSeries = new QtCharts::QLineSeries();
+					QLineSeries* pLowLimitlSeries = new QLineSeries();
+					QLineSeries* pHighLimitSeries = new QLineSeries();
 
 					if (pLowLimitlSeries == nullptr || pHighLimitSeries == nullptr)
 					{
@@ -1123,15 +1123,15 @@ namespace Measure
 
 					pChart->addSeries(pNominalSeries);
 					pChart->addSeries(pMeasureSeries);
-					pChart->addSeries(pHighLimitSeries);
-					pChart->addSeries(pLowLimitlSeries);
+					//pChart->addSeries(pHighLimitSeries);
+					//pChart->addSeries(pLowLimitlSeries);
 				}
 				break;
 
 			case ChartType::Value20El:
 			case ChartType::Value20En:
 				{
-					QtCharts::QLineSeries* pMeasureSeries = new QtCharts::QLineSeries();
+					QLineSeries* pMeasureSeries = new QLineSeries();
 					if (pMeasureSeries == nullptr)
 					{
 						break;
@@ -1167,13 +1167,13 @@ namespace Measure
 		//
 		pChart->createDefaultAxes();
 
-		QList<QtCharts::QAbstractAxis*> axisXList = pChart->axes(Qt::Horizontal);
+		QList<QAbstractAxis*> axisXList = pChart->axes(Qt::Horizontal);
 		if (axisXList.isEmpty() == true)
 		{
 			return;
 		}
 
-		QtCharts::QValueAxis* pAxisX = dynamic_cast<QtCharts::QValueAxis*>(axisXList.at(0));
+		QValueAxis* pAxisX = dynamic_cast<QValueAxis*>(axisXList.at(0));
 		if (pAxisX == nullptr)
 		{
 			return;
@@ -1183,13 +1183,13 @@ namespace Measure
 		pAxisX->setTickCount(pointCount);
 		pAxisX->setLabelFormat("%.0f");
 
-		QList<QtCharts::QAbstractAxis*> axisYList = pChart->axes(Qt::Vertical);
+		QList<QAbstractAxis*> axisYList = pChart->axes(Qt::Vertical);
 		if (axisYList.isEmpty() == true)
 		{
 			return;
 		}
 
-		QtCharts::QValueAxis* pAxisY = dynamic_cast<QtCharts::QValueAxis*>(axisYList.at(0));
+		QValueAxis* pAxisY = dynamic_cast<QValueAxis*>(axisYList.at(0));
 		if (pAxisY == nullptr)
 		{
 			return;
@@ -1212,7 +1212,7 @@ namespace Measure
 		QDialog dialog(this, Qt::Dialog | Qt::WindowSystemMenuHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 		dialog.setWindowTitle(tr("Graph - %1").arg(pLinearityMeasurement->customAppSignalID()));
 
-		QRect screen = QDesktopWidget().availableGeometry(this);
+		QRect screen = parentWidget()->screen()->availableGeometry();
 		dialog.resize(static_cast<int>(screen.width() * 0.7), static_cast<int>(screen.height() * 0.4));
 		dialog.move(screen.center() - rect().center());
 

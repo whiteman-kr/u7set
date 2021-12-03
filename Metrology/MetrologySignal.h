@@ -185,7 +185,7 @@ namespace Metrology
 
 	const int SignalIDTypeCount = 3;
 
-	#define ERR_SIGNAL_ID_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= Metrology::SignalIDTypeCount)
+	#define ERR_SIGNAL_ID_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= Metrology::SignalIDTypeCount)
 
 	QString SignalIDTypeCaption(int type);
 
@@ -378,7 +378,7 @@ namespace Metrology
 
 	const int CmpValueTypeCount	= 2;
 
-	#define ERR_METROLOGY_CMP_VALUE_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= Metrology::CmpValueTypeCount)
+	#define ERR_METROLOGY_CMP_VALUE_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= Metrology::CmpValueTypeCount)
 
 	QString CmpValueTypeCpation(CmpValueType type);
 

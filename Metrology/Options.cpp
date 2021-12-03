@@ -2098,7 +2098,7 @@ bool compareDouble(double lDouble, double rDouble)
 Options::Options(QObject* parent) :
 	QObject(parent)
 {
-	qRegisterMetaTypeStreamOperators<QMap<QString,int>>("QMap<QString,int>");
+	qRegisterMetaType<QMap<QString,int>>("QMap<QString,int>");
 }
 
 // -------------------------------------------------------------------------------------------------------------------

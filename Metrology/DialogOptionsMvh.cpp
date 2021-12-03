@@ -71,7 +71,7 @@ void DialogOptionsMeasureViewHeader::setHeaderList()
 		horizontalHeaderLabels.append(qApp->translate("DialogOptionsMvh", MvhColumn[c]));
 	}
 
-	m_pColumnList->setColumnCount(horizontalHeaderLabels.count());
+	m_pColumnList->setColumnCount(static_cast<int>(horizontalHeaderLabels.count()));
 	m_pColumnList->setHorizontalHeaderLabels(horizontalHeaderLabels);
 	m_pColumnList->verticalHeader()->hide();
 

@@ -295,8 +295,8 @@ void DialogCalculator::createInterface()
 
 void DialogCalculator::initDialog()
 {
-	QRegExp rx("^[-]{0,1}[0-9]*[.]{1}[0-9]*$");
-	QValidator* validator = new QRegExpValidator(rx, this);
+	QRegularExpression rx("^[-]{0,1}[0-9]*[.]{1}[0-9]*$");
+	QValidator* validator = new QRegularExpressionValidator(rx, this);
 
 	// init elements of interface
 	//

@@ -1937,7 +1937,7 @@ namespace ExtWidgets
 
 		for (std::pair<int, QString> i : p->enumValues())
 		{
-			m_combo->addItem(tr(i.second.toUtf8()), i.first);
+			m_combo->addItem(QObject::tr(i.second.toUtf8()), i.first);
 		}
 		m_combo->setCurrentIndex(-1);
 
