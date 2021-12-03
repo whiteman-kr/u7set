@@ -479,9 +479,12 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 	writeMessage(QString("TuningEnabled = %1").arg(readSettings.tuningEnabled));
 	if (readSettings.tuningEnabled == true)
 	{
-		writeMessage(tr("TuningService (id, ip, port): %1, %2, %3").arg(readSettings.tuningService.equipmentId()).arg(readSettings.tuningService.ip()).arg(readSettings.tuningService.port()));
+		for (const MonitorSettings::TuningService& ts : readSettings.tuningServices)
+		{
+			writeMessage(tr("TuningService (id, ip, port): %1, %2, %3").arg(ts.tuningServiceID).arg(ts.clientRequestIP).arg(ts.clientRequestPort));
+			writeMessage(tr("TuningSources: %1").arg(ts.drivenSources.join(", ")));
+		}
 		writeMessage(tr("TuningUserAccounts: %1").arg(readSettings.tuningUserAccounts.join(", ")));
-		writeMessage(tr("TuningSources: %1").arg(readSettings.tuningSources.join(", ")));
 		writeMessage(tr("TuningSessionTimeout: %1").arg(readSettings.tuningSessionTimeout));
 	}
 
@@ -680,9 +683,7 @@ bool MonitorConfigController::applyCurSettingsProfile(std::shared_ptr<const Soft
 
 	if (ms.tuningEnabled == true)
 	{
-		outSetting->tuningService = ConfigConnection(ms.tuningServiceID, ms.tuningServiceIP, ms.tuningServicePort);
-		outSetting->tuningSources = ms.getTuningSources();
-
+		outSetting->tuningServices = ms.tuningServices;
 		outSetting->tuningLogin = ms.tuningLogin;
 		outSetting->tuningUserAccounts = ms.getUsersAccounts();
 		outSetting->tuningSessionTimeout = ms.tuningSessionTimeout;
@@ -691,9 +692,7 @@ bool MonitorConfigController::applyCurSettingsProfile(std::shared_ptr<const Soft
 	{
 		// tuning disabled
 		//
-		outSetting->tuningService = ConfigConnection();
-		outSetting->tuningSources.clear();
-
+		outSetting->tuningServices.clear();
 		outSetting->tuningLogin = false;
 		outSetting->tuningUserAccounts.clear();
 		outSetting->tuningSessionTimeout = 0;

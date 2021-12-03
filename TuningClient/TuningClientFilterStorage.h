@@ -17,7 +17,7 @@ public:
 
 	void createSchemaCounterFilters();
 
-	void updateCounters(const TuningSignalManager* objects, const TuningClientTcpClient* tcpClient, TuningFilter* filter = nullptr);
+	void updateCounters(const TuningSignalManager* objects, const std::vector<TuningClientTcpClient*> tcpClients, TuningFilter* filter = nullptr);
 
 	void removeFilters(TuningFilter::Source sourceType);
 

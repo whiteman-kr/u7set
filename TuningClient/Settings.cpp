@@ -6,39 +6,6 @@
 QColor redColor = QColor(192, 0, 0);
 
 //
-// ConfigConnection
-//
-
-
-ConfigConnection::ConfigConnection(QString EquipmentId, QString ipAddress, int port) :
-	m_equipmentId(EquipmentId),
-	m_ip(ipAddress),
-	m_port(port)
-{
-}
-
-QString ConfigConnection::equipmentId() const
-{
-	return m_equipmentId;
-}
-
-QString ConfigConnection::ip() const
-{
-	return m_ip;
-}
-
-int ConfigConnection::port() const
-{
-	return m_port;
-}
-
-HostAddressPort ConfigConnection::address() const
-{
-	HostAddressPort h(m_ip, m_port);
-	return h;
-}
-
-//
 // Settings
 //
 
@@ -76,8 +43,6 @@ void Settings::StoreSystem()
 
 	s.setValue("m_configuratorIpAddress2", m_configuratorIpAddress2);
 	s.setValue("m_configuratorPort2", m_configuratorPort2);
-
-	s.setValue("m_enableSimulation", m_enableSimulation);
 
 	s.setValue("m_filtersCustomFile", m_filtersCustomFile);
 	s.setValue("m_useFiltersCustomFile", m_useFiltersCustomFile);
@@ -121,8 +86,6 @@ void Settings::RestoreSystem()
 
 	m_configuratorIpAddress2 = s.value("m_configuratorIpAddress2", "127.0.0.1").toString();
 	m_configuratorPort2 = s.value("m_configuratorPort2", PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST).toInt();
-
-	m_enableSimulation = s.value("m_enableSimulation", m_enableSimulation).toBool();
 
 	// Determine the Local settings folder
 

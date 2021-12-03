@@ -2,16 +2,19 @@
 #include "TuningClientTcpClient.h"
 
 TuningClientTcpClient::TuningClientTcpClient(const SoftwareInfo& softwareInfo,
+											 const QString& tuningServiceId,
+											 int singleLmControlMode,
 											 TuningSignalManager* signalManager,
 											 Log::LogFile* log,
-											 TuningLog::TuningLog* tuningLog, TuningUserManager* userManager) :
-	TuningTcpClient(softwareInfo, signalManager),
+											 TuningLog::TuningLog* tuningLog,
+											 TuningUserManager* userManager) :
+	TuningTcpClient(softwareInfo, tuningServiceId, singleLmControlMode, signalManager),
 	TcpClientStatistics(this),
 	m_log(log),
 	m_tuningLog(tuningLog),
 	m_userManager(userManager)
 {
-	setObjectName("TuningClientTcpClient");
+	setObjectName(tuningServiceId);
 
 	assert(m_log);
 	assert(m_tuningLog);
@@ -52,7 +55,7 @@ void TuningClientTcpClient::writeLogSignalChange(const QString& message)
 
 int TuningClientTcpClient::sourceErrorCount() const
 {
-	QMutexLocker l(&m_tuningSourcesMutex);
+	QReadLocker l(&m_tuningSourcesLock);
 
 	int result = 0;
 
@@ -74,7 +77,7 @@ int TuningClientTcpClient::sourceErrorCount() const
 
 int TuningClientTcpClient::sourceErrorCount(Hash equipmentHash) const
 {
-	QMutexLocker l(&m_tuningSourcesMutex);
+	QReadLocker l(&m_tuningSourcesLock);
 
 	if (m_tuningSources.find(equipmentHash) == m_tuningSources.end())
 	{
@@ -105,7 +108,7 @@ int TuningClientTcpClient::sourceSorCount(bool* sorActive, bool* sorValid) const
 	*sorActive = false;
 	*sorValid = false;
 
-	QMutexLocker l(&m_tuningSourcesMutex);
+	QReadLocker l(&m_tuningSourcesLock);
 
 	for (const auto& it : m_tuningSources)
 	{
@@ -144,7 +147,7 @@ int TuningClientTcpClient::sourceSorCount(Hash equipmentHash, bool* sorActive, b
 
 	int result = 0;
 
-	QMutexLocker l(&m_tuningSourcesMutex);
+	QReadLocker l(&m_tuningSourcesLock);
 
 	if (m_tuningSources.find(equipmentHash) == m_tuningSources.end())
 	{
@@ -173,57 +176,30 @@ int TuningClientTcpClient::sourceSorCount(Hash equipmentHash, bool* sorActive, b
 
 QString TuningClientTcpClient::getStateToolTip() const
 {
-	Tcp::ConnectionState connectionState = getConnectionState();
 	HostAddressPort currentConnection = currentServerAddressPort();
 
-	QString result = tr("Tuning Service connection\n\n");
+	QString result = tr("ID: %1\n").arg(tuningServiceId());
 	result += tr("Address (primary): %1\n").arg(serverAddressPort(0).addressPortStr());
-	result += tr("Address (secondary): %1\n\n").arg(serverAddressPort(1).addressPortStr());
-	result += tr("Address (current): %1\n").arg(currentConnection.addressPortStr());
-	result += tr("Connection: ") + (connectionState.isConnected ? tr("established") : tr("no connection"));
+	result += tr("Address (secondary): %1\n").arg(serverAddressPort(1).addressPortStr());
+	result += tr("Address (current): %1").arg(currentConnection.addressPortStr());
 
 	return result;
 }
 
-bool TuningClientTcpClient::takeClientControl(QWidget* parentWidget)
+std::vector<Hash> TuningClientTcpClient::getProcessedHashes(const std::vector<Hash>& hashes)
 {
-	if (m_simulationMode == false)
-	{
-		if (activeTuningSourceCount() == 0)
-		{
-			QMessageBox::critical(parentWidget, qAppName(),	 tr("No tuning sources with control enabled found."));
+	std::vector<Hash> result;
+	result.reserve(hashes.size());
 
-			return false;
+	QReadLocker l(&m_signalHashesLock);
+
+	for (Hash hash : hashes)
+	{
+		if (m_signalHashesSet.find(hash) != m_signalHashesSet.end())
+		{
+			result.push_back(hash);
 		}
 	}
 
-	if (singleLmControlMode() == true && clientIsActive() == false)
-	{
-		QString equipmentId = singleActiveTuningSource();
-
-		if (QMessageBox::warning(parentWidget, qAppName(),
-								 tr("Warning!\n\nCurrent client is not selected as active now.\n\nAre you sure you want to take control and activate the source %1?").arg(equipmentId),
-								 QMessageBox::Yes | QMessageBox::No,
-								 QMessageBox::No) != QMessageBox::Yes)
-		{
-			return false;
-		}
-
-		activateTuningSourceControl(equipmentId, true, true);
-	}
-
-	return true;
-}
-
-
-bool TuningClientTcpClient::writingIsEnabled(const TuningSignalState& state) const
-{
-	if (lmStatusFlagMode() == LmStatusFlagMode::AccessKey)
-	{
-		return state.writingIsEnabled();
-	}
-	else
-	{
-		return true;
-	}
+	return result;
 }

@@ -89,8 +89,11 @@ namespace VFrame30
 	public:
 		TuningController() = delete;
 		TuningController(ITuningSignalManager* signalManager, ITuningTcpClient* tcpClient, QWidget* parent = nullptr);
+		TuningController(ITuningSignalManager* signalManager, std::vector<ITuningTcpClient*> tcpClients, QWidget* parent = nullptr);
 
 		void setTcpClient(ITuningTcpClient* tcpClient);
+		void setTcpClients(std::vector<ITuningTcpClient*> tcpClients);
+
 		void resetTcpClient();
 
 	public:
@@ -118,7 +121,7 @@ namespace VFrame30
 
 	private:
 		ITuningSignalManager* m_signalManager = nullptr;
-		ITuningTcpClient* m_tcpClient = nullptr;
+		std::vector<ITuningTcpClient*> m_tcpClients;
 	};
 
 }

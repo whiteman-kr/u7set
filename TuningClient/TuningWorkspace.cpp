@@ -136,10 +136,10 @@ void FilterButton::slot_toggled(bool checked)
 
 int TuningWorkspace::m_instanceCounter = 0;
 
-TuningWorkspace::TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> workspaceFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, TuningClientFilterStorage* tuningFilterStorage, QWidget* parent) :
+TuningWorkspace::TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> workspaceFilter, TuningSignalManager* tuningSignalManager, std::vector<TuningClientTcpClient*> tcpClients, TuningClientFilterStorage* tuningFilterStorage, QWidget* parent) :
 	QWidget(parent),
 	m_tuningSignalManager(tuningSignalManager),
-	m_tuningTcpClient(tuningTcpClient),
+	m_tuningTcpClients(tcpClients),
 	m_tuningFilterStorage(tuningFilterStorage),
 	m_workspaceFilter(workspaceFilter),
 	m_treeFilter(treeFilter)
@@ -150,7 +150,6 @@ TuningWorkspace::TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::
 	//assert(m_treeFilter); // Can be nullptr
 	assert(m_workspaceFilter);
 	assert(m_tuningSignalManager);
-	assert(m_tuningTcpClient);
 	assert(m_tuningFilterStorage);
 
 	QVBoxLayout* mainLayout = new QVBoxLayout();
@@ -354,7 +353,7 @@ void TuningWorkspace::updateFilters(std::shared_ptr<TuningFilter> rootFilter)
 			return;
 		}
 
-		swp->updateFilters(rootFilter);
+		swp->createControls(rootFilter);
 	}
 }
 
@@ -927,7 +926,7 @@ QWidget* TuningWorkspace::createTuningPageOrWorkspace(std::shared_ptr<TuningFilt
 		auto it = m_tuningWorkspacesMap.find(childWorkspaceFilterId);
 		if (it == m_tuningWorkspacesMap.end())
 		{
-			TuningWorkspace* tw = new TuningWorkspace(m_treeFilter, childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClient, m_tuningFilterStorage, this/*parent*/);
+			TuningWorkspace* tw = new TuningWorkspace(m_treeFilter, childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClients, m_tuningFilterStorage, this/*parent*/);
 
 			m_tuningWorkspacesMap[childWorkspaceFilterId] = tw;
 
@@ -946,7 +945,7 @@ QWidget* TuningWorkspace::createTuningPageOrWorkspace(std::shared_ptr<TuningFilt
 		{
 			// We have to create Presets Switch page
 			//
-			SwitchFiltersPage* swp = new SwitchFiltersPage(childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClient, m_tuningFilterStorage);
+			SwitchFiltersPage* swp = new SwitchFiltersPage(childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClients, m_tuningFilterStorage);
 			m_switchPresetPages.push_back(swp);
 			return swp;
 		}
@@ -957,7 +956,7 @@ QWidget* TuningWorkspace::createTuningPageOrWorkspace(std::shared_ptr<TuningFilt
 			auto it = m_tuningPagesMap.find(childWorkspaceFilterId);
 			if (it == m_tuningPagesMap.end())
 			{
-				TuningPage* tp = new TuningPage(m_treeFilter, childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClient, m_tuningFilterStorage);
+				TuningPage* tp = new TuningPage(m_treeFilter, childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClients, m_tuningFilterStorage);
 
 				m_tuningPagesMap[childWorkspaceFilterId] = tp;
 
@@ -1322,10 +1321,20 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 	bool valid = false;
 	bool controlIsEnabled = false;
 	bool hasUnappliedParams = false;
+	bool access = false;
 
-    bool access = false;
+	bool sourceFound = false;
 
-	if (m_tuningTcpClient->tuningSourceInfo(hash, &ts) == false)
+	for (const TuningClientTcpClient* client : m_tuningTcpClients)
+	{
+		if (client->tuningSourceInfo(hash, &ts) == true)
+		{
+			sourceFound = true;
+			break;
+		}
+	}
+
+	if (sourceFound == false)
 	{
 		status = tr("Unknown");
 	}
@@ -1542,16 +1551,36 @@ void TuningWorkspace::activateControl(const QString& equipmentId, bool enable)
 		return;
 	}
 
+	TuningClientTcpClient* client = nullptr;
+
+	for (TuningClientTcpClient* tc : m_tuningTcpClients)
+	{
+		if (tc->hasTuningSource(::calcHash(equipmentId)) == true)
+		{
+			client = tc;
+			break;
+		}
+	}
+
+	if (client == nullptr)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Error: no TCP client found for source %1.").arg(equipmentId));
+		return;
+	}
+
 	// Take Control
 
 	QString action = enable ? tr("activate") : tr("deactivate");
 
 	bool forceTakeControl = false;
 
-	if (m_tuningTcpClient->singleLmControlMode() == true && m_tuningTcpClient->clientIsActive() == false)
+	if (client->singleLmControlMode() == true && client->clientIsActive() == false)
 	{
 		if (QMessageBox::warning(this, qAppName(),
-								 tr("Warning!\n\nCurrent client is not selected as active now.\n\nAre you sure you want to take control and %1 the source %2?").arg(action).arg(equipmentId),
+								 tr("Warning!\n\nClient %1 is not selected as active now.\n\nAre you sure you want to take control and %2 the source %3?")
+								 .arg(client->tuningServiceId())
+								 .arg(action)
+								 .arg(equipmentId),
 								 QMessageBox::Yes | QMessageBox::No,
 								 QMessageBox::No) != QMessageBox::Yes)
 		{
@@ -1571,7 +1600,7 @@ void TuningWorkspace::activateControl(const QString& equipmentId, bool enable)
 		}
 	}
 
-	m_tuningTcpClient->activateTuningSourceControl(equipmentId, enable, forceTakeControl);
+	client->activateTuningSourceControl(equipmentId, enable, forceTakeControl);
 }
 
 QTreeWidgetItem* TuningWorkspace::findFilterWidget(const QString& id, QTreeWidgetItem* treeItem)
@@ -1685,11 +1714,6 @@ void TuningWorkspace::slot_treeContextMenuRequested(const QPoint& pos)
 		return;
 	}
 
-	if (m_tuningTcpClient->singleLmControlMode() == false)
-	{
-		return;
-	}
-
 	if (filter->isEmpty() == true)
 	{
 		return;
@@ -1700,9 +1724,28 @@ void TuningWorkspace::slot_treeContextMenuRequested(const QPoint& pos)
 		return;
 	}
 
+	const QString equipmentId = filter->caption();
+
 	TuningSource ts;
 
-	if (m_tuningTcpClient->tuningSourceInfo(::calcHash(filter->caption()), &ts) == false)
+	TuningClientTcpClient* client = nullptr;
+
+	for (TuningClientTcpClient* tc : m_tuningTcpClients)
+	{
+		if (tc->tuningSourceInfo(::calcHash(equipmentId), &ts) == true)
+		{
+			client = tc;
+			break;
+		}
+	}
+
+	if (client == nullptr)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Error: no TCP client found for source %1.").arg(equipmentId));
+		return;
+	}
+
+	if (client->singleLmControlMode() == false)
 	{
 		return;
 	}

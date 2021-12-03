@@ -384,6 +384,15 @@ private:
 class MonitorSettings : public SoftwareSettings
 {
 public:
+	struct TuningService
+	{
+		QString tuningServiceID;
+		QString clientRequestIP;
+		int clientRequestPort = 0;
+		QStringList drivenSources;
+	};
+
+public:
 	QString cfgServiceID1;
 	HostAddressPort cfgServiceIP1;
 
@@ -414,10 +423,8 @@ public:
 	int archiveServicePort2 = 0;
 
 	bool tuningEnabled = false;
-	QString tuningServiceID;
-	QString tuningServiceIP;
-	int tuningServicePort = 0;
-	QString tuningSources;
+
+	std::vector<TuningService> tuningServices;
 
 	bool tuningLogin = false;
 	QString tuningUserAccounts;
@@ -433,7 +440,6 @@ private:
 
 public:
 	QStringList getSchemaTags() const;
-	QStringList getTuningSources() const;
 	QStringList getUsersAccounts() const;
 
 	void clear();
@@ -448,6 +454,7 @@ public:
 		QString clientRequestIP;
 		int clientRequestPort = 0;
 		QStringList drivenSources;
+		bool singleLmControl = false;
 	};
 
 public:

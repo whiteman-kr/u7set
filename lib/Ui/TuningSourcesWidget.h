@@ -6,6 +6,7 @@
 #include "DialogSourceInfo.h"
 
 class TuningTcpClient;
+class TuningSource;
 
 //
 // DialogTuningSourceInfo
@@ -16,16 +17,24 @@ class DialogTuningSourceInfo : public DialogSourceInfo
 	Q_OBJECT
 
 public:
-	explicit DialogTuningSourceInfo(TuningTcpClient* tcpClient, QWidget* parent, Hash sourceHash);
+	explicit DialogTuningSourceInfo(std::vector<TuningTcpClient*> tcpClients, QWidget* parent, Hash sourceHash);
 	virtual ~DialogTuningSourceInfo();
 
-	void setTuningTcpClient(TuningTcpClient* tcpClient);
+	Hash sourceHash() const;
+
+	void setTuningTcpClients(std::vector<TuningTcpClient*> tcpClients);
 
 private:
+	bool findActiveTuningTcpClient();
+
 	void updateData() override;
 
 private:
-	TuningTcpClient* m_tcpClient = nullptr;
+	std::vector<TuningTcpClient*> m_tcpClients;
+
+	TuningTcpClient* m_activeTcpClient = nullptr;
+
+	QString m_sourceEquipmentId;
 
 };
 
@@ -34,10 +43,10 @@ class TuningSourcesWidget : public QWidget
 	Q_OBJECT
 public:
 
-	explicit TuningSourcesWidget(TuningTcpClient* tcpClient, bool hasActivationControls, bool hasCloseButton, QWidget* parent);
+	explicit TuningSourcesWidget(std::vector<TuningTcpClient*> tcpClients, bool hasActivationControls, bool hasCloseButton, QWidget* parent);
 	virtual ~TuningSourcesWidget();
 
-	void setTuningTcpClient(TuningTcpClient* tcpClient);
+	void setTuningTcpClients(std::vector<TuningTcpClient*> tcpClients);
 
 signals:
 	void closeButtonPressed();
@@ -48,26 +57,29 @@ protected:
 	virtual bool login();	// Override this function to ask password before activating/deactivating sources
 
 private slots:
-	void slot_tuningSourcesArrived();
+	void closeClicked();
 
-	void on_btnClose_clicked();
+	void detailsClicked();
 
-	void on_btnDetails_clicked();
+	void treeWidget_itemSelectionChanged();
 
-	void on_treeWidget_itemSelectionChanged();
+	void treeWidget_itemDoubleClicked(QTreeWidgetItem *item, int column);
 
-	void on_treeWidget_itemDoubleClicked(QTreeWidgetItem *item, int column);
+	void enableControl_clicked();
 
-	void on_btnEnableControl_clicked();
+	void disableControl_clicked();
 
-	void on_btnDisableControl_clicked();
-
-	void onDetailsDialogClosed(Hash hash);
+	void detailsDialogClosed(Hash hash);
 
 private:
+	bool checkTuningSourcesChanged() const;
+
 	void update(bool refreshOnly);
 
 	void activateControl(bool enable);
+
+	TuningTcpClient* selectedClient() const;
+	const std::optional<TuningSource> selectedSource() const;
 
 	enum class Columns
 	{
@@ -93,25 +105,21 @@ private:
 	QPushButton* m_btnDetails = nullptr;
 	QPushButton* m_btnEnableControl = nullptr;
 	QPushButton* m_btnDisableControl = nullptr;
-	QLabel* m_labelSingleControlMode = nullptr;
 
 	int m_updateStateTimerId = -1;
 
 	bool m_hasActivationControls = false;
 
-	bool m_singleControlMode = true;
-
-	TuningTcpClient* m_tuningTcpClient = nullptr;
+	std::vector<TuningTcpClient*> m_tuningTcpClients;
 
 	QWidget* m_parent = nullptr;
-
-	QString m_singleLmControlEnabledString;
-	QString m_singleLmControlDisabledString;
 
 	static const int columnIndex_Hash = 0;
 	static const int columnIndex_EquipmentId = 1;
 
 	std::map<Hash, DialogTuningSourceInfo*> m_sourceInfoDialogsMap;
+
+	std::set<Hash> m_tuningClientsSourcesHashes;	// used for comparing with current state, if it is changed - full refresh is performed
 };
 
 

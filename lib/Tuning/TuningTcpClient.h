@@ -83,20 +83,27 @@ class TuningTcpClient : public Tcp::Client, public ITuningTcpClient
 
 public:
 	TuningTcpClient(const SoftwareInfo& softwareInfo,
+					const QString& tuningServiceId,
+					bool singleLmControlMode,
 					TuningSignalManager* signalManager);
 
 	virtual ~TuningTcpClient();
 
 public:
-	void setSimulationMode(bool value);
-
 	// Tuning sources
 	//
 	std::vector<Hash> tuningSourcesEquipmentHashes() const;
 	std::vector<TuningSource> tuningSourcesInfo() const;
 	bool tuningSourceInfo(Hash equipmentHash, TuningSource* result) const;
+	bool hasTuningSource(Hash equipmentHash) const;
 
 	bool activateTuningSourceControl(const QString& equipmentId, bool enableControl, bool forceTakeControl);
+
+	// Searching signals
+	//
+	bool hasTuningSignals(const std::vector<Hash> appSignalHashes) const;	// Returns true if client processes at least one of specified signals
+	bool hasTuningSignal(Hash appSignalHash) const;
+	bool hasTuningSignal(QString appSignalId) const override;
 
 	// Writing states
 	//
@@ -177,6 +184,9 @@ public:
 	bool autoApply() const;
 	void setAutoApply(bool value);
 
+	QString tuningServiceId() const;
+	void setTuningServiceId(const QString& tuningServiceId);
+
 	// LM Control functions
 
 	bool singleLmControlMode() const;
@@ -191,6 +201,7 @@ public:
 	QString singleActiveTuningSource() const;
 
 	LmStatusFlagMode lmStatusFlagMode() const;
+	void setLmStatusFlagMode(const LmStatusFlagMode& mode);
 
 	// Data
 	//
@@ -199,6 +210,7 @@ private:
 	Hash m_instanceIdHash;
 	int m_requestInterval = 100;
 	bool m_autoApply = true;
+	QString m_tuningServiceId;
 
 	LmStatusFlagMode m_lmStatusFlagMode = LmStatusFlagMode::SOR;
 
@@ -208,8 +220,12 @@ protected:
 
 	// Tuning sources
 	//
-	mutable QMutex m_tuningSourcesMutex;				// For access to m_tuningSources, m_equipmentToSignalMap
+	mutable QReadWriteLock m_tuningSourcesLock;				// For access to m_tuningSources, m_equipmentToSignalMap
 	std::map<Hash, TuningSource> m_tuningSources;		// Key is hash of EquipmentID
+
+	mutable QReadWriteLock m_signalHashesLock;			// For access to m_signalHashes and m_signalHashesSet
+	std::vector<Hash> m_signalHashes;					// SORTED Hash Vector for iterating all processed signals
+	std::unordered_set<Hash> m_signalHashesSet;			// Hash Table for fast checking if signal is processed by this client
 
 private:
 	// Processing
@@ -220,9 +236,6 @@ private:
 	int m_readTuningSignalIndex = 0;
 	int m_readTuningSignalCount = 0;
 
-	mutable QMutex m_signalHashesMutex;					// For access to m_signalHashes
-	std::vector<Hash> m_signalHashes;
-
 	bool m_singleLmControlMode = false;
 
 	mutable QMutex m_activeClientMutex;				// For access to m_activeClientId, m_activeClientIp
@@ -230,9 +243,6 @@ private:
 	QString m_activeClientIp;
 
 	bool m_currentClientIsActive = false;
-
-protected:
-	bool m_simulationMode = false;
 
 private:
 	// Cached protobuf messages
@@ -255,5 +265,4 @@ private:
 	::Network::TuningSignalsApply m_applyTuningSignals;
 	::Network::TuningSignalsApplyReply m_applyTuningSignalsReply;
 };
-
 

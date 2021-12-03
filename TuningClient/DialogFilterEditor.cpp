@@ -2,10 +2,8 @@
 #include "MainWindow.h"
 
 
-DialogFilterEditor::DialogFilterEditor(TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, TuningFilterStorage* filterStorage,
-                                                   QWidget* parent):
+DialogFilterEditor::DialogFilterEditor(TuningSignalManager* tuningSignalManager, TuningFilterStorage* filterStorage, QWidget* parent):
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
-	m_tuningClientTcpClient(tuningTcpClient),
 	m_tuningSignalManager(tuningSignalManager)
 {
 	assert(tuningSignalManager);

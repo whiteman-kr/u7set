@@ -147,8 +147,8 @@ private:
 	bool readAppDataServiceAndArchiveSettings(const Builder::Context* context,
 											  const Hardware::Software* software);
 
-	bool readTuningSettings(const Builder::Context* context,
-							const Hardware::Software* software);
+	bool readTuningServiceSettings(const Builder::Context* context,
+											  const Hardware::Software* software);
 };
 
 // -------------------------------------------------------------------------------------------

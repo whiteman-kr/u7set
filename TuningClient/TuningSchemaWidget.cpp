@@ -5,8 +5,8 @@
 //
 // TuningClientTuningController
 //
-TuningClientTuningController::TuningClientTuningController(ITuningSignalManager* signalManager, ITuningTcpClient* tcpClient, QWidget* parent):
-	VFrame30::TuningController(signalManager, tcpClient, parent)
+TuningClientTuningController::TuningClientTuningController(ITuningSignalManager* signalManager, std::vector<ITuningTcpClient*> tcpClients, QWidget* parent):
+	VFrame30::TuningController(signalManager, tcpClients, parent)
 {
 }
 

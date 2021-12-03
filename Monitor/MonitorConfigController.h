@@ -47,16 +47,19 @@ struct ConfigSettings
 	ConfigConnection archiveService1;
 	ConfigConnection archiveService2;
 
+	// Tuning settings
+	//
 	bool tuningEnabled = false;
-	QStringList tuningSources;
-	ConfigConnection tuningService;
+	std::vector<MonitorSettings::TuningService> tuningServices;
 
 	bool tuningLogin = false;
 	QStringList tuningUserAccounts;
 	int tuningSessionTimeout = 0;
 
+	//
 	QString globalScript;
 	QString onConfigurationArrivedScript;
+
 	QImage logoImage;
 
 	MonitorBehavior monitorBeahvior;

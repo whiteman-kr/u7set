@@ -1,7 +1,7 @@
 #include "MonitorTuningTcpClient.h"
 
-MonitorTuningTcpClient::MonitorTuningTcpClient(const SoftwareInfo& softwareInfo, TuningSignalManager* signalManager, ILogFile* logFile) :
-	TuningTcpClient(softwareInfo, signalManager),
+MonitorTuningTcpClient::MonitorTuningTcpClient(const SoftwareInfo& softwareInfo, const QString& tuningServiceId, TuningSignalManager* signalManager, ILogFile* logFile) :
+	TuningTcpClient(softwareInfo, tuningServiceId, false/*singleLmControlMode*/, signalManager),
 	TcpClientStatistics(this),
 	m_logFile(logFile, "TuningTcpClient")
 {
@@ -18,7 +18,7 @@ MonitorTuningTcpClient::~MonitorTuningTcpClient()
 
 int MonitorTuningTcpClient::sourceErrorCount() const
 {
-	QMutexLocker l(&m_tuningSourcesMutex);
+	QReadLocker l(&m_tuningSourcesLock);
 
 	int result = 0;
 

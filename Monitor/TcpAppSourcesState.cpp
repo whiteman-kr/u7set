@@ -131,7 +131,7 @@ std::vector<Hash> TcpAppSourcesState::appDataSourceHashes()
 {
 	std::vector<Hash> result;
 
-	QMutexLocker l(&m_appDataSourceStatesMutex);
+	QReadLocker l(&m_appDataSourceStatesLock);
 
 	for (auto it : m_appDataSourceStates)
 	{
@@ -143,7 +143,7 @@ std::vector<Hash> TcpAppSourcesState::appDataSourceHashes()
 
 AppDataSourceState TcpAppSourcesState::appDataSourceState(Hash id, bool* ok)
 {
-	QMutexLocker l(&m_appDataSourceStatesMutex);
+	QReadLocker l(&m_appDataSourceStatesLock);
 
 	auto it = m_appDataSourceStates.find(id);
 	if (it == m_appDataSourceStates.end())
@@ -165,7 +165,7 @@ AppDataSourceState TcpAppSourcesState::appDataSourceState(Hash id, bool* ok)
 
 int TcpAppSourcesState::sourceErrorCount()
 {
-	QMutexLocker l(&m_appDataSourceStatesMutex);
+	QReadLocker l(&m_appDataSourceStatesLock);
 
 	int result = 0;
 
@@ -210,9 +210,10 @@ void TcpAppSourcesState::onConnection()
 
 	assert(isClearToSendRequest() == true);
 
-	QMutexLocker l(&m_appDataSourceStatesMutex);
-	m_appDataSourceStates.clear();
-	l.unlock();
+	{
+		QWriteLocker l(&m_appDataSourceStatesLock);
+		m_appDataSourceStates.clear();
+	}
 
 	resetToGetAppDataSourcesInfo();
 
@@ -225,12 +226,10 @@ void TcpAppSourcesState::onDisconnection()
 	m_logFile.writeMessage("onDisconnection()");
 
 	{
-		QMutexLocker l(&m_appDataSourceStatesMutex);
-
+		QWriteLocker l(&m_appDataSourceStatesLock);
 		for (auto& it : m_appDataSourceStates)
 		{
 			AppDataSourceState& ads = it.second;
-
 			ads.invalidate();
 		}
 	}
@@ -304,8 +303,10 @@ void TcpAppSourcesState::requestAppDataSourcesInfo()
 		return;
 	}
 
-	QMutexLocker l(&m_appDataSourceStatesMutex);
-	m_appDataSourceStates.clear();
+	{
+		QWriteLocker l(&m_appDataSourceStatesLock);
+		m_appDataSourceStates.clear();
+	}
 
 	sendRequest(ADS_GET_APP_DATA_SOURCES_INFO);
 
@@ -334,21 +335,23 @@ void TcpAppSourcesState::processAppDataSourcesInfo(const QByteArray& data)
 		return;
 	}
 
-	QMutexLocker l(&m_appDataSourceStatesMutex);
-	m_appDataSourceStates.clear();
-
-	for (int i = 0; i < m_getDataSourcesInfoReply.datasourceinfo_size(); i++)
 	{
-		const ::Network::DataSourceInfo& dsi = m_getDataSourcesInfoReply.datasourceinfo(i);
+		QWriteLocker l(&m_appDataSourceStatesLock);
+		m_appDataSourceStates.clear();
 
-		AppDataSourceState ads;
-		ads.info = dsi;
+		for (int i = 0; i < m_getDataSourcesInfoReply.datasourceinfo_size(); i++)
+		{
+			const ::Network::DataSourceInfo& dsi = m_getDataSourcesInfoReply.datasourceinfo(i);
 
-		Hash hash = ::calcHash(QString::fromStdString(ads.info.moduleequipmentid()));
+			AppDataSourceState ads;
+			ads.info = dsi;
 
-		assert(m_appDataSourceStates.count(hash) == 0);
+			Hash hash = ::calcHash(QString::fromStdString(ads.info.moduleequipmentid()));
 
-		m_appDataSourceStates[hash] = ads;
+			assert(m_appDataSourceStates.count(hash) == 0);
+
+			m_appDataSourceStates[hash] = ads;
+		}
 	}
 
 	resetToGetAppDataSourcesState();
@@ -363,8 +366,6 @@ void TcpAppSourcesState::requestAppDataSourcesState()
 
 void TcpAppSourcesState::processAppDataSourcesState(const QByteArray& data)
 {
-	QMutexLocker l(&m_appDataSourceStatesMutex);
-
 	bool ok = m_getAppDataSourcesStateReply.ParseFromArray(data.constData(), data.size());
 
 	if (ok == false)
@@ -386,31 +387,35 @@ void TcpAppSourcesState::processAppDataSourcesState(const QByteArray& data)
 	}
 
 	//
-	for (int i = 0; i < m_getAppDataSourcesStateReply.appdatasourcesstates_size(); i++)
 	{
-		const ::Network::AppDataSourceState& state = m_getAppDataSourcesStateReply.appdatasourcesstates(i);
+		QWriteLocker l(&m_appDataSourceStatesLock);
 
-		Hash id = state.id();
-
-		bool found = false;
-
-		for (auto& it : m_appDataSourceStates)
+		for (int i = 0; i < m_getAppDataSourcesStateReply.appdatasourcesstates_size(); i++)
 		{
-			AppDataSourceState& ads = it.second;
+			const ::Network::AppDataSourceState& state = m_getAppDataSourcesStateReply.appdatasourcesstates(i);
 
-			if (ads.id() == id)
+			Hash id = state.id();
+
+			bool found = false;
+
+			for (auto& it : m_appDataSourceStates)
 			{
-				ads.setNewState(state);
+				AppDataSourceState& ads = it.second;
 
-				found = true;
+				if (ads.id() == id)
+				{
+					ads.setNewState(state);
 
-				break;
+					found = true;
+
+					break;
+				}
 			}
-		}
 
-		if (found == false)
-		{
-			assert(false);
+			if (found == false)
+			{
+				assert(false);
+			}
 		}
 	}
 
