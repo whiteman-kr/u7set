@@ -56,9 +56,6 @@ namespace Tuning
 							const TuningSources& sources);
 		~TuningClientContext();
 
-		void getSourcesInfo(std::vector<Network::DataSourceInfo>* dataSourcesInfo) const;
-		void getSourcesStates(std::vector<Network::TuningSourceState>* tuningSourcesStates) const;
-
 		void readSignalStates(const Network::TuningSignalsRead& request, Network::TuningSignalsReadReply* reply) const;
 
 		void writeSignalStates(const QString& clientEquipmentID,

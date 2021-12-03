@@ -12,7 +12,7 @@ namespace Tuning
 	const char* TcpTuningServer::SCM_CLIENT_ID = "SCM";
 
 	TcpTuningServer::TcpTuningServer(TuningServiceWorker& service,
-									 TuningSources& tuningSources,
+									 const TuningSources& tuningSources,
 									 std::shared_ptr<CircularLogger> logger) :
 		Tcp::Server(service.softwareInfo()),
 		m_service(service),
@@ -119,66 +119,42 @@ namespace Tuning
 		DEBUG_LOG_MSG(m_logger, QString(tr("TDS_GET_TUNING_SOURCES_INFO request from %1, %2")).
 					  arg(clientEquipmentID).arg(peerAddr().addressStr()));
 
-
-		QVector<const TuningClientContext*> clientContexts;
-
-		QString msg;
-
 		NetworkError errCode = NetworkError::Success;
 
-		if (clientEquipmentID == SCM_CLIENT_ID)
+		const TuningClientContext* clntContext =
+				m_service.getClientContext(clientEquipmentID);
+
+		if (clntContext == nullptr &&
+			clientEquipmentID != SCM_CLIENT_ID)
 		{
-			m_service.getAllClientContexts(clientContexts);
-		}
-		else
-		{
-			const TuningClientContext* clntContext =
-					m_service.getClientContext(clientEquipmentID);
+			// unknown clientID
+			//
+			errCode = NetworkError::UnknownTuningClientID;
 
-			if (clntContext == nullptr)
-			{
-				// unknown clientID
-				//
-				errCode = NetworkError::UnknownTuningClientID;
+			m_getTuningSourcesInfoReply.set_error(TO_INT(errCode));
+			sendReply(m_getTuningSourcesInfoReply);
 
-				m_getTuningSourcesInfoReply.set_error(TO_INT(errCode));
-				sendReply(m_getTuningSourcesInfoReply);
-
-				DEBUG_LOG_ERR(m_logger, QString(tr("Send reply %1 on TDS_GET_TUNING_SOURCES_INFO to %2")).
-							  arg(getNetworkErrorStr(errCode)).arg(peerAddr().addressStr()));
-				return;
-			}
-
-			clientContexts.append(clntContext);
+			DEBUG_LOG_ERR(m_logger, QString(tr("Send reply %1 on TDS_GET_TUNING_SOURCES_INFO to %2")).
+						  arg(getNetworkErrorStr(errCode)).arg(peerAddr().addressStr()));
+			return;
 		}
 
-		QHash<quint64, quint64> dataSourcesIDs;
-
-		for(const TuningClientContext* clientContext : clientContexts)
+		if (m_clientSourcesList.has_value() == false)
 		{
-			std::vector<Network::DataSourceInfo> dsiArray;
+			initClientSourcesList(clientEquipmentID);
+		}
 
-			clientContext->getSourcesInfo(&dsiArray);
+		for(const QString& sourceID : m_clientSourcesList.value())
+		{
+			const TuningSource* src = m_tuningSources.getSourceByID(sourceID);
 
-			for(const Network::DataSourceInfo& dsi : dsiArray)
-			{
-				quint64 sourceID = dsi.id();
+			TEST_PTR_CONTINUE(src);
 
-				if (dataSourcesIDs.contains(sourceID) == false)
-				{
-					dataSourcesIDs.insert(sourceID, sourceID);
+			Network::DataSourceInfo* newDsi = m_getTuningSourcesInfoReply.add_tuningsourceinfo();
 
-					Network::DataSourceInfo* newDsi = m_getTuningSourcesInfoReply.add_tuningsourceinfo();
+			TEST_PTR_CONTINUE(newDsi);
 
-					if (newDsi == nullptr)
-					{
-						assert(false);
-						continue;
-					}
-
-					*newDsi = dsi;
-				}
-			}
+			src->saveToProto(newDsi);
 		}
 
 		errCode = NetworkError::Success;
@@ -195,7 +171,6 @@ namespace Tuning
 					  arg(getNetworkErrorStr(errCode)).arg(peerAddr().addressStr()));
 	}
 
-
 	void TcpTuningServer::onGetTuningSourcesStateRequest(const char *requestData, quint32 requestDataSize)
 	{
 		m_getTuningSourcesStatesReply.Clear();
@@ -211,64 +186,53 @@ namespace Tuning
 
 		QString clientEquipmentID = connectedSoftwareInfo().equipmentID();
 
-		QVector<const TuningClientContext*> clientContexts;
+		const TuningClientContext* clntContext =
+				m_service.getClientContext(clientEquipmentID);
 
-		// построить список ID источников
-
-		if (clientEquipmentID == SCM_CLIENT_ID)
+		if (clntContext == nullptr &&
+			clientEquipmentID != SCM_CLIENT_ID)
 		{
-			// здесь включить ВСЕ
-			m_service.getAllClientContexts(clientContexts);
+			// unknown clientID
+			//
+			NetworkError errCode = NetworkError::UnknownTuningClientID;
+
+			m_getTuningSourcesStatesReply.set_error(TO_INT(errCode));
+			sendReply(m_getTuningSourcesStatesReply);
+
+			DEBUG_LOG_ERR(m_logger, QString(tr("Send reply %1 on TDS_GET_TUNING_SOURCES_STATES to %2")).
+						  arg(getNetworkErrorStr(errCode)).arg(peerAddr().addressStr()));
+			return;
 		}
-		else
+
+		if (m_clientSourcesList.has_value() == false)
 		{
-			const TuningClientContext* clntContext =
-					m_service.getClientContext(clientEquipmentID);
-
-			if (clntContext == nullptr)
-			{
-				// unknown clientID
-				//
-				NetworkError errCode = NetworkError::UnknownTuningClientID;
-
-				m_getTuningSourcesStatesReply.set_error(TO_INT(errCode));
-				sendReply(m_getTuningSourcesStatesReply);
-
-				DEBUG_LOG_ERR(m_logger, QString(tr("Send reply %1 on TDS_GET_TUNING_SOURCES_STATES to %2")).
-							  arg(getNetworkErrorStr(errCode)).arg(peerAddr().addressStr()));
-				return;
-			}
-
-			// здесь ТОЛЬКО ТЕ ЧТО УПРАВЛЯЕТ СЛИЕНТ КОНТЕКСТ
-			clientContexts.append(clntContext);
+			initClientSourcesList(clientEquipmentID);
 		}
-wsergergerg
-		std::set<quint64, quint64> dataSourcesIDs;
 
-		for(const TuningClientContext* clientContext : clientContexts)
+		for(const QString& sourceID : m_clientSourcesList.value())
 		{
-			std::vector<Network::TuningSourceState> tssArray;
+			const TuningSourceThreadShared sourceThread = m_service.getTuningSourceThread(sourceID);
 
-			clientContext->getSourcesStates(tssArray);
-
-			for(const Network::TuningSourceState& tss : tssArray)
+			if (sourceThread == nullptr)
 			{
-				quint64 sourceID = tss.sourceid();
+				const TuningSource* src = m_tuningSources.getSourceByID(sourceID);
 
-				if (dataSourcesIDs.contains(sourceID) == false)
+				TEST_PTR_CONTINUE(src);
+
+				const QStringList& tuningLans = src->getEnabledLansProvidedTuning();
+
+				for(const QString& lanID : tuningLans)
 				{
-					dataSourcesIDs.insert(sourceID, sourceID);
-
 					Network::TuningSourceState* newTss = m_getTuningSourcesStatesReply.add_tuningsourcesstate();
 
-					if (newTss == nullptr)
-					{
-						assert(false);
-						continue;
-					}
-
-					*newTss = tss;
+					newTss->set_sourceid(src->ID());
+					newTss->set_lanequipmentid(lanID.toStdString());
+					newTss->set_isreply(false);
 				}
+			}
+			else
+			{
+				sourceThread->getSourceState(&m_getTuningSourcesStatesReply);
 			}
 		}
 
@@ -316,7 +280,7 @@ wsergergerg
 				Hash signalHash = m_tuningSignalsReadRequest.signalhash(i);
 				quint32 ip = m_signalHash2SourceIP.value(signalHash);
 
-				const TuningSourceThread* thread = m_service.getTuningSourceThread(ip);
+				const TuningSourceThreadShared thread = m_service.getTuningSourceThread(ip);
 
 				TEST_PTR_CONTINUE(thread);
 
@@ -690,7 +654,7 @@ wsergergerg
 
 	void TcpTuningServer::prepareSignalGetter()
 	{
-		for (TuningSource& tuningSource : m_tuningSources)
+		for (const TuningSource& tuningSource : m_tuningSources)
 		{
 			TEST_PTR_CONTINUE(tuningSource.tuningData());
 
@@ -719,6 +683,32 @@ wsergergerg
 
 				m_sourceId2SignalHash.insert(tuningSource.ID(), signalHash);
 			}
+		}
+	}
+
+	void TcpTuningServer::initClientSourcesList(const QString& clientEquipmentID)
+	{
+		Q_ASSERT(m_clientSourcesList.has_value() == false);		// one time init
+
+		if (clientEquipmentID == SCM_CLIENT_ID)
+		{
+			// send all sources info to SCM
+			//
+			m_clientSourcesList = m_tuningSources.getAllSourcesIDs();
+		}
+		else
+		{
+			auto settings = m_service.tuningServiceSettings();
+
+			TuningServiceSettings::TuningClient tunClient = settings.getTuningClient(clientEquipmentID);
+
+			if (tunClient.isValid() == false)
+			{
+				Q_ASSERT(false);		// clientEquipmentID should be checked early!
+				return;
+			}
+
+			m_clientSourcesList = tunClient.uniqueSourcesIDs();
 		}
 	}
 

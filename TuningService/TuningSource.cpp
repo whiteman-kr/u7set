@@ -136,4 +136,16 @@ namespace Tuning
 
 		return nullptr;
 	}
+
+	QStringList TuningSources::getAllSourcesIDs() const
+	{
+		QStringList ids;
+
+		for(const TuningSource&  src : *this)
+		{
+			ids.append(src.moduleEquipmentID());
+		}
+
+		return ids;
+	}
 }

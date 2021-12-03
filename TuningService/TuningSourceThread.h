@@ -412,7 +412,7 @@ namespace Tuning
 		void pushReply(int channel, const RupFotipV2& reply);
 		void incErrReplySize(quint32 channelIP);
 
-		void getSourceState(std::vector<Network::TuningSourceState>* tuningSourcesStates);
+		void getSourceState(Network::GetTuningSourcesStatesReply* reply);
 
 		void readSignalState(Network::TuningSignalState* tss) const;
 

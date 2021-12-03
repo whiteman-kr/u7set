@@ -86,11 +86,23 @@ namespace Tuning
 		return m_clientContextMap.getClientContext(QString::fromStdString(clientID));
 	}
 
-	TuningSourceThread* TuningServiceWorker::getTuningSourceThread(quint32 sourceIP)
+	TuningSourceThreadShared TuningServiceWorker::getTuningSourceThread(quint32 sourceIP)
 	{
 		auto it = m_ip2sourceThread.find(sourceIP);
 
 		if (it == m_ip2sourceThread.end())
+		{
+			return nullptr;
+		}
+
+		return it->second;
+	}
+
+	TuningSourceThreadShared TuningServiceWorker::getTuningSourceThread(const QString& sourceID)
+	{
+		auto it = m_sourceThreads.find(sourceID);
+
+		if (it == m_sourceThreads.end())
 		{
 			return nullptr;
 		}
@@ -501,7 +513,7 @@ namespace Tuning
 
 			// create TuningSourceWorkerThreads and fill m_sourceWorkerThreadMap
 			//
-			TuningSourceThread* sourceThread = createTuningSourceThread(tuningSource);
+			TuningSourceThreadShared sourceThread = createTuningSourceThread(tuningSource);
 
 			TEST_PTR_CONTINUE(sourceThread);
 
@@ -512,7 +524,7 @@ namespace Tuning
 
 		for(auto& p : m_sourceThreads)
 		{
-			TuningSourceThread* sourceThread = p.second;
+			TuningSourceThreadShared sourceThread = p.second;
 
 			sourceThread->start();
 			sourceThread->waitWhileHandlersInitialized();
@@ -524,8 +536,6 @@ namespace Tuning
 	TuningSourceThreadShared TuningServiceWorker::createTuningSourceThread(const TuningSource& source)
 	{
 		auto it = m_sourceThreads.find(source.moduleEquipmentID());
-
-		TuningSourceThread* sourceThread = nullptr;
 
 		if (it != m_sourceThreads.end())
 		{
@@ -565,14 +575,13 @@ namespace Tuning
 	{
 		for(auto& p : m_sourceThreads)
 		{
-			TuningSourceThread* sourceThread = p.second;
+			TuningSourceThreadShared sourceThread = p.second;
 
 			TEST_PTR_CONTINUE(sourceThread)
 
-			removeSourceThreadFromTuningClientContexts(sourceThread);
+			removeSourceThreadFromTuningClientContexts(sourceThread->sourceEquipmentID());
 
 			sourceThread->quitAndWait();
-			delete sourceThread;
 		}
 
 		m_sourceThreads.clear();
@@ -629,7 +638,7 @@ namespace Tuning
 		m_socketListenerThreads.clear();
 	}
 
-	void TuningServiceWorker::setSourceThreadInTuningClientContexts(TuningSourceThread* thread)
+	void TuningServiceWorker::setSourceThreadInTuningClientContexts(TuningSourceThreadShared thread)
 	{
 		TEST_PTR_RETURN(thread);
 
@@ -647,8 +656,6 @@ namespace Tuning
 
 	void TuningServiceWorker::removeSourceThreadFromTuningClientContexts(const QString& tuningSourceID)
 	{
-		TEST_PTR_RETURN(thread);
-
 		for(TuningClientContext* clientContext : m_clientContextMap)
 		{
 			if (clientContext == nullptr)

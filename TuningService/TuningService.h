@@ -32,7 +32,8 @@ namespace Tuning
 		const TuningClientContext* getClientContext(QString clientID) const;
 		const TuningClientContext* getClientContext(const std::string& clientID) const;
 
-		TuningSourceThread* getTuningSourceThread(quint32 sourceIP);
+		TuningSourceThreadShared getTuningSourceThread(quint32 sourceIP);
+		TuningSourceThreadShared getTuningSourceThread(const QString& sourceID);
 
 		void getAllClientContexts(QVector<const TuningClientContext*>& clientContexts);
 
@@ -51,6 +52,8 @@ namespace Tuning
 
 		QString activeClientID() const;
 		QString activeClientIP() const;
+
+		const TuningServiceSettings& tuningServiceSettings() const { return m_settings; }
 
 	signals:
 
@@ -91,7 +94,7 @@ namespace Tuning
 		void runSourcesListenerThreads();
 		void stopSourcesListenerThreads();
 
-		void setSourceThreadInTuningClientContexts(TuningSourceThread* thread);
+		void setSourceThreadInTuningClientContexts(TuningSourceThreadShared thread);
 		void removeSourceThreadFromTuningClientContexts(const QString& tuningSourceID);
 
 		bool isSimulationMode() const;

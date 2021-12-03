@@ -1416,9 +1416,9 @@ namespace Tuning
 		handler->incErrReplySize();
 	}
 
-	void TuningSourceThread::getSourceState(std::vector<Network::TuningSourceState>* tuningSourcesStates)
+	void TuningSourceThread::getSourceState(Network::GetTuningSourcesStatesReply* reply)
 	{
-		TEST_PTR_RETURN(tuningSourcesStates);
+		TEST_PTR_RETURN(reply);
 
 		AUTO_LOCK(m_handlersMutex);
 
@@ -1426,11 +1426,11 @@ namespace Tuning
 		{
 			TEST_PTR_CONTINUE(handler);
 
-			Network::TuningSourceState s;
+			Network::TuningSourceState* newTss = reply->add_tuningsourcesstate();
 
-			handler->state().saveToProto(&s);
+			TEST_PTR_CONTINUE(newTss);
 
-			tuningSourcesStates->push_back(s);
+			handler->state().saveToProto(newTss);
 		}
 	}
 
@@ -1733,6 +1733,8 @@ namespace Tuning
 			tenMsElapsed = false;
 
 			checkChannelsResponse();
+
+			checkSetSOR();
 		}
 		while(isQuitRequested() == false);
 
@@ -2149,7 +2151,7 @@ namespace Tuning
 	{
 		quint32 sourceIP = tuningSourceIP.toIPv4Address();
 
-		TuningSourceThread* sourceThread = m_service.getTuningSourceThread(sourceIP);
+		TuningSourceThreadShared sourceThread = m_service.getTuningSourceThread(sourceIP);
 
 		if (sourceThread == nullptr)
 		{
@@ -2167,7 +2169,7 @@ namespace Tuning
 	{
 		quint32 sourceIP = tuningSourceIP.toIPv4Address();
 
-		TuningSourceThread* sourceThread = m_service.getTuningSourceThread(sourceIP);
+		TuningSourceThreadShared sourceThread = m_service.getTuningSourceThread(sourceIP);
 
 		if (sourceThread == nullptr)
 		{

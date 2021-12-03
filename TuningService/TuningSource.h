@@ -36,6 +36,7 @@ namespace Tuning
 		void buildMaps();
 
 		const TuningSource* getSourceByID(const QString& sourceID) const;
+		QStringList getAllSourcesIDs() const;
 
 	private:
 		QHash<QString, int> m_id2Source;
