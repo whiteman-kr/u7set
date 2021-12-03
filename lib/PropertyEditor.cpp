@@ -2455,7 +2455,19 @@ namespace ExtWidgets
 
 		if (m_property->specificEditor() == E::PropertySpecificEditor::ChooseFileDialog)
 		{
-			QString fileName = QFileDialog::getOpenFileName(this->parentWidget(), tr("Select File"), QString(), m_property->validator());
+			QString defaultPath = m_oldValue.toString();
+
+			if (QFile().exists(defaultPath) == false)
+			{
+				defaultPath = QFileInfo(m_oldValue.toString()).absolutePath();
+
+				if (QDir().exists(defaultPath) == false)
+				{
+					defaultPath.clear();
+				}
+			}
+
+			QString fileName = QFileDialog::getOpenFileName(this->parentWidget(), tr("Select File"), defaultPath, m_property->validator());
 			if (fileName.isEmpty() == true)
 			{
 				return;
@@ -2470,7 +2482,14 @@ namespace ExtWidgets
 
 		if (m_property->specificEditor() == E::PropertySpecificEditor::ChooseDirectoryDialog)
 		{
-			QString dirName = QFileDialog::getExistingDirectory(this->parentWidget(), tr("Select Directory"));
+			QString defaultPath = m_oldValue.toString();
+
+			if (QDir().exists(defaultPath) == false)
+			{
+				defaultPath.clear();
+			}
+
+			QString dirName = QFileDialog::getExistingDirectory(this->parentWidget(), tr("Select Directory"), defaultPath);
 			if (dirName.isEmpty() == true)
 			{
 				return;
