@@ -248,17 +248,17 @@ void MainWindow::createActions()
 	// ?
 	//
 	m_pShowUserManualAction = new QAction(tr("User Manual ..."), this);
-	m_pShowUserManualAction->setIcon(QIcon(":/icons/About Сonnection.png"));
+	m_pShowUserManualAction->setIcon(QIcon(":/icons/About Connection.png"));
 	m_pShowUserManualAction->setToolTip(tr("Show User Manual"));
 	connect(m_pShowUserManualAction, &QAction::triggered, this, &MainWindow::showUserManual);
 
 	m_pAboutQtAction = new QAction(tr("About Qt ..."), this);
-	m_pAboutQtAction->setIcon(QIcon(":/icons/About Сonnection.png"));
+	m_pAboutQtAction->setIcon(QIcon(":/icons/About Connection.png"));
 	m_pAboutQtAction->setToolTip(tr("Show Qt information"));
 	connect(m_pAboutQtAction, &QAction::triggered, this, &MainWindow::aboutQt);
 
 	m_pAboutConnectionAction = new QAction(tr("About connect to server ..."), this);
-	m_pAboutConnectionAction->setIcon(QIcon(":/icons/About Сonnection.png"));
+	m_pAboutConnectionAction->setIcon(QIcon(":/icons/About Connection.png"));
 	m_pAboutConnectionAction->setToolTip(tr("About connect to server"));
 	connect(m_pAboutConnectionAction, &QAction::triggered, this, &MainWindow::aboutConnection);
 

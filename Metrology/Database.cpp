@@ -292,7 +292,35 @@ void SqlFieldBase::append(QString name, QMetaType::Type type, int length)
 		return;
 	}
 
+
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))	// for Qt6
+
 	QSqlField field(name, QMetaType(type));
+
+#else											// for Qt5
+
+	QVariant::Type vtype = QVariant::Invalid;
+
+	switch(type)
+	{
+		case QMetaType::Bool:		vtype = QVariant::Bool;		break;
+		case QMetaType::Int:		vtype = QVariant::Int;		break;
+		case QMetaType::Double:		vtype = QVariant::Double;	break;
+		case QMetaType::QString:	vtype = QVariant::String;	break;
+
+		default:
+			assert(0);
+			vtype = QVariant::Invalid;
+	}
+
+	if (vtype == QVariant::Invalid)
+	{
+		return;
+	}
+
+	QSqlField field(name, vtype);
+
+#endif
 
 	if (type == QMetaType::Double)
 	{
@@ -320,6 +348,8 @@ QString SqlFieldBase::extFieldName(int index)
 
 	QString result;
 
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))	// for Qt6
+
 	switch(f.metaType().id())
 	{
 		case QMetaType::Bool:		result = QString("%1 BOOL").arg(f.name());									break;
@@ -331,6 +361,21 @@ QString SqlFieldBase::extFieldName(int index)
 			assert(0);
 			result.clear();
 	}
+
+#else											// for Qt5
+
+	switch(f.type())
+	{
+		case QVariant::Bool:	result = QString("%1 BOOL").arg(f.name());									break;
+		case QVariant::Int:		result = QString("%1 INTEGER").arg(f.name());								break;
+		case QVariant::Double:	result = QString("%1 DOUBLE(0, %2)").arg(f.name()).arg(f.precision());		break;
+		case QVariant::String:	result = QString("%1 VARCHAR(%2)").arg(f.name()).arg(f.length());			break;
+
+		default:
+			result.clear();
+	}
+
+#endif
 
 	return result;
 }
