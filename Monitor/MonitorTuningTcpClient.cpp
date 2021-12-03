@@ -1,7 +1,7 @@
 #include "MonitorTuningTcpClient.h"
 
 MonitorTuningTcpClient::MonitorTuningTcpClient(const SoftwareInfo& softwareInfo, const QString& tuningServiceId, TuningSignalManager* signalManager, ILogFile* logFile) :
-	TuningTcpClient(softwareInfo, tuningServiceId, signalManager),
+	TuningTcpClient(softwareInfo, tuningServiceId, false/*singleLmControlMode*/, signalManager),
 	TcpClientStatistics(this),
 	m_logFile(logFile, "TuningTcpClient")
 {

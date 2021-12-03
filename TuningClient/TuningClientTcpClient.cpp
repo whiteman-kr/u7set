@@ -3,10 +3,12 @@
 
 TuningClientTcpClient::TuningClientTcpClient(const SoftwareInfo& softwareInfo,
 											 const QString& tuningServiceId,
+											 int singleLmControlMode,
 											 TuningSignalManager* signalManager,
 											 Log::LogFile* log,
-											 TuningLog::TuningLog* tuningLog, TuningUserManager* userManager) :
-	TuningTcpClient(softwareInfo, tuningServiceId, signalManager),
+											 TuningLog::TuningLog* tuningLog,
+											 TuningUserManager* userManager) :
+	TuningTcpClient(softwareInfo, tuningServiceId, singleLmControlMode, signalManager),
 	TcpClientStatistics(this),
 	m_log(log),
 	m_tuningLog(tuningLog),

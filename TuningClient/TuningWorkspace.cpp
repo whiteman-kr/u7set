@@ -1577,7 +1577,10 @@ void TuningWorkspace::activateControl(const QString& equipmentId, bool enable)
 	if (client->singleLmControlMode() == true && client->clientIsActive() == false)
 	{
 		if (QMessageBox::warning(this, qAppName(),
-								 tr("Warning!\n\nCurrent client is not selected as active now.\n\nAre you sure you want to take control and %1 the source %2?").arg(action).arg(equipmentId),
+								 tr("Warning!\n\nClient %1 is not selected as active now.\n\nAre you sure you want to take control and %2 the source %3?")
+								 .arg(client->tuningServiceId())
+								 .arg(action)
+								 .arg(equipmentId),
 								 QMessageBox::Yes | QMessageBox::No,
 								 QMessageBox::No) != QMessageBox::Yes)
 		{

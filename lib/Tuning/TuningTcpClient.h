@@ -84,6 +84,7 @@ class TuningTcpClient : public Tcp::Client, public ITuningTcpClient
 public:
 	TuningTcpClient(const SoftwareInfo& softwareInfo,
 					const QString& tuningServiceId,
+					bool singleLmControlMode,
 					TuningSignalManager* signalManager);
 
 	virtual ~TuningTcpClient();

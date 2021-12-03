@@ -1413,6 +1413,7 @@ bool TuningClientSettings::writeToXml(XmlWriteHelper& xml) const
 		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, tsc.clientRequestIP);
 		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, tsc.clientRequestPort);
 		xml.writeStringListAttribute(XmlAttribute::DRIVEN_SOURCES, tsc.drivenSources);
+		xml.writeBoolAttribute(EquipmentPropNames::SINGLE_LM_CONTROL, tsc.singleLmControl);
 
 		xml.writeEndElement();		// </TuningService>
 	}
@@ -1483,6 +1484,7 @@ bool TuningClientSettings::readFromXml(XmlReadHelper& xml)
 		result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &tsc.clientRequestIP);
 		result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &tsc.clientRequestPort);
 		result &= xml.readStringListAttribute(XmlAttribute::DRIVEN_SOURCES, &tsc.drivenSources);
+		result &= xml.readBoolAttribute(EquipmentPropNames::SINGLE_LM_CONTROL, &tsc.singleLmControl);
 
 		tuningServices.push_back(tsc);
 	}
@@ -1628,7 +1630,8 @@ bool operator == (const TuningClientSettings::TuningService& left,
 {
 	return left.tuningServiceID == right.tuningServiceID &&
 			left.clientRequestIP == right.clientRequestIP &&
-			left.clientRequestPort == right.clientRequestPort;
+			left.clientRequestPort == right.clientRequestPort &&
+			left.singleLmControl == right.singleLmControl;
 }
 
 

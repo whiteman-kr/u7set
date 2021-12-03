@@ -454,6 +454,7 @@ public:
 		QString clientRequestIP;
 		int clientRequestPort = 0;
 		QStringList drivenSources;
+		bool singleLmControl = false;
 	};
 
 public:

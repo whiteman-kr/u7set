@@ -399,7 +399,13 @@ void MainWindow::runTcpClients()
 	{
 		// TuningClientTcpClient
 		//
-		TuningClientTcpClient* client = new TuningClientTcpClient(m_configController.softwareInfo(), ts.tuningServiceID, &m_tuningSignalManager, theLogFile, m_tuningLog, &m_userManager);
+		TuningClientTcpClient* client = new TuningClientTcpClient(m_configController.softwareInfo(),
+																  ts.tuningServiceID,
+																  ts.singleLmControl,
+																  &m_tuningSignalManager,
+																  theLogFile,
+																  m_tuningLog,
+																  &m_userManager);
 		client->setInstanceId(theSettings.instanceStrId());
 		client->setRequestInterval(theSettings.m_requestInterval);
 

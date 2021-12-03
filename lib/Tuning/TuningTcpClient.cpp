@@ -21,9 +21,10 @@ bool TuningWriteCommand::load(const Network::TuningWriteCommand& message)
 //
 // TuningTcpClient
 //
-TuningTcpClient::TuningTcpClient(const SoftwareInfo& softwareInfo, const QString& tuningServiceId, TuningSignalManager* signalManager) :
+TuningTcpClient::TuningTcpClient(const SoftwareInfo& softwareInfo, const QString& tuningServiceId, bool singleLmControlMode, TuningSignalManager* signalManager) :
 	Tcp::Client(softwareInfo, HostAddressPort("0.0.0.0", 0), "TuningTcpClient"),
 	m_tuningServiceId(tuningServiceId),
+	m_singleLmControlMode(singleLmControlMode),
 	m_instanceId(softwareInfo.equipmentID()),
 	m_instanceIdHash(::calcHash(softwareInfo.equipmentID())),
 	m_signals(signalManager)
@@ -491,7 +492,7 @@ void TuningTcpClient::processTuningSourcesInfo(const QByteArray& data)
 		}
 	}
 
-	m_singleLmControlMode = m_tuningSourcesInfoReply.singlelmcontrolmode();
+	//m_singleLmControlMode = m_tuningSourcesInfoReply.singlelmcontrolmode();
 
 	requestTuningSourcesState();
 
@@ -641,7 +642,7 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 		m_activeClientIp = m_tuningSourcesStatesReply.activeclientip().c_str();
 
 		QString localAddress = localAddressPort().addressStr();
-		m_currentClientIsActive = (m_singleLmControlMode == false) || (m_activeClientId == m_instanceId && m_activeClientIp == localAddress);
+		m_currentClientIsActive = (singleLmControlMode() == false) || (m_activeClientId == m_instanceId && m_activeClientIp == localAddress);
 	}
 
 	//
@@ -1193,7 +1194,7 @@ bool TuningTcpClient::singleLmControlMode() const
 
 bool TuningTcpClient::clientIsActive() const
 {
-	if (m_singleLmControlMode == false)
+	if (singleLmControlMode() == false)
 	{
 		return true;
 	}
@@ -1235,7 +1236,7 @@ int TuningTcpClient::activeTuningSourceCount() const
 
 QString TuningTcpClient::singleActiveTuningSource() const
 {
-	if (m_singleLmControlMode == false)
+	if (singleLmControlMode() == false)
 	{
 		assert(false);
 		return QString();

@@ -12,7 +12,9 @@ class TuningClientTcpClient : public TuningTcpClient, public TcpClientStatistics
 {
 	Q_OBJECT
 public:
-	TuningClientTcpClient(const SoftwareInfo& softwareInfo, const QString& tuningServiceId,
+	TuningClientTcpClient(const SoftwareInfo& softwareInfo,
+						  const QString& tuningServiceId,
+						  int singleLmControlMode,
 						  TuningSignalManager* signalManager,
 						  Log::LogFile* log,
 						  TuningLog::TuningLog* tuningLog,

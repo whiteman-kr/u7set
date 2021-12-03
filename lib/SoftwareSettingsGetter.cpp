@@ -1690,6 +1690,8 @@ bool TuningClientSettingsGetter::readFromDevice(const Builder::Context* context,
 
 		tsc.drivenSources = tc.uniqueSourcesIDs();
 
+		tsc.singleLmControl = tsg.singleLmControl;
+
 		tuningServices.push_back(tsc);
 	}
 
