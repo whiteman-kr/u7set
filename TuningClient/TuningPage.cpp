@@ -2550,12 +2550,6 @@ void TuningPage::slot_undo()
 	for (Hash hash : hashes)
 	{
 		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
-
-		if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
-		{
-			continue;
-		}
-
 		m_tuningSignalManager->setNewValue(hash, state.value());
 	}
 }

@@ -54,6 +54,7 @@ DialogTuningSourceInfo::DialogTuningSourceInfo(std::vector<TuningTcpClient*> tcp
 
 	QTreeWidgetItem* stateItem = new QTreeWidgetItem(QStringList() << tr("2-Source State"));
 
+	createDataItem(stateItem, "LanEquipmentID");
 	createDataItem(stateItem, "IsReply");
 	createDataItem(stateItem, "RequestCount");
 	createDataItem(stateItem, "ReplyCount");
@@ -261,6 +262,7 @@ void DialogTuningSourceInfo::updateData()
 
 	item->setData(0, Qt::UserRole, 0);
 
+	setDataItemText("LanEquipmentID", ts.state.lanequipmentid().c_str());
 	setDataItemText("IsReply", ts.state.isreply() ? "Yes" : "No");
 
 	{
@@ -590,7 +592,11 @@ void TuningSourcesWidget::update(bool refreshOnly)
 				sourceItem->setData(columnIndex_Hash, Qt::UserRole, ::calcHash(ts.equipmentId()));
 				sourceItem->setData(columnIndex_EquipmentId, Qt::UserRole, ts.equipmentId());
 
-				m_tuningClientsSourcesHashes.insert(::calcHash(client->tuningServiceId() + ts.equipmentId()));
+				Hash hash = ::calcHash(client->tuningServiceId() + ts.equipmentId());
+
+				Q_ASSERT (m_tuningClientsSourcesHashes.find(hash) == m_tuningClientsSourcesHashes.end());
+
+				m_tuningClientsSourcesHashes.insert(hash);
 			}
 
 			m_treeWidget->addTopLevelItem(clientItem);

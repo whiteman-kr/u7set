@@ -867,7 +867,6 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 
 		if (lmStatusFlagMode() != LmStatusFlagMode::AccessKey)
 		{
-			int check_this_carefully_writingIsEnabled;
 			// Set Access key flag to Validity flag & Control flag if Access Key function is inactive
 			//
 			arrivedState.m_flags.writingIsEnabled = arrivedState.valid() & arrivedState.controlIsEnabled();
