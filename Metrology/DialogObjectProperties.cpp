@@ -92,20 +92,16 @@ void DialogProjectProperty::createPropertyList()
 	std::shared_ptr<PropertyPattern> property = std::make_shared<PropertyPattern>(&m_info);
 	propertyObjects.push_back(property);
 
-	#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))	// for Qt6
-
-		for(int сategoryIndex = 0; сategoryIndex < ProjectPropertyCategoryCount; сategoryIndex++)
+	for(int сategoryIndex = 0; сategoryIndex < ProjectPropertyCategoryCount; сategoryIndex++)
+	{
+		ProjectPropertyCategory сategory = static_cast<ProjectPropertyCategory>(сategoryIndex);
+		if (ERR_PROJECT_PROPERTY_CATEGORY(сategory) == true)
 		{
-			ProjectPropertyCategory сategory = static_cast<ProjectPropertyCategory>(сategoryIndex);
-			if (ERR_PROJECT_PROPERTY_CATEGORY(сategory) == true)
-			{
-				continue;
-			}
-
-			m_pPropertyEditor->setCategoryViewOrder(ProjectPropertyCategoryCaption(сategory), сategoryIndex);
+			continue;
 		}
 
-	#endif
+		m_pPropertyEditor->setCategoryViewOrder(ProjectPropertyCategoryCaption(сategory), сategoryIndex);
+	}
 
 	m_pPropertyEditor->setObjects(propertyObjects);
 
@@ -124,33 +120,16 @@ QString ProjectPropertyCategoryCaption(ProjectPropertyCategory category)
 {
 	QString caption;
 
-	#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))	// for Qt6
+	switch (category)
+	{
+		case ProjectPropertyCategory::Info:		caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Project");			break;
+		case ProjectPropertyCategory::Host:		caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Host");			break;
+		case ProjectPropertyCategory::Version:	caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "File version");	break;
 
-		switch (category)
-		{
-			case ProjectPropertyCategory::Info:		caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Project");			break;
-			case ProjectPropertyCategory::Host:		caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Host");			break;
-			case ProjectPropertyCategory::Version:	caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "File version");	break;
-
-			default:
-				assert(0);
-				caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Unknown");
-		}
-
-	#else
-
-		switch (category)
-		{
-			case ProjectPropertyCategory::Info:		caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "1 Project");		break;
-			case ProjectPropertyCategory::Host:		caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "2 Host");			break;
-			case ProjectPropertyCategory::Version:	caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "3 File version");	break;
-
-			default:
-				assert(0);
-				caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Unknown");
-		}
-
-	#endif
+		default:
+			assert(0);
+			caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Unknown");
+	}
 
 	return qApp->translate("DialogObjectProperty", caption.toUtf8());
 }
@@ -1378,22 +1357,18 @@ void DialogSignalProperty::createPropertyList()
 	std::shared_ptr<PropertyPattern> property = std::make_shared<PropertyPattern>(&m_param);
 	propertyObjects.push_back(property);
 
-	#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))	// for Qt6
-
-		for(int сategoryIndex = 0; сategoryIndex < SignalPropertyCategoryCount; сategoryIndex++)
+	for(int сategoryIndex = 0; сategoryIndex < SignalPropertyCategoryCount; сategoryIndex++)
+	{
+		SignalPropertyCategory сategory = static_cast<SignalPropertyCategory>(сategoryIndex);
+		if (ERR_SIGNAL_PROPERTY_CATEGORY(сategory) == true)
 		{
-			SignalPropertyCategory сategory = static_cast<SignalPropertyCategory>(сategoryIndex);
-			if (ERR_SIGNAL_PROPERTY_CATEGORY(сategory) == true)
-			{
-				continue;
-			}
-
-			m_pPropertyEditor->setCategoryViewOrder(SignalPropertyCategoryCaption(сategory), сategoryIndex);
+			continue;
 		}
 
-		m_pPropertyEditor->setMaxDecimaplPlaces(15);
+		m_pPropertyEditor->setCategoryViewOrder(SignalPropertyCategoryCaption(сategory), сategoryIndex);
+	}
 
-	#endif
+	m_pPropertyEditor->setMaxDecimaplPlaces(15);
 
 	m_pPropertyEditor->setObjects(propertyObjects);
 
@@ -1635,35 +1610,17 @@ QString SignalPropertyCategoryCaption(SignalPropertyCategory category)
 {
 	QString caption;
 
-	#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))	// for Qt6
+	switch (category)
+	{
+		case SignalPropertyCategory::SignalID:			caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Signal ID");			break;
+		case SignalPropertyCategory::SignalPosition:	caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Position");			break;
+		case SignalPropertyCategory::ElectricLimit:		caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Electric range");		break;
+		case SignalPropertyCategory::EngineeringLimit:	caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Engineering range");	break;
 
-		switch (category)
-		{
-			case SignalPropertyCategory::SignalID:			caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Signal ID");			break;
-			case SignalPropertyCategory::SignalPosition:	caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Position");			break;
-			case SignalPropertyCategory::ElectricLimit:		caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Electric range");		break;
-			case SignalPropertyCategory::EngineeringLimit:	caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Engineering range");	break;
-
-			default:
-				assert(0);
-				caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Unknown");
-		}
-
-	#else
-
-		switch (category)
-		{
-			case SignalPropertyCategory::SignalID:			caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "1 Signal ID");			break;
-			case SignalPropertyCategory::SignalPosition:	caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "2 Position");			break;
-			case SignalPropertyCategory::ElectricLimit:		caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "3 Electric range");	break;
-			case SignalPropertyCategory::EngineeringLimit:	caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "4 Engineering range");	break;
-
-			default:
-				assert(0);
-				caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Unknown");
-		}
-
-	#endif
+		default:
+			assert(0);
+			caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Unknown");
+	}
 
 	return qApp->translate("DialogObjectProperty", caption.toUtf8());
 }
@@ -2012,20 +1969,16 @@ void DialogComparatorProperty::createPropertyList()
 	std::shared_ptr<PropertyPattern> property = std::make_shared<PropertyPattern>(&m_comparatorEx);
 	propertyObjects.push_back(property);
 
-	#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))	// for Qt6
-
-		for(int сategoryIndex = 0; сategoryIndex < ComparatorPropertyCategoryCount; сategoryIndex++)
+	for(int сategoryIndex = 0; сategoryIndex < ComparatorPropertyCategoryCount; сategoryIndex++)
+	{
+		ComparatorPropertyCategory сategory = static_cast<ComparatorPropertyCategory>(сategoryIndex);
+		if (ERR_COMPARATOR_PROPERTY_CATEGORY(сategory) == true)
 		{
-			ComparatorPropertyCategory сategory = static_cast<ComparatorPropertyCategory>(сategoryIndex);
-			if (ERR_COMPARATOR_PROPERTY_CATEGORY(сategory) == true)
-			{
-				continue;
-			}
-
-			m_pPropertyEditor->setCategoryViewOrder(ComparatorPropertyCategoryCaption(сategory), сategoryIndex);
+			continue;
 		}
 
-	#endif
+		m_pPropertyEditor->setCategoryViewOrder(ComparatorPropertyCategoryCaption(сategory), сategoryIndex);
+	}
 
 	m_pPropertyEditor->setObjects(propertyObjects);
 
@@ -2099,37 +2052,18 @@ QString ComparatorPropertyCategoryCaption(ComparatorPropertyCategory category)
 {
 	QString caption;
 
-	#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))	// for Qt6
+	switch (category)
+	{
+		case ComparatorPropertyCategory::Schema:		caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Schema");		break;
+		case ComparatorPropertyCategory::Input:			caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Input");		break;
+		case ComparatorPropertyCategory::Comapre:		caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Compare");		break;
+		case ComparatorPropertyCategory::Hysteresis:	caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Hysteresis");	break;
+		case ComparatorPropertyCategory::Output:		caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Output");		break;
 
-		switch (category)
-		{
-			case ComparatorPropertyCategory::Schema:		caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Schema");		break;
-			case ComparatorPropertyCategory::Input:			caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Input");		break;
-			case ComparatorPropertyCategory::Comapre:		caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Compare");		break;
-			case ComparatorPropertyCategory::Hysteresis:	caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Hysteresis");	break;
-			case ComparatorPropertyCategory::Output:		caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Output");		break;
-
-			default:
-				assert(0);
-				caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Unknown");
-		}
-
-	#else
-
-		switch (category)
-		{
-			case ComparatorPropertyCategory::Schema:		caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "1 Schema");		break;
-			case ComparatorPropertyCategory::Input:			caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "2 Input");			break;
-			case ComparatorPropertyCategory::Comapre:		caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "3 Compare");		break;
-			case ComparatorPropertyCategory::Hysteresis:	caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "4 Hysteresis");	break;
-			case ComparatorPropertyCategory::Output:		caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "5 Output");		break;
-
-			default:
-				assert(0);
-				caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Unknown");
-		}
-
-	#endif
+		default:
+			assert(0);
+			caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Unknown");
+	}
 
 	return qApp->translate("DialogObjectProperty", caption.toUtf8());
 }
@@ -2319,20 +2253,16 @@ void DialogMeasureProperty::createPropertyList()
 	std::shared_ptr<PropertyPattern> property = std::make_shared<PropertyPattern>(m_pMeasurement);
 	propertyObjects.push_back(property);
 
-	#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))	// for Qt6
-
-		for(int сategoryIndex = 0; сategoryIndex < MeasurePropertyCategoryCount; сategoryIndex++)
+	for(int сategoryIndex = 0; сategoryIndex < MeasurePropertyCategoryCount; сategoryIndex++)
+	{
+		MeasurePropertyCategory сategory = static_cast<MeasurePropertyCategory>(сategoryIndex);
+		if (ERR_MEASURE_PROPERTY_CATEGORY(сategory) == true)
 		{
-			MeasurePropertyCategory сategory = static_cast<MeasurePropertyCategory>(сategoryIndex);
-			if (ERR_MEASURE_PROPERTY_CATEGORY(сategory) == true)
-			{
-				continue;
-			}
-
-			m_pPropertyEditor->setCategoryViewOrder(MeasurePropertyCategoryCaption(сategory), сategoryIndex);
+			continue;
 		}
 
-	#endif
+		m_pPropertyEditor->setCategoryViewOrder(MeasurePropertyCategoryCaption(сategory), сategoryIndex);
+	}
 
 	m_pPropertyEditor->setObjects(propertyObjects);
 
@@ -2380,35 +2310,17 @@ QString MeasurePropertyCategoryCaption(MeasurePropertyCategory category)
 {
 	QString caption;
 
-	#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))	// for Qt6
+	switch (category)
+	{
+		case MeasurePropertyCategory::MeasureID:		caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Signal ID");	break;
+		case MeasurePropertyCategory::MeasurePosition:	caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Position");	break;
+		case MeasurePropertyCategory::Limits:			caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Limits");		break;
+		case MeasurePropertyCategory::Errors:			caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Errors");		break;
 
-		switch (category)
-		{
-			case MeasurePropertyCategory::MeasureID:		caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Signal ID");	break;
-			case MeasurePropertyCategory::MeasurePosition:	caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Position");	break;
-			case MeasurePropertyCategory::Limits:			caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Limits");		break;
-			case MeasurePropertyCategory::Errors:			caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Errors");		break;
-
-			default:
-				assert(0);
-				caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Unknown");
-		}
-
-	#else
-
-		switch (category)
-		{
-			case MeasurePropertyCategory::MeasureID:		caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "1 Signal ID");	break;
-			case MeasurePropertyCategory::MeasurePosition:	caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "2 Position");	break;
-			case MeasurePropertyCategory::Limits:			caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "3 Limits");	break;
-			case MeasurePropertyCategory::Errors:			caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "4 Errors");	break;
-
-			default:
-				assert(0);
-				caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Unknown");
-		}
-
-	#endif
+		default:
+			assert(0);
+			caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Unknown");
+	}
 
 	return qApp->translate("DialogObjectProperty", caption.toUtf8());
 }
