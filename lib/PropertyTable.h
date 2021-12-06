@@ -35,7 +35,7 @@ namespace ExtWidgets
 
 	};
 
-	typedef QMap<QString, std::pair<std::shared_ptr<PropertyObject>, QVariant>> ModifiedObjectsData;
+	typedef QMultiMap<QString, std::pair<std::shared_ptr<PropertyObject>, QVariant>> ModifiedObjectsData;
 
 	struct PropertyTableObject
 	{
