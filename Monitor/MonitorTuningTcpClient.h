@@ -13,7 +13,6 @@ public:
 	MonitorTuningTcpClient(const SoftwareInfo& softwareInfo, const QString& tuningServiceId, TuningSignalManager* signalManager, ILogFile* logFile);
 	virtual ~MonitorTuningTcpClient();
 
-	int sourceErrorCount() const;
 protected:
 	virtual void writeLogAlert(const QString& message) override;
 	virtual void writeLogError(const QString& message) override;

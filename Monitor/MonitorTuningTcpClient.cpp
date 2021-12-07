@@ -16,28 +16,6 @@ MonitorTuningTcpClient::~MonitorTuningTcpClient()
 {
 }
 
-int MonitorTuningTcpClient::sourceErrorCount() const
-{
-	QReadLocker l(&m_tuningSourcesLock);
-
-	int result = 0;
-
-	for (const auto& it : m_tuningSources)
-	{
-		const TuningSource& ts = it.second;
-
-		if (ts.state.isreply() == false && ts.state.controlisactive() == true)
-		{
-			result++;
-			continue;
-		}
-
-		result += ts.getErrorsCount();
-	}
-
-	return result;
-}
-
 void MonitorTuningTcpClient::writeLogAlert(const QString& message)
 {
 	TuningTcpClient::writeLogAlert(message);

@@ -46,7 +46,7 @@ std::vector<Hash> TuningTcpClient::tuningSourcesEquipmentHashes() const
 
 	std::vector<Hash> result;
 
-	for (auto p : m_tuningSources)
+	for (const auto& p : m_tuningSources)
 	{
 		result.push_back(p.first);
 	}
@@ -61,7 +61,7 @@ std::vector<TuningSource> TuningTcpClient::tuningSourcesInfo() const
 	std::vector<TuningSource> result;
 	result.reserve(m_tuningSources.size());
 
-	for (auto ds : m_tuningSources)
+	for (const auto& ds : m_tuningSources)
 	{
 		result.push_back(ds.second);
 	}
@@ -481,18 +481,15 @@ void TuningTcpClient::processTuningSourcesInfo(const QByteArray& data)
 		{
 			const ::Network::DataSourceInfo& dsi = m_tuningSourcesInfoReply.tuningsourceinfo(i);
 
-			TuningSource ts;
-			ts.info = dsi;
+			TuningSource ts(dsi);
 
-			Hash hash = ::calcHash(QString::fromStdString(ts.info.moduleequipmentid()));
+			Hash hash = ::calcHash(QString::fromStdString(ts.info().moduleequipmentid()));
 
 			assert(m_tuningSources.count(hash) == 0);
 
 			m_tuningSources[hash] = ts;
 		}
 	}
-
-	//m_singleLmControlMode = m_tuningSourcesInfoReply.singlelmcontrolmode();
 
 	requestTuningSourcesState();
 
@@ -580,48 +577,55 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 				{
 					// Write SOR change to tuning log
 
-					if (ts.state.isreply() == true && m_lmStatusFlagMode != LmStatusFlagMode::None)
+					qDebug() << ts.channelsCount();
+
+					for (int s = 0; s < ts.channelsCount(); s++)
 					{
-						TuningValue oldSor;
-						oldSor.setType(TuningValueType::Discrete);
-						oldSor.setDiscreteValue(ts.state.setsor() ? 1 : 0);
+						const ::Network::TuningSourceState& state = ts.state(s);
 
-						TuningValue newSor;
-						newSor.setType(TuningValueType::Discrete);
-						newSor.setDiscreteValue(tss.setsor() ? 1 : 0);
-
-						if (oldSor != newSor)
+						if (state.isreply() == true && m_lmStatusFlagMode != LmStatusFlagMode::None)
 						{
-							AppSignalParam param;
-							param.setEquipmentId(QString::fromStdString(ts.info.moduleequipmentid()));
+							TuningValue oldSor;
+							oldSor.setType(TuningValueType::Discrete);
+							oldSor.setDiscreteValue(state.setsor() ? 1 : 0);
 
-							switch (m_lmStatusFlagMode)
+							TuningValue newSor;
+							newSor.setType(TuningValueType::Discrete);
+							newSor.setDiscreteValue(tss.setsor() ? 1 : 0);
+
+							if (oldSor != newSor)
 							{
-							case LmStatusFlagMode::AccessKey:
+								AppSignalParam param;
+								param.setEquipmentId(QString::fromStdString(ts.info().moduleequipmentid()));
+
+								switch (m_lmStatusFlagMode)
 								{
-									param.setCustomSignalId(tr("Access Key"));
+								case LmStatusFlagMode::AccessKey:
+									{
+										param.setCustomSignalId(tr("Access Key"));
+										break;
+									}
+								case LmStatusFlagMode::SOR:
+									{
+										param.setCustomSignalId(tr("SOR is set"));
+										break;
+									}
+								default:
+									Q_ASSERT(false);
+									param.setCustomSignalId(tr("LM Status Flag"));
 									break;
 								}
-							case LmStatusFlagMode::SOR:
-								{
-									param.setCustomSignalId(tr("SOR is set"));
-									break;
-								}
-							default:
-								Q_ASSERT(false);
-								param.setCustomSignalId(tr("LM Status Flag"));
-								break;
+
+								param.setPrecision(0);
+
+								writeLogSignalChange(param, oldSor, newSor);
 							}
-
-							param.setPrecision(0);
-
-							writeLogSignalChange(param, oldSor, newSor);
 						}
-					}
+					} // Write SOR
 
 					// Set new source state
 
-					ts.setNewState(tss);
+					ts.setState(tss);
 
 					//
 
@@ -1223,9 +1227,13 @@ int TuningTcpClient::activeTuningSourceCount() const
 	{
 		const TuningSource& ts = it.second;
 
-		if (ts.state.controlisactive() == true)
+		for (int i = 0; i < ts.channelsCount(); i++)
 		{
-			result++;
+			if (ts.state(i).controlisactive() == true)
+			{
+				result++;
+				break;	// Break if found control in the source, do not count twice
+			}
 		}
 	}
 
@@ -1247,9 +1255,12 @@ QString TuningTcpClient::singleActiveTuningSource() const
 	{
 		const TuningSource& ts = it.second;
 
-		if (ts.state.controlisactive() == true)
+		for (int i = 0; i < ts.channelsCount(); i++)
 		{
-			return ts.equipmentId();
+			if (ts.state(i).controlisactive() == true)
+			{
+				return ts.equipmentId();
+			}
 		}
 	}
 

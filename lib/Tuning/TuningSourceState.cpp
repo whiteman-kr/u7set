@@ -9,38 +9,44 @@ TuningSource::TuningSource()
 	m_perviousStateLastUpdateTime = QDateTime::currentDateTime();
 }
 
+TuningSource::TuningSource(const ::Network::DataSourceInfo& info):
+	TuningSource()
+{
+	m_info = info;
+}
+
 quint64 TuningSource::id() const
 {
-	return info.id();
+	return m_info.id();
 }
 
 QString TuningSource::equipmentId() const
 {
-	return QString::fromStdString(info.moduleequipmentid());
+	return QString::fromStdString(m_info.moduleequipmentid());
 }
 
-QString TuningSource::lanEquipmentId() const
+QString TuningSource::lanEquipmentId(int lanIndex) const
 {
-	return QString::fromStdString(info.lancontrollerinfo(0).equipmentid());
-}
-
-void TuningSource::setNewState(const ::Network::TuningSourceState& newState)
-{
-	QDateTime ct = QDateTime::currentDateTime();
-
-	qint64 secsTo = m_perviousStateLastUpdateTime.secsTo(ct);
-
-	if (secsTo > m_previousStateUpdatePeriod)
+	if (lanIndex < 0 || lanIndex >= m_info.lancontrollerinfo_size())
 	{
-		m_previousState = state;
-		m_perviousStateLastUpdateTime = ct;
+		Q_ASSERT(false);
+		return {};
 	}
 
-	state = newState;
+	return QString::fromStdString(m_info.lancontrollerinfo(lanIndex).equipmentid());
 }
 
-int TuningSource::getErrorsCount() const
+int TuningSource::getErrorsCount(int channel) const
 {
+	if (channel < 0 || channel >= m_states.size())
+	{
+		Q_ASSERT(false);
+		return 0;
+	}
+
+	const ::Network::TuningSourceState& currentState = m_states[channel];
+	const ::Network::TuningSourceState& previousState = m_previousStates[channel];
+
 	int result = 0;
 
 	// Errors counter
@@ -48,37 +54,37 @@ int TuningSource::getErrorsCount() const
 	// errors in reply RupFrameHeader
 	//
 
-	if (state.errrupprotocolversion() > m_previousState.errrupprotocolversion())
+	if (currentState.errrupprotocolversion() > previousState.errrupprotocolversion())
 	{
 		result++;
 	}
 
-	if (state.errrupframesize() > m_previousState.errrupframesize())
+	if (currentState.errrupframesize() > previousState.errrupframesize())
 	{
 		result++;
 	}
 
-	if (state.errrupnontuningdata() > m_previousState.errrupnontuningdata())
+	if (currentState.errrupnontuningdata() > previousState.errrupnontuningdata())
 	{
 		result++;
 	}
 
-	if (state.errrupmoduletype() > m_previousState.errrupmoduletype())
+	if (currentState.errrupmoduletype() > previousState.errrupmoduletype())
 	{
 		result++;
 	}
 
-	if (state.errrupframesquantity() > m_previousState.errrupframesquantity())
+	if (currentState.errrupframesquantity() > previousState.errrupframesquantity())
 	{
 		result++;
 	}
 
-	if (state.errrupframenumber() > m_previousState.errrupframenumber())
+	if (currentState.errrupframenumber() > previousState.errrupframenumber())
 	{
 		result++;
 	}
 
-	if (state.errrupcrc() > m_previousState.errrupcrc())
+	if (currentState.errrupcrc() > previousState.errrupcrc())
 	{
 		result++;
 	}
@@ -86,42 +92,42 @@ int TuningSource::getErrorsCount() const
 	// errors in reply FotipHeader
 	//
 
-	if (state.errfotipprotocolversion() > m_previousState.errfotipprotocolversion())
+	if (currentState.errfotipprotocolversion() > previousState.errfotipprotocolversion())
 	{
 		result++;
 	}
 
-	if (state.errfotipuniqueid() > m_previousState.errfotipuniqueid())
+	if (currentState.errfotipuniqueid() > previousState.errfotipuniqueid())
 	{
 		result++;
 	}
 
-	if (state.errfotiplmnumber() > m_previousState.errfotiplmnumber())
+	if (currentState.errfotiplmnumber() > previousState.errfotiplmnumber())
 	{
 		result++;
 	}
 
-	if (state.errfotipsubsystemcode() > m_previousState.errfotipsubsystemcode())
+	if (currentState.errfotipsubsystemcode() > previousState.errfotipsubsystemcode())
 	{
 		result++;
 	}
 
-	if (state.errfotipoperationcode() > m_previousState.errfotipoperationcode())
+	if (currentState.errfotipoperationcode() > previousState.errfotipoperationcode())
 	{
 		result++;
 	}
 
-	if (state.errfotipframesize() > m_previousState.errfotipframesize())
+	if (currentState.errfotipframesize() > previousState.errfotipframesize())
 	{
 		result++;
 	}
 
-	if (state.errfotipromsize() > m_previousState.errfotipromsize())
+	if (currentState.errfotipromsize() > previousState.errfotipromsize())
 	{
 		result++;
 	}
 
-	if (state.errfotipromframesize() > m_previousState.errfotipromframesize())
+	if (currentState.errfotipromframesize() > previousState.errfotipromframesize())
 	{
 		result++;
 	}
@@ -139,52 +145,52 @@ int TuningSource::getErrorsCount() const
 	//	result++;
 	//}
 
-	if (state.fotipflagdatatypeerr() > m_previousState.fotipflagdatatypeerr())
+	if (currentState.fotipflagdatatypeerr() > previousState.fotipflagdatatypeerr())
 	{
 		result++;
 	}
 
-	if (state.fotipflagopcodeerr() > m_previousState.fotipflagopcodeerr())
+	if (currentState.fotipflagopcodeerr() > previousState.fotipflagopcodeerr())
 	{
 		result++;
 	}
 
-	if (state.fotipflagstartaddrerr() > m_previousState.fotipflagstartaddrerr())
+	if (currentState.fotipflagstartaddrerr() > previousState.fotipflagstartaddrerr())
 	{
 		result++;
 	}
 
-	if (state.fotipflagromsizeerr() > m_previousState.fotipflagromsizeerr())
+	if (currentState.fotipflagromsizeerr() > previousState.fotipflagromsizeerr())
 	{
 		result++;
 	}
 
-	if (state.fotipflagromframesizeerr() > m_previousState.fotipflagromframesizeerr())
+	if (currentState.fotipflagromframesizeerr() > previousState.fotipflagromframesizeerr())
 	{
 		result++;
 	}
 
-	if (state.fotipflagframesizeerr() > m_previousState.fotipflagframesizeerr())
+	if (currentState.fotipflagframesizeerr() > previousState.fotipflagframesizeerr())
 	{
 		result++;
 	}
 
-	if (state.fotipflagprotocolversionerr() > m_previousState.fotipflagprotocolversionerr())
+	if (currentState.fotipflagprotocolversionerr() > previousState.fotipflagprotocolversionerr())
 	{
 		result++;
 	}
 
-	if (state.fotipflagsubsystemkeyerr() > m_previousState.fotipflagsubsystemkeyerr())
+	if (currentState.fotipflagsubsystemkeyerr() > previousState.fotipflagsubsystemkeyerr())
 	{
 		result++;
 	}
 
-	if (state.fotipflaguniueiderr() > m_previousState.fotipflaguniueiderr())
+	if (currentState.fotipflaguniueiderr() > previousState.fotipflaguniueiderr())
 	{
 		result++;
 	}
 
-	if (state.fotipflagoffseterr() > m_previousState.fotipflagoffseterr())
+	if (currentState.fotipflagoffseterr() > previousState.fotipflagoffseterr())
 	{
 		result++;
 	}
@@ -198,12 +204,12 @@ int TuningSource::getErrorsCount() const
 	// General errors
 	//
 
-	if (state.erranaloglowboundcheck() > m_previousState.erranaloglowboundcheck())
+	if (currentState.erranaloglowboundcheck() > previousState.erranaloglowboundcheck())
 	{
 		result++;
 	}
 
-	if (state.erranaloghighboundcheck() > m_previousState.erranaloghighboundcheck())
+	if (currentState.erranaloghighboundcheck() > previousState.erranaloghighboundcheck())
 	{
 		result++;
 	}
@@ -211,18 +217,147 @@ int TuningSource::getErrorsCount() const
 	return result;
 }
 
-bool TuningSource::valid() const
+int TuningSource::getErrorsCount(Hash controllerHash) const
 {
-	return m_valid;
+	auto it = m_controllerToStateMap.find(controllerHash);
+	if (it == m_controllerToStateMap.end())
+	{
+		Q_ASSERT(false);
+		return 0;
+	}
+	else
+	{
+		Q_ASSERT(it->second >= 0 && it->second < m_states.size());
+		return getErrorsCount(it->second);
+	}
+}
+
+const ::Network::DataSourceInfo& TuningSource::info() const
+{
+	return m_info;
+}
+
+int TuningSource::channelsCount() const
+{
+	if (m_states.size() == m_info.lancontrollerinfo_size())
+	{
+		// Number of LAN controllers in info should be equal to number of received states.
+		//
+		return static_cast<int>(m_states.size());
+	}
+
+	// Maybe, info is received, but states are not received yet
+	//
+	return 0;
+}
+
+const ::Network::TuningSourceState& TuningSource::state(int channel) const
+{
+	if (channel < 0 || channel >= m_states.size())
+	{
+		static ::Network::TuningSourceState emptyState;
+
+		Q_ASSERT(false);
+		return emptyState;
+	}
+
+	return m_states[channel];
+}
+
+const ::Network::TuningSourceState& TuningSource::state(Hash controllerHash) const
+{
+	static ::Network::TuningSourceState emptyState;
+
+	auto it = m_controllerToStateMap.find(controllerHash);
+	if (it == m_controllerToStateMap.end())
+	{
+		Q_ASSERT(false);
+		return emptyState;
+	}
+	else
+	{
+		Q_ASSERT(it->second >= 0 && it->second < m_states.size());
+		return m_states[it->second];
+	}
+}
+
+const ::Network::TuningSourceState& TuningSource::previousState(int channel) const
+{
+	if (channel < 0 || channel >= m_previousStates.size())
+	{
+		static ::Network::TuningSourceState emptyState;
+
+		Q_ASSERT(false);
+		return emptyState;
+	}
+
+	return m_previousStates[channel];
+}
+const ::Network::TuningSourceState& TuningSource::previousState(Hash controllerHash) const
+{
+	static ::Network::TuningSourceState emptyState;
+
+	auto it = m_controllerToStateMap.find(controllerHash);
+	if (it == m_controllerToStateMap.end())
+	{
+		Q_ASSERT(false);
+		return emptyState;
+	}
+	else
+	{
+		Q_ASSERT(it->second >= 0 && it->second < m_previousStates.size());
+		return m_previousStates[it->second];
+	}
+}
+
+void TuningSource::setState(const ::Network::TuningSourceState& newState)
+{
+	Hash controllerHash = ::calcHash(QString::fromStdString(newState.lanequipmentid()));
+
+	int channel = -1;
+
+	auto it = m_controllerToStateMap.find(controllerHash);
+	if (it == m_controllerToStateMap.end())
+	{
+		// Insert a new state to array of states
+		//
+		m_states.push_back(newState);
+		m_previousStates.push_back(newState);
+
+		channel = static_cast<int>(m_states.size() - 1);
+		m_controllerToStateMap[controllerHash] = channel;
+
+		Q_ASSERT(m_states.size() == m_previousStates.size());
+	}
+	else
+	{
+		Q_ASSERT(m_states.size() == m_previousStates.size());
+
+		// Modify existing state in array of states
+		//
+		channel = it->second;
+		m_states[channel] = newState;
+
+		// Every 5 seconds modify previous state
+		//
+		QDateTime ct = QDateTime::currentDateTime();
+
+		qint64 secsTo = m_perviousStateLastUpdateTime.secsTo(ct);
+
+		if (secsTo > m_previousStateUpdatePeriod)
+		{
+			m_previousStates[channel] = newState;
+			m_perviousStateLastUpdateTime = ct;
+		}
+	}
+
+	return;
 }
 
 void TuningSource::invalidate()
 {
-	m_valid = false;
-	state.set_setsor(false);
-}
-
-const ::Network::TuningSourceState& TuningSource::previousState() const
-{
-	return m_previousState;
+	for (int i = 0; i < static_cast<int>(m_states.size()); i++)
+	{
+		m_states[i].set_setsor(false);
+	}
 }

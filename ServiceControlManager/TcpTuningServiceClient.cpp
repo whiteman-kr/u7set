@@ -248,7 +248,8 @@ void TcpTuningServiceClient::onGetTuningSourcesInfo(const char *replyData, quint
 
 		for (const TuningSource& ts : m_tuningSources)
 		{
-			if (ts.id() == dsi.id() && ts.lanEquipmentId() == QString::fromStdString(dsi.lancontrollerinfo(0).equipmentid()))
+			int todo_multichannel = 1;
+			if (ts.id() == dsi.id() && ts.lanEquipmentId(0) == QString::fromStdString(dsi.lancontrollerinfo(0).equipmentid()))
 			{
 				isAlreadyExists = true;
 				break;
@@ -260,9 +261,7 @@ void TcpTuningServiceClient::onGetTuningSourcesInfo(const char *replyData, quint
 			continue;
 		}
 
-		TuningSource ts;
-		ts.info = dsi;
-
+		TuningSource ts(dsi);
 		m_tuningSources.push_back(ts);
 	}
 
@@ -300,7 +299,8 @@ void TcpTuningServiceClient::onGetTuningSourcesStates(const char *replyData, qui
 		{
 			if (ts.id() == id)
 			{
-				ts.setNewState(tss);
+				int todo_multichannel = 1;
+				ts.setState(tss);
 
 				found = true;
 				break;

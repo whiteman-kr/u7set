@@ -1317,12 +1317,6 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 
 	TuningSource ts;
 
-	QString status;
-	bool valid = false;
-	bool controlIsEnabled = false;
-	bool hasUnappliedParams = false;
-	bool access = false;
-
 	bool sourceFound = false;
 
 	for (const TuningClientTcpClient* client : m_tuningTcpClients)
@@ -1334,56 +1328,76 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 		}
 	}
 
+	QString status;
+
+	bool controlIsEnabled = false;
+	bool isReply = false;
+	bool hasUnappliedParams = false;
+	bool access = false;
+
 	if (sourceFound == false)
 	{
 		status = tr("Unknown");
 	}
 	else
 	{
-		valid = ts.valid();
-		controlIsEnabled = ts.state.controlisactive();
-		hasUnappliedParams = ts.state.hasunappliedparams();
+		std::vector<int> replyCounts;
 
-		if (theConfigSettings.lmStatusFlagMode() == LmStatusFlagMode::AccessKey &&
-            valid == true &&
-            controlIsEnabled == true &&
-            ts.state.isreply() == true)
-			{
-                access = ts.state.writingdisabled() == false;
-			}
-
-		if (valid == false)
+		for (int c = 0; c < ts.channelsCount(); c++)
 		{
-			status = tr("Unknown");
+			const ::Network::TuningSourceState& state = ts.state(c);
+
+			int todo_array_for_all_params = 1;
+
+			controlIsEnabled |= state.controlisactive();
+			isReply |= state.isreply();
+			hasUnappliedParams |= state.hasunappliedparams();
+
+			replyCounts.push_back(static_cast<int>(state.replycount()));
+
+			if (theConfigSettings.lmStatusFlagMode() == LmStatusFlagMode::AccessKey &&
+				controlIsEnabled == true &&
+				state.isreply() == true)
+			{
+				access = state.writingdisabled() == false;
+			}
+		}
+
+		if (controlIsEnabled == false)
+		{
+			status = tr("Inactive");
 		}
 		else
 		{
-			if (controlIsEnabled == false)
+			if (isReply == false)
 			{
-				status = tr("Inactive");
+				status = tr("No Reply");
 			}
 			else
 			{
-				if (ts.state.isreply() == false)
+				if (errorCounter > 0)
 				{
-					status = tr("No Reply");
+					status = tr("E: %1").arg(errorCounter);
 				}
 				else
 				{
-					if (errorCounter > 0)
+					QString s;
+					for (int r : replyCounts)
 					{
-						status = tr("E: %1").arg(errorCounter);
+						s += tr("%1/").arg(r);
+					}
+					if (s.isEmpty() == false)
+					{
+						s.remove(s.length() - 1, 1);
+					}
+
+					if (hasUnappliedParams == true)
+					{
+						status = tr("Unapplied [%1 replies]").arg(s);
 					}
 					else
 					{
-						if (hasUnappliedParams == true)
-						{
-							status = tr("Unapplied [%1 replies]").arg(ts.state.replycount());
-						}
-						else
-						{
-							status = tr("Active [%1 replies]").arg(ts.state.replycount());
-						}
+						status = tr("Active [%1 replies]").arg(s);
 					}
 				}
 			}
@@ -1430,40 +1444,32 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 		treeItem->setText(m_columnStatusIndex, status);
 	}
 
-	QColor stateBackColor;
-	QColor stateTextColor;
+	QColor stateBackColor = Qt::white;
+	QColor stateTextColor = Qt::darkGray;
 
-	if (valid == false)
+	if (controlIsEnabled == false)
 	{
-		stateBackColor = Qt::white;
-		stateTextColor = Qt::darkGray;
+		stateBackColor = Qt::gray;
+		stateTextColor = Qt::white;
 	}
 	else
 	{
-		if (controlIsEnabled == false)
+		if (errorCounter > 0)
 		{
-			stateBackColor = Qt::gray;
+			stateBackColor = redColor;
 			stateTextColor = Qt::white;
 		}
 		else
 		{
-			if (errorCounter > 0)
+			if (hasUnappliedParams == true)
 			{
-				stateBackColor = redColor;
-				stateTextColor = Qt::white;
+				stateBackColor = Qt::yellow;
+				stateTextColor = Qt::black;
 			}
 			else
 			{
-				if (hasUnappliedParams == true)
-				{
-					stateBackColor = Qt::yellow;
-					stateTextColor = Qt::black;
-				}
-				else
-				{
-					stateBackColor = Qt::white;
-					stateTextColor = Qt::black;
-				}
+				stateBackColor = Qt::white;
+				stateTextColor = Qt::black;
 			}
 		}
 	}
@@ -1476,7 +1482,7 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 	if (treeItem->foreground(m_columnStatusIndex) != stateTextColor)
     {
 		treeItem->setForeground(m_columnStatusIndex, stateTextColor);
-    }
+	}
 }
 
 void TuningWorkspace::updateTreeItemCounters(QTreeWidgetItem* treeItem, TuningFilter* filter)
@@ -1752,6 +1758,16 @@ void TuningWorkspace::slot_treeContextMenuRequested(const QPoint& pos)
 
 	QMenu menu(this);
 
+	bool controlIsActive = false;
+	for (int c = 0; c < ts.channelsCount(); c++)
+	{
+		if (ts.state(c).controlisactive() == true)
+		{
+			controlIsActive = true;
+			break;
+		}
+	}
+
 	// EnableControl
 
 	QAction* actionEnable = new QAction(tr("Activate Control"), &menu);
@@ -1760,7 +1776,7 @@ void TuningWorkspace::slot_treeContextMenuRequested(const QPoint& pos)
 	{
 		activateControl(filter->caption(), true);
 	};
-	actionEnable->setEnabled(ts.state.controlisactive() == false);
+	actionEnable->setEnabled(controlIsActive == false);
 	connect(actionEnable, &QAction::triggered, this, fEnableControl);
 
 	menu.addAction(actionEnable);
@@ -1773,7 +1789,7 @@ void TuningWorkspace::slot_treeContextMenuRequested(const QPoint& pos)
 	{
 		activateControl(filter->caption(), false);
 	};
-	actionDisable->setEnabled(ts.state.controlisactive() == true);
+	actionDisable->setEnabled(controlIsActive == true);
 	connect(actionDisable, &QAction::triggered, this, fDisableControl);
 
 	menu.addAction(actionDisable);

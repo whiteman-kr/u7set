@@ -17,10 +17,8 @@ class DialogTuningSourceInfo : public DialogSourceInfo
 	Q_OBJECT
 
 public:
-	explicit DialogTuningSourceInfo(std::vector<TuningTcpClient*> tcpClients, QWidget* parent, Hash sourceHash);
+	explicit DialogTuningSourceInfo(std::vector<TuningTcpClient*> tcpClients, QWidget* parent, Hash sourceHash, int sourceChannel);
 	virtual ~DialogTuningSourceInfo();
-
-	Hash sourceHash() const;
 
 	void setTuningTcpClients(std::vector<TuningTcpClient*> tcpClients);
 
@@ -35,6 +33,9 @@ private:
 	TuningTcpClient* m_activeTcpClient = nullptr;
 
 	QString m_sourceEquipmentId;
+
+	Hash m_tuningSourceHash = UNDEFINED_HASH;
+	int m_tuningSourceChannel = 0;
 
 };
 
@@ -79,7 +80,8 @@ private:
 	void activateControl(bool enable);
 
 	TuningTcpClient* selectedClient() const;
-	const std::optional<TuningSource> selectedSource() const;
+	const Hash selectedSourceHash() const;
+	const int selectedSourceChannel() const;
 
 	enum class Columns
 	{
@@ -101,6 +103,7 @@ private:
 
 private:
 
+	QWidget* m_parent = nullptr;
 	QTreeWidget* m_treeWidget = nullptr;
 	QPushButton* m_btnDetails = nullptr;
 	QPushButton* m_btnEnableControl = nullptr;
@@ -112,14 +115,13 @@ private:
 
 	std::vector<TuningTcpClient*> m_tuningTcpClients;
 
-	QWidget* m_parent = nullptr;
+	static const int columnIndex_ClientHash = 0;
+	static const int columnIndex_SourceEquipmentIdHash = 1;
+	static const int columnIndex_SourceChannel = 2;
 
-	static const int columnIndex_Hash = 0;
-	static const int columnIndex_EquipmentId = 1;
+	std::map<Hash, DialogTuningSourceInfo*> m_sourceInfoDialogsMap;	// Used for managing details dialogs. Key is "Source ID + Channel" Hash.
 
-	std::map<Hash, DialogTuningSourceInfo*> m_sourceInfoDialogsMap;
-
-	std::set<Hash> m_tuningClientsSourcesHashes;	// used for comparing with current state, if it is changed - full refresh is performed
+	std::set<Hash> m_tuningClientsLansHashes;	// Used for comparing with current state, if it is changed - full refresh is performed. Key is "Client ID + Lan ID" Hash.
 };
 
 

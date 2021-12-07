@@ -63,13 +63,19 @@ int TuningClientTcpClient::sourceErrorCount() const
 	{
 		const TuningSource& ts = it.second;
 
-		if (ts.state.isreply() == false && ts.state.controlisactive() == true)
+		for (int i = 0; i < ts.channelsCount(); i++)
 		{
-			result++;
-			continue;
+			if (ts.state(i).isreply() == false && ts.state(i).controlisactive() == true)
+			{
+				// Control but not valid
+				//
+				result++;
+			}
+			else
+			{
+				result += ts.getErrorsCount(i);
+			}
 		}
-
-		result += ts.getErrorsCount();
 	}
 
 	return result;
@@ -86,12 +92,21 @@ int TuningClientTcpClient::sourceErrorCount(Hash equipmentHash) const
 
 	const TuningSource& ts = m_tuningSources.at(equipmentHash);
 
-	if (ts.state.isreply() == false && ts.state.controlisactive() == true)
+	int result = 0;
+
+	for (int i = 0; i < ts.channelsCount(); i++)
 	{
-		return 1;
+		if (ts.state(i).isreply() == false && ts.state(i).controlisactive() == true)
+		{
+			result++;
+		}
+		else
+		{
+			result += ts.getErrorsCount(i);
+		}
 	}
 
-	return ts.getErrorsCount();
+	return result;
 }
 
 int TuningClientTcpClient::sourceSorCount(bool* sorActive, bool* sorValid) const
@@ -114,19 +129,31 @@ int TuningClientTcpClient::sourceSorCount(bool* sorActive, bool* sorValid) const
 	{
 		const TuningSource& ts = it.second;
 
-		if (ts.state.controlisactive() == true)
+		bool sorIsSet = false;
+
+		for (int i = 0; i < ts.channelsCount(); i++)
 		{
-			*sorActive = true;
+			auto state = ts.state(i);
 
-			if (ts.state.isreply() == true)
+			if (state.controlisactive() == true)
 			{
-				*sorValid = true;
+				*sorActive = true;
 
-				if (ts.state.setsor() == true)
+				if (state.isreply() == true)
 				{
-					result++;
+					*sorValid = true;
+
+					if (state.setsor() == true)
+					{
+						sorIsSet = true;
+					}
 				}
 			}
+		}
+
+		if (sorIsSet == true)
+		{
+			result++;
 		}
 	}
 
@@ -156,17 +183,22 @@ int TuningClientTcpClient::sourceSorCount(Hash equipmentHash, bool* sorActive, b
 
 	const TuningSource& ts = m_tuningSources.at(equipmentHash);
 
-	if (ts.state.controlisactive() == true)
+	for (int i = 0; i < ts.channelsCount(); i++)
 	{
-		*sorActive = true;
+		auto state = ts.state(i);
 
-		if (ts.state.isreply() == true)
+		if (state.controlisactive() == true)
 		{
-			*sorValid = true;
+			*sorActive = true;
 
-			if (ts.state.setsor() == true)
+			if (state.isreply() == true)
 			{
-				result = 1;
+				*sorValid = true;
+
+				if (state.setsor() == true)
+				{
+					result = 1;
+				}
 			}
 		}
 	}

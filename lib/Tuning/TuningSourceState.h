@@ -1,36 +1,47 @@
 #pragma once
 
+#include <map>
 #include <QDateTime>
+#include "../CommonLib/Hash.h"
 #include "../Proto/network.pb.h"
 
 class TuningSource
 {
 public:
 	TuningSource();
+	TuningSource(const ::Network::DataSourceInfo& info);
 
 	quint64 id() const;
 	QString equipmentId() const;
-	QString lanEquipmentId() const;
 
-	void setNewState(const ::Network::TuningSourceState& newState);
+	QString lanEquipmentId(int lanIndex) const;
 
-	int getErrorsCount() const;
+	int getErrorsCount(int channel) const;
+	int getErrorsCount(Hash controllerHash) const;
 
-	bool valid() const;
+	int channelsCount() const;	// Gets number of received channels (LANs count in info and received states)
+
+	const ::Network::DataSourceInfo& info() const;
+
+	const ::Network::TuningSourceState& state(int channel) const;
+	const ::Network::TuningSourceState& state(Hash controllerHash) const;
+
+	const ::Network::TuningSourceState& previousState(int channel) const;
+	const ::Network::TuningSourceState& previousState(Hash controllerHash) const;
+
+	void setState(const ::Network::TuningSourceState& newState);
+
 	void invalidate();
 
-	const ::Network::TuningSourceState& previousState() const;
-
-public:
-	::Network::DataSourceInfo info;
-	::Network::TuningSourceState state;
-
 private:
+	::Network::DataSourceInfo m_info;
+
+	std::vector<::Network::TuningSourceState> m_states;
+	std::vector<::Network::TuningSourceState> m_previousStates;
+
+	std::map<Hash, int> m_controllerToStateMap;	// Key is Ethernet Controller Hash, value is index in m_states
+
 	qint64 m_previousStateUpdatePeriod = 5;
-
-	bool m_valid = true;
-
-	::Network::TuningSourceState m_previousState;	// Previous state is updated every 5 seconds
 
 	QDateTime m_perviousStateLastUpdateTime;
 };

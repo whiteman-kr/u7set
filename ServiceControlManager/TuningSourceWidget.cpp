@@ -171,7 +171,8 @@ void TuningSourceWidget::updateStateFields()
 	{
 		if (source.id() == m_id && source.equipmentId() == m_equipmentId)
 		{
-			pState = &source.state;
+			int todo_multichannel = 1;
+			pState = &source.state(0);
 		}
 	}
 
@@ -205,7 +206,7 @@ void TuningSourceWidget::setClientSocket(TcpTuningServiceClient *tcpClientSocket
 	{
 		if (source.id() == m_id && source.equipmentId() == m_equipmentId)
 		{
-			pInfo = &source.info;
+			pInfo = &source.info();
 		}
 	}
 
