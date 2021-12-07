@@ -21,7 +21,6 @@ PropertyPage::PropertyPage(Options* options, PropertyPageType pageType, ExtWidge
 	, m_baseWidget(pPropertyEditor)
 	, m_widgetType(PropertyPageWidgetType::List)
 	, m_pageType(pageType)
-
 {
 	switch (pageType)
 	{
@@ -570,7 +569,7 @@ PropertyGroupType groupByPage(PropertyPageType pageType)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-PropertyPageType DialogOptions::m_currentPage = PropertyPageType::Linearity_Measure;
+PropertyPageType DialogOptions::m_currentPage = PropertyPageType::Service_Connection;
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -1198,6 +1197,11 @@ void DialogOptions::loadSettings()
 	restoreGeometry(geometry);
 
 	m_currentPage = static_cast<PropertyPageType>(s.value(QString("%1OptionsDialog/activePage").arg(WINDOW_GEOMETRY_OPTIONS_KEY), PropertyPageType::Linearity_Measure).toInt());
+
+	if (ERR_PROPERTY_PAGE_TYPE(m_currentPage) == true)
+	{
+		m_currentPage = PropertyPageType::Service_Connection;
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------

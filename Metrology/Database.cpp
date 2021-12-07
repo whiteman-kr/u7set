@@ -292,7 +292,6 @@ void SqlFieldBase::append(QString name, QMetaType::Type type, int length)
 		return;
 	}
 
-
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))	// for Qt6
 
 	QSqlField field(name, QMetaType(type));
