@@ -5,13 +5,13 @@ CONFIG += ordered
 SUBDIRS += Protobuf \
     	QScintilla/src/qscintilla.pro \
         TrendView \
-	AppSignalLib \
+        AppSignalLib \
         UtilsLib \
         OnlineLib \
         ServiceLib \
         HardwareLib \
-	CommonLib \
-	VFrame30 \
+        CommonLib \
+        VFrame30 \
         DbLib \
         Simulator \
         SimulatorConsole \

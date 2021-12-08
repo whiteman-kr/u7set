@@ -89,12 +89,6 @@ unix:PRE_TARGETDEPS += $$DESTDIR/libSimulator.a
 INCLUDEPATH += $$PWD/../Simulator
 DEPENDPATH += $$PWD/../Simulator
 
-# TrendView
-#
-LIBS += -lTrendView
-win32:PRE_TARGETDEPS += $$DESTDIR/TrendView.lib
-unix:PRE_TARGETDEPS += $$DESTDIR/libTrendView.a
-
 # VFrame30 library
 #
 LIBS += -lVFrame30
@@ -102,6 +96,12 @@ win32:PRE_TARGETDEPS += $$DESTDIR/VFrame30.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libVFrame30.a
 INCLUDEPATH += ../VFrame30
 DEPENDPATH += ../VFrame30
+
+# TrendView
+#
+LIBS += -lTrendView
+win32:PRE_TARGETDEPS += $$DESTDIR/TrendView.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libTrendView.a
 
 # Protobuf
 #
