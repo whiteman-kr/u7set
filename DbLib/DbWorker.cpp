@@ -388,6 +388,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0366.sql", "Upgrade to version 366, Monitor preset default tags are applogic and monitor"},
 	{":/DatabaseUpgrade/Upgrade0367.sql", "Upgrade to version 367, LAN configuration is build based on LM description LAN types and places"},
 	{":/DatabaseUpgrade/Upgrade0368.sql", "Upgrade to version 368, Added LM11-SR90 preset and LM description"},
+	{":/DatabaseUpgrade/Upgrade0369.sql", "Upgrade to version 369, LAN configuration generating improvements"},
 };
 
 int DbWorker::counter = 0;

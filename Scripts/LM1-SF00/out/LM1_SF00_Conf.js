@@ -641,8 +641,22 @@ function fillLanServiceData(confFirmware, softwareType, root, module, ethernetco
         // If Enable == true, take IP from service or default if service is not found
         lan.ip = ethernetController.propertyIP(controllerPrefix + "IP");
         lan.port = ethernetController.propertyInt(controllerPrefix + "Port");
-        let serviceObject = root.childByEquipmentId(serviceID);
-        if (serviceObject == null || serviceObject.isSoftware() == false) {
+        let serviceObject = root.childByEquipmentId(serviceID); // This can be software or controller
+        let serviceSoftware = null; // This will be software
+        if (serviceObject != null) {
+            if (serviceObject.isController() == true) {
+                let parentObject = serviceObject.parent();
+                if (parentObject != null && parentObject.isSoftware() == true) {
+                    serviceSoftware = parentObject.toSoftware();
+                }
+            }
+            else {
+                if (serviceObject.isSoftware() == true) {
+                    serviceSoftware = serviceObject.toSoftware();
+                }
+            }
+        }
+        if (serviceObject == null || serviceSoftware == null) {
             //Service was not found
             if (lan.serviceIP != 0 && lan.servicePort != 0) {
                 log.wrnCFG3018(controllerPrefix + "DataService", ipToString(lan.serviceIP), lan.servicePort, ethernetController.equipmentId);
@@ -654,21 +668,20 @@ function fillLanServiceData(confFirmware, softwareType, root, module, ethernetco
         else {
             // Check software type
             //
-            let service = serviceObject.toSoftware();
-            if (service.softwareType != softwareType) {
-                log.errCFG3017(ethernetController.equipmentId, "Type", service.equipmentId);
+            if (serviceSoftware.softwareType != softwareType) {
+                log.errCFG3017(ethernetController.equipmentId, "Type", serviceSoftware.equipmentId);
                 return false;
             }
             // Take address from service
             let checkServiceProperties = [servicePrefix + "IP", servicePrefix + "Port"];
             for (let cp = 0; cp < checkServiceProperties.length; cp++) {
-                if (service.propertyValue(checkServiceProperties[cp]) == undefined) {
-                    log.errCFG3000(checkServiceProperties[cp], service.equipmentId);
+                if (serviceObject.propertyValue(checkServiceProperties[cp]) == undefined) {
+                    log.errCFG3000(checkServiceProperties[cp], serviceObject.equipmentId);
                     return false;
                 }
             }
-            lan.serviceIP = service.propertyIP(servicePrefix + "IP");
-            lan.servicePort = service.propertyInt(servicePrefix + "Port");
+            lan.serviceIP = serviceObject.propertyIP(servicePrefix + "IP");
+            lan.servicePort = serviceObject.propertyInt(servicePrefix + "Port");
         }
         lan.dataID = module.propertyValue(overridePrefix + "LANDataUID");
         if (lan.dataID == undefined) {
