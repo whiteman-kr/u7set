@@ -1,5 +1,6 @@
 #ifndef MONITORTRENDS_H
 #define MONITORTRENDS_H
+
 #include "TrendMainWindow.h"
 #include "MonitorConfigController.h"
 #include "ArchiveTrendTcpClient.h"
@@ -49,9 +50,7 @@ public:
 protected slots:
 	void slot_archiveDataReceived(QString appSignalId, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
 	void slot_realtimeDataReceived(std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState);
-
 	void slot_trendModeChanged();
-
 
 	// Data
 	//

@@ -5,9 +5,10 @@
 
 namespace TrendLib
 {
-	RenderThread::RenderThread(Trend* trend, QObject* parent)
+	RenderThread::RenderThread(Trend* trend, ITrendDataProvider* dataProvider, QObject* parent)
 		: QThread(parent),
-		m_trend(trend)
+		m_trend(trend),
+		m_drawParam(dataProvider)
 	{
 		qRegisterMetaType<TrendLib::TrendParam>("TrendParam");
 
@@ -86,7 +87,10 @@ namespace TrendLib
 
 	TrendWidget::TrendWidget(QWidget* parent) :
 		QWidget(parent),
-		m_thread(&m_trend)
+		m_trend(),
+		m_trendParam(&m_trend.signalSet()),
+		m_thread(&m_trend, &m_trend.signalSet()),
+		m_pixmapDrawParam(&m_trend.signalSet())
 	{
 		setMouseTracking(true);		// To enable mouseMoveEvent without pressed button
 

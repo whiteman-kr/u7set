@@ -1,6 +1,7 @@
 #include "IndicatorTrend.h"
 #include "Schema.h"
 #include "SchemaView.h"
+#include "ClientSchemaView.h"
 #include "SchemaItemIndicator.h"
 #include "PropertyNames.h"
 #include "DrawParam.h"
@@ -9,11 +10,115 @@
 namespace VFrame30
 {
 	//
+	// IndicatorTrendSignalParam
+	//
+	void IndicatorTrendSignalParam::propertyDemand(const QString&)
+	{
+		ADD_PROPERTY_GETTER_SETTER(QColor, PropertyNames::color, true, IndicatorTrendSignalParam::color, IndicatorTrendSignalParam::setColor)
+				->setCategory(PropertyNames::indicatorSettings);
+
+		ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::lineWeight, true, IndicatorTrendSignalParam::lineWeight, IndicatorTrendSignalParam::setLineWeight)
+				->setCategory(PropertyNames::indicatorSettings);
+
+		ADD_PROPERTY_GETTER_SETTER(double, PropertyNames::lowLimit, true, IndicatorTrendSignalParam::lowLimit, IndicatorTrendSignalParam::setLowLimit)
+				->setCategory(PropertyNames::indicatorSettings);
+
+		ADD_PROPERTY_GETTER_SETTER(double, PropertyNames::highLimit, true, IndicatorTrendSignalParam::highLimit, IndicatorTrendSignalParam::setHighLimit)
+				->setCategory(PropertyNames::indicatorSettings);
+
+		return;
+	}
+
+	bool IndicatorTrendSignalParam::save(Proto::IndicatorTrendSignalParam* message) const
+	{
+		if (message == nullptr)
+		{
+			Q_ASSERT(message);
+			return false;
+		}
+
+		message->set_color(m_color.rgba());
+		message->set_linewieght(m_lineWeight);
+
+		message->set_lowlimit(m_lowLimit);
+		message->set_highlimit(m_highLimit);
+
+		return true;
+	}
+
+	bool IndicatorTrendSignalParam::load(const Proto::IndicatorTrendSignalParam& message)
+	{
+		m_color = message.color();
+		m_lineWeight = message.linewieght();
+
+		m_lowLimit = message.lowlimit();
+		m_highLimit = message.highlimit();
+
+		return true;
+	}
+
+	void IndicatorTrendSignalParam::initTrensSignalParam(TrendLib::TrendSignalParam* trendSignalParam) const
+	{
+		if (trendSignalParam == nullptr)
+		{
+			Q_ASSERT(trendSignalParam);
+			return;
+		}
+
+		trendSignalParam->setColor(color().rgb());
+		trendSignalParam->setLineWeight(lineWeight());
+
+		trendSignalParam->setLowLimit(lowLimit());
+		trendSignalParam->setHighLimit(highLimit());
+
+		return;
+	}
+
+	QColor IndicatorTrendSignalParam::color() const
+	{
+		return m_color;
+	}
+
+	void IndicatorTrendSignalParam::setColor(const QColor& value)
+	{
+		m_color = value;
+	}
+
+	int IndicatorTrendSignalParam::lineWeight() const
+	{
+		return m_lineWeight;
+	}
+
+	void IndicatorTrendSignalParam::setLineWeight(int value)
+	{
+		m_lineWeight = value;
+	}
+
+	double IndicatorTrendSignalParam::lowLimit() const
+	{
+		return m_lowLimit;
+	}
+	void IndicatorTrendSignalParam::setLowLimit(double value)
+	{
+		m_lowLimit = std::min(m_highLimit, value);
+	}
+
+	double IndicatorTrendSignalParam::highLimit() const
+	{
+		return m_highLimit;
+	}
+	void IndicatorTrendSignalParam::setHighLimit(double value)
+	{
+		m_highLimit = std::max(m_lowLimit, value);
+	}
+
+	//
 	// IndicatorTrend
 	//
 	IndicatorTrend::IndicatorTrend(SchemaUnit itemUnit) :
 		Indicator(itemUnit)
 	{
+		m_drawTimer.start();
 	}
 
 	void IndicatorTrend::createProperties(SchemaItemIndicator* propertyObject, int /*signalCount*/)
@@ -35,7 +140,11 @@ namespace VFrame30
 		p->setCategory(PropertyNames::indicatorSettings);
 		p->setDescription(PropertyNames::indicatorTrendLaneDurationToolTip);
 
-		m_drawTimer.start();
+		propertyObject->ADD_PROPERTY_CAT_VAR(PropertyVector<IndicatorTrendSignalParam>,
+											 PropertyNames::trendSignalParams,
+											 PropertyNames::indicatorSettings,
+											 true,
+											 m_trendSignalParams);
 
 		return;
 	}
@@ -60,6 +169,15 @@ namespace VFrame30
 		m_redrawInterval = m.redrawinterval();
 		m_trendParam.setLaneDuration(m.duration());						// Save/restore in ms
 
+		m_trendSignalParams.clear();
+		m_trendSignalParams.reserve(static_cast<size_t>(m.trendsignalparams_size()));
+		for (int i = 0; i < m.trendsignalparams_size(); i++)
+		{
+			auto tsp = m_trendSignalParams.createItem();
+			tsp->load(m.trendsignalparams(i));
+			m_trendSignalParams.push_back(tsp);
+		}
+
 		return true;
 	}
 
@@ -79,6 +197,12 @@ namespace VFrame30
 		m->set_timetype(static_cast<int>(m_timeType));
 		m->set_redrawinterval(m_redrawInterval);
 		m->set_duration(m_trendParam.duration());						// Save/restore in ms
+
+		for (const auto& tsp : m_trendSignalParams)
+		{
+			::Proto::IndicatorTrendSignalParam* mtrsp = m->add_trendsignalparams();
+			tsp->save(mtrsp);
+		}
 
 		return true;
 	}
@@ -132,6 +256,23 @@ namespace VFrame30
 		//
 		m_trendParam.setRect(trendRect);
 		m_trendParam.setDpi(drawParam->dpiX(), drawParam->dpiY());
+		m_trendParam.setTimeType(m_timeType);
+
+		if (drawParam->isMonitorMode() == true)
+		{
+			Q_ASSERT(drawParam->clientSchemaView());
+			m_trendParam.setTrendDataProvider(drawParam->clientSchemaView()->schemaManager());
+
+			// Shift realtime trend
+			//
+			TimeStamp maxTimeStamp = m_trendParam.trendDataProvider()->maxTimeStamp(schemaItem->guid(), m_timeType);
+
+			if (maxTimeStamp.timeStamp != 0)
+			{
+				TimeStamp startTimeStamp = {maxTimeStamp.timeStamp - m_trendParam.duration() * m_trendParam.laneCount()};
+				m_trendParam.setStartTimeStamp(startTimeStamp);
+			}
+		}
 
 		// Detect if image update is required
 		//
@@ -146,51 +287,68 @@ namespace VFrame30
 
 			m_image = QImage{static_cast<int>(trendRect.width()), static_cast<int>(trendRect.height()), QImage::Format_RGB32};
 
-			qDebug() << "Trend image size " << m_image.rect().size();
-			qDebug() << "Trend image dpis " << m_image.logicalDpiX() << " x " << m_image.logicalDpiY();
-		}
-
-		// Check if there are any new signals
-		//
-		QStringList itemSignalIds = schemaItem->signalIds();
-		QStringList trendSignalIds = m_trend.signalSet().trendSignalIds();
-
-		if (itemSignalIds != trendSignalIds)
-		{
-			std::list<TrendLib::TrendSignalParam> signalParams;
-
-			AppSignalController* appSignalController = drawParam->appSignalController();
-			Q_ASSERT(appSignalController);
-
-			for (const QString& appSignalId : qAsConst(itemSignalIds))
-			{
-				bool signalFound = false;
-
-				AppSignalParam appSignalParam = appSignalController->signalParam(appSignalId, &signalFound);
-				if (signalFound == false)
-				{
-					appSignalParam.setAppSignalId(appSignalId);
-				}
-
-				signalParams.emplace_back(appSignalParam);
-			}
-
-			m_trend.signalSet().addSignals(std::move(signalParams));
+			//qDebug() << "Trend image size " << m_image.rect().size();
+			//qDebug() << "Trend image dpis " << m_image.logicalDpiX() << " x " << m_image.logicalDpiY();
 		}
 
 		// Draw trend to QImage and then copy it to painter
 		//
 		if (requiredRedraw == true)
 		{
+			// Check if there are any new signals
+			//
+			QStringList itemSignalIds = schemaItem->signalIds();
+			QStringList trendSignalIds = m_trend.signalSet().trendSignalIds();
+
+			if (itemSignalIds != trendSignalIds)
+			{
+				std::list<TrendLib::TrendSignalParam> signalParams;
+
+				AppSignalController* appSignalController = drawParam->appSignalController();
+				Q_ASSERT(appSignalController);
+
+				for (int index = 0;
+					 const QString& appSignalId : qAsConst(itemSignalIds))
+				{
+					bool signalFound = false;
+
+					AppSignalParam appSignalParam = appSignalController->signalParam(appSignalId, &signalFound);
+					if (signalFound == false)
+					{
+						appSignalParam.setAppSignalId(appSignalId);
+					}
+
+					TrendLib::TrendSignalParam& trensSignalParam = signalParams.emplace_back(appSignalParam);
+
+					// Set trend line draw params
+					//
+					if (index < m_trendSignalParams.size())
+					{
+						std::shared_ptr<IndicatorTrendSignalParam> itsp = m_trendSignalParams[index];
+						Q_ASSERT(itsp);
+
+						itsp->initTrensSignalParam(&trensSignalParam);
+					}
+
+					index++;
+				}
+
+				m_trend.signalSet().addSignals(std::move(signalParams));
+			}
+
+			//	--
+			//
 			m_drawTimer.restart();
 
 			QElapsedTimer drawTimer;
 			drawTimer.start();
 
+			m_trend.setUuid(schemaItem->guid());
+
 			m_trendParam.signalDescriptionRect().clear();
 			m_trend.draw(&m_image, m_trendParam);
 
-			qDebug() << "m_trend.draw " << drawTimer.elapsed() << " ms";
+			//qDebug() << "m_trend.draw " << drawTimer.elapsed() << " ms";
 		}
 
 		painter->drawImage(boundingRect, m_image);

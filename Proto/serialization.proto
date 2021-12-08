@@ -578,6 +578,21 @@ message VFrameSetPoint
 //
 message IndicatorHistogramVert
 {
+    optional int32 signalSource = 100 [default = 0];
+    optional int32 precision = 103 [default = 2];
+    optional int32 analogFormat = 104 [default = 102];	// Default 102 (charcode for 'f') is AnalogFormat::f
+
+    optional FontParam font = 109;
+
+    optional bool drawRect = 110 [default = false];
+    optional double lineWeight = 111 [default = 0];
+
+    optional uint32 backgroundColor = 116;
+    optional uint32 lineColor = 117;
+    repeated uint32 signalColors = 118;
+
+    // --
+    //
     optional double startValue = 1;
 	optional double endValue = 2;
 
@@ -615,26 +630,34 @@ message IndicatorArrowIndicator
 	optional double spanAngle = 17;
 }
 
+message IndicatorTrendSignalParam
+{
+    optional fixed32 color = 2;
+    optional int32 lineWieght = 3;
+    optional double lowLimit = 20;
+    optional double highLimit = 21;
+}
+
+message IndicatorTrend
+{
+    optional int32 sampleperiod = 90;
+	optional int32 timeType = 91;
+    optional int64 redrawinterval = 100;
+	optional int64 duration = 51;
+
+    repeated IndicatorTrendSignalParam trendSignalParams = 110;
+}
+
+
 message SchemaItemIndicator
 {
     optional string signalIds = 1;
-	optional int32 signalSource = 2 [default = 0];
-	optional int32 precision = 3 [default = 2];
-	optional int32 analogFormat = 4 [default = 102];	// Default 102 (charcode for 'f') is AnalogFormat::f
-
-    optional FontParam font = 9;
-
-    optional bool drawRect = 10 [default = false];
-	optional double lineWeight = 11 [default = 0];
-
-    optional uint32 backgroundColor = 16;
-	optional uint32 lineColor = 17;
-	repeated uint32 signalColors = 18;
 
     optional uint32 type = 32 [default = 0];
 
     optional IndicatorHistogramVert indicatorHistogramVert = 48;
 	optional IndicatorArrowIndicator indicatorArrowIndicator = 49;
+	optional IndicatorTrend indicatorTrend = 50;
 }
 
 
@@ -1375,6 +1398,16 @@ message SchemaDetails
 	repeated Uuid guids = 23;
 	repeated string tags = 24;
 	repeated string loopbacks = 25;
+
+    message TrendIndicatorSchemaItems
+	{
+	    optional Uuid itemUuid = 2;
+		optional int32 samplePeriod = 3;		// Enum E::RtTrendsSamplePeriod
+		optional int32 timeType = 4;		// Enum E::TimeType
+		optional int32 durationSeconds = 5;
+		repeated string appSignalIds = 6;
+	}
+	repeated TrendIndicatorSchemaItems trendIndicators = 30;
 }
 
 

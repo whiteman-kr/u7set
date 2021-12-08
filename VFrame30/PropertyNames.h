@@ -16,6 +16,9 @@ namespace VFrame30
 		inline static const QString width{"Width"};
 		inline static const QString height{"Height"};
 
+		inline static const QString lowLimit{"LowLimit"};
+		inline static const QString highLimit{"HighLimit"};
+
 		inline static const QString acceptClick{"AcceptClick"};
 		inline static const QString clickScript{"ClickScript"};
 		inline static const QString preDrawScript{"PreDrawScript"};
@@ -108,6 +111,15 @@ namespace VFrame30
 		inline static const QString indicatorStartAngle{"StartAngle"};
 		inline static const QString indicatorSpanAngle{"SpanAngle"};
 
+		inline static const QString timeType{"TimeType"};
+		inline static const QString timeTypeToolTip{"Plant: plant time received from LogicModule, System: server time (UTC+0), Local: localized server time (UTC+Time Zone)"};
+
+		inline static const QString indicatorTrendSamplePeriod{"SamplePeriod"};
+		inline static const QString indicatorTrendRedrawInterval{"RedrawInterval"};
+		inline static const QString indicatorTrendRedrawIntervalToolTip{"Trend image update time, ms"};
+		inline static const QString indicatorTrendLaneDuration{"LaneDuration"};
+		inline static const QString indicatorTrendLaneDurationToolTip{"Lane duration, seconds"};
+
 		inline static const QString indicatorMargingLeft{"MarginLeft"};
 		inline static const QString indicatorMargingTop{"MarginTop"};
 		inline static const QString indicatorMargingRight{"MarginRight"};
@@ -116,6 +128,7 @@ namespace VFrame30
 
 		inline static const QString drawSetpoints{"DrawSetpoints"};
 		inline static const QString customSetpoints{"CustomSetpoints"};
+		inline static const QString trendSignalParams{"TrendSignalParams"};
 
 		// --
 		//
@@ -206,6 +219,7 @@ namespace VFrame30
 		inline static const QString busSettingCategory{"Bus Settings"};
 		inline static const QString busInbusSettingCategory{"InBus Settings (Manual Signal Placement)"};
 
+		inline static const QString commonCategory{"Common"};
 		inline static const QString behaviourCategory{"Behaviour"};
 		inline static const QString appearanceCategory{"Appearance"};
 		inline static const QString functionalCategory{"Functional"};

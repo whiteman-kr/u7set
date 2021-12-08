@@ -2,6 +2,8 @@
 
 #include "../CommonLib/Times.h"
 #include "../CommonLib/Types.h"
+#include "ITrendDataProvider.h"
+
 #include <QColor>
 #include <QRectF>
 
@@ -28,6 +30,7 @@ namespace TrendLib
 	{
 	public:
 		TrendParam();
+		TrendParam(ITrendDataProvider* dataProvider);
 
 	public:
 		bool save(::Proto::TrendParam* message) const;
@@ -55,6 +58,10 @@ namespace TrendLib
 
 		E::TrendMode trendMode() const;
 		void setTrendMode(E::TrendMode value);
+
+		TrendLib::ITrendDataProvider* trendDataProvider();
+		const TrendLib::ITrendDataProvider* trendDataProvider() const;
+		void setTrendDataProvider(TrendLib::ITrendDataProvider* dataProvider);
 
 		QColor backColor1st() const;
 		void setBackColor1st(const QColor& value);
@@ -91,6 +98,7 @@ namespace TrendLib
 		int m_laneCount = 1;
 
 		E::TrendMode m_trendMode = E::TrendMode::Archive;
+		ITrendDataProvider* m_dataProvider = nullptr;
 
 		QColor m_backColor1st = {qRgb(0xE0, 0xE0, 0xE0)};
 		QColor m_backColor2nd = {qRgb(0xEA, 0xEA, 0xEA)};

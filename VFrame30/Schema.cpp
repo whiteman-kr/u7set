@@ -12,6 +12,7 @@
 #include "SchemaItemLink.h"
 #include "SchemaItemConnection.h"
 #include "SchemaItemLoopback.h"
+#include "SchemaItemIndicator.h"
 #include "HorzVertLinks.h"
 #include "DrawParam.h"
 #include "PropertyNames.h"
@@ -1791,14 +1792,17 @@ namespace VFrame30
 		//
 		QSet<QString> connections;
 		QSet<QString> loopbacks;
+		std::vector<TrendIndicatorSchemaItems> realTimeTrends;
 
-		if (schema->isLogicSchema() == true)
+		for (const std::shared_ptr<SchemaLayer>& layer : schema->Layers)
 		{
-			for (const std::shared_ptr<SchemaLayer>& layer : schema->Layers)
+			if (layer->compile() == true)
 			{
-				if (layer->compile() == true)
+				for (const std::shared_ptr<SchemaItem>& item : layer->Items)
 				{
-					for (const std::shared_ptr<SchemaItem>& item : layer->Items)
+					// Items on LogicSchemas
+					//
+					if (schema->isLogicSchema() == true)
 					{
 						if (const SchemaItemConnection* connItem = item->toType<SchemaItemConnection>();
 							connItem != nullptr)
@@ -1822,8 +1826,21 @@ namespace VFrame30
 						}
 					}
 
-					break;
+					// Items on all other schemas
+					//
+					if (const SchemaItemIndicator* ii = item->toType<SchemaItemIndicator>();
+						ii != nullptr &&
+						ii->isTrend() == true)
+					{
+						realTimeTrends.emplace_back(ii->guid(),
+													ii->trendSamplePeriod(),
+													ii->trendTimeType(),
+													ii->trendDurationSeconds(),
+													ii->signalIds());
+					}
 				}
+
+				break;
 			}
 		}
 
@@ -1889,6 +1906,13 @@ namespace VFrame30
 		jsonObject.insert("Loopbacks", QJsonValue::fromVariant(loopbacksVariant));
 		jsonObject.insert("Tags", QJsonValue::fromVariant(tagsVariant));
 		jsonObject.insert("ItemGuids", QJsonValue::fromVariant(guidsVariant));
+
+		QJsonArray jsontrendsIndicators;
+		for (const TrendIndicatorSchemaItems& trendItem : realTimeTrends)
+		{
+			jsontrendsIndicators.push_back(trendItem.toJsonObject());
+		}
+		jsonObject["RealTimeTrendItems"] = jsontrendsIndicators;
 
 		// Convert json to string and return it
 		//
@@ -2044,11 +2068,25 @@ namespace VFrame30
 
 				// ItemGuids
 				//
-				m_guids.clear();
+				{
+					m_guids.clear();
 
-				QStringList guidList = jsonObject.value(QLatin1String("ItemGuids")).toVariant().toStringList();
+					QStringList guidList = jsonObject.value(QLatin1String("ItemGuids")).toVariant().toStringList();
+					std::for_each(guidList.begin(), guidList.end(), [this](const QString& str){	m_guids.insert(QUuid(str));});
+				}
 
-				std::for_each(guidList.begin(), guidList.end(), [this](const QString& str){	m_guids.insert(QUuid(str));});
+				// m_trendsIndicators
+				//
+				{
+					m_trendsIndicators.clear();
+					QJsonArray jsa = jsonObject.value(QLatin1String("RealTimeTrendItems")).toArray();
+
+					for (QJsonValueRef v : jsa)
+					{
+						Q_ASSERT(v.isObject() == true);
+						m_trendsIndicators.emplace_back().fromJsonObject(v.toObject());
+					}
+				}
 			}
 			break;
 		default:
@@ -2105,6 +2143,12 @@ namespace VFrame30
 			assert(uuidMesage);
 
 			uuidMesage->set_uuid(&u, sizeof(u));
+		}
+
+		for (const auto& ti : m_trendsIndicators)
+		{
+			::Proto::SchemaDetails::TrendIndicatorSchemaItems* trendsIndicators = message->add_trendindicators();
+			ti.saveData(trendsIndicators);
 		}
 
 		return true;
@@ -2166,6 +2210,18 @@ namespace VFrame30
 		{
 			QUuid guid = Proto::Read(message.guids(i));
 			m_guids.insert(guid);
+		}
+
+		{
+			m_trendsIndicators.clear();
+			int tiCount = message.trendindicators_size();
+			for (int i = 0; i < tiCount; i++)
+			{
+				const auto& tiMessage = message.trendindicators(i);
+
+				TrendIndicatorSchemaItems& trendSchemaItem = m_trendsIndicators.emplace_back();
+				trendSchemaItem.loadData(tiMessage);
+			}
 		}
 
 		return true;
@@ -2260,8 +2316,81 @@ namespace VFrame30
 		return m_loopbacks.contains(loopbackId);
 	}
 
+	SchemaDetails::TrendIndicatorSchemaItems::TrendIndicatorSchemaItems(QUuid _itemUuid,
+																		E::RtTrendsSamplePeriod _samplePeriod,
+																		E::TimeType _timeType,
+																		int _durationSeconds,
+																		const QStringList& _appSignalIds) :
+		itemUuid(_itemUuid),
+		samplePeriod(_samplePeriod),
+		timeType(_timeType),
+		durationSeconds(_durationSeconds),
+		appSignalIds(_appSignalIds)
+	{
+	}
+
+	QJsonObject SchemaDetails::TrendIndicatorSchemaItems::toJsonObject() const
+	{
+		QJsonObject jsonObject;
+
+		jsonObject.insert(QLatin1String{"itemUuid"}, QJsonValue{itemUuid.toString()});
+		jsonObject.insert(QLatin1String{"samplePeriod"}, QJsonValue{static_cast<int>(samplePeriod)});
+		jsonObject.insert(QLatin1String{"timeType"}, QJsonValue{static_cast<int>(timeType)});
+		jsonObject.insert(QLatin1String{"appSignalIds"}, QJsonValue{appSignalIds.join(", ")});
+		jsonObject.insert(QLatin1String{"durationSeconds"}, QJsonValue{durationSeconds});
+
+		return jsonObject;
+	}
+
+	bool SchemaDetails::TrendIndicatorSchemaItems::fromJsonObject(const QJsonObject& jsonObject)
+	{
+		itemUuid = jsonObject.value(QLatin1String{"itemUuid"}).toString();
+		samplePeriod = static_cast<E::RtTrendsSamplePeriod>(jsonObject.value(QLatin1String{"samplePeriod"}).toInt());
+		timeType = static_cast<E::TimeType>(jsonObject.value(QLatin1String{"timeType"}).toInt());
+		durationSeconds = jsonObject.value(QLatin1String{"durationSeconds"}).toInt();
+
+		appSignalIds = jsonObject.value(QLatin1String{"appSignalIds"}).toString().split(',', Qt::SkipEmptyParts);
+		for (QString& appSignal : appSignalIds)
+		{
+			appSignal = appSignal.trimmed();
+		}
+
+		return true;
+	}
+
+	bool SchemaDetails::TrendIndicatorSchemaItems::saveData(::Proto::SchemaDetails::TrendIndicatorSchemaItems* message) const
+	{
+		Proto::Write(message->mutable_itemuuid(), itemUuid);
+		message->set_sampleperiod(static_cast<int>(samplePeriod));
+		message->set_timetype(static_cast<int>(timeType));
+		message->set_durationseconds(durationSeconds);
+
+		for (const QString& s : appSignalIds)
+		{
+			message->add_appsignalids(s.toStdString());
+		}
+
+		return true;
+	}
+
+	bool SchemaDetails::TrendIndicatorSchemaItems::loadData(const ::Proto::SchemaDetails::TrendIndicatorSchemaItems& message)
+	{
+		itemUuid = Proto::Read(message.itemuuid());
+		samplePeriod = static_cast<E::RtTrendsSamplePeriod>(message.sampleperiod());
+		timeType = static_cast<E::TimeType>(message.timetype());
+		durationSeconds = message.durationseconds();
+
+		appSignalIds.clear();
+		for (const auto& sm : message.appsignalids())
+		{
+			appSignalIds.push_back(QString::fromStdString(sm));
+		}
+
+		return true;
+	}
+
 	SchemaDetailsSet::SchemaDetailsSet() :
-		Proto::ObjectSerialization<SchemaDetailsSet>(Proto::ProtoCompress::Never)
+		Proto::ObjectSerialization<SchemaDetailsSet>(Proto::ProtoCompress::Auto)
 	{
 	}
 
@@ -2479,6 +2608,19 @@ namespace VFrame30
 		}
 
 		return {};
+	}
+
+	std::vector<SchemaDetails::TrendIndicatorSchemaItems> SchemaDetailsSet::trendIndicators() const
+	{
+		std::vector<SchemaDetails::TrendIndicatorSchemaItems> result;
+		result.reserve(128);
+
+		for (const auto&[schemaId, schemaDetails] : m_details)
+		{
+			result.insert(result.end(), schemaDetails->m_trendsIndicators.begin(), schemaDetails->m_trendsIndicators.end());
+		}
+
+		return result;
 	}
 
 }

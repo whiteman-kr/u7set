@@ -8,6 +8,49 @@ namespace VFrame30
 	class IRealTimeTrendSource;
 
 	//
+	// IndicatorTrendSignalParam
+	//
+	class IndicatorTrendSignalParam : public PropertyObject
+	{
+		Q_OBJECT
+
+	public:
+		IndicatorTrendSignalParam() = default;
+		IndicatorTrendSignalParam(const IndicatorTrendSignalParam&) = default;
+		virtual ~IndicatorTrendSignalParam() = default;
+
+		IndicatorTrendSignalParam& operator=(const IndicatorTrendSignalParam&) noexcept = default;
+
+	public:
+		virtual void propertyDemand(const QString&) override;
+
+		bool save(Proto::IndicatorTrendSignalParam* message) const;
+		bool load(const Proto::IndicatorTrendSignalParam& message);
+
+		void initTrensSignalParam(TrendLib::TrendSignalParam* trendSignalParam) const;
+
+	public slots:
+		QColor color() const;
+		void setColor(const QColor& value);
+
+		int lineWeight() const;
+		void setLineWeight(int value);
+
+		double lowLimit() const;
+		void setLowLimit(double value);
+
+		double highLimit() const;
+		void setHighLimit(double value);
+
+	private:
+		QColor m_color = Qt::darkBlue;
+		int m_lineWeight = 1;
+
+		double m_lowLimit = 0.0;
+		double m_highLimit = 100.0;
+	};
+
+	//
 	// Trend as indicator
 	//
 	class IndicatorTrend : public Indicator
@@ -54,6 +97,9 @@ namespace VFrame30
 		E::RtTrendsSamplePeriod m_samplePeriod = E::RtTrendsSamplePeriod::sp_5s;
 		E::TimeType m_timeType = E::TimeType::Local;
 		qint64 m_redrawInterval = 1_sec;
+
+		PropertyVector<IndicatorTrendSignalParam> m_trendSignalParams;
+
 		mutable TrendLib::TrendParam m_trendParam;
 
 		//  --
@@ -62,5 +108,7 @@ namespace VFrame30
 		mutable QImage m_image;
 		mutable QElapsedTimer m_drawTimer;
 	};
-
 }
+
+Q_DECLARE_METATYPE(VFrame30::IndicatorTrendSignalParam)
+Q_DECLARE_METATYPE(PropertyVector<VFrame30::IndicatorTrendSignalParam>)
