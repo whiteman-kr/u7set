@@ -9896,6 +9896,7 @@ class TuningSignalState PROTOBUF_FINAL :
     kTuningDefaultFieldNumber = 16,
     kSuccessfulWriteTimeFieldNumber = 12,
     kUnsuccessfulWriteTimeFieldNumber = 13,
+    kLmTimeFieldNumber = 17,
   };
   // optional .Proto.TuningValue value = 4;
   bool has_value() const;
@@ -10120,6 +10121,19 @@ class TuningSignalState PROTOBUF_FINAL :
   void _internal_set_unsuccessfulwritetime(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
+  // optional sfixed64 lmTime = 17 [default = 0];
+  bool has_lmtime() const;
+  private:
+  bool _internal_has_lmtime() const;
+  public:
+  void clear_lmtime();
+  ::PROTOBUF_NAMESPACE_ID::int64 lmtime() const;
+  void set_lmtime(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_lmtime() const;
+  void _internal_set_lmtime(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:Network.TuningSignalState)
  private:
   class _Internal;
@@ -10145,6 +10159,7 @@ class TuningSignalState PROTOBUF_FINAL :
   bool tuningdefault_;
   ::PROTOBUF_NAMESPACE_ID::int64 successfulwritetime_;
   ::PROTOBUF_NAMESPACE_ID::int64 unsuccessfulwritetime_;
+  ::PROTOBUF_NAMESPACE_ID::int64 lmtime_;
   friend struct ::TableStruct_network_2eproto;
 };
 // -------------------------------------------------------------------
@@ -24207,6 +24222,34 @@ inline void TuningSignalState::_internal_set_tuningdefault(bool value) {
 inline void TuningSignalState::set_tuningdefault(bool value) {
   _internal_set_tuningdefault(value);
   // @@protoc_insertion_point(field_set:Network.TuningSignalState.tuningDefault)
+}
+
+// optional sfixed64 lmTime = 17 [default = 0];
+inline bool TuningSignalState::_internal_has_lmtime() const {
+  bool value = (_has_bits_[0] & 0x00010000u) != 0;
+  return value;
+}
+inline bool TuningSignalState::has_lmtime() const {
+  return _internal_has_lmtime();
+}
+inline void TuningSignalState::clear_lmtime() {
+  lmtime_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00010000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSignalState::_internal_lmtime() const {
+  return lmtime_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSignalState::lmtime() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSignalState.lmTime)
+  return _internal_lmtime();
+}
+inline void TuningSignalState::_internal_set_lmtime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00010000u;
+  lmtime_ = value;
+}
+inline void TuningSignalState::set_lmtime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_lmtime(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSignalState.lmTime)
 }
 
 // -------------------------------------------------------------------

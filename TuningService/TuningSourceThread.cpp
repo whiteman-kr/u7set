@@ -123,25 +123,26 @@ namespace Tuning
 		return tv.typeStr();
 	}
 
-	void TuningSignal::updateCurrentValue(bool valid, const TuningValue& value, qint64 time)
-	{
-		if (valid == true)
-		{
-			m_successfulReadTime = time;
-		}
-
-		setCurrentValue(valid, value);
-	}
-
-	void TuningSignal::setCurrentValue(bool valid, const TuningValue& value)
+	void TuningSignal::setCurrentValue(bool valid, const TuningValue& value, qint64 readTime, qint64 lmTime)
 	{
 		m_valid = valid;
 
-		Q_ASSERT(m_currentValue.type() == value.type());
-		Q_ASSERT(m_defaultValue.type() == value.type());
+		if (m_valid == true)
+		{
+			m_successfulReadTime = readTime;
+			m_lmTime = lmTime;
 
-		m_currentValue = value;
-		m_tuningDefaultFlag = (m_currentValue == m_defaultValue ? 1 : 0);
+			Q_ASSERT(m_currentValue.type() == value.type());
+			Q_ASSERT(m_defaultValue.type() == value.type());
+
+			m_currentValue = value;
+			m_tuningDefaultFlag = (m_currentValue == m_defaultValue ? 1 : 0);
+		}
+		else
+		{
+			m_lmTime = 0;
+			m_tuningDefaultFlag = false;
+		}
 	}
 
 	void TuningSignal::setReadLowBound(const TuningValue& value)
@@ -160,8 +161,9 @@ namespace Tuning
 
 	void TuningSignal::invalidate()
 	{
-		m_valid = false;
-		m_tuningDefaultFlag = false;
+		setCurrentValue(false,
+						// next params isn't matter
+						TuningValue(), 0, 0);
 	}
 
 	FotipV2::DataType TuningSignal::fotipV2DataType() const
@@ -1473,6 +1475,7 @@ namespace Tuning
 		tss->set_writerequesttime(ts->writeRequestTime());
 		tss->set_successfulwritetime(ts->successfulWriteTime());
 		tss->set_unsuccessfulwritetime(ts->unsuccessfulWriteTime());
+		tss->set_lmtime(ts->lmTime());
 
 		tss->set_writeclient(ts->writeClient());
 		tss->set_writeerrorcode(TO_INT(ts->writeErrorCode()));
@@ -1591,6 +1594,10 @@ namespace Tuning
 
 	bool TuningSourceThread::updateFrameSignalsState(RupFotipV2& reply)
 	{
+		//
+		// Byte order of reply.rupHeader already REVERSED!!!
+		//
+
 		bool updateResult = m_tuningMem.updateFrame(reply.fotipFrame.header.startAddressW,
 													reply.fotipFrame.header.romFrameSizeB,
 													reply.fotipFrame.data);
@@ -1616,6 +1623,8 @@ namespace Tuning
 		quint8* dataPtr = reply.fotipFrame.data;
 
 		qint64 updateTime = QDateTime::currentMSecsSinceEpoch();
+
+		qint64 lmTime = reply.rupHeader.timeStamp.toInt64(false);		// header already reversed!
 
 		int tuningSignalsCount = TO_INT(m_tuningSignals.size());
 
@@ -1669,7 +1678,7 @@ namespace Tuning
 			switch(frameNo % 3)
 			{
 			case 0:
-				ts.updateCurrentValue(true, tuningValue, updateTime);
+				ts.setCurrentValue(true, tuningValue, updateTime, lmTime);
 				break;
 
 			case 1:

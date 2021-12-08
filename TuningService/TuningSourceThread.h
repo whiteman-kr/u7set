@@ -127,9 +127,7 @@ namespace Tuning
 		int bit() const { return m_bit; }
 		int frameNo() const { return m_frameNo; }
 
-		void updateCurrentValue(bool valid, const TuningValue& value, qint64 time);
-
-		void setCurrentValue(bool valid, const TuningValue& value);
+		void setCurrentValue(bool valid, const TuningValue& value, qint64 readTime, qint64 lmTime);
 		void setReadLowBound(const TuningValue& value);
 		void setReadHighBound(const TuningValue& value);
 		void invalidate();
@@ -146,6 +144,7 @@ namespace Tuning
 		qint64 writeRequestTime() const { return m_writeRequestTime; }
 		qint64 successfulWriteTime() const { return m_successfulWriteTime; }
 		qint64 unsuccessfulWriteTime() const { return m_unsuccessfulWriteTime; }
+		qint64 lmTime() const { return m_lmTime; }
 
 		Hash writeClient() const { return m_writeClient; }
 
@@ -196,6 +195,7 @@ namespace Tuning
 		qint64 m_writeRequestTime = 0;			// time of last write request (UTC)
 		qint64 m_successfulWriteTime = 0;		// time of last succesfull signal writing (UTC), usually should be near m_writeRequestTime
 		qint64 m_unsuccessfulWriteTime = 0;		// time of last unsuccesfull signal writing (UTC), usually should be near m_writeRequestTime
+		qint64 m_lmTime = 0;
 
 		Hash m_writeClient = 0;									// last write client's EquipmentID hash
 		NetworkError m_writeErrorCode = NetworkError::Success;	// last write error code, NetworkError:  Success, TuningValueOutOfRange, TuningNoReply

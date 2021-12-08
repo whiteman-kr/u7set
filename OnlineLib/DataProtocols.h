@@ -45,6 +45,8 @@ namespace Rup
 		void reverseBytes();
 
 		void setDateTime(const QDateTime& dateTime);
+
+		qint64 toInt64(bool reverseBytes = false) const;
 	};
 
 	struct Header

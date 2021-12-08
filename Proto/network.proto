@@ -519,6 +519,8 @@ message TuningSignalState
 
 	optional bool tuningDefault = 16 [default = false];			// flag, sets to 1 if current tunable signal value is equal to tuning default value,
 																// else sets to 0
+
+	optional sfixed64 lmTime = 17 [default = 0];
 }
 
 message TuningSignalsReadReply
