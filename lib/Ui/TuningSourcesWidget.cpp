@@ -213,7 +213,7 @@ void DialogTuningSourceInfo::updateData()
 
 	QString title;
 
-	if (ts.channelsCount() == 1)
+	if (ts.statesChannelsCount() == 1)
 	{
 		title = tr("Tuning Source - %1").arg(m_sourceEquipmentId);
 	}
@@ -238,13 +238,15 @@ void DialogTuningSourceInfo::updateData()
 
 	item->setData(0, Qt::UserRole, 0);
 
-	if (m_tuningSourceChannel < 0 || m_tuningSourceChannel >= ts.channelsCount())
+	const ::Network::DataSourceInfo& info = ts.info();
+
+	if (m_tuningSourceChannel < 0 ||
+		m_tuningSourceChannel >= ts.controllersCount() ||
+		m_tuningSourceChannel >= ts.statesChannelsCount())
 	{
 		Q_ASSERT(false);
 		return;
 	}
-
-	const ::Network::DataSourceInfo& info = ts.info();
 
 	setDataItemText("ID", tr("%1 (%2h)").arg(QString::number(info.id())).arg(QString::number(info.id(), 16)));
 	setDataItemText("EquipmentID", info.moduleequipmentid().c_str());
@@ -273,7 +275,7 @@ void DialogTuningSourceInfo::updateData()
 		return;
 	}
 
-	if (m_tuningSourceChannel >= ts.channelsCount())
+	if (m_tuningSourceChannel >= ts.statesChannelsCount())
 	{
 		Q_ASSERT(false);
 		return;
@@ -537,7 +539,7 @@ bool TuningSourcesWidget::checkTuningSourcesChanged() const
 
 		for (const TuningSource& ts : clientSources)
 		{
-			for (int c = 0; c < ts.channelsCount(); c++)
+			for (int c = 0; c < ts.statesChannelsCount(); c++)
 			{
 				sourcesCount++;
 
@@ -598,13 +600,13 @@ void TuningSourcesWidget::update(bool refreshOnly)
 			{
 				const ::Network::DataSourceInfo& info = ts.info();
 
-				for (int i = 0; i < ts.channelsCount(); i++)
+				for (int i = 0; i < ts.controllersCount(); i++)
 				{
 					QStringList connectionStrings;
 
-					QString lanEquipmentId = QString::fromStdString(info.lancontrollerinfo()[i].equipmentid());
+					QString lanEquipmentId = ts.controllerEquipmentId(i);
 
-					if (ts.channelsCount() == 1)
+					if (ts.statesChannelsCount() == 1)
 					{
 						connectionStrings << info.moduleequipmentid().c_str();
 					}
@@ -612,6 +614,7 @@ void TuningSourcesWidget::update(bool refreshOnly)
 					{
 						connectionStrings << lanEquipmentId;
 					}
+
 					connectionStrings << info.lancontrollerinfo()[i].tuningip().c_str();
 					connectionStrings << QString::number(info.lancontrollerinfo()[i].tuningport());
 

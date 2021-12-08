@@ -447,7 +447,8 @@ void ServiceTableModel::serviceAckReceived(const UdpRequest udpRequest)
 			if (newServiceInfo.ParseFromArray(udpRequest.data(),
 											  static_cast<int>(udpRequest.dataSize())) == false)
 			{
-				assert(false);
+				qDebug() << Q_FUNC_INFO << "newServiceInfo.ParseFromArray failed";
+				Q_ASSERT(false);
 				return;
 			}
 

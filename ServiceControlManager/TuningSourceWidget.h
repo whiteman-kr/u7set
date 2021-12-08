@@ -11,11 +11,12 @@ class TuningSourceWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit TuningSourceWidget(quint64 id, QString equipmentId, QWidget *parent = nullptr);
+	explicit TuningSourceWidget(quint64 id, QString equipmentId, int channel, QWidget *parent = nullptr);
 	~TuningSourceWidget();
 
-	quint64 id() { return m_id; }
-	QString equipmentId() { return m_equipmentId; }
+	quint64 id() const { return m_id; }
+	QString equipmentId() const { return m_equipmentId; }
+	int channel() const { return m_channel; }
 signals:
 	void forgetMe();
 
@@ -42,5 +43,6 @@ private:
 	TcpTuningServiceClient* m_tcpClientSocket = nullptr;
 	quint64 m_id;
 	QString m_equipmentId;
+	int m_channel = 0;
 };
 

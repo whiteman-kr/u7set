@@ -13,7 +13,7 @@
 struct staticPropertyFieldDefinition
 {
 	QString fieldName;
-	std::function<QString(const Network::DataSourceInfo& info)> fieldValueGetter;
+	std::function<QString(const Network::DataSourceInfo& info, int channel)> fieldValueGetter;
 };
 
 struct dynamicPropertyFieldDefinition
@@ -23,21 +23,21 @@ struct dynamicPropertyFieldDefinition
 };
 
 static const QList<staticPropertyFieldDefinition> staticPropertiesFieldList {
-	{ QStringLiteral("EquipmentID"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.moduleequipmentid()); } },
-	{ QStringLiteral("Caption"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.modulecaption()); } },
-	{ QStringLiteral("DataType"), [](const Network::DataSourceInfo& info) { return E::valueToString(static_cast<E::LanControllerType>(info.lancontrollerinfo(0).lancontrollertype())); } },
-	{ QStringLiteral("IP"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.lancontrollerinfo(0).tuningip()); } },
-	{ QStringLiteral("Port"), [](const Network::DataSourceInfo& info) { return QString::number(info.lancontrollerinfo(0).tuningport()); } },
-	{ QStringLiteral("Channel"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.subsystemchannel()); } },
-	{ QStringLiteral("SubsystemKey"), [](const Network::DataSourceInfo& info) { return QString::number(info.subsystemkey()); } },
-	{ QStringLiteral("SubsystemID"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.subsystemid()); } },
+	{ QStringLiteral("EquipmentID"), [](const Network::DataSourceInfo& info, int /*channel*/) { return QString::fromStdString(info.moduleequipmentid()); } },
+	{ QStringLiteral("Caption"), [](const Network::DataSourceInfo& info, int /*channel*/) { return QString::fromStdString(info.modulecaption()); } },
+	{ QStringLiteral("DataType"), [](const Network::DataSourceInfo& info, int channel) { return E::valueToString(static_cast<E::LanControllerType>(info.lancontrollerinfo(channel).lancontrollertype())); } },
+	{ QStringLiteral("IP"), [](const Network::DataSourceInfo& info, int channel) { return QString::fromStdString(info.lancontrollerinfo(channel).tuningip()); } },
+	{ QStringLiteral("Port"), [](const Network::DataSourceInfo& info, int channel) { return QString::number(info.lancontrollerinfo(channel).tuningport()); } },
+	{ QStringLiteral("Channel"), [](const Network::DataSourceInfo& info, int /*channel*/) { return QString::fromStdString(info.subsystemchannel()); } },
+	{ QStringLiteral("SubsystemKey"), [](const Network::DataSourceInfo& info, int /*channel*/) { return QString::number(info.subsystemkey()); } },
+	{ QStringLiteral("SubsystemID"), [](const Network::DataSourceInfo& info, int /*channel*/) { return QString::fromStdString(info.subsystemid()); } },
 
-	{ QStringLiteral("LmNumber"), [](const Network::DataSourceInfo& info) { return QString::number(info.lmnumber()); } },
-	{ QStringLiteral("ModuleType"), [](const Network::DataSourceInfo& info) { return QString::number(info.moduletype()); } },
-	{ QStringLiteral("AdapterID"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.lancontrollerinfo(0).equipmentid()); } },
-	{ QStringLiteral("TuningEnable"), [](const Network::DataSourceInfo& info) { return info.lancontrollerinfo(0).tuningenable() ? "Yes" : "No"; } },
+	{ QStringLiteral("LmNumber"), [](const Network::DataSourceInfo& info, int /*channel*/) { return QString::number(info.lmnumber()); } },
+	{ QStringLiteral("ModuleType"), [](const Network::DataSourceInfo& info, int /*channel*/) { return QString::number(info.moduletype()); } },
+	{ QStringLiteral("AdapterID"), [](const Network::DataSourceInfo& info, int channel) { return QString::fromStdString(info.lancontrollerinfo(channel).equipmentid()); } },
+	{ QStringLiteral("TuningEnable"), [](const Network::DataSourceInfo& info, int channel) { return info.lancontrollerinfo(channel).tuningenable() ? "Yes" : "No"; } },
 
-	{ QStringLiteral("SourceID"), [](const Network::DataSourceInfo& info) { return "0x" + QString("%1").arg(info.id(), sizeof(info.id()) * 2, 16, QChar('0')).toUpper(); } },
+	{ QStringLiteral("SourceID"), [](const Network::DataSourceInfo& info, int /*channel*/) { return "0x" + QString("%1").arg(info.id(), sizeof(info.id()) * 2, 16, QChar('0')).toUpper(); } },
 };
 
 static const QList<dynamicPropertyFieldDefinition> dynamicPropertiesFieldList {
@@ -104,10 +104,11 @@ static const QList<dynamicPropertyFieldDefinition> dynamicPropertiesFieldList {
 	{ QStringLiteral("ErrTuningFrameUpdate"), [](const Network::TuningSourceState& state) { return QString::number(state.errtuningframeupdate()); } },
 };
 
-TuningSourceWidget::TuningSourceWidget(quint64 id, QString equipmentId, QWidget *parent) :
+TuningSourceWidget::TuningSourceWidget(quint64 id, QString equipmentId, int channel, QWidget *parent) :
 	QWidget(parent),
 	m_id(id),
-	m_equipmentId(equipmentId)
+	m_equipmentId(equipmentId),
+	m_channel(channel)
 {
 	setWindowFlag(Qt::Dialog, true);
 
@@ -171,8 +172,14 @@ void TuningSourceWidget::updateStateFields()
 	{
 		if (source.id() == m_id && source.equipmentId() == m_equipmentId)
 		{
-			int todo_multichannel = 1;
-			pState = &source.state(0);
+			if (m_channel >= source.statesChannelsCount())
+			{
+				Q_ASSERT(false);
+				break;
+			}
+
+			pState = &source.state(m_channel);
+			break;
 		}
 	}
 
@@ -207,6 +214,14 @@ void TuningSourceWidget::setClientSocket(TcpTuningServiceClient *tcpClientSocket
 		if (source.id() == m_id && source.equipmentId() == m_equipmentId)
 		{
 			pInfo = &source.info();
+
+			if (m_channel >= source.controllersCount())
+			{
+				// Channel is bigger than controllers count
+				//
+				Q_ASSERT(false);
+				return;
+			}
 		}
 	}
 
@@ -222,7 +237,7 @@ void TuningSourceWidget::setClientSocket(TcpTuningServiceClient *tcpClientSocket
 	{
 		auto& field = staticPropertiesFieldList[i];
 
-		m_infoModel->setData(m_infoModel->index(i, 1), field.fieldValueGetter(*pInfo));
+		m_infoModel->setData(m_infoModel->index(i, 1), field.fieldValueGetter(*pInfo, m_channel));
 	}
 }
 

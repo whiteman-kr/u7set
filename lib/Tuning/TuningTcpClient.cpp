@@ -577,9 +577,7 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 				{
 					// Write SOR change to tuning log
 
-					qDebug() << ts.channelsCount();
-
-					for (int s = 0; s < ts.channelsCount(); s++)
+					for (int s = 0; s < ts.statesChannelsCount(); s++)
 					{
 						const ::Network::TuningSourceState& state = ts.state(s);
 
@@ -823,6 +821,19 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 
 		if (found == true)
 		{
+			// Compare time
+			//
+			int todo_compare_time = 1;
+
+			/*
+			if (arrivedState.successfulReadTime() <= previousState.successfulReadTime())
+			{
+				// Arrived time is less than existing time, do not process this state
+				//
+				continue;
+			}
+			*/
+
 			// Process write error only if writing was performed by current client
 			//
 			Hash writeClientHash = stateMessage.writeclient();
@@ -1227,7 +1238,7 @@ int TuningTcpClient::activeTuningSourceCount() const
 	{
 		const TuningSource& ts = it.second;
 
-		for (int i = 0; i < ts.channelsCount(); i++)
+		for (int i = 0; i < ts.statesChannelsCount(); i++)
 		{
 			if (ts.state(i).controlisactive() == true)
 			{
@@ -1255,7 +1266,7 @@ QString TuningTcpClient::singleActiveTuningSource() const
 	{
 		const TuningSource& ts = it.second;
 
-		for (int i = 0; i < ts.channelsCount(); i++)
+		for (int i = 0; i < ts.statesChannelsCount(); i++)
 		{
 			if (ts.state(i).controlisactive() == true)
 			{

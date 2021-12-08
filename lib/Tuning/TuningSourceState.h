@@ -14,23 +14,21 @@ public:
 	quint64 id() const;
 	QString equipmentId() const;
 
-	QString lanEquipmentId(int lanIndex) const;
-
-	int getErrorsCount(int channel) const;
-	int getErrorsCount(Hash controllerHash) const;
-
-	int channelsCount() const;	// Gets number of received channels (LANs count in info and received states)
-
 	const ::Network::DataSourceInfo& info() const;
 
-	const ::Network::TuningSourceState& state(int channel) const;
-	const ::Network::TuningSourceState& state(Hash controllerHash) const;
+	int controllersCount() const;	// Gets number of LAN controllers received from DataSourceInfo
+	QString controllerEquipmentId(int index) const;
 
+	int statesChannelsCount() const;		// Gets number of Channels of states received from TuningSourceState
+
+	const ::Network::TuningSourceState& state(int channel) const;
 	const ::Network::TuningSourceState& previousState(int channel) const;
-	const ::Network::TuningSourceState& previousState(Hash controllerHash) const;
 
 	void setState(const ::Network::TuningSourceState& newState);
 
+	int getErrorsCount(int channel) const;
+
+	bool valid() const;
 	void invalidate();
 
 private:
@@ -40,6 +38,8 @@ private:
 	std::vector<::Network::TuningSourceState> m_previousStates;
 
 	std::map<Hash, int> m_controllerToStateMap;	// Key is Ethernet Controller Hash, value is index in m_states
+
+	bool m_valid = true;
 
 	qint64 m_previousStateUpdatePeriod = 5;
 

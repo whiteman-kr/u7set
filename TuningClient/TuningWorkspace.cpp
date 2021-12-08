@@ -115,10 +115,10 @@ void FilterButton::update(int discreteCounter)
 					   .arg(textSelectedColor.name());
 
 
-	if (styleSheet() != style)
+					if (styleSheet() != style)
 	{
-		setStyleSheet(style);
-	}
+					setStyleSheet(style);
+}
 }
 
 void FilterButton::slot_toggled(bool checked)
@@ -491,7 +491,7 @@ void TuningWorkspace::updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter
 
 		if (m_columnAccessIndex != -1)
 		{
-            const int defaultWidth = 50;
+			const int defaultWidth = 50;
 
 			int width = settings.value("TuningWorkspace/FilterTreeColumnsAccess", defaultWidth).toInt();
 			if (width < defaultWidth || width > columnMaxWidth)
@@ -1020,7 +1020,7 @@ void TuningWorkspace::addChildTreeObjects(const std::shared_ptr<TuningFilter> fi
 
 		//if (f->isSourceSchema() == true || f->isSourceEquipment() == true)
 		//{
-			//caption += QString(" [+%1 DEBUG counters]").arg(f->childFiltersCount());
+		//caption += QString(" [+%1 DEBUG counters]").arg(f->childFiltersCount());
 		//}
 
 		static QString equipmentString = tr("Equipment");
@@ -1330,6 +1330,7 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 
 	QString status;
 
+	bool valid = false;
 	bool controlIsEnabled = false;
 	bool isReply = false;
 	bool hasUnappliedParams = false;
@@ -1343,12 +1344,13 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 	{
 		std::vector<int> replyCounts;
 
-		for (int c = 0; c < ts.channelsCount(); c++)
+		for (int c = 0; c < ts.statesChannelsCount(); c++)
 		{
 			const ::Network::TuningSourceState& state = ts.state(c);
 
 			int todo_array_for_all_params = 1;
 
+			valid |= ts.valid();
 			controlIsEnabled |= state.controlisactive();
 			isReply |= state.isreply();
 			hasUnappliedParams |= state.hasunappliedparams();
@@ -1356,87 +1358,95 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 			replyCounts.push_back(static_cast<int>(state.replycount()));
 
 			if (theConfigSettings.lmStatusFlagMode() == LmStatusFlagMode::AccessKey &&
-				controlIsEnabled == true &&
+				ts.valid() == true &&
+				state.controlisactive() == true &&
 				state.isreply() == true)
 			{
-				access = state.writingdisabled() == false;
+				access |= state.writingdisabled() == false;
 			}
 		}
 
-		if (controlIsEnabled == false)
+		if (valid == false)
 		{
-			status = tr("Inactive");
+			status = tr("Unknown");
 		}
 		else
 		{
-			if (isReply == false)
+			if (controlIsEnabled == false)
 			{
-				status = tr("No Reply");
+				status = tr("Inactive");
 			}
 			else
 			{
-				if (errorCounter > 0)
+				if (isReply == false)
 				{
-					status = tr("E: %1").arg(errorCounter);
+					status = tr("No Reply");
 				}
 				else
 				{
-					QString s;
-					for (int r : replyCounts)
+					if (errorCounter > 0)
 					{
-						s += tr("%1/").arg(r);
-					}
-					if (s.isEmpty() == false)
-					{
-						s.remove(s.length() - 1, 1);
-					}
-
-					if (hasUnappliedParams == true)
-					{
-						status = tr("Unapplied [%1 replies]").arg(s);
+						status = tr("E: %1").arg(errorCounter);
 					}
 					else
 					{
-						status = tr("Active [%1 replies]").arg(s);
+						QString s;
+						for (int r : replyCounts)
+						{
+							s += tr("%1/").arg(r);
+						}
+						if (s.isEmpty() == false)
+						{
+							s.remove(s.length() - 1, 1);
+						}
+
+						if (hasUnappliedParams == true)
+						{
+							status = tr("Unapplied [%1 replies]").arg(s);
+						}
+						else
+						{
+							status = tr("Active [%1 replies]").arg(s);
+						}
 					}
 				}
 			}
 		}
 	}
 
-    // Access column
+	// Access column
 
 	if (m_columnAccessIndex != -1)
 	{
 		QColor accessBackColor = Qt::white;
 		QColor accessTextColor = Qt::black;
 
-        if (access == true)
-        {
+		if (access == true)
+		{
 			accessBackColor = QColor(0, 128, 0);
 			accessTextColor = Qt::white;
-        }
+		}
 
-        QString accessText = access ? tr("Yes") : tr("No");
+		QString accessText = access ? tr("Yes") : tr("No");
 
 		if (treeItem->text(m_columnAccessIndex) != accessText)
-        {
+		{
 			treeItem->setText(m_columnAccessIndex, accessText);
-        }
+		}
 
 		if (treeItem->background(m_columnAccessIndex) != accessBackColor)
-        {
+		{
 			treeItem->setBackground(m_columnAccessIndex, accessBackColor);
-        }
+		}
 
 		if (treeItem->foreground(m_columnAccessIndex) != accessTextColor)
-        {
+		{
 			treeItem->setForeground(m_columnAccessIndex, accessTextColor);
 		}
 
-    }
+	}
 
-    // Status column
+	// Status column
 
 
 	if (treeItem->text(m_columnStatusIndex) != status)
@@ -1445,42 +1455,50 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 	}
 
 	QColor stateBackColor = Qt::white;
-	QColor stateTextColor = Qt::darkGray;
+	QColor stateTextColor = Qt::black;
 
-	if (controlIsEnabled == false)
+	if (valid == false)
 	{
-		stateBackColor = Qt::gray;
-		stateTextColor = Qt::white;
+		stateBackColor = Qt::white;
+		stateTextColor = Qt::darkGray;
 	}
 	else
 	{
-		if (errorCounter > 0)
+		if (controlIsEnabled == false)
 		{
-			stateBackColor = redColor;
+			stateBackColor = Qt::gray;
 			stateTextColor = Qt::white;
 		}
 		else
 		{
-			if (hasUnappliedParams == true)
+			if (errorCounter > 0)
 			{
-				stateBackColor = Qt::yellow;
-				stateTextColor = Qt::black;
+				stateBackColor = redColor;
+				stateTextColor = Qt::white;
 			}
 			else
 			{
-				stateBackColor = Qt::white;
-				stateTextColor = Qt::black;
+				if (hasUnappliedParams == true)
+				{
+					stateBackColor = Qt::yellow;
+					stateTextColor = Qt::black;
+				}
+				else
+				{
+					stateBackColor = Qt::white;
+					stateTextColor = Qt::black;
+				}
 			}
 		}
 	}
 
 	if (treeItem->background(m_columnStatusIndex) != stateBackColor)
-    {
-		 treeItem->setBackground(m_columnStatusIndex, stateBackColor);
-    }
+	{
+		treeItem->setBackground(m_columnStatusIndex, stateBackColor);
+	}
 
 	if (treeItem->foreground(m_columnStatusIndex) != stateTextColor)
-    {
+	{
 		treeItem->setForeground(m_columnStatusIndex, stateTextColor);
 	}
 }
@@ -1648,9 +1666,9 @@ QTreeWidgetItem* TuningWorkspace::findFilterWidget(const QString& id, QTreeWidge
 bool TuningWorkspace::eventFilter(QObject *object, QEvent *event)
 {
 	if (m_tab != nullptr && object == m_tab->tabBar() &&
-			(event->type() == QEvent::MouseButtonPress ||
-			 event->type() == QEvent::MouseButtonRelease ||
-			 event->type() == QEvent::KeyPress))
+		(event->type() == QEvent::MouseButtonPress ||
+		 event->type() == QEvent::MouseButtonRelease ||
+		 event->type() == QEvent::KeyPress))
 	{
 		if (askForSavePendingChanges() == false)
 		{
@@ -1659,9 +1677,9 @@ bool TuningWorkspace::eventFilter(QObject *object, QEvent *event)
 	}
 
 	if (m_filterTree != nullptr && (object == m_filterTree || object == m_filterTree->viewport()) &&
-			(event->type() == QEvent::MouseButtonPress ||
-			 event->type() == QEvent::MouseButtonRelease ||
-			 event->type() == QEvent::KeyPress))
+		(event->type() == QEvent::MouseButtonPress ||
+		 event->type() == QEvent::MouseButtonRelease ||
+		 event->type() == QEvent::KeyPress))
 	{
 		if (askForSavePendingChanges() == false)
 		{
@@ -1672,9 +1690,9 @@ bool TuningWorkspace::eventFilter(QObject *object, QEvent *event)
 	for (FilterButton* b : m_filterButtons)
 	{
 		if (object == b &&
-				(event->type() == QEvent::MouseButtonPress ||
-				 event->type() == QEvent::MouseButtonRelease ||
-				 event->type() == QEvent::KeyPress))
+			(event->type() == QEvent::MouseButtonPress ||
+			 event->type() == QEvent::MouseButtonRelease ||
+			 event->type() == QEvent::KeyPress))
 		{
 			if (askForSavePendingChanges() == false)
 			{
@@ -1759,7 +1777,7 @@ void TuningWorkspace::slot_treeContextMenuRequested(const QPoint& pos)
 	QMenu menu(this);
 
 	bool controlIsActive = false;
-	for (int c = 0; c < ts.channelsCount(); c++)
+	for (int c = 0; c < ts.statesChannelsCount(); c++)
 	{
 		if (ts.state(c).controlisactive() == true)
 		{
