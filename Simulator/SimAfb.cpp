@@ -370,7 +370,7 @@ namespace Sim
 
 		// Setting math flags
 		//
-		m_mathFlags.overflow = std::fetestexcept(FE_OVERFLOW) || std::isinf(result);
+		m_mathFlags.overflow = std::fetestexcept(FE_OVERFLOW) || (std::isnormal(op1) && std::isnormal(op2) && std::isinf(result) );
 		m_mathFlags.underflow = std::fetestexcept(FE_UNDERFLOW);
 		m_mathFlags.divByZero = std::fetestexcept(FE_DIVBYZERO);
 		m_mathFlags.zero = (result == .0f) || m_mathFlags.underflow;
