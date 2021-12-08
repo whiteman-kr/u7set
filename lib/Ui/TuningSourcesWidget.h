@@ -17,7 +17,7 @@ class DialogTuningSourceInfo : public DialogSourceInfo
 	Q_OBJECT
 
 public:
-	explicit DialogTuningSourceInfo(std::vector<TuningTcpClient*> tcpClients, QWidget* parent, Hash sourceHash, int sourceChannel);
+	explicit DialogTuningSourceInfo(std::vector<TuningTcpClient*> tcpClients, QWidget* parent, Hash sourceHash, int channel);
 	virtual ~DialogTuningSourceInfo();
 
 	void setTuningTcpClients(std::vector<TuningTcpClient*> tcpClients);
@@ -35,7 +35,7 @@ private:
 	QString m_sourceEquipmentId;
 
 	Hash m_tuningSourceHash = UNDEFINED_HASH;
-	int m_tuningSourceChannel = 0;
+	int m_channel = 0;
 
 };
 

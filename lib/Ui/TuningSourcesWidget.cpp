@@ -5,11 +5,11 @@
 
 #include <QTreeWidget>
 
-DialogTuningSourceInfo::DialogTuningSourceInfo(std::vector<TuningTcpClient*> tcpClients, QWidget* parent, Hash sourceHash, int sourceChannel) :
-	DialogSourceInfo(parent, sourceHash + sourceChannel /*This is an unique dialog indentifier, NOT sourceHash!*/),
+DialogTuningSourceInfo::DialogTuningSourceInfo(std::vector<TuningTcpClient*> tcpClients, QWidget* parent, Hash sourceHash, int channel) :
+	DialogSourceInfo(parent, sourceHash + channel /*This is an unique dialog indentifier, NOT sourceHash!*/),
 	m_tcpClients(tcpClients),
 	m_tuningSourceHash(sourceHash),
-	m_tuningSourceChannel(sourceChannel)
+	m_channel(channel)
 {
 	QHBoxLayout* l = new QHBoxLayout();
 
@@ -219,7 +219,7 @@ void DialogTuningSourceInfo::updateData()
 	}
 	else
 	{
-		title = tr("Tuning Source - %1, Channel %2").arg(m_sourceEquipmentId).arg(m_tuningSourceChannel);
+		title = tr("Tuning Source - %1, Channel %2").arg(m_sourceEquipmentId).arg(m_channel);
 	}
 
 	if (windowTitle() != title)
@@ -240,9 +240,7 @@ void DialogTuningSourceInfo::updateData()
 
 	const ::Network::DataSourceInfo& info = ts.info();
 
-	if (m_tuningSourceChannel < 0 ||
-		m_tuningSourceChannel >= ts.controllersCount() ||
-		m_tuningSourceChannel >= ts.statesChannelsCount())
+	if (m_channel < 0 || m_channel >= ts.controllersCount())
 	{
 		Q_ASSERT(false);
 		return;
@@ -251,22 +249,28 @@ void DialogTuningSourceInfo::updateData()
 	setDataItemText("ID", tr("%1 (%2h)").arg(QString::number(info.id())).arg(QString::number(info.id(), 16)));
 	setDataItemText("EquipmentID", info.moduleequipmentid().c_str());
 	setDataItemText("Caption", info.modulecaption().c_str());
-	setDataItemNumber("DataType", info.lancontrollerinfo()[m_tuningSourceChannel].lancontrollertype());
-	setDataItemText("IP", info.lancontrollerinfo()[m_tuningSourceChannel].tuningip().c_str());
-	setDataItemNumber("Port", info.lancontrollerinfo()[m_tuningSourceChannel].tuningport());
+	setDataItemNumber("DataType", info.lancontrollerinfo()[m_channel].lancontrollertype());
+	setDataItemText("IP", info.lancontrollerinfo()[m_channel].tuningip().c_str());
+	setDataItemNumber("Port", info.lancontrollerinfo()[m_channel].tuningport());
 	setDataItemText("Channel", info.subsystemchannel().c_str());
 	setDataItemNumber("SubsystemID", info.subsystemkey());
 	setDataItemText("Subsystem", info.subsystemid().c_str());
 
 	setDataItemNumber("LmNumber", info.lmnumber());
 	setDataItemText("LmModuleType", tr("%1 (%2h)").arg(QString::number(info.moduletype())).arg(QString::number(info.moduletype(), 16)));
-	setDataItemText("LmAdapterID", info.lancontrollerinfo()[m_tuningSourceChannel].equipmentid().c_str());
-	setDataItemNumber("LmDataEnable", info.lancontrollerinfo()[m_tuningSourceChannel].tuningenable());
+	setDataItemText("LmAdapterID", info.lancontrollerinfo()[m_channel].equipmentid().c_str());
+	setDataItemNumber("LmDataEnable", info.lancontrollerinfo()[m_channel].tuningenable());
 	setDataItemText("LmDataID", tr("%1 (%2h)").
-					arg(QString::number(info.lancontrollerinfo()[m_tuningSourceChannel].tuningdatauid())).
-			arg(QString::number(info.lancontrollerinfo()[m_tuningSourceChannel].tuningdatauid(), 16)));
+					arg(QString::number(info.lancontrollerinfo()[m_channel].tuningdatauid())).
+			arg(QString::number(info.lancontrollerinfo()[m_channel].tuningdatauid(), 16)));
 
 	// state
+
+	if (m_channel >= ts.statesChannelsCount())
+	{
+		// No state is received yet
+		return;
+	}
 
 	item = m_treeWidget->topLevelItem(1);
 	if (item == nullptr)
@@ -275,14 +279,8 @@ void DialogTuningSourceInfo::updateData()
 		return;
 	}
 
-	if (m_tuningSourceChannel >= ts.statesChannelsCount())
-	{
-		Q_ASSERT(false);
-		return;
-	}
-
-	const ::Network::TuningSourceState& state = ts.state(m_tuningSourceChannel);
-	const ::Network::TuningSourceState& previousState = ts.previousState(m_tuningSourceChannel);
+	const ::Network::TuningSourceState& state = ts.state(m_channel);
+	const ::Network::TuningSourceState& previousState = ts.previousState(m_channel);
 
 	item->setData(0, Qt::UserRole, 0);
 
@@ -539,11 +537,11 @@ bool TuningSourcesWidget::checkTuningSourcesChanged() const
 
 		for (const TuningSource& ts : clientSources)
 		{
-			for (int c = 0; c < ts.statesChannelsCount(); c++)
+			for (int c = 0; c < ts.controllersCount(); c++)
 			{
 				sourcesCount++;
 
-				Hash hash = ::calcHash(client->tuningServiceId() + ts.state(c).lanequipmentid().c_str());
+				Hash hash = ::calcHash(client->tuningServiceId() + ts.controllerEquipmentId(c));
 
 				if (m_tuningClientsLansHashes.find(hash) == m_tuningClientsLansHashes.end())
 				{
@@ -703,10 +701,26 @@ void TuningSourcesWidget::update(bool refreshOnly)
 
 				if (client->tuningSourceInfo(sourceHash, &ts) == false)
 				{
+					sourceItem->setText(static_cast<int>(Columns::State), "???");
+					sourceItem->setText(static_cast<int>(Columns::IsActive), "???");
+					sourceItem->setText(static_cast<int>(Columns::HasUnappliedParams), "???");
+					sourceItem->setText(static_cast<int>(Columns::RequestCount), "???");
+					sourceItem->setText(static_cast<int>(Columns::ReplyCount), "???");
 					continue;
 				}
 
 				int sourceChannel = sourceItem->data(columnIndex_SourceChannel, Qt::UserRole).value<int>();
+
+				if (sourceChannel >= ts.statesChannelsCount())
+				{
+					// No state received for this channel
+					sourceItem->setText(static_cast<int>(Columns::State), "???");
+					sourceItem->setText(static_cast<int>(Columns::IsActive), "???");
+					sourceItem->setText(static_cast<int>(Columns::HasUnappliedParams), "???");
+					sourceItem->setText(static_cast<int>(Columns::RequestCount), "???");
+					sourceItem->setText(static_cast<int>(Columns::ReplyCount), "???");
+					continue;
+				}
 
 				const ::Network::TuningSourceState& state = ts.state(sourceChannel);
 

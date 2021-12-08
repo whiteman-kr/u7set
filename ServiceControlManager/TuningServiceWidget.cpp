@@ -3,6 +3,7 @@
 #include "TuningSourceWidget.h"
 #include <QStandardItemModel>
 #include <QTableView>
+#include <QMessageBox>
 
 TuningServiceWidget::TuningServiceWidget(const SoftwareInfo& softwareInfo, const ServiceData& service, quint32 udpIp, quint16 udpPort, QWidget *parent) :
 	BaseServiceStateWidget(softwareInfo, service, udpIp, udpPort, parent)
@@ -423,7 +424,7 @@ void TuningServiceWidget::onTuningSourceDoubleClicked(const QModelIndex &index)
 
 	if (tsClicked == nullptr)
 	{
-		Q_ASSERT(tsClicked);
+		QMessageBox::warning(this, qAppName(), tr("No TuningState is received for this source!"));
 		return;
 	}
 
