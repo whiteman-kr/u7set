@@ -295,8 +295,8 @@ void DialogCalculator::createInterface()
 
 void DialogCalculator::initDialog()
 {
-	QRegExp rx("^[-]{0,1}[0-9]*[.]{1}[0-9]*$");
-	QValidator* validator = new QRegExpValidator(rx, this);
+	QRegularExpression rx("^[-]{0,1}[0-9]*[.]{1}[0-9]*$");
+	QValidator* validator = new QRegularExpressionValidator(rx, this);
 
 	// init elements of interface
 	//
@@ -494,19 +494,26 @@ void DialogCalculator::conversionTr()
 		return;
 	}
 
+	switch (sensorType)
+	{
+		case E::SensorType::Ohm_Pt_a_391:
+		case E::SensorType::Ohm_Pt_a_385:
+		case E::SensorType::Ohm_Cu_a_428:
+		case E::SensorType::Ohm_Cu_a_426:
+		case E::SensorType::Ohm_Ni_a_617:	m_pTrR0Edit->setEnabled(true);		break;
+
+		default:							m_pTrR0Edit->setEnabled(false);		break;
+	}
+
 	double degreeVal = m_pTrDegreeEdit->text().toDouble();
 	double electricVal = m_pTrElectricEdit->text().toDouble();
 
 	double r0 = m_pTrR0Edit->text().toDouble();
-	if (r0 == 0.0)
-	{
-		r0 = m_uc.default_r0(sensorType);
-	}
 
 	if (m_pTrDegreeRadio->isChecked() == true)
 	{
-		double degreeLowLimit = m_uc.conversionDegree(electricLimit.lowLimit * r0 / 100, UnitsConvertType::ElectricToPhysical, unit, sensorType, r0);
-		double degreeHighLimit = m_uc.conversionDegree(electricLimit.highLimit * r0 / 100, UnitsConvertType::ElectricToPhysical, unit, sensorType, r0);
+		double degreeLowLimit = m_uc.conversionDegree(electricLimit.lowLimit*  r0 / 100, UnitsConvertType::ElectricToPhysical, unit, sensorType, r0);
+		double degreeHighLimit = m_uc.conversionDegree(electricLimit.highLimit*  r0 / 100, UnitsConvertType::ElectricToPhysical, unit, sensorType, r0);
 
 		if (degreeVal < degreeLowLimit || degreeVal > degreeHighLimit)
 		{
@@ -529,7 +536,7 @@ void DialogCalculator::conversionTr()
 
 	if (m_pTrElectricRadio->isChecked() == true)
 	{
-		if (electricVal < electricLimit.lowLimit * r0 / 100 || electricVal > electricLimit.highLimit * r0 / 100)
+		if (electricVal < electricLimit.lowLimit*  r0 / 100 || electricVal > electricLimit.highLimit*  r0 / 100)
 		{
 			m_pTrDegreeEdit->setText(	tr("Out of range: %1 .. %2").
 										arg(QString::number(electricLimit.lowLimit, 'f', DefaultElectricUnitPrecesion),

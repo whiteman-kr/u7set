@@ -21,291 +21,321 @@ PropertyPage::PropertyPage(Options* options, PropertyPageType pageType, ExtWidge
 	, m_baseWidget(pPropertyEditor)
 	, m_widgetType(PropertyPageWidgetType::List)
 	, m_pageType(pageType)
-
 {
 	switch (pageType)
 	{
 		case PropertyPageType::Service_Connection:
 			{
-				QString categoryType = tr("1 Service");
+					QString categoryService = tr("Service");
 
-				ADD_PROPERTY_GETTER_SETTER(	OT::ServerType, OT::serverConnectionParamCaption(OT::sco_Type), true, m_options->socket().type, m_options->socket().setType)
-					->setCategory(categoryType)
-					.setViewOrder(0);
+					ADD_PROPERTY_GETTER_SETTER(	OT::ServerType, OT::serverConnectionParamCaption(OT::sco_Type), true, m_options->socket().type, m_options->socket().setType)
+						->setCategory(categoryService)
+						.setViewOrder(0);
 
-				QString categoryConnection = tr("2 Server connection");
+					QString categoryConnection = tr("Server connection");
 
-				ADD_PROPERTY_GETTER_SETTER(	OT::ServerPriority, OT::serverConnectionParamCaption(OT::sco_Priority), true, m_options->socket().priority, m_options->socket().setPriority)
-					->setCategory(categoryConnection)
-					.setViewOrder(0);
-				ADD_PROPERTY_GETTER_SETTER(	QString, OT::serverConnectionParamCaption(OT::sco_EquipmentID), true, m_options->socket().equipmentID, m_options->socket().setEquipmentID)
-					->setCategory(categoryConnection)
-					.setViewOrder(1);
-				ADD_PROPERTY_GETTER_SETTER(	QString, OT::serverConnectionParamCaption(OT::sco_ServerIP), true, m_options->socket().serverIP, m_options->socket().setServerIP)
-					->setCategory(categoryConnection)
-					.setViewOrder(2);
-				ADD_PROPERTY_GETTER_SETTER(	int, OT::serverConnectionParamCaption(OT::sco_ServerPort), true, m_options->socket().serverPort, m_options->socket().setServerPort)
-					->setCategory(categoryConnection)
-					.setViewOrder(3);
+					ADD_PROPERTY_GETTER_SETTER(	OT::ServerPriority, OT::serverConnectionParamCaption(OT::sco_Priority), true, m_options->socket().priority, m_options->socket().setPriority)
+						->setCategory(categoryConnection)
+						.setViewOrder(0);
+					ADD_PROPERTY_GETTER_SETTER(	QString, OT::serverConnectionParamCaption(OT::sco_EquipmentID), true, m_options->socket().equipmentID, m_options->socket().setEquipmentID)
+						->setCategory(categoryConnection)
+						.setViewOrder(1);
+					ADD_PROPERTY_GETTER_SETTER(	QString, OT::serverConnectionParamCaption(OT::sco_ServerIP), true, m_options->socket().serverIP, m_options->socket().setServerIP)
+						->setCategory(categoryConnection)
+						.setViewOrder(2);
+					ADD_PROPERTY_GETTER_SETTER(	int, OT::serverConnectionParamCaption(OT::sco_ServerPort), true, m_options->socket().serverPort, m_options->socket().setServerPort)
+						->setCategory(categoryConnection)
+						.setViewOrder(3);
+
+					pPropertyEditor->setCategoryViewOrder (categoryService, 0);
+					pPropertyEditor->setCategoryViewOrder (categoryConnection, 1);
 			}
 			break;
 
 		case PropertyPageType::Module_Measure:
 			{
-				QString categoryIdentification = tr("1 Identification of module");
+					QString categoryIdentification = tr("Identification of module");
 
-				ADD_PROPERTY_GETTER_SETTER(QString, OT::ModuleParamCaption(OT::mo_SuffixSN), true, m_options->module().suffixSN, m_options->module().setSuffixSN)
-					->setCategory(categoryIdentification)
-					.setViewOrder(0);
+					ADD_PROPERTY_GETTER_SETTER(QString, OT::ModuleParamCaption(OT::mo_SuffixSN), true, m_options->module().suffixSN, m_options->module().setSuffixSN)
+						->setCategory(categoryIdentification)
+						.setViewOrder(0);
 
-				QString categoryMeasure = tr("2 Measuring of module");
+					QString categoryMeasure = tr("Measuring of module");
 
-				ADD_PROPERTY_GETTER_SETTER(bool, OT::ModuleParamCaption(OT::mo_MeasureInterInsteadIn), true, m_options->module().measureInterInsteadIn, m_options->module().setMeasureInterInsteadIn)
-					->setCategory(categoryMeasure)
-					.setViewOrder(0);
-				ADD_PROPERTY_GETTER_SETTER(bool, OT::ModuleParamCaption(OT::mo_MeasureLinAdnCmp), true, m_options->module().measureLinAndCmp, m_options->module().setMeasureLinAndCmp)
-					->setCategory(categoryMeasure)
-					.setViewOrder(1);
-				ADD_PROPERTY_GETTER_SETTER(bool, OT::ModuleParamCaption(OT::mo_MeasureEntireModule), true, m_options->module().measureEntireModule, m_options->module().setMeasureEntireModule)
-					->setCategory(categoryMeasure)
-					.setViewOrder(2);
-				ADD_PROPERTY_GETTER_SETTER(bool, OT::ModuleParamCaption(OT::mo_ShowOnSchemas), true, m_options->module().measureShownOnSchemas, m_options->module().setMeasureShownOnSchemas)
-					->setCategory(categoryMeasure)
-					.setViewOrder(3);
-				ADD_PROPERTY_GETTER_SETTER(bool, OT::ModuleParamCaption(OT::mo_WarningIfMeasured), true, m_options->module().warningIfMeasured, m_options->module().setWarningIfMeasured)
-					->setCategory(categoryMeasure)
-					.setViewOrder(4);
+					ADD_PROPERTY_GETTER_SETTER(bool, OT::ModuleParamCaption(OT::mo_MeasureInterInsteadIn), true, m_options->module().measureInterInsteadIn, m_options->module().setMeasureInterInsteadIn)
+						->setCategory(categoryMeasure)
+						.setViewOrder(0);
+					ADD_PROPERTY_GETTER_SETTER(bool, OT::ModuleParamCaption(OT::mo_MeasureLinAdnCmp), true, m_options->module().measureLinAndCmp, m_options->module().setMeasureLinAndCmp)
+						->setCategory(categoryMeasure)
+						.setViewOrder(1);
+					ADD_PROPERTY_GETTER_SETTER(bool, OT::ModuleParamCaption(OT::mo_MeasureEntireModule), true, m_options->module().measureEntireModule, m_options->module().setMeasureEntireModule)
+						->setCategory(categoryMeasure)
+						.setViewOrder(2);
+					ADD_PROPERTY_GETTER_SETTER(bool, OT::ModuleParamCaption(OT::mo_ShowOnSchemas), true, m_options->module().measureShownOnSchemas, m_options->module().setMeasureShownOnSchemas)
+						->setCategory(categoryMeasure)
+						.setViewOrder(3);
+					ADD_PROPERTY_GETTER_SETTER(bool, OT::ModuleParamCaption(OT::mo_WarningIfMeasured), true, m_options->module().warningIfMeasured, m_options->module().setWarningIfMeasured)
+						->setCategory(categoryMeasure)
+						.setViewOrder(4);
 
-				QString categoryLimits = tr("3 Limits");
+					QString categoryLimits = tr("Limits");
 
-				ADD_PROPERTY_GETTER_SETTER(int, OT::ModuleParamCaption(OT::mo_MaxInputs), true, m_options->module().maxInputCount, m_options->module().setMaxInputCount)
-					->setCategory(categoryLimits)
-					.setViewOrder(0);
+					ADD_PROPERTY_GETTER_SETTER(int, OT::ModuleParamCaption(OT::mo_MaxInputs), true, m_options->module().maxInputCount, m_options->module().setMaxInputCount)
+						->setCategory(categoryLimits)
+						.setViewOrder(0);
+
+					pPropertyEditor->setCategoryViewOrder (categoryIdentification, 0);
+					pPropertyEditor->setCategoryViewOrder (categoryMeasure, 1);
+					pPropertyEditor->setCategoryViewOrder (categoryLimits, 2);
 			}
 			break;
 
 		case PropertyPageType::Linearity_Measure:
 			{
-				QString categoryErrors = tr("1 Metrological error");
+					QString categoryErrors = tr("Metrological error");
 
-				ADD_PROPERTY_GETTER_SETTER(double, OT::LinearityParamCaption(OT::lo_ErrorLimit), true, m_options->linearity().errorLimit, m_options->linearity().setErrorLimit)
-					->setCategory(categoryErrors)
-					.setViewOrder(0)
-					.setPrecision(3);
-				ADD_PROPERTY_GETTER_SETTER(Measure::MT::ErrorType, OT::LinearityParamCaption(OT::lo_ErrorType), true, m_options->linearity().errorType, m_options->linearity().setErrorType)
-					->setCategory(categoryErrors)
-					.setViewOrder(1);
-				ADD_PROPERTY_GETTER_SETTER(Measure::MT::CalcErrorRange, OT::LinearityParamCaption(OT::lo_CalcErrorByRange), true, m_options->linearity().calcErrorByRange, m_options->linearity().setCalcErrorByRange)
-					->setCategory(categoryErrors)
-					.setViewOrder(2);
+					ADD_PROPERTY_GETTER_SETTER(double, OT::LinearityParamCaption(OT::lo_ErrorLimit), true, m_options->linearity().errorLimit, m_options->linearity().setErrorLimit)
+						->setCategory(categoryErrors)
+						.setViewOrder(0)
+						.setPrecision(3);
+					ADD_PROPERTY_GETTER_SETTER(Measure::MT::ErrorType, OT::LinearityParamCaption(OT::lo_ErrorType), true, m_options->linearity().errorType, m_options->linearity().setErrorType)
+						->setCategory(categoryErrors)
+						.setViewOrder(1);
+					ADD_PROPERTY_GETTER_SETTER(Measure::MT::CalcErrorRange, OT::LinearityParamCaption(OT::lo_CalcErrorByRange), true, m_options->linearity().calcErrorByRange, m_options->linearity().setCalcErrorByRange)
+						->setCategory(categoryErrors)
+						.setViewOrder(2);
 
-				QString categoryMeasure = tr("2 Measurements at the single point");
+					QString categoryMeasure = tr("Measurements at the single point");
 
-				ADD_PROPERTY_GETTER_SETTER(int, OT::LinearityParamCaption(OT::lo_MeasureTime), true, m_options->linearity().measureTimeInPoint, m_options->linearity().setMeasureTimeInPoint)
-					->setCategory(categoryMeasure)
-					.setViewOrder(0);
-				ADD_PROPERTY_GETTER_SETTER(int, OT::LinearityParamCaption(OT::lo_MeasuresInPoint), true, m_options->linearity().measureCountInPoint, m_options->linearity().setMeasureCountInPoint)
-					->setCategory(categoryMeasure)
-					.setViewOrder(1);
+					ADD_PROPERTY_GETTER_SETTER(int, OT::LinearityParamCaption(OT::lo_MeasureTime), true, m_options->linearity().measureTimeInPoint, m_options->linearity().setMeasureTimeInPoint)
+						->setCategory(categoryMeasure)
+						.setViewOrder(0);
+					ADD_PROPERTY_GETTER_SETTER(int, OT::LinearityParamCaption(OT::lo_MeasuresInPoint), true, m_options->linearity().measureCountInPoint, m_options->linearity().setMeasureCountInPoint)
+						->setCategory(categoryMeasure)
+						.setViewOrder(1);
 
-				QString categoryPoints = tr("3 Measurement points");
+					QString categoryPoints = tr("Measurement points");
 
-				ADD_PROPERTY_GETTER_SETTER(Measure::LT::LinearityDivision, OT::LinearityParamCaption(OT::lo_DivisionType), true, m_options->linearity().divisionType, m_options->linearity().setDivisionType)
-					->setCategory(categoryPoints)
-					.setViewOrder(0);
-				ADD_PROPERTY_GETTER_SETTER(int, OT::LinearityParamCaption(OT::lo_PointCount), true, m_options->linearity().measurePointsCount, m_options->linearity().setMeasurePointsCount)
-					->setCategory(categoryPoints)
-					.setViewOrder(1);
-				ADD_PROPERTY_GETTER_SETTER(double, OT::LinearityParamCaption(OT::lo_LowLimit), true, m_options->linearity().lowLimitRange, m_options->linearity().setLowLimitRange)
-					->setCategory(categoryPoints)
-					.setViewOrder(2)
-					.setPrecision(1)
-					.setReadOnly(m_options->linearity().divisionType() == Measure::LT::LinearityDivision::Manual);
-				ADD_PROPERTY_GETTER_SETTER(double, OT::LinearityParamCaption(OT::lo_HighLimit), true, m_options->linearity().highLimitRange, m_options->linearity().setHighLimitRange)
-					->setCategory(categoryPoints)
-					.setViewOrder(3)
-					.setPrecision(1)
-					.setReadOnly(m_options->linearity().divisionType() == Measure::LT::LinearityDivision::Manual);
-				ADD_PROPERTY_GETTER(QString, OT::LinearityParamCaption(OT::lo_ValuesOfPoints), true, m_options->linearity().measurePointsText)
-					->setCategory(categoryPoints)
-					.setViewOrder(4)
-					.setPrecision(1)
-					.setReadOnly(true);
+					ADD_PROPERTY_GETTER_SETTER(Measure::LT::LinearityDivision, OT::LinearityParamCaption(OT::lo_DivisionType), true, m_options->linearity().divisionType, m_options->linearity().setDivisionType)
+						->setCategory(categoryPoints)
+						.setViewOrder(0);
+					ADD_PROPERTY_GETTER_SETTER(int, OT::LinearityParamCaption(OT::lo_PointCount), true, m_options->linearity().measurePointsCount, m_options->linearity().setMeasurePointsCount)
+						->setCategory(categoryPoints)
+						.setViewOrder(1);
+					ADD_PROPERTY_GETTER_SETTER(double, OT::LinearityParamCaption(OT::lo_LowLimit), true, m_options->linearity().lowLimitRange, m_options->linearity().setLowLimitRange)
+						->setCategory(categoryPoints)
+						.setViewOrder(2)
+						.setPrecision(1)
+						.setReadOnly(m_options->linearity().divisionType() == Measure::LT::LinearityDivision::Manual);
+					ADD_PROPERTY_GETTER_SETTER(double, OT::LinearityParamCaption(OT::lo_HighLimit), true, m_options->linearity().highLimitRange, m_options->linearity().setHighLimitRange)
+						->setCategory(categoryPoints)
+						.setViewOrder(3)
+						.setPrecision(1)
+						.setReadOnly(m_options->linearity().divisionType() == Measure::LT::LinearityDivision::Manual);
+					ADD_PROPERTY_GETTER(QString, OT::LinearityParamCaption(OT::lo_ValuesOfPoints), true, m_options->linearity().measurePointsText)
+						->setCategory(categoryPoints)
+						.setViewOrder(4)
+						.setPrecision(1)
+						.setReadOnly(true);
 
-				QString categoryViewType = tr("4 Type of displaying measurement list");
+					QString categoryViewType = tr("Type of displaying measurement list");
 
-				ADD_PROPERTY_GETTER_SETTER(OT::LinearityViewType, OT::LinearityParamCaption(OT::lo_ViewType), true, m_options->linearity().viewType, m_options->linearity().setViewType)
-					->setCategory(categoryViewType)
-					.setViewOrder(0);
+					ADD_PROPERTY_GETTER_SETTER(OT::LinearityViewType, OT::LinearityParamCaption(OT::lo_ViewType), true, m_options->linearity().viewType, m_options->linearity().setViewType)
+						->setCategory(categoryViewType)
+						.setViewOrder(0);
+
+					pPropertyEditor->setCategoryViewOrder (categoryErrors, 0);
+					pPropertyEditor->setCategoryViewOrder (categoryMeasure, 1);
+					pPropertyEditor->setCategoryViewOrder (categoryPoints, 2);
+					pPropertyEditor->setCategoryViewOrder (categoryViewType, 3);
 			}
 			break;
 
 		case PropertyPageType::Comparator_Measure:
 			{
+					QString categoryErrors = tr("Metrological error");
 
-				QString categoryErrors = tr("1 Metrological error");
+					ADD_PROPERTY_GETTER_SETTER(double, OT::ComparatorParamCaption(OT::co_ErrorLimit), true, m_options->comparator().errorLimit, m_options->comparator().setErrorLimit)
+						->setCategory(categoryErrors)
+						.setViewOrder(0)
+						.setPrecision(3);
+					ADD_PROPERTY_GETTER_SETTER(Measure::MT::ErrorType, OT::ComparatorParamCaption(OT::co_ErrorType), true, m_options->comparator().errorType, m_options->comparator().setErrorType)
+						->setCategory(categoryErrors)
+						.setViewOrder(1);
+					ADD_PROPERTY_GETTER_SETTER(Measure::MT::CalcErrorRange, OT::ComparatorParamCaption(OT::co_CalcErrorByRange), true, m_options->comparator().calcErrorByRange, m_options->comparator().setCalcErrorByRange)
+						->setCategory(categoryErrors)
+						.setViewOrder(2);
+					ADD_PROPERTY_GETTER_SETTER(double, OT::ComparatorParamCaption(OT::co_StartValue), true, m_options->comparator().startValueForCompare, m_options->comparator().setStartValueForCompare)
+						->setCategory(categoryErrors)
+						.setViewOrder(3)
+						.setPrecision(3);
 
-				ADD_PROPERTY_GETTER_SETTER(double, OT::ComparatorParamCaption(OT::co_ErrorLimit), true, m_options->comparator().errorLimit, m_options->comparator().setErrorLimit)
-					->setCategory(categoryErrors)
-					.setViewOrder(0)
-					.setPrecision(3);
-				ADD_PROPERTY_GETTER_SETTER(Measure::MT::ErrorType, OT::ComparatorParamCaption(OT::co_ErrorType), true, m_options->comparator().errorType, m_options->comparator().setErrorType)
-					->setCategory(categoryErrors)
-					.setViewOrder(1);
-				ADD_PROPERTY_GETTER_SETTER(Measure::MT::CalcErrorRange, OT::ComparatorParamCaption(OT::co_CalcErrorByRange), true, m_options->comparator().calcErrorByRange, m_options->comparator().setCalcErrorByRange)
-					->setCategory(categoryErrors)
-					.setViewOrder(2);
-				ADD_PROPERTY_GETTER_SETTER(double, OT::ComparatorParamCaption(OT::co_StartValue), true, m_options->comparator().startValueForCompare, m_options->comparator().setStartValueForCompare)
-					->setCategory(categoryErrors)
-					.setViewOrder(3)
-					.setPrecision(3);
+					QString categoryPermissions = tr("Permissions");
 
-				QString categoryPermissions = tr("2 Permissions");
+					ADD_PROPERTY_GETTER_SETTER(int, OT::ComparatorParamCaption(OT::co_StartFromComparator), true, m_options->comparator().startFromComparator, m_options->comparator().setStartFromComparator)
+						->setCategory(categoryPermissions)
+						.setViewOrder(0);
+					ADD_PROPERTY_GETTER_SETTER(bool, OT::ComparatorParamCaption(OT::co_MeasureHysteresis), true, m_options->comparator().enableMeasureHysteresis, m_options->comparator().setEnableMeasureHysteresis)
+						->setCategory(categoryPermissions)
+						.setViewOrder(1);
 
-				ADD_PROPERTY_GETTER_SETTER(int, OT::ComparatorParamCaption(OT::co_StartFromComparator), true, m_options->comparator().startFromComparator, m_options->comparator().setStartFromComparator)
-					->setCategory(categoryPermissions)
-					.setViewOrder(0);
-				ADD_PROPERTY_GETTER_SETTER(bool, OT::ComparatorParamCaption(OT::co_MeasureHysteresis), true, m_options->comparator().enableMeasureHysteresis, m_options->comparator().setEnableMeasureHysteresis)
-					->setCategory(categoryPermissions)
-					.setViewOrder(1);
+					pPropertyEditor->setCategoryViewOrder (categoryErrors, 0);
+					pPropertyEditor->setCategoryViewOrder (categoryPermissions, 1);
 			}
 			break;
 
 		case PropertyPageType::MeasureView_Text:
 			{
-				QString categoryFont = tr("1 Font");
+					QString categoryFont = tr("Font");
 
-				ADD_PROPERTY_GETTER_SETTER(QString, OT::MeasureViewParamCaption(OT::mwo_Font), true, m_options->measureView().font().toString, m_options->measureView().setFont)
-					->setCategory(categoryFont)
-					.setViewOrder(0);
+					ADD_PROPERTY_GETTER_SETTER(QFont, OT::MeasureViewParamCaption(OT::mwo_Font), true, m_options->measureView().font, m_options->measureView().setFont)
+						->setCategory(categoryFont)
+						.setViewOrder(0);
 
-				QString categoryColor = tr("2 Colors");
+					QString categoryColor = tr("Colors");
 
-				ADD_PROPERTY_GETTER_SETTER(QColor, OT::MeasureViewParamCaption(OT::mwo_ColorNoError), true, m_options->measureView().colorNotError, m_options->measureView().setColorNotError)
-					->setCategory(categoryColor)
-					.setViewOrder(0);
-				ADD_PROPERTY_GETTER_SETTER(QColor, OT::MeasureViewParamCaption(OT::mwo_ColorErrorOfLimit), true, m_options->measureView().colorErrorLimit, m_options->measureView().setColorErrorLimit)
-					->setCategory(categoryColor)
-					.setViewOrder(1);
-				ADD_PROPERTY_GETTER_SETTER(QColor, OT::MeasureViewParamCaption(OT::mwo_ColorErrorOfControl), true, m_options->measureView().colorErrorControl, m_options->measureView().setColorErrorControl)
-					->setCategory(categoryColor)
-					.setViewOrder(2);
+					ADD_PROPERTY_GETTER_SETTER(QColor, OT::MeasureViewParamCaption(OT::mwo_ColorNoError), true, m_options->measureView().colorNotError, m_options->measureView().setColorNotError)
+						->setCategory(categoryColor)
+						.setViewOrder(0);
+					ADD_PROPERTY_GETTER_SETTER(QColor, OT::MeasureViewParamCaption(OT::mwo_ColorErrorOfLimit), true, m_options->measureView().colorErrorLimit, m_options->measureView().setColorErrorLimit)
+						->setCategory(categoryColor)
+						.setViewOrder(1);
+					ADD_PROPERTY_GETTER_SETTER(QColor, OT::MeasureViewParamCaption(OT::mwo_ColorErrorOfControl), true, m_options->measureView().colorErrorControl, m_options->measureView().setColorErrorControl)
+						->setCategory(categoryColor)
+						.setViewOrder(2);
 
-				QString categoryMeasurements = tr("3 Measurements");
+					QString categoryMeasurements = tr("Measurements");
 
-				ADD_PROPERTY_GETTER_SETTER(bool, OT::MeasureViewParamCaption(OT::mwo_ShowNoValid), true, m_options->measureView().showNoValid, m_options->measureView().setShowNoValid)
-					->setCategory(categoryMeasurements)
-					.setViewOrder(0);
-				ADD_PROPERTY_GETTER_SETTER(bool, OT::MeasureViewParamCaption(OT::mwo_PrecesionByCalibrator), true, m_options->measureView().precesionByCalibrator, m_options->measureView().setPrecesionByCalibrator)
-					->setCategory(categoryMeasurements)
-					.setViewOrder(0);
+					ADD_PROPERTY_GETTER_SETTER(bool, OT::MeasureViewParamCaption(OT::mwo_ShowNoValid), true, m_options->measureView().showNoValid, m_options->measureView().setShowNoValid)
+						->setCategory(categoryMeasurements)
+						.setViewOrder(0);
+					ADD_PROPERTY_GETTER_SETTER(bool, OT::MeasureViewParamCaption(OT::mwo_PrecesionByCalibrator), true, m_options->measureView().precesionByCalibrator, m_options->measureView().setPrecesionByCalibrator)
+						->setCategory(categoryMeasurements)
+						.setViewOrder(0);
+
+					pPropertyEditor->setCategoryViewOrder (categoryFont, 0);
+					pPropertyEditor->setCategoryViewOrder (categoryColor, 1);
+					pPropertyEditor->setCategoryViewOrder (categoryMeasurements, 2);
 			}
 			break;
 
 		case PropertyPageType::Panel_SignalInfo:
 			{
-				QString categoryFont = tr("1 Font");
+					QString categoryFont = tr("Font");
 
-				ADD_PROPERTY_GETTER_SETTER(QString, OT::SignalInfoParamCaption(OT::sio_Font), true, m_options->signalInfo().font().toString, m_options->signalInfo().setFont)
-					->setCategory(categoryFont)
-					.setViewOrder(0);
+					ADD_PROPERTY_GETTER_SETTER(QFont, OT::SignalInfoParamCaption(OT::sio_Font), true, m_options->signalInfo().font, m_options->signalInfo().setFont)
+						->setCategory(categoryFont)
+						.setViewOrder(0);
 
-				QString categoryMeasure = tr("2 Displaying signal state");
+					QString categoryMeasure = tr("Displaying signal state");
 
-				ADD_PROPERTY_GETTER_SETTER(bool, OT::SignalInfoParamCaption(OT::sio_ShowNoValid), true, m_options->signalInfo().showNoValid, m_options->signalInfo().setShowNoValid)
-					->setCategory(categoryMeasure)
-					.setViewOrder(0);
-				ADD_PROPERTY_GETTER_SETTER(bool, OT::SignalInfoParamCaption(OT::sio_ShowElectricState), true, m_options->signalInfo().showElectricState, m_options->signalInfo().setShowElectricState)
-					->setCategory(categoryMeasure)
-					.setViewOrder(1);
+					ADD_PROPERTY_GETTER_SETTER(bool, OT::SignalInfoParamCaption(OT::sio_ShowNoValid), true, m_options->signalInfo().showNoValid, m_options->signalInfo().setShowNoValid)
+						->setCategory(categoryMeasure)
+						.setViewOrder(0);
+					ADD_PROPERTY_GETTER_SETTER(bool, OT::SignalInfoParamCaption(OT::sio_ShowElectricState), true, m_options->signalInfo().showElectricState, m_options->signalInfo().setShowElectricState)
+						->setCategory(categoryMeasure)
+						.setViewOrder(1);
 
-				QString categoryColor = tr("3 Colors");
+					QString categoryColor = tr("Colors");
 
-				ADD_PROPERTY_GETTER_SETTER(QColor, OT::SignalInfoParamCaption(OT::sio_ColorFlagNoValid), true, m_options->signalInfo().colorFlagValid, m_options->signalInfo().setColorFlagValid)
-					->setCategory(categoryColor)
-					.setViewOrder(0);
-				ADD_PROPERTY_GETTER_SETTER(QColor, OT::SignalInfoParamCaption(OT::sio_ColorFlagSim), true, m_options->signalInfo().colorFlagSim, m_options->signalInfo().setColorFlagSim)
-					->setCategory(categoryColor)
-					.setViewOrder(1);
-				ADD_PROPERTY_GETTER_SETTER(QColor, OT::SignalInfoParamCaption(OT::sio_ColorFlagLock), true, m_options->signalInfo().colorFlagLock, m_options->signalInfo().setColorFlagLock)
-					->setCategory(categoryColor)
-					.setViewOrder(2);
-				ADD_PROPERTY_GETTER_SETTER(QColor, OT::SignalInfoParamCaption(OT::sio_ColorFlagOverflow), true, m_options->signalInfo().colorFlagOverflow, m_options->signalInfo().setColorFlagOverflow)
-					->setCategory(categoryColor)
-					.setViewOrder(3);
-				ADD_PROPERTY_GETTER_SETTER(QColor, OT::SignalInfoParamCaption(OT::sio_ColorFlagUnderflow), true, m_options->signalInfo().colorFlagUnderflow, m_options->signalInfo().setColorFlagUnderflow)
-					->setCategory(categoryColor)
-					.setViewOrder(4);
+					ADD_PROPERTY_GETTER_SETTER(QColor, OT::SignalInfoParamCaption(OT::sio_ColorFlagNoValid), true, m_options->signalInfo().colorFlagValid, m_options->signalInfo().setColorFlagValid)
+						->setCategory(categoryColor)
+						.setViewOrder(0);
+					ADD_PROPERTY_GETTER_SETTER(QColor, OT::SignalInfoParamCaption(OT::sio_ColorFlagSim), true, m_options->signalInfo().colorFlagSim, m_options->signalInfo().setColorFlagSim)
+						->setCategory(categoryColor)
+						.setViewOrder(1);
+					ADD_PROPERTY_GETTER_SETTER(QColor, OT::SignalInfoParamCaption(OT::sio_ColorFlagLock), true, m_options->signalInfo().colorFlagLock, m_options->signalInfo().setColorFlagLock)
+						->setCategory(categoryColor)
+						.setViewOrder(2);
+					ADD_PROPERTY_GETTER_SETTER(QColor, OT::SignalInfoParamCaption(OT::sio_ColorFlagOverflow), true, m_options->signalInfo().colorFlagOverflow, m_options->signalInfo().setColorFlagOverflow)
+						->setCategory(categoryColor)
+						.setViewOrder(3);
+					ADD_PROPERTY_GETTER_SETTER(QColor, OT::SignalInfoParamCaption(OT::sio_ColorFlagUnderflow), true, m_options->signalInfo().colorFlagUnderflow, m_options->signalInfo().setColorFlagUnderflow)
+						->setCategory(categoryColor)
+						.setViewOrder(4);
 
-				QString categoryTime = tr("4 Time for updating");
+					QString categoryTime = tr("Time for updating");
 
-				ADD_PROPERTY_GETTER_SETTER(int, OT::SignalInfoParamCaption(OT::sio_TimeForUpdate), true, m_options->signalInfo().timeForUpdate, m_options->signalInfo().setTimeForUpdate)
-					->setCategory(categoryTime)
-					.setViewOrder(0);
+					ADD_PROPERTY_GETTER_SETTER(int, OT::SignalInfoParamCaption(OT::sio_TimeForUpdate), true, m_options->signalInfo().timeForUpdate, m_options->signalInfo().setTimeForUpdate)
+						->setCategory(categoryTime)
+						.setViewOrder(0);
+
+					pPropertyEditor->setCategoryViewOrder (categoryFont, 0);
+					pPropertyEditor->setCategoryViewOrder (categoryMeasure, 1);
+					pPropertyEditor->setCategoryViewOrder (categoryColor, 2);
+					pPropertyEditor->setCategoryViewOrder (categoryTime, 3);
 			}
 			break;
 
 		case PropertyPageType::Panel_ComparatorInfo:
 			{
+					QString categoryFont = tr("Font");
 
-				QString categoryFont = tr("1 Font");
+					ADD_PROPERTY_GETTER_SETTER(QFont, OT::ComparatorInfoParamCaption(OT::cio_Font), true, m_options->comparatorInfo().font, m_options->comparatorInfo().setFont)
+						->setCategory(categoryFont)
+						.setViewOrder(0);
 
-				ADD_PROPERTY_GETTER_SETTER(QString, OT::ComparatorInfoParamCaption(OT::cio_Font), true, m_options->comparatorInfo().font().toString, m_options->comparatorInfo().setFont)
-					->setCategory(categoryFont)
-					.setViewOrder(0);
+					QString categoryColor = tr("Colors");
 
-				QString categoryColor = tr("2 Colors");
+					ADD_PROPERTY_GETTER_SETTER(QColor, OT::ComparatorInfoParamCaption(OT::cio_ColorFlagSim), true, m_options->comparatorInfo().colorFlagSim, m_options->comparatorInfo().setColorFlagSim)
+						->setCategory(categoryColor)
+						.setViewOrder(0);
+					ADD_PROPERTY_GETTER_SETTER(QColor, OT::ComparatorInfoParamCaption(OT::cio_ColorFlagLock), true, m_options->comparatorInfo().colorFlagSim, m_options->comparatorInfo().setColorFlagLock)
+						->setCategory(categoryColor)
+						.setViewOrder(1);
+					ADD_PROPERTY_GETTER_SETTER(QColor, OT::ComparatorInfoParamCaption(OT::cio_ColorStateFalse), true, m_options->comparatorInfo().colorStateFalse, m_options->comparatorInfo().setColorStateFalse)
+						->setCategory(categoryColor)
+						.setViewOrder(2);
+					ADD_PROPERTY_GETTER_SETTER(QColor, OT::ComparatorInfoParamCaption(OT::cio_ColorStateTrue), true, m_options->comparatorInfo().colorStateTrue, m_options->comparatorInfo().setColorStateTrue)
+						->setCategory(categoryColor)
+						.setViewOrder(3);
 
-				ADD_PROPERTY_GETTER_SETTER(QColor, OT::ComparatorInfoParamCaption(OT::cio_ColorFlagSim), true, m_options->comparatorInfo().colorFlagSim, m_options->comparatorInfo().setColorFlagSim)
-					->setCategory(categoryColor)
-					.setViewOrder(0);
-				ADD_PROPERTY_GETTER_SETTER(QColor, OT::ComparatorInfoParamCaption(OT::cio_ColorFlagLock), true, m_options->comparatorInfo().colorFlagSim, m_options->comparatorInfo().setColorFlagLock)
-					->setCategory(categoryColor)
-					.setViewOrder(1);
-				ADD_PROPERTY_GETTER_SETTER(QColor, OT::ComparatorInfoParamCaption(OT::cio_ColorStateFalse), true, m_options->comparatorInfo().colorStateFalse, m_options->comparatorInfo().setColorStateFalse)
-					->setCategory(categoryColor)
-					.setViewOrder(2);
-				ADD_PROPERTY_GETTER_SETTER(QColor, OT::ComparatorInfoParamCaption(OT::cio_ColorStateTrue), true, m_options->comparatorInfo().colorStateTrue, m_options->comparatorInfo().setColorStateTrue)
-					->setCategory(categoryColor)
-					.setViewOrder(3);
+					QString categoryTime = tr("Time for updating");
 
-				QString categoryTime = tr("3 Time for updating");
+					ADD_PROPERTY_GETTER_SETTER(int, OT::ComparatorInfoParamCaption(OT::cio_TimeForUpdate), true, m_options->comparatorInfo().timeForUpdate, m_options->comparatorInfo().setTimeForUpdate)
+						->setCategory(categoryTime)
+						.setViewOrder(0);
 
-				ADD_PROPERTY_GETTER_SETTER(int, OT::ComparatorInfoParamCaption(OT::cio_TimeForUpdate), true, m_options->comparatorInfo().timeForUpdate, m_options->comparatorInfo().setTimeForUpdate)
-					->setCategory(categoryTime)
-					.setViewOrder(0);
+					pPropertyEditor->setCategoryViewOrder (categoryFont, 0);
+					pPropertyEditor->setCategoryViewOrder (categoryColor, 1);
+					pPropertyEditor->setCategoryViewOrder (categoryTime, 2);
 			}
 			break;
 
 		case PropertyPageType::Database_Location:
 			{
-				QString categoryDatabase = tr("Location of Database");
+					QString categoryDatabase = tr("Location of Database");
 
-				ADD_PROPERTY_GETTER_SETTER(QString, OT::DatabaseParamCaption(OT::dbo_LocationPath), true, m_options->database().locationPath, m_options->database().setLocationPath)
-					->setCategory(categoryDatabase)
-					.setViewOrder(0);
-				ADD_PROPERTY_GETTER_SETTER(OT::DatabaseType, OT::DatabaseParamCaption(OT::dbo_Type), true, m_options->database().type, m_options->database().setType)
-					->setCategory(categoryDatabase)
-					.setViewOrder(1);
+					ADD_PROPERTY_GETTER_SETTER(QString, OT::DatabaseParamCaption(OT::dbo_LocationPath), true, m_options->database().locationPath, m_options->database().setLocationPath)
+						->setCategory(categoryDatabase)
+						.setViewOrder(0)
+						.setSpecificEditor(E::PropertySpecificEditor::ChooseDirectoryDialog);
+					ADD_PROPERTY_GETTER_SETTER(OT::DatabaseType, OT::DatabaseParamCaption(OT::dbo_Type), true, m_options->database().type, m_options->database().setType)
+						->setCategory(categoryDatabase)
+						.setViewOrder(1);
 			}
 			break;
 
 		case PropertyPageType::Database_Backup:
 			{
-				QString categoryEvent = tr("1 Events");
+					QString categoryEvent = tr("Events");
 
-				ADD_PROPERTY_GETTER_SETTER(bool, OT::DatabaseParamCaption(OT::dbo_OnStart), true, m_options->database().onStart, m_options->database().setOnStart)
-					->setCategory(categoryEvent)
-					.setViewOrder(0);
-				ADD_PROPERTY_GETTER_SETTER(bool, OT::DatabaseParamCaption(OT::dbo_OnExit), true, m_options->database().onExit, m_options->database().setOnExit)
-					->setCategory(categoryEvent)
-					.setViewOrder(1);
+					ADD_PROPERTY_GETTER_SETTER(bool, OT::DatabaseParamCaption(OT::dbo_OnStart), true, m_options->database().onStart, m_options->database().setOnStart)
+						->setCategory(categoryEvent)
+						.setViewOrder(0);
+					ADD_PROPERTY_GETTER_SETTER(bool, OT::DatabaseParamCaption(OT::dbo_OnExit), true, m_options->database().onExit, m_options->database().setOnExit)
+						->setCategory(categoryEvent)
+						.setViewOrder(1);
 
-				QString categoryPath = tr("2 Location of reserve copy");
+					QString categoryPath = tr("Location of reserve copy");
 
-				ADD_PROPERTY_GETTER_SETTER(QString, OT::DatabaseParamCaption(OT::dbo_CopyPath), true, m_options->database().backupPath, m_options->database().setBackupPath)
-					->setCategory(categoryPath)
-					.setViewOrder(0);
+					ADD_PROPERTY_GETTER_SETTER(QString, OT::DatabaseParamCaption(OT::dbo_CopyPath), true, m_options->database().backupPath, m_options->database().setBackupPath)
+						->setCategory(categoryPath)
+						.setViewOrder(0)
+						.setSpecificEditor(E::PropertySpecificEditor::ChooseDirectoryDialog);
+
+					pPropertyEditor->setCategoryViewOrder (categoryEvent, 0);
+					pPropertyEditor->setCategoryViewOrder (categoryPath, 1);
 			}
 			break;
 
@@ -539,7 +569,7 @@ PropertyGroupType groupByPage(PropertyPageType pageType)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-PropertyPageType DialogOptions::m_currentPage = PropertyPageType::Linearity_Measure;
+PropertyPageType DialogOptions::m_currentPage = PropertyPageType::Service_Connection;
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -569,8 +599,7 @@ void DialogOptions::createInterface()
 	setWindowFlags(Qt::Dialog | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Options.png"));
 
-	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
-
+	QRect screen = parentWidget()->screen()->availableGeometry();
 	setMinimumSize(static_cast<int>(screen.width() * 0.45), static_cast<int>(screen.height() * 0.3));
 	loadSettings();
 
@@ -589,6 +618,7 @@ void DialogOptions::createInterface()
 	m_pPropertyEditor = new ExtWidgets::PropertyEditor(this);
 	m_pPropertyEditor->setSplitterPosition(300);
 	m_pPropertyEditor->setReadOnly(false);
+	m_pPropertyEditor->hide();
 
 	connect(m_pPropertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &DialogOptions::onPropertyValueChanged);
 
@@ -1167,6 +1197,11 @@ void DialogOptions::loadSettings()
 	restoreGeometry(geometry);
 
 	m_currentPage = static_cast<PropertyPageType>(s.value(QString("%1OptionsDialog/activePage").arg(WINDOW_GEOMETRY_OPTIONS_KEY), PropertyPageType::Linearity_Measure).toInt());
+
+	if (ERR_PROPERTY_PAGE_TYPE(m_currentPage) == true)
+	{
+		m_currentPage = PropertyPageType::Service_Connection;
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------

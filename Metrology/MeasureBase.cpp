@@ -75,7 +75,7 @@ namespace Measure
 
 		//
 		//
-		m_measureTime.setTime_t(0);
+		m_measureTime.setDate(QDate());
 		m_calibrator.clear();
 		m_reportType = -1;
 
@@ -3056,8 +3056,11 @@ namespace Measure
 
 	void Base::signalBaseLoaded()
 	{
-		QtConcurrent::run(Base::markNotExistMeasuremetsFromStatistics, this);
-		QtConcurrent::run(Base::markWrongRangeFromStatistics, this);
+		QFuture<void> resRun0 = QtConcurrent::run(Base::markNotExistMeasuremetsFromStatistics, this);
+		QFuture<void> resRun1 = QtConcurrent::run(Base::markWrongRangeFromStatistics, this);
+
+		//resRun0.waitForFinished();
+		//resRun1.waitForFinished();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------

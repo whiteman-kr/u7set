@@ -4,6 +4,41 @@
 #include "../CommonLib/PropertyObject.h"
 #include "../CommonLib/AfbParamValue.h"
 
+inline int qVariantTypeId(const QVariant& v)
+{
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))									// for Qt6
+	return v.typeId();
+#else																			// for Qt5
+	return v.userType();
+#endif
+}
+
+/*
+
+PropertyEditor class can edit following types of properties contained in PropertyObject classes:
+
+PropertyVector
+PropertyList
+Enum
+TuningValue
+Afb::AfbParamValue
+<QVector<QColor>>
+QMetaType::QFont
+QMetaType::QDateTime
+QMetaType::Int
+QMetaType::UInt
+QMetaType::Float
+QMetaType::Double
+QMetaType::Bool
+QMetaType::QString
+QMetaType::QStringList
+QMetaType::QColor
+QMetaType::QUuid
+QMetaType::QByteArray
+QMetaType::QImage
+
+*/
+
 class QPlainTextEdit;
 
 namespace ExtWidgets
@@ -41,7 +76,7 @@ namespace ExtWidgets
 		static QString propertyVectorText(QVariant& value);
 		static QString stringListText(const QVariant& value);
 		static QString colorVectorText(QVariant& value);
-		static QString propertyValueText(Property* p, int row);	// row is used for StringList
+		static QString propertyValueText(Property* p, int row, int maxDecimalPlaces);	// row is used for StringList
 
 	};
 
@@ -68,6 +103,9 @@ namespace ExtWidgets
 		[[nodiscard]] bool isReadOnly() const;
 		void setReadOnly(bool readOnly);
 
+		[[nodiscard]] int maxDecimaplPlaces() const;		// If decimal places is less or equal then 'f' format is used, otherwise 'g' is used
+		void setMaxDecimaplPlaces(int value);
+
 		[[nodiscard]] QString defaultSpecificPropertyCategory() const;
 		void setDefaultSpecificPropertyCategory(QString value);
 
@@ -79,6 +117,7 @@ namespace ExtWidgets
 
 		static QIcon drawCheckBox(int state, bool enabled);
 		static QIcon drawImage(const QImage& image);
+                static QIcon drawFont(const QFont& font);
 		static QIcon propertyIcon(Property* p, bool sameValue, bool enabled);
 
 		PropertyEditCellWidget* createCellEditor(std::shared_ptr<Property> propertyPtr, bool sameValue, bool readOnly, QWidget* parent);
@@ -95,13 +134,13 @@ namespace ExtWidgets
 			Text,
 			Array,
 			Enum,
-			FilePath,
 			CheckBox,
-			Color
+                        Color
 		};
 
 		bool m_expertMode = false;
 		bool m_readOnly = false;
+		int m_maxDecimaplPlaces = 5;
 
 		QString m_scriptHelpFile;
 		QPoint m_scriptHelpWindowPos = QPoint(-1, -1);
@@ -250,7 +289,7 @@ namespace ExtWidgets
 		void cancelButtonPressed();
 
 	protected:
-		QRegExpValidator* m_regExpValidator = nullptr;
+		QRegularExpressionValidator* m_regExpValidator = nullptr;
 
 	private:
 		bool m_modified = false;
@@ -308,46 +347,6 @@ namespace ExtWidgets
 	signals:
 		void valueChanged(QVariant value);
 
-	};
-
-	//
-	// MultiFilePathEdit
-	//
-	struct FilePathPropertyType
-	{
-		FilePathPropertyType() :
-			filter("*.*")
-		{
-		}
-
-		QString filePath;
-		QString filter;
-
-		static int filePathTypeId();
-	};
-
-	class MultiFilePathEdit : public PropertyEditCellWidget
-	{
-		Q_OBJECT
-
-	public:
-		explicit MultiFilePathEdit(QWidget* parent, bool readOnly);
-		void setValue(std::shared_ptr<Property> property, bool readOnly) override;
-
-	public slots:
-		void onEditingFinished();
-
-	private slots:
-		void onButtonPressed();
-
-	private:
-		bool eventFilter(QObject* watched, QEvent* event) override;
-
-	private:
-		QLineEdit* m_lineEdit = nullptr;
-        QToolButton* m_button = nullptr;
-		bool m_escape = false;
-		QVariant m_oldPath;
 	};
 
 	//
@@ -655,11 +654,19 @@ namespace ExtWidgets
 		void setObjects(const std::vector<std::shared_ptr<PropertyObject>>& objects);
 		void setObjects(const QList<std::shared_ptr<PropertyObject>>& objects);
 
+		int categoryViewOrder(const QString& category) const;
+		void setCategoryViewOrder(const QString& category, int order);
+		void setCategoryViewOrders(const std::map<QString, int>& orders);
+
 		// Properties and support
 		//
 		int splitterPosition() const;
 		void setSplitterPosition(int pos);
 
+		bool alternateCategories() const;
+		void setAlternateCategories(bool value);
+
+		//
 		void autoAdjustSplitterPosition();
 
 		bool isPropertyExists(const QString& propertyName) const;
@@ -695,14 +702,29 @@ namespace ExtWidgets
 		int getSelectionType();	// returns -1 if no type is selected or they are different
 		void startEditing();
 		void toggleSelected();
+		void saveExpandedGroups();
+		void restoreExpandedGroups();
+		void saveScrollPosition();
+		void restoreScrollPosition();
 
 	private:
 		// Private Data
 		//
 		PropertyTreeWidget* m_treeWidget = nullptr;
+
 		std::map<QString, PropertyEditorObject> m_treeObjects;
+
 		QList<std::shared_ptr<PropertyObject>> m_objects;
+
 		PropertyEditorDelegate* m_itemDelegate = nullptr;
+
+		bool m_alternateCategories = false;
+
+		std::map<QString, int> m_categoryOrders;
+
+		std::set<QString> m_notExpandedCategories;
+
+		QString m_firstVisibleItemText;
 	};
 
 	extern PropertyEditorSettings thePropertyEditorSettings;
@@ -710,6 +732,5 @@ namespace ExtWidgets
 
 
 Q_DECLARE_METATYPE(std::shared_ptr<Property>)
-Q_DECLARE_METATYPE(ExtWidgets::FilePathPropertyType)
 Q_DECLARE_METATYPE(QVector<QColor>)
 

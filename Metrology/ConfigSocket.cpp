@@ -177,7 +177,8 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
 
 	emit configurationLoaded();
 
-	QtConcurrent::run(ConfigSocket::loadSignalBase, this);
+	QFuture<void> resRun = QtConcurrent::run(ConfigSocket::loadSignalBase, this);
+	//resRun.waitForFinished();
 
 	return;
 }
@@ -247,7 +248,7 @@ bool ConfigSocket::readMetrologySignalSet(const QByteArray& fileData)
 	QElapsedTimer responseTime;
 	responseTime.start();
 
-	bool result = m_protoMetrologySignalSet.ParseFromArray(fileData.constData(), fileData.size());
+	bool result = m_protoMetrologySignalSet.ParseFromArray(fileData.constData(), static_cast<int>(fileData.size()));
 	if (result == false)
 	{
 		return false;

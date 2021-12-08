@@ -26,7 +26,7 @@ void FileDiff::loadFileData(const QByteArray& fileData, std::vector<FileLine>* f
 
 	QStringList strings = string.split(QChar::LineFeed);
 
-	int count =  strings.size();
+	int count =  static_cast<int>(strings.size());
 
 	fileLines->resize(count);
 
@@ -127,9 +127,9 @@ void FileDiff::alignResults(const std::vector<T>& source, const std::vector<T>& 
 							int* removedCount,
 							int* alignedCount)
 {
-	int sourceIndex = 0;
-	int targetIndex  = 0;
-	int lcsIndex = 0;
+	size_t sourceIndex = 0;
+	size_t targetIndex  = 0;
+	size_t lcsIndex = 0;
 
 	*alignedCount = 0;
 	*addedCount = 0;
@@ -326,8 +326,8 @@ ProjectDiffGenerator::ProjectDiffGenerator(const QString& fileName,
 									 const QString& userName,
 									 const QString& userPassword):
 	ReportGenerator(schemaView),
-	m_filePath(fileName),
 	m_reportParams(settings),
+	m_filePath(fileName),
 	m_projectName(projectName),
 	m_userName(userName),
 	m_userPassword(userPassword)
@@ -591,7 +591,7 @@ void ProjectDiffGenerator::compareProject(std::map<int, std::vector<std::shared_
 
 	// Place signals to front
 	//
-	for (int i = 0; i < m_reportParams.fileTypeParams.size(); i++)
+	for (size_t i = 0; i < m_reportParams.fileTypeParams.size(); i++)
 	{
 		ReportFileTypeParams ft = m_reportParams.fileTypeParams[i];
 
@@ -1857,9 +1857,9 @@ void ProjectDiffGenerator::compareFilesData(const std::shared_ptr<DbFile>& sourc
 							   &removedCount,
 							   &alignedCount);
 
-		int sourceIndex = 0;
-		int targetIndex  = 0;
-		int actionIndex = 0;
+		size_t sourceIndex = 0;
+		size_t targetIndex  = 0;
+		size_t actionIndex = 0;
 
 		while (sourceIndex < fileLinesSourceAligned.size() || targetIndex < fileLinesTargetAligned.size())
 		{
@@ -2258,6 +2258,8 @@ void ProjectDiffGenerator::comparePropertyObjects(const PropertyObject& sourceOb
 		return;
 	}
 
+	const int maxDecimalPlaces = 5;
+
 	std::vector<std::shared_ptr<Property>> sourceProperties = sourceObject.properties();
 	std::vector<std::shared_ptr<Property>> targetProperties = targetObject.properties();
 
@@ -2332,7 +2334,7 @@ void ProjectDiffGenerator::comparePropertyObjects(const PropertyObject& sourceOb
 			}
 
 			diff.newValue = tp->value();
-			diff.newValueText = ExtWidgets::PropertyTools::propertyValueText(tp.get(), -1);
+			diff.newValueText = ExtWidgets::PropertyTools::propertyValueText(tp.get(), -1, maxDecimalPlaces);
 
 			result->push_back(diff);
 			continue;
@@ -2357,8 +2359,8 @@ void ProjectDiffGenerator::comparePropertyObjects(const PropertyObject& sourceOb
 		diff.oldValue = sp->value();
 		diff.newValue = tp->value();
 
-		diff.oldValueText = ExtWidgets::PropertyTools::propertyValueText(sp.get(), -1);
-		diff.newValueText = ExtWidgets::PropertyTools::propertyValueText(tp.get(), -1);
+		diff.oldValueText = ExtWidgets::PropertyTools::propertyValueText(sp.get(), -1, maxDecimalPlaces);
+		diff.newValueText = ExtWidgets::PropertyTools::propertyValueText(tp.get(), -1, maxDecimalPlaces);
 
 		// Both are enums
 		//
@@ -2520,11 +2522,11 @@ void ProjectDiffGenerator::generateTitlePage(QTextDocument* textDocument,
 		blockLeftFormat.setAlignment(Qt::AlignLeft);
 
 		QTextCharFormat charHeaderFormat = textCursor.charFormat();
-		charHeaderFormat.setFontFamily("Arial");
+		charHeaderFormat.setFont(QFont("Arial"));
 		charHeaderFormat.setFontPointSize(72.0 / fontScaling);
 
 		QTextCharFormat charRegularFormat = textCursor.charFormat();
-		charRegularFormat.setFontFamily("Arial");
+		charRegularFormat.setFont(QFont("Arial"));
 		charRegularFormat.setFontPointSize(36.0 / fontScaling);
 
 		textCursor.setBlockFormat(blockLeftFormat);
@@ -2672,7 +2674,7 @@ void ProjectDiffGenerator::generateReportFilesPage(QTextDocument* textDocument, 
 		blockLeftFormat.setAlignment(Qt::AlignLeft);
 
 		QTextCharFormat charRegularFormat = textCursor.charFormat();
-		charRegularFormat.setFontFamily("Times");
+		charRegularFormat.setFont(QFont("Times"));
 		charRegularFormat.setFontPointSize(36.0 / fontScaling);
 
 		textCursor.setBlockFormat(blockCenterFormat);
@@ -2708,7 +2710,7 @@ void ProjectDiffGenerator::generateReportFilesPage(QTextDocument* textDocument, 
 		{
 			fileName = QDir::toNativeSeparators(fileName);
 
-			int pos = fileName.lastIndexOf(QDir::separator());
+			int pos = static_cast<int>(fileName.lastIndexOf(QDir::separator()));
 			if (pos != -1)
 			{
 				fileName = fileName.right(fileName.length() - pos - 1);
@@ -3008,7 +3010,7 @@ void ProjectDiffGenerator::renderReport(std::map<int, std::vector<std::shared_pt
 				subreportName = tr("NoName");
 			}
 
-			int pos = pdfFileName.lastIndexOf('.');
+			int pos = static_cast<int>(pdfFileName.lastIndexOf('.'));
 			if (pos != -1)
 			{
 				pdfFileName.insert(pos, tr("_%1").arg(subreportName));

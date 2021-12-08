@@ -18,7 +18,7 @@ public:
 	struct FileLine
 	{
 		QString text;
-		int line = -1;
+		qsizetype line = -1;
 		Hash hash = UNDEFINED_HASH;
 
 		bool operator == (const FileLine& That) const

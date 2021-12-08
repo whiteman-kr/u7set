@@ -2098,7 +2098,11 @@ bool compareDouble(double lDouble, double rDouble)
 Options::Options(QObject* parent) :
 	QObject(parent)
 {
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))									// for Qt6
+	qRegisterMetaType<QMap<QString,int>>("QMap<QString,int>");
+#else																			// for Qt5
 	qRegisterMetaTypeStreamOperators<QMap<QString,int>>("QMap<QString,int>");
+#endif
 }
 
 // -------------------------------------------------------------------------------------------------------------------

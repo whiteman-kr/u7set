@@ -33,12 +33,12 @@ DialogMeasurePoint::DialogMeasurePoint(const LinearityOption& linearity, QWidget
 	m_lowRangeLabel->setText(tr("Low,%"));
 	m_highRangeLabel->setText(tr("High,%"));
 
-	QRegExp rx("^[-]{0,1}[0-9]*[.]{1}[0-9]*$");
-	QValidator* validator = new QRegExpValidator(rx, this);
+	QRegularExpression rx("^[-]{0,1}[0-9]*[.]{1}[0-9]*$");
+	QValidator* validator = new QRegularExpressionValidator(rx, this);
 
 	m_pointCountEdit->setFixedWidth(40);
 	m_pointCountEdit->setAlignment(Qt::AlignHCenter);
-	m_pointCountEdit->setValidator(validator);
+	m_pointCountEdit->setValidator(new QIntValidator(this));
 	m_lowRangeEdit->setFixedWidth(40);
 	m_lowRangeEdit->setAlignment(Qt::AlignHCenter);
 	m_lowRangeEdit->setValidator(validator);
@@ -115,7 +115,7 @@ void DialogMeasurePoint::setHeaderList()
 		horizontalHeaderLabels.append(Measure::PointSensorCaption(sensor));
 	}
 
-	m_pointList->setColumnCount(horizontalHeaderLabels.count());
+	m_pointList->setColumnCount(static_cast<int>(horizontalHeaderLabels.count()));
 	m_pointList->setHorizontalHeaderLabels(horizontalHeaderLabels);
 
 	for(int column = 0; column < m_pointList->columnCount(); column++)

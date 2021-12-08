@@ -176,7 +176,9 @@ SelectSignalWidget::SelectSignalWidget(QWidget* parent) :
 	// --
 	//
 	setLayout(new QHBoxLayout{this});
-	layout()->setMargin(layout()->margin() / 4);
+
+	QMargins m = contentsMargins() / 4;
+	layout()->setContentsMargins(m);
 
 	layout()->addWidget(m_button);
 

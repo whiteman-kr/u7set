@@ -32,7 +32,6 @@
         <file>Images/logo.png</file>
         <file>icons/CheckGreen.png</file>
         <file>icons/CheckRed.png</file>
-        <file>icons/About Сonnection.png</file>
         <file>icons/Connection.png</file>
         <file>icons/Tuning.png</file>
         <file>icons/Rack.png</file>
@@ -46,5 +45,6 @@
         <file>icons/PreviousFind.png</file>
         <file>icons/SelectForMeasure.png</file>
         <file>docs/Metrology_User_Manual.pdf</file>
+        <file>icons/About Connection.png</file>
     </qresource>
 </RCC>

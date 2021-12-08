@@ -305,8 +305,8 @@ bool Calibrator::getIDN()
 	//
 	int begPos = 0, endPos = 0;
 
-	begPos = m_lastResponse.indexOf(',', 0);
-	endPos = m_lastResponse.indexOf(',', begPos+1);
+	begPos = static_cast<int>(m_lastResponse.indexOf(',', 0));
+	endPos = static_cast<int>(m_lastResponse.indexOf(',', begPos+1));
 
 	// Calibrator name
 	//
@@ -334,7 +334,7 @@ bool Calibrator::getIDN()
 	}
 
 	begPos = endPos;
-	endPos = m_lastResponse.indexOf(',', begPos+1);
+	endPos = static_cast<int>(m_lastResponse.indexOf(',', begPos+1));
 
 	// Calibrator serial number
 	//
@@ -1487,7 +1487,7 @@ void Calibrator::parseResponse()
 			value = m_lastResponse;
 			value.remove(' ');
 
-			begPos = value.indexOf(',');
+			begPos = static_cast<int>(value.indexOf(','));
 			if (begPos == -1)
 			{
 				break;
@@ -1505,7 +1505,7 @@ void Calibrator::parseResponse()
 
 			value = m_lastResponse;
 
-			begPos = value.indexOf("<MEAS>", 0);
+			begPos = static_cast<int>(value.indexOf("<MEAS>", 0));
 			if (begPos == -1)
 			{
 				break;
@@ -1513,7 +1513,7 @@ void Calibrator::parseResponse()
 
 			value.remove(0, begPos + 6);
 
-			endPos = value.indexOf("</MEAS>", 0);
+			endPos = static_cast<int>(value.indexOf("</MEAS>", 0));
 			if (endPos == -1)
 			{
 				break;
@@ -1525,7 +1525,7 @@ void Calibrator::parseResponse()
 
 			value = m_lastResponse;
 
-			begPos = value.indexOf("<MEAS>", begPos + 1);
+			begPos = static_cast<int>(value.indexOf("<MEAS>", begPos + 1));
 			if (begPos == -1)
 			{
 				break;
@@ -1533,7 +1533,7 @@ void Calibrator::parseResponse()
 
 			value.remove(0, begPos + 6);
 
-			endPos = value.indexOf("</MEAS>", 0);
+			endPos = static_cast<int>(value.indexOf("</MEAS>", 0));
 			if (endPos == -1)
 			{
 				break;
