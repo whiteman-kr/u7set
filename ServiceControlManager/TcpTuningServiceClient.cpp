@@ -298,7 +298,7 @@ void TcpTuningServiceClient::onGetTuningSourcesStates(const char *replyData, qui
 		{
 			if (ts.id() == id)
 			{
-				ts.setState(tss);
+				ts.setNewState(tss);
 
 				found = true;
 				break;
@@ -467,6 +467,12 @@ void TcpTuningServiceClient::onGetTuningSignalState(const char *replyData, quint
 		{
 			assert(false);
 			return;
+		}
+
+		if (signalHash == UNDEFINED_HASH)
+		{
+			// This may be if tuning source control is disabled
+			continue;
 		}
 
 		assert(signalHash == m_signalHashes[signalIndex]);

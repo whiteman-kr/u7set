@@ -6,6 +6,7 @@
 #include "../VFrame30/DrawParam.h"
 #include "TuningSignalInfo.h"
 #include "DialogChooseFilter.h"
+#include "../lib/Tuning/TuningSourcesHelper.h"
 
 #include <QTableView>
 #include <QInputDialog>
@@ -1389,28 +1390,46 @@ bool TuningPage::write()
 		return false;
 	}
 
+	// Find TCP clients that contain modified signals
+	//
 	{
-		// Find TCP clients that contain modified signals
-		// and take control of them
+		std::vector<TuningTcpClient*> clientsToCheckControl;
 
-		std::vector<TuningClientTcpClient*> clientsToWrite;
-
-		for (TuningClientTcpClient* client : m_tuningTcpClients)
+		for (TuningTcpClient* client : m_tuningTcpClients)
 		{
-			if (client->singleLmControlMode() == true && client->hasTuningSignals(modifiedHashes) == true)
+			if (client->isConnected() == true &&
+				client->singleLmControlMode() == true &&
+				client->hasTuningSignals(modifiedHashes) == true)
 			{
-				clientsToWrite.push_back(client);
+				clientsToCheckControl.push_back(client);
 			}
 		}
 
-		if (TuningPage::takeClientsControl(clientsToWrite, this) == false)
+		// Check if same tuning sources are activated in clients
+		//
+		if (TuningSourcesHelper::clientsHaveSameActiveSource(clientsToCheckControl) == false)
+		{
+			QMessageBox::critical(this, qAppName(), tr("To write changes, please activate the same Tuning Source in all Tuning Services."));
+			return false;
+		}
+
+		// Take control on required clients
+		//
+		if (TuningSourcesHelper::takeServicesControl(clientsToCheckControl, this) == false)
 		{
 			return false;
 		}
 	}
 
+	// Write values on all clients
+	//
 	for (TuningClientTcpClient* client : m_tuningTcpClients)
 	{
+		if (client->isConnected() == false)
+		{
+			continue;
+		}
+
 		std::vector<TuningWriteCommand> commands;
 
 		std::vector<Hash> clientHashes = client->getProcessedHashes(modifiedHashes);
@@ -1451,7 +1470,17 @@ void TuningPage::apply()
 		return;
 	}
 
-	if (TuningPage::takeClientsControl(m_tuningTcpClients, this) == false)
+	// Check if same tuning sources are activated in all clients
+	//
+	if (TuningSourcesHelper::clientsHaveSameActiveSource({m_tuningTcpClients.begin(), m_tuningTcpClients.end()}) == false)
+	{
+		QMessageBox::critical(this, qAppName(), tr("To write changes, please activate the same Tuning Source in all Tuning Services."));
+		return;
+	}
+
+	// Take control on all clients
+	//
+	if (TuningSourcesHelper::takeServicesControl({m_tuningTcpClients.begin(), m_tuningTcpClients.end()}, this) == false)
 	{
 		return;
 	}
@@ -1481,6 +1510,11 @@ void TuningPage::apply()
 
 	for (TuningClientTcpClient* client : m_tuningTcpClients)
 	{
+		if (client->isConnected() == false)
+		{
+			continue;
+		}
+
 		client->applyTuningSignals();
 	}
 
@@ -2267,85 +2301,6 @@ void TuningPage::restoreSignalsFromFilter(TuningFilter* filter)
 	{
 		QMessageBox::warning(this, qAppName(), tr("%1 values were restored from the filter. Check them and apply the changes.").arg(restoredCount));
 	}
-}
-
-bool TuningPage::takeClientsControl(std::vector<TuningClientTcpClient*> clients, QWidget* parentWidget)
-{
-	if (clients.empty() == true)
-	{
-		return true;
-	}
-
-	QStringList clientsWithoutActiveSources;
-
-	for (const TuningClientTcpClient* client : clients)
-	{
-		if (client->isConnected() == true &&
-			client->singleLmControlMode() == true &&
-			client->activeTuningSourceCount() == 0)
-		{
-			clientsWithoutActiveSources.push_back(client->tuningServiceId());
-		}
-	}
-
-	if (clientsWithoutActiveSources.empty() == false)
-	{
-		QMessageBox::critical(parentWidget, qAppName(),	 QObject::tr("No tuning sources with control enabled found for clients %1.").arg(clientsWithoutActiveSources.join(';')));
-		return false;
-	}
-
-	QStringList nonActiveClients;
-	QStringList sourcesToActivate;
-
-	for (const TuningClientTcpClient* client : clients)
-	{
-		if (client->isConnected() == true &&
-			client->singleLmControlMode() == true &&
-			client->clientIsActive() == false)
-		{
-			nonActiveClients.push_back(client->tuningServiceId());
-			sourcesToActivate.push_back(client->singleActiveTuningSource());
-		}
-	}
-
-	if (nonActiveClients.empty() == false && sourcesToActivate.empty() == false)
-	{
-		QString question;
-
-		if (nonActiveClients.size() == 1 && sourcesToActivate.size() == 1)
-		{
-			question = QObject::tr("Warning!\n\nClient %1 is not selected as active now.\n\nAre you sure you want to take control and activate the source %2?")
-					   .arg(nonActiveClients[0])
-					.arg(sourcesToActivate[0]);
-		}
-		else
-		{
-			question = QObject::tr("Warning!\n\nClients %1 are not selected as active now.\n\nAre you sure you want to take control and activate sources %2?")
-					   .arg(nonActiveClients.join(';'))
-					   .arg(sourcesToActivate.join(';'));
-		}
-
-		if (QMessageBox::warning(parentWidget, qAppName(),
-								 question,
-								 QMessageBox::Yes | QMessageBox::No,
-								 QMessageBox::No) != QMessageBox::Yes)
-		{
-			return false;
-		}
-	}
-
-
-	for (TuningClientTcpClient* client : clients)
-	{
-		if (client->isConnected() == true &&
-			client->singleLmControlMode() == true &&
-			client->clientIsActive() == false)
-		{
-			client->activateTuningSourceControl(client->singleActiveTuningSource(), true, true);
-		}
-	}
-
-	return true;
 }
 
 void TuningPage::slot_timerTick500()

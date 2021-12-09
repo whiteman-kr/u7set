@@ -6,7 +6,6 @@
 
 TuningSource::TuningSource()
 {
-	m_perviousStateLastUpdateTime = QDateTime::currentDateTime();
 }
 
 TuningSource::TuningSource(const ::Network::DataSourceInfo& info):
@@ -46,14 +45,14 @@ QString TuningSource::controllerEquipmentId(int index) const
 	return QString::fromStdString(m_info.lancontrollerinfo(index).equipmentid());
 }
 
-int TuningSource::statesChannelsCount() const
+int TuningSource::statesCount() const
 {
 	return static_cast<int>(m_states.size());
 }
 
-const ::Network::TuningSourceState& TuningSource::state(int channel) const
+const ::Network::TuningSourceState& TuningSource::state(int index) const
 {
-	if (channel < 0 || channel >= m_states.size())
+	if (index < 0 || index >= m_states.size())
 	{
 		static ::Network::TuningSourceState emptyState;
 
@@ -61,12 +60,27 @@ const ::Network::TuningSourceState& TuningSource::state(int channel) const
 		return emptyState;
 	}
 
-	return m_states[channel];
+	return m_states[index];
 }
 
-const ::Network::TuningSourceState& TuningSource::previousState(int channel) const
+const ::Network::TuningSourceState& TuningSource::state(Hash controllerHash) const
 {
-	if (channel < 0 || channel >= m_previousStates.size())
+	auto it = m_controllerToStateMap.find(controllerHash);
+	if (it != std::end(m_controllerToStateMap))
+	{
+		return m_states[it->second];
+	}
+
+	Q_ASSERT(false);
+
+	static ::Network::TuningSourceState emptyState;
+	return emptyState;
+}
+
+const ::Network::TuningSourceState& TuningSource::previousState(int index) const
+{
+	auto it = m_previousStates.find(index);
+	if (it == m_previousStates.end())
 	{
 		static ::Network::TuningSourceState emptyState;
 
@@ -74,63 +88,100 @@ const ::Network::TuningSourceState& TuningSource::previousState(int channel) con
 		return emptyState;
 	}
 
-	return m_previousStates[channel];
+	return it->second;
 }
 
-void TuningSource::setState(const ::Network::TuningSourceState& newState)
+const ::Network::TuningSourceState& TuningSource::previousState(Hash controllerHash) const
+{
+	auto it = m_controllerToStateMap.find(controllerHash);
+	if (it != std::end(m_controllerToStateMap))
+	{
+		if (m_previousStates.find(it->second) != m_previousStates.end())
+		{
+			return m_previousStates.at(it->second);
+		}
+	}
+
+	Q_ASSERT(false);
+
+	static ::Network::TuningSourceState emptyState;
+	return emptyState;
+}
+
+void TuningSource::setNewState(const ::Network::TuningSourceState& newState)
 {
 	Hash controllerHash = ::calcHash(QString::fromStdString(newState.lanequipmentid()));
 
 	int channel = -1;
 
+	const QDateTime ct = QDateTime::currentDateTime();
+
 	auto it = m_controllerToStateMap.find(controllerHash);
 	if (it == m_controllerToStateMap.end())
 	{
+
 		// Insert a new state to array of states
 		//
 		m_states.push_back(newState);
-		m_previousStates.push_back(newState);
 
 		channel = static_cast<int>(m_states.size() - 1);
 		m_controllerToStateMap[controllerHash] = channel;
 
+		// Remember previous state and it's update time
+		//
+		m_previousStates[channel] = newState;
+		m_temporaryStates[channel] = newState;
+		m_previousStatesUpdateTimes[channel] = ct;
+
 		Q_ASSERT(m_states.size() == m_previousStates.size());
+		Q_ASSERT(m_states.size() == m_temporaryStates.size());
+		Q_ASSERT(m_states.size() == m_previousStatesUpdateTimes.size());
 	}
 	else
 	{
 		Q_ASSERT(m_states.size() == m_previousStates.size());
+		Q_ASSERT(m_states.size() == m_temporaryStates.size());
+		Q_ASSERT(m_states.size() == m_previousStatesUpdateTimes.size());
 
 		// Modify existing state in array of states
 		//
 		channel = it->second;
+
 		m_states[channel] = newState;
 
 		// Every 5 seconds modify previous state
 		//
-		QDateTime ct = QDateTime::currentDateTime();
+		if (m_previousStates.find(channel) == m_previousStates.end() ||
+			m_temporaryStates.find(channel) == m_temporaryStates.end())
+		{
+			Q_ASSERT(false);
+			return;
+		}
 
-		qint64 secsTo = m_perviousStateLastUpdateTime.secsTo(ct);
+		const qint64 m_previousStateUpdatePeriod = 5;
 
+		qint64 secsTo = m_previousStatesUpdateTimes.at(channel).secsTo(ct);
 		if (secsTo > m_previousStateUpdatePeriod)
 		{
-			m_previousStates[channel] = newState;
-			m_perviousStateLastUpdateTime = ct;
+			m_previousStates[channel] = m_temporaryStates.at(channel);
+			m_temporaryStates[channel] = newState;
+			m_previousStatesUpdateTimes[channel] = ct;
 		}
 	}
 
 	return;
 }
 
-int TuningSource::getErrorsCount(int channel) const
+int TuningSource::getErrorsCount(int index) const
 {
-	if (channel < 0 || channel >= m_states.size())
+	if (index < 0 || index >= m_states.size())
 	{
 		Q_ASSERT(false);
 		return 0;
 	}
 
-	const ::Network::TuningSourceState& currentState = m_states[channel];
-	const ::Network::TuningSourceState& previousState = m_previousStates[channel];
+	const ::Network::TuningSourceState& currentState = m_states[index];
+	const ::Network::TuningSourceState& previousState = this->previousState(index);
 
 	int result = 0;
 

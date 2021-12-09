@@ -166,8 +166,6 @@ private:
 
 	void restoreSignalsFromFilter(TuningFilter* filter);
 
-	static bool takeClientsControl(std::vector<TuningClientTcpClient*> clients, QWidget* parentWidget);
-
 private slots:
 
 	void slot_timerTick500();

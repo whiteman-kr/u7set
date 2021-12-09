@@ -1,6 +1,7 @@
 #include "TuningWorkspace.h"
 #include "Settings.h"
 #include "MainWindow.h"
+#include "../lib/Tuning/TuningSourcesHelper.h"
 
 #include <QButtonGroup>
 #include <QTreeWidget>
@@ -1315,72 +1316,68 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 
 	int errorCounter = filter->counters().errorCounter;
 
-	TuningSource ts;
+	QString status;
 
-	bool sourceFound = false;
+	int statesCount = 0;
+	int validCount = 0;
+	int controlIsEnabledCount = 0;
+	int isReplyCount = 0;
+	int hasUnappliedParamsCount = 0;
+	int accessCount = 0;
+
+	std::vector<int> replyCounts;
 
 	for (const TuningClientTcpClient* client : m_tuningTcpClients)
 	{
+		TuningSource ts;
+
 		if (client->tuningSourceInfo(hash, &ts) == true)
 		{
-			sourceFound = true;
-			break;
+			for (int c = 0; c < ts.statesCount(); c++)
+			{
+				statesCount++;
+
+				const ::Network::TuningSourceState& state = ts.state(c);
+
+				if (ts.valid() == true) validCount++;
+				if (state.controlisactive() == true) controlIsEnabledCount++;
+				if (state.isreply() == true) isReplyCount++;
+				if (state.hasunappliedparams() == true) hasUnappliedParamsCount++;
+
+				replyCounts.push_back(static_cast<int>(state.replycount()));
+
+				if (theConfigSettings.lmStatusFlagMode() == LmStatusFlagMode::AccessKey &&
+					ts.valid() == true &&
+					state.controlisactive() == true &&
+					state.isreply() == true)
+				{
+					if (state.writingdisabled() == false) accessCount++;
+				}
+			}
 		}
 	}
 
-	QString status;
-
-	bool valid = false;
-	bool controlIsEnabled = false;
-	bool isReply = false;
-	bool hasUnappliedParams = false;
-	bool access = false;
-
-	if (sourceFound == false)
+	if (statesCount == 0)
 	{
 		status = tr("Unknown");
 	}
 	else
 	{
-		std::vector<int> replyCounts;
-
-		for (int c = 0; c < ts.statesChannelsCount(); c++)
+		if (validCount != statesCount)
 		{
-			const ::Network::TuningSourceState& state = ts.state(c);
-
-			int todo_array_for_all_params = 1;
-
-			valid |= ts.valid();
-			controlIsEnabled |= state.controlisactive();
-			isReply |= state.isreply();
-			hasUnappliedParams |= state.hasunappliedparams();
-
-			replyCounts.push_back(static_cast<int>(state.replycount()));
-
-			if (theConfigSettings.lmStatusFlagMode() == LmStatusFlagMode::AccessKey &&
-				ts.valid() == true &&
-				state.controlisactive() == true &&
-				state.isreply() == true)
-			{
-				access |= state.writingdisabled() == false;
-			}
-		}
-
-		if (valid == false)
-		{
-			status = tr("Unknown");
+			status = (validCount == 0) ? tr("Non-valid") : tr("Non-valid (%1/%2)").arg(statesCount - validCount).arg(statesCount);
 		}
 		else
 		{
-			if (controlIsEnabled == false)
+			if (controlIsEnabledCount != statesCount)
 			{
-				status = tr("Inactive");
+				status = (controlIsEnabledCount == 0) ?  tr("Inactive") : tr("Inactive (%1/%2)").arg(statesCount - controlIsEnabledCount).arg(statesCount) ;
 			}
 			else
 			{
-				if (isReply == false)
+				if (isReplyCount != statesCount)
 				{
-					status = tr("No Reply");
+					status = (isReplyCount == 0) ?  tr("No Reply") : tr("No Reply (%1/%2)").arg(statesCount - isReplyCount).arg(statesCount);
 				}
 				else
 				{
@@ -1400,9 +1397,16 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 							s.remove(s.length() - 1, 1);
 						}
 
-						if (hasUnappliedParams == true)
+						if (hasUnappliedParamsCount > 0)
 						{
-							status = tr("Unapplied [%1 replies]").arg(s);
+							if (hasUnappliedParamsCount != statesCount)
+							{
+								status = tr("Unapplied (%1/%2) [%3 replies]").arg(statesCount - hasUnappliedParamsCount).arg(statesCount).arg(s);
+							}
+							else
+							{
+								status = tr("Unapplied [%1 replies]").arg(s);
+							}
 						}
 						else
 						{
@@ -1421,13 +1425,22 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 		QColor accessBackColor = Qt::white;
 		QColor accessTextColor = Qt::black;
 
-		if (access == true)
+		if (accessCount > 0)
 		{
 			accessBackColor = QColor(0, 128, 0);
 			accessTextColor = Qt::white;
 		}
 
-		QString accessText = access ? tr("Yes") : tr("No");
+		QString accessText;
+
+		if (accessCount == 0)
+		{
+			accessText = tr("No");
+		}
+		else
+		{
+			accessText = accessCount == statesCount ? tr("Yes") : tr("Yes (%1/%2)").arg(statesCount - accessCount).arg(statesCount);
+		}
 
 		if (treeItem->text(m_columnAccessIndex) != accessText)
 		{
@@ -1457,15 +1470,19 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 	QColor stateBackColor = Qt::white;
 	QColor stateTextColor = Qt::black;
 
-	if (valid == false)
+	if (validCount == 0)
 	{
+		// All are non-valid
+		//
 		stateBackColor = Qt::white;
 		stateTextColor = Qt::darkGray;
 	}
 	else
 	{
-		if (controlIsEnabled == false)
+		if (controlIsEnabledCount != statesCount)
 		{
+			// Control is not enabled for all
+			//
 			stateBackColor = Qt::gray;
 			stateTextColor = Qt::white;
 		}
@@ -1473,19 +1490,18 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 		{
 			if (errorCounter > 0)
 			{
+				// Errors present
+				//
 				stateBackColor = redColor;
 				stateTextColor = Qt::white;
 			}
 			else
 			{
-				if (hasUnappliedParams == true)
+				if (hasUnappliedParamsCount > 0)
 				{
+					// Unapplied params present
+					//
 					stateBackColor = Qt::yellow;
-					stateTextColor = Qt::black;
-				}
-				else
-				{
-					stateBackColor = Qt::white;
 					stateTextColor = Qt::black;
 				}
 			}
@@ -1575,56 +1591,7 @@ void TuningWorkspace::activateControl(const QString& equipmentId, bool enable)
 		return;
 	}
 
-	TuningClientTcpClient* client = nullptr;
-
-	for (TuningClientTcpClient* tc : m_tuningTcpClients)
-	{
-		if (tc->hasTuningSource(::calcHash(equipmentId)) == true)
-		{
-			client = tc;
-			break;
-		}
-	}
-
-	if (client == nullptr)
-	{
-		QMessageBox::critical(this, qAppName(), tr("Error: no TCP client found for source %1.").arg(equipmentId));
-		return;
-	}
-
-	// Take Control
-
-	QString action = enable ? tr("activate") : tr("deactivate");
-
-	bool forceTakeControl = false;
-
-	if (client->singleLmControlMode() == true && client->clientIsActive() == false)
-	{
-		if (QMessageBox::warning(this, qAppName(),
-								 tr("Warning!\n\nClient %1 is not selected as active now.\n\nAre you sure you want to take control and %2 the source %3?")
-								 .arg(client->tuningServiceId())
-								 .arg(action)
-								 .arg(equipmentId),
-								 QMessageBox::Yes | QMessageBox::No,
-								 QMessageBox::No) != QMessageBox::Yes)
-		{
-			return;
-		}
-
-		forceTakeControl = true;
-	}
-	else
-	{
-		if (QMessageBox::warning(this, qAppName(),
-								 tr("Are you sure you want to %1 the source %2?").arg(action).arg(equipmentId),
-								 QMessageBox::Yes | QMessageBox::No,
-								 QMessageBox::No) != QMessageBox::Yes)
-		{
-			return;
-		}
-	}
-
-	client->activateTuningSourceControl(equipmentId, enable, forceTakeControl);
+	TuningSourcesHelper::activateTuningSourceControl({m_tuningTcpClients.begin(), m_tuningTcpClients.end()}, equipmentId, enable, this);
 }
 
 QTreeWidgetItem* TuningWorkspace::findFilterWidget(const QString& id, QTreeWidgetItem* treeItem)
@@ -1750,41 +1717,12 @@ void TuningWorkspace::slot_treeContextMenuRequested(const QPoint& pos)
 
 	const QString equipmentId = filter->caption();
 
-	TuningSource ts;
+	bool activateEnabled = false;
+	bool deactivateEnabled = false;
 
-	TuningClientTcpClient* client = nullptr;
-
-	for (TuningClientTcpClient* tc : m_tuningTcpClients)
-	{
-		if (tc->tuningSourceInfo(::calcHash(equipmentId), &ts) == true)
-		{
-			client = tc;
-			break;
-		}
-	}
-
-	if (client == nullptr)
-	{
-		QMessageBox::critical(this, qAppName(), tr("Error: no TCP client found for source %1.").arg(equipmentId));
-		return;
-	}
-
-	if (client->singleLmControlMode() == false)
-	{
-		return;
-	}
+	TuningSourcesHelper::isActivationActionsAvailable({m_tuningTcpClients.begin(), m_tuningTcpClients.end()}, equipmentId, &activateEnabled, &deactivateEnabled);
 
 	QMenu menu(this);
-
-	bool controlIsActive = false;
-	for (int c = 0; c < ts.statesChannelsCount(); c++)
-	{
-		if (ts.state(c).controlisactive() == true)
-		{
-			controlIsActive = true;
-			break;
-		}
-	}
 
 	// EnableControl
 
@@ -1794,7 +1732,7 @@ void TuningWorkspace::slot_treeContextMenuRequested(const QPoint& pos)
 	{
 		activateControl(filter->caption(), true);
 	};
-	actionEnable->setEnabled(controlIsActive == false);
+	actionEnable->setEnabled(activateEnabled);
 	connect(actionEnable, &QAction::triggered, this, fEnableControl);
 
 	menu.addAction(actionEnable);
@@ -1807,7 +1745,7 @@ void TuningWorkspace::slot_treeContextMenuRequested(const QPoint& pos)
 	{
 		activateControl(filter->caption(), false);
 	};
-	actionDisable->setEnabled(controlIsActive == true);
+	actionDisable->setEnabled(deactivateEnabled);
 	connect(actionDisable, &QAction::triggered, this, fDisableControl);
 
 	menu.addAction(actionDisable);

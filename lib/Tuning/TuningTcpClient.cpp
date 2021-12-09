@@ -510,8 +510,7 @@ void TuningTcpClient::processTuningSourcesInfo(const QByteArray& data)
 
 	}
 
-	emit tuningSourcesArrived();
-
+	emit tuningSourcesInfoArrived();
 
 	return;
 }
@@ -567,7 +566,7 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 
 			quint64 id = tss.sourceid();
 
-			bool found = false;
+			//bool found = false;
 
 			for (auto& it : m_tuningSources)
 			{
@@ -575,9 +574,41 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 
 				if (ts.id() == id)
 				{
+					// --------------------------------------------------------------------
+
+					/*
+					int ask_whiteman_about_this = 1;
+
+					//qDebug() << "service id = " << tuningServiceId() << " states count = " << ts.statesCount();
+
+					//qDebug() << "state = " << tuningServiceId() << " lan id = " << QString::fromStdString(state.lanequipmentid());
+
+					bool wrongService = false;
+
+					for (int q = 0; q < ts.controllersCount(); q++)
+					{
+						if (ts.controllerEquipmentId(q) == QString::fromStdString(tss.lanequipmentid()))
+						{
+							QString serviceId = QString::fromStdString(ts.info().lancontrollerinfo(q).tuningserviceid());
+
+							if (serviceId.startsWith(tuningServiceId()) == false)
+							{
+								qDebug() << "LM Adapter " <<  QString::fromStdString(tss.lanequipmentid()) << " is not processed by service " << tuningServiceId();
+								wrongService = true;
+							}
+						}
+					}
+
+					if (wrongService == true)
+					{
+						continue;
+					}*/
+
+					// --------------------------------------------------------------------
+
 					// Write SOR change to tuning log
 
-					for (int s = 0; s < ts.statesChannelsCount(); s++)
+					for (int s = 0; s < ts.statesCount(); s++)
 					{
 						const ::Network::TuningSourceState& state = ts.state(s);
 
@@ -623,18 +654,39 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 
 					// Set new source state
 
-					ts.setState(tss);
+					/*
+					::Network::TuningSourceState tss1 = tss;
+
+					static int x = 0;
+					static int c = 0;
+
+					if ((c++) & 1)
+					{
+						if (x < 200)
+						{
+							tss1.set_errfotipoperationcode(x++);
+						}
+						else
+						{
+							tss1.set_errfotipoperationcode(x);
+						}
+
+					}*/
+
+					//tss. tuningServiceId()
+
+					ts.setNewState(tss);
 
 					//
 
-					found = true;
+					//found = true;
 
 					break;
 
 				}	//ts.id() == id
 			}
 
-			assert(found == true);
+			//assert(found == true);
 		}
 	}
 
@@ -797,8 +849,6 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 	std::vector<TuningSignalState> arrivedStates;
 	arrivedStates.reserve(stateCount);
 
-	bool found = false;
-
 	for (int i = 0; i < stateCount; i++)
 	{
 
@@ -814,25 +864,37 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 			continue;
 		}
 
-
 		TuningSignalState arrivedState(stateMessage);
 
-		TuningSignalState previousState = m_signals->state(stateMessage.signalhash(), &found);
+		// When updating states, we have to set some properties locally
+		//
+		arrivedState.m_flags.controlIsEnabled = (error == NetworkError::LmControlIsNotActive) ? false : true;
+
+		if (lmStatusFlagMode() != LmStatusFlagMode::AccessKey)
+		{
+			// Set Access key flag to Validity flag & Control flag if Access Key function is inactive
+			//
+			arrivedState.m_flags.writingIsEnabled = arrivedState.valid() & arrivedState.controlIsEnabled();
+		}
+		else
+		{
+			arrivedState.m_flags.writingIsEnabled = arrivedState.valid() & arrivedState.writingIsEnabled();
+		}
+
+		bool found = false;
+
+		TuningSignalState currentState = m_signals->state(stateMessage.signalhash(), &found);
 
 		if (found == true)
 		{
-			// Compare time
-			//
-			int todo_compare_time = 1;
+			int todo_synchronization = 1;
 
-			/*
-			if (arrivedState.successfulReadTime() <= previousState.successfulReadTime())
+			// Compare time, if it is less than existing time - do not process state
+			//
+			if (arrivedState.lmTime() <= currentState.lmTime())
 			{
-				// Arrived time is less than existing time, do not process this state
-				//
 				continue;
 			}
-			*/
 
 			// Process write error only if writing was performed by current client
 			//
@@ -842,14 +904,14 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 			{
 				if (static_cast<NetworkError>(stateMessage.writeerrorcode()) == NetworkError::Success)
 				{
-					if (arrivedState.successfulWriteTime() > previousState.successfulWriteTime())
+					if (arrivedState.successfulWriteTime() > currentState.successfulWriteTime())
 					{
 						m_signals->setNewValueAsApplied(arrivedState.hash());
 					}
 				}
 				else
 				{
-					if (arrivedState.unsuccessfulWriteTime() > previousState.unsuccessfulWriteTime())
+					if (arrivedState.unsuccessfulWriteTime() > currentState.unsuccessfulWriteTime())
 					{
 						//						qDebug() << "arrivedState.unsuccessfulWriteTime() " << arrivedState.unsuccessfulWriteTime().toMSecsSinceEpoch();
 						//						qDebug() << "previousState.unsuccessfulWriteTime() " << previousState.unsuccessfulWriteTime().toMSecsSinceEpoch();
@@ -874,21 +936,8 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 					}
 				}
 			}
-		}
 
-		// When updating states, we have to set some properties locally
-		//
-		arrivedState.m_flags.controlIsEnabled = (error == NetworkError::LmControlIsNotActive) ? false : true;
-
-		if (lmStatusFlagMode() != LmStatusFlagMode::AccessKey)
-		{
-			// Set Access key flag to Validity flag & Control flag if Access Key function is inactive
 			//
-			arrivedState.m_flags.writingIsEnabled = arrivedState.valid() & arrivedState.controlIsEnabled();
-		}
-		else
-		{
-			arrivedState.m_flags.writingIsEnabled = arrivedState.valid() & arrivedState.writingIsEnabled();
 		}
 
 		// --
@@ -1238,7 +1287,7 @@ int TuningTcpClient::activeTuningSourceCount() const
 	{
 		const TuningSource& ts = it.second;
 
-		for (int i = 0; i < ts.statesChannelsCount(); i++)
+		for (int i = 0; i < ts.statesCount(); i++)
 		{
 			if (ts.state(i).controlisactive() == true)
 			{
@@ -1252,7 +1301,7 @@ int TuningTcpClient::activeTuningSourceCount() const
 }
 
 
-QString TuningTcpClient::singleActiveTuningSource() const
+QString TuningTcpClient::activeTuningSource() const
 {
 	if (singleLmControlMode() == false)
 	{
@@ -1266,7 +1315,7 @@ QString TuningTcpClient::singleActiveTuningSource() const
 	{
 		const TuningSource& ts = it.second;
 
-		for (int i = 0; i < ts.statesChannelsCount(); i++)
+		for (int i = 0; i < ts.statesCount(); i++)
 		{
 			if (ts.state(i).controlisactive() == true)
 			{

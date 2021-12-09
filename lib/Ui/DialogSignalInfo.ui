@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>670</width>
-    <height>438</height>
+    <height>459</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -311,7 +311,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>5</number>
      </property>
      <property name="elideMode">
       <enum>Qt::ElideMiddle</enum>
@@ -829,10 +829,13 @@
          </item>
          <item row="5" column="2">
           <layout class="QGridLayout" name="gridLayout_15">
-           <item row="0" column="0">
-            <widget class="QLabel" name="labelServerTimeHeader_3">
+           <item row="2" column="1">
+            <widget class="QLabel" name="labelSuccessfulWriteTime">
+             <property name="frameShape">
+              <enum>QFrame::Box</enum>
+             </property>
              <property name="text">
-              <string>Successful Read Time</string>
+              <string>TextLabel</string>
              </property>
             </widget>
            </item>
@@ -853,8 +856,8 @@
              </property>
             </widget>
            </item>
-           <item row="1" column="1">
-            <widget class="QLabel" name="labelWriteRequestTime">
+           <item row="4" column="1">
+            <widget class="QLabel" name="labelLmTime">
              <property name="frameShape">
               <enum>QFrame::Box</enum>
              </property>
@@ -870,20 +873,27 @@
              </property>
             </widget>
            </item>
-           <item row="2" column="1">
-            <widget class="QLabel" name="labelSuccessfulWriteTime">
+           <item row="0" column="0">
+            <widget class="QLabel" name="labelServerTimeHeader_3">
+             <property name="text">
+              <string>Successful Read Time</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="labelPlantTimeHeader_4">
+             <property name="text">
+              <string>LM Time</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QLabel" name="labelWriteRequestTime">
              <property name="frameShape">
               <enum>QFrame::Box</enum>
              </property>
              <property name="text">
               <string>TextLabel</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0">
-            <widget class="QLabel" name="labelPlantTimeHeader_4">
-             <property name="text">
-              <string>Unsuccessful Write Time</string>
              </property>
             </widget>
            </item>
@@ -894,6 +904,13 @@
              </property>
              <property name="text">
               <string>TextLabel</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="labelPlantTimeHeader_5">
+             <property name="text">
+              <string>Unsuccessful Write Time</string>
              </property>
             </widget>
            </item>

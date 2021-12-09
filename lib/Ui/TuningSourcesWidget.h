@@ -17,7 +17,7 @@ class DialogTuningSourceInfo : public DialogSourceInfo
 	Q_OBJECT
 
 public:
-	explicit DialogTuningSourceInfo(std::vector<TuningTcpClient*> tcpClients, QWidget* parent, Hash sourceHash, int channel);
+	explicit DialogTuningSourceInfo(std::vector<TuningTcpClient*> tcpClients, QWidget* parent, Hash m_sourceHash, Hash lanEquipmentHash);
 	virtual ~DialogTuningSourceInfo();
 
 	void setTuningTcpClients(std::vector<TuningTcpClient*> tcpClients);
@@ -27,16 +27,16 @@ private:
 
 	void updateData() override;
 
+	void updateInfo();
+	void updateState();
+
 private:
 	std::vector<TuningTcpClient*> m_tcpClients;
 
 	TuningTcpClient* m_activeTcpClient = nullptr;
 
-	QString m_sourceEquipmentId;
-
-	Hash m_tuningSourceHash = UNDEFINED_HASH;
-	int m_channel = 0;
-
+	Hash m_sourceHash;
+	Hash m_lanEquipmentHash;
 };
 
 class TuningSourcesWidget : public QWidget
@@ -72,16 +72,21 @@ private slots:
 
 	void detailsDialogClosed(Hash hash);
 
-private:
-	bool checkTuningSourcesChanged() const;
+	void tuningSourcesInfoArrived();
 
-	void update(bool refreshOnly);
+private:
+	void updateAll();
+
+	void fillTuningSourcesInfo();
+
+	void updateTuningSourcesStates();
+
+	void enableActivationControls();
 
 	void activateControl(bool enable);
 
-	TuningTcpClient* selectedClient() const;
-	const Hash selectedSourceHash() const;
-	const int selectedSourceChannel() const;
+	Hash selectedSourceHash() const;
+	Hash selectedLanControllerHash() const;
 
 	enum class Columns
 	{
@@ -115,13 +120,16 @@ private:
 
 	std::vector<TuningTcpClient*> m_tuningTcpClients;
 
-	static const int columnIndex_ClientHash = 0;
-	static const int columnIndex_SourceEquipmentIdHash = 1;
-	static const int columnIndex_SourceChannel = 2;
+	static const int columnIndex_SourceHash = 0;
+
+	static const int columnIndex_ControllerHash = 0;
+
+	bool m_tuningSourcesInfoArrived = false;
 
 	std::map<Hash, DialogTuningSourceInfo*> m_sourceInfoDialogsMap;	// Used for managing details dialogs. Key is "Source ID + Channel" Hash.
 
-	std::set<Hash> m_tuningClientsLansHashes;	// Used for comparing with current state, if it is changed - full refresh is performed. Key is "Client ID + Lan ID" Hash.
+	std::map<Hash, QTreeWidgetItem*> m_sourceHashToSourceItemMap;
+	std::map<Hash, QTreeWidgetItem*> m_controllerHashToControllerItemMap;
 };
 
 

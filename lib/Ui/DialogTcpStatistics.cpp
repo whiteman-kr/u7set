@@ -159,23 +159,14 @@ void DialogTcpStatistics::update()
 
 	int count = static_cast<int>(stats.size());
 
-	bool refreshOnly = true;
-
 	if (m_treeWidget->topLevelItemCount() != count)
-	{
-		refreshOnly = false;
-	}
-
-	if (refreshOnly == false)
 	{
 		m_treeWidget->clear();
 
-		for (TcpClientStatistics::Statisctics& s : stats)
+		for (int i = 0; i < count; i++)
 		{
-			Q_UNUSED(s);
-
 			QTreeWidgetItem* item = new QTreeWidgetItem();
-			item->setData(0, Qt::UserRole, QVariant::fromValue<size_t>(s.id));
+			item->setData(0, Qt::UserRole, i);
 			m_treeWidget->addTopLevelItem(item);
 		}
 	}
@@ -183,7 +174,6 @@ void DialogTcpStatistics::update()
 	for (int i = 0; i < count; i++)
 	{
 		TcpClientStatistics::Statisctics& stat = stats[i];
-
 
 		QTreeWidgetItem* item = nullptr;
 
@@ -196,7 +186,7 @@ void DialogTcpStatistics::update()
 				continue;
 			}
 
-			if (topItem->data(0, Qt::UserRole).value<size_t>() == stat.id)
+			if (topItem->data(0, Qt::UserRole).toInt() == i)
 			{
 				item = topItem;
 				break;

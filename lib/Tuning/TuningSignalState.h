@@ -167,6 +167,7 @@ public:
 	QDateTime writeRequestTime() const;
 	QDateTime successfulWriteTime() const;
 	QDateTime unsuccessfulWriteTime() const;
+	QDateTime lmTime() const;
 
 	bool setState(const ::Network::TuningSignalState& message);
 
@@ -191,6 +192,7 @@ public:
 	qint64 m_writeRequestTime = 0;
 	qint64 m_successfulWriteTime = 0;
 	qint64 m_unsuccessfulWriteTime = 0;
+	qint64 m_lmTime = 0;
 };
 
 Q_DECLARE_METATYPE(TuningSignalState)

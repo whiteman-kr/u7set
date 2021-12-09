@@ -151,6 +151,7 @@ void TuningSignalInfo::updateInfo()
 	text += tr("WriteRequestTime:\t%1\n").arg(state.writeRequestTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
 	text += tr("SuccessfulWriteTime:\t%1\n").arg(state.successfulWriteTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
 	text += tr("UnsuccessfulWriteTime:\t%1\n").arg(state.unsuccessfulWriteTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));;
+	text += tr("LmTime:\t\t%1\n").arg(state.lmTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));;
 
 	if (m_textEditText != text)
 	{

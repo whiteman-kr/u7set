@@ -63,7 +63,7 @@ int TuningClientTcpClient::sourceErrorCount() const
 	{
 		const TuningSource& ts = it.second;
 
-		for (int i = 0; i < ts.statesChannelsCount(); i++)
+		for (int i = 0; i < ts.statesCount(); i++)
 		{
 			if (ts.state(i).isreply() == false && ts.state(i).controlisactive() == true)
 			{
@@ -94,7 +94,7 @@ int TuningClientTcpClient::sourceErrorCount(Hash equipmentHash) const
 
 	int result = 0;
 
-	for (int i = 0; i < ts.statesChannelsCount(); i++)
+	for (int i = 0; i < ts.statesCount(); i++)
 	{
 		if (ts.state(i).isreply() == false && ts.state(i).controlisactive() == true)
 		{
@@ -131,7 +131,7 @@ int TuningClientTcpClient::sourceSorCount(bool* sorActive, bool* sorValid) const
 
 		bool sorIsSet = false;
 
-		for (int i = 0; i < ts.statesChannelsCount(); i++)
+		for (int i = 0; i < ts.statesCount(); i++)
 		{
 			auto state = ts.state(i);
 
@@ -183,7 +183,7 @@ int TuningClientTcpClient::sourceSorCount(Hash equipmentHash, bool* sorActive, b
 
 	const TuningSource& ts = m_tuningSources.at(equipmentHash);
 
-	for (int i = 0; i < ts.statesChannelsCount(); i++)
+	for (int i = 0; i < ts.statesCount(); i++)
 	{
 		auto state = ts.state(i);
 
