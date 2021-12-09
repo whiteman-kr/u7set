@@ -441,6 +441,11 @@ namespace Tuning
 
 			m_waitReply = false;
 
+			LOG_MSG(m_tuningLog, QString("%1 TIMEOUT on request to %2 (%3)").
+										arg(toHex(m_request.rupFotipV2.rupHeader.numerator)).
+										arg(m_portEquipmentID).
+										arg(m_sourceIP.addressPortStr()));
+
 
 			qDebug() << C_STR(QString("NoReply from %1 (%2) [RUP frame No = %3]").
 							  arg(m_portEquipmentID).
@@ -490,7 +495,7 @@ namespace Tuning
 
 		m_requestAppSignalID.clear();
 
-		logTuningRequest(m_lastProcessedCommand, &m_requestAppSignalID);
+		logTuningRequest(m_lastProcessedCommand, &m_requestAppSignalID, m_request.rupFotipV2.rupHeader.numerator);
 
 		m_retryCount = 0;
 
@@ -622,9 +627,9 @@ namespace Tuning
 
 				if (rupFotipV2.fotipFrame.isDiscreteData() == true)
 				{
-					DEBUG_LOG_MSG(m_logger, QString("RupFotipV2 WRITE request %1 is sent to %2 (%3), signal %4 value %5."
+					DEBUG_LOG_MSG(m_logger, QString("%1 RupFotipV2 WRITE request is sent to %2 (%3), signal %4 value %5."
 													"StartAddrW %6, OffsetInFrameW %7, RawValue32 %8 BE, Bitmask32 %9 BE").
-								  arg(requestID, 4, 16, QLatin1Char('0')).
+								  arg(toHex(requestID)).
 								  arg(sourceEquipmentID()).
 								  arg(m_sourceIP.addressStr()).
 								  arg(appSignalID).
@@ -636,8 +641,8 @@ namespace Tuning
 				}
 				else
 				{
-					DEBUG_LOG_MSG(m_logger, QString("RupFotipV2 WRITE request %1 is sent to %2 (%3), signal %4 value %5").
-								  arg(requestID, 4, 16, QLatin1Char('0')).
+					DEBUG_LOG_MSG(m_logger, QString("%1 RupFotipV2 WRITE request is sent to %2 (%3), signal %4 value %5").
+								  arg(toHex(requestID)).
 								  arg(sourceEquipmentID()).
 								  arg(m_sourceIP.addressStr()).
 								  arg(appSignalID).
@@ -647,8 +652,8 @@ namespace Tuning
 			break;
 
 		case FotipV2::OpCode::Apply:
-			DEBUG_LOG_MSG(m_logger, QString("RupFotipV2 APPLY request %1 is sent to %2 (%3)").
-						  arg(requestID, 4, 16, QLatin1Char('0')).
+			DEBUG_LOG_MSG(m_logger, QString("%1 RupFotipV2 APPLY request is sent to %2 (%3)").
+						  arg(toHex(requestID)).
 						  arg(sourceEquipmentID()).
 						  arg(m_sourceIP.addressStr()));
 			break;
@@ -910,10 +915,11 @@ namespace Tuning
 					boundCheckStr = ("No bound check errors ");
 				}
 
-				msg = QString("Reply is received from %1 (%2) on RupFotipV2 WRITE request %3: %4").
+				msg = QString("%1 Reply (%2) received from %3 (%4) on RupFotipV2 WRITE request: %5").
+								arg(toHex(m_request.rupFotipV2.rupHeader.numerator)).
+								arg(toHex(reply.rupHeader.numerator)).
 								arg(sourceEquipmentID()).
 								arg(m_sourceIP.addressStr()).
-								arg(reply.rupHeader.numerator, 4, 16, QLatin1Char('0')).
 								arg(boundCheckStr);
 			}
 			break;
@@ -922,10 +928,11 @@ namespace Tuning
 			{
 				quint32 data32 = *reinterpret_cast<quint32*>(reply.fotipFrame.data + m_request.rupFotipV2.fotipFrame.header.offsetInFrameW * 2);
 
-				msg = QString("Reply is received from %1 (%2) on RupFotipV2 WRITE request %3. Data32[%4W] = %5").
+				msg = QString("%1 Reply (%2) received from %3 (%4) on RupFotipV2 WRITE request. Data32[%5W] = %6").
+								arg(toHex(m_request.rupFotipV2.rupHeader.numerator)).
+								arg(toHex(reply.rupHeader.numerator)).
 								arg(sourceEquipmentID()).
 								arg(m_sourceIP.addressStr()).
-								arg(reply.rupHeader.numerator, 4, 16, QLatin1Char('0')).
 								arg(m_request.rupFotipV2.fotipFrame.header.offsetInFrameW).
 								arg(data32, 8, 16, QLatin1Char('0'));
 			}
@@ -966,7 +973,7 @@ namespace Tuning
 			m_state.hasUnappliedParams = true;
 		}
 
-		logTuningReply(m_lastProcessedCommand, reply);
+		logTuningReply(m_lastProcessedCommand, reply, m_request.rupFotipV2.rupHeader.numerator);
 	}
 
 	void TuningChannelHandler::processApplyReply(RupFotipV2& reply)
@@ -990,7 +997,7 @@ namespace Tuning
 					  arg(reply.rupHeader.numerator, 4, 16, QLatin1Char('0')).
 					  arg(result));
 
-		logTuningReply(m_lastProcessedCommand, reply);
+		logTuningReply(m_lastProcessedCommand, reply, m_request.rupFotipV2.rupHeader.numerator);
 	}
 
 	void TuningChannelHandler::finalizeWriting(NetworkError errCode)
@@ -1233,11 +1240,11 @@ namespace Tuning
 		return result;
 	}
 
-	void TuningChannelHandler::logTuningRequest(const TuningCommand& cmd, QString* appSignalID)
+	void TuningChannelHandler::logTuningRequest(const TuningCommand& cmd, QString* appSignalID, quint16 requestNumerator)
 	{
 		TEST_PTR_RETURN(appSignalID);
 
-		QString str = QString("LM=%1 Client=%2 User=%3").arg(m_portEquipmentID).arg(cmd.clientEquipmentID).arg(cmd.user);
+		static const QString filler("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
 
 		QString logStr;
 
@@ -1252,17 +1259,31 @@ namespace Tuning
 
 				TEST_PTR_RETURN(ts);
 
-				logStr = QString("WRITE request %1 Signal=%2 Type=%3 CurValue=%4 NewValue=%5 SOR=%6").
-							arg(str).arg(ts->appSignalID()).arg(cmd.write.newTuningValue.typeStr()).
-							arg(ts->currentValue().toString()).arg(cmd.write.newTuningValue.toString()).
-							arg(m_state.setSOR == true ? 1 : 0);
+				logStr = QString("%1 WRITE request%2=> %3 Signal=%4 Type=%5 CurValue=%6 NewValue=%7 SOR=%8 (Client=%9, User=%10)").
+							arg(toHex(requestNumerator)).
+							arg(filler).
+							arg(m_portEquipmentID).
+							arg(ts->appSignalID()).
+							arg(cmd.write.newTuningValue.typeStr()).
+							arg(ts->currentValue().toString()).
+							arg(cmd.write.newTuningValue.toString()).
+							arg(m_state.setSOR == true ? 1 : 0).
+							arg(cmd.clientEquipmentID).
+							arg(cmd.user);
 
 				*appSignalID = ts->appSignalID();
 			}
 			break;
 
 		case FotipV2::OpCode::Apply:
-			logStr = QString("APPLY request %1 SOR=%2").arg(str).arg(m_state.setSOR == true ? 1 : 0);
+
+			logStr = QString("%1 APPLY request%2=> %3 SOR=%4 (Client=%5, User=%6)").
+								arg(toHex(requestNumerator)).
+								arg(filler).
+								arg(m_portEquipmentID).
+								arg(m_state.setSOR == true ? 1 : 0).
+								arg(cmd.clientEquipmentID).
+								arg(cmd.user);
 			break;
 
 		default:
@@ -1273,7 +1294,9 @@ namespace Tuning
 		LOG_MSG(m_tuningLog, logStr);
 	}
 
-	void TuningChannelHandler::logTuningReply(const TuningCommand& cmd, const RupFotipV2& reply)
+	void TuningChannelHandler::logTuningReply(const TuningCommand& cmd,
+											  const RupFotipV2& reply,
+											  quint16 requestNumerator)
 	{
 		QString logStr;
 
@@ -1292,12 +1315,14 @@ namespace Tuning
 
 				if (ts->signalType() == E::SignalType::Analog)
 				{
-					checkResultStr = QString("LowBoundCheck=%1 HighBoundCheck=%2 ").
+					checkResultStr = QString("LowBoundCheck=%1 HighBoundCheck=%2").
 							arg(reply.fotipFrame.analogCmpErrors.lowBoundCheckError == 0 ? "Success" : "Fail").
 							arg(reply.fotipFrame.analogCmpErrors.highBoundCheckError == 0 ? "Success" : "Fail");
 				}
 
-				logStr = QString("WRITE reply&nbsp;&nbsp;&nbsp;LM=%1 Signal=%2 CurValue=%3 %4SOR=%5").
+				logStr = QString("%1 WRITE reply (%2) <= %3 Signal=%4 CurValue=%5 %6 SOR=%7").
+							arg(toHex(requestNumerator)).
+							arg(toHex(reply.rupHeader.numerator)).
 							arg(m_portEquipmentID).
 							arg(ts->appSignalID()).
 							arg(ts->currentValue().toString()).
@@ -1307,7 +1332,9 @@ namespace Tuning
 			break;
 
 		case FotipV2::OpCode::Apply:
-			logStr = QString("APPLY reply&nbsp;&nbsp;&nbsp;LM=%1 Result=%2 SOR=%3").
+			logStr = QString("%1 APPLY reply (%2) <= %3 Result=%4 SOR=%5").
+						arg(toHex(requestNumerator)).
+						arg(toHex(reply.rupHeader.numerator)).
 						arg(m_portEquipmentID).
 						arg(reply.fotipFrame.header.flags.succesfulApply == 1 ? "Success" : "Fail").
 						arg(m_state.setSOR == true ? 1 : 0);

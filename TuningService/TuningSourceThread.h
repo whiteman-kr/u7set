@@ -322,10 +322,12 @@ namespace Tuning
 
 		void invalidateAllSignals();
 
-		void logTuningRequest(const TuningCommand& cmd, QString* appSignalID);
-		void logTuningReply(const TuningCommand& cmd, const RupFotipV2& reply);
+		void logTuningRequest(const TuningCommand& cmd, QString* appSignalID, quint16 requestNumerator);
+		void logTuningReply(const TuningCommand& cmd, const RupFotipV2& reply, quint16 requestNumerator);
 
 		TuningSignal* getTuningSignal(Hash signalHash);
+
+		QString toHex(quint16 v) const { return (QString("%1").arg(v, 4, 16, Latin1Char::ZERO)).toUpper();}
 
 	private:
 		TuningSourceThread& m_sourceThread;
