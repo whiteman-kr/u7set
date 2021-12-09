@@ -223,6 +223,11 @@ namespace Tuning
 
 				for(const QString& lanID : tuningLans)
 				{
+					if (m_service.isControlled(src->moduleEquipmentID(), lanID) == false)
+					{
+						continue;
+					}
+
 					Network::TuningSourceState* newTss = m_getTuningSourcesStatesReply.add_tuningsourcesstate();
 
 					newTss->set_sourceid(src->ID());

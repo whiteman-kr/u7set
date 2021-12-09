@@ -55,6 +55,8 @@ namespace Tuning
 
 		const TuningServiceSettings& tuningServiceSettings() const { return m_settings; }
 
+		bool isControlled(const QString& lmEquipmentID, const QString& lanEquipmentID) const;
+
 	signals:
 
 	public slots:
@@ -76,6 +78,8 @@ namespace Tuning
 
 		void buildServiceMaps();
 		void clearServiceMaps();
+
+		void fillControlledLans();
 
 		bool readConfiguration(const QByteArray& cfgXmlData);
 		bool loadConfigurationFromFile(const QString& fileName);
@@ -106,7 +110,6 @@ namespace Tuning
 								  const BuildFileInfoArray buildFileInfoArray,
 								  SessionParams sessionParams,
 								  std::shared_ptr<const SoftwareSettings> curSettingsProfile);
-
 	private:
 		CircularLoggerShared m_logger;
 		CircularLoggerShared m_tuningLog;
@@ -117,6 +120,8 @@ namespace Tuning
 		std::map<quint32, TuningSourceThreadShared> m_ip2sourceThread;	// TuningSource LANs ipV4 => TuningSourceThreadShared
 
 		TuningSources m_tuningSources;
+
+		std::set<std::pair<QString, QString>> m_controlledLans;			// pair: <LM EquipmentID, LAN EquipmentID>
 
 		CfgLoaderThread* m_cfgLoaderThread = nullptr;
 

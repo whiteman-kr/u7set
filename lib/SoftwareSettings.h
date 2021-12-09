@@ -210,7 +210,7 @@ public:
 		QString portEquipmentID;
 		HostAddressPort tuningDataIP;
 
-		bool isValid() { return lmEquipmentID.isEmpty() == false; }
+		bool isValid() const { return lmEquipmentID.isEmpty() == false; }
 	};
 
 	struct TuningClient

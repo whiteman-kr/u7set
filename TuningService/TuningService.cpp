@@ -276,6 +276,11 @@ namespace Tuning
 		return clientIP;
 	}
 
+	bool TuningServiceWorker::isControlled(const QString& lmEquipmentID, const QString& lanEquipmentID) const
+	{
+		return m_controlledLans.contains({ lmEquipmentID, lanEquipmentID });
+	}
+
 	void TuningServiceWorker::initialize()
 	{
 		runCfgLoaderThread();
@@ -341,34 +346,47 @@ namespace Tuning
 
 	void TuningServiceWorker::buildServiceMaps()
 	{
+		fillControlledLans();
 		m_clientContextMap.init(m_settings, m_tuningSources);
 	}
 
-
 	void TuningServiceWorker::clearServiceMaps()
 	{
+		m_controlledLans.clear();
 		m_clientContextMap.clear();
 	}
 
-	void TuningServiceWorker::runTcpTuningServerThread()
+	void TuningServiceWorker::fillControlledLans()
 	{
-		Q_ASSERT(m_tcpTuningServerThread == nullptr);
+		m_controlledLans.clear();
 
-		TcpTuningServer* tcpTuningSever = new TcpTuningServer(*this, m_tuningSources, m_logger);
-
-		m_tcpTuningServerThread = new TcpTuningServerThread(m_settings.clientRequestIP,
-												tcpTuningSever,
-												m_logger);
-		m_tcpTuningServerThread->start();
-	}
-
-	void TuningServiceWorker::stopTcpTuningServerThread()
-	{
-		if (m_tcpTuningServerThread != nullptr)
+		for(int channel = CHANNEL_1; channel < TuningServiceSettings::CHANNELS_COUNT; channel++)
 		{
-			m_tcpTuningServerThread->quitAndWait();
-			delete m_tcpTuningServerThread;
-			m_tcpTuningServerThread = nullptr;
+			const TuningServiceSettings::ChannelSettings& ch = m_settings.channelSettings[channel];
+
+			if (ch.enable == false)
+			{
+				continue;
+			}
+
+			for(auto& ts : ch.sources)
+			{
+				if (ts.isValid() == false)
+				{
+					Q_ASSERT(false);
+					continue;
+				}
+
+				std::pair<QString, QString> srcLan = { ts.lmEquipmentID, ts.portEquipmentID };
+
+				if (m_controlledLans.contains(srcLan) == true)
+				{
+					Q_ASSERT(false);
+					continue;
+				}
+
+				m_controlledLans.insert(srcLan);
+			}
 		}
 	}
 
@@ -469,6 +487,28 @@ namespace Tuning
 		m_tuningSources.buildMaps();
 
 		return result;
+	}
+
+	void TuningServiceWorker::runTcpTuningServerThread()
+	{
+		Q_ASSERT(m_tcpTuningServerThread == nullptr);
+
+		TcpTuningServer* tcpTuningSever = new TcpTuningServer(*this, m_tuningSources, m_logger);
+
+		m_tcpTuningServerThread = new TcpTuningServerThread(m_settings.clientRequestIP,
+												tcpTuningSever,
+												m_logger);
+		m_tcpTuningServerThread->start();
+	}
+
+	void TuningServiceWorker::stopTcpTuningServerThread()
+	{
+		if (m_tcpTuningServerThread != nullptr)
+		{
+			m_tcpTuningServerThread->quitAndWait();
+			delete m_tcpTuningServerThread;
+			m_tcpTuningServerThread = nullptr;
+		}
 	}
 
 	void TuningServiceWorker::runTuningSourceThreads()
