@@ -12,7 +12,8 @@ void TuningSourcesHelper::isActivationActionsAvailable(std::vector<TuningTcpClie
 
 	for (const TuningTcpClient* client : clients)
 	{
-		if (client->singleLmControlMode() == true &&
+		if (client->isConnected() == true &&
+			client->singleLmControlMode() == true &&
 			client->hasTuningSource(::calcHash(sourceEquipmentId)) == true)
 		{
 			clientsCount++;
@@ -46,7 +47,8 @@ void TuningSourcesHelper::activateTuningSourceControl(std::vector<TuningTcpClien
 
 	for (TuningTcpClient* client : clients)
 	{
-		if (client->singleLmControlMode() == true &&
+		if (client->isConnected() == true &&
+			client->singleLmControlMode() == true &&
 			client->hasTuningSource(::calcHash(sourceEquipmentId)) == true)
 		{
 			bool enabled = client->activeTuningSource() == sourceEquipmentId;
@@ -127,36 +129,26 @@ bool TuningSourcesHelper::takeServicesControl(std::vector<TuningTcpClient*> clie
 		return true;
 	}
 
-	QStringList clientsWithoutActiveSources;
+	std::vector<TuningTcpClient*> clientsToTakeControl;
 
-	for (const TuningTcpClient* client : clients)
+	for (TuningTcpClient* client : clients)
 	{
 		if (client->isConnected() == true &&
+			client->activeTuningSourceCount() != 0 &&
 			client->singleLmControlMode() == true &&
-			client->activeTuningSourceCount() == 0)
+			client->clientIsActive() == false)
 		{
-			clientsWithoutActiveSources.push_back(client->tuningServiceId());
+			clientsToTakeControl.push_back(client);
 		}
-	}
-
-	if (clientsWithoutActiveSources.empty() == false)
-	{
-		QMessageBox::critical(parent, qAppName(),	 QObject::tr("No tuning sources with control enabled found for clients %1.").arg(clientsWithoutActiveSources.join(';')));
-		return false;
 	}
 
 	QStringList nonActiveClients;
 	QStringList sourcesToActivate;
 
-	for (const TuningTcpClient* client : clients)
+	for (const TuningTcpClient* client : clientsToTakeControl)
 	{
-		if (client->isConnected() == true &&
-			client->singleLmControlMode() == true &&
-			client->clientIsActive() == false)
-		{
-			nonActiveClients.push_back(client->tuningServiceId());
-			sourcesToActivate.push_back(client->activeTuningSource());
-		}
+		nonActiveClients.push_back(client->tuningServiceId());
+		sourcesToActivate.push_back(client->activeTuningSource());
 	}
 
 	if (nonActiveClients.empty() == false && sourcesToActivate.empty() == false)
@@ -185,14 +177,9 @@ bool TuningSourcesHelper::takeServicesControl(std::vector<TuningTcpClient*> clie
 		}
 	}
 
-	for (TuningTcpClient* client : clients)
+	for (TuningTcpClient* client : clientsToTakeControl)
 	{
-		if (client->isConnected() == true &&
-			client->singleLmControlMode() == true &&
-			client->clientIsActive() == false)
-		{
-			client->activateTuningSourceControl(client->activeTuningSource(), true, true);
-		}
+		client->activateTuningSourceControl(client->activeTuningSource(), true, true);
 	}
 
 	return true;
@@ -205,24 +192,22 @@ bool TuningSourcesHelper::clientsHaveSameActiveSource(std::vector<TuningTcpClien
 
 	for (TuningTcpClient* client : clients)
 	{
-		if (client->isConnected() == false ||
-			client->singleLmControlMode() == false)
+		if (client->isConnected() == true &&
+			client->singleLmControlMode() == true)
 		{
-			continue;
-		}
-
-		// Check if active tuning source matches in all clients
-		//
-		if (firstActiveTuningSource == true)
-		{
-			firstActiveTuningSource = false;
-			activeTuningSource = client->activeTuningSource();
-		}
-		else
-		{
-			if (activeTuningSource != client->activeTuningSource())
+			// Check if active tuning source matches in all clients
+			//
+			if (firstActiveTuningSource == true)
 			{
-				return false;
+				firstActiveTuningSource = false;
+				activeTuningSource = client->activeTuningSource();
+			}
+			else
+			{
+				if (activeTuningSource != client->activeTuningSource())
+				{
+					return false;
+				}
 			}
 		}
 	}

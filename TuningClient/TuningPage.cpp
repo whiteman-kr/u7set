@@ -1354,6 +1354,39 @@ bool TuningPage::write()
 		return false;
 	}
 
+	// Find TCP clients that contain modified signals
+	//
+	{
+		std::vector<TuningTcpClient*> clientsToCheckControl;
+
+		for (TuningTcpClient* client : m_tuningTcpClients)
+		{
+			if (client->isConnected() == true &&
+				client->singleLmControlMode() == true &&
+				client->hasTuningSignals(modifiedHashes) == true)
+			{
+				clientsToCheckControl.push_back(client);
+			}
+		}
+
+		// Check if same tuning sources are activated in clients
+		//
+		if (TuningSourcesHelper::clientsHaveSameActiveSource(clientsToCheckControl) == false)
+		{
+			QMessageBox::critical(this, qAppName(), tr("To write changes, please activate the same Tuning Source in all Tuning Services."));
+			return false;
+		}
+
+		// Take control on required clients
+		//
+		if (TuningSourcesHelper::takeServicesControl(clientsToCheckControl, this) == false)
+		{
+			return false;
+		}
+	}
+
+	// Ask confirmation question
+	//
 	int listCount = 0;
 
 	for (Hash hash : modifiedHashes)
@@ -1388,37 +1421,6 @@ bool TuningPage::write()
 							 QMessageBox::No) != QMessageBox::Yes)
 	{
 		return false;
-	}
-
-	// Find TCP clients that contain modified signals
-	//
-	{
-		std::vector<TuningTcpClient*> clientsToCheckControl;
-
-		for (TuningTcpClient* client : m_tuningTcpClients)
-		{
-			if (client->isConnected() == true &&
-				client->singleLmControlMode() == true &&
-				client->hasTuningSignals(modifiedHashes) == true)
-			{
-				clientsToCheckControl.push_back(client);
-			}
-		}
-
-		// Check if same tuning sources are activated in clients
-		//
-		if (TuningSourcesHelper::clientsHaveSameActiveSource(clientsToCheckControl) == false)
-		{
-			QMessageBox::critical(this, qAppName(), tr("To write changes, please activate the same Tuning Source in all Tuning Services."));
-			return false;
-		}
-
-		// Take control on required clients
-		//
-		if (TuningSourcesHelper::takeServicesControl(clientsToCheckControl, this) == false)
-		{
-			return false;
-		}
 	}
 
 	// Write values on all clients
@@ -1470,17 +1472,31 @@ void TuningPage::apply()
 		return;
 	}
 
-	// Check if same tuning sources are activated in all clients
+	std::vector<TuningTcpClient*> clientsToApply;
+
+	// Find Active Tcp clients that contain modified signals
 	//
-	if (TuningSourcesHelper::clientsHaveSameActiveSource({m_tuningTcpClients.begin(), m_tuningTcpClients.end()}) == false)
 	{
-		QMessageBox::critical(this, qAppName(), tr("To write changes, please activate the same Tuning Source in all Tuning Services."));
+		for (TuningTcpClient* client : m_tuningTcpClients)
+		{
+			if (client->isConnected() == true &&
+				client->activeTuningSourceCount() != 0 &&
+				client->hasTuningSignals(m_model->allHashes()) == true)
+			{
+				clientsToApply.push_back(client);
+			}
+		}
+	}
+
+	if (clientsToApply.empty() == true)
+	{
+		QMessageBox::warning(this, qAppName(), tr("No tuning sources to apply!"));
 		return;
 	}
 
 	// Take control on all clients
 	//
-	if (TuningSourcesHelper::takeServicesControl({m_tuningTcpClients.begin(), m_tuningTcpClients.end()}, this) == false)
+	if (TuningSourcesHelper::takeServicesControl(clientsToApply, this) == false)
 	{
 		return;
 	}
@@ -1508,7 +1524,7 @@ void TuningPage::apply()
 		}
 	}
 
-	for (TuningClientTcpClient* client : m_tuningTcpClients)
+	for (TuningTcpClient* client : clientsToApply)
 	{
 		if (client->isConnected() == false)
 		{
@@ -1754,7 +1770,10 @@ void TuningPage::slot_listContextMenuRequested(const QPoint& pos)
 
 			auto f = [this, hash, instanceIdHash]() -> void
 			{
-				TuningSignalInfo* d = new TuningSignalInfo(hash, m_model->analogFormat(), instanceIdHash, m_tuningSignalManager, this);
+				TuningSignalInfo* d = new TuningSignalInfo(hash, m_model->analogFormat(), instanceIdHash,
+														   m_tuningSignalManager,
+														   {m_tuningTcpClients.begin(), m_tuningTcpClients.end()},
+														   this);
 				d->show();
 			};
 

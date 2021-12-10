@@ -1470,12 +1470,12 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 	QColor stateBackColor = Qt::white;
 	QColor stateTextColor = Qt::black;
 
-	if (validCount == 0)
+	if (validCount != statesCount)
 	{
 		// All are non-valid
 		//
-		stateBackColor = Qt::white;
-		stateTextColor = Qt::darkGray;
+		stateBackColor = redColor;
+		stateTextColor = Qt::white;
 	}
 	else
 	{

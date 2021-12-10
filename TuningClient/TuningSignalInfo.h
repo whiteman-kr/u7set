@@ -10,15 +10,20 @@ namespace Ui {
 }
 
 class TuningSignalManager;
-class TuningClientTcpClient;
+class TuningTcpClient;
 
 class TuningSignalInfo : public QDialog
 {
 	Q_OBJECT
 
 public:
-	explicit TuningSignalInfo(Hash appSignalHash, E::AnalogFormat analogFormat, Hash instanceIdHash, TuningSignalManager* signalManager, QWidget* parent = 0);
+	explicit TuningSignalInfo(Hash appSignalHash, E::AnalogFormat analogFormat, Hash instanceIdHash,
+							  TuningSignalManager* signalManager,
+							  std::vector<TuningTcpClient*> tuningTcpClients,
+							  QWidget* parent = 0);
 	~TuningSignalInfo();
+
+	void setTuningTcpClients(std::vector<TuningTcpClient*> tuningTcpClients);
 
 private:
 	virtual void timerEvent(QTimerEvent* event) override;
@@ -35,6 +40,8 @@ private:
 	Hash m_instanceIdHash = UNDEFINED_HASH;
 
 	TuningSignalManager* m_signalManager = nullptr;
+
+	std::vector<TuningTcpClient*> m_signalTcpClients;
 
 	QString m_textEditText;
 };

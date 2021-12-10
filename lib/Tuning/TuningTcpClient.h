@@ -118,6 +118,10 @@ public:
 	//
 	void applyTuningSignals() override;
 
+	// Reading state
+	//
+	TuningSignalState state(Hash hash, bool* found) const;
+
 private:
 	virtual void onClientThreadStarted() override;
 	virtual void onClientThreadFinished() override;
@@ -215,6 +219,9 @@ private:
 	LmStatusFlagMode m_lmStatusFlagMode = LmStatusFlagMode::SOR;
 
 	TuningSignalManager* m_signals = nullptr;
+
+	mutable QReadWriteLock m_statesLocker;				// For access to m_states
+	std::map<Hash, TuningSignalState> m_states;
 
 protected:
 

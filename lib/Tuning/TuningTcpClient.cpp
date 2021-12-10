@@ -229,6 +229,36 @@ void TuningTcpClient::applyTuningSignals()
 	return;
 }
 
+TuningSignalState TuningTcpClient::state(Hash hash, bool* found) const
+{
+	if (hash == 0)
+	{
+		assert(hash != 0);
+		return TuningSignalState();
+	}
+
+	QReadLocker l(&m_statesLocker);
+
+	auto foundState = m_states.find(hash);
+
+	if (found != nullptr)
+	{
+		*found = !(foundState == m_states.end());
+	}
+
+	if (foundState != m_states.end())
+	{
+		return foundState->second;
+	}
+	else
+	{
+		TuningSignalState result;
+		result.m_flags.valid = false;
+
+		return result;
+	}
+}
+
 void TuningTcpClient::onClientThreadStarted()
 {
 	connect(m_signals, &TuningSignalManager::signalsLoaded, this, &TuningTcpClient::slot_signalsUpdated);
@@ -881,22 +911,45 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 			arrivedState.m_flags.writingIsEnabled = arrivedState.valid() & arrivedState.writingIsEnabled();
 		}
 
-		bool found = false;
+		// Get local current state and update it to arrived
+		//
+		bool clientCurrentStateFound = false;
 
-		TuningSignalState currentState = m_signals->state(stateMessage.signalhash(), &found);
+		TuningSignalState clientCurrentState;
 
-		if (found == true)
+		QWriteLocker l(&m_statesLocker);
 		{
-			int todo_synchronization = 1;
-
-			// Compare time, if it is less than existing time - do not process state
-			//
-			if (arrivedState.lmTime() <= currentState.lmTime())
+			auto it = m_states.find(stateMessage.signalhash());
+			if (it != std::end(m_states))
 			{
+				clientCurrentStateFound = true;
+				clientCurrentState = it->second;
+			}
+
+			m_states[stateMessage.signalhash()] = arrivedState;
+		}
+
+		// Compare arrived state with last state
+		//
+
+		if (clientCurrentStateFound == true)
+		{
+			// If state is not received, then write it to signals storage if validity or control flags were changed
+			//
+			if (arrivedState.valid() == false || arrivedState.controlIsEnabled() == false)
+			{
+				if (clientCurrentState.m_flags.valid != arrivedState.m_flags.valid || clientCurrentState.m_flags.controlIsEnabled != arrivedState.m_flags.controlIsEnabled)
+				{
+					clientCurrentState.m_flags.valid = arrivedState.m_flags.valid;
+					clientCurrentState.m_flags.controlIsEnabled = arrivedState.m_flags.controlIsEnabled;
+
+					arrivedStates.push_back(clientCurrentState);
+				}
+
 				continue;
 			}
 
-			// Process write error only if writing was performed by current client
+			// Process write result (only if writing was performed by current client)
 			//
 			Hash writeClientHash = stateMessage.writeclient();
 
@@ -904,14 +957,14 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 			{
 				if (static_cast<NetworkError>(stateMessage.writeerrorcode()) == NetworkError::Success)
 				{
-					if (arrivedState.successfulWriteTime() > currentState.successfulWriteTime())
+					if (arrivedState.successfulWriteTime() > clientCurrentState.successfulWriteTime())
 					{
 						m_signals->setNewValueAsApplied(arrivedState.hash());
 					}
 				}
 				else
 				{
-					if (arrivedState.unsuccessfulWriteTime() > currentState.unsuccessfulWriteTime())
+					if (arrivedState.unsuccessfulWriteTime() > clientCurrentState.unsuccessfulWriteTime())
 					{
 						//						qDebug() << "arrivedState.unsuccessfulWriteTime() " << arrivedState.unsuccessfulWriteTime().toMSecsSinceEpoch();
 						//						qDebug() << "previousState.unsuccessfulWriteTime() " << previousState.unsuccessfulWriteTime().toMSecsSinceEpoch();
@@ -919,8 +972,10 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 
 						m_signals->setNewValueAsApplied(arrivedState.hash());
 
-						AppSignalParam param = m_signals->signalParam(stateMessage.signalhash(), &found);
-						if (found == false)
+						bool paramFound = false;
+
+						AppSignalParam param = m_signals->signalParam(stateMessage.signalhash(), &paramFound);
+						if (paramFound == false)
 						{
 							assert(false);
 							continue;
@@ -935,10 +990,34 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 									  );
 					}
 				}
-			}
+			} // m_instanceIdHash == writeClientHash
 
+			// Get clobal current state and update it
 			//
-		}
+			bool currentStateFound = false;
+
+			TuningSignalState currentState = m_signals->state(stateMessage.signalhash(), &currentStateFound);
+
+			if (currentStateFound == true)
+			{
+				// If arrived LM time is less than current time up to 5 seconds - skip this state
+				//
+
+				if ((currentState.m_lmTime - 5000) < arrivedState.m_lmTime &&
+					arrivedState.m_lmTime <= currentState.m_lmTime)
+				{
+					//qDebug()  << tr("skip time, d = %1").arg(arrivedState.m_lmTime - currentState.m_lmTime);
+					continue;
+				}
+
+				// Global state time is set only if received time is bigger
+				//
+				arrivedState.m_successfulReadTime = std::max(arrivedState.m_successfulReadTime, currentState.m_successfulReadTime);
+				arrivedState.m_writeRequestTime = std::max(arrivedState.m_writeRequestTime, currentState.m_writeRequestTime);
+				arrivedState.m_successfulWriteTime = std::max(arrivedState.m_successfulWriteTime, currentState.m_successfulWriteTime);
+				arrivedState.m_unsuccessfulWriteTime = std::max(arrivedState.m_unsuccessfulWriteTime, currentState.m_unsuccessfulWriteTime);
+			}
+		} // currentStateFound == true
 
 		// --
 		//
