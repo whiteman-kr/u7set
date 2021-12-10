@@ -357,6 +357,20 @@ OTHER_FILES += \
 
 DISTFILES += \
     ../Etc/ClientBehavior/ClientBehavior.xml \
+    ../Presets/LogicModuleDescription/BVB15Module0000.xml \
+    ../Presets/LogicModuleDescription/LM11_SR90.xml \
+    ../Presets/LogicModuleDescription/LM1_SF00.xml \
+    ../Presets/LogicModuleDescription/LM1_SF40.xml \
+    ../Presets/LogicModuleDescription/LM1_SR01.xml \
+    ../Presets/LogicModuleDescription/LM1_SR02.xml \
+    ../Presets/LogicModuleDescription/LM1_SR03.xml \
+    ../Presets/LogicModuleDescription/LM1_SR04.xml \
+    ../Presets/LogicModuleDescription/LM1_SR042T.xml \
+    ../Presets/LogicModuleDescription/LM1_SR05.xml \
+    ../Presets/LogicModuleDescription/LM1_SR20.xml \
+    ../Presets/LogicModuleDescription/LM8_SR10.xml \
+    ../Presets/LogicModuleDescription/MSO3Module0000.xml \
+    ../Presets/LogicModuleDescription/MSO4_SR21.xml \
     ../Scripts/AIFM/AIFM.js \
     ../Scripts/AIM/AIM.js \
     ../Scripts/AIM_4PH/AIM_4PH.js \
@@ -393,28 +407,13 @@ DISTFILES += \
     Afbl/tct_off_v1.afb \
     Afbl/tct_on_v1.afb \
     Afbl/tct_vibr_v1.afb \
-    LogicModuleDescription/LM1_SR05.xml \
-    LogicModuleDescription/LM1_SR20.xml \
-    LogicModuleDescription/LM8_SR10.xml \
-    LogicModuleDescription/MSO4_SR21.xml \
     Ufbl/UFB_A3_LANDSCAPE.templ_ufb \
     Ufbl/UFB_A4_LANDSCAPE.templ_ufb \
     Ufbl/file2pgsql.exe \
     Ufbl/_convert_all.bat \
-    LogicModuleDescription/LogicModule0000.xml \
     ../Proto/network.proto \
-    LogicModuleDescription/LM1_SF00.xml \
-    LogicModuleDescription/LM1_SR01.xml \
-    LogicModuleDescription/LM1_SF00.xml \
-    LogicModuleDescription/LM1_SR01.xml \
-    LogicModuleDescription/BVB15Module0000.xml \
-    LogicModuleDescription/LM1_SR02.xml \
     ../Etc/SignalPropertyBehavior/SignalPropertyBehavior.csv \
-    LogicModuleDescription/MSO3Module0000.xml \
-    Images/u7.ico \
-    LogicModuleDescription/LM1_SR04.xml \
-    LogicModuleDescription/LM1_SR03.xml \
-    LogicModuleDescription/LM1_SF40.xml
+    Images/u7.ico
 
 # Add curent dir to a list of library directory paths
 #

@@ -288,7 +288,9 @@ namespace Sim
 
 		// Setting math flags
 		//
-		m_mathFlags.overflow = std::fetestexcept(FE_OVERFLOW);
+		int inf12 = std::isinf(op1) + std::isinf(op2);
+		int nan12 = std::isnan(op1) + std::isnan(op2);
+		m_mathFlags.overflow = std::fetestexcept(FE_OVERFLOW) || (inf12 != 0 && nan12 == 0);
 		m_mathFlags.underflow = std::fetestexcept(FE_UNDERFLOW);
 		m_mathFlags.divByZero = std::fetestexcept(FE_DIVBYZERO);
 		m_mathFlags.zero = (result == .0f) || m_mathFlags.underflow;
@@ -303,7 +305,7 @@ namespace Sim
 	{
 		resetMathFlags();
 
-		// signed integer overflow in c++ is undefined behavior, so we extend sion32 to sint64
+		// --
 		//
 		float op1 = this->floatValue();
 		float op2 = operand.floatValue();
@@ -313,7 +315,9 @@ namespace Sim
 
 		// Setting math flags
 		//
-		m_mathFlags.overflow = std::fetestexcept(FE_OVERFLOW);
+		int inf12 = std::isinf(op1) + std::isinf(op2);
+		int nan12 = std::isnan(op1) + std::isnan(op2);
+		m_mathFlags.overflow = std::fetestexcept(FE_OVERFLOW) || (inf12 != 0 && nan12 == 0);
 		m_mathFlags.underflow = std::fetestexcept(FE_UNDERFLOW);
 		m_mathFlags.divByZero = std::fetestexcept(FE_DIVBYZERO);
 		m_mathFlags.zero = (result == .0f) || m_mathFlags.underflow;
@@ -328,7 +332,7 @@ namespace Sim
 	{
 		resetMathFlags();
 
-		// signed integer overflow in c++ is undefined behavior, so we extend sion32 to sint64
+		// --
 		//
 		float op1 = this->floatValue();
 		float op2 = operand.floatValue();
@@ -338,7 +342,10 @@ namespace Sim
 
 		// Setting math flags
 		//
-		m_mathFlags.overflow = std::fetestexcept(FE_OVERFLOW);
+		int inf12 = std::isinf(op1) + std::isinf(op2);
+		int norm12 = std::isnormal(op1) + std::isnormal(op2);
+
+		m_mathFlags.overflow = std::fetestexcept(FE_OVERFLOW) || (inf12 == 2) || (inf12 == 1 && norm12 == 1);
 		m_mathFlags.underflow = std::fetestexcept(FE_UNDERFLOW);
 		m_mathFlags.divByZero = std::fetestexcept(FE_DIVBYZERO);
 		m_mathFlags.zero = (result == .0f) || m_mathFlags.underflow;
@@ -353,7 +360,7 @@ namespace Sim
 	{
 		resetMathFlags();
 
-		// signed integer overflow in c++ is undefined behavior, so we extend sion32 to sint64
+		// --
 		//
 		float op1 = this->floatValue();
 		float op2 = operand.floatValue();
@@ -363,7 +370,7 @@ namespace Sim
 
 		// Setting math flags
 		//
-		m_mathFlags.overflow = std::fetestexcept(FE_OVERFLOW);
+		m_mathFlags.overflow = std::fetestexcept(FE_OVERFLOW) || (std::isnormal(op1) && std::isnormal(op2) && std::isinf(result) );
 		m_mathFlags.underflow = std::fetestexcept(FE_UNDERFLOW);
 		m_mathFlags.divByZero = std::fetestexcept(FE_DIVBYZERO);
 		m_mathFlags.zero = (result == .0f) || m_mathFlags.underflow;
@@ -419,12 +426,11 @@ namespace Sim
 		m_mathFlags.underflow = std::fetestexcept(FE_UNDERFLOW);
 		m_mathFlags.divByZero = std::fetestexcept(FE_DIVBYZERO);
 		m_mathFlags.zero = (result == .0f) || m_mathFlags.underflow;
-		m_mathFlags.nan = (result != result);		// According to the IEEE standard, NaN values have the odd property that comparisons involving
-													// them are always false. That is, for a float f, f != f will be true only if f is NaN.
-													// Some compilers can optimize it!
+		m_mathFlags.nan = std::isnan(result);
 
 		setFloatValue(result);
 
+		return;
 	}
 
 	void AfbComponentParam::absSignedInt()
@@ -445,6 +451,80 @@ namespace Sim
 		}
 
 		setSignedIntValue(result);
+
+		return;
+	}
+
+	void AfbComponentParam::sinFloatingPoint()
+	{
+		resetMathFlags();
+
+		float fp = this->floatValue();
+
+		std::feclearexcept(FE_ALL_EXCEPT);
+		float result = std::sin(fp);
+
+		// No flags are set in Altera's floating point ip-core
+		//
+
+		setFloatValue(result);
+
+		return;
+	}
+
+	void AfbComponentParam::cosFloatingPoint()
+	{
+		resetMathFlags();
+
+		float fp = this->floatValue();
+
+		std::feclearexcept(FE_ALL_EXCEPT);
+		float result = std::cos(fp);
+
+		// No flags set in Altera's floating point ip-core
+		//
+
+		setFloatValue(result);
+
+		return;
+	}
+
+	void AfbComponentParam::logFloatingPoint()
+	{
+		resetMathFlags();
+
+		float fp = this->floatValue();
+
+		std::feclearexcept(FE_ALL_EXCEPT);
+		float result = std::log(fp);
+
+		// Setting math flags
+		//
+		m_mathFlags.zero = (result == .0f) || std::isinf(fp) ;
+		m_mathFlags.nan = std::isnan(result);
+
+		setFloatValue(result);
+
+		return;
+	}
+
+	void AfbComponentParam::expFloatingPoint()
+	{
+		resetMathFlags();
+
+		float fp = this->floatValue();
+
+		std::feclearexcept(FE_ALL_EXCEPT);
+		float result = std::exp(fp);
+
+		// Setting math flags
+		//
+		m_mathFlags.nan = std::isnan(result);
+		m_mathFlags.overflow = std::isnormal(fp) && std::isinf(result);
+		m_mathFlags.underflow = std::fetestexcept(FE_UNDERFLOW);
+		m_mathFlags.zero = std::isinf(fp) && std::signbit(fp);
+
+		setFloatValue(result);
 
 		return;
 	}

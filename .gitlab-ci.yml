@@ -236,7 +236,7 @@ test job:
     - "#               Run XML validation"
     - "# ----------------------------------------------"
     - "pushd ."	
-    - "cd $Env:CI_PROJECT_DIR/u7/LogicModuleDescription"
+    - "cd $Env:CI_PROJECT_DIR/Presets/LogicModuleDescription"
     - "&./validate_xmls.bat"
     - "popd"
 

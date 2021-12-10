@@ -1104,7 +1104,7 @@ namespace Log
 
 		if (role == Qt::DisplayRole)
 		{
-			int displayIndex = column;
+			int displayIndex = static_cast<int>(column);
 			if (displayIndex == m_columnTime)
 			{
 				return record.time.toString(messageTimeFormat);

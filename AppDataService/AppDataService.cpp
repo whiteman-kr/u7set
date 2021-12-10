@@ -422,8 +422,25 @@ bool AppDataServiceWorker::readDataSources(const QByteArray& fileData)
 	{
 		AppDataSourceShared appDataSource = std::make_shared<AppDataSource>(dataSources[i]);
 
+		bool appDataProvided = false;
+		bool appDataEnabled = false;
+
 		for(const LanControllerInfo& lci : appDataSource->lanControllersInfo()())
 		{
+			if (lci.isProvideAppData() == false)
+			{
+				continue;
+			}
+
+			appDataProvided = true;
+
+			if (lci.appDataEnable == false)
+			{
+				continue;
+			}
+
+			appDataEnabled = true;
+
 			if (m_appDataSources.contains(lci.equipmentID) == true)
 			{
 				DEBUG_LOG_ERR(logger(), QString("Duplicate AppDataSource adapter EquipmentID %1").
@@ -438,8 +455,14 @@ bool AppDataServiceWorker::readDataSources(const QByteArray& fileData)
 				continue;
 			}
 
-			m_appDataSources.insert(lci.equipmentID, appDataSource);
 			m_appDataSourcesIP.insert(lci.appDataIP32(), appDataSource);
+		}
+
+		Q_ASSERT(appDataProvided == true);
+
+		if (appDataEnabled == true)
+		{
+			m_appDataSources.insert(appDataSource->moduleEquipmentID(), appDataSource);
 		}
 	}
 

@@ -215,11 +215,22 @@ namespace Builder
 	{
 		if (m_lmDescription == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return 0;
 		}
 
 		return m_lmDescription->descriptionNumber();
+	}
+
+	QString ModuleLogicCompiler::lmDescriptionName() const
+	{
+		if (m_lmDescription == nullptr)
+		{
+			Q_ASSERT(false);
+			return 0;
+		}
+
+		return m_lmDescription->name();
 	}
 
 	bool ModuleLogicCompiler::expertMode() const

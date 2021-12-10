@@ -153,6 +153,11 @@ namespace Sim
 		void absFloatingPoint();
 		void absSignedInt();
 
+		void sinFloatingPoint();
+		void cosFloatingPoint();
+		void logFloatingPoint();
+		void expFloatingPoint();
+
 		void convertSignedIntToFloat();
 		void convertWordToFloat();
 		void convertWordToSignedInt();

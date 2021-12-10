@@ -27,7 +27,6 @@ void FileDiff::loadFileData(const QByteArray& fileData, std::vector<FileLine>* f
 	QStringList strings = string.split(QChar::LineFeed);
 
 	qsizetype count =  strings.size();
-
 	fileLines->resize(count);
 
 	for (qsizetype i = 0; i < count; i++)

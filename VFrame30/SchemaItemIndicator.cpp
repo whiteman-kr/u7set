@@ -6,10 +6,10 @@
 #include "Schema.h"
 #include "FblItemRect.h"
 #include "MacrosExpander.h"
-#include "TuningController.h"
 #include "AppSignalController.h"
 #include "IndicatorHistogramVert.h"
 #include "IndicatorArrowIndicator.h"
+#include "IndicatorTrend.h"
 
 namespace VFrame30
 {
@@ -29,29 +29,12 @@ namespace VFrame30
 			{
 				std::make_unique<IndicatorHistogramVert>(unit),		// E::IndicatorType::HistogramVert
 				std::make_unique<IndicatorArrowIndicator>(unit),	// E::IndicatorType::ArrowIndicator
+				std::make_unique<IndicatorTrend>(unit),				// E::IndicatorType::Trend
 			}
 	{
 		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::appSignalIDs, PropertyNames::functionalCategory, true, SchemaItemIndicator::signalIdsString, SchemaItemIndicator::setSignalIdsString);
-		ADD_PROPERTY_GET_SET_CAT(E::SignalSource, PropertyNames::signalSource, PropertyNames::functionalCategory, true, SchemaItemIndicator::signalSource, SchemaItemIndicator::setSignalSource);
-
-		ADD_PROPERTY_GETTER_SETTER(E::AnalogFormat, PropertyNames::analogFormat, true, SchemaItemIndicator::analogFormat, SchemaItemIndicator::setAnalogFormat);
-		ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::precision, true, SchemaItemIndicator::precision, SchemaItemIndicator::setPrecision);
-
-		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::fontName, PropertyNames::textCategory, true, SchemaItemIndicator::getFontName, SchemaItemIndicator::setFontName);
-		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::fontSize, PropertyNames::textCategory, true, SchemaItemIndicator::getFontSize, SchemaItemIndicator::setFontSize);
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontBold, PropertyNames::textCategory, true, SchemaItemIndicator::getFontBold, SchemaItemIndicator::setFontBold);
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontItalic, PropertyNames::textCategory, true,  SchemaItemIndicator::getFontItalic, SchemaItemIndicator::setFontItalic);
 
 		ADD_PROPERTY_GETTER_SETTER(E::IndicatorType, PropertyNames::indicatorType, true, SchemaItemIndicator::indicatorType, SchemaItemIndicator::setIndicatorType);
-
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::drawRect, PropertyNames::appearanceCategory, true, SchemaItemIndicator::drawRect, SchemaItemIndicator::setDrawRect);
-
-		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::lineWeight, PropertyNames::appearanceCategory, true, SchemaItemIndicator::lineWeight, SchemaItemIndicator::setLineWeight);
-
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::backgroundColor, PropertyNames::appearanceCategory, true, SchemaItemIndicator::backgroundColor, SchemaItemIndicator::setBackgroundColor);
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::lineColor, PropertyNames::appearanceCategory, true, SchemaItemIndicator::lineColor, SchemaItemIndicator::setLineColor);
-
-		ADD_PROPERTY_GET_SET_CAT(QVector<QColor>, PropertyNames::indicatorSignalColors, PropertyNames::appearanceCategory, true, SchemaItemIndicator::signalColors, SchemaItemIndicator::setSignalColors);
 
 		m_static = false;
 		setItemUnit(unit);
@@ -61,25 +44,6 @@ namespace VFrame30
 		for (IndicatorObjectPtr& indicator : m_indicatorObjects)
 		{
 			connect(indicator.get(), &Indicator::updatePropertiesList, this, &SchemaItemIndicator::updateIndicatorProperties);
-		}
-
-		// Set font
-		//
-		m_font.setName(QStringLiteral("Arial"));
-
-		switch (unit)
-		{
-		case SchemaUnit::Display:
-			m_font.setSize(12.0, unit);
-			break;
-		case SchemaUnit::Inch:
-			m_font.setSize(1.0 / 8.0, unit);		// 1/8"
-			break;
-		case SchemaUnit::Millimeter:
-			m_font.setSize(mm2in(3), unit);
-			break;
-		default:
-			Q_ASSERT(false);
 		}
 
 		return;
@@ -96,30 +60,12 @@ namespace VFrame30
 			Q_ASSERT(message->has_schemaitem());
 			return false;
 		}
-		
+
 		// --
 		//
 		Proto::SchemaItemIndicator* indicatorMessage = message->mutable_schemaitem()->mutable_indicator();
 
 		indicatorMessage->set_signalids(signalIdsString().toStdString());
-		indicatorMessage->set_signalsource(static_cast<int32_t>(m_signalSource));
-
-		indicatorMessage->set_analogformat(static_cast<int32_t>(m_analogFormat));
-		indicatorMessage->set_precision(m_precision);
-
-		m_font.SaveData(indicatorMessage->mutable_font());
-
-		indicatorMessage->set_drawrect(m_drawRect);
-		indicatorMessage->set_lineweight(m_lineWeight);
-
-		indicatorMessage->set_backgroundcolor(m_backgroundColor.rgba());
-		indicatorMessage->set_linecolor(m_lineColor.rgba());
-
-		indicatorMessage->mutable_signalcolors()->Reserve(static_cast<int>(m_signalColors.size()));
-		for (const QColor& bc : m_signalColors)
-		{
-			indicatorMessage->mutable_signalcolors()->Add(bc.rgba());
-		}
 
 		indicatorMessage->set_type(static_cast<int>(m_indicatorType));
 
@@ -157,27 +103,6 @@ namespace VFrame30
 		const Proto::SchemaItemIndicator& indicatorMessage = message.schemaitem().indicator();
 
 		setSignalIdsString(indicatorMessage.signalids().data());
-		m_signalSource = static_cast<E::SignalSource>(indicatorMessage.signalsource());
-
-		m_analogFormat = static_cast<E::AnalogFormat>(indicatorMessage.analogformat());
-		m_precision = indicatorMessage.precision();
-
-		m_font.LoadData(indicatorMessage.font());
-
-		m_drawRect = indicatorMessage.drawrect();
-		m_lineWeight = indicatorMessage.lineweight();
-
-		m_backgroundColor = QColor::fromRgba(indicatorMessage.backgroundcolor());
-		m_lineColor = QColor::fromRgba(indicatorMessage.linecolor());
-
-		m_signalColors.clear();
-		m_signalColors.reserve(indicatorMessage.signalcolors_size());
-
-		const auto& bcfiled = indicatorMessage.signalcolors();
-		for (auto bc : bcfiled)
-		{
-			m_signalColors.push_back(QColor::fromRgba(bc));
-		}
 
 		// Set iunits for the IndicatorObject, as it is not saved in proto container and it must be the same with schema item
 		//
@@ -214,209 +139,63 @@ namespace VFrame30
 		return;
 	}
 
-	std::set<QString> SchemaItemIndicator::getSignalTags(CDrawParam* drawParam, const QString& appSignalId) const
+	// Trend functions
+	//
+	bool SchemaItemIndicator::isTrend() const
 	{
-		Q_ASSERT(drawParam);
-
-		std::set<QString> result;
-
-		switch (signalSource())
-		{
-		case E::SignalSource::AppDataService:
-			if (drawParam->appSignalController() == nullptr)
-			{
-				Q_ASSERT(drawParam->appSignalController());
-			}
-			else
-			{
-				QStringList tags = drawParam->appSignalController()->signalTags(appSignalId);
-				for (const QString& t : tags)
-				{
-					result.insert(t);
-				}
-			}
-			break;
-
-		case E::SignalSource::TuningService:
-			if (drawParam->tuningController() == nullptr)
-			{
-			}
-			else
-			{
-				AppSignalParam param;
-				param.setAppSignalId(appSignalId);
-
-				bool ok = getSignalParam(drawParam, &param);
-				if (ok == true)
-				{
-					for (const QString& t : param.tags())
-					{
-						result.insert(t);
-					}
-				}
-
-			}
-			break;
-
-		default:
-			Q_ASSERT(false);
-		}
-
-		return result;
+		return m_indicatorType == E::IndicatorType::Trend;
 	}
 
-	bool SchemaItemIndicator::getSignalParam(CDrawParam* drawParam, AppSignalParam* signalParam) const
+	TrendLib::Trend& SchemaItemIndicator::trend()
 	{
-		if (drawParam == nullptr ||
-			signalParam == nullptr)
-		{
-			Q_ASSERT(drawParam);
-			Q_ASSERT(signalParam);
-			return false;
-		}
+		Q_ASSERT(isTrend() == true);
 
-		if (drawParam->appSignalController() != nullptr)
-		{
-			Q_ASSERT(drawParam->appSignalController() != nullptr);
-			return false;
-		}
+		IndicatorTrend* i = indicatorObject<IndicatorTrend>();
+		Q_ASSERT(i);
 
-		bool ok = false;
-
-		switch (signalSource())
-		{
-		case E::SignalSource::AppDataService:
-			if (drawParam->appSignalController() == nullptr)
-			{
-			}
-			else
-			{
-				*signalParam = drawParam->appSignalController()->signalParam(signalParam->appSignalId(), &ok);
-			}
-			break;
-
-		case E::SignalSource::TuningService:
-			if (drawParam->tuningController() == nullptr)
-			{
-			}
-			else
-			{
-				*signalParam = drawParam->tuningController()->signalParam(signalParam->appSignalId(), &ok);
-			}
-			break;
-
-		default:
-			Q_ASSERT(false);
-			ok = false;
-		}
-
-		return ok;
+		return i->trend();
 	}
 
-	bool SchemaItemIndicator::getSignalState(CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const
+	const TrendLib::Trend& SchemaItemIndicator::trend() const
 	{
-		if (drawParam == nullptr ||
-			signalParam == nullptr ||
-			appSignalState == nullptr ||
-			tuningSignalState == nullptr)
-		{
-			Q_ASSERT(drawParam);
-			Q_ASSERT(signalParam);
-			Q_ASSERT(appSignalState);
-			Q_ASSERT(tuningSignalState);
-			return false;
-		}
+		Q_ASSERT(isTrend() == true);
 
-		if (drawParam->appSignalController() == nullptr)
-		{
-			Q_ASSERT(drawParam->appSignalController() != nullptr);
-			return false;
-		}
+		const IndicatorTrend* i = indicatorObject<IndicatorTrend>();
+		Q_ASSERT(i);
 
-		bool ok = false;
-
-		switch (signalSource())
-		{
-		case E::SignalSource::AppDataService:
-			if (drawParam->appSignalController() == nullptr)
-			{
-			}
-			else
-			{
-				*signalParam = drawParam->appSignalController()->signalParam(signalParam->appSignalId(), &ok);
-				*appSignalState = drawParam->appSignalController()->signalState(signalParam->appSignalId(), nullptr);
-			}
-			break;
-
-		case E::SignalSource::TuningService:
-			if (drawParam->tuningController() == nullptr)
-			{
-			}
-			else
-			{
-				*signalParam = drawParam->tuningController()->signalParam(signalParam->appSignalId(), &ok);
-				*tuningSignalState = drawParam->tuningController()->signalState(signalParam->appSignalId(), nullptr);
-
-				appSignalState->m_hash = signalParam->hash();
-				appSignalState->m_flags.valid = tuningSignalState->valid();
-				appSignalState->m_value = tuningSignalState->value().toDouble();
-			}
-			break;
-
-		default:
-			Q_ASSERT(false);
-			ok = false;
-		}
-
-		return ok;
+		return i->trend();
 	}
 
-	std::optional<double> SchemaItemIndicator::getSignalState(CDrawParam* drawParam, const QString& appSignalId) const
+	E::RtTrendsSamplePeriod SchemaItemIndicator::trendSamplePeriod() const
 	{
-		bool valid = false;
-		double value = -1;
+		Q_ASSERT(isTrend() == true);
 
-		switch (signalSource())
-		{
-		case E::SignalSource::AppDataService:
-			if (drawParam->appSignalController() == nullptr)
-			{
-			}
-			else
-			{
-				AppSignalState state = drawParam->appSignalController()->signalState(appSignalId, nullptr);
+		const IndicatorTrend* i = indicatorObject<IndicatorTrend>();
+		Q_ASSERT(i);
 
-				valid = state.isValid();
-				value = state.value();
-			}
-			break;
-
-		case E::SignalSource::TuningService:
-			if (drawParam->tuningController() == nullptr)
-			{
-			}
-			else
-			{
-				TuningSignalState state = drawParam->tuningController()->signalState(appSignalId, nullptr);
-
-				valid = state.valid();
-				value = state.value().toDouble();
-			}
-			break;
-
-		default:
-			Q_ASSERT(false);
-		}
-
-		if (valid == false)
-		{
-			return {};
-		}
-		else
-		{
-			return {value};
-		}
+		return i->samplePeriod();
 	}
+
+	E::TimeType SchemaItemIndicator::trendTimeType() const
+	{
+		Q_ASSERT(isTrend() == true);
+
+		const IndicatorTrend* i = indicatorObject<IndicatorTrend>();
+		Q_ASSERT(i);
+
+		return i->timeType();
+	}
+
+	int SchemaItemIndicator::trendDurationSeconds() const
+	{
+		Q_ASSERT(isTrend() == true);
+
+		const IndicatorTrend* i = indicatorObject<IndicatorTrend>();
+		Q_ASSERT(i);
+
+		return i->durationSeconds();
+	}
+
 
 	// Properties and Data
 	//
@@ -471,126 +250,6 @@ namespace VFrame30
 		return;
 	}
 
-	E::SignalSource SchemaItemIndicator::signalSource() const
-	{
-		return m_signalSource;
-	}
-
-	void SchemaItemIndicator::setSignalSource(E::SignalSource value)
-	{
-		m_signalSource = value;
-	}
-
-	E::AnalogFormat SchemaItemIndicator::analogFormat() const
-	{
-		return m_analogFormat;
-	}
-
-	void SchemaItemIndicator::setAnalogFormat(E::AnalogFormat value)
-	{
-		m_analogFormat = value;
-	}
-
-	int SchemaItemIndicator::precision() const
-	{
-		return qBound(-1, m_precision, 32);
-	}
-
-	void SchemaItemIndicator::setPrecision(int value)
-	{
-		m_precision = qBound(-1, value, 32);
-	}
-
-	IMPLEMENT_FONT_PROPERTIES(SchemaItemIndicator, Font, m_font);
-
-	FontParam& SchemaItemIndicator::font()
-	{
-		return m_font;
-	}
-
-	const FontParam& SchemaItemIndicator::font() const
-	{
-		return m_font;
-	}
-
-	bool SchemaItemIndicator::drawRect() const
-	{
-		return m_drawRect;
-	}
-
-	void SchemaItemIndicator::setDrawRect(bool value)
-	{
-		m_drawRect = value;
-	}
-
-	double SchemaItemIndicator::lineWeight() const
-	{
-		if (itemUnit() == SchemaUnit::Display)
-		{
-			return VFrame30::RoundDisplayPoint(m_lineWeight);
-		}
-		else
-		{
-			double pt = VFrame30::ConvertPoint(m_lineWeight, SchemaUnit::Inch, Settings::regionalUnit(), 0);
-			pt = VFrame30::RoundPoint(pt, Settings::regionalUnit());
-			return pt;
-		}
-	}
-
-	double SchemaItemIndicator::lineWeightDraw() const noexcept
-	{
-		return m_lineWeight;
-	}
-
-	void SchemaItemIndicator::setLineWeight(double weight)
-	{
-		if (weight < 0)
-		{
-			weight = 0;
-		}
-
-		if (itemUnit() == SchemaUnit::Display)
-		{
-			m_lineWeight = VFrame30::RoundDisplayPoint(weight);
-		}
-		else
-		{
-			double pt = VFrame30::ConvertPoint(weight, Settings::regionalUnit(), SchemaUnit::Inch, 0);
-			m_lineWeight = pt;
-		}
-	}
-
-	const QColor& SchemaItemIndicator::backgroundColor() const
-	{
-		return m_backgroundColor;
-	}
-
-	void SchemaItemIndicator::setBackgroundColor(const QColor& color)
-	{
-		m_backgroundColor = color;
-	}
-
-	const QColor& SchemaItemIndicator::lineColor() const
-	{
-		return m_lineColor;
-	}
-
-	void SchemaItemIndicator::setLineColor(const QColor& color)
-	{
-		m_lineColor = color;
-	}
-
-	const QVector<QColor>& SchemaItemIndicator::signalColors() const
-	{
-		return m_signalColors;
-	}
-
-	void SchemaItemIndicator::setSignalColors(const QVector<QColor>& value)
-	{
-		m_signalColors = value;
-		//m_signalColors.resize(12);
-	}
-
 	E::IndicatorType SchemaItemIndicator::indicatorType() const
 	{
 		return m_indicatorType;
@@ -618,35 +277,11 @@ namespace VFrame30
 		removeCategoryProperties(PropertyNames::indicatorSettings);
 		indicatorObject()->createProperties(this, static_cast<int>(m_signalIds.size()));
 
+		// --
+		//
 		emit propertyListChanged();
 
 		return;
-	}
-
-	Indicator* SchemaItemIndicator::indicatorObject()
-	{
-		size_t index = static_cast<size_t>(m_indicatorType);
-
-		if (index >= m_indicatorObjects.size())
-		{
-			Q_ASSERT(index < m_indicatorObjects.size());
-			index = 0;
-		}
-
-		return m_indicatorObjects[index].get();
-	}
-
-	const Indicator* SchemaItemIndicator::indicatorObject() const
-	{
-		size_t index = static_cast<size_t>(m_indicatorType);
-
-		if (index >= m_indicatorObjects.size())
-		{
-			Q_ASSERT(index < m_indicatorObjects.size());
-			index = 0;
-		}
-
-		return m_indicatorObjects[index].get();
 	}
 
 }

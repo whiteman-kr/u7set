@@ -37,11 +37,10 @@ namespace TrendLib
 		}
 
 		bool ok = true;
-
 		ok &= m_signalSet.load(message.signal_set());
 		ok &= m_rulerSet.load(message.ruler_set());
 
-		return true;
+		return ok;
 	}
 
 	void Trend::draw(QImage* image, const TrendParam& drawParam) const
@@ -891,11 +890,21 @@ namespace TrendLib
 		QDateTime finishTime = requestFinishTime.toDateTime();
 
 		std::list<std::shared_ptr<OneHourData>> signalData;
+		bool requestResult = false;
 
-		bool requestResult = signalSet().getTrendData(signal.appSignalId(), startTime, finishTime, drawParam.timeType(), &signalData);
-		if (requestResult == false)
+		if (drawParam.trendDataProvider() != nullptr)
 		{
-			signalData.clear();
+			requestResult = drawParam.trendDataProvider()->trendData(uuid(),
+																	 signal.appSignalId(),
+																	 startTime,
+																	 finishTime,
+																	 drawParam.timeType(),
+																	 &signalData);
+
+			if (requestResult == false)
+			{
+				signalData.clear();
+			}
 		}
 
 		// --
@@ -2153,6 +2162,16 @@ namespace TrendLib
 
 		painter->restore();
 		return;
+	}
+
+	QUuid Trend::uuid() const
+	{
+		return m_uuid;
+	}
+
+	void Trend::setUuid(QUuid value)
+	{
+		m_uuid = value;
 	}
 
 	TrendLib::TrendSignalSet& Trend::signalSet()

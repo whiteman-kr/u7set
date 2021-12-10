@@ -36,13 +36,13 @@ DialogAfbLibraryCheck::DialogAfbLibraryCheck(DbController* db, QWidget* parent)
 
 	// Init combo
 
-	QComboBox* lmDescriptionsCombo = new QComboBox();
-	lmDescriptionsCombo->setMinimumWidth(250);
+	m_lmDescriptionsCombo = new QComboBox();
+	m_lmDescriptionsCombo->setMinimumWidth(250);
 
-	connect(lmDescriptionsCombo, &QComboBox::currentTextChanged, this, &DialogAfbLibraryCheck::libraryFileChanged);
+	connect(m_lmDescriptionsCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &DialogAfbLibraryCheck::libraryFileChanged);
 
 	QHBoxLayout* comboLayout = new QHBoxLayout();
-	comboLayout->addWidget(lmDescriptionsCombo);
+	comboLayout->addWidget(m_lmDescriptionsCombo);
 	comboLayout->addStretch();
 
 	topLayout->addLayout(comboLayout);
@@ -143,7 +143,7 @@ DialogAfbLibraryCheck::DialogAfbLibraryCheck(DbController* db, QWidget* parent)
 
 		for (const DbFileInfo& fi : files)
 		{
-			lmDescriptionsCombo->addItem(fi.fileName());
+			m_lmDescriptionsCombo->addItem(fi.fileName());
 		}
 	}
 }
@@ -155,8 +155,10 @@ DialogAfbLibraryCheck::~DialogAfbLibraryCheck()
 }
 
 
-void DialogAfbLibraryCheck::libraryFileChanged(const QString& fileName)
+void DialogAfbLibraryCheck::libraryFileChanged(int index)
 {
+	const QString& fileName = m_lmDescriptionsCombo->itemText(index);
+
 	std::vector<DbFileInfo> fileList;
 
 	QString LmDescriptionFile = fileName;

@@ -343,7 +343,7 @@ namespace Builder
 		bool checkSignedInt32(const AppFbParamValue& paramValue);
 		bool checkFloat32(const AppFbParamValue& paramValue);
 
-		int lmDescriptionNumber() const;
+		QString lmDescriptionName() const;
 
 	private:
 		int m_instance = -1;

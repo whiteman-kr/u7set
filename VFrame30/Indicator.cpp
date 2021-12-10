@@ -11,6 +11,11 @@ namespace VFrame30
 		Q_ASSERT(m_itemUnit == SchemaUnit::Display || m_itemUnit == SchemaUnit::Inch);
 	}
 
+	SchemaUnit Indicator::itemUnit() const
+	{
+		return m_itemUnit;
+	}
+
 	void Indicator::setUnits(SchemaUnit itemUnit)
 	{
 		Q_ASSERT(m_itemUnit == SchemaUnit::Display || m_itemUnit == SchemaUnit::Inch);

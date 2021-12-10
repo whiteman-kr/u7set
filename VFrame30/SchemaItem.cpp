@@ -60,7 +60,7 @@ namespace VFrame30
 			->setExpert(true);
 
 		addProperty<bool, SchemaItem, &SchemaItem::commented, &SchemaItem::setCommented>(PropertyNames::commented, PropertyNames::functionalCategory, true);
-		addProperty<bool, SchemaItem, &SchemaItem::isLocked, &SchemaItem::setLocked>(PropertyNames::locked, PropertyNames::appearanceCategory, true);
+		addProperty<bool, SchemaItem, &SchemaItem::isLocked, &SchemaItem::setLocked>(PropertyNames::locked, PropertyNames::commonCategory, true);
 
 		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::tags, true, SchemaItem::tagsAsString, SchemaItem::setTags)
 			->setSpecificEditor(E::PropertySpecificEditor::Tags);

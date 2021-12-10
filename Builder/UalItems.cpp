@@ -1014,15 +1014,15 @@ namespace Builder
 		return false;
 	}
 
-	int UalAfb::lmDescriptionNumber() const
+	QString UalAfb::lmDescriptionName() const
 	{
 		if (m_compiler == nullptr)
 		{
-			assert(false);
-			return 0;
+			Q_ASSERT(false);
+			return QString();
 		}
 
-		return m_compiler->lmDescriptionNumber();
+		return m_compiler->lmDescriptionName();
 	}
 
 	// ---------------------------------------------------------------------------------------

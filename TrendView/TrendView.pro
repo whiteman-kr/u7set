@@ -45,6 +45,7 @@ SOURCES += \
 
 HEADERS += \
     Forms/DialogChooseTrendSignals.h \
+    ITrendDataProvider.h \
     Stable.h \
     TrendScale.h \
     TrendWidget.h \

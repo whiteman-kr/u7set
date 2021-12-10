@@ -303,6 +303,7 @@ void MonitorTrendsWidget::createRealtimeConnection()
 
 	connect(m_rtTcpClient, &RtTrendTcpClient::dataReady, &signalSet(), &TrendLib::TrendSignalSet::slot_realtimeDataReceived);
 	connect(m_rtTcpClient, &RtTrendTcpClient::requestError, &signalSet(), &TrendLib::TrendSignalSet::slot_realtimeRequestError);
+	connect(m_rtTcpClient, &RtTrendTcpClient::connectionLost, &signalSet(), qOverload<>(&TrendLib::TrendSignalSet::addNonValidPoint));
 
 	connect(m_rtTcpClient, &RtTrendTcpClient::dataReady, this, &MonitorTrendsWidget::slot_realtimeDataReceived);
 
@@ -320,22 +321,6 @@ void MonitorTrendsWidget::setRealtimeParams()
 		Q_ASSERT(m_rtTcpClientThread);
 		return;
 	}
-
-	//	enum class RtTrendsSamplePeriod
-	//	{
-	//		sp_5ms,
-	//		sp_10ms,
-	//		sp_20ms,
-	//		sp_50ms,
-	//		sp_100ms,
-	//		sp_250ms,
-	//		sp_500ms,
-	//		sp_1s,
-	//		sp_5s,
-	//		sp_15s,
-	//		sp_30s,
-	//		sp_60s,
-	//	};
 
 	E::RtTrendsSamplePeriod samplePeriod = E::RtTrendsSamplePeriod::sp_100ms;
 	qint64 duration = m_trendWidget->duration();
@@ -405,9 +390,9 @@ void MonitorTrendsWidget::setRealtimeParams()
 		}
 	}
 
-	std::vector<TrendLib::TrendSignalParam> signalSetVector = trend().signalSet().trendSignals();
+	QStringList trendSignals = trend().signalSet().trendSignalIds();
 
-	m_rtTcpClient->setData(samplePeriod, std::move(signalSetVector));
+	m_rtTcpClient->setData(samplePeriod, trendSignals);
 
 	return;
 }

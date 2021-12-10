@@ -7789,7 +7789,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_med" Caption="med" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="28" Size="32"/>
 				<Pin OpName="o_max" Caption="max" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="30" Size="32"/>
 				<Pin OpName="o_min" Caption="min" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="32" Size="32"/>
-<!--				<Pin OpName="o_med_in" Caption="med_in" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="34" Size="16"/>
+				<!--<Pin OpName="o_med_in" Caption="med_in" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="34" Size="16"/>
 				<Pin OpName="o_max_in" Caption="max_in" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="35" Size="16"/>
 				<Pin OpName="o_min_in" Caption="min_in" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="36" Size="16"/>-->
 			</Outputs>
@@ -7960,7 +7960,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 	
 	createOutput(videoItemFblElement, afbElement, "OutMax", "max");
 	createOutput(videoItemFblElement, afbElement, "OutMin", "min");
-<!--	createOutput(videoItemFblElement, afbElement, "OutMedIn", "med_in");
+	<!--createOutput(videoItemFblElement, afbElement, "OutMedIn", "med_in");
 	createOutput(videoItemFblElement, afbElement, "OutMaxIn", "max_in");
 	createOutput(videoItemFblElement, afbElement, "OutMinIn", "min_in");-->
 

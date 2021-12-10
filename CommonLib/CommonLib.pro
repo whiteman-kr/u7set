@@ -57,6 +57,10 @@ HEADERS += \
 
 SOURCES += \
 	AfbParamValue.cpp \
+	PropertyObject.cpp \
 	Times.cpp \
 	Types.cpp
+
+DISTFILES += \
+    PropertyObject.impl
 

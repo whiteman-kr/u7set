@@ -643,7 +643,6 @@ namespace Builder
 		return true;
 	}
 
-
 	bool MetrologyCfgGenerator::testElectricLimit_Input_Ohm(const AppSignal& signal)
 	{
 		if (signal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false || signal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
@@ -680,12 +679,15 @@ namespace Builder
 
 		double r0 = uc.r0_from_signal(signal);
 
-		if (uc.r0_is_use(sensorType) == true && r0 == 0.0)
+		if (sensorType != E::SensorType::NoSensor && sensorType != E::SensorType::Ohm_Raw)
 		{
-			// Signal %1 has wrong R0 (ThermoResistor)
-			//
-			m_log->errEQP6114(signal.appSignalID());
-			return false;
+			if (r0 == 0.0)
+			{
+				// Signal %1 has wrong R0 (ThermoResistor)
+				//
+				m_log->errEQP6114(signal.appSignalID());
+				return false;
+			}
 		}
 
 		SignalElectricLimit electricLimit = uc.getElectricLimit(signal.electricUnit(), signal.sensorType());
@@ -697,7 +699,7 @@ namespace Builder
 		double lowLimit = electricLimit.lowLimit;
 		double highLimit = electricLimit.highLimit;
 
-		if (uc.r0_is_use(sensorType) == true)
+		if (sensorType != E::SensorType::NoSensor && sensorType != E::SensorType::Ohm_Raw)
 		{
 			lowLimit = lowLimit * r0 / 100;
 			highLimit = highLimit * r0 / 100;
@@ -819,7 +821,6 @@ namespace Builder
 
 		return true;
 	}
-
 
 	bool MetrologyCfgGenerator::testElectricLimit_Input_Hz(const AppSignal& signal)
 	{

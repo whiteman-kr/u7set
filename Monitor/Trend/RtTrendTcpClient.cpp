@@ -25,29 +25,56 @@ RtTrendTcpClient::~RtTrendTcpClient()
 	qDebug() << "RtTrendTcpClient::~RtTrendTcpClient()";
 }
 
-bool RtTrendTcpClient::setData(E::RtTrendsSamplePeriod samplePeriod, std::vector<TrendLib::TrendSignalParam> trendSignals)
+bool RtTrendTcpClient::addSignals(const QStringList& appSignalIds)
+{
+	QMutexLocker ml(&m_dataMutex);
+
+	m_signalSet.clear();
+	for (const QString& s : appSignalIds)
+	{
+		m_signalSet.insert(::calcHash(s));
+	}
+
+	return true;
+}
+
+bool RtTrendTcpClient::setData(const QStringList& trendSignals)
+{
+	m_signalSet.clear();
+	for (const QString& s : trendSignals)
+	{
+		m_signalSet.insert(::calcHash(s));
+	}
+
+	return true;
+}
+
+bool RtTrendTcpClient::setData(E::RtTrendsSamplePeriod samplePeriod, const QStringList& trendSignals)
 {
 	QMutexLocker ml(&m_dataMutex);
 
 	m_samplePeriod = samplePeriod;
 
 	m_signalSet.clear();
-	for (const TrendLib::TrendSignalParam& sp : trendSignals)
+	for (const QString& s : trendSignals)
 	{
-		m_signalSet.insert(sp.appSignalHash());
+		m_signalSet.insert(::calcHash(s));
 	}
 
 	return true;
 }
 
-bool RtTrendTcpClient::clearData()
+void RtTrendTcpClient::setSamplePeriod(E::RtTrendsSamplePeriod samplePeriod)
 {
 	QMutexLocker ml(&m_dataMutex);
+	m_samplePeriod = samplePeriod;
+	return;
+}
 
-	m_samplePeriod = E::RtTrendsSamplePeriod::sp_100ms;
-	m_signalSet.clear();
-
-	return true;
+E::RtTrendsSamplePeriod RtTrendTcpClient::samplePeriod() const
+{
+	QMutexLocker ml(&m_dataMutex);
+	return m_samplePeriod;
 }
 
 void RtTrendTcpClient::onClientThreadStarted()
@@ -82,10 +109,10 @@ void RtTrendTcpClient::onConnection()
 
 void RtTrendTcpClient::onDisconnection()
 {
+	emit connectionLost();
+
 	qDebug() << "TrendTcpClient::onDisconnection";
 	m_logFile.writeMessage("onDisconnection()");
-
-	clearData();
 	return;
 }
 
@@ -164,7 +191,7 @@ void RtTrendTcpClient::requestTrendManagement()
 	//
 	for (Hash signalHash : signalSet)
 	{
-		if (m_trackedSignals.find(signalHash) == m_trackedSignals.end())
+		if (m_trackedSignals.contains(signalHash) == false)
 		{
 			m_managementRequest.add_appendsignalhashes(signalHash);
 		}
@@ -174,7 +201,7 @@ void RtTrendTcpClient::requestTrendManagement()
 	//
 	for (Hash trackedSignalHash : m_trackedSignals)
 	{
-		if (signalSet.find(trackedSignalHash) == signalSet.end())
+		if (signalSet.contains(trackedSignalHash) == false)
 		{
 			m_managementRequest.add_deletesignalhashes(trackedSignalHash);
 		}
@@ -204,6 +231,8 @@ void RtTrendTcpClient::processTrendManagement(const QByteArray& data)
 	if (error != 0)
 	{
 		emit requestError(QString::fromStdString(m_managementReply.errorstring()));
+		m_logFile.writeError(QString("processTrendManagement, error received ") + QString::fromStdString(m_managementReply.errorstring()));
+
 		closeConnection();
 		return;
 	}
@@ -317,7 +346,6 @@ void RtTrendTcpClient::processTrendStateChanges(const QByteArray& data)
 
 	// signal dataReady(std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState);
 	//
-
 	if (realtimeData->signalData.empty() == false)
 	{
 		emit dataReady(realtimeData, minState, maxState);

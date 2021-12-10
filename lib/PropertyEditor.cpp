@@ -67,7 +67,7 @@ namespace ExtWidgets
 
 	QString PropertyTools::stringListText(const QVariant& value)
 	{
-		if (value.typeId() == QMetaType::QStringList)
+		if (qVariantTypeId(value) == QMetaType::QStringList)
 		{
 			const int TextMaxLength = 128;
 
@@ -124,7 +124,7 @@ namespace ExtWidgets
 
 		// all other types
 		//
-		int type = value.typeId();
+		int type = qVariantTypeId(value);
 
 		if (type == TuningValue::tuningValueTypeId())
 		{
@@ -1088,7 +1088,7 @@ namespace ExtWidgets
 		for (auto prop : props)
 		{
 			if (prop->category().isEmpty() == true &&
-					prop->value().typeId() == QMetaType::QString)
+				qVariantTypeId(prop->value()) == QMetaType::QString)
 			{
 				return tr("%1 - %2").arg(objectIndex).arg(prop->value().toString());
 			}
@@ -3019,7 +3019,7 @@ namespace ExtWidgets
 			newValue = d.value();
 		}
 
-		if (m_currentValue.typeId() == QMetaType::QStringList || m_currentValue.typeId() == qMetaTypeId<QVector<QColor>>())
+		if (qVariantTypeId(m_currentValue) == QMetaType::QStringList || qVariantTypeId(m_currentValue) == qMetaTypeId<QVector<QColor>>())
 		{
 			VectorEditorDialog d(this, m_property->caption(), m_currentValue);
 			if (d.exec() != QDialog::Accepted)
@@ -3042,7 +3042,7 @@ namespace ExtWidgets
 		}
 		else
 		{
-			if (m_currentValue.typeId() == QMetaType::QStringList)
+			if (qVariantTypeId(m_currentValue) == QMetaType::QStringList)
 			{
 				m_lineEdit->setText(PropertyTools::stringListText(m_currentValue));
 			}
@@ -3726,12 +3726,12 @@ namespace ExtWidgets
 
 			// Bool
 
-			if (value.typeId() == QMetaType::Bool)
+			if (qVariantTypeId(value) == QMetaType::Bool)
 			{
 				text = tr("<Different values>");
 			}
 
-			if (value.typeId() == qMetaTypeId<Afb::AfbParamValue>())
+			if (qVariantTypeId(value) == qMetaTypeId<Afb::AfbParamValue>())
 			{
 				Afb::AfbParamValue v = value.value<Afb::AfbParamValue>();
 

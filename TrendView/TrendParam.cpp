@@ -3,8 +3,12 @@
 
 namespace TrendLib
 {
-
 	TrendParam::TrendParam()
+	{
+	}
+
+	TrendParam::TrendParam(ITrendDataProvider* dataProvider) :
+		m_dataProvider(dataProvider)
 	{
 	}
 
@@ -138,6 +142,21 @@ namespace TrendLib
 	{
 		m_trendMode = value;
 		return;
+	}
+
+	TrendLib::ITrendDataProvider* TrendParam::trendDataProvider()
+	{
+		return m_dataProvider;
+	}
+
+	const TrendLib::ITrendDataProvider* TrendParam::trendDataProvider() const
+	{
+		return m_dataProvider;
+	}
+
+	void TrendParam::setTrendDataProvider(TrendLib::ITrendDataProvider* dataProvider)
+	{
+		m_dataProvider = dataProvider;
 	}
 
 	QColor TrendParam::backColor1st() const

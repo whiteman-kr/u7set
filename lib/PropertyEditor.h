@@ -4,6 +4,14 @@
 #include "../CommonLib/PropertyObject.h"
 #include "../CommonLib/AfbParamValue.h"
 
+inline int qVariantTypeId(const QVariant& v)
+{
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))									// for Qt6
+	return v.typeId();
+#else																			// for Qt5
+	return v.userType();
+#endif
+}
 /*
 
 PropertyEditor class can edit following types of properties contained in PropertyObject classes:

@@ -95,7 +95,7 @@ namespace VFrame30
 
 		QRectF rect{item->boundingRectInDocPt(drawParam)};
 
-		p->fillRect(rect, item->backgroundColor());
+		p->fillRect(rect, Qt::lightGray);
 
 		return;
 	}

@@ -92,7 +92,7 @@ public:
 	virtual ~DialogAfbLibraryCheck();
 
 private slots:
-	void libraryFileChanged(const QString& fileName);
+	void libraryFileChanged(int index);
 	//void onCheckPins();
 
 private:
@@ -109,6 +109,7 @@ private:
 private:
 	DbController* m_db = nullptr;
 
+	QComboBox* m_lmDescriptionsCombo = nullptr;
 	QTreeWidget* m_afbElementTreeWidget = nullptr;
 	QTreeWidget* m_afbComponentTreeWidget = nullptr;
 

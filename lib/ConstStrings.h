@@ -621,3 +621,8 @@ namespace Afb
 	inline const QString PARAM_I_DATA_X2("i_data_x2");
 }
 
+namespace LmDescriptionName
+{
+	inline const QString LM1_SR04("LM1_SR04");
+	inline const QString LM8_SR10("LM8_SR10");
+}

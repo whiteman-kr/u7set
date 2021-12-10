@@ -1090,7 +1090,7 @@ namespace ExtWidgets
 			}
 
 			if (expandValuesToAllRows() == false &&
-				p->value().typeId() != QMetaType::QStringList &&
+				qVariantTypeId(p->value()) != QMetaType::QStringList &&
 				row > 0)
 			{
 				continue;
