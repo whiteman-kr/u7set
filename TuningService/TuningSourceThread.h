@@ -278,13 +278,12 @@ namespace Tuning
 		void startHandler();
 		void stopHandler();
 
+		void run();
+
 		bool isInitialized() const;
 		bool isReply() const;
 		bool setSOR() const;
 		bool writingDisabled() const;
-
-		void periodicProcessing();
-		bool processReplyQueue();
 
 		void pushReply(const RupFotipV2& reply);
 		void incErrReplySize();
@@ -296,11 +295,11 @@ namespace Tuning
 		const TuningSourceState& state() const { return m_state; }
 
 	private:
-		void initTuningSignals(TuningDataSharedConst td);
 
 		bool processWaitReply();
+		void processUntimelyReply();
 		bool processCommandQueue();
-		bool processIdle();
+		bool enqueueTuningReadCommand();
 
 		void onNoReply();
 
@@ -368,9 +367,9 @@ namespace Tuning
 
 		bool m_waitReply = false;
 
-		const int MAX_WAIT_REPLY_COUNTER = 2;
+		const int MAX_WAIT_REPLY_TIMEOUT_COUNTER = 10;
 
-		int m_waitReplyCounter = 0;
+		int m_waitReplyTimeoutCounter = 0;				// incremented every 1 ms
 
 		int m_nextFrameToAutoRead = 0;
 
@@ -385,7 +384,7 @@ namespace Tuning
 
 		const int MAX_RETRY_COUNT = 3;
 
-		Queue<RupFotipV2> m_replyQueue;
+		FastThreadSafeQueue<RupFotipV2> m_replyQueue;
 
 		TuningCommandQueue m_tuningCommandQueue;
 
@@ -452,6 +451,7 @@ namespace Tuning
 		TuningChannelHandler* getChannelHandler(int channel);
 		TuningChannelHandler* getChannelHandlerByIP(quint32 ip);
 
+		void runHandlers();
 		void checkChannelsResponse();
 		void invalidateAllSignals();
 

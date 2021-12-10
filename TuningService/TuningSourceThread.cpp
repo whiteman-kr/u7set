@@ -250,7 +250,7 @@ namespace Tuning
 		m_logger(logger),
 		m_tuningLog(tuningLog),
 		m_socket(nullptr),
-		m_replyQueue(nullptr, 10)
+		m_replyQueue(10)
 {
 		Q_ASSERT(m_channel >=0 && m_channel < TuningServiceSettings::CHANNELS_COUNT);
 
@@ -328,6 +328,31 @@ namespace Tuning
 		DEBUG_LOG_MSG(m_logger, QString("Tuning source %1 (%2) handler is stopped").arg(m_portEquipmentID).arg(m_sourceIP.addressPortStr()));
 	}
 
+	void TuningChannelHandler::run()
+	{
+		//
+		// TuningSourceThread call this function every 1 ms
+		//
+		if (m_waitReply == true)
+		{
+			bool replyReceived = processWaitReply();
+
+			if (replyReceived == false)
+			{
+				return;			// nothing to do while not receive reply or reply timout elapsed
+			}
+		}
+
+		processUntimelyReply();
+
+		if (processCommandQueue() == true)
+		{
+			return;
+		}
+
+		enqueueTuningReadCommand();
+	}
+
 	bool TuningChannelHandler::isInitialized() const
 	{
 		return m_isInitialized;
@@ -348,66 +373,9 @@ namespace Tuning
 		return m_state.writingDisabled;
 	}
 
-	void TuningChannelHandler::periodicProcessing()
-	{
-		if (processWaitReply() == true)
-		{
-			return;
-		}
-
-		if (processCommandQueue() == true)
-		{
-			return;
-		}
-
-		if (processIdle() == true)
-		{
-			return;
-		}
-	}
-
-	bool TuningChannelHandler::processReplyQueue()
-	{
-		assert(sizeof(Rup::Frame) == sizeof(RupFotipV2));
-
-		// convert reply from Rup::Frame to RupFotipV2
-		//
-		bool res = m_replyQueue.pop(&m_reply);
-
-		if (res == false)
-		{
-			return false;
-		}
-
-		if (m_waitReply == false)
-		{
-			m_state.errUntimelyReplay++;
-			return false;
-		}
-
-		m_waitReplyCounter = 0;
-		m_retryCount = 0;
-
-		m_state.isReply = true;
-
-		m_state.replyCount++;
-
-		if ((m_state.replyCount % 100) == 0)
-		{
-			qDebug() << C_STR(QString("Receive %1 replies from %2, NoReplies = %3").
-							  arg(m_state.replyCount).arg(m_portEquipmentID).arg(m_state.errNoReply));
-		}
-
-		processReply(m_reply);
-
-		m_waitReply = false;
-
-		return true;
-	}
-
 	void TuningChannelHandler::pushReply(const RupFotipV2& reply)
 	{
-		m_replyQueue.push(&reply);
+		m_replyQueue.push(reply, QThread::currentThread());
 	}
 
 	void TuningChannelHandler::incErrReplySize()
@@ -424,57 +392,112 @@ namespace Tuning
 
 	bool TuningChannelHandler::processWaitReply()
 	{
-		if (m_waitReply == true)
+		if (m_waitReply == false)
 		{
-			m_waitReplyCounter++;
-
-			if (m_waitReplyCounter < MAX_WAIT_REPLY_COUNTER)
-			{
-				return true;
-			}
-
-			m_waitReplyCounter = 0;
-
-			// fix replay timeout
-			//
-			m_state.errNoReply++;
-
-			m_waitReply = false;
-
-			LOG_MSG(m_tuningLog, QString("%1 TIMEOUT on request to %2 (%3)").
-										arg(toHex(m_request.rupFotipV2.rupHeader.numerator)).
-										arg(m_portEquipmentID).
-										arg(m_sourceIP.addressPortStr()));
-
-
-			qDebug() << C_STR(QString("NoReply from %1 (%2) [RUP frame No = %3]").
-							  arg(m_portEquipmentID).
-							  arg(m_sourceIP.addressPortStr()).
-							  arg(m_request.rupFotipV2.rupHeader.numerator));
-
-			m_retryCount++;
-
-			if (m_retryCount >= MAX_RETRY_COUNT)
-			{
-				onNoReply();
-
-				m_state.isReply = false;
-			}
-			else
-			{
-				// retry last request
-				//
-				sendFotipRequest(m_request, m_requestAppSignalID);
-			}
+			Q_ASSERT(false);
+			return true;				// like as reply has been received
 		}
 
-		return false;			// switch to next processing
+		// yes, we wait reply
+
+		bool replyReceived = m_replyQueue.pop(&m_reply, QThread::currentThread());
+
+		if (replyReceived == true)
+		{
+			m_state.isReply = true;
+			m_state.replyCount++;
+
+			//
+
+			m_waitReply = false;
+			m_waitReplyTimeoutCounter = 0;
+			m_retryCount = 0;
+
+			//
+
+			processReply(m_reply);
+
+			//
+
+			if ((m_state.replyCount % 100) == 0)
+			{
+				qDebug() << C_STR(QString("Receive %1 replies from %2, NoReplies = %3").
+								  arg(m_state.replyCount).arg(m_portEquipmentID).arg(m_state.errNoReply));
+			}
+
+			return true;				// reply received
+		}
+
+		// reply isn't received yet
+
+		m_waitReplyTimeoutCounter++;
+
+		if (m_waitReplyTimeoutCounter < MAX_WAIT_REPLY_TIMEOUT_COUNTER)
+		{
+			return false;
+		}
+
+		m_waitReplyTimeoutCounter = 0;
+
+		// fix replay timeout
+		//
+		m_state.errNoReply++;
+
+		LOG_MSG(m_tuningLog, QString("%1 TIMEOUT on request to %2 (%3)").
+									arg(toHex(m_request.rupFotipV2.rupHeader.numerator)).
+									arg(m_portEquipmentID).
+									arg(m_sourceIP.addressPortStr()));
+
+		qDebug() << C_STR(QString("NoReply from %1 (%2) [RUP frame No = %3]").
+						  arg(m_portEquipmentID).
+						  arg(m_sourceIP.addressPortStr()).
+						  arg(m_request.rupFotipV2.rupHeader.numerator));
+
+		m_retryCount++;
+
+		if (m_retryCount < MAX_RETRY_COUNT)
+		{
+			m_waitReply = false;
+
+			// retry last request
+			//
+			sendFotipRequest(m_request, m_requestAppSignalID);
+
+			return false;
+		}
+
+		onNoReply();
+
+		m_state.isReply = false;
+		m_waitReply = false;
+
+		return true;				// reply isn't recived but TRUE returned to run other processings
+	}
+
+	void TuningChannelHandler::processUntimelyReply()
+	{
+		if (m_waitReply == false)
+		{
+			bool replyReceived = false;
+
+			do
+			{
+				replyReceived = m_replyQueue.pop(&m_reply, QThread::currentThread());
+
+				if (replyReceived == true)
+				{
+					m_state.errUntimelyReplay++;
+				}
+			}
+			while(replyReceived == true);	// m_replyQueue clearing
+		}
 	}
 
 	bool TuningChannelHandler::processCommandQueue()
 	{
 		if (m_waitReply == true)
 		{
+			Q_ASSERT(false);
 			return true;		// while wating reply has not another processing
 		}
 
@@ -504,10 +527,11 @@ namespace Tuning
 		return true;
 	}
 
-	bool TuningChannelHandler::processIdle()
+	bool TuningChannelHandler::enqueueTuningReadCommand()
 	{
 		if (m_waitReply == true)
 		{
+			Q_ASSERT(false);
 			return true;		// while wating reply has not another processing
 		}
 
@@ -547,10 +571,12 @@ namespace Tuning
 
 	void TuningChannelHandler::sendFotipRequest(SimRupFotipV2& request, const QString& appSignalID)
 	{
-		assert(sizeof(Rup::Frame) == Socket::ENTIRE_UDP_SIZE);
-		assert(sizeof(RupFotipV2) == Socket::ENTIRE_UDP_SIZE);
-		assert(sizeof(FotipV2::Frame) == Rup::FRAME_DATA_SIZE);
-		assert(sizeof(FotipV2::Header) == 128);
+		Q_ASSERT(sizeof(Rup::Frame) == Socket::ENTIRE_UDP_SIZE);
+		Q_ASSERT(sizeof(RupFotipV2) == Socket::ENTIRE_UDP_SIZE);
+		Q_ASSERT(sizeof(FotipV2::Frame) == Rup::FRAME_DATA_SIZE);
+		Q_ASSERT(sizeof(FotipV2::Header) == 128);
+
+		Q_ASSERT(m_waitReply == false);
 
 		RupFotipV2& rupFotipV2 = request.rupFotipV2;
 
@@ -602,8 +628,7 @@ namespace Tuning
 
 		//
 
-		m_waitReplyCounter = 0;
-
+		m_waitReplyTimeoutCounter = 0;
 		m_waitReply = true;
 
 		if (sent == -1)
@@ -1742,35 +1767,15 @@ namespace Tuning
 		initTuningSignals();
 		initHandlers();
 
-		int msCount = 0;
-		bool tenMsElapsed = false;
-
 		do
 		{
-			msleep(1);
-			msCount++;
-
-			if (msCount >= 10)
-			{
-				tenMsElapsed = true;
-				msCount = 0;
-			}
-
-			for(TuningChannelHandler* handler : m_handlers)
-			{
-				bool replyProcessed = handler->processReplyQueue();
-
-				if (tenMsElapsed == true || replyProcessed == true)
-				{
-					handler->periodicProcessing();	// each 10 ms or after reply processed
-				}
-			}
-
-			tenMsElapsed = false;
+			runHandlers();
 
 			checkChannelsResponse();
 
 			checkSetSOR();
+
+			msleep(1);
 		}
 		while(isQuitRequested() == false);
 
@@ -1876,6 +1881,14 @@ namespace Tuning
 	TuningChannelHandler* TuningSourceThread::getChannelHandler(int channel)
 	{
 		return const_cast<TuningChannelHandler*>(privateGetChannelHandler(channel));
+	}
+
+	void TuningSourceThread::runHandlers()
+	{
+		for(TuningChannelHandler* handler : m_handlers)
+		{
+			handler->run();
+		}
 	}
 
 	void TuningSourceThread::checkChannelsResponse()
