@@ -104,11 +104,12 @@ static const QList<dynamicPropertyFieldDefinition> dynamicPropertiesFieldList {
 	{ QStringLiteral("ErrTuningFrameUpdate"), [](const Network::TuningSourceState& state) { return QString::number(state.errtuningframeupdate()); } },
 };
 
-TuningSourceWidget::TuningSourceWidget(quint64 id, QString equipmentId, int channel, QWidget *parent) :
+TuningSourceWidget::TuningSourceWidget(quint64 id, QString equipmentId, QString controllerEquipmentId, int controllerIndex, QWidget *parent) :
 	QWidget(parent),
 	m_id(id),
 	m_equipmentId(equipmentId),
-	m_channel(channel)
+	m_controllerEquipmentId(controllerEquipmentId),
+	m_controllerIndex(controllerIndex)
 {
 	setWindowFlag(Qt::Dialog, true);
 
@@ -148,13 +149,13 @@ TuningSourceWidget::TuningSourceWidget(quint64 id, QString equipmentId, int chan
 
 	setWindowTitle(equipmentId);
 
-	setWindowPosition(this, "TuningSourceWidget/" + equipmentId);
+	setWindowPosition(this, "TuningSourceWidget/" + m_equipmentId);
 
 	QSettings settings;
-	m_splitter->restoreState(settings.value("TuningSourceWidget/" + equipmentId + "/splitterState", m_splitter->saveState()).toByteArray());
+	m_splitter->restoreState(settings.value("TuningSourceWidget/" + m_equipmentId + "/splitterState", m_splitter->saveState()).toByteArray());
 
-	m_infoTable->setColumnWidth(0, settings.value("TuningSourceWidget/" + equipmentId + "/infoColumnWidth", m_infoTable->columnWidth(0)).toInt());
-	m_stateTable->setColumnWidth(0, settings.value("TuningSourceWidget/" + equipmentId + "/stateColumnWidth", m_stateTable->columnWidth(0)).toInt());
+	m_infoTable->setColumnWidth(0, settings.value("TuningSourceWidget/" + m_equipmentId + "/infoColumnWidth", m_infoTable->columnWidth(0)).toInt());
+	m_stateTable->setColumnWidth(0, settings.value("TuningSourceWidget/" + m_equipmentId + "/stateColumnWidth", m_stateTable->columnWidth(0)).toInt());
 }
 
 TuningSourceWidget::~TuningSourceWidget()
@@ -168,17 +169,21 @@ void TuningSourceWidget::updateStateFields()
 
 	const Network::TuningSourceState* pState = nullptr;
 
-	for (auto& source : m_tcpClientSocket->tuningSources())
+	for (const auto& ts : m_tcpClientSocket->tuningSources())
 	{
-		if (source.id() == m_id && source.equipmentId() == m_equipmentId)
+		if (ts.id() == id() && ts.equipmentId() == equipmentId())
 		{
-			if (m_channel >= source.statesChannelsCount())
+			for (int i = 0; i < ts.statesCount(); i++)
 			{
-				Q_ASSERT(false);
-				break;
+				if (QString::fromStdString(ts.state(i).lanequipmentid()) == controllerEquipmentId())
+				{
+					pState = &ts.state(i);
+					break;
+				}
 			}
-
-			pState = &source.state(m_channel);
+		}
+		if (pState != nullptr)
+		{
 			break;
 		}
 	}
@@ -209,19 +214,11 @@ void TuningSourceWidget::setClientSocket(TcpTuningServiceClient *tcpClientSocket
 
 	const Network::DataSourceInfo* pInfo = nullptr;
 
-	for (auto& source : m_tcpClientSocket->tuningSources())
+	for (const auto& ts : m_tcpClientSocket->tuningSources())
 	{
-		if (source.id() == m_id && source.equipmentId() == m_equipmentId)
+		if (ts.id() == id() && ts.equipmentId() == equipmentId())
 		{
-			pInfo = &source.info();
-
-			if (m_channel >= source.controllersCount())
-			{
-				// Channel is bigger than controllers count
-				//
-				Q_ASSERT(false);
-				return;
-			}
+			pInfo = &ts.info();
 		}
 	}
 
@@ -237,7 +234,7 @@ void TuningSourceWidget::setClientSocket(TcpTuningServiceClient *tcpClientSocket
 	{
 		auto& field = staticPropertiesFieldList[i];
 
-		m_infoModel->setData(m_infoModel->index(i, 1), field.fieldValueGetter(*pInfo, m_channel));
+		m_infoModel->setData(m_infoModel->index(i, 1), field.fieldValueGetter(*pInfo, m_controllerIndex));
 	}
 }
 

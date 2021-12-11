@@ -118,6 +118,10 @@ public:
 	//
 	void applyTuningSignals() override;
 
+	// Reading state
+	//
+	TuningSignalState state(Hash hash, bool* found) const;
+
 private:
 	virtual void onClientThreadStarted() override;
 	virtual void onClientThreadFinished() override;
@@ -165,7 +169,7 @@ public slots:
 	void slot_configurationArrived(HostAddressPort address, bool autoApply, LmStatusFlagMode lmStatusFlagMode);
 
 signals:
-	void tuningSourcesArrived();
+	void tuningSourcesInfoArrived();
 
 private:
 	QString networkErrorStr(NetworkError error);
@@ -198,7 +202,7 @@ public:
 
 	int activeTuningSourceCount() const;
 
-	QString singleActiveTuningSource() const;
+	QString activeTuningSource() const;
 
 	LmStatusFlagMode lmStatusFlagMode() const;
 	void setLmStatusFlagMode(const LmStatusFlagMode& mode);
@@ -215,6 +219,9 @@ private:
 	LmStatusFlagMode m_lmStatusFlagMode = LmStatusFlagMode::SOR;
 
 	TuningSignalManager* m_signals = nullptr;
+
+	mutable QReadWriteLock m_statesLocker;				// For access to m_states
+	std::map<Hash, TuningSignalState> m_states;
 
 protected:
 

@@ -8,6 +8,7 @@ class TcpTuningServiceClient;
 
 static const QStringList tuningSourceStaticFieldsHeaderLabels {
 	QStringLiteral("EquipmentId"),
+	QStringLiteral("LanEquipmentId"),
 	QStringLiteral("Caption"),
 	QStringLiteral("Ip"),
 	QStringLiteral("Port"),

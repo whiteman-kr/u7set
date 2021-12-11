@@ -176,7 +176,15 @@ namespace Builder
 
 			if (tunClient.isValid() == true)
 			{
-				m_tuningSources.append(tunClient.uniqueSourcesIDs());
+				QStringList clientEquipmentList = tunClient.uniqueSourcesIDs();
+
+				for (const QString& ce : clientEquipmentList )
+				{
+					if (m_tuningSources.contains(ce) == false)
+					{
+						m_tuningSources.append(ce);
+					}
+				}
 			}
 			else
 			{

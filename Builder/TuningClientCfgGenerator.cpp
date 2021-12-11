@@ -217,7 +217,15 @@ namespace Builder
 
 			if (tunClient.isValid() == true)
 			{
-				equipmentList->append(tunClient.uniqueSourcesIDs());
+				QStringList clientEquipmentList = tunClient.uniqueSourcesIDs();
+
+				for (const QString& ce : clientEquipmentList )
+				{
+					if (equipmentList->contains(ce) == false)
+					{
+						equipmentList->append(ce);
+					}
+				}
 			}
 			else
 			{

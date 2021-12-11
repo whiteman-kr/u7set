@@ -229,6 +229,36 @@ void TuningTcpClient::applyTuningSignals()
 	return;
 }
 
+TuningSignalState TuningTcpClient::state(Hash hash, bool* found) const
+{
+	if (hash == 0)
+	{
+		assert(hash != 0);
+		return TuningSignalState();
+	}
+
+	QReadLocker l(&m_statesLocker);
+
+	auto foundState = m_states.find(hash);
+
+	if (found != nullptr)
+	{
+		*found = !(foundState == m_states.end());
+	}
+
+	if (foundState != m_states.end())
+	{
+		return foundState->second;
+	}
+	else
+	{
+		TuningSignalState result;
+		result.m_flags.valid = false;
+
+		return result;
+	}
+}
+
 void TuningTcpClient::onClientThreadStarted()
 {
 	connect(m_signals, &TuningSignalManager::signalsLoaded, this, &TuningTcpClient::slot_signalsUpdated);
@@ -510,8 +540,7 @@ void TuningTcpClient::processTuningSourcesInfo(const QByteArray& data)
 
 	}
 
-	emit tuningSourcesArrived();
-
+	emit tuningSourcesInfoArrived();
 
 	return;
 }
@@ -567,7 +596,7 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 
 			quint64 id = tss.sourceid();
 
-			bool found = false;
+			//bool found = false;
 
 			for (auto& it : m_tuningSources)
 			{
@@ -575,9 +604,41 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 
 				if (ts.id() == id)
 				{
+					// --------------------------------------------------------------------
+
+					/*
+					int ask_whiteman_about_this = 1;
+
+					//qDebug() << "service id = " << tuningServiceId() << " states count = " << ts.statesCount();
+
+					//qDebug() << "state = " << tuningServiceId() << " lan id = " << QString::fromStdString(state.lanequipmentid());
+
+					bool wrongService = false;
+
+					for (int q = 0; q < ts.controllersCount(); q++)
+					{
+						if (ts.controllerEquipmentId(q) == QString::fromStdString(tss.lanequipmentid()))
+						{
+							QString serviceId = QString::fromStdString(ts.info().lancontrollerinfo(q).tuningserviceid());
+
+							if (serviceId.startsWith(tuningServiceId()) == false)
+							{
+								qDebug() << "LM Adapter " <<  QString::fromStdString(tss.lanequipmentid()) << " is not processed by service " << tuningServiceId();
+								wrongService = true;
+							}
+						}
+					}
+
+					if (wrongService == true)
+					{
+						continue;
+					}*/
+
+					// --------------------------------------------------------------------
+
 					// Write SOR change to tuning log
 
-					for (int s = 0; s < ts.statesChannelsCount(); s++)
+					for (int s = 0; s < ts.statesCount(); s++)
 					{
 						const ::Network::TuningSourceState& state = ts.state(s);
 
@@ -623,18 +684,39 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 
 					// Set new source state
 
-					ts.setState(tss);
+					/*
+					::Network::TuningSourceState tss1 = tss;
+
+					static int x = 0;
+					static int c = 0;
+
+					if ((c++) & 1)
+					{
+						if (x < 200)
+						{
+							tss1.set_errfotipoperationcode(x++);
+						}
+						else
+						{
+							tss1.set_errfotipoperationcode(x);
+						}
+
+					}*/
+
+					//tss. tuningServiceId()
+
+					ts.setNewState(tss);
 
 					//
 
-					found = true;
+					//found = true;
 
 					break;
 
 				}	//ts.id() == id
 			}
 
-			assert(found == true);
+			//assert(found == true);
 		}
 	}
 
@@ -797,8 +879,6 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 	std::vector<TuningSignalState> arrivedStates;
 	arrivedStates.reserve(stateCount);
 
-	bool found = false;
-
 	for (int i = 0; i < stateCount; i++)
 	{
 
@@ -814,67 +894,7 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 			continue;
 		}
 
-
 		TuningSignalState arrivedState(stateMessage);
-
-		TuningSignalState previousState = m_signals->state(stateMessage.signalhash(), &found);
-
-		if (found == true)
-		{
-			// Compare time
-			//
-			int todo_compare_time = 1;
-
-			/*
-			if (arrivedState.successfulReadTime() <= previousState.successfulReadTime())
-			{
-				// Arrived time is less than existing time, do not process this state
-				//
-				continue;
-			}
-			*/
-
-			// Process write error only if writing was performed by current client
-			//
-			Hash writeClientHash = stateMessage.writeclient();
-
-			if (m_instanceIdHash == writeClientHash)
-			{
-				if (static_cast<NetworkError>(stateMessage.writeerrorcode()) == NetworkError::Success)
-				{
-					if (arrivedState.successfulWriteTime() > previousState.successfulWriteTime())
-					{
-						m_signals->setNewValueAsApplied(arrivedState.hash());
-					}
-				}
-				else
-				{
-					if (arrivedState.unsuccessfulWriteTime() > previousState.unsuccessfulWriteTime())
-					{
-						//						qDebug() << "arrivedState.unsuccessfulWriteTime() " << arrivedState.unsuccessfulWriteTime().toMSecsSinceEpoch();
-						//						qDebug() << "previousState.unsuccessfulWriteTime() " << previousState.unsuccessfulWriteTime().toMSecsSinceEpoch();
-						//						qDebug() << "stateMessage.writeerrorcode() " << stateMessage.writeerrorcode();
-
-						m_signals->setNewValueAsApplied(arrivedState.hash());
-
-						AppSignalParam param = m_signals->signalParam(stateMessage.signalhash(), &found);
-						if (found == false)
-						{
-							assert(false);
-							continue;
-						}
-
-						writeLogAlert(tr("processReadTuningSignals(), Error writing value '%1' to signal '%2' (%3), logic module '%4': %5")
-									  .arg(m_signals->newValue(arrivedState.hash()).toString())
-									  .arg(param.customSignalId())
-									  .arg(param.caption())
-									  .arg(param.lmEquipmentId())
-									  .arg(networkErrorStr(static_cast<NetworkError>(stateMessage.writeerrorcode())))
-									  );
-					}
-				}
-			}
-		}
 
 		// When updating states, we have to set some properties locally
 		//
@@ -890,6 +910,114 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 		{
 			arrivedState.m_flags.writingIsEnabled = arrivedState.valid() & arrivedState.writingIsEnabled();
 		}
+
+		// Get local current state and update it to arrived
+		//
+		bool clientCurrentStateFound = false;
+
+		TuningSignalState clientCurrentState;
+
+		QWriteLocker l(&m_statesLocker);
+		{
+			auto it = m_states.find(stateMessage.signalhash());
+			if (it != std::end(m_states))
+			{
+				clientCurrentStateFound = true;
+				clientCurrentState = it->second;
+			}
+
+			m_states[stateMessage.signalhash()] = arrivedState;
+		}
+
+		// Compare arrived state with last state
+		//
+
+		if (clientCurrentStateFound == true)
+		{
+			// If state is not received, then write it to signals storage if validity or control flags were changed
+			//
+			if (arrivedState.valid() == false || arrivedState.controlIsEnabled() == false)
+			{
+				if (clientCurrentState.m_flags.valid != arrivedState.m_flags.valid || clientCurrentState.m_flags.controlIsEnabled != arrivedState.m_flags.controlIsEnabled)
+				{
+					clientCurrentState.m_flags.valid = arrivedState.m_flags.valid;
+					clientCurrentState.m_flags.controlIsEnabled = arrivedState.m_flags.controlIsEnabled;
+
+					arrivedStates.push_back(clientCurrentState);
+				}
+
+				continue;
+			}
+
+			// Process write result (only if writing was performed by current client)
+			//
+			Hash writeClientHash = stateMessage.writeclient();
+
+			if (m_instanceIdHash == writeClientHash)
+			{
+				if (static_cast<NetworkError>(stateMessage.writeerrorcode()) == NetworkError::Success)
+				{
+					if (arrivedState.successfulWriteTime() > clientCurrentState.successfulWriteTime())
+					{
+						m_signals->setNewValueAsApplied(arrivedState.hash());
+					}
+				}
+				else
+				{
+					if (arrivedState.unsuccessfulWriteTime() > clientCurrentState.unsuccessfulWriteTime())
+					{
+						//						qDebug() << "arrivedState.unsuccessfulWriteTime() " << arrivedState.unsuccessfulWriteTime().toMSecsSinceEpoch();
+						//						qDebug() << "previousState.unsuccessfulWriteTime() " << previousState.unsuccessfulWriteTime().toMSecsSinceEpoch();
+						//						qDebug() << "stateMessage.writeerrorcode() " << stateMessage.writeerrorcode();
+
+						m_signals->setNewValueAsApplied(arrivedState.hash());
+
+						bool paramFound = false;
+
+						AppSignalParam param = m_signals->signalParam(stateMessage.signalhash(), &paramFound);
+						if (paramFound == false)
+						{
+							assert(false);
+							continue;
+						}
+
+						writeLogAlert(tr("processReadTuningSignals(), Error writing value '%1' to signal '%2' (%3), logic module '%4': %5")
+									  .arg(m_signals->newValue(arrivedState.hash()).toString())
+									  .arg(param.customSignalId())
+									  .arg(param.caption())
+									  .arg(param.lmEquipmentId())
+									  .arg(networkErrorStr(static_cast<NetworkError>(stateMessage.writeerrorcode())))
+									  );
+					}
+				}
+			} // m_instanceIdHash == writeClientHash
+
+			// Get clobal current state and update it
+			//
+			bool currentStateFound = false;
+
+			TuningSignalState currentState = m_signals->state(stateMessage.signalhash(), &currentStateFound);
+
+			if (currentStateFound == true)
+			{
+				// If arrived LM time is less than current time up to 5 seconds - skip this state
+				//
+
+				if ((currentState.m_lmTime - 5000) < arrivedState.m_lmTime &&
+					arrivedState.m_lmTime <= currentState.m_lmTime)
+				{
+					//qDebug()  << tr("skip time, d = %1").arg(arrivedState.m_lmTime - currentState.m_lmTime);
+					continue;
+				}
+
+				// Global state time is set only if received time is bigger
+				//
+				arrivedState.m_successfulReadTime = std::max(arrivedState.m_successfulReadTime, currentState.m_successfulReadTime);
+				arrivedState.m_writeRequestTime = std::max(arrivedState.m_writeRequestTime, currentState.m_writeRequestTime);
+				arrivedState.m_successfulWriteTime = std::max(arrivedState.m_successfulWriteTime, currentState.m_successfulWriteTime);
+				arrivedState.m_unsuccessfulWriteTime = std::max(arrivedState.m_unsuccessfulWriteTime, currentState.m_unsuccessfulWriteTime);
+			}
+		} // currentStateFound == true
 
 		// --
 		//
@@ -1238,7 +1366,7 @@ int TuningTcpClient::activeTuningSourceCount() const
 	{
 		const TuningSource& ts = it.second;
 
-		for (int i = 0; i < ts.statesChannelsCount(); i++)
+		for (int i = 0; i < ts.statesCount(); i++)
 		{
 			if (ts.state(i).controlisactive() == true)
 			{
@@ -1252,7 +1380,7 @@ int TuningTcpClient::activeTuningSourceCount() const
 }
 
 
-QString TuningTcpClient::singleActiveTuningSource() const
+QString TuningTcpClient::activeTuningSource() const
 {
 	if (singleLmControlMode() == false)
 	{
@@ -1266,7 +1394,7 @@ QString TuningTcpClient::singleActiveTuningSource() const
 	{
 		const TuningSource& ts = it.second;
 
-		for (int i = 0; i < ts.statesChannelsCount(); i++)
+		for (int i = 0; i < ts.statesCount(); i++)
 		{
 			if (ts.state(i).controlisactive() == true)
 			{
