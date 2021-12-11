@@ -266,6 +266,8 @@ namespace Tuning
 		m_lmModuleType = static_cast<quint16>(source.moduleType());
 		m_subsystemCode = static_cast<quint16>(source.subsystemKey());
 
+		m_rupNumerator = m_channel * 1000;		// different numerator start value for each channel
+
 		m_disableModulesTypeChecking = disableModulesTypeChecking;
 
 		m_tuningSimIP = channelInfo.tuningSimIP;
