@@ -250,7 +250,7 @@ namespace Tuning
 	//
 	// ----------------------------------------------------------------------------------
 
-	class TuningSourceThread;
+	class TuningSourceThreadWorker;
 
 	struct TuningChannelInfo
 	{
@@ -263,7 +263,7 @@ namespace Tuning
 	class TuningChannelHandler
 	{
 	public:
-		TuningChannelHandler(TuningSourceThread& srcThread,
+		TuningChannelHandler(TuningSourceThreadWorker& srcThread,
 							const TuningChannelInfo& channelInfo,
 							bool disableModulesTypeChecking,
 							E::SoftwareRunMode swRunMode,
@@ -329,7 +329,7 @@ namespace Tuning
 		QString toHex(quint16 v) const { return (QString("%1").arg(v, 4, 16, Latin1Char::ZERO)).toUpper();}
 
 	private:
-		TuningSourceThread& m_sourceThread;
+		TuningSourceThreadWorker& m_sourceThread;
 		CircularLoggerShared m_logger;
 		CircularLoggerShared m_tuningLog;
 
@@ -367,22 +367,22 @@ namespace Tuning
 
 		bool m_waitReply = false;
 
-		const int MAX_WAIT_REPLY_TIMEOUT_COUNTER = 10;
-
-		int m_waitReplyTimeoutCounter = 0;				// incremented every 1 ms
-
 		int m_nextFrameToAutoRead = 0;
 
 		QUdpSocket m_socket;
 
 		SimRupFotipV2 m_request;
 		QString m_requestAppSignalID;
+		qint64 m_lastRequestTime = 0;
+		qint64 m_lastCmdProcessingTime = 0;
 
 		RupFotipV2 m_reply;
 
 		int m_retryCount = 0;
 
 		const int MAX_RETRY_COUNT = 3;
+		const int REPLY_TIMEOUT_MS = 30;
+		const int COMMAND_PROCESSING_PAUSE_MS = 5;
 
 		FastThreadSafeQueue<RupFotipV2> m_replyQueue;
 
@@ -401,14 +401,19 @@ namespace Tuning
 	//
 	// ----------------------------------------------------------------------------------
 
-	class TuningSourceThread : public RunOverrideThread
+	class TuningSourceThreadWorker : public SimpleThreadWorker
 	{
 	public:
-		TuningSourceThread(	const TuningServiceSettings& settings,
+		TuningSourceThreadWorker(	const TuningServiceSettings& settings,
 							const TuningSource& source,
 							E::SoftwareRunMode swRunMode,
 							CircularLoggerShared logger,
 							CircularLoggerShared tuningLog);
+
+		void onThreadStarted() override;
+		void onThreadFinished() override;
+
+		void timerEvent(QTimerEvent* event) override;
 
 		void pushReply(int channel, const RupFotipV2& reply);
 		void incErrReplySize(quint32 channelIP);
@@ -429,6 +434,8 @@ namespace Tuning
 
 		void waitWhileHandlersInitialized() const;
 
+		bool isSourceHandlerExistsForChannel(int channel) const;
+
 		const TuningSource& source() const { return m_source; }
 
 		const TuningSignal* getTuningSignal(Hash hash) const;
@@ -436,16 +443,17 @@ namespace Tuning
 
 		bool updateFrameSignalsState(RupFotipV2& reply);
 
-		bool isSourceHandlerExistsForChannel(int channel) const;
 
 		Network::DataSourceInfo protoDataSourceInfo() const { return m_protoDataSourceInfo; }
 
 	private:
-		void run() override;
-
 		void initTuningSignals();
+
 		void initHandlers();
 		void shutdownHandlers();
+
+		void initTimer();
+		void shutdownTimer();
 
 		const TuningChannelHandler* getChannelHandler(int channel) const;
 		TuningChannelHandler* getChannelHandler(int channel);
@@ -478,6 +486,10 @@ namespace Tuning
 
 		//
 
+		QBasicTimer* m_timer = nullptr;
+
+		//
+
 		mutable QMutex m_handlersMutex;
 
 		std::vector<TuningChannelHandler*> m_handlers;
@@ -498,6 +510,36 @@ namespace Tuning
 		TuningMemory m_tuningMem;
 	};
 
+	class TuningSourceThread : public SimpleThread
+	{
+	public:
+		TuningSourceThread(const TuningServiceSettings& settings,
+							const TuningSource& source,
+							E::SoftwareRunMode swRunMode,
+							CircularLoggerShared logger,
+							CircularLoggerShared tuningLog);
+
+		void pushReply(int channel, const RupFotipV2& reply);
+		void incErrReplySize(quint32 channelIP);
+		void getSourceState(Network::GetTuningSourcesStatesReply* reply);
+		void readSignalState(Network::TuningSignalState* tss) const;
+
+		NetworkError writeSignalState(const QString& clientEquipmentID,
+										const QString& user,
+										Hash signalHash,
+										const TuningValue& newValue);
+
+		NetworkError applySignalStates(	const QString& clientEquipmentID,
+										const QString& user);
+
+		QString sourceEquipmentID() const;
+		void waitWhileHandlersInitialized() const;
+		bool isSourceHandlerExistsForChannel(int channel) const;
+
+	private:
+		TuningSourceThreadWorker* m_worker = nullptr;
+	};
+
 	using TuningSourceThreadShared = std::shared_ptr<TuningSourceThread>;
 
 	// ----------------------------------------------------------------------------------
@@ -510,8 +552,6 @@ namespace Tuning
 
 	class TuningSocketListener : public SimpleThreadWorker
 	{
-		Q_OBJECT
-
 	public:
 		TuningSocketListener(TuningServiceWorker& service,
 							 const HostAddressPort& listenIP,
@@ -520,21 +560,18 @@ namespace Tuning
 							 std::shared_ptr<CircularLogger> logger);
 		~TuningSocketListener();
 
-	signals:
-
 	private:
-		virtual void onThreadStarted() override;
-		virtual void onThreadFinished() override;
+		void onThreadStarted() override;
+		void onThreadFinished() override;
+
+		void timerEvent(QTimerEvent* event) override;
+
+		void initTimer();
+		void shutdownTimer();
 
 		void createSocket();
 		void closeSocket();
-
-		void startTimer();
-
-	private slots:
-		void onTimer();
-
-		void onSocketReadyRead();
+		bool readSocket();
 
 		void pushReplyToTuningSource(const QHostAddress& tuningSourceIP, const RupFotipV2& reply);
 		void incErrReplySizeOfTuningSource(const QHostAddress& tuningSourceIP);
@@ -547,9 +584,11 @@ namespace Tuning
 
 		std::shared_ptr<CircularLogger> m_logger;
 
-		QTimer m_timer;
+		//
 
+		QBasicTimer* m_timer = nullptr;
 		QUdpSocket* m_socket = nullptr;
+		qint64 m_socketCreateLastTime = 0;
 
 		// statistics
 		//
@@ -560,25 +599,14 @@ namespace Tuning
 		qint64 m_errNotExpectedSimPacket = 0;
 	};
 
-
-	// ----------------------------------------------------------------------------------
-	//
-	// TuningSocketListenerThread class declaration
-	//
-	// ----------------------------------------------------------------------------------
-
 	class TuningSocketListenerThread : public SimpleThread
 	{
 	public:
 		TuningSocketListenerThread(TuningServiceWorker& service,
-								   const HostAddressPort& listenIP,
-								   int channel,
-								   bool simulationMode,
-								   std::shared_ptr<CircularLogger> logger);
-		~TuningSocketListenerThread();
-
-	private:
-		int m_channel = 0;
-		TuningSocketListener* m_socketListener = nullptr;
+								const HostAddressPort& listenIP,
+								int channel,
+								bool simulationMode,
+								std::shared_ptr<CircularLogger> logger);
 	};
+
 }
