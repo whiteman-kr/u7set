@@ -67,6 +67,7 @@ namespace Sim
 	public:
 		// Implementing IAppSignalManager - AppSignals
 		//
+		virtual int signalsCount() const override;
 		virtual std::vector<AppSignalParam> signalList() const override;
 
 		virtual bool signalExists(Hash hash) const override;

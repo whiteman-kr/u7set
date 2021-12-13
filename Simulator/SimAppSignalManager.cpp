@@ -799,6 +799,12 @@ namespace Sim
 		return true;
 	}
 
+	int AppSignalManager::signalsCount() const
+	{
+		QReadLocker rl(&m_signalParamLock);
+		return static_cast<int>(m_signalParams.size());
+	}
+
 	std::vector<AppSignalParam> AppSignalManager::signalList() const
 	{
 		std::vector<AppSignalParam> result;

@@ -233,6 +233,12 @@ bool AppSignalManager::signalExists(Hash hash) const
 	return result != m_signalParams.end();
 }
 
+int AppSignalManager::signalsCount() const
+{
+	QReadLocker rl(&m_paramsLocker);
+	return static_cast<int>(m_signalParams.size());
+}
+
 std::vector<AppSignalParam> AppSignalManager::signalList() const
 {
 	QReadLocker rl(&m_paramsLocker);

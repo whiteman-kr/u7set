@@ -31,7 +31,14 @@ class MonitorArchive
 public:
 	static std::vector<QString> getArchiveList();
 	static bool activateWindow(QString archiveName);
+
 	static bool startNewWidget(MonitorConfigController* configController, const std::vector<AppSignalParam>& appSignals, QWidget* parent);
+
+	static bool requestArchiveWithNewWidget(MonitorConfigController* configController, const std::vector<AppSignalParam>& appSignals,
+							   QDateTime startTime,
+							   QDateTime endTime,
+							   E::TimeType timeType,
+							   QWidget* parent);
 
 	static void registerWindow(QString name, MonitorArchiveWidget* window);
 	static void unregisterWindow(QString name);
@@ -51,6 +58,8 @@ public:
 	void ensureVisible();
 
 	bool setSignals(const std::vector<AppSignalParam>& appSignals);
+	bool setTime(QDateTime startTime, QDateTime endTime, E::TimeType timeType);
+	void requestDataOnConnection();
 
 protected:
 	void requestData();
@@ -84,6 +93,7 @@ protected slots:
 
 	void slot_configurationArrived(ConfigSettings configuration);
 
+	void tcpConnectionEstablished();
 	void dataReceived(std::shared_ptr<ArchiveChunk> chunk);
 	void tcpClientError(QString errorMessage);
 	void tcpStatus(QString status, int statesReceived, int requestCount, int repliesCount);
@@ -132,6 +142,8 @@ private:
 	QLabel* m_statusBarConnectionStateLabel = nullptr;
 
 	ArchiveSource m_source;
+
+	bool m_requestDataOnConnection = false;
 };
 
 

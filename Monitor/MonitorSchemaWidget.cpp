@@ -12,6 +12,8 @@
 #include "../VFrame30/SchemaItemLoopback.h"
 #include "../VFrame30/MonitorSchema.h"
 #include "../VFrame30/MacrosExpander.h"
+#include "MonitorSignalSnapshot.h"
+#include "MonitorArchive.h"
 
 //
 //MonitorTuningController
@@ -63,6 +65,11 @@ MonitorSchemaWidget::MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schem
 	connect(this, &QWidget::customContextMenuRequested, this, &MonitorSchemaWidget::contextMenuRequested);
 
 	createActions();
+
+	connect(monitorSchemaView(), &MonitorSchemaView::signal_showSignalsArchive, this, &MonitorSchemaWidget::signalsArchive);
+	connect(monitorSchemaView(), &MonitorSchemaView::signal_showSignalsSnapshotByList, this, &MonitorSchemaWidget::signalsSnapshotByList);
+	connect(monitorSchemaView(), &MonitorSchemaView::signal_showSignalsSnapshotByMask, this, &MonitorSchemaWidget::signalsSnapshotByMask);
+	connect(monitorSchemaView(), &MonitorSchemaView::signal_showSignalsSnapshotByTags, this, &MonitorSchemaWidget::signalsSnapshotByTags);
 
 	return;
 }
@@ -370,6 +377,177 @@ void MonitorSchemaWidget::signalInfo(QString appSignalId)
 	                             theMonitorMainWindow->monitorCentralWidget());
 
 	return;
+}
+
+void MonitorSchemaWidget::signalsArchive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType)
+{
+	MonitorConfigController* configController = theMonitorMainWindow->configController();
+
+	std::vector<AppSignalParam> appSignals;
+	QStringList notFoundSignals;
+
+	if (theSignals.signalsCount() == 0)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Signals database is not loaded!"));
+		return;
+	}
+
+	for (const QString& s : signalsList)
+	{
+		bool ok = false;
+		AppSignalParam asp = theSignals.signalParam(s, &ok);
+
+		if (ok == true)
+		{
+			appSignals.push_back(asp);
+		}
+		else
+		{
+			notFoundSignals.push_back(s);
+		}
+	}
+
+	if (notFoundSignals.empty() == false)
+	{
+		QString errorMsg;
+
+		int count = notFoundSignals.size();
+		if (count > 10)
+		{
+			notFoundSignals.erase(notFoundSignals.begin() + 10, notFoundSignals.end());
+
+			errorMsg = tr("Signals with specified identifiers were not found:\n\n%1\n\nand %2 more.")
+					   .arg(notFoundSignals.join('\n'))
+					   .arg(count - notFoundSignals.size());
+		}
+		else
+		{
+			errorMsg = tr("Signals with specified identifiers were not found:\n\n%1\n").arg(notFoundSignals.join('\n'));
+		}
+
+		QMessageBox::critical(this, qAppName(), errorMsg);
+		return;
+	}
+
+	if (appSignals.empty() == true)
+	{
+		QMessageBox::critical(this, qAppName(), tr("No signals supplied!"));
+		return;
+	}
+
+	if (timeType != static_cast<int>(E::TimeType::Plant) &&
+		timeType != static_cast<int>(E::TimeType::System) &&
+		timeType != static_cast<int>(E::TimeType::Local))
+	{
+		QMessageBox::critical(this, qAppName(), tr("Incorrect time type! Supported values: 0 - Plant, 1 - System, 2 - Local."));
+		return;
+	}
+
+	if (startTime > endTime)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Archive request Start Time (%1) shoud be earlier than End Time (%2).")
+							  .arg(startTime.toString("dd/MM/yyyy hh:mm:ss"))
+							  .arg(endTime.toString("dd/MM/yyyy hh:mm:ss")));
+		return;
+	}
+
+	MonitorArchive::requestArchiveWithNewWidget(configController, appSignals, startTime, endTime, static_cast<E::TimeType>(timeType), this);
+	return;
+}
+
+void MonitorSchemaWidget::signalsSnapshotByList(QStringList signalsList)
+{
+	MonitorDialogSignalSnapshot* d = MonitorDialogSignalSnapshot::createDialog(theMonitorMainWindow->configController(),
+											theMonitorMainWindow->tcpSignalClient(),
+											&theSignals,
+											theMonitorMainWindow->monitorCentralWidget());
+
+	std::vector<AppSignalParam> specialSignals;
+
+	QStringList notFoundSignals;
+
+	for (const QString& appSignalId : signalsList)
+	{
+		bool found = false;
+
+		AppSignalParam asp = theSignals.signalParam(appSignalId, &found);
+		if (found == true)
+		{
+			specialSignals.push_back(asp);
+		}
+		else
+		{
+			notFoundSignals.push_back(appSignalId);
+		}
+	}
+
+
+	if (notFoundSignals.empty() == false)
+	{
+		QString errorMsg;
+
+		int count = notFoundSignals.size();
+		if (count > 10)
+		{
+			notFoundSignals.erase(notFoundSignals.begin() + 10, notFoundSignals.end());
+
+			errorMsg = tr("Signals with specified identifiers were not found:\n\n%1\n\nand %2 more.")
+								  .arg(notFoundSignals.join('\n'))
+								  .arg(count - notFoundSignals.size());
+
+		}
+		else
+		{
+			errorMsg = tr("Signals with specified identifiers were not found!\n\n%1").arg(notFoundSignals.join('\n'));
+		}
+
+		QMessageBox::critical(this, qAppName(), errorMsg);
+		return;
+
+	}
+
+	if (specialSignals.empty() == true)
+	{
+		return;
+	}
+
+	qDebug() << "specialSignals" << specialSignals.size();
+
+	d->resetSignalsType();
+	d->setSignalsMask(QString());
+	d->setSignalsTags(QString());
+
+	d->setSpecificSignals(specialSignals);
+
+	d->show();
+}
+
+void MonitorSchemaWidget::signalsSnapshotByMask(QString mask)
+{
+	MonitorDialogSignalSnapshot* d = MonitorDialogSignalSnapshot::createDialog(theMonitorMainWindow->configController(),
+											theMonitorMainWindow->tcpSignalClient(),
+											&theSignals,
+											theMonitorMainWindow->monitorCentralWidget());
+
+	d->resetSignalsType();
+	d->setSignalsMask(mask);
+	d->setSignalsTags(QString());
+
+	d->show();
+}
+
+void MonitorSchemaWidget::signalsSnapshotByTags(QString tags)
+{
+	MonitorDialogSignalSnapshot* d = MonitorDialogSignalSnapshot::createDialog(theMonitorMainWindow->configController(),
+											theMonitorMainWindow->tcpSignalClient(),
+											&theSignals,
+											theMonitorMainWindow->monitorCentralWidget());
+
+	d->resetSignalsType();
+	d->setSignalsMask(QString());
+	d->setSignalsTags(tags);
+
+	d->show();
 }
 
 MonitorSchemaView* MonitorSchemaWidget::monitorSchemaView()

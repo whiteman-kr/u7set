@@ -35,13 +35,26 @@ SimDialogSignalSnapshot::SimDialogSignalSnapshot(SimIdeSimulator* simuator,
 												 QString softwareEquipmentId,
 												 QString lmEquipmentId,
 												 QWidget *parent)
-    :DialogSignalSnapshot(appSignalManager, projectName, softwareEquipmentId, lmEquipmentId, parent),
+	:DialogSignalSnapshot(appSignalManager, projectName, softwareEquipmentId, parent),
 	  m_simuator(simuator)
 {
 	if (m_simuator == nullptr)
 	{
 		Q_ASSERT(m_simuator);
 		return;
+	}
+
+	resetSignalsType();
+
+	setSignalsTags(QString());
+
+	if (lmEquipmentId.isEmpty() == true)
+	{
+		setSignalsMask(QString());
+	}
+	else
+	{
+		setLmEquipmentId(lmEquipmentId);
 	}
 
 	return;

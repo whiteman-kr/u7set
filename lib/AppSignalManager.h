@@ -44,6 +44,7 @@ public:
 
 	// IAppSignalManager implememntation - AppSignals
 	//
+	virtual int signalsCount() const final;
 	virtual std::vector<AppSignalParam> signalList() const final;
 
 	virtual bool signalExists(Hash hash) const override;

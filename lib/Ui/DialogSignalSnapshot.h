@@ -184,12 +184,14 @@ struct DialogSignalSnapshotSettings
 	QByteArray horzHeader;
 	int horzHeaderCount = 0;	// Stores SnapshotColumns::ColumnCount constant to restore default settings if columns set changes
 
+	bool typeSetAutomatically = false;
 	SignalSnapshotModel::SignalType signalType = SignalSnapshotModel::SignalType::All;
 
 	bool maskSetAutomatically = false;
 	QStringList maskList;
 	SignalSnapshotModel::MaskType maskType = SignalSnapshotModel::MaskType::AppSignalId;
 
+	bool tagsSetAutomatically = false;
 	QStringList tagsList;
 
 	int sortColumn = 0;
@@ -225,15 +227,20 @@ protected:
 								  QString softwareEquipmentId,
 								  QWidget *parent);
 
-	explicit DialogSignalSnapshot(IAppSignalManager* appSignalManager,
-								  QString projectName,
-								  QString softwareEquipmentId,
-								  QString lmEquipmentId,
-								  QWidget *parent);
 	virtual ~DialogSignalSnapshot();
 
 	QString projectName() const;
 	void setProjectName(const QString& projectName);
+
+public:
+	const std::vector<AppSignalParam>& specificSignals() const;
+	void setSpecificSignals(const std::vector<AppSignalParam>& specificSignals);
+
+	void setLmEquipmentId(const QString& lmEquipmentId);
+	void setSignalsMask(const QString& mask);
+	void setSignalsTags(const QString& tags);
+
+	void resetSignalsType();
 
 public slots:
 	void schemasUpdated();
@@ -255,40 +262,36 @@ protected slots:
 	void headerColumnToggled(bool checked);
 
 private slots:
-	void on_DialogSignalSnapshot_finished(int result);
-	void on_contextMenuRequested(const QPoint& pos);
-	void on_tableView_doubleClicked(const QModelIndex &index);
-	void on_sortIndicatorChanged(int column, Qt::SortOrder order);
-	void on_typeCombo_currentIndexChanged(int index);
-	void on_editMask_returnPressed();
-	void on_editTags_returnPressed();
-	void on_schemaCombo_currentIndexChanged(int index);
-	void on_comboMaskType_currentIndexChanged(int index);
-	void on_buttonExport_clicked();
-	void on_buttonPrint_clicked();
+	void dialogFinished(int result);
+	void contextMenuRequested(const QPoint& pos);
+	void tableViewdoubleClicked(const QModelIndex &index);
+	void sortIndicatorChanged(int column, Qt::SortOrder order);
+	void typeComboCurrentIndexChanged(int index);
+	void editMaskReturnPressed();
+	void editTagsReturnPressed();
+	void schemaComboCurrentIndexChanged(int index);
+	void maskTypeComboCurrentIndexChanged(int index);
+	void buttonExportClicked();
+	void buttonPrintClicked();
 
 private:
 	void setupUi();
-
 	void createMenus();
 
 	void fillSchemas();
-
 	void fillSignals();
 
 	virtual void timerEvent(QTimerEvent* event) override;
-
 	void updateTableItems();
 
-	void maskChanged();
-
+	void maskChanged(bool addToCompleter);
 	void tagsChanged();
 
 private:
 
 	QComboBox* m_typeCombo = nullptr;
 	QComboBox* m_schemaCombo = nullptr;
-	QComboBox* m_comboMaskType = nullptr;
+	QComboBox* m_maskTypeCombo = nullptr;
 
 	QLineEdit* m_editMask = nullptr;
 	QLineEdit* m_editTags = nullptr;
@@ -305,6 +308,8 @@ private:
 	IAppSignalManager* m_appSignalManager = nullptr;
 
 	SignalSnapshotModel *m_model = nullptr;
+
+	std::vector<AppSignalParam> m_specificSignals;
 
 	int m_updateStateTimerId = -1;
 

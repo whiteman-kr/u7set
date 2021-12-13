@@ -50,7 +50,7 @@ bool ArchiveTcpClient::requestData(TimeStamp startTime,
 							.arg([](const auto& appSignals) -> QString
 									{
 										QStringList result;
-										result.reserve(appSignals.size());
+										result.reserve(static_cast<int>(appSignals.size()));
 										for (const AppSignalParam& s : appSignals)
 										{
 											result.push_back(s.appSignalId());
@@ -187,6 +187,8 @@ void ArchiveTcpClient::onConnection()
 
 	resetState();
 
+	emit signal_connectionEstablished();
+
 	return;
 }
 
@@ -286,7 +288,7 @@ void ArchiveTcpClient::requestStart()
 	m_startRequest.set_removeperiodic(m_requestData.removePrioodicRecords);
 
 	QStringList appSignlList;
-	appSignlList.reserve(m_requestData.appSignals.size());
+	appSignlList.reserve(static_cast<int>(m_requestData.appSignals.size()));
 
 	for (const std::pair<Hash, QString> sp : m_requestData.appSignals)
 	{

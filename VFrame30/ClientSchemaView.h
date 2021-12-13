@@ -230,6 +230,86 @@ namespace VFrame30
 		//
 		QString schemaIdByIndex(int schemaIndex) const;
 
+		/// \brief Shows signals archive for specified signals list, time period and time type
+		/*!
+		Shows signals archive for specified signals list, time period and time type
+		\warning Month number is 0-based in JavaScript!\n
+
+
+		\code
+		(function(schemaItem)
+		{
+			const TIME_PLANT =  0;
+			const TIME_SYSTEM = 1;
+			const TIME_LOCAL =  2;
+
+			let signalsList = ["#APPSIGNALID01", "#APPSIGNALID02", "#APPSIGNALID03"];
+
+			let startTime = new Date(2021, 11, 25, 01, 23, 40);	// 25 of December '2021, 01:23:40; month number is 0-based
+			let endTime = new Date();							// Current date and time
+
+			let timeType = TIME_PLANT;
+
+			view.showSignalsArchive(signalsList, startTime, endTime, timeType);
+		})
+		\endcode
+		*/
+		void showSignalsArchive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType);
+		/// \brief Show snapshot for signals specified by list of Application Signal IDs
+		/*!
+		Show snapshot for signals specified by list of Application Signal IDs
+
+		\code
+		(function(schemaItem)
+		{
+			let signalsList = ["#APPSIGNALID01", "#APPSIGNALID02", "#APPSIGNALID03"];
+
+			view.showSignalsSnapshotByList(signalsList);
+		})
+		\endcode
+
+		*/
+		void showSignalsSnapshotByList(QStringList signalsList);
+
+		/// \brief Show snapshot for signals specified by mask or by text fragment.
+		/*!
+		Show snapshot for signals specified by mask. Several masks can be specified separated by a semicolon.
+		If mask contains '*' or '?' symbols it is processed as a wildcard, otherwise specified test is searched
+		in signal identifiers.
+
+		\code
+		(function(schemaItem)
+		{
+			// Search by Mask
+			//
+			view.showSignalsSnapshotByMask("#APPSIGNAL_IN_BL*;#APPSIGNAL_IN_SIM??");
+		}
+
+		(function(schemaItem)
+		{
+			// Search by text fragment
+			//
+			view.showSignalsSnapshotByMask("REG");
+		})
+		\endcode
+
+		*/
+		void showSignalsSnapshotByMask(QString mask);
+
+		/// \brief Show snapshot for signals specified by tags
+		/*!
+		Show snapshot for signals specified by tags. Several tags can be specified separated by a semicolon.
+
+		\code
+		(function(schemaItem)
+		{
+			view.showSignalsSnapshotByTags("sim;lock");
+		})
+		\endcode
+
+		*/
+		void showSignalsSnapshotByTags(QString tags);
+
 	private:
 		QString schemaId() const;
 		QString schemaCaption() const;
@@ -275,6 +355,10 @@ namespace VFrame30
 
 	signals:
 		void signal_setSchema(QString schemaId, QStringList highlightIds);
+		void signal_showSignalsArchive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType);
+		void signal_showSignalsSnapshotByList(QStringList signalsList);
+		void signal_showSignalsSnapshotByMask(QString mask);
+		void signal_showSignalsSnapshotByTags(QString tags);
 
 		// Properties
 		//
@@ -339,6 +423,13 @@ namespace VFrame30
 		const TuningClientBehavior& tuningClientBehavior() const noexcept;
 		void setTuningClientBehavior(const TuningClientBehavior& src);
 		void setTuningClientBehavior(TuningClientBehavior&& src);
+
+		// Actions
+		void showSignalsArchive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType);
+
+		void showSignalsSnapshot(QStringList signalsList);
+		void showSignalsSnapshotByMask(QString mask);
+		void showSignalsSnapshotByTags(QString tags);
 
 	private:
 		VFrame30::SchemaManager* m_schemaManager = nullptr;
