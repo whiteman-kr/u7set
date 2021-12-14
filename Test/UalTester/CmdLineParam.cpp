@@ -139,7 +139,7 @@ bool CmdLineParam::parse()
 				argv.append(pArg);
 			}
 
-			m_cmdLineParser.setCmdLineArgs(args.count(), argv.data());
+			m_cmdLineParser.setCmdLineArgs(TO_INT(args.count()), argv.data());
 			m_cmdLineParser.parse();
 		}
 	}
@@ -346,7 +346,7 @@ int CmdLineParam::getStartTestIndex(const QVector<TestItem>& testList)
 		break;
 	}
 
-	return startTestIndex;
+	return TO_INT(startTestIndex);
 }
 
 bool CmdLineParam::enableExecuteTest(const QString& testID)

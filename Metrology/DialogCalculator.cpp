@@ -494,21 +494,14 @@ void DialogCalculator::conversionTr()
 		return;
 	}
 
-	switch (sensorType)
-	{
-		case E::SensorType::Ohm_Pt_a_391:
-		case E::SensorType::Ohm_Pt_a_385:
-		case E::SensorType::Ohm_Cu_a_428:
-		case E::SensorType::Ohm_Cu_a_426:
-		case E::SensorType::Ohm_Ni_a_617:	m_pTrR0Edit->setEnabled(true);		break;
-
-		default:							m_pTrR0Edit->setEnabled(false);		break;
-	}
-
 	double degreeVal = m_pTrDegreeEdit->text().toDouble();
 	double electricVal = m_pTrElectricEdit->text().toDouble();
 
 	double r0 = m_pTrR0Edit->text().toDouble();
+	if (r0 < R0_OHM_LOW_LIMIT || r0 > R0_OHM_HIGH_LIMIT)
+	{
+		r0 = 100.0;
+	}
 
 	if (m_pTrDegreeRadio->isChecked() == true)
 	{
