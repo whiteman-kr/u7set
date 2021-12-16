@@ -1072,9 +1072,52 @@ bool LmDescription::Lan::load(const QDomDocument& document, QString* errorMessag
 		return false;
 	}
 
+	errorMessage->clear();	// Just in case
+
 	QDomElement element = elements.at(0).toElement();
 
 	*this = Lan();
+
+	// Read LAN version
+	//
+	{
+		const int defaultRupVersion = 5;
+		const int defaultFotipVersion = 2;
+
+		bool ok = false;
+
+		// RupVersion
+		//
+		if (element.hasAttribute(QLatin1String("RupVersion")) == true)
+		{
+			m_rupVersion = element.attribute("RupVersion").toInt(&ok);
+			if (ok == false)
+			{
+				errorMessage->append(tr("Cant't read attribute RupVersion in Lan section."));
+				return false;
+			}
+		}
+		else
+		{
+			m_rupVersion = defaultRupVersion;	// Default value
+		}
+
+		// FotipVersion
+		//
+		if (element.hasAttribute(QLatin1String("FotipVersion")) == true)
+		{
+			m_fotipVersion = element.attribute("FotipVersion").toInt(&ok);
+			if (ok == false)
+			{
+				errorMessage->append(tr("Cant't read attribute FotipVersion in Lan section."));
+				return false;
+			}
+		}
+		else
+		{
+			m_fotipVersion = defaultFotipVersion;	// Default value
+		}
+	}
 
 	// Func for gettiong data from some xml section
 	//
@@ -1109,8 +1152,6 @@ bool LmDescription::Lan::load(const QDomDocument& document, QString* errorMessag
 
 	// Read LAN Controllers
 	//
-
-	errorMessage->clear();	// Just in case
 
 	QDomNodeList controllers = element.elementsByTagName(QLatin1String("LanController"));
 

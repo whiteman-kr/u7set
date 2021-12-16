@@ -169,6 +169,9 @@ public:
 
 	struct Lan
 	{
+		int m_rupVersion = 0;
+		int m_fotipVersion = 0;
+
 		std::vector<LanController> m_lanControllers;
 
 		int lanControllerCount() const;
