@@ -4248,7 +4248,7 @@ namespace Builder
 		assert(m_tuningData == nullptr);
 		assert(m_lmDescription);
 
-		// common code for IPEN (FotipV1) and FotipV2 tuning protocols and data
+		// common code for IPEN (Fotip::V1) and Fotip::V2 tuning protocols and data
 		//
 		bool tuningLanExists = false;
 		bool tuningEnabled = false;

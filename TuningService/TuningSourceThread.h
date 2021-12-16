@@ -152,7 +152,7 @@ namespace Tuning
 		void setWriteErrorCode(NetworkError errCode) { m_writeErrorCode = errCode; }
 		void resetWriteErrorCode() { setWriteErrorCode(NetworkError::Success); }
 
-		FotipV2::DataType fotipV2DataType() const;
+		Fotip::DataType fotipDataType() const;
 
 	private:
 		void updateTuningValuesType(E::SignalType signalType, E::AnalogAppSignalFormat analogFormat);
@@ -212,7 +212,7 @@ namespace Tuning
 		QString clientEquipmentID;
 		QString user;
 
-		FotipV2::OpCode opCode = FotipV2::OpCode::Read;
+		Fotip::OpCode opCode = Fotip::OpCode::Read;
 		bool autoCommand = false;
 
 		struct
@@ -264,6 +264,7 @@ namespace Tuning
 	{
 	public:
 		TuningChannelHandler(TuningSourceThreadWorker& srcThread,
+							int tuningProtocolVersion,
 							const TuningChannelInfo& channelInfo,
 							bool disableModulesTypeChecking,
 							E::SoftwareRunMode swRunMode,
@@ -285,7 +286,7 @@ namespace Tuning
 		bool setSOR() const;
 		bool writingDisabled() const;
 
-		void pushReply(const RupFotipV2& reply);
+		void pushReply(const RupFotip& reply);
 		void incErrReplySize();
 
 		void getState(Network::TuningSourceState* tuningSourceState);
@@ -301,28 +302,30 @@ namespace Tuning
 		bool processCommandQueue();
 		bool enqueueTuningReadCommand();
 
+		bool getNewReply();
+
 		void onNoReply();
 
-		bool prepareFotipRequest(const TuningCommand& tuningCmd, RupFotipV2& request);
-		void sendFotipRequest(SimRupFotipV2& request, const QString& appSignalID);
+		bool prepareFotipRequest(const TuningCommand& tuningCmd, RupFotip& request);
+		void sendFotipRequest(SimRupFotip& request, const QString& appSignalID, bool retry);
 
 		bool initRupHeader(Rup::Header& rupHeader);
-		bool initFotipFrame(FotipV2::Frame& fotipFrame, const TuningCommand& tuningCmd);
+		bool initFotipFrame(Fotip::Frame& fotipFrame, const TuningCommand& tuningCmd);
 
-		void processReply(RupFotipV2& reply);
-		void processReadReply(RupFotipV2& reply);
-		void processWriteReply(RupFotipV2& reply);
-		void processApplyReply(RupFotipV2& reply);
+		void processReply(RupFotip& reply);
+		void processReadReply(RupFotip& reply);
+		void processWriteReply(RupFotip& reply);
+		void processApplyReply(RupFotip& reply);
 
 		void finalizeWriting(NetworkError errCode);
 
 		bool checkRupHeader(const Rup::Header& rupHeader);
-		bool checkFotipHeader(const FotipV2::Header& fotipHeader);
+		bool checkFotipHeader(const Fotip::Header& fotipHeader);
 
 		void invalidateAllSignals();
 
 		void logTuningRequest(const TuningCommand& cmd, QString* appSignalID, quint16 requestNumerator);
-		void logTuningReply(const TuningCommand& cmd, const RupFotipV2& reply, quint16 requestNumerator);
+		void logTuningReply(const TuningCommand& cmd, const RupFotip& reply, quint16 requestNumerator);
 
 		TuningSignal* getTuningSignal(Hash signalHash);
 
@@ -330,6 +333,7 @@ namespace Tuning
 
 	private:
 		TuningSourceThreadWorker& m_sourceThread;
+		int m_tuningProtocolVersion = Fotip::V2;
 		CircularLoggerShared m_logger;
 		CircularLoggerShared m_tuningLog;
 
@@ -365,32 +369,39 @@ namespace Tuning
 
 		//
 
+		const int REPLY_TIMEOUT_MS = 50;
+		const int PAUSE_BEFORE_NEXT_REQUEST_MS = 2; // +2..3ms delay
+
+		const int MAX_RETRY_COUNT = 3;
+
 		bool m_waitReply = false;
+		qint64 m_lastRequestTime = 0;
+		qint64 m_lastReplyTime = 0;
+		int m_retryCount = 0;
+
+		//
 
 		int m_nextFrameToAutoRead = 0;
 
 		QUdpSocket m_socket;
 
-		SimRupFotipV2 m_request;
+		SimRupFotip m_request;
 		QString m_requestAppSignalID;
-		qint64 m_lastRequestTime = 0;
-		qint64 m_lastCmdProcessingTime = 0;
 
-		RupFotipV2 m_reply;
+		SimpleMutex m_newReplyMutex;
+		RupFotip m_newReply;
+		bool m_newReplyReady = false;
 
-		int m_retryCount = 0;
+		RupFotip m_reply;
 
-		const int MAX_RETRY_COUNT = 3;
-		const int REPLY_TIMEOUT_MS = 30;
-		const int COMMAND_PROCESSING_PAUSE_MS = 5;
-
-		FastThreadSafeQueue<RupFotipV2> m_replyQueue;
+		FastThreadSafeQueue<RupFotip> m_replyQueue;
 
 		TuningCommandQueue m_tuningCommandQueue;
 
 		TuningCommand m_lastProcessedCommand;
 
 		quint16 m_rupNumerator = 0;
+		quint64 m_fotipRequestNumerator = 0;
 
 		TuningSourceState m_state;
 	};
@@ -401,21 +412,24 @@ namespace Tuning
 	//
 	// ----------------------------------------------------------------------------------
 
+	class TuningServiceWorker;
+
 	class TuningSourceThreadWorker : public SimpleThreadWorker
 	{
 	public:
-		TuningSourceThreadWorker(	const TuningServiceSettings& settings,
-							const TuningSource& source,
-							E::SoftwareRunMode swRunMode,
-							CircularLoggerShared logger,
-							CircularLoggerShared tuningLog);
+		TuningSourceThreadWorker(TuningServiceWorker& service,
+								const TuningServiceSettings& settings,
+								const TuningSource& source,
+								E::SoftwareRunMode swRunMode,
+								CircularLoggerShared logger,
+								CircularLoggerShared tuningLog);
 
 		void onThreadStarted() override;
 		void onThreadFinished() override;
 
 		void timerEvent(QTimerEvent* event) override;
 
-		void pushReply(int channel, const RupFotipV2& reply);
+		void pushReply(int channel, const RupFotip& reply);
 		void incErrReplySize(quint32 channelIP);
 
 		void getSourceState(Network::GetTuningSourcesStatesReply* reply);
@@ -441,10 +455,12 @@ namespace Tuning
 		const TuningSignal* getTuningSignal(Hash hash) const;
 		TuningSignal* getTuningSignal(Hash hash);
 
-		bool updateFrameSignalsState(RupFotipV2& reply);
+		bool updateFrameSignalsState(RupFotip& reply);
 
 
 		Network::DataSourceInfo protoDataSourceInfo() const { return m_protoDataSourceInfo; }
+
+		TuningServiceWorker& service() { return m_service; }
 
 	private:
 		void initTuningSignals();
@@ -471,6 +487,8 @@ namespace Tuning
 		const TuningSignal* privateGetTuningSignal(Hash hash) const;
 
 	private:
+		TuningServiceWorker& m_service;
+
 		std::vector<TuningChannelInfo> m_tuningChannelsInfo;
 		const TuningSource& m_source;
 		Network::DataSourceInfo m_protoDataSourceInfo;
@@ -513,13 +531,14 @@ namespace Tuning
 	class TuningSourceThread : public SimpleThread
 	{
 	public:
-		TuningSourceThread(const TuningServiceSettings& settings,
+		TuningSourceThread(TuningServiceWorker &service,
+						   const TuningServiceSettings& settings,
 							const TuningSource& source,
 							E::SoftwareRunMode swRunMode,
 							CircularLoggerShared logger,
 							CircularLoggerShared tuningLog);
 
-		void pushReply(int channel, const RupFotipV2& reply);
+		void pushReply(int channel, const RupFotip& reply);
 		void incErrReplySize(quint32 channelIP);
 		void getSourceState(Network::GetTuningSourcesStatesReply* reply);
 		void readSignalState(Network::TuningSignalState* tss) const;
@@ -573,7 +592,7 @@ namespace Tuning
 		void closeSocket();
 		bool readSocket();
 
-		void pushReplyToTuningSource(const QHostAddress& tuningSourceIP, const RupFotipV2& reply);
+		void pushReplyToTuningSource(const QHostAddress& tuningSourceIP, const RupFotip& reply);
 		void incErrReplySizeOfTuningSource(const QHostAddress& tuningSourceIP);
 
 	private:

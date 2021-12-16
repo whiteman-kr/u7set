@@ -98,13 +98,21 @@ namespace Rup
 
 // ----------------------------------------------------------------------------
 //
-// FOTIP - Fiber Optic Tuning Interface data protocol V2 description
+// FOTIP - Fiber Optic Tuning Interface data protocol V3 description
 //
 // ----------------------------------------------------------------------------
 
-namespace FotipV2
+// Versions details:
+//
+// V2 - basic implementation of FOTIP protocol
+//
+// V3 - field Fotip::Header::requestNumerator added
+//
+
+namespace Fotip
 {
-	const int VERSION = 2;
+	const int V2 = 2;
+	const int V3 = 3;
 
 	union HeaderFlags
 	{
@@ -167,25 +175,26 @@ namespace FotipV2
 		quint16 all;
 	};
 
-	const int HEADER_RESERVE_SIZE = 94;
+	const int HEADER_RESERVE_SIZE = 86;
 
 	struct Header
 	{
-		quint16 protocolVersion;					// == 2
+		quint16 protocolVersion;					// == 3
 		quint64 uniqueId;
 
-		FotipV2::SubsystemKey subsystemKey;
+		Fotip::SubsystemKey subsystemKey;
 
-		quint16 operationCode;						// enum FotipV2::OpCode values
+		quint16 operationCode;						// enum Fotip::OpCode values
 
-		FotipV2::HeaderFlags flags;
+		Fotip::HeaderFlags flags;
 
 		quint32 startAddressW;
 		quint16 fotipFrameSizeB;
 		quint32 romSizeB;
 		quint16 romFrameSizeB;
-		quint16 dataType;							// enum FotipV2::DataType values
+		quint16 dataType;							// enum Fotip::DataType values
 		quint32 offsetInFrameW;
+		quint64 requestNumerator;					// from v3
 
 		quint8 reserv[HEADER_RESERVE_SIZE];
 
@@ -197,7 +206,7 @@ namespace FotipV2
 
 	struct Frame
 	{
-		FotipV2::Header header;
+		Fotip::Header header;
 
 		union
 		{
@@ -228,11 +237,11 @@ namespace FotipV2
 	};
 }
 
-struct RupFotipV2
+struct RupFotip
 {
 	Rup::Header rupHeader;
 
-	FotipV2::Frame fotipFrame;
+	Fotip::Frame fotipFrame;
 
 	quint64 CRC64;			// = 1 + x + x^3 + x^4 + x^64
 
@@ -240,9 +249,9 @@ struct RupFotipV2
 	bool checkCRC64();
 };
 
-struct SimRupFotipV2
+struct SimRupFotip
 {
-	RupFotipV2 rupFotipV2;
+	RupFotip rupFotip;
 
 	quint16 simVersion;		// == 1
 	quint32 tuningSourceIP;

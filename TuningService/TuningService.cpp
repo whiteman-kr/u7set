@@ -281,8 +281,51 @@ namespace Tuning
 		return m_controlledLans.contains({ lmEquipmentID, lanEquipmentID });
 	}
 
+	void TuningServiceWorker::logTuningPacket(bool request,
+											  Fotip::OpCode opCode,
+											  quint16 rupNumerator,
+											  quint64 fotipNumerator)
+	{
+		if (m_tuningPacketLog == nullptr)
+		{
+			return;
+		}
+
+		QString opCodeStr;
+
+		switch(opCode)
+		{
+		case Fotip::OpCode::Read:
+			opCodeStr = "READ&nbsp;";
+			break;
+
+		case Fotip::OpCode::Write:
+			opCodeStr = "WRITE";
+			break;
+
+		case Fotip::OpCode::Apply:
+			opCodeStr = "APPLY";
+			break;
+
+		default:
+			//Q_ASSERT(false);
+			opCodeStr = QString("Unknown opCode = %1").arg(TO_INT(opCode));
+		};
+
+		LOG_MSG(m_tuningPacketLog, QString("%1 %2 %3 %4").
+				arg(rupNumerator, sizeof(rupNumerator) * 2, 16, Latin1Char::ZERO).
+				arg(request == true ? "request" : "reply&nbsp;&nbsp;" ).
+				arg(opCodeStr).
+				arg(fotipNumerator, sizeof(fotipNumerator) * 2, 16, Latin1Char::ZERO));
+	}
+
 	void TuningServiceWorker::initialize()
 	{
+		m_tuningPacketLog = std::make_shared<CircularLogger>();
+
+		LOGGER_INIT(m_tuningPacketLog, QString("TuningPacket"), Service::getInstanceID(argc(), argv()));
+		m_tuningPacketLog->setLogCodeInfo(false);
+
 		runCfgLoaderThread();
 	}
 
@@ -290,6 +333,8 @@ namespace Tuning
 	{
 		clearConfiguration();
 		stopCfgLoaderThread();
+
+		LOGGER_SHUTDOWN(m_tuningPacketLog);
 	}
 
 	void TuningServiceWorker::runCfgLoaderThread()
@@ -584,7 +629,8 @@ namespace Tuning
 		}
 
 		TuningSourceThreadShared sourceThread =
-				std::make_shared<TuningSourceThread>(	m_settings,
+				std::make_shared<TuningSourceThread>(	*this,
+														m_settings,
 														source,
 														sessionParams().softwareRunMode,
 														m_logger,

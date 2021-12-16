@@ -141,7 +141,7 @@ namespace Rup
 }
 
 
-namespace FotipV2
+namespace Fotip
 {
 	void Header::reverseBytes()
 	{
@@ -160,16 +160,16 @@ namespace FotipV2
 		romFrameSizeB = reverseUint16(romFrameSizeB);
 		dataType = reverseUint16(dataType);
 		offsetInFrameW = reverseUint32(offsetInFrameW);
+		requestNumerator = reverseUint64(requestNumerator);
 	}
-
 
 	QString Frame::valueStr(bool reverseValue)
 	{
-		Q_ASSERT(static_cast<FotipV2::OpCode>(header.operationCode) == FotipV2::OpCode::Write);
+		Q_ASSERT(static_cast<Fotip::OpCode>(header.operationCode) == Fotip::OpCode::Write);
 
-		switch(static_cast<FotipV2::DataType>(header.dataType))
+		switch(static_cast<Fotip::DataType>(header.dataType))
 		{
-		case FotipV2::DataType::AnalogFloat:
+		case Fotip::DataType::AnalogFloat:
 			{
 				float floatValue = write.analogFloatValue;
 
@@ -181,7 +181,7 @@ namespace FotipV2
 				return QString("%1").arg(static_cast<double>(floatValue));
 			}
 
-		case FotipV2::DataType::AnalogSignedInt:
+		case Fotip::DataType::AnalogSignedInt:
 			{
 				qint32 signedIntValue = write.analogSignedIntValue;
 
@@ -193,7 +193,7 @@ namespace FotipV2
 				return QString("%1").arg(signedIntValue);
 			}
 
-		case FotipV2::DataType::Discrete:
+		case Fotip::DataType::Discrete:
 			{
 				quint32 unsignedIntValue = write.discreteValue;
 
@@ -207,24 +207,24 @@ namespace FotipV2
 
 		default:
 			assert(false);
-			return QString("Unknown FotipV2::DataType");
+			return QString("Unknown Fotip::DataType");
 		}
 	}
 
 	bool Frame::isDiscreteData()
 	{
-		Q_ASSERT(static_cast<FotipV2::OpCode>(header.operationCode) == FotipV2::OpCode::Write);
+		Q_ASSERT(static_cast<Fotip::OpCode>(header.operationCode) == Fotip::OpCode::Write);
 
-		return static_cast<FotipV2::DataType>(header.dataType) == FotipV2::DataType::Discrete;
+		return static_cast<Fotip::DataType>(header.dataType) == Fotip::DataType::Discrete;
 	}
 }
 
-void RupFotipV2::calcCRC64()
+void RupFotip::calcCRC64()
 {
 	CRC64 = reverseUint64(Crc::crc64(&rupHeader, Socket::ENTIRE_UDP_SIZE - sizeof(quint64 /*CRC64*/ )));
 }
 
-bool RupFotipV2::checkCRC64()
+bool RupFotip::checkCRC64()
 {
 	quint64 calculatedCRC = reverseUint64(Crc::crc64(&rupHeader, Socket::ENTIRE_UDP_SIZE - sizeof(quint64 /*CRC64*/ )));
 

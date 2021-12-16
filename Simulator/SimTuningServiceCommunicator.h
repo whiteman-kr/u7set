@@ -152,7 +152,7 @@ namespace Sim
 		bool processWriteConfirmations();
 		bool processRequests();
 
-		void finalizeAndSendReply(quint32 tuningSourceIP, SimRupFotipV2 &reply);
+		void finalizeAndSendReply(quint32 tuningSourceIP, SimRupFotip &reply);
 
 		void cancelTuningSourceHandlersOperations();
 
@@ -190,8 +190,8 @@ namespace Sim
 		QUdpSocket* m_socket = nullptr;
 
 		qint64 m_lastRequestTime = 0;
-		SimRupFotipV2 m_request;
-		SimRupFotipV2 m_reply;
+		SimRupFotip m_request;
+		SimRupFotip m_reply;
 
 		std::map<quint32, std::shared_ptr<TuningSourceHandler>> m_tuningSourcesByIP;
 		std::map<std::pair<QString, QString>, std::shared_ptr<TuningSourceHandler>> m_tuningSourcesByEquipmentID;
@@ -212,12 +212,12 @@ namespace Sim
 		virtual ~TuningSourceHandler();
 
 		void updateTuningData(const RamArea& data, bool setSorChassisState, TimeStamp timeStamp);
-		bool writeConfirmation(qint64 confirmationID, RupFotipV2* reply);
+		bool writeConfirmation(qint64 confirmationID, RupFotip* reply);
 
 		void tuningModeEntered(const RamArea& ramArea, bool setSorChassisState, TimeStamp timeStamp);
 		void tuningModeLeft();
 
-		bool processRequest(const RupFotipV2& request, RupFotipV2* nowReply);
+		bool processRequest(const RupFotip& request, RupFotip* nowReply);
 
 		void cancelOperations();
 
@@ -226,19 +226,19 @@ namespace Sim
 
 	private:
 		bool checkRequestRupHeader(const Rup::Header& rupHeader);
-		bool checkRequestFotipHeader(const FotipV2::Header& requestFotipHeader, FotipV2::HeaderFlags* replyFlags);
+		bool checkRequestFotipHeader(const Fotip::Header& requestFotipHeader, Fotip::HeaderFlags* replyFlags);
 
-		void processReadRequest(const FotipV2::Frame& request,
-								FotipV2::Frame* reply, bool*
+		void processReadRequest(const Fotip::Frame& request,
+								Fotip::Frame* reply, bool*
 								sendReplyImmediately);
 
-		void processWriteRequest(const FotipV2::Frame& request,
-								 FotipV2::Frame* reply,
+		void processWriteRequest(const Fotip::Frame& request,
+								 Fotip::Frame* reply,
 								 bool* sendReplyImmediately);
 
 		void processApplyRequest(bool* sendReplyImmediately);
 
-		void readFrameData(quint32 startFrameAddrW, FotipV2::Frame* reply);
+		void readFrameData(quint32 startFrameAddrW, Fotip::Frame* reply);
 
 	private:
 		TuningServiceCommunicator& m_tsCommunicator;
@@ -246,6 +246,7 @@ namespace Sim
 		QString m_portEquipmentID;
 		HostAddressPort m_tuningSourceIP;
 		int m_moduleType = 0;
+		int m_tuningProtocolVersion = Fotip::V2;
 		int m_lmNumber = -1;
 		int m_subsystemKey = -1;
 		quint64 m_lmUniqueID = 0;
@@ -275,7 +276,7 @@ namespace Sim
 		std::optional<qint64> m_waitingConfirmationID;
 		int m_receivedConfirmationsCount = 0;
 
-		RupFotipV2 m_delayedReply;
+		RupFotip m_delayedReply;
 	};
 }
 

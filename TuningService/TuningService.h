@@ -57,6 +57,8 @@ namespace Tuning
 
 		bool isControlled(const QString& lmEquipmentID, const QString& lanEquipmentID) const;
 
+		void logTuningPacket(bool request, Fotip::OpCode opCode, quint16 rupNumerator, quint64 fotipNumerator);
+
 	signals:
 
 	public slots:
@@ -113,6 +115,7 @@ namespace Tuning
 	private:
 		CircularLoggerShared m_logger;
 		CircularLoggerShared m_tuningLog;
+		CircularLoggerShared m_tuningPacketLog;
 
 		TuningServiceSettings m_settings;
 
