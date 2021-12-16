@@ -275,6 +275,8 @@ namespace Sim
 		//	BCOMP, OpCode 10
 		//
 		void afb_bcomp_v111(AfbComponentInstance* instance);
+		void afb_bcomp_v112(AfbComponentInstance* instance);
+		void afb_bcomp_private(AfbComponentInstance* instance, int conf, int version);
 
 		//	DAMPER, OpCode 11
 		//
@@ -283,10 +285,14 @@ namespace Sim
 		//	MEM - Median and Extremum, OpCode 12
 		//
 		void afb_mem_v7(AfbComponentInstance* instance);
+		void afb_mem_v8(AfbComponentInstance* instance);
+		void afb_mem_private(AfbComponentInstance* instance, int conf, int count, int version);
 
 		//	MATH, OpCode 13
 		//
 		void afb_math_v104(AfbComponentInstance* instance);
+		void afb_math_v105(AfbComponentInstance* instance);
+		void afb_math_private(AfbComponentInstance* instance, int conf, int version);
 
 		//	SCALE, OpCode 14
 		//
@@ -295,6 +301,8 @@ namespace Sim
 		//	FUNC, OpCode 16
 		//
 		void afb_func_v3(AfbComponentInstance* instance);
+		void afb_func_v4(AfbComponentInstance* instance);
+		void afb_func_private(AfbComponentInstance* instance, int conf, int version);
 
 		//	INTEGRATOR, OpCode 17
 		//
@@ -307,6 +315,8 @@ namespace Sim
 		void afb_dpcomp_v3(AfbComponentInstance* instance);
 		void afb_dpcomp_v4(AfbComponentInstance* instance);
 		void afb_dpcomp_v5(AfbComponentInstance* instance);
+		void afb_dpcomp_v6(AfbComponentInstance* instance);
+		void afb_dpcomp_private(AfbComponentInstance* instance, int conf, int version);
 
 		//	MUX, OpCode 21
 		//
@@ -417,16 +427,21 @@ namespace Sim
 			{QStringLiteral("afb_bcod_v104"),		&CommandProcessor_LM5_LM6::afb_bcod_v104},				// 8
 			{QStringLiteral("afb_bdec_v103"),		&CommandProcessor_LM5_LM6::afb_bdec_v103},				// 9
 			{QStringLiteral("afb_bcomp_v111"),		&CommandProcessor_LM5_LM6::afb_bcomp_v111},				// 10
+			{QStringLiteral("afb_bcomp_v112"),		&CommandProcessor_LM5_LM6::afb_bcomp_v112},				// 10
 			{QStringLiteral("afb_damper_v112"),		&CommandProcessor_LM5_LM6::afb_damper_v112},			// 11
 			{QStringLiteral("afb_mem_v7"),			&CommandProcessor_LM5_LM6::afb_mem_v7},					// 12
+			{QStringLiteral("afb_mem_v8"),			&CommandProcessor_LM5_LM6::afb_mem_v8},					// 12
 			{QStringLiteral("afb_math_v104"),		&CommandProcessor_LM5_LM6::afb_math_v104},				// 13
+			{QStringLiteral("afb_math_v105"),		&CommandProcessor_LM5_LM6::afb_math_v105},				// 13
 			{QStringLiteral("afb_scale_v108"),		&CommandProcessor_LM5_LM6::afb_scale_v108},				// 14
 			{QStringLiteral("afb_func_v3"),			&CommandProcessor_LM5_LM6::afb_func_v3},				// 16
+			{QStringLiteral("afb_func_v4"),			&CommandProcessor_LM5_LM6::afb_func_v4},				// 16
 			{QStringLiteral("afb_int_v6_tiunlim"),	&CommandProcessor_LM5_LM6::afb_int_v6_tiunlim},			// 17	ti is unlimited
 			{QStringLiteral("afb_int_v6_ti350000"),	&CommandProcessor_LM5_LM6::afb_int_v6_ti350000},		// 17	ti is limited to 350000ms
 			{QStringLiteral("afb_dpcomp_v3"),		&CommandProcessor_LM5_LM6::afb_dpcomp_v3},				// 20
 			{QStringLiteral("afb_dpcomp_v4"),		&CommandProcessor_LM5_LM6::afb_dpcomp_v4},				// 20
 			{QStringLiteral("afb_dpcomp_v5"),		&CommandProcessor_LM5_LM6::afb_dpcomp_v5},				// 20
+			{QStringLiteral("afb_dpcomp_v6"),		&CommandProcessor_LM5_LM6::afb_dpcomp_v6},				// 20
 			{QStringLiteral("afb_mux_v1"),			&CommandProcessor_LM5_LM6::afb_mux_v1},					// 21
 			{QStringLiteral("afb_latch_v4"),		&CommandProcessor_LM5_LM6::afb_latch_v4},				// 22
 			{QStringLiteral("afb_latch_v5"),		&CommandProcessor_LM5_LM6::afb_latch_v5},				// 22
@@ -440,6 +455,7 @@ namespace Sim
 			{QStringLiteral("afb_mismatch_v3"),		&CommandProcessor_LM5_LM6::afb_mismatch_v3},			// 27
 			{QStringLiteral("afb_mismatch_v4"),		&CommandProcessor_LM5_LM6::afb_mismatch_v4},			// 27
 			{QStringLiteral("afb_tconv_v0"),		&CommandProcessor_LM5_LM6::afb_tconv_v0},				// 28
+			{QStringLiteral("afb_tconv_v1"),		&CommandProcessor_LM5_LM6::afb_tconv_v1},				// 28
 			{QStringLiteral("afb_indication_v1"),	&CommandProcessor_LM5_LM6::afb_indication_v1},			// 29
 			{QStringLiteral("afb_pulse_gen_v0"),	&CommandProcessor_LM5_LM6::afb_pulse_gen_v0},			// 30
 		};

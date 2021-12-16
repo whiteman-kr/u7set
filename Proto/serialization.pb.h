@@ -61,7 +61,7 @@ struct TableStruct_serialization_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[104]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[107]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -193,6 +193,12 @@ extern IndicatorArrowIndicatorDefaultTypeInternal _IndicatorArrowIndicator_defau
 class IndicatorHistogramVert;
 struct IndicatorHistogramVertDefaultTypeInternal;
 extern IndicatorHistogramVertDefaultTypeInternal _IndicatorHistogramVert_default_instance_;
+class IndicatorTrend;
+struct IndicatorTrendDefaultTypeInternal;
+extern IndicatorTrendDefaultTypeInternal _IndicatorTrend_default_instance_;
+class IndicatorTrendSignalParam;
+struct IndicatorTrendSignalParamDefaultTypeInternal;
+extern IndicatorTrendSignalParamDefaultTypeInternal _IndicatorTrendSignalParam_default_instance_;
 class LmComparatorSet;
 struct LmComparatorSetDefaultTypeInternal;
 extern LmComparatorSetDefaultTypeInternal _LmComparatorSet_default_instance_;
@@ -238,6 +244,9 @@ extern SchemaDetailsDefaultTypeInternal _SchemaDetails_default_instance_;
 class SchemaDetailsSet;
 struct SchemaDetailsSetDefaultTypeInternal;
 extern SchemaDetailsSetDefaultTypeInternal _SchemaDetailsSet_default_instance_;
+class SchemaDetails_TrendIndicatorSchemaItems;
+struct SchemaDetails_TrendIndicatorSchemaItemsDefaultTypeInternal;
+extern SchemaDetails_TrendIndicatorSchemaItemsDefaultTypeInternal _SchemaDetails_TrendIndicatorSchemaItems_default_instance_;
 class SchemaItem;
 struct SchemaItemDefaultTypeInternal;
 extern SchemaItemDefaultTypeInternal _SchemaItem_default_instance_;
@@ -425,6 +434,8 @@ template<> ::Proto::FontParam* Arena::CreateMaybeMessage<::Proto::FontParam>(Are
 template<> ::Proto::ImageItem* Arena::CreateMaybeMessage<::Proto::ImageItem>(Arena*);
 template<> ::Proto::IndicatorArrowIndicator* Arena::CreateMaybeMessage<::Proto::IndicatorArrowIndicator>(Arena*);
 template<> ::Proto::IndicatorHistogramVert* Arena::CreateMaybeMessage<::Proto::IndicatorHistogramVert>(Arena*);
+template<> ::Proto::IndicatorTrend* Arena::CreateMaybeMessage<::Proto::IndicatorTrend>(Arena*);
+template<> ::Proto::IndicatorTrendSignalParam* Arena::CreateMaybeMessage<::Proto::IndicatorTrendSignalParam>(Arena*);
 template<> ::Proto::LmComparatorSet* Arena::CreateMaybeMessage<::Proto::LmComparatorSet>(Arena*);
 template<> ::Proto::LogicSchema* Arena::CreateMaybeMessage<::Proto::LogicSchema>(Arena*);
 template<> ::Proto::MetrologySignal* Arena::CreateMaybeMessage<::Proto::MetrologySignal>(Arena*);
@@ -440,6 +451,7 @@ template<> ::Proto::ProtoAppSignalData* Arena::CreateMaybeMessage<::Proto::Proto
 template<> ::Proto::Schema* Arena::CreateMaybeMessage<::Proto::Schema>(Arena*);
 template<> ::Proto::SchemaDetails* Arena::CreateMaybeMessage<::Proto::SchemaDetails>(Arena*);
 template<> ::Proto::SchemaDetailsSet* Arena::CreateMaybeMessage<::Proto::SchemaDetailsSet>(Arena*);
+template<> ::Proto::SchemaDetails_TrendIndicatorSchemaItems* Arena::CreateMaybeMessage<::Proto::SchemaDetails_TrendIndicatorSchemaItems>(Arena*);
 template<> ::Proto::SchemaItem* Arena::CreateMaybeMessage<::Proto::SchemaItem>(Arena*);
 template<> ::Proto::SchemaItemAfb* Arena::CreateMaybeMessage<::Proto::SchemaItemAfb>(Arena*);
 template<> ::Proto::SchemaItemBus* Arena::CreateMaybeMessage<::Proto::SchemaItemBus>(Arena*);
@@ -8663,24 +8675,33 @@ class IndicatorHistogramVert PROTOBUF_FINAL :
 
   enum : int {
     kCustomSetPointsFieldNumber = 72,
+    kSignalColorsFieldNumber = 118,
+    kFontFieldNumber = 109,
     kStartValueFieldNumber = 1,
     kEndValueFieldNumber = 2,
     kBarWidthFieldNumber = 16,
     kLeftMarginFieldNumber = 20,
     kTopMarginFieldNumber = 21,
-    kScaleTypeFieldNumber = 75,
     kRightMarginFieldNumber = 22,
     kBottomMarginFieldNumber = 23,
+    kDrawRectFieldNumber = 110,
     kDrawGridForAllBarsFieldNumber = 41,
     kDrawGridValueForAllBarsFieldNumber = 43,
     kDrawSetpointsFieldNumber = 70,
+    kScaleTypeFieldNumber = 75,
+    kSignalSourceFieldNumber = 100,
+    kLineWeightFieldNumber = 111,
+    kBackgroundColorFieldNumber = 116,
+    kLineColorFieldNumber = 117,
+    kAnalogFormatFieldNumber = 104,
+    kLinearGridMainStepFieldNumber = 50,
+    kLinearGridSmallStepFieldNumber = 51,
+    kLogarithmicGridMainStepFieldNumber = 52,
     kDrawBarRectFieldNumber = 32,
     kDrawGridFieldNumber = 40,
     kDrawGridValuesFieldNumber = 42,
     kDrawGridValueUnitsFieldNumber = 44,
-    kLinearGridMainStepFieldNumber = 50,
-    kLinearGridSmallStepFieldNumber = 51,
-    kLogarithmicGridMainStepFieldNumber = 52,
+    kPrecisionFieldNumber = 103,
     kLogarithmicGridSmallStepFieldNumber = 53,
   };
   // repeated .Proto.VFrameSetPoint customSetPoints = 72;
@@ -8700,6 +8721,46 @@ class IndicatorHistogramVert PROTOBUF_FINAL :
   ::Proto::VFrameSetPoint* add_customsetpoints();
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::VFrameSetPoint >&
       customsetpoints() const;
+
+  // repeated uint32 signalColors = 118;
+  int signalcolors_size() const;
+  private:
+  int _internal_signalcolors_size() const;
+  public:
+  void clear_signalcolors();
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_signalcolors(int index) const;
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint32 >&
+      _internal_signalcolors() const;
+  void _internal_add_signalcolors(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint32 >*
+      _internal_mutable_signalcolors();
+  public:
+  ::PROTOBUF_NAMESPACE_ID::uint32 signalcolors(int index) const;
+  void set_signalcolors(int index, ::PROTOBUF_NAMESPACE_ID::uint32 value);
+  void add_signalcolors(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint32 >&
+      signalcolors() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint32 >*
+      mutable_signalcolors();
+
+  // optional .Proto.FontParam font = 109;
+  bool has_font() const;
+  private:
+  bool _internal_has_font() const;
+  public:
+  void clear_font();
+  const ::Proto::FontParam& font() const;
+  ::Proto::FontParam* release_font();
+  ::Proto::FontParam* mutable_font();
+  void set_allocated_font(::Proto::FontParam* font);
+  private:
+  const ::Proto::FontParam& _internal_font() const;
+  ::Proto::FontParam* _internal_mutable_font();
+  public:
+  void unsafe_arena_set_allocated_font(
+      ::Proto::FontParam* font);
+  ::Proto::FontParam* unsafe_arena_release_font();
 
   // optional double startValue = 1;
   bool has_startvalue() const;
@@ -8766,19 +8827,6 @@ class IndicatorHistogramVert PROTOBUF_FINAL :
   void _internal_set_topmargin(double value);
   public:
 
-  // optional int32 scaleType = 75 [default = 0];
-  bool has_scaletype() const;
-  private:
-  bool _internal_has_scaletype() const;
-  public:
-  void clear_scaletype();
-  ::PROTOBUF_NAMESPACE_ID::int32 scaletype() const;
-  void set_scaletype(::PROTOBUF_NAMESPACE_ID::int32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_scaletype() const;
-  void _internal_set_scaletype(::PROTOBUF_NAMESPACE_ID::int32 value);
-  public:
-
   // optional double rightMargin = 22;
   bool has_rightmargin() const;
   private:
@@ -8803,6 +8851,19 @@ class IndicatorHistogramVert PROTOBUF_FINAL :
   private:
   double _internal_bottommargin() const;
   void _internal_set_bottommargin(double value);
+  public:
+
+  // optional bool drawRect = 110 [default = false];
+  bool has_drawrect() const;
+  private:
+  bool _internal_has_drawrect() const;
+  public:
+  void clear_drawrect();
+  bool drawrect() const;
+  void set_drawrect(bool value);
+  private:
+  bool _internal_drawrect() const;
+  void _internal_set_drawrect(bool value);
   public:
 
   // optional bool drawGridForAllBars = 41 [default = false];
@@ -8842,6 +8903,123 @@ class IndicatorHistogramVert PROTOBUF_FINAL :
   private:
   ::PROTOBUF_NAMESPACE_ID::int32 _internal_drawsetpoints() const;
   void _internal_set_drawsetpoints(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int32 scaleType = 75 [default = 0];
+  bool has_scaletype() const;
+  private:
+  bool _internal_has_scaletype() const;
+  public:
+  void clear_scaletype();
+  ::PROTOBUF_NAMESPACE_ID::int32 scaletype() const;
+  void set_scaletype(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_scaletype() const;
+  void _internal_set_scaletype(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int32 signalSource = 100 [default = 0];
+  bool has_signalsource() const;
+  private:
+  bool _internal_has_signalsource() const;
+  public:
+  void clear_signalsource();
+  ::PROTOBUF_NAMESPACE_ID::int32 signalsource() const;
+  void set_signalsource(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_signalsource() const;
+  void _internal_set_signalsource(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional double lineWeight = 111 [default = 0];
+  bool has_lineweight() const;
+  private:
+  bool _internal_has_lineweight() const;
+  public:
+  void clear_lineweight();
+  double lineweight() const;
+  void set_lineweight(double value);
+  private:
+  double _internal_lineweight() const;
+  void _internal_set_lineweight(double value);
+  public:
+
+  // optional uint32 backgroundColor = 116;
+  bool has_backgroundcolor() const;
+  private:
+  bool _internal_has_backgroundcolor() const;
+  public:
+  void clear_backgroundcolor();
+  ::PROTOBUF_NAMESPACE_ID::uint32 backgroundcolor() const;
+  void set_backgroundcolor(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_backgroundcolor() const;
+  void _internal_set_backgroundcolor(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // optional uint32 lineColor = 117;
+  bool has_linecolor() const;
+  private:
+  bool _internal_has_linecolor() const;
+  public:
+  void clear_linecolor();
+  ::PROTOBUF_NAMESPACE_ID::uint32 linecolor() const;
+  void set_linecolor(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_linecolor() const;
+  void _internal_set_linecolor(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // optional int32 analogFormat = 104 [default = 102];
+  bool has_analogformat() const;
+  private:
+  bool _internal_has_analogformat() const;
+  public:
+  void clear_analogformat();
+  ::PROTOBUF_NAMESPACE_ID::int32 analogformat() const;
+  void set_analogformat(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_analogformat() const;
+  void _internal_set_analogformat(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional double linearGridMainStep = 50 [default = 50];
+  bool has_lineargridmainstep() const;
+  private:
+  bool _internal_has_lineargridmainstep() const;
+  public:
+  void clear_lineargridmainstep();
+  double lineargridmainstep() const;
+  void set_lineargridmainstep(double value);
+  private:
+  double _internal_lineargridmainstep() const;
+  void _internal_set_lineargridmainstep(double value);
+  public:
+
+  // optional double linearGridSmallStep = 51 [default = 10];
+  bool has_lineargridsmallstep() const;
+  private:
+  bool _internal_has_lineargridsmallstep() const;
+  public:
+  void clear_lineargridsmallstep();
+  double lineargridsmallstep() const;
+  void set_lineargridsmallstep(double value);
+  private:
+  double _internal_lineargridsmallstep() const;
+  void _internal_set_lineargridsmallstep(double value);
+  public:
+
+  // optional double logarithmicGridMainStep = 52 [default = 1];
+  bool has_logarithmicgridmainstep() const;
+  private:
+  bool _internal_has_logarithmicgridmainstep() const;
+  public:
+  void clear_logarithmicgridmainstep();
+  double logarithmicgridmainstep() const;
+  void set_logarithmicgridmainstep(double value);
+  private:
+  double _internal_logarithmicgridmainstep() const;
+  void _internal_set_logarithmicgridmainstep(double value);
   public:
 
   // optional bool drawBarRect = 32 [default = true];
@@ -8896,43 +9074,17 @@ class IndicatorHistogramVert PROTOBUF_FINAL :
   void _internal_set_drawgridvalueunits(bool value);
   public:
 
-  // optional double linearGridMainStep = 50 [default = 50];
-  bool has_lineargridmainstep() const;
+  // optional int32 precision = 103 [default = 2];
+  bool has_precision() const;
   private:
-  bool _internal_has_lineargridmainstep() const;
+  bool _internal_has_precision() const;
   public:
-  void clear_lineargridmainstep();
-  double lineargridmainstep() const;
-  void set_lineargridmainstep(double value);
+  void clear_precision();
+  ::PROTOBUF_NAMESPACE_ID::int32 precision() const;
+  void set_precision(::PROTOBUF_NAMESPACE_ID::int32 value);
   private:
-  double _internal_lineargridmainstep() const;
-  void _internal_set_lineargridmainstep(double value);
-  public:
-
-  // optional double linearGridSmallStep = 51 [default = 10];
-  bool has_lineargridsmallstep() const;
-  private:
-  bool _internal_has_lineargridsmallstep() const;
-  public:
-  void clear_lineargridsmallstep();
-  double lineargridsmallstep() const;
-  void set_lineargridsmallstep(double value);
-  private:
-  double _internal_lineargridsmallstep() const;
-  void _internal_set_lineargridsmallstep(double value);
-  public:
-
-  // optional double logarithmicGridMainStep = 52 [default = 1];
-  bool has_logarithmicgridmainstep() const;
-  private:
-  bool _internal_has_logarithmicgridmainstep() const;
-  public:
-  void clear_logarithmicgridmainstep();
-  double logarithmicgridmainstep() const;
-  void set_logarithmicgridmainstep(double value);
-  private:
-  double _internal_logarithmicgridmainstep() const;
-  void _internal_set_logarithmicgridmainstep(double value);
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_precision() const;
+  void _internal_set_precision(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
   // optional double logarithmicGridSmallStep = 53 [default = 0.5];
@@ -8958,24 +9110,33 @@ class IndicatorHistogramVert PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::VFrameSetPoint > customsetpoints_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint32 > signalcolors_;
+  ::Proto::FontParam* font_;
   double startvalue_;
   double endvalue_;
   double barwidth_;
   double leftmargin_;
   double topmargin_;
-  ::PROTOBUF_NAMESPACE_ID::int32 scaletype_;
   double rightmargin_;
   double bottommargin_;
+  bool drawrect_;
   bool drawgridforallbars_;
   bool drawgridvalueforallbars_;
   ::PROTOBUF_NAMESPACE_ID::int32 drawsetpoints_;
+  ::PROTOBUF_NAMESPACE_ID::int32 scaletype_;
+  ::PROTOBUF_NAMESPACE_ID::int32 signalsource_;
+  double lineweight_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 backgroundcolor_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 linecolor_;
+  ::PROTOBUF_NAMESPACE_ID::int32 analogformat_;
+  double lineargridmainstep_;
+  double lineargridsmallstep_;
+  double logarithmicgridmainstep_;
   bool drawbarrect_;
   bool drawgrid_;
   bool drawgridvalues_;
   bool drawgridvalueunits_;
-  double lineargridmainstep_;
-  double lineargridsmallstep_;
-  double logarithmicgridmainstep_;
+  ::PROTOBUF_NAMESPACE_ID::int32 precision_;
   double logarithmicgridsmallstep_;
   friend struct ::TableStruct_serialization_2eproto;
 };
@@ -9175,6 +9336,414 @@ class IndicatorArrowIndicator PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class IndicatorTrendSignalParam PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.IndicatorTrendSignalParam) */ {
+ public:
+  inline IndicatorTrendSignalParam() : IndicatorTrendSignalParam(nullptr) {}
+  virtual ~IndicatorTrendSignalParam();
+  explicit constexpr IndicatorTrendSignalParam(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  IndicatorTrendSignalParam(const IndicatorTrendSignalParam& from);
+  IndicatorTrendSignalParam(IndicatorTrendSignalParam&& from) noexcept
+    : IndicatorTrendSignalParam() {
+    *this = ::std::move(from);
+  }
+
+  inline IndicatorTrendSignalParam& operator=(const IndicatorTrendSignalParam& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline IndicatorTrendSignalParam& operator=(IndicatorTrendSignalParam&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
+    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
+  }
+  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
+    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const IndicatorTrendSignalParam& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const IndicatorTrendSignalParam* internal_default_instance() {
+    return reinterpret_cast<const IndicatorTrendSignalParam*>(
+               &_IndicatorTrendSignalParam_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    33;
+
+  friend void swap(IndicatorTrendSignalParam& a, IndicatorTrendSignalParam& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(IndicatorTrendSignalParam* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(IndicatorTrendSignalParam* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline IndicatorTrendSignalParam* New() const final {
+    return CreateMaybeMessage<IndicatorTrendSignalParam>(nullptr);
+  }
+
+  IndicatorTrendSignalParam* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<IndicatorTrendSignalParam>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const IndicatorTrendSignalParam& from);
+  void MergeFrom(const IndicatorTrendSignalParam& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(IndicatorTrendSignalParam* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Proto.IndicatorTrendSignalParam";
+  }
+  protected:
+  explicit IndicatorTrendSignalParam(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_serialization_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kColorFieldNumber = 2,
+    kLineWieghtFieldNumber = 3,
+    kLowLimitFieldNumber = 20,
+    kHighLimitFieldNumber = 21,
+  };
+  // optional fixed32 color = 2;
+  bool has_color() const;
+  private:
+  bool _internal_has_color() const;
+  public:
+  void clear_color();
+  ::PROTOBUF_NAMESPACE_ID::uint32 color() const;
+  void set_color(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_color() const;
+  void _internal_set_color(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // optional int32 lineWieght = 3;
+  bool has_linewieght() const;
+  private:
+  bool _internal_has_linewieght() const;
+  public:
+  void clear_linewieght();
+  ::PROTOBUF_NAMESPACE_ID::int32 linewieght() const;
+  void set_linewieght(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_linewieght() const;
+  void _internal_set_linewieght(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional double lowLimit = 20;
+  bool has_lowlimit() const;
+  private:
+  bool _internal_has_lowlimit() const;
+  public:
+  void clear_lowlimit();
+  double lowlimit() const;
+  void set_lowlimit(double value);
+  private:
+  double _internal_lowlimit() const;
+  void _internal_set_lowlimit(double value);
+  public:
+
+  // optional double highLimit = 21;
+  bool has_highlimit() const;
+  private:
+  bool _internal_has_highlimit() const;
+  public:
+  void clear_highlimit();
+  double highlimit() const;
+  void set_highlimit(double value);
+  private:
+  double _internal_highlimit() const;
+  void _internal_set_highlimit(double value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:Proto.IndicatorTrendSignalParam)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 color_;
+  ::PROTOBUF_NAMESPACE_ID::int32 linewieght_;
+  double lowlimit_;
+  double highlimit_;
+  friend struct ::TableStruct_serialization_2eproto;
+};
+// -------------------------------------------------------------------
+
+class IndicatorTrend PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.IndicatorTrend) */ {
+ public:
+  inline IndicatorTrend() : IndicatorTrend(nullptr) {}
+  virtual ~IndicatorTrend();
+  explicit constexpr IndicatorTrend(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  IndicatorTrend(const IndicatorTrend& from);
+  IndicatorTrend(IndicatorTrend&& from) noexcept
+    : IndicatorTrend() {
+    *this = ::std::move(from);
+  }
+
+  inline IndicatorTrend& operator=(const IndicatorTrend& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline IndicatorTrend& operator=(IndicatorTrend&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
+    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
+  }
+  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
+    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const IndicatorTrend& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const IndicatorTrend* internal_default_instance() {
+    return reinterpret_cast<const IndicatorTrend*>(
+               &_IndicatorTrend_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    34;
+
+  friend void swap(IndicatorTrend& a, IndicatorTrend& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(IndicatorTrend* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(IndicatorTrend* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline IndicatorTrend* New() const final {
+    return CreateMaybeMessage<IndicatorTrend>(nullptr);
+  }
+
+  IndicatorTrend* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<IndicatorTrend>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const IndicatorTrend& from);
+  void MergeFrom(const IndicatorTrend& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(IndicatorTrend* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Proto.IndicatorTrend";
+  }
+  protected:
+  explicit IndicatorTrend(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_serialization_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kTrendSignalParamsFieldNumber = 110,
+    kDurationFieldNumber = 51,
+    kSampleperiodFieldNumber = 90,
+    kTimeTypeFieldNumber = 91,
+    kRedrawintervalFieldNumber = 100,
+  };
+  // repeated .Proto.IndicatorTrendSignalParam trendSignalParams = 110;
+  int trendsignalparams_size() const;
+  private:
+  int _internal_trendsignalparams_size() const;
+  public:
+  void clear_trendsignalparams();
+  ::Proto::IndicatorTrendSignalParam* mutable_trendsignalparams(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::IndicatorTrendSignalParam >*
+      mutable_trendsignalparams();
+  private:
+  const ::Proto::IndicatorTrendSignalParam& _internal_trendsignalparams(int index) const;
+  ::Proto::IndicatorTrendSignalParam* _internal_add_trendsignalparams();
+  public:
+  const ::Proto::IndicatorTrendSignalParam& trendsignalparams(int index) const;
+  ::Proto::IndicatorTrendSignalParam* add_trendsignalparams();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::IndicatorTrendSignalParam >&
+      trendsignalparams() const;
+
+  // optional int64 duration = 51;
+  bool has_duration() const;
+  private:
+  bool _internal_has_duration() const;
+  public:
+  void clear_duration();
+  ::PROTOBUF_NAMESPACE_ID::int64 duration() const;
+  void set_duration(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_duration() const;
+  void _internal_set_duration(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int32 sampleperiod = 90;
+  bool has_sampleperiod() const;
+  private:
+  bool _internal_has_sampleperiod() const;
+  public:
+  void clear_sampleperiod();
+  ::PROTOBUF_NAMESPACE_ID::int32 sampleperiod() const;
+  void set_sampleperiod(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_sampleperiod() const;
+  void _internal_set_sampleperiod(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int32 timeType = 91;
+  bool has_timetype() const;
+  private:
+  bool _internal_has_timetype() const;
+  public:
+  void clear_timetype();
+  ::PROTOBUF_NAMESPACE_ID::int32 timetype() const;
+  void set_timetype(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_timetype() const;
+  void _internal_set_timetype(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int64 redrawinterval = 100;
+  bool has_redrawinterval() const;
+  private:
+  bool _internal_has_redrawinterval() const;
+  public:
+  void clear_redrawinterval();
+  ::PROTOBUF_NAMESPACE_ID::int64 redrawinterval() const;
+  void set_redrawinterval(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_redrawinterval() const;
+  void _internal_set_redrawinterval(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:Proto.IndicatorTrend)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::IndicatorTrendSignalParam > trendsignalparams_;
+  ::PROTOBUF_NAMESPACE_ID::int64 duration_;
+  ::PROTOBUF_NAMESPACE_ID::int32 sampleperiod_;
+  ::PROTOBUF_NAMESPACE_ID::int32 timetype_;
+  ::PROTOBUF_NAMESPACE_ID::int64 redrawinterval_;
+  friend struct ::TableStruct_serialization_2eproto;
+};
+// -------------------------------------------------------------------
+
 class SchemaItemIndicator PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.SchemaItemIndicator) */ {
  public:
@@ -9225,7 +9794,7 @@ class SchemaItemIndicator PROTOBUF_FINAL :
                &_SchemaItemIndicator_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    33;
+    35;
 
   friend void swap(SchemaItemIndicator& a, SchemaItemIndicator& b) {
     a.Swap(&b);
@@ -9295,42 +9864,12 @@ class SchemaItemIndicator PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kSignalColorsFieldNumber = 18,
     kSignalIdsFieldNumber = 1,
-    kFontFieldNumber = 9,
     kIndicatorHistogramVertFieldNumber = 48,
     kIndicatorArrowIndicatorFieldNumber = 49,
-    kSignalSourceFieldNumber = 2,
-    kDrawRectFieldNumber = 10,
-    kLineWeightFieldNumber = 11,
+    kIndicatorTrendFieldNumber = 50,
     kTypeFieldNumber = 32,
-    kBackgroundColorFieldNumber = 16,
-    kLineColorFieldNumber = 17,
-    kPrecisionFieldNumber = 3,
-    kAnalogFormatFieldNumber = 4,
   };
-  // repeated uint32 signalColors = 18;
-  int signalcolors_size() const;
-  private:
-  int _internal_signalcolors_size() const;
-  public:
-  void clear_signalcolors();
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_signalcolors(int index) const;
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint32 >&
-      _internal_signalcolors() const;
-  void _internal_add_signalcolors(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint32 >*
-      _internal_mutable_signalcolors();
-  public:
-  ::PROTOBUF_NAMESPACE_ID::uint32 signalcolors(int index) const;
-  void set_signalcolors(int index, ::PROTOBUF_NAMESPACE_ID::uint32 value);
-  void add_signalcolors(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint32 >&
-      signalcolors() const;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint32 >*
-      mutable_signalcolors();
-
   // optional string signalIds = 1;
   bool has_signalids() const;
   private:
@@ -9350,24 +9889,6 @@ class SchemaItemIndicator PROTOBUF_FINAL :
   void _internal_set_signalids(const std::string& value);
   std::string* _internal_mutable_signalids();
   public:
-
-  // optional .Proto.FontParam font = 9;
-  bool has_font() const;
-  private:
-  bool _internal_has_font() const;
-  public:
-  void clear_font();
-  const ::Proto::FontParam& font() const;
-  ::Proto::FontParam* release_font();
-  ::Proto::FontParam* mutable_font();
-  void set_allocated_font(::Proto::FontParam* font);
-  private:
-  const ::Proto::FontParam& _internal_font() const;
-  ::Proto::FontParam* _internal_mutable_font();
-  public:
-  void unsafe_arena_set_allocated_font(
-      ::Proto::FontParam* font);
-  ::Proto::FontParam* unsafe_arena_release_font();
 
   // optional .Proto.IndicatorHistogramVert indicatorHistogramVert = 48;
   bool has_indicatorhistogramvert() const;
@@ -9405,44 +9926,23 @@ class SchemaItemIndicator PROTOBUF_FINAL :
       ::Proto::IndicatorArrowIndicator* indicatorarrowindicator);
   ::Proto::IndicatorArrowIndicator* unsafe_arena_release_indicatorarrowindicator();
 
-  // optional int32 signalSource = 2 [default = 0];
-  bool has_signalsource() const;
+  // optional .Proto.IndicatorTrend indicatorTrend = 50;
+  bool has_indicatortrend() const;
   private:
-  bool _internal_has_signalsource() const;
+  bool _internal_has_indicatortrend() const;
   public:
-  void clear_signalsource();
-  ::PROTOBUF_NAMESPACE_ID::int32 signalsource() const;
-  void set_signalsource(::PROTOBUF_NAMESPACE_ID::int32 value);
+  void clear_indicatortrend();
+  const ::Proto::IndicatorTrend& indicatortrend() const;
+  ::Proto::IndicatorTrend* release_indicatortrend();
+  ::Proto::IndicatorTrend* mutable_indicatortrend();
+  void set_allocated_indicatortrend(::Proto::IndicatorTrend* indicatortrend);
   private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_signalsource() const;
-  void _internal_set_signalsource(::PROTOBUF_NAMESPACE_ID::int32 value);
+  const ::Proto::IndicatorTrend& _internal_indicatortrend() const;
+  ::Proto::IndicatorTrend* _internal_mutable_indicatortrend();
   public:
-
-  // optional bool drawRect = 10 [default = false];
-  bool has_drawrect() const;
-  private:
-  bool _internal_has_drawrect() const;
-  public:
-  void clear_drawrect();
-  bool drawrect() const;
-  void set_drawrect(bool value);
-  private:
-  bool _internal_drawrect() const;
-  void _internal_set_drawrect(bool value);
-  public:
-
-  // optional double lineWeight = 11 [default = 0];
-  bool has_lineweight() const;
-  private:
-  bool _internal_has_lineweight() const;
-  public:
-  void clear_lineweight();
-  double lineweight() const;
-  void set_lineweight(double value);
-  private:
-  double _internal_lineweight() const;
-  void _internal_set_lineweight(double value);
-  public:
+  void unsafe_arena_set_allocated_indicatortrend(
+      ::Proto::IndicatorTrend* indicatortrend);
+  ::Proto::IndicatorTrend* unsafe_arena_release_indicatortrend();
 
   // optional uint32 type = 32 [default = 0];
   bool has_type() const;
@@ -9457,58 +9957,6 @@ class SchemaItemIndicator PROTOBUF_FINAL :
   void _internal_set_type(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
-  // optional uint32 backgroundColor = 16;
-  bool has_backgroundcolor() const;
-  private:
-  bool _internal_has_backgroundcolor() const;
-  public:
-  void clear_backgroundcolor();
-  ::PROTOBUF_NAMESPACE_ID::uint32 backgroundcolor() const;
-  void set_backgroundcolor(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_backgroundcolor() const;
-  void _internal_set_backgroundcolor(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  public:
-
-  // optional uint32 lineColor = 17;
-  bool has_linecolor() const;
-  private:
-  bool _internal_has_linecolor() const;
-  public:
-  void clear_linecolor();
-  ::PROTOBUF_NAMESPACE_ID::uint32 linecolor() const;
-  void set_linecolor(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_linecolor() const;
-  void _internal_set_linecolor(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  public:
-
-  // optional int32 precision = 3 [default = 2];
-  bool has_precision() const;
-  private:
-  bool _internal_has_precision() const;
-  public:
-  void clear_precision();
-  ::PROTOBUF_NAMESPACE_ID::int32 precision() const;
-  void set_precision(::PROTOBUF_NAMESPACE_ID::int32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_precision() const;
-  void _internal_set_precision(::PROTOBUF_NAMESPACE_ID::int32 value);
-  public:
-
-  // optional int32 analogFormat = 4 [default = 102];
-  bool has_analogformat() const;
-  private:
-  bool _internal_has_analogformat() const;
-  public:
-  void clear_analogformat();
-  ::PROTOBUF_NAMESPACE_ID::int32 analogformat() const;
-  void set_analogformat(::PROTOBUF_NAMESPACE_ID::int32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_analogformat() const;
-  void _internal_set_analogformat(::PROTOBUF_NAMESPACE_ID::int32 value);
-  public:
-
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemIndicator)
  private:
   class _Internal;
@@ -9518,19 +9966,11 @@ class SchemaItemIndicator PROTOBUF_FINAL :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint32 > signalcolors_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr signalids_;
-  ::Proto::FontParam* font_;
   ::Proto::IndicatorHistogramVert* indicatorhistogramvert_;
   ::Proto::IndicatorArrowIndicator* indicatorarrowindicator_;
-  ::PROTOBUF_NAMESPACE_ID::int32 signalsource_;
-  bool drawrect_;
-  double lineweight_;
+  ::Proto::IndicatorTrend* indicatortrend_;
   ::PROTOBUF_NAMESPACE_ID::uint32 type_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 backgroundcolor_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 linecolor_;
-  ::PROTOBUF_NAMESPACE_ID::int32 precision_;
-  ::PROTOBUF_NAMESPACE_ID::int32 analogformat_;
   friend struct ::TableStruct_serialization_2eproto;
 };
 // -------------------------------------------------------------------
@@ -9585,7 +10025,7 @@ class FblConnectionPoint PROTOBUF_FINAL :
                &_FblConnectionPoint_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    34;
+    36;
 
   friend void swap(FblConnectionPoint& a, FblConnectionPoint& b) {
     a.Swap(&b);
@@ -9846,7 +10286,7 @@ class FblItem PROTOBUF_FINAL :
                &_FblItem_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    35;
+    37;
 
   friend void swap(FblItem& a, FblItem& b) {
     a.Swap(&b);
@@ -9999,7 +10439,7 @@ class FblItemRect PROTOBUF_FINAL :
                &_FblItemRect_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    36;
+    38;
 
   friend void swap(FblItemRect& a, FblItemRect& b) {
     a.Swap(&b);
@@ -10290,7 +10730,7 @@ class FblItemLine PROTOBUF_FINAL :
                &_FblItemLine_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    37;
+    39;
 
   friend void swap(FblItemLine& a, FblItemLine& b) {
     a.Swap(&b);
@@ -10472,7 +10912,7 @@ class SchemaItemSignalColumn PROTOBUF_FINAL :
                &_SchemaItemSignalColumn_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    38;
+    40;
 
   friend void swap(SchemaItemSignalColumn& a, SchemaItemSignalColumn& b) {
     a.Swap(&b);
@@ -10651,7 +11091,7 @@ class SchemaItemSignal PROTOBUF_FINAL :
                &_SchemaItemSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    39;
+    41;
 
   friend void swap(SchemaItemSignal& a, SchemaItemSignal& b) {
     a.Swap(&b);
@@ -10918,7 +11358,7 @@ class SchemaItemInput PROTOBUF_FINAL :
                &_SchemaItemInput_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    40;
+    42;
 
   friend void swap(SchemaItemInput& a, SchemaItemInput& b) {
     a.Swap(&b);
@@ -11049,7 +11489,7 @@ class SchemaItemOutput PROTOBUF_FINAL :
                &_SchemaItemOutput_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    41;
+    43;
 
   friend void swap(SchemaItemOutput& a, SchemaItemOutput& b) {
     a.Swap(&b);
@@ -11180,7 +11620,7 @@ class SchemaItemInOut PROTOBUF_FINAL :
                &_SchemaItemInOut_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    42;
+    44;
 
   friend void swap(SchemaItemInOut& a, SchemaItemInOut& b) {
     a.Swap(&b);
@@ -11311,7 +11751,7 @@ class SchemaItemLink PROTOBUF_FINAL :
                &_SchemaItemLink_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    43;
+    45;
 
   friend void swap(SchemaItemLink& a, SchemaItemLink& b) {
     a.Swap(&b);
@@ -11442,7 +11882,7 @@ class SchemaItemAfb PROTOBUF_FINAL :
                &_SchemaItemAfb_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    44;
+    46;
 
   friend void swap(SchemaItemAfb& a, SchemaItemAfb& b) {
     a.Swap(&b);
@@ -11693,7 +12133,7 @@ class SchemaItemConst PROTOBUF_FINAL :
                &_SchemaItemConst_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    45;
+    47;
 
   friend void swap(SchemaItemConst& a, SchemaItemConst& b) {
     a.Swap(&b);
@@ -12028,7 +12468,7 @@ class SchemaItemConnection PROTOBUF_FINAL :
                &_SchemaItemConnection_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    46;
+    48;
 
   friend void swap(SchemaItemConnection& a, SchemaItemConnection& b) {
     a.Swap(&b);
@@ -12184,7 +12624,7 @@ class SchemaItemTransmitter PROTOBUF_FINAL :
                &_SchemaItemTransmitter_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    47;
+    49;
 
   friend void swap(SchemaItemTransmitter& a, SchemaItemTransmitter& b) {
     a.Swap(&b);
@@ -12333,7 +12773,7 @@ class SchemaItemReceiver PROTOBUF_FINAL :
                &_SchemaItemReceiver_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    48;
+    50;
 
   friend void swap(SchemaItemReceiver& a, SchemaItemReceiver& b) {
     a.Swap(&b);
@@ -12571,7 +13011,7 @@ class SchemaItemUfb PROTOBUF_FINAL :
                &_SchemaItemUfb_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    49;
+    51;
 
   friend void swap(SchemaItemUfb& a, SchemaItemUfb& b) {
     a.Swap(&b);
@@ -12806,7 +13246,7 @@ class SchemaItemTerminator PROTOBUF_FINAL :
                &_SchemaItemTerminator_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    50;
+    52;
 
   friend void swap(SchemaItemTerminator& a, SchemaItemTerminator& b) {
     a.Swap(&b);
@@ -12937,7 +13377,7 @@ class SchemaItemValue PROTOBUF_FINAL :
                &_SchemaItemValue_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    51;
+    53;
 
   friend void swap(SchemaItemValue& a, SchemaItemValue& b) {
     a.Swap(&b);
@@ -13285,7 +13725,7 @@ class SchemaItemImageValue PROTOBUF_FINAL :
                &_SchemaItemImageValue_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    52;
+    54;
 
   friend void swap(SchemaItemImageValue& a, SchemaItemImageValue& b) {
     a.Swap(&b);
@@ -13573,7 +14013,7 @@ class SchemaItemBus PROTOBUF_FINAL :
                &_SchemaItemBus_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    53;
+    55;
 
   friend void swap(SchemaItemBus& a, SchemaItemBus& b) {
     a.Swap(&b);
@@ -13764,7 +14204,7 @@ class SchemaItemBusComposer PROTOBUF_FINAL :
                &_SchemaItemBusComposer_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    54;
+    56;
 
   friend void swap(SchemaItemBusComposer& a, SchemaItemBusComposer& b) {
     a.Swap(&b);
@@ -13895,7 +14335,7 @@ class SchemaItemBusExtractor PROTOBUF_FINAL :
                &_SchemaItemBusExtractor_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    55;
+    57;
 
   friend void swap(SchemaItemBusExtractor& a, SchemaItemBusExtractor& b) {
     a.Swap(&b);
@@ -14048,7 +14488,7 @@ class SchemaItemLoopback PROTOBUF_FINAL :
                &_SchemaItemLoopback_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    56;
+    58;
 
   friend void swap(SchemaItemLoopback& a, SchemaItemLoopback& b) {
     a.Swap(&b);
@@ -14204,7 +14644,7 @@ class SchemaItemLoopbackSource PROTOBUF_FINAL :
                &_SchemaItemLoopbackSource_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    57;
+    59;
 
   friend void swap(SchemaItemLoopbackSource& a, SchemaItemLoopbackSource& b) {
     a.Swap(&b);
@@ -14335,7 +14775,7 @@ class SchemaItemLoopbackTarget PROTOBUF_FINAL :
                &_SchemaItemLoopbackTarget_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    58;
+    60;
 
   friend void swap(SchemaItemLoopbackTarget& a, SchemaItemLoopbackTarget& b) {
     a.Swap(&b);
@@ -14466,7 +14906,7 @@ class SchemaItemControl PROTOBUF_FINAL :
                &_SchemaItemControl_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    59;
+    61;
 
   friend void swap(SchemaItemControl& a, SchemaItemControl& b) {
     a.Swap(&b);
@@ -14644,7 +15084,7 @@ class SchemaItemPushButton PROTOBUF_FINAL :
                &_SchemaItemPushButton_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    60;
+    62;
 
   friend void swap(SchemaItemPushButton& a, SchemaItemPushButton& b) {
     a.Swap(&b);
@@ -14985,7 +15425,7 @@ class SchemaItemLineEdit PROTOBUF_FINAL :
                &_SchemaItemLineEdit_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    61;
+    63;
 
   friend void swap(SchemaItemLineEdit& a, SchemaItemLineEdit& b) {
     a.Swap(&b);
@@ -15311,7 +15751,7 @@ class DeviceObject PROTOBUF_FINAL :
                &_DeviceObject_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    62;
+    64;
 
   friend void swap(DeviceObject& a, DeviceObject& b) {
     a.Swap(&b);
@@ -15885,7 +16325,7 @@ class DeviceRoot PROTOBUF_FINAL :
                &_DeviceRoot_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    63;
+    65;
 
   friend void swap(DeviceRoot& a, DeviceRoot& b) {
     a.Swap(&b);
@@ -16016,7 +16456,7 @@ class DeviceSystem PROTOBUF_FINAL :
                &_DeviceSystem_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    64;
+    66;
 
   friend void swap(DeviceSystem& a, DeviceSystem& b) {
     a.Swap(&b);
@@ -16147,7 +16587,7 @@ class DeviceRack PROTOBUF_FINAL :
                &_DeviceRack_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    65;
+    67;
 
   friend void swap(DeviceRack& a, DeviceRack& b) {
     a.Swap(&b);
@@ -16278,7 +16718,7 @@ class DeviceChassis PROTOBUF_FINAL :
                &_DeviceChassis_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    66;
+    68;
 
   friend void swap(DeviceChassis& a, DeviceChassis& b) {
     a.Swap(&b);
@@ -16427,7 +16867,7 @@ class DeviceModule PROTOBUF_FINAL :
                &_DeviceModule_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    67;
+    69;
 
   friend void swap(DeviceModule& a, DeviceModule& b) {
     a.Swap(&b);
@@ -16650,7 +17090,7 @@ class DeviceController PROTOBUF_FINAL :
                &_DeviceController_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    68;
+    70;
 
   friend void swap(DeviceController& a, DeviceController& b) {
     a.Swap(&b);
@@ -16781,7 +17221,7 @@ class DeviceAppSignal PROTOBUF_FINAL :
                &_DeviceAppSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    69;
+    71;
 
   friend void swap(DeviceAppSignal& a, DeviceAppSignal& b) {
     a.Swap(&b);
@@ -17206,7 +17646,7 @@ class Workstation PROTOBUF_FINAL :
                &_Workstation_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    70;
+    72;
 
   friend void swap(Workstation& a, Workstation& b) {
     a.Swap(&b);
@@ -17355,7 +17795,7 @@ class Software PROTOBUF_FINAL :
                &_Software_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    71;
+    73;
 
   friend void swap(Software& a, Software& b) {
     a.Swap(&b);
@@ -17504,7 +17944,7 @@ class ModuleConfiguration PROTOBUF_FINAL :
                &_ModuleConfiguration_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    72;
+    74;
 
   friend void swap(ModuleConfiguration& a, ModuleConfiguration& b) {
     a.Swap(&b);
@@ -17702,7 +18142,7 @@ class ModuleConfigurationValue PROTOBUF_FINAL :
                &_ModuleConfigurationValue_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    73;
+    75;
 
   friend void swap(ModuleConfigurationValue& a, ModuleConfigurationValue& b) {
     a.Swap(&b);
@@ -17883,7 +18323,7 @@ class Property PROTOBUF_FINAL :
                &_Property_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    74;
+    76;
 
   friend void swap(Property& a, Property& b) {
     a.Swap(&b);
@@ -18064,7 +18504,7 @@ class SignalSpecPropValue PROTOBUF_FINAL :
                &_SignalSpecPropValue_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    75;
+    77;
 
   friend void swap(SignalSpecPropValue& a, SignalSpecPropValue& b) {
     a.Swap(&b);
@@ -18365,7 +18805,7 @@ class SignalSpecPropValues PROTOBUF_FINAL :
                &_SignalSpecPropValues_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    76;
+    78;
 
   friend void swap(SignalSpecPropValues& a, SignalSpecPropValues& b) {
     a.Swap(&b);
@@ -18518,7 +18958,7 @@ class Address16 PROTOBUF_FINAL :
                &_Address16_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    77;
+    79;
 
   friend void swap(Address16& a, Address16& b) {
     a.Swap(&b);
@@ -18685,7 +19125,7 @@ class Unit PROTOBUF_FINAL :
                &_Unit_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    78;
+    80;
 
   friend void swap(Unit& a, Unit& b) {
     a.Swap(&b);
@@ -18859,7 +19299,7 @@ class UnitSet PROTOBUF_FINAL :
                &_UnitSet_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    79;
+    81;
 
   friend void swap(UnitSet& a, UnitSet& b) {
     a.Swap(&b);
@@ -19012,7 +19452,7 @@ class TuningValue PROTOBUF_FINAL :
                &_TuningValue_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    80;
+    82;
 
   friend void swap(TuningValue& a, TuningValue& b) {
     a.Swap(&b);
@@ -19191,7 +19631,7 @@ class AppSignalDbField PROTOBUF_FINAL :
                &_AppSignalDbField_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    81;
+    83;
 
   friend void swap(AppSignalDbField& a, AppSignalDbField& b) {
     a.Swap(&b);
@@ -19475,7 +19915,7 @@ class StateFlagSignal PROTOBUF_FINAL :
                &_StateFlagSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    82;
+    84;
 
   friend void swap(StateFlagSignal& a, StateFlagSignal& b) {
     a.Swap(&b);
@@ -19646,7 +20086,7 @@ class AppSignalCalculatedParam PROTOBUF_FINAL :
                &_AppSignalCalculatedParam_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    83;
+    85;
 
   friend void swap(AppSignalCalculatedParam& a, AppSignalCalculatedParam& b) {
     a.Swap(&b);
@@ -19995,7 +20435,7 @@ class AppSignal PROTOBUF_FINAL :
                &_AppSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    84;
+    86;
 
   friend void swap(AppSignal& a, AppSignal& b) {
     a.Swap(&b);
@@ -20663,7 +21103,7 @@ class AppSignalSet PROTOBUF_FINAL :
                &_AppSignalSet_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    85;
+    87;
 
   friend void swap(AppSignalSet& a, AppSignalSet& b) {
     a.Swap(&b);
@@ -20816,7 +21256,7 @@ class ProtoAppSignalData PROTOBUF_FINAL :
                &_ProtoAppSignalData_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    86;
+    88;
 
   friend void swap(ProtoAppSignalData& a, ProtoAppSignalData& b) {
     a.Swap(&b);
@@ -21322,7 +21762,7 @@ class AppSignalState PROTOBUF_FINAL :
                &_AppSignalState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    87;
+    89;
 
   friend void swap(AppSignalState& a, AppSignalState& b) {
     a.Swap(&b);
@@ -21576,7 +22016,7 @@ class Connection PROTOBUF_FINAL :
                &_Connection_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    88;
+    90;
 
   friend void swap(Connection& a, Connection& b) {
     a.Swap(&b);
@@ -22125,7 +22565,7 @@ class SchemaDetailsSet PROTOBUF_FINAL :
                &_SchemaDetailsSet_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    89;
+    91;
 
   friend void swap(SchemaDetailsSet& a, SchemaDetailsSet& b) {
     a.Swap(&b);
@@ -22228,6 +22668,231 @@ class SchemaDetailsSet PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class SchemaDetails_TrendIndicatorSchemaItems PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.SchemaDetails.TrendIndicatorSchemaItems) */ {
+ public:
+  inline SchemaDetails_TrendIndicatorSchemaItems() : SchemaDetails_TrendIndicatorSchemaItems(nullptr) {}
+  virtual ~SchemaDetails_TrendIndicatorSchemaItems();
+  explicit constexpr SchemaDetails_TrendIndicatorSchemaItems(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  SchemaDetails_TrendIndicatorSchemaItems(const SchemaDetails_TrendIndicatorSchemaItems& from);
+  SchemaDetails_TrendIndicatorSchemaItems(SchemaDetails_TrendIndicatorSchemaItems&& from) noexcept
+    : SchemaDetails_TrendIndicatorSchemaItems() {
+    *this = ::std::move(from);
+  }
+
+  inline SchemaDetails_TrendIndicatorSchemaItems& operator=(const SchemaDetails_TrendIndicatorSchemaItems& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline SchemaDetails_TrendIndicatorSchemaItems& operator=(SchemaDetails_TrendIndicatorSchemaItems&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
+    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
+  }
+  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
+    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const SchemaDetails_TrendIndicatorSchemaItems& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const SchemaDetails_TrendIndicatorSchemaItems* internal_default_instance() {
+    return reinterpret_cast<const SchemaDetails_TrendIndicatorSchemaItems*>(
+               &_SchemaDetails_TrendIndicatorSchemaItems_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    92;
+
+  friend void swap(SchemaDetails_TrendIndicatorSchemaItems& a, SchemaDetails_TrendIndicatorSchemaItems& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(SchemaDetails_TrendIndicatorSchemaItems* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(SchemaDetails_TrendIndicatorSchemaItems* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline SchemaDetails_TrendIndicatorSchemaItems* New() const final {
+    return CreateMaybeMessage<SchemaDetails_TrendIndicatorSchemaItems>(nullptr);
+  }
+
+  SchemaDetails_TrendIndicatorSchemaItems* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<SchemaDetails_TrendIndicatorSchemaItems>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const SchemaDetails_TrendIndicatorSchemaItems& from);
+  void MergeFrom(const SchemaDetails_TrendIndicatorSchemaItems& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(SchemaDetails_TrendIndicatorSchemaItems* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Proto.SchemaDetails.TrendIndicatorSchemaItems";
+  }
+  protected:
+  explicit SchemaDetails_TrendIndicatorSchemaItems(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_serialization_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kAppSignalIdsFieldNumber = 6,
+    kItemUuidFieldNumber = 2,
+    kSamplePeriodFieldNumber = 3,
+    kTimeTypeFieldNumber = 4,
+    kDurationSecondsFieldNumber = 5,
+  };
+  // repeated string appSignalIds = 6;
+  int appsignalids_size() const;
+  private:
+  int _internal_appsignalids_size() const;
+  public:
+  void clear_appsignalids();
+  const std::string& appsignalids(int index) const;
+  std::string* mutable_appsignalids(int index);
+  void set_appsignalids(int index, const std::string& value);
+  void set_appsignalids(int index, std::string&& value);
+  void set_appsignalids(int index, const char* value);
+  void set_appsignalids(int index, const char* value, size_t size);
+  std::string* add_appsignalids();
+  void add_appsignalids(const std::string& value);
+  void add_appsignalids(std::string&& value);
+  void add_appsignalids(const char* value);
+  void add_appsignalids(const char* value, size_t size);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& appsignalids() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_appsignalids();
+  private:
+  const std::string& _internal_appsignalids(int index) const;
+  std::string* _internal_add_appsignalids();
+  public:
+
+  // optional .Proto.Uuid itemUuid = 2;
+  bool has_itemuuid() const;
+  private:
+  bool _internal_has_itemuuid() const;
+  public:
+  void clear_itemuuid();
+  const ::Proto::Uuid& itemuuid() const;
+  ::Proto::Uuid* release_itemuuid();
+  ::Proto::Uuid* mutable_itemuuid();
+  void set_allocated_itemuuid(::Proto::Uuid* itemuuid);
+  private:
+  const ::Proto::Uuid& _internal_itemuuid() const;
+  ::Proto::Uuid* _internal_mutable_itemuuid();
+  public:
+  void unsafe_arena_set_allocated_itemuuid(
+      ::Proto::Uuid* itemuuid);
+  ::Proto::Uuid* unsafe_arena_release_itemuuid();
+
+  // optional int32 samplePeriod = 3;
+  bool has_sampleperiod() const;
+  private:
+  bool _internal_has_sampleperiod() const;
+  public:
+  void clear_sampleperiod();
+  ::PROTOBUF_NAMESPACE_ID::int32 sampleperiod() const;
+  void set_sampleperiod(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_sampleperiod() const;
+  void _internal_set_sampleperiod(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int32 timeType = 4;
+  bool has_timetype() const;
+  private:
+  bool _internal_has_timetype() const;
+  public:
+  void clear_timetype();
+  ::PROTOBUF_NAMESPACE_ID::int32 timetype() const;
+  void set_timetype(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_timetype() const;
+  void _internal_set_timetype(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int32 durationSeconds = 5;
+  bool has_durationseconds() const;
+  private:
+  bool _internal_has_durationseconds() const;
+  public:
+  void clear_durationseconds();
+  ::PROTOBUF_NAMESPACE_ID::int32 durationseconds() const;
+  void set_durationseconds(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_durationseconds() const;
+  void _internal_set_durationseconds(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:Proto.SchemaDetails.TrendIndicatorSchemaItems)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> appsignalids_;
+  ::Proto::Uuid* itemuuid_;
+  ::PROTOBUF_NAMESPACE_ID::int32 sampleperiod_;
+  ::PROTOBUF_NAMESPACE_ID::int32 timetype_;
+  ::PROTOBUF_NAMESPACE_ID::int32 durationseconds_;
+  friend struct ::TableStruct_serialization_2eproto;
+};
+// -------------------------------------------------------------------
+
 class SchemaDetails PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.SchemaDetails) */ {
  public:
@@ -22278,7 +22943,7 @@ class SchemaDetails PROTOBUF_FINAL :
                &_SchemaDetails_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    90;
+    93;
 
   friend void swap(SchemaDetails& a, SchemaDetails& b) {
     a.Swap(&b);
@@ -22345,6 +23010,8 @@ class SchemaDetails PROTOBUF_FINAL :
 
   // nested types ----------------------------------------------------
 
+  typedef SchemaDetails_TrendIndicatorSchemaItems TrendIndicatorSchemaItems;
+
   // accessors -------------------------------------------------------
 
   enum : int {
@@ -22354,6 +23021,7 @@ class SchemaDetails PROTOBUF_FINAL :
     kGuidsFieldNumber = 23,
     kTagsFieldNumber = 24,
     kLoopbacksFieldNumber = 25,
+    kTrendIndicatorsFieldNumber = 30,
     kSchemaIdFieldNumber = 4,
     kCaptionFieldNumber = 5,
     kEquipmentIdFieldNumber = 7,
@@ -22500,6 +23168,24 @@ class SchemaDetails PROTOBUF_FINAL :
   std::string* _internal_add_loopbacks();
   public:
 
+  // repeated .Proto.SchemaDetails.TrendIndicatorSchemaItems trendIndicators = 30;
+  int trendindicators_size() const;
+  private:
+  int _internal_trendindicators_size() const;
+  public:
+  void clear_trendindicators();
+  ::Proto::SchemaDetails_TrendIndicatorSchemaItems* mutable_trendindicators(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::SchemaDetails_TrendIndicatorSchemaItems >*
+      mutable_trendindicators();
+  private:
+  const ::Proto::SchemaDetails_TrendIndicatorSchemaItems& _internal_trendindicators(int index) const;
+  ::Proto::SchemaDetails_TrendIndicatorSchemaItems* _internal_add_trendindicators();
+  public:
+  const ::Proto::SchemaDetails_TrendIndicatorSchemaItems& trendindicators(int index) const;
+  ::Proto::SchemaDetails_TrendIndicatorSchemaItems* add_trendindicators();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::SchemaDetails_TrendIndicatorSchemaItems >&
+      trendindicators() const;
+
   // optional string schemaId = 4;
   bool has_schemaid() const;
   private:
@@ -22641,6 +23327,7 @@ class SchemaDetails PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::Uuid > guids_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> tags_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> loopbacks_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::SchemaDetails_TrendIndicatorSchemaItems > trendindicators_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr schemaid_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr caption_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr equipmentid_;
@@ -22702,7 +23389,7 @@ class ArchSignal PROTOBUF_FINAL :
                &_ArchSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    91;
+    94;
 
   friend void swap(ArchSignal& a, ArchSignal& b) {
     a.Swap(&b);
@@ -22891,7 +23578,7 @@ class ArchSignals PROTOBUF_FINAL :
                &_ArchSignals_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    92;
+    95;
 
   friend void swap(ArchSignals& a, ArchSignals& b) {
     a.Swap(&b);
@@ -23044,7 +23731,7 @@ class BusSignal PROTOBUF_FINAL :
                &_BusSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    93;
+    96;
 
   friend void swap(BusSignal& a, BusSignal& b) {
     a.Swap(&b);
@@ -23491,7 +24178,7 @@ class Bus PROTOBUF_FINAL :
                &_Bus_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    94;
+    97;
 
   friend void swap(Bus& a, Bus& b) {
     a.Swap(&b);
@@ -23747,7 +24434,7 @@ class ComparatorSignal PROTOBUF_FINAL :
                &_ComparatorSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    95;
+    98;
 
   friend void swap(ComparatorSignal& a, ComparatorSignal& b) {
     a.Swap(&b);
@@ -23948,7 +24635,7 @@ class Comparator PROTOBUF_FINAL :
                &_Comparator_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    96;
+    99;
 
   friend void swap(Comparator& a, Comparator& b) {
     a.Swap(&b);
@@ -24286,7 +24973,7 @@ class LmComparatorSet PROTOBUF_FINAL :
                &_LmComparatorSet_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    97;
+    100;
 
   friend void swap(LmComparatorSet& a, LmComparatorSet& b) {
     a.Swap(&b);
@@ -24462,7 +25149,7 @@ class ComparatorSet PROTOBUF_FINAL :
                &_ComparatorSet_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    98;
+    101;
 
   friend void swap(ComparatorSet& a, ComparatorSet& b) {
     a.Swap(&b);
@@ -24615,7 +25302,7 @@ class MetrologySignalLocation PROTOBUF_FINAL :
                &_MetrologySignalLocation_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    99;
+    102;
 
   friend void swap(MetrologySignalLocation& a, MetrologySignalLocation& b) {
     a.Swap(&b);
@@ -24919,7 +25606,7 @@ class MetrologySignal PROTOBUF_FINAL :
                &_MetrologySignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    100;
+    103;
 
   friend void swap(MetrologySignal& a, MetrologySignal& b) {
     a.Swap(&b);
@@ -25228,7 +25915,7 @@ class MetrologySignalSet PROTOBUF_FINAL :
                &_MetrologySignalSet_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    101;
+    104;
 
   friend void swap(MetrologySignalSet& a, MetrologySignalSet& b) {
     a.Swap(&b);
@@ -25381,7 +26068,7 @@ class SimOverrideSignal PROTOBUF_FINAL :
                &_SimOverrideSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    102;
+    105;
 
   friend void swap(SimOverrideSignal& a, SimOverrideSignal& b) {
     a.Swap(&b);
@@ -25624,7 +26311,7 @@ class SimOverrideSignalWorkspace PROTOBUF_FINAL :
                &_SimOverrideSignalWorkspace_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    103;
+    106;
 
   friend void swap(SimOverrideSignalWorkspace& a, SimOverrideSignalWorkspace& b) {
     a.Swap(&b);
@@ -37319,9 +38006,335 @@ inline void VFrameSetPoint::set_allocated_outputappsignalid(std::string* outputa
 
 // IndicatorHistogramVert
 
+// optional int32 signalSource = 100 [default = 0];
+inline bool IndicatorHistogramVert::_internal_has_signalsource() const {
+  bool value = (_has_bits_[0] & 0x00002000u) != 0;
+  return value;
+}
+inline bool IndicatorHistogramVert::has_signalsource() const {
+  return _internal_has_signalsource();
+}
+inline void IndicatorHistogramVert::clear_signalsource() {
+  signalsource_ = 0;
+  _has_bits_[0] &= ~0x00002000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 IndicatorHistogramVert::_internal_signalsource() const {
+  return signalsource_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 IndicatorHistogramVert::signalsource() const {
+  // @@protoc_insertion_point(field_get:Proto.IndicatorHistogramVert.signalSource)
+  return _internal_signalsource();
+}
+inline void IndicatorHistogramVert::_internal_set_signalsource(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00002000u;
+  signalsource_ = value;
+}
+inline void IndicatorHistogramVert::set_signalsource(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_signalsource(value);
+  // @@protoc_insertion_point(field_set:Proto.IndicatorHistogramVert.signalSource)
+}
+
+// optional int32 precision = 103 [default = 2];
+inline bool IndicatorHistogramVert::_internal_has_precision() const {
+  bool value = (_has_bits_[0] & 0x02000000u) != 0;
+  return value;
+}
+inline bool IndicatorHistogramVert::has_precision() const {
+  return _internal_has_precision();
+}
+inline void IndicatorHistogramVert::clear_precision() {
+  precision_ = 2;
+  _has_bits_[0] &= ~0x02000000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 IndicatorHistogramVert::_internal_precision() const {
+  return precision_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 IndicatorHistogramVert::precision() const {
+  // @@protoc_insertion_point(field_get:Proto.IndicatorHistogramVert.precision)
+  return _internal_precision();
+}
+inline void IndicatorHistogramVert::_internal_set_precision(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x02000000u;
+  precision_ = value;
+}
+inline void IndicatorHistogramVert::set_precision(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_precision(value);
+  // @@protoc_insertion_point(field_set:Proto.IndicatorHistogramVert.precision)
+}
+
+// optional int32 analogFormat = 104 [default = 102];
+inline bool IndicatorHistogramVert::_internal_has_analogformat() const {
+  bool value = (_has_bits_[0] & 0x00020000u) != 0;
+  return value;
+}
+inline bool IndicatorHistogramVert::has_analogformat() const {
+  return _internal_has_analogformat();
+}
+inline void IndicatorHistogramVert::clear_analogformat() {
+  analogformat_ = 102;
+  _has_bits_[0] &= ~0x00020000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 IndicatorHistogramVert::_internal_analogformat() const {
+  return analogformat_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 IndicatorHistogramVert::analogformat() const {
+  // @@protoc_insertion_point(field_get:Proto.IndicatorHistogramVert.analogFormat)
+  return _internal_analogformat();
+}
+inline void IndicatorHistogramVert::_internal_set_analogformat(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00020000u;
+  analogformat_ = value;
+}
+inline void IndicatorHistogramVert::set_analogformat(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_analogformat(value);
+  // @@protoc_insertion_point(field_set:Proto.IndicatorHistogramVert.analogFormat)
+}
+
+// optional .Proto.FontParam font = 109;
+inline bool IndicatorHistogramVert::_internal_has_font() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  PROTOBUF_ASSUME(!value || font_ != nullptr);
+  return value;
+}
+inline bool IndicatorHistogramVert::has_font() const {
+  return _internal_has_font();
+}
+inline void IndicatorHistogramVert::clear_font() {
+  if (font_ != nullptr) font_->Clear();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const ::Proto::FontParam& IndicatorHistogramVert::_internal_font() const {
+  const ::Proto::FontParam* p = font_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Proto::FontParam&>(
+      ::Proto::_FontParam_default_instance_);
+}
+inline const ::Proto::FontParam& IndicatorHistogramVert::font() const {
+  // @@protoc_insertion_point(field_get:Proto.IndicatorHistogramVert.font)
+  return _internal_font();
+}
+inline void IndicatorHistogramVert::unsafe_arena_set_allocated_font(
+    ::Proto::FontParam* font) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(font_);
+  }
+  font_ = font;
+  if (font) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.IndicatorHistogramVert.font)
+}
+inline ::Proto::FontParam* IndicatorHistogramVert::release_font() {
+  _has_bits_[0] &= ~0x00000001u;
+  ::Proto::FontParam* temp = font_;
+  font_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::Proto::FontParam* IndicatorHistogramVert::unsafe_arena_release_font() {
+  // @@protoc_insertion_point(field_release:Proto.IndicatorHistogramVert.font)
+  _has_bits_[0] &= ~0x00000001u;
+  ::Proto::FontParam* temp = font_;
+  font_ = nullptr;
+  return temp;
+}
+inline ::Proto::FontParam* IndicatorHistogramVert::_internal_mutable_font() {
+  _has_bits_[0] |= 0x00000001u;
+  if (font_ == nullptr) {
+    auto* p = CreateMaybeMessage<::Proto::FontParam>(GetArena());
+    font_ = p;
+  }
+  return font_;
+}
+inline ::Proto::FontParam* IndicatorHistogramVert::mutable_font() {
+  // @@protoc_insertion_point(field_mutable:Proto.IndicatorHistogramVert.font)
+  return _internal_mutable_font();
+}
+inline void IndicatorHistogramVert::set_allocated_font(::Proto::FontParam* font) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete font_;
+  }
+  if (font) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(font);
+    if (message_arena != submessage_arena) {
+      font = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, font, submessage_arena);
+    }
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  font_ = font;
+  // @@protoc_insertion_point(field_set_allocated:Proto.IndicatorHistogramVert.font)
+}
+
+// optional bool drawRect = 110 [default = false];
+inline bool IndicatorHistogramVert::_internal_has_drawrect() const {
+  bool value = (_has_bits_[0] & 0x00000100u) != 0;
+  return value;
+}
+inline bool IndicatorHistogramVert::has_drawrect() const {
+  return _internal_has_drawrect();
+}
+inline void IndicatorHistogramVert::clear_drawrect() {
+  drawrect_ = false;
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline bool IndicatorHistogramVert::_internal_drawrect() const {
+  return drawrect_;
+}
+inline bool IndicatorHistogramVert::drawrect() const {
+  // @@protoc_insertion_point(field_get:Proto.IndicatorHistogramVert.drawRect)
+  return _internal_drawrect();
+}
+inline void IndicatorHistogramVert::_internal_set_drawrect(bool value) {
+  _has_bits_[0] |= 0x00000100u;
+  drawrect_ = value;
+}
+inline void IndicatorHistogramVert::set_drawrect(bool value) {
+  _internal_set_drawrect(value);
+  // @@protoc_insertion_point(field_set:Proto.IndicatorHistogramVert.drawRect)
+}
+
+// optional double lineWeight = 111 [default = 0];
+inline bool IndicatorHistogramVert::_internal_has_lineweight() const {
+  bool value = (_has_bits_[0] & 0x00004000u) != 0;
+  return value;
+}
+inline bool IndicatorHistogramVert::has_lineweight() const {
+  return _internal_has_lineweight();
+}
+inline void IndicatorHistogramVert::clear_lineweight() {
+  lineweight_ = 0;
+  _has_bits_[0] &= ~0x00004000u;
+}
+inline double IndicatorHistogramVert::_internal_lineweight() const {
+  return lineweight_;
+}
+inline double IndicatorHistogramVert::lineweight() const {
+  // @@protoc_insertion_point(field_get:Proto.IndicatorHistogramVert.lineWeight)
+  return _internal_lineweight();
+}
+inline void IndicatorHistogramVert::_internal_set_lineweight(double value) {
+  _has_bits_[0] |= 0x00004000u;
+  lineweight_ = value;
+}
+inline void IndicatorHistogramVert::set_lineweight(double value) {
+  _internal_set_lineweight(value);
+  // @@protoc_insertion_point(field_set:Proto.IndicatorHistogramVert.lineWeight)
+}
+
+// optional uint32 backgroundColor = 116;
+inline bool IndicatorHistogramVert::_internal_has_backgroundcolor() const {
+  bool value = (_has_bits_[0] & 0x00008000u) != 0;
+  return value;
+}
+inline bool IndicatorHistogramVert::has_backgroundcolor() const {
+  return _internal_has_backgroundcolor();
+}
+inline void IndicatorHistogramVert::clear_backgroundcolor() {
+  backgroundcolor_ = 0u;
+  _has_bits_[0] &= ~0x00008000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 IndicatorHistogramVert::_internal_backgroundcolor() const {
+  return backgroundcolor_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 IndicatorHistogramVert::backgroundcolor() const {
+  // @@protoc_insertion_point(field_get:Proto.IndicatorHistogramVert.backgroundColor)
+  return _internal_backgroundcolor();
+}
+inline void IndicatorHistogramVert::_internal_set_backgroundcolor(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _has_bits_[0] |= 0x00008000u;
+  backgroundcolor_ = value;
+}
+inline void IndicatorHistogramVert::set_backgroundcolor(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_backgroundcolor(value);
+  // @@protoc_insertion_point(field_set:Proto.IndicatorHistogramVert.backgroundColor)
+}
+
+// optional uint32 lineColor = 117;
+inline bool IndicatorHistogramVert::_internal_has_linecolor() const {
+  bool value = (_has_bits_[0] & 0x00010000u) != 0;
+  return value;
+}
+inline bool IndicatorHistogramVert::has_linecolor() const {
+  return _internal_has_linecolor();
+}
+inline void IndicatorHistogramVert::clear_linecolor() {
+  linecolor_ = 0u;
+  _has_bits_[0] &= ~0x00010000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 IndicatorHistogramVert::_internal_linecolor() const {
+  return linecolor_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 IndicatorHistogramVert::linecolor() const {
+  // @@protoc_insertion_point(field_get:Proto.IndicatorHistogramVert.lineColor)
+  return _internal_linecolor();
+}
+inline void IndicatorHistogramVert::_internal_set_linecolor(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _has_bits_[0] |= 0x00010000u;
+  linecolor_ = value;
+}
+inline void IndicatorHistogramVert::set_linecolor(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_linecolor(value);
+  // @@protoc_insertion_point(field_set:Proto.IndicatorHistogramVert.lineColor)
+}
+
+// repeated uint32 signalColors = 118;
+inline int IndicatorHistogramVert::_internal_signalcolors_size() const {
+  return signalcolors_.size();
+}
+inline int IndicatorHistogramVert::signalcolors_size() const {
+  return _internal_signalcolors_size();
+}
+inline void IndicatorHistogramVert::clear_signalcolors() {
+  signalcolors_.Clear();
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 IndicatorHistogramVert::_internal_signalcolors(int index) const {
+  return signalcolors_.Get(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 IndicatorHistogramVert::signalcolors(int index) const {
+  // @@protoc_insertion_point(field_get:Proto.IndicatorHistogramVert.signalColors)
+  return _internal_signalcolors(index);
+}
+inline void IndicatorHistogramVert::set_signalcolors(int index, ::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  signalcolors_.Set(index, value);
+  // @@protoc_insertion_point(field_set:Proto.IndicatorHistogramVert.signalColors)
+}
+inline void IndicatorHistogramVert::_internal_add_signalcolors(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  signalcolors_.Add(value);
+}
+inline void IndicatorHistogramVert::add_signalcolors(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_add_signalcolors(value);
+  // @@protoc_insertion_point(field_add:Proto.IndicatorHistogramVert.signalColors)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint32 >&
+IndicatorHistogramVert::_internal_signalcolors() const {
+  return signalcolors_;
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint32 >&
+IndicatorHistogramVert::signalcolors() const {
+  // @@protoc_insertion_point(field_list:Proto.IndicatorHistogramVert.signalColors)
+  return _internal_signalcolors();
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint32 >*
+IndicatorHistogramVert::_internal_mutable_signalcolors() {
+  return &signalcolors_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint32 >*
+IndicatorHistogramVert::mutable_signalcolors() {
+  // @@protoc_insertion_point(field_mutable_list:Proto.IndicatorHistogramVert.signalColors)
+  return _internal_mutable_signalcolors();
+}
+
 // optional double startValue = 1;
 inline bool IndicatorHistogramVert::_internal_has_startvalue() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
   return value;
 }
 inline bool IndicatorHistogramVert::has_startvalue() const {
@@ -37329,7 +38342,7 @@ inline bool IndicatorHistogramVert::has_startvalue() const {
 }
 inline void IndicatorHistogramVert::clear_startvalue() {
   startvalue_ = 0;
-  _has_bits_[0] &= ~0x00000001u;
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline double IndicatorHistogramVert::_internal_startvalue() const {
   return startvalue_;
@@ -37339,7 +38352,7 @@ inline double IndicatorHistogramVert::startvalue() const {
   return _internal_startvalue();
 }
 inline void IndicatorHistogramVert::_internal_set_startvalue(double value) {
-  _has_bits_[0] |= 0x00000001u;
+  _has_bits_[0] |= 0x00000002u;
   startvalue_ = value;
 }
 inline void IndicatorHistogramVert::set_startvalue(double value) {
@@ -37349,7 +38362,7 @@ inline void IndicatorHistogramVert::set_startvalue(double value) {
 
 // optional double endValue = 2;
 inline bool IndicatorHistogramVert::_internal_has_endvalue() const {
-  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
   return value;
 }
 inline bool IndicatorHistogramVert::has_endvalue() const {
@@ -37357,7 +38370,7 @@ inline bool IndicatorHistogramVert::has_endvalue() const {
 }
 inline void IndicatorHistogramVert::clear_endvalue() {
   endvalue_ = 0;
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline double IndicatorHistogramVert::_internal_endvalue() const {
   return endvalue_;
@@ -37367,7 +38380,7 @@ inline double IndicatorHistogramVert::endvalue() const {
   return _internal_endvalue();
 }
 inline void IndicatorHistogramVert::_internal_set_endvalue(double value) {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000004u;
   endvalue_ = value;
 }
 inline void IndicatorHistogramVert::set_endvalue(double value) {
@@ -37377,7 +38390,7 @@ inline void IndicatorHistogramVert::set_endvalue(double value) {
 
 // optional double barWidth = 16;
 inline bool IndicatorHistogramVert::_internal_has_barwidth() const {
-  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
   return value;
 }
 inline bool IndicatorHistogramVert::has_barwidth() const {
@@ -37385,7 +38398,7 @@ inline bool IndicatorHistogramVert::has_barwidth() const {
 }
 inline void IndicatorHistogramVert::clear_barwidth() {
   barwidth_ = 0;
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline double IndicatorHistogramVert::_internal_barwidth() const {
   return barwidth_;
@@ -37395,7 +38408,7 @@ inline double IndicatorHistogramVert::barwidth() const {
   return _internal_barwidth();
 }
 inline void IndicatorHistogramVert::_internal_set_barwidth(double value) {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000008u;
   barwidth_ = value;
 }
 inline void IndicatorHistogramVert::set_barwidth(double value) {
@@ -37405,7 +38418,7 @@ inline void IndicatorHistogramVert::set_barwidth(double value) {
 
 // optional double leftMargin = 20;
 inline bool IndicatorHistogramVert::_internal_has_leftmargin() const {
-  bool value = (_has_bits_[0] & 0x00000008u) != 0;
+  bool value = (_has_bits_[0] & 0x00000010u) != 0;
   return value;
 }
 inline bool IndicatorHistogramVert::has_leftmargin() const {
@@ -37413,7 +38426,7 @@ inline bool IndicatorHistogramVert::has_leftmargin() const {
 }
 inline void IndicatorHistogramVert::clear_leftmargin() {
   leftmargin_ = 0;
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline double IndicatorHistogramVert::_internal_leftmargin() const {
   return leftmargin_;
@@ -37423,7 +38436,7 @@ inline double IndicatorHistogramVert::leftmargin() const {
   return _internal_leftmargin();
 }
 inline void IndicatorHistogramVert::_internal_set_leftmargin(double value) {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000010u;
   leftmargin_ = value;
 }
 inline void IndicatorHistogramVert::set_leftmargin(double value) {
@@ -37433,7 +38446,7 @@ inline void IndicatorHistogramVert::set_leftmargin(double value) {
 
 // optional double topMargin = 21;
 inline bool IndicatorHistogramVert::_internal_has_topmargin() const {
-  bool value = (_has_bits_[0] & 0x00000010u) != 0;
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
   return value;
 }
 inline bool IndicatorHistogramVert::has_topmargin() const {
@@ -37441,7 +38454,7 @@ inline bool IndicatorHistogramVert::has_topmargin() const {
 }
 inline void IndicatorHistogramVert::clear_topmargin() {
   topmargin_ = 0;
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline double IndicatorHistogramVert::_internal_topmargin() const {
   return topmargin_;
@@ -37451,7 +38464,7 @@ inline double IndicatorHistogramVert::topmargin() const {
   return _internal_topmargin();
 }
 inline void IndicatorHistogramVert::_internal_set_topmargin(double value) {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000020u;
   topmargin_ = value;
 }
 inline void IndicatorHistogramVert::set_topmargin(double value) {
@@ -37517,7 +38530,7 @@ inline void IndicatorHistogramVert::set_bottommargin(double value) {
 
 // optional bool drawBarRect = 32 [default = true];
 inline bool IndicatorHistogramVert::_internal_has_drawbarrect() const {
-  bool value = (_has_bits_[0] & 0x00000800u) != 0;
+  bool value = (_has_bits_[0] & 0x00200000u) != 0;
   return value;
 }
 inline bool IndicatorHistogramVert::has_drawbarrect() const {
@@ -37525,7 +38538,7 @@ inline bool IndicatorHistogramVert::has_drawbarrect() const {
 }
 inline void IndicatorHistogramVert::clear_drawbarrect() {
   drawbarrect_ = true;
-  _has_bits_[0] &= ~0x00000800u;
+  _has_bits_[0] &= ~0x00200000u;
 }
 inline bool IndicatorHistogramVert::_internal_drawbarrect() const {
   return drawbarrect_;
@@ -37535,7 +38548,7 @@ inline bool IndicatorHistogramVert::drawbarrect() const {
   return _internal_drawbarrect();
 }
 inline void IndicatorHistogramVert::_internal_set_drawbarrect(bool value) {
-  _has_bits_[0] |= 0x00000800u;
+  _has_bits_[0] |= 0x00200000u;
   drawbarrect_ = value;
 }
 inline void IndicatorHistogramVert::set_drawbarrect(bool value) {
@@ -37545,7 +38558,7 @@ inline void IndicatorHistogramVert::set_drawbarrect(bool value) {
 
 // optional bool drawGrid = 40 [default = true];
 inline bool IndicatorHistogramVert::_internal_has_drawgrid() const {
-  bool value = (_has_bits_[0] & 0x00001000u) != 0;
+  bool value = (_has_bits_[0] & 0x00400000u) != 0;
   return value;
 }
 inline bool IndicatorHistogramVert::has_drawgrid() const {
@@ -37553,7 +38566,7 @@ inline bool IndicatorHistogramVert::has_drawgrid() const {
 }
 inline void IndicatorHistogramVert::clear_drawgrid() {
   drawgrid_ = true;
-  _has_bits_[0] &= ~0x00001000u;
+  _has_bits_[0] &= ~0x00400000u;
 }
 inline bool IndicatorHistogramVert::_internal_drawgrid() const {
   return drawgrid_;
@@ -37563,7 +38576,7 @@ inline bool IndicatorHistogramVert::drawgrid() const {
   return _internal_drawgrid();
 }
 inline void IndicatorHistogramVert::_internal_set_drawgrid(bool value) {
-  _has_bits_[0] |= 0x00001000u;
+  _has_bits_[0] |= 0x00400000u;
   drawgrid_ = value;
 }
 inline void IndicatorHistogramVert::set_drawgrid(bool value) {
@@ -37573,7 +38586,7 @@ inline void IndicatorHistogramVert::set_drawgrid(bool value) {
 
 // optional bool drawGridForAllBars = 41 [default = false];
 inline bool IndicatorHistogramVert::_internal_has_drawgridforallbars() const {
-  bool value = (_has_bits_[0] & 0x00000100u) != 0;
+  bool value = (_has_bits_[0] & 0x00000200u) != 0;
   return value;
 }
 inline bool IndicatorHistogramVert::has_drawgridforallbars() const {
@@ -37581,7 +38594,7 @@ inline bool IndicatorHistogramVert::has_drawgridforallbars() const {
 }
 inline void IndicatorHistogramVert::clear_drawgridforallbars() {
   drawgridforallbars_ = false;
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00000200u;
 }
 inline bool IndicatorHistogramVert::_internal_drawgridforallbars() const {
   return drawgridforallbars_;
@@ -37591,7 +38604,7 @@ inline bool IndicatorHistogramVert::drawgridforallbars() const {
   return _internal_drawgridforallbars();
 }
 inline void IndicatorHistogramVert::_internal_set_drawgridforallbars(bool value) {
-  _has_bits_[0] |= 0x00000100u;
+  _has_bits_[0] |= 0x00000200u;
   drawgridforallbars_ = value;
 }
 inline void IndicatorHistogramVert::set_drawgridforallbars(bool value) {
@@ -37601,7 +38614,7 @@ inline void IndicatorHistogramVert::set_drawgridforallbars(bool value) {
 
 // optional bool drawGridValues = 42 [default = true];
 inline bool IndicatorHistogramVert::_internal_has_drawgridvalues() const {
-  bool value = (_has_bits_[0] & 0x00002000u) != 0;
+  bool value = (_has_bits_[0] & 0x00800000u) != 0;
   return value;
 }
 inline bool IndicatorHistogramVert::has_drawgridvalues() const {
@@ -37609,7 +38622,7 @@ inline bool IndicatorHistogramVert::has_drawgridvalues() const {
 }
 inline void IndicatorHistogramVert::clear_drawgridvalues() {
   drawgridvalues_ = true;
-  _has_bits_[0] &= ~0x00002000u;
+  _has_bits_[0] &= ~0x00800000u;
 }
 inline bool IndicatorHistogramVert::_internal_drawgridvalues() const {
   return drawgridvalues_;
@@ -37619,7 +38632,7 @@ inline bool IndicatorHistogramVert::drawgridvalues() const {
   return _internal_drawgridvalues();
 }
 inline void IndicatorHistogramVert::_internal_set_drawgridvalues(bool value) {
-  _has_bits_[0] |= 0x00002000u;
+  _has_bits_[0] |= 0x00800000u;
   drawgridvalues_ = value;
 }
 inline void IndicatorHistogramVert::set_drawgridvalues(bool value) {
@@ -37629,7 +38642,7 @@ inline void IndicatorHistogramVert::set_drawgridvalues(bool value) {
 
 // optional bool drawGridValueForAllBars = 43 [default = false];
 inline bool IndicatorHistogramVert::_internal_has_drawgridvalueforallbars() const {
-  bool value = (_has_bits_[0] & 0x00000200u) != 0;
+  bool value = (_has_bits_[0] & 0x00000400u) != 0;
   return value;
 }
 inline bool IndicatorHistogramVert::has_drawgridvalueforallbars() const {
@@ -37637,7 +38650,7 @@ inline bool IndicatorHistogramVert::has_drawgridvalueforallbars() const {
 }
 inline void IndicatorHistogramVert::clear_drawgridvalueforallbars() {
   drawgridvalueforallbars_ = false;
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00000400u;
 }
 inline bool IndicatorHistogramVert::_internal_drawgridvalueforallbars() const {
   return drawgridvalueforallbars_;
@@ -37647,7 +38660,7 @@ inline bool IndicatorHistogramVert::drawgridvalueforallbars() const {
   return _internal_drawgridvalueforallbars();
 }
 inline void IndicatorHistogramVert::_internal_set_drawgridvalueforallbars(bool value) {
-  _has_bits_[0] |= 0x00000200u;
+  _has_bits_[0] |= 0x00000400u;
   drawgridvalueforallbars_ = value;
 }
 inline void IndicatorHistogramVert::set_drawgridvalueforallbars(bool value) {
@@ -37657,7 +38670,7 @@ inline void IndicatorHistogramVert::set_drawgridvalueforallbars(bool value) {
 
 // optional bool drawGridValueUnits = 44 [default = true];
 inline bool IndicatorHistogramVert::_internal_has_drawgridvalueunits() const {
-  bool value = (_has_bits_[0] & 0x00004000u) != 0;
+  bool value = (_has_bits_[0] & 0x01000000u) != 0;
   return value;
 }
 inline bool IndicatorHistogramVert::has_drawgridvalueunits() const {
@@ -37665,7 +38678,7 @@ inline bool IndicatorHistogramVert::has_drawgridvalueunits() const {
 }
 inline void IndicatorHistogramVert::clear_drawgridvalueunits() {
   drawgridvalueunits_ = true;
-  _has_bits_[0] &= ~0x00004000u;
+  _has_bits_[0] &= ~0x01000000u;
 }
 inline bool IndicatorHistogramVert::_internal_drawgridvalueunits() const {
   return drawgridvalueunits_;
@@ -37675,7 +38688,7 @@ inline bool IndicatorHistogramVert::drawgridvalueunits() const {
   return _internal_drawgridvalueunits();
 }
 inline void IndicatorHistogramVert::_internal_set_drawgridvalueunits(bool value) {
-  _has_bits_[0] |= 0x00004000u;
+  _has_bits_[0] |= 0x01000000u;
   drawgridvalueunits_ = value;
 }
 inline void IndicatorHistogramVert::set_drawgridvalueunits(bool value) {
@@ -37685,7 +38698,7 @@ inline void IndicatorHistogramVert::set_drawgridvalueunits(bool value) {
 
 // optional double linearGridMainStep = 50 [default = 50];
 inline bool IndicatorHistogramVert::_internal_has_lineargridmainstep() const {
-  bool value = (_has_bits_[0] & 0x00008000u) != 0;
+  bool value = (_has_bits_[0] & 0x00040000u) != 0;
   return value;
 }
 inline bool IndicatorHistogramVert::has_lineargridmainstep() const {
@@ -37693,7 +38706,7 @@ inline bool IndicatorHistogramVert::has_lineargridmainstep() const {
 }
 inline void IndicatorHistogramVert::clear_lineargridmainstep() {
   lineargridmainstep_ = 50;
-  _has_bits_[0] &= ~0x00008000u;
+  _has_bits_[0] &= ~0x00040000u;
 }
 inline double IndicatorHistogramVert::_internal_lineargridmainstep() const {
   return lineargridmainstep_;
@@ -37703,7 +38716,7 @@ inline double IndicatorHistogramVert::lineargridmainstep() const {
   return _internal_lineargridmainstep();
 }
 inline void IndicatorHistogramVert::_internal_set_lineargridmainstep(double value) {
-  _has_bits_[0] |= 0x00008000u;
+  _has_bits_[0] |= 0x00040000u;
   lineargridmainstep_ = value;
 }
 inline void IndicatorHistogramVert::set_lineargridmainstep(double value) {
@@ -37713,7 +38726,7 @@ inline void IndicatorHistogramVert::set_lineargridmainstep(double value) {
 
 // optional double linearGridSmallStep = 51 [default = 10];
 inline bool IndicatorHistogramVert::_internal_has_lineargridsmallstep() const {
-  bool value = (_has_bits_[0] & 0x00010000u) != 0;
+  bool value = (_has_bits_[0] & 0x00080000u) != 0;
   return value;
 }
 inline bool IndicatorHistogramVert::has_lineargridsmallstep() const {
@@ -37721,7 +38734,7 @@ inline bool IndicatorHistogramVert::has_lineargridsmallstep() const {
 }
 inline void IndicatorHistogramVert::clear_lineargridsmallstep() {
   lineargridsmallstep_ = 10;
-  _has_bits_[0] &= ~0x00010000u;
+  _has_bits_[0] &= ~0x00080000u;
 }
 inline double IndicatorHistogramVert::_internal_lineargridsmallstep() const {
   return lineargridsmallstep_;
@@ -37731,7 +38744,7 @@ inline double IndicatorHistogramVert::lineargridsmallstep() const {
   return _internal_lineargridsmallstep();
 }
 inline void IndicatorHistogramVert::_internal_set_lineargridsmallstep(double value) {
-  _has_bits_[0] |= 0x00010000u;
+  _has_bits_[0] |= 0x00080000u;
   lineargridsmallstep_ = value;
 }
 inline void IndicatorHistogramVert::set_lineargridsmallstep(double value) {
@@ -37741,7 +38754,7 @@ inline void IndicatorHistogramVert::set_lineargridsmallstep(double value) {
 
 // optional double logarithmicGridMainStep = 52 [default = 1];
 inline bool IndicatorHistogramVert::_internal_has_logarithmicgridmainstep() const {
-  bool value = (_has_bits_[0] & 0x00020000u) != 0;
+  bool value = (_has_bits_[0] & 0x00100000u) != 0;
   return value;
 }
 inline bool IndicatorHistogramVert::has_logarithmicgridmainstep() const {
@@ -37749,7 +38762,7 @@ inline bool IndicatorHistogramVert::has_logarithmicgridmainstep() const {
 }
 inline void IndicatorHistogramVert::clear_logarithmicgridmainstep() {
   logarithmicgridmainstep_ = 1;
-  _has_bits_[0] &= ~0x00020000u;
+  _has_bits_[0] &= ~0x00100000u;
 }
 inline double IndicatorHistogramVert::_internal_logarithmicgridmainstep() const {
   return logarithmicgridmainstep_;
@@ -37759,7 +38772,7 @@ inline double IndicatorHistogramVert::logarithmicgridmainstep() const {
   return _internal_logarithmicgridmainstep();
 }
 inline void IndicatorHistogramVert::_internal_set_logarithmicgridmainstep(double value) {
-  _has_bits_[0] |= 0x00020000u;
+  _has_bits_[0] |= 0x00100000u;
   logarithmicgridmainstep_ = value;
 }
 inline void IndicatorHistogramVert::set_logarithmicgridmainstep(double value) {
@@ -37769,7 +38782,7 @@ inline void IndicatorHistogramVert::set_logarithmicgridmainstep(double value) {
 
 // optional double logarithmicGridSmallStep = 53 [default = 0.5];
 inline bool IndicatorHistogramVert::_internal_has_logarithmicgridsmallstep() const {
-  bool value = (_has_bits_[0] & 0x00040000u) != 0;
+  bool value = (_has_bits_[0] & 0x04000000u) != 0;
   return value;
 }
 inline bool IndicatorHistogramVert::has_logarithmicgridsmallstep() const {
@@ -37777,7 +38790,7 @@ inline bool IndicatorHistogramVert::has_logarithmicgridsmallstep() const {
 }
 inline void IndicatorHistogramVert::clear_logarithmicgridsmallstep() {
   logarithmicgridsmallstep_ = 0.5;
-  _has_bits_[0] &= ~0x00040000u;
+  _has_bits_[0] &= ~0x04000000u;
 }
 inline double IndicatorHistogramVert::_internal_logarithmicgridsmallstep() const {
   return logarithmicgridsmallstep_;
@@ -37787,7 +38800,7 @@ inline double IndicatorHistogramVert::logarithmicgridsmallstep() const {
   return _internal_logarithmicgridsmallstep();
 }
 inline void IndicatorHistogramVert::_internal_set_logarithmicgridsmallstep(double value) {
-  _has_bits_[0] |= 0x00040000u;
+  _has_bits_[0] |= 0x04000000u;
   logarithmicgridsmallstep_ = value;
 }
 inline void IndicatorHistogramVert::set_logarithmicgridsmallstep(double value) {
@@ -37797,7 +38810,7 @@ inline void IndicatorHistogramVert::set_logarithmicgridsmallstep(double value) {
 
 // optional int32 drawSetpoints = 70 [default = 0];
 inline bool IndicatorHistogramVert::_internal_has_drawsetpoints() const {
-  bool value = (_has_bits_[0] & 0x00000400u) != 0;
+  bool value = (_has_bits_[0] & 0x00000800u) != 0;
   return value;
 }
 inline bool IndicatorHistogramVert::has_drawsetpoints() const {
@@ -37805,7 +38818,7 @@ inline bool IndicatorHistogramVert::has_drawsetpoints() const {
 }
 inline void IndicatorHistogramVert::clear_drawsetpoints() {
   drawsetpoints_ = 0;
-  _has_bits_[0] &= ~0x00000400u;
+  _has_bits_[0] &= ~0x00000800u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 IndicatorHistogramVert::_internal_drawsetpoints() const {
   return drawsetpoints_;
@@ -37815,7 +38828,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 IndicatorHistogramVert::drawsetpoints() co
   return _internal_drawsetpoints();
 }
 inline void IndicatorHistogramVert::_internal_set_drawsetpoints(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000400u;
+  _has_bits_[0] |= 0x00000800u;
   drawsetpoints_ = value;
 }
 inline void IndicatorHistogramVert::set_drawsetpoints(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -37864,7 +38877,7 @@ IndicatorHistogramVert::customsetpoints() const {
 
 // optional int32 scaleType = 75 [default = 0];
 inline bool IndicatorHistogramVert::_internal_has_scaletype() const {
-  bool value = (_has_bits_[0] & 0x00000020u) != 0;
+  bool value = (_has_bits_[0] & 0x00001000u) != 0;
   return value;
 }
 inline bool IndicatorHistogramVert::has_scaletype() const {
@@ -37872,7 +38885,7 @@ inline bool IndicatorHistogramVert::has_scaletype() const {
 }
 inline void IndicatorHistogramVert::clear_scaletype() {
   scaletype_ = 0;
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00001000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 IndicatorHistogramVert::_internal_scaletype() const {
   return scaletype_;
@@ -37882,7 +38895,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 IndicatorHistogramVert::scaletype() const 
   return _internal_scaletype();
 }
 inline void IndicatorHistogramVert::_internal_set_scaletype(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00001000u;
   scaletype_ = value;
 }
 inline void IndicatorHistogramVert::set_scaletype(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -38008,6 +39021,277 @@ inline void IndicatorArrowIndicator::set_spanangle(double value) {
 
 // -------------------------------------------------------------------
 
+// IndicatorTrendSignalParam
+
+// optional fixed32 color = 2;
+inline bool IndicatorTrendSignalParam::_internal_has_color() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool IndicatorTrendSignalParam::has_color() const {
+  return _internal_has_color();
+}
+inline void IndicatorTrendSignalParam::clear_color() {
+  color_ = 0u;
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 IndicatorTrendSignalParam::_internal_color() const {
+  return color_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 IndicatorTrendSignalParam::color() const {
+  // @@protoc_insertion_point(field_get:Proto.IndicatorTrendSignalParam.color)
+  return _internal_color();
+}
+inline void IndicatorTrendSignalParam::_internal_set_color(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _has_bits_[0] |= 0x00000001u;
+  color_ = value;
+}
+inline void IndicatorTrendSignalParam::set_color(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_color(value);
+  // @@protoc_insertion_point(field_set:Proto.IndicatorTrendSignalParam.color)
+}
+
+// optional int32 lineWieght = 3;
+inline bool IndicatorTrendSignalParam::_internal_has_linewieght() const {
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline bool IndicatorTrendSignalParam::has_linewieght() const {
+  return _internal_has_linewieght();
+}
+inline void IndicatorTrendSignalParam::clear_linewieght() {
+  linewieght_ = 0;
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 IndicatorTrendSignalParam::_internal_linewieght() const {
+  return linewieght_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 IndicatorTrendSignalParam::linewieght() const {
+  // @@protoc_insertion_point(field_get:Proto.IndicatorTrendSignalParam.lineWieght)
+  return _internal_linewieght();
+}
+inline void IndicatorTrendSignalParam::_internal_set_linewieght(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000002u;
+  linewieght_ = value;
+}
+inline void IndicatorTrendSignalParam::set_linewieght(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_linewieght(value);
+  // @@protoc_insertion_point(field_set:Proto.IndicatorTrendSignalParam.lineWieght)
+}
+
+// optional double lowLimit = 20;
+inline bool IndicatorTrendSignalParam::_internal_has_lowlimit() const {
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  return value;
+}
+inline bool IndicatorTrendSignalParam::has_lowlimit() const {
+  return _internal_has_lowlimit();
+}
+inline void IndicatorTrendSignalParam::clear_lowlimit() {
+  lowlimit_ = 0;
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline double IndicatorTrendSignalParam::_internal_lowlimit() const {
+  return lowlimit_;
+}
+inline double IndicatorTrendSignalParam::lowlimit() const {
+  // @@protoc_insertion_point(field_get:Proto.IndicatorTrendSignalParam.lowLimit)
+  return _internal_lowlimit();
+}
+inline void IndicatorTrendSignalParam::_internal_set_lowlimit(double value) {
+  _has_bits_[0] |= 0x00000004u;
+  lowlimit_ = value;
+}
+inline void IndicatorTrendSignalParam::set_lowlimit(double value) {
+  _internal_set_lowlimit(value);
+  // @@protoc_insertion_point(field_set:Proto.IndicatorTrendSignalParam.lowLimit)
+}
+
+// optional double highLimit = 21;
+inline bool IndicatorTrendSignalParam::_internal_has_highlimit() const {
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
+  return value;
+}
+inline bool IndicatorTrendSignalParam::has_highlimit() const {
+  return _internal_has_highlimit();
+}
+inline void IndicatorTrendSignalParam::clear_highlimit() {
+  highlimit_ = 0;
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline double IndicatorTrendSignalParam::_internal_highlimit() const {
+  return highlimit_;
+}
+inline double IndicatorTrendSignalParam::highlimit() const {
+  // @@protoc_insertion_point(field_get:Proto.IndicatorTrendSignalParam.highLimit)
+  return _internal_highlimit();
+}
+inline void IndicatorTrendSignalParam::_internal_set_highlimit(double value) {
+  _has_bits_[0] |= 0x00000008u;
+  highlimit_ = value;
+}
+inline void IndicatorTrendSignalParam::set_highlimit(double value) {
+  _internal_set_highlimit(value);
+  // @@protoc_insertion_point(field_set:Proto.IndicatorTrendSignalParam.highLimit)
+}
+
+// -------------------------------------------------------------------
+
+// IndicatorTrend
+
+// optional int32 sampleperiod = 90;
+inline bool IndicatorTrend::_internal_has_sampleperiod() const {
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline bool IndicatorTrend::has_sampleperiod() const {
+  return _internal_has_sampleperiod();
+}
+inline void IndicatorTrend::clear_sampleperiod() {
+  sampleperiod_ = 0;
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 IndicatorTrend::_internal_sampleperiod() const {
+  return sampleperiod_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 IndicatorTrend::sampleperiod() const {
+  // @@protoc_insertion_point(field_get:Proto.IndicatorTrend.sampleperiod)
+  return _internal_sampleperiod();
+}
+inline void IndicatorTrend::_internal_set_sampleperiod(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000002u;
+  sampleperiod_ = value;
+}
+inline void IndicatorTrend::set_sampleperiod(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_sampleperiod(value);
+  // @@protoc_insertion_point(field_set:Proto.IndicatorTrend.sampleperiod)
+}
+
+// optional int32 timeType = 91;
+inline bool IndicatorTrend::_internal_has_timetype() const {
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  return value;
+}
+inline bool IndicatorTrend::has_timetype() const {
+  return _internal_has_timetype();
+}
+inline void IndicatorTrend::clear_timetype() {
+  timetype_ = 0;
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 IndicatorTrend::_internal_timetype() const {
+  return timetype_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 IndicatorTrend::timetype() const {
+  // @@protoc_insertion_point(field_get:Proto.IndicatorTrend.timeType)
+  return _internal_timetype();
+}
+inline void IndicatorTrend::_internal_set_timetype(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000004u;
+  timetype_ = value;
+}
+inline void IndicatorTrend::set_timetype(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_timetype(value);
+  // @@protoc_insertion_point(field_set:Proto.IndicatorTrend.timeType)
+}
+
+// optional int64 redrawinterval = 100;
+inline bool IndicatorTrend::_internal_has_redrawinterval() const {
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
+  return value;
+}
+inline bool IndicatorTrend::has_redrawinterval() const {
+  return _internal_has_redrawinterval();
+}
+inline void IndicatorTrend::clear_redrawinterval() {
+  redrawinterval_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 IndicatorTrend::_internal_redrawinterval() const {
+  return redrawinterval_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 IndicatorTrend::redrawinterval() const {
+  // @@protoc_insertion_point(field_get:Proto.IndicatorTrend.redrawinterval)
+  return _internal_redrawinterval();
+}
+inline void IndicatorTrend::_internal_set_redrawinterval(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00000008u;
+  redrawinterval_ = value;
+}
+inline void IndicatorTrend::set_redrawinterval(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_redrawinterval(value);
+  // @@protoc_insertion_point(field_set:Proto.IndicatorTrend.redrawinterval)
+}
+
+// optional int64 duration = 51;
+inline bool IndicatorTrend::_internal_has_duration() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool IndicatorTrend::has_duration() const {
+  return _internal_has_duration();
+}
+inline void IndicatorTrend::clear_duration() {
+  duration_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 IndicatorTrend::_internal_duration() const {
+  return duration_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 IndicatorTrend::duration() const {
+  // @@protoc_insertion_point(field_get:Proto.IndicatorTrend.duration)
+  return _internal_duration();
+}
+inline void IndicatorTrend::_internal_set_duration(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00000001u;
+  duration_ = value;
+}
+inline void IndicatorTrend::set_duration(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_duration(value);
+  // @@protoc_insertion_point(field_set:Proto.IndicatorTrend.duration)
+}
+
+// repeated .Proto.IndicatorTrendSignalParam trendSignalParams = 110;
+inline int IndicatorTrend::_internal_trendsignalparams_size() const {
+  return trendsignalparams_.size();
+}
+inline int IndicatorTrend::trendsignalparams_size() const {
+  return _internal_trendsignalparams_size();
+}
+inline void IndicatorTrend::clear_trendsignalparams() {
+  trendsignalparams_.Clear();
+}
+inline ::Proto::IndicatorTrendSignalParam* IndicatorTrend::mutable_trendsignalparams(int index) {
+  // @@protoc_insertion_point(field_mutable:Proto.IndicatorTrend.trendSignalParams)
+  return trendsignalparams_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::IndicatorTrendSignalParam >*
+IndicatorTrend::mutable_trendsignalparams() {
+  // @@protoc_insertion_point(field_mutable_list:Proto.IndicatorTrend.trendSignalParams)
+  return &trendsignalparams_;
+}
+inline const ::Proto::IndicatorTrendSignalParam& IndicatorTrend::_internal_trendsignalparams(int index) const {
+  return trendsignalparams_.Get(index);
+}
+inline const ::Proto::IndicatorTrendSignalParam& IndicatorTrend::trendsignalparams(int index) const {
+  // @@protoc_insertion_point(field_get:Proto.IndicatorTrend.trendSignalParams)
+  return _internal_trendsignalparams(index);
+}
+inline ::Proto::IndicatorTrendSignalParam* IndicatorTrend::_internal_add_trendsignalparams() {
+  return trendsignalparams_.Add();
+}
+inline ::Proto::IndicatorTrendSignalParam* IndicatorTrend::add_trendsignalparams() {
+  // @@protoc_insertion_point(field_add:Proto.IndicatorTrend.trendSignalParams)
+  return _internal_add_trendsignalparams();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::IndicatorTrendSignalParam >&
+IndicatorTrend::trendsignalparams() const {
+  // @@protoc_insertion_point(field_list:Proto.IndicatorTrend.trendSignalParams)
+  return trendsignalparams_;
+}
+
+// -------------------------------------------------------------------
+
 // SchemaItemIndicator
 
 // optional string signalIds = 1;
@@ -38083,335 +39367,9 @@ inline void SchemaItemIndicator::set_allocated_signalids(std::string* signalids)
   // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItemIndicator.signalIds)
 }
 
-// optional int32 signalSource = 2 [default = 0];
-inline bool SchemaItemIndicator::_internal_has_signalsource() const {
-  bool value = (_has_bits_[0] & 0x00000010u) != 0;
-  return value;
-}
-inline bool SchemaItemIndicator::has_signalsource() const {
-  return _internal_has_signalsource();
-}
-inline void SchemaItemIndicator::clear_signalsource() {
-  signalsource_ = 0;
-  _has_bits_[0] &= ~0x00000010u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemIndicator::_internal_signalsource() const {
-  return signalsource_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemIndicator::signalsource() const {
-  // @@protoc_insertion_point(field_get:Proto.SchemaItemIndicator.signalSource)
-  return _internal_signalsource();
-}
-inline void SchemaItemIndicator::_internal_set_signalsource(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000010u;
-  signalsource_ = value;
-}
-inline void SchemaItemIndicator::set_signalsource(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _internal_set_signalsource(value);
-  // @@protoc_insertion_point(field_set:Proto.SchemaItemIndicator.signalSource)
-}
-
-// optional int32 precision = 3 [default = 2];
-inline bool SchemaItemIndicator::_internal_has_precision() const {
-  bool value = (_has_bits_[0] & 0x00000400u) != 0;
-  return value;
-}
-inline bool SchemaItemIndicator::has_precision() const {
-  return _internal_has_precision();
-}
-inline void SchemaItemIndicator::clear_precision() {
-  precision_ = 2;
-  _has_bits_[0] &= ~0x00000400u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemIndicator::_internal_precision() const {
-  return precision_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemIndicator::precision() const {
-  // @@protoc_insertion_point(field_get:Proto.SchemaItemIndicator.precision)
-  return _internal_precision();
-}
-inline void SchemaItemIndicator::_internal_set_precision(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000400u;
-  precision_ = value;
-}
-inline void SchemaItemIndicator::set_precision(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _internal_set_precision(value);
-  // @@protoc_insertion_point(field_set:Proto.SchemaItemIndicator.precision)
-}
-
-// optional int32 analogFormat = 4 [default = 102];
-inline bool SchemaItemIndicator::_internal_has_analogformat() const {
-  bool value = (_has_bits_[0] & 0x00000800u) != 0;
-  return value;
-}
-inline bool SchemaItemIndicator::has_analogformat() const {
-  return _internal_has_analogformat();
-}
-inline void SchemaItemIndicator::clear_analogformat() {
-  analogformat_ = 102;
-  _has_bits_[0] &= ~0x00000800u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemIndicator::_internal_analogformat() const {
-  return analogformat_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemIndicator::analogformat() const {
-  // @@protoc_insertion_point(field_get:Proto.SchemaItemIndicator.analogFormat)
-  return _internal_analogformat();
-}
-inline void SchemaItemIndicator::_internal_set_analogformat(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000800u;
-  analogformat_ = value;
-}
-inline void SchemaItemIndicator::set_analogformat(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _internal_set_analogformat(value);
-  // @@protoc_insertion_point(field_set:Proto.SchemaItemIndicator.analogFormat)
-}
-
-// optional .Proto.FontParam font = 9;
-inline bool SchemaItemIndicator::_internal_has_font() const {
-  bool value = (_has_bits_[0] & 0x00000002u) != 0;
-  PROTOBUF_ASSUME(!value || font_ != nullptr);
-  return value;
-}
-inline bool SchemaItemIndicator::has_font() const {
-  return _internal_has_font();
-}
-inline void SchemaItemIndicator::clear_font() {
-  if (font_ != nullptr) font_->Clear();
-  _has_bits_[0] &= ~0x00000002u;
-}
-inline const ::Proto::FontParam& SchemaItemIndicator::_internal_font() const {
-  const ::Proto::FontParam* p = font_;
-  return p != nullptr ? *p : reinterpret_cast<const ::Proto::FontParam&>(
-      ::Proto::_FontParam_default_instance_);
-}
-inline const ::Proto::FontParam& SchemaItemIndicator::font() const {
-  // @@protoc_insertion_point(field_get:Proto.SchemaItemIndicator.font)
-  return _internal_font();
-}
-inline void SchemaItemIndicator::unsafe_arena_set_allocated_font(
-    ::Proto::FontParam* font) {
-  if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(font_);
-  }
-  font_ = font;
-  if (font) {
-    _has_bits_[0] |= 0x00000002u;
-  } else {
-    _has_bits_[0] &= ~0x00000002u;
-  }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.SchemaItemIndicator.font)
-}
-inline ::Proto::FontParam* SchemaItemIndicator::release_font() {
-  _has_bits_[0] &= ~0x00000002u;
-  ::Proto::FontParam* temp = font_;
-  font_ = nullptr;
-  if (GetArena() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-  return temp;
-}
-inline ::Proto::FontParam* SchemaItemIndicator::unsafe_arena_release_font() {
-  // @@protoc_insertion_point(field_release:Proto.SchemaItemIndicator.font)
-  _has_bits_[0] &= ~0x00000002u;
-  ::Proto::FontParam* temp = font_;
-  font_ = nullptr;
-  return temp;
-}
-inline ::Proto::FontParam* SchemaItemIndicator::_internal_mutable_font() {
-  _has_bits_[0] |= 0x00000002u;
-  if (font_ == nullptr) {
-    auto* p = CreateMaybeMessage<::Proto::FontParam>(GetArena());
-    font_ = p;
-  }
-  return font_;
-}
-inline ::Proto::FontParam* SchemaItemIndicator::mutable_font() {
-  // @@protoc_insertion_point(field_mutable:Proto.SchemaItemIndicator.font)
-  return _internal_mutable_font();
-}
-inline void SchemaItemIndicator::set_allocated_font(::Proto::FontParam* font) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
-  if (message_arena == nullptr) {
-    delete font_;
-  }
-  if (font) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(font);
-    if (message_arena != submessage_arena) {
-      font = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, font, submessage_arena);
-    }
-    _has_bits_[0] |= 0x00000002u;
-  } else {
-    _has_bits_[0] &= ~0x00000002u;
-  }
-  font_ = font;
-  // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItemIndicator.font)
-}
-
-// optional bool drawRect = 10 [default = false];
-inline bool SchemaItemIndicator::_internal_has_drawrect() const {
-  bool value = (_has_bits_[0] & 0x00000020u) != 0;
-  return value;
-}
-inline bool SchemaItemIndicator::has_drawrect() const {
-  return _internal_has_drawrect();
-}
-inline void SchemaItemIndicator::clear_drawrect() {
-  drawrect_ = false;
-  _has_bits_[0] &= ~0x00000020u;
-}
-inline bool SchemaItemIndicator::_internal_drawrect() const {
-  return drawrect_;
-}
-inline bool SchemaItemIndicator::drawrect() const {
-  // @@protoc_insertion_point(field_get:Proto.SchemaItemIndicator.drawRect)
-  return _internal_drawrect();
-}
-inline void SchemaItemIndicator::_internal_set_drawrect(bool value) {
-  _has_bits_[0] |= 0x00000020u;
-  drawrect_ = value;
-}
-inline void SchemaItemIndicator::set_drawrect(bool value) {
-  _internal_set_drawrect(value);
-  // @@protoc_insertion_point(field_set:Proto.SchemaItemIndicator.drawRect)
-}
-
-// optional double lineWeight = 11 [default = 0];
-inline bool SchemaItemIndicator::_internal_has_lineweight() const {
-  bool value = (_has_bits_[0] & 0x00000040u) != 0;
-  return value;
-}
-inline bool SchemaItemIndicator::has_lineweight() const {
-  return _internal_has_lineweight();
-}
-inline void SchemaItemIndicator::clear_lineweight() {
-  lineweight_ = 0;
-  _has_bits_[0] &= ~0x00000040u;
-}
-inline double SchemaItemIndicator::_internal_lineweight() const {
-  return lineweight_;
-}
-inline double SchemaItemIndicator::lineweight() const {
-  // @@protoc_insertion_point(field_get:Proto.SchemaItemIndicator.lineWeight)
-  return _internal_lineweight();
-}
-inline void SchemaItemIndicator::_internal_set_lineweight(double value) {
-  _has_bits_[0] |= 0x00000040u;
-  lineweight_ = value;
-}
-inline void SchemaItemIndicator::set_lineweight(double value) {
-  _internal_set_lineweight(value);
-  // @@protoc_insertion_point(field_set:Proto.SchemaItemIndicator.lineWeight)
-}
-
-// optional uint32 backgroundColor = 16;
-inline bool SchemaItemIndicator::_internal_has_backgroundcolor() const {
-  bool value = (_has_bits_[0] & 0x00000100u) != 0;
-  return value;
-}
-inline bool SchemaItemIndicator::has_backgroundcolor() const {
-  return _internal_has_backgroundcolor();
-}
-inline void SchemaItemIndicator::clear_backgroundcolor() {
-  backgroundcolor_ = 0u;
-  _has_bits_[0] &= ~0x00000100u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint32 SchemaItemIndicator::_internal_backgroundcolor() const {
-  return backgroundcolor_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint32 SchemaItemIndicator::backgroundcolor() const {
-  // @@protoc_insertion_point(field_get:Proto.SchemaItemIndicator.backgroundColor)
-  return _internal_backgroundcolor();
-}
-inline void SchemaItemIndicator::_internal_set_backgroundcolor(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _has_bits_[0] |= 0x00000100u;
-  backgroundcolor_ = value;
-}
-inline void SchemaItemIndicator::set_backgroundcolor(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _internal_set_backgroundcolor(value);
-  // @@protoc_insertion_point(field_set:Proto.SchemaItemIndicator.backgroundColor)
-}
-
-// optional uint32 lineColor = 17;
-inline bool SchemaItemIndicator::_internal_has_linecolor() const {
-  bool value = (_has_bits_[0] & 0x00000200u) != 0;
-  return value;
-}
-inline bool SchemaItemIndicator::has_linecolor() const {
-  return _internal_has_linecolor();
-}
-inline void SchemaItemIndicator::clear_linecolor() {
-  linecolor_ = 0u;
-  _has_bits_[0] &= ~0x00000200u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint32 SchemaItemIndicator::_internal_linecolor() const {
-  return linecolor_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint32 SchemaItemIndicator::linecolor() const {
-  // @@protoc_insertion_point(field_get:Proto.SchemaItemIndicator.lineColor)
-  return _internal_linecolor();
-}
-inline void SchemaItemIndicator::_internal_set_linecolor(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _has_bits_[0] |= 0x00000200u;
-  linecolor_ = value;
-}
-inline void SchemaItemIndicator::set_linecolor(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _internal_set_linecolor(value);
-  // @@protoc_insertion_point(field_set:Proto.SchemaItemIndicator.lineColor)
-}
-
-// repeated uint32 signalColors = 18;
-inline int SchemaItemIndicator::_internal_signalcolors_size() const {
-  return signalcolors_.size();
-}
-inline int SchemaItemIndicator::signalcolors_size() const {
-  return _internal_signalcolors_size();
-}
-inline void SchemaItemIndicator::clear_signalcolors() {
-  signalcolors_.Clear();
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint32 SchemaItemIndicator::_internal_signalcolors(int index) const {
-  return signalcolors_.Get(index);
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint32 SchemaItemIndicator::signalcolors(int index) const {
-  // @@protoc_insertion_point(field_get:Proto.SchemaItemIndicator.signalColors)
-  return _internal_signalcolors(index);
-}
-inline void SchemaItemIndicator::set_signalcolors(int index, ::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  signalcolors_.Set(index, value);
-  // @@protoc_insertion_point(field_set:Proto.SchemaItemIndicator.signalColors)
-}
-inline void SchemaItemIndicator::_internal_add_signalcolors(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  signalcolors_.Add(value);
-}
-inline void SchemaItemIndicator::add_signalcolors(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _internal_add_signalcolors(value);
-  // @@protoc_insertion_point(field_add:Proto.SchemaItemIndicator.signalColors)
-}
-inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint32 >&
-SchemaItemIndicator::_internal_signalcolors() const {
-  return signalcolors_;
-}
-inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint32 >&
-SchemaItemIndicator::signalcolors() const {
-  // @@protoc_insertion_point(field_list:Proto.SchemaItemIndicator.signalColors)
-  return _internal_signalcolors();
-}
-inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint32 >*
-SchemaItemIndicator::_internal_mutable_signalcolors() {
-  return &signalcolors_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint32 >*
-SchemaItemIndicator::mutable_signalcolors() {
-  // @@protoc_insertion_point(field_mutable_list:Proto.SchemaItemIndicator.signalColors)
-  return _internal_mutable_signalcolors();
-}
-
 // optional uint32 type = 32 [default = 0];
 inline bool SchemaItemIndicator::_internal_has_type() const {
-  bool value = (_has_bits_[0] & 0x00000080u) != 0;
+  bool value = (_has_bits_[0] & 0x00000010u) != 0;
   return value;
 }
 inline bool SchemaItemIndicator::has_type() const {
@@ -38419,7 +39377,7 @@ inline bool SchemaItemIndicator::has_type() const {
 }
 inline void SchemaItemIndicator::clear_type() {
   type_ = 0u;
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint32 SchemaItemIndicator::_internal_type() const {
   return type_;
@@ -38429,7 +39387,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint32 SchemaItemIndicator::type() const {
   return _internal_type();
 }
 inline void SchemaItemIndicator::_internal_set_type(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000010u;
   type_ = value;
 }
 inline void SchemaItemIndicator::set_type(::PROTOBUF_NAMESPACE_ID::uint32 value) {
@@ -38439,7 +39397,7 @@ inline void SchemaItemIndicator::set_type(::PROTOBUF_NAMESPACE_ID::uint32 value)
 
 // optional .Proto.IndicatorHistogramVert indicatorHistogramVert = 48;
 inline bool SchemaItemIndicator::_internal_has_indicatorhistogramvert() const {
-  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
   PROTOBUF_ASSUME(!value || indicatorhistogramvert_ != nullptr);
   return value;
 }
@@ -38448,7 +39406,7 @@ inline bool SchemaItemIndicator::has_indicatorhistogramvert() const {
 }
 inline void SchemaItemIndicator::clear_indicatorhistogramvert() {
   if (indicatorhistogramvert_ != nullptr) indicatorhistogramvert_->Clear();
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline const ::Proto::IndicatorHistogramVert& SchemaItemIndicator::_internal_indicatorhistogramvert() const {
   const ::Proto::IndicatorHistogramVert* p = indicatorhistogramvert_;
@@ -38466,14 +39424,14 @@ inline void SchemaItemIndicator::unsafe_arena_set_allocated_indicatorhistogramve
   }
   indicatorhistogramvert_ = indicatorhistogramvert;
   if (indicatorhistogramvert) {
-    _has_bits_[0] |= 0x00000004u;
+    _has_bits_[0] |= 0x00000002u;
   } else {
-    _has_bits_[0] &= ~0x00000004u;
+    _has_bits_[0] &= ~0x00000002u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.SchemaItemIndicator.indicatorHistogramVert)
 }
 inline ::Proto::IndicatorHistogramVert* SchemaItemIndicator::release_indicatorhistogramvert() {
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000002u;
   ::Proto::IndicatorHistogramVert* temp = indicatorhistogramvert_;
   indicatorhistogramvert_ = nullptr;
   if (GetArena() != nullptr) {
@@ -38483,13 +39441,13 @@ inline ::Proto::IndicatorHistogramVert* SchemaItemIndicator::release_indicatorhi
 }
 inline ::Proto::IndicatorHistogramVert* SchemaItemIndicator::unsafe_arena_release_indicatorhistogramvert() {
   // @@protoc_insertion_point(field_release:Proto.SchemaItemIndicator.indicatorHistogramVert)
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000002u;
   ::Proto::IndicatorHistogramVert* temp = indicatorhistogramvert_;
   indicatorhistogramvert_ = nullptr;
   return temp;
 }
 inline ::Proto::IndicatorHistogramVert* SchemaItemIndicator::_internal_mutable_indicatorhistogramvert() {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000002u;
   if (indicatorhistogramvert_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::IndicatorHistogramVert>(GetArena());
     indicatorhistogramvert_ = p;
@@ -38512,9 +39470,9 @@ inline void SchemaItemIndicator::set_allocated_indicatorhistogramvert(::Proto::I
       indicatorhistogramvert = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, indicatorhistogramvert, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000004u;
+    _has_bits_[0] |= 0x00000002u;
   } else {
-    _has_bits_[0] &= ~0x00000004u;
+    _has_bits_[0] &= ~0x00000002u;
   }
   indicatorhistogramvert_ = indicatorhistogramvert;
   // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItemIndicator.indicatorHistogramVert)
@@ -38522,7 +39480,7 @@ inline void SchemaItemIndicator::set_allocated_indicatorhistogramvert(::Proto::I
 
 // optional .Proto.IndicatorArrowIndicator indicatorArrowIndicator = 49;
 inline bool SchemaItemIndicator::_internal_has_indicatorarrowindicator() const {
-  bool value = (_has_bits_[0] & 0x00000008u) != 0;
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
   PROTOBUF_ASSUME(!value || indicatorarrowindicator_ != nullptr);
   return value;
 }
@@ -38531,7 +39489,7 @@ inline bool SchemaItemIndicator::has_indicatorarrowindicator() const {
 }
 inline void SchemaItemIndicator::clear_indicatorarrowindicator() {
   if (indicatorarrowindicator_ != nullptr) indicatorarrowindicator_->Clear();
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline const ::Proto::IndicatorArrowIndicator& SchemaItemIndicator::_internal_indicatorarrowindicator() const {
   const ::Proto::IndicatorArrowIndicator* p = indicatorarrowindicator_;
@@ -38549,14 +39507,14 @@ inline void SchemaItemIndicator::unsafe_arena_set_allocated_indicatorarrowindica
   }
   indicatorarrowindicator_ = indicatorarrowindicator;
   if (indicatorarrowindicator) {
-    _has_bits_[0] |= 0x00000008u;
+    _has_bits_[0] |= 0x00000004u;
   } else {
-    _has_bits_[0] &= ~0x00000008u;
+    _has_bits_[0] &= ~0x00000004u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.SchemaItemIndicator.indicatorArrowIndicator)
 }
 inline ::Proto::IndicatorArrowIndicator* SchemaItemIndicator::release_indicatorarrowindicator() {
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000004u;
   ::Proto::IndicatorArrowIndicator* temp = indicatorarrowindicator_;
   indicatorarrowindicator_ = nullptr;
   if (GetArena() != nullptr) {
@@ -38566,13 +39524,13 @@ inline ::Proto::IndicatorArrowIndicator* SchemaItemIndicator::release_indicatora
 }
 inline ::Proto::IndicatorArrowIndicator* SchemaItemIndicator::unsafe_arena_release_indicatorarrowindicator() {
   // @@protoc_insertion_point(field_release:Proto.SchemaItemIndicator.indicatorArrowIndicator)
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000004u;
   ::Proto::IndicatorArrowIndicator* temp = indicatorarrowindicator_;
   indicatorarrowindicator_ = nullptr;
   return temp;
 }
 inline ::Proto::IndicatorArrowIndicator* SchemaItemIndicator::_internal_mutable_indicatorarrowindicator() {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000004u;
   if (indicatorarrowindicator_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::IndicatorArrowIndicator>(GetArena());
     indicatorarrowindicator_ = p;
@@ -38595,12 +39553,95 @@ inline void SchemaItemIndicator::set_allocated_indicatorarrowindicator(::Proto::
       indicatorarrowindicator = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, indicatorarrowindicator, submessage_arena);
     }
+    _has_bits_[0] |= 0x00000004u;
+  } else {
+    _has_bits_[0] &= ~0x00000004u;
+  }
+  indicatorarrowindicator_ = indicatorarrowindicator;
+  // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItemIndicator.indicatorArrowIndicator)
+}
+
+// optional .Proto.IndicatorTrend indicatorTrend = 50;
+inline bool SchemaItemIndicator::_internal_has_indicatortrend() const {
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
+  PROTOBUF_ASSUME(!value || indicatortrend_ != nullptr);
+  return value;
+}
+inline bool SchemaItemIndicator::has_indicatortrend() const {
+  return _internal_has_indicatortrend();
+}
+inline void SchemaItemIndicator::clear_indicatortrend() {
+  if (indicatortrend_ != nullptr) indicatortrend_->Clear();
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline const ::Proto::IndicatorTrend& SchemaItemIndicator::_internal_indicatortrend() const {
+  const ::Proto::IndicatorTrend* p = indicatortrend_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Proto::IndicatorTrend&>(
+      ::Proto::_IndicatorTrend_default_instance_);
+}
+inline const ::Proto::IndicatorTrend& SchemaItemIndicator::indicatortrend() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemIndicator.indicatorTrend)
+  return _internal_indicatortrend();
+}
+inline void SchemaItemIndicator::unsafe_arena_set_allocated_indicatortrend(
+    ::Proto::IndicatorTrend* indicatortrend) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(indicatortrend_);
+  }
+  indicatortrend_ = indicatortrend;
+  if (indicatortrend) {
     _has_bits_[0] |= 0x00000008u;
   } else {
     _has_bits_[0] &= ~0x00000008u;
   }
-  indicatorarrowindicator_ = indicatorarrowindicator;
-  // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItemIndicator.indicatorArrowIndicator)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.SchemaItemIndicator.indicatorTrend)
+}
+inline ::Proto::IndicatorTrend* SchemaItemIndicator::release_indicatortrend() {
+  _has_bits_[0] &= ~0x00000008u;
+  ::Proto::IndicatorTrend* temp = indicatortrend_;
+  indicatortrend_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::Proto::IndicatorTrend* SchemaItemIndicator::unsafe_arena_release_indicatortrend() {
+  // @@protoc_insertion_point(field_release:Proto.SchemaItemIndicator.indicatorTrend)
+  _has_bits_[0] &= ~0x00000008u;
+  ::Proto::IndicatorTrend* temp = indicatortrend_;
+  indicatortrend_ = nullptr;
+  return temp;
+}
+inline ::Proto::IndicatorTrend* SchemaItemIndicator::_internal_mutable_indicatortrend() {
+  _has_bits_[0] |= 0x00000008u;
+  if (indicatortrend_ == nullptr) {
+    auto* p = CreateMaybeMessage<::Proto::IndicatorTrend>(GetArena());
+    indicatortrend_ = p;
+  }
+  return indicatortrend_;
+}
+inline ::Proto::IndicatorTrend* SchemaItemIndicator::mutable_indicatortrend() {
+  // @@protoc_insertion_point(field_mutable:Proto.SchemaItemIndicator.indicatorTrend)
+  return _internal_mutable_indicatortrend();
+}
+inline void SchemaItemIndicator::set_allocated_indicatortrend(::Proto::IndicatorTrend* indicatortrend) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete indicatortrend_;
+  }
+  if (indicatortrend) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(indicatortrend);
+    if (message_arena != submessage_arena) {
+      indicatortrend = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, indicatortrend, submessage_arena);
+    }
+    _has_bits_[0] |= 0x00000008u;
+  } else {
+    _has_bits_[0] &= ~0x00000008u;
+  }
+  indicatortrend_ = indicatortrend;
+  // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItemIndicator.indicatorTrend)
 }
 
 // -------------------------------------------------------------------
@@ -52598,6 +53639,251 @@ SchemaDetailsSet::schemasdetails() const {
 
 // -------------------------------------------------------------------
 
+// SchemaDetails_TrendIndicatorSchemaItems
+
+// optional .Proto.Uuid itemUuid = 2;
+inline bool SchemaDetails_TrendIndicatorSchemaItems::_internal_has_itemuuid() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  PROTOBUF_ASSUME(!value || itemuuid_ != nullptr);
+  return value;
+}
+inline bool SchemaDetails_TrendIndicatorSchemaItems::has_itemuuid() const {
+  return _internal_has_itemuuid();
+}
+inline void SchemaDetails_TrendIndicatorSchemaItems::clear_itemuuid() {
+  if (itemuuid_ != nullptr) itemuuid_->Clear();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const ::Proto::Uuid& SchemaDetails_TrendIndicatorSchemaItems::_internal_itemuuid() const {
+  const ::Proto::Uuid* p = itemuuid_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Proto::Uuid&>(
+      ::Proto::_Uuid_default_instance_);
+}
+inline const ::Proto::Uuid& SchemaDetails_TrendIndicatorSchemaItems::itemuuid() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaDetails.TrendIndicatorSchemaItems.itemUuid)
+  return _internal_itemuuid();
+}
+inline void SchemaDetails_TrendIndicatorSchemaItems::unsafe_arena_set_allocated_itemuuid(
+    ::Proto::Uuid* itemuuid) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(itemuuid_);
+  }
+  itemuuid_ = itemuuid;
+  if (itemuuid) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.SchemaDetails.TrendIndicatorSchemaItems.itemUuid)
+}
+inline ::Proto::Uuid* SchemaDetails_TrendIndicatorSchemaItems::release_itemuuid() {
+  _has_bits_[0] &= ~0x00000001u;
+  ::Proto::Uuid* temp = itemuuid_;
+  itemuuid_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::Proto::Uuid* SchemaDetails_TrendIndicatorSchemaItems::unsafe_arena_release_itemuuid() {
+  // @@protoc_insertion_point(field_release:Proto.SchemaDetails.TrendIndicatorSchemaItems.itemUuid)
+  _has_bits_[0] &= ~0x00000001u;
+  ::Proto::Uuid* temp = itemuuid_;
+  itemuuid_ = nullptr;
+  return temp;
+}
+inline ::Proto::Uuid* SchemaDetails_TrendIndicatorSchemaItems::_internal_mutable_itemuuid() {
+  _has_bits_[0] |= 0x00000001u;
+  if (itemuuid_ == nullptr) {
+    auto* p = CreateMaybeMessage<::Proto::Uuid>(GetArena());
+    itemuuid_ = p;
+  }
+  return itemuuid_;
+}
+inline ::Proto::Uuid* SchemaDetails_TrendIndicatorSchemaItems::mutable_itemuuid() {
+  // @@protoc_insertion_point(field_mutable:Proto.SchemaDetails.TrendIndicatorSchemaItems.itemUuid)
+  return _internal_mutable_itemuuid();
+}
+inline void SchemaDetails_TrendIndicatorSchemaItems::set_allocated_itemuuid(::Proto::Uuid* itemuuid) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete itemuuid_;
+  }
+  if (itemuuid) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(itemuuid);
+    if (message_arena != submessage_arena) {
+      itemuuid = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, itemuuid, submessage_arena);
+    }
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  itemuuid_ = itemuuid;
+  // @@protoc_insertion_point(field_set_allocated:Proto.SchemaDetails.TrendIndicatorSchemaItems.itemUuid)
+}
+
+// optional int32 samplePeriod = 3;
+inline bool SchemaDetails_TrendIndicatorSchemaItems::_internal_has_sampleperiod() const {
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline bool SchemaDetails_TrendIndicatorSchemaItems::has_sampleperiod() const {
+  return _internal_has_sampleperiod();
+}
+inline void SchemaDetails_TrendIndicatorSchemaItems::clear_sampleperiod() {
+  sampleperiod_ = 0;
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaDetails_TrendIndicatorSchemaItems::_internal_sampleperiod() const {
+  return sampleperiod_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaDetails_TrendIndicatorSchemaItems::sampleperiod() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaDetails.TrendIndicatorSchemaItems.samplePeriod)
+  return _internal_sampleperiod();
+}
+inline void SchemaDetails_TrendIndicatorSchemaItems::_internal_set_sampleperiod(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000002u;
+  sampleperiod_ = value;
+}
+inline void SchemaDetails_TrendIndicatorSchemaItems::set_sampleperiod(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_sampleperiod(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaDetails.TrendIndicatorSchemaItems.samplePeriod)
+}
+
+// optional int32 timeType = 4;
+inline bool SchemaDetails_TrendIndicatorSchemaItems::_internal_has_timetype() const {
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  return value;
+}
+inline bool SchemaDetails_TrendIndicatorSchemaItems::has_timetype() const {
+  return _internal_has_timetype();
+}
+inline void SchemaDetails_TrendIndicatorSchemaItems::clear_timetype() {
+  timetype_ = 0;
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaDetails_TrendIndicatorSchemaItems::_internal_timetype() const {
+  return timetype_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaDetails_TrendIndicatorSchemaItems::timetype() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaDetails.TrendIndicatorSchemaItems.timeType)
+  return _internal_timetype();
+}
+inline void SchemaDetails_TrendIndicatorSchemaItems::_internal_set_timetype(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000004u;
+  timetype_ = value;
+}
+inline void SchemaDetails_TrendIndicatorSchemaItems::set_timetype(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_timetype(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaDetails.TrendIndicatorSchemaItems.timeType)
+}
+
+// optional int32 durationSeconds = 5;
+inline bool SchemaDetails_TrendIndicatorSchemaItems::_internal_has_durationseconds() const {
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
+  return value;
+}
+inline bool SchemaDetails_TrendIndicatorSchemaItems::has_durationseconds() const {
+  return _internal_has_durationseconds();
+}
+inline void SchemaDetails_TrendIndicatorSchemaItems::clear_durationseconds() {
+  durationseconds_ = 0;
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaDetails_TrendIndicatorSchemaItems::_internal_durationseconds() const {
+  return durationseconds_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaDetails_TrendIndicatorSchemaItems::durationseconds() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaDetails.TrendIndicatorSchemaItems.durationSeconds)
+  return _internal_durationseconds();
+}
+inline void SchemaDetails_TrendIndicatorSchemaItems::_internal_set_durationseconds(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000008u;
+  durationseconds_ = value;
+}
+inline void SchemaDetails_TrendIndicatorSchemaItems::set_durationseconds(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_durationseconds(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaDetails.TrendIndicatorSchemaItems.durationSeconds)
+}
+
+// repeated string appSignalIds = 6;
+inline int SchemaDetails_TrendIndicatorSchemaItems::_internal_appsignalids_size() const {
+  return appsignalids_.size();
+}
+inline int SchemaDetails_TrendIndicatorSchemaItems::appsignalids_size() const {
+  return _internal_appsignalids_size();
+}
+inline void SchemaDetails_TrendIndicatorSchemaItems::clear_appsignalids() {
+  appsignalids_.Clear();
+}
+inline std::string* SchemaDetails_TrendIndicatorSchemaItems::add_appsignalids() {
+  // @@protoc_insertion_point(field_add_mutable:Proto.SchemaDetails.TrendIndicatorSchemaItems.appSignalIds)
+  return _internal_add_appsignalids();
+}
+inline const std::string& SchemaDetails_TrendIndicatorSchemaItems::_internal_appsignalids(int index) const {
+  return appsignalids_.Get(index);
+}
+inline const std::string& SchemaDetails_TrendIndicatorSchemaItems::appsignalids(int index) const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaDetails.TrendIndicatorSchemaItems.appSignalIds)
+  return _internal_appsignalids(index);
+}
+inline std::string* SchemaDetails_TrendIndicatorSchemaItems::mutable_appsignalids(int index) {
+  // @@protoc_insertion_point(field_mutable:Proto.SchemaDetails.TrendIndicatorSchemaItems.appSignalIds)
+  return appsignalids_.Mutable(index);
+}
+inline void SchemaDetails_TrendIndicatorSchemaItems::set_appsignalids(int index, const std::string& value) {
+  // @@protoc_insertion_point(field_set:Proto.SchemaDetails.TrendIndicatorSchemaItems.appSignalIds)
+  appsignalids_.Mutable(index)->assign(value);
+}
+inline void SchemaDetails_TrendIndicatorSchemaItems::set_appsignalids(int index, std::string&& value) {
+  // @@protoc_insertion_point(field_set:Proto.SchemaDetails.TrendIndicatorSchemaItems.appSignalIds)
+  appsignalids_.Mutable(index)->assign(std::move(value));
+}
+inline void SchemaDetails_TrendIndicatorSchemaItems::set_appsignalids(int index, const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  appsignalids_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:Proto.SchemaDetails.TrendIndicatorSchemaItems.appSignalIds)
+}
+inline void SchemaDetails_TrendIndicatorSchemaItems::set_appsignalids(int index, const char* value, size_t size) {
+  appsignalids_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:Proto.SchemaDetails.TrendIndicatorSchemaItems.appSignalIds)
+}
+inline std::string* SchemaDetails_TrendIndicatorSchemaItems::_internal_add_appsignalids() {
+  return appsignalids_.Add();
+}
+inline void SchemaDetails_TrendIndicatorSchemaItems::add_appsignalids(const std::string& value) {
+  appsignalids_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add:Proto.SchemaDetails.TrendIndicatorSchemaItems.appSignalIds)
+}
+inline void SchemaDetails_TrendIndicatorSchemaItems::add_appsignalids(std::string&& value) {
+  appsignalids_.Add(std::move(value));
+  // @@protoc_insertion_point(field_add:Proto.SchemaDetails.TrendIndicatorSchemaItems.appSignalIds)
+}
+inline void SchemaDetails_TrendIndicatorSchemaItems::add_appsignalids(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  appsignalids_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:Proto.SchemaDetails.TrendIndicatorSchemaItems.appSignalIds)
+}
+inline void SchemaDetails_TrendIndicatorSchemaItems::add_appsignalids(const char* value, size_t size) {
+  appsignalids_.Add()->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:Proto.SchemaDetails.TrendIndicatorSchemaItems.appSignalIds)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>&
+SchemaDetails_TrendIndicatorSchemaItems::appsignalids() const {
+  // @@protoc_insertion_point(field_list:Proto.SchemaDetails.TrendIndicatorSchemaItems.appSignalIds)
+  return appsignalids_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
+SchemaDetails_TrendIndicatorSchemaItems::mutable_appsignalids() {
+  // @@protoc_insertion_point(field_mutable_list:Proto.SchemaDetails.TrendIndicatorSchemaItems.appSignalIds)
+  return &appsignalids_;
+}
+
+// -------------------------------------------------------------------
+
 // SchemaDetails
 
 // optional int32 version = 2;
@@ -53428,6 +54714,45 @@ inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
 SchemaDetails::mutable_loopbacks() {
   // @@protoc_insertion_point(field_mutable_list:Proto.SchemaDetails.loopbacks)
   return &loopbacks_;
+}
+
+// repeated .Proto.SchemaDetails.TrendIndicatorSchemaItems trendIndicators = 30;
+inline int SchemaDetails::_internal_trendindicators_size() const {
+  return trendindicators_.size();
+}
+inline int SchemaDetails::trendindicators_size() const {
+  return _internal_trendindicators_size();
+}
+inline void SchemaDetails::clear_trendindicators() {
+  trendindicators_.Clear();
+}
+inline ::Proto::SchemaDetails_TrendIndicatorSchemaItems* SchemaDetails::mutable_trendindicators(int index) {
+  // @@protoc_insertion_point(field_mutable:Proto.SchemaDetails.trendIndicators)
+  return trendindicators_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::SchemaDetails_TrendIndicatorSchemaItems >*
+SchemaDetails::mutable_trendindicators() {
+  // @@protoc_insertion_point(field_mutable_list:Proto.SchemaDetails.trendIndicators)
+  return &trendindicators_;
+}
+inline const ::Proto::SchemaDetails_TrendIndicatorSchemaItems& SchemaDetails::_internal_trendindicators(int index) const {
+  return trendindicators_.Get(index);
+}
+inline const ::Proto::SchemaDetails_TrendIndicatorSchemaItems& SchemaDetails::trendindicators(int index) const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaDetails.trendIndicators)
+  return _internal_trendindicators(index);
+}
+inline ::Proto::SchemaDetails_TrendIndicatorSchemaItems* SchemaDetails::_internal_add_trendindicators() {
+  return trendindicators_.Add();
+}
+inline ::Proto::SchemaDetails_TrendIndicatorSchemaItems* SchemaDetails::add_trendindicators() {
+  // @@protoc_insertion_point(field_add:Proto.SchemaDetails.trendIndicators)
+  return _internal_add_trendindicators();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::SchemaDetails_TrendIndicatorSchemaItems >&
+SchemaDetails::trendindicators() const {
+  // @@protoc_insertion_point(field_list:Proto.SchemaDetails.trendIndicators)
+  return trendindicators_;
 }
 
 // -------------------------------------------------------------------
@@ -56939,6 +58264,12 @@ SimOverrideSignalWorkspace::overridesignals() const {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

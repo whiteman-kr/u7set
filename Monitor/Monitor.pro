@@ -100,12 +100,12 @@ SOURCES += main.cpp \
     ArchiveData.cpp \
     TcpSignalRecents.cpp \
 	MonitorSchemaManager.cpp \
-    SelectSchemaWidget.cpp \    
+	SelectSchemaWidget.cpp \
+	Trend/RtTrendSchema.cpp \
 	../lib/Tuning/TuningSignalManager.cpp \
     ../lib/Tuning/TuningTcpClient.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
-#	../lib/AppSignalProperties.cpp \
     Trend/RtTrendTcpClient.cpp \
     Trend/ArchiveTrendTcpClient.cpp \
     MonitorTuningTcpClient.cpp \
@@ -163,7 +163,7 @@ HEADERS  += \
     ../lib/Tuning/TuningSignalManager.h \
     ../lib/Tuning/TuningTcpClient.h \
     ../lib/Tuning/TuningSourceState.h \
-#	../lib/AppSignalProperties.h \
+    Trend/RtTrendSchema.h \
     Trend/RtTrendTcpClient.h \
     Trend/ArchiveTrendTcpClient.h \
     MonitorTuningTcpClient.h \

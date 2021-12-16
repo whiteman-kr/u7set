@@ -140,6 +140,7 @@ namespace ExtWidgets
 		void editKeyPressed();
 		void symbolKeyPressed(QString key);
 		void copyKeyPressed();
+		void pasteKeyPressed();
 		void spaceKeyPressed();
 	};
 
@@ -182,6 +183,7 @@ namespace ExtWidgets
 		void onCellSymbolKeyPressed(QString key);
 		void onCellToggleKeyPressed();
 		void onCellCopyKeyPressed();
+		void onCellPasteKeyPressed();
 		void onShowErrorMessage (QString message);
 		void onPropertyFilterChanged();
 		void onTableContextMenuRequested(const QPoint &pos);

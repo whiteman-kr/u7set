@@ -84,6 +84,23 @@ namespace VFrame30
 		return {};
 	}
 
+	bool SchemaManager::trendData(QUuid /*trendUuid*/,
+								  QString /*appSignalId*/,
+								  QDateTime /*from*/,
+								  QDateTime /*to*/,
+								  E::TimeType /*timeType*/,
+								  std::list<std::shared_ptr<TrendLib::OneHourData>>* /*outData*/) const
+	{
+		Q_ASSERT(false);
+		return false;
+	}
+
+	TimeStamp SchemaManager::maxTimeStamp(QUuid /*trendUuid*/, E::TimeType /*timeType*/) const
+	{
+		Q_ASSERT(false);
+		return {};
+	}
+
 	// Load schema, must be overriden to perform loading schema appropriate to client.
 	//
 	std::shared_ptr<VFrame30::Schema> SchemaManager::loadSchema(QString schemaId)

@@ -604,13 +604,13 @@ public:
 	{
 		HistogramVert,
 		ArrowIndicator,
-		//Trend,
+		Trend,
 		//CustomDraw
 		// !!!! COUNT IS DEFINED IN THE NEXT FUNCTION IndicatorTypeCount !!!
 	};
 	Q_ENUM(IndicatorType)
 
-	static const size_t IndicatorTypeCount = 2;
+	static const size_t IndicatorTypeCount = 3;
 
 	enum class CmpType
 	{

@@ -13,6 +13,14 @@ EditSchemaAppSignalProvider::EditSchemaAppSignalProvider(AppSignalSetProvider* s
 	Q_ASSERT(signalSetProvider);
 }
 
+int EditSchemaAppSignalProvider::signalsCount() const
+{
+	// Unlikely this function required for schema editing
+	//
+	Q_ASSERT(false);
+	return 0;
+}
+
 std::vector<AppSignalParam> EditSchemaAppSignalProvider::signalList() const
 {
 	// Unlikely this function required for schema editing

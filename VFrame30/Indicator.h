@@ -14,6 +14,7 @@ namespace VFrame30
 	class Indicator : public QObject
 	{
 		Q_OBJECT
+
 	public:
 		Indicator() = delete;
 		explicit Indicator(SchemaUnit itemUnit);
@@ -39,6 +40,7 @@ namespace VFrame30
 		template <typename TYPE>
 		void regionalSetter(TYPE value, TYPE* variable);
 
+		SchemaUnit itemUnit() const;
 		void setUnits(SchemaUnit itemUnit);
 
 	protected:

@@ -52,7 +52,7 @@
 		<OptoPortDataSize>2560</OptoPortDataSize>
 		<SharedBuffer>false</SharedBuffer>
 	</OptoInterface>
-	<Lan>
+	<Lan RupVersion="5" FotipVersion="2">
 		<LanController>
 			<Type>Tuning</Type>
 			<Place>1</Place>

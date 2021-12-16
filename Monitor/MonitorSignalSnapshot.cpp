@@ -1,19 +1,23 @@
 #include "MonitorSignalSnapshot.h"
 #include "MonitorConfigController.h"
 
-bool MonitorDialogSignalSnapshot::showDialog(MonitorConfigController *configController,
-					   TcpSignalClient* tcpSignalClient,
-					   AppSignalManager* appSignalManager,
-					   QString projectName,
-					   QString softwareEquipmentId,
-					   MonitorCentralWidget* centralWidget)
+MonitorDialogSignalSnapshot* MonitorDialogSignalSnapshot::createDialog(MonitorConfigController *configController,
+											 TcpSignalClient* tcpSignalClient,
+											 AppSignalManager* appSignalManager,
+											 MonitorCentralWidget* centralWidget)
 {
+	if (configController == nullptr || tcpSignalClient == nullptr || appSignalManager == nullptr || centralWidget == nullptr)
+	{
+		Q_ASSERT(configController);
+		Q_ASSERT(tcpSignalClient);
+		Q_ASSERT(appSignalManager);
+		Q_ASSERT(centralWidget);
+		return nullptr;
+	}
 
 	MonitorDialogSignalSnapshot* dss = new MonitorDialogSignalSnapshot(configController,
-														 appSignalManager,
-														 projectName,
-														 softwareEquipmentId,
-														 centralWidget);
+																	   appSignalManager,
+																	   centralWidget);
 
 	connect(dss, &DialogSignalSnapshot::signalContextMenu, centralWidget, &MonitorCentralWidget::slot_signalContextMenu);
 	connect(dss, &DialogSignalSnapshot::signalInfo, centralWidget, &MonitorCentralWidget::slot_signalInfo);
@@ -21,18 +25,17 @@ bool MonitorDialogSignalSnapshot::showDialog(MonitorConfigController *configCont
 	connect(tcpSignalClient, &TcpSignalClient::signalParamAndUnitsArrived, dss, &MonitorDialogSignalSnapshot::signalsUpdated);
 	connect(configController, &MonitorConfigController::configurationUpdate, dss, &MonitorDialogSignalSnapshot::schemasUpdated);
 
-	dss->show();
-
-	return true;
+	return dss;
 }
 
 
 MonitorDialogSignalSnapshot::MonitorDialogSignalSnapshot(MonitorConfigController *configController,
-							  AppSignalManager* appSignalManager,
-							  QString projectName,
-							  QString softwareEquipmentId,
-							  QWidget *parent)
-    :DialogSignalSnapshot(appSignalManager, projectName, softwareEquipmentId, parent),
+														 AppSignalManager* appSignalManager,
+														 QWidget *parent)
+	:DialogSignalSnapshot(appSignalManager,
+						  configController->configuration().project,
+						  configController->configuration().softwareEquipmentId,
+						  parent),
 	  m_configController(configController)
 {
 	if (m_configController == nullptr)

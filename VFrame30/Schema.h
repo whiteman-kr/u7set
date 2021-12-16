@@ -355,6 +355,32 @@ namespace VFrame30
 		std::set<QString> m_loopbacks;
 		std::set<QString> m_tags;		// All tags are kept in lowercase
 		std::set<QUuid> m_guids;
+
+		// SchemaItemIndicator, type trend
+		//
+		struct TrendIndicatorSchemaItems
+		{
+			TrendIndicatorSchemaItems() = default;
+			TrendIndicatorSchemaItems(QUuid _itemUuid,
+									  E::RtTrendsSamplePeriod _samplePeriod,
+									  E::TimeType _timeType,
+									  int _durationSeconds,
+									  const QStringList& _appSignalIds);
+
+			QUuid itemUuid;			// SchemaItemIndicator id
+			E::RtTrendsSamplePeriod samplePeriod = E::RtTrendsSamplePeriod::sp_1s;
+			E::TimeType timeType = E::TimeType::Local;
+			int durationSeconds = 0;
+			QStringList appSignalIds;
+
+			QJsonObject toJsonObject() const;
+			bool fromJsonObject(const QJsonObject& jsonObject);
+
+			bool saveData(::Proto::SchemaDetails::TrendIndicatorSchemaItems* message) const;
+			bool loadData(const ::Proto::SchemaDetails::TrendIndicatorSchemaItems& message);
+		};
+
+		std::vector<TrendIndicatorSchemaItems> m_trendsIndicators;
 	};
 
 
@@ -401,6 +427,8 @@ namespace VFrame30
 		QString schemaCaptionById(const QString& schemaId) const;
 		QString schemaCaptionByIndex(int schemaIndex) const;
 		QString schemaIdByIndex(int schemaIndex) const;
+
+		std::vector<SchemaDetails::TrendIndicatorSchemaItems> trendIndicators() const;
 
 	private:
 		std::map<QString, std::shared_ptr<SchemaDetails>> m_details;	// Key is schemaId

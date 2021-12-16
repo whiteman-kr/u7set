@@ -3,6 +3,7 @@
 
 #include "Trend.h"
 #include "TrendRuler.h"
+#include "ITrendDataProvider.h"
 #include <QPixmap>
 #include <QImage>
 #include <QWidget>
@@ -24,7 +25,7 @@ namespace TrendLib
 		Q_OBJECT
 
 	public:
-		explicit RenderThread(Trend* trend, QObject* parent = 0);
+		explicit RenderThread(Trend* trend, ITrendDataProvider* dataProvider, QObject* parent = 0);
 		virtual ~RenderThread();
 
 	public:
@@ -147,12 +148,12 @@ namespace TrendLib
 		void setTrendMode(E::TrendMode value);
 
 	private:
+		Trend m_trend;
+		TrendParam m_trendParam;
+
 		RenderThread m_thread;
 		QPixmap m_pixmap;
 		TrendParam m_pixmapDrawParam;			// DrawParmas whcih was used to generate m_pixmap;
-
-		Trend m_trend;
-		TrendParam m_trendParam;
 
 		enum class MouseAction
 		{

@@ -210,6 +210,26 @@ namespace VFrame30
 		return m_clientSchemaView->schemaManager()->schemaIdByIndex(schemaIndex);
 	}
 
+	void ScriptSchemaView::showArchive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType)
+	{
+		m_clientSchemaView->showArchive(signalsList, startTime, endTime, timeType);
+	}
+
+	void ScriptSchemaView::showSnapshot(QStringList signalsList)
+	{
+		m_clientSchemaView->showSnapshot(signalsList);
+	}
+
+	void ScriptSchemaView::showSnapshotByMask(QStringList masks)
+	{
+		m_clientSchemaView->showSnapshotByMask(masks);
+	}
+
+	void ScriptSchemaView::showSnapshotByTag(QStringList tags)
+	{
+		m_clientSchemaView->showSnapshotByTag(tags);
+	}
+
 	QString ScriptSchemaView::schemaId() const
 	{
 		return m_clientSchemaView->schema()->schemaId();
@@ -847,4 +867,25 @@ namespace VFrame30
 	{
 		m_tuningClientBehavior = std::move(src);
 	}
+
+	void ClientSchemaView::showArchive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType)
+	{
+		emit signal_showArchive(signalsList, startTime, endTime, timeType);
+	}
+
+	void ClientSchemaView::showSnapshot(QStringList signalsList)
+	{
+		emit signal_showSnapshot(signalsList);
+	}
+
+	void ClientSchemaView::showSnapshotByMask(QStringList masks)
+	{
+		emit signal_showSnapshotByMask(masks);
+	}
+
+	void ClientSchemaView::showSnapshotByTag(QStringList tags)
+	{
+		emit signal_showSnapshotByTag(tags);
+	}
+
 }

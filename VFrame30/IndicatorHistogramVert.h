@@ -1,5 +1,6 @@
 #pragma once
 #include "Indicator.h"
+#include "FontParam.h"
 #include "../AppSignalLib/AppSignalParam.h"
 #include "../lib/Tuning/TuningSignalState.h"
 
@@ -91,6 +92,7 @@ namespace VFrame30
 	class IndicatorHistogramVert : public Indicator
 	{
 		Q_OBJECT
+
 	public:
 		IndicatorHistogramVert() = delete;
 		explicit IndicatorHistogramVert(SchemaUnit itemUnit);
@@ -126,11 +128,15 @@ namespace VFrame30
 		};
 		void drawGrids(const std::vector<DrawGridStruct> grids, CDrawParam* drawParam, const QRectF barRect, const SchemaItemIndicator* item) const;
 
+		std::set<QString> getSignalTags(CDrawParam* drawParam, const QString& appSignalId) const;
+		bool getSignalParam(CDrawParam* drawParam, AppSignalParam* signalParam) const;
+		bool getSignalState(CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const;
+		std::optional<double> getSignalState(CDrawParam* drawParam, const QString& appSignalId) const;
+
 		// Setpoints drawing
 		//
 		std::vector<IndicatorSetpoint> comparators(CDrawParam* drawParam,
-												   const QString& appSignalId,
-												   const SchemaItemIndicator* schemaItem) const;
+												   const QString& appSignalId) const;
 
 		std::optional<QBrush> getAlertBrush(const std::vector<IndicatorSetpoint>& setpoints,
 											CDrawParam* drawParam,
@@ -170,10 +176,58 @@ namespace VFrame30
 		double pointToScaleValue(double value) const;
 		double pointFromScaleValue(double scaleValue) const;
 
+		// Properties
+		//
+	public:
+		E::SignalSource signalSource() const;
+		void setSignalSource(E::SignalSource value);
+
+		E::AnalogFormat analogFormat() const;
+		void setAnalogFormat(E::AnalogFormat value);
+
+		int precision() const;
+		void setPrecision(int value);
+
+		DECLARE_FONT_PROPERTIES(Font)
+
+		FontParam& font();
+		const FontParam& font() const;
+
+		bool drawRect() const;
+		void setDrawRect(bool value);
+
+		double lineWeight() const;
+		double lineWeightDraw() const noexcept;
+		void setLineWeight(double weight);
+
+		const QColor& backgroundColor() const;
+		void setBackgroundColor(const QColor& color);
+
+		const QColor& lineColor() const;
+		void setLineColor(const QColor& color);
+
+		const QVector<QColor>& signalColors() const;
+		void setSignalColors(const QVector<QColor>& value);
+
 	private:
+		E::SignalSource m_signalSource = E::SignalSource::AppDataService;
+
+		E::AnalogFormat m_analogFormat = E::AnalogFormat::f_9;
+		int m_precision = 2;
+
+		FontParam m_font;
+
+		bool m_drawRect = false;
+		double m_lineWeight = 0.0;				// Line weight, in pixels or inches depends on UnitDocPt
+
+		QColor m_backgroundColor{Qt::lightGray};
+		QColor m_lineColor{Qt::black};
+
+		QVector<QColor> m_signalColors = {Qt::darkBlue};
+
 		double m_startValue = 0;				// Start/End Values for top and bottom of the indicator,
 		double m_endValue = 100.0;				// this field is common for all signals and all columns
-		// so it's not possible to set different scales for several signals
+												// so it's not possible to set different scales for several signals
 
 		double m_barWidth = 0;					// Column width, In inches or pixels, getter and setter converts it to regional units
 		bool m_drawBarRect = true;

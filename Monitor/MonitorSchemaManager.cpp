@@ -2,12 +2,18 @@
 
 MonitorSchemaManager::MonitorSchemaManager(MonitorConfigController* configController, QObject* parent /*= nullptr*/) :
 	VFrame30::SchemaManager(parent),
-	m_configController(configController)
+	m_configController(configController),
+	m_rtTrendSchemas(configController)
 {
 	Q_ASSERT(m_configController);
 
 	connect(m_configController, &MonitorConfigController::configurationArrived, this, &MonitorSchemaManager::slot_configurationArrived);
 
+	return;
+}
+
+MonitorSchemaManager::~MonitorSchemaManager()
+{
 	return;
 }
 
@@ -75,6 +81,21 @@ QString MonitorSchemaManager::schemaIdByIndex(int schemaIndex) const
 	return m_configController->schemaIdByIndex(schemaIndex);
 }
 
+bool MonitorSchemaManager::trendData(QUuid trendUuid,
+									 QString appSignalId,
+									 QDateTime /*from*/,
+									 QDateTime /*to*/,
+									 E::TimeType /*timeType*/,
+									 std::list<std::shared_ptr<TrendLib::OneHourData>>* outData) const
+{
+	return m_rtTrendSchemas.trendData(trendUuid, appSignalId, outData);
+}
+
+TimeStamp MonitorSchemaManager::maxTimeStamp(QUuid trendUuid, E::TimeType /*timeType*/) const
+{
+	return m_rtTrendSchemas.maxTimeStamp(trendUuid);
+}
+
 void MonitorSchemaManager::slot_configurationArrived(ConfigSettings configuration)
 {
 	clear();
@@ -82,6 +103,10 @@ void MonitorSchemaManager::slot_configurationArrived(ConfigSettings configuratio
 	setGlobalScript(configuration.globalScript);
 	setOnConfigurationArrivedScript(configuration.onConfigurationArrivedScript);
 
+	// Schemas Realtime Trends
+	// At this point m_configController already has SchemaDetails.pbuf,so we can use it
+	//
+	m_rtTrendSchemas.updateRealtimeConnections();
 	return;
 }
 

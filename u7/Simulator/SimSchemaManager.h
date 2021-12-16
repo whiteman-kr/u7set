@@ -15,6 +15,16 @@ public:
 protected:
 	virtual std::shared_ptr<VFrame30::Schema> loadSchema(QString schemaId) override;
 
+	// RealTime Trends (ITrendDataProvider)
+	//
+public:
+	virtual bool trendData(QUuid trendUuid,
+						   QString appSignalId,
+						   QDateTime from,
+						   QDateTime to,
+						   E::TimeType timeType,
+						   std::list<std::shared_ptr<TrendLib::OneHourData>>* outData) const override;
+
 	// Slots
 	//
 protected slots:

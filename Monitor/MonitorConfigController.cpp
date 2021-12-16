@@ -440,14 +440,13 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 		{
 			qDebug() << "ERROR: Cannot get " << fileName << ", " << parsingError;
 
-			QMutexLocker locker(&m_mutex);
+			QWriteLocker locker(&m_schemaDetailsLock);
 			m_schemaDetailsSet.clear();
 		}
 		else
 		{
-			QMutexLocker locker(&m_mutex);
+			QWriteLocker locker(&m_schemaDetailsLock);
 			m_schemaDetailsSet.clear();
-
 			m_schemaDetailsSet.Load(ba);
 		}
 	}
@@ -557,7 +556,7 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 	// --
 	//
 	{
-		QMutexLocker locker(&m_confugurationMutex);
+		QWriteLocker locker(&m_confugurationLock);
 		m_configuration = readSettings;		// Cannot move readSettings here as it is used later for `emit configurationArrived(readSettings)`
 	}
 
@@ -703,25 +702,21 @@ bool MonitorConfigController::applyCurSettingsProfile(std::shared_ptr<const Soft
 
 VFrame30::SchemaDetailsSet MonitorConfigController::schemasDetailsSet() const
 {
-	QMutexLocker l(&m_mutex);
+	QReadLocker l(&m_schemaDetailsLock);
 	return m_schemaDetailsSet;
 }
 
 std::vector<VFrame30::SchemaDetails> MonitorConfigController::schemasDetails() const
 {
-	QMutexLocker l(&m_mutex);
-
-	std::vector<VFrame30::SchemaDetails> result = m_schemaDetailsSet.schemasDetails();
-
-	return result;
+	QReadLocker l(&m_schemaDetailsLock);
+	return m_schemaDetailsSet.schemasDetails();
 }
 
 std::set<QString> MonitorConfigController::schemaAppSignals(const QString& schemaId)
 {
-	QMutexLocker l(&m_mutex);
+	QReadLocker l(&m_schemaDetailsLock);
 
 	std::shared_ptr<VFrame30::SchemaDetails> details = m_schemaDetailsSet.schemaDetails(schemaId);
-
 	if (details == nullptr)
 	{
 		return std::set<QString>();
@@ -732,48 +727,54 @@ std::set<QString> MonitorConfigController::schemaAppSignals(const QString& schem
 
 QStringList MonitorConfigController::schemasByAppSignalId(const QString& appSignalId) const
 {
-	QMutexLocker l(&m_mutex);
+	QReadLocker l(&m_schemaDetailsLock);
 	return m_schemaDetailsSet.schemasByAppSignalId(appSignalId);
 }
 
 QStringList MonitorConfigController::schemasByLoopbackId(const QString& loopbackId) const
 {
-	QMutexLocker l(&m_mutex);
+	QReadLocker l(&m_schemaDetailsLock);
 	return m_schemaDetailsSet.schemasByLoopbackId(loopbackId);
 }
 
 ConfigSettings MonitorConfigController::configuration() const
 {
-	QMutexLocker locker(&m_confugurationMutex);
+	QReadLocker locker(&m_confugurationLock);
 	return m_configuration;
 }
 
 QString MonitorConfigController::configurationStartSchemaId() const
 {
-	QMutexLocker locker(&m_confugurationMutex);
+	QReadLocker locker(&m_confugurationLock);
 	return m_configuration.startSchemaId;
 }
 
 int MonitorConfigController::schemaCount() const
 {
-	QMutexLocker l(&m_mutex);
+	QReadLocker l(&m_schemaDetailsLock);
 	return m_schemaDetailsSet.schemaCount();
 }
 
 QString MonitorConfigController::schemaCaptionById(const QString& schemaId) const
 {
-	QMutexLocker l(&m_mutex);
+	QReadLocker l(&m_schemaDetailsLock);
 	return m_schemaDetailsSet.schemaCaptionById(schemaId);
 }
 
 QString MonitorConfigController::schemaCaptionByIndex(int schemaIndex) const
 {
-	QMutexLocker l(&m_mutex);
+	QReadLocker l(&m_schemaDetailsLock);
 	return m_schemaDetailsSet.schemaCaptionByIndex(schemaIndex);
 }
 
 QString MonitorConfigController::schemaIdByIndex(int schemaIndex) const
 {
-	QMutexLocker l(&m_mutex);
+	QReadLocker l(&m_schemaDetailsLock);
 	return m_schemaDetailsSet.schemaIdByIndex(schemaIndex);
+}
+
+std::vector<VFrame30::SchemaDetails::TrendIndicatorSchemaItems> MonitorConfigController::trendSchemaItems() const
+{
+	QReadLocker l(&m_schemaDetailsLock);
+	return m_schemaDetailsSet.trendIndicators();
 }

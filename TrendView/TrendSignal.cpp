@@ -480,22 +480,22 @@ namespace TrendLib
 		{
 			QMutexLocker l(&m_archiveMutex);
 
-			for (const std::pair<Hash, TrendArchive>& p : m_archiveLocalTime)
+			for (const auto&[hash, trendArchive] : m_archiveLocalTime)
 			{
 				::Proto::TrendArchive* messageTrenaArchive = message->add_archive_local_time();
-				ok &= p.second.save(p.second.appSignalId, messageTrenaArchive);
+				ok &= trendArchive.save(trendArchive.appSignalId, messageTrenaArchive);
 			}
 
-			for (const std::pair<Hash, TrendArchive>& p : m_archiveSystemTime)
+			for (const auto&[hash, trendArchive] : m_archiveSystemTime)
 			{
 				::Proto::TrendArchive* messageTrenaArchive = message->add_archive_system_time();
-				ok &= p.second.save(p.second.appSignalId, messageTrenaArchive);
+				ok &= trendArchive.save(trendArchive.appSignalId, messageTrenaArchive);
 			}
 
-			for (const std::pair<Hash, TrendArchive>& p : m_archivePlantTime)
+			for (const auto&[hash, trendArchive] : m_archivePlantTime)
 			{
 				::Proto::TrendArchive* messageTrenaArchive = message->add_archive_plant_time();
-				ok &= p.second.save(p.second.appSignalId, messageTrenaArchive);
+				ok &= trendArchive.save(trendArchive.appSignalId, messageTrenaArchive);
 			}
 		}
 
@@ -600,6 +600,21 @@ namespace TrendLib
 		return true;
 	}
 
+	bool TrendSignalSet::addSignals(std::list<TrendSignalParam>&& signalParams)
+	{
+		if (signalParams.size() >= 16)
+		{
+			return false;
+		}
+
+		QMutexLocker locker(&m_paramMutex);
+
+		m_signalParams.clear();
+		m_signalParams = std::move(signalParams);
+
+		return true;
+	}
+
 	void TrendSignalSet::removeSignal(QString appSignalId)
 	{
 		QMutexLocker locker(&m_paramMutex);
@@ -610,6 +625,13 @@ namespace TrendLib
 				return s.appSignalId() == appSignalId;
 			});
 
+		return;
+	}
+
+	void TrendSignalSet::removeAllSignals()
+	{
+		QMutexLocker locker(&m_paramMutex);
+		m_signalParams.clear();
 		return;
 	}
 
@@ -729,6 +751,21 @@ namespace TrendLib
 			{
 				result.emplace_back(s.appSignalHash());
 			}
+		}
+
+		return result;
+	}
+
+	QStringList TrendSignalSet::trendSignalIds() const
+	{
+		QMutexLocker locker(&m_paramMutex);
+
+		QStringList result;
+		result.reserve(m_signalParams.size());
+
+		for (const TrendSignalParam& s : m_signalParams)
+		{
+			result << s.appSignalId();
 		}
 
 		return result;
@@ -917,7 +954,12 @@ namespace TrendLib
 		return true;
 	}
 
-	bool TrendSignalSet::getTrendData(QString appSignalId, QDateTime from, QDateTime to, E::TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const
+	bool TrendSignalSet::trendData(QUuid /*trendUuid*/,
+								   QString appSignalId,
+								   QDateTime from,
+								   QDateTime to,
+								   E::TimeType timeType,
+								   std::list<std::shared_ptr<OneHourData>>* outData) const
 	{
 		if (outData == nullptr ||
 			from > to)
@@ -1003,7 +1045,6 @@ namespace TrendLib
 						// MAKE A COPY of hourData
 						//
 						auto copiedHourData = std::make_shared<TrendLib::OneHourData>(hourData.operator*());
-
 						outData->push_back(copiedHourData);
 					}
 					break;
@@ -1016,6 +1057,54 @@ namespace TrendLib
 		}	// QMutexLocker locker(&m_archiveMutex);
 
 		return true;
+	}
+
+	TimeStamp TrendSignalSet::maxTimeStamp(QUuid /*trendUuid*/, E::TimeType timeType) const
+	{
+		QMutexLocker locker(&m_archiveMutex);
+
+		std::map<Hash, TrendArchive>* m_archive = nullptr;
+		switch (timeType)
+		{
+		case E::TimeType::Local:	m_archive = &m_archiveLocalTime;	break;
+		case E::TimeType::System:	m_archive = &m_archiveSystemTime;	break;
+		case E::TimeType::Plant:	m_archive = &m_archivePlantTime;	break;
+		default:
+			Q_ASSERT(false);
+			return {};
+		}
+
+		TimeStamp result{};
+
+		for (const auto& [signalHash, trendArchive] : *m_archive)
+		{
+			auto rit = trendArchive.m_hours.rbegin();
+			if (rit != trendArchive.m_hours.rend())
+			{
+				const std::shared_ptr<OneHourData>& sp = rit->second;
+				Q_ASSERT(sp);
+
+				if (sp->data.empty() == false)
+				{
+					const TrendStateRecord& record = sp->data.back();
+
+					if (record.states.empty() == false)
+					{
+						switch (timeType)
+						{
+						case E::TimeType::Local:	result.timeStamp = std::max(result.timeStamp, record.states.back().local);	break;
+						case E::TimeType::System:	result.timeStamp = std::max(result.timeStamp, record.states.back().system);	break;
+						case E::TimeType::Plant:	result.timeStamp = std::max(result.timeStamp, record.states.back().plant);	break;
+						default:
+							Q_ASSERT(false);
+							return {};
+						}
+					}
+				}
+			}
+		}
+
+		return result;
 	}
 
 	bool TrendSignalSet::addTrendPoint(QString appSignalId, E::TimeType timeType, TrendStateItem stateItem)
@@ -1294,52 +1383,58 @@ namespace TrendLib
 		//
 		for (auto& [hash, trendArchive] : *archive)
 		{
-			if (trendArchive.m_hours.empty() == true)
-			{
-				// Do not add non valid point if signal archive is empty
-				//
-			}
-			else
-			{
-				// Find the last hour with points and add non valid state to it
-				//
-				for (auto rhit = trendArchive.m_hours.rbegin(); rhit != trendArchive.m_hours.rend(); ++rhit)
-				{
-					std::shared_ptr<OneHourData> hour = rhit->second;
+			TrendSignalSet::addNonValidPoint(&trendArchive);
+		}
 
-					if (hour->data.empty() == true)
+		return;
+	}
+
+	void TrendSignalSet::addNonValidPoint(TrendArchive* trendArchive)
+	{
+		if (trendArchive->m_hours.empty() == true)
+		{
+			// Do not add non-valid point if signal archive is empty
+			//
+		}
+		else
+		{
+			// Find the last hour with points and add non valid state to it
+			//
+			for (auto rhit = trendArchive->m_hours.rbegin(); rhit != trendArchive->m_hours.rend(); ++rhit)
+			{
+				std::shared_ptr<OneHourData> hour = rhit->second;
+
+				if (hour->data.empty() == true)
+				{
+					// It can be just request for ah hour
+					// Process the next hour
+					//
+					continue;
+				}
+				else
+				{
+					// Assume that record has some states
+					//
+					TrendStateRecord& record = hour->data.back();
+
+					if (record.states.empty() == false)
 					{
-						// It can be just request for ah hour
-						// Process the next hour
+						// Just duplicate last state with invalid flag
 						//
-						continue;
+						TrendStateItem tsi = record.states.back();
+						tsi.flags = 0;
+
+						record.states.push_back(tsi);
 					}
 					else
 					{
-						// Assume that record has some states
-						//
-						TrendStateRecord& record = hour->data.back();
-
-						if (record.states.empty() == false)
-						{
-							// Just duplicate last state with invalid flag
-							//
-							TrendStateItem tsi = record.states.back();
-							tsi.flags = 0;
-
-							record.states.push_back(tsi);
-						}
-						else
-						{
-							Q_ASSERT(record.states.empty() == false);
-						}
-
-						break;
+						Q_ASSERT(record.states.empty() == false);
 					}
+
+					break;
 				}
 			}
 		}
-
 
 		return;
 	}
@@ -1347,7 +1442,7 @@ namespace TrendLib
 	void TrendSignalSet::slot_archiveDataReceived(QString appSignalId, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data)
 	{
 		// Ignore data if there is no such signal in SignalParams
-		// Probably it was requested but later signal was excluded
+		// It could be requested but later signal was excluded
 		//
 		{
 			QMutexLocker paramLocker(&m_paramMutex);

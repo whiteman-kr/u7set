@@ -112,6 +112,9 @@ namespace TrendLib
 		// Properties
 		//
 	public:
+		QUuid uuid() const;
+		void setUuid(QUuid value);
+
 		TrendLib::TrendSignalSet& signalSet();
 		const TrendLib::TrendSignalSet& signalSet() const;
 
@@ -119,6 +122,8 @@ namespace TrendLib
 		const TrendLib::TrendRulerSet& rulerSet() const;
 
 	private:
+		QUuid m_uuid{};			// id of trend, used for SchemaItemIndicator, to identfy schemaitem
+
 		TrendLib::TrendSignalSet m_signalSet;
 		TrendLib::TrendRulerSet m_rulerSet;
 

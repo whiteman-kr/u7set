@@ -2,8 +2,11 @@
 #define TRENDSIGNAL_H
 
 #include <array>
+#include <list>
+#include <map>
 #include <bitset>
 #include <memory>
+#include "ITrendDataProvider.h"
 #include "../CommonLib/Types.h"
 #include "../AppSignalLib/AppSignalParam.h"
 
@@ -17,10 +20,11 @@ namespace Proto
 	class TrendSignalSet;
 }
 
-using TrendColor = quint32;		// This is QRgb, the problem is this header is used buy othe libs without GUI (simulator)
+using TrendColor = quint32;		// This is QRgb, the problem is this header is used buy other libs without GUI (simulator)
 
 namespace TrendLib
 {
+
 #pragma pack(push, 1)
 	struct TrendStateItem_v1
 	{
@@ -101,7 +105,7 @@ namespace TrendLib
 	struct TrendStateRecord
 	{
 		std::vector<TrendStateItem> states;
-		static const size_t RecomendedSize = 1600;			// TrendStateItem is about 36-40 bytes, 1600 is abou 64KB
+		static const size_t RecomendedSize = 3200;			// TrendStateItem is about 36-40 bytes, 1600 is about 64KB, 3200 is about 128KB
 
 		// Serialization
 		//
@@ -261,7 +265,8 @@ namespace TrendLib
 		QRectF m_tempDrawRect;		// Draw signal area
 	};
 
-	class TrendSignalSet : public QObject
+
+	class TrendSignalSet : public QObject, public ITrendDataProvider
 	{
 		Q_OBJECT
 
@@ -274,7 +279,10 @@ namespace TrendLib
 
 	public:
 		bool addSignal(const TrendSignalParam& signal);
+		bool addSignals(std::list<TrendSignalParam>&& signalParams);
+
 		void removeSignal(QString appSignalId);
+		void removeAllSignals();
 
 		[[nodiscard]] TrendLib::TrendSignalParam signalParam(const QString& appSignalId, bool* ok) const;
 		bool setSignalParam(const TrendLib::TrendSignalParam& signalParam);		// Update data
@@ -284,25 +292,41 @@ namespace TrendLib
 		[[nodiscard]] std::vector<TrendLib::TrendSignalParam> discreteSignals() const;
 
 		[[nodiscard]] std::vector<Hash> trendSignalsHashes(const QString& equipmentId = QString()) const;
+		[[nodiscard]] QStringList trendSignalIds() const;
 
 		[[nodiscard]] int discretesSignalsCount() const;
 		[[nodiscard]] int analogSignalsCount() const;
 
 		bool getFullExistingTrendData(QString appSignalId, E::TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const;
 		bool getExistingTrendData(QString appSignalId, QDateTime from, QDateTime to, E::TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const;
-		bool getTrendData(QString appSignalId, QDateTime from, QDateTime to, E::TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const;
+
+		// ITrendDataProvider implementation
+		//
+		virtual bool trendData(QUuid trendUuid,
+							   QString appSignalId,
+							   QDateTime from,
+							   QDateTime to,
+							   E::TimeType timeType,
+							   std::list<std::shared_ptr<OneHourData>>* outData) const override;
+
+		virtual TimeStamp maxTimeStamp(QUuid trendUuid, E::TimeType timeType) const override;
+
+		// End of ITrendDataProvider
 
 		bool addTrendPoint(QString appSignalId, E::TimeType timeType, TrendStateItem stateItem);
 		bool removeTrendPoint(QString appSignalId, int index, E::TimeType timeType);
 
 		void clear(E::TimeType timeType);
 
-		void addNonValidPoint();	// Add non valid points to all signals, useful in switching mode Archive/RealTime
-
-	private:
-		void addNonValidPoint(E::TimeType timeType);
-
+		// Add non valid points to all signals, useful in switching mode Archive/RealTime
+		//
 	public slots:
+		void addNonValidPoint();
+		void addNonValidPoint(E::TimeType timeType);
+		static void addNonValidPoint(TrendArchive* archive);
+
+		// --
+		//
 		void slot_archiveDataReceived(QString appSignalId, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
 		void slot_archiveRequestError(QString appSignalId, TimeStamp requestedHour, E::TimeType timeType);
 

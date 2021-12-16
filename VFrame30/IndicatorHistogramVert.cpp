@@ -4,6 +4,7 @@
 #include "DrawParam.h"
 #include "../AppSignalLib/AppSignalParam.h"
 #include "../lib/ComparatorSet.h"
+#include "TuningController.h"
 #include "AppSignalController.h"
 
 
@@ -88,6 +89,24 @@ namespace VFrame30
 		m_rightMargin(itemUnit == SchemaUnit::Display ? 10 : mm2in(5)),
 		m_bottomMargin(itemUnit == SchemaUnit::Display ? 10 : mm2in(5))
 	{
+		// Set font
+		//
+		m_font.setName(QStringLiteral("Arial"));
+
+		switch (itemUnit)
+		{
+		case SchemaUnit::Display:
+			m_font.setSize(12.0, itemUnit);
+			break;
+		case SchemaUnit::Inch:
+			m_font.setSize(1.0 / 8.0, itemUnit);		// 1/8"
+			break;
+		case SchemaUnit::Millimeter:
+			m_font.setSize(mm2in(3), itemUnit);
+			break;
+		default:
+			Q_ASSERT(false);
+		}
 	}
 
 	E::IndicatorScaleType IndicatorHistogramVert::scaleType() const
@@ -113,6 +132,34 @@ namespace VFrame30
 
 	void IndicatorHistogramVert::createProperties(SchemaItemIndicator* propertyObject, int /*signalCount*/)
 	{
+		propertyObject->ADD_PROPERTY_GET_SET_CAT(E::SignalSource,
+												 PropertyNames::signalSource,
+												 PropertyNames::indicatorSettings,
+												 true,
+												 IndicatorHistogramVert::signalSource,
+												 IndicatorHistogramVert::setSignalSource);
+
+		propertyObject->ADD_PROPERTY_GETTER_SETTER(E::AnalogFormat, PropertyNames::analogFormat, true, IndicatorHistogramVert::analogFormat, IndicatorHistogramVert::setAnalogFormat)
+				->setCategory(PropertyNames::indicatorSettings);
+		propertyObject->ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::precision, true, IndicatorHistogramVert::precision, IndicatorHistogramVert::setPrecision)
+				->setCategory(PropertyNames::indicatorSettings);
+
+		propertyObject->ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::fontName, PropertyNames::indicatorSettings, true, IndicatorHistogramVert::getFontName, IndicatorHistogramVert::setFontName);
+		propertyObject->ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::fontSize, PropertyNames::indicatorSettings, true, IndicatorHistogramVert::getFontSize, IndicatorHistogramVert::setFontSize);
+		propertyObject->ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontBold, PropertyNames::indicatorSettings, true, IndicatorHistogramVert::getFontBold, IndicatorHistogramVert::setFontBold);
+		propertyObject->ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontItalic, PropertyNames::indicatorSettings, true,  IndicatorHistogramVert::getFontItalic, IndicatorHistogramVert::setFontItalic);
+
+		propertyObject->ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::drawRect, PropertyNames::indicatorSettings, true, IndicatorHistogramVert::drawRect, IndicatorHistogramVert::setDrawRect);
+
+		propertyObject->ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::lineWeight, PropertyNames::indicatorSettings, true, IndicatorHistogramVert::lineWeight, IndicatorHistogramVert::setLineWeight);
+
+		propertyObject->ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::backgroundColor, PropertyNames::indicatorSettings, true, IndicatorHistogramVert::backgroundColor, IndicatorHistogramVert::setBackgroundColor);
+		propertyObject->ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::lineColor, PropertyNames::indicatorSettings, true, IndicatorHistogramVert::lineColor, IndicatorHistogramVert::setLineColor);
+
+		propertyObject->ADD_PROPERTY_GET_SET_CAT(QVector<QColor>, PropertyNames::indicatorSignalColors, PropertyNames::indicatorSettings, true, IndicatorHistogramVert::signalColors, IndicatorHistogramVert::setSignalColors);
+
+		// --
+		//
 		propertyObject->ADD_PROPERTY_CAT_VAR(double,
 											 PropertyNames::indicatorEndValue,
 											 PropertyNames::indicatorSettings,
@@ -258,13 +305,13 @@ namespace VFrame30
 		//
 		propertyObject->ADD_PROPERTY_CAT_VAR(E::IndicatorDrawSetpoints,
 											 PropertyNames::drawSetpoints,
-											 PropertyNames::setpointsCategory,
+											 PropertyNames::indicatorSettings,
 											 true,
 											 m_drawSetpoints);
 
 		propertyObject->ADD_PROPERTY_CAT_VAR(PropertyVector<CustomSetPoint>,
 											 PropertyNames::customSetpoints,
-											 PropertyNames::setpointsCategory,
+											 PropertyNames::indicatorSettings,
 											 true,
 											 m_customSetPoints)
 				->setDescription(QStringLiteral("CustomSetPoints if DrawSetpoints is set to CustomSetpoints"));
@@ -281,6 +328,25 @@ namespace VFrame30
 		}
 
 		auto m = message->mutable_indicatorhistogramvert();				// Line to change 1
+
+		m->set_signalsource(static_cast<int32_t>(m_signalSource));
+
+		m->set_analogformat(static_cast<int32_t>(m_analogFormat));
+		m->set_precision(m_precision);
+
+		m_font.SaveData(m->mutable_font());
+
+		m->set_drawrect(m_drawRect);
+		m->set_lineweight(m_lineWeight);
+
+		m->set_backgroundcolor(m_backgroundColor.rgba());
+		m->set_linecolor(m_lineColor.rgba());
+
+		m->mutable_signalcolors()->Reserve(m_signalColors.size());
+		for (const QColor& bc : m_signalColors)
+		{
+			m->mutable_signalcolors()->Add(bc.rgba());
+		}
 
 		m->set_startvalue(m_startValue);
 		m->set_endvalue(m_endValue);
@@ -331,6 +397,28 @@ namespace VFrame30
 		}
 
 		const auto& m = message.indicatorhistogramvert();	// Line to change 2
+
+		m_signalSource = static_cast<E::SignalSource>(m.signalsource());
+
+		m_analogFormat = static_cast<E::AnalogFormat>(m.analogformat());
+		m_precision = m.precision();
+
+		m_font.LoadData(m.font());
+
+		m_drawRect = m.drawrect();
+		m_lineWeight = m.lineweight();
+
+		m_backgroundColor = QColor::fromRgba(m.backgroundcolor());
+		m_lineColor = QColor::fromRgba(m.linecolor());
+
+		m_signalColors.clear();
+		m_signalColors.reserve(m.signalcolors_size());
+
+		const auto& bcfiled = m.signalcolors();
+		for (auto bc : bcfiled)
+		{
+			m_signalColors.push_back(QColor::fromRgba(bc));
+		}
 
 		m_startValue = m.startvalue();
 		m_endValue = m.endvalue();
@@ -397,24 +485,24 @@ namespace VFrame30
 
 		// Bar Colors, if colors not enough then propagate the last one
 		//
-		QVector<QColor> signalColors = schemaItem->signalColors();
-		if (signalColors.isEmpty() == true)
+		QVector<QColor> signalColorsVector = signalColors();
+		if (signalColorsVector.isEmpty() == true)
 		{
-			signalColors.push_back(Qt::darkBlue);
+			signalColorsVector.push_back(Qt::darkBlue);
 		}
 
-		while (signalColors.size() < appSignalIds.size())
+		while (signalColorsVector.size() < appSignalIds.size())
 		{
-			signalColors.push_back(signalColors.back());
+			signalColorsVector.push_back(signalColorsVector.back());
 		}
 
 		// Draw background
 		//
-		p->fillRect(rect, schemaItem->backgroundColor());
+		p->fillRect(rect, backgroundColor());
 
-		if (schemaItem->drawRect() == true)
+		if (drawRect() == true)
 		{
-			QPen rectPen(schemaItem->lineColor(), schemaItem->lineWeightDraw() == 0.0 ? drawParam->cosmeticPenWidth() : schemaItem->lineWeightDraw());
+			QPen rectPen(lineColor(), lineWeightDraw() == 0.0 ? drawParam->cosmeticPenWidth() : lineWeightDraw());
 			rectPen.setJoinStyle(Qt::MiterJoin);
 
 			p->setPen(rectPen);
@@ -473,13 +561,13 @@ namespace VFrame30
 
 			barRects.push_back(barRect);
 
-			QBrush barBrush = QBrush(signalColors[barIndex]);
+			QBrush barBrush = QBrush(signalColorsVector[barIndex]);
 
 			if (drawParam->appSignalController() != nullptr)
 			{
-				schemaItem->getSignalState(drawParam, &signalParam, &appSignalState, &tuningSignalState);
+				getSignalState(drawParam, &signalParam, &appSignalState, &tuningSignalState);
 
-				std::vector<IndicatorSetpoint> signalSetpoints = comparators(drawParam, appSignalId, schemaItem);
+				std::vector<IndicatorSetpoint> signalSetpoints = comparators(drawParam, appSignalId);
 
 				// Get bar color
 				// signalColors[barIndex] - is Ba base color
@@ -563,7 +651,7 @@ namespace VFrame30
 
 			double currentValue = 0;
 
-			switch (schemaItem->signalSource())
+			switch (signalSource())
 			{
 				case E::SignalSource::AppDataService:
 					valid = appSignalState.isValid();
@@ -636,7 +724,7 @@ namespace VFrame30
 		//
 		if (m_drawBarRect == true)
 		{
-			QPen rectPen(schemaItem->lineColor(), schemaItem->lineWeightDraw() == 0.0 ? drawParam->cosmeticPenWidth() : schemaItem->lineWeightDraw());
+			QPen rectPen(lineColor(), lineWeightDraw() == 0.0 ? drawParam->cosmeticPenWidth() : lineWeightDraw());
 			rectPen.setJoinStyle(Qt::MiterJoin);
 
 			p->setPen(rectPen);
@@ -649,7 +737,7 @@ namespace VFrame30
 			m_drawBarRect == true &&
 			(m_drawGridForAllBars == true || signalIndex == 0))
 		{
-			double mainGridWidth = schemaItem->font().drawSize() / 2.0;
+			double mainGridWidth = font().drawSize() / 2.0;
 			double smallGridWidth = mainGridWidth / 2.0;
 
 			// Draw top and bottom grids
@@ -666,13 +754,13 @@ namespace VFrame30
 				{
 					if (m_drawGridValueUnits == true && units.isEmpty() == false)
 					{
-						topValue = QString("%1 %2 ").arg(m_endValue, 0, static_cast<char>(schemaItem->analogFormat()), schemaItem->precision()).arg(units);
-						bottomValue = QString("%1 %2 ").arg(m_startValue, 0, static_cast<char>(schemaItem->analogFormat()), schemaItem->precision()).arg(units);
+						topValue = QString("%1 %2 ").arg(m_endValue, 0, static_cast<char>(analogFormat()), precision()).arg(units);
+						bottomValue = QString("%1 %2 ").arg(m_startValue, 0, static_cast<char>(analogFormat()), precision()).arg(units);
 					}
 					else
 					{
-						topValue = QString("%1 ").arg(m_endValue, 0, static_cast<char>(schemaItem->analogFormat()), schemaItem->precision());
-						bottomValue = QString("%1 ").arg(m_startValue, 0, static_cast<char>(schemaItem->analogFormat()), schemaItem->precision());
+						topValue = QString("%1 ").arg(m_endValue, 0, static_cast<char>(analogFormat()), precision());
+						bottomValue = QString("%1 ").arg(m_startValue, 0, static_cast<char>(analogFormat()), precision());
 					}
 				}
 
@@ -721,7 +809,7 @@ namespace VFrame30
 							gridValue = 0;
 						}
 
-						text = QString("%1 ").arg(gridValue, 0, static_cast<char>(schemaItem->analogFormat()), schemaItem->precision());
+						text = QString("%1 ").arg(gridValue, 0, static_cast<char>(analogFormat()), precision());
 					}
 
 					double vertPos = barRect.bottom() - (value -  lowLimit) * factor;
@@ -789,7 +877,7 @@ namespace VFrame30
 		QPainter* p = drawParam->painter();
 		Q_ASSERT(p);
 
-		QPen pen(item->lineColor(), item->lineWeightDraw() == 0.0 ? drawParam->cosmeticPenWidth() : item->lineWeightDraw());
+		QPen pen(lineColor(), lineWeightDraw() == 0.0 ? drawParam->cosmeticPenWidth() : lineWeightDraw());
 		p->setPen(pen);
 
 		for (const DrawGridStruct& g : grids)
@@ -801,16 +889,219 @@ namespace VFrame30
 			{
 				QRectF textRect{barRect.left() - g.gridWidth, g.gridVertPos, 0, 0};
 
-				DrawHelper::drawText(p, item->font(), item->itemUnit(), g.text, textRect, Qt::AlignRight | Qt::AlignVCenter | Qt::TextDontClip | Qt::TextSingleLine);
+				DrawHelper::drawText(p, font(), item->itemUnit(), g.text, textRect, Qt::AlignRight | Qt::AlignVCenter | Qt::TextDontClip | Qt::TextSingleLine);
 			}
 		}
 
 		return;
 	}
 
+	std::set<QString> IndicatorHistogramVert::getSignalTags(CDrawParam* drawParam, const QString& appSignalId) const
+	{
+		Q_ASSERT(drawParam);
+
+		std::set<QString> result;
+
+		switch (signalSource())
+		{
+		case E::SignalSource::AppDataService:
+			if (drawParam->appSignalController() == nullptr)
+			{
+				Q_ASSERT(drawParam->appSignalController());
+			}
+			else
+			{
+				QStringList tags = drawParam->appSignalController()->signalTags(appSignalId);
+				for (const QString& t : tags)
+				{
+					result.insert(t);
+				}
+			}
+			break;
+
+		case E::SignalSource::TuningService:
+			if (drawParam->tuningController() == nullptr)
+			{
+			}
+			else
+			{
+				AppSignalParam param;
+				param.setAppSignalId(appSignalId);
+
+				bool ok = getSignalParam(drawParam, &param);
+				if (ok == true)
+				{
+					for (const QString& t : param.tags())
+					{
+						result.insert(t);
+					}
+				}
+
+			}
+			break;
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		return result;
+	}
+
+	bool IndicatorHistogramVert::getSignalParam(CDrawParam* drawParam, AppSignalParam* signalParam) const
+	{
+		if (drawParam == nullptr ||
+			signalParam == nullptr)
+		{
+			Q_ASSERT(drawParam);
+			Q_ASSERT(signalParam);
+			return false;
+		}
+
+		if (drawParam->appSignalController() != nullptr)
+		{
+			Q_ASSERT(drawParam->appSignalController() != nullptr);
+			return false;
+		}
+
+		bool ok = false;
+
+		switch (signalSource())
+		{
+		case E::SignalSource::AppDataService:
+			if (drawParam->appSignalController() == nullptr)
+			{
+			}
+			else
+			{
+				*signalParam = drawParam->appSignalController()->signalParam(signalParam->appSignalId(), &ok);
+			}
+			break;
+
+		case E::SignalSource::TuningService:
+			if (drawParam->tuningController() == nullptr)
+			{
+			}
+			else
+			{
+				*signalParam = drawParam->tuningController()->signalParam(signalParam->appSignalId(), &ok);
+			}
+			break;
+
+		default:
+			Q_ASSERT(false);
+			ok = false;
+		}
+
+		return ok;
+	}
+
+	bool IndicatorHistogramVert::getSignalState(CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const
+	{
+		if (drawParam == nullptr ||
+			signalParam == nullptr ||
+			appSignalState == nullptr ||
+			tuningSignalState == nullptr)
+		{
+			Q_ASSERT(drawParam);
+			Q_ASSERT(signalParam);
+			Q_ASSERT(appSignalState);
+			Q_ASSERT(tuningSignalState);
+			return false;
+		}
+
+		if (drawParam->appSignalController() == nullptr)
+		{
+			Q_ASSERT(drawParam->appSignalController() != nullptr);
+			return false;
+		}
+
+		bool ok = false;
+
+		switch (signalSource())
+		{
+		case E::SignalSource::AppDataService:
+			if (drawParam->appSignalController() == nullptr)
+			{
+			}
+			else
+			{
+				*signalParam = drawParam->appSignalController()->signalParam(signalParam->appSignalId(), &ok);
+				*appSignalState = drawParam->appSignalController()->signalState(signalParam->appSignalId(), nullptr);
+			}
+			break;
+
+		case E::SignalSource::TuningService:
+			if (drawParam->tuningController() == nullptr)
+			{
+			}
+			else
+			{
+				*signalParam = drawParam->tuningController()->signalParam(signalParam->appSignalId(), &ok);
+				*tuningSignalState = drawParam->tuningController()->signalState(signalParam->appSignalId(), nullptr);
+
+				appSignalState->m_hash = signalParam->hash();
+				appSignalState->m_flags.valid = tuningSignalState->valid();
+				appSignalState->m_value = tuningSignalState->value().toDouble();
+			}
+			break;
+
+		default:
+			Q_ASSERT(false);
+			ok = false;
+		}
+
+		return ok;
+	}
+
+	std::optional<double> IndicatorHistogramVert::getSignalState(CDrawParam* drawParam, const QString& appSignalId) const
+	{
+		bool valid = false;
+		double value = -1;
+
+		switch (signalSource())
+		{
+		case E::SignalSource::AppDataService:
+			if (drawParam->appSignalController() == nullptr)
+			{
+			}
+			else
+			{
+				AppSignalState state = drawParam->appSignalController()->signalState(appSignalId, nullptr);
+
+				valid = state.isValid();
+				value = state.value();
+			}
+			break;
+
+		case E::SignalSource::TuningService:
+			if (drawParam->tuningController() == nullptr)
+			{
+			}
+			else
+			{
+				TuningSignalState state = drawParam->tuningController()->signalState(appSignalId, nullptr);
+
+				valid = state.valid();
+				value = state.value().toDouble();
+			}
+			break;
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		if (valid == false)
+		{
+			return {};
+		}
+		else
+		{
+			return {value};
+		}
+	}
+
 	std::vector<IndicatorSetpoint> IndicatorHistogramVert::comparators(CDrawParam* drawParam,
-																	   const QString& appSignalId,
-																	   const SchemaItemIndicator* schemaItem) const
+																	   const QString& appSignalId) const
 	{
 		Q_ASSERT(drawParam);
 
@@ -904,7 +1195,7 @@ namespace VFrame30
 			}
 			else
 			{
-				comparatorValue = schemaItem->getSignalState(drawParam, valueSignal.appSignalID());
+				comparatorValue = getSignalState(drawParam, valueSignal.appSignalID());
 			}
 
 			if (comparatorValue.has_value() == true)
@@ -916,7 +1207,7 @@ namespace VFrame30
 
 				if (stateSignal.isAcquired() == true)
 				{
-					alertedValue = schemaItem->getSignalState(drawParam, stateSignal.appSignalID());
+					alertedValue = getSignalState(drawParam, stateSignal.appSignalID());
 				}
 
 				// if setting outputs state is not valid it is also indicated as alerted
@@ -974,10 +1265,10 @@ namespace VFrame30
 	}
 
 	std::optional<QBrush> IndicatorHistogramVert::getAlertBrush(const std::vector<IndicatorSetpoint>& setpoints,
-										CDrawParam* drawParam,
-										const AppSignalState& appSignalState,
-										const TuningSignalState& tuningSignalState,
-										const SchemaItemIndicator* schemaItem) const
+																CDrawParam* drawParam,
+																const AppSignalState& appSignalState,
+																const TuningSignalState& tuningSignalState,
+																const SchemaItemIndicator* schemaItem) const
 	{
 		Q_ASSERT(drawParam);
 		Q_ASSERT(schemaItem);
@@ -992,7 +1283,7 @@ namespace VFrame30
 		bool mismatch = false;
 		bool outOfLimits = false;
 
-		switch (schemaItem->signalSource())
+		switch (signalSource())
 		{
 			case E::SignalSource::AppDataService:
 				blocked = appSignalState.isBlocked();
@@ -1068,7 +1359,7 @@ namespace VFrame30
 
 				if (output.isAcquired() == true)
 				{
-					auto signalTags = schemaItem->getSignalTags(drawParam, output.appSignalID());
+					auto signalTags = getSignalTags(drawParam, output.appSignalID());
 
 					for (const QString& t : signalTags)
 					{
@@ -1147,7 +1438,7 @@ namespace VFrame30
 			return;
 		}
 
-		double mainGridWidth = schemaItem->font().drawSize() / 1.8;
+		double mainGridWidth = font().drawSize() / 1.8;
 		QString valueString;
 
 		for (const DrawSetpointStruct& ds : setpoints)
@@ -1168,7 +1459,7 @@ namespace VFrame30
 
 			QBrush brush{color};
 
-			QPen pen(brush, schemaItem->lineWeightDraw() == 0.0 ? drawParam->cosmeticPenWidth() : schemaItem->lineWeightDraw());
+			QPen pen(brush, lineWeightDraw() == 0.0 ? drawParam->cosmeticPenWidth() : lineWeightDraw());
 			p->setPen(pen);
 
 			// Draw horz line
@@ -1195,12 +1486,12 @@ namespace VFrame30
 					(alerted == true && drawParam->blinkPhase() == true))
 				{
 					valueString = QString(" %1 %2")
-									.arg(value, 0, static_cast<char>(schemaItem->analogFormat()), schemaItem->precision())
+									.arg(value, 0, static_cast<char>(analogFormat()), precision())
 									.arg(cmpSymbol);
 
 					QRectF textRect{barRect.right() + mainGridWidth, drawParam->gridToDpiY(y), 0, 0};
 
-					DrawHelper::drawText(p, schemaItem->font(), schemaItem->itemUnit(), valueString, textRect, Qt::AlignLeft | Qt::AlignVCenter | Qt::TextDontClip | Qt::TextSingleLine);
+					DrawHelper::drawText(p, font(), schemaItem->itemUnit(), valueString, textRect, Qt::AlignLeft | Qt::AlignVCenter | Qt::TextDontClip | Qt::TextSingleLine);
 				}
 			}
 		}
@@ -1214,7 +1505,7 @@ namespace VFrame30
 		// The result is shifted up by std::numeric_limits<double>::max_exponent10().
 		// For negative value, logarithm is taken from absolute value and then shifted and multiplied by -1.
 		// This means that we take a "ghost" logarithm from negative value.
-
+		//
 		double result = std::fabs(value);
 
 		if (result < std::numeric_limits<double>::min())
@@ -1223,7 +1514,6 @@ namespace VFrame30
 		}
 
 		result = std::log10(result);
-
 		result += std::numeric_limits<double>::max_exponent10;
 
 		if (value < 0)
@@ -1239,11 +1529,9 @@ namespace VFrame30
 		// Power calculation, reverse function for indicatorLog10.
 		// Input value is shifted down by std::numeric_limits<double>::max_exponent10() and power is calculated from its absoulte value.
 		// The sign of the result depened on input value sign.
-
+		//
 		double result = std::fabs(value);
-
 		result -= std::numeric_limits<double>::max_exponent10;
-
 		result = std::pow(10, result);
 
 		if (value < 0)
@@ -1259,13 +1547,11 @@ namespace VFrame30
 		switch (m_scaleType)
 		{
 		case E::IndicatorScaleType::Linear:
-			{
-				return value;
-			}
+			return value;
+
 		case E::IndicatorScaleType::Logarithmic:
-			{
-				return indicatorLog10(value);
-			}
+			return indicatorLog10(value);
+
 		default:
 			Q_ASSERT(false);
 		}
@@ -1278,20 +1564,137 @@ namespace VFrame30
 		switch (m_scaleType)
 		{
 		case E::IndicatorScaleType::Linear:
-			{
-				return scaleValue;
-			}
-		case E::IndicatorScaleType::Logarithmic:
-			{
-				scaleValue = indicatorPow10(scaleValue);
+			return scaleValue;
 
-				return scaleValue;
-			}
+		case E::IndicatorScaleType::Logarithmic:
+			scaleValue = indicatorPow10(scaleValue);
+			return scaleValue;
 
 		default:
 			Q_ASSERT(false);
 		}
+
 		return 0;
+	}
+
+	E::SignalSource IndicatorHistogramVert::signalSource() const
+	{
+		return m_signalSource;
+	}
+
+	void IndicatorHistogramVert::setSignalSource(E::SignalSource value)
+	{
+		m_signalSource = value;
+	}
+
+	E::AnalogFormat IndicatorHistogramVert::analogFormat() const
+	{
+		return m_analogFormat;
+	}
+
+	void IndicatorHistogramVert::setAnalogFormat(E::AnalogFormat value)
+	{
+		m_analogFormat = value;
+	}
+
+	int IndicatorHistogramVert::precision() const
+	{
+		return qBound(-1, m_precision, 32);
+	}
+
+	void IndicatorHistogramVert::setPrecision(int value)
+	{
+		m_precision = qBound(-1, value, 32);
+	}
+
+	IMPLEMENT_FONT_PROPERTIES(IndicatorHistogramVert, Font, m_font);
+
+	FontParam& IndicatorHistogramVert::font()
+	{
+		return m_font;
+	}
+
+	const FontParam& IndicatorHistogramVert::font() const
+	{
+		return m_font;
+	}
+
+	bool IndicatorHistogramVert::drawRect() const
+	{
+		return m_drawRect;
+	}
+
+	void IndicatorHistogramVert::setDrawRect(bool value)
+	{
+		m_drawRect = value;
+	}
+
+	double IndicatorHistogramVert::lineWeight() const
+	{
+		if (itemUnit() == SchemaUnit::Display)
+		{
+			return VFrame30::RoundDisplayPoint(m_lineWeight);
+		}
+		else
+		{
+			double pt = VFrame30::ConvertPoint(m_lineWeight, SchemaUnit::Inch, Settings::regionalUnit(), 0);
+			pt = VFrame30::RoundPoint(pt, Settings::regionalUnit());
+			return pt;
+		}
+	}
+
+	double IndicatorHistogramVert::lineWeightDraw() const noexcept
+	{
+		return m_lineWeight;
+	}
+
+	void IndicatorHistogramVert::setLineWeight(double weight)
+	{
+		if (weight < 0)
+		{
+			weight = 0;
+		}
+
+		if (itemUnit() == SchemaUnit::Display)
+		{
+			m_lineWeight = VFrame30::RoundDisplayPoint(weight);
+		}
+		else
+		{
+			double pt = VFrame30::ConvertPoint(weight, Settings::regionalUnit(), SchemaUnit::Inch, 0);
+			m_lineWeight = pt;
+		}
+	}
+
+	const QColor& IndicatorHistogramVert::backgroundColor() const
+	{
+		return m_backgroundColor;
+	}
+
+	void IndicatorHistogramVert::setBackgroundColor(const QColor& color)
+	{
+		m_backgroundColor = color;
+	}
+
+	const QColor& IndicatorHistogramVert::lineColor() const
+	{
+		return m_lineColor;
+	}
+
+	void IndicatorHistogramVert::setLineColor(const QColor& color)
+	{
+		m_lineColor = color;
+	}
+
+	const QVector<QColor>& IndicatorHistogramVert::signalColors() const
+	{
+		return m_signalColors;
+	}
+
+	void IndicatorHistogramVert::setSignalColors(const QVector<QColor>& value)
+	{
+		m_signalColors = value;
+		//m_signalColors.resize(12);
 	}
 
 }

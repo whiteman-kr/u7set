@@ -2993,12 +2993,6 @@ namespace Sim
 		// Define input opIndexes
 		//
 		const int i_conf = 0;
-		const int i_sp_s = 1;		// Setting value
-		const int i_sp_r = 3;		// Reset value
-		const int i_prev_result = 5;// Prev result
-		const int i_data = 6;		// Input data
-		const int o_result = 9;		// Result
-		const int o_nan = 10;		// Any input FP param NaN
 
 		// Get params, throws exception in case of error
 		//
@@ -3006,7 +3000,57 @@ namespace Sim
 
 		// AFB Logic
 		//
-		if (conf >=1 && conf <= 4)
+		if (conf < 1 || conf > 8)
+		{
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
+		}
+		else
+		{
+			afb_bcomp_private(instance, conf, 112);
+		}
+
+		return;
+	}
+
+	void CommandProcessor_LM5_LM6::afb_bcomp_v112(AfbComponentInstance* instance)
+	{
+		// Define input opIndexes
+		//
+		const int i_conf = 0;
+
+		// Get params, throws exception in case of error
+		//
+		quint16 conf = instance->param(i_conf)->wordValue();
+
+		// AFB Logic
+		//
+		if (conf < 1 || conf > 12)
+		{
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
+		}
+		else
+		{
+			afb_bcomp_private(instance, conf, 112);
+		}
+
+		return;
+	}
+
+	void CommandProcessor_LM5_LM6::afb_bcomp_private(AfbComponentInstance* instance, int conf, int /*version*/)
+	{
+		// Define input opIndexes
+		//
+		//const int i_conf = 0;
+		const int i_sp_s = 1;		// Setting value
+		const int i_sp_r = 3;		// Reset value
+		const int i_prev_result = 5;// Prev result
+		const int i_data = 6;		// Input data
+		const int o_result = 9;		// Result
+		const int o_nan = 10;		// Any input FP param NaN
+
+		// AFB Logic
+		//
+		if (conf >= 1 && conf <= 4 || conf == 9 || conf == 10)
 		{
 			const qint32 settingValue = instance->param(i_sp_s)->signedIntValue();
 			const qint32 resetValue = instance->param(i_sp_r)->signedIntValue();
@@ -3123,6 +3167,92 @@ namespace Sim
 				}
 				break;
 
+			case 9:		// SignedInt32, >=
+				if (instance->paramExists(i_prev_result) == true)	// There is not prev result for first cycle;
+				{
+					prevResult = instance->param(i_prev_result)->wordValue();
+				}
+
+				if (inputValue < settingValue)
+				{
+					if (prevResult == 0)
+					{
+						instance->addParamWord(o_result, 0);
+						instance->addParamWord(i_prev_result, 0);	 // can be commneted as it's already 0
+						break;
+					}
+					else
+					{
+						// Prev result is 1, so setting is alerted
+						//
+						if (inputValue > resetValue)
+						{
+							instance->addParamWord(o_result, 1);		// can be commneted as it's already 1
+							instance->addParamWord(i_prev_result, 1);	// can be commneted as it's already 1
+						}
+						else
+						{
+							instance->addParamWord(o_result, 0);
+							instance->addParamWord(i_prev_result, 0);
+						}
+						break;
+					}
+				}
+				else
+				{
+					// if (inputValue >= settingValue)
+					//
+					instance->addParamWord(o_result, 1);
+					instance->addParamWord(i_prev_result, 1);
+					break;
+				}
+
+				// Q_ASSERT(false);
+				break;
+
+			case 10:		// SignedInt32, <=
+				if (instance->paramExists(i_prev_result) == true)	// There is not prev result for first cycle;
+				{
+					prevResult = instance->param(i_prev_result)->wordValue();
+				}
+
+				if (inputValue > settingValue)
+				{
+					if (prevResult == 0)
+					{
+						instance->addParamWord(o_result, 0);
+						instance->addParamWord(i_prev_result, 0);	 // can be commneted as it's already 0
+						break;
+					}
+					else
+					{
+						// Prev result is 1, so setting is alerted
+						//
+						if (inputValue < resetValue)
+						{
+							instance->addParamWord(o_result, 1);		// can be commneted as it's already 1
+							instance->addParamWord(i_prev_result, 1);	// can be commneted as it's already 1
+						}
+						else
+						{
+							instance->addParamWord(o_result, 0);
+							instance->addParamWord(i_prev_result, 0);
+						}
+						break;
+					}
+				}
+				else
+				{
+					// if (inputValue <= settingValue)
+					//
+					instance->addParamWord(o_result, 1);
+					instance->addParamWord(i_prev_result, 1);
+					break;
+				}
+
+				// Q_ASSERT(false);
+				break;
+
 			default:
 				SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 			}
@@ -3130,7 +3260,7 @@ namespace Sim
 			return;
 		}
 
-		if (conf >=5 && conf <= 8)
+		if ((conf >=5 && conf <= 8) || conf == 11 || conf == 12)
 		{
 			float settingValue = instance->param(i_sp_s)->floatValue();
 			float resetValue = instance->param(i_sp_r)->floatValue();
@@ -3209,6 +3339,7 @@ namespace Sim
 					// Q_ASSERT(false);
 				}
 				break;
+
 			case 7:		// FloatingPoint32, <
 				instance->addParamWord(o_nan, nan);
 				if (nan != 0)
@@ -3257,6 +3388,7 @@ namespace Sim
 
 				// Q_ASSERT(false);
 				break;
+
 			case 8:		// FloatingPoint32, <>
 				instance->addParamWord(o_nan, nan);
 				if (nan != 0)
@@ -3272,6 +3404,105 @@ namespace Sim
 				{
 					instance->addParamWord(o_result, 1);
 				}
+				break;
+
+			case 11:		// FloatingPoint32, >=
+				{
+					instance->addParamWord(o_nan, nan);
+					if (nan != 0)
+					{
+						break;
+					}
+
+					if (instance->paramExists(i_prev_result) == true)	// There is not prev result for first cycle;
+					{
+						prevResult = instance->param(i_prev_result)->wordValue();
+					}
+
+					if (inputValue < settingValue)
+					{
+						if (prevResult == 0)
+						{
+							instance->addParamWord(o_result, 0);
+							instance->addParamWord(i_prev_result, 0);	 // can be commneted as it's already 0
+							break;
+						}
+						else
+						{
+							// Prev result is 1, so setting is alerted
+							//
+							if (inputValue > resetValue)
+							{
+								instance->addParamWord(o_result, 1);		// can be commneted as it's already 1
+								instance->addParamWord(i_prev_result, 1);	// can be commneted as it's already 1
+							}
+							else
+							{
+								instance->addParamWord(o_result, 0);
+								instance->addParamWord(i_prev_result, 0);
+							}
+							break;
+						}
+					}
+					else
+					{
+						// if (inputValue >= settingValue)
+						//
+						instance->addParamWord(o_result, 1);
+						instance->addParamWord(i_prev_result, 1);
+						break;
+					}
+
+					// Q_ASSERT(false);
+				}
+				break;
+			case 12:		// FloatingPoint32, <=
+				instance->addParamWord(o_nan, nan);
+				if (nan != 0)
+				{
+					break;
+				}
+
+				if (instance->paramExists(i_prev_result) == true)	// There is not prev result for first cycle;
+				{
+					prevResult = instance->param(i_prev_result)->wordValue();
+				}
+
+				if (inputValue > settingValue)
+				{
+					if (prevResult == 0)
+					{
+						instance->addParamWord(o_result, 0);
+						instance->addParamWord(i_prev_result, 0);	 // can be commneted as it's already 0
+						break;
+					}
+					else
+					{
+						// Prev result is 1, so setting is alerted
+						//
+						if (inputValue < resetValue)
+						{
+							instance->addParamWord(o_result, 1);		// can be commneted as it's already 1
+							instance->addParamWord(i_prev_result, 1);	// can be commneted as it's already 1
+						}
+						else
+						{
+							instance->addParamWord(o_result, 0);
+							instance->addParamWord(i_prev_result, 0);
+						}
+						break;
+					}
+				}
+				else
+				{
+					// if (inputValue <= settingValue)
+					//
+					instance->addParamWord(o_result, 1);
+					instance->addParamWord(i_prev_result, 1);
+					break;
+				}
+
+				// Q_ASSERT(false);
 				break;
 			default:
 				SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
@@ -3447,25 +3678,6 @@ namespace Sim
 	{
 		const int i_count = 0;			// Input count
 		const int i_conf = 1;			// SI/FP
-		const int i_enable_1 = 2;		// up to 8 - opcodes: 2, 3, 4, 5, 6, 7, 8, 9
-		// ...
-		const int i_in_1 = 10;			// up to 8 - opcodes: 10, 12, 14, 16, 18, 20, 22, 24
-		// ...
-
-		const int o_med_val = 28;
-		const int o_max_val = 30;
-		const int o_min_val = 32;
-		const int o_med_index = 34;
-		const int o_max_index = 35;
-		const int o_min_index = 36;
-		const int o_overflow = 37;
-		const int o_underflow = 38;
-		const int o_zero = 39;
-		const int o_nan = 40;
-		const int o_dev_by_zero = 41;
-		const int o_mem_edi = 43;
-		//const int o_version = 44;
-
 		const int maxInputCount = 8;
 
 		quint16 count = instance->param(i_count)->wordValue();
@@ -3474,24 +3686,58 @@ namespace Sim
 		checkParamRange(count, 3, maxInputCount, QStringLiteral("i_count"));
 		checkParamRange(conf, 1, 2, QStringLiteral("i_conf"));
 
+		return afb_mem_private(instance, conf, count, 7);
+	}
+
+	void CommandProcessor_LM5_LM6::afb_mem_v8(AfbComponentInstance* instance)
+	{
+		const int i_count = 0;			// Input count
+		const int i_conf = 1;			// SI/FP
+		const int maxInputCount = 8;
+
+		quint16 count = instance->param(i_count)->wordValue();
+		quint16 conf = instance->param(i_conf)->wordValue();
+
+		checkParamRange(count, 3, maxInputCount, QStringLiteral("i_count"));
+		checkParamRange(conf, 1, 2, QStringLiteral("i_conf"));
+
+		return afb_mem_private(instance, conf, count, 8);
+	}
+
+	void CommandProcessor_LM5_LM6::afb_mem_private(AfbComponentInstance* instance, int conf, int count, int version)
+	{
+		const int i_enable_1 = 2;		// up to 8 - opcodes: 2, 3, 4, 5, 6, 7, 8, 9
+		// ...
+		const int i_in_1 = 10;			// up to 8 - opcodes: 10, 12, 14, 16, 18, 20, 22, 24
+		// ...
+		const int o_med_val = 28;
+		const int o_max_val = 30;
+		const int o_min_val = 32;
+		//const int o_med_index = 34;
+		//const int o_max_index = 35;
+		//const int o_min_index = 36;
+		const int o_overflow = 37;
+		const int o_underflow = 38;
+		const int o_zero = 39;
+		const int o_nan = 40;
+		const int o_validity = 41;
+		const int o_mem_edi = 43;
+		const int maxInputCount = 8;
+
 		// These outputs do not work really good in real AFB, so we taking them off the AFB items,
 		// they do not usable now
 		//
-		instance->addParamWord(o_med_index, 0);
-		instance->addParamWord(o_max_index, 0);
-		instance->addParamWord(o_min_index, 0);
-		instance->addParamWord(o_dev_by_zero, 0);	// There is impossible duv by zero
+		//instance->addParamWord(o_med_index, 0);
+		//instance->addParamWord(o_max_index, 0);
+		//instance->addParamWord(o_min_index, 0);
+		//instance->addParamWord(o_dev_by_zero, 0);	// There is impossible div by zero, version 7. In version 8, 41st outpust is o_validity
 
-		// --
-		//
-		if (conf == 1)
+		if (conf == 1)		// SI - SignedInteger
 		{
-			// SI - SignedInteger
-			//
 			struct Operand
 			{
 				qint64 value;
-				quint16 operandIndex;	// 1-based
+				quint16 operandIndex;	// 1-based for version 7, 0-based for version 8+
 			};
 
 			std::array<Operand, maxInputCount> operands;
@@ -3505,6 +3751,8 @@ namespace Sim
 				const AfbComponentParam* enable = instance->param(i_enable_1 + i);
 				if (enable->wordValue() == 0)
 				{
+					// Input is not valid, skip it
+					//
 					continue;
 				}
 
@@ -3525,12 +3773,8 @@ namespace Sim
 
 			// --
 			//
-
 			Operand median = {0, 0};
-			quint16 overflow = 0;
-			quint16 underflow = 0;
-			quint16 zero = 0;
-			quint16 nan = 0;
+			quint16 validity = (operandCount > 0);
 			quint16 mem_edi = 0;
 
 			switch (operandCount)
@@ -3544,9 +3788,16 @@ namespace Sim
 
 			case 1:
 				median = operands[0];
-				maxOperand = {0, 0};	// Such wierd behavior is now, subject to chanhe in future version
-				minOperand = {0, 0};	// Such wierd behavior is now, subject to chanhe in future version
-				zero = median.value == 0 ? 0x0001 : 0x0000;
+				if (version == 7)
+				{
+					maxOperand = {0, 0};	// Such wierd behavior is now, subject to chanhe in future version
+					minOperand = {0, 0};	// Such wierd behavior is now, subject to chanhe in future version
+				}
+				else
+				{
+					maxOperand = median;
+					minOperand = median;
+				}
 				break;
 
 			case 2:
@@ -3554,7 +3805,6 @@ namespace Sim
 				//
 				median.value = (operands[0].value + operands[1].value) / 2;
 				median.operandIndex = 0;
-				zero = median.value == 0 ? 0x0001 : 0x0000;
 				break;
 
 			default:
@@ -3565,7 +3815,6 @@ namespace Sim
 							});
 
 				median = operands[operandCount / 2];
-				zero = median.value == 0 ? 0x0001 : 0x0000;
 				break;
 			}
 
@@ -3575,10 +3824,7 @@ namespace Sim
 //			instance->addParamWord(o_med_index, median.operandIndex);			// This output is not used in AFB
 //			instance->addParamWord(o_max_index, maxOperand.operandIndex);		// This output is not used in AFB
 //			instance->addParamWord(o_min_index, minOperand.operandIndex);		// This output is not used in AFB
-			instance->addParamWord(o_overflow, overflow);
-			instance->addParamWord(o_underflow, underflow);
-			instance->addParamWord(o_zero, zero);
-			instance->addParamWord(o_nan, nan);
+			instance->addParamWord(o_validity, validity);
 			instance->addParamWord(o_mem_edi, mem_edi);
 
 			return;
@@ -3627,9 +3873,9 @@ namespace Sim
 			//
 			Operand median = {AfbComponentParam{static_cast<quint16>(o_med_val)}, 0};
 
+			quint16 validity = (operandCount > 0);
 			quint16 overflow = 0;
 			quint16 underflow = 0;
-			quint16 zero = 0;
 			quint16 nan = 0;
 			quint16 mem_edi = 0;
 
@@ -3644,9 +3890,16 @@ namespace Sim
 
 			case 1:
 				median = operands[0];
-				maxOperand = {AfbComponentParam{0}, 0};	// Such wierd behavior is now, subject to chanhe in future version
-				minOperand = {AfbComponentParam{0}, 0};	// Such wierd behavior is now, subject to chanhe in future version
-				zero = median.value.floatValue() == 0 ? 0x0001 : 0x0000;
+				if (version == 7)
+				{
+					maxOperand = {AfbComponentParam{0}, 0};	// Such wierd behavior is now, subject to chanhe in future version
+					minOperand = {AfbComponentParam{0}, 0};	// Such wierd behavior is now, subject to chanhe in future version
+				}
+				else
+				{
+					maxOperand = median;
+					minOperand = median;
+				}
 				break;
 
 			case 2:
@@ -3665,8 +3918,6 @@ namespace Sim
 				nan |= median.value.mathNan();
 
 				median.operandIndex = 0;		// Operand index set 0, subject to change in the next MEDIAN version
-
-				zero = median.value.floatValue() == 0 ? 0x0001 : 0x0000;
 				break;
 
 			default:
@@ -3677,10 +3928,10 @@ namespace Sim
 							});
 
 				median = operands[operandCount / 2];
-
-				zero = median.value.floatValue() == 0 ? 0x0001 : 0x0000;
 				break;
 			}
+
+			quint16 zero = median.value.floatValue() == 0 ? 0x0001 : 0x0000;
 
 			instance->addParamFloat(o_med_val, median.value.floatValue());
 			instance->addParamFloat(o_max_val, maxOperand.value.floatValue());
@@ -3688,6 +3939,7 @@ namespace Sim
 			//instance->addParamWord(o_med_index, median.operandIndex);
 			//instance->addParamWord(o_max_index, maxOperand.operandIndex);
 			//instance->addParamWord(o_min_index, minOperand.operandIndex);
+			instance->addParamWord(o_validity, validity);
 			instance->addParamWord(o_overflow, overflow);
 			instance->addParamWord(o_underflow, underflow);
 			instance->addParamWord(o_zero, zero);
@@ -3708,6 +3960,52 @@ namespace Sim
 		// Define input opIndexes
 		//
 		const int i_conf = 0;
+
+		// Get params,  check_param throws exception in case of error
+		//
+		quint16 conf = instance->param(i_conf)->wordValue();
+
+		if (conf < 1 || conf > 8)
+		{
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
+									.arg(conf), Q_FUNC_INFO);
+		}
+		else
+		{
+			return afb_math_private(instance, conf, 104);
+		}
+
+		return;
+	}
+
+	void CommandProcessor_LM5_LM6::afb_math_v105(AfbComponentInstance* instance)
+	{
+		// Define input opIndexes
+		//
+		const int i_conf = 0;
+
+		// Get params,  check_param throws exception in case of error
+		//
+		quint16 conf = instance->param(i_conf)->wordValue();
+
+		if (conf < 1 || conf > 8)
+		{
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
+									.arg(conf), Q_FUNC_INFO);
+		}
+		else
+		{
+			return afb_math_private(instance, conf, 105);
+		}
+
+		return;
+	}
+
+	void CommandProcessor_LM5_LM6::afb_math_private(AfbComponentInstance* instance, int conf, int version)
+	{
+		// Define input opIndexes
+		//
+		//const int i_conf = 0;
 		const int i_1_oprd = 1;
 		const int i_2_oprd = 3;
 		const int o_result = 6;
@@ -3720,15 +4018,12 @@ namespace Sim
 
 		// Get params,  check_param throws exception in case of error
 		//
-		const AfbComponentParam* conf = instance->param(i_conf);
 		AfbComponentParam operand1 = *instance->param(i_1_oprd);
 		AfbComponentParam operand2 = *instance->param(i_2_oprd);
 
-		quint16 confValue = conf->wordValue();
-
 		// Logic	conf: 1'-'+' (SI),  '2'-'-' (SI),  '3'-'*' (SI),  '4'-'/' (SI), '5'-'+' (FP),  '6'-'-' (FP),  '7'-'*' (FP),  '8'-'/' (FP)
 		//
-		switch (confValue)
+		switch (conf)
 		{
 			case 1:
 				operand1.addSignedInteger(operand2);
@@ -3756,8 +4051,7 @@ namespace Sim
 				break;
 			default:
 				SimException::raise(QStringLiteral("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
-										.arg(conf->wordValue()),
-									Q_FUNC_INFO);
+										.arg(conf), Q_FUNC_INFO);
 		}
 
 		// Save result
@@ -3774,8 +4068,9 @@ namespace Sim
 		// AFB MATH version 104 has an issue for SI operations +, -, *:
 		// if result is -2'147'483'648 (what is ok) the overflow flag is set to 1 (supposed to be 0 as -2'147'483'648 within valid int32 range)
 		//
-		if (operand1.signedIntValue() == INT_MIN &&
-			(confValue == 1 || confValue == 2 || confValue == 3))
+		if (version == 104 &&
+			operand1.signedIntValue() == INT_MIN &&
+			(conf == 1 || conf == 2 || conf == 3))
 		{
 			instance->addParamWord(o_overflow, 1);
 		}
@@ -4074,6 +4369,45 @@ namespace Sim
 		// Define input opIndexes
 		//
 		const int i_conf = 0;
+		quint16 conf = instance->param(i_conf)->wordValue();
+
+		if (conf == 1 || conf == 2 || conf == 7 || conf == 8)
+		{
+			return afb_func_private(instance, conf, 3);
+		}
+		else
+		{
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
+								.arg(conf), Q_FUNC_INFO);
+		}
+
+		return;
+	}
+
+	void CommandProcessor_LM5_LM6::afb_func_v4(AfbComponentInstance* instance)
+	{
+		// Define input opIndexes
+		//
+		const int i_conf = 0;
+		quint16 conf = instance->param(i_conf)->wordValue();
+
+		if (conf < 1 || conf > 8)
+		{
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
+								.arg(conf), Q_FUNC_INFO);
+		}
+		else
+		{
+			return afb_func_private(instance, conf, 4);
+		}
+
+		return;
+	}
+
+	void CommandProcessor_LM5_LM6::afb_func_private(AfbComponentInstance* instance, int conf, int version)
+	{
+		// Define input opIndexes
+		//
 		const int i_data = 1;
 
 		const int o_result = 5;
@@ -4082,14 +4416,11 @@ namespace Sim
 		const int o_zero = 9;
 		const int o_nan = 10;
 		const int o_div_by_zero = 11;
-		//const int o_func_edi = 12;
-		//const int o_version = 13;
 
 		// Get params,  check_param throws exception in case of error
 		//
-		quint16 conf = instance->param(i_conf)->wordValue();
-
 		AfbComponentParam result{static_cast<quint16>(o_result)};
+
 		quint16 overflow = 0;
 		quint16 underflow = 0;
 		quint16 zero = 0;
@@ -4169,17 +4500,60 @@ namespace Sim
 					break;
 				}
 
-				// what type og float is it ?
-				SimException::raise(QStringLiteral("Specific type of float: %1, %2.")
-									.arg(floatData),
+				// what type of float is it ?
+				SimException::raise(QStringLiteral("Specific type of float: %1, conf %2, afb_func_v%3")
+									.arg(floatData)
+									.arg(conf)
+									.arg(version),
 									Q_FUNC_INFO);
 			}
 			break;
 		case 2:		// FP ABS
 			{
-				float floatData = instance->param(i_data)->floatValue();
+				float floatData = std::fabs(instance->param(i_data)->floatValue());
+				result.setFloatValue(floatData);
 
-				result.setFloatValue(std::fabs(floatData));
+				zero = (floatData == 0.f);
+			}
+			break;
+		case 3:		// FP SIN, Altera's fp ip-core dows not generate any flags for sin, but LM generates o_zero for output
+			{
+				float floatData = std::sin(instance->param(i_data)->floatValue());
+				result.setFloatValue(floatData);
+
+				zero = (floatData == 0.f);
+			}
+			break;
+		case 4:		// FP COS, Altera's fp ip-core dows not generate any flags for cos, but LM generates o_zero for output
+			{
+				float floatData = std::cos(instance->param(i_data)->floatValue());
+				result.setFloatValue(floatData);
+
+				zero = (floatData == 0.f);
+			}
+			break;
+		case 5:		// FP Log(e)
+			{
+				AfbComponentParam floatData = *instance->param(i_data);
+				floatData.logFloatingPoint();
+
+				result.setFloatValue(floatData.floatValue());
+
+				zero = result.mathZero();
+				nan = result.mathNan();
+			}
+			break;
+		case 6:		// FP Exp
+			{
+				AfbComponentParam floatData = *instance->param(i_data);
+				floatData.expFloatingPoint();
+
+				result.setFloatValue(floatData.floatValue());
+
+				nan = result.mathNan();
+				overflow = result.mathOverflow();
+				underflow = result.mathUnderflow();
+				zero = result.mathZero();
 			}
 			break;
 		case 7:		// FP INV is  = 1.0/data;
@@ -4191,15 +4565,29 @@ namespace Sim
 
 				underflow = result.mathUnderflow();
 				zero = result.mathZero();
-				nan = result.mathNan();
 				div_by_zero = result.mathDivByZero();
+				nan = result.mathNan();
 			}
 			break;
 		case 8:		// SI ABS
 			{
-				qint32 intData = instance->param(i_data)->signedIntValue();
+				qint32 inputData = instance->param(i_data)->signedIntValue();
 
-				result.setSignedIntValue(std::abs(intData));
+				qint32 resultValue = 0;
+				if (inputData == std::numeric_limits<qint32>::lowest())		// -2147483648 cannot became positive 2147483648
+				{
+					resultValue = std::numeric_limits<qint32>::max();
+					overflow = 1;
+				}
+				else
+				{
+					resultValue = std::abs(inputData);
+					overflow = 0;
+				}
+
+				result.setSignedIntValue(resultValue);
+
+				zero = (resultValue == 0);
 			}
 			break;
 		default:
@@ -4742,9 +5130,64 @@ namespace Sim
 		//
 		quint16 conf = instance->param(i_conf)->wordValue();
 
+		if (conf < 1 || conf > 8)
+		{
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
+		}
+
+		return afb_dpcomp_private(instance, conf, 5);
+	}
+
+	void CommandProcessor_LM5_LM6::afb_dpcomp_v6(AfbComponentInstance* instance)
+	{
+		// Define input opIndexes
+		//
+		const int i_conf = 0;
+		const int i_hyst = 1;			// Hysteresis value
+		const int i_prev_result = 3;	// Prev result
+
+		const int i_data = 4;			// Input data
+		const int i_setting = 6;		// Setting value
+
+		const int o_result = 9;			// Result
+		const int o_overflow = 10;		// Result
+		const int o_underflow = 11;		// Result
+		const int o_nan = 13;			// Any input FP param NaN
+		const int o_param_err = 14;		// Param error - if (config = 0) or (config > 8) or (i_hys < 0)
+
+		// Get params, throws exception in case of error
+		//
+		quint16 conf = instance->param(i_conf)->wordValue();
+
+		if (conf < 1 || conf > 12)
+		{
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
+		}
+
+		return afb_dpcomp_private(instance, conf, 6);
+	}
+
+	void CommandProcessor_LM5_LM6::afb_dpcomp_private(AfbComponentInstance* instance, int conf, int /*version*/)
+	{
+		// Define input opIndexes
+		//
+		//const int i_conf = 0;
+		const int i_hyst = 1;			// Hysteresis value
+		const int i_prev_result = 3;	// Prev result
+
+		const int i_data = 4;			// Input data
+		const int i_setting = 6;		// Setting value
+
+		const int o_result = 9;			// Result
+		const int o_overflow = 10;		// Result
+		const int o_underflow = 11;		// Result
+		const int o_nan = 13;			// Any input FP param NaN
+		const int o_param_err = 14;		// Param error - if (config = 0) or (config > 8) or (i_hys < 0)
+
+
 		// AFB Logic
 		//
-		if (conf >= 1 && conf <= 4)
+		if ((conf >= 1 && conf <= 4) || conf == 9 || conf == 10)
 		{
 			qint64 hystValue = instance->param(i_hyst)->signedIntValue();
 			qint64 settingValue = instance->param(i_setting)->signedIntValue();
@@ -4879,6 +5322,68 @@ namespace Sim
 				}
 				break;
 
+			case 9:		// SignedInt32, >=
+				{
+					qint64 limit = settingValue - hystValue;
+
+					if (limit > std::numeric_limits<qint32>::max() ||
+						limit < std::numeric_limits<qint32>::lowest())
+					{
+						limit = std::clamp<qint64>(limit, std::numeric_limits<qint32>::lowest(), std::numeric_limits<qint32>::max());
+
+						instance->addParamWord(o_overflow, 1);
+					}
+
+					if (instance->paramExists(i_prev_result) == true)	// There is not prev result for first cycle;
+					{
+						prevResult = instance->param(i_prev_result)->wordValue();
+					}
+
+					if (inputValue >= settingValue ||
+						(prevResult == 1 && inputValue > limit))
+					{
+						instance->addParamWord(o_result, 1);
+						instance->addParamWord(i_prev_result, 1);
+					}
+					else
+					{
+						instance->addParamWord(o_result, 0);
+						instance->addParamWord(i_prev_result, 0);
+					}
+				}
+				break;
+
+			case 10:		// SignedInt32, <=
+				{
+					qint64 limit = settingValue + hystValue;
+
+					if (limit > std::numeric_limits<qint32>::max() ||
+						limit < std::numeric_limits<qint32>::lowest())
+					{
+						limit = std::clamp<qint64>(limit, std::numeric_limits<qint32>::lowest(), std::numeric_limits<qint32>::max());
+
+						instance->addParamWord(o_overflow, 1);
+					}
+
+					if (instance->paramExists(i_prev_result) == true)	// There is not prev result for first cycle;
+					{
+						prevResult = instance->param(i_prev_result)->wordValue();
+					}
+
+					if ((inputValue <= settingValue) ||
+						(prevResult == 1 && inputValue < limit))
+					{
+						instance->addParamWord(o_result, 1);
+						instance->addParamWord(i_prev_result, 1);
+					}
+					else
+					{
+						instance->addParamWord(o_result, 0);
+						instance->addParamWord(i_prev_result, 0);
+					}
+				}
+				break;
+
 			default:
 				SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 			}
@@ -4886,7 +5391,7 @@ namespace Sim
 			return;
 		}
 
-		if (conf >= 5 && conf <= 8)
+		if ((conf >= 5 && conf <= 8) || conf == 11 || conf == 12)
 		{
 			float hystValue = instance->param(i_hyst)->floatValue();
 			float settingValue = instance->param(i_setting)->floatValue();
@@ -5026,6 +5531,64 @@ namespace Sim
 
 					instance->addParamWord(o_overflow, setValLow.mathOverflow() || setValHigh.mathOverflow());
 					instance->addParamWord(o_underflow, setValLow.mathUnderflow() || setValHigh.mathUnderflow());
+				}
+				break;
+
+			case 11:		// FloatingPoint32, >=
+				{
+					if (instance->paramExists(i_prev_result) == true)	// There is not prev result for first cycle;
+					{
+						prevResult = instance->param(i_prev_result)->wordValue();
+					}
+
+					AfbComponentParam t;
+
+					t.setFloatValue(settingValue);
+					t.subFloatingPoint(hystValue);
+
+					if ((inputValue >= settingValue) ||
+						(prevResult == 1 && inputValue > t.floatValue()))
+					{
+						instance->addParamWord(o_result, 1);
+						instance->addParamWord(i_prev_result, 1);
+					}
+					else
+					{
+						instance->addParamWord(o_result, 0);
+						instance->addParamWord(i_prev_result, 0);
+					}
+
+					instance->addParamWord(o_overflow, t.mathOverflow());
+					instance->addParamWord(o_underflow, t.mathUnderflow());
+				}
+				break;
+
+			case 12:		// FloatingPoint32, <=
+				{
+					if (instance->paramExists(i_prev_result) == true)	// There is not prev result for first cycle;
+					{
+						prevResult = instance->param(i_prev_result)->wordValue();
+					}
+
+					AfbComponentParam t;
+
+					t.setFloatValue(settingValue);
+					t.addFloatingPoint(hystValue);
+
+					if ((inputValue <= settingValue) ||
+						(prevResult == 1 && inputValue < t.floatValue()))
+					{
+						instance->addParamWord(o_result, 1);
+						instance->addParamWord(i_prev_result, 1);
+					}
+					else
+					{
+						instance->addParamWord(o_result, 0);
+						instance->addParamWord(i_prev_result, 0);
+					}
+
+					instance->addParamWord(o_overflow, t.mathOverflow());
+					instance->addParamWord(o_underflow, t.mathUnderflow());
 				}
 				break;
 

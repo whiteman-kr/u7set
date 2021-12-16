@@ -107,10 +107,15 @@ struct TimeStamp
 		return this->timeStamp != value.timeStamp;
 	}
 
-	TimeStamp& operator += (qint64 timeSpan)
+	TimeStamp& operator+= (qint64 timeSpan)
 	{
 		timeStamp += timeSpan;
+		return *this;
+	}
 
+	TimeStamp& operator-= (qint64 timeSpan)
+	{
+		timeStamp -= timeSpan;
 		return *this;
 	}
 };

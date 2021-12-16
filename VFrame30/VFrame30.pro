@@ -74,6 +74,7 @@ HEADERS += \
     Indicator.h \
     IndicatorArrowIndicator.h \
     IndicatorHistogramVert.h \
+    IndicatorTrend.h \
     LogController.h \
     SchemaItemFrame.h \
     SchemaItemIndicator.h \
@@ -145,6 +146,7 @@ SOURCES += \
     Indicator.cpp \
     IndicatorArrowIndicator.cpp \
     IndicatorHistogramVert.cpp \
+    IndicatorTrend.cpp \
     LogController.cpp \
     SchemaItemFrame.cpp \
     SchemaItemIndicator.cpp \

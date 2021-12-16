@@ -1279,21 +1279,18 @@ void MonitorMainWindow::slot_trends()
 
 void MonitorMainWindow::slot_signalSnapshot()
 {
-
-
-	MonitorDialogSignalSnapshot::showDialog(&m_configController,
+	MonitorDialogSignalSnapshot* d = MonitorDialogSignalSnapshot::createDialog(&m_configController,
 											m_tcpSignalClient,
 											&theSignals,
-											m_configController.configuration().project,
-											m_configController.configuration().softwareEquipmentId,
-											theMonitorMainWindow->monitorCentralWidget());
+											monitorCentralWidget());
+	d->show();
 
 	return;
 }
 
 void MonitorMainWindow::slot_findSignal()
 {
-	MonitorCentralWidget* cw = theMonitorMainWindow->monitorCentralWidget();
+	MonitorCentralWidget* cw = monitorCentralWidget();
 	if (cw == nullptr)
 	{
 		Q_ASSERT(cw);

@@ -3,6 +3,7 @@
 #include "PosRectImpl.h"
 #include "FontParam.h"
 #include "Indicator.h"
+#include "../TrendView/Trend.h"
 
 
 class AppSignalState;
@@ -37,10 +38,17 @@ namespace VFrame30
 	public:
 		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const final;
 
-		std::set<QString> getSignalTags(CDrawParam* drawParam, const QString& appSignalId) const;
-		bool getSignalParam(CDrawParam* drawParam, AppSignalParam* signalParam) const;
-		bool getSignalState(CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const;
-		std::optional<double> getSignalState(CDrawParam* drawParam, const QString& appSignalId) const;
+		// Trend functions, only if IndicatorType == E::IndicatorType::Trend
+		//
+	public:
+		bool isTrend() const;
+
+		TrendLib::Trend& trend();
+		const TrendLib::Trend& trend() const;
+
+		E::RtTrendsSamplePeriod trendSamplePeriod() const;
+		E::TimeType trendTimeType() const;
+		int trendDurationSeconds() const;
 
 		// Properties and Data
 		//
@@ -50,36 +58,6 @@ namespace VFrame30
 
 		QStringList signalIds() const;
 		void setSignalIds(const QStringList& value);
-
-		E::SignalSource signalSource() const;
-		void setSignalSource(E::SignalSource value);
-
-		E::AnalogFormat analogFormat() const;
-		void setAnalogFormat(E::AnalogFormat value);
-
-		int precision() const;
-		void setPrecision(int value);
-
-		DECLARE_FONT_PROPERTIES(Font)
-
-		FontParam& font();
-		const FontParam& font() const;
-
-		bool drawRect() const;
-		void setDrawRect(bool value);
-
-		double lineWeight() const;
-		double lineWeightDraw() const noexcept;
-		void setLineWeight(double weight);
-
-		const QColor& backgroundColor() const;
-		void setBackgroundColor(const QColor& color);
-
-		const QColor& lineColor() const;
-		void setLineColor(const QColor& color);
-
-		const QVector<QColor>& signalColors() const;
-		void setSignalColors(const QVector<QColor>& value);
 
 		E::IndicatorType indicatorType() const;
 		void setIndicatorType(E::IndicatorType value);
@@ -93,33 +71,52 @@ namespace VFrame30
 		void updateIndicatorProperties();
 
 	private:
-		Indicator* indicatorObject();
-		const Indicator* indicatorObject() const;
+		template<typename IndicatorType = VFrame30::Indicator>
+		IndicatorType* indicatorObject();
+
+		template<typename IndicatorType = VFrame30::Indicator>
+		const IndicatorType* indicatorObject() const;
 
 	private:
 		QStringList m_signalIds = {"#APPSIGNALID"};
-		E::SignalSource m_signalSource = E::SignalSource::AppDataService;
-
-		E::AnalogFormat m_analogFormat = E::AnalogFormat::f_9;
-		int m_precision = 2;
-
-		FontParam m_font;
-
-		bool m_drawRect = false;
-		double m_lineWeight = 0.0;				// Line weight, in pixels or inches depends on UnitDocPt
-
-		QColor m_backgroundColor{Qt::lightGray};
-		QColor m_lineColor{Qt::black};
-
-		QVector<QColor> m_signalColors = {Qt::darkBlue};
 
 		E::IndicatorType m_indicatorType = E::IndicatorType::HistogramVert;
 
+		// !!!
 		// Do not remove any items (even obsolete) from the next array, do not change its orded,
 		// only add new items after adding them to E::IndicatorType
-		//
+		// !!!
 		std::array<IndicatorObjectPtr, E::IndicatorTypeCount> m_indicatorObjects;
 	};
+
+
+	template<typename IndicatorType/* = VFrame30::Indicator*/>
+	IndicatorType* SchemaItemIndicator::indicatorObject()
+	{
+		size_t index = static_cast<size_t>(m_indicatorType);
+
+		if (index >= m_indicatorObjects.size())
+		{
+			Q_ASSERT(index < m_indicatorObjects.size());
+			index = 0;
+		}
+
+		return dynamic_cast<IndicatorType*>(m_indicatorObjects[index].get());
+	}
+
+	template<typename IndicatorType/* = VFrame30::Indicator*/>
+	const IndicatorType* SchemaItemIndicator::indicatorObject() const
+	{
+		size_t index = static_cast<size_t>(m_indicatorType);
+
+		if (index >= m_indicatorObjects.size())
+		{
+			Q_ASSERT(index < m_indicatorObjects.size());
+			index = 0;
+		}
+
+		return dynamic_cast<const IndicatorType*>(m_indicatorObjects[index].get());
+	}
 
 }
 

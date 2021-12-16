@@ -9,6 +9,21 @@
 #include "../TrendView/TrendSignal.h"
 #include "MonitorConfigController.h"
 
+
+//     onConnection()
+//            |
+//	 startRequestCycle()    <-------------------------------------------+
+//	          |															|
+//   requestTrendManagement() - RT_TRENDS_MANAGEMENT					|
+//   processTrendManagement() - RT_TRENDS_MANAGEMENT					|
+//            |															|
+//   requestTrendStateChanges() - RT_TRENDS_GET_STATE_CHANGES			|
+//   processTrendStateChanges() - RT_TRENDS_GET_STATE_CHANGES			|
+//            |															|
+//	 emit dataReady(...)												|
+//            |															|
+//            +---------------------------------------------------------+
+//
 class RtTrendTcpClient : public Tcp::Client, public TcpClientStatistics
 {
 	Q_OBJECT
@@ -20,8 +35,12 @@ public:
 	// Methods
 	//
 public:
-	bool setData(E::RtTrendsSamplePeriod samplePeriod, std::vector<TrendLib::TrendSignalParam> trendSignals);
-	bool clearData();
+	bool addSignals(const QStringList& appSignalIds);
+	bool setData(const QStringList& trendSignals);
+	bool setData(E::RtTrendsSamplePeriod samplePeriod, const QStringList& trendSignals);
+
+	void setSamplePeriod(E::RtTrendsSamplePeriod samplePeriod);
+	E::RtTrendsSamplePeriod samplePeriod() const;
 
 public:
 	virtual void onClientThreadStarted() override;
@@ -48,6 +67,7 @@ protected slots:
 signals:
 	void dataReady(std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState);
 	void requestError(QString text);
+	void connectionLost();
 
 	// Staticstic
 	//

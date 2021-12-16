@@ -137,6 +137,8 @@ public:
 	QString schemaCaptionByIndex(int schemaIndex) const;
 	QString schemaIdByIndex(int schemaIndex) const;
 
+	std::vector<VFrame30::SchemaDetails::TrendIndicatorSchemaItems> trendSchemaItems() const;
+
 	// Data section
 	//
 private:
@@ -146,10 +148,10 @@ private:
 
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
-	mutable QMutex m_mutex;
+	mutable QReadWriteLock m_schemaDetailsLock;
 	VFrame30::SchemaDetailsSet m_schemaDetailsSet;
 
-	mutable QMutex m_confugurationMutex;		// for access only to m_configuration
+	mutable QReadWriteLock m_confugurationLock;		// for access only to m_configuration
 	ConfigSettings m_configuration;
 };
 

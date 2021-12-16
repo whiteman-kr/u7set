@@ -55,6 +55,20 @@ std::shared_ptr<VFrame30::Schema> SimSchemaManager::loadSchema(QString schemaId)
 	return {};
 }
 
+bool SimSchemaManager::trendData(QUuid /*trendUuid*/,
+								 QString /*appSignalId*/,
+								 QDateTime /*from*/,
+								 QDateTime /*to*/,
+								 E::TimeType /*timeType*/,
+								 std::list<std::shared_ptr<TrendLib::OneHourData>>* /*outData*/) const
+{
+	// If you want Monitor schemas in simulator ide and want SchemaItemIndicater in mode trend
+	// then you have to add here some code
+	//
+	Q_ASSERT(false);
+	return false;
+}
+
 void SimSchemaManager::slot_projectUpdated()
 {
 	// Set MonitorID
