@@ -210,24 +210,24 @@ namespace VFrame30
 		return m_clientSchemaView->schemaManager()->schemaIdByIndex(schemaIndex);
 	}
 
-	void ScriptSchemaView::showSignalsArchive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType)
+	void ScriptSchemaView::showArchive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType)
 	{
-		m_clientSchemaView->showSignalsArchive(signalsList, startTime, endTime, timeType);
+		m_clientSchemaView->showArchive(signalsList, startTime, endTime, timeType);
 	}
 
-	void ScriptSchemaView::showSignalsSnapshotByList(QStringList signalsList)
+	void ScriptSchemaView::showSnapshot(QStringList signalsList)
 	{
-		m_clientSchemaView->showSignalsSnapshot(signalsList);
+		m_clientSchemaView->showSnapshot(signalsList);
 	}
 
-	void ScriptSchemaView::showSignalsSnapshotByMask(QString mask)
+	void ScriptSchemaView::showSnapshotByMask(QStringList masks)
 	{
-		m_clientSchemaView->showSignalsSnapshotByMask(mask);
+		m_clientSchemaView->showSnapshotByMask(masks);
 	}
 
-	void ScriptSchemaView::showSignalsSnapshotByTags(QString tags)
+	void ScriptSchemaView::showSnapshotByTag(QStringList tags)
 	{
-		m_clientSchemaView->showSignalsSnapshotByTags(tags);
+		m_clientSchemaView->showSnapshotByTag(tags);
 	}
 
 	QString ScriptSchemaView::schemaId() const
@@ -868,24 +868,24 @@ namespace VFrame30
 		m_tuningClientBehavior = std::move(src);
 	}
 
-	void ClientSchemaView::showSignalsArchive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType)
+	void ClientSchemaView::showArchive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType)
 	{
-		emit signal_showSignalsArchive(signalsList, startTime, endTime, timeType);
+		emit signal_showArchive(signalsList, startTime, endTime, timeType);
 	}
 
-	void ClientSchemaView::showSignalsSnapshot(QStringList signalsList)
+	void ClientSchemaView::showSnapshot(QStringList signalsList)
 	{
-		emit signal_showSignalsSnapshotByList(signalsList);
+		emit signal_showSnapshot(signalsList);
 	}
 
-	void ClientSchemaView::showSignalsSnapshotByMask(QString mask)
+	void ClientSchemaView::showSnapshotByMask(QStringList masks)
 	{
-		emit signal_showSignalsSnapshotByMask(mask);
+		emit signal_showSnapshotByMask(masks);
 	}
 
-	void ClientSchemaView::showSignalsSnapshotByTags(QString tags)
+	void ClientSchemaView::showSnapshotByTag(QStringList tags)
 	{
-		emit signal_showSignalsSnapshotByTags(tags);
+		emit signal_showSnapshotByTag(tags);
 	}
 
 }

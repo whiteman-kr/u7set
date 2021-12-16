@@ -64,9 +64,9 @@ public slots:
 	void signalInfo(QString appSignalId);
 
 	void signalsArchive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType);
-	void signalsSnapshotByList(QStringList signalsList);
-	void signalsSnapshotByMask(QString mask);
-	void signalsSnapshotByTags(QString tags);
+	void signalsSnapshot(QStringList signalsList);
+	void signalsSnapshotByMask(QStringList masks);
+	void signalsSnapshotByTag(QStringList tags);
 
 	// Properties
 	//

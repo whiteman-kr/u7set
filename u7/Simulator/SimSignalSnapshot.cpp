@@ -46,11 +46,11 @@ SimDialogSignalSnapshot::SimDialogSignalSnapshot(SimIdeSimulator* simuator,
 
 	resetSignalsType();
 
-	setSignalsTags(QString());
+	setSignalsTags({});
 
 	if (lmEquipmentId.isEmpty() == true)
 	{
-		setSignalsMask(QString());
+		setSignalsMask({});
 	}
 	else
 	{

@@ -237,8 +237,8 @@ public:
 	void setSpecificSignals(const std::vector<AppSignalParam>& specificSignals);
 
 	void setLmEquipmentId(const QString& lmEquipmentId);
-	void setSignalsMask(const QString& mask);
-	void setSignalsTags(const QString& tags);
+	void setSignalsMask(const QStringList& masks);
+	void setSignalsTags(const QStringList& tags);
 
 	void resetSignalsType();
 

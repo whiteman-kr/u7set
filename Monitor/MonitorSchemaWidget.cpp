@@ -66,10 +66,10 @@ MonitorSchemaWidget::MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schem
 
 	createActions();
 
-	connect(monitorSchemaView(), &MonitorSchemaView::signal_showSignalsArchive, this, &MonitorSchemaWidget::signalsArchive);
-	connect(monitorSchemaView(), &MonitorSchemaView::signal_showSignalsSnapshotByList, this, &MonitorSchemaWidget::signalsSnapshotByList);
-	connect(monitorSchemaView(), &MonitorSchemaView::signal_showSignalsSnapshotByMask, this, &MonitorSchemaWidget::signalsSnapshotByMask);
-	connect(monitorSchemaView(), &MonitorSchemaView::signal_showSignalsSnapshotByTags, this, &MonitorSchemaWidget::signalsSnapshotByTags);
+	connect(monitorSchemaView(), &MonitorSchemaView::signal_showArchive, this, &MonitorSchemaWidget::signalsArchive);
+	connect(monitorSchemaView(), &MonitorSchemaView::signal_showSnapshot, this, &MonitorSchemaWidget::signalsSnapshot);
+	connect(monitorSchemaView(), &MonitorSchemaView::signal_showSnapshotByMask, this, &MonitorSchemaWidget::signalsSnapshotByMask);
+	connect(monitorSchemaView(), &MonitorSchemaView::signal_showSnapshotByTag, this, &MonitorSchemaWidget::signalsSnapshotByTag);
 
 	return;
 }
@@ -455,7 +455,7 @@ void MonitorSchemaWidget::signalsArchive(QStringList signalsList, QDateTime star
 	return;
 }
 
-void MonitorSchemaWidget::signalsSnapshotByList(QStringList signalsList)
+void MonitorSchemaWidget::signalsSnapshot(QStringList signalsList)
 {
 	MonitorDialogSignalSnapshot* d = MonitorDialogSignalSnapshot::createDialog(theMonitorMainWindow->configController(),
 											theMonitorMainWindow->tcpSignalClient(),
@@ -511,18 +511,16 @@ void MonitorSchemaWidget::signalsSnapshotByList(QStringList signalsList)
 		return;
 	}
 
-	qDebug() << "specialSignals" << specialSignals.size();
-
 	d->resetSignalsType();
-	d->setSignalsMask(QString());
-	d->setSignalsTags(QString());
+	d->setSignalsMask({});
+	d->setSignalsTags({});
 
 	d->setSpecificSignals(specialSignals);
 
 	d->show();
 }
 
-void MonitorSchemaWidget::signalsSnapshotByMask(QString mask)
+void MonitorSchemaWidget::signalsSnapshotByMask(QStringList masks)
 {
 	MonitorDialogSignalSnapshot* d = MonitorDialogSignalSnapshot::createDialog(theMonitorMainWindow->configController(),
 											theMonitorMainWindow->tcpSignalClient(),
@@ -530,13 +528,13 @@ void MonitorSchemaWidget::signalsSnapshotByMask(QString mask)
 											theMonitorMainWindow->monitorCentralWidget());
 
 	d->resetSignalsType();
-	d->setSignalsMask(mask);
-	d->setSignalsTags(QString());
+	d->setSignalsMask(masks);
+	d->setSignalsTags({});
 
 	d->show();
 }
 
-void MonitorSchemaWidget::signalsSnapshotByTags(QString tags)
+void MonitorSchemaWidget::signalsSnapshotByTag(QStringList tags)
 {
 	MonitorDialogSignalSnapshot* d = MonitorDialogSignalSnapshot::createDialog(theMonitorMainWindow->configController(),
 											theMonitorMainWindow->tcpSignalClient(),
@@ -544,7 +542,7 @@ void MonitorSchemaWidget::signalsSnapshotByTags(QString tags)
 											theMonitorMainWindow->monitorCentralWidget());
 
 	d->resetSignalsType();
-	d->setSignalsMask(QString());
+	d->setSignalsMask({});
 	d->setSignalsTags(tags);
 
 	d->show();

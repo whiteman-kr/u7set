@@ -235,80 +235,67 @@ namespace VFrame30
 		Shows signals archive for specified signals list, time period and time type
 		\warning Month number is 0-based in JavaScript!\n
 
-
 		\code
-		(function(schemaItem)
-		{
-			const TIME_PLANT =  0;
-			const TIME_SYSTEM = 1;
-			const TIME_LOCAL =  2;
+		const TIME_PLANT =  0;
+		const TIME_SYSTEM = 1;
+		const TIME_LOCAL =  2;
 
-			let signalsList = ["#APPSIGNALID01", "#APPSIGNALID02", "#APPSIGNALID03"];
+		let signalsList = ["#APPSIGNALID01", "#APPSIGNALID02", "#APPSIGNALID03"];
 
-			let startTime = new Date(2021, 11, 25, 01, 23, 40);	// 25 of December '2021, 01:23:40; month number is 0-based
-			let endTime = new Date();							// Current date and time
+		let startTime = new Date(2021, 11, 25, 01, 23, 40);	// 25 of December '2021, 01:23:40; month number is 0-based
+		let endTime = new Date();							// Current date and time
 
-			let timeType = TIME_PLANT;
-
-			view.showSignalsArchive(signalsList, startTime, endTime, timeType);
-		})
+		view.showArchive(signalsList, startTime, endTime, TIME_PLANT);
 		\endcode
 		*/
-		void showSignalsArchive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType);
+		void showArchive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType);
 		/// \brief Show snapshot for signals specified by list of Application Signal IDs
 		/*!
 		Show snapshot for signals specified by list of Application Signal IDs
 
 		\code
-		(function(schemaItem)
-		{
-			let signalsList = ["#APPSIGNALID01", "#APPSIGNALID02", "#APPSIGNALID03"];
-
-			view.showSignalsSnapshotByList(signalsList);
-		})
+		let signalsList = ["#APPSIGNALID01", "#APPSIGNALID02", "#APPSIGNALID03"];
+		view.showSnapshot(signalsList);
 		\endcode
 
 		*/
-		void showSignalsSnapshotByList(QStringList signalsList);
+		void showSnapshot(QStringList signalsList);
 
 		/// \brief Show snapshot for signals specified by mask or by text fragment.
 		/*!
-		Show snapshot for signals specified by mask. Several masks can be specified separated by a semicolon.
+		Show snapshot for signals specified by mask. Several masks can be specified by an array.
 		If mask contains '*' or '?' symbols it is processed as a wildcard, otherwise specified test is searched
 		in signal identifiers.
 
+		Detailed information about masks can be found in \ref maskDescription "Masks Description".
+
 		\code
-		(function(schemaItem)
-		{
-			// Search by Mask
-			//
-			view.showSignalsSnapshotByMask("#APPSIGNAL_IN_BL*;#APPSIGNAL_IN_SIM??");
-		}
+		// Search by mask
+		//
+		view.showSnapshotByMask("REG*");
 
-		(function(schemaItem)
-		{
-			// Search by text fragment
-			//
-			view.showSignalsSnapshotByMask("REG");
-		})
+		// Search by several masks
+		//
+		view.showSnapshotByMask(["#APPSIGNAL_IN_BL*", "#APPSIGNAL_IN_SIM??"]);
 		\endcode
-
 		*/
-		void showSignalsSnapshotByMask(QString mask);
+		void showSnapshotByMask(QStringList masks);
 
 		/// \brief Show snapshot for signals specified by tags
 		/*!
-		Show snapshot for signals specified by tags. Several tags can be specified separated by a semicolon.
+		Show snapshot for signals specified by tags. Several tags can be specified by an array.
 
 		\code
-		(function(schemaItem)
-		{
-			view.showSignalsSnapshotByTags("sim;lock");
-		})
-		\endcode
+		// Search by tag
+		//
+		view.showSnapshotByTag("sim");
 
+		// Search by several tags
+		//
+		view.showSnapshotByTag(["sim", "lock"]);
+		\endcode
 		*/
-		void showSignalsSnapshotByTags(QString tags);
+		void showSnapshotByTag(QStringList tags);
 
 	private:
 		QString schemaId() const;
@@ -355,10 +342,10 @@ namespace VFrame30
 
 	signals:
 		void signal_setSchema(QString schemaId, QStringList highlightIds);
-		void signal_showSignalsArchive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType);
-		void signal_showSignalsSnapshotByList(QStringList signalsList);
-		void signal_showSignalsSnapshotByMask(QString mask);
-		void signal_showSignalsSnapshotByTags(QString tags);
+		void signal_showArchive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType);
+		void signal_showSnapshot(QStringList signalsList);
+		void signal_showSnapshotByMask(QStringList masks);
+		void signal_showSnapshotByTag(QStringList tags);
 
 		// Properties
 		//
@@ -425,11 +412,11 @@ namespace VFrame30
 		void setTuningClientBehavior(TuningClientBehavior&& src);
 
 		// Actions
-		void showSignalsArchive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType);
+		void showArchive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType);
 
-		void showSignalsSnapshot(QStringList signalsList);
-		void showSignalsSnapshotByMask(QString mask);
-		void showSignalsSnapshotByTags(QString tags);
+		void showSnapshot(QStringList signalsList);
+		void showSnapshotByMask(QStringList masks);
+		void showSnapshotByTag(QStringList tags);
 
 	private:
 		VFrame30::SchemaManager* m_schemaManager = nullptr;

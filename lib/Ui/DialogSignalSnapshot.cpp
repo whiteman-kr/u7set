@@ -1305,7 +1305,7 @@ void DialogSignalSnapshot::setLmEquipmentId(const QString& lmEquipmentId)
 	return;
 }
 
-void DialogSignalSnapshot::setSignalsMask(const QString& mask)
+void DialogSignalSnapshot::setSignalsMask(const QStringList& masks)
 {
 	if (m_editMask == nullptr || m_maskTypeCombo == nullptr)
 	{
@@ -1316,7 +1316,7 @@ void DialogSignalSnapshot::setSignalsMask(const QString& mask)
 
 	// Set Mask(s)
 	//
-	m_editMask->setText(mask);
+	m_editMask->setText(masks.join(';'));
 
 	maskChanged(false/*addToCompleter*/);
 
@@ -1332,7 +1332,7 @@ void DialogSignalSnapshot::setSignalsMask(const QString& mask)
 	return;
 }
 
-void DialogSignalSnapshot::setSignalsTags(const QString& tags)
+void DialogSignalSnapshot::setSignalsTags(const QStringList& tags)
 {
 	if (m_editTags == nullptr)
 	{
@@ -1340,7 +1340,7 @@ void DialogSignalSnapshot::setSignalsTags(const QString& tags)
 		return;
 	}
 
-	m_editTags->setText(tags);
+	m_editTags->setText(tags.join(' '));
 
 	tagsChanged();
 
