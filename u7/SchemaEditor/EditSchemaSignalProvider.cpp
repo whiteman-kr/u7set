@@ -220,6 +220,13 @@ std::vector<std::shared_ptr<Comparator>> EditSchemaAppSignalProvider::setpointsB
 	return {};
 }
 
+QStringList EditSchemaAppSignalProvider::tags() const
+{
+	// No simulation of this function in edit schema mode
+	//
+	return {};
+}
+
 EditSchemaTuningSignalProvider::EditSchemaTuningSignalProvider(AppSignalSetProvider* signalSetProvider) :
 	m_signalSetProvider(signalSetProvider)
 {

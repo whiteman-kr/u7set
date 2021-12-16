@@ -50,6 +50,10 @@ public:
 	//
 	virtual std::vector<std::shared_ptr<Comparator>> setpointsByInputSignalId(const QString& appSignalId) const override;
 
+	// Tags
+	//
+	virtual QStringList tags() const override;
+
 private:
 	AppSignalSetProvider* m_signalSetProvider = nullptr;
 };

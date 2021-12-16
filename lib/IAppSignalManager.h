@@ -42,5 +42,9 @@ public:
 	// Setpoints
 	//
 	virtual std::vector<std::shared_ptr<Comparator>> setpointsByInputSignalId(const QString& appSignalId) const = 0;
+
+	// Tags
+	//
+	virtual QStringList tags() const = 0;
 };
 

@@ -99,6 +99,10 @@ namespace Sim
 		//
 		virtual std::vector<std::shared_ptr<Comparator>> setpointsByInputSignalId(const QString& appSignalId) const override;
 
+		// Tags
+		//
+		virtual QStringList tags() const final;
+
 		// Data Acess
 		//
 	public:
@@ -116,6 +120,7 @@ namespace Sim
 		std::unordered_map<Hash, AppSignal> m_signalParamsExt;		// Except AppSignalParam, we need Signal as it has more information (like offset in memory)
 		std::unordered_map<Hash, Hash> m_customToAppSignalId;
 		std::unordered_map<QString, QStringList> m_tagToAppSignals;	// Key is tag - value is list of AppSignalIDs with this tag
+		std::set<QString> m_tags;
 
 		// SimRuntime data
 		//
