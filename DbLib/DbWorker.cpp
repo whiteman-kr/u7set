@@ -390,6 +390,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0368.sql", "Upgrade to version 368, Added LM11-SR90 preset and LM description"},
 	{":/DatabaseUpgrade/Upgrade0369.sql", "Upgrade to version 369, LAN configuration generating improvements"},
 	{":/DatabaseUpgrade/Upgrade0370.sql", "Upgrade to version 370, Added median_si/fp validity output to LM11-SR90"},
+	{":/DatabaseUpgrade/Upgrade0371.sql", "Upgrade to version 371, Bugfix with sin/cos opcode in LM11-SR90, LM8-SR10"},
 };
 
 int DbWorker::counter = 0;

@@ -7575,7 +7575,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#math_sin_fp_v1"    Caption="math_sin_fp"    Version="1.0000">
+		<AFB id="#math_sin_fp_v1"    Caption="math_sin_fp"    Version="1.0001">
 			<Properties>				
 				<Description>Function Block outputs the sinus calculation result</Description>
 				<Category>Math</Category>
@@ -7592,8 +7592,8 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</Outputs>
 			<Params>            
 				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
-					<Value>4</Value>
-					<Default>4</Default>
+					<Value>3</Value>
+					<Default>3</Default>
 					<LowLimit>1</LowLimit>
 					<HighLimit>8</HighLimit>
 					<Script>
@@ -7654,7 +7654,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#math_cos_fp_v1"    Caption="math_cos_fp"    Version="1.0000">
+		<AFB id="#math_cos_fp_v1"    Caption="math_cos_fp"    Version="1.0001">
 			<Properties>				
 				<Description>Function Block outputs the cosinus calculation result</Description>
 				<Category>Math</Category>
@@ -7671,8 +7671,8 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</Outputs>
 			<Params>            
 				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
-					<Value>5</Value>
-					<Default>5</Default>
+					<Value>4</Value>
+					<Default>4</Default>
 					<LowLimit>1</LowLimit>
 					<HighLimit>8</HighLimit>
 					<Script>
