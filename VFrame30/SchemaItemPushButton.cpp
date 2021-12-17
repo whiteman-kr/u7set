@@ -644,7 +644,7 @@ namespace VFrame30
 
 		QPen pen;
 		pen.setColor(style->standardPalette().color(QPalette::Normal, QPalette::Dark));
-		pen.setWidthF(1.0 / drawParam->dpiX());
+		pen.setWidthF(1.0 / drawParam->realDpiX());
 		p->setPen(pen);
 
 		p->drawRoundedRect(r, 5.0, 5.0, Qt::RelativeSize);

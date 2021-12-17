@@ -1086,7 +1086,7 @@ bool EditSchemaWidget::event(QEvent* event)
 
 		if (itemUnderPoint != nullptr)
 		{
-			QString toolTip = itemUnderPoint->toolTipText(this->logicalDpiX(), this->logicalDpiY());
+			QString toolTip = itemUnderPoint->toolTipText(this->logicalDpiX(), this->logicalDpiY(), this->devicePixelRatioF());
 			setToolTip(toolTip);
 		}
 		else
@@ -6452,42 +6452,6 @@ void EditSchemaWidget::editPaste()
 				continue;	// No transform, the problem is: we need to transform pos, height, points pos
 							// it's all ok, BUT also we need to trasform lineWeight, TextSize and maybe something else
 							// and these properties can variy from item to item.
-
-//				// Transform units
-//				//
-//				double xf = 1.0;
-//				double yf = 1.0;
-
-//				if (schemaItem->itemUnit() == SchemaUnit::Display)
-//				{
-//					Q_ASSERT(schema()->unit() == SchemaUnit::Inch);
-
-//					xf = this->logicalDpiX();
-//					yf = this->logicalDpiY();
-//				}
-//				else
-//				{
-//					Q_ASSERT(schema()->unit() == SchemaUnit::Display);
-
-//					xf = 1.0 / this->logicalDpiX();
-//					yf = 1.0 / this->logicalDpiY();
-//				}
-
-//				if (VFrame30::PosRectImpl* posRect = schemaItem->toType<VFrame30::PosRectImpl>();
-//					posRect != nullptr)
-//				{
-//					schemaItem->setItemUnit(schema()->unit());
-
-//					posRect->moveItem(posRect->leftDocPt() * xf, posRect->topDocPt() * yf);
-
-//					posRect->SetWidthInDocPt(posRect->GetWidthInDocPt() * xf);
-//					posRect->SetHeightInDocPt(posRect->GetHeightInDocPt() * yf);
-//				}
-
-//				if (VFrame30::PosLineImpl* posLine = schemaItem->toType<VFrame30::PosLineImpl>();
-//					posLine != nullptr)
-//				{
-//				}
 			}
 
 			// --

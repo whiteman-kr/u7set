@@ -1239,10 +1239,11 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		return m_cachedGridSize * 10;
 	}
 
-	QString SchemaItemSignal::toolTipText(int dpiX, int dpiY) const
+	QString SchemaItemSignal::toolTipText(double dpiX, double dpiY, double devicePixelRatio) const
 	{
 		Q_UNUSED(dpiX);
 		Q_UNUSED(dpiY);
+		Q_UNUSED(devicePixelRatio);
 
 		QString str = {"Signal(s): "};
 

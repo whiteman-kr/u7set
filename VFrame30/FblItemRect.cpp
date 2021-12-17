@@ -327,7 +327,7 @@ namespace VFrame30
 
 		// --
 		//
-		int dpiX = drawParam->dpiX();
+		const double dpiX = drawParam->realDpiX();
 
 		// Correct rect width
 		//
@@ -758,7 +758,7 @@ namespace VFrame30
 		}
 
 		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
-		double pinWidth = GetPinWidth(itemUnit(), drawParam->device()->logicalDpiX());
+		double pinWidth = GetPinWidth(itemUnit(), drawParam->realDpiX());
 
 		if (inputsCount() > 0)
 		{

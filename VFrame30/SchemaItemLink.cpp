@@ -92,7 +92,7 @@ namespace VFrame30
 
 		QPainter* p = drawParam->painter();
 
-		const int dpiX = drawParam->dpiX();
+		const double dpiX = drawParam->realDpiX();
 
 		// Draw the main part
 		//

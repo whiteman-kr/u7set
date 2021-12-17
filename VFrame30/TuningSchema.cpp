@@ -7,8 +7,6 @@ namespace VFrame30
 
 	TuningSchema::TuningSchema(void)
 	{
-		//qDebug() << "TuningSchema::TuningSchema(void)";
-
 		setUnit(SchemaUnit::Inch);
 
 		setDocWidth(mm2in(297));
@@ -26,7 +24,6 @@ namespace VFrame30
 	
 	TuningSchema::~TuningSchema(void)
 	{
-		//qDebug() << "TuningSchema::~TuningSchema(void)";
 	}
 
 	QStringList TuningSchema::getSignalList() const

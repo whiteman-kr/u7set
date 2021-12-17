@@ -151,17 +151,19 @@ namespace VFrame30
 		{
 		case SchemaUnit::Display:
 			{
-				displayPos = {static_cast<int>(leftDocPt() * zoom / 100.0),
-							  static_cast<int>(topDocPt() * zoom / 100.0)};
+				double devicePixelRatio = widget->devicePixelRatioF();
 
-				displaySize = {static_cast<int>(widthDocPt() * zoom / 100.0),
-							   static_cast<int>(heightDocPt() * zoom / 100.0)};
+				displayPos = {static_cast<int>(leftDocPt() * zoom / 100.0 / devicePixelRatio),
+							  static_cast<int>(topDocPt() * zoom / 100.0 / devicePixelRatio)};
+
+				displaySize = {static_cast<int>(widthDocPt() * zoom / 100.0 / devicePixelRatio),
+							   static_cast<int>(heightDocPt() * zoom / 100.0 / devicePixelRatio)};
 			}
 			break;
 		case SchemaUnit::Inch:
 			{
-				double dpiX = widget->logicalDpiX();
-				double dpiY = widget->logicalDpiY();
+				double dpiX = widget->physicalDpiX();
+				double dpiY = widget->physicalDpiY();
 
 				displayPos = {static_cast<int>(leftDocPt() * zoom / 100.0 * dpiX),
 							  static_cast<int>(topDocPt() * zoom / 100.0 * dpiY)};

@@ -268,20 +268,17 @@ namespace VFrame30
 
 		if (schema() != nullptr && m_infoMode  == false)
 		{
-			int dpiX = logicalDpiX();
-			int dpiY = logicalDpiY();
-
 			QRect updateRect = paintEvent->rect();
-			updateRect.adjust(-dpiX, -dpiY / 4, dpiX, dpiY / 4);	// -one inch, to draw pin names
+			updateRect.adjust(-logicalDpiX(), -logicalDpiY() / 4, logicalDpiX(), logicalDpiY() / 4);	// some space to draw pin names
 
 			QPointF cls;
 			QPointF clf;
 
-			bool mok = true;
-			mok &= MousePosToDocPoint(updateRect.topLeft(), &cls, dpiX, dpiY);
-			mok &= MousePosToDocPoint(updateRect.bottomRight(), &clf, dpiX, dpiY);
+			bool mouseOk = true;
+			mouseOk &= MousePosToDocPoint(updateRect.topLeft(), &cls);
+			mouseOk &= MousePosToDocPoint(updateRect.bottomRight(), &clf);
 
-			if (mok == true)
+			if (mouseOk == true)
 			{
 				clipRect.setTopLeft(cls);
 				clipRect.setSize({clf.x() - cls.x(), clf.y() - cls.y()});
@@ -293,11 +290,9 @@ namespace VFrame30
 		QPainter p;
 		p.begin(this);
 
-		p.save();
-
 		VFrame30::CDrawParam drawParam(&p, schema().get(), this, schema()->gridSize(), schema()->pinGridStep());
 
-		drawParam.setControlBarSize(schema()->unit() == SchemaUnit::Display ?	10 * (100.0 / zoom()) : mm2in(2.4) * (100.0 / zoom()));		// Is required for drawing highlights on items
+		drawParam.setControlBarSize(CONTROL_BAR(schema()->unit(), p.device()->devicePixelRatioF(), zoom()));		// Is required for drawing highlights on items
 		drawParam.setBlinkPhase(static_cast<bool>((QTime::currentTime().msec() / 250) % 2));	// 0-249 : false, 250-499 : true, 500-749 : false, 750-999 : true
 		drawParam.setEditMode(false);
 
@@ -310,22 +305,6 @@ namespace VFrame30
 		// Draw schema
 		//
 		SchemaView::draw(drawParam, clipRect);
-
-		// Calc size
-		//
-		p.setRenderHint(QPainter::Antialiasing);
-
-		// Ajust QPainter
-		//
-		Ajust(&p, 0, 0, zoom());
-
-		// Draw elements highlighted by its AppSignalId
-		//
-		//drawHighlights();
-
-		// --
-		//
-		p.restore();
 
 		// --
 		//

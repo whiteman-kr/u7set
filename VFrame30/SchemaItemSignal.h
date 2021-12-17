@@ -159,7 +159,7 @@ namespace VFrame30
 		// Other
 		//
 	public:
-		virtual QString toolTipText(int dpiX, int dpiY) const override;
+		virtual QString toolTipText(double dpiX, double dpiY, double devicePixelRatio) const override;
 
 		SchemaItemPtr transformIntoInput();
 		SchemaItemPtr transformIntoInOut();

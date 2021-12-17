@@ -244,8 +244,8 @@ namespace VFrame30
 		if (m_itemUnit == SchemaUnit::Inch)
 		{
 			trendRect = {0, 0,
-						 boundingRect.width() * drawParam->dpiX() * zoom,		// Zoom image so it will be well drawn on high zoom values
-						 boundingRect.height() * drawParam->dpiY() * zoom};
+						 boundingRect.width() * drawParam->realDpiX() * zoom,		// Zoom image so it will be well drawn on high zoom values
+						 boundingRect.height() * drawParam->realDpiY() * zoom};
 		}
 		else
 		{
@@ -255,7 +255,7 @@ namespace VFrame30
 		// --
 		//
 		m_trendParam.setRect(trendRect);
-		m_trendParam.setDpi(drawParam->dpiX(), drawParam->dpiY());
+		m_trendParam.setDpi(drawParam->realDpiX(), drawParam->realDpiY());
 		m_trendParam.setTimeType(m_timeType);
 
 		if (drawParam->isMonitorMode() == true)
@@ -286,9 +286,6 @@ namespace VFrame30
 			requiredRedraw = true;
 
 			m_image = QImage{static_cast<int>(trendRect.width()), static_cast<int>(trendRect.height()), QImage::Format_RGB32};
-
-			//qDebug() << "Trend image size " << m_image.rect().size();
-			//qDebug() << "Trend image dpis " << m_image.logicalDpiX() << " x " << m_image.logicalDpiY();
 		}
 
 		// Draw trend to QImage and then copy it to painter

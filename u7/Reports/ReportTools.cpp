@@ -823,7 +823,7 @@ void ReportGenerator::printSchema(QPdfWriter* pdfWriter,
 	}
 
 	// Calculate the upper schema offset
-
+	//
 	const QRect pageRect = pdfWriter->pageLayout().paintRectPixels(pdfWriter->resolution());
 
 	int schemaTop = 0;
@@ -838,9 +838,9 @@ void ReportGenerator::printSchema(QPdfWriter* pdfWriter,
 	const int schemaMaxHeight = pageRect.height() - schemaTop;
 
 	// Calculate draw parameters
-
-	double schemaWidthInPixel = schema->GetDocumentWidth(pdfWriter->resolution(), 100.0);		// Export 100% zoom
-	double schemaHeightInPixel = schema->GetDocumentHeight(pdfWriter->resolution(), 100.0);		// Export 100% zoom
+	//
+	double schemaWidthInPixel = schema->GetDocumentWidth(pdfWriter->physicalDpiX(), 100.0);		// Export 100% zoom
+	double schemaHeightInPixel = schema->GetDocumentHeight(pdfWriter->physicalDpiY(), 100.0);		// Export 100% zoom
 
 	double zoom = pageRect.width() / schemaWidthInPixel;
 
@@ -849,24 +849,20 @@ void ReportGenerator::printSchema(QPdfWriter* pdfWriter,
 	if (schemaHeightInPixelWZoomed > schemaMaxHeight)
 	{
 		// Reduce schema's height, it does not fit vertically
-
+		//
 		double yZoom =  schemaMaxHeight / schemaHeightInPixelWZoomed;
 
 		zoom *= yZoom;
 
 		// Center schema horizontally
-
+		//
 		int schemaWidthInPixelZoomed = static_cast<int>(schemaWidthInPixel * zoom + 0.5);
 
 		schemaLeft =  (pageRect.width() - schemaWidthInPixelZoomed) / 2;
 	}
 
-	// Draw rect
-
-	//m_pdfPainter.fillRect(QRectF(0, schemaTop, pageRect.width(), pageRect.height() - schemaTop), QColor(0xB0, 0xB0, 0xB0));
-
 	// Draw Schema
-
+	//
 	painter->save();
 	painter->setRenderHint(QPainter::Antialiasing);
 
@@ -887,10 +883,7 @@ void ReportGenerator::printSchema(QPdfWriter* pdfWriter,
 		compareActions.value() != nullptr &&
 		compareActions.value()->empty() == false)
 	{
-		drawParam.setControlBarSize(
-			schema->unit() == SchemaUnit::Display ?
-						(4 / zoom) : (VFrame30::mm2in(2.4) / zoom));
-
+		drawParam.setControlBarSize(CONTROL_BAR(schema->unit(), drawParam.device()->devicePixelRatioF(), zoom * 100.0));
 		m_schemaView->drawCompareOutlines(&drawParam, clipRect, *(compareActions.value()));
 	}
 

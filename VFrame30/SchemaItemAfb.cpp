@@ -51,7 +51,7 @@ namespace VFrame30
 	{
 		QPainter* p = drawParam->painter();
 
-		int dpiX = drawParam->dpiX();
+		double dpiX = drawParam->realDpiX();
 		double pinWidth = GetPinWidth(itemUnit(), dpiX);
 
 		FontParam smallFont = m_font;
@@ -212,9 +212,9 @@ namespace VFrame30
 				p->resetTransform();
 
 				QRectF textRect(rect.left() * p->device()->logicalDpiX(),
-								   rect.top() * p->device()->logicalDpiY(),
-								   rect.width() * p->device()->logicalDpiX(),
-								   rect.height() * p->device()->logicalDpiY());
+								rect.top() * p->device()->logicalDpiY(),
+								rect.width() * p->device()->logicalDpiX(),
+								rect.height() * p->device()->logicalDpiY());
 
 				p->drawText(textRect, flags, text);
 				p->restore();
@@ -257,17 +257,17 @@ namespace VFrame30
 
 		// set DPI independent draw
 		//
-		p->scale(p->device()->logicalDpiX(), p->device()->logicalDpiY());
+		p->scale(p->device()->physicalDpiX(), p->device()->physicalDpiY());
 
 		const double intend = 1.0 / 4.0;
 		const double pinWdith = 2.0 / 4.0;
 		const double pinHeight = static_cast<double>(p->fontInfo().pixelSize()) / p->device()->logicalDpiY() * 1.25;
 		const double typeWidth = 2.0 / 4.0;
 
-		QRectF rect(static_cast<double>(drawRect.left()) / p->device()->logicalDpiX(),
-					static_cast<double>(drawRect.top()) / p->device()->logicalDpiY(),
-					static_cast<double>(drawRect.width()) / p->device()->logicalDpiX(),
-					static_cast<double>(drawRect.height()) / p->device()->logicalDpiY());
+		QRectF rect(static_cast<double>(drawRect.left()) / p->device()->physicalDpiX(),
+					static_cast<double>(drawRect.top()) / p->device()->physicalDpiY(),
+					static_cast<double>(drawRect.width()) / p->device()->physicalDpiX(),
+					static_cast<double>(drawRect.height()) / p->device()->physicalDpiY());
 
 		// --
 		//
@@ -562,13 +562,13 @@ namespace VFrame30
 		return true;
 	}
 
-	QString SchemaItemAfb::toolTipText(int dpiX, int dpiY) const
+	QString SchemaItemAfb::toolTipText(double dpiX, double dpiY, double devicePixelRatio) const
 	{
-		QImage image(QSize(3 * dpiX, 3 * dpiY), QImage::Format_RGB32);		// size 3x3 inches
+		QImage image(QSize(3 * dpiX * devicePixelRatio, 3 * dpiY * devicePixelRatio), QImage::Format_RGB32);		// size 3x3 inches
 		image.fill(Qt::white);
 
-		image.setDotsPerMeterX(static_cast<int>(1000.0 / 25.4 * dpiX));
-		image.setDotsPerMeterY(static_cast<int>(1000.0 / 25.4 * dpiY));
+		image.setDotsPerMeterX(static_cast<int>(1000.0 / 25.4 * dpiX * devicePixelRatio));
+		image.setDotsPerMeterY(static_cast<int>(1000.0 / 25.4 * dpiX * devicePixelRatio));
 
 		QPainter painter;
 		painter.setRenderHint(QPainter::Antialiasing, true);
@@ -584,8 +584,8 @@ namespace VFrame30
 
 		QString html = QString("<img src='data:image/png;base64, %0' height=\"%2\" width=\"%3\"/>")
 					   .arg(QString(data.toBase64()))
-					   .arg(image.size().height())
-					   .arg(image.size().width());
+					   .arg(image.size().height() / devicePixelRatio)
+					   .arg(image.size().width() / devicePixelRatio);
 
 		return html;
 	}

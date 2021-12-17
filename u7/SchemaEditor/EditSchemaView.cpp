@@ -81,20 +81,17 @@ void EditSchemaView::paintEvent(QPaintEvent* paintEvent)
 
 	if (schema() != nullptr && theSettings.infoMode() == false)
 	{
-		int dpiX = logicalDpiX();
-		int dpiY = logicalDpiY();
-
 		QRect updateRect = paintEvent->rect();
-		updateRect.adjust(-dpiX, -dpiY / 4, dpiX, dpiY / 4);	// -one inch, to draw pin names
+		updateRect.adjust(-logicalDpiX(), -logicalDpiY() / 4, logicalDpiX(), logicalDpiY() / 4);	// some space to draw pin names
 
 		QPointF cls;
 		QPointF clf;
 
-		bool mok = true;
-		mok &= MousePosToDocPoint(updateRect.topLeft(), &cls, dpiX, dpiY);
-		mok &= MousePosToDocPoint(updateRect.bottomRight(), &clf, dpiX, dpiY);
+		bool mouseOk = true;
+		mouseOk &= MousePosToDocPoint(updateRect.topLeft(), &cls);
+		mouseOk &= MousePosToDocPoint(updateRect.bottomRight(), &clf);
 
-		if (mok == true)
+		if (mouseOk == true)
 		{
 			clipRect.setTopLeft(cls);
 			clipRect.setSize({clf.x() - cls.x(), clf.y() - cls.y()});
@@ -108,23 +105,24 @@ void EditSchemaView::paintEvent(QPaintEvent* paintEvent)
 		QPainter p(this);
 
 		VFrame30::CDrawParam drawParam(&p, schema().get(), this, schema()->gridSize(), schema()->pinGridStep());
-		drawParam.setControlBarSize(
-			schema()->unit() == SchemaUnit::Display ?	10 * (100.0 / zoom()) : VFrame30::mm2in(2.4) * (100.0 / zoom()));
-
+		drawParam.setControlBarSize(CONTROL_BAR(schema()->unit(), p.device()->devicePixelRatioF(), zoom()));
 		drawParam.setInfoMode(theSettings.infoMode());
 		drawParam.session() = session();
 
 		drawParam.setAppSignalController(&m_appSignalController);
 
+		//QElapsedTimer et;
+		//et.start();
+
 		draw(drawParam, clipRect);
+
+		//qDebug() << "EditSchemaView::paintEvent, draw time " << et.elapsed() << "ms";
 	}
 
 	// Draw other -- selection, grid, outlines, rulers, etc
 	//
 	QPainter p;
 	p.begin(this);
-
-	p.save();
 
 	VFrame30::CDrawParam drawParam(&p, schema().get(), this, schema()->gridSize(), schema()->pinGridStep());
 	drawParam.setInfoMode(theSettings.infoMode());
@@ -139,20 +137,18 @@ void EditSchemaView::paintEvent(QPaintEvent* paintEvent)
 
 	// Draw schema
 	//
-	drawParam.setControlBarSize(schema()->unit() == SchemaUnit::Display ?
-									10 * (100.0 / zoom()) :
-									VFrame30::mm2in(2.4) * (100.0 / zoom()));
+	drawParam.setControlBarSize(CONTROL_BAR(schema()->unit(), p.device()->devicePixelRatioF(), zoom()));
 
 	// Draw Build Issues
 	//
 	drawBuildIssues(&drawParam, clipRect);
 
-	// Draw run order
+	// Draw run order - Update: run order dows not work after UFB became more complex and now they can have signals inside
 	//
-	if (theSettings.isDebugMode() == true)
-	{
-		drawRunOrder(&drawParam, clipRect);
-	}
+	//if (theSettings.isDebugMode() == true)
+	//{
+	//	drawRunOrder(&drawParam, clipRect);
+	//}
 
 	// Draw selection
 	//
@@ -188,16 +184,20 @@ void EditSchemaView::paintEvent(QPaintEvent* paintEvent)
 		drawCompareOutlines(&drawParam, clipRect);
 	}
 
-	p.restore();
-
-	// Draw grid performed IS NOT AJUSTED PAINTER
+	// Draw grid performed IN NOT AJUSTED PAINTER
 	//
 	{
-		QRect updateRect = paintEvent->rect();
+		p.resetTransform();
+
+		QRectF updateRect = paintEvent->rect();
+		updateRect.moveTopLeft(updateRect.topLeft() * devicePixelRatioF());
+		updateRect.setSize(updateRect.size() * devicePixelRatioF());
+
 		updateRect.adjust(-1, -1, 1, 1);
 
 		drawGrid(&p, updateRect);
 	}
+
 
 	// --
 	//
@@ -933,7 +933,7 @@ void EditSchemaView::drawCompareOutlines(VFrame30::CDrawParam* drawParam, const 
 		return;
 	}
 
-	// Draw items by layers which has Show flag
+	// Draw items by layers which has show flag
 	//
 	double clipX = clipRect.left();
 	double clipY = clipRect.top();
@@ -998,7 +998,7 @@ void EditSchemaView::drawCompareOutlines(VFrame30::CDrawParam* drawParam, const 
 
 void EditSchemaView::drawGrid(QPainter* p, const QRectF& clipRect)
 {
-	assert(p);
+	Q_ASSERT(p);
 
 //	if (m_mouseSelectionStartPoint.isNull() == false &&
 //		m_mouseSelectionEndPoint.isNull() == false)
@@ -1010,9 +1010,8 @@ void EditSchemaView::drawGrid(QPainter* p, const QRectF& clipRect)
 //	}
 
 	auto unit = schema()->unit();
-
-	double frameWidth = schema()->docWidth();
-	double frameHeight = schema()->docHeight();
+	double documentWidth = schema()->docWidth();
+	double documentHeight = schema()->docHeight();
 	double gridSize = schema()->gridSize();
 	double scale = zoom() / 100.0;
 
@@ -1037,19 +1036,24 @@ void EditSchemaView::drawGrid(QPainter* p, const QRectF& clipRect)
 	//
 	if (gridSize == 0)
 	{
-		assert(gridSize);
+		Q_ASSERT(gridSize);
 		return;
 	}
 
-	int horzGridCount = qBound(0, static_cast<int>(frameWidth / gridSize), 1024);
-	int vertGridCount = qBound(0, static_cast<int>(frameHeight / gridSize), 1024);
+	int horzGridCount = qBound(0, static_cast<int>(documentWidth / gridSize), 1024);
+	int vertGridCount = qBound(0, static_cast<int>(documentHeight / gridSize), 1024);
 
 	// Drawing grid
 	//
-	p->setPen(QColor{0x00, 0x00, 0x80, 0xB4});
+	p->setPen(QColor{0x00, 0x00, 0x80, 0xFF});
 
-	const double dpiX = unit == SchemaUnit::Display ? 1.0 : p->device()->logicalDpiX();
-	const double dpiY = unit == SchemaUnit::Display ? 1.0 : p->device()->logicalDpiY();
+	const double dpiX = (unit == SchemaUnit::Display) ?
+							(1.0) :
+							(p->device()->physicalDpiX() * devicePixelRatioF());
+
+	const double dpiY = (unit == SchemaUnit::Display) ?
+							(1.0) :
+							(p->device()->physicalDpiY() * devicePixelRatioF());
 
 	const double dpiXScale = gridSize * dpiX * scale;
 	const double dpiYScale = gridSize * dpiY * scale;
@@ -1058,6 +1062,8 @@ void EditSchemaView::drawGrid(QPainter* p, const QRectF& clipRect)
 	points.reserve(1024);
 
 	QPointF pt;
+
+	p->scale(1.0 / devicePixelRatioF(), 1.0 / devicePixelRatioF());
 
 	for (int v = 0; v < vertGridCount; ++v)
 	{
@@ -1070,7 +1076,7 @@ void EditSchemaView::drawGrid(QPainter* p, const QRectF& clipRect)
 
 			if (clipRect.contains(pt) == true)
 			{
-				points.push_back(pt);
+				points.emplace_back(pt);
 			}
 		}
 
@@ -1103,7 +1109,7 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 
 	// --
 	//
-	const double controlBarSize = ControlBar(schemaItem->itemUnit(), zoom());
+	const double controlBarSize = CONTROL_BAR(schemaItem->itemUnit(), this->devicePixelRatioF(), zoom());
 	const bool ctrlIsPressed = QApplication::keyboardModifiers().testFlag(Qt::ControlModifier);
 
 	// SchemaItem position and point are the same units
@@ -1667,7 +1673,7 @@ void EditSchemaView::exportToPdf(const QString& fileName, bool infoMode)
 	}
 
 	pdfWriter.setPageSize(pageSize);
-	pdfWriter.setPageMargins(QMarginsF(0, 0, pageWidth, pageHeight));
+	pdfWriter.setPageMargins(QMarginsF(0, 0, 0, 0));
 
 	// --
 	//
@@ -1679,11 +1685,10 @@ void EditSchemaView::exportToPdf(const QString& fileName, bool infoMode)
 	drawParam.session() = session();
 	drawParam.setAppSignalController(&m_appSignalController);
 
-
 	// Calc size
 	//
-	int widthInPixel = schema()->GetDocumentWidth(p.device()->logicalDpiX(), 100.0);		// Export 100% zoom
-	int heightInPixel = schema()->GetDocumentHeight(p.device()->logicalDpiY(), 100.0);		// Export 100% zoom
+	int widthInPixel = schema()->GetDocumentWidth(pdfWriter.resolution(), 100.0);		// Export 100% zoom
+	int heightInPixel = schema()->GetDocumentHeight(pdfWriter.resolution(), 100.0);		// Export 100% zoom
 
 	// Clear device
 	//
@@ -1692,8 +1697,7 @@ void EditSchemaView::exportToPdf(const QString& fileName, bool infoMode)
 
 	// Ajust QPainter
 	//
-	//Ajust(&p, 0, 0, 100.0);		// Export 100% zoom
-	Ajust(&p, 0, 0, 100.0);		// Export 100% zoom
+	Ajust(&p, 0, 0, 100.0);			// Export 100% zoom
 
 	// Draw Schema
 	//

@@ -175,7 +175,7 @@ namespace VFrame30
 		return inVal * 25.4;
 	}
 
-	double ConvertPoint(double point, SchemaUnit convertFrom, SchemaUnit convertTo, int dpi)
+	double ConvertPoint(double point, SchemaUnit convertFrom, SchemaUnit convertTo, double dpi)
 	{
 		if (convertFrom == convertTo)
 		{
@@ -258,7 +258,7 @@ namespace VFrame30
 		return 0.0;
 	}
 
-	void ConvertPoint(double& x, double& y, const SchemaUnit convertFrom, const SchemaUnit convertTo, const int dpiX, const int dpiY)
+	void ConvertPoint(double& x, double& y, const SchemaUnit convertFrom, const SchemaUnit convertTo, const double dpiX, const double dpiY)
 	{
 		if (convertFrom == convertTo)
 		{

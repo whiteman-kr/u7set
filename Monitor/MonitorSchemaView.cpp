@@ -33,7 +33,7 @@ MonitorSchemaView::MonitorSchemaView(MonitorSchemaManager* schemaManager,
 
 void MonitorSchemaView::paintEvent(QPaintEvent* event)
 {
-	this->setInfoMode(MonitorAppSettings::instance().showItemsLabels());
+	setInfoMode(MonitorAppSettings::instance().showItemsLabels());
 	return ClientSchemaView::paintEvent(event);
 }
 

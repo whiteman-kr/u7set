@@ -86,7 +86,7 @@ namespace VFrame30
 			r.setBottom(r.top() + 0.000001);
 		}
 
-		int dpiX = drawParam->dpiX();
+		double dpiX = drawParam->realDpiX();
 		double pinWidth = GetPinWidth(itemUnit(), dpiX);
 
 		if (inputsCount() > 0)

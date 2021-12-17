@@ -150,123 +150,22 @@ namespace VFrame30
 
 	QPointF BaseSchemaWidget::widgetPointToDocument(const QPoint& widgetPoint) const
 	{
-		double docX = 0;	// Result
-		double docY = 0;
-
-		double dpiX = logicalDpiX();
-		double dpiY = logicalDpiY();
-
-		int widthInPixels = schema()->GetDocumentWidth(dpiX, zoom());
-		int heightInPixels = schema()->GetDocumentHeight(dpiY, zoom());
-
-		QRect clientRect = geometry();
-
-		if (horizontalScrollBar() != nullptr &&
-			horizontalScrollBar()->isVisible())
-		{
-			clientRect.setHeight(clientRect.height() - horizontalScrollBar()->height());
-		}
-
-		if (verticalScrollBar() != nullptr &&
-			verticalScrollBar()->isVisible())
-		{
-			clientRect.setWidth(clientRect.width() - verticalScrollBar()->width());
-		}
-
-		int startX = 0;
-		int startY = 0;
-
-		if (clientRect.width() >= widthInPixels)
-		{
-			startX = (clientRect.width() - widthInPixels) / 2;
-		}
-		else
-		{
-			startX = -horizontalScrollBar()->value();
-		}
-
-		if (clientRect.height() >= heightInPixels)
-		{
-			startY = (clientRect.height() - heightInPixels) / 2;
-		}
-		else
-		{
-			startY = -verticalScrollBar()->value();
-		}
-
-		const double x = widgetPoint.x() - startX;		// position in points
-		const double y = widgetPoint.y() - startY;
-
-		// Scaling to zoom factor
-		//
-		if (schema()->unit() == SchemaUnit::Display)
-		{
-			docX = x / (zoom() / 100.0);
-			docY = y / (zoom() / 100.0);
-		}
-		else
-		{
-			docX = x / (dpiX * (zoom() / 100.0));
-			docY = y / (dpiY * (zoom() / 100.0));
-		}
-		
-		return QPointF(docX, docY);
-	}
-
-	bool BaseSchemaWidget::MousePosToDocPoint(const QPoint& mousePos, QPointF* destDocPos, int dpiX /*= 0*/, int dpiY /*= 0*/)
-	{
-		if (destDocPos == nullptr)
-		{
-			assert(destDocPos != nullptr);
-			return false;
-		}
-
-		dpiX = dpiX == 0 ? logicalDpiX() : dpiX;
-		dpiY = dpiY == 0 ? logicalDpiY() : dpiY;
-
-		const double zoom = schemaView()->zoom();
-
-		int widthInPixels = schema()->GetDocumentWidth(dpiX, zoom);
-		int heightInPixels = schema()->GetDocumentHeight(dpiY, zoom);
-
-		int startX = 0;
-		int startY = 0;
-
-		QRect widgetRect = viewport()->rect();
-
-		if (widgetRect.width() >= widthInPixels)
-		{
-			startX = (widgetRect.width() - widthInPixels) / 2;
-		}
-		else
-		{
-			startX = -horizontalScrollBar()->value();
-		}
-
-		if (widgetRect.height() >= heightInPixels)
-		{
-			startY = (widgetRect.height() - heightInPixels) / 2;
-		}
-		else
-		{
-			startY = -verticalScrollBar()->value();
-		}
-
-		const int x = mousePos.x() - startX;
-		const int y = mousePos.y() - startY;
+		double devicePixelRatio = m_schemaView->devicePixelRatioF();
 
 		if (schema()->unit() == SchemaUnit::Display)
 		{
-			destDocPos->setX(x / (zoom / 100.0));
-			destDocPos->setY(y / (zoom / 100.0));
+			QPointF docPos = m_schemaView->mapFromParent(widgetPoint) * devicePixelRatio / (zoom() / 100.0);
+			return docPos;
 		}
 		else
 		{
-			destDocPos->setX(x / (dpiX * (zoom / 100.0)));
-			destDocPos->setY(y / (dpiY * (zoom / 100.0)));
-		}
+			QPointF mappedToView = m_schemaView->mapFromParent(widgetPoint) * devicePixelRatio / (zoom() / 100.0);
 
-		return true;
+			mappedToView.setX(mappedToView.x() / m_schemaView->realDpiX(m_schemaView));
+			mappedToView.setY(mappedToView.y() / m_schemaView->realDpiY(m_schemaView));
+
+			return mappedToView;
+		}
 	}
 
 	void BaseSchemaWidget::zoomIn()
@@ -343,39 +242,30 @@ namespace VFrame30
 
 	void BaseSchemaWidget::setZoom(double zoom, bool repaint, int horzScrollValue /*= -1*/, int vertScrollValue /*= -1*/)
 	{
-		QPoint widgetCenterPoint(viewport()->size().width() / 2,
-								 viewport()->size().height() / 2);
-
-		QPointF oldDocPos;
-		MousePosToDocPoint(widgetCenterPoint, &oldDocPos);
+		QPoint widgetCenterPoint(viewport()->size().width() / 2, viewport()->size().height() / 2);
+		QPointF oldDocPos =	widgetPointToDocument(widgetCenterPoint);
 
 		zoom = schemaView()->setZoom(zoom, repaint);	// new zoom can be set
 
-		QPointF newDocPos;
-		MousePosToDocPoint(widgetCenterPoint, &newDocPos);
-
-		// --
-		//
-		QPointF dPos = (newDocPos - oldDocPos);
-
-		// --
-		//
-		int newHorzValue = 0;
-		int newVertValue = 0;
+		QPointF newDocPos = widgetPointToDocument(widgetCenterPoint);
+		QPointF dPos = (newDocPos - oldDocPos);							// Delta in document units
 
 		switch (schema()->unit())
 		{
 		case SchemaUnit::Display:
-			newHorzValue = horizontalScrollBar()->value() - static_cast<int>(dPos.x() * zoom / 100.0);
-			newVertValue = verticalScrollBar()->value() - static_cast<int>(dPos.y() * zoom / 100.0);
+			dPos.setX(dPos.x() * zoom / 100.0 / schemaView()->devicePixelRatioF());
+			dPos.setY(dPos.y() * zoom / 100.0 / schemaView()->devicePixelRatioF());
 			break;
 		case SchemaUnit::Inch:
-			newHorzValue = horizontalScrollBar()->value() - static_cast<int>(dPos.x() * (zoom / 100.0) * logicalDpiX());
-			newVertValue = verticalScrollBar()->value() - static_cast<int>(dPos.y() * (zoom / 100.0) * logicalDpiY());
+			dPos.setX(dPos.x() * schemaView()->realDpiX(schemaView()) * (zoom / 100.0) / schemaView()->devicePixelRatioF());
+			dPos.setY(dPos.y() * schemaView()->realDpiY(schemaView()) * (zoom / 100.0) / schemaView()->devicePixelRatioF());
 			break;
 		default:
 			assert(false);
 		}
+
+		int newHorzValue = horizontalScrollBar()->value() - static_cast<int>(dPos.x());
+		int newVertValue = verticalScrollBar()->value() - static_cast<int>(dPos.y());
 
 		horizontalScrollBar()->setValue(horzScrollValue == -1 ? newHorzValue : horzScrollValue);
 		verticalScrollBar()->setValue(vertScrollValue == -1 ? newVertValue : vertScrollValue);

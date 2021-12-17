@@ -25,8 +25,7 @@ namespace VFrame30
 		// Methods
 		//
 	public:
-		QPointF widgetPointToDocument(const QPoint& widgetPoint) const;
-		bool MousePosToDocPoint(const QPoint& mousePos, QPointF* destDocPos, int dpiX = 0, int dpiY = 0);
+		[[nodiscard]] QPointF widgetPointToDocument(const QPoint& widgetPoint) const;
 
 		// Slots
 		//

@@ -214,7 +214,7 @@ namespace VFrame30
 			r.setBottom(r.top() + 0.000001);
 		}
 
-		int dpiX = drawParam->dpiX();
+		double dpiX = drawParam->realDpiX();
 		double pinWidth = GetPinWidth(itemUnit(), dpiX);
 
 		// Draw line and symbol >>
@@ -468,7 +468,7 @@ namespace VFrame30
 			r.setBottom(r.top() + 0.000001);
 		}
 
-		int dpiX = drawParam->dpiX();
+		double dpiX = drawParam->realDpiX();
 		double pinWidth = GetPinWidth(itemUnit(), dpiX);
 
 		// --

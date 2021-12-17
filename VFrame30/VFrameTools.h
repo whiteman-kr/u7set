@@ -45,8 +45,8 @@ namespace VFrame30
 	double mm2in(double mmVal);
 	double in2mm(double inVal);
 
-	double ConvertPoint(double point, SchemaUnit convertFrom, SchemaUnit convertTo, int dpi);
-	void ConvertPoint(double& x, double& y, const SchemaUnit convertFrom, const SchemaUnit convertTo, const int dpiX, const int dpiY);
+	double ConvertPoint(double point, SchemaUnit convertFrom, SchemaUnit convertTo, double dpi);
+	void ConvertPoint(double& x, double& y, const SchemaUnit convertFrom, const SchemaUnit convertTo, const double dpiX, const double dpiY);
 
 	QPointF snapToGrid(QPointF pt, double gridSize);
 	QPointF snapToGrid(double x, double y, double gridSize);

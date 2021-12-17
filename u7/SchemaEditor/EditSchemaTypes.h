@@ -1,11 +1,6 @@
 #pragma once
 
 
-#define ControlBarSizeDisplay		10
-#define ControlBarMm				(VFrame30::mm2in(2.4))
-#define ControlBar(_unit, _zoom)	((_unit == SchemaUnit::Display) ? ControlBarSizeDisplay * (100.0 / _zoom) : ControlBarMm * (100.0 / _zoom))
-
-
 enum class MouseState
 {
 	None,								// No state

@@ -131,7 +131,7 @@ namespace VFrame30
 		void DrawPinCross(QPainter* p, double x, double y, double pinWidth) const;
 		void DrawPinJoint(QPainter* p, double x, double y, double pinWidth) const;
 
-		double GetPinWidth(SchemaUnit unit, int dpi) const;
+		double GetPinWidth(SchemaUnit unit, double dpi) const;
 		double GetPinWidth(SchemaUnit unit, QPaintDevice* device) const;
 
 		// Connections

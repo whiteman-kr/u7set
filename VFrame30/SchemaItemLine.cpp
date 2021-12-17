@@ -184,7 +184,7 @@ namespace VFrame30
 
 		lineWeight = (units == SchemaUnit::Display) ?
 						 std::max(1.0, lineWeight) :
-						 std::max((1.0 / painter->device()->logicalDpiY()), lineWeight);
+						 std::max((1.0 / painter->device()->physicalDpiY() * painter->device()->devicePixelRatioF()), lineWeight);
 
 		double capHeight = lineWeight * 2.0 * factor;
 		capHeight = (units == SchemaUnit::Display) ?

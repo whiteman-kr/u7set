@@ -40,7 +40,10 @@ namespace VFrame30
 		// Methods
 		//
 	public:
-		bool MousePosToDocPoint(const QPoint& mousePos, QPointF* pDestDocPos, int dpiX = 0, int dpiY = 0);
+		[[nodiscard]] double realDpiX(const QPaintDevice* device) const;
+		[[nodiscard]] double realDpiY(const QPaintDevice* device) const;
+
+		bool MousePosToDocPoint(const QPoint& mousePos, QPointF* pDestDocPos, double dpiX = 0, double dpiY = 0);
 
 		std::shared_ptr<Schema> schema();
 		std::shared_ptr<Schema> schema() const;
@@ -62,7 +65,7 @@ namespace VFrame30
 		//
 	public:
 		double zoom() const;
-		double setZoom(double value, bool repaint = true, int dpiX = 0, int dpiY = 0);
+		double setZoom(double value, bool repaint = true);
 
 		const Session& session() const;
 		Session& session();

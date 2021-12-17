@@ -627,7 +627,7 @@ namespace VFrame30
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
-			return isIntersectRect(x, y, 1, 1);
+			return isIntersectRect(x - 2, y - 2, 4, 4);
 		}
 		else
 		{
@@ -1054,10 +1054,11 @@ namespace VFrame30
 		return QRectF();
 	}
 
-	QString SchemaItem::toolTipText(int dpiX, int dpiY) const
+	QString SchemaItem::toolTipText(double dpiX, double dpiY, double devicePixelRatio) const
 	{
 		Q_UNUSED(dpiX);
-		Q_UNUSED(dpiY)
+		Q_UNUSED(dpiY);
+		Q_UNUSED(devicePixelRatio);
 		return {};
 	}
 

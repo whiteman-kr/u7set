@@ -321,7 +321,7 @@ namespace VFrame30
 		return;
 	}
 
-	double FblItem::GetPinWidth(SchemaUnit unit, int dpi) const
+	double FblItem::GetPinWidth(SchemaUnit unit, double dpi) const
 	{
 		double pinWidth = static_cast<float>(mm2in(3));	// 3 μμ!
 
@@ -335,7 +335,7 @@ namespace VFrame30
 
 	double FblItem::GetPinWidth(SchemaUnit unit, QPaintDevice* device) const
 	{
-		int dpi = 96;
+		double dpi = 96;
 
 		if (device == nullptr)
 		{
@@ -343,7 +343,7 @@ namespace VFrame30
 		}
 		else
 		{
-			dpi = device->logicalDpiX();
+			dpi = device->physicalDpiX() * device->devicePixelRatioF();
 		}
 
 		double pinWidth = static_cast<float>(mm2in(3));	// 3 μμ!

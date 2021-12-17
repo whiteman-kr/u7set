@@ -412,7 +412,6 @@ void SchemasReportGenerator::exportFilesToPdf()
 
 		closeProject();
 	}
-
 	catch (QString errorMessage)
 	{
 		closeProject();
@@ -428,7 +427,7 @@ void SchemasReportGenerator::exportFilesToPdf()
 	}
 
 	// Save schemas to PDF
-
+	//
 	for (auto it = schemas.begin(); it != schemas.end(); it++)
 	{
 		if (m_stop == true)
@@ -477,7 +476,7 @@ void SchemasReportGenerator::exportFilesToPdf()
 			pageSize = QPageSize(QSize(static_cast<int>(pageWidth), static_cast<int>(pageHeight)));
 
 			pdfWriter->setResolution(72);	// 72 is from enum QPageLayout::Unit help,
-			// QPageLayout::Point	1	1/!!! 72th !!!! of an inch
+											// QPageLayout::Point	1	1/!!! 72th !!!! of an inch
 		}
 
 		pdfWriter->setPageSize(pageSize);
@@ -528,7 +527,7 @@ void SchemasReportGenerator::exportFilesToAlbum()
 	addMarginItem({tr("%OBJECT%"), -1, -1, m_marginFont, Qt::AlignRight | Qt::AlignTop});
 
 	// Create PDF writer
-
+	//
 	std::shared_ptr<QPdfWriter> pdfWriter = std::make_shared<QPdfWriter>(filePath());
 	pdfWriter->setTitle(m_projectName);
 	pdfWriter->setPageLayout(pageLayout());
@@ -698,7 +697,6 @@ void SchemasReportGenerator::exportAllSchemasToAlbum()
 		}
 
 		pdfWriter->setPageLayout(pl);
-
 		pdfWriter->setResolution(resolution());
 
 		// Render schemas

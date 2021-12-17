@@ -342,7 +342,7 @@ namespace VFrame30
 		//
 		virtual QRectF boundingRectInDocPt(const CDrawParam* drawParam) const;
 
-		virtual QString toolTipText(int dpiX, int dpiY) const;
+		virtual QString toolTipText(double dpiX, double dpiY, double devicePixelRatio) const;
 
 		QString lastScriptError() const noexcept;
 

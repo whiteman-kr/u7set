@@ -203,13 +203,7 @@ namespace VFrame30
 		std::vector<SchemaItemPtr> result;
 		result.reserve(8);
 
-		QPointF docPoint;
-
-		bool convertResult = MousePosToDocPoint(pos, &docPoint);
-		if (convertResult == false)
-		{
-			return result;
-		}
+		QPointF docPoint = widgetPointToDocument(pos);
 
 		double x = docPoint.x();
 		double y = docPoint.y();

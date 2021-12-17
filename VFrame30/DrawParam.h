@@ -4,6 +4,10 @@
 #include "Session.h"
 #include "../lib/ClientBehavior.h"
 
+#define CONTROL_BAR_PX		10
+#define CONTROL_BAR_MM		(VFrame30::mm2in(2.4))
+#define CONTROL_BAR(_unit, _devicePixelRatio, _zoom)	((_unit == SchemaUnit::Display) ? CONTROL_BAR_PX * _devicePixelRatio * (100.0 / _zoom) : CONTROL_BAR_MM * (100.0 / _zoom))
+
 class QPainter;
 class QPaintDevice;
 class QPixmap;
@@ -26,6 +30,7 @@ namespace VFrame30
 	public:
 		QPainter* painter();
 		QPaintDevice* device();
+		const QPaintDevice* device() const;
 
 		const Schema* schema() const;
 
@@ -52,8 +57,11 @@ namespace VFrame30
 
 		double cosmeticPenWidth() const;
 
-		int dpiX() const noexcept;
-		int dpiY() const noexcept;
+		double realDpiX() const noexcept;			// physicalDpiX * devicePixelration
+		double realDpiY() const noexcept;			// physicalDpiY * devicePixelration
+
+		static double realDpiX(QPainter* painter) noexcept;
+		static double realDpiY(QPainter* painter) noexcept;
 
 		double gridToDpiX(double pos) const noexcept;
 		double gridToDpiY(double pos) const noexcept;
@@ -114,9 +122,6 @@ namespace VFrame30
 		bool m_pdfMode = false;
 		bool m_blinkPhase = false;
 		bool m_drawNotesLayer = true;
-
-		mutable int m_dpiX = -1;
-		mutable int m_dpiY = -1;
 
 		double m_cosmeticPenWidth = 0.0;
 	};

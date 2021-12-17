@@ -75,7 +75,6 @@ HEADERS += \
     FblItemLine.h \
     FblItem.h \
     DrawParam.h \
-    Print.h \
     VFrame30Library.h \
     HorzVertLinks.h \
 	Configuration.h \
@@ -146,7 +145,6 @@ SOURCES += \
     FblItemLine.cpp \
     FblItem.cpp \
     DrawParam.cpp \
-    Print.cpp \
     VFrame30Library.cpp \
     HorzVertLinks.cpp \
 	Configuration.cpp \

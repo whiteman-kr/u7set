@@ -208,8 +208,8 @@ namespace VFrame30
 			case SchemaUnit::Inch:
 				// in this case - size of the image depends on monitor DPI and IT CAN LOOK DIFFERENT FOR SEVERAL MONITORS WITH DIFFERENT DPI!!!
 				//
-				imageRect.setWidth(imageRect.width() / drawParam->dpiX());
-				imageRect.setHeight(imageRect.height() / drawParam->dpiY());
+				imageRect.setWidth(imageRect.width() / drawParam->realDpiX());
+				imageRect.setHeight(imageRect.height() / drawParam->realDpiY());
 				break;
 			default:
 				assert(false);

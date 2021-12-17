@@ -35,7 +35,7 @@ namespace VFrame30
 		// Methods
 		//
 	public:
-		virtual QString toolTipText(int dpiX, int dpiY) const final;
+		virtual QString toolTipText(double dpiX, double dpiY, double devicePixelRatio) const final;
 		virtual QString buildName() const final;
 
 		bool setAfbParam(const QString& name, QVariant value, std::shared_ptr<VFrame30::Schema> schema, QString* errorMsg);

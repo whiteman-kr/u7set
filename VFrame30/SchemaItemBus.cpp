@@ -242,7 +242,7 @@ namespace VFrame30
 
 		// Draw pin
 		//
-		int dpiX = drawParam->dpiX();
+		double dpiX = drawParam->realDpiX();
 		double pinWidth = GetPinWidth(itemUnit(), dpiX);
 
 		QPointF pt1(drawParam->gridToDpi(vip.X, vip.Y));
@@ -524,7 +524,7 @@ R"(<p><b>BusComposer:</b> Create a bus signal</p>
 
 		// Draw pin
 		//
-		int dpiX = drawParam->dpiX();
+		double dpiX = drawParam->realDpiX();
 		double pinWidth = GetPinWidth(itemUnit(), dpiX);
 
 		QPointF pt1(drawParam->gridToDpi(vip.X, vip.Y));

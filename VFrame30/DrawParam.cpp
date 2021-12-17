@@ -46,6 +46,11 @@ namespace VFrame30
 		return m_painter->device();
 	}
 
+	const QPaintDevice* CDrawParam::device() const
+	{
+		return m_painter->device();
+	}
+
 	const Schema* CDrawParam::schema() const
 	{
 		return m_schema;
@@ -109,40 +114,24 @@ namespace VFrame30
 		return m_cosmeticPenWidth;
 	}
 
-	int CDrawParam::dpiX() const noexcept
+	double CDrawParam::realDpiX() const noexcept
 	{
-		if (m_dpiX == -1)
-		{
-			if (m_painter != nullptr && m_painter->device() != nullptr)
-			{
-				this->m_dpiX = m_painter->device()->logicalDpiX();
-			}
-			else
-			{
-				Q_ASSERT(m_painter);
-				this->m_dpiX = 96;
-			}
-		}
-
-		return m_dpiX;
+		return m_painter->device()->physicalDpiX() * m_painter->device()->devicePixelRatioF();
 	}
 
-	int CDrawParam::dpiY() const noexcept
+	double CDrawParam::realDpiY() const noexcept
 	{
-		if (m_dpiY == -1)
-		{
-			if (m_painter != nullptr && m_painter->device() != nullptr)
-			{
-				this->m_dpiY = m_painter->device()->logicalDpiY();
-			}
-			else
-			{
-				Q_ASSERT(m_painter);
-				this->m_dpiY = 96;
-			}
-		}
+		return m_painter->device()->physicalDpiY() * m_painter->device()->devicePixelRatioF();
+	}
 
-		return m_dpiY;
+	double CDrawParam::realDpiX(QPainter* painter) noexcept
+	{
+		return painter->device()->physicalDpiX() * painter->device()->devicePixelRatioF();
+	}
+
+	double CDrawParam::realDpiY(QPainter* painter) noexcept
+	{
+		return painter->device()->physicalDpiY() * painter->device()->devicePixelRatioF();
 	}
 
 	double CDrawParam::gridToDpiX(double pos) const noexcept
@@ -162,7 +151,7 @@ namespace VFrame30
 
 		if (schema()->unit() == SchemaUnit::Inch)
 		{
-			int dpix = this->dpiX();
+			double dpix = this->realDpiX();
 			return (static_cast<double>(static_cast<int>(pos * zoom * dpix)) / dpix) / zoom;
 		}
 
@@ -188,7 +177,7 @@ namespace VFrame30
 
 		if (schema()->unit() == SchemaUnit::Inch)
 		{
-			const int dpiy = this->dpiY();
+			const double dpiy = this->realDpiY();
 			return (static_cast<double>(static_cast<int>(pos * zoom * dpiy)) / dpiy) / zoom;
 		}
 
@@ -203,7 +192,8 @@ namespace VFrame30
 		if (schemaView() == nullptr)
 		{
 			Q_ASSERT(schemaView() != nullptr);
-			result = QPointF(x, y);
+			result.setX(x);
+			result.setY(y);
 			return result;
 		}
 
@@ -218,8 +208,8 @@ namespace VFrame30
 		{
 			Q_ASSERT(schema()->unit() == SchemaUnit::Inch);
 
-			const int dpix = this->dpiX();
-			const int dpiy = this->dpiY();
+			const double dpix = this->realDpiX();
+			const double dpiy = this->realDpiY();
 
 			result = QPointF((static_cast<double>(static_cast<int>(x * zoom * dpix)) / dpix) / zoom,
 							 (static_cast<double>(static_cast<int>(y * zoom * dpiy)) / dpiy) / zoom);
@@ -249,8 +239,8 @@ namespace VFrame30
 		{
 			Q_ASSERT(schema()->unit() == SchemaUnit::Inch);
 
-			const int dpix = this->dpiX();
-			const int dpiy = this->dpiY();
+			const double dpix = this->realDpiX();
+			const double dpiy = this->realDpiY();
 
 			result = QPointF((static_cast<double>(static_cast<int>(pos.x() * zoom * dpix)) / dpix) / zoom,
 							 (static_cast<double>(static_cast<int>(pos.y() * zoom * dpiy)) / dpiy) / zoom);
@@ -389,14 +379,6 @@ namespace VFrame30
 			return;
 		}
 
-		QPaintDevice* pPaintDevice = painter->device();
-		const double dpiX = pPaintDevice->logicalDpiX();
-		const double dpiY = pPaintDevice->logicalDpiY();
-
-		QRectF rc;
-
-		painter->save();
-
 		QFont f(font.name());
 
 		f.setBold(font.bold());
@@ -407,12 +389,19 @@ namespace VFrame30
 		if (unit == SchemaUnit::Display)
 		{
 			f.setPixelSize(static_cast<int>(font.drawSize()));
-			rc = rect;
+
+			painter->setFont(f);
+			painter->drawText(rect, flags, str, boundingRect);
 		}
 		else
 		{
 			Q_ASSERT(unit == SchemaUnit::Inch);
-								
+
+			QRectF rc;
+			const double dpiX = CDrawParam::realDpiX(painter);
+			const double dpiY = CDrawParam::realDpiY(painter);
+
+			painter->save();
 			painter->scale(1.0 / dpiX, 1.0 / dpiY);
 
 			int pixelSize = static_cast<int>(font.drawSize() * dpiY);
@@ -422,13 +411,13 @@ namespace VFrame30
 			rc.setTop(rect.top() * dpiY);
 			rc.setRight(rect.right() * dpiX);
 			rc.setBottom(rect.bottom() * dpiY);
+
+			painter->setFont(f);
+			painter->drawText(rc, flags, str, boundingRect);
+
+			painter->restore();
 		}
 
-		painter->setFont(f);
-
-		painter->drawText(rc, flags, str, boundingRect);
-
-		painter->restore();
 		return;
 	}
 
@@ -440,32 +429,29 @@ namespace VFrame30
 			return;
 		}
 
-		QPaintDevice* pPaintDevice = painter->device();
-		const double dpiX = pPaintDevice->logicalDpiX();
-		const double dpiY = pPaintDevice->logicalDpiY();
-
-		QRectF rc;
-
-		painter->save();
-
 		if (unit == SchemaUnit::Display)
 		{
-			rc = rect;
+			painter->drawText(rect, flags, str, boundingRect);
 		}
 		else
 		{
 			Q_ASSERT(unit == SchemaUnit::Inch);
 
+			const double dpiX = CDrawParam::realDpiX(painter);
+			const double dpiY = CDrawParam::realDpiY(painter);
+
+			painter->save();
 			painter->scale(1.0 / dpiX, 1.0 / dpiY);
 
+			QRectF rc;
 			rc.setLeft(rect.left() * dpiX);
 			rc.setTop(rect.top() * dpiY);
 			rc.setRight(rect.right() * dpiX);
 			rc.setBottom(rect.bottom() * dpiY);
-		}
 
-		painter->drawText(rc, flags, str, boundingRect);
-		painter->restore();
+			painter->drawText(rc, flags, str, boundingRect);
+			painter->restore();
+		}
 
 		return;
 	}

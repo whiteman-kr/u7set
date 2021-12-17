@@ -18,21 +18,21 @@ SUBDIRS += Protobuf \
 	Builder \
 	BuilderConsole \
 	u7 \
-    Metrology \
-    ServiceControlManager \
+	Metrology \
+	ServiceControlManager \
 	ConfigurationService \
-    ArchivingService \
-    Monitor \
+	ArchivingService \
+	Monitor \
 	TuningService \
-    AppDataService \
+	AppDataService \
 	DiagDataService \
-    TuningClient \
-    mconf \
+	TuningClient \
+	mconf \
 	PacketSource \
 	PacketViewer \
 	UalTester \
-    SimulatorTests \
-    u7databaseTests
+	SimulatorTests \
+	u7databaseTests
 
 PacketSource.subdir = ./Tools/PacketSource
 PacketViewer.subdir = ./Tools/PacketViewer

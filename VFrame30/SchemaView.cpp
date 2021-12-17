@@ -287,20 +287,12 @@ namespace VFrame30
 
 		// Calc size
 		//
-		int widthInPixel = schema()->GetDocumentWidth(p->device()->logicalDpiX(), zoom());
-		int heightInPixel = schema()->GetDocumentHeight(p->device()->logicalDpiY(), zoom());
+		int widthInPixel = schema()->GetDocumentWidth(drawParam.realDpiX(), zoom());
+		int heightInPixel = schema()->GetDocumentHeight(drawParam.realDpiY(), zoom());
 
 		// Clear device
 		//
 		p->fillRect(QRectF(0, 0, widthInPixel + 1, heightInPixel + 1), QColor(0xB0, 0xB0, 0xB0));
-
-		if (p->device()->logicalDpiX() <= 96)
-		{
-			// If higher then 96 then most likely it is 4K display, no need to use Antialiasing in primitive drawings
-			// Note, that font will be antialiased in anyway
-			//
-			p->setRenderHint(QPainter::Antialiasing);
-		}
 
 		// Ajust QPainter
 		//
@@ -319,35 +311,64 @@ namespace VFrame30
 		//
 		painter->resetTransform();
 
+		zoom /= 100.0;
+
+		double dpr = painter->device()->devicePixelRatioF();
+		double dpix = painter->device()->physicalDpiX();
+		double dpiy = painter->device()->physicalDpiY();
+
 		if (m_schema->unit() == SchemaUnit::Inch)
 		{
-			painter->translate(startX + 0.5, startY + 0.5);
-			painter->scale(
-				(double)painter->device()->logicalDpiX() * zoom / 100.0,
-				(double)painter->device()->logicalDpiY() * zoom / 100.0);
+			startX = startX + 0.5 / dpr;
+			startY = startY + 0.5 / dpr;
+
+			double scalex = dpix * zoom;
+			double scaley = dpiy * zoom;
+
+			painter->translate(startX, startY);
+			painter->scale(scalex, scaley);
 		}
 		else
 		{
-			startX = VFrame30::Round(startX) + 0.5;
-			startY = VFrame30::Round(startY) + 0.5;
+			startX = VFrame30::Round(startX) + 0.5 / dpr;
+			startY = VFrame30::Round(startY) + 0.5 / dpr;
+
+			double scalex = 1.0 / dpr * zoom;
+			double scaley = 1.0 / dpr * zoom;
 
 			painter->translate(startX, startY);
-			painter->scale(zoom / 100.0, zoom / 100.0);
+			painter->scale(scalex, scaley);
 		}
 
 		return;
 	}
 
-	bool SchemaView::MousePosToDocPoint(const QPoint& mousePos, QPointF* pDestDocPos, int dpiX /*= 0*/, int dpiY /*= 0*/)
+	double SchemaView::realDpiX(const QPaintDevice* device) const
+	{
+		// Drawing can be performed in other device, not in windows, for example to pdf, that's why device is required
+		//
+		Q_ASSERT(device);
+		return device->physicalDpiX() * device->devicePixelRatioF();
+	}
+
+	double SchemaView::realDpiY(const QPaintDevice* device) const
+	{
+		// Drawing can be performed in other device, not in windows, for example to pdf, that's why device is required
+		//
+		Q_ASSERT(device);
+		return device->physicalDpiY() * device->devicePixelRatioF();
+	}
+
+	bool SchemaView::MousePosToDocPoint(const QPoint& mousePos, QPointF* pDestDocPos, double dpiX /*= 0*/, double dpiY /*= 0*/)
 	{
 		if (pDestDocPos == nullptr)
 		{
-			assert(pDestDocPos != nullptr);
+			assert(pDestDocPos);
 			return false;
 		}
 
-		int x = mousePos.x();
-		int y = mousePos.y();
+		double x = mousePos.x() * devicePixelRatioF();
+		double y = mousePos.y() * devicePixelRatioF();
 
 		if (schema()->unit() == SchemaUnit::Display)
 		{
@@ -356,8 +377,8 @@ namespace VFrame30
 		}
 		else
 		{
-			dpiX = dpiX == 0 ? logicalDpiX() : dpiX;
-			dpiY = dpiY == 0 ? logicalDpiY() : dpiY;
+			dpiX = dpiX == 0 ? realDpiX(this) : dpiX;
+			dpiY = dpiY == 0 ? realDpiY(this) : dpiY;
 
 			pDestDocPos->setX(x / (dpiX * (m_zoom / 100.0)));
 			pDestDocPos->setY(y / (dpiY * (m_zoom / 100.0)));
@@ -373,12 +394,12 @@ namespace VFrame30
 		return m_zoom;
 	}
 
-	double SchemaView::setZoom(double value, bool repaint /*= true*/, int dpiX /*= 0*/, int dpiY /*= 0*/)
+	double SchemaView::setZoom(double value, bool repaint /*= true*/)
 	{
 		// Calc DPI
 		//
-		dpiX = (dpiX == 0) ? logicalDpiX() : dpiX;
-		dpiY = (dpiY == 0) ? logicalDpiY() : dpiY;
+		double realDpiX = physicalDpiX() * devicePixelRatioF();
+		double realDpiY = physicalDpiY() * devicePixelRatioF();
 
 		// if value is 0 then fit page into parent
 		//
@@ -412,13 +433,13 @@ namespace VFrame30
 
 				if (schema()->unit() == SchemaUnit::Display)
 				{
-					horzScaleFactor = (viewportSize.width() * 0.99) / schema()->docWidth();
-					vertScaleFactor = (viewportSize.height() * 0.99) / schema()->docHeight();
+					horzScaleFactor = (viewportSize.width() * devicePixelRatioF() * 0.99) / schema()->docWidth();
+					vertScaleFactor = (viewportSize.height() * devicePixelRatioF() * 0.99) / schema()->docHeight();
 				}
 				else
 				{
-					horzScaleFactor = (viewportSize.width() * 0.99) / (schema()->docWidth() * dpiX);
-					vertScaleFactor = (viewportSize.height() * 0.99) / (schema()->docHeight() * dpiY);
+					horzScaleFactor = (viewportSize.width() * devicePixelRatioF() * 0.99) / (schema()->docWidth() * realDpiX);
+					vertScaleFactor = (viewportSize.height() * devicePixelRatioF() * 0.99) / (schema()->docHeight() * realDpiY);
 				}
 
 				value = std::min(vertScaleFactor, horzScaleFactor) * 100.0;
@@ -431,15 +452,18 @@ namespace VFrame30
 
 		m_zoom = value;
 
-		// resize widget
+		// Width and height of the document in physical dpis, taking into account devicePixelRatio
 		//
-		int widthInPixel = schema()->GetDocumentWidth(dpiX, m_zoom);
-		int heightInPixel = schema()->GetDocumentHeight(dpiY, m_zoom);
+		int widthInPixel = static_cast<int>(schema()->GetDocumentWidth(realDpiX, m_zoom));
+		int heightInPixel = static_cast<int>(schema()->GetDocumentHeight(realDpiY, m_zoom));
 
-		QSize scaledPixelSize;
+		// The size of window is set in different points
+		// Qt widget points must be corrected according to devicePixelRatio()
+		//
+		int widthInQtPoints = static_cast<int>(widthInPixel / devicePixelRatio());
+		int heightInQtPixel = static_cast<int>(heightInPixel / devicePixelRatio());
 
-		scaledPixelSize.setWidth(widthInPixel);
-		scaledPixelSize.setHeight(heightInPixel);
+		QSize scaledPixelSize{widthInQtPoints, heightInQtPixel};
 
 		if (minimumSize() != scaledPixelSize)
 		{
