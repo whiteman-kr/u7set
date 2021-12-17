@@ -19,6 +19,7 @@ namespace VFrame30
 	public:
 		// App Signals
 		//
+		[[nodiscard]] int signalsCount() const;
 		[[nodiscard]] bool signalExists(Hash hash) const;
 		[[nodiscard]] bool signalExists(const QString& appSignalId) const;
 
@@ -125,6 +126,9 @@ namespace VFrame30
 		// Script Interface
 		//
 	public slots:
+		/// \brief Returns total signals count in the database.
+		int signalsCount() const;
+
 		/// \brief Returns AppSignalParam structure of signal specified by <b>signalId</b>. If error occurs, the return value is <b>undefined</b>.
 		QJSValue signalParam(QString signalId) const;		// Returns AppSignalParam
 		QJSValue signalParam(Hash signalHash) const;		// Returns AppSignalParam

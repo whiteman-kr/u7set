@@ -18,6 +18,7 @@ public:
 	// IAppSignalManager implementation
 	//
 public:
+	virtual int signalsCount() const override;
 	virtual std::vector<AppSignalParam> signalList() const override;
 
 	virtual bool signalExists(Hash hash) const override;
@@ -48,6 +49,10 @@ public:
 	// Setpoints
 	//
 	virtual std::vector<std::shared_ptr<Comparator>> setpointsByInputSignalId(const QString& appSignalId) const override;
+
+	// Tags
+	//
+	virtual QStringList tags() const override;
 
 private:
 	AppSignalSetProvider* m_signalSetProvider = nullptr;

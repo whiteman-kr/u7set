@@ -10,18 +10,14 @@ class MonitorDialogSignalSnapshot : public DialogSignalSnapshot
 	Q_OBJECT
 
 public:
-	static bool showDialog(MonitorConfigController *configController,
+	static MonitorDialogSignalSnapshot* createDialog(MonitorConfigController *configController,
 						   TcpSignalClient* tcpSignalClient,
 						   AppSignalManager* appSignalManager,
-						   QString projectName,
-						   QString softwareEquipmentId,
 						   MonitorCentralWidget* centralWidget);
 
 private:
 	explicit MonitorDialogSignalSnapshot(MonitorConfigController *configController,
 								  AppSignalManager* appSignalManager,
-								  QString projectName,
-								  QString softwareEquipmentId,
 								  QWidget *parent);
 
 private:

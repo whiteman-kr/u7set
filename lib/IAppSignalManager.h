@@ -11,6 +11,7 @@ class IAppSignalManager
 public:
 	// AppSignals
 	//
+	virtual int signalsCount() const = 0;
 	virtual std::vector<AppSignalParam> signalList() const = 0;
 
 	virtual bool signalExists(Hash hash) const = 0;
@@ -41,5 +42,9 @@ public:
 	// Setpoints
 	//
 	virtual std::vector<std::shared_ptr<Comparator>> setpointsByInputSignalId(const QString& appSignalId) const = 0;
+
+	// Tags
+	//
+	virtual QStringList tags() const = 0;
 };
 

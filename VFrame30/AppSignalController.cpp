@@ -14,6 +14,17 @@ namespace VFrame30
 		assert(m_appSignalManager);
 	}
 
+	int AppSignalController::signalsCount() const
+	{
+		if (m_appSignalManager == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		return m_appSignalManager->signalsCount();
+	}
+
 	bool AppSignalController::signalExists(Hash hash) const
 	{
 		if (m_appSignalManager == nullptr)
@@ -169,6 +180,17 @@ namespace VFrame30
 	ScriptAppSignalController::~ScriptAppSignalController()
 	{
 		qDebug() << "ScriptAppSignalController::~ScriptAppSignalController()";
+	}
+
+	int ScriptAppSignalController::signalsCount() const
+	{
+		if (m_appSignalManager == nullptr)
+		{
+			assert(m_appSignalManager);
+			return 0;
+		}
+
+		return m_appSignalManager->signalsCount();
 	}
 
 	QJSValue ScriptAppSignalController::signalParam(QString signalId) const

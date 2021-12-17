@@ -117,6 +117,25 @@ bool MonitorArchive::startNewWidget(MonitorConfigController* configController, c
 	return false;
 }
 
+bool MonitorArchive::requestArchiveWithNewWidget(MonitorConfigController* configController,
+									const std::vector<AppSignalParam>& appSignals,
+									QDateTime startTime,
+									QDateTime endTime,
+									E::TimeType timeType,
+									QWidget* parent)
+{
+	MonitorArchiveWidget* window = new MonitorArchiveWidget(configController, parent);
+
+	window->setSignals(appSignals);
+	window->setTime(startTime, endTime, timeType);
+
+	window->show();
+
+	window->requestDataOnConnection();
+
+	return false;
+}
+
 void MonitorArchive::registerWindow(QString name, MonitorArchiveWidget* window)
 {
 	Q_ASSERT(m_archiveList.count(name) == 0);
@@ -142,7 +161,7 @@ MonitorArchiveWidget::MonitorArchiveWidget(MonitorConfigController* configContro
 {
 	setAttribute(Qt::WA_DeleteOnClose);
 
-static int no = 1;
+	static int no = 1;
 	QString name = QString("Monitor Archive %1").arg(no++);
 	MonitorArchive::registerWindow(name, this);
 
@@ -292,6 +311,7 @@ static int no = 1;
 
 	m_tcpClientThread->start();
 
+	connect(m_tcpClient, &ArchiveTcpClient::signal_connectionEstablished, this, &MonitorArchiveWidget::tcpConnectionEstablished);
 	connect(m_tcpClient, &ArchiveTcpClient::dataReady, this, &MonitorArchiveWidget::dataReceived);
 	connect(m_tcpClient, &ArchiveTcpClient::requestError, this, &MonitorArchiveWidget::tcpClientError);
 	connect(m_tcpClient, &ArchiveTcpClient::statusUpdate, this, &MonitorArchiveWidget::tcpStatus);
@@ -361,6 +381,46 @@ bool MonitorArchiveWidget::setSignals(const std::vector<AppSignalParam>& appSign
 	return true;
 }
 
+bool MonitorArchiveWidget::setTime(QDateTime startTime, QDateTime endTime, E::TimeType timeType)
+{
+	m_source.requestStartTime = TimeStamp(startTime);
+	m_startDateTimeEdit->setDateTime(startTime);
+
+	m_source.requestEndTime = TimeStamp(endTime);
+	m_endDateTimeEdit->setDateTime(endTime);
+
+	m_source.timeType = timeType;
+
+	int currentTimeType = m_timeType->findData(QVariant::fromValue(m_source.timeType));
+	Q_ASSERT(currentTimeType != -1);
+
+	if (currentTimeType != -1)
+	{
+		m_timeType->setCurrentIndex(currentTimeType);
+	}
+
+	return true;
+}
+
+void MonitorArchiveWidget::requestDataOnConnection()
+{
+	if (m_source.acceptedSignals.empty() == true)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	if (m_tcpClient->isConnected() == true)
+	{
+		requestData();
+	}
+	else
+	{
+		m_requestDataOnConnection = true;
+
+		m_updateButton->setText(tr("Cancel"));
+	}
+}
 
 void MonitorArchiveWidget::requestData()
 {
@@ -383,6 +443,9 @@ void MonitorArchiveWidget::requestData()
 		Q_ASSERT(m_tcpClient->isRequestInProgress());
 		return;
 	}
+
+	m_model->clear();
+	m_model->setParams(m_source.acceptedSignals, m_source.timeType);
 
 	m_source.requestStartTime = TimeStamp(m_startDateTimeEdit->dateTime());
 	m_source.requestEndTime = TimeStamp(m_endDateTimeEdit->dateTime());
@@ -487,9 +550,9 @@ void MonitorArchiveWidget::dropEvent(QDropEvent* event)
 		{
 			auto foundId = std::find_if(m_source.acceptedSignals.begin(), m_source.acceptedSignals.end(),
 										[&appSignalParam](const AppSignalParam& sp)
-										{
-											return sp.appSignalId() == appSignalParam.appSignalId();
-										});
+			{
+				return sp.appSignalId() == appSignalParam.appSignalId();
+			});
 
 			if (foundId == m_source.acceptedSignals.end())
 			{
@@ -568,7 +631,7 @@ void MonitorArchiveWidget::exportButton()
 		extension.compare(QLatin1String("htm"), Qt::CaseInsensitive) == 0 ||
 		extension.compare(QLatin1String("html"), Qt::CaseInsensitive) == 0 ||
 		extension.compare(QLatin1String("txt"), Qt::CaseInsensitive) == 0/* ||
-		extension.compare(QLatin1String("odt"), Qt::CaseInsensitive) == 0*/)
+			extension.compare(QLatin1String("odt"), Qt::CaseInsensitive) == 0*/)
 	{
 		MonitorExportPrint ep(&m_source, &m_configuration, this);
 		ep.exportTable(m_view, fileName, extension);
@@ -598,13 +661,17 @@ void MonitorArchiveWidget::updateOrCancelButton()
 			return;
 		}
 
-		m_model->clear();
-		m_model->setParams(m_source.acceptedSignals, m_source.timeType);
-
 		requestData();
 	}
 	else
 	{
+		if (m_requestDataOnConnection == true)
+		{
+			// If request on connection is pending - cancel it
+			//
+			m_requestDataOnConnection = false;
+		}
+
 		cancelRequest();
 	}
 	return;
@@ -640,9 +707,6 @@ void MonitorArchiveWidget::signalsButton()
 		m_timeType->setCurrentIndex(currentTimeType);
 	}
 
-	m_model->clear();
-	m_model->setParams(m_source.acceptedSignals, m_source.timeType);
-
 	requestData();
 
 	return;
@@ -651,9 +715,9 @@ void MonitorArchiveWidget::signalsButton()
 void MonitorArchiveWidget::showSignalInfo(QString appSignalId)
 {
 	MonitorSignalInfo::showDialog(appSignalId,
-	                             theMonitorMainWindow->configController(),
-	                             theMonitorMainWindow->tcpSignalClient(),
-	                             theMonitorMainWindow->monitorCentralWidget());
+								  theMonitorMainWindow->configController(),
+								  theMonitorMainWindow->tcpSignalClient(),
+								  theMonitorMainWindow->monitorCentralWidget());
 }
 
 void MonitorArchiveWidget::removeSignal(QString appSignalId)
@@ -682,6 +746,16 @@ void MonitorArchiveWidget::removeSignal(QString appSignalId)
 void MonitorArchiveWidget::slot_configurationArrived(ConfigSettings configuration)
 {
 	m_configuration = configuration;
+}
+
+void MonitorArchiveWidget::tcpConnectionEstablished()
+{
+	if (m_requestDataOnConnection == true)
+	{
+		m_requestDataOnConnection = false;
+
+		requestData();
+	}
 }
 
 void MonitorArchiveWidget::dataReceived(std::shared_ptr<ArchiveChunk> chunk)

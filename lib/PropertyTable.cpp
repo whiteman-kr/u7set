@@ -346,7 +346,7 @@ namespace ExtWidgets
 
 			const PropertyTableObject& to = tableObjects[0];
 
-			for (auto p : to.properties)
+			for (const auto& p : to.properties)
 			{
 				QString propertyName = p->caption();
 
@@ -447,7 +447,7 @@ namespace ExtWidgets
 
 				pto.rowCount = 1;
 
-				for (auto p : pto.properties)
+				for (const auto& p : pto.properties)
 				{
 					int type = p.get()->value().userType();
 
@@ -542,7 +542,7 @@ namespace ExtWidgets
 			}
 
 			if (m_propertyTable->expandValuesToAllRows() == false &&
-					p->value().userType() != QMetaType::QStringList &&  row > 0)
+				p->value().userType() != QMetaType::QStringList &&  row > 0)
 			{
 				return QVariant();
 			}
@@ -564,7 +564,7 @@ namespace ExtWidgets
 			}
 
 			if (m_propertyTable->expandValuesToAllRows() == false &&
-					p->value().userType() != QMetaType::QStringList &&  row > 0)
+				p->value().userType() != QMetaType::QStringList &&  row > 0)
 			{
 				return QVariant();
 			}
@@ -683,6 +683,12 @@ namespace ExtWidgets
 				return;
 			}
 
+			if ((event->modifiers() & Qt::ControlModifier) != 0 && event->key() == Qt::Key_V)
+			{
+				emit pasteKeyPressed();
+				return;
+			}
+
 			if (event->text().isEmpty() == false)
 			{
 				emit symbolKeyPressed(event->text());
@@ -773,6 +779,7 @@ namespace ExtWidgets
 		connect(m_tableView, &PropertyTableView::symbolKeyPressed, this, &PropertyTable::onCellSymbolKeyPressed);
 		connect(m_tableView, &PropertyTableView::spaceKeyPressed, this, &PropertyTable::onCellToggleKeyPressed);
 		connect(m_tableView, &PropertyTableView::copyKeyPressed, this, &PropertyTable::onCellCopyKeyPressed);
+		connect(m_tableView, &PropertyTableView::pasteKeyPressed, this, &PropertyTable::onCellPasteKeyPressed);
 
 
 		// Edit Delegate
@@ -797,7 +804,7 @@ namespace ExtWidgets
 	void PropertyTable::setObjects(const std::vector<std::shared_ptr<PropertyObject>>& objects)
 	{
 		QList<std::shared_ptr<PropertyObject>> list =
-		        QList<std::shared_ptr<PropertyObject>>::fromVector(QVector<std::shared_ptr<PropertyObject>>{objects.begin(), objects.end()});
+				QList<std::shared_ptr<PropertyObject>>::fromVector(QVector<std::shared_ptr<PropertyObject>>{objects.begin(), objects.end()});
 
 		return setObjects(list);
 	}
@@ -808,7 +815,7 @@ namespace ExtWidgets
 
 		// Disconnect updatePropertiesList slot from previous objects
 
-		for (std::shared_ptr<PropertyObject> po : m_objects)
+		for (const std::shared_ptr<PropertyObject>& po : m_objects)
 		{
 			bool ok = disconnect(po.get(), &PropertyObject::propertyListChanged, this, &PropertyTable::updatePropertiesList);
 			if (ok == false)
@@ -823,7 +830,7 @@ namespace ExtWidgets
 
 		// Connect updatePropertiesList slot to new objects
 
-		for (std::shared_ptr<PropertyObject> po : m_objects)
+		for (const std::shared_ptr<PropertyObject>& po : m_objects)
 		{
 			bool ok = connect(po.get(), &PropertyObject::propertyListChanged, this, &PropertyTable::updatePropertiesList);
 			if (ok == false)
@@ -911,11 +918,13 @@ namespace ExtWidgets
 
 		QList<std::shared_ptr<PropertyObject>> modifiedObjects;
 
-		for (const QString& propertyName : modifiedObjectsData.keys())
+		const auto keys = modifiedObjectsData.keys();
+
+		for (const QString& propertyName : keys)
 		{
 			QList<std::pair<std::shared_ptr<PropertyObject>, QVariant>> objectsData = modifiedObjectsData.values(propertyName);
 
-			for (auto objectData : objectsData)
+			for (const auto& objectData : objectsData)
 			{
 				std::shared_ptr<PropertyObject> object = objectData.first;
 				QVariant value = objectData.second;
@@ -939,7 +948,7 @@ namespace ExtWidgets
 				if (oldValue == newValue && errorString.isEmpty() == true)
 				{
 					errorString = QString("Property: %1 - incorrect input value")
-							.arg(propertyName);
+								  .arg(propertyName);
 				}
 
 				modifiedObjects.append(object);
@@ -1106,6 +1115,187 @@ namespace ExtWidgets
 		return;
 	}
 
+	void PropertyTable::onCellPasteKeyPressed()
+	{
+		QModelIndexList selectedIndexes = m_tableView->selectionModel()->selectedIndexes();
+		if (selectedIndexes.size() != 1)
+		{
+			return;
+		}
+
+		int selectedRow = selectedIndexes[0].row();
+		int selectedColumn = selectedIndexes[0].column();
+
+		QClipboard* clipboard = QApplication::clipboard();
+		if (clipboard->mimeData()->hasText() == false)
+		{
+			return;
+		}
+
+		QStringList textRows = clipboard->text().split(QChar::LineFeed);
+		if (textRows.empty() == true)
+		{
+			return;
+		}
+
+		ModifiedObjectsData modifiedObjectsData;
+
+		for (int r = 0; r < textRows.size(); r++)
+		{
+			int pasteRow = selectedRow + r;
+
+			if (pasteRow >= m_proxyModel.rowCount())
+			{
+				// This row is out of table range
+				//
+				break;
+			}
+
+			const QString& rowString = textRows[r];
+
+			QStringList rowStrings = rowString.split(QChar::Tabulation);
+
+			for (int c = 0; c < rowStrings.size(); c++)
+			{
+				int pasteColumn = selectedColumn + c;
+
+				if (pasteColumn >= m_proxyModel.columnCount())
+				{
+					// This column is out of table range
+					//
+					break;
+				}
+
+				// Paste text
+				//
+				const QString& text = rowStrings[c];
+
+				QModelIndex mi = m_proxyModel.index(pasteRow, pasteColumn);
+
+				std::shared_ptr<PropertyObject> po = m_proxyModel.propertyObjectByIndex(mi);
+				if (po == nullptr)
+				{
+					Q_ASSERT(po);
+					return;
+				}
+
+				int editRow = -1;
+
+				std::shared_ptr<Property> p = m_proxyModel.propertyByIndex(mi, &editRow);
+				if (p == nullptr)
+				{
+					Q_ASSERT(p);
+					return;
+				}
+
+				int valueType = qVariantTypeId(p->value());
+
+				if (expandValuesToAllRows() == false &&
+					valueType != QMetaType::QStringList &&
+					editRow > 0)
+				{
+					continue;
+				}
+
+				bool ok = false;
+				QVariant v;
+
+				switch (valueType)
+				{
+				case QMetaType::QString:
+					{
+						v = text;
+						ok = true;
+					}
+					break;
+				case QMetaType::Int:
+					{
+						v = text.toInt(&ok);
+					}
+					break;
+				case QMetaType::UInt:
+					{
+						v = text.toUInt(&ok);
+					}
+					break;
+				case QMetaType::Float:
+					{
+						v = text.toFloat(&ok);
+					}
+					break;
+				case QMetaType::Double:
+					{
+						v = text.toDouble(&ok);
+					}
+					break;
+				case QMetaType::Bool:
+					{
+						ok = text.contains("True", Qt::CaseInsensitive) == true || text.contains("False", Qt::CaseInsensitive) == true;
+						if (ok == true)
+						{
+							v = text.contains("True", Qt::CaseInsensitive) == true ? true : false;
+						}
+					}
+					break;
+				}
+
+				if (valueType == QMetaType::QStringList)
+				{
+					QStringList l = p.get()->value().toStringList();
+
+					if (editRow < static_cast<int>(l.size()))
+					{
+						ok = true;
+
+						l[editRow] = text;
+
+						v = l;
+					}
+				}
+
+				if (valueType == TuningValue::tuningValueTypeId())
+				{
+					TuningValue tv = p->value().value<TuningValue>();
+
+					tv.fromString(text, &ok);
+
+					if (ok == true)
+					{
+						v = QVariant::fromValue(tv);
+					}
+				}
+
+				if (valueType == qMetaTypeId<Afb::AfbParamValue>())
+				{
+					Afb::AfbParamValue av = p->value().value<Afb::AfbParamValue>();
+
+					ok = av.fromString(text);
+
+					if (ok == true)
+					{
+						v = av.toVariant();
+					}
+				}
+
+				if (ok == true)
+				{
+					modifiedObjectsData.insert(p->caption(), std::make_pair(po, v));
+				}
+			}
+		}
+
+		if (modifiedObjectsData.empty() == true)
+		{
+			return;
+		}
+
+		valueChanged(modifiedObjectsData);
+
+		updatePropertiesValues();
+
+		return;
+	}
+
 	void PropertyTable::onShowErrorMessage (QString message)
 	{
 		QMessageBox::warning(this, "Error", message);
@@ -1184,7 +1374,7 @@ namespace ExtWidgets
 			int selectionType = getSelectionType();
 
 			if (selectionType == QMetaType::QString ||
-					selectionType == QMetaType::QStringList)
+				selectionType == QMetaType::QStringList)
 			{
 				QAction* a = menu.addAction(tr("Replace..."));
 				connect(a, &QAction::triggered, this, &PropertyTable::onReplace);
@@ -1246,7 +1436,7 @@ namespace ExtWidgets
 		int selectionType = getSelectionType();
 
 		if (selectionType != QMetaType::QString &&
-				selectionType != QMetaType::QStringList)
+			selectionType != QMetaType::QStringList)
 		{
 			return;
 		}
@@ -1346,7 +1536,7 @@ namespace ExtWidgets
 
 		// Fill stringListValues
 
-		for (auto it : multiRowValues)
+		for (const auto& it : multiRowValues)
 		{
 			std::pair<QString, std::shared_ptr<PropertyObject>> key = it.first;
 
@@ -1466,11 +1656,11 @@ namespace ExtWidgets
 
 			// Create a map with all properties
 			//
-			for (std::shared_ptr<PropertyObject> pobject : m_objects)
+			for (const std::shared_ptr<PropertyObject>& pobject : m_objects)
 			{
-				PropertyObject* object = pobject.get();
+				const PropertyObject* object = pobject.get();
 
-				for (std::shared_ptr<Property> p : object->properties())
+				for (const std::shared_ptr<Property>& p : object->properties())
 				{
 					// Filter the property
 
@@ -1591,7 +1781,7 @@ namespace ExtWidgets
 
 		std::vector<PropertyTableObject> tableObjects;
 
-		for (std::shared_ptr<PropertyObject> pobject : m_objects)
+		for (const std::shared_ptr<PropertyObject>& pobject : m_objects)
 		{
 			PropertyObject* object = pobject.get();
 
@@ -1622,17 +1812,17 @@ namespace ExtWidgets
 				}
 
 				if (p->isEnum() == true ||
-						type == TuningValue::tuningValueTypeId() ||
-						type == qMetaTypeId<Afb::AfbParamValue>() ||
-						type == QMetaType::Int ||
-						type == QMetaType::UInt ||
-						type == QMetaType::Float ||
-						type == QMetaType::Double ||
-						type == QMetaType::Bool ||
-						type == QMetaType::QColor ||
-						type == QMetaType::QUuid ||
-						type == QMetaType::QString ||
-						type == QMetaType::QStringList)
+					type == TuningValue::tuningValueTypeId() ||
+					type == qMetaTypeId<Afb::AfbParamValue>() ||
+					type == QMetaType::Int ||
+					type == QMetaType::UInt ||
+					type == QMetaType::Float ||
+					type == QMetaType::Double ||
+					type == QMetaType::Bool ||
+					type == QMetaType::QColor ||
+					type == QMetaType::QUuid ||
+					type == QMetaType::QString ||
+					type == QMetaType::QStringList)
 				{
 					pto.properties.push_back(p);
 				}
@@ -1683,8 +1873,8 @@ namespace ExtWidgets
 			}
 
 			if (expandValuesToAllRows() == false &&
-					userType != QMetaType::QStringList &&
-					row > 0)
+				userType != QMetaType::QStringList &&
+				row > 0)
 			{
 				// empty cell with no-repeated value is selected
 				return -1;
