@@ -11616,18 +11616,26 @@ namespace Builder
 		//
 		for(Afb::AfbParam pv : appFb->logicFb().params())
 		{
-			if (pv.opName() == "i_conf") // set comparator type: =(1(SI)), > (2(SI)), < (3(SI)), ? (4(SI)),= (5(FP)), > (6(FP)), < (7(FP)), ? (8(FP))
+			if (pv.opName() == "i_conf") // set comparator type: =(1(SI)), > (2(SI)), < (3(SI)), != (4(SI)),= (5(FP)), > (6(FP)), < (7(FP)), != (8(FP)), >= (9 (SI)), <= (10 (SI)),  >= (11 (FP)),  <= (12 (FP))
+
 			{
 				switch (pv.afbParamValue().value().toInt())
 				{
 					case 1:
-					case 5:			cmp->setCmpType(E::CmpType::Equal);		break;
+					case 5:			cmp->setCmpType(E::CmpType::Equal);			break;
 					case 2:
-					case 6:			cmp->setCmpType(E::CmpType::Greate);	break;
+					case 6:			cmp->setCmpType(E::CmpType::Greate);		break;
 					case 3:
-					case 7:			cmp->setCmpType(E::CmpType::Less);		break;
+					case 7:			cmp->setCmpType(E::CmpType::Less);			break;
 					case 4:
-					case 8:			cmp->setCmpType(E::CmpType::NotEqual);	break;
+					case 8:			cmp->setCmpType(E::CmpType::NotEqual);		break;
+					case 9:
+					case 11:		cmp->setCmpType(E::CmpType::GreateEqual);	break;
+					case 10:
+					case 12:		cmp->setCmpType(E::CmpType::LessEqual);		break;
+
+					default:
+						assert(0);
 				}
 			}
 
@@ -11638,7 +11646,9 @@ namespace Builder
 					case E::DataFormat::Float :			cmp->compare().setConstValue(pv.afbParamValue().value().toDouble());	break;
 					case E::DataFormat::SignedInt :		cmp->compare().setConstValue(pv.afbParamValue().value().toInt());		break;
 					case E::DataFormat::UnsignedInt :	cmp->compare().setConstValue(pv.afbParamValue().value().toInt());		break;
-					default:							assert(0);
+
+					default:
+						assert(0);
 				}
 			}
 
@@ -11649,7 +11659,9 @@ namespace Builder
 					case E::DataFormat::Float :			cmp->hysteresis().setConstValue(pv.afbParamValue().value().toDouble());	break;
 					case E::DataFormat::SignedInt :		cmp->hysteresis().setConstValue(pv.afbParamValue().value().toInt());	break;
 					case E::DataFormat::UnsignedInt :	cmp->hysteresis().setConstValue(pv.afbParamValue().value().toInt());	break;
-					default:							assert(0);
+
+					default:
+						assert(0);
 				}
 			}
 		}
@@ -11783,7 +11795,8 @@ namespace Builder
 			return false;
 		}
 
-		if (cmp->cmpType() == E::CmpType::Equal || cmp->cmpType() == E::CmpType::NotEqual)
+		if (	cmp->cmpType() == E::CmpType::Equal || cmp->cmpType() == E::CmpType::NotEqual ||
+				cmp->cmpType() == E::CmpType::GreateEqual || cmp->cmpType() == E::CmpType::LessEqual)
 		{
 			if (cmp->inAnalogSignalFormat() == E::AnalogAppSignalFormat::Float32)
 			{
