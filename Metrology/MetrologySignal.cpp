@@ -1206,10 +1206,11 @@ namespace Metrology
 
 		switch (cmpType())
 		{
-			case E::CmpType::Greate:	typeStr = QChar(9650);	break;
-			case E::CmpType::Less:		typeStr = QChar(9660);	break;
+			case E::CmpType::Greate:	typeStr = QChar(0x25B2);	break;
+			case E::CmpType::Less:		typeStr = QChar(0x25BC);	break;
 
 			default:
+				assert(0);
 				typeStr.clear();
 		}
 
