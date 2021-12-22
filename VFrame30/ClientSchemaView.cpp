@@ -759,7 +759,8 @@ namespace VFrame30
 
 		if (result.isError())
 		{
-			formatScriptError(result);	// it will trace error, must not use any messageboxes here, it lead to exception on paint device
+			QString err = formatScriptError(result);	// it will trace error, must not use any messageboxes here, it lead to exception on paint device
+			logController()->writeError(tr("Evaluating GlobalScript error:") + err);
 		}
 
 		return result.isError() == false;
@@ -784,13 +785,12 @@ namespace VFrame30
 		qDebug() << "\tStack: " << scriptValue.property("stack").toString();
 		qDebug() << "\tMessage: " << scriptValue.toString();
 
-		QString str = QString("Script running uncaught exception at line %1\n"
-							  "\tClass: %2 %3\n"
-							  "\tStack: %4\n"
-							  "\tMessage: %5")
+		QString stack = scriptValue.property("stack").toString();
+
+		QString str = QString("Script running uncaught exception at line [%1], Class: [%2], Stack: [%3], Message: [%4]")
 					  .arg(scriptValue.property("lineNumber").toInt())
 					  .arg(metaObject()->className())
-					  .arg(scriptValue.property("stack").toString())
+					  .arg(stack)
 					  .arg(scriptValue.toString());
 
 		return str;
@@ -807,6 +807,11 @@ namespace VFrame30
 						  .arg(where)
 						  .arg(scriptValue.property("lineNumber").toInt())
 						  .arg(scriptValue.toString());
+
+		if (logController() != nullptr)
+		{
+			logController()->writeError(message);
+		}
 
 		QMessageBox::critical(this, QApplication::applicationDisplayName(), message);
 

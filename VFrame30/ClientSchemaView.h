@@ -420,19 +420,19 @@ namespace VFrame30
 
 		//  LogController
 		//
-		LogController* logController();
-		const LogController* logController() const;
+		[[nodiscard]] LogController* logController();
+		[[nodiscard]] const LogController* logController() const;
 		void setLogController(LogController* value);
 
 		// --
 		//
-		QJSEngine* jsEngine();
-		QString globalScript() const;
+		[[nodiscard]] QJSEngine* jsEngine();
+		[[nodiscard]] QString globalScript() const;
 
 		bool runScript(QJSValue& evaluatedJs, QString where, bool reportError);
 		bool reEvaluateGlobalScript();
 		QJSValue evaluateScript(QString script, QString where, bool reportError);
-		QString formatScriptError(const QJSValue& scriptValue) const;
+		[[nodiscard]] QString formatScriptError(const QJSValue& scriptValue) const;
 		void reportScriptError(const QJSValue& scriptValue, QString where);
 
 		// Variables
