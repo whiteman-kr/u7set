@@ -240,7 +240,9 @@ namespace VFrame30
 			{
 				const std::shared_ptr<SchemaItem>& item = *vi;
 
-				if (item->acceptClick() == true && item->isIntersectPoint(x, y) == true && item->clickScript().isEmpty() == false)
+				if (item->acceptClick() == true &&
+					item->isIntersectPoint(x, y) == true &&
+					item->clickScript().isEmpty() == false)
 				{
 					setCursor(Qt::PointingHandCursor);
 					event->accept();

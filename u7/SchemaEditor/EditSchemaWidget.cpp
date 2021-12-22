@@ -3269,15 +3269,11 @@ void EditSchemaWidget::addItem(SchemaItemPtr newItem)
 
 void EditSchemaWidget::setMouseCursor(QPoint mousePos)
 {
-	setCursor(QCursor(Qt::CursorShape::ArrowCursor));
-
 	for (size_t i = 0; i < sizeof(m_mouseStateCursor) / sizeof(m_mouseStateCursor[0]); i++)
 	{
 		if (mouseState() == m_mouseStateCursor[i].mouseState)
 		{
-			QCursor cursor(m_mouseStateCursor[i].cursorShape);
-			setCursor(cursor);
-
+			setCursor(m_mouseStateCursor[i].cursorShape);
 			return;
 		}
 	}
@@ -3380,34 +3376,31 @@ void EditSchemaWidget::setMouseCursor(QPoint mousePos)
 			}
 		}
 
-		QCursor cursor(Qt::ArrowCursor);
-		setCursor(cursor);
+		setCursor(Qt::ArrowCursor);
 		return;
 	}
 
-	// ���������� ������� ��� �������� ������ �������� �� �����
+	// --
 	//
 	if (dynamic_cast<VFrame30::IPosLine*>(editSchemaView()->m_newItem.get()) != nullptr)
 	{
-		QCursor cursor(Qt::CursorShape::CrossCursor);
-		setCursor(cursor);
+		setCursor(Qt::CursorShape::CrossCursor);
 		return;
 	}
 
 	if (dynamic_cast<VFrame30::IPosRect*>(editSchemaView()->m_newItem.get()) != nullptr)
 	{
-		QCursor cursor(Qt::CursorShape::CrossCursor);
-		setCursor(cursor);
+		setCursor(Qt::CursorShape::CrossCursor);
 		return;
 	}
 
 	if (dynamic_cast<VFrame30::IPosConnection*>(editSchemaView()->m_newItem.get()) != nullptr)
 	{
-		QCursor cursor(Qt::CursorShape::CrossCursor);
-		setCursor(cursor);
+		setCursor(Qt::CursorShape::CrossCursor);
 		return;
 	}
 
+	setCursor(Qt::ArrowCursor);
 	return;
 }
 
