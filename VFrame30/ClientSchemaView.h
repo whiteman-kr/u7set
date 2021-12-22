@@ -233,20 +233,64 @@ namespace VFrame30
 		/// \brief Shows signals archive for specified signals list, time period and time type
 		/*!
 		Shows signals archive for specified signals list, time period and time type
-		\warning Month number is 0-based in JavaScript!\n
+		\warning Month number is 0-based in JavaScript!
+		<br>
 
 		\code
+		//Show archive from specified time to current time
+		//
 		const TIME_PLANT =  0;
 		const TIME_SYSTEM = 1;
 		const TIME_LOCAL =  2;
 
 		let signalsList = ["#APPSIGNALID01", "#APPSIGNALID02", "#APPSIGNALID03"];
 
-		let startTime = new Date(2021, 11, 25, 01, 23, 40);	// 25 of December '2021, 01:23:40; month number is 0-based
+		// Check if signals database is loaded
+		//
+		if (signals.signalsCount() == 0)
+		{
+			view.errorMessageBox("Signal database is not loaded!");
+			return;
+		}
+
+		let startTime = new Date(2021, 11, 25, 1, 23, 40);	// 25 of December '2021, 01:23:40; month number is 0-based
 		let endTime = new Date();							// Current date and time
 
 		view.showArchive(signalsList, startTime, endTime, TIME_PLANT);
 		\endcode
+		<br>
+
+		\code
+		//Show archive for last day
+		//
+		const TIME_PLANT =  0;
+		const TIME_SYSTEM = 1;
+		const TIME_LOCAL =  2;
+
+		let signalsList = ["#ANALOG_004", "#ANALOG_040"];
+
+		// Check if signals database is loaded
+		//
+		if (signals.signalsCount() == 0)
+		{
+			view.errorMessageBox("Signal database is not loaded!");
+			return;
+		}
+
+		let startTime = new Date(new Date() - (1000 * 60 * 60 * 24));// Subtract one day from current time
+		let endTime = new Date();
+
+		// Alternative way to subtract one day from current time
+		// let startTime = new Date();
+		// startTime.setDate(endTime.getDate() - 1);
+
+		// One more alternative way to subtract one day from current time
+		// let startTime = new Date(endTime - (1000 * 60 * 60 * 24));
+
+		view.showArchive(signalsList, startTime, endTime, TIME_LOCAL);
+
+		\endcode
+
 		*/
 		void showArchive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType);
 		/// \brief Show snapshot for signals specified by list of Application Signal IDs
@@ -376,19 +420,19 @@ namespace VFrame30
 
 		//  LogController
 		//
-		LogController* logController();
-		const LogController* logController() const;
+		[[nodiscard]] LogController* logController();
+		[[nodiscard]] const LogController* logController() const;
 		void setLogController(LogController* value);
 
 		// --
 		//
-		QJSEngine* jsEngine();
-		QString globalScript() const;
+		[[nodiscard]] QJSEngine* jsEngine();
+		[[nodiscard]] QString globalScript() const;
 
 		bool runScript(QJSValue& evaluatedJs, QString where, bool reportError);
 		bool reEvaluateGlobalScript();
 		QJSValue evaluateScript(QString script, QString where, bool reportError);
-		QString formatScriptError(const QJSValue& scriptValue) const;
+		[[nodiscard]] QString formatScriptError(const QJSValue& scriptValue) const;
 		void reportScriptError(const QJSValue& scriptValue, QString where);
 
 		// Variables
