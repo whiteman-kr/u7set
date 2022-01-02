@@ -106,6 +106,7 @@ and examples in this document.
 A few global classes can be accessed by scripts:
 
 - \ref ScriptMonitorApplication "ScriptMonitorApplication" class (<b>app</b> object) is used to access Monitor application properties and functions; 
+
 - \ref ScriptTuningClientApplication "ScriptTuningClientApplication" class (<b>app</b> object) is used to access TuningClient application properties and functions; 
 
 - \ref VFrame30::ScriptSchemaView "ScriptSchemaView" class (<b>view</b> object) is used to access schema items and variables, 

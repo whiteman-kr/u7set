@@ -90,7 +90,7 @@ public slots:
 
 	\code
 	let signalsList = ["#APPSIGNALID01", "#APPSIGNALID02", "#APPSIGNALID03"];
-	view.showSnapshot(signalsList);
+	app.showSnapshot(signalsList);
 	\endcode
 
 	*/
@@ -107,11 +107,11 @@ public slots:
 	\code
 	// Search by mask
 	//
-	view.showSnapshotByMask("REG*");
+	app.showSnapshotByMask("REG*");
 
 	// Search by several masks
 	//
-	view.showSnapshotByMask(["#APPSIGNAL_IN_BL*", "#APPSIGNAL_IN_SIM??"]);
+	app.showSnapshotByMask(["#APPSIGNAL_IN_BL*", "#APPSIGNAL_IN_SIM??"]);
 	\endcode
 	*/
 	void showSnapshotByMask(QStringList masks);
@@ -123,11 +123,11 @@ public slots:
 	\code
 	// Search by tag
 	//
-	view.showSnapshotByTag("sim");
+	app.showSnapshotByTag("sim");
 
 	// Search by several tags
 	//
-	view.showSnapshotByTag(["sim", "lock"]);
+	app.showSnapshotByTag(["sim", "lock"]);
 	\endcode
 	*/
 	void showSnapshotByTag(QStringList tags);
