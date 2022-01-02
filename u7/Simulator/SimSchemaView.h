@@ -12,6 +12,9 @@ public:
 	explicit SimSchemaView(SimSchemaManager* schemaManager, QWidget* parent = nullptr);
 	virtual ~SimSchemaView();
 
+protected:
+	virtual void updateScriptGlobalVars(QJSEngine& engine) override;
+
 public slots:
 	void overrideSignalsChanged(QStringList addedAppSignalIds);	// Added or deleted signal
 

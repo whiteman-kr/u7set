@@ -210,26 +210,6 @@ namespace VFrame30
 		return m_clientSchemaView->schemaManager()->schemaIdByIndex(schemaIndex);
 	}
 
-	void ScriptSchemaView::showArchive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType)
-	{
-		m_clientSchemaView->showArchive(signalsList, startTime, endTime, timeType);
-	}
-
-	void ScriptSchemaView::showSnapshot(QStringList signalsList)
-	{
-		m_clientSchemaView->showSnapshot(signalsList);
-	}
-
-	void ScriptSchemaView::showSnapshotByMask(QStringList masks)
-	{
-		m_clientSchemaView->showSnapshotByMask(masks);
-	}
-
-	void ScriptSchemaView::showSnapshotByTag(QStringList tags)
-	{
-		m_clientSchemaView->showSnapshotByTag(tags);
-	}
-
 	QString ScriptSchemaView::schemaId() const
 	{
 		return m_clientSchemaView->schema()->schemaId();
@@ -538,6 +518,30 @@ namespace VFrame30
 		return;
 	}
 
+	void ClientSchemaView::updateScriptGlobalVars(QJSEngine& engine)
+	{
+		// create global variable "view"
+		//
+		{
+			m_scriptSchemaView = std::make_unique<ScriptSchemaView>(this, m_schemaViewHistory);
+
+			QQmlEngine::setObjectOwnership(m_scriptSchemaView.get(), QQmlEngine::CppOwnership);
+			QJSValue jsSchemaView = engine.newQObject(m_scriptSchemaView.get());
+
+			engine.globalObject().setProperty(PropertyNames::scriptGlobalVariableView, jsSchemaView);
+		}
+
+		// Create global variable "log"
+		//
+		{
+			QJSValue jsLog = engine.newQObject(m_logController);
+			QQmlEngine::setObjectOwnership(m_logController, QQmlEngine::CppOwnership);
+
+			engine.globalObject().setProperty(PropertyNames::scriptGlobalVariableLog, jsLog);
+		}
+
+		return;
+	}
 
 	void ClientSchemaView::startRepaintTimer()
 	{
@@ -674,43 +678,7 @@ namespace VFrame30
 
 		if (m_jsEngineGlobalsWereCreated == false)
 		{
-			// create global variable "view"
-			//
-			m_scriptSchemaView = std::make_unique<ScriptSchemaView>(this, m_schemaViewHistory);
-
-			{
-				QQmlEngine::setObjectOwnership(m_scriptSchemaView.get(), QQmlEngine::CppOwnership);
-				QJSValue jsSchemaView = m_jsEngine.newQObject(m_scriptSchemaView.get());
-
-				m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableView, jsSchemaView);
-			}
-
-			// create global variable "tuning"
-			//
-			{
-				QJSValue jsTuning = m_jsEngine.newQObject(m_tuningController);
-				QQmlEngine::setObjectOwnership(m_tuningController, QQmlEngine::CppOwnership);
-
-				m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableTuning, jsTuning);
-			}
-
-			// Create global variable "signals"
-			//
-			{
-				QJSValue jsSignals = m_jsEngine.newQObject(m_scriptAppSignalController.get());
-				QQmlEngine::setObjectOwnership(m_scriptAppSignalController.get(), QQmlEngine::CppOwnership);
-
-				m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableSignals, jsSignals);
-			}
-
-			// Create global variable "log"
-			//
-			{
-				QJSValue jsLog = m_jsEngine.newQObject(m_logController);
-				QQmlEngine::setObjectOwnership(m_logController, QQmlEngine::CppOwnership);
-
-				m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableLog, jsLog);
-			}
+			updateScriptGlobalVars(m_jsEngine);
 
 			// Evaluate global script
 			//
@@ -872,25 +840,4 @@ namespace VFrame30
 	{
 		m_tuningClientBehavior = std::move(src);
 	}
-
-	void ClientSchemaView::showArchive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType)
-	{
-		emit signal_showArchive(signalsList, startTime, endTime, timeType);
-	}
-
-	void ClientSchemaView::showSnapshot(QStringList signalsList)
-	{
-		emit signal_showSnapshot(signalsList);
-	}
-
-	void ClientSchemaView::showSnapshotByMask(QStringList masks)
-	{
-		emit signal_showSnapshotByMask(masks);
-	}
-
-	void ClientSchemaView::showSnapshotByTag(QStringList tags)
-	{
-		emit signal_showSnapshotByTag(tags);
-	}
-
 }

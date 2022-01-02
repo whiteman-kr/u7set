@@ -249,7 +249,8 @@ namespace RtTrends
 
 		if (source == nullptr)
 		{
-			ASSERT_RETURN_FALSE;
+			//ASSERT_RETURN_FALSE;
+			return false;
 		}
 
 		int lmWorkcycle_ms = source->moduleWorkcycle_ms();
