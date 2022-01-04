@@ -102,7 +102,6 @@ windows build job:
     - "copy $Env:QT_BIN_DIR\\bin\\Qt6Svg.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
     - "copy $Env:QT_BIN_DIR\\bin\\Qt6Test.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
     - "copy $Env:QT_BIN_DIR\\bin\\Qt6Widgets.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
-    - "copy $Env:QT_BIN_DIR\\bin\\Qt6WinExtras.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
     - "copy $Env:QT_BIN_DIR\\bin\\Qt6Xml.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
     - "copy $Env:QT_BIN_DIR\\bin\\Qt6Charts.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
 # Copy Qt plugins
