@@ -8,6 +8,7 @@
 #include "SelectSchemaWidget.h"
 #include "MonitorTuningTcpClient.h"
 #include "InstanceResolver.h"
+#include "../VFrame30/ClientSchemaView.h"
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/TuningController.h"
 #include "../UtilsLib/LogFile.h"
@@ -86,12 +87,19 @@ protected slots:
 	void showMatsUserManual();
 	void debug();
 
-	// slots
-protected:
+	// Slots
+	//
+public slots:
 	void slot_archive();
+	void slot_archive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType);
+
 	void slot_trends();
 
 	void slot_signalSnapshot();
+	void slot_signalSnapshot(QStringList signalsList);
+	void slot_signalSnapshotByMask(QStringList masks);
+	void slot_signalSnapshotByTag(QStringList tags);
+
 	void slot_findSignal();
 	void slot_historyChanged(bool enableBack, bool enableForward);
 	void slot_updateActions(bool schemaWidgetSelected);
@@ -111,8 +119,8 @@ protected:
 	// Properties
 	//
 public:
-	MonitorConfigController* configController();
-	const MonitorConfigController* configController() const;
+	MonitorConfigController& configController();
+	const MonitorConfigController& configController() const;
 
 	TcpSignalClient* tcpSignalClient();
 	const TcpSignalClient* tcpSignalClient() const;
@@ -241,5 +249,4 @@ protected:
 
 };
 
-extern MonitorMainWindow* theMonitorMainWindow;
 

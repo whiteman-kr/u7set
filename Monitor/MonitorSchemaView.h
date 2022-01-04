@@ -1,7 +1,9 @@
 #pragma once
 
-#include "../VFrame30/ClientSchemaView.h"
 #include "MonitorSchemaManager.h"
+#include "../VFrame30/ClientSchemaView.h"
+#include "../VFrame30/AppSignalController.h"
+
 
 namespace VFrame30
 {
@@ -25,6 +27,8 @@ public:
 
 protected:
 	virtual void paintEvent(QPaintEvent* event) override;
+
+	virtual void updateScriptGlobalVars(QJSEngine& engine) override;
 
 	// Properties
 	//

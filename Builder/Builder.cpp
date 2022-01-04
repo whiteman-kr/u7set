@@ -64,8 +64,7 @@ namespace Builder
 
 		if (isRunning() == true)
 		{
-			assert(isRunning() == false);
-			stop();
+			return false;
 		}
 
 		m_thread->setProjectName(projectName);

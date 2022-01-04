@@ -715,9 +715,9 @@ void MonitorArchiveWidget::signalsButton()
 void MonitorArchiveWidget::showSignalInfo(QString appSignalId)
 {
 	MonitorSignalInfo::showDialog(appSignalId,
-								  theMonitorMainWindow->configController(),
-								  theMonitorMainWindow->tcpSignalClient(),
-								  theMonitorMainWindow->monitorCentralWidget());
+								  &(theApp.mainWindow()->configController()),
+								  theApp.mainWindow()->tcpSignalClient(),
+								  theApp.mainWindow()->monitorCentralWidget());
 }
 
 void MonitorArchiveWidget::removeSignal(QString appSignalId)

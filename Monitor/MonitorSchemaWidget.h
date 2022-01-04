@@ -63,11 +63,6 @@ public slots:
 						   const QList<QMenu*>& customMenu);
 	void signalInfo(QString appSignalId);
 
-	void signalsArchive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType);
-	void signalsSnapshot(QStringList signalsList);
-	void signalsSnapshotByMask(QStringList masks);
-	void signalsSnapshotByTag(QStringList tags);
-
 	// Properties
 	//
 public:
