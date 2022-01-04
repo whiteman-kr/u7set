@@ -43,7 +43,7 @@ namespace TrendLib
 		QMutex m_mutex;
 		TrendParam m_drawParam;
 
-		bool m_newJob = false;
+		std::atomic<bool> m_newJob = false;
 
 		// Draw cache
 		//

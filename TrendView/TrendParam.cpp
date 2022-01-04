@@ -66,29 +66,38 @@ namespace TrendLib
 		return;
 	}
 
-	int TrendParam::dpiX() const
+	double TrendParam::physicalDpiX() const
 	{
-		return m_dpiX;
+		return m_physicalDpiX;
 	}
 
-	int TrendParam::dpiY() const
+	double TrendParam::physicalDpiY() const
 	{
-		return m_dpiY;
+		return m_physicalDpiY;
 	}
 
-	void TrendParam::setDpi(int dpiX, int dpiY)
+	double TrendParam::realDpiX() const
 	{
-		m_dpiX = dpiX;
-		m_dpiY = dpiY;
+		return m_physicalDpiX * m_devicePixelRatio;
+	}
 
-		if (m_dpiX >= 600)
-		{
-			m_cosmeticPenWidth = 1.0 / 128.0;
-		}
-		else
-		{
-			m_cosmeticPenWidth = 0;
-		}
+	double TrendParam::realDpiY() const
+	{
+		return m_physicalDpiY * m_devicePixelRatio;
+	}
+
+	double TrendParam::devicePixelRatio() const
+	{
+		return m_devicePixelRatio;
+	}
+
+	void TrendParam::setDpi(double physicalDpiX, double physicalDpiY, double devicePixelRatio)
+	{
+		m_physicalDpiX = physicalDpiX;
+		m_physicalDpiY = physicalDpiY;
+		m_devicePixelRatio = devicePixelRatio;
+
+		m_cosmeticPenWidth = (m_physicalDpiX >= 600) ? (1.0 / 128.0) : 0.0;
 
 		return;
 	}

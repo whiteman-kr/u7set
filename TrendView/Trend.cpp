@@ -1,4 +1,5 @@
 #include "Trend.h"
+#include <vector>
 #include "../UtilsLib/CUtils.h"
 #include "../Proto/trends.pb.h"
 #include "TrendScale.h"
@@ -72,7 +73,7 @@ namespace TrendLib
 
 		if (needAdjustPainter == true)
 		{
-			adjustPainter(painter, drawParam.dpiX(), drawParam.dpiY());
+			adjustPainter(painter, drawParam);
 		}
 
 		// --
@@ -117,11 +118,11 @@ namespace TrendLib
 		std::vector<TrendSignalParam> analogs = signalSet().analogSignals();
 
 		// Calc InsideRect
-		// +-------------------------------+
-		// |  +---------------------------+|
-		// |  |   insideRect (trendArea)  ||
-		// |  +---------------------------+|
-		// +-------------------------------+
+		// +--------------------------------+
+		// |   +---------------------------+|
+		// |   |   insideRect (trendArea)  ||
+		// |   +---------------------------+|
+		// +--------------------------------+
 		//
 		QRectF insideRect = calcTrendArea(laneRect, drawParam);
 
@@ -242,7 +243,7 @@ namespace TrendLib
 
 	void Trend::drawTimeGrid(QPainter* painter, const QRectF& laneRect, const QRectF& insideRect, const TrendParam& drawParam) const
 	{
-		double dpiX = drawParam.dpiX();
+		double dpiX = drawParam.realDpiX();
 
 		// Calc time grid
 		//
@@ -257,7 +258,7 @@ namespace TrendLib
 		QString estimatedString = (drawParam.duration() < 10_sec) ? "HH:MM:SS.XXX" : "HH:MM:SS";
 		drawText(painter, estimatedString, QRectF(), drawParam, Qt::AlignCenter, &boundRect);
 
-		double minTimeInterval = boundRect.width() * 1.4;
+		double minTimeInterval = boundRect.width() * 1.2;
 
 		TimeStamp startTimeStamp = drawParam.startTimeStamp();
 		qint64 duration = drawParam.duration();
@@ -473,7 +474,7 @@ namespace TrendLib
 				painter->setPen(ts.color());
 
 				// Draw description text
-
+				//
 				QRectF testDesctriptionBoundRect;
 				drawText(painter, signalText, signalRect, drawParam, Qt::AlignLeft | Qt::AlignTop | Qt::TextSingleLine, &testDesctriptionBoundRect);
 
@@ -596,7 +597,7 @@ namespace TrendLib
 
 		// Draw horz grids
 		//
-		double dpiY = drawParam.dpiY();
+		double dpiY = drawParam.realDpiY();
 
 		QPen gridPen(Qt::lightGray, drawParam.cosmeticPenWidth(), Qt::PenStyle::DashLine);
 		painter->setPen(gridPen);
@@ -719,7 +720,7 @@ namespace TrendLib
 
 		// Draw horz grids
 		//
-		double dpiY = drawParam.dpiY();
+		double dpiY = drawParam.realDpiY();
 
 		QPen gridPen(Qt::lightGray, drawParam.cosmeticPenWidth(), Qt::PenStyle::DashLine);
 		painter->setPen(gridPen);
@@ -943,7 +944,7 @@ namespace TrendLib
 		E::TimeType timeType = drawParam.timeType();
 
 		QPen linePen({signal.color()},
-					 (signal.lineWeight() <= 1.0) ? drawParam.cosmeticPenWidth() : signal.lineWeight() / drawParam.dpiY(),
+					 (signal.lineWeight() <= 1.0) ? drawParam.cosmeticPenWidth() : signal.lineWeight() / drawParam.realDpiY(),
 					 Qt::SolidLine);
 		painter->setPen(linePen);
 
@@ -954,7 +955,7 @@ namespace TrendLib
 		TimeStamp startTimeStamp = drawParam.startTimeStamp();
 		qint64 duration = drawParam.duration();
 
-		double dpiY = drawParam.dpiY();
+		double dpiY = drawParam.realDpiY();
 
 		double yPos0 = signalRect.bottom() - textBoundRect.height() / 2.0;
 		double yPos1 = signalRect.top() + textBoundRect.height() * 1.1;
@@ -1105,7 +1106,7 @@ namespace TrendLib
 		E::TimeType timeType = drawParam.timeType();
 
 		QPen linePen({signal.color()},
-					 (signal.lineWeight() <= 1.0) ? drawParam.cosmeticPenWidth() : signal.lineWeight() / drawParam.dpiY());
+					 (signal.lineWeight() <= 1.0) ? drawParam.cosmeticPenWidth() : signal.lineWeight() / drawParam.realDpiY());
 		painter->setPen(linePen);
 
 		static const int recomendedSize = 8192;
@@ -1235,7 +1236,7 @@ namespace TrendLib
 		return;
 	}
 
-	void Trend::drawRulers(QPainter* painter, const TrendParam& drawParam) const
+	void Trend::drawRulers(QPainter* painter, TrendParam drawParam) const
 	{
 		if (painter == nullptr)
 		{
@@ -1243,10 +1244,14 @@ namespace TrendLib
 			return;
 		}
 
-		adjustPainter(painter, drawParam.dpiX(), drawParam.dpiY());
+		drawParam.setDpi(painter->device()->physicalDpiX(), painter->device()->physicalDpiY(), painter->device()->devicePixelRatioF());
 
-		double dpiX = static_cast<double>(drawParam.dpiX());
-		double dpiY = static_cast<double>(drawParam.dpiY());
+		adjustPainter(painter, drawParam);
+
+		// --
+		//
+		double dpiX = drawParam.realDpiX();
+		double dpiY = drawParam.realDpiY();
 
 		E::TimeType timeType = drawParam.timeType();
 
@@ -1386,11 +1391,12 @@ namespace TrendLib
 					// Draw distance between rulers
 					//
 					qint64 rulersDistance = ruler.timeStamp().timeStamp - prevRuler.timeStamp().timeStamp;
+					int days = static_cast<int>(rulersDistance / 1_day) % 24;
+					rulersDistance -= days * 1_day;
 					int msecs = static_cast<int>(rulersDistance % 1000_ms);
 					int secs = static_cast<int>(rulersDistance / 1_sec) % 60;
 					int mins = static_cast<int>(rulersDistance / 1_min) % 60;
 					int hours = static_cast<int>(rulersDistance / 1_hour) % 60;
-					int days = static_cast<int>(rulersDistance / 1_day) % 24;
 
 					QString distanceText;
 
@@ -1685,7 +1691,7 @@ namespace TrendLib
 		return nonValid;
 	}
 
-	void Trend::adjustPainter(QPainter* painter, int dpiX, int dpiY)
+	void Trend::adjustPainter(QPainter* painter, const TrendParam& trendParam)
 	{
 		Q_ASSERT(painter);
 
@@ -1695,7 +1701,8 @@ namespace TrendLib
 		painter->resetTransform();
 
 		painter->translate(0.5, 0.5);
-		painter->scale(dpiX, dpiY);
+		painter->scale(trendParam.realDpiX() / trendParam.devicePixelRatio(),
+					   trendParam.realDpiY() / trendParam.devicePixelRatio());
 
 		return;
 	}
@@ -1846,8 +1853,8 @@ namespace TrendLib
 
 	QRectF Trend::calcLaneRect(int laneIndex, const TrendParam& drawParam)
 	{
-		QSizeF inchSize(static_cast<double>(drawParam.rect().size().width()) / static_cast<double>(drawParam.dpiX()),
-						static_cast<double>(drawParam.rect().size().height()) / static_cast<double>(drawParam.dpiY()));
+		QSizeF inchSize(static_cast<double>(drawParam.rect().size().width()) / drawParam.realDpiX(),
+						static_cast<double>(drawParam.rect().size().height()) / drawParam.realDpiY());
 
 		double laneMargin = 1.0 / 32.0;		// 1/16 inch
 		double laneHeight = (inchSize.height() - laneMargin) / static_cast<double>(drawParam.laneCount()) - laneMargin;
@@ -1871,47 +1878,46 @@ namespace TrendLib
 
 	QRectF Trend::calcTrendArea(const QRectF& laneRect, const TrendParam& drawParam, size_t analogSignalCount)
 	{
-		double dpiX = drawParam.dpiX();
-		double dpiY = drawParam.dpiY();
-
 		// Calc InsideRect(trendArea)
-		// +-------------------------------+
-		// |  +---------------------------+|
-		// |  |   insideRect (trendArea)  ||
-		// |  +---------------------------+|
-		// +-------------------------------+
+		// +--------------------------------+
+		// |   +---------------------------+|
+		// |   |   insideRect (trendArea)  ||
+		// |   +---------------------------+|
+		// +--------------------------------+
 		//
 		QRectF insideRect;
 
 		if (drawParam.viewMode() == TrendViewMode::Separated)
 		{
-			insideRect.setLeft(laneRect.left() + 6.0/8.0);
-			insideRect.setTop(laneRect.top() + 1.0/5.0);
-			insideRect.setWidth(laneRect.width() - insideRect.left() - 2.0/8.0);
-			insideRect.setHeight(laneRect.height() - (insideRect.top() - laneRect.top()) - 0.3);
+			insideRect.setLeft(laneRect.left() + 3.0 / 4.0);
+			insideRect.setRight(laneRect.right() - 1.0 / 4.0);
+			insideRect.setTop(laneRect.top() + 1.0 / 4.0);
+			insideRect.setBottom(laneRect.bottom() - 3.0 / 8.0);
 		}
 
 		if (drawParam.viewMode() == TrendViewMode::Overlapped)
 		{
-			if (analogSignalCount == 0 ||
-				analogSignalCount == 1)
+			if (analogSignalCount < 2)	// 0 or 1
 			{
-				insideRect.setLeft(laneRect.left() + 6.0/8.0);
-				insideRect.setTop(laneRect.top() + 1.0/5.0);
-				insideRect.setWidth(laneRect.width() - insideRect.left() - 2.0/8.0);
-				insideRect.setHeight(laneRect.height() - (insideRect.top() - laneRect.top()) - 0.3);
+				insideRect.setLeft(laneRect.left() + 3.0 / 4.0);
+				insideRect.setRight(laneRect.right() - 1.0 / 4.0);
+				insideRect.setTop(laneRect.top() + 1.0 / 4.0);
+				insideRect.setBottom(laneRect.bottom() - 3.0 / 8.0);
 			}
 			else
 			{
-				insideRect.setLeft(laneRect.left() + 6.0/8.0 * 1.5);
-				insideRect.setTop(laneRect.top() + 1.0/5.0);
-				insideRect.setWidth(laneRect.width() - insideRect.left() - 2.0/8.0);
-				insideRect.setHeight(laneRect.height() - (insideRect.top() - laneRect.top()) - 0.3);
+				insideRect.setLeft(laneRect.left() + 3.0 / 4.0  * 1.5);
+				insideRect.setRight(laneRect.right() - 1.0 / 4.0);
+				insideRect.setTop(laneRect.top() + 1.0 / 4.0);
+				insideRect.setBottom(laneRect.bottom() - 3.0 / 8.0);
 			}
 		}
 
 		// Ajust inside rect to dpiX, so it will look pretty while drawing it with cosmetic pen
 		//
+		double dpiX = drawParam.realDpiX();
+		double dpiY = drawParam.realDpiY();
+
 		insideRect.setLeft(static_cast<double>(static_cast<int>(insideRect.left() * dpiX)) / dpiX);
 		insideRect.setTop(static_cast<double>(static_cast<int>(insideRect.top() * dpiY)) / dpiY);
 		insideRect.setWidth(static_cast<double>(static_cast<int>(insideRect.width() * dpiX)) / dpiX);
@@ -1942,35 +1948,35 @@ namespace TrendLib
 
 	QRect Trend::inchRectToPixelRect(const QRectF& rect, const TrendParam& drawParam)
 	{
-		QRect result(static_cast<int>(rect.left() * drawParam.dpiX()),
-					 static_cast<int>(rect.top() * drawParam.dpiY()),
-					 static_cast<int>(rect.width() * drawParam.dpiX()),
-					 static_cast<int>(rect.height() * drawParam.dpiY()));
+		QRect result(static_cast<int>(rect.left() * drawParam.physicalDpiX()),
+					 static_cast<int>(rect.top() * drawParam.physicalDpiY()),
+					 static_cast<int>(rect.width() * drawParam.physicalDpiX()),
+					 static_cast<int>(rect.height() * drawParam.physicalDpiY()));
 
 		return result;
 	}
 
 	QRectF Trend::pixelRectToInchRect(const QRect& rect, const TrendParam& drawParam)
 	{
-		QRectF result(static_cast<double>(rect.left()) / static_cast<double>(drawParam.dpiX()),
-					  static_cast<double>(rect.top()) / static_cast<double>(drawParam.dpiY()),
-					  static_cast<double>(rect.width()) / static_cast<double>(drawParam.dpiX()),
-					  static_cast<double>(rect.height()) / static_cast<double>(drawParam.dpiY()));
+		QRectF result(static_cast<double>(rect.left()) / static_cast<double>(drawParam.physicalDpiX()),
+					  static_cast<double>(rect.top()) / static_cast<double>(drawParam.physicalDpiY()),
+					  static_cast<double>(rect.width()) / static_cast<double>(drawParam.physicalDpiX()),
+					  static_cast<double>(rect.height()) / static_cast<double>(drawParam.physicalDpiY()));
 
 		return result;
 	}
 
 	QPoint Trend::inchPointToPixelPoint(const QPointF& point, const TrendParam& drawParam)
 	{
-		QPoint result(static_cast<int>(point.x() * drawParam.dpiX()),
-					  static_cast<int>(point.y() * drawParam.dpiY()));
+		QPoint result(static_cast<int>(point.x() * drawParam.physicalDpiX()),
+					  static_cast<int>(point.y() * drawParam.physicalDpiY()));
 		return result;
 	}
 
 	QPointF Trend::pixelPointToInchPoint(const QPoint& point, const TrendParam& drawParam)
 	{
-		QPointF result(static_cast<double>(point.x()) / static_cast<double>(drawParam.dpiX()),
-					   static_cast<double>(point.y()) / static_cast<double>(drawParam.dpiY()));
+		QPointF result(static_cast<double>(point.x()) / static_cast<double>(drawParam.physicalDpiX()),
+					   static_cast<double>(point.y()) / static_cast<double>(drawParam.physicalDpiY()));
 		return result;
 	}
 
@@ -1993,8 +1999,11 @@ namespace TrendLib
 		*outTime = TimeStamp();
 
 		QRectF rect = drawParam.rect();
-		QPointF pos(static_cast<double>(mousePos.x()) / static_cast<double>(drawParam.dpiX()),		// Transform mousePos to inches, as everything for drawing is done in inches
-					static_cast<double>(mousePos.y()) / static_cast<double>(drawParam.dpiY()));
+
+		// Transform mousePos to inches, as everything for drawing is done in inches
+		//
+		QPointF pos(static_cast<double>(mousePos.x()) / drawParam.physicalDpiX(),
+					static_cast<double>(mousePos.y()) / drawParam.physicalDpiY());
 
 		// MouseOn::Outside
 		//
@@ -2068,12 +2077,10 @@ namespace TrendLib
 
 					// Check if pos on signal description
 					//
-					for (const std::pair<QString, QRectF>& p : drawParam.signalDescriptionRect())
+					for (const auto&[signalId, descriptionRect] : drawParam.signalDescriptionRect())
 					{
-						if (p.second.contains(pos) == true)
+						if (descriptionRect.contains(pos) == true)
 						{
-							QString signalId = p.first;
-
 							for (const TrendSignalParam& tsp : discretes)
 							{
 								if (tsp.appSignalId() == signalId)
@@ -2122,42 +2129,41 @@ namespace TrendLib
 			return;
 		}
 
-		if (str.isEmpty())
-		{
-			return;
-		}
-
 		painter->save();
 
-		double dpiX = drawParam.dpiX();
-		double dpiY = drawParam.dpiY();
+		double realDpiX = drawParam.realDpiX();
+		double realDpiY = drawParam.realDpiY();
 
-		painter->scale(1.0 / dpiX, 1.0 / dpiY);
+		painter->resetTransform();
+		painter->scale(1.0 / drawParam.devicePixelRatio(), 1.0 / drawParam.devicePixelRatio());
 
-		QFont f(QStringLiteral("Arial"));
+		// Set font
+		//
+		QFont font;
 
-		double fontSize = 2.0 / 16.0;	// Font size is 2/16 in
-		if (dpiY > 120)
-		{
-			fontSize = 1.75 / 16.0;		// For HiDPI
-		}
+		int pixelSize = static_cast<int>(3.7 / 25.4 * realDpiY);	// 3.7mm
+		font.setPixelSize(pixelSize);
 
-		int pixelSize = qRound(fontSize * dpiY);
-		f.setPixelSize(pixelSize > 0 ? pixelSize : 1);
-		painter->setFont(f);
+		painter->setFont(font);
 
-		QRectF rc;
-		rc.setLeft(rect.left() * dpiX);
-		rc.setTop(rect.top() * dpiY);
-		rc.setRight(rect.right() * dpiX);
-		rc.setBottom(rect.bottom() * dpiY);
+		// --
+		//
+		QRectF rc{rect.left() * realDpiX,
+				  rect.top() * realDpiY,
+				  rect.width() * realDpiX,
+				  rect.height() * realDpiY};
 
 		QRectF boundingRectIn;
+
 		painter->drawText(rc, flags, str, &boundingRectIn);
 
 		if (boundingRect != nullptr)
 		{
-			*boundingRect = QRectF(boundingRectIn.left() / dpiX, boundingRectIn.top() / dpiY, boundingRectIn.width() / dpiX, boundingRectIn.height() / dpiY);
+			*boundingRect = QRectF{
+							boundingRectIn.left() / realDpiX,
+							boundingRectIn.top() / realDpiY,
+							boundingRectIn.width() / realDpiX,
+							boundingRectIn.height() / realDpiY};
 		}
 
 		painter->restore();

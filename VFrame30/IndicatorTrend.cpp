@@ -255,7 +255,6 @@ namespace VFrame30
 		// --
 		//
 		m_trendParam.setRect(trendRect);
-		m_trendParam.setDpi(drawParam->realDpiX(), drawParam->realDpiY());
 		m_trendParam.setTimeType(m_timeType);
 
 		if (drawParam->isMonitorMode() == true)
@@ -286,6 +285,10 @@ namespace VFrame30
 			requiredRedraw = true;
 
 			m_image = QImage{static_cast<int>(trendRect.width()), static_cast<int>(trendRect.height()), QImage::Format_RGB32};
+
+			m_image.setDevicePixelRatio(1.0);
+			m_image.setDotsPerMeterX(static_cast<int>(drawParam->realDpiX() / 25.4 * 1000.0));
+			m_image.setDotsPerMeterY(static_cast<int>(drawParam->realDpiY() / 25.4 * 1000.0));
 		}
 
 		// Draw trend to QImage and then copy it to painter
@@ -343,6 +346,8 @@ namespace VFrame30
 			m_trend.setUuid(schemaItem->guid());
 
 			m_trendParam.signalDescriptionRect().clear();
+			m_trendParam.setDpi(m_image.dotsPerMeterX() / (1000.0 / 25.4), m_image.dotsPerMeterY() / (1000.0 / 25.4), m_image.devicePixelRatioF());
+
 			m_trend.draw(&m_image, m_trendParam);
 
 			//qDebug() << "m_trend.draw " << drawTimer.elapsed() << " ms";

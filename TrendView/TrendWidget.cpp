@@ -31,9 +31,11 @@ namespace TrendLib
 
 	void RenderThread::render(const TrendParam& drawParam)
 	{
-		QMutexLocker locker(&m_mutex);
+		{
+			QMutexLocker locker(&m_mutex);
+			m_drawParam = drawParam;
+		}
 
-		m_drawParam = drawParam;
 		m_newJob = true;
 
 		if (isRunning() == false)
@@ -58,8 +60,10 @@ namespace TrendLib
 			// Start new job
 			//
 			m_mutex.lock();
+
 			TrendParam drawParam = m_drawParam;
 			drawParam.signalDescriptionRect().clear();
+
 			m_mutex.unlock();
 
 			// Set m_newJob to false, so it can be raised again while current drawing in progress
@@ -69,15 +73,21 @@ namespace TrendLib
 			if (m_image.size() != drawParam.rect().size())
 			{
 				QSize pixelSize = drawParam.rect().size().toSize();
-				m_image = QImage(pixelSize, QImage::Format_RGB32);
+
+				m_image = QImage{pixelSize, QImage::Format_RGB32};
+
+				m_image.setDevicePixelRatio(1.0);
+				m_image.setDotsPerMeterX(static_cast<int>(drawParam.realDpiX() / 25.4 * 1000.0));
+				m_image.setDotsPerMeterY(static_cast<int>(drawParam.realDpiY() / 25.4 * 1000.0));
 			}
 
 			// All drawing are done in inches
 			//
+			drawParam.setDpi(m_image.dotsPerMeterX() / (1000.0 / 25.4), m_image.dotsPerMeterY() / (1000.0 / 25.4), m_image.devicePixelRatioF());
+
 			m_trend->draw(&m_image, drawParam);
 
 			emit renderedImage(m_image, drawParam);
-
 		}
 		while (isInterruptionRequested() == false);
 
@@ -261,23 +271,31 @@ namespace TrendLib
 
 	void TrendWidget::updateWidget()
 	{
-		m_trendParam.setRect(rect());
-		m_trendParam.setDpi(logicalDpiX(), logicalDpiY());
+		double devicePixelRatio = devicePixelRatioF();
+		QRectF hdRect{0, 0, rect().width() * devicePixelRatio, rect().height() * devicePixelRatio};
+
+		m_trendParam.setRect(hdRect);
+		m_trendParam.setDpi(physicalDpiX(), physicalDpiY(), devicePixelRatio);
 
 		m_thread.render(m_trendParam);
 	}
 
 	bool TrendWidget::saveImageToFile(QString fileName) const
 	{
-		QPixmap pixmap = m_pixmap;
-		TrendParam drawParam = m_pixmapDrawParam;
+		QImage image = m_pixmap.toImage();
 
 		{
-			QPainter p(&pixmap);
+			QPainter p(&image);
+
+			TrendParam drawParam = m_pixmapDrawParam;
+			drawParam.setDpi(p.device()->physicalDpiX(),
+							 p.device()->physicalDpiY(),
+							 1.0);
+
 			m_trend.drawRulers(&p, drawParam);
 		}
 
-		bool ok = pixmap.save(fileName, nullptr, -1);
+		bool ok = image.save(fileName, nullptr, -1);
 
 		return ok;
 	}
@@ -302,7 +320,7 @@ namespace TrendLib
 						rc.height() * static_cast<double>(resolution));
 
 		drawParam.setRect(drawRect);
-		drawParam.setDpi(resolution, resolution);
+		drawParam.setDpi(resolution, resolution, 1.0);
 
 		// --
 		//
@@ -345,7 +363,7 @@ namespace TrendLib
 						rc.height() * static_cast<double>(resolution)};
 
 		drawParam.setRect(drawRect);
-		drawParam.setDpi(resolution, resolution);
+		drawParam.setDpi(resolution, resolution, printer->devicePixelRatioF());
 
 		// Draw to printer
 		//
@@ -376,16 +394,19 @@ namespace TrendLib
 			return;
 		}
 
-		if (m_pixmap.size() != rect().size())
+		double devicePixelRatio = devicePixelRatioF();
+		QRectF hdRect{0, 0, rect().width() * devicePixelRatio, rect().height() * devicePixelRatio};
+
+		if (m_pixmap.size() != hdRect.size().toSize())
 		{
 			// New pixmap is not ready yet, scale the current one
 			//
 			painter.fillRect(rect(), m_trendParam.backColor1st());
-			painter.drawPixmap(m_pixmap.rect(), m_pixmap, m_pixmap.rect());
+			painter.drawPixmap(rect(), m_pixmap, m_pixmap.rect());
 			return;
 		}
 
-		painter.drawPixmap(0, 0, m_pixmap);
+		painter.drawPixmap(rect(), m_pixmap, m_pixmap.rect());
 
 		// Draw rulers
 		//
@@ -395,7 +416,10 @@ namespace TrendLib
 		//
 		if (m_mouseAction == MouseAction::SelectViewSelectSecondPoint)
 		{
-			Trend::adjustPainter(&painter, m_pixmapDrawParam.dpiX(), m_pixmapDrawParam.dpiY());
+			TrendParam drawParam = m_pixmapDrawParam;
+			drawParam.setDpi(this->physicalDpiX(), this->physicalDpiY(), this->devicePixelRatioF());
+
+			Trend::adjustPainter(&painter, drawParam);
 
 			QRectF selectionRect(m_startSelectViewPoint, m_finishSelectViewPoint);
 			selectionRect = selectionRect.normalized();
@@ -404,8 +428,6 @@ namespace TrendLib
 
 			if (selectionRect.isEmpty() == false)
 			{
-				//painter.fillRect(m_allowedSelectViewArea, Qt::blue);
-
 				QPen p(Qt::blue, 0, Qt::DashLine, Qt::PenCapStyle::RoundCap);
 
 				painter.setBrush(Qt::NoBrush);
@@ -588,7 +610,10 @@ namespace TrendLib
 			TimeStamp timeStamp;
 			TrendSignalParam onSignal;
 
-			Trend::MouseOn mouseOn = m_trend.mouseIsOver(event->pos(), m_pixmapDrawParam, &laneIndex, &timeStamp, &rulerIndex, &onSignal);
+			TrendParam tp = m_pixmapDrawParam;
+			tp.setDpi(this->physicalDpiX(), this->physicalDpiY(), this->devicePixelRatioF());
+
+			Trend::MouseOn mouseOn = m_trend.mouseIsOver(event->pos(), tp, &laneIndex, &timeStamp, &rulerIndex, &onSignal);
 
 			Qt::CursorShape newCursorShape = Qt::ArrowCursor;
 
@@ -629,6 +654,7 @@ namespace TrendLib
 			case MouseAction::None:
 				Q_ASSERT(false);
 				break;
+
 			case MouseAction::Scroll:
 				{
 					// Scroll time with a mouse mode
@@ -683,7 +709,7 @@ namespace TrendLib
 							if (std::fabs(highLimit - lowLimit) > std::numeric_limits<double>::min() &&
 								signalRect.height() > std::numeric_limits<double>::min())
 							{
-								double dy = mouseOffset.y() / m_trendParam.dpiY();
+								double dy = mouseOffset.y() / m_trendParam.realDpiY();
 								double k = (highLimit - lowLimit) / signalRect.height();
 
 								highLimit -= dy * k;
@@ -716,6 +742,7 @@ namespace TrendLib
 					emit startTimeChanged(ts);
 				}
 				break;
+
 			case MouseAction::MoveRuler:
 				{
 					Q_ASSERT(m_rulerMoveRulerIndex != -1);
@@ -769,12 +796,15 @@ namespace TrendLib
 			return;
 		}
 
-		int numDegrees = event->angleDelta().y() / 8;
-		int numSteps = numDegrees / 15;
+		int vertDegrees = event->angleDelta().y() / 8;
+		int vertSteps = vertDegrees / 15;
 
-		if (numSteps == 0)
+		int horzDegrees = event->angleDelta().x() / 8;		// Horz degrees work with pressed Alt
+		int horzSteps = horzDegrees / 15;
+
+		if (vertSteps == 0 && horzSteps == 0)
 		{
-			event->ignore();
+			event->accept();
 			return;
 		}
 
@@ -782,14 +812,14 @@ namespace TrendLib
 
 		// Calc time
 		//
-		if (event->modifiers().testFlag(Qt::AltModifier) == false)
+		if (vertSteps != 0)
 		{
 			qint64 startTime = m_trendParam.startTimeStamp().timeStamp;
 
 			qint64 oldDuration = m_trendParam.duration();
 			qint64 newLaneDuration = oldDuration;
 
-			if (numSteps < 0)
+			if (vertSteps < 0)
 			{
 				newLaneDuration = static_cast<qint64>(oldDuration * 1.1);
 				startTime -= static_cast<qint64>((newLaneDuration - oldDuration) / 2.0);
@@ -815,7 +845,7 @@ namespace TrendLib
 			}
 		}
 
-		if (event->modifiers().testFlag(Qt::AltModifier) == true)
+		if (horzSteps != 0)
 		{
 			// Scale analog signals
 			//
@@ -872,7 +902,7 @@ namespace TrendLib
 					continue;
 				}
 
-				if (numSteps > 0)
+				if (horzSteps > 0)
 				{
 					h = h - delta * 0.1;
 					l = l + delta * 0.1;
@@ -916,7 +946,10 @@ namespace TrendLib
 
 	Trend::MouseOn TrendWidget::mouseIsOver(const QPoint& mousePos, int* outLaneIndex, TimeStamp* timeStamp, int* rulerIndex, TrendSignalParam* onSignal)
 	{
-		return m_trend.mouseIsOver(mousePos, m_pixmapDrawParam, outLaneIndex, timeStamp, rulerIndex, onSignal);
+		TrendParam tp = m_pixmapDrawParam;
+		tp.setDpi(this->physicalDpiX(), this->physicalDpiY(), this->devicePixelRatioF());
+
+		return m_trend.mouseIsOver(mousePos, tp, outLaneIndex, timeStamp, rulerIndex, onSignal);
 	}
 
 	void TrendWidget::resetRulerHighlight()
@@ -976,7 +1009,7 @@ namespace TrendLib
 		double left = qMin(m_startSelectViewPoint.x(), m_finishSelectViewPoint.x());
 		double right = qMax(m_startSelectViewPoint.x(), m_finishSelectViewPoint.x());
 
-		if (std::fabs(right - left) * m_trendParam.dpiX() <= 1)
+		if (std::fabs(right - left) * m_trendParam.realDpiX() <= 1)
 		{
 			// Value is way too small
 			//
@@ -1031,7 +1064,7 @@ namespace TrendLib
 			double top = qMin(m_startSelectViewPoint.y(), m_finishSelectViewPoint.y());
 			double bottom = qMax(m_startSelectViewPoint.y(), m_finishSelectViewPoint.y());
 
-			if (std::fabs(bottom - top) * m_trendParam.dpiY() <= 1)
+			if (std::fabs(bottom - top) * m_trendParam.realDpiY() <= 1)
 			{
 				// Value is way too small
 				//

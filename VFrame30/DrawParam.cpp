@@ -124,6 +124,11 @@ namespace VFrame30
 		return m_painter->device()->physicalDpiY() * m_painter->device()->devicePixelRatioF();
 	}
 
+	double CDrawParam::devicePixelRatio() const noexcept
+	{
+		return m_painter->device()->devicePixelRatioF();
+	}
+
 	double CDrawParam::realDpiX(QPainter* painter) noexcept
 	{
 		return painter->device()->physicalDpiX() * painter->device()->devicePixelRatioF();

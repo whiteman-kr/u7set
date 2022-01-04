@@ -68,10 +68,10 @@ namespace TrendLib
 		void drawSignalTrendDiscrete(QPainter* painter, const TrendSignalParam& signal, const TrendParam& drawParam, const std::list<std::shared_ptr<OneHourData>>& signalData) const;
 		void drawSignalTrendAnalog(QPainter* painter, const TrendSignalParam& signal, const TrendParam& drawParam, const std::list<std::shared_ptr<OneHourData>>& signalData) const;
 
-		void drawRulers(QPainter* painter, const TrendParam& drawParam) const;
+		void drawRulers(QPainter* painter, TrendParam drawParam) const;
 		TrendStateItem rulerSignalState(const TrendRuler& ruler, QString appSignalId, E::TimeType timeType) const;
 
-		static void adjustPainter(QPainter* painter, int dpiX, int dpiY);
+		static void adjustPainter(QPainter* painter, const TrendParam& trendParam);
 
 		void drawPolyline(QPainter* painter, const QVector<QPointF>& lines, const QRectF& rect) const;
 

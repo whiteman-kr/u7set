@@ -59,6 +59,7 @@ namespace VFrame30
 
 		double realDpiX() const noexcept;			// physicalDpiX * devicePixelration
 		double realDpiY() const noexcept;			// physicalDpiY * devicePixelration
+		double devicePixelRatio() const noexcept;
 
 		static double realDpiX(QPainter* painter) noexcept;
 		static double realDpiY(QPainter* painter) noexcept;

@@ -32,6 +32,8 @@ namespace TrendLib
 		TrendParam();
 		TrendParam(ITrendDataProvider* dataProvider);
 
+		TrendParam& operator=(const TrendParam&)  = default;
+
 	public:
 		bool save(::Proto::TrendParam* message) const;
 		bool load(const ::Proto::TrendParam& message);
@@ -40,9 +42,12 @@ namespace TrendLib
 		QRectF rect() const;
 		void setRect(const QRectF& value);
 
-		int dpiX() const;
-		int dpiY() const;
-		void setDpi(int dpiX, int dpiY);
+		double physicalDpiX() const;
+		double physicalDpiY() const;
+		double realDpiX() const;
+		double realDpiY() const;
+		double devicePixelRatio() const;
+		void setDpi(double physicalDpiX, double physicalDpiY, double devicePixelRatio);
 
 		TrendViewMode viewMode() const;
 		void setViewMode(TrendViewMode value);
@@ -89,8 +94,9 @@ namespace TrendLib
 
 	private:
 		QRectF m_rect;
-		int m_dpiX = 96;
-		int m_dpiY = 96;
+		double m_physicalDpiX = 96;
+		double m_physicalDpiY = 96;
+		double m_devicePixelRatio = 1.0;
 
 		TrendViewMode m_viewMode = TrendViewMode::Separated;
 		E::TrendScaleType m_scaleType = E::TrendScaleType::Linear;
