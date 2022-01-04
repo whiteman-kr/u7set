@@ -277,9 +277,6 @@ void OutputLogTextEdit::keyPressEvent(QKeyEvent* e)
 //
 // OutputDockWidget
 //
-
-
-
 OutputDockWidgetTitleButton::OutputDockWidgetTitleButton(QDockWidget *dockWidget, bool drawActualIconSizeOnWindows)
 	: QAbstractButton(dockWidget),
 	  m_drawActualIconSizeOnWindows(drawActualIconSizeOnWindows)
@@ -776,7 +773,7 @@ void OutputDockWidget::createToolbar()
 	int pixelsWide = fm.horizontalAdvance(windowTitle());
 
 	QHBoxLayout* l = new QHBoxLayout(outputDockPanelWidget);
-	l->setContentsMargins(pixelsWide + margin * 4, 0, margin, 0);
+	l->setContentsMargins(pixelsWide + margin * 4, 0, margin, 1);
 
 	m_errorLabel = new QLabel(tr("E: 0000"));
 	l->addWidget(m_errorLabel);
@@ -837,9 +834,10 @@ void OutputDockWidget::createToolbar()
 	connect(m_findEdit, &QLineEdit::textEdited, [this](){m_findCompleter->complete();});
 	connect(m_findCompleter, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), m_findEdit, &QLineEdit::setText);
 
-	m_findButton = new QPushButton("Find");
+	m_findButton = new QToolButton(this);
+	m_findButton->setText(tr("Find"));
 	l->addWidget(m_findButton);
-	connect(m_findButton, &QPushButton::clicked, this, &OutputDockWidget::findEvent);
+	connect(m_findButton, &QToolButton::clicked, this, &OutputDockWidget::findEvent);
 
 	l->addStretch();
 

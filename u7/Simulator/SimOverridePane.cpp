@@ -34,6 +34,7 @@ SimOverridePane::SimOverridePane(Sim::Simulator* simulator, DbController* dbc, Q
 	// --
 	//
 	QHBoxLayout* layout = new QHBoxLayout;
+	layout->setContentsMargins(0, 0, 0, 0);
 
 	layout->insertWidget(0, m_treeWidget);
 

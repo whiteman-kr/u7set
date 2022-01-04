@@ -157,7 +157,7 @@ private:
 	QCompleter* m_findCompleter = nullptr;
 	QStringList m_findCompleterStrings;
 
-	QPushButton* m_findButton = nullptr;
+	QToolButton* m_findButton = nullptr;
 
 	OutputDockWidgetTitleButton* m_prevWarningButton = nullptr;
 	OutputDockWidgetTitleButton* m_nextWarningButton = nullptr;
