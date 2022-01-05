@@ -188,9 +188,9 @@ int main(int argc, char* argv[])
 
 
 #ifdef GITLAB_CI_BUILD
-	a.setApplicationVersion(QString("0.8.%1 (%2)").arg(CI_PIPELINE_ID).arg(CI_BUILD_REF_SLUG));
+	a.setApplicationVersion(QString("0.9.%1 (%2)").arg(CI_PIPELINE_ID).arg(CI_BUILD_REF_SLUG));
 #else
-	a.setApplicationVersion(QString("0.8.LOCALBUILD"));
+	a.setApplicationVersion(QString("0.9.LOCALBUILD"));
 #endif
 
 	VFrame30::init();

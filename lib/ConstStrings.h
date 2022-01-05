@@ -506,7 +506,8 @@ namespace AppSignalDefaultSpecPropStruct
 
 namespace Manufacturer
 {
-	inline const QString RADIY("Radiy");
+	inline const QString RADIY("RadiyQt6");		// Radiy -> RadiyQt6, thus settings can be stored (for sw with Qt5 and Qt6)
+												// in different registry locations as Qt5 and Qt6 have distinct settings format (for UI)
 	inline const QString SITE("radiy.com");
 }
 
