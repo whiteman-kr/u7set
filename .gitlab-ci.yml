@@ -104,6 +104,8 @@ windows build job:
     - "copy $Env:QT_BIN_DIR\\bin\\Qt6Widgets.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
     - "copy $Env:QT_BIN_DIR\\bin\\Qt6Xml.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
     - "copy $Env:QT_BIN_DIR\\bin\\Qt6Charts.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
+    - "copy $Env:QT_BIN_DIR\\bin\\Qt6OpenGL.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
+    - "copy $Env:QT_BIN_DIR\\bin\\Qt6OpenGLWidgets.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
 # Copy Qt plugins
     - "mkdir \"$Env:CI_PROJECT_DIR\\bin\\release\\iconengines\""
     - "copy $Env:QT_BIN_DIR\\plugins\\iconengines\\qsvgicon.dll \"$Env:CI_PROJECT_DIR/bin/release/iconengines/\""
