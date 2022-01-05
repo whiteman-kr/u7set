@@ -120,8 +120,6 @@ windows build job:
     - "mkdir \"$Env:CI_PROJECT_DIR\\bin\\release\\sqldrivers\""
     - "copy $Env:QT_BIN_DIR\\plugins\\sqldrivers\\qsqlite.dll \"$Env:CI_PROJECT_DIR/bin/release/sqldrivers/\""
     - "copy $Env:QT_BIN_DIR\\plugins\\sqldrivers\\qsqlpsql.dll \"$Env:CI_PROJECT_DIR/bin/release/sqldrivers/\""
-    - "mkdir \"$Env:CI_PROJECT_DIR\\bin\\release\\printsupport\""
-    - "copy $Env:QT_BIN_DIR\\plugins\\printsupport\\windowsprintersupport.dll \"$Env:CI_PROJECT_DIR/bin/release/printsupport/\""
     - "mkdir \"$Env:CI_PROJECT_DIR\\bin\\release\\styles\""
     - "copy $Env:QT_BIN_DIR\\plugins\\styles\\qwindowsvistastyle.dll \"$Env:CI_PROJECT_DIR/bin/release/styles/\""
 
@@ -197,7 +195,6 @@ windows build job:
       - bin/release/imageformats/*.dll
       - bin/release/platforms/*.dll
       - bin/release/sqldrivers/*.dll
-      - bin/release/printsupport/*.dll
       - bin/release/styles/*.dll
       - bin/release/scripthelp/*.*
       - bin/release/scripthelp/search/*.*
