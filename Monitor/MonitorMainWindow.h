@@ -110,6 +110,14 @@ public slots:
 	//void checkMonitorSingleInstance();
 	void activateRequested();
 
+	void toggleSchemaTree();
+	void setVisibleSchemaTree(bool visible);
+	void setVisibleTabBar(bool visible);
+	void setVisibleToolBar(bool visible);
+	void setVisibleStatusBar(bool visible);
+	void setVisibleMenu(bool visible);
+	void setFullScreen(bool value);
+
 	void slot_login();
 	void slot_reLogin();
 

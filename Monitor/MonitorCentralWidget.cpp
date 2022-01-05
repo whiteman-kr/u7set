@@ -1,5 +1,6 @@
 #include "MonitorCentralWidget.h"
 #include "MonitorSchemaManager.h"
+#include "MonitorAppSettings.h"
 #include "../VFrame30/MonitorSchema.h"
 #include "../VFrame30/LogicSchema.h"
 #include "../lib/Ui/SchemaListWidget.h"
@@ -20,6 +21,7 @@ MonitorCentralWidget::MonitorCentralWidget(MonitorSchemaManager* schemaManager,
 	// --
 	//
 	tabBar()->setExpanding(true);
+	tabBar()->setVisible(MonitorAppSettings::instance().showSchemasTabBar());
 
 	// At first we see just one tab, so it is not closable
 	//

@@ -25,6 +25,41 @@ void ScriptMonitorApplication::showSnapshotByTag(QStringList tags)
 	emit signal_showSnapshotByTag(std::move(tags));
 }
 
+void ScriptMonitorApplication::setVisibleTabBar(bool visible)
+{
+	emit signal_setVisibleTabBar(visible);
+}
+
+void ScriptMonitorApplication::setVisibleSchemaTree(bool visible)
+{
+	emit signal_setVisibleSchemaTree(visible);
+}
+
+void ScriptMonitorApplication::toggleSchemaTree()
+{
+	emit signal_toggleSchemaTree();
+}
+
+void ScriptMonitorApplication::setVisibleToolBar(bool visible)
+{
+	emit signal_setVisibleToolBar(visible);
+}
+
+void ScriptMonitorApplication::setVisibleStatusBar(bool visible)
+{
+	emit signal_setVisibleStatusBar(visible);
+}
+
+void ScriptMonitorApplication::setVisibleMenu(bool visible)
+{
+	emit signal_setVisibleMenu(visible);
+}
+
+void ScriptMonitorApplication::setFullScreen(bool fullScreen)
+{
+	emit signal_setFullScreen(fullScreen);
+}
+
 QString ScriptMonitorApplication::equipmentId() const
 {
 	if (m_mainWindow == nullptr)
@@ -43,9 +78,18 @@ void ScriptMonitorApplication::setMainWindow(MonitorMainWindow* mainWindow)
 	if (m_mainWindow != nullptr)
 	{
 		connect(this, &ScriptMonitorApplication::signal_showArchive, m_mainWindow, qOverload<QStringList, QDateTime, QDateTime, int>(&MonitorMainWindow::slot_archive), Qt::QueuedConnection);
+
 		connect(this, &ScriptMonitorApplication::signal_showSnapshot, m_mainWindow, qOverload<QStringList>(&MonitorMainWindow::slot_signalSnapshot), Qt::QueuedConnection);
 		connect(this, &ScriptMonitorApplication::signal_showSnapshotByMask, m_mainWindow, &MonitorMainWindow::slot_signalSnapshotByMask, Qt::QueuedConnection);
 		connect(this, &ScriptMonitorApplication::signal_showSnapshotByTag, m_mainWindow, &MonitorMainWindow::slot_signalSnapshotByTag, Qt::QueuedConnection);
+
+		connect(this, &ScriptMonitorApplication::signal_toggleSchemaTree, m_mainWindow, &MonitorMainWindow::toggleSchemaTree, Qt::QueuedConnection);
+		connect(this, &ScriptMonitorApplication::signal_setVisibleSchemaTree, m_mainWindow, &MonitorMainWindow::setVisibleSchemaTree, Qt::QueuedConnection);
+		connect(this, &ScriptMonitorApplication::signal_setVisibleTabBar, m_mainWindow, &MonitorMainWindow::setVisibleTabBar, Qt::QueuedConnection);
+		connect(this, &ScriptMonitorApplication::signal_setVisibleToolBar, m_mainWindow, &MonitorMainWindow::setVisibleToolBar, Qt::QueuedConnection);
+		connect(this, &ScriptMonitorApplication::signal_setVisibleStatusBar, m_mainWindow, &MonitorMainWindow::setVisibleStatusBar, Qt::QueuedConnection);
+		connect(this, &ScriptMonitorApplication::signal_setVisibleMenu, m_mainWindow, &MonitorMainWindow::setVisibleMenu, Qt::QueuedConnection);
+		connect(this, &ScriptMonitorApplication::signal_setFullScreen, m_mainWindow, &MonitorMainWindow::setFullScreen, Qt::QueuedConnection);
 	}
 
 	return;

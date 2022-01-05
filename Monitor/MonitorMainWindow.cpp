@@ -249,10 +249,18 @@ void MonitorMainWindow::restoreWindowState()
 	auto mainWindowGeometry = s.value("MainWindow/geometry").toByteArray();
 	auto mainWindowState = s.value("MainWindow/state").toByteArray();
 
-
 	move(mainWindowPos);
 	restoreGeometry(mainWindowGeometry);
+
 	restoreState(mainWindowState);
+
+	// Full screen could be set by script, and then saved on exit
+	// there is no weay to unset full screen from UI, so application always start without fullscreen
+	//
+	if ((windowState() & Qt::WindowFullScreen) != 0)
+	{
+		setWindowState(windowState() ^ Qt::WindowFullScreen);
+	}
 
 	// Ensure widget is visible
 	//
@@ -926,6 +934,7 @@ void MonitorMainWindow::showSettings()
 		// Apply settings here
 		//
 		showLogo();
+		setVisibleTabBar(MonitorAppSettings::instance().showSchemasTabBar());
 
 		// Reconnect
 		//
@@ -1520,6 +1529,88 @@ void MonitorMainWindow::slot_login()
 	{
 		m_tuningUserManager.login(this);
 	}
+}
+
+void MonitorMainWindow::toggleSchemaTree()
+{
+	if (m_schemaListAction != nullptr)
+	{
+		m_schemaListAction->toggle();
+	}
+
+	return;
+}
+
+void MonitorMainWindow::setVisibleSchemaTree(bool visible)
+{
+	if (m_schemaListAction != nullptr)
+	{
+		m_schemaListAction-> setChecked(visible);
+	}
+
+	return;
+}
+
+void MonitorMainWindow::setVisibleTabBar(bool visible)
+{
+	MonitorCentralWidget* m = monitorCentralWidget();
+	Q_ASSERT(m);
+
+	if (m != nullptr)
+	{
+		m->tabBar()->setVisible(visible);
+	}
+
+	return;
+}
+
+void MonitorMainWindow::setVisibleToolBar(bool visible)
+{
+	if (m_toolBar != nullptr)
+	{
+		m_toolBar->setVisible(visible);
+	}
+
+	return;
+}
+
+void MonitorMainWindow::setVisibleStatusBar(bool visible)
+{
+	if (auto sb = statusBar();
+		sb != nullptr)
+	{
+		sb->setVisible(visible);
+	}
+
+	return;
+}
+
+void MonitorMainWindow::setVisibleMenu(bool visible)
+{
+	if (auto m = menuBar();
+		m != nullptr)
+	{
+		m->setVisible(visible);
+	}
+
+	return;
+}
+
+void MonitorMainWindow::setFullScreen(bool value)
+{
+	if (value == true)
+	{
+		setWindowState(windowState() | Qt::WindowFullScreen);
+	}
+	else
+	{
+		if ((windowState() & Qt::WindowFullScreen) != 0)
+		{
+			setWindowState(windowState() ^ Qt::WindowFullScreen);
+		}
+	}
+
+	return;
 }
 
 void MonitorMainWindow::slot_reLogin()
