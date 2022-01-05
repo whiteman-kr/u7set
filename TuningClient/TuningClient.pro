@@ -64,6 +64,7 @@ SOURCES +=\
     ../lib/Ui/DialogTcpStatistics.cpp \
     LogonWorkspace.cpp \
 	MainWindow.cpp \
+    ScriptTuningClientApplication.cpp \
     TuningPage.cpp \
     Settings.cpp \
     TuningSignalInfo.cpp \
@@ -108,6 +109,7 @@ HEADERS  += MainWindow.h \
     ../lib/Tuning/TuningUserManager.h \
     ../lib/Ui/DialogTcpStatistics.h \
     LogonWorkspace.h \
+    ScriptTuningClientApplication.h \
     Stable.h \
     TuningPage.h \
     Settings.h \

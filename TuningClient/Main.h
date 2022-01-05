@@ -1,5 +1,5 @@
-#ifndef MAIN_H
-#define MAIN_H
+#pragma once
+#include "ScriptTuningClientApplication.h"
 
 #pragma pack(1)
 struct TuningClientSharedData
@@ -9,6 +9,7 @@ struct TuningClientSharedData
 };
 #pragma pack()
 
+extern ScriptTuningClientApplication theApp;
 extern QSharedMemory* theSharedMemorySingleApp;
 
-#endif // MAIN_H
+

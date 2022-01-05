@@ -2,6 +2,7 @@
 #include "MainWindow.h"
 #include <QApplication>
 #include "Settings.h"
+#include "ScriptTuningClientApplication.h"
 #include "../lib/Tuning/TuningUserManager.h"
 #include <QCommandLineParser>
 #include "../VFrame30/VFrame30Library.h"
@@ -143,6 +144,7 @@ bool EnableDumping(DWORD dumpCount)
 QTranslator m_translator; // contains the translations for this application
 
 QSharedMemory* theSharedMemorySingleApp = nullptr;
+ScriptTuningClientApplication theApp;
 
 void switchTranslator(QTranslator& translator, const QString& filename)
 {
