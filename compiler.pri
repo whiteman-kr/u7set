@@ -7,7 +7,8 @@ win32 {
 }
 unix {
     CONFIG -= c++17
-	CONFIG += c++20
+    #CONFIG += c++20
+	QMAKE_CXXFLAGS += -std=c++20
 }
 
 # Optimization flags
