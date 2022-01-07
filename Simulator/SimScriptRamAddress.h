@@ -29,7 +29,7 @@ namespace Sim
 		Q_INVOKABLE RamAddress(const Address16& addr16);
 		Q_INVOKABLE RamAddress(quint32 offset, quint32 bit);
 
-		~RamAddress() = default;
+		Q_INVOKABLE auto operator<=>(const RamAddress&) const = default;
 
 	public:
 		static const quint32 BadAddress = std::numeric_limits<quint32>::max();

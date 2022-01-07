@@ -26,7 +26,6 @@ namespace Sim
 		bool isNull() const;
 
 	public slots:
-
 		bool isAddrInIoModuleBuf(int modulePlace, RamAddress addr) const;
 		bool isAddrInAcquiredAppDataBuf(RamAddress addr) const;
 		bool isAddrAfterAcquiredAppDataBuf(RamAddress addr) const;
@@ -34,6 +33,7 @@ namespace Sim
 		RamAddress ioModuleBufStartAddr(int modulePlace) const;
 		int ioModuleBufSize() const;
 
+	public:
 		RamAddress appDataStartAddr() const;
 		int appDataSizeW() const;
 		int appDataSizeBytes() const;
