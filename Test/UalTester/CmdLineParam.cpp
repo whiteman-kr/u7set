@@ -311,7 +311,7 @@ bool CmdLineParam::printToReportFile(const QStringList& msgList)
 	qsizetype msgCount = msgList.count();
 	for(qsizetype i = 0; i < msgCount; i++)
 	{
-		writtenBytes = reportFile.write(msgList[i].toUtf8() + "\r\n");
+		writtenBytes = reportFile.write(msgList[static_cast<int>(i)].toUtf8() + "\r\n");
 	}
 
 	reportFile.close();
@@ -336,7 +336,7 @@ int CmdLineParam::getStartTestIndex(const QVector<TestItem>& testList)
 	qsizetype testCount = testList.count();
 	for(qsizetype testIndex = 0; testIndex < testCount; testIndex++)
 	{
-		TestItem test = testList.at(testIndex);
+		TestItem test = testList.at(static_cast<int>(testIndex));
 		if (m_fromTestID != test.testID())
 		{
 			continue;
@@ -376,7 +376,7 @@ bool CmdLineParam::enableExecuteTestForLM(TestItem test)
 	qsizetype presetCount = test.compatibleList().count();
 	for (qsizetype i = 0; i < presetCount; i++)
 	{
-		if (m_presetLM == test.compatibleList().at(i))
+		if (m_presetLM == test.compatibleList().at(static_cast<int>(i)))
 		{
 			foundPreset = true;
 			break;
@@ -402,7 +402,7 @@ void CmdLineParam::updateTestFilesParam(QString& cmdLine)
 		return;
 	}
 
-	params.remove(0, posParam);
+	params.remove(0, static_cast<int>(posParam));
 
 	qsizetype posNextParam = params.indexOf("-", 1);
 	if (posNextParam == -1)
@@ -410,7 +410,7 @@ void CmdLineParam::updateTestFilesParam(QString& cmdLine)
 		posNextParam = cmdLine.length();
 	}
 
-	params.remove(posNextParam, params.length());
+	params.remove(static_cast<int>(posNextParam), params.length());
 
 	QString orignalParams = params;
 

@@ -6,6 +6,7 @@
 #include "../UtilsLib/WUtils.h"
 #include "../Proto/network.pb.h"
 #include "../CommonLib/HostAddressPort.h"
+#include "../OnlineLib/DataProtocols.h"
 
 struct LanControllerInfo
 {
@@ -118,6 +119,12 @@ public:
 	std::vector<quint32> appDataIP32addresses() const;
 	std::vector<HostAddressPort> appDataHostAddressPorts() const;
 
+	int rupVersion() const;
+	void setRupVersion(int v);
+
+	int fotipVersion() const;
+	void setFotipVersion(int v);
+
 private:
 	const LanControllerInfo& find(int controllerNo) const;
 	const LanControllerInfo& find(const QString& equipmentID) const;
@@ -127,6 +134,8 @@ private:
 	bool contains(const QString& equipmentID) const;
 
 private:
+	int m_rupVersion = Rup::V5;
+	int m_fotipVersion = Fotip::V2;
 	std::vector<LanControllerInfo> m_lans;
 
 private:

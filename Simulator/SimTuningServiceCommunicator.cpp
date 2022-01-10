@@ -819,7 +819,7 @@ namespace Sim
 		//
 		Rup::Header& replyRupHeader = reply->rupHeader;
 
-		replyRupHeader.protocolVersion = Rup::VERSION;
+		replyRupHeader.protocolVersion = Rup::V5;
 		replyRupHeader.numerator = requestRupHeader.numerator;
 		replyRupHeader.frameSize = Socket::ENTIRE_UDP_SIZE;
 
@@ -899,7 +899,7 @@ namespace Sim
 
 	bool TuningSourceHandler::checkRequestRupHeader(const Rup::Header& rupHeader)
 	{
-		if (rupHeader.protocolVersion != Rup::VERSION)
+		if (rupHeader.protocolVersion != Rup::V5)
 		{
 			return false;
 		}

@@ -14,9 +14,7 @@
 
 namespace Rup
 {
-	#define RUP_VERSION 5
-
-	const int VERSION = RUP_VERSION;
+	inline const int V5 = 5;		// basic implementation of RUP protocol
 
 	union Flags
 	{
@@ -46,7 +44,11 @@ namespace Rup
 
 		void setDateTime(const QDateTime& dateTime);
 
-		qint64 toInt64(bool reverseBytes = false) const;
+		QDateTime toDateTime(bool reverseBytes, bool* ok) const;
+		qint64 toInt64(bool reverseBytes, bool* ok) const;
+		bool isValid(bool reverseBytes) const;
+
+		QString rawToString(bool reverseBytes) const;
 	};
 
 	struct Header
@@ -102,17 +104,12 @@ namespace Rup
 //
 // ----------------------------------------------------------------------------
 
-// Versions details:
-//
-// V2 - basic implementation of FOTIP protocol
-//
-// V3 - field Fotip::Header::requestNumerator added
-//
-
 namespace Fotip
 {
-	const int V2 = 2;
-	const int V3 = 3;
+	inline const int V2 = 2;		// basic implementation of FOTIP protocol
+
+	inline const int V3 = 3;		// field Fotip::Header::requestNumerator added
+									// in area of Fotip::Header::reserv
 
 	union HeaderFlags
 	{
@@ -175,7 +172,7 @@ namespace Fotip
 		quint16 all;
 	};
 
-	const int HEADER_RESERVE_SIZE = 86;
+	const int HEADER_RESERVE_SIZE = 78;
 
 	struct Header
 	{
@@ -195,6 +192,7 @@ namespace Fotip
 		quint16 dataType;							// enum Fotip::DataType values
 		quint32 offsetInFrameW;
 		quint64 requestNumerator;					// from v3
+		quint64 fotipProcessingNumerator;							// from v3
 
 		quint8 reserv[HEADER_RESERVE_SIZE];
 
