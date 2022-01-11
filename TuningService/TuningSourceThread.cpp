@@ -92,6 +92,10 @@ namespace Tuning
 	//
 	// ----------------------------------------------------------------------------------
 
+	SafeTuningValue::SafeTuningValue()
+	{
+	}
+
 	SafeTuningValue::SafeTuningValue(const SafeTuningValue& stv)
 	{
 		m_mutex.lock();
@@ -108,6 +112,8 @@ namespace Tuning
 		m_value = tv;
 
 		m_mutex.unlock();
+
+		return *this;
 	}
 
 	bool SafeTuningValue::operator == (const SafeTuningValue& stv) const
@@ -116,13 +122,25 @@ namespace Tuning
 
 		m_mutex.lock();
 
-		res = m_value == stv.m_value;
+		res = (m_value == stv.m_value);
 
 		m_mutex.unlock();
 
 		return res;
 	}
 
+	bool SafeTuningValue::operator == (const TuningValue& tv) const
+	{
+		bool res = false;
+
+		m_mutex.lock();
+
+		res = (m_value == tv);
+
+		m_mutex.unlock();
+
+		return res;
+	}
 
 	TuningValueType SafeTuningValue::type() const
 	{
@@ -135,6 +153,28 @@ namespace Tuning
 		m_mutex.unlock();
 
 		return t;
+	}
+
+	void SafeTuningValue::setType(TuningValueType t)
+	{
+		m_mutex.lock();
+
+		m_value.setType(t);
+
+		m_mutex.unlock();
+	}
+
+	TuningValue SafeTuningValue::tuningValue() const
+	{
+		TuningValue tv;
+
+		m_mutex.lock();
+
+		tv = m_value;
+
+		m_mutex.unlock();
+
+		return tv;
 	}
 
 	// ----------------------------------------------------------------------------------

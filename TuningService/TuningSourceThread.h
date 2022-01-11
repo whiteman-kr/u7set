@@ -96,16 +96,26 @@ namespace Tuning
 		void saveToProto(Network::TuningSourceState* tss) const;
 	};
 
+	// ----------------------------------------------------------------------------------
+	//
+	// SafeTuningValue class declaration
+	//
+	// ----------------------------------------------------------------------------------
 
 	class SafeTuningValue
 	{
 	public:
+		SafeTuningValue();
 		SafeTuningValue(const SafeTuningValue& stv);
 
 		SafeTuningValue& operator = (const TuningValue& tv);
 		bool operator == (const SafeTuningValue& stv) const;
+		bool operator == (const TuningValue& stv) const;
 
 		TuningValueType type() const;
+		void setType(TuningValueType t);
+
+		TuningValue tuningValue() const;
 
 	private:
 		mutable SimpleMutex m_mutex;
@@ -132,14 +142,14 @@ namespace Tuning
 		TuningValueType tuningValueType() const { return m_tuningValueType; }
 		QString tuningValueTypeStr() const;
 
-		SafeTuningValue currentValue() const { return m_currentValue; }
-		SafeTuningValue readLowBound() const { return m_readLowBound; }
-		SafeTuningValue readHighBound() const { return m_readHighBound; }
+		TuningValue currentValue() const { return m_currentValue.tuningValue(); }
+		TuningValue readLowBound() const { return m_readLowBound.tuningValue(); }
+		TuningValue readHighBound() const { return m_readHighBound.tuningValue(); }
 		bool isTuningDefault() const { return m_tuningDefaultFlag; }
 
-		SafeTuningValue defaultValue() const { return m_defaultValue; }
-		SafeTuningValue lowBound() const { return m_lowBound; }
-		SafeTuningValue highBound() const { return m_highBound; }
+		TuningValue defaultValue() const { return m_defaultValue; }
+		TuningValue lowBound() const { return m_lowBound; }
+		TuningValue highBound() const { return m_highBound; }
 
 		int offset() const { return m_offset; }
 		int bit() const { return m_bit; }
@@ -193,11 +203,11 @@ namespace Tuning
 
 		TuningValueType m_tuningValueType = TuningValueType::Discrete;
 
-		// signal properties from RPCT Databse
+		// signal properties from RPCT Database
 		//
-		SafeTuningValue m_lowBound;
-		SafeTuningValue m_highBound;
-		SafeTuningValue m_defaultValue;
+		TuningValue m_lowBound;
+		TuningValue m_highBound;
+		TuningValue m_defaultValue;
 
 		// signal state read from LM
 		//
