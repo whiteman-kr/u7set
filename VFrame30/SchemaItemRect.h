@@ -97,12 +97,12 @@ namespace VFrame30
 		Q_PROPERTY(QColor FillColor READ fillColor WRITE setFillColor)
 
 		/// \brief Switches rectangle filling
-		Q_PROPERTY(double fill READ fill WRITE setFill)
-		Q_PROPERTY(double Fill READ fill WRITE setFill)
+		Q_PROPERTY(bool fill READ fill WRITE setFill)
+		Q_PROPERTY(bool Fill READ fill WRITE setFill)
 
 		/// \brief Switches rectangle border drawing
-		Q_PROPERTY(double drawRect READ drawRect WRITE setDrawRect)
-		Q_PROPERTY(double DrawRect READ drawRect WRITE setDrawRect)
+		Q_PROPERTY(bool drawRect READ drawRect WRITE setDrawRect)
+		Q_PROPERTY(bool DrawRect READ drawRect WRITE setDrawRect)
 
 		/// \brief Sets rect pen line style (0 - NoPen, 1 - SolidLine, 2 - DashLine, 3 - DotLine, 4 - DashDotLine, 5 - DashDotDotLine)
 		Q_PROPERTY(E::LineStyle lineStyle READ lineStyle WRITE setLineStyle)

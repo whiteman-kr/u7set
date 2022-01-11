@@ -12,6 +12,9 @@ class TuningSchemaView : public VFrame30::ClientSchemaView
 public:
 	TuningSchemaView(TuningSchemaManager* schemaManager, QWidget* parent = nullptr);
 	virtual ~TuningSchemaView() = default;
+
+protected:
+	virtual void updateScriptGlobalVars(QJSEngine& engine) override;
 };
 
 #endif // TUNINGSCHEMAVIEW_H

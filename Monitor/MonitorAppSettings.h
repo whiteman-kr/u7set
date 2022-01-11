@@ -24,6 +24,7 @@ public:
 
 		int requestTimeIntervalMs = 20;	// 20 ms
 
+		bool showSchemasTabBar = true;
 		bool showLogo = true;
 		bool showItemsLabels = false;
 		bool singleInstance = false;
@@ -66,6 +67,7 @@ public:
 
 	int requestTimeInterval() const;
 
+	bool showSchemasTabBar() const;
 	bool showLogo() const;
 	bool showItemsLabels() const;
 	bool singleInstance() const;

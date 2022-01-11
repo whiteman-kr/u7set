@@ -230,73 +230,6 @@ namespace VFrame30
 		//
 		QString schemaIdByIndex(int schemaIndex) const;
 
-		/// \brief Shows signals archive for specified signals list, time period and time type
-		/*!
-		Shows signals archive for specified signals list, time period and time type
-		\warning Month number is 0-based in JavaScript!\n
-
-		\code
-		const TIME_PLANT =  0;
-		const TIME_SYSTEM = 1;
-		const TIME_LOCAL =  2;
-
-		let signalsList = ["#APPSIGNALID01", "#APPSIGNALID02", "#APPSIGNALID03"];
-
-		let startTime = new Date(2021, 11, 25, 01, 23, 40);	// 25 of December '2021, 01:23:40; month number is 0-based
-		let endTime = new Date();							// Current date and time
-
-		view.showArchive(signalsList, startTime, endTime, TIME_PLANT);
-		\endcode
-		*/
-		void showArchive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType);
-		/// \brief Show snapshot for signals specified by list of Application Signal IDs
-		/*!
-		Show snapshot for signals specified by list of Application Signal IDs
-
-		\code
-		let signalsList = ["#APPSIGNALID01", "#APPSIGNALID02", "#APPSIGNALID03"];
-		view.showSnapshot(signalsList);
-		\endcode
-
-		*/
-		void showSnapshot(QStringList signalsList);
-
-		/// \brief Show snapshot for signals specified by mask or by text fragment.
-		/*!
-		Show snapshot for signals specified by mask. Several masks can be specified by an array.
-		If mask contains '*' or '?' symbols it is processed as a wildcard, otherwise specified test is searched
-		in signal identifiers.
-
-		Detailed information about masks can be found in \ref maskDescription "Masks Description".
-
-		\code
-		// Search by mask
-		//
-		view.showSnapshotByMask("REG*");
-
-		// Search by several masks
-		//
-		view.showSnapshotByMask(["#APPSIGNAL_IN_BL*", "#APPSIGNAL_IN_SIM??"]);
-		\endcode
-		*/
-		void showSnapshotByMask(QStringList masks);
-
-		/// \brief Show snapshot for signals specified by tags
-		/*!
-		Show snapshot for signals specified by tags. Several tags can be specified by an array.
-
-		\code
-		// Search by tag
-		//
-		view.showSnapshotByTag("sim");
-
-		// Search by several tags
-		//
-		view.showSnapshotByTag(["sim", "lock"]);
-		\endcode
-		*/
-		void showSnapshotByTag(QStringList tags);
-
 	private:
 		QString schemaId() const;
 		QString schemaCaption() const;
@@ -337,15 +270,13 @@ namespace VFrame30
 		virtual void mousePressEvent(QMouseEvent* event) override;
 		virtual void mouseReleaseEvent(QMouseEvent* event) override;
 
+		virtual void updateScriptGlobalVars(QJSEngine& engine);
+
 	protected slots:
 		void startRepaintTimer();
 
 	signals:
 		void signal_setSchema(QString schemaId, QStringList highlightIds);
-		void signal_showArchive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType);
-		void signal_showSnapshot(QStringList signalsList);
-		void signal_showSnapshotByMask(QStringList masks);
-		void signal_showSnapshotByTag(QStringList tags);
 
 		// Properties
 		//
@@ -376,19 +307,19 @@ namespace VFrame30
 
 		//  LogController
 		//
-		LogController* logController();
-		const LogController* logController() const;
+		[[nodiscard]] LogController* logController();
+		[[nodiscard]] const LogController* logController() const;
 		void setLogController(LogController* value);
 
 		// --
 		//
-		QJSEngine* jsEngine();
-		QString globalScript() const;
+		[[nodiscard]] QJSEngine* jsEngine();
+		[[nodiscard]] QString globalScript() const;
 
 		bool runScript(QJSValue& evaluatedJs, QString where, bool reportError);
 		bool reEvaluateGlobalScript();
 		QJSValue evaluateScript(QString script, QString where, bool reportError);
-		QString formatScriptError(const QJSValue& scriptValue) const;
+		[[nodiscard]] QString formatScriptError(const QJSValue& scriptValue) const;
 		void reportScriptError(const QJSValue& scriptValue, QString where);
 
 		// Variables
@@ -411,22 +342,17 @@ namespace VFrame30
 		void setTuningClientBehavior(const TuningClientBehavior& src);
 		void setTuningClientBehavior(TuningClientBehavior&& src);
 
-		// Actions
-		void showArchive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType);
-
-		void showSnapshot(QStringList signalsList);
-		void showSnapshotByMask(QStringList masks);
-		void showSnapshotByTag(QStringList tags);
-
 	private:
 		VFrame30::SchemaManager* m_schemaManager = nullptr;
 		VFrame30::ISchemaViewHistory* m_schemaViewHistory = nullptr;		// Can be nullptr if widget does not support history navigation
 
+	protected:
 		TuningController* m_tuningController = nullptr;
 		AppSignalController* m_appSignalController = nullptr;
 		std::unique_ptr<ScriptAppSignalController> m_scriptAppSignalController;
 		LogController* m_logController = nullptr;
 
+	private:
 		bool m_periodicUpdate = true;		// Update widget every 250 ms
 		bool m_infoMode = false;			// Show some aditional info like labels
 

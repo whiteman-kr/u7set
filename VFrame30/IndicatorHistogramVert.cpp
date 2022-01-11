@@ -1476,6 +1476,8 @@ namespace VFrame30
 			case E::CmpType::Greate:	cmpSymbol = QChar(0x25B2);	break;
 			case E::CmpType::Less:		cmpSymbol = QChar(0x25BC);	break;
 			case E::CmpType::NotEqual:	cmpSymbol = QChar(0x2260);	break;
+			case E::CmpType::GreateEqual:	cmpSymbol = QChar(0x2265);	break;
+			case E::CmpType::LessEqual:	cmpSymbol = QChar(0x2264);	break;
 			default:
 				Q_ASSERT(false);
 			}

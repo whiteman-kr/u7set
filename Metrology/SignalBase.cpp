@@ -2703,7 +2703,7 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 			{
 				case E::CmpType::Equal:
 					{
-						//
+						// Equal - Up
 						//
 						comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
 
@@ -2714,7 +2714,7 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 
 						signalComparatorList.push_back(comparatorEx);
 
-						//
+						// Equal - Down
 						//
 						comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
 
@@ -2730,7 +2730,7 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 
 				case E::CmpType::NotEqual:
 					{
-						//
+						// NotEqual - Up
 						//
 						comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
 
@@ -2741,13 +2741,83 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 
 						signalComparatorList.push_back(comparatorEx);
 
-						//
+						// NotEqual - Down
 						//
 						comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
 
 						initComparatorSignals(comparatorEx.get());
 
 						comparatorEx->setCmpType(E::CmpType::Less);
+						comparatorEx->setDeviation(Metrology::ComparatorEx::DeviationType::Down);
+
+						signalComparatorList.push_back(comparatorEx);
+					}
+
+					break;
+
+				case E::CmpType::GreateEqual:
+					{
+						// Greate
+						//
+						comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
+
+						initComparatorSignals(comparatorEx.get());
+						comparatorEx->setCmpType(E::CmpType::Greate);
+						signalComparatorList.push_back(comparatorEx);
+
+						// Equal - Up
+						//
+						comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
+
+						initComparatorSignals(comparatorEx.get());
+
+						comparatorEx->setCmpType(E::CmpType::Less);
+						comparatorEx->setDeviation(Metrology::ComparatorEx::DeviationType::Up);
+
+						signalComparatorList.push_back(comparatorEx);
+
+						// Equal - Down
+						//
+						comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
+
+						initComparatorSignals(comparatorEx.get());
+
+						comparatorEx->setCmpType(E::CmpType::Greate);
+						comparatorEx->setDeviation(Metrology::ComparatorEx::DeviationType::Down);
+
+						signalComparatorList.push_back(comparatorEx);
+					}
+
+					break;
+
+				case E::CmpType::LessEqual:
+					{
+						// Less
+						//
+						comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
+
+						initComparatorSignals(comparatorEx.get());
+						comparatorEx->setCmpType(E::CmpType::Less);
+						signalComparatorList.push_back(comparatorEx);
+
+						// Equal - Up
+						//
+						comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
+
+						initComparatorSignals(comparatorEx.get());
+
+						comparatorEx->setCmpType(E::CmpType::Less);
+						comparatorEx->setDeviation(Metrology::ComparatorEx::DeviationType::Up);
+
+						signalComparatorList.push_back(comparatorEx);
+
+						// Equal - Down
+						//
+						comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
+
+						initComparatorSignals(comparatorEx.get());
+
+						comparatorEx->setCmpType(E::CmpType::Greate);
 						comparatorEx->setDeviation(Metrology::ComparatorEx::DeviationType::Down);
 
 						signalComparatorList.push_back(comparatorEx);

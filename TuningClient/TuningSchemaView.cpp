@@ -1,8 +1,10 @@
 #include "TuningSchemaView.h"
 #include "TuningSchemaWidget.h"
 #include "MainWindow.h"
+#include "Main.h"
 #include "../VFrame30/DrawParam.h"
 #include "../VFrame30/MonitorSchema.h"
+#include "../VFrame30/PropertyNames.h"
 
 TuningSchemaView::TuningSchemaView(TuningSchemaManager* schemaManager, QWidget* parent /*= nullptr*/)
 	:  VFrame30::ClientSchemaView(schemaManager, nullptr, parent)
@@ -28,3 +30,27 @@ TuningSchemaView::TuningSchemaView(TuningSchemaManager* schemaManager, QWidget* 
 	return;
 }
 
+void TuningSchemaView::updateScriptGlobalVars(QJSEngine& engine)
+{
+	VFrame30::ClientSchemaView::updateScriptGlobalVars(engine);
+
+	// create global variable "app"
+	//
+	{
+		QJSValue jsApp = engine.newQObject(&theApp);
+		QQmlEngine::setObjectOwnership(&theApp, QQmlEngine::CppOwnership);
+
+		engine.globalObject().setProperty(VFrame30::PropertyNames::scriptGlobalVariableApp, jsApp);
+	}
+
+	// create global variable "tuning"
+	//
+	{
+		QJSValue jsTuning = engine.newQObject(tuningController());
+		QQmlEngine::setObjectOwnership(tuningController(), QQmlEngine::CppOwnership);
+
+		engine.globalObject().setProperty(VFrame30::PropertyNames::scriptGlobalVariableTuning, jsTuning);
+	}
+
+	return;
+}

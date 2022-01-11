@@ -73,8 +73,12 @@
 
 #include "../lib/AppSignalManager.h"
 #include "../lib/Tuning/TuningSignalManager.h"
+#include "ScriptMonitorApplication.h"
 
+// Defined in main.cpp
+//
 extern AppSignalManager theSignals;
 extern TuningSignalManager theTuningSignals;
+extern ScriptMonitorApplication theApp;
 
 

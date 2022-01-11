@@ -25,6 +25,7 @@ void AppSignalManager::reset()
 		m_signalParams.clear();
 		m_signalParamByEquipmentId.clear();
 		m_tagToAppSignals.clear();
+		m_tags.clear();
 	}
 
 	{
@@ -62,9 +63,9 @@ void AppSignalManager::addSignal(const AppSignalParam& appSignal)
 	// Add tags to m_signaIdsByTag
 	//
 	const QString& appSignalId = appSignal.appSignalId();
+	const std::set<QString>& tags = appSignal.tags();
 
-	for (const std::set<QString>& tags = appSignal.tags();
-		 const QString& tag : tags)
+	for (const QString& tag : tags)
 	{
 		QStringList& l = m_tagToAppSignals[tag];
 
@@ -75,6 +76,10 @@ void AppSignalManager::addSignal(const AppSignalParam& appSignal)
 
 		l.push_back(appSignalId);
 	}
+
+	// Add tags to commot tag set
+	//
+	m_tags.insert(tags.begin(), tags.end());
 
 	return;
 }
@@ -95,9 +100,9 @@ void AppSignalManager::addSignals(const std::vector<AppSignalParam>& appSignals)
 		// Add tags to m_signaIdsByTag
 		//
 		const QString& appSignalId = s.appSignalId();
+		const std::set<QString>& tags = s.tags();
 
-		for (const std::set<QString>& tags = s.tags();
-			 const QString& tag : tags)
+		for (const QString& tag : tags)
 		{
 			QStringList& l = m_tagToAppSignals[tag];
 
@@ -108,6 +113,10 @@ void AppSignalManager::addSignals(const std::vector<AppSignalParam>& appSignals)
 
 			l.push_back(appSignalId);
 		}
+
+		// Add tags to commot tag set
+		//
+		m_tags.insert(tags.begin(), tags.end());
 	}
 
 	return;
@@ -511,3 +520,19 @@ AppSignalParam AppSignalManager::signalParamByEquipemntId(const QString& equipme
 
 	return signalParam(appSignalIdHash, found);
 }
+
+QStringList AppSignalManager::tags() const
+{
+	QReadLocker rl(&m_paramsLocker);
+
+	QStringList result;
+	result.reserve(m_tags.size());
+
+	for (const QString& t : m_tags)
+	{
+		result.push_back(t);
+	}
+
+	return result;
+}
+

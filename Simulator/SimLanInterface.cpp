@@ -1,5 +1,8 @@
 #include "SimLanInterface.h"
 #include "Simulator.h"
+#include "SimTuningLanInterface.h"
+#include "SimAppDataLanInterface.h"
+#include "SimDiagDataLanInterface.h"
 
 namespace Sim
 {
@@ -38,7 +41,9 @@ namespace Sim
 
 	bool LanInterface::isTuning() const
 	{
-		return (static_cast<int>(m_lanControllerInfo.lanControllerType) & static_cast<int>(E::LanControllerType::Tuning)) != 0;
+		bool result = dynamic_cast<const TuningLanInterface*>(this) != nullptr;
+		Q_ASSERT(result ? (static_cast<int>(m_lanControllerInfo.lanControllerType) & static_cast<int>(E::LanControllerType::Tuning)) != 0 : true);
+		return result;
 	}
 
 	TuningLanInterface* LanInterface::toTuningLanInterface()
@@ -71,7 +76,9 @@ namespace Sim
 
 	bool LanInterface::isAppData() const
 	{
-		return (static_cast<int>(m_lanControllerInfo.lanControllerType) & static_cast<int>(E::LanControllerType::AppData)) != 0;
+		bool result = dynamic_cast<const AppDataLanInterface*>(this);
+		Q_ASSERT(result ? (static_cast<int>(m_lanControllerInfo.lanControllerType) & static_cast<int>(E::LanControllerType::AppData)) != 0 : true);
+		return result;
 	}
 
 	int LanInterface::appDataSizeBytes() const
@@ -81,7 +88,9 @@ namespace Sim
 
 	bool LanInterface::isDiagData() const
 	{
-		return (static_cast<int>(m_lanControllerInfo.lanControllerType) & static_cast<int>(E::LanControllerType::DiagData)) != 0;
+		bool result = dynamic_cast<const DiagDataLanInterface*>(this);
+		Q_ASSERT(result ? (static_cast<int>(m_lanControllerInfo.lanControllerType) & static_cast<int>(E::LanControllerType::DiagData)) != 0 : true);
+		return result;
 	}
 
 }

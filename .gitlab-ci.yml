@@ -141,6 +141,9 @@ windows build job:
 # Copy documents
     - "mkdir \"$Env:CI_PROJECT_DIR/bin/release/docs\""
     - "copy $Env:CI_PROJECT_DIR\\Metrology\\docs\\Metrology_User_Manual.pdf \"$Env:CI_PROJECT_DIR/bin/release/docs/\""
+# Copy GlobalScript library
+    - "mkdir \"$Env:CI_PROJECT_DIR/bin/release/scripting\""
+    - "copy $Env:CI_PROJECT_DIR\\Scripts\\GlobalScript\\*.* \"$Env:CI_PROJECT_DIR/bin/release/scripting/\""
 
 #Remove some files not requiered for releases
     - "# ----------------------------------------------"
@@ -210,6 +213,7 @@ windows build job:
       - bin/release/sqldrivers/*.dll
       - bin/release/printsupport/*.dll
       - bin/release/styles/*.dll
+      - bin/release/scripting/*.*
       - bin/release/scripthelp/*.*
       - bin/release/scripthelp/search/*.*
       - bin/release/docs/*.pdf

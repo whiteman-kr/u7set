@@ -250,10 +250,18 @@ void MonitorMainWindow::restoreWindowState()
 	auto mainWindowGeometry = s.value("MainWindow/geometry").toByteArray();
 	auto mainWindowState = s.value("MainWindow/state").toByteArray();
 
-
 	move(mainWindowPos);
 	restoreGeometry(mainWindowGeometry);
+
 	restoreState(mainWindowState);
+
+	// Full screen could be set by script, and then saved on exit
+	// there is no weay to unset full screen from UI, so application always start without fullscreen
+	//
+	if ((windowState() & Qt::WindowFullScreen) != 0)
+	{
+		setWindowState(windowState() ^ Qt::WindowFullScreen);
+	}
 
 	// Ensure widget is visible
 	//
@@ -515,7 +523,7 @@ void MonitorMainWindow::createActions()
 	m_archiveAction->setIcon(QIcon(":/Images/Images/Archive.svg"));
 	m_archiveAction->setEnabled(true);
 	m_archiveAction->setData(QVariant("IAmIndependentArchive"));	// This is required to find this action in MonitorToolBar for drag and drop
-	connect(m_archiveAction, &QAction::triggered, this, &MonitorMainWindow::slot_archive);
+	connect(m_archiveAction, &QAction::triggered, this, QOverload<>::of(&MonitorMainWindow::slot_archive));
 
 	m_trendsAction = new QAction(tr("Trends"), this);
 	m_trendsAction->setIcon(QIcon(":/Images/Images/Trends.svg"));
@@ -527,7 +535,7 @@ void MonitorMainWindow::createActions()
 	m_signalSnapshotAction->setStatusTip(tr("View signals state in real time"));
 	m_signalSnapshotAction->setIcon(QIcon(":/Images/Images/Snapshot.svg"));
 	m_signalSnapshotAction->setEnabled(true);
-	connect(m_signalSnapshotAction, &QAction::triggered, this, &MonitorMainWindow::slot_signalSnapshot);
+	connect(m_signalSnapshotAction, &QAction::triggered, this, qOverload<>(&MonitorMainWindow::slot_signalSnapshot));
 
 	m_findSignalAction = new QAction(tr("Find Signal"), this);
 	m_findSignalAction->setStatusTip(tr("Find signal by it's ID"));
@@ -1025,6 +1033,7 @@ void MonitorMainWindow::showSettings()
 		// Apply settings here
 		//
 		showLogo();
+		setVisibleTabBar(MonitorAppSettings::instance().showSchemasTabBar());
 
 		// Reconnect
 		//
@@ -1203,6 +1212,81 @@ void MonitorMainWindow::slot_archive()
 	return;
 }
 
+void MonitorMainWindow::slot_archive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType)
+{
+	std::vector<AppSignalParam> appSignals;
+	QStringList notFoundSignals;
+
+	if (theSignals.signalsCount() == 0)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Signals database is not loaded!"));
+		return;
+	}
+
+	for (const QString& s : signalsList)
+	{
+		bool ok = false;
+		AppSignalParam asp = theSignals.signalParam(s, &ok);
+
+		if (ok == true)
+		{
+			appSignals.push_back(asp);
+		}
+		else
+		{
+			notFoundSignals.push_back(s);
+		}
+	}
+
+	if (notFoundSignals.empty() == false)
+	{
+		QString errorMsg;
+
+		int count = notFoundSignals.size();
+		if (count > 10)
+		{
+			notFoundSignals.erase(notFoundSignals.begin() + 10, notFoundSignals.end());
+
+			errorMsg = tr("Signals with specified identifiers were not found:\n\n%1\n\nand %2 more.")
+					   .arg(notFoundSignals.join('\n'))
+					   .arg(count - notFoundSignals.size());
+		}
+		else
+		{
+			errorMsg = tr("Signals with specified identifiers were not found:\n\n%1\n").arg(notFoundSignals.join('\n'));
+		}
+
+		QMessageBox::critical(this, qAppName(), errorMsg);
+		return;
+	}
+
+	if (appSignals.empty() == true)
+	{
+		QMessageBox::critical(this, qAppName(), tr("No signals supplied!"));
+		return;
+	}
+
+	if (timeType != static_cast<int>(E::TimeType::Plant) &&
+		timeType != static_cast<int>(E::TimeType::System) &&
+		timeType != static_cast<int>(E::TimeType::Local))
+	{
+		QMessageBox::critical(this, qAppName(), tr("Incorrect time type! Supported values: 0 - Plant, 1 - System, 2 - Local."));
+		return;
+	}
+
+	if (startTime > endTime)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Archive request Start Time (%1) shoud be earlier than End Time (%2).")
+							  .arg(startTime.toString("dd/MM/yyyy hh:mm:ss"))
+							  .arg(endTime.toString("dd/MM/yyyy hh:mm:ss")));
+		return;
+	}
+
+	MonitorArchive::requestArchiveWithNewWidget(&configController(), appSignals, startTime, endTime, static_cast<E::TimeType>(timeType), this);
+	return;
+}
+
+
 void MonitorMainWindow::slot_trends()
 {
 	// Get Trends list
@@ -1286,6 +1370,100 @@ void MonitorMainWindow::slot_signalSnapshot()
 	d->show();
 
 	return;
+}
+
+void MonitorMainWindow::slot_signalSnapshot(QStringList signalsList)
+{
+	MonitorDialogSignalSnapshot* d = MonitorDialogSignalSnapshot::createDialog(
+										 &configController(),
+										 tcpSignalClient(),
+										 &theSignals,
+										 monitorCentralWidget());
+
+	std::vector<AppSignalParam> specialSignals;
+
+	QStringList notFoundSignals;
+
+	for (const QString& appSignalId : signalsList)
+	{
+		bool found = false;
+
+		AppSignalParam asp = theSignals.signalParam(appSignalId, &found);
+		if (found == true)
+		{
+			specialSignals.push_back(asp);
+		}
+		else
+		{
+			notFoundSignals.push_back(appSignalId);
+		}
+	}
+
+
+	if (notFoundSignals.empty() == false)
+	{
+		QString errorMsg;
+
+		int count = notFoundSignals.size();
+		if (count > 10)
+		{
+			notFoundSignals.erase(notFoundSignals.begin() + 10, notFoundSignals.end());
+
+			errorMsg = tr("Signals with specified identifiers were not found:\n\n%1\n\nand %2 more.")
+								  .arg(notFoundSignals.join('\n'))
+								  .arg(count - notFoundSignals.size());
+
+		}
+		else
+		{
+			errorMsg = tr("Signals with specified identifiers were not found!\n\n%1").arg(notFoundSignals.join('\n'));
+		}
+
+		QMessageBox::critical(this, qAppName(), errorMsg);
+		return;
+
+	}
+
+	if (specialSignals.empty() == true)
+	{
+		return;
+	}
+
+	d->resetSignalsType();
+	d->setSignalsMask({});
+	d->setSignalsTags({});
+
+	d->setSpecificSignals(specialSignals);
+
+	d->show();
+}
+
+void MonitorMainWindow::slot_signalSnapshotByMask(QStringList masks)
+{
+	auto d = MonitorDialogSignalSnapshot::createDialog(&configController(),
+													   tcpSignalClient(),
+													   &theSignals,
+													   monitorCentralWidget());
+
+	d->resetSignalsType();
+	d->setSignalsMask(masks);
+	d->setSignalsTags({});
+
+	d->show();
+}
+
+void MonitorMainWindow::slot_signalSnapshotByTag(QStringList tags)
+{
+	auto d = MonitorDialogSignalSnapshot::createDialog(&configController(),
+													   tcpSignalClient(),
+													   &theSignals,
+													   monitorCentralWidget());
+
+	d->resetSignalsType();
+	d->setSignalsMask({});
+	d->setSignalsTags(tags);
+
+	d->show();
 }
 
 void MonitorMainWindow::slot_findSignal()
@@ -1436,6 +1614,88 @@ void MonitorMainWindow::slot_login()
 	}
 }
 
+void MonitorMainWindow::toggleSchemaTree()
+{
+	if (m_schemaListAction != nullptr)
+	{
+		m_schemaListAction->toggle();
+	}
+
+	return;
+}
+
+void MonitorMainWindow::setVisibleSchemaTree(bool visible)
+{
+	if (m_schemaListAction != nullptr)
+	{
+		m_schemaListAction-> setChecked(visible);
+	}
+
+	return;
+}
+
+void MonitorMainWindow::setVisibleTabBar(bool visible)
+{
+	MonitorCentralWidget* m = monitorCentralWidget();
+	Q_ASSERT(m);
+
+	if (m != nullptr)
+	{
+		m->tabBar()->setVisible(visible);
+	}
+
+	return;
+}
+
+void MonitorMainWindow::setVisibleToolBar(bool visible)
+{
+	if (m_toolBar != nullptr)
+	{
+		m_toolBar->setVisible(visible);
+	}
+
+	return;
+}
+
+void MonitorMainWindow::setVisibleStatusBar(bool visible)
+{
+	if (auto sb = statusBar();
+		sb != nullptr)
+	{
+		sb->setVisible(visible);
+	}
+
+	return;
+}
+
+void MonitorMainWindow::setVisibleMenu(bool visible)
+{
+	if (auto m = menuBar();
+		m != nullptr)
+	{
+		m->setVisible(visible);
+	}
+
+	return;
+}
+
+void MonitorMainWindow::setFullScreen(bool value)
+{
+	if (value == true)
+	{
+		setWindowState(windowState() | Qt::WindowFullScreen);
+	}
+	else
+	{
+		if ((windowState() & Qt::WindowFullScreen) != 0)
+		{
+			setWindowState(windowState() ^ Qt::WindowFullScreen);
+		}
+	}
+
+	return;
+}
+
 void MonitorMainWindow::slot_reLogin()
 {
 	if (m_tuningUserManager.tuningSessionTimeout() > 0 && m_tuningUserManager.isLoggedIn() == true)
@@ -1480,14 +1740,14 @@ void MonitorMainWindow::slot_loggedOut()
 	m_loginUserTimeoutAction->setEnabled(false);
 }
 
-MonitorConfigController* MonitorMainWindow::configController()
+MonitorConfigController& MonitorMainWindow::configController()
 {
-	return &m_configController;
+	return m_configController;
 }
 
-const MonitorConfigController* MonitorMainWindow::configController() const
+const MonitorConfigController& MonitorMainWindow::configController() const
 {
-	return &m_configController;
+	return m_configController;
 }
 
 TcpSignalClient* MonitorMainWindow::tcpSignalClient()
@@ -1705,7 +1965,7 @@ void MonitorToolBar::dropEvent(QDropEvent* event)
 
 		if (appSignals.empty() == false)
 		{
-			MonitorArchive::startNewWidget(mainWindow->configController(), appSignals, mainWindow);
+			MonitorArchive::startNewWidget(&mainWindow->configController(), appSignals, mainWindow);
 		}
 	}
 

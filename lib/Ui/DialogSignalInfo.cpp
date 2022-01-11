@@ -38,6 +38,8 @@ QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowClose
 		case E::CmpType::Less:		s += "Type: <b>&lt; (Less)</b><br>";		break;
 		case E::CmpType::Equal:		s += "Type: <b>= (Equal)</b><br>";			break;
 		case E::CmpType::NotEqual:	s += "Type: <b>&lt;&gt; (Not Equal)</b><br>";		break;
+		case E::CmpType::GreateEqual:	s += "Type: <b>&gt;= (Greater or Equal)</b><br>";	break;
+		case E::CmpType::LessEqual:		s += "Type: <b>&lt;= (Less or Equal)</b><br>";		break;
 	}
 
 	// Input
@@ -1620,6 +1622,8 @@ void DialogSignalInfo::fillSetpoints()
 			case E::CmpType::Equal:		item->setText(static_cast<int>(SetpointsColumns::Type), "=");		break;
 			case E::CmpType::Less:		item->setText(static_cast<int>(SetpointsColumns::Type), "<");		break;
 			case E::CmpType::NotEqual:	item->setText(static_cast<int>(SetpointsColumns::Type), "<>");		break;
+			case E::CmpType::GreateEqual:	item->setText(static_cast<int>(SetpointsColumns::Type), ">=");	break;
+			case E::CmpType::LessEqual:	item->setText(static_cast<int>(SetpointsColumns::Type), "<=");		break;
 		}
 
 		// Output
