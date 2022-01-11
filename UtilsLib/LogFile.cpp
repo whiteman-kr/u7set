@@ -89,7 +89,7 @@ namespace Log
 			return false;
 		}
 
-		sessionHash = _strtoui64(ptr, nullptr, 16);
+		sessionHash = strtoull(ptr, nullptr, 16);
 
 		if (currentSessionHash != 0 && sessionHash != currentSessionHash)
 		{
