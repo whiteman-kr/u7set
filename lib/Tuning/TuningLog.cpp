@@ -16,7 +16,7 @@ namespace TuningLog
 	//
 
 	TuningLog::TuningLog(const QString& logName, const QString& path, int maxFileSize, int maxFilesCount)
-		: Log::LogFile(logName, path, maxFileSize, maxFilesCount)
+		: Log::LogFile(logName, path, maxFileSize, maxFilesCount, false/*addAppInfoOnStart*/)
 	{
 	}
 
@@ -73,7 +73,7 @@ namespace TuningLog
 		headers.push_back(std::make_pair(tr("Old Value"), 0.2));
 		headers.push_back(std::make_pair(tr("New Value"), 0.2));
 
-		LogFile::view(parent, false, headers);
+		LogFile::view(parent, false/*showType*/, true/*headerVisible*/, headers);
 	}
 }
 
