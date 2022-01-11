@@ -230,6 +230,7 @@ namespace Fotip
 		dataType = reverseUint16(dataType);
 		offsetInFrameW = reverseUint32(offsetInFrameW);
 		requestNumerator = reverseUint64(requestNumerator);
+		fotipProcessingNumerator = reverseUint64(fotipProcessingNumerator);
 	}
 
 	QString Frame::valueStr(bool reverseValue)

@@ -522,7 +522,7 @@ namespace Tuning
 		{
 			replyReceived = m_replyQueue.pop(&m_reply, QThread::currentThread());
 
-			if (replyReceived == true && m_fotipVersion == Fotip::V3)
+			if (replyReceived == true && m_fotipVersion >= Fotip::V3)
 			{
 				quint64 replyNumerator = reverseUint64(m_reply.fotipFrame.header.requestNumerator);
 

@@ -1,4 +1,5 @@
 #include "TcpTuningServer.h"
+#include "TuningService.h"
 
 namespace Tuning
 {

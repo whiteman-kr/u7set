@@ -70,6 +70,8 @@ namespace Sim
 
 		std::queue<TuningRecord> fetchWriteTuningQueue(const QString& lmEquipmentId);
 
+		ScopedLog& log();
+
 	private:
 		qint64 writeTuningRecord(TuningRecord&& r);
 
@@ -98,6 +100,17 @@ namespace Sim
 		//
 		QMutex m_qmutex;
 		std::map<QString, std::queue<TuningRecord>> m_writeTuningQueue;
+	};
+
+	class FotipProcessingNumeratorsMap
+	{
+	public:
+		void appendNumerator(const QString& lmEquipmentID);
+		quint64 getNextFotipProcessingNumerator(const QString& lmEquipmentID);
+
+	private:
+		QMutex m_mapMutex;
+		std::map<QString, quint64> m_fotipProcessingNumeratorsMap;			// lmEquipmentID -> fotipProcessingNumerator
 	};
 
 	class TuningSourceHandler;
@@ -240,13 +253,17 @@ namespace Sim
 
 		void readFrameData(quint32 startFrameAddrW, Fotip::Frame* reply);
 
+		void setFotipProcessingNumerator(RupFotip* reply);
+
 	private:
 		TuningServiceCommunicator& m_tsCommunicator;
+		ScopedLog& m_log;
 		QString m_lmEquipmentID;
 		QString m_portEquipmentID;
 		HostAddressPort m_tuningSourceIP;
 		int m_moduleType = 0;
-		int m_tuningProtocolVersion = Fotip::V2;
+		int m_rupVersion = Rup::V5;
+		int m_fotipVersion = Fotip::V2;
 		int m_lmNumber = -1;
 		int m_subsystemKey = -1;
 		quint64 m_lmUniqueID = 0;
@@ -277,6 +294,9 @@ namespace Sim
 		int m_receivedConfirmationsCount = 0;
 
 		RupFotip m_delayedReply;
+
+		static FotipProcessingNumeratorsMap m_processingNumeratorsMap;	// one map for all TuningSourceHandlers
+																		// each entry in map according to one real LM
 	};
 }
 

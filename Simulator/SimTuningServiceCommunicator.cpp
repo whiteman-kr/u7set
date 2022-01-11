@@ -140,6 +140,11 @@ namespace Sim
 		return result;
 	}
 
+	ScopedLog& TuningServiceCommunicator::log()
+	{
+		return m_log;
+	}
+
 	qint64 TuningServiceCommunicator::writeTuningRecord(TuningRecord&& r)
 	{
 		QMutexLocker l(&m_qmutex);
@@ -205,6 +210,39 @@ namespace Sim
 	bool TuningServiceCommunicator::softwareEnabled() const
 	{
 		return m_simulator->software().enabled();
+	}
+
+	// ---------------------------------------------------------------------------------------------------------
+	//
+	// FotipProcessingNumeratorsMap class implementation
+	//
+	// ---------------------------------------------------------------------------------------------------------
+
+	void FotipProcessingNumeratorsMap::appendNumerator(const QString& lmEquipmentID)
+	{
+		AUTO_LOCK(m_mapMutex);
+
+		if (m_fotipProcessingNumeratorsMap.contains(lmEquipmentID) == false)
+		{
+			m_fotipProcessingNumeratorsMap.insert({lmEquipmentID, 0});
+		}
+	}
+
+	quint64 FotipProcessingNumeratorsMap::getNextFotipProcessingNumerator(const QString& lmEquipmentID)
+	{
+		AUTO_LOCK(m_mapMutex);
+
+		auto it = m_fotipProcessingNumeratorsMap.find(lmEquipmentID);
+
+		if (it == m_fotipProcessingNumeratorsMap.end())
+		{
+			Q_ASSERT(false);
+			return 0;
+		}
+
+		quint64 numerator = ++it->second;
+
+		return numerator;
 	}
 
 	// ---------------------------------------------------------------------------------------------------------
@@ -631,7 +669,7 @@ namespace Sim
 		m_writeConfirmationQueue.swap(emptyQueue);
 		m_queueMutex.unlock();
 
-		for(auto p : m_tuningSourcesByIP)
+		for(auto& p : m_tuningSourcesByIP)
 		{
 			TEST_PTR_CONTINUE(p.second);
 
@@ -645,16 +683,21 @@ namespace Sim
 	//
 	// ---------------------------------------------------------------------------------------------------------
 
+	FotipProcessingNumeratorsMap TuningSourceHandler::m_processingNumeratorsMap;
+
 	TuningSourceHandler::TuningSourceHandler(TuningServiceCommunicator& tsCommunicator,
 												 const QString& lmEquipmentID,
 												 const QString& portEquipmentID,
 												 const HostAddressPort& ip,
 												 const ::LogicModuleInfo& logicModuleInfo) :
 		m_tsCommunicator(tsCommunicator),
+		m_log(tsCommunicator.log()),
 		m_lmEquipmentID(lmEquipmentID),
 		m_portEquipmentID(portEquipmentID),
 		m_tuningSourceIP(ip),
 		m_moduleType(logicModuleInfo.moduleType()),
+		m_rupVersion(logicModuleInfo.lanControllers.rupVersion()),
+		m_fotipVersion(logicModuleInfo.lanControllers.fotipVersion()),
 		m_lmNumber(logicModuleInfo.lmNumber),
 		m_subsystemKey(logicModuleInfo.subsystemKey),
 		m_lmUniqueID(logicModuleInfo.lmUniqueID)
@@ -688,6 +731,8 @@ namespace Sim
 													QString("TuningData::") + m_lmEquipmentID);
 
 		m_tuningDataReadBuffer.resize(m_tuningDataFramePayloadB);
+
+		m_processingNumeratorsMap.appendNumerator(m_lmEquipmentID);
 	}
 
 	TuningSourceHandler::~TuningSourceHandler()
@@ -762,6 +807,7 @@ namespace Sim
 		if (result == true)
 		{
 			memcpy(reply, &m_delayedReply, sizeof(m_delayedReply));
+			setFotipProcessingNumerator(reply);
 		}
 
 		return result;
@@ -819,7 +865,7 @@ namespace Sim
 		//
 		Rup::Header& replyRupHeader = reply->rupHeader;
 
-		replyRupHeader.protocolVersion = Rup::V5;
+		replyRupHeader.protocolVersion = static_cast<quint16>(m_rupVersion);
 		replyRupHeader.numerator = requestRupHeader.numerator;
 		replyRupHeader.frameSize = Socket::ENTIRE_UDP_SIZE;
 
@@ -834,7 +880,7 @@ namespace Sim
 		//
 		Fotip::Header& replyFotipHeader = reply->fotipFrame.header;
 
-		replyFotipHeader.protocolVersion = static_cast<quint16>(m_tuningProtocolVersion);
+		replyFotipHeader.protocolVersion = static_cast<quint16>(m_fotipVersion);
 		replyFotipHeader.uniqueId = m_lmUniqueID;
 		replyFotipHeader.subsystemKey.lmNumber = m_lmNumber;
 		replyFotipHeader.subsystemKey.subsystemCode = m_subsystemKey;
@@ -846,6 +892,17 @@ namespace Sim
 
 		replyFotipHeader.startAddressW = requestFotipHeader.startAddressW;
 		replyFotipHeader.offsetInFrameW = requestFotipHeader.offsetInFrameW;
+
+		replyFotipHeader.fotipProcessingNumerator = 0;	// here is only initialization (from Fotip::V3)
+														// real value will set after request processing
+		if (m_fotipVersion >= Fotip::V3)
+		{
+			replyFotipHeader.requestNumerator = requestFotipHeader.requestNumerator;
+		}
+		else
+		{
+			replyFotipHeader.requestNumerator = 0;
+		}
 
 		replyFlags.setSOR = m_setSorChassisState == true ? 1 : 0;
 
@@ -888,6 +945,10 @@ namespace Sim
 			memcpy(&m_delayedReply, reply, sizeof(m_delayedReply));
 			return false;
 		}
+		else
+		{
+			setFotipProcessingNumerator(reply);
+		}
 
 		return true;
 	}
@@ -899,8 +960,10 @@ namespace Sim
 
 	bool TuningSourceHandler::checkRequestRupHeader(const Rup::Header& rupHeader)
 	{
-		if (rupHeader.protocolVersion != Rup::V5)
+		if (rupHeader.protocolVersion != m_rupVersion)
 		{
+			m_log.writeError(QString("Wrong RUP protocol version on %1. Received version %2, expected version %3").
+							 arg(m_portEquipmentID).arg(rupHeader.protocolVersion).arg(m_rupVersion));
 			return false;
 		}
 
@@ -938,8 +1001,10 @@ namespace Sim
 
 	bool TuningSourceHandler::checkRequestFotipHeader(const Fotip::Header& requestFotipHeader, Fotip::HeaderFlags* replyFlags)
 	{
-		if (requestFotipHeader.protocolVersion != m_tuningProtocolVersion)
+		if (requestFotipHeader.protocolVersion != m_fotipVersion)
 		{
+			m_log.writeError(QString("Wrong FOTIP protocol version on %1. Received version %2, expected version %3").
+							 arg(m_portEquipmentID).arg(requestFotipHeader.protocolVersion).arg(m_fotipVersion));
 			replyFlags->versionError = 1;
 		}
 
@@ -1205,6 +1270,22 @@ namespace Sim
 			Q_ASSERT(false);
 		}
 	}
+
+	void TuningSourceHandler::setFotipProcessingNumerator(RupFotip* reply)
+	{
+		TEST_PTR_RETURN(reply);
+
+		if (m_fotipVersion >= Fotip::V3)
+		{
+			quint64 numerator = m_processingNumeratorsMap.getNextFotipProcessingNumerator(m_lmEquipmentID);
+			reply->fotipFrame.header.fotipProcessingNumerator = numerator;
+		}
+		else
+		{
+			reply->fotipFrame.header.fotipProcessingNumerator = 0;
+		}
+	}
+
 
 }
 
