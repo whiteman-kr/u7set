@@ -321,10 +321,9 @@ namespace Tuning
 
 	void TuningServiceWorker::initialize()
 	{
-		m_tuningPacketLog = std::make_shared<CircularLogger>();
-
-		LOGGER_INIT(m_tuningPacketLog, QString("TuningPacket"), Service::getInstanceID(argc(), argv()));
-		m_tuningPacketLog->setLogCodeInfo(false);
+//		m_tuningPacketLog = std::make_shared<CircularLogger>();
+//		LOGGER_INIT(m_tuningPacketLog, QString("TuningPacket"), Service::getInstanceID(argc(), argv()));
+//		m_tuningPacketLog->setLogCodeInfo(false);
 
 		runCfgLoaderThread();
 	}
@@ -334,7 +333,10 @@ namespace Tuning
 		clearConfiguration();
 		stopCfgLoaderThread();
 
-		LOGGER_SHUTDOWN(m_tuningPacketLog);
+		if (m_tuningPacketLog != nullptr)
+		{
+			LOGGER_SHUTDOWN(m_tuningPacketLog);
+		}
 	}
 
 	void TuningServiceWorker::runCfgLoaderThread()
@@ -374,13 +376,13 @@ namespace Tuning
 		m_mainMutex.unlock();
 	}
 
-	void TuningServiceWorker::applyNewConfiguration()
+	void TuningServiceWorker::applyNewConfiguration(const TuningSources& newSources)
 	{
 		DEBUG_LOG_MSG(m_logger, QString("Apply new configuration"));
 
 		m_mainMutex.lock();
 
-		buildServiceMaps();
+		buildServiceMaps(newSources);
 		runTuningSourceThreads();
 		runSourcesListenerThreads();
 
@@ -389,8 +391,9 @@ namespace Tuning
 		runTcpTuningServerThread();
 	}
 
-	void TuningServiceWorker::buildServiceMaps()
+	void TuningServiceWorker::buildServiceMaps(const TuningSources& newSources)
 	{
+		m_tuningSources = newSources;
 		fillControlledLans();
 		m_clientContextMap.init(m_settings, m_tuningSources);
 	}
@@ -399,6 +402,7 @@ namespace Tuning
 	{
 		m_controlledLans.clear();
 		m_clientContextMap.clear();
+		m_tuningSources.clear();
 	}
 
 	void TuningServiceWorker::fillControlledLans()
@@ -511,11 +515,13 @@ namespace Tuning
 		return result;
 	}
 
-	bool TuningServiceWorker::readTuningDataSources(const QByteArray& fileData, const QString& profile)
+	bool TuningServiceWorker::readTuningDataSources(const QByteArray& fileData, const QString& profile, TuningSources* newSources)
 	{
-		m_tuningSources.clear();
+		TEST_PTR_RETURN_FALSE(newSources);
 
-		TuningSources sources;
+		newSources->clear();
+
+		QVector<TuningSource> sources;
 
 		bool result = DataSourcesXML<TuningSource>::readFromXml(fileData, &sources);
 
@@ -525,11 +531,11 @@ namespace Tuning
 		{
 			if (ts.profile() == profile)
 			{
-				m_tuningSources.push_back(ts);
+				newSources->push_back(ts);
 			}
 		}
 
-		m_tuningSources.buildMaps();
+		newSources->buildMaps();
 
 		return result;
 	}
@@ -553,6 +559,8 @@ namespace Tuning
 			m_tcpTuningServerThread->quitAndWait();
 			delete m_tcpTuningServerThread;
 			m_tcpTuningServerThread = nullptr;
+
+			DEBUG_LOG_MSG(m_logger, QString("TcpTuningServerThread stoped"));
 		}
 	}
 
@@ -802,6 +810,8 @@ namespace Tuning
 
 		bool result = true;
 
+		TuningSources newSources;
+
 		for(Builder::BuildFileInfo bfi : buildFileInfoArray)
 		{
 			QByteArray fileData;
@@ -820,7 +830,7 @@ namespace Tuning
 
 			if (bfi.ID == CfgFileId::TUNING_SOURCES)
 			{
-				result &= readTuningDataSources(fileData, sessionParams.currentSettingsProfile);
+				result &= readTuningDataSources(fileData, sessionParams.currentSettingsProfile, &newSources);
 			}
 
 			if (result == true)
@@ -837,7 +847,7 @@ namespace Tuning
 		if (result == true)
 		{
 			clearConfiguration();
-			applyNewConfiguration();
+			applyNewConfiguration(newSources);
 		}
 	}
 }

@@ -76,16 +76,16 @@ namespace Tuning
 		void stopCfgLoaderThread();
 
 		void clearConfiguration();
-		void applyNewConfiguration();
+		void applyNewConfiguration(const TuningSources& newSources);
 
-		void buildServiceMaps();
+		void buildServiceMaps(const TuningSources& newSources);
 		void clearServiceMaps();
 
 		void fillControlledLans();
 
 		bool readConfiguration(const QByteArray& cfgXmlData);
 		bool loadConfigurationFromFile(const QString& fileName);
-		bool readTuningDataSources(const QByteArray& fileData, const QString& profile);
+		bool readTuningDataSources(const QByteArray& fileData, const QString& profile, TuningSources* newSources);
 
 		void runTcpTuningServerThread();
 		void stopTcpTuningServerThread();

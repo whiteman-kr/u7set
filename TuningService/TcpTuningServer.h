@@ -99,8 +99,9 @@ namespace Tuning
 	class TcpTuningServerThread : public Tcp::ServerThread
 	{
 	public:
-		TcpTuningServerThread(const HostAddressPort& listenAddressPort,
-								TcpTuningServer* server, std::shared_ptr<CircularLogger> logger);
+		TcpTuningServerThread(	const HostAddressPort& listenAddressPort,
+								TcpTuningServer* server,
+								std::shared_ptr<CircularLogger> logger);
 	};
 
 }
