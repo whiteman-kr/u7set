@@ -5583,42 +5583,20 @@ namespace Builder
 
 	void ModuleLogicCompiler::sortSignalList(QVector<UalSignal*>& signalList)
 	{
-		int count = signalList.count();
-
-		for(int i = 0; i < count - 1; i++)
-		{
-			for(int k = i + 1; k < count; k++)
-			{
-				UalSignal* s1 = signalList[i];
-				UalSignal* s2 = signalList[k];
-
-				if (s1->appSignalID() > s2->appSignalID())
-				{
-					signalList[i] = s2;
-					signalList[k] = s1;
-				}
-			}
-		}
+		std::sort(signalList.begin(), signalList.end(),
+				  [] (UalSignal* a, UalSignal* b)
+					{
+						return a->appSignalID() < b->appSignalID();
+					});
 	}
 
 	void ModuleLogicCompiler::sortSignalList(QVector<const UalSignal*>& signalList)
 	{
-		int count = signalList.count();
-
-		for(int i = 0; i < count - 1; i++)
-		{
-			for(int k = i + 1; k < count; k++)
-			{
-				const UalSignal* s1 = signalList[i];
-				const UalSignal* s2 = signalList[k];
-
-				if (s1->appSignalID() > s2->appSignalID())
-				{
-					signalList[i] = s2;
-					signalList[k] = s1;
-				}
-			}
-		}
+		std::sort(signalList.begin(), signalList.end(),
+				  [] (const UalSignal* a, const UalSignal* b)
+					{
+						return a->appSignalID() < b->appSignalID();
+					});
 	}
 
 	bool ModuleLogicCompiler::disposeSignalsInMemory()
