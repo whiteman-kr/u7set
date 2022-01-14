@@ -94,7 +94,7 @@ namespace Builder
 							continue;
 						}
 
-						racks.append(Metrology::RackParam(racks.count() , pRack->equipmentId(), pRack->caption()));
+						racks.append(Metrology::RackParam(TO_INT(racks.count()) , pRack->equipmentId(), pRack->caption()));
 					}
 				}
 
@@ -102,7 +102,7 @@ namespace Builder
 				//
 				xml.writeStartElement("Racks");
 				{
-					xml.writeIntAttribute(XmlAttribute::COUNT, racks.count());
+					xml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(racks.count()));
 
 					for(Metrology::RackParam rack : racks)
 					{
@@ -139,7 +139,7 @@ namespace Builder
 				//
 				xml.writeStartElement("TuningSources");
 				{
-					xml.writeIntAttribute(XmlAttribute::COUNT, tuningSourceEquipmentID.count());
+					xml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(tuningSourceEquipmentID.count()));
 
 					for(const QString& equipmentID : tuningSourceEquipmentID)
 					{
@@ -251,7 +251,7 @@ namespace Builder
 		//
 		QVector<Metrology::SignalParam> signalsToWrite;
 
-		int signalCount = m_signalSet->count();
+		int signalCount = TO_INT(m_signalSet->count());
 		for(int i = 0; i < signalCount; i++)
 		{
 			AppSignal& signal = (*m_signalSet)[i];
@@ -681,7 +681,7 @@ namespace Builder
 
 		if (sensorType != E::SensorType::NoSensor && sensorType != E::SensorType::Ohm_Raw)
 		{
-			if (r0 == 0.0)
+			if (r0 < R0_OHM_LOW_LIMIT || r0 > R0_OHM_HIGH_LIMIT)
 			{
 				// Signal %1 has wrong R0 (ThermoResistor)
 				//

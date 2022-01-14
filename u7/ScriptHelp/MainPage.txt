@@ -97,13 +97,17 @@ All MATS schema items have special properties to store script code for different
 
 <b>Monitor</b> and <b>TuningClient</b> equipment presets have special <b>GlobalScript</b> property that stores library script functions 
 defined by user. Library functions are available to all schema items displayed by appropriate software. 
-For example, if many schema items have scripts with same logic (maybe with own signal identifiers), this logic 
+For example, if many schema items have scripts with same logic (maybe with their own signal identifiers), this logic 
 can be described in global script function and called from items scripts with different arguments.
 
 Script event handlers have predefined function prototypes. They are described in corresponding items descriptions 
 and examples in this document.
 
 A few global classes can be accessed by scripts:
+
+- \ref ScriptMonitorApplication "ScriptMonitorApplication" class (<b>app</b> object) is used to access Monitor application properties and functions; 
+
+- \ref ScriptTuningClientApplication "ScriptTuningClientApplication" class (<b>app</b> object) is used to access TuningClient application properties and functions; 
 
 - \ref VFrame30::ScriptSchemaView "ScriptSchemaView" class (<b>view</b> object) is used to access schema items and variables, 
 switch between schemas, display message boxes;
@@ -120,7 +124,6 @@ signal parameters (AppSignalParam), requesting and setting tunable values (Tunin
 to application's log file.
 
 Script code error messages are displayed directly on appropriate schema item when script is executed.
-
 */
 
 /*! @page testsScripts Tests Scripts Introduction
@@ -151,4 +154,26 @@ Testin scripts can perform following actions:
 The following classes are used to perform testing:
 
 - \ref Sim::ScriptSimulator "ScriptSimulator" is s class that runs all simulations on compiled project. 
+*/
+
+/*! @page maskDescription Masks Description
+ *  \ingroup groupSchemaScripts
+
+Masks are used to filter signals by their identifiers. Mask is a string with wildcards like '*' and '?'. '*' symbol means any set of symbols on its place, '?' symbol means one symbol on its place.
+<br>
+<br>
+Examples:
+<br>
+<br>
+Mask for AppSignalID:
+<b>#SF001P014*</b> will mean #SF001P014_MID, #SF001P014_A, #SF001P014_B, #SF001P014_C
+<br>
+<br>
+Mask for CustomAppSignalID:
+<b>T?30T01?</b> will mean TA30T011, TB30T011, TA30T017
+<br>
+<br>
+Mask for Equipment ID:
+<b>#SYSTEMID_RACK01_CH01_MD??</b> means #SYSTEMID_RACK01_CH01_MD12, #SYSTEMID_RACK01_CH01_MD02, #SYSTEMID_RACK01_CH01_MD08, but NOT #SYSTEMID_RACK01_CH01_MD00A
+
 */

@@ -3,7 +3,6 @@
 #include "../OnlineLib/Tcp.h"
 #include "../Proto/network.pb.h"
 #include "TuningSource.h"
-#include "TuningService.h"
 
 namespace Tuning
 {
@@ -100,8 +99,9 @@ namespace Tuning
 	class TcpTuningServerThread : public Tcp::ServerThread
 	{
 	public:
-		TcpTuningServerThread(const HostAddressPort& listenAddressPort,
-								TcpTuningServer* server, std::shared_ptr<CircularLogger> logger);
+		TcpTuningServerThread(	const HostAddressPort& listenAddressPort,
+								TcpTuningServer* server,
+								std::shared_ptr<CircularLogger> logger);
 	};
 
 }

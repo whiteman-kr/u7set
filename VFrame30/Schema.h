@@ -48,7 +48,7 @@ namespace VFrame30
 		Q_PROPERTY(QColor BackgroundColor READ backgroundColor WRITE setBackgroundColor)
 
 		/// \brief Layer count.
-		Q_PROPERTY(int layerCont READ layerCount)
+		Q_PROPERTY(int layerCount READ layerCount)
 
 	public:
 		explicit ScriptSchema(std::shared_ptr<Schema> schema);

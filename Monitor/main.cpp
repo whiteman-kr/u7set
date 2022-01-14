@@ -5,6 +5,7 @@
 #include "MonitorMainWindow.h"
 #include "MonitorConfigController.h"
 #include "TcpSignalClient.h"
+#include "ScriptMonitorApplication.h"
 
 #if __has_include("../gitlabci_version.h")
 #include "../gitlabci_version.h"
@@ -12,9 +13,7 @@
 
 AppSignalManager theSignals;
 TuningSignalManager theTuningSignals;
-
-MonitorMainWindow* theMonitorMainWindow = nullptr;
-
+ScriptMonitorApplication theApp;
 
 int main(int argc, char *argv[])
 {
@@ -101,12 +100,16 @@ int main(int argc, char *argv[])
 	int result = 0;
 	{
 		MonitorMainWindow w(instanceResover, si);
-		theMonitorMainWindow = &w;
+
+		theApp.setMainWindow(&w);
+
 		w.show();
 
 		// --
 		//
 		result = a.exec();
+
+		theApp.setMainWindow(nullptr);
 	}
 
 	// Shutting down

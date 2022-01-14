@@ -38,7 +38,87 @@ namespace Rup
 		millisecond = static_cast<quint16>(time.msec());
 	}
 
-	qint64 TimeStamp::toInt64(bool reverseBytes) const
+	QDateTime TimeStamp::toDateTime(bool reverseBytes, bool* ok) const
+	{
+		if (ok == nullptr)
+		{
+			Q_ASSERT(false);
+			return QDateTime();
+		}
+
+		quint16 _hour = hour;
+		quint16 _minute = minute;
+		quint16 _second = second;
+		quint16 _millisecond = millisecond;
+
+		quint16 _day = day;
+		quint16 _month = month;
+		quint16 _year = year;
+
+		if (reverseBytes == true)
+		{
+			_hour = reverseUint16(_hour);
+			_minute = reverseUint16(_minute);
+			_second = reverseUint16(_second);
+			_millisecond = reverseUint16(_millisecond);
+
+			_day = reverseUint16(_day);
+			_month = reverseUint16(_month);
+			_year = reverseUint16(_year);
+		}
+
+		// if timeStampOk == false, first of all check bytes order!
+		//
+		bool timeStampOk = (_hour >= 0 && _hour <= 23) &&
+							(_minute >= 0 && _minute <= 59) &&
+							(_second >= 0 && _second <= 59) &&
+							(_millisecond >= 0 && _millisecond <= 999) &&
+							(_day >= 1 && _day <= 31) &&
+							(_month >= 1 && _month <= 12) &&
+							(_year >= 1970);
+
+		if (timeStampOk == false)
+		{
+			*ok = false;
+			return QDateTime();
+		}
+
+		// ok == true
+
+		QDateTime dt;
+
+		dt.setTimeSpec(Qt::UTC);
+
+		dt.setDate(QDate(_year, _month, _day));
+		dt.setTime(QTime(_hour, _minute, _second, _millisecond));
+
+		*ok = dt.isValid();
+
+		return dt;
+	}
+
+	qint64 TimeStamp::toInt64(bool reverseBytes, bool* ok) const
+	{
+		QDateTime dt = toDateTime(reverseBytes, ok);
+
+		if (*ok == false)
+		{
+			return 0;
+		}
+
+		return dt.toMSecsSinceEpoch();
+	}
+
+	bool TimeStamp::isValid(bool reverseBytes) const
+	{
+		bool ok = true;
+
+		toDateTime(reverseBytes, &ok);
+
+		return ok;
+	}
+
+	QString TimeStamp::rawToString(bool reverseBytes) const
 	{
 		quint16 _hour = hour;
 		quint16 _minute = minute;
@@ -61,25 +141,14 @@ namespace Rup
 			_year = reverseUint16(_year);
 		}
 
-		// if any asserts is failed, first of all check bytes order!
-		//
-		Q_ASSERT(_hour >= 0 && _hour <= 23);
-		Q_ASSERT(_minute >= 0 && _minute <= 59);
-		Q_ASSERT(_second >= 0 && _second <= 59);
-		Q_ASSERT(_millisecond >= 0 && _millisecond <= 999);
-
-		Q_ASSERT(_day >= 1 && _day <= 31);
-		Q_ASSERT(_month >= 1 && _month <= 12);
-		Q_ASSERT(_year >= 1970);
-
-		QDateTime dt;
-
-		dt.setTimeSpec(Qt::UTC);
-
-		dt.setDate(QDate(_year, _month, _day));
-		dt.setTime(QTime(_hour, _minute, _second, _millisecond));
-
-		return dt.toMSecsSinceEpoch();
+		return QString("%1:%2:%3.%4 %5.%6.%7").
+				arg(_hour, 2, 10, Latin1Char::ZERO).
+				arg(_minute, 2, 10, Latin1Char::ZERO).
+				arg(_second, 2, 10, Latin1Char::ZERO).
+				arg(_millisecond, 3, 10, Latin1Char::ZERO).
+				arg(_day, 2, 10, Latin1Char::ZERO).
+				arg(_month, 2, 10, Latin1Char::ZERO).
+				arg(_year, 4, 10, Latin1Char::ZERO);
 	}
 
 	void Header::reverseBytes()
@@ -141,7 +210,7 @@ namespace Rup
 }
 
 
-namespace FotipV2
+namespace Fotip
 {
 	void Header::reverseBytes()
 	{
@@ -160,16 +229,17 @@ namespace FotipV2
 		romFrameSizeB = reverseUint16(romFrameSizeB);
 		dataType = reverseUint16(dataType);
 		offsetInFrameW = reverseUint32(offsetInFrameW);
+		requestNumerator = reverseUint64(requestNumerator);
+		fotipProcessingNumerator = reverseUint64(fotipProcessingNumerator);
 	}
-
 
 	QString Frame::valueStr(bool reverseValue)
 	{
-		Q_ASSERT(static_cast<FotipV2::OpCode>(header.operationCode) == FotipV2::OpCode::Write);
+		Q_ASSERT(static_cast<Fotip::OpCode>(header.operationCode) == Fotip::OpCode::Write);
 
-		switch(static_cast<FotipV2::DataType>(header.dataType))
+		switch(static_cast<Fotip::DataType>(header.dataType))
 		{
-		case FotipV2::DataType::AnalogFloat:
+		case Fotip::DataType::AnalogFloat:
 			{
 				float floatValue = write.analogFloatValue;
 
@@ -181,7 +251,7 @@ namespace FotipV2
 				return QString("%1").arg(static_cast<double>(floatValue));
 			}
 
-		case FotipV2::DataType::AnalogSignedInt:
+		case Fotip::DataType::AnalogSignedInt:
 			{
 				qint32 signedIntValue = write.analogSignedIntValue;
 
@@ -193,7 +263,7 @@ namespace FotipV2
 				return QString("%1").arg(signedIntValue);
 			}
 
-		case FotipV2::DataType::Discrete:
+		case Fotip::DataType::Discrete:
 			{
 				quint32 unsignedIntValue = write.discreteValue;
 
@@ -207,24 +277,24 @@ namespace FotipV2
 
 		default:
 			assert(false);
-			return QString("Unknown FotipV2::DataType");
+			return QString("Unknown Fotip::DataType");
 		}
 	}
 
 	bool Frame::isDiscreteData()
 	{
-		Q_ASSERT(static_cast<FotipV2::OpCode>(header.operationCode) == FotipV2::OpCode::Write);
+		Q_ASSERT(static_cast<Fotip::OpCode>(header.operationCode) == Fotip::OpCode::Write);
 
-		return static_cast<FotipV2::DataType>(header.dataType) == FotipV2::DataType::Discrete;
+		return static_cast<Fotip::DataType>(header.dataType) == Fotip::DataType::Discrete;
 	}
 }
 
-void RupFotipV2::calcCRC64()
+void RupFotip::calcCRC64()
 {
 	CRC64 = reverseUint64(Crc::crc64(&rupHeader, Socket::ENTIRE_UDP_SIZE - sizeof(quint64 /*CRC64*/ )));
 }
 
-bool RupFotipV2::checkCRC64()
+bool RupFotip::checkCRC64()
 {
 	quint64 calculatedCRC = reverseUint64(Crc::crc64(&rupHeader, Socket::ENTIRE_UDP_SIZE - sizeof(quint64 /*CRC64*/ )));
 

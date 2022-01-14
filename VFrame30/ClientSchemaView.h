@@ -270,6 +270,8 @@ namespace VFrame30
 		virtual void mousePressEvent(QMouseEvent* event) override;
 		virtual void mouseReleaseEvent(QMouseEvent* event) override;
 
+		virtual void updateScriptGlobalVars(QJSEngine& engine);
+
 	protected slots:
 		void startRepaintTimer();
 
@@ -305,19 +307,19 @@ namespace VFrame30
 
 		//  LogController
 		//
-		LogController* logController();
-		const LogController* logController() const;
+		[[nodiscard]] LogController* logController();
+		[[nodiscard]] const LogController* logController() const;
 		void setLogController(LogController* value);
 
 		// --
 		//
-		QJSEngine* jsEngine();
-		QString globalScript() const;
+		[[nodiscard]] QJSEngine* jsEngine();
+		[[nodiscard]] QString globalScript() const;
 
 		bool runScript(QJSValue& evaluatedJs, QString where, bool reportError);
 		bool reEvaluateGlobalScript();
 		QJSValue evaluateScript(QString script, QString where, bool reportError);
-		QString formatScriptError(const QJSValue& scriptValue) const;
+		[[nodiscard]] QString formatScriptError(const QJSValue& scriptValue) const;
 		void reportScriptError(const QJSValue& scriptValue, QString where);
 
 		// Variables
@@ -344,11 +346,13 @@ namespace VFrame30
 		VFrame30::SchemaManager* m_schemaManager = nullptr;
 		VFrame30::ISchemaViewHistory* m_schemaViewHistory = nullptr;		// Can be nullptr if widget does not support history navigation
 
+	protected:
 		TuningController* m_tuningController = nullptr;
 		AppSignalController* m_appSignalController = nullptr;
 		std::unique_ptr<ScriptAppSignalController> m_scriptAppSignalController;
 		LogController* m_logController = nullptr;
 
+	private:
 		bool m_periodicUpdate = true;		// Update widget every 250 ms
 		bool m_infoMode = false;			// Show some aditional info like labels
 

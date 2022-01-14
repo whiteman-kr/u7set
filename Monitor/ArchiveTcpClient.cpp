@@ -50,7 +50,7 @@ bool ArchiveTcpClient::requestData(TimeStamp startTime,
 							.arg([](const auto& appSignals) -> QString
 									{
 										QStringList result;
-										result.reserve(appSignals.size());
+										result.reserve(static_cast<int>(appSignals.size()));
 										for (const AppSignalParam& s : appSignals)
 										{
 											result.push_back(s.appSignalId());
@@ -186,6 +186,8 @@ void ArchiveTcpClient::onConnection()
 	Q_ASSERT(isClearToSendRequest() == true);
 
 	resetState();
+
+	emit signal_connectionEstablished();
 
 	return;
 }

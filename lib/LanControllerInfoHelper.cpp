@@ -296,6 +296,9 @@ bool LanControllerInfoHelper::getInfo(const Hardware::DeviceModule& lm,
 
 	const LmDescription::Lan& lan = lmDescription->lan();
 
+	lanControllersInfo->setRupVersion(lan.m_rupVersion);
+	lanControllersInfo->setFotipVersion(lan.m_fotipVersion);
+
 	bool result = true;
 
 	for(const LmDescription::LanController& lanController : lan.m_lanControllers)

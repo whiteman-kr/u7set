@@ -8286,8 +8286,9 @@ class TuningSourceState PROTOBUF_FINAL :
     kFotipFlagApplySuccessFieldNumber = 42,
     kFotipFlagSetSORFieldNumber = 43,
     kFotipFlagWritingDisabledFieldNumber = 44,
-    kHasUnappliedParamsFieldNumber = 17,
+    kFotipProcessingNumeratorFieldNumber = 45,
     kErrRupProtocolVersionFieldNumber = 50,
+    kHasUnappliedParamsFieldNumber = 17,
     kErrRupFrameSizeFieldNumber = 51,
     kErrRupNonTuningDataFieldNumber = 52,
     kErrRupModuleTypeFieldNumber = 53,
@@ -8630,17 +8631,17 @@ class TuningSourceState PROTOBUF_FINAL :
   void _internal_set_fotipflagwritingdisabled(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
-  // optional bool hasUnappliedParams = 17 [default = false];
-  bool has_hasunappliedparams() const;
+  // optional uint64 fotipProcessingNumerator = 45 [default = 0];
+  bool has_fotipprocessingnumerator() const;
   private:
-  bool _internal_has_hasunappliedparams() const;
+  bool _internal_has_fotipprocessingnumerator() const;
   public:
-  void clear_hasunappliedparams();
-  bool hasunappliedparams() const;
-  void set_hasunappliedparams(bool value);
+  void clear_fotipprocessingnumerator();
+  ::PROTOBUF_NAMESPACE_ID::uint64 fotipprocessingnumerator() const;
+  void set_fotipprocessingnumerator(::PROTOBUF_NAMESPACE_ID::uint64 value);
   private:
-  bool _internal_hasunappliedparams() const;
-  void _internal_set_hasunappliedparams(bool value);
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_fotipprocessingnumerator() const;
+  void _internal_set_fotipprocessingnumerator(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
   // optional int64 errRupProtocolVersion = 50 [default = 0];
@@ -8654,6 +8655,19 @@ class TuningSourceState PROTOBUF_FINAL :
   private:
   ::PROTOBUF_NAMESPACE_ID::int64 _internal_errrupprotocolversion() const;
   void _internal_set_errrupprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional bool hasUnappliedParams = 17 [default = false];
+  bool has_hasunappliedparams() const;
+  private:
+  bool _internal_has_hasunappliedparams() const;
+  public:
+  void clear_hasunappliedparams();
+  bool hasunappliedparams() const;
+  void set_hasunappliedparams(bool value);
+  private:
+  bool _internal_hasunappliedparams() const;
+  void _internal_set_hasunappliedparams(bool value);
   public:
 
   // optional int64 errRupFrameSize = 51 [default = 0];
@@ -8975,8 +8989,9 @@ class TuningSourceState PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::int64 fotipflagapplysuccess_;
   ::PROTOBUF_NAMESPACE_ID::int64 fotipflagsetsor_;
   ::PROTOBUF_NAMESPACE_ID::int64 fotipflagwritingdisabled_;
-  bool hasunappliedparams_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 fotipprocessingnumerator_;
   ::PROTOBUF_NAMESPACE_ID::int64 errrupprotocolversion_;
+  bool hasunappliedparams_;
   ::PROTOBUF_NAMESPACE_ID::int64 errrupframesize_;
   ::PROTOBUF_NAMESPACE_ID::int64 errrupnontuningdata_;
   ::PROTOBUF_NAMESPACE_ID::int64 errrupmoduletype_;
@@ -9897,6 +9912,7 @@ class TuningSignalState PROTOBUF_FINAL :
     kSuccessfulWriteTimeFieldNumber = 12,
     kUnsuccessfulWriteTimeFieldNumber = 13,
     kLmTimeFieldNumber = 17,
+    kFotipProcessingNumeratorFieldNumber = 18,
   };
   // optional .Proto.TuningValue value = 4;
   bool has_value() const;
@@ -10134,6 +10150,19 @@ class TuningSignalState PROTOBUF_FINAL :
   void _internal_set_lmtime(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
+  // optional fixed64 fotipProcessingNumerator = 18 [default = 0];
+  bool has_fotipprocessingnumerator() const;
+  private:
+  bool _internal_has_fotipprocessingnumerator() const;
+  public:
+  void clear_fotipprocessingnumerator();
+  ::PROTOBUF_NAMESPACE_ID::uint64 fotipprocessingnumerator() const;
+  void set_fotipprocessingnumerator(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_fotipprocessingnumerator() const;
+  void _internal_set_fotipprocessingnumerator(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:Network.TuningSignalState)
  private:
   class _Internal;
@@ -10160,6 +10189,7 @@ class TuningSignalState PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::int64 successfulwritetime_;
   ::PROTOBUF_NAMESPACE_ID::int64 unsuccessfulwritetime_;
   ::PROTOBUF_NAMESPACE_ID::int64 lmtime_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 fotipprocessingnumerator_;
   friend struct ::TableStruct_network_2eproto;
 };
 // -------------------------------------------------------------------
@@ -21967,7 +21997,7 @@ inline void TuningSourceState::set_writingdisabled(bool value) {
 
 // optional bool hasUnappliedParams = 17 [default = false];
 inline bool TuningSourceState::_internal_has_hasunappliedparams() const {
-  bool value = (_has_bits_[0] & 0x01000000u) != 0;
+  bool value = (_has_bits_[0] & 0x04000000u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_hasunappliedparams() const {
@@ -21975,7 +22005,7 @@ inline bool TuningSourceState::has_hasunappliedparams() const {
 }
 inline void TuningSourceState::clear_hasunappliedparams() {
   hasunappliedparams_ = false;
-  _has_bits_[0] &= ~0x01000000u;
+  _has_bits_[0] &= ~0x04000000u;
 }
 inline bool TuningSourceState::_internal_hasunappliedparams() const {
   return hasunappliedparams_;
@@ -21985,7 +22015,7 @@ inline bool TuningSourceState::hasunappliedparams() const {
   return _internal_hasunappliedparams();
 }
 inline void TuningSourceState::_internal_set_hasunappliedparams(bool value) {
-  _has_bits_[0] |= 0x01000000u;
+  _has_bits_[0] |= 0x04000000u;
   hasunappliedparams_ = value;
 }
 inline void TuningSourceState::set_hasunappliedparams(bool value) {
@@ -22413,6 +22443,34 @@ inline void TuningSourceState::set_fotipflagwritingdisabled(::PROTOBUF_NAMESPACE
   // @@protoc_insertion_point(field_set:Network.TuningSourceState.fotipFlagWritingDisabled)
 }
 
+// optional uint64 fotipProcessingNumerator = 45 [default = 0];
+inline bool TuningSourceState::_internal_has_fotipprocessingnumerator() const {
+  bool value = (_has_bits_[0] & 0x01000000u) != 0;
+  return value;
+}
+inline bool TuningSourceState::has_fotipprocessingnumerator() const {
+  return _internal_has_fotipprocessingnumerator();
+}
+inline void TuningSourceState::clear_fotipprocessingnumerator() {
+  fotipprocessingnumerator_ = PROTOBUF_ULONGLONG(0);
+  _has_bits_[0] &= ~0x01000000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 TuningSourceState::_internal_fotipprocessingnumerator() const {
+  return fotipprocessingnumerator_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 TuningSourceState::fotipprocessingnumerator() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSourceState.fotipProcessingNumerator)
+  return _internal_fotipprocessingnumerator();
+}
+inline void TuningSourceState::_internal_set_fotipprocessingnumerator(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _has_bits_[0] |= 0x01000000u;
+  fotipprocessingnumerator_ = value;
+}
+inline void TuningSourceState::set_fotipprocessingnumerator(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_fotipprocessingnumerator(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSourceState.fotipProcessingNumerator)
+}
+
 // optional int64 errRupProtocolVersion = 50 [default = 0];
 inline bool TuningSourceState::_internal_has_errrupprotocolversion() const {
   bool value = (_has_bits_[0] & 0x02000000u) != 0;
@@ -22443,7 +22501,7 @@ inline void TuningSourceState::set_errrupprotocolversion(::PROTOBUF_NAMESPACE_ID
 
 // optional int64 errRupFrameSize = 51 [default = 0];
 inline bool TuningSourceState::_internal_has_errrupframesize() const {
-  bool value = (_has_bits_[0] & 0x04000000u) != 0;
+  bool value = (_has_bits_[0] & 0x08000000u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_errrupframesize() const {
@@ -22451,7 +22509,7 @@ inline bool TuningSourceState::has_errrupframesize() const {
 }
 inline void TuningSourceState::clear_errrupframesize() {
   errrupframesize_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x04000000u;
+  _has_bits_[0] &= ~0x08000000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errrupframesize() const {
   return errrupframesize_;
@@ -22461,7 +22519,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errrupframesize() const
   return _internal_errrupframesize();
 }
 inline void TuningSourceState::_internal_set_errrupframesize(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x04000000u;
+  _has_bits_[0] |= 0x08000000u;
   errrupframesize_ = value;
 }
 inline void TuningSourceState::set_errrupframesize(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22471,7 +22529,7 @@ inline void TuningSourceState::set_errrupframesize(::PROTOBUF_NAMESPACE_ID::int6
 
 // optional int64 errRupNonTuningData = 52 [default = 0];
 inline bool TuningSourceState::_internal_has_errrupnontuningdata() const {
-  bool value = (_has_bits_[0] & 0x08000000u) != 0;
+  bool value = (_has_bits_[0] & 0x10000000u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_errrupnontuningdata() const {
@@ -22479,7 +22537,7 @@ inline bool TuningSourceState::has_errrupnontuningdata() const {
 }
 inline void TuningSourceState::clear_errrupnontuningdata() {
   errrupnontuningdata_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x08000000u;
+  _has_bits_[0] &= ~0x10000000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errrupnontuningdata() const {
   return errrupnontuningdata_;
@@ -22489,7 +22547,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errrupnontuningdata() c
   return _internal_errrupnontuningdata();
 }
 inline void TuningSourceState::_internal_set_errrupnontuningdata(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x08000000u;
+  _has_bits_[0] |= 0x10000000u;
   errrupnontuningdata_ = value;
 }
 inline void TuningSourceState::set_errrupnontuningdata(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22499,7 +22557,7 @@ inline void TuningSourceState::set_errrupnontuningdata(::PROTOBUF_NAMESPACE_ID::
 
 // optional int64 errRupModuleType = 53 [default = 0];
 inline bool TuningSourceState::_internal_has_errrupmoduletype() const {
-  bool value = (_has_bits_[0] & 0x10000000u) != 0;
+  bool value = (_has_bits_[0] & 0x20000000u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_errrupmoduletype() const {
@@ -22507,7 +22565,7 @@ inline bool TuningSourceState::has_errrupmoduletype() const {
 }
 inline void TuningSourceState::clear_errrupmoduletype() {
   errrupmoduletype_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x10000000u;
+  _has_bits_[0] &= ~0x20000000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errrupmoduletype() const {
   return errrupmoduletype_;
@@ -22517,7 +22575,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errrupmoduletype() cons
   return _internal_errrupmoduletype();
 }
 inline void TuningSourceState::_internal_set_errrupmoduletype(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x10000000u;
+  _has_bits_[0] |= 0x20000000u;
   errrupmoduletype_ = value;
 }
 inline void TuningSourceState::set_errrupmoduletype(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22527,7 +22585,7 @@ inline void TuningSourceState::set_errrupmoduletype(::PROTOBUF_NAMESPACE_ID::int
 
 // optional int64 errRupFramesQuantity = 54 [default = 0];
 inline bool TuningSourceState::_internal_has_errrupframesquantity() const {
-  bool value = (_has_bits_[0] & 0x20000000u) != 0;
+  bool value = (_has_bits_[0] & 0x40000000u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_errrupframesquantity() const {
@@ -22535,7 +22593,7 @@ inline bool TuningSourceState::has_errrupframesquantity() const {
 }
 inline void TuningSourceState::clear_errrupframesquantity() {
   errrupframesquantity_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x20000000u;
+  _has_bits_[0] &= ~0x40000000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errrupframesquantity() const {
   return errrupframesquantity_;
@@ -22545,7 +22603,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errrupframesquantity() 
   return _internal_errrupframesquantity();
 }
 inline void TuningSourceState::_internal_set_errrupframesquantity(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x20000000u;
+  _has_bits_[0] |= 0x40000000u;
   errrupframesquantity_ = value;
 }
 inline void TuningSourceState::set_errrupframesquantity(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22555,7 +22613,7 @@ inline void TuningSourceState::set_errrupframesquantity(::PROTOBUF_NAMESPACE_ID:
 
 // optional int64 errRupFrameNumber = 55 [default = 0];
 inline bool TuningSourceState::_internal_has_errrupframenumber() const {
-  bool value = (_has_bits_[0] & 0x40000000u) != 0;
+  bool value = (_has_bits_[0] & 0x80000000u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_errrupframenumber() const {
@@ -22563,7 +22621,7 @@ inline bool TuningSourceState::has_errrupframenumber() const {
 }
 inline void TuningSourceState::clear_errrupframenumber() {
   errrupframenumber_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x40000000u;
+  _has_bits_[0] &= ~0x80000000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errrupframenumber() const {
   return errrupframenumber_;
@@ -22573,7 +22631,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errrupframenumber() con
   return _internal_errrupframenumber();
 }
 inline void TuningSourceState::_internal_set_errrupframenumber(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x40000000u;
+  _has_bits_[0] |= 0x80000000u;
   errrupframenumber_ = value;
 }
 inline void TuningSourceState::set_errrupframenumber(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22583,7 +22641,7 @@ inline void TuningSourceState::set_errrupframenumber(::PROTOBUF_NAMESPACE_ID::in
 
 // optional int64 errRupCRC = 56 [default = 0];
 inline bool TuningSourceState::_internal_has_errrupcrc() const {
-  bool value = (_has_bits_[0] & 0x80000000u) != 0;
+  bool value = (_has_bits_[1] & 0x00000001u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_errrupcrc() const {
@@ -22591,7 +22649,7 @@ inline bool TuningSourceState::has_errrupcrc() const {
 }
 inline void TuningSourceState::clear_errrupcrc() {
   errrupcrc_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x80000000u;
+  _has_bits_[1] &= ~0x00000001u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errrupcrc() const {
   return errrupcrc_;
@@ -22601,7 +22659,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errrupcrc() const {
   return _internal_errrupcrc();
 }
 inline void TuningSourceState::_internal_set_errrupcrc(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x80000000u;
+  _has_bits_[1] |= 0x00000001u;
   errrupcrc_ = value;
 }
 inline void TuningSourceState::set_errrupcrc(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22611,7 +22669,7 @@ inline void TuningSourceState::set_errrupcrc(::PROTOBUF_NAMESPACE_ID::int64 valu
 
 // optional int64 errFotipProtocolVersion = 60 [default = 0];
 inline bool TuningSourceState::_internal_has_errfotipprotocolversion() const {
-  bool value = (_has_bits_[1] & 0x00000001u) != 0;
+  bool value = (_has_bits_[1] & 0x00000002u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_errfotipprotocolversion() const {
@@ -22619,7 +22677,7 @@ inline bool TuningSourceState::has_errfotipprotocolversion() const {
 }
 inline void TuningSourceState::clear_errfotipprotocolversion() {
   errfotipprotocolversion_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[1] &= ~0x00000001u;
+  _has_bits_[1] &= ~0x00000002u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errfotipprotocolversion() const {
   return errfotipprotocolversion_;
@@ -22629,7 +22687,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errfotipprotocolversion
   return _internal_errfotipprotocolversion();
 }
 inline void TuningSourceState::_internal_set_errfotipprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[1] |= 0x00000001u;
+  _has_bits_[1] |= 0x00000002u;
   errfotipprotocolversion_ = value;
 }
 inline void TuningSourceState::set_errfotipprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22639,7 +22697,7 @@ inline void TuningSourceState::set_errfotipprotocolversion(::PROTOBUF_NAMESPACE_
 
 // optional int64 errFotipUniqueID = 61 [default = 0];
 inline bool TuningSourceState::_internal_has_errfotipuniqueid() const {
-  bool value = (_has_bits_[1] & 0x00000002u) != 0;
+  bool value = (_has_bits_[1] & 0x00000004u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_errfotipuniqueid() const {
@@ -22647,7 +22705,7 @@ inline bool TuningSourceState::has_errfotipuniqueid() const {
 }
 inline void TuningSourceState::clear_errfotipuniqueid() {
   errfotipuniqueid_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[1] &= ~0x00000002u;
+  _has_bits_[1] &= ~0x00000004u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errfotipuniqueid() const {
   return errfotipuniqueid_;
@@ -22657,7 +22715,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errfotipuniqueid() cons
   return _internal_errfotipuniqueid();
 }
 inline void TuningSourceState::_internal_set_errfotipuniqueid(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[1] |= 0x00000002u;
+  _has_bits_[1] |= 0x00000004u;
   errfotipuniqueid_ = value;
 }
 inline void TuningSourceState::set_errfotipuniqueid(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22667,7 +22725,7 @@ inline void TuningSourceState::set_errfotipuniqueid(::PROTOBUF_NAMESPACE_ID::int
 
 // optional int64 errFotipLmNumber = 62 [default = 0];
 inline bool TuningSourceState::_internal_has_errfotiplmnumber() const {
-  bool value = (_has_bits_[1] & 0x00000004u) != 0;
+  bool value = (_has_bits_[1] & 0x00000008u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_errfotiplmnumber() const {
@@ -22675,7 +22733,7 @@ inline bool TuningSourceState::has_errfotiplmnumber() const {
 }
 inline void TuningSourceState::clear_errfotiplmnumber() {
   errfotiplmnumber_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[1] &= ~0x00000004u;
+  _has_bits_[1] &= ~0x00000008u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errfotiplmnumber() const {
   return errfotiplmnumber_;
@@ -22685,7 +22743,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errfotiplmnumber() cons
   return _internal_errfotiplmnumber();
 }
 inline void TuningSourceState::_internal_set_errfotiplmnumber(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[1] |= 0x00000004u;
+  _has_bits_[1] |= 0x00000008u;
   errfotiplmnumber_ = value;
 }
 inline void TuningSourceState::set_errfotiplmnumber(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22695,7 +22753,7 @@ inline void TuningSourceState::set_errfotiplmnumber(::PROTOBUF_NAMESPACE_ID::int
 
 // optional int64 errFotipSubsystemCode = 63 [default = 0];
 inline bool TuningSourceState::_internal_has_errfotipsubsystemcode() const {
-  bool value = (_has_bits_[1] & 0x00000008u) != 0;
+  bool value = (_has_bits_[1] & 0x00000010u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_errfotipsubsystemcode() const {
@@ -22703,7 +22761,7 @@ inline bool TuningSourceState::has_errfotipsubsystemcode() const {
 }
 inline void TuningSourceState::clear_errfotipsubsystemcode() {
   errfotipsubsystemcode_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[1] &= ~0x00000008u;
+  _has_bits_[1] &= ~0x00000010u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errfotipsubsystemcode() const {
   return errfotipsubsystemcode_;
@@ -22713,7 +22771,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errfotipsubsystemcode()
   return _internal_errfotipsubsystemcode();
 }
 inline void TuningSourceState::_internal_set_errfotipsubsystemcode(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[1] |= 0x00000008u;
+  _has_bits_[1] |= 0x00000010u;
   errfotipsubsystemcode_ = value;
 }
 inline void TuningSourceState::set_errfotipsubsystemcode(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22723,7 +22781,7 @@ inline void TuningSourceState::set_errfotipsubsystemcode(::PROTOBUF_NAMESPACE_ID
 
 // optional int64 errFotipOperationCode = 64 [default = 0];
 inline bool TuningSourceState::_internal_has_errfotipoperationcode() const {
-  bool value = (_has_bits_[1] & 0x00000010u) != 0;
+  bool value = (_has_bits_[1] & 0x00000020u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_errfotipoperationcode() const {
@@ -22731,7 +22789,7 @@ inline bool TuningSourceState::has_errfotipoperationcode() const {
 }
 inline void TuningSourceState::clear_errfotipoperationcode() {
   errfotipoperationcode_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[1] &= ~0x00000010u;
+  _has_bits_[1] &= ~0x00000020u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errfotipoperationcode() const {
   return errfotipoperationcode_;
@@ -22741,7 +22799,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errfotipoperationcode()
   return _internal_errfotipoperationcode();
 }
 inline void TuningSourceState::_internal_set_errfotipoperationcode(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[1] |= 0x00000010u;
+  _has_bits_[1] |= 0x00000020u;
   errfotipoperationcode_ = value;
 }
 inline void TuningSourceState::set_errfotipoperationcode(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22751,7 +22809,7 @@ inline void TuningSourceState::set_errfotipoperationcode(::PROTOBUF_NAMESPACE_ID
 
 // optional int64 errFotipFrameSize = 65 [default = 0];
 inline bool TuningSourceState::_internal_has_errfotipframesize() const {
-  bool value = (_has_bits_[1] & 0x00000020u) != 0;
+  bool value = (_has_bits_[1] & 0x00000040u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_errfotipframesize() const {
@@ -22759,7 +22817,7 @@ inline bool TuningSourceState::has_errfotipframesize() const {
 }
 inline void TuningSourceState::clear_errfotipframesize() {
   errfotipframesize_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[1] &= ~0x00000020u;
+  _has_bits_[1] &= ~0x00000040u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errfotipframesize() const {
   return errfotipframesize_;
@@ -22769,7 +22827,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errfotipframesize() con
   return _internal_errfotipframesize();
 }
 inline void TuningSourceState::_internal_set_errfotipframesize(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[1] |= 0x00000020u;
+  _has_bits_[1] |= 0x00000040u;
   errfotipframesize_ = value;
 }
 inline void TuningSourceState::set_errfotipframesize(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22779,7 +22837,7 @@ inline void TuningSourceState::set_errfotipframesize(::PROTOBUF_NAMESPACE_ID::in
 
 // optional int64 errFotipRomSize = 66 [default = 0];
 inline bool TuningSourceState::_internal_has_errfotipromsize() const {
-  bool value = (_has_bits_[1] & 0x00000040u) != 0;
+  bool value = (_has_bits_[1] & 0x00000080u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_errfotipromsize() const {
@@ -22787,7 +22845,7 @@ inline bool TuningSourceState::has_errfotipromsize() const {
 }
 inline void TuningSourceState::clear_errfotipromsize() {
   errfotipromsize_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[1] &= ~0x00000040u;
+  _has_bits_[1] &= ~0x00000080u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errfotipromsize() const {
   return errfotipromsize_;
@@ -22797,7 +22855,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errfotipromsize() const
   return _internal_errfotipromsize();
 }
 inline void TuningSourceState::_internal_set_errfotipromsize(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[1] |= 0x00000040u;
+  _has_bits_[1] |= 0x00000080u;
   errfotipromsize_ = value;
 }
 inline void TuningSourceState::set_errfotipromsize(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22807,7 +22865,7 @@ inline void TuningSourceState::set_errfotipromsize(::PROTOBUF_NAMESPACE_ID::int6
 
 // optional int64 errFotipRomFrameSize = 67 [default = 0];
 inline bool TuningSourceState::_internal_has_errfotipromframesize() const {
-  bool value = (_has_bits_[1] & 0x00000080u) != 0;
+  bool value = (_has_bits_[1] & 0x00000100u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_errfotipromframesize() const {
@@ -22815,7 +22873,7 @@ inline bool TuningSourceState::has_errfotipromframesize() const {
 }
 inline void TuningSourceState::clear_errfotipromframesize() {
   errfotipromframesize_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[1] &= ~0x00000080u;
+  _has_bits_[1] &= ~0x00000100u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errfotipromframesize() const {
   return errfotipromframesize_;
@@ -22825,7 +22883,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errfotipromframesize() 
   return _internal_errfotipromframesize();
 }
 inline void TuningSourceState::_internal_set_errfotipromframesize(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[1] |= 0x00000080u;
+  _has_bits_[1] |= 0x00000100u;
   errfotipromframesize_ = value;
 }
 inline void TuningSourceState::set_errfotipromframesize(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22835,7 +22893,7 @@ inline void TuningSourceState::set_errfotipromframesize(::PROTOBUF_NAMESPACE_ID:
 
 // optional int64 errAnalogLowBoundCheck = 68 [default = 0];
 inline bool TuningSourceState::_internal_has_erranaloglowboundcheck() const {
-  bool value = (_has_bits_[1] & 0x00000100u) != 0;
+  bool value = (_has_bits_[1] & 0x00000200u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_erranaloglowboundcheck() const {
@@ -22843,7 +22901,7 @@ inline bool TuningSourceState::has_erranaloglowboundcheck() const {
 }
 inline void TuningSourceState::clear_erranaloglowboundcheck() {
   erranaloglowboundcheck_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[1] &= ~0x00000100u;
+  _has_bits_[1] &= ~0x00000200u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_erranaloglowboundcheck() const {
   return erranaloglowboundcheck_;
@@ -22853,7 +22911,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::erranaloglowboundcheck(
   return _internal_erranaloglowboundcheck();
 }
 inline void TuningSourceState::_internal_set_erranaloglowboundcheck(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[1] |= 0x00000100u;
+  _has_bits_[1] |= 0x00000200u;
   erranaloglowboundcheck_ = value;
 }
 inline void TuningSourceState::set_erranaloglowboundcheck(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22863,7 +22921,7 @@ inline void TuningSourceState::set_erranaloglowboundcheck(::PROTOBUF_NAMESPACE_I
 
 // optional int64 errAnalogHighBoundCheck = 69 [default = 0];
 inline bool TuningSourceState::_internal_has_erranaloghighboundcheck() const {
-  bool value = (_has_bits_[1] & 0x00000200u) != 0;
+  bool value = (_has_bits_[1] & 0x00000400u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_erranaloghighboundcheck() const {
@@ -22871,7 +22929,7 @@ inline bool TuningSourceState::has_erranaloghighboundcheck() const {
 }
 inline void TuningSourceState::clear_erranaloghighboundcheck() {
   erranaloghighboundcheck_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[1] &= ~0x00000200u;
+  _has_bits_[1] &= ~0x00000400u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_erranaloghighboundcheck() const {
   return erranaloghighboundcheck_;
@@ -22881,7 +22939,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::erranaloghighboundcheck
   return _internal_erranaloghighboundcheck();
 }
 inline void TuningSourceState::_internal_set_erranaloghighboundcheck(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[1] |= 0x00000200u;
+  _has_bits_[1] |= 0x00000400u;
   erranaloghighboundcheck_ = value;
 }
 inline void TuningSourceState::set_erranaloghighboundcheck(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22891,7 +22949,7 @@ inline void TuningSourceState::set_erranaloghighboundcheck(::PROTOBUF_NAMESPACE_
 
 // optional int64 errUntimelyReplay = 70 [default = 0];
 inline bool TuningSourceState::_internal_has_erruntimelyreplay() const {
-  bool value = (_has_bits_[1] & 0x00000400u) != 0;
+  bool value = (_has_bits_[1] & 0x00000800u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_erruntimelyreplay() const {
@@ -22899,7 +22957,7 @@ inline bool TuningSourceState::has_erruntimelyreplay() const {
 }
 inline void TuningSourceState::clear_erruntimelyreplay() {
   erruntimelyreplay_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[1] &= ~0x00000400u;
+  _has_bits_[1] &= ~0x00000800u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_erruntimelyreplay() const {
   return erruntimelyreplay_;
@@ -22909,7 +22967,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::erruntimelyreplay() con
   return _internal_erruntimelyreplay();
 }
 inline void TuningSourceState::_internal_set_erruntimelyreplay(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[1] |= 0x00000400u;
+  _has_bits_[1] |= 0x00000800u;
   erruntimelyreplay_ = value;
 }
 inline void TuningSourceState::set_erruntimelyreplay(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22919,7 +22977,7 @@ inline void TuningSourceState::set_erruntimelyreplay(::PROTOBUF_NAMESPACE_ID::in
 
 // optional int64 errSent = 71 [default = 0];
 inline bool TuningSourceState::_internal_has_errsent() const {
-  bool value = (_has_bits_[1] & 0x00000800u) != 0;
+  bool value = (_has_bits_[1] & 0x00001000u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_errsent() const {
@@ -22927,7 +22985,7 @@ inline bool TuningSourceState::has_errsent() const {
 }
 inline void TuningSourceState::clear_errsent() {
   errsent_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[1] &= ~0x00000800u;
+  _has_bits_[1] &= ~0x00001000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errsent() const {
   return errsent_;
@@ -22937,7 +22995,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errsent() const {
   return _internal_errsent();
 }
 inline void TuningSourceState::_internal_set_errsent(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[1] |= 0x00000800u;
+  _has_bits_[1] |= 0x00001000u;
   errsent_ = value;
 }
 inline void TuningSourceState::set_errsent(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22947,7 +23005,7 @@ inline void TuningSourceState::set_errsent(::PROTOBUF_NAMESPACE_ID::int64 value)
 
 // optional int64 errPartialSent = 72 [default = 0];
 inline bool TuningSourceState::_internal_has_errpartialsent() const {
-  bool value = (_has_bits_[1] & 0x00001000u) != 0;
+  bool value = (_has_bits_[1] & 0x00002000u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_errpartialsent() const {
@@ -22955,7 +23013,7 @@ inline bool TuningSourceState::has_errpartialsent() const {
 }
 inline void TuningSourceState::clear_errpartialsent() {
   errpartialsent_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[1] &= ~0x00001000u;
+  _has_bits_[1] &= ~0x00002000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errpartialsent() const {
   return errpartialsent_;
@@ -22965,7 +23023,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errpartialsent() const 
   return _internal_errpartialsent();
 }
 inline void TuningSourceState::_internal_set_errpartialsent(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[1] |= 0x00001000u;
+  _has_bits_[1] |= 0x00002000u;
   errpartialsent_ = value;
 }
 inline void TuningSourceState::set_errpartialsent(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22975,7 +23033,7 @@ inline void TuningSourceState::set_errpartialsent(::PROTOBUF_NAMESPACE_ID::int64
 
 // optional int64 errReplySize = 73 [default = 0];
 inline bool TuningSourceState::_internal_has_errreplysize() const {
-  bool value = (_has_bits_[1] & 0x00002000u) != 0;
+  bool value = (_has_bits_[1] & 0x00004000u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_errreplysize() const {
@@ -22983,7 +23041,7 @@ inline bool TuningSourceState::has_errreplysize() const {
 }
 inline void TuningSourceState::clear_errreplysize() {
   errreplysize_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[1] &= ~0x00002000u;
+  _has_bits_[1] &= ~0x00004000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errreplysize() const {
   return errreplysize_;
@@ -22993,7 +23051,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errreplysize() const {
   return _internal_errreplysize();
 }
 inline void TuningSourceState::_internal_set_errreplysize(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[1] |= 0x00002000u;
+  _has_bits_[1] |= 0x00004000u;
   errreplysize_ = value;
 }
 inline void TuningSourceState::set_errreplysize(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -23003,7 +23061,7 @@ inline void TuningSourceState::set_errreplysize(::PROTOBUF_NAMESPACE_ID::int64 v
 
 // optional int64 errNoReply = 74 [default = 0];
 inline bool TuningSourceState::_internal_has_errnoreply() const {
-  bool value = (_has_bits_[1] & 0x00004000u) != 0;
+  bool value = (_has_bits_[1] & 0x00008000u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_errnoreply() const {
@@ -23011,7 +23069,7 @@ inline bool TuningSourceState::has_errnoreply() const {
 }
 inline void TuningSourceState::clear_errnoreply() {
   errnoreply_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[1] &= ~0x00004000u;
+  _has_bits_[1] &= ~0x00008000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errnoreply() const {
   return errnoreply_;
@@ -23021,7 +23079,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errnoreply() const {
   return _internal_errnoreply();
 }
 inline void TuningSourceState::_internal_set_errnoreply(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[1] |= 0x00004000u;
+  _has_bits_[1] |= 0x00008000u;
   errnoreply_ = value;
 }
 inline void TuningSourceState::set_errnoreply(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -23031,7 +23089,7 @@ inline void TuningSourceState::set_errnoreply(::PROTOBUF_NAMESPACE_ID::int64 val
 
 // optional int64 errTuningFrameUpdate = 75 [default = 0];
 inline bool TuningSourceState::_internal_has_errtuningframeupdate() const {
-  bool value = (_has_bits_[1] & 0x00008000u) != 0;
+  bool value = (_has_bits_[1] & 0x00010000u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_errtuningframeupdate() const {
@@ -23039,7 +23097,7 @@ inline bool TuningSourceState::has_errtuningframeupdate() const {
 }
 inline void TuningSourceState::clear_errtuningframeupdate() {
   errtuningframeupdate_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[1] &= ~0x00008000u;
+  _has_bits_[1] &= ~0x00010000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errtuningframeupdate() const {
   return errtuningframeupdate_;
@@ -23049,7 +23107,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errtuningframeupdate() 
   return _internal_errtuningframeupdate();
 }
 inline void TuningSourceState::_internal_set_errtuningframeupdate(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[1] |= 0x00008000u;
+  _has_bits_[1] |= 0x00010000u;
   errtuningframeupdate_ = value;
 }
 inline void TuningSourceState::set_errtuningframeupdate(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -24250,6 +24308,34 @@ inline void TuningSignalState::_internal_set_lmtime(::PROTOBUF_NAMESPACE_ID::int
 inline void TuningSignalState::set_lmtime(::PROTOBUF_NAMESPACE_ID::int64 value) {
   _internal_set_lmtime(value);
   // @@protoc_insertion_point(field_set:Network.TuningSignalState.lmTime)
+}
+
+// optional fixed64 fotipProcessingNumerator = 18 [default = 0];
+inline bool TuningSignalState::_internal_has_fotipprocessingnumerator() const {
+  bool value = (_has_bits_[0] & 0x00020000u) != 0;
+  return value;
+}
+inline bool TuningSignalState::has_fotipprocessingnumerator() const {
+  return _internal_has_fotipprocessingnumerator();
+}
+inline void TuningSignalState::clear_fotipprocessingnumerator() {
+  fotipprocessingnumerator_ = PROTOBUF_ULONGLONG(0);
+  _has_bits_[0] &= ~0x00020000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 TuningSignalState::_internal_fotipprocessingnumerator() const {
+  return fotipprocessingnumerator_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 TuningSignalState::fotipprocessingnumerator() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSignalState.fotipProcessingNumerator)
+  return _internal_fotipprocessingnumerator();
+}
+inline void TuningSignalState::_internal_set_fotipprocessingnumerator(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _has_bits_[0] |= 0x00020000u;
+  fotipprocessingnumerator_ = value;
+}
+inline void TuningSignalState::set_fotipprocessingnumerator(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_fotipprocessingnumerator(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSignalState.fotipProcessingNumerator)
 }
 
 // -------------------------------------------------------------------

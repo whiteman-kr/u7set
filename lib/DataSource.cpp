@@ -310,6 +310,8 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 
 	result &= readAdditionalSectionsFromXml(xml);
 
+	RETURN_IF_FALSE(result);
+
 	m_id = generateID();
 
 	return result;

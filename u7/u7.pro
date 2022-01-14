@@ -31,6 +31,11 @@ win32:QMAKE_CXXFLAGS += /std:c++latest
 
 include(../warnings.pri)
 
+# generate PDBs for release
+#
+win32:QMAKE_CXXFLAGS_RELEASE += /Zi
+win32:QMAKE_LFLAGS_RELEASE += /DEBUG
+
 #Application icon
 win32:RC_ICONS += Images/u7.ico
 

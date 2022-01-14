@@ -57,6 +57,8 @@ namespace Tuning
 
 		bool isControlled(const QString& lmEquipmentID, const QString& lanEquipmentID) const;
 
+		void logTuningPacket(bool request, Fotip::OpCode opCode, quint16 rupNumerator, quint64 fotipNumerator);
+
 	signals:
 
 	public slots:
@@ -74,16 +76,16 @@ namespace Tuning
 		void stopCfgLoaderThread();
 
 		void clearConfiguration();
-		void applyNewConfiguration();
+		void applyNewConfiguration(const TuningSources& newSources);
 
-		void buildServiceMaps();
+		void buildServiceMaps(const TuningSources& newSources);
 		void clearServiceMaps();
 
 		void fillControlledLans();
 
 		bool readConfiguration(const QByteArray& cfgXmlData);
 		bool loadConfigurationFromFile(const QString& fileName);
-		bool readTuningDataSources(const QByteArray& fileData, const QString& profile);
+		bool readTuningDataSources(const QByteArray& fileData, const QString& profile, TuningSources* newSources);
 
 		void runTcpTuningServerThread();
 		void stopTcpTuningServerThread();
@@ -113,6 +115,7 @@ namespace Tuning
 	private:
 		CircularLoggerShared m_logger;
 		CircularLoggerShared m_tuningLog;
+		CircularLoggerShared m_tuningPacketLog;
 
 		TuningServiceSettings m_settings;
 

@@ -43,9 +43,6 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 
 	theLogFile = new Log::LogFile("TuningClient");
 
-	theLogFile->writeText("---");
-	theLogFile->writeMessage(tr("Application started."));
-
 	m_tuningLog = new TuningLog::TuningLog("TuningClientSignals");
 
 	createActions();
@@ -99,7 +96,6 @@ MainWindow::~MainWindow()
 	theSettings.m_mainWindowGeometry = saveGeometry();
 	theSettings.m_mainWindowState = saveState();
 
-	theLogFile->writeMessage(tr("Application finished."));
 	delete theLogFile;
 
 	delete m_tuningLog;
@@ -212,34 +208,34 @@ void MainWindow::createStatusBar()
 {
 
 	m_statusBarBuildInfo = new QLabel();
-	m_statusBarBuildInfo->setAlignment(Qt::AlignLeft);
+	m_statusBarBuildInfo->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
 	m_statusBarBuildInfo->setIndent(3);
 
 	m_statusBarLmControlMode = new QLabel();
-	m_statusBarLmControlMode->setAlignment(Qt::AlignLeft);
+	m_statusBarLmControlMode->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
 
 	m_statusBarLmErrors = new QLabel();
-	m_statusBarLmErrors->setAlignment(Qt::AlignLeft);
+	m_statusBarLmErrors->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
 	m_statusBarLmErrors->setMinimumWidth(80);
 	m_statusBarLmErrors->installEventFilter(this);
 	m_statusBarLmErrors->setToolTip(tr("LM Errors (click for details)"));
 
 	m_statusBarSor = new QLabel();
-	m_statusBarSor->setAlignment(Qt::AlignLeft);
+	m_statusBarSor->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
 	m_statusBarSor->setMinimumWidth(80);
 	m_statusBarSor->installEventFilter(this);
 	m_statusBarSor->setToolTip(tr("SOR counter (click for details)"));
 
 	m_statusBarConfigConnection = new QLabel();
-	m_statusBarConfigConnection->setAlignment(Qt::AlignLeft);
+	m_statusBarConfigConnection->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
 	m_statusBarConfigConnection->setMinimumWidth(100);
 
 	m_statusBarTuningConnection = new QLabel();
-	m_statusBarTuningConnection->setAlignment(Qt::AlignLeft);
+	m_statusBarTuningConnection->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
 	m_statusBarTuningConnection->setMinimumWidth(100);
 
 	m_statusBarLogAlerts = new QLabel();
-	m_statusBarLogAlerts->setAlignment(Qt::AlignLeft);
+	m_statusBarLogAlerts->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
 	m_statusBarLogAlerts->setMinimumWidth(100);
 	m_statusBarLogAlerts->installEventFilter(this);
 	m_statusBarLogAlerts->setToolTip(tr("Error and warning counters in the log (click to view log)"));
@@ -1050,7 +1046,14 @@ void MainWindow::updateStatusBar()
 		}
 		else
 		{
-			m_statusBarLogAlerts->setStyleSheet(QString("QLabel {color : white; background-color: %1}").arg(redColor.name()));
+			if (m_logErrorsCounter == 0)
+			{
+				m_statusBarLogAlerts->setStyleSheet("QLabel {color : white; background-color: #F87217}");
+			}
+			else
+			{
+				m_statusBarLogAlerts->setStyleSheet(QString("QLabel {color : white; background-color: %1}").arg(redColor.name()));
+			}
 		}
 	}
 }

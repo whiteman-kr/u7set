@@ -2,6 +2,7 @@
 #define APPSIGNALMANAGER_H
 
 #include <map>
+#include <set>
 #include <memory>
 #include <vector>
 #include <unordered_map>
@@ -44,6 +45,7 @@ public:
 
 	// IAppSignalManager implememntation - AppSignals
 	//
+	virtual int signalsCount() const final;
 	virtual std::vector<AppSignalParam> signalList() const final;
 
 	virtual bool signalExists(Hash hash) const override;
@@ -75,6 +77,10 @@ public:
 	//
 	virtual std::vector<std::shared_ptr<Comparator>> setpointsByInputSignalId(const QString& appSignalId) const final;
 
+	// Tags
+	//
+	virtual QStringList tags() const final;
+
 	// Extension
 	//
 public:
@@ -89,6 +95,7 @@ private:
 	std::unordered_map<Hash, AppSignalParam> m_signalParams;			// Key is hash from AppSignalID (hash from hash here, not nice)
 	std::unordered_map<QString, QString> m_signalParamByEquipmentId;	// Key is EquipmentId - value is AppSignalID
 	std::unordered_map<QString, QStringList> m_tagToAppSignals;			// Key is tag - value is list of AppSignalIDs with this tag
+	std::set<QString> m_tags;											// All tags for received AppSignals
 
 	mutable QReadWriteLock m_statesLocker;
 	std::unordered_map<Hash, AppSignalState> m_signalStates;

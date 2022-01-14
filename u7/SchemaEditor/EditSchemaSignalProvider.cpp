@@ -13,6 +13,14 @@ EditSchemaAppSignalProvider::EditSchemaAppSignalProvider(AppSignalSetProvider* s
 	Q_ASSERT(signalSetProvider);
 }
 
+int EditSchemaAppSignalProvider::signalsCount() const
+{
+	// Unlikely this function required for schema editing
+	//
+	Q_ASSERT(false);
+	return 0;
+}
+
 std::vector<AppSignalParam> EditSchemaAppSignalProvider::signalList() const
 {
 	// Unlikely this function required for schema editing
@@ -209,6 +217,13 @@ std::vector<std::shared_ptr<Comparator>> EditSchemaAppSignalProvider::setpointsB
 	// No simulation of this function in edit schema mode
 	//
 	Q_UNUSED(appSignalId);
+	return {};
+}
+
+QStringList EditSchemaAppSignalProvider::tags() const
+{
+	// No simulation of this function in edit schema mode
+	//
 	return {};
 }
 

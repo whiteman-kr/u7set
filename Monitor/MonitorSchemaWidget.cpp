@@ -365,9 +365,9 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 void MonitorSchemaWidget::signalInfo(QString appSignalId)
 {
 	MonitorSignalInfo::showDialog(appSignalId,
-	                             theMonitorMainWindow->configController(),
-	                             theMonitorMainWindow->tcpSignalClient(),
-	                             theMonitorMainWindow->monitorCentralWidget());
+								 &theApp.mainWindow()->configController(),
+								 theApp.mainWindow()->tcpSignalClient(),
+								 theApp.mainWindow()->monitorCentralWidget());
 
 	return;
 }

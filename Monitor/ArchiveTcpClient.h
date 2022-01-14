@@ -71,6 +71,7 @@ protected:
 	void processCancel(const QByteArray& data);
 
 signals:
+	void signal_connectionEstablished();
 	void signal_startRequest();
 	void signal_cancelRequest();
 

@@ -418,6 +418,7 @@ message TuningSourceState
 	optional int64 fotipFlagApplySuccess = 42 [default = 0];
 	optional int64 fotipFlagSetSOR = 43 [default = 0];
 	optional int64 fotipFlagWritingDisabled = 44 [default = 0];
+	optional uint64 fotipProcessingNumerator = 45 [default = 0];
 
     // errors in reply RupFrameHeader
     //
@@ -521,6 +522,7 @@ message TuningSignalState
 																// else sets to 0
 
 	optional sfixed64 lmTime = 17 [default = 0];
+	optional fixed64 fotipProcessingNumerator = 18 [default = 0];
 }
 
 message TuningSignalsReadReply

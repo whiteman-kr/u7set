@@ -180,6 +180,7 @@ namespace Sim
 			m_signalParamsExt.clear();
 			m_customToAppSignalId.clear();
 			m_tagToAppSignals.clear();
+			m_tags.clear();
 		}
 
 		{
@@ -231,6 +232,7 @@ namespace Sim
 		std::unordered_map<Hash, AppSignal> signalParamsExt;
 		std::unordered_map<Hash, Hash> customToAppSignalId;
 		std::unordered_map<Hash, FlagsReadStruct> flagsStruct;
+		std::set<QString> allTags;
 
 		signalParams.reserve(message.appsignal_size());
 		signalParamsExt.reserve(message.appsignal_size());
@@ -254,9 +256,9 @@ namespace Sim
 			// Add tags to m_signaIdsByTag
 			//
 			const QString& appSignalId = signalParam.appSignalId();
+			const std::set<QString>& tags = signalParam.tags();
 
-			for (const std::set<QString>& tags = signalParam.tags();
-				 const QString& tag : tags)
+			for (const QString& tag : tags)
 			{
 				QStringList& l = m_tagToAppSignals[tag];
 
@@ -267,6 +269,10 @@ namespace Sim
 
 				l.push_back(appSignalId);
 			}
+
+			// Add tags to common set
+			//
+			allTags.insert(tags.begin(), tags.end());
 		}
 
 		for (const auto&[h, s] : signalParamsExt)
@@ -285,9 +291,10 @@ namespace Sim
 		{
 			QWriteLocker wl(&m_signalParamLock);
 
-			std::swap(signalParams, m_signalParams);
-			std::swap(signalParamsExt, m_signalParamsExt);
-			std::swap(customToAppSignalId, m_customToAppSignalId);
+			m_signalParams = std::move(signalParams);
+			m_signalParamsExt = std::move(signalParamsExt);
+			m_customToAppSignalId = std::move(customToAppSignalId);
+			m_tags = std::move(allTags);
 		}
 
 		{
@@ -799,6 +806,12 @@ namespace Sim
 		return true;
 	}
 
+	int AppSignalManager::signalsCount() const
+	{
+		QReadLocker rl(&m_signalParamLock);
+		return static_cast<int>(m_signalParams.size());
+	}
+
 	std::vector<AppSignalParam> AppSignalManager::signalList() const
 	{
 		std::vector<AppSignalParam> result;
@@ -974,6 +987,21 @@ static const AppSignalParam dummy;
 		//int todo_setpointsByInputSignalId = 0;
 		//Q_ASSERT(false);		// TO DO
 		return {};
+	}
+
+	QStringList AppSignalManager::tags() const
+	{
+		QReadLocker rl(&m_signalParamLock);
+
+		QStringList result;
+		result.reserve(m_tags.size());
+
+		for (const QString& t : m_tags)
+		{
+			result.push_back(t);
+		}
+
+		return result;
 	}
 
 	const Simulator* AppSignalManager::simulator() const

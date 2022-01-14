@@ -673,8 +673,7 @@ namespace Metrology
 
 			case E::ElectricUnit::Ohm:
 
-				if (	m_electricSensorType != E::SensorType::NoSensor && m_electricSensorType != E::SensorType::Ohm_Raw &&
-						m_electricSensorType != E::SensorType::Ohm_Pt21 && m_electricSensorType != E::SensorType::Ohm_Cu23)
+				if (m_electricSensorType != E::SensorType::NoSensor && m_electricSensorType != E::SensorType::Ohm_Raw)
 				{
 					typeStr += " " + electricR0Str();
 				}
@@ -779,8 +778,7 @@ namespace Metrology
 				 m_electricSensorType != E::SensorType::mV_Raw_Mul_32 &&
 				 m_electricSensorType != E::SensorType::mV_Raw_m1200_p1200) ||
 
-				(m_electricUnitID == E::ElectricUnit::Ohm &&
-				 m_electricSensorType != E::SensorType::Ohm_Raw) )
+				(m_electricUnitID == E::ElectricUnit::Ohm && m_electricSensorType != E::SensorType::Ohm_Raw))
 		{
 			return false;	// for non-linear
 		}
@@ -1208,10 +1206,11 @@ namespace Metrology
 
 		switch (cmpType())
 		{
-			case E::CmpType::Greate:	typeStr = QChar(9650);	break;
-			case E::CmpType::Less:		typeStr = QChar(9660);	break;
+			case E::CmpType::Greate:	typeStr = QChar(0x25B2);	break;
+			case E::CmpType::Less:		typeStr = QChar(0x25BC);	break;
 
 			default:
+				assert(0);
 				typeStr.clear();
 		}
 

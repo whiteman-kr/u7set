@@ -1,4 +1,5 @@
 #include "TcpTuningServer.h"
+#include "TuningService.h"
 
 namespace Tuning
 {
@@ -723,13 +724,10 @@ namespace Tuning
 	//
 	// -------------------------------------------------------------------------------
 
-	class TuningServiceWorker;
-
 	TcpTuningServerThread::TcpTuningServerThread(const HostAddressPort& listenAddressPort,
-							TcpTuningServer* server,
-							std::shared_ptr<CircularLogger> logger) :
+												TcpTuningServer* server,
+												std::shared_ptr<CircularLogger> logger) :
 		Tcp::ServerThread(listenAddressPort, server, logger)
 	{
 	}
-
 }

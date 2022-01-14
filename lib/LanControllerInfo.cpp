@@ -457,6 +457,9 @@ void LanControllersInfo::writeToXml(XmlWriteHelper& xml)const
 	xml.writeStartElement(XmlElement::LAN_CONTROLLERS);
 	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(m_lans.size()));
 
+	xml.writeIntAttribute(XmlAttribute::RUP_VERSION, m_rupVersion);
+	xml.writeIntAttribute(XmlAttribute::FOTIP_VERSION, m_fotipVersion);
+
 	for(const LanControllerInfo& lci : m_lans)
 	{
 		lci.writeToXml(xml);
@@ -476,7 +479,9 @@ bool LanControllersInfo::readFromXml(XmlReadHelper& xml)
 
 	int count = 0;
 
-	result = xml.readIntAttribute(XmlAttribute::COUNT, &count);
+	result &= xml.readIntAttribute(XmlAttribute::COUNT, &count);
+	result &= xml.readIntAttribute(XmlAttribute::RUP_VERSION, &m_rupVersion);
+	result &= xml.readIntAttribute(XmlAttribute::FOTIP_VERSION, &m_fotipVersion);
 
 	RETURN_IF_FALSE(result);
 
@@ -508,6 +513,8 @@ bool LanControllersInfo::readFromXml(const QDomNode& lanControllersNode, QString
 	int count = 0;
 
 	result &= DomXmlHelper::getIntAttribute(lanControllersElem, XmlAttribute::COUNT, &count, errMsg);
+	result &= DomXmlHelper::getIntAttribute(lanControllersElem, XmlAttribute::RUP_VERSION, &m_rupVersion, errMsg);
+	result &= DomXmlHelper::getIntAttribute(lanControllersElem, XmlAttribute::FOTIP_VERSION, &m_fotipVersion, errMsg);
 
 	QDomNodeList lanControllerNodes = lanControllersElem.elementsByTagName(XmlElement::LAN_CONTROLLER);
 
@@ -616,6 +623,26 @@ std::vector<HostAddressPort> LanControllersInfo::appDataHostAddressPorts() const
 	}
 
 	return addresses;
+}
+
+int LanControllersInfo::rupVersion() const
+{
+	return m_rupVersion;
+}
+
+void LanControllersInfo::setRupVersion(int v)
+{
+	m_rupVersion = v;
+}
+
+int LanControllersInfo::fotipVersion() const
+{
+	return m_fotipVersion;
+}
+
+void LanControllersInfo::setFotipVersion(int v)
+{
+	m_fotipVersion = v;
 }
 
 LanControllerInfo& LanControllersInfo::operator[](int index)

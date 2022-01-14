@@ -617,7 +617,9 @@ public:
 		Equal,
 		Greate,
 		Less,
-		NotEqual
+		NotEqual,
+		GreateEqual,
+		LessEqual,
 	};
 	Q_ENUM(CmpType)
 

@@ -78,6 +78,9 @@ public:
 
 	int moduleWorkcycle_ms() const { return m_moduleWorkcycle_mcs / 1000; }
 
+	int rupVersion() const { return m_lanControllersInfo.rupVersion(); }
+	int fotipVersion() const { return m_lanControllersInfo.fotipVersion(); }
+
 	//
 
 	void writeToXml(XmlWriteHelper& xml) const;

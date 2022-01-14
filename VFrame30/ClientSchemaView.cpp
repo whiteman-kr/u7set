@@ -518,6 +518,30 @@ namespace VFrame30
 		return;
 	}
 
+	void ClientSchemaView::updateScriptGlobalVars(QJSEngine& engine)
+	{
+		// create global variable "view"
+		//
+		{
+			m_scriptSchemaView = std::make_unique<ScriptSchemaView>(this, m_schemaViewHistory);
+
+			QQmlEngine::setObjectOwnership(m_scriptSchemaView.get(), QQmlEngine::CppOwnership);
+			QJSValue jsSchemaView = engine.newQObject(m_scriptSchemaView.get());
+
+			engine.globalObject().setProperty(PropertyNames::scriptGlobalVariableView, jsSchemaView);
+		}
+
+		// Create global variable "log"
+		//
+		{
+			QJSValue jsLog = engine.newQObject(m_logController);
+			QQmlEngine::setObjectOwnership(m_logController, QQmlEngine::CppOwnership);
+
+			engine.globalObject().setProperty(PropertyNames::scriptGlobalVariableLog, jsLog);
+		}
+
+		return;
+	}
 
 	void ClientSchemaView::startRepaintTimer()
 	{
@@ -654,43 +678,7 @@ namespace VFrame30
 
 		if (m_jsEngineGlobalsWereCreated == false)
 		{
-			// create global variable "view"
-			//
-			m_scriptSchemaView = std::make_unique<ScriptSchemaView>(this, m_schemaViewHistory);
-
-			{
-				QQmlEngine::setObjectOwnership(m_scriptSchemaView.get(), QQmlEngine::CppOwnership);
-				QJSValue jsSchemaView = m_jsEngine.newQObject(m_scriptSchemaView.get());
-
-				m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableView, jsSchemaView);
-			}
-
-			// create global variable "tuning"
-			//
-			{
-				QJSValue jsTuning = m_jsEngine.newQObject(m_tuningController);
-				QQmlEngine::setObjectOwnership(m_tuningController, QQmlEngine::CppOwnership);
-
-				m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableTuning, jsTuning);
-			}
-
-			// Create global variable "signals"
-			//
-			{
-				QJSValue jsSignals = m_jsEngine.newQObject(m_scriptAppSignalController.get());
-				QQmlEngine::setObjectOwnership(m_scriptAppSignalController.get(), QQmlEngine::CppOwnership);
-
-				m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableSignals, jsSignals);
-			}
-
-			// Create global variable "log"
-			//
-			{
-				QJSValue jsLog = m_jsEngine.newQObject(m_logController);
-				QQmlEngine::setObjectOwnership(m_logController, QQmlEngine::CppOwnership);
-
-				m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableLog, jsLog);
-			}
+			updateScriptGlobalVars(m_jsEngine);
 
 			// Evaluate global script
 			//
@@ -739,7 +727,8 @@ namespace VFrame30
 
 		if (result.isError())
 		{
-			formatScriptError(result);	// it will trace error, must not use any messageboxes here, it lead to exception on paint device
+			QString err = formatScriptError(result);	// it will trace error, must not use any messageboxes here, it lead to exception on paint device
+			logController()->writeError(tr("Evaluating GlobalScript error:") + err);
 		}
 
 		return result.isError() == false;
@@ -764,13 +753,12 @@ namespace VFrame30
 		qDebug() << "\tStack: " << scriptValue.property("stack").toString();
 		qDebug() << "\tMessage: " << scriptValue.toString();
 
-		QString str = QString("Script running uncaught exception at line %1\n"
-							  "\tClass: %2 %3\n"
-							  "\tStack: %4\n"
-							  "\tMessage: %5")
+		QString stack = scriptValue.property("stack").toString();
+
+		QString str = QString("Script running uncaught exception at line [%1], Class: [%2], Stack: [%3], Message: [%4]")
 					  .arg(scriptValue.property("lineNumber").toInt())
 					  .arg(metaObject()->className())
-					  .arg(scriptValue.property("stack").toString())
+					  .arg(stack)
 					  .arg(scriptValue.toString());
 
 		return str;
@@ -787,6 +775,11 @@ namespace VFrame30
 						  .arg(where)
 						  .arg(scriptValue.property("lineNumber").toInt())
 						  .arg(scriptValue.toString());
+
+		if (logController() != nullptr)
+		{
+			logController()->writeError(message);
+		}
 
 		QMessageBox::critical(this, QApplication::applicationDisplayName(), message);
 

@@ -139,7 +139,7 @@ bool CmdLineParam::parse()
 				argv.append(pArg);
 			}
 
-			m_cmdLineParser.setCmdLineArgs(args.count(), argv.data());
+			m_cmdLineParser.setCmdLineArgs(TO_INT(args.count()), argv.data());
 			m_cmdLineParser.parse();
 		}
 	}
@@ -308,10 +308,10 @@ bool CmdLineParam::printToReportFile(const QStringList& msgList)
 
 	qint64 writtenBytes = 0;
 
-	int msgCount = msgList.count();
-	for(int i = 0; i < msgCount; i++)
+	qsizetype msgCount = msgList.count();
+	for(qsizetype i = 0; i < msgCount; i++)
 	{
-		writtenBytes = reportFile.write(msgList[i].toUtf8() + "\r\n");
+		writtenBytes = reportFile.write(msgList[static_cast<int>(i)].toUtf8() + "\r\n");
 	}
 
 	reportFile.close();
@@ -331,12 +331,12 @@ int CmdLineParam::getStartTestIndex(const QVector<TestItem>& testList)
 		return 0;
 	}
 
-	int startTestIndex = -1;
+	qsizetype startTestIndex = -1;
 
-	int testCount = testList.count();
-	for(int testIndex = 0; testIndex < testCount; testIndex++)
+	qsizetype testCount = testList.count();
+	for(qsizetype testIndex = 0; testIndex < testCount; testIndex++)
 	{
-		TestItem test = testList.at(testIndex);
+		TestItem test = testList.at(static_cast<int>(testIndex));
 		if (m_fromTestID != test.testID())
 		{
 			continue;
@@ -346,7 +346,7 @@ int CmdLineParam::getStartTestIndex(const QVector<TestItem>& testList)
 		break;
 	}
 
-	return startTestIndex;
+	return TO_INT(startTestIndex);
 }
 
 bool CmdLineParam::enableExecuteTest(const QString& testID)
@@ -373,10 +373,10 @@ bool CmdLineParam::enableExecuteTestForLM(TestItem test)
 
 	bool foundPreset = false;
 
-	int presetCount = test.compatibleList().count();
-	for (int i = 0; i < presetCount; i++)
+	qsizetype presetCount = test.compatibleList().count();
+	for (qsizetype i = 0; i < presetCount; i++)
 	{
-		if (m_presetLM == test.compatibleList().at(i))
+		if (m_presetLM == test.compatibleList().at(static_cast<int>(i)))
 		{
 			foundPreset = true;
 			break;
@@ -396,21 +396,21 @@ void CmdLineParam::updateTestFilesParam(QString& cmdLine)
 	const QString key = "-f=";
 	QString params = cmdLine;
 
-	int posParam = params.indexOf(key);
+	qsizetype posParam = params.indexOf(key);
 	if (posParam == -1)
 	{
 		return;
 	}
 
-	params.remove(0, posParam);
+	params.remove(0, static_cast<int>(posParam));
 
-	int posNextParam = params.indexOf("-", 1);
+	qsizetype posNextParam = params.indexOf("-", 1);
 	if (posNextParam == -1)
 	{
 		posNextParam = cmdLine.length();
 	}
 
-	params.remove(posNextParam, params.length());
+	params.remove(static_cast<int>(posNextParam), params.length());
 
 	QString orignalParams = params;
 
@@ -418,7 +418,7 @@ void CmdLineParam::updateTestFilesParam(QString& cmdLine)
 	params.replace('\n', ',');
 	params.replace('\t', ',');
 	params.replace(' ', ',');
-	params.replace(QRegExp("[,]{2,}"),",");
+	params.replace(QRegularExpression("[,]{2,}"),",");
 
 	if (params[key.length()] == ',')
 	{

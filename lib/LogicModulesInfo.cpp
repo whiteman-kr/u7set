@@ -322,6 +322,9 @@ bool LogicModulesInfo::load(::LogicModuleInfo* lmi, const QDomNode& lmNode, QStr
 
 		lmInfo->lanControllers.resize(lanControllersCount);
 
+		lmInfo->lanControllers.setRupVersion(lmDescription->lan().m_rupVersion);
+		lmInfo->lanControllers.setFotipVersion(lmDescription->lan().m_fotipVersion);
+
 		for(int i = 0; i < lanControllersCount; i++)
 		{
 			bool ok = false;

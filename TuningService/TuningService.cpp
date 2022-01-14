@@ -281,8 +281,50 @@ namespace Tuning
 		return m_controlledLans.contains({ lmEquipmentID, lanEquipmentID });
 	}
 
+	void TuningServiceWorker::logTuningPacket(bool request,
+											  Fotip::OpCode opCode,
+											  quint16 rupNumerator,
+											  quint64 fotipNumerator)
+	{
+		if (m_tuningPacketLog == nullptr)
+		{
+			return;
+		}
+
+		QString opCodeStr;
+
+		switch(opCode)
+		{
+		case Fotip::OpCode::Read:
+			opCodeStr = "READ&nbsp;";
+			break;
+
+		case Fotip::OpCode::Write:
+			opCodeStr = "WRITE";
+			break;
+
+		case Fotip::OpCode::Apply:
+			opCodeStr = "APPLY";
+			break;
+
+		default:
+			//Q_ASSERT(false);
+			opCodeStr = QString("Unknown opCode = %1").arg(TO_INT(opCode));
+		};
+
+		LOG_MSG(m_tuningPacketLog, QString("%1 %2 %3 %4").
+				arg(rupNumerator, sizeof(rupNumerator) * 2, 16, Latin1Char::ZERO).
+				arg(request == true ? "request" : "reply&nbsp;&nbsp;" ).
+				arg(opCodeStr).
+				arg(fotipNumerator, sizeof(fotipNumerator) * 2, 16, Latin1Char::ZERO));
+	}
+
 	void TuningServiceWorker::initialize()
 	{
+//		m_tuningPacketLog = std::make_shared<CircularLogger>();
+//		LOGGER_INIT(m_tuningPacketLog, QString("TuningPacket"), Service::getInstanceID(argc(), argv()));
+//		m_tuningPacketLog->setLogCodeInfo(false);
+
 		runCfgLoaderThread();
 	}
 
@@ -290,6 +332,11 @@ namespace Tuning
 	{
 		clearConfiguration();
 		stopCfgLoaderThread();
+
+		if (m_tuningPacketLog != nullptr)
+		{
+			LOGGER_SHUTDOWN(m_tuningPacketLog);
+		}
 	}
 
 	void TuningServiceWorker::runCfgLoaderThread()
@@ -329,13 +376,13 @@ namespace Tuning
 		m_mainMutex.unlock();
 	}
 
-	void TuningServiceWorker::applyNewConfiguration()
+	void TuningServiceWorker::applyNewConfiguration(const TuningSources& newSources)
 	{
 		DEBUG_LOG_MSG(m_logger, QString("Apply new configuration"));
 
 		m_mainMutex.lock();
 
-		buildServiceMaps();
+		buildServiceMaps(newSources);
 		runTuningSourceThreads();
 		runSourcesListenerThreads();
 
@@ -344,8 +391,9 @@ namespace Tuning
 		runTcpTuningServerThread();
 	}
 
-	void TuningServiceWorker::buildServiceMaps()
+	void TuningServiceWorker::buildServiceMaps(const TuningSources& newSources)
 	{
+		m_tuningSources = newSources;
 		fillControlledLans();
 		m_clientContextMap.init(m_settings, m_tuningSources);
 	}
@@ -354,6 +402,7 @@ namespace Tuning
 	{
 		m_controlledLans.clear();
 		m_clientContextMap.clear();
+		m_tuningSources.clear();
 	}
 
 	void TuningServiceWorker::fillControlledLans()
@@ -466,11 +515,13 @@ namespace Tuning
 		return result;
 	}
 
-	bool TuningServiceWorker::readTuningDataSources(const QByteArray& fileData, const QString& profile)
+	bool TuningServiceWorker::readTuningDataSources(const QByteArray& fileData, const QString& profile, TuningSources* newSources)
 	{
-		m_tuningSources.clear();
+		TEST_PTR_RETURN_FALSE(newSources);
 
-		TuningSources sources;
+		newSources->clear();
+
+		QVector<TuningSource> sources;
 
 		bool result = DataSourcesXML<TuningSource>::readFromXml(fileData, &sources);
 
@@ -480,11 +531,11 @@ namespace Tuning
 		{
 			if (ts.profile() == profile)
 			{
-				m_tuningSources.push_back(ts);
+				newSources->push_back(ts);
 			}
 		}
 
-		m_tuningSources.buildMaps();
+		newSources->buildMaps();
 
 		return result;
 	}
@@ -508,6 +559,8 @@ namespace Tuning
 			m_tcpTuningServerThread->quitAndWait();
 			delete m_tcpTuningServerThread;
 			m_tcpTuningServerThread = nullptr;
+
+			DEBUG_LOG_MSG(m_logger, QString("TcpTuningServerThread stoped"));
 		}
 	}
 
@@ -584,7 +637,8 @@ namespace Tuning
 		}
 
 		TuningSourceThreadShared sourceThread =
-				std::make_shared<TuningSourceThread>(	m_settings,
+				std::make_shared<TuningSourceThread>(	*this,
+														m_settings,
 														source,
 														sessionParams().softwareRunMode,
 														m_logger,
@@ -756,6 +810,8 @@ namespace Tuning
 
 		bool result = true;
 
+		TuningSources newSources;
+
 		for(Builder::BuildFileInfo bfi : buildFileInfoArray)
 		{
 			QByteArray fileData;
@@ -774,7 +830,7 @@ namespace Tuning
 
 			if (bfi.ID == CfgFileId::TUNING_SOURCES)
 			{
-				result &= readTuningDataSources(fileData, sessionParams.currentSettingsProfile);
+				result &= readTuningDataSources(fileData, sessionParams.currentSettingsProfile, &newSources);
 			}
 
 			if (result == true)
@@ -791,7 +847,7 @@ namespace Tuning
 		if (result == true)
 		{
 			clearConfiguration();
-			applyNewConfiguration();
+			applyNewConfiguration(newSources);
 		}
 	}
 }
