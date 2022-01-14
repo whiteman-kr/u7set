@@ -109,6 +109,9 @@ module VFrame30 {
 		// Functions
 		//
 		hasTag(tag: string): boolean;
+
+		propertyValue(name: string): any;
+		setPropertyValue(name: string, value: any): void;
 	}
 
 	export interface PosLineImpl extends SchemaItem {
