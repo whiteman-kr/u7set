@@ -7746,7 +7746,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Device Object %1 not found.
+	/// Title: Device object %1 not found.
 	///
 	/// Parameters:
 	///		%1 DeviceObject EquipmentID
@@ -7758,7 +7758,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6010,
-				  tr("Device Object %1 not found.")
+				  tr("Device object %1 not found.")
 				  .arg(equipmemtId));
 	}
 
@@ -7766,7 +7766,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Device Object %1 not found on %2.
+	/// Title: Device object %1 not found on %2.
 	///
 	/// Parameters:
 	///		%1 DeviceObject EquipmentID
@@ -7779,7 +7779,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6011,
-				  tr("Device Object %1 not found on %2.")
+				  tr("Device object %1 not found on %2.")
 				  .arg(equipmemtId)
 				  .arg(buildStep));
 	}
@@ -8443,6 +8443,93 @@ namespace Builder
 				  6202,
 				  tr("Property TuningUserAccounts can't be empty in (%1) software if TuningLogin is set to 'true'.").
 						arg(tuningClientMonitorId));
+	}
+
+	/// IssueCode: EQP6203
+	///
+	/// IssueType: Error
+	///
+	/// Title: Source %1 specified in %2.TuningSourceEquipmentID is not processed by service %3 which the client is connected to.
+	///
+	/// Parameters:
+	///		%1 Specified TuningSourceID
+	///		%2 TuningClient/Monitor EquipmentID
+	///		%3 TuningService EquipmentID
+	///
+	/// Description:
+	///		Specified TuningSourceID is not processed by TuningService which current TuningClient/Monitor connects to.
+	///
+	void IssueLogger::errEQP6203(QString tuningSourceId, QString tuningClientMonitorId, QString tuningServiceId)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6203,
+				  tr("Source %1 specified in %2.TuningSourceEquipmentID is not processed by service %3 which the client is connected to.").
+				  arg(tuningSourceId).
+				  arg(tuningClientMonitorId).
+				  arg(tuningServiceId));
+	}
+
+	/// IssueCode: EQP6204
+	///
+	///
+	/// IssueType: Error
+	///
+	/// Title: %1.TuningSourceEquipmentID property can't be empty in Safety Project. Specify tuning sources which are processed by this client.
+	///
+	/// Parameters:
+	///		%1 TuningClient EquipmentID
+	///
+	/// Description:
+	///		TuningSourceEquipmentID property of TuningClient can't be empty in Safety Project. Tuning sources should be specified.
+	///
+	void IssueLogger::errEQP6204(QString tuningClientId)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6204,
+				  tr("%1.TuningSourceEquipmentID property can't be empty in Safety Project. Specify tuning sources which are processed by this client.").
+				  arg(tuningClientId));
+	}
+
+	/// IssueCode: EQP6205
+	///
+	///
+	/// IssueType: Error
+	///
+	/// Title: No tuning sources found for %1.
+	///
+	/// Parameters:
+	///		%1 Client EquipmentID
+	///
+	/// Description:
+	///		No tuning sources found for TuningClient or Monitor.
+	///
+	void IssueLogger::errEQP6205(QString tuningClientMonitorId)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6205,
+				  tr("No tuning sources found for %1.").
+				  arg(tuningClientMonitorId));
+	}
+
+	/// IssueCode: EQP6206
+	///
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property %1.TuningServiceID can't be empty if tuning enabled.
+	///
+	/// Parameters:
+	///		%1 Client EquipmentID
+	///
+	/// Description:
+	///		TuningServiceID is not specified while tuning enabled. Check client settings.
+	///
+	void IssueLogger::errEQP6206(QString tuningClientID)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6206,
+				  QString(tr("Property %1.TuningServiceID can't be empty if tuning enabled.")).
+				  arg(tuningClientID));
 	}
 
 	/// IssueCode: EQP6210

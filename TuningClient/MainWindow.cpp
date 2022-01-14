@@ -25,6 +25,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 {
 	m_singleLmControlModeText = QObject::tr("Single LM Control Mode");
 	m_multipleLmControlModeText = QObject::tr("Multiple LM Control Mode");
+	m_mixedLmControlModeText = QObject::tr("Mixed LM Control Mode");
 
 	if (theSettings.m_mainWindowPos.x() != -1 && theSettings.m_mainWindowPos.y() != -1)
 	{
@@ -55,24 +56,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 
 	setCentralWidget(new QLabel(tr("Waiting for configuration...")));
 
-	// TuningClientTcpClient
-	//
-	m_tcpClient = new TuningClientTcpClient(softwareInfo, &m_tuningSignalManager, theLogFile, m_tuningLog, &m_userManager);
-	m_tcpClient->setInstanceId(theSettings.instanceStrId());
-	m_tcpClient->setRequestInterval(theSettings.m_requestInterval);
-
-	if (theSettings.m_simulationMode == true)
-	{
-		QMessageBox::warning(this, qAppName(), tr("Warning! TuningClient is running in debugging simulation mode!"));
-		m_tcpClient->setSimulationMode(theSettings.m_simulationMode);	// For debugging
-	}
-
-	m_tcpClientThread = new SimpleThread(m_tcpClient);
-	m_tcpClientThread->start();
-
 	// Global connections
-
-	connect(&m_configController, &ConfigController::tcpClientConfigurationArrived, m_tcpClient, &TuningClientTcpClient::slot_configurationArrived);
 
 	connect(&m_configController, &ConfigController::filtersArrived, this, &MainWindow::slot_projectFiltersUpdated, Qt::DirectConnection);
 	connect(&m_configController, &ConfigController::signalsArrived, this, &MainWindow::slot_signalsUpdated, Qt::DirectConnection);
@@ -107,9 +91,9 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 
 MainWindow::~MainWindow()
 {
+	deleteWorkspace();
 
-	m_tcpClientThread->quitAndWait(10000);
-	delete m_tcpClientThread;
+	stopTcpClients();
 
 	theSettings.m_mainWindowPos = pos();
 	theSettings.m_mainWindowGeometry = saveGeometry();
@@ -230,13 +214,9 @@ void MainWindow::createStatusBar()
 	m_statusBarBuildInfo = new QLabel();
 	m_statusBarBuildInfo->setAlignment(Qt::AlignLeft);
 	m_statusBarBuildInfo->setIndent(3);
-	//m_statusBarBuildInfo->setIndent(3);
-	//m_statusBarBuildInfo->setText(m_singleLmControlMode ? m_singleLmControlModeText : m_multipleLmControlModeText);
 
 	m_statusBarLmControlMode = new QLabel();
 	m_statusBarLmControlMode->setAlignment(Qt::AlignLeft);
-	//m_statusBarLmControlMode->setIndent(3);
-	m_statusBarLmControlMode->setText(m_singleLmControlMode ? m_singleLmControlModeText : m_multipleLmControlModeText);
 
 	m_statusBarLmErrors = new QLabel();
 	m_statusBarLmErrors->setAlignment(Qt::AlignLeft);
@@ -321,7 +301,6 @@ void MainWindow::closeEvent(QCloseEvent *event)
 			event->ignore();
 		}
 	}
-
 }
 
 void MainWindow::timerEvent(QTimerEvent* event)
@@ -375,7 +354,7 @@ void MainWindow::timerEvent(QTimerEvent* event)
 
 	if  (event->timerId() == m_mainWindowTimerId_500ms)
 	{
-		m_filterStorage.updateCounters(&m_tuningSignalManager, m_tcpClient, nullptr);
+		m_filterStorage.updateCounters(&m_tuningSignalManager, m_tcpClients, nullptr);
 
 		emit timerTick500();
 	}
@@ -407,11 +386,97 @@ void MainWindow::createAndCheckFiltersHashes(bool userFiltersOnly)
 	}
 }
 
+void MainWindow::runTcpClients()
+{
+	if (m_tcpClients.empty() == false || m_tcpClientThreads.empty() == false)
+	{
+		Q_ASSERT(m_tcpClients.empty() == true);
+		Q_ASSERT(m_tcpClientThreads.empty() == true);
+		return;
+	}
+
+	for (const TuningClientSettings::TuningService& ts : theConfigSettings.clientSettings.tuningServices)
+	{
+		// TuningClientTcpClient
+		//
+		TuningClientTcpClient* client = new TuningClientTcpClient(m_configController.softwareInfo(),
+																  ts.tuningServiceID,
+																  ts.singleLmControl,
+																  &m_tuningSignalManager,
+																  theLogFile,
+																  m_tuningLog,
+																  &m_userManager);
+		client->setInstanceId(theSettings.instanceStrId());
+		client->setRequestInterval(theSettings.m_requestInterval);
+
+		const HostAddressPort addrPort = HostAddressPort(ts.clientRequestIP, ts.clientRequestPort);
+
+		client->setServers(addrPort, addrPort, true);
+		client->setAutoApply(theConfigSettings.clientSettings.autoApply);
+		client->setLmStatusFlagMode(theConfigSettings.lmStatusFlagMode());
+
+		SimpleThread* thread = new SimpleThread(client);
+		thread->start();
+
+		m_tcpClients.push_back(client);
+		m_tcpClientThreads.push_back(thread);
+	}
+
+	if (m_dialogTuningSources != nullptr)
+	{
+		m_dialogTuningSources->setTuningSources({m_tcpClients.begin(), m_tcpClients.end()});
+	}
+}
+
+void MainWindow::stopTcpClients()
+{
+	if (m_noWorkspaceLabel != nullptr ||
+		m_logonWorkspace != nullptr ||
+		m_tuningWorkspace != nullptr ||
+		m_schemasWorkspaces.empty() == false ||
+		m_tabWidget != nullptr)
+	{
+		// We should not delete TCP clients if workspace exists!
+		//
+		Q_ASSERT(m_noWorkspaceLabel == nullptr);
+		Q_ASSERT(m_logonWorkspace == nullptr);
+		Q_ASSERT(m_tuningWorkspace == nullptr);
+		Q_ASSERT(m_schemasWorkspaces.empty() == true);
+		Q_ASSERT(m_tabWidget == nullptr);
+		return;
+	}
+
+	if (m_dialogTuningSources != nullptr)
+	{
+		m_dialogTuningSources->setTuningSources({});
+	}
+
+	for (SimpleThread* t : m_tcpClientThreads)
+	{
+		t->quitAndWait(10000);
+		delete t;
+	}
+
+	m_tcpClients.clear();
+	m_tcpClientThreads.clear();
+}
+
 void MainWindow::createWorkspace()
 {
-	if (m_tuningWorkspace != nullptr || m_schemasWorkspaces.empty() == false)
+	// Check if previous workspace is deleted
+
+	if (m_noWorkspaceLabel != nullptr ||
+		m_logonWorkspace != nullptr ||
+		m_tuningWorkspace != nullptr ||
+		m_schemasWorkspaces.empty() == false ||
+		m_tabWidget != nullptr)
 	{
-		QMessageBox::warning(this, tr("Warning"), tr("Program configuration has been changed and will be updated."));
+		Q_ASSERT(m_noWorkspaceLabel == nullptr);
+		Q_ASSERT(m_logonWorkspace == nullptr);
+		Q_ASSERT(m_tuningWorkspace == nullptr);
+		Q_ASSERT(m_schemasWorkspaces.empty() == true);
+		Q_ASSERT(m_tabWidget == nullptr);
+		return;
 	}
 
 	// Create main layout
@@ -422,41 +487,6 @@ void MainWindow::createWorkspace()
 		m_mainLayout = new QVBoxLayout(w);
 		m_mainLayout->setContentsMargins(0, 0, 0, 0);
 		setCentralWidget(w);
-	}
-
-	// Delete old workspaces
-
-	if (m_noWorkspaceLabel != nullptr)
-	{
-		delete m_noWorkspaceLabel;
-		m_noWorkspaceLabel = nullptr;
-	}
-
-	if (m_logonWorkspace != nullptr)
-	{
-		delete m_logonWorkspace;
-		m_logonWorkspace = nullptr;
-	}
-
-	if (m_tuningWorkspace != nullptr)
-	{
-		delete m_tuningWorkspace;
-		m_tuningWorkspace = nullptr;
-	}
-
-	if (m_schemasWorkspaces.empty() == false)
-	{
-		for (SchemasWorkspace* sw : m_schemasWorkspaces)
-		{
-			delete sw;
-		}
-		m_schemasWorkspaces.clear();
-	}
-
-	if (m_tabWidget != nullptr)
-	{
-		delete m_tabWidget;
-		m_tabWidget = nullptr;
 	}
 
 	createAndCheckFiltersHashes(false/*userFiltersOnly*/);
@@ -474,6 +504,19 @@ void MainWindow::createWorkspace()
 			return;
 		}
 
+		std::vector<ITuningTcpClient*> clientInterfaces;
+		for (TuningClientTcpClient* client : m_tcpClients)
+		{
+			ITuningTcpClient* ic = dynamic_cast<ITuningTcpClient*>(client);
+			if (ic == nullptr)
+			{
+				Q_ASSERT(ic);
+				continue;
+			}
+
+			clientInterfaces.push_back(ic);
+		}
+
 		int count = rootFilter->childFiltersCount();
 		for (int i = 0; i < count; i++)
 		{
@@ -488,7 +531,7 @@ void MainWindow::createWorkspace()
 			{
 				schemaFiltersFound = true;
 
-				SchemasWorkspace* sw = new SchemasWorkspace(&m_configController, &m_tuningSignalManager, m_tcpClient,
+				SchemasWorkspace* sw = new SchemasWorkspace(&m_configController, &m_tuningSignalManager, clientInterfaces,
 															childFilter->caption(),
 															childFilter->tagsList(),
 															childFilter->startSchemaId(),
@@ -500,7 +543,7 @@ void MainWindow::createWorkspace()
 
 		if (schemaFiltersFound == false)
 		{
-			SchemasWorkspace* sw = new SchemasWorkspace(&m_configController, &m_tuningSignalManager, m_tcpClient,
+			SchemasWorkspace* sw = new SchemasWorkspace(&m_configController, &m_tuningSignalManager, clientInterfaces,
 														tr("Schemas"),
 														{},
 														theConfigSettings.clientSettings.startSchemaID,
@@ -512,7 +555,7 @@ void MainWindow::createWorkspace()
 
 	if (theConfigSettings.clientSettings.showSignals == true)
 	{
-		m_tuningWorkspace = new TuningWorkspace(nullptr, m_filterStorage.root(), &m_tuningSignalManager, m_tcpClient, &m_filterStorage, this);
+		m_tuningWorkspace = new TuningWorkspace(nullptr, m_filterStorage.root(), &m_tuningSignalManager, m_tcpClients, &m_filterStorage, this);
 	}
 
 	// Create login workspace
@@ -530,7 +573,7 @@ void MainWindow::createWorkspace()
 
 	if (m_schemasWorkspaces.empty() == true && m_tuningWorkspace == nullptr)
 	{
-		m_noWorkspaceLabel = new QLabel("No workspaces exist, configuration error.");
+		m_noWorkspaceLabel = new QLabel(tr("No workspaces exist, configuration error."));
 		m_mainLayout->addWidget(m_noWorkspaceLabel);
 	}
 	else
@@ -571,6 +614,44 @@ void MainWindow::createWorkspace()
 	}
 }
 
+void MainWindow::deleteWorkspace()
+{
+	// Delete old workspaces
+
+	if (m_noWorkspaceLabel != nullptr)
+	{
+		delete m_noWorkspaceLabel;
+		m_noWorkspaceLabel = nullptr;
+	}
+
+	if (m_logonWorkspace != nullptr)
+	{
+		delete m_logonWorkspace;
+		m_logonWorkspace = nullptr;
+	}
+
+	if (m_tuningWorkspace != nullptr)
+	{
+		delete m_tuningWorkspace;
+		m_tuningWorkspace = nullptr;
+	}
+
+	if (m_schemasWorkspaces.empty() == false)
+	{
+		for (SchemasWorkspace* sw : m_schemasWorkspaces)
+		{
+			delete sw;
+		}
+		m_schemasWorkspaces.clear();
+	}
+
+	if (m_tabWidget != nullptr)
+	{
+		delete m_tabWidget;
+		m_tabWidget = nullptr;
+	}
+}
+
 bool MainWindow::eventFilter(QObject *object, QEvent *event)
 {
 	if (object == m_statusBarLmErrors &&
@@ -603,7 +684,6 @@ void MainWindow::updateStatusBar()
 	//
 	assert(m_statusBarLmControlMode);
 	assert(m_statusBarConfigConnection);
-	assert(m_tcpClient);
 
 	// BuildInfo
 
@@ -614,35 +694,84 @@ void MainWindow::updateStatusBar()
 		m_statusBarBuildInfo->setText(text);
 	}
 
-	// LM Control Mode
+	// LM Control Mode Label
 
-	if (m_singleLmControlMode != m_tcpClient->singleLmControlMode() || m_activeClientId != m_tcpClient->activeClientId() || m_activeClientIp != m_tcpClient->activeClientIp())
 	{
-		m_singleLmControlMode = m_tcpClient->singleLmControlMode();
+		int singleLmControlModeCount = 0;
 
-		m_activeClientId = m_tcpClient->activeClientId();
-		m_activeClientIp = m_tcpClient->activeClientIp();
-
-		QString str = m_singleLmControlMode ? m_singleLmControlModeText : m_multipleLmControlModeText;
-
-		if (m_activeClientId.isEmpty() == false && m_activeClientIp.isEmpty() == false)
+		for (const TuningClientTcpClient* client: m_tcpClients)
 		{
-			str += tr(", active client is %1, %2").arg(m_activeClientId).arg(m_activeClientIp);
-
-			if (m_tcpClient->clientIsActive() == true)
+			if (client->singleLmControlMode() == true)
 			{
-				str += tr(" (current)");
+				singleLmControlModeCount++;
 			}
 		}
 
-		m_statusBarLmControlMode->setText(str);
+		QString str = m_multipleLmControlModeText;
+
+		if (m_tcpClients.empty() == false)
+		{
+			if (singleLmControlModeCount == static_cast<int>(m_tcpClients.size()))
+			{
+				str = m_singleLmControlModeText;
+			}
+			else
+			{
+				if (singleLmControlModeCount > 0)
+				{
+					str = m_mixedLmControlModeText;
+				}
+			}
+		}
+
+		if (m_statusBarLmControlMode->text() != str)
+		{
+			m_statusBarLmControlMode->setText(str);
+		}
 	}
 
-	Tcp::ConnectionState configConnState =  m_configController.getConnectionState();
-	Tcp::ConnectionState tuningConnState =  m_tcpClient->getConnectionState();
+	// LM Control Tooltip
+
+	{
+		QString str;
+
+		for (const TuningClientTcpClient* client: m_tcpClients)
+		{
+			str += tr("%1: ").arg(client->tuningServiceId());
+
+			QString activeClientId = client->activeClientId();
+			QString activeClientIp = client->activeClientIp();
+
+			if (activeClientId.isEmpty() == false && activeClientIp.isEmpty() == false)
+			{
+				str += tr("active client is %1, %2").arg(activeClientId).arg(activeClientIp);
+
+				if (client->clientIsActive() == true)
+				{
+					str += tr(" (current)");
+				}
+			}
+			else
+			{
+				str += tr("active");
+			}
+
+			str += "\n";
+		}
+
+		str = str.trimmed();
+
+		if (m_statusBarLmControlMode->toolTip() != str)
+		{
+			m_statusBarLmControlMode->setToolTip(str);
+		}
+	}
+
 
 	// ConfigService
 	//
+	Tcp::ConnectionState configConnState =  m_configController.getConnectionState();
+
 	text = tr(" ConfigService: ");
 
 	if (configConnState.isConnected == false)
@@ -651,7 +780,7 @@ void MainWindow::updateStatusBar()
 	}
 	else
 	{
-		text += tr(" connected, packets: %1").arg(QString::number(configConnState.replyCount));
+		text += tr("%1").arg(QString::number(configConnState.replyCount));
 	}
 
 	if (text != m_statusBarConfigConnection->text())
@@ -668,23 +797,42 @@ void MainWindow::updateStatusBar()
 
 	// TuningService
 	//
+
 	text = tr(" TuningService: ");
 
-	if (tuningConnState.isConnected == false)
+	tooltip.clear();
+
+	for (const TuningClientTcpClient* client: m_tcpClients)
 	{
-		text += tr(" no connection");
+		Tcp::ConnectionState tuningConnState =  client->getConnectionState();
+
+		if (tuningConnState.isConnected == true)
+		{
+			text += tr(" %1 /").arg(QString::number(tuningConnState.replyCount));
+		}
+		else
+		{
+			if (m_tcpClients.size() > 1)
+			{
+				text += tr(" No /");
+			}
+			else
+			{
+				text += tr(" No connection");
+			}
+		}
+
+		tooltip += client->getStateToolTip() + "\n\n";
 	}
-	else
-	{
-		text += tr(" connected, packets: %1").arg(QString::number(tuningConnState.replyCount));
-	}
+
+	text.remove(text.length() - 1, 1);	// remove last "/"
+
+	tooltip = tooltip.trimmed();
 
 	if (text != m_statusBarTuningConnection->text())
 	{
 		m_statusBarTuningConnection->setText(text);
 	}
-
-	tooltip = m_tcpClient->getStateToolTip();
 
 	if (tooltip != m_statusBarTuningConnection->toolTip())
 	{
@@ -692,6 +840,7 @@ void MainWindow::updateStatusBar()
 	}
 
 	// Counters
+
 	{
 		int labelCount = 0;
 
@@ -790,104 +939,98 @@ void MainWindow::updateStatusBar()
 		}
 	}
 
-	std::vector<Hash> sources = m_tcpClient->tuningSourcesEquipmentHashes();
+	// LM Errors
 
-	if (sources.empty() == true)
-	{
-		m_statusBarLmErrors->setText(tr(" No LM information "));
-		m_statusBarSor->setText(QString());
-	}
-	else
+	TuningCounters rootCounters = m_filterStorage.root()->counters();
+
 	{
 		assert(m_statusBarLmErrors);
 
 		// Lm Errors tool
 
-		TuningCounters rootCounters = m_filterStorage.root()->counters();
+		text = tr(" LM Errors: %1 ").arg(rootCounters.errorCounter);
 
-		if (m_lmErrorsCounter != rootCounters.errorCounter)
+		if (m_statusBarLmErrors->text() != text)
 		{
-			m_lmErrorsCounter = rootCounters.errorCounter;
-
-			m_statusBarLmErrors->setText(tr(" LM Errors: %1 ").arg(m_lmErrorsCounter));
-
-			if (m_lmErrorsCounter == 0)
-			{
-				if (m_statusBarLmErrors->styleSheet() != "")
-				{
-					m_statusBarLmErrors->setStyleSheet("");
-				}
-			}
-			else
-			{
-				QString styleSheet = QString("QLabel {color : white; background-color: %1}").arg(redColor.name());
-
-				if (m_statusBarLmErrors->styleSheet() != styleSheet)
-				{
-					m_statusBarLmErrors->setStyleSheet(styleSheet);
-				}
-			}
+			m_statusBarLmErrors->setText(text);
 		}
 
-		// Sor tool
-
-		if (theConfigSettings.lmStatusFlagMode() == LmStatusFlagMode::SOR)
+		if (rootCounters.errorCounter == 0)
 		{
-			QString sorStatus;
-
-			if (rootCounters.sorActive == false)
+			if (m_statusBarLmErrors->styleSheet() != "")
 			{
-				sorStatus = tr(" SOR: ");
-			}
-			else
-			{
-				if (rootCounters.sorValid == false)
-				{
-					sorStatus = tr(" SOR: ? ");
-				}
-				else
-				{
-					if (rootCounters.sorCounter == 0)
-					{
-						sorStatus = tr(" SOR: No ");
-					}
-					else
-					{
-						if (rootCounters.sorCounter == 1)
-						{
-							sorStatus = tr(" SOR: Yes ");
-						}
-						else
-						{
-							sorStatus = tr(" SOR: Yes [%1] ").arg(rootCounters.sorCounter);
-						}
-					}
-				}
-			}
-
-			if (m_sorStatus != sorStatus)
-			{
-				m_sorStatus = sorStatus;
-
-				assert(m_statusBarSor);
-
-				m_statusBarSor->setText(sorStatus);
-
-				if ((rootCounters.sorActive == true && rootCounters.sorValid == false) || rootCounters.sorCounter > 0)
-				{
-                    m_statusBarSor->setStyleSheet(QString("QLabel {color : white; background-color: %1}").arg(redColor.name()));
-
-				}
-				else
-				{
-					m_statusBarSor->setStyleSheet(m_statusBarLmControlMode->styleSheet());
-				}
+				m_statusBarLmErrors->setStyleSheet(QString());
 			}
 		}
 		else
 		{
-			m_statusBarSor->setText(QString());
+			QString styleSheet = QString("QLabel {color : white; background-color: %1}").arg(redColor.name());
+
+			if (m_statusBarLmErrors->styleSheet() != styleSheet)
+			{
+				m_statusBarLmErrors->setStyleSheet(styleSheet);
+			}
 		}
+
+	}
+
+	// SOR counter
+
+	if (theConfigSettings.lmStatusFlagMode() == LmStatusFlagMode::SOR)
+	{
+		if (rootCounters.sorActive == false)
+		{
+			text = tr(" SOR: -");
+		}
+		else
+		{
+			if (rootCounters.sorValid == false)
+			{
+				text = tr(" SOR: ? ");
+			}
+			else
+			{
+				if (rootCounters.sorCounter == 0)
+				{
+					text = tr(" SOR: No ");
+				}
+				else
+				{
+					if (rootCounters.sorCounter == 1)
+					{
+						text = tr(" SOR: Yes ");
+					}
+					else
+					{
+						text = tr(" SOR: Yes [%1] ").arg(rootCounters.sorCounter);
+					}
+				}
+			}
+		}
+
+		if (m_statusBarSor->text() != text)
+		{
+			assert(m_statusBarSor);
+
+			m_statusBarSor->setText(text);
+
+			QString stylesheet;
+
+			if ((rootCounters.sorActive == true && rootCounters.sorValid == false) || rootCounters.sorCounter > 0)
+			{
+				stylesheet = QString("QLabel {color : white; background-color: %1}").arg(redColor.name());
+			}
+
+			if (m_statusBarSor->styleSheet() != stylesheet)
+			{
+				m_statusBarSor->setStyleSheet(stylesheet);
+			}
+		}
+	}
+	else
+	{
+		m_statusBarSor->setText(QString());
+		m_statusBarSor->setStyleSheet(QString());
 	}
 
 	// Log alerts tool
@@ -907,13 +1050,48 @@ void MainWindow::updateStatusBar()
 		}
 		else
 		{
-            m_statusBarLogAlerts->setStyleSheet(QString("QLabel {color : white; background-color: %1}").arg(redColor.name()));
+			m_statusBarLogAlerts->setStyleSheet(QString("QLabel {color : white; background-color: %1}").arg(redColor.name()));
 		}
 	}
 }
 
 void MainWindow::slot_configurationArrived()
 {
+	QWidget* wm = QApplication::activeModalWidget();
+	QWidget* wp = QApplication::activePopupWidget();
+	if (wm != nullptr || wp != nullptr)
+	{
+		// Some modal or popup window is active, so deleting workspace is not available.
+		// In this case we need to restart the application.
+		//
+		QMessageBox::warning(this, tr("Warning"), tr("Program configuraton has been changed. Press OK to restart the program."));
+
+		// Remove the shared memory single application object
+		//
+		delete theSharedMemorySingleApp;
+		theSharedMemorySingleApp = nullptr;
+
+		// Restart the program
+		//
+		QString program = qApp->arguments()[0];
+		QStringList arguments = qApp->arguments().mid(1); // remove the 1st argument - the program name
+		qApp->quit();
+		QProcess::startDetached(program, arguments);
+
+		return;
+	}
+
+	if (m_tuningWorkspace != nullptr || m_schemasWorkspaces.empty() == false)
+	{
+		QMessageBox::warning(this, tr("Warning"), tr("Program configuration has been changed and will be updated."));
+	}
+
+	deleteWorkspace();
+
+	stopTcpClients();
+
+	runTcpClients();
+
 	createWorkspace();
 
 	return;
@@ -962,35 +1140,35 @@ void MainWindow::runPresetEditor()
 
 	TuningClientFilterStorage editFilters = m_filterStorage;
 
-	DialogFilterEditor d(&m_tuningSignalManager, m_tcpClient, &editFilters, this);
+	DialogFilterEditor d(&m_tuningSignalManager, &editFilters, this);
 
 	if (d.exec() == QDialog::Accepted)
 	{
-        //m_filterStorage = editFilters;  // This is not allowed, we need to keep shared pointers to existing non-user filters
+		//m_filterStorage = editFilters;  // This is not allowed, we need to keep shared pointers to existing non-user filters
 
-        // Delete user filters from main storage
+		// Delete user filters from main storage
 
-        m_filterStorage.removeFilters(TuningFilter::Source::User);
+		m_filterStorage.removeFilters(TuningFilter::Source::User);
 
-        // Add user filters from editing storage
+		// Add user filters from editing storage
 
-        for (int i = 0; i < editFilters.root()->childFiltersCount(); i++)
-        {
-            std::shared_ptr<TuningFilter> child = editFilters.root()->childFilter(i);
+		for (int i = 0; i < editFilters.root()->childFiltersCount(); i++)
+		{
+			std::shared_ptr<TuningFilter> child = editFilters.root()->childFilter(i);
 
-            if (child == nullptr)
-            {
-                Q_ASSERT(child);
-                return;
-            }
+			if (child == nullptr)
+			{
+				Q_ASSERT(child);
+				return;
+			}
 
-            if (child->source() != TuningFilter::Source::User)
-            {
-                continue;
-            }
+			if (child->source() != TuningFilter::Source::User)
+			{
+				continue;
+			}
 
-            m_filterStorage.add(child, false);
-        }
+			m_filterStorage.add(child, false);
+		}
 
 		QString errorMsg;
 
@@ -1018,12 +1196,25 @@ void MainWindow::showTuningSources()
 {
 	if (m_dialogTuningSources == nullptr)
 	{
-		m_dialogTuningSources = new DialogTuningSources(m_tcpClient, true, this);
+		std::vector<TuningTcpClient*> clients;
+		for (const auto& c: m_tcpClients)
+		{
+			TuningTcpClient* tc = dynamic_cast<TuningTcpClient*>(c);
+			if (tc == nullptr)
+			{
+				Q_ASSERT(tc);
+				return;
+			}
+
+			clients.push_back(tc);
+		}
+
+		m_dialogTuningSources = new DialogTuningSources(clients, true, this);
 		m_dialogTuningSources->show();
 
 		auto f = [this]() -> void
 		{
-				m_dialogTuningSources = nullptr;
+			m_dialogTuningSources = nullptr;
 		};
 
 		connect(m_dialogTuningSources, &DialogTuningSources::dialogClosed, this, f);
@@ -1045,9 +1236,9 @@ void MainWindow::showStatistics()
 		m_dialogStatistics->show();
 
 		auto f = [this]() -> void
-			{
-				m_dialogStatistics = nullptr;
-			};
+		{
+			m_dialogStatistics = nullptr;
+		};
 
 		connect(m_dialogStatistics, &DialogTcpStatistics::dialogClosed, this, f);
 	}

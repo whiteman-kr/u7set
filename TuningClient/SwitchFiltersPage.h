@@ -116,14 +116,15 @@ class SwitchFiltersPage : public QWidget
 public:
 	explicit SwitchFiltersPage(std::shared_ptr<TuningFilter> workspaceFilter,
 								TuningSignalManager* tuningSignalManager,
-								TuningClientTcpClient* tuningTcpClient,
+								std::vector<TuningClientTcpClient*> tuningTcpClients,
 								TuningFilterStorage* tuningFilterStorage,
 								QWidget* parent = 0);
 	~SwitchFiltersPage();
 
-	void updateFilters(std::shared_ptr<TuningFilter> root);
+	void createControls(std::shared_ptr<TuningFilter> root);
 
 private:
+
 	void createFiltersList(std::shared_ptr<TuningFilter> filter);
 	void createButtons();
 	void createListItems();
@@ -142,10 +143,8 @@ private slots:
 	void onPrev();
 	void onNext();
 	void onApply();
-	void slot_timerTick500();
-
-	void slot_filterButtonClicked(std::shared_ptr<TuningFilter> filter);
-
+	void onTimerTick500();
+	void onFilterButtonClicked(std::shared_ptr<TuningFilter> filter);
 	void onFilterTablePressed();
 
 
@@ -166,7 +165,7 @@ private:
 
 	TuningSignalManager* m_tuningSignalManager = nullptr;
 
-	TuningClientTcpClient* m_tuningTcpClient = nullptr;
+	std::vector<TuningClientTcpClient*> m_tuningTcpClients;
 
 	TuningFilterStorage* m_tuningFilterStorage = nullptr;
 

@@ -3,6 +3,7 @@
 #include "TuningSourceWidget.h"
 #include <QStandardItemModel>
 #include <QTableView>
+#include <QMessageBox>
 
 TuningServiceWidget::TuningServiceWidget(const SoftwareInfo& softwareInfo, const ServiceData& service, quint32 udpIp, quint16 udpPort, QWidget *parent) :
 	BaseServiceStateWidget(softwareInfo, service, udpIp, udpPort, parent)
@@ -35,17 +36,18 @@ TuningServiceWidget::TuningServiceWidget(const SoftwareInfo& softwareInfo, const
 	m_settingsTabModel->setHeaderData(1, Qt::Horizontal, "Value");
 
 	m_settingsTabModel->setData(m_settingsTabModel->index(0, 0), "Equipment ID");
+	m_settingsTabModel->setData(m_settingsTabModel->index(1, 0), "LAN Equipment ID");
 
-	m_settingsTabModel->setData(m_settingsTabModel->index(1, 0), "Client Request IP");
-	m_settingsTabModel->setData(m_settingsTabModel->index(2, 0), "Client Request NetMask");
+	m_settingsTabModel->setData(m_settingsTabModel->index(2, 0), "Client Request IP");
+	m_settingsTabModel->setData(m_settingsTabModel->index(3, 0), "Client Request NetMask");
 
-	m_settingsTabModel->setData(m_settingsTabModel->index(3, 0), "Tuning Data IP");
-	m_settingsTabModel->setData(m_settingsTabModel->index(4, 0), "Tuning Data NetMask");
+	m_settingsTabModel->setData(m_settingsTabModel->index(4, 0), "Tuning Data IP");
+	m_settingsTabModel->setData(m_settingsTabModel->index(5, 0), "Tuning Data NetMask");
 
-	m_settingsTabModel->setData(m_settingsTabModel->index(5, 0), "Signle LM Control");
-	m_settingsTabModel->setData(m_settingsTabModel->index(6, 0), "Disable modules Type checking");
+	m_settingsTabModel->setData(m_settingsTabModel->index(6, 0), "Signle LM Control");
+	m_settingsTabModel->setData(m_settingsTabModel->index(7, 0), "Disable modules Type checking");
 
-	m_settingsTabModel->setData(m_settingsTabModel->index(7, 0), "Tuning Sim IP");
+	m_settingsTabModel->setData(m_settingsTabModel->index(8, 0), "Tuning Sim IP");
 
 	//----------------------------------------------------------------------------------------------------
 	QTableView* tuningSourcesTableView = addTabWithTableView(125, "Tuning Sources");
@@ -67,7 +69,7 @@ TuningServiceWidget::TuningServiceWidget(const SoftwareInfo& softwareInfo, const
 
 	m_tuningSourcesTabModel->setHorizontalHeaderLabels(tuningSourceHeaderLabels);
 
-	tuningSourcesTableView->setColumnWidth(0, 175);
+	tuningSourcesTableView->setColumnWidth(0, 250);
 	tuningSourcesTableView->setColumnWidth(1, 250);
 
 	connect(tuningSourcesTableView, &QTableView::doubleClicked, this, &TuningServiceWidget::onTuningSourceDoubleClicked);
@@ -154,8 +156,8 @@ void TuningServiceWidget::updateStateInfo()
 
 	m_settingsTabModel->setData(m_settingsTabModel->index(0, 1), tuningSettings->equipmentID);
 
-	m_settingsTabModel->setData(m_settingsTabModel->index(1, 1), ch.clientRequestIP.addressStr());
-	m_settingsTabModel->setData(m_settingsTabModel->index(2, 1), ch.clientRequestNetmask.toString());
+	m_settingsTabModel->setData(m_settingsTabModel->index(1, 1), tuningSettings->clientRequestIP.addressStr());
+	m_settingsTabModel->setData(m_settingsTabModel->index(2, 1), tuningSettings->clientRequestNetmask.toString());
 
 	m_settingsTabModel->setData(m_settingsTabModel->index(3, 1), ch.tuningDataIP.addressStr());
 	m_settingsTabModel->setData(m_settingsTabModel->index(4, 1), ch.tuningDataNetmask.toString());
@@ -237,26 +239,41 @@ void TuningServiceWidget::reloadTuningSourcesList()
 
 	const QList<TuningSource>& tsList = m_tcpClientSocket->tuningSources();
 
-	m_tuningSourcesTabModel->setRowCount(tsList.count());
+	int sourcesLanCount = 0;
+
+	for (const TuningSource& ts : tsList)
+	{
+		sourcesLanCount += ts.info().lancontrollerinfo_size();
+	}
+
+	m_tuningSourcesTabModel->setRowCount(sourcesLanCount);
 	int row = 0;
 
 	for (const TuningSource& ts : tsList)
 	{
-		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 0), ts.equipmentId());
-		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 1), QString::fromStdString(ts.info.modulecaption()));
-		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 2), QString::fromStdString(ts.info.lancontrollerinfo(0).tuningip()));
-		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 3), ts.info.lancontrollerinfo(0).tuningport());
-		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 4), QString::fromStdString(ts.info.subsystemchannel()));
-		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 5), ts.info.subsystemkey());
-		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 6), QString::fromStdString(ts.info.subsystemid()));
-		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 7), ts.info.lmnumber());
+		const ::Network::DataSourceInfo& info = ts.info();
 
-		for (int j = tuningSourceStaticFieldsHeaderLabels.count(); j < m_tuningSourcesTabModel->columnCount(); j++)
+		int lanControllersCount = ts.info().lancontrollerinfo_size();
+
+		for (int c = 0; c < lanControllersCount; c++)
 		{
-			m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, j), "???");
-		}
+			m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 0), ts.equipmentId());
+			m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 1), QString::fromStdString(info.lancontrollerinfo(c).equipmentid()));
+			m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 2), QString::fromStdString(info.modulecaption()));
+			m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 3), QString::fromStdString(info.lancontrollerinfo(c).tuningip()));
+			m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 4), info.lancontrollerinfo(c).tuningport());
+			m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 5), QString::fromStdString(info.subsystemchannel()));
+			m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 6), info.subsystemkey());
+			m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 7), QString::fromStdString(info.subsystemid()));
+			m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 8), info.lmnumber());
 
-		row++;
+			for (int j = tuningSourceStaticFieldsHeaderLabels.count(); j < m_tuningSourcesTabModel->columnCount(); j++)
+			{
+				m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, j), "-");
+			}
+
+			row++;
+		}
 	}
 }
 
@@ -275,17 +292,32 @@ void TuningServiceWidget::updateTuningSourcesState()
 	}
 
 	int firstColumn = tuningSourceStaticFieldsHeaderLabels.count();
+
 	int row = 0;
 
 	for (const TuningSource& ts : m_tcpClientSocket->tuningSources())
 	{
-		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, firstColumn + 0), ts.state.isreply() ? tr("Yes") : tr("No"));
-		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, firstColumn + 1), ts.state.controlisactive() ? tr("Yes") : tr("No"));
-		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, firstColumn + 2), ts.state.setsor() ? tr("Yes") : tr("No"));
-		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, firstColumn + 3), static_cast<qint64>(ts.state.requestcount()));
-		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, firstColumn + 4), static_cast<qint64>(ts.state.replycount()));
+		for (int c = 0; c < ts.controllersCount(); c++)
+		{
+			// Find a state to display
+			//
+			for (int s = 0; s < ts.statesCount(); s++)
+			{
+				const ::Network::TuningSourceState& state = ts.state(s);
 
-		row++;
+				if (QString::fromStdString(state.lanequipmentid()) == ts.controllerEquipmentId(c))
+				{
+					m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, firstColumn + 0), state.isreply() ? tr("Yes") : tr("No"));
+					m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, firstColumn + 1), state.controlisactive() ? tr("Yes") : tr("No"));
+					m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, firstColumn + 2), state.setsor() ? tr("Yes") : tr("No"));
+					m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, firstColumn + 3), static_cast<qint64>(state.requestcount()));
+					m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, firstColumn + 4), static_cast<qint64>(state.replycount()));
+				}
+			}
+			//
+
+			row++;
+		}
 	}
 }
 
@@ -372,11 +404,74 @@ void TuningServiceWidget::onTuningSourceDoubleClicked(const QModelIndex &index)
 	TEST_PTR_RETURN(m_tcpClientSocket);
 
 	int row = index.row();
-	const TuningSource& ts = m_tcpClientSocket->tuningSources()[row];
 
+	const TuningSource* tsClicked = nullptr;
+	int lanIndexClicked = 0;
+	QString lanEquipmentIdClicked;
+
+	// Find TuningSource and controller from the row
+	//
+	{
+		int rowCounter = 0;
+
+		for (const TuningSource& ts : m_tcpClientSocket->tuningSources())
+		{
+			for (int c = 0; c < ts.controllersCount(); c++)
+			{
+				if (rowCounter == row)
+				{
+					tsClicked = &ts;
+					lanIndexClicked = c;
+					lanEquipmentIdClicked = ts.controllerEquipmentId(c);
+
+					break;
+				}
+
+				rowCounter++;
+			}
+
+			// We have found a controller user clicked on
+			//
+			if (tsClicked != nullptr)
+			{
+				break;
+			}
+		}
+	}
+
+	if (tsClicked == nullptr)
+	{
+		return;
+	}
+
+	// Now check if we have state for this controller
+	//
+	{
+		bool stateFound = false;
+
+		for (int c = 0; c < tsClicked->statesCount(); c++)
+		{
+			if (QString::fromStdString(tsClicked->state(c).lanequipmentid()) == lanEquipmentIdClicked)
+			{
+				stateFound = true;
+				break;
+			}
+		}
+
+		if (stateFound == false)
+		{
+			QMessageBox::warning(this, qAppName(), tr("No state information for this source!"));
+			return;
+		}
+	}
+
+	// Create or show widget for clicked TuningSource
+	//
 	for (auto& sourceWidget : m_tuningSourceWidgetList)
 	{
-		if (sourceWidget->id() == ts.id() && sourceWidget->equipmentId() == ts.equipmentId())
+		if (sourceWidget->id() == tsClicked->id() &&
+			sourceWidget->equipmentId() == tsClicked->equipmentId() &&
+			sourceWidget->controllerEquipmentId() == lanEquipmentIdClicked)
 		{
 			sourceWidget->show();
 			sourceWidget->raise();
@@ -386,7 +481,11 @@ void TuningServiceWidget::onTuningSourceDoubleClicked(const QModelIndex &index)
 		}
 	}
 
-	TuningSourceWidget* newWidget = new TuningSourceWidget(ts.id(), ts.equipmentId(), this);
+	TuningSourceWidget* newWidget = new TuningSourceWidget(tsClicked->id(),
+														   tsClicked->equipmentId(),
+														   lanEquipmentIdClicked,
+														   lanIndexClicked,
+														   this);
 	newWidget->setClientSocket(m_tcpClientSocket);
 
 	newWidget->show();

@@ -286,7 +286,7 @@ void ArchiveTcpClient::requestStart()
 	m_startRequest.set_removeperiodic(m_requestData.removePrioodicRecords);
 
 	QStringList appSignlList;
-	appSignlList.reserve(m_requestData.appSignals.size());
+	appSignlList.reserve(static_cast<int>(m_requestData.appSignals.size()));
 
 	for (const std::pair<Hash, QString> sp : m_requestData.appSignals)
 	{

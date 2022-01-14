@@ -12,7 +12,7 @@ class TuningClientTuningController : public VFrame30::TuningController
 	Q_OBJECT
 
 public:
-	TuningClientTuningController(ITuningSignalManager* signalManager, ITuningTcpClient* tcpClient, QWidget* parent = nullptr);
+	TuningClientTuningController(ITuningSignalManager* signalManager, std::vector<ITuningTcpClient*> tcpClients, QWidget* parent = nullptr);
 
 protected:
 	[[nodiscard]] virtual bool checkTuningAccess() const override;

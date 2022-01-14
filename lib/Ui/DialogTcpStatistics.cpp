@@ -55,6 +55,9 @@ DialogTcpStatistics::DialogTcpStatistics(QWidget* parent) :
 
 	update();
 
+	m_treeWidget->setSortingEnabled(true);
+	m_treeWidget->sortByColumn(0, Qt::AscendingOrder);
+
 	for (int i = 0; i < m_treeWidget->columnCount(); i++)
 	{
 		m_treeWidget->resizeColumnToContents(i);
@@ -156,22 +159,14 @@ void DialogTcpStatistics::update()
 
 	int count = static_cast<int>(stats.size());
 
-	bool refreshOnly = true;
-
 	if (m_treeWidget->topLevelItemCount() != count)
-	{
-		refreshOnly = false;
-	}
-
-	if (refreshOnly == false)
 	{
 		m_treeWidget->clear();
 
-		for (TcpClientStatistics::Statisctics& s : stats)
+		for (int i = 0; i < count; i++)
 		{
-			Q_UNUSED(s);
-
 			QTreeWidgetItem* item = new QTreeWidgetItem();
+			item->setData(0, Qt::UserRole, i);
 			m_treeWidget->addTopLevelItem(item);
 		}
 	}
@@ -180,14 +175,29 @@ void DialogTcpStatistics::update()
 	{
 		TcpClientStatistics::Statisctics& stat = stats[i];
 
-		QTreeWidgetItem* item = m_treeWidget->topLevelItem(i);
-		if (item == nullptr)
+		QTreeWidgetItem* item = nullptr;
+
+		for (int j = 0; j < m_treeWidget->topLevelItemCount(); j++)
 		{
-			Q_ASSERT(false);
-			continue;
+			QTreeWidgetItem* topItem = m_treeWidget->topLevelItem(j);
+			if (topItem == nullptr)
+			{
+				Q_ASSERT(topItem);
+				continue;
+			}
+
+			if (topItem->data(0, Qt::UserRole).toInt() == i)
+			{
+				item = topItem;
+				break;
+			}
 		}
 
-		item->setData(0, Qt::UserRole, QVariant::fromValue<size_t>(stat.id));
+		if (item == nullptr)
+		{
+			Q_ASSERT(item);
+			continue;
+		}
 
 		item->setText(static_cast<int>(Columns::Caption), stat.objectName);
 		item->setText(static_cast<int>(Columns::IsConnected), stat.state.isConnected ? tr("Yes") : tr("No"));

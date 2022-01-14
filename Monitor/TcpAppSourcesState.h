@@ -91,7 +91,7 @@ private:
 private:
 	int m_requestPeriod = 100;
 
-	QMutex m_appDataSourceStatesMutex;
+	QReadWriteLock m_appDataSourceStatesLock;	// For access to m_appDataSourceStates
 	std::map<Hash, AppDataSourceState> m_appDataSourceStates;
 
 	// Cache protobuf messages

@@ -21,6 +21,8 @@ public:
 	ConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2, QWidget* parent);
 	virtual ~ConfigController();
 
+	const SoftwareInfo& softwareInfo() const;
+
 	// Methods
 	//
 public:
@@ -39,8 +41,6 @@ public:
 	// signals
 	//
 signals:
-	void tcpClientConfigurationArrived(HostAddressPort address, bool autoApply, LmStatusFlagMode lmStatusFlagMode);
-
 	void signalsArrived(QByteArray data);
 	void filtersArrived(QByteArray data);
 
@@ -72,6 +72,8 @@ public:
 private:
 	QSharedMemory m_appInstanceSharedMemory;
 	int m_appInstanceNo = -1;
+
+	SoftwareInfo m_softwareInfo;
 
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 

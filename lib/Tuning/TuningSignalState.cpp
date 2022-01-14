@@ -110,6 +110,11 @@ QDateTime TuningSignalState::unsuccessfulWriteTime() const
 	return QDateTime::fromMSecsSinceEpoch(m_unsuccessfulWriteTime);
 }
 
+QDateTime TuningSignalState::lmTime() const
+{
+	return QDateTime::fromMSecsSinceEpoch(m_lmTime);
+}
+
 bool TuningSignalState::setState(const ::Network::TuningSignalState& message)
 {
 	m_hash = message.signalhash();
@@ -124,14 +129,7 @@ bool TuningSignalState::setState(const ::Network::TuningSignalState& message)
 	m_flags.writeInProgress = message.writeinprogress();
 	m_writeErrorCode = message.writeerrorcode();
 
-    if (message.valid() == true)
-    {
-        m_flags.writingIsEnabled = message.writingdisabled() == false;
-    }
-    else
-    {
-        m_flags.writingIsEnabled = false;
-    }
+	m_flags.writingIsEnabled = message.valid() == true && message.writingdisabled() == false;
 
 	m_flags.tuningDefault = message.tuningdefault();
 
@@ -141,6 +139,7 @@ bool TuningSignalState::setState(const ::Network::TuningSignalState& message)
 	m_writeRequestTime = message.writerequesttime();
 	m_successfulWriteTime = message.successfulwritetime();
 	m_unsuccessfulWriteTime = message.unsuccessfulwritetime();
+	m_lmTime = message.lmtime();
 
 	return true;
 }

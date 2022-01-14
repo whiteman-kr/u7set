@@ -15,10 +15,22 @@ public:
 
 	static bool getSoftwareConnection(const Hardware::EquipmentSet* equipment,
 										const Hardware::Software* thisSoftware,
-										const QString& propConnectedSoBftwareID,
+										const QString& propConnectedSoftwareID,
 										const QString& propConnectedSoftwareIP,
 										const QString& propConnectedSoftwarePort,
 										QString* connectedSoftwareID,
+										HostAddressPort* connectedSoftwareIP,
+										bool emptyAllowed,
+										const QString &defaultIP,
+										int defaultPort,
+										E::SoftwareType requiredSoftwareType,
+										Builder::IssueLogger* log);
+
+	static bool getSoftwareConnectionBySoftwareID(const Hardware::EquipmentSet* equipment,
+										const Hardware::Software* thisSoftware,
+										const QString& connectedSoftwareID, const QString &propConnectedSoftwareID,
+										const QString& propConnectedSoftwareIP,
+										const QString& propConnectedSoftwarePort,
 										HostAddressPort* connectedSoftwareIP,
 										bool emptyAllowed,
 										const QString &defaultIP,
@@ -39,6 +51,10 @@ public:
 
 	virtual bool readFromDevice(const Builder::Context* context,
 								const Hardware::Software* software) = 0;
+
+	bool readFromDeviceByEquipmentID(const Builder::Context* context,
+									const QString& softwareID,
+									E::SoftwareType requiredSoftwareType = E::SoftwareType::Unknown);
 };
 
 // -------------------------------------------------------------------------------------------
@@ -84,8 +100,7 @@ private:
 
 	bool fillTuningClientsInfo(const Builder::Context* context,
 							   const Hardware::Software* software,
-							   bool singleLmControlEnabled,
-							   int channel);
+							   bool singleLmControlEnabled);
 };
 
 // -------------------------------------------------------------------------------------------
@@ -132,8 +147,8 @@ private:
 	bool readAppDataServiceAndArchiveSettings(const Builder::Context* context,
 											  const Hardware::Software* software);
 
-	bool readTuningSettings(const Builder::Context* context,
-							const Hardware::Software* software);
+	bool readTuningServiceSettings(const Builder::Context* context,
+											  const Hardware::Software* software);
 };
 
 // -------------------------------------------------------------------------------------------

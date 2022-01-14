@@ -41,12 +41,12 @@ QString SwitchFiltersPage::tag_FilterSwitch = "FilterSwitches";
 
 SwitchFiltersPage::SwitchFiltersPage(std::shared_ptr<TuningFilter> workspaceFilter,
 									 TuningSignalManager* tuningSignalManager,
-									 TuningClientTcpClient* tuningTcpClient, TuningFilterStorage* tuningFilterStorage,
+									 std::vector<TuningClientTcpClient*> tuningTcpClients, TuningFilterStorage* tuningFilterStorage,
 									 QWidget* parent) :
 	QWidget(parent),
 	m_workspaceFilter(workspaceFilter),
 	m_tuningSignalManager(tuningSignalManager),
-	m_tuningTcpClient(tuningTcpClient),
+	m_tuningTcpClients(tuningTcpClients),
 	m_tuningFilterStorage(tuningFilterStorage)
 {
 	m_mainLayout = new QVBoxLayout(this);
@@ -56,10 +56,6 @@ SwitchFiltersPage::SwitchFiltersPage(std::shared_ptr<TuningFilter> workspaceFilt
 		Q_ASSERT(m_workspaceFilter);
 		return;
 	}
-
-	updateFilters(m_tuningFilterStorage->root());
-
-	connect(theMainWindow, &MainWindow::timerTick500, this, &SwitchFiltersPage::slot_timerTick500);
 
 	// Determine button and list colors from tags
 	// Tags format: ...;AlertBackColor=#f00000;AlertTextColor=#c00000;GrayedBackColor=#d0d000;GrayedTextColor=#000000;...
@@ -116,6 +112,10 @@ SwitchFiltersPage::SwitchFiltersPage(std::shared_ptr<TuningFilter> workspaceFilt
 		m_mainLayout->setContentsMargins(0, 0, 0, 0);
 	}
 
+	createControls(m_tuningFilterStorage->root());
+
+	connect(theMainWindow, &MainWindow::timerTick500, this, &SwitchFiltersPage::onTimerTick500);
+
 	setLayout(m_mainLayout);
 }
 
@@ -124,12 +124,10 @@ SwitchFiltersPage::~SwitchFiltersPage()
 {
 }
 
-void SwitchFiltersPage::updateFilters(std::shared_ptr<TuningFilter> root)
+void SwitchFiltersPage::createControls(std::shared_ptr<TuningFilter> root)
 {
 	m_buttonFilters.clear();
 	m_listFilters.clear();
-
-	createFiltersList(root);
 
 	// Delete all controls
 	//
@@ -160,17 +158,34 @@ void SwitchFiltersPage::updateFilters(std::shared_ptr<TuningFilter> root)
 		m_promptLabel = nullptr;
 	}
 
-	// Create new controls
+	// Controls in this form only used in Multiple-LM control mode
+
+	for (const TuningTcpClient* client : m_tuningTcpClients)
+	{
+		if (client->singleLmControlMode() == true)
+		{
+			m_promptLabel = new QLabel(tr("This tab should be used only with Multiple LM Control Mode of TuningServices. Disable \"SingleLMControl\" mode for all services."));
+			m_promptLabel->setAlignment(Qt::AlignHCenter | Qt::AlignCenter);
+
+			m_mainLayout->addWidget(m_promptLabel);
+
+			return;
+		}
+	}
+
+	// Fill filters
 	//
+	createFiltersList(root);
 
 	// Apply Button
 	//
 	if (theConfigSettings.clientSettings.autoApply == false &&
-			(m_buttonFilters.empty() == false || m_listFilters.empty() == false))
+		(m_buttonFilters.empty() == false || m_listFilters.empty() == false))
 	{
 		m_applyButton = new QPushButton(tr("Apply"), this);
 		connect(m_applyButton, &QPushButton::clicked, this, &SwitchFiltersPage::onApply);
 	}
+
 
 	// Buttons
 	//
@@ -184,13 +199,13 @@ void SwitchFiltersPage::updateFilters(std::shared_ptr<TuningFilter> root)
 
 		const int controlHeight = 25;
 
-        QPushButton* b = new QPushButton(this);
-        QPixmap pixmap(":/Images/Images/ButtonSettings.png");
-        b->setIcon(QIcon(pixmap));
+		QPushButton* b = new QPushButton(this);
+		QPixmap pixmap(":/Images/Images/ButtonSettings.png");
+		b->setIcon(QIcon(pixmap));
 		b->setIconSize(QSize(static_cast<int>(controlHeight * 0.8), static_cast<int>(controlHeight * 0.8)));
-        b->setFixedSize(controlHeight, controlHeight);
-        connect(b, &QPushButton::clicked, this, &SwitchFiltersPage::onOptions);
-        scrollControlsLayout->addWidget(b);
+		b->setFixedSize(controlHeight, controlHeight);
+		connect(b, &QPushButton::clicked, this, &SwitchFiltersPage::onOptions);
+		scrollControlsLayout->addWidget(b);
 
 		scrollControlsLayout->addStretch();
 
@@ -206,7 +221,7 @@ void SwitchFiltersPage::updateFilters(std::shared_ptr<TuningFilter> root)
 
 		scrollControlsLayout->addStretch();
 
-        scrollControlsLayout->addSpacerItem(new QSpacerItem(controlHeight, 0));
+		scrollControlsLayout->addSpacerItem(new QSpacerItem(controlHeight, 0));
 
 
 		// Buttons layout
@@ -235,16 +250,17 @@ void SwitchFiltersPage::updateFilters(std::shared_ptr<TuningFilter> root)
 		topLayout->addStretch();
 		topLayout->addLayout(scrollControlsLayout);
 
-        // Apply button at the bottom
+		// Apply button at the bottom
 
-        if (m_applyButton != nullptr && m_listFilters.empty() == true)
-        {
-            scrollControlsLayout->addWidget(m_applyButton);
-        }
+		if (m_applyButton != nullptr && m_listFilters.empty() == true)
+		{
+			scrollControlsLayout->addWidget(m_applyButton);
+		}
 	}
 
 	// Table
 	//
+
 	if (m_listFilters.empty() == false)
 	{
 		m_filterTableWidget = new QWidget(this);
@@ -320,17 +336,17 @@ void SwitchFiltersPage::createFiltersList(std::shared_ptr<TuningFilter> filter)
 	}
 
 	if (m_workspaceFilter->tagsList().isEmpty() == true ||
-			m_workspaceFilter->hasAnyTag(filter->tagsList()) == true)
+		m_workspaceFilter->hasAnyTag(filter->tagsList()) == true)
 	{
 		if (filter->isEmpty() == false &&
-				filter->tagsList().contains(tag_FilterButton))
+			filter->tagsList().contains(tag_FilterButton))
 		{
 			filter->setHasDiscreteCounter(true);
 			m_buttonFilters.push_back(filter);
 		}
 
 		if (filter->isEmpty() == false &&
-				filter->tagsList().contains(tag_FilterSwitch))
+			filter->tagsList().contains(tag_FilterSwitch))
 		{
 			filter->setHasDiscreteCounter(true);
 			m_listFilters.push_back(filter);
@@ -365,9 +381,13 @@ void SwitchFiltersPage::createButtons()
 	for (int i = 0; i < count; i++)
 	{
 		QLayoutItem* item = m_buttonsLayout->takeAt(0);
-		if (item == nullptr || item->widget() == nullptr)
+		if (item == nullptr)
 		{
 			Q_ASSERT(item);
+			return;
+		}
+		if (item->widget() == nullptr)
+		{
 			Q_ASSERT(item->widget());
 			return;
 		}
@@ -398,7 +418,7 @@ void SwitchFiltersPage::createButtons()
 
 		m_filterButtons.push_back(b);
 
-		connect(b, &FilterPushButton::clicked, this, &SwitchFiltersPage::slot_filterButtonClicked);
+		connect(b, &FilterPushButton::clicked, this, &SwitchFiltersPage::onFilterButtonClicked);
 
 		b->setFixedSize(theSettings.m_switchPresetsPageButtonsWidth, theSettings.m_switchPresetsPageButtonsHeight);
 
@@ -459,24 +479,30 @@ void SwitchFiltersPage::createListItems()
 
 			m_filterTable->setItem(i, c, item);
 
-			FilterCheckBox* check = new FilterCheckBox(tr("OFF"));
-			connect(check, &FilterCheckBox::pressed, this, &SwitchFiltersPage::onFilterTablePressed);
-
-			check->setStyleSheet("FilterCheckBox::indicator{width:25px;height:25px;}");
+			FilterCheckBox* check = nullptr;
 
 			switch (c)
 			{
 			case static_cast<int>(Columns::State):
-				m_filterTable->setCellWidget(i, static_cast<int>(Columns::State), check);
-				item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+				{
+					check = new FilterCheckBox(tr("OFF"), this);
+					connect(check, &FilterCheckBox::pressed, this, &SwitchFiltersPage::onFilterTablePressed);
+					check->setStyleSheet("FilterCheckBox::indicator{width:25px;height:25px;}");
+					m_filterTable->setCellWidget(i, static_cast<int>(Columns::State), check);
+					item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+				}
 				break;
 			case static_cast<int>(Columns::Caption):
-				item->setText(f->caption());
-				item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+				{
+					item->setText(f->caption());
+					item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+				}
 				break;
 			case static_cast<int>(Columns::Counter):
-				item->setText("0/0");
-				item->setFlags(Qt::NoItemFlags /*Qt::ItemIsEnabled/* | Qt::ItemIsSelectable*/);
+				{
+					item->setText("0/0");
+					item->setFlags(Qt::NoItemFlags);
+				}
 				break;
 			}
 		}
@@ -492,17 +518,14 @@ bool SwitchFiltersPage::changeFilterSignals(std::shared_ptr<TuningFilter> filter
 		return false;
 	}
 
-	if (m_tuningTcpClient->takeClientControl(this) == false)
-	{
-		return false;
-	}
-
 	if (filter == nullptr)
 	{
 		Q_ASSERT(filter);
 		return false;
 	}
 
+	// Check if all signals are enabled to write
+	//
 	TuningCounters tc = filter->counters();
 
 	int discreteCount = countDiscretes(filter.get());
@@ -513,6 +536,8 @@ bool SwitchFiltersPage::changeFilterSignals(std::shared_ptr<TuningFilter> filter
 		return false;
 	}
 
+	// Output warning message
+	//
 	int newValue = 0;
 
 	if (tc.discreteCounter == 0)
@@ -561,13 +586,24 @@ bool SwitchFiltersPage::changeFilterSignals(std::shared_ptr<TuningFilter> filter
 		}
 	}
 
-	std::vector <TuningFilterSignal> filterSignals = filter->getFilterSignals();
+	// Get filter signals and their hashes
+	//
+	std::vector<TuningFilterSignal> filterSignals = filter->getFilterSignals();
 
-	for (auto f : filterSignals)
+	std::vector<Hash> signalsHashes;
+
+	for (const TuningFilterSignal& f : filterSignals)
+	{
+		signalsHashes.push_back(f.appSignalHash());
+	}
+
+	// Write new values
+	//
+	for (Hash hash : signalsHashes)
 	{
 		bool ok = false;
 
-		AppSignalParam asp = m_tuningSignalManager->signalParam(f.appSignalHash(), &ok);
+		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
 		if (ok == false)
 		{
 			continue;
@@ -582,10 +618,15 @@ bool SwitchFiltersPage::changeFilterSignals(std::shared_ptr<TuningFilter> filter
 		tv.setType(TuningValueType::Discrete);
 		tv.setDiscreteValue(newValue);
 
-		m_tuningTcpClient->writeTuningSignal(f.appSignalId(), tv);
+		for (TuningClientTcpClient* client : m_tuningTcpClients)
+		{
+			if (client->hasTuningSignal(hash) == true)
+			{
+				client->writeTuningSignal(asp.appSignalId(), tv);
+				client->writeLogSignalChange(tr("'%1' filter is toggled.").arg(filter->caption()));
+			}
+		}
 	}
-
-	m_tuningTcpClient->writeLogSignalChange(tr("'%1' filter is toggled.").arg(filter->caption()));
 
 	return true;
 }
@@ -593,11 +634,6 @@ bool SwitchFiltersPage::changeFilterSignals(std::shared_ptr<TuningFilter> filter
 void SwitchFiltersPage::apply()
 {
 	if (theMainWindow->userManager()->login(this) == false)
-	{
-		return;
-	}
-
-	if (m_tuningTcpClient->takeClientControl(this) == false)
 	{
 		return;
 	}
@@ -625,7 +661,10 @@ void SwitchFiltersPage::apply()
 		}
 	}
 
-	m_tuningTcpClient->applyTuningSignals();
+	for (TuningClientTcpClient* client : m_tuningTcpClients)
+	{
+		client->applyTuningSignals();
+	}
 
 	return;
 }
@@ -692,7 +731,7 @@ int SwitchFiltersPage::countWritingEnabled(TuningFilter* filter)
 
 		if (ok == true)
 		{
-			if (m_tuningTcpClient->writingIsEnabled(state) == true)
+			if (state.writingIsEnabled() == true)
 			{
 				result++;
 			}
@@ -706,7 +745,7 @@ void SwitchFiltersPage::showEvent(QShowEvent *ev)
 {
 	Q_UNUSED(ev);
 
-	slot_timerTick500();
+	onTimerTick500();
 }
 
 void SwitchFiltersPage::onOptions()
@@ -730,7 +769,7 @@ void SwitchFiltersPage::onOptions()
 		m_prevButton->setVisible(m_buttonFilters.size() > theSettings.m_switchPresetsPageColCount * theSettings.m_switchPresetsPageRowCount);
 		m_nextButton->setVisible(m_buttonFilters.size() > theSettings.m_switchPresetsPageColCount * theSettings.m_switchPresetsPageRowCount);
 
-		slot_timerTick500();
+		onTimerTick500();
 	}
 }
 
@@ -742,7 +781,7 @@ void SwitchFiltersPage::onPrev()
 
 		createButtons();
 
-		slot_timerTick500();
+		onTimerTick500();
 	}
 }
 void SwitchFiltersPage::onNext()
@@ -753,7 +792,7 @@ void SwitchFiltersPage::onNext()
 
 		createButtons();
 
-		slot_timerTick500();
+		onTimerTick500();
 	}
 }
 
@@ -762,7 +801,7 @@ void SwitchFiltersPage::onApply()
 	apply();
 }
 
-void SwitchFiltersPage::slot_timerTick500()
+void SwitchFiltersPage::onTimerTick500()
 {
 	if  (isVisible() == false)
 	{
@@ -774,7 +813,7 @@ void SwitchFiltersPage::slot_timerTick500()
 	int count = static_cast<int>(m_filterButtons.size());
 	for (int i = 0; i < count; i++)
 	{
-		auto b = m_filterButtons[i];
+		FilterPushButton* b = m_filterButtons[i];
 		if (b == nullptr)
 		{
 			Q_ASSERT(b);
@@ -848,6 +887,8 @@ void SwitchFiltersPage::slot_timerTick500()
 	count = static_cast<int>(m_listFilters.size());
 	for (int i = 0; i < count; i++)
 	{
+		Q_ASSERT(m_filterTable);
+
 		auto f = m_listFilters[i];
 
 		int discreteCount = countDiscretes(f.get());
@@ -960,7 +1001,7 @@ void SwitchFiltersPage::slot_timerTick500()
 	}
 }
 
-void SwitchFiltersPage::slot_filterButtonClicked(std::shared_ptr<TuningFilter> filter)
+void SwitchFiltersPage::onFilterButtonClicked(std::shared_ptr<TuningFilter> filter)
 {
 	if (filter == nullptr)
 	{

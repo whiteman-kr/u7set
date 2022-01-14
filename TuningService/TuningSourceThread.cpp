@@ -11,52 +11,30 @@ namespace Tuning
 {
 	// ----------------------------------------------------------------------------------
 	//
-	// SourceStatistics struct implementation
+	// TuningSourceState struct implementation
 	//
 	// ----------------------------------------------------------------------------------
 
-	void SourceStatistics::get(Network::TuningSourceState* tss)
+	void TuningSourceState::saveToProto(Network::TuningSourceState* tss) const
 	{
 		TEST_PTR_RETURN(tss);
 
-		tss->set_sourceid(dataSourceID);
+		tss->set_sourceid(sourceID);
+		tss->set_lanequipmentid(lanEquipmentID);
+
+		//
 
 		tss->set_isreply(isReply);
-
 		tss->set_requestcount(requestCount);
 		tss->set_replycount(replyCount);
-
 		tss->set_commandqueuesize(commandQueueSize);
+		tss->set_controlisactive(controlIsActive);
+		tss->set_setsor(setSOR);
+		tss->set_writingdisabled(writingDisabled);
+		tss->set_hasunappliedparams(hasUnappliedParams);
 
-		tss->set_erruntimelyreplay(errUntimelyReplay);
-		tss->set_errsent(errSent);
-		tss->set_errpartialsent(errPartialSent);
-		tss->set_errreplysize(errReplySize);
-		tss->set_errnoreply(errNoReply);
-		tss->set_errrupcrc(errRupCRC);
-
-		// errors in reply RupFrameHeader
 		//
-		tss->set_errrupprotocolversion(errRupProtocolVersion);
-		tss->set_errrupframesize(errRupFrameSize);
-		tss->set_errrupnontuningdata(errRupNonTuningData);
-		tss->set_errrupmoduletype(errRupModuleType);
-		tss->set_errrupframesquantity(errRupFramesQuantity);
-		tss->set_errrupframenumber(errRupFrameNumber);
 
-		// errors in reply FotipHeader
-		//
-		tss->set_errfotipprotocolversion(errFotipProtocolVersion);
-		tss->set_errfotipuniqueid(errFotipUniqueID);
-		tss->set_errfotiplmnumber(errFotipLmNumber);
-		tss->set_errfotipsubsystemcode(errFotipSubsystemCode);
-		tss->set_errfotipoperationcode(errFotipOperationCode);
-		tss->set_errfotipframesize(errFotipFrameSize);
-		tss->set_errfotipromsize(errFotipRomSize);
-		tss->set_errfotipromframesize(errFotipRomFrameSize);
-
-		// errors reported by LM in reply FotipHeader.flags
-		//
 		tss->set_fotipflagboundschecksuccess(fotipFlagBoundsCheckSuccess);
 		tss->set_fotipflagwritesuccess(fotipFlagWriteSuccess);
 		tss->set_fotipflagdatatypeerr(fotipFlagDataTypeErr);
@@ -73,15 +51,36 @@ namespace Tuning
 		tss->set_fotipflagsetsor(fotipFlagSetSOR);
 		tss->set_fotipflagwritingdisabled(fotipFlagWritingDisabled);
 
+		//
+
+		tss->set_errrupprotocolversion(errRupProtocolVersion);
+		tss->set_errrupframesize(errRupFrameSize);
+		tss->set_errrupnontuningdata(errRupNonTuningData);
+		tss->set_errrupmoduletype(errRupModuleType);
+		tss->set_errrupframesquantity(errRupFramesQuantity);
+		tss->set_errrupframenumber(errRupFrameNumber);
+		tss->set_errrupcrc(errRupCRC);
+
+		//
+
+		tss->set_errfotipprotocolversion(errFotipProtocolVersion);
+		tss->set_errfotipuniqueid(errFotipUniqueID);
+		tss->set_errfotiplmnumber(errFotipLmNumber);
+		tss->set_errfotipsubsystemcode(errFotipSubsystemCode);
+		tss->set_errfotipoperationcode(errFotipOperationCode);
+		tss->set_errfotipframesize(errFotipFrameSize);
+		tss->set_errfotipromsize(errFotipRomSize);
+		tss->set_errfotipromframesize(errFotipRomFrameSize);
 		tss->set_erranaloglowboundcheck(errAnalogLowBoundCheck);
 		tss->set_erranaloghighboundcheck(errAnalogHighBoundCheck);
 
-		tss->set_controlisactive(controlIsActive);
-		tss->set_setsor(setSOR);
-		tss->set_writingdisabled(writingDisabled);
+		//
 
-		tss->set_hasunappliedparams(hasUnappliedParams);
-
+		tss->set_erruntimelyreplay(errUntimelyReplay);
+		tss->set_errsent(errSent);
+		tss->set_errpartialsent(errPartialSent);
+		tss->set_errreplysize(errReplySize);
+		tss->set_errnoreply(errNoReply);
 		tss->set_errtuningframeupdate(errTuningFrameUpdate);
 	}
 
@@ -124,25 +123,26 @@ namespace Tuning
 		return tv.typeStr();
 	}
 
-	void TuningSignal::updateCurrentValue(bool valid, const TuningValue& value, qint64 time)
-	{
-		if (valid == true)
-		{
-			m_successfulReadTime = time;
-		}
-
-		setCurrentValue(valid, value);
-	}
-
-	void TuningSignal::setCurrentValue(bool valid, const TuningValue& value)
+	void TuningSignal::setCurrentValue(bool valid, const TuningValue& value, qint64 readTime, qint64 lmTime)
 	{
 		m_valid = valid;
 
-		Q_ASSERT(m_currentValue.type() == value.type());
-		Q_ASSERT(m_defaultValue.type() == value.type());
+		if (m_valid == true)
+		{
+			m_successfulReadTime = readTime;
+			m_lmTime = lmTime;
 
-		m_currentValue = value;
-		m_tuningDefaultFlag = (m_currentValue == m_defaultValue ? 1 : 0);
+			Q_ASSERT(m_currentValue.type() == value.type());
+			Q_ASSERT(m_defaultValue.type() == value.type());
+
+			m_currentValue = value;
+			m_tuningDefaultFlag = (m_currentValue == m_defaultValue ? 1 : 0);
+		}
+		else
+		{
+			m_lmTime = 0;
+			m_tuningDefaultFlag = false;
+		}
 	}
 
 	void TuningSignal::setReadLowBound(const TuningValue& value)
@@ -161,8 +161,9 @@ namespace Tuning
 
 	void TuningSignal::invalidate()
 	{
-		m_valid = false;
-		m_tuningDefaultFlag = false;
+		setCurrentValue(false,
+						// next params isn't matter
+						TuningValue(), 0, 0);
 	}
 
 	FotipV2::DataType TuningSignal::fotipV2DataType() const
@@ -245,12 +246,11 @@ namespace Tuning
 												CircularLoggerShared logger,
 												CircularLoggerShared tuningLog) :
 		m_sourceThread(srcThread),
-		m_stat(srcThread.sourceStatistics()),
 		m_channel(channelInfo.channel),
 		m_logger(logger),
 		m_tuningLog(tuningLog),
 		m_socket(nullptr),
-		m_replyQueue(nullptr, 10)
+		m_replyQueue(10)
 {
 		Q_ASSERT(m_channel >=0 && m_channel < TuningServiceSettings::CHANNELS_COUNT);
 
@@ -265,6 +265,8 @@ namespace Tuning
 		m_lmNumber = static_cast<quint16>(source.lmNumber());
 		m_lmModuleType = static_cast<quint16>(source.moduleType());
 		m_subsystemCode = static_cast<quint16>(source.subsystemKey());
+
+		m_rupNumerator = m_channel * 1000;		// different numerator start value for each channel
 
 		m_disableModulesTypeChecking = disableModulesTypeChecking;
 
@@ -282,6 +284,12 @@ namespace Tuning
 		m_tuningDataFramePayloadW = td->tuningDataFramePayloadW();
 
 		m_tuningUsedFramesCount = td->usedFramesCount();
+
+		//
+
+		m_state.sourceID = srcThread.source().ID();
+		m_state.channel = m_channel;
+		m_state.lanEquipmentID = channelInfo.portEquipmentID.toStdString();
 	}
 
 	TuningChannelHandler::~TuningChannelHandler()
@@ -305,7 +313,7 @@ namespace Tuning
 
 	void TuningChannelHandler::startHandler()
 	{
-		m_stat.controlIsActive = true;
+		m_state.controlIsActive = true;
 
 		DEBUG_LOG_MSG(m_logger, QString("Tuning source %1 (%2, channel %3)  handler is started").
 					  arg(m_portEquipmentID).
@@ -317,9 +325,34 @@ namespace Tuning
 
 	void TuningChannelHandler::stopHandler()
 	{
-		m_stat.controlIsActive = false;
+		m_state.controlIsActive = false;
 
 		DEBUG_LOG_MSG(m_logger, QString("Tuning source %1 (%2) handler is stopped").arg(m_portEquipmentID).arg(m_sourceIP.addressPortStr()));
+	}
+
+	void TuningChannelHandler::run()
+	{
+		//
+		// TuningSourceThread call this function every 1 ms
+		//
+		if (m_waitReply == true)
+		{
+			bool replyReceived = processWaitReply();
+
+			if (replyReceived == false)
+			{
+				return;			// nothing to do while not receive reply or reply timout elapsed
+			}
+		}
+
+		processUntimelyReply();
+
+		if (processCommandQueue() == true)
+		{
+			return;
+		}
+
+		enqueueTuningReadCommand();
 	}
 
 	bool TuningChannelHandler::isInitialized() const
@@ -329,131 +362,144 @@ namespace Tuning
 
 	bool TuningChannelHandler::isReply() const
 	{
-		return m_isReply;
+		return m_state.isReply;
 	}
 
-	void TuningChannelHandler::periodicProcessing()
+	bool TuningChannelHandler::setSOR() const
 	{
-		if (processWaitReply() == true)
-		{
-			return;
-		}
-
-		if (processCommandQueue() == true)
-		{
-			return;
-		}
-
-		if (processIdle() == true)
-		{
-			return;
-		}
+		return m_state.setSOR;
 	}
 
-	bool TuningChannelHandler::processReplyQueue()
+	bool TuningChannelHandler::writingDisabled() const
 	{
-		assert(sizeof(Rup::Frame) == sizeof(RupFotipV2));
-
-		// convert reply from Rup::Frame to RupFotipV2
-		//
-		bool res = m_replyQueue.pop(&m_reply);
-
-		if (res == false)
-		{
-			return false;
-		}
-
-		if (m_waitReply == false)
-		{
-			m_stat.errUntimelyReplay++;
-			return false;
-		}
-
-		m_waitReplyCounter = 0;
-		m_retryCount = 0;
-
-		m_isReply = true;
-
-		m_stat.replyCount++;
-
-		if ((m_stat.replyCount % 100) == 0)
-		{
-			qDebug() << C_STR(QString("Receive %1 replies from %2, NoReplies = %3").
-							  arg(m_stat.replyCount).arg(m_portEquipmentID).arg(m_stat.errNoReply));
-		}
-
-		processReply(m_reply);
-
-		m_waitReply = false;
-
-		return true;
+		return m_state.writingDisabled;
 	}
 
 	void TuningChannelHandler::pushReply(const RupFotipV2& reply)
 	{
-		m_replyQueue.push(&reply);
+		m_replyQueue.push(reply, QThread::currentThread());
 	}
 
 	void TuningChannelHandler::incErrReplySize()
 	{
-		m_stat.errReplySize++;
+		m_state.errReplySize++;
 	}
 
 	void TuningChannelHandler::getState(Network::TuningSourceState* tuningSourceState)
 	{
 		TEST_PTR_RETURN(tuningSourceState);
 
-		m_stat.get(tuningSourceState);
+		m_state.saveToProto(tuningSourceState);
 	}
 
 	bool TuningChannelHandler::processWaitReply()
 	{
-		if (m_waitReply == true)
+		if (m_waitReply == false)
 		{
-			m_waitReplyCounter++;
-
-			if (m_waitReplyCounter < MAX_WAIT_REPLY_COUNTER)
-			{
-				return true;
-			}
-
-			m_waitReplyCounter = 0;
-
-			// fix replay timeout
-			//
-			m_stat.errNoReply++;
-
-			m_waitReply = false;
-
-
-			qDebug() << C_STR(QString("NoReply from %1 (%2) [RUP frame No = %3]").
-							  arg(m_portEquipmentID).
-							  arg(m_sourceIP.addressPortStr()).
-							  arg(m_request.rupFotipV2.rupHeader.numerator));
-
-			m_retryCount++;
-
-			if (m_retryCount >= MAX_RETRY_COUNT)
-			{
-				onNoReply();
-
-				m_isReply = false;
-			}
-			else
-			{
-				// retry last request
-				//
-				sendFotipRequest(m_request, m_requestAppSignalID);
-			}
+			Q_ASSERT(false);
+			return true;				// like as reply has been received
 		}
 
-		return false;			// switch to next processing
+		// yes, we wait reply
+
+		bool replyReceived = m_replyQueue.pop(&m_reply, QThread::currentThread());
+
+		if (replyReceived == true)
+		{
+			m_state.isReply = true;
+			m_state.replyCount++;
+
+			//
+
+			m_waitReply = false;
+			m_waitReplyTimeoutCounter = 0;
+			m_retryCount = 0;
+
+			//
+
+			processReply(m_reply);
+
+			//
+
+			if ((m_state.replyCount % 100) == 0)
+			{
+				qDebug() << C_STR(QString("Receive %1 replies from %2, NoReplies = %3").
+								  arg(m_state.replyCount).arg(m_portEquipmentID).arg(m_state.errNoReply));
+			}
+
+			return true;				// reply received
+		}
+
+		// reply isn't received yet
+
+		m_waitReplyTimeoutCounter++;
+
+		if (m_waitReplyTimeoutCounter < MAX_WAIT_REPLY_TIMEOUT_COUNTER)
+		{
+			return false;
+		}
+
+		m_waitReplyTimeoutCounter = 0;
+
+		// fix replay timeout
+		//
+		m_state.errNoReply++;
+
+		LOG_MSG(m_tuningLog, QString("%1 TIMEOUT on request to %2 (%3)").
+									arg(toHex(m_request.rupFotipV2.rupHeader.numerator)).
+									arg(m_portEquipmentID).
+									arg(m_sourceIP.addressPortStr()));
+
+		qDebug() << C_STR(QString("NoReply from %1 (%2) [RUP frame No = %3]").
+						  arg(m_portEquipmentID).
+						  arg(m_sourceIP.addressPortStr()).
+						  arg(m_request.rupFotipV2.rupHeader.numerator));
+
+		m_retryCount++;
+
+		if (m_retryCount < MAX_RETRY_COUNT)
+		{
+			m_waitReply = false;
+
+			// retry last request
+			//
+			sendFotipRequest(m_request, m_requestAppSignalID);
+
+			return false;
+		}
+
+		onNoReply();
+
+		m_state.isReply = false;
+		m_waitReply = false;
+
+		return true;				// reply isn't recived but TRUE returned to run other processings
+	}
+
+	void TuningChannelHandler::processUntimelyReply()
+	{
+		if (m_waitReply == false)
+		{
+			bool replyReceived = false;
+
+			do
+			{
+				replyReceived = m_replyQueue.pop(&m_reply, QThread::currentThread());
+
+				if (replyReceived == true)
+				{
+					m_state.errUntimelyReplay++;
+				}
+			}
+			while(replyReceived == true);	// m_replyQueue clearing
+		}
 	}
 
 	bool TuningChannelHandler::processCommandQueue()
 	{
 		if (m_waitReply == true)
 		{
+			Q_ASSERT(false);
 			return true;		// while wating reply has not another processing
 		}
 
@@ -474,7 +520,7 @@ namespace Tuning
 
 		m_requestAppSignalID.clear();
 
-		logTuningRequest(m_lastProcessedCommand, &m_requestAppSignalID);
+		logTuningRequest(m_lastProcessedCommand, &m_requestAppSignalID, m_request.rupFotipV2.rupHeader.numerator);
 
 		m_retryCount = 0;
 
@@ -483,10 +529,11 @@ namespace Tuning
 		return true;
 	}
 
-	bool TuningChannelHandler::processIdle()
+	bool TuningChannelHandler::enqueueTuningReadCommand()
 	{
 		if (m_waitReply == true)
 		{
+			Q_ASSERT(false);
 			return true;		// while wating reply has not another processing
 		}
 
@@ -526,10 +573,12 @@ namespace Tuning
 
 	void TuningChannelHandler::sendFotipRequest(SimRupFotipV2& request, const QString& appSignalID)
 	{
-		assert(sizeof(Rup::Frame) == Socket::ENTIRE_UDP_SIZE);
-		assert(sizeof(RupFotipV2) == Socket::ENTIRE_UDP_SIZE);
-		assert(sizeof(FotipV2::Frame) == Rup::FRAME_DATA_SIZE);
-		assert(sizeof(FotipV2::Header) == 128);
+		Q_ASSERT(sizeof(Rup::Frame) == Socket::ENTIRE_UDP_SIZE);
+		Q_ASSERT(sizeof(RupFotipV2) == Socket::ENTIRE_UDP_SIZE);
+		Q_ASSERT(sizeof(FotipV2::Frame) == Rup::FRAME_DATA_SIZE);
+		Q_ASSERT(sizeof(FotipV2::Header) == 128);
+
+		Q_ASSERT(m_waitReply == false);
 
 		RupFotipV2& rupFotipV2 = request.rupFotipV2;
 
@@ -566,7 +615,7 @@ namespace Tuning
 										  m_tuningSimIP.port());
 		}
 
-		m_stat.requestCount++;
+		m_state.requestCount++;
 
 		// revert headers to LittleEndian
 		//
@@ -581,19 +630,18 @@ namespace Tuning
 
 		//
 
-		m_waitReplyCounter = 0;
-
+		m_waitReplyTimeoutCounter = 0;
 		m_waitReply = true;
 
 		if (sent == -1)
 		{
-			m_stat.errSent++;
+			m_state.errSent++;
 			return;
 		}
 
 		if (sent < static_cast<qint64>(sizeof(m_request)))
 		{
-			m_stat.errPartialSent++;
+			m_state.errPartialSent++;
 		}
 
 		// logging
@@ -606,9 +654,9 @@ namespace Tuning
 
 				if (rupFotipV2.fotipFrame.isDiscreteData() == true)
 				{
-					DEBUG_LOG_MSG(m_logger, QString("RupFotipV2 WRITE request %1 is sent to %2 (%3), signal %4 value %5."
+					DEBUG_LOG_MSG(m_logger, QString("%1 RupFotipV2 WRITE request is sent to %2 (%3), signal %4 value %5."
 													"StartAddrW %6, OffsetInFrameW %7, RawValue32 %8 BE, Bitmask32 %9 BE").
-								  arg(requestID, 4, 16, QLatin1Char('0')).
+								  arg(toHex(requestID)).
 								  arg(sourceEquipmentID()).
 								  arg(m_sourceIP.addressStr()).
 								  arg(appSignalID).
@@ -620,8 +668,8 @@ namespace Tuning
 				}
 				else
 				{
-					DEBUG_LOG_MSG(m_logger, QString("RupFotipV2 WRITE request %1 is sent to %2 (%3), signal %4 value %5").
-								  arg(requestID, 4, 16, QLatin1Char('0')).
+					DEBUG_LOG_MSG(m_logger, QString("%1 RupFotipV2 WRITE request is sent to %2 (%3), signal %4 value %5").
+								  arg(toHex(requestID)).
 								  arg(sourceEquipmentID()).
 								  arg(m_sourceIP.addressStr()).
 								  arg(appSignalID).
@@ -631,8 +679,8 @@ namespace Tuning
 			break;
 
 		case FotipV2::OpCode::Apply:
-			DEBUG_LOG_MSG(m_logger, QString("RupFotipV2 APPLY request %1 is sent to %2 (%3)").
-						  arg(requestID, 4, 16, QLatin1Char('0')).
+			DEBUG_LOG_MSG(m_logger, QString("%1 RupFotipV2 APPLY request is sent to %2 (%3)").
+						  arg(toHex(requestID)).
 						  arg(sourceEquipmentID()).
 						  arg(m_sourceIP.addressStr()));
 			break;
@@ -792,7 +840,7 @@ namespace Tuning
 		if (result == false)
 		{
 			finalizeWriting(NetworkError::TuningNoReply);
-			m_stat.errRupCRC++;
+			m_state.errRupCRC++;
 			return;
 		}
 
@@ -838,12 +886,22 @@ namespace Tuning
 
 	void TuningChannelHandler::processReadReply(RupFotipV2& reply)
 	{
-		m_sourceThread.updateFrameSignalsState(reply);
+		bool res = m_sourceThread.updateFrameSignalsState(reply);
+
+		if (res == false)
+		{
+			m_state.errTuningFrameUpdate++;
+		}
 	}
 
 	void TuningChannelHandler::processWriteReply(RupFotipV2& reply)
 	{
-		m_sourceThread.updateFrameSignalsState(reply);
+		bool res = m_sourceThread.updateFrameSignalsState(reply);
+
+		if (res == false)
+		{
+			m_state.errTuningFrameUpdate++;
+		}
 
 		reply.fotipFrame.analogCmpErrors.all = reverseUint16(reply.fotipFrame.analogCmpErrors.all);
 
@@ -862,7 +920,7 @@ namespace Tuning
 
 				if (reply.fotipFrame.analogCmpErrors.highBoundCheckError == 1)
 				{
-					m_stat.errAnalogHighBoundCheck++;
+					m_state.errAnalogHighBoundCheck++;
 
 					boundCheckStr = QString("HighBoundCheckError == 1 ");
 					errCode = NetworkError::TuningValueOutOfRange;
@@ -871,7 +929,7 @@ namespace Tuning
 
 				if (reply.fotipFrame.analogCmpErrors.lowBoundCheckError == 1)
 				{
-					m_stat.errAnalogLowBoundCheck++;
+					m_state.errAnalogLowBoundCheck++;
 
 					boundCheckStr = QString("LowBoundCheckError == 1 ");
 					errCode = NetworkError::TuningValueOutOfRange;
@@ -884,10 +942,11 @@ namespace Tuning
 					boundCheckStr = ("No bound check errors ");
 				}
 
-				msg = QString("Reply is received from %1 (%2) on RupFotipV2 WRITE request %3: %4").
+				msg = QString("%1 Reply (%2) received from %3 (%4) on RupFotipV2 WRITE request: %5").
+								arg(toHex(m_request.rupFotipV2.rupHeader.numerator)).
+								arg(toHex(reply.rupHeader.numerator)).
 								arg(sourceEquipmentID()).
 								arg(m_sourceIP.addressStr()).
-								arg(reply.rupHeader.numerator, 4, 16, QLatin1Char('0')).
 								arg(boundCheckStr);
 			}
 			break;
@@ -896,10 +955,11 @@ namespace Tuning
 			{
 				quint32 data32 = *reinterpret_cast<quint32*>(reply.fotipFrame.data + m_request.rupFotipV2.fotipFrame.header.offsetInFrameW * 2);
 
-				msg = QString("Reply is received from %1 (%2) on RupFotipV2 WRITE request %3. Data32[%4W] = %5").
+				msg = QString("%1 Reply (%2) received from %3 (%4) on RupFotipV2 WRITE request. Data32[%5W] = %6").
+								arg(toHex(m_request.rupFotipV2.rupHeader.numerator)).
+								arg(toHex(reply.rupHeader.numerator)).
 								arg(sourceEquipmentID()).
 								arg(m_sourceIP.addressStr()).
-								arg(reply.rupHeader.numerator, 4, 16, QLatin1Char('0')).
 								arg(m_request.rupFotipV2.fotipFrame.header.offsetInFrameW).
 								arg(data32, 8, 16, QLatin1Char('0'));
 			}
@@ -937,10 +997,10 @@ namespace Tuning
 		}
 		else
 		{
-			m_stat.hasUnappliedParams = true;
+			m_state.hasUnappliedParams = true;
 		}
 
-		logTuningReply(m_lastProcessedCommand, reply);
+		logTuningReply(m_lastProcessedCommand, reply, m_request.rupFotipV2.rupHeader.numerator);
 	}
 
 	void TuningChannelHandler::processApplyReply(RupFotipV2& reply)
@@ -951,7 +1011,7 @@ namespace Tuning
 		{
 			result = "Success";
 
-			m_stat.hasUnappliedParams = false;
+			m_state.hasUnappliedParams = false;
 		}
 		else
 		{
@@ -964,7 +1024,7 @@ namespace Tuning
 					  arg(reply.rupHeader.numerator, 4, 16, QLatin1Char('0')).
 					  arg(result));
 
-		logTuningReply(m_lastProcessedCommand, reply);
+		logTuningReply(m_lastProcessedCommand, reply, m_request.rupFotipV2.rupHeader.numerator);
 	}
 
 	void TuningChannelHandler::finalizeWriting(NetworkError errCode)
@@ -1001,13 +1061,13 @@ namespace Tuning
 
 		if (rupHeader.protocolVersion != Rup::VERSION)
 		{
-			m_stat.errRupProtocolVersion++;
+			m_state.errRupProtocolVersion++;
 			result &= false;
 		}
 
 		if (rupHeader.frameSize != Socket::ENTIRE_UDP_SIZE)
 		{
-			m_stat.errRupFrameSize++;
+			m_state.errRupFrameSize++;
 			result &= false;
 		}
 
@@ -1016,13 +1076,13 @@ namespace Tuning
 			rupHeader.flags.diagData != 0 ||
 			rupHeader.flags.test != 0)
 		{
-			m_stat.errRupNonTuningData++;
+			m_state.errRupNonTuningData++;
 			result &= false;
 		}
 
 		if (m_disableModulesTypeChecking == false && rupHeader.moduleType != m_lmModuleType)
 		{
-			m_stat.errRupModuleType++;
+			m_state.errRupModuleType++;
 			result &= false;
 
 			qDebug() << "Invalid moduleType of" << m_portEquipmentID << "( waiting" << m_lmModuleType << ", receiving" << rupHeader.moduleType << ")";
@@ -1030,13 +1090,13 @@ namespace Tuning
 
 		if (rupHeader.framesQuantity != 1)
 		{
-			m_stat.errRupFramesQuantity++;
+			m_state.errRupFramesQuantity++;
 			result &= false;
 		}
 
 		if (rupHeader.frameNumber != 0)
 		{
-			m_stat.errRupFrameNumber++;
+			m_state.errRupFrameNumber++;
 			result &= false;
 		}
 
@@ -1051,15 +1111,15 @@ namespace Tuning
 
 		if (fotipHeader.protocolVersion != FotipV2::VERSION)
 		{
-			m_stat.errFotipProtocolVersion++;
+			m_state.errFotipProtocolVersion++;
 			result = false;
 		}
 
 		if (fotipHeader.uniqueId != m_sourceUniqueID)
 		{
-			m_stat.errFotipUniqueID++;
+			m_state.errFotipUniqueID++;
 
-			if ((m_stat.errFotipUniqueID % 500) == 0)
+			if ((m_state.errFotipUniqueID % 500) == 0)
 			{
 				DEBUG_LOG_ERR(m_logger, QString("Wrong tuning source UniqueID: %1.").arg(m_sourceIP.addressStr()));
 			}
@@ -1067,42 +1127,42 @@ namespace Tuning
 		}
 		else
 		{
-			m_stat.errFotipUniqueID = 0;		// added by Vintenko 26.12.2017
+			m_state.errFotipUniqueID = 0;		// added by Vintenko 26.12.2017
 		}
 
 		if (fotipHeader.subsystemKey.lmNumber != m_lmNumber)
 		{
-			m_stat.errFotipLmNumber++;
+			m_state.errFotipLmNumber++;
 			result = false;
 		}
 
 		if (fotipHeader.subsystemKey.subsystemCode != m_subsystemCode)
 		{
-			m_stat.errFotipSubsystemCode++;
+			m_state.errFotipSubsystemCode++;
 			result = false;
 		}
 
 		if (fotipHeader.operationCode != m_request.rupFotipV2.fotipFrame.header.operationCode)
 		{
-			m_stat.errFotipOperationCode++;
+			m_state.errFotipOperationCode++;
 			result = false;
 		}
 
 		if (fotipHeader.fotipFrameSizeB != sizeof(FotipV2::Frame))
 		{
-			m_stat.errFotipFrameSize++;
+			m_state.errFotipFrameSize++;
 			result = false;
 		}
 
 		if (fotipHeader.romSizeB !=  static_cast<quint32>(m_tuningFlashSizeB))
 		{
-			m_stat.errFotipRomSize++;
+			m_state.errFotipRomSize++;
 			result = false;
 		}
 
 		if (fotipHeader.romFrameSizeB != m_tuningFlashFramePayloadB)
 		{
-			m_stat.errFotipRomFrameSize++;
+			m_state.errFotipRomFrameSize++;
 			result = false;
 		}
 
@@ -1112,61 +1172,61 @@ namespace Tuning
 		//
 		if (flags.dataTypeError == 1)
 		{
-			m_stat.fotipFlagDataTypeErr++;
+			m_state.fotipFlagDataTypeErr++;
 			result = false;
 		}
 
 		if (flags.operationCodeError == 1)
 		{
-			m_stat.fotipFlagOpCodeErr++;
+			m_state.fotipFlagOpCodeErr++;
 			result = false;
 		}
 
 		if (flags.startAddressError == 1)
 		{
-			m_stat.fotipFlagStartAddrErr++;
+			m_state.fotipFlagStartAddrErr++;
 			result = false;
 		}
 
 		if (flags.romSizeError == 1)
 		{
-			m_stat.fotipFlagRomSizeErr++;
+			m_state.fotipFlagRomSizeErr++;
 			result = false;
 		}
 
 		if (flags.romFrameSizeError == 1)
 		{
-			m_stat.fotipFlagRomFrameSizeErr++;
+			m_state.fotipFlagRomFrameSizeErr++;
 			result = false;
 		}
 
 		if (flags.frameSizeError == 1)
 		{
-			m_stat.fotipFlagFrameSizeErr++;
+			m_state.fotipFlagFrameSizeErr++;
 			result = false;
 		}
 
 		if (flags.versionError == 1)
 		{
-			m_stat.fotipFlagProtocolVersionErr++;
+			m_state.fotipFlagProtocolVersionErr++;
 			result = false;
 		}
 
 		if (flags.subsystemKeyError == 1)
 		{
-			m_stat.fotipFlagSubsystemKeyErr++;
+			m_state.fotipFlagSubsystemKeyErr++;
 			result = false;
 		}
 
 		if (flags.idError == 1)
 		{
-			m_stat.fotipFlagUniueIDErr++;
+			m_state.fotipFlagUniueIDErr++;
 			result = false;
 		}
 
 		if (flags.offsetError == 1)
 		{
-			m_stat.fotipFlagOffsetErr++;
+			m_state.fotipFlagOffsetErr++;
 			result = false;
 		}
 
@@ -1174,44 +1234,44 @@ namespace Tuning
 		//
 		if (flags.successfulCheck == 1)
 		{
-			m_stat.fotipFlagBoundsCheckSuccess++;
+			m_state.fotipFlagBoundsCheckSuccess++;
 		}
 
 		if (flags.successfulWrite == 1)
 		{
-			m_stat.fotipFlagWriteSuccess++;
+			m_state.fotipFlagWriteSuccess++;
 		}
 
 		if (flags.succesfulApply == 1)
 		{
-			m_stat.fotipFlagApplySuccess++;
+			m_state.fotipFlagApplySuccess++;
 		}
 
 		if (flags.setSOR == 1)
 		{
-			m_stat.fotipFlagSetSOR++;					// for platform LMs
-			m_stat.setSOR = true;
+			m_state.fotipFlagSetSOR++;					// for platform LMs
+			m_state.setSOR = true;
 
-			m_stat.fotipFlagWritingDisabled++;			// for non-platform LMs
-			m_stat.writingDisabled = true;
+			m_state.fotipFlagWritingDisabled++;			// for non-platform LMs
+			m_state.writingDisabled = true;
 		}
 		else
 		{
-			m_stat.fotipFlagSetSOR = 0;					// for platform LMs
-			m_stat.setSOR = false;
+			m_state.fotipFlagSetSOR = 0;					// for platform LMs
+			m_state.setSOR = false;
 
-			m_stat.fotipFlagWritingDisabled = 0;		// for non-platform LMs
-			m_stat.writingDisabled = false;
+			m_state.fotipFlagWritingDisabled = 0;		// for non-platform LMs
+			m_state.writingDisabled = false;
 		}
 
 		return result;
 	}
 
-	void TuningChannelHandler::logTuningRequest(const TuningCommand& cmd, QString* appSignalID)
+	void TuningChannelHandler::logTuningRequest(const TuningCommand& cmd, QString* appSignalID, quint16 requestNumerator)
 	{
 		TEST_PTR_RETURN(appSignalID);
 
-		QString str = QString("LM=%1 Client=%2 User=%3").arg(m_portEquipmentID).arg(cmd.clientEquipmentID).arg(cmd.user);
+		static const QString filler("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
 
 		QString logStr;
 
@@ -1226,17 +1286,31 @@ namespace Tuning
 
 				TEST_PTR_RETURN(ts);
 
-				logStr = QString("WRITE request %1 Signal=%2 Type=%3 CurValue=%4 NewValue=%5 SOR=%6").
-							arg(str).arg(ts->appSignalID()).arg(cmd.write.newTuningValue.typeStr()).
-							arg(ts->currentValue().toString()).arg(cmd.write.newTuningValue.toString()).
-							arg(m_stat.setSOR == true ? 1 : 0);
+				logStr = QString("%1 WRITE request%2=> %3 Signal=%4 Type=%5 CurValue=%6 NewValue=%7 SOR=%8 (Client=%9, User=%10)").
+							arg(toHex(requestNumerator)).
+							arg(filler).
+							arg(m_portEquipmentID).
+							arg(ts->appSignalID()).
+							arg(cmd.write.newTuningValue.typeStr()).
+							arg(ts->currentValue().toString()).
+							arg(cmd.write.newTuningValue.toString()).
+							arg(m_state.setSOR == true ? 1 : 0).
+							arg(cmd.clientEquipmentID).
+							arg(cmd.user);
 
 				*appSignalID = ts->appSignalID();
 			}
 			break;
 
 		case FotipV2::OpCode::Apply:
-			logStr = QString("APPLY request %1 SOR=%2").arg(str).arg(m_stat.setSOR == true ? 1 : 0);
+
+			logStr = QString("%1 APPLY request%2=> %3 SOR=%4 (Client=%5, User=%6)").
+								arg(toHex(requestNumerator)).
+								arg(filler).
+								arg(m_portEquipmentID).
+								arg(m_state.setSOR == true ? 1 : 0).
+								arg(cmd.clientEquipmentID).
+								arg(cmd.user);
 			break;
 
 		default:
@@ -1247,7 +1321,9 @@ namespace Tuning
 		LOG_MSG(m_tuningLog, logStr);
 	}
 
-	void TuningChannelHandler::logTuningReply(const TuningCommand& cmd, const RupFotipV2& reply)
+	void TuningChannelHandler::logTuningReply(const TuningCommand& cmd,
+											  const RupFotipV2& reply,
+											  quint16 requestNumerator)
 	{
 		QString logStr;
 
@@ -1266,12 +1342,14 @@ namespace Tuning
 
 				if (ts->signalType() == E::SignalType::Analog)
 				{
-					checkResultStr = QString("LowBoundCheck=%1 HighBoundCheck=%2 ").
+					checkResultStr = QString("LowBoundCheck=%1 HighBoundCheck=%2").
 							arg(reply.fotipFrame.analogCmpErrors.lowBoundCheckError == 0 ? "Success" : "Fail").
 							arg(reply.fotipFrame.analogCmpErrors.highBoundCheckError == 0 ? "Success" : "Fail");
 				}
 
-				logStr = QString("WRITE reply&nbsp;&nbsp;&nbsp;LM=%1 Signal=%2 CurValue=%3 %4SOR=%5").
+				logStr = QString("%1 WRITE reply (%2) <= %3 Signal=%4 CurValue=%5 %6 SOR=%7").
+							arg(toHex(requestNumerator)).
+							arg(toHex(reply.rupHeader.numerator)).
 							arg(m_portEquipmentID).
 							arg(ts->appSignalID()).
 							arg(ts->currentValue().toString()).
@@ -1281,10 +1359,12 @@ namespace Tuning
 			break;
 
 		case FotipV2::OpCode::Apply:
-			logStr = QString("APPLY reply&nbsp;&nbsp;&nbsp;LM=%1 Result=%2 SOR=%3").
+			logStr = QString("%1 APPLY reply (%2) <= %3 Result=%4 SOR=%5").
+						arg(toHex(requestNumerator)).
+						arg(toHex(reply.rupHeader.numerator)).
 						arg(m_portEquipmentID).
 						arg(reply.fotipFrame.header.flags.succesfulApply == 1 ? "Success" : "Fail").
-						arg(m_stat.setSOR == true ? 1 : 0);
+						arg(m_state.setSOR == true ? 1 : 0);
 			break;
 
 		default:
@@ -1316,7 +1396,7 @@ namespace Tuning
 		m_logger(logger),
 		m_tuningLog(tuningLog)
 	{
-		m_stat.dataSourceID = m_source.ID();		// ID generated by DataSource::generateID()
+		source.saveToProto(&m_protoDataSourceInfo);
 
 		m_disableModulesTypeChecking = settings.disableModulesTypeChecking;
 
@@ -1374,14 +1454,40 @@ namespace Tuning
 		handler->pushReply(reply);
 	}
 
-	void TuningSourceThread::incErrReplySize()
+	void TuningSourceThread::incErrReplySize(quint32 channelIP)
 	{
-		m_stat.errReplySize++;
+		AUTO_LOCK(m_handlersMutex);
+
+		auto it = m_ip2handlers.find(channelIP);
+
+		if (it == m_ip2handlers.end())
+		{
+			return;
+		}
+
+		TuningChannelHandler* handler = it->second;
+
+		TEST_PTR_RETURN(handler);
+
+		handler->incErrReplySize();
 	}
 
-	void TuningSourceThread::getState(Network::TuningSourceState* tuningSourceState)
+	void TuningSourceThread::getSourceState(Network::GetTuningSourcesStatesReply* reply)
 	{
-		m_stat.get(tuningSourceState);
+		TEST_PTR_RETURN(reply);
+
+		AUTO_LOCK(m_handlersMutex);
+
+		for(auto handler : m_handlers)
+		{
+			TEST_PTR_CONTINUE(handler);
+
+			Network::TuningSourceState* newTss = reply->add_tuningsourcesstate();
+
+			TEST_PTR_CONTINUE(newTss);
+
+			handler->state().saveToProto(newTss);
+		}
 	}
 
 	void TuningSourceThread::readSignalState(Network::TuningSignalState* tss) const
@@ -1423,6 +1529,7 @@ namespace Tuning
 		tss->set_writerequesttime(ts->writeRequestTime());
 		tss->set_successfulwritetime(ts->successfulWriteTime());
 		tss->set_unsuccessfulwritetime(ts->unsuccessfulWriteTime());
+		tss->set_lmtime(ts->lmTime());
 
 		tss->set_writeclient(ts->writeClient());
 		tss->set_writeerrorcode(TO_INT(ts->writeErrorCode()));
@@ -1512,10 +1619,8 @@ namespace Tuning
 
 			bool allInitialized = true;
 
-			for(auto&p : m_handlers)
+			for(const TuningChannelHandler* handler : m_handlers)
 			{
-				const TuningChannelHandler* handler = p.second;
-
 				allInitialized &= handler->isInitialized();
 			}
 
@@ -1541,15 +1646,18 @@ namespace Tuning
 		return const_cast<TuningSignal*>(privateGetTuningSignal(hash));
 	}
 
-	void TuningSourceThread::updateFrameSignalsState(RupFotipV2& reply)
+	bool TuningSourceThread::updateFrameSignalsState(RupFotipV2& reply)
 	{
+		//
+		// Byte order of reply.rupHeader already REVERSED!!!
+		//
+
 		bool updateResult = m_tuningMem.updateFrame(reply.fotipFrame.header.startAddressW,
 													reply.fotipFrame.header.romFrameSizeB,
 													reply.fotipFrame.data);
 		if (updateResult == false)
 		{
-			m_stat.errTuningFrameUpdate++;
-			return;
+			return false;
 		}
 
 		// parse signals values and bounds
@@ -1561,7 +1669,7 @@ namespace Tuning
 		if (arrayIndex < 0 || arrayIndex >= m_frameSignals.size())
 		{
 			assert(false);
-			return;
+			return false;
 		}
 
 		const std::vector<int>& frameSignals = m_frameSignals[arrayIndex];
@@ -1569,6 +1677,8 @@ namespace Tuning
 		quint8* dataPtr = reply.fotipFrame.data;
 
 		qint64 updateTime = QDateTime::currentMSecsSinceEpoch();
+
+		qint64 lmTime = reply.rupHeader.timeStamp.toInt64(false);		// header already reversed!
 
 		int tuningSignalsCount = TO_INT(m_tuningSignals.size());
 
@@ -1622,7 +1732,7 @@ namespace Tuning
 			switch(frameNo % 3)
 			{
 			case 0:
-				ts.updateCurrentValue(true, tuningValue, updateTime);
+				ts.setCurrentValue(true, tuningValue, updateTime, lmTime);
 				break;
 
 			case 1:
@@ -1637,6 +1747,8 @@ namespace Tuning
 				assert(false);
 			}
 		}
+
+		return true;
 	}
 
 	bool TuningSourceThread::isSourceHandlerExistsForChannel(int channel) const
@@ -1657,41 +1769,15 @@ namespace Tuning
 		initTuningSignals();
 		initHandlers();
 
-		int msCount = 0;
-		bool tenMsElapsed = false;
-
 		do
 		{
-			msleep(1);
-			msCount++;
-
-			if (msCount >= 10)
-			{
-				tenMsElapsed = true;
-				msCount = 0;
-			}
-
-			for(auto& p : m_handlers)
-			{
-				TuningChannelHandler* handler = p.second;
-
-				if (handler == nullptr)
-				{
-					Q_ASSERT(false);
-					continue;
-				}
-
-				bool replyProcessed = handler->processReplyQueue();
-
-				if (tenMsElapsed == true || replyProcessed == true)
-				{
-					handler->periodicProcessing();	// each 10 ms or after reply processed
-				}
-			}
-
-			tenMsElapsed = false;
+			runHandlers();
 
 			checkChannelsResponse();
+
+			checkSetSOR();
+
+			msleep(1);
 		}
 		while(isQuitRequested() == false);
 
@@ -1755,12 +1841,15 @@ namespace Tuning
 
 		Q_ASSERT(m_handlers.size() == 0);
 
-		for(const TuningChannelInfo& tci :m_tuningChannelsInfo)
+		for(const TuningChannelInfo& tci : m_tuningChannelsInfo)
 		{
 			TuningChannelHandler* handler = new TuningChannelHandler(*this, tci, m_disableModulesTypeChecking,
 																	 m_swRunMode, m_logger, m_tuningLog);
 
-			m_handlers.insert({tci.channel, handler});
+			m_handlers.push_back(handler);
+
+			m_ch2handlers.insert({tci.channel, handler});
+			m_ip2handlers.insert({tci.tuningDataIP.address32(), handler});
 
 			handler->startHandler();
 		}
@@ -1770,10 +1859,8 @@ namespace Tuning
 	{
 		AUTO_LOCK(m_handlersMutex);
 
-		for(auto& p : m_handlers)
+		for(TuningChannelHandler* handler : m_handlers)
 		{
-			TuningChannelHandler* handler = p.second;
-
 			if (handler != nullptr)
 			{
 				handler->stopHandler();
@@ -1798,30 +1885,29 @@ namespace Tuning
 		return const_cast<TuningChannelHandler*>(privateGetChannelHandler(channel));
 	}
 
+	void TuningSourceThread::runHandlers()
+	{
+		for(TuningChannelHandler* handler : m_handlers)
+		{
+			handler->run();
+		}
+	}
+
 	void TuningSourceThread::checkChannelsResponse()
 	{
 		bool anyChannelReply = false;
 
-		for(auto& p: m_handlers)
+		for(TuningChannelHandler* handler : m_handlers)
 		{
-			const TuningChannelHandler* handler = p.second;
-
-			if (handler != nullptr)
-			{
-				anyChannelReply |= handler->isReply();
-			}
-			else
-			{
-				Q_ASSERT(false);
-			}
+			anyChannelReply |= handler->isReply();
 		}
 
-		if (anyChannelReply == false && m_stat.isReply == true)
+		if (anyChannelReply == false && m_anyChannelReply == true)
 		{
 			invalidateAllSignals();
 		}
 
-		m_stat.isReply = anyChannelReply;
+		m_anyChannelReply = anyChannelReply;
 	}
 
 	void TuningSourceThread::invalidateAllSignals()
@@ -1832,16 +1918,30 @@ namespace Tuning
 		}
 	}
 
+	void TuningSourceThread::checkSetSOR()
+	{
+		bool setSOR = false;
+		bool writingDisabled = false;
+
+		for(TuningChannelHandler* handler : m_handlers)
+		{
+			if (handler->isReply() == true)
+			{
+				setSOR |= handler->setSOR();
+				writingDisabled |= handler->writingDisabled();
+			}
+		}
+
+		m_setSOR = setSOR;
+		m_writingDisabled = writingDisabled;
+	}
+
 	void TuningSourceThread::pushCommandToHandlers(const TuningCommand& cmd, const QString& appSignalID)
 	{
 		AUTO_LOCK(m_handlersMutex);
 
-		for(auto& p : m_handlers)
+		for(TuningChannelHandler* handler : m_handlers)
 		{
-			TuningChannelHandler* handler = p.second;
-
-			TEST_PTR_CONTINUE(handler);
-
 			handler->pushTuningCommand(cmd);
 
 			switch(cmd.opCode)
@@ -1879,9 +1979,9 @@ namespace Tuning
 			return nullptr;
 		}
 
-		auto it = m_handlers.find(channel);
+		auto it = m_ch2handlers.find(channel);
 
-		if (it == m_handlers.end())
+		if (it == m_ch2handlers.end())
 		{
 			return nullptr;
 		}
@@ -1909,6 +2009,9 @@ namespace Tuning
 
 		return &m_tuningSignals[index];
 	}
+
+
+
 
 	// -------------------------------------------------------------------------
 	//
@@ -2099,7 +2202,7 @@ namespace Tuning
 	{
 		quint32 sourceIP = tuningSourceIP.toIPv4Address();
 
-		TuningSourceThread* sourceThread = m_service.getTuningSourceThread(sourceIP);
+		TuningSourceThreadShared sourceThread = m_service.getTuningSourceThread(sourceIP);
 
 		if (sourceThread == nullptr)
 		{
@@ -2117,7 +2220,7 @@ namespace Tuning
 	{
 		quint32 sourceIP = tuningSourceIP.toIPv4Address();
 
-		TuningSourceThread* sourceThread = m_service.getTuningSourceThread(sourceIP);
+		TuningSourceThreadShared sourceThread = m_service.getTuningSourceThread(sourceIP);
 
 		if (sourceThread == nullptr)
 		{
@@ -2125,7 +2228,7 @@ namespace Tuning
 			return;
 		}
 
-		sourceThread->incErrReplySize();
+		sourceThread->incErrReplySize(tuningSourceIP.toIPv4Address());
 	}
 
 	// ----------------------------------------------------------------------------------

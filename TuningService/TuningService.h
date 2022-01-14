@@ -32,7 +32,8 @@ namespace Tuning
 		const TuningClientContext* getClientContext(QString clientID) const;
 		const TuningClientContext* getClientContext(const std::string& clientID) const;
 
-		TuningSourceThread* getTuningSourceThread(quint32 sourceIP);
+		TuningSourceThreadShared getTuningSourceThread(quint32 sourceIP);
+		TuningSourceThreadShared getTuningSourceThread(const QString& sourceID);
 
 		void getAllClientContexts(QVector<const TuningClientContext*>& clientContexts);
 
@@ -51,6 +52,10 @@ namespace Tuning
 
 		QString activeClientID() const;
 		QString activeClientIP() const;
+
+		const TuningServiceSettings& tuningServiceSettings() const { return m_settings; }
+
+		bool isControlled(const QString& lmEquipmentID, const QString& lanEquipmentID) const;
 
 	signals:
 
@@ -74,6 +79,8 @@ namespace Tuning
 		void buildServiceMaps();
 		void clearServiceMaps();
 
+		void fillControlledLans();
+
 		bool readConfiguration(const QByteArray& cfgXmlData);
 		bool loadConfigurationFromFile(const QString& fileName);
 		bool readTuningDataSources(const QByteArray& fileData, const QString& profile);
@@ -85,14 +92,14 @@ namespace Tuning
 		bool runTuningSourceThread(bool runSingleSource,
 								   const QString& tuningSourceEquipmentID);
 
-		TuningSourceThread* createTuningSourceThread(const TuningSource& source);
+		TuningSourceThreadShared createTuningSourceThread(const TuningSource& source);
 		void stopTuningSourceThreads();
 
 		void runSourcesListenerThreads();
 		void stopSourcesListenerThreads();
 
-		void setSourceThreadInTuningClientContexts(TuningSourceThread* thread);
-		void removeSourceThreadFromTuningClientContexts(TuningSourceThread* thread);
+		void setSourceThreadInTuningClientContexts(TuningSourceThreadShared thread);
+		void removeSourceThreadFromTuningClientContexts(const QString& tuningSourceID);
 
 		bool isSimulationMode() const;
 
@@ -103,21 +110,22 @@ namespace Tuning
 								  const BuildFileInfoArray buildFileInfoArray,
 								  SessionParams sessionParams,
 								  std::shared_ptr<const SoftwareSettings> curSettingsProfile);
-
 	private:
 		CircularLoggerShared m_logger;
 		CircularLoggerShared m_tuningLog;
 
 		TuningServiceSettings m_settings;
 
-		std::map<QString, Tuning::TuningSourceThread*> m_sourceThreads;		// module EquipmentID => TuningSourceThread*
-		std::map<quint32, Tuning::TuningSourceThread*> m_ip2sourceThread;	// LAN ipV4 => TuningSourceThread*
+		std::map<QString, TuningSourceThreadShared> m_sourceThreads;	// module EquipmentID => TuningSourceThreadShared
+		std::map<quint32, TuningSourceThreadShared> m_ip2sourceThread;	// TuningSource LANs ipV4 => TuningSourceThreadShared
 
 		TuningSources m_tuningSources;
 
+		std::set<std::pair<QString, QString>> m_controlledLans;			// pair: <LM EquipmentID, LAN EquipmentID>
+
 		CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
-		std::vector<TcpTuningServerThread*> m_tcpTuningServerThreads;
+		TcpTuningServerThread* m_tcpTuningServerThread = nullptr;
 
 		mutable QMutex m_mainMutex;
 

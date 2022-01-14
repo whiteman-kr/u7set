@@ -19,8 +19,12 @@ namespace Tuning
 
 		bool hasTuningSignals() const;
 
+		const QStringList& getEnabledLansProvidedTuning() const;
+
 	private:
 		TuningDataShared m_tuningData;
+
+		mutable std::optional<QStringList> m_enabledLansProvidedTuning;
 	};
 
 	class TuningSources : public QVector<TuningSource>
@@ -32,6 +36,7 @@ namespace Tuning
 		void buildMaps();
 
 		const TuningSource* getSourceByID(const QString& sourceID) const;
+		QStringList getAllSourcesIDs() const;
 
 	private:
 		QHash<QString, int> m_id2Source;

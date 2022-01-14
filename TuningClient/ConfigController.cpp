@@ -8,6 +8,7 @@
 //
 
 ConfigController::ConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2, QWidget* parent) :
+	m_softwareInfo(softwareInfo),
 	m_parent(parent),
 	m_address1(address1),
 	m_address2(address2)
@@ -151,14 +152,12 @@ QString ConfigController::getStateToolTip()
 		return QString();
 	}
 
-	Tcp::ConnectionState connectionState = m_cfgLoaderThread->getConnectionState();
 	HostAddressPort currentConnection = m_cfgLoaderThread->getCurrentServerAddressPort();
 
-	QString result = tr("Configuration Service connection\n\n");
+	QString result;
 	result += tr("Address (primary): %1\n").arg(m_address1.addressPortStr());
-	result += tr("Address (secondary): %1\n\n").arg(m_address2.addressPortStr());
-	result += tr("Address (current): %1\n").arg(currentConnection.addressPortStr());
-	result += tr("Connection: ") + (connectionState.isConnected ? tr("established") : tr("no connection"));
+	result += tr("Address (secondary): %1\n").arg(m_address2.addressPortStr());
+	result += tr("Address (current): %1").arg(currentConnection.addressPortStr());
 
 	return result;
 }
@@ -278,7 +277,11 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 	// Trace received params
 	//
 	theLogFile->writeMessage(tr("New configuration arrived"));
-	theLogFile->writeMessage(tr("TUNS1 (id, ip, port): %1, %2, %3").arg(readSettings.serviceAddress.equipmentId()).arg(readSettings.serviceAddress.ip()).arg(readSettings.serviceAddress.port()));
+
+	for (const TuningClientSettings::TuningService& ts : readSettings.clientSettings.tuningServices)
+	{
+		theLogFile->writeMessage(tr("Tuning Service Connection: %1, %2, %3").arg(ts.tuningServiceID).arg(ts.clientRequestIP).arg(ts.clientRequestPort));
+	}
 
 	bool someFilesUpdated = false;
 
@@ -477,20 +480,11 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 		theLogFile->writeMessage(str);
 	}
 
-	// Emit signals to inform everybody about new configuration
+	// Emit signal to inform everybody about new configuration
 	//
 
-	if (serversUpdated == true)
+	if (someFilesUpdated == true || apperanceUpdated == true || serversUpdated == true)
 	{
-
-		emit tcpClientConfigurationArrived(theConfigSettings.serviceAddress.address(),
-										   theConfigSettings.clientSettings.autoApply,
-										   theConfigSettings.lmStatusFlagMode());
-	}
-
-	if (someFilesUpdated == true || apperanceUpdated == true)
-	{
-
 		// Modify logon mode
 
 		if (theMainWindow->userManager()->isLoggedIn() == true)
@@ -507,6 +501,11 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 	}
 
 	return;
+}
+
+const SoftwareInfo& ConfigController::softwareInfo() const
+{
+	return m_softwareInfo;
 }
 
 bool ConfigController::getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr)
@@ -634,10 +633,6 @@ bool ConfigController::applyCurSettingsProfile(std::shared_ptr<const SoftwareSet
 	}
 
 	outSetting->clientSettings = *typedSettingsPtr;
-
-	outSetting->serviceAddress = ConfigConnection(outSetting->clientSettings.tuningServiceID,
-														outSetting->clientSettings.tuningServiceIP,
-														outSetting->clientSettings.tuningServicePort);
 
 	return true;
 }

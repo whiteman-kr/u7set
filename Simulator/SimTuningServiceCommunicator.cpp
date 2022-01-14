@@ -828,6 +828,7 @@ namespace Sim
 		replyRupHeader.moduleType = static_cast<quint16>(m_moduleType);
 		replyRupHeader.framesQuantity = 1;
 		replyRupHeader.frameNumber = 0;
+		replyRupHeader.timeStamp.setDateTime(QDateTime::currentDateTime());
 
 		// reply FotipV2::Header initialization
 		//

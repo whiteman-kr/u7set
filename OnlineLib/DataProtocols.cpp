@@ -38,6 +38,50 @@ namespace Rup
 		millisecond = static_cast<quint16>(time.msec());
 	}
 
+	qint64 TimeStamp::toInt64(bool reverseBytes) const
+	{
+		quint16 _hour = hour;
+		quint16 _minute = minute;
+		quint16 _second = second;
+		quint16 _millisecond = millisecond;
+
+		quint16 _day = day;
+		quint16 _month = month;
+		quint16 _year = year;
+
+		if (reverseBytes == true)
+		{
+			_hour = reverseUint16(_hour);
+			_minute = reverseUint16(_minute);
+			_second = reverseUint16(_second);
+			_millisecond = reverseUint16(_millisecond);
+
+			_day = reverseUint16(_day);
+			_month = reverseUint16(_month);
+			_year = reverseUint16(_year);
+		}
+
+		// if any asserts is failed, first of all check bytes order!
+		//
+		Q_ASSERT(_hour >= 0 && _hour <= 23);
+		Q_ASSERT(_minute >= 0 && _minute <= 59);
+		Q_ASSERT(_second >= 0 && _second <= 59);
+		Q_ASSERT(_millisecond >= 0 && _millisecond <= 999);
+
+		Q_ASSERT(_day >= 1 && _day <= 31);
+		Q_ASSERT(_month >= 1 && _month <= 12);
+		Q_ASSERT(_year >= 1970);
+
+		QDateTime dt;
+
+		dt.setTimeSpec(Qt::UTC);
+
+		dt.setDate(QDate(_year, _month, _day));
+		dt.setTime(QTime(_hour, _minute, _second, _millisecond));
+
+		return dt.toMSecsSinceEpoch();
+	}
+
 	void Header::reverseBytes()
 	{
 		frameSize = reverseUint16(frameSize);

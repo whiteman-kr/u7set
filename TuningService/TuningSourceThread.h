@@ -21,45 +21,27 @@ namespace Tuning
 	//
 	// ----------------------------------------------------------------------------------
 
-	struct SourceStatistics
+	struct TuningSourceState
 	{
-		std::atomic<quint64> dataSourceID;		// generate by DataSource::generateID()
+		// Tuning Source channel identification
+		// only once initialized fields that not require std::atomic<>
+		//
+		quint64	sourceID;					// generate by DataSource::generateID()
+		std::string lanEquipmentID;
+		int channel = CHANNEL_1;
 
+		// Tuning Source processing states
+		//
 		std::atomic<bool> isReply = false;
-
 		std::atomic<qint64> requestCount = 0;
 		std::atomic<qint64> replyCount = 0;
-
 		std::atomic<qint32> commandQueueSize = 0;
+		std::atomic<bool> controlIsActive = false;
+		std::atomic<bool> setSOR = false;
+		std::atomic<bool> writingDisabled = false;
+		std::atomic<bool> hasUnappliedParams = false;
 
-		std::atomic<qint64> errUntimelyReplay = 0;
-		std::atomic<qint64> errSent = 0;
-		std::atomic<qint64> errPartialSent = 0;
-		std::atomic<qint64> errReplySize = 0;
-		std::atomic<qint64> errNoReply = 0;
-		std::atomic<qint64> errRupCRC = 0;
-
-		// errors in reply RupFrameHeader
-		//
-		std::atomic<qint64> errRupProtocolVersion = 0;
-		std::atomic<qint64> errRupFrameSize = 0;
-		std::atomic<qint64> errRupNonTuningData = 0;
-		std::atomic<qint64> errRupModuleType = 0;
-		std::atomic<qint64> errRupFramesQuantity = 0;
-		std::atomic<qint64> errRupFrameNumber = 0;
-
-		// errors in reply FotipHeader
-		//
-		std::atomic<qint64> errFotipProtocolVersion = 0;
-		std::atomic<qint64> errFotipUniqueID = 0;
-		std::atomic<qint64> errFotipLmNumber = 0;
-		std::atomic<qint64> errFotipSubsystemCode = 0;
-		std::atomic<qint64> errFotipOperationCode = 0;
-		std::atomic<qint64> errFotipFrameSize = 0;
-		std::atomic<qint64> errFotipRomSize = 0;
-		std::atomic<qint64> errFotipRomFrameSize = 0;
-
-		// errors reported by LM in reply FotipHeader.flags
+		// flags reported by LM in reply FotipHeader.flags
 		//
 		std::atomic<qint64> fotipFlagBoundsCheckSuccess = 0;
 		std::atomic<qint64> fotipFlagWriteSuccess = 0;
@@ -77,17 +59,39 @@ namespace Tuning
 		std::atomic<qint64> fotipFlagSetSOR = 0;
 		std::atomic<qint64> fotipFlagWritingDisabled = 0;
 
+		// errors in reply RupFrameHeader
+		//
+		std::atomic<qint64> errRupProtocolVersion = 0;
+		std::atomic<qint64> errRupFrameSize = 0;
+		std::atomic<qint64> errRupNonTuningData = 0;
+		std::atomic<qint64> errRupModuleType = 0;
+		std::atomic<qint64> errRupFramesQuantity = 0;
+		std::atomic<qint64> errRupFrameNumber = 0;
+		std::atomic<qint64> errRupCRC = 0;
+
+		// errors in reply FotipHeader
+		//
+		std::atomic<qint64> errFotipProtocolVersion = 0;
+		std::atomic<qint64> errFotipUniqueID = 0;
+		std::atomic<qint64> errFotipLmNumber = 0;
+		std::atomic<qint64> errFotipSubsystemCode = 0;
+		std::atomic<qint64> errFotipOperationCode = 0;
+		std::atomic<qint64> errFotipFrameSize = 0;
+		std::atomic<qint64> errFotipRomSize = 0;
+		std::atomic<qint64> errFotipRomFrameSize = 0;
 		std::atomic<qint64> errAnalogLowBoundCheck = 0;
 		std::atomic<qint64> errAnalogHighBoundCheck = 0;
 
+		// Tuning Source processing errors
+		//
+		std::atomic<qint64> errUntimelyReplay = 0;
+		std::atomic<qint64> errSent = 0;
+		std::atomic<qint64> errPartialSent = 0;
+		std::atomic<qint64> errReplySize = 0;
+		std::atomic<qint64> errNoReply = 0;
 		std::atomic<qint64> errTuningFrameUpdate = 0;
 
-		std::atomic<bool> controlIsActive = false;
-		std::atomic<bool> setSOR = false;
-		std::atomic<bool> writingDisabled = false;
-		std::atomic<bool> hasUnappliedParams = false;
-
-		void get(Network::TuningSourceState* tss);
+		void saveToProto(Network::TuningSourceState* tss) const;
 	};
 
 	// ----------------------------------------------------------------------------------
@@ -123,9 +127,7 @@ namespace Tuning
 		int bit() const { return m_bit; }
 		int frameNo() const { return m_frameNo; }
 
-		void updateCurrentValue(bool valid, const TuningValue& value, qint64 time);
-
-		void setCurrentValue(bool valid, const TuningValue& value);
+		void setCurrentValue(bool valid, const TuningValue& value, qint64 readTime, qint64 lmTime);
 		void setReadLowBound(const TuningValue& value);
 		void setReadHighBound(const TuningValue& value);
 		void invalidate();
@@ -142,6 +144,7 @@ namespace Tuning
 		qint64 writeRequestTime() const { return m_writeRequestTime; }
 		qint64 successfulWriteTime() const { return m_successfulWriteTime; }
 		qint64 unsuccessfulWriteTime() const { return m_unsuccessfulWriteTime; }
+		qint64 lmTime() const { return m_lmTime; }
 
 		Hash writeClient() const { return m_writeClient; }
 
@@ -192,6 +195,7 @@ namespace Tuning
 		qint64 m_writeRequestTime = 0;			// time of last write request (UTC)
 		qint64 m_successfulWriteTime = 0;		// time of last succesfull signal writing (UTC), usually should be near m_writeRequestTime
 		qint64 m_unsuccessfulWriteTime = 0;		// time of last unsuccesfull signal writing (UTC), usually should be near m_writeRequestTime
+		qint64 m_lmTime = 0;
 
 		Hash m_writeClient = 0;									// last write client's EquipmentID hash
 		NetworkError m_writeErrorCode = NetworkError::Success;	// last write error code, NetworkError:  Success, TuningValueOutOfRange, TuningNoReply
@@ -274,11 +278,12 @@ namespace Tuning
 		void startHandler();
 		void stopHandler();
 
+		void run();
+
 		bool isInitialized() const;
 		bool isReply() const;
-
-		void periodicProcessing();
-		bool processReplyQueue();
+		bool setSOR() const;
+		bool writingDisabled() const;
 
 		void pushReply(const RupFotipV2& reply);
 		void incErrReplySize();
@@ -287,12 +292,14 @@ namespace Tuning
 
 		void pushTuningCommand(const TuningCommand& tc) { m_tuningCommandQueue.push(tc); }
 
+		const TuningSourceState& state() const { return m_state; }
+
 	private:
-		void initTuningSignals(TuningDataSharedConst td);
 
 		bool processWaitReply();
+		void processUntimelyReply();
 		bool processCommandQueue();
-		bool processIdle();
+		bool enqueueTuningReadCommand();
 
 		void onNoReply();
 
@@ -314,19 +321,17 @@ namespace Tuning
 
 		void invalidateAllSignals();
 
-		void logTuningRequest(const TuningCommand& cmd, QString* appSignalID);
-		void logTuningReply(const TuningCommand& cmd, const RupFotipV2& reply);
+		void logTuningRequest(const TuningCommand& cmd, QString* appSignalID, quint16 requestNumerator);
+		void logTuningReply(const TuningCommand& cmd, const RupFotipV2& reply, quint16 requestNumerator);
 
 		TuningSignal* getTuningSignal(Hash signalHash);
+
+		QString toHex(quint16 v) const { return (QString("%1").arg(v, 4, 16, Latin1Char::ZERO)).toUpper();}
 
 	private:
 		TuningSourceThread& m_sourceThread;
 		CircularLoggerShared m_logger;
 		CircularLoggerShared m_tuningLog;
-
-		SourceStatistics& m_stat;
-
-		bool m_isReply = false;
 
 		bool m_disableModulesTypeChecking = false;
 
@@ -356,16 +361,15 @@ namespace Tuning
 
 		//
 
-		mutable QMutex m_mutex;
 		std::atomic<bool> m_isInitialized = {false};
 
 		//
 
 		bool m_waitReply = false;
 
-		const int MAX_WAIT_REPLY_COUNTER = 2;
+		const int MAX_WAIT_REPLY_TIMEOUT_COUNTER = 10;
 
-		int m_waitReplyCounter = 0;
+		int m_waitReplyTimeoutCounter = 0;				// incremented every 1 ms
 
 		int m_nextFrameToAutoRead = 0;
 
@@ -380,13 +384,15 @@ namespace Tuning
 
 		const int MAX_RETRY_COUNT = 3;
 
-		Queue<RupFotipV2> m_replyQueue;
+		FastThreadSafeQueue<RupFotipV2> m_replyQueue;
 
 		TuningCommandQueue m_tuningCommandQueue;
 
 		TuningCommand m_lastProcessedCommand;
 
 		quint16 m_rupNumerator = 0;
+
+		TuningSourceState m_state;
 	};
 
 	// ----------------------------------------------------------------------------------
@@ -405,9 +411,9 @@ namespace Tuning
 							CircularLoggerShared tuningLog);
 
 		void pushReply(int channel, const RupFotipV2& reply);
-		void incErrReplySize();
+		void incErrReplySize(quint32 channelIP);
 
-		void getState(Network::TuningSourceState* tuningSourceState);
+		void getSourceState(Network::GetTuningSourcesStatesReply* reply);
 
 		void readSignalState(Network::TuningSignalState* tss) const;
 
@@ -428,11 +434,11 @@ namespace Tuning
 		const TuningSignal* getTuningSignal(Hash hash) const;
 		TuningSignal* getTuningSignal(Hash hash);
 
-		void updateFrameSignalsState(RupFotipV2& reply);
-
-		SourceStatistics& sourceStatistics() { return m_stat; }
+		bool updateFrameSignalsState(RupFotipV2& reply);
 
 		bool isSourceHandlerExistsForChannel(int channel) const;
+
+		Network::DataSourceInfo protoDataSourceInfo() const { return m_protoDataSourceInfo; }
 
 	private:
 		void run() override;
@@ -443,9 +449,13 @@ namespace Tuning
 
 		const TuningChannelHandler* getChannelHandler(int channel) const;
 		TuningChannelHandler* getChannelHandler(int channel);
+		TuningChannelHandler* getChannelHandlerByIP(quint32 ip);
 
+		void runHandlers();
 		void checkChannelsResponse();
 		void invalidateAllSignals();
+
+		void checkSetSOR();
 
 		void pushCommandToHandlers(const TuningCommand& cmd, const QString& appSignalID);
 
@@ -455,6 +465,7 @@ namespace Tuning
 	private:
 		std::vector<TuningChannelInfo> m_tuningChannelsInfo;
 		const TuningSource& m_source;
+		Network::DataSourceInfo m_protoDataSourceInfo;
 		bool m_disableModulesTypeChecking = false;
 		E::SoftwareRunMode m_swRunMode = E::SoftwareRunMode::Normal;
 		CircularLoggerShared m_logger;
@@ -468,7 +479,15 @@ namespace Tuning
 		//
 
 		mutable QMutex m_handlersMutex;
-		std::map<int, TuningChannelHandler*> m_handlers;			// channel => TuningChannelHandler
+
+		std::vector<TuningChannelHandler*> m_handlers;
+		std::map<int, TuningChannelHandler*> m_ch2handlers;			// channel => TuningChannelHandler
+		std::map<quint32, TuningChannelHandler*> m_ip2handlers;		// source lan IP => TuningChannelHandler
+
+		bool m_anyChannelReply = false;
+
+		std::atomic<bool> m_setSOR = false;
+		std::atomic<bool> m_writingDisabled = false;
 
 		//
 
@@ -477,14 +496,9 @@ namespace Tuning
 		std::vector<std::vector<int>> m_frameSignals;
 
 		TuningMemory m_tuningMem;
-
-		bool m_setSOR = false;
-		bool m_writingDisabled = false;
-
-		// statisticts
-		//
-		SourceStatistics m_stat;
 	};
+
+	using TuningSourceThreadShared = std::shared_ptr<TuningSourceThread>;
 
 	// ----------------------------------------------------------------------------------
 	//

@@ -9,7 +9,7 @@ class ClientTuningSourcesWidget : public TuningSourcesWidget
 	Q_OBJECT
 public:
 
-	explicit ClientTuningSourcesWidget(TuningTcpClient* tcpClient, bool hasActivationControls, bool hasCloseButton, QWidget* parent);
+	explicit ClientTuningSourcesWidget(std::vector<TuningTcpClient*> tcpClients, bool hasActivationControls, bool hasCloseButton, QWidget* parent);
 	virtual ~ClientTuningSourcesWidget();
 
 protected:
@@ -27,8 +27,10 @@ class DialogTuningSources : public QDialog
 	Q_OBJECT
 
 public:
-	explicit DialogTuningSources(TuningTcpClient* tcpClient, bool hasActivationControls, QWidget* parent);
+	explicit DialogTuningSources(std::vector<TuningTcpClient*> tcpClients, bool hasActivationControls, QWidget* parent);
 	virtual ~DialogTuningSources();
+
+	void setTuningSources(std::vector<TuningTcpClient*> tcpClients);
 
 protected:
 	virtual void reject() override;

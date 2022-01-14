@@ -381,8 +381,8 @@ void ServiceData::parseServiceInfo()
 
 		// TO DO 2ch tuning!
 		//
-		clientRequestIp = tuningDataServiceSettings->channelSettings[0].clientRequestIP.address32();
-		clientRequestPort = tuningDataServiceSettings->channelSettings[0].clientRequestIP.port();
+		clientRequestIp = tuningDataServiceSettings->clientRequestIP.address32();
+		clientRequestPort = tuningDataServiceSettings->clientRequestIP.port();
 	}
 		break;
 	case E::SoftwareType::ArchiveService:
@@ -447,7 +447,8 @@ void ServiceTableModel::serviceAckReceived(const UdpRequest udpRequest)
 			if (newServiceInfo.ParseFromArray(udpRequest.data(),
 											  static_cast<int>(udpRequest.dataSize())) == false)
 			{
-				assert(false);
+				qDebug() << Q_FUNC_INFO << "newServiceInfo.ParseFromArray failed";
+				Q_ASSERT(false);
 				return;
 			}
 

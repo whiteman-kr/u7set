@@ -10,10 +10,9 @@ class MonitorTuningTcpClient : public TuningTcpClient, public TcpClientStatistic
 	Q_OBJECT
 
 public:
-	MonitorTuningTcpClient(const SoftwareInfo& softwareInfo, TuningSignalManager* signalManager, ILogFile* logFile);
+	MonitorTuningTcpClient(const SoftwareInfo& softwareInfo, const QString& tuningServiceId, TuningSignalManager* signalManager, ILogFile* logFile);
 	virtual ~MonitorTuningTcpClient();
 
-	int sourceErrorCount() const;
 protected:
 	virtual void writeLogAlert(const QString& message) override;
 	virtual void writeLogError(const QString& message) override;

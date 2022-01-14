@@ -30,7 +30,9 @@ public:
 	//
 	int signalsCount() const;
 	std::vector<AppSignalParam> signalList() const;
+
 	std::vector<Hash> signalHashes() const;
+	std::vector<Hash> signalHashes(const std::vector<Hash> lmEquipmentIdHashes) const;
 
 	// Implementation ITuningSignalManager
 	//
@@ -52,7 +54,6 @@ public:
 	// State manipulation
 	//
 public:
-	void validateStates();
 	void invalidateStates();
 
 	void setState(const QString& appSignalId, const TuningSignalState& state);
@@ -78,18 +79,18 @@ private:
 
 	// Objects storage
 	//
-	mutable QMutex m_signalsMutex;									// For access to m_signals
+	mutable QReadWriteLock m_signalsLock;									// For access to m_signals
 	std::unordered_map<Hash, AppSignalParam> m_signals;
 	std::unordered_map<QString, QStringList> m_tagToAppSignals;		// Key is tag - value is list of AppSignalIDs with this tag
 
 	// States storage
 	//
-	mutable QMutex m_statesMutex;						// For access to m_states
+	mutable QReadWriteLock m_statesLock;						// For access to m_states
 	std::unordered_map<Hash, TuningSignalState> m_states;
 
 	// New values storage
 	//
-	mutable QMutex m_newValuesMutex;						// For access to m_newValues
+	mutable QReadWriteLock m_newValuesLock;						// For access to m_newValues
 	std::unordered_map<Hash, TuningNewValue> m_newValues;
 };
 

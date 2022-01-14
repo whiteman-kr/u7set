@@ -33,10 +33,18 @@ namespace Log
 	const std::array<QString, 7> messageTypeTextShort{"ALL", "ERR", "WRN", "MSG", "ALERT", "TXT", "DATA"};
 	const std::array<QString, 7> messageTypeTextLong{"All", "Error", "Warning", "Message", "Alert", "Text", "DataInvisible"};
 
-	const char* messageTimeFormat = {"dd.MM.yyyy hh:mm:ss.zzz"};
+	const QString messageTimeFormat("dd.MM.yyyy hh:mm:ss.zzz");
 
 	QString LogFileRecord::toString(const QString& sessionHashString) const
 	{
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 3)
+		static QMutex m;
+		QMutexLocker l(&m);
+#else
+		int delete_mutex_above;
+		// see: https://forum.qt.io/topic/120355/qdatetime-assert/2
+#endif
+
 		if (type == MessageType::Text)
 		{
 			return QString("%1\t%2\r\n").arg(sessionHashString).arg(text);

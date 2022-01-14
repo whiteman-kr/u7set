@@ -74,6 +74,28 @@ namespace Tuning
 		return m_tuningData->getSignalsCount() != 0;
 	}
 
+	const QStringList& TuningSource::getEnabledLansProvidedTuning() const
+	{
+		if (m_enabledLansProvidedTuning.has_value() == false)
+		{
+			QStringList lans;
+
+			for(const LanControllerInfo& lci : lanControllersInfo()())
+			{
+				if (lci.isProvideTuning() == true &&
+					lci.tuningEnable == true)
+				{
+					lans.append(lci.equipmentID);
+				}
+			}
+
+			m_enabledLansProvidedTuning = lans;
+		}
+
+		return m_enabledLansProvidedTuning.value();
+	}
+
+
 	// -------------------------------------------------------------------------------
 	//
 	// TuningSources class implementation
@@ -113,5 +135,17 @@ namespace Tuning
 		}
 
 		return nullptr;
+	}
+
+	QStringList TuningSources::getAllSourcesIDs() const
+	{
+		QStringList ids;
+
+		for(const TuningSource&  src : *this)
+		{
+			ids.append(src.moduleEquipmentID());
+		}
+
+		return ids;
 	}
 }
