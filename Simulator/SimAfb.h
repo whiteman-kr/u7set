@@ -130,37 +130,39 @@ namespace Sim
 
 		// --
 		//
-		void addSignedInteger(const AfbComponentParam& operand);
-		void subSignedInteger(const AfbComponentParam& operand);
-		void mulSignedInteger(const AfbComponentParam& operand);
-		void divSignedInteger(const AfbComponentParam& operand);
+		void addSignedInteger(const AfbComponentParam& operand);	// Tests+
+		void subSignedInteger(const AfbComponentParam& operand);	// Tests+
+		void mulSignedInteger(const AfbComponentParam& operand);	// Tests+
+		void divSignedInteger(const AfbComponentParam& operand);	// Tests+
 
-		void addSignedIntegerNumber(qint32 operand);
-		void subSignedIntegerNumber(qint32 operand);
-		void mulSignedIntegerNumber(qint32 operand);
-		void divSignedIntegerNumber(qint32 operand);
+		void addSignedIntegerNumber(qint32 operand);				// Tests+
+		void subSignedIntegerNumber(qint32 operand);				// Tests+
+		void mulSignedIntegerNumber(qint32 operand);				// Tests+
+		void divSignedIntegerNumber(qint32 operand);				// Tests+
 
-		void addFloatingPoint(const AfbComponentParam& operand);
-		void subFloatingPoint(const AfbComponentParam& operand);
+		void addFloatingPoint(const AfbComponentParam& operand);	// Tests+
+		void subFloatingPoint(const AfbComponentParam& operand);	// Tests+
 		void mulFloatingPoint(const AfbComponentParam& operand);
 		void divFloatingPoint(const AfbComponentParam& operand);
 
-		void addFloatingPoint(float operand);
-		void subFloatingPoint(float operand);
+		void addFloatingPoint(float operand);						// Tests+
+		void subFloatingPoint(float operand);						// Tests+
 		void mulFloatingPoint(float operand);
 		void divFloatingPoint(float operand);
 
-		void absFloatingPoint();
-		void absSignedInt();
+		void absFloatingPoint();									// Tests+
+		void absSignedInt();										// Tests+
 
 		void sinFloatingPoint();
 		void cosFloatingPoint();
 		void logFloatingPoint();
 		void expFloatingPoint();
 
-		void convertSignedIntToFloat();
-		void convertWordToFloat();
-		void convertWordToSignedInt();
+		void convertSInt32ToSInt64();								// Tests+
+		void convertSInt64ToSInt32();								// Tests+
+		void convertSignedIntToFloat();								// Tests+
+		void convertWordToFloat();									// Tests+
+		void convertWordToSignedInt();								// Tests+
 
 		// --
 		//

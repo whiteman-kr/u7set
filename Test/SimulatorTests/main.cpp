@@ -2,6 +2,7 @@
 #include <SimRamTests.h>
 #include <SimCommandTest_LM5_LM6.h>
 #include <SimProfilesTest.h>
+#include <SimAfbParamTests.h>
 #include "../Protobuf/google/protobuf/message.h"
 
 int main(int argc, char *argv[])
@@ -21,6 +22,11 @@ int main(int argc, char *argv[])
 	{
 		SimProfilesTest spt;
 		status |= QTest::qExec(&spt, argc, argv);
+	}
+
+	{
+		SimAfbParamTests t;
+		status |= QTest::qExec(&t, argc, argv);
 	}
 
 	google::protobuf::ShutdownProtobufLibrary();

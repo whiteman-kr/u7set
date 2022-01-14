@@ -413,8 +413,6 @@ namespace Sim
 	{
 		resetMathFlags();
 
-		// signed integer overflow in c++ is undefined behavior, so we extend sion32 to sint64
-		//
 		float fp = this->floatValue();
 
 		std::feclearexcept(FE_ALL_EXCEPT);
@@ -525,6 +523,37 @@ namespace Sim
 		m_mathFlags.zero = std::isinf(fp) && std::signbit(fp);
 
 		setFloatValue(result);
+
+		return;
+	}
+
+	void AfbComponentParam::convertSInt32ToSInt64()
+	{
+		resetMathFlags();
+		setSignedInt64Value(signedIntValue());
+		return;
+	}
+
+	void AfbComponentParam::convertSInt64ToSInt32()
+	{
+		resetMathFlags();
+
+		qint64 value = signedInt64Value();
+
+		if (value > std::numeric_limits<qint32>::max())
+		{
+			value = std::numeric_limits<qint32>::max();
+			m_mathFlags.overflow = true;
+		}
+
+		if (value < std::numeric_limits<qint32>::lowest())
+		{
+			value = std::numeric_limits<qint32>::lowest();
+			m_mathFlags.overflow = true;
+		}
+
+		setSignedIntValue(static_cast<int>(value));
+		m_mathFlags.zero = (value == 0);
 
 		return;
 	}

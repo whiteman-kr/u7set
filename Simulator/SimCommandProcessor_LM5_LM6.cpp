@@ -4115,37 +4115,54 @@ namespace Sim
 		{
 		case 1: // 16(UI)/16(UI)
 			{
-				result = *instance->param(i_ui_data);
-				result.setOpIndex(o_ui_result);
+				qint64 wideResult = instance->param(i_ui_data)->wordValue();
 
-				result.convertWordToSignedInt();
+				wideResult *= k1->signedIntValue();
+				wideResult /= 32768;
+				wideResult += k2->signedIntValue();
 
-				result.mulSignedInteger(*k1);
-				result.divSignedIntegerNumber(32768);
-				result.addSignedInteger(*k2);
-
-				if (result.signedIntValue() > std::numeric_limits<quint16>().max())
+				if (wideResult > std::numeric_limits<quint16>().max())
 				{
-					// Overflow
-					//
+					wideResult = std::numeric_limits<quint16>().max();
 					result.setMathOverflow(1);
 				}
 
+				if (wideResult < std::numeric_limits<quint16>().lowest())
+				{
+					wideResult = std::numeric_limits<quint16>().lowest();
+					result.setMathOverflow(1);
+				}
+
+				result.setWordValue(static_cast<quint16>(wideResult));
+				result.setOpIndex(o_ui_result);
+
 				// Save result
 				//
-				instance->addParamWord(o_ui_result, result.wordValue());
+				instance->addParam(result);
 			}
 			break;
 		case 2: // 16(UI)/32(SI)
 			{
-				result = *instance->param(i_ui_data);
+				qint64 wideResult = instance->param(i_ui_data)->wordValue();
+
+				wideResult *= k1->signedIntValue();
+				wideResult /= 32768;
+				wideResult += k2->signedIntValue();
+
+				if (wideResult > std::numeric_limits<qint32>().max())
+				{
+					wideResult = std::numeric_limits<qint32>().max();
+					result.setMathOverflow(1);
+				}
+
+				if (wideResult < std::numeric_limits<qint32>().lowest())
+				{
+					wideResult = std::numeric_limits<qint32>().lowest();
+					result.setMathOverflow(1);
+				}
+
+				result.setSignedIntValue(static_cast<qint32>(wideResult));
 				result.setOpIndex(o_si_fp_result);
-
-				result.convertWordToSignedInt();
-
-				result.mulSignedInteger(*k1);
-				result.divSignedIntegerNumber(32768);
-				result.addSignedInteger(*k2);
 
 				// Save result
 				//
@@ -4154,33 +4171,43 @@ namespace Sim
 			break;
 		case 3: // 32(SI)/16(UI)
 			{
-				result = *instance->param(i_si_fp_data);
-				result.setOpIndex(o_ui_result);
+				qint64 wideResult = instance->param(i_si_fp_data)->signedIntValue();
 
-				result.mulSignedInteger(*k1);
-				result.divSignedIntegerNumber(32768);
-				result.addSignedInteger(*k2);
+				wideResult *= k1->signedIntValue();
+				wideResult /= 32768;
+				wideResult += k2->signedIntValue();
 
-				if (result.signedIntValue() > std::numeric_limits<quint16>().max())
+				if (wideResult > std::numeric_limits<quint16>().max())
 				{
-					// Overflow
-					//
+					wideResult = std::numeric_limits<quint16>().max();
 					result.setMathOverflow(1);
 				}
 
+				if (wideResult < std::numeric_limits<quint16>().lowest())
+				{
+					wideResult = std::numeric_limits<quint16>().lowest();
+					result.setMathOverflow(1);
+				}
+
+				result.setWordValue(static_cast<quint16>(wideResult));
+				result.setOpIndex(o_ui_result);
+
 				// Save result
 				//
-				instance->addParamWord(o_ui_result, result.wordValue());
+				instance->addParam(result);
 			}
 			break;
 		case 4: // 32(SI)/32(SI)
 			{
-				result = *instance->param(i_si_fp_data);
-				result.setOpIndex(o_si_fp_result);
+				qint64 wideResult = instance->param(i_si_fp_data)->signedIntValue();
 
-				result.mulSignedInteger(*k1);
-				result.divSignedIntegerNumber(32768);
-				result.addSignedInteger(*k2);
+				wideResult *= k1->signedIntValue();
+				wideResult /= 32768;
+				wideResult += k2->signedIntValue();
+
+				result.setSignedInt64Value(wideResult);
+				result.convertSInt64ToSInt32();
+				result.setOpIndex(o_si_fp_result);
 
 				// Save result
 				//
