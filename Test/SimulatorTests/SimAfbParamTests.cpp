@@ -1,5 +1,6 @@
 #include "SimAfbParamTests.h"
 #include "../../UtilsLib/WUtils.h"
+#include <cmath>
 
 SimAfbParamTests::SimAfbParamTests()
 {
@@ -772,7 +773,7 @@ void SimAfbParamTests::addFloatingPointTest()
 		p2.setFloatValue(value2);
 		p1.addFloatingPoint(p2);
 
-		QVERIFY(::isnan(p1.floatValue()));
+		QVERIFY(std::isnan(p1.floatValue()));
 
 		QVERIFY(p1.mathOverflow() == 0);
 		QVERIFY(p1.mathUnderflow() == 0);
@@ -791,7 +792,7 @@ void SimAfbParamTests::addFloatingPointTest()
 		p2.setFloatValue(value2);
 		p1.addFloatingPoint(p2);
 
-		QVERIFY(::isinf(p1.floatValue()));
+		QVERIFY(std::isinf(p1.floatValue()));
 
 		QVERIFY(p1.mathOverflow() == 1);
 		QVERIFY(p1.mathUnderflow() == 0);
@@ -894,7 +895,7 @@ void SimAfbParamTests::subFloatingPointTest()
 		p2.setFloatValue(value2);
 		p1.subFloatingPoint(p2);
 
-		QVERIFY(::isnan(p1.floatValue()));
+		QVERIFY(std::isnan(p1.floatValue()));
 
 		QVERIFY(p1.mathOverflow() == 0);
 		QVERIFY(p1.mathUnderflow() == 0);
@@ -913,7 +914,7 @@ void SimAfbParamTests::subFloatingPointTest()
 		p2.setFloatValue(value2);
 		p1.subFloatingPoint(p2);
 
-		QVERIFY(::isinf(p1.floatValue()));
+		QVERIFY(std::isinf(p1.floatValue()));
 
 		QVERIFY(p1.mathOverflow() == 1);
 		QVERIFY(p1.mathUnderflow() == 0);
@@ -934,7 +935,7 @@ void SimAfbParamTests::absFloatingPointTest()
 		p.absFloatingPoint();
 
 		QVERIFY(p.floatValue() == 0.f);
-		QVERIFY(::signbit(p.floatValue()) == false);
+		QVERIFY(std::signbit(p.floatValue()) == false);
 		QVERIFY(p.mathZero() == 1);
 	}
 
@@ -944,8 +945,8 @@ void SimAfbParamTests::absFloatingPointTest()
 		p.setFloatValue(-std::numeric_limits<float>::infinity());
 		p.absFloatingPoint();
 
-		QVERIFY(::isinf(p.floatValue()) == true);
-		QVERIFY(::signbit(p.floatValue()) == false);
+		QVERIFY(std::isinf(p.floatValue()) == true);
+		QVERIFY(std::signbit(p.floatValue()) == false);
 	}
 
 	{
@@ -972,7 +973,7 @@ void SimAfbParamTests::absFloatingPointTest()
 		p.setFloatValue(std::numeric_limits<float>::quiet_NaN());
 		p.absFloatingPoint();
 
-		QVERIFY(::isnan(p.floatValue()) == true);
+		QVERIFY(std::isnan(p.floatValue()) == true);
 		QVERIFY(p.mathNan() == 1);
 	}
 }
@@ -1086,7 +1087,7 @@ void SimAfbParamTests::convertSInt64ToSInt32()
 		p.convertSInt64ToSInt32();
 
 		QVERIFY(p.signedIntValue() == std::numeric_limits<qint32>::max());
-		QVERIFY(p.mathOverflow() == true);
+		QVERIFY(p.mathOverflow() != 0);
 	}
 
 	{
@@ -1097,7 +1098,7 @@ void SimAfbParamTests::convertSInt64ToSInt32()
 		p.convertSInt64ToSInt32();
 
 		QVERIFY(p.signedIntValue() == std::numeric_limits<qint32>::min());
-		QVERIFY(p.mathOverflow() == true);
+		QVERIFY(p.mathOverflow() != 0);
 	}
 
 	return;
