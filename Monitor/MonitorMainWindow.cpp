@@ -692,27 +692,27 @@ void MonitorMainWindow::createToolBars()
 void MonitorMainWindow::createStatusBar()
 {
 	m_statusBarInfo = new QLabel();
-	m_statusBarInfo->setAlignment(Qt::AlignLeft);
+	m_statusBarInfo->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
 	m_statusBarInfo->setIndent(3);
 
 	m_statusBarConfigConnection = new QLabel();
-	m_statusBarConfigConnection->setAlignment(Qt::AlignHCenter);
+	m_statusBarConfigConnection->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
 	m_statusBarConfigConnection->setMinimumWidth(100);
 
 	m_statusBarAppDataConnection = new QLabel();
-	m_statusBarAppDataConnection->setAlignment(Qt::AlignHCenter);
+	m_statusBarAppDataConnection->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
 	m_statusBarAppDataConnection->setMinimumWidth(100);
 
 	m_statusBarTuningConnection = new QLabel();
-	m_statusBarTuningConnection->setAlignment(Qt::AlignHCenter);
+	m_statusBarTuningConnection->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
 	m_statusBarTuningConnection->setMinimumWidth(100);
 
 	m_statusBarProjectInfo = new QLabel;
-	m_statusBarProjectInfo->setAlignment(Qt::AlignHCenter);
+	m_statusBarProjectInfo->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
 	m_statusBarProjectInfo->setMinimumWidth(100);
 
 	m_statusBarLogAlerts = new QLabel;
-	m_statusBarLogAlerts->setAlignment(Qt::AlignHCenter);
+	m_statusBarLogAlerts->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
 	m_statusBarLogAlerts->setMinimumWidth(100);
 	m_statusBarLogAlerts->setToolTip(tr("Error and warning counters in the log (click to view log)"));
 	m_statusBarLogAlerts->installEventFilter(this);
@@ -894,7 +894,14 @@ void MonitorMainWindow::updateStatusBar()
 		}
 		else
 		{
-			m_statusBarLogAlerts->setStyleSheet("QLabel {color : white; background-color: red}");
+			if (m_logErrorsCounter == 0)
+			{
+				m_statusBarLogAlerts->setStyleSheet("QLabel {color : white; background-color: #F87217}");
+			}
+			else
+			{
+				m_statusBarLogAlerts->setStyleSheet("QLabel {color : white; background-color: #C00000}");
+			}
 		}
 	}
 
