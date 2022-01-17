@@ -2,6 +2,7 @@
 
 #include <QUdpSocket>
 #include <vector>
+#include <queue>
 
 #include "../UtilsLib/SimpleThread.h"
 #include "../OnlineLib/CircularLogger.h"
@@ -287,7 +288,7 @@ namespace Tuning
 	//
 	// ----------------------------------------------------------------------------------
 
-	class TuningCommandQueue : private QList<TuningCommand>
+	class TuningCommandQueue
 	{
 	public:
 		void push(const TuningCommand& cmd);
@@ -295,6 +296,7 @@ namespace Tuning
 
 	private:
 		QMutex m_mutex;
+		std::queue<TuningCommand> m_queue;
 	};
 
 	// ----------------------------------------------------------------------------------
@@ -355,7 +357,7 @@ namespace Tuning
 
 		const TuningSourceState& state() const { return m_state; }
 
-		void stopCommandProcessing(quint64 commandID);
+		void stopCommandProcessing(const TuningCommand& cmd, int srcChannel);
 
 	private:
 

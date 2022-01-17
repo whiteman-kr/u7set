@@ -369,7 +369,7 @@ namespace Tuning
 	{
 		m_mutex.lock();
 
-		append(cmd);
+		m_queue.push(cmd);
 
 		m_mutex.unlock();
 	}
@@ -382,9 +382,10 @@ namespace Tuning
 
 		m_mutex.lock();
 
-		if (isEmpty() == false)
+		if (m_queue.empty() == false)
 		{
-			*cmd = takeFirst();
+			*cmd = m_queue.front();
+			m_queue.pop();
 			result = true;
 		}
 
@@ -570,9 +571,15 @@ namespace Tuning
 		m_state.saveToProto(tuningSourceState);
 	}
 
-	void TuningChannelHandler::stopCommandProcessing(quint64 commandID)
+	void TuningChannelHandler::stopCommandProcessing(const TuningCommand& cmd, int srcChannel)
 	{
-		if (m_alreadyProcessedCommands.size() == 5)
+		quint64 commandID = cmd.commandID();
+
+		DEBUG_STOP;
+		qDebug() << C_STR(QString("STOP command %1 processing from channel %2 recieved in channel %3 (queuesize %4)").
+						  arg(commandID).arg(srcChannel + 1).arg(m_channel + 1).arg(m_alreadyProcessedCommands.size()));
+
+		if (m_alreadyProcessedCommands.size() == 1000)
 		{
 			m_alreadyProcessedCommands.erase(m_alreadyProcessedCommands.begin());	// remove first element
 		}
@@ -592,13 +599,11 @@ namespace Tuning
 		}
 
 		DEBUG_STOP;
-
-		qDebug() << C_STR(QString("STOP Command processing ID = %1 channel %2").
+		qDebug() << C_STR(QString("CANCEL command %1 processing in channel %2").
 						  arg(commandID).arg(m_channel + 1));
 
 		m_lastProcessedCommand.resetCommandID();
 		m_waitReply = false;
-
 	}
 
 	bool TuningChannelHandler::processWaitReply()
@@ -755,7 +760,7 @@ namespace Tuning
 
 			DEBUG_STOP;
 
-			qDebug() << C_STR(QString("Skip command %1 processing, channel %2").
+			qDebug() << C_STR(QString("SKIP command %1 processing, channel %2").
 							  arg(m_lastProcessedCommand.commandID()).arg(m_channel+1));
 			return true;
 		}
@@ -2154,7 +2159,7 @@ namespace Tuning
 
 			if (handler->channel() != srcChannel)
 			{
-				handler->stopCommandProcessing(cmd.commandID());
+				handler->stopCommandProcessing(cmd, srcChannel);
 			}
 		}
 	}
