@@ -1443,7 +1443,9 @@ bool TuningPage::write()
 				continue;
 			}
 
-			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+			// Take state from client, NOT (!) from tuningSignalManager, to skip writing non-valid signals in multi-channel case
+			//
+			TuningSignalState state = client->state(hash, &ok);
 
 			if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
 			{

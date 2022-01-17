@@ -1314,24 +1314,61 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 
 	assert(m_columnStatusIndex != -1);
 
-	int errorCounter = filter->counters().errorCounter;
+	QString statusText;
 
-	QString status;
-
-	int statesCount = 0;
 	int validCount = 0;
 	int controlIsEnabledCount = 0;
 	int isReplyCount = 0;
 	int hasUnappliedParamsCount = 0;
-	int accessCount = 0;
 
 	std::vector<int> replyCounts;
 
+	int statesCount = 0;
+	int accessCount = 0;
+
+	QString prevSourceStatus;
+
 	for (const TuningClientTcpClient* client : m_tuningTcpClients)
 	{
+		bool sourceDrivenByThisClient = false;
+
+		for (const TuningClientSettings::TuningService& tcs : theConfigSettings.clientSettings.tuningServices)
+		{
+			if (client->tuningServiceId() != tcs.tuningServiceID)
+			{
+				continue;
+			}
+
+			for (const QString& drivenSource : tcs.drivenSources)
+			{
+				if (::calcHash(drivenSource) == hash)
+				{
+					sourceDrivenByThisClient = true;
+					break;
+				}
+			}
+			if (sourceDrivenByThisClient == true)
+			{
+				break;
+			}
+		}
+
+		if (sourceDrivenByThisClient == false)
+		{
+			continue;
+		}
+
 		TuningSource ts;
 
-		if (client->tuningSourceInfo(hash, &ts) == true)
+		QString sourceStatus;
+
+		if (client->tuningSourceInfo(hash, &ts) == false)
+		{
+			statesCount++;
+			sourceStatus = tr("Non-Valid");
+			replyCounts.push_back(0);
+		}
+		else
 		{
 			for (int c = 0; c < ts.statesCount(); c++)
 			{
@@ -1339,12 +1376,44 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 
 				const ::Network::TuningSourceState& state = ts.state(c);
 
+				// Create source status
+				//
+				if (ts.valid() == false)
+				{
+					sourceStatus = tr("Non-Valid");
+				}
+				else
+				{
+					if (state.controlisactive() == false)
+					{
+						sourceStatus = tr("Inactive");
+					}
+					else
+					{
+						if (state.isreply() == false)
+						{
+							sourceStatus = tr("No Reply");
+						}
+						else
+						{
+							if (state.hasunappliedparams() == true)
+							{
+								sourceStatus = tr("Unapplied");
+							}
+							else
+							{
+								sourceStatus = tr("Active");
+							}
+						}
+					}
+				}
+
+				// Increment counters
+				//
 				if (ts.valid() == true) validCount++;
 				if (state.controlisactive() == true) controlIsEnabledCount++;
 				if (state.isreply() == true) isReplyCount++;
 				if (state.hasunappliedparams() == true) hasUnappliedParamsCount++;
-
-				replyCounts.push_back(static_cast<int>(state.replycount()));
 
 				if (theConfigSettings.lmStatusFlagMode() == LmStatusFlagMode::AccessKey &&
 					ts.valid() == true &&
@@ -1353,73 +1422,51 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 				{
 					if (state.writingdisabled() == false) accessCount++;
 				}
+
+				replyCounts.push_back(static_cast<int>(state.replycount()));
+
 			}
 		}
+
+		// Add status to the result if it is not repeated
+		//
+		if (prevSourceStatus.isEmpty() == true || prevSourceStatus != sourceStatus)
+		{
+			prevSourceStatus = sourceStatus;
+			statusText += sourceStatus;
+			statusText += "/";
+		}
+
+	}	// Loop through clients
+
+	if (statusText.isEmpty() == false)
+	{
+		statusText.chop(1);
 	}
 
 	if (statesCount == 0)
 	{
-		status = tr("Unknown");
+		statusText = tr("Unknown");
 	}
 	else
 	{
-		if (validCount != statesCount)
+		// Add reply count
+		//
+		QString replyStrings;
+		for (int r : replyCounts)
 		{
-			status = (validCount == 0) ? tr("Non-valid") : tr("Non-valid (%1/%2)").arg(statesCount - validCount).arg(statesCount);
+			replyStrings += tr("%1/").arg(r);
 		}
-		else
+		if (replyStrings.isEmpty() == false)
 		{
-			if (controlIsEnabledCount != statesCount)
-			{
-				status = (controlIsEnabledCount == 0) ?  tr("Inactive") : tr("Inactive (%1/%2)").arg(statesCount - controlIsEnabledCount).arg(statesCount) ;
-			}
-			else
-			{
-				if (isReplyCount != statesCount)
-				{
-					status = (isReplyCount == 0) ?  tr("No Reply") : tr("No Reply (%1/%2)").arg(statesCount - isReplyCount).arg(statesCount);
-				}
-				else
-				{
-					if (errorCounter > 0)
-					{
-						status = tr("E: %1").arg(errorCounter);
-					}
-					else
-					{
-						QString s;
-						for (int r : replyCounts)
-						{
-							s += tr("%1/").arg(r);
-						}
-						if (s.isEmpty() == false)
-						{
-							s.remove(s.length() - 1, 1);
-						}
+			replyStrings.chop(1);
+		}
 
-						if (hasUnappliedParamsCount > 0)
-						{
-							if (hasUnappliedParamsCount != statesCount)
-							{
-								status = tr("Unapplied (%1/%2) [%3 replies]").arg(statesCount - hasUnappliedParamsCount).arg(statesCount).arg(s);
-							}
-							else
-							{
-								status = tr("Unapplied [%1 replies]").arg(s);
-							}
-						}
-						else
-						{
-							status = tr("Active [%1 replies]").arg(s);
-						}
-					}
-				}
-			}
-		}
+		statusText += tr(" [%1]").arg(replyStrings);
 	}
 
 	// Access column
-
+	//
 	if (m_columnAccessIndex != -1)
 	{
 		QColor accessBackColor = Qt::white;
@@ -1459,27 +1506,26 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 
 	}
 
-	// Status column
-
-
-	if (treeItem->text(m_columnStatusIndex) != status)
+	// Status column text and color
+	//
+	if (treeItem->text(m_columnStatusIndex) != statusText)
 	{
-		treeItem->setText(m_columnStatusIndex, status);
+		treeItem->setText(m_columnStatusIndex, statusText);
 	}
 
 	QColor stateBackColor = Qt::white;
 	QColor stateTextColor = Qt::black;
 
-	if (validCount != statesCount)
+	if (validCount == 0 || isReplyCount == 0)
 	{
-		// All are non-valid
+		// All are non-valid or no reply
 		//
 		stateBackColor = redColor;
 		stateTextColor = Qt::white;
 	}
 	else
 	{
-		if (controlIsEnabledCount != statesCount)
+		if (controlIsEnabledCount == 0)
 		{
 			// Control is not enabled for all
 			//
@@ -1488,19 +1534,19 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 		}
 		else
 		{
-			if (errorCounter > 0)
+			if ((validCount < statesCount) || (isReplyCount < statesCount) || (controlIsEnabledCount < statesCount))
 			{
-				// Errors present
+				// Some are non-valid no-reply or control is not enabled
 				//
-				stateBackColor = redColor;
+				stateBackColor = QColor(0xF87217);
 				stateTextColor = Qt::white;
 			}
 			else
 			{
+				// Unapplied params present
+				//
 				if (hasUnappliedParamsCount > 0)
 				{
-					// Unapplied params present
-					//
 					stateBackColor = Qt::yellow;
 					stateTextColor = Qt::black;
 				}
