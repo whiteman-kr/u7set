@@ -1314,7 +1314,7 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 
 	assert(m_columnStatusIndex != -1);
 
-	QString statusText;
+	QStringList statusStrings;
 
 	int validCount = 0;
 	int controlIsEnabledCount = 0;
@@ -1325,8 +1325,6 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 
 	int statesCount = 0;
 	int accessCount = 0;
-
-	QString prevSourceStatus;
 
 	for (const TuningClientTcpClient* client : m_tuningTcpClients)
 	{
@@ -1367,6 +1365,13 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 			statesCount++;
 			sourceStatus = tr("Non-Valid");
 			replyCounts.push_back(0);
+
+			// Add status to the result if it is not repeated
+			//
+			if (statusStrings.empty() == true || statusStrings.last() != sourceStatus)
+			{
+				statusStrings.push_back(sourceStatus);
+			}
 		}
 		else
 		{
@@ -1425,26 +1430,19 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 
 				replyCounts.push_back(static_cast<int>(state.replycount()));
 
+				// Add status to the result if it is not repeated
+				//
+				if (statusStrings.empty() == true || statusStrings.last() != sourceStatus)
+				{
+					statusStrings.push_back(sourceStatus);
+				}
 			}
 		}
-
-		// Add status to the result if it is not repeated
-		//
-		if (prevSourceStatus.isEmpty() == true || prevSourceStatus != sourceStatus)
-		{
-			prevSourceStatus = sourceStatus;
-			statusText += sourceStatus;
-			statusText += "/";
-		}
-
 	}	// Loop through clients
 
-	if (statusText.isEmpty() == false)
-	{
-		statusText.chop(1);
-	}
+	QString statusText = statusStrings.join('/');
 
-	if (statesCount == 0)
+	if (statusText.isEmpty() == true)
 	{
 		statusText = tr("Unknown");
 	}
