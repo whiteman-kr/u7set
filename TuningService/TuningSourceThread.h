@@ -163,10 +163,12 @@ namespace Tuning
 		void setReadHighBound(const TuningValue& value);
 		void invalidate();
 
-		bool writeInProgress() const { return m_writeInProgress; }
+		void initWriting(quint64 writeCommandID);
+		void finalizeWriting(quint64 writeCommandID, NetworkError errCode);
+
+		bool writeInProgress() const;
 
 		void setWriteClient(const QString& clientEquipmentID) { m_writeClient = calcHash(clientEquipmentID); }
-		void setWriteInProgress(bool inProgress) { m_writeInProgress = inProgress; }
 		void setWriteRequestTime(qint64 writeRequestTime) { m_writeRequestTime = writeRequestTime; }
 		void setSuccessfulWriteTime(qint64 writeTime) { m_successfulWriteTime = writeTime; }
 		void setUnsuccessfulWriteTime(qint64 writeTime) { m_unsuccessfulWriteTime = writeTime; }
@@ -181,8 +183,6 @@ namespace Tuning
 		Hash writeClient() const { return m_writeClient; }
 
 		NetworkError writeErrorCode() const { return m_writeErrorCode; }
-		void setWriteErrorCode(NetworkError errCode) { m_writeErrorCode = errCode; }
-		void resetWriteErrorCode() { setWriteErrorCode(NetworkError::Success); }
 
 		Fotip::DataType fotipDataType() const;
 
@@ -218,7 +218,16 @@ namespace Tuning
 		SafeTuningValue m_readHighBound;
 
 		std::atomic<bool> m_tuningDefaultFlag = false;
-		std::atomic<bool> m_writeInProgress = false;
+
+		//
+
+		mutable SimpleMutex m_writeStateMutex;
+
+		quint64 m_writeCommandID = 0;							// if != 0 - writing in progress
+																// if == 0 - no writing in progress (or writing is already finished)
+		NetworkError m_writeErrorCode = NetworkError::Success;	// last write error code, NetworkError:  Success, TuningValueOutOfRange, TuningNoReply
+
+		//
 
 		std::atomic<qint64> m_successfulReadTime = 0;		// time of last succesfull signal reading (UTC), in normal should be permanently update
 		std::atomic<qint64> m_writeRequestTime = 0;			// time of last write request (UTC)
@@ -230,7 +239,6 @@ namespace Tuning
 		//
 
 		std::atomic<Hash> m_writeClient = 0;									// last write client's EquipmentID hash
-		std::atomic<NetworkError> m_writeErrorCode = NetworkError::Success;	// last write error code, NetworkError:  Success, TuningValueOutOfRange, TuningNoReply
 	};
 
 	using TuningSignalShared = std::shared_ptr<TuningSignal>;
@@ -244,6 +252,8 @@ namespace Tuning
 
 	struct TuningCommand
 	{
+		TuningCommand();
+
 		QString clientEquipmentID;
 		QString user;
 
@@ -261,6 +271,14 @@ namespace Tuning
 
 			TuningValue newTuningValue;
 		} write;
+
+		quint64 commandID() const { return m_commandID; }
+		void resetCommandID() { m_commandID = 0; }
+
+	private:
+		quint64 m_commandID = 0;
+
+		static std::atomic<quint64> m_globalCommandID;
 	};
 
 	// ----------------------------------------------------------------------------------
@@ -298,7 +316,7 @@ namespace Tuning
 	class TuningChannelHandler
 	{
 		//
-		// Code of both TuningChannelHandlers of one TuningSource sequantally executing
+		// Code of both (all) TuningChannelHandlers of one TuningSource sequantally executing
 		// in context of one TuningSourceWorkerThread, so no any Mutexes is required
 		// on changing data of TuningSourceWorker
 		//
@@ -337,6 +355,8 @@ namespace Tuning
 
 		const TuningSourceState& state() const { return m_state; }
 
+		void stopCommandProcessing(quint64 commandID);
+
 	private:
 
 		bool processWaitReply();
@@ -353,9 +373,9 @@ namespace Tuning
 		bool initFotipFrame(Fotip::Frame& fotipFrame, const TuningCommand& tuningCmd);
 
 		void processReply(RupFotip& reply);
-		void processReadReply(RupFotip& reply);
-		void processWriteReply(RupFotip& reply);
-		void processApplyReply(RupFotip& reply);
+		bool processReadReply(RupFotip& reply);
+		bool processWriteReply(RupFotip& reply);
+		bool processApplyReply(RupFotip& reply);
 
 		void finalizeWriting(NetworkError errCode);
 
@@ -436,6 +456,7 @@ namespace Tuning
 		TuningCommandQueue m_tuningCommandQueue;
 
 		TuningCommand m_lastProcessedCommand;
+		std::set<quint64> m_alreadyProcessedCommands;
 
 		quint16 m_rupNumerator = 0;
 		quint64 m_fotipRequestNumerator = 0;
@@ -494,10 +515,11 @@ namespace Tuning
 
 		bool updateFrameSignalsState(RupFotip& reply);
 
-
 		Network::DataSourceInfo protoDataSourceInfo() const { return m_protoDataSourceInfo; }
 
 		TuningServiceWorker& service() { return m_service; }
+
+		void stopCommandProcessing(const TuningCommand& cmd, int srcChannel);
 
 	private:
 		void initTuningSignals();
