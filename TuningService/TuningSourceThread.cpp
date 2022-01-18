@@ -575,6 +575,8 @@ namespace Tuning
 	{
 		quint64 commandID = cmd.commandID();
 
+		Q_UNUSED(srcChannel);
+
 //		DEBUG_STOP;
 //		qDebug() << C_STR(QString("STOP command %1 processing from channel %2 recieved in channel %3 (queuesize %4)").
 //						  arg(commandID).arg(srcChannel + 1).arg(m_channel + 1).arg(m_alreadyProcessedCommands.size()));
@@ -2375,6 +2377,8 @@ namespace Tuning
 	void TuningSourceThreadWorker::pushCommandToHandlers(const TuningCommand& cmd, const QString& appSignalID)
 	{
 		AUTO_LOCK(m_handlersMutex);
+
+		Q_UNUSED(appSignalID);
 
 		for(TuningChannelHandler* handler : m_handlers)
 		{
