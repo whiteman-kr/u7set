@@ -268,7 +268,7 @@ namespace Tuning
 	{
 		Q_ASSERT(writeCommandID != 0);
 
-		qDebug() << "write Command" << writeCommandID;
+//		qDebug() << "write Command" << writeCommandID;
 
 		m_writeStateMutex.lock();
 
@@ -282,7 +282,7 @@ namespace Tuning
 	{
 		m_writeStateMutex.lock();
 
-		qDebug() << "command" << writeCommandID << " error" << TO_INT(errCode);
+//		qDebug() << "command" << writeCommandID << " error" << TO_INT(errCode);
 
 		if (writeCommandID == m_writeCommandID)
 		{
@@ -575,9 +575,9 @@ namespace Tuning
 	{
 		quint64 commandID = cmd.commandID();
 
-		DEBUG_STOP;
-		qDebug() << C_STR(QString("STOP command %1 processing from channel %2 recieved in channel %3 (queuesize %4)").
-						  arg(commandID).arg(srcChannel + 1).arg(m_channel + 1).arg(m_alreadyProcessedCommands.size()));
+//		DEBUG_STOP;
+//		qDebug() << C_STR(QString("STOP command %1 processing from channel %2 recieved in channel %3 (queuesize %4)").
+//						  arg(commandID).arg(srcChannel + 1).arg(m_channel + 1).arg(m_alreadyProcessedCommands.size()));
 
 		if (m_alreadyProcessedCommands.size() == 1000)
 		{
@@ -598,9 +598,9 @@ namespace Tuning
 			return;
 		}
 
-		DEBUG_STOP;
-		qDebug() << C_STR(QString("CANCEL command %1 processing in channel %2").
-						  arg(commandID).arg(m_channel + 1));
+//		DEBUG_STOP;
+//		qDebug() << C_STR(QString("CANCEL command %1 processing in channel %2").
+//						  arg(commandID).arg(m_channel + 1));
 
 		m_lastProcessedCommand.resetCommandID();
 		m_waitReply = false;
@@ -744,12 +744,43 @@ namespace Tuning
 		// get command from queue and send FOTIP request
 		//
 
-		if (m_tuningCommandQueue.pop(&m_lastProcessedCommand) == false)
+		TuningCommand newCommand;
+
+		if (m_tuningCommandQueue.pop(&newCommand) == false)
 		{
 			return false;		// queue is empty, go to next processing
 		}
 
-		auto it = m_alreadyProcessedCommands.find(m_lastProcessedCommand.commandID());
+		// lazy clearing of m_alreadyProcessedCommands set
+
+		if (m_alreadyProcessedCommands.size() > 0 && newCommand.commandID() > 50)
+		{
+			//
+			// removing from m_alreadyProcessedCommands commandIDs that "distance" from new commandID more than 50
+			//
+			quint64 cmdIdToDelete = newCommand.commandID() - 50;
+
+			for(int deletedCtr = 0; deletedCtr < 100; deletedCtr++)
+			{
+				auto first = m_alreadyProcessedCommands.begin();
+
+				if (first == m_alreadyProcessedCommands.end())
+				{
+					break;
+				}
+
+				if (*first >= cmdIdToDelete)
+				{
+					break;
+				}
+
+				m_alreadyProcessedCommands.erase(first);
+			}
+		}
+
+		//
+
+		auto it = m_alreadyProcessedCommands.find(newCommand.commandID());
 
 		if (it != m_alreadyProcessedCommands.end())
 		{
@@ -758,12 +789,13 @@ namespace Tuning
 			//
 			m_alreadyProcessedCommands.erase(it);
 
-			DEBUG_STOP;
-
-			qDebug() << C_STR(QString("SKIP command %1 processing, channel %2").
-							  arg(m_lastProcessedCommand.commandID()).arg(m_channel+1));
+//			DEBUG_STOP;
+//			qDebug() << C_STR(QString("SKIP command %1 processing, channel %2").
+//							  arg(newCommand.commandID()).arg(m_channel+1));
 			return true;
 		}
+
+		m_lastProcessedCommand = newCommand;
 
 		bool result = prepareFotipRequest(m_lastProcessedCommand, m_request.rupFotip);
 
@@ -2075,7 +2107,7 @@ namespace Tuning
 
 		if (ok == false)
 		{
-			DEBUG_STOP;
+			//DEBUG_STOP;
 			//Q_ASSERT(false);		// this error should be detected early
 			//return false;
 		}
@@ -2354,19 +2386,19 @@ namespace Tuning
 				break;
 
 			case Fotip::OpCode::Write:
-				DEBUG_LOG_MSG(m_logger, QString("Enqueue WRITE command: source %1 channel %2 (%3), signal %4, value %5").
-							  arg(sourceEquipmentID()).
-							  arg(handler->channel() + 1).
-							  arg(handler->sourceIP().addressPortStr()).
-							  arg(appSignalID).
-							  arg(cmd.write.newTuningValue.toString()));
+//				DEBUG_LOG_MSG(m_logger, QString("Enqueue WRITE command: source %1 channel %2 (%3), signal %4, value %5").
+//							  arg(sourceEquipmentID()).
+//							  arg(handler->channel() + 1).
+//							  arg(handler->sourceIP().addressPortStr()).
+//							  arg(appSignalID).
+//							  arg(cmd.write.newTuningValue.toString()));
 				break;
 
 			case Fotip::OpCode::Apply:
-				DEBUG_LOG_MSG(m_logger, QString("Enqueue APPLY command: source %1 channel %2 (%3)").
-							  arg(sourceEquipmentID()).
-							  arg(handler->channel() + 1).
-							  arg(handler->sourceIP().addressPortStr()));
+//				DEBUG_LOG_MSG(m_logger, QString("Enqueue APPLY command: source %1 channel %2 (%3)").
+//							  arg(sourceEquipmentID()).
+//							  arg(handler->channel() + 1).
+//							  arg(handler->sourceIP().addressPortStr()));
 				break;
 
 			default:
