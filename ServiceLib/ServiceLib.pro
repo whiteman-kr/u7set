@@ -19,11 +19,6 @@ include(../warnings.pri)
 
 include(./qtservice/src/qtservice.pri)
 
-# generate PDBs for release
-#
-win32:QMAKE_CXXFLAGS_RELEASE += /Zi
-win32:QMAKE_LFLAGS_RELEASE += /DEBUG
-
 # Optimization flags
 #
 win32 {

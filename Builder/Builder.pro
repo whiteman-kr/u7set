@@ -14,11 +14,6 @@ include(../warnings.pri)
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
-# generate PDBs for release
-#
-win32:QMAKE_CXXFLAGS_RELEASE += /Zi
-win32:QMAKE_LFLAGS_RELEASE += /DEBUG
-
 # DESTDIR
 #
 win32 {
