@@ -1,5 +1,7 @@
 #pragma once
 
+#include <optional>
+
 #include "../lib/DataSource.h"
 #include "../lib/TuningDataStorage.h"
 
