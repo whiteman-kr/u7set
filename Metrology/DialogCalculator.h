@@ -100,8 +100,8 @@ private:
 	QLineEdit*		m_pDpfFLowEdit = nullptr;
 	QLineEdit*		m_pDpfFHighEdit = nullptr;
 
-	QRadioButton*	m_pDrСelsiusRadio = nullptr;
-	QLineEdit*		m_pDrСelsiusEdit = nullptr;
+    QRadioButton*	m_pDrCelsiusRadio = nullptr;
+    QLineEdit*		m_pDrCelsiusEdit = nullptr;
 	QRadioButton*	m_pDrFahrenheitRadio = nullptr;
 	QLineEdit*		m_pDrFahrenheitEdit = nullptr;
 

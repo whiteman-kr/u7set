@@ -25,8 +25,8 @@ const int CalibratorTypeCount = 4;
 
 #define ERR_CALIBRATOR_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= CalibratorTypeCount)
 
-QString CalibratorTypeCaption(int сalibratorType);
-QString CalibratorIdnCaption(int сalibratorType);
+QString CalibratorTypeCaption(int calibratorType);
+QString CalibratorIdnCaption(int calibratorType);
 
 // ==============================================================================================
 
@@ -56,7 +56,7 @@ const int CalibratorModeCount = 2;
 
 #define ERR_CALIBRATOR_MODE(mode) (static_cast<int>(mode) < 0 || static_cast<int>(mode) >= CalibratorModeCount)
 
-QString CalibratorModeCaption(int сalibratorType);
+QString CalibratorModeCaption(int calibratorType);
 
 // ----------------------------------------------------------------------------------------------
 
@@ -77,7 +77,7 @@ const int CalibratorUnitCount = 8;
 
 #define ERR_CALIBRATOR_UNIT(unit) (static_cast<int>(unit) < 0 || static_cast<int>(unit) >= CalibratorUnitCount)
 
-QString CalibratorUnitCaption(int сalibratorUnit);
+QString CalibratorUnitCaption(int calibratorUnit);
 
 // ----------------------------------------------------------------------------------------------
 // Minimal range for calibrators TRX-II and Calys75 this is 400 Ohm

@@ -387,10 +387,10 @@ void ServiceData::parseServiceInfo()
 		break;
 	case E::SoftwareType::ArchiveService:
 	{
-		ArchivingServiceSettings* archivingServiceSettinпs = dynamic_cast<ArchivingServiceSettings*>(pSettings);
-		Q_ASSERT(archivingServiceSettinпs);
-		clientRequestIp = archivingServiceSettinпs->clientRequestIP.address32();
-		clientRequestPort = archivingServiceSettinпs->clientRequestIP.port();
+        ArchivingServiceSettings* archivingServiceSettings = dynamic_cast<ArchivingServiceSettings*>(pSettings);
+        Q_ASSERT(archivingServiceSettings);
+        clientRequestIp = archivingServiceSettings->clientRequestIP.address32();
+        clientRequestPort = archivingServiceSettings->clientRequestIP.port();
 	}
 		break;
 	default:

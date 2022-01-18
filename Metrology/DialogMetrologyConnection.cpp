@@ -1138,7 +1138,7 @@ void DialogMetrologyConnection::onPotentialConnections()
 			continue;
 		}
 
-		Metrology::ConnectionType сonnectionType = Metrology::ConnectionType::Unused;
+        Metrology::ConnectionType connectionType = Metrology::ConnectionType::Unused;
 
 		switch (param.inOutType())
 		{
@@ -1149,7 +1149,7 @@ void DialogMetrologyConnection::onPotentialConnections()
 					continue;
 				}
 
-				сonnectionType = Metrology::ConnectionType::Input_Internal;
+                connectionType = Metrology::ConnectionType::Input_Internal;
 
 				break;
 
@@ -1165,7 +1165,7 @@ void DialogMetrologyConnection::onPotentialConnections()
 					continue;
 				}
 
-				сonnectionType = Metrology::ConnectionType::Input_Output;
+                connectionType = Metrology::ConnectionType::Input_Output;
 
 				break;
 
@@ -1173,12 +1173,12 @@ void DialogMetrologyConnection::onPotentialConnections()
 				continue;
 		}
 
-		if (ERR_METROLOGY_CONNECTION_TYPE(сonnectionType) == true)
+        if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 		{
 			continue;
 		}
 
-		int found = m_connectionBase.findConnectionIndex(Metrology::ConnectionIoType::Destination, сonnectionType, pSignal);
+        int found = m_connectionBase.findConnectionIndex(Metrology::ConnectionIoType::Destination, connectionType, pSignal);
 		if (found != -1)
 		{
 			continue;
@@ -1187,7 +1187,7 @@ void DialogMetrologyConnection::onPotentialConnections()
 		Metrology::Connection connection;
 
 		connection.setAppSignalID(Metrology::ConnectionIoType::Source, ConnectionUndefinedID);
-		connection.setType(сonnectionType);
+        connection.setType(connectionType);
 		connection.setAppSignalID(Metrology::ConnectionIoType::Destination, param.appSignalID());
 		connection.setSignal(Metrology::ConnectionIoType::Destination, pSignal);
 

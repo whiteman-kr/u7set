@@ -21,7 +21,7 @@ PacketSourceCore::PacketSourceCore(const CmdLineParam& cmdLine, QObject *parent)
 {
 	clear();
 
-	m_buildOption.setСfgSrvEquipmentID(cmdLine.cfgEquipmentID());
+	m_buildOption.setCfgSrvEquipmentID(cmdLine.cfgEquipmentID());
 	m_buildOption.setCfgSrvIP(cmdLine.cfgServIP());
 	m_buildOption.setAppDataSrvEquipmentID(cmdLine.adsEquipmentID());
 	m_buildOption.setUalTesterIP(cmdLine.ualTesterIP());

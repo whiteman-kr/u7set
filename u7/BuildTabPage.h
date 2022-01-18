@@ -99,9 +99,6 @@ private:
 
 	int m_logTimerId = -1;
 
-	QFile m_logFile;
-	static const char* m_buildLogFileName;
-
 	Builder::Builder m_builder;		// In constructor it receives pointer to m_outputLog, so m_outputLog must be created already!
 
 	std::map<QUuid, OutputMessageLevel> m_itemsIssues;		// contains QUuid of all schemes items with issues

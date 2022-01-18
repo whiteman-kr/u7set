@@ -157,7 +157,7 @@ void OptionsDialog::onOk()
 		return;
 	}
 
-	m_buildOption.setСfgSrvEquipmentID(cfgSrvID);
+	m_buildOption.setCfgSrvEquipmentID(cfgSrvID);
 	m_buildOption.setCfgSrvIP(HostAddressPort(cfgSrvIP, cfgSrvPort.toInt()));
 	m_buildOption.setAppDataSrvEquipmentID(appDataSrvID);
 	m_buildOption.setUalTesterIP(HostAddressPort(ualTesterIP, PORT_TUNING_SERVICE_CLIENT_REQUEST));

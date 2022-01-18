@@ -80,7 +80,7 @@ CalibratorOption CalibratorsOption::calibrator(int channel) const
 // -------------------------------------------------------------------------------------------------------------------
 
 
-void CalibratorsOption::setCalibrator(int channel, const CalibratorOption& сalibrator)
+void CalibratorsOption::setCalibrator(int channel, const CalibratorOption& calibrator)
 {
 	if (ERR_CHANNEL(channel) == true)
 	{
@@ -88,7 +88,7 @@ void CalibratorsOption::setCalibrator(int channel, const CalibratorOption& сali
 		return;
 	}
 
-	m_calibrator[channel] = сalibrator;
+    m_calibrator[channel] = calibrator;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
