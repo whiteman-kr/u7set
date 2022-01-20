@@ -1,5 +1,14 @@
 'use strict'
 
+// If project property 'Run Simulator Tests on Build' is set to true,
+// then following constant 'SkipOnBuild' can control if tests will be executed
+// on the build from this particular file.
+// Note, if SkipOnBuild is true then manual tests run is still possible.
+//
+var SkipOnBuild = false;        // true: Do not execute tests on build
+                                // false: Execute tests ob build (note project property 'Run Simulator Tests on Build')
+
+
 const RamReadAccess = 1;        // Use these constants as param for ReadRam*/WriteRam* functions
 const RamWriteAccess = 2;
 const RamReadWriteAccess = 3;

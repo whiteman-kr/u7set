@@ -138,6 +138,16 @@ namespace Sim
 		return m_scriptSimulator.result();
 	}
 
+	bool Simulator::checkSkipOnBuildConst() const
+	{
+		return m_scriptSimulator.checkSkipOnBuildConst();
+	}
+
+	void Simulator::setCheckSkipOnBuildConst(bool value)
+	{
+		m_scriptSimulator.setCheckSkipOnBuildConst(value);
+	}
+
 	void Simulator::clearImpl()
 	{
 		m_control.reset();

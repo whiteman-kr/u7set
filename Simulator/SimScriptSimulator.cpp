@@ -87,12 +87,27 @@ namespace Sim
 					return;
 				}
 
+				// If constant SkipOnBuild is true, then skip this test
+				//
+				if (m_scriptSimulator->checkSkipOnBuildConst() == true)
+				{
+					QJSValue prop = m_jsEngine->globalObject().property("SkipOnBuild");
+					QVariant skipOnBuild = prop.toVariant();
+
+					if (skipOnBuild.isValid() == true &&
+						skipOnBuild.type() == QMetaType::Bool &&
+						skipOnBuild.toBool() == true)
+					{
+						m_log.writeWarning(tr("Test %1 skipped (as SkipOnBuild is true)").arg(script.scriptCaption));
+						continue;
+					}
+				}
+
 				// initTestCase() - will be called before the first test function is executed.
 				// cleanupTestCase() - will be called after the last test function was executed.
 				// init() - will be called before each test function is executed.
 				// cleanup() - will be called after every test function.
 				//
-
 				QElapsedTimer timer;
 				timer.start();
 
@@ -110,7 +125,7 @@ namespace Sim
 
 				QJSValueIterator it(m_jsEngine->globalObject());
 				while (it.hasNext() == true)
-				{
+				{					
 					it.next();
 
 					if (it.name().startsWith("test"))
@@ -623,6 +638,16 @@ namespace Sim
 	void ScriptSimulator::setExecutionTimeout(qint64 value)
 	{
 		m_executionTimeout = value;
+	}
+
+	bool ScriptSimulator::checkSkipOnBuildConst() const
+	{
+		return m_checkSkipOnBuildConst;
+	}
+
+	void ScriptSimulator::setCheckSkipOnBuildConst(bool value)
+	{
+		m_checkSkipOnBuildConst = value;
 	}
 
 	Simulator* ScriptSimulator::simulator()
