@@ -12,7 +12,7 @@ DialogSettings::DialogSettings(QWidget* parent) :
 	ui->setupUi(this);
 
 	ui->m_instanceCombo->addItems(theSettings.instanceHistory());
-	ui->m_instanceCombo->setCurrentText(theSettings.instanceStrId());
+	ui->m_instanceCombo->setCurrentText(theSettings.instanceStrId().toUpper());
 
 	ui->m_IP1->setText(theSettings.configuratorAddress1().addressStr());
 	ui->m_port1->setText(QString::number(theSettings.configuratorAddress1().port()));
@@ -81,7 +81,7 @@ void DialogSettings::on_DialogSettings_accepted()
 	QStringList instanceHistory;
 	for (int i = 0; i < ui->m_instanceCombo->count(); i++)
 	{
-		instanceHistory.push_back(ui->m_instanceCombo->itemText(i));
+		instanceHistory.push_back(ui->m_instanceCombo->itemText(i).toUpper());
 
 		if (instanceHistory.size() >= 10)
 		{
@@ -89,13 +89,15 @@ void DialogSettings::on_DialogSettings_accepted()
 		}
 	}
 
-	if (instanceHistory.contains(ui->m_instanceCombo->currentText()) == false)
+	QString instanceStrId = ui->m_instanceCombo->currentText().toUpper();
+
+	if (instanceHistory.contains(instanceStrId) == false)
 	{
-		instanceHistory.push_front(ui->m_instanceCombo->currentText());
+		instanceHistory.push_front(instanceStrId);
 	}
 
 	theSettings.setInstanceHistory(instanceHistory);
-	theSettings.setInstanceStrId(ui->m_instanceCombo->currentText());
+	theSettings.setInstanceStrId(instanceStrId);
 
 	// IP Configuration
 

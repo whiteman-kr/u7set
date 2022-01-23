@@ -388,10 +388,10 @@ void StatisticsBase::createComparatorList(bool shownOnSchemas)
 			continue;
 		}
 
-		int comparatorCount = pSignal->param().comparatorCount();
-		for(int с = 0; с < comparatorCount; с++)
+        int comparatorCount = pSignal->param().comparatorCount();
+        for(int c = 0; c < comparatorCount; c++)
 		{
-			StatisticsItem si(pSignal, pSignal->param().comparator(с));
+            StatisticsItem si(pSignal, pSignal->param().comparator(c));
 
 			/*
 			if (param.isInternal() == true)

@@ -142,7 +142,7 @@ void DialogAppDataSourceInfo::updateData()
 
 	bool ok = false;
 
-	AppDataSourceState ds = m_tcpClient->appDataSourceState(m_sourceHash, &ok);
+	AppDataSourceState ds = m_tcpClient->appDataSourceState(m_uniqueHash, &ok);
 	if (ok == false)
 	{
 		return;

@@ -185,6 +185,7 @@ namespace XmlElement
 	inline const QString ARCHIVE_SERVICE2("ArchiveService2");
 
 	inline const QString DIAG_DATA_SERVICE("DiagDataService");
+	inline const QString TUNING_SERVICES("TuningServices");
 	inline const QString TUNING_SERVICE("TuningService");
 
 	inline const QString APPEARANCE("Appearance");
@@ -265,6 +266,7 @@ namespace XmlAttribute
 	inline const QString TUNING_SERVICE_IP("TuningServiceIP");
 	inline const QString TUNING_SERVICE_PORT("TuningServicePort");
 	inline const QString CONTROLLER_EQUIPMENT_ID("ControllerEquipmentID");
+	inline const QString DRIVEN_SOURCES("DrivenSources");
 
 	inline const QString SOFTWARE_METROLOGY_ID("SoftwareMetrologyID");
 
@@ -276,6 +278,9 @@ namespace XmlAttribute
 	inline const QString SUBSYSTEM_ID("SubsystemID");
 	inline const QString MODULE_TYPE("ModuleType");
 	inline const QString MODULE_UNIQUE_ID("ModuleUniqueID");
+
+	inline const QString RUP_VERSION("RupVersion");
+	inline const QString FOTIP_VERSION("FotipVersion");
 }
 
 namespace Latin1Char

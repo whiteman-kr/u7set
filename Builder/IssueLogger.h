@@ -491,8 +491,8 @@ namespace Builder
         void errEQP6008(QString equipmentId, QString childEquipmentId, int childPlace); // Child childEquipmentId is not allowed in parent equipmentId
 		void errEQP6009(QString equipmemtId, QUuid equpmentUuid);	// Property Place must be 0 (Equipment object %1).
 
-		void errEQP6010(QString equipmemtId);						// Device Object %1 not found.
-		void errEQP6011(QString equipmemtId, QString buildStep);	// Device Object %1 not found on %2.
+		void errEQP6010(QString equipmemtId);						// Device object %1 not found.
+		void errEQP6011(QString equipmemtId, QString buildStep);	// Device object %1 not found on %2.
 
 		void errEQP6020(QString lm, QUuid lmUuid);					//	Property lmDescriptionFile is empty
 
@@ -528,11 +528,13 @@ namespace Builder
 		void errEQP6121(QString appSignalID);																						//  Metrology connections contain a non-existent source signal: %1.
 		void errEQP6122(QString appSignalID);																						//  Metrology connections contain a non-existent destination signal: %1.
 
-
-
 		void errEQP6200(QString monotorId);							// Monitor (%1) cannot be used for tuning in Safety Project. Clear option in %1.TuningEnable or override behavior in menu Project->Project Properties...->Safety Project.
 		void errEQP6201(QString tuningServiceId);					// TuningService (%1) cannot be used for multi LM control in Safety Project. Turn On option %1.SingleLmControl or override behavior in menu Project->Project Properties...->Safety Project.
 		void errEQP6202(QString tuningClientMonitorId);				// Property TuningUserAccounts can't be empty in (%1) software if TuningLogin is set to 'true'.
+		void errEQP6203(QString tuningSourceId, QString tuningClientMonitorId, QString tuningServiceId);	// Source %1 specified in %2.TuningSourceEquipmentID is not processed by service %3 which the client is connected to.
+		void errEQP6204(QString tuningClientId);					// %1.TuningSourceEquipmentID property can't be empty in Safety Project. Specify tuning sources which are processed by this client.
+		void errEQP6205(QString tuningClientMonitorId);				// No tuning sources found for %1.
+		void errEQP6206(QString tuningClientID);					// Property %1.TuningServiceID can't be empty if tuning enabled.
 
 		void errEQP6210(QString behaviorId, QString softwareObjectStrId);	// Client behavior (%1) specified in %2.BehaviorID does not exist.
 

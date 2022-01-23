@@ -3,7 +3,6 @@
 #include "../OnlineLib/Tcp.h"
 #include "../Proto/network.pb.h"
 #include "TuningSource.h"
-#include "TuningService.h"
 
 namespace Tuning
 {
@@ -20,8 +19,7 @@ namespace Tuning
 	{
 	public:
 		TcpTuningServer(TuningServiceWorker& service,
-						int channel,
-						TuningSources& tuningSources,
+						const TuningSources& tuningSources,
 						std::shared_ptr<CircularLogger> logger);
 	private:
 		virtual void onServerThreadStarted() override;
@@ -49,17 +47,20 @@ namespace Tuning
 
 		void prepareSignalGetter();
 
+		void initClientSourcesList(const QString& clientEquipmentID);
+
 	private:
 		static const char* SCM_CLIENT_ID;
 
 		TuningServiceWorker& m_service;
-		int m_channel = 0;
 
-		TuningSources& m_tuningSources;
+		const TuningSources& m_tuningSources;
 
 		QHash<Hash, const AppSignal*> m_signalHash2SignalPtr;
 		QHash<Hash, quint32> m_signalHash2SourceIP;
 		QMultiHash<quint64, Hash> m_sourceId2SignalHash;
+
+		std::optional<QStringList> m_clientSourcesList;
 
 		std::shared_ptr<CircularLogger> m_logger;
 
@@ -89,7 +90,6 @@ namespace Tuning
 		Network::ServiceSettings m_getServiceSettingsReply;
 	};
 
-
 	// -------------------------------------------------------------------------------
 	//
 	// TcpTuningServerThread class declaration
@@ -99,8 +99,9 @@ namespace Tuning
 	class TcpTuningServerThread : public Tcp::ServerThread
 	{
 	public:
-		TcpTuningServerThread(const HostAddressPort& listenAddressPort,
-								TcpTuningServer* server, std::shared_ptr<CircularLogger> logger);
+		TcpTuningServerThread(	const HostAddressPort& listenAddressPort,
+								TcpTuningServer* server,
+								std::shared_ptr<CircularLogger> logger);
 	};
 
 }

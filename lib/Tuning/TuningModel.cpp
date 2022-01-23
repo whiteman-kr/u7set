@@ -928,8 +928,7 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 
 						if (tss.writeInProgress() == true)
 						{
-							QString editValueString = newValue.toString();
-							return tr("Writing %1").arg(editValueString);
+							return tr("Writing");
 						}
 
 						return valueString;
@@ -946,8 +945,7 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 
 						if (tss.writeInProgress() == true)
 						{
-							QString editValueString = newValue.toString(m_analogFormat, asp.precision());
-							return tr("Writing %1").arg(editValueString);
+							return tr("Writing");
 						}
 
 						if (tss.outOfRange() == true)

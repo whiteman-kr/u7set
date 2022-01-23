@@ -92,15 +92,15 @@ void DialogProjectProperty::createPropertyList()
 	std::shared_ptr<PropertyPattern> property = std::make_shared<PropertyPattern>(&m_info);
 	propertyObjects.push_back(property);
 
-	for(int сategoryIndex = 0; сategoryIndex < ProjectPropertyCategoryCount; сategoryIndex++)
+    for(int categoryIndex = 0; categoryIndex < ProjectPropertyCategoryCount; categoryIndex++)
 	{
-		ProjectPropertyCategory сategory = static_cast<ProjectPropertyCategory>(сategoryIndex);
-		if (ERR_PROJECT_PROPERTY_CATEGORY(сategory) == true)
+        ProjectPropertyCategory category = static_cast<ProjectPropertyCategory>(categoryIndex);
+        if (ERR_PROJECT_PROPERTY_CATEGORY(category) == true)
 		{
 			continue;
 		}
 
-		m_pPropertyEditor->setCategoryViewOrder(ProjectPropertyCategoryCaption(сategory), сategoryIndex);
+        m_pPropertyEditor->setCategoryViewOrder(ProjectPropertyCategoryCaption(category), categoryIndex);
 	}
 
 	m_pPropertyEditor->setObjects(propertyObjects);
@@ -1356,15 +1356,15 @@ void DialogSignalProperty::createPropertyList()
 	std::shared_ptr<PropertyPattern> property = std::make_shared<PropertyPattern>(&m_param);
 	propertyObjects.push_back(property);
 
-	for(int сategoryIndex = 0; сategoryIndex < SignalPropertyCategoryCount; сategoryIndex++)
+    for(int categoryIndex = 0; categoryIndex < SignalPropertyCategoryCount; categoryIndex++)
 	{
-		SignalPropertyCategory сategory = static_cast<SignalPropertyCategory>(сategoryIndex);
-		if (ERR_SIGNAL_PROPERTY_CATEGORY(сategory) == true)
+        SignalPropertyCategory category = static_cast<SignalPropertyCategory>(categoryIndex);
+        if (ERR_SIGNAL_PROPERTY_CATEGORY(category) == true)
 		{
 			continue;
 		}
 
-		m_pPropertyEditor->setCategoryViewOrder(SignalPropertyCategoryCaption(сategory), сategoryIndex);
+        m_pPropertyEditor->setCategoryViewOrder(SignalPropertyCategoryCaption(category), categoryIndex);
 	}
 
 	m_pPropertyEditor->setMaxDecimaplPlaces(15);
@@ -1968,15 +1968,15 @@ void DialogComparatorProperty::createPropertyList()
 	std::shared_ptr<PropertyPattern> property = std::make_shared<PropertyPattern>(&m_comparatorEx);
 	propertyObjects.push_back(property);
 
-	for(int сategoryIndex = 0; сategoryIndex < ComparatorPropertyCategoryCount; сategoryIndex++)
+    for(int categoryIndex = 0; categoryIndex < ComparatorPropertyCategoryCount; categoryIndex++)
 	{
-		ComparatorPropertyCategory сategory = static_cast<ComparatorPropertyCategory>(сategoryIndex);
-		if (ERR_COMPARATOR_PROPERTY_CATEGORY(сategory) == true)
+        ComparatorPropertyCategory category = static_cast<ComparatorPropertyCategory>(categoryIndex);
+        if (ERR_COMPARATOR_PROPERTY_CATEGORY(category) == true)
 		{
 			continue;
 		}
 
-		m_pPropertyEditor->setCategoryViewOrder(ComparatorPropertyCategoryCaption(сategory), сategoryIndex);
+        m_pPropertyEditor->setCategoryViewOrder(ComparatorPropertyCategoryCaption(category), categoryIndex);
 	}
 
 	m_pPropertyEditor->setObjects(propertyObjects);
@@ -2252,15 +2252,15 @@ void DialogMeasureProperty::createPropertyList()
 	std::shared_ptr<PropertyPattern> property = std::make_shared<PropertyPattern>(m_pMeasurement);
 	propertyObjects.push_back(property);
 
-	for(int сategoryIndex = 0; сategoryIndex < MeasurePropertyCategoryCount; сategoryIndex++)
+    for(int categoryIndex = 0; categoryIndex < MeasurePropertyCategoryCount; categoryIndex++)
 	{
-		MeasurePropertyCategory сategory = static_cast<MeasurePropertyCategory>(сategoryIndex);
-		if (ERR_MEASURE_PROPERTY_CATEGORY(сategory) == true)
+        MeasurePropertyCategory category = static_cast<MeasurePropertyCategory>(categoryIndex);
+        if (ERR_MEASURE_PROPERTY_CATEGORY(category) == true)
 		{
 			continue;
 		}
 
-		m_pPropertyEditor->setCategoryViewOrder(MeasurePropertyCategoryCaption(сategory), сategoryIndex);
+        m_pPropertyEditor->setCategoryViewOrder(MeasurePropertyCategoryCaption(category), categoryIndex);
 	}
 
 	m_pPropertyEditor->setObjects(propertyObjects);

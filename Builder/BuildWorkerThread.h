@@ -56,8 +56,8 @@ namespace Builder
 		bool taskProcessTuningParameters();			// Tuning Parameters
 		bool taskGenerationModulesConfiguration();	// Generate Modules Configuration
 		bool taskGenerationBitstreamFile();			// Generate Bitstream File
-		bool taskGenerationSoftwareConfiguration();// Generate Software Configuration
-		bool taskRunSimTests();					// Run Simulator-based tests
+		bool taskGenerationSoftwareConfiguration();	// Generate Software Configuration
+		bool taskRunSimTests();						// Run Simulator-based tests
 
 		struct BuildTask
 		{

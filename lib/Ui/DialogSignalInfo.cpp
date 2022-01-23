@@ -1913,6 +1913,7 @@ void DialogSignalInfo::updateTuningSignalState()
 	ui->labelWriteRequestTime->setText(tuningSignalState.writeRequestTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
 	ui->labelSuccessfulWriteTime->setText(tuningSignalState.successfulWriteTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
 	ui->labelUnsuccessfulWriteTime->setText(tuningSignalState.unsuccessfulWriteTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
+	ui->labelLmTime->setText(tuningSignalState.lmTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
 
 	ui->widgetTuningFlags->updateControl(tuningSignalState.m_flags);
 

@@ -132,11 +132,41 @@ public slots:
 	*/
 	void showSnapshotByTag(QStringList tags);
 
+	/// \brief Show or hide schemas tree.
+	void setVisibleSchemaTree(bool visible);
+
+	/// \brief Show or hide schemas tree oppositely to current visible state.
+	void toggleSchemaTree();
+
+	/// \brief Show or hide schemas tab bar.
+	void setVisibleTabBar(bool visible);
+
+	/// \brief Show or hide tool bar.
+	void setVisibleToolBar(bool visible);
+
+	/// \brief Show or hide status bar.
+	void setVisibleStatusBar(bool visible);
+
+	/// \brief Show or hide main menu bar.
+	void setVisibleMenu(bool visible);
+
+	/// \brief Set or rest fuill screen mode.
+	void setFullScreen(bool fullScreen);
+
 signals:
 	void signal_showArchive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType);
+
 	void signal_showSnapshot(QStringList signalsList);
 	void signal_showSnapshotByMask(QStringList masks);
 	void signal_showSnapshotByTag(QStringList tags);
+
+	void signal_toggleSchemaTree();
+	void signal_setVisibleSchemaTree(bool visible);
+	void signal_setVisibleTabBar(bool visible);
+	void signal_setVisibleToolBar(bool visible);
+	void signal_setVisibleStatusBar(bool visible);
+	void signal_setVisibleMenu(bool visible);
+	void signal_setFullScreen(bool value);
 
 public:
 	QString equipmentId() const;

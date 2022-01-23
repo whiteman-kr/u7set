@@ -42,6 +42,7 @@ void DialogSettings::setSettings(const MonitorAppSettings::Data& value)
 	ui->editConfiguratorIpAddress2->setText(m_settings.cfgSrvIpAddress2);
 	ui->editConfiguratorPort2->setText(QString().setNum(m_settings.cfgSrvPort2));
 
+	ui->checkShowSchemasTabBar->setChecked(m_settings.showSchemasTabBar);
 	ui->checkShowLogo->setChecked(m_settings.showLogo);
 	ui->checkShowItemsLabels->setChecked(m_settings.showItemsLabels);
 	ui->checkSingleInstance->setChecked(m_settings.singleInstance);
@@ -154,6 +155,7 @@ std::optional<MonitorAppSettings::Data> DialogSettings::parseData()
 	data.cfgSrvIpAddress2 = configuratorIpAddress2;
 	data.cfgSrvPort2 = serverPort2;
 
+	data.showSchemasTabBar = ui->checkShowSchemasTabBar->isChecked();
 	data.showLogo = ui->checkShowLogo->isChecked();
 	data.showItemsLabels = ui->checkShowItemsLabels->isChecked();
 	data.windowCaption = ui->windowCaptionEdit->text();

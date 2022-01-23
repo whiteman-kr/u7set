@@ -9,7 +9,7 @@ class DialogSourceInfo : public QDialog
 	Q_OBJECT
 
 protected:
-	DialogSourceInfo(QWidget* parent, Hash sourceHash);
+	DialogSourceInfo(QWidget* parent, Hash uniqueHash);
 	virtual ~DialogSourceInfo();
 
 protected:
@@ -36,7 +36,7 @@ public:
 	static QColor dataItemErrorColor;
 
 protected:
-	Hash m_sourceHash;
+	Hash m_uniqueHash;
 	QTreeWidget* m_treeWidget = nullptr;
 
 private:

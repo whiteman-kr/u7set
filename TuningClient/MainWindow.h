@@ -11,7 +11,7 @@
 #include "DialogTuningSources.h"
 #include "../lib/Ui/DialogTcpStatistics.h"
 
-class TuningTcpClient;
+class TuningClientTcpClient;
 class DialogAlert;
 
 namespace Ui {
@@ -37,9 +37,9 @@ private:
 
 	TuningSignalManager m_tuningSignalManager;
 
-	TuningClientTcpClient* m_tcpClient = nullptr;
+	std::vector<TuningClientTcpClient*> m_tcpClients;
 
-	SimpleThread* m_tcpClientThread = nullptr;
+	std::vector<SimpleThread*> m_tcpClientThreads;
 
 	TuningClientFilterStorage m_filterStorage;
 
@@ -92,7 +92,12 @@ private:
 
 	void createAndCheckFiltersHashes(bool userFiltersOnly);
 
+	void runTcpClients();
+	void stopTcpClients();
+
 	void createWorkspace();
+	void deleteWorkspace();
+
 
 private:
 	bool eventFilter(QObject *object, QEvent *event) override;
@@ -126,17 +131,14 @@ private:
 
 	TuningLog::TuningLog* m_tuningLog = nullptr;
 
-	bool m_singleLmControlMode = true;
-	QString m_activeClientId;
-	QString m_activeClientIp;
 	int m_discreteCounter = -1;
-	int m_lmErrorsCounter = -1;
 	QString m_sorStatus;
 	int m_logErrorsCounter = -1;
 	int m_logWarningsCounter = -1;
 
 	QString m_singleLmControlModeText;
 	QString m_multipleLmControlModeText;
+	QString m_mixedLmControlModeText;
 
 	DialogTuningSources* m_dialogTuningSources = nullptr;
 	DialogTcpStatistics* m_dialogStatistics = nullptr;

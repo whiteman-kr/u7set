@@ -17,7 +17,8 @@ namespace Builder
 		virtual bool generateConfigurationStep1() override;
 
 	protected:
-		bool initSchemaTagsAndTuningSources();
+		bool initSchemaTags();
+		bool initTuningSources();
 
 		bool saveScriptProperties(QString scriptProperty, QString fileName);
 
@@ -38,7 +39,6 @@ namespace Builder
 		bool writeMonitorLogo();
 
 	private:
-//		bool m_tuningEnabled = false;
 		QStringList m_tuningSources;
 
 		QStringList m_schemaTagList;		// Generated in writeMonitorSettings

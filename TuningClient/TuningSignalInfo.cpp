@@ -7,11 +7,12 @@
 #include "TuningClientTcpClient.h"
 #include "Settings.h"
 
-TuningSignalInfo::TuningSignalInfo(Hash appSignalHash, E::AnalogFormat analogFormat, Hash instanceIdHash, TuningSignalManager* signalManager, QWidget *parent) :
+TuningSignalInfo::TuningSignalInfo(Hash appSignalHash, E::AnalogFormat analogFormat, Hash instanceIdHash,
+								   TuningSignalManager* signalManager, std::vector<TuningTcpClient*> tuningTcpClients, QWidget *parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::TuningSignalInfo),
 	m_appSignalHash(appSignalHash),
-    m_analogFormat(analogFormat),
+	m_analogFormat(analogFormat),
 	m_instanceIdHash(instanceIdHash),
 	m_signalManager(signalManager)
 {
@@ -23,6 +24,8 @@ TuningSignalInfo::TuningSignalInfo(Hash appSignalHash, E::AnalogFormat analogFor
 
 	assert(m_signalManager);
 
+	setTuningTcpClients(tuningTcpClients);
+
 	bool found = false;
 	AppSignalParam asp = m_signalManager->signalParam(m_appSignalHash, &found);
 
@@ -33,9 +36,9 @@ TuningSignalInfo::TuningSignalInfo(Hash appSignalHash, E::AnalogFormat analogFor
 	ui->m_lineEquipmentId->setText(asp.equipmentId());
 	ui->m_lineLmEquipmentId->setText(asp.lmEquipmentId());
 
-	updateInfo();
-
 	setWindowTitle(tr("%1 - %2").arg(asp.customSignalId()).arg(asp.caption()));
+
+	updateInfo();
 
 	m_timerId = startTimer(500);
 
@@ -45,6 +48,21 @@ TuningSignalInfo::TuningSignalInfo(Hash appSignalHash, E::AnalogFormat analogFor
 TuningSignalInfo::~TuningSignalInfo()
 {
 	delete ui;
+}
+
+void TuningSignalInfo::setTuningTcpClients(std::vector<TuningTcpClient*> tuningTcpClients)
+{
+	m_signalTcpClients.clear();
+
+	// Get TCP clients that process this signal
+	//
+	for (TuningTcpClient* client : tuningTcpClients)
+	{
+		if (client->hasTuningSignal(m_appSignalHash) == true)
+		{
+			m_signalTcpClients.push_back(client);
+		}
+	}
 }
 
 void TuningSignalInfo::timerEvent(QTimerEvent* event)
@@ -63,18 +81,106 @@ void TuningSignalInfo::timerEvent(QTimerEvent* event)
 void TuningSignalInfo::updateInfo()
 {
 	bool found = false;
+
+	QStringList validStrings;
+	QStringList outOfRangeStrings;
+	QStringList writeInProgressStrings;
+	QStringList controlIsEnabledStrings;
+	QStringList isTuningDefaultStrings;
+	QStringList writingIsEnabledStrings;
+
+	QStringList stateServices;
+	QStringList writeClientHashes;
+	QStringList writeErrorCodes;
+	QStringList lmTimes;
+	QStringList successfulReadTimes;
+	QStringList writeRequestTimes;
+	QStringList successfulWriteTimes;
+	QStringList unsuccessfulWriteTimes;
+
+	// Fill the data received from TCP clients
+	//
+	for (TuningTcpClient* client : m_signalTcpClients)
+	{
+		TuningSignalState clientState = client->state(m_appSignalHash, &found);
+
+		stateServices.push_back(client->tuningServiceId());
+
+		validStrings.push_back(clientState.valid() == true ? tr("Yes") : tr("No"));
+		outOfRangeStrings.push_back(clientState.outOfRange() == true ? tr("Yes") : tr("No"));
+		writeInProgressStrings.push_back(clientState.writeInProgress() == true ? tr("Yes") : tr("No"));
+		controlIsEnabledStrings.push_back(clientState.controlIsEnabled() == true ? tr("Yes") : tr("No"));
+		isTuningDefaultStrings.push_back(clientState.isTuningDefault() == true ? tr("Yes") : tr("No"));
+
+		if (theConfigSettings.lmStatusFlagMode() == LmStatusFlagMode::AccessKey)
+		{
+			writingIsEnabledStrings.push_back(clientState.writingIsEnabled() == true ? tr("Yes") : tr("No"));
+		}
+
+		QString hashString = QString("%1h").arg(QString::number(clientState.writeClient(), 16));
+		if (clientState.writeClient() == m_instanceIdHash)
+		{
+			hashString += tr(" (this client)");
+		}
+		writeClientHashes.push_back(hashString);
+
+		writeErrorCodes.push_back(getNetworkErrorStr(static_cast<NetworkError>(clientState.writeErrorCode())));
+
+		lmTimes.push_back(clientState.lmTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
+		successfulReadTimes.push_back(clientState.successfulReadTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
+		writeRequestTimes.push_back(clientState.writeRequestTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
+		successfulWriteTimes.push_back(clientState.successfulWriteTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
+		unsuccessfulWriteTimes.push_back(clientState.unsuccessfulWriteTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
+	}
+
+	// Fill the data that is received from TuningSignalManager
+
+	TuningSignalState managerState = m_signalManager->state(m_appSignalHash, &found);
+
+	{
+		stateServices.push_back(tr("TuningSignalManager"));
+
+		validStrings.push_back(managerState.valid() == true ? tr("Yes") : tr("No"));
+		outOfRangeStrings.push_back(managerState.outOfRange() == true ? tr("Yes") : tr("No"));
+		writeInProgressStrings.push_back(managerState.writeInProgress() == true ? tr("Yes") : tr("No"));
+		controlIsEnabledStrings.push_back(managerState.controlIsEnabled() == true ? tr("Yes") : tr("No"));
+		isTuningDefaultStrings.push_back(managerState.isTuningDefault() == true ? tr("Yes") : tr("No"));
+
+		if (theConfigSettings.lmStatusFlagMode() == LmStatusFlagMode::AccessKey)
+		{
+			writingIsEnabledStrings.push_back(managerState.writingIsEnabled() == true ? tr("Yes") : tr("No"));
+		}
+
+		QString hashString = QString("%1h").arg(QString::number(managerState.writeClient(), 16));
+		if (managerState.writeClient() == m_instanceIdHash)
+		{
+			hashString += tr(" (this client)");
+		}
+		writeClientHashes.push_back(hashString);
+
+		writeErrorCodes.push_back(getNetworkErrorStr(static_cast<NetworkError>(managerState.writeErrorCode())));
+
+		lmTimes.push_back(managerState.lmTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
+		successfulReadTimes.push_back(managerState.successfulReadTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
+		writeRequestTimes.push_back(managerState.writeRequestTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
+		successfulWriteTimes.push_back(managerState.successfulWriteTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
+		unsuccessfulWriteTimes.push_back(managerState.unsuccessfulWriteTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
+	}
+
+	// Print data to the dialog
+	//
+
 	AppSignalParam asp = m_signalManager->signalParam(m_appSignalHash, &found);
-	TuningSignalState state = m_signalManager->state(m_appSignalHash, &found);
 
 	QString text;
 
-	if (state.controlIsEnabled() == false)
+	if (managerState.controlIsEnabled() == false)
 	{
 		text = tr("Disabled");
 	}
 	else
 	{
-		if (state.valid() == false)
+		if (managerState.valid() == false)
 		{
 			text = tr("?");
 		}
@@ -82,22 +188,22 @@ void TuningSignalInfo::updateInfo()
 		{
 			if (asp.isAnalog() == true)
 			{
-				text = state.value().toString(m_analogFormat, asp.precision()) + " " + asp.unit();
+				text = managerState.value().toString(m_analogFormat, asp.precision()) + " " + asp.unit();
 			}
 			else
 			{
-				text = state.value().toString();
+				text = managerState.value().toString();
 			}
 		}
 	}
 
 	ui->m_labelValue->setText(text);
 
-	// Flags and info
+	// New value
 	//
 	text.clear();
 
-	if (state.controlIsEnabled() == false)
+	if (managerState.controlIsEnabled() == false)
 	{
 		text += tr("NewValue:\t\tDisabled\n");
 	}
@@ -122,35 +228,36 @@ void TuningSignalInfo::updateInfo()
 
 	text += "\n";
 
-	text += tr("Valid:\t\t%1\n").arg(state.valid() == true ? tr("Yes") : tr("No"));
-	text += tr("OutOfRange:\t\t%1\n").arg(state.outOfRange() == true ? tr("Yes") : tr("No"));
-	text += tr("WriteInProgress:\t%1\n").arg(state.writeInProgress() == true ? tr("Yes") : tr("No"));
-	text += tr("ControlIsEnabled:\t%1\n").arg(state.controlIsEnabled() == true ? tr("Yes") : tr("No"));
-	text += tr("TuningDefault:\t\t%1\n").arg(state.isTuningDefault() == true ? tr("Yes") : tr("No"));
+	text += tr("Source:\t\t%1\n").arg(stateServices.join(" / "));
+
+	text += "\n";
+
+	text += tr("Valid:\t\t%1\n").arg(validStrings.join(" / "));
+	text += tr("OutOfRange:\t\t%1\n").arg(outOfRangeStrings.join(" / "));
+	text += tr("WriteInProgress:\t%1\n").arg(writeInProgressStrings.join(" / "));
+	text += tr("ControlIsEnabled:\t%1\n").arg(controlIsEnabledStrings.join(" / "));
+	text += tr("TuningDefault:\t\t%1\n").arg(isTuningDefaultStrings.join(" / "));
+
+	text += "\n";
 
 	if (theConfigSettings.lmStatusFlagMode() == LmStatusFlagMode::AccessKey)
 	{
-		text += tr("WritingIsEnabled:\t%1\n").arg(state.writingIsEnabled() == true ? tr("Yes") : tr("No"));
+		text += tr("WritingIsEnabled:\t%1\n").arg(writingIsEnabledStrings.join(" / "));
 	}
+
+	text += tr("WriteClientHash:\t%1\n").arg(writeClientHashes.join(" / "));
+	text += tr("WriteErrorCode:\t\t%1\n").arg(writeErrorCodes.join(" / "));
 
 	text += "\n";
 
-	QString hashString = QString("%1h").arg(QString::number(state.writeClient(), 16));
-
-	if (state.writeClient() == m_instanceIdHash)
-	{
-		hashString += tr(" (this client)");
-	}
-
-	text += tr("WriteClientHash:\t%1\n").arg(hashString);
-	text += tr("WriteErrorCode:\t\t%1\n").arg(getNetworkErrorStr(static_cast<NetworkError>(state.writeErrorCode())));
+	text += tr("LM Time:\t\t%1\n").arg(lmTimes.join(" / "));
 
 	text += "\n";
 
-	text += tr("SuccessfulReadTime:\t%1\n").arg(state.successfulReadTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
-	text += tr("WriteRequestTime:\t%1\n").arg(state.writeRequestTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
-	text += tr("SuccessfulWriteTime:\t%1\n").arg(state.successfulWriteTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
-	text += tr("UnsuccessfulWriteTime:\t%1\n").arg(state.unsuccessfulWriteTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));;
+	text += tr("SuccessfulReadTime:\t%1\n").arg(successfulReadTimes.join(" / "));
+	text += tr("WriteRequestTime:\t%1\n").arg(writeRequestTimes.join(" / "));
+	text += tr("SuccessfulWriteTime:\t%1\n").arg(successfulWriteTimes.join(" / "));
+	text += tr("UnsuccessfulWriteTime:\t%1\n").arg(unsuccessfulWriteTimes.join(" / "));
 
 	if (m_textEditText != text)
 	{

@@ -1,6 +1,7 @@
 #include <set>
 #include "LmDescription.h"
 #include "../HardwareLib/DeviceObject.h"
+#include "../OnlineLib/DataProtocols.h"
 
 bool LmCommand::loadFromXml(const QDomElement& element, QString* errorMessage)
 {
@@ -1081,8 +1082,8 @@ bool LmDescription::Lan::load(const QDomDocument& document, QString* errorMessag
 	// Read LAN version
 	//
 	{
-		const int defaultRupVersion = 5;
-		const int defaultFotipVersion = 2;
+		const int defaultRupVersion = Rup::V5;
+		const int defaultFotipVersion = Fotip::V2;
 
 		bool ok = false;
 

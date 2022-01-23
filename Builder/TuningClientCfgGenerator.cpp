@@ -29,11 +29,11 @@ namespace Builder
 	bool TuningClientCfgGenerator::generateConfigurationStep1()
 	{
 		if (m_software == nullptr ||
-				m_software->softwareType() != E::SoftwareType::TuningClient ||
-				m_equipment == nullptr ||
-				m_cfgXml == nullptr ||
-				m_buildResultWriter == nullptr ||
-				m_subsystems == nullptr)
+			m_software->softwareType() != E::SoftwareType::TuningClient ||
+			m_equipment == nullptr ||
+			m_cfgXml == nullptr ||
+			m_buildResultWriter == nullptr ||
+			m_subsystems == nullptr)
 		{
 			assert(m_software);
 			assert(m_software->softwareType() == E::SoftwareType::Monitor);
@@ -58,7 +58,7 @@ namespace Builder
 		// Check tuning users list
 		//
 		if (settings->tuningLogin == true &&
-			settings->tuningUserAccounts.split(';', Qt::SkipEmptyParts).isEmpty() == true)
+			settings->tuningUserAccounts.split(Separator::SEMICOLON, Qt::SkipEmptyParts).isEmpty() == true)
 		{
 			m_log->errEQP6202(m_software->equipmentIdTemplate());
 			return false;
@@ -74,12 +74,6 @@ namespace Builder
 
 		// Generate tuning signals
 		//
-		if (equipmentList.empty() == true)
-		{
-			log->errCFG3022(m_software->equipmentIdTemplate(), "TuningSourceEquipmentID");
-			return false;
-		}
-
 		result &= createTuningSignals(equipmentList, m_signalSet, &m_tuningSet);
 		if (result == false)
 		{
@@ -183,47 +177,66 @@ namespace Builder
 
 	bool TuningClientCfgGenerator::createEquipmentList(QStringList* equipmentList)
 	{
-		QString equipmentString;
-
 		if (equipmentList == nullptr)
 		{
 			assert(equipmentList);
 			return false;
 		}
 
-		//
-		// equipmentList
-		//
-		bool ok = false;
+		bool result = true;
 
-		equipmentString = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "TuningSourceEquipmentID", &ok).trimmed();
-		if (ok == false)
-		{
-			return false;
-		}
+		equipmentList->clear();
 
-		// Parse equipmentList
-		//
-		if (equipmentString.isEmpty() == false)
-		{
-			equipmentString.replace(' ', ';');
-			equipmentString.replace('\n', ';');
-			equipmentString.remove('\r');
-			*equipmentList = equipmentString.split(';');
-		}
+		std::shared_ptr<const TuningClientSettings> settings = m_settingsSet.getSettingsDefaultProfile<TuningClientSettings>();
 
-		// Check for valid EquipmentIds
-		//
-		for (const QString& tuningEquipmentID : *equipmentList)
+		for(const TuningClientSettings::TuningService& tsc : settings->tuningServices)
 		{
-			if (m_equipment->deviceObject(tuningEquipmentID) == nullptr)
+			std::shared_ptr<Hardware::DeviceObject> tuningServiceObject = m_equipment->deviceObject(tsc.tuningServiceID);
+			if (tuningServiceObject == nullptr)
 			{
-				m_log->errEQP6109(tuningEquipmentID, m_software->equipmentIdTemplate());
-				return false;
+				m_log->errCFG3021(m_software->equipmentId(), EquipmentPropNames::TUNING_SERVICE_ID, tsc.tuningServiceID);
+				result = false;
+				continue;
+			}
+
+			std::shared_ptr<Hardware::Software> tuningServiceSoftware = tuningServiceObject->toSoftware();
+			if (tuningServiceSoftware == nullptr)
+			{
+				m_log->errCFG3021(m_software->equipmentId(), EquipmentPropNames::TUNING_SERVICE_ID, tsc.tuningServiceID);
+				result = false;
+				continue;
+			}
+
+			TuningServiceSettingsGetter tsg;
+			if (tsg.readFromDevice(m_context, tuningServiceSoftware.get()) == false)
+			{
+				result = false;
+				continue;
+			}
+
+			TuningServiceSettingsGetter::TuningClient tunClient = tsg.getTuningClient(equipmentID());
+
+			if (tunClient.isValid() == true)
+			{
+				QStringList clientEquipmentList = tunClient.uniqueSourcesIDs();
+
+				for (const QString& ce : clientEquipmentList )
+				{
+					if (equipmentList->contains(ce) == false)
+					{
+						equipmentList->append(ce);
+					}
+				}
+			}
+			else
+			{
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("TuningClient %1 isn't found in clients list of TuningService %2").
+											arg(equipmentID()).arg(tsc.tuningServiceID));
+				result = false;
 			}
 		}
 
-		return true;
+		return result;
 	}
 
 	bool TuningClientCfgGenerator::createObjectFilters(const QStringList& equipmentList)

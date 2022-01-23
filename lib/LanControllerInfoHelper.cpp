@@ -83,6 +83,17 @@ bool LanControllerInfoHelper::getInfo(const Hardware::DeviceModule& lm,
 			{
 				const Hardware::DeviceObject* tunService = equipmentSet.deviceObject(lanControllerInfo->tuningServiceID).get();
 
+				if (tunService == nullptr)
+				{
+					// Property %1.%2 is linked to undefined software ID %3.
+					//
+					log->errCFG3021(deviceController->equipmentIdTemplate(),
+									EquipmentPropNames::TUNING_SERVICE_ID,
+									lanControllerInfo->tuningServiceID);
+
+					return false;
+				}
+
 				if (tunService->isController() == false)
 				{
 					QStringList controllersIDs;
@@ -284,6 +295,9 @@ bool LanControllerInfoHelper::getInfo(const Hardware::DeviceModule& lm,
 	lanControllersInfo->clear();
 
 	const LmDescription::Lan& lan = lmDescription->lan();
+
+	lanControllersInfo->setRupVersion(lan.m_rupVersion);
+	lanControllersInfo->setFotipVersion(lan.m_fotipVersion);
 
 	bool result = true;
 

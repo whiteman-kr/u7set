@@ -52,6 +52,7 @@ SOURCES += main.cpp \
     ../lib/ClientBehavior.cpp \
     ../lib/ComparatorSet.cpp \
     ../lib/SoftwareSettings.cpp \
+    ../lib/Tuning/TuningSourcesHelper.cpp \
     ../lib/Tuning/TuningUserManager.cpp \
     ../lib/Ui/DialogSignalSnapshot.cpp \
     ../lib/Ui/DialogTcpStatistics.cpp \
@@ -109,6 +110,7 @@ HEADERS  += \
     ../lib/ConstStrings.h \
 	../UtilsLib/ILogFile.h \
     ../lib/SoftwareSettings.h \
+    ../lib/Tuning/TuningSourcesHelper.h \
     ../lib/Tuning/TuningUserManager.h \
     ../lib/Ui/DialogSignalSnapshot.h \
     ../lib/Ui/DialogTcpStatistics.h \

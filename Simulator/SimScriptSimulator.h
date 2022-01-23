@@ -164,6 +164,9 @@ namespace Sim
 		qint64 executionTimeout() const;
 		void setExecutionTimeout(qint64 value);
 
+		bool checkSkipOnBuildConst() const;
+		void setCheckSkipOnBuildConst(bool value);
+
 		[[nodiscard]] Simulator* simulator();
 		[[nodiscard]] const Simulator* simulator() const;
 
@@ -182,7 +185,8 @@ namespace Sim
 
 		ScriptWorkerThread m_workerThread{this};
 
-		qint64 m_executionTimeout = -1;		// Script execution timeout in milliseconds, negative means no timeout
+		std::atomic<qint64> m_executionTimeout = -1;		// Script execution timeout in milliseconds, negative means no timeout
+		std::atomic<bool> m_checkSkipOnBuildConst = false;	// If true then check script global variable SkipOnBuild, and both re true the SKIP this file
 	};
 
 }

@@ -37,7 +37,7 @@ public:
 	explicit TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter,
 							 std::shared_ptr<TuningFilter> workspaceFilter,
 							 TuningSignalManager* tuningSignalManager,
-							 TuningClientTcpClient* tuningTcpClient,
+							 std::vector<TuningClientTcpClient*> tcpClients,
 							 TuningClientFilterStorage* tuningFilterStorage,
 							 QWidget* parent);
 
@@ -91,7 +91,7 @@ private:
 
 	TuningSignalManager* m_tuningSignalManager = nullptr;
 
-	TuningClientTcpClient* m_tuningTcpClient = nullptr;
+	std::vector<TuningClientTcpClient*> m_tuningTcpClients;
 
 	TuningClientFilterStorage* m_tuningFilterStorage = nullptr;
 

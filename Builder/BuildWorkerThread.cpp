@@ -2166,7 +2166,7 @@ namespace Builder
 
 		for (const std::shared_ptr<DbFile>& f : files)
 		{
-			testScripts.emplace_back(Sim::SimScriptItem{f->data(), scriptFilesTree.filePath(f->fileId()) + "/" + f->fileName()});
+			testScripts.emplace_back(f->data(), scriptFilesTree.filePath(f->fileId()) + "/" + f->fileName());
 		}
 
 		class SimLogger : public ILogFile
@@ -2222,6 +2222,8 @@ namespace Builder
 
 		// Run scripts
 		//
+		simulator.setCheckSkipOnBuildConst(true);
+
 		ok = simulator.runScripts(testScripts, timeout);
 		if (ok == false)
 		{

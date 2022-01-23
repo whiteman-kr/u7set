@@ -54,6 +54,7 @@ void MonitorAppSettings::save(QSettings& settings) const
 	settings.setValue("MonitorAppSettings/configuratorIpAddress2", data.cfgSrvIpAddress2);
 	settings.setValue("MonitorAppSettings/configuratorPort2", data.cfgSrvPort2);
 
+	settings.setValue("MonitorAppSettings/showSchemasTabBar", data.showSchemasTabBar);
 	settings.setValue("MonitorAppSettings/showLogo", data.showLogo);
 	settings.setValue("MonitorAppSettings/showItemsLabels", data.showItemsLabels);
 	settings.setValue("MonitorAppSettings/singleInstance", data.singleInstance);
@@ -74,6 +75,7 @@ void MonitorAppSettings::load(const QSettings& settings)
 	data.cfgSrvIpAddress2 = settings.value("MonitorAppSettings/configuratorIpAddress2", "127.0.0.1").toString();
 	data.cfgSrvPort2 = settings.value("MonitorAppSettings/configuratorPort2", PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST).toInt();
 
+	data.showSchemasTabBar = settings.value("MonitorAppSettings/showSchemasTabBar", true).toBool();
 	data.showLogo = settings.value("MonitorAppSettings/showLogo", true).toBool();
 	data.showItemsLabels = settings.value("MonitorAppSettings/showItemsLabels", false).toBool();
 	data.singleInstance = settings.value("MonitorAppSettings/singleInstance", false).toBool();
@@ -148,6 +150,12 @@ int MonitorAppSettings::requestTimeInterval() const
 {
 	QMutexLocker l(&m_mutex);
 	return m_data.requestTimeIntervalMs;
+}
+
+bool MonitorAppSettings::showSchemasTabBar() const
+{
+	QMutexLocker l(&m_mutex);
+	return m_data.showSchemasTabBar;
 }
 
 bool MonitorAppSettings::showLogo() const

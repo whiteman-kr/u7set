@@ -55,7 +55,9 @@ namespace Builder
 		//
 		result &= saveScriptProperties("OnConfigurationArrived", "OnConfigurationArrived.js");
 
-		result &= initSchemaTagsAndTuningSources();
+		result &= initSchemaTags();
+
+		result &= initTuningSources();
 
 		// Add links to schema files (previously written) via m_cfgXml->addLinkToFile(...)
 		//
@@ -104,7 +106,7 @@ namespace Builder
 		return result;
 	}
 
-	bool MonitorCfgGenerator::initSchemaTagsAndTuningSources()
+	bool MonitorCfgGenerator::initSchemaTags()
 	{
 		std::shared_ptr<const MonitorSettings> settings = m_settingsSet.getSettingsDefaultProfile<MonitorSettings>();
 
@@ -122,10 +124,80 @@ namespace Builder
 			return false;
 		}
 
-		m_tuningSources = settings->getTuningSources();
-
 		return true;
 	}
+
+	bool MonitorCfgGenerator::initTuningSources()
+	{
+		std::shared_ptr<const MonitorSettings> settings = m_settingsSet.getSettingsDefaultProfile<MonitorSettings>();
+
+		if (settings->tuningEnabled == false)
+		{
+			return true;
+		}
+
+		if (settings->tuningServices.empty() == true)
+		{
+			// Property %1.TuningServiceID can't be empty if tuning enabled.
+			//
+			m_log-> errEQP6206(equipmentID());
+			return false;
+		}
+
+		bool result = true;
+
+		m_tuningSources.clear();
+
+		for(const MonitorSettings::TuningService& tsc : settings->tuningServices)
+		{
+			std::shared_ptr<Hardware::DeviceObject> tuningServiceObject = m_equipment->deviceObject(tsc.tuningServiceID);
+			if (tuningServiceObject == nullptr)
+			{
+				m_log->errCFG3021(m_software->equipmentId(), EquipmentPropNames::TUNING_SERVICE_ID, tsc.tuningServiceID);
+				result = false;
+				continue;
+			}
+			std::shared_ptr<Hardware::Software> tuningServiceSoftware = tuningServiceObject->toSoftware();
+			if (tuningServiceSoftware == nullptr)
+			{
+				m_log->errCFG3021(m_software->equipmentId(), EquipmentPropNames::TUNING_SERVICE_ID, tsc.tuningServiceID);
+				result = false;
+				continue;
+			}
+
+			TuningServiceSettingsGetter tsg;
+			if (tsg.readFromDevice(m_context, tuningServiceSoftware.get()) == false)
+			{
+				result = false;
+				continue;
+			}
+
+			TuningServiceSettingsGetter::TuningClient tunClient = tsg.getTuningClient(equipmentID());
+
+			if (tunClient.isValid() == true)
+			{
+				QStringList clientEquipmentList = tunClient.uniqueSourcesIDs();
+
+				for (const QString& ce : clientEquipmentList )
+				{
+					if (m_tuningSources.contains(ce) == false)
+					{
+						m_tuningSources.append(ce);
+					}
+				}
+			}
+			else
+			{
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Monitor %1 isn't found in clients list of TuningService %2").
+											arg(equipmentID()).arg(tsc.tuningServiceID));
+				result = false;
+				continue;
+			}
+		}
+
+		return result;
+	}
+
 
 	bool MonitorCfgGenerator::saveScriptProperties(QString scriptProperty, QString fileName)
 	{

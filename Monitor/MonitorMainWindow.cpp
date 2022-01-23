@@ -66,7 +66,7 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	MonitorCentralWidget* monitorCentralWidget = new MonitorCentralWidget(&m_schemaManager,
 																		  m_appSignalController.get(),
 																		  m_tuningController.get(),
-	                                                                      m_logController.get(),
+																		  m_logController.get(),
 																		  this);
 	setCentralWidget(monitorCentralWidget);
 
@@ -88,11 +88,11 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	// --
 	//
 	connect(monitorCentralWidget, &MonitorCentralWidget::signal_actionCloseTabUpdated, this,
-		[this](bool allowed)
-		{
-			Q_ASSERT(m_closeTabAction);
-			m_closeTabAction->setEnabled(allowed);
-		});
+			[this](bool allowed)
+	{
+		Q_ASSERT(m_closeTabAction);
+		m_closeTabAction->setEnabled(allowed);
+	});
 
 	connect(monitorCentralWidget, &MonitorCentralWidget::signal_historyChanged, this, &MonitorMainWindow::slot_historyChanged);
 	connect(monitorCentralWidget, &MonitorCentralWidget::signal_tabPageChanged, this, &MonitorMainWindow::slot_updateActions);
@@ -115,9 +115,9 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	m_schemaListDock->setTitleBarWidget(new QWidget{});		// Hides title bar
 
 	SchemaListWidget* schemaListWidget = new SchemaListWidget(
-												 std::vector{SchemaListTreeColumns::SchemaID, SchemaListTreeColumns::Caption},
-												 false,
-												 m_schemaListDock);
+											 std::vector{SchemaListTreeColumns::SchemaID, SchemaListTreeColumns::Caption},
+											 false,
+											 m_schemaListDock);
 	m_schemaListDock->setWidget(schemaListWidget);
 
 	addDockWidget(Qt::LeftDockWidgetArea, m_schemaListDock);
@@ -133,10 +133,10 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	connect(schemaListWidget, &SchemaListWidget::openSchemaRequest, monitorCentralWidget, &MonitorCentralWidget::slot_selectSchemaForCurrentTab);
 
 	connect(m_schemaManager.monitorConfigController(), &MonitorConfigController::configurationUpdate,
-				[this, schemaListWidget]()
-				{
-					schemaListWidget->setDetails(m_schemaManager.monitorConfigController()->schemasDetailsSet());
-				});
+			[this, schemaListWidget]()
+	{
+		schemaListWidget->setDetails(m_schemaManager.monitorConfigController()->schemasDetailsSet());
+	});
 
 	return;
 }
@@ -158,11 +158,12 @@ MonitorMainWindow::~MonitorMainWindow()
 		delete m_sourcesStateClientThread;
 	}
 
-	if (m_tuningTcpClientThread != nullptr)
+	if (m_dialogDataSources != nullptr)
 	{
-		m_tuningTcpClientThread->quitAndWait(10000);
-		delete m_tuningTcpClientThread;
+		m_dialogDataSources->close();
 	}
+
+	stopTuningTcpClients();
 
 	return;
 }
@@ -249,10 +250,18 @@ void MonitorMainWindow::restoreWindowState()
 	auto mainWindowGeometry = s.value("MainWindow/geometry").toByteArray();
 	auto mainWindowState = s.value("MainWindow/state").toByteArray();
 
-
 	move(mainWindowPos);
 	restoreGeometry(mainWindowGeometry);
+
 	restoreState(mainWindowState);
+
+	// Full screen could be set by script, and then saved on exit
+	// there is no weay to unset full screen from UI, so application always start without fullscreen
+	//
+	if ((windowState() & Qt::WindowFullScreen) != 0)
+	{
+		setWindowState(windowState() ^ Qt::WindowFullScreen);
+	}
 
 	// Ensure widget is visible
 	//
@@ -382,8 +391,8 @@ void MonitorMainWindow::showLogo()
 
 
 	m_logoSeparator->setVisible(MonitorAppSettings::instance().showLogo() == true &&
-								 m_configController.configuration().tuningEnabled == true &&
-								 m_tuningUserManager.tuningLogin() == true);
+								m_configController.configuration().tuningEnabled == true &&
+								m_tuningUserManager.tuningLogin() == true);
 
 	return;
 }
@@ -683,27 +692,27 @@ void MonitorMainWindow::createToolBars()
 void MonitorMainWindow::createStatusBar()
 {
 	m_statusBarInfo = new QLabel();
-	m_statusBarInfo->setAlignment(Qt::AlignLeft);
+	m_statusBarInfo->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
 	m_statusBarInfo->setIndent(3);
 
 	m_statusBarConfigConnection = new QLabel();
-	m_statusBarConfigConnection->setAlignment(Qt::AlignHCenter);
+	m_statusBarConfigConnection->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
 	m_statusBarConfigConnection->setMinimumWidth(100);
 
 	m_statusBarAppDataConnection = new QLabel();
-	m_statusBarAppDataConnection->setAlignment(Qt::AlignHCenter);
+	m_statusBarAppDataConnection->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
 	m_statusBarAppDataConnection->setMinimumWidth(100);
 
 	m_statusBarTuningConnection = new QLabel();
-	m_statusBarTuningConnection->setAlignment(Qt::AlignHCenter);
+	m_statusBarTuningConnection->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
 	m_statusBarTuningConnection->setMinimumWidth(100);
 
 	m_statusBarProjectInfo = new QLabel;
-	m_statusBarProjectInfo->setAlignment(Qt::AlignHCenter);
+	m_statusBarProjectInfo->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
 	m_statusBarProjectInfo->setMinimumWidth(100);
 
 	m_statusBarLogAlerts = new QLabel;
-	m_statusBarLogAlerts->setAlignment(Qt::AlignHCenter);
+	m_statusBarLogAlerts->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
 	m_statusBarLogAlerts->setMinimumWidth(100);
 	m_statusBarLogAlerts->setToolTip(tr("Error and warning counters in the log (click to view log)"));
 	m_statusBarLogAlerts->installEventFilter(this);
@@ -726,6 +735,49 @@ MonitorCentralWidget* MonitorMainWindow::monitorCentralWidget()
 	Q_ASSERT(centralWidget != nullptr);
 
 	return centralWidget;
+}
+
+void MonitorMainWindow::runTuningTcpClients()
+{
+	if (m_tuningTcpClients.empty() == false || m_tuningTcpClientThreads.empty() == false)
+	{
+		Q_ASSERT(m_tuningTcpClients.empty() == true);
+		Q_ASSERT(m_tuningTcpClientThreads.empty() == true);
+		return;
+	}
+
+	for (const MonitorSettings::TuningService& ts : m_configController.configuration().tuningServices)
+	{
+		// TuningClientTcpClient
+		//
+		MonitorTuningTcpClient* client = new MonitorTuningTcpClient(m_configController.softwareInfo(), ts.tuningServiceID, &theTuningSignals, &m_LogFile);
+
+		const HostAddressPort addrPort = HostAddressPort(ts.clientRequestIP, ts.clientRequestPort);
+		client->setServers(addrPort, addrPort, false);
+
+
+		SimpleThread* thread = new SimpleThread(client);
+		thread->start();
+
+		m_tuningTcpClients.push_back(client);
+		m_tuningTcpClientThreads.push_back(thread);
+	}
+
+	return;
+}
+
+void MonitorMainWindow::stopTuningTcpClients()
+{
+	for (SimpleThread* t : m_tuningTcpClientThreads)
+	{
+		t->quitAndWait(10000);
+		delete t;
+	}
+
+	m_tuningTcpClients.clear();
+	m_tuningTcpClientThreads.clear();
+
+	return;
 }
 
 void MonitorMainWindow::updateStatusBar()
@@ -763,23 +815,66 @@ void MonitorMainWindow::updateStatusBar()
 
 	// TuningService connection
 	//
-	if  (m_configController.configuration().tuningEnabled == true && m_tuningTcpClient != nullptr)
-	{
-		Tcp::ConnectionState tuningClientState = m_tuningTcpClient->getConnectionState();
 
-		showSoftwareConnection(tr("Tuning Service"), tr("TuningService"),
-							   tuningClientState,
-							   m_tuningTcpClient->serverAddressPort1(),
-							   m_tuningTcpClient->serverAddressPort2(),
-							   m_statusBarTuningConnection);
+	if  (m_configController.configuration().tuningEnabled == true && m_tuningTcpClients.empty() == false)
+	{
+		QString statusText;
+		QString tooltipText;
+
+		statusText = tr(" %1:").arg(tr("Tuning Service"));
+
+		for (const MonitorTuningTcpClient* client : m_tuningTcpClients)
+		{
+			Tcp::ConnectionState tuningClientState = client->getConnectionState();
+
+			const auto& portPrimary = client->serverAddressPort1();
+			const auto& portSecondary = client->serverAddressPort2();
+
+			tooltipText.append(tr("%1\r\n\r\n").arg(client->tuningServiceId()));
+			tooltipText.append(tr("Address (primary): %1\r\n").arg(portPrimary.addressPortStr()));
+			tooltipText.append(tr("Address (secondary): %1\r\n\r\n").arg(portSecondary.addressPortStr()));
+			tooltipText.append(tr("Address (current): %1\r\n").arg(tuningClientState.peerAddr.addressPortStr()));
+
+			if (tuningClientState.isConnected == true)
+			{
+				statusText += tr(" %1 /").arg(tuningClientState.replyCount);
+				tooltipText.append(tr("Connection: established\n\n"));
+			}
+			else
+			{
+				if (m_tuningTcpClients.size() > 1)
+				{
+					statusText += tr(" No /");
+				}
+				else
+				{
+					statusText += tr(" No connection");
+				}
+				tooltipText.append(tr("Connection: no connection\n\n"));
+			}
+		}
+
+		statusText.remove(statusText.length() - 1, 1);
+
+		tooltipText = tooltipText.trimmed();
+
+		if (m_statusBarTuningConnection->text() != statusText)
+		{
+			m_statusBarTuningConnection->setText(statusText);
+		}
+		if (m_statusBarTuningConnection->toolTip() != tooltipText)
+		{
+			m_statusBarTuningConnection->setToolTip(tooltipText);
+		}
 	}
+
 
 	// BuildNo
 	//
 	{
 		QString text = QString(" Project: %1   Build: %2  ")
-				.arg(m_configController.configuration().project)
-				.arg(m_configController.configuration().buildNo);
+					   .arg(m_configController.configuration().project)
+					   .arg(m_configController.configuration().buildNo);
 
 		m_statusBarProjectInfo->setText(text);
 	}
@@ -799,7 +894,14 @@ void MonitorMainWindow::updateStatusBar()
 		}
 		else
 		{
-			m_statusBarLogAlerts->setStyleSheet("QLabel {color : white; background-color: red}");
+			if (m_logErrorsCounter == 0)
+			{
+				m_statusBarLogAlerts->setStyleSheet("QLabel {color : white; background-color: #F87217}");
+			}
+			else
+			{
+				m_statusBarLogAlerts->setStyleSheet("QLabel {color : white; background-color: #C00000}");
+			}
 		}
 	}
 
@@ -865,17 +967,29 @@ void MonitorMainWindow::showDataSources()
 {
 	if (m_dialogDataSources == nullptr)
 	{
+		std::vector<TuningTcpClient*> tuningTcpClients;
+		for (const auto& c: m_tuningTcpClients)
+		{
+			TuningTcpClient* tc = dynamic_cast<TuningTcpClient*>(c);
+			if (tc == nullptr)
+			{
+				Q_ASSERT(tc);
+				return;
+			}
+			tuningTcpClients.push_back(tc);
+		}
+
 		m_dialogDataSources = new DialogDataSources(m_tcpSourcesStateClient,
 													m_configController.configuration().tuningEnabled,
-													m_tuningTcpClient,
+													tuningTcpClients,
 													false,
 													this);
 		m_dialogDataSources->show();
 
 		auto f = [this]() -> void
-			{
-				m_dialogDataSources = nullptr;
-			};
+		{
+			m_dialogDataSources = nullptr;
+		};
 
 		connect(m_dialogDataSources, &DialogDataSources::dialogClosed, this, f);
 	}
@@ -926,6 +1040,7 @@ void MonitorMainWindow::showSettings()
 		// Apply settings here
 		//
 		showLogo();
+		setVisibleTabBar(MonitorAppSettings::instance().showSchemasTabBar());
 
 		// Reconnect
 		//
@@ -959,9 +1074,9 @@ void MonitorMainWindow::showStatistics()
 		m_dialogStatistics->show();
 
 		auto f = [this]() -> void
-			{
-				m_dialogStatistics = nullptr;
-			};
+		{
+			m_dialogStatistics = nullptr;
+		};
 
 		connect(m_dialogStatistics, &DialogTcpStatistics::dialogClosed, this, f);
 	}
@@ -1019,10 +1134,10 @@ void MonitorMainWindow::debug()
 
 	// Create tab
 	//
-//	QTabWidget* tabWidget = monitorCentralWidget();
+	//	QTabWidget* tabWidget = monitorCentralWidget();
 
-//	MonitorSchemaWidget* schemaWidget = new MonitorSchemaWidget(schema);
-//	tabWidget->addTab(schemaWidget, "Debug tab: " + fileInfo.fileName());
+	//	MonitorSchemaWidget* schemaWidget = new MonitorSchemaWidget(schema);
+	//	tabWidget->addTab(schemaWidget, "Debug tab: " + fileInfo.fileName());
 
 #endif	// QT_DEBUG
 }
@@ -1422,44 +1537,28 @@ void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
 	// Refresh TuningUserManager configuration
 	//
 	m_tuningUserManager.setConfiguration(configuration.tuningLogin,
-								   configuration.tuningUserAccounts,
-								   false/*loginPerOperation*/,
-								   configuration.tuningSessionTimeout);
+										 configuration.tuningUserAccounts,
+										 false/*loginPerOperation*/,
+										 configuration.tuningSessionTimeout);
 
 	showTuningLoginControls();
 
-	// Close TuningTcpClient
+	// Close TuningTcpClients
 	//
-	if (m_tuningTcpClientThread != nullptr)
-	{
-		m_tuningController->resetTcpClient();
+	stopTuningTcpClients();
 
-		m_tuningTcpClientThread->quitAndWait(10000);
-		delete m_tuningTcpClientThread;
-
-		m_tuningTcpClientThread = nullptr;
-		m_tuningTcpClient = nullptr;
-	}
-
-	// Create TuningTcpClient if tuning is enabled
+	// Create TuningTcpClients if tuning is enabled
 	//
 	if (configuration.tuningEnabled == true)
 	{
-		m_tuningTcpClient = new MonitorTuningTcpClient(m_configController.softwareInfo(), &theTuningSignals, &m_LogFile);
-
-		m_tuningTcpClient->setServers(configuration.tuningService.address(),
-									  configuration.tuningService.address(),
-									  false);
-
-		m_tuningTcpClientThread = new SimpleThread(m_tuningTcpClient);
-		m_tuningTcpClientThread->start();
-
-		m_tuningController->setTcpClient(m_tuningTcpClient);
+		runTuningTcpClients();
 	}
+
+	m_tuningController->setTcpClients({m_tuningTcpClients.begin(),m_tuningTcpClients.end()});
 
 	if (m_dialogDataSources != nullptr)
 	{
-		m_dialogDataSources->setTuningTcpClient(m_configController.configuration().tuningEnabled, m_tuningTcpClient, false);
+		m_dialogDataSources->setTuningTcpClients(configuration.tuningEnabled, {m_tuningTcpClients.begin(),m_tuningTcpClients.end()}, false);
 	}
 
 	m_statusBarTuningConnection->setVisible(configuration.tuningEnabled == true);
@@ -1478,7 +1577,7 @@ void MonitorMainWindow::slot_unknownClient()
 	QMessageBox::critical(this,
 						  qAppName(),
 						  tr("Configuration Service does not recognize Monitor EquipmentID %1")
-								.arg(m_configController.softwareInfo().equipmentID()));
+						  .arg(m_configController.softwareInfo().equipmentID()));
 
 	return;
 }
@@ -1490,15 +1589,15 @@ void MonitorMainWindow::activateRequested()
 	// will be every time on top, so we need remove WindowStaysOnTop flag, apply changes, and only then remove
 	// X11Bypass flag.
 	//
-//	this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint | Qt::X11BypassWindowManagerHint);
-//	this->activateWindow();
-//	this->show();
-//	this->setWindowFlags(this->windowFlags() & (~Qt::WindowStaysOnTopHint));
-//	this->activateWindow();
-//	this->show();
-//	this->setWindowFlags(this->windowFlags() & (~Qt::X11BypassWindowManagerHint));
-//	this->activateWindow();
-//	this->show();
+	//	this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint | Qt::X11BypassWindowManagerHint);
+	//	this->activateWindow();
+	//	this->show();
+	//	this->setWindowFlags(this->windowFlags() & (~Qt::WindowStaysOnTopHint));
+	//	this->activateWindow();
+	//	this->show();
+	//	this->setWindowFlags(this->windowFlags() & (~Qt::X11BypassWindowManagerHint));
+	//	this->activateWindow();
+	//	this->show();
 
 	// WARNING: Windows prevents from stealing focus, to avoid it set registry key
 	// Computer\HKEY_CURRENT_USER\Control Panel\Desktop\ForegroundLockTimeout to 0
@@ -1520,6 +1619,88 @@ void MonitorMainWindow::slot_login()
 	{
 		m_tuningUserManager.login(this);
 	}
+}
+
+void MonitorMainWindow::toggleSchemaTree()
+{
+	if (m_schemaListAction != nullptr)
+	{
+		m_schemaListAction->toggle();
+	}
+
+	return;
+}
+
+void MonitorMainWindow::setVisibleSchemaTree(bool visible)
+{
+	if (m_schemaListAction != nullptr)
+	{
+		m_schemaListAction-> setChecked(visible);
+	}
+
+	return;
+}
+
+void MonitorMainWindow::setVisibleTabBar(bool visible)
+{
+	MonitorCentralWidget* m = monitorCentralWidget();
+	Q_ASSERT(m);
+
+	if (m != nullptr)
+	{
+		m->tabBar()->setVisible(visible);
+	}
+
+	return;
+}
+
+void MonitorMainWindow::setVisibleToolBar(bool visible)
+{
+	if (m_toolBar != nullptr)
+	{
+		m_toolBar->setVisible(visible);
+	}
+
+	return;
+}
+
+void MonitorMainWindow::setVisibleStatusBar(bool visible)
+{
+	if (auto sb = statusBar();
+		sb != nullptr)
+	{
+		sb->setVisible(visible);
+	}
+
+	return;
+}
+
+void MonitorMainWindow::setVisibleMenu(bool visible)
+{
+	if (auto m = menuBar();
+		m != nullptr)
+	{
+		m->setVisible(visible);
+	}
+
+	return;
+}
+
+void MonitorMainWindow::setFullScreen(bool value)
+{
+	if (value == true)
+	{
+		setWindowState(windowState() | Qt::WindowFullScreen);
+	}
+	else
+	{
+		if ((windowState() & Qt::WindowFullScreen) != 0)
+		{
+			setWindowState(windowState() ^ Qt::WindowFullScreen);
+		}
+	}
+
+	return;
 }
 
 void MonitorMainWindow::slot_reLogin()

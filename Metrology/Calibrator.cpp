@@ -1669,11 +1669,11 @@ bool CalibratorLimit::isValid() const
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-QString CalibratorTypeCaption(int сalibratorType)
+QString CalibratorTypeCaption(int calibratorType)
 {
 	QString caption;
 
-	switch (сalibratorType)
+    switch (calibratorType)
 	{
 		case CalibratorType::TrxII:		caption = "TRX-II";			break;
 		case CalibratorType::Calys75:	caption = "CALYS-75";		break;
@@ -1688,11 +1688,11 @@ QString CalibratorTypeCaption(int сalibratorType)
 	return caption;
 };
 
-QString CalibratorIdnCaption(int сalibratorType)
+QString CalibratorIdnCaption(int calibratorType)
 {
 	QString caption;
 
-	switch (сalibratorType)
+    switch (calibratorType)
 	{
 		case CalibratorType::TrxII:		caption = "TRX-IIR";		break;
 		case CalibratorType::Calys75:	caption = "Calys 75";		break;
@@ -1725,11 +1725,11 @@ CalibratorInterface getCalibratorInterface(int calibratorType)
 	return interface;
 }
 
-QString CalibratorModeCaption(int сalibratorMode)
+QString CalibratorModeCaption(int calibratorMode)
 {
-	QString caption;
+    QString caption;
 
-	switch (сalibratorMode)
+    switch (calibratorMode)
 	{
 		case CalibratorMode::MeasureMode:	caption = QT_TRANSLATE_NOOP("Calibrator", "Measure");	break;
 		case CalibratorMode::SourceMode:	caption = QT_TRANSLATE_NOOP("Calibrator", "Source");	break;
@@ -1742,11 +1742,11 @@ QString CalibratorModeCaption(int сalibratorMode)
 	return caption;
 };
 
-QString CalibratorUnitCaption(int сalibratorUnit)
+QString CalibratorUnitCaption(int calibratorUnit)
 {
 	QString caption;
 
-	switch (сalibratorUnit)
+    switch (calibratorUnit)
 	{
 		case CalibratorUnit::mV:		caption = QT_TRANSLATE_NOOP("Calibrator", "mV");			break;
 		case CalibratorUnit::mA:		caption = QT_TRANSLATE_NOOP("Calibrator", "mA");			break;

@@ -1,6 +1,7 @@
 #include "TuningSchemaView.h"
 #include "TuningSchemaWidget.h"
 #include "MainWindow.h"
+#include "Main.h"
 #include "../VFrame30/DrawParam.h"
 #include "../VFrame30/MonitorSchema.h"
 #include "../VFrame30/PropertyNames.h"
@@ -35,12 +36,12 @@ void TuningSchemaView::updateScriptGlobalVars(QJSEngine& engine)
 
 	// create global variable "app"
 	//
-//	{
-//		QJSValue jsApp = engine.newQObject(&theApp);
-//		QQmlEngine::setObjectOwnership(&theApp, QQmlEngine::CppOwnership);
+	{
+		QJSValue jsApp = engine.newQObject(&theApp);
+		QQmlEngine::setObjectOwnership(&theApp, QQmlEngine::CppOwnership);
 
-//		engine.globalObject().setProperty(VFrame30::PropertyNames::scriptGlobalVariableApp, jsApp);
-//	}
+		engine.globalObject().setProperty(VFrame30::PropertyNames::scriptGlobalVariableApp, jsApp);
+	}
 
 	// create global variable "tuning"
 	//

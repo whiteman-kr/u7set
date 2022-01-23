@@ -15,27 +15,6 @@ extern QColor redColor;
 // ConfigConnection
 //
 
-class ConfigConnection
-{
-	ConfigConnection() {}
-
-public:
-	ConfigConnection(QString EquipmentId, QString ipAddress, int port);
-
-	QString equipmentId() const;
-	QString ip() const;
-	int port() const;
-
-	HostAddressPort address() const;
-
-protected:
-	QString m_equipmentId;
-	QString m_ip;
-	int m_port;
-
-	friend struct ConfigSettings;
-};
-
 //
 // BuildInfo
 //
@@ -91,8 +70,6 @@ struct ConfigSettings
 {
 	TuningClientSettings clientSettings;
 
-	ConfigConnection serviceAddress;				// Tuning Service connection params
-
 	std::vector<SchemaInfo> schemas;
 
 	BuildInfo buildInfo;
@@ -112,7 +89,6 @@ struct ConfigSettings
 
 	ConfigSettings& operator = (const ConfigSettings& That)
 	{
-		serviceAddress = That.serviceAddress;
 		clientSettings = That.clientSettings;
 
 		schemas = That.schemas;
@@ -173,9 +149,6 @@ public:
 public:
 
 	int m_requestInterval = 100;
-
-	bool m_enableSimulation = false;
-	bool m_simulationMode = false;
 
 	// MainWindow options
 

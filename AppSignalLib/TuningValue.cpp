@@ -133,6 +133,13 @@ void TuningValue::setDoubleValue(double doubleValue)
 	m_double = doubleValue;
 }
 
+void TuningValue::setValue(const TuningValue& tv)
+{
+	m_type = tv.m_type;
+	m_int64 = tv.m_int64;
+	m_double = tv.m_double;
+}
+
 void TuningValue::setValue(TuningValueType valueType, qint64 intValue, double doubleValue)
 {
 	assert(valueType == TuningValueType::Discrete ||

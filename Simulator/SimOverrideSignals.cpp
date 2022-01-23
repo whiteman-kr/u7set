@@ -328,8 +328,10 @@ namespace Sim
 	{
 		assert(m_dataSizeW == 1);
 
+		value = value ? 0x0001 : 0x0000;
+
 		m_ramOverrides[0].mask = qToBigEndian<quint16>(0x0001 << m_address.bit());
-		m_ramOverrides[0].data = qToBigEndian<quint16>((value & 0x0001) << m_address.bit());
+		m_ramOverrides[0].data = qToBigEndian<quint16>(value << m_address.bit());
 
 		m_value = QVariant::fromValue(value);
 

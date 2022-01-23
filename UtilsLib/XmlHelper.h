@@ -28,6 +28,7 @@ public:
 	void writeEndElement();
 
 	void writeStringAttribute(const QString& name, const QString& value);
+	void writeStringListAttribute(const QString& name, const QStringList& list);
 	void writeIntAttribute(const QString& name, int value, bool hex = false);
 	void writeBoolAttribute(const QString& name, bool value);
 	void writeInt64Attribute(const QString& name, qint64 value, bool hex = false);
@@ -111,6 +112,7 @@ public:
 	bool atEnd();
 
 	bool readStringAttribute(const QString& name, QString* value);
+	bool readStringListAttribute(const QString& name, QStringList* list);
 	bool readIntAttribute(const QString& name, int* value);
 	bool readBoolAttribute(const QString& name, bool* value);
 	bool readInt64Attribute(const QString& name, qlonglong* value);

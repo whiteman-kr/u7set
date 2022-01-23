@@ -8262,54 +8262,76 @@ class TuningSourceState PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
+    kLanEquipmentIDFieldNumber = 2,
     kSourceIDFieldNumber = 1,
-    kRequestCountFieldNumber = 3,
-    kReplyCountFieldNumber = 4,
-    kErrUntimelyReplayFieldNumber = 6,
-    kErrSentFieldNumber = 7,
-    kErrPartialSentFieldNumber = 8,
-    kErrReplySizeFieldNumber = 9,
-    kErrNoReplyFieldNumber = 10,
-    kErrRupProtocolVersionFieldNumber = 11,
-    kErrRupFrameSizeFieldNumber = 12,
-    kErrRupNonTuningDataFieldNumber = 13,
-    kErrRupModuleTypeFieldNumber = 14,
-    kErrRupFramesQuantityFieldNumber = 15,
-    kErrRupFrameNumberFieldNumber = 16,
-    kErrFotipProtocolVersionFieldNumber = 17,
-    kErrFotipUniqueIDFieldNumber = 18,
-    kErrFotipLmNumberFieldNumber = 19,
-    kErrFotipSubsystemCodeFieldNumber = 20,
-    kErrFotipOperationCodeFieldNumber = 21,
-    kErrFotipFrameSizeFieldNumber = 22,
-    kErrFotipRomSizeFieldNumber = 23,
-    kErrFotipRomFrameSizeFieldNumber = 24,
-    kFotipFlagBoundsCheckSuccessFieldNumber = 25,
-    kFotipFlagWriteSuccessFieldNumber = 26,
-    kFotipFlagDataTypeErrFieldNumber = 27,
-    kCommandQueueSizeFieldNumber = 5,
-    kIsReplyFieldNumber = 2,
-    kControlIsActiveFieldNumber = 42,
-    kSetSORFieldNumber = 43,
-    kHasUnappliedParamsFieldNumber = 44,
-    kFotipFlagOpCodeErrFieldNumber = 28,
-    kFotipFlagStartAddrErrFieldNumber = 29,
-    kFotipFlagRomSizeErrFieldNumber = 30,
-    kFotipFlagRomFrameSizeErrFieldNumber = 31,
-    kFotipFlagFrameSizeErrFieldNumber = 32,
-    kFotipFlagProtocolVersionErrFieldNumber = 33,
-    kFotipFlagSubsystemKeyErrFieldNumber = 34,
-    kFotipFlagUniueIDErrFieldNumber = 35,
-    kFotipFlagOffsetErrFieldNumber = 36,
-    kFotipFlagApplySuccessFieldNumber = 37,
-    kFotipFlagSetSORFieldNumber = 38,
-    kErrAnalogLowBoundCheckFieldNumber = 39,
-    kErrAnalogHighBoundCheckFieldNumber = 40,
-    kErrRupCRCFieldNumber = 41,
-    kFotipFlagWritingDisabledFieldNumber = 46,
-    kErrTuningFrameUpdateFieldNumber = 47,
-    kWritingDisabledFieldNumber = 45,
+    kRequestCountFieldNumber = 11,
+    kReplyCountFieldNumber = 12,
+    kCommandQueueSizeFieldNumber = 13,
+    kIsReplyFieldNumber = 10,
+    kControlIsActiveFieldNumber = 14,
+    kSetSORFieldNumber = 15,
+    kWritingDisabledFieldNumber = 16,
+    kFotipFlagBoundsCheckSuccessFieldNumber = 30,
+    kFotipFlagWriteSuccessFieldNumber = 31,
+    kFotipFlagDataTypeErrFieldNumber = 32,
+    kFotipFlagOpCodeErrFieldNumber = 33,
+    kFotipFlagStartAddrErrFieldNumber = 34,
+    kFotipFlagRomSizeErrFieldNumber = 35,
+    kFotipFlagRomFrameSizeErrFieldNumber = 36,
+    kFotipFlagFrameSizeErrFieldNumber = 37,
+    kFotipFlagProtocolVersionErrFieldNumber = 38,
+    kFotipFlagSubsystemKeyErrFieldNumber = 39,
+    kFotipFlagUniueIDErrFieldNumber = 40,
+    kFotipFlagOffsetErrFieldNumber = 41,
+    kFotipFlagApplySuccessFieldNumber = 42,
+    kFotipFlagSetSORFieldNumber = 43,
+    kFotipFlagWritingDisabledFieldNumber = 44,
+    kFotipProcessingNumeratorFieldNumber = 45,
+    kErrRupProtocolVersionFieldNumber = 50,
+    kHasUnappliedParamsFieldNumber = 17,
+    kErrRupFrameSizeFieldNumber = 51,
+    kErrRupNonTuningDataFieldNumber = 52,
+    kErrRupModuleTypeFieldNumber = 53,
+    kErrRupFramesQuantityFieldNumber = 54,
+    kErrRupFrameNumberFieldNumber = 55,
+    kErrRupCRCFieldNumber = 56,
+    kErrFotipProtocolVersionFieldNumber = 60,
+    kErrFotipUniqueIDFieldNumber = 61,
+    kErrFotipLmNumberFieldNumber = 62,
+    kErrFotipSubsystemCodeFieldNumber = 63,
+    kErrFotipOperationCodeFieldNumber = 64,
+    kErrFotipFrameSizeFieldNumber = 65,
+    kErrFotipRomSizeFieldNumber = 66,
+    kErrFotipRomFrameSizeFieldNumber = 67,
+    kErrAnalogLowBoundCheckFieldNumber = 68,
+    kErrAnalogHighBoundCheckFieldNumber = 69,
+    kErrUntimelyReplayFieldNumber = 70,
+    kErrSentFieldNumber = 71,
+    kErrPartialSentFieldNumber = 72,
+    kErrReplySizeFieldNumber = 73,
+    kErrNoReplyFieldNumber = 74,
+    kErrTuningFrameUpdateFieldNumber = 75,
   };
+  // optional string lanEquipmentID = 2;
+  bool has_lanequipmentid() const;
+  private:
+  bool _internal_has_lanequipmentid() const;
+  public:
+  void clear_lanequipmentid();
+  const std::string& lanequipmentid() const;
+  void set_lanequipmentid(const std::string& value);
+  void set_lanequipmentid(std::string&& value);
+  void set_lanequipmentid(const char* value);
+  void set_lanequipmentid(const char* value, size_t size);
+  std::string* mutable_lanequipmentid();
+  std::string* release_lanequipmentid();
+  void set_allocated_lanequipmentid(std::string* lanequipmentid);
+  private:
+  const std::string& _internal_lanequipmentid() const;
+  void _internal_set_lanequipmentid(const std::string& value);
+  std::string* _internal_mutable_lanequipmentid();
+  public:
+
   // optional uint64 sourceID = 1 [default = 0];
   bool has_sourceid() const;
   private:
@@ -8323,7 +8345,7 @@ class TuningSourceState PROTOBUF_FINAL :
   void _internal_set_sourceid(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // optional int64 requestCount = 3 [default = 0];
+  // optional int64 requestCount = 11 [default = 0];
   bool has_requestcount() const;
   private:
   bool _internal_has_requestcount() const;
@@ -8336,7 +8358,7 @@ class TuningSourceState PROTOBUF_FINAL :
   void _internal_set_requestcount(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
-  // optional int64 replyCount = 4 [default = 0];
+  // optional int64 replyCount = 12 [default = 0];
   bool has_replycount() const;
   private:
   bool _internal_has_replycount() const;
@@ -8349,293 +8371,7 @@ class TuningSourceState PROTOBUF_FINAL :
   void _internal_set_replycount(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
-  // optional int64 errUntimelyReplay = 6 [default = 0];
-  bool has_erruntimelyreplay() const;
-  private:
-  bool _internal_has_erruntimelyreplay() const;
-  public:
-  void clear_erruntimelyreplay();
-  ::PROTOBUF_NAMESPACE_ID::int64 erruntimelyreplay() const;
-  void set_erruntimelyreplay(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_erruntimelyreplay() const;
-  void _internal_set_erruntimelyreplay(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 errSent = 7 [default = 0];
-  bool has_errsent() const;
-  private:
-  bool _internal_has_errsent() const;
-  public:
-  void clear_errsent();
-  ::PROTOBUF_NAMESPACE_ID::int64 errsent() const;
-  void set_errsent(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errsent() const;
-  void _internal_set_errsent(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 errPartialSent = 8 [default = 0];
-  bool has_errpartialsent() const;
-  private:
-  bool _internal_has_errpartialsent() const;
-  public:
-  void clear_errpartialsent();
-  ::PROTOBUF_NAMESPACE_ID::int64 errpartialsent() const;
-  void set_errpartialsent(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errpartialsent() const;
-  void _internal_set_errpartialsent(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 errReplySize = 9 [default = 0];
-  bool has_errreplysize() const;
-  private:
-  bool _internal_has_errreplysize() const;
-  public:
-  void clear_errreplysize();
-  ::PROTOBUF_NAMESPACE_ID::int64 errreplysize() const;
-  void set_errreplysize(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errreplysize() const;
-  void _internal_set_errreplysize(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 errNoReply = 10 [default = 0];
-  bool has_errnoreply() const;
-  private:
-  bool _internal_has_errnoreply() const;
-  public:
-  void clear_errnoreply();
-  ::PROTOBUF_NAMESPACE_ID::int64 errnoreply() const;
-  void set_errnoreply(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errnoreply() const;
-  void _internal_set_errnoreply(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 errRupProtocolVersion = 11 [default = 0];
-  bool has_errrupprotocolversion() const;
-  private:
-  bool _internal_has_errrupprotocolversion() const;
-  public:
-  void clear_errrupprotocolversion();
-  ::PROTOBUF_NAMESPACE_ID::int64 errrupprotocolversion() const;
-  void set_errrupprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errrupprotocolversion() const;
-  void _internal_set_errrupprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 errRupFrameSize = 12 [default = 0];
-  bool has_errrupframesize() const;
-  private:
-  bool _internal_has_errrupframesize() const;
-  public:
-  void clear_errrupframesize();
-  ::PROTOBUF_NAMESPACE_ID::int64 errrupframesize() const;
-  void set_errrupframesize(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errrupframesize() const;
-  void _internal_set_errrupframesize(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 errRupNonTuningData = 13 [default = 0];
-  bool has_errrupnontuningdata() const;
-  private:
-  bool _internal_has_errrupnontuningdata() const;
-  public:
-  void clear_errrupnontuningdata();
-  ::PROTOBUF_NAMESPACE_ID::int64 errrupnontuningdata() const;
-  void set_errrupnontuningdata(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errrupnontuningdata() const;
-  void _internal_set_errrupnontuningdata(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 errRupModuleType = 14 [default = 0];
-  bool has_errrupmoduletype() const;
-  private:
-  bool _internal_has_errrupmoduletype() const;
-  public:
-  void clear_errrupmoduletype();
-  ::PROTOBUF_NAMESPACE_ID::int64 errrupmoduletype() const;
-  void set_errrupmoduletype(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errrupmoduletype() const;
-  void _internal_set_errrupmoduletype(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 errRupFramesQuantity = 15 [default = 0];
-  bool has_errrupframesquantity() const;
-  private:
-  bool _internal_has_errrupframesquantity() const;
-  public:
-  void clear_errrupframesquantity();
-  ::PROTOBUF_NAMESPACE_ID::int64 errrupframesquantity() const;
-  void set_errrupframesquantity(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errrupframesquantity() const;
-  void _internal_set_errrupframesquantity(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 errRupFrameNumber = 16 [default = 0];
-  bool has_errrupframenumber() const;
-  private:
-  bool _internal_has_errrupframenumber() const;
-  public:
-  void clear_errrupframenumber();
-  ::PROTOBUF_NAMESPACE_ID::int64 errrupframenumber() const;
-  void set_errrupframenumber(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errrupframenumber() const;
-  void _internal_set_errrupframenumber(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 errFotipProtocolVersion = 17 [default = 0];
-  bool has_errfotipprotocolversion() const;
-  private:
-  bool _internal_has_errfotipprotocolversion() const;
-  public:
-  void clear_errfotipprotocolversion();
-  ::PROTOBUF_NAMESPACE_ID::int64 errfotipprotocolversion() const;
-  void set_errfotipprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errfotipprotocolversion() const;
-  void _internal_set_errfotipprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 errFotipUniqueID = 18 [default = 0];
-  bool has_errfotipuniqueid() const;
-  private:
-  bool _internal_has_errfotipuniqueid() const;
-  public:
-  void clear_errfotipuniqueid();
-  ::PROTOBUF_NAMESPACE_ID::int64 errfotipuniqueid() const;
-  void set_errfotipuniqueid(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errfotipuniqueid() const;
-  void _internal_set_errfotipuniqueid(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 errFotipLmNumber = 19 [default = 0];
-  bool has_errfotiplmnumber() const;
-  private:
-  bool _internal_has_errfotiplmnumber() const;
-  public:
-  void clear_errfotiplmnumber();
-  ::PROTOBUF_NAMESPACE_ID::int64 errfotiplmnumber() const;
-  void set_errfotiplmnumber(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errfotiplmnumber() const;
-  void _internal_set_errfotiplmnumber(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 errFotipSubsystemCode = 20 [default = 0];
-  bool has_errfotipsubsystemcode() const;
-  private:
-  bool _internal_has_errfotipsubsystemcode() const;
-  public:
-  void clear_errfotipsubsystemcode();
-  ::PROTOBUF_NAMESPACE_ID::int64 errfotipsubsystemcode() const;
-  void set_errfotipsubsystemcode(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errfotipsubsystemcode() const;
-  void _internal_set_errfotipsubsystemcode(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 errFotipOperationCode = 21 [default = 0];
-  bool has_errfotipoperationcode() const;
-  private:
-  bool _internal_has_errfotipoperationcode() const;
-  public:
-  void clear_errfotipoperationcode();
-  ::PROTOBUF_NAMESPACE_ID::int64 errfotipoperationcode() const;
-  void set_errfotipoperationcode(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errfotipoperationcode() const;
-  void _internal_set_errfotipoperationcode(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 errFotipFrameSize = 22 [default = 0];
-  bool has_errfotipframesize() const;
-  private:
-  bool _internal_has_errfotipframesize() const;
-  public:
-  void clear_errfotipframesize();
-  ::PROTOBUF_NAMESPACE_ID::int64 errfotipframesize() const;
-  void set_errfotipframesize(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errfotipframesize() const;
-  void _internal_set_errfotipframesize(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 errFotipRomSize = 23 [default = 0];
-  bool has_errfotipromsize() const;
-  private:
-  bool _internal_has_errfotipromsize() const;
-  public:
-  void clear_errfotipromsize();
-  ::PROTOBUF_NAMESPACE_ID::int64 errfotipromsize() const;
-  void set_errfotipromsize(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errfotipromsize() const;
-  void _internal_set_errfotipromsize(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 errFotipRomFrameSize = 24 [default = 0];
-  bool has_errfotipromframesize() const;
-  private:
-  bool _internal_has_errfotipromframesize() const;
-  public:
-  void clear_errfotipromframesize();
-  ::PROTOBUF_NAMESPACE_ID::int64 errfotipromframesize() const;
-  void set_errfotipromframesize(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errfotipromframesize() const;
-  void _internal_set_errfotipromframesize(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 fotipFlagBoundsCheckSuccess = 25 [default = 0];
-  bool has_fotipflagboundschecksuccess() const;
-  private:
-  bool _internal_has_fotipflagboundschecksuccess() const;
-  public:
-  void clear_fotipflagboundschecksuccess();
-  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagboundschecksuccess() const;
-  void set_fotipflagboundschecksuccess(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_fotipflagboundschecksuccess() const;
-  void _internal_set_fotipflagboundschecksuccess(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 fotipFlagWriteSuccess = 26 [default = 0];
-  bool has_fotipflagwritesuccess() const;
-  private:
-  bool _internal_has_fotipflagwritesuccess() const;
-  public:
-  void clear_fotipflagwritesuccess();
-  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagwritesuccess() const;
-  void set_fotipflagwritesuccess(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_fotipflagwritesuccess() const;
-  void _internal_set_fotipflagwritesuccess(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 fotipFlagDataTypeErr = 27 [default = 0];
-  bool has_fotipflagdatatypeerr() const;
-  private:
-  bool _internal_has_fotipflagdatatypeerr() const;
-  public:
-  void clear_fotipflagdatatypeerr();
-  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagdatatypeerr() const;
-  void set_fotipflagdatatypeerr(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_fotipflagdatatypeerr() const;
-  void _internal_set_fotipflagdatatypeerr(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int32 commandQueueSize = 5 [default = 0];
+  // optional int32 commandQueueSize = 13 [default = 0];
   bool has_commandqueuesize() const;
   private:
   bool _internal_has_commandqueuesize() const;
@@ -8648,7 +8384,7 @@ class TuningSourceState PROTOBUF_FINAL :
   void _internal_set_commandqueuesize(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
-  // optional bool isReply = 2 [default = false];
+  // optional bool isReply = 10 [default = false];
   bool has_isreply() const;
   private:
   bool _internal_has_isreply() const;
@@ -8661,7 +8397,7 @@ class TuningSourceState PROTOBUF_FINAL :
   void _internal_set_isreply(bool value);
   public:
 
-  // optional bool controlIsActive = 42 [default = false];
+  // optional bool controlIsActive = 14 [default = false];
   bool has_controlisactive() const;
   private:
   bool _internal_has_controlisactive() const;
@@ -8674,7 +8410,7 @@ class TuningSourceState PROTOBUF_FINAL :
   void _internal_set_controlisactive(bool value);
   public:
 
-  // optional bool setSOR = 43 [default = false];
+  // optional bool setSOR = 15 [default = false];
   bool has_setsor() const;
   private:
   bool _internal_has_setsor() const;
@@ -8687,228 +8423,7 @@ class TuningSourceState PROTOBUF_FINAL :
   void _internal_set_setsor(bool value);
   public:
 
-  // optional bool hasUnappliedParams = 44 [default = false];
-  bool has_hasunappliedparams() const;
-  private:
-  bool _internal_has_hasunappliedparams() const;
-  public:
-  void clear_hasunappliedparams();
-  bool hasunappliedparams() const;
-  void set_hasunappliedparams(bool value);
-  private:
-  bool _internal_hasunappliedparams() const;
-  void _internal_set_hasunappliedparams(bool value);
-  public:
-
-  // optional int64 fotipFlagOpCodeErr = 28 [default = 0];
-  bool has_fotipflagopcodeerr() const;
-  private:
-  bool _internal_has_fotipflagopcodeerr() const;
-  public:
-  void clear_fotipflagopcodeerr();
-  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagopcodeerr() const;
-  void set_fotipflagopcodeerr(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_fotipflagopcodeerr() const;
-  void _internal_set_fotipflagopcodeerr(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 fotipFlagStartAddrErr = 29 [default = 0];
-  bool has_fotipflagstartaddrerr() const;
-  private:
-  bool _internal_has_fotipflagstartaddrerr() const;
-  public:
-  void clear_fotipflagstartaddrerr();
-  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagstartaddrerr() const;
-  void set_fotipflagstartaddrerr(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_fotipflagstartaddrerr() const;
-  void _internal_set_fotipflagstartaddrerr(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 fotipFlagRomSizeErr = 30 [default = 0];
-  bool has_fotipflagromsizeerr() const;
-  private:
-  bool _internal_has_fotipflagromsizeerr() const;
-  public:
-  void clear_fotipflagromsizeerr();
-  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagromsizeerr() const;
-  void set_fotipflagromsizeerr(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_fotipflagromsizeerr() const;
-  void _internal_set_fotipflagromsizeerr(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 fotipFlagRomFrameSizeErr = 31 [default = 0];
-  bool has_fotipflagromframesizeerr() const;
-  private:
-  bool _internal_has_fotipflagromframesizeerr() const;
-  public:
-  void clear_fotipflagromframesizeerr();
-  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagromframesizeerr() const;
-  void set_fotipflagromframesizeerr(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_fotipflagromframesizeerr() const;
-  void _internal_set_fotipflagromframesizeerr(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 fotipFlagFrameSizeErr = 32 [default = 0];
-  bool has_fotipflagframesizeerr() const;
-  private:
-  bool _internal_has_fotipflagframesizeerr() const;
-  public:
-  void clear_fotipflagframesizeerr();
-  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagframesizeerr() const;
-  void set_fotipflagframesizeerr(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_fotipflagframesizeerr() const;
-  void _internal_set_fotipflagframesizeerr(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 fotipFlagProtocolVersionErr = 33 [default = 0];
-  bool has_fotipflagprotocolversionerr() const;
-  private:
-  bool _internal_has_fotipflagprotocolversionerr() const;
-  public:
-  void clear_fotipflagprotocolversionerr();
-  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagprotocolversionerr() const;
-  void set_fotipflagprotocolversionerr(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_fotipflagprotocolversionerr() const;
-  void _internal_set_fotipflagprotocolversionerr(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 fotipFlagSubsystemKeyErr = 34 [default = 0];
-  bool has_fotipflagsubsystemkeyerr() const;
-  private:
-  bool _internal_has_fotipflagsubsystemkeyerr() const;
-  public:
-  void clear_fotipflagsubsystemkeyerr();
-  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagsubsystemkeyerr() const;
-  void set_fotipflagsubsystemkeyerr(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_fotipflagsubsystemkeyerr() const;
-  void _internal_set_fotipflagsubsystemkeyerr(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 fotipFlagUniueIDErr = 35 [default = 0];
-  bool has_fotipflaguniueiderr() const;
-  private:
-  bool _internal_has_fotipflaguniueiderr() const;
-  public:
-  void clear_fotipflaguniueiderr();
-  ::PROTOBUF_NAMESPACE_ID::int64 fotipflaguniueiderr() const;
-  void set_fotipflaguniueiderr(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_fotipflaguniueiderr() const;
-  void _internal_set_fotipflaguniueiderr(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 fotipFlagOffsetErr = 36 [default = 0];
-  bool has_fotipflagoffseterr() const;
-  private:
-  bool _internal_has_fotipflagoffseterr() const;
-  public:
-  void clear_fotipflagoffseterr();
-  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagoffseterr() const;
-  void set_fotipflagoffseterr(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_fotipflagoffseterr() const;
-  void _internal_set_fotipflagoffseterr(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 fotipFlagApplySuccess = 37 [default = 0];
-  bool has_fotipflagapplysuccess() const;
-  private:
-  bool _internal_has_fotipflagapplysuccess() const;
-  public:
-  void clear_fotipflagapplysuccess();
-  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagapplysuccess() const;
-  void set_fotipflagapplysuccess(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_fotipflagapplysuccess() const;
-  void _internal_set_fotipflagapplysuccess(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 fotipFlagSetSOR = 38 [default = 0];
-  bool has_fotipflagsetsor() const;
-  private:
-  bool _internal_has_fotipflagsetsor() const;
-  public:
-  void clear_fotipflagsetsor();
-  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagsetsor() const;
-  void set_fotipflagsetsor(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_fotipflagsetsor() const;
-  void _internal_set_fotipflagsetsor(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 errAnalogLowBoundCheck = 39 [default = 0];
-  bool has_erranaloglowboundcheck() const;
-  private:
-  bool _internal_has_erranaloglowboundcheck() const;
-  public:
-  void clear_erranaloglowboundcheck();
-  ::PROTOBUF_NAMESPACE_ID::int64 erranaloglowboundcheck() const;
-  void set_erranaloglowboundcheck(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_erranaloglowboundcheck() const;
-  void _internal_set_erranaloglowboundcheck(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 errAnalogHighBoundCheck = 40 [default = 0];
-  bool has_erranaloghighboundcheck() const;
-  private:
-  bool _internal_has_erranaloghighboundcheck() const;
-  public:
-  void clear_erranaloghighboundcheck();
-  ::PROTOBUF_NAMESPACE_ID::int64 erranaloghighboundcheck() const;
-  void set_erranaloghighboundcheck(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_erranaloghighboundcheck() const;
-  void _internal_set_erranaloghighboundcheck(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 errRupCRC = 41 [default = 0];
-  bool has_errrupcrc() const;
-  private:
-  bool _internal_has_errrupcrc() const;
-  public:
-  void clear_errrupcrc();
-  ::PROTOBUF_NAMESPACE_ID::int64 errrupcrc() const;
-  void set_errrupcrc(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errrupcrc() const;
-  void _internal_set_errrupcrc(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 fotipFlagWritingDisabled = 46 [default = 0];
-  bool has_fotipflagwritingdisabled() const;
-  private:
-  bool _internal_has_fotipflagwritingdisabled() const;
-  public:
-  void clear_fotipflagwritingdisabled();
-  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagwritingdisabled() const;
-  void set_fotipflagwritingdisabled(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_fotipflagwritingdisabled() const;
-  void _internal_set_fotipflagwritingdisabled(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 errTuningFrameUpdate = 47 [default = 0];
-  bool has_errtuningframeupdate() const;
-  private:
-  bool _internal_has_errtuningframeupdate() const;
-  public:
-  void clear_errtuningframeupdate();
-  ::PROTOBUF_NAMESPACE_ID::int64 errtuningframeupdate() const;
-  void set_errtuningframeupdate(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errtuningframeupdate() const;
-  void _internal_set_errtuningframeupdate(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional bool writingDisabled = 45 [default = false];
+  // optional bool writingDisabled = 16 [default = false];
   bool has_writingdisabled() const;
   private:
   bool _internal_has_writingdisabled() const;
@@ -8921,6 +8436,526 @@ class TuningSourceState PROTOBUF_FINAL :
   void _internal_set_writingdisabled(bool value);
   public:
 
+  // optional int64 fotipFlagBoundsCheckSuccess = 30 [default = 0];
+  bool has_fotipflagboundschecksuccess() const;
+  private:
+  bool _internal_has_fotipflagboundschecksuccess() const;
+  public:
+  void clear_fotipflagboundschecksuccess();
+  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagboundschecksuccess() const;
+  void set_fotipflagboundschecksuccess(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_fotipflagboundschecksuccess() const;
+  void _internal_set_fotipflagboundschecksuccess(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 fotipFlagWriteSuccess = 31 [default = 0];
+  bool has_fotipflagwritesuccess() const;
+  private:
+  bool _internal_has_fotipflagwritesuccess() const;
+  public:
+  void clear_fotipflagwritesuccess();
+  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagwritesuccess() const;
+  void set_fotipflagwritesuccess(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_fotipflagwritesuccess() const;
+  void _internal_set_fotipflagwritesuccess(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 fotipFlagDataTypeErr = 32 [default = 0];
+  bool has_fotipflagdatatypeerr() const;
+  private:
+  bool _internal_has_fotipflagdatatypeerr() const;
+  public:
+  void clear_fotipflagdatatypeerr();
+  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagdatatypeerr() const;
+  void set_fotipflagdatatypeerr(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_fotipflagdatatypeerr() const;
+  void _internal_set_fotipflagdatatypeerr(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 fotipFlagOpCodeErr = 33 [default = 0];
+  bool has_fotipflagopcodeerr() const;
+  private:
+  bool _internal_has_fotipflagopcodeerr() const;
+  public:
+  void clear_fotipflagopcodeerr();
+  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagopcodeerr() const;
+  void set_fotipflagopcodeerr(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_fotipflagopcodeerr() const;
+  void _internal_set_fotipflagopcodeerr(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 fotipFlagStartAddrErr = 34 [default = 0];
+  bool has_fotipflagstartaddrerr() const;
+  private:
+  bool _internal_has_fotipflagstartaddrerr() const;
+  public:
+  void clear_fotipflagstartaddrerr();
+  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagstartaddrerr() const;
+  void set_fotipflagstartaddrerr(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_fotipflagstartaddrerr() const;
+  void _internal_set_fotipflagstartaddrerr(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 fotipFlagRomSizeErr = 35 [default = 0];
+  bool has_fotipflagromsizeerr() const;
+  private:
+  bool _internal_has_fotipflagromsizeerr() const;
+  public:
+  void clear_fotipflagromsizeerr();
+  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagromsizeerr() const;
+  void set_fotipflagromsizeerr(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_fotipflagromsizeerr() const;
+  void _internal_set_fotipflagromsizeerr(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 fotipFlagRomFrameSizeErr = 36 [default = 0];
+  bool has_fotipflagromframesizeerr() const;
+  private:
+  bool _internal_has_fotipflagromframesizeerr() const;
+  public:
+  void clear_fotipflagromframesizeerr();
+  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagromframesizeerr() const;
+  void set_fotipflagromframesizeerr(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_fotipflagromframesizeerr() const;
+  void _internal_set_fotipflagromframesizeerr(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 fotipFlagFrameSizeErr = 37 [default = 0];
+  bool has_fotipflagframesizeerr() const;
+  private:
+  bool _internal_has_fotipflagframesizeerr() const;
+  public:
+  void clear_fotipflagframesizeerr();
+  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagframesizeerr() const;
+  void set_fotipflagframesizeerr(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_fotipflagframesizeerr() const;
+  void _internal_set_fotipflagframesizeerr(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 fotipFlagProtocolVersionErr = 38 [default = 0];
+  bool has_fotipflagprotocolversionerr() const;
+  private:
+  bool _internal_has_fotipflagprotocolversionerr() const;
+  public:
+  void clear_fotipflagprotocolversionerr();
+  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagprotocolversionerr() const;
+  void set_fotipflagprotocolversionerr(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_fotipflagprotocolversionerr() const;
+  void _internal_set_fotipflagprotocolversionerr(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 fotipFlagSubsystemKeyErr = 39 [default = 0];
+  bool has_fotipflagsubsystemkeyerr() const;
+  private:
+  bool _internal_has_fotipflagsubsystemkeyerr() const;
+  public:
+  void clear_fotipflagsubsystemkeyerr();
+  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagsubsystemkeyerr() const;
+  void set_fotipflagsubsystemkeyerr(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_fotipflagsubsystemkeyerr() const;
+  void _internal_set_fotipflagsubsystemkeyerr(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 fotipFlagUniueIDErr = 40 [default = 0];
+  bool has_fotipflaguniueiderr() const;
+  private:
+  bool _internal_has_fotipflaguniueiderr() const;
+  public:
+  void clear_fotipflaguniueiderr();
+  ::PROTOBUF_NAMESPACE_ID::int64 fotipflaguniueiderr() const;
+  void set_fotipflaguniueiderr(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_fotipflaguniueiderr() const;
+  void _internal_set_fotipflaguniueiderr(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 fotipFlagOffsetErr = 41 [default = 0];
+  bool has_fotipflagoffseterr() const;
+  private:
+  bool _internal_has_fotipflagoffseterr() const;
+  public:
+  void clear_fotipflagoffseterr();
+  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagoffseterr() const;
+  void set_fotipflagoffseterr(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_fotipflagoffseterr() const;
+  void _internal_set_fotipflagoffseterr(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 fotipFlagApplySuccess = 42 [default = 0];
+  bool has_fotipflagapplysuccess() const;
+  private:
+  bool _internal_has_fotipflagapplysuccess() const;
+  public:
+  void clear_fotipflagapplysuccess();
+  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagapplysuccess() const;
+  void set_fotipflagapplysuccess(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_fotipflagapplysuccess() const;
+  void _internal_set_fotipflagapplysuccess(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 fotipFlagSetSOR = 43 [default = 0];
+  bool has_fotipflagsetsor() const;
+  private:
+  bool _internal_has_fotipflagsetsor() const;
+  public:
+  void clear_fotipflagsetsor();
+  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagsetsor() const;
+  void set_fotipflagsetsor(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_fotipflagsetsor() const;
+  void _internal_set_fotipflagsetsor(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 fotipFlagWritingDisabled = 44 [default = 0];
+  bool has_fotipflagwritingdisabled() const;
+  private:
+  bool _internal_has_fotipflagwritingdisabled() const;
+  public:
+  void clear_fotipflagwritingdisabled();
+  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagwritingdisabled() const;
+  void set_fotipflagwritingdisabled(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_fotipflagwritingdisabled() const;
+  void _internal_set_fotipflagwritingdisabled(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional uint64 fotipProcessingNumerator = 45 [default = 0];
+  bool has_fotipprocessingnumerator() const;
+  private:
+  bool _internal_has_fotipprocessingnumerator() const;
+  public:
+  void clear_fotipprocessingnumerator();
+  ::PROTOBUF_NAMESPACE_ID::uint64 fotipprocessingnumerator() const;
+  void set_fotipprocessingnumerator(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_fotipprocessingnumerator() const;
+  void _internal_set_fotipprocessingnumerator(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // optional int64 errRupProtocolVersion = 50 [default = 0];
+  bool has_errrupprotocolversion() const;
+  private:
+  bool _internal_has_errrupprotocolversion() const;
+  public:
+  void clear_errrupprotocolversion();
+  ::PROTOBUF_NAMESPACE_ID::int64 errrupprotocolversion() const;
+  void set_errrupprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errrupprotocolversion() const;
+  void _internal_set_errrupprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional bool hasUnappliedParams = 17 [default = false];
+  bool has_hasunappliedparams() const;
+  private:
+  bool _internal_has_hasunappliedparams() const;
+  public:
+  void clear_hasunappliedparams();
+  bool hasunappliedparams() const;
+  void set_hasunappliedparams(bool value);
+  private:
+  bool _internal_hasunappliedparams() const;
+  void _internal_set_hasunappliedparams(bool value);
+  public:
+
+  // optional int64 errRupFrameSize = 51 [default = 0];
+  bool has_errrupframesize() const;
+  private:
+  bool _internal_has_errrupframesize() const;
+  public:
+  void clear_errrupframesize();
+  ::PROTOBUF_NAMESPACE_ID::int64 errrupframesize() const;
+  void set_errrupframesize(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errrupframesize() const;
+  void _internal_set_errrupframesize(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errRupNonTuningData = 52 [default = 0];
+  bool has_errrupnontuningdata() const;
+  private:
+  bool _internal_has_errrupnontuningdata() const;
+  public:
+  void clear_errrupnontuningdata();
+  ::PROTOBUF_NAMESPACE_ID::int64 errrupnontuningdata() const;
+  void set_errrupnontuningdata(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errrupnontuningdata() const;
+  void _internal_set_errrupnontuningdata(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errRupModuleType = 53 [default = 0];
+  bool has_errrupmoduletype() const;
+  private:
+  bool _internal_has_errrupmoduletype() const;
+  public:
+  void clear_errrupmoduletype();
+  ::PROTOBUF_NAMESPACE_ID::int64 errrupmoduletype() const;
+  void set_errrupmoduletype(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errrupmoduletype() const;
+  void _internal_set_errrupmoduletype(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errRupFramesQuantity = 54 [default = 0];
+  bool has_errrupframesquantity() const;
+  private:
+  bool _internal_has_errrupframesquantity() const;
+  public:
+  void clear_errrupframesquantity();
+  ::PROTOBUF_NAMESPACE_ID::int64 errrupframesquantity() const;
+  void set_errrupframesquantity(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errrupframesquantity() const;
+  void _internal_set_errrupframesquantity(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errRupFrameNumber = 55 [default = 0];
+  bool has_errrupframenumber() const;
+  private:
+  bool _internal_has_errrupframenumber() const;
+  public:
+  void clear_errrupframenumber();
+  ::PROTOBUF_NAMESPACE_ID::int64 errrupframenumber() const;
+  void set_errrupframenumber(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errrupframenumber() const;
+  void _internal_set_errrupframenumber(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errRupCRC = 56 [default = 0];
+  bool has_errrupcrc() const;
+  private:
+  bool _internal_has_errrupcrc() const;
+  public:
+  void clear_errrupcrc();
+  ::PROTOBUF_NAMESPACE_ID::int64 errrupcrc() const;
+  void set_errrupcrc(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errrupcrc() const;
+  void _internal_set_errrupcrc(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errFotipProtocolVersion = 60 [default = 0];
+  bool has_errfotipprotocolversion() const;
+  private:
+  bool _internal_has_errfotipprotocolversion() const;
+  public:
+  void clear_errfotipprotocolversion();
+  ::PROTOBUF_NAMESPACE_ID::int64 errfotipprotocolversion() const;
+  void set_errfotipprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errfotipprotocolversion() const;
+  void _internal_set_errfotipprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errFotipUniqueID = 61 [default = 0];
+  bool has_errfotipuniqueid() const;
+  private:
+  bool _internal_has_errfotipuniqueid() const;
+  public:
+  void clear_errfotipuniqueid();
+  ::PROTOBUF_NAMESPACE_ID::int64 errfotipuniqueid() const;
+  void set_errfotipuniqueid(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errfotipuniqueid() const;
+  void _internal_set_errfotipuniqueid(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errFotipLmNumber = 62 [default = 0];
+  bool has_errfotiplmnumber() const;
+  private:
+  bool _internal_has_errfotiplmnumber() const;
+  public:
+  void clear_errfotiplmnumber();
+  ::PROTOBUF_NAMESPACE_ID::int64 errfotiplmnumber() const;
+  void set_errfotiplmnumber(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errfotiplmnumber() const;
+  void _internal_set_errfotiplmnumber(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errFotipSubsystemCode = 63 [default = 0];
+  bool has_errfotipsubsystemcode() const;
+  private:
+  bool _internal_has_errfotipsubsystemcode() const;
+  public:
+  void clear_errfotipsubsystemcode();
+  ::PROTOBUF_NAMESPACE_ID::int64 errfotipsubsystemcode() const;
+  void set_errfotipsubsystemcode(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errfotipsubsystemcode() const;
+  void _internal_set_errfotipsubsystemcode(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errFotipOperationCode = 64 [default = 0];
+  bool has_errfotipoperationcode() const;
+  private:
+  bool _internal_has_errfotipoperationcode() const;
+  public:
+  void clear_errfotipoperationcode();
+  ::PROTOBUF_NAMESPACE_ID::int64 errfotipoperationcode() const;
+  void set_errfotipoperationcode(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errfotipoperationcode() const;
+  void _internal_set_errfotipoperationcode(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errFotipFrameSize = 65 [default = 0];
+  bool has_errfotipframesize() const;
+  private:
+  bool _internal_has_errfotipframesize() const;
+  public:
+  void clear_errfotipframesize();
+  ::PROTOBUF_NAMESPACE_ID::int64 errfotipframesize() const;
+  void set_errfotipframesize(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errfotipframesize() const;
+  void _internal_set_errfotipframesize(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errFotipRomSize = 66 [default = 0];
+  bool has_errfotipromsize() const;
+  private:
+  bool _internal_has_errfotipromsize() const;
+  public:
+  void clear_errfotipromsize();
+  ::PROTOBUF_NAMESPACE_ID::int64 errfotipromsize() const;
+  void set_errfotipromsize(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errfotipromsize() const;
+  void _internal_set_errfotipromsize(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errFotipRomFrameSize = 67 [default = 0];
+  bool has_errfotipromframesize() const;
+  private:
+  bool _internal_has_errfotipromframesize() const;
+  public:
+  void clear_errfotipromframesize();
+  ::PROTOBUF_NAMESPACE_ID::int64 errfotipromframesize() const;
+  void set_errfotipromframesize(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errfotipromframesize() const;
+  void _internal_set_errfotipromframesize(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errAnalogLowBoundCheck = 68 [default = 0];
+  bool has_erranaloglowboundcheck() const;
+  private:
+  bool _internal_has_erranaloglowboundcheck() const;
+  public:
+  void clear_erranaloglowboundcheck();
+  ::PROTOBUF_NAMESPACE_ID::int64 erranaloglowboundcheck() const;
+  void set_erranaloglowboundcheck(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_erranaloglowboundcheck() const;
+  void _internal_set_erranaloglowboundcheck(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errAnalogHighBoundCheck = 69 [default = 0];
+  bool has_erranaloghighboundcheck() const;
+  private:
+  bool _internal_has_erranaloghighboundcheck() const;
+  public:
+  void clear_erranaloghighboundcheck();
+  ::PROTOBUF_NAMESPACE_ID::int64 erranaloghighboundcheck() const;
+  void set_erranaloghighboundcheck(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_erranaloghighboundcheck() const;
+  void _internal_set_erranaloghighboundcheck(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errUntimelyReplay = 70 [default = 0];
+  bool has_erruntimelyreplay() const;
+  private:
+  bool _internal_has_erruntimelyreplay() const;
+  public:
+  void clear_erruntimelyreplay();
+  ::PROTOBUF_NAMESPACE_ID::int64 erruntimelyreplay() const;
+  void set_erruntimelyreplay(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_erruntimelyreplay() const;
+  void _internal_set_erruntimelyreplay(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errSent = 71 [default = 0];
+  bool has_errsent() const;
+  private:
+  bool _internal_has_errsent() const;
+  public:
+  void clear_errsent();
+  ::PROTOBUF_NAMESPACE_ID::int64 errsent() const;
+  void set_errsent(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errsent() const;
+  void _internal_set_errsent(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errPartialSent = 72 [default = 0];
+  bool has_errpartialsent() const;
+  private:
+  bool _internal_has_errpartialsent() const;
+  public:
+  void clear_errpartialsent();
+  ::PROTOBUF_NAMESPACE_ID::int64 errpartialsent() const;
+  void set_errpartialsent(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errpartialsent() const;
+  void _internal_set_errpartialsent(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errReplySize = 73 [default = 0];
+  bool has_errreplysize() const;
+  private:
+  bool _internal_has_errreplysize() const;
+  public:
+  void clear_errreplysize();
+  ::PROTOBUF_NAMESPACE_ID::int64 errreplysize() const;
+  void set_errreplysize(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errreplysize() const;
+  void _internal_set_errreplysize(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errNoReply = 74 [default = 0];
+  bool has_errnoreply() const;
+  private:
+  bool _internal_has_errnoreply() const;
+  public:
+  void clear_errnoreply();
+  ::PROTOBUF_NAMESPACE_ID::int64 errnoreply() const;
+  void set_errnoreply(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errnoreply() const;
+  void _internal_set_errnoreply(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errTuningFrameUpdate = 75 [default = 0];
+  bool has_errtuningframeupdate() const;
+  private:
+  bool _internal_has_errtuningframeupdate() const;
+  public:
+  void clear_errtuningframeupdate();
+  ::PROTOBUF_NAMESPACE_ID::int64 errtuningframeupdate() const;
+  void set_errtuningframeupdate(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errtuningframeupdate() const;
+  void _internal_set_errtuningframeupdate(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:Network.TuningSourceState)
  private:
   class _Internal;
@@ -8930,36 +8965,18 @@ class TuningSourceState PROTOBUF_FINAL :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<2> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr lanequipmentid_;
   ::PROTOBUF_NAMESPACE_ID::uint64 sourceid_;
   ::PROTOBUF_NAMESPACE_ID::int64 requestcount_;
   ::PROTOBUF_NAMESPACE_ID::int64 replycount_;
-  ::PROTOBUF_NAMESPACE_ID::int64 erruntimelyreplay_;
-  ::PROTOBUF_NAMESPACE_ID::int64 errsent_;
-  ::PROTOBUF_NAMESPACE_ID::int64 errpartialsent_;
-  ::PROTOBUF_NAMESPACE_ID::int64 errreplysize_;
-  ::PROTOBUF_NAMESPACE_ID::int64 errnoreply_;
-  ::PROTOBUF_NAMESPACE_ID::int64 errrupprotocolversion_;
-  ::PROTOBUF_NAMESPACE_ID::int64 errrupframesize_;
-  ::PROTOBUF_NAMESPACE_ID::int64 errrupnontuningdata_;
-  ::PROTOBUF_NAMESPACE_ID::int64 errrupmoduletype_;
-  ::PROTOBUF_NAMESPACE_ID::int64 errrupframesquantity_;
-  ::PROTOBUF_NAMESPACE_ID::int64 errrupframenumber_;
-  ::PROTOBUF_NAMESPACE_ID::int64 errfotipprotocolversion_;
-  ::PROTOBUF_NAMESPACE_ID::int64 errfotipuniqueid_;
-  ::PROTOBUF_NAMESPACE_ID::int64 errfotiplmnumber_;
-  ::PROTOBUF_NAMESPACE_ID::int64 errfotipsubsystemcode_;
-  ::PROTOBUF_NAMESPACE_ID::int64 errfotipoperationcode_;
-  ::PROTOBUF_NAMESPACE_ID::int64 errfotipframesize_;
-  ::PROTOBUF_NAMESPACE_ID::int64 errfotipromsize_;
-  ::PROTOBUF_NAMESPACE_ID::int64 errfotipromframesize_;
-  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagboundschecksuccess_;
-  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagwritesuccess_;
-  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagdatatypeerr_;
   ::PROTOBUF_NAMESPACE_ID::int32 commandqueuesize_;
   bool isreply_;
   bool controlisactive_;
   bool setsor_;
-  bool hasunappliedparams_;
+  bool writingdisabled_;
+  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagboundschecksuccess_;
+  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagwritesuccess_;
+  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagdatatypeerr_;
   ::PROTOBUF_NAMESPACE_ID::int64 fotipflagopcodeerr_;
   ::PROTOBUF_NAMESPACE_ID::int64 fotipflagstartaddrerr_;
   ::PROTOBUF_NAMESPACE_ID::int64 fotipflagromsizeerr_;
@@ -8971,12 +8988,32 @@ class TuningSourceState PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::int64 fotipflagoffseterr_;
   ::PROTOBUF_NAMESPACE_ID::int64 fotipflagapplysuccess_;
   ::PROTOBUF_NAMESPACE_ID::int64 fotipflagsetsor_;
+  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagwritingdisabled_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 fotipprocessingnumerator_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errrupprotocolversion_;
+  bool hasunappliedparams_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errrupframesize_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errrupnontuningdata_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errrupmoduletype_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errrupframesquantity_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errrupframenumber_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errrupcrc_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errfotipprotocolversion_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errfotipuniqueid_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errfotiplmnumber_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errfotipsubsystemcode_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errfotipoperationcode_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errfotipframesize_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errfotipromsize_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errfotipromframesize_;
   ::PROTOBUF_NAMESPACE_ID::int64 erranaloglowboundcheck_;
   ::PROTOBUF_NAMESPACE_ID::int64 erranaloghighboundcheck_;
-  ::PROTOBUF_NAMESPACE_ID::int64 errrupcrc_;
-  ::PROTOBUF_NAMESPACE_ID::int64 fotipflagwritingdisabled_;
+  ::PROTOBUF_NAMESPACE_ID::int64 erruntimelyreplay_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errsent_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errpartialsent_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errreplysize_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errnoreply_;
   ::PROTOBUF_NAMESPACE_ID::int64 errtuningframeupdate_;
-  bool writingdisabled_;
   friend struct ::TableStruct_network_2eproto;
 };
 // -------------------------------------------------------------------
@@ -9874,6 +9911,8 @@ class TuningSignalState PROTOBUF_FINAL :
     kTuningDefaultFieldNumber = 16,
     kSuccessfulWriteTimeFieldNumber = 12,
     kUnsuccessfulWriteTimeFieldNumber = 13,
+    kLmTimeFieldNumber = 17,
+    kFotipProcessingNumeratorFieldNumber = 18,
   };
   // optional .Proto.TuningValue value = 4;
   bool has_value() const;
@@ -10098,6 +10137,32 @@ class TuningSignalState PROTOBUF_FINAL :
   void _internal_set_unsuccessfulwritetime(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
+  // optional sfixed64 lmTime = 17 [default = 0];
+  bool has_lmtime() const;
+  private:
+  bool _internal_has_lmtime() const;
+  public:
+  void clear_lmtime();
+  ::PROTOBUF_NAMESPACE_ID::int64 lmtime() const;
+  void set_lmtime(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_lmtime() const;
+  void _internal_set_lmtime(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional fixed64 fotipProcessingNumerator = 18 [default = 0];
+  bool has_fotipprocessingnumerator() const;
+  private:
+  bool _internal_has_fotipprocessingnumerator() const;
+  public:
+  void clear_fotipprocessingnumerator();
+  ::PROTOBUF_NAMESPACE_ID::uint64 fotipprocessingnumerator() const;
+  void set_fotipprocessingnumerator(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_fotipprocessingnumerator() const;
+  void _internal_set_fotipprocessingnumerator(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:Network.TuningSignalState)
  private:
   class _Internal;
@@ -10123,6 +10188,8 @@ class TuningSignalState PROTOBUF_FINAL :
   bool tuningdefault_;
   ::PROTOBUF_NAMESPACE_ID::int64 successfulwritetime_;
   ::PROTOBUF_NAMESPACE_ID::int64 unsuccessfulwritetime_;
+  ::PROTOBUF_NAMESPACE_ID::int64 lmtime_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 fotipprocessingnumerator_;
   friend struct ::TableStruct_network_2eproto;
 };
 // -------------------------------------------------------------------
@@ -21633,7 +21700,7 @@ TuningSourceFilling::signalspersource() const {
 
 // optional uint64 sourceID = 1 [default = 0];
 inline bool TuningSourceState::_internal_has_sourceid() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_sourceid() const {
@@ -21641,7 +21708,7 @@ inline bool TuningSourceState::has_sourceid() const {
 }
 inline void TuningSourceState::clear_sourceid() {
   sourceid_ = PROTOBUF_ULONGLONG(0);
-  _has_bits_[0] &= ~0x00000001u;
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint64 TuningSourceState::_internal_sourceid() const {
   return sourceid_;
@@ -21651,7 +21718,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint64 TuningSourceState::sourceid() const {
   return _internal_sourceid();
 }
 inline void TuningSourceState::_internal_set_sourceid(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _has_bits_[0] |= 0x00000001u;
+  _has_bits_[0] |= 0x00000002u;
   sourceid_ = value;
 }
 inline void TuningSourceState::set_sourceid(::PROTOBUF_NAMESPACE_ID::uint64 value) {
@@ -21659,9 +21726,82 @@ inline void TuningSourceState::set_sourceid(::PROTOBUF_NAMESPACE_ID::uint64 valu
   // @@protoc_insertion_point(field_set:Network.TuningSourceState.sourceID)
 }
 
-// optional bool isReply = 2 [default = false];
+// optional string lanEquipmentID = 2;
+inline bool TuningSourceState::_internal_has_lanequipmentid() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool TuningSourceState::has_lanequipmentid() const {
+  return _internal_has_lanequipmentid();
+}
+inline void TuningSourceState::clear_lanequipmentid() {
+  lanequipmentid_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& TuningSourceState::lanequipmentid() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSourceState.lanEquipmentID)
+  return _internal_lanequipmentid();
+}
+inline void TuningSourceState::set_lanequipmentid(const std::string& value) {
+  _internal_set_lanequipmentid(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSourceState.lanEquipmentID)
+}
+inline std::string* TuningSourceState::mutable_lanequipmentid() {
+  // @@protoc_insertion_point(field_mutable:Network.TuningSourceState.lanEquipmentID)
+  return _internal_mutable_lanequipmentid();
+}
+inline const std::string& TuningSourceState::_internal_lanequipmentid() const {
+  return lanequipmentid_.Get();
+}
+inline void TuningSourceState::_internal_set_lanequipmentid(const std::string& value) {
+  _has_bits_[0] |= 0x00000001u;
+  lanequipmentid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void TuningSourceState::set_lanequipmentid(std::string&& value) {
+  _has_bits_[0] |= 0x00000001u;
+  lanequipmentid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Network.TuningSourceState.lanEquipmentID)
+}
+inline void TuningSourceState::set_lanequipmentid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000001u;
+  lanequipmentid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Network.TuningSourceState.lanEquipmentID)
+}
+inline void TuningSourceState::set_lanequipmentid(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000001u;
+  lanequipmentid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Network.TuningSourceState.lanEquipmentID)
+}
+inline std::string* TuningSourceState::_internal_mutable_lanequipmentid() {
+  _has_bits_[0] |= 0x00000001u;
+  return lanequipmentid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* TuningSourceState::release_lanequipmentid() {
+  // @@protoc_insertion_point(field_release:Network.TuningSourceState.lanEquipmentID)
+  if (!_internal_has_lanequipmentid()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return lanequipmentid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void TuningSourceState::set_allocated_lanequipmentid(std::string* lanequipmentid) {
+  if (lanequipmentid != nullptr) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  lanequipmentid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), lanequipmentid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Network.TuningSourceState.lanEquipmentID)
+}
+
+// optional bool isReply = 10 [default = false];
 inline bool TuningSourceState::_internal_has_isreply() const {
-  bool value = (_has_bits_[0] & 0x04000000u) != 0;
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_isreply() const {
@@ -21669,7 +21809,7 @@ inline bool TuningSourceState::has_isreply() const {
 }
 inline void TuningSourceState::clear_isreply() {
   isreply_ = false;
-  _has_bits_[0] &= ~0x04000000u;
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline bool TuningSourceState::_internal_isreply() const {
   return isreply_;
@@ -21679,7 +21819,7 @@ inline bool TuningSourceState::isreply() const {
   return _internal_isreply();
 }
 inline void TuningSourceState::_internal_set_isreply(bool value) {
-  _has_bits_[0] |= 0x04000000u;
+  _has_bits_[0] |= 0x00000020u;
   isreply_ = value;
 }
 inline void TuningSourceState::set_isreply(bool value) {
@@ -21687,9 +21827,9 @@ inline void TuningSourceState::set_isreply(bool value) {
   // @@protoc_insertion_point(field_set:Network.TuningSourceState.isReply)
 }
 
-// optional int64 requestCount = 3 [default = 0];
+// optional int64 requestCount = 11 [default = 0];
 inline bool TuningSourceState::_internal_has_requestcount() const {
-  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_requestcount() const {
@@ -21697,7 +21837,7 @@ inline bool TuningSourceState::has_requestcount() const {
 }
 inline void TuningSourceState::clear_requestcount() {
   requestcount_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_requestcount() const {
   return requestcount_;
@@ -21707,7 +21847,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::requestcount() const {
   return _internal_requestcount();
 }
 inline void TuningSourceState::_internal_set_requestcount(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000004u;
   requestcount_ = value;
 }
 inline void TuningSourceState::set_requestcount(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -21715,9 +21855,9 @@ inline void TuningSourceState::set_requestcount(::PROTOBUF_NAMESPACE_ID::int64 v
   // @@protoc_insertion_point(field_set:Network.TuningSourceState.requestCount)
 }
 
-// optional int64 replyCount = 4 [default = 0];
+// optional int64 replyCount = 12 [default = 0];
 inline bool TuningSourceState::_internal_has_replycount() const {
-  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_replycount() const {
@@ -21725,7 +21865,7 @@ inline bool TuningSourceState::has_replycount() const {
 }
 inline void TuningSourceState::clear_replycount() {
   replycount_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_replycount() const {
   return replycount_;
@@ -21735,7 +21875,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::replycount() const {
   return _internal_replycount();
 }
 inline void TuningSourceState::_internal_set_replycount(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000008u;
   replycount_ = value;
 }
 inline void TuningSourceState::set_replycount(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -21743,9 +21883,9 @@ inline void TuningSourceState::set_replycount(::PROTOBUF_NAMESPACE_ID::int64 val
   // @@protoc_insertion_point(field_set:Network.TuningSourceState.replyCount)
 }
 
-// optional int32 commandQueueSize = 5 [default = 0];
+// optional int32 commandQueueSize = 13 [default = 0];
 inline bool TuningSourceState::_internal_has_commandqueuesize() const {
-  bool value = (_has_bits_[0] & 0x02000000u) != 0;
+  bool value = (_has_bits_[0] & 0x00000010u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_commandqueuesize() const {
@@ -21753,7 +21893,7 @@ inline bool TuningSourceState::has_commandqueuesize() const {
 }
 inline void TuningSourceState::clear_commandqueuesize() {
   commandqueuesize_ = 0;
-  _has_bits_[0] &= ~0x02000000u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 TuningSourceState::_internal_commandqueuesize() const {
   return commandqueuesize_;
@@ -21763,7 +21903,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 TuningSourceState::commandqueuesize() cons
   return _internal_commandqueuesize();
 }
 inline void TuningSourceState::_internal_set_commandqueuesize(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x02000000u;
+  _has_bits_[0] |= 0x00000010u;
   commandqueuesize_ = value;
 }
 inline void TuningSourceState::set_commandqueuesize(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -21771,541 +21911,121 @@ inline void TuningSourceState::set_commandqueuesize(::PROTOBUF_NAMESPACE_ID::int
   // @@protoc_insertion_point(field_set:Network.TuningSourceState.commandQueueSize)
 }
 
-// optional int64 errUntimelyReplay = 6 [default = 0];
-inline bool TuningSourceState::_internal_has_erruntimelyreplay() const {
-  bool value = (_has_bits_[0] & 0x00000008u) != 0;
-  return value;
-}
-inline bool TuningSourceState::has_erruntimelyreplay() const {
-  return _internal_has_erruntimelyreplay();
-}
-inline void TuningSourceState::clear_erruntimelyreplay() {
-  erruntimelyreplay_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00000008u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_erruntimelyreplay() const {
-  return erruntimelyreplay_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::erruntimelyreplay() const {
-  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errUntimelyReplay)
-  return _internal_erruntimelyreplay();
-}
-inline void TuningSourceState::_internal_set_erruntimelyreplay(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00000008u;
-  erruntimelyreplay_ = value;
-}
-inline void TuningSourceState::set_erruntimelyreplay(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_erruntimelyreplay(value);
-  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errUntimelyReplay)
-}
-
-// optional int64 errSent = 7 [default = 0];
-inline bool TuningSourceState::_internal_has_errsent() const {
-  bool value = (_has_bits_[0] & 0x00000010u) != 0;
-  return value;
-}
-inline bool TuningSourceState::has_errsent() const {
-  return _internal_has_errsent();
-}
-inline void TuningSourceState::clear_errsent() {
-  errsent_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00000010u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errsent() const {
-  return errsent_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errsent() const {
-  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errSent)
-  return _internal_errsent();
-}
-inline void TuningSourceState::_internal_set_errsent(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00000010u;
-  errsent_ = value;
-}
-inline void TuningSourceState::set_errsent(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_errsent(value);
-  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errSent)
-}
-
-// optional int64 errPartialSent = 8 [default = 0];
-inline bool TuningSourceState::_internal_has_errpartialsent() const {
-  bool value = (_has_bits_[0] & 0x00000020u) != 0;
-  return value;
-}
-inline bool TuningSourceState::has_errpartialsent() const {
-  return _internal_has_errpartialsent();
-}
-inline void TuningSourceState::clear_errpartialsent() {
-  errpartialsent_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00000020u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errpartialsent() const {
-  return errpartialsent_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errpartialsent() const {
-  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errPartialSent)
-  return _internal_errpartialsent();
-}
-inline void TuningSourceState::_internal_set_errpartialsent(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00000020u;
-  errpartialsent_ = value;
-}
-inline void TuningSourceState::set_errpartialsent(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_errpartialsent(value);
-  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errPartialSent)
-}
-
-// optional int64 errReplySize = 9 [default = 0];
-inline bool TuningSourceState::_internal_has_errreplysize() const {
+// optional bool controlIsActive = 14 [default = false];
+inline bool TuningSourceState::_internal_has_controlisactive() const {
   bool value = (_has_bits_[0] & 0x00000040u) != 0;
   return value;
 }
-inline bool TuningSourceState::has_errreplysize() const {
-  return _internal_has_errreplysize();
+inline bool TuningSourceState::has_controlisactive() const {
+  return _internal_has_controlisactive();
 }
-inline void TuningSourceState::clear_errreplysize() {
-  errreplysize_ = PROTOBUF_LONGLONG(0);
+inline void TuningSourceState::clear_controlisactive() {
+  controlisactive_ = false;
   _has_bits_[0] &= ~0x00000040u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errreplysize() const {
-  return errreplysize_;
+inline bool TuningSourceState::_internal_controlisactive() const {
+  return controlisactive_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errreplysize() const {
-  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errReplySize)
-  return _internal_errreplysize();
+inline bool TuningSourceState::controlisactive() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSourceState.controlIsActive)
+  return _internal_controlisactive();
 }
-inline void TuningSourceState::_internal_set_errreplysize(::PROTOBUF_NAMESPACE_ID::int64 value) {
+inline void TuningSourceState::_internal_set_controlisactive(bool value) {
   _has_bits_[0] |= 0x00000040u;
-  errreplysize_ = value;
+  controlisactive_ = value;
 }
-inline void TuningSourceState::set_errreplysize(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_errreplysize(value);
-  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errReplySize)
+inline void TuningSourceState::set_controlisactive(bool value) {
+  _internal_set_controlisactive(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSourceState.controlIsActive)
 }
 
-// optional int64 errNoReply = 10 [default = 0];
-inline bool TuningSourceState::_internal_has_errnoreply() const {
+// optional bool setSOR = 15 [default = false];
+inline bool TuningSourceState::_internal_has_setsor() const {
   bool value = (_has_bits_[0] & 0x00000080u) != 0;
   return value;
 }
-inline bool TuningSourceState::has_errnoreply() const {
-  return _internal_has_errnoreply();
+inline bool TuningSourceState::has_setsor() const {
+  return _internal_has_setsor();
 }
-inline void TuningSourceState::clear_errnoreply() {
-  errnoreply_ = PROTOBUF_LONGLONG(0);
+inline void TuningSourceState::clear_setsor() {
+  setsor_ = false;
   _has_bits_[0] &= ~0x00000080u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errnoreply() const {
-  return errnoreply_;
+inline bool TuningSourceState::_internal_setsor() const {
+  return setsor_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errnoreply() const {
-  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errNoReply)
-  return _internal_errnoreply();
+inline bool TuningSourceState::setsor() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSourceState.setSOR)
+  return _internal_setsor();
 }
-inline void TuningSourceState::_internal_set_errnoreply(::PROTOBUF_NAMESPACE_ID::int64 value) {
+inline void TuningSourceState::_internal_set_setsor(bool value) {
   _has_bits_[0] |= 0x00000080u;
-  errnoreply_ = value;
+  setsor_ = value;
 }
-inline void TuningSourceState::set_errnoreply(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_errnoreply(value);
-  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errNoReply)
+inline void TuningSourceState::set_setsor(bool value) {
+  _internal_set_setsor(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSourceState.setSOR)
 }
 
-// optional int64 errRupProtocolVersion = 11 [default = 0];
-inline bool TuningSourceState::_internal_has_errrupprotocolversion() const {
+// optional bool writingDisabled = 16 [default = false];
+inline bool TuningSourceState::_internal_has_writingdisabled() const {
   bool value = (_has_bits_[0] & 0x00000100u) != 0;
   return value;
 }
-inline bool TuningSourceState::has_errrupprotocolversion() const {
-  return _internal_has_errrupprotocolversion();
+inline bool TuningSourceState::has_writingdisabled() const {
+  return _internal_has_writingdisabled();
 }
-inline void TuningSourceState::clear_errrupprotocolversion() {
-  errrupprotocolversion_ = PROTOBUF_LONGLONG(0);
+inline void TuningSourceState::clear_writingdisabled() {
+  writingdisabled_ = false;
   _has_bits_[0] &= ~0x00000100u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errrupprotocolversion() const {
-  return errrupprotocolversion_;
+inline bool TuningSourceState::_internal_writingdisabled() const {
+  return writingdisabled_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errrupprotocolversion() const {
-  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errRupProtocolVersion)
-  return _internal_errrupprotocolversion();
+inline bool TuningSourceState::writingdisabled() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSourceState.writingDisabled)
+  return _internal_writingdisabled();
 }
-inline void TuningSourceState::_internal_set_errrupprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value) {
+inline void TuningSourceState::_internal_set_writingdisabled(bool value) {
   _has_bits_[0] |= 0x00000100u;
-  errrupprotocolversion_ = value;
+  writingdisabled_ = value;
 }
-inline void TuningSourceState::set_errrupprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_errrupprotocolversion(value);
-  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errRupProtocolVersion)
+inline void TuningSourceState::set_writingdisabled(bool value) {
+  _internal_set_writingdisabled(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSourceState.writingDisabled)
 }
 
-// optional int64 errRupFrameSize = 12 [default = 0];
-inline bool TuningSourceState::_internal_has_errrupframesize() const {
-  bool value = (_has_bits_[0] & 0x00000200u) != 0;
+// optional bool hasUnappliedParams = 17 [default = false];
+inline bool TuningSourceState::_internal_has_hasunappliedparams() const {
+  bool value = (_has_bits_[0] & 0x04000000u) != 0;
   return value;
 }
-inline bool TuningSourceState::has_errrupframesize() const {
-  return _internal_has_errrupframesize();
+inline bool TuningSourceState::has_hasunappliedparams() const {
+  return _internal_has_hasunappliedparams();
 }
-inline void TuningSourceState::clear_errrupframesize() {
-  errrupframesize_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00000200u;
+inline void TuningSourceState::clear_hasunappliedparams() {
+  hasunappliedparams_ = false;
+  _has_bits_[0] &= ~0x04000000u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errrupframesize() const {
-  return errrupframesize_;
+inline bool TuningSourceState::_internal_hasunappliedparams() const {
+  return hasunappliedparams_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errrupframesize() const {
-  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errRupFrameSize)
-  return _internal_errrupframesize();
+inline bool TuningSourceState::hasunappliedparams() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSourceState.hasUnappliedParams)
+  return _internal_hasunappliedparams();
 }
-inline void TuningSourceState::_internal_set_errrupframesize(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00000200u;
-  errrupframesize_ = value;
+inline void TuningSourceState::_internal_set_hasunappliedparams(bool value) {
+  _has_bits_[0] |= 0x04000000u;
+  hasunappliedparams_ = value;
 }
-inline void TuningSourceState::set_errrupframesize(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_errrupframesize(value);
-  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errRupFrameSize)
-}
-
-// optional int64 errRupNonTuningData = 13 [default = 0];
-inline bool TuningSourceState::_internal_has_errrupnontuningdata() const {
-  bool value = (_has_bits_[0] & 0x00000400u) != 0;
-  return value;
-}
-inline bool TuningSourceState::has_errrupnontuningdata() const {
-  return _internal_has_errrupnontuningdata();
-}
-inline void TuningSourceState::clear_errrupnontuningdata() {
-  errrupnontuningdata_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00000400u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errrupnontuningdata() const {
-  return errrupnontuningdata_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errrupnontuningdata() const {
-  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errRupNonTuningData)
-  return _internal_errrupnontuningdata();
-}
-inline void TuningSourceState::_internal_set_errrupnontuningdata(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00000400u;
-  errrupnontuningdata_ = value;
-}
-inline void TuningSourceState::set_errrupnontuningdata(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_errrupnontuningdata(value);
-  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errRupNonTuningData)
+inline void TuningSourceState::set_hasunappliedparams(bool value) {
+  _internal_set_hasunappliedparams(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSourceState.hasUnappliedParams)
 }
 
-// optional int64 errRupModuleType = 14 [default = 0];
-inline bool TuningSourceState::_internal_has_errrupmoduletype() const {
-  bool value = (_has_bits_[0] & 0x00000800u) != 0;
-  return value;
-}
-inline bool TuningSourceState::has_errrupmoduletype() const {
-  return _internal_has_errrupmoduletype();
-}
-inline void TuningSourceState::clear_errrupmoduletype() {
-  errrupmoduletype_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00000800u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errrupmoduletype() const {
-  return errrupmoduletype_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errrupmoduletype() const {
-  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errRupModuleType)
-  return _internal_errrupmoduletype();
-}
-inline void TuningSourceState::_internal_set_errrupmoduletype(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00000800u;
-  errrupmoduletype_ = value;
-}
-inline void TuningSourceState::set_errrupmoduletype(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_errrupmoduletype(value);
-  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errRupModuleType)
-}
-
-// optional int64 errRupFramesQuantity = 15 [default = 0];
-inline bool TuningSourceState::_internal_has_errrupframesquantity() const {
-  bool value = (_has_bits_[0] & 0x00001000u) != 0;
-  return value;
-}
-inline bool TuningSourceState::has_errrupframesquantity() const {
-  return _internal_has_errrupframesquantity();
-}
-inline void TuningSourceState::clear_errrupframesquantity() {
-  errrupframesquantity_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00001000u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errrupframesquantity() const {
-  return errrupframesquantity_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errrupframesquantity() const {
-  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errRupFramesQuantity)
-  return _internal_errrupframesquantity();
-}
-inline void TuningSourceState::_internal_set_errrupframesquantity(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00001000u;
-  errrupframesquantity_ = value;
-}
-inline void TuningSourceState::set_errrupframesquantity(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_errrupframesquantity(value);
-  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errRupFramesQuantity)
-}
-
-// optional int64 errRupFrameNumber = 16 [default = 0];
-inline bool TuningSourceState::_internal_has_errrupframenumber() const {
-  bool value = (_has_bits_[0] & 0x00002000u) != 0;
-  return value;
-}
-inline bool TuningSourceState::has_errrupframenumber() const {
-  return _internal_has_errrupframenumber();
-}
-inline void TuningSourceState::clear_errrupframenumber() {
-  errrupframenumber_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00002000u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errrupframenumber() const {
-  return errrupframenumber_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errrupframenumber() const {
-  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errRupFrameNumber)
-  return _internal_errrupframenumber();
-}
-inline void TuningSourceState::_internal_set_errrupframenumber(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00002000u;
-  errrupframenumber_ = value;
-}
-inline void TuningSourceState::set_errrupframenumber(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_errrupframenumber(value);
-  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errRupFrameNumber)
-}
-
-// optional int64 errFotipProtocolVersion = 17 [default = 0];
-inline bool TuningSourceState::_internal_has_errfotipprotocolversion() const {
-  bool value = (_has_bits_[0] & 0x00004000u) != 0;
-  return value;
-}
-inline bool TuningSourceState::has_errfotipprotocolversion() const {
-  return _internal_has_errfotipprotocolversion();
-}
-inline void TuningSourceState::clear_errfotipprotocolversion() {
-  errfotipprotocolversion_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00004000u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errfotipprotocolversion() const {
-  return errfotipprotocolversion_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errfotipprotocolversion() const {
-  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errFotipProtocolVersion)
-  return _internal_errfotipprotocolversion();
-}
-inline void TuningSourceState::_internal_set_errfotipprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00004000u;
-  errfotipprotocolversion_ = value;
-}
-inline void TuningSourceState::set_errfotipprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_errfotipprotocolversion(value);
-  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errFotipProtocolVersion)
-}
-
-// optional int64 errFotipUniqueID = 18 [default = 0];
-inline bool TuningSourceState::_internal_has_errfotipuniqueid() const {
-  bool value = (_has_bits_[0] & 0x00008000u) != 0;
-  return value;
-}
-inline bool TuningSourceState::has_errfotipuniqueid() const {
-  return _internal_has_errfotipuniqueid();
-}
-inline void TuningSourceState::clear_errfotipuniqueid() {
-  errfotipuniqueid_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00008000u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errfotipuniqueid() const {
-  return errfotipuniqueid_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errfotipuniqueid() const {
-  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errFotipUniqueID)
-  return _internal_errfotipuniqueid();
-}
-inline void TuningSourceState::_internal_set_errfotipuniqueid(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00008000u;
-  errfotipuniqueid_ = value;
-}
-inline void TuningSourceState::set_errfotipuniqueid(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_errfotipuniqueid(value);
-  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errFotipUniqueID)
-}
-
-// optional int64 errFotipLmNumber = 19 [default = 0];
-inline bool TuningSourceState::_internal_has_errfotiplmnumber() const {
-  bool value = (_has_bits_[0] & 0x00010000u) != 0;
-  return value;
-}
-inline bool TuningSourceState::has_errfotiplmnumber() const {
-  return _internal_has_errfotiplmnumber();
-}
-inline void TuningSourceState::clear_errfotiplmnumber() {
-  errfotiplmnumber_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00010000u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errfotiplmnumber() const {
-  return errfotiplmnumber_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errfotiplmnumber() const {
-  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errFotipLmNumber)
-  return _internal_errfotiplmnumber();
-}
-inline void TuningSourceState::_internal_set_errfotiplmnumber(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00010000u;
-  errfotiplmnumber_ = value;
-}
-inline void TuningSourceState::set_errfotiplmnumber(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_errfotiplmnumber(value);
-  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errFotipLmNumber)
-}
-
-// optional int64 errFotipSubsystemCode = 20 [default = 0];
-inline bool TuningSourceState::_internal_has_errfotipsubsystemcode() const {
-  bool value = (_has_bits_[0] & 0x00020000u) != 0;
-  return value;
-}
-inline bool TuningSourceState::has_errfotipsubsystemcode() const {
-  return _internal_has_errfotipsubsystemcode();
-}
-inline void TuningSourceState::clear_errfotipsubsystemcode() {
-  errfotipsubsystemcode_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00020000u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errfotipsubsystemcode() const {
-  return errfotipsubsystemcode_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errfotipsubsystemcode() const {
-  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errFotipSubsystemCode)
-  return _internal_errfotipsubsystemcode();
-}
-inline void TuningSourceState::_internal_set_errfotipsubsystemcode(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00020000u;
-  errfotipsubsystemcode_ = value;
-}
-inline void TuningSourceState::set_errfotipsubsystemcode(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_errfotipsubsystemcode(value);
-  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errFotipSubsystemCode)
-}
-
-// optional int64 errFotipOperationCode = 21 [default = 0];
-inline bool TuningSourceState::_internal_has_errfotipoperationcode() const {
-  bool value = (_has_bits_[0] & 0x00040000u) != 0;
-  return value;
-}
-inline bool TuningSourceState::has_errfotipoperationcode() const {
-  return _internal_has_errfotipoperationcode();
-}
-inline void TuningSourceState::clear_errfotipoperationcode() {
-  errfotipoperationcode_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00040000u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errfotipoperationcode() const {
-  return errfotipoperationcode_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errfotipoperationcode() const {
-  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errFotipOperationCode)
-  return _internal_errfotipoperationcode();
-}
-inline void TuningSourceState::_internal_set_errfotipoperationcode(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00040000u;
-  errfotipoperationcode_ = value;
-}
-inline void TuningSourceState::set_errfotipoperationcode(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_errfotipoperationcode(value);
-  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errFotipOperationCode)
-}
-
-// optional int64 errFotipFrameSize = 22 [default = 0];
-inline bool TuningSourceState::_internal_has_errfotipframesize() const {
-  bool value = (_has_bits_[0] & 0x00080000u) != 0;
-  return value;
-}
-inline bool TuningSourceState::has_errfotipframesize() const {
-  return _internal_has_errfotipframesize();
-}
-inline void TuningSourceState::clear_errfotipframesize() {
-  errfotipframesize_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00080000u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errfotipframesize() const {
-  return errfotipframesize_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errfotipframesize() const {
-  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errFotipFrameSize)
-  return _internal_errfotipframesize();
-}
-inline void TuningSourceState::_internal_set_errfotipframesize(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00080000u;
-  errfotipframesize_ = value;
-}
-inline void TuningSourceState::set_errfotipframesize(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_errfotipframesize(value);
-  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errFotipFrameSize)
-}
-
-// optional int64 errFotipRomSize = 23 [default = 0];
-inline bool TuningSourceState::_internal_has_errfotipromsize() const {
-  bool value = (_has_bits_[0] & 0x00100000u) != 0;
-  return value;
-}
-inline bool TuningSourceState::has_errfotipromsize() const {
-  return _internal_has_errfotipromsize();
-}
-inline void TuningSourceState::clear_errfotipromsize() {
-  errfotipromsize_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00100000u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errfotipromsize() const {
-  return errfotipromsize_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errfotipromsize() const {
-  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errFotipRomSize)
-  return _internal_errfotipromsize();
-}
-inline void TuningSourceState::_internal_set_errfotipromsize(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00100000u;
-  errfotipromsize_ = value;
-}
-inline void TuningSourceState::set_errfotipromsize(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_errfotipromsize(value);
-  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errFotipRomSize)
-}
-
-// optional int64 errFotipRomFrameSize = 24 [default = 0];
-inline bool TuningSourceState::_internal_has_errfotipromframesize() const {
-  bool value = (_has_bits_[0] & 0x00200000u) != 0;
-  return value;
-}
-inline bool TuningSourceState::has_errfotipromframesize() const {
-  return _internal_has_errfotipromframesize();
-}
-inline void TuningSourceState::clear_errfotipromframesize() {
-  errfotipromframesize_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00200000u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errfotipromframesize() const {
-  return errfotipromframesize_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errfotipromframesize() const {
-  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errFotipRomFrameSize)
-  return _internal_errfotipromframesize();
-}
-inline void TuningSourceState::_internal_set_errfotipromframesize(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00200000u;
-  errfotipromframesize_ = value;
-}
-inline void TuningSourceState::set_errfotipromframesize(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_errfotipromframesize(value);
-  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errFotipRomFrameSize)
-}
-
-// optional int64 fotipFlagBoundsCheckSuccess = 25 [default = 0];
+// optional int64 fotipFlagBoundsCheckSuccess = 30 [default = 0];
 inline bool TuningSourceState::_internal_has_fotipflagboundschecksuccess() const {
-  bool value = (_has_bits_[0] & 0x00400000u) != 0;
+  bool value = (_has_bits_[0] & 0x00000200u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_fotipflagboundschecksuccess() const {
@@ -22313,7 +22033,7 @@ inline bool TuningSourceState::has_fotipflagboundschecksuccess() const {
 }
 inline void TuningSourceState::clear_fotipflagboundschecksuccess() {
   fotipflagboundschecksuccess_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00400000u;
+  _has_bits_[0] &= ~0x00000200u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_fotipflagboundschecksuccess() const {
   return fotipflagboundschecksuccess_;
@@ -22323,7 +22043,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::fotipflagboundschecksuc
   return _internal_fotipflagboundschecksuccess();
 }
 inline void TuningSourceState::_internal_set_fotipflagboundschecksuccess(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00400000u;
+  _has_bits_[0] |= 0x00000200u;
   fotipflagboundschecksuccess_ = value;
 }
 inline void TuningSourceState::set_fotipflagboundschecksuccess(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22331,9 +22051,9 @@ inline void TuningSourceState::set_fotipflagboundschecksuccess(::PROTOBUF_NAMESP
   // @@protoc_insertion_point(field_set:Network.TuningSourceState.fotipFlagBoundsCheckSuccess)
 }
 
-// optional int64 fotipFlagWriteSuccess = 26 [default = 0];
+// optional int64 fotipFlagWriteSuccess = 31 [default = 0];
 inline bool TuningSourceState::_internal_has_fotipflagwritesuccess() const {
-  bool value = (_has_bits_[0] & 0x00800000u) != 0;
+  bool value = (_has_bits_[0] & 0x00000400u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_fotipflagwritesuccess() const {
@@ -22341,7 +22061,7 @@ inline bool TuningSourceState::has_fotipflagwritesuccess() const {
 }
 inline void TuningSourceState::clear_fotipflagwritesuccess() {
   fotipflagwritesuccess_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00800000u;
+  _has_bits_[0] &= ~0x00000400u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_fotipflagwritesuccess() const {
   return fotipflagwritesuccess_;
@@ -22351,7 +22071,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::fotipflagwritesuccess()
   return _internal_fotipflagwritesuccess();
 }
 inline void TuningSourceState::_internal_set_fotipflagwritesuccess(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00800000u;
+  _has_bits_[0] |= 0x00000400u;
   fotipflagwritesuccess_ = value;
 }
 inline void TuningSourceState::set_fotipflagwritesuccess(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22359,9 +22079,9 @@ inline void TuningSourceState::set_fotipflagwritesuccess(::PROTOBUF_NAMESPACE_ID
   // @@protoc_insertion_point(field_set:Network.TuningSourceState.fotipFlagWriteSuccess)
 }
 
-// optional int64 fotipFlagDataTypeErr = 27 [default = 0];
+// optional int64 fotipFlagDataTypeErr = 32 [default = 0];
 inline bool TuningSourceState::_internal_has_fotipflagdatatypeerr() const {
-  bool value = (_has_bits_[0] & 0x01000000u) != 0;
+  bool value = (_has_bits_[0] & 0x00000800u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_fotipflagdatatypeerr() const {
@@ -22369,7 +22089,7 @@ inline bool TuningSourceState::has_fotipflagdatatypeerr() const {
 }
 inline void TuningSourceState::clear_fotipflagdatatypeerr() {
   fotipflagdatatypeerr_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x01000000u;
+  _has_bits_[0] &= ~0x00000800u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_fotipflagdatatypeerr() const {
   return fotipflagdatatypeerr_;
@@ -22379,7 +22099,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::fotipflagdatatypeerr() 
   return _internal_fotipflagdatatypeerr();
 }
 inline void TuningSourceState::_internal_set_fotipflagdatatypeerr(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x01000000u;
+  _has_bits_[0] |= 0x00000800u;
   fotipflagdatatypeerr_ = value;
 }
 inline void TuningSourceState::set_fotipflagdatatypeerr(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22387,9 +22107,9 @@ inline void TuningSourceState::set_fotipflagdatatypeerr(::PROTOBUF_NAMESPACE_ID:
   // @@protoc_insertion_point(field_set:Network.TuningSourceState.fotipFlagDataTypeErr)
 }
 
-// optional int64 fotipFlagOpCodeErr = 28 [default = 0];
+// optional int64 fotipFlagOpCodeErr = 33 [default = 0];
 inline bool TuningSourceState::_internal_has_fotipflagopcodeerr() const {
-  bool value = (_has_bits_[0] & 0x40000000u) != 0;
+  bool value = (_has_bits_[0] & 0x00001000u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_fotipflagopcodeerr() const {
@@ -22397,7 +22117,7 @@ inline bool TuningSourceState::has_fotipflagopcodeerr() const {
 }
 inline void TuningSourceState::clear_fotipflagopcodeerr() {
   fotipflagopcodeerr_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x40000000u;
+  _has_bits_[0] &= ~0x00001000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_fotipflagopcodeerr() const {
   return fotipflagopcodeerr_;
@@ -22407,7 +22127,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::fotipflagopcodeerr() co
   return _internal_fotipflagopcodeerr();
 }
 inline void TuningSourceState::_internal_set_fotipflagopcodeerr(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x40000000u;
+  _has_bits_[0] |= 0x00001000u;
   fotipflagopcodeerr_ = value;
 }
 inline void TuningSourceState::set_fotipflagopcodeerr(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22415,9 +22135,9 @@ inline void TuningSourceState::set_fotipflagopcodeerr(::PROTOBUF_NAMESPACE_ID::i
   // @@protoc_insertion_point(field_set:Network.TuningSourceState.fotipFlagOpCodeErr)
 }
 
-// optional int64 fotipFlagStartAddrErr = 29 [default = 0];
+// optional int64 fotipFlagStartAddrErr = 34 [default = 0];
 inline bool TuningSourceState::_internal_has_fotipflagstartaddrerr() const {
-  bool value = (_has_bits_[0] & 0x80000000u) != 0;
+  bool value = (_has_bits_[0] & 0x00002000u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_fotipflagstartaddrerr() const {
@@ -22425,7 +22145,7 @@ inline bool TuningSourceState::has_fotipflagstartaddrerr() const {
 }
 inline void TuningSourceState::clear_fotipflagstartaddrerr() {
   fotipflagstartaddrerr_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x80000000u;
+  _has_bits_[0] &= ~0x00002000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_fotipflagstartaddrerr() const {
   return fotipflagstartaddrerr_;
@@ -22435,7 +22155,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::fotipflagstartaddrerr()
   return _internal_fotipflagstartaddrerr();
 }
 inline void TuningSourceState::_internal_set_fotipflagstartaddrerr(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x80000000u;
+  _has_bits_[0] |= 0x00002000u;
   fotipflagstartaddrerr_ = value;
 }
 inline void TuningSourceState::set_fotipflagstartaddrerr(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22443,9 +22163,9 @@ inline void TuningSourceState::set_fotipflagstartaddrerr(::PROTOBUF_NAMESPACE_ID
   // @@protoc_insertion_point(field_set:Network.TuningSourceState.fotipFlagStartAddrErr)
 }
 
-// optional int64 fotipFlagRomSizeErr = 30 [default = 0];
+// optional int64 fotipFlagRomSizeErr = 35 [default = 0];
 inline bool TuningSourceState::_internal_has_fotipflagromsizeerr() const {
-  bool value = (_has_bits_[1] & 0x00000001u) != 0;
+  bool value = (_has_bits_[0] & 0x00004000u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_fotipflagromsizeerr() const {
@@ -22453,7 +22173,7 @@ inline bool TuningSourceState::has_fotipflagromsizeerr() const {
 }
 inline void TuningSourceState::clear_fotipflagromsizeerr() {
   fotipflagromsizeerr_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[1] &= ~0x00000001u;
+  _has_bits_[0] &= ~0x00004000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_fotipflagromsizeerr() const {
   return fotipflagromsizeerr_;
@@ -22463,7 +22183,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::fotipflagromsizeerr() c
   return _internal_fotipflagromsizeerr();
 }
 inline void TuningSourceState::_internal_set_fotipflagromsizeerr(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[1] |= 0x00000001u;
+  _has_bits_[0] |= 0x00004000u;
   fotipflagromsizeerr_ = value;
 }
 inline void TuningSourceState::set_fotipflagromsizeerr(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22471,9 +22191,9 @@ inline void TuningSourceState::set_fotipflagromsizeerr(::PROTOBUF_NAMESPACE_ID::
   // @@protoc_insertion_point(field_set:Network.TuningSourceState.fotipFlagRomSizeErr)
 }
 
-// optional int64 fotipFlagRomFrameSizeErr = 31 [default = 0];
+// optional int64 fotipFlagRomFrameSizeErr = 36 [default = 0];
 inline bool TuningSourceState::_internal_has_fotipflagromframesizeerr() const {
-  bool value = (_has_bits_[1] & 0x00000002u) != 0;
+  bool value = (_has_bits_[0] & 0x00008000u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_fotipflagromframesizeerr() const {
@@ -22481,7 +22201,7 @@ inline bool TuningSourceState::has_fotipflagromframesizeerr() const {
 }
 inline void TuningSourceState::clear_fotipflagromframesizeerr() {
   fotipflagromframesizeerr_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[1] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00008000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_fotipflagromframesizeerr() const {
   return fotipflagromframesizeerr_;
@@ -22491,7 +22211,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::fotipflagromframesizeer
   return _internal_fotipflagromframesizeerr();
 }
 inline void TuningSourceState::_internal_set_fotipflagromframesizeerr(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[1] |= 0x00000002u;
+  _has_bits_[0] |= 0x00008000u;
   fotipflagromframesizeerr_ = value;
 }
 inline void TuningSourceState::set_fotipflagromframesizeerr(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22499,9 +22219,9 @@ inline void TuningSourceState::set_fotipflagromframesizeerr(::PROTOBUF_NAMESPACE
   // @@protoc_insertion_point(field_set:Network.TuningSourceState.fotipFlagRomFrameSizeErr)
 }
 
-// optional int64 fotipFlagFrameSizeErr = 32 [default = 0];
+// optional int64 fotipFlagFrameSizeErr = 37 [default = 0];
 inline bool TuningSourceState::_internal_has_fotipflagframesizeerr() const {
-  bool value = (_has_bits_[1] & 0x00000004u) != 0;
+  bool value = (_has_bits_[0] & 0x00010000u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_fotipflagframesizeerr() const {
@@ -22509,7 +22229,7 @@ inline bool TuningSourceState::has_fotipflagframesizeerr() const {
 }
 inline void TuningSourceState::clear_fotipflagframesizeerr() {
   fotipflagframesizeerr_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[1] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00010000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_fotipflagframesizeerr() const {
   return fotipflagframesizeerr_;
@@ -22519,7 +22239,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::fotipflagframesizeerr()
   return _internal_fotipflagframesizeerr();
 }
 inline void TuningSourceState::_internal_set_fotipflagframesizeerr(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[1] |= 0x00000004u;
+  _has_bits_[0] |= 0x00010000u;
   fotipflagframesizeerr_ = value;
 }
 inline void TuningSourceState::set_fotipflagframesizeerr(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22527,9 +22247,9 @@ inline void TuningSourceState::set_fotipflagframesizeerr(::PROTOBUF_NAMESPACE_ID
   // @@protoc_insertion_point(field_set:Network.TuningSourceState.fotipFlagFrameSizeErr)
 }
 
-// optional int64 fotipFlagProtocolVersionErr = 33 [default = 0];
+// optional int64 fotipFlagProtocolVersionErr = 38 [default = 0];
 inline bool TuningSourceState::_internal_has_fotipflagprotocolversionerr() const {
-  bool value = (_has_bits_[1] & 0x00000008u) != 0;
+  bool value = (_has_bits_[0] & 0x00020000u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_fotipflagprotocolversionerr() const {
@@ -22537,7 +22257,7 @@ inline bool TuningSourceState::has_fotipflagprotocolversionerr() const {
 }
 inline void TuningSourceState::clear_fotipflagprotocolversionerr() {
   fotipflagprotocolversionerr_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[1] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00020000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_fotipflagprotocolversionerr() const {
   return fotipflagprotocolversionerr_;
@@ -22547,7 +22267,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::fotipflagprotocolversio
   return _internal_fotipflagprotocolversionerr();
 }
 inline void TuningSourceState::_internal_set_fotipflagprotocolversionerr(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[1] |= 0x00000008u;
+  _has_bits_[0] |= 0x00020000u;
   fotipflagprotocolversionerr_ = value;
 }
 inline void TuningSourceState::set_fotipflagprotocolversionerr(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22555,9 +22275,9 @@ inline void TuningSourceState::set_fotipflagprotocolversionerr(::PROTOBUF_NAMESP
   // @@protoc_insertion_point(field_set:Network.TuningSourceState.fotipFlagProtocolVersionErr)
 }
 
-// optional int64 fotipFlagSubsystemKeyErr = 34 [default = 0];
+// optional int64 fotipFlagSubsystemKeyErr = 39 [default = 0];
 inline bool TuningSourceState::_internal_has_fotipflagsubsystemkeyerr() const {
-  bool value = (_has_bits_[1] & 0x00000010u) != 0;
+  bool value = (_has_bits_[0] & 0x00040000u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_fotipflagsubsystemkeyerr() const {
@@ -22565,7 +22285,7 @@ inline bool TuningSourceState::has_fotipflagsubsystemkeyerr() const {
 }
 inline void TuningSourceState::clear_fotipflagsubsystemkeyerr() {
   fotipflagsubsystemkeyerr_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[1] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00040000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_fotipflagsubsystemkeyerr() const {
   return fotipflagsubsystemkeyerr_;
@@ -22575,7 +22295,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::fotipflagsubsystemkeyer
   return _internal_fotipflagsubsystemkeyerr();
 }
 inline void TuningSourceState::_internal_set_fotipflagsubsystemkeyerr(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[1] |= 0x00000010u;
+  _has_bits_[0] |= 0x00040000u;
   fotipflagsubsystemkeyerr_ = value;
 }
 inline void TuningSourceState::set_fotipflagsubsystemkeyerr(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22583,9 +22303,9 @@ inline void TuningSourceState::set_fotipflagsubsystemkeyerr(::PROTOBUF_NAMESPACE
   // @@protoc_insertion_point(field_set:Network.TuningSourceState.fotipFlagSubsystemKeyErr)
 }
 
-// optional int64 fotipFlagUniueIDErr = 35 [default = 0];
+// optional int64 fotipFlagUniueIDErr = 40 [default = 0];
 inline bool TuningSourceState::_internal_has_fotipflaguniueiderr() const {
-  bool value = (_has_bits_[1] & 0x00000020u) != 0;
+  bool value = (_has_bits_[0] & 0x00080000u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_fotipflaguniueiderr() const {
@@ -22593,7 +22313,7 @@ inline bool TuningSourceState::has_fotipflaguniueiderr() const {
 }
 inline void TuningSourceState::clear_fotipflaguniueiderr() {
   fotipflaguniueiderr_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[1] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00080000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_fotipflaguniueiderr() const {
   return fotipflaguniueiderr_;
@@ -22603,7 +22323,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::fotipflaguniueiderr() c
   return _internal_fotipflaguniueiderr();
 }
 inline void TuningSourceState::_internal_set_fotipflaguniueiderr(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[1] |= 0x00000020u;
+  _has_bits_[0] |= 0x00080000u;
   fotipflaguniueiderr_ = value;
 }
 inline void TuningSourceState::set_fotipflaguniueiderr(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22611,9 +22331,9 @@ inline void TuningSourceState::set_fotipflaguniueiderr(::PROTOBUF_NAMESPACE_ID::
   // @@protoc_insertion_point(field_set:Network.TuningSourceState.fotipFlagUniueIDErr)
 }
 
-// optional int64 fotipFlagOffsetErr = 36 [default = 0];
+// optional int64 fotipFlagOffsetErr = 41 [default = 0];
 inline bool TuningSourceState::_internal_has_fotipflagoffseterr() const {
-  bool value = (_has_bits_[1] & 0x00000040u) != 0;
+  bool value = (_has_bits_[0] & 0x00100000u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_fotipflagoffseterr() const {
@@ -22621,7 +22341,7 @@ inline bool TuningSourceState::has_fotipflagoffseterr() const {
 }
 inline void TuningSourceState::clear_fotipflagoffseterr() {
   fotipflagoffseterr_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[1] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00100000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_fotipflagoffseterr() const {
   return fotipflagoffseterr_;
@@ -22631,7 +22351,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::fotipflagoffseterr() co
   return _internal_fotipflagoffseterr();
 }
 inline void TuningSourceState::_internal_set_fotipflagoffseterr(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[1] |= 0x00000040u;
+  _has_bits_[0] |= 0x00100000u;
   fotipflagoffseterr_ = value;
 }
 inline void TuningSourceState::set_fotipflagoffseterr(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22639,9 +22359,9 @@ inline void TuningSourceState::set_fotipflagoffseterr(::PROTOBUF_NAMESPACE_ID::i
   // @@protoc_insertion_point(field_set:Network.TuningSourceState.fotipFlagOffsetErr)
 }
 
-// optional int64 fotipFlagApplySuccess = 37 [default = 0];
+// optional int64 fotipFlagApplySuccess = 42 [default = 0];
 inline bool TuningSourceState::_internal_has_fotipflagapplysuccess() const {
-  bool value = (_has_bits_[1] & 0x00000080u) != 0;
+  bool value = (_has_bits_[0] & 0x00200000u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_fotipflagapplysuccess() const {
@@ -22649,7 +22369,7 @@ inline bool TuningSourceState::has_fotipflagapplysuccess() const {
 }
 inline void TuningSourceState::clear_fotipflagapplysuccess() {
   fotipflagapplysuccess_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[1] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00200000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_fotipflagapplysuccess() const {
   return fotipflagapplysuccess_;
@@ -22659,7 +22379,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::fotipflagapplysuccess()
   return _internal_fotipflagapplysuccess();
 }
 inline void TuningSourceState::_internal_set_fotipflagapplysuccess(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[1] |= 0x00000080u;
+  _has_bits_[0] |= 0x00200000u;
   fotipflagapplysuccess_ = value;
 }
 inline void TuningSourceState::set_fotipflagapplysuccess(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22667,9 +22387,9 @@ inline void TuningSourceState::set_fotipflagapplysuccess(::PROTOBUF_NAMESPACE_ID
   // @@protoc_insertion_point(field_set:Network.TuningSourceState.fotipFlagApplySuccess)
 }
 
-// optional int64 fotipFlagSetSOR = 38 [default = 0];
+// optional int64 fotipFlagSetSOR = 43 [default = 0];
 inline bool TuningSourceState::_internal_has_fotipflagsetsor() const {
-  bool value = (_has_bits_[1] & 0x00000100u) != 0;
+  bool value = (_has_bits_[0] & 0x00400000u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_fotipflagsetsor() const {
@@ -22677,7 +22397,7 @@ inline bool TuningSourceState::has_fotipflagsetsor() const {
 }
 inline void TuningSourceState::clear_fotipflagsetsor() {
   fotipflagsetsor_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[1] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00400000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_fotipflagsetsor() const {
   return fotipflagsetsor_;
@@ -22687,7 +22407,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::fotipflagsetsor() const
   return _internal_fotipflagsetsor();
 }
 inline void TuningSourceState::_internal_set_fotipflagsetsor(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[1] |= 0x00000100u;
+  _has_bits_[0] |= 0x00400000u;
   fotipflagsetsor_ = value;
 }
 inline void TuningSourceState::set_fotipflagsetsor(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -22695,7 +22415,483 @@ inline void TuningSourceState::set_fotipflagsetsor(::PROTOBUF_NAMESPACE_ID::int6
   // @@protoc_insertion_point(field_set:Network.TuningSourceState.fotipFlagSetSOR)
 }
 
-// optional int64 errAnalogLowBoundCheck = 39 [default = 0];
+// optional int64 fotipFlagWritingDisabled = 44 [default = 0];
+inline bool TuningSourceState::_internal_has_fotipflagwritingdisabled() const {
+  bool value = (_has_bits_[0] & 0x00800000u) != 0;
+  return value;
+}
+inline bool TuningSourceState::has_fotipflagwritingdisabled() const {
+  return _internal_has_fotipflagwritingdisabled();
+}
+inline void TuningSourceState::clear_fotipflagwritingdisabled() {
+  fotipflagwritingdisabled_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00800000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_fotipflagwritingdisabled() const {
+  return fotipflagwritingdisabled_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::fotipflagwritingdisabled() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSourceState.fotipFlagWritingDisabled)
+  return _internal_fotipflagwritingdisabled();
+}
+inline void TuningSourceState::_internal_set_fotipflagwritingdisabled(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00800000u;
+  fotipflagwritingdisabled_ = value;
+}
+inline void TuningSourceState::set_fotipflagwritingdisabled(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_fotipflagwritingdisabled(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSourceState.fotipFlagWritingDisabled)
+}
+
+// optional uint64 fotipProcessingNumerator = 45 [default = 0];
+inline bool TuningSourceState::_internal_has_fotipprocessingnumerator() const {
+  bool value = (_has_bits_[0] & 0x01000000u) != 0;
+  return value;
+}
+inline bool TuningSourceState::has_fotipprocessingnumerator() const {
+  return _internal_has_fotipprocessingnumerator();
+}
+inline void TuningSourceState::clear_fotipprocessingnumerator() {
+  fotipprocessingnumerator_ = PROTOBUF_ULONGLONG(0);
+  _has_bits_[0] &= ~0x01000000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 TuningSourceState::_internal_fotipprocessingnumerator() const {
+  return fotipprocessingnumerator_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 TuningSourceState::fotipprocessingnumerator() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSourceState.fotipProcessingNumerator)
+  return _internal_fotipprocessingnumerator();
+}
+inline void TuningSourceState::_internal_set_fotipprocessingnumerator(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _has_bits_[0] |= 0x01000000u;
+  fotipprocessingnumerator_ = value;
+}
+inline void TuningSourceState::set_fotipprocessingnumerator(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_fotipprocessingnumerator(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSourceState.fotipProcessingNumerator)
+}
+
+// optional int64 errRupProtocolVersion = 50 [default = 0];
+inline bool TuningSourceState::_internal_has_errrupprotocolversion() const {
+  bool value = (_has_bits_[0] & 0x02000000u) != 0;
+  return value;
+}
+inline bool TuningSourceState::has_errrupprotocolversion() const {
+  return _internal_has_errrupprotocolversion();
+}
+inline void TuningSourceState::clear_errrupprotocolversion() {
+  errrupprotocolversion_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x02000000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errrupprotocolversion() const {
+  return errrupprotocolversion_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errrupprotocolversion() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errRupProtocolVersion)
+  return _internal_errrupprotocolversion();
+}
+inline void TuningSourceState::_internal_set_errrupprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x02000000u;
+  errrupprotocolversion_ = value;
+}
+inline void TuningSourceState::set_errrupprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errrupprotocolversion(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errRupProtocolVersion)
+}
+
+// optional int64 errRupFrameSize = 51 [default = 0];
+inline bool TuningSourceState::_internal_has_errrupframesize() const {
+  bool value = (_has_bits_[0] & 0x08000000u) != 0;
+  return value;
+}
+inline bool TuningSourceState::has_errrupframesize() const {
+  return _internal_has_errrupframesize();
+}
+inline void TuningSourceState::clear_errrupframesize() {
+  errrupframesize_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x08000000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errrupframesize() const {
+  return errrupframesize_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errrupframesize() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errRupFrameSize)
+  return _internal_errrupframesize();
+}
+inline void TuningSourceState::_internal_set_errrupframesize(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x08000000u;
+  errrupframesize_ = value;
+}
+inline void TuningSourceState::set_errrupframesize(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errrupframesize(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errRupFrameSize)
+}
+
+// optional int64 errRupNonTuningData = 52 [default = 0];
+inline bool TuningSourceState::_internal_has_errrupnontuningdata() const {
+  bool value = (_has_bits_[0] & 0x10000000u) != 0;
+  return value;
+}
+inline bool TuningSourceState::has_errrupnontuningdata() const {
+  return _internal_has_errrupnontuningdata();
+}
+inline void TuningSourceState::clear_errrupnontuningdata() {
+  errrupnontuningdata_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x10000000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errrupnontuningdata() const {
+  return errrupnontuningdata_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errrupnontuningdata() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errRupNonTuningData)
+  return _internal_errrupnontuningdata();
+}
+inline void TuningSourceState::_internal_set_errrupnontuningdata(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x10000000u;
+  errrupnontuningdata_ = value;
+}
+inline void TuningSourceState::set_errrupnontuningdata(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errrupnontuningdata(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errRupNonTuningData)
+}
+
+// optional int64 errRupModuleType = 53 [default = 0];
+inline bool TuningSourceState::_internal_has_errrupmoduletype() const {
+  bool value = (_has_bits_[0] & 0x20000000u) != 0;
+  return value;
+}
+inline bool TuningSourceState::has_errrupmoduletype() const {
+  return _internal_has_errrupmoduletype();
+}
+inline void TuningSourceState::clear_errrupmoduletype() {
+  errrupmoduletype_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x20000000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errrupmoduletype() const {
+  return errrupmoduletype_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errrupmoduletype() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errRupModuleType)
+  return _internal_errrupmoduletype();
+}
+inline void TuningSourceState::_internal_set_errrupmoduletype(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x20000000u;
+  errrupmoduletype_ = value;
+}
+inline void TuningSourceState::set_errrupmoduletype(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errrupmoduletype(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errRupModuleType)
+}
+
+// optional int64 errRupFramesQuantity = 54 [default = 0];
+inline bool TuningSourceState::_internal_has_errrupframesquantity() const {
+  bool value = (_has_bits_[0] & 0x40000000u) != 0;
+  return value;
+}
+inline bool TuningSourceState::has_errrupframesquantity() const {
+  return _internal_has_errrupframesquantity();
+}
+inline void TuningSourceState::clear_errrupframesquantity() {
+  errrupframesquantity_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x40000000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errrupframesquantity() const {
+  return errrupframesquantity_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errrupframesquantity() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errRupFramesQuantity)
+  return _internal_errrupframesquantity();
+}
+inline void TuningSourceState::_internal_set_errrupframesquantity(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x40000000u;
+  errrupframesquantity_ = value;
+}
+inline void TuningSourceState::set_errrupframesquantity(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errrupframesquantity(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errRupFramesQuantity)
+}
+
+// optional int64 errRupFrameNumber = 55 [default = 0];
+inline bool TuningSourceState::_internal_has_errrupframenumber() const {
+  bool value = (_has_bits_[0] & 0x80000000u) != 0;
+  return value;
+}
+inline bool TuningSourceState::has_errrupframenumber() const {
+  return _internal_has_errrupframenumber();
+}
+inline void TuningSourceState::clear_errrupframenumber() {
+  errrupframenumber_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x80000000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errrupframenumber() const {
+  return errrupframenumber_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errrupframenumber() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errRupFrameNumber)
+  return _internal_errrupframenumber();
+}
+inline void TuningSourceState::_internal_set_errrupframenumber(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x80000000u;
+  errrupframenumber_ = value;
+}
+inline void TuningSourceState::set_errrupframenumber(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errrupframenumber(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errRupFrameNumber)
+}
+
+// optional int64 errRupCRC = 56 [default = 0];
+inline bool TuningSourceState::_internal_has_errrupcrc() const {
+  bool value = (_has_bits_[1] & 0x00000001u) != 0;
+  return value;
+}
+inline bool TuningSourceState::has_errrupcrc() const {
+  return _internal_has_errrupcrc();
+}
+inline void TuningSourceState::clear_errrupcrc() {
+  errrupcrc_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[1] &= ~0x00000001u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errrupcrc() const {
+  return errrupcrc_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errrupcrc() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errRupCRC)
+  return _internal_errrupcrc();
+}
+inline void TuningSourceState::_internal_set_errrupcrc(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[1] |= 0x00000001u;
+  errrupcrc_ = value;
+}
+inline void TuningSourceState::set_errrupcrc(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errrupcrc(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errRupCRC)
+}
+
+// optional int64 errFotipProtocolVersion = 60 [default = 0];
+inline bool TuningSourceState::_internal_has_errfotipprotocolversion() const {
+  bool value = (_has_bits_[1] & 0x00000002u) != 0;
+  return value;
+}
+inline bool TuningSourceState::has_errfotipprotocolversion() const {
+  return _internal_has_errfotipprotocolversion();
+}
+inline void TuningSourceState::clear_errfotipprotocolversion() {
+  errfotipprotocolversion_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[1] &= ~0x00000002u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errfotipprotocolversion() const {
+  return errfotipprotocolversion_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errfotipprotocolversion() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errFotipProtocolVersion)
+  return _internal_errfotipprotocolversion();
+}
+inline void TuningSourceState::_internal_set_errfotipprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[1] |= 0x00000002u;
+  errfotipprotocolversion_ = value;
+}
+inline void TuningSourceState::set_errfotipprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errfotipprotocolversion(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errFotipProtocolVersion)
+}
+
+// optional int64 errFotipUniqueID = 61 [default = 0];
+inline bool TuningSourceState::_internal_has_errfotipuniqueid() const {
+  bool value = (_has_bits_[1] & 0x00000004u) != 0;
+  return value;
+}
+inline bool TuningSourceState::has_errfotipuniqueid() const {
+  return _internal_has_errfotipuniqueid();
+}
+inline void TuningSourceState::clear_errfotipuniqueid() {
+  errfotipuniqueid_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[1] &= ~0x00000004u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errfotipuniqueid() const {
+  return errfotipuniqueid_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errfotipuniqueid() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errFotipUniqueID)
+  return _internal_errfotipuniqueid();
+}
+inline void TuningSourceState::_internal_set_errfotipuniqueid(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[1] |= 0x00000004u;
+  errfotipuniqueid_ = value;
+}
+inline void TuningSourceState::set_errfotipuniqueid(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errfotipuniqueid(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errFotipUniqueID)
+}
+
+// optional int64 errFotipLmNumber = 62 [default = 0];
+inline bool TuningSourceState::_internal_has_errfotiplmnumber() const {
+  bool value = (_has_bits_[1] & 0x00000008u) != 0;
+  return value;
+}
+inline bool TuningSourceState::has_errfotiplmnumber() const {
+  return _internal_has_errfotiplmnumber();
+}
+inline void TuningSourceState::clear_errfotiplmnumber() {
+  errfotiplmnumber_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[1] &= ~0x00000008u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errfotiplmnumber() const {
+  return errfotiplmnumber_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errfotiplmnumber() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errFotipLmNumber)
+  return _internal_errfotiplmnumber();
+}
+inline void TuningSourceState::_internal_set_errfotiplmnumber(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[1] |= 0x00000008u;
+  errfotiplmnumber_ = value;
+}
+inline void TuningSourceState::set_errfotiplmnumber(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errfotiplmnumber(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errFotipLmNumber)
+}
+
+// optional int64 errFotipSubsystemCode = 63 [default = 0];
+inline bool TuningSourceState::_internal_has_errfotipsubsystemcode() const {
+  bool value = (_has_bits_[1] & 0x00000010u) != 0;
+  return value;
+}
+inline bool TuningSourceState::has_errfotipsubsystemcode() const {
+  return _internal_has_errfotipsubsystemcode();
+}
+inline void TuningSourceState::clear_errfotipsubsystemcode() {
+  errfotipsubsystemcode_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[1] &= ~0x00000010u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errfotipsubsystemcode() const {
+  return errfotipsubsystemcode_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errfotipsubsystemcode() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errFotipSubsystemCode)
+  return _internal_errfotipsubsystemcode();
+}
+inline void TuningSourceState::_internal_set_errfotipsubsystemcode(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[1] |= 0x00000010u;
+  errfotipsubsystemcode_ = value;
+}
+inline void TuningSourceState::set_errfotipsubsystemcode(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errfotipsubsystemcode(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errFotipSubsystemCode)
+}
+
+// optional int64 errFotipOperationCode = 64 [default = 0];
+inline bool TuningSourceState::_internal_has_errfotipoperationcode() const {
+  bool value = (_has_bits_[1] & 0x00000020u) != 0;
+  return value;
+}
+inline bool TuningSourceState::has_errfotipoperationcode() const {
+  return _internal_has_errfotipoperationcode();
+}
+inline void TuningSourceState::clear_errfotipoperationcode() {
+  errfotipoperationcode_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[1] &= ~0x00000020u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errfotipoperationcode() const {
+  return errfotipoperationcode_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errfotipoperationcode() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errFotipOperationCode)
+  return _internal_errfotipoperationcode();
+}
+inline void TuningSourceState::_internal_set_errfotipoperationcode(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[1] |= 0x00000020u;
+  errfotipoperationcode_ = value;
+}
+inline void TuningSourceState::set_errfotipoperationcode(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errfotipoperationcode(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errFotipOperationCode)
+}
+
+// optional int64 errFotipFrameSize = 65 [default = 0];
+inline bool TuningSourceState::_internal_has_errfotipframesize() const {
+  bool value = (_has_bits_[1] & 0x00000040u) != 0;
+  return value;
+}
+inline bool TuningSourceState::has_errfotipframesize() const {
+  return _internal_has_errfotipframesize();
+}
+inline void TuningSourceState::clear_errfotipframesize() {
+  errfotipframesize_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[1] &= ~0x00000040u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errfotipframesize() const {
+  return errfotipframesize_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errfotipframesize() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errFotipFrameSize)
+  return _internal_errfotipframesize();
+}
+inline void TuningSourceState::_internal_set_errfotipframesize(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[1] |= 0x00000040u;
+  errfotipframesize_ = value;
+}
+inline void TuningSourceState::set_errfotipframesize(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errfotipframesize(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errFotipFrameSize)
+}
+
+// optional int64 errFotipRomSize = 66 [default = 0];
+inline bool TuningSourceState::_internal_has_errfotipromsize() const {
+  bool value = (_has_bits_[1] & 0x00000080u) != 0;
+  return value;
+}
+inline bool TuningSourceState::has_errfotipromsize() const {
+  return _internal_has_errfotipromsize();
+}
+inline void TuningSourceState::clear_errfotipromsize() {
+  errfotipromsize_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[1] &= ~0x00000080u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errfotipromsize() const {
+  return errfotipromsize_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errfotipromsize() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errFotipRomSize)
+  return _internal_errfotipromsize();
+}
+inline void TuningSourceState::_internal_set_errfotipromsize(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[1] |= 0x00000080u;
+  errfotipromsize_ = value;
+}
+inline void TuningSourceState::set_errfotipromsize(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errfotipromsize(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errFotipRomSize)
+}
+
+// optional int64 errFotipRomFrameSize = 67 [default = 0];
+inline bool TuningSourceState::_internal_has_errfotipromframesize() const {
+  bool value = (_has_bits_[1] & 0x00000100u) != 0;
+  return value;
+}
+inline bool TuningSourceState::has_errfotipromframesize() const {
+  return _internal_has_errfotipromframesize();
+}
+inline void TuningSourceState::clear_errfotipromframesize() {
+  errfotipromframesize_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[1] &= ~0x00000100u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errfotipromframesize() const {
+  return errfotipromframesize_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errfotipromframesize() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errFotipRomFrameSize)
+  return _internal_errfotipromframesize();
+}
+inline void TuningSourceState::_internal_set_errfotipromframesize(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[1] |= 0x00000100u;
+  errfotipromframesize_ = value;
+}
+inline void TuningSourceState::set_errfotipromframesize(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errfotipromframesize(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errFotipRomFrameSize)
+}
+
+// optional int64 errAnalogLowBoundCheck = 68 [default = 0];
 inline bool TuningSourceState::_internal_has_erranaloglowboundcheck() const {
   bool value = (_has_bits_[1] & 0x00000200u) != 0;
   return value;
@@ -22723,7 +22919,7 @@ inline void TuningSourceState::set_erranaloglowboundcheck(::PROTOBUF_NAMESPACE_I
   // @@protoc_insertion_point(field_set:Network.TuningSourceState.errAnalogLowBoundCheck)
 }
 
-// optional int64 errAnalogHighBoundCheck = 40 [default = 0];
+// optional int64 errAnalogHighBoundCheck = 69 [default = 0];
 inline bool TuningSourceState::_internal_has_erranaloghighboundcheck() const {
   bool value = (_has_bits_[1] & 0x00000400u) != 0;
   return value;
@@ -22751,177 +22947,149 @@ inline void TuningSourceState::set_erranaloghighboundcheck(::PROTOBUF_NAMESPACE_
   // @@protoc_insertion_point(field_set:Network.TuningSourceState.errAnalogHighBoundCheck)
 }
 
-// optional int64 errRupCRC = 41 [default = 0];
-inline bool TuningSourceState::_internal_has_errrupcrc() const {
+// optional int64 errUntimelyReplay = 70 [default = 0];
+inline bool TuningSourceState::_internal_has_erruntimelyreplay() const {
   bool value = (_has_bits_[1] & 0x00000800u) != 0;
   return value;
 }
-inline bool TuningSourceState::has_errrupcrc() const {
-  return _internal_has_errrupcrc();
+inline bool TuningSourceState::has_erruntimelyreplay() const {
+  return _internal_has_erruntimelyreplay();
 }
-inline void TuningSourceState::clear_errrupcrc() {
-  errrupcrc_ = PROTOBUF_LONGLONG(0);
+inline void TuningSourceState::clear_erruntimelyreplay() {
+  erruntimelyreplay_ = PROTOBUF_LONGLONG(0);
   _has_bits_[1] &= ~0x00000800u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errrupcrc() const {
-  return errrupcrc_;
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_erruntimelyreplay() const {
+  return erruntimelyreplay_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errrupcrc() const {
-  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errRupCRC)
-  return _internal_errrupcrc();
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::erruntimelyreplay() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errUntimelyReplay)
+  return _internal_erruntimelyreplay();
 }
-inline void TuningSourceState::_internal_set_errrupcrc(::PROTOBUF_NAMESPACE_ID::int64 value) {
+inline void TuningSourceState::_internal_set_erruntimelyreplay(::PROTOBUF_NAMESPACE_ID::int64 value) {
   _has_bits_[1] |= 0x00000800u;
-  errrupcrc_ = value;
+  erruntimelyreplay_ = value;
 }
-inline void TuningSourceState::set_errrupcrc(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_errrupcrc(value);
-  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errRupCRC)
-}
-
-// optional bool controlIsActive = 42 [default = false];
-inline bool TuningSourceState::_internal_has_controlisactive() const {
-  bool value = (_has_bits_[0] & 0x08000000u) != 0;
-  return value;
-}
-inline bool TuningSourceState::has_controlisactive() const {
-  return _internal_has_controlisactive();
-}
-inline void TuningSourceState::clear_controlisactive() {
-  controlisactive_ = false;
-  _has_bits_[0] &= ~0x08000000u;
-}
-inline bool TuningSourceState::_internal_controlisactive() const {
-  return controlisactive_;
-}
-inline bool TuningSourceState::controlisactive() const {
-  // @@protoc_insertion_point(field_get:Network.TuningSourceState.controlIsActive)
-  return _internal_controlisactive();
-}
-inline void TuningSourceState::_internal_set_controlisactive(bool value) {
-  _has_bits_[0] |= 0x08000000u;
-  controlisactive_ = value;
-}
-inline void TuningSourceState::set_controlisactive(bool value) {
-  _internal_set_controlisactive(value);
-  // @@protoc_insertion_point(field_set:Network.TuningSourceState.controlIsActive)
+inline void TuningSourceState::set_erruntimelyreplay(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_erruntimelyreplay(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errUntimelyReplay)
 }
 
-// optional bool setSOR = 43 [default = false];
-inline bool TuningSourceState::_internal_has_setsor() const {
-  bool value = (_has_bits_[0] & 0x10000000u) != 0;
-  return value;
-}
-inline bool TuningSourceState::has_setsor() const {
-  return _internal_has_setsor();
-}
-inline void TuningSourceState::clear_setsor() {
-  setsor_ = false;
-  _has_bits_[0] &= ~0x10000000u;
-}
-inline bool TuningSourceState::_internal_setsor() const {
-  return setsor_;
-}
-inline bool TuningSourceState::setsor() const {
-  // @@protoc_insertion_point(field_get:Network.TuningSourceState.setSOR)
-  return _internal_setsor();
-}
-inline void TuningSourceState::_internal_set_setsor(bool value) {
-  _has_bits_[0] |= 0x10000000u;
-  setsor_ = value;
-}
-inline void TuningSourceState::set_setsor(bool value) {
-  _internal_set_setsor(value);
-  // @@protoc_insertion_point(field_set:Network.TuningSourceState.setSOR)
-}
-
-// optional bool hasUnappliedParams = 44 [default = false];
-inline bool TuningSourceState::_internal_has_hasunappliedparams() const {
-  bool value = (_has_bits_[0] & 0x20000000u) != 0;
-  return value;
-}
-inline bool TuningSourceState::has_hasunappliedparams() const {
-  return _internal_has_hasunappliedparams();
-}
-inline void TuningSourceState::clear_hasunappliedparams() {
-  hasunappliedparams_ = false;
-  _has_bits_[0] &= ~0x20000000u;
-}
-inline bool TuningSourceState::_internal_hasunappliedparams() const {
-  return hasunappliedparams_;
-}
-inline bool TuningSourceState::hasunappliedparams() const {
-  // @@protoc_insertion_point(field_get:Network.TuningSourceState.hasUnappliedParams)
-  return _internal_hasunappliedparams();
-}
-inline void TuningSourceState::_internal_set_hasunappliedparams(bool value) {
-  _has_bits_[0] |= 0x20000000u;
-  hasunappliedparams_ = value;
-}
-inline void TuningSourceState::set_hasunappliedparams(bool value) {
-  _internal_set_hasunappliedparams(value);
-  // @@protoc_insertion_point(field_set:Network.TuningSourceState.hasUnappliedParams)
-}
-
-// optional bool writingDisabled = 45 [default = false];
-inline bool TuningSourceState::_internal_has_writingdisabled() const {
-  bool value = (_has_bits_[1] & 0x00004000u) != 0;
-  return value;
-}
-inline bool TuningSourceState::has_writingdisabled() const {
-  return _internal_has_writingdisabled();
-}
-inline void TuningSourceState::clear_writingdisabled() {
-  writingdisabled_ = false;
-  _has_bits_[1] &= ~0x00004000u;
-}
-inline bool TuningSourceState::_internal_writingdisabled() const {
-  return writingdisabled_;
-}
-inline bool TuningSourceState::writingdisabled() const {
-  // @@protoc_insertion_point(field_get:Network.TuningSourceState.writingDisabled)
-  return _internal_writingdisabled();
-}
-inline void TuningSourceState::_internal_set_writingdisabled(bool value) {
-  _has_bits_[1] |= 0x00004000u;
-  writingdisabled_ = value;
-}
-inline void TuningSourceState::set_writingdisabled(bool value) {
-  _internal_set_writingdisabled(value);
-  // @@protoc_insertion_point(field_set:Network.TuningSourceState.writingDisabled)
-}
-
-// optional int64 fotipFlagWritingDisabled = 46 [default = 0];
-inline bool TuningSourceState::_internal_has_fotipflagwritingdisabled() const {
+// optional int64 errSent = 71 [default = 0];
+inline bool TuningSourceState::_internal_has_errsent() const {
   bool value = (_has_bits_[1] & 0x00001000u) != 0;
   return value;
 }
-inline bool TuningSourceState::has_fotipflagwritingdisabled() const {
-  return _internal_has_fotipflagwritingdisabled();
+inline bool TuningSourceState::has_errsent() const {
+  return _internal_has_errsent();
 }
-inline void TuningSourceState::clear_fotipflagwritingdisabled() {
-  fotipflagwritingdisabled_ = PROTOBUF_LONGLONG(0);
+inline void TuningSourceState::clear_errsent() {
+  errsent_ = PROTOBUF_LONGLONG(0);
   _has_bits_[1] &= ~0x00001000u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_fotipflagwritingdisabled() const {
-  return fotipflagwritingdisabled_;
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errsent() const {
+  return errsent_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::fotipflagwritingdisabled() const {
-  // @@protoc_insertion_point(field_get:Network.TuningSourceState.fotipFlagWritingDisabled)
-  return _internal_fotipflagwritingdisabled();
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errsent() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errSent)
+  return _internal_errsent();
 }
-inline void TuningSourceState::_internal_set_fotipflagwritingdisabled(::PROTOBUF_NAMESPACE_ID::int64 value) {
+inline void TuningSourceState::_internal_set_errsent(::PROTOBUF_NAMESPACE_ID::int64 value) {
   _has_bits_[1] |= 0x00001000u;
-  fotipflagwritingdisabled_ = value;
+  errsent_ = value;
 }
-inline void TuningSourceState::set_fotipflagwritingdisabled(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_fotipflagwritingdisabled(value);
-  // @@protoc_insertion_point(field_set:Network.TuningSourceState.fotipFlagWritingDisabled)
+inline void TuningSourceState::set_errsent(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errsent(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errSent)
 }
 
-// optional int64 errTuningFrameUpdate = 47 [default = 0];
-inline bool TuningSourceState::_internal_has_errtuningframeupdate() const {
+// optional int64 errPartialSent = 72 [default = 0];
+inline bool TuningSourceState::_internal_has_errpartialsent() const {
   bool value = (_has_bits_[1] & 0x00002000u) != 0;
+  return value;
+}
+inline bool TuningSourceState::has_errpartialsent() const {
+  return _internal_has_errpartialsent();
+}
+inline void TuningSourceState::clear_errpartialsent() {
+  errpartialsent_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[1] &= ~0x00002000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errpartialsent() const {
+  return errpartialsent_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errpartialsent() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errPartialSent)
+  return _internal_errpartialsent();
+}
+inline void TuningSourceState::_internal_set_errpartialsent(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[1] |= 0x00002000u;
+  errpartialsent_ = value;
+}
+inline void TuningSourceState::set_errpartialsent(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errpartialsent(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errPartialSent)
+}
+
+// optional int64 errReplySize = 73 [default = 0];
+inline bool TuningSourceState::_internal_has_errreplysize() const {
+  bool value = (_has_bits_[1] & 0x00004000u) != 0;
+  return value;
+}
+inline bool TuningSourceState::has_errreplysize() const {
+  return _internal_has_errreplysize();
+}
+inline void TuningSourceState::clear_errreplysize() {
+  errreplysize_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[1] &= ~0x00004000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errreplysize() const {
+  return errreplysize_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errreplysize() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errReplySize)
+  return _internal_errreplysize();
+}
+inline void TuningSourceState::_internal_set_errreplysize(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[1] |= 0x00004000u;
+  errreplysize_ = value;
+}
+inline void TuningSourceState::set_errreplysize(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errreplysize(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errReplySize)
+}
+
+// optional int64 errNoReply = 74 [default = 0];
+inline bool TuningSourceState::_internal_has_errnoreply() const {
+  bool value = (_has_bits_[1] & 0x00008000u) != 0;
+  return value;
+}
+inline bool TuningSourceState::has_errnoreply() const {
+  return _internal_has_errnoreply();
+}
+inline void TuningSourceState::clear_errnoreply() {
+  errnoreply_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[1] &= ~0x00008000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errnoreply() const {
+  return errnoreply_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errnoreply() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSourceState.errNoReply)
+  return _internal_errnoreply();
+}
+inline void TuningSourceState::_internal_set_errnoreply(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[1] |= 0x00008000u;
+  errnoreply_ = value;
+}
+inline void TuningSourceState::set_errnoreply(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errnoreply(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSourceState.errNoReply)
+}
+
+// optional int64 errTuningFrameUpdate = 75 [default = 0];
+inline bool TuningSourceState::_internal_has_errtuningframeupdate() const {
+  bool value = (_has_bits_[1] & 0x00010000u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_errtuningframeupdate() const {
@@ -22929,7 +23097,7 @@ inline bool TuningSourceState::has_errtuningframeupdate() const {
 }
 inline void TuningSourceState::clear_errtuningframeupdate() {
   errtuningframeupdate_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[1] &= ~0x00002000u;
+  _has_bits_[1] &= ~0x00010000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errtuningframeupdate() const {
   return errtuningframeupdate_;
@@ -22939,7 +23107,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errtuningframeupdate() 
   return _internal_errtuningframeupdate();
 }
 inline void TuningSourceState::_internal_set_errtuningframeupdate(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[1] |= 0x00002000u;
+  _has_bits_[1] |= 0x00010000u;
   errtuningframeupdate_ = value;
 }
 inline void TuningSourceState::set_errtuningframeupdate(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -24112,6 +24280,62 @@ inline void TuningSignalState::_internal_set_tuningdefault(bool value) {
 inline void TuningSignalState::set_tuningdefault(bool value) {
   _internal_set_tuningdefault(value);
   // @@protoc_insertion_point(field_set:Network.TuningSignalState.tuningDefault)
+}
+
+// optional sfixed64 lmTime = 17 [default = 0];
+inline bool TuningSignalState::_internal_has_lmtime() const {
+  bool value = (_has_bits_[0] & 0x00010000u) != 0;
+  return value;
+}
+inline bool TuningSignalState::has_lmtime() const {
+  return _internal_has_lmtime();
+}
+inline void TuningSignalState::clear_lmtime() {
+  lmtime_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00010000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSignalState::_internal_lmtime() const {
+  return lmtime_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSignalState::lmtime() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSignalState.lmTime)
+  return _internal_lmtime();
+}
+inline void TuningSignalState::_internal_set_lmtime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00010000u;
+  lmtime_ = value;
+}
+inline void TuningSignalState::set_lmtime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_lmtime(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSignalState.lmTime)
+}
+
+// optional fixed64 fotipProcessingNumerator = 18 [default = 0];
+inline bool TuningSignalState::_internal_has_fotipprocessingnumerator() const {
+  bool value = (_has_bits_[0] & 0x00020000u) != 0;
+  return value;
+}
+inline bool TuningSignalState::has_fotipprocessingnumerator() const {
+  return _internal_has_fotipprocessingnumerator();
+}
+inline void TuningSignalState::clear_fotipprocessingnumerator() {
+  fotipprocessingnumerator_ = PROTOBUF_ULONGLONG(0);
+  _has_bits_[0] &= ~0x00020000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 TuningSignalState::_internal_fotipprocessingnumerator() const {
+  return fotipprocessingnumerator_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 TuningSignalState::fotipprocessingnumerator() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSignalState.fotipProcessingNumerator)
+  return _internal_fotipprocessingnumerator();
+}
+inline void TuningSignalState::_internal_set_fotipprocessingnumerator(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _has_bits_[0] |= 0x00020000u;
+  fotipprocessingnumerator_ = value;
+}
+inline void TuningSignalState::set_fotipprocessingnumerator(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_fotipprocessingnumerator(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSignalState.fotipProcessingNumerator)
 }
 
 // -------------------------------------------------------------------

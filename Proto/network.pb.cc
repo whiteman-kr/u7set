@@ -601,36 +601,18 @@ struct TuningSourceFillingDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT TuningSourceFillingDefaultTypeInternal _TuningSourceFilling_default_instance_;
 constexpr TuningSourceState::TuningSourceState(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : sourceid_(PROTOBUF_ULONGLONG(0))
+  : lanequipmentid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , sourceid_(PROTOBUF_ULONGLONG(0))
   , requestcount_(PROTOBUF_LONGLONG(0))
   , replycount_(PROTOBUF_LONGLONG(0))
-  , erruntimelyreplay_(PROTOBUF_LONGLONG(0))
-  , errsent_(PROTOBUF_LONGLONG(0))
-  , errpartialsent_(PROTOBUF_LONGLONG(0))
-  , errreplysize_(PROTOBUF_LONGLONG(0))
-  , errnoreply_(PROTOBUF_LONGLONG(0))
-  , errrupprotocolversion_(PROTOBUF_LONGLONG(0))
-  , errrupframesize_(PROTOBUF_LONGLONG(0))
-  , errrupnontuningdata_(PROTOBUF_LONGLONG(0))
-  , errrupmoduletype_(PROTOBUF_LONGLONG(0))
-  , errrupframesquantity_(PROTOBUF_LONGLONG(0))
-  , errrupframenumber_(PROTOBUF_LONGLONG(0))
-  , errfotipprotocolversion_(PROTOBUF_LONGLONG(0))
-  , errfotipuniqueid_(PROTOBUF_LONGLONG(0))
-  , errfotiplmnumber_(PROTOBUF_LONGLONG(0))
-  , errfotipsubsystemcode_(PROTOBUF_LONGLONG(0))
-  , errfotipoperationcode_(PROTOBUF_LONGLONG(0))
-  , errfotipframesize_(PROTOBUF_LONGLONG(0))
-  , errfotipromsize_(PROTOBUF_LONGLONG(0))
-  , errfotipromframesize_(PROTOBUF_LONGLONG(0))
-  , fotipflagboundschecksuccess_(PROTOBUF_LONGLONG(0))
-  , fotipflagwritesuccess_(PROTOBUF_LONGLONG(0))
-  , fotipflagdatatypeerr_(PROTOBUF_LONGLONG(0))
   , commandqueuesize_(0)
   , isreply_(false)
   , controlisactive_(false)
   , setsor_(false)
-  , hasunappliedparams_(false)
+  , writingdisabled_(false)
+  , fotipflagboundschecksuccess_(PROTOBUF_LONGLONG(0))
+  , fotipflagwritesuccess_(PROTOBUF_LONGLONG(0))
+  , fotipflagdatatypeerr_(PROTOBUF_LONGLONG(0))
   , fotipflagopcodeerr_(PROTOBUF_LONGLONG(0))
   , fotipflagstartaddrerr_(PROTOBUF_LONGLONG(0))
   , fotipflagromsizeerr_(PROTOBUF_LONGLONG(0))
@@ -642,12 +624,32 @@ constexpr TuningSourceState::TuningSourceState(
   , fotipflagoffseterr_(PROTOBUF_LONGLONG(0))
   , fotipflagapplysuccess_(PROTOBUF_LONGLONG(0))
   , fotipflagsetsor_(PROTOBUF_LONGLONG(0))
+  , fotipflagwritingdisabled_(PROTOBUF_LONGLONG(0))
+  , fotipprocessingnumerator_(PROTOBUF_ULONGLONG(0))
+  , errrupprotocolversion_(PROTOBUF_LONGLONG(0))
+  , hasunappliedparams_(false)
+  , errrupframesize_(PROTOBUF_LONGLONG(0))
+  , errrupnontuningdata_(PROTOBUF_LONGLONG(0))
+  , errrupmoduletype_(PROTOBUF_LONGLONG(0))
+  , errrupframesquantity_(PROTOBUF_LONGLONG(0))
+  , errrupframenumber_(PROTOBUF_LONGLONG(0))
+  , errrupcrc_(PROTOBUF_LONGLONG(0))
+  , errfotipprotocolversion_(PROTOBUF_LONGLONG(0))
+  , errfotipuniqueid_(PROTOBUF_LONGLONG(0))
+  , errfotiplmnumber_(PROTOBUF_LONGLONG(0))
+  , errfotipsubsystemcode_(PROTOBUF_LONGLONG(0))
+  , errfotipoperationcode_(PROTOBUF_LONGLONG(0))
+  , errfotipframesize_(PROTOBUF_LONGLONG(0))
+  , errfotipromsize_(PROTOBUF_LONGLONG(0))
+  , errfotipromframesize_(PROTOBUF_LONGLONG(0))
   , erranaloglowboundcheck_(PROTOBUF_LONGLONG(0))
   , erranaloghighboundcheck_(PROTOBUF_LONGLONG(0))
-  , errrupcrc_(PROTOBUF_LONGLONG(0))
-  , fotipflagwritingdisabled_(PROTOBUF_LONGLONG(0))
-  , errtuningframeupdate_(PROTOBUF_LONGLONG(0))
-  , writingdisabled_(false){}
+  , erruntimelyreplay_(PROTOBUF_LONGLONG(0))
+  , errsent_(PROTOBUF_LONGLONG(0))
+  , errpartialsent_(PROTOBUF_LONGLONG(0))
+  , errreplysize_(PROTOBUF_LONGLONG(0))
+  , errnoreply_(PROTOBUF_LONGLONG(0))
+  , errtuningframeupdate_(PROTOBUF_LONGLONG(0)){}
 struct TuningSourceStateDefaultTypeInternal {
   constexpr TuningSourceStateDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -730,7 +732,9 @@ constexpr TuningSignalState::TuningSignalState(
   , writingdisabled_(false)
   , tuningdefault_(false)
   , successfulwritetime_(PROTOBUF_LONGLONG(0))
-  , unsuccessfulwritetime_(PROTOBUF_LONGLONG(0)){}
+  , unsuccessfulwritetime_(PROTOBUF_LONGLONG(0))
+  , lmtime_(PROTOBUF_LONGLONG(0))
+  , fotipprocessingnumerator_(PROTOBUF_ULONGLONG(0)){}
 struct TuningSignalStateDefaultTypeInternal {
   constexpr TuningSignalStateDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -1598,29 +1602,15 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_network_2eproto::offsets[] PRO
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, sourceid_),
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, lanequipmentid_),
   PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, isreply_),
   PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, requestcount_),
   PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, replycount_),
   PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, commandqueuesize_),
-  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, erruntimelyreplay_),
-  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errsent_),
-  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errpartialsent_),
-  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errreplysize_),
-  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errnoreply_),
-  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errrupprotocolversion_),
-  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errrupframesize_),
-  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errrupnontuningdata_),
-  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errrupmoduletype_),
-  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errrupframesquantity_),
-  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errrupframenumber_),
-  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errfotipprotocolversion_),
-  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errfotipuniqueid_),
-  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errfotiplmnumber_),
-  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errfotipsubsystemcode_),
-  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errfotipoperationcode_),
-  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errfotipframesize_),
-  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errfotipromsize_),
-  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errfotipromframesize_),
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, controlisactive_),
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, setsor_),
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, writingdisabled_),
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, hasunappliedparams_),
   PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, fotipflagboundschecksuccess_),
   PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, fotipflagwritesuccess_),
   PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, fotipflagdatatypeerr_),
@@ -1635,26 +1625,41 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_network_2eproto::offsets[] PRO
   PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, fotipflagoffseterr_),
   PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, fotipflagapplysuccess_),
   PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, fotipflagsetsor_),
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, fotipflagwritingdisabled_),
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, fotipprocessingnumerator_),
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errrupprotocolversion_),
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errrupframesize_),
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errrupnontuningdata_),
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errrupmoduletype_),
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errrupframesquantity_),
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errrupframenumber_),
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errrupcrc_),
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errfotipprotocolversion_),
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errfotipuniqueid_),
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errfotiplmnumber_),
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errfotipsubsystemcode_),
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errfotipoperationcode_),
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errfotipframesize_),
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errfotipromsize_),
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errfotipromframesize_),
   PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, erranaloglowboundcheck_),
   PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, erranaloghighboundcheck_),
-  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errrupcrc_),
-  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, controlisactive_),
-  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, setsor_),
-  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, hasunappliedparams_),
-  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, writingdisabled_),
-  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, fotipflagwritingdisabled_),
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, erruntimelyreplay_),
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errsent_),
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errpartialsent_),
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errreplysize_),
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errnoreply_),
   PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errtuningframeupdate_),
-  0,
-  26,
   1,
+  0,
+  5,
   2,
-  25,
   3,
   4,
-  5,
   6,
   7,
   8,
+  26,
   9,
   10,
   11,
@@ -1671,6 +1676,10 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_network_2eproto::offsets[] PRO
   22,
   23,
   24,
+  25,
+  27,
+  28,
+  29,
   30,
   31,
   32,
@@ -1685,12 +1694,11 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_network_2eproto::offsets[] PRO
   41,
   42,
   43,
-  27,
-  28,
-  29,
-  46,
   44,
   45,
+  46,
+  47,
+  48,
   PROTOBUF_FIELD_OFFSET(::Network::GetTuningSourcesStatesReply, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::Network::GetTuningSourcesStatesReply, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -1755,6 +1763,8 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_network_2eproto::offsets[] PRO
   PROTOBUF_FIELD_OFFSET(::Network::TuningSignalState, setsor_),
   PROTOBUF_FIELD_OFFSET(::Network::TuningSignalState, writingdisabled_),
   PROTOBUF_FIELD_OFFSET(::Network::TuningSignalState, tuningdefault_),
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSignalState, lmtime_),
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSignalState, fotipprocessingnumerator_),
   3,
   4,
   9,
@@ -1771,6 +1781,8 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_network_2eproto::offsets[] PRO
   11,
   12,
   13,
+  16,
+  17,
   PROTOBUF_FIELD_OFFSET(::Network::TuningSignalsReadReply, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::Network::TuningSignalsReadReply, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -2053,36 +2065,36 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 497, -1, sizeof(::Network::GetTuningSourcesStates)},
   { 502, 509, sizeof(::Network::SignalsAssociatedToTuningSource)},
   { 511, 518, sizeof(::Network::TuningSourceFilling)},
-  { 520, 572, sizeof(::Network::TuningSourceState)},
-  { 619, 629, sizeof(::Network::GetTuningSourcesStatesReply)},
-  { 634, 642, sizeof(::Network::ChangeConrolledTuningSourceRequest)},
-  { 645, 653, sizeof(::Network::ChangeConrolledTuningSourceReply)},
-  { 656, -1, sizeof(::Network::TuningSignalsRead)},
-  { 662, 683, sizeof(::Network::TuningSignalState)},
-  { 699, 706, sizeof(::Network::TuningSignalsReadReply)},
-  { 708, 715, sizeof(::Network::TuningWriteCommand)},
-  { 717, 724, sizeof(::Network::TuningSignalsWrite)},
-  { 726, 733, sizeof(::Network::TuningSignalWriteResult)},
-  { 735, 742, sizeof(::Network::TuningSignalsWriteReply)},
-  { 744, -1, sizeof(::Network::TuningSignalsApply)},
-  { 749, 755, sizeof(::Network::TuningSignalsApplyReply)},
-  { 756, 763, sizeof(::Network::DataSourceWrite)},
-  { 765, 771, sizeof(::Network::DataSourceWriteReply)},
-  { 772, -1, sizeof(::Network::PacketSourceExit)},
-  { 777, 783, sizeof(::Network::PacketSourceExitReply)},
-  { 784, 791, sizeof(::Network::SaveAppSignalsStatesToArchiveRequest)},
-  { 793, 800, sizeof(::Network::SaveAppSignalsStatesToArchiveReply)},
-  { 802, 813, sizeof(::Network::GetAppSignalStatesFromArchiveStartRequest)},
-  { 819, 828, sizeof(::Network::GetAppSignalStatesFromArchiveStartReply)},
-  { 832, 838, sizeof(::Network::GetAppSignalStatesFromArchiveNextRequest)},
-  { 839, 854, sizeof(::Network::GetAppSignalStatesFromArchiveNextReply)},
-  { 864, 870, sizeof(::Network::GetAppSignalStatesFromArchiveCancelRequest)},
-  { 871, 879, sizeof(::Network::GetAppSignalStatesFromArchiveCancelReply)},
-  { 882, 891, sizeof(::Network::RtTrendsManagementRequest)},
-  { 895, 904, sizeof(::Network::RtTrendsManagementReply)},
-  { 908, -1, sizeof(::Network::RtTrendsGetStateChangesRequest)},
-  { 913, 921, sizeof(::Network::RtTrendsGetStateChangesReply)},
-  { 924, 936, sizeof(::Network::GetFileReply)},
+  { 520, 574, sizeof(::Network::TuningSourceState)},
+  { 623, 633, sizeof(::Network::GetTuningSourcesStatesReply)},
+  { 638, 646, sizeof(::Network::ChangeConrolledTuningSourceRequest)},
+  { 649, 657, sizeof(::Network::ChangeConrolledTuningSourceReply)},
+  { 660, -1, sizeof(::Network::TuningSignalsRead)},
+  { 666, 689, sizeof(::Network::TuningSignalState)},
+  { 707, 714, sizeof(::Network::TuningSignalsReadReply)},
+  { 716, 723, sizeof(::Network::TuningWriteCommand)},
+  { 725, 732, sizeof(::Network::TuningSignalsWrite)},
+  { 734, 741, sizeof(::Network::TuningSignalWriteResult)},
+  { 743, 750, sizeof(::Network::TuningSignalsWriteReply)},
+  { 752, -1, sizeof(::Network::TuningSignalsApply)},
+  { 757, 763, sizeof(::Network::TuningSignalsApplyReply)},
+  { 764, 771, sizeof(::Network::DataSourceWrite)},
+  { 773, 779, sizeof(::Network::DataSourceWriteReply)},
+  { 780, -1, sizeof(::Network::PacketSourceExit)},
+  { 785, 791, sizeof(::Network::PacketSourceExitReply)},
+  { 792, 799, sizeof(::Network::SaveAppSignalsStatesToArchiveRequest)},
+  { 801, 808, sizeof(::Network::SaveAppSignalsStatesToArchiveReply)},
+  { 810, 821, sizeof(::Network::GetAppSignalStatesFromArchiveStartRequest)},
+  { 827, 836, sizeof(::Network::GetAppSignalStatesFromArchiveStartReply)},
+  { 840, 846, sizeof(::Network::GetAppSignalStatesFromArchiveNextRequest)},
+  { 847, 862, sizeof(::Network::GetAppSignalStatesFromArchiveNextReply)},
+  { 872, 878, sizeof(::Network::GetAppSignalStatesFromArchiveCancelRequest)},
+  { 879, 887, sizeof(::Network::GetAppSignalStatesFromArchiveCancelReply)},
+  { 890, 899, sizeof(::Network::RtTrendsManagementRequest)},
+  { 903, 912, sizeof(::Network::RtTrendsManagementReply)},
+  { 916, -1, sizeof(::Network::RtTrendsGetStateChangesRequest)},
+  { 921, 929, sizeof(::Network::RtTrendsGetStateChangesReply)},
+  { 932, 944, sizeof(::Network::GetFileReply)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -2297,133 +2309,136 @@ const char descriptor_table_protodef_network_2eproto[] PROTOBUF_SECTION_VARIABLE
   "Hash\030\002 \003(\004\"n\n\023TuningSourceFilling\022\023\n\013sig"
   "nalCount\030\001 \002(\004\022B\n\020signalsPerSource\030\002 \003(\013"
   "2(.Network.SignalsAssociatedToTuningSour"
-  "ce\"\273\013\n\021TuningSourceState\022\023\n\010sourceID\030\001 \001"
-  "(\004:\0010\022\026\n\007isReply\030\002 \001(\010:\005false\022\027\n\014request"
-  "Count\030\003 \001(\003:\0010\022\025\n\nreplyCount\030\004 \001(\003:\0010\022\033\n"
-  "\020commandQueueSize\030\005 \001(\005:\0010\022\034\n\021errUntimel"
-  "yReplay\030\006 \001(\003:\0010\022\022\n\007errSent\030\007 \001(\003:\0010\022\031\n\016"
-  "errPartialSent\030\010 \001(\003:\0010\022\027\n\014errReplySize\030"
-  "\t \001(\003:\0010\022\025\n\nerrNoReply\030\n \001(\003:\0010\022 \n\025errRu"
-  "pProtocolVersion\030\013 \001(\003:\0010\022\032\n\017errRupFrame"
-  "Size\030\014 \001(\003:\0010\022\036\n\023errRupNonTuningData\030\r \001"
-  "(\003:\0010\022\033\n\020errRupModuleType\030\016 \001(\003:\0010\022\037\n\024er"
-  "rRupFramesQuantity\030\017 \001(\003:\0010\022\034\n\021errRupFra"
-  "meNumber\030\020 \001(\003:\0010\022\"\n\027errFotipProtocolVer"
-  "sion\030\021 \001(\003:\0010\022\033\n\020errFotipUniqueID\030\022 \001(\003:"
-  "\0010\022\033\n\020errFotipLmNumber\030\023 \001(\003:\0010\022 \n\025errFo"
-  "tipSubsystemCode\030\024 \001(\003:\0010\022 \n\025errFotipOpe"
-  "rationCode\030\025 \001(\003:\0010\022\034\n\021errFotipFrameSize"
-  "\030\026 \001(\003:\0010\022\032\n\017errFotipRomSize\030\027 \001(\003:\0010\022\037\n"
-  "\024errFotipRomFrameSize\030\030 \001(\003:\0010\022&\n\033fotipF"
-  "lagBoundsCheckSuccess\030\031 \001(\003:\0010\022 \n\025fotipF"
-  "lagWriteSuccess\030\032 \001(\003:\0010\022\037\n\024fotipFlagDat"
-  "aTypeErr\030\033 \001(\003:\0010\022\035\n\022fotipFlagOpCodeErr\030"
-  "\034 \001(\003:\0010\022 \n\025fotipFlagStartAddrErr\030\035 \001(\003:"
-  "\0010\022\036\n\023fotipFlagRomSizeErr\030\036 \001(\003:\0010\022#\n\030fo"
-  "tipFlagRomFrameSizeErr\030\037 \001(\003:\0010\022 \n\025fotip"
-  "FlagFrameSizeErr\030  \001(\003:\0010\022&\n\033fotipFlagPr"
-  "otocolVersionErr\030! \001(\003:\0010\022#\n\030fotipFlagSu"
-  "bsystemKeyErr\030\" \001(\003:\0010\022\036\n\023fotipFlagUniue"
-  "IDErr\030# \001(\003:\0010\022\035\n\022fotipFlagOffsetErr\030$ \001"
-  "(\003:\0010\022 \n\025fotipFlagApplySuccess\030% \001(\003:\0010\022"
-  "\032\n\017fotipFlagSetSOR\030& \001(\003:\0010\022!\n\026errAnalog"
-  "LowBoundCheck\030\' \001(\003:\0010\022\"\n\027errAnalogHighB"
-  "oundCheck\030( \001(\003:\0010\022\024\n\terrRupCRC\030) \001(\003:\0010"
-  "\022\036\n\017controlIsActive\030* \001(\010:\005false\022\025\n\006setS"
-  "OR\030+ \001(\010:\005false\022!\n\022hasUnappliedParams\030, "
-  "\001(\010:\005false\022\036\n\017writingDisabled\030- \001(\010:\005fal"
-  "se\022#\n\030fotipFlagWritingDisabled\030. \001(\003:\0010\022"
-  "\037\n\024errTuningFrameUpdate\030/ \001(\003:\0010\"\272\001\n\033Get"
-  "TuningSourcesStatesReply\022\020\n\005error\030\001 \001(\005:"
-  "\0010\0226\n\022tuningSourcesState\030\002 \003(\0132\032.Network"
-  ".TuningSourceState\022!\n\023singleLmControlMod"
-  "e\030\003 \001(\010:\004true\022\026\n\016activeClientID\030\004 \001(\t\022\026\n"
-  "\016activeClientIP\030\005 \001(\t\"z\n\"ChangeConrolled"
-  "TuningSourceRequest\022\023\n\013takeControl\030\001 \001(\010"
-  "\022\037\n\027tuningSourceEquipmentID\030\002 \001(\t\022\036\n\017act"
-  "ivateControl\030\003 \001(\010:\005false\"\177\n ChangeConro"
-  "lledTuningSourceReply\022\020\n\005error\030\001 \001(\005:\0010\022"
-  ")\n!controlledTuningSourceEquipmentID\030\002 \001"
-  "(\t\022\036\n\017controlIsActive\030\003 \001(\010:\005false\"\'\n\021Tu"
-  "ningSignalsRead\022\022\n\nsignalHash\030\002 \003(\004\"\360\003\n\021"
-  "TuningSignalState\022\025\n\nsignalHash\030\001 \001(\006:\0010"
-  "\022\020\n\005error\030\002 \001(\005:\0010\022\024\n\005valid\030\003 \001(\010:\005false"
-  "\022!\n\005value\030\004 \001(\0132\022.Proto.TuningValue\022(\n\014r"
-  "eadLowBound\030\005 \001(\0132\022.Proto.TuningValue\022)\n"
-  "\rreadHighBound\030\006 \001(\0132\022.Proto.TuningValue"
-  "\022\036\n\017writeInProgress\030\007 \001(\010:\005false\022\031\n\016writ"
-  "eErrorCode\030\010 \001(\005:\0010\022\026\n\013writeClient\030\t \001(\006"
-  ":\0010\022\035\n\022successfulReadTime\030\n \001(\020:\0010\022\033\n\020wr"
-  "iteRequestTime\030\013 \001(\020:\0010\022\036\n\023successfulWri"
-  "teTime\030\014 \001(\020:\0010\022 \n\025unsuccessfulWriteTime"
-  "\030\r \001(\020:\0010\022\025\n\006setSOR\030\016 \001(\010:\005false\022\036\n\017writ"
-  "ingDisabled\030\017 \001(\010:\005false\022\034\n\rtuningDefaul"
-  "t\030\020 \001(\010:\005false\"a\n\026TuningSignalsReadReply"
-  "\022\020\n\005error\030\001 \001(\005:\0010\0225\n\021tuningSignalState\030"
-  "\002 \003(\0132\032.Network.TuningSignalState\"N\n\022Tun"
-  "ingWriteCommand\022\025\n\nsignalHash\030\001 \001(\004:\0010\022!"
-  "\n\005value\030\002 \001(\0132\022.Proto.TuningValue\"]\n\022Tun"
-  "ingSignalsWrite\022\030\n\tautoApply\030\002 \001(\010:\005fals"
-  "e\022-\n\010commands\030\003 \003(\0132\033.Network.TuningWrit"
-  "eCommand\"B\n\027TuningSignalWriteResult\022\025\n\ns"
-  "ignalHash\030\001 \001(\004:\0010\022\020\n\005error\030\002 \001(\005:\0010\"b\n\027"
-  "TuningSignalsWriteReply\022\020\n\005error\030\001 \001(\005:\001"
-  "0\0225\n\013writeResult\030\002 \003(\0132 .Network.TuningS"
-  "ignalWriteResult\"\024\n\022TuningSignalsApply\"+"
-  "\n\027TuningSignalsApplyReply\022\020\n\005error\030\001 \001(\005"
-  ":\0010\"B\n\017DataSourceWrite\022\031\n\021sourceEquipmen"
-  "tID\030\001 \001(\t\022\024\n\005state\030\002 \001(\010:\005false\"(\n\024DataS"
-  "ourceWriteReply\022\020\n\005error\030\001 \001(\005:\0010\"\022\n\020Pac"
-  "ketSourceExit\")\n\025PacketSourceExitReply\022\020"
-  "\n\005error\030\001 \001(\005:\0010\"q\n$SaveAppSignalsStates"
-  "ToArchiveRequest\022\031\n\021clientEquipmentID\030\001 "
-  "\001(\t\022.\n\017appSignalStates\030\002 \003(\0132\025.Proto.App"
-  "SignalState\"N\n\"SaveAppSignalsStatesToArc"
-  "hiveReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError"
-  "\030\002 \001(\005:\003100\"\271\001\n)GetAppSignalStatesFromAr"
-  "chiveStartRequest\022\031\n\021clientEquipmentID\030\001"
-  " \001(\t\022\023\n\010timeType\030\002 \001(\005:\0011\022\024\n\tstartTime\030\003"
-  " \001(\020:\0010\022\022\n\007endTime\030\004 \001(\020:\0010\022\024\n\014signalHas"
-  "hes\030\005 \003(\004\022\034\n\016removePeriodic\030\006 \001(\010:\004true\""
-  "~\n\'GetAppSignalStatesFromArchiveStartRep"
-  "ly\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:"
-  "\003100\022\023\n\013errorString\030\004 \001(\t\022\024\n\trequestID\030\003"
-  " \001(\r:\0010\"@\n(GetAppSignalStatesFromArchive"
-  "NextRequest\022\024\n\trequestID\030\001 \001(\r:\0010\"\271\002\n&Ge"
-  "tAppSignalStatesFromArchiveNextReply\022\020\n\005"
-  "error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022\024"
-  "\n\trequestID\030\003 \001(\r:\0010\022\023\n\013errorString\030\n \001("
-  "\t\022\030\n\tdataReady\030\004 \001(\010:\005false\022\033\n\020totalStat"
-  "esCount\030\005 \001(\005:\0010\022\032\n\017sentStatesCount\030\006 \001("
-  "\005:\0010\022\034\n\021statesInPartCount\030\007 \001(\005:\0010\022\031\n\nis"
-  "LastPart\030\010 \001(\010:\005false\022.\n\017appSignalStates"
-  "\030\t \003(\0132\025.Proto.AppSignalState\"B\n*GetAppS"
-  "ignalStatesFromArchiveCancelRequest\022\024\n\tr"
-  "equestID\030\001 \001(\r:\0010\"i\n(GetAppSignalStatesF"
-  "romArchiveCancelReply\022\020\n\005error\030\001 \001(\005:\0010\022"
-  "\026\n\tarchError\030\002 \001(\005:\003100\022\023\n\013errorString\030\003"
-  " \001(\t\"\204\001\n\031RtTrendsManagementRequest\022\031\n\021cl"
-  "ientEquipmentID\030\001 \001(\t\022\024\n\014samplePeriod\030\002 "
-  "\001(\005\022\032\n\022appendSignalHashes\030\003 \003(\004\022\032\n\022delet"
-  "eSignalHashes\030\004 \003(\004\"s\n\027RtTrendsManagemen"
-  "tReply\022\020\n\005error\030\001 \001(\005:\0010\022\023\n\013errorString\030"
-  "\002 \001(\t\022\024\n\014samplePeriod\030\003 \001(\005\022\033\n\023trackedSi"
-  "gnalHashes\030\004 \003(\004\" \n\036RtTrendsGetStateChan"
-  "gesRequest\"r\n\034RtTrendsGetStateChangesRep"
-  "ly\022\020\n\005error\030\001 \001(\005:\0010\022\023\n\013errorString\030\002 \001("
-  "\t\022+\n\014signalStates\030\003 \003(\0132\025.Proto.AppSigna"
-  "lState\"\247\001\n\014GetFileReply\022\024\n\terrorCode\030\001 \002"
-  "(\005:\0010\022\023\n\010fileSize\030\002 \001(\003:\0010\022\025\n\ntotalParts"
-  "\030\003 \001(\005:\0010\022\026\n\013currentPart\030\004 \001(\005:\0010\022\032\n\017cur"
-  "rentPartSize\030\005 \001(\005:\0010\022\013\n\003md5\030\006 \001(\014\022\024\n\014fi"
-  "lePartData\030\n \001(\014"
+  "ce\"\370\013\n\021TuningSourceState\022\023\n\010sourceID\030\001 \001"
+  "(\004:\0010\022\026\n\016lanEquipmentID\030\002 \001(\t\022\026\n\007isReply"
+  "\030\n \001(\010:\005false\022\027\n\014requestCount\030\013 \001(\003:\0010\022\025"
+  "\n\nreplyCount\030\014 \001(\003:\0010\022\033\n\020commandQueueSiz"
+  "e\030\r \001(\005:\0010\022\036\n\017controlIsActive\030\016 \001(\010:\005fal"
+  "se\022\025\n\006setSOR\030\017 \001(\010:\005false\022\036\n\017writingDisa"
+  "bled\030\020 \001(\010:\005false\022!\n\022hasUnappliedParams\030"
+  "\021 \001(\010:\005false\022&\n\033fotipFlagBoundsCheckSucc"
+  "ess\030\036 \001(\003:\0010\022 \n\025fotipFlagWriteSuccess\030\037 "
+  "\001(\003:\0010\022\037\n\024fotipFlagDataTypeErr\030  \001(\003:\0010\022"
+  "\035\n\022fotipFlagOpCodeErr\030! \001(\003:\0010\022 \n\025fotipF"
+  "lagStartAddrErr\030\" \001(\003:\0010\022\036\n\023fotipFlagRom"
+  "SizeErr\030# \001(\003:\0010\022#\n\030fotipFlagRomFrameSiz"
+  "eErr\030$ \001(\003:\0010\022 \n\025fotipFlagFrameSizeErr\030%"
+  " \001(\003:\0010\022&\n\033fotipFlagProtocolVersionErr\030&"
+  " \001(\003:\0010\022#\n\030fotipFlagSubsystemKeyErr\030\' \001("
+  "\003:\0010\022\036\n\023fotipFlagUniueIDErr\030( \001(\003:\0010\022\035\n\022"
+  "fotipFlagOffsetErr\030) \001(\003:\0010\022 \n\025fotipFlag"
+  "ApplySuccess\030* \001(\003:\0010\022\032\n\017fotipFlagSetSOR"
+  "\030+ \001(\003:\0010\022#\n\030fotipFlagWritingDisabled\030, "
+  "\001(\003:\0010\022#\n\030fotipProcessingNumerator\030- \001(\004"
+  ":\0010\022 \n\025errRupProtocolVersion\0302 \001(\003:\0010\022\032\n"
+  "\017errRupFrameSize\0303 \001(\003:\0010\022\036\n\023errRupNonTu"
+  "ningData\0304 \001(\003:\0010\022\033\n\020errRupModuleType\0305 "
+  "\001(\003:\0010\022\037\n\024errRupFramesQuantity\0306 \001(\003:\0010\022"
+  "\034\n\021errRupFrameNumber\0307 \001(\003:\0010\022\024\n\terrRupC"
+  "RC\0308 \001(\003:\0010\022\"\n\027errFotipProtocolVersion\030<"
+  " \001(\003:\0010\022\033\n\020errFotipUniqueID\030= \001(\003:\0010\022\033\n\020"
+  "errFotipLmNumber\030> \001(\003:\0010\022 \n\025errFotipSub"
+  "systemCode\030\? \001(\003:\0010\022 \n\025errFotipOperation"
+  "Code\030@ \001(\003:\0010\022\034\n\021errFotipFrameSize\030A \001(\003"
+  ":\0010\022\032\n\017errFotipRomSize\030B \001(\003:\0010\022\037\n\024errFo"
+  "tipRomFrameSize\030C \001(\003:\0010\022!\n\026errAnalogLow"
+  "BoundCheck\030D \001(\003:\0010\022\"\n\027errAnalogHighBoun"
+  "dCheck\030E \001(\003:\0010\022\034\n\021errUntimelyReplay\030F \001"
+  "(\003:\0010\022\022\n\007errSent\030G \001(\003:\0010\022\031\n\016errPartialS"
+  "ent\030H \001(\003:\0010\022\027\n\014errReplySize\030I \001(\003:\0010\022\025\n"
+  "\nerrNoReply\030J \001(\003:\0010\022\037\n\024errTuningFrameUp"
+  "date\030K \001(\003:\0010\"\272\001\n\033GetTuningSourcesStates"
+  "Reply\022\020\n\005error\030\001 \001(\005:\0010\0226\n\022tuningSources"
+  "State\030\002 \003(\0132\032.Network.TuningSourceState\022"
+  "!\n\023singleLmControlMode\030\003 \001(\010:\004true\022\026\n\016ac"
+  "tiveClientID\030\004 \001(\t\022\026\n\016activeClientIP\030\005 \001"
+  "(\t\"z\n\"ChangeConrolledTuningSourceRequest"
+  "\022\023\n\013takeControl\030\001 \001(\010\022\037\n\027tuningSourceEqu"
+  "ipmentID\030\002 \001(\t\022\036\n\017activateControl\030\003 \001(\010:"
+  "\005false\"\177\n ChangeConrolledTuningSourceRep"
+  "ly\022\020\n\005error\030\001 \001(\005:\0010\022)\n!controlledTuning"
+  "SourceEquipmentID\030\002 \001(\t\022\036\n\017controlIsActi"
+  "ve\030\003 \001(\010:\005false\"\'\n\021TuningSignalsRead\022\022\n\n"
+  "signalHash\030\002 \003(\004\"\250\004\n\021TuningSignalState\022\025"
+  "\n\nsignalHash\030\001 \001(\006:\0010\022\020\n\005error\030\002 \001(\005:\0010\022"
+  "\024\n\005valid\030\003 \001(\010:\005false\022!\n\005value\030\004 \001(\0132\022.P"
+  "roto.TuningValue\022(\n\014readLowBound\030\005 \001(\0132\022"
+  ".Proto.TuningValue\022)\n\rreadHighBound\030\006 \001("
+  "\0132\022.Proto.TuningValue\022\036\n\017writeInProgress"
+  "\030\007 \001(\010:\005false\022\031\n\016writeErrorCode\030\010 \001(\005:\0010"
+  "\022\026\n\013writeClient\030\t \001(\006:\0010\022\035\n\022successfulRe"
+  "adTime\030\n \001(\020:\0010\022\033\n\020writeRequestTime\030\013 \001("
+  "\020:\0010\022\036\n\023successfulWriteTime\030\014 \001(\020:\0010\022 \n\025"
+  "unsuccessfulWriteTime\030\r \001(\020:\0010\022\025\n\006setSOR"
+  "\030\016 \001(\010:\005false\022\036\n\017writingDisabled\030\017 \001(\010:\005"
+  "false\022\034\n\rtuningDefault\030\020 \001(\010:\005false\022\021\n\006l"
+  "mTime\030\021 \001(\020:\0010\022#\n\030fotipProcessingNumerat"
+  "or\030\022 \001(\006:\0010\"a\n\026TuningSignalsReadReply\022\020\n"
+  "\005error\030\001 \001(\005:\0010\0225\n\021tuningSignalState\030\002 \003"
+  "(\0132\032.Network.TuningSignalState\"N\n\022Tuning"
+  "WriteCommand\022\025\n\nsignalHash\030\001 \001(\004:\0010\022!\n\005v"
+  "alue\030\002 \001(\0132\022.Proto.TuningValue\"]\n\022Tuning"
+  "SignalsWrite\022\030\n\tautoApply\030\002 \001(\010:\005false\022-"
+  "\n\010commands\030\003 \003(\0132\033.Network.TuningWriteCo"
+  "mmand\"B\n\027TuningSignalWriteResult\022\025\n\nsign"
+  "alHash\030\001 \001(\004:\0010\022\020\n\005error\030\002 \001(\005:\0010\"b\n\027Tun"
+  "ingSignalsWriteReply\022\020\n\005error\030\001 \001(\005:\0010\0225"
+  "\n\013writeResult\030\002 \003(\0132 .Network.TuningSign"
+  "alWriteResult\"\024\n\022TuningSignalsApply\"+\n\027T"
+  "uningSignalsApplyReply\022\020\n\005error\030\001 \001(\005:\0010"
+  "\"B\n\017DataSourceWrite\022\031\n\021sourceEquipmentID"
+  "\030\001 \001(\t\022\024\n\005state\030\002 \001(\010:\005false\"(\n\024DataSour"
+  "ceWriteReply\022\020\n\005error\030\001 \001(\005:\0010\"\022\n\020Packet"
+  "SourceExit\")\n\025PacketSourceExitReply\022\020\n\005e"
+  "rror\030\001 \001(\005:\0010\"q\n$SaveAppSignalsStatesToA"
+  "rchiveRequest\022\031\n\021clientEquipmentID\030\001 \001(\t"
+  "\022.\n\017appSignalStates\030\002 \003(\0132\025.Proto.AppSig"
+  "nalState\"N\n\"SaveAppSignalsStatesToArchiv"
+  "eReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 "
+  "\001(\005:\003100\"\271\001\n)GetAppSignalStatesFromArchi"
+  "veStartRequest\022\031\n\021clientEquipmentID\030\001 \001("
+  "\t\022\023\n\010timeType\030\002 \001(\005:\0011\022\024\n\tstartTime\030\003 \001("
+  "\020:\0010\022\022\n\007endTime\030\004 \001(\020:\0010\022\024\n\014signalHashes"
+  "\030\005 \003(\004\022\034\n\016removePeriodic\030\006 \001(\010:\004true\"~\n\'"
+  "GetAppSignalStatesFromArchiveStartReply\022"
+  "\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\00310"
+  "0\022\023\n\013errorString\030\004 \001(\t\022\024\n\trequestID\030\003 \001("
+  "\r:\0010\"@\n(GetAppSignalStatesFromArchiveNex"
+  "tRequest\022\024\n\trequestID\030\001 \001(\r:\0010\"\271\002\n&GetAp"
+  "pSignalStatesFromArchiveNextReply\022\020\n\005err"
+  "or\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022\024\n\tr"
+  "equestID\030\003 \001(\r:\0010\022\023\n\013errorString\030\n \001(\t\022\030"
+  "\n\tdataReady\030\004 \001(\010:\005false\022\033\n\020totalStatesC"
+  "ount\030\005 \001(\005:\0010\022\032\n\017sentStatesCount\030\006 \001(\005:\001"
+  "0\022\034\n\021statesInPartCount\030\007 \001(\005:\0010\022\031\n\nisLas"
+  "tPart\030\010 \001(\010:\005false\022.\n\017appSignalStates\030\t "
+  "\003(\0132\025.Proto.AppSignalState\"B\n*GetAppSign"
+  "alStatesFromArchiveCancelRequest\022\024\n\trequ"
+  "estID\030\001 \001(\r:\0010\"i\n(GetAppSignalStatesFrom"
+  "ArchiveCancelReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\t"
+  "archError\030\002 \001(\005:\003100\022\023\n\013errorString\030\003 \001("
+  "\t\"\204\001\n\031RtTrendsManagementRequest\022\031\n\021clien"
+  "tEquipmentID\030\001 \001(\t\022\024\n\014samplePeriod\030\002 \001(\005"
+  "\022\032\n\022appendSignalHashes\030\003 \003(\004\022\032\n\022deleteSi"
+  "gnalHashes\030\004 \003(\004\"s\n\027RtTrendsManagementRe"
+  "ply\022\020\n\005error\030\001 \001(\005:\0010\022\023\n\013errorString\030\002 \001"
+  "(\t\022\024\n\014samplePeriod\030\003 \001(\005\022\033\n\023trackedSigna"
+  "lHashes\030\004 \003(\004\" \n\036RtTrendsGetStateChanges"
+  "Request\"r\n\034RtTrendsGetStateChangesReply\022"
+  "\020\n\005error\030\001 \001(\005:\0010\022\023\n\013errorString\030\002 \001(\t\022+"
+  "\n\014signalStates\030\003 \003(\0132\025.Proto.AppSignalSt"
+  "ate\"\247\001\n\014GetFileReply\022\024\n\terrorCode\030\001 \002(\005:"
+  "\0010\022\023\n\010fileSize\030\002 \001(\003:\0010\022\025\n\ntotalParts\030\003 "
+  "\001(\005:\0010\022\026\n\013currentPart\030\004 \001(\005:\0010\022\032\n\017curren"
+  "tPartSize\030\005 \001(\005:\0010\022\013\n\003md5\030\006 \001(\014\022\024\n\014fileP"
+  "artData\030\n \001(\014"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_network_2eproto_deps[1] = {
   &::descriptor_table_serialization_2eproto,
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_network_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_network_2eproto = {
-  false, false, 10456, descriptor_table_protodef_network_2eproto, "network.proto", 
+  false, false, 10573, descriptor_table_protodef_network_2eproto, "network.proto", 
   &descriptor_table_network_2eproto_once, descriptor_table_network_2eproto_deps, 1, 66,
   schemas, file_default_instances, TableStruct_network_2eproto::offsets,
   file_level_metadata_network_2eproto, file_level_enum_descriptors_network_2eproto, file_level_service_descriptors_network_2eproto,
@@ -14810,117 +14825,126 @@ class TuningSourceState::_Internal {
  public:
   using HasBits = decltype(std::declval<TuningSourceState>()._has_bits_);
   static void set_has_sourceid(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
+  }
+  static void set_has_lanequipmentid(HasBits* has_bits) {
     (*has_bits)[0] |= 1u;
   }
   static void set_has_isreply(HasBits* has_bits) {
-    (*has_bits)[0] |= 67108864u;
-  }
-  static void set_has_requestcount(HasBits* has_bits) {
-    (*has_bits)[0] |= 2u;
-  }
-  static void set_has_replycount(HasBits* has_bits) {
-    (*has_bits)[0] |= 4u;
-  }
-  static void set_has_commandqueuesize(HasBits* has_bits) {
-    (*has_bits)[0] |= 33554432u;
-  }
-  static void set_has_erruntimelyreplay(HasBits* has_bits) {
-    (*has_bits)[0] |= 8u;
-  }
-  static void set_has_errsent(HasBits* has_bits) {
-    (*has_bits)[0] |= 16u;
-  }
-  static void set_has_errpartialsent(HasBits* has_bits) {
     (*has_bits)[0] |= 32u;
   }
-  static void set_has_errreplysize(HasBits* has_bits) {
+  static void set_has_requestcount(HasBits* has_bits) {
+    (*has_bits)[0] |= 4u;
+  }
+  static void set_has_replycount(HasBits* has_bits) {
+    (*has_bits)[0] |= 8u;
+  }
+  static void set_has_commandqueuesize(HasBits* has_bits) {
+    (*has_bits)[0] |= 16u;
+  }
+  static void set_has_controlisactive(HasBits* has_bits) {
     (*has_bits)[0] |= 64u;
   }
-  static void set_has_errnoreply(HasBits* has_bits) {
+  static void set_has_setsor(HasBits* has_bits) {
     (*has_bits)[0] |= 128u;
   }
-  static void set_has_errrupprotocolversion(HasBits* has_bits) {
+  static void set_has_writingdisabled(HasBits* has_bits) {
     (*has_bits)[0] |= 256u;
   }
-  static void set_has_errrupframesize(HasBits* has_bits) {
-    (*has_bits)[0] |= 512u;
-  }
-  static void set_has_errrupnontuningdata(HasBits* has_bits) {
-    (*has_bits)[0] |= 1024u;
-  }
-  static void set_has_errrupmoduletype(HasBits* has_bits) {
-    (*has_bits)[0] |= 2048u;
-  }
-  static void set_has_errrupframesquantity(HasBits* has_bits) {
-    (*has_bits)[0] |= 4096u;
-  }
-  static void set_has_errrupframenumber(HasBits* has_bits) {
-    (*has_bits)[0] |= 8192u;
-  }
-  static void set_has_errfotipprotocolversion(HasBits* has_bits) {
-    (*has_bits)[0] |= 16384u;
-  }
-  static void set_has_errfotipuniqueid(HasBits* has_bits) {
-    (*has_bits)[0] |= 32768u;
-  }
-  static void set_has_errfotiplmnumber(HasBits* has_bits) {
-    (*has_bits)[0] |= 65536u;
-  }
-  static void set_has_errfotipsubsystemcode(HasBits* has_bits) {
-    (*has_bits)[0] |= 131072u;
-  }
-  static void set_has_errfotipoperationcode(HasBits* has_bits) {
-    (*has_bits)[0] |= 262144u;
-  }
-  static void set_has_errfotipframesize(HasBits* has_bits) {
-    (*has_bits)[0] |= 524288u;
-  }
-  static void set_has_errfotipromsize(HasBits* has_bits) {
-    (*has_bits)[0] |= 1048576u;
-  }
-  static void set_has_errfotipromframesize(HasBits* has_bits) {
-    (*has_bits)[0] |= 2097152u;
+  static void set_has_hasunappliedparams(HasBits* has_bits) {
+    (*has_bits)[0] |= 67108864u;
   }
   static void set_has_fotipflagboundschecksuccess(HasBits* has_bits) {
-    (*has_bits)[0] |= 4194304u;
+    (*has_bits)[0] |= 512u;
   }
   static void set_has_fotipflagwritesuccess(HasBits* has_bits) {
-    (*has_bits)[0] |= 8388608u;
+    (*has_bits)[0] |= 1024u;
   }
   static void set_has_fotipflagdatatypeerr(HasBits* has_bits) {
-    (*has_bits)[0] |= 16777216u;
+    (*has_bits)[0] |= 2048u;
   }
   static void set_has_fotipflagopcodeerr(HasBits* has_bits) {
-    (*has_bits)[0] |= 1073741824u;
+    (*has_bits)[0] |= 4096u;
   }
   static void set_has_fotipflagstartaddrerr(HasBits* has_bits) {
-    (*has_bits)[0] |= 2147483648u;
+    (*has_bits)[0] |= 8192u;
   }
   static void set_has_fotipflagromsizeerr(HasBits* has_bits) {
-    (*has_bits)[1] |= 1u;
+    (*has_bits)[0] |= 16384u;
   }
   static void set_has_fotipflagromframesizeerr(HasBits* has_bits) {
-    (*has_bits)[1] |= 2u;
+    (*has_bits)[0] |= 32768u;
   }
   static void set_has_fotipflagframesizeerr(HasBits* has_bits) {
-    (*has_bits)[1] |= 4u;
+    (*has_bits)[0] |= 65536u;
   }
   static void set_has_fotipflagprotocolversionerr(HasBits* has_bits) {
-    (*has_bits)[1] |= 8u;
+    (*has_bits)[0] |= 131072u;
   }
   static void set_has_fotipflagsubsystemkeyerr(HasBits* has_bits) {
-    (*has_bits)[1] |= 16u;
+    (*has_bits)[0] |= 262144u;
   }
   static void set_has_fotipflaguniueiderr(HasBits* has_bits) {
-    (*has_bits)[1] |= 32u;
+    (*has_bits)[0] |= 524288u;
   }
   static void set_has_fotipflagoffseterr(HasBits* has_bits) {
-    (*has_bits)[1] |= 64u;
+    (*has_bits)[0] |= 1048576u;
   }
   static void set_has_fotipflagapplysuccess(HasBits* has_bits) {
-    (*has_bits)[1] |= 128u;
+    (*has_bits)[0] |= 2097152u;
   }
   static void set_has_fotipflagsetsor(HasBits* has_bits) {
+    (*has_bits)[0] |= 4194304u;
+  }
+  static void set_has_fotipflagwritingdisabled(HasBits* has_bits) {
+    (*has_bits)[0] |= 8388608u;
+  }
+  static void set_has_fotipprocessingnumerator(HasBits* has_bits) {
+    (*has_bits)[0] |= 16777216u;
+  }
+  static void set_has_errrupprotocolversion(HasBits* has_bits) {
+    (*has_bits)[0] |= 33554432u;
+  }
+  static void set_has_errrupframesize(HasBits* has_bits) {
+    (*has_bits)[0] |= 134217728u;
+  }
+  static void set_has_errrupnontuningdata(HasBits* has_bits) {
+    (*has_bits)[0] |= 268435456u;
+  }
+  static void set_has_errrupmoduletype(HasBits* has_bits) {
+    (*has_bits)[0] |= 536870912u;
+  }
+  static void set_has_errrupframesquantity(HasBits* has_bits) {
+    (*has_bits)[0] |= 1073741824u;
+  }
+  static void set_has_errrupframenumber(HasBits* has_bits) {
+    (*has_bits)[0] |= 2147483648u;
+  }
+  static void set_has_errrupcrc(HasBits* has_bits) {
+    (*has_bits)[1] |= 1u;
+  }
+  static void set_has_errfotipprotocolversion(HasBits* has_bits) {
+    (*has_bits)[1] |= 2u;
+  }
+  static void set_has_errfotipuniqueid(HasBits* has_bits) {
+    (*has_bits)[1] |= 4u;
+  }
+  static void set_has_errfotiplmnumber(HasBits* has_bits) {
+    (*has_bits)[1] |= 8u;
+  }
+  static void set_has_errfotipsubsystemcode(HasBits* has_bits) {
+    (*has_bits)[1] |= 16u;
+  }
+  static void set_has_errfotipoperationcode(HasBits* has_bits) {
+    (*has_bits)[1] |= 32u;
+  }
+  static void set_has_errfotipframesize(HasBits* has_bits) {
+    (*has_bits)[1] |= 64u;
+  }
+  static void set_has_errfotipromsize(HasBits* has_bits) {
+    (*has_bits)[1] |= 128u;
+  }
+  static void set_has_errfotipromframesize(HasBits* has_bits) {
     (*has_bits)[1] |= 256u;
   }
   static void set_has_erranaloglowboundcheck(HasBits* has_bits) {
@@ -14929,26 +14953,23 @@ class TuningSourceState::_Internal {
   static void set_has_erranaloghighboundcheck(HasBits* has_bits) {
     (*has_bits)[1] |= 1024u;
   }
-  static void set_has_errrupcrc(HasBits* has_bits) {
+  static void set_has_erruntimelyreplay(HasBits* has_bits) {
     (*has_bits)[1] |= 2048u;
   }
-  static void set_has_controlisactive(HasBits* has_bits) {
-    (*has_bits)[0] |= 134217728u;
-  }
-  static void set_has_setsor(HasBits* has_bits) {
-    (*has_bits)[0] |= 268435456u;
-  }
-  static void set_has_hasunappliedparams(HasBits* has_bits) {
-    (*has_bits)[0] |= 536870912u;
-  }
-  static void set_has_writingdisabled(HasBits* has_bits) {
-    (*has_bits)[1] |= 16384u;
-  }
-  static void set_has_fotipflagwritingdisabled(HasBits* has_bits) {
+  static void set_has_errsent(HasBits* has_bits) {
     (*has_bits)[1] |= 4096u;
   }
-  static void set_has_errtuningframeupdate(HasBits* has_bits) {
+  static void set_has_errpartialsent(HasBits* has_bits) {
     (*has_bits)[1] |= 8192u;
+  }
+  static void set_has_errreplysize(HasBits* has_bits) {
+    (*has_bits)[1] |= 16384u;
+  }
+  static void set_has_errnoreply(HasBits* has_bits) {
+    (*has_bits)[1] |= 32768u;
+  }
+  static void set_has_errtuningframeupdate(HasBits* has_bits) {
+    (*has_bits)[1] |= 65536u;
   }
 };
 
@@ -14962,17 +14983,23 @@ TuningSourceState::TuningSourceState(const TuningSourceState& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
       _has_bits_(from._has_bits_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  lanequipmentid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_lanequipmentid()) {
+    lanequipmentid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_lanequipmentid(), 
+      GetArena());
+  }
   ::memcpy(&sourceid_, &from.sourceid_,
-    static_cast<size_t>(reinterpret_cast<char*>(&writingdisabled_) -
-    reinterpret_cast<char*>(&sourceid_)) + sizeof(writingdisabled_));
+    static_cast<size_t>(reinterpret_cast<char*>(&errtuningframeupdate_) -
+    reinterpret_cast<char*>(&sourceid_)) + sizeof(errtuningframeupdate_));
   // @@protoc_insertion_point(copy_constructor:Network.TuningSourceState)
 }
 
 void TuningSourceState::SharedCtor() {
+lanequipmentid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
     reinterpret_cast<char*>(&sourceid_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&writingdisabled_) -
-    reinterpret_cast<char*>(&sourceid_)) + sizeof(writingdisabled_));
+    0, static_cast<size_t>(reinterpret_cast<char*>(&errtuningframeupdate_) -
+    reinterpret_cast<char*>(&sourceid_)) + sizeof(errtuningframeupdate_));
 }
 
 TuningSourceState::~TuningSourceState() {
@@ -14983,6 +15010,7 @@ TuningSourceState::~TuningSourceState() {
 
 void TuningSourceState::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
+  lanequipmentid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
 void TuningSourceState::ArenaDtor(void* object) {
@@ -15002,37 +15030,41 @@ void TuningSourceState::Clear() {
   (void) cached_has_bits;
 
   cached_has_bits = _has_bits_[0];
-  if (cached_has_bits & 0x000000ffu) {
+  if (cached_has_bits & 0x00000001u) {
+    lanequipmentid_.ClearNonDefaultToEmpty();
+  }
+  if (cached_has_bits & 0x000000feu) {
     ::memset(&sourceid_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&errnoreply_) -
-        reinterpret_cast<char*>(&sourceid_)) + sizeof(errnoreply_));
+        reinterpret_cast<char*>(&setsor_) -
+        reinterpret_cast<char*>(&sourceid_)) + sizeof(setsor_));
   }
   if (cached_has_bits & 0x0000ff00u) {
-    ::memset(&errrupprotocolversion_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&errfotipuniqueid_) -
-        reinterpret_cast<char*>(&errrupprotocolversion_)) + sizeof(errfotipuniqueid_));
+    ::memset(&writingdisabled_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&fotipflagromframesizeerr_) -
+        reinterpret_cast<char*>(&writingdisabled_)) + sizeof(fotipflagromframesizeerr_));
   }
   if (cached_has_bits & 0x00ff0000u) {
-    ::memset(&errfotiplmnumber_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&fotipflagwritesuccess_) -
-        reinterpret_cast<char*>(&errfotiplmnumber_)) + sizeof(fotipflagwritesuccess_));
+    ::memset(&fotipflagframesizeerr_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&fotipflagwritingdisabled_) -
+        reinterpret_cast<char*>(&fotipflagframesizeerr_)) + sizeof(fotipflagwritingdisabled_));
   }
   if (cached_has_bits & 0xff000000u) {
-    ::memset(&fotipflagdatatypeerr_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&fotipflagstartaddrerr_) -
-        reinterpret_cast<char*>(&fotipflagdatatypeerr_)) + sizeof(fotipflagstartaddrerr_));
+    ::memset(&fotipprocessingnumerator_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&errrupframenumber_) -
+        reinterpret_cast<char*>(&fotipprocessingnumerator_)) + sizeof(errrupframenumber_));
   }
   cached_has_bits = _has_bits_[1];
   if (cached_has_bits & 0x000000ffu) {
-    ::memset(&fotipflagromsizeerr_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&fotipflagapplysuccess_) -
-        reinterpret_cast<char*>(&fotipflagromsizeerr_)) + sizeof(fotipflagapplysuccess_));
+    ::memset(&errrupcrc_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&errfotipromsize_) -
+        reinterpret_cast<char*>(&errrupcrc_)) + sizeof(errfotipromsize_));
   }
-  if (cached_has_bits & 0x00007f00u) {
-    ::memset(&fotipflagsetsor_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&writingdisabled_) -
-        reinterpret_cast<char*>(&fotipflagsetsor_)) + sizeof(writingdisabled_));
+  if (cached_has_bits & 0x0000ff00u) {
+    ::memset(&errfotipromframesize_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&errnoreply_) -
+        reinterpret_cast<char*>(&errfotipromframesize_)) + sizeof(errnoreply_));
   }
+  errtuningframeupdate_ = PROTOBUF_LONGLONG(0);
   _has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
@@ -15052,369 +15084,388 @@ const char* TuningSourceState::_InternalParse(const char* ptr, ::PROTOBUF_NAMESP
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional bool isReply = 2 [default = false];
+      // optional string lanEquipmentID = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+          auto str = _internal_mutable_lanequipmentid();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Network.TuningSourceState.lanEquipmentID");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional bool isReply = 10 [default = false];
+      case 10:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 80)) {
           _Internal::set_has_isreply(&_has_bits_);
           isreply_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional int64 requestCount = 3 [default = 0];
-      case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
+      // optional int64 requestCount = 11 [default = 0];
+      case 11:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 88)) {
           _Internal::set_has_requestcount(&_has_bits_);
           requestcount_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional int64 replyCount = 4 [default = 0];
-      case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
+      // optional int64 replyCount = 12 [default = 0];
+      case 12:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 96)) {
           _Internal::set_has_replycount(&_has_bits_);
           replycount_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional int32 commandQueueSize = 5 [default = 0];
-      case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 40)) {
+      // optional int32 commandQueueSize = 13 [default = 0];
+      case 13:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 104)) {
           _Internal::set_has_commandqueuesize(&_has_bits_);
           commandqueuesize_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional int64 errUntimelyReplay = 6 [default = 0];
-      case 6:
+      // optional bool controlIsActive = 14 [default = false];
+      case 14:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 112)) {
+          _Internal::set_has_controlisactive(&_has_bits_);
+          controlisactive_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional bool setSOR = 15 [default = false];
+      case 15:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 120)) {
+          _Internal::set_has_setsor(&_has_bits_);
+          setsor_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional bool writingDisabled = 16 [default = false];
+      case 16:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 128)) {
+          _Internal::set_has_writingdisabled(&_has_bits_);
+          writingdisabled_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional bool hasUnappliedParams = 17 [default = false];
+      case 17:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 136)) {
+          _Internal::set_has_hasunappliedparams(&_has_bits_);
+          hasunappliedparams_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 fotipFlagBoundsCheckSuccess = 30 [default = 0];
+      case 30:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 240)) {
+          _Internal::set_has_fotipflagboundschecksuccess(&_has_bits_);
+          fotipflagboundschecksuccess_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 fotipFlagWriteSuccess = 31 [default = 0];
+      case 31:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 248)) {
+          _Internal::set_has_fotipflagwritesuccess(&_has_bits_);
+          fotipflagwritesuccess_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 fotipFlagDataTypeErr = 32 [default = 0];
+      case 32:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 0)) {
+          _Internal::set_has_fotipflagdatatypeerr(&_has_bits_);
+          fotipflagdatatypeerr_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 fotipFlagOpCodeErr = 33 [default = 0];
+      case 33:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
+          _Internal::set_has_fotipflagopcodeerr(&_has_bits_);
+          fotipflagopcodeerr_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 fotipFlagStartAddrErr = 34 [default = 0];
+      case 34:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
+          _Internal::set_has_fotipflagstartaddrerr(&_has_bits_);
+          fotipflagstartaddrerr_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 fotipFlagRomSizeErr = 35 [default = 0];
+      case 35:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
+          _Internal::set_has_fotipflagromsizeerr(&_has_bits_);
+          fotipflagromsizeerr_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 fotipFlagRomFrameSizeErr = 36 [default = 0];
+      case 36:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
+          _Internal::set_has_fotipflagromframesizeerr(&_has_bits_);
+          fotipflagromframesizeerr_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 fotipFlagFrameSizeErr = 37 [default = 0];
+      case 37:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 40)) {
+          _Internal::set_has_fotipflagframesizeerr(&_has_bits_);
+          fotipflagframesizeerr_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 fotipFlagProtocolVersionErr = 38 [default = 0];
+      case 38:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 48)) {
+          _Internal::set_has_fotipflagprotocolversionerr(&_has_bits_);
+          fotipflagprotocolversionerr_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 fotipFlagSubsystemKeyErr = 39 [default = 0];
+      case 39:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 56)) {
+          _Internal::set_has_fotipflagsubsystemkeyerr(&_has_bits_);
+          fotipflagsubsystemkeyerr_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 fotipFlagUniueIDErr = 40 [default = 0];
+      case 40:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 64)) {
+          _Internal::set_has_fotipflaguniueiderr(&_has_bits_);
+          fotipflaguniueiderr_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 fotipFlagOffsetErr = 41 [default = 0];
+      case 41:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 72)) {
+          _Internal::set_has_fotipflagoffseterr(&_has_bits_);
+          fotipflagoffseterr_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 fotipFlagApplySuccess = 42 [default = 0];
+      case 42:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 80)) {
+          _Internal::set_has_fotipflagapplysuccess(&_has_bits_);
+          fotipflagapplysuccess_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 fotipFlagSetSOR = 43 [default = 0];
+      case 43:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 88)) {
+          _Internal::set_has_fotipflagsetsor(&_has_bits_);
+          fotipflagsetsor_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 fotipFlagWritingDisabled = 44 [default = 0];
+      case 44:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 96)) {
+          _Internal::set_has_fotipflagwritingdisabled(&_has_bits_);
+          fotipflagwritingdisabled_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional uint64 fotipProcessingNumerator = 45 [default = 0];
+      case 45:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 104)) {
+          _Internal::set_has_fotipprocessingnumerator(&_has_bits_);
+          fotipprocessingnumerator_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 errRupProtocolVersion = 50 [default = 0];
+      case 50:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 144)) {
+          _Internal::set_has_errrupprotocolversion(&_has_bits_);
+          errrupprotocolversion_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 errRupFrameSize = 51 [default = 0];
+      case 51:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 152)) {
+          _Internal::set_has_errrupframesize(&_has_bits_);
+          errrupframesize_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 errRupNonTuningData = 52 [default = 0];
+      case 52:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 160)) {
+          _Internal::set_has_errrupnontuningdata(&_has_bits_);
+          errrupnontuningdata_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 errRupModuleType = 53 [default = 0];
+      case 53:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 168)) {
+          _Internal::set_has_errrupmoduletype(&_has_bits_);
+          errrupmoduletype_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 errRupFramesQuantity = 54 [default = 0];
+      case 54:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 176)) {
+          _Internal::set_has_errrupframesquantity(&_has_bits_);
+          errrupframesquantity_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 errRupFrameNumber = 55 [default = 0];
+      case 55:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 184)) {
+          _Internal::set_has_errrupframenumber(&_has_bits_);
+          errrupframenumber_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 errRupCRC = 56 [default = 0];
+      case 56:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 192)) {
+          _Internal::set_has_errrupcrc(&_has_bits_);
+          errrupcrc_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 errFotipProtocolVersion = 60 [default = 0];
+      case 60:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 224)) {
+          _Internal::set_has_errfotipprotocolversion(&_has_bits_);
+          errfotipprotocolversion_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 errFotipUniqueID = 61 [default = 0];
+      case 61:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 232)) {
+          _Internal::set_has_errfotipuniqueid(&_has_bits_);
+          errfotipuniqueid_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 errFotipLmNumber = 62 [default = 0];
+      case 62:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 240)) {
+          _Internal::set_has_errfotiplmnumber(&_has_bits_);
+          errfotiplmnumber_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 errFotipSubsystemCode = 63 [default = 0];
+      case 63:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 248)) {
+          _Internal::set_has_errfotipsubsystemcode(&_has_bits_);
+          errfotipsubsystemcode_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 errFotipOperationCode = 64 [default = 0];
+      case 64:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 0)) {
+          _Internal::set_has_errfotipoperationcode(&_has_bits_);
+          errfotipoperationcode_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 errFotipFrameSize = 65 [default = 0];
+      case 65:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
+          _Internal::set_has_errfotipframesize(&_has_bits_);
+          errfotipframesize_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 errFotipRomSize = 66 [default = 0];
+      case 66:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
+          _Internal::set_has_errfotipromsize(&_has_bits_);
+          errfotipromsize_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 errFotipRomFrameSize = 67 [default = 0];
+      case 67:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
+          _Internal::set_has_errfotipromframesize(&_has_bits_);
+          errfotipromframesize_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 errAnalogLowBoundCheck = 68 [default = 0];
+      case 68:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
+          _Internal::set_has_erranaloglowboundcheck(&_has_bits_);
+          erranaloglowboundcheck_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 errAnalogHighBoundCheck = 69 [default = 0];
+      case 69:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 40)) {
+          _Internal::set_has_erranaloghighboundcheck(&_has_bits_);
+          erranaloghighboundcheck_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 errUntimelyReplay = 70 [default = 0];
+      case 70:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 48)) {
           _Internal::set_has_erruntimelyreplay(&_has_bits_);
           erruntimelyreplay_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional int64 errSent = 7 [default = 0];
-      case 7:
+      // optional int64 errSent = 71 [default = 0];
+      case 71:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 56)) {
           _Internal::set_has_errsent(&_has_bits_);
           errsent_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional int64 errPartialSent = 8 [default = 0];
-      case 8:
+      // optional int64 errPartialSent = 72 [default = 0];
+      case 72:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 64)) {
           _Internal::set_has_errpartialsent(&_has_bits_);
           errpartialsent_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional int64 errReplySize = 9 [default = 0];
-      case 9:
+      // optional int64 errReplySize = 73 [default = 0];
+      case 73:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 72)) {
           _Internal::set_has_errreplysize(&_has_bits_);
           errreplysize_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional int64 errNoReply = 10 [default = 0];
-      case 10:
+      // optional int64 errNoReply = 74 [default = 0];
+      case 74:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 80)) {
           _Internal::set_has_errnoreply(&_has_bits_);
           errnoreply_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional int64 errRupProtocolVersion = 11 [default = 0];
-      case 11:
+      // optional int64 errTuningFrameUpdate = 75 [default = 0];
+      case 75:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 88)) {
-          _Internal::set_has_errrupprotocolversion(&_has_bits_);
-          errrupprotocolversion_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 errRupFrameSize = 12 [default = 0];
-      case 12:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 96)) {
-          _Internal::set_has_errrupframesize(&_has_bits_);
-          errrupframesize_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 errRupNonTuningData = 13 [default = 0];
-      case 13:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 104)) {
-          _Internal::set_has_errrupnontuningdata(&_has_bits_);
-          errrupnontuningdata_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 errRupModuleType = 14 [default = 0];
-      case 14:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 112)) {
-          _Internal::set_has_errrupmoduletype(&_has_bits_);
-          errrupmoduletype_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 errRupFramesQuantity = 15 [default = 0];
-      case 15:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 120)) {
-          _Internal::set_has_errrupframesquantity(&_has_bits_);
-          errrupframesquantity_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 errRupFrameNumber = 16 [default = 0];
-      case 16:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 128)) {
-          _Internal::set_has_errrupframenumber(&_has_bits_);
-          errrupframenumber_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 errFotipProtocolVersion = 17 [default = 0];
-      case 17:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 136)) {
-          _Internal::set_has_errfotipprotocolversion(&_has_bits_);
-          errfotipprotocolversion_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 errFotipUniqueID = 18 [default = 0];
-      case 18:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 144)) {
-          _Internal::set_has_errfotipuniqueid(&_has_bits_);
-          errfotipuniqueid_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 errFotipLmNumber = 19 [default = 0];
-      case 19:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 152)) {
-          _Internal::set_has_errfotiplmnumber(&_has_bits_);
-          errfotiplmnumber_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 errFotipSubsystemCode = 20 [default = 0];
-      case 20:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 160)) {
-          _Internal::set_has_errfotipsubsystemcode(&_has_bits_);
-          errfotipsubsystemcode_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 errFotipOperationCode = 21 [default = 0];
-      case 21:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 168)) {
-          _Internal::set_has_errfotipoperationcode(&_has_bits_);
-          errfotipoperationcode_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 errFotipFrameSize = 22 [default = 0];
-      case 22:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 176)) {
-          _Internal::set_has_errfotipframesize(&_has_bits_);
-          errfotipframesize_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 errFotipRomSize = 23 [default = 0];
-      case 23:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 184)) {
-          _Internal::set_has_errfotipromsize(&_has_bits_);
-          errfotipromsize_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 errFotipRomFrameSize = 24 [default = 0];
-      case 24:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 192)) {
-          _Internal::set_has_errfotipromframesize(&_has_bits_);
-          errfotipromframesize_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 fotipFlagBoundsCheckSuccess = 25 [default = 0];
-      case 25:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 200)) {
-          _Internal::set_has_fotipflagboundschecksuccess(&_has_bits_);
-          fotipflagboundschecksuccess_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 fotipFlagWriteSuccess = 26 [default = 0];
-      case 26:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 208)) {
-          _Internal::set_has_fotipflagwritesuccess(&_has_bits_);
-          fotipflagwritesuccess_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 fotipFlagDataTypeErr = 27 [default = 0];
-      case 27:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 216)) {
-          _Internal::set_has_fotipflagdatatypeerr(&_has_bits_);
-          fotipflagdatatypeerr_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 fotipFlagOpCodeErr = 28 [default = 0];
-      case 28:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 224)) {
-          _Internal::set_has_fotipflagopcodeerr(&_has_bits_);
-          fotipflagopcodeerr_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 fotipFlagStartAddrErr = 29 [default = 0];
-      case 29:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 232)) {
-          _Internal::set_has_fotipflagstartaddrerr(&_has_bits_);
-          fotipflagstartaddrerr_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 fotipFlagRomSizeErr = 30 [default = 0];
-      case 30:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 240)) {
-          _Internal::set_has_fotipflagromsizeerr(&_has_bits_);
-          fotipflagromsizeerr_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 fotipFlagRomFrameSizeErr = 31 [default = 0];
-      case 31:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 248)) {
-          _Internal::set_has_fotipflagromframesizeerr(&_has_bits_);
-          fotipflagromframesizeerr_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 fotipFlagFrameSizeErr = 32 [default = 0];
-      case 32:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 0)) {
-          _Internal::set_has_fotipflagframesizeerr(&_has_bits_);
-          fotipflagframesizeerr_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 fotipFlagProtocolVersionErr = 33 [default = 0];
-      case 33:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          _Internal::set_has_fotipflagprotocolversionerr(&_has_bits_);
-          fotipflagprotocolversionerr_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 fotipFlagSubsystemKeyErr = 34 [default = 0];
-      case 34:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
-          _Internal::set_has_fotipflagsubsystemkeyerr(&_has_bits_);
-          fotipflagsubsystemkeyerr_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 fotipFlagUniueIDErr = 35 [default = 0];
-      case 35:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
-          _Internal::set_has_fotipflaguniueiderr(&_has_bits_);
-          fotipflaguniueiderr_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 fotipFlagOffsetErr = 36 [default = 0];
-      case 36:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
-          _Internal::set_has_fotipflagoffseterr(&_has_bits_);
-          fotipflagoffseterr_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 fotipFlagApplySuccess = 37 [default = 0];
-      case 37:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 40)) {
-          _Internal::set_has_fotipflagapplysuccess(&_has_bits_);
-          fotipflagapplysuccess_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 fotipFlagSetSOR = 38 [default = 0];
-      case 38:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 48)) {
-          _Internal::set_has_fotipflagsetsor(&_has_bits_);
-          fotipflagsetsor_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 errAnalogLowBoundCheck = 39 [default = 0];
-      case 39:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 56)) {
-          _Internal::set_has_erranaloglowboundcheck(&_has_bits_);
-          erranaloglowboundcheck_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 errAnalogHighBoundCheck = 40 [default = 0];
-      case 40:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 64)) {
-          _Internal::set_has_erranaloghighboundcheck(&_has_bits_);
-          erranaloghighboundcheck_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 errRupCRC = 41 [default = 0];
-      case 41:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 72)) {
-          _Internal::set_has_errrupcrc(&_has_bits_);
-          errrupcrc_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional bool controlIsActive = 42 [default = false];
-      case 42:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 80)) {
-          _Internal::set_has_controlisactive(&_has_bits_);
-          controlisactive_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional bool setSOR = 43 [default = false];
-      case 43:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 88)) {
-          _Internal::set_has_setsor(&_has_bits_);
-          setsor_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional bool hasUnappliedParams = 44 [default = false];
-      case 44:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 96)) {
-          _Internal::set_has_hasunappliedparams(&_has_bits_);
-          hasunappliedparams_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional bool writingDisabled = 45 [default = false];
-      case 45:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 104)) {
-          _Internal::set_has_writingdisabled(&_has_bits_);
-          writingdisabled_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 fotipFlagWritingDisabled = 46 [default = 0];
-      case 46:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 112)) {
-          _Internal::set_has_fotipflagwritingdisabled(&_has_bits_);
-          fotipflagwritingdisabled_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 errTuningFrameUpdate = 47 [default = 0];
-      case 47:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 120)) {
           _Internal::set_has_errtuningframeupdate(&_has_bits_);
           errtuningframeupdate_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
@@ -15450,288 +15501,302 @@ failure:
 
   cached_has_bits = _has_bits_[0];
   // optional uint64 sourceID = 1 [default = 0];
-  if (cached_has_bits & 0x00000001u) {
+  if (cached_has_bits & 0x00000002u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_sourceid(), target);
   }
 
-  // optional bool isReply = 2 [default = false];
+  // optional string lanEquipmentID = 2;
+  if (cached_has_bits & 0x00000001u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_lanequipmentid().data(), static_cast<int>(this->_internal_lanequipmentid().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Network.TuningSourceState.lanEquipmentID");
+    target = stream->WriteStringMaybeAliased(
+        2, this->_internal_lanequipmentid(), target);
+  }
+
+  // optional bool isReply = 10 [default = false];
+  if (cached_has_bits & 0x00000020u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(10, this->_internal_isreply(), target);
+  }
+
+  // optional int64 requestCount = 11 [default = 0];
+  if (cached_has_bits & 0x00000004u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(11, this->_internal_requestcount(), target);
+  }
+
+  // optional int64 replyCount = 12 [default = 0];
+  if (cached_has_bits & 0x00000008u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(12, this->_internal_replycount(), target);
+  }
+
+  // optional int32 commandQueueSize = 13 [default = 0];
+  if (cached_has_bits & 0x00000010u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(13, this->_internal_commandqueuesize(), target);
+  }
+
+  // optional bool controlIsActive = 14 [default = false];
+  if (cached_has_bits & 0x00000040u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(14, this->_internal_controlisactive(), target);
+  }
+
+  // optional bool setSOR = 15 [default = false];
+  if (cached_has_bits & 0x00000080u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(15, this->_internal_setsor(), target);
+  }
+
+  // optional bool writingDisabled = 16 [default = false];
+  if (cached_has_bits & 0x00000100u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(16, this->_internal_writingdisabled(), target);
+  }
+
+  // optional bool hasUnappliedParams = 17 [default = false];
   if (cached_has_bits & 0x04000000u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(2, this->_internal_isreply(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(17, this->_internal_hasunappliedparams(), target);
   }
 
-  // optional int64 requestCount = 3 [default = 0];
-  if (cached_has_bits & 0x00000002u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(3, this->_internal_requestcount(), target);
-  }
-
-  // optional int64 replyCount = 4 [default = 0];
-  if (cached_has_bits & 0x00000004u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(4, this->_internal_replycount(), target);
-  }
-
-  // optional int32 commandQueueSize = 5 [default = 0];
-  if (cached_has_bits & 0x02000000u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(5, this->_internal_commandqueuesize(), target);
-  }
-
-  // optional int64 errUntimelyReplay = 6 [default = 0];
-  if (cached_has_bits & 0x00000008u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(6, this->_internal_erruntimelyreplay(), target);
-  }
-
-  // optional int64 errSent = 7 [default = 0];
-  if (cached_has_bits & 0x00000010u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(7, this->_internal_errsent(), target);
-  }
-
-  // optional int64 errPartialSent = 8 [default = 0];
-  if (cached_has_bits & 0x00000020u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(8, this->_internal_errpartialsent(), target);
-  }
-
-  // optional int64 errReplySize = 9 [default = 0];
-  if (cached_has_bits & 0x00000040u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(9, this->_internal_errreplysize(), target);
-  }
-
-  // optional int64 errNoReply = 10 [default = 0];
-  if (cached_has_bits & 0x00000080u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(10, this->_internal_errnoreply(), target);
-  }
-
-  // optional int64 errRupProtocolVersion = 11 [default = 0];
-  if (cached_has_bits & 0x00000100u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(11, this->_internal_errrupprotocolversion(), target);
-  }
-
-  // optional int64 errRupFrameSize = 12 [default = 0];
+  // optional int64 fotipFlagBoundsCheckSuccess = 30 [default = 0];
   if (cached_has_bits & 0x00000200u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(12, this->_internal_errrupframesize(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(30, this->_internal_fotipflagboundschecksuccess(), target);
   }
 
-  // optional int64 errRupNonTuningData = 13 [default = 0];
+  // optional int64 fotipFlagWriteSuccess = 31 [default = 0];
   if (cached_has_bits & 0x00000400u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(13, this->_internal_errrupnontuningdata(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(31, this->_internal_fotipflagwritesuccess(), target);
   }
 
-  // optional int64 errRupModuleType = 14 [default = 0];
+  // optional int64 fotipFlagDataTypeErr = 32 [default = 0];
   if (cached_has_bits & 0x00000800u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(14, this->_internal_errrupmoduletype(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(32, this->_internal_fotipflagdatatypeerr(), target);
   }
 
-  // optional int64 errRupFramesQuantity = 15 [default = 0];
+  // optional int64 fotipFlagOpCodeErr = 33 [default = 0];
   if (cached_has_bits & 0x00001000u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(15, this->_internal_errrupframesquantity(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(33, this->_internal_fotipflagopcodeerr(), target);
   }
 
-  // optional int64 errRupFrameNumber = 16 [default = 0];
+  // optional int64 fotipFlagStartAddrErr = 34 [default = 0];
   if (cached_has_bits & 0x00002000u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(16, this->_internal_errrupframenumber(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(34, this->_internal_fotipflagstartaddrerr(), target);
   }
 
-  // optional int64 errFotipProtocolVersion = 17 [default = 0];
+  // optional int64 fotipFlagRomSizeErr = 35 [default = 0];
   if (cached_has_bits & 0x00004000u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(17, this->_internal_errfotipprotocolversion(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(35, this->_internal_fotipflagromsizeerr(), target);
   }
 
-  // optional int64 errFotipUniqueID = 18 [default = 0];
+  // optional int64 fotipFlagRomFrameSizeErr = 36 [default = 0];
   if (cached_has_bits & 0x00008000u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(18, this->_internal_errfotipuniqueid(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(36, this->_internal_fotipflagromframesizeerr(), target);
   }
 
-  // optional int64 errFotipLmNumber = 19 [default = 0];
+  // optional int64 fotipFlagFrameSizeErr = 37 [default = 0];
   if (cached_has_bits & 0x00010000u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(19, this->_internal_errfotiplmnumber(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(37, this->_internal_fotipflagframesizeerr(), target);
   }
 
-  // optional int64 errFotipSubsystemCode = 20 [default = 0];
+  // optional int64 fotipFlagProtocolVersionErr = 38 [default = 0];
   if (cached_has_bits & 0x00020000u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(20, this->_internal_errfotipsubsystemcode(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(38, this->_internal_fotipflagprotocolversionerr(), target);
   }
 
-  // optional int64 errFotipOperationCode = 21 [default = 0];
+  // optional int64 fotipFlagSubsystemKeyErr = 39 [default = 0];
   if (cached_has_bits & 0x00040000u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(21, this->_internal_errfotipoperationcode(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(39, this->_internal_fotipflagsubsystemkeyerr(), target);
   }
 
-  // optional int64 errFotipFrameSize = 22 [default = 0];
+  // optional int64 fotipFlagUniueIDErr = 40 [default = 0];
   if (cached_has_bits & 0x00080000u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(22, this->_internal_errfotipframesize(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(40, this->_internal_fotipflaguniueiderr(), target);
   }
 
-  // optional int64 errFotipRomSize = 23 [default = 0];
+  // optional int64 fotipFlagOffsetErr = 41 [default = 0];
   if (cached_has_bits & 0x00100000u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(23, this->_internal_errfotipromsize(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(41, this->_internal_fotipflagoffseterr(), target);
   }
 
-  // optional int64 errFotipRomFrameSize = 24 [default = 0];
+  // optional int64 fotipFlagApplySuccess = 42 [default = 0];
   if (cached_has_bits & 0x00200000u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(24, this->_internal_errfotipromframesize(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(42, this->_internal_fotipflagapplysuccess(), target);
   }
 
-  // optional int64 fotipFlagBoundsCheckSuccess = 25 [default = 0];
+  // optional int64 fotipFlagSetSOR = 43 [default = 0];
   if (cached_has_bits & 0x00400000u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(25, this->_internal_fotipflagboundschecksuccess(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(43, this->_internal_fotipflagsetsor(), target);
   }
 
-  // optional int64 fotipFlagWriteSuccess = 26 [default = 0];
+  // optional int64 fotipFlagWritingDisabled = 44 [default = 0];
   if (cached_has_bits & 0x00800000u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(26, this->_internal_fotipflagwritesuccess(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(44, this->_internal_fotipflagwritingdisabled(), target);
   }
 
-  // optional int64 fotipFlagDataTypeErr = 27 [default = 0];
+  // optional uint64 fotipProcessingNumerator = 45 [default = 0];
   if (cached_has_bits & 0x01000000u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(27, this->_internal_fotipflagdatatypeerr(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(45, this->_internal_fotipprocessingnumerator(), target);
   }
 
-  // optional int64 fotipFlagOpCodeErr = 28 [default = 0];
-  if (cached_has_bits & 0x40000000u) {
+  // optional int64 errRupProtocolVersion = 50 [default = 0];
+  if (cached_has_bits & 0x02000000u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(28, this->_internal_fotipflagopcodeerr(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(50, this->_internal_errrupprotocolversion(), target);
   }
 
-  // optional int64 fotipFlagStartAddrErr = 29 [default = 0];
-  if (cached_has_bits & 0x80000000u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(29, this->_internal_fotipflagstartaddrerr(), target);
-  }
-
-  cached_has_bits = _has_bits_[1];
-  // optional int64 fotipFlagRomSizeErr = 30 [default = 0];
-  if (cached_has_bits & 0x00000001u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(30, this->_internal_fotipflagromsizeerr(), target);
-  }
-
-  // optional int64 fotipFlagRomFrameSizeErr = 31 [default = 0];
-  if (cached_has_bits & 0x00000002u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(31, this->_internal_fotipflagromframesizeerr(), target);
-  }
-
-  // optional int64 fotipFlagFrameSizeErr = 32 [default = 0];
-  if (cached_has_bits & 0x00000004u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(32, this->_internal_fotipflagframesizeerr(), target);
-  }
-
-  // optional int64 fotipFlagProtocolVersionErr = 33 [default = 0];
-  if (cached_has_bits & 0x00000008u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(33, this->_internal_fotipflagprotocolversionerr(), target);
-  }
-
-  // optional int64 fotipFlagSubsystemKeyErr = 34 [default = 0];
-  if (cached_has_bits & 0x00000010u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(34, this->_internal_fotipflagsubsystemkeyerr(), target);
-  }
-
-  // optional int64 fotipFlagUniueIDErr = 35 [default = 0];
-  if (cached_has_bits & 0x00000020u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(35, this->_internal_fotipflaguniueiderr(), target);
-  }
-
-  // optional int64 fotipFlagOffsetErr = 36 [default = 0];
-  if (cached_has_bits & 0x00000040u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(36, this->_internal_fotipflagoffseterr(), target);
-  }
-
-  // optional int64 fotipFlagApplySuccess = 37 [default = 0];
-  if (cached_has_bits & 0x00000080u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(37, this->_internal_fotipflagapplysuccess(), target);
-  }
-
-  // optional int64 fotipFlagSetSOR = 38 [default = 0];
-  if (cached_has_bits & 0x00000100u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(38, this->_internal_fotipflagsetsor(), target);
-  }
-
-  // optional int64 errAnalogLowBoundCheck = 39 [default = 0];
-  if (cached_has_bits & 0x00000200u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(39, this->_internal_erranaloglowboundcheck(), target);
-  }
-
-  // optional int64 errAnalogHighBoundCheck = 40 [default = 0];
-  if (cached_has_bits & 0x00000400u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(40, this->_internal_erranaloghighboundcheck(), target);
-  }
-
-  // optional int64 errRupCRC = 41 [default = 0];
-  if (cached_has_bits & 0x00000800u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(41, this->_internal_errrupcrc(), target);
-  }
-
-  cached_has_bits = _has_bits_[0];
-  // optional bool controlIsActive = 42 [default = false];
+  // optional int64 errRupFrameSize = 51 [default = 0];
   if (cached_has_bits & 0x08000000u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(42, this->_internal_controlisactive(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(51, this->_internal_errrupframesize(), target);
   }
 
-  // optional bool setSOR = 43 [default = false];
+  // optional int64 errRupNonTuningData = 52 [default = 0];
   if (cached_has_bits & 0x10000000u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(43, this->_internal_setsor(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(52, this->_internal_errrupnontuningdata(), target);
   }
 
-  // optional bool hasUnappliedParams = 44 [default = false];
+  // optional int64 errRupModuleType = 53 [default = 0];
   if (cached_has_bits & 0x20000000u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(44, this->_internal_hasunappliedparams(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(53, this->_internal_errrupmoduletype(), target);
+  }
+
+  // optional int64 errRupFramesQuantity = 54 [default = 0];
+  if (cached_has_bits & 0x40000000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(54, this->_internal_errrupframesquantity(), target);
+  }
+
+  // optional int64 errRupFrameNumber = 55 [default = 0];
+  if (cached_has_bits & 0x80000000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(55, this->_internal_errrupframenumber(), target);
   }
 
   cached_has_bits = _has_bits_[1];
-  // optional bool writingDisabled = 45 [default = false];
-  if (cached_has_bits & 0x00004000u) {
+  // optional int64 errRupCRC = 56 [default = 0];
+  if (cached_has_bits & 0x00000001u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(45, this->_internal_writingdisabled(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(56, this->_internal_errrupcrc(), target);
   }
 
-  // optional int64 fotipFlagWritingDisabled = 46 [default = 0];
+  // optional int64 errFotipProtocolVersion = 60 [default = 0];
+  if (cached_has_bits & 0x00000002u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(60, this->_internal_errfotipprotocolversion(), target);
+  }
+
+  // optional int64 errFotipUniqueID = 61 [default = 0];
+  if (cached_has_bits & 0x00000004u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(61, this->_internal_errfotipuniqueid(), target);
+  }
+
+  // optional int64 errFotipLmNumber = 62 [default = 0];
+  if (cached_has_bits & 0x00000008u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(62, this->_internal_errfotiplmnumber(), target);
+  }
+
+  // optional int64 errFotipSubsystemCode = 63 [default = 0];
+  if (cached_has_bits & 0x00000010u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(63, this->_internal_errfotipsubsystemcode(), target);
+  }
+
+  // optional int64 errFotipOperationCode = 64 [default = 0];
+  if (cached_has_bits & 0x00000020u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(64, this->_internal_errfotipoperationcode(), target);
+  }
+
+  // optional int64 errFotipFrameSize = 65 [default = 0];
+  if (cached_has_bits & 0x00000040u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(65, this->_internal_errfotipframesize(), target);
+  }
+
+  // optional int64 errFotipRomSize = 66 [default = 0];
+  if (cached_has_bits & 0x00000080u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(66, this->_internal_errfotipromsize(), target);
+  }
+
+  // optional int64 errFotipRomFrameSize = 67 [default = 0];
+  if (cached_has_bits & 0x00000100u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(67, this->_internal_errfotipromframesize(), target);
+  }
+
+  // optional int64 errAnalogLowBoundCheck = 68 [default = 0];
+  if (cached_has_bits & 0x00000200u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(68, this->_internal_erranaloglowboundcheck(), target);
+  }
+
+  // optional int64 errAnalogHighBoundCheck = 69 [default = 0];
+  if (cached_has_bits & 0x00000400u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(69, this->_internal_erranaloghighboundcheck(), target);
+  }
+
+  // optional int64 errUntimelyReplay = 70 [default = 0];
+  if (cached_has_bits & 0x00000800u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(70, this->_internal_erruntimelyreplay(), target);
+  }
+
+  // optional int64 errSent = 71 [default = 0];
   if (cached_has_bits & 0x00001000u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(46, this->_internal_fotipflagwritingdisabled(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(71, this->_internal_errsent(), target);
   }
 
-  // optional int64 errTuningFrameUpdate = 47 [default = 0];
+  // optional int64 errPartialSent = 72 [default = 0];
   if (cached_has_bits & 0x00002000u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(47, this->_internal_errtuningframeupdate(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(72, this->_internal_errpartialsent(), target);
+  }
+
+  // optional int64 errReplySize = 73 [default = 0];
+  if (cached_has_bits & 0x00004000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(73, this->_internal_errreplysize(), target);
+  }
+
+  // optional int64 errNoReply = 74 [default = 0];
+  if (cached_has_bits & 0x00008000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(74, this->_internal_errnoreply(), target);
+  }
+
+  // optional int64 errTuningFrameUpdate = 75 [default = 0];
+  if (cached_has_bits & 0x00010000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(75, this->_internal_errtuningframeupdate(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -15752,337 +15817,351 @@ size_t TuningSourceState::ByteSizeLong() const {
 
   cached_has_bits = _has_bits_[0];
   if (cached_has_bits & 0x000000ffu) {
-    // optional uint64 sourceID = 1 [default = 0];
+    // optional string lanEquipmentID = 2;
     if (cached_has_bits & 0x00000001u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_lanequipmentid());
+    }
+
+    // optional uint64 sourceID = 1 [default = 0];
+    if (cached_has_bits & 0x00000002u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
           this->_internal_sourceid());
     }
 
-    // optional int64 requestCount = 3 [default = 0];
-    if (cached_has_bits & 0x00000002u) {
+    // optional int64 requestCount = 11 [default = 0];
+    if (cached_has_bits & 0x00000004u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
           this->_internal_requestcount());
     }
 
-    // optional int64 replyCount = 4 [default = 0];
-    if (cached_has_bits & 0x00000004u) {
+    // optional int64 replyCount = 12 [default = 0];
+    if (cached_has_bits & 0x00000008u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
           this->_internal_replycount());
     }
 
-    // optional int64 errUntimelyReplay = 6 [default = 0];
-    if (cached_has_bits & 0x00000008u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_erruntimelyreplay());
-    }
-
-    // optional int64 errSent = 7 [default = 0];
+    // optional int32 commandQueueSize = 13 [default = 0];
     if (cached_has_bits & 0x00000010u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_errsent());
-    }
-
-    // optional int64 errPartialSent = 8 [default = 0];
-    if (cached_has_bits & 0x00000020u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_errpartialsent());
-    }
-
-    // optional int64 errReplySize = 9 [default = 0];
-    if (cached_has_bits & 0x00000040u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_errreplysize());
-    }
-
-    // optional int64 errNoReply = 10 [default = 0];
-    if (cached_has_bits & 0x00000080u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_errnoreply());
-    }
-
-  }
-  if (cached_has_bits & 0x0000ff00u) {
-    // optional int64 errRupProtocolVersion = 11 [default = 0];
-    if (cached_has_bits & 0x00000100u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_errrupprotocolversion());
-    }
-
-    // optional int64 errRupFrameSize = 12 [default = 0];
-    if (cached_has_bits & 0x00000200u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_errrupframesize());
-    }
-
-    // optional int64 errRupNonTuningData = 13 [default = 0];
-    if (cached_has_bits & 0x00000400u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_errrupnontuningdata());
-    }
-
-    // optional int64 errRupModuleType = 14 [default = 0];
-    if (cached_has_bits & 0x00000800u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_errrupmoduletype());
-    }
-
-    // optional int64 errRupFramesQuantity = 15 [default = 0];
-    if (cached_has_bits & 0x00001000u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_errrupframesquantity());
-    }
-
-    // optional int64 errRupFrameNumber = 16 [default = 0];
-    if (cached_has_bits & 0x00002000u) {
-      total_size += 2 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_errrupframenumber());
-    }
-
-    // optional int64 errFotipProtocolVersion = 17 [default = 0];
-    if (cached_has_bits & 0x00004000u) {
-      total_size += 2 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_errfotipprotocolversion());
-    }
-
-    // optional int64 errFotipUniqueID = 18 [default = 0];
-    if (cached_has_bits & 0x00008000u) {
-      total_size += 2 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_errfotipuniqueid());
-    }
-
-  }
-  if (cached_has_bits & 0x00ff0000u) {
-    // optional int64 errFotipLmNumber = 19 [default = 0];
-    if (cached_has_bits & 0x00010000u) {
-      total_size += 2 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_errfotiplmnumber());
-    }
-
-    // optional int64 errFotipSubsystemCode = 20 [default = 0];
-    if (cached_has_bits & 0x00020000u) {
-      total_size += 2 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_errfotipsubsystemcode());
-    }
-
-    // optional int64 errFotipOperationCode = 21 [default = 0];
-    if (cached_has_bits & 0x00040000u) {
-      total_size += 2 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_errfotipoperationcode());
-    }
-
-    // optional int64 errFotipFrameSize = 22 [default = 0];
-    if (cached_has_bits & 0x00080000u) {
-      total_size += 2 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_errfotipframesize());
-    }
-
-    // optional int64 errFotipRomSize = 23 [default = 0];
-    if (cached_has_bits & 0x00100000u) {
-      total_size += 2 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_errfotipromsize());
-    }
-
-    // optional int64 errFotipRomFrameSize = 24 [default = 0];
-    if (cached_has_bits & 0x00200000u) {
-      total_size += 2 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_errfotipromframesize());
-    }
-
-    // optional int64 fotipFlagBoundsCheckSuccess = 25 [default = 0];
-    if (cached_has_bits & 0x00400000u) {
-      total_size += 2 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_fotipflagboundschecksuccess());
-    }
-
-    // optional int64 fotipFlagWriteSuccess = 26 [default = 0];
-    if (cached_has_bits & 0x00800000u) {
-      total_size += 2 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_fotipflagwritesuccess());
-    }
-
-  }
-  if (cached_has_bits & 0xff000000u) {
-    // optional int64 fotipFlagDataTypeErr = 27 [default = 0];
-    if (cached_has_bits & 0x01000000u) {
-      total_size += 2 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_fotipflagdatatypeerr());
-    }
-
-    // optional int32 commandQueueSize = 5 [default = 0];
-    if (cached_has_bits & 0x02000000u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_commandqueuesize());
     }
 
-    // optional bool isReply = 2 [default = false];
-    if (cached_has_bits & 0x04000000u) {
+    // optional bool isReply = 10 [default = false];
+    if (cached_has_bits & 0x00000020u) {
       total_size += 1 + 1;
     }
 
-    // optional bool controlIsActive = 42 [default = false];
-    if (cached_has_bits & 0x08000000u) {
+    // optional bool controlIsActive = 14 [default = false];
+    if (cached_has_bits & 0x00000040u) {
+      total_size += 1 + 1;
+    }
+
+    // optional bool setSOR = 15 [default = false];
+    if (cached_has_bits & 0x00000080u) {
+      total_size += 1 + 1;
+    }
+
+  }
+  if (cached_has_bits & 0x0000ff00u) {
+    // optional bool writingDisabled = 16 [default = false];
+    if (cached_has_bits & 0x00000100u) {
       total_size += 2 + 1;
     }
 
-    // optional bool setSOR = 43 [default = false];
-    if (cached_has_bits & 0x10000000u) {
-      total_size += 2 + 1;
+    // optional int64 fotipFlagBoundsCheckSuccess = 30 [default = 0];
+    if (cached_has_bits & 0x00000200u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
+          this->_internal_fotipflagboundschecksuccess());
     }
 
-    // optional bool hasUnappliedParams = 44 [default = false];
-    if (cached_has_bits & 0x20000000u) {
-      total_size += 2 + 1;
+    // optional int64 fotipFlagWriteSuccess = 31 [default = 0];
+    if (cached_has_bits & 0x00000400u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
+          this->_internal_fotipflagwritesuccess());
     }
 
-    // optional int64 fotipFlagOpCodeErr = 28 [default = 0];
-    if (cached_has_bits & 0x40000000u) {
+    // optional int64 fotipFlagDataTypeErr = 32 [default = 0];
+    if (cached_has_bits & 0x00000800u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
+          this->_internal_fotipflagdatatypeerr());
+    }
+
+    // optional int64 fotipFlagOpCodeErr = 33 [default = 0];
+    if (cached_has_bits & 0x00001000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
           this->_internal_fotipflagopcodeerr());
     }
 
-    // optional int64 fotipFlagStartAddrErr = 29 [default = 0];
-    if (cached_has_bits & 0x80000000u) {
+    // optional int64 fotipFlagStartAddrErr = 34 [default = 0];
+    if (cached_has_bits & 0x00002000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
           this->_internal_fotipflagstartaddrerr());
     }
 
-  }
-  cached_has_bits = _has_bits_[1];
-  if (cached_has_bits & 0x000000ffu) {
-    // optional int64 fotipFlagRomSizeErr = 30 [default = 0];
-    if (cached_has_bits & 0x00000001u) {
+    // optional int64 fotipFlagRomSizeErr = 35 [default = 0];
+    if (cached_has_bits & 0x00004000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
           this->_internal_fotipflagromsizeerr());
     }
 
-    // optional int64 fotipFlagRomFrameSizeErr = 31 [default = 0];
-    if (cached_has_bits & 0x00000002u) {
+    // optional int64 fotipFlagRomFrameSizeErr = 36 [default = 0];
+    if (cached_has_bits & 0x00008000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
           this->_internal_fotipflagromframesizeerr());
     }
 
-    // optional int64 fotipFlagFrameSizeErr = 32 [default = 0];
-    if (cached_has_bits & 0x00000004u) {
+  }
+  if (cached_has_bits & 0x00ff0000u) {
+    // optional int64 fotipFlagFrameSizeErr = 37 [default = 0];
+    if (cached_has_bits & 0x00010000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
           this->_internal_fotipflagframesizeerr());
     }
 
-    // optional int64 fotipFlagProtocolVersionErr = 33 [default = 0];
-    if (cached_has_bits & 0x00000008u) {
+    // optional int64 fotipFlagProtocolVersionErr = 38 [default = 0];
+    if (cached_has_bits & 0x00020000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
           this->_internal_fotipflagprotocolversionerr());
     }
 
-    // optional int64 fotipFlagSubsystemKeyErr = 34 [default = 0];
-    if (cached_has_bits & 0x00000010u) {
+    // optional int64 fotipFlagSubsystemKeyErr = 39 [default = 0];
+    if (cached_has_bits & 0x00040000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
           this->_internal_fotipflagsubsystemkeyerr());
     }
 
-    // optional int64 fotipFlagUniueIDErr = 35 [default = 0];
-    if (cached_has_bits & 0x00000020u) {
+    // optional int64 fotipFlagUniueIDErr = 40 [default = 0];
+    if (cached_has_bits & 0x00080000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
           this->_internal_fotipflaguniueiderr());
     }
 
-    // optional int64 fotipFlagOffsetErr = 36 [default = 0];
-    if (cached_has_bits & 0x00000040u) {
+    // optional int64 fotipFlagOffsetErr = 41 [default = 0];
+    if (cached_has_bits & 0x00100000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
           this->_internal_fotipflagoffseterr());
     }
 
-    // optional int64 fotipFlagApplySuccess = 37 [default = 0];
-    if (cached_has_bits & 0x00000080u) {
+    // optional int64 fotipFlagApplySuccess = 42 [default = 0];
+    if (cached_has_bits & 0x00200000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
           this->_internal_fotipflagapplysuccess());
     }
 
-  }
-  if (cached_has_bits & 0x00007f00u) {
-    // optional int64 fotipFlagSetSOR = 38 [default = 0];
-    if (cached_has_bits & 0x00000100u) {
+    // optional int64 fotipFlagSetSOR = 43 [default = 0];
+    if (cached_has_bits & 0x00400000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
           this->_internal_fotipflagsetsor());
     }
 
-    // optional int64 errAnalogLowBoundCheck = 39 [default = 0];
+    // optional int64 fotipFlagWritingDisabled = 44 [default = 0];
+    if (cached_has_bits & 0x00800000u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
+          this->_internal_fotipflagwritingdisabled());
+    }
+
+  }
+  if (cached_has_bits & 0xff000000u) {
+    // optional uint64 fotipProcessingNumerator = 45 [default = 0];
+    if (cached_has_bits & 0x01000000u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+          this->_internal_fotipprocessingnumerator());
+    }
+
+    // optional int64 errRupProtocolVersion = 50 [default = 0];
+    if (cached_has_bits & 0x02000000u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
+          this->_internal_errrupprotocolversion());
+    }
+
+    // optional bool hasUnappliedParams = 17 [default = false];
+    if (cached_has_bits & 0x04000000u) {
+      total_size += 2 + 1;
+    }
+
+    // optional int64 errRupFrameSize = 51 [default = 0];
+    if (cached_has_bits & 0x08000000u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
+          this->_internal_errrupframesize());
+    }
+
+    // optional int64 errRupNonTuningData = 52 [default = 0];
+    if (cached_has_bits & 0x10000000u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
+          this->_internal_errrupnontuningdata());
+    }
+
+    // optional int64 errRupModuleType = 53 [default = 0];
+    if (cached_has_bits & 0x20000000u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
+          this->_internal_errrupmoduletype());
+    }
+
+    // optional int64 errRupFramesQuantity = 54 [default = 0];
+    if (cached_has_bits & 0x40000000u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
+          this->_internal_errrupframesquantity());
+    }
+
+    // optional int64 errRupFrameNumber = 55 [default = 0];
+    if (cached_has_bits & 0x80000000u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
+          this->_internal_errrupframenumber());
+    }
+
+  }
+  cached_has_bits = _has_bits_[1];
+  if (cached_has_bits & 0x000000ffu) {
+    // optional int64 errRupCRC = 56 [default = 0];
+    if (cached_has_bits & 0x00000001u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
+          this->_internal_errrupcrc());
+    }
+
+    // optional int64 errFotipProtocolVersion = 60 [default = 0];
+    if (cached_has_bits & 0x00000002u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
+          this->_internal_errfotipprotocolversion());
+    }
+
+    // optional int64 errFotipUniqueID = 61 [default = 0];
+    if (cached_has_bits & 0x00000004u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
+          this->_internal_errfotipuniqueid());
+    }
+
+    // optional int64 errFotipLmNumber = 62 [default = 0];
+    if (cached_has_bits & 0x00000008u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
+          this->_internal_errfotiplmnumber());
+    }
+
+    // optional int64 errFotipSubsystemCode = 63 [default = 0];
+    if (cached_has_bits & 0x00000010u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
+          this->_internal_errfotipsubsystemcode());
+    }
+
+    // optional int64 errFotipOperationCode = 64 [default = 0];
+    if (cached_has_bits & 0x00000020u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
+          this->_internal_errfotipoperationcode());
+    }
+
+    // optional int64 errFotipFrameSize = 65 [default = 0];
+    if (cached_has_bits & 0x00000040u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
+          this->_internal_errfotipframesize());
+    }
+
+    // optional int64 errFotipRomSize = 66 [default = 0];
+    if (cached_has_bits & 0x00000080u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
+          this->_internal_errfotipromsize());
+    }
+
+  }
+  if (cached_has_bits & 0x0000ff00u) {
+    // optional int64 errFotipRomFrameSize = 67 [default = 0];
+    if (cached_has_bits & 0x00000100u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
+          this->_internal_errfotipromframesize());
+    }
+
+    // optional int64 errAnalogLowBoundCheck = 68 [default = 0];
     if (cached_has_bits & 0x00000200u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
           this->_internal_erranaloglowboundcheck());
     }
 
-    // optional int64 errAnalogHighBoundCheck = 40 [default = 0];
+    // optional int64 errAnalogHighBoundCheck = 69 [default = 0];
     if (cached_has_bits & 0x00000400u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
           this->_internal_erranaloghighboundcheck());
     }
 
-    // optional int64 errRupCRC = 41 [default = 0];
+    // optional int64 errUntimelyReplay = 70 [default = 0];
     if (cached_has_bits & 0x00000800u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_errrupcrc());
+          this->_internal_erruntimelyreplay());
     }
 
-    // optional int64 fotipFlagWritingDisabled = 46 [default = 0];
+    // optional int64 errSent = 71 [default = 0];
     if (cached_has_bits & 0x00001000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_fotipflagwritingdisabled());
+          this->_internal_errsent());
     }
 
-    // optional int64 errTuningFrameUpdate = 47 [default = 0];
+    // optional int64 errPartialSent = 72 [default = 0];
     if (cached_has_bits & 0x00002000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_errtuningframeupdate());
+          this->_internal_errpartialsent());
     }
 
-    // optional bool writingDisabled = 45 [default = false];
+    // optional int64 errReplySize = 73 [default = 0];
     if (cached_has_bits & 0x00004000u) {
-      total_size += 2 + 1;
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
+          this->_internal_errreplysize());
+    }
+
+    // optional int64 errNoReply = 74 [default = 0];
+    if (cached_has_bits & 0x00008000u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
+          this->_internal_errnoreply());
     }
 
   }
+  // optional int64 errTuningFrameUpdate = 75 [default = 0];
+  if (cached_has_bits & 0x00010000u) {
+    total_size += 2 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
+        this->_internal_errtuningframeupdate());
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
         _internal_metadata_, total_size, &_cached_size_);
@@ -16117,143 +16196,143 @@ void TuningSourceState::MergeFrom(const TuningSourceState& from) {
   cached_has_bits = from._has_bits_[0];
   if (cached_has_bits & 0x000000ffu) {
     if (cached_has_bits & 0x00000001u) {
-      sourceid_ = from.sourceid_;
+      _internal_set_lanequipmentid(from._internal_lanequipmentid());
     }
     if (cached_has_bits & 0x00000002u) {
-      requestcount_ = from.requestcount_;
+      sourceid_ = from.sourceid_;
     }
     if (cached_has_bits & 0x00000004u) {
-      replycount_ = from.replycount_;
+      requestcount_ = from.requestcount_;
     }
     if (cached_has_bits & 0x00000008u) {
-      erruntimelyreplay_ = from.erruntimelyreplay_;
+      replycount_ = from.replycount_;
     }
     if (cached_has_bits & 0x00000010u) {
-      errsent_ = from.errsent_;
+      commandqueuesize_ = from.commandqueuesize_;
     }
     if (cached_has_bits & 0x00000020u) {
-      errpartialsent_ = from.errpartialsent_;
+      isreply_ = from.isreply_;
     }
     if (cached_has_bits & 0x00000040u) {
-      errreplysize_ = from.errreplysize_;
+      controlisactive_ = from.controlisactive_;
     }
     if (cached_has_bits & 0x00000080u) {
-      errnoreply_ = from.errnoreply_;
+      setsor_ = from.setsor_;
     }
     _has_bits_[0] |= cached_has_bits;
   }
   if (cached_has_bits & 0x0000ff00u) {
     if (cached_has_bits & 0x00000100u) {
-      errrupprotocolversion_ = from.errrupprotocolversion_;
+      writingdisabled_ = from.writingdisabled_;
     }
     if (cached_has_bits & 0x00000200u) {
-      errrupframesize_ = from.errrupframesize_;
+      fotipflagboundschecksuccess_ = from.fotipflagboundschecksuccess_;
     }
     if (cached_has_bits & 0x00000400u) {
-      errrupnontuningdata_ = from.errrupnontuningdata_;
+      fotipflagwritesuccess_ = from.fotipflagwritesuccess_;
     }
     if (cached_has_bits & 0x00000800u) {
-      errrupmoduletype_ = from.errrupmoduletype_;
+      fotipflagdatatypeerr_ = from.fotipflagdatatypeerr_;
     }
     if (cached_has_bits & 0x00001000u) {
-      errrupframesquantity_ = from.errrupframesquantity_;
+      fotipflagopcodeerr_ = from.fotipflagopcodeerr_;
     }
     if (cached_has_bits & 0x00002000u) {
-      errrupframenumber_ = from.errrupframenumber_;
+      fotipflagstartaddrerr_ = from.fotipflagstartaddrerr_;
     }
     if (cached_has_bits & 0x00004000u) {
-      errfotipprotocolversion_ = from.errfotipprotocolversion_;
+      fotipflagromsizeerr_ = from.fotipflagromsizeerr_;
     }
     if (cached_has_bits & 0x00008000u) {
-      errfotipuniqueid_ = from.errfotipuniqueid_;
+      fotipflagromframesizeerr_ = from.fotipflagromframesizeerr_;
     }
     _has_bits_[0] |= cached_has_bits;
   }
   if (cached_has_bits & 0x00ff0000u) {
     if (cached_has_bits & 0x00010000u) {
-      errfotiplmnumber_ = from.errfotiplmnumber_;
+      fotipflagframesizeerr_ = from.fotipflagframesizeerr_;
     }
     if (cached_has_bits & 0x00020000u) {
-      errfotipsubsystemcode_ = from.errfotipsubsystemcode_;
+      fotipflagprotocolversionerr_ = from.fotipflagprotocolversionerr_;
     }
     if (cached_has_bits & 0x00040000u) {
-      errfotipoperationcode_ = from.errfotipoperationcode_;
+      fotipflagsubsystemkeyerr_ = from.fotipflagsubsystemkeyerr_;
     }
     if (cached_has_bits & 0x00080000u) {
-      errfotipframesize_ = from.errfotipframesize_;
+      fotipflaguniueiderr_ = from.fotipflaguniueiderr_;
     }
     if (cached_has_bits & 0x00100000u) {
-      errfotipromsize_ = from.errfotipromsize_;
+      fotipflagoffseterr_ = from.fotipflagoffseterr_;
     }
     if (cached_has_bits & 0x00200000u) {
-      errfotipromframesize_ = from.errfotipromframesize_;
+      fotipflagapplysuccess_ = from.fotipflagapplysuccess_;
     }
     if (cached_has_bits & 0x00400000u) {
-      fotipflagboundschecksuccess_ = from.fotipflagboundschecksuccess_;
+      fotipflagsetsor_ = from.fotipflagsetsor_;
     }
     if (cached_has_bits & 0x00800000u) {
-      fotipflagwritesuccess_ = from.fotipflagwritesuccess_;
+      fotipflagwritingdisabled_ = from.fotipflagwritingdisabled_;
     }
     _has_bits_[0] |= cached_has_bits;
   }
   if (cached_has_bits & 0xff000000u) {
     if (cached_has_bits & 0x01000000u) {
-      fotipflagdatatypeerr_ = from.fotipflagdatatypeerr_;
+      fotipprocessingnumerator_ = from.fotipprocessingnumerator_;
     }
     if (cached_has_bits & 0x02000000u) {
-      commandqueuesize_ = from.commandqueuesize_;
+      errrupprotocolversion_ = from.errrupprotocolversion_;
     }
     if (cached_has_bits & 0x04000000u) {
-      isreply_ = from.isreply_;
-    }
-    if (cached_has_bits & 0x08000000u) {
-      controlisactive_ = from.controlisactive_;
-    }
-    if (cached_has_bits & 0x10000000u) {
-      setsor_ = from.setsor_;
-    }
-    if (cached_has_bits & 0x20000000u) {
       hasunappliedparams_ = from.hasunappliedparams_;
     }
+    if (cached_has_bits & 0x08000000u) {
+      errrupframesize_ = from.errrupframesize_;
+    }
+    if (cached_has_bits & 0x10000000u) {
+      errrupnontuningdata_ = from.errrupnontuningdata_;
+    }
+    if (cached_has_bits & 0x20000000u) {
+      errrupmoduletype_ = from.errrupmoduletype_;
+    }
     if (cached_has_bits & 0x40000000u) {
-      fotipflagopcodeerr_ = from.fotipflagopcodeerr_;
+      errrupframesquantity_ = from.errrupframesquantity_;
     }
     if (cached_has_bits & 0x80000000u) {
-      fotipflagstartaddrerr_ = from.fotipflagstartaddrerr_;
+      errrupframenumber_ = from.errrupframenumber_;
     }
     _has_bits_[0] |= cached_has_bits;
   }
   cached_has_bits = from._has_bits_[1];
   if (cached_has_bits & 0x000000ffu) {
     if (cached_has_bits & 0x00000001u) {
-      fotipflagromsizeerr_ = from.fotipflagromsizeerr_;
+      errrupcrc_ = from.errrupcrc_;
     }
     if (cached_has_bits & 0x00000002u) {
-      fotipflagromframesizeerr_ = from.fotipflagromframesizeerr_;
+      errfotipprotocolversion_ = from.errfotipprotocolversion_;
     }
     if (cached_has_bits & 0x00000004u) {
-      fotipflagframesizeerr_ = from.fotipflagframesizeerr_;
+      errfotipuniqueid_ = from.errfotipuniqueid_;
     }
     if (cached_has_bits & 0x00000008u) {
-      fotipflagprotocolversionerr_ = from.fotipflagprotocolversionerr_;
+      errfotiplmnumber_ = from.errfotiplmnumber_;
     }
     if (cached_has_bits & 0x00000010u) {
-      fotipflagsubsystemkeyerr_ = from.fotipflagsubsystemkeyerr_;
+      errfotipsubsystemcode_ = from.errfotipsubsystemcode_;
     }
     if (cached_has_bits & 0x00000020u) {
-      fotipflaguniueiderr_ = from.fotipflaguniueiderr_;
+      errfotipoperationcode_ = from.errfotipoperationcode_;
     }
     if (cached_has_bits & 0x00000040u) {
-      fotipflagoffseterr_ = from.fotipflagoffseterr_;
+      errfotipframesize_ = from.errfotipframesize_;
     }
     if (cached_has_bits & 0x00000080u) {
-      fotipflagapplysuccess_ = from.fotipflagapplysuccess_;
+      errfotipromsize_ = from.errfotipromsize_;
     }
     _has_bits_[1] |= cached_has_bits;
   }
-  if (cached_has_bits & 0x00007f00u) {
+  if (cached_has_bits & 0x0000ff00u) {
     if (cached_has_bits & 0x00000100u) {
-      fotipflagsetsor_ = from.fotipflagsetsor_;
+      errfotipromframesize_ = from.errfotipromframesize_;
     }
     if (cached_has_bits & 0x00000200u) {
       erranaloglowboundcheck_ = from.erranaloglowboundcheck_;
@@ -16262,18 +16341,24 @@ void TuningSourceState::MergeFrom(const TuningSourceState& from) {
       erranaloghighboundcheck_ = from.erranaloghighboundcheck_;
     }
     if (cached_has_bits & 0x00000800u) {
-      errrupcrc_ = from.errrupcrc_;
+      erruntimelyreplay_ = from.erruntimelyreplay_;
     }
     if (cached_has_bits & 0x00001000u) {
-      fotipflagwritingdisabled_ = from.fotipflagwritingdisabled_;
+      errsent_ = from.errsent_;
     }
     if (cached_has_bits & 0x00002000u) {
-      errtuningframeupdate_ = from.errtuningframeupdate_;
+      errpartialsent_ = from.errpartialsent_;
     }
     if (cached_has_bits & 0x00004000u) {
-      writingdisabled_ = from.writingdisabled_;
+      errreplysize_ = from.errreplysize_;
+    }
+    if (cached_has_bits & 0x00008000u) {
+      errnoreply_ = from.errnoreply_;
     }
     _has_bits_[1] |= cached_has_bits;
+  }
+  if (cached_has_bits & 0x00010000u) {
+    _internal_set_errtuningframeupdate(from._internal_errtuningframeupdate());
   }
 }
 
@@ -16300,9 +16385,10 @@ void TuningSourceState::InternalSwap(TuningSourceState* other) {
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   swap(_has_bits_[0], other->_has_bits_[0]);
   swap(_has_bits_[1], other->_has_bits_[1]);
+  lanequipmentid_.Swap(&other->lanequipmentid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(TuningSourceState, writingdisabled_)
-      + sizeof(TuningSourceState::writingdisabled_)
+      PROTOBUF_FIELD_OFFSET(TuningSourceState, errtuningframeupdate_)
+      + sizeof(TuningSourceState::errtuningframeupdate_)
       - PROTOBUF_FIELD_OFFSET(TuningSourceState, sourceid_)>(
           reinterpret_cast<char*>(&sourceid_),
           reinterpret_cast<char*>(&other->sourceid_));
@@ -17510,6 +17596,12 @@ class TuningSignalState::_Internal {
   static void set_has_tuningdefault(HasBits* has_bits) {
     (*has_bits)[0] |= 8192u;
   }
+  static void set_has_lmtime(HasBits* has_bits) {
+    (*has_bits)[0] |= 65536u;
+  }
+  static void set_has_fotipprocessingnumerator(HasBits* has_bits) {
+    (*has_bits)[0] |= 131072u;
+  }
 };
 
 const ::Proto::TuningValue&
@@ -17562,16 +17654,16 @@ TuningSignalState::TuningSignalState(const TuningSignalState& from)
     readhighbound_ = nullptr;
   }
   ::memcpy(&signalhash_, &from.signalhash_,
-    static_cast<size_t>(reinterpret_cast<char*>(&unsuccessfulwritetime_) -
-    reinterpret_cast<char*>(&signalhash_)) + sizeof(unsuccessfulwritetime_));
+    static_cast<size_t>(reinterpret_cast<char*>(&fotipprocessingnumerator_) -
+    reinterpret_cast<char*>(&signalhash_)) + sizeof(fotipprocessingnumerator_));
   // @@protoc_insertion_point(copy_constructor:Network.TuningSignalState)
 }
 
 void TuningSignalState::SharedCtor() {
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
     reinterpret_cast<char*>(&value_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&unsuccessfulwritetime_) -
-    reinterpret_cast<char*>(&value_)) + sizeof(unsuccessfulwritetime_));
+    0, static_cast<size_t>(reinterpret_cast<char*>(&fotipprocessingnumerator_) -
+    reinterpret_cast<char*>(&value_)) + sizeof(fotipprocessingnumerator_));
 }
 
 TuningSignalState::~TuningSignalState() {
@@ -17627,6 +17719,11 @@ void TuningSignalState::Clear() {
     ::memset(&writerequesttime_, 0, static_cast<size_t>(
         reinterpret_cast<char*>(&unsuccessfulwritetime_) -
         reinterpret_cast<char*>(&writerequesttime_)) + sizeof(unsuccessfulwritetime_));
+  }
+  if (cached_has_bits & 0x00030000u) {
+    ::memset(&lmtime_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&fotipprocessingnumerator_) -
+        reinterpret_cast<char*>(&lmtime_)) + sizeof(fotipprocessingnumerator_));
   }
   _has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -17765,6 +17862,22 @@ const char* TuningSignalState::_InternalParse(const char* ptr, ::PROTOBUF_NAMESP
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
+      // optional sfixed64 lmTime = 17 [default = 0];
+      case 17:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 137)) {
+          _Internal::set_has_lmtime(&has_bits);
+          lmtime_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<::PROTOBUF_NAMESPACE_ID::int64>(ptr);
+          ptr += sizeof(::PROTOBUF_NAMESPACE_ID::int64);
+        } else goto handle_unusual;
+        continue;
+      // optional fixed64 fotipProcessingNumerator = 18 [default = 0];
+      case 18:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 145)) {
+          _Internal::set_has_fotipprocessingnumerator(&has_bits);
+          fotipprocessingnumerator_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<::PROTOBUF_NAMESPACE_ID::uint64>(ptr);
+          ptr += sizeof(::PROTOBUF_NAMESPACE_ID::uint64);
+        } else goto handle_unusual;
+        continue;
       default: {
       handle_unusual:
         if ((tag & 7) == 4 || tag == 0) {
@@ -17897,6 +18010,18 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(16, this->_internal_tuningdefault(), target);
   }
 
+  // optional sfixed64 lmTime = 17 [default = 0];
+  if (cached_has_bits & 0x00010000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteSFixed64ToArray(17, this->_internal_lmtime(), target);
+  }
+
+  // optional fixed64 fotipProcessingNumerator = 18 [default = 0];
+  if (cached_has_bits & 0x00020000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFixed64ToArray(18, this->_internal_fotipprocessingnumerator(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -18008,6 +18133,18 @@ size_t TuningSignalState::ByteSizeLong() const {
     }
 
   }
+  if (cached_has_bits & 0x00030000u) {
+    // optional sfixed64 lmTime = 17 [default = 0];
+    if (cached_has_bits & 0x00010000u) {
+      total_size += 2 + 8;
+    }
+
+    // optional fixed64 fotipProcessingNumerator = 18 [default = 0];
+    if (cached_has_bits & 0x00020000u) {
+      total_size += 2 + 8;
+    }
+
+  }
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
         _internal_metadata_, total_size, &_cached_size_);
@@ -18094,6 +18231,15 @@ void TuningSignalState::MergeFrom(const TuningSignalState& from) {
     }
     _has_bits_[0] |= cached_has_bits;
   }
+  if (cached_has_bits & 0x00030000u) {
+    if (cached_has_bits & 0x00010000u) {
+      lmtime_ = from.lmtime_;
+    }
+    if (cached_has_bits & 0x00020000u) {
+      fotipprocessingnumerator_ = from.fotipprocessingnumerator_;
+    }
+    _has_bits_[0] |= cached_has_bits;
+  }
 }
 
 void TuningSignalState::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
@@ -18119,8 +18265,8 @@ void TuningSignalState::InternalSwap(TuningSignalState* other) {
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   swap(_has_bits_[0], other->_has_bits_[0]);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(TuningSignalState, unsuccessfulwritetime_)
-      + sizeof(TuningSignalState::unsuccessfulwritetime_)
+      PROTOBUF_FIELD_OFFSET(TuningSignalState, fotipprocessingnumerator_)
+      + sizeof(TuningSignalState::fotipprocessingnumerator_)
       - PROTOBUF_FIELD_OFFSET(TuningSignalState, value_)>(
           reinterpret_cast<char*>(&value_),
           reinterpret_cast<char*>(&other->value_));

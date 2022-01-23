@@ -248,7 +248,7 @@ void TcpTuningServiceClient::onGetTuningSourcesInfo(const char *replyData, quint
 
 		for (const TuningSource& ts : m_tuningSources)
 		{
-			if (ts.id() == dsi.id() && ts.lanEquipmentId() == QString::fromStdString(dsi.lancontrollerinfo(0).equipmentid()))
+			if (ts.id() == dsi.id() && ts.equipmentId() == QString::fromStdString(dsi.moduleequipmentid()))
 			{
 				isAlreadyExists = true;
 				break;
@@ -260,9 +260,7 @@ void TcpTuningServiceClient::onGetTuningSourcesInfo(const char *replyData, quint
 			continue;
 		}
 
-		TuningSource ts;
-		ts.info = dsi;
-
+		TuningSource ts(dsi);
 		m_tuningSources.push_back(ts);
 	}
 
@@ -469,6 +467,12 @@ void TcpTuningServiceClient::onGetTuningSignalState(const char *replyData, quint
 		{
 			assert(false);
 			return;
+		}
+
+		if (signalHash == UNDEFINED_HASH)
+		{
+			// This may be if tuning source control is disabled
+			continue;
 		}
 
 		assert(signalHash == m_signalHashes[signalIndex]);

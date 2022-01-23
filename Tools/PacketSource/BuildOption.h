@@ -26,7 +26,7 @@ public:
 	//
 	//
 	QString cfgSrvEquipmentID() const { return m_cfgSrvEquipmentID; }
-	void setСfgSrvEquipmentID(const QString& equipmentID) { m_cfgSrvEquipmentID = equipmentID; }
+    void setCfgSrvEquipmentID(const QString& equipmentID) { m_cfgSrvEquipmentID = equipmentID; }
 
 	HostAddressPort cfgSrvIP() const { return m_cfgSrvIP; }
 	void setCfgSrvIP(const HostAddressPort& ip) { m_cfgSrvIP = ip; }

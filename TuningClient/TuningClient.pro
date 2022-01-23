@@ -18,11 +18,6 @@ include(../warnings.pri)
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
-# generate PDBs for release
-#
-win32:QMAKE_CXXFLAGS_RELEASE += /Zi
-win32:QMAKE_LFLAGS_RELEASE += /DEBUG
-
 #Application icon
 win32:RC_ICONS += Images/TuningClient.ico
 
@@ -63,9 +58,11 @@ SOURCES +=\
     ../lib/Ui/DialogTcpStatistics.cpp \
     LogonWorkspace.cpp \
 	MainWindow.cpp \
+    ScriptTuningClientApplication.cpp \
     TuningPage.cpp \
     Settings.cpp \
     TuningSignalInfo.cpp \
+    ../lib/Tuning/TuningSourcesHelper.cpp \
     TuningWorkspace.cpp \
     ConfigController.cpp \
     ../lib/BuildInfo.cpp \
@@ -86,7 +83,7 @@ SOURCES +=\
     ../lib/Tuning/TuningSignalState.cpp \
     DialogFilterEditor.cpp \
     ../lib/Tuning/TuningTcpClient.cpp \
-    TuningClientTcpClient.cpp \ 
+    TuningClientTcpClient.cpp \
     ../lib/Tuning/TuningLog.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
     TuningSchemaManager.cpp \
@@ -107,10 +104,12 @@ HEADERS  += MainWindow.h \
     ../lib/Tuning/TuningUserManager.h \
     ../lib/Ui/DialogTcpStatistics.h \
     LogonWorkspace.h \
+    ScriptTuningClientApplication.h \
     Stable.h \
     TuningPage.h \
     Settings.h \
     TuningSignalInfo.h \
+    ../lib/Tuning/TuningSourcesHelper.h \
     TuningWorkspace.h \
     ConfigController.h \
     ../lib/BuildInfo.h \
@@ -131,7 +130,7 @@ HEADERS  += MainWindow.h \
     ../lib/Tuning/TuningSignalState.h \
     DialogFilterEditor.h \
     ../lib/Tuning/TuningTcpClient.h \
-    TuningClientTcpClient.h \ 
+    TuningClientTcpClient.h \
     ../lib/Tuning/TuningLog.h \
     ../lib/Tuning/TuningSourceState.h \
     TuningSchemaManager.h \

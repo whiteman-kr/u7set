@@ -24,12 +24,14 @@ CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
 SOURCES +=  \
+    SimAfbParamTests.cpp \
     SimCommandTest_LM5_LM6.cpp \
     SimProfilesTest.cpp \
     SimRamTests.cpp \
     main.cpp
 
 HEADERS += \
+    SimAfbParamTests.h \
     Stable.h \
 	../../CommonLib/PropertyObject.h \
 	SimCommandTest_LM5_LM6.h \

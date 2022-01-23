@@ -1,6 +1,7 @@
 #include "TuningWorkspace.h"
 #include "Settings.h"
 #include "MainWindow.h"
+#include "../lib/Tuning/TuningSourcesHelper.h"
 
 #include <QButtonGroup>
 #include <QTreeWidget>
@@ -115,10 +116,10 @@ void FilterButton::update(int discreteCounter)
 					   .arg(textSelectedColor.name());
 
 
-	if (styleSheet() != style)
+					if (styleSheet() != style)
 	{
-		setStyleSheet(style);
-	}
+					setStyleSheet(style);
+}
 }
 
 void FilterButton::slot_toggled(bool checked)
@@ -136,10 +137,10 @@ void FilterButton::slot_toggled(bool checked)
 
 int TuningWorkspace::m_instanceCounter = 0;
 
-TuningWorkspace::TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> workspaceFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, TuningClientFilterStorage* tuningFilterStorage, QWidget* parent) :
+TuningWorkspace::TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> workspaceFilter, TuningSignalManager* tuningSignalManager, std::vector<TuningClientTcpClient*> tcpClients, TuningClientFilterStorage* tuningFilterStorage, QWidget* parent) :
 	QWidget(parent),
 	m_tuningSignalManager(tuningSignalManager),
-	m_tuningTcpClient(tuningTcpClient),
+	m_tuningTcpClients(tcpClients),
 	m_tuningFilterStorage(tuningFilterStorage),
 	m_workspaceFilter(workspaceFilter),
 	m_treeFilter(treeFilter)
@@ -150,7 +151,6 @@ TuningWorkspace::TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::
 	//assert(m_treeFilter); // Can be nullptr
 	assert(m_workspaceFilter);
 	assert(m_tuningSignalManager);
-	assert(m_tuningTcpClient);
 	assert(m_tuningFilterStorage);
 
 	QVBoxLayout* mainLayout = new QVBoxLayout();
@@ -354,7 +354,7 @@ void TuningWorkspace::updateFilters(std::shared_ptr<TuningFilter> rootFilter)
 			return;
 		}
 
-		swp->updateFilters(rootFilter);
+		swp->createControls(rootFilter);
 	}
 }
 
@@ -492,7 +492,7 @@ void TuningWorkspace::updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter
 
 		if (m_columnAccessIndex != -1)
 		{
-            const int defaultWidth = 50;
+			const int defaultWidth = 50;
 
 			int width = settings.value("TuningWorkspace/FilterTreeColumnsAccess", defaultWidth).toInt();
 			if (width < defaultWidth || width > columnMaxWidth)
@@ -927,7 +927,7 @@ QWidget* TuningWorkspace::createTuningPageOrWorkspace(std::shared_ptr<TuningFilt
 		auto it = m_tuningWorkspacesMap.find(childWorkspaceFilterId);
 		if (it == m_tuningWorkspacesMap.end())
 		{
-			TuningWorkspace* tw = new TuningWorkspace(m_treeFilter, childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClient, m_tuningFilterStorage, this/*parent*/);
+			TuningWorkspace* tw = new TuningWorkspace(m_treeFilter, childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClients, m_tuningFilterStorage, this/*parent*/);
 
 			m_tuningWorkspacesMap[childWorkspaceFilterId] = tw;
 
@@ -946,7 +946,7 @@ QWidget* TuningWorkspace::createTuningPageOrWorkspace(std::shared_ptr<TuningFilt
 		{
 			// We have to create Presets Switch page
 			//
-			SwitchFiltersPage* swp = new SwitchFiltersPage(childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClient, m_tuningFilterStorage);
+			SwitchFiltersPage* swp = new SwitchFiltersPage(childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClients, m_tuningFilterStorage);
 			m_switchPresetPages.push_back(swp);
 			return swp;
 		}
@@ -957,7 +957,7 @@ QWidget* TuningWorkspace::createTuningPageOrWorkspace(std::shared_ptr<TuningFilt
 			auto it = m_tuningPagesMap.find(childWorkspaceFilterId);
 			if (it == m_tuningPagesMap.end())
 			{
-				TuningPage* tp = new TuningPage(m_treeFilter, childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClient, m_tuningFilterStorage);
+				TuningPage* tp = new TuningPage(m_treeFilter, childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClients, m_tuningFilterStorage);
 
 				m_tuningPagesMap[childWorkspaceFilterId] = tp;
 
@@ -1021,7 +1021,7 @@ void TuningWorkspace::addChildTreeObjects(const std::shared_ptr<TuningFilter> fi
 
 		//if (f->isSourceSchema() == true || f->isSourceEquipment() == true)
 		//{
-			//caption += QString(" [+%1 DEBUG counters]").arg(f->childFiltersCount());
+		//caption += QString(" [+%1 DEBUG counters]").arg(f->childFiltersCount());
 		//}
 
 		static QString equipmentString = tr("Equipment");
@@ -1314,160 +1314,258 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 
 	assert(m_columnStatusIndex != -1);
 
-	int errorCounter = filter->counters().errorCounter;
+	QStringList statusStrings;
 
-	TuningSource ts;
+	int validCount = 0;
+	int controlIsEnabledCount = 0;
+	int isReplyCount = 0;
+	int hasUnappliedParamsCount = 0;
 
-	QString status;
-	bool valid = false;
-	bool controlIsEnabled = false;
-	bool hasUnappliedParams = false;
+	QStringList replyCounts;
 
-    bool access = false;
+	int statesCount = 0;
+	int accessCount = 0;
 
-	if (m_tuningTcpClient->tuningSourceInfo(hash, &ts) == false)
+	for (const TuningClientTcpClient* client : m_tuningTcpClients)
 	{
-		status = tr("Unknown");
-	}
-	else
-	{
-		valid = ts.valid();
-		controlIsEnabled = ts.state.controlisactive();
-		hasUnappliedParams = ts.state.hasunappliedparams();
+		bool sourceDrivenByThisClient = false;
 
-		if (theConfigSettings.lmStatusFlagMode() == LmStatusFlagMode::AccessKey &&
-            valid == true &&
-            controlIsEnabled == true &&
-            ts.state.isreply() == true)
+		for (const TuningClientSettings::TuningService& tcs : theConfigSettings.clientSettings.tuningServices)
+		{
+			if (client->tuningServiceId() != tcs.tuningServiceID)
 			{
-                access = ts.state.writingdisabled() == false;
+				continue;
 			}
 
-		if (valid == false)
+			for (const QString& drivenSource : tcs.drivenSources)
+			{
+				if (::calcHash(drivenSource) == hash)
+				{
+					sourceDrivenByThisClient = true;
+					break;
+				}
+			}
+			if (sourceDrivenByThisClient == true)
+			{
+				break;
+			}
+		}
+
+		if (sourceDrivenByThisClient == false)
 		{
-			status = tr("Unknown");
+			continue;
+		}
+
+		TuningSource ts;
+
+		QString sourceStatus;
+
+		if (client->tuningSourceInfo(hash, &ts) == false ||
+			ts.valid() == false)
+		{
+			statesCount++;
+			sourceStatus = tr("Non-Valid");
+
+			if (statusStrings.empty() == true || statusStrings.last() != sourceStatus)
+			{
+				statusStrings.push_back(sourceStatus);
+			}
 		}
 		else
 		{
-			if (controlIsEnabled == false)
+			for (int c = 0; c < ts.statesCount(); c++)
 			{
-				status = tr("Inactive");
-			}
-			else
-			{
-				if (ts.state.isreply() == false)
+				statesCount++;
+
+				const ::Network::TuningSourceState& state = ts.state(c);
+
+				if (state.controlisactive() == false)
 				{
-					status = tr("No Reply");
+					sourceStatus = tr("Inactive");
+
+					if (statusStrings.empty() == true || statusStrings.last() != sourceStatus)
+					{
+						statusStrings.push_back(sourceStatus);
+					}
 				}
 				else
 				{
-					if (errorCounter > 0)
+					if (state.isreply() == false)
 					{
-						status = tr("E: %1").arg(errorCounter);
+						sourceStatus = tr("No Reply");
+
+						if (statusStrings.empty() == true || statusStrings.last() != sourceStatus)
+						{
+							statusStrings.push_back(sourceStatus);
+						}
 					}
 					else
 					{
-						if (hasUnappliedParams == true)
+						if (state.hasunappliedparams() == true)
 						{
-							status = tr("Unapplied [%1 replies]").arg(ts.state.replycount());
+							statusStrings.push_back(tr("Unapplied [%1]").arg(state.replycount()));
 						}
 						else
 						{
-							status = tr("Active [%1 replies]").arg(ts.state.replycount());
+							statusStrings.push_back(tr("Active [%1]").arg(state.replycount()));
 						}
+
+						replyCounts.push_back(tr("%1").arg(static_cast<int>(state.replycount())));
 					}
+				}
+
+				// Increment counters
+				//
+				if (ts.valid() == true) validCount++;
+				if (state.controlisactive() == true) controlIsEnabledCount++;
+				if (state.isreply() == true) isReplyCount++;
+				if (state.hasunappliedparams() == true) hasUnappliedParamsCount++;
+
+				if (theConfigSettings.lmStatusFlagMode() == LmStatusFlagMode::AccessKey &&
+					ts.valid() == true &&
+					state.controlisactive() == true &&
+					state.isreply() == true)
+				{
+					if (state.writingdisabled() == false) accessCount++;
 				}
 			}
 		}
+	}	// Loop through clients
+
+	QString statusText = statusStrings.join(" / ");
+
+	if (statusText.isEmpty() == true)
+	{
+		statusText = tr("Unknown");
 	}
 
-    // Access column
-
+	if (statesCount > 0 && validCount == statesCount)
+	{
+		if (hasUnappliedParamsCount == statesCount)
+		{
+			// All are unappplied
+			//
+			statusText = tr("Unapplied [%1]").arg(replyCounts.join(" / "));
+		}
+		else
+		{
+			if (isReplyCount == statesCount)
+			{
+				// All are active
+				//
+				statusText = tr("Active [%1]").arg(replyCounts.join(" / "));
+			}
+		}
+	}
+	// Access column
+	//
 	if (m_columnAccessIndex != -1)
 	{
 		QColor accessBackColor = Qt::white;
 		QColor accessTextColor = Qt::black;
 
-        if (access == true)
-        {
+		if (accessCount > 0)
+		{
 			accessBackColor = QColor(0, 128, 0);
 			accessTextColor = Qt::white;
-        }
+		}
 
-        QString accessText = access ? tr("Yes") : tr("No");
+		QString accessText;
+
+		if (accessCount == 0)
+		{
+			accessText = tr("No");
+		}
+		else
+		{
+			accessText = accessCount == statesCount ? tr("Yes") : tr("Yes (%1/%2)").arg(statesCount - accessCount).arg(statesCount);
+		}
 
 		if (treeItem->text(m_columnAccessIndex) != accessText)
-        {
+		{
 			treeItem->setText(m_columnAccessIndex, accessText);
-        }
+		}
 
 		if (treeItem->background(m_columnAccessIndex) != accessBackColor)
-        {
+		{
 			treeItem->setBackground(m_columnAccessIndex, accessBackColor);
-        }
+		}
 
 		if (treeItem->foreground(m_columnAccessIndex) != accessTextColor)
-        {
+		{
 			treeItem->setForeground(m_columnAccessIndex, accessTextColor);
 		}
 
-    }
-
-    // Status column
-
-
-	if (treeItem->text(m_columnStatusIndex) != status)
-	{
-		treeItem->setText(m_columnStatusIndex, status);
 	}
 
-	QColor stateBackColor;
-	QColor stateTextColor;
-
-	if (valid == false)
+	// Status column text and color
+	//
+	if (treeItem->text(m_columnStatusIndex) != statusText)
 	{
-		stateBackColor = Qt::white;
-		stateTextColor = Qt::darkGray;
+		treeItem->setText(m_columnStatusIndex, statusText);
+	}
+
+	QColor stateBackColor = Qt::white;
+	QColor stateTextColor = Qt::black;
+
+	if (validCount == 0)
+	{
+		// All are non-valid
+		//
+		stateBackColor = redColor;
+		stateTextColor = Qt::white;
 	}
 	else
 	{
-		if (controlIsEnabled == false)
+		if (controlIsEnabledCount == 0)
 		{
+			// Control is not enabled for all
+			//
 			stateBackColor = Qt::gray;
 			stateTextColor = Qt::white;
 		}
 		else
 		{
-			if (errorCounter > 0)
+			if (isReplyCount == 0)
 			{
+				// All are No Reply
+				//
 				stateBackColor = redColor;
 				stateTextColor = Qt::white;
 			}
 			else
 			{
-				if (hasUnappliedParams == true)
+				if ((validCount < statesCount) || (isReplyCount < statesCount) || (controlIsEnabledCount < statesCount))
 				{
-					stateBackColor = Qt::yellow;
-					stateTextColor = Qt::black;
+					// Some are non-valid no-reply or control is not enabled
+					//
+					stateBackColor = QColor(0xF87217);
+					stateTextColor = Qt::white;
 				}
 				else
 				{
-					stateBackColor = Qt::white;
-					stateTextColor = Qt::black;
+					// Unapplied params present
+					//
+					if (hasUnappliedParamsCount > 0)
+					{
+						stateBackColor = Qt::yellow;
+						stateTextColor = Qt::black;
+					}
 				}
 			}
 		}
 	}
 
+
 	if (treeItem->background(m_columnStatusIndex) != stateBackColor)
-    {
-		 treeItem->setBackground(m_columnStatusIndex, stateBackColor);
-    }
+	{
+		treeItem->setBackground(m_columnStatusIndex, stateBackColor);
+	}
 
 	if (treeItem->foreground(m_columnStatusIndex) != stateTextColor)
-    {
+	{
 		treeItem->setForeground(m_columnStatusIndex, stateTextColor);
-    }
+	}
 }
 
 void TuningWorkspace::updateTreeItemCounters(QTreeWidgetItem* treeItem, TuningFilter* filter)
@@ -1542,36 +1640,7 @@ void TuningWorkspace::activateControl(const QString& equipmentId, bool enable)
 		return;
 	}
 
-	// Take Control
-
-	QString action = enable ? tr("activate") : tr("deactivate");
-
-	bool forceTakeControl = false;
-
-	if (m_tuningTcpClient->singleLmControlMode() == true && m_tuningTcpClient->clientIsActive() == false)
-	{
-		if (QMessageBox::warning(this, qAppName(),
-								 tr("Warning!\n\nCurrent client is not selected as active now.\n\nAre you sure you want to take control and %1 the source %2?").arg(action).arg(equipmentId),
-								 QMessageBox::Yes | QMessageBox::No,
-								 QMessageBox::No) != QMessageBox::Yes)
-		{
-			return;
-		}
-
-		forceTakeControl = true;
-	}
-	else
-	{
-		if (QMessageBox::warning(this, qAppName(),
-								 tr("Are you sure you want to %1 the source %2?").arg(action).arg(equipmentId),
-								 QMessageBox::Yes | QMessageBox::No,
-								 QMessageBox::No) != QMessageBox::Yes)
-		{
-			return;
-		}
-	}
-
-	m_tuningTcpClient->activateTuningSourceControl(equipmentId, enable, forceTakeControl);
+	TuningSourcesHelper::activateTuningSourceControl({m_tuningTcpClients.begin(), m_tuningTcpClients.end()}, equipmentId, enable, this);
 }
 
 QTreeWidgetItem* TuningWorkspace::findFilterWidget(const QString& id, QTreeWidgetItem* treeItem)
@@ -1613,9 +1682,9 @@ QTreeWidgetItem* TuningWorkspace::findFilterWidget(const QString& id, QTreeWidge
 bool TuningWorkspace::eventFilter(QObject *object, QEvent *event)
 {
 	if (m_tab != nullptr && object == m_tab->tabBar() &&
-			(event->type() == QEvent::MouseButtonPress ||
-			 event->type() == QEvent::MouseButtonRelease ||
-			 event->type() == QEvent::KeyPress))
+		(event->type() == QEvent::MouseButtonPress ||
+		 event->type() == QEvent::MouseButtonRelease ||
+		 event->type() == QEvent::KeyPress))
 	{
 		if (askForSavePendingChanges() == false)
 		{
@@ -1624,9 +1693,9 @@ bool TuningWorkspace::eventFilter(QObject *object, QEvent *event)
 	}
 
 	if (m_filterTree != nullptr && (object == m_filterTree || object == m_filterTree->viewport()) &&
-			(event->type() == QEvent::MouseButtonPress ||
-			 event->type() == QEvent::MouseButtonRelease ||
-			 event->type() == QEvent::KeyPress))
+		(event->type() == QEvent::MouseButtonPress ||
+		 event->type() == QEvent::MouseButtonRelease ||
+		 event->type() == QEvent::KeyPress))
 	{
 		if (askForSavePendingChanges() == false)
 		{
@@ -1637,9 +1706,9 @@ bool TuningWorkspace::eventFilter(QObject *object, QEvent *event)
 	for (FilterButton* b : m_filterButtons)
 	{
 		if (object == b &&
-				(event->type() == QEvent::MouseButtonPress ||
-				 event->type() == QEvent::MouseButtonRelease ||
-				 event->type() == QEvent::KeyPress))
+			(event->type() == QEvent::MouseButtonPress ||
+			 event->type() == QEvent::MouseButtonRelease ||
+			 event->type() == QEvent::KeyPress))
 		{
 			if (askForSavePendingChanges() == false)
 			{
@@ -1685,11 +1754,6 @@ void TuningWorkspace::slot_treeContextMenuRequested(const QPoint& pos)
 		return;
 	}
 
-	if (m_tuningTcpClient->singleLmControlMode() == false)
-	{
-		return;
-	}
-
 	if (filter->isEmpty() == true)
 	{
 		return;
@@ -1700,12 +1764,12 @@ void TuningWorkspace::slot_treeContextMenuRequested(const QPoint& pos)
 		return;
 	}
 
-	TuningSource ts;
+	const QString equipmentId = filter->caption();
 
-	if (m_tuningTcpClient->tuningSourceInfo(::calcHash(filter->caption()), &ts) == false)
-	{
-		return;
-	}
+	bool activateEnabled = false;
+	bool deactivateEnabled = false;
+
+	TuningSourcesHelper::isActivationActionsAvailable({m_tuningTcpClients.begin(), m_tuningTcpClients.end()}, equipmentId, &activateEnabled, &deactivateEnabled);
 
 	QMenu menu(this);
 
@@ -1717,7 +1781,7 @@ void TuningWorkspace::slot_treeContextMenuRequested(const QPoint& pos)
 	{
 		activateControl(filter->caption(), true);
 	};
-	actionEnable->setEnabled(ts.state.controlisactive() == false);
+	actionEnable->setEnabled(activateEnabled);
 	connect(actionEnable, &QAction::triggered, this, fEnableControl);
 
 	menu.addAction(actionEnable);
@@ -1730,7 +1794,7 @@ void TuningWorkspace::slot_treeContextMenuRequested(const QPoint& pos)
 	{
 		activateControl(filter->caption(), false);
 	};
-	actionDisable->setEnabled(ts.state.controlisactive() == true);
+	actionDisable->setEnabled(deactivateEnabled);
 	connect(actionDisable, &QAction::triggered, this, fDisableControl);
 
 	menu.addAction(actionDisable);

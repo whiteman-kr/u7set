@@ -9,8 +9,6 @@
 // BuildTabPage
 //
 //
-const char* BuildTabPage::m_buildLogFileName = "buildlog.html";
-
 
 BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 	MainTabPage(dbcontroller, parent),
@@ -324,41 +322,6 @@ void BuildTabPage::projectClosed()
 void BuildTabPage::build()
 {
 	m_outputWidget->clear();
-
-	// init build log file
-	//
-    QString logFileName = QDir::fromNativeSeparators(theSettings.buildOutputPath());
-
-	if (logFileName.endsWith('/') == false)
-	{
-		logFileName += '/';
-	}
-	logFileName += m_buildLogFileName;
-
-	if (m_logFile.isOpen() == true && m_logFile.fileName() == logFileName)
-	{
-		// it is ok, file is open and has right name
-		//
-	}
-	else
-	{
-		if (m_logFile.isOpen())
-		{
-			m_logFile.close();
-		}
-
-		m_logFile.setFileName(logFileName);
-		m_logFile.open(QIODevice::Append | QIODevice::Text);
-	}
-
-	if (m_logFile.isOpen() == true)
-	{
-		LOG_MESSAGE((&m_builder.log()), tr("Build log file: %1").arg(logFileName));
-	}
-	else
-	{
-		LOG_WARNING_OBSOLETE((&m_builder.log()), Builder::IssueType::NotDefined,  tr("Cannot open output log file (%1) for writing").arg(logFileName));
-	}
 
 	// --
 	//

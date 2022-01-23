@@ -67,6 +67,9 @@ public:
 	MonitorCentralWidget* monitorCentralWidget();
 
 private:
+	void runTuningTcpClients();
+	void stopTuningTcpClients();
+
 	void updateStatusBar();
 	void showSoftwareConnection(const QString& caption, const QString& shortCaption, Tcp::ConnectionState connectionState, HostAddressPort portPrimary, HostAddressPort portSecondary, QLabel* label);
 
@@ -110,6 +113,14 @@ public slots:
 	//void checkMonitorSingleInstance();
 	void activateRequested();
 
+	void toggleSchemaTree();
+	void setVisibleSchemaTree(bool visible);
+	void setVisibleTabBar(bool visible);
+	void setVisibleToolBar(bool visible);
+	void setVisibleStatusBar(bool visible);
+	void setVisibleMenu(bool visible);
+	void setFullScreen(bool value);
+
 	void slot_login();
 	void slot_reLogin();
 
@@ -149,8 +160,8 @@ private:
 	TcpSignalRecents* m_tcpSignalRecents = nullptr;
 	SimpleThread* m_tcpRecentsThread = nullptr;
 
-	MonitorTuningTcpClient* m_tuningTcpClient = nullptr;
-	SimpleThread* m_tuningTcpClientThread = nullptr;
+	std::vector<MonitorTuningTcpClient*> m_tuningTcpClients;
+	std::vector<SimpleThread*> m_tuningTcpClientThreads;
 
 	TcpAppSourcesState* m_tcpSourcesStateClient = nullptr;
 	SimpleThread* m_sourcesStateClientThread = nullptr;

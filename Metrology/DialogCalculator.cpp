@@ -247,15 +247,15 @@ void DialogCalculator::createInterface()
 
 	QHBoxLayout* dr_C_Layout = new QHBoxLayout;
 
-	m_pDrСelsiusRadio = new QRadioButton(this);
-	m_pDrСelsiusEdit = new QLineEdit("100", this);
-	QLabel* pDrСelsiusLabel = new QLabel(tr("°C"), this);
-	pDrСelsiusLabel->setFixedWidth(30);
-	m_pDrСelsiusEdit->setFont(*m_digitFont);
+	m_pDrCelsiusRadio = new QRadioButton(this);
+	m_pDrCelsiusEdit = new QLineEdit("100", this);
+    QLabel* pDrCelsiusLabel = new QLabel(tr("°C"), this);
+    pDrCelsiusLabel->setFixedWidth(30);
+	m_pDrCelsiusEdit->setFont(*m_digitFont);
 
-	dr_C_Layout->addWidget(m_pDrСelsiusRadio);
-	dr_C_Layout->addWidget(m_pDrСelsiusEdit);
-	dr_C_Layout->addWidget(pDrСelsiusLabel);
+	dr_C_Layout->addWidget(m_pDrCelsiusRadio);
+	dr_C_Layout->addWidget(m_pDrCelsiusEdit);
+    dr_C_Layout->addWidget(pDrCelsiusLabel);
 	dr_C_Layout->addStretch();
 
 	QHBoxLayout* dr_F_Layout = new QHBoxLayout;
@@ -430,14 +430,14 @@ void DialogCalculator::initDialog()
 
 	// Degrees
 	//
-	m_pDrСelsiusRadio->setChecked(true);
+	m_pDrCelsiusRadio->setChecked(true);
 
-	connect(m_pDrСelsiusRadio, &QRadioButton::clicked, this, &DialogCalculator::onDrRadio);
-	connect(m_pDrСelsiusEdit, &QLineEdit::textChanged, this, &DialogCalculator::onDrValue);
+	connect(m_pDrCelsiusRadio, &QRadioButton::clicked, this, &DialogCalculator::onDrRadio);
+	connect(m_pDrCelsiusEdit, &QLineEdit::textChanged, this, &DialogCalculator::onDrValue);
 	connect(m_pDrFahrenheitRadio, &QRadioButton::clicked, this, &DialogCalculator::onDrRadio);
 	connect(m_pDrFahrenheitEdit, &QLineEdit::textChanged, this, &DialogCalculator::onDrValue);
 
-	m_pDrСelsiusEdit->setValidator(validator);
+	m_pDrCelsiusEdit->setValidator(validator);
 	m_pDrFahrenheitEdit->setValidator(validator);
 
 	conversionDr();
@@ -653,12 +653,12 @@ void DialogCalculator::conversionDpf()
 
 void DialogCalculator::conversionDr()
 {
-	if (m_pDrСelsiusRadio->isChecked() == true)
+	if (m_pDrCelsiusRadio->isChecked() == true)
 	{
-		double val = m_uc.conversionDegree(m_pDrСelsiusEdit->text().toDouble(), UnitsConvertType::CelsiusToFahrenheit);
+		double val = m_uc.conversionDegree(m_pDrCelsiusEdit->text().toDouble(), UnitsConvertType::CelsiusToFahrenheit);
 
-		m_pDrСelsiusEdit->setFocus();
-		m_pDrСelsiusEdit->setReadOnly(false);
+		m_pDrCelsiusEdit->setFocus();
+		m_pDrCelsiusEdit->setReadOnly(false);
 		m_pDrFahrenheitEdit->setText(QString::number(val, 'f', DefaultElectricUnitPrecesion));
 		m_pDrFahrenheitEdit->setReadOnly(true);
 	}
@@ -669,8 +669,8 @@ void DialogCalculator::conversionDr()
 
 		m_pDrFahrenheitEdit->setFocus();
 		m_pDrFahrenheitEdit->setReadOnly(false);
-		m_pDrСelsiusEdit->setText(QString::number(val, 'f', DefaultElectricUnitPrecesion));
-		m_pDrСelsiusEdit->setReadOnly(true);
+		m_pDrCelsiusEdit->setText(QString::number(val, 'f', DefaultElectricUnitPrecesion));
+		m_pDrCelsiusEdit->setReadOnly(true);
 	}
 }
 

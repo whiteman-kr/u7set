@@ -385,74 +385,72 @@ message TuningSourceFilling
 
 message TuningSourceState
 {
+	// Tuning Source channel identification
+	//
     optional uint64 sourceID = 1 [default = 0];
+	optional string lanEquipmentID = 2;
 
-    optional bool isReply = 2 [default = false];
+	// Tuning Source processing states
+	//
+	optional bool isReply = 10 [default = false];
+	optional int64 requestCount = 11 [default = 0];
+	optional int64 replyCount = 12 [default = 0];
+	optional int32 commandQueueSize = 13 [default = 0];
+	optional bool controlIsActive = 14 [default = false];
+	optional bool setSOR = 15 [default = false];
+	optional bool writingDisabled = 16 [default = false];
+	optional bool hasUnappliedParams = 17 [default = false];
 
-    optional int64 requestCount = 3 [default = 0];
-    optional int64 replyCount = 4 [default = 0];
-
-    optional int32 commandQueueSize = 5 [default = 0];
-
-    optional int64 errUntimelyReplay = 6 [default = 0];
-    optional int64 errSent = 7 [default = 0];
-    optional int64 errPartialSent = 8 [default = 0];
-    optional int64 errReplySize = 9 [default = 0];
-    optional int64 errNoReply = 10 [default = 0];
+	// flags reported by LM in reply FotipHeader.flags
+	//
+	optional int64 fotipFlagBoundsCheckSuccess = 30 [default = 0];
+	optional int64 fotipFlagWriteSuccess = 31 [default = 0];
+	optional int64 fotipFlagDataTypeErr = 32 [default = 0];
+	optional int64 fotipFlagOpCodeErr = 33 [default = 0];
+	optional int64 fotipFlagStartAddrErr = 34 [default = 0];
+	optional int64 fotipFlagRomSizeErr = 35 [default = 0];
+	optional int64 fotipFlagRomFrameSizeErr = 36 [default = 0];
+	optional int64 fotipFlagFrameSizeErr = 37 [default = 0];
+	optional int64 fotipFlagProtocolVersionErr = 38 [default = 0];
+	optional int64 fotipFlagSubsystemKeyErr = 39 [default = 0];
+	optional int64 fotipFlagUniueIDErr = 40 [default = 0];
+	optional int64 fotipFlagOffsetErr = 41 [default = 0];
+	optional int64 fotipFlagApplySuccess = 42 [default = 0];
+	optional int64 fotipFlagSetSOR = 43 [default = 0];
+	optional int64 fotipFlagWritingDisabled = 44 [default = 0];
+	optional uint64 fotipProcessingNumerator = 45 [default = 0];
 
     // errors in reply RupFrameHeader
     //
-    optional int64 errRupProtocolVersion = 11 [default = 0];
-    optional int64 errRupFrameSize = 12 [default = 0];
-    optional int64 errRupNonTuningData = 13 [default = 0];
-    optional int64 errRupModuleType = 14 [default = 0];
-    optional int64 errRupFramesQuantity = 15 [default = 0];
-    optional int64 errRupFrameNumber = 16 [default = 0];
+	optional int64 errRupProtocolVersion = 50 [default = 0];
+	optional int64 errRupFrameSize = 51 [default = 0];
+	optional int64 errRupNonTuningData = 52 [default = 0];
+	optional int64 errRupModuleType = 53 [default = 0];
+	optional int64 errRupFramesQuantity = 54 [default = 0];
+	optional int64 errRupFrameNumber = 55 [default = 0];
+	optional int64 errRupCRC = 56 [default = 0];
 
     // errors in reply FotipHeader
     //
-    optional int64 errFotipProtocolVersion = 17 [default = 0];
-    optional int64 errFotipUniqueID = 18 [default = 0];
-    optional int64 errFotipLmNumber = 19 [default = 0];
-    optional int64 errFotipSubsystemCode = 20 [default = 0];
-    optional int64 errFotipOperationCode = 21 [default = 0];
-    optional int64 errFotipFrameSize = 22 [default = 0];
-    optional int64 errFotipRomSize = 23 [default = 0];
-    optional int64 errFotipRomFrameSize = 24 [default = 0];
+	optional int64 errFotipProtocolVersion = 60 [default = 0];
+	optional int64 errFotipUniqueID = 61 [default = 0];
+	optional int64 errFotipLmNumber = 62 [default = 0];
+	optional int64 errFotipSubsystemCode = 63 [default = 0];
+	optional int64 errFotipOperationCode = 64 [default = 0];
+	optional int64 errFotipFrameSize = 65 [default = 0];
+	optional int64 errFotipRomSize = 66 [default = 0];
+	optional int64 errFotipRomFrameSize = 67 [default = 0];
+	optional int64 errAnalogLowBoundCheck = 68 [default = 0];
+	optional int64 errAnalogHighBoundCheck = 69 [default = 0];
 
-    // errors reported by LM in reply FotipHeader.flags
-    //
-    optional int64 fotipFlagBoundsCheckSuccess = 25 [default = 0];
-    optional int64 fotipFlagWriteSuccess = 26 [default = 0];
-    optional int64 fotipFlagDataTypeErr = 27 [default = 0];
-    optional int64 fotipFlagOpCodeErr = 28 [default = 0];
-    optional int64 fotipFlagStartAddrErr = 29 [default = 0];
-    optional int64 fotipFlagRomSizeErr = 30 [default = 0];
-    optional int64 fotipFlagRomFrameSizeErr = 31 [default = 0];
-    optional int64 fotipFlagFrameSizeErr = 32 [default = 0];
-    optional int64 fotipFlagProtocolVersionErr = 33 [default = 0];
-    optional int64 fotipFlagSubsystemKeyErr = 34 [default = 0];
-    optional int64 fotipFlagUniueIDErr = 35 [default = 0];
-    optional int64 fotipFlagOffsetErr = 36 [default = 0];
-    optional int64 fotipFlagApplySuccess = 37 [default = 0];
-    optional int64 fotipFlagSetSOR = 38 [default = 0];
-
-    optional int64 errAnalogLowBoundCheck = 39 [default = 0];
-    optional int64 errAnalogHighBoundCheck = 40 [default = 0];
-
-    optional int64 errRupCRC = 41 [default = 0];
-
-    optional bool controlIsActive = 42 [default = false];
-    optional bool setSOR = 43 [default = false];
-
-    optional bool hasUnappliedParams = 44 [default = false];
-
+	// Tuning Source processing errors
 	//
-
-	optional bool writingDisabled = 45 [default = false];
-	optional int64 fotipFlagWritingDisabled = 46 [default = 0];
-
-    optional int64 errTuningFrameUpdate = 47 [default = 0];
+	optional int64 errUntimelyReplay = 70 [default = 0];
+	optional int64 errSent = 71 [default = 0];
+	optional int64 errPartialSent = 72 [default = 0];
+	optional int64 errReplySize = 73 [default = 0];
+	optional int64 errNoReply = 74 [default = 0];
+	optional int64 errTuningFrameUpdate = 75 [default = 0];
 }
 
 message GetTuningSourcesStatesReply
@@ -462,7 +460,7 @@ message GetTuningSourcesStatesReply
 
     optional bool singleLmControlMode = 3 [default = true];
     optional string activeClientID = 4;				    // if singleLmControlMode == true then EquipmentID of activeClient
-                                                                    // else - empty string
+														// else - empty string
     optional string activeClientIP = 5;				    // similar to activeClientID
 }
 
@@ -479,8 +477,8 @@ message ChangeConrolledTuningSourceRequest
                                                                     // empty - to request current controlled source (activateControl field is ignored)
 
     optional bool activateControl = 3 [default = false];	    // if tuningSourceEquipmentID is not empty:
-                                                                    //	    true - to activate tuning source control
-								    //	    false - to deactivate tuning source control
+																//	    true - to activate tuning source control
+																//	    false - to deactivate tuning source control
 }
 
 message ChangeConrolledTuningSourceReply
@@ -522,6 +520,9 @@ message TuningSignalState
 
 	optional bool tuningDefault = 16 [default = false];			// flag, sets to 1 if current tunable signal value is equal to tuning default value,
 																// else sets to 0
+
+	optional sfixed64 lmTime = 17 [default = 0];
+	optional fixed64 fotipProcessingNumerator = 18 [default = 0];
 }
 
 message TuningSignalsReadReply

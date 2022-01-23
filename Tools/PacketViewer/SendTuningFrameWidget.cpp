@@ -204,7 +204,7 @@ SendTuningFrameWidget::~SendTuningFrameWidget()
 
 void SendTuningFrameWidget::sendPacket()
 {
-	static_assert(sizeof(FotipV2::Header) == 128, "fotip header size check failed");
+	static_assert(sizeof(Fotip::Header) == 128, "fotip header size check failed");
 
 	if (!checkSocket())
 	{
@@ -213,9 +213,9 @@ void SendTuningFrameWidget::sendPacket()
 
 	static quint16 dataTypes[] =
 	{
-		static_cast<quint16>(FotipV2::DataType::AnalogSignedInt),
-		static_cast<quint16>(FotipV2::DataType::AnalogFloat),
-		static_cast<quint16>(FotipV2::DataType::Discrete)
+		static_cast<quint16>(Fotip::DataType::AnalogSignedInt),
+		static_cast<quint16>(Fotip::DataType::AnalogFloat),
+		static_cast<quint16>(Fotip::DataType::Discrete)
 	};
 
 	Rup::Frame frame;
@@ -247,7 +247,7 @@ void SendTuningFrameWidget::sendPacket()
 		writeBigEndian<quint16>(timeStamp.second,  static_cast<quint16>(time.time().second()));
 		writeBigEndian<quint16>(timeStamp.millisecond,  static_cast<quint16>(time.time().msec()));
 
-		FotipV2::Header& fotip = *reinterpret_cast<FotipV2::Header*>(frame.data);
+		Fotip::Header& fotip = *reinterpret_cast<Fotip::Header*>(frame.data);
 		writeBigEndian<quint16>(fotip.protocolVersion, 1);
 		writeBigEndian<quint64>(fotip.uniqueId, m_uniqueId->text().toUInt());
 
@@ -261,7 +261,7 @@ void SendTuningFrameWidget::sendPacket()
 
 		writeBigEndian<quint16>(fotip.operationCode,
 								static_cast<quint16>((m_operationCode->currentIndex() == 0) ?
-														FotipV2::OpCode::Read : FotipV2::OpCode::Write));
+														Fotip::OpCode::Read : Fotip::OpCode::Write));
 		writeBigEndian<quint16>(fotip.flags.all,  static_cast<quint16>(m_flags->text().toUInt()));
 		writeBigEndian<quint32>(fotip.startAddressW, m_startAddress->text().toUInt());
 		writeBigEndian<quint16>(fotip.fotipFrameSizeB,  static_cast<quint16>(m_fotipFrameSize->text().toUInt()));
@@ -275,8 +275,8 @@ void SendTuningFrameWidget::sendPacket()
 				break;
 			case 1:
 			{
-				quint16* fotipData = reinterpret_cast<quint16*>(frame.data + sizeof(FotipV2::Header));
-				for (int i = 0; i < FotipV2::TX_RX_DATA_SIZE / 2; i++)
+				quint16* fotipData = reinterpret_cast<quint16*>(frame.data + sizeof(Fotip::Header));
+				for (int i = 0; i < Fotip::TX_RX_DATA_SIZE / 2; i++)
 				{
 					writeBigEndian(fotipData[i], static_cast<quint16>(m_randGen.generate() & 0xFFFF));
 				}
@@ -284,8 +284,8 @@ void SendTuningFrameWidget::sendPacket()
 			}
 			case 2:
 			{
-				quint16* fotipData = reinterpret_cast<quint16*>(frame.data + sizeof(FotipV2::Header));
-				for (int i = 0; i < FotipV2::TX_RX_DATA_SIZE / 2; i++)
+				quint16* fotipData = reinterpret_cast<quint16*>(frame.data + sizeof(Fotip::Header));
+				for (int i = 0; i < Fotip::TX_RX_DATA_SIZE / 2; i++)
 				{
 					if (i % 2 == 0)
 					{
@@ -326,7 +326,7 @@ void SendTuningFrameWidget::sendPacket()
 		timeStamp.second = static_cast<quint16>(time.time().second());
 		timeStamp.millisecond = static_cast<quint16>(time.time().msec());
 
-		FotipV2::Header& fotip = *reinterpret_cast<FotipV2::Header*>(frame.data);
+		Fotip::Header& fotip = *reinterpret_cast<Fotip::Header*>(frame.data);
 		fotip.protocolVersion = 1;
 		fotip.uniqueId = m_uniqueId->text().toUInt();
 
@@ -338,7 +338,7 @@ void SendTuningFrameWidget::sendPacket()
 		fotip.subsystemKey.crc = (data << 4) % 0b10011;	// x^4+x+1
 
 		fotip.operationCode = (static_cast<quint16>((m_operationCode->currentIndex() == 0) ?
-								FotipV2::OpCode::Read : FotipV2::OpCode::Write));
+								Fotip::OpCode::Read : Fotip::OpCode::Write));
 		fotip.flags.all =  static_cast<quint16>(m_flags->text().toUInt());
 		fotip.startAddressW = m_startAddress->text().toUInt();
 		fotip.fotipFrameSizeB = static_cast<quint16>(m_fotipFrameSize->text().toUInt());
@@ -352,8 +352,8 @@ void SendTuningFrameWidget::sendPacket()
 				break;
 			case 1:
 			{
-				quint16* fotipData = reinterpret_cast<quint16*>(frame.data + sizeof(FotipV2::Header));
-				for (int i = 0; i < FotipV2::TX_RX_DATA_SIZE / 2; i++)
+				quint16* fotipData = reinterpret_cast<quint16*>(frame.data + sizeof(Fotip::Header));
+				for (int i = 0; i < Fotip::TX_RX_DATA_SIZE / 2; i++)
 				{
 					fotipData[i] = static_cast<quint16>(m_randGen.generate() & 0xFFFF);
 				}
@@ -361,8 +361,8 @@ void SendTuningFrameWidget::sendPacket()
 			}
 			case 2:
 			{
-				quint16* fotipData = reinterpret_cast<quint16*>(frame.data + sizeof(FotipV2::Header));
-				for (int i = 0; i < FotipV2::TX_RX_DATA_SIZE / 2; i++)
+				quint16* fotipData = reinterpret_cast<quint16*>(frame.data + sizeof(Fotip::Header));
+				for (int i = 0; i < Fotip::TX_RX_DATA_SIZE / 2; i++)
 				{
 					if (i % 2 == 0)
 					{

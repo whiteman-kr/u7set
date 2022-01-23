@@ -204,19 +204,23 @@ private:
 class TuningServiceSettings : public SoftwareSettings
 {
 public:
-	struct TuningClient
-	{
-		QString equipmentID;
-		QStringList sourcesIDs;
-	};
-
 	struct TuningSource
 	{
 		QString lmEquipmentID;
 		QString portEquipmentID;
 		HostAddressPort tuningDataIP;
 
-		bool isValid() { return lmEquipmentID.isEmpty() == false; }
+		bool isValid() const { return lmEquipmentID.isEmpty() == false; }
+	};
+
+	struct TuningClient
+	{
+		QString equipmentID;
+		std::vector<TuningSource> drivenSources;
+
+		QStringList uniqueSourcesIDs() const;
+
+		bool isValid() { return equipmentID.isEmpty() == false; }
 	};
 
 	struct ChannelSettings
@@ -225,16 +229,12 @@ public:
 
 		QString serviceControllerEquipmentID;
 
-		HostAddressPort clientRequestIP;
-		QHostAddress clientRequestNetmask;
-
 		HostAddressPort tuningDataIP;
 		QHostAddress tuningDataNetmask;
 
 		HostAddressPort tuningSimIP;
 
 		std::vector<TuningSource> sources;
-		std::vector<TuningClient> clients;
 
 		TuningSource getTuningSource(const QString& sourceEquipmentID) const;
 	};
@@ -242,6 +242,9 @@ public:
 	static const int CHANNELS_COUNT = 2;
 
 	QString equipmentID;
+
+	HostAddressPort clientRequestIP;
+	QHostAddress clientRequestNetmask;
 
 	int channelCount = 0;
 
@@ -254,10 +257,13 @@ public:
 	bool singleLmControl = true;
 	bool disableModulesTypeChecking = false;
 
+	std::vector<TuningClient> clients;
+
 	ChannelSettings channelSettings[CHANNELS_COUNT];
 
-	std::vector<TuningClient> getAllUniqueClients() const;
 	bool isSourceExists(const QString& moduleEquipmentID) const;
+
+	TuningClient getTuningClient(const QString& clientEquipmentID) const;
 
 private:
 	// this methods should be call by SoftwareSettingsSet only
@@ -266,6 +272,10 @@ private:
 	bool readFromXml(XmlReadHelper& xml) override;
 
 	friend class SoftwareSettingsSet;
+
+private:
+	static bool writeTuningSourcesToXml(XmlWriteHelper& xml, const std::vector<TuningSource>& sources);
+	static bool readTuningSourcesFromXml(XmlReadHelper& xml, std::vector<TuningSource>* sources);
 };
 
 class ArchivingServiceSettings : public SoftwareSettings
@@ -374,6 +384,15 @@ private:
 class MonitorSettings : public SoftwareSettings
 {
 public:
+	struct TuningService
+	{
+		QString tuningServiceID;
+		QString clientRequestIP;
+		int clientRequestPort = 0;
+		QStringList drivenSources;
+	};
+
+public:
 	QString cfgServiceID1;
 	HostAddressPort cfgServiceIP1;
 
@@ -404,10 +423,8 @@ public:
 	int archiveServicePort2 = 0;
 
 	bool tuningEnabled = false;
-	QString tuningServiceID;
-	QString tuningServiceIP;
-	int tuningServicePort = 0;
-	QString tuningSources;
+
+	std::vector<TuningService> tuningServices;
 
 	bool tuningLogin = false;
 	QString tuningUserAccounts;
@@ -423,7 +440,6 @@ private:
 
 public:
 	QStringList getSchemaTags() const;
-	QStringList getTuningSources() const;
 	QStringList getUsersAccounts() const;
 
 	void clear();
@@ -432,15 +448,23 @@ public:
 class TuningClientSettings : public SoftwareSettings
 {
 public:
+	struct TuningService
+	{
+		QString tuningServiceID;
+		QString clientRequestIP;
+		int clientRequestPort = 0;
+		QStringList drivenSources;
+		bool singleLmControl = false;
+	};
+
+public:
 	QString cfgServiceID1;
 	HostAddressPort cfgServiceIP1;
 
 	QString cfgServiceID2;
 	HostAddressPort cfgServiceIP2;
 
-	QString tuningServiceID;
-	QString tuningServiceIP;
-	int tuningServicePort = 0;
+	std::vector<TuningService> tuningServices;
 
 	bool autoApply = true;
 
@@ -474,9 +498,12 @@ public:
 	QStringList getSchemaTags() const;
 	QStringList getUsersAccounts() const;
 
-	const TuningClientSettings& operator = (const TuningClientSettings& src);
+	//const TuningClientSettings& operator = (const TuningClientSettings& src);
 
 	bool appearanceChanged(const TuningClientSettings& src) const;
 	bool connectionChanged(const TuningClientSettings& src) const;
 };
+
+bool operator == (const TuningClientSettings::TuningService& left,
+				  const TuningClientSettings::TuningService& right);
 

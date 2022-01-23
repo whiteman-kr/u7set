@@ -6,27 +6,26 @@
 
 SchemasWorkspace::SchemasWorkspace(ConfigController* configController,
 								   TuningSignalManager* tuningSignalManager,
-								   TuningClientTcpClient* tuningTcpClient,
+								   std::vector<ITuningTcpClient*> tuningTcpClients,
 								   const QString& caption,
 								   const QStringList& schemasTags,
 								   QString startSchemaId,
 								   ILogFile* logFile,
 								   QWidget* parent) :
 	QWidget(parent),
-    m_tuningController(tuningSignalManager, tuningTcpClient),
+	m_tuningController(tuningSignalManager, tuningTcpClients),
 	m_logController(logFile),
 	m_tuningSignalManager(tuningSignalManager),
-	m_tuningTcpClient(tuningTcpClient),
 	m_schemaManager(configController),
 	m_caption(caption),
 	m_startSchemaId(startSchemaId),
 	m_schemasTags(schemasTags)
 {
-	if (configController == nullptr || m_tuningSignalManager== nullptr || m_tuningTcpClient == nullptr )
+
+	if (configController == nullptr || m_tuningSignalManager== nullptr)
 	{
 		assert(configController);
 		assert(m_tuningSignalManager);
-		assert(m_tuningTcpClient);
 		return;
 	}
 

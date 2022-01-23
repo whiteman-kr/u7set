@@ -76,6 +76,18 @@ void XmlWriteHelper::writeStringAttribute(const QString& name, const QString& va
 	m_xmlWriter->writeAttribute(name, value);
 }
 
+void XmlWriteHelper::writeStringListAttribute(const QString& name, const QStringList& list)
+{
+#ifdef QT_DEBUG
+	for(const QString& str : list)
+	{
+		Q_ASSERT(str.contains(Separator::SEMICOLON) == false);
+	}
+#endif
+
+	writeStringAttribute(name, list.join(Separator::SEMICOLON));
+}
+
 void XmlWriteHelper::writeIntAttribute(const QString& name, int value, bool hex)
 {
 	if (hex == true)
@@ -303,6 +315,22 @@ bool XmlReadHelper::readStringAttribute(const QString& name, QString* value)
 	}
 
 	*value = attrs.value(name).toString();
+
+	return true;
+}
+
+bool XmlReadHelper::readStringListAttribute(const QString& name, QStringList* list)
+{
+	TEST_PTR_RETURN_FALSE(list);
+
+	QString str;
+
+	if (readStringAttribute(name, &str) == false)
+	{
+		return false;
+	}
+
+	*list = str.split(Separator::SEMICOLON, Qt::SkipEmptyParts);
 
 	return true;
 }
