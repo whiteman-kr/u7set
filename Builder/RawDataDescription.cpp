@@ -54,7 +54,7 @@ namespace Hardware
 
 			bool res = true;
 
-			int commentIndex = str.indexOf("//");
+			int commentIndex = static_cast<int>(str.indexOf("//"));
 
 			if (commentIndex != -1)
 			{

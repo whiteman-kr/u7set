@@ -43,14 +43,6 @@ namespace Log
 
 	QString LogFileRecord::toString(const QString& sessionHashString) const
 	{
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 3)
-		static QMutex m;
-		QMutexLocker l(&m);
-#else
-		int delete_mutex_above;
-		// see: https://forum.qt.io/topic/120355/qdatetime-assert/2
-#endif
-
 		if (type == MessageType::Text)
 		{
 			return QString("%1\t%2\r\n")
@@ -1454,7 +1446,7 @@ namespace Log
 
 	QVariant LogRecordModel::data(const QModelIndex& index, int role) const
 	{
-		size_t column = index.column();
+		int column = index.column();
 		if (column < 0 || column >= m_columnsNames.size())
 		{
 			assert(false);

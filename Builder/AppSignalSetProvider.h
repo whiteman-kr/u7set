@@ -150,7 +150,7 @@ public:
 	AppSignal* getSignalByStrID(const QString signalStrID);
 	QVector<int> getChannelSignalsID(int signalGroupID) { return m_signalSet.getChannelSignalsID(signalGroupID); }
 	int key(int index) const { return m_signalSet.key(index); }
-	int keyIndex(int key) { return m_signalSet.keyIndex(key); }
+	int keyIndex(int key) { return static_cast<int>(m_signalSet.keyIndex(key)); }
 	QVector<int> getSameChannelSignals(int index);
 
 	const AppSignal& getLoadedSignal(int index);

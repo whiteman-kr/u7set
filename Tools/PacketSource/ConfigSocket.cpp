@@ -155,7 +155,7 @@ QString ConfigSocket::cfgSrvInfo()
 	connectedState.append(tr("Loaded sources: %1\n").arg(m_pscore->sourceBase().count()));
 	connectedState.append(tr("Loaded signals: %1\n\n").arg(m_pscore->signalBase().count()));
 
-	int filesCount = m_loadedFiles.count();
+	int filesCount = static_cast<int>(m_loadedFiles.count());
 
 	connectedState.append(tr("Loaded files: %1").arg(filesCount));
 
@@ -311,7 +311,7 @@ bool ConfigSocket::readConfiguration(const QByteArray& fileData,
 		return false;
 	}
 
-	int index = adsIDList.indexOf(m_pscore->buildOption().appDataSrvEquipmentID());
+	int index = static_cast<int>(adsIDList.indexOf(m_pscore->buildOption().appDataSrvEquipmentID()));
 	if (index == -1)
 	{
 		emit unknownAdsEquipmentID(adsIDList);
@@ -339,7 +339,7 @@ bool ConfigSocket::readAppSignalSet(const QByteArray& fileData)
 	QElapsedTimer responseTime;
 	responseTime.start();
 
-	bool result = m_protoAppSignalSet.ParseFromArray(fileData.constData(), fileData.size());
+	bool result = m_protoAppSignalSet.ParseFromArray(fileData.constData(), static_cast<int>(fileData.size()));
 	if (result == false)
 	{
 		qDebug() << __FUNCTION__ << "Error parsing AppSignalSet";
@@ -376,7 +376,7 @@ bool ConfigSocket::readAppDataSource(const QByteArray& fileData)
 		return false;
 	}
 
-	int dataSourcesCount = dataSources.count();
+	int dataSourcesCount = static_cast<int>(dataSources.count());
 	for(int i = 0; i < dataSourcesCount; i++)
 	{
 		const DataSource& ds = dataSources[i];
@@ -402,7 +402,7 @@ bool ConfigSocket::readAppDataSource(const QByteArray& fileData)
 			si.lmIP = ip;
 			si.appDataSrvIP = m_appDataSrvIP;
 
-			si.signalCount = ds.associatedSignals(E::LanControllerType::AppData).count();
+			si.signalCount = static_cast<int>(ds.associatedSignals(E::LanControllerType::AppData).count());
 
 			// Source
 			//

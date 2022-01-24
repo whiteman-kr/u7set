@@ -564,7 +564,10 @@ namespace VFrame30
 
 	QString SchemaItemAfb::toolTipText(double dpiX, double dpiY, double devicePixelRatio) const
 	{
-		QImage image(QSize(3 * dpiX * devicePixelRatio, 3 * dpiY * devicePixelRatio), QImage::Format_RGB32);		// size 3x3 inches
+		QImage image(QSize(static_cast<int>(3 * dpiX * devicePixelRatio),
+						   static_cast<int>(3 * dpiY * devicePixelRatio)),
+						   QImage::Format_RGB32);		// size 3x3 inches
+
 		image.fill(Qt::white);
 
 		image.setDotsPerMeterX(static_cast<int>(1000.0 / 25.4 * dpiX * devicePixelRatio));

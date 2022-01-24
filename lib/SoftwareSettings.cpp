@@ -314,7 +314,7 @@ bool CfgServiceSettings::writeToXml(XmlWriteHelper& xml) const
 	xml.writeHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, clientRequestNetmask);
 
 	xml.writeStartElement(XmlElement::CLIENTS);
-	xml.writeIntAttribute(XmlAttribute::COUNT, clients.count());
+	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(clients.count()));
 
 	for(const QPair<QString, E::SoftwareType>& pair : clients)
 	{

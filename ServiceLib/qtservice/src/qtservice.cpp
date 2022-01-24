@@ -1219,7 +1219,7 @@ int QtServiceBase::argc() const
 		return 0;
 	}
 
-	return d_ptr->args.count();
+	return static_cast<int>(d_ptr->args.count());
 }
 
 QStringList QtServiceBase::args() const

@@ -78,17 +78,21 @@ int main(int argc, char *argv[])
 
     if (locale != "en")
     {
+		bool loadResult = true;
+
 		qtTranslator = new QTranslator(qApp);
-        qtTranslator->load(QString("qt_%1.qm").arg(locale),":/translations");
+		loadResult &= qtTranslator->load(QString("qt_%1.qm").arg(locale),":/translations");
         qApp->installTranslator(qtTranslator);
 
 		qtbaseTranslator = new QTranslator(qApp);
-        qtbaseTranslator->load(QString("qtbase_%1.qm").arg(locale),":/translations");
+		loadResult &= qtbaseTranslator->load(QString("qtbase_%1.qm").arg(locale),":/translations");
         qApp->installTranslator(qtbaseTranslator);
 
 		appTranslator = new QTranslator(qApp);
-        appTranslator->load(QString("ServiceControlManager_%1.qm").arg(locale),":/translations");
+		loadResult &= appTranslator->load(QString("ServiceControlManager_%1.qm").arg(locale),":/translations");
         qApp->installTranslator(appTranslator);
+
+		Q_UNUSED(loadResult);
     }
 
 	SoftwareInfo si;

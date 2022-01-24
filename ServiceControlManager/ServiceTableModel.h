@@ -1,5 +1,4 @@
-#ifndef SERVICETABLEMODEL_H
-#define SERVICETABLEMODEL_H
+#pragma once
 
 #include <QAbstractTableModel>
 #include <QHostAddress>
@@ -85,6 +84,5 @@ private:
 	void setServiceState(quint32 ip, quint16 port, ServiceState state);
 	void getServiceState(quint32 ip, quint16 port, int& hostIndex, int& portIndex);
 	void checkForDeletingSocket(UdpClientSocket* socket);
+	int hostsInfoCount() const;
 };
-
-#endif // SERVICETABLEMODEL_H

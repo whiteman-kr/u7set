@@ -61,7 +61,7 @@ ServiceTableModel::~ServiceTableModel()
 	m_timer.stop();
 
 	QSettings settings;
-	settings.beginWriteArray("ServiceTableModel/ServerList", m_hostsInfo.count());
+	settings.beginWriteArray("ServiceTableModel/ServerList", hostsInfoCount());
 
 	for (int i = 0; i < m_hostsInfo.count(); i++)
 	{
@@ -151,12 +151,12 @@ void ServiceTableModel::restartUdpSocketThread()
 
 int ServiceTableModel::rowCount(const QModelIndex&) const
 {
-	return m_hostsInfo.count();
+	return hostsInfoCount();
 }
 
 int ServiceTableModel::columnCount(const QModelIndex&) const
 {
-	return servicesInfo.count();
+	return static_cast<int>(servicesInfo.count());
 }
 
 QVariant ServiceTableModel::data(const QModelIndex &index, int role) const
@@ -300,14 +300,14 @@ void ServiceTableModel::setServiceState(quint32 ip, quint16 port, ServiceState s
 	HostInfo hi;
 	hi.ip = ip;
 	hi.servicesData[portIndex].information.set_servicestate(TO_INT(state));
-	beginInsertRows(QModelIndex(), m_hostsInfo.count(), m_hostsInfo.count());
+	beginInsertRows(QModelIndex(), hostsInfoCount(), hostsInfoCount());
 	m_hostsInfo.append(hi);
 
 	endInsertRows();
 
 	restartUdpSocketThread();
 
-	emit serviceStateChanged(m_hostsInfo.count() - 1);
+	emit serviceStateChanged(hostsInfoCount() - 1);
 }
 
 void ServiceTableModel::getServiceState(quint32 ip, quint16 port, int& hostIndex, int& serviceIndex)
@@ -334,6 +334,11 @@ void ServiceTableModel::getServiceState(quint32 ip, quint16 port, int& hostIndex
 			hostIndex = i;
 		}
 	}
+}
+
+int ServiceTableModel::hostsInfoCount() const
+{
+	return static_cast<int>(m_hostsInfo.count());
 }
 
 void ServiceData::parseServiceInfo()
@@ -415,13 +420,13 @@ void ServiceTableModel::addAddress(QString connectionAddress)
 	}
 	HostInfo hi;
 	hi.ip = ip;
-	beginInsertRows(QModelIndex(), m_hostsInfo.count(), m_hostsInfo.count());
+	beginInsertRows(QModelIndex(), hostsInfoCount(), hostsInfoCount());
 	m_hostsInfo.append(hi);
 	endInsertRows();
 
 	restartUdpSocketThread();
 
-	emit serviceStateChanged(m_hostsInfo.count() - 1);
+	emit serviceStateChanged(hostsInfoCount() - 1);
 }
 
 
@@ -468,7 +473,7 @@ void ServiceTableModel::serviceAckReceived(const UdpRequest udpRequest)
 
 				service.parseServiceInfo();
 
-				beginInsertRows(QModelIndex(), m_hostsInfo.count(), m_hostsInfo.count());
+				beginInsertRows(QModelIndex(), hostsInfoCount(), hostsInfoCount());
 
 				m_hostsInfo.append(hi);
 
@@ -622,7 +627,7 @@ void ServiceTableModel::setServiceInformation(quint32 ip, quint16 port, Network:
 		HostInfo hi;
 		hi.ip = ip;
 		hi.servicesData[serviceIndex].information = sInfo;
-		beginInsertRows(QModelIndex(), m_hostsInfo.count(), m_hostsInfo.count());
+		beginInsertRows(QModelIndex(), hostsInfoCount(), hostsInfoCount());
 		m_hostsInfo.append(hi);
 		endInsertRows();
 

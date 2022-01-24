@@ -325,7 +325,7 @@ void TcpAppDataClient::onGetAppSignalListNextReply(const char* replyData, quint3
 
 		m_signalHashes.append(hash);
 
-		m_hash2Index.insert(hash, m_signalHashes.count() - 1);
+		m_hash2Index.insert(hash, static_cast<int>(m_signalHashes.count() - 1));
 	}
 
 	m_currentPart++;
@@ -368,7 +368,7 @@ void TcpAppDataClient::onGetAppSignalReply(const char* replyData, quint32 replyD
 
 	int startIndex = m_getParamsCurrentPart * ADS_GET_APP_SIGNAL_PARAM_MAX;
 
-	int signalCount = m_signalParams.count();
+	int signalCount = static_cast<int>(m_signalParams.count());
 
 	for(int i = 0; i < paramCount; i++)
 	{
@@ -440,7 +440,7 @@ void TcpAppDataClient::onGetAppSignalStateReply(const char* replyData, quint32 r
 
 	int startIndex = m_getStatesCurrentPart * ADS_GET_APP_SIGNAL_STATE_MAX;
 
-	int signalCount = m_signalParams.count();
+	int signalCount = static_cast<int>(m_signalParams.count());
 
 	for(int i = 0; i < stateCount; i++)
 	{

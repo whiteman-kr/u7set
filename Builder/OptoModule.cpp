@@ -532,7 +532,7 @@ namespace Hardware
 
 		// mix port EquipmentID in dataID
 		//
-		m_txDataID = CRC32(m_txDataID, C_STR(m_equipmentID), m_equipmentID.length(), false);
+		m_txDataID = CRC32(m_txDataID, C_STR(m_equipmentID), static_cast<int>(m_equipmentID.length()), false);
 
 		// mix txSignals ID and bitAddress in buffer
 		//
@@ -767,7 +767,7 @@ namespace Hardware
 
 		// mix port EquipmentID in dataID
 		//
-		m_rxDataID = CRC32(m_rxDataID, C_STR(m_equipmentID), m_equipmentID.length(), false);
+		m_rxDataID = CRC32(m_rxDataID, C_STR(m_equipmentID), static_cast<int>(m_equipmentID.length()), false);
 
 		// mix rxSignals ID and bitAddress in buffer
 		//
@@ -1822,38 +1822,47 @@ namespace Hardware
 
 	void OptoPort::sortByOffsetBitNoAscending(QVector<TxRxSignalShared>& list)
 	{
-		int count = list.count();
+		std::sort(list.begin(), list.end(), [](TxRxSignalShared& a, TxRxSignalShared& b)
+											{
+												return a->addrInBuf().bitAddress() < b->addrInBuf().bitAddress();
+											});
 
-		for(int i = 0; i < count - 1; i++)
-		{
-			for(int k = i + 1; k < count; k++)
-			{
-				if (list[i]->addrInBuf().bitAddress() > list[k]->addrInBuf().bitAddress())
-				{
-					TxRxSignalShared temp = list[i];
-					list[i] = list[k];
-					list[k] = temp;
-				}
-			}
-		}
+//		int count = static_cast<int>(list.count());
+
+//		for(int i = 0; i < count - 1; i++)
+//		{
+//			for(int k = i + 1; k < count; k++)
+//			{
+//				if (list[i]->addrInBuf().bitAddress() > list[k]->addrInBuf().bitAddress())
+//				{
+//					TxRxSignalShared temp = list[i];
+//					list[i] = list[k];
+//					list[k] = temp;
+//				}
+//			}
+//		}
 	}
 
 	void OptoPort::sortByAppSignalIdAscending(QVector<TxRxSignalShared>& list)
 	{
-		int count = list.count();
+		std::sort(list.begin(), list.end(), [](TxRxSignalShared& a, TxRxSignalShared& b)
+											{
+												return a->appSignalID() < b->appSignalID();
+											});
+//		int count = list.count();
 
-		for(int i = 0; i < count - 1; i++)
-		{
-			for(int k = i + 1; k < count; k++)
-			{
-				if (list[i]->appSignalID() > list[k]->appSignalID())
-				{
-					TxRxSignalShared temp = list[i];
-					list[i] =  list[k];
-					list[k] = temp;
-				}
-			}
-		}
+//		for(int i = 0; i < count - 1; i++)
+//		{
+//			for(int k = i + 1; k < count; k++)
+//			{
+//				if (list[i]->appSignalID() > list[k]->appSignalID())
+//				{
+//					TxRxSignalShared temp = list[i];
+//					list[i] =  list[k];
+//					list[k] = temp;
+//				}
+//			}
+//		}
 	}
 
 	bool OptoPort::checkSignalsOffsets(const QVector<TxRxSignalShared>& signalList, int startIndex, int count) const
@@ -1895,7 +1904,7 @@ namespace Hardware
 		QVector<TxRxSignalShared> tempList;
 		QVector<TxRxSignalShared> tempSignalList = signalList;
 
-		int count = tempSignalList.count();
+		int count = static_cast<int>(tempSignalList.count());
 
 		signalList.clear();
 
@@ -1915,7 +1924,7 @@ namespace Hardware
 
 		signalList.append(tempList);
 
-		if (checkSignalsOffsets(signalList, 0, signalList.count()) == false)
+		if (checkSignalsOffsets(signalList, 0, static_cast<int>(signalList.count())) == false)
 		{
 			return false;
 		}
@@ -2349,7 +2358,7 @@ namespace Hardware
 		// checking ports addresses overlapping
 		// usefull for manual settings of ports
 		//
-		int portsCount = m_ports.count();
+		int portsCount = static_cast<int>(m_ports.count());
 
 		bool result = true;
 
@@ -2663,20 +2672,25 @@ namespace Hardware
 
 	void OptoModule::sortPortsByEquipmentIDAscending(QVector<OptoPort*>& ports)
 	{
-		int count = ports.count();
+		std::sort(ports.begin(), ports.end(), [](OptoPort* a, OptoPort* b)
+											{
+												return a->equipmentID() < b->equipmentID();
+											});
 
-		for(int i = 0; i < count - 1; i++)
-		{
-			for(int k = i + 1; k < count; k++)
-			{
-				if (ports[i]->equipmentID() > ports[k]->equipmentID())
-				{
-					OptoPort* temp = ports[i];
-					ports[i] = ports[k];
-					ports[k] = temp;
-				}
-			}
-		}
+//		int count = ports.count();
+
+//		for(int i = 0; i < count - 1; i++)
+//		{
+//			for(int k = i + 1; k < count; k++)
+//			{
+//				if (ports[i]->equipmentID() > ports[k]->equipmentID())
+//				{
+//					OptoPort* temp = ports[i];
+//					ports[i] = ports[k];
+//					ports[k] = temp;
+//				}
+//			}
+//		}
 	}
 
 	// --------------------------------------------------------------------------------------
@@ -3208,20 +3222,25 @@ namespace Hardware
 			modules.append(optoModule);
 		}
 
-		int count = modules.count();
+		std::sort(modules.begin(), modules.end(), [] (OptoModuleShared& a, OptoModuleShared& b)
+													{
+														return a->equipmentID() < b->equipmentID();
+													});
 
-		for(int i = 0; i < count - 1; i++)
-		{
-			for(int k = i + 1; k < count; k++)
-			{
-				if (modules[i]->equipmentID() > modules[k]->equipmentID())
-				{
-					OptoModuleShared temp = modules[i];
-					modules[i] = modules[k];
-					modules[k] = temp;
-				}
-			}
-		}
+//		int count = modules.count();
+
+//		for(int i = 0; i < count - 1; i++)
+//		{
+//			for(int k = i + 1; k < count; k++)
+//			{
+//				if (modules[i]->equipmentID() > modules[k]->equipmentID())
+//				{
+//					OptoModuleShared temp = modules[i];
+//					modules[i] = modules[k];
+//					modules[k] = temp;
+//				}
+//			}
+//		}
 	}
 
 	OptoPortShared OptoModuleStorage::getOptoPort(const QString& optoPortID) const

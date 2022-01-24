@@ -65,7 +65,7 @@ namespace Builder
 		XmlWriteHelper xml(m_cfgXml->xmlWriter());
 
 		xml.writeStartElement(XmlElement::APP_DATA_SERVICES);
-		xml.writeIntAttribute(XmlAttribute::COUNT, appDataServicesIDs.count());
+		xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(appDataServicesIDs.count()));
 
 		QString ids = appDataServicesIDs.join(Separator::SEMICOLON);
 

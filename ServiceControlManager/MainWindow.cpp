@@ -88,8 +88,11 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 			QString locale = fileNames[i];
 			locale.remove(0, locale.indexOf('_') + 1);
 			locale.truncate(locale.lastIndexOf('.'));
+
 			QTranslator translator;
-			translator.load(fileNames[i], qmPath);
+			bool loadResult = translator.load(fileNames[i], qmPath);
+			Q_UNUSED(loadResult);
+
 			QString language = translator.translate("MainWindow", "English");
 			action = new QAction(QString("&%1 %2").arg(i + 2).arg(language), this);
 			action->setCheckable(true);

@@ -2543,7 +2543,7 @@ void AppSignalSet::updateID2IndexInMap(const AppSignal* appSignal)
 {
 	TEST_PTR_RETURN(appSignal);
 
-	qsizetype index = keyIndex(appSignal->ID());
+	int index = static_cast<int>(keyIndex(appSignal->ID()));
 
 	updateID2IndexInMap(appSignal->appSignalID(), index);
 }
@@ -2781,5 +2781,5 @@ void AppSignalSet::replaceOrAppendIfNotExists(int signalID, const AppSignal& s)
 		append(signalID, new AppSignal(s));
 	}
 
-	m_strID2IndexMap.insert(s.appSignalID(), keyIndex(signalID));
+	m_strID2IndexMap.insert(s.appSignalID(), static_cast<int>(keyIndex(signalID)));
 }

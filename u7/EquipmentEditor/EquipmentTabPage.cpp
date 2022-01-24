@@ -1683,7 +1683,7 @@ void EquipmentTabPage::importPreset()
 	{
 		QByteArray compressedData = QByteArray::fromRawData(fileMessage.compressedthis().data(), static_cast<int>(fileMessage.compressedthis().size()));
 		QByteArray uncompressedData = qUncompress(compressedData);
-		message.ParseFromArray(uncompressedData.constData(), uncompressedData.size());
+		message.ParseFromArray(uncompressedData.constData(), static_cast<int>(uncompressedData.size()));
 	}
 	else
 	{

@@ -625,7 +625,7 @@ AppSignalParam AppSignalSetProvider::getAppSignalParam(QString appSignalId)
 		return param;
 	}
 
-	return getAppSignalParam(m_signalSet.keyIndex(signal->ID()));
+	return getAppSignalParam(static_cast<int>(m_signalSet.keyIndex(signal->ID())));
 }
 
 QVector<int> AppSignalSetProvider::getSameChannelSignals(int index)
@@ -636,7 +636,7 @@ QVector<int> AppSignalSetProvider::getSameChannelSignals(int index)
 		QVector<int> sameChannelSignalIDs = m_signalSet.getChannelSignalsID(m_signalSet[index].signalGroupID());
 		foreach (const int id, sameChannelSignalIDs)
 		{
-			sameChannelSignalRows.append(m_signalSet.keyIndex(id));
+			sameChannelSignalRows.append(static_cast<int>(m_signalSet.keyIndex(id)));
 		}
 	}
 	else

@@ -1249,7 +1249,7 @@ void MonitorMainWindow::slot_archive(QStringList signalsList, QDateTime startTim
 	{
 		QString errorMsg;
 
-		int count = notFoundSignals.size();
+		int count = static_cast<int>(notFoundSignals.size());
 		if (count > 10)
 		{
 			notFoundSignals.erase(notFoundSignals.begin() + 10, notFoundSignals.end());
@@ -1411,7 +1411,7 @@ void MonitorMainWindow::slot_signalSnapshot(QStringList signalsList)
 	{
 		QString errorMsg;
 
-		int count = notFoundSignals.size();
+		int count = static_cast<int>(notFoundSignals.size());
 		if (count > 10)
 		{
 			notFoundSignals.erase(notFoundSignals.begin() + 10, notFoundSignals.end());

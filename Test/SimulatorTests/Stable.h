@@ -15,6 +15,7 @@
 #include <QFloat16>
 #include <QtCore>
 #include <QTest>
+#include <QSignalSpy>
 
 #ifdef _MSC_VER
 	#pragma warning(pop)

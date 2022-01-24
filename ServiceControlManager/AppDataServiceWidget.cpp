@@ -282,7 +282,7 @@ DataSourcesStateModel::~DataSourcesStateModel()
 
 int DataSourcesStateModel::rowCount(const QModelIndex&) const
 {
-	return m_dataSource.count();
+	return static_cast<int>(m_dataSource.count());
 }
 
 int DataSourcesStateModel::columnCount(const QModelIndex&) const
@@ -824,7 +824,7 @@ int SignalStateModel::rowCount(const QModelIndex&) const
 	{
 		return 0;
 	}
-	return m_clientSocket->signalParams().count();
+	return static_cast<int>(m_clientSocket->signalParams().count());
 }
 
 int SignalStateModel::columnCount(const QModelIndex&) const

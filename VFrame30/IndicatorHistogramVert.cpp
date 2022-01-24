@@ -342,7 +342,7 @@ namespace VFrame30
 		m->set_backgroundcolor(m_backgroundColor.rgba());
 		m->set_linecolor(m_lineColor.rgba());
 
-		m->mutable_signalcolors()->Reserve(m_signalColors.size());
+		m->mutable_signalcolors()->Reserve(static_cast<int>(m_signalColors.size()));
 		for (const QColor& bc : m_signalColors)
 		{
 			m->mutable_signalcolors()->Add(bc.rgba());

@@ -511,7 +511,7 @@ namespace Builder
 
 			if (expectedRowQuantity == -1)
 			{
-				expectedRowQuantity = fileContent.count();
+				expectedRowQuantity = static_cast<int>(fileContent.count());
 			}
 			int reportRowQuantity = std::min(expectedRowQuantity, static_cast<int>(fileContent.count()));
 
@@ -1212,7 +1212,7 @@ namespace Builder
 		std::map<Hash, QString> hashMap;
 		bool noEqualHashesFound = true;
 
-		int signalCount = signalSet()->count();
+		int signalCount = static_cast<int>(signalSet()->count());
 
 		for(int i = 0; i < signalCount; i++)
 		{

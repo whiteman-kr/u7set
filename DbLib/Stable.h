@@ -36,6 +36,7 @@
 #include <QPushButton>
 #include <QTime>
 #include <QThread>
+#include <QTreeWidget>
 
 #ifdef _MSC_VER
 	#pragma warning(pop)

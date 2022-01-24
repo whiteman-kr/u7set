@@ -110,7 +110,7 @@ void SimOverridePane::dropEvent(QDropEvent* event)
 	QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
 
 	::Proto::AppSignalSet protoSetMessage;
-	bool ok = protoSetMessage.ParseFromArray(data.constData(), data.size());
+	bool ok = protoSetMessage.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 
 	if (ok == false)
 	{

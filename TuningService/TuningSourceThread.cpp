@@ -2212,7 +2212,7 @@ namespace Tuning
 
 		td->getSignals(&tuningSignals);
 
-		int signalCount = tuningSignals.count();
+		int signalCount = static_cast<int>(tuningSignals.count());
 
 		m_tuningSignals.resize(signalCount);
 

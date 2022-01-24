@@ -135,7 +135,7 @@ void RtConnection::updateSignals(const QStringList appSignalIds)
 		}
 	}
 
-	Q_ASSERT(m_trendSignals.size() == appSignalIds.size());
+	Q_ASSERT(m_trendSignals.size() == static_cast<size_t>(appSignalIds.size()));
 
 	m_tcpClient->setData(appSignalIds);
 

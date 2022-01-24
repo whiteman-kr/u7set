@@ -79,7 +79,7 @@ AppDataSourceWidget::AppDataSourceWidget(quint64 id, QString equipmentId, QWidge
 	// Source info
 	//
 	m_infoTable = new QTableView(this);
-	m_infoModel = new QStandardItemModel(staticPropertiesFieldList.count(), 2, this);
+	m_infoModel = new QStandardItemModel(static_cast<int>(staticPropertiesFieldList.count()), 2, this);
 
 	for (int i = 0; i < staticPropertiesFieldList.count(); i++)
 	{
@@ -93,7 +93,7 @@ AppDataSourceWidget::AppDataSourceWidget(quint64 id, QString equipmentId, QWidge
 	// Source state
 	//
 	m_stateTable = new QTableView(this);
-	m_stateModel = new QStandardItemModel(dynamicPropertiesFieldList.count(), 2, this);
+	m_stateModel = new QStandardItemModel(static_cast<int>(dynamicPropertiesFieldList.count()), 2, this);
 
 	for (int i = 0; i < dynamicPropertiesFieldList.count(); i++)
 	{

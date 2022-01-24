@@ -64,7 +64,7 @@ TuningServiceWidget::TuningServiceWidget(const SoftwareInfo& softwareInfo, const
 		tuningSourceHeaderLabels << tr(qPrintable(headerLabel));
 	}
 
-	m_tuningSourcesTabModel = new QStandardItemModel(0, tuningSourceHeaderLabels.size(), this);
+	m_tuningSourcesTabModel = new QStandardItemModel(0, static_cast<int>(tuningSourceHeaderLabels.size()), this);
 	tuningSourcesTableView->setModel(m_tuningSourcesTabModel);
 
 	m_tuningSourcesTabModel->setHorizontalHeaderLabels(tuningSourceHeaderLabels);
@@ -89,7 +89,7 @@ TuningServiceWidget::TuningServiceWidget(const SoftwareInfo& softwareInfo, const
 		tuningSignalsHeaderLabels << tr(qPrintable(headerLabel));
 	}
 
-	m_tuningSignalsTabModel = new QStandardItemModel(0, tuningSignalsHeaderLabels.size(), this);
+	m_tuningSignalsTabModel = new QStandardItemModel(0, static_cast<int>(tuningSignalsHeaderLabels.size()), this);
 	tuningSignalsTableView->setModel(m_tuningSignalsTabModel);
 
 	tuningSignalsTableView->setColumnWidth(0, 175);
@@ -267,7 +267,7 @@ void TuningServiceWidget::reloadTuningSourcesList()
 			m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 7), QString::fromStdString(info.subsystemid()));
 			m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 8), info.lmnumber());
 
-			for (int j = tuningSourceStaticFieldsHeaderLabels.count(); j < m_tuningSourcesTabModel->columnCount(); j++)
+			for (int j = static_cast<int>(tuningSourceStaticFieldsHeaderLabels.count()); j < m_tuningSourcesTabModel->columnCount(); j++)
 			{
 				m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, j), "-");
 			}
@@ -283,7 +283,7 @@ void TuningServiceWidget::updateTuningSourcesState()
 	{
 		for (int i = 0; i < m_tuningSourcesTabModel->rowCount(); i++)
 		{
-			for (int j = tuningSourceStaticFieldsHeaderLabels.count(); j < m_tuningSourcesTabModel->columnCount(); j++)
+			for (int j = static_cast<int>(tuningSourceStaticFieldsHeaderLabels.count()); j < m_tuningSourcesTabModel->columnCount(); j++)
 			{
 				m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(i, j), "???");
 			}
@@ -291,7 +291,7 @@ void TuningServiceWidget::updateTuningSourcesState()
 		return;
 	}
 
-	int firstColumn = tuningSourceStaticFieldsHeaderLabels.count();
+	int firstColumn = static_cast<int>(tuningSourceStaticFieldsHeaderLabels.count());
 
 	int row = 0;
 
@@ -332,7 +332,7 @@ void TuningServiceWidget::reloadTuningSignalsList()
 
 	const QVector<AppSignal>& tspVector = m_tcpClientSocket->tuningSignalParams();
 
-	m_tuningSignalsTabModel->setRowCount(tspVector.count());
+	m_tuningSignalsTabModel->setRowCount(static_cast<int>(tspVector.count()));
 	int row = 0;
 
 	for (const AppSignal& tsp : tspVector)
@@ -345,7 +345,7 @@ void TuningServiceWidget::reloadTuningSignalsList()
 		m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, 5), E::valueToString<E::SignalType>(tsp.signalType()));
 		m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, 6), tsp.tuningDefaultValue().toString());
 
-		for (int j = tuningSignalsStaticFieldsHeaderLabels.count(); j < m_tuningSignalsTabModel->columnCount(); j++)
+		for (int j = static_cast<int>(tuningSignalsStaticFieldsHeaderLabels.count()); j < m_tuningSignalsTabModel->columnCount(); j++)
 		{
 			m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, j), "???");
 		}
@@ -360,7 +360,7 @@ void TuningServiceWidget::updateTuningSignalsState()
 	{
 		for (int i = 0; i < m_tuningSignalsTabModel->rowCount(); i++)
 		{
-			for (int j = tuningSignalsStaticFieldsHeaderLabels.count(); j < m_tuningSignalsTabModel->columnCount(); j++)
+			for (int j = static_cast<int>(tuningSignalsStaticFieldsHeaderLabels.count()); j < m_tuningSignalsTabModel->columnCount(); j++)
 			{
 				m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(i, j), "???");
 			}
@@ -368,7 +368,7 @@ void TuningServiceWidget::updateTuningSignalsState()
 		return;
 	}
 
-	int firstColumn = tuningSignalsStaticFieldsHeaderLabels.count();
+	int firstColumn = static_cast<int>(tuningSignalsStaticFieldsHeaderLabels.count());
 	int row = 0;
 
 	for (const TuningSignalState& tss : m_tcpClientSocket->tuningSignalStates())

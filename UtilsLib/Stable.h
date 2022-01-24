@@ -57,6 +57,8 @@
 
 #include <QQueue>
 
+#include <QPixmap>
+
 #include <QSettings>
 #include <QString>
 #include <QStringList>

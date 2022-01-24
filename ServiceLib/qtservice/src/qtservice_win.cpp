@@ -222,7 +222,7 @@ QString QtServiceController::serviceFilePath() const
 			if (pQueryServiceConfig(hService, reinterpret_cast<LPQUERY_SERVICE_CONFIG>(data), 8 * 1024, &sizeNeeded))
 			{
 				LPQUERY_SERVICE_CONFIG config = reinterpret_cast<LPQUERY_SERVICE_CONFIG>(data);
-				result = QString::fromUtf16(reinterpret_cast<const ushort*>(config->lpBinaryPathName));
+				result = QString::fromUtf16(reinterpret_cast<const char16_t*>(config->lpBinaryPathName));
             }
             pCloseServiceHandle(hService);
         }
@@ -258,7 +258,7 @@ QString QtServiceController::serviceDescription() const
 
 				if (desc->lpDescription)
 				{
-					result = QString::fromUtf16(reinterpret_cast<const ushort*>(desc->lpDescription));
+					result = QString::fromUtf16(reinterpret_cast<const char16_t*>(desc->lpDescription));
 				}
             }
             pCloseServiceHandle(hService);
@@ -577,7 +577,7 @@ void WINAPI QtServiceSysPrivate::serviceMain(DWORD dwArgc, wchar_t** lpszArgv)
 
     for (DWORD i = 0; i < dwArgc; i++)
 	{
-		instance->serviceArgs.append(QString::fromUtf16(reinterpret_cast<unsigned short*>(lpszArgv[i])));
+		instance->serviceArgs.append(QString::fromUtf16(reinterpret_cast<char16_t*>(lpszArgv[i])));
 	}
 
     instance->startSemaphore.release(); // let the qapp creation start
@@ -893,7 +893,7 @@ bool QtServiceBasePrivate::start()
 		// WhiteMan end 10.11.2014
     }
 
-    int argc = sys->serviceArgs.size();
+	int argc = static_cast<int>(sys->serviceArgs.size());
     QVector<char *> argv(argc);
     QList<QByteArray> argvData;
     for (int i = 0; i < argc; ++i)
@@ -1015,7 +1015,7 @@ QString QtServiceBasePrivate::filePath() const
 {
     wchar_t path[_MAX_PATH];
 	::GetModuleFileNameW(nullptr, path, _MAX_PATH);
-	return QString::fromUtf16(reinterpret_cast<unsigned short*>(path));
+	return QString::fromUtf16(reinterpret_cast<char16_t*>(path));
 }
 
 

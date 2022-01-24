@@ -449,7 +449,7 @@ void FrameDataPanel::setState()
 
 	QModelIndexList rows = m_pView->selectionModel()->selectedRows();
 
-	int rowCount = rows.count();
+	int rowCount = static_cast<int>(rows.count());
 	if (rowCount <= 0)
 	{
 		return;

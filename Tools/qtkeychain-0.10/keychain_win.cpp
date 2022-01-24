@@ -56,7 +56,7 @@ void WritePasswordJobPrivate::scheduledStart() {
     cred.Comment = const_cast<wchar_t*>(L"QtKeychain");
     cred.Type = CRED_TYPE_GENERIC;
     cred.TargetName = name;
-    cred.CredentialBlobSize = data.size();
+	cred.CredentialBlobSize = static_cast<DWORD>(data.size());
     cred.CredentialBlob = (LPBYTE)pwd;
     cred.Persist = CRED_PERSIST_ENTERPRISE;
 

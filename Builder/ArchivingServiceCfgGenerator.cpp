@@ -54,7 +54,7 @@ namespace Builder
 
 		Proto::ArchSignals msg;
 
-		int count = m_signalSet->count();
+		int count = static_cast<int>(m_signalSet->count());
 
 		for(int i = 0; i < count; i++)
 		{
