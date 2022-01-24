@@ -1465,6 +1465,13 @@ namespace Tuning
 		if (fotipHeader.protocolVersion != m_fotipVersion)
 		{
 			m_state.errFotipProtocolVersion++;
+
+			if ((m_state.errFotipProtocolVersion % 20) == 0)
+			{
+				DEBUG_LOG_ERR(m_logger, QString("%1 FOTIP version ERROR (version in request = %2, version in reply = %3)").
+										arg(m_portEquipmentID).arg(m_fotipVersion).arg(fotipHeader.protocolVersion));
+			}
+
 			result = false;
 		}
 
