@@ -40,9 +40,9 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	//
 	//
 
-	theLogFile = new Log::LogFile("TuningClient");
+	theLogFile = new Log::LogFile("TuningClient", QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + softwareInfo.equipmentID());
 
-	m_tuningLog = new TuningLog::TuningLog("TuningClientSignals");
+	m_tuningLog = new TuningLog::TuningLog("TuningClientSignals", QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + softwareInfo.equipmentID());
 
 	createActions();
 	createMenu();

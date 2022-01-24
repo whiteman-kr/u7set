@@ -12,6 +12,7 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QDateTimeEdit>
+#include <QStyledItemDelegate>
 #include <string>
 
 namespace Log
@@ -55,7 +56,9 @@ namespace Log
 		//
 		void read(bool currentSessionOnly);
 
-		void loadFromFile(const QString& fileName);
+		void readFromFile(const QString& fileName);
+
+		void cancelReadFromFile();
 
 		void getLoadedData(std::vector<LogFileRecord>* result);
 
@@ -65,9 +68,6 @@ namespace Log
 
 		QString getCurrentFileName() const;
 		QString getLogPath() const;
-
-		bool loadedFromFile() const;
-		QString getLoadedFileName() const;
 
 		quint64 sessionHash() const;
 		const QString& sessionHashString() const;
@@ -94,9 +94,10 @@ namespace Log
 	signals:
 		void writeFailure(QString errorString);
 		void readStart(bool currentSessionOnly);
-		void readFromFile(QString fileName);
+		void readLogFromFile(QString fileName);
 		void readInProgress(QString fileName, int recordsRead);
 		void readComplete();
+		void readFromFileComplete(const QString& fileName);
 		void recordArrived(LogFileRecord record);
 
 	private:
@@ -110,6 +111,8 @@ namespace Log
 		int m_maxFileSize;
 		int m_maxFilesCount;
 
+		bool m_cancelReadFromFile = false;
+
 		int m_currentFileNumber = 0;
 
 		quint64 m_sessionHash = 0;
@@ -121,9 +124,6 @@ namespace Log
 		std::vector<LogFileRecord> m_readResult;
 		int m_errorCount = 0;
 		int m_warningCount = 0;
-
-		bool m_loadedFromFile = false;
-		QString m_loadedFileName;
 
 		std::unique_ptr<QSharedMemory> m_sharedMemory;
 	};
@@ -215,12 +215,25 @@ namespace Log
 	protected:
 	};
 
+	class SelectionControlDelegate : public QStyledItemDelegate
+	{
+		public:
+			SelectionControlDelegate(QObject* parent, LogRecordModel* model);
+			void initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const override;
+
+	private:
+			LogRecordModel* m_model = nullptr;
+	};
+
 	class LogFileProgressDialog : public QDialog
 	{
 		Q_OBJECT
 	public:
 		LogFileProgressDialog(QWidget* parent);
 		virtual ~LogFileProgressDialog();
+
+	signals:
+		void cancelRead();
 
 	public slots:
 		void readInProgress(QString fileName, int recordsRead);
@@ -288,12 +301,15 @@ namespace Log
 		void onTypeComboIndexChanged(int index);
 		void onTimeFilter();
 		void onFilter();
+		void onFilterEdited(const QString& text);
 		void onSearch();
 
 		void onAllSessionsClicked();
 
-		void onReadComplete();
-		void onRecordArrived(LogFileRecord record);
+		void onLoadComplete();
+		void onLoadFromFileComplete(const QString& fileName);
+
+		void onRecordArrived(Log::LogFileRecord record);
 
 		void onCellCopyKeyPressed();
 
@@ -336,6 +352,7 @@ namespace Log
 		LogFileProgressDialog m_progressDialog;
 
 		bool m_firstShow = true;
+		bool m_loadedFromFile = false;
 	};
 
 	class LogFile : public QObject, public ILogFile
