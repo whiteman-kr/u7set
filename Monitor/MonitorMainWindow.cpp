@@ -15,7 +15,7 @@
 
 MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow(parent),
-	m_LogFile(qAppName()),
+	m_LogFile(qAppName(), QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + softwareInfo.equipmentID()),
 	m_instanceResolver(instanceResolver),
 	m_configController(softwareInfo, MonitorAppSettings::instance().configuratorAddress1(), MonitorAppSettings::instance().configuratorAddress2(), &m_LogFile),
 	m_schemaManager(&m_configController),

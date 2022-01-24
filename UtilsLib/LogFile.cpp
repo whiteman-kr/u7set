@@ -47,7 +47,7 @@ namespace Log
 		static QMutex m;
 		QMutexLocker l(&m);
 #else
-		int delete_mutex_above;
+		// int delete_mutex_above;
 		// see: https://forum.qt.io/topic/120355/qdatetime-assert/2
 #endif
 
@@ -305,10 +305,7 @@ namespace Log
 			m_queue.push_back(r);
 		}
 
-		if (loadedFromFile() == false)
-		{
-			emit recordArrived(r);
-		}
+		emit recordArrived(r);
 
 		return true;
 	}
@@ -327,10 +324,7 @@ namespace Log
 			m_queue.push_back(r);
 		}
 
-		if (loadedFromFile() == false)
-		{
-			emit recordArrived(r);
-		}
+		emit recordArrived(r);
 
 		return true;
 	}
@@ -340,9 +334,14 @@ namespace Log
 		emit readStart(currentSessionOnly);
 	}
 
-	void LogFileWorker::loadFromFile(const QString& fileName)
+	void LogFileWorker::readFromFile(const QString& fileName)
 	{
-		emit readFromFile(fileName);
+		emit readLogFromFile(fileName);
+	}
+
+	void LogFileWorker::cancelReadFromFile()
+	{
+		m_cancelReadFromFile = true;
 	}
 
 	void LogFileWorker::getLoadedData(std::vector<LogFileRecord>* result)
@@ -364,16 +363,6 @@ namespace Log
 	QString LogFileWorker::getLogPath() const
 	{
 		return m_path;
-	}
-
-	bool LogFileWorker::loadedFromFile() const
-	{
-		return m_loadedFromFile;
-	}
-
-	QString LogFileWorker::getLoadedFileName() const
-	{
-		return m_loadedFileName;
 	}
 
 	quint64 LogFileWorker::sessionHash() const
@@ -443,7 +432,7 @@ namespace Log
 		// Connect load event to load slot
 
 		connect(this, &LogFileWorker::readStart, this, &LogFileWorker::slot_load);
-		connect(this, &LogFileWorker::readFromFile, this, &LogFileWorker::slot_loadFromFile);
+		connect(this, &LogFileWorker::readLogFromFile, this, &LogFileWorker::slot_loadFromFile);
 
 		// Create shared memory to lock file writing
 		//
@@ -965,6 +954,11 @@ namespace Log
 				numLines++;
 				ptr++;
 			}
+
+			if (m_cancelReadFromFile == true)
+			{
+				break;
+			}
 		}
 
 		return true;
@@ -1017,11 +1011,17 @@ namespace Log
 		int errorCount = 0;
 		int warningCount = 0;
 
+		m_cancelReadFromFile = false;
+
 		for (int i = 0; i < m_maxFilesCount; i++)
 		{
 			emit readInProgress(getLogFileName(i), static_cast<int>(readResult.size()));
-
 			readFileRecords(getLogFileName(i), currentSessionOnly, &readResult, &errorCount, &warningCount);
+
+			if (m_cancelReadFromFile == true)
+			{
+				break;
+			}
 		}
 
 		{
@@ -1050,7 +1050,7 @@ namespace Log
 			{
 				Q_ASSERT(lok);
 
-				emit readComplete();
+				emit readFromFileComplete(fileName);
 				return;
 			}
 
@@ -1065,12 +1065,9 @@ namespace Log
 
 		if (lockSuccess == false)
 		{
-			emit readComplete();
+			emit readFromFileComplete(fileName);
 			return;
 		}
-
-		m_loadedFromFile = true;
-		m_loadedFileName = fileName;
 
 		// Create unlocker pointer
 		//
@@ -1083,6 +1080,8 @@ namespace Log
 		int errorCount = 0;
 		int warningCount = 0;
 
+		m_cancelReadFromFile = false;
+
 		emit readInProgress(fileName, static_cast<int>(readResult.size()));
 		readFileRecords(fileName, false/*currentSessionOnly*/, &readResult, &errorCount, &warningCount);
 
@@ -1093,7 +1092,7 @@ namespace Log
 			m_warningCount = warningCount;
 		}
 
-		emit readComplete();
+		emit readFromFileComplete(fileName);
 	}
 
 	void LogFileWorker::slot_onTimer()
@@ -1455,7 +1454,7 @@ namespace Log
 	QVariant LogRecordModel::data(const QModelIndex& index, int role) const
 	{
 		size_t column = index.column();
-		if (column < 0 || column >= m_columnsNames.size())
+		if (column >= static_cast<size_t>(m_columnsNames.size()))
 		{
 			assert(false);
 			return {};
@@ -1563,16 +1562,53 @@ namespace Log
 		return QVariant();
 	}
 
+	//
+	// SelectionControlDelegate
+	//
+	SelectionControlDelegate::SelectionControlDelegate(QObject* parent, LogRecordModel* model) :
+		QStyledItemDelegate(parent),
+		m_model(model)
+	{
+	}
+
+	void SelectionControlDelegate::initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const
+	{
+		QStyledItemDelegate::initStyleOption(option, index);
+
+		// Set background color for selected item (by default it is displayed by white)
+		//
+		if (option->state & QStyle::State_Selected)
+		{
+			QBrush br = m_model->data(index, Qt::ForegroundRole).value<QBrush>();
+			option->palette.setColor(QPalette::HighlightedText, br.color());
+		}
+	}
+
+	//
+	// LogFileProgressDialog
+	//
 	LogFileProgressDialog::LogFileProgressDialog(QWidget* parent):
 		QDialog(parent, Qt::FramelessWindowHint | Qt::Dialog)
 	{
-		QHBoxLayout* mainLayout = new QHBoxLayout(this);
+		QVBoxLayout* mainLayout = new QVBoxLayout(this);
 
-		setFixedSize(350, 100);
+		setMinimumSize(350, 100);
 
 		m_label = new QLabel("Loading...");
 		m_label->setAlignment(Qt::AlignCenter);
 		mainLayout->addWidget(m_label);
+
+		QHBoxLayout* bl = new QHBoxLayout();
+
+		bl->addStretch();
+
+		QPushButton* b = new QPushButton(tr("Cancel"));
+		bl->addWidget(b);
+		connect(b, &QPushButton::clicked, this, &LogFileProgressDialog::cancelRead);
+
+		bl->addStretch();
+
+		mainLayout->addLayout(bl);
 
 		setLayout(mainLayout);
 	}
@@ -1634,7 +1670,7 @@ namespace Log
 		connect(b, &QPushButton::clicked, this, &DialogTimeFilter::accept);
 		hb->addWidget(b);
 
-		b = new QPushButton(tr("Remove"));
+		b = new QPushButton(tr("Reset"));
 		connect(b, &QPushButton::clicked, [this](){
 			m_filterTimeFrom = -1;
 			m_filterTimeTo = -1;
@@ -1747,7 +1783,11 @@ namespace Log
 		setWindowTitle(tr("Log View - %1").arg(worker->logName()));
 
 		connect(m_worker, &LogFileWorker::readInProgress, &m_progressDialog, &LogFileProgressDialog::readInProgress);
+
 		connect(m_worker, &LogFileWorker::readComplete, &m_progressDialog, &LogFileProgressDialog::readComplete);
+		connect(m_worker, &LogFileWorker::readFromFileComplete, &m_progressDialog, &LogFileProgressDialog::readComplete);
+
+		connect(&m_progressDialog, &LogFileProgressDialog::cancelRead, [this](){m_worker->cancelReadFromFile();});
 
 		QVBoxLayout* mainLayout = new QVBoxLayout();
 		setLayout(mainLayout);
@@ -1788,6 +1828,12 @@ namespace Log
 		m_filterLineEdit->setClearButtonEnabled(true);
 		topLayout->addWidget(m_filterLineEdit);
 		connect(m_filterLineEdit, &QLineEdit::returnPressed, this, &LogFileDialog::onFilter);
+		connect(m_filterLineEdit, &QLineEdit::textEdited, this, &LogFileDialog::onFilterEdited);
+
+		QString text = QString(50, 'a');
+		QFontMetrics fm(m_filterLineEdit->font());
+		int pixelsWide = fm.boundingRect(text).width();
+		m_filterLineEdit->setFixedWidth(pixelsWide);
 
 		// --
 		//
@@ -1797,6 +1843,7 @@ namespace Log
 		// --
 		//
 		m_search = new QPushButton(tr("Search <F3>"));
+		m_search->setEnabled(false);
 		m_search->setDefault(true);
 		topLayout->addWidget(m_search);
 
@@ -1805,6 +1852,7 @@ namespace Log
 		// --
 		//
 		m_filter = new QPushButton(tr("Filter"));
+		m_filter->setEnabled(false);
 		topLayout->addWidget(m_filter);
 
 		connect(m_filter, &QPushButton::clicked, this, &LogFileDialog::onFilter);
@@ -1853,6 +1901,7 @@ namespace Log
 
 		m_table->verticalHeader()->hide();
 		m_table->verticalHeader()->sectionResizeMode(QHeaderView::Fixed);
+		m_table->setItemDelegate(new SelectionControlDelegate(this, &m_model));
 
 		if (headerVisible == false)
 		{
@@ -1896,29 +1945,26 @@ namespace Log
 
 		bottomLayout->addWidget(m_logPathLabel);
 
-		m_load = new QPushButton(tr("Load..."));
-		connect(m_load, &QPushButton::clicked, this, &LogFileDialog::onLoad);
-		bottomLayout->addWidget(m_load);
-
 		bottomLayout->addStretch();
 
 		m_clear = new QPushButton(tr("Clear"));
 		connect(m_clear, &QPushButton::clicked, this, &LogFileDialog::onClear);
 		bottomLayout->addWidget(m_clear);
 
-		m_export = new QPushButton(tr("Export"));
+		m_load = new QPushButton(tr("Load..."));
+		connect(m_load, &QPushButton::clicked, this, &LogFileDialog::onLoad);
+		bottomLayout->addWidget(m_load);
+
+		m_export = new QPushButton(tr("Export..."));
 		connect(m_export, &QPushButton::clicked, this, &LogFileDialog::onExport);
 		bottomLayout->addWidget(m_export);
 
 		mainLayout->addLayout(bottomLayout);
 
-		QSize defaultSize = QSize(1024, 600);
-
-		setMinimumSize(defaultSize);
-
 		// --
 		//
-		connect(m_worker, &LogFileWorker::readComplete, this, &LogFileDialog::onReadComplete);
+		connect(m_worker, &LogFileWorker::readComplete, this, &LogFileDialog::onLoadComplete);
+		connect(m_worker, &LogFileWorker::readFromFileComplete, this, &LogFileDialog::onLoadFromFileComplete);
 		connect(m_worker, &LogFileWorker::recordArrived, this, &LogFileDialog::onRecordArrived, Qt::QueuedConnection);
 
 		// Restore settings
@@ -1944,17 +1990,13 @@ namespace Log
 		{
 			restoreGeometry(windowGeometry);
 		}
-		else
-		{
-			resize(defaultSize);
-		}
 
 		bool autoScroll = s.value("LogFileDialog/autoScroll", true).toBool();
 		m_autoScroll->setChecked(autoScroll);
 
 		// Read existing log
 
-		m_worker->read(true);
+		m_worker->read(true/*currentSessionOnly*/);
 
 		enableControls(false);
 
@@ -2015,7 +2057,9 @@ namespace Log
 
 		m_clear->setEnabled(enable);
 		m_export->setEnabled(enable);
-		m_filter->setEnabled(enable);
+
+		m_search->setEnabled(m_filterLineEdit->text().isEmpty() == false);
+		m_filter->setEnabled(m_filterLineEdit->text().isEmpty() == false);
 	}
 
 	void LogFileDialog::adjustColumnsWidth()
@@ -2140,6 +2184,12 @@ namespace Log
 		m_counterLabel->setText(tr("Total records: %1, Errors: %2, Warnings: %3").arg(m_model.rowCount()).arg(m_model.errorCount()).arg(m_model.warningCount()));
 	}
 
+	void LogFileDialog::onFilterEdited(const QString& text)
+	{
+		m_filter->setEnabled(text.isEmpty() == false);
+		m_search->setEnabled(text.isEmpty() == false);
+	}
+
 	void LogFileDialog::onSearch()
 	{
 		// Turn off autoscroll
@@ -2187,7 +2237,7 @@ namespace Log
 		m_progressDialog.exec();
 	}
 
-	void LogFileDialog::onReadComplete()
+	void LogFileDialog::onLoadComplete()
 	{
 		std::vector<LogFileRecord> loadResult;
 
@@ -2195,16 +2245,28 @@ namespace Log
 
 		m_model.setRecords(&loadResult);
 
-		if (m_worker->loadedFromFile() == true)
-		{
-			setWindowTitle(m_worker->getLoadedFileName());
+		m_logPathLabel->setText(tr("File: <a href=\"%1\">%1</a>").arg(m_worker->getCurrentFileName()));
 
-			m_logPathLabel->setText(tr("File: <a href=\"%1\">%1</a>").arg(m_worker->getLoadedFileName()));
-		}
-		else
-		{
-			m_logPathLabel->setText(tr("File: <a href=\"%1\">%1</a>").arg(m_worker->getCurrentFileName()));
-		}
+		m_counterLabel->setText(tr("Total records: %1, Errors: %2, Warnings: %3").arg(m_model.rowCount()).arg(m_model.errorCount()).arg(m_model.warningCount()));
+
+		m_table->scrollToBottom();
+
+		adjustColumnsWidth();
+
+		enableControls(true);
+	}
+
+	void LogFileDialog::onLoadFromFileComplete(const QString& fileName)
+	{
+		std::vector<LogFileRecord> loadResult;
+
+		m_worker->getLoadedData(&loadResult);
+
+		m_model.setRecords(&loadResult);
+
+		setWindowTitle(fileName);
+
+		m_logPathLabel->setText(tr("File: <a href=\"%1\">%1</a>").arg(fileName));
 
 		m_counterLabel->setText(tr("Total records: %1, Errors: %2, Warnings: %3").arg(m_model.rowCount()).arg(m_model.errorCount()).arg(m_model.warningCount()));
 
@@ -2222,9 +2284,8 @@ namespace Log
 			return;
 		}
 
-		if (m_worker->loadedFromFile() == true)
+		if (m_loadedFromFile == true)
 		{
-			Q_ASSERT(false);
 			return;
 		}
 
@@ -2333,11 +2394,13 @@ namespace Log
 			return;
 		}
 
+		m_loadedFromFile = true;
+
 		m_autoScroll->setChecked(false);
 
 		enableControls(false);
 
-		m_worker->loadFromFile(QDir::toNativeSeparators(fileName));
+		m_worker->readFromFile(QDir::toNativeSeparators(fileName));
 
 		m_progressDialog.exec();
 
@@ -2421,7 +2484,7 @@ namespace Log
 
 		m_sessionHash = ::calcHash(uuid.toString());
 
-		m_logFileWorker = new LogFileWorker(logName, path, maxFileSize, maxFilesCount, m_sessionHash);
+		m_logFileWorker = new LogFileWorker(logName, QDir::toNativeSeparators(path), maxFileSize, maxFilesCount, m_sessionHash);
 
 		connect(m_logFileWorker, &LogFileWorker::writeFailure, this, &LogFile::onFlushFailure);
 
