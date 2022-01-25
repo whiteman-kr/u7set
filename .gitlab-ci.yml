@@ -50,7 +50,7 @@ linux build job:
     - "#               Build Project"
     - "# ----------------------------------------------"    
     - "~/Qt/6.2.2/gcc_64/bin/qmake u7set.pro -spec linux-g++"
-    - "make -j6"
+    - "make -j12"
 
 
 windows build job:
