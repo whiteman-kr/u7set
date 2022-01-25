@@ -3912,6 +3912,7 @@ void TestsWidget::runTests(std::vector<int> fileIds)
 	}
 
 	std::vector<DbFileInfo> dbFiles;
+	dbFiles.reserve(fileIds.size());
 
 	for (int fileId : fileIds)
 	{

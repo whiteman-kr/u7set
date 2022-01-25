@@ -762,6 +762,8 @@ bool Configurator::send(int moduleUartId,
 	}
 
 	std::vector<quint8> recHeaderBuffer;
+	recHeaderBuffer.reserve(headerSize);
+
 	for (int i = 0; i < headerSize; i++)
 	{
 		recHeaderBuffer.push_back(recBuffer[i]);
@@ -799,6 +801,8 @@ bool Configurator::send(int moduleUartId,
 	// Read Data
 	//
 	std::vector<quint8> recDataBuffer;
+	recDataBuffer.reserve(expecetedDataBytes);
+
 	for (int i = 0; i < expecetedDataBytes; i++)
 	{
 		recDataBuffer.push_back(recBuffer[headerSize + i]);

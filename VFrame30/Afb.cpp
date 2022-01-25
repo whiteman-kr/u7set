@@ -1148,7 +1148,7 @@ namespace Afb
 		// Section <Value>
 		//
 		std::function<QVariant(QString, E::SignalType, E::DataFormat)> valToDataFormat =
-				[](QString str, E::SignalType type, E::DataFormat dataFormat) -> QVariant
+				[](const QString& str, E::SignalType type, E::DataFormat dataFormat) -> QVariant
 				{
 					if (type == E::SignalType::Analog)
 					{
@@ -1156,22 +1156,22 @@ namespace Afb
 						{
 						case E::DataFormat::UnsignedInt:
 						case E::DataFormat::SignedInt:
-							return QVariant(str.toInt());
+							return {str.toInt()};
 						case E::DataFormat::Float:
-							return QVariant(str.toDouble());
+							return {str.toDouble()};
 						default:
 							assert(false);
-							return QVariant();
+							return {};
 						}
 					}
 
 					if (type == E::SignalType::Discrete)
 					{
-						return QVariant(str == "1" ? true : false);
+						return {str == "1" ? true : false};
 					}
 
 					assert(false);
-					return QVariant();
+					return {};
 				};
 
 		{
@@ -1627,13 +1627,8 @@ namespace Afb
 	//							FblElement
 	//
 	//
-	AfbElement::AfbElement(void)
-	{
-	}
-
 	AfbElement::AfbElement(const AfbElement& that)
 		: QObject()
-
 	{
 		*this = that;
 	}

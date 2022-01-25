@@ -681,14 +681,14 @@ namespace Sim
 			}
 		}
 
-		return RamAreaInfo();
+		return {};
 	}
 
 	RamAreaInfo Ram::memoryAreaInfo(int index) const
 	{
 		if (index < 0 || static_cast<size_t>(index) >= m_memoryAreas.size())
 		{
-			return RamAreaInfo();
+			return {};
 		}
 
 		return m_memoryAreas[index];

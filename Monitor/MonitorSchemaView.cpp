@@ -22,8 +22,7 @@ MonitorSchemaView::MonitorSchemaView(MonitorSchemaManager* schemaManager,
 	setTuningController(tuningController);
 	setLogController(logController);
 
-	Q_ASSERT(schemaManager);
-	Q_ASSERT(schemaManager->monitorConfigController());
+	Q_ASSERT(schemaManager && schemaManager->monitorConfigController());
 
 	connect(schemaManager->monitorConfigController(), &MonitorConfigController::configurationArrived, this, &MonitorSchemaView::configurationArrived);
 

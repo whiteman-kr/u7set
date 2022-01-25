@@ -10,7 +10,7 @@ class DialogDataSources : public QDialog
 	Q_OBJECT
 public:
 	explicit DialogDataSources(TcpAppSourcesState* tcpAppSourceState, bool showTuningWidget, std::vector<TuningTcpClient*> tcpTuningClients, bool hasActivationControls, QWidget* parent);
-	virtual ~DialogDataSources();
+	virtual ~DialogDataSources() = default;
 
 	void setTuningTcpClients(bool showTuningWidget, std::vector<TuningTcpClient*> tcpTuningClients, bool hasActivationControls);
 

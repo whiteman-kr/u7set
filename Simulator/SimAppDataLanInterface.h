@@ -12,10 +12,7 @@ namespace Sim
 
 	public:
 		explicit AppDataLanInterface(const ::LanControllerInfo& lci, Lans* lans);
-		virtual ~AppDataLanInterface();
-
-	public:
-	private:
+		virtual ~AppDataLanInterface() = default;
 	};
 
 }

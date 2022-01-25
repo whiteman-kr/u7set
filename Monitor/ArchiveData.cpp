@@ -7,7 +7,7 @@ ArchiveData::ArchiveData()
 }
 
 
-void ArchiveData::addChunk(std::shared_ptr<ArchiveChunk> chunk)
+void ArchiveData::addChunk(const std::shared_ptr<ArchiveChunk>& chunk)
 {
 	if (chunk == nullptr ||
 		chunk->states.empty() == true)
@@ -46,7 +46,7 @@ AppSignalState ArchiveData::state(int index) const
 	if (index < 0)
 	{
 		Q_ASSERT(index >= 0);
-		return AppSignalState();
+		return {};
 	}
 
 	if (index >= 20000)
@@ -69,5 +69,5 @@ AppSignalState ArchiveData::state(int index) const
 	}
 
 	Q_ASSERT(index >= size());
-	return AppSignalState();
+	return {};
 }

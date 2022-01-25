@@ -138,7 +138,7 @@ struct ObjectState
 class DbProject
 {
 public:
-	DbProject();
+	DbProject() = default;
 	virtual ~DbProject() = default;
 
 public:

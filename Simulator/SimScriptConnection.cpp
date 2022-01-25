@@ -196,7 +196,7 @@ namespace Sim
 
 	RamAddress ScriptConnPortInfo::txBufAbsAddr() const
 	{
-		return RamAddress(m_connPortInfo.txBufferAbsAddr, 0);
+		return {static_cast<quint32>(m_connPortInfo.txBufferAbsAddr), 0};
 	}
 
 	int ScriptConnPortInfo::txDataSizeW() const
@@ -211,7 +211,7 @@ namespace Sim
 
 	RamAddress ScriptConnPortInfo::rxBufAbsAddr() const
 	{
-		return RamAddress(m_connPortInfo.rxBufferAbsAddr, 0);
+		return {static_cast<quint32>(m_connPortInfo.rxBufferAbsAddr), 0};
 	}
 
 	int ScriptConnPortInfo::rxDataSizeW() const
@@ -231,7 +231,7 @@ namespace Sim
 
 	RamAddress ScriptConnPortInfo::rxValiditySignalAbsAddr() const
 	{
-		return RamAddress(m_connPortInfo.rxValiditySignalAbsAddr);
+		return {m_connPortInfo.rxValiditySignalAbsAddr};
 	}
 
 	bool ScriptConnPortInfo::isTxSignalExist(const QString& txAppSignalID) const
@@ -311,10 +311,6 @@ namespace Sim
 	//
 	// ----------------------------------------------------------------------------------
 
-	ScriptConnSignalInfo::ScriptConnSignalInfo()
-	{
-	}
-
 	ScriptConnSignalInfo::ScriptConnSignalInfo(const ::ConnectionTxRxSignal& signalInfo) :
 		m_signalInfo(signalInfo)
 	{
@@ -322,7 +318,7 @@ namespace Sim
 
 	QString ScriptConnSignalInfo::appSignalID() const
 	{
-		return m_signalInfo.IDs.first();
+		return std::move(m_signalInfo.IDs.first());
 	}
 
 	QStringList ScriptConnSignalInfo::appSignalIDs() const
@@ -347,12 +343,12 @@ namespace Sim
 
 	RamAddress ScriptConnSignalInfo::addrInBuf() const
 	{
-		return RamAddress(m_signalInfo.addrInBuf);
+		return {m_signalInfo.addrInBuf};
 	}
 
 	RamAddress ScriptConnSignalInfo::absAddr() const
 	{
-		return RamAddress(m_signalInfo.absAddr);
+		return {m_signalInfo.absAddr};
 	}
 
 	int ScriptConnSignalInfo::dataSizeBits() const

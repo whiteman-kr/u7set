@@ -1,6 +1,6 @@
 #pragma once
 
-#include <assert.h>
+#include <cassert>
 
 #include "../../OnlineLib/Tcp.h"
 #include "../../OnlineLib/SocketIO.h"

@@ -2,10 +2,6 @@
 #include "../../UtilsLib/WUtils.h"
 #include <cmath>
 
-SimAfbParamTests::SimAfbParamTests()
-{
-}
-
 void SimAfbParamTests::initTestCase()
 {
 }

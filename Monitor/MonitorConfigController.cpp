@@ -3,8 +3,8 @@
 #include "MonitorAppSettings.h"
 
 ConfigConnection::ConfigConnection(QString EquipmentId, QString ipAddress, int port) :
-	m_equipmentId(EquipmentId),
-	m_ip(ipAddress),
+	m_equipmentId(std::move(EquipmentId)),
+	m_ip(std::move(ipAddress)),
 	m_port(port)
 {
 }
@@ -719,7 +719,7 @@ std::set<QString> MonitorConfigController::schemaAppSignals(const QString& schem
 	std::shared_ptr<VFrame30::SchemaDetails> details = m_schemaDetailsSet.schemaDetails(schemaId);
 	if (details == nullptr)
 	{
-		return std::set<QString>();
+		return {};
 	}
 
 	return details->m_signals;

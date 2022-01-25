@@ -562,7 +562,7 @@ void PendingChangesDialog::updateData()
 
 	for (const DbFileInfo& fi : checkedOutFiles)
 	{
-		objects.push_back(fi);
+		objects.emplace_back(fi);
 	}
 
 	// Get checked out signals
@@ -580,7 +580,7 @@ void PendingChangesDialog::updateData()
 		{
 			for (const AppSignal& s : checkedOutSignals)
 			{
-				objects.push_back(s);
+				objects.emplace_back(s);
 			}
 		}
 	}

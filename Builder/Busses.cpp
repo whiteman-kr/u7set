@@ -227,7 +227,7 @@ namespace Builder
 
 	const QString Bus::INVALUD_BUS_SIGNAL_ID("##InvalidBusSignalID##");
 
-	Bus::Bus(const Busses& busses, const VFrame30::Bus bus, IssueLogger* log) :
+	Bus::Bus(const Busses& busses, const VFrame30::Bus& bus, IssueLogger* log) :
 		m_busses(busses),
 		m_srcBus(bus),
 		m_log(log)
@@ -930,7 +930,7 @@ namespace Builder
 			return false;
 		}
 
-		for(BusShared bus : busInitOrder)
+		for(const BusShared& bus : busInitOrder)
 		{
 			result &= bus->init();
 		}
@@ -1002,7 +1002,7 @@ namespace Builder
 		{
 			int orderedCount = 0;
 
-			for(BusShared bus : m_busses)
+			for(const BusShared& bus : m_busses)
 			{
 				if (nonOrderedBusses.contains(bus->busTypeID()) == false)
 				{

@@ -24,11 +24,6 @@ namespace Db
 //	DbProject
 //
 //
-DbProject::DbProject() :
-	m_version(0)
-{
-}
-
 QString DbProject::databaseName() const
 {
 	return m_databaseName;

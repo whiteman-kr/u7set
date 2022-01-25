@@ -26,7 +26,7 @@ QVariant ArchiveModel::headerData(int section, Qt::Orientation /*orientation*/, 
 {
 	if (role != Qt::DisplayRole)
 	{
-		return QVariant();
+		return {};
 	}
 
 	switch (static_cast<ArchiveColumns>(section))
@@ -72,7 +72,7 @@ QVariant ArchiveModel::headerData(int section, Qt::Orientation /*orientation*/, 
 	}
 
 	Q_ASSERT(false);
-	return QVariant();
+	return {};
 }
 
 QVariant ArchiveModel::data(const QModelIndex& index, int role) const
@@ -87,7 +87,7 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 {
 	if (row >= m_archive.size())
 	{
-		return QVariant();
+		return {};
 	}
 
 	if (role == Qt::DisplayRole)
@@ -257,7 +257,7 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 		 column ==  static_cast<int>(ArchiveColumns::Blocked) ||
 		 column ==  static_cast<int>(ArchiveColumns::Mismatch)))
 	{
-		return QVariant(Qt::AlignCenter);
+		return {Qt::AlignCenter};
 	}
 
 	if (role == Qt::ToolTipRole)
@@ -323,7 +323,7 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 		return toolTip;
 	}
 
-	return QVariant();
+	return {};
 }
 
 QString ArchiveModel::getValueString(const AppSignalState& state, const ArchiveSignalParam& signalParam) const
@@ -406,7 +406,7 @@ void ArchiveModel::setParams(const std::vector<AppSignalParam>& appSignals, E::T
 	return;
 }
 
-void ArchiveModel::addData(std::shared_ptr<ArchiveChunk> chunk)
+void ArchiveModel::addData(const std::shared_ptr<ArchiveChunk>& chunk)
 {
 	if (chunk == nullptr)
 	{
@@ -443,7 +443,7 @@ std::vector<ArchiveSignalParam> ArchiveModel::appSignals()
 	std::vector<ArchiveSignalParam> result;
 	result.reserve(m_appSignals.size());
 
-	for (const std::pair<Hash, ArchiveSignalParam>& p : m_appSignals)
+	for (const auto& p : m_appSignals)
 	{
 		result.push_back(p.second);
 	}

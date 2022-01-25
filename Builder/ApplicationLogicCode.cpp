@@ -2388,7 +2388,7 @@ namespace Builder
 			prevCmdExecTime = execTime;
 		}
 
-		alpPhaseClockCount += prevCmdExecTime;
+		*alpPhaseClockCount += prevCmdExecTime;
 
 		return true;
 	}

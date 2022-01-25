@@ -442,7 +442,7 @@ private:
 		Q_OBJECT
 
 	public:
-		AfbElement(void);
+		AfbElement(void) = default;
 		AfbElement(const AfbElement& that);
 		AfbElement& operator=(const AfbElement& that) noexcept;
 

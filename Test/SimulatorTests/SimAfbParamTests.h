@@ -9,7 +9,7 @@ class SimAfbParamTests : public QObject
 	Q_OBJECT
 
 public:
-	SimAfbParamTests();
+	SimAfbParamTests() = default;
 
 private slots:
 	void initTestCase();

@@ -4,7 +4,7 @@
 
 #include "Tcp.h"
 #include "../Proto/network.pb.h"
-#include <stdlib.h>
+#include <cstdlib>
 
 namespace Tcp
 {

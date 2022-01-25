@@ -412,19 +412,6 @@ namespace Sim
 		return ok;
 	}
 
-	bool DeviceEmulator::setAfbParam(int afbOpCode, int instanceNo, AfbComponentParam&& param)
-	{
-		QString errorMessage;
-		bool ok = m_afbComponents.addInstantiatorParam(afbOpCode, instanceNo, std::move(param), &errorMessage);
-
-		if (ok == false)
-		{
-			SIM_FAULT(QString("Add addInstantiatorParam error, %1").arg(errorMessage));
-		}
-
-		return ok;
-	}
-
 	// RAM access
 	//
 	bool DeviceEmulator::movRamMem(quint32 src, quint32 dst, quint32 sizeW)

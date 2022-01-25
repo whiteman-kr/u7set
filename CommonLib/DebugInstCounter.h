@@ -2,7 +2,7 @@
 
 #include <QtCore/QMutex>
 #include <QtCore/QDebug>
-#include <assert.h>
+#include <cassert>
 #include <iostream>
 
 

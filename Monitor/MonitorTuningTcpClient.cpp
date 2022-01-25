@@ -12,10 +12,6 @@ MonitorTuningTcpClient::MonitorTuningTcpClient(const SoftwareInfo& softwareInfo,
 	setAutoApply(true);
 }
 
-MonitorTuningTcpClient::~MonitorTuningTcpClient()
-{
-}
-
 void MonitorTuningTcpClient::writeLogAlert(const QString& message)
 {
 	TuningTcpClient::writeLogAlert(message);

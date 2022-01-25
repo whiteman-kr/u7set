@@ -2,8 +2,8 @@
 
 // C includes, must be before c++ includes
 //
-#include <assert.h>
-#include <stdint.h>
+#include <cassert>
+#include <cstdint>
 
 // C++ includes
 //
@@ -28,6 +28,8 @@
 	#pragma warning(disable : 4127)
 	#pragma warning(disable : 6326)
     #pragma warning(disable : 28182)	// C:\Qt\5.15.0\msvc2019_64\include\QtCore\qvector.h(761) : warning C28182: Dereferencing NULL pointer. 'd' contains the same NULL value as 'x' did. See line 713 for an earlier location where this can occur: Lines: 702, 703, 705, 709, 710, 713, 715, 716, 718, 719, 720, 722, 724, 729, 746, 748, 749, 758, 760, 761
+	#pragma warning(disable : 6386)
+	#pragma warning(disable : 6385)
 #endif
 
 #include <QAbstractSocket>

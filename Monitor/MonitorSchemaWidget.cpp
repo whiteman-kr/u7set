@@ -133,7 +133,7 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 		{
 			std::vector<std::shared_ptr<Property>> props = static_cast<const PropertyObject*>(schemaItemUfb)->specificProperties();
 
-			for (auto p : props)
+			for (const auto& p : props)
 			{
 				QString v = p->value().toString();
 				if (v.startsWith(QChar('#')) == true)

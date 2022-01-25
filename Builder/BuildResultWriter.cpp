@@ -944,7 +944,7 @@ namespace Builder
 			usedPath = outputPath;
 			break;
 		}
-		while(1);
+		while(true);
 
 		return QDir(usedPath).absolutePath();
 	}

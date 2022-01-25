@@ -667,7 +667,7 @@ public:
 		if (str == nullptr)
 		{
 			Q_ASSERT(str);
-			return QString();
+			return {};
 		}
 
 		return {str};
@@ -755,7 +755,7 @@ public:
 
 		for (int i = 0; i < keyCount; i++)
 		{
-			result.push_back(std::make_pair(me.value(i), QString::fromLocal8Bit(me.key(i))));
+			result.emplace_back(me.value(i), QString::fromLocal8Bit(me.key(i)));
 		}
 
 		return result;

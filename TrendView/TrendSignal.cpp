@@ -93,7 +93,7 @@ namespace TrendLib
 
 		message->set_app_signal_id(mapAppSignalId.toStdString());
 
-		for (const std::pair<TimeStamp, std::shared_ptr<OneHourData>>& p : m_hours)
+		for (const auto& p : m_hours)
 		{
             if (p.second == nullptr)
             {
@@ -656,7 +656,7 @@ namespace TrendLib
 			}
 		}
 
-		return TrendLib::TrendSignalParam();
+		return {};
 	}
 
 	bool TrendSignalSet::setSignalParam(const TrendLib::TrendSignalParam& signalParam)
@@ -1494,7 +1494,7 @@ namespace TrendLib
 			return;
 		}
 
-		archive.m_hours[requestedHour] = data;
+		archive.m_hours[requestedHour] = std::move(data);
 
 		return;
 	}

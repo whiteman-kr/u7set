@@ -57,6 +57,6 @@ std::set<QString> MonitorDialogSignalSnapshot::schemaAppSignals(const QString& s
 		return m_configController->schemaAppSignals(schemaStrId);
 	}
 
-	return std::set<QString>();
+	return {};
 }
 

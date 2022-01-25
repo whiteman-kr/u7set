@@ -32,10 +32,6 @@ namespace VFrame30
 		return;
 	}
 	
-	CDrawParam::~CDrawParam(void)
-	{
-	}
-
 	QPainter* CDrawParam::painter()
 	{
 		return m_painter;

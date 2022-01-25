@@ -1,6 +1,6 @@
 #include "MeasureViewHeader.h"
 
-#include <assert.h>
+#include <cassert>
 #include <QSettings>
 
 #include "Options.h"

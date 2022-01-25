@@ -661,7 +661,7 @@ namespace Sim
 		AfbComponentParam param(opIndex);
 		param.setDwordValue(value);
 
-		return addParam(std::move(param));
+		return addParam(param);
 	}
 
 	bool AfbComponentInstance::addParamFloat(quint16 opIndex, float value)
@@ -669,7 +669,7 @@ namespace Sim
 		AfbComponentParam param(opIndex);
 		param.setFloatValue(value);
 
-		return addParam(std::move(param));
+		return addParam(param);
 	}
 
 	bool AfbComponentInstance::addParamDouble(quint16 opIndex, double value)
@@ -677,7 +677,7 @@ namespace Sim
 		AfbComponentParam param(opIndex);
 		param.setDoubleValue(value);
 
-		return addParam(std::move(param));
+		return addParam(param);
 	}
 
 	bool AfbComponentInstance::addParamSignedInt(quint16 opIndex, qint32 value)
@@ -685,7 +685,7 @@ namespace Sim
 		AfbComponentParam param(opIndex);
 		param.setSignedIntValue(value);
 
-		return addParam(std::move(param));
+		return addParam(param);
 	}
 
 	bool AfbComponentInstance::addParamSignedInt64(quint16 opIndex, qint64 value)
@@ -693,14 +693,14 @@ namespace Sim
 		AfbComponentParam param(opIndex);
 		param.setSignedInt64Value(value);
 
-		return addParam(std::move(param));
+		return addParam(param);
 	}
 
 	//
 	// ModelComponent
 	//
 	ModelComponent::ModelComponent(std::shared_ptr<const Afb::AfbComponent> afbComp) :
-		m_afbComp(afbComp)
+		m_afbComp(std::move(afbComp))
 	{
 		assert(m_afbComp);
 		return;
@@ -817,7 +817,7 @@ namespace Sim
 
 		// Get or add instance and set new param
 		//
-		bool ok = m_instances[instanceNo].addParam(std::move(instParam));
+		bool ok = m_instances[instanceNo].addParam(instParam);
 
 		return ok;
 	}
@@ -915,7 +915,7 @@ namespace Sim
 			return false;
 		}
 
-		return modelComponent.addParam(instanceNo, std::move(instParam), errorMessage);
+		return modelComponent.addParam(instanceNo, instParam, errorMessage);
 	}
 
 	AfbComponentInstance* AfbComponentSet::componentInstance(int componentOpCode, int instance) noexcept

@@ -152,7 +152,7 @@ void TrendSlider::sliderRailChanged(qint64 newValue)
 
 TimeStamp TrendSlider::value() const
 {
-	return TimeStamp(m_value);
+	return {m_value};
 }
 
 void TrendSlider::setValue(const TimeStamp& value)
@@ -181,7 +181,7 @@ void TrendSlider::setValueShiftMinMax(const TimeStamp& val)
 
 TimeStamp TrendSlider::max() const
 {
-	return TimeStamp(m_max);
+	return {m_max};
 }
 
 void TrendSlider::setMax(const TimeStamp& value)
@@ -193,7 +193,7 @@ void TrendSlider::setMax(const TimeStamp& value)
 
 TimeStamp TrendSlider::min() const
 {
-	return TimeStamp(m_min);
+	return {m_min};
 }
 
 void TrendSlider::setMin(const TimeStamp& value)
@@ -476,7 +476,7 @@ QRect TrendSliderRailSubcontrol::sliderRect() const
 		}
 	}
 
-	return QRect(sliderPos, 0, sliderWidth, this->height());
+	return {sliderPos, 0, sliderWidth, this->height()};
 }
 
 void TrendSliderRailSubcontrol::paramsChanged(qint64 value, qint64 min, qint64 max, qint64 singleStep, qint64 pageStep)

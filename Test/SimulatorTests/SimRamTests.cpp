@@ -4,11 +4,6 @@
 #include <algorithm>
 
 
-SimRamTests::SimRamTests()
-{
-}
-
-
 void SimRamTests::initTestCase()
 {
 }
@@ -47,7 +42,7 @@ void SimRamTests::ramAreaWriteBitTest()
 	//
 	for (quint16 i = 0; i < 16; i += 3)
 	{
-		quint16 data = i % 3 ? 0 : 1;		// Write every third bit to 1
+		quint16 data = (i % 3) ? 0 : 1;		// Write every third bit to 1
 
 		ok = m_ramArea->writeBit(offset, i, data, E::ByteOrder::LittleEndian);
 		QVERIFY(ok == true);

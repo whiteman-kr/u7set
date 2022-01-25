@@ -309,7 +309,7 @@ bool ConnectionsInfo::load(ConnectionPortInfo* cpi, const QDomElement& connectio
 
 		QDomElement rxValiditySignalElem;
 
-		result = DomXmlHelper::getSingleChildElement(portElem, ConnectionsInfo::ELEM_RX_VALIDITY_SIGNAL, &rxValiditySignalElem, errMsg);
+		result &= DomXmlHelper::getSingleChildElement(portElem, ConnectionsInfo::ELEM_RX_VALIDITY_SIGNAL, &rxValiditySignalElem, errMsg);
 
 		if (result == false)
 		{

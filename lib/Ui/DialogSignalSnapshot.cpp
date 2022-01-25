@@ -546,7 +546,7 @@ void SignalSnapshotModel::fillSignals()
 
 			for (const QString& tag : m_tags)
 			{
-				if (std::find(signalTags.begin(), signalTags.end(), tag) != signalTags.end())
+				if (signalTags.find(tag) != signalTags.end())
 				{
 					result = true;
 					break;

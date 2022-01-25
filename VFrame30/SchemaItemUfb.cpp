@@ -213,7 +213,7 @@ namespace VFrame30
 		// Draw highlights for m_appSignalIds
 		//
 		{
-			for (auto prop : props)
+			for (const auto& prop : props)
 			{
 				bool breakLoop = false;
 				QString v = prop->value().toString();
@@ -486,7 +486,7 @@ namespace VFrame30
 	{
 		if (m_specificPropertiesStruct != value)
 		{
-			m_specificPropertiesStruct = value;
+			m_specificPropertiesStruct = std::move(value);
 			parseSpecificPropertiesStruct(m_specificPropertiesStruct);
 		}
 

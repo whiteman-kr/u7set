@@ -10,9 +10,10 @@ TARGET = protobuf
 TEMPLATE = lib
 CONFIG += staticlib
 
-CONFIG += warn_off
-
 include(../compiler.pri)
+
+CONFIG += warn_off
+win32:QMAKE_CXXFLAGS -= /analyze
 
 # DESTDIR
 #

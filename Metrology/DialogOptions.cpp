@@ -7,7 +7,7 @@
 #include <QHBoxLayout>
 #include <QListWidget>
 #include <QPushButton>
-#include <assert.h>
+#include <cassert>
 
 #include "DialogMeasurePoint.h"
 #include "DialogOptionsMvh.h"

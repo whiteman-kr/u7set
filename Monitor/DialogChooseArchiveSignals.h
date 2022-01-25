@@ -22,7 +22,7 @@ public:
 							   QWidget* parent);
 	virtual ~DialogChooseArchiveSignals();
 
-	ArchiveSource accpetedResult() const;
+	[[nodiscard]] ArchiveSource accpetedResult() const;
 
 protected:
 	void fillSignalList();
@@ -31,7 +31,7 @@ protected:
 	void addSignal(const AppSignalParam& signal);
 	void removeSelectedSignal();
 
-	bool archiveSignalsHasSignalId(QString signalId);
+	[[nodiscard]] bool archiveSignalsHasSignalId(const QString& signalId);
 
 	void disableControls();
 
@@ -96,7 +96,7 @@ public:
 
 	void filterSignals(DialogChooseArchiveSignals::ArchiveSignalType signalType, QString signalIdFilter, QString schemaId);
 
-	AppSignalParam signalByRow(int row) const;
+	[[nodiscard]] AppSignalParam signalByRow(int row) const;
 
 private:
 	std::vector<int> m_signalIndexes;

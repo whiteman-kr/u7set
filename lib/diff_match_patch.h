@@ -40,7 +40,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cwchar>
-#include <time.h>
+#include <ctime>
 
 /*
  * Functions for diff, match and patch.

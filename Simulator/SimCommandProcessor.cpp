@@ -25,10 +25,6 @@ namespace Sim
 		assert(device);
 	}
 
-	CommandProcessor::~CommandProcessor()
-	{
-	}
-
 	CommandProcessor* CommandProcessor::createInstance(DeviceEmulator* device)
 	{
 		Q_ASSERT(device);

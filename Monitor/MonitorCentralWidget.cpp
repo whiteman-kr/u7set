@@ -275,8 +275,7 @@ void MonitorCentralWidget::slot_historyBack()
 
 	if (curTabWidget == nullptr || curTabWidget->canBackHistory() == false)
 	{
-		Q_ASSERT(curTabWidget);
-		Q_ASSERT(curTabWidget->canBackHistory() == true);
+		Q_ASSERT(curTabWidget && curTabWidget->canBackHistory() == true);
 		return;
 	}
 
@@ -291,8 +290,7 @@ void MonitorCentralWidget::slot_historyForward()
 
 	if (curTabWidget == nullptr || curTabWidget->canForwardHistory() == false)
 	{
-		Q_ASSERT(false);
-		Q_ASSERT(curTabWidget->canForwardHistory());
+		Q_ASSERT(curTabWidget && curTabWidget->canForwardHistory() == true);
 		return;
 	}
 

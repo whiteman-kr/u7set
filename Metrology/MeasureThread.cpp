@@ -1,6 +1,6 @@
 #include "MeasureThread.h"
 
-#include <assert.h>
+#include <cassert>
 #include <QTime>
 
 #include "UnitsConvertor.h"

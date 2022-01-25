@@ -3,17 +3,8 @@
 
 namespace VFrame30
 {
-	Configuration::Configuration()
-	{
-	}
-
-	Configuration::~Configuration()
-	{
-	}
-
 	// Serialization
 	//
-
 	bool Configuration::SaveData(Proto::Envelope* message) const
 	{
 		const std::string& className = this->metaObject()->className();
@@ -108,7 +99,7 @@ namespace VFrame30
 
 		if (result == false)
 		{
-			return std::shared_ptr<Configuration>();
+			return {};
 		}
 
 		return configuration;

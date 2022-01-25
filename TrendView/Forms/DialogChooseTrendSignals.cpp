@@ -496,7 +496,7 @@ QVariant FilteredTrendSignalsModel::headerData(int section, Qt::Orientation orie
 		}
 	}
 
-	return QVariant();
+	return {};
 }
 
 QVariant FilteredTrendSignalsModel::data(const QModelIndex& index, int role) const
@@ -511,7 +511,7 @@ QVariant FilteredTrendSignalsModel::data(const QModelIndex& index, int role) con
 			if (row < 0 || row >= static_cast<int>(m_signalIndexes.size()))
 			{
 				Q_ASSERT(row >= 0 && row < static_cast<int>(m_signalIndexes.size()));
-				return QVariant();
+				return {};
 			}
 
 			int signalIndex = m_signalIndexes[row];
@@ -520,7 +520,7 @@ QVariant FilteredTrendSignalsModel::data(const QModelIndex& index, int role) con
 				signalIndex >= static_cast<int>(m_signals.size()))
 			{
 				Q_ASSERT(signalIndex >= 0 &&  signalIndex < static_cast<int>(m_signals.size()));
-				return QVariant();
+				return {};
 			}
 
 			const AppSignalParam& signalParam = m_signals[signalIndex];
@@ -537,13 +537,13 @@ QVariant FilteredTrendSignalsModel::data(const QModelIndex& index, int role) con
 				case E::SignalType::Bus:		return QString("B");
 				default:
 					Q_ASSERT(false);
-					return QVariant();
+					return {};
 				}
 			case 2:
 				return signalParam.caption();
 			default:
 				Q_ASSERT(false);
-				return QVariant();
+				return {};
 			}
 		}
 		break;
@@ -552,7 +552,7 @@ QVariant FilteredTrendSignalsModel::data(const QModelIndex& index, int role) con
 			if (row < 0 || row >= static_cast<int>(m_signalIndexes.size()))
 			{
 				Q_ASSERT(row >= 0 && row < static_cast<int>(m_signalIndexes.size()));
-				return QVariant();
+				return {};
 			}
 
 			int signalIndex = m_signalIndexes[row];
@@ -561,7 +561,7 @@ QVariant FilteredTrendSignalsModel::data(const QModelIndex& index, int role) con
 				signalIndex >= static_cast<int>(m_signals.size()))
 			{
 				Q_ASSERT(signalIndex >= 0 &&  signalIndex < static_cast<int>(m_signals.size()));
-				return QVariant();
+				return {};
 			}
 
 			const AppSignalParam& signalParam = m_signals[signalIndex];
@@ -575,7 +575,7 @@ QVariant FilteredTrendSignalsModel::data(const QModelIndex& index, int role) con
 
 		}
 	default:
-		return QVariant();
+		return {};
 	}
 }
 
@@ -675,7 +675,7 @@ AppSignalParam FilteredTrendSignalsModel::signalByRow(int row) const
 	if (row < 0 || row >= static_cast<int>(m_signalIndexes.size()))
 	{
 		Q_ASSERT(row >= 0 && row < static_cast<int>(m_signalIndexes.size()));
-		return AppSignalParam();
+		return {};
 	}
 
 	int signalIndex = m_signalIndexes[row];
@@ -683,7 +683,7 @@ AppSignalParam FilteredTrendSignalsModel::signalByRow(int row) const
 	if (signalIndex < 0 || signalIndex >= static_cast<int>(m_signals.size()))
 	{
 		Q_ASSERT(signalIndex >= 0 && signalIndex < static_cast<int>(m_signals.size()));
-		return AppSignalParam();
+		return {};
 	}
 
 	return m_signals[signalIndex];

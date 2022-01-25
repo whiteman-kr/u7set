@@ -195,14 +195,14 @@ namespace Log
 		if (strncmp(str.c_str(), "ERR", str.length()) == 0)
 		{
 			type = MessageType::Error;
-			*errorCount++;
+			(*errorCount)++;
 		}
 		else
 		{
 			if (strncmp(str.c_str(), "WRN", str.length()) == 0)
 			{
 				type = MessageType::Warning;
-				*warningCount++;
+				(*warningCount)++;
 			}
 			else
 			{
@@ -1301,6 +1301,8 @@ namespace Log
 		std::vector<LogFileRecord> res;
 
 		int count = static_cast<int>(m_filteredRecordsIndex.size());
+		res.reserve(count);
+
 		for (int i = 0; i < count; i++)
 		{
 			res.push_back(m_records[m_filteredRecordsIndex[i]]);

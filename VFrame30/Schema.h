@@ -314,7 +314,7 @@ namespace VFrame30
 	class SchemaDetails
 	{
 	public:
-		SchemaDetails() noexcept;
+		SchemaDetails() noexcept = default;
 		SchemaDetails(const SchemaDetails&) = default;
 		SchemaDetails(SchemaDetails&&) = default;
 		SchemaDetails(const QString& details) noexcept;

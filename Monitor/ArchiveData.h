@@ -28,12 +28,12 @@ public:
 	ArchiveData();
 
 public:
-	void addChunk(std::shared_ptr<ArchiveChunk> chunk);
+	void addChunk(const std::shared_ptr<ArchiveChunk>& chunk);
 
-	int size() const;
+	[[nodiscard]] int size() const;
 	void clear();
 
-	AppSignalState state(int index) const;
+	[[nodiscard]] AppSignalState state(int index) const;
 
 private:
 	std::vector<std::shared_ptr<ArchiveChunk>> m_chunks;

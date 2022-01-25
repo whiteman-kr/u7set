@@ -374,7 +374,6 @@ namespace TrendLib
 		{
 			// Something wrong
 			//
-			gridCount = 100;
 			return {};
 		}
 

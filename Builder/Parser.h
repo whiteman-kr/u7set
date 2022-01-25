@@ -107,8 +107,8 @@ namespace Builder
 		//
 		AppLogicItem() = default;
 		AppLogicItem(const AppLogicItem&) = default;
-		AppLogicItem(std::shared_ptr<VFrame30::FblItemRect> fblItem,
-					 std::shared_ptr<VFrame30::Schema> schema);
+		AppLogicItem(const std::shared_ptr<VFrame30::FblItemRect>& fblItem,
+					 const std::shared_ptr<VFrame30::Schema>& schema);
 
 		const Afb::AfbElement& afbElement() const;
 		Afb::AfbElement& afbElement();
@@ -148,9 +148,9 @@ namespace Builder
 
 		bool checkItemsRelationsConsistency(IssueLogger* log) const;
 
-		static bool checkItemsRelationsConsistency(QString equipmentId,
-														const std::list<AppLogicItem>& items,
-														IssueLogger* log);
+		static bool checkItemsRelationsConsistency(const QString& equipmentId,
+												   const std::list<AppLogicItem>& items,
+												   IssueLogger* log);
 
 		bool removeInOutItemKeepAssoc(const QUuid& itemGuid);
 
@@ -232,10 +232,10 @@ namespace Builder
 	public:
 		const std::list<std::shared_ptr<AppLogicModule>>& modules() const;
 		std::list<std::shared_ptr<AppLogicModule>>& modules();
-		std::shared_ptr<AppLogicModule> module(QString moduleStrID);
+		std::shared_ptr<AppLogicModule> module(const QString& moduleStrID);
 
 		const std::map<QString, std::shared_ptr<AppLogicModule>>& ufbs() const;
-		std::shared_ptr<AppLogicModule> ufb(QString ufbId) const;
+		std::shared_ptr<AppLogicModule> ufb(const QString& ufbId) const;
 
 	private:
 		std::list<std::shared_ptr<AppLogicModule>> m_modules;

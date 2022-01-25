@@ -478,7 +478,7 @@ namespace VFrame30
 	}
 	void SchemaItemPushButton::setText(QString value)
 	{
-		m_text = value;
+		m_text = std::move(value);
 	}
 
 	bool SchemaItemPushButton::isCheckable() const

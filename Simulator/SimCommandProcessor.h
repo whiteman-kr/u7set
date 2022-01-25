@@ -29,7 +29,7 @@ namespace Sim
 		explicit CommandProcessor(DeviceEmulator* device);
 
 	public:
-		virtual ~CommandProcessor();
+		virtual ~CommandProcessor() = default;
 		static CommandProcessor* createInstance(DeviceEmulator* device);
 
 	public:

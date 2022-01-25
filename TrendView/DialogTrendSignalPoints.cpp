@@ -83,14 +83,14 @@ TrendLib::TrendStateItem TrendPointsModel::stateItemByIndex(int index, int* oneH
 		Q_ASSERT(oneHourIndex);
 		Q_ASSERT(recordIndex);
 		Q_ASSERT(stateIndex);
-		return TrendLib::TrendStateItem();
+		return {};
 	}
 
 	int currentIndex = 0;
 	*oneHourIndex = 0;
 	*recordIndex = 0;
 	*stateIndex = 0;
-	*ok = 0;
+	*ok = false;
 
 	for (const auto& oneHourDataPtr : m_signalData)
 	{
@@ -116,7 +116,7 @@ TrendLib::TrendStateItem TrendPointsModel::stateItemByIndex(int index, int* oneH
 	}
 
 	*ok = false;
-	return TrendLib::TrendStateItem();
+	return {};
 }
 
 int TrendPointsModel::rowCount(const QModelIndex& /*parent*/) const
@@ -147,7 +147,7 @@ QVariant TrendPointsModel::data(const QModelIndex& index, int role) const
 		if (ok == false)
 		{
 			Q_ASSERT(ok);
-			return QVariant();
+			return {};
 		}
 
 		switch (index.column())
@@ -182,7 +182,7 @@ QVariant TrendPointsModel::data(const QModelIndex& index, int role) const
 		}
 	}
 
-	return QVariant();
+	return {};
 }
 
 QVariant TrendPointsModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -211,7 +211,7 @@ QVariant TrendPointsModel::headerData(int section, Qt::Orientation orientation, 
 		}
 	}
 
-	return QVariant();
+	return {};
 }
 
 

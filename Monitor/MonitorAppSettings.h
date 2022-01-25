@@ -7,7 +7,7 @@
 class MonitorAppSettings
 {
 public:
-	MonitorAppSettings();
+	MonitorAppSettings() = default;
 	~MonitorAppSettings() = default;
 
 public:

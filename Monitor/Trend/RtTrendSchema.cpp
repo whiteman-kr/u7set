@@ -173,9 +173,8 @@ void RtConnection::slot_connectionLost()
 
 	try
 	{
-		Q_ASSERT(m_tcpClient);
+		Q_ASSERT(m_tcpClient && m_tcpClient->samplePeriod() == m_samplePeriod);
 		Q_ASSERT(m_tcpClientThread);
-		Q_ASSERT(m_tcpClient->samplePeriod() == m_samplePeriod);
 
 		for (auto& [signalHash, rtSignal] : m_trendSignals)
 		{
@@ -200,9 +199,8 @@ void RtConnection::appendRealtimeData(Hash signalHash, const std::vector<TrendLi
 	{
 		QMutexLocker wl(&m_mutex);
 
-		Q_ASSERT(m_tcpClient);
+		Q_ASSERT(m_tcpClient && m_tcpClient->samplePeriod() == m_samplePeriod);
 		Q_ASSERT(m_tcpClientThread);
-		Q_ASSERT(m_tcpClient->samplePeriod() == m_samplePeriod);
 
 		RtSignal& rtSignal = m_trendSignals.at(signalHash);
 		Q_ASSERT(::calcHash(rtSignal.appSignalId()) == signalHash);
@@ -286,7 +284,7 @@ void RtConnection::trimArchive_unsafe(int durationSeconds, TrendLib::TrendArchiv
 {
 	Q_ASSERT(archive);
 
-	int64_t durationHours = durationSeconds	/ 3600 + (durationSeconds % 3600 ? 1 : 0);
+	int64_t durationHours = durationSeconds	/ 3600 + ((durationSeconds % 3600) ? 1 : 0);
 	int64_t durationMs = durationHours * 1_hour;
 
 	TimeStamp lastHour = archive->m_hours.crbegin()->first;

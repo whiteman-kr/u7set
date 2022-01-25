@@ -37,8 +37,7 @@ namespace Builder
 			m_cfgXml == nullptr ||
 			m_buildResultWriter == nullptr)
 		{
-			Q_ASSERT(m_software);
-			Q_ASSERT(m_software->softwareType() == E::SoftwareType::Monitor);
+			Q_ASSERT(m_software && m_software->softwareType() == E::SoftwareType::Monitor);
 			Q_ASSERT(m_equipment);
 			Q_ASSERT(m_cfgXml);
 			Q_ASSERT(m_buildResultWriter);
@@ -279,7 +278,7 @@ namespace Builder
 		//
 		VFrame30::SchemaDetailsSet detailsSet;
 
-		for (auto schemaFile : monitorSchemas)
+		for (const auto& schemaFile : monitorSchemas)
 		{
 			result &= m_cfgXml->addLinkToFile(schemaFile->subDir, schemaFile->fileName);
 			detailsSet.add(schemaFile->details);

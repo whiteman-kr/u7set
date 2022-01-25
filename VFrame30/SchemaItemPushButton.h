@@ -345,7 +345,7 @@ namespace VFrame30
 		int someIntProperty() const {return 0;}
 		void setSomeIntProperty(int value) {Q_UNUSED(value);}
 
-		QString someStringProperty() const {return QString();}
+		QString someStringProperty() const {return {}; }
 		void setSomeStringProperty(QString value) {Q_UNUSED(value);}
 	};
 }

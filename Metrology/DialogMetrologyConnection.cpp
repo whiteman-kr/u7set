@@ -765,6 +765,8 @@ void DialogMetrologyConnection::updateList()
 	std::vector<Metrology::Connection> connectionList;
 
 	int count = m_connectionBase.count();
+	connectionList.reserve(count);
+
 	for(int i = 0; i < count; i++)
 	{
 		connectionList.push_back(m_connectionBase.connection(i));
