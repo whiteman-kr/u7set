@@ -8,6 +8,7 @@ echo --------------- Creating data folders ------------------
 md packages\u7set\data
 md packages\u7set.develop.rpct\data
 md packages\u7set.develop.rpct\data\scripthelp
+md packages\u7set.develop.rpct\data\scripting
 md packages\u7set.develop.rpct.docs\data\docs
 md packages\u7set.develop.rpct.docs\data\docs\Appendixes
 md packages\u7set.mats.cfgsrv\data
@@ -30,6 +31,7 @@ copy ..\bin\release\vcredist_x64.exe packages\u7set\data
 copy ..\bin\release\u7.exe packages\u7set.develop.rpct\data
 
 xcopy ..\bin\release\scripthelp packages\u7set.develop.rpct\data\scripthelp /sy
+xcopy ..\bin\release\scripting packages\u7set.develop.rpct\data\scripting /sy
 
 copy ..\bin\release\docs\D11.5_AFBL_RM.pdf packages\u7set.develop.rpct.docs\data\docs
 copy ..\bin\release\docs\D11.6_RPCT-UM.pdf packages\u7set.develop.rpct.docs\data\docs
