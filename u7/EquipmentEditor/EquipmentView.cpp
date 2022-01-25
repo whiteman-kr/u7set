@@ -2532,7 +2532,7 @@ void EquipmentView::updateFromPreset()
 
 	// Done
 	//
-	QMessageBox::information(this, QApplication::applicationName(), tr("Update form preset done"));
+	QMessageBox::information(this, QApplication::applicationName(), tr("Update from preset done"));
 
 	return;
 }
