@@ -243,16 +243,19 @@ TuningWorkspace::~TuningWorkspace()
 			settings.setValue(tr("TuningWorkspace/FilterTreeColumnCounter%1").arg(i), width);
 		}
 
-		if (m_columnStatusIndex != -1)
-		{
-			int width = m_filterTree->columnWidth(m_columnStatusIndex);
-			settings.setValue("TuningWorkspace/FilterTreeColumnStatus", width);
-		}
 		if (m_columnSorIndex != -1)
 		{
 			int width = m_filterTree->columnWidth(m_columnSorIndex);
 			settings.setValue("TuningWorkspace/FilterTreeColumnSor", width);
 		}
+
+
+		if (m_columnStatusIndex != -1)
+		{
+			int width = m_filterTree->columnWidth(m_columnStatusIndex);
+			settings.setValue("TuningWorkspace/FilterTreeColumnStatus", width);
+		}
+
 
 		// Save masks
 		//
@@ -530,6 +533,7 @@ void TuningWorkspace::updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter
 			m_filterTree->setColumnWidth(m_columnDiscreteCountIndexes[i], width);
 		}
 
+
 		if (m_columnStatusIndex != -1)
 		{
 			const int defaultWidth = 80;
@@ -542,6 +546,7 @@ void TuningWorkspace::updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter
 
 			m_filterTree->setColumnWidth(m_columnStatusIndex, width);
 		}
+
 
 		//
 
@@ -1314,6 +1319,8 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 
 	assert(m_columnStatusIndex != -1);
 
+	int errorCounter = filter->counters().errorCounter;
+
 	QStringList statusStrings;
 
 	int validCount = 0;
@@ -1457,6 +1464,12 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 			}
 		}
 	}
+
+	if (errorCounter > 0)
+	{
+		statusText += tr(", E: %1").arg(errorCounter);
+	}
+
 	// Access column
 	//
 	if (m_columnAccessIndex != -1)
@@ -1526,9 +1539,9 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 		}
 		else
 		{
-			if (isReplyCount == 0)
+			if (isReplyCount == 0 || errorCounter > 0)
 			{
-				// All are No Reply
+				// All are No Reply or some errors present
 				//
 				stateBackColor = redColor;
 				stateTextColor = Qt::white;
