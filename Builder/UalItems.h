@@ -504,7 +504,7 @@ namespace Builder
 		bool isFrombusConversionRequired() const { return m_frombusConversionRequired; }
 		void setFrombusConversionRequired(bool required) { m_frombusConversionRequired = required; }
 		bool isFrombusConversionCodeAlreadyGenerated() const { return m_frombusConversionCodeIsAlreadyGenerated; }
-		bool setFrombusConversionCodeIsAlreadyGenerated() { return m_frombusConversionCodeIsAlreadyGenerated = true; }
+		void setFrombusConversionCodeIsAlreadyGenerated() { m_frombusConversionCodeIsAlreadyGenerated = true; }
 
 		bool anyParentBusIsAcquired() const;
 
