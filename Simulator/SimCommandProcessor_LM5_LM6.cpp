@@ -3050,7 +3050,7 @@ namespace Sim
 
 		// AFB Logic
 		//
-		if (conf >= 1 && conf <= 4 || conf == 9 || conf == 10)
+		if ((conf >= 1 && conf <= 4) || conf == 9 || conf == 10)
 		{
 			const qint32 settingValue = instance->param(i_sp_s)->signedIntValue();
 			const qint32 resetValue = instance->param(i_sp_r)->signedIntValue();
@@ -4641,15 +4641,25 @@ namespace Sim
 	//
 	void CommandProcessor_LM5_LM6::afb_int_v6_tiunlim(AfbComponentInstance* instance)
 	{
-		return afb_int_v6(instance, std::numeric_limits<qint32>::max());
+		return afb_int_private(instance, std::numeric_limits<qint32>::max(), 6);
 	}
 
 	void CommandProcessor_LM5_LM6::afb_int_v6_ti350000(AfbComponentInstance* instance)
 	{
-		return afb_int_v6(instance, 350000);
+		return afb_int_private(instance, 350000, 6);
 	}
 
-	void CommandProcessor_LM5_LM6::afb_int_v6(AfbComponentInstance* instance, qint32 maxTiValue)
+	void CommandProcessor_LM5_LM6::afb_int_v7_tiunlim(AfbComponentInstance* instance)
+	{
+		return afb_int_private(instance, std::numeric_limits<qint32>::max(), 7);
+	}
+
+	void CommandProcessor_LM5_LM6::afb_int_v7_ti350000(AfbComponentInstance* instance)
+	{
+		return afb_int_private(instance, 350000, 7);
+	}
+
+	void CommandProcessor_LM5_LM6::afb_int_private(AfbComponentInstance* instance, qint32 maxTiValue, int version)
 	{
 		// Define inputs/outputs opIndexes
 		//
@@ -4712,11 +4722,25 @@ namespace Sim
 
 		do
 		{
+			nan |= std::isnan(maxValue) ? 1 : 0;
+			nan |= std::isnan(minValue) ? 1 : 0;
+
 			if (maxValue <= minValue)
 			{
 				result.setFloatValue(yi_prev);
 				param_err = 0x0001;
 				break;
+			}
+
+			if (version == 7)
+			{
+				// In version 7 added following checks
+				//
+				param_err |= (ri_const < minValue || ri_const > maxValue) ? 1 : 0;
+				param_err |= (x_tr < minValue || x_tr > maxValue) ? 1 : 0;
+
+				nan |= std::isnan(ri_const) ? 1 : 0;
+				nan |= std::isnan(x_tr) ? 1 : 0;
 			}
 
 			if (ti < m_cycleDurationMs ||
@@ -5141,17 +5165,17 @@ namespace Sim
 		// Define input opIndexes
 		//
 		const int i_conf = 0;
-		const int i_hyst = 1;			// Hysteresis value
-		const int i_prev_result = 3;	// Prev result
+//		const int i_hyst = 1;			// Hysteresis value
+//		const int i_prev_result = 3;	// Prev result
 
-		const int i_data = 4;			// Input data
-		const int i_setting = 6;		// Setting value
+//		const int i_data = 4;			// Input data
+//		const int i_setting = 6;		// Setting value
 
-		const int o_result = 9;			// Result
-		const int o_overflow = 10;		// Result
-		const int o_underflow = 11;		// Result
-		const int o_nan = 13;			// Any input FP param NaN
-		const int o_param_err = 14;		// Param error - if (config = 0) or (config > 8) or (i_hys < 0)
+//		const int o_result = 9;			// Result
+//		const int o_overflow = 10;		// Result
+//		const int o_underflow = 11;		// Result
+//		const int o_nan = 13;			// Any input FP param NaN
+//		const int o_param_err = 14;		// Param error - if (config = 0) or (config > 8) or (i_hys < 0)
 
 		// Get params, throws exception in case of error
 		//
@@ -5170,17 +5194,17 @@ namespace Sim
 		// Define input opIndexes
 		//
 		const int i_conf = 0;
-		const int i_hyst = 1;			// Hysteresis value
-		const int i_prev_result = 3;	// Prev result
+//		const int i_hyst = 1;			// Hysteresis value
+//		const int i_prev_result = 3;	// Prev result
 
-		const int i_data = 4;			// Input data
-		const int i_setting = 6;		// Setting value
+//		const int i_data = 4;			// Input data
+//		const int i_setting = 6;		// Setting value
 
-		const int o_result = 9;			// Result
-		const int o_overflow = 10;		// Result
-		const int o_underflow = 11;		// Result
-		const int o_nan = 13;			// Any input FP param NaN
-		const int o_param_err = 14;		// Param error - if (config = 0) or (config > 8) or (i_hys < 0)
+//		const int o_result = 9;			// Result
+//		const int o_overflow = 10;		// Result
+//		const int o_underflow = 11;		// Result
+//		const int o_nan = 13;			// Any input FP param NaN
+//		const int o_param_err = 14;		// Param error - if (config = 0) or (config > 8) or (i_hys < 0)
 
 		// Get params, throws exception in case of error
 		//

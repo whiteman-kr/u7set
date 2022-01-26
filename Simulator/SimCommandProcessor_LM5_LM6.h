@@ -308,7 +308,9 @@ namespace Sim
 		//
 		void afb_int_v6_tiunlim(AfbComponentInstance* instance);
 		void afb_int_v6_ti350000(AfbComponentInstance* instance);
-		void afb_int_v6(AfbComponentInstance* instance, qint32 maxTiValue);
+		void afb_int_v7_tiunlim(AfbComponentInstance* instance);
+		void afb_int_v7_ti350000(AfbComponentInstance* instance);
+		void afb_int_private(AfbComponentInstance* instance, qint32 maxTiValue, int version);
 
 		//	DPCOMP, OpCode 20
 		//
@@ -438,6 +440,8 @@ namespace Sim
 			{QStringLiteral("afb_func_v4"),			&CommandProcessor_LM5_LM6::afb_func_v4},				// 16
 			{QStringLiteral("afb_int_v6_tiunlim"),	&CommandProcessor_LM5_LM6::afb_int_v6_tiunlim},			// 17	ti is unlimited
 			{QStringLiteral("afb_int_v6_ti350000"),	&CommandProcessor_LM5_LM6::afb_int_v6_ti350000},		// 17	ti is limited to 350000ms
+			{QStringLiteral("afb_int_v7_tiunlim"),	&CommandProcessor_LM5_LM6::afb_int_v7_tiunlim},			// 17	ti is unlimited
+			{QStringLiteral("afb_int_v7_ti350000"),	&CommandProcessor_LM5_LM6::afb_int_v7_ti350000},		// 17	ti is limited to 350000ms
 			{QStringLiteral("afb_dpcomp_v3"),		&CommandProcessor_LM5_LM6::afb_dpcomp_v3},				// 20
 			{QStringLiteral("afb_dpcomp_v4"),		&CommandProcessor_LM5_LM6::afb_dpcomp_v4},				// 20
 			{QStringLiteral("afb_dpcomp_v5"),		&CommandProcessor_LM5_LM6::afb_dpcomp_v5},				// 20
