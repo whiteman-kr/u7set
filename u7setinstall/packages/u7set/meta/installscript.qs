@@ -177,7 +177,7 @@ Component.prototype.installVCRedist = function()
 
     if (doInstall)
     {
-        var vcPath = installer.value("TargetDir") + "/vcredist_x64.exe";
+        var vcPath = installer.value("TargetDir") + "/vc_redist.x64.exe";
         installer.execute(vcPath, "/norestart", "/passive");
     }
 }
