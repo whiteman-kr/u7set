@@ -1,6 +1,5 @@
 #include "PropertyObject.h"
-#include "../UtilsLib/CsvFile.h"
-
+#include <QRegularExpression>
 
 //
 //
@@ -491,13 +490,38 @@ QString PropertyObject::createSpecificPropertyStruct(const QString& name,
 	resultStrings.push_back(essential ? trueString: falseString);
 	resultStrings.push_back(readOnly ? trueString : falseString);
 
+	static const QChar semicolon = ';';
+	static const QChar quotes = '"';
+	static const QLatin1String singleQuotesStr = QLatin1String("\"");
+	static const QLatin1String doubleQuotesStr = QLatin1String("\"\"");
+
 	for (QString& s : resultStrings)
 	{
 		s.replace(QChar::CarriageReturn, QLatin1String("\\r"));
 		s.replace(QChar::LineFeed, QLatin1String("\\n"));
+
+		// CSV-specific formatting
+		//
+		bool externalQuotes = false;
+
+		if (s.contains(semicolon) == true)
+		{
+			externalQuotes = true;
+		}
+
+		if (s.contains(quotes) == true)
+		{
+			s.replace(singleQuotesStr, doubleQuotesStr);
+			externalQuotes = true;
+		}
+
+		if (externalQuotes == true)
+		{
+			s = quotes + s + quotes;
+		}
 	}
 
-	return CsvFile::stringsToCSV(resultStrings);
+	return resultStrings.join(';');
 }
 
 // Specific properties
@@ -585,7 +609,26 @@ std::pair<bool, QString> PropertyObject::parseSpecificPropertiesStruct(const QSt
 			continue;
 		}
 
-		QStringList columns = CsvFile::csvToStrings(row);
+		// Parse row to columns using CSV regular expression
+		//
+		QStringList columns;
+
+		static const QLatin1String singleQuotesStr = QLatin1String("\"");
+		static const QLatin1String doubleQuotesStr = QLatin1String("\"\"");
+
+		// Regular expression was taken from https://forum.qt.io/topic/119076/qregexp-to-parse-a-csv-file
+		//
+		const QRegularExpression regExp(R"x((\;|\n|^)(?:"([^"]*(?:""[^"]*)*)"|([^"\;\n]*)))x");
+
+		QRegularExpressionMatchIterator matchIt = regExp.globalMatch(row);
+		while (matchIt.hasNext())
+		{
+			const QRegularExpressionMatch match = matchIt.next();
+
+			QString s = match.capturedTexts().last();
+			s.replace(doubleQuotesStr, singleQuotesStr);
+			columns.push_back(s);
+		}
 
 		for (QString& col : columns)
 		{
