@@ -126,7 +126,7 @@ namespace VFrame30
 			double gridWidth;
 			QString text;
 		};
-		void drawGrids(const std::vector<DrawGridStruct> grids, CDrawParam* drawParam, const QRectF barRect, const SchemaItemIndicator* item) const;
+		void drawGrids(const std::vector<DrawGridStruct>& grids, CDrawParam* drawParam, const QRectF barRect, const SchemaItemIndicator* item) const;
 
 		std::set<QString> getSignalTags(CDrawParam* drawParam, const QString& appSignalId) const;
 		bool getSignalParam(CDrawParam* drawParam, AppSignalParam* signalParam) const;

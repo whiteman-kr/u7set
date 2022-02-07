@@ -139,7 +139,7 @@ void ArchiveTcpClient::timerEvent(QTimerEvent* )
 void ArchiveTcpClient::emitErrorResetState(QString errorMessage)
 {
 	resetState();
-	emit requestError(errorMessage);
+	emit requestError(std::move(errorMessage));
 	return;
 }
 

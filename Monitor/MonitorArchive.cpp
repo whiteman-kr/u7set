@@ -745,7 +745,7 @@ void MonitorArchiveWidget::removeSignal(QString appSignalId)
 
 void MonitorArchiveWidget::slot_configurationArrived(ConfigSettings configuration)
 {
-	m_configuration = configuration;
+	m_configuration = std::move(configuration);
 }
 
 void MonitorArchiveWidget::tcpConnectionEstablished()
@@ -766,7 +766,7 @@ void MonitorArchiveWidget::dataReceived(std::shared_ptr<ArchiveChunk> chunk)
 		return;
 	}
 
-	m_model->addData(chunk);
+	m_model->addData(std::move(chunk));
 
 	return;
 }

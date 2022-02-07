@@ -618,7 +618,7 @@ std::vector<HostAddressPort> LanControllersInfo::appDataHostAddressPorts() const
 	{
 		if (lci.isProvideAppData() == true)
 		{
-			addresses.push_back(HostAddressPort(lci.appDataIP, lci.appDataPort));
+			addresses.emplace_back(lci.appDataIP, lci.appDataPort);
 		}
 	}
 

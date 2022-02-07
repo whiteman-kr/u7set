@@ -214,7 +214,7 @@ namespace VFrame30
 		if (schemaView == nullptr)
 		{
 			assert(schemaView);
-			return QJSValue();
+			return {};
 		}
 
 		QJSEngine* engine = schemaView->jsEngine();
@@ -233,7 +233,7 @@ namespace VFrame30
 
 	void SchemaItemControl::setStyleSheet(QString value)
 	{
-		m_styleSheet = value;
+		m_styleSheet = std::move(value);
 	}
 
 	const QString& SchemaItemControl::toolTip() const

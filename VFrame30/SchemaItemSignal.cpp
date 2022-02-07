@@ -1247,7 +1247,7 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 
 		QString str = {"Signal(s): "};
 
-		for (QString signalId : m_appSignalIds)
+		for (const QString& signalId : m_appSignalIds)
 		{
 			str.append(tr("\n\t%1").arg(signalId));
 		}
@@ -1475,7 +1475,7 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 
 	void SchemaItemSignal::setCustomText(QString value)
 	{
-		m_customText = value;
+		m_customText = std::move(value);
 	}
 
 	int SchemaItemSignal::columnCount() const

@@ -21,7 +21,7 @@ namespace TrendLib
 		Q_OBJECT
 
 	public:
-		explicit TrendMainWindow(QWidget* parent = 0);
+		explicit TrendMainWindow(QWidget* parent = nullptr);
 		virtual ~TrendMainWindow();
 
 		// Methods
@@ -91,10 +91,10 @@ namespace TrendLib
 		//
 	public:
 		[[nodiscard]] TrendLib::TrendSignalSet& signalSet();
-		const TrendLib::TrendSignalSet& signalSet() const;
+		[[nodiscard]] const TrendLib::TrendSignalSet& signalSet() const;
 
 		[[nodiscard]] TrendLib::Trend& trend();
-		const TrendLib::Trend& trend() const;
+		[[nodiscard]] const TrendLib::Trend& trend() const;
 
 		[[nodiscard]] E::TrendMode trendMode() const;
 		void setTrendMode(E::TrendMode value);

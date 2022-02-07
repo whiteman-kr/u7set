@@ -197,7 +197,7 @@ std::vector<DbTag> DialogTagsEditor::getTags() const
 			return {};
 		}
 
-		tags.push_back({item->text(0), item->text(1)});
+		tags.emplace_back(item->text(0), item->text(1));
 	}
 
 	return tags;

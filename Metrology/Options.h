@@ -1,7 +1,7 @@
 #ifndef OPTIONS_H
 #define OPTIONS_H
 
-#include <assert.h>
+#include <cassert>
 
 #include <QObject>
 #include <QMutex>

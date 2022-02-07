@@ -8,14 +8,14 @@ const char* TuningValue::TYPE_STR_FLOAT = "Float";
 const char* TuningValue::TYPE_STR_DOUBLE = "Double";
 const char* TuningValue::TYPE_STR_UNKNOWN = "?";
 
-TuningValue::TuningValue(TuningValueType valueType)
+TuningValue::TuningValue(TuningValueType valueType) :
+	m_type(valueType)
 {
-	m_type = valueType;
 }
 
 TuningValue::TuningValue(QVariant value)
 {
-	fromVariant(value);
+	fromVariant(std::move(value));
 }
 
 TuningValue::TuningValue(TuningValueType valueType, double value)

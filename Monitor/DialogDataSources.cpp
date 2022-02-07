@@ -27,17 +27,14 @@ DialogDataSources::DialogDataSources(TcpAppSourcesState* tcpAppSourceState, bool
 	m_mainLayout->addWidget(m_appDataSourcesWidget);
 
 	// Tuning
-
-	setTuningTcpClients(showTuningWidget, tcpTuningClients, hasActivationControls);
-
 	//
+	setTuningTcpClients(showTuningWidget, std::move(tcpTuningClients), hasActivationControls);
 
+	// --
+	//
 	setLayout(m_mainLayout);
 
-}
-
-DialogDataSources::~DialogDataSources()
-{
+	return;
 }
 
 void DialogDataSources::setTuningTcpClients(bool showTuningWidget, std::vector<TuningTcpClient*> tcpTuningClients, bool hasActivationControls)
@@ -54,7 +51,7 @@ void DialogDataSources::setTuningTcpClients(bool showTuningWidget, std::vector<T
 
 		if (m_tuningSourcesWidget == nullptr)
 		{
-			m_tuningSourcesWidget = new TuningSourcesWidget(tcpTuningClients, hasActivationControls, true, this);
+			m_tuningSourcesWidget = new TuningSourcesWidget(std::move(tcpTuningClients), hasActivationControls, true, this);
 
 			connect(m_tuningSourcesWidget, &TuningSourcesWidget::closeButtonPressed, this, &DialogDataSources::reject);
 
@@ -62,7 +59,7 @@ void DialogDataSources::setTuningTcpClients(bool showTuningWidget, std::vector<T
 		}
 		else
 		{
-			m_tuningSourcesWidget->setTuningTcpClients(tcpTuningClients);
+			m_tuningSourcesWidget->setTuningTcpClients(std::move(tcpTuningClients));
 		}
 	}
 	else

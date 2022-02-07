@@ -140,7 +140,7 @@ AppSignalSpecPropValue::AppSignalSpecPropValue()
 {
 }
 
-bool AppSignalSpecPropValue::create(std::shared_ptr<Property> prop)
+bool AppSignalSpecPropValue::create(const std::shared_ptr<Property>& prop)
 {
 	if (prop == nullptr)
 	{
@@ -341,7 +341,7 @@ bool AppSignalSpecPropValues::createFromSpecPropStruct(const QString& specPropSt
 
 	std::vector<std::shared_ptr<Property>> properties = pob.properties();
 
-	for(std::shared_ptr<Property> property : properties)
+	for(const std::shared_ptr<Property>& property : properties)
 	{
 		AppSignalSpecPropValue specPropValue;
 
@@ -381,7 +381,7 @@ bool AppSignalSpecPropValues::updateFromSpecPropStruct(const QString& specPropSt
 
 	std::vector<std::shared_ptr<Property>> properties = pob.properties();
 
-	for(std::shared_ptr<Property> property : properties)
+	for(const std::shared_ptr<Property>& property : properties)
 	{
 		QString propName = property->caption();
 
@@ -446,7 +446,7 @@ bool AppSignalSpecPropValues::updateFromSpecPropStruct(const QString& specPropSt
 
 	// create new property value, set to default
 	//
-	for(std::shared_ptr<Property> property : namesToCreate)
+	for(const std::shared_ptr<Property>& property : namesToCreate)
 	{
 		AppSignalSpecPropValue specPropValue;
 
@@ -1199,7 +1199,7 @@ bool AppSignal::createSpecPropValues()
 
 	AppSignalSpecPropValues spValues;
 
-	for(std::shared_ptr<Property> specificProperty : specificProperties)
+	for(const std::shared_ptr<Property>& specificProperty : specificProperties)
 	{
 		AppSignalSpecPropValue spValue;
 

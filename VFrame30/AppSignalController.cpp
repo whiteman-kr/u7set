@@ -52,7 +52,7 @@ namespace VFrame30
 		if (m_appSignalManager == nullptr)
 		{
 			assert(false);
-			return AppSignalParam();
+			return {};
 		}
 
 		return m_appSignalManager->signalParam(signalHash, found);
@@ -63,7 +63,7 @@ namespace VFrame30
 		if (m_appSignalManager == nullptr)
 		{
 			assert(false);
-			return AppSignalParam();
+			return {};
 		}
 
 		return m_appSignalManager->signalParam(appSignalId, found);
@@ -74,7 +74,7 @@ namespace VFrame30
 		if (m_appSignalManager == nullptr)
 		{
 			assert(false);
-			return AppSignalState();
+			return {};
 		}
 
 		return m_appSignalManager->signalState(signalHash, found);
@@ -85,7 +85,7 @@ namespace VFrame30
 		if (m_appSignalManager == nullptr)
 		{
 			assert(false);
-			return AppSignalState();
+			return {};
 		}
 
 		return m_appSignalManager->signalState(appSignalId, found);

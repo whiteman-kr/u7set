@@ -1,6 +1,6 @@
 #include "TuningSocket.h"
 
-#include <assert.h>
+#include <cassert>
 
 #include "SignalBase.h"
 #include "Options.h"

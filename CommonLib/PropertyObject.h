@@ -828,7 +828,7 @@ public:
 		if (isEnum() == false)		// Commented for perfomance reasone
 		{
 			Q_ASSERT(isEnum());
-			return QVariant();
+			return {};
 		}
 #endif
 
@@ -1274,7 +1274,7 @@ public:
 		}
 		else
 		{
-			return QVariant(m_value);
+			return {m_value};
 		}
 	}
 
@@ -1443,12 +1443,12 @@ public:
 		{
 			if (key == m_value)
 			{
-				return QVariant(str);
+				return {str};
 			}
 		}
 
 		Q_ASSERT(false);
-		return QVariant();
+		return {};
 	}
 
 public:
@@ -1461,7 +1461,7 @@ public:
 		}
 		else
 		{
-			return QVariant(m_value);
+			return {m_value};
 		}
 	}
 
@@ -1857,7 +1857,7 @@ template <typename OBJECT_TYPE>
 class PropertyVectorBase : public std::vector<std::shared_ptr<OBJECT_TYPE>>
 {
 public:
-	virtual ~PropertyVectorBase() {};
+	virtual ~PropertyVectorBase() = default;
 	[[nodiscard]] virtual std::shared_ptr<OBJECT_TYPE> createItem() const = 0;
 };
 
@@ -1915,7 +1915,7 @@ template <typename OBJECT_TYPE>
 class PropertyListBase : public std::list<std::shared_ptr<OBJECT_TYPE>>
 {
 public:
-	virtual ~PropertyListBase() {};
+	virtual ~PropertyListBase() = default;
 	[[nodiscard]] virtual std::shared_ptr<OBJECT_TYPE> createItem() const = 0;
 };
 

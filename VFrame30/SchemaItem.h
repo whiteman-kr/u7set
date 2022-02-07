@@ -163,7 +163,7 @@ namespace VFrame30
 
 	protected:
 		bool runScript(QJSValue& evaluatedJs, QJSEngine* engine);
-		QJSValue evaluateScript(QString script, QJSEngine* engine, QWidget* parentWidget) const;
+		QJSValue evaluateScript(const QString& script, QJSEngine* engine, QWidget* parentWidget) const;
 		QString formatSqriptError(const QJSValue& scriptValue) const;
 		void reportSqriptError(const QJSValue& scriptValue, QWidget* parent) const;
 

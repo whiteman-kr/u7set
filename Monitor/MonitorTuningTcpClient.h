@@ -11,7 +11,7 @@ class MonitorTuningTcpClient : public TuningTcpClient, public TcpClientStatistic
 
 public:
 	MonitorTuningTcpClient(const SoftwareInfo& softwareInfo, const QString& tuningServiceId, TuningSignalManager* signalManager, ILogFile* logFile);
-	virtual ~MonitorTuningTcpClient();
+	virtual ~MonitorTuningTcpClient() = default;
 
 protected:
 	virtual void writeLogAlert(const QString& message) override;

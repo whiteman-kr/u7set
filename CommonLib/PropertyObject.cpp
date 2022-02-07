@@ -1,5 +1,5 @@
 #include "PropertyObject.h"
-
+#include <QRegularExpression>
 
 //
 //
@@ -391,7 +391,7 @@ QVariant PropertyObject::propertyValue(const QString& caption) const
 	else
 	{
 		qDebug() << "PropertyObject::propertyValue: property not found: " << caption;
-		return QVariant();
+		return {};
 	}
 }
 
@@ -468,33 +468,60 @@ QString PropertyObject::createSpecificPropertyStruct(const QString& name,
 {
 	static_assert(PropertyObject::m_lastSpecificPropertiesVersion >= 1 && PropertyObject::m_lastSpecificPropertiesVersion <= 7);	// Function must be reviewed if version is raised
 
-	QString result = QStringLiteral("%1;").arg(m_lastSpecificPropertiesVersion);
-
-	QLatin1String trueStringSc{"true;"};
-	QLatin1String falseStringSc{"false;"};
 	QLatin1String trueString{"true"};
 	QLatin1String falseString{"false"};
 
-	result += name + ";";
-	result += category + ";";
-	result += strType + ";";
-	result += strMin + ";";
-	result += strMax + ";";
-	result += strDefaultValue + ";";
-	result += tr("%1;").arg(precision),
-	result += updateFromPreset ? trueStringSc : falseStringSc;
-	result += expert ? trueStringSc : falseStringSc;
-	result += description + ";";
-	result += visible ? trueStringSc : falseStringSc;
-	result += E::valueToString<E::PropertySpecificEditor>(editor) + ";";
-	result += tr("%1;").arg(viewOrder);
-	result += essential ? trueStringSc : falseStringSc;
-	result += readOnly ? trueString : falseString;	// No semicolon!
+	QStringList resultStrings;
 
-	result = result.replace(QChar::CarriageReturn, QLatin1String("\\r"));
-	result = result.replace(QChar::LineFeed, QLatin1String("\\n"));
+	resultStrings.push_back(QStringLiteral("%1").arg(m_lastSpecificPropertiesVersion));
+	resultStrings.push_back(name);
+	resultStrings.push_back(category);
+	resultStrings.push_back(strType);
+	resultStrings.push_back(strMin);
+	resultStrings.push_back(strMax);
+	resultStrings.push_back(strDefaultValue);
+	resultStrings.push_back(QStringLiteral("%1").arg(precision));
+	resultStrings.push_back(updateFromPreset ? trueString : falseString);
+	resultStrings.push_back(expert ? trueString : falseString);
+	resultStrings.push_back(description);
+	resultStrings.push_back(visible ? trueString : falseString);
+	resultStrings.push_back(E::valueToString<E::PropertySpecificEditor>(editor));
+	resultStrings.push_back(QStringLiteral("%1").arg(viewOrder));
+	resultStrings.push_back(essential ? trueString: falseString);
+	resultStrings.push_back(readOnly ? trueString : falseString);
 
-	return result;
+	static const QChar semicolon = ';';
+	static const QChar quotes = '"';
+	static const QLatin1String singleQuotesStr = QLatin1String("\"");
+	static const QLatin1String doubleQuotesStr = QLatin1String("\"\"");
+
+	for (QString& s : resultStrings)
+	{
+		s.replace(QChar::CarriageReturn, QLatin1String("\\r"));
+		s.replace(QChar::LineFeed, QLatin1String("\\n"));
+
+		// CSV-specific formatting
+		//
+		bool externalQuotes = false;
+
+		if (s.contains(semicolon) == true)
+		{
+			externalQuotes = true;
+		}
+
+		if (s.contains(quotes) == true)
+		{
+			s.replace(singleQuotesStr, doubleQuotesStr);
+			externalQuotes = true;
+		}
+
+		if (externalQuotes == true)
+		{
+			s = quotes + s + quotes;
+		}
+	}
+
+	return resultStrings.join(';');
 }
 
 // Specific properties
@@ -582,7 +609,26 @@ std::pair<bool, QString> PropertyObject::parseSpecificPropertiesStruct(const QSt
 			continue;
 		}
 
-		QStringList columns = row.split(';');
+		// Parse row to columns using CSV regular expression
+		//
+		QStringList columns;
+
+		static const QLatin1String singleQuotesStr = QLatin1String("\"");
+		static const QLatin1String doubleQuotesStr = QLatin1String("\"\"");
+
+		// Regular expression was taken from https://forum.qt.io/topic/119076/qregexp-to-parse-a-csv-file
+		//
+		const QRegularExpression regExp(R"x((\;|\n|^)(?:"([^"]*(?:""[^"]*)*)"|([^"\;\n]*)))x");
+
+		QRegularExpressionMatchIterator matchIt = regExp.globalMatch(row);
+		while (matchIt.hasNext())
+		{
+			const QRegularExpressionMatch match = matchIt.next();
+
+			QString s = match.capturedTexts().last();
+			s.replace(doubleQuotesStr, singleQuotesStr);
+			columns.push_back(s);
+		}
 
 		for (QString& col : columns)
 		{

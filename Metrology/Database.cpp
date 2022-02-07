@@ -1,6 +1,6 @@
 #include "Database.h"
 
-#include <assert.h>
+#include <cassert>
 #include <QMessageBox>
 #include <QFile>
 

@@ -1864,9 +1864,7 @@ bool DbController::deleteDeviceObjects(std::vector<Hardware::DeviceObject*>& dev
 		Hardware::DeviceObject* deviceObject = devices[i];
 
 		const DbFileInfo* fi = deviceObject->data();
-		Q_ASSERT(fi);
-
-		Q_ASSERT(fi->fileId() == files[i].fileId());
+		Q_ASSERT(fi && fi->fileId() == files[i].fileId());
 
 		auto fileInfo = std::make_shared<DbFileInfo>(files[i], deviceObject->details());
 		deviceObject->setData(fileInfo);
@@ -1982,9 +1980,7 @@ bool DbController::getDeviceTreeLatestVersion(const DbFileInfo& file, std::share
 		// Get parentId
 		//
 		const DbFileInfo* fio = deviceObject->data();
-
-		Q_ASSERT(fio);
-		Q_ASSERT(fileId == fio->fileId());
+		Q_ASSERT(fio && fio->fileId() == fileId);
 
 		int parentId = fio->parentId();
 

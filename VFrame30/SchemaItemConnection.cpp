@@ -82,7 +82,7 @@ namespace VFrame30
 	QString SchemaItemConnection::buildName() const
 	{
 		assert(false);
-		return QString();
+		return {};
 	}
 
 	QString SchemaItemConnection::connectionIds() const

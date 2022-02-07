@@ -24,7 +24,7 @@ namespace Builder
 		std::vector<std::shared_ptr<Hardware::Connection>> result;
 		result.reserve(m_objectsVector.size());
 
-		for (std::shared_ptr<Hardware::Connection> connection : m_objectsVector)
+		for (const std::shared_ptr<Hardware::Connection>& connection : m_objectsVector)
 		{
 			for (const QString& mask : masks)
 			{
@@ -92,7 +92,7 @@ namespace Builder
 		return result;
 	}
 
-	std::shared_ptr<Hardware::Connection> ConnectionStorage::getPortConnection(QString portEquipmentId) const
+	std::shared_ptr<Hardware::Connection> ConnectionStorage::getPortConnection(const QString& portEquipmentId) const
 	{
 		for (const std::shared_ptr<Hardware::Connection>& connection : m_objectsVector)
 		{

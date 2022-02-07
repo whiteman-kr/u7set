@@ -1119,7 +1119,7 @@ namespace Builder
 
 		if (txDiscretes.count() > 0)
 		{
-			for(Hardware::TxRxSignalShared txDiscrete :  txDiscretes)
+			for(const Hardware::TxRxSignalShared& txDiscrete :  txDiscretes)
 			{
 				str = QString("\t%1 <= in_data(%2);").
 						arg(txDiscrete->appSignalID().remove("#")).

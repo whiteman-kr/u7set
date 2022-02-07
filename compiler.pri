@@ -3,7 +3,7 @@
 #
 win32 {
     CONFIG -= c++17
-	CONFIG += c++latest
+    CONFIG += c++latest
 }
 unix {
     CONFIG -= c++17

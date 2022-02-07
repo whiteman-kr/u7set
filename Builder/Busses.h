@@ -114,7 +114,7 @@ namespace Builder
 		static const QString INVALUD_BUS_SIGNAL_ID;
 
 	public:
-		Bus(const Busses& busses, const VFrame30::Bus bus, IssueLogger* log);
+		Bus(const Busses& busses, const VFrame30::Bus& bus, IssueLogger* log);
 
 		bool init();
 

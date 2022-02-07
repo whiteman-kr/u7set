@@ -162,7 +162,7 @@ namespace Afb
 
 				if (isTrue == true || isFalse == true)
 				{
-					Q_ASSERT(isTrue * isFalse == 0);
+					Q_ASSERT((isTrue == true && isFalse == false) || (isTrue == false && isFalse == true));
 					return setValue(isTrue);
 				}
 

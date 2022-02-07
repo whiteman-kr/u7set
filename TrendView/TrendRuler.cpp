@@ -130,7 +130,7 @@ namespace TrendLib
 	void TrendRulerSet::deleteRuler(const TimeStamp& rulerTimeStamp)
 	{
 		auto it = std::remove_if(m_rulers.begin(), m_rulers.end(),
-								[&rulerTimeStamp](TrendRuler& ruler)
+								[&rulerTimeStamp](const TrendRuler& ruler)
 								{
 									return ruler.timeStamp() == rulerTimeStamp;
 								});

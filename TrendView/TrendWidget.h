@@ -25,7 +25,7 @@ namespace TrendLib
 		Q_OBJECT
 
 	public:
-		explicit RenderThread(Trend* trend, ITrendDataProvider* dataProvider, QObject* parent = 0);
+		explicit RenderThread(Trend* trend, ITrendDataProvider* dataProvider, QObject* parent = nullptr);
 		virtual ~RenderThread();
 
 	public:

@@ -211,7 +211,7 @@ namespace VFrame30
 				return ErrorCode::InternalError;
 			}
 
-			for (std::shared_ptr<SchemaItem> sourceItem : sourceLayer->Items)
+			for (const std::shared_ptr<SchemaItem>& sourceItem : sourceLayer->Items)
 			{
 				// Make a deep copy of source item, set new guid and label to it
 				//

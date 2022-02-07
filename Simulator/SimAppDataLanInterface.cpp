@@ -13,9 +13,4 @@ namespace Sim
 
 		return;
 	}
-
-	AppDataLanInterface::~AppDataLanInterface()
-	{
-	}
-
 }

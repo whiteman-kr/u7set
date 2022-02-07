@@ -1,6 +1,6 @@
 #include "SourceBase.h"
 
-#include <assert.h>
+#include <cassert>
 #include <QFile>
 
 #include "../../UtilsLib/XmlHelper.h"

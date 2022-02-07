@@ -583,7 +583,7 @@ namespace Sim
 			}
 		}
 
-		return std::shared_ptr<LogicModule>();
+		return {};
 	}
 
 	std::vector<std::shared_ptr<LogicModule>> Simulator::logicModules() const

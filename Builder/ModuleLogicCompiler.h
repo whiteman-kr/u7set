@@ -280,7 +280,7 @@ namespace Builder
 		AppSignal* getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal, const QString& busTypeID);
 		AppSignal* getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal);
 		AppSignal* getCompatibleConnectedSignal(const LogicPin& outPin, const AppSignal& s);
-		AppSignal* getCompatibleConnectedBusSignal(const LogicPin& outPin, const QString busTypeID);
+		AppSignal* getCompatibleConnectedBusSignal(const LogicPin& outPin, const QString& busTypeID);
 		bool isCompatible(const LogicAfbSignal& outAfbSignal, const QString& busTypeID, const AppSignal* s);
 
 		bool isConnectedToTerminatorOnly(const LogicPin& outPin);

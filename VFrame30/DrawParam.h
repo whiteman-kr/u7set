@@ -20,12 +20,11 @@ namespace VFrame30
 	class AppSignalController;
 	class TuningController;
 
-	class CDrawParam
+	class CDrawParam final
 	{
 	public:
 		CDrawParam(void) = delete;
 		CDrawParam(QPainter* painter, Schema* schema, const SchemaView* view, double gridSize, int pinGridStep);
-		virtual ~CDrawParam(void);
 
 	public:
 		QPainter* painter();

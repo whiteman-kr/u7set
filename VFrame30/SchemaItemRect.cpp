@@ -334,7 +334,7 @@ namespace VFrame30
 	}
 	void SchemaItemRect::setText(QString value)
 	{
-		m_text = value;
+		m_text = std::move(value);
 	}
 
 	bool SchemaItemRect::wordWrap() const

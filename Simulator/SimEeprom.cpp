@@ -12,10 +12,6 @@ namespace Sim
 	{
 	}
 
-	Eeprom::~Eeprom()
-	{
-	}
-
 	bool Eeprom::init(const Hardware::ModuleFirmwareData& data)
 	{
 		m_uartId = static_cast<UartId>(data.uartId);

@@ -106,7 +106,7 @@ namespace VFrame30
 		points.clear();
 		for (int i = 0; i < posConnectionImplMessage.points().size(); i++)
 		{
-			points.push_back(SchemaPoint(posConnectionImplMessage.points(i)));
+			points.emplace_back(posConnectionImplMessage.points(i));
 		}
 
 		return true;
@@ -515,7 +515,7 @@ namespace VFrame30
 	{
 		if (points.size() == 0)
 		{
-			return QRectF();
+			return {};
 		}
 
 		double l = points.front().X;

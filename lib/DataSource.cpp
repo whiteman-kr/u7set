@@ -921,7 +921,7 @@ bool DataSourceOnline::processRupFrameTimeQueue(const QThread* thread)
 
 			break;
 		}
-		while(1);
+		while(true);
 
 		m_rupFrameTimeQueue.completePop(thread);
 

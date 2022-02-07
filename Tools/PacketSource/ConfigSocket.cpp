@@ -266,7 +266,8 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
 
 	emit configurationLoaded();
 
-	QtConcurrent::run(ConfigSocket::loadSignalBase, this);
+	auto runResult = QtConcurrent::run(ConfigSocket::loadSignalBase, this);
+	Q_UNUSED(runResult);
 
 	return;
 }

@@ -30,8 +30,8 @@ namespace Sim
 	//
 	struct SimControlRunStruct
 	{
-		SimControlRunStruct(const std::shared_ptr<LogicModule>& lm) :
-			m_lm(lm)
+		SimControlRunStruct(std::shared_ptr<LogicModule> lm) :
+			m_lm(std::move(lm))
 		{
 		}
 

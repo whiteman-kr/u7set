@@ -704,7 +704,7 @@ namespace VFrame30
 				return p.afbParamValue().toVariant();
 			}
 		}
-		return QVariant();
+		return {};
 	}
 
 	Afb::AfbParam SchemaItemAfb::afbParam(const QString& name)
@@ -717,7 +717,7 @@ namespace VFrame30
 			}
 		}
 
-		return Afb::AfbParam();
+		return {};
 	}
 
 	std::optional<bool> SchemaItemAfb::getAssignFlagsValue() const
@@ -1130,12 +1130,12 @@ namespace VFrame30
 
 	void SchemaItemAfb::addInputSignal(QString caption, int type, int opIndex, int /*size*/)
 	{
-		addInput(opIndex, static_cast<E::SignalType>(type), caption);
+		addInput(opIndex, static_cast<E::SignalType>(type), std::move(caption));
 	}
 
 	void SchemaItemAfb::addOutputSignal(QString caption, int type, int opIndex, int /*size*/)
 	{
-		addOutput(opIndex, static_cast<E::SignalType>(type), caption);
+		addOutput(opIndex, static_cast<E::SignalType>(type), std::move(caption));
 	}
 
 	void SchemaItemAfb::removeInputSignals()

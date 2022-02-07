@@ -165,7 +165,7 @@ R"+++((function(lastOverrideValue, workcycle)
 
 	public:
 		explicit OverrideSignals(Sim::Simulator* simulator, QObject* parent = nullptr);
-		virtual ~OverrideSignals();
+		virtual ~OverrideSignals() = default;
 
 	public:
 		void clear();

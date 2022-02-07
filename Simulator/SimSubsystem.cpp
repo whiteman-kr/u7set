@@ -168,7 +168,7 @@ namespace Sim
 
 		 if (it == m_devicesByEquipmentId.end())
 		 {
-			 return std::shared_ptr<LogicModule>();
+			 return {};
 		 }
 		 else
 		 {

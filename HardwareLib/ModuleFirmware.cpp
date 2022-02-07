@@ -12,7 +12,7 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QJsonArray>
-#include <math.h>
+#include <cmath>
 
 
 namespace Hardware
@@ -83,7 +83,7 @@ namespace Hardware
 		for (auto it : m_firmwareData)
 		{
 			ModuleFirmwareData& data = it.second;
-			result.push_back(std::make_pair(it.first, data.uartType));
+			result.emplace_back(it.first, data.uartType);
 		}
 
 		return result;

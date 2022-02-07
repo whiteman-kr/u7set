@@ -434,7 +434,7 @@ namespace VFrame30
 	{
 		if (schema() == nullptr)
 		{
-			return QString();
+			return {};
 		}
 
 		return schema()->schemaId();
@@ -444,7 +444,7 @@ namespace VFrame30
 	{
 		if (schema() == nullptr)
 		{
-			return QString();
+			return {};
 		}
 
 		return schema()->caption();

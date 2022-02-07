@@ -210,7 +210,6 @@ namespace Sim
 		Sim::AfbComponentInstance* afbComponentInstance(int opCode, int instanceNo);
 
 		bool setAfbParam(int afbOpCode, int instanceNo, const AfbComponentParam& param);
-		bool setAfbParam(int afbOpCode, int instanceNo, AfbComponentParam&& param);
 
 		// RAM access
 		//

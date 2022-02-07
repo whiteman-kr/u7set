@@ -8,7 +8,7 @@
 
 namespace Hardware
 {
-	ScriptDeviceObject::ScriptDeviceObject(std::shared_ptr<DeviceObject> deviceObject, QObject* parent /*= nullptr*/) :
+	ScriptDeviceObject::ScriptDeviceObject(const std::shared_ptr<DeviceObject>& deviceObject, QObject* parent /*= nullptr*/) :
 		QObject(parent),
 		m_deviceObject(deviceObject)
 	{
@@ -744,7 +744,7 @@ namespace Hardware
 	//
 	// AppSignal
 	//
-	ScriptDeviceAppSignal::ScriptDeviceAppSignal(std::shared_ptr<DeviceAppSignal> deviceAppSignal, QObject* parent /*= nullptr*/) :
+	ScriptDeviceAppSignal::ScriptDeviceAppSignal(const std::shared_ptr<DeviceAppSignal>& deviceAppSignal, QObject* parent /*= nullptr*/) :
 		ScriptDeviceObject(deviceAppSignal, parent)
 	{
 		assert(deviceAppSignal);

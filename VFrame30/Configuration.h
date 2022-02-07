@@ -13,8 +13,8 @@ namespace VFrame30
 		Q_OBJECT
 
 	public:
-		Configuration();
-		virtual ~Configuration();
+		Configuration() = default;
+		virtual ~Configuration() = default;
 
 		// Serialization
 		//

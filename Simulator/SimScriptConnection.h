@@ -144,7 +144,7 @@ namespace Sim
 		Q_PROPERTY(int dataSizeBits READ dataSizeBits CONSTANT)
 
 	public:
-		ScriptConnSignalInfo();
+		ScriptConnSignalInfo() = default;
 		ScriptConnSignalInfo(const ::ConnectionTxRxSignal& signalInfo);
 
 		QString appSignalID() const;

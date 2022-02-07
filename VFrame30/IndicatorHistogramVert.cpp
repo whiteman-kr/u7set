@@ -794,7 +794,7 @@ namespace VFrame30
 
 				// Add a grid point
 				//
-				auto addGridPoint = [this, &grids, &barRect, &schemaItem, factor, signalIndex, lowLimit](double value, double gridWidth, bool drawValue) -> void
+				auto addGridPoint = [this, &grids, &barRect, factor, signalIndex, lowLimit](double value, double gridWidth, bool drawValue) -> void
 				{
 					QString text;
 
@@ -872,7 +872,7 @@ namespace VFrame30
 		return;
 	}
 
-	void IndicatorHistogramVert::drawGrids(const std::vector<DrawGridStruct> grids, CDrawParam* drawParam, const QRectF barRect, const SchemaItemIndicator* item) const
+	void IndicatorHistogramVert::drawGrids(const std::vector<DrawGridStruct>& grids, CDrawParam* drawParam, const QRectF barRect, const SchemaItemIndicator* item) const
 	{
 		QPainter* p = drawParam->painter();
 		Q_ASSERT(p);
@@ -1413,7 +1413,7 @@ namespace VFrame30
 
 			for (const IndicatorSetpoint& is : signalSetpoints)
 			{
-				drawSetpoints.push_back(DrawSetpointStruct{signalIndex, barRects[signalIndex], is});
+				drawSetpoints.emplace_back(signalIndex, barRects[signalIndex], is);
 			}
 		}
 

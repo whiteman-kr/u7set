@@ -98,7 +98,7 @@ namespace VFrame30
 	QString SchemaItemBus::buildName() const
 	{
 		assert(false);
-		return QString();
+		return {};
 	}
 
 	void SchemaItemBus::setBusPins(const Bus& bus)
@@ -417,7 +417,7 @@ R"(<p><b>BusComposer:</b> Create a bus signal</p>
 		//
 		std::vector<std::shared_ptr<Property>> props = this->properties();
 
-		for (auto p : props)
+		for (const auto& p : props)
 		{
 			if (p->specific() == true)
 			{
@@ -454,7 +454,7 @@ R"(<p><b>BusComposer:</b> Create a bus signal</p>
 		for (const ::Proto::Property& p :  extractor.properties())
 		{
 			auto it = std::find_if(specificProps.begin(), specificProps.end(),
-				[p](std::shared_ptr<Property> dp)
+				[p](const std::shared_ptr<Property>& dp)
 				{
 					return dp->caption().toStdString() == p.name();
 				});
@@ -649,7 +649,7 @@ R"(<p><b>BusExtractor:</b> Get signal(s) from a bus</p>
 			QString propName = "ShowOut_" + busSignal.signalId();
 
 			auto it = std::find_if(props.begin(), props.end(),
-					[&propName](std::shared_ptr<Property> p)
+					[&propName](const std::shared_ptr<Property>& p)
 					{
 						return p->caption() == propName;
 					});
@@ -707,7 +707,7 @@ R"(<p><b>BusExtractor:</b> Get signal(s) from a bus</p>
 			QString propName = "ShowOut_" + busSignal.signalId();
 
 			auto it = std::find_if(props.begin(), props.end(),
-					[&propName](std::shared_ptr<Property> p)
+					[&propName](const std::shared_ptr<Property>& p)
 					{
 						return p->caption() == propName;
 					});

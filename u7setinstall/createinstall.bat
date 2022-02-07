@@ -26,7 +26,7 @@ md packages\u7set.tools.mconf\data
 echo --------------- Copying Source Files ------------------
 
 xcopy ..\bin\release\*.dll packages\u7set\data /sy
-copy ..\bin\release\vcredist_x64.exe packages\u7set\data
+copy ..\bin\release\vc_redist.x64.exe packages\u7set\data
 
 copy ..\bin\release\u7.exe packages\u7set.develop.rpct\data
 

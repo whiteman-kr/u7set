@@ -1,11 +1,6 @@
 #include "MonitorAppSettings.h"
 #include "../OnlineLib/SocketIO.h"
 
-
-MonitorAppSettings::MonitorAppSettings()
-{
-}
-
 MonitorAppSettings& MonitorAppSettings::instance()
 {
 	static MonitorAppSettings theSettings;

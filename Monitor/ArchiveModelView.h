@@ -32,7 +32,7 @@ Q_DECLARE_METATYPE(ArchiveColumns);
 class ArchiveSignalParam : public AppSignalParam
 {
 public:
-	ArchiveSignalParam() {}
+	ArchiveSignalParam() = default;
 	explicit ArchiveSignalParam(const AppSignalParam& _appSignalParam) : AppSignalParam(_appSignalParam), precision(_appSignalParam.precision()) {}
 
 	E::ValueViewType viewType = E::ValueViewType::Dec;
@@ -67,7 +67,7 @@ private:
 	//
 public:
 	void setParams(const std::vector<AppSignalParam>& appSignals, E::TimeType timeType);
-	void addData(std::shared_ptr<ArchiveChunk> chunk);
+	void addData(const std::shared_ptr<ArchiveChunk>& chunk);
 	void clear();
 
 	std::vector<ArchiveSignalParam> appSignals();

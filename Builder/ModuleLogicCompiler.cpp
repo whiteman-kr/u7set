@@ -3600,7 +3600,7 @@ namespace Builder
 		return getCompatibleConnectedSignal(outPin, dummySignal, busTypeID);
 	}
 
-	AppSignal* ModuleLogicCompiler::getCompatibleConnectedBusSignal(const LogicPin& outPin, const QString busTypeID)
+	AppSignal* ModuleLogicCompiler::getCompatibleConnectedBusSignal(const LogicPin& outPin, const QString& busTypeID)
 	{
 		LogicAfbSignal dummyBusSignal;
 
@@ -6853,7 +6853,6 @@ namespace Builder
 		{
 			if (item == nullptr)
 			{
-				result = false;
 				ASSERT_RESULT_FALSE_BREAK
 			}
 
@@ -7174,7 +7173,6 @@ namespace Builder
 		{
 			if (item == nullptr)
 			{
-				result = false;
 				ASSERT_RESULT_FALSE_BREAK
 			}
 
@@ -8043,7 +8041,6 @@ namespace Builder
 			if (firstCommand == true)
 			{
 				cmd.setComment(QString("refreshing loopback %1 (%2signal %3)").arg(loopbackID).arg(busStr).arg(lbSignal->signal()->appSignalID()));
-				firstCommand = false;
 			}
 
 			code->append(cmd);

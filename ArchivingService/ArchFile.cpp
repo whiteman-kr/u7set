@@ -411,7 +411,7 @@ ArchFindResult ArchFilePartition::binarySearch(E::TimeType timeType, qint64 time
 			break;
 		}
 	}
-	while(1);
+	while(true);
 
 	return ArchFindResult::SearchError;
 }

@@ -42,7 +42,7 @@ namespace Sim
 	{
 	public:
 		explicit Eeprom(UartId uartId = UartId::Undefined);
-		virtual ~Eeprom();
+		virtual ~Eeprom() = default;
 
 		// Access
 		//

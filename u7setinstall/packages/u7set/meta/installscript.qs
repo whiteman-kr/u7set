@@ -168,7 +168,7 @@ Component.prototype.installVCRedist = function()
 
         bld = parseInt(elements[elements.length-1]);
 
-        if (bld < 28720)
+        if (bld < 30708)
         {
             doInstall = true;
         }
@@ -177,7 +177,7 @@ Component.prototype.installVCRedist = function()
 
     if (doInstall)
     {
-        var vcPath = installer.value("TargetDir") + "/vcredist_x64.exe";
+        var vcPath = installer.value("TargetDir") + "/vc_redist.x64.exe";
         installer.execute(vcPath, "/norestart", "/passive");
     }
 }

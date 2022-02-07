@@ -33,7 +33,7 @@ namespace Hardware
 		Q_PROPERTY(int childrenCount READ childrenCount)
 
 	public:
-		ScriptDeviceObject(std::shared_ptr<DeviceObject> deviceObject, QObject* parent = nullptr);
+		ScriptDeviceObject(const std::shared_ptr<DeviceObject>& deviceObject, QObject* parent = nullptr);
 
 		std::shared_ptr<const DeviceObject> deviceObject() const;
 		std::shared_ptr<DeviceObject> deviceObject();
@@ -217,7 +217,7 @@ namespace Hardware
 		Q_OBJECT
 
 	public:
-		ScriptDeviceAppSignal(std::shared_ptr<DeviceAppSignal> deviceAppSignal, QObject* parent = nullptr);
+		ScriptDeviceAppSignal(const std::shared_ptr<DeviceAppSignal>& deviceAppSignal, QObject* parent = nullptr);
 
 	private:
 		const Hardware::DeviceAppSignal* appSignal() const;

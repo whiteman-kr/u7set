@@ -37,12 +37,10 @@ std::shared_ptr<VFrame30::Schema> MonitorSchemaManager::loadSchema(QString schem
 	bool result = m_configController->getFileBlockedById(schemaId, &data, &errorString);
 	if (result == false)
 	{
-		return std::shared_ptr<VFrame30::Schema>();
+		return {};
 	}
 
-	std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(data);
-
-	return schema;
+	return VFrame30::Schema::Create(data);
 }
 
 int MonitorSchemaManager::schemaCount() const
@@ -139,5 +137,5 @@ QString MonitorSchemaManager::onConfigurationArrivedScript() const
 
 void MonitorSchemaManager::setOnConfigurationArrivedScript(QString value)
 {
-	m_onConfigurationArrivedScript = value;
+	m_onConfigurationArrivedScript = std::move(value);
 }

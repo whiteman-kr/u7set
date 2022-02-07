@@ -215,7 +215,7 @@ void AppSignalPropertyManager::detectNewProperties(const AppSignal &signal)
 
 	AppSignalSpecPropValues spValues;
 
-	for(std::shared_ptr<Property> specificProperty : specificProperties)
+	for(const std::shared_ptr<Property>& specificProperty : specificProperties)
 	{
 		int index = m_propertyName2IndexMap.value(specificProperty->caption(), -1);
 		if (index != -1)

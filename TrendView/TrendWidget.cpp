@@ -1,7 +1,7 @@
 #include "TrendWidget.h"
 #include "../Proto/trends.pb.h"
 #include "TrendScale.h"
-#include <string.h>
+#include <cstring>
 
 namespace TrendLib
 {

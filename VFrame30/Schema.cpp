@@ -26,7 +26,7 @@ namespace VFrame30
 	// ScriptSchema
 	//
 	ScriptSchema::ScriptSchema(std::shared_ptr<Schema> schema) :
-		m_schema(schema)
+		m_schema(std::move(schema))
 	{
 		Q_ASSERT(m_schema);
 	}
@@ -829,7 +829,7 @@ namespace VFrame30
 		for (std::shared_ptr<VFrame30::SchemaItemAfb> si : schemaAfbItems)
 		{
 			auto foundIt = std::find_if(afbs.begin(), afbs.end(),
-				[&si](std::shared_ptr<Afb::AfbElement> afb)
+				[&si](const std::shared_ptr<Afb::AfbElement>& afb)
 				{
 					return si->afbStrID() == afb->strID();
 				});
@@ -874,7 +874,7 @@ namespace VFrame30
 
 		for (std::shared_ptr<SchemaLayer> l : Layers)
 		{
-			for (std::shared_ptr<SchemaItem> si : l->Items)
+			for (const std::shared_ptr<SchemaItem>& si : l->Items)
 			{
 				std::shared_ptr<VFrame30::SchemaItemUfb> schemaUfbItem = std::dynamic_pointer_cast<VFrame30::SchemaItemUfb>(si);
 
@@ -890,7 +890,7 @@ namespace VFrame30
 		for (std::shared_ptr<VFrame30::SchemaItemUfb> si : schemaUfbItems)
 		{
 			auto foundIt = std::find_if(ufbs.begin(), ufbs.end(),
-				[&si](std::shared_ptr<UfbSchema> ufb)
+				[&si](const std::shared_ptr<UfbSchema>& ufb)
 				{
 					return si->ufbSchemaId() == ufb->schemaId();
 				});
@@ -1012,7 +1012,7 @@ namespace VFrame30
 
 		for (std::shared_ptr<SchemaLayer> layer : Layers)
 		{
-			for (std::shared_ptr<SchemaItem> item : layer->Items)
+			for (const std::shared_ptr<SchemaItem>& item : layer->Items)
 			{
 				result.push_back(item->guid());
 			}
@@ -1043,7 +1043,7 @@ namespace VFrame30
 			}
 		}
 
-		return std::shared_ptr<SchemaItem>();
+		return {};
 	}
 
 	template<typename SchemaItemType>
@@ -1166,7 +1166,7 @@ namespace VFrame30
 		{
 			assert(engine);
 			assert(parentWidget);
-			return QJSValue();
+			return {};
 		}
 
 		QJSValue result = engine->evaluate(script);
@@ -1599,7 +1599,7 @@ namespace VFrame30
 		catch (...)
 		{
 			assert(false);
-			return QUuid();
+			return {};
 		}
 	}
 
@@ -1612,7 +1612,7 @@ namespace VFrame30
 		catch (...)
 		{
 			assert(false);
-			return std::shared_ptr<VFrame30::SchemaLayer>();
+			return {};
 		}
 	}
 
@@ -1735,7 +1735,7 @@ namespace VFrame30
 
 	void Schema::setPreDrawScript(QString value)
 	{
-		m_preDrawScript = value;
+		m_preDrawScript = std::move(value);
 	}
 
 	QString Schema::onShowScript() const
@@ -1745,7 +1745,7 @@ namespace VFrame30
 
 	void Schema::setOnShowScript(QString value)
 	{
-		m_onShowScript = value;
+		m_onShowScript = std::move(value);
 	}
 
 	//
@@ -1753,10 +1753,6 @@ namespace VFrame30
 	//				SchemaDetails
 	//
 	//
-	SchemaDetails::SchemaDetails() noexcept
-	{
-	}
-
 	SchemaDetails::SchemaDetails(const QString& details) noexcept
 	{
 		parseDetails(details);
@@ -2470,7 +2466,7 @@ namespace VFrame30
 	{
 		assert(details);
 
-		m_details[details->m_schemaId] = details;
+		m_details[details->m_schemaId] = std::move(details);
 
 		return;
 	}

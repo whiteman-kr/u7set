@@ -615,12 +615,12 @@ namespace Sim
 
 	RamAddress ScriptSimulator::createRamAddress()
 	{
-		return RamAddress();
+		return {};
 	}
 
 	RamAddress ScriptSimulator::createRamAddress(int offset, int bit)
 	{
-		return RamAddress(offset, bit);
+		return {static_cast<quint32>(offset), static_cast<quint32>(bit)};
 	}
 
 	ScopedLog& ScriptSimulator::log()

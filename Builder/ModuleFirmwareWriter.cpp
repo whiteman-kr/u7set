@@ -502,7 +502,7 @@ namespace Hardware
 
 						// Description header string
 
-						QString descriptionHeaderString = "Version;" + CsvFile::getCsvString(channelData.descriptionFields, true);
+						QString descriptionHeaderString = "Version;" + CsvFile::stringsToCSV(channelData.descriptionFields, true);
 
 						jDescription.insert("desc fields", descriptionHeaderString);
 
@@ -518,7 +518,7 @@ namespace Hardware
 								return false;
 							}
 
-							QString descriptionString = QString("%1;%2").arg(channelData.descriptionFieldsVersion).arg(CsvFile::getCsvString(di, true));
+							QString descriptionString = QString("%1;%2").arg(channelData.descriptionFieldsVersion).arg(CsvFile::stringsToCSV(di, true));
 
 							jDescription.insert("desc" + QString::number(diIndex++).rightJustified(8, '0'), descriptionString);
 						}

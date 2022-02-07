@@ -402,8 +402,8 @@ namespace Builder
 	//
 	// ------------------------------------------------------------------------
 
-	AppLogicItem::AppLogicItem(std::shared_ptr<VFrame30::FblItemRect> fblItem,
-							   std::shared_ptr<VFrame30::Schema> schema) :
+	AppLogicItem::AppLogicItem(const std::shared_ptr<VFrame30::FblItemRect>& fblItem,
+							   const std::shared_ptr<VFrame30::Schema>& schema) :
 		m_fblItem(fblItem),
 		m_schema(schema)
 	{
@@ -947,9 +947,9 @@ namespace Builder
 		return AppLogicModule::checkItemsRelationsConsistency(m_equipmentId, m_items, log);
 	}
 
-	bool AppLogicModule::checkItemsRelationsConsistency(QString equipmentId,
-															 const std::list<AppLogicItem>& items,
-															 IssueLogger* log)
+	bool AppLogicModule::checkItemsRelationsConsistency(const QString& equipmentId,
+														const std::list<AppLogicItem>& items,
+														IssueLogger* log)
 	{
 		if (log == nullptr)
 		{
@@ -1200,7 +1200,7 @@ namespace Builder
 
 		const QUuid& sourceOutputUuid = in.associatedIOs().front();
 		auto sourceItemIt = std::find_if(m_fblItemsAcc.begin(), m_fblItemsAcc.end(),
-								   [&sourceOutputUuid](std::pair<const QUuid, Builder::AppLogicItem> alip)
+								   [&sourceOutputUuid](const std::pair<const QUuid, Builder::AppLogicItem>& alip)
 								   {
 										return alip.second.m_fblItem->hasOutput(sourceOutputUuid);
 								   });
@@ -1227,7 +1227,7 @@ namespace Builder
 		for (const QUuid& targetInputUuid : out.associatedIOs())
 		{
 			auto targetItemIt = std::find_if(m_fblItemsAcc.begin(), m_fblItemsAcc.end(),
-									   [&targetInputUuid](std::pair<const QUuid, Builder::AppLogicItem> alip)
+									   [&targetInputUuid](const std::pair<const QUuid, Builder::AppLogicItem>& alip)
 									   {
 											return alip.second.m_fblItem->hasInput(targetInputUuid);
 									   });
@@ -1490,7 +1490,7 @@ namespace Builder
 		//
 		for (auto lit = signalInputItems.begin(); lit != signalInputItems.end(); ++lit)
 		{
-			QString inputStrId = lit.key();
+			const QString& inputStrId = lit.key();
 
 			auto outputIt = signalOutputItems.find(inputStrId);
 
@@ -1761,7 +1761,7 @@ namespace Builder
 				QThread::yieldCurrentThread();
 			}
 		}
-		while (1);
+		while (true);
 
 		for (QFuture<bool>& task : orderTasks)
 		{
@@ -2537,7 +2537,7 @@ namespace Builder
 
 			// Remove Fake Items
 			//
-			for (SchemaItemPtr fakeItem : fakeItems)
+			for (const SchemaItemPtr& fakeItem : fakeItems)
 			{
 				module->removeInOutItemKeepAssoc(fakeItem->guid());
 			}
@@ -2645,7 +2645,7 @@ namespace Builder
 		return m_modules;
 	}
 
-	std::shared_ptr<AppLogicModule> AppLogicData::module(QString moduleStrID)
+	std::shared_ptr<AppLogicModule> AppLogicData::module(const QString& moduleStrID)
 	{
 		for(std::shared_ptr<AppLogicModule> modulePtr : m_modules)
 		{
@@ -2663,7 +2663,7 @@ namespace Builder
 		return m_ufbs;
 	}
 
-	std::shared_ptr<AppLogicModule> AppLogicData::ufb(QString ufbId) const
+	std::shared_ptr<AppLogicModule> AppLogicData::ufb(const QString& ufbId) const
 	{
 		auto it = m_ufbs.find(ufbId);
 
@@ -3263,7 +3263,7 @@ namespace Builder
 				QThread::yieldCurrentThread();
 			}
 		}
-		while (1);
+		while (true);
 
 
 		for (auto& task : loadSchemaTasks)
@@ -4729,9 +4729,7 @@ namespace Builder
 					if (fbl.second->isSignalElement() == true)
 					{
 						const VFrame30::SchemaItemSignal* signalElement = fbl.second->toSignalElement();
-						Q_ASSERT(signalElement);
-
-						Q_ASSERT(signalElement->multiChannel() == false);
+						Q_ASSERT(signalElement && signalElement->multiChannel() == false);
 
 						QString appSignalId = signalElement->appSignalIds();
 

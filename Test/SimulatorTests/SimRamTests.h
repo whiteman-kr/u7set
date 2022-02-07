@@ -9,7 +9,7 @@ class SimRamTests : public QObject
 	Q_OBJECT
 
 public:
-	SimRamTests();
+	SimRamTests() = default;
 
 private slots:
 	void initTestCase();

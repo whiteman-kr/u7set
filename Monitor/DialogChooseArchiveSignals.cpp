@@ -238,7 +238,7 @@ void DialogChooseArchiveSignals::removeSelectedSignal()
 	return;
 }
 
-bool DialogChooseArchiveSignals::archiveSignalsHasSignalId(QString signalId)
+bool DialogChooseArchiveSignals::archiveSignalsHasSignalId(const QString& signalId)
 {
 	int itemCount = ui->archiveSignals->topLevelItemCount();
 
@@ -561,7 +561,7 @@ QVariant FilteredArchiveSignalsModel::headerData(int section, Qt::Orientation or
 		}
 	}
 
-	return QVariant();
+	return {};
 }
 
 QVariant FilteredArchiveSignalsModel::data(const QModelIndex& index, int role) const
@@ -576,7 +576,7 @@ QVariant FilteredArchiveSignalsModel::data(const QModelIndex& index, int role) c
 			if (row < 0 || row >= static_cast<int>(m_signalIndexes.size()))
 			{
 				Q_ASSERT(row >= 0 && row < static_cast<int>(m_signalIndexes.size()));
-				return QVariant();
+				return {};
 			}
 
 			int signalIndex = m_signalIndexes[row];
@@ -585,7 +585,7 @@ QVariant FilteredArchiveSignalsModel::data(const QModelIndex& index, int role) c
 				signalIndex >= static_cast<int>(m_signals.size()))
 			{
 				Q_ASSERT(signalIndex >= 0 &&  signalIndex < static_cast<int>(m_signals.size()));
-				return QVariant();
+				return {};
 			}
 
 			const AppSignalParam& signalParam = m_signals[signalIndex];
@@ -602,13 +602,13 @@ QVariant FilteredArchiveSignalsModel::data(const QModelIndex& index, int role) c
 				case E::SignalType::Bus:		return QString("B");
 				default:
 					Q_ASSERT(false);
-					return QVariant();
+					return {};
 				}
 			case 2:
 				return signalParam.caption();
 			default:
 				Q_ASSERT(false);
-				return QVariant();
+				return {};
 			}
 		}
 		break;
@@ -617,7 +617,7 @@ QVariant FilteredArchiveSignalsModel::data(const QModelIndex& index, int role) c
 			if (row < 0 || row >= static_cast<int>(m_signalIndexes.size()))
 			{
 				Q_ASSERT(row >= 0 && row < static_cast<int>(m_signalIndexes.size()));
-				return QVariant();
+				return {};
 			}
 
 			int signalIndex = m_signalIndexes[row];
@@ -626,7 +626,7 @@ QVariant FilteredArchiveSignalsModel::data(const QModelIndex& index, int role) c
 				signalIndex >= static_cast<int>(m_signals.size()))
 			{
 				Q_ASSERT(signalIndex >= 0 &&  signalIndex < static_cast<int>(m_signals.size()));
-				return QVariant();
+				return {};
 			}
 
 			const AppSignalParam& signalParam = m_signals[signalIndex];
@@ -640,10 +640,8 @@ QVariant FilteredArchiveSignalsModel::data(const QModelIndex& index, int role) c
 		}
 		break;
 	default:
-		return QVariant();
+		return {};
 	}
-
-	//return QVariant();	unreachable
 }
 
 void FilteredArchiveSignalsModel::filterSignals(DialogChooseArchiveSignals::ArchiveSignalType signalType, QString signalIdFilter, QString schemaId)
@@ -765,7 +763,7 @@ AppSignalParam FilteredArchiveSignalsModel::signalByRow(int row) const
 	if (row < 0 || row >= static_cast<int>(m_signalIndexes.size()))
 	{
 		Q_ASSERT(row >= 0 && row < static_cast<int>(m_signalIndexes.size()));
-		return AppSignalParam();
+		return {};
 	}
 
 	int signalIndex = m_signalIndexes[row];
@@ -773,7 +771,7 @@ AppSignalParam FilteredArchiveSignalsModel::signalByRow(int row) const
 	if (signalIndex < 0 || signalIndex >= static_cast<int>(m_signals.size()))
 	{
 		Q_ASSERT(signalIndex >= 0 && signalIndex < static_cast<int>(m_signals.size()));
-		return AppSignalParam();
+		return {};
 	}
 
 	return m_signals[signalIndex];

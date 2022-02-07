@@ -3,7 +3,7 @@
 #endif
 
 #include "SocketIO.h"
-#include <assert.h>
+#include <cassert>
 
 QString getNetworkErrorStr(NetworkError err)
 {

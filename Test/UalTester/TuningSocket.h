@@ -1,7 +1,7 @@
 #ifndef TUNINGSOCKET_H
 #define TUNINGSOCKET_H
 
-#include <assert.h>
+#include <cassert>
 
 // This class is designed to receive signals from TuningSrv
 //

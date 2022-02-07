@@ -574,10 +574,6 @@ namespace Sim
 		return;
 	}
 
-	OverrideSignals::~OverrideSignals()
-	{
-	}
-
 	void OverrideSignals::clear()
 	{
 		{

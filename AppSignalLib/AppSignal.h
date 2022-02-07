@@ -119,7 +119,7 @@ class AppSignalSpecPropValue
 public:
 	AppSignalSpecPropValue();
 
-	bool create(std::shared_ptr<Property> prop);
+	bool create(const std::shared_ptr<Property>& prop);
 	bool create(const QString& name, const QVariant& value, bool isEnum);
 
 	bool setValue(const QString& name, const QVariant& value, bool isEnum);

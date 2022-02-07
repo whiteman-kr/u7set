@@ -5,24 +5,28 @@
 #include "CsvFile.h"
 #include <QVariant>
 
-QString CsvFile::getCsvString(const QStringList& strings, bool replaceSeparatorsAndQuotes)
+QString CsvFile::stringsToCSV(const QStringList& strings, bool replaceSeparatorsAndQuotes)
 {
 	static const QChar semicolon = ';';
 	static const QChar comma = ',';
 	static const QChar quotes = '"';
 	static const QChar singleQuotes = '\'';
-	static const QLatin1String doubleQuotes = QLatin1String("\"\"");
+	static const QLatin1String singleQuotesStr = QLatin1String("\"");
+	static const QLatin1String doubleQuotesStr = QLatin1String("\"\"");
 
 	QString result;
 
 	qsizetype count = strings.size();
 
-	for (QString s : strings)
+	for (int i = 0; i < count; i++)
 	{
+		QString s = strings[i];
+
 		if (replaceSeparatorsAndQuotes == true)
 		{
-			s = s.replace(quotes, singleQuotes);
-			s = s.replace(semicolon, comma);
+			s.replace(quotes, singleQuotes);
+			s.replace(semicolon, comma);
+			result += s;
 		}
 		else
 		{
@@ -35,9 +39,7 @@ QString CsvFile::getCsvString(const QStringList& strings, bool replaceSeparators
 
 			if (s.contains(quotes) == true)
 			{
-				// replace quotes to double quotes
-				//
-				s = s.replace(quotes, doubleQuotes);
+				s.replace(singleQuotesStr, doubleQuotesStr);
 				externalQuotes = true;
 			}
 
@@ -45,23 +47,24 @@ QString CsvFile::getCsvString(const QStringList& strings, bool replaceSeparators
 			{
 				// place the expression to external quotes
 				//
-				s = quotes + s + quotes;
+				result += quotes + s + quotes;
+			}
+			else
+			{
+				result += s;
 			}
 		}
 
-		result += s;
-
-		if (count > 1)
+		if (i != count - 1)
 		{
 			result += semicolon;
-			count--;
 		}
 	}
 
 	return result;
 }
 
-QString CsvFile::getCsvString(const QVariantList& strings, bool replaceSeparatorsAndQuotes)
+QString CsvFile::stringsToCSV(const QVariantList& strings, bool replaceSeparatorsAndQuotes)
 {
 	QStringList l;
 
@@ -70,5 +73,29 @@ QString CsvFile::getCsvString(const QVariantList& strings, bool replaceSeparator
 		l << s.toString();
 	}
 
-	return getCsvString(l, replaceSeparatorsAndQuotes);
+	return stringsToCSV(l, replaceSeparatorsAndQuotes);
+}
+
+QStringList CsvFile::csvToStrings(const QString& csvSting)
+{
+	static const QLatin1String singleQuotesStr = QLatin1String("\"");
+	static const QLatin1String doubleQuotesStr = QLatin1String("\"\"");
+
+	QStringList result;
+
+	// Regular expression was taken from https://forum.qt.io/topic/119076/qregexp-to-parse-a-csv-file
+	//
+	const QRegularExpression regExp(R"x((\;|\n|^)(?:"([^"]*(?:""[^"]*)*)"|([^"\;\n]*)))x");
+
+	QRegularExpressionMatchIterator matchIt = regExp.globalMatch(csvSting);
+	while (matchIt.hasNext())
+	{
+		const QRegularExpressionMatch match = matchIt.next();
+
+		QString s = match.capturedTexts().last();
+		s.replace(doubleQuotesStr, singleQuotesStr);
+		result.push_back(s);
+	}
+
+	return result;
 }

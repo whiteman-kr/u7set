@@ -23,7 +23,7 @@ namespace Builder
 		:QObject(parent),
 		  m_signal(signal),
 		  m_offsetW(offsetW),
-		  m_busTypeId(busTypeId)
+		  m_busTypeId(std::move(busTypeId))
 	{
 
 	}

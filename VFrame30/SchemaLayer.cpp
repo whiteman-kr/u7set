@@ -182,7 +182,7 @@ namespace VFrame30
 		}
 		else
 		{
-			return std::shared_ptr<SchemaItem>();
+			return {};
 		}
 	}
 

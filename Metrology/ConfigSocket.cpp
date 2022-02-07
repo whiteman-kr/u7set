@@ -1,6 +1,6 @@
 #include "ConfigSocket.h"
 
-#include <assert.h>
+#include <cassert>
 #include <QtConcurrent>
 
 #include "../lib/SoftwareSettings.h"

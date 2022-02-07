@@ -125,7 +125,7 @@ namespace VFrame30
 
 	QString SchemaItemTerminator::buildName() const
 	{
-		return QString("Terminator");
+		return QLatin1String{"Terminator"};
 	}
 
 }

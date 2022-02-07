@@ -107,63 +107,63 @@ EditSchemaWidget::EditSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
 
 	// Left Button Down
 	//
-	m_mouseLeftDownStateAction.push_back(MouseStateAction(MouseState::None, std::bind(&EditSchemaWidget::mouseLeftDown_None, this, std::placeholders::_1)));
-	m_mouseLeftDownStateAction.push_back(MouseStateAction(MouseState::AddSchemaPosLineStartPoint, std::bind(&EditSchemaWidget::mouseLeftDown_AddSchemaPosLineStartPoint, this, std::placeholders::_1)));
-	m_mouseLeftDownStateAction.push_back(MouseStateAction(MouseState::AddSchemaPosRectStartPoint, std::bind(&EditSchemaWidget::mouseLeftDown_AddSchemaPosRectStartPoint, this, std::placeholders::_1)));
-	m_mouseLeftDownStateAction.push_back(MouseStateAction(MouseState::AddSchemaPosConnectionStartPoint, std::bind(&EditSchemaWidget::mouseLeftDown_AddSchemaPosConnectionStartPoint, this, std::placeholders::_1)));
+	m_mouseLeftDownStateAction.emplace_back(MouseState::None, std::bind(&EditSchemaWidget::mouseLeftDown_None, this, std::placeholders::_1));
+	m_mouseLeftDownStateAction.emplace_back(MouseState::AddSchemaPosLineStartPoint, std::bind(&EditSchemaWidget::mouseLeftDown_AddSchemaPosLineStartPoint, this, std::placeholders::_1));
+	m_mouseLeftDownStateAction.emplace_back(MouseState::AddSchemaPosRectStartPoint, std::bind(&EditSchemaWidget::mouseLeftDown_AddSchemaPosRectStartPoint, this, std::placeholders::_1));
+	m_mouseLeftDownStateAction.emplace_back(MouseState::AddSchemaPosConnectionStartPoint, std::bind(&EditSchemaWidget::mouseLeftDown_AddSchemaPosConnectionStartPoint, this, std::placeholders::_1));
 
 	// Left Button Up
 	//
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::Selection, std::bind(&EditSchemaWidget::mouseLeftUp_Selection, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::Moving, std::bind(&EditSchemaWidget::mouseLeftUp_Moving, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingTopLeft, std::bind(&EditSchemaWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingTop, std::bind(&EditSchemaWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingTopRight, std::bind(&EditSchemaWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingRight, std::bind(&EditSchemaWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingBottomRight, std::bind(&EditSchemaWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingBottom, std::bind(&EditSchemaWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingBottomLeft, std::bind(&EditSchemaWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingLeft, std::bind(&EditSchemaWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::MovingStartLinePoint, std::bind(&EditSchemaWidget::mouseLeftUp_MovingLinePoint, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::MovingEndLinePoint, std::bind(&EditSchemaWidget::mouseLeftUp_MovingLinePoint, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::AddSchemaPosLineEndPoint, std::bind(&EditSchemaWidget::mouseLeftUp_AddSchemaPosLineEndPoint, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::AddSchemaPosRectEndPoint, std::bind(&EditSchemaWidget::mouseLeftUp_AddSchemaPosRectEndPoint, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::AddSchemaPosConnectionNextPoint, std::bind(&EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::MovingHorizontalEdge, std::bind(&EditSchemaWidget::mouseLeftUp_MovingEdgeOrVertex, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::MovingVerticalEdge, std::bind(&EditSchemaWidget::mouseLeftUp_MovingEdgeOrVertex, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::MovingConnectionLinePoint, std::bind(&EditSchemaWidget::mouseLeftUp_MovingEdgeOrVertex, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.emplace_back(MouseState::Selection, std::bind(&EditSchemaWidget::mouseLeftUp_Selection, this, std::placeholders::_1));
+	m_mouseLeftUpStateAction.emplace_back(MouseState::Moving, std::bind(&EditSchemaWidget::mouseLeftUp_Moving, this, std::placeholders::_1));
+	m_mouseLeftUpStateAction.emplace_back(MouseState::SizingTopLeft, std::bind(&EditSchemaWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1));
+	m_mouseLeftUpStateAction.emplace_back(MouseState::SizingTop, std::bind(&EditSchemaWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1));
+	m_mouseLeftUpStateAction.emplace_back(MouseState::SizingTopRight, std::bind(&EditSchemaWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1));
+	m_mouseLeftUpStateAction.emplace_back(MouseState::SizingRight, std::bind(&EditSchemaWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1));
+	m_mouseLeftUpStateAction.emplace_back(MouseState::SizingBottomRight, std::bind(&EditSchemaWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1));
+	m_mouseLeftUpStateAction.emplace_back(MouseState::SizingBottom, std::bind(&EditSchemaWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1));
+	m_mouseLeftUpStateAction.emplace_back(MouseState::SizingBottomLeft, std::bind(&EditSchemaWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1));
+	m_mouseLeftUpStateAction.emplace_back(MouseState::SizingLeft, std::bind(&EditSchemaWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1));
+	m_mouseLeftUpStateAction.emplace_back(MouseState::MovingStartLinePoint, std::bind(&EditSchemaWidget::mouseLeftUp_MovingLinePoint, this, std::placeholders::_1));
+	m_mouseLeftUpStateAction.emplace_back(MouseState::MovingEndLinePoint, std::bind(&EditSchemaWidget::mouseLeftUp_MovingLinePoint, this, std::placeholders::_1));
+	m_mouseLeftUpStateAction.emplace_back(MouseState::AddSchemaPosLineEndPoint, std::bind(&EditSchemaWidget::mouseLeftUp_AddSchemaPosLineEndPoint, this, std::placeholders::_1));
+	m_mouseLeftUpStateAction.emplace_back(MouseState::AddSchemaPosRectEndPoint, std::bind(&EditSchemaWidget::mouseLeftUp_AddSchemaPosRectEndPoint, this, std::placeholders::_1));
+	m_mouseLeftUpStateAction.emplace_back(MouseState::AddSchemaPosConnectionNextPoint, std::bind(&EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint, this, std::placeholders::_1));
+	m_mouseLeftUpStateAction.emplace_back(MouseState::MovingHorizontalEdge, std::bind(&EditSchemaWidget::mouseLeftUp_MovingEdgeOrVertex, this, std::placeholders::_1));
+	m_mouseLeftUpStateAction.emplace_back(MouseState::MovingVerticalEdge, std::bind(&EditSchemaWidget::mouseLeftUp_MovingEdgeOrVertex, this, std::placeholders::_1));
+	m_mouseLeftUpStateAction.emplace_back(MouseState::MovingConnectionLinePoint, std::bind(&EditSchemaWidget::mouseLeftUp_MovingEdgeOrVertex, this, std::placeholders::_1));
 
 	// Moouse Mov
 	//
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::Scrolling, std::bind(&EditSchemaWidget::mouseMove_Scrolling, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::Selection, std::bind(&EditSchemaWidget::mouseMove_Selection, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::Moving, std::bind(&EditSchemaWidget::mouseMove_Moving, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingTopLeft, std::bind(&EditSchemaWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingTop, std::bind(&EditSchemaWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingTopRight, std::bind(&EditSchemaWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingRight, std::bind(&EditSchemaWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingBottomRight, std::bind(&EditSchemaWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingBottom, std::bind(&EditSchemaWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingBottomLeft, std::bind(&EditSchemaWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingLeft, std::bind(&EditSchemaWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::MovingStartLinePoint, std::bind(&EditSchemaWidget::mouseMove_MovingLinePoint, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::MovingEndLinePoint, std::bind(&EditSchemaWidget::mouseMove_MovingLinePoint, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::AddSchemaPosLineEndPoint, std::bind(&EditSchemaWidget::mouseMove_AddSchemaPosLineEndPoint, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::AddSchemaPosRectEndPoint, std::bind(&EditSchemaWidget::mouseMove_AddSchemaPosRectEndPoint, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::AddSchemaPosConnectionNextPoint, std::bind(&EditSchemaWidget::mouseMove_AddSchemaPosConnectionNextPoint, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::MovingHorizontalEdge, std::bind(&EditSchemaWidget::mouseMove_MovingEdgesOrVertex, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::MovingVerticalEdge, std::bind(&EditSchemaWidget::mouseMove_MovingEdgesOrVertex, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::MovingConnectionLinePoint, std::bind(&EditSchemaWidget::mouseMove_MovingEdgesOrVertex, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.emplace_back(MouseState::Scrolling, std::bind(&EditSchemaWidget::mouseMove_Scrolling, this, std::placeholders::_1));
+	m_mouseMoveStateAction.emplace_back(MouseState::Selection, std::bind(&EditSchemaWidget::mouseMove_Selection, this, std::placeholders::_1));
+	m_mouseMoveStateAction.emplace_back(MouseState::Moving, std::bind(&EditSchemaWidget::mouseMove_Moving, this, std::placeholders::_1));
+	m_mouseMoveStateAction.emplace_back(MouseState::SizingTopLeft, std::bind(&EditSchemaWidget::mouseMove_SizingRect, this, std::placeholders::_1));
+	m_mouseMoveStateAction.emplace_back(MouseState::SizingTop, std::bind(&EditSchemaWidget::mouseMove_SizingRect, this, std::placeholders::_1));
+	m_mouseMoveStateAction.emplace_back(MouseState::SizingTopRight, std::bind(&EditSchemaWidget::mouseMove_SizingRect, this, std::placeholders::_1));
+	m_mouseMoveStateAction.emplace_back(MouseState::SizingRight, std::bind(&EditSchemaWidget::mouseMove_SizingRect, this, std::placeholders::_1));
+	m_mouseMoveStateAction.emplace_back(MouseState::SizingBottomRight, std::bind(&EditSchemaWidget::mouseMove_SizingRect, this, std::placeholders::_1));
+	m_mouseMoveStateAction.emplace_back(MouseState::SizingBottom, std::bind(&EditSchemaWidget::mouseMove_SizingRect, this, std::placeholders::_1));
+	m_mouseMoveStateAction.emplace_back(MouseState::SizingBottomLeft, std::bind(&EditSchemaWidget::mouseMove_SizingRect, this, std::placeholders::_1));
+	m_mouseMoveStateAction.emplace_back(MouseState::SizingLeft, std::bind(&EditSchemaWidget::mouseMove_SizingRect, this, std::placeholders::_1));
+	m_mouseMoveStateAction.emplace_back(MouseState::MovingStartLinePoint, std::bind(&EditSchemaWidget::mouseMove_MovingLinePoint, this, std::placeholders::_1));
+	m_mouseMoveStateAction.emplace_back(MouseState::MovingEndLinePoint, std::bind(&EditSchemaWidget::mouseMove_MovingLinePoint, this, std::placeholders::_1));
+	m_mouseMoveStateAction.emplace_back(MouseState::AddSchemaPosLineEndPoint, std::bind(&EditSchemaWidget::mouseMove_AddSchemaPosLineEndPoint, this, std::placeholders::_1));
+	m_mouseMoveStateAction.emplace_back(MouseState::AddSchemaPosRectEndPoint, std::bind(&EditSchemaWidget::mouseMove_AddSchemaPosRectEndPoint, this, std::placeholders::_1));
+	m_mouseMoveStateAction.emplace_back(MouseState::AddSchemaPosConnectionNextPoint, std::bind(&EditSchemaWidget::mouseMove_AddSchemaPosConnectionNextPoint, this, std::placeholders::_1));
+	m_mouseMoveStateAction.emplace_back(MouseState::MovingHorizontalEdge, std::bind(&EditSchemaWidget::mouseMove_MovingEdgesOrVertex, this, std::placeholders::_1));
+	m_mouseMoveStateAction.emplace_back(MouseState::MovingVerticalEdge, std::bind(&EditSchemaWidget::mouseMove_MovingEdgesOrVertex, this, std::placeholders::_1));
+	m_mouseMoveStateAction.emplace_back(MouseState::MovingConnectionLinePoint, std::bind(&EditSchemaWidget::mouseMove_MovingEdgesOrVertex, this, std::placeholders::_1));
 
 	// Mouse Right Button Down
 	//
 	//m_mouseRightDownStateAction.push_back(MouseStateAction(MouseState::None, std::bind(&EditSchemaWidget::mouseRightDown_None, this, std::placeholders::_1)));
-	m_mouseRightDownStateAction.push_back(MouseStateAction(MouseState::AddSchemaPosConnectionNextPoint, std::bind(&EditSchemaWidget::mouseRightDown_AddSchemaPosConnectionNextPoint, this, std::placeholders::_1)));
-	m_mouseRightDownStateAction.push_back(MouseStateAction(MouseState::MovingConnectionLinePoint, std::bind(&EditSchemaWidget::mouseRightDown_MovingEdgesOrVertex, this, std::placeholders::_1)));
+	m_mouseRightDownStateAction.emplace_back(MouseState::AddSchemaPosConnectionNextPoint, std::bind(&EditSchemaWidget::mouseRightDown_AddSchemaPosConnectionNextPoint, this, std::placeholders::_1));
+	m_mouseRightDownStateAction.emplace_back(MouseState::MovingConnectionLinePoint, std::bind(&EditSchemaWidget::mouseRightDown_MovingEdgesOrVertex, this, std::placeholders::_1));
 
 	// Mouse Right Button Up
 	//
-	m_mouseRightUpStateAction.push_back(MouseStateAction(MouseState::None, std::bind(&EditSchemaWidget::mouseRightUp_None, this, std::placeholders::_1)));
+	m_mouseRightUpStateAction.emplace_back(MouseState::None, std::bind(&EditSchemaWidget::mouseRightUp_None, this, std::placeholders::_1));
 
 	// Init Session Variables
 	//
@@ -3545,7 +3545,7 @@ void EditSchemaWidget::initMoveAfbsConnectionLinks(MouseState mouseState)
 	std::vector<SchemaItemPtr> selected = selectedNonLockedItems();
 	std::multiset<std::shared_ptr<VFrame30::SchemaItemLink>> commonLinks;
 
-	for (SchemaItemPtr item : selected)
+	for (const SchemaItemPtr& item : selected)
 	{
 		if (item->isFblItemRect() == false)
 		{

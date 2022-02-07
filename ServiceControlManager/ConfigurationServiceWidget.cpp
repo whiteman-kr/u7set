@@ -121,6 +121,8 @@ void ConfigurationServiceWidget::updateServiceState()
 		stateTabModel()->setData(stateTabModel()->index(6, 1), "???");
 		stateTabModel()->setData(stateTabModel()->index(7, 1), "???");
 		stateTabModel()->setData(stateTabModel()->index(8, 1), "???");
+
+		return;
 	}
 
 	const Network::ConfigurationServiceState& s = m_tcpClientSocket->serviceState();

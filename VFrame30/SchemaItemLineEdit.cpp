@@ -437,7 +437,7 @@ namespace VFrame30
 	}
 	void SchemaItemLineEdit::setText(QString value)
 	{
-		m_text = value;
+		m_text = std::move(value);
 	}
 
 	const QString& SchemaItemLineEdit::placeholderText() const

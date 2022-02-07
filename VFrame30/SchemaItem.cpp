@@ -318,13 +318,13 @@ namespace VFrame30
 		return true;
 	}
 
-	QJSValue SchemaItem::evaluateScript(QString script, QJSEngine* engine, QWidget* parentWidget) const
+	QJSValue SchemaItem::evaluateScript(const QString& script, QJSEngine* engine, QWidget* parentWidget) const
 	{
 		if (engine == nullptr)
 		{
 			assert(engine);
 			assert(parentWidget);
-			return QJSValue();
+			return {};
 		}
 
 		QJSValue result = engine->evaluate(script);
@@ -394,7 +394,7 @@ namespace VFrame30
 		//
 		std::vector<std::shared_ptr<Property>> props = properties();
 
-		for (auto p : props)
+		for (const auto& p : props)
 		{
 			if (p->visible() == false)
 			{
@@ -411,7 +411,7 @@ namespace VFrame30
 
 					if (valueText.contains(text, cs) == true)
 					{
-						result.push_back({p->caption(), valueText});
+						result.emplace_back(p->caption(), valueText);
 						continue;
 					}
 				}
@@ -423,7 +423,7 @@ namespace VFrame30
 
 					if (valueText.contains(text, cs) == true)
 					{
-						result.push_back({p->caption(), valueText});
+						result.emplace_back(p->caption(), valueText);
 						continue;
 					}
 				}
@@ -435,7 +435,7 @@ namespace VFrame30
 
 					if (valueText.contains(text, cs) == true)
 					{
-						result.push_back({p->caption(), valueText.join(QChar::LineFeed)});
+						result.emplace_back(p->caption(), valueText.join(QChar::LineFeed));
 						continue;
 					}
 				}
@@ -463,7 +463,7 @@ namespace VFrame30
 		//
 		std::vector<std::shared_ptr<Property>> props = properties();
 
-		for (auto p : props)
+		for (const auto& p : props)
 		{
 			if (p->visible() == false ||
 				p->readOnly() == true)
@@ -713,7 +713,7 @@ namespace VFrame30
 	std::vector<SchemaPoint> SchemaItem::getPointList() const
 	{
 		Q_ASSERT(false);
-		return std::vector<SchemaPoint>();
+		return {};
 	}
 
 	void SchemaItem::setPointList(const std::vector<SchemaPoint>& /*points*/)
@@ -934,7 +934,7 @@ namespace VFrame30
 		m_tags.clear();
 		m_tags.reserve(tags.size());
 
-		for (QString t : tags)
+		for (const QString& t : tags)
 		{
 			QString trimmed = t.trimmed();
 
@@ -1013,7 +1013,7 @@ namespace VFrame30
 
 	void SchemaItem::setClickScript(QString value)
 	{
-		m_clickScript = value;
+		m_clickScript = std::move(value);
 	}
 
 	QString SchemaItem::preDrawScript() const
@@ -1023,7 +1023,7 @@ namespace VFrame30
 
 	void SchemaItem::setPreDrawScript(QString value)
 	{
-		m_preDrawScript = value;
+		m_preDrawScript = std::move(value);
 	}
 
 	bool SchemaItem::blinkPhase() const
@@ -1051,7 +1051,7 @@ namespace VFrame30
 	QRectF SchemaItem::boundingRectInDocPt(const CDrawParam* /*drawParam*/) const
 	{
 		assert(false);		// Must be implemented in child classes
-		return QRectF();
+		return {};
 	}
 
 	QString SchemaItem::toolTipText(double dpiX, double dpiY, double devicePixelRatio) const

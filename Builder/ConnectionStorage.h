@@ -19,7 +19,7 @@ namespace Builder
 		QStringList connectionIds() const;
 		QStringList filterByMoudules(const QStringList& modules) const;
 
-		std::shared_ptr<Hardware::Connection> getPortConnection(QString portEquipmentId) const;
+		std::shared_ptr<Hardware::Connection> getPortConnection(const QString& portEquipmentId) const;
 
 		std::vector<std::shared_ptr<Hardware::Connection>> getConnections() const;
 
