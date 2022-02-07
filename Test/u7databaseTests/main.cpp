@@ -189,6 +189,7 @@ int runSpecificTest(const QStringList& cmdLineArgs, QStringList& specificArgs, b
 	bool returnCode = QTest::qExec(testObject, cmdLineArgs);
 
 	Hardware::shutdown();
+	google::protobuf::ShutdownProtobufLibrary();
 
 	delete testObject;
 

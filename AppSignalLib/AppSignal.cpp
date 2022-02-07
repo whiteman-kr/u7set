@@ -675,6 +675,7 @@ AppSignal::AppSignal(const AppSignal& s)
 AppSignal::AppSignal(const ID_AppSignalID& ids)
 {
 	m_ID = ids.ID;
+	m_signalGroupID = ids.signalGroupID;
 	m_appSignalID = ids.appSignalID;
 
 	m_isLoaded = false;
@@ -2609,7 +2610,12 @@ void AppSignalSet::append(const int& signalID, AppSignal* signal)
 
 	SignalPtrOrderedHash::append(signalID, signal);
 
-	m_groupSignals.insert(signal->signalGroupID(), signalID);
+	int groupID = signal->signalGroupID();
+
+	if (m_groupSignals.contains(groupID, signalID) == false)
+	{
+		m_groupSignals.insert(groupID, signalID);
+	}
 }
 
 void AppSignalSet::append(AppSignal* signal)

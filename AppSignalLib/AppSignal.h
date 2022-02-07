@@ -22,6 +22,7 @@ class XmlReadHelper;
 struct ID_AppSignalID
 {
 	int ID = -1;
+	int signalGroupID = -1;
 	QString appSignalID;
 };
 

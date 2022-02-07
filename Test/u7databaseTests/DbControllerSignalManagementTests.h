@@ -154,7 +154,7 @@ private:
 
 	QString getSignalsIDAppSignalID(int userID,
 									 bool withDeleted,
-									 std::vector<std::pair<int, QString>>* ids);
+									 std::vector<ID_AppSignalID>* ids);
 
 	QString addTestSignals(int userID,
 						   E::SignalType signalType,
@@ -168,17 +168,17 @@ private:
 	QString getActualSignalsSignalInstanceID(int userID, bool with_deleted, std::vector<int>* ids);
 	QString getLatestSignal(int userID, int signalID, AppSignal* s);
 
-	QString removePairsWithID(std::vector<std::pair<int, QString>>* pairs,
+	QString removePairsWithID(std::vector<ID_AppSignalID>* pairs,
 								const std::vector<int>& idsToRemove);
 
-	std::vector<std::pair<int, QString>> toPairsVector(const QVector<ID_AppSignalID>& qv);
+	std::vector<ID_AppSignalID> toPairsVector(const QVector<ID_AppSignalID>& qv);
 
 	bool findPairWithID(int id,
-							const std::vector<std::pair<int, QString>>& pairs,
-							std::pair<int, QString>* pair);
+							const std::vector<ID_AppSignalID>& pairs,
+							ID_AppSignalID* pair);
 
 	QString checkSignalIDsAppSignalID(std::vector<int> ids,
-									const std::vector<std::pair<int, QString>>& pairs);
+									const std::vector<ID_AppSignalID>& pairs);
 
 	int rand0to(int upRange) const;
 

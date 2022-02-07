@@ -392,6 +392,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0370.sql", "Upgrade to version 370, Added median_si/fp validity output to LM11-SR90"},
 	{":/DatabaseUpgrade/Upgrade0371.sql", "Upgrade to version 371, Bugfix with sin/cos opcode in LM11-SR90, LM8-SR10"},
 	{":/DatabaseUpgrade/Upgrade0372.sql", "Upgrade to version 372, Added Lan version attributes to LM Descriptions"},
+	{":/DatabaseUpgrade/Upgrade0373.sql", "Upgrade to version 373, Changes in function get_signals_id_appsignalid"},
 };
 
 int DbWorker::counter = 0;
@@ -4725,7 +4726,8 @@ void DbWorker::slot_getSignalsIDAppSignalID(QVector<ID_AppSignalID>* signalsIDAp
 	{
 
 		iasi.ID = q.value(0).toInt();
-		iasi.appSignalID = q.value(1).toString();
+		iasi.signalGroupID = q.value(1).toInt();
+		iasi.appSignalID = q.value(2).toString();
 
 		signalsIDAppSignalID->append(iasi);
 	}
@@ -5210,9 +5212,11 @@ void DbWorker::slot_addSignal(E::SignalType signalType, QVector<AppSignal>* newS
 
 bool DbWorker::addSignal(E::SignalType signalType, QVector<AppSignal>* newSignal)
 {
-	if (newSignal == nullptr)
+	TEST_PTR_RETURN_FALSE(newSignal);
+
+	if (newSignal->size() == 0)
 	{
-		assert(newSignal != nullptr);
+		Q_ASSERT(false);
 		return false;
 	}
 

@@ -984,7 +984,7 @@ void DbControllerSignalTests::test_getSignalsIDAppSignalID()
 
 	TS_VERIFY(addTestSignals(USER2_ID, E::SignalType::Analog, 1, 5 + rand0to(2), &user2SignalsIDs));
 
-	std::vector<std::pair<int,QString>> result;
+	std::vector<ID_AppSignalID> result;
 
 	// Admin should see all signals
 	//
@@ -1037,18 +1037,18 @@ void DbControllerSignalTests::test_getSignalsIDAppSignalID()
 
 	int id = user2SignalsIDs[0];
 
-	std::pair<int, QString> p;
+	ID_AppSignalID p;
 
 	QVERIFY(findPairWithID(id, result, &p));
 
-	const QString OLD_APP_SIGNAL_ID(p.second);
+	const QString OLD_APP_SIGNAL_ID(p.appSignalID);
 
 	TS_VERIFY(checkinSignals(USER2_ID, std::vector<int>({id}), "checkin user2 signal", nullptr));
 
 	TS_VERIFY(getSignalsIDAppSignalID(USER2_ID, true, &result));
 
 	QVERIFY(findPairWithID(id, result, &p) == true);
-	QVERIFY(p.second == OLD_APP_SIGNAL_ID);
+	QVERIFY(p.appSignalID == OLD_APP_SIGNAL_ID);
 
 	// try change AppSignalID under User3
 	//
@@ -1068,17 +1068,17 @@ void DbControllerSignalTests::test_getSignalsIDAppSignalID()
 	//
 	TS_VERIFY(getSignalsIDAppSignalID(USER2_ID, true, &result));
 	QVERIFY(findPairWithID(id, result, &p) == true);
-	QVERIFY(p.second == OLD_APP_SIGNAL_ID);
+	QVERIFY(p.appSignalID == OLD_APP_SIGNAL_ID);
 
 	// under Admin and User3, should see NEW_APP_SIGNAL_ID
 	//
 	TS_VERIFY(getSignalsIDAppSignalID(ADMIN_ID, true, &result));
 	QVERIFY(findPairWithID(id, result, &p) == true);
-	QVERIFY(p.second == NEW_APP_SIGNAL_ID);
+	QVERIFY(p.appSignalID == NEW_APP_SIGNAL_ID);
 
 	TS_VERIFY(getSignalsIDAppSignalID(USER3_ID, true, &result));
 	QVERIFY(findPairWithID(id, result, &p) == true);
-	QVERIFY(p.second == NEW_APP_SIGNAL_ID);
+	QVERIFY(p.appSignalID == NEW_APP_SIGNAL_ID);
 
 	TS_VERIFY(checkinSignals(USER3_ID, std::vector<int>({id}), "checkin user3 signal", nullptr));
 
@@ -1086,15 +1086,15 @@ void DbControllerSignalTests::test_getSignalsIDAppSignalID()
 	//
 	TS_VERIFY(getSignalsIDAppSignalID(ADMIN_ID, true, &result));
 	QVERIFY(findPairWithID(id, result, &p) == true);
-	QVERIFY(p.second == NEW_APP_SIGNAL_ID);
+	QVERIFY(p.appSignalID == NEW_APP_SIGNAL_ID);
 
 	TS_VERIFY(getSignalsIDAppSignalID(USER2_ID, true, &result));
 	QVERIFY(findPairWithID(id, result, &p) == true);
-	QVERIFY(p.second == NEW_APP_SIGNAL_ID);
+	QVERIFY(p.appSignalID == NEW_APP_SIGNAL_ID);
 
 	TS_VERIFY(getSignalsIDAppSignalID(USER3_ID, true, &result));
 	QVERIFY(findPairWithID(id, result, &p) == true);
-	QVERIFY(p.second == NEW_APP_SIGNAL_ID);
+	QVERIFY(p.appSignalID == NEW_APP_SIGNAL_ID);
 
 	db.close();
 }
@@ -1893,7 +1893,7 @@ void DbControllerSignalTests::dbcTest_getSignalsIDAppSignalID()
 	TS_VERIFY(addTestSignals(USER2_ID, E::SignalType::Analog, 1, 5 + rand0to(2), &stdUser2SignalsIDs));
 
 	QVector<ID_AppSignalID> qvResult;
-	std::vector<std::pair<int, QString>> result;
+	std::vector<ID_AppSignalID> result;
 
 	// Admin should see all signals
 	//
@@ -1947,18 +1947,18 @@ void DbControllerSignalTests::dbcTest_getSignalsIDAppSignalID()
 
 	int id = stdUser2SignalsIDs[0];
 
-	std::pair<int, QString> p;
+	ID_AppSignalID p;
 
 	QVERIFY(findPairWithID(id, result, &p));
 
-	const QString OLD_APP_SIGNAL_ID(p.second);
+	const QString OLD_APP_SIGNAL_ID(p.appSignalID);
 
 	TS_VERIFY(checkinSignals(USER2_ID, std::vector<int>({id}), "checkin user2 signal", nullptr));
 
 	QVERIFY(m_dbcUser2->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
 
 	QVERIFY(findPairWithID(id, result, &p) == true);
-	QVERIFY(p.second == OLD_APP_SIGNAL_ID);
+	QVERIFY(p.appSignalID == OLD_APP_SIGNAL_ID);
 
 	// try change AppSignalID under User3
 	//
@@ -1981,7 +1981,7 @@ void DbControllerSignalTests::dbcTest_getSignalsIDAppSignalID()
 	result = toPairsVector(qvResult);
 
 	QVERIFY(findPairWithID(id, result, &p) == true);
-	QVERIFY(p.second == OLD_APP_SIGNAL_ID);
+	QVERIFY(p.appSignalID == OLD_APP_SIGNAL_ID);
 
 	// under Admin and User3, should see NEW_APP_SIGNAL_ID
 	//
@@ -1989,14 +1989,14 @@ void DbControllerSignalTests::dbcTest_getSignalsIDAppSignalID()
 	result = toPairsVector(qvResult);
 
 	QVERIFY(findPairWithID(id, result, &p) == true);
-	QVERIFY(p.second == NEW_APP_SIGNAL_ID);
+	QVERIFY(p.appSignalID == NEW_APP_SIGNAL_ID);
 
 	QVERIFY(m_dbcUser3->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
 
 	result = toPairsVector(qvResult);
 
 	QVERIFY(findPairWithID(id, result, &p) == true);
-	QVERIFY(p.second == NEW_APP_SIGNAL_ID);
+	QVERIFY(p.appSignalID == NEW_APP_SIGNAL_ID);
 
 	TS_VERIFY(checkinSignals(USER3_ID, std::vector<int>({id}), "checkin user3 signal", nullptr));
 
@@ -2005,17 +2005,17 @@ void DbControllerSignalTests::dbcTest_getSignalsIDAppSignalID()
 	QVERIFY(m_dbcAdmin->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
 	result = toPairsVector(qvResult);
 	QVERIFY(findPairWithID(id, result, &p) == true);
-	QVERIFY(p.second == NEW_APP_SIGNAL_ID);
+	QVERIFY(p.appSignalID == NEW_APP_SIGNAL_ID);
 
 	QVERIFY(m_dbcUser2->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
 	result = toPairsVector(qvResult);
 	QVERIFY(findPairWithID(id, result, &p) == true);
-	QVERIFY(p.second == NEW_APP_SIGNAL_ID);
+	QVERIFY(p.appSignalID == NEW_APP_SIGNAL_ID);
 
 	QVERIFY(m_dbcUser3->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
 	result = toPairsVector(qvResult);
 	QVERIFY(findPairWithID(id, result, &p) == true);
-	QVERIFY(p.second == NEW_APP_SIGNAL_ID);
+	QVERIFY(p.appSignalID == NEW_APP_SIGNAL_ID);
 
 	db.close();
 }
@@ -2512,7 +2512,7 @@ QString DbControllerSignalTests::getSignalsIDs(int userID, bool withDeleted, std
 
 QString DbControllerSignalTests::getSignalsIDAppSignalID(int userID,
 														 bool withDeleted,
-														 std::vector<std::pair<int, QString>>* ids)
+														 std::vector<ID_AppSignalID>* ids)
 {
 	TS_TEST_PTR_RETURN(ids);
 
@@ -2524,10 +2524,11 @@ QString DbControllerSignalTests::getSignalsIDAppSignalID(int userID,
 												arg(userID).arg(withDeleted == true ? "true" : "false"));
 	while(q.next() == true)
 	{
-		std::pair<int, QString> p;
+		ID_AppSignalID p;
 
-		p.first = q.value(0).toInt();
-		p.second = q.value(1).toString();
+		p.ID = q.value(0).toInt();
+		p.signalGroupID = q.value(1).toInt();
+		p.appSignalID = q.value(2).toString();
 
 		ids->push_back(p);
 	}
@@ -2636,7 +2637,7 @@ QString DbControllerSignalTests::getLatestSignal(int userID, int signalID, AppSi
 	TS_RETURN_SUCCESS();
 }
 
-QString DbControllerSignalTests::removePairsWithID(std::vector<std::pair<int, QString>>* pairs,
+QString DbControllerSignalTests::removePairsWithID(std::vector<ID_AppSignalID>* pairs,
 												   const std::vector<int>& idsToRemove)
 {
 	TS_TEST_PTR_RETURN(pairs);
@@ -2645,7 +2646,7 @@ QString DbControllerSignalTests::removePairsWithID(std::vector<std::pair<int, QS
 	{
 		for(auto it = pairs->begin(); it != pairs->end(); it++)
 		{
-			if (it->first == idToRemove)
+			if (it->ID == idToRemove)
 			{
 				pairs->erase(it, it + 1);
 				break;
@@ -2656,27 +2657,27 @@ QString DbControllerSignalTests::removePairsWithID(std::vector<std::pair<int, QS
 	TS_RETURN_SUCCESS();
 }
 
-std::vector<std::pair<int, QString>> DbControllerSignalTests::toPairsVector(const QVector<ID_AppSignalID>& qv)
+std::vector<ID_AppSignalID> DbControllerSignalTests::toPairsVector(const QVector<ID_AppSignalID>& qv)
 {
-	std::vector<std::pair<int, QString>> result;
+	std::vector<ID_AppSignalID> result;
 
 	for(const ID_AppSignalID& v : qv)
 	{
-		result.push_back({v.ID, v.appSignalID});
+		result.push_back({v.ID, v.signalGroupID, v.appSignalID});
 	}
 
 	return result;
 }
 
 bool DbControllerSignalTests::findPairWithID(	int id,
-												const std::vector<std::pair<int, QString>>& pairs,
-												std::pair<int, QString>* pair)
+												const std::vector<ID_AppSignalID>& pairs,
+												ID_AppSignalID* pair)
 {
 	TEST_PTR_RETURN_FALSE(pair);
 
-	for(auto p : pairs)
+	for(auto& p : pairs)
 	{
-		if (p.first == id)
+		if (p.ID == id)
 		{
 			*pair = p;
 			return true;
@@ -2687,17 +2688,17 @@ bool DbControllerSignalTests::findPairWithID(	int id,
 }
 
 QString DbControllerSignalTests::checkSignalIDsAppSignalID(std::vector<int> ids,
-								const std::vector<std::pair<int, QString>>& pairs)
+								const std::vector<ID_AppSignalID>& pairs)
 {
 	for(int id : ids)
 	{
-		std::pair<int, QString> p;
+		ID_AppSignalID p;
 
 		bool find = findPairWithID(id, pairs, &p);
 
 		TS_VERIFY_RETURN_ERR(find == true, "Pair SignalID + AppSignalID is not found");
 
-		TS_VERIFY_RETURN_ERR(p.second.startsWith(QString("#SIGNAL%1").arg(id)) == true, "AppSignalID is wrong");
+		TS_VERIFY_RETURN_ERR(p.appSignalID.startsWith(QString("#SIGNAL%1").arg(id)) == true, "AppSignalID is wrong");
 	}
 
 	TS_RETURN_SUCCESS();

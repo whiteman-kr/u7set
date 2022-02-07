@@ -1157,6 +1157,12 @@ QVector<int> AppSignalSetProvider::cloneSignals(const QSet<int>& signalIDs)
 		else
 		{
 			groupSignalIDs = m_signalSet.getChannelSignalsID(signal);
+
+			if (groupSignalIDs.size() == 0)
+			{
+				Q_ASSERT(false);
+				continue;
+			}
 		}
 		std::sort(groupSignalIDs.begin(), groupSignalIDs.end());
 
