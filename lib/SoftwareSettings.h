@@ -455,6 +455,8 @@ public:
 		int clientRequestPort = 0;
 		QStringList drivenSources;
 		bool singleLmControl = false;
+
+		bool operator == (const TuningService&) const = default;
 	};
 
 public:
@@ -503,7 +505,3 @@ public:
 	bool appearanceChanged(const TuningClientSettings& src) const;
 	bool connectionChanged(const TuningClientSettings& src) const;
 };
-
-bool operator == (const TuningClientSettings::TuningService& left,
-				  const TuningClientSettings::TuningService& right);
-

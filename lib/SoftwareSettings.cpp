@@ -1624,14 +1624,3 @@ bool TuningClientSettings::connectionChanged(const TuningClientSettings& src) co
 
 	return false;
 }
-
-bool operator == (const TuningClientSettings::TuningService& left,
-				  const TuningClientSettings::TuningService& right)
-{
-	return left.tuningServiceID == right.tuningServiceID &&
-			left.clientRequestIP == right.clientRequestIP &&
-			left.clientRequestPort == right.clientRequestPort &&
-			left.singleLmControl == right.singleLmControl;
-}
-
-
