@@ -391,6 +391,25 @@ namespace Builder
 				  QString(tr("Build output path %1. Standard writeble location will be used: %2")).arg(issue).arg(stdWritablePath));
 	}
 
+	/// IssueCode: CMN0023
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Can't delete file or directory: %1
+	///
+	/// Parameters:
+	///		%1 file name or directory path
+	///
+	/// Description:
+	///		Specified file cannot be deleted.
+	///
+	void IssueLogger::wrnCMN0023(QString fileDirName)
+	{
+		LOG_WARNING1(IssueType::Common,
+				  23,
+				  QString(tr("Can't delete file or directory: %1")).arg(fileDirName));
+	}
+
 
 	// INT			Internal issues							1000-1999
 	//

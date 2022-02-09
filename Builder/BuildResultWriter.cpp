@@ -49,7 +49,7 @@ namespace Builder
 
 		m_file.setFileName(fullPathFileName);
 
-		QIODevice::OpenMode mode =  QIODevice::ReadWrite;
+		QIODevice::OpenMode mode = QIODevice::ReadWrite | QIODeviceBase::Truncate;
 
 		if (textMode == true)
 		{
@@ -444,41 +444,46 @@ namespace Builder
 		return true;
 	}
 
-	bool BuildResult::clearDirectory(const QString &directory)
+	void BuildResult::clearDirectory(const QString& directory)
 	{
-		bool result = true;
 		QDir dir(directory);
 
 		if (dir.exists(directory))
 		{
 			QFileInfoList dirContent = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::System | QDir::Hidden  | QDir::AllDirs | QDir::Files, QDir::DirsFirst);
+
 			foreach(QFileInfo entry, dirContent)
 			{
+				bool res = true;
+
+				QString filePathToDelete  = entry.absoluteFilePath();
+
 				if (entry.isDir())
 				{
-					result = clearDirectory(entry.absoluteFilePath());
-					result = dir.rmdir(entry.absoluteFilePath());
+					clearDirectory(filePathToDelete);
+
+					res = dir.rmdir(filePathToDelete);
 				}
 				else
 				{
-					result = QFile::remove(entry.absoluteFilePath());
+					res = QFile::remove(filePathToDelete);
 				}
 
-				if (!result)
+				if (res == false)
 				{
-						return result;
+					// Can't delete file or directory: %1
+					//
+					m_log->wrnCMN0023(filePathToDelete);
 				}
 			}
 		}
-
-		return result;
 	}
 
 	bool BuildResult::createBuildXml(const BuildInfo& buildInfo)
 	{
 		m_buildXmlFile.setFileName(m_fullPath + "/build.xml");
 
-		if (m_buildXmlFile.open(QIODevice::ReadWrite | QIODevice::Text) == false)
+		if (m_buildXmlFile.open(QIODevice::ReadWrite | QIODevice::Text | QIODeviceBase::Truncate) == false)
 		{
 			return false;
 		}

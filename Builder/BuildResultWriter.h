@@ -106,7 +106,7 @@ namespace Builder
 
 	private:
 		bool createBuildDirectory();
-		bool clearDirectory(const QString &directory);
+		void clearDirectory(const QString& directory);
 
 		bool createBuildXml(const BuildInfo& buildInfo);
 		bool writeBuildXmlFilesSection(const HashedVector<QString, BuildFile*>& buildFiles);
