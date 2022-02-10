@@ -65,14 +65,15 @@ namespace TuningLog
 
 	void TuningLog::viewSignalsLog(QWidget* parent)
 	{
-		std::vector<std::pair<QString, double>> headers;
-		headers.reserve(5);
+        QStringList headers;
+        headers.reserve(6);
 
-		headers.emplace_back(tr("User"), 0.1);
-		headers.emplace_back(tr("EquipmentID/Message"), 0.3);
-		headers.emplace_back(tr("CustomAppSignalID"), 0.2);
-		headers.emplace_back(tr("Old Value"), 0.2);
-		headers.emplace_back(tr("New Value"), 0.2);
+        headers.emplace_back(tr("User"));
+        headers.emplace_back(tr("EquipmentID/Message"));
+        headers.emplace_back(tr("CustomAppSignalID"));
+        headers.emplace_back(tr("Old Value"));
+        headers.emplace_back(tr("New Value"));
+        headers.emplace_back(QString());
 
 		LogFile::view(parent, false/*showType*/, true/*headerVisible*/, headers);
 	}

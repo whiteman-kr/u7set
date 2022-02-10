@@ -1101,44 +1101,30 @@ namespace Log
 	//
 	// LogRecordModel
 	//
-	LogRecordModel::LogRecordModel(bool showTypeColumn, std::vector<std::pair<QString, double> > headerTitles):
+    LogRecordModel::LogRecordModel(bool showTypeColumn, const QStringList &headerTitles):
 		m_showTypeColumn(showTypeColumn)
 	{
 		int c = 0;
 
-		double usedWidth = 0;
-
 		m_columnsNames << tr("Time");
-		m_columnsWidthPercent.push_back(0.20);
-		usedWidth += 0.20;
 		m_columnTime = c++;
 
 		if (m_showTypeColumn == true)
 		{
 			m_columnsNames << tr("Type");
-			m_columnsWidthPercent.push_back(0.05);
-			usedWidth += 0.05;
 			m_columnType = c++;
 		}
 
-		if (headerTitles.size() == 0)
+        if (headerTitles.empty() == true)
 		{
 			m_columnsNames << tr("Message");
-			m_columnsWidthPercent.push_back(1 - usedWidth);
 			m_columnText = c++;
 		}
 		else
 		{
-			int count = static_cast<int>(headerTitles.size());
-
-			double totalWidth = (1 - usedWidth);
-
-			for (int i = 0; i < count; i++)
+            for (const QString& s : headerTitles)
 			{
-				const QString& s = headerTitles[i].first;
-
 				m_columnsNames << s;
-				m_columnsWidthPercent.push_back(totalWidth * headerTitles[i].second);
 			}
 
 			m_columnText = c++;
@@ -1341,17 +1327,6 @@ namespace Log
 		return true;
 	}
 
-	double LogRecordModel::columnWidthPercent(size_t index)
-	{
-		if (index >= m_columnsWidthPercent.size())
-		{
-			assert(false);
-			return 100;
-		}
-
-		return m_columnsWidthPercent[index];
-	}
-
 	int LogRecordModel::errorCount() const
 	{
 		return m_errorCount;
@@ -1364,6 +1339,11 @@ namespace Log
 
 	int LogRecordModel::searchIssue(int startRow, bool forward) const
 	{
+        if (rowCount() == 0)
+        {
+            return -1;
+        }
+
 		int row = startRow;
 
 		do
@@ -1402,6 +1382,11 @@ namespace Log
 		{
 			return -1;
 		}
+
+        if (rowCount() == 0)
+        {
+            return -1;
+        }
 
 		int row = startRow;
 
@@ -1766,7 +1751,7 @@ namespace Log
 	// LogFileDialog
 	//
 
-	LogFileDialog::LogFileDialog(LogFileWorker* worker, QWidget* parent, bool useMessageType, bool headerVisible, const std::vector<std::pair<QString, double>>& headerTitles) :
+    LogFileDialog::LogFileDialog(LogFileWorker* worker, QWidget* parent, bool useMessageType, bool headerVisible, const QStringList &headerTitles) :
 		QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint),
 		m_worker(worker),
 		m_model(useMessageType, headerTitles),
@@ -1894,19 +1879,17 @@ namespace Log
 		m_table->setModel(&m_model);
 
 		m_table->verticalHeader()->hide();
-		m_table->verticalHeader()->sectionResizeMode(QHeaderView::Fixed);
+        m_table->verticalHeader()->sectionResizeMode(QHeaderView::Fixed);
 		m_table->setItemDelegate(new SelectionControlDelegate(this, &m_model));
 
-		if (headerVisible == false)
+        m_table->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+        m_table->setStyleSheet("QTableView::item { margin: 10px }");
+        m_table->horizontalHeader()->setStretchLastSection(true);
+
+        if (headerVisible == false)
 		{
-			m_table->horizontalHeader()->hide();
-			m_table->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-			m_table->horizontalHeader()->setStretchLastSection(true);
-		}
-		else
-		{
-			m_table->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
-		}
+            m_table->horizontalHeader()->hide();
+        }
 
 		m_table->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
 
@@ -2011,23 +1994,6 @@ namespace Log
 		}
 	}
 
-	void LogFileDialog::showEvent(QShowEvent* event)
-	{
-		Q_UNUSED(event);
-
-		if (m_firstShow == true)
-		{
-			m_firstShow = false;
-			adjustColumnsWidth();
-		}
-	}
-
-	void LogFileDialog::resizeEvent(QResizeEvent* event)
-	{
-		Q_UNUSED(event);
-		adjustColumnsWidth();
-	}
-
 	void LogFileDialog::enableControls(bool enable)
 	{
 		if (m_recordTypeCombo != nullptr)
@@ -2054,28 +2020,6 @@ namespace Log
 
 		m_search->setEnabled(m_filterLineEdit->text().isEmpty() == false);
 		m_filter->setEnabled(m_filterLineEdit->text().isEmpty() == false);
-	}
-
-	void LogFileDialog::adjustColumnsWidth()
-	{
-		if (m_table == nullptr)
-		{
-			return;
-		}
-
-		double totalWidth = m_table->viewport()->size().width();
-
-		for (int c = 0; c < m_table->horizontalHeader()->count(); c++)
-		{
-			int columnWidth = static_cast<int>(totalWidth * m_model.columnWidthPercent(c));
-
-			if (columnWidth >= totalWidth)
-			{
-				columnWidth = 100;
-			}
-
-			m_table->setColumnWidth(c, columnWidth);
-		}
 	}
 
 	void LogFileDialog::searchIssue(bool forward)
@@ -2245,7 +2189,10 @@ namespace Log
 
 		m_table->scrollToBottom();
 
-		adjustColumnsWidth();
+        for (int i = 0; i < m_table->horizontalHeader()->count() - 1; i++)
+        {
+            m_table->resizeColumnToContents(i);
+        }
 
 		enableControls(true);
 	}
@@ -2266,7 +2213,10 @@ namespace Log
 
 		m_table->scrollToBottom();
 
-		adjustColumnsWidth();
+        for (int i = 0; i < m_table->horizontalHeader()->count() - 1; i++)
+        {
+            m_table->resizeColumnToContents(i);
+        }
 
 		enableControls(true);
 	}
@@ -2289,8 +2239,11 @@ namespace Log
 
 		if (modelWasEmpty == true)
 		{
-			adjustColumnsWidth();
-		}
+            for (int i = 0; i < m_table->horizontalHeader()->count() - 1; i++)
+            {
+                m_table->resizeColumnToContents(i);
+            }
+        }
 
 		m_logPathLabel->setText(tr("File: <a href=\"%1\">%1</a>").arg(m_worker->getCurrentFileName()));
 
@@ -2597,7 +2550,7 @@ namespace Log
 		return m_logFileWorker->write(type, text);
 	}
 
-	void LogFile::view(QWidget* parent, bool showType, bool headerVisible, std::vector<std::pair<QString, double>> headerTitles)
+    void LogFile::view(QWidget* parent, bool showType, bool headerVisible, const QStringList& headerTitles)
 	{
 		m_alertAckCounter = 0;
 		m_errorAckCounter = 0;
