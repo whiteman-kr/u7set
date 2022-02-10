@@ -3,7 +3,7 @@
 #include "SchemaPropertiesDialog.h"
 #include "SchemaLayersDialog.h"
 #include "SchemaItemPropertiesDialog.h"
-#include "TagsEditor.h"
+#include "DbTagsEditor.h"
 #include "./Forms/ChooseAfbDialog.h"
 #include "./Forms/ChooseUfbDialog.h"
 #include "SignalPropertiesDialog.h"
@@ -5570,11 +5570,11 @@ void EditSchemaWidget::f2KeyForSignal(SchemaItemPtr item)
 		int height = QSettings().value("f2KeyForSignal/tagsSelectorDialog/height").toInt();
 		tagsSelectorDialog.resize(width, height);
 
-		TagsEditor te{this->db(), &d};
+		DbTagsEditor te{this->db(), &d};
 		te.setText(tagsEdit->text());
 
-		connect(&te, &TagsEditor::okPressed, &tagsSelectorDialog, &QDialog::accept);
-		connect(&te, &TagsEditor::cancelPressed, &tagsSelectorDialog, &QDialog::reject);
+		connect(&te, &DbTagsEditor::okPressed, &tagsSelectorDialog, &QDialog::accept);
+		connect(&te, &DbTagsEditor::cancelPressed, &tagsSelectorDialog, &QDialog::reject);
 
 		QHBoxLayout l;
 		l.addWidget(&te);
