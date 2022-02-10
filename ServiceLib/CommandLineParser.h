@@ -50,7 +50,7 @@ public:
 	static bool checkSettingWriteStatus(QSettings& settings, const QString& settingName, std::shared_ptr<CircularLogger> logger);
 
 	bool optionIsSet(const QString& optionName) const;					// use with all option types
-	QString optionValue(const QString& optionName) const;			// use only with OptionType::SingleValue
+	QString optionValue(const QString& optionName) const;				// use only with OptionType::SingleValue
 	QStringList optionValues(const QString& optionName) const;			// use only with OptionType::MultipleValues
 
 	QString settingValue(const QString& settingName) const;

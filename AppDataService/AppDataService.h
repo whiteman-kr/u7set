@@ -71,6 +71,10 @@ private:
 	bool readAppSignals(const QByteArray& fileData);
 
 	void buildAppSignalID2IndexMap(bool signalsLoadResult);
+
+	void createTimeErrLog();
+	void shutdownTimeErrLog();
+
 	void createAndInitSignalStates();
 	void prepareAppDataSources();
 
@@ -112,6 +116,9 @@ private:
 	int m_appDataProcessingThreadCount = 0;
 	QString m_strCmdLineAppDataReceivingIP;
 	HostAddressPort m_cmdLineAppDataReceivingIP;
+	bool m_logRupTimeErrors = false;
+
+	CircularLoggerShared m_timeErrLog;
 
 	int m_autoArchivingGroupsCount = 0;
 

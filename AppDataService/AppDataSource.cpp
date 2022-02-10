@@ -84,13 +84,18 @@ AppDataSource::AppDataSource(const Network::DataSourceInfo& proto) :
 	loadFromProto(proto);
 }
 
-void AppDataSource::prepare(const AppSignals& appSignals, DynamicAppSignalStates* signalStates, int autoArchivingGroupsCount)
+void AppDataSource::prepare(const AppSignals& appSignals,
+							DynamicAppSignalStates* signalStates,
+							int autoArchivingGroupsCount,
+							CircularLoggerShared timeErrLog)
 {
 	if (signalStates == nullptr)
 	{
 		assert(false);
 		return;
 	}
+
+	setTimeErrLog(timeErrLog);
 
 	m_autoArchivingGroupsCount = autoArchivingGroupsCount;
 
@@ -213,6 +218,7 @@ bool AppDataSource::getState(Network::AppDataSourceState* proto) const
 	proto->set_errorframesize(errorFrameSize());
 	proto->set_errorduplicateplanttime(errorDuplicatePlantTime());
 	proto->set_errornonmonotonicplanttime(errorDuplicatePlantTime());
+	proto->set_errorplanttimeformat(errorPlantTimeFormat());
 	proto->set_lmequipmentid(moduleEquipmentID().toStdString());
 
 	return true;
@@ -250,6 +256,7 @@ void AppDataSource::setState(const Network::AppDataSourceState& proto)
 	setErrorFrameSize(proto.errorframesize());
 	setErrorDuplicatePlantTime(proto.errorduplicateplanttime());
 	setErrorNonmonotonicPlantTime(proto.errornonmonotonicplanttime());
+	setErrorPlantTimeFormat(proto.errorplanttimeformat());
 }
 
 bool AppDataSource::getSignalState(SimpleAppSignalStateArchiveFlag* state, const QThread* thread)

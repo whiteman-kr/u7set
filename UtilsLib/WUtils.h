@@ -131,6 +131,17 @@ inline qint64 reverseInt64(qint64 val)	  { return reverseBytes<qint64>(val);  }
 
 inline float reverseFloat(float val)	  { return reverseBytes<float>(val);   }
 
+// Format time to string:  2022.12.31 06:24:59.239
+//
+inline QString formatTime_YYYY_MM_DD(int year, int month, int day, int hour, int minute, int second, int millisecond)
+{
+	QChar zero = QLatin1Char('0');
+
+	return QString("%1.%2.%3 %4:%5:%6.%7").
+			arg(year).arg(month, 2, 10, zero).arg(day, 2, 10, zero).
+			arg(hour, 2, 10, zero).arg(minute, 2, 10, zero).arg(second, 2, 10, zero).arg(millisecond, 3, 10, zero);
+}
+
 class PrintElapsedTime
 {
 public:

@@ -10,6 +10,7 @@
 #include "../UtilsLib/SimpleThread.h"
 #include "../OnlineLib/DataProtocols.h"
 #include "../OnlineLib/SocketIO.h"
+#include "../OnlineLib/CircularLogger.h"
 #include "../CommonLib/Times.h"
 #include "../CommonLib/HostAddressPort.h"
 #include "ConstStrings.h"
@@ -218,6 +219,9 @@ public:
 	qint64 errorNonmonotonicPlantTime() const { return m_errorNonmonotonicPlantTime; }
 	void setErrorNonmonotonicPlantTime(qint64 err) { m_errorNonmonotonicPlantTime = err; }
 
+	qint64 errorPlantTimeFormat() const { return m_errorPlantTimeFormat; }
+	void setErrorPlantTimeFormat(qint64 err) { m_errorPlantTimeFormat = err; }
+
 	bool dataProcessingEnabled() const { return m_dataProcessingEnabled; }
 	void setDataProcessingEnabled(bool enabled) { m_dataProcessingEnabled = enabled; }
 
@@ -255,6 +259,8 @@ public:
 	void addSignalIndex(int index) { m_relatedSignalIndexes.append(index); }
 	const QVector<int>& signalIndexes() const { return m_relatedSignalIndexes; }
 
+	void setTimeErrLog(CircularLoggerShared timeErrLog) { m_timeErrLog = timeErrLog; }
+
 private:
 	bool collect(const RupFrameTime& rupFrameTime);
 	bool reallocate(quint32 framesQuantity);
@@ -262,11 +268,13 @@ private:
 	void calcDataReceivingRate();
 
 	QString getTimeStr(qint64 timeMs) const;
+	QString getTimeStr(const Rup::TimeStamp& ts) const;
 
 private:
 	// static information
 	//
 	QVector<int> m_relatedSignalIndexes;
+	CircularLoggerShared m_timeErrLog;
 
 	// dynamic state information
 	//
@@ -300,6 +308,7 @@ private:
 	qint64 m_errorFrameSize = 0;
 	qint64 m_errorDuplicatePlantTime = 0;
 	qint64 m_errorNonmonotonicPlantTime = 0;
+	qint64 m_errorPlantTimeFormat = 0;
 
 	bool m_dataProcessingEnabled = true;
 

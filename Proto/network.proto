@@ -228,6 +228,7 @@ message AppDataSourceState
 	optional int32 signalStatesQueueSize = 29 [default = 0];
 
     optional int32 state = 30 [default = 0];		// == E::DataSourceState::NoData
+	optional int64 errorPlantTimeFormat = 31 [default = 0];
 }
 
 

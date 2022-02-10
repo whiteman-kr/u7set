@@ -2,6 +2,7 @@
 
 #include "../AppSignalLib/AppSignal.h"
 #include "../lib/DataSource.h"
+#include "../OnlineLib/CircularLogger.h"
 #include "DynamicAppSignalState.h"
 
 class AppSignals : public HashedVector<QString, AppSignal*>
@@ -24,7 +25,10 @@ public:
 	AppDataSource(const DataSource& dataSource);
 	AppDataSource(const Network::DataSourceInfo& proto);
 
-	void prepare(const AppSignals& appSignals, DynamicAppSignalStates* signalStates, int autoArchivingGroupsCount);
+	void prepare(const AppSignals& appSignals,
+				 DynamicAppSignalStates* signalStates,
+				 int autoArchivingGroupsCount,
+				 CircularLoggerShared timeErrLog);
 
 	bool parsePacket();
 

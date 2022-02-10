@@ -59,6 +59,7 @@ static const QList<dynamicPropertyFieldDefinition> dynamicPropertiesFieldList {
 	{ QStringLiteral("Error Data ID"), [](const DataSourceOnline& source) { return source.errorDataID(); } },
 	{ QStringLiteral("Error Bad frame size"), [](const DataSourceOnline& source) { return source.errorFrameSize(); } },
 
+//	{ QStringLiteral("Error plant time format"), [](const DataSourceOnline& source) { return source.errorPlantTimeFormat(); } },
 	{ QStringLiteral("Error Duplicate plant time"), [](const DataSourceOnline& source) { return source.errorDuplicatePlantTime(); } },
 	{ QStringLiteral("Error Non monotonic plant time"), [](const DataSourceOnline& source) { return source.errorNonmonotonicPlantTime(); } },
 };

@@ -4188,6 +4188,7 @@ class AppDataSourceState PROTOBUF_FINAL :
     kErrorNonmonotonicPlantTimeFieldNumber = 26,
     kSignalStatesQueueSizeFieldNumber = 29,
     kStateFieldNumber = 30,
+    kErrorPlantTimeFormatFieldNumber = 31,
   };
   // optional string lmEquipmentID = 27;
   bool has_lmequipmentid() const;
@@ -4586,6 +4587,19 @@ class AppDataSourceState PROTOBUF_FINAL :
   void _internal_set_state(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
+  // optional int64 errorPlantTimeFormat = 31 [default = 0];
+  bool has_errorplanttimeformat() const;
+  private:
+  bool _internal_has_errorplanttimeformat() const;
+  public:
+  void clear_errorplanttimeformat();
+  ::PROTOBUF_NAMESPACE_ID::int64 errorplanttimeformat() const;
+  void set_errorplanttimeformat(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errorplanttimeformat() const;
+  void _internal_set_errorplanttimeformat(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:Network.AppDataSourceState)
  private:
   class _Internal;
@@ -4625,6 +4639,7 @@ class AppDataSourceState PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::int64 errornonmonotonicplanttime_;
   ::PROTOBUF_NAMESPACE_ID::int32 signalstatesqueuesize_;
   ::PROTOBUF_NAMESPACE_ID::int32 state_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errorplanttimeformat_;
   friend struct ::TableStruct_network_2eproto;
 };
 // -------------------------------------------------------------------
@@ -18747,6 +18762,34 @@ inline void AppDataSourceState::_internal_set_state(::PROTOBUF_NAMESPACE_ID::int
 inline void AppDataSourceState::set_state(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_state(value);
   // @@protoc_insertion_point(field_set:Network.AppDataSourceState.state)
+}
+
+// optional int64 errorPlantTimeFormat = 31 [default = 0];
+inline bool AppDataSourceState::_internal_has_errorplanttimeformat() const {
+  bool value = (_has_bits_[0] & 0x40000000u) != 0;
+  return value;
+}
+inline bool AppDataSourceState::has_errorplanttimeformat() const {
+  return _internal_has_errorplanttimeformat();
+}
+inline void AppDataSourceState::clear_errorplanttimeformat() {
+  errorplanttimeformat_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x40000000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_errorplanttimeformat() const {
+  return errorplanttimeformat_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::errorplanttimeformat() const {
+  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.errorPlantTimeFormat)
+  return _internal_errorplanttimeformat();
+}
+inline void AppDataSourceState::_internal_set_errorplanttimeformat(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x40000000u;
+  errorplanttimeformat_ = value;
+}
+inline void AppDataSourceState::set_errorplanttimeformat(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errorplanttimeformat(value);
+  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.errorPlantTimeFormat)
 }
 
 // -------------------------------------------------------------------

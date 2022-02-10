@@ -339,6 +339,14 @@ namespace SoftwareSetting
 	inline const QString OVERRIDE_APP_DATA_RECEIVING_IP("OverrideAppDataReceivingIP");
 }
 
+namespace CmdLineOption
+{
+	inline const QString ID("id");
+	inline const QString CFG_IP1("cfgip1");
+	inline const QString CFG_IP2("cfgip2");
+	inline const QString LOG_RUP_TIME_ERR("logRupTimeErr");
+}
+
 namespace Directory
 {
 	inline const QString COMMON("Common");

@@ -113,7 +113,7 @@ void CommandLineParser::parse()
 			{
 				const QString cmdLineArg = cmdLineArgs[i];
 
-				if (cmdLineArg.mid(0, len) != op.name)
+				if (cmdLineArg.mid(0, len).toLower() != op.name.toLower())
 				{
 					continue;
 				}

@@ -93,11 +93,12 @@ void AppDataServiceWorker::initCmdLineParser()
 {
 	CommandLineParser& cp = cmdLineParser();
 
-	cp.addSingleValueOption("id", SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
-	cp.addSingleValueOption("cfgip1", SoftwareSetting::CFG_SERVICE_IP1, "IP address of first Configuration Service.", "IPv4:Port");
-	cp.addSingleValueOption("cfgip2", SoftwareSetting::CFG_SERVICE_IP2, "IP address of second Configuration Service.", "IPv4:Port");
+	cp.addSingleValueOption(CmdLineOption::ID, SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
+	cp.addSingleValueOption(CmdLineOption::CFG_IP1, SoftwareSetting::CFG_SERVICE_IP1, "IP address of first Configuration Service.", "IPv4:Port");
+	cp.addSingleValueOption(CmdLineOption::CFG_IP2, SoftwareSetting::CFG_SERVICE_IP2, "IP address of second Configuration Service.", "IPv4:Port");
 	cp.addSingleValueOption("ptc", SoftwareSetting::PROCESSING_THREADS_COUNT, "App data processing threads count", "N");
 	cp.addSingleValueOption("recvip", SoftwareSetting::OVERRIDE_APP_DATA_RECEIVING_IP, "Override AppDataReceivingIP", "IPv4:Port");
+	cp.addSimpleOption(CmdLineOption::LOG_RUP_TIME_ERR, "Log RUP frames time errors");
 }
 
 void AppDataServiceWorker::loadSettings()
@@ -106,6 +107,8 @@ void AppDataServiceWorker::loadSettings()
 
 	m_strCmdLineAppDataReceivingIP = getStrSetting(SoftwareSetting::OVERRIDE_APP_DATA_RECEIVING_IP);
 	m_cmdLineAppDataReceivingIP.setAddressPortStr(m_strCmdLineAppDataReceivingIP, PORT_APP_DATA_SERVICE_DATA);
+
+	m_logRupTimeErrors = cmdLineParser().optionIsSet(CmdLineOption::LOG_RUP_TIME_ERR);
 
 	DEBUG_LOG_MSG(logger(), QString(tr("Settings from command line or registry:")));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::EQUIPMENT_ID).arg(equipmentID()));
@@ -508,6 +511,29 @@ bool AppDataServiceWorker::readAppSignals(const QByteArray& fileData)
 }
 
 
+void AppDataServiceWorker::createTimeErrLog()
+{
+	Q_ASSERT(m_timeErrLog == nullptr);
+
+	if (m_logRupTimeErrors == true)
+	{
+		m_timeErrLog = std::make_shared<CircularLogger>();
+
+		LOGGER_INIT(m_timeErrLog, QString("RupTimeErr"), QString());
+
+		m_timeErrLog->setLogCodeInfo(false);
+	}
+}
+
+void AppDataServiceWorker::shutdownTimeErrLog()
+{
+	if (m_timeErrLog != nullptr)
+	{
+		LOGGER_SHUTDOWN(m_timeErrLog);
+		m_timeErrLog = nullptr;
+	}
+}
+
 void AppDataServiceWorker::createAndInitSignalStates()
 {
 	m_signalStates.clear();
@@ -564,7 +590,7 @@ void AppDataServiceWorker::prepareAppDataSources()
 
 	for(AppDataSourceShared appDataSource : m_appDataSources)
 	{
-		appDataSource->prepare(m_appSignals, &m_signalStates, m_autoArchivingGroupsCount);
+		appDataSource->prepare(m_appSignals, &m_signalStates, m_autoArchivingGroupsCount, m_timeErrLog);
 
 		const QStringList& sourceSignals = appDataSource->associatedSignals(E::LanControllerType::AppData);
 
@@ -583,6 +609,7 @@ void AppDataServiceWorker::applyNewConfiguration()
 {
 	m_autoArchivingGroupsCount = m_curSettingsProfile.autoArchiveInterval * 60;
 
+	createTimeErrLog();
 	createAndInitSignalStates();
 	prepareAppDataSources();
 
@@ -604,6 +631,7 @@ void AppDataServiceWorker::clearConfiguration()
 	stopAppDataReceiverlThread();
 	stopTcpArchiveClientThread();
 	stopSignalStatesProcessingThread();
+	shutdownTimeErrLog();
 
 	m_appSignals.clear();
 	m_appDataSources.clear();
