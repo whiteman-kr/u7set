@@ -1,4 +1,5 @@
 #include "DialogSignalSnapshot.h"
+#include "../lib/Ui/DialogChooseTags.h"
 
 //
 // SnapshotExportPrint
@@ -1089,9 +1090,9 @@ DialogSignalSnapshot::DialogSignalSnapshot(IAppSignalManager* appSignalManager,
 										   QString softwareEquipmentId,
 										   QWidget *parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint),
-	m_appSignalManager(appSignalManager),
 	m_projectName(projectName),
-	m_softwareEquipmentId(softwareEquipmentId)
+    m_appSignalManager(appSignalManager),
+    m_softwareEquipmentId(softwareEquipmentId)
 {
 	setupUi();
 
@@ -1600,9 +1601,20 @@ void DialogSignalSnapshot::setupUi()
 
 	filterLayout->addWidget(new QLabel(tr("Tags")), 1, 2);
 
+    QHBoxLayout* tagsLayout = new QHBoxLayout();
+    tagsLayout->setSpacing(2);
+    tagsLayout->setContentsMargins(0, 0, 0, 0);
+
 	m_editTags = new QLineEdit();
 	connect(m_editTags, &QLineEdit::returnPressed, this, &DialogSignalSnapshot::editTagsReturnPressed);
-	filterLayout->addWidget(m_editTags, 1, 3, 1, 2);
+    tagsLayout->addWidget(m_editTags);
+
+    m_buttonChooseTags = new QToolButton();
+    connect(m_buttonChooseTags, &QToolButton::clicked, this, &DialogSignalSnapshot::buttonChooseTagsClicked);
+    m_buttonChooseTags->setText("...");
+    tagsLayout->addWidget(m_buttonChooseTags);
+
+    filterLayout->addLayout(tagsLayout, 1, 3, 1, 2);
 
 	// Export/Print/Fixate
 
@@ -1994,6 +2006,39 @@ void DialogSignalSnapshot::buttonPrintClicked()
 {
 	SnapshotExportPrint ep(m_projectName, m_softwareEquipmentId, this);
 	ep.printTable(m_tableView);
+}
+
+void DialogSignalSnapshot::buttonChooseTagsClicked()
+{
+    QDialog tagsSelectorDialog{this, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint};
+
+    int width = QSettings().value("DialogSignalSnapshot/tagsSelectorDialog/width", 340).toInt();
+    int height = QSettings().value("DialogSignalSnapshot/tagsSelectorDialog/height", 400).toInt();
+    tagsSelectorDialog.resize(width, height);
+
+    ChooseTagsWidget te{m_appSignalManager->tags(), this};
+    te.setText(m_editTags->text());
+
+    connect(&te, &ChooseTagsWidget::okPressed, &tagsSelectorDialog, &QDialog::accept);
+    connect(&te, &ChooseTagsWidget::cancelPressed, &tagsSelectorDialog, &QDialog::reject);
+
+    QHBoxLayout l;
+    l.addWidget(&te);
+    tagsSelectorDialog.setLayout(&l);
+
+    if (tagsSelectorDialog.exec() == QDialog::Accepted)
+    {
+        m_editTags->setText(te.text());
+
+        m_settings.tagsSetAutomatically = false;
+
+        tagsChanged();
+
+        fillSignals();
+    }
+
+    QSettings().setValue("DialogSignalSnapshot/tagsSelectorDialog/width", tagsSelectorDialog.width());
+    QSettings().setValue("DialogSignalSnapshot/tagsSelectorDialog/height", tagsSelectorDialog.height());
 }
 
 DialogSignalSnapshotSettings theDialogSignalSnapshotSettings;

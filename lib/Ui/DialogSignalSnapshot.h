@@ -273,6 +273,7 @@ private slots:
 	void maskTypeComboCurrentIndexChanged(int index);
 	void buttonExportClicked();
 	void buttonPrintClicked();
+    void buttonChooseTagsClicked();
 
 private:
 	void setupUi();
@@ -295,6 +296,7 @@ private:
 
 	QLineEdit* m_editMask = nullptr;
 	QLineEdit* m_editTags = nullptr;
+    QToolButton* m_buttonChooseTags = nullptr;
 
 	QPushButton* m_buttonFixate = nullptr;
 

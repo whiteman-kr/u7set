@@ -133,7 +133,7 @@ namespace Log
 		Q_OBJECT
 
 	public:
-		LogRecordModel(bool showTypeColumn, std::vector<std::pair<QString, double>> headerTitles);
+        LogRecordModel(bool showTypeColumn, const QStringList& headerTitles);
 		~LogRecordModel();
 
 	public:
@@ -172,8 +172,6 @@ namespace Log
 		bool processRecordFilter(const LogFileRecord& record) const;
 
 	public:
-		double columnWidthPercent(size_t index);
-
 		int errorCount() const;
 		int warningCount() const;
 
@@ -192,9 +190,8 @@ namespace Log
 
 	private:
 		QStringList m_columnsNames;
-		std::vector<double> m_columnsWidthPercent;
 
-		std::vector<int> m_filteredRecordsIndex;
+        std::vector<int> m_filteredRecordsIndex;
 		std::vector<LogFileRecord> m_records;
 
 		int m_errorCount = 0;
@@ -284,16 +281,12 @@ namespace Log
 		Q_OBJECT
 
 	public:
-		LogFileDialog(LogFileWorker* worker, QWidget* parent, bool useMessageType, bool headerVisible, const std::vector<std::pair<QString, double>>& headerTitles);
+        LogFileDialog(LogFileWorker* worker, QWidget* parent, bool useMessageType, bool headerVisible, const QStringList& headerTitles);
 		virtual ~LogFileDialog();
 
 	private:
 
-		virtual void showEvent(QShowEvent* event);
-		virtual void resizeEvent(QResizeEvent *event);
-
 		void enableControls(bool enable);
-		void adjustColumnsWidth();
 
 		void searchIssue(bool forward);
 
@@ -351,7 +344,6 @@ namespace Log
 
 		LogFileProgressDialog m_progressDialog;
 
-		bool m_firstShow = true;
 		bool m_loadedFromFile = false;
 	};
 
@@ -372,7 +364,7 @@ namespace Log
 		bool writeArray(const QStringList& textArray);
 		bool write(MessageType type, const QString& text);
 
-		void view(QWidget* parent, bool showType = true, bool headerVisible = false, std::vector<std::pair<QString, double>> headerTitles = {});
+        void view(QWidget* parent, bool showType = true, bool headerVisible = false, const QStringList &headerTitles = {});
 
 		[[nodiscard]] int alertAckCounter() const;
 		[[nodiscard]] int errorAckCounter() const;

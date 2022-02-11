@@ -2,7 +2,7 @@
 #include "IdePropertyEditor.h"
 #include "SpecificPropertiesEditor.h"
 #include "SvgEditor.h"
-#include "TagsEditor.h"
+#include "DbTagsEditor.h"
 
 //
 // IdePropertyEditorHelper
@@ -57,7 +57,7 @@ ExtWidgets::PropertyTextEditor* IdePropertyEditorHelper::createPropertyTextEdito
 			return new ExtWidgets::PropertyPlainTextEditor(parent);
 		}
 
-		TagsEditor* editor = new TagsEditor(dbController, parent);
+		DbTagsEditor* editor = new DbTagsEditor(dbController, parent);
 		return editor;
 	}
 

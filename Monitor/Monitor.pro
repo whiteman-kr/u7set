@@ -54,6 +54,7 @@ SOURCES += main.cpp \
     ../lib/SoftwareSettings.cpp \
     ../lib/Tuning/TuningSourcesHelper.cpp \
     ../lib/Tuning/TuningUserManager.cpp \
+    ../lib/Ui/DialogChooseTags.cpp \
     ../lib/Ui/DialogSignalSnapshot.cpp \
     ../lib/Ui/DialogTcpStatistics.cpp \
     ../lib/Ui/DragDropHelper.cpp \
@@ -111,6 +112,7 @@ HEADERS  += \
     ../lib/SoftwareSettings.h \
     ../lib/Tuning/TuningSourcesHelper.h \
     ../lib/Tuning/TuningUserManager.h \
+    ../lib/Ui/DialogChooseTags.h \
     ../lib/Ui/DialogSignalSnapshot.h \
     ../lib/Ui/DialogTcpStatistics.h \
     ../lib/Ui/DragDropHelper.h \

@@ -65,6 +65,8 @@ CONFIG(release, debug|release) {
 
 
 HEADERS  += \
+    ../lib/Ui/DialogChooseTags.h \
+    DbTagsEditor.h \
 	Stable.h \
     ../lib/ExportPrint.h \
     ../lib/QDoublevalidatorEx.h \
@@ -125,7 +127,6 @@ HEADERS  += \
     Simulator/SimSelectSchemaPage.h \
     Simulator/SimSignalSnapshot.h \
     Simulator/SimTrend/SimTrends.h \
-    TagsEditor.h \
     TestsTabPage.h \
     UserManagementDialog.h \
 	EquipmentEditor/EquipmentTabPage.h \
@@ -195,6 +196,7 @@ HEADERS  += \
 SOURCES +=\
 	../lib/ExportPrint.cpp \
 	../lib/SoftwareXmlReader.cpp \
+    ../lib/Ui/DialogChooseTags.cpp \
 	../lib/Ui/DialogSignalInfo.cpp \
 	../lib/Ui/DialogSignalSearch.cpp \
 	../lib/Ui/DialogSignalSnapshot.cpp \
@@ -217,6 +219,7 @@ SOURCES +=\
 	../lib/QScintillaLexers/LexerXML.cpp \
 	../lib/PropertyTable.cpp \
 	../Metrology/MetrologyConnection.cpp \
+    DbTagsEditor.cpp \
 	DlgMetrologyConnection.cpp \
 	CentralWidget.cpp \
 	CreateProjectDialog.cpp \
@@ -250,7 +253,6 @@ SOURCES +=\
 	Simulator/SimSelectSchemaPage.cpp \
 	Simulator/SimSignalSnapshot.cpp \
 	Simulator/SimTrend/SimTrends.cpp \
-	TagsEditor.cpp \
 	TestsTabPage.cpp \
 	UserManagementDialog.cpp \
 	EquipmentEditor/EquipmentTabPage.cpp \
