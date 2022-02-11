@@ -217,7 +217,7 @@ bool AppDataSource::getState(Network::AppDataSourceState* proto) const
 	proto->set_errordataid(errorDataID());
 	proto->set_errorframesize(errorFrameSize());
 	proto->set_errorduplicateplanttime(errorDuplicatePlantTime());
-	proto->set_errornonmonotonicplanttime(errorDuplicatePlantTime());
+	proto->set_errornonmonotonicplanttime(errorNonmonotonicPlantTime());
 	proto->set_errorplanttimeformat(errorPlantTimeFormat());
 	proto->set_lmequipmentid(moduleEquipmentID().toStdString());
 

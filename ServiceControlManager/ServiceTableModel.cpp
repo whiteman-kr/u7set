@@ -108,10 +108,10 @@ void ServiceTableModel::startUdpSocketThread()
 
 			m_socketThread->addWorker(clientSocket);
 
-			if (!clientSocket->isWaitingForAck())
+/*			if (!clientSocket->isWaitingForAck())
 			{
 				clientSocket->sendRequest(RQID_SERVICE_GET_INFO);
-			}
+			}*/
 		}
 	}
 
@@ -545,8 +545,6 @@ void ServiceTableModel::checkServiceStates()
 		for (int j = 0; j < servicesInfo.count(); j++)
 		{
 			UdpClientSocket* clientSocket = m_hostsInfo[i].servicesData[j].clientSocket;
-
-			assert(clientSocket != nullptr);
 
 			if (clientSocket == nullptr)
 			{

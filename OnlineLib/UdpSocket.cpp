@@ -283,8 +283,9 @@ void UdpClientSocket::onSendRequest(UdpRequest request)
 
 	if (m_state != State::ReadyToSend)
 	{
-		//qDebug() << "request: " << request.ID() << " last ack: " << m_ack.ID() << " last request: " << m_request.ID();
-		assert(m_state == State::ReadyToSend);
+		// qDebug() << "request: " << request.ID() << " last ack: " << m_ack.ID() << " last request: " << m_request.ID();
+		//assert(m_state == State::ReadyToSend);
+		// qDebug() << "untimely SendRequest " << m_serverAddress << ":" << m_port;
 		return;
 	}
 

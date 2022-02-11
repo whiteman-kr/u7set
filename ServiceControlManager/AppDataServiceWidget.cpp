@@ -48,9 +48,10 @@ DSC_ERROR_FRAME_NOMBER = 35,
 DSC_LOST_PACKET_COUNT = 36,
 DSC_ERROR_DATA_ID = 37,
 DSC_ERROR_BAD_FRAME_SIZE = 38,
-DSC_ERROR_DUPLICATE_PLANT_TIME = 39,
-DSC_ERROR_NONMONOTONIC_PLANT_TIME = 40,
-DSC_COUNT = 41;
+DSC_ERROR_PLANT_TIME_FORMAT = 39,
+DSC_ERROR_DUPLICATE_PLANT_TIME = 40,
+DSC_ERROR_NONMONOTONIC_PLANT_TIME = 41,
+DSC_COUNT = 42;
 
 const int dataSourceStateColumn[] =
 {
@@ -78,6 +79,7 @@ const int dataSourceStateColumn[] =
 	DSC_ERROR_FRAME_NOMBER,
 	DSC_ERROR_DATA_ID,
 	DSC_ERROR_BAD_FRAME_SIZE,
+	DSC_ERROR_PLANT_TIME_FORMAT,
 	DSC_ERROR_DUPLICATE_PLANT_TIME,
 	DSC_ERROR_NONMONOTONIC_PLANT_TIME,
 	DSC_LOST_PACKET_COUNT,
@@ -128,6 +130,7 @@ const char* const dataSourceColumnStr[] =
 	"Lost packet count",
 	"Error Data ID",
 	"Error Bad frame size",
+	"Error plant time format",
 	"Error Duplicate plant time",
 	"Error nonmonotonic plant time",
 };
@@ -360,6 +363,7 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 				case DSC_LOST_PACKET_COUNT: return source.lostPacketCount();
 				case DSC_ERROR_DATA_ID: return source.errorDataID();
 				case DSC_ERROR_BAD_FRAME_SIZE: return source.errorFrameSize();
+				case DSC_ERROR_PLANT_TIME_FORMAT: return source.errorPlantTimeFormat();
 				case DSC_ERROR_DUPLICATE_PLANT_TIME: return source.errorDuplicatePlantTime();
 				case DSC_ERROR_NONMONOTONIC_PLANT_TIME: return source.errorNonmonotonicPlantTime();
 				default:
