@@ -184,12 +184,7 @@ namespace XmlElement
 	inline const QString CFG_SERVICE2("CfgService2");
 
 	inline const QString APP_DATA_SERVICE("AppDataService");
-	inline const QString APP_DATA_SERVICE1("AppDataService1");
-	inline const QString APP_DATA_SERVICE2("AppDataService2");
-
 	inline const QString ARCHIVE_SERVICE("ArchiveService");
-	inline const QString ARCHIVE_SERVICE1("ArchiveService1");
-	inline const QString ARCHIVE_SERVICE2("ArchiveService2");
 
 	inline const QString DIAG_DATA_SERVICE("DiagDataService");
 	inline const QString TUNING_SERVICES("TuningServices");

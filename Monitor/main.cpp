@@ -11,7 +11,6 @@
 #include "../gitlabci_version.h"
 #endif
 
-AppSignalManager theSignals;
 TuningSignalManager theTuningSignals;
 ScriptMonitorApplication theApp;
 
@@ -79,8 +78,8 @@ int main(int argc, char *argv[])
 	VFrame30::init();
 	//Hardware::Init();
 
-	SoftwareInfo si;
-	si.init(E::SoftwareType::Monitor, MonitorAppSettings::instance().equipmentId(), 0, 1);
+	SoftwareInfo softwareInfo;
+	softwareInfo.init(E::SoftwareType::Monitor, MonitorAppSettings::instance().equipmentId(), 0, 1);
 
 	// --
 	//
@@ -99,11 +98,11 @@ int main(int argc, char *argv[])
 	//
 	int result = 0;
 	{
-		MonitorMainWindow w(instanceResover, si);
+		MonitorMainWindow mainWindow(instanceResover, softwareInfo);
 
-		theApp.setMainWindow(&w);
+		theApp.setMainWindow(&mainWindow);
 
-		w.show();
+		mainWindow.show();
 
 		// --
 		//

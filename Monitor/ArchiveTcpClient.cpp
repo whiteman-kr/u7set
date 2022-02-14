@@ -2,10 +2,12 @@
 #include "MonitorAppSettings.h"
 
 ArchiveTcpClient::ArchiveTcpClient(MonitorConfigController* configController, ILogFile* logFile) :
-	Tcp::Client(configController->softwareInfo(),
-				configController->configuration().archiveService1.address(),
-				configController->configuration().archiveService2.address(),
-				"ArchiveTcpClient"),
+	// TO DO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	Tcp::Client(configController->softwareInfo(), {}, {}),
+//	Tcp::Client(configController->softwareInfo(),
+//				configController->configuration().archiveService1.address(),
+//				configController->configuration().archiveService2.address(),
+//				"ArchiveTcpClient"),
 	TcpClientStatistics(this),
 	m_cfgController(configController),
 	m_logFile(logFile, "ArchiveTcpClient")
@@ -15,12 +17,12 @@ ArchiveTcpClient::ArchiveTcpClient(MonitorConfigController* configController, IL
 
 	setObjectName("ArchiveTcpClient");
 
-	qDebug()
-			<< "ArchiveTcpClient::ArchiveTcpClient("
-			<< configController->configuration().archiveService1.address().addressPortStr()
-			<< ", "
-			<< configController->configuration().archiveService2.address().addressPortStr()
-			<< ");";
+//	qDebug()
+//			<< "ArchiveTcpClient::ArchiveTcpClient("
+//			<< configController->configuration().archiveService1.address().addressPortStr()
+//			<< ", "
+//			<< configController->configuration().archiveService2.address().addressPortStr()
+//			<< ");";
 
 	connect(this, &ArchiveTcpClient::signal_startRequest, this, &ArchiveTcpClient::slot_startRequest);
 	connect(this, &ArchiveTcpClient::signal_cancelRequest, this, &ArchiveTcpClient::slot_cancelRequest);
@@ -593,8 +595,10 @@ void ArchiveTcpClient::slot_cancelRequest()
 
 void ArchiveTcpClient::slot_configurationArrived(ConfigSettings configuration)
 {
-	HostAddressPort s1 = configuration.archiveService1.address();
-	HostAddressPort s2 = configuration.archiveService2.address();
+	// TO DO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	HostAddressPort s1, s2;
+//	HostAddressPort s1 = configuration.archiveService1.address();
+//	HostAddressPort s2 = configuration.archiveService2.address();
 
 	if (serverAddressPort(0) != s1 ||
 		serverAddressPort(1) != s2)

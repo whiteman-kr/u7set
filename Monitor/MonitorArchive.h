@@ -32,13 +32,18 @@ public:
 	static std::vector<QString> getArchiveList();
 	static bool activateWindow(QString archiveName);
 
-	static bool startNewWidget(MonitorConfigController* configController, const std::vector<AppSignalParam>& appSignals, QWidget* parent);
-
-	static bool requestArchiveWithNewWidget(MonitorConfigController* configController, const std::vector<AppSignalParam>& appSignals,
-							   QDateTime startTime,
-							   QDateTime endTime,
-							   E::TimeType timeType,
+	static bool startNewWidget(MonitorSignalManager* signalManager,
+							   MonitorConfigController* configController,
+							   const std::vector<AppSignalParam>& appSignals,
 							   QWidget* parent);
+
+	static bool requestArchiveWithNewWidget(MonitorSignalManager* signalManager,
+											MonitorConfigController* configController,
+											const std::vector<AppSignalParam>& appSignals,
+											QDateTime startTime,
+											QDateTime endTime,
+											E::TimeType timeType,
+											QWidget* parent);
 
 	static void registerWindow(QString name, MonitorArchiveWidget* window);
 	static void unregisterWindow(QString name);
@@ -51,7 +56,9 @@ private:
 class MonitorArchiveWidget : public QMainWindow
 {
 public:
-	MonitorArchiveWidget(MonitorConfigController* configController, QWidget* parent);
+	MonitorArchiveWidget(MonitorSignalManager* signalManager,
+						 MonitorConfigController* configController,
+						 QWidget* parent);
 	virtual ~MonitorArchiveWidget();
 
 public:
@@ -102,8 +109,10 @@ protected slots:
 	// Data
 	//
 private:
-	ConfigConnection m_archiveService1;
-	ConfigConnection m_archiveService2;
+	MonitorSignalManager* m_signalManager = nullptr;
+	MonitorSettings::ArchiveService m_archiveService;
+//	ConfigConnection m_archiveService1;
+//	ConfigConnection m_archiveService2;
 
 	std::vector<VFrame30::SchemaDetails> m_schemasDetails;
 

@@ -147,11 +147,11 @@ class ComparatorSet
 public:
 	ComparatorSet();
 	ComparatorSet(const ComparatorSet& src);
-	ComparatorSet(ComparatorSet&& src);
+	ComparatorSet(ComparatorSet&& src) noexcept;
 	virtual ~ComparatorSet();
 
 	ComparatorSet& operator= (const ComparatorSet& src);
-	ComparatorSet& operator= (ComparatorSet&& src);
+	ComparatorSet& operator= (ComparatorSet&& src) noexcept;
 
 public:
 	void dump() const;

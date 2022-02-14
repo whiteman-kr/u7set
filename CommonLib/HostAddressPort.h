@@ -22,6 +22,7 @@ public:
 	HostAddressPort& operator=(const HostAddressPort &other) = default;
 	bool operator==(const HostAddressPort &other) const;
 	bool operator!=(const HostAddressPort &other) const;
+	bool operator<(const HostAddressPort &other) const;
 
 	void setAddress(quint32 ip4Addr);
 
@@ -133,6 +134,13 @@ inline bool HostAddressPort::operator==(const HostAddressPort& other) const
 inline bool HostAddressPort::operator!=(const HostAddressPort& other) const
 {
 	return m_hostAddress != other.m_hostAddress || m_port != other.m_port;
+}
+
+inline bool HostAddressPort::operator<(const HostAddressPort& other) const
+{
+	quint64 l = static_cast<quint64>(this->m_hostAddress.toIPv4Address()) << 32 | this->port();
+	quint64 r = static_cast<quint64>(other.m_hostAddress.toIPv4Address()) << 32 | other.port();
+	return l < r;
 }
 
 inline void HostAddressPort::setAddress(quint32 ip4Addr)

@@ -7,14 +7,16 @@ DialogChooseArchiveSignals::ArchiveSignalType DialogChooseArchiveSignals::m_last
 QString DialogChooseArchiveSignals::m_lastSchemaId;
 
 
-DialogChooseArchiveSignals::DialogChooseArchiveSignals(
-		const std::vector<VFrame30::SchemaDetails>& schemaDetails,
-		const ArchiveSource& init,
-		QWidget* parent) :
+DialogChooseArchiveSignals::DialogChooseArchiveSignals(IAppSignalManager* signalManager,
+													   const std::vector<VFrame30::SchemaDetails>& schemaDetails,
+													   const ArchiveSource& init,
+													   QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::DialogChooseArchiveSignals),
 	m_schemasDetails(schemaDetails)
 {
+	Q_ASSERT(signalManager);
+
 	ui->setupUi(this);
 
 	setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint | Qt::WindowMaximizeButtonHint);
@@ -102,7 +104,7 @@ DialogChooseArchiveSignals::DialogChooseArchiveSignals(
 
 	ui->archiveSignals->setHeaderLabels(headerLabels);
 
-	FilteredArchiveSignalsModel* model = new FilteredArchiveSignalsModel(theSignals.signalList(),
+	FilteredArchiveSignalsModel* model = new FilteredArchiveSignalsModel(signalManager->signalList(),
 																		 m_schemasDetails,
 																		 ui->filteredSignals);
 	ui->filteredSignals->setModel(model);

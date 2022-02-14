@@ -158,10 +158,10 @@ public:
 	[[nodiscard]] static QString toString(double value, E::ValueViewType viewType, E::AnalogFormat analogFormat, E::AnalogAppSignalFormat analogAppSignalFormat, int precision);
 
 public:
-	Hash m_hash = 0;					// == ::calcHash(AppSignalID)
-	Times m_time;
-	AppSignalStateFlags m_flags;
-	double m_value = 0;
+	Hash m_hash{};
+	Times m_time{};
+	double m_value{};
+	AppSignalStateFlags m_flags{};
 
 	static const quint32 VALID = 1;
 	static const quint32 INVALID = 0;

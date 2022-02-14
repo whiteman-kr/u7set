@@ -2,32 +2,6 @@
 #include "MonitorConfigController.h"
 #include "MonitorAppSettings.h"
 
-ConfigConnection::ConfigConnection(QString EquipmentId, QString ipAddress, int port) :
-	m_equipmentId(std::move(EquipmentId)),
-	m_ip(std::move(ipAddress)),
-	m_port(port)
-{
-}
-
-QString ConfigConnection::equipmentId() const
-{
-	return m_equipmentId;
-}
-
-QString ConfigConnection::ip() const
-{
-	return m_ip;
-}
-
-int ConfigConnection::port() const
-{
-	return m_port;
-}
-
-HostAddressPort ConfigConnection::address() const
-{
-	return HostAddressPort{m_ip, static_cast<quint16>(m_port)};
-}
 
 MonitorConfigController::MonitorConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2, ILogFile* logFile) :
 	HasLogFile(logFile, "ConfigController"),
@@ -456,27 +430,44 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 	// Trace received params
 	//
 	qDebug() << "New configuration arrived";
+	writeMessage(tr("New configuration arrived: StartSchemaID %1").arg(readSettings.startSchemaId));
+
 	qDebug() << "StartSchemaID: " << readSettings.startSchemaId;
 
-	qDebug() << "ADS1 (id, ip, port): " << readSettings.appDataService1.equipmentId() << ", " << readSettings.appDataService1.ip() << ", " << readSettings.appDataService1.port();
-	qDebug() << "ADS2 (id, ip, port): " << readSettings.appDataService2.equipmentId() << ", " << readSettings.appDataService2.ip() << ", " << readSettings.appDataService2.port();
+	// --
+	//
+	writeMessage(tr("AppDatService(s): %1").arg(readSettings.appDataServices.size()));
+	qDebug() << "AppDatService(s):";
 
-	qDebug() << "ADS RT Trends 1 (id, ip, port): " << readSettings.appDataServiceRealtimeTrend1.equipmentId() << ", " << readSettings.appDataServiceRealtimeTrend1.ip() << ", " << readSettings.appDataServiceRealtimeTrend1.port();
-	qDebug() << "ADS RT Trends 2 (id, ip, port): " << readSettings.appDataServiceRealtimeTrend2.equipmentId() << ", " << readSettings.appDataServiceRealtimeTrend2.ip() << ", " << readSettings.appDataServiceRealtimeTrend2.port();
+	for (const MonitorSettings::AppDataService& service : readSettings.appDataServices)
+	{
+		qDebug() << "Service: id, address: " << service.equipmentId << ", " << service.address.addressPortStr();
+		writeMessage(tr("Service: id, address: %1, %2").arg(service.equipmentId).arg(service.address.addressPortStr()));
+	}
 
-	qDebug() << "ArchiveService1 (id, ip, port): " << readSettings.archiveService1.equipmentId() << ", " << readSettings.archiveService1.ip() << ", " << readSettings.archiveService1.port();
-	qDebug() << "ArchiveService2 (id, ip, port): " << readSettings.archiveService2.equipmentId() << ", " << readSettings.archiveService2.ip() << ", " << readSettings.archiveService2.port();
+	// --
+	//
+	writeMessage(tr("AppDataRealTimeService(s): %1").arg(readSettings.appDataRealTimeServices.size()));
+	qDebug() << "AppDataRealTimeService(s):";
 
-	writeMessage(tr("New configuration arrived: StartSchemaID %1").arg(readSettings.startSchemaId));
-	writeMessage(tr("ADS1 (id, ip, port): %1, %2, %3").arg(readSettings.appDataService1.equipmentId()).arg(readSettings.appDataService1.ip()).arg(readSettings.appDataService1.port()));
-	writeMessage(tr("ADS2 (id, ip, port): %1, %2, %3").arg(readSettings.appDataService2.equipmentId()).arg(readSettings.appDataService2.ip()).arg(readSettings.appDataService2.port()));
+	for (const MonitorSettings::AppDataService& service : readSettings.appDataRealTimeServices)
+	{
+		qDebug() << "Service: id, address: " << service.equipmentId << ", " << service.address.addressPortStr();
+		writeMessage(tr("Service: id, address: %1, %2").arg(service.equipmentId).arg(service.address.addressPortStr()));
+	}
 
-	writeMessage(tr("ADS RT Trends 1 (id, ip, port): %1, %2, %3").arg(readSettings.appDataServiceRealtimeTrend1.equipmentId()).arg(readSettings.appDataServiceRealtimeTrend1.ip()).arg(readSettings.appDataServiceRealtimeTrend1.port()));
-	writeMessage(tr("ADS RT Trends 2 (id, ip, port): %1, %2, %3").arg(readSettings.appDataServiceRealtimeTrend2.equipmentId()).arg(readSettings.appDataServiceRealtimeTrend2.ip()).arg(readSettings.appDataServiceRealtimeTrend2.port()));
+	// --
+	//
+	writeMessage(tr("ArchiveService(s): %1").arg(readSettings.archiveServices.size()));
+	qDebug() << "ArchiveService(s):";
+	for (const MonitorSettings::ArchiveService& service : readSettings.archiveServices)
+	{
+		qDebug() << "Service: id, address: " << service.equipmentId << ", " << service.address.addressPortStr();
+		writeMessage(tr("Service: id, address: %1, %2").arg(service.equipmentId).arg(service.address.addressPortStr()));
+	}
 
-	writeMessage(tr("ArchiveService1 (id, ip, port): %1, %2, %3").arg(readSettings.archiveService1.equipmentId()).arg(readSettings.archiveService1.ip()).arg(readSettings.archiveService1.port()));
-	writeMessage(tr("ArchiveService2 (id, ip, port): %1, %2, %3").arg(readSettings.archiveService2.equipmentId()).arg(readSettings.archiveService2.ip()).arg(readSettings.archiveService2.port()));
-
+	// --
+	//
 	writeMessage(QString("TuningEnabled = %1").arg(readSettings.tuningEnabled));
 	if (readSettings.tuningEnabled == true)
 	{
@@ -516,7 +507,7 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 			}
 			else
 			{
-				theSignals.setSetpoints(std::move(setpoints));
+				m_setpoints = std::move(setpoints);
 			}
 		}
 	}
@@ -642,53 +633,44 @@ bool MonitorConfigController::applyCurSettingsProfile(std::shared_ptr<const Soft
 {
 	if (curSettingsProfile == nullptr)
 	{
-		Q_ASSERT(false);
+		Q_ASSERT(curSettingsProfile);
 		return false;
 	}
 
 	if (outSetting == nullptr)
 	{
-		Q_ASSERT(false);
+		Q_ASSERT(outSetting);
 		return false;
 	}
 
-	const MonitorSettings* typedSettingsPtr = dynamic_cast<const MonitorSettings*>(curSettingsProfile.get());
+	const MonitorSettings* ms = dynamic_cast<const MonitorSettings*>(curSettingsProfile.get());
 
-	if (typedSettingsPtr == nullptr)
+	if (ms == nullptr)
 	{
-		Q_ASSERT(false);
+		Q_ASSERT(ms);
 		return false;
 	}
 
-	const MonitorSettings& ms = *typedSettingsPtr;
-
+	// --
 	//
+	outSetting->startSchemaId = ms->startSchemaId;
 
-	outSetting->startSchemaId = ms.startSchemaId;
-
+	// --
 	//
+	outSetting->appDataServices = ms->appDataServices;
+	outSetting->appDataRealTimeServices = ms->appDataServices;
+	outSetting->archiveServices = ms->archiveServices;
 
-	outSetting->appDataService1 = ConfigConnection(ms.appDataServiceID1, ms.appDataServiceIP1, ms.appDataServicePort1);
-	outSetting->appDataService2 = ConfigConnection(ms.appDataServiceID2, ms.appDataServiceIP2, ms.appDataServicePort2);
-
-	outSetting->appDataServiceRealtimeTrend1 = ConfigConnection(ms.appDataServiceID1, ms.realtimeDataIP1, ms.realtimeDataPort1);
-	outSetting->appDataServiceRealtimeTrend2 = ConfigConnection(ms.appDataServiceID2, ms.realtimeDataIP2, ms.realtimeDataPort2);
-
+	//  --
 	//
+	outSetting->tuningEnabled = ms->tuningEnabled;
 
-	outSetting->archiveService1 = ConfigConnection(ms.archiveServiceID1, ms.archiveServiceIP1, ms.archiveServicePort1);
-	outSetting->archiveService2 = ConfigConnection(ms.archiveServiceID2, ms.archiveServiceIP2, ms.archiveServicePort2);
-
-	//
-
-	outSetting->tuningEnabled = ms.tuningEnabled;
-
-	if (ms.tuningEnabled == true)
+	if (ms->tuningEnabled == true)
 	{
-		outSetting->tuningServices = ms.tuningServices;
-		outSetting->tuningLogin = ms.tuningLogin;
-		outSetting->tuningUserAccounts = ms.getUsersAccounts();
-		outSetting->tuningSessionTimeout = ms.tuningSessionTimeout;
+		outSetting->tuningServices = ms->tuningServices;
+		outSetting->tuningLogin = ms->tuningLogin;
+		outSetting->tuningUserAccounts = ms->getUsersAccounts();
+		outSetting->tuningSessionTimeout = ms->tuningSessionTimeout;
 	}
 	else
 	{
@@ -786,4 +768,9 @@ std::vector<VFrame30::SchemaDetails::TrendIndicatorSchemaItems> MonitorConfigCon
 {
 	QReadLocker l(&m_schemaDetailsLock);
 	return m_schemaDetailsSet.trendIndicators();
+}
+
+const ComparatorSet& MonitorConfigController::setpoints() const
+{
+	return m_setpoints;
 }

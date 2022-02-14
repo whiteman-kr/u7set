@@ -106,25 +106,33 @@ bool MonitorArchive::activateWindow(QString archiveName)
 	return true;
 }
 
-bool MonitorArchive::startNewWidget(MonitorConfigController* configController, const std::vector<AppSignalParam>& appSignals, QWidget* parent)
+bool MonitorArchive::startNewWidget(MonitorSignalManager* signalManager,
+									MonitorConfigController* configController,
+									const std::vector<AppSignalParam>& appSignals,
+									QWidget* parent)
 {
-	MonitorArchiveWidget* window = new MonitorArchiveWidget(configController, parent);
+	Q_ASSERT(signalManager);
+	Q_ASSERT(configController);
 
+	MonitorArchiveWidget* window = new MonitorArchiveWidget(signalManager, configController, parent);
 	window->setSignals(appSignals);
-
 	window->show();
 
 	return false;
 }
 
-bool MonitorArchive::requestArchiveWithNewWidget(MonitorConfigController* configController,
-									const std::vector<AppSignalParam>& appSignals,
-									QDateTime startTime,
-									QDateTime endTime,
-									E::TimeType timeType,
-									QWidget* parent)
+bool MonitorArchive::requestArchiveWithNewWidget(MonitorSignalManager* signalManager,
+												 MonitorConfigController* configController,
+												 const std::vector<AppSignalParam>& appSignals,
+												 QDateTime startTime,
+												 QDateTime endTime,
+												 E::TimeType timeType,
+												 QWidget* parent)
 {
-	MonitorArchiveWidget* window = new MonitorArchiveWidget(configController, parent);
+	Q_ASSERT(signalManager);
+	Q_ASSERT(configController);
+
+	MonitorArchiveWidget* window = new MonitorArchiveWidget(signalManager, configController, parent);
 
 	window->setSignals(appSignals);
 	window->setTime(startTime, endTime, timeType);
@@ -152,13 +160,22 @@ void MonitorArchive::unregisterWindow(QString name)
 	return;
 }
 
-MonitorArchiveWidget::MonitorArchiveWidget(MonitorConfigController* configController, QWidget* parent) :
+MonitorArchiveWidget::MonitorArchiveWidget(MonitorSignalManager* signalManager,
+										   MonitorConfigController* configController,
+										   QWidget* parent) :
 	QMainWindow(parent, Qt::WindowSystemMenuHint | Qt::WindowMaximizeButtonHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
-	m_archiveService1(configController->configuration().archiveService1),
-	m_archiveService2(configController->configuration().archiveService2),
+	m_signalManager(signalManager),
+	m_archiveService(configController->configuration().archiveServices.empty() ?			// TO DO????!!!!!!!!!!!
+						 MonitorSettings::ArchiveService{} :
+						 configController->configuration().archiveServices.front()),
+	//m_archiveService1(configController->configuration().archiveService1),
+	//m_archiveService2(configController->configuration().archiveService2),
 	m_schemasDetails(configController->schemasDetails()),
 	m_configuration(configController->configuration())
 {
+	Q_ASSERT(m_signalManager);
+	Q_ASSERT(configController);
+
 	setAttribute(Qt::WA_DeleteOnClose);
 
 	static int no = 1;
@@ -680,7 +697,7 @@ void MonitorArchiveWidget::updateOrCancelButton()
 
 void MonitorArchiveWidget::signalsButton()
 {
-	DialogChooseArchiveSignals dialog(m_schemasDetails, m_source, this);
+	DialogChooseArchiveSignals dialog(m_signalManager, m_schemasDetails, m_source, this);
 
 	int result = dialog.exec();
 
@@ -715,8 +732,8 @@ void MonitorArchiveWidget::signalsButton()
 void MonitorArchiveWidget::showSignalInfo(QString appSignalId)
 {
 	MonitorSignalInfo::showDialog(appSignalId,
+								  m_signalManager,
 								  &(theApp.mainWindow()->configController()),
-								  theApp.mainWindow()->tcpSignalClient(),
 								  theApp.mainWindow()->monitorCentralWidget());
 }
 

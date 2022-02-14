@@ -100,6 +100,7 @@ HEADERS  += \
 	../lib/Tuning/TuningModel.h \
 	../lib/WidgetUtils.h \
 	../lib/Ui/DialogAbout.h \
+	../lib/IAppSignalManager.h \
 	../lib/Ui/TextEditCompleter.h \
 	../lib/PropertyTable.h \
 	../Metrology/MetrologyConnection.h \

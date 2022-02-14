@@ -398,6 +398,12 @@ private:
 class MonitorSettings : virtual public SoftwareSettings
 {
 public:
+	struct ConfigService
+	{
+		QString equipmentId;
+		HostAddressPort address;
+	};
+
 	struct TuningService
 	{
 		QString tuningServiceID;
@@ -406,38 +412,31 @@ public:
 		QStringList drivenSources;
 	};
 
-public:
-	QString cfgServiceID1;
-	HostAddressPort cfgServiceIP1;
+	struct AppDataService
+	{
+		QString equipmentId;
+		HostAddressPort address;
+		HostAddressPort realtimeAddress;
+	};
 
-	QString cfgServiceID2;
-	HostAddressPort cfgServiceIP2;
+	struct ArchiveService
+	{
+		QString equipmentId;
+		QString appDataServiceId;	// ID of the source AppDataService for this ArchiveService
+		HostAddressPort address;
+	};
+
+public:
+	ConfigService configService1;
+	ConfigService configService2;
+
+	std::vector<AppDataService> appDataServices;
+	std::vector<ArchiveService> archiveServices;
 
 	QString startSchemaId;
 	QString schemaTags;
 
-	QString appDataServiceID1;
-	QString appDataServiceIP1;
-	int appDataServicePort1 = 0;
-	QString realtimeDataIP1;
-	int realtimeDataPort1 = 0;
-
-	QString appDataServiceID2;
-	QString appDataServiceIP2;
-	int appDataServicePort2 = 0;
-	QString realtimeDataIP2;
-	int realtimeDataPort2 = 0;
-
-	QString archiveServiceID1;
-	QString archiveServiceIP1;
-	int archiveServicePort1 = 0;
-
-	QString archiveServiceID2;
-	QString archiveServiceIP2;
-	int archiveServicePort2 = 0;
-
 	bool tuningEnabled = false;
-
 	std::vector<TuningService> tuningServices;
 
 	bool tuningLogin = false;
@@ -445,7 +444,7 @@ public:
 	int tuningSessionTimeout = 0;
 
 private:
-	// this methods should be call by SoftwareSettingsSet only
+	// these methods should be call by SoftwareSettingsSet only
 	//
 	bool writeToXml(XmlWriteHelper& xml) const override;
 	bool readFromXml(XmlReadHelper& xml) override;

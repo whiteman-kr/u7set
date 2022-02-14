@@ -136,6 +136,9 @@ protected:
 	AppSignalParam signal() const;
 	void updateSignal(const AppSignalParam& signal);
 
+	IAppSignalManager* signalManager();
+	const IAppSignalManager* signalManager() const;
+
 protected:
 	virtual std::optional<AppSignal> getSignalExt(const AppSignalParam& appSignalParam) = 0;
 
@@ -236,6 +239,7 @@ private:
 
 	bool m_firstShow = true;
 };
+
 
 class QLabelAppSignalDragAndDrop : public QLabel
 {

@@ -1,7 +1,7 @@
 #ifndef DIALOGCHOOSEARCHIVESIGNALS_H
 #define DIALOGCHOOSEARCHIVESIGNALS_H
 
-#include "../AppSignalLib/AppSignalManager.h"
+#include "MonitorSignalManager.h"
 #include "../VFrame30/Schema.h"
 #include "ArchiveData.h"
 
@@ -17,7 +17,8 @@ public:
 	struct Result;
 
 public:
-	DialogChooseArchiveSignals(const std::vector<VFrame30::SchemaDetails>& schemaDetails,
+	DialogChooseArchiveSignals(IAppSignalManager* signalManager,
+							   const std::vector<VFrame30::SchemaDetails>& schemaDetails,
 							   const ArchiveSource& init,
 							   QWidget* parent);
 	virtual ~DialogChooseArchiveSignals();

@@ -2,10 +2,12 @@
 #include "MonitorAppSettings.h"
 
 ArchiveTrendTcpClient::ArchiveTrendTcpClient(MonitorConfigController* configController, ILogFile* logFile) :
-	Tcp::Client(configController->softwareInfo(),
-				configController->configuration().archiveService1.address(),
-				configController->configuration().archiveService2.address(),
-				"ArchiveTrendTcpClient"),
+	// TO DO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	Tcp::Client(configController->softwareInfo(), {}, {}),
+//	Tcp::Client(configController->softwareInfo(),
+//				configController->configuration().archiveService1.address(),
+//				configController->configuration().archiveService2.address(),
+//				"ArchiveTrendTcpClient"),
 	TcpClientStatistics(this),
 	m_cfgController(configController),
 	m_logFile(logFile, "ArchiveTrendTcpClient")
@@ -427,8 +429,10 @@ void ArchiveTrendTcpClient::slot_requestData(QString appSignalId, TimeStamp hour
 
 void ArchiveTrendTcpClient::slot_configurationArrived(ConfigSettings configuration)
 {
-	HostAddressPort s1 = configuration.archiveService1.address();
-	HostAddressPort s2 = configuration.archiveService2.address();
+	// TO DO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	HostAddressPort s1, s2;
+//	HostAddressPort s1 = configuration.archiveService1.address();
+//	HostAddressPort s2 = configuration.archiveService2.address();
 
 	if (serverAddressPort(0) != s1 ||
 		serverAddressPort(1) != s2)

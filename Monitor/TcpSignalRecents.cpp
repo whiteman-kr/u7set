@@ -11,18 +11,18 @@ void RecentUsed::add(Hash hash)
 {
 	qint64 now = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 
-	auto it = m_signalToTile.find(hash);
-	if (it == m_signalToTile.end())
+	auto it = m_signalToTime.find(hash);
+	if (it == m_signalToTime.end())
 	{
-		if (m_signalToTile.size() >= m_maxSize)
+		if (m_signalToTime.size() >= m_maxSize)
 		{
 			auto lastTimeIt = m_timeToSignal.begin();
 
-			m_signalToTile.erase(lastTimeIt->second);
+			m_signalToTime.erase(lastTimeIt->second);
 			m_timeToSignal.erase(lastTimeIt);
 		}
 
-		m_signalToTile.insert({hash, now});
+		m_signalToTime.insert({hash, now});
 		m_timeToSignal.insert({now, hash});
 	}
 	else
@@ -48,7 +48,7 @@ void RecentUsed::add(Hash hash)
 		it->second = now;
 	}
 
-	Q_ASSERT(m_signalToTile.size() == m_timeToSignal.size());
+	Q_ASSERT(m_signalToTime.size() == m_timeToSignal.size());
 	return;
 }
 
@@ -64,8 +64,8 @@ void RecentUsed::add(const QVector<Hash>& hashes)
 
 bool RecentUsed::remove(Hash hash)
 {
-	auto it = m_signalToTile.find(hash);
-	if (it == m_signalToTile.end())
+	auto it = m_signalToTime.find(hash);
+	if (it == m_signalToTime.end())
 	{
 		return false;
 	}
@@ -85,9 +85,9 @@ bool RecentUsed::remove(Hash hash)
 	}
 	Q_ASSERT(removedFromTimeMap == true);
 
-	m_signalToTile.erase(it);
+	m_signalToTime.erase(it);
 
-	Q_ASSERT(m_signalToTile.size() == m_timeToSignal.size());
+	Q_ASSERT(m_signalToTime.size() == m_timeToSignal.size());
 	return true;
 }
 
@@ -104,20 +104,20 @@ bool RecentUsed::remove(const std::vector<Hash>& hashes)
 
 int RecentUsed::size() const
 {
-	return static_cast<int>(m_signalToTile.size());
+	return static_cast<int>(m_signalToTime.size());
 }
 
 const std::map<Hash, qint64>& RecentUsed::rawHashes() const
 {
-	return m_signalToTile;
+	return m_signalToTime;
 }
 
 std::vector<Hash> RecentUsed::hashes() const
 {
 	std::vector<Hash> result;
-	result.reserve(m_signalToTile.size());
+	result.reserve(m_signalToTime.size());
 
-	for (auto p : m_signalToTile)
+	for (auto p : m_signalToTime)
 	{
 		result.push_back(p.first);
 	}
@@ -127,21 +127,23 @@ std::vector<Hash> RecentUsed::hashes() const
 
 
 
-TcpSignalRecents::TcpSignalRecents(MonitorConfigController* configController, ILogFile* logFile) :
-	Tcp::Client(configController->softwareInfo(),
-				configController->configuration().appDataService1.address(),
-				configController->configuration().appDataService2.address(),
-				"TcpSignalRecents"),
+TcpSignalRecents::TcpSignalRecents(const MonitorConfigController& configController,
+								   const MonitorSettings::AppDataService& adsInfo,
+								   MonitorSignalManager& signalManager,
+								   ILogFile* logFile) :
+	Tcp::Client(configController.softwareInfo(), adsInfo.address, "TcpSignalRecents"),
 	TcpClientStatistics(this),
+	HasLogFile(logFile, QString("Recent ") + adsInfo.equipmentId),
 	m_cfgController(configController),
-	m_logFile(logFile, "TcpSignalRecents")
+	m_serverSettings(adsInfo),
+	m_signalManager(signalManager)
 {
-	Q_ASSERT(m_cfgController);
-	Q_ASSERT(logFile);
+	setObjectName("TcpSignalRecents " + adsInfo.equipmentId);
 
+	Q_ASSERT(this->logFile());
 	qDebug() << "TcpSignalRecents::TcpSignalRecents(...)";
 
-	setObjectName("TcpSignalRecents");
+	return;
 }
 
 TcpSignalRecents::~TcpSignalRecents()
@@ -153,11 +155,7 @@ TcpSignalRecents::~TcpSignalRecents()
 void TcpSignalRecents::onClientThreadStarted()
 {
 	qDebug() << "TcpSignalRecents::onClientThreadStarted()";
-	m_logFile.writeMessage("onClientThreadStarted()");
-
-	connect(m_cfgController, &MonitorConfigController::configurationArrived,
-			this, &TcpSignalRecents::slot_configurationArrived,
-			Qt::QueuedConnection);
+	writeMessage("TcpSignalRecents::onClientThreadStarted()");
 
 	return;
 }
@@ -165,15 +163,15 @@ void TcpSignalRecents::onClientThreadStarted()
 void TcpSignalRecents::onClientThreadFinished()
 {
 	qDebug() << "TcpSignalRecents::onClientThreadFinished()";
-	m_logFile.writeMessage("onClientThreadFinished()");
+	writeMessage("TcpSignalRecents::onClientThreadFinished()");
 
-	theSignals.reset();
+	//theSignals.reset();	!signal reset moved to AdsConnection::configurationArrived
 }
 
 void TcpSignalRecents::onConnection()
 {
 	qDebug() << "TcpSignalRecents::onConnection()";
-	m_logFile.writeMessage("onConnection()");
+	writeMessage("TcpSignalRecents::onConnection()");
 
 	Q_ASSERT(isClearToSendRequest() == true);
 
@@ -185,13 +183,19 @@ void TcpSignalRecents::onConnection()
 void TcpSignalRecents::onDisconnection()
 {
 	qDebug() << "TcpSignalRecents::onDisconnection";
-	m_logFile.writeMessage("onDisconnection()");
+	writeMessage("TcpSignalRecents::onDisconnection()");
+
+	m_signalManager.invalidateSignalStates(QThread::currentThreadId());
+
+	emit connectionReset();
+
+	return;
 }
 
 void TcpSignalRecents::onReplyTimeout()
 {
 	qDebug() << "TcpSignalRecents::onReplyTimeout()";
-	m_logFile.writeWarning("onReplyTimeout()");
+	writeWarning("TcpSignalRecents::onReplyTimeout()");
 }
 
 void TcpSignalRecents::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
@@ -215,7 +219,7 @@ void TcpSignalRecents::processReply(quint32 requestID, const char* replyData, qu
 		Q_ASSERT(false);
 
 		qDebug() << "Wrong requestID in TcpSignalRecents::processReply()";
-		m_logFile.writeError(QString("Wrong requestID in TcpSignalRecents::processReply(), requestId %1").arg(requestID));
+		writeError(QString("Wrong requestID in TcpSignalRecents::processReply(), requestId %1").arg(requestID));
 
 		requestSignalState();
 	}
@@ -304,7 +308,7 @@ void TcpSignalRecents::processSignalState(const QByteArray& data)
 	if (m_getSignalStateReply.error() != 0)
 	{
 		qDebug() << "TcpSignalRecents::processSignalState, error received: " << m_getSignalStateReply.error();
-		m_logFile.writeError(QString("processSignalState, error received %1").arg(m_getSignalStateReply.error()));
+		writeError(QString("processSignalState, error received %1").arg(m_getSignalStateReply.error()));
 
 		Q_ASSERT(m_getSignalStateReply.error() != 0);
 
@@ -325,7 +329,7 @@ void TcpSignalRecents::processSignalState(const QByteArray& data)
 		states.emplace_back(protoState);
 	}
 
-	theSignals.setState(states);
+	m_signalManager.setState(states, QThread::currentThreadId());
 
 	//qDebug() << "Priority updates state count  "  << states.size();
 
@@ -333,17 +337,4 @@ void TcpSignalRecents::processSignalState(const QByteArray& data)
 	return;
 }
 
-void TcpSignalRecents::slot_configurationArrived(ConfigSettings configuration)
-{
-	HostAddressPort s1 = configuration.appDataService1.address();
-	HostAddressPort s2 = configuration.appDataService2.address();
-
-	if (serverAddressPort(0) != s1 ||
-		serverAddressPort(1) != s2)
-	{
-		setServers(s1, s2, true);
-	}
-
-	return;
-}
 

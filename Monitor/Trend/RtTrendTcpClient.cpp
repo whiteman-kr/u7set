@@ -2,9 +2,13 @@
 #include "MonitorAppSettings.h"
 
 RtTrendTcpClient::RtTrendTcpClient(MonitorConfigController* configController, ILogFile* logFile) :
+//	Tcp::Client(configController->softwareInfo(),
+//				configController->configuration().appDataServiceRealtimeTrend1.address(),		// TO DO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//				configController->configuration().appDataServiceRealtimeTrend2.address(),
+//				"RtTrendTcpClient"),
 	Tcp::Client(configController->softwareInfo(),
-				configController->configuration().appDataServiceRealtimeTrend1.address(),
-				configController->configuration().appDataServiceRealtimeTrend2.address(),
+				{},		// TO DO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				{},
 				"RtTrendTcpClient"),
 	TcpClientStatistics(this),
 	m_cfgController(configController),
@@ -360,8 +364,10 @@ void RtTrendTcpClient::processTrendStateChanges(const QByteArray& data)
 
 void RtTrendTcpClient::slot_configurationArrived(ConfigSettings configuration)
 {
-	HostAddressPort s1 = configuration.appDataServiceRealtimeTrend1.address();
-	HostAddressPort s2 = configuration.appDataServiceRealtimeTrend2.address();
+	// TO DO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	HostAddressPort s1, s2;
+//	HostAddressPort s1 = configuration.appDataServiceRealtimeTrend1.address();
+//	HostAddressPort s2 = configuration.appDataServiceRealtimeTrend2.address();
 
 	if (serverAddressPort(0) != s1 ||
 		serverAddressPort(1) != s2)

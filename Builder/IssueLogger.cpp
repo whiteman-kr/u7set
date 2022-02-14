@@ -1235,14 +1235,14 @@ namespace Builder
     /// Description:
     ///			Occurs if adapter property is empty.
     ///
-    void IssueLogger::errCFG3022(QString objectID, QString propertyName)
-    {
-        LOG_ERROR(IssueType::FscConfiguration,
-                  3022,
+	void IssueLogger::errCFG3022(QString objectID, QString propertyName)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3022,
 				  tr("Property %1.%2 is empty.")
-                  .arg(objectID)
-                  .arg(propertyName));
-    }
+				  .arg(objectID)
+				  .arg(propertyName));
+	}
 
 	/// IssueCode: CFG3023
 	///

@@ -319,7 +319,7 @@ ComparatorSet::ComparatorSet(const ComparatorSet& src)
 	return;
 }
 
-ComparatorSet::ComparatorSet(ComparatorSet&& src)
+ComparatorSet::ComparatorSet(ComparatorSet&& src) noexcept
 {
 	*this = std::move(src);
 	return;
@@ -349,15 +349,19 @@ ComparatorSet& ComparatorSet::operator= (const ComparatorSet& src)
 	return *this;
 }
 
-ComparatorSet& ComparatorSet::operator= (ComparatorSet&& src)
+ComparatorSet& ComparatorSet::operator= (ComparatorSet&& src) noexcept
 {
 	decltype(m_bySignal) bySignal;
 	decltype(m_byLm) byLm;
 
 	{
 		QMutexLocker l(&src.m_mutex);
+
 		bySignal = std::move(src.m_bySignal);
 		byLm = std::move(src.m_byLm);
+
+		src.m_bySignal = {};
+		src.m_byLm = {};
 	}
 
 	{
@@ -394,6 +398,8 @@ void ComparatorSet::clear()
 
 	m_byLm.clear();
 	m_bySignal.clear();
+
+	return;
 }
 
 void ComparatorSet::insert(const QString& lmID, std::shared_ptr<Comparator> comparator)

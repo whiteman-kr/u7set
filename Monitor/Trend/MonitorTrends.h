@@ -14,7 +14,8 @@ class MonitorTrends
 public:
 	static std::vector<QString> getTrendsList();
 	static bool activateTrendWindow(QString trendName);
-	static bool startTrendApp(MonitorConfigController* configController,
+	static bool startTrendApp(MonitorSignalManager* signalManager,
+							  MonitorConfigController* configController,
 							  const std::vector<AppSignalParam>& appSignals,
 							  QWidget* parent);
 
@@ -58,8 +59,9 @@ private:
 	IAppSignalManager* m_appSignalManager = nullptr;
 	MonitorConfigController* m_configController = nullptr;
 
-	ConfigConnection m_archiveService1;
-	ConfigConnection m_archiveService2;
+	std::vector<MonitorSettings::ArchiveService> m_archiveServices;
+//	ConfigConnection m_archiveService1;
+//	ConfigConnection m_archiveService2;
 
 	ArchiveTrendTcpClient* m_archiveTcpClient = nullptr;
 	SimpleThread* m_archiveTcpClientThread = nullptr;

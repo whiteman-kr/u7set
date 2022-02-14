@@ -20,6 +20,7 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
     m_instanceResolver(instanceResolver),
 	m_configController(softwareInfo, MonitorAppSettings::instance().configuratorAddress1(), MonitorAppSettings::instance().configuratorAddress2(), &m_LogFile),
 	m_schemaManager(&m_configController),
+	m_signalManager{m_configController, &m_LogFile},
 	m_dialogAlert(this)
 {
 	setWindowTitle(MonitorAppSettings::instance().windowCaption());
@@ -27,23 +28,6 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	connect(&m_configController, &MonitorConfigController::configurationArrived, this, &MonitorMainWindow::slot_configurationArrived);
 	connect(&m_configController, &MonitorConfigController::unknownClient, this, &MonitorMainWindow::slot_unknownClient);
 	connect(&m_configController, &MonitorConfigController::wrongClientHostname, this, &MonitorMainWindow::slot_wrongClientHostname);
-
-	// TcpSignalClient
-	//
-	m_tcpSignalClient = new TcpSignalClient(&m_configController, &m_LogFile);
-
-	m_tcpClientThread = new SimpleThread(m_tcpSignalClient);
-	m_tcpClientThread->start();
-
-	// TcpSignalClient
-	//
-	m_tcpSignalRecents = new TcpSignalRecents(&m_configController, &m_LogFile);
-
-	m_tcpRecentsThread = new SimpleThread(m_tcpSignalRecents);
-	m_tcpRecentsThread->start();
-
-	connect(&theSignals, &AppSignalManager::addSignalToPriorityList, m_tcpSignalRecents, &TcpSignalRecents::addSignal, Qt::QueuedConnection);
-	connect(&theSignals, &AppSignalManager::addSignalsToPriorityList, m_tcpSignalRecents, &TcpSignalRecents::addSignals, Qt::QueuedConnection);
 
 	// TcpSourcesStateClient
 	//
@@ -59,7 +43,7 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 
 	// Creating signals controllers for VFrame30
 	//
-	m_appSignalController = std::make_unique<VFrame30::AppSignalController>(&theSignals);
+	m_appSignalController = std::make_unique<VFrame30::AppSignalController>(&m_signalManager);
 	m_tuningController = std::make_unique<MonitorTuningController>(&theTuningSignals, nullptr, &m_tuningUserManager);
 	m_logController = std::make_unique<VFrame30::LogController>(&m_LogFile);
 
@@ -145,15 +129,6 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 
 MonitorMainWindow::~MonitorMainWindow()
 {
-	m_tcpClientThread->quitAndWait(10000);
-	delete m_tcpClientThread;
-
-	if (m_tcpRecentsThread)
-	{
-		m_tcpRecentsThread->quitAndWait(10000);
-		delete m_tcpRecentsThread;
-	}
-
 	if (m_sourcesStateClientThread != nullptr)
 	{
 		m_sourcesStateClientThread->quitAndWait(10000);
@@ -230,7 +205,7 @@ bool MonitorMainWindow::eventFilter(QObject *object, QEvent *event)
 
 void MonitorMainWindow::showTrends(const std::vector<AppSignalParam>& appSignals)
 {
-	MonitorTrends::startTrendApp(&m_configController, appSignals, this);
+	MonitorTrends::startTrendApp(&m_signalManager, &m_configController, appSignals, this);
 }
 
 void MonitorMainWindow::saveWindowState()
@@ -764,7 +739,6 @@ void MonitorMainWindow::runTuningTcpClients()
 		const HostAddressPort addrPort = HostAddressPort(ts.clientRequestIP, ts.clientRequestPort);
 		client->setServers(addrPort, addrPort, false);
 
-
 		SimpleThread* thread = new SimpleThread(client);
 		thread->start();
 
@@ -800,31 +774,23 @@ void MonitorMainWindow::updateStatusBar()
 	// ConfigService connection
 	//
 	{
-		Tcp::ConnectionState confiConnState =  m_configController.getConnectionState();
+		std::vector<Tcp::ConnectionState> confiConnState = {m_configController.getConnectionState()};
 
-		showSoftwareConnection(tr("Configuration Service"), tr("ConfigService"),
+		showSoftwareConnection(tr("CfgService"),
 							   confiConnState,
-							   MonitorAppSettings::instance().configuratorAddress1(),
-							   MonitorAppSettings::instance().configuratorAddress2(),
 							   m_statusBarConfigConnection);
 	}
 
 	// AppDataService connection
 	//
-	if  (m_tcpSignalClient != nullptr)
 	{
-		Tcp::ConnectionState signalClientState =  m_tcpSignalClient->getConnectionState();
-
-		showSoftwareConnection(tr("Application Data Service"), tr("AppDataService"),
-							   signalClientState,
-							   m_tcpSignalClient->serverAddressPort1(),
-							   m_tcpSignalClient->serverAddressPort2(),
+		showSoftwareConnection("AppDataService",
+							   m_tcpSignalClientCtrl.tcpSignalConnStates(),
 							   m_statusBarAppDataConnection);
 	}
 
 	// TuningService connection
 	//
-
 	if  (m_configController.configuration().tuningEnabled == true && m_tuningTcpClients.empty() == false)
 	{
 		QString statusText;
@@ -917,34 +883,65 @@ void MonitorMainWindow::updateStatusBar()
 	return;
 }
 
-void MonitorMainWindow::showSoftwareConnection(const QString& caption, const QString& shortCaption, Tcp::ConnectionState connectionState, HostAddressPort portPrimary, HostAddressPort portSecondary, QLabel* label)
+void MonitorMainWindow::showSoftwareConnection(const QString& caption,
+											   const std::vector<Tcp::ConnectionState>& connectionStates,
+											   QLabel* label)
 {
-	QString tooltipText = tr("%1\r\n\r\n").arg(caption);
-	tooltipText.append(tr("Address (primary): %1\r\n").arg(portPrimary.addressPortStr()));
-	tooltipText.append(tr("Address (secondary): %1\r\n\r\n").arg(portSecondary.addressPortStr()));
-	tooltipText.append(tr("Address (current): %1\r\n").arg(connectionState.peerAddr.addressPortStr()));
+	if (label == nullptr)
+	{
+		Q_ASSERT(label);
+		return;
+	}
+
+	QString toolTipText = tr("%1:\n").arg(caption);
+
+	if (connectionStates.empty() == true)
+	{
+		toolTipText += tr("Not configured");
+	}
+
+	int statusOk = 0;
+	qint64 replyCount = 0;
+	for (const Tcp::ConnectionState& state : connectionStates)
+	{
+		if (state.isConnected == true)
+		{
+			statusOk ++;
+		}
+
+		replyCount += state.replyCount;
+
+		toolTipText += QString("%1 %2 (%3)\n")
+							.arg(state.connectedSoftwareInfo.equipmentID())
+							.arg(state.peerAddr.addressPortStr())
+							.arg(state.isConnected ? "ok" : "down");
+	}
+	toolTipText = toolTipText.trimmed();
+
+	label->setText(caption);
+	label->setToolTip(toolTipText);
 
 	QString statusText;
 
-	if (connectionState.isConnected == true)
+	if (connectionStates.size() <= 1)
 	{
-		statusText = tr(" %1: %2 ").arg(shortCaption).arg(connectionState.replyCount);
-		tooltipText.append(tr("Connection: established"));
+		statusText = tr("%1: %2 (Replies: %3)")
+					 .arg(caption)
+					 .arg(statusOk ? "ok" : "down")
+					 .arg(replyCount);
 	}
 	else
 	{
-		statusText = tr(" %1: no connection ").arg(shortCaption);
-		tooltipText.append(tr("Connection: no connection"));
+		statusText = tr("%1: %2/%3 (Replies: %4)")
+					 .arg(caption)
+					 .arg(statusOk)
+					 .arg(connectionStates.size())
+					 .arg(replyCount);
 	}
 
-	if (label->text() != statusText)
-	{
-		label->setText(statusText);
-	}
-	if (label->toolTip() != tooltipText)
-	{
-		label->setToolTip(tooltipText);
-	}
+	label->setText(statusText);
+
+	return;
 }
 
 void MonitorMainWindow::exit()
@@ -1223,7 +1220,7 @@ void MonitorMainWindow::slot_archive()
 	if (archiveWindowToActivate.isEmpty() == true)
 	{
 		std::vector<AppSignalParam> appSignals;
-		MonitorArchive::startNewWidget(&m_configController, appSignals, this);
+		MonitorArchive::startNewWidget(&m_signalManager, &m_configController, appSignals, this);
 	}
 	else
 	{
@@ -1238,7 +1235,7 @@ void MonitorMainWindow::slot_archive(QStringList signalsList, QDateTime startTim
 	std::vector<AppSignalParam> appSignals;
 	QStringList notFoundSignals;
 
-	if (theSignals.signalsCount() == 0)
+	if (m_signalManager.signalsCount() == 0)
 	{
 		QMessageBox::critical(this, qAppName(), tr("Signals database is not loaded!"));
 		return;
@@ -1247,7 +1244,7 @@ void MonitorMainWindow::slot_archive(QStringList signalsList, QDateTime startTim
 	for (const QString& s : signalsList)
 	{
 		bool ok = false;
-		AppSignalParam asp = theSignals.signalParam(s, &ok);
+		AppSignalParam asp = m_signalManager.signalParam(s, &ok);
 
 		if (ok == true)
 		{
@@ -1303,7 +1300,7 @@ void MonitorMainWindow::slot_archive(QStringList signalsList, QDateTime startTim
 		return;
 	}
 
-	MonitorArchive::requestArchiveWithNewWidget(&configController(), appSignals, startTime, endTime, static_cast<E::TimeType>(timeType), this);
+	MonitorArchive::requestArchiveWithNewWidget(&m_signalManager, &configController(), appSignals, startTime, endTime, static_cast<E::TimeType>(timeType), this);
 	return;
 }
 
@@ -1372,7 +1369,7 @@ void MonitorMainWindow::slot_trends()
 	if (trendToActivate.isEmpty() == true)
 	{
 		std::vector<AppSignalParam> appSignals;
-		MonitorTrends::startTrendApp(&m_configController, appSignals, this);
+		MonitorTrends::startTrendApp(&m_signalManager, &m_configController, appSignals, this);
 	}
 	else
 	{
@@ -1385,8 +1382,7 @@ void MonitorMainWindow::slot_trends()
 void MonitorMainWindow::slot_signalSnapshot()
 {
 	MonitorDialogSignalSnapshot* d = MonitorDialogSignalSnapshot::createDialog(&m_configController,
-											m_tcpSignalClient,
-											&theSignals,
+											&m_signalManager,
 											monitorCentralWidget());
 	d->show();
 
@@ -1397,8 +1393,7 @@ void MonitorMainWindow::slot_signalSnapshot(QStringList signalsList)
 {
 	MonitorDialogSignalSnapshot* d = MonitorDialogSignalSnapshot::createDialog(
 										 &configController(),
-										 tcpSignalClient(),
-										 &theSignals,
+										 &m_signalManager,
 										 monitorCentralWidget());
 
 	std::vector<AppSignalParam> specialSignals;
@@ -1409,7 +1404,7 @@ void MonitorMainWindow::slot_signalSnapshot(QStringList signalsList)
 	{
 		bool found = false;
 
-		AppSignalParam asp = theSignals.signalParam(appSignalId, &found);
+		AppSignalParam asp = m_signalManager.signalParam(appSignalId, &found);
 		if (found == true)
 		{
 			specialSignals.push_back(asp);
@@ -1462,8 +1457,7 @@ void MonitorMainWindow::slot_signalSnapshot(QStringList signalsList)
 void MonitorMainWindow::slot_signalSnapshotByMask(QStringList masks)
 {
 	auto d = MonitorDialogSignalSnapshot::createDialog(&configController(),
-													   tcpSignalClient(),
-													   &theSignals,
+													   &m_signalManager,
 													   monitorCentralWidget());
 
 	d->resetSignalsType();
@@ -1476,8 +1470,7 @@ void MonitorMainWindow::slot_signalSnapshotByMask(QStringList masks)
 void MonitorMainWindow::slot_signalSnapshotByTag(QStringList tags)
 {
 	auto d = MonitorDialogSignalSnapshot::createDialog(&configController(),
-													   tcpSignalClient(),
-													   &theSignals,
+													   &m_signalManager,
 													   monitorCentralWidget());
 
 	d->resetSignalsType();
@@ -1496,9 +1489,9 @@ void MonitorMainWindow::slot_findSignal()
 		return;
 	}
 
-	DialogSignalSearch* dsi = new DialogSignalSearch(this, &theSignals);
+	DialogSignalSearch* dsi = new DialogSignalSearch(this, &m_signalManager);
 
-	connect(m_tcpSignalClient, &TcpSignalClient::signalParamAndUnitsArrived, dsi, &DialogSignalSearch::signalsUpdated);
+	connect(&m_signalManager, &MonitorSignalManager::signalParamsUpdated, dsi, &DialogSignalSearch::signalsUpdated);
 
 	connect(dsi, &DialogSignalSearch::signalContextMenu, cw, &MonitorCentralWidget::slot_signalContextMenu);
 	connect(dsi, &DialogSignalSearch::signalInfo, cw, &MonitorCentralWidget::slot_signalInfo);
@@ -1786,14 +1779,14 @@ const MonitorConfigController& MonitorMainWindow::configController() const
 	return m_configController;
 }
 
-TcpSignalClient* MonitorMainWindow::tcpSignalClient()
+MonitorSignalManager& MonitorMainWindow::signalManager()
 {
-	return m_tcpSignalClient;
+	return m_signalManager;
 }
 
-const TcpSignalClient* MonitorMainWindow::tcpSignalClient() const
+const MonitorSignalManager& MonitorMainWindow::signalManager() const
 {
-	return m_tcpSignalClient;
+	return m_signalManager;
 }
 
 TuningUserManager& MonitorMainWindow::userManager()
@@ -2001,7 +1994,7 @@ void MonitorToolBar::dropEvent(QDropEvent* event)
 
 		if (appSignals.empty() == false)
 		{
-			MonitorArchive::startNewWidget(&mainWindow->configController(), appSignals, mainWindow);
+			MonitorArchive::startNewWidget(&mainWindow->signalManager(), &mainWindow->configController(), appSignals, mainWindow);
 		}
 	}
 

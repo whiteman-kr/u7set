@@ -2,6 +2,8 @@
 
 #include "MonitorConfigController.h"
 #include "MonitorSchemaManager.h"
+#include "MonitorSignalManager.h"
+#include "AdsConnection.h"
 #include "TcpSignalClient.h"
 #include "TcpSignalRecents.h"
 #include "TcpAppSourcesState.h"
@@ -72,7 +74,9 @@ private:
 	void stopTuningTcpClients();
 
 	void updateStatusBar();
-	void showSoftwareConnection(const QString& caption, const QString& shortCaption, Tcp::ConnectionState connectionState, HostAddressPort portPrimary, HostAddressPort portSecondary, QLabel* label);
+	void showSoftwareConnection(const QString& caption,
+								const std::vector<Tcp::ConnectionState>& connectionStates,
+								QLabel* label);
 
 	// Commands
 	//
@@ -136,8 +140,8 @@ public:
 	MonitorConfigController& configController();
 	const MonitorConfigController& configController() const;
 
-	TcpSignalClient* tcpSignalClient();
-	const TcpSignalClient* tcpSignalClient() const;
+	MonitorSignalManager& signalManager();
+	const MonitorSignalManager& signalManager() const;
 
 	TuningUserManager& userManager();
 	const TuningUserManager& userManager() const;
@@ -153,16 +157,13 @@ private:
 
 	MonitorConfigController m_configController;
 	MonitorSchemaManager m_schemaManager;
+	MonitorSignalManager m_signalManager;
 
 	std::unique_ptr<VFrame30::AppSignalController> m_appSignalController;
 	std::unique_ptr<MonitorTuningController> m_tuningController;
 	std::unique_ptr<VFrame30::LogController> m_logController;
 
-	TcpSignalClient* m_tcpSignalClient = nullptr;
-	SimpleThread* m_tcpClientThread = nullptr;
-
-	TcpSignalRecents* m_tcpSignalRecents = nullptr;
-	SimpleThread* m_tcpRecentsThread = nullptr;
+	AdsConnection m_tcpSignalClientCtrl{m_configController, m_signalManager, &m_LogFile};
 
 	std::vector<MonitorTuningTcpClient*> m_tuningTcpClients;
 	std::vector<SimpleThread*> m_tuningTcpClientThreads;
@@ -262,7 +263,6 @@ public:
 protected:
 	virtual void dragEnterEvent(QDragEnterEvent *event) override;
 	virtual void dropEvent(QDropEvent* event) override;
-
 };
 
 

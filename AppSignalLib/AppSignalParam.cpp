@@ -119,6 +119,8 @@ void AppSignalState::save(Proto::AppSignalState* protoState)
 	protoState->set_systemtime(m_time.system.timeStamp);
 	protoState->set_localtime(m_time.local.timeStamp);
 	protoState->set_planttime(m_time.plant.timeStamp);
+
+	return;
 }
 
 Hash AppSignalState::load(const Proto::AppSignalState& protoState)

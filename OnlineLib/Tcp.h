@@ -128,7 +128,7 @@ namespace Tcp
 
 		HostAddressPort localAddressPort() const;
 
-		ConnectionState getConnectionState() const;
+		virtual ConnectionState getConnectionState() const;
 
 		SoftwareInfo localSoftwareInfo() const;
 		SoftwareInfo connectedSoftwareInfo() const;

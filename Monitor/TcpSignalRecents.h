@@ -5,7 +5,7 @@
 #include "../OnlineLib/TcpClientStatistics.h"
 #include "../CommonLib/Hash.h"
 #include "../Proto/network.pb.h"
-#include "../AppSignalLib/AppSignalManager.h"
+#include "MonitorSignalManager.h"
 #include "MonitorConfigController.h"
 
 
@@ -32,18 +32,21 @@ public:
 
 private:
 	int m_maxSize = 750;
-	std::map<Hash, qint64> m_signalToTile;				// first - signal hash, second - time of last update
+	std::map<Hash, qint64> m_signalToTime;				// first - signal hash, second - time of last update
 	std::multimap<qint64, Hash> m_timeToSignal;			// second - time of last update, first - signal hash
 };
 
 
 
-class TcpSignalRecents : public Tcp::Client, public TcpClientStatistics
+class TcpSignalRecents : public Tcp::Client, public TcpClientStatistics, public HasLogFile
 {
 	Q_OBJECT
 
 public:
-	TcpSignalRecents(MonitorConfigController* configController, ILogFile* logFile);
+	TcpSignalRecents(const MonitorConfigController& configController,
+					 const MonitorSettings::AppDataService& adsInfo,
+					 MonitorSignalManager& signalManager,
+					 ILogFile* logFile);
 	virtual ~TcpSignalRecents();
 
 public:
@@ -63,12 +66,14 @@ protected:
 	void requestSignalState();
 	void processSignalState(const QByteArray& data);
 
-protected slots:
-	void slot_configurationArrived(ConfigSettings configuration);
+signals:
+	void connectionReset();
 
 private:
-	MonitorConfigController* m_cfgController = nullptr;
-	HasLogFile m_logFile;
+	const MonitorConfigController& m_cfgController;
+	MonitorSettings::AppDataService m_serverSettings;
+	MonitorSignalManager& m_signalManager;
+
 	RecentUsed m_recents = RecentUsed(ADS_GET_APP_SIGNAL_STATE_MAX);
 
 private:

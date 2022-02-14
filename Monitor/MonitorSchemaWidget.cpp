@@ -166,11 +166,11 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 
 	if (signalList.isEmpty() == false || impactSignalList.isEmpty() == false || loopbacks.isEmpty() == false)
 	{
-		auto f = [](QString& s)
+		auto f = [this](QString& s)
 			{
 				if (s.startsWith('@') == true)
 				{
-					s = theSignals.equipmentToAppSiganlId(s);
+					s = signalManager()->equipmentToAppSiganlId(s);
 				}
 			};
 
@@ -324,7 +324,7 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 	for (const QString& s : appSignals)
 	{
 		bool ok = false;
-		AppSignalParam signal =	theSignals.signalParam(s, &ok);
+		AppSignalParam signal =	signalManager()->signalParam(s, &ok);
 
 		QString signalId = ok ? QString("%1 %2").arg(signal.customSignalId()).arg(signal.caption()) : s;
 
@@ -350,7 +350,7 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 		{
 			bool ok = false;
 
-			AppSignalParam signal =	theSignals.signalParam(s, &ok);
+			AppSignalParam signal =	signalManager()->signalParam(s, &ok);
 
 			QString signalId = ok ? QString("%1 %2").arg(signal.customSignalId()).arg(signal.caption()) : s;
 
@@ -376,10 +376,9 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 void MonitorSchemaWidget::signalInfo(QString appSignalId)
 {
 	MonitorSignalInfo::showDialog(appSignalId,
-								 &theApp.mainWindow()->configController(),
-								 theApp.mainWindow()->tcpSignalClient(),
-								 theApp.mainWindow()->monitorCentralWidget());
-
+								  monitorSignalManager(),
+								  &theApp.mainWindow()->configController(),
+								  theApp.mainWindow()->monitorCentralWidget());
 	return;
 }
 
@@ -395,6 +394,36 @@ const MonitorSchemaView* MonitorSchemaWidget::monitorSchemaView() const
 	const MonitorSchemaView* result = dynamic_cast<const MonitorSchemaView*>(schemaView());
 	Q_ASSERT(result);
 	return result;
+}
+
+IAppSignalManager* MonitorSchemaWidget::signalManager()
+{
+	return monitorSchemaView()->appSignalController()->appSignalManager();
+}
+
+const IAppSignalManager* MonitorSchemaWidget::signalManager() const
+{
+	return monitorSchemaView()->appSignalController()->appSignalManager();
+}
+
+MonitorSignalManager* MonitorSchemaWidget::monitorSignalManager()
+{
+	IAppSignalManager* sm = signalManager();
+
+	MonitorSignalManager* msm = dynamic_cast<MonitorSignalManager*>(sm);
+	Q_ASSERT(msm);
+
+	return msm;
+}
+
+const MonitorSignalManager* MonitorSchemaWidget::monitorSignalManager() const
+{
+	const IAppSignalManager* sm = signalManager();
+
+	const MonitorSignalManager* msm = dynamic_cast<const MonitorSignalManager*>(sm);
+	Q_ASSERT(msm);
+
+	return msm;
 }
 
 MonitorSchemaManager* MonitorSchemaWidget::schemaManager()

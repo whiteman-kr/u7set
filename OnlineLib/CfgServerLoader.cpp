@@ -640,7 +640,7 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 		{
 			if (m_cfgFilesInfo[CONFIGURATION_XML_FILE_INDEX].md5 != md5)
 			{
-				// configuration changed !!!!!!!!!!!!
+				// configuration changed !!!
 			}
 		}
 		else

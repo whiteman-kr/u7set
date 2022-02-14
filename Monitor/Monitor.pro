@@ -63,12 +63,14 @@ SOURCES += main.cpp \
     ../lib/Ui/SchemaListWidget.cpp \
     ../lib/Ui/TabWidgetEx.cpp \
     ../lib/Ui/TagSelectorWidget.cpp \
+    AdsConnection.cpp \
     InstanceResolver.cpp \
     MonitorAppSettings.cpp \
     MonitorMainWindow.cpp \
 	MonitorCentralWidget.cpp \
     MonitorSchemaView.cpp \
     MonitorSignalInfo.cpp \
+    MonitorSignalManager.cpp \
     MonitorSignalSnapshot.cpp \
     DialogSettings.cpp \
     ../lib/BuildInfo.cpp \
@@ -121,12 +123,14 @@ HEADERS  += \
     ../lib/Ui/SchemaListWidget.h \
     ../lib/Ui/TabWidgetEx.h \
     ../lib/Ui/TagSelectorWidget.h \
+    AdsConnection.h \
     InstanceResolver.h \
     MonitorAppSettings.h \
     MonitorMainWindow.h \
     MonitorCentralWidget.h \
     MonitorSchemaView.h \
     MonitorSignalInfo.h \
+    MonitorSignalManager.h \
     MonitorSignalSnapshot.h \
     ScriptMonitorApplication.h \
 	Stable.h \

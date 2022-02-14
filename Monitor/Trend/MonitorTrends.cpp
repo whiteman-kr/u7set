@@ -34,11 +34,12 @@ bool MonitorTrends::activateTrendWindow(QString trendName)
 	return true;
 }
 
-bool MonitorTrends::startTrendApp(MonitorConfigController* configController,
+bool MonitorTrends::startTrendApp(MonitorSignalManager* signalManager,
+								  MonitorConfigController* configController,
                                   const std::vector<AppSignalParam>& appSignals,
                                   QWidget* parent)
 {
-	MonitorTrendsWidget* window = new MonitorTrendsWidget(&theSignals, configController, parent);
+	MonitorTrendsWidget* window = new MonitorTrendsWidget(signalManager, configController, parent);
 
 	std::vector<TrendLib::TrendSignalParam> trendSignals;
 	trendSignals.reserve(appSignals.size());
@@ -75,8 +76,7 @@ MonitorTrendsWidget::MonitorTrendsWidget(IAppSignalManager* appSignalManager,
 	TrendLib::TrendMainWindow(parent),
     m_appSignalManager(appSignalManager),
 	m_configController(configController),
-	m_archiveService1(configController->configuration().archiveService1),
-	m_archiveService2(configController->configuration().archiveService2)
+	m_archiveServices(configController->configuration().archiveServices)
 {
 static int no = 1;
 	QString trendName = QString("Monitor Trends %1").arg(no++);
