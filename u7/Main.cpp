@@ -15,6 +15,7 @@
 #include <QList>
 #include <optional>
 #include "../Protobuf/google/protobuf/message.h"
+#include "../UtilsLib/CrashExceptionHandler.h"
 
 #include "../lib/SoftwareXmlReader.h"
 
@@ -97,6 +98,11 @@ int main(int argc, char *argv[])
 		//
 		MainWindow* w = new MainWindow(&dbController, nullptr);
 		w->show();
+
+#if defined (Q_OS_WIN)
+        CrashExceptionHandler cdh;
+        QObject::connect(&cdh, &CrashExceptionHandler::miniDumpCreated, w, &MainWindow::onMiniDumpCreated);
+#endif
 
 		dbController.enableProgress();
 

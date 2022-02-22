@@ -56,6 +56,9 @@ private:
 
 	CentralWidget* getCentralWidget();
 
+public slots:
+    void onMiniDumpCreated(QString dumpFilePath, bool result);
+
 	// Commands
 	//
 protected slots:

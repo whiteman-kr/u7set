@@ -3385,26 +3385,33 @@ namespace ExtWidgets
 	void PropertyEditorDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
 				const QModelIndex &index) const
 	{
+        // Try to save/restore state to prevent QRasterPaintEngine::brushOriginChanged crash
+        //
+        painter->save();
 
-		// Don't draw if editor is active for this index
-		//
-		if (index == m_editIndex)
-		{
-			//painter->fillRect(option.rect, Qt::red);
-		}
-		else
-		{
-			QItemDelegate::paint(painter, option, index);
-		}
+        {
+            // Don't draw if editor is active for this index
+            //
+            if (index == m_editIndex)
+            {
+                //painter->fillRect(option.rect, Qt::red);
+            }
+            else
+            {
+                QItemDelegate::paint(painter, option, index);
+            }
 
-		// Draw vertical grid line
-		//
-		QColor color = static_cast<QRgb>(QApplication::style()->styleHint(QStyle::SH_Table_GridLineColor, &option));
-		painter->save();
-		painter->setPen(QPen(color));
-		int right = (option.direction == Qt::LeftToRight) ? option.rect.right() : option.rect.left();
-		painter->drawLine(right, option.rect.y(), right, option.rect.bottom());
-		painter->restore();
+            // Draw vertical grid line
+            //
+            QColor color = static_cast<QRgb>(QApplication::style()->styleHint(QStyle::SH_Table_GridLineColor, &option));
+            painter->save();
+            painter->setPen(QPen(color));
+            int right = (option.direction == Qt::LeftToRight) ? option.rect.right() : option.rect.left();
+            painter->drawLine(right, option.rect.y(), right, option.rect.bottom());
+            painter->restore();
+        }
+
+        painter->restore();
 	}
 
 	void PropertyEditorDelegate::onValueChanged(QVariant value)
@@ -3485,16 +3492,30 @@ namespace ExtWidgets
 		QTreeWidget::keyPressEvent(event);
 	}
 
+    void PropertyTreeWidget::paintEvent(QPaintEvent* event)
+    {
+        UiTools::m_lastPaintEventCode = 2;
+        return QTreeWidget::paintEvent(event);
+    }
+
 	void PropertyTreeWidget::drawRow(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 	{
-		QStyleOptionViewItem opt = option;
+        // Try to save/restore state to prevent QRasterPaintEngine::brushOriginChanged crash
+        //
+        painter->save();
 
-		QTreeWidget::drawRow(painter, opt, index);
-		QColor color = static_cast<QRgb>(QApplication::style()->styleHint(QStyle::SH_Table_GridLineColor, &opt));
-		painter->save();
-		painter->setPen(QPen(color));
-		painter->drawLine(opt.rect.x(), opt.rect.bottom(), opt.rect.right(), opt.rect.bottom());
-		painter->restore();
+        {
+            QStyleOptionViewItem opt = option;
+
+            QTreeWidget::drawRow(painter, opt, index);
+            QColor color = static_cast<QRgb>(QApplication::style()->styleHint(QStyle::SH_Table_GridLineColor, &opt));
+            painter->save();
+            painter->setPen(QPen(color));
+            painter->drawLine(opt.rect.x(), opt.rect.bottom(), opt.rect.right(), opt.rect.bottom());
+            painter->restore();
+        }
+
+        painter->restore();
 	}
 
 	//

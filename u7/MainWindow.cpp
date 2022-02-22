@@ -508,6 +508,29 @@ CentralWidget* MainWindow::getCentralWidget()
 	return pCentralWidget;
 }
 
+void MainWindow::onMiniDumpCreated(QString dumpFilePath, bool result)
+{
+    QFile textFile(dumpFilePath + ".txt");
+    if(textFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text) == true)
+    {
+        QTextStream stream(&textFile);
+        stream << tr("UiTools::m_lastPaintEventCode = %1").arg(UiTools::m_lastPaintEventCode) << "\n";
+    }
+
+    QString s;
+
+    if (result == false)
+    {
+        s = QObject::tr("Application has been crashed!\nColld not save crash dump file:\n%1.").arg(dumpFilePath);
+    }
+    else
+    {
+        s = QObject::tr("Application has been crashed!\nA crash dump has been created:\n%1\nPlease send this file and program execulable file to support.").arg(dumpFilePath);
+    }
+
+    QMessageBox::critical(this, qAppName(), s);
+}
+
 void MainWindow::exit()
 {
 	qApp->closeAllWindows();
@@ -1020,6 +1043,9 @@ void MainWindow::showAbout()
 
 void MainWindow::showAboutQt()
 {
+    int* x = nullptr;
+    *x = 0;
+
 	QMessageBox::aboutQt(this, qAppName());
 
 	return;

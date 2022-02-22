@@ -65,6 +65,7 @@ CONFIG(release, debug|release) {
 
 
 HEADERS  += \
+    ../UtilsLib/CrashExceptionHandler.h \
     ../lib/Ui/DialogChooseTags.h \
     DbTagsEditor.h \
 	Stable.h \
@@ -194,6 +195,7 @@ HEADERS  += \
 	SvgEditor.h \
 
 SOURCES +=\
+    ../UtilsLib/CrashExceptionHandler.cpp \
 	../lib/ExportPrint.cpp \
 	../lib/SoftwareXmlReader.cpp \
     ../lib/Ui/DialogChooseTags.cpp \

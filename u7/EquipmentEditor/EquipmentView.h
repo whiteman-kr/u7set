@@ -103,6 +103,7 @@ public slots:
 protected:
 	virtual void focusInEvent(QFocusEvent* event) override;
 	virtual void focusOutEvent(QFocusEvent* event) override;
+    virtual void paintEvent(QPaintEvent *event) override;
 
 	// Properties
 	//

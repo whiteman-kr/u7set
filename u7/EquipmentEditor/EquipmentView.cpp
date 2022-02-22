@@ -11,6 +11,7 @@
 #include "../Forms/DialogUpdateFromPreset.h"
 #include "../SchemaEditor/CreateSignalDialog.h"
 #include "../SignalsTabPage.h"
+#include "../UtilsLib/Ui/UiTools.h"
 
 //
 //
@@ -2851,6 +2852,12 @@ void EquipmentView::focusOutEvent(QFocusEvent* event)
 	}
 
 	return;
+}
+
+void EquipmentView::paintEvent(QPaintEvent *event)
+{
+    UiTools::m_lastPaintEventCode = 1;
+    QTreeView::paintEvent(event);
 }
 
 EquipmentModel* EquipmentView::equipmentModel()
