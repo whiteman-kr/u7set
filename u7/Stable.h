@@ -50,6 +50,7 @@
 #endif
 
 #include <QtCore>
+#include <QtWidgets>
 #include <QtGui>
 #include <QtXml>
 #include <QtSvg>
