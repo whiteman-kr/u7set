@@ -2,6 +2,7 @@
 
 #include "SchemaLayer.h"
 #include "../CommonLib/PropertyObject.h"
+#include "../UtilsLib/ILogFile.h"
 #include <QColor>
 
 
@@ -17,7 +18,6 @@ namespace VFrame30
 
 	class SchemaLayer;
 	class CDrawParam;
-	class VideoFrameWidgetAgent;
 	class SchemaItem;
 	class LogicSchema;
 	class UfbSchema;
@@ -128,9 +128,6 @@ namespace VFrame30
 	public:
 		virtual void Draw(CDrawParam* drawParam, const QRectF& clipRect);
 
-		virtual void MouseClick(const QPointF& docPoint, VideoFrameWidgetAgent* pVideoFrameWidgetAgent) const;
-		void RunClickScript(const std::shared_ptr<SchemaItem>& schemaItem) const;
-
 		int GetDocumentWidth(double DpiX, double zoom) const;
 		int GetDocumentHeight(double DpiY, double zoom) const;
 
@@ -157,8 +154,8 @@ namespace VFrame30
 		// Scripting
 		//
 	public:
-		bool preDrawEvent(QJSEngine* engine);
-		bool onShowEvent(QJSEngine* engine);
+		bool preDrawEvent(QJSEngine* engine, ILogFile* log);
+		bool onShowEvent(QJSEngine* engine, ILogFile* log);
 
 	protected:
 		bool runScript(QJSValue& evaluatedJs, QJSEngine* engine);

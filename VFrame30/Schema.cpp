@@ -444,12 +444,18 @@ namespace VFrame30
 			return;
 		}
 
+		ClientSchemaView* clientView = drawParam->clientSchemaView();
+		ILogFile* log = clientView != nullptr ? clientView->logFile() : nullptr;
+
 		if (drawParam->isMonitorMode() == true)
 		{
-			ClientSchemaView* view = drawParam->clientSchemaView();
-			Q_ASSERT(view);
+			Q_ASSERT(clientView);
 
-			this->preDrawEvent(view->jsEngine());
+			bool mbe = clientView->setScriptMessageBoxAllowed(false);
+
+			this->preDrawEvent(clientView->jsEngine(), log);
+
+			clientView->setScriptMessageBoxAllowed(mbe);
 		}
 
 		// Cleare client area by "grey" color
@@ -498,17 +504,31 @@ namespace VFrame30
 					continue;
 				}
 
+				if (isClientMode == true && item->isCommented() == false)
+				{
+					// Call preDrawEvent for all items, even if they out of screen
+					// Some items preDrawEvents may have scipt for caching reasons
+					//
+					bool mbe = clientView->setScriptMessageBoxAllowed(false);
+
+					item->preDrawEvent(clientView->jsEngine());
+
+					clientView->setScriptMessageBoxAllowed(mbe);
+
+					if (item->lastScriptError().isEmpty() == false &&
+						log != nullptr)
+					{
+						// Report script error to Monitor or TuningClient log
+						//
+						log->writeWarning(tr("SchemaItem %1, PreDrawEvent script error: %2")
+										  .arg(item->label())
+										  .arg(item->lastScriptError()));
+					}
+				}
+
 				if (item->isIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
 				{
 					item->setDrawParam(drawParam);
-
-					if (isClientMode == true)
-					{
-						ClientSchemaView* view = drawParam->clientSchemaView();
-						Q_ASSERT(view);
-
-						item->preDrawEvent(view->jsEngine());
-					}
 
 					item->draw(drawParam, this, layer.get());	// Drawing item is here
 
@@ -541,86 +561,6 @@ namespace VFrame30
 
 		//qDebug() << "Schema::Draw " << timer.elapsed();
 
-		return;
-	}
-
-	void Schema::MouseClick(const QPointF& docPoint, VideoFrameWidgetAgent* pVideoFrameWidgetAgent) const
-	{
-		if (pVideoFrameWidgetAgent == nullptr)
-		{
-			assert(pVideoFrameWidgetAgent != nullptr);
-			return;
-		}
-
-		double x = docPoint.x();
-		double y = docPoint.y();
-
-		bool stop = false;
-
-		for (auto layer = Layers.crbegin(); layer != Layers.crend(); layer++)
-		{
-			const SchemaLayer* pLayer = layer->get();
-
-			if (pLayer->show() == false)
-			{
-				continue;
-			}
-
-			for (auto vi = pLayer->Items.crbegin(); vi != pLayer->Items.crend(); vi++)
-			{
-				const std::shared_ptr<SchemaItem>& item = *vi;
-
-				if (item->acceptClick() == true && item->isIntersectPoint(x, y) == true && item->clickScript().isEmpty() == false)
-				{
-					RunClickScript(item/*, pVideoFrameWidgetAgent*/);
-					stop = true;
-					break;
-				}
-			}
-
-			if (stop == true)
-			{
-				break;
-			}
-		}
-
-		return;
-	}
-
-	void Schema::RunClickScript(const std::shared_ptr<SchemaItem>& schemaItem/*, VideoFrameWidgetAgent* pVideoFrameWidgetAgent*/) const
-	{
-		assert(false);
-		Q_UNUSED(schemaItem);
-
-/*		if (pVideoFrameWidgetAgent == nullptr || schemaItem->acceptClick() == false || schemaItem->clickScript().isEmpty() == true)
-		{
-			assert(pVideoFrameWidgetAgent != nullptr);
-			return;
-		}
-
-		// Extract script text from SchemaItem
-		//
-		QString script = schemaItem->clickScript();
-		QScriptEngine scriptEngine;
-		QScriptValue globalValue = scriptEngine.globalObject();
-
-		// Adust script enviroment
-		//
-
-		// Set proprties
-		//
-		QScriptValue vfWidgetAgentValue = scriptEngine.newQObject(pVideoFrameWidgetAgent);
-		globalValue.setProperty("videoFrameWidget", vfWidgetAgentValue);
-
-		// Run script
-		//
-		QScriptValue result = scriptEngine.evaluate(script);
-
-		// Process script running result
-		//
-#ifdef _DEBUG
-		qDebug() << strID() << "RunClickScript result:" << result.toString();
-#endif*/
 		return;
 	}
 
@@ -1065,7 +1005,7 @@ namespace VFrame30
 
 	// Scripting
 	//
-	bool Schema::preDrawEvent(QJSEngine* engine)
+	bool Schema::preDrawEvent(QJSEngine* engine, ILogFile* log)
 	{
 		if (engine == nullptr)
 		{
@@ -1094,10 +1034,17 @@ namespace VFrame30
 
 		bool result = runScript(m_jsPreDrawScript, engine);
 
+		if (m_lastScriptError.isEmpty() == false && log != nullptr)
+		{
+			log->writeWarning(tr("Schema %1, preDrawEvent script error: %2")
+							  .arg(schemaId())
+							  .arg(m_lastScriptError));
+		}
+
 		return result;
 	}
 
-	bool Schema::onShowEvent(QJSEngine* engine)
+	bool Schema::onShowEvent(QJSEngine* engine, ILogFile* log)
 	{
 		if (engine == nullptr)
 		{
@@ -1125,6 +1072,13 @@ namespace VFrame30
 		}
 
 		bool result = runScript(m_jsOnShowScript, engine);
+
+		if (m_lastScriptError.isEmpty() == false && log != nullptr)
+		{
+			log->writeWarning(tr("Schema %1, ShowEvent script error: %2")
+							  .arg(schemaId())
+							  .arg(m_lastScriptError));
+		}
 
 		return result;
 	}

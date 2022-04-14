@@ -309,7 +309,12 @@ namespace VFrame30
 		//
 		[[nodiscard]] LogController* logController();
 		[[nodiscard]] const LogController* logController() const;
+		[[nodiscard]] ILogFile* logFile();
+		[[nodiscard]] const ILogFile* logFile() const;
+
 		void setLogController(LogController* value);
+
+
 
 		// --
 		//
@@ -321,6 +326,9 @@ namespace VFrame30
 		QJSValue evaluateScript(QString script, QString where, bool reportError);
 		[[nodiscard]] QString formatScriptError(const QJSValue& scriptValue) const;
 		void reportScriptError(const QJSValue& scriptValue, QString where);
+
+		bool scriptMessageBoxAllowed() const;
+		bool setScriptMessageBoxAllowed(bool enable);
 
 		// Variables
 		//
@@ -365,6 +373,10 @@ namespace VFrame30
 
 		QJSEngine m_jsEngine;
 
+		bool m_alloScriptMessageBox = false;// Allow or disable using message box in scripts
+
+		// --
+		//
 		std::shared_ptr<SchemaItem> m_leftClickOverItem;
 		QDateTime m_lastRepaintEventFired = QDateTime::currentDateTime();
 

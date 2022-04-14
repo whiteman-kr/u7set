@@ -209,7 +209,7 @@ namespace VFrame30
 		void returnPressed();
 		void textChanged(const QString& text);
 
-		void runEventScript(QJSValue& evaluatedJs, QLineEdit* controlWidget);
+		void runEventScript(QJSValue& evaluatedJs, QLineEdit* controlWidget, bool allowMessageBox);
 
 		// Properties and Data
 		//

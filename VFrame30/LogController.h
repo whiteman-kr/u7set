@@ -92,6 +92,9 @@ namespace VFrame30
 		/// \brief Writes Text record to the log file.
 		bool writeText(QString text);
 
+		ILogFile* logFile();
+		const ILogFile* logFile() const;
+
 	private:
 		ILogFile* m_logFile = nullptr;
 

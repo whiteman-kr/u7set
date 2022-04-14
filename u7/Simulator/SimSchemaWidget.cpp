@@ -45,7 +45,7 @@ SimSchemaWidget::SimSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
 
 	// Run onShowScript
 	//
-	schema->onShowEvent(clientSchemaView()->jsEngine());
+	schema->onShowEvent(clientSchemaView()->jsEngine(), clientSchemaView()->logFile());
 
 	// --
 	//
@@ -443,7 +443,7 @@ void SimSchemaWidget::updateSchema()
 
 	// Run onShowScript
 	//
-	schema()->onShowEvent(clientSchemaView()->jsEngine());
+	schema()->onShowEvent(clientSchemaView()->jsEngine(), clientSchemaView()->logFile());
 
 	return;
 }

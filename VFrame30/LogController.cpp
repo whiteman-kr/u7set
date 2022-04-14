@@ -64,4 +64,14 @@ namespace VFrame30
 
 		return m_logFile->writeText(text);
 	}
+
+	ILogFile* LogController::logFile()
+	{
+		return m_logFile;
+	}
+
+	const ILogFile* LogController::logFile() const
+	{
+		return m_logFile;
+	}
 }

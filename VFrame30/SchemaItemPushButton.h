@@ -192,7 +192,7 @@ namespace VFrame30
 		void released();
 		void toggled(bool checked);
 
-		void runEventScript(QJSValue& evaluatedJs, QPushButton* buttonWidget);
+		void runEventScript(QJSValue& evaluatedJs, QPushButton* buttonWidget, bool allowMessageBox);
 
 		// Properties and Data
 		//

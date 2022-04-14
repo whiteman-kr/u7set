@@ -146,26 +146,59 @@ namespace VFrame30
 
 	void ScriptSchemaView::warningMessageBox(QString text)
 	{
-		QMessageBox::warning(m_clientSchemaView, qAppName(), text);
+		if (m_clientSchemaView->scriptMessageBoxAllowed() == true)
+		{
+			QMessageBox::warning(m_clientSchemaView, qAppName(), text);
+		}
+		else
+		{
+			auto l = m_clientSchemaView->logController();
+			l->writeWarning(tr("MessageBox is not allowed at current script. Text: ") + text);
+		}
 		return;
 	}
 
 	void ScriptSchemaView::errorMessageBox(QString text)
 	{
-		QMessageBox::critical(m_clientSchemaView, qAppName(), text);
+		if (m_clientSchemaView->scriptMessageBoxAllowed() == true)
+		{
+			QMessageBox::critical(m_clientSchemaView, qAppName(), text);
+		}
+		else
+		{
+			auto l = m_clientSchemaView->logController();
+			l->writeWarning(tr("MessageBox is not allowed at current script. Text: ") + text);
+		}
 		return;
 	}
 
 	void ScriptSchemaView::infoMessageBox(QString text)
 	{
-		QMessageBox::information(m_clientSchemaView, qAppName(), text);
+		if (m_clientSchemaView->scriptMessageBoxAllowed() == true)
+		{
+			QMessageBox::information(m_clientSchemaView, qAppName(), text);
+		}
+		else
+		{
+			auto l = m_clientSchemaView->logController();
+			l->writeWarning(tr("MessageBox is not allowed at current script. Text: ") + text);
+		}
 		return;
 	}
 
 	bool ScriptSchemaView::questionMessageBox(QString text)
 	{
-		int result = QMessageBox::question(m_clientSchemaView, qAppName(), text,  QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
-		return result == QMessageBox::Yes;
+		if (m_clientSchemaView->scriptMessageBoxAllowed() == true)
+		{
+			int result = QMessageBox::question(m_clientSchemaView, qAppName(), text,  QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+			return result == QMessageBox::Yes;
+		}
+		else
+		{
+			auto l = m_clientSchemaView->logController();
+			l->writeWarning(tr("MessageBox is not allowed at current script. Text: ") + text);
+			return false;
+		}
 	}
 
 	bool ScriptSchemaView::variableExists(QString name) const
@@ -475,7 +508,22 @@ namespace VFrame30
 					{
 						// Run script
 						//
+						bool prev = setScriptMessageBoxAllowed(true);
+
 						item->clickEvent(jsEngine(), this);
+
+						setScriptMessageBoxAllowed(prev);
+
+						if (item->lastScriptError().isEmpty() == false &&
+							logController() != nullptr)
+						{
+							// Report script error to Monitor or TuningClient log
+							//
+							auto l = logController();
+							l->writeWarning(tr("SchemaItem %1, ClickEvent script error: %2")
+												.arg(item->label())
+												.arg(item->lastScriptError()));
+						}
 
 						// --
 						//
@@ -641,6 +689,30 @@ namespace VFrame30
 		return m_logController;
 	}
 
+	ILogFile* ClientSchemaView::logFile()
+	{
+		if (m_logController != nullptr)
+		{
+			return m_logController->logFile();
+		}
+		else
+		{
+			return nullptr;
+		}
+	}
+
+	const ILogFile* ClientSchemaView::logFile() const
+	{
+		if (m_logController != nullptr)
+		{
+			return m_logController->logFile();
+		}
+		else
+		{
+			return nullptr;
+		}
+	}
+
 	void ClientSchemaView::setLogController(LogController* value)
 	{
 		m_logController = value;
@@ -763,6 +835,19 @@ namespace VFrame30
 		QMessageBox::critical(this, QApplication::applicationDisplayName(), message);
 
 		return;
+	}
+
+	bool ClientSchemaView::scriptMessageBoxAllowed() const
+	{
+		return m_alloScriptMessageBox;
+	}
+
+	bool ClientSchemaView::setScriptMessageBoxAllowed(bool enable)
+	{
+		bool prevState = m_alloScriptMessageBox;
+		m_alloScriptMessageBox = enable;
+
+		return prevState;
 	}
 
 	bool ClientSchemaView::variableExists(QString name) const

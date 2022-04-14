@@ -4,7 +4,7 @@
 #include "../CommonLib/PropertyObject.h"
 #include "../CommonLib/Factory.h"
 #include "../CommonLib/DebugInstCounter.h"
-#include "../lib/OutputLog.h"
+#include "../UtilsLib/ILogFile.h"
 #include "../Proto/ProtoSerialization.h"
 #include <QJSValue>
 
@@ -164,8 +164,8 @@ namespace VFrame30
 	protected:
 		bool runScript(QJSValue& evaluatedJs, QJSEngine* engine);
 		QJSValue evaluateScript(const QString& script, QJSEngine* engine, QWidget* parentWidget) const;
-		QString formatSqriptError(const QJSValue& scriptValue) const;
-		void reportSqriptError(const QJSValue& scriptValue, QWidget* parent) const;
+		QString formatScriptError(const QJSValue& scriptValue) const;
+		void reportScriptError(const QJSValue& scriptValue, ILogFile* logFile) const;
 
 		// Text search/replace
 		//

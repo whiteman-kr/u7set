@@ -276,7 +276,7 @@ namespace VFrame30
 
 		// Run script
 		//
-		runEventScript(m_jsAfterCreate, control);
+		runEventScript(m_jsAfterCreate, control, false);
 
 		return;
 	}
@@ -311,7 +311,7 @@ namespace VFrame30
 
 		// Run script
 		//
-		runEventScript(m_jsClicked, senderWidget);
+		runEventScript(m_jsClicked, senderWidget, true);
 
 		return;
 	}
@@ -346,7 +346,7 @@ namespace VFrame30
 
 		// Run script
 		//
-		runEventScript(m_jsPressed, senderWidget);
+		runEventScript(m_jsPressed, senderWidget, true);
 
 		return;
 	}
@@ -381,7 +381,7 @@ namespace VFrame30
 
 		// Run script
 		//
-		runEventScript(m_jsReleased, senderWidget);
+		runEventScript(m_jsReleased, senderWidget, true);
 
 		return;
 	}
@@ -416,12 +416,12 @@ namespace VFrame30
 
 		// Run script
 		//
-		runEventScript(m_jsToggled, senderWidget);
+		runEventScript(m_jsToggled, senderWidget, true);
 
 		return;
 	}
 
-	void SchemaItemPushButton::runEventScript(QJSValue& evaluatedJs, QPushButton* buttonWidget)
+	void SchemaItemPushButton::runEventScript(QJSValue& evaluatedJs, QPushButton* buttonWidget, bool allowMessageBox)
 	{
 		if (evaluatedJs.isError() == true ||
 			evaluatedJs.isNull() == true)
@@ -437,6 +437,8 @@ namespace VFrame30
 			assert(schemaView);
 			return;
 		}
+
+		bool prevAllowMessageBoxState = schemaView->setScriptMessageBoxAllowed(allowMessageBox);
 
 		QJSEngine* engine = schemaView->jsEngine();
 		assert(engine);
@@ -459,9 +461,11 @@ namespace VFrame30
 		//
 		QJSValue jsResult = evaluatedJs.call(args);
 
+		schemaView->setScriptMessageBoxAllowed(prevAllowMessageBoxState);
+
 		if (jsResult.isError() == true)
 		{
-			reportSqriptError(jsResult, schemaView);
+			reportScriptError(jsResult, schemaView->logFile());
 			return;
 		}
 

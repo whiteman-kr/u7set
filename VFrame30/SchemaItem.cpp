@@ -307,7 +307,7 @@ namespace VFrame30
 		QJSValue jsResult = evaluatedJs.call(args);
 		if (jsResult.isError() == true)
 		{
-			m_lastScriptError = formatSqriptError(jsResult);
+			m_lastScriptError = formatScriptError(jsResult);
 			return false;
 		}
 		else
@@ -331,7 +331,7 @@ namespace VFrame30
 
 		if (result.isError() == true)
 		{
-			m_lastScriptError = formatSqriptError(result);
+			m_lastScriptError = formatScriptError(result);
 
 			if (parentWidget != nullptr)
 			{
@@ -342,7 +342,7 @@ namespace VFrame30
 		return result;
 	}
 
-	QString SchemaItem::formatSqriptError(const QJSValue& scriptValue) const
+	QString SchemaItem::formatScriptError(const QJSValue& scriptValue) const
 	{
 		qDebug() << "Script running uncaught exception at line " << scriptValue.property("lineNumber").toInt();
 		qDebug() << "\tItem: " << guid().toString() << " " << metaObject()->className();
@@ -361,17 +361,14 @@ namespace VFrame30
 		return str;
 	}
 
-	void SchemaItem::reportSqriptError(const QJSValue& scriptValue, QWidget* parent) const
+	void SchemaItem::reportScriptError(const QJSValue& scriptValue, ILogFile* logFile) const
 	{
-		qDebug() << "Script running uncaught exception at line " << scriptValue.property("lineNumber").toInt();
-		qDebug() << "\tItem: " << guid().toString() << " " << metaObject()->className();
-		qDebug() << "\tStack: " << scriptValue.property("stack").toString();
-		qDebug() << "\tMessage: " << scriptValue.toString();
+		QString error = formatScriptError(scriptValue);
 
-		QMessageBox::critical(parent, QApplication::applicationDisplayName(),
-							  tr("Script uncaught exception at line %1:\n%2")
-								  .arg(scriptValue.property("lineNumber").toInt())
-								  .arg(scriptValue.toString()));
+		if (logFile != nullptr)
+		{
+			logFile->writeWarning(error);
+		}
 
 		return;
 	}

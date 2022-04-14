@@ -403,7 +403,7 @@ namespace VFrame30
 
 		// Run onShowScript
 		//
-		schema->onShowEvent(clientSchemaView()->jsEngine());
+		schema->onShowEvent(clientSchemaView()->jsEngine(), clientSchemaView()->logFile());
 
 		// --
 		//
