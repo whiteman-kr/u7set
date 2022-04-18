@@ -444,7 +444,7 @@ namespace VFrame30
 			return;
 		}
 
-		ClientSchemaView* clientView = drawParam->clientSchemaView();
+		ClientSchemaView* clientView = drawParam->isMonitorMode() ? drawParam->clientSchemaView() : nullptr;
 		ILogFile* log = clientView != nullptr ? clientView->logFile() : nullptr;
 
 		if (drawParam->isMonitorMode() == true)
