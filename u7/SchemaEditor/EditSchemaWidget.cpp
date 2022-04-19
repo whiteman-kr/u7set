@@ -245,6 +245,7 @@ void EditSchemaWidget::createActions()
 	m_detachWindow->setShortcut(Qt::ALT | Qt::Key_D);
 	m_detachWindow->setShortcutVisibleInContextMenu(true);
 	connect(m_detachWindow, &QAction::triggered, this, &EditSchemaWidget::detachOrAttachWindow);
+	addAction(m_detachWindow);
 
 	m_fileCheckInAction = new QAction(tr("Check In"), this);
 	m_fileCheckInAction->setStatusTip(tr("Check In changes..."));
