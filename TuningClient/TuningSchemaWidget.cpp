@@ -42,6 +42,11 @@ TuningSchemaWidget::TuningSchemaWidget(TuningSignalManager* tuningSignalManager,
 	clientSchemaView()->setLogController(logController);
 	clientSchemaView()->setZoom(100, false);
 
+	// Run onShowScript
+	//
+	Q_ASSERT(schema);
+	schema->onShowEvent(clientSchemaView()->jsEngine(), clientSchemaView()->logFile());
+
 	return;
 }
 
