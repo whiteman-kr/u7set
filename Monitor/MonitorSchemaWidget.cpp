@@ -64,6 +64,11 @@ MonitorSchemaWidget::MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schem
 
 	createActions();
 
+	// Run onShowScript
+	//
+	Q_ASSERT(schema);
+	schema->onShowEvent(clientSchemaView()->jsEngine(), clientSchemaView()->logFile());
+
 	return;
 }
 
