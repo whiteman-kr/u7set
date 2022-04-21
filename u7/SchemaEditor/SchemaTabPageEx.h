@@ -184,8 +184,8 @@ public:
 	void setFilter(QString filter);
 	void setTagFilter(const QStringList& tags);
 
-
 signals:
+	void showFileProperties(DbFileInfo files);
 	void openFileSignal(DbFileInfo files);
 	void viewFileSignal(DbFileInfo files);
 

@@ -1863,13 +1863,24 @@ void SchemaFileViewEx::slot_doubleClicked(const QModelIndex& index)
 	}
 	else
 	{
-		if (file.state() == E::VcsState::CheckedOut)
+		if (qApp->keyboardModifiers().testFlag(Qt::AltModifier) == true)
 		{
-			emit openFileSignal(file);
+			// Show file properties
+			//
+			emit showFileProperties(file);
 		}
 		else
 		{
-			emit viewFileSignal(file);
+			// Open file
+			//
+			if (file.state() == E::VcsState::CheckedOut)
+			{
+				emit openFileSignal(file);
+			}
+			else
+			{
+				emit viewFileSignal(file);
+			}
 		}
 	}
 
@@ -2327,6 +2338,7 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db, AppSignalSetPro
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SchemaControlTabPageEx::projectOpened);
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SchemaControlTabPageEx::projectClosed);
 
+	connect(m_filesView, &SchemaFileViewEx::showFileProperties, this, &SchemaControlTabPageEx::showFileProperties);
 	connect(m_filesView, &SchemaFileViewEx::openFileSignal, this, &SchemaControlTabPageEx::openFile);
 	connect(m_filesView, &SchemaFileViewEx::viewFileSignal, this, &SchemaControlTabPageEx::viewFile);
 
