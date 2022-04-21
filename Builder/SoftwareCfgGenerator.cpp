@@ -262,10 +262,7 @@ namespace Builder
 						returnResult = false;
 					}
 
-					// ADD EVEN EXCLUDED FOR BUILD SCHEMAS
-					// as it can be pannel schema
-					//
-					//if (schema->excludeFromBuild() == false)
+					if (schema->excludeFromBuild() == false)
 					{
 						QMutexLocker locker(&schemasMutex);	// Mutext used only here, as only here concurent access to schemas is possible
 						schemaMap[schema->schemaId()] = FileSchemaStruct{fileLatestVersion, schema};
