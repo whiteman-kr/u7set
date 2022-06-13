@@ -360,6 +360,8 @@ namespace Builder
 
 		const quint16 CONST_COMPARATOR_OPCODE = 10;
 		const quint16 DYNAMIC_COMPARATOR_OPCODE = 20;
+
+		static std::set<QString> m_lmsWithLessGreateEqMode;
 	};
 
 	class UalAfbsMap: public HashedVector<QUuid, UalAfb*>

@@ -713,6 +713,8 @@ namespace Builder
 	//
 	// ---------------------------------------------------------------------------------------
 
+	std::set<QString> UalAfb::m_lmsWithLessGreateEqMode;
+
 	UalAfb::UalAfb(const UalItem& appItem, bool isBusProcessingAfb) :
 		UalItem(appItem),
 		m_isBusProcessing(isBusProcessingAfb)
@@ -724,6 +726,16 @@ namespace Builder
 			AppFbParamValue value(afbParam);
 
 			m_paramValuesArray.insert(afbParam.opName(), value);
+		}
+
+		//
+
+		if (m_lmsWithLessGreateEqMode.empty() == true)
+		{
+			m_lmsWithLessGreateEqMode.insert(LmDescriptionName::LM1_SR20);
+			m_lmsWithLessGreateEqMode.insert(LmDescriptionName::LM1_SR05);
+			m_lmsWithLessGreateEqMode.insert(LmDescriptionName::LM8_SR10);
+			m_lmsWithLessGreateEqMode.insert(LmDescriptionName::LM11_SR90);
 		}
 	}
 

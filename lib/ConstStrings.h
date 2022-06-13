@@ -638,5 +638,10 @@ namespace Afb
 namespace LmDescriptionName
 {
 	inline const QString LM1_SR04("LM1_SR04");
+	inline const QString LM1_SR05("LM1_SR05");
+	inline const QString LM1_SR20("LM1_SR20");
+
 	inline const QString LM8_SR10("LM8_SR10");
+
+	inline const QString LM11_SR90("LM11_SR90");
 }

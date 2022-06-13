@@ -393,9 +393,9 @@ namespace Builder
 			iConf == BCOMP_32SI_GREAT ||
 			iConf == BCOMP_32SI_LESS ||
 			iConf == BCOMP_32SI_NOT_EQU ||
-			(lmDescriptionName() == LmDescriptionName::LM8_SR10 &&
-			 (iConf == BCOMP_32SI_GREAT_EQU ||
-			  iConf == BCOMP_32SI_LESS_EQU)))
+				(m_lmsWithLessGreateEqMode.contains(lmDescriptionName()) == true &&
+				(iConf == BCOMP_32SI_GREAT_EQU || iConf == BCOMP_32SI_LESS_EQU))
+			)
 		{
 			// comparison of signed int values
 			//
@@ -447,9 +447,9 @@ namespace Builder
 			iConf == BCOMP_32FP_GREAT ||
 			iConf == BCOMP_32FP_LESS ||
 			iConf == BCOMP_32FP_NOT_EQU ||
-			(lmDescriptionName() == LmDescriptionName::LM8_SR10 &&
-			 (iConf == BCOMP_32FP_GREAT_EQU ||
-			  iConf == BCOMP_32FP_LESS_EQU)))
+				(m_lmsWithLessGreateEqMode.contains(lmDescriptionName()) == true &&
+				(iConf == BCOMP_32FP_GREAT_EQU || iConf == BCOMP_32FP_LESS_EQU))
+			)
 		{
 			// comparison of floating point values
 			//
@@ -1361,8 +1361,8 @@ namespace Builder
 			iConf == CMP_32SI_GREAT ||
 			iConf == CMP_32SI_LESS ||
 			iConf == CMP_32SI_NOT_EQU ||
-			(lmDescriptionName() == LmDescriptionName::LM8_SR10 &&
-			(iConf == CMP_32SI_GREAT_EQU || iConf == CMP_32SI_LESS_EQU))
+				(m_lmsWithLessGreateEqMode.contains(lmDescriptionName()) == true &&
+				(iConf == CMP_32SI_GREAT_EQU || iConf == CMP_32SI_LESS_EQU))
 			)
 		{
 			m_runTime = 5 + 14;
@@ -1394,8 +1394,8 @@ namespace Builder
 			iConf == CMP_32FP_GREAT ||
 			iConf == CMP_32FP_LESS ||
 			iConf == CMP_32FP_NOT_EQU ||
-			(lmDescriptionName() == LmDescriptionName::LM8_SR10 &&
-			(iConf == CMP_32FP_GREAT_EQU || iConf == CMP_32FP_LESS_EQU))
+				(m_lmsWithLessGreateEqMode.contains(lmDescriptionName()) == true &&
+				(iConf == CMP_32FP_GREAT_EQU || iConf == CMP_32FP_LESS_EQU))
 			)
 		{
 			m_runTime = 16 + 14;
