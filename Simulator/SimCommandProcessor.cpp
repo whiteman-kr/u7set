@@ -189,7 +189,7 @@ namespace Sim
 			{
 				SimException::raise(QString("Read uninitialized memory detected, RAM address %1 (0x%2).")
 										.arg(address)
-										.arg(address, 0, 16, QChar('0')));
+				                        .arg(address, 0, 16, QChar('0')));
 			}
 
 			address++;
@@ -231,9 +231,9 @@ namespace Sim
 					.arg(afb.pinCaption(command->m_afbPinOpCode));
 	}
 
-	QString CommandProcessor::strAddr(quint16 address) const
+	QString CommandProcessor::strAddr(quint32 address) const
 	{
-		QString hexAddr = QString("%1").arg(static_cast<ushort>(address), 4, 16, QChar('0'));
+		QString hexAddr = QString("%1").arg(static_cast<ushort>(address), 4, 16, QChar('0')).toUpper();
 		if (hexAddr.at(0).isDigit() == false)
 		{
 			hexAddr.prepend('0');
@@ -242,9 +242,9 @@ namespace Sim
 		return hexAddr;
 	}
 
-	QString CommandProcessor::strBitAddr(quint16 address, quint16 bitNo) const
+	QString CommandProcessor::strBitAddr(quint32 address, quint16 bitNo) const
 	{
-		QString hexAddr = QString("%1").arg(static_cast<ushort>(address), 4, 16, QChar('0'));
+		QString hexAddr = QString("%1").arg(static_cast<ushort>(address), 4, 16, QChar('0')).toUpper();
 		if (hexAddr.at(0).isDigit() == false)
 		{
 			hexAddr.prepend('0');
@@ -263,7 +263,7 @@ namespace Sim
 
 	QString CommandProcessor::strWordConst(quint16 data) const
 	{
-		QString dataStr = QString("%1").arg(static_cast<ushort>(data), 4, 16, QChar('0'));
+		QString dataStr = QString("%1").arg(static_cast<ushort>(data), 4, 16, QChar('0')).toUpper();
 		if (dataStr.at(0).isDigit() == false)
 		{
 			dataStr.prepend('0');
@@ -274,7 +274,7 @@ namespace Sim
 
 	QString CommandProcessor::strDwordConst(quint32 data) const
 	{
-		QString dataStr = QString("%1").arg(static_cast<quint32>(data), 8, 16, QChar('0'));
+		QString dataStr = QString("%1").arg(static_cast<quint32>(data), 8, 16, QChar('0')).toUpper();
 		if (dataStr.at(0).isDigit() == false)
 		{
 			dataStr.prepend('0');

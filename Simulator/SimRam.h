@@ -197,7 +197,7 @@ namespace Sim
 		RamAreaInfo memoryAreaInfo(const QString& name) const;
 		RamAreaInfo memoryAreaInfo(int index) const;
 
-	using Handle = size_t;	// Handle is just index in m_memoryAreas vector
+	using Handle = size_t;	// Handle is index in m_memoryAreas vector
 	static const Handle InvalidHandle = std::numeric_limits<Handle>::max();
 
 		[[nodiscard]] Handle memoryAreaHandle(E::LogicModuleRamAccess access, quint32 offsetW) const;

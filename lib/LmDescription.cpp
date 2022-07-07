@@ -804,6 +804,18 @@ bool LmDescription::Memory::load(const QDomDocument& document, QString* errorMes
 	return errorMessage->isEmpty();
 }
 
+bool LmDescription::Memory::isAppLogicBitData(quint32 address) const
+{
+	return address >= m_appLogicBitDataOffset &&
+	       address < (m_appLogicBitDataOffset + m_appLogicBitDataSize);
+}
+
+bool LmDescription::Memory::isAppLogicWordData(quint32 address) const
+{
+	return address >= m_appLogicWordDataOffset &&
+	       address < (m_appLogicWordDataOffset + m_appLogicWordDataSize);
+}
+
 bool LmDescription::LogicUnit::load(const QDomDocument& document, QString* errorMessage)
 {
 	if (errorMessage == nullptr)

@@ -233,7 +233,7 @@ namespace Sim
 
 	bool RamArea::writeBit(quint32 offsetW, quint16 bitNo, quint16 data, E::ByteOrder byteOrder) noexcept
 	{
-		// Cannot use contains function, cause such signals like _pblink stored in memory for reading, but actually I write there manually
+		// Cannot use contains(...) function, cause signals like *_pblink are stored in memory for reading, but actually I write there manually
 		//
 		const quint32 areaOffset = offset();
 

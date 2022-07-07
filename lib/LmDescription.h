@@ -131,6 +131,9 @@ public:
 		quint32 txDiagDataSize() const { return m_txDiagDataSize; }
 
 		bool load(const QDomDocument& document, QString* errorMessage);
+
+		bool isAppLogicBitData(quint32 address) const;
+		bool isAppLogicWordData(quint32 address) const;
 	};
 
 	struct LogicUnit

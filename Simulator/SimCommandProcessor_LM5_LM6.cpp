@@ -436,20 +436,23 @@ namespace Sim
 	{
 		command->m_size = 3;
 
-		command->m_word0 = m_device->getWord(command->m_offset + 1);		// word0 - adderess2 - destionation
-		command->m_word1 = m_device->getWord(command->m_offset + 2);		// word1 - adderess1 - source
+		quint16 dstAddress = m_device->getWord(command->m_offset + 1);
+		quint16 srcAddress = m_device->getWord(command->m_offset + 2);
 
-		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, command->m_word1);
-		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
+		command->m_word0 = dstAddress;		// word0 - adderess2 - destionation
+		command->m_word1 = srcAddress;		// word1 - adderess1 - source
 
-		sanitizerCheck(command->m_word1, 1);
-		sanitizerWrite(command->m_word0, 1);
+		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, srcAddress);
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, dstAddress);
 
-		// --
-		//
 		command->m_string = strCommand(command->caption()) +
-							strAddr(command->m_word0) + ", " +
-							strAddr(command->m_word1);
+		                    strAddr(dstAddress) + ", " +
+		                    strAddr(srcAddress);
+
+		// Cheks
+		//
+		sanitizerCheck(srcAddress, 1);
+		sanitizerWrite(dstAddress, 1);
 
 		return;
 	}
@@ -473,22 +476,45 @@ namespace Sim
 	{
 		command->m_size = 4;
 
-		command->m_word0 = m_device->getWord(command->m_offset + 1);		// word0 - adderess2 - dst
-		command->m_word1 = m_device->getWord(command->m_offset + 2);		// word1 - adderess1 - src
-		command->m_word2 = m_device->getWord(command->m_offset + 3);		// word2 - words to move
+		quint16 dst = m_device->getWord(command->m_offset + 1);
+		quint16 src = m_device->getWord(command->m_offset + 2);
+		quint16 count = m_device->getWord(command->m_offset + 3);
 
-		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, command->m_word1);
-		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
+		command->m_word0 = dst;		// word0 - adderess2 - dst
+		command->m_word1 = src;		// word1 - adderess1 - src
+		command->m_word2 = count;	// word2 - words to move
 
-		sanitizerCheck(command->m_word1, command->m_word2);
-		sanitizerWrite(command->m_word0, command->m_word2);
+		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, src);
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, dst);
+
+		command->m_string = strCommand(command->caption()) +
+		                    strAddr(dst) + ", " +
+		                    strAddr(src) + ", " +
+		                    strWordConst(count);
 
 		// --
 		//
-		command->m_string = strCommand(command->caption()) +
-							strAddr(command->m_word0) + ", " +
-							strAddr(command->m_word1) + ", " +
-							strWordConst(command->m_word2);
+		sanitizerCheck(src, count);
+		sanitizerWrite(dst, count);
+
+		// This command cannot write to bit memory (AppLogicBitDataOffset/AppLogicBitDataSize)
+		//
+		{
+			const LmDescription::Memory& memory = m_device->lmDescription().memory();
+
+			for (quint16 i = 0; i < count; i++)
+			{
+				if (memory.isAppLogicBitData(dst + i) == true)
+				{
+					QString message = QString("Command '%1' not allowed to write to bit-accessed memory area (%2 - %3)")
+					                  .arg(command->m_string)
+					                  .arg(strAddr(memory.m_appLogicBitDataOffset))
+					                  .arg(strAddr(memory.m_appLogicBitDataOffset + memory.m_appLogicBitDataSize));
+
+					SimException::raise(message);
+				}
+			}
+		}
 
 		return;
 	}
@@ -528,18 +554,23 @@ namespace Sim
 	{
 		command->m_size = 3;
 
-		command->m_word0 = m_device->getWord(command->m_offset + 1);		// word0 - address
-		command->m_word1 = m_device->getWord(command->m_offset + 2);		// word1 - data
+		quint16 dst = m_device->getWord(command->m_offset + 1);
+		quint16 data = m_device->getWord(command->m_offset + 2);
 
-		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
+		command->m_word0 = dst;		// word0 - address
+		command->m_word1 = data;	// word1 - data
 
-		sanitizerWrite(command->m_word0, 1);
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, dst);
 
-		// movc     0b402h, #0
+		// movc     0D402, #0
 		//
 		command->m_string = strCommand(command->caption()) +
-							strAddr(command->m_word0) + ", " +
-							strWordConst(command->m_word1);
+		                    strAddr(dst) + ", " +
+		                    strWordConst(data);
+
+		// Checks
+		//
+		sanitizerWrite(dst, 1);
 
 		return;
 	}
@@ -558,21 +589,43 @@ namespace Sim
 	{
 		command->m_size = 4;
 
-		command->m_word0 = m_device->getWord(command->m_offset + 1);		// word0 - data address
+		quint16 dst = m_device->getWord(command->m_offset + 1);
+
+		command->m_word0 = dst;												// word0 - data address
 		command->m_word1 = m_device->getWord(command->m_offset + 2);		// word1 - data
 		command->m_bitNo0 = m_device->getWord(command->m_offset + 3);		// bitNo0 - bitno
 
-		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, dst);
 
+		// MOVBC    0B402[0], #0
+		//
+		command->m_string = strCommand(command->m_command.caption) +
+		                    strBitAddr(dst, command->m_bitNo0) +
+							", " +
+							strBitConst(command->m_word1);
+
+		// Checks
+		//
 		checkParamRange(command->m_word1, 0, 1, QStringLiteral("BitData"));
 		checkParamRange(command->m_bitNo0, 0, 15, QStringLiteral("BitNo"));
 
-		// MOVBC    0B402h[0], #0
+		// This command can write only to:
+		//		bit memory (AppLogicBitDataOffset/AppLogicBitDataSize)
+		//		word memory	(AppLogicWordDataOffset/AppLogicWordDataSize)
 		//
-		command->m_string = strCommand(command->m_command.caption) +
-							strBitAddr(command->m_word0, command->m_bitNo0) +
-							", " +
-							strBitConst(command->m_word1);
+		if (const LmDescription::Memory& memory = m_device->lmDescription().memory();
+		    memory.isAppLogicBitData(dst) == false &&
+		    memory.isAppLogicWordData(dst) == false)
+		{
+			QString message = QString("Command '%1' allowed to write only to AppLogicBit area (%2 - %3) and AppLogicWord (%4 - %5) memory areas")
+			                  .arg(command->m_string)
+			                  .arg(strAddr(memory.m_appLogicBitDataOffset))
+			                  .arg(strAddr(memory.m_appLogicBitDataOffset + memory.m_appLogicBitDataSize))
+			                  .arg(strAddr(memory.m_appLogicWordDataOffset))
+			                  .arg(strAddr(memory.m_appLogicWordDataOffset + memory.m_appLogicWordDataSize));
+
+			SimException::raise(message);
+		}
 
 		return;
 	}
@@ -639,28 +692,27 @@ namespace Sim
 	{
 		command->m_size = 3;
 
+		quint16 dstAddress = m_device->getWord(command->m_offset + 2);
+
 		command->m_afbOpCode = m_device->getWord(command->m_offset + 0) & 0x003F;		// Lowest 6 bit
 		command->m_afbInstance = m_device->getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
 		command->m_afbPinOpCode = m_device->getWord(command->m_offset + 1) & 0x003F;	// Lowest 6 bit
 
-		command->m_word0 = m_device->getWord(command->m_offset + 2);					// Word0 - data address
+		command->m_word0 = dstAddress;		// Word0 - data address
 
-		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, dstAddress);
 		command->m_afbComponentInstance = m_device->afbComponentInstance(command->m_afbOpCode, command->m_afbInstance);
+
+		command->m_string = strCommand(command->caption()) +
+		                    strAddr(dstAddress) +
+		                    ", " +
+		                    strAfbInstPin(command);
 
 		// Checks
 		//
 		AfbComponent afb = checkAfb(command->m_afbOpCode, command->m_afbInstance, command->m_afbPinOpCode);
 
-		sanitizerWrite(command->m_word0, 1);
-
-		// String representation
-		// rdfb 0478h, LOGIC.0[i_2_oprd]
-		//
-		command->m_string = strCommand(command->caption()) +
-								strAddr(command->m_word0) +
-								", " +
-								strAfbInstPin(command);
+		sanitizerWrite(dstAddress, 1);
 
 		return;
 	}
@@ -785,10 +837,12 @@ namespace Sim
 		command->m_afbInstance = m_device->getWord(command->m_offset + 1) >> 6;			// Highest 10 bits
 		command->m_afbPinOpCode = m_device->getWord(command->m_offset + 1) & 0x003F;	// Lowest 6 bit
 
-		command->m_word0 = m_device->getWord(command->m_offset + 2);					// Word0 - data address
+		quint16 dst = m_device->getWord(command->m_offset + 2);
+
+		command->m_word0 = dst;															// Word0 - data address
 		command->m_bitNo0 = m_device->getWord(command->m_offset + 3);					// BitNo
 
-		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, dst);
 
 		// Checks
 		//
@@ -801,9 +855,26 @@ namespace Sim
 		// rdfbb 46083h[0], LOGIC.0[o_result]
 		//
 		command->m_string = strCommand(command->caption()) +
-							strBitAddr(command->m_word0, command->m_bitNo0) +
+		                    strBitAddr(dst, command->m_bitNo0) +
 							", " +
 							strAfbInstPin(command);
+
+		// This command can write only to:
+		//		bit memory (AppLogicBitDataOffset/AppLogicBitDataSize)
+		//
+		if (const LmDescription::Memory& memory = m_device->lmDescription().memory();
+		    memory.isAppLogicBitData(dst) == false &&
+		    memory.isAppLogicWordData(dst) == false)
+		{
+			QString message = QString("Command '%1' allowed to write only to AppLogicBit area (%2 - %3) and AppLogicWord (%4 - %5) memory areas")
+			                  .arg(command->m_string)
+			                  .arg(strAddr(memory.m_appLogicBitDataOffset))
+			                  .arg(strAddr(memory.m_appLogicBitDataOffset + memory.m_appLogicBitDataSize))
+			                  .arg(strAddr(memory.m_appLogicWordDataOffset))
+			                  .arg(strAddr(memory.m_appLogicWordDataOffset + memory.m_appLogicWordDataSize));
+
+			SimException::raise(message);
+		}
 
 		return;
 	}
@@ -863,13 +934,17 @@ namespace Sim
 	{
 		command->m_size = 4;
 
-		command->m_word0 = m_device->getWord(command->m_offset + 1);		// word0 - adderess
-		command->m_word1 = m_device->getWord(command->m_offset + 2);		// word1 - data
-		command->m_word2 = m_device->getWord(command->m_offset + 3);		// word2 - words to move
+		quint16 dst = m_device->getWord(command->m_offset + 1);
+		quint16 data = m_device->getWord(command->m_offset + 2);
+		quint16 count = m_device->getWord(command->m_offset + 3);
 
-		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
+		command->m_word0 = dst;		// word0 - adderess
+		command->m_word1 = data;		// word1 - data
+		command->m_word2 = count;		// word2 - words to move
 
-		sanitizerWrite(command->m_word0, command->m_word2);
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, dst);
+
+		sanitizerWrite(dst, count);
 
 		// m_memoryAreaTo is not used here, as this method can be used in the range of only one MemoryArea
 		//
@@ -877,9 +952,28 @@ namespace Sim
 		// --
 		//
 		command->m_string = strCommand(command->caption()) +
-							strAddr(command->m_word0) + ", " +
-							strWordConst(command->m_word1) + ", " +
-							strWordConst(command->m_word2);
+		                    strAddr(dst) + ", " +
+		                    strWordConst(data) + ", " +
+		                    strWordConst(count);
+
+		// This command cannot write to bit memory (AppLogicBitDataOffset/AppLogicBitDataSize)
+		//
+		{
+			const LmDescription::Memory& memory = m_device->lmDescription().memory();
+
+			for (quint16 i = 0; i < count; i++)
+			{
+				if (memory.isAppLogicBitData(dst + i) == true)
+				{
+					QString message = QString("Command '%1' not allowed to write to bit-accessed memory area (%2 - %3)")
+					                  .arg(command->m_string)
+					                  .arg(strAddr(memory.m_appLogicBitDataOffset))
+					                  .arg(strAddr(memory.m_appLogicBitDataOffset + memory.m_appLogicBitDataSize));
+
+					SimException::raise(message);
+				}
+			}
+		}
 
 		return;
 
@@ -904,20 +998,44 @@ namespace Sim
 	{
 		command->m_size = 4;
 
-		command->m_word0 = m_device->getWord(command->m_offset + 2);					// source address (ADR1)
-		command->m_bitNo0 = m_device->getWord(command->m_offset + 3) & 0b1111;			//
+		quint16 src = m_device->getWord(command->m_offset + 2);							// source address (ADR1)
+		quint16 srcBitNo = m_device->getWord(command->m_offset + 3) & 0b1111;
 
-		command->m_word1 = m_device->getWord(command->m_offset + 1);					// destionation address	(ADR2)
-		command->m_bitNo1 = (m_device->getWord(command->m_offset + 3) >> 8) & 0b1111;	//
+		quint16 dst = m_device->getWord(command->m_offset + 1);							// destionation address	(ADR2)
+		quint16 dstBitNo = (m_device->getWord(command->m_offset + 3) >> 8) & 0b1111;
 
-		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, command->m_word0);
-		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word1);
+		command->m_word0 = src;					// source address (ADR1)
+		command->m_bitNo0 = srcBitNo;
+
+		command->m_word1 = dst;					// destionation address	(ADR2)
+		command->m_bitNo1 = dstBitNo;
+
+		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, src);
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, dst);
 
 		// String representation
 		//
 		command->m_string =	strCommand(command->caption()) +
-							strBitAddr(command->m_word0, command->m_bitNo0) + ", " +
-							strBitAddr(command->m_word1, command->m_bitNo1);
+		                    strBitAddr(src, srcBitNo) + ", " +
+		                    strBitAddr(dst, dstBitNo);
+
+		// This command can write only to:
+		//		bit memory (AppLogicBitDataOffset/AppLogicBitDataSize)
+		//		word memory	(AppLogicWordDataOffset/AppLogicWordDataSize)
+		//
+		if (const LmDescription::Memory& memory = m_device->lmDescription().memory();
+		    memory.isAppLogicBitData(dst) == false &&
+		    memory.isAppLogicWordData(dst) == false)
+		{
+			QString message = QString("Command '%1' allowed to write only to AppLogicBit area (%2 - %3) and AppLogicWord (%4 - %5) memory areas")
+			                  .arg(command->m_string)
+			                  .arg(strAddr(memory.m_appLogicBitDataOffset))
+			                  .arg(strAddr(memory.m_appLogicBitDataOffset + memory.m_appLogicBitDataSize))
+			                  .arg(strAddr(memory.m_appLogicWordDataOffset))
+			                  .arg(strAddr(memory.m_appLogicWordDataOffset + memory.m_appLogicWordDataSize));
+
+			SimException::raise(message);
+		}
 
 		return;
 	}
@@ -961,20 +1079,37 @@ namespace Sim
 	{
 		command->m_size = 3;
 
-		command->m_word0 = m_device->getWord(command->m_offset + 1);		// word0 - address2 - destionation
-		command->m_word1 = m_device->getWord(command->m_offset + 2);		// word1 - address1 - source
+		quint16 dst = m_device->getWord(command->m_offset + 1);		// word0 - address2 - destionation
+		quint16 src = m_device->getWord(command->m_offset + 2);		// word1 - address1 - source
 
-		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, command->m_word1);
-		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
+		command->m_word0 = dst;		// word0 - address2 - destionation
+		command->m_word1 = src;		// word1 - address1 - source
 
-		sanitizerCheck(command->m_word1, 2);
-		sanitizerWrite(command->m_word0, 2);
+		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, src);
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, dst);
 
-		// --
-		//
 		command->m_string = strCommand(command->caption()) +
 							strAddr(command->m_word0) + ", " +
 							strAddr(command->m_word1);
+
+		// Checks
+		//
+		sanitizerCheck(src, 2);
+		sanitizerWrite(dst, 2);
+
+		// This command cannot write to bit memory (AppLogicBitDataOffset/AppLogicBitDataSize)
+		//
+		if (const LmDescription::Memory& memory = m_device->lmDescription().memory();
+		    memory.isAppLogicBitData(dst) == true ||
+		    memory.isAppLogicBitData(dst + 1) == true)
+		{
+			QString message = QString("Command '%1' not allowed to write to bit-accessed memory area (%2 - %3)")
+			                  .arg(command->m_string)
+			                  .arg(strAddr(memory.m_appLogicBitDataOffset))
+			                  .arg(strAddr(memory.m_appLogicBitDataOffset + memory.m_appLogicBitDataSize));
+
+			SimException::raise(message);
+		}
 
 		return;
 	}
@@ -998,18 +1133,34 @@ namespace Sim
 	{
 		command->m_size = 4;
 
-		command->m_word0 = m_device->getWord(command->m_offset + 1);				// word0 - RAM address
-		command->m_dword0 = m_device->getDword(command->m_offset + 2);				// Dword0 - data
+		quint16 dst = m_device->getWord(command->m_offset + 1);
 
-		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
+		command->m_word0 = dst;												// word0 - RAM address
+		command->m_dword0 = m_device->getDword(command->m_offset + 2);		// Dword0 - data
 
-		sanitizerWrite(command->m_word0, 2);
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, dst);
 
-		// movc32     0b402h, #0
-		//
 		command->m_string = strCommand(command->caption()) +
-							strAddr(command->m_word0) + ", " +
+		                    strAddr(dst) + ", " +
 							strDwordConst(command->m_dword0);
+
+		// Checks
+		//
+		sanitizerWrite(dst, 2);
+
+		// This command cannot write to bit memory (AppLogicBitDataOffset/AppLogicBitDataSize)
+		//
+		if (const LmDescription::Memory& memory = m_device->lmDescription().memory();
+		    memory.isAppLogicBitData(dst) == true ||
+		    memory.isAppLogicBitData(dst + 1) == true)
+		{
+			QString message = QString("Command '%1' not allowed to write to bit-accessed memory area (%2 - %3)")
+			                  .arg(command->m_string)
+			                  .arg(strAddr(memory.m_appLogicBitDataOffset))
+			                  .arg(strAddr(memory.m_appLogicBitDataOffset + memory.m_appLogicBitDataSize));
+
+			SimException::raise(message);
+		}
 
 		return;
 	}
@@ -1087,21 +1238,20 @@ namespace Sim
 
 		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
 
-		sanitizerWrite(command->m_word0, 2);
+		// String representation
+		//
+		command->m_string = strCommand(command->caption()) +
+		                    strAddr(command->m_word0) +
+		                    ", " +
+		                    strAfbInstPin(command);
 
 		// Checks
 		//
+		sanitizerWrite(command->m_word0, 2);
+
 		AfbComponent afb = checkAfb(command->m_afbOpCode, command->m_afbInstance, command->m_afbPinOpCode);
 
 		command->m_afbComponentInstance = m_device->afbComponentInstance(command->m_afbOpCode, command->m_afbInstance);
-
-		// String representation
-		// rdfb32 0478h, LOGIC.0[i_2_oprd]
-		//
-		command->m_string = strCommand(command->caption()) +
-							strAddr(command->m_word0) +
-							", " +
-							strAfbInstPin(command);
 
 		return;
 	}
@@ -1140,12 +1290,11 @@ namespace Sim
 		command->m_afbComponentInstance = m_device->afbComponentInstance(command->m_afbOpCode, command->m_afbInstance);
 
 		// String representation
-		// wrfbc32 MATH.0[i_oprd_1], #0423445h
 		//
 		command->m_string = strCommand(command->caption()) +
-							strAfbInstPin(command) +
-							", " +
-							strDwordConst(command->m_dword0);
+		                    strAfbInstPin(command) +
+		                    ", " +
+		                    strDwordConst(command->m_dword0);
 
 		return;
 	}
@@ -1210,13 +1359,32 @@ namespace Sim
 	{
 		command->m_size = 3;
 
-		command->m_word0 = m_device->getWord(command->m_offset + 1);					// m_word0 - Destination address
-		command->m_bitNo0 = m_device->getWord(command->m_offset + 2) & 0x0F;			// m_bitNo0 - Destination bit no
+		quint16 dst = m_device->getWord(command->m_offset + 1);
 
-		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
+		command->m_word0 = dst;													// m_word0 - Destination address
+		command->m_bitNo0 = m_device->getWord(command->m_offset + 2) & 0x0F;	// m_bitNo0 - Destination bit no
+
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, dst);
 
 		command->m_string = strCommand(command->caption()) +
-							strBitAddr(command->m_word0, command->m_bitNo0);
+		                    strBitAddr(dst, command->m_bitNo0);
+
+		// This command can write only to:
+		//		bit memory (AppLogicBitDataOffset/AppLogicBitDataSize)
+		//
+		if (const LmDescription::Memory& memory = m_device->lmDescription().memory();
+		    memory.isAppLogicBitData(dst) == false &&
+		    memory.isAppLogicWordData(dst) == false)
+		{
+			QString message = QString("Command '%1' allowed to write only to AppLogicBit area (%2 - %3) and AppLogicWord (%4 - %5) memory areas")
+			                  .arg(command->m_string)
+			                  .arg(strAddr(memory.m_appLogicBitDataOffset))
+			                  .arg(strAddr(memory.m_appLogicBitDataOffset + memory.m_appLogicBitDataSize))
+			                  .arg(strAddr(memory.m_appLogicWordDataOffset))
+			                  .arg(strAddr(memory.m_appLogicWordDataOffset + memory.m_appLogicWordDataSize));
+
+			SimException::raise(message);
+		}
 
 		return;
 	}
@@ -1238,19 +1406,37 @@ namespace Sim
 	{
 		command->m_size = 3;
 
-		command->m_word0 = m_device->getWord(command->m_offset + 1);			// destination address (ADR2)
-		command->m_word1 = m_device->getWord(command->m_offset + 2);			// source address (ADR1)
+		quint16 dst = m_device->getWord(command->m_offset + 1);		// destination address (ADR2)
+		quint16 src = m_device->getWord(command->m_offset + 2);		// source address (ADR1)
 
-		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, command->m_word1);
-		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
+		command->m_word0 = dst;										// destination address (ADR2)
+		command->m_word1 = src;										// source address (ADR1)
 
-		sanitizerWrite(command->m_word0, 1);
+		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, src);
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, dst);
 
 		// String representation
 		//
 		command->m_string = strCommand(command->caption()) +
 							strAddr(command->m_word0) + ", " +
 							strAddr(command->m_word1);
+
+		// Checks
+		//
+		sanitizerWrite(command->m_word0, 1);
+
+		// This command can read only from word access app data memory (AppLogicWordDataOffset/AppLogicWordDataSize)
+		//
+		if (const LmDescription::Memory& memory = m_device->lmDescription().memory();
+		    memory.isAppLogicWordData(src) == false)
+		{
+			QString message = QString("Command '%1' allowed to read only from word access app data memory (%2 - %3)")
+			                  .arg(command->m_string)
+			                  .arg(strAddr(memory.m_appLogicWordDataOffset))
+			                  .arg(strAddr(memory.m_appLogicWordDataOffset + memory.m_appLogicWordDataSize));
+
+			SimException::raise(message);
+		}
 
 		return;
 	}
@@ -1274,19 +1460,52 @@ namespace Sim
 	{
 		command->m_size = 3;
 
-		command->m_word0 = m_device->getWord(command->m_offset + 1);			// destination address (ADR2)
-		command->m_word1 = m_device->getWord(command->m_offset + 2);			// source address (ADR1)
+		quint16 dst = m_device->getWord(command->m_offset + 1);		// destination address (ADR2)
+		quint16 src = m_device->getWord(command->m_offset + 2);		// source address (ADR1)
 
-		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, command->m_word1);
-		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, command->m_word0);
+		command->m_word0 = dst;										// destination address (ADR2)
+		command->m_word1 = src;										// source address (ADR1)
 
-		sanitizerWrite(command->m_word0, 2);
+		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, src);
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, dst);
 
 		// String representation
 		//
 		command->m_string = strCommand(command->caption()) +
-							strAddr(command->m_word0) + ", " +
-							strAddr(command->m_word1);
+		                    strAddr(dst) + ", " +
+		                    strAddr(src);
+
+		// Checks
+		//
+		sanitizerWrite(dst, 2);
+
+		// This command can read only from word access app data memory (AppLogicWordDataOffset/AppLogicWordDataSize)
+		//
+		if (const LmDescription::Memory& memory = m_device->lmDescription().memory();
+		    memory.isAppLogicWordData(src) == false ||
+		    memory.isAppLogicWordData(src + 1) == false)
+		{
+			QString message = QString("Command '%1' allowed to read only from word access app data memory (%2 - %3)")
+			                  .arg(command->m_string)
+			                  .arg(strAddr(memory.m_appLogicWordDataOffset))
+			                  .arg(strAddr(memory.m_appLogicWordDataOffset + memory.m_appLogicWordDataSize));
+
+			SimException::raise(message);
+		}
+
+		// This command cannot write to bit memory (AppLogicBitDataOffset/AppLogicBitDataSize)
+		//
+		if (const LmDescription::Memory& memory = m_device->lmDescription().memory();
+		    memory.isAppLogicBitData(dst) == true ||
+		    memory.isAppLogicBitData(dst + 1) == true)
+		{
+			QString message = QString("Command '%1' not allowed to write to bit-accessed memory area (%2 - %3)")
+			                  .arg(command->m_string)
+			                  .arg(strAddr(memory.m_appLogicBitDataOffset))
+			                  .arg(strAddr(memory.m_appLogicBitDataOffset + memory.m_appLogicBitDataSize));
+
+			SimException::raise(message);
+		}
 
 		return;
 	}

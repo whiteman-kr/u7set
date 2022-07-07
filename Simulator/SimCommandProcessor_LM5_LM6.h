@@ -7,7 +7,7 @@ class SimCommandTest_LM5_LM6;
 namespace Sim
 {
 
-	class CommandProcessor_LM5_LM6 : public CommandProcessor
+	class CommandProcessor_LM5_LM6 final : public CommandProcessor
 	{
 		Q_OBJECT
 

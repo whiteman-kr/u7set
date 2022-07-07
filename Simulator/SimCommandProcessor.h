@@ -82,8 +82,8 @@ namespace Sim
 		QString strAfbInst(const DeviceCommand* command) const;
 		QString strAfbInstPin(const DeviceCommand* command) const;
 
-		QString strAddr(quint16 address) const;
-		QString strBitAddr(quint16 address, quint16 bitNo) const;
+		QString strAddr(quint32 address) const;
+		QString strBitAddr(quint32 address, quint16 bitNo) const;
 
 		QString strBitConst(quint16 data) const;
 		QString strWordConst(quint16 data) const;
