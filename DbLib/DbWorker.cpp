@@ -393,6 +393,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0371.sql", "Upgrade to version 371, Bugfix with sin/cos opcode in LM11-SR90, LM8-SR10"},
 	{":/DatabaseUpgrade/Upgrade0372.sql", "Upgrade to version 372, Added Lan version attributes to LM Descriptions"},
 	{":/DatabaseUpgrade/Upgrade0373.sql", "Upgrade to version 373, Changes in function get_signals_id_appsignalid"},
+    {":/DatabaseUpgrade/Upgrade0374.sql", "Upgrade to version 374, Added out_max, out_min to AFB integrator(c) and deriv(c)"},
 };
 
 int DbWorker::counter = 0;

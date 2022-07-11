@@ -1,0 +1,9 @@
+--- Hardware implementation version 5
+
+deriv:
+1.0015 - added out_max, out_min outputs
+
+derivc:
+1.0015 - added out_max, out_min outputs
+    
+

@@ -1,0 +1,20 @@
+--- Hardware implementation version 6
+
+integrator:
+1.0012 - added sync
+1.0013 - added out_max, out_min outputs
+
+integratorc:
+1.0012 - added sync
+1.0013 - added out_max, out_min outputs
+    
+
+--- Hardware implementation version 7
+
+integrator:
+1.0012 - added sync
+1.0013 - added out_max, out_min outputs
+
+integratorc:
+1.0012 - added sync
+1.0013 - added out_max, out_min outputs
