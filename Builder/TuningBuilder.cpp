@@ -95,7 +95,7 @@ namespace Builder
 											 "Tuning",
 											 frameSize,
 											 frameCount,
-											 lmDescription->lmDescriptionFile(m),
+			                                 LmDescription::lmDescriptionFile(m),
 											 lmDescription->descriptionNumber());
 
 			Tuning::TuningDataShared tuningData = m_tuningDataStorage->getTuningData(m->equipmentIdTemplate());

@@ -44,10 +44,10 @@ SwitchFiltersPage::SwitchFiltersPage(std::shared_ptr<TuningFilter> workspaceFilt
 									 std::vector<TuningClientTcpClient*> tuningTcpClients, TuningFilterStorage* tuningFilterStorage,
 									 QWidget* parent) :
 	QWidget(parent),
-	m_workspaceFilter(workspaceFilter),
-	m_tuningSignalManager(tuningSignalManager),
-	m_tuningTcpClients(tuningTcpClients),
-	m_tuningFilterStorage(tuningFilterStorage)
+    m_tuningSignalManager(tuningSignalManager),
+    m_tuningTcpClients(tuningTcpClients),
+    m_tuningFilterStorage(tuningFilterStorage),
+    m_workspaceFilter(workspaceFilter)
 {
 	m_mainLayout = new QVBoxLayout(this);
 
@@ -566,15 +566,19 @@ bool SwitchFiltersPage::changeFilterSignals(std::shared_ptr<TuningFilter> filter
 		}
 		else
 		{
-			int result = QMessageBox::warning(this, qAppName(), tr("Signals of the filter '%1' have different values. Please select the following action:").arg(filter->caption()),
-											  tr("Set All to 0"), tr("Set All to 1"), tr("Cancel"), 2);
-			if (result == 0)
+			QMessageBox msgBox{this};
+			msgBox.setText(tr("Signals of the filter '%1' have different values. Please select the following action:").arg(filter->caption()));
+			QPushButton* saveTo0Button = msgBox.addButton(tr("Set All to 0"), QMessageBox::ActionRole);
+			QPushButton* saveTo1Button = msgBox.addButton(tr("Set All to 1"), QMessageBox::ActionRole);
+			/*QPushButton* saveTo2Button = */msgBox.addButton(tr("Set All to 2"), QMessageBox::ActionRole);
+
+			if (msgBox.clickedButton() == saveTo0Button)
 			{
 				newValue = 0;
 			}
 			else
 			{
-				if (result == 1)
+				if (msgBox.clickedButton() == saveTo1Button)
 				{
 					newValue = 1;
 				}

@@ -1295,22 +1295,27 @@ bool TuningPage::askForSavePendingChanges()
 		return true;
 	}
 
-	int result = QMessageBox::warning(this, qAppName(), tr("Warning! Some values were modified but not written. Please select the following:"), tr("Write"), tr("Undo"), tr("Cancel"));
+	QMessageBox msgBox{this};
+	msgBox.setText(tr("Some values were modified but not written. Please select the following:"));
+	QPushButton* saveButton = msgBox.addButton(QMessageBox::Save);
+	QPushButton* undoButton = msgBox.addButton(tr("Undo"), QMessageBox::ActionRole);
+	/*QPushButton* cancelButton = */msgBox.addButton(QMessageBox::Cancel);
 
-	if (result == 0)
+	if (msgBox.clickedButton() == saveButton)
 	{
-		if (write() == false)
-		{
-			return false;
-		}
-		return true;
+		return write();
 	}
 
-	if (result == 1)
+	if (msgBox.clickedButton() == undoButton)
 	{
 		undo();
 		return true;
 	}
+
+//	if (msgBox.clickedButton() == cancelButton)
+//	{
+//		return false;
+//	}
 
 	return false;
 }

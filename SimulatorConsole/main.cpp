@@ -29,7 +29,7 @@ void messageOutputHandler(QtMsgType type, const QMessageLogContext& context, con
             fprintf(stderr, "err: %s\n", localMsg.constData());
 			break;
 		case QtFatalMsg:
-			fprintf(stderr, "fatal: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+			fprintf(stderr, "fatal: %s (%s:%d, %s)\n", localMsg.constData(), context.file, context.line, context.function);
 			abort();
 		}
 	}

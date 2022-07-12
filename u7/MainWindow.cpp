@@ -1043,11 +1043,7 @@ void MainWindow::showAbout()
 
 void MainWindow::showAboutQt()
 {
-    int* x = nullptr;
-    *x = 0;
-
 	QMessageBox::aboutQt(this, qAppName());
-
 	return;
 }
 

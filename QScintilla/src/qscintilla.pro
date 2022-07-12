@@ -34,6 +34,8 @@ unix {
 	CONFIG(release, debug|release): DESTDIR = ../../bin_unix/release
 }
 
+include(../../compiler.pri)
+
 #CONFIG(debug, debug|release) {
 #    mac: {
 #        TARGET = qscintilla2_qt$${QT_MAJOR_VERSION}_debug
@@ -70,9 +72,9 @@ macx:lessThan(QT_MAJOR_VERSION, 6) {
 CONFIG -= android_install
 
 # For old versions of GCC.
-unix:!macx {
-    CONFIG += c++11
-}
+#unix:!macx {
+#    CONFIG += c++11
+#}
 
 # Comment this in if you want the internal Scintilla classes to be placed in a
 # Scintilla namespace rather than pollute the global namespace.

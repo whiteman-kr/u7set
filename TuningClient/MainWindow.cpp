@@ -289,9 +289,13 @@ void MainWindow::closeEvent(QCloseEvent *event)
 {
 	if (m_tuningWorkspace != nullptr && m_tuningWorkspace->hasPendingChanges() == true)
 	{
-		int result = QMessageBox::warning(this, qAppName(), tr("Warning! Some values were modified but not written. Are you sure you want to exit?"), tr("Yes"), tr("No"));
+		auto result = QMessageBox::warning(this,
+		                                   qAppName(),
+		                                   tr("Warning! Some values were modified but not written. Are you sure you want to exit?"),
+		                                   QMessageBox::Yes | QMessageBox::No,
+		                                   QMessageBox::No);
 
-		if (result == QDialog::Accepted)
+		if (result == QMessageBox::Yes)
 		{
 			event->ignore();
 		}

@@ -176,7 +176,7 @@ namespace VFrame30
 		{
 			if (currentImage->hasAnyImage() == false)
 			{
-				currentImage->drawError(drawParam, rect, QStringLiteral("No Image"));
+				ImageItem::drawError(drawParam, rect, QStringLiteral("No Image"));
 			}
 			else
 			{
