@@ -49,7 +49,7 @@ linux build job:
     - "# ----------------------------------------------"
     - "#               Build Project"
     - "# ----------------------------------------------"    
-    - "~/Qt/6.2.3/gcc_64/bin/qmake u7set.pro -spec linux-g++"
+    - "~/Qt/6.2.4/gcc_64/bin/qmake u7set.pro -spec linux-g++"
     - "make -j9"
 
 
@@ -68,7 +68,7 @@ windows build job:
     - "echo $Env:CI_COMMIT_SHA"
     - "git status"
     - "git log -1"
-    - $Env:QT_BIN_DIR="C:\\Qt\\6.2.3\\msvc2019_64"
+    - $Env:QT_BIN_DIR="C:\\Qt\\6.2.4\\msvc2019_64"
 #generation version file
     - "'#pragma once' > gitlabci_version.h"
     - "' ' >> gitlabci_version.h"
