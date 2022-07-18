@@ -3842,6 +3842,11 @@ namespace Sim
 				isZero = (result == .0f) || isUnderflow;
 				isNan = std::isnan(result);
 
+				if (isUnderflow)	// Altera's ip core sets 0 if operation result is denormalized number
+				{
+					result = 0;
+				}
+
 				instance->addParamFloat(o_result, result);
 				instance->addParamFloat(o_current_fp, result);
 				instance->addParamFloat(i_prev_fp, result);
@@ -4650,6 +4655,26 @@ namespace Sim
 		return;
 	}
 
+	void CommandProcessor_LM5_LM6::afb_func_v5(AfbComponentInstance* instance)
+	{
+		// Define input opIndexes
+		//
+		const int i_conf = 0;
+		quint16 conf = instance->param(i_conf)->wordValue();
+
+		if (conf < 1 || conf > 13)
+		{
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
+			                    .arg(conf), Q_FUNC_INFO);
+		}
+		else
+		{
+			return afb_func_private(instance, conf, 5);
+		}
+
+		return;
+	}
+
 	void CommandProcessor_LM5_LM6::afb_func_private(AfbComponentInstance* instance, int conf, int version)
 	{
 		// Define input opIndexes
@@ -4657,7 +4682,8 @@ namespace Sim
 		const int i_data = 1;
 
 		const int o_result = 5;
-		const int o_overflow = 7;
+		const int o_result_sign = 6;	// result for conf 13
+		const int o_overflow_inf = 7;
 		const int o_underflow = 8;
 		const int o_zero = 9;
 		const int o_nan = 10;
@@ -4667,7 +4693,7 @@ namespace Sim
 		//
 		AfbComponentParam result{static_cast<quint16>(o_result)};
 
-		quint16 overflow = 0;
+		quint16 overflow_inf = 0;
 		quint16 underflow = 0;
 		quint16 zero = 0;
 		quint16 nan = 0;
@@ -4685,14 +4711,14 @@ namespace Sim
 					{
 						result.setFloatValue(std::numeric_limits<float>::quiet_NaN());
 						nan = 1;
-						overflow  = 0;
+						overflow_inf  = 0;
 						zero = 0;
 					}
 					else
 					{
 						result.setFloatValue(std::sqrt(floatData));
 						nan = 0;
-						overflow  = 0;
+						overflow_inf  = 0;
 						zero = 0;
 					}
 
@@ -4705,14 +4731,14 @@ namespace Sim
 					{
 						result.setFloatValue(std::numeric_limits<float>::infinity());
 						nan = 0;
-						overflow  = 1;
+						overflow_inf  = 1;
 						zero = 0;
 					}
 					else
 					{
 						result.setFloatValue(std::numeric_limits<float>::quiet_NaN());
 						nan = 1;
-						overflow  = 0;
+						overflow_inf  = 0;
 						zero = 0;
 					}
 
@@ -4723,7 +4749,7 @@ namespace Sim
 				{
 					result.setFloatValue(std::numeric_limits<float>::quiet_NaN());
 					nan = 1;
-					overflow  = 0;
+					overflow_inf  = 0;
 					zero = 0;
 					break;
 				}
@@ -4732,7 +4758,7 @@ namespace Sim
 				{
 					result.setFloatValue(.0f);
 					nan = 0;
-					overflow  = 0;
+					overflow_inf  = 0;
 					zero = 1;
 					break;
 				}
@@ -4741,7 +4767,7 @@ namespace Sim
 				{
 					result.setFloatValue(.0f);
 					nan = 0;
-					overflow  = 0;
+					overflow_inf  = 0;
 					zero = 1;
 					break;
 				}
@@ -4797,7 +4823,7 @@ namespace Sim
 				result.setFloatValue(floatData.floatValue());
 
 				nan = result.mathNan();
-				overflow = result.mathOverflow();
+				overflow_inf = result.mathOverflow();
 				underflow = result.mathUnderflow();
 				zero = result.mathZero();
 			}
@@ -4823,12 +4849,12 @@ namespace Sim
 				if (inputData == std::numeric_limits<qint32>::lowest())		// -2147483648 cannot became positive 2147483648
 				{
 					resultValue = std::numeric_limits<qint32>::max();
-					overflow = 1;
+					overflow_inf = 1;
 				}
 				else
 				{
 					resultValue = std::abs(inputData);
-					overflow = 0;
+					overflow_inf = 0;
 				}
 
 				result.setSignedIntValue(resultValue);
@@ -4836,6 +4862,81 @@ namespace Sim
 				zero = (resultValue == 0);
 			}
 			break;
+		case 9:		// FP sign inversion
+			{
+				float floatData = instance->param(i_data)->floatValue();
+				quint32 asBinary = std::bit_cast<quint32>(floatData);
+
+				if (asBinary != 0)				// 0 must not become negative zero
+				{
+					asBinary ^= 0x80000000;		// flip sign bin
+				}
+
+				floatData = std::bit_cast<float>(asBinary);
+				result.setFloatValue(floatData);
+
+				zero = asBinary == 0;
+				nan = std::isnan(floatData);
+			}
+			break;
+		case 10:		// SI sign inversion
+			{
+				qint64 data = instance->param(i_data)->signedIntValue();
+				data *= -1;
+
+				if (data > std::numeric_limits<qint32>::max())	// data is 64bit wide, so it is possible that (data > max)
+				{
+					data = std::numeric_limits<qint32>::max();
+					overflow_inf = 1;
+				}
+
+				result.setSignedIntValue(static_cast<qint32>(data));
+				zero = (data == 0);
+			}
+			break;
+		case 11:		// FP negate
+			{
+				float floatData = instance->param(i_data)->floatValue();
+				quint32 asBinary = std::bit_cast<quint32>(floatData);
+
+				if (asBinary != 0)				// 0 must not become negative zero
+				{
+					asBinary |= 0x80000000;		// flip sign bin
+				}
+
+				floatData = std::bit_cast<float>(asBinary);
+				result.setFloatValue(floatData);
+
+				zero = asBinary == 0;
+				nan = std::isnan(floatData);
+			}
+			break;
+		case 12:		// SI negate
+			{
+				qint32 data = instance->param(i_data)->signedIntValue();
+				if (data > 0)
+				{
+					data *= -1;
+				}
+
+				result.setSignedIntValue(data);
+				zero = (data == 0);
+			}
+			break;
+		case 13:		// SI/FP sign
+			{
+				float data = instance->param(i_data)->floatValue();
+
+				quint16 sign = std::signbit(data);
+
+				result.setOpIndex(o_result_sign);
+				result.setWordValue(sign);
+
+				overflow_inf = std::isinf(data);	// for configuraion 13 ouput o_overflow is o_inf
+				nan = std::isnan(data);
+			}
+			break;
+
 		default:
 			SimException::raise(QStringLiteral("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
 								.arg(conf),
@@ -4844,10 +4945,9 @@ namespace Sim
 
 		// Save result
 		//
-		result.setOpIndex(o_result);
 		instance->addParam(result);
 
-		instance->addParamWord(o_overflow, overflow);
+		instance->addParamWord(o_overflow_inf, overflow_inf);
 		instance->addParamWord(o_underflow, underflow);
 		instance->addParamWord(o_zero, zero);
 		instance->addParamWord(o_nan, nan);

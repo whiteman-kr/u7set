@@ -276,7 +276,7 @@ namespace Sim
 
 		initTuningSourcesHandlers(*settings.get());
 
-		qDebug() << "TuningRequestsProcessingThread " << C_STR(tsCommunicator.tuningServiceEquipmentID()) << "channel" << channel+1;
+		//qDebug() << "TuningRequestsProcessingThread " << C_STR(tsCommunicator.tuningServiceEquipmentID()) << "channel" << channel+1;
 	}
 
 	TuningRequestsProcessingThread::~TuningRequestsProcessingThread()

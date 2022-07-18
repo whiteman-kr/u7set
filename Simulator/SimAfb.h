@@ -12,7 +12,7 @@
 
 namespace Sim
 {
-	class AfbComponent
+	class AfbComponent final
 	{
 	public:
 		AfbComponent() = delete;
@@ -42,7 +42,7 @@ namespace Sim
 	};
 
 
-	class AfbComponentParam
+	class AfbComponentParam final
 	{
 	public:
 		AfbComponentParam() = default;
@@ -50,6 +50,7 @@ namespace Sim
 		explicit AfbComponentParam(quint16 paramOpIndex) :
 			m_paramOpIndex(paramOpIndex)
 		{
+			static_assert(std::is_trivially_copyable_v<AfbComponentParam>);
 		}
 
 		explicit AfbComponentParam(quint16 paramOpIndex, quint16 word) :

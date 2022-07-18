@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule Name="LM1_SF00" DescriptionNumber="0" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.0022">
+<LogicModule Name="LM1_SF00" DescriptionNumber="0" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.23">
 	<FlashMemory>
 	    <AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFramePayload>1016</AppLogicFramePayload>
@@ -328,7 +328,7 @@
 			<Pin OpName="o_nan"		OpIndex ="15"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="16"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="FUNC"		OpCode="16"	HasRam="true"	ImpVersion="3"		VersionOpIndex="13"	MaxInstCount="256" SimulationFunc="afb_func_v3">
+		<AFBComponent Caption="FUNC"		OpCode="16"	HasRam="false"	ImpVersion="3"		VersionOpIndex="13"	MaxInstCount="256" SimulationFunc="afb_func_v3">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_data"		OpIndex ="1"	PinType = "Input"/>
 			<Pin OpName="o_result"		OpIndex ="5"	PinType = "Output"/>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule Name="LM1_SR05" DescriptionNumber="5" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.0003">
+<LogicModule Name="LM1_SR05" DescriptionNumber="5" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.4">
 	<FlashMemory>
 	    <AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFramePayload>1016</AppLogicFramePayload>
@@ -359,14 +359,15 @@
 			<Pin OpName="o_nan"		OpIndex ="15"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="16"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="FUNC"		OpCode="16"	HasRam="true"	ImpVersion="4"		VersionOpIndex="13"	MaxInstCount="256" SimulationFunc="afb_func_v4">
+		<AFBComponent Caption="FUNC" OpCode="16" HasRam="false" ImpVersion="5" VersionOpIndex="13" MaxInstCount="256" SimulationFunc="afb_func_v5">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_data"		OpIndex ="1"	PinType = "Input"/>
 			<Pin OpName="o_result"		OpIndex ="5"	PinType = "Output"/>
-			<Pin OpName="o_overflow"	OpIndex ="7"	PinType = "Output"/>
+			<Pin OpName="o_result_sign"	OpIndex ="6"	PinType = "Output"/>
+			<Pin OpName="o_ov_inf"		OpIndex ="7"	PinType = "Output"/>
 			<Pin OpName="o_underflow"	OpIndex ="8"	PinType = "Output"/>
 			<Pin OpName="o_zero"		OpIndex ="9"	PinType = "Output"/>
-			<Pin OpName="o_nan"		OpIndex ="10"	PinType = "Output"/>
+			<Pin OpName="o_nan"			OpIndex ="10"	PinType = "Output"/>
 			<Pin OpName="o_div_by_zero"	OpIndex ="11"	PinType = "Output"/>
 			<Pin OpName="o_funct_edi"	OpIndex ="12"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="13"	PinType = "Output"/>
@@ -8574,7 +8575,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#math_sqrt_fp_v1"   Caption="math_sqrt_fp"   Version="1.0006">
+		<AFB id="#math_sqrt_fp_v1"   Caption="math_sqrt_fp"   Version="1.6">
 			<Properties>				
 				<Description>Function Block outputs the square root calculation result</Description>
 				<Category>Math</Category>
@@ -8605,84 +8606,69 @@ function createOutputSignals(videoItemFblElement, afbElement)
 					<Value>1</Value>
 					<Default>1</Default>
 					<Script>
-						<Changed>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
-						</Changed>
+						<Changed>(function(videoItemFblElement, afbElement) { return createOutputSignals(videoItemFblElement, afbElement); }) </Changed>
 					</Script>
 				</Param>            
 				<Param OpName="OutZero" Caption="OutZero" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>1</Value>
 					<Default>1</Default>
 					<Script>
-						<Changed>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
-						</Changed>
+						<Changed>(function(videoItemFblElement, afbElement) { return createOutputSignals(videoItemFblElement, afbElement); }) </Changed>
 					</Script>
 				</Param>
 				<Param OpName="OutNaN" Caption="OutNaN" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>1</Value>
 					<Default>1</Default>
 					<Script>
-						<Changed>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
-						</Changed>
+						<Changed>(function(videoItemFblElement, afbElement) { return createOutputSignals(videoItemFblElement, afbElement); }) </Changed>
 					</Script>
 				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
-function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
-{
-	var show = videoItemFblElement.getParamBoolValue(paramName);
-	if (show == true)
-	{
-		var s = afbElement.getAfbSignalByCaption(signalCaption);
-		if (s != null)
-		{
-			videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
-		}	
-	}
-}
+					function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
+					{
+						var show = videoItemFblElement.getParamBoolValue(paramName);
+						if (show == true)
+						{
+							var s = afbElement.getAfbSignalByCaption(signalCaption);
+							if (s != null)
+							{
+								videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+							}	
+						}
+					}
 
-function createOutputSignals(videoItemFblElement, afbElement)
-{
-	videoItemFblElement.removeOutputSignals();
-	
-	var out = afbElement.getAfbSignalByCaption("out");
-	if (out != null)
-	{
-		videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
-	}
-	
-	createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
-	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
-	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
+					function createOutputSignals(videoItemFblElement, afbElement)
+					{
+						videoItemFblElement.removeOutputSignals();
+						
+						var out = afbElement.getAfbSignalByCaption("out");
+						if (out != null)
+						{
+							videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
+						}
+						
+						createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
+						createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
+						createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
 
-	videoItemFblElement.adjustHeight();
+						videoItemFblElement.adjustHeight();
 
-	return true;
-}
+						return true;
+					}
 				</Library>
 				<AfterCreation>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
+					(function(videoItemFblElement, afbElement)
+					{
+						return createOutputSignals(videoItemFblElement, afbElement);
+					})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#math_abs_fp_v1"    Caption="math_abs_fp"    Version="1.0007">
-			<Properties>								
+		<AFB id="#math_abs_fp_v1" Caption="math_abs_fp" Version="1.7">
+			<Properties>
 				<Description>Function Block outputs the absolute value of the input signal</Description>
 				<Category>Math</Category>
 				<OpCode>16</OpCode>
@@ -8710,58 +8696,53 @@ function createOutputSignals(videoItemFblElement, afbElement)
 					<Value>1</Value>
 					<Default>1</Default>
 					<Script>
-						<Changed>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
-						</Changed>
+						<Changed>(function(videoItemFblElement, afbElement) { return createOutputSignals(videoItemFblElement, afbElement); }) </Changed>
 					</Script>
 				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
-function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
-{
-	var show = videoItemFblElement.getParamBoolValue(paramName);
-	if (show == true)
-	{
-		var s = afbElement.getAfbSignalByCaption(signalCaption);
-		if (s != null)
-		{
-			videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
-		}	
-	}
-}
+					function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
+					{
+						var show = videoItemFblElement.getParamBoolValue(paramName);
+						if (show == true)
+						{
+							var s = afbElement.getAfbSignalByCaption(signalCaption);
+							if (s != null)
+							{
+								videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+							}	
+						}
+					}
 
-function createOutputSignals(videoItemFblElement, afbElement)
-{
-	videoItemFblElement.removeOutputSignals();
-	
-	var out = afbElement.getAfbSignalByCaption("out");
-	if (out != null)
-	{
-		videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
-	}
-	
-	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
+					function createOutputSignals(videoItemFblElement, afbElement)
+					{
+						videoItemFblElement.removeOutputSignals();
+						
+						var out = afbElement.getAfbSignalByCaption("out");
+						if (out != null)
+						{
+							videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
+						}
+						
+						createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
 
-	videoItemFblElement.adjustHeight();
+						videoItemFblElement.adjustHeight();
 
-	return true;
-}
+						return true;
+					}
 				</Library>
 				<AfterCreation>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
+					(function(videoItemFblElement, afbElement)
+					{
+						return createOutputSignals(videoItemFblElement, afbElement);
+					})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#math_loge_fp_v1"   Caption="math_loge_fp"   Version="1.0006">
-			<Properties>				
+		<AFB id="#math_loge_fp_v1" Caption="math_loge_fp" Version="1.6">
+			<Properties>
 				<Description>Function Block outputs the natural logarithmic calculation result</Description>
 				<Category>Math</Category>
 				<OpCode>16</OpCode>
@@ -8790,71 +8771,61 @@ function createOutputSignals(videoItemFblElement, afbElement)
 					<Value>1</Value>
 					<Default>1</Default>
 					<Script>
-						<Changed>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
-						</Changed>
+						<Changed>(function(videoItemFblElement, afbElement) { return createOutputSignals(videoItemFblElement, afbElement); }) </Changed>
 					</Script>
 				</Param>
 				<Param OpName="OutNaN" Caption="OutNaN" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>1</Value>
 					<Default>1</Default>
 					<Script>
-						<Changed>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
-						</Changed>
+						<Changed>(function(videoItemFblElement, afbElement) { return createOutputSignals(videoItemFblElement, afbElement); }) </Changed>
 					</Script>
 				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
-function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
-{
-	var show = videoItemFblElement.getParamBoolValue(paramName);
-	if (show == true)
-	{
-		var s = afbElement.getAfbSignalByCaption(signalCaption);
-		if (s != null)
-		{
-			videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
-		}	
-	}
-}
+					function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
+					{
+						var show = videoItemFblElement.getParamBoolValue(paramName);
+						if (show == true)
+						{
+							var s = afbElement.getAfbSignalByCaption(signalCaption);
+							if (s != null)
+							{
+								videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+							}	
+						}
+					}
 
-function createOutputSignals(videoItemFblElement, afbElement)
-{
-	videoItemFblElement.removeOutputSignals();
-	
-	var out = afbElement.getAfbSignalByCaption("out");
-	if (out != null)
-	{
-		videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
-	}	
-	
-	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
-	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");	
+					function createOutputSignals(videoItemFblElement, afbElement)
+					{
+						videoItemFblElement.removeOutputSignals();
+						
+						var out = afbElement.getAfbSignalByCaption("out");
+						if (out != null)
+						{
+							videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
+						}	
+						
+						createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
+						createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");	
 
-	videoItemFblElement.adjustHeight();
+						videoItemFblElement.adjustHeight();
 
-	return true;
-}
+						return true;
+					}
 				</Library>
 				<AfterCreation>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
+					(function(videoItemFblElement, afbElement)
+					{
+						return createOutputSignals(videoItemFblElement, afbElement);
+					})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#math_sin_fp_v1"    Caption="math_sin_fp"    Version="1.0001">
-			<Properties>				
+		<AFB id="#math_sin_fp_v1" Caption="math_sin_fp" Version="1.1">
+			<Properties>
 				<Description>Function Block outputs the sinus calculation result</Description>
 				<Category>Math</Category>
 				<OpCode>16</OpCode>
@@ -8882,58 +8853,53 @@ function createOutputSignals(videoItemFblElement, afbElement)
 					<Value>1</Value>
 					<Default>1</Default>
 					<Script>
-						<Changed>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
-						</Changed>
+						<Changed>(function(videoItemFblElement, afbElement) { return createOutputSignals(videoItemFblElement, afbElement); })</Changed>
 					</Script>
 				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
-function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
-{
-	var show = videoItemFblElement.getParamBoolValue(paramName);
-	if (show == true)
-	{
-		var s = afbElement.getAfbSignalByCaption(signalCaption);
-		if (s != null)
-		{
-			videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
-		}	
-	}
-}
+					function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
+					{
+						var show = videoItemFblElement.getParamBoolValue(paramName);
+						if (show == true)
+						{
+							var s = afbElement.getAfbSignalByCaption(signalCaption);
+							if (s != null)
+							{
+								videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+							}	
+						}
+					}
 
-function createOutputSignals(videoItemFblElement, afbElement)
-{
-	videoItemFblElement.removeOutputSignals();
-	
-	var out = afbElement.getAfbSignalByCaption("out");
-	if (out != null)
-	{
-		videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
-	}	
-	
-	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
+					function createOutputSignals(videoItemFblElement, afbElement)
+					{
+						videoItemFblElement.removeOutputSignals();
+						
+						var out = afbElement.getAfbSignalByCaption("out");
+						if (out != null)
+						{
+							videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
+						}	
+						
+						createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
 
-	videoItemFblElement.adjustHeight();
+						videoItemFblElement.adjustHeight();
 
-	return true;
-}
-				</Library>
+						return true;
+					}
+									</Library>
 				<AfterCreation>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
+					(function(videoItemFblElement, afbElement)
+					{
+						return createOutputSignals(videoItemFblElement, afbElement);
+					})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#math_cos_fp_v1"    Caption="math_cos_fp"    Version="1.0001">
-			<Properties>				
+		<AFB id="#math_cos_fp_v1" Caption="math_cos_fp" Version="1.1">
+			<Properties>
 				<Description>Function Block outputs the cosinus calculation result</Description>
 				<Category>Math</Category>
 				<OpCode>16</OpCode>
@@ -8961,58 +8927,53 @@ function createOutputSignals(videoItemFblElement, afbElement)
 					<Value>1</Value>
 					<Default>1</Default>
 					<Script>
-						<Changed>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
-						</Changed>
+						<Changed>(function(videoItemFblElement, afbElement) { return createOutputSignals(videoItemFblElement, afbElement); }) </Changed>
 					</Script>
 				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
-function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
-{
-	var show = videoItemFblElement.getParamBoolValue(paramName);
-	if (show == true)
-	{
-		var s = afbElement.getAfbSignalByCaption(signalCaption);
-		if (s != null)
-		{
-			videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
-		}	
-	}
-}
+					function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
+					{
+						var show = videoItemFblElement.getParamBoolValue(paramName);
+						if (show == true)
+						{
+							var s = afbElement.getAfbSignalByCaption(signalCaption);
+							if (s != null)
+							{
+								videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+							}	
+						}
+					}
 
-function createOutputSignals(videoItemFblElement, afbElement)
-{
-	videoItemFblElement.removeOutputSignals();
-	
-	var out = afbElement.getAfbSignalByCaption("out");
-	if (out != null)
-	{
-		videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
-	}	
-	
-	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
+					function createOutputSignals(videoItemFblElement, afbElement)
+					{
+						videoItemFblElement.removeOutputSignals();
+						
+						var out = afbElement.getAfbSignalByCaption("out");
+						if (out != null)
+						{
+							videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
+						}	
+						
+						createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
 
-	videoItemFblElement.adjustHeight();
+						videoItemFblElement.adjustHeight();
 
-	return true;
-}
+						return true;
+					}
 				</Library>
 				<AfterCreation>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
+					(function(videoItemFblElement, afbElement)
+					{
+						return createOutputSignals(videoItemFblElement, afbElement);
+					})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#math_exp_fp_v1"    Caption="math_exp_fp"    Version="1.0006">
-			<Properties>				
+		<AFB id="#math_exp_fp_v1" Caption="math_exp_fp" Version="1.6">
+			<Properties>
 				<Description>Function Block outputs the exponential calculation result</Description>
 				<Category>Math</Category>
 				<OpCode>16</OpCode>
@@ -9043,97 +9004,77 @@ function createOutputSignals(videoItemFblElement, afbElement)
 					<Value>1</Value>
 					<Default>1</Default>
 					<Script>
-						<Changed>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
-						</Changed>
+						<Changed>(function(videoItemFblElement, afbElement) { return createOutputSignals(videoItemFblElement, afbElement); }) </Changed>
 					</Script>
 				</Param>
 				<Param OpName="OutUnderflow" Caption="OutUnderflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>1</Value>
 					<Default>1</Default>
 					<Script>
-						<Changed>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
-						</Changed>
+						<Changed>(function(videoItemFblElement, afbElement) { return createOutputSignals(videoItemFblElement, afbElement); }) </Changed>
 					</Script>
 				</Param>
 				<Param OpName="OutZero" Caption="OutZero" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>1</Value>
 					<Default>1</Default>
 					<Script>
-						<Changed>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
-						</Changed>
+						<Changed>(function(videoItemFblElement, afbElement) { return createOutputSignals(videoItemFblElement, afbElement); }) </Changed>
 					</Script>
 				</Param>
 				<Param OpName="OutNaN" Caption="OutNaN" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>1</Value>
 					<Default>1</Default>
 					<Script>
-						<Changed>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
-						</Changed>
+						<Changed>(function(videoItemFblElement, afbElement) { return createOutputSignals(videoItemFblElement, afbElement); }) </Changed>
 					</Script>
 				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
-function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
-{
-	var show = videoItemFblElement.getParamBoolValue(paramName);
-	if (show == true)
-	{
-		var s = afbElement.getAfbSignalByCaption(signalCaption);
-		if (s != null)
-		{
-			videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
-		}	
-	}
-}
+					function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
+					{
+						var show = videoItemFblElement.getParamBoolValue(paramName);
+						if (show == true)
+						{
+							var s = afbElement.getAfbSignalByCaption(signalCaption);
+							if (s != null)
+							{
+								videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+							}	
+						}
+					}
 
-function createOutputSignals(videoItemFblElement, afbElement)
-{
-	videoItemFblElement.removeOutputSignals();
-	
-	var out = afbElement.getAfbSignalByCaption("out");
-	if (out != null)
-	{
-		videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
-	}	
-	
-	createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
-	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
-	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
-	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");	
+					function createOutputSignals(videoItemFblElement, afbElement)
+					{
+						videoItemFblElement.removeOutputSignals();
+						
+						var out = afbElement.getAfbSignalByCaption("out");
+						if (out != null)
+						{
+							videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
+						}	
+						
+						createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
+						createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
+						createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
+						createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");	
 
-	videoItemFblElement.adjustHeight();
+						videoItemFblElement.adjustHeight();
 
-	return true;
-}
+						return true;
+					}
 				</Library>
 				<AfterCreation>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
+					(function(videoItemFblElement, afbElement)
+					{
+						return createOutputSignals(videoItemFblElement, afbElement);
+					})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#math_inv_fp_v1"    Caption="math_inv_fp"    Version="1.0006">
-			<Properties>				
+		<AFB id="#math_inv_fp_v1" Caption="math_inv_fp" Version="1.6">
+			<Properties>
 				<Description>Function Block outputs the inversion value of the input signal in accordance with control signals</Description>
 				<Category>Math</Category>
 				<OpCode>16</OpCode>
@@ -9164,97 +9105,77 @@ function createOutputSignals(videoItemFblElement, afbElement)
 					<Value>1</Value>
 					<Default>1</Default>
 					<Script>
-						<Changed>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
-						</Changed>
+						<Changed>(function(videoItemFblElement, afbElement) { return createOutputSignals(videoItemFblElement, afbElement); }) </Changed>
 					</Script>
 				</Param>
 				<Param OpName="OutZero" Caption="OutZero" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>1</Value>
 					<Default>1</Default>
 					<Script>
-						<Changed>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
-						</Changed>
+						<Changed>(function(videoItemFblElement, afbElement) { return createOutputSignals(videoItemFblElement, afbElement); }) </Changed>
 					</Script>
 				</Param>
 				<Param OpName="OutNaN" Caption="OutNaN" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>1</Value>
 					<Default>1</Default>
 					<Script>
-						<Changed>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
-						</Changed>
+						<Changed>(function(videoItemFblElement, afbElement) { return createOutputSignals(videoItemFblElement, afbElement); }) </Changed>
 					</Script>
 				</Param>
 				<Param OpName="OutDivByZero" Caption="OutDivByZero" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>1</Value>
 					<Default>1</Default>
 					<Script>
-						<Changed>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
-						</Changed>
+						<Changed>(function(videoItemFblElement, afbElement) { return createOutputSignals(videoItemFblElement, afbElement); }) </Changed>
 					</Script>
 				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
-function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
-{
-	var show = videoItemFblElement.getParamBoolValue(paramName);
-	if (show == true)
-	{
-		var s = afbElement.getAfbSignalByCaption(signalCaption);
-		if (s != null)
-		{
-			videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
-		}	
-	}
-}
+					function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
+					{
+						var show = videoItemFblElement.getParamBoolValue(paramName);
+						if (show == true)
+						{
+							var s = afbElement.getAfbSignalByCaption(signalCaption);
+							if (s != null)
+							{
+								videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+							}	
+						}
+					}
 
-function createOutputSignals(videoItemFblElement, afbElement)
-{
-	videoItemFblElement.removeOutputSignals();
-	
-	var out = afbElement.getAfbSignalByCaption("out");
-	if (out != null)
-	{
-		videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
-	}
-	
-	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
-	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
-	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
-	createOutput(videoItemFblElement, afbElement, "OutDivByZero", "div_by_zero");
+					function createOutputSignals(videoItemFblElement, afbElement)
+					{
+						videoItemFblElement.removeOutputSignals();
+						
+						var out = afbElement.getAfbSignalByCaption("out");
+						if (out != null)
+						{
+							videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
+						}
+						
+						createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
+						createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
+						createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
+						createOutput(videoItemFblElement, afbElement, "OutDivByZero", "div_by_zero");
 
-	videoItemFblElement.adjustHeight();
+						videoItemFblElement.adjustHeight();
 
-	return true;
-}
+						return true;
+					}
 				</Library>
 				<AfterCreation>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
+					(function(videoItemFblElement, afbElement)
+					{
+						return createOutputSignals(videoItemFblElement, afbElement);
+					})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-        <AFB id="#math_abs_si_v1"    Caption="math_abs_si"    Version="1.0007">
-			<Properties>				
+		<AFB id="#math_abs_si_v1" Caption="math_abs_si" Version="1.8">
+			<Properties>
 				<Description>Function Block outputs the absolute value of the input signal in signed integer data forma</Description>
 				<Category>Math</Category>
 				<OpCode>16</OpCode>
@@ -9283,70 +9204,511 @@ function createOutputSignals(videoItemFblElement, afbElement)
 					<Value>1</Value>
 					<Default>1</Default>
 					<Script>
-						<Changed>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
-						</Changed>
+						<Changed>(function(videoItemFblElement, afbElement) { return createOutputSignals(videoItemFblElement, afbElement); }) </Changed>
 					</Script>
 				</Param>
 				<Param OpName="OutZero" Caption="OutZero" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>1</Value>
 					<Default>1</Default>
 					<Script>
-						<Changed>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
-						</Changed>
+						<Changed>(function(videoItemFblElement, afbElement) { return createOutputSignals(videoItemFblElement, afbElement); }) </Changed>
 					</Script>
 				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
-function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
-{
-	var show = videoItemFblElement.getParamBoolValue(paramName);
-	if (show == true)
-	{
-		var s = afbElement.getAfbSignalByCaption(signalCaption);
-		if (s != null)
-		{
-			videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
-		}	
-	}
-}
+					function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
+					{
+						var show = videoItemFblElement.getParamBoolValue(paramName);
+						if (show == true)
+						{
+							var s = afbElement.getAfbSignalByCaption(signalCaption);
+							if (s != null)
+							{
+								videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+							}	
+						}
+					}
 
-function createOutputSignals(videoItemFblElement, afbElement)
-{
-	videoItemFblElement.removeOutputSignals();
-	
-	var out = afbElement.getAfbSignalByCaption("out");
-	if (out != null)
-	{
-		videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
-	}
-	
-	createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
-	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
+					function createOutputSignals(videoItemFblElement, afbElement)
+					{
+						videoItemFblElement.removeOutputSignals();
+						
+						var out = afbElement.getAfbSignalByCaption("out");
+						if (out != null)
+						{
+							videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
+						}
+						
+						createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
+						createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
 
-	videoItemFblElement.adjustHeight();
+						videoItemFblElement.adjustHeight();
 
-	return true;
-}
+						return true;
+					}
 				</Library>
 				<AfterCreation>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
+					(function(videoItemFblElement, afbElement)
+					{
+						return createOutputSignals(videoItemFblElement, afbElement);
+					})
+				</AfterCreation>
+			</CommonScript>
+		</AFB>
+		
+		<AFB id="#math_sign_inv_fp_v1" Caption="math_sign_inv_fp" Version="1.1">
+			<Properties>
+				<Description>Function Block outputs the additive inversion value of the input signal (sign inversion), output = input * (-1). Exception: sign will not inverse for positiv 0.</Description>
+				<Category>Math</Category>
+				<OpCode>16</OpCode>
+				<InternalUse>false</InternalUse>
+				<MinWidth>26</MinWidth>
+			</Properties>
+			<Inputs>
+				<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="1" Size="32"/>           
+			</Inputs>
+			<Outputs>
+				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="5" Size="32"/>
+				<Pin OpName="o_zero" Caption="zero" Type="Discrete" ByteOrder="BigEndian" OpIndex="9" Size="1"/>
+				<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="10" Size="1"/>
+			</Outputs>
+			<Params>            
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>9</Value>
+					<Default>9</Default>
+					<LowLimit>1</LowLimit>
+					<HighLimit>16</HighLimit>
+					<Script>
+						<Changed></Changed>
+					</Script>
+				</Param>
+				<Param OpName="OutZero" Caption="OutZero" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>(function(videoItemFblElement, afbElement) { return createOutputSignals(videoItemFblElement, afbElement); }) </Changed>
+					</Script>
+				</Param>
+				<Param OpName="OutNaN" Caption="OutNaN" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>(function(videoItemFblElement, afbElement) { return createOutputSignals(videoItemFblElement, afbElement); }) </Changed>
+					</Script>
+				</Param>
+			</Params>
+			<CommonScript>
+				<Library>
+					function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
+					{
+						var show = videoItemFblElement.getParamBoolValue(paramName);
+						if (show == true)
+						{
+							var s = afbElement.getAfbSignalByCaption(signalCaption);
+							if (s != null)
+							{
+								videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+							}	
+						}
+					}
+
+					function createOutputSignals(videoItemFblElement, afbElement)
+					{
+						videoItemFblElement.removeOutputSignals();
+						
+						var out = afbElement.getAfbSignalByCaption("out");
+						if (out != null)
+						{
+							videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
+						}
+						
+						createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
+						createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
+
+						videoItemFblElement.adjustHeight();
+						return true;
+					}
+				</Library>
+				<AfterCreation>
+					(function(videoItemFblElement, afbElement)
+					{
+						return createOutputSignals(videoItemFblElement, afbElement);
+					})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-            <AFB id="#median_fp_v1"      Caption="median_fp"      Version="1.0009">
+		<AFB id="#math_sign_inv_si_v1" Caption="math_sign_inv_si" Version="1.1">
+			<Properties>
+				<Description>Function Block outputs the additive inversion value of the input signal (sign inversion), output = input * (-1).</Description>
+				<Category>Math</Category>
+				<OpCode>16</OpCode>
+				<InternalUse>false</InternalUse>
+				<MinWidth>26</MinWidth>
+			</Properties>
+			<Inputs>
+				<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="1" Size="32"/>           
+			</Inputs>
+			<Outputs>
+				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="5" Size="32"/>
+				<Pin OpName="o_overflow" Caption="overflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="7" Size="1"/>
+				<Pin OpName="o_zero" Caption="zero" Type="Discrete" ByteOrder="BigEndian" OpIndex="9" Size="1"/>
+			</Outputs>
+			<Params>            
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>10</Value>
+					<Default>10</Default>
+					<LowLimit>1</LowLimit>
+					<HighLimit>16</HighLimit>
+					<Script>
+						<Changed></Changed>
+					</Script>
+				</Param>
+				<Param OpName="OutOverflow" Caption="OutOverflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>(function(videoItemFblElement, afbElement) { return createOutputSignals(videoItemFblElement, afbElement); }) </Changed>
+					</Script>
+				</Param>
+				<Param OpName="OutZero" Caption="OutZero" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>(function(videoItemFblElement, afbElement) { return createOutputSignals(videoItemFblElement, afbElement); }) </Changed>
+					</Script>
+				</Param>
+			</Params>
+			<CommonScript>
+				<Library>
+					function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
+					{
+						var show = videoItemFblElement.getParamBoolValue(paramName);
+						if (show == true)
+						{
+							var s = afbElement.getAfbSignalByCaption(signalCaption);
+							if (s != null)
+							{
+								videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+							}
+						}
+					}
+
+					function createOutputSignals(videoItemFblElement, afbElement)
+					{
+						videoItemFblElement.removeOutputSignals();
+						
+						var out = afbElement.getAfbSignalByCaption("out");
+						if (out != null)
+						{
+							videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
+						}
+						
+						createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
+						createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
+
+						videoItemFblElement.adjustHeight();
+						return true;
+					}
+				</Library>
+				<AfterCreation>
+					(function(videoItemFblElement, afbElement)
+					{
+						return createOutputSignals(videoItemFblElement, afbElement);
+					})
+				</AfterCreation>
+			</CommonScript>
+		</AFB>
+		
+		<AFB id="#math_negate_fp_v1" Caption="math_negate_fp" Version="1.1">
+			<Properties>
+				<Description>Function Block outputs the negative value of input signal (set sign bit), output = -abs(input). Exception: 0 remains positiv.</Description>
+				<Category>Math</Category>
+				<OpCode>16</OpCode>
+				<InternalUse>false</InternalUse>
+				<MinWidth>26</MinWidth>
+			</Properties>
+			<Inputs>
+				<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="1" Size="32"/>           
+			</Inputs>
+			<Outputs>
+				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="5" Size="32"/>
+				<Pin OpName="o_zero" Caption="zero" Type="Discrete" ByteOrder="BigEndian" OpIndex="9" Size="1"/>
+				<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="10" Size="1"/>
+			</Outputs>
+			<Params>            
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>11</Value>
+					<Default>11</Default>
+					<LowLimit>1</LowLimit>
+					<HighLimit>16</HighLimit>
+					<Script>
+						<Changed></Changed>
+					</Script>
+				</Param>
+				<Param OpName="OutZero" Caption="OutZero" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>(function(videoItemFblElement, afbElement) { return createOutputSignals(videoItemFblElement, afbElement); }) </Changed>
+					</Script>
+				</Param>
+				<Param OpName="OutNaN" Caption="OutNaN" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>(function(videoItemFblElement, afbElement) { return createOutputSignals(videoItemFblElement, afbElement); }) </Changed>
+					</Script>
+				</Param>
+			</Params>
+			<CommonScript>
+				<Library>
+					function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
+					{
+						var show = videoItemFblElement.getParamBoolValue(paramName);
+						if (show == true)
+						{
+							var s = afbElement.getAfbSignalByCaption(signalCaption);
+							if (s != null)
+							{
+								videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+							}	
+						}
+					}
+
+					function createOutputSignals(videoItemFblElement, afbElement)
+					{
+						videoItemFblElement.removeOutputSignals();
+						
+						var out = afbElement.getAfbSignalByCaption("out");
+						if (out != null)
+						{
+							videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
+						}
+						
+						createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
+						createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
+
+						videoItemFblElement.adjustHeight();
+						return true;
+					}
+				</Library>
+				<AfterCreation>
+					(function(videoItemFblElement, afbElement)
+					{
+						return createOutputSignals(videoItemFblElement, afbElement);
+					})
+				</AfterCreation>
+			</CommonScript>
+		</AFB>
+		
+		<AFB id="#math_negate_si_v1" Caption="math_negate_si" Version="1.1">
+			<Properties>
+				<Description>Function Block outputs the negative value of input signal (set sign bit), output = -abs(input).</Description>
+				<Category>Math</Category>
+				<OpCode>16</OpCode>
+				<InternalUse>false</InternalUse>
+				<MinWidth>26</MinWidth>
+			</Properties>
+			<Inputs>
+				<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="1" Size="32"/>           
+			</Inputs>
+			<Outputs>
+				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="5" Size="32"/>
+				<Pin OpName="o_zero" Caption="zero" Type="Discrete" ByteOrder="BigEndian" OpIndex="9" Size="1"/>
+			</Outputs>
+			<Params>            
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>12</Value>
+					<Default>12</Default>
+					<LowLimit>1</LowLimit>
+					<HighLimit>16</HighLimit>
+					<Script>
+						<Changed></Changed>
+					</Script>
+				</Param>
+				<Param OpName="OutZero" Caption="OutZero" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>(function(videoItemFblElement, afbElement) { return createOutputSignals(videoItemFblElement, afbElement); }) </Changed>
+					</Script>
+				</Param>
+			</Params>
+			<CommonScript>
+				<Library>
+					function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
+					{
+						var show = videoItemFblElement.getParamBoolValue(paramName);
+						if (show == true)
+						{
+							var s = afbElement.getAfbSignalByCaption(signalCaption);
+							if (s != null)
+							{
+								videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+							}	
+						}
+					}
+
+					function createOutputSignals(videoItemFblElement, afbElement)
+					{
+						videoItemFblElement.removeOutputSignals();
+						
+						var out = afbElement.getAfbSignalByCaption("out");
+						if (out != null)
+						{
+							videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
+						}
+						
+						createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
+
+						videoItemFblElement.adjustHeight();
+						return true;
+					}
+				</Library>
+				<AfterCreation>
+					(function(videoItemFblElement, afbElement)
+					{
+						return createOutputSignals(videoItemFblElement, afbElement);
+					})
+				</AfterCreation>
+			</CommonScript>
+		</AFB>
+		
+		<AFB id="#sign_bit_fp_v1" Caption="sign_bit_fp" Version="1.1">
+			<Properties>
+				<Description>Function Block outputs the sign bit of input signal. Result: 0 if input is positive, 1 if input is negative.</Description>
+				<Category>Math</Category>
+				<OpCode>16</OpCode>
+				<InternalUse>false</InternalUse>
+				<MinWidth>26</MinWidth>
+			</Properties>
+			<Inputs>
+				<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="1" Size="32"/>           
+			</Inputs>
+			<Outputs>
+				<Pin OpName="o_result" Caption="sign" Type="Discrete" ByteOrder="BigEndian" OpIndex="6" Size="1"/>
+			</Outputs>
+			<Params>            
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>13</Value>
+					<Default>13</Default>
+					<LowLimit>1</LowLimit>
+					<HighLimit>16</HighLimit>
+					<Script>
+						<Changed></Changed>
+					</Script>
+				</Param>
+			</Params>
+			<CommonScript>
+				<Library>
+				</Library>
+				<AfterCreation>
+				</AfterCreation>
+			</CommonScript>
+		</AFB>
+		
+		<AFB id="#is_nan_fp_v1" Caption="is_nan_fp" Version="1.1">
+			<Properties>
+				<Description>Function Block determines if the floating point input signal is a not-a-number (NaN) value.</Description>
+				<Category>Math</Category>
+				<OpCode>16</OpCode>
+				<InternalUse>false</InternalUse>
+				<MinWidth>26</MinWidth>
+			</Properties>
+			<Inputs>
+				<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="1" Size="32"/>           
+			</Inputs>
+			<Outputs>
+				<Pin OpName="o_result" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="10" Size="1"/>
+			</Outputs>
+			<Params>            
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>13</Value>
+					<Default>13</Default>
+					<LowLimit>1</LowLimit>
+					<HighLimit>16</HighLimit>
+					<Script>
+						<Changed></Changed>
+					</Script>
+				</Param>
+			</Params>
+			<CommonScript>
+				<Library>
+				</Library>
+				<AfterCreation>
+				</AfterCreation>
+			</CommonScript>
+		</AFB>
+		
+		<AFB id="#is_inf_fp_v1" Caption="is_inf_fp" Version="1.1">
+			<Properties>
+				<Description>Function Block determines if the floating point input signal is a a positive or negative infinity.</Description>
+				<Category>Math</Category>
+				<OpCode>16</OpCode>
+				<InternalUse>false</InternalUse>
+				<MinWidth>26</MinWidth>
+			</Properties>
+			<Inputs>
+				<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="1" Size="32"/>           
+			</Inputs>
+			<Outputs>
+				<Pin OpName="o_result" Caption="inf" Type="Discrete" ByteOrder="BigEndian" OpIndex="7" Size="1"/>
+			</Outputs>
+			<Params>            
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>13</Value>
+					<Default>13</Default>
+					<LowLimit>1</LowLimit>
+					<HighLimit>16</HighLimit>
+					<Script>
+						<Changed></Changed>
+					</Script>
+				</Param>
+			</Params>
+			<CommonScript>
+				<Library>
+				</Library>
+				<AfterCreation>
+				</AfterCreation>
+			</CommonScript>
+		</AFB>		
+		
+		<AFB id="#sign_bit_si_v1" Caption="sign_bit_si" Version="1.1">
+			<Properties>
+				<Description>Function Block outputs the sign bit of input signal. Result: 0 if input is positive, 1 if input is negative.</Description>
+				<Category>Math</Category>
+				<OpCode>16</OpCode>
+				<InternalUse>false</InternalUse>
+				<MinWidth>26</MinWidth>
+			</Properties>
+			<Inputs>
+				<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="1" Size="32"/>           
+			</Inputs>
+			<Outputs>
+				<Pin OpName="o_result" Caption="sign" Type="Discrete" ByteOrder="BigEndian" OpIndex="6" Size="1"/>
+			</Outputs>
+			<Params>            
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>13</Value>
+					<Default>13</Default>
+					<LowLimit>1</LowLimit>
+					<HighLimit>16</HighLimit>
+					<Script>
+						<Changed></Changed>
+					</Script>
+				</Param>
+			</Params>
+			<CommonScript>
+				<Library>
+				</Library>
+				<AfterCreation>
+				</AfterCreation>
+			</CommonScript>
+		</AFB>
+
+		<AFB id="#median_fp_v1"      Caption="median_fp"      Version="1.0009">
 			<Properties>				
 				<Description>Median and extremum Block outputs a median value and an extremum value (minimum and maximum) in accordance with control signals. Float data format</Description>
 				<Category>Logic</Category>

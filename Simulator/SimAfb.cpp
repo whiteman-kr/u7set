@@ -296,6 +296,13 @@ namespace Sim
 		m_mathFlags.zero = (result == .0f) || m_mathFlags.underflow;
 		m_mathFlags.nan = std::isnan(result);
 
+		// Altera's ip core sets 0 if operation result is denormalized number
+		//
+		if (m_mathFlags.underflow)
+		{
+			result = 0;
+		}
+
 		setFloatValue(result);
 
 		return;
@@ -322,6 +329,13 @@ namespace Sim
 		m_mathFlags.divByZero = std::fetestexcept(FE_DIVBYZERO);
 		m_mathFlags.zero = (result == .0f) || m_mathFlags.underflow;
 		m_mathFlags.nan = std::isnan(result);
+
+		// Altera's ip core sets 0 if operation result is denormalized number
+		//
+		if (m_mathFlags.underflow)
+		{
+			result = 0;
+		}
 
 		setFloatValue(result);
 
@@ -351,6 +365,13 @@ namespace Sim
 		m_mathFlags.zero = (result == .0f) || m_mathFlags.underflow;
 		m_mathFlags.nan = std::isnan(result);
 
+		// Altera's ip core sets 0 if operation result is denormalized number
+		//
+		if (m_mathFlags.underflow)
+		{
+			result = 0;
+		}
+
 		setFloatValue(result);
 
 		return;
@@ -375,6 +396,13 @@ namespace Sim
 		m_mathFlags.divByZero = std::fetestexcept(FE_DIVBYZERO);
 		m_mathFlags.zero = (result == .0f) || m_mathFlags.underflow;
 		m_mathFlags.nan = std::isnan(result);
+
+		// Altera's ip core sets 0 if operation result is denormalized number
+		//
+		if (m_mathFlags.underflow)
+		{
+			result = 0;
+		}
 
 		setFloatValue(result);
 
@@ -425,6 +453,13 @@ namespace Sim
 		m_mathFlags.divByZero = std::fetestexcept(FE_DIVBYZERO);
 		m_mathFlags.zero = (result == .0f) || m_mathFlags.underflow;
 		m_mathFlags.nan = std::isnan(result);
+
+		// Altera's ip core sets 0 if operation result is denormalized number
+		//
+		if (m_mathFlags.underflow)
+		{
+			result = 0;
+		}
 
 		setFloatValue(result);
 
@@ -521,6 +556,13 @@ namespace Sim
 		m_mathFlags.overflow = std::isnormal(fp) && std::isinf(result);
 		m_mathFlags.underflow = std::fetestexcept(FE_UNDERFLOW);
 		m_mathFlags.zero = std::isinf(fp) && std::signbit(fp);
+
+		// Altera's ip core sets 0 if operation result is denormalized number
+		//
+		if (m_mathFlags.underflow)
+		{
+			result = 0;
+		}
 
 		setFloatValue(result);
 

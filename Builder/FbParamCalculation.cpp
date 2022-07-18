@@ -1250,6 +1250,26 @@ namespace Builder
 			m_runTime = 4 + 4;		// abs si
 			break;
 
+		case 9:
+			m_runTime = 4 + 4;		// sign inversion fp
+			break;
+
+		case 10:
+			m_runTime = 4 + 4;		// sign inversion si
+			break;
+
+		case 11:
+			m_runTime = 4 + 4;		// negate fp
+			break;
+
+		case 12:
+			m_runTime = 4 + 4;		// negate si
+			break;
+
+		case 13:
+			m_runTime = 4 + 4;		// get sign fp/si
+			break;
+
 		default:
 			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 			//

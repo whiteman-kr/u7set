@@ -374,6 +374,7 @@
         <file>Upgrade0372.sql</file>
         <file>Upgrade0373.sql</file>
         <file>Upgrade0374.sql</file>
+        <file>Upgrade0375.sql</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>
