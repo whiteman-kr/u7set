@@ -1,0 +1,27 @@
+--- Hardware implementation version 5
+
+math_sign_inv_fp
+1.1 - added math_sign_inv_fp
+
+math_sign_inv_si
+1.1 - added math_sign_inv_si
+
+math_negate_fp
+1.1 - added math_negate_fp
+
+math_negate_si
+1.1 - added math_negate_fp
+
+sign_bit_fp
+1.1 - added sign_bit_fp
+
+is_inf_fp
+1.1 - added is_inf_fp
+
+is_nan_fp
+1.1 - added is_nan_fp
+                  
+sign_bit_si
+1.1 - added math_sign_inv_si
+
+    
