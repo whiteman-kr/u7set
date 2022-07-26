@@ -20,8 +20,9 @@ is_inf_fp
 
 is_nan_fp
 1.1 - added is_nan_fp
+
+sign_bit_fp
+1.1 - added sign_bit_si
                   
-sign_bit_si
-1.1 - added math_sign_inv_si
 
     

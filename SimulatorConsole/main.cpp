@@ -44,7 +44,7 @@ void messageOutputHandler(QtMsgType type, const QMessageLogContext& context, con
 void showProgrammUsageHint()
 {
 	std::cout << "Programm usage:\n";
-	std::cout << "  SimulatorConsole [-build=build_dir] [-script=script_file] [-profile=profile_name]\n";
+	std::cout << "  SimulatorConsole [-build=build_dir] [-script=script_file] [-profile=profile_name] [-unlock_timer]\n";
 	std::cout << "\n";
 	std::cout << "Create template simualtion script:\n";
 	std::cout << "  SimulatorConsole [-create=file_name]\n";
@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
 	QCoreApplication app(argc, argv);
 
 	// Parse arguments
-	// SimulatorConsole.exe [-build=build_dir] [-script=script_file] [-profile=profile_name]
+	// SimulatorConsole.exe [-build=build_dir] [-script=script_file] [-profile=profile_name] [-unlock_timer]
 	// SimulatorConsole.exe [-create=file_name]
 	//
 	QStringList args = QCoreApplication::arguments();
@@ -141,6 +141,7 @@ int main(int argc, char *argv[])
 	QString buildPath;
 	QString scriptFile;
 	QString profileName;
+	bool unlockTimer = false;
 
 	for (int argIndex = 1; argIndex < argc; argIndex++)
 	{
@@ -171,6 +172,12 @@ int main(int argc, char *argv[])
 			continue;
 		}
 
+		if (args[argIndex].startsWith("-unlock_timer", Qt::CaseInsensitive) == true)
+		{
+			unlockTimer = true;
+			continue;
+		}
+
 		// --
 		//
 		std::cout << "Unknown argument: " << args[argIndex].toStdString() << "\n\n";
@@ -191,10 +198,8 @@ int main(int argc, char *argv[])
 	}
 
 	simulator.setCurrentProfile(profileName);
-
-	// Add modules to simulation
-	//
-	simulator.control().setRunList({});
+	simulator.control().setUnlockTimer(unlockTimer);
+	simulator.control().setRunList({});		// Add all modules to simulation
 
 	bool ok = true;
 

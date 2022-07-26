@@ -345,7 +345,7 @@ namespace Sim
 
 	bool Control::unlockTimer() const
 	{
-		return m_unlockTimer;
+		return m_unlockTimer.load(std::memory_order_relaxed);
 	}
 
 	void Control::setUnlockTimer(bool value)
@@ -675,7 +675,10 @@ namespace Sim
 								.arg(elapsedUsecs.count() / 1000)
 								.arg(perfRation);
 
-		//qDebug() << logMessage;
+		if (unlockTimer() == true)
+		{
+			qDebug() << logMessage;
+		}
 		m_log.writeDebug(logMessage);
 
 		return result;
