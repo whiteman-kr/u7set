@@ -318,7 +318,7 @@ namespace Sim
 
 	QString ScriptConnSignalInfo::appSignalID() const
 	{
-		return std::move(m_signalInfo.IDs.first());
+		return m_signalInfo.IDs.first();
 	}
 
 	QStringList ScriptConnSignalInfo::appSignalIDs() const

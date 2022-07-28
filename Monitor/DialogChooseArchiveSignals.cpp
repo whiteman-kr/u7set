@@ -1,19 +1,58 @@
 #include "DialogChooseArchiveSignals.h"
 #include "ui_DialogChooseArchiveSignals.h"
-#include "MonitorAppSettings.h"
+#include "MonitorSignalManager.h"
 
 
-DialogChooseArchiveSignals::ArchiveSignalType DialogChooseArchiveSignals::m_lastSignalType = DialogChooseArchiveSignals::ArchiveSignalType::AllSignals;
-QString DialogChooseArchiveSignals::m_lastSchemaId;
+namespace	// Anonymous namespace, as this class is used just in this translation unit
+{
+	class FilteredArchiveSignalsModel : public QAbstractTableModel
+	{
+		// Q_OBJECT
+
+	public:
+		FilteredArchiveSignalsModel(std::vector<ArchiveSignal>&& signalss, QObject* parent);
+
+	public:
+		int rowCount(const QModelIndex& parent = QModelIndex{}) const override;
+		int columnCount(const QModelIndex& parent = QModelIndex{}) const override;
+		QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+		QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+
+		void filterSignals(QString server, DialogChooseArchiveSignals::ArchiveSignalType signalType, QString signalIdFilter);
+
+		[[nodiscard]] ArchiveSignal signalByRow(int row) const;		// can throw std::out_of_range()
+
+	private:
+		std::vector<size_t> m_signalIndexes;
+		std::vector<ArchiveSignal> m_signals;
+		std::map<QString, std::vector<size_t>> m_startWithArrays;	// Key is startWith, in lowercase. Values is indexes in m_signals for startWith
+
+		enum class ColumnType
+		{
+			SignalId,
+			Type,
+			Caption,
+			Server
+		};
+	};
+}
+
+//
+//
+//	DialogChooseArchiveSignals
+//
+//
+DialogChooseArchiveSignals::ArchiveSignalType DialogChooseArchiveSignals::s_lastSignalType = DialogChooseArchiveSignals::ArchiveSignalType::AllSignals;
+QString DialogChooseArchiveSignals::s_lastServer;
 
 
-DialogChooseArchiveSignals::DialogChooseArchiveSignals(IAppSignalManager* signalManager,
-													   const std::vector<VFrame30::SchemaDetails>& schemaDetails,
+DialogChooseArchiveSignals::DialogChooseArchiveSignals(MonitorSignalManager* signalManager,
+													   const std::vector<MonitorSettings::ArchiveService>& archiveServices,
 													   const ArchiveSource& init,
 													   QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::DialogChooseArchiveSignals),
-	m_schemasDetails(schemaDetails)
+	m_archiveServices(archiveServices)
 {
 	Q_ASSERT(signalManager);
 
@@ -28,10 +67,8 @@ DialogChooseArchiveSignals::DialogChooseArchiveSignals(IAppSignalManager* signal
 	ui->signalTypeCombo->addItem(tr("Analog Signals"), QVariant::fromValue<ArchiveSignalType>(ArchiveSignalType::AnalogSignals));
 	ui->signalTypeCombo->addItem(tr("Discrete Signals"), QVariant::fromValue<ArchiveSignalType>(ArchiveSignalType::DiscreteSignals));
 
-	int currentSignalTypeIndex = ui->signalTypeCombo->findData(QVariant::fromValue<ArchiveSignalType>(m_lastSignalType));
-	Q_ASSERT(currentSignalTypeIndex != -1);
-
-	if (currentSignalTypeIndex != -1)
+	if (int currentSignalTypeIndex = ui->signalTypeCombo->findData(QVariant::fromValue<ArchiveSignalType>(s_lastSignalType));
+		currentSignalTypeIndex != -1)
 	{
 		ui->signalTypeCombo->setCurrentIndex(currentSignalTypeIndex);
 	}
@@ -40,20 +77,11 @@ DialogChooseArchiveSignals::DialogChooseArchiveSignals(IAppSignalManager* signal
 
 	// Fill Schema Combo
 	//
-	Q_ASSERT(ui->schemaCombo);
-	ui->schemaCombo->addItem(tr("All Schemas"), QVariant::fromValue<QString>(QString()));
-	for (const VFrame30::SchemaDetails& schema : m_schemasDetails)
-	{
-		ui->schemaCombo->addItem(schema.m_schemaId + " - " + schema.m_caption, QVariant(schema.m_schemaId));
-	}
+	std::ranges::sort(m_archiveServices, [](const auto& a, const auto& b) {return a.shortenId < b.shortenId;});
 
-	int schemaIndex = ui->schemaCombo->findData(QVariant(m_lastSchemaId));
-	if (schemaIndex != -1)
-	{
-		ui->schemaCombo->setCurrentIndex(schemaIndex);
-	}
+	fillServerCombo();
 
-	connect(ui->schemaCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &DialogChooseArchiveSignals::schemaCurrentIndexChanged);
+	connect(ui->serverCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &DialogChooseArchiveSignals::serverCurrentIndexChanged);
 
 	// Fill Start/End date/time
 	//
@@ -73,10 +101,8 @@ DialogChooseArchiveSignals::DialogChooseArchiveSignals(IAppSignalManager* signal
 	ui->timeTypeCombo->addItem(tr("Server Time UTC%100").arg(QChar(0x00B1)), QVariant::fromValue(E::TimeType::System));
 	ui->timeTypeCombo->addItem(tr("Plant Time"), QVariant::fromValue(E::TimeType::Plant));
 
-	int currentTimeType = ui->timeTypeCombo->findData(QVariant::fromValue(init.timeType));
-	Q_ASSERT(currentTimeType != -1);
-
-	if (currentTimeType != -1)
+	if (int currentTimeType = ui->timeTypeCombo->findData(QVariant::fromValue(init.timeType));
+		currentTimeType != -1)
 	{
 		ui->timeTypeCombo->setCurrentIndex(currentTimeType);
 	}
@@ -101,14 +127,31 @@ DialogChooseArchiveSignals::DialogChooseArchiveSignals(IAppSignalManager* signal
 	headerLabels << "SignalID";
 	headerLabels << "Type";
 	headerLabels << "Caption";
+	headerLabels << "Server";
 
 	ui->archiveSignals->setHeaderLabels(headerLabels);
 
-	FilteredArchiveSignalsModel* model = new FilteredArchiveSignalsModel(signalManager->signalList(),
-																		 m_schemasDetails,
-																		 ui->filteredSignals);
-	ui->filteredSignals->setModel(model);
+	std::vector<AppSignalParam> signalParams = signalManager->signalList();
 
+	std::vector<ArchiveSignal> signalParamsSources;
+	signalParamsSources.reserve(signalParams.size());
+
+	for (const AppSignalParam& sp : signalParams)
+	{
+		// Make signal copy for each ArchiveService which has this signal
+		//
+		for (const MonitorSettings::ArchiveService& archiveService : m_archiveServices)
+		{
+			if (signalManager->appDataServiceHasSignal(archiveService.appDataServiceId, sp.appSignalId()) == true)
+			{
+				signalParamsSources.emplace_back(sp, archiveService.equipmentId, archiveService.shortenId);
+			}
+		}
+	}
+
+	FilteredArchiveSignalsModel* model = new FilteredArchiveSignalsModel{std::move(signalParamsSources), ui->filteredSignals};
+	ui->filteredSignals->setModel(model);
+	
 	// --
 	//
 	fillSignalList();
@@ -120,14 +163,14 @@ DialogChooseArchiveSignals::DialogChooseArchiveSignals(IAppSignalManager* signal
 
 	// --
 	// --
-	disableControls();
+	updateControls();
 
 	ui->filteredSignals->header()->resizeSection(1, ui->filteredSignals->header()->sectionSizeHint(1));		// 1 is TypeColumn (A/D)
-	ui->archiveSignals->header()->resizeSection(1 , ui->archiveSignals->header()->sectionSizeHint(1));			// 1 is TypeColumn (A/D)
+	ui->archiveSignals->header()->resizeSection(1 , ui->archiveSignals->header()->sectionSizeHint(1));		// 1 is TypeColumn (A/D)
 
 	// Fill added signals
 	//
-	for (const AppSignalParam& appSignal : init.acceptedSignals)
+	for (const ArchiveSignal& appSignal : init.acceptedSignals)
 	{
 		addSignal(appSignal);
 	}
@@ -145,6 +188,32 @@ ArchiveSource DialogChooseArchiveSignals::accpetedResult() const
 	return m_result;
 }
 
+void DialogChooseArchiveSignals::fillServerCombo()
+{
+	Q_ASSERT(ui->serverCombo);
+
+	ui->serverCombo->clear();
+
+	// Fill combo box
+	//
+	ui->serverCombo->addItem(s_allServers, {});
+
+	for (const MonitorSettings::ArchiveService& srv : m_archiveServices)
+	{
+		ui->serverCombo->addItem(srv.shortenId, QVariant{srv.equipmentId});
+	}
+
+	// Set current item in combo box
+	//
+	if (int serverIndex = ui->serverCombo->findData(QVariant{s_lastServer});
+		serverIndex != -1)
+	{
+		ui->serverCombo->setCurrentIndex(serverIndex);
+	}
+
+	return;
+}
+
 void DialogChooseArchiveSignals::fillSignalList()
 {
 	filterSignals();
@@ -156,29 +225,34 @@ void DialogChooseArchiveSignals::filterSignals()
 	// Get SignalType
 	//
 	ArchiveSignalType signaType = ui->signalTypeCombo->currentData().value<ArchiveSignalType>();
-	Q_ASSERT(signaType == ArchiveSignalType::AllSignals ||
-		   signaType == ArchiveSignalType::AnalogSignals ||
-		   signaType == ArchiveSignalType::DiscreteSignals);
 
-	// Get schema id, empty if schema is not required
+	Q_ASSERT(signaType == ArchiveSignalType::AllSignals ||
+			 signaType == ArchiveSignalType::AnalogSignals ||
+			 signaType == ArchiveSignalType::DiscreteSignals);
+
+	// Get ArchiveServiceId
 	//
-	QString schemaId = ui->schemaCombo->currentData().toString();
+	QString server = ui->serverCombo->currentData().toString();
+
+	// signalIdFilter
+	//
+	QString signalIdFilter = ui->filterEdit->text();
 
 	// Apply filter to model
 	//
 	FilteredArchiveSignalsModel* model = dynamic_cast<FilteredArchiveSignalsModel*>(ui->filteredSignals->model());
 	Q_ASSERT(model);
 
-	model->filterSignals(signaType, ui->filterEdit->text(), schemaId);
+	model->filterSignals(server, signaType, signalIdFilter);
 
 	return;
 }
 
-void DialogChooseArchiveSignals::addSignal(const AppSignalParam& signal)
+void DialogChooseArchiveSignals::addSignal(const ArchiveSignal& archiveSignal)
 {
-	if (archiveSignalsHasSignalId(signal.customSignalId()) == true)
+	if (signalAlreadyPresent(archiveSignal.signalParam.customSignalId(), archiveSignal.archiveServiceId) == true)
 	{
-		// SignaID already presnt in ArchiveSignals
+		// SignaID already present in ArchiveSignals
 		//
 		return;
 	}
@@ -189,38 +263,44 @@ void DialogChooseArchiveSignals::addSignal(const AppSignalParam& signal)
 		return;
 	}
 
+	const AppSignalParam& signalParam = archiveSignal.signalParam;
+
 	QString signalType;
-	switch (signal.type())
+	switch (signalParam.type())
 	{
 	case E::SignalType::Analog:		signalType = "A";	break;
 	case E::SignalType::Discrete:	signalType = "D";	break;
 	case E::SignalType::Bus:		signalType = "B";	break;
-	default:
-		Q_ASSERT(false);
 	}
 
-	QStringList itemData;
-	itemData << signal.customSignalId();
-	itemData << signalType;
-	itemData << signal.caption();
+	Q_ASSERT(signalType.isEmpty() == false);
 
-	QString toolTip = QString("%1\n%2\n%3")
-						.arg(signal.customSignalId())
-						.arg(signal.appSignalId())
-						.arg(signal.caption());
+	QStringList itemData;
+	itemData << signalParam.customSignalId();
+	itemData << signalType;
+	itemData << signalParam.caption();
+	itemData << archiveSignal.archiveServiceShortenId;
+
+	QString toolTip = QString{"%1\n%2\n%3\nServer: %4 (%5)"}
+						.arg(archiveSignal.signalParam.customSignalId())
+						.arg(archiveSignal.signalParam.appSignalId())
+						.arg(archiveSignal.signalParam.caption())
+						.arg(archiveSignal.archiveServiceShortenId)
+						.arg(archiveSignal.archiveServiceId);
 
 	QTreeWidgetItem* item = new QTreeWidgetItem(ui->archiveSignals, itemData);
-	item->setData(0, Qt::UserRole, QVariant::fromValue(signal));
+	item->setData(0, Qt::UserRole, QVariant::fromValue(archiveSignal));
+	item->setData(3, Qt::UserRole, QVariant::fromValue(archiveSignal.archiveServiceId));
 
 	item->setToolTip(0, toolTip);
 	item->setToolTip(1, toolTip);
 	item->setToolTip(2, toolTip);
+	item->setToolTip(3, toolTip);
 
 	ui->archiveSignals->addTopLevelItem(item);
 	ui->archiveSignals->setCurrentItem(item, QItemSelectionModel::SelectCurrent);
 
-
-	disableControls();
+	updateControls();
 
 	return;
 }
@@ -236,11 +316,11 @@ void DialogChooseArchiveSignals::removeSelectedSignal()
 		ui->archiveSignals->takeTopLevelItem(currentIndex.row());
 	}
 
-	disableControls();
+	updateControls();
 	return;
 }
 
-bool DialogChooseArchiveSignals::archiveSignalsHasSignalId(const QString& signalId)
+bool DialogChooseArchiveSignals::signalAlreadyPresent(const QString& customSignalId, const QString& archiveServiceId)
 {
 	int itemCount = ui->archiveSignals->topLevelItemCount();
 
@@ -249,7 +329,10 @@ bool DialogChooseArchiveSignals::archiveSignalsHasSignalId(const QString& signal
 		QTreeWidgetItem* item = ui->archiveSignals->topLevelItem(i);
 		Q_ASSERT(item);
 
-		if (item->text(0) == signalId)
+		QString itemArchiveServiceId = item->data(3, Qt::UserRole).toString();
+		Q_ASSERT(itemArchiveServiceId.isEmpty() == false);
+
+		if (item->text(0) == customSignalId && itemArchiveServiceId == archiveServiceId)
 		{
 			return true;
 		}
@@ -258,7 +341,7 @@ bool DialogChooseArchiveSignals::archiveSignalsHasSignalId(const QString& signal
 	return false;
 }
 
-void DialogChooseArchiveSignals::disableControls()
+void DialogChooseArchiveSignals::updateControls()
 {
 	Q_ASSERT(ui->filteredSignals);
 	Q_ASSERT(ui->archiveSignals);
@@ -278,18 +361,23 @@ void DialogChooseArchiveSignals::disableControls()
 
 	// Add Signal Button
 	//
+	try
 	{
 		QModelIndex index = ui->filteredSignals->currentIndex();
 
 		if (index.isValid() == true)
 		{
-			const AppSignalParam signal = fileterModel->signalByRow(index.row());
-			enableAddButton = !archiveSignalsHasSignalId(signal.customSignalId());
+			ArchiveSignal signal = fileterModel->signalByRow(index.row());
+			enableAddButton = !signalAlreadyPresent(signal.signalParam.customSignalId(), signal.archiveServiceId);
 		}
 		else
 		{
 			enableAddButton = false;
 		}
+	}
+	catch (std::out_of_range&)
+	{
+		enableAddButton = false;
 	}
 
 	// Remove Signal Button
@@ -328,7 +416,7 @@ void DialogChooseArchiveSignals::signalTypeCurrentIndexChanged(int /*index*/)
 	filterSignals();
 }
 
-void DialogChooseArchiveSignals::schemaCurrentIndexChanged(int /*index*/)
+void DialogChooseArchiveSignals::serverCurrentIndexChanged(int /*index*/)
 {
 	filterSignals();
 }
@@ -349,8 +437,14 @@ void DialogChooseArchiveSignals::on_addSignalButton_clicked()
 		return;
 	}
 
-	const AppSignalParam signal = model->signalByRow(index.row());
-	addSignal(signal);
+	try
+	{
+		auto signal = model->signalByRow(index.row());
+		addSignal(signal);
+	}
+	catch (std::out_of_range&)
+	{
+	}
 
 	return;
 }
@@ -364,7 +458,7 @@ void DialogChooseArchiveSignals::on_removeAllSignalsButton_clicked()
 {
 	ui->archiveSignals->clear();
 
-	disableControls();
+	updateControls();
 
 	return;
 }
@@ -416,15 +510,21 @@ void DialogChooseArchiveSignals::on_filteredSignals_doubleClicked(const QModelIn
 		return;
 	}
 
-	const AppSignalParam signal = model->signalByRow(index.row());
-	addSignal(signal);
+	try
+	{
+		auto signal = model->signalByRow(index.row());
+		addSignal(signal);
+	}
+	catch (std::out_of_range&)
+	{
+	}
 
 	return;
 }
 
 void DialogChooseArchiveSignals::slot_filteredSignalsSelectionChanged(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)
 {
-	disableControls();
+	updateControls();
 }
 
 void DialogChooseArchiveSignals::on_archiveSignals_doubleClicked(const QModelIndex& /*index*/)
@@ -434,63 +534,7 @@ void DialogChooseArchiveSignals::on_archiveSignals_doubleClicked(const QModelInd
 
 void DialogChooseArchiveSignals::slot_archiveSignalsSelectionChanged(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)
 {
-	disableControls();
-}
-
-//
-//	FilteredArchiveSignalsModel
-//
-FilteredArchiveSignalsModel::FilteredArchiveSignalsModel(const std::vector<AppSignalParam>& signalss,
-														 const std::vector<VFrame30::SchemaDetails>& schemasDetails,
-														 QObject* parent)
-	: QAbstractTableModel(parent),
-	m_signals(signalss),
-	m_schemasDetails(schemasDetails)
-{
-	std::sort(m_signals.begin(), m_signals.end(),
-			[](const AppSignalParam& s1, const AppSignalParam& s2) -> bool
-			{
-				return s1.customSignalId() < s2.customSignalId();
-			});
-
-	m_signalIndexes.reserve(m_signals.size());
-
-	// Init m_startWithArrays.
-	// m_startWithArrays keeps vector of indexes for "StartWith"
-	//
-	size_t siganlCount = m_signals.size();
-
-	for (size_t index = 0; index < siganlCount; index ++)
-	{
-		const AppSignalParam& appSignal = m_signals[index];
-		QString customSignalId = appSignal.customSignalId().toLower();
-
-		if (customSignalId.isEmpty() == true)
-		{
-			Q_ASSERT(customSignalId.isEmpty() == false);
-			continue;
-		}
-
-		QString firstLetter = customSignalId.at(0);
-
-		auto foundStartWithIt = m_startWithArrays.find(firstLetter);
-		if (foundStartWithIt == m_startWithArrays.end())
-		{
-			std::vector<int> signalIndexes;
-			signalIndexes.reserve(8192);
-
-			signalIndexes.push_back(static_cast<int>(index));
-
-			m_startWithArrays[firstLetter] = signalIndexes;
-		}
-		else
-		{
-			std::vector<int>& signalIndexes = foundStartWithIt->second;
-			signalIndexes.push_back(static_cast<int>(index));
-		}
-	}
-
-	return;
+	updateControls();
 }
 
 void DialogChooseArchiveSignals::on_buttonBox_accepted()
@@ -510,8 +554,8 @@ void DialogChooseArchiveSignals::on_buttonBox_accepted()
 
 	m_result.removePeriodicRecords = ui->removePeriodicCheckbox->isChecked();
 
-	m_lastSignalType = ui->signalTypeCombo->currentData().value<ArchiveSignalType>();
-	m_lastSchemaId = ui->schemaCombo->currentData().toString();
+	s_lastSignalType = ui->signalTypeCombo->currentData().value<ArchiveSignalType>();
+	s_lastServer = ui->serverCombo->currentData().toString();
 
 	m_result.acceptedSignals.reserve(ui->archiveSignals->topLevelItemCount());
 
@@ -524,12 +568,68 @@ void DialogChooseArchiveSignals::on_buttonBox_accepted()
 
 		Q_ASSERT(signalVariant.isNull() == false);
 		Q_ASSERT(signalVariant.isValid() == true);
+		Q_ASSERT(signalVariant.canConvert<ArchiveSignal>() == true);
 
-		AppSignalParam signalParam = signalVariant.value<AppSignalParam>();
+		ArchiveSignal archiveSignal = signalVariant.value<ArchiveSignal>();
 
-		Q_ASSERT(signalParam.customSignalId() == treeItem->text(0));
+		Q_ASSERT(archiveSignal.signalParam.customSignalId() == treeItem->text(0));
 
-		m_result.acceptedSignals.push_back(signalParam);
+		m_result.acceptedSignals.push_back(std::move(archiveSignal));
+	}
+
+	return;
+}
+
+//
+//
+//	FilteredArchiveSignalsModel
+//
+//
+FilteredArchiveSignalsModel::FilteredArchiveSignalsModel(std::vector<ArchiveSignal>&& signalss, QObject* parent)
+	: QAbstractTableModel(parent),
+	m_signals(std::move(signalss))
+{
+
+	std::sort(m_signals.begin(), m_signals.end(),
+			[](const auto& a, const auto& b) -> bool
+			{
+				return std::make_tuple(a.signalParam.customSignalId(), a.archiveServiceId) <
+					   std::make_tuple(b.signalParam.customSignalId(), b.archiveServiceId);
+			});
+
+	m_signalIndexes.reserve(m_signals.size());
+
+	// Init m_startWithArrays.
+	// m_startWithArrays keeps vector of indexes for "StartWith"
+	//
+	for (size_t index = 0, signalCount = m_signals.size(); index < signalCount; index++)
+	{
+		const AppSignalParam& appSignal = m_signals[index].signalParam;
+		QString customSignalId = appSignal.customSignalId().toLower();
+
+		if (customSignalId.isEmpty() == true)
+		{
+			Q_ASSERT(customSignalId.isEmpty() == false);
+			continue;
+		}
+
+		QString firstLetter = customSignalId.at(0);
+
+		auto foundStartWithIt = m_startWithArrays.find(firstLetter);
+		if (foundStartWithIt == m_startWithArrays.end())
+		{
+			std::vector<size_t> signalIndexes;
+			signalIndexes.reserve(8192);
+
+			signalIndexes.push_back(static_cast<int>(index));
+
+			m_startWithArrays[firstLetter] = signalIndexes;
+		}
+		else
+		{
+			std::vector<size_t>& signalIndexes = foundStartWithIt->second;
+			signalIndexes.push_back(static_cast<int>(index));
+		}
 	}
 
 	return;
@@ -542,7 +642,7 @@ int FilteredArchiveSignalsModel::rowCount(const QModelIndex& /*parent*/) const
 
 int FilteredArchiveSignalsModel::columnCount(const QModelIndex& /*parent*/) const
 {
-	return 3;	// Columns: SignalID, Typem Caption
+	return 4;	// ColumnType::SignalId, ... , ColumnType::Server
 }
 
 QVariant FilteredArchiveSignalsModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
@@ -551,15 +651,23 @@ QVariant FilteredArchiveSignalsModel::headerData(int section, Qt::Orientation or
 	{
 		if (orientation == Qt::Horizontal)
 		{
-			switch (section)
+			switch (static_cast<ColumnType>(section))
 			{
-			case 0:
-				return QString("SignalID");
-			case 1:
-				return QString("Type");
-			case 2:
-				return QString("Caption");
+			case ColumnType::SignalId:
+				return QString{"SignalID"};
+
+			case ColumnType::Type:
+				return QString{"Type"};
+
+			case ColumnType::Caption:
+				return QString{"Caption"};
+
+			case ColumnType::Server:
+				return QString{"Server"};
 			}
+
+			Q_ASSERT(false);
+			return {};
 		}
 	}
 
@@ -568,46 +676,46 @@ QVariant FilteredArchiveSignalsModel::headerData(int section, Qt::Orientation or
 
 QVariant FilteredArchiveSignalsModel::data(const QModelIndex& index, int role) const
 {
-	int row = index.row();
-	int col = index.column();
+	size_t row = index.row();
+	ColumnType col = static_cast<ColumnType>(index.column());
 
 	switch (role)
 	{
 	case Qt::DisplayRole:
 		{
-			if (row < 0 || row >= static_cast<int>(m_signalIndexes.size()))
+			if (row >= m_signalIndexes.size())
 			{
-				Q_ASSERT(row >= 0 && row < static_cast<int>(m_signalIndexes.size()));
+				Q_ASSERT(row < m_signalIndexes.size());
 				return {};
 			}
 
-			int signalIndex = m_signalIndexes[row];
-
-			if (signalIndex < 0 ||
-				signalIndex >= static_cast<int>(m_signals.size()))
+			size_t signalIndex = m_signalIndexes[row];
+			if (signalIndex >= m_signals.size())
 			{
-				Q_ASSERT(signalIndex >= 0 &&  signalIndex < static_cast<int>(m_signals.size()));
+				Q_ASSERT(signalIndex < m_signals.size());
 				return {};
 			}
 
-			const AppSignalParam& signalParam = m_signals[signalIndex];
+			const ArchiveSignal& archiveSignal = m_signals[signalIndex];
 
 			switch (col)
 			{
-			case 0:
-				return signalParam.customSignalId();
-			case 1:
-				switch (signalParam.type())
+			case ColumnType::SignalId:
+				return archiveSignal.signalParam.customSignalId();
+			case ColumnType::Type:
+				switch (archiveSignal.signalParam.type())
 				{
-				case E::SignalType::Analog:		return QString("A");
-				case E::SignalType::Discrete:	return QString("D");
-				case E::SignalType::Bus:		return QString("B");
+				case E::SignalType::Analog:		return QString{"A"};
+				case E::SignalType::Discrete:	return QString{"D"};
+				case E::SignalType::Bus:		return QString{"B"};
 				default:
 					Q_ASSERT(false);
 					return {};
 				}
-			case 2:
-				return signalParam.caption();
+			case ColumnType::Caption:
+				return archiveSignal.signalParam.caption();
+			case ColumnType::Server:
+				return archiveSignal.archiveServiceShortenId;
 			default:
 				Q_ASSERT(false);
 				return {};
@@ -616,27 +724,28 @@ QVariant FilteredArchiveSignalsModel::data(const QModelIndex& index, int role) c
 		break;
 	case Qt::ToolTipRole:
 		{
-			if (row < 0 || row >= static_cast<int>(m_signalIndexes.size()))
+			if (row >= m_signalIndexes.size())
 			{
-				Q_ASSERT(row >= 0 && row < static_cast<int>(m_signalIndexes.size()));
+				Q_ASSERT(row < m_signalIndexes.size());
 				return {};
 			}
 
-			int signalIndex = m_signalIndexes[row];
+			size_t signalIndex = m_signalIndexes[row];
 
-			if (signalIndex < 0 ||
-				signalIndex >= static_cast<int>(m_signals.size()))
+			if (signalIndex >= m_signals.size())
 			{
-				Q_ASSERT(signalIndex >= 0 &&  signalIndex < static_cast<int>(m_signals.size()));
+				Q_ASSERT(signalIndex < m_signals.size());
 				return {};
 			}
 
-			const AppSignalParam& signalParam = m_signals[signalIndex];
+			const ArchiveSignal& archiveSignal = m_signals[signalIndex];
 
-			QString toolTip = QString("%1\n%2\n%3")
-								.arg(signalParam.customSignalId())
-								.arg(signalParam.appSignalId())
-								.arg(signalParam.caption());
+			QString toolTip = QString{"%1\n%2\n%3\nServer: %4 (%5)"}
+								.arg(archiveSignal.signalParam.customSignalId())
+								.arg(archiveSignal.signalParam.appSignalId())
+								.arg(archiveSignal.signalParam.caption())
+								.arg(archiveSignal.archiveServiceShortenId)
+								.arg(archiveSignal.archiveServiceId);
 
 			return toolTip;
 		}
@@ -646,37 +755,26 @@ QVariant FilteredArchiveSignalsModel::data(const QModelIndex& index, int role) c
 	}
 }
 
-void FilteredArchiveSignalsModel::filterSignals(DialogChooseArchiveSignals::ArchiveSignalType signalType, QString signalIdFilter, QString schemaId)
+void FilteredArchiveSignalsModel::filterSignals(QString server, DialogChooseArchiveSignals::ArchiveSignalType signalType, QString signalIdFilter)
 {
 	beginResetModel();
 
 	QString filterText = signalIdFilter.trimmed().toLower();
-
-	auto sit = std::find_if(m_schemasDetails.begin(), m_schemasDetails.end(),
-				[&schemaId](const VFrame30::SchemaDetails& details)
-				{
-					return details.m_schemaId == schemaId;
-				});
-
-	int schemaIndex = -1;
-	if (sit != m_schemasDetails.end())
-	{
-		schemaIndex = static_cast<int>(std::distance(m_schemasDetails.begin(), sit));
-		Q_ASSERT(schemaIndex < m_schemasDetails.size());
-	}
+	server = server.trimmed();
 
 	if (filterText.isEmpty() == true)
 	{
-		// No filter, add all signals by other filters
+		// No text filter, add all signals by other filters
 		//
 		m_signalIndexes.clear();
 
-		int signalCount = static_cast<int>(m_signals.size());
-		for (int i = 0; i < signalCount; i++)
+		for (size_t i = 0, signalCount = m_signals.size(); i < signalCount; i++)
 		{
+			const ArchiveSignal& s = m_signals[i];
+
 			if ((signalType == DialogChooseArchiveSignals::ArchiveSignalType::AllSignals) ||
-				(signalType == DialogChooseArchiveSignals::ArchiveSignalType::AnalogSignals && m_signals[i].isAnalog() == true) ||
-				(signalType == DialogChooseArchiveSignals::ArchiveSignalType::DiscreteSignals && m_signals[i].isDiscrete() == true))
+				(signalType == DialogChooseArchiveSignals::ArchiveSignalType::AnalogSignals && s.signalParam.isAnalog() == true) ||
+				(signalType == DialogChooseArchiveSignals::ArchiveSignalType::DiscreteSignals && s.signalParam.isDiscrete() == true))
 			{
 			}
 			else
@@ -684,8 +782,8 @@ void FilteredArchiveSignalsModel::filterSignals(DialogChooseArchiveSignals::Arch
 				continue;
 			}
 
-			if (schemaId.isEmpty() == true ||
-				(schemaIndex != -1 && m_schemasDetails[schemaIndex].m_signals.count(m_signals[i].appSignalId()) != 0))
+			if (server.isEmpty() == true ||
+				s.archiveServiceId == server)
 			{
 			}
 			else
@@ -707,24 +805,24 @@ void FilteredArchiveSignalsModel::filterSignals(DialogChooseArchiveSignals::Arch
 	}
 	else
 	{
-		std::vector<int>& signalIndexes = foundStartWithIt->second;
+		std::vector<size_t>& signalIndexes = foundStartWithIt->second;
 
 		m_signalIndexes.clear();
 
-		for (int index : signalIndexes)
+		for (size_t index : signalIndexes)
 		{
-			if (index < 0 || index >= static_cast<int>(m_signals.size()))
+			if (index >= m_signals.size())
 			{
-				Q_ASSERT(index >= 0 && index < static_cast<int>(m_signals.size()));
+				Q_ASSERT(index < m_signals.size());
 				continue;
 			}
 
-			const AppSignalParam& signal = m_signals[index];
+			const ArchiveSignal& s = m_signals[index];
 
 			// if filterText.size() == 1 then we already filrtered it by getting data from m_startWithArrays
 			//
 			if (filterText.size() == 1 ||
-				signal.customSignalId().startsWith(filterText, Qt::CaseInsensitive) == true)
+				s.signalParam.customSignalId().startsWith(filterText, Qt::CaseInsensitive) == true)
 			{
 			}
 			else
@@ -733,8 +831,8 @@ void FilteredArchiveSignalsModel::filterSignals(DialogChooseArchiveSignals::Arch
 			}
 
 			if ((signalType == DialogChooseArchiveSignals::ArchiveSignalType::AllSignals) ||
-				(signalType == DialogChooseArchiveSignals::ArchiveSignalType::AnalogSignals && signal.isAnalog() == true) ||
-				(signalType == DialogChooseArchiveSignals::ArchiveSignalType::DiscreteSignals && signal.isDiscrete() == true))
+				(signalType == DialogChooseArchiveSignals::ArchiveSignalType::AnalogSignals && s.signalParam.isAnalog() == true) ||
+				(signalType == DialogChooseArchiveSignals::ArchiveSignalType::DiscreteSignals && s.signalParam.isDiscrete() == true))
 			{
 			}
 			else
@@ -742,8 +840,8 @@ void FilteredArchiveSignalsModel::filterSignals(DialogChooseArchiveSignals::Arch
 				continue;
 			}
 
-			if (schemaId.isEmpty() == true ||
-				(schemaIndex != -1 && m_schemasDetails[schemaIndex].m_signals.count(signal.appSignalId()) != 0))
+			if (server.isEmpty() == true ||
+				s.archiveServiceId == server)
 			{
 			}
 			else
@@ -760,24 +858,25 @@ void FilteredArchiveSignalsModel::filterSignals(DialogChooseArchiveSignals::Arch
 	return;
 }
 
-AppSignalParam FilteredArchiveSignalsModel::signalByRow(int row) const
+ArchiveSignal FilteredArchiveSignalsModel::signalByRow(int row) const	// can throw std::out_of_range()
 {
-	if (row < 0 || row >= static_cast<int>(m_signalIndexes.size()))
+	size_t r = static_cast<size_t>(row);
+
+	if (r >= m_signalIndexes.size())
 	{
-		Q_ASSERT(row >= 0 && row < static_cast<int>(m_signalIndexes.size()));
-		return {};
+		Q_ASSERT(r < m_signalIndexes.size());
+		throw std::out_of_range("FilteredArchiveSignalsModel::signalByRow(r) where r is out of range");
 	}
 
-	int signalIndex = m_signalIndexes[row];
+	size_t signalIndex = m_signalIndexes[r];
 
-	if (signalIndex < 0 || signalIndex >= static_cast<int>(m_signals.size()))
+	if (signalIndex >= m_signals.size())
 	{
-		Q_ASSERT(signalIndex >= 0 && signalIndex < static_cast<int>(m_signals.size()));
-		return {};
+		Q_ASSERT(signalIndex < m_signals.size());
+		throw std::out_of_range("FilteredArchiveSignalsModel::signalByRow(r) where signalIndex is out of range");
 	}
 
 	return m_signals[signalIndex];
 }
-
 
 

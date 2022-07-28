@@ -473,7 +473,7 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 	{
 		for (const MonitorSettings::TuningService& ts : readSettings.tuningServices)
 		{
-			writeMessage(tr("TuningService (id, ip, port): %1, %2, %3").arg(ts.tuningServiceID).arg(ts.clientRequestIP).arg(ts.clientRequestPort));
+			writeMessage(tr("TuningService (id, ip, port): %1, %2, %3").arg(ts.equipmentId).arg(ts.clientRequestIP).arg(ts.clientRequestPort));
 			writeMessage(tr("TuningSources: %1").arg(ts.drivenSources.join(", ")));
 		}
 		writeMessage(tr("TuningUserAccounts: %1").arg(readSettings.tuningUserAccounts.join(", ")));

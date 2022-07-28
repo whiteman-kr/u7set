@@ -9,10 +9,11 @@
 // Get signals params and states from AppDataServices(s)
 // and set them to
 //
-class AdsConnection : public QObject, public HasLogFile
+class AdsConnection : public QObject
 {
 	Q_OBJECT
 
+private:
 	struct Connection
 	{
 		Connection(MonitorConfigController& configController,
@@ -22,6 +23,7 @@ class AdsConnection : public QObject, public HasLogFile
 		Connection(const Connection&) = delete;
 		Connection(Connection&& src) noexcept;
 		~Connection();
+
 		Connection& operator=(const Connection&) = delete;
 		Connection& operator=(Connection&& src) noexcept;
 
@@ -48,11 +50,15 @@ public:
 private slots:
 	void configurationArrived(ConfigSettings conf);
 
+	// --
+	//
 private:
+	HasLogFile m_logFile;
+
 	MonitorConfigController& m_configController;
 	MonitorSignalManager& m_signalManager;
 
-	std::list<Connection> m_conns;		// Key is AppDataServiceID
+	std::list<Connection> m_conns;
 };
 
 

@@ -406,7 +406,8 @@ public:
 
 	struct TuningService
 	{
-		QString tuningServiceID;
+		QString equipmentId;
+		QString shortenId;			// Short version of tuningServiceID
 		QString clientRequestIP;
 		int clientRequestPort = 0;
 		QStringList drivenSources;
@@ -415,15 +416,17 @@ public:
 	struct AppDataService
 	{
 		QString equipmentId;
+		QString shortenId;			// Short version of equipmentId
 		HostAddressPort address;
 		HostAddressPort realtimeAddress;
 	};
 
 	struct ArchiveService
 	{
-		QString equipmentId;
+		QString equipmentId;		// ArchiveService equipmentId
+		QString shortenId;			// Short version of equipmentId
 		QString appDataServiceId;	// ID of the source AppDataService for this ArchiveService
-		HostAddressPort address;
+		HostAddressPort address;	// ArchiveService ip address and port
 	};
 
 public:
@@ -456,7 +459,11 @@ public:
 	QStringList getUsersAccounts() const;
 
 	void clear();
+
+	template<typename SERVICETYPE>
+	static void setShortId(std::vector<SERVICETYPE>* services);
 };
+
 
 class TuningClientSettings : virtual public SoftwareSettings
 {

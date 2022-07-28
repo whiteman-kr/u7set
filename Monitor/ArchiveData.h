@@ -1,12 +1,20 @@
-#ifndef ARCHIVEDATA_H
-#define ARCHIVEDATA_H
+#pragma once
 
 #include "../AppSignalLib/AppSignalParam.h"
 #include "../CommonLib/Times.h"
 
+
+struct ArchiveSignal
+{
+	AppSignalParam signalParam;
+	QString archiveServiceId;
+	QString archiveServiceShortenId;
+};
+
 struct ArchiveSource
 {
-	std::vector<AppSignalParam> acceptedSignals;
+	std::vector<ArchiveSignal> acceptedSignals;
+
 	E::TimeType timeType = E::TimeType::Local;
 	TimeStamp requestStartTime;
 	TimeStamp requestEndTime;
@@ -40,4 +48,3 @@ private:
 	int m_cachedSize = 0;
 };
 
-#endif // ARCHIVEDATA_H

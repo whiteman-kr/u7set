@@ -7,7 +7,6 @@
 #include "../CommonLib/Hash.h"
 #include "../CommonLib/Times.h"
 #include "../CommonLib/Types.h"
-#include "../UtilsLib/Queue.h"
 #include "../OnlineLib/SimpleAppSignalState.h"
 #include "AppSignal.h"
 

@@ -733,7 +733,7 @@ void MonitorMainWindow::runTuningTcpClients()
 	{
 		// TuningClientTcpClient
 		//
-        MonitorTuningTcpClient* client = new MonitorTuningTcpClient(m_configController.softwareInfo(), ts.tuningServiceID, &theTuningSignals,
+        MonitorTuningTcpClient* client = new MonitorTuningTcpClient(m_configController.softwareInfo(), ts.equipmentId, &theTuningSignals,
                                                                     &m_LogFile, &m_tuningLogFile, &m_tuningUserManager);
 
 		const HostAddressPort addrPort = HostAddressPort(ts.clientRequestIP, ts.clientRequestPort);
@@ -854,14 +854,17 @@ void MonitorMainWindow::updateStatusBar()
 		m_statusBarProjectInfo->setText(text);
 	}
 
-	if ((m_logErrorsCounter != m_LogFile.errorAckCounter() || m_logWarningsCounter != m_LogFile.warningAckCounter()))
+	if (m_logErrorsCounter != std::clamp(m_LogFile.errorAckCounter(), 0, 999) ||
+		m_logWarningsCounter != std::clamp(m_LogFile.warningAckCounter(), 0, 999))
 	{
-		m_logErrorsCounter = m_LogFile.errorAckCounter();
-		m_logWarningsCounter = m_LogFile.warningAckCounter();
+		m_logErrorsCounter = std::clamp(m_LogFile.errorAckCounter(), 0, 999);
+		m_logWarningsCounter = std::clamp(m_LogFile.warningAckCounter(), 0, 999);
 
 		assert(m_statusBarLogAlerts);
 
-		m_statusBarLogAlerts->setText(QString(" Log E: %1 W: %2").arg(m_logErrorsCounter).arg(m_logWarningsCounter));
+		m_statusBarLogAlerts->setText(QString(" Log E: %1 W: %2 ")
+										.arg(m_logErrorsCounter)
+										.arg(m_logWarningsCounter));
 
 		if (m_logErrorsCounter == 0 && m_logWarningsCounter == 0)
 		{

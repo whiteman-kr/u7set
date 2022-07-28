@@ -429,7 +429,7 @@ void TcpSignalClient::processSignalParam(const QByteArray& data)
 		}
 	}
 
-	m_signalManager.addSignals(appSignals);
+	m_signalManager.addSignals(appSignals, m_serverSettings.equipmentId);
 
 	requestSignalParam(m_lastSignalParamStartIndex + ADS_GET_APP_SIGNAL_PARAM_MAX);
 

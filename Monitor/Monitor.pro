@@ -86,7 +86,7 @@ SOURCES += main.cpp \
     DialogChooseArchiveSignals.cpp \
     ArchiveTcpClient.cpp \
     ArchiveModelView.cpp \
-    ArchiveData.cpp \
+	ArchiveData.cpp \
     TcpSignalRecents.cpp \
 	MonitorSchemaManager.cpp \
 	SelectSchemaWidget.cpp \
@@ -148,7 +148,7 @@ HEADERS  += \
     DialogChooseArchiveSignals.h \
     ArchiveTcpClient.h \
     ArchiveModelView.h \
-    ArchiveData.h \
+	ArchiveData.h \
     TcpSignalRecents.h \
     SelectSchemaWidget.h \
     MonitorSchemaManager.h \

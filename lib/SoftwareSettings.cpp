@@ -1233,7 +1233,7 @@ bool MonitorSettings::writeToXml(XmlWriteHelper& xml) const
 	{
 		xml.writeStartElement(XmlElement::TUNING_SERVICE);
 
-		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, tsc.tuningServiceID);
+		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, tsc.equipmentId);
 		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, tsc.clientRequestIP);
 		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, tsc.clientRequestPort);
 		xml.writeStringListAttribute(XmlAttribute::DRIVEN_SOURCES, tsc.drivenSources);
@@ -1343,6 +1343,28 @@ bool MonitorSettings::readFromXml(XmlReadHelper& xml)
 			continue;
 		}
 
+		if (xml.name() == XmlElement::ARCHIVE_SERVICE)
+		{
+			ArchiveService archiveService;
+
+			QString clientRequestIp;
+			int clientRequestPort = 0;
+
+
+			result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &archiveService.equipmentId);
+			result &= xml.readStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_ID, &archiveService.appDataServiceId);
+
+			result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &clientRequestIp);
+			result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestPort);
+
+			archiveService.address.setAddressPort(clientRequestIp, clientRequestPort);
+
+			archiveServices.push_back(archiveService);
+
+			xml.skipCurrentElement();
+			continue;
+		}
+
 		if (xml.name() == XmlElement::TUNING_SERVICES)
 		{
 			result &= xml.readBoolAttribute(EquipmentPropNames::TUNING_ENABLE, &tuningEnabled);
@@ -1356,7 +1378,7 @@ bool MonitorSettings::readFromXml(XmlReadHelper& xml)
 
 				result &= xml.findElement(XmlElement::TUNING_SERVICE);
 
-				result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &tsc.tuningServiceID);
+				result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &tsc.equipmentId);
 				result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &tsc.clientRequestIP);
 				result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &tsc.clientRequestPort);
 				result &= xml.readStringListAttribute(XmlAttribute::DRIVEN_SOURCES, &tsc.drivenSources);
@@ -1384,6 +1406,10 @@ bool MonitorSettings::readFromXml(XmlReadHelper& xml)
 		xml.skipCurrentElement();
 	}
 
+	MonitorSettings::setShortId<AppDataService>(&appDataServices);
+	MonitorSettings::setShortId<ArchiveService>(&archiveServices);
+	MonitorSettings::setShortId<TuningService>(&tuningServices);
+
 	result &= (appDataServices.empty() == false);
 
 	return result;
@@ -1402,6 +1428,91 @@ QStringList MonitorSettings::getUsersAccounts() const
 void MonitorSettings::clear()
 {
 	*this = MonitorSettings{};
+}
+
+template<typename SERVICETYPE>		// SERVICETYPE is one of TuningService, AppDataService, ArchiveService
+void MonitorSettings::setShortId(std::vector<SERVICETYPE>* services)
+{
+	if (services == nullptr)
+	{
+		Q_ASSERT(services);
+		return;
+	}
+
+	if (services->empty() == true)
+	{
+		return;
+	}
+
+	struct ServiceRecord
+	{
+		QString serviceId;		// Full ArchiveServiceID
+		QString shortId;		// Shorted ArchiveServiceID
+		QString currentId;		// Current work version (used for creating shortId)
+	};
+
+	std::vector<ServiceRecord> ss;
+	ss.reserve(services->size());
+
+	for (const SERVICETYPE& as : *services)
+	{
+		ss.push_back({as.equipmentId, as.equipmentId, as.equipmentId});
+	}
+
+	if (ss.size() == 1)
+	{
+		// If there is just one service then make it a bit shorter (remove system)
+		//
+		QString shortId = ss[0].shortId;
+
+		if (qsizetype underscoreIndex = shortId.indexOf('_');
+			underscoreIndex != -1)
+		{
+			ss[0].shortId = shortId.right(shortId.size() - (underscoreIndex + 1));
+		}
+		else
+		{
+			// ss[0].shortId = shortId;
+		}
+	}
+	else
+	{
+		for (qsizetype i = 0; i < ss[0].serviceId.size(); i++)
+		{
+			QChar firstLetter = ss[0].currentId[0];
+
+			if (firstLetter == QChar('_'))
+			{
+				std::ranges::for_each(ss, [](ServiceRecord& sr){	sr.shortId = sr.currentId; sr.shortId.remove(0, 1);});
+			}
+
+			bool firstLetterIsSame = std::all_of(ss.begin(), ss.end(),
+												 [firstLetter](const ServiceRecord& sr)
+												 {
+													return sr.currentId[0] == firstLetter;
+												 });
+
+			if (firstLetterIsSame == true)
+			{
+				std::ranges::for_each(ss, [](ServiceRecord& sr){	sr.currentId.remove(0, 1);});
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+
+	// Set result
+	//
+	Q_ASSERT(services->size() == ss.size());
+
+	for (size_t i = 0; i < services->size(); i++)
+	{
+		services->at(i).shortenId = ss.at(i).shortId;
+	}
+
+	return;
 }
 
 // -------------------------------------------------------------------------------------

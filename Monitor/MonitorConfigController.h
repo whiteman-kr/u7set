@@ -18,10 +18,8 @@ struct ConfigSettings
 
 	std::vector<MonitorSettings::AppDataService> appDataServices;
 	std::vector<MonitorSettings::AppDataService> appDataRealTimeServices;
-	std::vector<MonitorSettings::ArchiveService> archiveServices;
 
-//	ConfigConnection archiveService1;
-//	ConfigConnection archiveService2;
+	std::vector<MonitorSettings::ArchiveService> archiveServices;
 
 	// Tuning settings
 	//

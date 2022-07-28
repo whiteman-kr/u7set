@@ -1,24 +1,22 @@
-#ifndef DIALOGCHOOSEARCHIVESIGNALS_H
-#define DIALOGCHOOSEARCHIVESIGNALS_H
+#pragma once
 
-#include "MonitorSignalManager.h"
-#include "../VFrame30/Schema.h"
 #include "ArchiveData.h"
+#include "../lib/SoftwareSettings.h"
 
+class MonitorSignalManager;
 
 namespace Ui {
 	class DialogChooseArchiveSignals;
 }
 
+
 class DialogChooseArchiveSignals : public QDialog
 {
 	Q_OBJECT
-public:
-	struct Result;
 
 public:
-	DialogChooseArchiveSignals(IAppSignalManager* signalManager,
-							   const std::vector<VFrame30::SchemaDetails>& schemaDetails,
+	DialogChooseArchiveSignals(MonitorSignalManager* signalManager,
+							   const std::vector<MonitorSettings::ArchiveService>& archiveServices,
 							   const ArchiveSource& init,
 							   QWidget* parent);
 	virtual ~DialogChooseArchiveSignals();
@@ -26,19 +24,20 @@ public:
 	[[nodiscard]] ArchiveSource accpetedResult() const;
 
 protected:
+	void fillServerCombo();
 	void fillSignalList();
 	void filterSignals();
 
-	void addSignal(const AppSignalParam& signal);
+	void addSignal(const ArchiveSignal& archiveSignal);
 	void removeSelectedSignal();
 
-	[[nodiscard]] bool archiveSignalsHasSignalId(const QString& signalId);
+	[[nodiscard]] bool signalAlreadyPresent(const QString& customSignalId, const QString& archiveServiceId);
 
-	void disableControls();
+	void updateControls();
 
 private slots:
 	void signalTypeCurrentIndexChanged(int index);
-	void schemaCurrentIndexChanged(int index);
+	void serverCurrentIndexChanged(int index);
 
 	void on_addSignalButton_clicked();
 	void on_removeSignalButton_clicked();
@@ -70,40 +69,17 @@ private:
 	Ui::DialogChooseArchiveSignals* ui;
 	QCompleter* m_filterCompleter = nullptr;
 
-	const std::vector<VFrame30::SchemaDetails>& m_schemasDetails;
+	std::vector<MonitorSettings::ArchiveService> m_archiveServices;
+
+	// --
+	//
+	ArchiveSource m_result;
 
 	// Variable to restore last UI state
 	//
-	static ArchiveSignalType m_lastSignalType;
-	static QString m_lastSchemaId;
+	static ArchiveSignalType s_lastSignalType;
+	static QString s_lastServer;
 
-	ArchiveSource m_result;
+	inline static const QString s_allServers{"All Servers"};
 };
 
-class FilteredArchiveSignalsModel : public QAbstractTableModel
-{
-	Q_OBJECT
-
-public:
-	FilteredArchiveSignalsModel(const std::vector<AppSignalParam>& signalss,
-								const std::vector<VFrame30::SchemaDetails>& schemasDetails,
-								QObject* parent);
-
-public:
-	int rowCount(const QModelIndex& parent = QModelIndex()) const override;
-	int columnCount(const QModelIndex& parent = QModelIndex()) const override;
-	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
-
-	void filterSignals(DialogChooseArchiveSignals::ArchiveSignalType signalType, QString signalIdFilter, QString schemaId);
-
-	[[nodiscard]] AppSignalParam signalByRow(int row) const;
-
-private:
-	std::vector<int> m_signalIndexes;
-	std::vector<AppSignalParam> m_signals;
-	const std::vector<VFrame30::SchemaDetails>& m_schemasDetails;
-	std::map<QString, std::vector<int>> m_startWithArrays;	// Key is startWith, in lowercase. Values is indexes in m_signals for stratWith
-};
-
-#endif // DIALOGCHOOSEARCHIVESIGNALS_H

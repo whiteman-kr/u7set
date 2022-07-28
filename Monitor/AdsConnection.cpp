@@ -86,7 +86,7 @@ HostAddressPort AdsConnection::Connection::address() const
 AdsConnection::AdsConnection(MonitorConfigController& configController,
 							 MonitorSignalManager& signalManager,
 							 ILogFile* logFile) :
-	HasLogFile(logFile, "AdsConnection"),
+	m_logFile(logFile, "AdsConnection"),
 	m_configController(configController),
 	m_signalManager(signalManager)
 {
@@ -129,7 +129,19 @@ void AdsConnection::configurationArrived(ConfigSettings conf)
 
 	for (const MonitorSettings::AppDataService& ads : conf.appDataServices)
 	{
-		m_conns.emplace_back(m_configController, ads, m_signalManager, logFile());
+		auto it = std::find_if(m_conns.begin(), m_conns.end(), [&ads](const Connection& c)
+		{
+			return c.address() == ads.address;
+		});
+
+		if (it != m_conns.end())
+		{
+			// Such connection already exists
+			//
+			continue;
+		}
+
+		m_conns.emplace_back(m_configController, ads, m_signalManager, m_logFile.logFile());
 	}
 
 	return;

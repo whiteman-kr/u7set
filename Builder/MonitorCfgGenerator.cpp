@@ -149,17 +149,17 @@ namespace Builder
 
 		for(const MonitorSettings::TuningService& tsc : settings->tuningServices)
 		{
-			std::shared_ptr<Hardware::DeviceObject> tuningServiceObject = m_equipment->deviceObject(tsc.tuningServiceID);
+			std::shared_ptr<Hardware::DeviceObject> tuningServiceObject = m_equipment->deviceObject(tsc.equipmentId);
 			if (tuningServiceObject == nullptr)
 			{
-				m_log->errCFG3021(m_software->equipmentId(), EquipmentPropNames::TUNING_SERVICE_ID, tsc.tuningServiceID);
+				m_log->errCFG3021(m_software->equipmentId(), EquipmentPropNames::TUNING_SERVICE_ID, tsc.equipmentId);
 				result = false;
 				continue;
 			}
 			std::shared_ptr<Hardware::Software> tuningServiceSoftware = tuningServiceObject->toSoftware();
 			if (tuningServiceSoftware == nullptr)
 			{
-				m_log->errCFG3021(m_software->equipmentId(), EquipmentPropNames::TUNING_SERVICE_ID, tsc.tuningServiceID);
+				m_log->errCFG3021(m_software->equipmentId(), EquipmentPropNames::TUNING_SERVICE_ID, tsc.equipmentId);
 				result = false;
 				continue;
 			}
@@ -189,7 +189,7 @@ namespace Builder
 			else
 			{
 				LOG_INTERNAL_ERROR_MSG(m_log, QString("Monitor %1 isn't found in clients list of TuningService %2").
-											arg(equipmentID()).arg(tsc.tuningServiceID));
+											arg(equipmentID()).arg(tsc.equipmentId));
 				result = false;
 				continue;
 			}

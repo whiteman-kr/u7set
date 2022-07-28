@@ -1611,7 +1611,7 @@ bool MonitorSettingsGetter::readTuningServiceSettings(const Builder::Context* co
 
 		TuningService tsc;
 
-		tsc.tuningServiceID = tuningServiceID;
+		tsc.equipmentId = tuningServiceID;
 		tsc.clientRequestIP = tuningServiceClientIP.addressStr();
 		tsc.clientRequestPort = tuningServiceClientIP.port();
 
