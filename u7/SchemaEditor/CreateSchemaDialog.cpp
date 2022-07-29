@@ -4,9 +4,11 @@
 #include "../DbLib/DbController.h"
 #include "../DbLib/DbStruct.h"
 #include "../VFrame30/SchemaLayer.h"
-#include "../VFrame30/VFrame30.h"
+#include "../VFrame30/Schema.h"
+#include "../VFrame30/UfbSchema.h"
+#include "../VFrame30/LogicSchema.h"
 #include "../VFrame30/Settings.h"
-#include "../VFrame30/FblItemRect.h"
+#include "../VFrame30/SchemaItem.h"
 
 
 //1. если мен€ютс€ юниты то надо помен€ть введенные размеры

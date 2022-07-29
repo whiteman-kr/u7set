@@ -29,7 +29,6 @@
 #include "../VFrame30/SchemaItemIndicator.h"
 #include "../VFrame30/SchemaItemLoopback.h"
 #include "../VFrame30/Session.h"
-#include "../VFrame30/DrawParam.h"
 #include "../VFrame30/Bus.h"
 #include "../lib/LmDescription.h"
 #include "../AppSignalSetProvider.h"

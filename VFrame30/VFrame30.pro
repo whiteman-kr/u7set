@@ -81,7 +81,6 @@ HEADERS += \
     VFrame30Library.h \
     HorzVertLinks.h \
 	Configuration.h \
-    VFrame30.h \
 	MonitorSchema.h \
     Afb.h \
     Schema.h \
