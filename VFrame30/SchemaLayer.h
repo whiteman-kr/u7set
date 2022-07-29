@@ -1,9 +1,15 @@
 #pragma once
 
-#include "SchemaItem.h"
+#include "../CommonLib/Factory.h"
+#include "../CommonLib/DebugInstCounter.h"
+#include "../Proto/ProtoSerialization.h"
+#include "SchemaPoint.h"
 
 namespace VFrame30
 {
+	class SchemaLayer;
+	class SchemaItem;
+
 	using SchemaLayerPtr = std::shared_ptr<VFrame30::SchemaLayer>;
 	class SchemaLayer;
 	class Schema;

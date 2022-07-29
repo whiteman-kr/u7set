@@ -9,6 +9,7 @@
 #include "SignalPropertiesDialog.h"
 #include "GlobalMessanger.h"
 #include "../Builder/ConnectionStorage.h"
+#include "../VFrame30/SchemaLayer.h"
 #include "../VFrame30/UfbSchema.h"
 #include "../VFrame30/SchemaItemLine.h"
 #include "../VFrame30/SchemaItemRect.h"

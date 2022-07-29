@@ -82,11 +82,11 @@ SOURCES += main.cpp \
     ../lib/Ui/DialogSignalSearch.cpp \
     DialogColumns.cpp \
     Trend/MonitorTrends.cpp \
-    MonitorArchive.cpp \
-    DialogChooseArchiveSignals.cpp \
-    ArchiveTcpClient.cpp \
-    ArchiveModelView.cpp \
-	ArchiveData.cpp \
+	Archive/MonitorArchive.cpp \
+	Archive/DialogChooseArchiveSignals.cpp \
+	Archive/ArchiveTcpClient.cpp \
+	Archive/ArchiveModelView.cpp \
+	Archive/ArchiveData.cpp \
     TcpSignalRecents.cpp \
 	MonitorSchemaManager.cpp \
 	SelectSchemaWidget.cpp \
@@ -144,11 +144,11 @@ HEADERS  += \
     ../lib/Ui/DialogSignalSearch.h \
     DialogColumns.h \
     Trend/MonitorTrends.h \
-    MonitorArchive.h \
-    DialogChooseArchiveSignals.h \
-    ArchiveTcpClient.h \
-    ArchiveModelView.h \
-	ArchiveData.h \
+	Archive/MonitorArchive.h \
+	Archive/DialogChooseArchiveSignals.h \
+	Archive/ArchiveTcpClient.h \
+	Archive/ArchiveModelView.h \
+	Archive/ArchiveData.h \
     TcpSignalRecents.h \
     SelectSchemaWidget.h \
     MonitorSchemaManager.h \
@@ -174,7 +174,7 @@ FORMS    += \
     DialogSettings.ui \
     ../lib/Ui/DialogSignalInfo.ui \
     DialogColumns.ui \
-    DialogChooseArchiveSignals.ui
+	Archive/DialogChooseArchiveSignals.ui
 
 RESOURCES += \
     Monitor.qrc

@@ -1,5 +1,6 @@
 #include "SoftwareCfgGenerator.h"
 #include "ApplicationLogicCompiler.h"
+#include "../VFrame30/SchemaLayer.h"
 #include "../lib/DeviceHelper.h"
 #include "../lib/SoftwareSettings.h"
 #include "../lib/LanControllerInfoHelper.h"

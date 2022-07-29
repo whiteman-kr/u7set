@@ -1,33 +1,17 @@
-#ifndef MONITORARCHIVE_H
-#define MONITORARCHIVE_H
+#pragma once
 
-#include "MonitorConfigController.h"
-#include "DialogChooseArchiveSignals.h"
 #include "ArchiveTcpClient.h"
 #include "ArchiveModelView.h"
-#include "../lib/ExportPrint.h"
 
 class MonitorArchiveWidget;
-class QPrinter;
-class QTextDocument;
-
-
-class MonitorExportPrint : public ExportPrint
-{
-public:
-	MonitorExportPrint(ArchiveSource* source, ConfigSettings* configuration, QWidget* parent);
-	virtual ~MonitorExportPrint() = default;
-
-private:
-	virtual void generateHeader(QTextCursor& cursor) override;
-
-	ArchiveSource* m_source = nullptr;
-	ConfigSettings* m_configuration = nullptr;
-};
+class MonitorConfigController;
 
 
 class MonitorArchive
 {
+public:
+	MonitorArchive() = delete;
+
 public:
 	static std::vector<QString> getArchiveList();
 	static bool activateWindow(QString archiveName);
@@ -96,8 +80,6 @@ protected slots:
 	void showSignalInfo(QString appSignalId);	// Slot to ArchiveView::requestToShowSignalInfo
 	void removeSignal(QString appSignalId);		// Slot to ArchiveView::requestToRemoveSignal
 
-
-
 	void slot_configurationArrived(ConfigSettings configuration);
 
 	void tcpConnectionEstablished();
@@ -110,16 +92,13 @@ protected slots:
 	//
 private:
 	MonitorSignalManager* m_signalManager = nullptr;
-	MonitorSettings::ArchiveService m_archiveService;
-//	ConfigConnection m_archiveService1;
-//	ConfigConnection m_archiveService2;
 
-	std::vector<VFrame30::SchemaDetails> m_schemasDetails;
+	std::vector<MonitorSettings::ArchiveService> m_archiveServices;
+	QString m_projectName;
+	QString m_softwareId;
 
-	ConfigSettings m_configuration;
-
-	ArchiveTcpClient* m_tcpClient = nullptr;
-	SimpleThread* m_tcpClientThread = nullptr;
+//	ArchiveTcpClient* m_tcpClient = nullptr;
+//	SimpleThread* m_tcpClientThread = nullptr;
 
 
 	enum  StatusBarColumns
@@ -156,4 +135,3 @@ private:
 };
 
 
-#endif // MONITORARCHIVE_H

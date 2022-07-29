@@ -10,6 +10,7 @@
 #include "EditEngineSetObject.h"
 #include "EditEngineSetSchemaProperty.h"
 #include "EditEngineNop.h"
+#include "../../VFrame30/SchemaLayer.h"
 
 namespace EditEngine
 {

@@ -3,6 +3,7 @@
 #include "Settings.h"
 #include "../DbLib/DbController.h"
 #include "../DbLib/DbStruct.h"
+#include "../VFrame30/SchemaLayer.h"
 #include "../VFrame30/VFrame30.h"
 #include "../VFrame30/Settings.h"
 #include "../VFrame30/FblItemRect.h"

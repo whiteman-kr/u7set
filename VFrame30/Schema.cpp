@@ -1,4 +1,5 @@
 #include "Schema.h"
+#include "SchemaLayer.h"
 #include "LogicSchema.h"
 #include "UfbSchema.h"
 #include "MonitorSchema.h"
