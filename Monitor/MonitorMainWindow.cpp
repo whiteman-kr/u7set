@@ -5,6 +5,7 @@
 #include "MonitorSignalSnapshot.h"
 #include "./Archive/MonitorArchive.h"
 #include "DialogDataSources.h"
+#include "Globals.h"
 #include "./Trend/MonitorTrends.h"
 #include "../VFrame30/Schema.h"
 #include "../lib/Ui/DialogSignalSearch.h"

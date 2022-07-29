@@ -64,6 +64,8 @@ SOURCES += main.cpp \
     ../lib/Ui/TabWidgetEx.cpp \
     ../lib/Ui/TagSelectorWidget.cpp \
     AdsConnection.cpp \
+    Archive/MonitorArchive.cpp \
+    Archive/MonitorArchiveWidget.cpp \
     InstanceResolver.cpp \
     MonitorAppSettings.cpp \
     MonitorMainWindow.cpp \
@@ -82,7 +84,6 @@ SOURCES += main.cpp \
     ../lib/Ui/DialogSignalSearch.cpp \
     DialogColumns.cpp \
     Trend/MonitorTrends.cpp \
-	Archive/MonitorArchive.cpp \
 	Archive/DialogChooseArchiveSignals.cpp \
 	Archive/ArchiveTcpClient.cpp \
 	Archive/ArchiveModelView.cpp \
@@ -124,6 +125,9 @@ HEADERS  += \
     ../lib/Ui/TabWidgetEx.h \
     ../lib/Ui/TagSelectorWidget.h \
     AdsConnection.h \
+    Archive/MonitorArchive.h \
+    Archive/MonitorArchiveWidget.h \
+    Globals.h \
     InstanceResolver.h \
     MonitorAppSettings.h \
     MonitorMainWindow.h \
@@ -144,7 +148,6 @@ HEADERS  += \
     ../lib/Ui/DialogSignalSearch.h \
     DialogColumns.h \
     Trend/MonitorTrends.h \
-	Archive/MonitorArchive.h \
 	Archive/DialogChooseArchiveSignals.h \
 	Archive/ArchiveTcpClient.h \
 	Archive/ArchiveModelView.h \

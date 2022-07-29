@@ -1,18 +1,12 @@
-#include "../UtilsLib/SimpleThread.h"
-#include "../lib/Tuning/TuningSignalManager.h"
 #include "../VFrame30/VFrame30Library.h"
+#include "Globals.h"
 #include "MonitorAppSettings.h"
 #include "MonitorMainWindow.h"
-#include "MonitorConfigController.h"
-#include "TcpSignalClient.h"
-#include "ScriptMonitorApplication.h"
 
 #if __has_include("../gitlabci_version.h")
 #include "../gitlabci_version.h"
 #endif
 
-TuningSignalManager theTuningSignals;
-ScriptMonitorApplication theApp;
 
 int main(int argc, char *argv[])
 {

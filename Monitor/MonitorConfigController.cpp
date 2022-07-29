@@ -1,6 +1,7 @@
 #include "../lib/SoftwareSettings.h"
 #include "MonitorConfigController.h"
 #include "MonitorAppSettings.h"
+#include "Globals.h"
 
 
 MonitorConfigController::MonitorConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2, ILogFile* logFile) :

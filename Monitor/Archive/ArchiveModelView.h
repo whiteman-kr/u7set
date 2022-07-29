@@ -1,5 +1,5 @@
-#ifndef ARCHIVEMODELVIEW_H
-#define ARCHIVEMODELVIEW_H
+#pragma once
+
 #include "ArchiveData.h"
 
 enum class ArchiveColumns
@@ -129,4 +129,3 @@ private:
 	QAction* copyAction = nullptr;
 };
 
-#endif // ARCHIVEMODELVIEW_H

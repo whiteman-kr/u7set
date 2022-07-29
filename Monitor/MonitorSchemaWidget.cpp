@@ -3,6 +3,7 @@
 #include "MonitorSchemaView.h"
 #include "MonitorSchemaManager.h"
 #include "MonitorSignalInfo.h"
+#include "Globals.h"
 #include "../VFrame30/SchemaItemSignal.h"
 #include "../VFrame30/SchemaItemValue.h"
 #include "../VFrame30/SchemaItemImageValue.h"

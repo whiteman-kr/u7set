@@ -34,7 +34,7 @@ bool MonitorTrends::activateTrendWindow(QString trendName)
 	return true;
 }
 
-bool MonitorTrends::startTrendApp(MonitorSignalManager* signalManager,
+bool MonitorTrends::startTrendApp(IAppSignalManager* signalManager,
 								  MonitorConfigController* configController,
                                   const std::vector<AppSignalParam>& appSignals,
                                   QWidget* parent)

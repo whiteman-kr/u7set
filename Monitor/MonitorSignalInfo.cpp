@@ -3,6 +3,8 @@
 #include "../UtilsLib/Ui/UiTools.h"
 #include "ui_DialogSignalInfo.h"
 
+class MonitorSignalManager;
+
 bool MonitorSignalInfo::showDialog(QString appSignalId,
 								   MonitorSignalManager* signalManager,
 								   MonitorConfigController* configController,

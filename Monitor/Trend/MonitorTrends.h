@@ -8,13 +8,14 @@
 
 class MonitorTrendsWidget;
 class QLabel;
+class IAppSignalManager;
 
 class MonitorTrends
 {
 public:
 	static std::vector<QString> getTrendsList();
 	static bool activateTrendWindow(QString trendName);
-	static bool startTrendApp(MonitorSignalManager* signalManager,
+	static bool startTrendApp(IAppSignalManager* signalManager,
 							  MonitorConfigController* configController,
 							  const std::vector<AppSignalParam>& appSignals,
 							  QWidget* parent);

@@ -1,6 +1,7 @@
 #ifndef MONITORSIGNALINFO_H
 #define MONITORSIGNALINFO_H
 
+#include "MonitorSignalManager.h"
 #include "../lib/Ui/DialogSignalInfo.h"
 
 class MonitorCentralWidget;
