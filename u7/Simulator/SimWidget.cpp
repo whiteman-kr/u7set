@@ -1,7 +1,5 @@
 #include "SimWidget.h"
-#include "Settings.h"
 #include "SimProjectWidget.h"
-#include "SimMemoryWidget.h"
 #include "SimOutputWidget.h"
 #include "SimOverridePane.h"
 #include "SimSelectBuildDialog.h"
@@ -11,7 +9,6 @@
 #include "SimSchemaPage.h"
 #include "SimCodePage.h"
 #include "SimTrend/SimTrends.h"
-#include "../SimulatorTabPage.h"
 #include "../../lib/Ui/TabWidgetEx.h"
 #include "../../lib/Ui/DialogSignalSearch.h"
 #include "SimSignalSnapshot.h"
@@ -40,12 +37,10 @@ SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 	setDockOptions(AnimatedDocks | AllowTabbedDocks | GroupedDragging);
 
 	m_tabWidget = new TabWidgetEx{this};
-	m_tabWidget->tabBarEx()->setDrawTopLine(false);
 	m_tabWidget->setDocumentMode(false);
 	m_tabWidget->tabBar()->setContextMenuPolicy(Qt::CustomContextMenu);
 
 	setCentralWidget(m_tabWidget);
-	centralWidget()->setBackgroundRole(QPalette::Dark);
 	centralWidget()->setAutoFillBackground(true);
 
 	QVBoxLayout* layout = new QVBoxLayout;
