@@ -259,8 +259,8 @@ bool DynamicAppSignalState::setState(const Times& time,
 					}
 				}
 
-				curState.flags.aboveHighLimit = (curState.value > m_signal->highEngineeringUnits() ? 1 : 0);
-				curState.flags.belowLowLimit = (curState.value < m_signal->lowEngineeringUnits() ? 1 : 0);
+				curState.flags.aboveHighLimit = (curState.value > m_highLimit ? 1 : 0);
+				curState.flags.belowLowLimit = (curState.value < m_lowLimit ? 1 : 0);
 
 				break;
 
