@@ -1,16 +1,20 @@
 --- Hardware implementation version 5
 
-math_sign_inv_fp
+sign_inv_fp
 1.1 - added math_sign_inv_fp
+1.2 - shortened caption to sign_inv_fp
 
-math_sign_inv_si
+sign_inv_si
 1.1 - added math_sign_inv_si
+1.2 - shortened caption to sign_inv_si
 
-math_negate_fp
+negate_fp
 1.1 - added math_negate_fp
+1.2 - shortened caption to negate_fp
 
-math_negate_si
-1.1 - added math_negate_fp
+negate_si
+1.1 - added math_negate_si
+1.2 - shortened caption to negate_si
 
 sign_bit_fp
 1.1 - added sign_bit_fp

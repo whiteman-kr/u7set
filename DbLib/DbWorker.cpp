@@ -395,6 +395,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0373.sql", "Upgrade to version 373, Changes in function get_signals_id_appsignalid"},
     {":/DatabaseUpgrade/Upgrade0374.sql", "Upgrade to version 374, Added out_max, out_min to AFB integrator(c) and deriv(c)"},
     {":/DatabaseUpgrade/Upgrade0375.sql", "Upgrade to version 375, Added xmls for LMs SR05, SR20, where afb func changed to version 5"},
+	{":/DatabaseUpgrade/Upgrade0376.sql", "Upgrade to version 376, Shortened some math_afbs captions for LMs SR05, SR20"},
 };
 
 int DbWorker::counter = 0;

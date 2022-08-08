@@ -7984,7 +7984,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#math_sign_inv_fp_v1" Caption="math_sign_inv_fp" Version="1.1">
+        <AFB id="#math_sign_inv_fp_v1" Caption="sign_inv_fp" Version="1.2">
 			<Properties>
 				<Description>Function Block outputs the additive inversion value of the input signal (sign inversion), output = input * (-1). Exception: sign will not inverse for positiv 0.</Description>
 				<Category>Math</Category>
@@ -8066,7 +8066,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#math_sign_inv_si_v1" Caption="math_sign_inv_si" Version="1.1">
+        <AFB id="#math_sign_inv_si_v1" Caption="sign_inv_si" Version="1.2">
 			<Properties>
 				<Description>Function Block outputs the additive inversion value of the input signal (sign inversion), output = input * (-1).</Description>
 				<Category>Math</Category>
@@ -8148,7 +8148,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 		
-		<AFB id="#math_negate_fp_v1" Caption="math_negate_fp" Version="1.1">
+        <AFB id="#math_negate_fp_v1" Caption="negate_fp" Version="1.2">
 			<Properties>
 				<Description>Function Block outputs the negative value of input signal (set sign bit), output = -abs(input). Exception: 0 remains positiv.</Description>
 				<Category>Math</Category>
@@ -8230,7 +8230,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 		
-		<AFB id="#math_negate_si_v1" Caption="math_negate_si" Version="1.1">
+        <AFB id="#math_negate_si_v1" Caption="negate_si" Version="1.2">
 			<Properties>
 				<Description>Function Block outputs the negative value of input signal (set sign bit), output = -abs(input).</Description>
 				<Category>Math</Category>

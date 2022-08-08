@@ -675,10 +675,10 @@ namespace Sim
 								.arg(elapsedUsecs.count() / 1000)
 								.arg(perfRation);
 
-		if (unlockTimer() == true)
-		{
-			qDebug() << logMessage;
-		}
+//		if (unlockTimer() == true)
+//		{
+//			qDebug() << logMessage;
+//		}
 		m_log.writeDebug(logMessage);
 
 		return result;
