@@ -504,6 +504,14 @@ namespace VFrame30
 					continue;
 				}
 
+				// DrawParam requires for preDrawScript and for draw itself
+				//
+				item->setDrawParam(drawParam);
+
+				std::shared_ptr<void> finalizer(nullptr, [item](void*){item->setDrawParam(nullptr);});
+
+				// --
+				//
 				if (isClientMode == true && item->isCommented() == false)
 				{
 					// Call preDrawEvent for all items, even if they out of screen
@@ -528,8 +536,6 @@ namespace VFrame30
 
 				if (item->isIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
 				{
-					item->setDrawParam(drawParam);
-
 					item->draw(drawParam, this, layer.get());	// Drawing item is here
 
 					if (item->isCommented() == true)
@@ -549,8 +555,6 @@ namespace VFrame30
 						item->drawScriptError(drawParam);
 					}
 				}
-
-				item->setDrawParam(nullptr);
 			}
 		}
 

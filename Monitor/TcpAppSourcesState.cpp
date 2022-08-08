@@ -348,7 +348,10 @@ void TcpAppSourcesState::processAppDataSourcesInfo(const QByteArray& data)
 
 			Hash hash = ::calcHash(QString::fromStdString(ads.info.moduleequipmentid()));
 
-			assert(m_appDataSourceStates.count(hash) == 0);
+			// TO DO
+			// Fix this bug https://jira.radiy.com/browse/RPCT-3273
+			//
+			//assert(m_appDataSourceStates.count(hash) == 0);
 
 			m_appDataSourceStates[hash] = ads;
 		}
