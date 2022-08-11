@@ -1814,24 +1814,6 @@ namespace Sim
 						result = 1;
 					}
 				}
-
-//				if (counter == 0 &&
-//					prevInputValue == 0 &&
-//					currentInputValue == 1)
-//				{
-//					// Start timer
-//					//
-//					counter = time / m_cycleDurationMs;
-//				}
-//				else
-//				{
-//					if (counter != 0)
-//					{
-//						counter --;
-//					}
-//				}
-
-//				result = (counter == 0) ? 0 : 1;
 			}
 			break;
 
@@ -1842,15 +1824,35 @@ namespace Sim
 
 				// FILTER (tctc_filter) - defacto is RC FILTER, on next AFBL version 209 it is fixed, and this implementation move to conf 6
 				//
+
+				// VHDL
+//				if wave = '1' and counter >= counter_t then
+//					o_result		<= '1';				[1]
+//					wave_dff		<= '1';
+//				elsif  wave = '0' and counter = 0 then
+//					o_result		<= '0';				[2]
+//					wave_dff		<= '0';
+//					counter		:= (others => '0');
+//				elsif wave = '1'  then
+//					o_result		<= wave_dff;		[3]
+//					counter			:= counter + 1;
+//				else
+//					o_result		<= wave_dff;		[4]
+//					counter			:= counter - 1;
+//				end if;
+
 				if (currentInputValue == 0)
 				{
 					if (counter == 0)
 					{
+						// [2]
+						//
 						result = 0;
-						counter = time / m_cycleDurationMs;		// counter cannot be more then (time / m_cycleDurationMs)
 					}
 					else
 					{
+						// [4]
+						//
 						counter --;
 						result = prevResultValue;
 					}
@@ -1859,11 +1861,15 @@ namespace Sim
 				{
 					if (counter >= static_cast<quint32>(time / m_cycleDurationMs))
 					{
+						// [1]
+						//
 						result = 1;
-						counter = time / m_cycleDurationMs;		// counter cannot be more then (time / m_cycleDurationMs)
+						counter = time / m_cycleDurationMs;		// counter cannot be greater than (time / m_cycleDurationMs)
 					}
 					else
 					{
+						// [3]
+						//
 						counter ++;
 						result = prevResultValue;
 					}
@@ -1963,16 +1969,17 @@ namespace Sim
 		case 1:
 			{
 				/* VHDL Code
-						if wave = '0' then
+
+					if wave = '0' then
+						o_result	<= '0';
+						counter		:=	(others => '0');
+					elseif
+						counter >= counter_t then
+							o_result	<= '1';
+						else
 							o_result	<= '0';
-							counter		:=	(others => '0');
-						elseif
-							counter >= counter_t then
-								o_result	<= '1';
-							else
-								o_result	<= '0';
-								counter		:= counter + 1;
-							end if;
+							counter		:= counter + 1;
+						end if;
 				*/
 
 				// On
@@ -2001,7 +2008,6 @@ namespace Sim
 			{
 				// Off
 				//
-
 				/*
 						if wave = '1' then
 							o_result		<= '1';
@@ -2079,24 +2085,6 @@ namespace Sim
 						result = 1;
 					}
 				}
-
-//				if (counter == 0 &&
-//					prevInputValue == 0 &&
-//					currentInputValue == 1)
-//				{
-//					// Start timer
-//					//
-//					counter = time / m_cycleDurationMs;
-//				}
-//				else
-//				{
-//					if (counter != 0)
-//					{
-//						counter --;
-//					}
-//				}
-
-//				result = (counter == 0) ? 0 : 1;
 			}
 			break;
 
@@ -2149,31 +2137,6 @@ namespace Sim
 						}
 					}
 				}
-
-//				if (prevInputValue != currentInputValue)
-//				{
-//					// Start timer
-//					//
-//					counter = time / m_cycleDurationMs + 1;
-//				}
-
-//				if (counter != 0 )
-//				{
-//					counter --;
-
-//					if (counter == 0)
-//					{
-//						result = currentInputValue;
-//					}
-//					else
-//					{
-//						result = prevResultValue;
-//					}
-//				}
-//				else
-//				{
-//					result = prevResultValue;
-//				}
 			}
 			break;
 
@@ -2209,29 +2172,6 @@ namespace Sim
 						}
 					}
 				}
-
-				// THIS IS RIGHT AND SIMPLE CODE, BUT now 'counter' is exposed to output for sync internal state, so I had to
-				// rewrite code as it's done in VHDL (conter up)
-				//
-
-//				// Univibrator R (TCTC_RSV)
-//				//
-//				if (prevInputValue == 0 &&
-//					currentInputValue == 1)
-//				{
-//					// Start timer
-//					//
-//					counter = time / m_cycleDurationMs;
-//				}
-//				else
-//				{
-//					if (counter != 0)
-//					{
-//						counter --;
-//					}
-//				}
-
-//				result = (counter == 0) ? 0 : 1;
 			}
 			break;
 
@@ -2239,34 +2179,6 @@ namespace Sim
 			{
 				// RC FILTER (tctc_rcfilter)
 				//
-//				if (currentInputValue == 1 && counter >= static_cast<quint32>(time / m_cycleDurationMs))
-//				{
-//					result = 1;
-//					prevResultValue = 1;
-//				}
-//				else
-//				{
-//					if  (currentInputValue == 0 && counter == 0)
-//					{
-//						result = 0;
-//						prevResultValue = 0;
-//						counter	= 0;
-//					}
-//					else
-//					{
-//						if (currentInputValue == 1)
-//						{
-//							result = prevResultValue;
-//							counter ++;
-//						}
-//						else
-//						{
-//							result = prevResultValue;
-//							counter	--;
-//						}
-//					}
-//				}
-
 				if (currentInputValue == 0)
 				{
 					if (counter == 0)
@@ -2402,7 +2314,6 @@ namespace Sim
 			{
 				// Off
 				//
-
 				/*
 						if wave = '1' then
 							o_result		<= '1';
@@ -2480,24 +2391,6 @@ namespace Sim
 						result = 1;
 					}
 				}
-
-//				if (counter == 0 &&
-//					prevInputValue == 0 &&
-//					currentInputValue == 1)
-//				{
-//					// Start timer
-//					//
-//					counter = time / m_cycleDurationMs;
-//				}
-//				else
-//				{
-//					if (counter != 0)
-//					{
-//						counter --;
-//					}
-//				}
-
-//				result = (counter == 0) ? 0 : 1;
 			}
 			break;
 
@@ -2550,31 +2443,6 @@ namespace Sim
 						}
 					}
 				}
-
-//				if (prevInputValue != currentInputValue)
-//				{
-//					// Start timer
-//					//
-//					counter = time / m_cycleDurationMs + 1;
-//				}
-
-//				if (counter != 0 )
-//				{
-//					counter --;
-
-//					if (counter == 0)
-//					{
-//						result = currentInputValue;
-//					}
-//					else
-//					{
-//						result = prevResultValue;
-//					}
-//				}
-//				else
-//				{
-//					result = prevResultValue;
-//				}
 			}
 			break;
 
@@ -2610,29 +2478,6 @@ namespace Sim
 						}
 					}
 				}
-
-				// THIS IS RIGHT AND SIMPLE CODE, BUT now 'counter' is exposed to output for sync internal state, so I had to
-				// rewrite code as it's done in VHDL (conter up)
-				//
-
-//				// Univibrator R (TCTC_RSV)
-//				//
-//				if (prevInputValue == 0 &&
-//					currentInputValue == 1)
-//				{
-//					// Start timer
-//					//
-//					counter = time / m_cycleDurationMs;
-//				}
-//				else
-//				{
-//					if (counter != 0)
-//					{
-//						counter --;
-//					}
-//				}
-
-//				result = (counter == 0) ? 0 : 1;
 			}
 			break;
 
@@ -2640,34 +2485,6 @@ namespace Sim
 			{
 				// RC FILTER (tctc_rcfilter)
 				//
-//				if (currentInputValue == 1 && counter >= static_cast<quint32>(time / m_cycleDurationMs))
-//				{
-//					result = 1;
-//					prevResultValue = 1;
-//				}
-//				else
-//				{
-//					if  (currentInputValue == 0 && counter == 0)
-//					{
-//						result = 0;
-//						prevResultValue = 0;
-//						counter	= 0;
-//					}
-//					else
-//					{
-//						if (currentInputValue == 1)
-//						{
-//							result = prevResultValue;
-//							counter ++;
-//						}
-//						else
-//						{
-//							result = prevResultValue;
-//							counter	--;
-//						}
-//					}
-//				}
-
 				if (currentInputValue == 0)
 				{
 					if (counter == 0)
