@@ -1,9 +1,6 @@
 #ifndef SIMTUNSIGNALMANGER_H
 #define SIMTUNSIGNALMANGER_H
 
-#include <unordered_map>
-#include <QMutex>
-
 #include "../lib/Tuning/TuningSignalManager.h"
 #include "SimScopedLog.h"
 
@@ -16,7 +13,7 @@ namespace Sim
 
 	public:
 		explicit TuningSignalManager(ScopedLog log, QObject* parent = nullptr);
-		virtual ~TuningSignalManager();
+		virtual ~TuningSignalManager() = default;
 
 	private:
 		ScopedLog m_log;

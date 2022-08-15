@@ -2,6 +2,7 @@
 #include "Simulator.h"
 #include "SimAppDataLanInterface.h"
 #include "SimDiagDataLanInterface.h"
+#include "SimTuningLanInterface.h"
 
 namespace Sim
 {

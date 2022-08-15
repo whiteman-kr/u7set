@@ -3,7 +3,6 @@
 #include <map>
 #include <vector>
 #include <memory>
-#include <cstring>
 #include <QByteArray>
 #include "../CommonLib/Types.h"
 #include "SimOverrideSignals.h"

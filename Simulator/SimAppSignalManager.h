@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../AppSignalLib/AppSignal.h"
-#include "../lib/AppSignalManager.h"
+#include "../lib/IAppSignalManager.h"
 #include "../TrendView/TrendSignal.h"
 #include "SimRam.h"
 #include "SimScopedLog.h"

@@ -6,11 +6,10 @@
 #include <vector>
 #include <optional>
 #include <QThread>
-#include <QtConcurrent/QtConcurrent>
+#include <QtConcurrent>
 #include <QMutex>
 #include "SimLogicModule.h"
-#include "SimTimeController.h"
-#include "SimAppSignalManager.h"
+
 
 namespace Sim
 {

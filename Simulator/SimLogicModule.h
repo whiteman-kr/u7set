@@ -7,8 +7,6 @@
 #include <QtConcurrent/QtConcurrent>
 #include "SimEeprom.h"
 #include "SimDeviceEmulator.h"
-#include "SimTimeController.h"
-#include "SimCommandProcessor.h"
 #include "../lib/LmDescription.h"
 #include "../lib/LogicModulesInfo.h"
 #include "../HardwareLib/ModuleFirmware.h"

@@ -1,7 +1,6 @@
 #include "SimOverrideSignals.h"
 #include "Simulator.h"
 #include "SimRam.h"
-#include "SimAppSignalManager.h"
 #include "../Proto/ProtoSerialization.h"
 #include <QJSEngine>
 #include <fstream>

@@ -77,7 +77,6 @@ SOURCES += \
     SimSubsystem.cpp \
     SimDeviceEmulator.cpp \
     SimControl.cpp \
-    SimTimeController.cpp \
     SimAppSignalManager.cpp \
     SimTuningSignalManager.cpp \
     SimAfb.cpp \
@@ -127,7 +126,6 @@ HEADERS += \
     SimSubsystem.h \
     SimDeviceEmulator.h \
     SimControl.h \
-    SimTimeController.h \
     SimAppSignalManager.h \
     SimTuningSignalManager.h \
     SimAfb.h \

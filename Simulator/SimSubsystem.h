@@ -3,7 +3,6 @@
 #include <map>
 #include <memory>
 #include "SimScopedLog.h"
-#include "SimEeprom.h"
 #include "SimLogicModule.h"
 
 namespace Hardware

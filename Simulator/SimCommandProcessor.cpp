@@ -1,5 +1,6 @@
 #include <cassert>
 #include "SimCommandProcessor.h"
+#include "SimException.h"
 #include "SimCommandProcessor_LM5_LM6.h"
 
 namespace Sim

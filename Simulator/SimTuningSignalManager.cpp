@@ -11,9 +11,4 @@ namespace Sim
 		m_log(log, "TuningSignalManager")
 	{
 	}
-
-	TuningSignalManager::~TuningSignalManager()
-	{
-	}
-
 }

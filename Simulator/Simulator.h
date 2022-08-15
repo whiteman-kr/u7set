@@ -13,14 +13,11 @@
 #include "SimOverrideSignals.h"
 #include "SimConnections.h"
 #include "SimScriptSimulator.h"
-#include "SimLans.h"
 #include "SimSoftware.h"
 #include "SimProfiles.h"
 #include "SimScopedLog.h"
 
-
 class QTextStream;
-
 
 namespace Sim
 {

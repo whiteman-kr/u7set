@@ -1,6 +1,7 @@
+#include <QJSValueIterator>
 #include "SimScriptSimulator.h"
 #include "Simulator.h"
-#include <QJSValueIterator>
+#include "SimScriptLogicModule.h"
 
 namespace Sim
 {

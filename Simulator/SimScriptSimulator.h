@@ -1,10 +1,8 @@
 #pragma once
 #include <QQmlEngine>
-#include "../CommonLib/Types.h"
 #include "../AppSignalLib/AppSignalParam.h"
 #include "SimScriptSignal.h"
 #include "SimScriptDevUtils.h"
-#include "SimScriptLogicModule.h"
 #include "SimScriptLmDescription.h"
 #include "SimScriptConnection.h"
 

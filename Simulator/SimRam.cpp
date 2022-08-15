@@ -1,8 +1,7 @@
 #include "SimRam.h"
 #include <cstring>
 #include <QtEndian>
-#include <SimOverrideSignals.h>
-#include <SimException.h>
+#include "SimOverrideSignals.h"
 
 
 namespace Sim

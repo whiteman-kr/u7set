@@ -3,7 +3,6 @@
 #include <functional>
 #include "QtCore"
 #include "SimDeviceEmulator.h"
-#include "SimException.h"
 
 class SimCommandTest_LM5_LM6;
 

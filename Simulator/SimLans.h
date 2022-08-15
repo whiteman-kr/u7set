@@ -1,9 +1,11 @@
 #pragma once
-
+#include <queue>
 #include "../CommonLib/Times.h"
 #include "../lib/LogicModulesInfo.h"
 #include "SimScopedLog.h"
-#include "SimTuningLanInterface.h"
+#include "SimRam.h"
+#include "SimTuningRecord.h"
+#include "SimLanInterface.h"
 
 namespace Sim
 {

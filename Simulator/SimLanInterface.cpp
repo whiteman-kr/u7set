@@ -1,5 +1,5 @@
 #include "SimLanInterface.h"
-#include "Simulator.h"
+#include "SimLans.h"
 #include "SimTuningLanInterface.h"
 #include "SimAppDataLanInterface.h"
 #include "SimDiagDataLanInterface.h"

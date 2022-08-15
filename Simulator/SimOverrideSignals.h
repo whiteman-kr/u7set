@@ -1,9 +1,9 @@
 #pragma once
 
 #include <optional>
+#include <array>
 #include <QObject>
 #include <QReadWriteLock>
-#include <array>
 #include "../CommonLib/Types.h"
 #include "../AppSignalLib/AppSignal.h"
 #include "SimScopedLog.h"
