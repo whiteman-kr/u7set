@@ -557,6 +557,66 @@ void LanControllersInfo::append(const LanControllerInfo& info)
 	m_lans.push_back(info);
 }
 
+void LanControllersInfo::filterLansByAppDataServiceID(const QString& appDataServiceID)
+{
+	auto it = m_lans.begin();
+
+	while(it != m_lans.end())
+	{
+		Q_ASSERT(it->isProvideAppData() == true);
+
+		if (it->appDataServiceID != appDataServiceID)
+		{
+			m_lans.erase(it);
+			it = m_lans.begin();
+		}
+		else
+		{
+			it++;
+		}
+	}
+}
+
+void LanControllersInfo::filterLansByDiagDataServiceID(const QString& diagDataServiceID)
+{
+	auto it = m_lans.begin();
+
+	while(it != m_lans.end())
+	{
+		Q_ASSERT(it->isProvideDiagData() == true);
+
+		if (it->diagDataServiceID != diagDataServiceID)
+		{
+			m_lans.erase(it);
+			it = m_lans.begin();
+		}
+		else
+		{
+			it++;
+		}
+	}
+}
+
+void LanControllersInfo::filterLansByTuningServiceID(const QString& tuningServiceID)
+{
+	auto it = m_lans.begin();
+
+	while(it != m_lans.end())
+	{
+		Q_ASSERT(it->isProvideTuning() == true);
+
+		if (it->tuningServiceID != tuningServiceID)
+		{
+			m_lans.erase(it);
+			it = m_lans.begin();
+		}
+		else
+		{
+			it++;
+		}
+	}
+}
+
 const std::vector<LanControllerInfo>& LanControllersInfo::operator ()() const
 {
 	return m_lans;

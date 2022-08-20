@@ -108,6 +108,10 @@ public:
 	void clear();
 	void append(const LanControllerInfo& info);
 
+	void filterLansByAppDataServiceID(const QString& appDataServiceID);
+	void filterLansByDiagDataServiceID(const QString& diagDataServiceID);
+	void filterLansByTuningServiceID(const QString& tuningServiceID);
+
 	const std::vector<LanControllerInfo>& operator()() const;
 
 	const LanControllerInfo& operator[](int index) const;

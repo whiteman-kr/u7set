@@ -515,7 +515,7 @@ namespace Tuning
 		return result;
 	}
 
-	bool TuningServiceWorker::readTuningDataSources(const QByteArray& fileData, const QString& profile, TuningSources* newSources)
+	bool TuningServiceWorker::readTuningSources(const QByteArray& fileData, const QString& profile, TuningSources* newSources)
 	{
 		TEST_PTR_RETURN_FALSE(newSources);
 
@@ -830,7 +830,7 @@ namespace Tuning
 
 			if (bfi.ID == CfgFileId::TUNING_SOURCES)
 			{
-				result &= readTuningDataSources(fileData, sessionParams.currentSettingsProfile, &newSources);
+				result &= readTuningSources(fileData, sessionParams.currentSettingsProfile, &newSources);
 			}
 
 			if (result == true)

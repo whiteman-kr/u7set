@@ -64,62 +64,73 @@ namespace Builder
 
 		QVector<DataSource> dataSources;
 
-		std::shared_ptr<const AppDataServiceSettings> settings = m_settingsSet.getSettingsDefaultProfile<AppDataServiceSettings>();
+		QStringList profiles = m_settingsSet.getSettingsProfiles();
 
-		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
-
-		quint32 receivingNetmask = settings->appDataReceivingNetmask.toIPv4Address();
-
-		quint32 receivingSubnet = settings->appDataReceivingIP.address32() & receivingNetmask;
-
-		for(Hardware::DeviceModule* lm : m_context->m_lmModules)
+		for(const QString& profile : profiles)
 		{
-			if (lm == nullptr)
+			std::shared_ptr<const AppDataServiceSettings> settings =
+					m_settingsSet.getSettingsProfile<AppDataServiceSettings>(profile);
+
+			TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
+
+			quint32 receivingNetmask = settings->appDataReceivingNetmask.toIPv4Address();
+
+			quint32 receivingSubnet = settings->appDataReceivingIP.address32() & receivingNetmask;
+
+			for(Hardware::DeviceModule* lm : m_context->m_lmModules)
 			{
-				LOG_INTERNAL_ERROR(m_log);
-				result = false;
-				continue;
-			}
-
-			DataSource ds;
-
-			result &= SoftwareSettingsGetter::getLmPropertiesFromDevice(lm, E::LanControllerType::AppData,
-																		m_context, &ds);
-			int connectedAdaptersCount = 0;
-
-			for(const LanControllerInfo& lan : ds.lanControllersInfo()())
-			{
-				if (lan.appDataEnable == false || lan.appDataServiceID != m_software->equipmentIdTemplate())
+				if (lm == nullptr)
 				{
-					continue;
-				}
-
-				if (connectedAdaptersCount > 0)
-				{
-					// Several ethernet adapters of LM %1 are connected to same AppDataService %2.
-					//
-					m_log->errCFG3030(lm->equipmentIdTemplate(), m_software->equipmentIdTemplate());
+					LOG_INTERNAL_ERROR(m_log);
 					result = false;
 					continue;
 				}
 
-				if ((QHostAddress(lan.appDataIP).toIPv4Address() & receivingNetmask) != receivingSubnet)
+				DataSource ds;
+
+				ds.setProfile(profile);
+
+				result &= SoftwareSettingsGetter::getLmPropertiesFromDevice(lm, E::LanControllerType::AppData,
+																			m_context, &ds);
+
+				ds.lanControllersInfo().filterLansByAppDataServiceID(m_software->equipmentIdTemplate());
+
+				int connectedAdaptersCount = 0;
+
+				for(const LanControllerInfo& lan : ds.lanControllersInfo()())
 				{
-					// Different subnet address in data source IP %1 (%2) and data receiving IP %3 (%4).
-					//
-					m_log->errCFG3043(lan.appDataIP,
-									  lan.equipmentID,
-									  settings->appDataReceivingIP.addressStr(),
-									  equipmentID());
-					result = false;
-					continue;
+					if (lan.appDataEnable == false || lan.appDataServiceID != m_software->equipmentIdTemplate())
+					{
+						continue;
+					}
+
+					if (connectedAdaptersCount > 0)
+					{
+						// Several ethernet adapters of LM %1 are connected to same AppDataService %2.
+						//
+						m_log->errCFG3030(lm->equipmentIdTemplate(), m_software->equipmentIdTemplate());
+						result = false;
+						continue;
+					}
+
+					if ((QHostAddress(lan.appDataIP).toIPv4Address() & receivingNetmask) != receivingSubnet)
+					{
+						// Different subnet address in data source IP %1 (%2) and data receiving IP %3 (%4).
+						//
+						m_log->errCFG3043(lan.appDataIP,
+										  lan.equipmentID,
+										  settings->appDataReceivingIP.addressStr(),
+										  equipmentID());
+						result = false;
+						continue;
+					}
+
+					connectedAdaptersCount++;
+
+					result &= findAppDataSourceAssociatedSignals(ds);	// inside fills m_associatedAppSignals also
+
+					dataSources.append(ds);
 				}
-
-				connectedAdaptersCount++;
-
-				result &= findAppDataSourceAssociatedSignals(ds);	// inside fills m_associatedAppSignals also
-
-				dataSources.append(ds);
 			}
 		}
 

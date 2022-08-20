@@ -85,7 +85,7 @@ namespace Tuning
 
 		bool readConfiguration(const QByteArray& cfgXmlData);
 		bool loadConfigurationFromFile(const QString& fileName);
-		bool readTuningDataSources(const QByteArray& fileData, const QString& profile, TuningSources* newSources);
+		bool readTuningSources(const QByteArray& fileData, const QString& profile, TuningSources* newSources);
 
 		void runTcpTuningServerThread();
 		void stopTcpTuningServerThread();

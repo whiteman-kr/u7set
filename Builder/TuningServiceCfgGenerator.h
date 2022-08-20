@@ -20,7 +20,7 @@ namespace Builder
 		virtual bool generateConfigurationStep1() override;
 
 	private:
-		bool writeTuningSources();
+		bool writeTuningSourcesXml();
 
 		bool writeRunScriptFile(const QString& profile, const TuningServiceSettings& settings, E::OS os);
 

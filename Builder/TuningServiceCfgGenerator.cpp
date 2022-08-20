@@ -47,7 +47,7 @@ namespace Builder
 
 		do
 		{
-			if (writeTuningSources() == false) break;
+			if (writeTuningSourcesXml() == false) break;
 
 			result = true;
 		}
@@ -56,7 +56,7 @@ namespace Builder
 		return result;
 	}
 
-	bool TuningServiceCfgGenerator::writeTuningSources()
+	bool TuningServiceCfgGenerator::writeTuningSourcesXml()
 	{
 		QStringList profiles = m_settingsSet.getSettingsProfiles();
 
@@ -113,7 +113,15 @@ namespace Builder
 					result &= SoftwareSettingsGetter::getLmPropertiesFromDevice(lm,
 															E::LanControllerType::Tuning,
 															m_context, &ts);
+
 					if (result == false)
+					{
+						continue;
+					}
+
+					ts.lanControllersInfo().filterLansByTuningServiceID(m_software->equipmentIdTemplate());
+
+					if (ts.lanControllersInfo()().size() == 0)
 					{
 						continue;
 					}

@@ -377,7 +377,7 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 
 		if (bfi.ID == CfgFileId::APP_DATA_SOURCES)
 		{
-			result &= readDataSources(fileData);			// fill m_appDataSources
+			result &= readAppDataSources(fileData, sessionParams.currentSettingsProfile);			// fill m_appDataSources
 		}
 
 		if (bfi.ID == CfgFileId::APP_SIGNAL_SET)
@@ -406,7 +406,7 @@ void AppDataServiceWorker::onTimer()
 {
 }
 
-bool AppDataServiceWorker::readDataSources(const QByteArray& fileData)
+bool AppDataServiceWorker::readAppDataSources(const QByteArray& fileData, const QString& profile)
 {
 	m_appDataSources.clear();
 	m_appDataSourcesIP.clear();
@@ -421,9 +421,14 @@ bool AppDataServiceWorker::readDataSources(const QByteArray& fileData)
 		return false;
 	}
 
-	for(int i = 0; i < dataSources.count(); i++)
+	for(const DataSource& dataSource : dataSources)
 	{
-		AppDataSourceShared appDataSource = std::make_shared<AppDataSource>(dataSources[i]);
+		if (dataSource.profile() != profile)
+		{
+			continue;
+		}
+
+		AppDataSourceShared appDataSource = std::make_shared<AppDataSource>(dataSource);
 
 		bool appDataProvided = false;
 		bool appDataEnabled = false;

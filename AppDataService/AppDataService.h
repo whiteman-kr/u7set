@@ -67,7 +67,7 @@ private:
 							  SessionParams sessionParams,
 							  std::shared_ptr<const SoftwareSettings> currentSettingsProfile);
 
-	bool readDataSources(const QByteArray& fileData);
+	bool readAppDataSources(const QByteArray& fileData, const QString& profile);
 	bool readAppSignals(const QByteArray& fileData);
 
 	void buildAppSignalID2IndexMap(bool signalsLoadResult);
