@@ -1341,26 +1341,27 @@ bool SignalsTabPage::editSignals(QVector<int> ids)
 		return false;
 	}
 
+	bool hasEditedSignals = false;
+
 	if (dlg.exec() == QDialog::Accepted)
 	{
-		QVector<ObjectState> states;
+		QVector<AppSignal*> signalsToSave;
+
 		for (int i = 0; i < ids.count(); i++)
 		{
-			if (!dlg.isEditedSignal(ids[i]))
+			if (dlg.isEditedSignal(ids[i]) == true)
 			{
-				delete signalVector[i];
-				signalVector.remove(i);
+				signalsToSave.append(signalVector[i]);
 			}
 		}
 
-		m_signalSetProvider->saveSignals(signalVector);
-		for (int i = 0; i < signalVector.count(); i++)
+		if (signalsToSave.isEmpty() == false)
 		{
-			delete signalVector[i];
-		}
+			hasEditedSignals = true;
 
-		m_signalSetProvider->loadSignalSet(ids);
-		return true;
+			m_signalSetProvider->saveSignals(signalsToSave);
+			m_signalSetProvider->loadSignalSet(ids);
+		}
 	}
 
 	for (int i = 0; i < signalVector.count(); i++)
@@ -1368,11 +1369,7 @@ bool SignalsTabPage::editSignals(QVector<int> ids)
 		delete signalVector[i];
 	}
 
-	if (dlg.hasEditedSignals())
-	{
-		m_signalSetProvider->loadSignalSet(ids);	//Signal could be checked out but not changed
-	}
-	return false;
+	return hasEditedSignals;
 }
 
 void SignalsTabPage::cloneSignal()

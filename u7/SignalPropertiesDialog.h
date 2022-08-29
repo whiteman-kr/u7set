@@ -32,7 +32,7 @@ public:
 	explicit SignalPropertiesDialog(DbController* dbController, QVector<AppSignal*> signalVector, bool readOnly, bool tryCheckout, QWidget *parent = 0);
 
 	bool isEditedSignal(int id) const { return m_editedSignalsId.contains(id); }
-	bool hasEditedSignals() const { return m_editedSignalsId.isEmpty() == false; }
+	bool hasEditedSignals() const { return m_editedSignalsId.empty() == false; }
 
 	bool isValid() const { return m_isValid; }
 
@@ -61,7 +61,7 @@ private:
 private:
 	DbController* m_dbController;
 	QVector<AppSignal*> m_signalVector;
-	QVector<int> m_editedSignalsId;
+	std::set<int> m_editedSignalsId;
 	QDialogButtonBox* m_buttonBox;
 	QList<std::shared_ptr<PropertyObject>> m_objList;
 	bool m_tryCheckout;

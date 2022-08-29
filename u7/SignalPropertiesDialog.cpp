@@ -317,10 +317,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 				if (readOnly == false)
 				{
 					appSignal.setAppSignalID(upperAppSignalId);
-					if (m_editedSignalsId.contains(appSignal.ID()) == false)
-					{
-						m_editedSignalsId.push_back(appSignal.ID());
-					}
+					m_editedSignalsId.insert(appSignal.ID());
 				}
 			}
 		}
@@ -557,15 +554,15 @@ void SignalPropertiesDialog::checkoutSignals(QList<std::shared_ptr<PropertyObjec
 		AppSignalProperties* signalProperites = dynamic_cast<AppSignalProperties*>(object.get());
 		AppSignal& signal = signalProperites->signal();
 		int id = signal.ID();
-		if (signal.checkedOut() || m_editedSignalsId.contains(id))
+
+		if (signal.checkedOut())
 		{
-			if (!m_editedSignalsId.contains(id))
-			{
-				m_editedSignalsId.append(id);
-			}
+			m_editedSignalsId.insert(id);
 			continue;
 		}
+
 		QString message;
+
 		if (checkoutSignal(signal, message) == false)
 		{
 			if (message.isEmpty() == false)
@@ -576,10 +573,8 @@ void SignalPropertiesDialog::checkoutSignals(QList<std::shared_ptr<PropertyObjec
 			m_buttonBox->setStandardButtons(QDialogButtonBox::Cancel);
 			return;
 		}
-		if (!m_editedSignalsId.contains(id))
-		{
-			m_editedSignalsId.append(id);
-		}
+
+		m_editedSignalsId.insert(id);
 	}
 }
 
