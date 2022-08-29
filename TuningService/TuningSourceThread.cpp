@@ -1324,14 +1324,14 @@ namespace Tuning
 
 		finalizeWriting(errCode);
 
-		DEBUG_LOG_ERR(m_logger, msg);
-
 		if (hasErrors == true)
 		{
-//			DEBUG_LOG_ERR(m_logger, msg);
+			DEBUG_LOG_ERR(m_logger, msg);
 		}
 		else
 		{
+			DEBUG_LOG_MSG(m_logger, msg);
+
 			m_state.hasUnappliedParams = true;
 		}
 
