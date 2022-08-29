@@ -4023,6 +4023,8 @@ namespace ExtWidgets
 					}
 					else
 					{
+                        // Comparing AfbParamValue type
+                        //
 						if (value.userType() == qMetaTypeId<Afb::AfbParamValue>() &&
 							_p->value().userType() == qMetaTypeId<Afb::AfbParamValue>())
 						{
@@ -4036,10 +4038,28 @@ namespace ExtWidgets
 						}
 						else
 						{
-							if (value != _p->value())
-							{
-								sameValue = false;
-							}
+                            // Check value type before comparint TuningValues
+                            //
+                            if (value.userType() == qMetaTypeId<TuningValue>() &&
+                                _p->value().userType() == qMetaTypeId<TuningValue>())
+                            {
+                                TuningValue v1 = value.value<TuningValue>();
+                                TuningValue v2 = _p->value().value<TuningValue>();
+
+                                if (v1.type() != v2.type() || v1 != v2)
+                                {
+                                    sameValue = false;
+                                }
+                            }
+                            else
+                            {
+                                // Comparing common value type
+                                //
+                                if (value != _p->value())
+                                {
+                                    sameValue = false;
+                                }
+                            }
 						}
 					}
 				}
