@@ -38,6 +38,7 @@ namespace Log
 	// LogFileRecord
 	//
 	const std::array<QString, 6> messageTypeTextShort{"ERR", "WRN", "MSG", "ALERT", "TXT", "DATA"};
+    const std::array<char, 6> messageTypeFirstLetter{'E', 'W', 'M', 'A', 'T', 'D'};
 
 	const QString messageTimeFormat("dd.MM.yyyy hh:mm:ss.zzz");
 
@@ -64,7 +65,7 @@ namespace Log
 				.arg(QString::fromLocal8Bit(text.c_str()));
 	}
 
-	bool LogFileRecord::loadFromString(const char* buf, const qint64 bufSize, const quint64 currentSessionHash, int* errorCount, int* warningCount)
+    bool LogFileRecord::loadFromString(const char* buf, const qint64 bufSize, const quint64 currentSessionHash)
 	{
 		const int MAX_STR_LEN = 1024;
 
@@ -118,15 +119,72 @@ namespace Log
 			return false;
 		}
 
-		qint64 strLen = ptrEnd - ptr;
-		if (strLen > MAX_STR_LEN)
-		{
-			Q_ASSERT(false);
-			return false;
-		}
-		str.assign(ptr, strLen);
+        // Custom time parsing from messageTimeFormat("dd.MM.yyyy hh:mm:ss.zzz"), because
+        // time = QDateTime::fromString(str.c_str(), messageTimeFormat).toMSecsSinceEpoch() is very slow
+        //
+        do{
+            time = 0;
 
-		time = QDateTime::fromString(str.c_str(), messageTimeFormat).toMSecsSinceEpoch();
+            const char* timePtr = ptr;
+
+            int dd = atoi(timePtr);
+
+            if (*(timePtr + 2) != '.')
+            {
+                break;
+            }
+            timePtr += 3;
+
+            int MM = atoi(timePtr);
+
+            if (*(timePtr + 2) != '.')
+            {
+                break;
+            }
+            timePtr += 3;
+
+            int yyyy = atoi(timePtr);
+
+            if (*(timePtr + 4) != ' ')
+            {
+                break;
+            }
+            timePtr += 5;
+
+            int hh = atoi(timePtr);
+
+            if (*(timePtr + 2) != ':')
+            {
+                break;
+            }
+            timePtr += 3;
+
+            int mm = atoi(timePtr);
+
+            if (*(timePtr + 2) != ':')
+            {
+                break;
+            }
+            timePtr += 3;
+
+            int ss = atoi(timePtr);
+
+            if (*(timePtr + 2) != '.')
+            {
+                break;
+            }
+            timePtr += 3;
+
+            int zzz = atoi(timePtr);
+
+            if (*(timePtr + 3) != '\t')
+            {
+                break;
+            }
+            //timePtr += 4;
+
+            time = QDateTime(QDate(yyyy, MM, dd), QTime(hh, mm, ss, zzz)).toMSecsSinceEpoch();
+        }while(false);
 
 		ptr = ptrEnd;
 		ptr++;
@@ -173,7 +231,7 @@ namespace Log
 				return false;
 			}
 
-			strLen = ptrEnd - ptr;
+            qint64 strLen = ptrEnd - ptr;
 			if (strLen > MAX_STR_LEN)
 			{
 				Q_ASSERT(false);
@@ -184,7 +242,7 @@ namespace Log
 			return true;
 		}
 
-		strLen = ptrEnd - ptr;
+        qint64 strLen = ptrEnd - ptr;
 		if (strLen > MAX_STR_LEN)
 		{
 			Q_ASSERT(false);
@@ -192,33 +250,31 @@ namespace Log
 		}
 		str.assign(ptr, strLen);
 
-		if (strncmp(str.c_str(), "ERR", str.length()) == 0)
+        if (*str.c_str() == messageTypeFirstLetter[Error])
 		{
 			type = MessageType::Error;
-			(*errorCount)++;
 		}
 		else
 		{
-			if (strncmp(str.c_str(), "WRN", str.length()) == 0)
-			{
+            if (*str.c_str() == messageTypeFirstLetter[Warning])
+            {
 				type = MessageType::Warning;
-				(*warningCount)++;
 			}
 			else
 			{
-				if (strncmp(str.c_str(), "MSG", str.length()) == 0)
-				{
+                if (*str.c_str() == messageTypeFirstLetter[Message])
+                {
 					type = MessageType::Message;
 				}
 				else
 				{
-					if (strncmp(str.c_str(), "ALERT", str.length()) == 0)
+                    if (*str.c_str() == messageTypeFirstLetter[Alert])
 					{
 						type = MessageType::Alert;
 					}
 					else
 					{
-						if (strncmp(str.c_str(), "DATA", str.length()) == 0)
+                        if (*str.c_str() == messageTypeFirstLetter[Data])
 						{
 							type = MessageType::Data;
 						}
@@ -281,7 +337,7 @@ namespace Log
 	LogFileWorker::~LogFileWorker()
 	{
 		qDebug() << "LogFileWorker::~LogFileWorker, ThreadId " << QThread::currentThreadId();
-	}
+    }
 
 	bool LogFileWorker::write(MessageType type, const QString& text)
 	{
@@ -306,7 +362,7 @@ namespace Log
 	{
 		LogFileRecord r;
 
-		r.time = QDateTime::currentDateTime().toMSecsSinceEpoch();
+        r.time = QDateTime::currentDateTime().toMSecsSinceEpoch();
 		r.type = MessageType::Data;
 		r.sessionHash = m_sessionHash;
 		r.text = textArray.join('\t').toLocal8Bit().toStdString();
@@ -321,25 +377,30 @@ namespace Log
 		return true;
 	}
 
-	void LogFileWorker::read(bool currentSessionOnly)
+    void LogFileWorker::load(bool currentSessionOnly)
 	{
-		emit readStart(currentSessionOnly);
+        emit loadStart(currentSessionOnly);
 	}
 
-	void LogFileWorker::readFromFile(const QString& fileName)
+    void LogFileWorker::loadFromFile(const QString& fileName)
 	{
-		emit readLogFromFile(fileName);
+        emit loadLogFromFile(fileName);
 	}
 
-	void LogFileWorker::cancelReadFromFile()
+    void LogFileWorker::cancelLoad()
 	{
-		m_cancelReadFromFile = true;
+        m_cancelLoad = true;
 	}
 
-	void LogFileWorker::getLoadedData(std::vector<LogFileRecord>* result)
+    void LogFileWorker::getLoadedChunks(std::vector<std::shared_ptr<LogFileChunk>>* result)
 	{
-		QMutexLocker l(&m_readLogMutex);
-		result->swap(m_readResult);
+        QMutexLocker l(&m_loadLogMutex);
+
+        while (m_loadedChunks.empty() == false)
+        {
+            result->push_back(m_loadedChunks.front());
+            m_loadedChunks.pop();
+        }
 	}
 
 	QString LogFileWorker::logName() const
@@ -366,6 +427,11 @@ namespace Log
 	{
 		return m_sessionHashString;
 	}
+
+    bool LogFileWorker::loadInProgress() const
+    {
+        return m_loadInProgress;
+    }
 
 	void LogFileWorker::onThreadStarted()
 	{
@@ -423,8 +489,8 @@ namespace Log
 
 		// Connect load event to load slot
 
-		connect(this, &LogFileWorker::readStart, this, &LogFileWorker::slot_load);
-		connect(this, &LogFileWorker::readLogFromFile, this, &LogFileWorker::slot_loadFromFile);
+        connect(this, &LogFileWorker::loadStart, this, &LogFileWorker::slot_load);
+        connect(this, &LogFileWorker::loadLogFromFile, this, &LogFileWorker::slot_loadFromFile);
 
 		// Create shared memory to lock file writing
 		//
@@ -713,7 +779,7 @@ namespace Log
 
 
 		m_queueMutex.lock();
-		std::vector<LogFileRecord> queueCopy{std::move(m_queue)};
+        std::vector<LogFileRecord> queueCopy{std::move(m_queue)};
 		m_queue = {};
 		m_queue.reserve(64);
 		m_queueMutex.unlock();
@@ -879,16 +945,8 @@ namespace Log
 		return true;
 	}
 
-	bool LogFileWorker::readFileRecords(const QString& fileName, bool currentSessionOnly, std::vector<LogFileRecord>* result, int* errorCount, int* warningCount)
+    bool LogFileWorker::readFileRecords(const QString& fileName, bool currentSessionOnly)
 	{
-		if (result == nullptr || errorCount == nullptr || warningCount == nullptr)
-		{
-			assert(result);
-			assert(errorCount);
-			assert(warningCount);
-			return false;
-		}
-
 		QFile f(fileName);
 
 		if (f.exists() == false)
@@ -928,7 +986,12 @@ namespace Log
 
 		const quint64 sessionHash = currentSessionOnly == true ? m_sessionHash : 0;
 
-		while (ptr != nullptr && ptr != endPtr)
+        const int maxReadResultSize = 1000;
+
+        std::vector<LogFileRecord> readResult;
+        readResult.reserve(maxReadResultSize);
+
+        while (ptr != nullptr && ptr != endPtr)
 		{
 			const char* str = ptr;
 
@@ -938,20 +1001,53 @@ namespace Log
 			{
 				qint64 len = ptr - str + 1;	// Length of the string INCLUDING '\n'
 
-				if (record.loadFromString(str, len, sessionHash, errorCount, warningCount) == true)
+                if (record.loadFromString(str, len, sessionHash) == true)
 				{
-					result->push_back(record);
+                    readResult.push_back(record);
+
+                    // Emit a signal that chunk is ready when its size exceeds maxReadResultSize records
+                    //
+                    if (readResult.size() >= maxReadResultSize)
+                    {
+                        std::shared_ptr<LogFileChunk> chunk = std::make_shared<LogFileChunk>();
+                        *chunk = std::move(readResult);
+                        readResult = {};
+
+                        {
+                            QMutexLocker l(&m_loadLogMutex);
+                            m_loadedChunks.push(chunk);
+                        }
+
+                        emit loadChunkComplete();
+                    }
 				}
 
 				numLines++;
 				ptr++;
 			}
 
-			if (m_cancelReadFromFile == true)
+            if (m_cancelLoad == true)
 			{
 				break;
 			}
 		}
+
+        // Emit a signal that last chunk is ready
+        //
+        if (readResult.empty() == false)
+        {
+            std::shared_ptr<LogFileChunk> chunk = std::make_shared<LogFileChunk>();
+            *chunk = std::move(readResult);
+            readResult = {};
+
+            {
+                QMutexLocker l(&m_loadLogMutex);
+                m_loadedChunks.push(chunk);
+            }
+
+            emit loadChunkComplete();
+        }
+
 
 		return true;
 	}
@@ -973,7 +1069,7 @@ namespace Log
 			{
 				Q_ASSERT(lok);
 
-				emit readComplete();
+                emit loadComplete();
 				return;
 			}
 
@@ -988,7 +1084,7 @@ namespace Log
 
 		if (lockSuccess == false)
 		{
-			emit readComplete();
+            emit loadComplete();
 			return;
 		}
 
@@ -998,33 +1094,24 @@ namespace Log
 
 		// Read the log
 		//
-		std::vector<LogFileRecord> readResult;
-		readResult.reserve(64000);
-		int errorCount = 0;
-		int warningCount = 0;
+        m_loadInProgress = true;
 
-		m_cancelReadFromFile = false;
+        m_cancelLoad = false;
 
-		for (int i = 0; i < m_maxFilesCount; i++)
+        for (int i = 0; i < m_maxFilesCount; i++)  // Read from older to newer file!
 		{
-			emit readInProgress(getLogFileName(i), static_cast<int>(readResult.size()));
-			readFileRecords(getLogFileName(i), currentSessionOnly, &readResult, &errorCount, &warningCount);
+            readFileRecords(getLogFileName(i), currentSessionOnly);
 
-			if (m_cancelReadFromFile == true)
+            if (m_cancelLoad == true)
 			{
 				break;
 			}
 		}
 
-		{
-			QMutexLocker l(&m_readLogMutex);
-			m_readResult = std::move(readResult);
-			m_errorCount = errorCount;
-			m_warningCount = warningCount;
-		}
+        m_loadInProgress = false;
 
-		emit readComplete();
-	}
+        emit loadComplete();
+    }
 
 	void LogFileWorker::slot_loadFromFile(QString fileName)
 	{
@@ -1042,7 +1129,7 @@ namespace Log
 			{
 				Q_ASSERT(lok);
 
-				emit readFromFileComplete(fileName);
+                emit loadComplete();
 				return;
 			}
 
@@ -1057,7 +1144,7 @@ namespace Log
 
 		if (lockSuccess == false)
 		{
-			emit readFromFileComplete(fileName);
+            emit loadComplete();
 			return;
 		}
 
@@ -1067,24 +1154,16 @@ namespace Log
 
 		// Read the log
 		//
-		std::vector<LogFileRecord> readResult;
-		readResult.reserve(64000);
-		int errorCount = 0;
-		int warningCount = 0;
 
-		m_cancelReadFromFile = false;
+        m_loadInProgress = true;
 
-		emit readInProgress(fileName, static_cast<int>(readResult.size()));
-		readFileRecords(fileName, false/*currentSessionOnly*/, &readResult, &errorCount, &warningCount);
+        m_cancelLoad = false;
 
-		{
-			QMutexLocker l(&m_readLogMutex);
-			m_readResult = std::move(readResult);
-			m_errorCount = errorCount;
-			m_warningCount = warningCount;
-		}
+        readFileRecords(fileName, false/*currentSessionOnly*/);
 
-		emit readFromFileComplete(fileName);
+        m_loadInProgress = false;
+
+        emit loadComplete();
 	}
 
 	void LogFileWorker::slot_onTimer()
@@ -1096,6 +1175,129 @@ namespace Log
 			emit writeFailure(errorString);
 		}
 	}
+
+    //
+    // LogRecordProxyModel
+    //
+    LogRecordProxyModel::LogRecordProxyModel(LogRecordModel* sourceModel):
+        m_sourceModel(sourceModel)
+    {
+        connect(this, &QSortFilterProxyModel::modelAboutToBeReset, [this](){
+            m_errorCount = 0;
+            m_warningCount = 0;
+        });
+
+    }
+
+    int LogRecordProxyModel::recordCount() const
+    {
+        return rowCount();
+    }
+
+    int LogRecordProxyModel::sourceRow(int row) const
+    {
+        return mapToSource(index(row, 0)).row();
+    }
+
+    int LogRecordProxyModel::errorCount() const
+    {
+        return m_errorCount;
+    }
+
+    int LogRecordProxyModel::warningCount() const
+    {
+        return m_warningCount;
+    }
+
+
+    int LogRecordProxyModel::filterRecordTypeMask() const
+    {
+        return m_filterRecordTypeMask;
+    }
+
+    void LogRecordProxyModel::setFilterRecordTypeMask(int value)
+    {
+        beginResetModel();
+
+        m_filterRecordTypeMask = value;
+
+        endResetModel();
+    }
+
+    QString LogRecordProxyModel::filterText() const
+    {
+        return QString::fromLocal8Bit(m_filterText.c_str());
+    }
+
+    void LogRecordProxyModel::setFilterText(const QString& value)
+    {
+        beginResetModel();
+
+        m_filterText = value.toLocal8Bit().toStdString();
+
+        endResetModel();
+    }
+
+    qint64 LogRecordProxyModel::filterTimeFrom() const
+    {
+        return m_filterTimeFrom;
+    }
+
+    qint64 LogRecordProxyModel::filterTimeTo() const
+    {
+        return m_filterTimeTo;
+    }
+
+    void LogRecordProxyModel::setFilterTime(qint64 from, quint64 to)
+    {
+        beginResetModel();
+
+        m_filterTimeFrom = from;
+        m_filterTimeTo = to;
+
+        endResetModel();
+    }
+
+    bool LogRecordProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex& /*sourceParent*/) const
+    {
+        const LogFileRecord& record = m_sourceModel->record(sourceRow);
+
+        if (m_filterRecordTypeMask != MessageType::All)
+        {
+            if ((m_filterRecordTypeMask & (1 << record.type)) == 0)
+            {
+                return false;
+            }
+        }
+
+        if (m_filterTimeFrom != -1 && m_filterTimeTo != -1)
+        {
+            if (record.time < m_filterTimeFrom || record.time > m_filterTimeTo)
+            {
+                return false;
+            }
+        }
+
+        if (m_filterText.empty() == false)
+        {
+            if (record.text.find(m_filterText) == std::string::npos)
+            {
+                return false;
+            }
+        }
+
+        if (record.type == MessageType::Error)
+        {
+            m_errorCount++;
+        }
+
+        if (record.type == MessageType::Warning)
+        {
+            m_warningCount++;
+        }
+
+        return true;
+    }
 
 
 	//
@@ -1133,290 +1335,94 @@ namespace Log
 
 	LogRecordModel::~LogRecordModel()
 	{
-	}
+    }
 
-	void LogRecordModel::setRecords(std::vector<LogFileRecord>* records)
-	{
-		m_records = std::move(*records);
-
-		fillRecords();
-	}
-
-	void LogRecordModel::addRecord(const LogFileRecord& record)
-	{
-		m_records.push_back(record);
-
-		if (processRecordFilter(record) == true)
-		{
-			int index = static_cast<int>(m_filteredRecordsIndex.size());
-
-			beginInsertRows(QModelIndex(), index, index);
-
-			m_filteredRecordsIndex.push_back(static_cast<int>(m_records.size() - 1));
-
-			if (record.type == MessageType::Error)
-			{
-				m_errorCount++;
-			}
-			else
-			{
-				if (record.type == MessageType::Warning)
-				{
-					m_warningCount++;
-				}
-			}
-
-			insertRows(index, 1);
-
-			endInsertRows();
-		}
-	}
-
-	int LogRecordModel::recordsCount() const
-	{
-		return static_cast<int>(m_records.size());
-
-	}
-
-	int LogRecordModel::filterRecordTypeMask() const
-	{
-		return m_filterRecordTypeMask;
-	}
-
-	void LogRecordModel::setFilterRecordTypeMask(int value)
-	{
-		m_filterRecordTypeMask = value;
-	}
-
-	QString LogRecordModel::filterText() const
-	{
-		return QString::fromLocal8Bit(m_filterText.c_str());
-	}
-
-	void LogRecordModel::setFilterText(const QString& value)
-	{
-		m_filterText = value.toLocal8Bit().toStdString();
-	}
-
-	qint64 LogRecordModel::filterTimeFrom() const
-	{
-		return m_filterTimeFrom;
-	}
-
-	void LogRecordModel::setFilterTimeFrom(qint64 value)
-	{
-		m_filterTimeFrom = value;
-	}
-
-	qint64 LogRecordModel::filterTimeTo() const
-	{
-		return m_filterTimeTo;
-	}
-
-	void LogRecordModel::setFilterTimeTo(qint64 value)
-	{
-		m_filterTimeTo = value;
-	}
-
-	void LogRecordModel::fillRecords()
-	{
-		m_errorCount = 0;
-		m_warningCount = 0;
-
-		// Remove data from the model
-		//
-		if (rowCount() > 0)
-		{
-			beginRemoveRows(QModelIndex(), 0, rowCount() - 1);
-
-			removeRows(0, rowCount());
-			m_filteredRecordsIndex.clear();
-			endRemoveRows();
-		}
-
-		// Process filters
-		//
-		int count = static_cast<int>(m_records.size());
-
-		m_filteredRecordsIndex.reserve(count);
-
-		for (int i = 0; i < count; i++)
-		{
-			const LogFileRecord& rec = m_records[i];
-
-			if (processRecordFilter(rec) == true)
-			{
-				m_filteredRecordsIndex.push_back(i);
-
-				if (rec.type == MessageType::Error)
-				{
-					m_errorCount++;
-				}
-				else
-				{
-					if (rec.type == MessageType::Warning)
-					{
-						m_warningCount++;
-					}
-				}
-			}
-		}
-
-		// Set data to the model
-		//
-		if (m_filteredRecordsIndex.empty() == false)
-		{
-			int filterRecordsCount = static_cast<int>(m_filteredRecordsIndex.size());
-
-			beginInsertRows(QModelIndex(), 0, filterRecordsCount - 1);
-
-			insertRows(0, static_cast<int>(filterRecordsCount));
-
-			endInsertRows();
-		}
-	}
-
-	void LogRecordModel::getFilteredRecords(std::vector<LogFileRecord>* result) const
-	{
-		if (result == nullptr)
-		{
-			Q_ASSERT(result);
-			return;
-		}
-
-		std::vector<LogFileRecord> res;
-
-		int count = static_cast<int>(m_filteredRecordsIndex.size());
-		res.reserve(count);
-
-		for (int i = 0; i < count; i++)
-		{
-			res.push_back(m_records[m_filteredRecordsIndex[i]]);
-		}
-
-		*result = std::move(res);
-		return;
-	}
-
-	bool LogRecordModel::processRecordFilter(const LogFileRecord& record) const
-	{
-		if (m_filterRecordTypeMask != MessageType::All)
-		{
-			if ((m_filterRecordTypeMask & (1 << record.type)) == 0)
-			{
-				return false;
-			}
-		}
-
-		if (m_filterText.empty() == false)
-		{
-			if (record.text.find(m_filterText) == std::string::npos)
-			{
-				return false;
-			}
-		}
-
-		if (m_filterTimeFrom != -1 && m_filterTimeTo != -1)
-		{
-			if (record.time < m_filterTimeFrom || record.time > m_filterTimeTo)
-			{
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	int LogRecordModel::errorCount() const
-	{
-		return m_errorCount;
-	}
-
-	int LogRecordModel::warningCount() const
-	{
-		return m_warningCount;
-	}
-
-	int LogRecordModel::searchIssue(int startRow, bool forward) const
-	{
-        if (rowCount() == 0)
+    void LogRecordModel::clear()
+    {
+        // Remove data from the model
+        //
+        if (rowCount() > 0)
         {
-            return -1;
+            beginResetModel();
+
+            m_chunks.clear();
+
+            endResetModel();
+        }
+    }
+
+    void LogRecordModel::appendChunk(const std::shared_ptr<LogFileChunk>& chunk)
+	{
+        // Append data to the model
+        //
+        if (chunk->empty() == false)
+        {
+            int index = rowCount();
+
+            int count = static_cast<int>(chunk->size());
+
+            beginInsertRows(QModelIndex(), index, index + count - 1);
+
+            m_chunks.insert(m_chunks.end(), chunk);
+
+            endInsertRows();
+       }
+	}
+
+    void LogRecordModel::appendRecord(const LogFileRecord& record)
+	{
+        if (m_chunks.empty() == true)
+        {
+            std::shared_ptr<LogFileChunk> chunk = std::make_shared<LogFileChunk>();
+            m_chunks.insert(m_chunks.end(), chunk);
         }
 
-		int row = startRow;
+        // Add record to last chunk
+        //
+        int index = rowCount();
 
-		do
-		{
-			if (forward == true)
-			{
-				row++;
-				if (row >= rowCount())	// Loop to start
-				{
-					row = 0;
-				}
-			}
-			else
-			{
-				row--;
-				if (row < 0)	// Loop to end
-				{
-					row = rowCount() - 1;
-				}
-			}
+        beginInsertRows(QModelIndex(), index, index);
 
-			const LogFileRecord& rec = m_records[m_filteredRecordsIndex[row]];
+        std::shared_ptr<LogFileChunk> ch = m_chunks[m_chunks.size() - 1];
+        ch->push_back(record);
 
-			if (rec.type == MessageType::Warning || rec.type == MessageType::Error)
-			{
-				return row;
-			}
-		}while (row != startRow);
-
-		return -1;
+        endInsertRows();
 	}
 
-	int LogRecordModel::searchRecord(int startRow, const std::string& text) const
-	{
-		if (text.empty() == true)
-		{
-			return -1;
-		}
-
-        if (rowCount() == 0)
+    const LogFileRecord& LogRecordModel::record(int row) const
+    {
+        int processedRows = 0;
+        for (const auto& ch : m_chunks)
         {
-            return -1;
+            if (row >= processedRows && row < processedRows + static_cast<int>(ch->size()))
+            {
+                return (*ch)[row - processedRows];
+            }
+            processedRows += static_cast<int>(ch->size());
         }
 
-		int row = startRow;
+        Q_ASSERT(false);
+        static LogFileRecord emptyRecord;
+        return emptyRecord;
+    }
 
-		do
-		{
-			row++;
-			if (row >= rowCount())	// Loop to start
-			{
-				row = 0;
-			}
+    QBrush LogRecordModel::color(const QModelIndex& index) const
+    {
+        return data(index, Qt::ForegroundRole).value<QBrush>();
+    }
 
-			const LogFileRecord& rec = m_records[m_filteredRecordsIndex[row]];
-
-
-
-			if (rec.text.find(text) != std::string::npos)
-			{
-				return row;
-			}
-		}while (row != startRow);
-
-		return -1;
-	}
-
-
-	int LogRecordModel::rowCount(const QModelIndex& parent) const
+    int LogRecordModel::rowCount(const QModelIndex& parent) const
 	{
 		Q_UNUSED(parent);
-		return static_cast<int>(m_filteredRecordsIndex.size());
-	}
+
+        int result = 0;
+        for (const auto& ch : m_chunks)
+        {
+            result += static_cast<int>(ch->size());
+        }
+
+        return result;
+    }
 
 	int LogRecordModel::columnCount(const QModelIndex& parent) const
 	{
@@ -1438,34 +1444,19 @@ namespace Log
 			assert(false);
 			return {};
 		}
-
-		size_t row = index.row();
-		if (row >= m_filteredRecordsIndex.size())
-		{
-			assert(false);
-			return QVariant();
-		}
-
-		size_t recordIndex = m_filteredRecordsIndex[row];
-		if (recordIndex >= m_records.size())
-		{
-			Q_ASSERT(recordIndex < m_records.size());
-			return {};
-		}
-
-		const LogFileRecord& record = m_records[recordIndex];
+        const LogFileRecord& rec = record(index.row());
 
 		if (role == Qt::DisplayRole)
 		{
 			int displayIndex = static_cast<int>(column);
 			if (displayIndex == m_columnTime)
 			{
-				return QDateTime().fromMSecsSinceEpoch(record.time).toString(messageTimeFormat);
+                return QDateTime().fromMSecsSinceEpoch(rec.time).toString(messageTimeFormat);
 			}
 
 			if (displayIndex == m_columnType)
 			{
-				size_t intType = static_cast<size_t>(record.type);
+                size_t intType = static_cast<size_t>(rec.type);
 				if (intType >= messageTypeTextShort.size())
 				{
 					assert(false);
@@ -1477,7 +1468,7 @@ namespace Log
 
 			if (displayIndex >= m_columnText)
 			{
-				if (record.type == MessageType::Data)
+                if (rec.type == MessageType::Data)
 				{
 					int textColumnNo = displayIndex - m_columnText;
 
@@ -1487,7 +1478,7 @@ namespace Log
 						return QVariant();
 					}
 
-					QStringList textArray = QString::fromLocal8Bit(record.text.c_str()).split('\t');
+                    QStringList textArray = QString::fromLocal8Bit(rec.text.c_str()).split('\t');
 
 					if (textColumnNo < textArray.size())
 					{
@@ -1496,14 +1487,14 @@ namespace Log
 				}
 				else
 				{
-					return QString::fromLocal8Bit(record.text.c_str());
+                    return QString::fromLocal8Bit(rec.text.c_str());
 				}
 			}
 		}
 
 		if (role == Qt::ForegroundRole)
 		{
-			switch (record.type)
+            switch (rec.type)
 			{
 			case MessageType::Error:
 				return QBrush{qRgb(0xE0, 0x33, 0x33)};
@@ -1544,9 +1535,10 @@ namespace Log
 	//
 	// SelectionControlDelegate
 	//
-	SelectionControlDelegate::SelectionControlDelegate(QObject* parent, LogRecordModel* model) :
+    SelectionControlDelegate::SelectionControlDelegate(QObject* parent, LogRecordModel* model, LogRecordProxyModel* proxyModel) :
 		QStyledItemDelegate(parent),
-		m_model(model)
+        m_model(model),
+        m_proxyModel(proxyModel)
 	{
 	}
 
@@ -1558,56 +1550,12 @@ namespace Log
 		//
 		if (option->state & QStyle::State_Selected)
 		{
-			QBrush br = m_model->data(index, Qt::ForegroundRole).value<QBrush>();
+            QBrush br = m_model->color(m_proxyModel->mapToSource(index));
 			option->palette.setColor(QPalette::HighlightedText, br.color());
 		}
 	}
 
-	//
-	// LogFileProgressDialog
-	//
-	LogFileProgressDialog::LogFileProgressDialog(QWidget* parent):
-		QDialog(parent, Qt::FramelessWindowHint | Qt::Dialog)
-	{
-		QVBoxLayout* mainLayout = new QVBoxLayout(this);
-
-		setMinimumSize(350, 100);
-
-		m_label = new QLabel("Loading...");
-		m_label->setAlignment(Qt::AlignCenter);
-		mainLayout->addWidget(m_label);
-
-		QHBoxLayout* bl = new QHBoxLayout();
-
-		bl->addStretch();
-
-		QPushButton* b = new QPushButton(tr("Cancel"));
-		bl->addWidget(b);
-		connect(b, &QPushButton::clicked, this, &LogFileProgressDialog::cancelRead);
-
-		bl->addStretch();
-
-		mainLayout->addLayout(bl);
-
-		setLayout(mainLayout);
-	}
-
-	LogFileProgressDialog::~LogFileProgressDialog()
-	{
-
-	}
-
-	void LogFileProgressDialog::readInProgress(QString fileName, int recordsRead)
-	{
-		m_label->setText(tr("Loading file: %1\n\nRecords loaded: %2").arg(QFileInfo(fileName).fileName()).arg(recordsRead));
-	}
-
-	void LogFileProgressDialog::readComplete()
-	{
-		QDialog::reject();
-	}
-
-	//
+    //
 	// DialogTimeFilter
 	//
 
@@ -1755,18 +1703,11 @@ namespace Log
 		QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint),
 		m_worker(worker),
 		m_model(useMessageType, headerTitles),
-		m_progressDialog(this)
+        m_proxyModel(&m_model)
 	{
 		setAttribute(Qt::WA_DeleteOnClose);
 
 		setWindowTitle(tr("Log View - %1").arg(worker->logName()));
-
-		connect(m_worker, &LogFileWorker::readInProgress, &m_progressDialog, &LogFileProgressDialog::readInProgress);
-
-		connect(m_worker, &LogFileWorker::readComplete, &m_progressDialog, &LogFileProgressDialog::readComplete);
-		connect(m_worker, &LogFileWorker::readFromFileComplete, &m_progressDialog, &LogFileProgressDialog::readComplete);
-
-		connect(&m_progressDialog, &LogFileProgressDialog::cancelRead, [this](){m_worker->cancelReadFromFile();});
 
 		QVBoxLayout* mainLayout = new QVBoxLayout();
 		setLayout(mainLayout);
@@ -1831,7 +1772,7 @@ namespace Log
 		// --
 		//
 		m_filter = new QPushButton(tr("Filter"));
-		m_filter->setEnabled(false);
+        m_filter->setEnabled(false);
 		topLayout->addWidget(m_filter);
 
 		connect(m_filter, &QPushButton::clicked, this, &LogFileDialog::onFilter);
@@ -1876,13 +1817,14 @@ namespace Log
 		// --
 		//
 		m_table = new LogTableView();
-		m_table->setModel(&m_model);
+        m_proxyModel.setSourceModel(&m_model);
+        m_table->setModel(&m_proxyModel);
 
 		m_table->verticalHeader()->hide();
         m_table->verticalHeader()->sectionResizeMode(QHeaderView::Fixed);
-		m_table->setItemDelegate(new SelectionControlDelegate(this, &m_model));
+        m_table->setItemDelegate(new SelectionControlDelegate(this, &m_model, &m_proxyModel));
 
-        m_table->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+        m_table->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
         m_table->setStyleSheet("QTableView::item { margin: 10px }");
         m_table->horizontalHeader()->setStretchLastSection(true);
 
@@ -1939,9 +1881,9 @@ namespace Log
 		mainLayout->addLayout(bottomLayout);
 
 		// --
-		//
-		connect(m_worker, &LogFileWorker::readComplete, this, &LogFileDialog::onLoadComplete);
-		connect(m_worker, &LogFileWorker::readFromFileComplete, this, &LogFileDialog::onLoadFromFileComplete);
+        //
+        connect(m_worker, &LogFileWorker::loadChunkComplete, this, &LogFileDialog::onLoadChunkComplete);
+        connect(m_worker, &LogFileWorker::loadComplete, this, &LogFileDialog::onLoadComplete);
 		connect(m_worker, &LogFileWorker::recordArrived, this, &LogFileDialog::onRecordArrived, Qt::QueuedConnection);
 
 		// Restore settings
@@ -1973,11 +1915,9 @@ namespace Log
 
 		// Read existing log
 
-		m_worker->read(true/*currentSessionOnly*/);
+        m_worker->load(true/*currentSessionOnly*/);
 
 		enableControls(false);
-
-		m_progressDialog.exec();
 	}
 
 	LogFileDialog::~LogFileDialog()
@@ -1991,35 +1931,21 @@ namespace Log
 		{
 			bool autoScroll = m_autoScroll->isChecked();
 			s.setValue("LogFileDialog/autoScroll", autoScroll);
-		}
+        }
+
+        if (m_worker->loadInProgress() == true)
+        {
+            m_worker->cancelLoad();
+        }
 	}
 
 	void LogFileDialog::enableControls(bool enable)
 	{
-		if (m_recordTypeCombo != nullptr)
-		{
-			m_recordTypeCombo->setEnabled(enable);
-		}
-
-		m_timeFilterButton->setEnabled(enable);
-		m_filterLineEdit->setEnabled(enable);
-		m_allSessions->setEnabled(enable);
-		m_autoScroll->setEnabled(enable);
-
-		if (m_prevIssue != nullptr)
-		{
-			m_prevIssue->setEnabled(enable);
-		}
-		if (m_nextIssue != nullptr)
-		{
-			m_nextIssue->setEnabled(enable);
-		}
+        m_allSessions->setEnabled(enable && m_loadedFromFile == false);
 
 		m_clear->setEnabled(enable);
+        m_load->setEnabled(enable);
 		m_export->setEnabled(enable);
-
-		m_search->setEnabled(m_filterLineEdit->text().isEmpty() == false);
-		m_filter->setEnabled(m_filterLineEdit->text().isEmpty() == false);
 	}
 
 	void LogFileDialog::searchIssue(bool forward)
@@ -2035,21 +1961,21 @@ namespace Log
 		QModelIndexList selectedIndexes = m_table->selectionModel()->selectedIndexes();
 		if (selectedIndexes.empty() == true)
 		{
-			row = forward ? 0 : m_model.rowCount() - 1;
+            row = forward ? 0 : m_proxyModel.rowCount() - 1;
 		}
 		else
 		{
 			row = selectedIndexes[0].row();
 		}
 
-		int issueRow = m_model.searchIssue(row, forward);
+        int issueRow = searchIssue(row, forward);
 		if (issueRow != -1)
 		{
-			m_table->selectionModel()->select(m_model.index(issueRow, 0), QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+            m_table->selectionModel()->select(m_proxyModel.index(issueRow, 0), QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
 
-			m_table->setCurrentIndex(m_model.index(issueRow, 0));
+            m_table->setCurrentIndex(m_proxyModel.index(issueRow, 0));
 
-			m_table->scrollTo(m_model.index(issueRow, 0), QAbstractItemView::EnsureVisible);
+            m_table->scrollTo(m_proxyModel.index(issueRow, 0), QAbstractItemView::EnsureVisible);
 		}
 		else
 		{
@@ -2057,6 +1983,81 @@ namespace Log
 		}
 	}
 
+    int LogFileDialog::searchIssue(int startRow, bool forward) const
+    {
+        if (m_proxyModel.recordCount() == 0)
+        {
+            return -1;
+        }
+
+        int row = startRow;
+
+        do
+        {
+            if (forward == true)
+            {
+                row++;
+                if (row >= m_proxyModel.recordCount())	// Loop to start
+                {
+                    row = 0;
+                }
+            }
+            else
+            {
+                row--;
+                if (row < 0)	// Loop to end
+                {
+                    row = m_proxyModel.recordCount() - 1;
+                }
+            }
+
+            int sourceRow =  m_proxyModel.sourceRow(row);
+
+            const LogFileRecord& rec = m_model.record(sourceRow);
+
+            if (rec.type == MessageType::Warning || rec.type == MessageType::Error)
+            {
+                return row;
+            }
+        }while (row != startRow);
+
+        return -1;
+    }
+
+    int LogFileDialog::searchRecord(int startRow, const std::string& text) const
+    {
+        if (text.empty() == true)
+        {
+            return -1;
+        }
+
+        if (m_proxyModel.recordCount() == 0)
+        {
+            return -1;
+        }
+
+        int row = startRow;
+
+        do
+        {
+            row++;
+            if (row >= m_proxyModel.recordCount())	// Loop to start
+            {
+                row = 0;
+            }
+
+            int sourceRow =  m_proxyModel.sourceRow(row);
+
+            const LogFileRecord& rec = m_model.record(sourceRow);
+
+            if (rec.text.find(text) != std::string::npos)
+            {
+                return row;
+            }
+        }while (row != startRow);
+
+        return -1;
+    }
 
 	void LogFileDialog::onTypeComboIndexChanged(int index)
 	{
@@ -2076,16 +2077,14 @@ namespace Log
 			filterRecordTypeMask = m_recordTypeCombo->itemData(typeComboIndex, Qt::UserRole).toInt();
 		}
 
-		m_model.setFilterRecordTypeMask(filterRecordTypeMask);
+        m_proxyModel.setFilterRecordTypeMask(filterRecordTypeMask);
 
-		m_model.fillRecords();
-
-		m_counterLabel->setText(tr("Total records: %1, Errors: %2, Warnings: %3").arg(m_model.rowCount()).arg(m_model.errorCount()).arg(m_model.warningCount()));
+        m_counterLabel->setText(tr("Total records: %1, Errors: %2, Warnings: %3").arg(m_proxyModel.rowCount()).arg(m_proxyModel.errorCount()).arg(m_proxyModel.warningCount()));
 	}
 
 	void LogFileDialog::onTimeFilter()
 	{
-		DialogTimeFilter d(m_model.filterTimeFrom(), m_model.filterTimeTo(), this);
+        DialogTimeFilter d(m_proxyModel.filterTimeFrom(), m_proxyModel.filterTimeTo(), this);
 		if (d.exec() == QDialog::Accepted)
 		{
 			qint64 filterTimeFrom = d.filterTimeFrom();
@@ -2102,12 +2101,9 @@ namespace Log
 				m_timeFilterButton->setStyleSheet({});
 			}
 
-			m_model.setFilterTimeFrom(filterTimeFrom);
-			m_model.setFilterTimeTo(filterTimeTo);
+            m_proxyModel.setFilterTime(filterTimeFrom, filterTimeTo);
 
-			m_model.fillRecords();
-
-			m_counterLabel->setText(tr("Total records: %1, Errors: %2, Warnings: %3").arg(m_model.rowCount()).arg(m_model.errorCount()).arg(m_model.warningCount()));
+            m_counterLabel->setText(tr("Total records: %1, Errors: %2, Warnings: %3").arg(m_proxyModel.rowCount()).arg(m_proxyModel.errorCount()).arg(m_proxyModel.warningCount()));
 
 			return;
 		}
@@ -2115,17 +2111,20 @@ namespace Log
 
 	void LogFileDialog::onFilter()
 	{
-		m_model.setFilterText(m_filterLineEdit->text());
+        m_proxyModel.setFilterText(m_filterLineEdit->text());
 
-		m_model.fillRecords();
-
-		m_counterLabel->setText(tr("Total records: %1, Errors: %2, Warnings: %3").arg(m_model.rowCount()).arg(m_model.errorCount()).arg(m_model.warningCount()));
+        m_counterLabel->setText(tr("Total records: %1, Errors: %2, Warnings: %3").arg(m_proxyModel.rowCount()).arg(m_proxyModel.errorCount()).arg(m_proxyModel.warningCount()));
 	}
 
 	void LogFileDialog::onFilterEdited(const QString& text)
 	{
-		m_filter->setEnabled(text.isEmpty() == false);
 		m_search->setEnabled(text.isEmpty() == false);
+        m_filter->setEnabled(text.isEmpty() == false);
+
+        if (m_proxyModel.filterText().isEmpty() == false && text.isEmpty() == true)
+        {
+            onFilter();
+        }
 	}
 
 	void LogFileDialog::onSearch()
@@ -2151,14 +2150,14 @@ namespace Log
 			return;
 		}
 
-		int foundRow = m_model.searchRecord(row, findText);
+        int foundRow = searchRecord(row, findText);
 		if (foundRow != -1)
 		{
-			m_table->selectionModel()->select(m_model.index(foundRow, 0), QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+            m_table->selectionModel()->select(m_proxyModel.index(foundRow, 0), QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
 
-			m_table->setCurrentIndex(m_model.index(foundRow, 0));
+            m_table->setCurrentIndex(m_proxyModel.index(foundRow, 0));
 
-			m_table->scrollTo(m_model.index(foundRow, 0), QAbstractItemView::EnsureVisible);
+            m_table->scrollTo(m_proxyModel.index(foundRow, 0), QAbstractItemView::EnsureVisible);
 		}
 		else
 		{
@@ -2168,57 +2167,73 @@ namespace Log
 
 	void LogFileDialog::onAllSessionsClicked()
 	{
-		m_worker->read(m_allSessions->isChecked() == false);
+        if (m_loadedFromFile == true)
+        {
+            return;
+        }
+
+        m_model.clear();
+
+        m_worker->load(m_allSessions->isChecked() == false);
 
 		enableControls(false);
-
-		m_progressDialog.exec();
 	}
 
-	void LogFileDialog::onLoadComplete()
-	{
-		std::vector<LogFileRecord> loadResult;
+    void LogFileDialog::onLoadChunkComplete()
+    {
+        bool modelWasEmpty = m_proxyModel.rowCount() == 0;
 
-		m_worker->getLoadedData(&loadResult);
+        std::vector<std::shared_ptr<LogFileChunk>> result;
 
-		m_model.setRecords(&loadResult);
+        m_worker->getLoadedChunks(&result);
 
-		m_logPathLabel->setText(tr("File: <a href=\"%1\">%1</a>").arg(m_worker->getCurrentFileName()));
-
-		m_counterLabel->setText(tr("Total records: %1, Errors: %2, Warnings: %3").arg(m_model.rowCount()).arg(m_model.errorCount()).arg(m_model.warningCount()));
-
-		m_table->scrollToBottom();
-
-        for (int i = 0; i < m_table->horizontalHeader()->count() - 1; i++)
+        if (result.empty() == true)
         {
-            m_table->resizeColumnToContents(i);
+            return;
         }
 
-		enableControls(true);
-	}
-
-	void LogFileDialog::onLoadFromFileComplete(const QString& fileName)
-	{
-		std::vector<LogFileRecord> loadResult;
-
-		m_worker->getLoadedData(&loadResult);
-
-		m_model.setRecords(&loadResult);
-
-		setWindowTitle(fileName);
-
-		m_logPathLabel->setText(tr("File: <a href=\"%1\">%1</a>").arg(fileName));
-
-		m_counterLabel->setText(tr("Total records: %1, Errors: %2, Warnings: %3").arg(m_model.rowCount()).arg(m_model.errorCount()).arg(m_model.warningCount()));
-
-		m_table->scrollToBottom();
-
-        for (int i = 0; i < m_table->horizontalHeader()->count() - 1; i++)
+        for (const auto& chunk : result)
         {
-            m_table->resizeColumnToContents(i);
+            m_model.appendChunk(chunk);
         }
 
-		enableControls(true);
+        if (modelWasEmpty == true)
+        {
+            for (int i = 0; i < m_table->horizontalHeader()->count() - 1; i++)
+            {
+                m_table->resizeColumnToContents(i);
+            }
+        }
+
+        m_counterLabel->setText(tr("Total records: %1, Errors: %2, Warnings: %3").arg(m_proxyModel.rowCount()).arg(m_proxyModel.errorCount()).arg(m_proxyModel.warningCount()));
+
+        if (m_autoScroll->isChecked() == true)
+        {
+            m_table->scrollToBottom();
+        }
+    }
+
+    void LogFileDialog::onLoadComplete()
+	{
+        for (const auto& rec : m_arrivedRecords)
+        {
+            m_model.appendRecord(rec);
+        }
+        m_arrivedRecords.clear();
+
+        //
+
+        if (m_loadedFromFile == false)
+        {
+            m_logPathLabel->setText(tr("File: <a href=\"%1\">%1</a>").arg(m_worker->getCurrentFileName()));
+        }
+        else
+        {
+            setWindowTitle(m_loadedFileName);
+            m_logPathLabel->setText(tr("File: <a href=\"%1\">%1</a>").arg(m_loadedFileName));
+        }
+
+        enableControls(true);
 	}
 
 	void LogFileDialog::onRecordArrived(LogFileRecord record)
@@ -2233,11 +2248,19 @@ namespace Log
 			return;
 		}
 
-		bool modelWasEmpty = m_model.recordsCount() == 0;
+        if (m_worker->loadInProgress() == true)
+        {
+            // Log loading is in progress, write the record to an array and add later
+            //
+            m_arrivedRecords.push_back(record);
+            return;
+        }
 
-		m_model.addRecord(record);
+        bool modelWasEmpty = m_proxyModel.rowCount() == 0;
 
-		if (modelWasEmpty == true)
+        m_model.appendRecord(record);
+
+        if (modelWasEmpty == true)
 		{
             for (int i = 0; i < m_table->horizontalHeader()->count() - 1; i++)
             {
@@ -2247,7 +2270,7 @@ namespace Log
 
 		m_logPathLabel->setText(tr("File: <a href=\"%1\">%1</a>").arg(m_worker->getCurrentFileName()));
 
-		m_counterLabel->setText(tr("Total records: %1, Errors: %2, Warnings: %3").arg(m_model.rowCount()).arg(m_model.errorCount()).arg(m_model.warningCount()));
+        m_counterLabel->setText(tr("Total records: %1, Errors: %2, Warnings: %3").arg(m_proxyModel.rowCount()).arg(m_proxyModel.errorCount()).arg(m_proxyModel.warningCount()));
 
 		if (m_autoScroll->isChecked() == true)
 		{
@@ -2315,7 +2338,7 @@ namespace Log
 
 			lastColumn = mi.column();
 
-			result += m_model.data(mi, Qt::DisplayRole).toString().trimmed();
+            result += m_proxyModel.data(mi, Qt::DisplayRole).toString().trimmed();
 		}
 
 		QClipboard* clipboard = QApplication::clipboard();
@@ -2342,29 +2365,40 @@ namespace Log
 		}
 
 		m_loadedFromFile = true;
+        m_loadedFileName = fileName;
 
 		m_autoScroll->setChecked(false);
 
-		enableControls(false);
+        m_model.clear();
 
-		m_worker->readFromFile(QDir::toNativeSeparators(fileName));
+        m_worker->loadFromFile(QDir::toNativeSeparators(fileName));
 
-		m_progressDialog.exec();
+        enableControls(false);
 
 		return;
 	}
 
 	void LogFileDialog::onClear()
 	{
-		static std::vector<LogFileRecord> emptyRecords;
-		m_model.setRecords(&emptyRecords);
+        m_model.clear();
 
-		m_counterLabel->setText(tr("Total records: %1, Errors: %2, Warnings: %3").arg(m_model.rowCount()).arg(m_model.errorCount()).arg(m_model.warningCount()));
-	}
+        m_allSessions->setChecked(false);
+
+        m_counterLabel->setText(tr("Total records: %1, Errors: %2, Warnings: %3").arg(m_proxyModel.rowCount()).arg(m_proxyModel.errorCount()).arg(m_proxyModel.warningCount()));
+
+        if (m_loadedFromFile == true)
+        {
+            m_loadedFromFile = false;
+
+            m_allSessions->setEnabled(true);
+
+            setWindowTitle(tr("Log View - %1").arg(m_worker->logName()));
+        }
+    }
 
 	void LogFileDialog::onExport()
 	{
-		QString fileName = QFileDialog::getSaveFileName(this,
+        QString fileName = QFileDialog::getSaveFileName(this,
 														tr("Save File"),
 														"Untitled.log",
 														tr("Log files (*.log)"));
@@ -2376,7 +2410,16 @@ namespace Log
 
 		std::vector<LogFileRecord> exportRecords;
 
-		m_model.getFilteredRecords(&exportRecords);
+        int count = m_proxyModel.recordCount();
+        exportRecords.reserve(count);
+
+        for (int i = 0; i < count; i++)
+        {
+            int sourceRow = m_proxyModel.sourceRow(i);
+            const LogFileRecord& rec = m_model.record(sourceRow);
+            exportRecords.push_back(rec);
+        }
+
 		if (exportRecords.empty() == true)
 		{
 			QMessageBox::warning(this, qAppName(), tr("No data to export!"));
@@ -2390,7 +2433,6 @@ namespace Log
 			return;
 		}
 
-
 		QTextStream out(&data);
 
 		for (const LogFileRecord& rec : exportRecords)
@@ -2399,6 +2441,7 @@ namespace Log
 		}
 
 		QMessageBox::information(this, qAppName(), tr("Export complete."));
+
 		return;
 	}
 
