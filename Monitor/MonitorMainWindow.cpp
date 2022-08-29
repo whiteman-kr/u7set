@@ -16,7 +16,8 @@
 MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow(parent),
 	m_LogFile(qAppName(), QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + softwareInfo.equipmentID()),
-	m_instanceResolver(instanceResolver),
+    m_tuningLogFile(qAppName() + "Tuning", QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + softwareInfo.equipmentID()),
+    m_instanceResolver(instanceResolver),
 	m_configController(softwareInfo, MonitorAppSettings::instance().configuratorAddress1(), MonitorAppSettings::instance().configuratorAddress2(), &m_LogFile),
 	m_schemaManager(&m_configController),
 	m_dialogAlert(this)
@@ -438,7 +439,12 @@ void MonitorMainWindow::createActions()
 	m_pLogAction->setStatusTip(tr("Show application log"));
 	connect(m_pLogAction, &QAction::triggered, this, &MonitorMainWindow::showLog);
 
-	m_pAboutQtAction = new QAction(tr("About Qt..."), this);
+    m_pTuningLogAction = new QAction(tr("Tuning Log..."), this);
+    m_pTuningLogAction->setStatusTip(tr("Show tuning log"));
+    connect(m_pTuningLogAction, &QAction::triggered, this, &MonitorMainWindow::showTuningLog);
+    m_pTuningLogAction->setVisible(false);
+
+    m_pAboutQtAction = new QAction(tr("About Qt..."), this);
 	m_pAboutQtAction->setStatusTip(tr("Show Qt information"));
 	//m_pAboutAction->setEnabled(true);
 	connect(m_pAboutQtAction, &QAction::triggered, this, &MonitorMainWindow::showAboutQt);
@@ -615,6 +621,7 @@ void MonitorMainWindow::createMenus()
 
 	helpMenu->addSeparator();
 	helpMenu->addAction(m_pLogAction);
+    helpMenu->addAction(m_pTuningLogAction);
 
 	helpMenu->addSeparator();
 
@@ -750,7 +757,8 @@ void MonitorMainWindow::runTuningTcpClients()
 	{
 		// TuningClientTcpClient
 		//
-		MonitorTuningTcpClient* client = new MonitorTuningTcpClient(m_configController.softwareInfo(), ts.tuningServiceID, &theTuningSignals, &m_LogFile);
+        MonitorTuningTcpClient* client = new MonitorTuningTcpClient(m_configController.softwareInfo(), ts.tuningServiceID, &theTuningSignals,
+                                                                    &m_LogFile, &m_tuningLogFile, &m_tuningUserManager);
 
 		const HostAddressPort addrPort = HostAddressPort(ts.clientRequestIP, ts.clientRequestPort);
 		client->setServers(addrPort, addrPort, false);
@@ -961,6 +969,11 @@ void MonitorMainWindow::schemaTreeListToggled(bool checked)
 void MonitorMainWindow::showLog()
 {
 	m_LogFile.view(this);
+}
+
+void MonitorMainWindow::showTuningLog()
+{
+    m_tuningLogFile.viewSignalsLog(this);
 }
 
 void MonitorMainWindow::showDataSources()
@@ -1537,11 +1550,13 @@ void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
 	// Refresh TuningUserManager configuration
 	//
 	m_tuningUserManager.setConfiguration(configuration.tuningLogin,
-										 configuration.tuningUserAccounts,
+                                         configuration.tuningUserAccounts,
 										 false/*loginPerOperation*/,
 										 configuration.tuningSessionTimeout);
 
 	showTuningLoginControls();
+
+    m_pTuningLogAction->setVisible(configuration.tuningEnabled == true);
 
 	// Close TuningTcpClients
 	//

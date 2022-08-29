@@ -127,10 +127,7 @@ void MonitorSignalInfo::setSchema(QString schemaId, QStringList highlightIds)
 		return;
 	}
 
-	if (currentTab->schemaId() != schemaId)
-	{
-		currentTab->setSchema(schemaId, highlightIds);
-	}
+	currentTab->setSchema(schemaId, highlightIds);
 
 	return;
 }

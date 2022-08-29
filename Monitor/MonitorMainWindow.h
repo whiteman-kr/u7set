@@ -15,6 +15,7 @@
 #include "../lib/Ui/DialogAlert.h"
 #include "../lib/Ui/DialogTcpStatistics.h"
 #include "../lib/Tuning/TuningUserManager.h"
+#include "../lib/Tuning/TuningLog.h"
 
 class MonitorCentralWidget;
 class MonitorToolBar;
@@ -81,6 +82,7 @@ protected slots:
 	void schemaTreeListToggled(bool checked);
 
 	void showLog();
+    void showTuningLog();
 	void showDataSources();
 	void showSettings();
 	void showStatistics();
@@ -145,6 +147,7 @@ protected:
 	//
 private:
 	Log::LogFile m_LogFile;						// Must be initialized first
+    TuningLog::TuningLog m_tuningLogFile;
 	InstanceResolver& m_instanceResolver;
 
 	MonitorConfigController m_configController;
@@ -182,6 +185,7 @@ private:
 	//
 	QAction* m_pDebugAction = nullptr;
 	QAction* m_pLogAction = nullptr;
+    QAction* m_pTuningLogAction = nullptr;
 	QAction* m_pAboutQtAction = nullptr;
 	QAction* m_pAboutAction = nullptr;
 	QAction* m_manualMatsAction = nullptr;
