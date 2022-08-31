@@ -448,6 +448,8 @@ namespace Tcp
 
 		virtual void onHeaderAndDataReady() final;
 
+		void processIntroduceMyselfReply(const char* dataBuffer, int dataSize);
+
 		virtual void initReadStatusVariables() final;
 
 		bool sendClientAliveRequest();

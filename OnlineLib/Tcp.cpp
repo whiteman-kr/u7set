@@ -1529,6 +1529,7 @@ namespace Tcp
 
 			if (m_header.id == RQID_INTRODUCE_MYSELF)
 			{
+				processIntroduceMyselfReply(m_receiveDataBuffer, m_header.dataSize);
 				onConnection();
 			}
 			else
@@ -1550,6 +1551,26 @@ namespace Tcp
 		m_readHeaderSize = 0;
 		m_readDataSize = 0;
 		m_connectTimeout = 0;
+	}
+
+	void Client::processIntroduceMyselfReply(const char* dataBuffer, int dataSize)
+	{
+		Network::SoftwareInfo inMessage;
+
+		bool result = inMessage.ParseFromArray(dataBuffer, dataSize);
+
+		if (result == false)
+		{
+			assert(false);
+			return;
+		}
+
+		m_stateMutex.lock();
+
+		m_state.connectedSoftwareInfo.serializeFrom(inMessage);
+		m_state.clientDescription = QString::fromStdString(inMessage.clientdescription());
+
+		m_stateMutex.unlock();
 	}
 
 	bool Client::sendClientAliveRequest()
