@@ -235,8 +235,8 @@ test job:
     - "# ----------------------------------------------"
     - "#               Run unit tests"
     - "# ----------------------------------------------"
-    - "&$Env:CI_PROJECT_DIR/bin/release/u7databasetests.exe"
-    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorTests.exe"
+    - "&$Env:CI_PROJECT_DIR/bin/release/u7databasetests.exe -junitxml -o u7databasetests.xml"
+    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorTests.exe -junitxml -o SimulatorTests.xml"
 
 #Run Builder test
     - "# ----------------------------------------------"
@@ -262,3 +262,7 @@ test job:
     - "#               Run ROVT tests"
     - "# ----------------------------------------------"
     - "#&C:/ROVT/ROVT_C.exe /b:C:\\Temp\\build\\test_simulator_v376\\build"
+  artifacts:
+    paths:
+      - u7databasetests.xml
+      - SimulatorTests.xml
