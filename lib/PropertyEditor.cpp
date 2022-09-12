@@ -1818,25 +1818,25 @@ namespace ExtWidgets
 		return true;
 	}
 
-	bool PropertyPlainTextEditor::eventFilter(QObject* obj, QEvent* event)
-	{
-		if (obj == m_plainTextEdit)
-		{
-			if (event->type() == QEvent::KeyPress)
-			{
-				QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+    bool PropertyPlainTextEditor::eventFilter(QObject* obj, QEvent* event)
+    {
+        if (obj == m_plainTextEdit)
+        {
+            if (event->type() == QEvent::KeyPress)
+            {
+                QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
 
-				if (keyEvent->key() == Qt::Key_Escape)
-				{
-					emit escapePressed();
-					return true;
-				}
-			}
-		}
+                if (keyEvent->key() == Qt::Key_Escape)
+                {
+                    emit escapePressed();
+                    return true;
+                }
+            }
+        }
 
-		// pass the event on to the parent class
-		return PropertyTextEditor::eventFilter(obj, event);
-	}
+        // pass the event on to the parent class
+        return PropertyTextEditor::eventFilter(obj, event);
+    }
 
 	void PropertyPlainTextEditor::onPlainTextContentsChange(int position, int charsRemoved, int charsAdded)
 	{

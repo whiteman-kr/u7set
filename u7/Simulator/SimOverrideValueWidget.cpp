@@ -379,21 +379,15 @@ namespace SimOverrideUI
 	{
 		m_scriptLabel = new QLabel(tr("Override Value Script:"));
 
-		m_scriptEdit = new QsciScintilla(this);
-		m_scriptEdit->setUtf8(true);
-		m_scriptEdit->setMarginType(0, QsciScintilla::NumberMargin);
-		m_scriptEdit->setMarginWidth(0, 40);
-		m_scriptEdit->setTabWidth(4);
-		m_scriptEdit->setAutoIndent(true);
+        m_scriptEdit = new CodeEditor(this);
 #if defined(Q_OS_WIN)
 		QFont f = QFont("Consolas");
 #else
 		QFont f = QFont("Courier");
 #endif
 		m_scriptEdit->setFont(f);
-		m_lexer.setFont(f);
-		m_scriptEdit->setLexer(&m_lexer);
-		m_scriptEdit->setModified(false);
+
+        JsHighlighter::createJsHighlighter(m_scriptEdit->document());
 
 		QString lastScript;
 		if (db()->isProjectOpened() == true)

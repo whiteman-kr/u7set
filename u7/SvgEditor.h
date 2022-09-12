@@ -2,8 +2,7 @@
 #define SVGEDITOR_H
 
 #include "../lib/PropertyEditor.h"
-#include "../QScintilla/src/Qsci/qsciscintilla.h"
-#include "../lib/QScintillaLexers/LexerXML.h"
+#include "CodeEditor.h"
 
 class SvgWidget : public QWidget
 {
@@ -53,9 +52,7 @@ private slots:
 
 
 private:
-	QsciScintilla* m_textEdit = nullptr;
-
-	LexerXML m_lexerXml;
+    CodeEditor* m_textEdit = nullptr;
 
 	QSplitter* m_topSplitter = nullptr;
 	SvgWidget m_svgWidget;

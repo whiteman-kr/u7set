@@ -67,6 +67,7 @@ CONFIG(release, debug|release) {
 HEADERS  += \
     ../UtilsLib/CrashExceptionHandler.h \
     ../lib/Ui/DialogChooseTags.h \
+    CodeEditor.h \
     DbTagsEditor.h \
 	Stable.h \
     ../lib/ExportPrint.h \
@@ -92,8 +93,6 @@ HEADERS  += \
 	../lib/Ui/DialogAbout.h \
 	../lib/AppSignalManager.h \
 	../lib/Ui/TextEditCompleter.h \
-	../lib/QScintillaLexers/LexerJavaScript.h \
-	../lib/QScintillaLexers/LexerXML.h \
 	../lib/PropertyTable.h \
 	../Metrology/MetrologyConnection.h \
 	DlgMetrologyConnection.h \
@@ -217,10 +216,9 @@ SOURCES +=\
 	../lib/Ui/DialogAbout.cpp \
 	../lib/WidgetUtils.cpp \
 	../lib/Ui/TextEditCompleter.cpp \
-	../lib/QScintillaLexers/LexerJavaScript.cpp \
-	../lib/QScintillaLexers/LexerXML.cpp \
 	../lib/PropertyTable.cpp \
 	../Metrology/MetrologyConnection.cpp \
+    CodeEditor.cpp \
     DbTagsEditor.cpp \
 	DlgMetrologyConnection.cpp \
 	CentralWidget.cpp \
@@ -429,14 +427,6 @@ LIBS += -L$$DESTDIR
 LIBS += -L.
 
 win32:LIBS += -lGdi32
-
-# QScintilla
-#
-LIBS += -lQScintilla
-win32:PRE_TARGETDEPS += $$DESTDIR/QScintilla.lib
-unix:PRE_TARGETDEPS += $$DESTDIR/libQScintilla.a
-INCLUDEPATH += ./../QScintilla/src
-DEPENDPATH += ./../QScintilla/src
 
 # VFrame30 library
 #

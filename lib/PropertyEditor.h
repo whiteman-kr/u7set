@@ -276,8 +276,8 @@ namespace ExtWidgets
 		bool modified();
 
 	signals:
-		void escapePressed();
-		void okPressed();
+        void escapePressed();
+        void okPressed();
 		void cancelPressed();
 
 	public slots:
@@ -312,8 +312,8 @@ namespace ExtWidgets
 
 		bool externalOkCancelButtons() const override;
 
-	protected:
-		bool eventFilter(QObject* obj, QEvent* event);
+    protected:
+        bool eventFilter(QObject* obj, QEvent* event) override;
 
 	private slots:
 		void onPlainTextContentsChange(int position, int charsRemoved, int charsAdded);

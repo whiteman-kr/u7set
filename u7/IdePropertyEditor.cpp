@@ -65,7 +65,7 @@ ExtWidgets::PropertyTextEditor* IdePropertyEditorHelper::createPropertyTextEdito
 	{
 		// This is Script
 		//
-		return new IdeCodeEditor(CodeType::JavaScript, parent);
+        return new IdeCodePropertyEditor(CodeType::JavaScript, parent);
 	}
 
 	return new ExtWidgets::PropertyPlainTextEditor(parent);
@@ -195,54 +195,54 @@ bool IdePropertyTable::storePropertyTextEditorSize(std::shared_ptr<Property> pro
 bool DialogFindReplace::m_caseSensitive = false;
 
 DialogFindReplace::DialogFindReplace(QWidget* parent)
-	:QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
+    :QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
 {
-	// Edit
+    // Edit
 
-	QLabel* labelFind = new QLabel("Find What:", this);
-	QLabel* labelReplace = new QLabel("Replace Width:", this);
+    QLabel* labelFind = new QLabel("Find What:", this);
+    QLabel* labelReplace = new QLabel("Replace Width:", this);
 
-	m_findEdit = new QLineEdit(this);
-	m_replaceEdit = new QLineEdit(this);
+    m_findEdit = new QLineEdit(this);
+    m_replaceEdit = new QLineEdit(this);
 
-	// Completers
+    // Completers
 
-	m_findCompleter = new QCompleter(theSettings.m_findCompleter, this);
-	m_findCompleter->setCaseSensitivity(Qt::CaseInsensitive);
-	m_findEdit->setCompleter(m_findCompleter);
-	connect(m_findEdit, &QLineEdit::textEdited, [this](){m_findCompleter->complete();});
-	connect(m_findCompleter, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), m_findEdit, &QLineEdit::setText);
+    m_findCompleter = new QCompleter(theSettings.m_findCompleter, this);
+    m_findCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+    m_findEdit->setCompleter(m_findCompleter);
+    connect(m_findEdit, &QLineEdit::textEdited, [this](){m_findCompleter->complete();});
+    connect(m_findCompleter, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), m_findEdit, &QLineEdit::setText);
 
-	m_replaceCompleter = new QCompleter(theSettings.m_replaceCompleter, this);
-	m_replaceCompleter->setCaseSensitivity(Qt::CaseInsensitive);
-	m_replaceEdit->setCompleter(m_replaceCompleter);
-	connect(m_replaceEdit, &QLineEdit::textEdited, [this](){m_replaceCompleter->complete();});
-	connect(m_replaceCompleter, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), m_replaceEdit, &QLineEdit::setText);
+    m_replaceCompleter = new QCompleter(theSettings.m_replaceCompleter, this);
+    m_replaceCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+    m_replaceEdit->setCompleter(m_replaceCompleter);
+    connect(m_replaceEdit, &QLineEdit::textEdited, [this](){m_replaceCompleter->complete();});
+    connect(m_replaceCompleter, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), m_replaceEdit, &QLineEdit::setText);
 
-	// Buttons
+    // Buttons
 
-	m_findButton = new QPushButton(tr("Find"), this);
-	m_replaceButton = new QPushButton(tr("Replace"), this);
-	m_replaceAllButton = new QPushButton(tr("Replace All"), this);
+    m_findButton = new QPushButton(tr("Find"), this);
+    m_replaceButton = new QPushButton(tr("Replace"), this);
+    m_replaceAllButton = new QPushButton(tr("Replace All"), this);
 
     connect(m_findButton, &QPushButton::clicked, this, &DialogFindReplace::onFind);
     connect(m_replaceButton, &QPushButton::clicked, this, &DialogFindReplace::onReplace);
-	connect(m_replaceAllButton, &QPushButton::clicked, this, &DialogFindReplace::onReplaceAllButton);
+    connect(m_replaceAllButton, &QPushButton::clicked, this, &DialogFindReplace::onReplaceAllButton);
 
-	// Replace menu
+    // Replace menu
 
-	m_replaceSelectedAction = new QAction("Process Selected Text", this);
-	connect(m_replaceSelectedAction, &QAction::triggered, [this](){onReplaceAll(true/*selectedOnly*/);});
-	m_replaceMenu.addAction(m_replaceSelectedAction);
+    m_replaceSelectedAction = new QAction("Process Selected Text", this);
+    connect(m_replaceSelectedAction, &QAction::triggered, [this](){onReplaceAll(true/*selectedOnly*/);});
+    m_replaceMenu.addAction(m_replaceSelectedAction);
 
-	m_replaceAllAction = new QAction("Process All Text", this);
-	connect(m_replaceAllAction, &QAction::triggered, [this](){onReplaceAll(false/*selectedOnly*/);});
-	m_replaceMenu.addAction(m_replaceAllAction);
+    m_replaceAllAction = new QAction("Process All Text", this);
+    connect(m_replaceAllAction, &QAction::triggered, [this](){onReplaceAll(false/*selectedOnly*/);});
+    m_replaceMenu.addAction(m_replaceAllAction);
 
-	m_caseSensitiveCheck = new QCheckBox(tr("Case Sensitive"));
-	m_caseSensitiveCheck->setChecked(m_caseSensitive);
+    m_caseSensitiveCheck = new QCheckBox(tr("Case Sensitive"));
+    m_caseSensitiveCheck->setChecked(m_caseSensitive);
 
-	// Layout
+    // Layout
 
     QGridLayout* gridLayout = new QGridLayout();
     gridLayout->addWidget(labelFind, 0, 0);
@@ -252,7 +252,7 @@ DialogFindReplace::DialogFindReplace(QWidget* parent)
     gridLayout->addWidget(m_replaceEdit, 1, 1);
 
     QHBoxLayout* buttonsLayout = new QHBoxLayout();
-	buttonsLayout->addWidget(m_caseSensitiveCheck);
+    buttonsLayout->addWidget(m_caseSensitiveCheck);
     buttonsLayout->addStretch();
     buttonsLayout->addWidget(m_findButton);
     buttonsLayout->addWidget(m_replaceButton);
@@ -270,7 +270,7 @@ DialogFindReplace::DialogFindReplace(QWidget* parent)
 
 DialogFindReplace::~DialogFindReplace()
 {
-	m_caseSensitive = m_caseSensitiveCheck->isChecked();
+    m_caseSensitive = m_caseSensitiveCheck->isChecked();
 }
 
 void DialogFindReplace::onFind()
@@ -281,9 +281,9 @@ void DialogFindReplace::onFind()
         return;
     }
 
-	saveCompleters();
+    saveCompleters();
 
-	emit findFirst(text, m_caseSensitiveCheck->isChecked());
+    emit findFirst(text, m_caseSensitiveCheck->isChecked());
 }
 
 void DialogFindReplace::onReplace()
@@ -300,153 +300,106 @@ void DialogFindReplace::onReplace()
         return;
     }
 
-	saveCompleters();
+    saveCompleters();
 
-	emit replace(textFind, textReplace, m_caseSensitiveCheck->isChecked());
+    emit replace(textFind, textReplace, m_caseSensitiveCheck->isChecked());
 }
 
 void DialogFindReplace::onReplaceAllButton()
 {
-	bool hasSelection = false;
+    bool hasSelection = false;
 
-	emit hasSelectedText(&hasSelection);
+    emit hasSelectedText(&hasSelection);
 
-	if (hasSelection == true)
-	{
-		m_replaceMenu.popup(QCursor::pos());
-	}
-	else
-	{
-		onReplaceAll(false/*selectedOnly*/);
-	}
+    if (hasSelection == true)
+    {
+        m_replaceMenu.popup(QCursor::pos());
+    }
+    else
+    {
+        onReplaceAll(false/*selectedOnly*/);
+    }
 }
 
 void DialogFindReplace::onReplaceAll(bool selectedOnly)
 {
-	QString textFind = m_findEdit->text();
-	if (textFind.isEmpty() == true)
-	{
-		return;
-	}
+    QString textFind = m_findEdit->text();
+    if (textFind.isEmpty() == true)
+    {
+        return;
+    }
 
-	QString textReplace = m_replaceEdit->text();
-	if (textReplace.isEmpty() == true)
-	{
-		return;
-	}
+    QString textReplace = m_replaceEdit->text();
+    if (textReplace.isEmpty() == true)
+    {
+        return;
+    }
 
-	saveCompleters();
+    saveCompleters();
 
-	emit replaceAll(textFind, textReplace, selectedOnly, m_caseSensitiveCheck->isChecked());
+    emit replaceAll(textFind, textReplace, selectedOnly, m_caseSensitiveCheck->isChecked());
 }
 
 void DialogFindReplace::saveCompleters()
 {
-	QString findText = m_findEdit->text();
+    QString findText = m_findEdit->text();
 
-	if (findText.isEmpty() == false && theSettings.m_findCompleter.contains(findText) == false)
-	{
-		theSettings.m_findCompleter.append(findText);
+    if (findText.isEmpty() == false && theSettings.m_findCompleter.contains(findText) == false)
+    {
+        theSettings.m_findCompleter.append(findText);
 
-		QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_findCompleter->model());
-		if (completerModel != nullptr)
-		{
-			completerModel->setStringList(theSettings.m_findCompleter);
-		}
-	}
+        QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_findCompleter->model());
+        if (completerModel != nullptr)
+        {
+            completerModel->setStringList(theSettings.m_findCompleter);
+        }
+    }
 
-	while (theSettings.m_findCompleter.size() > 100)
-	{
-		theSettings.m_findCompleter.pop_front();
-	}
+    while (theSettings.m_findCompleter.size() > 100)
+    {
+        theSettings.m_findCompleter.pop_front();
+    }
 
-	//
+    //
 
-	QString replaceText = m_replaceEdit->text();
+    QString replaceText = m_replaceEdit->text();
 
-	if (replaceText.isEmpty() == false && theSettings.m_replaceCompleter.contains(replaceText) == false)
-	{
-		theSettings.m_replaceCompleter.append(replaceText);
+    if (replaceText.isEmpty() == false && theSettings.m_replaceCompleter.contains(replaceText) == false)
+    {
+        theSettings.m_replaceCompleter.append(replaceText);
 
-		QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_replaceCompleter->model());
-		if (completerModel != nullptr)
-		{
-			completerModel->setStringList(theSettings.m_replaceCompleter);
-		}
-	}
+        QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_replaceCompleter->model());
+        if (completerModel != nullptr)
+        {
+            completerModel->setStringList(theSettings.m_replaceCompleter);
+        }
+    }
 
-	while (theSettings.m_replaceCompleter.size() > 100)
-	{
-		theSettings.m_replaceCompleter.pop_front();
-	}
-}
-
-//
-// IdeQsciScintilla
-//
-IdeQsciScintilla::IdeQsciScintilla():
-	QsciScintilla()
-{
-
-}
-
-IdeQsciScintilla::~IdeQsciScintilla()
-{
-
-}
-
-void IdeQsciScintilla::setCustomMenuActions(QList<QAction*> actions)
-{
-	m_customMenuActions = actions;
-}
-
-void IdeQsciScintilla::contextMenuEvent (QContextMenuEvent *e)
-{
-	QMenu* menu = createStandardContextMenu();
-
-	if (m_customMenuActions.empty() == false)
-	{
-		emit customContextMenuAboutToBeShown();
-
-		menu->addSeparator();
-		menu->addActions(m_customMenuActions);
-	}
-	menu->exec(e->globalPos());
+    while (theSettings.m_replaceCompleter.size() > 100)
+    {
+        theSettings.m_replaceCompleter.pop_front();
+    }
 }
 
 //
 // IdeCodeEditor
 //
 
-QString IdeCodeEditor::m_findText;
-
-bool IdeCodeEditor::m_findCaseSensitive = false;
-
 IdeCodeEditor::IdeCodeEditor(CodeType codeType, QWidget* parent) :
-    PropertyTextEditor(parent),
-	m_codeType(codeType),
-	m_parent(parent)
+    CodeEditor(parent),
+    m_parent(parent),
+    m_codeType(codeType)
 {
-	m_textEdit = new IdeQsciScintilla();
 
-    m_textEdit->setUtf8(true);
-	m_textEdit->setCaretLineVisible(true);
-	m_textEdit->setCaretLineBackgroundColor("#f0f0f0");
-	m_textEdit->setCaretWidth(2);
+    setCaretLineVisible(true);
+    setCaretLineBackgroundColor(0xf0f0f0);
 
-	connect(m_textEdit, &IdeQsciScintilla::customContextMenuAboutToBeShown, this, &IdeCodeEditor::onCustomContextMenuAboutToBeShown, Qt::DirectConnection);
-
-
-    m_textEdit->installEventFilter(this);
-
-    QHBoxLayout* l = new QHBoxLayout(this);
-	l->setContentsMargins(0, 0, 0, 0);
-    l->addWidget(m_textEdit);
+    installEventFilter(this);
 
     // Set up default font
     //
 #if defined(Q_OS_WIN)
-        QFont f = QFont("Consolas");
+        QFont f = QFont("Consolas", 11);
         //f.setPixelSize(font().pixelSize());
 #elif defined(Q_OS_MAC)
         QFont f = QFont("Courier");
@@ -456,358 +409,276 @@ IdeCodeEditor::IdeCodeEditor(CodeType codeType, QWidget* parent) :
         //f.setPixelSize(font().pixelSize());
 #endif
 
+    setFont(f);
+
     // Set up lexer
     //
-	m_lexerJavaScript.setDefaultFont(f);
-    m_lexerXml.setDefaultFont(f);
 
-	if (codeType == CodeType::JavaScript)
+    if (m_codeType == CodeType::JavaScript)
     {
-		m_textEdit->setLexer(&m_lexerJavaScript);
+        m_highlighter = JsHighlighter::createJsHighlighter(document());
     }
 
-    if (codeType == CodeType::Xml)
+    if (m_codeType == CodeType::Xml)
     {
-        m_textEdit->setLexer(&m_lexerXml);
+        m_highlighter = XmlHighlighter::createXmlHighlighter(document());
     }
 
     // Set up margins
 
-	if (codeType == CodeType::JavaScript || codeType == CodeType::Xml)
+    if (codeType == CodeType::JavaScript || codeType == CodeType::Xml)
     {
-        m_textEdit->setMarginType(0, QsciScintilla::NumberMargin);
-
-		QFontMetrics fm(f);
-		int width = static_cast<int>(fm.boundingRect("0000").width() * 1.2);
-
-		m_textEdit->setMarginWidth(0, width);
-		m_textEdit->setMarginsForegroundColor(QColor("#c0c0c0"));
-		m_textEdit->setMarginsBackgroundColor(QColor("#f0f0f0"));
+        setLineNumberAreaForegroundColor(QColor(0xc0c0c0));
+        setLineNumberAreaBackgroundColor(QColor(0xf0f0f0));
     }
     else
     {
-        m_textEdit->setMargins(0);
+        setLineNumberAreaVisible(false);
     }
 
     //
 
-    m_textEdit->setFont(f);
-    m_textEdit->setTabWidth(4);
-    m_textEdit->setAutoIndent(true);
-
-    connect(m_textEdit, &QsciScintilla::textChanged, this, &PropertyTextEditor::textChanged);
-
-	connect(m_textEdit, &QsciScintilla::textChanged, this, &IdeCodeEditor::onTextChanged);
-	connect(m_textEdit, &QsciScintilla::cursorPositionChanged, this, &IdeCodeEditor::onCursorPositionChanged);
-
+    connect(this, &QPlainTextEdit::cursorPositionChanged, this, &IdeCodeEditor::onCursorPositionChanged);
 }
 
 IdeCodeEditor::~IdeCodeEditor()
 {
 }
 
-QString IdeCodeEditor::text() const
+void IdeCodeEditor::onFind(QString findText, bool caseSensitive)
 {
-	return m_textEdit->text();
+    bool result = false;
+
+    if (m_findText.isEmpty() == false && m_findText == findText && caseSensitive == m_findCaseSensitive)
+    {
+        result = findNext();
+    }
+    else
+    {
+        if (findText.isEmpty() == true)
+        {
+            return;
+        }
+
+        m_findText = findText;
+
+        m_findCaseSensitive = caseSensitive;
+
+        result = findFirst(findText, caseSensitive, false/*whole*/);
+    }
+
+    if (result == false)
+    {
+        if (QMessageBox::question(this, qAppName(), tr("Search has reached the end of the document. Do you want to start searching from the beginning?")) == QMessageBox::Yes)
+        {
+            findFirst(findText, caseSensitive, false/*whole*/);
+        }
+    }
 }
 
-void IdeCodeEditor::setText(const QString& text)
+void IdeCodeEditor::onReplace(QString findText, QString replaceText, bool caseSensitive)
 {
-	m_textEdit->blockSignals(true);
+    if (findText.isEmpty() || replaceText.isEmpty())
+    {
+        return;
+    }
 
-	m_textEdit->setText(text);
+    if (hasSelectedText() && selectedText() == findText)
+    {
+        replace(replaceText);
+        return;
+    }
 
-	m_textEdit->blockSignals(false);
+    if (findText == m_findText)
+    {
+        if (findNext() == false)
+        {
+            QMessageBox::information(this, qAppName(), tr("Text was not found."));
+            return;
+        }
+    }
+    else
+    {
+        m_findText = findText;
 
-	if (m_codeType == CodeType::JavaScript || m_codeType == CodeType::Xml)
-	{
-		if (m_textEdit->lexer() == nullptr)
-		{
-			Q_ASSERT(m_textEdit->lexer());
-			return;
-		}
+        if (findFirst(findText, caseSensitive, false/*whole*/) == false)
+        {
+            QMessageBox::information(this, qAppName(), tr("Text was not found."));
+            return;
+        }
+    }
 
-		adjustMarginWidth();
-	}
-}
-
-int IdeCodeEditor::lines() const
-{
-	return m_textEdit->lines();
-}
-
-void IdeCodeEditor::getCursorPosition(int* line, int* index) const
-{
-	m_textEdit->getCursorPosition(line, index);
-}
-
-void IdeCodeEditor::setCursorPosition(int line, int index)
-{
-	m_textEdit->setCursorPosition(line, index);
-}
-
-bool IdeCodeEditor::readOnly() const
-{
-	return m_textEdit->isReadOnly();
-}
-
-void IdeCodeEditor::setReadOnly(bool value)
-{
-	m_textEdit->setReadOnly(value);
-}
-
-bool IdeCodeEditor::externalOkCancelButtons() const
-{
-	return true;
-}
-
-void IdeCodeEditor::activateEditor()
-{
-	m_textEdit->setFocus();
-}
-
-void IdeCodeEditor::setCustomMenuActions(QList<QAction*> actions)
-{
-	m_textEdit->setCustomMenuActions(actions);
-	return;
-}
-
-void IdeCodeEditor::findFirst(QString findText, bool caseSensitive)
-{
-	if (findText.isEmpty() == true)
-	{
-		return;
-	}
-
-	bool result = false;
-
-	if (m_findText == findText && caseSensitive == m_findCaseSensitive)
-	{
-		result = m_textEdit->findNext();
-	}
-	else
-	{
-		result = m_textEdit->findFirst(findText, false/*regular*/, caseSensitive, false/*whole*/, true/*wrap*/);
-
-		m_findCaseSensitive = caseSensitive;
-
-		m_findText = findText;
-	}
-
-	if (result == false)
-	{
-		m_textEdit->selectAll(false);
-
-		result = m_textEdit->findFirst(findText, false/*regular*/, caseSensitive, false/*whole*/, true/*wrap*/);
-
-		m_findCaseSensitive = caseSensitive;
-
-		m_findText = findText;
-	}
-
-	if (result == false)
-	{
-		QMessageBox::information(this, qAppName(), tr("Text was not found."));
-	}
-}
-
-void IdeCodeEditor::findNext()
-{
-	if (m_findText.isEmpty() == true)
-	{
-		return;
-	}
-
-	if (m_findFirst == true)
-	{
-		m_findFirst = false;
-
-		bool result = m_textEdit->findFirst(m_findText, false/*regular*/, m_findCaseSensitive, false/*whole*/, true/*wrap*/);
-
-		if (result == false)
-		{
-			QMessageBox::information(this, qAppName(), tr("Text was not found."));
-		}
-	}
-	else
-	{
-		m_textEdit->findNext();
-	}
-
-	return;
-}
-
-void IdeCodeEditor::replace(QString findText, QString replaceText, bool caseSensitive)
-{
-	if (findText.isEmpty() || replaceText.isEmpty())
-	{
-		return;
-	}
-
-	if (findText == m_findText)
-	{
-		m_textEdit->replace(replaceText);
-		return;
-	}
-
-	m_findText = findText;
-
-	if (m_textEdit->findFirst(findText, false/*regular*/, caseSensitive, false/*whole*/, true/*wrap*/) == false)
-	{
-		return;
-	}
-
-	m_textEdit->replace(replaceText);
+    replace(replaceText);
 }
 
 
-void IdeCodeEditor::replaceAll(QString findText, QString replaceText, bool selectedOnly, bool caseSensitive)
+void IdeCodeEditor::onReplaceAll(QString findText, QString replaceText, bool selectedOnly, bool caseSensitive)
 {
-	if (findText.isEmpty() || replaceText.isEmpty())
-	{
-		return;
-	}
+    if (findText.isEmpty() || replaceText.isEmpty())
+    {
+        return;
+    }
 
-	QString selectedText;
+    QString st;
 
-	if (selectedOnly == true)
-	{
-		selectedText = m_textEdit->selectedText();
-	}
-	else
-	{
-		selectedText = m_textEdit->text();
-	}
+    if (selectedOnly == true)
+    {
+        st = selectedText();
+    }
+    else
+    {
+        st = text();
+    }
 
-	qsizetype counter = selectedText.count(findText, caseSensitive == true ? Qt::CaseSensitive : Qt::CaseInsensitive);
+    qsizetype counter = st.count(findText, caseSensitive == true ? Qt::CaseSensitive : Qt::CaseInsensitive);
 
-	if (counter == 0)
-	{
-		QMessageBox::information(this, qAppName(), tr("Text was not found."));
-		return;
-	}
+    if (counter == 0)
+    {
+        QMessageBox::information(this, qAppName(), tr("Text was not found."));
+        return;
+    }
 
-	selectedText.replace(findText, replaceText, caseSensitive == true ? Qt::CaseSensitive : Qt::CaseInsensitive);
+    st.replace(findText, replaceText, caseSensitive == true ? Qt::CaseSensitive : Qt::CaseInsensitive);
 
-	if (selectedOnly == true)
-	{
-		m_textEdit->replaceSelectedText(selectedText);
-	}
-	else
-	{
-		m_textEdit->setText(selectedText);
-	}
+    if (selectedOnly == true)
+    {
+        replace(st);
+    }
+    else
+    {
+        setText(st);
+    }
 
-	QMessageBox::information(this, qAppName(), tr("%1 replacements occured.").arg(counter));
+    QMessageBox::information(this, qAppName(), tr("%1 replacements occured.").arg(counter));
 }
 
-  void IdeCodeEditor::hasSelectedText(bool* result)
+  void IdeCodeEditor::onHasSelectedText(bool* result)
 {
-	if (result == nullptr)
-	{
-		Q_ASSERT(result);
-		return;
-	}
+    if (result == nullptr)
+    {
+        Q_ASSERT(result);
+        return;
+    }
 
-	*result = m_textEdit->hasSelectedText();
-	return;
+    *result = hasSelectedText();
+    return;
 }
 
 bool IdeCodeEditor::eventFilter(QObject* obj, QEvent* event)
 {
-	if (event->type() == QEvent::KeyPress)
-	{
-		QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+    if (event->type() == QEvent::KeyPress)
+    {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
 
-		if (keyEvent->key() == Qt::Key_Escape)
-		{
-			return true;
-		}
+        if (keyEvent->key() == Qt::Key_Escape)
+        {
+            emit escapePressed();
+            return true;
+        }
 
-		if (obj == m_textEdit)
-		{
-			if (keyEvent->key() == Qt::Key_F && (keyEvent->modifiers() & Qt::ControlModifier))
-			{
-				if (m_findReplace == nullptr)
-				{
-					m_findReplace = new DialogFindReplace(this);
+        if (obj == this)
+        {
+            if ((keyEvent->key() == Qt::Key_F && (keyEvent->modifiers() & Qt::ControlModifier)) ||
+                    (keyEvent->key() == Qt::Key_F3 && m_findText.isEmpty() == true))
+            {
+                if (m_findReplace == nullptr)
+                {
+                    m_findReplace = new DialogFindReplace(this);
 
-					connect(m_findReplace, &DialogFindReplace::findFirst, this, &IdeCodeEditor::findFirst);
-					connect(m_findReplace, &DialogFindReplace::replace, this, &IdeCodeEditor::replace);
-					connect(m_findReplace, &DialogFindReplace::replaceAll, this, &IdeCodeEditor::replaceAll);
-					connect(m_findReplace, &DialogFindReplace::hasSelectedText, this, &IdeCodeEditor::hasSelectedText, Qt::DirectConnection);
-				}
+                    connect(m_findReplace, &DialogFindReplace::findFirst, this, &IdeCodeEditor::onFind);
+                    connect(m_findReplace, &DialogFindReplace::replace, this, &IdeCodeEditor::onReplace);
+                    connect(m_findReplace, &DialogFindReplace::replaceAll, this, &IdeCodeEditor::onReplaceAll);
+                    connect(m_findReplace, &DialogFindReplace::hasSelectedText, this, &IdeCodeEditor::onHasSelectedText, Qt::DirectConnection);
+                }
 
-				m_findReplace->show();
+                m_findReplace->show();
 
-				return true;
-			}
+                return true;
+            }
 
-			if (keyEvent->key() == Qt::Key_F3)
-			{
-				findNext();
-				return true;
-			}
+            if (keyEvent->key() == Qt::Key_F3)
+            {
+                onFind(m_findText, m_findCaseSensitive);
+                return true;
+            }
 
-			if (keyEvent->key() == Qt::Key_Tab && (keyEvent->modifiers() & Qt::ControlModifier))
-			{
-				emit ctrlTabKeyPressed();
-				return true;
-			}
+            if (keyEvent->key() == Qt::Key_Tab && (keyEvent->modifiers() & Qt::ControlModifier))
+            {
+                emit ctrlTabKeyPressed();
+                return true;
+            }
 
-			if (keyEvent->key() == Qt::Key_S && (keyEvent->modifiers() & Qt::ControlModifier))
-			{
-				emit saveKeyPressed();
-			}
+            if (keyEvent->key() == Qt::Key_S && (keyEvent->modifiers() & Qt::ControlModifier))
+            {
+                emit saveKeyPressed();
+            }
 
-			if (keyEvent->key() == Qt::Key_W && (keyEvent->modifiers() & Qt::ControlModifier))
-			{
-				emit closeKeyPressed();
-			}
-		}
-	}
+            if (keyEvent->key() == Qt::Key_W && (keyEvent->modifiers() & Qt::ControlModifier))
+            {
+                emit closeKeyPressed();
+            }
+        }
+    }
 
-	// pass the event on to the parent class
-	return PropertyTextEditor::eventFilter(obj, event);
+    // pass the event on to the parent class
+    return CodeEditor::eventFilter(obj, event);
 }
 
-void IdeCodeEditor::onCustomContextMenuAboutToBeShown()
+void IdeCodeEditor::onCursorPositionChanged()
 {
-	emit customContextMenuAboutToBeShown();
+    int line = 0;
+    int index = 0;
+
+    getCursorPosition(&line, &index);
+
+    emit cursorPositionChangedTo(line, index);
 }
 
-void IdeCodeEditor::onCursorPositionChanged(int line, int index)
+//
+// IdeCodePropertyEditor
+//
+IdeCodePropertyEditor::IdeCodePropertyEditor(CodeType codeType, QWidget* parent)
+    :ExtWidgets::PropertyTextEditor(parent)
 {
-	emit cursorPositionChanged(line, index);
+    m_textEdit = new IdeCodeEditor(codeType, this);
+
+    QHBoxLayout* l = new QHBoxLayout(this);
+    l->setContentsMargins(0, 0, 0, 0);
+    l->addWidget(m_textEdit);
+
+    connect(m_textEdit, &CodeEditor::textChanged, this, &PropertyTextEditor::textChanged);
+
 }
 
-void IdeCodeEditor::onTextChanged()
+IdeCodePropertyEditor::~IdeCodePropertyEditor()
 {
-	emit textChanged();
+
 }
 
-void IdeCodeEditor::adjustMarginWidth()
+QString IdeCodePropertyEditor::text() const
 {
-	// Adjust margin field width
-	//
-	int linesCount = m_textEdit->lines();
+    return m_textEdit->text();
 
-	int signCount = static_cast<int>(log10(linesCount) + 0.5);
-	if (signCount < 4)
-	{
-		signCount = 4;
-	}
-	signCount += 2;
+}
 
-	QFontMetrics fm(m_textEdit->lexer()->defaultFont());
+void IdeCodePropertyEditor::setText(const QString& text)
+{
+    m_textEdit->setText(text);
+}
 
-	QString sample = QString().fill('0', signCount);
+bool IdeCodePropertyEditor::readOnly() const
+{
+    return m_textEdit->isReadOnly();
+}
 
-	int marginWidth = static_cast<int>(fm.boundingRect(sample).width());
+void IdeCodePropertyEditor::setReadOnly(bool value)
+{
+    m_textEdit->setReadOnly(value);
+}
 
-	m_textEdit->setMarginWidth(0, marginWidth);
-
-	return;
+bool IdeCodePropertyEditor::externalOkCancelButtons() const
+{
+    return true;
 }
 
 //

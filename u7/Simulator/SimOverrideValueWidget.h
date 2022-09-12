@@ -1,10 +1,9 @@
 #pragma once
 #include "../../Simulator/Simulator.h"
 #include "../../Simulator/SimOverrideSignals.h"
-#include "../../QScintilla/src/Qsci/qsciscintilla.h"
-#include "../../lib/QScintillaLexers/LexerJavaScript.h"
 #include "../../DbLib/DbController.h"
 #include "../../lib/QDoublevalidatorEx.h"
+#include "CodeEditor.h"
 
 
 namespace SimOverrideUI
@@ -134,8 +133,7 @@ namespace SimOverrideUI
 		QPushButton* m_saveScriptButton = nullptr;
 
 		QLabel* m_scriptLabel = nullptr;
-		QsciScintilla* m_scriptEdit = nullptr;
-		LexerJavaScript m_lexer;
+        CodeEditor* m_scriptEdit = nullptr;
 
 		QDialogButtonBox* m_buttonBox = nullptr;
 

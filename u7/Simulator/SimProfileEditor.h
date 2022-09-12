@@ -2,8 +2,7 @@
 
 #include "../../Simulator/SimProfiles.h"
 #include "../DbLib/DbController.h"
-#include "../QScintilla/src/Qsci/qsciscintilla.h"
-#include "../lib/QScintillaLexers/LexerJavaScript.h"
+#include "CodeEditor.h"
 
 class SimProfileEditor : public QDialog
 {
@@ -41,8 +40,7 @@ private:
 
 	DbController* m_db = nullptr;
 
-	LexerJavaScript m_lexer;
-	QsciScintilla* m_textEdit = nullptr;
+    CodeEditor* m_textEdit = nullptr;
 
 	static SimProfileEditor* m_simProfileEditor;
 	static const QString m_exampleText;

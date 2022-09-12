@@ -102,8 +102,7 @@ SvgEditor::SvgEditor(QWidget* parent):
 
 	// TextEditor
 	//
-	m_textEdit = new QsciScintilla();
-	m_textEdit->setUtf8(true);
+    m_textEdit = new CodeEditor(this);
 
 #if defined(Q_OS_WIN)
 		QFont f = QFont("Consolas");
@@ -115,14 +114,11 @@ SvgEditor::SvgEditor(QWidget* parent):
 		//f.setPixelSize(font().pixelSize());
 #endif
 
-	m_lexerXml.setDefaultFont(f);
-	m_textEdit->setLexer(&m_lexerXml);
-
 	m_textEdit->setFont(f);
-	m_textEdit->setTabWidth(4);
-	m_textEdit->setAutoIndent(true);
 
-	connect(m_textEdit, &QsciScintilla::textChanged, this, &SvgEditor::onTextChanged);
+    XmlHighlighter::createXmlHighlighter(m_textEdit->document());
+
+    connect(m_textEdit, &CodeEditor::textChanged, this, &SvgEditor::onTextChanged);
 
 	// Top Layout
 	//

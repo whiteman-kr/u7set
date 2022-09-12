@@ -88,7 +88,7 @@ SimProfileEditor::SimProfileEditor(DbController* dbController, QWidget* parent)	
 	// Create Text Editor
 	//
 
-	m_textEdit = new QsciScintilla(this);
+    m_textEdit = new CodeEditor(this);
 
 #if defined(Q_OS_WIN)
 		QFont f = QFont("Consolas");
@@ -96,18 +96,13 @@ SimProfileEditor::SimProfileEditor(DbController* dbController, QWidget* parent)	
 		QFont f = QFont("Courier");
 #endif
 
-	// Set up lexer
-	//
-	m_lexer.setDefaultFont(f);
-	m_textEdit->setLexer(&m_lexer);
-
 	m_textEdit->setFont(f);
-	m_textEdit->setTabWidth(4);
-	m_textEdit->setAutoIndent(true);
 
-	connect(m_textEdit, &QsciScintilla::textChanged, this, &SimProfileEditor::textChanged);
+    JsHighlighter::createJsHighlighter(m_textEdit->document());
 
-	// Buttons
+    connect(m_textEdit, &CodeEditor::textChanged, this, &SimProfileEditor::textChanged);
+
+    // Buttons
 	//
 	QPushButton* buttonCheck = new QPushButton(tr("Check"));
 	QPushButton* buttonExample = new QPushButton(tr("Example"));
@@ -141,7 +136,7 @@ SimProfileEditor::SimProfileEditor(DbController* dbController, QWidget* parent)	
 
 	// Load file from database
 	//
-	std::vector<DbFileInfo> fileList;
+    std::vector<DbFileInfo> fileList;
 
 	bool ok = m_db->getFileList(&fileList, DbDir::EtcDir, Db::File::SimProfilesFileName, true, this);
 
@@ -153,13 +148,11 @@ SimProfileEditor::SimProfileEditor(DbController* dbController, QWidget* parent)	
 		{
 			QString text(file->data());
 
-			m_textEdit->blockSignals(true);
-			m_textEdit->setText(text);
-			m_textEdit->blockSignals(false);
+            m_textEdit->setText(text);
 
 			m_startText = text;
 		}
-	}
+    }
 
 	// Resize dialog
 	//
@@ -180,7 +173,7 @@ SimProfileEditor::SimProfileEditor(DbController* dbController, QWidget* parent)	
 		resize(static_cast<int>(screen.width() * 0.35),
 			   static_cast<int>(screen.height() * 0.35));
 		move(screen.center() - rect().center());
-	}
+    }
 
 	return;
 }

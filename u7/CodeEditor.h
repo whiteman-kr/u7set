@@ -1,0 +1,188 @@
+#pragma once
+
+#include <QWidget>
+#include <QMenu>
+#include <QPainter>
+#include <QTextBlock>
+#include <QPlainTextEdit>
+#include <QSyntaxHighlighter>
+#include <QRegularExpression>
+
+class Highlighter;
+
+struct FindContext
+{
+    QString text;
+    bool caseSensitive = false;
+    bool wholeWord = false;
+};
+
+class CodeEditor : public QPlainTextEdit
+{
+    Q_OBJECT
+
+public:
+    CodeEditor(QWidget *parent = nullptr);
+
+    QString text() const;
+    void setText(const QString& text);
+
+    bool autoIdent() const;
+    void setAutoIndent(bool autoIdent);
+
+    void lineNumberAreaPaintEvent(QPaintEvent *event);
+
+    void setCustomMenuActions(QList<QAction*> actions);
+
+    void setFont(const QFont& f);
+
+    // State
+    //
+    bool isModified() const;
+    void setModified(bool value);
+
+    // Text format
+    //
+    void setCaretLineVisible(bool visible);
+    void setCaretLineBackgroundColor(QColor color);
+    void setCaretWidth(int w);
+    void setTabWidth(int w);
+
+    // Cursor pos
+    //
+    void getCursorPosition(int* line, int* index) const;
+    void setCurrentLine(int line);
+    int lines() const;
+
+    // Line Number Area
+    //
+    bool lineNumberAreaVisible() const;
+    void setLineNumberAreaVisible(bool visible);
+
+    int lineNumberAreaWidth();
+
+    int customLineNumberAreaWidth();
+    void setCustomLineNumberAreaWidth(int width);
+
+    QColor lineNumberAreaBackgroundColor() const;
+    void setLineNumberAreaBackgroundColor(const QColor& color);
+
+    QColor lineNumberAreaForegroundColor() const;
+    void setLineNumberAreaForegroundColor(const QColor& color);
+
+    // Find/replace
+    //
+    bool findFirst(const QString& text, bool caseSensitive, bool whole);
+    bool findNext();
+
+    bool hasSelectedText() const;
+    QString selectedText() const;
+
+    void replace(const QString& text);
+
+private:
+    void keyPressEvent( QKeyEvent* e) override;
+    void resizeEvent(QResizeEvent* event) override;
+    void contextMenuEvent (QContextMenuEvent *e) override;
+
+signals:
+    void customContextMenuAboutToBeShown();
+
+private slots:
+    void updateLineNumberAreaWidth();
+    void updateLineNumberArea(const QRect &rect, int dy);
+
+    void highlightCurrentLine();
+
+private:
+    QWidget* m_lineNumberArea = nullptr;
+
+    bool m_autoIndent = true;
+
+    QList<QAction*> m_customMenuActions;
+    QMenu m_replaceMenu;
+    QAction* m_replaceSelectedAction = nullptr;
+    QAction* m_replaceAllAction = nullptr;
+
+    bool m_caretLineVisible = true;
+    QColor m_caretLineColor = QColor(0xf0f0f0);
+
+    int m_customLineNumberAreaWidth = -1;
+    bool m_lineNumberAreaVisible = true;
+    QColor m_lineNumberAreaBackgroundColor = QColor(Qt::lightGray);
+    QColor m_lineNumberAreaForegroundColor = QColor(Qt::black);
+
+    FindContext m_findContext;
+
+    bool m_modified = false;
+
+    QString m_tabSymbol;
+};
+
+class LineNumberArea : public QWidget
+{
+public:
+    LineNumberArea(CodeEditor *editor);
+
+private:
+    void paintEvent(QPaintEvent *event) override;
+    QSize sizeHint() const override;
+
+private:
+    CodeEditor *m_codeEditor = nullptr;
+};
+
+class Highlighter : public QSyntaxHighlighter
+{
+    Q_OBJECT
+
+protected:
+    Highlighter(QTextDocument *parent = nullptr);
+
+protected:
+    virtual void initializeFormat() = 0;
+
+    void highlightBlock(const QString &text) override;
+
+    virtual void extraHighlightBlock(const QString &text) {Q_UNUSED(text);}
+
+protected:
+    struct HighlightingRule
+    {
+        QRegularExpression pattern;
+        QTextCharFormat format;
+    };
+    QList<HighlightingRule> m_highlightingRules;
+
+};
+
+class JsHighlighter : public Highlighter
+{
+
+public:
+    static JsHighlighter* createJsHighlighter(QTextDocument *parent);
+
+private:
+    JsHighlighter(QTextDocument *parent);
+
+private:
+    virtual void initializeFormat() override;
+    virtual void extraHighlightBlock(const QString &text) override;
+
+private:
+    QTextCharFormat m_multiLineCommentFormat;
+};
+
+class XmlHighlighter : public Highlighter
+{
+
+public:
+    static XmlHighlighter* createXmlHighlighter(QTextDocument *parent);
+
+private:
+    XmlHighlighter(QTextDocument *parent);
+
+private:
+    virtual void initializeFormat() override;
+};
+

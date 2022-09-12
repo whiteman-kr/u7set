@@ -34,11 +34,10 @@
 #include "../Builder/AppSignalSetProvider.h"
 #include "Forms/ComparePropertyObjectDialog.h"
 #include "Settings.h"
-#include "../lib/QScintillaLexers/LexerJavaScript.h"
 #include "../lib/Ui/TextEditCompleter.h"
 #include "../lib/QDoublevalidatorEx.h"
 #include <cfloat>
-
+#include "CodeEditor.h"
 
 const EditSchemaWidget::MouseStateCursor EditSchemaWidget::m_mouseStateCursor[] =
 	{
@@ -5753,21 +5752,16 @@ void EditSchemaWidget::f2KeyForValue(SchemaItemPtr item)
 	//
 	QLabel* preDrawScriptLabel = new QLabel("PreDrawScript:", &d);
 
-	QsciScintilla* preDrawScriptEdit = new QsciScintilla(&d);
-	LexerJavaScript lexer;
-	preDrawScriptEdit->setText(preDrawScript);
-	preDrawScriptEdit->setMarginType(0, QsciScintilla::NumberMargin);
-	preDrawScriptEdit->setMarginWidth(0, 40);
+    CodeEditor* preDrawScriptEdit = new CodeEditor(&d);
+    JsHighlighter::createJsHighlighter(preDrawScriptEdit->document());
+
+    preDrawScriptEdit->setText(preDrawScript);
 
 #if defined(Q_OS_WIN)
 	preDrawScriptEdit->setFont(QFont("Consolas"));
 #else
 	preDrawScriptEdit->setFont(QFont("Courier"));
 #endif
-	preDrawScriptEdit->setTabWidth(4);
-	preDrawScriptEdit->setAutoIndent(true);
-	lexer.setFont(preDrawScriptEdit->font());
-	preDrawScriptEdit->setLexer(&lexer);
 
 	QPushButton* preDrawScriptTemplate = new QPushButton(tr("Paste PreDrawScript Template"), &d);
 
@@ -5904,24 +5898,16 @@ void EditSchemaWidget::f2KeyForImageValue(SchemaItemPtr item)
 	//
 	QLabel* preDrawScriptLabel = new QLabel("PreDrawScript:", &d);
 
-	QsciScintilla* preDrawScriptEdit = new QsciScintilla(&d);
-	preDrawScriptEdit->setText(preDrawScript);
-	preDrawScriptEdit->setMarginType(0, QsciScintilla::NumberMargin);
-	preDrawScriptEdit->setMarginWidth(0, 40);
+    CodeEditor* preDrawScriptEdit = new CodeEditor(&d);
+    JsHighlighter::createJsHighlighter(preDrawScriptEdit->document());
+
+    preDrawScriptEdit->setText(preDrawScript);
 
 #if defined(Q_OS_WIN)
-	QFont f = QFont("Consolas");
+    preDrawScriptEdit->setFont(QFont("Consolas"));
 #else
-	QFont f = QFont("Courier");
+    preDrawScriptEdit->setFont(QFont("Courier"));
 #endif
-
-	preDrawScriptEdit->setFont(f);
-	preDrawScriptEdit->setTabWidth(4);
-	preDrawScriptEdit->setAutoIndent(true);
-
-	LexerJavaScript lexer;
-	lexer.setFont(f);
-	preDrawScriptEdit->setLexer(&lexer);
 
 	QPushButton* preDrawScriptTemplate = new QPushButton(tr("Paste PreDrawScript Template"), &d);
 

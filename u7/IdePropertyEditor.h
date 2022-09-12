@@ -1,8 +1,9 @@
 #pragma once
 
-#include "../QScintilla/src/Qsci/qsciscintilla.h"
-#include "../lib/QScintillaLexers/LexerXML.h"
-#include "../lib/QScintillaLexers/LexerJavaScript.h"
+//#include "../QScintilla/src/Qsci/qsciscintilla.h"
+//#include "../lib/QScintillaLexers/LexerXML.h"
+//#include "../lib/QScintillaLexers/LexerJavaScript.h"
+#include "CodeEditor.h"
 
 #include "../lib/PropertyEditor.h"
 #include "../lib/PropertyTable.h"
@@ -75,24 +76,24 @@ class DialogFindReplace : public QDialog
 {
     Q_OBJECT
 public:
-	DialogFindReplace(QWidget* parent);
-	~DialogFindReplace();
+    DialogFindReplace(QWidget* parent);
+    ~DialogFindReplace();
 
 signals:
-	void findFirst(QString findText, bool caseSensitive);
-	void replace(QString findText, QString text, bool caseSensitive);
-	void replaceAll(QString findText, QString replaceText, bool selectedOnly, bool caseSensitive);
+    void findFirst(QString findText, bool caseSensitive);
+    void replace(QString findText, QString text, bool caseSensitive);
+    void replaceAll(QString findText, QString replaceText, bool selectedOnly, bool caseSensitive);
 
-	void hasSelectedText(bool* result);	// Use Qt::DirectConnection for this
+    void hasSelectedText(bool* result);	// Use Qt::DirectConnection for this
 
 private slots:
     void onFind();
     void onReplace();
-	void onReplaceAllButton();
-	void onReplaceAll(bool selectedOnly);
+    void onReplaceAllButton();
+    void onReplaceAll(bool selectedOnly);
 
 private:
-	void saveCompleters();
+    void saveCompleters();
 
 private:
     QLineEdit* m_findEdit = nullptr;
@@ -102,119 +103,88 @@ private:
     QPushButton* m_replaceButton = nullptr;
     QPushButton* m_replaceAllButton = nullptr;
 
-	QCompleter* m_findCompleter = nullptr;
-	QCompleter* m_replaceCompleter = nullptr;
+    QCompleter* m_findCompleter = nullptr;
+    QCompleter* m_replaceCompleter = nullptr;
 
-	QCheckBox* m_caseSensitiveCheck = nullptr;
-	static bool m_caseSensitive;
+    QCheckBox* m_caseSensitiveCheck = nullptr;
+    static bool m_caseSensitive;
 
-	QMenu m_replaceMenu;
-	QAction* m_replaceSelectedAction = nullptr;
-	QAction* m_replaceAllAction = nullptr;
+    QMenu m_replaceMenu;
+    QAction* m_replaceSelectedAction = nullptr;
+    QAction* m_replaceAllAction = nullptr;
 };
-
-
-class IdeQsciScintilla : public QsciScintilla
-{
-	Q_OBJECT
-public:
-	IdeQsciScintilla();
-	virtual ~IdeQsciScintilla();
-
-	void setCustomMenuActions(QList<QAction*> actions);
-
-private:
-	virtual void contextMenuEvent (QContextMenuEvent *e) override;
-
-signals:
-	void customContextMenuAboutToBeShown();
-
-private:
-	QList<QAction*> m_customMenuActions;
-	QMenu m_replaceMenu;
-	QAction* m_replaceSelectedAction = nullptr;
-	QAction* m_replaceAllAction = nullptr;
-};
-
 
 //
 // IdeCodeEditor
 //
 enum class CodeType
 {
-	JavaScript,
+    JavaScript,
     Xml,
     Unknown
 };
 
-
-class IdeCodeEditor : public ExtWidgets::PropertyTextEditor
+class IdeCodeEditor : public CodeEditor
 {
     Q_OBJECT
 public:
     IdeCodeEditor(CodeType codeType, QWidget* parent);
     ~IdeCodeEditor();
 
-	virtual QString text() const override;
-	virtual void setText(const QString& text) override;
-
-	int lines() const;
-	void getCursorPosition(int* line, int* index) const;
-	void setCursorPosition(int line, int index);
-
-	bool readOnly() const override;
-	void setReadOnly(bool value) override;
-
-	bool externalOkCancelButtons() const override;
-
-	void activateEditor();
-	void setCustomMenuActions(QList<QAction*> actions);
-
 public slots:
-	void findFirst(QString findText, bool caseSensitive);
-	void findNext();
-	void replace(QString findText, QString replaceText, bool caseSensitive);
-	void replaceAll(QString findText, QString replaceText, bool selectedOnly, bool caseSensitive);
-
-	void hasSelectedText(bool* result);
+    void onFind(QString findText, bool caseSensitive);
+    void onReplace(QString findText, QString replaceText, bool caseSensitive);
+    void onReplaceAll(QString findText, QString replaceText, bool selectedOnly, bool caseSensitive);
+    void onHasSelectedText(bool* result);
 
 signals:
-	void customContextMenuAboutToBeShown();
-	void cursorPositionChanged(int line, int index);
-	void textChanged();
-	void saveKeyPressed();
-	void closeKeyPressed();
-	void ctrlTabKeyPressed();
+    void cursorPositionChangedTo(int line, int index);
+    void saveKeyPressed();
+    void closeKeyPressed();
+    void ctrlTabKeyPressed();
+    void escapePressed();
 
 private:
-	bool eventFilter(QObject* obj, QEvent* event) override;
+    bool eventFilter(QObject* obj, QEvent* event) override;
 
 private slots:
-	void onCustomContextMenuAboutToBeShown();
-	void onCursorPositionChanged(int line, int index);
-	void onTextChanged();
+    void onCursorPositionChanged();
 
 private:
-	void adjustMarginWidth();
+    void adjustMarginWidth();
 
 private:
-	IdeQsciScintilla* m_textEdit = nullptr;
-
-	CodeType m_codeType = CodeType::Unknown;
-
-	LexerJavaScript m_lexerJavaScript;
-	LexerXML m_lexerXml;
-
     QWidget* m_parent = nullptr;
+
+    CodeType m_codeType = CodeType::Unknown;
+
+    Highlighter* m_highlighter = nullptr;
 
     DialogFindReplace* m_findReplace = nullptr;
 
-	bool m_findFirst = true;
-
-	static bool m_findCaseSensitive;
-	static QString m_findText;
+    bool m_findCaseSensitive = false;
+    QString m_findText;
 };
 
+class IdeCodePropertyEditor : public ExtWidgets::PropertyTextEditor
+{
+public:
+    IdeCodePropertyEditor(CodeType codeType, QWidget* parent);
+    ~IdeCodePropertyEditor();
+
+private:
+    virtual QString text() const override;
+    virtual void setText(const QString& text) override;
+
+    bool readOnly() const override;
+    void setReadOnly(bool value) override;
+
+    bool externalOkCancelButtons() const override;
+
+private:
+    IdeCodeEditor* m_textEdit = nullptr;
+
+};
 
 //
 // IdeTuningFiltersEditor

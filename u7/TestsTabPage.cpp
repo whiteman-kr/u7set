@@ -1300,7 +1300,7 @@ void TestsWidget::openFile()
 	codeEditor->setCustomMenuActions(customMenuActions);
 
 	connect(codeEditor, &IdeCodeEditor::textChanged, this, &TestsWidget::textChanged);
-	connect(codeEditor, &IdeCodeEditor::cursorPositionChanged, this, &TestsWidget::cursorPositionChanged);
+    connect(codeEditor, &IdeCodeEditor::cursorPositionChangedTo, this, &TestsWidget::cursorPositionChanged);
 	connect(codeEditor, &IdeCodeEditor::closeKeyPressed, this, &TestsWidget::onCloseKeyPressed);
 	connect(codeEditor, &IdeCodeEditor::saveKeyPressed, this, &TestsWidget::onSaveKeyPressed);
 	connect(codeEditor, &IdeCodeEditor::ctrlTabKeyPressed, this, &TestsWidget::onCtrlTabKeyPressed);
@@ -1945,8 +1945,8 @@ void TestsWidget::onGoToLine()
 		newLine  = maxLine;
 	}
 
-	codeEditor->setCursorPosition(newLine - 1, 0);
-	codeEditor->activateEditor();
+    codeEditor->setCurrentLine(newLine - 1);
+    codeEditor->setFocus();
 
 	return;
 }
@@ -2506,7 +2506,7 @@ void TestsWidget::setCurrentDocument(int fileId)
 		if (docFileId == fileId)
 		{
 			codeEditor->setVisible(true);
-			codeEditor->activateEditor();
+            codeEditor->setFocus();
 
 			if (m_cursorPosButton == nullptr)
 			{
@@ -3865,7 +3865,7 @@ void TestsWidget::updateOpenDocumentInfo(int fileId)
 
 	QString itemName = document.fileName();
 
-	if (document.codeEditor()->readOnly() == true)
+    if (document.codeEditor()->isReadOnly() == true)
 	{
 		itemName += QObject::tr(" [Read-only]");
 	}

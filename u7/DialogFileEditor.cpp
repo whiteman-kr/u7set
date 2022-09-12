@@ -118,7 +118,7 @@ bool DialogFileEditor::saveChanges()
 
 void DialogFileEditor::accept()
 {
-	if (m_editor->modified() == true)
+    if (m_editor->isModified() == true)
 	{
 		if (saveChanges() == false)
 		{
@@ -132,7 +132,7 @@ void DialogFileEditor::accept()
 
 void DialogFileEditor::reject()
 {
-	if (m_editor->modified() == true)
+    if (m_editor->isModified() == true)
 	{
 		QMessageBox::StandardButton result = QMessageBox::warning(this, qAppName(), tr("Do you want to save your changes?"), QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
 

@@ -3,7 +3,6 @@ TEMPLATE = subdirs
 CONFIG += ordered
 
 SUBDIRS += Protobuf \
-    QScintilla/src/qscintilla.pro \
     TrendView \
 	AppSignalLib \
 	UtilsLib \

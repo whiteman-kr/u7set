@@ -1,0 +1,694 @@
+#include "CodeEditor.h"
+
+#include <QRegularExpression>
+#include <QTimer>
+
+//
+// ------------------------------------------------------------------------------------------
+//
+CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
+{
+    m_tabSymbol.fill(QChar::Space, 4);
+
+    m_lineNumberArea = new LineNumberArea(this);
+
+    connect(this, &CodeEditor::blockCountChanged, this, &CodeEditor::updateLineNumberAreaWidth);
+    connect(this, &CodeEditor::updateRequest, this, &CodeEditor::updateLineNumberArea);
+    connect(this, &CodeEditor::cursorPositionChanged, this, &CodeEditor::highlightCurrentLine);
+
+    updateLineNumberAreaWidth();
+
+    highlightCurrentLine();
+
+    setWordWrapMode(QTextOption::NoWrap);
+
+    // Selection color
+    //
+    QPalette p = palette();
+    p.setColor(QPalette::Highlight, QColor(0x0078d7));
+    p.setColor(QPalette::HighlightedText, QColor(0xffffff));
+    setPalette(p);
+
+    connect(this, &CodeEditor::textChanged, this, [this](){
+        m_modified = true;
+    });
+
+    setCaretWidth(2);
+    setTabWidth(4);
+}
+
+QString CodeEditor::text() const
+{
+    return toPlainText();
+}
+
+void CodeEditor::setText(const QString& text)
+{
+    blockSignals(true);
+    setPlainText(text);
+    blockSignals(false);
+
+    updateLineNumberAreaWidth();
+}
+
+bool CodeEditor::autoIdent() const
+{
+    return m_autoIndent;
+}
+
+void CodeEditor::setAutoIndent(bool autoIdent)
+{
+    m_autoIndent = autoIdent;
+}
+
+
+void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
+{
+    QPainter painter(m_lineNumberArea);
+    painter.fillRect(event->rect(), lineNumberAreaBackgroundColor());
+
+    QTextBlock block = firstVisibleBlock();
+    int blockNumber = block.blockNumber();
+    int top = qRound(blockBoundingGeometry(block).translated(contentOffset()).top());
+    int bottom = top + qRound(blockBoundingRect(block).height());
+
+    while (block.isValid() && top <= event->rect().bottom())
+    {
+        if (block.isVisible() && bottom >= event->rect().top())
+        {
+            QString number = QString::number(blockNumber + 1);
+            painter.setPen(lineNumberAreaForegroundColor());
+            painter.drawText(0, top, m_lineNumberArea->width(), fontMetrics().height(),
+                             Qt::AlignRight, number);
+        }
+
+        block = block.next();
+        top = bottom;
+        bottom = top + qRound(blockBoundingRect(block).height());
+        ++blockNumber;
+    }
+}
+
+void CodeEditor::setCustomMenuActions(QList<QAction*> actions)
+{
+    m_customMenuActions = actions;
+}
+
+void CodeEditor::setFont(const QFont& f)
+{
+    QPlainTextEdit::setFont(f);
+
+    QFontMetrics fm(f);
+    setTabStopDistance(fm.horizontalAdvance(m_tabSymbol));
+}
+
+bool CodeEditor::isModified() const
+{
+    return m_modified;
+}
+
+void CodeEditor::setModified(bool value)
+{
+    m_modified = value;
+}
+
+void CodeEditor::setCaretLineVisible(bool visible)
+{
+    m_caretLineVisible = visible;
+}
+
+void CodeEditor::setCaretLineBackgroundColor(QColor color)
+{
+    m_caretLineColor = color;
+}
+
+void CodeEditor::setCaretWidth(int w)
+{
+    setCursorWidth(w);
+}
+
+void CodeEditor::setTabWidth(int w)
+{
+    m_tabSymbol.fill(QChar::Space, w);
+
+    QFontMetrics fm(font());
+    setTabStopDistance(fm.horizontalAdvance(m_tabSymbol));
+}
+
+void CodeEditor::getCursorPosition(int* line, int* index) const
+{
+    if (line == nullptr || index == nullptr)
+    {
+        Q_ASSERT(line);
+        Q_ASSERT(index);
+        return;
+    }
+
+    *line = textCursor().blockNumber() + 1;
+    *index= textCursor().columnNumber() + 1;
+    return;
+}
+
+void CodeEditor::setCurrentLine(int line)
+{
+    if (line > lines())
+    {
+        return;
+    }
+
+    moveCursor(QTextCursor::End);
+
+    QTextCursor cursor(document()->findBlockByLineNumber(line - 1));
+    setTextCursor(cursor);
+
+    QTimer::singleShot(10, this, [this](){
+        setFocus();
+    });
+}
+
+int CodeEditor::lines() const
+{
+    return document()->lineCount();
+}
+
+bool CodeEditor::lineNumberAreaVisible() const
+{
+    return m_lineNumberAreaVisible;
+}
+
+void CodeEditor::setLineNumberAreaVisible(bool visible)
+{
+    m_lineNumberAreaVisible = visible;
+}
+
+int CodeEditor::lineNumberAreaWidth()
+{
+    if (m_customLineNumberAreaWidth != -1)
+    {
+        return m_customLineNumberAreaWidth;
+    }
+
+    if (m_lineNumberAreaVisible == false)
+    {
+        return 0;
+    }
+
+    int digits = 1;
+    int max = qMax(1, blockCount());
+    while (max >= 10)
+    {
+        max /= 10;
+        ++digits;
+    }
+
+    int space = fontMetrics().horizontalAdvance(QLatin1Char('9')) * (digits);
+
+    return space;
+}
+
+int CodeEditor::customLineNumberAreaWidth()
+{
+    return m_customLineNumberAreaWidth;
+}
+
+void CodeEditor::setCustomLineNumberAreaWidth(int width)
+{
+    m_customLineNumberAreaWidth = width;
+}
+
+QColor CodeEditor::lineNumberAreaBackgroundColor() const
+{
+    return m_lineNumberAreaBackgroundColor;
+}
+
+void CodeEditor::setLineNumberAreaBackgroundColor(const QColor& color)
+{
+    m_lineNumberAreaBackgroundColor = color;
+}
+
+QColor CodeEditor::lineNumberAreaForegroundColor() const
+{
+    return m_lineNumberAreaForegroundColor;
+}
+
+void CodeEditor::setLineNumberAreaForegroundColor(const QColor& color)
+{
+    m_lineNumberAreaForegroundColor = color;
+}
+
+bool CodeEditor::findFirst(const QString& text, bool caseSensitive, bool whole)
+{
+    moveCursor(QTextCursor::Start);
+
+    m_findContext.text = text;
+    m_findContext.caseSensitive = caseSensitive;
+    m_findContext.wholeWord = whole;
+
+    return findNext();
+}
+
+bool CodeEditor::findNext()
+{
+    QTextDocument::FindFlags f = {};
+    if (m_findContext.caseSensitive == true)
+    {
+        f |= QTextDocument::FindCaseSensitively;
+    }
+    if (m_findContext.wholeWord == true)
+    {
+        f |= QTextDocument::FindWholeWords;
+    }
+
+    return find(m_findContext.text, f);
+}
+
+bool CodeEditor::hasSelectedText() const
+{
+    return textCursor().hasSelection();
+}
+
+QString CodeEditor::selectedText() const
+{
+    return textCursor().selectedText();
+}
+
+
+void CodeEditor::replace(const QString& text)
+{
+    QTextCursor cursor = textCursor();
+
+    if (cursor.hasSelection() == false)
+    {
+        return;
+    }
+
+    cursor.removeSelectedText();
+
+    // Save anchor and position before inserting text
+    //
+    int oldAnchor = cursor.anchor();
+    int oldPosition = cursor.position();
+
+    cursor.insertText(text);
+
+    // Select text between new cursor position and old selection start
+    //
+    int newPosition = 0, newAnchor = 0;
+    if(oldAnchor < oldPosition)
+    {
+        Q_ASSERT(false);
+        newAnchor = oldAnchor;
+        newPosition = cursor.position();
+    }
+    else
+    {
+        newAnchor = cursor.position();
+        newPosition = oldPosition;
+    }
+
+    cursor.setPosition(newAnchor, QTextCursor::MoveAnchor);
+    cursor.setPosition(newPosition, QTextCursor::KeepAnchor);
+
+    setTextCursor(cursor);
+}
+
+void CodeEditor::keyPressEvent(QKeyEvent* e)
+{
+    if (m_autoIndent == true &&
+            (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return || e->text() == "}"))
+    {
+        QString documentContents = document()->toPlainText();
+
+        if(documentContents.isEmpty() == false)
+        {
+            int indexToLeftOfCursor = textCursor().position() - 1;
+
+            if(indexToLeftOfCursor >= 0 && indexToLeftOfCursor < documentContents.length())
+            {
+                bool hitEnterAfterOpeningBrace = documentContents.at(indexToLeftOfCursor) == '{';
+                bool hitClosingBrace = e->text() == "}";
+
+                // Find the beginning of the current line
+                //
+                qsizetype currentLineStartIndex = documentContents.lastIndexOf('\n', indexToLeftOfCursor);
+                if (currentLineStartIndex == -1)
+                {
+                    currentLineStartIndex = 0;    // the beginning of the text
+                }
+                else
+                {
+                    currentLineStartIndex++;
+                }
+
+                if (hitClosingBrace == true)
+                {
+                    int openBracePos = documentContents.indexOf('{', currentLineStartIndex);
+                    bool lineHasOpeningBrace =  openBracePos != -1 && openBracePos < indexToLeftOfCursor;   // Needed to skip '{}' situation
+
+                    // Remove one tab symbol in current line
+                    //
+                    qsizetype lastTabSymbolStartIndex = documentContents.lastIndexOf(m_tabSymbol, indexToLeftOfCursor);
+                    if (lineHasOpeningBrace == false &&
+                            lastTabSymbolStartIndex != -1 &&
+                            currentLineStartIndex <= lastTabSymbolStartIndex)
+                    {
+                        // Set cursor before last tabSymbol
+
+                        qsizetype moveCount = indexToLeftOfCursor - lastTabSymbolStartIndex + 1 /*}*/;
+                        for (int i = 0; i < moveCount; i++)
+                        {
+                            moveCursor(QTextCursor::Left, QTextCursor::MoveAnchor);
+                        }
+
+                        // Select tab symbol
+
+                        for (int i = 0; i < m_tabSymbol.length(); i++)
+                        {
+                            moveCursor(QTextCursor::Right, QTextCursor::KeepAnchor);
+                        }
+
+                        // Remove tab symbol
+
+                        textCursor().removeSelectedText();
+
+                        // Move cursor after '}'
+
+                        for (int i = 0; i < (moveCount - m_tabSymbol.length()); i++)
+                        {
+                            moveCursor(QTextCursor::Right, QTextCursor::MoveAnchor);
+                        }
+                    }
+
+                    insertPlainText("}");
+                }
+                else
+                {
+                    insertPlainText("\n");
+
+                    // Find a whitespace part of the string from the beginning of the current line
+                    //
+
+                    static QRegularExpression regexp("\\S+");
+
+                    qsizetype currentTextStartIndex = documentContents.indexOf(regexp, currentLineStartIndex);
+
+                    if (currentTextStartIndex > currentLineStartIndex)
+                    {
+                        // Insert whitespace to the next line
+                        //
+                        QString currentLineStartWhiteSpace = documentContents.mid(currentLineStartIndex, currentTextStartIndex - currentLineStartIndex);
+
+                        insertPlainText(currentLineStartWhiteSpace);
+                    }
+
+                    if(hitEnterAfterOpeningBrace)
+                    {
+                        insertPlainText(m_tabSymbol);
+                    }
+                }
+
+                return;
+            }
+        }
+    }
+
+    QPlainTextEdit::keyPressEvent(e);
+}
+
+void CodeEditor::resizeEvent(QResizeEvent *e)
+{
+    QPlainTextEdit::resizeEvent(e);
+
+    QRect cr = contentsRect();
+    m_lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
+}
+
+void CodeEditor::contextMenuEvent (QContextMenuEvent *e)
+{
+    QMenu* menu = createStandardContextMenu();
+
+    if (m_customMenuActions.empty() == false)
+    {
+        emit customContextMenuAboutToBeShown();
+
+        menu->addSeparator();
+        menu->addActions(m_customMenuActions);
+    }
+    menu->exec(e->globalPos());
+}
+
+void CodeEditor::updateLineNumberAreaWidth()
+{
+    setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
+}
+
+void CodeEditor::updateLineNumberArea(const QRect &rect, int dy)
+{
+    if (dy)
+    {
+        m_lineNumberArea->scroll(0, dy);
+    }
+    else
+    {
+        m_lineNumberArea->update(0, rect.y(), m_lineNumberArea->width(), rect.height());
+    }
+
+    if (rect.contains(viewport()->rect()))
+    {
+        updateLineNumberAreaWidth();
+    }
+}
+
+void CodeEditor::highlightCurrentLine()
+{
+    QList<QTextEdit::ExtraSelection> extraSelections;
+
+    if (m_caretLineVisible == true && isReadOnly() == false)
+    {
+        QTextEdit::ExtraSelection selection;
+
+        selection.format.setBackground(m_caretLineColor);
+        selection.format.setProperty(QTextFormat::FullWidthSelection, true);
+        selection.cursor = textCursor();
+        selection.cursor.clearSelection();
+        extraSelections.append(selection);
+    }
+
+    setExtraSelections(extraSelections);
+}
+
+
+
+//
+// ------------------------------------------------------------------------------------------
+//
+LineNumberArea::LineNumberArea(CodeEditor *editor) :
+    QWidget(editor),
+    m_codeEditor(editor)
+{
+
+}
+
+QSize LineNumberArea::sizeHint() const
+{
+    return QSize(m_codeEditor->lineNumberAreaWidth(), 0);
+}
+
+void LineNumberArea::paintEvent(QPaintEvent *event)
+{
+    m_codeEditor->lineNumberAreaPaintEvent(event);
+}
+
+//
+// ------------------------------------------------------------------------------------------
+//
+Highlighter::Highlighter(QTextDocument *parent)
+    : QSyntaxHighlighter(parent)
+{
+}
+
+void Highlighter::highlightBlock(const QString &text)
+{
+    for (const HighlightingRule &rule : qAsConst(m_highlightingRules))
+    {
+        QRegularExpressionMatchIterator matchIterator = rule.pattern.globalMatch(text);
+        while (matchIterator.hasNext())
+        {
+            QRegularExpressionMatch match = matchIterator.next();
+            setFormat(static_cast<int>(match.capturedStart()), static_cast<int>(match.capturedLength()), rule.format);
+        }
+    }
+}
+
+//
+// ------------------------------------------------------------------------------------------
+//
+JsHighlighter* JsHighlighter::createJsHighlighter(QTextDocument *parent)
+{
+    JsHighlighter* h = new JsHighlighter(parent);
+    h->initializeFormat();
+    return h;
+}
+
+JsHighlighter::JsHighlighter(QTextDocument *parent):
+    Highlighter(parent)
+{
+
+}
+
+void JsHighlighter::initializeFormat()
+{
+    QTextCharFormat keywordFormat;
+    QTextCharFormat numberFormat;
+    QTextCharFormat classFormat;
+    QTextCharFormat singleLineCommentFormat;
+    QTextCharFormat quotationFormat;
+    QTextCharFormat functionFormat;
+
+    HighlightingRule rule;
+
+   keywordFormat.setForeground(QColor(0x7f, 0x7f, 0x00));
+
+    static const char* keywordArray =
+        "abstract boolean break byte case catch char class const continue "
+        "debugger default delete do double else enum export extends final "
+        "finally float for function goto if implements import in instanceof "
+        "int interface long native new package private protected public "
+        "return short static super switch synchronized this throw throws "
+        "transient try typeof var void volatile while with";
+
+
+    QStringList keywordPatterns = QString(keywordArray).split(' ');
+
+    for (const QString &pattern : keywordPatterns) {
+        rule.pattern = QRegularExpression(pattern);
+        rule.format = keywordFormat;
+        m_highlightingRules.append(rule);
+    }
+
+    classFormat.setForeground(Qt::darkMagenta);
+    rule.pattern = QRegularExpression(QStringLiteral("\\bQ[A-Za-z]+\\b"));
+    rule.format = classFormat;
+    m_highlightingRules.append(rule);
+
+    numberFormat.setForeground(Qt::darkBlue);
+    rule.pattern = QRegularExpression(QStringLiteral("\\b[0x]*[a-f0-9]+\\b"));
+    rule.format = numberFormat;
+    m_highlightingRules.append(rule);
+
+    quotationFormat.setForeground(Qt::darkGreen);
+    rule.pattern = QRegularExpression(QStringLiteral("\".*?\""));
+    rule.format = quotationFormat;
+    m_highlightingRules.append(rule);
+
+    functionFormat.setForeground(Qt::blue);
+    rule.pattern = QRegularExpression(QStringLiteral("\\b[A-Za-z0-9_]+(?=\\()"));
+    rule.format = functionFormat;
+    m_highlightingRules.append(rule);
+
+    singleLineCommentFormat.setForeground(Qt::darkGreen);
+    rule.pattern = QRegularExpression(QStringLiteral("//[^\n]*"));
+    rule.format = singleLineCommentFormat;
+    m_highlightingRules.append(rule);
+
+    m_multiLineCommentFormat.setForeground(Qt::darkGreen);
+}
+
+void JsHighlighter::extraHighlightBlock(const QString &text)
+{
+    static QRegularExpression commentStartExpression(QStringLiteral("/\\*"));
+    static QRegularExpression commentEndExpression(QStringLiteral("\\*/"));
+
+    setCurrentBlockState(0);
+
+    qsizetype startIndex = 0;
+    if (previousBlockState() != 1)
+    {
+        startIndex = text.indexOf(commentStartExpression);
+    }
+
+    while (startIndex >= 0)
+    {
+        QRegularExpressionMatch match = commentEndExpression.match(text, startIndex);
+        qsizetype endIndex = match.capturedStart();
+        qsizetype commentLength = 0;
+        if (endIndex == -1)
+        {
+            setCurrentBlockState(1);
+            commentLength = text.length() - startIndex;
+        }
+        else
+        {
+            commentLength = endIndex - startIndex + match.capturedLength();
+        }
+        setFormat(static_cast<int>(startIndex), static_cast<int>(commentLength), m_multiLineCommentFormat);
+        startIndex = text.indexOf(commentStartExpression, startIndex + commentLength);
+    }
+
+}
+
+//
+// ------------------------------------------------------------------------------------------
+//
+XmlHighlighter* XmlHighlighter::createXmlHighlighter(QTextDocument *parent)
+{
+    XmlHighlighter* h = new XmlHighlighter(parent);
+    h->initializeFormat();
+    return h;
+}
+
+XmlHighlighter::XmlHighlighter(QTextDocument *parent):
+    Highlighter(parent)
+{
+
+}
+
+void XmlHighlighter::initializeFormat()
+{
+    QTextCharFormat     xmlKeywordFormat;
+    QTextCharFormat     xmlElementFormat;
+    QTextCharFormat     xmlAttributeFormat;
+    QTextCharFormat     xmlValueFormat;
+    QTextCharFormat     xmlCommentFormat;
+
+    HighlightingRule rule;
+
+    xmlElementFormat.setForeground(Qt::darkBlue);
+    rule.pattern = QRegularExpression(QStringLiteral("<[?\\s]*[/]?[\\s]*([^\\n][^>]*)(?=[\\s/>])"));
+    rule.format = xmlElementFormat;
+    m_highlightingRules.append(rule);
+
+    xmlAttributeFormat.setForeground(QColor(0x00,0x80,0x80));
+    rule.pattern = QRegularExpression(QStringLiteral("\\w+(?=\\=)"));
+    rule.format = xmlAttributeFormat;
+    m_highlightingRules.append(rule);
+
+    xmlValueFormat.setForeground(Qt::darkMagenta);
+    rule.pattern = QRegularExpression(QStringLiteral("\"[^\\n\"]+\"(?=[?\\s/>])"));
+    rule.format = xmlValueFormat;
+    m_highlightingRules.append(rule);
+
+    xmlCommentFormat.setForeground(QColor(0x80,0x80,0x00));
+    rule.pattern = QRegularExpression(QStringLiteral("<!--[^\\n]*-->"));
+    rule.format = xmlCommentFormat;
+    m_highlightingRules.append(rule);
+
+    QList<QRegularExpression> xmlKeywordRegexes;
+    xmlKeywordRegexes = QList<QRegularExpression>()
+            << QRegularExpression("<\\?")
+            << QRegularExpression("/>")
+            << QRegularExpression(">")
+            << QRegularExpression("<")
+            << QRegularExpression("</")
+            << QRegularExpression("\\?>");
+    xmlKeywordFormat.setForeground(Qt::blue);
+    xmlKeywordFormat.setFontWeight(QFont::Bold);
+
+    for (const auto& it: xmlKeywordRegexes)
+    {
+        rule.pattern = QRegularExpression(it.pattern());
+        rule.format = xmlCommentFormat;
+        m_highlightingRules.append(rule);
+    }
+}
+
