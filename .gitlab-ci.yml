@@ -64,7 +64,7 @@ windows build job:
   tags:
     - vs2017
   script:
-    - "dir env:"
+    - "# dir env:"
     - "echo $Env:CI_COMMIT_SHA"
     - "git status"
     - "git log -1"
@@ -235,8 +235,8 @@ test job:
     - "# ----------------------------------------------"
     - "#               Run unit tests"
     - "# ----------------------------------------------"
-    - "&$Env:CI_PROJECT_DIR/bin/release/u7databasetests.exe -junitxml -o u7databasetests.xml"
-    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorTests.exe -junitxml -o SimulatorTests.xml"
+    - "&$Env:CI_PROJECT_DIR/bin/release/u7databasetests.exe -o u7databasetests.xml,junitxml -o con,txt"
+    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorTests.exe -o SimulatorTests.xml,junitxml -o con,txt"
 
 #Run Builder test
     - "# ----------------------------------------------"
