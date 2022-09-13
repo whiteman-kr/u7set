@@ -166,6 +166,9 @@ private:
     QString m_findText;
 };
 
+//
+// IdeCodePropertyEditor
+//
 class IdeCodePropertyEditor : public ExtWidgets::PropertyTextEditor
 {
 public:

@@ -30,8 +30,6 @@ public:
     bool autoIdent() const;
     void setAutoIndent(bool autoIdent);
 
-    void lineNumberAreaPaintEvent(QPaintEvent *event);
-
     void setCustomMenuActions(QList<QAction*> actions);
 
     void setFont(const QFont& f);
@@ -59,7 +57,10 @@ public:
     bool lineNumberAreaVisible() const;
     void setLineNumberAreaVisible(bool visible);
 
-    int lineNumberAreaWidth();
+    int lineNumberOffset() const;
+    void setLineNumberOffset(int offset);
+
+    int getLineNumberAreaWidth();
 
     int customLineNumberAreaWidth();
     void setCustomLineNumberAreaWidth(int width);
@@ -80,6 +81,9 @@ public:
 
     void replace(const QString& text);
 
+    // Utility functions
+    //
+    void lineNumberAreaPaintEvent(QPaintEvent *event);
 private:
     void keyPressEvent( QKeyEvent* e) override;
     void resizeEvent(QResizeEvent* event) override;
@@ -109,6 +113,7 @@ private:
 
     int m_customLineNumberAreaWidth = -1;
     bool m_lineNumberAreaVisible = true;
+    int m_lineNumberOffset = 0;
     QColor m_lineNumberAreaBackgroundColor = QColor(Qt::lightGray);
     QColor m_lineNumberAreaForegroundColor = QColor(Qt::black);
 
