@@ -37,7 +37,7 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
     setTabWidth(4);
 
     QFontMetrics fm(font());
-    setLineNumberOffset(fm.horizontalAdvance(QChar::Space) / 2);
+    setLineNumberOffset(static_cast<int>(fm.horizontalAdvance(QChar::Space) * 0.75));
 }
 
 QString CodeEditor::text() const
@@ -47,9 +47,13 @@ QString CodeEditor::text() const
 
 void CodeEditor::setText(const QString& text)
 {
-    blockSignals(true);
+    setPlainText(QString());
+
+    document()->blockSignals(true);
     setPlainText(text);
-    blockSignals(false);
+    document()->blockSignals(false);
+
+    m_modified = false;
 
     updateLineNumberAreaWidth();
 }
@@ -76,7 +80,7 @@ void CodeEditor::setFont(const QFont& f)
     QFontMetrics fm(f);
     setTabStopDistance(fm.horizontalAdvance(m_tabSymbol));
 
-    setLineNumberOffset(fm.horizontalAdvance(QChar::Space) / 2);
+    setLineNumberOffset(static_cast<int>(fm.horizontalAdvance(QChar::Space) * 0.75));
 }
 
 bool CodeEditor::isModified() const
@@ -188,7 +192,7 @@ int CodeEditor::getLineNumberAreaWidth()
         ++digits;
     }
 
-    int space = fontMetrics().horizontalAdvance(QLatin1Char('9')) * (digits + 1/*one extra symbol*/);
+    int space = static_cast<int>(fontMetrics().horizontalAdvance(QLatin1Char('9')) * (digits + 1.5/*1.5 of extra symbol*/));
 
     return space;
 }
@@ -397,7 +401,7 @@ void CodeEditor::keyPressEvent(QKeyEvent* e)
                 }
                 else
                 {
-                    insertPlainText("\n");
+                    QPlainTextEdit::keyPressEvent(e);   // insert \n
 
                     // Find a whitespace part of the string from the beginning of the current line
                     //
@@ -571,7 +575,7 @@ void JsHighlighter::initializeFormat()
         "finally float for function goto if implements import in instanceof "
         "int interface long native new package private protected public "
         "return short static super switch synchronized this throw throws "
-        "transient try typeof var void volatile while with";
+        "transient try typeof var void volatile while with let";
 
 
     QStringList keywordPatterns = QString(keywordArray).split(' ');
@@ -615,10 +619,20 @@ void JsHighlighter::extraHighlightBlock(const QString &text)
     static QRegularExpression commentStartExpression(QStringLiteral("/\\*"));
     static QRegularExpression commentEndExpression(QStringLiteral("\\*/"));
 
-    setCurrentBlockState(0);
+    int st = currentBlockState();
+    if (st == -1)
+        st = 0;
+    bool processedPeriodicHighlight = (st & 0x80) != 0;
+
+    setCurrentBlockState(0 | (processedPeriodicHighlight ? 0x80 : 0));
+
+    int pt = previousBlockState();
+    if (pt == -1)
+        pt = 0;
+    int previousState = pt & ~0x80;
 
     qsizetype startIndex = 0;
-    if (previousBlockState() != 1)
+    if (previousState != 1)
     {
         startIndex = text.indexOf(commentStartExpression);
     }
@@ -630,7 +644,7 @@ void JsHighlighter::extraHighlightBlock(const QString &text)
         qsizetype commentLength = 0;
         if (endIndex == -1)
         {
-            setCurrentBlockState(1);
+            setCurrentBlockState(1 | (processedPeriodicHighlight ? 0x80 : 0));
             commentLength = text.length() - startIndex;
         }
         else
@@ -707,4 +721,5 @@ void XmlHighlighter::initializeFormat()
         m_highlightingRules.append(rule);
     }
 }
+
 

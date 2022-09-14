@@ -439,6 +439,7 @@ IdeCodeEditor::IdeCodeEditor(CodeType codeType, QWidget* parent) :
     //
 
     connect(this, &QPlainTextEdit::cursorPositionChanged, this, &IdeCodeEditor::onCursorPositionChanged);
+    connect(this, &QPlainTextEdit::updateRequest, this, &IdeCodeEditor::onUpdateRequest);
 }
 
 IdeCodeEditor::~IdeCodeEditor()
@@ -632,6 +633,53 @@ void IdeCodeEditor::onCursorPositionChanged()
     getCursorPosition(&line, &index);
 
     emit cursorPositionChangedTo(line, index);
+
+}
+
+void IdeCodeEditor::onUpdateRequest(const QRect &rect, int dy)
+{
+    int startPos = cursorForPosition(QPoint(0, 0)).position();
+    QPoint bottom_right(viewport()->width() - 1, viewport()->height() - 1);
+    int endPos = cursorForPosition(bottom_right).position();
+
+    static int startPosPrev = 0;
+    static int endPosPrev = 0;
+    if (startPos == startPosPrev && endPos == endPosPrev)
+    {
+        return;
+    }
+    startPosPrev = startPos;
+    endPosPrev = endPos;
+
+    QTextCursor cursor = textCursor();
+    cursor.setPosition(startPos);
+    QTextBlock startBlock = cursor.block();
+    cursor.setPosition(endPos);
+    cursor.movePosition(QTextCursor::NextBlock);
+    QTextBlock endBlock = cursor.block();
+
+    //Iterate visible blocks
+    //
+    for(QTextBlock b = startBlock; b.isValid() && b != endBlock; b = b.next())
+    {
+        int st = b.userState();
+        if (st == -1)
+            st = 0;
+        bool processedPeriodicHighlight = (st & 0x80) != 0;
+        if (processedPeriodicHighlight == true)
+        {
+            continue;
+        }
+        b.setUserState(b.userState() | 0x80);
+
+        QTimer::singleShot(0, this, [this, b](){
+            blockSignals(true);
+            m_highlighter->rehighlightBlock(b);
+            blockSignals(false);
+
+        });
+
+    }
 }
 
 //

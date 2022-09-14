@@ -149,6 +149,8 @@ private:
 
 private slots:
     void onCursorPositionChanged();
+    void onUpdateRequest(const QRect &rect, int dy);
+
 
 private:
     void adjustMarginWidth();
