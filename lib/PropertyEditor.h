@@ -625,7 +625,6 @@ namespace ExtWidgets
 	protected:
 		virtual void mousePressEvent(QMouseEvent *event) override;
 		virtual void keyPressEvent(QKeyEvent *event) override;
-        virtual void paintEvent(QPaintEvent* event) override;
 		virtual void drawRow(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 
 	signals:

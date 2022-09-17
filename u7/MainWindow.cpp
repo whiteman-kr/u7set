@@ -510,13 +510,6 @@ CentralWidget* MainWindow::getCentralWidget()
 
 void MainWindow::onMiniDumpCreated(QString dumpFilePath, bool result)
 {
-    QFile textFile(dumpFilePath + ".txt");
-    if(textFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text) == true)
-    {
-        QTextStream stream(&textFile);
-        stream << tr("UiTools::m_lastPaintEventCode = %1").arg(UiTools::m_lastPaintEventCode) << "\n";
-    }
-
     QString s;
 
     if (result == false)

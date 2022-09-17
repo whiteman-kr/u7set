@@ -63,7 +63,7 @@ class FileTreeModel : public QAbstractItemModel
 
 public:
 	FileTreeModel() = delete;
-	FileTreeModel(DbController* dbcontroller, QString rootFilePath, QWidget* parentWidget, QObject* parent);
+	FileTreeModel(DbController* dbcontroller, QString rootFilePath, QObject* parent);
 	virtual ~FileTreeModel();
 
 	enum class Columns
@@ -142,7 +142,6 @@ public:
 	//
 private:
 	DbController* m_dbc = nullptr;
-	QWidget* m_parentWidget = nullptr;
 	QString m_rootFilePath;
 	int m_rootFileId = -1;
 

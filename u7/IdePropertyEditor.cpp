@@ -636,7 +636,7 @@ void IdeCodeEditor::onCursorPositionChanged()
 
 }
 
-void IdeCodeEditor::onUpdateRequest(const QRect &rect, int dy)
+void IdeCodeEditor::onUpdateRequest(const QRect& /*rect*/, int /*dy*/)
 {
     int startPos = cursorForPosition(QPoint(0, 0)).position();
     QPoint bottom_right(viewport()->width() - 1, viewport()->height() - 1);

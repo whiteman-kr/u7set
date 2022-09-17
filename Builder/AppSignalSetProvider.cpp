@@ -317,7 +317,7 @@ void AppSignalPropertyManager::reloadPropertyBehaviour()
 	int etcFileId = m_dbController->systemFileId(DbDir::EtcDir);
 
 	DbFileInfo propertyBehaviorFile;
-	m_dbController->getFileInfo(etcFileId, QString(Db::File::SignalPropertyBehaviorFileName), &propertyBehaviorFile, m_parentWidget);
+	m_dbController->getFileInfo(etcFileId, QString(Db::File::SignalPropertyBehaviorFileName), &propertyBehaviorFile, nullptr);
 
 	if (propertyBehaviorFile.isNull() == true)
 	{
@@ -326,7 +326,7 @@ void AppSignalPropertyManager::reloadPropertyBehaviour()
 	}
 
 	std::shared_ptr<DbFile> file;
-	bool result = m_dbController->getLatestVersion(propertyBehaviorFile, &file, m_parentWidget);
+	bool result = m_dbController->getLatestVersion(propertyBehaviorFile, &file, nullptr);
 	if (result == false)
 	{
 		QMessageBox::critical(m_parentWidget, "Error", QString("Could not load file \"%1\"").arg(Db::File::SignalPropertyBehaviorFileName));
@@ -649,7 +649,7 @@ QVector<int> AppSignalSetProvider::getSameChannelSignals(int index)
 void AppSignalSetProvider::loadUsers()
 {
 	std::vector<DbUser> list;
-	m_dbController->getUserList(&list, m_parentWidget);
+	m_dbController->getUserList(&list, nullptr);
 
 	m_usernameMap.clear();
 	for (size_t i = 0; i < list.size(); i++)
@@ -713,7 +713,7 @@ bool AppSignalSetProvider::checkoutSignal(int index)
 		signalsIDs << m_signalSet.key(index);
 	}
 	QVector<ObjectState> objectStates;
-	m_dbController->checkoutSignals(&signalsIDs, &objectStates, m_parentWidget);
+	m_dbController->checkoutSignals(&signalsIDs, &objectStates, nullptr);
 	if (objectStates.count() == 0)
 	{
 		return false;
@@ -798,7 +798,7 @@ void AppSignalSetProvider::initLazyLoadSignals()
 	m_propertyManager.reloadPropertyBehaviour();
 
 	QVector<ID_AppSignalID> signalIds;
-	dbController()->getSignalsIDAppSignalID(&signalIds, m_parentWidget);
+	dbController()->getSignalsIDAppSignalID(&signalIds, nullptr);
 
 	for (const ID_AppSignalID& id : signalIds)
 	{
@@ -846,7 +846,7 @@ void AppSignalSetProvider::finishLoadingSignals()
 			QVector<AppSignal> signalsToLoad;
 			signalsToLoad.reserve(signalIds.count());
 
-			dbController()->getLatestSignals(signalIds, &signalsToLoad, m_parentWidget);
+			dbController()->getLatestSignals(signalIds, &signalsToLoad, nullptr);
 
 			for (const AppSignal& loadedSignal: signalsToLoad)
 			{
@@ -907,7 +907,7 @@ void AppSignalSetProvider::loadNextSignalsPortion()
 		QVector<AppSignal> signalsToLoad;
 		signalsToLoad.reserve(signalIds.count());
 
-		dbController()->getLatestSignalsWithoutProgress(signalIds, &signalsToLoad, m_parentWidget);
+		dbController()->getLatestSignalsWithoutProgress(signalIds, &signalsToLoad, nullptr);
 
 		for (const AppSignal& loadedSignal : signalsToLoad)
 		{
@@ -951,7 +951,7 @@ bool AppSignalSetProvider::checkoutSignal(int index, QString& message)
 		signalsIDs << m_signalSet.key(index);
 	}
 	QVector<ObjectState> objectStates;
-	dbController()->checkoutSignals(&signalsIDs, &objectStates, m_parentWidget);
+	dbController()->checkoutSignals(&signalsIDs, &objectStates, nullptr);
 	if (objectStates.count() == 0)
 	{
 		return false;
@@ -1001,7 +1001,7 @@ bool AppSignalSetProvider::undoSignal(int id)
 	for (int signalId : signalsIDs)
 	{
 		ObjectState state;
-		dbController()->undoSignalChanges(signalId, &state, m_parentWidget);
+		dbController()->undoSignalChanges(signalId, &state, nullptr);
 		if (state.errCode != ERR_SIGNAL_OK)
 		{
 			states << state;
@@ -1024,7 +1024,7 @@ bool AppSignalSetProvider::undoSignal(int id)
 void AppSignalSetProvider::deleteSignal(int signalID)
 {
 	ObjectState state;
-	dbController()->deleteSignal(signalID, &state, m_parentWidget);
+	dbController()->deleteSignal(signalID, &state, nullptr);
 	if (state.errCode != ERR_SIGNAL_OK)
 	{
 		showError(state);
@@ -1060,7 +1060,7 @@ void AppSignalSetProvider::loadSignal(int signalId)
 	{
 		return;
 	}
-	dbController()->getLatestSignal(signalId, &m_signalSet[index], m_parentWidget);
+	dbController()->getLatestSignal(signalId, &m_signalSet[index], nullptr);
 	m_signalSet.updateID2IndexInMap(m_signalSet[index].appSignalID(), index);
 
 	emit signalUpdated(index);
@@ -1082,7 +1082,7 @@ void AppSignalSetProvider::loadSignals()
 
 	AppSignalSet signalSetForReplacement;
 
-	if (!dbController()->getSignals(&signalSetForReplacement, false, m_parentWidget))
+	if (!dbController()->getSignals(&signalSetForReplacement, false, nullptr))
 	{
 		emit error(tr("Could not load signals"));
 	}
@@ -1105,7 +1105,7 @@ void AppSignalSetProvider::saveSignal(AppSignal& signal)
 	ObjectState state;
 	trimSignalTextFields(signal);
 
-	dbController()->setSignalWorkcopy(&signal, &state, m_parentWidget);
+	dbController()->setSignalWorkcopy(&signal, &state, nullptr);
 
 	if (state.errCode != ERR_SIGNAL_OK)
 	{
@@ -1123,7 +1123,7 @@ void AppSignalSetProvider::saveSignals(QVector<AppSignal*> signalVector)
 		ObjectState state;
 		trimSignalTextFields(*signalVector[i]);
 
-		dbController()->setSignalWorkcopy(signalVector[i], &state, m_parentWidget);
+		dbController()->setSignalWorkcopy(signalVector[i], &state, nullptr);
 		states.append(state);
 
 		loadSignal(signalVector[i]->ID());
@@ -1210,7 +1210,7 @@ QVector<int> AppSignalSetProvider::cloneSignals(const QSet<int>& signalIDs)
 			groupSignals[i].setCustomAppSignalID(groupSignal.customAppSignalID() + suffix);
 		}
 
-		dbController()->addSignal(type, &groupSignals, m_parentWidget);
+		dbController()->addSignal(type, &groupSignals, nullptr);
 
 		qsizetype prevSize = resultSignalIDs.size();
 		resultSignalIDs.resize(prevSize + groupSignals.count());

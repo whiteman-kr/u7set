@@ -28,7 +28,6 @@ FilesTabPage::FilesTabPage(DbController* dbcontroller, QWidget* parent) :
 	//
 	m_fileModel = new FileTreeModel(dbcontroller,
 									Db::File::systemDirToName(DbDir::RootDir),
-									this,
 									this);
 
 #ifdef _DEBUG

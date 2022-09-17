@@ -303,7 +303,7 @@ bool EquipmentModel::hasChildren(const QModelIndex& parentIndex) const
 
 	DbFileInfo fi = *fileInfo(object.get());
 
-	bool result = dbController()->fileHasChildren(&hasChildren, fi, m_parentWidget);
+	bool result = dbController()->fileHasChildren(&hasChildren, fi, nullptr);
 
 	if (result == false)
 	{
@@ -338,7 +338,7 @@ bool EquipmentModel::canFetchMore(const QModelIndex& parent) const
 	bool hasChildren = false;
 	DbFileInfo fi = *fileInfo(object.get());
 
-	bool result = dbController()->fileHasChildren(&hasChildren, fi, m_parentWidget);
+	bool result = dbController()->fileHasChildren(&hasChildren, fi, nullptr);
 
 	if (result == false)
 	{
@@ -362,7 +362,7 @@ void EquipmentModel::fetchMore(const QModelIndex& parentIndex)
 
 	std::vector<DbFileInfo> files;
 
-	bool ok = dbController()->getFileList(&files, parentObjectFileInfo->fileId(), true, m_parentWidget);
+	bool ok = dbController()->getFileList(&files, parentObjectFileInfo->fileId(), true, nullptr);
 	if (ok == false)
 		return;
 
@@ -374,7 +374,7 @@ void EquipmentModel::fetchMore(const QModelIndex& parentIndex)
 	{
 		std::shared_ptr<DbFile> file;
 
-		dbController()->getLatestVersion(fi, &file, m_parentWidget);
+		dbController()->getLatestVersion(fi, &file, nullptr);
 		if (file == nullptr)
 		{
 			continue;
@@ -514,7 +514,7 @@ void EquipmentModel::deleteDeviceObject(const QModelIndexList& rowList)
 		devices.push_back(d.get());
 	}
 
-	bool result = dbController()->deleteDeviceObjects(devices, m_parentWidget);
+	bool result = dbController()->deleteDeviceObjects(devices, nullptr);
 	if (result == false)
 	{
 		return;
@@ -684,7 +684,7 @@ void EquipmentModel::checkInDeviceObject(QModelIndexList& rowList)
 	// Get all checked out files for selected parents
 	//
 	std::vector<DbFileInfo> checkedOutFiles;
-	dbController()->getCheckedOutFiles(&files, &checkedOutFiles, m_parentWidget);
+	dbController()->getCheckedOutFiles(&files, &checkedOutFiles, nullptr);
 
 	// Check in
 	//
@@ -744,7 +744,7 @@ void EquipmentModel::checkOutDeviceObject(QModelIndexList& rowList)
 		}
 	}
 
-	bool ok = dbController()->checkOut(files, m_parentWidget);
+	bool ok = dbController()->checkOut(files, nullptr);
 	if (ok == false)
 	{
 		return;
@@ -756,7 +756,7 @@ void EquipmentModel::checkOutDeviceObject(QModelIndexList& rowList)
 	std::vector<std::shared_ptr<DbFile>> freshFiles;
 	freshFiles.reserve(files.size());
 
-	ok = dbController()->getLatestVersion(files, &freshFiles, m_parentWidget);
+	ok = dbController()->getLatestVersion(files, &freshFiles, nullptr);
 	if (ok == false)
 	{
 		return;
@@ -873,7 +873,7 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undowRowList)
 		return;
 	}
 
-	bool ok = dbController()->undoChanges(files, m_parentWidget);
+	bool ok = dbController()->undoChanges(files, nullptr);
 	if (ok == false)
 	{
 		return;
@@ -896,7 +896,7 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undowRowList)
 
 	if (latestFiles.empty() == false)
 	{
-		ok = dbController()->getLatestVersion(latestFiles, &latestFilesVersion, m_parentWidget);
+		ok = dbController()->getLatestVersion(latestFiles, &latestFilesVersion, nullptr);
 
 		if (ok == false)
 		{

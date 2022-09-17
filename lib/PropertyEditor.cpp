@@ -3492,12 +3492,6 @@ namespace ExtWidgets
 		QTreeWidget::keyPressEvent(event);
 	}
 
-    void PropertyTreeWidget::paintEvent(QPaintEvent* event)
-    {
-        UiTools::m_lastPaintEventCode = 2;
-        return QTreeWidget::paintEvent(event);
-    }
-
 	void PropertyTreeWidget::drawRow(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 	{
         // Try to save/restore state to prevent QRasterPaintEngine::brushOriginChanged crash

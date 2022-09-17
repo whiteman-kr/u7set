@@ -28,8 +28,7 @@
 //
 SchemaListModelEx::SchemaListModelEx(DbController* dbc, QWidget* parentWidget) :
 	QAbstractItemModel(parentWidget),
-	HasDbController(dbc),
-	m_parentWidget(parentWidget)
+	HasDbController(dbc)
 {
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SchemaListModelEx::projectOpened);
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SchemaListModelEx::projectClosed);
@@ -1089,7 +1088,7 @@ void SchemaListModelEx::refresh()
 	// Get file tree
 	//
 	DbFileTree files;
-	bool ok = dbc()->getFileListTree(&files, m_parentFile.fileId(), true, m_parentWidget);
+    bool ok = dbc()->getFileListTree(&files, m_parentFile.fileId(), true, nullptr);
 
 	if (ok == false)
 	{
@@ -1130,7 +1129,7 @@ void SchemaListModelEx::refresh()
 	std::vector<DbUser> users;
 	users.reserve(32);
 
-	ok = dbc()->getUserList(&users, m_parentWidget);
+    ok = dbc()->getUserList(&users, nullptr);
 	if (ok == false)
 	{
 		// Clear users, but don't return, we still can show files

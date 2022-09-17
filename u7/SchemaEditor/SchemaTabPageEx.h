@@ -113,8 +113,6 @@ public:
 private:
 	DbFileInfo m_parentFile;
 
-	QWidget* m_parentWidget = nullptr;	// Inside this model DbController is used, and it requires parent widget for
-										// displaying progress and error messages
 	DbFileTree m_files;
 	mutable QString m_searchText;		// Set in match(), used in data for SearchSchemaRole()
 	mutable QString m_filterText;

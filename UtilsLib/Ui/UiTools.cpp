@@ -13,8 +13,6 @@
 #include <QDesktopServices>
 #include <QScreen>
 
-int UiTools::m_lastPaintEventCode = 0;
-
 //
 // UiTools
 //

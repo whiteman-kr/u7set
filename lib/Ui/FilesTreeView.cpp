@@ -286,11 +286,10 @@ bool FileTreeProxyModel::lessThan(const QModelIndex &left, const QModelIndex &ri
 // FileTreeModel
 //
 //
-FileTreeModel::FileTreeModel(DbController* dbcontroller, QString rootFilePath, QWidget* parentWidget, QObject* parent) :
+FileTreeModel::FileTreeModel(DbController* dbcontroller, QString rootFilePath, QObject* parent) :
 	QAbstractItemModel(parent),
 	m_dbc(dbcontroller),
 	m_rootFilePath(rootFilePath),
-	m_parentWidget(parentWidget),
 	m_root(std::make_shared<FileTreeModelItem>())
 {
 	assert(m_dbc);
@@ -654,7 +653,7 @@ bool FileTreeModel::hasChildren(const QModelIndex& parentIndex) const
 	bool hasChildren = false;
 	DbFileInfo fi(*file);
 
-	bool result = db()->fileHasChildren(&hasChildren, fi, m_parentWidget);
+	bool result = db()->fileHasChildren(&hasChildren, fi, nullptr);
 	if (result == false)
 	{
 		return false;
@@ -716,7 +715,7 @@ void FileTreeModel::fetchMore(const QModelIndex& parentIndex)
 
 	std::vector<DbFileInfo> files;
 
-	bool ok = db()->getFileList(&files, parentFile->fileId(), true, m_parentWidget);
+	bool ok = db()->getFileList(&files, parentFile->fileId(), true, nullptr);
 	if (ok == false)
 	{
 		Q_ASSERT(false);
@@ -751,7 +750,7 @@ void FileTreeModel::fetchMore(const QModelIndex& parentIndex)
 
 		std::vector<DbFileInfo> childFiles;
 
-		ok = db()->getFileList(&childFiles, fi.fileId(), true, m_parentWidget);
+		ok = db()->getFileList(&childFiles, fi.fileId(), true, nullptr);
 		if (ok == false)
 		{
 			Q_ASSERT(false);

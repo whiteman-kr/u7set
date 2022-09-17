@@ -12,7 +12,7 @@
 //
 
 TestsFileTreeModel::TestsFileTreeModel(DbController* dbcontroller, QString rootFilePath, QWidget* parentWidget, QObject* parent):
-	FileTreeModel(dbcontroller, rootFilePath, parentWidget, parent)
+	FileTreeModel(dbcontroller, rootFilePath, parent)
 {
 }
 

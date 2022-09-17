@@ -2854,12 +2854,6 @@ void EquipmentView::focusOutEvent(QFocusEvent* event)
 	return;
 }
 
-void EquipmentView::paintEvent(QPaintEvent *event)
-{
-    UiTools::m_lastPaintEventCode = 1;
-    QTreeView::paintEvent(event);
-}
-
 EquipmentModel* EquipmentView::equipmentModel()
 {
 	EquipmentModel* result = dynamic_cast<EquipmentModel*>(model());
