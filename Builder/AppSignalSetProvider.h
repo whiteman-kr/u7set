@@ -209,7 +209,6 @@ private:
 	AppSignalPropertyManager m_propertyManager;
 	QTimer* m_lazyLoadSignalsTimer = nullptr;
 	int m_middleVisibleSignalIndex = 0;
-	QWidget* m_parentWidget = nullptr;	//used by DbController
 	AppSignalSet m_signalSet;
 	QMap<int, QString> m_usernameMap;
 	bool m_partialLoading = false;

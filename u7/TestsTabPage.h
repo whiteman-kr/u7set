@@ -11,7 +11,7 @@ class TestsFileTreeModel : public FileTreeModel
 {
 public:
 	TestsFileTreeModel() = delete;
-	TestsFileTreeModel(DbController* dbcontroller, QString rootFilePath, QWidget* parentWidget, QObject* parent);
+	TestsFileTreeModel(DbController* dbcontroller, QString rootFilePath, QObject* parent);
 	virtual ~TestsFileTreeModel();
 
 private:

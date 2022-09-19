@@ -542,8 +542,7 @@ AppSignalSetProvider* AppSignalSetProvider::m_instance = nullptr;
 AppSignalSetProvider::AppSignalSetProvider(DbController* dbController, QWidget* parentWidget) :
 	QObject(parentWidget),
 	m_dbController(dbController),
-	m_propertyManager(dbController, parentWidget),
-	m_parentWidget(parentWidget)
+	m_propertyManager(dbController, parentWidget)
 {
 	assert(m_instance == nullptr);
 	m_instance = this;

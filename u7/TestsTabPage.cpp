@@ -11,7 +11,7 @@
 // TestsFileTreeModel
 //
 
-TestsFileTreeModel::TestsFileTreeModel(DbController* dbcontroller, QString rootFilePath, QWidget* parentWidget, QObject* parent):
+TestsFileTreeModel::TestsFileTreeModel(DbController* dbcontroller, QString rootFilePath, QObject* parent):
 	FileTreeModel(dbcontroller, rootFilePath, parent)
 {
 }
@@ -2893,7 +2893,7 @@ void TestsWidget::createTestsDock()
 	QVBoxLayout* testsLayout = new QVBoxLayout(testsWidget);
 	testsLayout->setContentsMargins(6, 0, 6, 6);
 
-	m_testsTreeModel = new TestsFileTreeModel(db(), Db::File::systemDirToName(DbDir::TestsDir), this, this);
+	m_testsTreeModel = new TestsFileTreeModel(db(), Db::File::systemDirToName(DbDir::TestsDir), this);
 
 #ifdef QT_DEBUG
 	[[maybe_unused]]QAbstractItemModelTester* modelTester = new QAbstractItemModelTester(m_testsTreeModel,
