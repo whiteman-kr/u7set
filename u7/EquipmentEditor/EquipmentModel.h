@@ -60,6 +60,8 @@ public:
 
 	void reset();
 
+	QModelIndex findObject(const QModelIndex& findStartIndex, int level, const QStringList& equipmentIdFragments);
+
 private:
 	void sortChildrenByCaption(std::shared_ptr<Hardware::DeviceObject> deviceObject, Qt::SortOrder order);
 	void sortChildrenByType(std::shared_ptr<Hardware::DeviceObject> deviceObject, Qt::SortOrder order);
@@ -108,6 +110,8 @@ public:
 		//
 		ColumnCount
 	};
+
+	static const int EquipmentIdRole = Qt::UserRole + 1;
 
 	// Data
 	//

@@ -32,7 +32,8 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 
 	// Set context menu to Equipment View
 	//
-	m_equipmentView->setContextMenuPolicy(Qt::DefaultContextMenu);
+	m_equipmentView->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(m_equipmentView, &EquipmentView::customContextMenuRequested, this, &EquipmentTabPage::onEquipmentViewContextMenuRequested);
 
 	// -----------------
 	//
@@ -64,6 +65,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	//
 	m_equipmentView->addAction(m_copyObjectAction);
 	m_equipmentView->addAction(m_pasteObjectAction);
+	m_equipmentView->addAction(m_findAction);
 	m_equipmentView->addAction(m_deleteObjectAction);
 	m_equipmentView->addAction(m_refreshAction);
 
@@ -196,46 +198,46 @@ void EquipmentTabPage::CreateActions()
 
 	connect(m_addObjectButton, &QAction::triggered, this, &EquipmentTabPage::addObjectTriggered);
 
-		m_addSystemAction = new QAction(tr("System"), this);
-		m_addSystemAction->setStatusTip(tr("Add system to the configuration..."));
-		m_addSystemAction->setEnabled(false);
-		connect(m_addSystemAction, &QAction::triggered, m_equipmentView, &EquipmentView::addSystem);
+	m_addSystemAction = new QAction(tr("System"), this);
+	m_addSystemAction->setStatusTip(tr("Add system to the configuration..."));
+	m_addSystemAction->setEnabled(false);
+	connect(m_addSystemAction, &QAction::triggered, m_equipmentView, &EquipmentView::addSystem);
 
-		m_addRackAction = new QAction(tr("Rack"), this);
-		m_addRackAction->setStatusTip(tr("Add rack to the configuration..."));
-		m_addRackAction->setEnabled(false);
-		connect(m_addRackAction, &QAction::triggered, m_equipmentView, &EquipmentView::addRack);
+	m_addRackAction = new QAction(tr("Rack"), this);
+	m_addRackAction->setStatusTip(tr("Add rack to the configuration..."));
+	m_addRackAction->setEnabled(false);
+	connect(m_addRackAction, &QAction::triggered, m_equipmentView, &EquipmentView::addRack);
 
-		m_addChassisAction = new QAction(tr("Chassis"), this);
-		m_addChassisAction->setStatusTip(tr("Add chassis to the configuration..."));
-		m_addChassisAction->setEnabled(false);
-		connect(m_addChassisAction, &QAction::triggered, m_equipmentView, &EquipmentView::addChassis);
+	m_addChassisAction = new QAction(tr("Chassis"), this);
+	m_addChassisAction->setStatusTip(tr("Add chassis to the configuration..."));
+	m_addChassisAction->setEnabled(false);
+	connect(m_addChassisAction, &QAction::triggered, m_equipmentView, &EquipmentView::addChassis);
 
-		m_addModuleAction = new QAction(tr("Module"), this);
-		m_addModuleAction->setStatusTip(tr("Add module to the configuration..."));
-		m_addModuleAction->setEnabled(false);
-		connect(m_addModuleAction, &QAction::triggered, m_equipmentView, &EquipmentView::addModule);
+	m_addModuleAction = new QAction(tr("Module"), this);
+	m_addModuleAction->setStatusTip(tr("Add module to the configuration..."));
+	m_addModuleAction->setEnabled(false);
+	connect(m_addModuleAction, &QAction::triggered, m_equipmentView, &EquipmentView::addModule);
 
-		m_addControllerAction = new QAction(tr("Controller"), this);
-		m_addControllerAction->setStatusTip(tr("Add controller to the configuration..."));
-		m_addControllerAction->setEnabled(false);
-		connect(m_addControllerAction, &QAction::triggered, m_equipmentView, &EquipmentView::addController);
+	m_addControllerAction = new QAction(tr("Controller"), this);
+	m_addControllerAction->setStatusTip(tr("Add controller to the configuration..."));
+	m_addControllerAction->setEnabled(false);
+	connect(m_addControllerAction, &QAction::triggered, m_equipmentView, &EquipmentView::addController);
 
-		m_addSignalAction = new QAction(tr("Signal"), this);
-		m_addSignalAction->setStatusTip(tr("Add signal to the configuration..."));
-		m_addSignalAction->setEnabled(false);
-		connect(m_addSignalAction, &QAction::triggered, m_equipmentView, &EquipmentView::addSignal);
+	m_addSignalAction = new QAction(tr("Signal"), this);
+	m_addSignalAction->setStatusTip(tr("Add signal to the configuration..."));
+	m_addSignalAction->setEnabled(false);
+	connect(m_addSignalAction, &QAction::triggered, m_equipmentView, &EquipmentView::addSignal);
 
 
-		m_addWorkstationAction = new QAction(tr("Workstation"), this);
-		m_addWorkstationAction->setStatusTip(tr("Add workstation to the configuration..."));
-		m_addWorkstationAction->setEnabled(false);
-		connect(m_addWorkstationAction, &QAction::triggered, m_equipmentView, &EquipmentView::addWorkstation);
+	m_addWorkstationAction = new QAction(tr("Workstation"), this);
+	m_addWorkstationAction->setStatusTip(tr("Add workstation to the configuration..."));
+	m_addWorkstationAction->setEnabled(false);
+	connect(m_addWorkstationAction, &QAction::triggered, m_equipmentView, &EquipmentView::addWorkstation);
 
-		m_addSoftwareAction = new QAction(tr("Software"), this);
-		m_addSoftwareAction->setStatusTip(tr("Add software to the configuration..."));
-		m_addSoftwareAction->setEnabled(false);
-		connect(m_addSoftwareAction, &QAction::triggered, m_equipmentView, &EquipmentView::addSoftware);
+	m_addSoftwareAction = new QAction(tr("Software"), this);
+	m_addSoftwareAction->setStatusTip(tr("Add software to the configuration..."));
+	m_addSoftwareAction->setEnabled(false);
+	connect(m_addSoftwareAction, &QAction::triggered, m_equipmentView, &EquipmentView::addSoftware);
 
 
 	//----------------------------------
@@ -260,35 +262,35 @@ void EquipmentTabPage::CreateActions()
 
 	connect(m_addNewPresetAction, &QAction::triggered, this, &EquipmentTabPage::addNewPresetTriggered);
 
-		m_addPresetRackAction = new QAction(tr("Preset Rack"), this);
-		m_addPresetRackAction->setStatusTip(tr("Add rack to the preset..."));
-		m_addPresetRackAction->setEnabled(false);
-		connect(m_addPresetRackAction, &QAction::triggered, m_equipmentView, &EquipmentView::addPresetRack);
+	m_addPresetRackAction = new QAction(tr("Preset Rack"), this);
+	m_addPresetRackAction->setStatusTip(tr("Add rack to the preset..."));
+	m_addPresetRackAction->setEnabled(false);
+	connect(m_addPresetRackAction, &QAction::triggered, m_equipmentView, &EquipmentView::addPresetRack);
 
-		m_addPresetChassisAction = new QAction(tr("Preset Chassis"), this);
-		m_addPresetChassisAction->setStatusTip(tr("Add chassis to the preset..."));
-		m_addPresetChassisAction->setEnabled(false);
-		connect(m_addPresetChassisAction, &QAction::triggered, m_equipmentView, &EquipmentView::addPresetChassis);
+	m_addPresetChassisAction = new QAction(tr("Preset Chassis"), this);
+	m_addPresetChassisAction->setStatusTip(tr("Add chassis to the preset..."));
+	m_addPresetChassisAction->setEnabled(false);
+	connect(m_addPresetChassisAction, &QAction::triggered, m_equipmentView, &EquipmentView::addPresetChassis);
 
-		m_addPresetModuleAction = new QAction(tr("Preset Module"), this);
-		m_addPresetModuleAction->setStatusTip(tr("Add module to the preset..."));
-		m_addPresetModuleAction->setEnabled(false);
-		connect(m_addPresetModuleAction, &QAction::triggered, m_equipmentView, &EquipmentView::addPresetModule);
+	m_addPresetModuleAction = new QAction(tr("Preset Module"), this);
+	m_addPresetModuleAction->setStatusTip(tr("Add module to the preset..."));
+	m_addPresetModuleAction->setEnabled(false);
+	connect(m_addPresetModuleAction, &QAction::triggered, m_equipmentView, &EquipmentView::addPresetModule);
 
-		m_addPresetControllerAction = new QAction(tr("Preset Controller"), this);
-		m_addPresetControllerAction->setStatusTip(tr("Add controller to the preset..."));
-		m_addPresetControllerAction->setEnabled(false);
-		connect(m_addPresetControllerAction, &QAction::triggered, m_equipmentView, &EquipmentView::addPresetController);
+	m_addPresetControllerAction = new QAction(tr("Preset Controller"), this);
+	m_addPresetControllerAction->setStatusTip(tr("Add controller to the preset..."));
+	m_addPresetControllerAction->setEnabled(false);
+	connect(m_addPresetControllerAction, &QAction::triggered, m_equipmentView, &EquipmentView::addPresetController);
 
-		m_addPresetWorkstationAction = new QAction(tr("Preset Worksation"), this);
-		m_addPresetWorkstationAction->setStatusTip(tr("Add workstation to the preset..."));
-		m_addPresetWorkstationAction->setEnabled(false);
-		connect(m_addPresetWorkstationAction, &QAction::triggered, m_equipmentView, &EquipmentView::addPresetWorkstation);
+	m_addPresetWorkstationAction = new QAction(tr("Preset Worksation"), this);
+	m_addPresetWorkstationAction->setStatusTip(tr("Add workstation to the preset..."));
+	m_addPresetWorkstationAction->setEnabled(false);
+	connect(m_addPresetWorkstationAction, &QAction::triggered, m_equipmentView, &EquipmentView::addPresetWorkstation);
 
-		m_addPresetSoftwareAction = new QAction(tr("Preset Software"), this);
-		m_addPresetSoftwareAction->setStatusTip(tr("Add software to the preset..."));
-		m_addPresetSoftwareAction->setEnabled(false);
-		connect(m_addPresetSoftwareAction, &QAction::triggered, m_equipmentView, &EquipmentView::addPresetSoftware);
+	m_addPresetSoftwareAction = new QAction(tr("Preset Software"), this);
+	m_addPresetSoftwareAction->setStatusTip(tr("Add software to the preset..."));
+	m_addPresetSoftwareAction->setEnabled(false);
+	connect(m_addPresetSoftwareAction, &QAction::triggered, m_equipmentView, &EquipmentView::addPresetSoftware);
 
 	//-----------------------------------
 	m_separatorAction0 = new QAction(tr("Application Signals"), this);
@@ -354,8 +356,6 @@ void EquipmentTabPage::CreateActions()
 	connect(m_showConnections, &QAction::triggered, this, &EquipmentTabPage::showConnections);
 
 	//-----------------------------------
-	m_separatorAction01 = new QAction(this);
-	m_separatorAction01->setSeparator(true);
 
 	m_copyObjectAction = new QAction(tr("Copy"), this);
 	m_copyObjectAction->setStatusTip(tr("Copy equipment to the clipboard..."));
@@ -372,8 +372,14 @@ void EquipmentTabPage::CreateActions()
 	connect(m_pasteObjectAction, &QAction::triggered, m_equipmentView, qOverload<>(&EquipmentView::pasteDevices));
 
 	//-----------------------------------
-	m_separatorAction1 = new QAction(this);
-	m_separatorAction1->setSeparator(true);
+
+	m_findAction = new QAction(tr("Find..."), this);
+	m_findAction->setStatusTip(tr("Find object by EquipmentID"));
+	m_findAction->setShortcut(QKeySequence::Find);
+	m_findAction->setObjectName("I_am_a_Find_Action");
+	connect(m_findAction, &QAction::triggered, m_equipmentView, &EquipmentView::findObject);
+
+	//-----------------------------------
 
 	m_deleteObjectAction = new QAction(tr("Delete"), this);
 	m_deleteObjectAction->setStatusTip(tr("Delete equipment object..."));
@@ -383,8 +389,6 @@ void EquipmentTabPage::CreateActions()
 	connect(m_deleteObjectAction, &QAction::triggered, m_equipmentView, &EquipmentView::deleteSelectedDevices);
 
 	//-----------------------------------
-	m_separatorAction2 = new QAction(this);
-	m_separatorAction2->setSeparator(true);
 
 	m_checkOutAction = new QAction(tr("CheckOut"), this);
 	m_checkOutAction->setStatusTip(tr("Check out device for edit"));
@@ -424,8 +428,6 @@ void EquipmentTabPage::CreateActions()
 	addAction(m_refreshAction);
 
 	//-----------------------------------
-	m_separatorAction3 = new QAction(this);
-	m_separatorAction3->setSeparator(true);
 
 	m_updateFromPresetAction = new QAction(tr("Update from Preset"), this);
 	m_updateFromPresetAction->setStatusTip(tr("Update from all object from preset"));
@@ -474,81 +476,6 @@ bool EquipmentTabPage::isPresetMode() const
 bool EquipmentTabPage::isConfigurationMode() const
 {
 	return m_equipmentModel->isConfigurationMode();
-}
-
-void EquipmentTabPage::contextMenuEvent(QContextMenuEvent* event)
-{
-	event->accept();
-
-	QMenu contextMenu{this};
-
-	if (isConfigurationMode() == true)
-	{
-		contextMenu.addMenu(m_addObjectMenu);
-		contextMenu.addAction(m_addFromPresetAction);
-		contextMenu.addAction(m_replaceAction);
-
-		contextMenu.addSeparator();
-		contextMenu.addAction(m_createInOutsToSignals);
-		contextMenu.addAction(m_createInternalAppSignal);
-		contextMenu.addAction(m_showAppSignals);
-
-		contextMenu.addSeparator();
-		contextMenu.addAction(m_addLogicSchemaToLm);
-		contextMenu.addAction(m_showLmsLogicSchemas);
-
-		contextMenu.addSeparator();
-		contextMenu.addAction(m_createConnection);
-		contextMenu.addAction(m_showObjectConnections);
-		contextMenu.addAction(m_showConnections);
-
-		contextMenu.addSeparator();
-		contextMenu.addAction(m_copyObjectAction);
-		contextMenu.addAction(m_pasteObjectAction);
-
-		contextMenu.addSeparator();
-		contextMenu.addAction(m_deleteObjectAction);
-
-		contextMenu.addSeparator();
-		contextMenu.addAction(m_checkOutAction);
-		contextMenu.addAction(m_checkInAction);
-		contextMenu.addAction(m_undoChangesAction);
-		contextMenu.addAction(m_historyAction);
-		contextMenu.addAction(m_compareAction);
-		contextMenu.addAction(m_refreshAction);
-
-		contextMenu.addSeparator();
-		contextMenu.addAction(m_updateFromPresetAction);
-		contextMenu.addAction(m_switchModeAction);
-	}
-	else
-	{
-		contextMenu.addMenu(m_addObjectMenu);
-		contextMenu.addMenu(m_addPresetMenu);
-
-		contextMenu.addSeparator();
-		contextMenu.addAction(m_copyObjectAction);
-		contextMenu.addAction(m_pasteObjectAction);
-
-		contextMenu.addSeparator();
-		contextMenu.addAction(m_deleteObjectAction);
-
-		contextMenu.addSeparator();
-		contextMenu.addAction(m_checkOutAction);
-		contextMenu.addAction(m_checkInAction);
-		contextMenu.addAction(m_undoChangesAction);
-		contextMenu.addAction(m_historyAction);
-		contextMenu.addAction(m_compareAction);
-		contextMenu.addAction(m_refreshAction);
-
-		contextMenu.addSeparator();
-		contextMenu.addAction(m_updateFromPresetAction);
-		contextMenu.addAction(m_switchModeAction);
-	}
-
-	contextMenu.exec(event->globalPos());
-
-	return;
 }
 
 void EquipmentTabPage::closeEvent(QCloseEvent* e)
@@ -1702,6 +1629,85 @@ void EquipmentTabPage::importPreset()
 	}
 
 	m_equipmentView->pasteDevices(message.items(), message.description(), false);
+
+	return;
+}
+
+void EquipmentTabPage::onEquipmentViewContextMenuRequested(const QPoint& /*pos*/)
+{
+	QMenu contextMenu{this};
+
+	if (isConfigurationMode() == true)
+	{
+		contextMenu.addMenu(m_addObjectMenu);
+		contextMenu.addAction(m_addFromPresetAction);
+		contextMenu.addAction(m_replaceAction);
+
+		contextMenu.addSeparator();
+		contextMenu.addAction(m_createInOutsToSignals);
+		contextMenu.addAction(m_createInternalAppSignal);
+		contextMenu.addAction(m_showAppSignals);
+
+		contextMenu.addSeparator();
+		contextMenu.addAction(m_addLogicSchemaToLm);
+		contextMenu.addAction(m_showLmsLogicSchemas);
+
+		contextMenu.addSeparator();
+		contextMenu.addAction(m_createConnection);
+		contextMenu.addAction(m_showObjectConnections);
+		contextMenu.addAction(m_showConnections);
+
+		contextMenu.addSeparator();
+		contextMenu.addAction(m_copyObjectAction);
+		contextMenu.addAction(m_pasteObjectAction);
+
+		contextMenu.addSeparator();
+		contextMenu.addAction(m_findAction);
+
+		contextMenu.addSeparator();
+		contextMenu.addAction(m_deleteObjectAction);
+
+		contextMenu.addSeparator();
+		contextMenu.addAction(m_checkOutAction);
+		contextMenu.addAction(m_checkInAction);
+		contextMenu.addAction(m_undoChangesAction);
+		contextMenu.addAction(m_historyAction);
+		contextMenu.addAction(m_compareAction);
+		contextMenu.addAction(m_refreshAction);
+
+		contextMenu.addSeparator();
+		contextMenu.addAction(m_updateFromPresetAction);
+		contextMenu.addAction(m_switchModeAction);
+	}
+	else
+	{
+		contextMenu.addMenu(m_addObjectMenu);
+		contextMenu.addMenu(m_addPresetMenu);
+
+		contextMenu.addSeparator();
+		contextMenu.addAction(m_copyObjectAction);
+		contextMenu.addAction(m_pasteObjectAction);
+
+		contextMenu.addSeparator();
+		contextMenu.addAction(m_findAction);
+
+		contextMenu.addSeparator();
+		contextMenu.addAction(m_deleteObjectAction);
+
+		contextMenu.addSeparator();
+		contextMenu.addAction(m_checkOutAction);
+		contextMenu.addAction(m_checkInAction);
+		contextMenu.addAction(m_undoChangesAction);
+		contextMenu.addAction(m_historyAction);
+		contextMenu.addAction(m_compareAction);
+		contextMenu.addAction(m_refreshAction);
+
+		contextMenu.addSeparator();
+		contextMenu.addAction(m_updateFromPresetAction);
+		contextMenu.addAction(m_switchModeAction);
+	}
+
+	contextMenu.exec(QCursor::pos());
 
 	return;
 }

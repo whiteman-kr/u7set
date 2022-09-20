@@ -2003,6 +2003,57 @@ bool EquipmentView::canPaste(const ::Proto::EnvelopeSetShortDescription& message
 }
 
 
+void EquipmentView::findObject()
+{
+	static QString findText = "";
+
+	QString text;
+	do
+	{
+		QInputDialog d(this);
+		d.setWindowFlags((d.windowFlags() &
+						~Qt::WindowMinimizeButtonHint &
+						~Qt::WindowMaximizeButtonHint &
+						~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+		d.setWindowTitle(tr("Find"));
+		d.setLabelText(tr("Enter EquipmentID:"));
+		d.setInputMode(QInputDialog::TextInput);
+		d.setTextValue(findText);
+
+		int width = QSettings().value("EquipmentTabPage/findDialogWidth", 300).toInt();
+		int height = QSettings().value("EquipmentTabPage/findDialogHeight", 200).toInt();
+		d.resize(width, height);
+
+		bool ok = d.exec() == QDialog::Accepted;
+		if (ok  == false)
+		{
+			return;
+		}
+
+		QSettings().setValue("EquipmentTabPage/findDialogWidth", d.width());
+		QSettings().setValue("EquipmentTabPage/findDialogHeight", d.height());
+
+		text = d.textValue();
+
+	}while(text.isEmpty() == true);
+
+	findText = text;
+
+	QStringList equipmentIdFragments = findText.split('_');
+
+	QModelIndex findIndex = equipmentModel()->findObject(equipmentModel()->index(0, 0, QModelIndex()), 1/*level*/, equipmentIdFragments);
+
+	if (findIndex.isValid() == true)
+	{
+		selectionModel()->clearSelection();
+		selectionModel()->setCurrentIndex(findIndex, QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
+	}
+	else
+	{
+		QMessageBox::information(this, qAppName(), tr("Object was not found!"));
+	}
+}
+
 void EquipmentView::deleteSelectedDevices()
 {
 	QModelIndexList selected = selectionModel()->selectedRows();
@@ -2822,6 +2873,12 @@ void EquipmentView::focusInEvent(QFocusEvent* /*event*/)
 			a->setShortcut(QKeySequence::Paste);
 			continue;
 		}
+
+		if (a->objectName() == QLatin1String("I_am_a_Find_Action"))
+		{
+			a->setShortcut(QKeySequence::Find);
+			continue;
+		}
 	}
 
 	return;
@@ -2844,6 +2901,12 @@ void EquipmentView::focusOutEvent(QFocusEvent* event)
 			}
 
 			if (a->objectName() == QLatin1String("I_am_a_Paste_Action"))
+			{
+				a->setShortcut(QKeySequence());
+				continue;
+			}
+
+			if (a->objectName() == QLatin1String("I_am_a_Find_Action"))
 			{
 				a->setShortcut(QKeySequence());
 				continue;

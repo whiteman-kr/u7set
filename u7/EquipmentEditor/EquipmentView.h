@@ -78,6 +78,8 @@ public slots:
 	bool canPaste() const;
 	bool canPaste(const ::Proto::EnvelopeSetShortDescription& message) const;
 
+	void findObject();
+
 	void deleteSelectedDevices();
 	void checkInSelectedDevices();
 	void checkOutSelectedDevices();

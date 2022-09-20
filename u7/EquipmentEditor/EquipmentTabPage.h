@@ -31,7 +31,6 @@ protected:
 	// Events
 	//
 protected:
-	virtual void contextMenuEvent(QContextMenuEvent* event) override;
 	virtual void closeEvent(QCloseEvent*) override;
 
 public slots:
@@ -62,19 +61,21 @@ protected slots:
 	void exportPreset();
 	void importPreset();
 
+	void onEquipmentViewContextMenuRequested(const QPoint& pos);
+
 	// Data
 	//
 private:
 	QMenu* m_addObjectMenu = new QMenu(tr("Add Object"), this);
 	QAction* m_addObjectButton = nullptr;
-		QAction* m_addSystemAction = nullptr;
-		QAction* m_addRackAction = nullptr;
-		QAction* m_addChassisAction = nullptr;
-		QAction* m_addModuleAction = nullptr;
-		QAction* m_addControllerAction = nullptr;
-		QAction* m_addSignalAction = nullptr;
-		QAction* m_addWorkstationAction = nullptr;
-		QAction* m_addSoftwareAction = nullptr;
+	QAction* m_addSystemAction = nullptr;
+	QAction* m_addRackAction = nullptr;
+	QAction* m_addChassisAction = nullptr;
+	QAction* m_addModuleAction = nullptr;
+	QAction* m_addControllerAction = nullptr;
+	QAction* m_addSignalAction = nullptr;
+	QAction* m_addWorkstationAction = nullptr;
+	QAction* m_addSoftwareAction = nullptr;
 
 	QAction* m_addFromPresetAction = nullptr;
 	QAction* m_replaceAction = nullptr;
@@ -82,12 +83,12 @@ private:
 	//----------------------------------
 	QMenu* m_addPresetMenu = nullptr;
 	QAction* m_addNewPresetAction = nullptr;
-		QAction* m_addPresetRackAction = nullptr;
-		QAction* m_addPresetChassisAction = nullptr;
-		QAction* m_addPresetModuleAction = nullptr;
-		QAction* m_addPresetControllerAction = nullptr;
-		QAction* m_addPresetWorkstationAction = nullptr;
-		QAction* m_addPresetSoftwareAction = nullptr;
+	QAction* m_addPresetRackAction = nullptr;
+	QAction* m_addPresetChassisAction = nullptr;
+	QAction* m_addPresetModuleAction = nullptr;
+	QAction* m_addPresetControllerAction = nullptr;
+	QAction* m_addPresetWorkstationAction = nullptr;
+	QAction* m_addPresetSoftwareAction = nullptr;
 
 	QAction* m_separatorActionA = nullptr;
 
@@ -107,14 +108,13 @@ private:
 	QAction* m_showConnections = nullptr;
 
 	//----------------------------------
-	QAction* m_separatorAction01 = nullptr;
 	QAction* m_copyObjectAction = nullptr;
 	QAction* m_pasteObjectAction = nullptr;
 	//----------------------------------
-	QAction* m_separatorAction1 = nullptr;
+	QAction* m_findAction = nullptr;
+	//----------------------------------
 	QAction* m_deleteObjectAction = nullptr;
 	//----------------------------------
-	QAction* m_separatorAction2 = nullptr;
 	QAction* m_checkOutAction = nullptr;
 	QAction* m_checkInAction = nullptr;
 	QAction* m_undoChangesAction = nullptr;
@@ -122,7 +122,6 @@ private:
 	QAction* m_compareAction = nullptr;
 	QAction* m_refreshAction = nullptr;
 	//----------------------------------
-	QAction* m_separatorAction3 = nullptr;
 	QAction* m_updateFromPresetAction = nullptr;
 	QAction* m_switchModeAction = nullptr;
 	QAction* m_pendingChangesAction = nullptr;
