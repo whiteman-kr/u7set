@@ -304,15 +304,38 @@ PropertyPage::PropertyPage(Options* options, PropertyPageType pageType, ExtWidge
 
 		case PropertyPageType::Database_Location:
 			{
-					QString categoryDatabase = tr("Location of Database");
+					QString typeDatabase = tr("Type of Database");
+
+					ADD_PROPERTY_GETTER_SETTER(OT::DatabaseType, OT::DatabaseParamCaption(OT::dbo_Type), true, m_options->database().type, m_options->database().setType)
+						->setCategory(typeDatabase)
+						.setViewOrder(0);
+
+					QString sqliteDatabase = tr("Configuration of SQLite database");
 
 					ADD_PROPERTY_GETTER_SETTER(QString, OT::DatabaseParamCaption(OT::dbo_LocationPath), true, m_options->database().locationPath, m_options->database().setLocationPath)
-						->setCategory(categoryDatabase)
+						->setCategory(sqliteDatabase)
 						.setViewOrder(0)
 						.setSpecificEditor(E::PropertySpecificEditor::ChooseDirectoryDialog);
-					ADD_PROPERTY_GETTER_SETTER(OT::DatabaseType, OT::DatabaseParamCaption(OT::dbo_Type), true, m_options->database().type, m_options->database().setType)
-						->setCategory(categoryDatabase)
+
+					QString postgresDatabase = tr("Configuration of Postgres database");
+
+					ADD_PROPERTY_GETTER_SETTER(QString, OT::DatabaseParamCaption(OT::dbo_Ip), true, m_options->database().ip, m_options->database().setIp)
+						->setCategory(postgresDatabase)
+						.setViewOrder(0);
+					ADD_PROPERTY_GETTER_SETTER(int, OT::DatabaseParamCaption(OT::dbo_Port), true, m_options->database().port, m_options->database().setPort)
+						->setCategory(postgresDatabase)
 						.setViewOrder(1);
+					ADD_PROPERTY_GETTER_SETTER(QString, OT::DatabaseParamCaption(OT::dbo_User), true, m_options->database().user, m_options->database().setUser)
+						->setCategory(postgresDatabase)
+						.setViewOrder(2);
+					ADD_PROPERTY_GETTER_SETTER(QString, OT::DatabaseParamCaption(OT::dbo_Password), true, m_options->database().password, m_options->database().setPassword)
+						->setCategory(postgresDatabase)
+						.setPassword(true)
+						.setViewOrder(3);
+
+					pPropertyEditor->setCategoryViewOrder (typeDatabase, 0);
+					pPropertyEditor->setCategoryViewOrder (sqliteDatabase, 1);
+					pPropertyEditor->setCategoryViewOrder (postgresDatabase, 2);
 			}
 			break;
 

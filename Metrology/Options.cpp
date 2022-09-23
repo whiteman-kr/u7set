@@ -1900,8 +1900,13 @@ void DatabaseOption::load()
 {
 	QSettings s;
 
-	m_locationPath = s.value(QString("%1LocationPath").arg(DATABASE_OPTIONS_REG_KEY), QDir::currentPath()).toString();
 	m_type = static_cast<OT::DatabaseType>(s.value(QString("%1Type").arg(DATABASE_OPTIONS_REG_KEY), OT::SQLite).toInt());
+	m_locationPath = s.value(QString("%1LocationPath").arg(DATABASE_OPTIONS_REG_KEY), QDir::currentPath()).toString();
+
+	m_ip = s.value(QString("%1IP").arg(DATABASE_OPTIONS_REG_KEY), DEFAULT_DB_IP).toString();
+	m_port = s.value(QString("%1Port").arg(DATABASE_OPTIONS_REG_KEY), DEFAULT_DB_PORT).toInt();
+	m_user = s.value(QString("%1User").arg(DATABASE_OPTIONS_REG_KEY), DEFAULT_DB_USER).toString();
+	m_password = s.value(QString("%1Password").arg(DATABASE_OPTIONS_REG_KEY), DEFAULT_DB_PASSWORD).toString();
 
 	m_onStart = s.value(QString("%1OnStart").arg(DATABASE_OPTIONS_REG_KEY), false).toBool();
 	m_onExit = s.value(QString("%1OnExit").arg(DATABASE_OPTIONS_REG_KEY), true).toBool();
@@ -1914,8 +1919,13 @@ void DatabaseOption::save()
 {
 	QSettings s;
 
-	s.setValue(QString("%1LocationPath").arg(DATABASE_OPTIONS_REG_KEY), m_locationPath);
 	s.setValue(QString("%1Type").arg(DATABASE_OPTIONS_REG_KEY), m_type);
+	s.setValue(QString("%1LocationPath").arg(DATABASE_OPTIONS_REG_KEY), m_locationPath);
+
+	s.setValue(QString("%1IP").arg(DATABASE_OPTIONS_REG_KEY), m_ip);
+	s.setValue(QString("%1Port").arg(DATABASE_OPTIONS_REG_KEY), m_port);
+	s.setValue(QString("%1User").arg(DATABASE_OPTIONS_REG_KEY), m_user);
+	s.setValue(QString("%1Password").arg(DATABASE_OPTIONS_REG_KEY), m_password);
 
 	s.setValue(QString("%1OnStart").arg(DATABASE_OPTIONS_REG_KEY), m_onStart);
 	s.setValue(QString("%1OnExit").arg(DATABASE_OPTIONS_REG_KEY), m_onExit);
@@ -1926,8 +1936,13 @@ void DatabaseOption::save()
 
 DatabaseOption& DatabaseOption::operator=(const DatabaseOption& from)
 {
-	m_locationPath = from.m_locationPath;
 	m_type = from.m_type;
+	m_locationPath = from.m_locationPath;
+
+	m_ip = from.m_ip;
+	m_port = from.m_port;
+	m_user = from.m_user;
+	m_password = from.m_password;
 
 	m_onStart = from.m_onStart;
 	m_onExit = from.m_onExit;
@@ -1944,8 +1959,12 @@ QString OT::DatabaseParamCaption(OT::DatabaseParam param)
 
 	switch (param)
 	{
-		case OT::dbo_LocationPath:	caption = QT_TRANSLATE_NOOP("Options", "Location path");		break;
 		case OT::dbo_Type:			caption = QT_TRANSLATE_NOOP("Options", "Type");					break;
+		case OT::dbo_LocationPath:	caption = QT_TRANSLATE_NOOP("Options", "Location path");		break;
+		case OT::dbo_Ip:			caption = QT_TRANSLATE_NOOP("Options", "IP");					break;
+		case OT::dbo_Port:			caption = QT_TRANSLATE_NOOP("Options", "Port");					break;
+		case OT::dbo_User:			caption = QT_TRANSLATE_NOOP("Options", "User");					break;
+		case OT::dbo_Password:		caption = QT_TRANSLATE_NOOP("Options", "Password");				break;
 		case OT::dbo_OnStart:		caption = QT_TRANSLATE_NOOP("Options", "On start application"); break;
 		case OT::dbo_OnExit:		caption = QT_TRANSLATE_NOOP("Options", "On exit application");	break;
 		case OT::dbo_CopyPath:		caption = QT_TRANSLATE_NOOP("Options", "Path for backup");		break;
@@ -1966,7 +1985,8 @@ QString OT::DatabaseTypeCaption(OT::DatabaseType type)
 
 	switch (type)
 	{
-		case OT::SQLite: caption = "SQLite"; break;
+		case OT::SQLite:		caption = "SQLite";		break;
+		case OT::PostgreSQL:	caption = "PostgreSQL";	break;
 
 		default:
 			assert(0);
@@ -2098,11 +2118,7 @@ bool compareDouble(double lDouble, double rDouble)
 Options::Options(QObject* parent) :
 	QObject(parent)
 {
-#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))									// for Qt6
 	qRegisterMetaType<QMap<QString,int>>("QMap<QString,int>");
-#else																			// for Qt5
-	qRegisterMetaTypeStreamOperators<QMap<QString,int>>("QMap<QString,int>");
-#endif
 }
 
 // -------------------------------------------------------------------------------------------------------------------

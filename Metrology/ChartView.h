@@ -4,14 +4,6 @@
 #include <QChart>
 #include <QChartView>
 
-#include "MeasureBase.h"
-
-// ==============================================================================================
-
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))	// for Qt5
-	using namespace QtCharts;
-#endif
-
 // ==============================================================================================
 
 enum ChartType

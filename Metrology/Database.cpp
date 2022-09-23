@@ -36,7 +36,8 @@ int SqlFieldBase::init(int objectType, int)
 			append("ObjectID",						QMetaType::Int);
 			append("Version",						QMetaType::Int);
 			append("Event",							QMetaType::QString, 256);
-			append("Time",							QMetaType::QString, 64);
+			append("Time",							QMetaType::QTime);
+			append("Description",					QMetaType::QString, 256);	// db ver 1, table ver 1
 
 			break;
 
@@ -99,7 +100,7 @@ int SqlFieldBase::init(int objectType, int)
 			append("EngineeringLimitErrorReduce",	QMetaType::Double);
 			append("EngineeringLimitErrorRelative",	QMetaType::Double);
 
-			append("MeasureTime",					QMetaType::QString, 64);
+			append("MeasureTime",					QMetaType::QTime);
 			append("Calibrator",					QMetaType::QString, 64);
 
 			break;
@@ -234,7 +235,7 @@ int SqlFieldBase::init(int objectType, int)
 			append("EngineeringLimitErrorReduce",	QMetaType::Double);
 			append("EngineeringLimitErrorRelative",	QMetaType::Double);
 
-			append("MeasureTime",					QMetaType::QString, 64);
+			append("MeasureTime",					QMetaType::QTime);
 			append("Calibrator",					QMetaType::QString, 64);
 
 			break;
@@ -292,34 +293,7 @@ void SqlFieldBase::append(QString name, QMetaType::Type type, int length)
 		return;
 	}
 
-#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))	// for Qt6
-
 	QSqlField field(name, QMetaType(type));
-
-#else											// for Qt5
-
-	QVariant::Type vtype = QVariant::Invalid;
-
-	switch(type)
-	{
-		case QMetaType::Bool:		vtype = QVariant::Bool;		break;
-		case QMetaType::Int:		vtype = QVariant::Int;		break;
-		case QMetaType::Double:		vtype = QVariant::Double;	break;
-		case QMetaType::QString:	vtype = QVariant::String;	break;
-
-		default:
-			assert(0);
-			vtype = QVariant::Invalid;
-	}
-
-	if (vtype == QVariant::Invalid)
-	{
-		return;
-	}
-
-	QSqlField field(name, vtype);
-
-#endif
 
 	if (type == QMetaType::Double)
 	{
@@ -347,38 +321,23 @@ QString SqlFieldBase::extFieldName(int index)
 
 	QString result;
 
-#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))	// for Qt6
-
 	switch(f.metaType().id())
 	{
-		case QMetaType::Bool:		result = QString("%1 BOOL").arg(f.name());									break;
-		case QMetaType::Int:		result = QString("%1 INTEGER").arg(f.name());								break;
-		case QMetaType::Double:		result = QString("%1 DOUBLE(0, %2)").arg(f.name()).arg(f.precision());		break;
-		case QMetaType::QString:	result = QString("%1 VARCHAR(%2)").arg(f.name()).arg(f.length());			break;
+		case QMetaType::Bool:		result = QString("%1 BOOLEAN").arg(f.name());								break;	// bool
+		case QMetaType::Int:		result = QString("%1 INTEGER").arg(f.name());								break;	// qint32
+		case QMetaType::Long:		result = QString("%1 BIGINT").arg(f.name());								break;	// qint64
+		case QMetaType::Double:		result = QString("%1 DOUBLE PRECISION").arg(f.name());						break;	// double
+		case QMetaType::QString:	result = QString("%1 VARCHAR(%2)").arg(f.name()).arg(f.length());			break;	// string
+		case QMetaType::QVariant:	result = QString("%1 BYTEA").arg(f.name());									break;	// blob
+		case QMetaType::QTime:		result = QString("%1 TIMESTAMP").arg(f.name());								break;	// date and time
 
 		default:
 			assert(0);
 			result.clear();
 	}
 
-#else											// for Qt5
-
-	switch(f.type())
-	{
-		case QVariant::Bool:	result = QString("%1 BOOL").arg(f.name());									break;
-		case QVariant::Int:		result = QString("%1 INTEGER").arg(f.name());								break;
-		case QVariant::Double:	result = QString("%1 DOUBLE(0, %2)").arg(f.name()).arg(f.precision());		break;
-		case QVariant::String:	result = QString("%1 VARCHAR(%2)").arg(f.name()).arg(f.length());			break;
-
-		default:
-			result.clear();
-	}
-
-#endif
-
 	return result;
 }
-
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -443,7 +402,7 @@ SqlHistoryDatabase::~SqlHistoryDatabase()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SqlHistoryDatabase::SqlHistoryDatabase(int objectID, int version, const QString& event,  const QString& time)
+SqlHistoryDatabase::SqlHistoryDatabase(int objectID, int version, const QString& event,  const QDateTime& time)
 {
 	m_objectID = objectID;
 	m_version = version;
@@ -574,7 +533,7 @@ bool SqlTable::isExist() const
 	int existTableCount = static_cast<int>(m_pDatabase->tables().count());
 	for(int et = 0; et < existTableCount; et++)
 	{
-		if (m_pDatabase->tables().at(et).compare(SqlTableName[type]) == 0)
+		if (m_pDatabase->tables().at(et).compare(SqlTableName[type], Qt::CaseInsensitive) == 0)
 		{
 			tableIsExist = true;
 			break;
@@ -791,7 +750,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					history->setObjectID(objectID);
 					history->setVersion(query.value(field++).toInt());
 					history->setEvent(query.value(field++).toString());
-					history->setTime(query.value(field++).toString());
+					history->setTime(query.value(field++).toDateTime());
 				}
 				break;
 
@@ -859,7 +818,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					measure->setErrorLimit(Measure::LimitType::Engineering, Measure::MT::ErrorType::Reduce, query.value(field++).toDouble());
 					measure->setErrorLimit(Measure::LimitType::Engineering, Measure::MT::ErrorType::Relative, query.value(field++).toDouble());
 
-					measure->setMeasureTime(QDateTime::fromString(query.value(field++).toString(), MEASURE_TIME_FORMAT));
+					measure->setMeasureTime(query.value(field++).toDateTime());
 					measure->setCalibrator(query.value(field++).toString());
 				}
 				break;
@@ -1037,7 +996,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					measure->setErrorLimit(Measure::LimitType::Engineering, Measure::MT::ErrorType::Reduce, query.value(field++).toDouble());
 					measure->setErrorLimit(Measure::LimitType::Engineering, Measure::MT::ErrorType::Relative, query.value(field++).toDouble());
 
-					measure->setMeasureTime(QDateTime::fromString(query.value(field++).toString(), MEASURE_TIME_FORMAT));
+					measure->setMeasureTime(query.value(field++).toDateTime());
 					measure->setCalibrator(query.value(field++).toString());
 				}
 				break;
@@ -1270,9 +1229,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, measure->errorLimit(Measure::LimitType::Engineering, Measure::MT::ErrorType::Reduce));
 					query.bindValue(field++, measure->errorLimit(Measure::LimitType::Engineering, Measure::MT::ErrorType::Relative));
 
-					measure->setMeasureTime(QDateTime::currentDateTime());
-
-					query.bindValue(field++, measure->measureTimeStr());
+					query.bindValue(field++, measure->measureTime());
 					query.bindValue(field++, measure->calibrator());
 				}
 				break;
@@ -1467,9 +1424,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, measure->errorLimit(Measure::LimitType::Engineering, Measure::MT::ErrorType::Reduce));
 					query.bindValue(field++, measure->errorLimit(Measure::LimitType::Engineering, Measure::MT::ErrorType::Relative));
 
-					measure->setMeasureTime(QDateTime::currentDateTime());
-
-					query.bindValue(field++, measure->measureTimeStr());
+					query.bindValue(field++, measure->measureTime());
 					query.bindValue(field++, measure->calibrator());
 				}
 				break;
@@ -1613,7 +1568,7 @@ SqlTable& SqlTable::operator=(SqlTable& from)
 
 SqlHistoryDatabase Database::m_history[] =
 {
-	SqlHistoryDatabase(SQL_TABLE_HISTORY, 0, "Create database", "11-11-2014 11:11:11"),
+	SqlHistoryDatabase(SQL_TABLE_HISTORY, 0, "Create database", QDateTime(QDate(2014, 11,11), QTime(11,11,11,00))),
 };
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1633,6 +1588,74 @@ Database::~Database()
 
 bool Database::open()
 {
+	bool result = false;
+
+	switch(m_databaseOption.type())
+	{
+		case OT::DatabaseType::SQLite:		result = openSQLite();		break;
+		case OT::DatabaseType::PostgreSQL:	result = openPostgres();	break;
+
+		default:
+			assert(0);
+			QMessageBox::critical(nullptr, tr("Database"), tr("Unknown type of database!"));
+			return false;
+	}
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	for(int type = 0; type < SQL_TABLE_COUNT; type++)
+	{
+		m_table[type].init(type, &m_database);
+	}
+
+	//
+	//
+	m_currentVersion = initVersion();
+	if (m_currentVersion > DATABASE_VERSION)
+	{
+		QMessageBox::critical(nullptr, tr("Database"), tr("Loaded database has version %1, latest known version is %2, please update your software!")
+							  .arg(m_currentVersion).arg(DATABASE_VERSION));
+
+		close();
+
+		return false;
+	}
+
+	createTables();
+
+	//
+	//
+	result = applyMigrations();
+	if (result == false)
+	{
+		QMessageBox::critical(nullptr, tr("Database"), tr("Error of migrations - Loaded database has version %1, latest known version is %2.")
+							  .arg(m_currentVersion).arg(DATABASE_VERSION));
+
+		close();
+
+		return false;
+	}
+
+	return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool Database::openSQLite()
+{
+	//
+	//
+	m_database = QSqlDatabase::addDatabase("QSQLITE");
+	if (m_database.lastError().isValid() == true)
+	{
+		return false;
+	}
+
+	//
+	//
 	QString path = m_databaseOption.locationPath();
 	if (path.isEmpty() == true)
 	{
@@ -1642,26 +1665,10 @@ bool Database::open()
 
 	//
 	//
-	switch(m_databaseOption.type())
-	{
-		case OT::DatabaseType::SQLite:
-
-			m_database = QSqlDatabase::addDatabase("QSQLITE");
-			if (m_database.lastError().isValid() == true)
-			{
-				return false;
-			}
-
-			m_database.setDatabaseName(path + QDir::separator() + DATABASE_NAME);
-
-			break;
-
-		default:
-			assert(0);
-	}
-
+	m_database.setDatabaseName(path + QDir::separator() + DATABASE_NAME + ".db");
 	if (m_database.open() == false)
 	{
+		qDebug() << m_database.lastError().text();
 		QMessageBox::critical(nullptr, tr("Database"), tr("Cannot open database"));
 		return false;
 	}
@@ -1680,28 +1687,107 @@ bool Database::open()
 		QMessageBox::critical(nullptr, tr("Database"), tr("Error set option of database: [synchronous=normal]"));
 	}
 
-	for(int type = 0; type < SQL_TABLE_COUNT; type++)
-	{
-		m_table[type].init(type, &m_database);
-	}
-
-	//
-	//
-	initVersion();
-	createTables();
-
-	//
-	//
-	if (m_databaseOption.onStart() == true)
-	{
-		createBackup();
-	}
-
-	//
-	//
 	return true;
 }
 
+// -------------------------------------------------------------------------------------------------------------------
+
+bool Database::openPostgres()
+{
+	QString connectionName = "default";
+	{
+		//
+		//
+		QSqlDatabase psql_db = QSqlDatabase::addDatabase("QPSQL", connectionName);
+		if (psql_db.lastError().isValid() == true)
+		{
+			return false;
+		}
+
+		// set options postgres database
+		//
+		psql_db.setDatabaseName("postgres");
+		psql_db.setHostName(m_databaseOption.ip());
+		psql_db.setPort(m_databaseOption.port());
+		psql_db.setUserName(m_databaseOption.user());
+		psql_db.setPassword(m_databaseOption.password());
+
+		if (psql_db.open() == false)
+		{
+			qDebug() << psql_db.lastError().text();
+			QMessageBox::critical(nullptr, tr("Database"), tr("Cannot open database"));
+			return false;
+		}
+
+		//
+		//
+		QSqlQuery query(psql_db);
+
+		bool result = query.exec("SELECT datname FROM pg_database");
+		if (result == false)
+		{
+			qDebug() << query.lastError().text();
+			psql_db.close();
+			return false;
+		}
+
+		// find our database
+		//
+		bool isExist = false;
+
+		while (query.next())
+		{
+			QString databaseName = query.value(0).toString();
+			if (QString::compare(databaseName, DATABASE_NAME, Qt::CaseInsensitive) == 0)
+			{
+				isExist = true;
+				break;
+			}
+		}
+
+		// if our database was not found
+		// create our database
+		//
+		if (isExist == false)
+		{
+			result = query.exec("CREATE DATABASE " + QString(DATABASE_NAME));
+			if (result == false)
+			{
+				qDebug() << query.lastError().text();
+				psql_db.close();
+				return false;
+			}
+		}
+
+		psql_db.close();
+	}
+	QSqlDatabase::removeDatabase(connectionName);
+
+	//
+	//
+	m_database = QSqlDatabase::addDatabase("QPSQL");
+	if (m_database.lastError().isValid() == true)
+	{
+		return false;
+	}
+
+	// set options our database
+	//
+	m_database.setDatabaseName(QString(DATABASE_NAME).toLower());
+	m_database.setHostName(m_databaseOption.ip());
+	m_database.setPort(m_databaseOption.port());
+	m_database.setUserName(m_databaseOption.user());
+	m_database.setPassword(m_databaseOption.password());
+
+	if (m_database.open() == false)
+	{
+		qDebug() << m_database.lastError().text();
+		QMessageBox::critical(nullptr, tr("Database"), tr("Cannot open database"));
+		return false;
+	}
+
+	return true;
+}
 // -------------------------------------------------------------------------------------------------------------------
 
 void Database::close()
@@ -1751,13 +1837,15 @@ SqlTable* Database::openTable(int objectType)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void Database::initVersion()
+int Database::initVersion()
 {
 	SqlTable table;
 	if (table.init(SQL_TABLE_DATABASE_INFO, &m_database) == false)
 	{
-		return;
+		return 0;
 	}
+
+	int databaseVersion = 0;
 
 	std::vector<SqlObjectInfo> info;
 
@@ -1772,31 +1860,36 @@ void Database::initVersion()
 				info[static_cast<quint64>(t)] = m_table[t].info();
 			}
 
-			table.write(info.data(), TO_INT(info.size()));
+			table.write(info.data(), static_cast<int>(info.size()));
+
+			databaseVersion = DATABASE_VERSION;
 		}
 	}
 	else
 	{
+		// open table that has data of database
+		//
 		if (table.open() == true)
 		{
+			// determine count of obejects in database
+			//
 			info.resize(static_cast<quint64>(table.recordCount()));
 
-			int count = table.read(info.data());
-			for (int i = 0; i < count; i++)
+			int objectCount = table.read(info.data());
+			for (int i = 0; i < objectCount; i++)
 			{
-				for(int t = 0; t < SQL_TABLE_COUNT; t++)
+				if (info[i].objectID() == SQL_TABLE_DATABASE_INFO)
 				{
-					if (m_table[t].info().objectID() == info[static_cast<quint64>(i)].objectID())
-					{
-						m_table[t].info().setVersion(info[static_cast<quint64>(i)].version());
-						break;
-					}
+					databaseVersion = info[i].version();
+					break;
 				}
 			}
 		}
 	}
 
 	table.close();
+
+	return databaseVersion;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2062,6 +2155,59 @@ void Database::updateInBase(Measure::Type measureType, const std::vector<Measure
 		QMessageBox::critical(nullptr, tr("Update measurements"), tr("Error update measurements from database"));
 	}
 }
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool Database::applyMigrations()
+{
+	if (m_currentVersion == DATABASE_VERSION)
+	{
+		return true;
+	}
+
+	// run all migrations
+	//
+	bool allMigrationOk = true;
+
+	for(int i = m_currentVersion; i < DATABASE_VERSION; i++)
+	{
+		QSqlQuery query;
+		bool result = query.exec(migration[i]);
+		if (result == false)
+		{
+			qDebug() << query.lastError().text();
+			allMigrationOk = false;
+		}
+	}
+
+	if (allMigrationOk == false)
+	{
+		return false;
+	}
+
+	// update DatabaseInfo
+	//
+	SqlTable* pTable = openTable(SQL_TABLE_DATABASE_INFO);
+	if (pTable != nullptr)
+	{
+		pTable->clear();
+
+		std::vector<SqlObjectInfo> info;
+
+		info.resize(SQL_TABLE_COUNT);
+		for(int t = 0; t < SQL_TABLE_COUNT; t++)
+		{
+			info[static_cast<quint64>(t)] = m_table[t].info();
+		}
+
+		pTable->write(info.data(), static_cast<int>(info.size()));
+
+		pTable->close();
+	}
+
+	return true;
+}
+
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------

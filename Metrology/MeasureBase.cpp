@@ -1169,6 +1169,8 @@ namespace Measure
 			return;
 		}
 
+		setMeasureTime(QDateTime::currentDateTime());
+
 		switch (connectionType)
 		{
 			case Metrology::ConnectionType::Unused:					fill_measure_input(ioParam);	break;
@@ -2272,6 +2274,8 @@ namespace Measure
 			return;
 		}
 
+		setMeasureTime(QDateTime::currentDateTime());
+
 		switch (connectionType)
 		{
 			case Metrology::ConnectionType::Unused:					fill_measure_input(ioParam);	break;
@@ -2934,8 +2938,6 @@ namespace Measure
 						default:
 							break;
 					}
-
-
 
 					break;
 				}

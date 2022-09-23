@@ -1081,15 +1081,19 @@ namespace OT
 	enum DatabaseParam
 	{
 		NoDatabaseParam = -1,
-		dbo_LocationPath = 0,
-		dbo_Type = 1,
-		dbo_OnStart = 2,
-		dbo_OnExit = 3,
-		dbo_CopyPath = 4,
+		dbo_Type = 0,
+		dbo_LocationPath = 1,
+		dbo_Ip = 2,
+		dbo_Port = 3,
+		dbo_User = 4,
+		dbo_Password = 5,
+		dbo_OnStart = 6,
+		dbo_OnExit = 7,
+		dbo_CopyPath = 8,
 	};
 	Q_ENUM_NS(DatabaseParam)
 
-	const int DatabaseParamCount = 5;
+	const int DatabaseParamCount = 9;
 
 	#define ERR_DBO_PARAM(param) (static_cast<int>(param) < 0 || static_cast<int>(param) >= OT::DatabaseParamCount)
 
@@ -1100,10 +1104,11 @@ namespace OT
 	enum DatabaseType
 	{
 		SQLite = 0,
+		PostgreSQL = 1,
 	};
 	Q_ENUM_NS(DatabaseType)
 
-	const int DatabaseTypeCount = 1;
+	const int DatabaseTypeCount = 2;
 
 	#define ERR_DATABASE_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= OT::DatabaseTypeCount)
 
@@ -1111,6 +1116,13 @@ namespace OT
 
 	// ----------------------------------------------------------------------------------------------
 }
+
+// ----------------------------------------------------------------------------------------------
+
+const QString DEFAULT_DB_IP = "localhost";
+const int DEFAULT_DB_PORT = 5432;
+const QString DEFAULT_DB_USER = "postgres";
+const QString DEFAULT_DB_PASSWORD = "password";
 
 // ----------------------------------------------------------------------------------------------
 
@@ -1126,11 +1138,25 @@ public:
 
 public:
 
+	OT::DatabaseType type() const { return m_type; }
+	void setType(OT::DatabaseType type) { m_type = type; }
+
 	QString locationPath() const { return m_locationPath; }
 	void setLocationPath(const QString& path) { m_locationPath = path; }
 
-	OT::DatabaseType type() const { return m_type; }
-	void setType(OT::DatabaseType type) { m_type = type; }
+
+	QString ip() const { return m_ip; }
+	void setIp(const QString& ip) { m_ip = ip; }
+
+	int port() const { return m_port; }
+	void setPort(int port) { m_port = port; }
+
+	QString user() const { return m_user; }
+	void setUser(const QString& user) { m_user = user; }
+
+	QString password() const { return m_password; }
+	void setPassword(const QString& password) { m_password = password; }
+
 
 	bool onStart () const { return m_onStart; }
 	void setOnStart(bool onStart) { m_onStart = onStart; }
@@ -1154,6 +1180,11 @@ private:
 
 	QString m_locationPath;
 	OT::DatabaseType m_type = OT::SQLite;
+
+	QString m_ip = DEFAULT_DB_IP;
+	int m_port = DEFAULT_DB_PORT;
+	QString m_user = DEFAULT_DB_IP;
+	QString m_password = DEFAULT_DB_IP;
 
 	bool m_onStart = false;
 	bool m_onExit = true;

@@ -9,8 +9,18 @@
 
 // ==============================================================================================
 
-#define					DATABASE_NAME		"Metrology.db"
-#define					DATABASE_VERSION	0
+#define					DATABASE_NAME		"Metrology"
+#define					DATABASE_VERSION	1
+
+// ==============================================================================================
+//
+// !!! Any changing must change version of database and version of appropriate table !!!
+//
+
+const char* const migration[DATABASE_VERSION] =
+{
+	"ALTER TABLE History ADD Description VARCHAR(256);",	// 1
+};
 
 // ==============================================================================================
 //
@@ -80,7 +90,7 @@ const int				SQL_TABLE_VER_UNKNONW = -1;
 const int				SqlTableVersion[SQL_TABLE_COUNT] =
 {
 						DATABASE_VERSION,	//	SQL_TABLE_DATABASE_INFO
-						0,					//	SQL_TABLE_HISTORY
+						1,					//	SQL_TABLE_HISTORY
 
 						0,					//	SQL_TABLE_LINEARITY
 						0,					//	SQL_TABLE_LINEARITY_ADD_EL_VAL
@@ -227,7 +237,7 @@ class SqlHistoryDatabase
 public:
 
 	SqlHistoryDatabase();
-	SqlHistoryDatabase(int objectID, int version, const QString& event, const QString& time);
+	SqlHistoryDatabase(int objectID, int version, const QString& event, const QDateTime& time);
 	virtual ~SqlHistoryDatabase();
 
 public:
@@ -241,8 +251,8 @@ public:
 	QString				event() const { return m_event; }
 	void				setEvent(const QString& event) { m_event = event; }
 
-	QString				time() const { return m_time; }
-	void				setTime(const QString& time) { m_time = time; }
+	QDateTime			time() const { return m_time; }
+	void				setTime(const QDateTime& time) { m_time = time; }
 
 	SqlHistoryDatabase& operator=(SqlHistoryDatabase& from);
 
@@ -251,7 +261,7 @@ private:
 	int					m_objectID = SQL_OBJECT_ID_UNKNONW;
 	int					m_version = SQL_TABLE_VER_UNKNONW;
 	QString				m_event;
-	QString				m_time;
+	QDateTime			m_time;
 };
 
 // ==============================================================================================
@@ -323,6 +333,8 @@ public:
 
 	bool				isOpen() const { return m_database.isOpen(); }
 	bool				open();
+	bool				openSQLite();
+	bool				openPostgres();
 	void				close();
 
 	SqlTable*			openTable(int objectType);
@@ -338,12 +350,16 @@ private:
 
 	DatabaseOption		m_databaseOption;
 
+	int					m_currentVersion = 0;
+
 	static SqlHistoryDatabase m_history[DATABASE_VERSION + 1];
 
 	bool				createBackup();
 
-	void				initVersion();
+	int					initVersion();
 	void				createTables();
+
+	bool				applyMigrations();
 
 public slots:
 
