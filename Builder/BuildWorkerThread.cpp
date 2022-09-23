@@ -947,6 +947,138 @@ namespace Builder
 		return true;
 	}
 
+	bool BuildWorkerThread::taskSaveTestScripts()
+	{
+		Q_ASSERT(m_context->m_buildResultWriter);
+
+		DbFileTree fileTree;
+
+		if (bool ok = m_context->m_db.getFileListTree(&fileTree, DbDir::TestsDir, true, nullptr);
+			ok == false)
+		{
+			m_context->m_log->errPDB2001(m_context->m_db.systemFileId(DbDir::TestsDir), "", m_context->m_db.lastError());
+			return false;
+		}
+
+		// --
+		//
+		const std::map<int, std::shared_ptr<DbFileInfo>>& files = fileTree.files();
+
+		QString javaScriptFileExtension{Db::File::JavaScriptFileExtension};
+
+		for (auto& [fileId, fileInfo] : files)
+		{
+			if (fileInfo->isFolder() == true)
+			{
+				continue;
+			}
+
+			QString fileExt = fileInfo->extension();
+
+			if (fileExt.compare(javaScriptFileExtension, Qt::CaseInsensitive) != 0)
+			{
+				continue;
+			}
+
+			std::shared_ptr<DbFile> file;
+
+			bool ok = m_context->m_db.getLatestVersion(*fileInfo, &file, nullptr);
+			if (ok == true)
+			{
+				BuildFile* buildFile = m_context->m_buildResultWriter->addFile(Directory::TESTS + fileTree.filePath(fileId), file->fileName(), file->data(), false);
+				if (buildFile == nullptr)
+				{
+					Q_ASSERT(buildFile);
+					return false;
+				}
+
+				// Create run script
+				//
+				QString scriptFileName = file->fileName();
+				scriptFileName.chop(javaScriptFileExtension.size());
+
+				QString outputPath = QDir::fromNativeSeparators(m_context->m_buildResultWriter->outputPath());
+				if (outputPath.endsWith("/") == true)
+				{
+					outputPath.truncate(outputPath.length() - 1);
+				}
+
+				QString buildDir = QString("%1/%2/build")
+						.arg(outputPath)
+						.arg(m_context->m_db.currentProject().projectName());
+
+				QString scriptDir = QString("%1/%2")
+						.arg(buildDir)
+						.arg(Directory::TESTS + fileTree.filePath(fileId));
+
+				BuildInfo&& b = m_context->m_buildResultWriter->buildInfo();
+
+				QString commStartWindows = "@rem ";
+				QString commStartLinux = "# ";
+
+				QStringList commentsList;
+
+				commentsList.append("Project: " + b.project + "\n");
+				commentsList.append("BuildNo: " + QString::number(b.id) + "\n");
+				commentsList.append("Date: " + b.dateStr() + "\n");
+				commentsList.append("Changeset: " + QString::number(b.changeset) + "\n");
+				commentsList.append("User: " + b.user + "\n");
+				commentsList.append("Workstation: " + b.workstation + "\n\n");
+				commentsList.append("Simulator profiles: " + m_context->m_simProfiles.profiles().join(' ') + "\n\n");
+
+
+				// Windows script
+				//
+				QString commentsWindows;
+
+				for (const QString& c: commentsList)
+				{
+					commentsWindows += commStartWindows + c;
+				}
+
+				// Linux script
+				//
+				QString commentsLinux;
+
+				for (const QString& c: commentsList)
+				{
+					commentsLinux += commStartLinux + c;
+				}
+
+				QString runScriptWindows = commentsWindows + tr("SimulatorConsole.exe -build=%1 -script=%2 -profile=Default")
+						.arg(QDir::toNativeSeparators(buildDir))
+						.arg(QDir::toNativeSeparators(scriptDir + "/" + file->fileName()));
+
+				QString runScriptLinux = commentsLinux + tr("./SimulatorConsole -build=%1 -script=%2 -profile=Default")
+						.arg(buildDir)
+						.arg(scriptDir + "/" + file->fileName());
+
+				// Add script files
+				//
+				buildFile = m_context->m_buildResultWriter->addFile(Directory::TESTS + fileTree.filePath(fileId), scriptFileName + "bat", runScriptWindows, false);
+				if (buildFile == nullptr)
+				{
+					Q_ASSERT(buildFile);
+					return false;
+				}
+
+				buildFile = m_context->m_buildResultWriter->addFile(Directory::TESTS + fileTree.filePath(fileId), scriptFileName + "sh", runScriptLinux, false);
+				if (buildFile == nullptr)
+				{
+					Q_ASSERT(buildFile);
+					return false;
+				}
+			}
+			else
+			{
+				m_context->m_log->errPDB2002(fileInfo->fileId(), fileInfo->fileName(), m_context->m_db.lastError());
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	bool BuildWorkerThread::taskCompileApplicationLogic()
 	{
 		m_context->m_tuningDataStorage = std::make_shared<Tuning::TuningDataStorage>();
