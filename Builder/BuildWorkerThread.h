@@ -57,6 +57,7 @@ namespace Builder
 		bool taskGenerationModulesConfiguration();	// Generate Modules Configuration
 		bool taskGenerationBitstreamFile();			// Generate Bitstream File
 		bool taskGenerationSoftwareConfiguration();	// Generate Software Configuration
+		bool taskSaveTestScripts();					// Save Test Scripts
 		bool taskRunSimTests();						// Run Simulator-based tests
 
 		struct BuildTask
@@ -166,6 +167,11 @@ namespace Builder
 					.func = &BuildWorkerThread::taskGenerationSoftwareConfiguration,
 					.name = "Software Configuration Generation",
 					.breakOnFailed = true
+				},
+				{
+					.func = &BuildWorkerThread::taskSaveTestScripts,
+					.name = "Saving Test Scripts",
+					.breakOnFailed = false
 				},
 				{
 					.func = &BuildWorkerThread::taskRunSimTests,
