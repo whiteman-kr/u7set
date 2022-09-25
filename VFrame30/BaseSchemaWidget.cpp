@@ -204,14 +204,24 @@ namespace VFrame30
 		setZoom(zoom(), true);
 	}
 
-	std::shared_ptr<VFrame30::Schema> BaseSchemaWidget::schema()
+	VFrame30::Schema* BaseSchemaWidget::schema()
 	{
 		return m_schemaView->schema();
 	}
 
-	const std::shared_ptr<VFrame30::Schema> BaseSchemaWidget::schema() const
+	const VFrame30::Schema* BaseSchemaWidget::schema() const
 	{
 		return m_schemaView->schema();
+	}
+
+	std::shared_ptr<VFrame30::Schema> BaseSchemaWidget::schemaSharedPtr()
+	{
+		return m_schemaView->schemaSharedPtr();
+	}
+
+	std::shared_ptr<VFrame30::Schema> BaseSchemaWidget::schemaSharedPtr() const
+	{
+		return m_schemaView->schemaSharedPtr();
 	}
 
 	void BaseSchemaWidget::setSchema(std::shared_ptr<VFrame30::Schema> schema, bool repaint)
@@ -234,7 +244,7 @@ namespace VFrame30
 		if (schemaView() == nullptr)
 		{
 			assert(schemaView() != nullptr);
-			return 1.0;							// if return value 0 then it is potential divide by 0
+			return 1.0;							// if return value is 0 then it is potential divide by 0
 		}
 
 		return schemaView()->zoom();

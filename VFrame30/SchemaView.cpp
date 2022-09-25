@@ -162,17 +162,27 @@ namespace VFrame30
 		return;
 	}
 
-	std::shared_ptr<Schema> SchemaView::schema()
+	VFrame30::Schema* SchemaView::schema()
+	{
+		return m_schema.get();
+	}
+
+	const VFrame30::Schema* SchemaView::schema() const
+	{
+		return m_schema.get();
+	}
+
+	std::shared_ptr<VFrame30::Schema> SchemaView::schemaSharedPtr()
 	{
 		return m_schema;
 	}
 
-	std::shared_ptr<Schema> SchemaView::schema() const
+	std::shared_ptr<VFrame30::Schema> SchemaView::schemaSharedPtr() const
 	{
 		return m_schema;
 	}
 
-	void SchemaView::setSchema(std::shared_ptr<Schema> schema, bool repaint)
+	void SchemaView::setSchema(std::shared_ptr<VFrame30::Schema> schema, bool repaint)
 	{
 		assert(schema.get() != nullptr);
 		m_schema = schema;
@@ -183,7 +193,7 @@ namespace VFrame30
 		return;
 	}
 
-	void SchemaView::setSchemaInternal(std::shared_ptr<Schema> schema)
+	void SchemaView::setSchemaInternal(std::shared_ptr<VFrame30::Schema> schema)
 	{
 		// Use this when yoo dont need to update zoom, sliders, etc
 		//
@@ -265,7 +275,7 @@ namespace VFrame30
 		}
 
 		QPainter p(this);
-		CDrawParam drawParam(&p, schema().get(), this, schema()->gridSize(), schema()->pinGridStep());
+		CDrawParam drawParam(&p, schema(), this, schema()->gridSize(), schema()->pinGridStep());
 
 		QRectF clipRect{0, 0, schema()->docWidth(), schema()->docHeight()};
 

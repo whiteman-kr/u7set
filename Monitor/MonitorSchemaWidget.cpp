@@ -108,21 +108,21 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 		if (VFrame30::SchemaItemValue* schemaItem = dynamic_cast<VFrame30::SchemaItemValue*>(item.get());
 			schemaItem != nullptr)
 		{
-			signalList.append(VFrame30::MacrosExpander::parse(schemaItem->signalIds(), clientSchemaView(), &clientSchemaView()->session(), schema().get(), schemaItem));
+			signalList.append(VFrame30::MacrosExpander::parse(schemaItem->signalIds(), clientSchemaView(), &clientSchemaView()->session(), schema(), schemaItem));
 			continue;
 		}
 
 		if (VFrame30::SchemaItemImageValue* schemaItem = dynamic_cast<VFrame30::SchemaItemImageValue*>(item.get());
 			schemaItem != nullptr)
 		{
-			signalList.append(VFrame30::MacrosExpander::parse(schemaItem->signalIds(), clientSchemaView(), &clientSchemaView()->session(), schema().get(), schemaItem));
+			signalList.append(VFrame30::MacrosExpander::parse(schemaItem->signalIds(), clientSchemaView(), &clientSchemaView()->session(), schema(), schemaItem));
 			continue;
 		}
 
 		if (VFrame30::SchemaItemIndicator* schemaItem = dynamic_cast<VFrame30::SchemaItemIndicator*>(item.get());
 			schemaItem != nullptr)
 		{
-			signalList.append(VFrame30::MacrosExpander::parse(schemaItem->signalIds(), clientSchemaView(), &clientSchemaView()->session(), schema().get(), schemaItem));
+			signalList.append(VFrame30::MacrosExpander::parse(schemaItem->signalIds(), clientSchemaView(), &clientSchemaView()->session(), schema(), schemaItem));
 			continue;
 		}
 

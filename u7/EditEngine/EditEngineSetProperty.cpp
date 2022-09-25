@@ -19,7 +19,7 @@ namespace EditEngine
 		assert(items.empty() == false);
 		assert(value.isValid() == true);
 
-		m_schema = schemaView->schema();
+		m_schema = schemaView->schemaSharedPtr();
 		assert(m_schema != nullptr);
 
 		for (auto& i : items)

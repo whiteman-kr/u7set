@@ -18,7 +18,7 @@ namespace EditEngine
 		assert(newState.isEmpty() == false);
 		assert(items.empty() == false);
 
-		m_schema = schemaView->schema();
+		m_schema = schemaView->schemaSharedPtr();
 		assert(m_schema != nullptr);
 
 		for (auto& item : items)

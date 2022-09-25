@@ -104,7 +104,7 @@ void EditSchemaView::paintEvent(QPaintEvent* paintEvent)
 	{
 		QPainter p(this);
 
-		VFrame30::CDrawParam drawParam(&p, schema().get(), this, schema()->gridSize(), schema()->pinGridStep());
+		VFrame30::CDrawParam drawParam(&p, schema(), this, schema()->gridSize(), schema()->pinGridStep());
 		drawParam.setControlBarSize(CONTROL_BAR(schema()->unit(), p.device()->devicePixelRatioF(), zoom()));
 		drawParam.setInfoMode(theSettings.infoMode());
 		drawParam.session() = session();
@@ -124,7 +124,7 @@ void EditSchemaView::paintEvent(QPaintEvent* paintEvent)
 	QPainter p;
 	p.begin(this);
 
-	VFrame30::CDrawParam drawParam(&p, schema().get(), this, schema()->gridSize(), schema()->pinGridStep());
+	VFrame30::CDrawParam drawParam(&p, schema(), this, schema()->gridSize(), schema()->pinGridStep());
 	drawParam.setInfoMode(theSettings.infoMode());
 
 	// Calc size
@@ -299,7 +299,7 @@ void EditSchemaView::drawRunOrder(VFrame30::CDrawParam* drawParam, QRectF clipRe
 
 				if (schema()->isLogicSchema() == true)
 				{
-					VFrame30::LogicSchema* logicSchema = dynamic_cast<VFrame30::LogicSchema*>((schema().get()));
+					VFrame30::LogicSchema* logicSchema = dynamic_cast<VFrame30::LogicSchema*>(schema());
 					if (logicSchema == nullptr)
 					{
 						assert(logicSchema);
@@ -1644,7 +1644,7 @@ bool EditSchemaView::isItemSelected(const SchemaItemPtr& item)
 
 void EditSchemaView::exportToPdf(const QString& fileName, bool infoMode)
 {
-	if (schema().get() == nullptr)
+	if (schema() == nullptr)
 	{
 		return;
 	}
@@ -1678,7 +1678,7 @@ void EditSchemaView::exportToPdf(const QString& fileName, bool infoMode)
 	// --
 	//
 	QPainter p(&pdfWriter);
-	VFrame30::CDrawParam drawParam(&p, schema().get(), this, schema()->gridSize(), schema()->pinGridStep());
+	VFrame30::CDrawParam drawParam(&p, schema(), this, schema()->gridSize(), schema()->pinGridStep());
 
 	drawParam.setInfoMode(infoMode);
 	drawParam.setPdfMode(true);

@@ -5,13 +5,19 @@
 #include "Settings.h"
 #include "GlobalMessanger.h"
 
-ProjectsTabPage::ProjectsTabPage(DbController* dbcontroller, QWidget* parent) :
-	MainTabPage(dbcontroller, parent)
+
+ProjectsTabPage::ProjectsTabPage(DbController* dbcontroller,
+								 std::function<bool(void)> preCloseConditionsCallback,
+								 QWidget* parent) :
+	MainTabPage(dbcontroller, parent),
+	m_preCloseConditionsCallback(std::move(preCloseConditionsCallback))
 {
+	assert(m_preCloseConditionsCallback);
+
 	//
 	// Controls
 	//
-	m_projectTable = new QTableWidget();
+	m_projectTable = new QTableWidget{};
 
 	m_projectTable->setSelectionBehavior(QAbstractItemView::SelectRows);
 	m_projectTable->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -43,12 +49,12 @@ ProjectsTabPage::ProjectsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	// Buttons
 	//
-	m_newProjectButton = new QPushButton(tr("New Project..."));
-	m_openProjectButton = new QPushButton(tr("Open Project"));
-	m_closeProjectButton = new QPushButton(tr("Close Project"));
-	m_cloneProjectButton = new QPushButton(tr("Clone..."));
-	m_deleteProjectButton = new QPushButton(tr("Delete Project"));
-	m_refreshProjectListButton = new QPushButton(tr("Refresh"));
+	m_newProjectButton = new QPushButton{tr("New Project...")};
+	m_openProjectButton = new QPushButton{tr("Open Project")};
+	m_closeProjectButton = new QPushButton{tr("Close Project")};
+	m_cloneProjectButton = new QPushButton{tr("Clone...")};
+	m_deleteProjectButton = new QPushButton{tr("Delete Project")};
+	m_refreshProjectListButton = new QPushButton{tr("Refresh")};
 
 	m_openProjectButton->setEnabled(false);
 	m_closeProjectButton->setEnabled(false);
@@ -64,19 +70,19 @@ ProjectsTabPage::ProjectsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	// Actions
 	//
-	m_newProjectAction = new QAction(tr("New Project..."), this);
+	m_newProjectAction = new QAction{tr("New Project..."), this};
 	connect(m_newProjectAction, &QAction::triggered, this, &ProjectsTabPage::createProject);
 
-	m_openProjectAction = new QAction(tr("Open Project..."), this);
+	m_openProjectAction = new QAction{tr("Open Project..."), this};
 	connect(m_openProjectAction, &QAction::triggered, this, &ProjectsTabPage::openProject);
 
-	m_closeProjectAction = new QAction(tr("Close Project"), this);
+	m_closeProjectAction = new QAction{tr("Close Project"), this};
 	connect(m_closeProjectAction, &QAction::triggered, this, &ProjectsTabPage::closeProject);
 
-	m_cloneProjectAction = new QAction(tr("Clone Project"), this);
+	m_cloneProjectAction = new QAction{tr("Clone Project"), this};
 	connect(m_cloneProjectAction, &QAction::triggered, this, &ProjectsTabPage::cloneProject);
 
-	m_deleteProjectAction = new QAction(tr("Delete Project"), this);
+	m_deleteProjectAction = new QAction{tr("Delete Project"), this};
 	connect(m_deleteProjectAction, &QAction::triggered, this, &ProjectsTabPage::deleteProject);
 
 	m_openProjectAction->setEnabled(false);
@@ -84,7 +90,7 @@ ProjectsTabPage::ProjectsTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_cloneProjectAction->setEnabled(false);
 	m_deleteProjectAction->setEnabled(false);
 
-	m_refreshAction = new QAction(tr("Refresh"), this);
+	m_refreshAction = new QAction{tr("Refresh"), this};
 	m_refreshAction->setShortcut(QKeySequence::StandardKey::Refresh);
 	connect(m_refreshAction, &QAction::triggered, this, &ProjectsTabPage::refreshProjectList);
 	addAction(m_refreshAction);
@@ -95,12 +101,12 @@ ProjectsTabPage::ProjectsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	// Left layout (project list)
 	//
-	QVBoxLayout* pLeftLayout = new QVBoxLayout();
+	QVBoxLayout* pLeftLayout = new QVBoxLayout{};
 	pLeftLayout->addWidget(m_projectTable);
 
 	// Right layout (buttons)
 	//
-	QVBoxLayout* pRightLayout = new QVBoxLayout();
+	QVBoxLayout* pRightLayout = new QVBoxLayout{};
 
 	pRightLayout->addWidget(m_newProjectButton);
 	pRightLayout->addWidget(m_openProjectButton);
@@ -112,7 +118,7 @@ ProjectsTabPage::ProjectsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	// Main Layout
 	//
-	QHBoxLayout* pMainLayout = new QHBoxLayout();
+	QHBoxLayout* pMainLayout = new QHBoxLayout{};
 	pMainLayout->addLayout(pLeftLayout);
 	pMainLayout->addLayout(pRightLayout);
 
@@ -140,11 +146,6 @@ void ProjectsTabPage::resizeEvent(QResizeEvent* event)
 	m_projectTable->setColumnWidth(1, static_cast<int>(m_projectTable->size().width() * 0.60));
 
 	return;
-}
-
-void ProjectsTabPage::showEvent(QShowEvent* event)
-{
-	QWidget::showEvent(event);
 }
 
 void ProjectsTabPage::projectOpened(DbProject project)
@@ -363,8 +364,14 @@ void ProjectsTabPage::closeProject()
 		return;
 	}
 
-	emit projectAboutToBeClosed();
-	dbController()->closeProject(this);
+	assert(m_preCloseConditionsCallback);
+
+	if (bool canBeClosed = m_preCloseConditionsCallback();
+		canBeClosed == true)
+	{
+		dbController()->closeProject(this);
+	}
+
 	return;
 }
 

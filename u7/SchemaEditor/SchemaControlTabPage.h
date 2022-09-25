@@ -3,27 +3,26 @@
 #ifdef _DEBUG
 	#include <QAbstractItemModelTester>
 #endif
-#include "MainTabPage.h"
 #include "../DbLib/DbController.h"
+#include "../VFrame30/Schema.h"
 #include "GlobalMessanger.h"
-#include "EditSchemaWidget.h"
-#include "../VFrame30/LogicSchema.h"
 
-class EditSchemaTabPageEx;
+class EditSchemaTabPage;
 class TagSelectorWidget;
 class AppSignalSetProvider;
 
+
 //
 //
-// SchemaListModelEx
+// SchemaListModel
 //
 //
-class SchemaListModelEx : public QAbstractItemModel, protected HasDbController
+class SchemaListModel : public QAbstractItemModel, protected HasDbController
 {
 	Q_OBJECT
 
 public:
-	SchemaListModelEx(DbController* dbc, QWidget* parentWidget);
+	SchemaListModel(DbController* dbc, QWidget* parentWidget);
 
 public:
 	virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
@@ -146,21 +145,21 @@ public:
 	std::vector<int> expandedFileIds(QTreeView* treeView);
 
 private:
-	SchemaListModelEx* m_sourceModel = nullptr;
+	SchemaListModel* m_sourceModel = nullptr;
 };
 
 //
 //
-// SchemaFileViewEx
+// SchemaFileView
 //
 //
-class SchemaFileViewEx : public QTreeView, public HasDbController
+class SchemaFileView : public QTreeView, public HasDbController
 {
 	Q_OBJECT
 
 public:
-	SchemaFileViewEx(DbController* dbc, QWidget* parent);
-	virtual ~SchemaFileViewEx();
+	SchemaFileView(DbController* dbc, QWidget* parent);
+	virtual ~SchemaFileView();
 
 	// Methods
 	//
@@ -202,7 +201,7 @@ public slots:
 	// Public properties
 	//
 public:
-	SchemaListModelEx& filesModel();
+	SchemaListModel& filesModel();
 	SchemaProxyListModel& proxyModel();
 
 	//	const std::vector<std::shared_ptr<DbFileInfo>>& files() const;
@@ -217,7 +216,7 @@ protected:
 	// Data
 	//
 private:
-	SchemaListModelEx m_filesModel;
+	SchemaListModel m_filesModel;
 	SchemaProxyListModel m_proxyModel;
 
 	int m_lastBuildIssueCount = -1;
@@ -263,17 +262,15 @@ public:
 // SchemaControlTabPage
 //
 //
-class SchemaControlTabPageEx : public QWidget, public HasDbController
+class SchemaControlTabPage : public QWidget, public HasDbController
 {
 	Q_OBJECT
 
 public:
-	SchemaControlTabPageEx(DbController* db, AppSignalSetProvider* signalSetProvider);
-	virtual ~SchemaControlTabPageEx();
+	SchemaControlTabPage(DbController* db, AppSignalSetProvider* signalSetProvider);
+	virtual ~SchemaControlTabPage();
 
 public:
-	VFrame30::Schema* createSchema() const;		// To delete????
-
 	bool hasUnsavedSchemas() const;
 	bool saveUnsavedSchemas();
 	bool resetModified();
@@ -285,11 +282,15 @@ private:
 
 	std::shared_ptr<VFrame30::Schema> createSchema(const DbFileInfo& parentFile) const;
 
-	EditSchemaTabPageEx* findOpenedFile(const DbFileInfo& file, bool readOnly);
+	EditSchemaTabPage* findOpenedFile(const DbFileInfo& file, bool readOnly);
 
 public slots:
-	void removeFromOpenedList(EditSchemaTabPageEx* editTabPage);
-	void detachOrAttachWindow(EditSchemaTabPageEx* editTabPage);
+	void removeFromOpenedList(EditSchemaTabPage* editTabPage);
+	void detachOrAttachWindow(EditSchemaTabPage* editTabPage);
+
+	void openFile(const DbFileInfo& file);
+	void viewFile(const DbFileInfo& file);
+	void viewFile(const DbFileInfo& file, int changesetId);
 
 protected slots:
 	void projectOpened();
@@ -299,9 +300,6 @@ protected slots:
 
 	void openSelectedFile();
 	void viewSelectedFile();
-
-	void openFile(const DbFileInfo& file);
-	void viewFile(const DbFileInfo& file);
 
 	void addLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile);
 	void addFile();
@@ -352,7 +350,7 @@ public:
 	// Data
 	//
 private:
-	SchemaFileViewEx* m_filesView = nullptr;
+	SchemaFileView* m_filesView = nullptr;
 	QToolBar* m_toolBar = nullptr;
 
 	QAction* m_searchAction = nullptr;
@@ -365,144 +363,10 @@ private:
 
 	TagSelectorWidget* m_tagSelector = nullptr;
 
-	std::list<EditSchemaTabPageEx*> m_openedFiles;		// Opened files (for edit and view)
+	std::list<EditSchemaTabPage*> m_openedFiles;		// Opened files (for edit and view)
 
 	AppSignalSetProvider* m_signalSetProvider = nullptr;
 
 	int m_lastSelectedNewSchemaForLmFileId = -1;
 };
 
-
-//
-//
-// SchemasTabPageEx - the main tab page added to IDE
-//
-//
-class SchemasTabPageEx : public MainTabPage
-{
-	Q_OBJECT
-
-public:
-	explicit SchemasTabPageEx(DbController* dbc, AppSignalSetProvider* signalSetProvider, QWidget* parent);
-	virtual ~SchemasTabPageEx();
-
-public:
-	[[nodiscard]] bool hasUnsavedSchemas() const;
-	bool saveUnsavedSchemas();
-	bool resetModified();
-
-	void refreshControlTabPage();
-
-public slots:
-	void projectOpened();
-	void projectClosed();
-
-protected slots:
-	void tabCloseRequested(int index);
-	void currentTabChanged(int index);
-
-	// Data
-	//
-protected:
-	QTabWidget* m_tabWidget = nullptr;
-	SchemaControlTabPageEx* m_controlTabPage = nullptr;
-
-	QString m_fileExtension;
-	QString m_templFileExtension;
-
-	QAction* m_showControlTabAccelerator = nullptr;
-};
-
-
-//
-//
-// EditSchemaTabPage
-//
-//
-class EditSchemaTabPageEx : public QMainWindow, public HasDbController
-{
-	Q_OBJECT
-
-public:
-	EditSchemaTabPageEx() = delete;
-	EditSchemaTabPageEx(QTabWidget* tabWidget,
-						std::shared_ptr<VFrame30::Schema> schema,
-						const DbFileInfo& fileInfo,
-						DbController* db,
-						AppSignalSetProvider* signalSetProvider);
-	virtual ~EditSchemaTabPageEx();
-
-protected:
-	virtual void closeEvent(QCloseEvent* event) override;
-
-	// Public methods
-	//
-public:
-	void ensureVisible();
-	void setPageTitle();
-	void updateZoomAndScrolls(bool fitToScreen, bool repaint);
-
-	void updateAfbSchemaItems();
-	void updateUfbSchemaItems();
-	void updateBussesSchemaItems();
-
-signals:
-	void vcsFileStateChanged();
-	void aboutToClose(EditSchemaTabPageEx*);
-	void pleaseDetachOrAttachWindow(EditSchemaTabPageEx*);
-
-public slots:
-	void detachOrAttachWindow();
-	void closeTab();
-
-protected slots:
-	void projectClosed();
-
-	void modifiedChanged(bool modified);
-
-	void checkInFile();
-	void checkOutFile();
-	void undoChangesFile();
-
-	void fileMenuTriggered();
-	void sizeAndPosMenuTriggered();
-	void itemsOrderTriggered();
-
-public:
-	bool saveWorkcopy();
-
-protected:
-	void getCurrentWorkcopy();				// Save current schema to a file
-	void setCurrentWorkcopy();				// Load a schema from a file
-
-	// Properties
-	//
-public:
-	std::shared_ptr<VFrame30::Schema> schema();
-
-	[[nodiscard]] const DbFileInfo& fileInfo() const;
-	void setFileInfo(const DbFileInfo& fi);
-
-	[[nodiscard]] bool readOnly() const;
-	void setReadOnly(bool value);
-
-	[[nodiscard]] bool modified() const;
-	void resetModified();
-
-	[[nodiscard]] bool compareWidget() const;
-	[[nodiscard]] bool isCompareWidget() const;
-	void setCompareWidget(bool value, std::shared_ptr<VFrame30::Schema> source, std::shared_ptr<VFrame30::Schema> target);
-
-	void setCompareItemActions(const std::map<QUuid, CompareAction>& itemsActions);
-
-	// Data
-	//
-private:
-	EditSchemaWidget* m_schemaWidget = nullptr;
-	QToolBar* m_toolBar = nullptr;
-	QTabWidget* m_tabWidget = nullptr;
-
-	QAction* m_fileAction = nullptr;
-	QAction* m_alignAction = nullptr;
-	QAction* m_orderAction = nullptr;
-};

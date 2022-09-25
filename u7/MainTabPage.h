@@ -17,7 +17,10 @@ public:
 	//
 protected:
 	DbController* dbController();
+	const DbController* dbController() const;
+
 	DbController* db();
+	const DbController* db() const;
 
 	// Data
 	//

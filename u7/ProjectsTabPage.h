@@ -3,41 +3,34 @@
 #include "MainTabPage.h"
 #include "../DbLib/DbStruct.h"
 
-class QListWidget;
 class DbController;
 
 class ProjectsTabPage : public MainTabPage
 {
 	Q_OBJECT
 public:
-	ProjectsTabPage(DbController* dbcontroller, QWidget* parent);
+	ProjectsTabPage(DbController* dbcontroller,
+					std::function<bool(void)> preCloseConditionsCallback,
+					QWidget* parent);
 
 protected:
 	virtual void resizeEvent(QResizeEvent* event) override;
-	virtual void showEvent(QShowEvent* event) override;
-
-signals:
-	void projectAboutToBeClosed();
 
 public slots:
 	void projectOpened(DbProject project);
 	void projectClosed();
 
-	private slots:
+private slots:
 	void createProject();
 	void openProject();
 	void closeProject();
 	void cloneProject();
 	void deleteProject();
 	void refreshProjectList();
-	void selectProject(const QString &projectName);
-	void projectsContextMenuRequested(const QPoint&pos);
+	void selectProject(const QString& projectName);
+	void projectsContextMenuRequested(const QPoint& pos);
 	void projectsSortIndicatorChanged(int column, Qt::SortOrder order);
 	void projectTableSelectionChanged();
-
-	// Properties
-	//
-protected:
 
 	// Data
 	//
@@ -57,5 +50,8 @@ private:
 	QAction* m_cloneProjectAction = nullptr;
 	QAction* m_deleteProjectAction = nullptr;
 	QAction* m_refreshAction = nullptr;
+
+	std::function<bool(void)> m_preCloseConditionsCallback;	// if returns true, then project can be closed,
+															// if returns false, then closing project must be stopped
 };
 

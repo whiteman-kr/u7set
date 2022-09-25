@@ -1,0 +1,355 @@
+#include "SchemasTabPage.h"
+#include "GlobalMessanger.h"
+#include "SchemaControlTabPage.h"
+#include "EditSchemaTabPage.h"
+#include "../lib/Ui/TabWidgetEx.h"
+
+
+
+//
+//
+// SchemasTabPage
+//
+//
+SchemasTabPage::SchemasTabPage(DbController* dbc, AppSignalSetProvider* signalSetProvider, QWidget* parent) :
+	MainTabPage(dbc, parent)
+{
+	m_tabWidget = new TabWidgetEx{this};
+
+	// --
+	//
+	QVBoxLayout* layout = new QVBoxLayout();
+	layout->setContentsMargins(0, 6, 0, 0);
+
+	layout->addWidget(m_tabWidget);
+
+	setLayout(layout);
+
+	// --
+	//
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SchemasTabPage::projectOpened);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SchemasTabPage::projectClosed);
+
+	// Evidently, project is not opened yet
+	//
+	this->setEnabled(false);
+
+	// Add control page
+	//
+	m_controlTabPage = new SchemaControlTabPage(dbc, signalSetProvider);
+	m_tabWidget->addTab(m_controlTabPage, tr("Schemas Control"));
+
+	m_tabWidget->setTabToolTip(0, tr("Schemas Control\n"
+									 "[CTRL + `]"));
+
+	// Hide close button for control tab page
+	//
+	QTabBar::ButtonPosition closeSide = (QTabBar::ButtonPosition)style()->styleHint(QStyle::SH_TabBar_CloseButtonPosition, 0, m_tabWidget->tabBar());
+	QToolButton* closeButton = static_cast<QToolButton*>(m_tabWidget->tabBar()->tabButton(0, closeSide));
+	if (closeButton != nullptr)
+	{
+		closeButton->setVisible(false);
+	}
+
+	// Add shortcut for switching to control tab page
+	//
+	m_showControlTabAccelerator = new QAction{tr("Schemas Control"), this};
+	m_showControlTabAccelerator->setShortcuts(QList<QKeySequence>{}
+											  <<  QKeySequence{Qt::CTRL | Qt::Key_QuoteLeft}
+											  <<  QKeySequence{Qt::CTRL | Qt::Key_AsciiTilde}
+											  );
+	m_showControlTabAccelerator->setShortcutContext(Qt::ApplicationShortcut);
+
+	addAction(m_showControlTabAccelerator);
+
+	connect(m_showControlTabAccelerator, &QAction::triggered,
+			[this]()
+			{
+				for (int i = 0; i < m_tabWidget->count(); i++)
+				{
+					SchemaControlTabPage* w = dynamic_cast<SchemaControlTabPage*>(m_tabWidget->widget(i));
+
+					if (w != nullptr)
+					{
+						if	(m_tabWidget->currentIndex() != i)
+						{
+							m_tabWidget->setCurrentIndex(i);
+						}
+
+						return;
+					}
+				}
+			});
+
+	connect(m_tabWidget->tabBar(), &QTabBar::tabCloseRequested, this, &SchemasTabPage::tabCloseRequested);
+	connect(m_tabWidget->tabBar(), &QTabBar::currentChanged, this, &SchemasTabPage::currentTabChanged);
+
+	return;
+}
+
+SchemasTabPage::~SchemasTabPage()
+{
+}
+
+bool SchemasTabPage::hasUnsavedSchemas() const
+{
+	Q_ASSERT(m_controlTabPage);
+	return m_controlTabPage->hasUnsavedSchemas();
+}
+
+bool SchemasTabPage::saveUnsavedSchemas()
+{
+	Q_ASSERT(m_controlTabPage);
+	return m_controlTabPage->saveUnsavedSchemas();
+}
+
+bool SchemasTabPage::resetModified()
+{
+	Q_ASSERT(m_controlTabPage);
+	return m_controlTabPage->resetModified();
+}
+
+
+namespace
+{
+	struct SessionSchema
+	{
+		bool readOnly = false;
+		int changesetId = 0;
+		QString schemaId;
+		int fileId = 0;
+		double zoom = 100.0;
+
+		QString saveSessionSchema() const;
+		bool restoreSessionSchema(const QString& str);
+	};
+
+	QString SessionSchema::saveSessionSchema() const
+	{
+		return QString("1;%1;%2;%3;%4;%5")
+				.arg(readOnly)
+				.arg(changesetId)
+				.arg(schemaId)
+				.arg(fileId)
+				.arg(zoom);
+	}
+
+	bool SessionSchema::restoreSessionSchema(const QString& str)
+	{
+		QStringList sl = str.split(';');
+
+		if (sl.isEmpty() == true)
+		{
+			Q_ASSERT(sl.isEmpty() == false);
+			return false;
+		}
+
+		int version = sl[0].toInt();
+
+		if (version == 1 && sl.size() == 6)
+		{
+			readOnly = sl[1].toInt() ? true : false;
+			changesetId = sl[2].toInt();
+			schemaId = sl[3];
+			fileId = sl[4].toInt();
+			zoom = std::clamp(sl[5].toDouble(), 50.0, 150.0);
+			return true;
+		}
+
+		// Unknow version? Just ignore it.
+		//
+		return false;
+	}
+} // anonymous namespace
+
+void SchemasTabPage::saveSession() const
+{
+	// Save all opened schamas
+	//
+	if (db()->isProjectOpened() == false)
+	{
+		Q_ASSERT(db()->isProjectOpened());
+		return;
+	}
+
+	// Save new session data, data saved to settings, for each project separately
+	//
+	QSettings settings;
+	QString keyDir = QString("Session/%1/SchemaEditor/")
+					 .arg(db()->currentProject().projectName());
+
+	settings.setValue(keyDir + "Count", m_tabWidget->count() - 1);	// 1 is control tab page, it si not stored
+
+	QString selectedSchema;
+
+	for (int tabIndex = 0, schemaIndex = 0; tabIndex < m_tabWidget->count(); tabIndex++)
+	{
+		auto editWidget = dynamic_cast<const EditSchemaTabPage*>(m_tabWidget->widget(tabIndex));
+		if (editWidget == nullptr)
+		{
+			continue;
+		}
+
+		const DbFileInfo& f = editWidget->fileInfo();
+
+		SessionSchema ss{
+			.readOnly = editWidget->readOnly(),
+			.changesetId = f.changeset(),
+			.schemaId = editWidget->schema()->schemaId(),
+			.fileId = f.fileId(),
+			.zoom = editWidget->zoom()
+		};
+
+		QString sessionString = ss.saveSessionSchema();
+		settings.setValue(keyDir + QString("Schema_%1").arg(schemaIndex), sessionString);
+
+		if (tabIndex == m_tabWidget->currentIndex())
+		{
+			selectedSchema = sessionString;
+		}
+
+		schemaIndex ++; // i is not index, as control widget is skipped
+	}
+
+	settings.setValue(keyDir + "Current", selectedSchema);
+
+	return;
+}
+
+void SchemasTabPage::restoreSession()
+{
+	// Restore all opened schemas
+	//
+	if (m_controlTabPage == nullptr || db()->isProjectOpened() == false)
+	{
+		Q_ASSERT(m_controlTabPage);
+		Q_ASSERT(db()->isProjectOpened());
+		return;
+	}
+
+	QSettings settings;
+	QString keyDir = QString("Session/%1/SchemaEditor/")
+					 .arg(db()->currentProject().projectName());
+
+	int schemaCount = settings.value(keyDir + "Count", 0).toInt();
+	QString currentSchemaRecord = settings.value(keyDir + "Current").toString();
+	int currentSchemaIndex = 0;
+
+	for (int i = 0; i < schemaCount; i++)
+	{
+		QString record = settings.value(keyDir + QString("Schema_%1").arg(i)).toString();
+
+		SessionSchema ss;
+
+		if (bool ok = ss.restoreSessionSchema(record);
+			ok == false)
+		{
+			continue;
+		}
+
+		DbFileInfo f;
+		if (bool ok = db()->getFileInfo(ss.fileId, &f, this);
+			ok == false)
+		{
+			continue;
+		}
+
+		if (ss.readOnly == true)
+		{
+			m_controlTabPage->viewFile(f, ss.changesetId);
+		}
+		else
+		{
+			m_controlTabPage->openFile(f);
+		}
+
+		auto editWidget = dynamic_cast<EditSchemaTabPage*>(m_tabWidget->widget(m_tabWidget->count() - 1));
+		Q_ASSERT(editWidget);
+
+		if (editWidget != nullptr)
+		{
+			editWidget->setZoom(ss.zoom, false);
+
+			if (currentSchemaRecord == record)
+			{
+				currentSchemaIndex = m_tabWidget->count() - 1;
+			}
+		}
+	}
+
+	m_tabWidget->setCurrentIndex(currentSchemaIndex);
+
+	return;
+}
+
+void SchemasTabPage::refreshControlTabPage()
+{
+	Q_ASSERT(m_controlTabPage);
+	m_controlTabPage->refresh();
+
+	return;
+}
+
+void SchemasTabPage::projectOpened()
+{
+	this->setEnabled(true);
+
+	restoreSession();
+
+	return;
+}
+
+void SchemasTabPage::projectClosed()
+{
+	GlobalMessanger::instance().clearBuildSchemaIssues();
+	GlobalMessanger::instance().clearSchemaItemRunOrder();
+
+	this->setEnabled(false);
+	return;
+}
+
+void SchemasTabPage::tabCloseRequested(int index)
+{
+	EditSchemaTabPage* w = dynamic_cast<EditSchemaTabPage*>(m_tabWidget->widget(index));
+	if (w == nullptr)
+	{
+		return;
+	}
+
+	if (w->modified() == true && m_tabWidget->currentIndex() != index)
+	{
+		m_tabWidget->setCurrentIndex(index);
+	}
+
+	w->closeTab();
+
+	return;
+}
+
+void SchemasTabPage::currentTabChanged(int index)
+{
+	// Show/hide close burron for inactive tab bar
+	//
+	QTabBar::ButtonPosition closeSide = (QTabBar::ButtonPosition)style()->styleHint(QStyle::SH_TabBar_CloseButtonPosition, 0, m_tabWidget->tabBar());
+
+	for (int i = 0; i < m_tabWidget->count(); i++)
+	{
+		EditSchemaTabPage* w = dynamic_cast<EditSchemaTabPage*>(m_tabWidget->widget(i));
+
+		if (w != nullptr)
+		{
+			if (i == index)
+			{
+				m_tabWidget->tabBar()->tabButton(i, closeSide)->show();
+			}
+			else
+			{
+				m_tabWidget->tabBar()->tabButton(i, closeSide)->hide();
+			}
+		}
+	}
+
+	return;
+}
+
+

@@ -15,7 +15,19 @@ DbController* MainTabPage::dbController()
 	return m_dbController;
 }
 
+const DbController* MainTabPage::dbController() const
+{
+	assert(m_dbController != nullptr);
+	return m_dbController;
+}
+
 DbController* MainTabPage::db()
+{
+	assert(m_dbController != nullptr);
+	return m_dbController;
+}
+
+const DbController* MainTabPage::db() const
 {
 	assert(m_dbController != nullptr);
 	return m_dbController;

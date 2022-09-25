@@ -5,7 +5,7 @@ class CentralWidget;
 class DbController;
 class ProjectsTabPage;
 class SchemasTabPage;
-class SchemasTabPageEx;
+class SchemasTabPage;
 class EquipmentTabPage;
 class SignalsTabPage;
 class FilesTabPage;
@@ -45,6 +45,8 @@ public:
 protected:
 	void saveWindowState();
 	void restoreWindowState();
+
+	bool preCloseConditions();
 
 	// Private methods
 	//
@@ -96,7 +98,6 @@ protected slots:
 
 private slots:
 	void projectOpened(DbProject project);
-	void projectAboutToBeClosed();
 	void projectClosed();
 
 	void buildStarted();
@@ -150,7 +151,7 @@ private:
 	ProjectsTabPage* m_projectsTab = nullptr;
 	EquipmentTabPage* m_equipmentTab = nullptr;
 	SignalsTabPage* m_signalsTab = nullptr;
-	SchemasTabPageEx* m_editSchemaTabPage = nullptr;
+	SchemasTabPage* m_schemaTabPage = nullptr;
 	BuildTabPage* m_buildTabPage = nullptr;
 	UploadTabPage* m_uploadTabPage = nullptr;
 	SimulatorTabPage* m_simulatorTabPage = nullptr;

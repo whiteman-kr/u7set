@@ -41,8 +41,11 @@ namespace VFrame30
 		// Properties
 		//
 	public:
-		std::shared_ptr<VFrame30::Schema> schema();
-		const std::shared_ptr<VFrame30::Schema> schema() const;
+		VFrame30::Schema* schema();
+		const VFrame30::Schema* schema() const;
+
+		std::shared_ptr<VFrame30::Schema> schemaSharedPtr();
+		std::shared_ptr<VFrame30::Schema> schemaSharedPtr() const;
 
 		virtual void setSchema(std::shared_ptr<VFrame30::Schema> schema, bool repaint);
 

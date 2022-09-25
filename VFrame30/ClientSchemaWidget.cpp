@@ -356,7 +356,7 @@ namespace VFrame30
 
 	SchemaHistoryItem ClientSchemaWidget::currentHistoryState() const
 	{
-		SchemaHistoryItem hi{schema(), clientSchemaView()->variables(), zoom(), horizontalScrollBar()->value(), verticalScrollBar()->value()};
+		SchemaHistoryItem hi{schemaSharedPtr(), clientSchemaView()->variables(), zoom(), horizontalScrollBar()->value(), verticalScrollBar()->value()};
 		return hi;
 	}
 

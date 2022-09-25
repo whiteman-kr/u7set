@@ -45,11 +45,14 @@ namespace VFrame30
 
 		bool MousePosToDocPoint(const QPoint& mousePos, QPointF* pDestDocPos, double dpiX = 0, double dpiY = 0);
 
-		std::shared_ptr<Schema> schema();
-		std::shared_ptr<Schema> schema() const;
+		VFrame30::Schema* schema();
+		const VFrame30::Schema* schema() const;
 
-		void setSchema(std::shared_ptr<Schema> schema, bool repaint);
-		void setSchemaInternal(std::shared_ptr<Schema> schema);	// Use this when yoo dont need to update zoom, sliders, etc
+		std::shared_ptr<VFrame30::Schema> schemaSharedPtr();
+		std::shared_ptr<VFrame30::Schema> schemaSharedPtr() const;
+
+		void setSchema(std::shared_ptr<VFrame30::Schema> schema, bool repaint);
+		void setSchemaInternal(std::shared_ptr<VFrame30::Schema> schema);	// Use this when yoo dont need to update zoom, sliders, etc
 
 		// Events
 		//

@@ -3013,13 +3013,13 @@ bool EditSchemaWidget::isTuningSchema() const
 
 std::shared_ptr<VFrame30::LogicSchema> EditSchemaWidget::logicSchema()
 {
-	std::shared_ptr<VFrame30::LogicSchema> logicSchema = std::dynamic_pointer_cast<VFrame30::LogicSchema>(schema());
+	std::shared_ptr<VFrame30::LogicSchema> logicSchema = std::dynamic_pointer_cast<VFrame30::LogicSchema>(schemaSharedPtr());
 	return logicSchema;
 }
 
 const std::shared_ptr<VFrame30::LogicSchema> EditSchemaWidget::logicSchema() const
 {
-	const std::shared_ptr<VFrame30::LogicSchema> logicSchema = std::dynamic_pointer_cast<VFrame30::LogicSchema>(schema());
+	const std::shared_ptr<VFrame30::LogicSchema> logicSchema = std::dynamic_pointer_cast<VFrame30::LogicSchema>(schemaSharedPtr());
 	return logicSchema;
 }
 
@@ -6130,7 +6130,7 @@ void EditSchemaWidget::undo()
 
 	if (m_schemaPropertiesDialog != nullptr && m_schemaPropertiesDialog->isVisible())
 	{
-		m_schemaPropertiesDialog->setSchema(schema());
+		m_schemaPropertiesDialog->setSchema(schemaSharedPtr());
 	}
 }
 
@@ -6143,7 +6143,7 @@ void EditSchemaWidget::redo()
 
 	if (m_schemaPropertiesDialog != nullptr && m_schemaPropertiesDialog->isVisible())
 	{
-		m_schemaPropertiesDialog->setSchema(schema());
+		m_schemaPropertiesDialog->setSchema(schemaSharedPtr());
 	}
 }
 
@@ -6757,7 +6757,7 @@ void EditSchemaWidget::schemaProperties()
 		m_schemaPropertiesDialog = new SchemaPropertiesDialog(m_editEngine, db(), this);
 	}
 
-	m_schemaPropertiesDialog->setSchema(schema());
+	m_schemaPropertiesDialog->setSchema(schemaSharedPtr());
 	m_schemaPropertiesDialog->show();
 	return;
 }

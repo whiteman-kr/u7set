@@ -26,11 +26,11 @@
 #include "Reports/ProjectDiffGenerator.h"
 #include "Reports/SchemasReportGenerator.h"
 #include "DialogShortcuts.h"
-#include "../VFrame30/VFrame30.h"
 #include "./Forms/FileHistoryDialog.h"
 #include "./Forms/ProjectPropertiesForm.h"
 #include "./Forms/PendingChangesDialog.h"
-#include "./SchemaEditor/SchemaTabPageEx.h"
+#include "./SchemaEditor/SchemasTabPage.h"
+#include "./SchemaEditor/EditSchemaWidget.h"
 #include "./EquipmentEditor/EquipmentTabPage.h"
 #include "./Simulator/SimProfileEditor.h"
 
@@ -65,8 +65,10 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 
 	// Add main tab pages
 	//
-	m_projectsTab = new ProjectsTabPage(dbController(), nullptr);
-	connect(m_projectsTab, &ProjectsTabPage::projectAboutToBeClosed, this, &MainWindow::projectAboutToBeClosed, Qt::DirectConnection);
+	m_projectsTab = new ProjectsTabPage{
+					dbController(),
+					[this](){ return preCloseConditions(); },
+					nullptr};
 
 	m_equipmentTab = new EquipmentTabPage(dbController(), nullptr);
 	m_signalsTab = new SignalsTabPage(m_signalSetProvider, dbController(), nullptr);
@@ -83,8 +85,8 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	m_filesTabPageIndex = getCentralWidget()->addTabPage(m_filesTabPage, m_filesTabPage->windowTitle());
 	getCentralWidget()->removeTab(m_filesTabPageIndex);	// It will be added in projectOpened slot if required
 
-	m_editSchemaTabPage = new SchemasTabPageEx{db(), m_signalSetProvider, this};
-	getCentralWidget()->addTabPage(m_editSchemaTabPage, tr("Schemas"));
+	m_schemaTabPage = new SchemasTabPage{db(), m_signalSetProvider, this};
+	getCentralWidget()->addTabPage(m_schemaTabPage, tr("Schemas"));
 
 	m_buildTabPage = new BuildTabPage(dbController(), nullptr);
 	getCentralWidget()->addTabPage(m_buildTabPage, tr("Build"));
@@ -122,59 +124,27 @@ void MainWindow::closeEvent(QCloseEvent* e)
 {
 	// Cancel build
 	//
+	assert(m_buildTabPage);
+
 	if (m_buildTabPage != nullptr)
 	{
 		m_buildTabPage->cancelBuild();
 	}
+
+	// Check if any schema or test is not saved
+	//
+	if (bool canBeClosed = preCloseConditions();
+		canBeClosed == false)
+	{
+		e->ignore();
+	}
 	else
 	{
-		assert(m_buildTabPage);
-	}
+		saveWindowState();		// Save windows state and accept event to close app
 
-	// check if any schema or test is not saved
-	//
-	if (m_editSchemaTabPage == nullptr || m_testsTabPage == nullptr)
-	{
-		assert(m_editSchemaTabPage);
-		assert(m_testsTabPage);
 		e->accept();
-		return;
+		qApp->closeAllWindows();
 	}
-
-	if (m_editSchemaTabPage->hasUnsavedSchemas() == true || m_testsTabPage->hasUnsavedTests() == true)
-	{
-		QMessageBox::StandardButton result = QMessageBox::question(this, QApplication::applicationName(),
-																   tr("Some items on Schemas and Tests tab pages have unsaved changes."),
-																   QMessageBox::SaveAll | QMessageBox::Discard | QMessageBox::Cancel,
-																   QMessageBox::SaveAll);
-
-		if (result == QMessageBox::Cancel)
-		{
-			e->ignore();
-			return;
-		}
-
-		if (result == QMessageBox::SaveAll)
-		{
-			m_editSchemaTabPage->saveUnsavedSchemas();	// It will reset modified flag
-			m_testsTabPage->saveUnsavedTests();	// It will reset modified flag
-		}
-
-		if (result == QMessageBox::Discard)
-		{
-			m_editSchemaTabPage->resetModified();		// Reset modidied flag for all opened files, so on closeEvent for tese files
-														// prompt to save them will not be shown
-			m_testsTabPage->resetModified();
-		}
-	}
-
-	// save windows state and accept event to close app
-	//
-	saveWindowState();
-
-	e->accept();
-
-	qApp->closeAllWindows();
 
 	return;
 }
@@ -237,6 +207,87 @@ void MainWindow::restoreWindowState()
 	restoreState(theSettings.m_mainWindowState);
 
 	return;
+}
+
+bool MainWindow::preCloseConditions()
+{
+	if (db()->isProjectOpened() == false)
+	{
+		return true;
+	}
+
+	if (m_schemaTabPage == nullptr ||
+		m_testsTabPage == nullptr)
+	{
+		assert(m_schemaTabPage);
+		assert(m_testsTabPage);
+		return false;
+	}
+
+	bool unsavedSchemas = m_schemaTabPage->hasUnsavedSchemas();
+	bool unsavedTests = m_testsTabPage->hasUnsavedTests();
+
+	bool satisfies = true;
+
+	if (int nu = (unsavedSchemas ? 2 : 0 ) | (unsavedTests ? 1 : 0);
+		nu != 0)
+	{
+		QString message;
+
+		switch (nu)
+		{
+		case 1:
+			message = tr("There are unsaved files on Tests tab page.");
+			break;
+		case 2:
+			message = tr("There are unsaved files on Schemas tab page.");
+			break;
+		case 3:
+			message = tr("There are unsaved files on Schemas and Tests tab pages.");
+			break;
+		default:
+			assert(false);
+		}
+
+		auto result = QMessageBox::question(this,
+											QApplication::applicationName(),
+											message,
+											QMessageBox::SaveAll | QMessageBox::Discard | QMessageBox::Cancel,
+											QMessageBox::SaveAll);
+		switch (result)
+		{
+		case QMessageBox::Cancel:
+			satisfies = false;
+			break;
+
+		case QMessageBox::SaveAll:
+			m_schemaTabPage->saveUnsavedSchemas();	// It will reset modified flag
+			m_testsTabPage->saveUnsavedTests();			// It will reset modified flag
+			satisfies = true;
+			break;
+
+		case QMessageBox::Discard:
+			// Reset modified flag for all opened files, so on closeEvent
+			// for these files prompt to save them will not be shown
+			m_schemaTabPage->resetModified();
+			m_testsTabPage->resetModified();
+			satisfies = true;
+			break;
+
+		default:
+			satisfies = true;
+			assert(false);
+		}
+	}
+
+	if (satisfies == true)
+	{
+		// Save opened schema list so it can be restored on next project open event
+		//
+		m_schemaTabPage->saveSession();
+	}
+
+	return satisfies;
 }
 
 void MainWindow::createActions()
@@ -715,7 +766,7 @@ void MainWindow::updateUfbsAfbsBusses()
 		return;
 	}
 
-	GlobalMessanger::instance().fireChangeCurrentTab(m_editSchemaTabPage);
+	GlobalMessanger::instance().fireChangeCurrentTab(m_schemaTabPage);
 
 	// Get Busses
 	//
@@ -1003,9 +1054,9 @@ void MainWindow::updateUfbsAfbsBusses()
 
 	// Refresh view
 	//
-	if (m_editSchemaTabPage != nullptr)
+	if (m_schemaTabPage != nullptr)
 	{
-		m_editSchemaTabPage->refreshControlTabPage();
+		m_schemaTabPage->refreshControlTabPage();
 	}
 
 	return;
@@ -1218,17 +1269,6 @@ void MainWindow::projectOpened(DbProject project)
 	}
 
 	return;
-}
-
-void MainWindow::projectAboutToBeClosed()
-{
-	if (m_testsTabPage == nullptr)
-	{
-		Q_ASSERT(m_testsTabPage);
-		return;
-	}
-
-	m_testsTabPage->saveUnsavedTests();
 }
 
 void MainWindow::projectClosed()

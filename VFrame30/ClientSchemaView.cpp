@@ -260,7 +260,7 @@ namespace VFrame30
 			return nullptr;
 		}
 
-		return new ScriptSchema(m_clientSchemaView->schema());
+		return new ScriptSchema(m_clientSchemaView->schemaSharedPtr());
 	}
 
 	int ScriptSchemaView::schemaCount() const
@@ -323,7 +323,7 @@ namespace VFrame30
 		QPainter p;
 		p.begin(this);
 
-		VFrame30::CDrawParam drawParam(&p, schema().get(), this, schema()->gridSize(), schema()->pinGridStep());
+		VFrame30::CDrawParam drawParam(&p, schema(), this, schema()->gridSize(), schema()->pinGridStep());
 
 		drawParam.setControlBarSize(CONTROL_BAR(schema()->unit(), p.device()->devicePixelRatioF(), zoom()));		// Is required for drawing highlights on items
 		drawParam.setBlinkPhase(static_cast<bool>((QTime::currentTime().msec() / 250) % 2));	// 0-249 : false, 250-499 : true, 500-749 : false, 750-999 : true

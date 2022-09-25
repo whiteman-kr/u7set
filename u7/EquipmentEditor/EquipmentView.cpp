@@ -2005,7 +2005,7 @@ bool EquipmentView::canPaste(const ::Proto::EnvelopeSetShortDescription& message
 
 void EquipmentView::findObject()
 {
-	static QString findText = "";
+	static QString findText;
 
 	QString text;
 	do
@@ -2016,7 +2016,7 @@ void EquipmentView::findObject()
 						~Qt::WindowMaximizeButtonHint &
 						~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
 		d.setWindowTitle(tr("Find"));
-		d.setLabelText(tr("Enter EquipmentID:"));
+		d.setLabelText(tr("EquipmentID (e.g. USB_RC105_CH02_MD00):"));
 		d.setInputMode(QInputDialog::TextInput);
 		d.setTextValue(findText);
 
@@ -2024,8 +2024,8 @@ void EquipmentView::findObject()
 		int height = QSettings().value("EquipmentTabPage/findDialogHeight", 200).toInt();
 		d.resize(width, height);
 
-		bool ok = d.exec() == QDialog::Accepted;
-		if (ok  == false)
+		if (auto mbresult = d.exec();
+			mbresult != QDialog::Accepted)
 		{
 			return;
 		}
@@ -2035,10 +2035,9 @@ void EquipmentView::findObject()
 
 		text = d.textValue();
 
-	}while(text.isEmpty() == true);
+	} while(text.isEmpty() == true);
 
 	findText = text;
-
 	QStringList equipmentIdFragments = findText.split('_');
 
 	QModelIndex findIndex = equipmentModel()->findObject(equipmentModel()->index(0, 0, QModelIndex()), 1/*level*/, equipmentIdFragments);
@@ -2050,8 +2049,10 @@ void EquipmentView::findObject()
 	}
 	else
 	{
-		QMessageBox::information(this, qAppName(), tr("Object was not found!"));
+		QMessageBox::information(this, qAppName(), tr("Object %1 not found.").arg(findText));
 	}
+
+	return;
 }
 
 void EquipmentView::deleteSelectedDevices()

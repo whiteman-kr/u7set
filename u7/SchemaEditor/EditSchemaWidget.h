@@ -1,10 +1,8 @@
 #pragma once
-#include "../VFrame30/PosConnectionImpl.h"
+
 #include "../VFrame30/BaseSchemaWidget.h"
 #include "../VFrame30/LogicSchema.h"
-#include "../VFrame30/SchemaView.h"
 #include "../VFrame30/SchemaItem.h"
-#include "../VFrame30/FblItem.h"
 #include "../VFrame30/UfbSchema.h"
 #include "../VFrame30/SchemaItemConnection.h"
 #include "../VFrame30/SchemaItemBus.h"
@@ -394,7 +392,6 @@ private:
 	//	Contexet Menu
 	//
 friend class EditSchemaTabPage;		// EditSchemaTabPage has toolbar, and it will contain some actions from this class
-friend class EditSchemaTabPageEx;	// EditSchemaTabPageEx has toolbar, and it will contain some actions from this class
 
 private:
 	// File

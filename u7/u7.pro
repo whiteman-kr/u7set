@@ -69,6 +69,9 @@ HEADERS  += \
     ../lib/Ui/DialogChooseTags.h \
     CodeEditor.h \
     DbTagsEditor.h \
+    SchemaEditor/EditSchemaTabPage.h \
+    SchemaEditor/SchemaControlTabPage.h \
+    SchemaEditor/SchemasTabPage.h \
 	Stable.h \
     ../lib/ExportPrint.h \
     ../lib/QDoublevalidatorEx.h \
@@ -186,7 +189,6 @@ HEADERS  += \
     Simulator/SimOutputWidget.h \
     Simulator/SimProjectWidget.h \
     SpecificPropertiesEditor.h \
-	SchemaEditor/SchemaTabPageEx.h \
     DialogAfbLibraryCheck.h \
     Forms/ProjectPropertiesForm.h \
     Forms/PendingChangesDialog.h \
@@ -241,8 +243,11 @@ SOURCES +=\
 	Reports/ReportTools.cpp \
 	Reports/SchemasReportGenerator.cpp \
 	SchemaEditor/EditSchemaSignalProvider.cpp \
+    SchemaEditor/EditSchemaTabPage.cpp \
 	SchemaEditor/EditSchemaTypes.cpp \
 	SchemaEditor/EditSchemaView.cpp \
+    SchemaEditor/SchemaControlTabPage.cpp \
+    SchemaEditor/SchemasTabPage.cpp \
 	Settings.cpp \
 	Simulator/SimConnectionPage.cpp \
 	Simulator/SimLogicModulePage.cpp \
@@ -312,7 +317,6 @@ SOURCES +=\
 	Simulator/SimMemoryWidget.cpp \
 	Simulator/SimBasePage.cpp \
 	SpecificPropertiesEditor.cpp \
-	SchemaEditor/SchemaTabPageEx.cpp \
 	DialogAfbLibraryCheck.cpp \
 	Forms/ProjectPropertiesForm.cpp \
 	Forms/PendingChangesDialog.cpp \
