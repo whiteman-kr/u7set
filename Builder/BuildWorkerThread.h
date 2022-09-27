@@ -58,6 +58,7 @@ namespace Builder
 		bool taskGenerationBitstreamFile();			// Generate Bitstream File
 		bool taskGenerationSoftwareConfiguration();	// Generate Software Configuration
 		bool taskSaveTestScripts();					// Save Test Scripts
+		bool createSchemasAlbums();
 		bool taskRunSimTests();						// Run Simulator-based tests
 
 		struct BuildTask

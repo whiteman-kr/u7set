@@ -3,7 +3,6 @@
 #include "../Builder/AppSignalProperties.h"
 #include "../lib/PropertyEditor.h"
 #include "../HardwareLib/Connection.h"
-#include "../VFrame30/DrawParam.h"
 #include "../VFrame30/Bus.h"
 
 #include "../lib/Ui/DialogProgress.h"
@@ -254,7 +253,7 @@ void ProjectDiffGeneratorThread::run(const QString& fileName,
 {
 	// Create schema view
 
-	ReportSchemaView* schemaView = new ReportSchemaView(appSignalProvider, parent);
+	ReportSchemaView* schemaView = new ReportSchemaView(appSignalProvider);
 
 	schemaView->session().setProject(projectName);
 	schemaView->session().setUsername(userName);
@@ -301,7 +300,7 @@ void ProjectDiffGeneratorThread::run(const QString& fileName,
 
 		worker->deleteLater();
 
-		schemaView->deleteLater();
+		delete schemaView;//->deleteLater();
 	});
 
 	// Start thread

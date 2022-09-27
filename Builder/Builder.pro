@@ -1,4 +1,4 @@
-QT       += qml sql xml widgets concurrent
+QT       += qml sql xml widgets concurrent gui printsupport
 
 TARGET = Builder
 TEMPLATE = lib
@@ -78,6 +78,7 @@ SOURCES += \
     Loopbacks.cpp \
     ModuleFirmwareWriter.cpp \
     Parser.cpp \
+    ReportGenerator.cpp \
     SignalSet.cpp \
     Busses.cpp \
     OptoModule.cpp \
@@ -140,6 +141,7 @@ HEADERS += \
 	AppSignalSetProvider.h \
     ConnectionStorage.h \
     Loopbacks.h \
+    ReportGenerator.h \
     SignalsHeap.h \
     Stable.h \
     IssueLogger.h \

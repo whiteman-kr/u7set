@@ -15,7 +15,7 @@
 //
 //
 EditSchemaView::EditSchemaView(AppSignalSetProvider* signalSetProvider, QWidget* parent) :
-	VFrame30::SchemaView(parent),
+	VFrame30::SchemaViewWidget(parent),
 	m_activeLayer(0),
 	m_mouseState(MouseState::None),
 	m_appSignalProvider(signalSetProvider),
@@ -31,7 +31,7 @@ EditSchemaView::EditSchemaView(AppSignalSetProvider* signalSetProvider, QWidget*
 }
 
 EditSchemaView::EditSchemaView(AppSignalSetProvider* signalSetProvider, std::shared_ptr<VFrame30::Schema> schema, QWidget* parent)
-	: VFrame30::SchemaView(schema, parent),
+	: VFrame30::SchemaViewWidget(schema, parent),
 	m_activeLayer(0),
 	m_mouseState(MouseState::None),
 	m_appSignalProvider(signalSetProvider),
@@ -52,7 +52,7 @@ EditSchemaView::~EditSchemaView()
 
 void EditSchemaView::timerEvent(QTimerEvent* event)
 {
-	VFrame30::SchemaView::timerEvent(event);
+	VFrame30::SchemaViewWidget::timerEvent(event);
 
 	if (event->timerId() == m_updateDuringBuildTimer)
 	{

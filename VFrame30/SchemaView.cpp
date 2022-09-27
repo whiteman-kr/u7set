@@ -5,504 +5,531 @@
 
 namespace VFrame30
 {
-	SchemaView::SchemaView(QWidget* parent) :
-		SchemaView(std::shared_ptr<Schema>(), parent)
+
+SchemaView::SchemaView()
+{
+
+}
+
+SchemaView::SchemaView(std::shared_ptr<Schema> schema):
+	m_schema(schema)
+{
+
+}
+
+void SchemaView::Ajust(QPainter* painter, double startX, double startY, double zoom) const
+{
+	// Set transform matrix
+	//
+	painter->resetTransform();
+
+	zoom /= 100.0;
+
+	double dpr = painter->device()->devicePixelRatioF();
+	double dpix = painter->device()->physicalDpiX();
+	double dpiy = painter->device()->physicalDpiY();
+
+	if (m_schema->unit() == SchemaUnit::Inch)
 	{
+		startX = startX + 0.5 / dpr;
+		startY = startY + 0.5 / dpr;
+
+		double scalex = dpix * zoom;
+		double scaley = dpiy * zoom;
+
+		painter->translate(startX, startY);
+		painter->scale(scalex, scaley);
+	}
+	else
+	{
+		startX = VFrame30::Round(startX) + 0.5 / dpr;
+		startY = VFrame30::Round(startY) + 0.5 / dpr;
+
+		double scalex = 1.0 / dpr * zoom;
+		double scaley = 1.0 / dpr * zoom;
+
+		painter->translate(startX, startY);
+		painter->scale(scalex, scaley);
 	}
 
-	SchemaView::SchemaView(std::shared_ptr<Schema> schema, QWidget* parent /*= 0*/) :
-		QWidget(parent),
-		m_schema(schema)
-	{
-		setMouseTracking(true);
-		return;
-	}
+	return;
+}
 
-	void SchemaView::updateControlWidgets(bool editMode)
+double SchemaView::realDpiX(const QPaintDevice* device) const
+{
+	// Drawing can be performed in other device, not in windows, for example to pdf, that's why device is required
+	//
+	Q_ASSERT(device);
+	return device->physicalDpiX() * device->devicePixelRatioF();
+}
+
+double SchemaView::realDpiY(const QPaintDevice* device) const
+{
+	// Drawing can be performed in other device, not in windows, for example to pdf, that's why device is required
+	//
+	Q_ASSERT(device);
+	return device->physicalDpiY() * device->devicePixelRatioF();
+}
+
+void SchemaView::setSchema(std::shared_ptr<Schema> schema, bool repaint)
+{
+	Q_UNUSED(repaint);
+	Q_ASSERT(false);	// This function is a stub and should be oveddiden in derived class
+
+	setSchemaInternal(schema);
+	return;
+}
+
+void SchemaView::setSchemaInternal(std::shared_ptr<Schema> schema)
+{
+	// Use this when yoo dont need to update zoom, sliders, etc
+	//
+	assert(schema.get() != nullptr);
+	m_schema = schema;
+	return;
+}
+
+VFrame30::Schema* SchemaView::schema()
+{
+	return m_schema.get();
+}
+
+const VFrame30::Schema* SchemaView::schema() const
+{
+	return m_schema.get();
+}
+
+std::shared_ptr<VFrame30::Schema> SchemaView::schemaSharedPtr()
+{
+	return m_schema;
+}
+
+std::shared_ptr<VFrame30::Schema> SchemaView::schemaSharedPtr() const
+{
+	return m_schema;
+}
+
+// Properties
+//
+double SchemaView::zoom() const
+{
+	return m_zoom;
+}
+
+const Session& SchemaView::session() const
+{
+	return m_session;
+}
+
+Session& SchemaView::session()
+{
+	return m_session;
+}
+
+
+//
+// SchemaViewWidget
+//
+SchemaViewWidget::SchemaViewWidget(QWidget* parent) :
+	QWidget(parent),
+	SchemaView(std::shared_ptr<Schema>())
+{
+}
+
+SchemaViewWidget::SchemaViewWidget(std::shared_ptr<Schema> schema, QWidget* parent /*= 0*/) :
+	QWidget(parent),
+	SchemaView(schema)
+{
+	setMouseTracking(true);
+	return;
+}
+
+void SchemaViewWidget::updateControlWidgets(bool editMode)
+{
+	// Find all SchemaItemControl
+	//
+	std::map<QUuid, std::shared_ptr<VFrame30::SchemaItemControl>> controlItems;
+
+	for (const std::shared_ptr<VFrame30::SchemaLayer>& layer : schema()->Layers)
 	{
-		// Find all SchemaItemControl
+		// Control items on Compile layer are ok, but on other layers they must be disabled (grayed)
 		//
-		std::map<QUuid, std::shared_ptr<VFrame30::SchemaItemControl>> controlItems;
-
-		for (std::shared_ptr<VFrame30::SchemaLayer> layer : schema()->Layers)
+		for (SchemaItemPtr& item : layer->Items)
 		{
-			// Control items on Compile layer are ok, but on other layers they must be disabled (grayed)
+			if (item->isControl() == false)
+			{
+				continue;
+			}
+
+			VFrame30::SchemaItemControl* controlItem = item->toType<VFrame30::SchemaItemControl>();
+			if (controlItem == nullptr)
+			{
+				Q_ASSERT(controlItem);
+				continue;
+			}
+
+			controlItems[item->guid()] = std::dynamic_pointer_cast<SchemaItemControl>(item);
+		}
+	}
+
+	// Update all children
+	// !!! Don't make childWidgets as a reference, as we change this list in the loop !!!
+	//
+	QObjectList childWidgets = children();
+
+	for (QObject* childObject : childWidgets)
+	{
+		QWidget* childWidget = dynamic_cast<QWidget*>(childObject);
+
+		if (childWidget == nullptr)
+		{
+			assert(dynamic_cast<QWidget*>(childObject) != nullptr);
+			continue;
+		}
+
+		QString objectName = childWidget->objectName();
+		QUuid widgetUuid = QUuid(objectName);
+
+		if (widgetUuid.isNull() == true)
+		{
+			continue;
+		}
+
+		auto foundIt = controlItems.find(widgetUuid);
+
+		if (foundIt == controlItems.end())
+		{
+			// Apparently SchemaItemControl was deleted
 			//
-			for (SchemaItemPtr& item : layer->Items)
-			{
-				if (item->isControl() == false)
-				{
-					continue;
-				}
-
-				VFrame30::SchemaItemControl* controlItem = item->toType<VFrame30::SchemaItemControl>();
-				if (controlItem == nullptr)
-				{
-					Q_ASSERT(controlItem);
-					continue;
-				}
-
-				controlItems[item->guid()] = std::dynamic_pointer_cast<SchemaItemControl>(item);
-			}
+			delete childWidget;
+			continue;
 		}
 
-		// Update all children
-		// !!! Don't make childWidgets as a reference, as we change this list in the loop !!!
-		//
-		QObjectList childWidgets = children();
+		std::shared_ptr<VFrame30::SchemaItemControl> controlItem = foundIt->second;
 
-		for (QObject* childObject : childWidgets)
+		controlItem->updateWdgetPosAndSize(childWidget, zoom());
+
+		if (editMode == true)
 		{
-			QWidget* childWidget = dynamic_cast<QWidget*>(childObject);
-
-			if (childWidget == nullptr)
-			{
-				assert(dynamic_cast<QWidget*>(childObject) != nullptr);
-				continue;
-			}
-
-			QString objectName = childWidget->objectName();
-			QUuid widgetUuid = QUuid(objectName);
-
-			if (widgetUuid.isNull() == true)
-			{
-				continue;
-			}
-
-			auto foundIt = controlItems.find(widgetUuid);
-
-			if (foundIt == controlItems.end())
-			{
-				// Apparently SchemaItemControl was deleted
-				//
-				delete childWidget;
-				continue;
-			}
-
-			std::shared_ptr<VFrame30::SchemaItemControl> controlItem = foundIt->second;
-
-			controlItem->updateWdgetPosAndSize(childWidget, zoom());
-
-			if (editMode == true)
-			{
-				controlItem->updateWidgetProperties(childWidget);
-			}
-
-			controlItems.erase(widgetUuid);
+			controlItem->updateWidgetProperties(childWidget);
 		}
 
-		// Create new items
-		//
-		for (auto controlItemPair : controlItems)
+		controlItems.erase(widgetUuid);
+	}
+
+	// Create new items
+	//
+	for (const auto& controlItemPair : controlItems)
+	{
+		std::shared_ptr<VFrame30::SchemaItemControl> controlItem = controlItemPair.second;
+
+		QWidget* childWidget = controlItem->createWidget(this, editMode, zoom());
+		assert(childWidget);
+
+		Q_UNUSED(childWidget);
+	}
+}
+
+void SchemaViewWidget::deleteControlWidgets()
+{
+	// Find all control items
+	//
+	std::map<QUuid, std::shared_ptr<VFrame30::SchemaItemControl>> controlItems;
+
+	for (const std::shared_ptr<VFrame30::SchemaLayer>& layer : schema()->Layers)
+	{
+		for (SchemaItemPtr& item : layer->Items)
 		{
-			std::shared_ptr<VFrame30::SchemaItemControl> controlItem = controlItemPair.second;
+			if (item->isControl() == false)
+			{
+				continue;
+			}
 
-			QWidget* childWidget = controlItem->createWidget(this, editMode, zoom());
-			assert(childWidget);
+			VFrame30::SchemaItemControl* controlItem = item->toType<VFrame30::SchemaItemControl>();
+			if (controlItem == nullptr)
+			{
+				Q_ASSERT(controlItem);
+				continue;
+			}
 
-			Q_UNUSED(childWidget);
+			controlItems[item->guid()] = std::dynamic_pointer_cast<SchemaItemControl>(item);
 		}
 	}
 
-	void SchemaView::deleteControlWidgets()
+	// Remove all control widgets
+	//
+	QObjectList childWidgets = children();							// Don't make childWidgets as a reference, as we change this list in the loop
+
+	for (QObject* childObject : childWidgets)
 	{
-		// Find all control items
-		//
-		std::map<QUuid, std::shared_ptr<VFrame30::SchemaItemControl>> controlItems;
+		QWidget* childWidget = dynamic_cast<QWidget*>(childObject);
 
-		for (std::shared_ptr<VFrame30::SchemaLayer> layer : schema()->Layers)
+		if (childWidget == nullptr)
 		{
-			for (SchemaItemPtr& item : layer->Items)
-			{
-				if (item->isControl() == false)
-				{
-					continue;
-				}
-
-				VFrame30::SchemaItemControl* controlItem = item->toType<VFrame30::SchemaItemControl>();
-				if (controlItem == nullptr)
-				{
-					Q_ASSERT(controlItem);
-					continue;
-				}
-
-				controlItems[item->guid()] = std::dynamic_pointer_cast<SchemaItemControl>(item);
-			}
+			assert(dynamic_cast<QWidget*>(childObject) != nullptr);
+			continue;
 		}
 
-		// Remove all control widgets
-		//
-		QObjectList childWidgets = children();							// Don't make childWidgets as a reference, as we change this list in the loop
+		QString objectName{childWidget->objectName()};
+		QUuid widgetUuid{objectName};
 
-		for (QObject* childObject : childWidgets)
+		if (widgetUuid.isNull() == true)
 		{
-			QWidget* childWidget = dynamic_cast<QWidget*>(childObject);
+			continue;
+		}
 
-			if (childWidget == nullptr)
-			{
-				assert(dynamic_cast<QWidget*>(childObject) != nullptr);
-				continue;
-			}
-
-			QString objectName{childWidget->objectName()};
-			QUuid widgetUuid{objectName};
-
-			if (widgetUuid.isNull() == true)
-			{
-				continue;
-			}
-
-			if (auto foundIt = controlItems.find(widgetUuid);
+		if (auto foundIt = controlItems.find(widgetUuid);
 				foundIt != controlItems.end())
-			{
-				delete childWidget;
-			}
+		{
+			delete childWidget;
 		}
+	}
 
+	return;
+}
+
+bool SchemaViewWidget::MousePosToDocPoint(const QPoint& mousePos, QPointF* pDestDocPos, double dpiX /*= 0*/, double dpiY /*= 0*/)
+{
+	if (pDestDocPos == nullptr)
+	{
+		assert(pDestDocPos);
+		return false;
+	}
+
+	double x = mousePos.x() * devicePixelRatioF();
+	double y = mousePos.y() * devicePixelRatioF();
+
+	if (schema()->unit() == SchemaUnit::Display)
+	{
+		pDestDocPos->setX(x / (m_zoom / 100.0));
+		pDestDocPos->setY(y / (m_zoom / 100.0));
+	}
+	else
+	{
+		dpiX = dpiX == 0 ? realDpiX(this) : dpiX;
+		dpiY = dpiY == 0 ? realDpiY(this) : dpiY;
+
+		pDestDocPos->setX(x / (dpiX * (m_zoom / 100.0)));
+		pDestDocPos->setY(y / (dpiY * (m_zoom / 100.0)));
+	}
+
+	return true;
+}
+
+void SchemaViewWidget::setSchema(std::shared_ptr<VFrame30::Schema> schema, bool repaint)
+{
+	assert(schema.get() != nullptr);
+	m_schema = schema;
+
+	setZoom(zoom(), repaint);		// Adjust sliders, widget etc.
+
+	emit signal_schemaChanged(schema.get());
+	return;
+}
+
+void SchemaViewWidget::draw(CDrawParam& drawParam, const QRectF& clipRect)
+{
+	if (schema() == nullptr)
+	{
 		return;
 	}
 
-	VFrame30::Schema* SchemaView::schema()
+	updateControlWidgets(drawParam.isEditMode());
+
+	// --
+	//
+	QPainter* p = drawParam.painter();
+
+	// Calc size
+	//
+	int widthInPixel = schema()->GetDocumentWidth(drawParam.realDpiX(), zoom());
+	int heightInPixel = schema()->GetDocumentHeight(drawParam.realDpiY(), zoom());
+
+	// Clear device
+	//
+	p->fillRect(QRectF(0, 0, widthInPixel + 1, heightInPixel + 1), QColor(0xB0, 0xB0, 0xB0));
+
+	// Ajust QPainter
+	//
+	Ajust(p, 0, 0, zoom());
+
+	// Draw Schema
+	//
+	schema()->Draw(&drawParam, clipRect);
+
+	return;
+}
+
+void SchemaViewWidget::paintEvent(QPaintEvent* /*paintEvent*/)
+{
+	if (schema() == nullptr)
 	{
-		return m_schema.get();
-	}
-
-	const VFrame30::Schema* SchemaView::schema() const
-	{
-		return m_schema.get();
-	}
-
-	std::shared_ptr<VFrame30::Schema> SchemaView::schemaSharedPtr()
-	{
-		return m_schema;
-	}
-
-	std::shared_ptr<VFrame30::Schema> SchemaView::schemaSharedPtr() const
-	{
-		return m_schema;
-	}
-
-	void SchemaView::setSchema(std::shared_ptr<VFrame30::Schema> schema, bool repaint)
-	{
-		assert(schema.get() != nullptr);
-		m_schema = schema;
-
-		setZoom(zoom(), repaint);		// Adjust sliders, widget etc.
-
-		emit signal_schemaChanged(schema.get());
 		return;
 	}
 
-	void SchemaView::setSchemaInternal(std::shared_ptr<VFrame30::Schema> schema)
+	QPainter p(this);
+	CDrawParam drawParam(&p, schema(), this, schema()->gridSize(), schema()->pinGridStep());
+
+	QRectF clipRect{0, 0, schema()->docWidth(), schema()->docHeight()};
+
+	draw(drawParam, clipRect);
+
+	return;
+}
+
+void SchemaViewWidget::mouseMoveEvent(QMouseEvent* event)
+{
+	// If any contrtol key is pressed, pass control further
+	//
+	if (event->buttons().testFlag(Qt::LeftButton) == true ||
+		event->buttons().testFlag(Qt::RightButton) == true ||
+		event->buttons().testFlag(Qt::MiddleButton) == true)
 	{
-		// Use this when yoo dont need to update zoom, sliders, etc
-		//
-		assert(schema.get() != nullptr);
-		m_schema = schema;
-		return;
-	}
-
-	void SchemaView::mouseMoveEvent(QMouseEvent* event)
-	{
-		// If any contrtol key is pressed, pass control further
-		//
-		if (event->buttons().testFlag(Qt::LeftButton) == true ||
-			event->buttons().testFlag(Qt::RightButton) == true ||
-			event->buttons().testFlag(Qt::MiddleButton) == true)
-		{
-			unsetCursor();		// set cursor to parent cursor
-
-			event->ignore();
-			return;
-		}
-
-		if (schema() == nullptr)
-		{
-			// Schema is not loaded
-			//
-			return;
-		}
-
-		// If the mouse cursor is over SchmeItem with acceptClick then set HandCursor
-		//
-		QPointF docPoint;
-
-		bool convertResult = MousePosToDocPoint(event->pos(), &docPoint);
-		if (convertResult == false)
-		{
-			unsetCursor();
-			return;
-		}
-				
-		double x = docPoint.x();
-		double y = docPoint.y();
-		
-		for (auto layer = schema()->Layers.crbegin(); layer != schema()->Layers.crend(); layer++)
-		{
-			const SchemaLayer* pLayer = layer->get();
-
-			if (pLayer->show() == false)
-			{
-				continue;
-			}
-
-			for (auto vi = pLayer->Items.crbegin(); vi != pLayer->Items.crend(); vi++)
-			{
-				const std::shared_ptr<SchemaItem>& item = *vi;
-
-				if (item->acceptClick() == true &&
-					item->isIntersectPoint(x, y) == true &&
-					item->clickScript().isEmpty() == false)
-				{
-					setCursor(Qt::PointingHandCursor);
-					event->accept();
-					return;
-				}
-			}
-		}
-
-		unsetCursor();
+		unsetCursor();		// set cursor to parent cursor
 
 		event->ignore();
 		return;
 	}
 
-	void SchemaView::paintEvent(QPaintEvent* /*paintEvent*/)
+	if (schema() == nullptr)
 	{
-		if (schema() == nullptr)
-		{
-			return;
-		}
-
-		QPainter p(this);
-		CDrawParam drawParam(&p, schema(), this, schema()->gridSize(), schema()->pinGridStep());
-
-		QRectF clipRect{0, 0, schema()->docWidth(), schema()->docHeight()};
-
-		draw(drawParam, clipRect);
-
+		// Schema is not loaded
+		//
 		return;
 	}
 
-	void SchemaView::draw(CDrawParam& drawParam, const QRectF& clipRect)
-	{
-		if (schema() == nullptr)
-		{
-			return;
-		}
-
-		updateControlWidgets(drawParam.isEditMode());
-
-		// --
-		//
-		QPainter* p = drawParam.painter();
-
-		// Calc size
-		//
-		int widthInPixel = schema()->GetDocumentWidth(drawParam.realDpiX(), zoom());
-		int heightInPixel = schema()->GetDocumentHeight(drawParam.realDpiY(), zoom());
-
-		// Clear device
-		//
-		p->fillRect(QRectF(0, 0, widthInPixel + 1, heightInPixel + 1), QColor(0xB0, 0xB0, 0xB0));
-
-		// Ajust QPainter
-		//
-		Ajust(p, 0, 0, zoom());
-
-		// Draw Schema
-		//
-		schema()->Draw(&drawParam, clipRect);
-
-		return;
-	}
-
-	void SchemaView::Ajust(QPainter* painter, double startX, double startY, double zoom) const
-	{
-		// Set transform matrix
-		//
-		painter->resetTransform();
-
-		zoom /= 100.0;
-
-		double dpr = painter->device()->devicePixelRatioF();
-		double dpix = painter->device()->physicalDpiX();
-		double dpiy = painter->device()->physicalDpiY();
-
-		if (m_schema->unit() == SchemaUnit::Inch)
-		{
-			startX = startX + 0.5 / dpr;
-			startY = startY + 0.5 / dpr;
-
-			double scalex = dpix * zoom;
-			double scaley = dpiy * zoom;
-
-			painter->translate(startX, startY);
-			painter->scale(scalex, scaley);
-		}
-		else
-		{
-			startX = VFrame30::Round(startX) + 0.5 / dpr;
-			startY = VFrame30::Round(startY) + 0.5 / dpr;
-
-			double scalex = 1.0 / dpr * zoom;
-			double scaley = 1.0 / dpr * zoom;
-
-			painter->translate(startX, startY);
-			painter->scale(scalex, scaley);
-		}
-
-		return;
-	}
-
-	double SchemaView::realDpiX(const QPaintDevice* device) const
-	{
-		// Drawing can be performed in other device, not in windows, for example to pdf, that's why device is required
-		//
-		Q_ASSERT(device);
-		return device->physicalDpiX() * device->devicePixelRatioF();
-	}
-
-	double SchemaView::realDpiY(const QPaintDevice* device) const
-	{
-		// Drawing can be performed in other device, not in windows, for example to pdf, that's why device is required
-		//
-		Q_ASSERT(device);
-		return device->physicalDpiY() * device->devicePixelRatioF();
-	}
-
-	bool SchemaView::MousePosToDocPoint(const QPoint& mousePos, QPointF* pDestDocPos, double dpiX /*= 0*/, double dpiY /*= 0*/)
-	{
-		if (pDestDocPos == nullptr)
-		{
-			assert(pDestDocPos);
-			return false;
-		}
-
-		double x = mousePos.x() * devicePixelRatioF();
-		double y = mousePos.y() * devicePixelRatioF();
-
-		if (schema()->unit() == SchemaUnit::Display)
-		{
-			pDestDocPos->setX(x / (m_zoom / 100.0));
-			pDestDocPos->setY(y / (m_zoom / 100.0));
-		}
-		else
-		{
-			dpiX = dpiX == 0 ? realDpiX(this) : dpiX;
-			dpiY = dpiY == 0 ? realDpiY(this) : dpiY;
-
-			pDestDocPos->setX(x / (dpiX * (m_zoom / 100.0)));
-			pDestDocPos->setY(y / (dpiY * (m_zoom / 100.0)));
-		}
-
-		return true;
-	}
-
-	// Properties
+	// If the mouse cursor is over SchmeItem with acceptClick then set HandCursor
 	//
-	double SchemaView::zoom() const
+	QPointF docPoint;
+
+	bool convertResult = MousePosToDocPoint(event->pos(), &docPoint);
+	if (convertResult == false)
 	{
-		return m_zoom;
+		unsetCursor();
+		return;
 	}
 
-	double SchemaView::setZoom(double value, bool repaint /*= true*/)
+	double x = docPoint.x();
+	double y = docPoint.y();
+
+	for (auto layer = schema()->Layers.crbegin(); layer != schema()->Layers.crend(); layer++)
 	{
-		// Calc DPI
-		//
-		double realDpiX = physicalDpiX() * devicePixelRatioF();
-		double realDpiY = physicalDpiY() * devicePixelRatioF();
+		const SchemaLayer* pLayer = layer->get();
 
-		// if value is 0 then fit page into parent
-		//
-		if (value == 0)
+		if (pLayer->show() == false)
 		{
-			QWidget* viewportWidget = this->parentWidget();		// Viewport can be real from QAbstractScrollArea or just any widget
-			QAbstractScrollArea* abstractScrollArea = qobject_cast<QAbstractScrollArea*>(viewportWidget->parentWidget());
+			continue;
+		}
 
-			if (viewportWidget == nullptr)
+		for (auto vi = pLayer->Items.crbegin(); vi != pLayer->Items.crend(); vi++)
+		{
+			const std::shared_ptr<SchemaItem>& item = *vi;
+
+			if (item->acceptClick() == true &&
+				item->isIntersectPoint(x, y) == true &&
+				item->clickScript().isEmpty() == false)
 			{
-				Q_ASSERT(viewportWidget);
-				value = 100;
+				setCursor(Qt::PointingHandCursor);
+				event->accept();
+				return;
+			}
+		}
+	}
+
+	unsetCursor();
+
+	event->ignore();
+	return;
+}
+
+double SchemaViewWidget::setZoom(double value, bool repaint /*= true*/)
+{
+	// Calc DPI
+	//
+	double realDpiX = physicalDpiX() * devicePixelRatioF();
+	double realDpiY = physicalDpiY() * devicePixelRatioF();
+
+	// if value is 0 then fit page into parent
+	//
+	if (value == 0)
+	{
+		QWidget* viewportWidget = this->parentWidget();		// Viewport can be real from QAbstractScrollArea or just any widget
+		QAbstractScrollArea* abstractScrollArea = qobject_cast<QAbstractScrollArea*>(viewportWidget->parentWidget());
+
+		if (viewportWidget == nullptr)
+		{
+			Q_ASSERT(viewportWidget);
+			value = 100;
+		}
+		else
+		{
+			QSize viewportSize;
+
+			if (abstractScrollArea != nullptr)
+			{
+				viewportSize = abstractScrollArea->maximumViewportSize();
 			}
 			else
 			{
-				QSize viewportSize;
-
-				if (abstractScrollArea != nullptr)
-				{
-					viewportSize = abstractScrollArea->maximumViewportSize();
-				}
-				else
-				{
-					viewportSize = viewportWidget->size();
-				}
-
-				// Scale to fit viewportWidget
-				//
-				double vertScaleFactor = 1.0;
-				double horzScaleFactor = 1.0;
-
-				if (schema()->unit() == SchemaUnit::Display)
-				{
-					horzScaleFactor = (viewportSize.width() * devicePixelRatioF() * 0.99) / schema()->docWidth();
-					vertScaleFactor = (viewportSize.height() * devicePixelRatioF() * 0.99) / schema()->docHeight();
-				}
-				else
-				{
-					horzScaleFactor = (viewportSize.width() * devicePixelRatioF() * 0.99) / (schema()->docWidth() * realDpiX);
-					vertScaleFactor = (viewportSize.height() * devicePixelRatioF() * 0.99) / (schema()->docHeight() * realDpiY);
-				}
-
-				value = std::min(vertScaleFactor, horzScaleFactor) * 100.0;
+				viewportSize = viewportWidget->size();
 			}
+
+			// Scale to fit viewportWidget
+			//
+			double vertScaleFactor = 1.0;
+			double horzScaleFactor = 1.0;
+
+			if (schema()->unit() == SchemaUnit::Display)
+			{
+				horzScaleFactor = (viewportSize.width() * devicePixelRatioF() * 0.99) / schema()->docWidth();
+				vertScaleFactor = (viewportSize.height() * devicePixelRatioF() * 0.99) / schema()->docHeight();
+			}
+			else
+			{
+				horzScaleFactor = (viewportSize.width() * devicePixelRatioF() * 0.99) / (schema()->docWidth() * realDpiX);
+				vertScaleFactor = (viewportSize.height() * devicePixelRatioF() * 0.99) / (schema()->docHeight() * realDpiY);
+			}
+
+			value = std::min(vertScaleFactor, horzScaleFactor) * 100.0;
 		}
-		else
-		{
-			value = qBound(30.0, value, 500.0);
-		}
-
-		m_zoom = value;
-
-		// Width and height of the document in physical dpis, taking into account devicePixelRatio
-		//
-		int widthInPixel = static_cast<int>(schema()->GetDocumentWidth(realDpiX, m_zoom));
-		int heightInPixel = static_cast<int>(schema()->GetDocumentHeight(realDpiY, m_zoom));
-
-		// The size of window is set in different points
-		// Qt widget points must be corrected according to devicePixelRatio()
-		//
-		int widthInQtPoints = static_cast<int>(widthInPixel / devicePixelRatio());
-		int heightInQtPixel = static_cast<int>(heightInPixel / devicePixelRatio());
-
-		QSize scaledPixelSize{widthInQtPoints, heightInQtPixel};
-
-		if (minimumSize() != scaledPixelSize)
-		{
-			setMinimumSize(scaledPixelSize);
-		}
-
-		if (size() != scaledPixelSize)
-		{
-			resize(scaledPixelSize);
-		}
-
-		if (repaint == true)
-		{
-			this->update();
-		}
-
-		return m_zoom;
 	}
-
-	const Session& SchemaView::session() const
+	else
 	{
-		return m_session;
+		value = qBound(30.0, value, 500.0);
 	}
 
-	Session& SchemaView::session()
+	m_zoom = value;
+
+	// Width and height of the document in physical dpis, taking into account devicePixelRatio
+	//
+	int widthInPixel = static_cast<int>(schema()->GetDocumentWidth(realDpiX, m_zoom));
+	int heightInPixel = static_cast<int>(schema()->GetDocumentHeight(realDpiY, m_zoom));
+
+	// The size of window is set in different points
+	// Qt widget points must be corrected according to devicePixelRatio()
+	//
+	int widthInQtPoints = static_cast<int>(widthInPixel / devicePixelRatio());
+	int heightInQtPixel = static_cast<int>(heightInPixel / devicePixelRatio());
+
+	QSize scaledPixelSize{widthInQtPoints, heightInQtPixel};
+
+	if (minimumSize() != scaledPixelSize)
 	{
-		return m_session;
+		setMinimumSize(scaledPixelSize);
 	}
+
+	if (size() != scaledPixelSize)
+	{
+		resize(scaledPixelSize);
+	}
+
+	if (repaint == true)
+	{
+		this->update();
+	}
+
+	return m_zoom;
+}
 
 }
+

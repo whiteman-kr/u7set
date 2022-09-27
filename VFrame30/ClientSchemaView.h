@@ -249,7 +249,7 @@ namespace VFrame30
 	//
 	// ClientSchemaView
 	//
-	class ClientSchemaView : public VFrame30::SchemaView
+	class ClientSchemaView : public VFrame30::SchemaViewWidget
 	{
 		Q_OBJECT
 

@@ -27,6 +27,8 @@
 #include <QtConcurrent>
 #include <QVector>
 
+#include <QWidget>
+
 #ifdef _MSC_VER
 	#pragma warning(pop)
 #endif

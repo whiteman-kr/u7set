@@ -275,7 +275,7 @@ namespace VFrame30
 	ClientSchemaView::ClientSchemaView(VFrame30::SchemaManager* schemaManager,
 									   ISchemaViewHistory* schemaViewHistory,
 									   QWidget* parent) :
-		VFrame30::SchemaView(parent),
+		VFrame30::SchemaViewWidget(parent),
 		m_schemaManager(schemaManager),
 		m_schemaViewHistory(schemaViewHistory)
 	{
@@ -337,7 +337,7 @@ namespace VFrame30
 
 		// Draw schema
 		//
-		SchemaView::draw(drawParam, clipRect);
+		SchemaViewWidget::draw(drawParam, clipRect);
 
 		// --
 		//
@@ -388,7 +388,7 @@ namespace VFrame30
 		}
 		else
 		{
-			VFrame30::SchemaView::mouseMoveEvent(event);	// This will set mouse cursor
+			VFrame30::SchemaViewWidget::mouseMoveEvent(event);	// This will set mouse cursor
 		}
 
 		return;
@@ -408,8 +408,8 @@ namespace VFrame30
 		{
 			// It is scrolling by midbutton, let scroll view process it
 			//
-			VFrame30::SchemaView::mouseMoveEvent(event);	// This will set mouse cursor
-			VFrame30::SchemaView::mousePressEvent(event);
+			VFrame30::SchemaViewWidget::mouseMoveEvent(event);	// This will set mouse cursor
+			VFrame30::SchemaViewWidget::mousePressEvent(event);
 			return;
 		}
 
@@ -467,8 +467,8 @@ namespace VFrame30
 		{
 			// It is scrolling by midbutton, let scroll view process it
 			//
-			VFrame30::SchemaView::mouseMoveEvent(event);	// This will set mouse cursor
-			VFrame30::SchemaView::mouseReleaseEvent(event);
+			VFrame30::SchemaViewWidget::mouseMoveEvent(event);	// This will set mouse cursor
+			VFrame30::SchemaViewWidget::mouseReleaseEvent(event);
 			return;
 		}
 
@@ -531,7 +531,7 @@ namespace VFrame30
 						m_leftClickOverItem.reset();
 						event->accept();
 
-						VFrame30::SchemaView::mouseMoveEvent(event);	// This will set mouse cursor
+						VFrame30::SchemaViewWidget::mouseMoveEvent(event);	// This will set mouse cursor
 						return;
 					}
 				}
@@ -540,7 +540,7 @@ namespace VFrame30
 			m_leftClickOverItem.reset();
 		}
 
-		VFrame30::SchemaView::mouseMoveEvent(event);	// This will set mouse cursor
+		VFrame30::SchemaViewWidget::mouseMoveEvent(event);	// This will set mouse cursor
 
 		return;
 	}

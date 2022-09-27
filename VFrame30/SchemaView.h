@@ -17,24 +17,16 @@ namespace VFrame30
 
 	static constexpr double ZoomStep = 10;
 
-	class SchemaView : public QWidget
+	class SchemaView
 	{
-		Q_OBJECT
 
 	public:
-		explicit SchemaView(QWidget* parent = nullptr);
-		explicit SchemaView(std::shared_ptr<Schema> schema, QWidget* parent = nullptr);
+		explicit SchemaView();
+		explicit SchemaView(std::shared_ptr<Schema> schema);
 
-	public:
-		void updateControlWidgets(bool editMode);
-		void deleteControlWidgets();
-		
 		// Painting
 		//
 	protected:
-		virtual void paintEvent(QPaintEvent*) override;
-		void draw(CDrawParam& drawParam, const QRectF& clipRect);
-
 		void Ajust(QPainter* painter, double startX, double startY, double zoom) const;
 
 		// Methods
@@ -43,7 +35,8 @@ namespace VFrame30
 		[[nodiscard]] double realDpiX(const QPaintDevice* device) const;
 		[[nodiscard]] double realDpiY(const QPaintDevice* device) const;
 
-		bool MousePosToDocPoint(const QPoint& mousePos, QPointF* pDestDocPos, double dpiX = 0, double dpiY = 0);
+		virtual void setSchema(std::shared_ptr<Schema> schema, bool repaint);
+		void setSchemaInternal(std::shared_ptr<Schema> schema);	// Use this when yoo dont need to update zoom, sliders, etc
 
 		VFrame30::Schema* schema();
 		const VFrame30::Schema* schema() const;
@@ -51,37 +44,63 @@ namespace VFrame30
 		std::shared_ptr<VFrame30::Schema> schemaSharedPtr();
 		std::shared_ptr<VFrame30::Schema> schemaSharedPtr() const;
 
-		void setSchema(std::shared_ptr<VFrame30::Schema> schema, bool repaint);
-		void setSchemaInternal(std::shared_ptr<VFrame30::Schema> schema);	// Use this when yoo dont need to update zoom, sliders, etc
-
-		// Events
-		//
-	protected:
-		virtual void mouseMoveEvent(QMouseEvent* event) override;
-
-		// Signals
-		//
-	signals:
-		void signal_schemaChanged(VFrame30::Schema* schema);
-
 		// Properties
 		//
 	public:
 		double zoom() const;
-		double setZoom(double value, bool repaint = true);
 
 		const Session& session() const;
 		Session& session();
 
 		// Data
 		//
-	private:
+	protected:
 		std::shared_ptr<VFrame30::Schema> m_schema;
+
 		double m_zoom = 100.0;
 
 		Session m_session;
+
 	};
 
+	class SchemaViewWidget : public QWidget, public SchemaView
+	{
+		Q_OBJECT
+
+	public:
+		explicit SchemaViewWidget(QWidget* parent = nullptr);
+		explicit SchemaViewWidget(std::shared_ptr<Schema> schema, QWidget* parent = nullptr);
+
+	public:
+		void updateControlWidgets(bool editMode);
+		void deleteControlWidgets();
+
+		bool MousePosToDocPoint(const QPoint& mousePos, QPointF* pDestDocPos, double dpiX = 0, double dpiY = 0);
+
+		void setSchema(std::shared_ptr<Schema> schema, bool repaint) override;
+
+		// Painting
+		//
+		void draw(CDrawParam& drawParam, const QRectF& clipRect);
+
+	protected:
+		virtual void paintEvent(QPaintEvent*) override;
+
+		// Events
+		//
+	protected:
+		virtual void mouseMoveEvent(QMouseEvent* event) override;
+
+	public:
+		// Properties
+		//
+		double setZoom(double value, bool repaint = true);
+
+		// Signals
+		//
+	signals:
+		void signal_schemaChanged(VFrame30::Schema* schema);
+	};
 }
 
 

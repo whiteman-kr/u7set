@@ -15,9 +15,18 @@
 #include "Forms/CompareDialog.h"
 #include "Forms/ComparePropertyObjectDialog.h"
 #include "IdePropertyEditor.h"
-#include "Reports/SchemasReportGenerator.h"
+#include "../lib/Ui/TabWidgetEx.h"
+#include "../lib/Ui/TagSelectorWidget.h"
+#include "../VFrame30/LogicSchema.h"
+#include "../VFrame30/MonitorSchema.h"
+#include "../VFrame30/WiringSchema.h"
+#include "../VFrame30/DiagSchema.h"
+#include "../VFrame30/UfbSchema.h"
+#include "../VFrame30/TuningSchema.h"
+#include "../VFrame30/FblItemRect.h"
 #include "DialogClientBehavior.h"
-
+#include "Reports/SchemasReport.h"
+#include <QPageLayout>
 
 //
 //

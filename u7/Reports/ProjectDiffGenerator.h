@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ReportTools.h"
+#include "../Builder/ReportGenerator.h"
 
 #include "GlobalMessanger.h"
 #include "../HardwareLib/DeviceObject.h"

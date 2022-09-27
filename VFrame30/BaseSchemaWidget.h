@@ -3,7 +3,7 @@
 namespace VFrame30
 {
 	class Schema;
-	class SchemaView;
+	class SchemaViewWidget;
 
 	class BaseSchemaWidget : public QScrollArea
 	{
@@ -11,7 +11,7 @@ namespace VFrame30
 
 	public:
 		BaseSchemaWidget() = delete;
-		BaseSchemaWidget(std::shared_ptr<VFrame30::Schema> schema, SchemaView* schemaView, QWidget* parent);
+		BaseSchemaWidget(std::shared_ptr<VFrame30::Schema> schema, SchemaViewWidget* schemaView, QWidget* parent);
 		virtual ~BaseSchemaWidget();
 
 	protected:
@@ -49,8 +49,8 @@ namespace VFrame30
 
 		virtual void setSchema(std::shared_ptr<VFrame30::Schema> schema, bool repaint);
 
-		SchemaView* schemaView();
-		const SchemaView* schemaView() const;
+		SchemaViewWidget* schemaView();
+		const SchemaViewWidget* schemaView() const;
 
 		double zoom() const;
 		void setZoom(double zoom, bool repaint, int horzScrollValue = -1, int vertScrollValue = -1);
@@ -60,7 +60,7 @@ namespace VFrame30
 	protected:
 
 	private:
-		SchemaView* m_schemaView = nullptr;
+		SchemaViewWidget* m_schemaView = nullptr;
 
 		// Interface data
 		//

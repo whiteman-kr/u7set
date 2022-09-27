@@ -16,7 +16,7 @@ class EditSchemaWidget;
 // EditSchemaView
 //
 //
-class EditSchemaView : public VFrame30::SchemaView
+class EditSchemaView : public VFrame30::SchemaViewWidget
 {
 	Q_OBJECT
 

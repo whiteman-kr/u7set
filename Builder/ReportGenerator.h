@@ -1,10 +1,10 @@
 #pragma once
 
+#include "../DbLib/DbController.h"
+
 #include "../VFrame30/SchemaView.h"
 #include "../VFrame30/AppSignalController.h"
-#include "SchemaEditor/EditSchemaSignalProvider.h"
-
-class DbController;
+#include "../VFrame30/EditSchemaSignalProvider.h"
 
 //
 // ReportFileTypeParams
@@ -34,31 +34,6 @@ struct ReportFileTypeParams
 	QPageLayout pageLayout = QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, QMarginsF(15, 15, 15, 15));
 };
 
-class DialogReportFileTypeParams : public QDialog
-{
-	Q_OBJECT
-
-public:
-	explicit DialogReportFileTypeParams(const std::vector<ReportFileTypeParams>& fileTypeParams, std::vector<ReportFileTypeParams> defaultFileTypeParams, QWidget *parent);
-
-	std::vector<ReportFileTypeParams> fileTypeParams() const;
-
-private slots:
-	void pageSetup();
-	void setToDefault();
-
-private:
-	void fillTree();
-
-private:
-	DbController* m_db = nullptr;
-	QTreeWidget* m_treeWidget = nullptr;
-
-	std::vector<ReportFileTypeParams> m_fileTypeParams;
-
-	std::vector<ReportFileTypeParams> m_defaultFileTypeParams;
-};
-
 //
 // ReportSchemaCompareAction
 //
@@ -78,7 +53,7 @@ enum class ReportSchemaCompareAction
 class ReportSchemaView : public VFrame30::SchemaView
 {
 public:
-	ReportSchemaView(AppSignalSetProvider* signalSetProvider, QWidget* parent);
+	ReportSchemaView(AppSignalSetProvider* signalSetProvider);
 
 	virtual ~ReportSchemaView();
 
@@ -311,4 +286,133 @@ private:
 
 	QTextCharFormat m_currentCharFormatSaved;
 	QTextBlockFormat m_currentBlockFormatSaved;
+};
+
+class SchemasReportGenerator : public ReportGenerator
+{
+	Q_OBJECT
+
+public:
+	SchemasReportGenerator(ReportSchemaView* schemaView,
+						const QString& serverIp,
+						int serverPort,
+						const QString& serverUserName,
+						const QString& serverPassword,
+						const QString& projectName,
+						const QString& userName,
+						const QString& userPassword,
+						std::vector<DbFileInfo> files,
+						const QString& filePath);
+
+	virtual ~SchemasReportGenerator();
+
+	void setReportFileTypeParams(const std::vector<ReportFileTypeParams>& reportFileTypeParams);
+
+	static std::vector<ReportFileTypeParams> defaultFileTypeParams(DbController* db);
+
+public slots:
+	void exportFilesToPdf();
+	void exportFilesToAlbum();
+	void exportAllSchemasToAlbums();
+
+	void stop();
+	void progressRequested();
+
+	void getProgress(int* progress, int* progressMin, int* progressMax, QString* progressText);
+
+signals:
+	void progressChanged(int progress, int progressMin, int progressMax, const QString& progressText);
+	void finished(const QString& errorMessage);
+
+public:
+	enum class WorkerStatus
+	{
+		Idle,
+		Loading,
+		Parsing,
+		Rendering
+	};
+
+	// Access to output data. Output data is filled if fileName is empty
+	//
+	QStringList outputFilesList() const;
+	const QByteArray& outputData(const QString& fileName);
+
+	// Statistics
+	//
+	WorkerStatus currentStatus() const;
+	int schemasCount() const;
+	int schemaIndex() const;
+	QString currentSchemaType() const;
+	QString currentSchemaId() const;
+
+private:
+	struct SchemaFilesInfo
+	{
+		SchemaFilesInfo(int fileId, const QString& caption)
+		{
+			this->fileId = fileId;
+			this->caption = caption;
+		}
+
+		int fileId = -1;
+		QString caption;
+
+		std::vector<DbFileInfo> schemasFiles;
+		std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas;	// Key is full path to schema file
+	};
+
+private:
+	DbController* db();
+	const QString& filePath() const;
+
+	void openProject();
+	void closeProject();
+	void loadSchemas(const std::vector<DbFileInfo>& files, std::map<QString, std::shared_ptr<VFrame30::Schema>>* schemas);
+
+private:
+	DbController m_db;
+
+	std::vector<ReportFileTypeParams> m_reportFileTypeParams;
+
+	// Input files for exportFilesToPdf() and exportFilesToAlbum()
+	//
+	std::vector<DbFileInfo> m_inputFiles;
+
+	// Output file path
+	//
+	QString m_filePath;
+
+	// Output Data
+	//
+	std::map<QString, QByteArray> m_outputData;
+
+	// Report parameters
+
+	bool m_stop = false;	// Stop processing flag, set by stop()
+
+	// Connection information
+
+	QString m_serverIp;
+	int m_serverPort = -1;
+	QString m_serverUserName;
+	QString m_serverPassword;
+
+	QString m_projectName;
+	QString m_userName;
+	QString m_userPassword;
+
+	QFont m_marginFont;
+
+	// Statistics data
+	//
+
+	WorkerStatus m_currentStatus = WorkerStatus::Idle;
+
+	mutable QMutex m_statisticsMutex;
+	int m_schemasCount = 0;	// Calculated after text rendering
+	int m_schemaIndex = 0;
+	QString m_currentSchemaType;
+	QString m_currentSchemaId;
+
 };

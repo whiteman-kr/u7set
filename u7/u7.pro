@@ -72,6 +72,8 @@ HEADERS  += \
     SchemaEditor/EditSchemaTabPage.h \
     SchemaEditor/SchemaControlTabPage.h \
     SchemaEditor/SchemasTabPage.h \
+    Reports/DialogReportFileTypeParams.h \
+    Reports/SchemasReport.h \
 	Stable.h \
     ../lib/ExportPrint.h \
     ../lib/QDoublevalidatorEx.h \
@@ -115,9 +117,6 @@ HEADERS  += \
     MainWindow.h \
     PasswordService.h \
     Reports/ProjectDiffGenerator.h \
-    Reports/ReportTools.h \
-    Reports/SchemasReportGenerator.h \
-    SchemaEditor/EditSchemaSignalProvider.h \
     SchemaEditor/EditSchemaTypes.h \
     SchemaEditor/EditSchemaView.h \
     Settings.h \
@@ -239,11 +238,10 @@ SOURCES +=\
 	MainTabPage.cpp \
 	MainWindow.cpp \
 	PasswordService.cpp \
+    Reports/DialogReportFileTypeParams.cpp \
 	Reports/ProjectDiffGenerator.cpp \
-	Reports/ReportTools.cpp \
-	Reports/SchemasReportGenerator.cpp \
-	SchemaEditor/EditSchemaSignalProvider.cpp \
     SchemaEditor/EditSchemaTabPage.cpp \
+    Reports/SchemasReport.cpp \
 	SchemaEditor/EditSchemaTypes.cpp \
 	SchemaEditor/EditSchemaView.cpp \
     SchemaEditor/SchemaControlTabPage.cpp \

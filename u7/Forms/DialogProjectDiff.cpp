@@ -2,6 +2,7 @@
 #include "ui_DialogProjectDiff.h"
 #include "../../DbLib/DbController.h"
 #include "SelectChangesetDialog.h"
+#include "Reports/DialogReportFileTypeParams.h"
 
 #include <QPageSetupDialog>
 #include <QPrinter>

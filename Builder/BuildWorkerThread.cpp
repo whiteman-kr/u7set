@@ -14,6 +14,8 @@
 #include "TestClientCfgGenerator.h"
 #include "../Simulator/Simulator.h"
 #include "../HardwareLib/Subsystem.h"
+#include "AppSignalSetProvider.h"
+#include "ReportGenerator.h"
 
 namespace Builder
 {
@@ -1170,6 +1172,107 @@ namespace Builder
 		if (ok == false)
 		{
 			return false;
+		}
+
+		if (QThread::currentThread()->isInterruptionRequested() == true)
+		{
+			return true;
+		}
+
+		if (m_context->m_projectProperties.generateAppLogicDrawings() == true)
+		{
+			m_log->writeMessage(tr("--------------------------------------[ Generating Schemas Albums ]---------------------------------------"));
+
+			ok = createSchemasAlbums();
+			if (ok == false)
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	bool BuildWorkerThread::createSchemasAlbums()
+	{
+		AppSignalSetProvider* asp = AppSignalSetProvider::getInstance();
+		if (asp == nullptr)
+		{
+			Q_ASSERT(asp);
+			return false;
+		}
+
+		ReportSchemaView schemaView(asp);
+
+		const BuildInfo& bi = m_context->m_buildResultWriter->buildInfo();
+		schemaView.session().setProject(bi.project);
+		schemaView.session().setUsername(bi.user);
+		schemaView.session().setHost(QHostInfo::localHostName());
+
+		SchemasReportGenerator worker(&schemaView,
+																	serverIpAddress(),
+																	serverPort(),
+																	serverUsername(),
+																	serverPassword(),
+																	projectName(),
+																	projectUserName(),
+																	projectUserPassword(),
+																	{},
+																	QString()/*data will be saved to output buffers*/);
+
+		worker.setReportFileTypeParams(SchemasReportGenerator::defaultFileTypeParams(&m_context->m_db));
+
+		// Create thread
+
+		QThread* thread = new QThread;
+
+		worker.moveToThread(thread);
+
+		QObject::connect(thread, &QThread::started, &worker, &SchemasReportGenerator::exportAllSchemasToAlbums);
+		QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);	// Schedule thread deleting
+
+		bool threadComplete = false;
+
+		QObject::connect(&worker, &SchemasReportGenerator::finished, &worker, [thread, &threadComplete, this](const QString& errorMessage)
+		{
+			if (errorMessage.isEmpty() == false)
+			{
+				m_log->writeMessage(errorMessage);
+			}
+
+			thread->quit();
+
+			thread->deleteLater();
+
+			threadComplete = true;
+		});
+
+		// Start thread
+		//
+		thread->start();
+
+		while(threadComplete == false)
+		{
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				return false;
+			}
+
+			QThread::msleep(100);
+		};
+
+		QStringList filesList = worker.outputFilesList();
+
+		for (const QString& fileName : filesList)
+		{
+			// Add PDF files
+			//
+			auto buildFile = m_context->m_buildResultWriter->addFile("Schemas.pdf", fileName, worker.outputData(fileName), false);
+			if (buildFile == nullptr)
+			{
+				Q_ASSERT(buildFile);
+				return false;
+			}
 		}
 
 		return true;
