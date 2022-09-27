@@ -7,7 +7,233 @@
 #include "../VFrame30/Schema.h"
 #include "../VFrame30/DrawParam.h"
 #include "../VFrame30/VFrameTools.h"
+#include "AppSignalSetProvider.h"
 
+//
+//
+// ReportSchemaAppSignalProvider - this calss is used to provide app signals for drawing schemas, showing and getting signal ids, description, preciosion, etc...
+//
+//
+
+ReportSchemaAppSignalProvider::ReportSchemaAppSignalProvider(AppSignalSetProvider* signalSetProvider) :
+	m_signalSetProvider(signalSetProvider)
+{
+	Q_ASSERT(signalSetProvider);
+}
+
+int ReportSchemaAppSignalProvider::signalsCount() const
+{
+	// Unlikely this function required for schema editing
+	//
+	Q_ASSERT(false);
+	return 0;
+}
+
+std::vector<AppSignalParam> ReportSchemaAppSignalProvider::signalList() const
+{
+	// Unlikely this function required for schema editing
+	//
+	Q_ASSERT(false);
+	return {};
+}
+
+bool ReportSchemaAppSignalProvider::signalExists(Hash hash) const
+{
+	// Unlikely this function required for schema editing
+	//
+	Q_UNUSED(hash);
+	Q_ASSERT(false);
+	return {};
+}
+
+bool ReportSchemaAppSignalProvider::signalExists(const QString& appSignalId) const
+{
+	AppSignal* s = m_signalSetProvider->getSignalByStrID(appSignalId);
+	return s != nullptr;
+}
+
+AppSignalParam ReportSchemaAppSignalProvider::signalParam(Hash signalHash, bool* found) const
+{
+	// Unlikely this function required for schema editing
+	//
+	Q_UNUSED(signalHash);
+	Q_UNUSED(found);
+	Q_ASSERT(false);
+	return {};
+}
+
+AppSignalParam ReportSchemaAppSignalProvider::signalParam(const QString& appSignalId, bool* found) const
+{
+	AppSignalParam result;
+
+	AppSignal* s = m_signalSetProvider->getSignalByStrID(appSignalId);
+
+	if (found != nullptr)
+	{
+		*found = s != nullptr;
+	}
+
+	if (s != nullptr)
+	{
+		result.load(*s);
+	}
+
+	return result;
+}
+
+AppSignalState ReportSchemaAppSignalProvider::signalState(Hash signalHash, bool* found) const
+{
+	// Unlikely this function required for schema editing
+	//
+	Q_UNUSED(signalHash);
+	Q_UNUSED(found);
+	Q_ASSERT(false);
+	return {};
+}
+
+AppSignalState ReportSchemaAppSignalProvider::signalState(const QString& appSignalId, bool* found) const
+{
+	AppSignalState result;
+	result.m_hash = ::calcHash(appSignalId);
+
+	AppSignal* s = m_signalSetProvider->getSignalByStrID(appSignalId);
+	if (found != nullptr)
+	{
+		*found = s != nullptr;
+	}
+
+	if (s != nullptr)
+	{
+		result.m_flags.valid = 1;
+		result.m_value = 0;
+
+//		result.m_time.plant = TimeStamp{QDateTime::currentDateTime()};
+//		result.m_time.local = result.m_time.plant;
+//		result.m_time.system = TimeStamp{QDateTime::currentDateTimeUtc()};
+	}
+
+	return result;
+}
+
+void ReportSchemaAppSignalProvider::signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const
+{
+	// Unlikely this function required for schema editing
+	//
+	Q_UNUSED(appSignalHashes);
+	Q_UNUSED(result);
+	Q_UNUSED(found);
+	Q_ASSERT(false);
+	return;
+}
+
+void ReportSchemaAppSignalProvider::signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const
+{
+	if (result == nullptr)
+	{
+		Q_ASSERT(result);
+		return;
+	}
+
+	if (found != nullptr)
+	{
+		*found = 0;
+	}
+
+	result->clear();
+	result->reserve(appSignalIds.size());
+
+	for (const QString& id : appSignalIds)
+	{
+		bool signalFound = false;
+
+		result->emplace_back(this->signalState(id, &signalFound));
+
+		if (signalFound && found != nullptr)
+		{
+			(*found)++;
+		}
+	}
+
+	return;
+}
+
+QStringList ReportSchemaAppSignalProvider::signalTags(Hash signalHash) const
+{
+	// Unlikely this function required for schema editing
+	//
+	Q_UNUSED(signalHash);
+	Q_ASSERT(false);
+	return {};
+}
+
+QStringList ReportSchemaAppSignalProvider::signalTags(const QString& appSignalId) const
+{
+	AppSignal* s = m_signalSetProvider->getSignalByStrID(appSignalId);
+
+	if (s != nullptr)
+	{
+		return s->tags();
+	}
+
+	return {};
+}
+
+bool ReportSchemaAppSignalProvider::signalHasTag(Hash signalHash, const QString& tag) const
+{
+	// Unlikely this function required for schema editing
+	//
+	Q_UNUSED(signalHash);
+	Q_UNUSED(tag);
+	Q_ASSERT(false);
+	return false;
+}
+
+bool ReportSchemaAppSignalProvider::signalHasTag(const QString& appSignalId, const QString& tag) const
+{
+	return signalTags(appSignalId).contains(tag, Qt::CaseInsensitive);
+}
+
+E::SignalType ReportSchemaAppSignalProvider::signalType(Hash signalHash, bool* found) const
+{
+	Q_UNUSED(signalHash);
+	Q_UNUSED(found);
+	Q_ASSERT(false);	// to do
+	return E::SignalType::Analog;
+}
+
+QStringList ReportSchemaAppSignalProvider::signalIdsByTag(const QString& /*tag*/) const
+{
+	// No simulation of this function in edit schema mode
+	//
+	Q_ASSERT(false);
+	return {};
+}
+
+E::SignalType ReportSchemaAppSignalProvider::signalType(const QString& appSignalId, bool* found) const
+{
+	return signalType(::calcHash(appSignalId), found);
+}
+
+QString ReportSchemaAppSignalProvider::equipmentToAppSiganlId(const QString& /*equipmentId*/) const
+{
+	Q_ASSERT(false);	// todo
+	return {};
+}
+
+std::vector<std::shared_ptr<Comparator>> ReportSchemaAppSignalProvider::setpointsByInputSignalId(const QString& appSignalId) const
+{
+	// No simulation of this function in edit schema mode
+	//
+	Q_UNUSED(appSignalId);
+	return {};
+}
+
+QStringList ReportSchemaAppSignalProvider::tags() const
+{
+	// No simulation of this function in edit schema mode
+	//
+	return {};
+}
 
 //
 // ReportSchemaView

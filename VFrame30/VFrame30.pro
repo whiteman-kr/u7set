@@ -57,7 +57,6 @@ HEADERS += \
     ../lib/ClientBehavior.h \
     ../lib/ComparatorSet.h \
 	../UtilsLib/ILogFile.h \
-    EditSchemaSignalProvider.h \
     ISchemaViewHistory.h \
     Indicator.h \
     IndicatorArrowIndicator.h \
@@ -130,7 +129,6 @@ HEADERS += \
     ../lib/OutputLog.h
 
 SOURCES += \
-    EditSchemaSignalProvider.cpp \
     Indicator.cpp \
     IndicatorArrowIndicator.cpp \
     IndicatorHistogramVert.cpp \
