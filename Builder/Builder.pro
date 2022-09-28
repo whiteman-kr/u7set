@@ -78,6 +78,7 @@ SOURCES += \
     Loopbacks.cpp \
     ModuleFirmwareWriter.cpp \
     Parser.cpp \
+    ReportAppSignalProvider.cpp \
     ReportGenerator.cpp \
     SignalSet.cpp \
     Busses.cpp \
@@ -141,6 +142,7 @@ HEADERS += \
 	AppSignalSetProvider.h \
     ConnectionStorage.h \
     Loopbacks.h \
+    ReportAppSignalProvider.h \
     ReportGenerator.h \
     SignalsHeap.h \
     Stable.h \

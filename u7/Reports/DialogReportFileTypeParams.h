@@ -2,6 +2,8 @@
 
 #include "../Builder/ReportGenerator.h"
 
+using namespace Builder;
+
 class DialogReportFileTypeParams : public QDialog
 {
 	Q_OBJECT

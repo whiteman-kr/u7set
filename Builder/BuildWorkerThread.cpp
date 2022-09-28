@@ -14,7 +14,6 @@
 #include "TestClientCfgGenerator.h"
 #include "../Simulator/Simulator.h"
 #include "../HardwareLib/Subsystem.h"
-#include "AppSignalSetProvider.h"
 #include "ReportGenerator.h"
 
 namespace Builder
@@ -1195,30 +1194,24 @@ namespace Builder
 
 	bool BuildWorkerThread::createSchemasAlbums()
 	{
-		AppSignalSetProvider* asp = AppSignalSetProvider::getInstance();
-		if (asp == nullptr)
-		{
-			Q_ASSERT(asp);
-			return false;
-		}
-
-		ReportSchemaView schemaView(asp);
+		std::shared_ptr<ReportSchemaView> schemaView = std::make_shared<ReportSchemaView>();
 
 		const BuildInfo& bi = m_context->m_buildResultWriter->buildInfo();
-		schemaView.session().setProject(bi.project);
-		schemaView.session().setUsername(bi.user);
-		schemaView.session().setHost(QHostInfo::localHostName());
+		schemaView->session().setProject(bi.project);
+		schemaView->session().setUsername(bi.user);
+		schemaView->session().setHost(QHostInfo::localHostName());
 
-		SchemasReportGenerator worker(&schemaView,
-																	serverIpAddress(),
-																	serverPort(),
-																	serverUsername(),
-																	serverPassword(),
-																	projectName(),
-																	projectUserName(),
-																	projectUserPassword(),
-																	{},
-																	QString()/*data will be saved to output buffers*/);
+		SchemasReportGenerator worker(schemaView,
+									  m_context->m_signalSet.get(),
+									  serverIpAddress(),
+									  serverPort(),
+									  serverUsername(),
+									  serverPassword(),
+									  projectName(),
+									  projectUserName(),
+									  projectUserPassword(),
+									  {},
+									  QString()/*data will be saved to output buffers*/);
 
 		worker.setReportFileTypeParams(SchemasReportGenerator::defaultFileTypeParams(&m_context->m_db));
 

@@ -69,6 +69,7 @@ HEADERS  += \
     ../lib/Ui/DialogChooseTags.h \
     CodeEditor.h \
     DbTagsEditor.h \
+    Reports/ProjectDiffReport.h \
     SchemaEditor/EditSchemaSignalProvider.h \
     SchemaEditor/EditSchemaTabPage.h \
     SchemaEditor/SchemaControlTabPage.h \
@@ -117,7 +118,6 @@ HEADERS  += \
     MainTabPage.h \
     MainWindow.h \
     PasswordService.h \
-    Reports/ProjectDiffGenerator.h \
     SchemaEditor/EditSchemaTypes.h \
     SchemaEditor/EditSchemaView.h \
     Settings.h \
@@ -240,7 +240,7 @@ SOURCES +=\
 	MainWindow.cpp \
 	PasswordService.cpp \
     Reports/DialogReportFileTypeParams.cpp \
-	Reports/ProjectDiffGenerator.cpp \
+    Reports/ProjectDiffReport.cpp \
     SchemaEditor/EditSchemaSignalProvider.cpp \
     SchemaEditor/EditSchemaTabPage.cpp \
     Reports/SchemasReport.cpp \

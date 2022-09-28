@@ -4299,7 +4299,7 @@ void SchemaControlTabPage::exportToPdf()
 								   db()->currentProject().projectName(),
 								   db()->currentUser().username(),
 								   db()->currentUser().password(),
-								   m_signalSetProvider,
+								   &m_signalSetProvider->signalSet(),
 								   this);
 
 	r.exportSchemasToPdf(pdfDirectory, files);
@@ -4348,7 +4348,7 @@ void SchemaControlTabPage::exportToAlbum()
 								   db()->currentProject().projectName(),
 								   db()->currentUser().username(),
 								   db()->currentUser().password(),
-								   m_signalSetProvider,
+								   &m_signalSetProvider->signalSet(),
 								   this);
 
 	r.exportSchemasToAlbum(albumPath, files, albumPageLayout);

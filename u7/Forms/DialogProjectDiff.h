@@ -3,7 +3,7 @@
 
 #include <QDialog>
 #include "GlobalMessanger.h"
-#include "Reports/ProjectDiffGenerator.h"
+#include "Reports/ProjectDiffReport.h"
 
 namespace Ui {
 	class DialogProjectDiff;

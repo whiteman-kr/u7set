@@ -1187,7 +1187,7 @@ void MainWindow::projectDifference()
 										db()->currentProject().projectName(),
 										db()->currentUser().username(),
 										db()->currentUser().password(),
-										m_signalSetProvider,
+										&m_signalSetProvider->signalSet(),
 										this);
 	}
 
@@ -1218,7 +1218,7 @@ void MainWindow::createSchemasAlbums()
 								   db()->currentProject().projectName(),
 								   db()->currentUser().username(),
 								   db()->currentUser().password(),
-								   m_signalSetProvider,
+								   &m_signalSetProvider->signalSet(),
 								   this);
 
 	r.exportAllSchemasToAlbum(albumPath, albumFileTypeParams);

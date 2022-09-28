@@ -1,5 +1,7 @@
 #include "../Builder/ReportGenerator.h"
 
+using namespace Builder;
+
 class SchemasReportDialog : public QDialog
 {
 	Q_OBJECT
@@ -60,7 +62,7 @@ public:
 								 const QString& projectName,
 								 const QString& userName,
 								 const QString& userPassword,
-								 AppSignalSetProvider* signalSetProvider,
+								 const AppSignalSet* signalSet,
 								 QWidget *parent);
 
 	void exportSchemasToPdf(const QString& filePath, const std::vector<DbFileInfo>& files);
@@ -86,7 +88,8 @@ private:
 	QString m_userName;
 	QString m_userPassword;
 
-	AppSignalSetProvider* m_appSignalProvider = nullptr;
+	const AppSignalSet* m_signalSet = nullptr;
+
 	QWidget* m_parent = nullptr;
 };
 

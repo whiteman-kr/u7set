@@ -1,9 +1,10 @@
-#include "ProjectDiffGenerator.h"
+#include "ProjectDiffReport.h"
 
 #include "../Builder/AppSignalProperties.h"
 #include "../lib/PropertyEditor.h"
 #include "../HardwareLib/Connection.h"
 #include "../VFrame30/Bus.h"
+#include "../VFrame30/Schema.h"
 
 #include "../lib/Ui/DialogProgress.h"
 
@@ -248,12 +249,12 @@ void ProjectDiffGeneratorThread::run(const QString& fileName,
 									 const QString& projectName,
 									 const QString& userName,
 									 const QString& userPassword,
-									 AppSignalSetProvider* appSignalProvider,
+									 const AppSignalSet* signalSet,
 									 QWidget* parent)
 {
 	// Create schema view
 
-	ReportSchemaView* schemaView = new ReportSchemaView(appSignalProvider);
+	std::shared_ptr<ReportSchemaView> schemaView = std::make_shared<ReportSchemaView>();
 
 	schemaView->session().setProject(projectName);
 	schemaView->session().setUsername(userName);
@@ -261,7 +262,7 @@ void ProjectDiffGeneratorThread::run(const QString& fileName,
 
 	// Create Worker
 
-	ProjectDiffGenerator* worker = new ProjectDiffGenerator(fileName, settings, schemaView, projectName, userName, userPassword);
+	ProjectDiffGenerator* worker = new ProjectDiffGenerator(fileName, settings, schemaView, signalSet, projectName, userName, userPassword);
 
 	// Create Progress Dialog
 
@@ -299,8 +300,6 @@ void ProjectDiffGeneratorThread::run(const QString& fileName,
 		}
 
 		worker->deleteLater();
-
-		delete schemaView;//->deleteLater();
 	});
 
 	// Start thread
@@ -318,12 +317,13 @@ void ProjectDiffGeneratorThread::run(const QString& fileName,
 //
 
 ProjectDiffGenerator::ProjectDiffGenerator(const QString& fileName,
-									 const ProjectDiffReportParams& settings,
-									 ReportSchemaView* schemaView,
-									 const QString& projectName,
-									 const QString& userName,
-									 const QString& userPassword):
-	ReportGenerator(schemaView),
+										   const ProjectDiffReportParams& settings,
+										   std::shared_ptr<ReportSchemaView> schemaView,
+										   const AppSignalSet *signalSet,
+										   const QString& projectName,
+										   const QString& userName,
+										   const QString& userPassword):
+	ReportGenerator(schemaView, signalSet),
 	m_reportParams(settings),
 	m_filePath(fileName),
 	m_projectName(projectName),

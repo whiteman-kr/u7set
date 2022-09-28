@@ -212,7 +212,7 @@ SchemasReportGeneratorThread::SchemasReportGeneratorThread(const QString& server
 														   const QString& projectName,
 														   const QString& userName,
 														   const QString& userPassword,
-														   AppSignalSetProvider* signalSetProvider,
+														   const AppSignalSet *signalSet,
 														   QWidget *parent):
 	m_serverIp(serverIp),
 	m_serverPort(serverPort),
@@ -221,7 +221,7 @@ SchemasReportGeneratorThread::SchemasReportGeneratorThread(const QString& server
 	m_projectName(projectName),
 	m_userName(userName),
 	m_userPassword(userPassword),
-	m_appSignalProvider(signalSetProvider),
+	m_signalSet(signalSet),
 	m_parent(parent)
 {
 
@@ -250,7 +250,7 @@ void SchemasReportGeneratorThread::run(TaskType task,
 {
 	// Create View
 
-	ReportSchemaView* schemaView = new ReportSchemaView(m_appSignalProvider);
+	std::shared_ptr<ReportSchemaView> schemaView = std::make_shared<ReportSchemaView>();
 
 	schemaView->session().setProject(m_projectName);
 	schemaView->session().setUsername(m_userName);
@@ -259,15 +259,16 @@ void SchemasReportGeneratorThread::run(TaskType task,
 	// Create Worker
 
 	SchemasReportGenerator* worker = new SchemasReportGenerator(schemaView,
-																 m_serverIp,
-																 m_serverPort,
-																 m_serverUserName,
-																 m_serverPassword,
-																 m_projectName,
-																 m_userName,
-																 m_userPassword,
-																 files,
-																 filePath);
+																m_signalSet,
+																m_serverIp,
+																m_serverPort,
+																m_serverUserName,
+																m_serverPassword,
+																m_projectName,
+																m_userName,
+																m_userPassword,
+																files,
+																filePath);
 
 	if (task == TaskType::ExportFilesToAlbum)
 	{
@@ -332,8 +333,6 @@ void SchemasReportGeneratorThread::run(TaskType task,
 		}
 
 		worker->deleteLater();
-
-		delete schemaView/*->deleteLater()*/;
 	});
 
 	// Start thread

@@ -4,62 +4,10 @@
 
 #include "../VFrame30/SchemaView.h"
 #include "../VFrame30/AppSignalController.h"
+#include "ReportAppSignalProvider.h"
 
-class AppSignalSetProvider;
-
-//
-//
-// EditSchemaAppSignalProvider - this calss is used to provide app signals for drawing schemas, showing and getting signal ids, description, preciosion, etc...
-//
-//
-class ReportSchemaAppSignalProvider final : public IAppSignalManager
+namespace Builder
 {
-public:
-	ReportSchemaAppSignalProvider() = delete;
-	ReportSchemaAppSignalProvider(AppSignalSetProvider* signalSetProvider);
-
-	// IAppSignalManager implementation
-	//
-public:
-	virtual int signalsCount() const override;
-	virtual std::vector<AppSignalParam> signalList() const override;
-
-	virtual bool signalExists(Hash hash) const override;
-	virtual bool signalExists(const QString& appSignalId) const override;
-
-	virtual AppSignalParam signalParam(Hash signalHash, bool* found) const override;
-	virtual AppSignalParam signalParam(const QString& appSignalId, bool* found) const override;
-
-	virtual AppSignalState signalState(Hash signalHash, bool* found) const override;
-	virtual AppSignalState signalState(const QString& appSignalId, bool* found) const override;
-
-	virtual void signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const override;
-	virtual void signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const override;
-
-	virtual QStringList signalTags(Hash signalHash) const override;
-	virtual QStringList signalTags(const QString& appSignalId) const override;
-
-	virtual bool signalHasTag(Hash signalHash, const QString& tag) const override;
-	virtual bool signalHasTag(const QString& appSignalId, const QString& tag) const override;
-
-	virtual QStringList signalIdsByTag(const QString& tag) const override;
-
-	virtual E::SignalType signalType(Hash signalHash, bool* found) const final;
-	virtual E::SignalType signalType(const QString& appSignalId, bool* found) const final;
-
-	virtual QString equipmentToAppSiganlId(const QString& equipmentId) const final;
-
-	// Setpoints
-	//
-	virtual std::vector<std::shared_ptr<Comparator>> setpointsByInputSignalId(const QString& appSignalId) const override;
-
-	// Tags
-	//
-	virtual QStringList tags() const override;
-
-private:
-	AppSignalSetProvider* m_signalSetProvider = nullptr;
-};
 
 //
 // ReportFileTypeParams
@@ -108,19 +56,11 @@ enum class ReportSchemaCompareAction
 class ReportSchemaView : public VFrame30::SchemaView
 {
 public:
-	ReportSchemaView(AppSignalSetProvider* signalSetProvider);
-
+	ReportSchemaView();
 	virtual ~ReportSchemaView();
 
 	void adjust(QPainter* painter, double startX, double startY, double zoom) const;
-
 	void drawCompareOutlines(VFrame30::CDrawParam* drawParam, const QRectF& clipRect, const std::map<QUuid, ReportSchemaCompareAction>& compareActions);
-
-	VFrame30::AppSignalController* appSignalController();
-
-private:
-	ReportSchemaAppSignalProvider m_appSignalProvider;
-	VFrame30::AppSignalController m_appSignalController;
 };
 
 //
@@ -278,7 +218,8 @@ struct ReportMarginItem
 class ReportGenerator : public QObject
 {
 public:
-	ReportGenerator(ReportSchemaView* schemaView);
+	ReportGenerator(std::shared_ptr<ReportSchemaView> schemaView,
+					const AppSignalSet *signalSet);
 
 public:
 	QPageLayout pageLayout() const;
@@ -308,7 +249,7 @@ protected:
 					 QPainter* painter,
 					 std::shared_ptr<VFrame30::Schema> schema,
 					 std::optional<const QTextDocument* const> textDocument,
-					 std::optional<const std::map<QUuid, ReportSchemaCompareAction>* const> compareActions) const;
+					 std::optional<const std::map<QUuid, ReportSchemaCompareAction>* const> compareActions);
 
 	// Formatting functions
 
@@ -334,13 +275,18 @@ private:
 	int m_pageResolution = 600;
 
 	std::vector<ReportMarginItem> m_marginItems;
-	ReportSchemaView* m_schemaView = nullptr;
+	std::shared_ptr<ReportSchemaView> m_schemaView;
 
 	QTextCharFormat m_currentCharFormat;
 	QTextBlockFormat m_currentBlockFormat;
 
 	QTextCharFormat m_currentCharFormatSaved;
 	QTextBlockFormat m_currentBlockFormatSaved;
+
+private:
+	ReportAppSignalProvider m_appSignalProvider;
+	VFrame30::AppSignalController m_appSignalController;
+
 };
 
 class SchemasReportGenerator : public ReportGenerator
@@ -348,16 +294,17 @@ class SchemasReportGenerator : public ReportGenerator
 	Q_OBJECT
 
 public:
-	SchemasReportGenerator(ReportSchemaView* schemaView,
-						const QString& serverIp,
-						int serverPort,
-						const QString& serverUserName,
-						const QString& serverPassword,
-						const QString& projectName,
-						const QString& userName,
-						const QString& userPassword,
-						std::vector<DbFileInfo> files,
-						const QString& filePath);
+	SchemasReportGenerator(std::shared_ptr<ReportSchemaView> schemaView,
+						   const AppSignalSet* signalSet,
+						   const QString& serverIp,
+						   int serverPort,
+						   const QString& serverUserName,
+						   const QString& serverPassword,
+						   const QString& projectName,
+						   const QString& userName,
+						   const QString& userPassword,
+						   std::vector<DbFileInfo> files,
+						   const QString& filePath);
 
 	virtual ~SchemasReportGenerator();
 
@@ -471,3 +418,4 @@ private:
 	QString m_currentSchemaId;
 
 };
+}

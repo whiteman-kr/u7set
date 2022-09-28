@@ -131,7 +131,7 @@ protected:
 	// For updating schema in timerEvent during build
 	//
 	int m_updateDuringBuildTimer = -1;
-	Builder::BuildIssues::Counter m_lastSchemaIssues = {-1, -1};
+	::Builder::BuildIssues::Counter m_lastSchemaIssues = {-1, -1};
 
 	// Temporary data can be changed in EditSchemaWidget
 	//

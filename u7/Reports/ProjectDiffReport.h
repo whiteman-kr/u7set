@@ -4,9 +4,9 @@
 
 #include "GlobalMessanger.h"
 #include "../HardwareLib/DeviceObject.h"
-#include "../VFrame30/Schema.h"
-#include "../VFrame30/SchemaView.h"
 #include "../DbLib/DbController.h"
+
+using namespace Builder;
 
 //
 // FileDiff
@@ -99,7 +99,7 @@ public:
 					const QString& projectName,
 					const QString& userName,
 					const QString& userPassword,
-					AppSignalSetProvider* appSignalProvider,
+					const AppSignalSet *signalSet,
 					QWidget* parent);
 
 };
@@ -114,11 +114,12 @@ class ProjectDiffGenerator : public ReportGenerator
 
 public:
 	ProjectDiffGenerator(const QString& fileName,
-					  const ProjectDiffReportParams& settings,
-					  ReportSchemaView* schemaView,
-					  const QString& projectName,
-					  const QString& userName,
-					  const QString& userPassword);
+						 const ProjectDiffReportParams& settings,
+						 std::shared_ptr<ReportSchemaView> schemaView,
+						 const AppSignalSet* signalSet,
+						 const QString& projectName,
+						 const QString& userName,
+						 const QString& userPassword);
 	virtual ~ProjectDiffGenerator();
 
 	static std::vector<ReportFileTypeParams> defaultFileTypeParams(DbController* db);
