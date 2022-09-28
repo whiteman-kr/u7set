@@ -961,6 +961,53 @@ namespace Builder
 			return false;
 		}
 
+		// Script comments
+		//
+		BuildInfo&& b = m_context->m_buildResultWriter->buildInfo();
+
+		QString commStartWindows = "@rem ";
+		QString commStartLinux = "# ";
+
+		QStringList scriptHeader;
+		scriptHeader.append("Project: " + b.project);
+		scriptHeader.append("BuildNo: " + QString::number(b.id));
+		scriptHeader.append("Date: " + b.dateStr());
+		scriptHeader.append("Changeset: " + QString::number(b.changeset));
+		scriptHeader.append("User: " + b.user);
+		scriptHeader.append("Workstation: " + b.workstation + "\n");
+		scriptHeader.append("Simulator profiles: " + m_context->m_simProfiles.profiles().join(' ') + "\n");
+
+		QStringList windowsScript;
+		QStringList linuxScript;
+
+		for (const QString& c: scriptHeader)
+		{
+			windowsScript.push_back(commStartWindows + c);
+		}
+
+		for (const QString& c: scriptHeader)
+		{
+			linuxScript.push_back(commStartLinux + c);
+		}
+
+		QStringList windowsScriptEnd;
+		windowsScriptEnd.append("\n@pause");
+		windowsScriptEnd.append("@exit /b 0");
+		windowsScriptEnd.append("\n:ERROR");
+		windowsScriptEnd.append("@echo Script execution error!");
+		windowsScriptEnd.append("@pause");
+		windowsScriptEnd.append("@exit /b 1");
+
+		QStringList linuxScriptEnd;
+		int todo_linux_scriptend = 1;
+		/*linuxScriptEnd.append("\n@pause");
+		linuxScriptEnd.append("@exit /b 0");
+		linuxScriptEnd.append("\n:ERROR");
+		linuxScriptEnd.append("@echo Script execution error!");
+		linuxScriptEnd.append("@pause");
+		linuxScriptEnd.append("@exit /b 1");*/
+
+
 		// --
 		//
 		const std::map<int, std::shared_ptr<DbFileInfo>>& files = fileTree.files();
@@ -1012,69 +1059,50 @@ namespace Builder
 						.arg(buildDir)
 						.arg(Directory::TESTS + fileTree.filePath(fileId));
 
-				BuildInfo&& b = m_context->m_buildResultWriter->buildInfo();
-
-				QString commStartWindows = "@rem ";
-				QString commStartLinux = "# ";
-
-				QStringList commentsList;
-
-				commentsList.append("Project: " + b.project + "\n");
-				commentsList.append("BuildNo: " + QString::number(b.id) + "\n");
-				commentsList.append("Date: " + b.dateStr() + "\n");
-				commentsList.append("Changeset: " + QString::number(b.changeset) + "\n");
-				commentsList.append("User: " + b.user + "\n");
-				commentsList.append("Workstation: " + b.workstation + "\n\n");
-				commentsList.append("Simulator profiles: " + m_context->m_simProfiles.profiles().join(' ') + "\n\n");
-
-
 				// Windows script
 				//
-				QString commentsWindows;
-
-				for (const QString& c: commentsList)
-				{
-					commentsWindows += commStartWindows + c;
-				}
-
-				// Linux script
-				//
-				QString commentsLinux;
-
-				for (const QString& c: commentsList)
-				{
-					commentsLinux += commStartLinux + c;
-				}
-
-				QString runScriptWindows = commentsWindows + tr("SimulatorConsole.exe -build=%1 -script=%2 -profile=Default")
+				QString runScriptWindows = tr("SimulatorConsole.exe -build=%1 -script=%2 -profile=Default\n"
+											  "@if ERRORLEVEL 1 goto ERROR")
 						.arg(QDir::toNativeSeparators(buildDir))
 						.arg(QDir::toNativeSeparators(scriptDir + "/" + file->fileName()));
 
-				QString runScriptLinux = commentsLinux + tr("./SimulatorConsole -build=%1 -script=%2 -profile=Default")
+				windowsScript.push_back(runScriptWindows);
+
+				// Linux script
+				//
+				int todo_check_linux=1;
+				QString runScriptLinux = tr("./SimulatorConsole -build=%1 -script=%2 -profile=Default\n"
+											"#if ERRORLEVEL 1 goto ERROR")
 						.arg(buildDir)
 						.arg(scriptDir + "/" + file->fileName());
 
-				// Add script files
-				//
-				buildFile = m_context->m_buildResultWriter->addFile(Directory::TESTS + fileTree.filePath(fileId), scriptFileName + "bat", runScriptWindows, false);
-				if (buildFile == nullptr)
-				{
-					Q_ASSERT(buildFile);
-					return false;
-				}
-
-				buildFile = m_context->m_buildResultWriter->addFile(Directory::TESTS + fileTree.filePath(fileId), scriptFileName + "sh", runScriptLinux, false);
-				if (buildFile == nullptr)
-				{
-					Q_ASSERT(buildFile);
-					return false;
-				}
+				linuxScript.push_back(runScriptLinux);
 			}
 			else
 			{
 				m_context->m_log->errPDB2002(fileInfo->fileId(), fileInfo->fileName(), m_context->m_db.lastError());
 				return false;
 			}
+		}
+
+
+		// Add script files
+		//
+		windowsScript.append(windowsScriptEnd);
+		linuxScript.append(linuxScriptEnd);
+
+		BuildFile* buildFile = m_context->m_buildResultWriter->addFile(Directory::TESTS, "RunAllProjectTests.bat", windowsScript.join('\n'), false);
+		if (buildFile == nullptr)
+		{
+			Q_ASSERT(buildFile);
+			return false;
+		}
+
+		buildFile = m_context->m_buildResultWriter->addFile(Directory::TESTS, "RunAllProjectTests.sh", linuxScript.join('\n'), false);
+		if (buildFile == nullptr)
+		{
+			Q_ASSERT(buildFile);
+			return false;
 		}
 
 		return true;
