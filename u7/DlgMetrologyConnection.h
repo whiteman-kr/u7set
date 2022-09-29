@@ -20,8 +20,8 @@
 #include <QPushButton>
 #include <QDialogButtonBox>
 
-#include "../Builder/AppSignalSetProvider.h"
-#include "../Builder/DbMetrologyConnection.h"
+#include "AppSignalSetProvider.h"
+#include "DbMetrologyConnection.h"
 #include "../AppSignalLib/AppSignal.h"
 #include "../lib/StandardColors.h"
 
@@ -61,7 +61,7 @@ public:
 
 public:
 
-	void setSignalSetProvider(AppSignalSetProvider* signalSetProvider);
+	void setSignalSetProvider(AppSignalSetProvider* provider);
 
 	int	connectionCount() const;
 	Metrology::Connection at(int index) const;
@@ -158,6 +158,8 @@ public:
 	//
 	//
 	bool createConnectionBySignal(AppSignal* pSignal);
+
+	void findSignal_in_signalSet();
 
 private:
 

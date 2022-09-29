@@ -31,7 +31,7 @@
 #include "../VFrame30/DrawParam.h"
 #include "../VFrame30/Bus.h"
 #include "../lib/LmDescription.h"
-#include "../Builder/AppSignalSetProvider.h"
+#include "../AppSignalSetProvider.h"
 #include "Forms/ComparePropertyObjectDialog.h"
 #include "Settings.h"
 #include "../lib/Ui/TextEditCompleter.h"

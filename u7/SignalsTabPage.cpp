@@ -4,7 +4,7 @@
 #include "BusStorage.h"
 #include "../DbLib/DbController.h"
 #include "../Builder/AppSignalProperties.h"
-#include "../Builder/AppSignalSetProvider.h"
+#include "AppSignalSetProvider.h"
 #include "../lib/WidgetUtils.h"
 #include "../lib/ConstStrings.h"
 #include "../lib/StandardColors.h"

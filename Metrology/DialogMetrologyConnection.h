@@ -42,7 +42,7 @@ public:
 
 public:
 
-	void setTypeID(Metrology::SignalIDType idType) { m_idType = idType; };
+	void setTypeID(Metrology::SignalIDType idType) { m_idType = idType; }
 
 	QString text(int row, int column, const Metrology::Connection& connection) const;
 

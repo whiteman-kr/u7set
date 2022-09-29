@@ -76,7 +76,7 @@ namespace Metrology
 			return false;
 		}
 
-		for(int ioType = 0; ioType < ConnectionIoTypeCount; ioType++)
+		for(int ioType = 0; ioType < CONNECTION_IO_TYPE_COUNT; ioType++)
 		{
 			if (connectionSignal(ioType).isExist() == false)		// signal has not been found in SignalSetProvider
 			{
@@ -95,7 +95,7 @@ namespace Metrology
 
 		m_type = ConnectionType::NoConnectionType;
 
-		for(int ioType = 0; ioType < ConnectionIoTypeCount; ioType++)
+		for(int ioType = 0; ioType < CONNECTION_IO_TYPE_COUNT; ioType++)
 		{
 			m_connectionSignal[ioType].clear();
 		}
@@ -201,7 +201,7 @@ namespace Metrology
 
 	ConnectionSignal Connection::connectionSignal(int ioType) const
 	{
-		if (ioType < 0 || ioType >= ConnectionIoTypeCount)
+		if (ioType < 0 || ioType >= CONNECTION_IO_TYPE_COUNT)
 		{
 			return ConnectionSignal();
 		}
@@ -225,7 +225,7 @@ namespace Metrology
 
 	QString Connection::appSignalID(int ioType) const
 	{
-		if (ioType < 0 || ioType >= ConnectionIoTypeCount)
+		if (ioType < 0 || ioType >= CONNECTION_IO_TYPE_COUNT)
 		{
 			return QString();
 		}
@@ -237,7 +237,7 @@ namespace Metrology
 
 	void Connection::setAppSignalID(int ioType, const QString& appSignalID)
 	{
-		if (ioType < 0 || ioType >= ConnectionIoTypeCount)
+		if (ioType < 0 || ioType >= CONNECTION_IO_TYPE_COUNT)
 		{
 			return;
 		}
@@ -249,7 +249,7 @@ namespace Metrology
 
 	bool Connection::isExist(int ioType) const
 	{
-		if (ioType < 0 || ioType >= ConnectionIoTypeCount)
+		if (ioType < 0 || ioType >= CONNECTION_IO_TYPE_COUNT)
 		{
 			return false;
 		}
@@ -261,7 +261,7 @@ namespace Metrology
 
 	void Connection::setSignal(int ioType, ::AppSignal* pSignal)
 	{
-		if (ioType < 0 || ioType >= ConnectionIoTypeCount)
+		if (ioType < 0 || ioType >= CONNECTION_IO_TYPE_COUNT)
 		{
 			return;
 		}
@@ -285,7 +285,7 @@ namespace Metrology
 
 	void Connection::setSignal(int ioType, Metrology::Signal* pSignal)
 	{
-		if (ioType < 0 || ioType >= ConnectionIoTypeCount)
+		if (ioType < 0 || ioType >= CONNECTION_IO_TYPE_COUNT)
 		{
 			return;
 		}
@@ -315,7 +315,7 @@ namespace Metrology
 
 	Metrology::Signal* Connection::metrologySignal(int ioType) const
 	{
-		if (ioType < 0 || ioType >= ConnectionIoTypeCount)
+		if (ioType < 0 || ioType >= CONNECTION_IO_TYPE_COUNT)
 		{
 			return nullptr;
 		}
@@ -366,7 +366,7 @@ namespace Metrology
 			return false;
 		}
 
-		for(int ioType = 0; ioType < ConnectionIoTypeCount; ioType++)
+		for(int ioType = 0; ioType < CONNECTION_IO_TYPE_COUNT; ioType++)
 		{
 			if (m_connectionSignal[ioType].appSignalID() != connection.m_connectionSignal[ioType].appSignalID())
 			{
@@ -501,7 +501,7 @@ namespace Metrology
 
 	int ConnectionBase::findConnectionIndex(int ioType, Metrology::Signal* pSignal) const
 	{
-		if (ioType < 0 || ioType >= ConnectionIoTypeCount)
+		if (ioType < 0 || ioType >= CONNECTION_IO_TYPE_COUNT)
 		{
 			Q_ASSERT(0);
 			return -1;
@@ -536,7 +536,7 @@ namespace Metrology
 
 	int ConnectionBase::findConnectionIndex(int ioType, ConnectionType connectionType, Metrology::Signal* pSignal) const
 	{
-		if (ioType < 0 || ioType >= ConnectionIoTypeCount)
+		if (ioType < 0 || ioType >= CONNECTION_IO_TYPE_COUNT)
 		{
 			Q_ASSERT(0);
 			return -1;
@@ -628,7 +628,7 @@ namespace Metrology
 
 		for(const Metrology::Connection& connection : m_connectionList)
 		{
-			for(int ioType = 0; ioType < ConnectionIoTypeCount; ioType++)
+			for(int ioType = 0; ioType < CONNECTION_IO_TYPE_COUNT; ioType++)
 			{
 				if (connection.appSignalID(ioType).isEmpty() == true)
 				{
@@ -683,7 +683,7 @@ namespace Metrology
 				}
 			}
 
-			for(int ioType = 0; ioType < ConnectionIoTypeCount; ioType++)
+			for(int ioType = 0; ioType < CONNECTION_IO_TYPE_COUNT; ioType++)
 			{
 				if (connection.appSignalID(ioType).isEmpty() == true)
 				{

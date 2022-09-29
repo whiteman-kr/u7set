@@ -34,7 +34,7 @@ bool IoSignalParam::isValid() const
 	}
 	else
 	{
-		for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType++)		// input and output
+		for(int ioType = 0; ioType < Metrology::CONNECTION_IO_TYPE_COUNT; ioType++)		// input and output
 		{
 			if (m_param[ioType].isValid() == false)
 			{
@@ -56,7 +56,7 @@ void IoSignalParam::clear()
 
 	m_connectionType = Metrology::ConnectionType::NoConnectionType;
 
-	for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType++)
+	for(int ioType = 0; ioType < Metrology::CONNECTION_IO_TYPE_COUNT; ioType++)
 	{
 		m_param[ioType].setAppSignalID(QString());
 	}
@@ -77,7 +77,7 @@ Metrology::SignalParam IoSignalParam::param(int ioType) const
 {
 	QMutexLocker l(&m_mutex);
 
-	if (ioType < 0 || ioType >= Metrology::ConnectionIoTypeCount)
+	if (ioType < 0 || ioType >= Metrology::CONNECTION_IO_TYPE_COUNT)
 	{
 		return Metrology::SignalParam();
 	}
@@ -89,7 +89,7 @@ Metrology::SignalParam IoSignalParam::param(int ioType) const
 
 bool IoSignalParam::setParam(int ioType, const Metrology::SignalParam& param)
 {
-	if (ioType < 0 || ioType >= Metrology::ConnectionIoTypeCount)
+	if (ioType < 0 || ioType >= Metrology::CONNECTION_IO_TYPE_COUNT)
 	{
 		return false;
 	}
@@ -739,7 +739,7 @@ IoSignalParam& IoSignalParam::operator=(const IoSignalParam& from)
 
 	m_connectionType = from.m_connectionType;
 
-	for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType++)
+	for(int ioType = 0; ioType < Metrology::CONNECTION_IO_TYPE_COUNT; ioType++)
 	{
 		m_param[ioType] = from.m_param[ioType];
 	}
@@ -989,7 +989,7 @@ void MeasureSignal::clear()
 
 	m_connectionType = Metrology::ConnectionType::NoConnectionType;
 
-	for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType++)
+	for(int ioType = 0; ioType < Metrology::CONNECTION_IO_TYPE_COUNT; ioType++)
 	{
 		m_signal[ioType].clear();
 	}
@@ -1003,7 +1003,7 @@ bool MeasureSignal::isEmpty() const
 
 	bool empty = true;
 
-	for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType++)
+	for(int ioType = 0; ioType < Metrology::CONNECTION_IO_TYPE_COUNT; ioType++)
 	{
 		if (m_signal[ioType].isEmpty() == false)
 		{
@@ -1024,7 +1024,7 @@ void MeasureSignal::setChannelCount(int count)
 
 	m_channelCount = count;
 
-	for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType++)
+	for(int ioType = 0; ioType < Metrology::CONNECTION_IO_TYPE_COUNT; ioType++)
 	{
 		m_signal[ioType].setSignalCount(count);
 	}
@@ -1034,7 +1034,7 @@ void MeasureSignal::setChannelCount(int count)
 
 MultiChannelSignal MeasureSignal::multiChannelSignal(int ioType) const
 {
-	if (ioType < 0 || ioType >= Metrology::ConnectionIoTypeCount)
+	if (ioType < 0 || ioType >= Metrology::CONNECTION_IO_TYPE_COUNT)
 	{
 		return MultiChannelSignal();
 	}
@@ -1048,7 +1048,7 @@ MultiChannelSignal MeasureSignal::multiChannelSignal(int ioType) const
 
 bool MeasureSignal::setMultiSignal(int ioType, const MultiChannelSignal& signal)
 {
-	if (ioType < 0 || ioType >= Metrology::ConnectionIoTypeCount)
+	if (ioType < 0 || ioType >= Metrology::CONNECTION_IO_TYPE_COUNT)
 	{
 		return false;
 	}
@@ -1064,7 +1064,7 @@ bool MeasureSignal::setMultiSignal(int ioType, const MultiChannelSignal& signal)
 
 Metrology::Signal* MeasureSignal::metrologySignal(int ioType, int channel) const
 {
-	if (ioType < 0 || ioType >= Metrology::ConnectionIoTypeCount)
+	if (ioType < 0 || ioType >= Metrology::CONNECTION_IO_TYPE_COUNT)
 	{
 		return nullptr;
 	}
@@ -1216,7 +1216,7 @@ bool MeasureSignal::contains(Metrology::Signal* pSignal) const
 
 	for(int ch = 0; ch < m_channelCount; ch++)
 	{
-		for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType++)
+		for(int ioType = 0; ioType < Metrology::CONNECTION_IO_TYPE_COUNT; ioType++)
 		{
 			if (m_signal[ioType].metrologySignal(ch) == pSignal)
 			{
@@ -1245,7 +1245,7 @@ MeasureSignal& MeasureSignal::operator=(const MeasureSignal& from)
 
 	m_channelCount = from.m_channelCount;
 
-	for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType++)
+	for(int ioType = 0; ioType < Metrology::CONNECTION_IO_TYPE_COUNT; ioType++)
 	{
 		m_signal[ioType] = from.m_signal[ioType];
 	}
@@ -2194,7 +2194,7 @@ void SignalBase::initConnectionSignals()
 			continue;
 		}
 
-		for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType++)
+		for(int ioType = 0; ioType < Metrology::CONNECTION_IO_TYPE_COUNT; ioType++)
 		{
 			if (pConnection->appSignalID(ioType).isEmpty() == true)
 			{

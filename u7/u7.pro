@@ -102,6 +102,7 @@ HEADERS  += \
 	../lib/Ui/TextEditCompleter.h \
 	../lib/PropertyTable.h \
 	../Metrology/MetrologyConnection.h \
+	AppSignalSetProvider.h \
 	DlgMetrologyConnection.h \
 	CentralWidget.h \
     CreateProjectDialog.h \
@@ -220,6 +221,7 @@ SOURCES +=\
 	../lib/Ui/TextEditCompleter.cpp \
 	../lib/PropertyTable.cpp \
 	../Metrology/MetrologyConnection.cpp \
+	AppSignalSetProvider.cpp \
     CodeEditor.cpp \
     DbTagsEditor.cpp \
 	DlgMetrologyConnection.cpp \

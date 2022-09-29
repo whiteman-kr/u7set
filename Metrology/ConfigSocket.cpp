@@ -376,7 +376,7 @@ bool ConfigSocket::readMetrologyConnections(const QByteArray& fileData, int file
 			continue;
 		}
 
-		for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType++)
+		for(int ioType = 0; ioType < Metrology::CONNECTION_IO_TYPE_COUNT; ioType++)
 		{
 			if (connection.appSignalID(ioType).isEmpty() == true)
 			{

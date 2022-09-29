@@ -4,7 +4,7 @@ namespace Metrology
 {
 
 	DbConnectionBase::DbConnectionBase(QObject* parent) :
-	    ConnectionBase(parent)
+		ConnectionBase(parent)
 	{
 	}
 
@@ -20,34 +20,26 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void DbConnectionBase::setSignalSetProvider(AppSignalSetProvider* signalSetProvider)
+	void DbConnectionBase::setDbController(DbController* dbController)
 	{
-		if (signalSetProvider == nullptr)
-		{
-			Q_ASSERT(signalSetProvider);
-			return;
-		}
+		TEST_PTR_RETURN(dbController);
 
-		m_signalSetProvider = signalSetProvider;
+		m_dbController = dbController;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	std::shared_ptr<DbFile> DbConnectionBase::getConnectionFile(DbController* db)
+	std::shared_ptr<DbFile> DbConnectionBase::getConnectionFile()
 	{
-		if (db == nullptr)
-		{
-			Q_ASSERT(db);
-			return nullptr;
-		}
+		TEST_PTR_RETURN_NULLPTR(m_dbController);
 
 		bool result = false;
 
 		std::shared_ptr<DbFile> file;
 		std::vector<DbFileInfo> fileList;
-		int etcFileId = db->systemFileId(DbDir::EtcDir);
+		int etcFileId = m_dbController->systemFileId(DbDir::EtcDir);
 
-		result = db->getFileList(&fileList, etcFileId, CONNECTIONS_FILE_NAME, true, nullptr);
+		result = m_dbController->getFileList(&fileList, etcFileId, CONNECTIONS_FILE_NAME, true, nullptr);
 		if (result == false || fileList.size() != 1)
 		{
 			// if it does not exists, then create a file
@@ -55,20 +47,20 @@ namespace Metrology
 			std::shared_ptr<DbFile> newFile = std::make_shared<DbFile>();
 			newFile->setFileName(CONNECTIONS_FILE_NAME);
 
-			result = db->addFile(newFile, etcFileId, nullptr);
+			result = m_dbController->addFile(newFile, etcFileId, nullptr);
 			if (result == false)
 			{
 				return nullptr;
 			}
 
-			result = db->getFileList(&fileList, etcFileId, CONNECTIONS_FILE_NAME, true, nullptr);
+			result = m_dbController->getFileList(&fileList, etcFileId, CONNECTIONS_FILE_NAME, true, nullptr);
 			if (result == false || fileList.size() != 1)
 			{
 				return nullptr;
 			}
 		}
 
-		result = db->getLatestVersion(fileList[0], &file, nullptr);
+		result = m_dbController->getLatestVersion(fileList[0], &file, nullptr);
 		if (result == false || file == nullptr)
 		{
 			return nullptr;
@@ -81,17 +73,14 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	bool DbConnectionBase::load(DbController* db)
+	bool DbConnectionBase::load()
 	{
-		if (db == nullptr)
-		{
-			Q_ASSERT(db);
-			return false;
-		}
+		TEST_PTR_RETURN_FALSE(m_dbController);
 
 		// open connection file
 		//
-		std::shared_ptr<DbFile> file = getConnectionFile(db);
+		std::shared_ptr<DbFile> file = getConnectionFile();
+
 		if (file == nullptr)
 		{
 			return false;
@@ -105,17 +94,16 @@ namespace Metrology
 
 			// currentUser
 			//
-			if (userId != db->currentUser().userId())
+			if (userId != m_dbController->currentUser().userId())
 			{
 				m_enableEditBase = false;
 			}
 
-			m_userIsAdmin = db->currentUser().isAdminstrator();
+			m_userIsAdmin = m_dbController->currentUser().isAdminstrator();
 
 			// user of file
 			//
-			m_userName = db->username(userId);
-
+			m_userName = m_dbController->username(userId);
 		}
 
 		// read CSV-data from file
@@ -126,7 +114,9 @@ namespace Metrology
 		// load connections from CSV-data
 		//
 		m_connectionMutex.lock();
-			m_connectionList = connectionsFromCsvData(data);
+
+		m_connectionList = connectionsFromCsvData(data);
+
 		m_connectionMutex.unlock();
 
 		return true;
@@ -136,18 +126,7 @@ namespace Metrology
 
 	bool DbConnectionBase::save(bool checkIn, const QString& comment)
 	{
-		if (m_signalSetProvider == nullptr)
-		{
-			Q_ASSERT(m_signalSetProvider);
-			return false;
-		}
-
-		DbController* db = m_signalSetProvider->dbController();
-		if (db == nullptr)
-		{
-			Q_ASSERT(db);
-			return false;
-		}
+		TEST_PTR_RETURN_FALSE(m_dbController);
 
 		// only Admin can do changes if base is Checked Out
 		//
@@ -161,7 +140,8 @@ namespace Metrology
 
 		// open connection file
 		//
-		std::shared_ptr<DbFile> file = getConnectionFile(db);
+		std::shared_ptr<DbFile> file = getConnectionFile();
+
 		if (file == nullptr)
 		{
 			return false;
@@ -190,7 +170,7 @@ namespace Metrology
 
 		// save file to database
 		//
-		if (db->setWorkcopy(file, nullptr) == false)
+		if (m_dbController->setWorkcopy(file, nullptr) == false)
 		{
 			return false;
 		}
@@ -199,7 +179,7 @@ namespace Metrology
 		//
 		if (checkIn == true)
 		{
-			if (db->checkIn(*file, comment, nullptr) == false)
+			if (m_dbController->checkIn(*file, comment, nullptr) == false)
 			{
 				return false;
 			}
@@ -216,22 +196,11 @@ namespace Metrology
 
 	bool DbConnectionBase::checkOut()
 	{
-		if (m_signalSetProvider == nullptr)
-		{
-			Q_ASSERT(m_signalSetProvider);
-			return false;
-		}
-
-		DbController* db = m_signalSetProvider->dbController();
-		if (db == nullptr)
-		{
-			Q_ASSERT(db);
-			return false;
-		}
+		TEST_PTR_RETURN_FALSE(m_dbController);
 
 		// open connection file
 		//
-		std::shared_ptr<DbFile> file = getConnectionFile(db);
+		std::shared_ptr<DbFile> file = getConnectionFile();
 		if (file == nullptr)
 		{
 			return false;
@@ -244,7 +213,7 @@ namespace Metrology
 			return true;
 		}
 
-		bool result = db->checkOut(*file, nullptr);
+		bool result = m_dbController->checkOut(*file, nullptr);
 		return result;
 	}
 
@@ -252,22 +221,11 @@ namespace Metrology
 
 	bool DbConnectionBase::isCheckIn()
 	{
-		if (m_signalSetProvider == nullptr)
-		{
-			Q_ASSERT(m_signalSetProvider);
-			return false;
-		}
-
-		DbController* db = m_signalSetProvider->dbController();
-		if (db == nullptr)
-		{
-			Q_ASSERT(db);
-			return false;
-		}
+		TEST_PTR_RETURN_FALSE(m_dbController);
 
 		// open connection file
 		//
-		std::shared_ptr<DbFile> file = getConnectionFile(db);
+		std::shared_ptr<DbFile> file = getConnectionFile();
 		if (file == nullptr)
 		{
 			return false;
@@ -277,42 +235,6 @@ namespace Metrology
 		//
 		bool result = file->state() == E::VcsState::CheckedIn;
 		return result;
-	}
-
-	// -------------------------------------------------------------------------------------------------------------------
-
-	void DbConnectionBase::findSignal_in_signalSet()
-	{
-		if (m_signalSetProvider == nullptr)
-		{
-			Q_ASSERT(m_signalSetProvider);
-			return;
-		}
-
-		QMutexLocker l(&m_connectionMutex);
-
-		for(Connection& connection : m_connectionList)
-		{
-			// init signals
-			//
-			for(int ioType = 0; ioType < ConnectionIoTypeCount; ioType++)
-			{
-				if (connection.appSignalID(ioType).isEmpty() == true)
-				{
-					continue;
-				}
-
-				::AppSignal* pSignal = m_signalSetProvider->getSignalByStrID(connection.appSignalID(ioType));
-				if (pSignal == nullptr)
-				{
-					continue;
-				}
-
-				m_signalSetProvider->loadSignal(pSignal->ID());
-
-				connection.setSignal(ioType, pSignal);
-			}
-		}
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -370,22 +292,11 @@ namespace Metrology
 
 	Connection DbConnectionBase::connectionFromChekedIn(int restoreID)
 	{
-		if (m_signalSetProvider == nullptr)
-		{
-			Q_ASSERT(m_signalSetProvider);
-			return Connection();
-		}
-
-		DbController* db = m_signalSetProvider->dbController();
-		if (db == nullptr)
-		{
-			Q_ASSERT(db);
-			return Connection();
-		}
+		TEST_PTR_RETURN_VALUE(m_dbController, Connection());
 
 		// file
 		//
-		std::shared_ptr<DbFile> file = getConnectionFile(db);
+		std::shared_ptr<DbFile> file = getConnectionFile();
 		if (file == nullptr)
 		{
 			return Connection();
@@ -394,7 +305,7 @@ namespace Metrology
 		// get last changeset of file
 		//
 		std::vector<DbChangeset> changesetList;
-		db->getFileHistory(*file, &changesetList, nullptr);
+		m_dbController->getFileHistory(*file, &changesetList, nullptr);
 
 		if (changesetList.size() == 0)
 		{
@@ -405,7 +316,8 @@ namespace Metrology
 		//
 		std::shared_ptr<DbFile> fileOut;
 
-		bool result = db->getSpecificCopy(*file, changesetList[0].changeset(), &fileOut, nullptr);
+		bool result = m_dbController->getSpecificCopy(*file, changesetList[0].changeset(), &fileOut, nullptr);
+
 		if (result == false)
 		{
 			return Connection();

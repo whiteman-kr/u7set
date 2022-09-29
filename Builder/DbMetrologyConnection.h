@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AppSignalSetProvider.h"
+
 #include "../DbLib/DbController.h"
 #include "../Metrology/MetrologyConnection.h"
 
@@ -24,19 +24,17 @@ namespace Metrology
 
 		//
 		//
-		void setSignalSetProvider(AppSignalSetProvider* signalSetProvider);
+		void setDbController(DbController* dbController);
 
 		//
 		//
-		std::shared_ptr<DbFile> getConnectionFile(DbController* db);
+		std::shared_ptr<DbFile> getConnectionFile();
 
-		bool load(DbController* db);
+		bool load();
 		bool save(bool checkIn, const QString &comment);
 
 		bool checkOut();
 		bool isCheckIn();
-
-		void findSignal_in_signalSet();
 
 		// resolution on edit
 		//
@@ -58,7 +56,7 @@ namespace Metrology
 
 	private:
 
-		AppSignalSetProvider* m_signalSetProvider = nullptr;
+		DbController* m_dbController = nullptr;
 
 		QString m_userName;
 		bool m_enableEditBase = true;

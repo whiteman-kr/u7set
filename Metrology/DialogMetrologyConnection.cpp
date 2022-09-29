@@ -379,7 +379,7 @@ void DialogMetrologyConnectionItem::selectSignal(int ioType)
 		return;
 	}
 
-	if (ioType < 0 || ioType >= Metrology::ConnectionIoTypeCount)
+	if (ioType < 0 || ioType >= Metrology::CONNECTION_IO_TYPE_COUNT)
 	{
 		return;
 	}
@@ -1267,7 +1267,7 @@ void DialogMetrologyConnection::onImport()
 			}
 		}
 
-		for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType++)
+		for(int ioType = 0; ioType < Metrology::CONNECTION_IO_TYPE_COUNT; ioType++)
 		{
 			if (connection.appSignalID(ioType).isEmpty() == true)
 			{
@@ -1298,7 +1298,7 @@ void DialogMetrologyConnection::onImport()
 			continue;
 		}
 
-		for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType++)
+		for(int ioType = 0; ioType < Metrology::CONNECTION_IO_TYPE_COUNT; ioType++)
 		{
 			Metrology::Signal* pSignal = theSignalBase.signalPtr(pConnection->appSignalID(ioType));
 			if (pSignal == nullptr)

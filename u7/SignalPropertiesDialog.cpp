@@ -7,7 +7,7 @@
 #include "../lib/PropertyEditor.h"
 #include "../DbLib/DbController.h"
 #include "../lib/WidgetUtils.h"
-#include "../Builder/AppSignalSetProvider.h"
+#include "AppSignalSetProvider.h"
 
 
 // Returns vector of pairs,

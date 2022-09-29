@@ -28,15 +28,11 @@ MetrologyConnectionTable::~MetrologyConnectionTable()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MetrologyConnectionTable::setSignalSetProvider(AppSignalSetProvider* signalSetProvider)
+void MetrologyConnectionTable::setSignalSetProvider(AppSignalSetProvider* provider)
 {
-	if (signalSetProvider == nullptr)
-	{
-		Q_ASSERT(signalSetProvider);
-		return;
-	}
+	TEST_PTR_RETURN(provider);
 
-	m_signalSetProvider = signalSetProvider;
+	m_signalSetProvider = provider;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -655,7 +651,7 @@ DialogMetrologyConnection::DialogMetrologyConnection(AppSignalSetProvider* signa
 	}
 
 	m_connectionTable.setSignalSetProvider(m_signalSetProvider);
-	m_connectionBase.setSignalSetProvider(m_signalSetProvider);
+	m_connectionBase.setDbController(m_signalSetProvider->dbController());
 
 	m_isModified = false;
 
@@ -894,21 +890,8 @@ void DialogMetrologyConnection::enableButtonsOnToolBar()
 
 bool DialogMetrologyConnection::loadConnectionBase()
 {
-	if (m_signalSetProvider == nullptr)
-	{
-		Q_ASSERT(m_signalSetProvider);
-		return false;
-	}
+	bool result = m_connectionBase.load();
 
-
-	DbController* db = m_signalSetProvider->dbController();
-	if (db == nullptr)
-	{
-		Q_ASSERT(db);
-		return false;
-	}
-
-	bool result = m_connectionBase.load(db);
 	if (result == false)
 	{
 		QMessageBox::critical(this, m_windowTitle, tr("Error: File of meterology connection %1 is not open!").arg(Metrology::CONNECTIONS_FILE_NAME));
@@ -917,12 +900,47 @@ bool DialogMetrologyConnection::loadConnectionBase()
 
 	m_isModified = false;
 
-	m_connectionBase.findSignal_in_signalSet();
+	findSignal_in_signalSet();
 
 	enableButtonsOnToolBar();
 	updateList();
 
 	return true;
+}
+
+void DialogMetrologyConnection::findSignal_in_signalSet()
+{
+	TEST_PTR_RETURN(m_signalSetProvider);
+
+	int connectionsCount = m_connectionBase.count();
+
+	for(int i = 0; i < connectionsCount; i++)
+	{
+		Metrology::Connection* connection = m_connectionBase.connectionPtr(i);
+
+		TEST_PTR_CONTINUE(connection);
+
+		// init signals
+		//
+		for(int ioType = 0; ioType < Metrology::CONNECTION_IO_TYPE_COUNT; ioType++)
+		{
+			if (connection->appSignalID(ioType).isEmpty() == true)
+			{
+				continue;
+			}
+
+			AppSignal* pSignal = m_signalSetProvider->getSignalByStrID(connection->appSignalID(ioType));
+
+			if (pSignal == nullptr)
+			{
+				continue;
+			}
+
+			m_signalSetProvider->loadSignal(pSignal->ID());
+
+			connection->setSignal(ioType, pSignal);
+		}
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1021,7 +1039,7 @@ void DialogMetrologyConnection::updateList()
 
 			bool found = false;
 
-			for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType++)
+			for(int ioType = 0; ioType < Metrology::CONNECTION_IO_TYPE_COUNT; ioType++)
 			{
 				//if(rx.exactMatch(connection.appSignalID(ioType)) == true)
 				if(rx.match(connection.appSignalID(ioType)).hasMatch() == true)
@@ -1643,7 +1661,7 @@ void DialogMetrologyConnection::importConnections()
 			}
 		}
 
-		for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType++)
+		for(int ioType = 0; ioType < Metrology::CONNECTION_IO_TYPE_COUNT; ioType++)
 		{
 			if (connection.appSignalID(ioType).isEmpty() == true)
 			{
@@ -1676,7 +1694,7 @@ void DialogMetrologyConnection::importConnections()
 			continue;
 		}
 
-		for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType++)
+		for(int ioType = 0; ioType < Metrology::CONNECTION_IO_TYPE_COUNT; ioType++)
 		{
 			AppSignal* pSignal = m_signalSetProvider->getSignalByStrID(pConnection->appSignalID(ioType));
 			if (pSignal == nullptr)

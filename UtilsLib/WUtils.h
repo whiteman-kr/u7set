@@ -18,6 +18,18 @@
 #define ASSERT_FALSE_CONTINUE		Q_ASSERT(false); \
 									continue;
 
+#define TEST_PTR_CONTINUE(ptr)		if (ptr == nullptr) \
+									{	\
+										Q_ASSERT(false);	\
+										continue; \
+									}
+
+#define TEST_PTR_RETURN(ptr)		if (ptr == nullptr) \
+									{	\
+										Q_ASSERT(false);	\
+										return; \
+									}
+
 #define TEST_PTR_RETURN_FALSE(ptr)	if (ptr == nullptr) \
 									{	\
 										Q_ASSERT(false);	\
@@ -29,6 +41,12 @@
 										Q_ASSERT(false);	\
 										return nullptr; \
 									}
+
+#define TEST_PTR_RETURN_VALUE(ptr, value)	if (ptr == nullptr) \
+											{	\
+												Q_ASSERT(false);	\
+												return value; \
+											}
 
 #define TEST_PTR_LOG_RETURN_FALSE(ptr, log)	if (ptr == nullptr) \
 											{	\
@@ -57,18 +75,6 @@
 												LOG_NULLPTR_ERROR(log); \
 												return; \
 											}
-
-#define TEST_PTR_CONTINUE(ptr)		if (ptr == nullptr) \
-									{	\
-										Q_ASSERT(false);	\
-										continue; \
-									}
-
-#define TEST_PTR_RETURN(ptr)		if (ptr == nullptr) \
-									{	\
-										Q_ASSERT(false);	\
-										return; \
-									}
 
 #define DELETE_IF_NOT_NULL(ptr)		if (ptr != nullptr) \
 									{	\

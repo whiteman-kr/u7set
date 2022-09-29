@@ -41,7 +41,7 @@ namespace Metrology
 		Source		= 0,
 		Destination	= 1,
 	};
-	const int ConnectionIoTypeCount = 2;		// count of ...ConnectionIoType elements
+	const int CONNECTION_IO_TYPE_COUNT = 2;		// count of ...ConnectionIoType elements
 
 	#define ERR_METROLOGY_CONNECTION_IO_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= Metrology::ConnectionIoTypeCount)
 
@@ -138,7 +138,7 @@ namespace Metrology
 	private:
 
 		ConnectionType m_type = ConnectionType::NoConnectionType;
-		ConnectionSignal m_connectionSignal[ConnectionIoTypeCount];
+		ConnectionSignal m_connectionSignal[CONNECTION_IO_TYPE_COUNT];
 
 		E::VcsItemAction m_action;
 		int m_restoreID = -1;

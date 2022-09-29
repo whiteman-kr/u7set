@@ -32,7 +32,7 @@ void SelectSignalItem::clear()
 	m_index = -1;
 	m_connectionType = Metrology::ConnectionType::NoConnectionType;
 
-	for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType++)
+	for(int ioType = 0; ioType < Metrology::CONNECTION_IO_TYPE_COUNT; ioType++)
 	{
 		m_signalId[ioType].clear();
 		m_caption[ioType].clear();
@@ -114,7 +114,7 @@ bool SelectSignalItem::set(int index, Metrology::ConnectionType connectionType, 
 
 QString SelectSignalItem::signalId(int ioType) const
 {
-	if (ioType < 0 || ioType >= Metrology::ConnectionIoTypeCount)
+	if (ioType < 0 || ioType >= Metrology::CONNECTION_IO_TYPE_COUNT)
 	{
 		return QString();
 	}
@@ -126,7 +126,7 @@ QString SelectSignalItem::signalId(int ioType) const
 
 void SelectSignalItem::setSignalId(int ioType, const QString& signalId)
 {
-	if (ioType < 0 || ioType >= Metrology::ConnectionIoTypeCount)
+	if (ioType < 0 || ioType >= Metrology::CONNECTION_IO_TYPE_COUNT)
 	{
 		return;
 	}
@@ -138,7 +138,7 @@ void SelectSignalItem::setSignalId(int ioType, const QString& signalId)
 
 QString SelectSignalItem::caption(int ioType) const
 {
-	if (ioType < 0 || ioType >= Metrology::ConnectionIoTypeCount)
+	if (ioType < 0 || ioType >= Metrology::CONNECTION_IO_TYPE_COUNT)
 	{
 		return QString();
 	}
@@ -150,7 +150,7 @@ QString SelectSignalItem::caption(int ioType) const
 
 void SelectSignalItem::setCaption(int ioType, const QString& caption)
 {
-	if (ioType < 0 || ioType >= Metrology::ConnectionIoTypeCount)
+	if (ioType < 0 || ioType >= Metrology::CONNECTION_IO_TYPE_COUNT)
 	{
 		return;
 	}

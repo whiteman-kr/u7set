@@ -69,7 +69,7 @@ bool MeasureThread::setActiveSignalParam(const MeasureSignal& activeSignal, cons
 	{
 		IoSignalParam ioParam;
 
-		for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType ++)
+		for(int ioType = 0; ioType < Metrology::CONNECTION_IO_TYPE_COUNT; ioType ++)
 		{
 			Metrology::Signal* pSignal = activeSignal.multiChannelSignal(ioType).metrologySignal(ch);
 			if (pSignal == nullptr)
@@ -1952,7 +1952,7 @@ void MeasureThread::signalParamChanged(const QString& appSignalID)
 
 	for(IoSignalParam& ioParam : m_activeIoParamList)
 	{
-		for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType ++)
+		for(int ioType = 0; ioType < Metrology::CONNECTION_IO_TYPE_COUNT; ioType ++)
 		{
 			if (ioParam.param(ioType).appSignalID() == appSignalID)
 			{

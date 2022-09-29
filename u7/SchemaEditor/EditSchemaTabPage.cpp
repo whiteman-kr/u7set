@@ -1,5 +1,4 @@
 #include "EditSchemaTabPage.h"
-#include "../Builder/AppSignalSetProvider.h"
 #include "EditSchemaWidget.h"
 #include "CheckInDialog.h"
 

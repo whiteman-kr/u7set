@@ -1,5 +1,5 @@
 #pragma once
-#include "../../Builder/AppSignalSetProvider.h"
+#include "../AppSignalSetProvider.h"
 #include "../../VFrame30/Schema.h"
 #include "../../VFrame30/SchemaView.h"
 #include "../../VFrame30/PosRectImpl.h"

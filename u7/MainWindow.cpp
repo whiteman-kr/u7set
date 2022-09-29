@@ -7,7 +7,7 @@
 #include "../lib/Ui/DialogAbout.h"
 #include "../lib/LogicModuleSet.h"
 #include "../UtilsLib/Ui/UiTools.h"
-#include "../Builder/AppSignalSetProvider.h"
+#include "AppSignalSetProvider.h"
 #include "UserManagementDialog.h"
 #include "ProjectsTabPage.h"
 #include "FilesTabPage.h"

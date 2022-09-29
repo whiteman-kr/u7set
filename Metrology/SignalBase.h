@@ -86,7 +86,7 @@ private:
 	mutable QMutex m_mutex;
 
 	Metrology::ConnectionType m_connectionType = Metrology::ConnectionType::NoConnectionType;
-	Metrology::SignalParam m_param[Metrology::ConnectionIoTypeCount];
+	Metrology::SignalParam m_param[Metrology::CONNECTION_IO_TYPE_COUNT];
 
 	std::shared_ptr<CalibratorManager> m_pCalibratorManager;
 
@@ -179,7 +179,7 @@ private:
 	Metrology::ConnectionType m_connectionType = Metrology::ConnectionType::NoConnectionType;
 
 	int m_channelCount = 0;
-	MultiChannelSignal m_signal[Metrology::ConnectionIoTypeCount];
+	MultiChannelSignal m_signal[Metrology::CONNECTION_IO_TYPE_COUNT];
 };
 
 // ==============================================================================================

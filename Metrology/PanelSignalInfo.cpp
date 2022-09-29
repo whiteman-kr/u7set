@@ -271,7 +271,7 @@ void SignalInfoTable::signalParamChanged(const QString& appSignalID)
 	quint64 signalCount = m_list.size();
 	for(quint64 c = 0; c < signalCount; c ++)
 	{
-		for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType ++)
+		for(int ioType = 0; ioType < Metrology::CONNECTION_IO_TYPE_COUNT; ioType ++)
 		{
 			if (m_list[c].param(ioType).appSignalID() == appSignalID)
 			{
@@ -798,7 +798,7 @@ void PanelSignalInfo::activeSignalChanged(const MeasureSignal& activeSignal)
 	{
 		IoSignalParam ioParam;
 
-		for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType ++)
+		for(int ioType = 0; ioType < Metrology::CONNECTION_IO_TYPE_COUNT; ioType ++)
 		{
 			Metrology::Signal* pSignal = activeSignal.multiChannelSignal(ioType).metrologySignal(c);
 			if (pSignal == nullptr)

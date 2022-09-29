@@ -69,10 +69,9 @@ SOURCES += \
 	../Metrology/UnitsConvertorTable.cpp \
     Builder.cpp \
 	AppSignalProperties.cpp \
-	AppSignalSetProvider.cpp \
+	DbMetrologyConnection.cpp \
     ConnectionStorage.cpp \
     IssueLogger.cpp \
-	DbMetrologyConnection.cpp \
     BuildWorkerThread.cpp \
     BuildResultWriter.cpp \
     Loopbacks.cpp \
@@ -139,7 +138,7 @@ HEADERS += \
 	../Metrology/UnitsConvertorTable.h \
 	Builder.h \
 	AppSignalProperties.h \
-	AppSignalSetProvider.h \
+	DbMetrologyConnection.h \
     ConnectionStorage.h \
     Loopbacks.h \
     ReportAppSignalProvider.h \
@@ -147,7 +146,6 @@ HEADERS += \
     SignalsHeap.h \
     Stable.h \
     IssueLogger.h \
-	DbMetrologyConnection.h \
 	BuildWorkerThread.h \
     BuildResultWriter.h \
     ModuleFirmwareWriter.h \

@@ -1,5 +1,5 @@
 #include "EditSchemaSignalProvider.h"
-#include "../Builder/AppSignalSetProvider.h"
+#include "../AppSignalSetProvider.h"
 
 //
 //
