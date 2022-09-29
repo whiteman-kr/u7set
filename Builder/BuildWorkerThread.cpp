@@ -963,7 +963,7 @@ namespace Builder
 
 		// Script comments
 		//
-		BuildInfo&& b = m_context->m_buildResultWriter->buildInfo();
+        BuildInfo b = m_context->m_buildResultWriter->buildInfo();
 
 		QString commStartWindows = "@rem ";
 		QString commStartLinux = "# ";
@@ -999,14 +999,7 @@ namespace Builder
 		windowsScriptEnd.append("@exit /b 1");
 
 		QStringList linuxScriptEnd;
-		int todo_linux_scriptend = 1;
-		/*linuxScriptEnd.append("\n@pause");
-		linuxScriptEnd.append("@exit /b 0");
-		linuxScriptEnd.append("\n:ERROR");
-		linuxScriptEnd.append("@echo Script execution error!");
-		linuxScriptEnd.append("@pause");
-		linuxScriptEnd.append("@exit /b 1");*/
-
+        linuxScriptEnd.append("exit 0");
 
 		// --
 		//
@@ -1062,7 +1055,7 @@ namespace Builder
 				// Windows script
 				//
 				QString runScriptWindows = tr("SimulatorConsole.exe -build=%1 -script=%2 -profile=Default\n"
-											  "@if ERRORLEVEL 1 goto ERROR")
+                                              "@if %ERRORLEVEL% NEQ 0 goto ERROR")
 						.arg(QDir::toNativeSeparators(buildDir))
 						.arg(QDir::toNativeSeparators(scriptDir + "/" + file->fileName()));
 
@@ -1070,9 +1063,11 @@ namespace Builder
 
 				// Linux script
 				//
-				int todo_check_linux=1;
-				QString runScriptLinux = tr("./SimulatorConsole -build=%1 -script=%2 -profile=Default\n"
-											"#if ERRORLEVEL 1 goto ERROR")
+                QString runScriptLinux = tr("./SimulatorConsole -build=%1 -script=%2 -profile=Default\n"
+                                            "if [ $? -ne 0 ]; then\n"
+                                            "echo \"Script execution failed!\"\n"
+                                            "exit 1\n"
+                                            "fi\n")
 						.arg(buildDir)
 						.arg(scriptDir + "/" + file->fileName());
 
