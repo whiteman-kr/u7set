@@ -80,11 +80,7 @@ namespace Metrology
 		// open connection file
 		//
 		std::shared_ptr<DbFile> file = getConnectionFile();
-
-		if (file == nullptr)
-		{
-			return false;
-		}
+		TEST_PTR_RETURN_FALSE(file);
 
 		//
 		//
@@ -113,11 +109,7 @@ namespace Metrology
 
 		// load connections from CSV-data
 		//
-		m_connectionMutex.lock();
-
 		m_connectionList = connectionsFromCsvData(data);
-
-		m_connectionMutex.unlock();
 
 		return true;
 	}
@@ -141,11 +133,7 @@ namespace Metrology
 		// open connection file
 		//
 		std::shared_ptr<DbFile> file = getConnectionFile();
-
-		if (file == nullptr)
-		{
-			return false;
-		}
+		TEST_PTR_RETURN_FALSE(file);
 
 		// file must be check out, after save
 		//
@@ -201,10 +189,7 @@ namespace Metrology
 		// open connection file
 		//
 		std::shared_ptr<DbFile> file = getConnectionFile();
-		if (file == nullptr)
-		{
-			return false;
-		}
+		TEST_PTR_RETURN_FALSE(file);
 
 		// check out file
 		//
@@ -226,10 +211,7 @@ namespace Metrology
 		// open connection file
 		//
 		std::shared_ptr<DbFile> file = getConnectionFile();
-		if (file == nullptr)
-		{
-			return false;
-		}
+		TEST_PTR_RETURN_FALSE(file);
 
 		// test checked in
 		//
@@ -241,8 +223,6 @@ namespace Metrology
 
 	void DbConnectionBase::setAction(int index, const E::VcsItemAction& type)
 	{
-		QMutexLocker l(&m_connectionMutex);
-
 		if (index < 0 || index >= TO_INT(m_connectionList.size()))
 		{
 			return;
@@ -255,8 +235,6 @@ namespace Metrology
 
 	void DbConnectionBase::removeAllMarked()
 	{
-		QMutexLocker l(&m_connectionMutex);
-
 		auto it = std::remove_if(m_connectionList.begin(), m_connectionList.end(), [](const Connection& connection)
 		{
 			if (connection.action() != E::VcsItemAction::Deleted)
@@ -279,8 +257,6 @@ namespace Metrology
 
 	void DbConnectionBase::updateRestoreIDs()
 	{
-		QMutexLocker l(&m_connectionMutex);
-
 		quint64 connectionCount = m_connectionList.size();
 		for(quint64 index = 0; index < connectionCount; index++)
 		{
@@ -297,10 +273,7 @@ namespace Metrology
 		// file
 		//
 		std::shared_ptr<DbFile> file = getConnectionFile();
-		if (file == nullptr)
-		{
-			return Connection();
-		}
+		TEST_PTR_RETURN_VALUE(file, Connection());
 
 		// get last changeset of file
 		//
@@ -315,9 +288,7 @@ namespace Metrology
 		// read last Checked In file
 		//
 		std::shared_ptr<DbFile> fileOut;
-
 		bool result = m_dbController->getSpecificCopy(*file, changesetList[0].changeset(), &fileOut, nullptr);
-
 		if (result == false)
 		{
 			return Connection();
@@ -364,8 +335,6 @@ namespace Metrology
 		// find and update connection
 		//
 		int connectionIndex = -1;
-
-		QMutexLocker l(&m_connectionMutex);
 
 		quint64 connectionCount = m_connectionList.size();
 		for(quint64 index = 0; index < connectionCount; index++)

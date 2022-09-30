@@ -22,9 +22,6 @@
 
 #include "AppSignalSetProvider.h"
 #include "DbMetrologyConnection.h"
-#include "../AppSignalLib/AppSignal.h"
-#include "../lib/StandardColors.h"
-
 
 // ==============================================================================================
 
@@ -72,7 +69,6 @@ private:
 
 	AppSignalSetProvider* m_signalSetProvider = nullptr;
 
-	mutable QMutex m_connectionMutex;
 	std::vector<Metrology::Connection> m_connectionList;
 
 	int columnCount(const QModelIndex &parent) const override;

@@ -78,7 +78,9 @@ namespace Builder
 				for (int s = 0; s < systemsCount; s++)
 				{
 					Hardware::DeviceObject* pSystem = m_equipment->root()->child(s).get();
-					if (pSystem == nullptr || pSystem->isSystem() == false)
+					TEST_PTR_CONTINUE(pSystem);
+
+					if (pSystem->isSystem() == false)
 					{
 						continue;
 					}
@@ -89,7 +91,9 @@ namespace Builder
 					for (int r = 0; r < racksCount; r++)
 					{
 						Hardware::DeviceObject* pRack = pSystem->child(r).get();
-						if (pRack == nullptr || pRack->isRack() == false)
+						TEST_PTR_CONTINUE(pRack);
+
+						if (pRack->isRack() == false)
 						{
 							continue;
 						}
@@ -228,11 +232,7 @@ namespace Builder
 		// Create and write build file MetrologySignals.xml
 		//
 		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(), File::METROLOGY_ITEMS_XML, CfgFileId::METROLOGY_ITEMS, "",  data);
-
-		if (buildFile == nullptr)
-		{
-			return false;
-		}
+		TEST_PTR_RETURN_FALSE(buildFile);
 
 		// add link to file MetrologySignals.xml in Configuration.xml
 		//
@@ -319,6 +319,9 @@ namespace Builder
 								hasWrongField = true;
 							}
 							break;
+
+						default:
+							Q_ASSERT(false);
 					}
 				}
 			}
@@ -366,10 +369,7 @@ namespace Builder
 		protoMetrologySignalSet.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(data.data()));
 
 		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(), File::METROLOGY_SIGNAL_SET, CfgFileId::METROLOGY_SIGNAL_SET, "",  data);
-		if (buildFile == nullptr)
-		{
-			return false;
-		}
+		TEST_PTR_RETURN_FALSE(buildFile);
 
 		bool result = m_cfgXml->addLinkToFile(buildFile);
 		if (result == false)
@@ -394,7 +394,9 @@ namespace Builder
 
 	void MetrologyCfgGenerator::getSignalLocation(Hardware::DeviceObject* pDeviceObject, Metrology::SignalLocation& l)
 	{
-		if (pDeviceObject == nullptr || pDeviceObject->isRoot() == true)
+		TEST_PTR_RETURN(pDeviceObject);
+
+		if (pDeviceObject->isRoot() == true)
 		{
 			return;
 		}

@@ -28,9 +28,9 @@ namespace Metrology
 		Input_C_Output_F	= 6,
 		Tuning_Output		= 7,
 	};
-	const int ConnectionTypeCount = 8;			// count of ...ConnectionType elements
+	const int CONNECTION_TYPE_COUNT = 8;			// count of ...ConnectionType elements
 
-	#define ERR_METROLOGY_CONNECTION_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= Metrology::ConnectionTypeCount)
+	#define ERR_METROLOGY_CONNECTION_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= Metrology::CONNECTION_TYPE_COUNT)
 
 	QString ConnectionTypeCaption(ConnectionType type);
 
@@ -43,7 +43,7 @@ namespace Metrology
 	};
 	const int CONNECTION_IO_TYPE_COUNT = 2;		// count of ...ConnectionIoType elements
 
-	#define ERR_METROLOGY_CONNECTION_IO_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= Metrology::ConnectionIoTypeCount)
+	#define ERR_METROLOGY_CONNECTION_IO_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= Metrology::CONNECTION_IO_TYPE_COUNT)
 
 	// ==============================================================================================
 
@@ -75,7 +75,6 @@ namespace Metrology
 
 		Metrology::Signal* m_pMetrologySignal = nullptr;	// only for software Metrology
 	};
-
 
 	// ==============================================================================================
 

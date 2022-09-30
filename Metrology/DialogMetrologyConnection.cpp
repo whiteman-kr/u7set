@@ -11,7 +11,6 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-
 QVariant MetrologyConnectionTable::data(const QModelIndex &index, int role) const
 {
 	if (index.isValid() == false)
@@ -272,7 +271,7 @@ void DialogMetrologyConnectionItem::createInterface()
 
 	// fill type list
 	//
-	for (int type = 0; type < Metrology::ConnectionTypeCount; type++)
+	for (int type = 0; type < Metrology::CONNECTION_TYPE_COUNT; type++)
 	{
 		m_pTypeList->addItem(qApp->translate("MetrologyConnection", Metrology::ConnectionTypeCaption(static_cast<Metrology::ConnectionType>(type)).toUtf8()), type);
 	}
@@ -379,7 +378,7 @@ void DialogMetrologyConnectionItem::selectSignal(int ioType)
 		return;
 	}
 
-	if (ioType < 0 || ioType >= Metrology::CONNECTION_IO_TYPE_COUNT)
+	if (ERR_METROLOGY_CONNECTION_IO_TYPE(ioType) == true)
 	{
 		return;
 	}

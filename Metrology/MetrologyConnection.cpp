@@ -25,10 +25,7 @@ namespace Metrology
 
 	void ConnectionSignal::set(::AppSignal* pSignal)
 	{
-		if (pSignal == nullptr)
-		{
-			return;
-		}
+		TEST_PTR_RETURN(pSignal);
 
 		m_appSignalID = pSignal->appSignalID();			// update appSignalID from real signal
 		m_exist = true;									// signal has been found in SignalSetProvider
@@ -40,17 +37,13 @@ namespace Metrology
 
 	void ConnectionSignal::set(Metrology::Signal* pSignal)
 	{
-		if (pSignal == nullptr)
-		{
-			return;
-		}
+		TEST_PTR_RETURN(pSignal);
 
 		Metrology::SignalParam& param = pSignal->param();
 		if (param.isValid() == false)
 		{
 			return;
 		}
-
 
 		m_appSignalID = param.appSignalID();			// update appSignalID from real signal
 		m_exist = true;									// signal has been found in SignalBase
@@ -201,7 +194,7 @@ namespace Metrology
 
 	ConnectionSignal Connection::connectionSignal(int ioType) const
 	{
-		if (ioType < 0 || ioType >= CONNECTION_IO_TYPE_COUNT)
+		if (ERR_METROLOGY_CONNECTION_IO_TYPE(ioType) == true)
 		{
 			return ConnectionSignal();
 		}
@@ -225,7 +218,7 @@ namespace Metrology
 
 	QString Connection::appSignalID(int ioType) const
 	{
-		if (ioType < 0 || ioType >= CONNECTION_IO_TYPE_COUNT)
+		if (ERR_METROLOGY_CONNECTION_IO_TYPE(ioType) == true)
 		{
 			return QString();
 		}
@@ -237,7 +230,7 @@ namespace Metrology
 
 	void Connection::setAppSignalID(int ioType, const QString& appSignalID)
 	{
-		if (ioType < 0 || ioType >= CONNECTION_IO_TYPE_COUNT)
+		if (ERR_METROLOGY_CONNECTION_IO_TYPE(ioType) == true)
 		{
 			return;
 		}
@@ -249,7 +242,7 @@ namespace Metrology
 
 	bool Connection::isExist(int ioType) const
 	{
-		if (ioType < 0 || ioType >= CONNECTION_IO_TYPE_COUNT)
+		if (ERR_METROLOGY_CONNECTION_IO_TYPE(ioType) == true)
 		{
 			return false;
 		}
@@ -261,17 +254,14 @@ namespace Metrology
 
 	void Connection::setSignal(int ioType, ::AppSignal* pSignal)
 	{
-		if (ioType < 0 || ioType >= CONNECTION_IO_TYPE_COUNT)
+		if (ERR_METROLOGY_CONNECTION_IO_TYPE(ioType) == true)
 		{
 			return;
 		}
 
 		m_connectionSignal[ioType].clear();
 
-		if (pSignal == nullptr)
-		{
-			return;
-		}
+		TEST_PTR_RETURN(pSignal);
 
 		if (signalIsOk(*pSignal) == false)
 		{
@@ -285,17 +275,14 @@ namespace Metrology
 
 	void Connection::setSignal(int ioType, Metrology::Signal* pSignal)
 	{
-		if (ioType < 0 || ioType >= CONNECTION_IO_TYPE_COUNT)
+		if (ERR_METROLOGY_CONNECTION_IO_TYPE(ioType) == true)
 		{
 			return;
 		}
 
 		m_connectionSignal[ioType].clear();
 
-		if (pSignal == nullptr)
-		{
-			return;
-		}
+		TEST_PTR_RETURN(pSignal);
 
 		Metrology::SignalParam& param = pSignal->param();
 		if (param.isValid() == false)
@@ -315,7 +302,7 @@ namespace Metrology
 
 	Metrology::Signal* Connection::metrologySignal(int ioType) const
 	{
-		if (ioType < 0 || ioType >= CONNECTION_IO_TYPE_COUNT)
+		if (ERR_METROLOGY_CONNECTION_IO_TYPE(ioType) == true)
 		{
 			return nullptr;
 		}
@@ -501,17 +488,13 @@ namespace Metrology
 
 	int ConnectionBase::findConnectionIndex(int ioType, Metrology::Signal* pSignal) const
 	{
-		if (ioType < 0 || ioType >= CONNECTION_IO_TYPE_COUNT)
+		if (ERR_METROLOGY_CONNECTION_IO_TYPE(ioType) == true)
 		{
 			Q_ASSERT(0);
 			return -1;
 		}
 
-		if (pSignal == nullptr)
-		{
-			Q_ASSERT(0);
-			return -1;
-		}
+		TEST_PTR_RETURN_VALUE(pSignal, -1);
 
 		auto it = std::find_if(begin(m_connectionList), end(m_connectionList), [=](const Connection& connection)
 		{
@@ -536,7 +519,7 @@ namespace Metrology
 
 	int ConnectionBase::findConnectionIndex(int ioType, ConnectionType connectionType, Metrology::Signal* pSignal) const
 	{
-		if (ioType < 0 || ioType >= CONNECTION_IO_TYPE_COUNT)
+		if (ERR_METROLOGY_CONNECTION_IO_TYPE(ioType) == true)
 		{
 			Q_ASSERT(0);
 			return -1;
@@ -548,11 +531,7 @@ namespace Metrology
 			return -1;
 		}
 
-		if (pSignal == nullptr)
-		{
-			Q_ASSERT(0);
-			return -1;
-		}
+		TEST_PTR_RETURN_VALUE(pSignal, -1);
 
 		auto it = std::find_if(begin(m_connectionList), end(m_connectionList), [=](const Connection& connection)
 		{
@@ -609,7 +588,9 @@ namespace Metrology
 			}
 
 			Metrology::Signal* pDestSignal = connection.metrologySignal(ConnectionIoType::Destination);
-			if (pDestSignal == nullptr || pDestSignal->param().isValid() == false)
+			TEST_PTR_CONTINUE(pDestSignal);
+
+			if (pDestSignal->param().isValid() == false)
 			{
 				continue;
 			}

@@ -77,7 +77,7 @@ Metrology::SignalParam IoSignalParam::param(int ioType) const
 {
 	QMutexLocker l(&m_mutex);
 
-	if (ioType < 0 || ioType >= Metrology::CONNECTION_IO_TYPE_COUNT)
+	if (ERR_METROLOGY_CONNECTION_IO_TYPE(ioType) == true)
 	{
 		return Metrology::SignalParam();
 	}
@@ -89,7 +89,7 @@ Metrology::SignalParam IoSignalParam::param(int ioType) const
 
 bool IoSignalParam::setParam(int ioType, const Metrology::SignalParam& param)
 {
-	if (ioType < 0 || ioType >= Metrology::CONNECTION_IO_TYPE_COUNT)
+	if (ERR_METROLOGY_CONNECTION_IO_TYPE(ioType) == true)
 	{
 		return false;
 	}
@@ -1034,7 +1034,7 @@ void MeasureSignal::setChannelCount(int count)
 
 MultiChannelSignal MeasureSignal::multiChannelSignal(int ioType) const
 {
-	if (ioType < 0 || ioType >= Metrology::CONNECTION_IO_TYPE_COUNT)
+	if (ERR_METROLOGY_CONNECTION_IO_TYPE(ioType) == true)
 	{
 		return MultiChannelSignal();
 	}
@@ -1048,7 +1048,7 @@ MultiChannelSignal MeasureSignal::multiChannelSignal(int ioType) const
 
 bool MeasureSignal::setMultiSignal(int ioType, const MultiChannelSignal& signal)
 {
-	if (ioType < 0 || ioType >= Metrology::CONNECTION_IO_TYPE_COUNT)
+	if (ERR_METROLOGY_CONNECTION_IO_TYPE(ioType) == true)
 	{
 		return false;
 	}
@@ -1064,7 +1064,7 @@ bool MeasureSignal::setMultiSignal(int ioType, const MultiChannelSignal& signal)
 
 Metrology::Signal* MeasureSignal::metrologySignal(int ioType, int channel) const
 {
-	if (ioType < 0 || ioType >= Metrology::CONNECTION_IO_TYPE_COUNT)
+	if (ERR_METROLOGY_CONNECTION_IO_TYPE(ioType) == true)
 	{
 		return nullptr;
 	}
