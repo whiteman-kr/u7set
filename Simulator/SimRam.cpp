@@ -808,6 +808,17 @@ namespace Sim
 		return area->setMem(offsetW, sizeW, data);
 	}
 
+	bool Ram::setMem(quint32 offsetW, quint32 sizeW, quint16 data, E::LogicModuleRamAccess access)
+	{
+		RamArea* area = memoryArea(access, offsetW);
+		if (area == nullptr)
+		{
+			return false;
+		}
+
+		return area->setMem(offsetW, sizeW, data);
+	}
+
 	bool Ram::writeBit(quint32 offsetW, quint16 bitNo, quint16 data, E::ByteOrder byteOrder) noexcept
 	{
 		RamArea* area = memoryArea(E::LogicModuleRamAccess::Write, offsetW);

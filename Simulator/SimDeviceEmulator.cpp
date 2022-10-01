@@ -1577,9 +1577,9 @@ namespace Sim
 				//		where each opto port has its own memery area
 				//		BUT OCM has shared memory area for several connections,
 				//		thats why we need to clear just some data.
-				//		Use: m_ram.setMem
+				//		Use: m_ram.setMem(...)
 				//
-				m_ram.setMem(portInfo.rxBufferAbsAddr, portInfo.rxDataSizeW, 0);
+				m_ram.setMem(portInfo.rxBufferAbsAddr, portInfo.rxDataSizeW, 0, E::LogicModuleRamAccess::Read);
 			}
 			else
 			{

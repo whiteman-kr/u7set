@@ -216,6 +216,7 @@ namespace Sim
 
 		bool movMem(quint32 src, quint32 dst, quint32 sizeW);
 		bool setMem(quint32 offsetW, quint32 sizeW, quint16 data);
+		bool setMem(quint32 offsetW, quint32 sizeW, quint16 data, E::LogicModuleRamAccess access);
 
 		bool writeBit(quint32 offsetW, quint16 bitNo, quint16 data, E::ByteOrder byteOrder) noexcept;
 		bool readBit(quint32 offsetW, quint16 bitNo, quint16* data, E::ByteOrder byteOrder, bool applyOverride = true) const noexcept;
