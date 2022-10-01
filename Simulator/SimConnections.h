@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <map>
+#include "../HardwareLib/Connection.h"
 #include "../CommonLib/Hash.h"
 #include "../lib/ConnectionsInfo.h"
 
@@ -18,7 +19,7 @@ namespace Sim
 	//
 	struct ConnectionData
 	{
-		std::vector<char> m_data;				// Raw data from LM memory
+		std::vector<char> m_data;					// Raw data from LM memory
 		std::chrono::microseconds m_sentTime{0};	// When packet was "sent". If 0 then buffer is not valid
 
 		int sizeBytes() const;
@@ -72,7 +73,8 @@ namespace Sim
 						 std::chrono::microseconds timeout,
 						 bool* timeoutHappend);
 
-		QString type() const;
+		QString typeStr() const;
+		Hardware::Connection::Type type() const;
 		const ::ConnectionInfo& connectionInfo() const;
 
 		const std::vector<Sim::ConnectionPortPtr>& ports() const;

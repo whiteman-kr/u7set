@@ -378,7 +378,7 @@ namespace SimProjectTreeItems
 										   const Sim::ConnectionPtr& connection) :
 		BaseTreeItem(parent,
 					 QStringList{} << connection->connectionId()
-								   << connection->type()),
+								   << connection->typeStr()),
 		m_connectionId(connection->connectionId())
 	{
 		setData(0, Qt::UserRole, QVariant(m_connectionId));

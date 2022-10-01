@@ -151,7 +151,7 @@ void SimCommandTest_LM5_LM6::testCommandStartAfb()
 	//
 	try
 	{
-		// No test for run, just for parsing
+		// No test for run
 		//
 	}
 	catch (...)

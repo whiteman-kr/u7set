@@ -1,6 +1,5 @@
 #include "SimRamTests.h"
 #include <QtTest>
-#include "SimOverrideSignals.h"
 #include <algorithm>
 
 
@@ -32,6 +31,32 @@ void SimRamTests::ramAreaCreateTest()
 	return;
 }
 
+void SimRamTests::ramAreaClearTest()
+{
+	// Put some data into area
+	//
+	m_ramArea->writeData<quint16>(SimRamTests::s_ra_offset + 0, 0x4455, E::ByteOrder::BigEndian);
+	m_ramArea->writeData<quint16>(SimRamTests::s_ra_offset + SimRamTests::s_ra_size / 2, 0x2233, E::ByteOrder::BigEndian);
+	m_ramArea->writeData<quint16>(SimRamTests::s_ra_offset + SimRamTests::s_ra_size - 1, 0x1122, E::ByteOrder::BigEndian);
+
+	// Clear area
+	//
+	m_ramArea->clear();
+
+	// Test that area was cleared
+	//
+	for (quint32 i = 0; i < SimRamTests::s_ra_size; i++)
+	{
+		quint16 data = 0xFFFF;
+		bool ok = m_ramArea->readData<quint16>(SimRamTests::s_ra_offset + i, &data, E::ByteOrder::BigEndian, true);
+		QVERIFY(ok == true);
+
+		QCOMPARE(data, 0);
+	}
+
+	return;
+}
+
 void SimRamTests::ramAreaWriteBitTest()
 {
 	const quint32 offsetInArea = 100;
@@ -52,6 +77,26 @@ void SimRamTests::ramAreaWriteBitTest()
 		QVERIFY(ok == true);
 
 		QCOMPARE(readData, data);
+	}
+
+	// Check write the very first and the very last bits
+	//
+	{
+		QCOMPARE(m_ramArea->data()[0], 0);
+
+		ok = m_ramArea->writeBit(s_ra_offset, 15, 1, E::ByteOrder::BigEndian);
+		QVERIFY(ok == true);
+
+		QCOMPARE(m_ramArea->data()[0], static_cast<char>(0x80));
+	}
+
+	{
+		QCOMPARE(m_ramArea->data()[s_ra_size * 2 - 1], 0);
+
+		ok = m_ramArea->writeBit(s_ra_offset + s_ra_size - 1, 0, 1, E::ByteOrder::BigEndian);
+		QVERIFY(ok == true);
+
+		QCOMPARE(m_ramArea->data()[s_ra_size * 2 - 1], 0x01);
 	}
 
 	return;
@@ -101,6 +146,8 @@ void SimRamTests::ramAreaWriteWordTest()
 	ovr.resize(s_ra_size);
 
 	ovr[s_ra_size / 2] = Sim::OverrideRamRecord{0xFFFF, qToBigEndian<quint16>(0x1122)};
+	ovr[s_ra_size / 2 + 1] = Sim::OverrideRamRecord{0xFFFF, qToBigEndian<quint16>(0x3344)};
+
 	m_ramArea->setOverrideData(std::move(ovr));
 
 	ok = m_ramArea->readWord(overrideDataOffset, &data, E::ByteOrder::BigEndian, false);	// Not apply override
@@ -110,6 +157,29 @@ void SimRamTests::ramAreaWriteWordTest()
 	ok = m_ramArea->readWord(overrideDataOffset, &data, E::ByteOrder::BigEndian, true);		// Apply override
 	QVERIFY(ok == true);
 	QCOMPARE(data, 0x1122);
+
+	ok = m_ramArea->readWord(overrideDataOffset + 1, &data, E::ByteOrder::BigEndian, true);		// Apply override
+	QVERIFY(ok == true);
+	QCOMPARE(data, 0x3344);
+
+	// Check after clear
+	//
+	m_ramArea->clear();
+
+	quint32 zbased = s_ra_size / 2;
+	QCOMPARE(m_ramArea->data()[zbased * 2 + 0], 0x11);
+	QCOMPARE(m_ramArea->data()[zbased * 2 + 1], 0x22);
+
+	QCOMPARE(m_ramArea->data()[(zbased + 1) * 2 + 0], 0x33);
+	QCOMPARE(m_ramArea->data()[(zbased + 1) * 2 + 1], 0x44);
+
+	ok = m_ramArea->readWord(overrideDataOffset, &data, E::ByteOrder::BigEndian, true);		// Apply override
+	QVERIFY(ok == true);
+	QCOMPARE(data, 0x1122);
+
+	ok = m_ramArea->readWord(overrideDataOffset + 1, &data, E::ByteOrder::BigEndian, true);		// Apply override
+	QVERIFY(ok == true);
+	QCOMPARE(data, 0x3344);
 
 	// Test errors
 	//
@@ -431,10 +501,38 @@ void SimRamTests::ramReadWriteBuffer()
 	QVERIFY(ok == true);
 	QVERIFY(buffer.size() == 100);
 
-	for (int i = 0; i < buffer.size(); i++)
+	for (size_t i = 0; i < buffer.size(); i++)
 	{
-		QVERIFY(buffer[i] == i);
+		QVERIFY(buffer[i] == static_cast<char>(i));
 	}
+
+	// Check close to area begin
+	//
+	std::vector<char> smallBuffer{0x11, 0x22, 0x33, 0x44, 0x55, 0x66};
+	QByteArray smallBufferQt = QByteArray::fromRawData(smallBuffer.data(), smallBuffer.size());
+
+	m_ramArea->writeBuffer(s_ra_offset, smallBufferQt);
+	m_ramArea->writeBuffer(s_ra_offset + s_ra_size - static_cast<quint32>(smallBuffer.size()) / 2, smallBufferQt);
+
+	quint16 d = 0;
+
+	m_ramArea->readData(s_ra_offset + 0, &d, E::ByteOrder::BigEndian, true);
+	QCOMPARE(d, 0x1122);
+
+	m_ramArea->readData(s_ra_offset + 0, &d, E::ByteOrder::BigEndian, true);
+	QCOMPARE(d, 0x1122);
+
+	m_ramArea->readData(s_ra_offset + 1, &d, E::ByteOrder::BigEndian, true);
+	QCOMPARE(d, 0x3344);
+
+	m_ramArea->readData(s_ra_offset + s_ra_size - 3, &d, E::ByteOrder::BigEndian, true);
+	QCOMPARE(d, 0x1122);
+
+	m_ramArea->readData(s_ra_offset + s_ra_size - 2, &d, E::ByteOrder::BigEndian, true);
+	QCOMPARE(d, 0x3344);
+
+	m_ramArea->readData(s_ra_offset + s_ra_size - 1, &d, E::ByteOrder::BigEndian, true);
+	QCOMPARE(d, 0x5566);
 
 	return;
 }
@@ -499,6 +597,39 @@ void SimRamTests::ramSetMem()
 		quint16 data;
 		ram.readWord(a, &data, E::BigEndian);
 		QCOMPARE(data, 0x0000);
+	}
+
+	// Check close to begin & end
+	//
+	{
+		quint16 data;
+		m_ramArea->setMem(s_ra_offset, 3, 0x1234);
+
+		m_ramArea->readWord(s_ra_offset + 0, &data, E::BigEndian, true);
+		QCOMPARE(data, 0x1234);
+
+		m_ramArea->readWord(s_ra_offset + 1, &data, E::BigEndian, true);
+		QCOMPARE(data, 0x1234);
+
+		m_ramArea->readWord(s_ra_offset + 2, &data, E::BigEndian, true);
+		QCOMPARE(data, 0x1234);
+
+		m_ramArea->readWord(s_ra_offset + 3, &data, E::BigEndian, true);
+		QCOMPARE(data, 0);
+	}
+
+	{
+		quint16 data;
+		m_ramArea->setMem(s_ra_offset + s_ra_size - 3, 3, 0x1234);
+
+		m_ramArea->readWord(s_ra_offset + s_ra_size - 3, &data, E::BigEndian, true);
+		QCOMPARE(data, 0x1234);
+
+		m_ramArea->readWord(s_ra_offset + s_ra_size - 2, &data, E::BigEndian, true);
+		QCOMPARE(data, 0x1234);
+
+		m_ramArea->readWord(s_ra_offset + s_ra_size - 1, &data, E::BigEndian, true);
+		QCOMPARE(data, 0x1234);
 	}
 
 	return;

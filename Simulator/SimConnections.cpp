@@ -138,6 +138,19 @@ namespace Sim
 		data->clear();
 		*timeoutHappend = false;
 
+		// There is no simulation for single port connection yet
+		// may be later will be added some input file of something else
+		// Just return time out
+		//
+		if (m_buildConnection.type == Hardware::Connection::Type::SinglePort)
+		{
+			*timeoutHappend = true;
+			m_timeout = true;
+			return true;
+		}
+
+		Q_ASSERT(m_buildConnection.type == Hardware::Connection::Type::PortToPort);
+
 		switch (portNo)
 		{
 		case 1:
@@ -220,7 +233,12 @@ namespace Sim
 		}
 	}
 
-	QString Connection::type() const
+	QString Connection::typeStr() const
+	{
+		return m_buildConnection.typeStr;
+	}
+
+	Hardware::Connection::Type Connection::type() const
 	{
 		return m_buildConnection.type;
 	}

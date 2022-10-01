@@ -18,6 +18,7 @@ private slots:
 	void cleanup();
 
 	void ramAreaCreateTest();
+	void ramAreaClearTest();
 	void ramAreaWriteBitTest();
 	void ramAreaWriteWordTest();
 	void ramAreaWriteDwordTest();
