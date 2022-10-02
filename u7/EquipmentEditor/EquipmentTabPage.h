@@ -1,13 +1,14 @@
 #pragma once
 
 #include "MainTabPage.h"
-#include "IdePropertyEditor.h"
 #include "GlobalMessanger.h"
 
+
+class IdePropertyEditor;
+class IdePropertyTable;
 class DbController;
 class EquipmentModel;
 class EquipmentView;
-
 
 //
 //
@@ -21,6 +22,8 @@ class EquipmentTabPage : public MainTabPage
 public:
 	EquipmentTabPage(DbController* dbcontroller, QWidget* parent);
 	virtual ~EquipmentTabPage();
+
+	void saveSession() const;
 
 protected:
 	void CreateActions();
@@ -144,5 +147,4 @@ private:
 	IdePropertyEditor* m_propertyEditor = nullptr;
 	IdePropertyTable* m_propertyTable = nullptr;
 };
-
 

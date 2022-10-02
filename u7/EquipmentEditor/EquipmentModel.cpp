@@ -1,7 +1,6 @@
 #include "EquipmentModel.h"
 #include "../../DbLib/DbController.h"
 #include "../../lib/StandardColors.h"
-#include "../GlobalMessanger.h"
 #include "../CheckInDialog.h"
 
 
@@ -32,8 +31,7 @@ EquipmentModel::EquipmentModel(DbController* dbcontroller, QWidget* parentWidget
 
 	m_root = m_configuration;	// Edit configuration default mode
 
-	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &EquipmentModel::projectOpened);
-	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &EquipmentModel::projectClosed);
+	return;
 }
 
 EquipmentModel::~EquipmentModel()
@@ -1148,7 +1146,7 @@ QModelIndex EquipmentModel::findObject(const QModelIndex& findStartIndex, int le
 	}
 
 	// Construct equipmentId according to level
-
+	//
 	QString equipmentId;
 	for (int i = 0; i < level; i++)
 	{
@@ -1160,18 +1158,18 @@ QModelIndex EquipmentModel::findObject(const QModelIndex& findStartIndex, int le
 	}
 
 	// Find an object starting from findStartIndex
-
+	//
 	QModelIndexList foundIndexes = match(findStartIndex, EquipmentModel::EquipmentIdRole, equipmentId, -1, Qt::MatchExactly);
 
 	// If we are at the highest level and result is not empty - return it, search finished
-
+	//
 	if (foundIndexes.empty() == false && level == equipmentIdFragments.size())
 	{
 		return foundIndexes[0];
 	}
 
 	// Otherwise fetch and search recursively child objects
-
+	//
 	for (QModelIndex& foundIndex : foundIndexes)
 	{
 		if (canFetchMore(foundIndex) == true)
@@ -1436,7 +1434,7 @@ void EquipmentModel::sortChildrenByUser(std::shared_ptr<Hardware::DeviceObject> 
 	return;
 }
 
-void EquipmentModel::projectOpened()
+void EquipmentModel::projectOpenedAction()
 {
 	if (dbController()->isProjectOpened() == false)
 	{
@@ -1467,7 +1465,7 @@ void EquipmentModel::projectOpened()
 	return;
 }
 
-void EquipmentModel::projectClosed()
+void EquipmentModel::projectClosedAction()
 {
 	// Release all children
 	//

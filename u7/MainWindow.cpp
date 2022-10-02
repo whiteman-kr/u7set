@@ -284,6 +284,7 @@ bool MainWindow::preCloseConditions()
 		// Save opened schema list so it can be restored on next project open event
 		//
 		m_schemaTabPage->saveSession();
+		m_equipmentTab->saveSession();
 	}
 
 	return satisfies;

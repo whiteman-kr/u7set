@@ -2,6 +2,7 @@
 #include "EquipmentModel.h"
 #include "EquipmentView.h"
 #include "EquipmentVcsDialog.h"
+#include "IdePropertyEditor.h"
 #include "../Settings.h"
 #include "../DialogConnections.h"
 #include "../Forms/ComparePropertyObjectDialog.h"
@@ -186,6 +187,12 @@ EquipmentTabPage::~EquipmentTabPage()
 	s.setValue("EquipmentTabPage/m_propertyTable/getColumnsWidth", QVariant::fromValue(m_propertyTable->getColumnsWidth()));
 	s.setValue("EquipmentTabPage/m_propertyTable/groupByCategory", m_propertyTable->groupByCategory());
 
+	return;
+}
+
+void EquipmentTabPage::saveSession() const
+{
+	m_equipmentView->saveSession();
 	return;
 }
 
@@ -377,7 +384,7 @@ void EquipmentTabPage::CreateActions()
 	m_findAction->setStatusTip(tr("Find object by EquipmentID"));
 	m_findAction->setShortcut(QKeySequence::Find);
 	m_findAction->setObjectName("I_am_a_Find_Action");
-	connect(m_findAction, &QAction::triggered, m_equipmentView, &EquipmentView::findObject);
+	connect(m_findAction, &QAction::triggered, m_equipmentView, qOverload<>(&EquipmentView::findObject));
 
 	//-----------------------------------
 

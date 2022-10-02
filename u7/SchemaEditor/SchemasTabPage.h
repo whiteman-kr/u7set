@@ -29,6 +29,9 @@ public:
 
 	void refreshControlTabPage();
 
+protected:
+	void showEvent(QShowEvent* event) override;
+
 public slots:
 	void projectOpened();
 	void projectClosed();
@@ -47,5 +50,9 @@ protected:
 	QString m_templFileExtension;
 
 	QAction* m_showControlTabAccelerator = nullptr;
+
+	// Postpone restore session to showEvent()
+	//
+	bool m_requireRestoreSession = false;
 };
 

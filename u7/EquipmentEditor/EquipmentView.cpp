@@ -5,13 +5,12 @@
 #include "DialogChoosePreset.h"
 #include "../GlobalMessanger.h"
 #include "../DialogConnections.h"
-#include "../Settings.h"
 #include "../Forms/FileHistoryDialog.h"
 #include "../Forms/CompareDialog.h"
 #include "../Forms/DialogUpdateFromPreset.h"
 #include "../SchemaEditor/CreateSignalDialog.h"
 #include "../SignalsTabPage.h"
-#include "../UtilsLib/Ui/UiTools.h"
+
 
 //
 //
@@ -34,6 +33,9 @@ EquipmentView::EquipmentView(DbController* dbcontroller) :
 
 	sortByColumn(EquipmentModel::Columns::ObjectPlaceColumn, Qt::SortOrder::AscendingOrder);
 
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &EquipmentView::projectOpened, Qt::QueuedConnection);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &EquipmentView::projectClosed, Qt::QueuedConnection);
+
 	return;
 }
 
@@ -54,6 +56,97 @@ bool EquipmentView::isConfigurationMode() const
 DbController* EquipmentView::db()
 {
 	return m_dbController;
+}
+
+const DbController* EquipmentView::db() const
+{
+	return m_dbController;
+}
+
+void EquipmentView::saveSession() const
+{
+	// Save all opened schamas
+	//
+	if (db()->isProjectOpened() == false)
+	{
+		Q_ASSERT(db()->isProjectOpened());
+		return;
+	}
+
+	// Save new session data, data saved to settings, for each project separately
+	//
+	QString equipmentId;
+	QModelIndexList selected = selectionModel()->selectedRows();
+
+	if (selected.empty() == false)
+	{
+		auto firstDevice = equipmentModel()->deviceObject(selected.first());
+		Q_ASSERT(firstDevice);
+
+		equipmentId = firstDevice->equipmentId();
+	}
+
+	// --
+	//
+	QSettings settings;
+	QString keyDir = QString("Session/%1-%2/EquipmentEditor/")
+					 .arg(db()->currentProject().projectName())
+					 .arg(db()->currentUser().username());
+
+	if (equipmentId.isEmpty() == false)
+	{
+		settings.setValue(keyDir + "Selected", equipmentId);
+	}
+
+	return;
+}
+
+void EquipmentView::restoreSession()
+{
+	m_requireRestoreSession = false;
+
+	// Restore session
+	//
+	if (db()->isProjectOpened() == false)
+	{
+		Q_ASSERT(db()->isProjectOpened());
+		return;
+	}
+
+	QSettings settings;
+	QString keyDir = QString("Session/%1-%2/EquipmentEditor/")
+					 .arg(db()->currentProject().projectName())
+					 .arg(db()->currentUser().username());
+
+	QString equipmentId = settings.value(keyDir + "Selected").toString();
+
+	if (equipmentId.isEmpty() == false)
+	{
+		findObject(equipmentId);
+	}
+
+	return;
+}
+
+
+void EquipmentView::projectOpened()
+{
+	equipmentModel()->projectOpenedAction();
+
+	setExpanded(QModelIndex{}, true);
+
+	m_requireRestoreSession = true;
+
+	return;
+}
+
+void EquipmentView::projectClosed()
+{
+	equipmentModel()->projectClosedAction();
+
+	m_requireRestoreSession = false;
+
+	return;
 }
 
 void EquipmentView::addSystem()
@@ -1697,7 +1790,6 @@ void EquipmentView::copySelectedDevices()
 	QByteArray ba(dataString.data(), static_cast<int>(dataString.size()));
 	QByteArray descrba(descriptionDataString.data(), static_cast<int>(descriptionDataString.size()));
 
-
 	if (ba.isEmpty() == false &&
 		descrba.isEmpty() == false)
 	{
@@ -2037,9 +2129,20 @@ void EquipmentView::findObject()
 
 	} while(text.isEmpty() == true);
 
-	findText = text;
-	QStringList equipmentIdFragments = findText.split('_');
+	// --
+	//
+	bool found = findObject(text);
+	if (found == false)
+	{
+		QMessageBox::information(this, qAppName(), tr("Object %1 not found.").arg(findText));
+	}
 
+	return;
+}
+
+bool EquipmentView::findObject(QString equipmentId)
+{
+	QStringList equipmentIdFragments = equipmentId.split('_');
 	QModelIndex findIndex = equipmentModel()->findObject(equipmentModel()->index(0, 0, QModelIndex()), 1/*level*/, equipmentIdFragments);
 
 	if (findIndex.isValid() == true)
@@ -2047,12 +2150,8 @@ void EquipmentView::findObject()
 		selectionModel()->clearSelection();
 		selectionModel()->setCurrentIndex(findIndex, QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
 	}
-	else
-	{
-		QMessageBox::information(this, qAppName(), tr("Object %1 not found.").arg(findText));
-	}
 
-	return;
+	return findIndex.isValid();
 }
 
 void EquipmentView::deleteSelectedDevices()
@@ -2853,6 +2952,18 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 	}
 
 	return true;
+}
+
+void EquipmentView::showEvent(QShowEvent* event)
+{
+	QTreeView::showEvent(event);
+
+	if (m_requireRestoreSession == true)
+	{
+		restoreSession();
+	}
+
+	return;
 }
 
 void EquipmentView::focusInEvent(QFocusEvent* /*event*/)
