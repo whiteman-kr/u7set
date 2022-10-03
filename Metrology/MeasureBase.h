@@ -12,14 +12,14 @@ namespace Measure
 
 	enum Type
 	{
-		NoMeasureType	= -1,
-		Linearity		= 0,
-		Comparators		= 1,
+		NoMeasureType = -1,
+		Linearity = 0,
+		Comparators = 1,
 	};
 
-	const int TypeCount	= 2;
+	const int TYPE_COUNT = 2;
 
-	#define ERR_MEASURE_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= Measure::TypeCount)
+	#define ERR_MEASURE_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= Measure::TYPE_COUNT)
 
 	QString TypeCaption(Measure::Type measureType);
 
@@ -27,16 +27,16 @@ namespace Measure
 
 	enum Kind
 	{
-		NoMeasureKind	= -1,
-		OneRack			= 0,
-		OneModule		= 1,
-		MultiRack		= 2,
-		MultiRack_MC	= 3,
+		NoMeasureKind = -1,
+		OneRack = 0,
+		OneModule = 1,
+		MultiRack = 2,
+		MultiRack_MC = 3,
 	};
 
-	const int KindCount	= 4;
+	const int KIND_COUNT	= 4;
 
-	#define ERR_MEASURE_KIND(kind) (static_cast<int>(kind) < 0 || static_cast<int>(kind) >= Measure::KindCount)
+	#define ERR_MEASURE_KIND(kind) (static_cast<int>(kind) < 0 || static_cast<int>(kind) >= Measure::KIND_COUNT)
 
 	QString KindCaption(Measure::Kind measureKind);
 
@@ -44,14 +44,14 @@ namespace Measure
 
 	enum LimitType
 	{
-		NoLimitType	= -1,
-		Electric	= 0,
-		Engineering	= 1,
+		NoLimitType = -1,
+		Electric = 0,
+		Engineering = 1,
 	};
 
-	const int LimitTypeCount = 2;
+	const int LIMIT_TYPE_COUNT = 2;
 
-	#define ERR_MEASURE_LIMIT_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= Measure::LimitTypeCount)
+	#define ERR_MEASURE_LIMIT_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= Measure::LIMIT_TYPE_COUNT)
 
 	QString LimitTypeCaption(Measure::LimitType limitType);
 
@@ -69,9 +69,9 @@ namespace Measure
 		};
 		Q_ENUM_NS(CalcErrorRange)
 
-		const int CalcErrorRangeCount = 3;
+		const int CALC_ERROR_RANGE_COUNT = 3;
 
-		#define ERR_MEASURE_CALC_ERROR_RANGE(byRange) (static_cast<int>(byRange) < 0 || static_cast<int>(byRange) >= Measure::MT::CalcErrorRangeCount)
+		#define ERR_MEASURE_CALC_ERROR_RANGE(byRange) (static_cast<int>(byRange) < 0 || static_cast<int>(byRange) >= Measure::MT::CALC_ERROR_RANGE_COUNT)
 
 		QString CalcErrorRangeCaption(CalcErrorRange byRange);
 		QString CalcErrorRangeCaptionTr(CalcErrorRange byRange);
@@ -86,9 +86,9 @@ namespace Measure
 		};
 		Q_ENUM_NS(ErrorType)
 
-		const int ErrorTypeCount = 3;
+		const int ERROR_TYPE_COUNT = 3;
 
-		#define ERR_MEASURE_ERROR_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= Measure::MT::ErrorTypeCount)
+		#define ERR_MEASURE_ERROR_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= Measure::MT::ERROR_TYPE_COUNT)
 
 		QString ErrorTypeCaption(ErrorType errorType);
 		QString ErrorTypeCaptionTr(ErrorType errorType);
@@ -98,14 +98,14 @@ namespace Measure
 
 	enum ErrorResult
 	{
-		NoErrorResult	= -1,
-		Ok				= 0,
-		Failed			= 1,
+		NoErrorResult = -1,
+		Ok = 0,
+		Failed = 1,
 	};
 
-	const int ErrorResultCount = 2;
+	const int ERROR_RESULT_COUNT = 2;
 
-	#define ERR_MEASURE_ERROR_RESULT(result) (static_cast<int>(result) < 0 || static_cast<int>(result) >= Measure::ErrorResultCount)
+	#define ERR_MEASURE_ERROR_RESULT(result) (static_cast<int>(result) < 0 || static_cast<int>(result) >= Measure::ERROR_RESULT_COUNT)
 
 	QString ErrorResultCaption(Measure::ErrorResult errorResult);
 
@@ -113,21 +113,21 @@ namespace Measure
 
 	enum AdditionalParam
 	{
-		NoAdditionalParam	= -1,
-		MaxValue			= 0,
-		SystemDeviation		= 1,
-		StandardDeviation	= 2,
-		LowBorder			= 3,
-		HighBorder			= 4,
-		Uncertainty			= 5,
+		NoAdditionalParam = -1,
+		MaxValue = 0,
+		SystemDeviation = 1,
+		StandardDeviation = 2,
+		LowBorder = 3,
+		HighBorder = 4,
+		Uncertainty = 5,
 	};
 
-	const int AdditionalParamCount = 6;
+	const int ADDITIONAL_PARAM_COUNT = 6;
 
 				// now used 6 (1 .. 6)
 				// maximum 16 items (0 .. 15)
 
-	#define ERR_MEASURE_ADDITIONAL_PARAM(param) (static_cast<int>(param) < 0 || static_cast<int>(param) >= Measure::AdditionalParamCount)
+	#define ERR_MEASURE_ADDITIONAL_PARAM(param) (static_cast<int>(param) < 0 || static_cast<int>(param) >= Measure::ADDITIONAL_PARAM_COUNT)
 
 	QString AdditionalParamCaption(Measure::AdditionalParam param);
 
@@ -138,11 +138,11 @@ namespace Measure
 		0, 1, 2, 3, 5, 10, 15, 20, 30, 45, 60,  // default value of seconds
 	};
 
-	const int TimeoutCount = sizeof(Timeout)/sizeof(Timeout[0]);
+	const int TIMEOUT_COUNT = sizeof(Timeout)/sizeof(Timeout[0]);
 
 	// ==============================================================================================
 
-	const int MaxMeasurementInPoint = 20;
+	const int MAX_MEASUREMENT_IN_POINT = 20;
 
 	// ==============================================================================================
 
@@ -294,20 +294,20 @@ namespace Measure
 
 		Metrology::SignalLocation m_location;
 
-		int m_calibratorPrecision = DefaultElectricUnitPrecesion;			// precision of electric range of calibrator
+		int m_calibratorPrecision = DEFAULT_ELECTRIC_UNIT_PRECESION;		// precision of electric range of calibrator
 
-		double m_nominal[LimitTypeCount];
-		double m_measure[LimitTypeCount];
+		double m_nominal[LIMIT_TYPE_COUNT];
+		double m_measure[LIMIT_TYPE_COUNT];
 
-		double m_lowLimit[LimitTypeCount];
-		double m_highLimit[LimitTypeCount];
-		QString m_unit[LimitTypeCount];
-		int m_limitPrecision[LimitTypeCount];
+		double m_lowLimit[LIMIT_TYPE_COUNT];
+		double m_highLimit[LIMIT_TYPE_COUNT];
+		QString m_unit[LIMIT_TYPE_COUNT];
+		int m_limitPrecision[LIMIT_TYPE_COUNT];
 
 		double m_adjustment = 0;
 
-		double m_error[LimitTypeCount][MT::ErrorTypeCount];
-		double m_errorLimit[LimitTypeCount][MT::ErrorTypeCount];
+		double m_error[LIMIT_TYPE_COUNT][MT::ERROR_TYPE_COUNT];
+		double m_errorLimit[LIMIT_TYPE_COUNT][MT::ERROR_TYPE_COUNT];
 
 		QDateTime m_measureTime;											// measure time
 		QString m_calibrator;												// calibrator name and calibrator SN
@@ -369,10 +369,10 @@ namespace Measure
 		double m_percent = 0;
 
 		int m_measureCount = 0;
-		double m_measureArray[LimitTypeCount][MaxMeasurementInPoint];
+		double m_measureArray[LIMIT_TYPE_COUNT][MAX_MEASUREMENT_IN_POINT];
 
 		int	m_additionalParamCount = 0;
-		double m_additionalParam[LimitTypeCount][AdditionalParamCount];
+		double m_additionalParam[LIMIT_TYPE_COUNT][ADDITIONAL_PARAM_COUNT];
 	};
 
 	// ==============================================================================================

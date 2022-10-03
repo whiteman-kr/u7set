@@ -15,9 +15,9 @@ enum ChartType
 	Value20En	= 3,
 };
 
-const int ChartTypeCount = 4;
+const int CHART_TYPE_COUNT = 4;
 
-#define ERR_GRAPH_TYPE_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= ChartTypeCount)
+#define ERR_GRAPH_TYPE_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= CHART_TYPE_COUNT)
 
 // ==============================================================================================
 

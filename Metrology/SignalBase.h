@@ -21,7 +21,7 @@
 //
 // ----------------------------------------------------------------------------------------------
 
-#define						MULTI_TEXT_DEVIDER	"\n"
+#define					MULTI_TEXT_DEVIDER	"\n"
 
 // ----------------------------------------------------------------------------------------------
 
@@ -142,7 +142,7 @@ private:
 // ==============================================================================================
 // class MeasureSignal consists array of two classes MultiChannelSignal: input and output
 //
-// MeasureSignal --- MultiChannelSignal[ConnectionIoType::ioCount] --- Metrology::Signal[Metrology::ChannelCount]
+// MeasureSignal --- MultiChannelSignal[ConnectionIoType::ioCount] --- Metrology::Signal[Metrology::CHANNEL_COUNT]
 //
 class MeasureSignal
 {

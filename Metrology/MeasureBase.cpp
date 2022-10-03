@@ -52,9 +52,9 @@ namespace Measure
 
 		m_location.clear();
 
-		m_calibratorPrecision = DefaultElectricUnitPrecesion;
+		m_calibratorPrecision = DEFAULT_ELECTRIC_UNIT_PRECESION;
 
-		for(int t = 0; t < Measure::LimitTypeCount; t++)
+		for(int t = 0; t < Measure::LIMIT_TYPE_COUNT; t++)
 		{
 			m_nominal[t] = 0;
 			m_measure[t] = 0;
@@ -64,7 +64,7 @@ namespace Measure
 			m_unit[t].clear();
 			m_limitPrecision[t] = 0;
 
-			for(int e = 0; e < MT::ErrorTypeCount; e++)
+			for(int e = 0; e < MT::ERROR_TYPE_COUNT; e++)
 			{
 				m_error[t][e] = 0;
 				m_errorLimit[t][e] = 0;
@@ -206,7 +206,7 @@ namespace Measure
 
 	QString Item::nominalStr(LimitType limitType) const
 	{
-		int precision = DefaultElectricUnitPrecesion;
+		int precision = DEFAULT_ELECTRIC_UNIT_PRECESION;
 
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -265,7 +265,7 @@ namespace Measure
 			}
 		}
 
-		int precision = DefaultElectricUnitPrecesion;
+		int precision = DEFAULT_ELECTRIC_UNIT_PRECESION;
 
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -538,7 +538,7 @@ namespace Measure
 	{
 		// calc errors vlue
 		//
-		for(int type = 0; type < Measure::LimitTypeCount; type++)
+		for(int type = 0; type < Measure::LIMIT_TYPE_COUNT; type++)
 		{
 			LimitType limitType = static_cast<LimitType>(type);
 
@@ -574,7 +574,7 @@ namespace Measure
 
 	void Item::calcErrorLimit(double errorLimit)
 	{
-		for(int type = 0; type < Measure::LimitTypeCount; type++)
+		for(int type = 0; type < Measure::LIMIT_TYPE_COUNT; type++)
 		{
 			LimitType limitType = static_cast<LimitType>(type);
 
@@ -621,7 +621,7 @@ namespace Measure
 			}
 		}
 
-		int precision = DefaultElectricUnitPrecesion;
+		int precision = DEFAULT_ELECTRIC_UNIT_PRECESION;
 
 		LimitType limitType = LimitType::NoLimitType;
 
@@ -913,7 +913,7 @@ namespace Measure
 			return;
 		}
 
-		int precision = DefaultElectricUnitPrecesion;
+		int precision = DEFAULT_ELECTRIC_UNIT_PRECESION;
 
 		switch (connectionType)
 		{
@@ -1094,7 +1094,7 @@ namespace Measure
 
 		m_calibratorPrecision = from.m_calibratorPrecision;
 
-		for(int l = 0; l < Measure::LimitTypeCount; l++)
+		for(int l = 0; l < Measure::LIMIT_TYPE_COUNT; l++)
 		{
 			m_nominal[l] = from.m_nominal[l];
 			m_measure[l] = from.m_measure[l];
@@ -1104,7 +1104,7 @@ namespace Measure
 			m_unit[l] = from.m_unit[l];
 			m_limitPrecision[l] = from.m_limitPrecision[l];
 
-			for(int e = 0; e < MT::ErrorTypeCount; e++)
+			for(int e = 0; e < MT::ERROR_TYPE_COUNT; e++)
 			{
 				m_error[l][e] = from.m_error[l][e];
 				m_errorLimit[l][e] = from.m_errorLimit[l][e];
@@ -1203,9 +1203,9 @@ namespace Measure
 
 		m_percent = 0;
 
-		for(int t = 0; t < Measure::LimitTypeCount; t++)
+		for(int t = 0; t < Measure::LIMIT_TYPE_COUNT; t++)
 		{
-			for(int m = 0; m < Measure::MaxMeasurementInPoint; m++)
+			for(int m = 0; m < Measure::MAX_MEASUREMENT_IN_POINT; m++)
 			{
 				m_measureArray[t][m] = 0;
 			}
@@ -1215,9 +1215,9 @@ namespace Measure
 
 		m_additionalParamCount = 0;
 
-		for(int l = 0; l < Measure::LimitTypeCount; l++)
+		for(int l = 0; l < Measure::LIMIT_TYPE_COUNT; l++)
 		{
-			for(int a = 0; a < Measure::AdditionalParamCount; a++)
+			for(int a = 0; a < Measure::ADDITIONAL_PARAM_COUNT; a++)
 			{
 				m_additionalParam[l][a] = 0;
 			}
@@ -1643,14 +1643,14 @@ namespace Measure
 		//
 		//
 
-		for(int type = 0; type < Measure::LimitTypeCount; type++)
+		for(int type = 0; type < Measure::LIMIT_TYPE_COUNT; type++)
 		{
 			LimitType limitType = static_cast<LimitType>(type);
 
 			// calc additional parameters
 			//
 
-			setAdditionalParamCount(Measure::AdditionalParamCount);
+			setAdditionalParamCount(Measure::ADDITIONAL_PARAM_COUNT);
 
 				// max deviation
 				//
@@ -1999,7 +1999,7 @@ namespace Measure
 			return 0;
 		}
 
-		if (index < 0 || index >= Measure::MaxMeasurementInPoint)
+		if (index < 0 || index >= Measure::MAX_MEASUREMENT_IN_POINT)
 		{
 			assert(0);
 			return 0;
@@ -2020,7 +2020,7 @@ namespace Measure
 			}
 		}
 
-		int precision = DefaultElectricUnitPrecesion;
+		int precision = DEFAULT_ELECTRIC_UNIT_PRECESION;
 
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -2038,7 +2038,7 @@ namespace Measure
 			}
 		}
 
-		if (index < 0 || index >= Measure::MaxMeasurementInPoint)
+		if (index < 0 || index >= Measure::MAX_MEASUREMENT_IN_POINT)
 		{
 			assert(0);
 			return QString();
@@ -2058,7 +2058,7 @@ namespace Measure
 			return;
 		}
 
-		if (index < 0 || index >= Measure::MaxMeasurementInPoint)
+		if (index < 0 || index >= Measure::MAX_MEASUREMENT_IN_POINT)
 		{
 			assert(0);
 			return;
@@ -2161,7 +2161,7 @@ namespace Measure
 
 		m_measureCount = pLinearityMeasureItem->measureCount();
 
-		for(int m = 0; m < Measure::MaxMeasurementInPoint; m++)
+		for(int m = 0; m < Measure::MAX_MEASUREMENT_IN_POINT; m++)
 		{
 			m_measureArray[limitType][m] = pLinearityMeasureItem->measureItemArray(limitType, m);
 		}
@@ -2192,7 +2192,7 @@ namespace Measure
 			return;
 		}
 
-		for(int a = 0; a < Measure::AdditionalParamCount; a++)
+		for(int a = 0; a < Measure::ADDITIONAL_PARAM_COUNT; a++)
 		{
 			m_additionalParam[limitType][a] = pLinearityMeasureItem->additionalParam(limitType, a);
 		}
@@ -2218,9 +2218,9 @@ namespace Measure
 	{
 		m_percent = from.m_percent;
 
-		for(int t = 0; t < Measure::LimitTypeCount; t++)
+		for(int t = 0; t < Measure::LIMIT_TYPE_COUNT; t++)
 		{
-			for(int m = 0; m < Measure::MaxMeasurementInPoint; m++)
+			for(int m = 0; m < Measure::MAX_MEASUREMENT_IN_POINT; m++)
 			{
 				m_measureArray[t][m] = from.m_measureArray[t][m];
 			}
@@ -2230,9 +2230,9 @@ namespace Measure
 
 		m_additionalParamCount = from.m_additionalParamCount;
 
-		for(int l = 0; l < Measure::LimitTypeCount; l++)
+		for(int l = 0; l < Measure::LIMIT_TYPE_COUNT; l++)
 		{
-			for(int a = 0; a < Measure::AdditionalParamCount; a++)
+			for(int a = 0; a < Measure::ADDITIONAL_PARAM_COUNT; a++)
 			{
 				m_additionalParam[l][a] = from.m_additionalParam[l][a];
 			}
@@ -2798,70 +2798,86 @@ namespace Measure
 
 		struct rawTableData
 		{
-			int		tableType;
-			Item*	pMeasurement;
-			int		recordCount;
+			int		tableType = 0;
+			Item*	pMeasurement = nullptr;
+			int		recordCount = 0;
 		};
+
+		// step 1
+		// -----------------------
+		// read all tables for current measureType in memory
+		//
+		std::map<int, int> measureIDMap; // measureID, Index - for fast search
 
 		std::vector<rawTableData> loadedTablesInMemory;
 
-		// read all tables for current measureType in memory
-		//
 		for(int tableType = 0; tableType < SQL_TABLE_COUNT; tableType++)
 		{
 			if (SqlTableByMeasureType[tableType] == measureType)
 			{
 				SqlTable* table = theDatabase.openTable(tableType);
-				if (table != nullptr)
+				TEST_PTR_CONTINUE(table);
+
+				rawTableData data;
+
+				// determine size data to allocate memory
+				//
+				data.tableType = tableType;
+				data.pMeasurement = nullptr;
+				data.recordCount = table->recordCount();
+
+				// allocate memory
+				//
+				switch(measureType)
 				{
-					rawTableData data;
+					case Measure::Type::Linearity:		data.pMeasurement = new LinearityItem[static_cast<quint64>(data.recordCount)];	break;
+					case Measure::Type::Comparators:	data.pMeasurement = new ComparatorItem[static_cast<quint64>(data.recordCount)];	break;
 
-					// determine size data to allocate memory
-
-					data.tableType = tableType;
-					data.pMeasurement = nullptr;
-					data.recordCount = table->recordCount();
-
-					// allocate memory
-
-					switch(measureType)
-					{
-						case Measure::Type::Linearity:		data.pMeasurement = new LinearityItem[static_cast<quint64>(data.recordCount)];	break;
-						case Measure::Type::Comparators:	data.pMeasurement = new ComparatorItem[static_cast<quint64>(data.recordCount)];	break;
-
-						default:
-							assert(0);
-					}
-
-					if (data.pMeasurement == nullptr)
-					{
+					default:
 						continue;
-					}
+				}
+				TEST_PTR_CONTINUE(data.pMeasurement);
 
-					// load data to memory
+				// load data to memory
+				//
+				int readRecord = table->read(data.pMeasurement);
+
+				//
+				//
+				if (readRecord == data.recordCount)
+				{
+					loadedTablesInMemory.push_back(data);
+
+					// create map for fast search
 					//
-
-					if (table->read(data.pMeasurement) == data.recordCount)
+					if (SqlTableAppointType[tableType] == SQL_TABLE_IS_MAIN)
 					{
-						loadedTablesInMemory.push_back(data);
-					}
-					else
-					{
-						switch(measureType)
+						for(int i = 0; i < data.recordCount; i++)
 						{
-							case Measure::Type::Linearity:		delete [] static_cast<LinearityItem*> (data.pMeasurement);	break;
-							case Measure::Type::Comparators:	delete [] static_cast<ComparatorItem*> (data.pMeasurement);	break;
+							Item* pMeasureFromMainTable = data.pMeasurement->at(i);
+							TEST_PTR_CONTINUE(pMeasureFromMainTable);
 
-							default:
-								assert(0);
+							measureIDMap.emplace(pMeasureFromMainTable->measureID(), i);
 						}
 					}
-
-					table->close();
 				}
+				else
+				{
+					//remove data from memory if data was not load correctly
+					//
+					switch(measureType)
+					{
+						case Measure::Type::Linearity:		delete [] static_cast<LinearityItem*> (data.pMeasurement);	break;
+						case Measure::Type::Comparators:	delete [] static_cast<ComparatorItem*> (data.pMeasurement);	break;
+
+						default:
+							continue;
+					}
+				}
+
+				table->close();
 			}
 		}
-
 
 		// if tables for current measureType is not exist, then exit
 		//
@@ -2871,154 +2887,92 @@ namespace Measure
 			return 0;
 		}
 
-		// get main table, afterwards from sub tables update data in main table
-		// append data-measurement in MeasurementBase
+		// step 2
+		// -----------------------
+		// get sub tables and update data in main table
 		//
-
 		rawTableData mainTable = loadedTablesInMemory[SQL_TABLE_IS_MAIN];
-
-		for(int mainIndex = 0; mainIndex < mainTable.recordCount; mainIndex++)
+		if(mainTable.pMeasurement == nullptr)
 		{
-			Item* pMainMeasure = mainTable.pMeasurement->at(mainIndex);
-			if (pMainMeasure == nullptr)
-			{
-				continue;
-			}
-
-			for(quint64 tableInMemory = SQL_TABLE_IS_SUB; tableInMemory < tableInMemoryCount; tableInMemory++)
-			{
-				rawTableData subTable = loadedTablesInMemory[tableInMemory];
-
-				for(int subIndex = 0; subIndex < subTable.recordCount; subIndex++)
-				{
-					Item* pSubMeasure = subTable.pMeasurement->at(subIndex);
-					if (pSubMeasure == nullptr)
-					{
-						continue;
-					}
-
-					// update main measurement from sub measurement
-					//
-					if (pMainMeasure->measureID() != pSubMeasure->measureID())
-					{
-						continue;
-					}
-
-					switch (pMainMeasure->measureType())
-					{
-						case Measure::Type::Linearity:
-							{
-								LinearityItem* pSupMeasurement = dynamic_cast<LinearityItem*>(pMainMeasure);
-								if (pSupMeasurement == nullptr)
-								{
-									continue;
-								}
-
-								switch(subTable.tableType)
-								{
-									case SQL_TABLE_LINEARITY_ADD_VAL_EL:	pSupMeasurement->updateAdditionalParam(Measure::LimitType::Electric, pSubMeasure);		break;
-									case SQL_TABLE_LINEARITY_ADD_VAL_EN:	pSupMeasurement->updateAdditionalParam(Measure::LimitType::Engineering, pSubMeasure);	break;
-									case SQL_TABLE_LINEARITY_20_EL:			pSupMeasurement->updateMeasureArray(Measure::LimitType::Electric, pSubMeasure);			break;
-									case SQL_TABLE_LINEARITY_20_EN:			pSupMeasurement->updateMeasureArray(Measure::LimitType::Engineering, pSubMeasure);		break;
-								}
-							}
-							break;
-
-						case Measure::Type::Comparators:
-							{
-								ComparatorItem* pSupMeasurement = dynamic_cast<ComparatorItem*>(pMainMeasure);
-								if (pSupMeasurement == nullptr)
-								{
-									continue;
-								}
-							}
-
-							break;
-
-						default:
-							break;
-					}
-
-					break;
-				}
-			}
+			return 0;
 		}
 
-		// append measuremets to MeasureBase from updated main table
-		//
-		for(int index = 0; index < mainTable.recordCount; index++)
-		{
-			Item* pMeasureTable = mainTable.pMeasurement->at(index);
-			if (pMeasureTable == nullptr)
-			{
-				continue;
-			}
-
-			Item* pMeasureAppend = nullptr;
-
-			switch(measureType)
-			{
-				case Measure::Type::Linearity:		pMeasureAppend = new LinearityItem;		break;
-				case Measure::Type::Comparators:	pMeasureAppend = new ComparatorItem;	break;
-				default:
-					assert(0);
-			}
-
-			if (pMeasureAppend == nullptr)
-			{
-				continue;
-			}
-
-			*pMeasureAppend = *pMeasureTable;
-
-			append(pMeasureAppend);
-		}
-
-		// if measurement is nonexistentin in main table, but exist in sub table,
-		// need remove this measurement in sub table
-		// remove nonexistent indexes-measurements-ID in sub tables
-		//
 		for(quint64 tableInMemory = SQL_TABLE_IS_SUB; tableInMemory < tableInMemoryCount; tableInMemory++)
 		{
 			rawTableData subTable = loadedTablesInMemory[tableInMemory];
+			TEST_PTR_CONTINUE(subTable.pMeasurement);
 
-			std::vector<int> removeKeyList;
+			std::vector<int> removeKeyList; // measureID list for remove
 
+			// find record in sub table by measureID
+			//
 			for(int subIndex = 0; subIndex < subTable.recordCount; subIndex++)
 			{
-				Item* pSubMeasure = subTable.pMeasurement->at(subIndex);
-				if (pSubMeasure == nullptr)
+				Item* pMeasureFromSubTable = subTable.pMeasurement->at(subIndex);
+				TEST_PTR_CONTINUE(pMeasureFromSubTable);
+
+				if (measureIDMap.contains(pMeasureFromSubTable->measureID()) == false)
+				{
+					removeKeyList.push_back(pMeasureFromSubTable->measureID());
+					continue;
+				}
+
+				int mainIndex = measureIDMap.at(pMeasureFromSubTable->measureID());
+				if (mainIndex < 0 || mainIndex > mainTable.recordCount)
 				{
 					continue;
 				}
 
-				bool foundMeasure = false;
+				Item* pMeasureFromMainTable = mainTable.pMeasurement->at(mainIndex);
+				TEST_PTR_CONTINUE(pMeasureFromMainTable);
 
-				for(int mainIndex = 0; mainIndex < mainTable.recordCount; mainIndex++)
+				// update main measurement from sub measurement
+				//
+				if (pMeasureFromMainTable->measureID() != pMeasureFromSubTable->measureID())
 				{
-					Item* pMainMeasure = mainTable.pMeasurement->at(mainIndex);
-					if (pMainMeasure == nullptr)
-					{
-						continue;
-					}
-
-					if (pMainMeasure->measureID() == pSubMeasure->measureID())
-					{
-						foundMeasure = true;
-						break;
-					}
+					Q_ASSERT(false);
+					continue;
 				}
 
-				// if measurement is not found in main table then need remove it in sub table
-				//
-				if (foundMeasure == false)
+				switch (pMeasureFromMainTable->measureType())
 				{
-					removeKeyList.push_back(pSubMeasure->measureID());
+					case Measure::Type::Linearity:
+						{
+							LinearityItem* pLinMeasurement = dynamic_cast<LinearityItem*>(pMeasureFromMainTable);
+							TEST_PTR_CONTINUE(pLinMeasurement);
+
+							switch(subTable.tableType)
+							{
+								case SQL_TABLE_LINEARITY_ADD_VAL_EL:	pLinMeasurement->updateAdditionalParam(Measure::LimitType::Electric, pMeasureFromSubTable);		break;
+								case SQL_TABLE_LINEARITY_ADD_VAL_EN:	pLinMeasurement->updateAdditionalParam(Measure::LimitType::Engineering, pMeasureFromSubTable);	break;
+								case SQL_TABLE_LINEARITY_20_EL:			pLinMeasurement->updateMeasureArray(Measure::LimitType::Electric, pMeasureFromSubTable);			break;
+								case SQL_TABLE_LINEARITY_20_EN:			pLinMeasurement->updateMeasureArray(Measure::LimitType::Engineering, pMeasureFromSubTable);		break;
+							}
+						}
+						break;
+
+					case Measure::Type::Comparators:
+						{
+							ComparatorItem* pCmpMeasurement = dynamic_cast<ComparatorItem*>(pMeasureFromMainTable);
+							TEST_PTR_CONTINUE(pCmpMeasurement);
+						}
+
+						break;
+
+					default:
+						continue;
 				}
 			}
 
-			// remove unnecessary measurement from sub table
+			// if measureID was not found in main table, but the measurement is exist in sub table,
+			// need remove this measurement in sub table
+			// remove nonexistent indexes-measurements-ID in sub tables
 			//
+			if (removeKeyList.size() == 0)
+			{
+				continue;
+			}
+
 			SqlTable* table = theDatabase.openTable(subTable.tableType);
 			if (table != nullptr)
 			{
@@ -3027,16 +2981,41 @@ namespace Measure
 			}
 		}
 
+		// step 3
+		// -----------------------
+		// append measuremets to MeasureBase from updated main table
+		//
+		for(int index = 0; index < mainTable.recordCount; index++)
+		{
+			Item* pMeasureFromMainTable = mainTable.pMeasurement->at(index);
+			TEST_PTR_CONTINUE(pMeasureFromMainTable);
+
+			Item* pMeasureForAppend = nullptr;
+
+			switch(measureType)
+			{
+				case Measure::Type::Linearity:		pMeasureForAppend = new LinearityItem;	break;
+				case Measure::Type::Comparators:	pMeasureForAppend = new ComparatorItem;	break;
+
+				default:
+					continue;
+			}
+
+			TEST_PTR_CONTINUE(pMeasureForAppend);
+
+			*pMeasureForAppend = *pMeasureFromMainTable;
+
+			append(pMeasureForAppend);
+		}
+
+		// step 4
+		// -----------------------
 		// remove raw table data from memory
 		//
 		for(quint64 tableInMemory = 0; tableInMemory < tableInMemoryCount; tableInMemory++)
 		{
 			rawTableData table = loadedTablesInMemory[tableInMemory];
-
-			if (table.pMeasurement == nullptr)
-			{
-				continue;
-			}
+			TEST_PTR_CONTINUE(table.pMeasurement);
 
 			switch(measureType)
 			{
@@ -3044,7 +3023,7 @@ namespace Measure
 				case Measure::Type::Comparators:	delete [] static_cast<ComparatorItem*> (table.pMeasurement);	break;
 
 				default:
-					assert(0);
+					continue;
 			}
 		}
 

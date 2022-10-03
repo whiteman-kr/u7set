@@ -600,7 +600,7 @@ DialogOptions::DialogOptions(const Options& options, QWidget* parent) :
 	QDialog(parent),
 	m_options(options)
 {
-	for(int measureType = 0; measureType < Measure::TypeCount; measureType++)
+	for(int measureType = 0; measureType < Measure::TYPE_COUNT; measureType++)
 	{
 		m_options.measureView().setUpdateColumnView(static_cast<Measure::Type>(measureType), false);
 	}
@@ -1122,7 +1122,7 @@ void DialogOptions::onPropertyValueChanged(QList<std::shared_ptr<PropertyObject>
 					// if any property has been changed on MeasureView_Text
 					// then update measure list
 					//
-					for(int measureType = 0; measureType < Measure::TypeCount; measureType++)
+					for(int measureType = 0; measureType < Measure::TYPE_COUNT; measureType++)
 					{
 						m_options.measureView().setUpdateColumnView(static_cast<Measure::Type>(measureType), true);
 					}

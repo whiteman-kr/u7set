@@ -11,7 +11,7 @@ namespace Measure
 	// -------------------------------------------------------------------------------------------------------------------
 	// -------------------------------------------------------------------------------------------------------------------
 
-	HeaderColumn ViewHeader::m_column[Measure::TypeCount][MaxColumnCount] =
+	HeaderColumn ViewHeader::m_column[Measure::TYPE_COUNT][MaxColumnCount] =
 	{
 		// Measurements of linearity
 		{
@@ -198,7 +198,7 @@ namespace Measure
 	ViewHeader::ViewHeader(QObject* parent) :
 		QObject(parent)
 	{
-		for(int measureType = 0; measureType < Measure::TypeCount; measureType++)
+		for(int measureType = 0; measureType < Measure::TYPE_COUNT; measureType++)
 		{
 			m_columnCount[measureType] = 0;
 		}
@@ -327,7 +327,7 @@ namespace Measure
 							setColumnVisible(MVC_CMN_L_HIGH_BORDER, false);
 							setColumnVisible(MVC_CMN_L_UNCERTAINTY, false);
 
-							for (int m = 0; m < Measure::MaxMeasurementInPoint; m ++)
+							for (int m = 0; m < Measure::MAX_MEASUREMENT_IN_POINT; m ++)
 							{
 								setColumnVisible(m + MVC_CMN_L_VALUE_0, false);
 							}
@@ -348,7 +348,7 @@ namespace Measure
 							setColumnVisible(MVC_CMN_L_HIGH_BORDER, true);
 							setColumnVisible(MVC_CMN_L_UNCERTAINTY, true);
 
-							for (int m = 0; m < Measure::MaxMeasurementInPoint; m ++)
+							for (int m = 0; m < Measure::MAX_MEASUREMENT_IN_POINT; m ++)
 							{
 								setColumnVisible(m + MVC_CMN_L_VALUE_0, false);
 							}
@@ -370,7 +370,7 @@ namespace Measure
 							setColumnVisible(MVC_CMN_L_HIGH_BORDER, false);
 							setColumnVisible(MVC_CMN_L_UNCERTAINTY, false);
 
-							for (int m = 0; m < Measure::MaxMeasurementInPoint; m ++)
+							for (int m = 0; m < Measure::MAX_MEASUREMENT_IN_POINT; m ++)
 							{
 								setColumnVisible(m + MVC_CMN_L_VALUE_0, true);
 							}

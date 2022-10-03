@@ -2326,7 +2326,7 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 			case Measure::Kind::MultiRack:
 			case Measure::Kind::MultiRack_MC:
 
-				channelCount = Metrology::ChannelCount;
+				channelCount = Metrology::CHANNEL_COUNT;
 				break;
 
 			default:

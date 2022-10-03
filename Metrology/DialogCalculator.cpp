@@ -461,7 +461,7 @@ void DialogCalculator::conversionLin()
 		double val = (m_pLinInValEdit->text().toDouble() - irl)*(orh-orl)/(irh-irl)+orl;
 
 		m_pLinInValEdit->setReadOnly(false);
-		m_pLinOutValEdit->setText(QString::number(val, 'f', DefaultElectricUnitPrecesion));
+		m_pLinOutValEdit->setText(QString::number(val, 'f', DEFAULT_ELECTRIC_UNIT_PRECESION));
 		m_pLinOutValEdit->setReadOnly(true);
 	}
 
@@ -470,7 +470,7 @@ void DialogCalculator::conversionLin()
 		double val = (m_pLinOutValEdit->text().toDouble() - orl)*(irh-irl)/(orh-orl)+irl;
 
 		m_pLinOutValEdit->setReadOnly(false);
-		m_pLinInValEdit->setText(QString::number(val, 'f', DefaultElectricUnitPrecesion));
+		m_pLinInValEdit->setText(QString::number(val, 'f', DEFAULT_ELECTRIC_UNIT_PRECESION));
 		m_pLinInValEdit->setReadOnly(true);
 	}
 }
@@ -511,8 +511,8 @@ void DialogCalculator::conversionTr()
 		if (degreeVal < degreeLowLimit || degreeVal > degreeHighLimit)
 		{
 			m_pTrElectricEdit->setText(	tr("Out of range: %1 .. %2").
-										arg(QString::number(degreeLowLimit, 'f', DefaultElectricUnitPrecesion),
-											QString::number(degreeHighLimit, 'f', DefaultElectricUnitPrecesion)));
+										arg(QString::number(degreeLowLimit, 'f', DEFAULT_ELECTRIC_UNIT_PRECESION),
+											QString::number(degreeHighLimit, 'f', DEFAULT_ELECTRIC_UNIT_PRECESION)));
 
 			m_pTrElectricEdit->setCursorPosition(0);
 		}
@@ -520,7 +520,7 @@ void DialogCalculator::conversionTr()
 		{
 			double val = m_uc.conversionDegree(degreeVal, UnitsConvertType::PhysicalToElectric, unit, sensorType, r0);
 
-			m_pTrElectricEdit->setText(QString::number(val, 'f', DefaultElectricUnitPrecesion));
+			m_pTrElectricEdit->setText(QString::number(val, 'f', DEFAULT_ELECTRIC_UNIT_PRECESION));
 		}
 
 		m_pTrDegreeEdit->setReadOnly(false);
@@ -532,8 +532,8 @@ void DialogCalculator::conversionTr()
 		if (electricVal < electricLimit.lowLimit*  r0 / 100 || electricVal > electricLimit.highLimit*  r0 / 100)
 		{
 			m_pTrDegreeEdit->setText(	tr("Out of range: %1 .. %2").
-										arg(QString::number(electricLimit.lowLimit, 'f', DefaultElectricUnitPrecesion),
-											QString::number(electricLimit.highLimit, 'f', DefaultElectricUnitPrecesion)));
+										arg(QString::number(electricLimit.lowLimit, 'f', DEFAULT_ELECTRIC_UNIT_PRECESION),
+											QString::number(electricLimit.highLimit, 'f', DEFAULT_ELECTRIC_UNIT_PRECESION)));
 
 			m_pTrDegreeEdit->setCursorPosition(0);
 		}
@@ -541,7 +541,7 @@ void DialogCalculator::conversionTr()
 		{
 			double val = m_uc.conversionDegree(electricVal, UnitsConvertType::ElectricToPhysical, unit, sensorType, r0);
 
-			m_pTrDegreeEdit->setText(QString::number(val, 'f', DefaultElectricUnitPrecesion));
+			m_pTrDegreeEdit->setText(QString::number(val, 'f', DEFAULT_ELECTRIC_UNIT_PRECESION));
 		}
 
 		m_pTrElectricEdit->setReadOnly(false);
@@ -579,8 +579,8 @@ void DialogCalculator::conversionTc()
 		if (degreeVal < degreeLowLimit || degreeVal > degreeHighLimit)
 		{
 			m_pTcElectricEdit->setText(	tr("Out of range: %1 .. %2").
-										arg(QString::number(degreeLowLimit, 'f', DefaultElectricUnitPrecesion),
-											QString::number(degreeHighLimit, 'f', DefaultElectricUnitPrecesion)));
+										arg(QString::number(degreeLowLimit, 'f', DEFAULT_ELECTRIC_UNIT_PRECESION),
+											QString::number(degreeHighLimit, 'f', DEFAULT_ELECTRIC_UNIT_PRECESION)));
 
 			m_pTcElectricEdit->setCursorPosition(0);
 		}
@@ -588,7 +588,7 @@ void DialogCalculator::conversionTc()
 		{
 			double val = m_uc.conversionDegree(degreeVal, UnitsConvertType::PhysicalToElectric, unit, sensorType);
 
-			m_pTcElectricEdit->setText(QString::number(val, 'f', DefaultElectricUnitPrecesion));
+			m_pTcElectricEdit->setText(QString::number(val, 'f', DEFAULT_ELECTRIC_UNIT_PRECESION));
 		}
 
 		m_pTcDegreeEdit->setFocus();
@@ -601,8 +601,8 @@ void DialogCalculator::conversionTc()
 		if (electricVal < electricLimit.lowLimit || electricVal > electricLimit.highLimit)
 		{
 			m_pTcDegreeEdit->setText(	tr("Out of range: %1 .. %2").
-										arg(QString::number(electricLimit.lowLimit, 'f', DefaultElectricUnitPrecesion),
-											QString::number(electricLimit.highLimit, 'f', DefaultElectricUnitPrecesion)));
+										arg(QString::number(electricLimit.lowLimit, 'f', DEFAULT_ELECTRIC_UNIT_PRECESION),
+											QString::number(electricLimit.highLimit, 'f', DEFAULT_ELECTRIC_UNIT_PRECESION)));
 
 			m_pTcDegreeEdit->setCursorPosition(0);
 		}
@@ -610,7 +610,7 @@ void DialogCalculator::conversionTc()
 		{
 			double val = m_uc.conversionDegree(electricVal, UnitsConvertType::ElectricToPhysical, unit, sensorType);
 
-			m_pTcDegreeEdit->setText(QString::number(val, 'f', DefaultElectricUnitPrecesion));
+			m_pTcDegreeEdit->setText(QString::number(val, 'f', DEFAULT_ELECTRIC_UNIT_PRECESION));
 		}
 
 		m_pTcElectricEdit->setFocus();
@@ -635,7 +635,7 @@ void DialogCalculator::conversionDpf()
 		double val = K*  sqrt(m_pDpfPValEdit->text().toDouble());
 
 		m_pDpfPValEdit->setReadOnly(false);
-		m_pDpfFValEdit->setText(QString::number(val, 'f', DefaultElectricUnitPrecesion));
+		m_pDpfFValEdit->setText(QString::number(val, 'f', DEFAULT_ELECTRIC_UNIT_PRECESION));
 		m_pDpfFValEdit->setReadOnly(true);
 	}
 
@@ -644,7 +644,7 @@ void DialogCalculator::conversionDpf()
 		double val = pow(m_pDpfFValEdit->text().toDouble() / K, 2);
 
 		m_pDpfFValEdit->setReadOnly(false);
-		m_pDpfPValEdit->setText(QString::number(val, 'f', DefaultElectricUnitPrecesion));
+		m_pDpfPValEdit->setText(QString::number(val, 'f', DEFAULT_ELECTRIC_UNIT_PRECESION));
 		m_pDpfPValEdit->setReadOnly(true);
 	}
 }
@@ -659,7 +659,7 @@ void DialogCalculator::conversionDr()
 
 		m_pDrCelsiusEdit->setFocus();
 		m_pDrCelsiusEdit->setReadOnly(false);
-		m_pDrFahrenheitEdit->setText(QString::number(val, 'f', DefaultElectricUnitPrecesion));
+		m_pDrFahrenheitEdit->setText(QString::number(val, 'f', DEFAULT_ELECTRIC_UNIT_PRECESION));
 		m_pDrFahrenheitEdit->setReadOnly(true);
 	}
 
@@ -669,7 +669,7 @@ void DialogCalculator::conversionDr()
 
 		m_pDrFahrenheitEdit->setFocus();
 		m_pDrFahrenheitEdit->setReadOnly(false);
-		m_pDrCelsiusEdit->setText(QString::number(val, 'f', DefaultElectricUnitPrecesion));
+		m_pDrCelsiusEdit->setText(QString::number(val, 'f', DEFAULT_ELECTRIC_UNIT_PRECESION));
 		m_pDrCelsiusEdit->setReadOnly(true);
 	}
 }

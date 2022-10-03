@@ -86,7 +86,7 @@ const double	CalibratorMinimalRangeOhm	= 400;
 
 // ----------------------------------------------------------------------------------------------
 
-const int		DefaultElectricUnitPrecesion = 4;
+const int		DEFAULT_ELECTRIC_UNIT_PRECESION = 4;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -166,7 +166,7 @@ struct CalibratorLimit
 	double lowLimit = 0;
 	double highLimit = 0;
 	int unit = CalibratorUnit::NoCalibratorUnit;
-	int precesion = DefaultElectricUnitPrecesion;
+	int precesion = DEFAULT_ELECTRIC_UNIT_PRECESION;
 
 	double ac0 = 0;
 	double ac1 = 0;

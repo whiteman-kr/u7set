@@ -203,7 +203,7 @@ DialogRackProperty::PropertyPattern::PropertyPattern(Metrology::RackParam* pObje
 	std::vector<std::pair<QString, int>> enumChannels;
 
 	enumChannels.push_back({QString(), 0});
-	for(int ch = 0; ch < Metrology::ChannelCount; ch++)
+	for(int ch = 0; ch < Metrology::CHANNEL_COUNT; ch++)
 	{
 		enumChannels.push_back({QString::number(ch + 1), ch + 1});
 	}
@@ -463,7 +463,7 @@ DialogRackGroupProperty::PropertyPattern::PropertyPattern(RackBase* pObject) : m
 	//
 	QString categoryRacks = DialogRackGroupProperty::tr("Racks");
 
-	for(int channel = 0; channel < Metrology::ChannelCount; channel++)
+	for(int channel = 0; channel < Metrology::CHANNEL_COUNT; channel++)
 	{
 		QString strHeader = DialogRackGroupProperty::tr("Channel") + " " + QString::number(channel + 1);
 
@@ -664,7 +664,7 @@ void DialogRackGroupProperty::updateRackList()
 			continue;
 		}
 
-		for(int channel = 0; channel < Metrology::ChannelCount; channel++)
+		for(int channel = 0; channel < Metrology::CHANNEL_COUNT; channel++)
 		{
 			auto propertyChannel = properties->propertyByCaption(tr("Channel") + " " + QString::number(channel + 1));
 			if (propertyChannel == nullptr)
@@ -763,7 +763,7 @@ void DialogRackGroupProperty::onPropertyValueChanged(QList<std::shared_ptr<Prope
 			continue;
 		}
 
-		for(int channel = 0; channel < Metrology::ChannelCount; channel++)
+		for(int channel = 0; channel < Metrology::CHANNEL_COUNT; channel++)
 		{
 			auto propertyChannel = properties->propertyByCaption(tr("Channel") + " " + QString::number(channel + 1));
 			if (propertyChannel == nullptr)
@@ -921,7 +921,7 @@ bool DialogRackGroupProperty::foundDuplicateRacks()
 			continue;
 		}
 
-		for(int channel = 0; channel < Metrology::ChannelCount; channel++)
+		for(int channel = 0; channel < Metrology::CHANNEL_COUNT; channel++)
 		{
 			QString currRackID = group.rackID(channel);
 

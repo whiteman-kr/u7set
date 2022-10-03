@@ -502,7 +502,7 @@ void RackBase::updateParamFromGroups()
 			continue;
 		}
 
-		for(int channel = 0; channel < Metrology::ChannelCount; channel++)
+		for(int channel = 0; channel < Metrology::CHANNEL_COUNT; channel++)
 		{
 			QString rackID = group.rackID(channel);
 			if (rackID.isEmpty() == true)

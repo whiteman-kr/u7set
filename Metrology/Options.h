@@ -79,7 +79,7 @@ public:
 
 private:
 
-	CalibratorOption m_calibrator[Metrology::ChannelCount];
+	CalibratorOption m_calibrator[Metrology::CHANNEL_COUNT];
 };
 
 
@@ -552,7 +552,7 @@ private:
 	Measure::MT::CalcErrorRange m_calcErrorByRange = Measure::MT::CalcErrorRange::By_Electric_Range;	// error is calculated by the range
 
 	int m_measureTimeInPoint = 1;																		// time, in seconds, during which will be made ​​N measurements at each point
-	int m_measureCountInPoint = Measure::MaxMeasurementInPoint;											// count of measurements in a point, according to GOST MI-2002 application 7
+	int m_measureCountInPoint = Measure::MAX_MEASUREMENT_IN_POINT;											// count of measurements in a point, according to GOST MI-2002 application 7
 
 	Measure::LT::LinearityDivision m_divisionType = Measure::LT::LinearityDivision::Manual;				// type of division measure range: manual - 0 or automatic - 1
 	double m_lowLimitRange = Measure::LinearityRangeLow;												// lower limit of the range for automatic division
@@ -764,7 +764,7 @@ public:
 //private:
 public:
 
-	Measure::HeaderColumn m_column[Measure::TypeCount][OT::LanguageTypeCount][Measure::MaxColumnCount];
+	Measure::HeaderColumn m_column[Measure::TYPE_COUNT][OT::LanguageTypeCount][Measure::MaxColumnCount];
 
 public:
 
@@ -812,7 +812,7 @@ private:
 
 	int m_measureType = Measure::Type::NoMeasureType;				// current, active ViewID
 
-	bool m_updateColumnView[Measure::TypeCount];					// determined the need to update the view after changing settings
+	bool m_updateColumnView[Measure::TYPE_COUNT];					// determined the need to update the view after changing settings
 
 	QFont m_font;
 	QFont m_fontBold;

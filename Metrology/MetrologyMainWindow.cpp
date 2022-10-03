@@ -59,7 +59,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent)
 	//
 	theOptions.linearity().points().load();
 
-	for(int measureType = 0; measureType < Measure::TypeCount; measureType++)
+	for(int measureType = 0; measureType < Measure::TYPE_COUNT; measureType++)
 	{
 		m_measureBase.load(static_cast<Measure::Type>(measureType));
 	}
@@ -393,7 +393,7 @@ bool MainWindow::createToolBars()
 		pMeasureTimeoutList->setEditable(true);
 		pMeasureTimeoutList->setValidator(validator);
 
-		for(int t = 0; t < Measure::TimeoutCount; t++)
+		for(int t = 0; t < Measure::TIMEOUT_COUNT; t++)
 		{
 			pMeasureTimeoutList->addItem(QString::number(Measure::Timeout[t], 'f', 1));
 		}
@@ -668,7 +668,7 @@ void MainWindow::createMeasureViews()
 	m_pMainTab = new QTabWidget();
 	m_pMainTab->setTabPosition(QTabWidget::South);
 
-	for(int measureType = 0; measureType < Measure::TypeCount; measureType++)
+	for(int measureType = 0; measureType < Measure::TYPE_COUNT; measureType++)
 	{
 		Measure::View* pView = new Measure::View(static_cast<Measure::Type>(measureType), this);
 		if (pView == nullptr)
@@ -819,7 +819,7 @@ void MainWindow::createContextMenu()
 
 	// init context menu
 	//
-	for(int measureType = 0; measureType < Measure::TypeCount; measureType++)
+	for(int measureType = 0; measureType < Measure::TYPE_COUNT; measureType++)
 	{
 		Measure::View* pView = measureView(static_cast<Measure::Type>(measureType));
 		if (pView == nullptr)
@@ -850,7 +850,7 @@ void MainWindow::loadOnToolBar_MeasureKind()
 
 		m_pMeasureKindList->clear();
 
-		for(int measureKind = 0; measureKind < Measure::KindCount; measureKind++)
+		for(int measureKind = 0; measureKind < Measure::KIND_COUNT; measureKind++)
 		{
 			if (measureKind == Measure::Kind::MultiRack || measureKind == Measure::Kind::MultiRack_MC)
 			{
@@ -1974,7 +1974,7 @@ void MainWindow::showOptions()
 
 	// update columns in the measure views
 	//
-	for(int measureType = 0; measureType < Measure::TypeCount; measureType++)
+	for(int measureType = 0; measureType < Measure::TYPE_COUNT; measureType++)
 	{
 		Measure::Type mesaure_Type = static_cast<Measure::Type>(measureType);
 

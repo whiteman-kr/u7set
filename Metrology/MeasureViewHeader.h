@@ -96,11 +96,11 @@ namespace Measure
 
 	private:
 
-		static				HeaderColumn m_column[Measure::TypeCount][MaxColumnCount];
+		static				HeaderColumn m_column[Measure::TYPE_COUNT][MaxColumnCount];
 
 		Measure::Type		m_measureType = Measure::Type::NoMeasureType;
 
-		int					m_columnCount[Measure::TypeCount];
+		int					m_columnCount[Measure::TYPE_COUNT];
 	};
 }
 

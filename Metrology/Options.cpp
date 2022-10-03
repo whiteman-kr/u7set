@@ -97,7 +97,7 @@ void CalibratorsOption::load()
 {
 	QSettings s;
 
-	for(int c = 0; c < Metrology::ChannelCount; c++ )
+	for(int c = 0; c < Metrology::CHANNEL_COUNT; c++ )
 	{
 		QString defaultPort = QString("COM%1").arg(QString::number(c+1));
 
@@ -120,7 +120,7 @@ void CalibratorsOption::save()
 {
 	QSettings s;
 
-	for(int c = 0; c < Metrology::ChannelCount; c++ )
+	for(int c = 0; c < Metrology::CHANNEL_COUNT; c++ )
 	{
 		s.setValue(QString("%1Calibrator%2/Port").arg(CALIBRATOR_OPTIONS_KEY).arg(c), m_calibrator[c].port());
 		s.setValue(QString("%1Calibrator%2/Type").arg(CALIBRATOR_OPTIONS_KEY).arg(c), m_calibrator[c].type());
@@ -131,7 +131,7 @@ void CalibratorsOption::save()
 
 CalibratorsOption& CalibratorsOption::operator=(const CalibratorsOption& from)
 {
-	for(int c = 0; c < Metrology::ChannelCount; c++ )
+	for(int c = 0; c < Metrology::CHANNEL_COUNT; c++ )
 	{
 		m_calibrator[c] = from.m_calibrator[c];
 	}
@@ -959,9 +959,9 @@ int LinearityOption::measureCountInPoint()
 		m_measureCountInPoint = 1;
 	}
 
-	if (m_measureCountInPoint > Measure::MaxMeasurementInPoint)
+	if (m_measureCountInPoint > Measure::MAX_MEASUREMENT_IN_POINT)
 	{
-		m_measureCountInPoint = Measure::MaxMeasurementInPoint;
+		m_measureCountInPoint = Measure::MAX_MEASUREMENT_IN_POINT;
 	}
 
 	return m_measureCountInPoint;
@@ -976,9 +976,9 @@ void LinearityOption::setMeasureCountInPoint(int measureCount)
 		measureCount = 1;
 	}
 
-	if (measureCount > Measure::MaxMeasurementInPoint)
+	if (measureCount > Measure::MAX_MEASUREMENT_IN_POINT)
 	{
-		measureCount = Measure::MaxMeasurementInPoint;
+		measureCount = Measure::MAX_MEASUREMENT_IN_POINT;
 	}
 
 	m_measureCountInPoint = measureCount;
@@ -1055,7 +1055,7 @@ void LinearityOption::load()
 	m_calcErrorByRange = static_cast<Measure::MT::CalcErrorRange>(s.value(QString("%1CalcErrorByRange").arg(LINEARITY_OPTIONS_KEY), Measure::MT::CalcErrorRange::By_Electric_Range).toInt());
 
 	m_measureTimeInPoint = s.value(QString("%1MeasureTimeInPoint").arg(LINEARITY_OPTIONS_KEY), 1).toInt();
-	m_measureCountInPoint = s.value(QString("%1MeasureCountInPoint").arg(LINEARITY_OPTIONS_KEY), Measure::MaxMeasurementInPoint).toInt();
+	m_measureCountInPoint = s.value(QString("%1MeasureCountInPoint").arg(LINEARITY_OPTIONS_KEY), Measure::MAX_MEASUREMENT_IN_POINT).toInt();
 
 	m_divisionType = static_cast<Measure::LT::LinearityDivision>(s.value(QString("%1RangeType").arg(LINEARITY_OPTIONS_KEY), Measure::LT::LinearityDivision::Manual).toInt());
 	m_lowLimitRange = s.value(QString("%1LowLimitRange").arg(LINEARITY_OPTIONS_KEY), Measure::LinearityRangeLow).toDouble();
@@ -1412,7 +1412,7 @@ void MeasureViewOption::load()
 		//
 		Measure::ViewHeader header;
 
-		for(int measureType = 0; measureType < Measure::TypeCount; measureType ++)
+		for(int measureType = 0; measureType < Measure::TYPE_COUNT; measureType ++)
 		{
 			header.setMeasureType(static_cast<Measure::Type>(measureType));
 
@@ -1431,7 +1431,7 @@ void MeasureViewOption::load()
 
 		// load
 		//
-		for(int measureType = 0; measureType < Measure::TypeCount; measureType ++)
+		for(int measureType = 0; measureType < Measure::TYPE_COUNT; measureType ++)
 		{
 			QString caption = Measure::TypeCaption(static_cast<Measure::Type>(measureType));
 
@@ -1477,7 +1477,7 @@ void MeasureViewOption::save()
 	{
 		QString language = LanguageTypeCaptionEn(static_cast<OT::LanguageType>(languageType));
 
-		for(int measureType = 0; measureType < Measure::TypeCount; measureType ++)
+		for(int measureType = 0; measureType < Measure::TYPE_COUNT; measureType ++)
 		{
 			QString caption = Measure::TypeCaption(static_cast<Measure::Type>(measureType));
 
@@ -1538,7 +1538,7 @@ void MeasureViewOption::saveColumnWidth(Measure::Type measureType, const Measure
 
 MeasureViewOption& MeasureViewOption::operator=(const MeasureViewOption& from)
 {
-	for(int measureType = 0; measureType < Measure::TypeCount; measureType ++)
+	for(int measureType = 0; measureType < Measure::TYPE_COUNT; measureType ++)
 	{
 		m_updateColumnView[measureType] = from.m_updateColumnView[measureType];
 

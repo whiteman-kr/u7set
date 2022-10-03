@@ -20,7 +20,7 @@ DialogOptionsMeasureViewHeader::DialogOptionsMeasureViewHeader(const MeasureView
 
 	m_pMeasureTypeList = new QComboBox(this);
 
-	for(int measureType = 0; measureType < Measure::TypeCount; measureType++)
+	for(int measureType = 0; measureType < Measure::TYPE_COUNT; measureType++)
 	{
 		m_pMeasureTypeList->addItem(qApp->translate("MeasureBase", Measure::TypeCaption(static_cast<Measure::Type>(measureType)).toUtf8()));
 	}

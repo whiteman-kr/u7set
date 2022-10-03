@@ -479,7 +479,7 @@ void CalibratorManager::updateValue()
 
 	if (measureLimit.isValid() == false)
 	{
-		measureValue = QString::number(m_pCalibrator->measureValue(), 'f', DefaultElectricUnitPrecesion);
+		measureValue = QString::number(m_pCalibrator->measureValue(), 'f', DEFAULT_ELECTRIC_UNIT_PRECESION);
 	}
 	else
 	{
@@ -497,7 +497,7 @@ void CalibratorManager::updateValue()
 
 	if (sourceLimit.isValid() == false)
 	{
-		sourceValue = QString::number(m_pCalibrator->sourceValue(), 'f', DefaultElectricUnitPrecesion);
+		sourceValue = QString::number(m_pCalibrator->sourceValue(), 'f', DEFAULT_ELECTRIC_UNIT_PRECESION);
 	}
 	else
 	{

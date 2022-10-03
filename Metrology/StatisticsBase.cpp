@@ -170,7 +170,7 @@ StatisticsBase::StatisticsBase(QObject* parent) :
 {
 	QMutexLocker l(&m_signalMutex);
 
-	m_statisticList.resize(Measure::TypeCount);
+	m_statisticList.resize(Measure::TYPE_COUNT);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

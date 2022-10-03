@@ -29,15 +29,15 @@ namespace Metrology
 		Channel_3 = 3,
 	};
 
-	const int ChannelCount = 4;
+	const int CHANNEL_COUNT = 4;
 
-	#define ERR_CHANNEL(channel) (channel < 0 || channel >= Metrology::ChannelCount)
+	#define ERR_CHANNEL(channel) (channel < 0 || channel >= Metrology::CHANNEL_COUNT)
 
 	// ==============================================================================================
 
-	const int InputCount	= 32;
+	const int InputCount = 32;
 
-	const int ComparatorCount	= 32;
+	const int ComparatorCount = 32;
 
 	// ==============================================================================================
 
