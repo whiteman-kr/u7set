@@ -598,10 +598,15 @@ private:
 	virtual void done(int r);
 
 	void saveSettings();
+	void saveFindCompleter();
+	void saveReplaceCompleter();
 
 private:
 	QLineEdit* m_findTextEdit = nullptr;
 	QLineEdit* m_replaceTextEdit = nullptr;
+
+	QCompleter* m_findCompleter = nullptr;
+	QCompleter* m_replaceCompleter = nullptr;
 
 	QCheckBox* m_caseSensitiveCheckBox = nullptr;
 	QTextEdit* m_findResult = nullptr;

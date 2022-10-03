@@ -276,7 +276,6 @@ class FindSignalDialog : public QDialog
 
 public:
 	FindSignalDialog(int currentUserId, bool currentUserIsAdmin, QTableView* parent = nullptr);
-	void notifyThatSignalSetHasChanged();
 
 	bool shouldReopen() { return m_shouldReopen; }
 	void allowReopen() { m_shouldReopen = true; }
@@ -303,11 +302,13 @@ private:
 	void replace(int row);
 	void reloadCurrentIdsMap();
 	void markFistInstancesIfItTheyNotUnique();
-	void generateListIfNeeded(bool throwWarning = true);
+	void generateListIfNeeded();
 
 	void updateCounters();
 
 	void saveDialogGeometry();
+	void saveFindCompleter();
+	void saveReplaceCompleter();
 
 private slots:
 	void generateListIfNeededWithWarning();
@@ -330,6 +331,9 @@ private:
 
 	QLineEdit* m_findString = nullptr;
 	QLineEdit* m_replaceString = nullptr;
+
+	QCompleter* m_findCompleter = nullptr;
+	QCompleter* m_replaceCompleter = nullptr;
 
 	QComboBox* m_searchInPropertyList = nullptr;
 
@@ -398,7 +402,6 @@ public slots:
 	void cloneSignal();
 	void deleteSignal();
 	void findAndReplaceSignal();
-	void updateFindOrReplaceDialog();
 
 	void undoSignalChanges();
 	void checkIn();

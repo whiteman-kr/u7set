@@ -1441,14 +1441,6 @@ void SignalsTabPage::findAndReplaceSignal()
 	m_findSignalDialog->setFocus();
 }
 
-void SignalsTabPage::updateFindOrReplaceDialog()
-{
-	if (m_findSignalDialog != nullptr)
-	{
-		m_findSignalDialog->notifyThatSignalSetHasChanged();
-	}
-}
-
 void SignalsTabPage::undoSignalChanges()
 {
 	m_signalSetProvider->finishLoadingSignals();
@@ -2659,6 +2651,23 @@ FindSignalDialog::FindSignalDialog(int currentUserId, bool currentUserIsAdmin, Q
 	connect(m_findPreviousButton, &QPushButton::clicked, this, &FindSignalDialog::findPrevious);
 	connect(m_findNextButton, &QPushButton::clicked, this, &FindSignalDialog::findNext);
 
+	// Create completers
+	//
+	QStringList completerStringList = QSettings{}.value("FindSignalDialog/SearchCompleter").toStringList();
+	m_findCompleter = new QCompleter(completerStringList, this);
+	m_findCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+	m_findString->setCompleter(m_findCompleter);
+	connect(m_findString, &QLineEdit::textEdited, this, [=](){m_findCompleter->complete();});
+	connect(m_findCompleter, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), m_findString, &QLineEdit::setText);
+
+	completerStringList = QSettings{}.value("FindSignalDialog/ReplaceCompleter").toStringList();
+	m_replaceCompleter = new QCompleter(completerStringList, this);
+	m_replaceCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+	m_replaceString->setCompleter(m_replaceCompleter);
+	connect(m_replaceString, &QLineEdit::textEdited, this, [=](){m_replaceCompleter->complete();});
+	connect(m_replaceCompleter, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), m_replaceString, &QLineEdit::setText);
+	//
+
 	QFormLayout* form = new QFormLayout;
 
 	form->addRow("Find:", m_findString);
@@ -2704,12 +2713,6 @@ FindSignalDialog::FindSignalDialog(int currentUserId, bool currentUserIsAdmin, Q
 	QTimer::singleShot(0, [this](){ m_findString->setFocus(); });
 }
 
-void FindSignalDialog::notifyThatSignalSetHasChanged()
-{
-	m_isMatchToCurrentSignalSet = false;
-	generateListIfNeeded(false);
-}
-
 void FindSignalDialog::closeEvent(QCloseEvent* event)
 {
 	saveDialogGeometry();
@@ -2718,7 +2721,7 @@ void FindSignalDialog::closeEvent(QCloseEvent* event)
 	QDialog::closeEvent(event);
 }
 
-void FindSignalDialog::generateListIfNeeded(bool throwWarning)
+void FindSignalDialog::generateListIfNeeded()
 {
 	SearchOptions currentOptions = getCurrentSearchOptions();
 	if (m_searchOptionsUsedLastTime == currentOptions && m_isMatchToCurrentSignalSet == true)
@@ -2756,7 +2759,7 @@ void FindSignalDialog::generateListIfNeeded(bool throwWarning)
 	else
 	{
 		QModelIndexList selection = m_signalTable->selectionModel()->selectedRows(0);
-		if (selection.count() == 0 && throwWarning)
+		if (selection.count() == 0)
 		{
 			QMessageBox::warning(this, tr("Warning"), tr("No one signal was selected!"));
 		}
@@ -2986,13 +2989,14 @@ FindSignalDialog::SearchOptions FindSignalDialog::getCurrentSearchOptions()
 	options.searchInSelected = m_searchInSelected->isChecked();
 	options.caseSensitive = m_caseSensitive->isChecked();
 	options.wholeWords = m_wholeWords->isChecked();
-
 	options.findString = m_findString->text();
 
 	if (options.caseSensitive == false)
 	{
 		options.findString = options.findString.toUpper();
 	}
+
+	saveFindCompleter();
 
 	return options;
 }
@@ -3080,6 +3084,8 @@ void FindSignalDialog::replace(int row)
 
 	m_signalSetProvider->saveSignal(signal);
 	m_foundListModel->setData(m_foundListModel->index(row, 2), replacedMessage, Qt::DisplayRole);
+
+	saveReplaceCompleter();
 }
 
 void FindSignalDialog::reloadCurrentIdsMap()
@@ -3148,9 +3154,66 @@ void FindSignalDialog::saveDialogGeometry()
 	saveWindowPosition(this, "FindSignalDialog");
 }
 
+void FindSignalDialog::saveFindCompleter()
+{
+	QString findText = m_findString->text();
+	if (findText.isEmpty() == true)
+	{
+		return;
+	}
+
+	QStringListModel* model = dynamic_cast<QStringListModel*>(m_findCompleter->model());
+	if (model == nullptr)
+	{
+		assert(model != nullptr);
+		return;
+	}
+
+	QStringList completerStringList = model->stringList();
+	if (completerStringList.contains(findText, Qt::CaseInsensitive) == false)
+	{
+		completerStringList.push_back(findText);
+		while (completerStringList.size() > 50)
+		{
+			completerStringList.pop_front();
+		}
+		QSettings{}.setValue("FindSignalDialog/SearchCompleter", completerStringList);
+		model->setStringList(completerStringList);
+	}
+}
+
+void FindSignalDialog::saveReplaceCompleter()
+{
+	QString replaceText = m_replaceString->text();
+	if (replaceText.isEmpty() == true)
+	{
+		return;
+	}
+
+	QStringListModel* model = dynamic_cast<QStringListModel*>(m_replaceCompleter->model());
+	if (model == nullptr)
+	{
+		assert(model != nullptr);
+		return;
+	}
+
+	QStringList completerStringList = model->stringList();
+
+	if (completerStringList.contains(replaceText, Qt::CaseInsensitive) == false)
+	{
+		completerStringList.push_back(replaceText);
+		while (completerStringList.size() > 50)
+		{
+			completerStringList.pop_front();
+		}
+		model->setStringList(completerStringList);
+		QSettings{}.setValue("FindSignalDialog/ReplaceCompleter", completerStringList);
+	}
+}
+
 void FindSignalDialog::generateListIfNeededWithWarning()
 {
-	generateListIfNeeded(true);
+	generateListIfNeeded();
 }
 
 void FindSignalDialog::replaceAll()

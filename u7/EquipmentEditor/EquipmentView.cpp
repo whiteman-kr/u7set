@@ -2099,6 +2099,8 @@ void EquipmentView::findObject()
 {
 	static QString findText;
 
+	QStringList completerStringList = QSettings{}.value("EquipmentTabPage/SearchCompleter").toStringList();
+
 	QString text;
 	do
 	{
@@ -2111,6 +2113,21 @@ void EquipmentView::findObject()
 		d.setLabelText(tr("EquipmentID (e.g. USB_RC105_CH02_MD00):"));
 		d.setInputMode(QInputDialog::TextInput);
 		d.setTextValue(findText);
+
+		QCompleter* completer = new QCompleter(completerStringList, this);
+		completer->setCaseSensitivity(Qt::CaseInsensitive);
+
+		QLineEdit* lineEdit = d.findChild<QLineEdit*>();
+		if (lineEdit == nullptr)
+		{
+			Q_ASSERT(lineEdit);
+		}
+		else
+		{
+			lineEdit->setCompleter(completer);
+			connect(lineEdit, &QLineEdit::textEdited, this, [=](){completer->complete();});
+			connect(completer, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), lineEdit, &QLineEdit::setText);
+		}
 
 		int width = QSettings().value("EquipmentTabPage/findDialogWidth", 300).toInt();
 		int height = QSettings().value("EquipmentTabPage/findDialogHeight", 200).toInt();
@@ -2128,6 +2145,16 @@ void EquipmentView::findObject()
 		text = d.textValue();
 
 	} while(text.isEmpty() == true);
+
+	if (completerStringList.contains(text, Qt::CaseInsensitive) == false)
+	{
+		completerStringList.push_back(text);
+		while (completerStringList.size() > 50)
+		{
+			completerStringList.pop_front();
+		}
+		QSettings{}.setValue("EquipmentTabPage/SearchCompleter", completerStringList);
+	}
 
 	// --
 	//

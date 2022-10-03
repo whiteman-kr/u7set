@@ -9927,11 +9927,19 @@ SchemaFindDialog::SchemaFindDialog(QWidget* parent) :
 	m_findTextEdit = new QLineEdit();
 	m_replaceTextEdit = new QLineEdit();
 
-	QCompleter* searchCompleter = new QCompleter(theSettings.buildSearchCompleter(), this);
-	searchCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+	QStringList completerStringList = QSettings{}.value("SchemaFindDialog/SearchCompleter").toStringList();
+	m_findCompleter = new QCompleter(completerStringList, this);
+	m_findCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+	m_findTextEdit->setCompleter(m_findCompleter);
+	connect(m_findTextEdit, &QLineEdit::textEdited, this, [=](){m_findCompleter->complete();});
+	connect(m_findCompleter, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), m_findTextEdit, &QLineEdit::setText);
 
-	m_findTextEdit->setCompleter(searchCompleter);
-	m_replaceTextEdit->setCompleter(searchCompleter);
+	completerStringList = QSettings{}.value("SchemaFindDialog/ReplaceCompleter").toStringList();
+	m_replaceCompleter = new QCompleter(completerStringList, this);
+	m_replaceCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+	m_replaceTextEdit->setCompleter(m_replaceCompleter);
+	connect(m_replaceTextEdit, &QLineEdit::textEdited, this, [=](){m_replaceCompleter->complete();});
+	connect(m_replaceCompleter, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), m_replaceTextEdit, &QLineEdit::setText);
 
 	// CaseSensivity check box
 	//
@@ -10015,11 +10023,13 @@ SchemaFindDialog::SchemaFindDialog(QWidget* parent) :
 
 	auto findNextFunc = [this]()
 		{
+			saveFindCompleter();
 			emit findNext(m_caseSensitiveCheckBox->isChecked() ? Qt::CaseSensitive : Qt::CaseInsensitive);
 		};
 
 	auto findPrevFunc = [this]()
 		{
+			saveFindCompleter();
 			emit findPrev(m_caseSensitiveCheckBox->isChecked() ? Qt::CaseSensitive : Qt::CaseInsensitive);
 		};
 
@@ -10149,6 +10159,9 @@ void SchemaFindDialog::replaceAndFindPressed()
 		return;
 	}
 
+	saveFindCompleter();
+	saveReplaceCompleter();
+
 	emit replaceAndFind(findText, replaceWith, cs);
 
 	return;
@@ -10164,6 +10177,9 @@ void SchemaFindDialog::replaceAllPressed()
 	{
 		return;
 	}
+
+	saveFindCompleter();
+	saveReplaceCompleter();
 
 	emit replaceAll(findText, replaceWith, cs);
 
@@ -10187,4 +10203,61 @@ void SchemaFindDialog::saveSettings()
 	settings.setValue("SchemaFindDialog/Geometry", saveGeometry());
 
 	return;
+}
+
+void SchemaFindDialog::saveFindCompleter()
+{
+	QString findText = m_findTextEdit->text();
+	if (findText.isEmpty() == true)
+	{
+		return;
+	}
+
+	QStringListModel* model = dynamic_cast<QStringListModel*>(m_findCompleter->model());
+	if (model == nullptr)
+	{
+		assert(model != nullptr);
+		return;
+	}
+
+	QStringList completerStringList = model->stringList();
+	if (completerStringList.contains(findText, Qt::CaseInsensitive) == false)
+	{
+		completerStringList.push_back(findText);
+		while (completerStringList.size() > 50)
+		{
+			completerStringList.pop_front();
+		}
+		QSettings{}.setValue("SchemaFindDialog/SearchCompleter", completerStringList);
+		model->setStringList(completerStringList);
+	}
+}
+
+void SchemaFindDialog::saveReplaceCompleter()
+{
+	QString replaceText = m_replaceTextEdit->text();
+	if (replaceText.isEmpty() == true)
+	{
+		return;
+	}
+
+	QStringListModel* model = dynamic_cast<QStringListModel*>(m_replaceCompleter->model());
+	if (model == nullptr)
+	{
+		assert(model != nullptr);
+		return;
+	}
+
+	QStringList completerStringList = model->stringList();
+
+	if (completerStringList.contains(replaceText, Qt::CaseInsensitive) == false)
+	{
+		completerStringList.push_back(replaceText);
+		while (completerStringList.size() > 50)
+		{
+			completerStringList.pop_front();
+		}
+		model->setStringList(completerStringList);
+		QSettings{}.setValue("SchemaFindDialog/ReplaceCompleter", completerStringList);
+	}
 }
