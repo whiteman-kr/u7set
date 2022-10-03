@@ -1665,7 +1665,7 @@ bool Database::openSQLite()
 
 	//
 	//
-	m_database.setDatabaseName(path + QDir::separator() + DATABASE_NAME + ".db");
+	m_database.setDatabaseName(path + QDir::separator() + DATABASE_NAME + DATABASE_NAME_EXT);
 	if (m_database.open() == false)
 	{
 		qDebug() << m_database.lastError().text();
@@ -1919,8 +1919,12 @@ void Database::createTables()
 
 bool Database::createBackup()
 {
-	QString sourcePath = m_databaseOption.locationPath() + QDir::separator() + DATABASE_NAME;
+	if (m_databaseOption.type() != OT::SQLite)
+	{
+		return false;
+	}
 
+	QString sourcePath = m_databaseOption.locationPath() + QDir::separator() + DATABASE_NAME + DATABASE_NAME_EXT;
 	if (QFile::exists(sourcePath) == false)
 	{
 		return false;
@@ -1940,7 +1944,7 @@ bool Database::createBackup()
 	QDate&& date = currentTime.date();
 	QTime&& time = currentTime.time();
 
-	QString destPath = QString("%1%2%3%4%5%6%7%8%9")
+	QString destPath = QString("%1%2%3%4%5%6%7%8%9%10")
 				.arg(path)
 				.arg(QDir::separator())
 				.arg(date.year(), 4, 10, QChar('0'))
@@ -1949,7 +1953,8 @@ bool Database::createBackup()
 				.arg(time.hour(), 2, 10, QChar('0'))
 				.arg(time.minute(), 2, 10, QChar('0'))
 				.arg(time.second(), 2, 10, QChar('0'))
-				.arg(DATABASE_NAME);
+				.arg(DATABASE_NAME)
+				.arg(DATABASE_NAME_EXT);
 
 	if (QFile::copy(sourcePath, destPath) == false)
 	{
