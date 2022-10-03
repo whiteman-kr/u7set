@@ -188,7 +188,7 @@ QVariant MetrologyConnectionTable::data(const QModelIndex &index, int role) cons
 			case E::VcsItemAction::Deleted :	return QColor(StandardColors::VcsDeleted);
 
 			default:
-				return QVariant();
+				;
 		}
 
 		return QVariant();
