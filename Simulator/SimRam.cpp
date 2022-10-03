@@ -49,11 +49,6 @@ namespace Sim
 		return false;
 	}
 
-	QString RamAreaInfo::name() const
-	{
-		return m_name;
-	}
-
 	//
 	// RamArea
 	//
@@ -145,14 +140,16 @@ namespace Sim
 
 		// Apply override
 		//
-		if (m_overrideData.empty() == false)
+		if (m_overrideData.size() == static_cast<size_t>(m_data.size() / 2))
 		{
 			int zeroBasedOffsetW = 0;
 
 			quint16* dataPtr = reinterpret_cast<quint16*>(m_data.data());
-			for (qint32 i = 0; i < m_data.size() / 2; i++)
+			for (qsizetype i = 0, sz = m_data.size() / 2; i < sz; i++)
 			{
 				m_overrideData[zeroBasedOffsetW].applyOverlapping(dataPtr);
+
+				zeroBasedOffsetW ++;
 				dataPtr ++;
 			}
 		}
@@ -163,13 +160,12 @@ namespace Sim
 	bool RamArea::writeBuffer(quint32 offsetW, const QByteArray& data) noexcept
 	{
 		int byteOffset = (offsetW - offset()) * 2;
-		if (byteOffset < 0 ||
-			m_data.size() - byteOffset < data.size())
+
+		if (byteOffset < 0 || byteOffset + data.size() > m_data.size())
 		{
 			// Buffer must be completely inside area
 			//
-			Q_ASSERT(byteOffset >= 0 &&
-					 m_data.size() - byteOffset >= data.size());
+			Q_ASSERT(byteOffset >= 0 && byteOffset + data.size() <= m_data.size());
 			return false;
 		}
 
@@ -177,7 +173,7 @@ namespace Sim
 
 		// Apply override
 		//
-		if (m_overrideData.empty() == false)
+		if (m_overrideData.size() == static_cast<size_t>(m_data.size() / 2))
 		{
 			int zeroBasedOffsetW = offsetW - offset();
 			assert(zeroBasedOffsetW >= 0 && zeroBasedOffsetW < m_data.size() / 2);
@@ -195,10 +191,8 @@ namespace Sim
 
 	bool RamArea::setMem(quint32 offsetW, quint32 sizeW, quint16 data)
 	{
-		//int byteOffset = (offsetW - offset()) * 2;
-
-		if (offsetW < offset() ||
-			(offsetW - offset() + sizeW) > static_cast<quint32>(m_data.size()) / 2)
+		if (qsizetype byteOffset = (offsetW - offset()) * 2;
+			byteOffset < 0 || byteOffset + sizeW * 2 > m_data.size())
 		{
 			// Buffer must be completely inside area
 			//
@@ -215,7 +209,7 @@ namespace Sim
 
 		// Apply override
 		//
-		if (m_overrideData.empty() == false)
+		if (m_overrideData.size() == static_cast<size_t>(m_data.size() / 2))
 		{
 			assert(zeroBasedOffsetW >= 0 && zeroBasedOffsetW < m_data.size() / 2);
 
@@ -223,6 +217,8 @@ namespace Sim
 			for (quint32 i = 0; i < sizeW; i++)
 			{
 				m_overrideData[zeroBasedOffsetW].applyOverlapping(dataPtr);
+
+				zeroBasedOffsetW ++;
 				dataPtr ++;
 			}
 		}
@@ -237,7 +233,7 @@ namespace Sim
 		const quint32 areaOffset = offset();
 
 		if (offsetW < areaOffset ||
-			offsetW > (areaOffset + size() - 2) ||
+			offsetW > (areaOffset + size() - 1) ||
 			(bitNo & ~0x0F) != 0)
 		{
 			return false;
@@ -393,11 +389,9 @@ namespace Sim
 	bool RamArea::writeData(quint32 offsetW, TYPE data, E::ByteOrder byteOrder) noexcept
 	{
 		size_t byteOffset = (offsetW - offset()) * 2;
-		if (byteOffset < 0 ||
-			byteOffset >= m_data.size() - sizeof(TYPE))
+		if (byteOffset > m_data.size() - sizeof(TYPE))
 		{
-			Q_ASSERT(byteOffset >= 0 &&
-				   byteOffset - sizeof(TYPE) <= static_cast<size_t>(m_data.size()));
+			Q_ASSERT(false);
 			return false;
 		}
 
@@ -443,11 +437,9 @@ namespace Sim
 		}
 
 		size_t byteOffset = (offsetW - offset()) * 2;
-		if (byteOffset < 0 ||
-			byteOffset >= m_data.size() - sizeof(TYPE))
+		if (byteOffset > m_data.size() - sizeof(TYPE))
 		{
-			Q_ASSERT(byteOffset >= 0 &&
-					byteOffset - sizeof(TYPE) <= static_cast<size_t>(m_data.size()));
+			Q_ASSERT(false);
 			return false;
 		}
 
@@ -808,6 +800,17 @@ namespace Sim
 	bool Ram::setMem(quint32 offsetW, quint32 sizeW, quint16 data)
 	{
 		RamArea* area = memoryArea(E::LogicModuleRamAccess::Write, offsetW);
+		if (area == nullptr)
+		{
+			return false;
+		}
+
+		return area->setMem(offsetW, sizeW, data);
+	}
+
+	bool Ram::setMem(quint32 offsetW, quint32 sizeW, quint16 data, E::LogicModuleRamAccess access)
+	{
+		RamArea* area = memoryArea(access, offsetW);
 		if (area == nullptr)
 		{
 			return false;

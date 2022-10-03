@@ -953,7 +953,7 @@ namespace Builder
 	{
 		QString commStart = getCommentStart(os);
 
-		BuildInfo&& b = m_buildResultWriter->buildInfo();
+        BuildInfo b = m_buildResultWriter->buildInfo();
 
 		QString comments;
 

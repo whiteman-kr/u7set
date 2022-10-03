@@ -70,10 +70,11 @@ private:
 	void sortChildrenByState(std::shared_ptr<Hardware::DeviceObject> deviceObject, Qt::SortOrder order);
 	void sortChildrenByUser(std::shared_ptr<Hardware::DeviceObject> deviceObject, Qt::SortOrder order);
 
-public slots:
-	void projectOpened();
-	void projectClosed();
+public:
+	void projectOpenedAction();
+	void projectClosedAction();
 
+public slots:
 	void switchMode();
 
 	void updateUserList();

@@ -153,9 +153,25 @@ bool ConnectionsInfo::load(ConnectionInfo* ci, const QDomNode& node, QString* er
 
 	result &= DomXmlHelper::getStringAttribute(elem, XmlAttribute::ID, &ci->ID, errMsg);
 	result &= DomXmlHelper::getIntAttribute(elem, ConnectionsInfo::ATTR_LINK_ID, &ci->linkID, errMsg);
-	result &= DomXmlHelper::getStringAttribute(elem, ConnectionsInfo::ATTR_TYPE, &ci->type, errMsg);
+	result &= DomXmlHelper::getStringAttribute(elem, ConnectionsInfo::ATTR_TYPE, &ci->typeStr, errMsg);
 	result &= DomXmlHelper::getBoolAttribute(elem, ConnectionsInfo::ATTR_ENABLE_MANUAL_SETTINGS, &ci->enableManualSettings, errMsg);
 	result &= DomXmlHelper::getBoolAttribute(elem, ConnectionsInfo::ATTR_DISABLE_DATA_ID_CONTROL, &ci->disableDataIDControl, errMsg);
+
+	if (ci->typeStr == CONN_TYPE_PORT_TO_PORT)
+	{
+		ci->type = Hardware::Connection::Type::PortToPort;
+	}
+	else
+	{
+		if (ci->typeStr == CONN_TYPE_SINGLE_PORT)
+		{
+			ci->type = Hardware::Connection::Type::SinglePort;
+		}
+		else
+		{
+			Q_ASSERT(false);
+		}
+	}
 
 	int portsCount = 0;
 
@@ -477,19 +493,20 @@ QString ConnectionsInfo::portTag(int portNo)
 
 		ci->ID = connection->connectionID();
 		ci->linkID = connection->linkID();
-		ci->type = connection->typeStr();
+		ci->typeStr = connection->typeStr();
+		ci->type = connection->type();
 		ci->enableManualSettings = connection->manualSettings();
 		ci->disableDataIDControl = connection->disableDataId();
 
 		int portsCount = 0;
 
-		if (ci->type == ConnectionsInfo::CONN_TYPE_SINGLE_PORT)
+		if (ci->type == Hardware::Connection::Type::SinglePort)
 		{
 			portsCount = 1;
 		}
 		else
 		{
-			if (ci->type == ConnectionsInfo::CONN_TYPE_PORT_TO_PORT)
+			if (ci->type == Hardware::Connection::Type::PortToPort)
 			{
 				portsCount = 2;
 			}
@@ -522,7 +539,7 @@ QString ConnectionsInfo::portTag(int portNo)
 
 		xml.writeStringAttribute(XmlAttribute::ID, ci.ID);
 		xml.writeIntAttribute(ConnectionsInfo::ATTR_LINK_ID, ci.linkID);
-		xml.writeStringAttribute(ConnectionsInfo::ATTR_TYPE, ci.type);
+		xml.writeStringAttribute(ConnectionsInfo::ATTR_TYPE, ci.typeStr);
 		xml.writeBoolAttribute(ConnectionsInfo::ATTR_ENABLE_MANUAL_SETTINGS, ci.enableManualSettings);
 		xml.writeBoolAttribute(ConnectionsInfo::ATTR_DISABLE_DATA_ID_CONTROL, ci.disableDataIDControl);
 		xml.writeIntAttribute(ConnectionsInfo::ATTR_PORTS_COUNT, static_cast<int>(ci.ports.size()));

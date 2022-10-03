@@ -5,7 +5,6 @@
 #include "../lib/Ui/TabWidgetEx.h"
 
 
-
 //
 //
 // SchemasTabPage
@@ -164,6 +163,14 @@ namespace
 
 void SchemasTabPage::saveSession() const
 {
+	if (m_requireRestoreSession == true)
+	{
+		// Session was not restored (no showEvent for widget)
+		// return to avoid storing empty session
+		//
+		return;
+	}
+
 	// Save all opened schamas
 	//
 	if (db()->isProjectOpened() == false)
@@ -175,8 +182,10 @@ void SchemasTabPage::saveSession() const
 	// Save new session data, data saved to settings, for each project separately
 	//
 	QSettings settings;
-	QString keyDir = QString("Session/%1/SchemaEditor/")
-					 .arg(db()->currentProject().projectName());
+
+	QString keyDir = QString("Session/%1-%2/SchemaEditor/")
+					 .arg(db()->currentProject().projectName())
+					 .arg(db()->currentUser().username());
 
 	settings.setValue(keyDir + "Count", m_tabWidget->count() - 1);	// 1 is control tab page, it si not stored
 
@@ -218,6 +227,8 @@ void SchemasTabPage::saveSession() const
 
 void SchemasTabPage::restoreSession()
 {
+	m_requireRestoreSession = false;
+
 	// Restore all opened schemas
 	//
 	if (m_controlTabPage == nullptr || db()->isProjectOpened() == false)
@@ -228,8 +239,9 @@ void SchemasTabPage::restoreSession()
 	}
 
 	QSettings settings;
-	QString keyDir = QString("Session/%1/SchemaEditor/")
-					 .arg(db()->currentProject().projectName());
+	QString keyDir = QString("Session/%1-%2/SchemaEditor/")
+					 .arg(db()->currentProject().projectName())
+					 .arg(db()->currentUser().username());
 
 	int schemaCount = settings.value(keyDir + "Count", 0).toInt();
 	QString currentSchemaRecord = settings.value(keyDir + "Current").toString();
@@ -290,11 +302,23 @@ void SchemasTabPage::refreshControlTabPage()
 	return;
 }
 
+void SchemasTabPage::showEvent(QShowEvent* event)
+{
+	MainTabPage::showEvent(event);
+
+	if (m_requireRestoreSession == true)
+	{
+		restoreSession();
+	}
+
+	return;
+}
+
 void SchemasTabPage::projectOpened()
 {
 	this->setEnabled(true);
 
-	restoreSession();
+	m_requireRestoreSession = true;
 
 	return;
 }
@@ -303,6 +327,8 @@ void SchemasTabPage::projectClosed()
 {
 	GlobalMessanger::instance().clearBuildSchemaIssues();
 	GlobalMessanger::instance().clearSchemaItemRunOrder();
+
+	m_requireRestoreSession = false;
 
 	this->setEnabled(false);
 	return;

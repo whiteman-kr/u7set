@@ -201,7 +201,7 @@ void SimConnectionPage::updateData()
 									 "\tLinkID:\t\t0x%2(%3)\n"
 									 "\tManual:\t\t%4\n"
 									 "\tControlDataID:\t%5\n")
-									.arg(m_connectionInfo.type)
+									.arg(m_connectionInfo.typeStr)
 									.arg(m_connectionInfo.linkID, 4, 16, QChar('0')).arg(m_connectionInfo.linkID)
 									.arg(m_connectionInfo.enableManualSettings ? "true" : "false")
 									.arg(m_connectionInfo.disableDataIDControl ? "false" : "true")

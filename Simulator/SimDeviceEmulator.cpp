@@ -1569,11 +1569,17 @@ namespace Sim
 			if (timeout == true)
 			{
 				// If receive buffer is empty then it is timeout
-				// Clear memory in dedicated memory area
 				//
-				m_ram.clearMemoryArea(portInfo.rxBufferAbsAddr, E::LogicModuleRamAccess::Read);
-
-				//qDebug() << "DeviceEmulator::receiveConnectionsData: Connection timeout " << c->connectionId();
+				// NO: Clear memory in dedicated memory area
+				//	   Don't do it:	m_ram.clearMemoryArea(portInfo.rxBufferAbsAddr, E::LogicModuleRamAccess::Read);
+				//
+				// YES: Cannot clear whole memory area, because it can be applied only for LM,
+				//		where each opto port has its own memery area
+				//		BUT OCM has shared memory area for several connections,
+				//		thats why we need to clear just some data.
+				//		Use: m_ram.setMem(...)
+				//
+				m_ram.setMem(portInfo.rxBufferAbsAddr, portInfo.rxDataSizeW, 0, E::LogicModuleRamAccess::Read);
 			}
 			else
 			{

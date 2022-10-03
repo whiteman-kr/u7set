@@ -2,11 +2,6 @@
 #include "../../HardwareLib/DeviceObject.h"
 #include "../../DbLib/DbController.h"
 
-namespace Hardware
-{
-	class DeviceObject;
-}
-
 class EquipmentModel;
 
 //
@@ -29,7 +24,14 @@ public:
 signals:
 	void updateState();
 
+public:
+	void saveSession() const;
+	void restoreSession();
+
 public slots:
+	void projectOpened();
+	void projectClosed();
+
 	void addSystem();
 	void addRack();
 	void addChassis();
@@ -79,6 +81,7 @@ public slots:
 	bool canPaste(const ::Proto::EnvelopeSetShortDescription& message) const;
 
 	void findObject();
+	bool findObject(QString equiepmentId);
 
 	void deleteSelectedDevices();
 	void checkInSelectedDevices();
@@ -103,6 +106,7 @@ public slots:
 	// Events
 	//
 protected:
+	virtual void showEvent(QShowEvent* event) override;
 	virtual void focusInEvent(QFocusEvent* event) override;
 	virtual void focusOutEvent(QFocusEvent* event) override;
 
@@ -112,11 +116,16 @@ protected:
 	EquipmentModel* equipmentModel();
 	EquipmentModel* equipmentModel() const;
 	DbController* db();
+	const DbController* db() const;
 
 	// Data
 	//
 private:
 	DbController* m_dbController;
+
+	// Postpone restore session to showEvent()
+	//
+	bool m_requireRestoreSession = false;
 
 public:
 	static const char* mimeType;					// = "application/x-deviceobjecs";

@@ -11,6 +11,7 @@ class SimRamTests;
 
 namespace Sim
 {
+
 	class RamAreaInfo
 	{
 	public:
@@ -19,7 +20,7 @@ namespace Sim
 		RamAreaInfo(RamAreaInfo&&) noexcept = default;
 		RamAreaInfo(E::LogicModuleRamAccess access, quint32 offset, quint32 size, QString name);
 		RamAreaInfo& operator=(const RamAreaInfo&) = default;
-		RamAreaInfo& operator=(RamAreaInfo&&) = default;
+		RamAreaInfo& operator=(RamAreaInfo&&) noexcept = default;
 		virtual ~RamAreaInfo() = default;
 
 	public:
@@ -40,17 +41,18 @@ namespace Sim
 		bool overlapped(E::LogicModuleRamAccess access, quint32 offset, quint32 size) const;
 
 	public:
-		QString name() const;
-		E::LogicModuleRamAccess access() const	{	return m_access;	}
-		quint32 offset() const					{	return m_offset;	}
-		quint32 size() const					{	return m_size;		}
+		const QString& name() const noexcept			{	return m_name;		}
+		E::LogicModuleRamAccess access() const noexcept	{	return m_access;	}
+		quint32 offset() const noexcept					{	return m_offset;	}
+		quint32 size() const noexcept					{	return m_size;		}
 
 	private:
 		QString m_name;
 		E::LogicModuleRamAccess m_access = E::LogicModuleRamAccess::Read;
-		quint32 m_offset = 0xFFFFFFFF;
-		quint32 m_size = 0;
+		quint32 m_offset = 0xFFFFFFFF;	// In words
+		quint32 m_size = 0;				// In words
 	};
+
 
 	class RamArea final : public RamAreaInfo
 	{
@@ -61,7 +63,7 @@ namespace Sim
 		virtual ~RamArea();
 
 		RamArea& operator=(const RamArea&) = default;
-		RamArea& operator=(RamArea&&) = default;
+		RamArea& operator=(RamArea&&) noexcept = default;
 
 		RamArea(E::LogicModuleRamAccess access, quint32 offset, quint32 size, bool clearOnStartCycle, QString name);
 
@@ -214,6 +216,7 @@ namespace Sim
 
 		bool movMem(quint32 src, quint32 dst, quint32 sizeW);
 		bool setMem(quint32 offsetW, quint32 sizeW, quint16 data);
+		bool setMem(quint32 offsetW, quint32 sizeW, quint16 data, E::LogicModuleRamAccess access);
 
 		bool writeBit(quint32 offsetW, quint16 bitNo, quint16 data, E::ByteOrder byteOrder) noexcept;
 		bool readBit(quint32 offsetW, quint16 bitNo, quint16* data, E::ByteOrder byteOrder, bool applyOverride = true) const noexcept;

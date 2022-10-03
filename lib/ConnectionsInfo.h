@@ -1,14 +1,12 @@
 #pragma once
 
 #ifdef IS_BUILDER
-
-#include "../HardwareLib/Connection.h"
-#include "../Builder/OptoModule.h"
-#include "../UtilsLib/XmlHelper.h"
-#include "../UtilsLib/WUtils.h"
-
+	#include "../Builder/OptoModule.h"
+	#include "../UtilsLib/XmlHelper.h"
+	#include "../UtilsLib/WUtils.h"
 #endif
 
+#include "../HardwareLib/Connection.h"
 #include "ConstStrings.h"
 #include "../UtilsLib/Address16.h"
 #include "../CommonLib/Types.h"
@@ -71,7 +69,8 @@ class ConnectionInfo
 public:
 	QString ID;
 	int linkID = -1;
-	QString type;
+	QString typeStr;
+	Hardware::Connection::Type type = Hardware::Connection::Type::PortToPort;
 	bool enableManualSettings = false;
 	bool disableDataIDControl = false;
 
