@@ -31,16 +31,6 @@ int SqlFieldBase::init(int objectType, int)
 
 			break;
 
-		case SQL_TABLE_HISTORY:
-
-			append("ObjectID",						QMetaType::Int);
-			append("Version",						QMetaType::Int);
-			append("Event",							QMetaType::QString, 256);
-			append("Time",							QMetaType::QTime);
-			append("Description",					QMetaType::QString, 256);	// db ver 1, table ver 1
-
-			break;
-
 		case SQL_TABLE_LINEARITY:
 
 			append("ObjectID",						QMetaType::Int);
@@ -390,42 +380,6 @@ SqlObjectInfo& SqlObjectInfo::operator=(SqlObjectInfo& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-SqlHistoryDatabase::SqlHistoryDatabase()
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-SqlHistoryDatabase::~SqlHistoryDatabase()
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-SqlHistoryDatabase::SqlHistoryDatabase(int objectID, int version, const QString& event,  const QDateTime& time)
-{
-	m_objectID = objectID;
-	m_version = version;
-	m_event = event;
-	m_time = time;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-SqlHistoryDatabase& SqlHistoryDatabase::operator=(SqlHistoryDatabase& from)
-{
-	m_objectID = from.m_objectID;
-	m_version = from.m_version;
-	m_event = from.m_event;
-	m_time = from.m_time;
-
-	return *this;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
 SqlTable::SqlTable()
 {
 }
@@ -736,21 +690,6 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					info->setObjectID(query.value(field++).toInt());
 					info->setCaption(query.value(field++).toString());
 					info->setVersion(query.value(field++).toInt());
-				}
-				break;
-
-			case SQL_TABLE_HISTORY:
-				{
-					SqlHistoryDatabase* history = static_cast<SqlHistoryDatabase*> (pRecord) + readedCount;
-					if (history == nullptr)
-					{
-						break;
-					}
-
-					history->setObjectID(objectID);
-					history->setVersion(query.value(field++).toInt());
-					history->setEvent(query.value(field++).toString());
-					history->setTime(query.value(field++).toDateTime());
 				}
 				break;
 
@@ -1141,20 +1080,6 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, info->objectID());
 					query.bindValue(field++, info->caption());
 					query.bindValue(field++, info->version());
-				}
-				break;
-
-			case SQL_TABLE_HISTORY:
-				{
-					SqlHistoryDatabase* history = static_cast<SqlHistoryDatabase*> (pRecord) + r;
-					if (history == nullptr)
-					{
-						break;
-					}
-
-					query.bindValue(field++, history->version());
-					query.bindValue(field++, history->event());
-					query.bindValue(field++, history->time());
 				}
 				break;
 
@@ -1566,13 +1491,6 @@ SqlTable& SqlTable::operator=(SqlTable& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-SqlHistoryDatabase Database::m_history[] =
-{
-	SqlHistoryDatabase(SQL_TABLE_HISTORY, 0, "Create database", QDateTime(QDate(2014, 11,11), QTime(11,11,11,00))),
-};
-
-// -------------------------------------------------------------------------------------------------------------------
-
 Database::Database(QObject* parent) :
 	QObject(parent)
 {
@@ -1665,7 +1583,7 @@ bool Database::openSQLite()
 
 	//
 	//
-	m_database.setDatabaseName(path + QDir::separator() + DATABASE_NAME + DATABASE_NAME_EXT);
+	m_database.setDatabaseName(path + QDir::separator() + DATABASE_NAME + DATABASE_SQLLITE_EXT);
 	if (m_database.open() == false)
 	{
 		qDebug() << m_database.lastError().text();
@@ -1924,7 +1842,7 @@ bool Database::createBackup()
 		return false;
 	}
 
-	QString sourcePath = m_databaseOption.locationPath() + QDir::separator() + DATABASE_NAME + DATABASE_NAME_EXT;
+	QString sourcePath = m_databaseOption.locationPath() + QDir::separator() + DATABASE_NAME + DATABASE_SQLLITE_EXT;
 	if (QFile::exists(sourcePath) == false)
 	{
 		return false;
@@ -1954,7 +1872,7 @@ bool Database::createBackup()
 				.arg(time.minute(), 2, 10, QChar('0'))
 				.arg(time.second(), 2, 10, QChar('0'))
 				.arg(DATABASE_NAME)
-				.arg(DATABASE_NAME_EXT);
+				.arg(DATABASE_SQLLITE_EXT);
 
 	if (QFile::copy(sourcePath, destPath) == false)
 	{

@@ -9,9 +9,10 @@
 
 // ==============================================================================================
 
-#define					DATABASE_NAME		"Metrology"
-#define					DATABASE_NAME_EXT	".db"
-#define					DATABASE_VERSION	1
+#define					DATABASE_VERSION		2
+#define					DATABASE_NAME			"Metrology"
+
+#define					DATABASE_SQLLITE_EXT	".db"
 
 // ==============================================================================================
 //
@@ -21,11 +22,12 @@
 const char* const migration[DATABASE_VERSION] =
 {
 	"ALTER TABLE History ADD Description VARCHAR(256);",	// 1
+	"DROP TABLE History;",									// 2
 };
 
 // ==============================================================================================
 //
-// Is a list of fields SQL tables.
+// list of fields SQL tables.
 //
 class SqlFieldBase : public QSqlRecord
 {
@@ -49,7 +51,6 @@ public:
 const char* const		SqlTableName[] =
 {
 						"DatabaseInfo",
-						"History",
 
 						"LinearityMeasure",
 						"LinearityMeasureAddValEl",
@@ -68,16 +69,15 @@ const int				SQL_TABLE_COUNT							= sizeof(SqlTableName)/sizeof(SqlTableName[0]
 
 const int				SQL_TABLE_UNKNONW						= -1,
 						SQL_TABLE_DATABASE_INFO					= 0,
-						SQL_TABLE_HISTORY						= 1,
-						SQL_TABLE_LINEARITY						= 2,
-						SQL_TABLE_LINEARITY_ADD_VAL_EL			= 3,
-						SQL_TABLE_LINEARITY_ADD_VAL_EN			= 4,
-						SQL_TABLE_LINEARITY_20_EL				= 5,
-						SQL_TABLE_LINEARITY_20_EN				= 6,
-						SQL_TABLE_LINEARITY_POINT				= 7,
-						SQL_TABLE_COMPARATOR					= 8,
-						SQL_TABLE_REPORT_HEADER					= 9,
-						SQL_TABLE_RACK_GROUP					= 10;
+						SQL_TABLE_LINEARITY						= 1,
+						SQL_TABLE_LINEARITY_ADD_VAL_EL			= 2,
+						SQL_TABLE_LINEARITY_ADD_VAL_EN			= 3,
+						SQL_TABLE_LINEARITY_20_EL				= 4,
+						SQL_TABLE_LINEARITY_20_EN				= 5,
+						SQL_TABLE_LINEARITY_POINT				= 6,
+						SQL_TABLE_COMPARATOR					= 7,
+						SQL_TABLE_REPORT_HEADER					= 8,
+						SQL_TABLE_RACK_GROUP					= 9;
 
 
 // ==============================================================================================
@@ -91,7 +91,6 @@ const int				SQL_TABLE_VER_UNKNONW = -1;
 const int				SqlTableVersion[SQL_TABLE_COUNT] =
 {
 						DATABASE_VERSION,	//	SQL_TABLE_DATABASE_INFO
-						1,					//	SQL_TABLE_HISTORY
 
 						0,					//	SQL_TABLE_LINEARITY
 						0,					//	SQL_TABLE_LINEARITY_ADD_EL_VAL
@@ -117,7 +116,6 @@ const int				SQL_OBJECT_ID_UNKNONW = -1;
 const int				SqlObjectID[SQL_TABLE_COUNT] =
 {
 						0,			//	SQL_TABLE_DATABASE_INFO
-						1,			//	SQL_TABLE_HISTORY
 
 						100,		//	SQL_TABLE_LINEARITY
 						110,		//	SQL_TABLE_LINEARITY_ADD_EL_VAL
@@ -144,7 +142,6 @@ const int				SQL_TABLE_IS_MAIN	= 0,
 const int				SqlTableByMeasureType[SQL_TABLE_COUNT] =
 {
 						Measure::Type::NoMeasureType,			//	SQL_TABLE_DATABASE_INFO						// SQL_TABLE_CONFIG
-						Measure::Type::NoMeasureType,			//	SQL_TABLE_HISTORY							// SQL_TABLE_CONFIG
 
 						Measure::Type::Linearity,				//	SQL_TABLE_LINEARITY							// SQL_TABLE_MEASURE_MAIN
 						Measure::Type::Linearity,				//	SQL_TABLE_LINEARITY_ADD_EL_VAL				// SQL_TABLE_MEASURE_SUB
@@ -165,7 +162,6 @@ const int				SqlTableByMeasureType[SQL_TABLE_COUNT] =
 const int				SqlTableAppointType[SQL_TABLE_COUNT] =
 {
 						SQL_TABLE_IS_CONFIG,				//	SQL_TABLE_DATABASE_INFO
-						SQL_TABLE_IS_CONFIG,				//	SQL_TABLE_HISTORY
 
 						SQL_TABLE_IS_MAIN,					//	SQL_TABLE_LINEARITY
 						SQL_TABLE_IS_SUB,					//	SQL_TABLE_LINEARITY_ADD_EL_VAL
@@ -228,41 +224,6 @@ private:
 	int					m_objectID = SQL_OBJECT_ID_UNKNONW;			// unique identifier of table in the database
 	QString				m_caption;									// caption of table
 	int					m_version = SQL_TABLE_VER_UNKNONW;			// table version, is read when the database initialization
-};
-
-// ==============================================================================================
-
-class SqlHistoryDatabase
-{
-
-public:
-
-	SqlHistoryDatabase();
-	SqlHistoryDatabase(int objectID, int version, const QString& event, const QDateTime& time);
-	virtual ~SqlHistoryDatabase();
-
-public:
-
-	int					objectID() const { return m_objectID; }
-	void				setObjectID(int objectID) { m_objectID = objectID; }
-
-	int					version() const { return m_version; }
-	void				setVersion(int verison) { m_version = verison; }
-
-	QString				event() const { return m_event; }
-	void				setEvent(const QString& event) { m_event = event; }
-
-	QDateTime			time() const { return m_time; }
-	void				setTime(const QDateTime& time) { m_time = time; }
-
-	SqlHistoryDatabase& operator=(SqlHistoryDatabase& from);
-
-private:
-
-	int					m_objectID = SQL_OBJECT_ID_UNKNONW;
-	int					m_version = SQL_TABLE_VER_UNKNONW;
-	QString				m_event;
-	QDateTime			m_time;
 };
 
 // ==============================================================================================
@@ -352,8 +313,6 @@ private:
 	DatabaseOption		m_databaseOption;
 
 	int					m_currentVersion = 0;
-
-	static SqlHistoryDatabase m_history[DATABASE_VERSION + 1];
 
 	bool				createBackup();
 
