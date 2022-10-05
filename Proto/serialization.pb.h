@@ -2618,10 +2618,13 @@ class EnvelopeSetShortDescription PROTOBUF_FINAL :
   enum : int {
     kClassnamehashFieldNumber = 2,
     kDevicetypeFieldNumber = 10,
+    kProjectNameFieldNumber = 6,
+    kUserNameFieldNumber = 7,
     kProjectdbversionFieldNumber = 1,
     kEquipmentEditorFieldNumber = 3,
     kPresetEditorFieldNumber = 4,
     kPresetRootFieldNumber = 5,
+    kExportTimeFieldNumber = 8,
   };
   // repeated uint32 classnamehash = 2;
   int classnamehash_size() const;
@@ -2666,6 +2669,46 @@ class EnvelopeSetShortDescription PROTOBUF_FINAL :
       devicetype() const;
   ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int32 >*
       mutable_devicetype();
+
+  // optional string projectName = 6;
+  bool has_projectname() const;
+  private:
+  bool _internal_has_projectname() const;
+  public:
+  void clear_projectname();
+  const std::string& projectname() const;
+  void set_projectname(const std::string& value);
+  void set_projectname(std::string&& value);
+  void set_projectname(const char* value);
+  void set_projectname(const char* value, size_t size);
+  std::string* mutable_projectname();
+  std::string* release_projectname();
+  void set_allocated_projectname(std::string* projectname);
+  private:
+  const std::string& _internal_projectname() const;
+  void _internal_set_projectname(const std::string& value);
+  std::string* _internal_mutable_projectname();
+  public:
+
+  // optional string userName = 7;
+  bool has_username() const;
+  private:
+  bool _internal_has_username() const;
+  public:
+  void clear_username();
+  const std::string& username() const;
+  void set_username(const std::string& value);
+  void set_username(std::string&& value);
+  void set_username(const char* value);
+  void set_username(const char* value, size_t size);
+  std::string* mutable_username();
+  std::string* release_username();
+  void set_allocated_username(std::string* username);
+  private:
+  const std::string& _internal_username() const;
+  void _internal_set_username(const std::string& value);
+  std::string* _internal_mutable_username();
+  public:
 
   // optional uint32 projectdbversion = 1;
   bool has_projectdbversion() const;
@@ -2719,6 +2762,19 @@ class EnvelopeSetShortDescription PROTOBUF_FINAL :
   void _internal_set_presetroot(bool value);
   public:
 
+  // optional uint64 exportTime = 8;
+  bool has_exporttime() const;
+  private:
+  bool _internal_has_exporttime() const;
+  public:
+  void clear_exporttime();
+  ::PROTOBUF_NAMESPACE_ID::uint64 exporttime() const;
+  void set_exporttime(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_exporttime() const;
+  void _internal_set_exporttime(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:Proto.EnvelopeSetShortDescription)
  private:
   class _Internal;
@@ -2730,10 +2786,13 @@ class EnvelopeSetShortDescription PROTOBUF_FINAL :
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint32 > classnamehash_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int32 > devicetype_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr projectname_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr username_;
   ::PROTOBUF_NAMESPACE_ID::uint32 projectdbversion_;
   bool equipmenteditor_;
   bool preseteditor_;
   bool presetroot_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 exporttime_;
   friend struct ::TableStruct_serialization_2eproto;
 };
 // -------------------------------------------------------------------
@@ -28501,7 +28560,7 @@ EnvelopeSet::items() const {
 
 // optional uint32 projectdbversion = 1;
 inline bool EnvelopeSetShortDescription::_internal_has_projectdbversion() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
   return value;
 }
 inline bool EnvelopeSetShortDescription::has_projectdbversion() const {
@@ -28509,7 +28568,7 @@ inline bool EnvelopeSetShortDescription::has_projectdbversion() const {
 }
 inline void EnvelopeSetShortDescription::clear_projectdbversion() {
   projectdbversion_ = 0u;
-  _has_bits_[0] &= ~0x00000001u;
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint32 EnvelopeSetShortDescription::_internal_projectdbversion() const {
   return projectdbversion_;
@@ -28519,7 +28578,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint32 EnvelopeSetShortDescription::projectdbver
   return _internal_projectdbversion();
 }
 inline void EnvelopeSetShortDescription::_internal_set_projectdbversion(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _has_bits_[0] |= 0x00000001u;
+  _has_bits_[0] |= 0x00000004u;
   projectdbversion_ = value;
 }
 inline void EnvelopeSetShortDescription::set_projectdbversion(::PROTOBUF_NAMESPACE_ID::uint32 value) {
@@ -28623,7 +28682,7 @@ EnvelopeSetShortDescription::mutable_devicetype() {
 
 // optional bool equipmentEditor = 3;
 inline bool EnvelopeSetShortDescription::_internal_has_equipmenteditor() const {
-  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
   return value;
 }
 inline bool EnvelopeSetShortDescription::has_equipmenteditor() const {
@@ -28631,7 +28690,7 @@ inline bool EnvelopeSetShortDescription::has_equipmenteditor() const {
 }
 inline void EnvelopeSetShortDescription::clear_equipmenteditor() {
   equipmenteditor_ = false;
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline bool EnvelopeSetShortDescription::_internal_equipmenteditor() const {
   return equipmenteditor_;
@@ -28641,7 +28700,7 @@ inline bool EnvelopeSetShortDescription::equipmenteditor() const {
   return _internal_equipmenteditor();
 }
 inline void EnvelopeSetShortDescription::_internal_set_equipmenteditor(bool value) {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000008u;
   equipmenteditor_ = value;
 }
 inline void EnvelopeSetShortDescription::set_equipmenteditor(bool value) {
@@ -28651,7 +28710,7 @@ inline void EnvelopeSetShortDescription::set_equipmenteditor(bool value) {
 
 // optional bool presetEditor = 4;
 inline bool EnvelopeSetShortDescription::_internal_has_preseteditor() const {
-  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  bool value = (_has_bits_[0] & 0x00000010u) != 0;
   return value;
 }
 inline bool EnvelopeSetShortDescription::has_preseteditor() const {
@@ -28659,7 +28718,7 @@ inline bool EnvelopeSetShortDescription::has_preseteditor() const {
 }
 inline void EnvelopeSetShortDescription::clear_preseteditor() {
   preseteditor_ = false;
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline bool EnvelopeSetShortDescription::_internal_preseteditor() const {
   return preseteditor_;
@@ -28669,7 +28728,7 @@ inline bool EnvelopeSetShortDescription::preseteditor() const {
   return _internal_preseteditor();
 }
 inline void EnvelopeSetShortDescription::_internal_set_preseteditor(bool value) {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000010u;
   preseteditor_ = value;
 }
 inline void EnvelopeSetShortDescription::set_preseteditor(bool value) {
@@ -28679,7 +28738,7 @@ inline void EnvelopeSetShortDescription::set_preseteditor(bool value) {
 
 // optional bool presetRoot = 5;
 inline bool EnvelopeSetShortDescription::_internal_has_presetroot() const {
-  bool value = (_has_bits_[0] & 0x00000008u) != 0;
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
   return value;
 }
 inline bool EnvelopeSetShortDescription::has_presetroot() const {
@@ -28687,7 +28746,7 @@ inline bool EnvelopeSetShortDescription::has_presetroot() const {
 }
 inline void EnvelopeSetShortDescription::clear_presetroot() {
   presetroot_ = false;
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline bool EnvelopeSetShortDescription::_internal_presetroot() const {
   return presetroot_;
@@ -28697,12 +28756,186 @@ inline bool EnvelopeSetShortDescription::presetroot() const {
   return _internal_presetroot();
 }
 inline void EnvelopeSetShortDescription::_internal_set_presetroot(bool value) {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000020u;
   presetroot_ = value;
 }
 inline void EnvelopeSetShortDescription::set_presetroot(bool value) {
   _internal_set_presetroot(value);
   // @@protoc_insertion_point(field_set:Proto.EnvelopeSetShortDescription.presetRoot)
+}
+
+// optional string projectName = 6;
+inline bool EnvelopeSetShortDescription::_internal_has_projectname() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool EnvelopeSetShortDescription::has_projectname() const {
+  return _internal_has_projectname();
+}
+inline void EnvelopeSetShortDescription::clear_projectname() {
+  projectname_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& EnvelopeSetShortDescription::projectname() const {
+  // @@protoc_insertion_point(field_get:Proto.EnvelopeSetShortDescription.projectName)
+  return _internal_projectname();
+}
+inline void EnvelopeSetShortDescription::set_projectname(const std::string& value) {
+  _internal_set_projectname(value);
+  // @@protoc_insertion_point(field_set:Proto.EnvelopeSetShortDescription.projectName)
+}
+inline std::string* EnvelopeSetShortDescription::mutable_projectname() {
+  // @@protoc_insertion_point(field_mutable:Proto.EnvelopeSetShortDescription.projectName)
+  return _internal_mutable_projectname();
+}
+inline const std::string& EnvelopeSetShortDescription::_internal_projectname() const {
+  return projectname_.Get();
+}
+inline void EnvelopeSetShortDescription::_internal_set_projectname(const std::string& value) {
+  _has_bits_[0] |= 0x00000001u;
+  projectname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void EnvelopeSetShortDescription::set_projectname(std::string&& value) {
+  _has_bits_[0] |= 0x00000001u;
+  projectname_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.EnvelopeSetShortDescription.projectName)
+}
+inline void EnvelopeSetShortDescription::set_projectname(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000001u;
+  projectname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.EnvelopeSetShortDescription.projectName)
+}
+inline void EnvelopeSetShortDescription::set_projectname(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000001u;
+  projectname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.EnvelopeSetShortDescription.projectName)
+}
+inline std::string* EnvelopeSetShortDescription::_internal_mutable_projectname() {
+  _has_bits_[0] |= 0x00000001u;
+  return projectname_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* EnvelopeSetShortDescription::release_projectname() {
+  // @@protoc_insertion_point(field_release:Proto.EnvelopeSetShortDescription.projectName)
+  if (!_internal_has_projectname()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return projectname_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void EnvelopeSetShortDescription::set_allocated_projectname(std::string* projectname) {
+  if (projectname != nullptr) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  projectname_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), projectname,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.EnvelopeSetShortDescription.projectName)
+}
+
+// optional string userName = 7;
+inline bool EnvelopeSetShortDescription::_internal_has_username() const {
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline bool EnvelopeSetShortDescription::has_username() const {
+  return _internal_has_username();
+}
+inline void EnvelopeSetShortDescription::clear_username() {
+  username_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline const std::string& EnvelopeSetShortDescription::username() const {
+  // @@protoc_insertion_point(field_get:Proto.EnvelopeSetShortDescription.userName)
+  return _internal_username();
+}
+inline void EnvelopeSetShortDescription::set_username(const std::string& value) {
+  _internal_set_username(value);
+  // @@protoc_insertion_point(field_set:Proto.EnvelopeSetShortDescription.userName)
+}
+inline std::string* EnvelopeSetShortDescription::mutable_username() {
+  // @@protoc_insertion_point(field_mutable:Proto.EnvelopeSetShortDescription.userName)
+  return _internal_mutable_username();
+}
+inline const std::string& EnvelopeSetShortDescription::_internal_username() const {
+  return username_.Get();
+}
+inline void EnvelopeSetShortDescription::_internal_set_username(const std::string& value) {
+  _has_bits_[0] |= 0x00000002u;
+  username_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void EnvelopeSetShortDescription::set_username(std::string&& value) {
+  _has_bits_[0] |= 0x00000002u;
+  username_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.EnvelopeSetShortDescription.userName)
+}
+inline void EnvelopeSetShortDescription::set_username(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000002u;
+  username_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.EnvelopeSetShortDescription.userName)
+}
+inline void EnvelopeSetShortDescription::set_username(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000002u;
+  username_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.EnvelopeSetShortDescription.userName)
+}
+inline std::string* EnvelopeSetShortDescription::_internal_mutable_username() {
+  _has_bits_[0] |= 0x00000002u;
+  return username_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* EnvelopeSetShortDescription::release_username() {
+  // @@protoc_insertion_point(field_release:Proto.EnvelopeSetShortDescription.userName)
+  if (!_internal_has_username()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000002u;
+  return username_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void EnvelopeSetShortDescription::set_allocated_username(std::string* username) {
+  if (username != nullptr) {
+    _has_bits_[0] |= 0x00000002u;
+  } else {
+    _has_bits_[0] &= ~0x00000002u;
+  }
+  username_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), username,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.EnvelopeSetShortDescription.userName)
+}
+
+// optional uint64 exportTime = 8;
+inline bool EnvelopeSetShortDescription::_internal_has_exporttime() const {
+  bool value = (_has_bits_[0] & 0x00000040u) != 0;
+  return value;
+}
+inline bool EnvelopeSetShortDescription::has_exporttime() const {
+  return _internal_has_exporttime();
+}
+inline void EnvelopeSetShortDescription::clear_exporttime() {
+  exporttime_ = PROTOBUF_ULONGLONG(0);
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 EnvelopeSetShortDescription::_internal_exporttime() const {
+  return exporttime_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 EnvelopeSetShortDescription::exporttime() const {
+  // @@protoc_insertion_point(field_get:Proto.EnvelopeSetShortDescription.exportTime)
+  return _internal_exporttime();
+}
+inline void EnvelopeSetShortDescription::_internal_set_exporttime(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _has_bits_[0] |= 0x00000040u;
+  exporttime_ = value;
+}
+inline void EnvelopeSetShortDescription::set_exporttime(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_exporttime(value);
+  // @@protoc_insertion_point(field_set:Proto.EnvelopeSetShortDescription.exportTime)
 }
 
 // -------------------------------------------------------------------

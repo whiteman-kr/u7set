@@ -69,6 +69,7 @@ HEADERS  += \
     ../lib/Ui/DialogChooseTags.h \
     CodeEditor.h \
     DbTagsEditor.h \
+    EquipmentEditor/DialogImportPreset.h \
     Reports/ProjectDiffReport.h \
     SchemaEditor/EditSchemaSignalProvider.h \
     SchemaEditor/EditSchemaTabPage.h \
@@ -232,6 +233,7 @@ SOURCES +=\
 	DialogSettings.cpp \
 	DialogTagsEditor.cpp \
 	EditEngine/EditEngineNop.cpp \
+    EquipmentEditor/DialogImportPreset.cpp \
 	EquipmentEditor/EquipmentModel.cpp \
 	EquipmentEditor/EquipmentView.cpp \
 	FilesTabPage.cpp \
@@ -330,6 +332,7 @@ FORMS    += \
     CreateProjectDialog.ui \
     CreateUserDialogDialog.ui \
     DialogSettings.ui \
+    EquipmentEditor/DialogImportPreset.ui \
     Forms/DialogProjectDiff.ui \
     DialogTagsEditor.ui \
     LoginDialog.ui \

@@ -155,6 +155,10 @@ message EnvelopeSetShortDescription
 	optional bool equipmentEditor = 3;				// Copy from Equipmnet editor
 	optional bool presetEditor = 4;					// Copy from Equipment preset editor
 	optional bool presetRoot = 5;					// All objects are preset root
+	optional string projectName = 6;
+	optional string userName = 7;
+	optional uint64 exportTime = 8;
+
 }
 
 // Export Device Preset Message

@@ -6,6 +6,7 @@
 #include "../Settings.h"
 #include "../DialogConnections.h"
 #include "../Forms/ComparePropertyObjectDialog.h"
+#include "../EquipmentEditor/DialogImportPreset.h"
 
 //
 //
@@ -1535,6 +1536,9 @@ void EquipmentTabPage::exportPreset()
 	::Proto::EnvelopeSet* setMessage = message.mutable_items();
 	::Proto::EnvelopeSetShortDescription* descriptionMessage = message.mutable_description();
 
+	descriptionMessage->set_projectname(db()->currentProject().projectName().toStdString());
+	descriptionMessage->set_username(db()->currentUser().username().toStdString());
+	descriptionMessage->set_exporttime(QDateTime::currentDateTime().toSecsSinceEpoch());
 	descriptionMessage->set_projectdbversion(DbController::databaseVersion());
 	descriptionMessage->set_equipmenteditor(isConfigurationMode());
 	descriptionMessage->set_preseteditor(isPresetMode());
@@ -1635,7 +1639,15 @@ void EquipmentTabPage::importPreset()
 		return;
 	}
 
-	m_equipmentView->pasteDevices(message.items(), message.description(), false);
+	DialogImportPreset d(&message, this);
+	if (d.exec() == QDialog::Accepted)
+	{
+		::Proto::EnvelopeSet chosenItems = d.chosenItems();
+		if (chosenItems.items_size() != 0)
+		{
+			m_equipmentView->pasteDevices(chosenItems, message.description(), false);
+		}
+	}
 
 	return;
 }

@@ -1749,6 +1749,9 @@ void EquipmentView::copySelectedDevices()
 	//
 	::Proto::EnvelopeSetShortDescription descriptionMessage;
 
+	descriptionMessage.set_projectname(db()->currentProject().projectName().toStdString());
+	descriptionMessage.set_username(db()->currentUser().username().toStdString());
+	descriptionMessage.set_exporttime(QDateTime::currentDateTime().toSecsSinceEpoch());
 	descriptionMessage.set_projectdbversion(DbController::databaseVersion());
 	descriptionMessage.set_equipmenteditor(isConfigurationMode());
 	descriptionMessage.set_preseteditor(isPresetMode());
