@@ -14,31 +14,14 @@
    <string>Dialog</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="2" column="0">
-    <widget class="QLabel" name="projectNameLabel">
+   <item row="0" column="0" colspan="2">
+    <widget class="QLabel" name="label">
      <property name="text">
-      <string>Project Name:</string>
+      <string>Please select preset(s) to import:</string>
      </property>
     </widget>
    </item>
-   <item row="5" column="1">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="0">
-    <widget class="QLabel" name="userNameLabel">
-     <property name="text">
-      <string>Project User:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0" colspan="2">
+   <item row="1" column="0" colspan="3">
     <widget class="QTreeWidget" name="presetsTree">
      <property name="rootIsDecorated">
       <bool>false</bool>
@@ -50,17 +33,73 @@
      </column>
     </widget>
    </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="projectNameLabel_2">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>Project:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QLabel" name="projectNameLabel">
+     <property name="text">
+      <string>Unknown</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QLabel" name="userNameLabel_2">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>User:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QLabel" name="userNameLabel">
+     <property name="text">
+      <string>Unknown</string>
+     </property>
+    </widget>
+   </item>
    <item row="4" column="0">
-    <widget class="QLabel" name="exportTimeLabel">
+    <widget class="QLabel" name="exportTimeLabel_2">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="text">
       <string>Created:</string>
      </property>
     </widget>
    </item>
-   <item row="0" column="0">
-    <widget class="QLabel" name="label">
+   <item row="4" column="1">
+    <widget class="QLabel" name="exportTimeLabel">
      <property name="text">
-      <string>Please select which presets to import:</string>
+      <string>Unknown</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="2">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>

@@ -12,10 +12,10 @@ class DialogImportPreset : public QDialog
 	Q_OBJECT
 
 public:
-	explicit DialogImportPreset(const ::Proto::ExportedDevicePreset* message, QWidget* parent);
+	explicit DialogImportPreset(const Proto::ExportedDevicePreset& message, QWidget* parent);
 	~DialogImportPreset();
 
-	::Proto::EnvelopeSet chosenItems() const;
+	const ::Proto::EnvelopeSet& chosenItems() const;
 
 private:
 	virtual void accept() override;

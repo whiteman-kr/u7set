@@ -1639,7 +1639,7 @@ void EquipmentTabPage::importPreset()
 		return;
 	}
 
-	DialogImportPreset d(&message, this);
+	DialogImportPreset d(message, this);
 	if (d.exec() == QDialog::Accepted)
 	{
 		::Proto::EnvelopeSet chosenItems = d.chosenItems();
