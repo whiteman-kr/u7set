@@ -4,9 +4,9 @@
 #include "../OnlineLib/TcpClientStatistics.h"
 #include "../CommonLib/Hash.h"
 #include "../Proto/network.pb.h"
-#include "../Lib/SoftwareSettings.h"
 #include "../AppSignalLib/AppSignalManager.h"
 #include "MonitorConfigController.h"
+#include "../lib/SoftwareSettings.h"
 
 class MonitorSignalManager;
 
@@ -45,8 +45,6 @@ public:
 	virtual void onReplyTimeout() override;
 
 	virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
-
-	virtual Tcp::ConnectionState getConnectionState() const override;
 
 	bool hasSignal(const QString& appSignalId) const;
 	bool hasSignal(Hash signalHash) const;

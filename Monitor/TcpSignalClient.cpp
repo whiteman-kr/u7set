@@ -49,6 +49,16 @@ void TcpSignalClient::onConnection()
 	qDebug() << "TcpSignalClient::onConnection()" << this->serverAddressPort1().addressPortStr();
 	writeMessage("TcpSignalClient::onConnection()");
 
+	if (m_serverSettings.equipmentId != connectedSoftwareInfo().equipmentID())
+	{
+		writeError(tr("Connected to wrong AppDataSrv, expected %1, connected to %2")
+				   .arg(m_serverSettings.equipmentId)
+				   .arg(connectedSoftwareInfo().equipmentID()));
+
+		closeConnection();
+		return;
+	}
+
 	Q_ASSERT(isClearToSendRequest() == true);
 
 	resetToGetSignalList();
@@ -115,16 +125,6 @@ void TcpSignalClient::processReply(quint32 requestID, const char* replyData, qui
 	}
 
 	return;
-}
-
-Tcp::ConnectionState TcpSignalClient::getConnectionState() const
-{
-	Tcp::ConnectionState state = Tcp::SocketWorker::getConnectionState();
-
-	state.peerAddr = m_serverSettings.address;
-	state.connectedSoftwareInfo.setEquipmentID(m_serverSettings.equipmentId);
-
-	return state;
 }
 
 bool TcpSignalClient::hasSignal(const QString& appSignalId) const
