@@ -122,8 +122,10 @@ std::vector<Tcp::ConnectionState> AdsConnection::recentSignalConnStates() const
 	return states;
 }
 
-void AdsConnection::configurationArrived(ConfigSettings conf)
+void AdsConnection::configurationArrived(const ConfigSettings& conf)
 {
+	m_logFile.writeMessage("configurationArrived");
+
 	m_conns.clear();	// it will stop all connection threads and destroy them
 	m_signalManager.reset();
 

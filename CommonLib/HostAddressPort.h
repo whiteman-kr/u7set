@@ -43,6 +43,7 @@ public:
 
 	[[nodiscard]] quint16 port() const;
 
+	[[nodiscard]] QString toString() const;
 	[[nodiscard]] QString addressPortStr() const;
 	[[nodiscard]] QString addressPortStrIfSet() const;
 
@@ -138,17 +139,7 @@ inline bool HostAddressPort::operator!=(const HostAddressPort& other) const
 
 inline bool HostAddressPort::operator<(const HostAddressPort& other) const
 {
-	if (this->m_hostAddress.protocol() != QHostAddress::IPv4Protocol ||
-		other.m_hostAddress.protocol() != QHostAddress::IPv4Protocol)
-	{
-		Q_ASSERT(this->m_hostAddress.protocol() == QHostAddress::IPv4Protocol);
-		Q_ASSERT(other.m_hostAddress.protocol() == QHostAddress::IPv4Protocol);
-		return false;
-	}
-
-	quint64 l = (static_cast<quint64>(this->m_hostAddress.toIPv4Address()) << 32) | this->port();
-	quint64 r = (static_cast<quint64>(other.m_hostAddress.toIPv4Address()) << 32) | other.port();
-	return l < r;
+	return addressPortStr() < other.addressPortStr();
 }
 
 inline void HostAddressPort::setAddress(quint32 ip4Addr)
@@ -239,6 +230,11 @@ inline QHostAddress HostAddressPort::address() const
 inline quint16 HostAddressPort::port() const
 {
 	return m_port;
+}
+
+inline QString HostAddressPort::toString() const
+{
+	return addressPortStr();
 }
 
 inline QString HostAddressPort::addressPortStr() const

@@ -48,7 +48,7 @@ public:
 	std::vector<Tcp::ConnectionState> recentSignalConnStates() const;
 
 private slots:
-	void configurationArrived(ConfigSettings conf);
+	void configurationArrived(const ConfigSettings& conf);
 
 	// --
 	//

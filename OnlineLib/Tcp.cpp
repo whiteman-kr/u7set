@@ -1880,10 +1880,10 @@ namespace Tcp
 			return;
 		}
 
-		onTryConnectToServer(m_selectedServer);
-
 		if (m_selectedServer.isSet() == true)
 		{
+			onTryConnectToServer(m_selectedServer);
+
 			m_socket->connectToHost(m_selectedServer.address(), m_selectedServer.port());
 		}
 	}
