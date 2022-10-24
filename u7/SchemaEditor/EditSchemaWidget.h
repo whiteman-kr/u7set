@@ -567,7 +567,7 @@ class SchemaFindDialog : public QDialog
 	Q_OBJECT
 
 public:
-	explicit SchemaFindDialog(QWidget* parent);
+	explicit SchemaFindDialog(bool enableReplace, QWidget* parent);
 	virtual ~SchemaFindDialog();
 
 	QString findText() const;
