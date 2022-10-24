@@ -581,7 +581,7 @@ void JsHighlighter::initializeFormat()
     QStringList keywordPatterns = QString(keywordArray).split(' ');
 
     for (const QString &pattern : keywordPatterns) {
-        rule.pattern = QRegularExpression(pattern);
+		rule.pattern = QRegularExpression("\\b"+pattern+"\\b");
         rule.format = keywordFormat;
         m_highlightingRules.append(rule);
     }
