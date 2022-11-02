@@ -445,10 +445,18 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 		}
 	}
 
-	AppSignalPropertyManager& manager = m_signalSetProvider->signalPropertyManager();
+	if (role == Qt::ForegroundRole)
+	{
+		if (signal.excludeFromBuild() == true)
+		{
+			return QVariant(QBrush(StandardColors::ExcludedFromBuildForeground));
+		}
+	}
 
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
+		AppSignalPropertyManager& manager = m_signalSetProvider->signalPropertyManager();
+
 		if (col >= manager.count())
 		{
 			return signal.checkedOut() ? getUserStr(signal.userID()) : "";
@@ -478,6 +486,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 			}
 
 		}
+
 		return value;
 	}
 

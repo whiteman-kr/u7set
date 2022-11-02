@@ -7,4 +7,6 @@ namespace StandardColors
 	static constexpr QRgb VcsAdded{qRgb(0xE0, 0xFF, 0xE0)};			// NOLINT
 	static constexpr QRgb VcsModified{qRgb(0xE0, 0xE8, 0xFF)};		// NOLINT
 	static constexpr QRgb VcsDeleted{qRgb(0xFF, 0xE0, 0xE0)};		// NOLINT
+
+	static constexpr QRgb ExcludedFromBuildForeground{qRgb(0xA0, 0xA0, 0xA0)};
 }
