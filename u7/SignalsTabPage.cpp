@@ -1487,9 +1487,9 @@ void SignalsTabPage::checkIn()
 
 void SignalsTabPage::viewSignalHistory()
 {
-	int row = m_signalsView->currentIndex().row();
+	int row = m_signalsProxyModel->mapToSource(m_signalsView->currentIndex()).row();
 
-	if (row < 0 || row >= m_signalsModel->rowCount())
+	if (row < 0 || row >= m_signalSetProvider->signalCount())
 	{
 		return;
 	}
