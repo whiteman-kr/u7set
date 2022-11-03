@@ -591,6 +591,7 @@ namespace Builder
 						//
 						log->errCFG3022(lanControllerInfo.equipmentID,
 										EquipmentPropNames::TUNING_SERVICE_ID);
+						result = false;
 					}
 					else
 					{
@@ -604,6 +605,7 @@ namespace Builder
 							log->errCFG3021(lanControllerInfo.equipmentID,
 											EquipmentPropNames::TUNING_SERVICE_ID,
 											lanControllerInfo.tuningServiceID);
+							result = false;
 						}
 						else
 						{
@@ -629,6 +631,7 @@ namespace Builder
 						//
 						log->errCFG3022(lanControllerInfo.equipmentID,
 										EquipmentPropNames::APP_DATA_SERVICE_ID);
+						result = false;
 					}
 					else
 					{
@@ -643,6 +646,7 @@ namespace Builder
 							log->errCFG3021(lanControllerInfo.equipmentID,
 											EquipmentPropNames::APP_DATA_SERVICE_ID,
 											lanControllerInfo.appDataServiceID);
+							result = false;
 						}
 						else
 						{
@@ -668,6 +672,7 @@ namespace Builder
 						//
 						log->errCFG3022(lanControllerInfo.equipmentID,
 										EquipmentPropNames::DIAG_DATA_SERVICE_ID);
+						result = false;
 					}
 					else
 					{
@@ -682,6 +687,7 @@ namespace Builder
 							log->errCFG3021(lanControllerInfo.equipmentID,
 											EquipmentPropNames::DIAG_DATA_SERVICE_ID,
 											lanControllerInfo.diagDataServiceID);
+							result = false;
 						}
 						else
 						{
