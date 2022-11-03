@@ -79,6 +79,9 @@ namespace VFrame30
 		Q_INVOKABLE void removeOutputSignals();
 		Q_INVOKABLE void removeOutputSignal(QString caption);
 
+	private:
+		QString getAfbParamValueText(const Afb::AfbParam& param) const;
+
 		// Properties and Data
 		//
 	public:

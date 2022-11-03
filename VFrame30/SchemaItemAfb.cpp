@@ -112,69 +112,7 @@ namespace VFrame30
 				continue;
 			}
 
-			QString paramValue;
-			bool afbParamValueIsString = param.afbParamValue().reference().isEmpty() == false;
-
-			QVariant a = afbParamValueIsString ?
-							param.afbParamValue().reference() :
-							param.afbParamValue().value();
-
-			switch (param.type())
-			{
-				case E::SignalType::Analog:
-					{
-						char paramFormat = precision() > 5 ? 'g' : 'f';
-
-						switch (param.dataFormat())
-						{
-							case E::DataFormat::UnsignedInt:
-								paramValue = a.toString();
-								break;
-
-							case E::DataFormat::SignedInt:
-								paramValue = a.toString();
-								break;
-
-							case E::DataFormat::Float:
-								if (afbParamValueIsString == true)
-								{
-									paramValue = a.toString();
-								}
-								else
-								{
-									paramValue.setNum(a.toDouble(), paramFormat, precision());
-
-									if (paramValue.contains(QChar('.')) == true &&
-										paramValue.contains(QChar('e')) == false &&
-										paramValue.size() > 2)
-									{
-										while(paramValue.endsWith('0'))
-										{
-											paramValue.chop(1);
-										}
-
-										if (paramValue.endsWith('.'))
-										{
-											paramValue.chop(1);
-										}
-									}
-								}
-								break;
-
-							default:
-								assert(false);
-						}
-					}
-					break;
-
-				case E::SignalType::Discrete:
-					{
-						paramValue = a.toString();
-					}
-					break;
-				default:
-					assert(false);
-			}
+			QString paramValue = getAfbParamValueText(param);
 
 			// Param string LOWERCASED
 			//
@@ -433,7 +371,8 @@ namespace VFrame30
 			}
 
 			QRectF paramRect(intend, paramY, rect.width() - intend * 2, pinHeight);
-			QString paramValueStr = param.afbParamValue().toString();
+
+			QString paramValue = getAfbParamValueText(param);
 
 			QString str;
 			if (param.isAnalog() == true)
@@ -445,7 +384,7 @@ namespace VFrame30
 					str = QString("%1, %2: %3 (%4 - %5), %6")
 						  .arg(param.caption())
 						  .arg(param.units())
-						  .arg(paramValueStr)
+						  .arg(paramValue)
 						  .arg(param.lowLimit().toString())
 						  .arg(param.highLimit().toString())
 						  .arg(typeStr);
@@ -454,7 +393,7 @@ namespace VFrame30
 				{
 					str = QString("%1: %2 (%3 - %4), %5")
 						  .arg(param.caption())
-						  .arg(paramValueStr)
+						  .arg(paramValue)
 						  .arg(param.lowLimit().toString())
 						  .arg(param.highLimit().toString())
 						  .arg(typeStr);
@@ -466,7 +405,7 @@ namespace VFrame30
 
 				str = QString("%1: %2")
 					  .arg(param.caption())
-					  .arg(paramValueStr);
+					  .arg(paramValue);
 			}
 
 			drawTextFunc(p, paramRect, str, Qt::AlignLeft | Qt::AlignVCenter | Qt::TextDontClip);
@@ -1156,6 +1095,74 @@ namespace VFrame30
 	void SchemaItemAfb::removeOutputSignal(QString caption)
 	{
 		removeOutput(caption);
+	}
+
+	QString SchemaItemAfb::getAfbParamValueText(const Afb::AfbParam& param) const
+	{
+		QString paramValue;
+		bool afbParamValueIsString = param.afbParamValue().reference().isEmpty() == false;
+
+		QVariant a = afbParamValueIsString ?
+						param.afbParamValue().reference() :
+						param.afbParamValue().value();
+
+		switch (param.type())
+		{
+			case E::SignalType::Analog:
+				{
+					char paramFormat = precision() > 5 ? 'g' : 'f';
+
+					switch (param.dataFormat())
+					{
+						case E::DataFormat::UnsignedInt:
+							paramValue = a.toString();
+							break;
+
+						case E::DataFormat::SignedInt:
+							paramValue = a.toString();
+							break;
+
+						case E::DataFormat::Float:
+							if (afbParamValueIsString == true)
+							{
+								paramValue = a.toString();
+							}
+							else
+							{
+								paramValue = param.afbParamValue().toString(paramFormat, precision());
+
+								if (paramValue.contains(QChar('.')) == true &&
+									paramValue.contains(QChar('e')) == false &&
+									paramValue.size() > 2)
+								{
+									while(paramValue.endsWith('0'))
+									{
+										paramValue.chop(1);
+									}
+
+									if (paramValue.endsWith('.'))
+									{
+										paramValue.chop(1);
+									}
+								}
+							}
+							break;
+
+						default:
+							assert(false);
+					}
+				}
+				break;
+
+			case E::SignalType::Discrete:
+				{
+					paramValue = a.toString();
+				}
+				break;
+			default:
+				assert(false);
+		}
+		return paramValue;
 	}
 
 	const QString& SchemaItemAfb::afbStrID() const
