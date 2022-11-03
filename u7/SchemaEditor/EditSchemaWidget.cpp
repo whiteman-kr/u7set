@@ -4888,7 +4888,7 @@ void EditSchemaWidget::f2KeyForRect(SchemaItemPtr item)
 	{
 		QString newValue = dialog.textValue();
 
-		if (newValue.isEmpty() == false && newValue != text)
+		if (newValue != text)
 		{
 			m_editEngine->runSetProperty(VFrame30::PropertyNames::text, QVariant(newValue), item);
 			editSchemaView()->update();
