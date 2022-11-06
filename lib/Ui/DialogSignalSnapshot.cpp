@@ -399,7 +399,6 @@ void SignalSnapshotModel::fillSignals()
 	if (rowCount() > 0)
 	{
 		beginRemoveRows(QModelIndex(), 0, rowCount() - 1);
-
 		removeRows(0, rowCount());
 
 		m_filteredSignals.clear();
@@ -408,22 +407,22 @@ void SignalSnapshotModel::fillSignals()
 	}
 
 	std::vector<int> filteredSignals;
-
 	filteredSignals.reserve(m_allSignals.size());
 
 	// Fill signals
 	//
-
 	int count = static_cast<int>(m_allSignals.size());
 
-	for (int i = 0; i < count; i++)
+	for (int signalIndex = 0; signalIndex < count; signalIndex++)
 	{
-		const AppSignalParam& s = m_allSignals[i];
+		const AppSignalParam& s = m_allSignals[signalIndex];
 
 		// Filter by Signal Type
-
+		//
 		switch (m_signalType)
 		{
+		case SignalSnapshotModel::SignalType::All:
+			break;
 		case SignalSnapshotModel::SignalType::AnalogInput:
 			if (s.isAnalog() == false || s.isInput() == false)
 			{
@@ -451,11 +450,10 @@ void SignalSnapshotModel::fillSignals()
 		}
 
 		// Filter by Mask
-
+		//
 		if (m_masks.isEmpty() == false)
 		{
 			bool result = false;
-
 			QStringList strIdList;
 
 			// Select what to analyze
@@ -463,30 +461,25 @@ void SignalSnapshotModel::fillSignals()
 			switch (m_maskType)
 			{
 			case MaskType::All:
-				{
-					strIdList << s.appSignalId().trimmed();
-					strIdList << s.customSignalId().trimmed();
-					strIdList << s.equipmentId().trimmed();
-				}
+				strIdList << s.appSignalId().trimmed();
+				strIdList << s.customSignalId().trimmed();
+				strIdList << s.equipmentId().trimmed();
+				strIdList << s.lmEquipmentId().trimmed();
 				break;
+
 			case MaskType::AppSignalId:
-				{
-					strIdList << s.appSignalId().trimmed();
-				}
+				strIdList << s.appSignalId().trimmed();
 				break;
+
 			case MaskType::CustomAppSignalId:
-				{
-					strIdList << s.customSignalId().trimmed();
-				}
+				strIdList << s.customSignalId().trimmed();
 				break;
+
 			case MaskType::EquipmentId:
-				{
-					strIdList << s.equipmentId().trimmed();
-				}
+				strIdList << s.equipmentId().trimmed();
+
 			case MaskType::LmEquipmentId:
-				{
-					strIdList << s.lmEquipmentId().trimmed();
-				}
+				strIdList << s.lmEquipmentId().trimmed();
 				break;
 			}
 
@@ -538,16 +531,15 @@ void SignalSnapshotModel::fillSignals()
 		}
 
 		// Filter by tags
-
+		//
 		if (m_tags.isEmpty() == false)
 		{
 			bool result = false;
-
 			const auto& signalTags = s.tags();
 
 			for (const QString& tag : m_tags)
 			{
-				if (signalTags.find(tag) != signalTags.end())
+				if (signalTags.contains(tag) == true)
 				{
 					result = true;
 					break;
@@ -561,11 +553,10 @@ void SignalSnapshotModel::fillSignals()
 		}
 
 		// Filter by Schema
-
+		//
 		if (m_schemaAppSignals.empty() == false)
 		{
 			bool result = false;
-
 			QString strId = s.appSignalId().trimmed();
 
 			for (const QString& appSignal : m_schemaAppSignals)
@@ -582,21 +573,20 @@ void SignalSnapshotModel::fillSignals()
 			}
 		}
 
-		filteredSignals.push_back(i);
+		filteredSignals.push_back(signalIndex);
 	}
 
 	if (filteredSignals.empty() == false)
 	{
 		beginInsertRows(QModelIndex(), 0, static_cast<int>(filteredSignals.size()) - 1);
 
-		std::swap(m_filteredSignals, filteredSignals);
+		m_filteredSignals = std::move(filteredSignals);
 
 		insertRows(0, static_cast<int>(m_filteredSignals.size()));
-
 		endInsertRows();
 	}
 
-	//
+	return;
 }
 
 void SignalSnapshotModel::updateStates(int from, int to)
