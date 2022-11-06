@@ -1,15 +1,17 @@
 #ifndef CREATESIGNALDIALOG_H
 #define CREATESIGNALDIALOG_H
 
-#include "../CommonLib/Types.h"
-
 
 class DbController;
 class CreateSignalDialog;
 
+
 struct CreatingSignalDialogOptions
 {
-	void init(QString schemaId, QString schemaCaption, QStringList equipmentIds, QStringList proposedAppSignalIds);
+	void init(QString schemaId,
+			  QString schemaCaption,
+			  QStringList equipmentIds,
+			  QStringList proposedAppSignalIds);
 
 	// Fill it
 	//
@@ -17,6 +19,7 @@ struct CreatingSignalDialogOptions
 	QString m_schemaCaption;
 	QStringList m_equipmentIds;
 	QStringList m_proposedAppSignalIds;
+	bool m_tuning = false;
 
 	// State variables, CreateSignalDialog has access to these
 	//
@@ -33,9 +36,11 @@ private:
 	SignalTypeAndFormat m_lastSignalType = SignalTypeAndFormat::Discrete;
 	QString m_lastBusTypeId;
 	QByteArray m_lastGeometry;
+	bool m_lastTuning = false;
 
 	friend class CreateSignalDialog;
 };
+
 
 struct CreateSignalDialogResult
 {
@@ -46,6 +51,8 @@ struct CreateSignalDialogResult
 	QStringList customSignalIds;
 
 	QString busTypeId;
+
+	bool tuning = false;
 };
 
 
@@ -93,6 +100,8 @@ private:
 	std::vector<std::pair<CreatingSignalDialogOptions::SignalTypeAndFormat, QRadioButton*>> m_signalTypeRadios;
 
 	QComboBox* m_busTypeCombo = nullptr;
+
+	QCheckBox* m_tuningCheckBox = nullptr;
 
 	QPushButton* m_generateNewIdsButton = nullptr;
 	QDialogButtonBox* m_buttonBox = nullptr;

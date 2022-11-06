@@ -311,7 +311,7 @@ void EquipmentTabPage::CreateActions()
 	connect(m_createInOutsToSignals, &QAction::triggered, m_equipmentView, QOverload<>::of(&EquipmentView::createInOutsToSignals));
 
 	m_createInternalAppSignal = new QAction(tr("Create Internal AppSignal"), this);
-	m_createInternalAppSignal->setStatusTip(tr("Add new interanal application signal to device"));
+	m_createInternalAppSignal->setStatusTip(tr("Add new internal application signal to device"));
 	m_createInternalAppSignal->setEnabled(false);
 	connect(m_createInternalAppSignal, &QAction::triggered, m_equipmentView, &EquipmentView::createInternalAppSignal);
 

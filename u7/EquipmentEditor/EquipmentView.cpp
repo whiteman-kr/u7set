@@ -1486,7 +1486,11 @@ void EquipmentView::createInternalAppSignal()
 	equipmentIdList << module->equipmentId();
 
 	static CreatingSignalDialogOptions options;
-	options.init(module->equipmentId(), module->equipmentId(), equipmentIdList, QStringList());
+
+	options.init(module->equipmentId(),
+				 module->equipmentId(),
+				 equipmentIdList,
+				 QStringList());
 
 	CreateSignalDialog::showDialog(db(), &options, this);
 

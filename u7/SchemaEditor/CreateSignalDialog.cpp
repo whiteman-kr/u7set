@@ -1,11 +1,13 @@
 #include "CreateSignalDialog.h"
 #include "../DbLib/DbController.h"
 #include "BusStorage.h"
-#include "SignalsTabPage.h"
 #include "SignalPropertiesDialog.h"
 #include "../AppSignalSetProvider.h"
 
-void CreatingSignalDialogOptions::init(QString schemaId, QString schemaCaption, QStringList equipmentIds, QStringList proposedAppSignalIds)
+void CreatingSignalDialogOptions::init(QString schemaId,
+									   QString schemaCaption,
+									   QStringList equipmentIds,
+									   QStringList proposedAppSignalIds)
 {
 	m_schemaId = schemaId;
 	m_schemaCaption = schemaCaption;
@@ -75,12 +77,18 @@ CreateSignalDialog::CreateSignalDialog(DbController* dbc, CreatingSignalDialogOp
 		connect(ecb, &QCheckBox::toggled, this, &CreateSignalDialog::equipmentIdToggled);
 	}
 
+	// Tuning
+	//
+	m_tuningCheckBox = new QCheckBox{tr("Tuning"), this};
+	m_tuningCheckBox->setChecked(m_options.m_lastTuning);
+
 	// Signal Type controls
 	//
 	m_signalTypeDiscrete = new QRadioButton(tr("Discrete"));
 	m_signalTypeFloatingPoint = new QRadioButton(tr("Analog Float32"));
 	m_signalTypeSignedInteger = new QRadioButton(tr("Analog SignedInt32"));
 	m_signalTypeBus = new QRadioButton(tr("Bus"));
+
 	connect(m_signalTypeBus, &QRadioButton::toggled, this, &CreateSignalDialog::busTypeToggled);
 
 	m_signalTypeRadios.push_back({CreatingSignalDialogOptions::SignalTypeAndFormat::Discrete, m_signalTypeDiscrete});
@@ -144,16 +152,31 @@ CreateSignalDialog::CreateSignalDialog(DbController* dbc, CreatingSignalDialogOp
 		row++;
 	}
 
-	QGroupBox* signalTypeGroup = new QGroupBox(tr("Signal Type"));
-	signalTypeGroup->setFlat(true);
-	layout->addWidget(signalTypeGroup, row++, 0, 1, 3);
+	// Tuning
+	//
+	QGroupBox* tuningGroup = new QGroupBox{tr("Tuning")};
+	layout->addWidget(tuningGroup, row, 1, 1, 2);
 
-	layout->addWidget(m_signalTypeDiscrete, row++, 0, 1, 3);
-	layout->addWidget(m_signalTypeFloatingPoint, row++, 0, 1, 3);
-	layout->addWidget(m_signalTypeSignedInteger, row++, 0, 1, 3);
-	layout->addWidget(m_signalTypeBus, row++, 0, 1, 3);
+	QVBoxLayout* tuningLayout = new QVBoxLayout{};
+	tuningLayout->addWidget(m_tuningCheckBox);
+	tuningLayout->addStretch(1);
+	tuningGroup->setLayout(tuningLayout);
 
-	layout->addWidget(m_busTypeCombo, row++, 0, 1, 1);
+	// Signal Type
+	//
+	QGroupBox* signalTypeGroup = new QGroupBox{tr("Signal Type")};
+	layout->addWidget(signalTypeGroup, row++, 0, 1, 1);
+
+	QVBoxLayout* signalTypeLayout = new QVBoxLayout{};
+
+	signalTypeLayout->addWidget(m_signalTypeDiscrete);
+	signalTypeLayout->addWidget(m_signalTypeFloatingPoint);
+	signalTypeLayout->addWidget(m_signalTypeSignedInteger);
+	signalTypeLayout->addWidget(m_signalTypeBus);
+	signalTypeLayout->addWidget(m_busTypeCombo);
+	signalTypeLayout->addStretch(1);
+
+	signalTypeGroup->setLayout(signalTypeLayout);
 
 	QWidget* stretch = new QWidget;
 	stretch->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -302,7 +325,7 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 	//
 	QVector<AppSignal> newSignals;
 
-	auto resultData = d.resultData();
+	CreateSignalDialogResult resultData = d.resultData();
 
 	if (resultData.equipmentIds.size() != resultData.appSignalIds.size() ||
 		resultData.equipmentIds.size() != resultData.customSignalIds.size())
@@ -358,12 +381,17 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 
 		initNewSignal(signal);
 
+		// Do it here, as initNewSignal sets EnableTuning to the last value from settings
+		//
+		signal.setEnableTuning(resultData.tuning);
+
 		if (resultData.signalType == CreatingSignalDialogOptions::SignalTypeAndFormat::Bus)
 		{
 			// Previous call initNewSignal spoils busTypeId
 			// so I have to restore it here
 			//
 			signal.setBusTypeID(resultData.busTypeId);
+			signal.setEnableTuning(false);
 		}
 
 		signal.setAppSignalID(appSignalId);
@@ -493,8 +521,10 @@ void CreateSignalDialog::busTypeToggled(bool checked)
 {
 	assert(m_signalTypeBus);
 	assert(m_busTypeCombo);
+	assert(m_tuningCheckBox);
 
 	m_busTypeCombo->setEnabled(checked);
+	m_tuningCheckBox->setEnabled(!checked);
 
 	return;
 }
@@ -533,6 +563,8 @@ void CreateSignalDialog::accept()
 	{
 		m_options.m_lastBusTypeId = m_busTypeCombo->currentText();
 	}
+
+	m_options.m_lastTuning = m_tuningCheckBox->isChecked();
 
 	// Saving result: signal type
 	//
@@ -578,6 +610,7 @@ void CreateSignalDialog::accept()
 	// Saving BusTypeID
 	//
 	m_result.busTypeId = m_busTypeCombo->currentText().trimmed();
+	m_result.tuning = m_tuningCheckBox->isChecked();
 
 	// Checks
 	//

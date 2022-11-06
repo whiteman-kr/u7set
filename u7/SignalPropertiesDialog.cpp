@@ -301,10 +301,13 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 		if (uppercaseAppSignalID)
 		{
 			QString upperAppSignalId = appSignal.appSignalID().toUpper();
+
 			if (appSignal.appSignalID() != upperAppSignalId)
 			{
 				QString message;
-				if (readOnly == false && checkoutSignal(appSignal, message) == false)
+				bool checkOutResult = m_tryCheckout ? checkoutSignal(appSignal, message) : true;
+
+				if (readOnly == false && checkOutResult == false)
 				{
 					if (message.isEmpty() == false)
 					{
