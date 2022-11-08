@@ -247,6 +247,11 @@ void SimWidget::createToolBar()
 	m_findSignalAction->setEnabled(true);
 	connect(m_findSignalAction, &QAction::triggered, this, &SimWidget::showFindSignal);
 
+
+	m_schemaListAction = new QAction{QIcon(":/Images/Images/SchemaList.svg"), tr("Show All Schemas"), this};
+	m_schemaListAction->setEnabled(true);
+	connect(m_schemaListAction, &QAction::triggered, this, &SimWidget::openAppSchemasTabPage);
+
 	m_snapshotAction = new QAction{QIcon(":/Images/Images/SimSnapshot.svg"), tr("Signals Snapshot"), this};
 	m_snapshotAction->setEnabled(true);
 	connect(m_snapshotAction, &QAction::triggered, this, &SimWidget::showSnapshot);
@@ -283,6 +288,7 @@ void SimWidget::createToolBar()
 	m_toolBar->addWidget(m_profilesComboBox);
 
 	m_toolBar->addSeparator();
+	m_toolBar->addAction(m_schemaListAction);
 	m_toolBar->addAction(m_snapshotAction);
 	m_toolBar->addAction(m_findSignalAction);
 

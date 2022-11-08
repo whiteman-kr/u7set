@@ -90,6 +90,7 @@
         <file>Images/ZoomFitToScreen.svg</file>
         <file>Images/ZoomIn.svg</file>
         <file>Images/ZoomOut.svg</file>
+        <file>Images/SchemaList.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>ScriptHelp/scripthelp.html</file>

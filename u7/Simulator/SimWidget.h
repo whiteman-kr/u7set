@@ -129,6 +129,7 @@ private:
 	QAction* m_allowLanComm = nullptr;
 	QComboBox* m_profilesComboBox = nullptr;
 
+	QAction* m_schemaListAction = nullptr;
 	QAction* m_snapshotAction = nullptr;
 	QAction* m_findSignalAction = nullptr;
 
