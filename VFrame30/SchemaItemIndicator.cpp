@@ -208,7 +208,7 @@ namespace VFrame30
 		// Expand variables in AppSignalIDs in MonitorMode, if applicable (m_drawParam is set and is monitor mode)
 		//
 		if (m_drawParam != nullptr &&
-			m_drawParam->isMonitorMode() == true &&
+			m_drawParam->drawMode() != DrawMode::Editor &&
 			m_drawParam->clientSchemaView() != nullptr)
 		{
 			result = MacrosExpander::parse(result, m_drawParam, this);
@@ -229,7 +229,7 @@ namespace VFrame30
 		// Expand variables in AppSignalIDs in MonitorMode, if applicable
 		//
 		if (m_drawParam != nullptr &&
-			m_drawParam->isMonitorMode() == true &&
+			m_drawParam->drawMode() != DrawMode::Editor &&
 			m_drawParam->clientSchemaView() != nullptr)
 		{
 			resultList = MacrosExpander::parse(resultList, m_drawParam, this);

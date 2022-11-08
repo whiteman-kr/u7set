@@ -25,14 +25,12 @@ public:
 							   QWidget* parent = nullptr);
 	virtual ~MonitorSchemaView() = default;
 
+public:
+	virtual VFrame30::DrawMode drawMode() const override;
+
 protected:
 	virtual void paintEvent(QPaintEvent* event) override;
-
 	virtual void updateScriptGlobalVars(QJSEngine& engine) override;
-
-	// Properties
-	//
-public:
 
 public slots:
 	void configurationArrived(ConfigSettings configuration);

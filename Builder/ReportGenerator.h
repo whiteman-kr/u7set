@@ -61,6 +61,8 @@ public:
 
 	void adjust(QPainter* painter, double startX, double startY, double zoom) const;
 	void drawCompareOutlines(VFrame30::CDrawParam* drawParam, const QRectF& clipRect, const std::map<QUuid, ReportSchemaCompareAction>& compareActions);
+
+	virtual VFrame30::DrawMode drawMode() const override;
 };
 
 //

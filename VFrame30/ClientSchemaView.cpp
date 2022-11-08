@@ -327,7 +327,6 @@ namespace VFrame30
 
 		drawParam.setControlBarSize(CONTROL_BAR(schema()->unit(), p.device()->devicePixelRatioF(), zoom()));		// Is required for drawing highlights on items
 		drawParam.setBlinkPhase(static_cast<bool>((QTime::currentTime().msec() / 250) % 2));	// 0-249 : false, 250-499 : true, 500-749 : false, 750-999 : true
-		drawParam.setEditMode(false);
 
 		drawParam.setAppSignalController(m_appSignalController);
 		drawParam.setTuningController(m_tuningController);

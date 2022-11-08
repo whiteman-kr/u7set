@@ -1,27 +1,18 @@
 #pragma once
 #include "Session.h"
-
-namespace VFrame30Private
-{
-	class SchemaRenderThread
-	{
-
-	};
-}
+#include "DrawParam.h"
 
 namespace VFrame30
 {
 	class Schema;
 	class SchemaItem;
-	class CDrawParam;
 
 	static constexpr double ZoomStep = 10;
 
 	class SchemaView
 	{
-
 	public:
-		explicit SchemaView();
+		SchemaView();
 		explicit SchemaView(std::shared_ptr<Schema> schema);
 
 		// Painting
@@ -32,6 +23,8 @@ namespace VFrame30
 		// Methods
 		//
 	public:
+		virtual DrawMode drawMode() const = 0;
+
 		[[nodiscard]] double realDpiX(const QPaintDevice* device) const;
 		[[nodiscard]] double realDpiY(const QPaintDevice* device) const;
 

@@ -1025,7 +1025,7 @@ namespace VFrame30
 
 	bool SchemaItem::blinkPhase() const
 	{
-		if (m_drawParam != nullptr && m_drawParam->isMonitorMode() == true)
+		if (m_drawParam != nullptr && m_drawParam->drawMode() != DrawMode::Editor)
 		{
 			return m_drawParam->blinkPhase();
 		}

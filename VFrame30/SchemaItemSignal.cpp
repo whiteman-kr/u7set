@@ -214,7 +214,7 @@ namespace VFrame30
 
 		FblItemRect::draw(drawParam, schema, layer);
 
-		if (drawParam->isMonitorMode() == true)
+		if (drawParam->drawMode() != DrawMode::Editor)
 		{
 			if (drawParam->appSignalController() ==  nullptr)
 			{
@@ -302,7 +302,9 @@ namespace VFrame30
 				text = signal.customSignalId();
 				if (text.isEmpty() == true)
 				{
-					text = drawParam->isEditMode() ? signal.appSignalId() : QLatin1String("?");
+					text = drawParam->drawMode() == DrawMode::Editor ?
+							   signal.appSignalId() :
+							   QLatin1String("?");
 				}
 			}
 			else
@@ -317,7 +319,9 @@ namespace VFrame30
 				text = impactSignal.customSignalId();
 				if (text.isEmpty() == true)
 				{
-					text = drawParam->isEditMode() ? impactSignal.appSignalId() : QLatin1String("?");
+					text = drawParam->drawMode() == DrawMode::Editor ?
+							   impactSignal.appSignalId() :
+							   QLatin1String("?");
 				}
 			}
 			else
@@ -333,7 +337,9 @@ namespace VFrame30
 
 				if (text.isEmpty() == true)
 				{
-					text = drawParam->isEditMode() ? signal.appSignalId() : QLatin1String("?");
+					text = drawParam->drawMode() == DrawMode::Editor ?
+							   signal.appSignalId() :
+							   QLatin1String("?");
 				}
 			}
 			else
@@ -348,7 +354,9 @@ namespace VFrame30
 				text = impactSignal.caption();
 				if (text.isEmpty() == true)
 				{
-					text = drawParam->isEditMode() ? impactSignal.appSignalId() : QLatin1String("?");
+					text = drawParam->drawMode() == DrawMode::Editor ?
+							   impactSignal.appSignalId() :
+							   QLatin1String("?");
 				}
 			}
 			else
@@ -361,7 +369,8 @@ namespace VFrame30
 			{
 				if (drawParam->appSignalController() != nullptr)
 				{
-					if (signalState.m_flags.valid == false)
+					if ((drawParam->drawMode() == DrawMode::Monitor && signalState.m_flags.valid == false) ||
+						(drawParam->drawMode() == DrawMode::Simulator && signalState.m_flags.stateAvailable == false))
 					{
 						const static QString nonValidStr = "?";
 						text = nonValidStr;
@@ -389,7 +398,8 @@ namespace VFrame30
 			{
 				if (drawParam->appSignalController() != nullptr)
 				{
-					if (impactSignalState.m_flags.valid == false)
+					if ((drawParam->drawMode() == DrawMode::Monitor && impactSignalState.m_flags.valid == false) ||
+						(drawParam->drawMode() == DrawMode::Simulator && impactSignalState.m_flags.stateAvailable == false))
 					{
 						const static QString nonValidStr = "?";
 						text = nonValidStr;

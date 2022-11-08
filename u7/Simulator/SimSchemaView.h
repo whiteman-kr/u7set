@@ -12,6 +12,9 @@ public:
 	explicit SimSchemaView(SimSchemaManager* schemaManager, QWidget* parent = nullptr);
 	virtual ~SimSchemaView();
 
+public:
+	virtual VFrame30::DrawMode drawMode() const override;
+
 protected:
 	virtual void updateScriptGlobalVars(QJSEngine& engine) override;
 
