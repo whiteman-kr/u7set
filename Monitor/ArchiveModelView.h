@@ -33,10 +33,12 @@ class ArchiveSignalParam : public AppSignalParam
 {
 public:
 	ArchiveSignalParam() = default;
-	explicit ArchiveSignalParam(const AppSignalParam& _appSignalParam) : AppSignalParam(_appSignalParam), precision(_appSignalParam.precision()) {}
+	explicit ArchiveSignalParam(const AppSignalParam& _appSignalParam) :
+		AppSignalParam(_appSignalParam), precision(_appSignalParam.precision()), analogAppSignalParam(_appSignalParam.analogSignalFormat()) {}
 
 	E::ValueViewType viewType = E::ValueViewType::Dec;
 	int precision = 2;
+	E::AnalogAppSignalFormat analogAppSignalParam = E::AnalogAppSignalFormat::SignedInt32;
 };
 
 //

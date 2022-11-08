@@ -853,7 +853,7 @@ QVariant SignalSnapshotModel::data(const QModelIndex &index, int role) const
 				switch (s.type())
 				{
 				case E::SignalType::Analog:
-					valueResult = state.toString(state.m_value, E::ValueViewType::Dec, m_analogFormat, m_analogPrecision == -1 ? s.precision() : m_analogPrecision);
+					valueResult = state.toString(state.m_value, E::ValueViewType::Dec, m_analogFormat, s.analogSignalFormat(), m_analogPrecision == -1 ? s.precision() : m_analogPrecision);
 					break;
 				case E::SignalType::Discrete:
 					valueResult = static_cast<int>(state.m_value) == 0 ? "0" : "1";
