@@ -55,18 +55,20 @@ namespace TrendLib
 
 		[[nodiscard]] bool isValid() const
 		{
-			return (flags & 0x00000001);
+			return (flags & 0x00000002);	// AppSignalStateFlags::stateAvailable, it is a real non valid
+											// validity bit 0 is a combination of stateAvailable and coupled valididty signal
+											// So
 		}
 
 		void setValid(bool valid)
 		{
 			if (valid == true)
 			{
-				flags |= 0x00000001;
+				flags |= 0x00000003;		// AppSignalStateFlags::stateAvailable && AppSignalStateFlags::valid
 			}
 			else
 			{
-				flags &= ~0x00000001;
+				flags &= ~0x00000003;		// AppSignalStateFlags::stateAvailable && AppSignalStateFlags::valid
 			}
 		}
 
