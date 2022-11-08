@@ -626,7 +626,7 @@ namespace VFrame30
 
 		// Draw valued bar
 		//
-		if (drawParam->isEditMode() == true)
+		if (drawParam->drawMode() == DrawMode::Editor)
 		{
 			QRectF signalValueRect = barRect;
 
@@ -1108,7 +1108,7 @@ namespace VFrame30
 		std::vector<IndicatorSetpoint> result;
 		result.reserve(8);
 
-		if (drawParam->isMonitorMode() == false ||
+		if (drawParam->drawMode() == DrawMode::Editor ||
 			drawParam->appSignalController() == nullptr)
 		{
 			return result;
@@ -1273,7 +1273,7 @@ namespace VFrame30
 		Q_ASSERT(drawParam);
 		Q_ASSERT(schemaItem);
 
-		if (drawParam->isMonitorMode() == false)
+		if (drawParam->drawMode() == DrawMode::Editor)
 		{
 			return {};
 		}
@@ -1384,7 +1384,7 @@ namespace VFrame30
 											   const std::vector<QRectF>& barRects,
 											   const SchemaItemIndicator* schemaItem) const
 	{
-		if (drawParam->isMonitorMode() == false)
+		if (drawParam->drawMode() == DrawMode::Editor)
 		{
 			// No access to setpoints
 			//

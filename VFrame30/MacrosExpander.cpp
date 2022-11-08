@@ -29,8 +29,11 @@ namespace VFrame30
 			return str;
 		}
 
+		const ClientSchemaView* clientView = (drawParam->drawMode() == DrawMode::Editor) ?
+												nullptr :
+												drawParam->clientSchemaView();
 		return parse(str,
-					 drawParam->isMonitorMode() ? drawParam->clientSchemaView() : nullptr,
+					 clientView,
 					 &drawParam->session(),
 					 drawParam->schema(),
 					 schemaItem);

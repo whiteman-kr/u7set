@@ -30,6 +30,11 @@ TuningSchemaView::TuningSchemaView(TuningSchemaManager* schemaManager, QWidget* 
 	return;
 }
 
+VFrame30::DrawMode TuningSchemaView::drawMode() const
+{
+	return VFrame30::DrawMode::Monitor;
+}
+
 void TuningSchemaView::updateScriptGlobalVars(QJSEngine& engine)
 {
 	VFrame30::ClientSchemaView::updateScriptGlobalVars(engine);

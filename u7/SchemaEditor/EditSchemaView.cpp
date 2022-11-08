@@ -50,6 +50,11 @@ EditSchemaView::~EditSchemaView()
 {
 }
 
+VFrame30::DrawMode EditSchemaView::drawMode() const
+{
+	return VFrame30::DrawMode::Editor;
+}
+
 void EditSchemaView::timerEvent(QTimerEvent* event)
 {
 	VFrame30::SchemaViewWidget::timerEvent(event);

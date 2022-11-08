@@ -1,7 +1,6 @@
 #include "SchemaView.h"
 #include "Schema.h"
 #include "SchemaItemControl.h"
-#include "DrawParam.h"
 
 namespace VFrame30
 {
@@ -334,7 +333,7 @@ void SchemaViewWidget::draw(CDrawParam& drawParam, const QRectF& clipRect)
 		return;
 	}
 
-	updateControlWidgets(drawParam.isEditMode());
+	updateControlWidgets(drawParam.drawMode() == DrawMode::Editor);
 
 	// --
 	//

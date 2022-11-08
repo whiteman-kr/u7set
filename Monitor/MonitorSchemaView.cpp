@@ -29,6 +29,10 @@ MonitorSchemaView::MonitorSchemaView(MonitorSchemaManager* schemaManager,
 	return;
 }
 
+VFrame30::DrawMode MonitorSchemaView::drawMode() const
+{
+	return VFrame30::DrawMode::Monitor;
+}
 
 void MonitorSchemaView::paintEvent(QPaintEvent* event)
 {

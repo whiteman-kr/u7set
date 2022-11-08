@@ -106,6 +106,11 @@ void ReportSchemaView::drawCompareOutlines(VFrame30::CDrawParam* drawParam, cons
 	}
 }
 
+VFrame30::DrawMode ReportSchemaView::drawMode() const
+{
+	return VFrame30::DrawMode::Editor;
+}
+
 //
 // ReportObject
 //

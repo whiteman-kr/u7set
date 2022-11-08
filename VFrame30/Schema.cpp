@@ -444,13 +444,16 @@ namespace VFrame30
 			return;
 		}
 
-		ClientSchemaView* clientView = drawParam->isMonitorMode() ? drawParam->clientSchemaView() : nullptr;
-		ILogFile* log = clientView != nullptr ? clientView->logFile() : nullptr;
+		ClientSchemaView* clientView = drawParam->drawMode() == DrawMode::Editor ?
+										   nullptr :
+										   drawParam->clientSchemaView();
 
-		if (drawParam->isMonitorMode() == true)
+		ILogFile* log = clientView ? clientView->logFile() : nullptr;
+
+		if (clientView != nullptr)
 		{
-			Q_ASSERT(clientView);
-
+			// Monitor or Simulator
+			//
 			bool mbe = clientView->setScriptMessageBoxAllowed(false);
 
 			this->preDrawEvent(clientView->jsEngine(), log);
@@ -478,7 +481,7 @@ namespace VFrame30
 		QElapsedTimer timer;
 		timer.start();
 
-		bool isClientMode = drawParam->isMonitorMode();
+		bool isClientMode = clientView != nullptr;
 
 		for (const SchemaLayerPtr& layer : Layers)
 		{

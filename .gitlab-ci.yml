@@ -23,6 +23,8 @@ linux build job:
     - develop
     - /experimental/
     - /^exp.*$/
+    - /^rpct-.*$/
+    - /^RPCT-.*$/
   tags:
     - gcc
   script:
@@ -61,6 +63,8 @@ windows build job:
     - develop
     - /experimental/
     - /^exp.*$/
+    - /^rpct-.*$/
+    - /^RPCT-.*$/
   tags:
     - vs2017
   script:
@@ -217,6 +221,8 @@ test job:
     - develop
     - /experimental/
     - /^exp.*$/
+    - /^rpct-.*$/
+    - /^RPCT-.*$/
   script:
     - "# dir env:"
     - "echo $Env:CI_COMMIT_SHA"

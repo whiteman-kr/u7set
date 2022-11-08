@@ -26,6 +26,9 @@ public:
 
 	virtual ~EditSchemaView();
 
+public:
+	virtual VFrame30::DrawMode drawMode() const override;
+
 	// Painting
 	//
 protected:

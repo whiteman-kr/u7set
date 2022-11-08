@@ -26,6 +26,11 @@ SimSchemaView::~SimSchemaView()
 	return;
 }
 
+VFrame30::DrawMode SimSchemaView::drawMode() const
+{
+	return VFrame30::DrawMode::Simulator;
+}
+
 void SimSchemaView::updateScriptGlobalVars(QJSEngine& engine)
 {
 	VFrame30::ClientSchemaView::updateScriptGlobalVars(engine);

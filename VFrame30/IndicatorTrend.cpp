@@ -257,7 +257,7 @@ namespace VFrame30
 		m_trendParam.setRect(trendRect);
 		m_trendParam.setTimeType(m_timeType);
 
-		if (drawParam->isMonitorMode() == true)
+		if (drawParam->drawMode() != DrawMode::Editor)
 		{
 			Q_ASSERT(drawParam->clientSchemaView());
 			m_trendParam.setTrendDataProvider(drawParam->clientSchemaView()->schemaManager());
@@ -277,7 +277,7 @@ namespace VFrame30
 		//
 		bool requiredRedraw = (m_redrawInterval < 250_ms) ||
 							  m_drawTimer.hasExpired(m_redrawInterval) ||
-							  drawParam->isEditMode();
+							  drawParam->drawMode() == DrawMode::Editor;
 
 		if (m_image.width() != static_cast<int>(trendRect.width()) ||
 			m_image.height() != static_cast<int>(trendRect.height()))

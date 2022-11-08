@@ -14,6 +14,14 @@ class QPixmap;
 
 namespace VFrame30
 {
+	enum class DrawMode
+	{
+		Monitor,
+		Simulator,
+		Editor
+	};
+
+
 	class Schema;
 	class SchemaView;
 	class ClientSchemaView;
@@ -69,11 +77,7 @@ namespace VFrame30
 		QPointF gridToDpi(const QPointF& pos) const noexcept;
 		QRectF gridToDpi(const QRectF& rect) const noexcept;
 
-		bool isEditMode() const noexcept;
-		void setEditMode(bool value);
-
-		bool isMonitorMode() const noexcept;
-		void setMonitorMode(bool value);
+		DrawMode drawMode() const noexcept;
 
 		bool infoMode() const noexcept;
 		void setInfoMode(bool value);
@@ -117,7 +121,6 @@ namespace VFrame30
 		double m_controlBarSize = 0.0;
 		double m_gridSize = 0.0;
 		int m_pinGridStep = 0;
-		bool m_isEditMode = true;
 		bool m_infoMode = false;
 		bool m_pdfMode = false;
 		bool m_blinkPhase = false;

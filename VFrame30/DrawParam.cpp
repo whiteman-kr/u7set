@@ -64,13 +64,13 @@ namespace VFrame30
 
 	const ClientSchemaView* CDrawParam::clientSchemaView() const
 	{
-		Q_ASSERT(isMonitorMode());
+		Q_ASSERT(drawMode() != DrawMode::Editor);
 		return dynamic_cast<const ClientSchemaView*>(m_schemaView);
 	}
 
 	ClientSchemaView* CDrawParam::clientSchemaView()
 	{
-		Q_ASSERT(isMonitorMode());
+		Q_ASSERT(drawMode() != DrawMode::Editor);
 		auto ptr = dynamic_cast<const ClientSchemaView*>(m_schemaView);
 		return const_cast<ClientSchemaView*>(ptr);
 	}
@@ -255,24 +255,9 @@ namespace VFrame30
 		return QRectF{gridToDpi(rect.topLeft()), gridToDpi(rect.bottomRight())};
 	}
 
-	bool CDrawParam::isEditMode() const noexcept
+	DrawMode CDrawParam::drawMode() const noexcept
 	{
-		return m_isEditMode;
-	}
-
-	void CDrawParam::setEditMode(bool value)
-	{
-		m_isEditMode = value;
-	}
-
-	bool CDrawParam::isMonitorMode() const noexcept
-	{
-		return !isEditMode();
-	}
-
-	void CDrawParam::setMonitorMode(bool value)
-	{
-		setEditMode(!value);
+		return m_schemaView->drawMode();
 	}
 
 	bool CDrawParam::infoMode() const noexcept
