@@ -338,11 +338,11 @@ QString ArchiveModel::getValueString(const AppSignalState& state, const ArchiveS
 		{
 			result = QString("%1 (%2)")
 						.arg(nonValidString)
-						.arg(AppSignalState::toString(state.value(), signalParam.viewType, E::AnalogFormat::f_9, signalParam.precision));
+						.arg(AppSignalState::toString(state.value(), signalParam.viewType, E::AnalogFormat::f_9, signalParam.analogSignalFormat(), signalParam.precision));
 		}
 		else
 		{
-			result = AppSignalState::toString(state.value(), signalParam.viewType, E::AnalogFormat::f_9, signalParam.precision);
+			result = AppSignalState::toString(state.value(), signalParam.viewType, E::AnalogFormat::f_9, signalParam.analogSignalFormat(), signalParam.precision);
 		}
 		break;
 	case E::SignalType::Discrete:

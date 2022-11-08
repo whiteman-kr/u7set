@@ -602,6 +602,9 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 		removeTabPage("Extended");
 	}
 
+	ui->labelValue->setWordWrap(true);
+	ui->labelValueTuning->setWordWrap(true);
+
 	UiTools::adjustDialogPlacement(this);
 
 	m_updateStateTimerId = startTimer(200);
@@ -1793,14 +1796,20 @@ void DialogSignalInfo::updateAppSignalState()
 	//
 	int oldFontSize = m_currentFontSize;
 
-	if (m_signal.isAnalog() &&
-		(m_viewType == E::ValueViewType::Bin32 || m_viewType == E::ValueViewType::Bin64 || multiLineText == true))
+	if (m_signal.isAnalog() && m_viewType == E::ValueViewType::Bin32)
 	{
 		m_currentFontSize = static_cast<int>(labelHeight * 0.33);
 	}
 	else
 	{
-		m_currentFontSize = static_cast<int>(labelHeight * 0.4);
+		if (m_signal.isAnalog() && (m_viewType == E::ValueViewType::Bin64 || multiLineText == true))
+		{
+			m_currentFontSize = static_cast<int>(labelHeight * 0.25);
+		}
+		else
+		{
+			m_currentFontSize = static_cast<int>(labelHeight * 0.4);
+		}
 	}
 
 	if (oldFontSize != m_currentFontSize)
@@ -2053,35 +2062,14 @@ QString DialogSignalInfo::appSignalStateText(const AppSignalParam& param, const 
 
 	if (param.isAnalog() == true)
 	{
-		double ipart = 0;
-		double fpart = std::modf(state.m_value, &ipart);
-
-		if((viewType == E::ValueViewType::Bin16 || viewType == E::ValueViewType::Bin32 || viewType == E::ValueViewType::Bin64 || viewType == E::ValueViewType::Hex) &&
-		   precision > 0 &&
-		   fpart != 0)
-		{
-			strValue = tr("Only integer value is displayed in HEX or BIN mode.\nSet view precision to zero to see the value.");
-		}
-		else
-		{
-			strValue = AppSignalState::toString(state.m_value, viewType, E::AnalogFormat::f_9, precision);
-		}
+		strValue = AppSignalState::toString(state.m_value, viewType, E::AnalogFormat::f_9, param.analogSignalFormat(), precision);
 	}
 
 	// Generate non valid string
 	//
-	if (state.m_flags.valid == false)
+	if (state.m_flags.valid == false && state.m_flags.stateAvailable == false)
 	{
-		if (state.m_flags.stateAvailable == true)
-		{
-			// Even state is not valid in some reason LM has value for this signal, show it
-			//
-			strValue = QString("? (%1)").arg(strValue);
-		}
-		else
-		{
-			strValue = QStringLiteral("?");
-		}
+		strValue = QStringLiteral("?");
 	}
 
 	return strValue;
@@ -2101,19 +2089,7 @@ QString DialogSignalInfo::tuningSignalStateText(const AppSignalParam& param, con
 
 	if (param.isAnalog() == true)
 	{
-		double ipart = 0;
-		double fpart = std::modf(state.m_value.toDouble(), &ipart);
-
-		if((viewType == E::ValueViewType::Bin16 || viewType == E::ValueViewType::Bin32 || viewType == E::ValueViewType::Bin64 || viewType == E::ValueViewType::Hex) &&
-		   precision > 0 &&
-		   fpart != 0)
-		{
-			strValue = tr("Only integer value is displayed in HEX or BIN mode.\nSet view precision to zero to see the value.");
-		}
-		else
-		{
-			strValue = AppSignalState::toString(state.m_value.toDouble(), viewType, E::AnalogFormat::f_9, precision);
-		}
+		strValue = AppSignalState::toString(state.m_value.toDouble(), viewType, E::AnalogFormat::f_9, param.analogSignalFormat(), precision);
 	}
 
 	// Generate non valid string

@@ -594,7 +594,7 @@ public:
 	//
 	enum class ValueViewType
 	{
-		Dec, Hex, Bin16, Bin32, Bin64, Exp, Count
+		Dec, Hex, Bin32, Bin64, Exp, Count
 	};
 	Q_ENUM(ValueViewType)
 

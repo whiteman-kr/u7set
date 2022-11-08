@@ -143,12 +143,17 @@ bool AppSignalState::hasSameValue(const AppSignalState& b) const
 		   m_hash == b.m_hash;
 }
 
-QString AppSignalState::toString(double value, E::ValueViewType viewType, E::AnalogFormat analogFormat, int precision)
+QString AppSignalState::toString(double value, E::ValueViewType viewType, E::AnalogFormat analogFormat, E::AnalogAppSignalFormat analogAppSignalFormat, int precision)
 {
 	QString result;
-	result.reserve(32);
+	result.reserve(64);
 
 	int p = 4;
+
+	float floatValue = static_cast<float>(value);
+	quint32 floatValueBits = std::bit_cast<quint32>(floatValue);
+
+	quint64 doubleValueBits = std::bit_cast<quint64>(value);
 
 	switch (viewType)
 	{
@@ -157,41 +162,94 @@ QString AppSignalState::toString(double value, E::ValueViewType viewType, E::Ana
 		break;
 
 	case E::ValueViewType::Hex:
-		result = /*tr("HEX:") + */QString::number((long)value, 16) + QStringLiteral("h");
-		break;
-
-	case E::ValueViewType::Exp:
-		result = /*tr("EXP:") + */QString::number(value, 'e', precision);
-		break;
-
-	case E::ValueViewType::Bin16:
+		if (analogAppSignalFormat == E::AnalogAppSignalFormat::SignedInt32)
 		{
-			result = QString::number((quint16)value, 2);
-			result = result.rightJustified(16, '0');
-			for (int q = 0; q < 3; q++, p += 5)
+			result = QString::number((long)value, 16).leftJustified(16, '0') + QStringLiteral("h");
+		}
+		else
+		{
+			Q_ASSERT(analogAppSignalFormat == E::AnalogAppSignalFormat::Float32);
+
+			result = QStringLiteral("FP IEEE 754: ") + QString::number(floatValueBits, 16).leftJustified(8, '0') + QStringLiteral("h");
+
+			if (std::isnan(floatValue) == true)
 			{
-				result.insert(p, ' ');
+				result += QStringLiteral(" (nan)");
+			}
+			if (std::isinf(floatValue) == true)
+			{
+				result += floatValue == -std::numeric_limits<float>::infinity() ? QStringLiteral(" (-inf)") : QStringLiteral(" (inf)");
 			}
 		}
 		break;
 
+	case E::ValueViewType::Exp:
+		result = QString::number(value, 'e', precision);
+		break;
+
 	case E::ValueViewType::Bin32:
-		result = QString::number((quint32)value, 2);
-		result = result.rightJustified(32, '0');
-		for (int q = 0; q < 7; q++, p += 5)
+		if (analogAppSignalFormat == E::AnalogAppSignalFormat::SignedInt32)
 		{
-			result.insert(p, ' ');
+			result = QString::number((quint32)floatValue, 2);
+			result = result.rightJustified(32, '0');
+			for (int q = 0; q < 7; q++, p += 5)
+			{
+				result.insert(p, ' ');
+			}
+		}
+		else
+		{
+			Q_ASSERT(analogAppSignalFormat == E::AnalogAppSignalFormat::Float32);
+
+			// Print IEEE 564 format for Float number
+
+			result = QString::number(floatValueBits, 2).rightJustified(32, '0');
+			result.insert(1, QStringLiteral(" E:"));
+			result.insert(result.length() - 23, QStringLiteral(" M:"));
+			result = QStringLiteral("FP IEEE 754: S:") + result;
+
+			if (std::isnan(floatValue) == true)
+			{
+				result += QStringLiteral(" (nan)");
+			}
+			if (std::isinf(floatValue) == true)
+			{
+				result += floatValue == -std::numeric_limits<float>::infinity() ? QStringLiteral(" (-inf)") : QStringLiteral(" (inf)");
+			}
 		}
 		break;
 
 	case E::ValueViewType::Bin64:
-		result = QString::number((quint64)value, 2);
-		result = result.rightJustified(64, '0');
-		for (int q = 0; q < 15; q++, p += 5)
+		if (analogAppSignalFormat == E::AnalogAppSignalFormat::SignedInt32)
 		{
-			result.insert(p, ' ');
+			result = QString::number((quint64)doubleValueBits, 2);
+			result = result.rightJustified(64, '0');
+			for (int q = 0; q < 15; q++, p += 5)
+			{
+				result.insert(p, ' ');
+			}
+			result.insert(40, QChar::LineFeed);
 		}
-		result.insert(40, QChar::LineFeed);
+		else
+		{
+			Q_ASSERT(analogAppSignalFormat == E::AnalogAppSignalFormat::Float32);
+
+			// Print IEEE 564 format for Double number
+
+			result = QString::number(doubleValueBits, 2).rightJustified(64, '0');
+			result.insert(1, QStringLiteral(" E:"));
+			result.insert(result.length() - 52, QStringLiteral(" M:"));
+			result = QStringLiteral("DBL IEEE 754: S:") + result;
+
+			if (std::isnan(value) == true)
+			{
+				result += QStringLiteral(" (nan)");
+			}
+			if (std::isinf(value) == true)
+			{
+				result += value == -std::numeric_limits<float>::infinity() ? QStringLiteral(" (-inf)") : QStringLiteral(" (inf)");
+			}
+		}
 		break;
 
 	default:
