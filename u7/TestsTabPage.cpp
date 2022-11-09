@@ -876,7 +876,7 @@ TestsTabPage::TestsTabPage(DbController* dbc, QWidget* parent) :
 	QVBoxLayout* layout = new QVBoxLayout;
 	setLayout(layout);
 
-	layout->setContentsMargins(0, 6, 0, 0);
+	layout->setContentsMargins(0, 0, 0, 0);
 	layout->addWidget(m_testsWidget);
 
 	// --
