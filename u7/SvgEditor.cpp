@@ -116,7 +116,7 @@ SvgEditor::SvgEditor(QWidget* parent):
 
 	m_textEdit->setFont(f);
 
-    XmlHighlighter::createXmlHighlighter(m_textEdit->document());
+	XmlHighlighter::createXmlHighlighter(m_textEdit);
 
     connect(m_textEdit, &CodeEditor::textChanged, this, &SvgEditor::onTextChanged);
 

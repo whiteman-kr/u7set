@@ -98,7 +98,7 @@ SimProfileEditor::SimProfileEditor(DbController* dbController, QWidget* parent)	
 
 	m_textEdit->setFont(f);
 
-    JsHighlighter::createJsHighlighter(m_textEdit->document());
+	JsHighlighter::createJsHighlighter(m_textEdit);
 
     connect(m_textEdit, &CodeEditor::textChanged, this, &SimProfileEditor::textChanged);
 

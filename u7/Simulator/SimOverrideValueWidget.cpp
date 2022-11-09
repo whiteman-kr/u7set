@@ -387,7 +387,7 @@ namespace SimOverrideUI
 #endif
 		m_scriptEdit->setFont(f);
 
-        JsHighlighter::createJsHighlighter(m_scriptEdit->document());
+		JsHighlighter::createJsHighlighter(m_scriptEdit);
 
 		QString lastScript;
 		if (db()->isProjectOpened() == true)

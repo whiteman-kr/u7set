@@ -29,10 +29,6 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
     p.setColor(QPalette::HighlightedText, QColor(0xffffff));
     setPalette(p);
 
-    connect(this, &CodeEditor::textChanged, this, [this](){
-        m_modified = true;
-    });
-
     setCaretWidth(2);
     setTabWidth(4);
 
@@ -49,11 +45,19 @@ void CodeEditor::setText(const QString& text)
 {
     setPlainText(QString());
 
-    document()->blockSignals(true);
-    setPlainText(text);
-    document()->blockSignals(false);
+	if (m_highlighter != nullptr)
+	{
+		document()->blockSignals(true);
+	}
 
-    m_modified = false;
+	setPlainText(text);
+
+	if (m_highlighter != nullptr)
+	{
+		document()->blockSignals(false);
+	}
+
+	document()->setModified(false);
 
     updateLineNumberAreaWidth();
 }
@@ -83,14 +87,19 @@ void CodeEditor::setFont(const QFont& f)
     setLineNumberOffset(static_cast<int>(fm.horizontalAdvance(QChar::Space) * 0.75));
 }
 
+void CodeEditor::setHighlighter(Highlighter* highlighter)
+{
+	m_highlighter = highlighter;
+}
+
 bool CodeEditor::isModified() const
 {
-    return m_modified;
+	return document()->isModified();
 }
 
 void CodeEditor::setModified(bool value)
 {
-    m_modified = value;
+	document()->setModified(value);
 }
 
 void CodeEditor::setCaretLineVisible(bool visible)
@@ -169,7 +178,7 @@ int CodeEditor::lineNumberOffset() const
 
 void CodeEditor::setLineNumberOffset(int offset)
 {
-    m_lineNumberOffset = offset;
+	m_lineNumberOffset = offset;
 }
 
 int CodeEditor::getLineNumberAreaWidth()
@@ -192,7 +201,7 @@ int CodeEditor::getLineNumberAreaWidth()
         ++digits;
     }
 
-    int space = static_cast<int>(fontMetrics().horizontalAdvance(QLatin1Char('9')) * (digits + 1.5/*1.5 of extra symbol*/));
+	int space = static_cast<int>(fontMetrics().horizontalAdvance(QLatin1Char('9')) * digits) + m_lineNumberOffset * 2;
 
     return space;
 }
@@ -455,6 +464,59 @@ void CodeEditor::contextMenuEvent (QContextMenuEvent *e)
     menu->exec(e->globalPos());
 }
 
+void CodeEditor::paintEvent(QPaintEvent *event)
+{
+	if (m_highlighter != nullptr)
+	{
+		updateHighlighter();
+	}
+
+	QPlainTextEdit::paintEvent(event);
+}
+
+void CodeEditor::updateHighlighter()
+{
+	if (m_highlighter == nullptr)
+	{
+		return;
+	}
+
+	int startPos = cursorForPosition(QPoint(0, 0)).position();
+	QPoint bottom_right(viewport()->width() - 1, viewport()->height() - 1);
+	int endPos = cursorForPosition(bottom_right).position();
+
+	if (startPos == m_startPosPrev && endPos == m_endPosPrev)
+	{
+		return;
+	}
+	m_startPosPrev = startPos;
+	m_endPosPrev = endPos;
+
+	QTextCursor cursor = textCursor();
+	cursor.setPosition(startPos);
+	QTextBlock startBlock = cursor.block();
+	cursor.setPosition(endPos);
+	cursor.movePosition(QTextCursor::NextBlock);
+	QTextBlock endBlock = cursor.block();
+
+	//Iterate visible blocks
+	//
+	for(QTextBlock b = startBlock; b.isValid() && b != endBlock; b = b.next())
+	{
+		int st = b.userState();
+		if (st == -1)
+			st = 0;
+		bool processedPeriodicHighlight = (st & 0x80) != 0;
+		if (processedPeriodicHighlight == true)
+		{
+			continue;
+		}
+		b.setUserState(b.userState() | 0x80);
+
+		m_highlighter->rehighlightBlock(b);
+	}
+}
+
 void CodeEditor::updateLineNumberAreaWidth()
 {
     setViewportMargins(getLineNumberAreaWidth(), 0, 0, 0);
@@ -494,8 +556,6 @@ void CodeEditor::highlightCurrentLine()
 
     setExtraSelections(extraSelections);
 }
-
-
 
 //
 // ------------------------------------------------------------------------------------------
@@ -543,11 +603,12 @@ void Highlighter::highlightBlock(const QString &text)
 //
 // ------------------------------------------------------------------------------------------
 //
-JsHighlighter* JsHighlighter::createJsHighlighter(QTextDocument *parent)
+void JsHighlighter::createJsHighlighter(CodeEditor* codeEditor)
 {
-    JsHighlighter* h = new JsHighlighter(parent);
+	JsHighlighter* h = new JsHighlighter(codeEditor->document());
     h->initializeFormat();
-    return h;
+	codeEditor->setHighlighter(h);
+	return;
 }
 
 JsHighlighter::JsHighlighter(QTextDocument *parent):
@@ -660,11 +721,12 @@ void JsHighlighter::extraHighlightBlock(const QString &text)
 //
 // ------------------------------------------------------------------------------------------
 //
-XmlHighlighter* XmlHighlighter::createXmlHighlighter(QTextDocument *parent)
+void XmlHighlighter::createXmlHighlighter(CodeEditor *codeEditor)
 {
-    XmlHighlighter* h = new XmlHighlighter(parent);
+	XmlHighlighter* h = new XmlHighlighter(codeEditor->document());
     h->initializeFormat();
-    return h;
+	codeEditor->setHighlighter(h);
+	return;
 }
 
 XmlHighlighter::XmlHighlighter(QTextDocument *parent):

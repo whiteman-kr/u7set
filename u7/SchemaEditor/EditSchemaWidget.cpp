@@ -5753,7 +5753,7 @@ void EditSchemaWidget::f2KeyForValue(SchemaItemPtr item)
 	QLabel* preDrawScriptLabel = new QLabel("PreDrawScript:", &d);
 
     CodeEditor* preDrawScriptEdit = new CodeEditor(&d);
-    JsHighlighter::createJsHighlighter(preDrawScriptEdit->document());
+	JsHighlighter::createJsHighlighter(preDrawScriptEdit);
 
     preDrawScriptEdit->setText(preDrawScript);
 
@@ -5899,7 +5899,7 @@ void EditSchemaWidget::f2KeyForImageValue(SchemaItemPtr item)
 	QLabel* preDrawScriptLabel = new QLabel("PreDrawScript:", &d);
 
     CodeEditor* preDrawScriptEdit = new CodeEditor(&d);
-    JsHighlighter::createJsHighlighter(preDrawScriptEdit->document());
+	JsHighlighter::createJsHighlighter(preDrawScriptEdit);
 
     preDrawScriptEdit->setText(preDrawScript);
 

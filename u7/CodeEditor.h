@@ -34,6 +34,8 @@ public:
 
     void setFont(const QFont& f);
 
+	void setHighlighter(Highlighter* highlighter);
+
     // State
     //
     bool isModified() const;
@@ -88,6 +90,9 @@ private:
     void keyPressEvent( QKeyEvent* e) override;
     void resizeEvent(QResizeEvent* event) override;
     void contextMenuEvent (QContextMenuEvent *e) override;
+	void paintEvent(QPaintEvent *event) override;
+
+	void updateHighlighter();
 
 signals:
     void customContextMenuAboutToBeShown();
@@ -100,6 +105,7 @@ private slots:
 
 private:
     QWidget* m_lineNumberArea = nullptr;
+	Highlighter* m_highlighter = nullptr;
 
     bool m_autoIndent = true;
 
@@ -119,9 +125,10 @@ private:
 
     FindContext m_findContext;
 
-    bool m_modified = false;
-
     QString m_tabSymbol;
+
+	int m_startPosPrev = 0;
+	int m_endPosPrev = 0;
 };
 
 class LineNumberArea : public QWidget
@@ -165,7 +172,7 @@ class JsHighlighter : public Highlighter
 {
 
 public:
-    static JsHighlighter* createJsHighlighter(QTextDocument *parent);
+	static void createJsHighlighter(CodeEditor *codeEditor);
 
 private:
     JsHighlighter(QTextDocument *parent);
@@ -182,7 +189,7 @@ class XmlHighlighter : public Highlighter
 {
 
 public:
-    static XmlHighlighter* createXmlHighlighter(QTextDocument *parent);
+	static void createXmlHighlighter(CodeEditor* codeEditor);
 
 private:
     XmlHighlighter(QTextDocument *parent);

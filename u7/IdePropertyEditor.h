@@ -149,7 +149,6 @@ private:
 
 private slots:
     void onCursorPositionChanged();
-    void onUpdateRequest(const QRect &rect, int dy);
 
 
 private:
@@ -159,8 +158,6 @@ private:
     QWidget* m_parent = nullptr;
 
     CodeType m_codeType = CodeType::Unknown;
-
-    Highlighter* m_highlighter = nullptr;
 
     DialogFindReplace* m_findReplace = nullptr;
 
