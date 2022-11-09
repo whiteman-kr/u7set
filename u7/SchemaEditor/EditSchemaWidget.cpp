@@ -5532,10 +5532,10 @@ void EditSchemaWidget::f2KeyForSignal(SchemaItemPtr item)
 
 	// AppSchemaIDs
 	//
-	QLabel* appSignalIdsLabel = new QLabel("AppSchemaIDs:", &d);
+	QLabel* appSignalIdsLabel = new QLabel("AppSignalIDs:", &d);
 
 	QTextEditCompleter* appSignalIdsEdit = new QTextEditCompleter(&d);
-	appSignalIdsEdit->setPlaceholderText("Enter AppSchemaIDs separated by lines. Press Ctrl+E to show completer.");
+	appSignalIdsEdit->setPlaceholderText("Enter AppSignalIDs separated by lines. Press Ctrl+E to show completer.");
 	appSignalIdsEdit->setPlainText(appSignalIds);
 	appSignalIdsEdit->setCompleter(completer);
 
