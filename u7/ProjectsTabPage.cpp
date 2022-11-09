@@ -194,6 +194,17 @@ void ProjectsTabPage::projectClosed()
 
 void ProjectsTabPage::createProject()
 {
+	// Use different DbController as during cretion project it can be opened and closed,
+	// and it must not emit any siganls to existing UI.
+	//
+	DbController dbc;
+
+	dbc.enableProgress();
+	dbc.setHost(theSettings.serverIpAddress());
+	dbc.setPort(theSettings.serverPort());
+	dbc.setServerUsername(theSettings.serverUsername());
+	dbc.setServerPassword(theSettings.serverPassword());
+
 	CreateProjectDialog dialog(this);
 
 	if (dialog.exec() == QDialog::Accepted)
@@ -204,7 +215,7 @@ void ProjectsTabPage::createProject()
 		// Check "Project already exist"...
 		//
 		std::vector<DbProject> projects;
-		dbController()->getProjectList(&projects, this);
+		dbc.getProjectList(&projects, this);
 
 		auto findPredicate = [&projectName](const DbProject& p) -> bool
 			{
@@ -217,23 +228,23 @@ void ProjectsTabPage::createProject()
 		{
 			// Add project
 			//
-			if (bool result = dbController()->createProject(projectName, administratorPassword, this);
+			if (bool result = dbc.createProject(projectName, administratorPassword, this);
 				result == true)
 			{
-				bool upgradeOk = dbController()->upgradeProject(projectName, administratorPassword, true, this);
+				bool upgradeOk = dbc.upgradeProject(projectName, administratorPassword, true, this);
 
 				if (upgradeOk == true)
 				{
 					// Open project to write Description and UppercaseAppSignalID properties
 					//
-					result = dbController()->openProject(projectName, "Administrator", administratorPassword, this);
+					result = dbc.openProject(projectName, "Administrator", administratorPassword, this);
 
 					if (result == true)
 					{
-						dbController()->setProjectProperty(Db::ProjectProperty::Description, dialog.projectDescription, this);
-						dbController()->setProjectProperty(Db::ProjectProperty::SafetyProject, true, this);
-						dbController()->setProjectProperty(Db::ProjectProperty::UppercaseAppSignalId, true, this);
-						dbController()->closeProject(this);
+						dbc.setProjectProperty(Db::ProjectProperty::Description, dialog.projectDescription, this);
+						dbc.setProjectProperty(Db::ProjectProperty::SafetyProject, true, this);
+						dbc.setProjectProperty(Db::ProjectProperty::UppercaseAppSignalId, true, this);
+						dbc.closeProject(this);
 					}
 				}
 			}
