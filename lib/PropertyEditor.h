@@ -273,15 +273,12 @@ namespace ExtWidgets
 
 		void setValidator(const QString& validator);
 
-		bool modified();
+		virtual bool isModified() const = 0;
 
 	signals:
         void escapePressed();
         void okPressed();
 		void cancelPressed();
-
-	public slots:
-		void textChanged();
 
 	protected:
 		void okButtonPressed();
@@ -290,8 +287,6 @@ namespace ExtWidgets
 	protected:
 		QRegularExpressionValidator* m_regExpValidator = nullptr;
 
-	private:
-		bool m_modified = false;
 	};
 
 	//
@@ -317,6 +312,9 @@ namespace ExtWidgets
 
 	private slots:
 		void onPlainTextContentsChange(int position, int charsRemoved, int charsAdded);
+
+	private:
+		bool isModified() const override;
 
 	private:
 		QPlainTextEdit* m_plainTextEdit = nullptr;

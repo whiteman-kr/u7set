@@ -42,6 +42,9 @@ public:
 
 	bool externalOkCancelButtons() const override;
 
+private:
+	bool isModified() const override;
+
 private slots:
 	void onTextChanged();
 

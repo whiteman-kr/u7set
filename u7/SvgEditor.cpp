@@ -199,13 +199,15 @@ bool SvgEditor::externalOkCancelButtons() const
 	return false;
 }
 
+bool SvgEditor::isModified() const
+{
+	return m_textEdit->isModified();
+}
+
 void SvgEditor::onTextChanged()
 {
 	m_svgWidget.setSvgData(m_textEdit->text());
 
-	//
-
-	textChanged();
 	return;
 }
 

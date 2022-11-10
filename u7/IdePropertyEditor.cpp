@@ -646,9 +646,6 @@ IdeCodePropertyEditor::IdeCodePropertyEditor(CodeType codeType, QWidget* parent)
     QHBoxLayout* l = new QHBoxLayout(this);
     l->setContentsMargins(0, 0, 0, 0);
     l->addWidget(m_textEdit);
-
-    connect(m_textEdit, &CodeEditor::textChanged, this, &PropertyTextEditor::textChanged);
-
 }
 
 IdeCodePropertyEditor::~IdeCodePropertyEditor()
@@ -664,7 +661,9 @@ QString IdeCodePropertyEditor::text() const
 
 void IdeCodePropertyEditor::setText(const QString& text)
 {
+	m_textEdit->blockSignals(true);
     m_textEdit->setText(text);
+	m_textEdit->blockSignals(false);
 }
 
 bool IdeCodePropertyEditor::readOnly() const
@@ -680,6 +679,11 @@ void IdeCodePropertyEditor::setReadOnly(bool value)
 bool IdeCodePropertyEditor::externalOkCancelButtons() const
 {
     return true;
+}
+
+bool IdeCodePropertyEditor::isModified() const
+{
+	return m_textEdit->isModified();
 }
 
 //
@@ -793,5 +797,10 @@ void IdeTuningFiltersEditor::setReadOnly(bool value)
 bool IdeTuningFiltersEditor::externalOkCancelButtons() const
 {
 	return true;
+}
+
+bool IdeTuningFiltersEditor::isModified() const
+{
+	return false;
 }
 

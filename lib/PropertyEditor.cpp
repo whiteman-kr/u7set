@@ -1737,16 +1737,6 @@ namespace ExtWidgets
 		}
 	}
 
-	bool PropertyTextEditor::modified()
-	{
-		return m_modified;
-	}
-
-	void PropertyTextEditor::textChanged()
-	{
-		m_modified = true;
-	}
-
 	void PropertyTextEditor::okButtonPressed()
 	{
 		emit okPressed();
@@ -1783,7 +1773,6 @@ namespace ExtWidgets
 
 		m_plainTextEdit->setTabStopDistance(metrics.horizontalAdvance(spaces));
 
-		connect(m_plainTextEdit, &QPlainTextEdit::textChanged, this, &PropertyPlainTextEditor::textChanged);
 		connect(m_plainTextEdit->document(), &QTextDocument::contentsChange, this, &PropertyPlainTextEditor::onPlainTextContentsChange);
 	}
 
@@ -1886,6 +1875,11 @@ namespace ExtWidgets
 		}
 
 		m_prevPlainText = newText;
+	}
+
+	bool PropertyPlainTextEditor::isModified() const
+	{
+		return m_plainTextEdit->document()->isModified();
 	}
 
 	//
@@ -2274,7 +2268,7 @@ namespace ExtWidgets
 
 	void MultiTextEditorDialog::reject()
 	{
-		if (m_editor->modified() == true)
+		if (m_editor->isModified() == true)
 		{
 			int result = QMessageBox::warning(this, qAppName(), tr("Do you want to save your changes?"), QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
 

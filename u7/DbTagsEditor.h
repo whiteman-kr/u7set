@@ -22,6 +22,9 @@ protected:
     bool externalOkCancelButtons() const override;
 
 private:
+	bool isModified() const override;
+
+private:
      ChooseTagsWidget* m_cw = nullptr;
 };
 

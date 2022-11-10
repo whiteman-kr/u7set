@@ -69,3 +69,8 @@ bool DbTagsEditor::externalOkCancelButtons() const
 {
 	return false;
 }
+
+bool DbTagsEditor::isModified() const
+{
+	return false;
+}

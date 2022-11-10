@@ -184,6 +184,9 @@ private:
     bool externalOkCancelButtons() const override;
 
 private:
+	bool isModified() const override;
+
+private:
     IdeCodeEditor* m_textEdit = nullptr;
 
 };
@@ -204,6 +207,9 @@ public:
     void setReadOnly(bool value) override;
 
 	bool externalOkCancelButtons() const override;
+
+private:
+	bool isModified() const override;
 
 private:
     TuningFilterEditor* m_tuningFilterEditor = nullptr;

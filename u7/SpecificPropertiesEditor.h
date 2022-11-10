@@ -178,6 +178,9 @@ public:
 	QString defaultCategory() const;
 	void setDefaultCategory(QString value);
 
+private:
+	bool isModified() const override;
+
 private slots:
 	void tableSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
 	void onPropertiesChanged(QList<std::shared_ptr<PropertyObject>> objects);

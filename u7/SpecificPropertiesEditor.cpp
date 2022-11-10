@@ -1101,6 +1101,11 @@ void SpecificPropertiesEditor::setDefaultCategory(QString value)
 	m_defaultCategory = value;
 }
 
+bool SpecificPropertiesEditor::isModified() const
+{
+	return false;
+}
+
 void SpecificPropertiesEditor::tableSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
 {
 	Q_UNUSED(selected);
