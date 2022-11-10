@@ -2268,7 +2268,6 @@ void UndoSignalsDialog::closeEvent(QCloseEvent* event)
 	QDialog::closeEvent(event);
 }
 
-
 SignalsProxyModel::SignalsProxyModel(SignalsModel *sourceModel, QObject *parent) :
 	QSortFilterProxyModel(parent),
 	m_sourceModel(sourceModel)

@@ -38,8 +38,6 @@ public:
 	static const QString categoryTuning;
 	static const QString categoryExpertProperties;
 
-	static const QString lastEditedSignalFieldValuePlace;
-
 public:
 	explicit AppSignalProperties(const AppSignal& signal, bool savePropertyDescription = false);
 
@@ -52,6 +50,8 @@ public:
 	int getPrecision();
 
 	std::vector<AppSignalPropertyDescription> getProperties() const { return m_propertyDescription; }
+
+	static QString lastEditedSignalPropsPrefix(const AppSignal& s);
 
 	Q_INVOKABLE QString appSignalID() const { return m_signal.appSignalID(); }
 	Q_INVOKABLE QString customAppSignalID() const { return m_signal.customAppSignalID(); }

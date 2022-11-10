@@ -725,7 +725,6 @@ QString AppSignal::initFromDeviceSignal(const QString& deviceSignalEquipmentID,
 	case E::SignalType::Discrete:
 
 		setDataSize(m_signalType, m_analogSignalFormat);
-		updateTuningValuesType();
 		initTuningValues();
 
 		break;
@@ -2091,6 +2090,8 @@ bool AppSignal::addFlagSignalID(E::AppSignalStateFlagType flagType, const QStrin
 
 void AppSignal::initTuningValues()
 {
+	updateTuningValuesType();
+
 	switch (signalType())
 	{
 	case E::SignalType::Analog:
@@ -2132,7 +2133,6 @@ AppSignal* AppSignal::createDiscreteSignal(	E::SignalInOutType inOutType,
 	newSignal->setCaption(caption);
 	newSignal->setEquipmentID(equipmentID);
 
-	newSignal->updateTuningValuesType();
 	newSignal->initTuningValues();
 
 	return newSignal;

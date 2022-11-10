@@ -34,8 +34,6 @@ const QString AppSignalProperties::categoryOnlineMonitoringSystem("6 Online Moni
 const QString AppSignalProperties::categoryTuning("7 Tuning");
 const QString AppSignalProperties::categoryExpertProperties("8 Expert properties");
 
-const QString AppSignalProperties::lastEditedSignalFieldValuePlace("SignalsTabPage/LastEditedSignal/");
-
 QString AppSignalProperties::generateCaption(const QString& name)
 {
 	QString result;
@@ -141,6 +139,11 @@ int AppSignalProperties::getPrecision()
 	}
 
 	return precision;
+}
+
+QString AppSignalProperties::lastEditedSignalPropsPrefix(const AppSignal& s)
+{
+	return "SignalsTabPage/LastEditedSignalProps/" + E::valueToString(s.signalType()) + "/";
 }
 
 void AppSignalProperties::initProperties(bool savePropertyDescription)

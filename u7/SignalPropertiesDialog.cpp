@@ -143,7 +143,6 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& sig
 	return result;
 }
 
-
 void initNewSignal(AppSignal& signal)
 {
 	QSettings settings;
@@ -187,6 +186,8 @@ void initNewSignal(AppSignal& signal)
 	setter(AppSignalPropNames::LOW_ENGINEERING_UNITS, 0.0);
 	setter(AppSignalPropNames::HIGH_ENGINEERING_UNITS, 100.0);
 
+	QString propKeyPrefix = AppSignalProperties::lastEditedSignalPropsPrefix(signal);
+
 	for (int i = 0; i < propertyManager.count(); i++)
 	{
 		if (propertyManager.getBehaviour(signal, i) != E::PropertyBehaviourType::Write)
@@ -194,8 +195,9 @@ void initNewSignal(AppSignal& signal)
 			continue;
 		}
 
-		QString name = propertyManager.name(i);
-		QVariant value = settings.value(AppSignalProperties::lastEditedSignalFieldValuePlace + name, QVariant());
+		QString propName = propertyManager.name(i);
+
+		QVariant value = settings.value(propKeyPrefix + propName, QVariant());
 		if (value.isValid() == false)
 		{
 			continue;
@@ -493,7 +495,6 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 	accept();
 }
 
-
 void SignalPropertiesDialog::rejectCheckoutProperty()
 {
 	for (std::shared_ptr<PropertyObject> object : m_objList)
@@ -698,11 +699,13 @@ void SignalPropertiesDialog::saveLastEditedSignalProperties()
 		return;
 	}
 
+	QSettings settings;
+
 	AppSignalPropertyManager& manager = *AppSignalPropertyManager::getInstance();
 
 	const AppSignal& signal = *m_signalVector[0];
 
-	QSettings settings(QSettings::UserScope, qApp->organizationName());
+	QString propKeyPrefix = AppSignalProperties::lastEditedSignalPropsPrefix(signal);
 
 	for (int i = 0; i < manager.count(); i++)
 	{
@@ -711,7 +714,8 @@ void SignalPropertiesDialog::saveLastEditedSignalProperties()
 			continue;
 		}
 
-		QString name = manager.name(i);
-		settings.setValue(AppSignalProperties::lastEditedSignalFieldValuePlace + name, manager.value(&signal, i, theSettings.isExpertMode()));
+		QString propName = manager.name(i);
+
+		settings.setValue(propKeyPrefix + propName, manager.value(&signal, i, theSettings.isExpertMode()));
 	}
 }
