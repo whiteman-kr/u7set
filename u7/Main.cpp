@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
 
 		dbController.disableProgress();
 
-		dbController.setHost(theSettings.serverIpAddress());
+		dbController.setHost(theSettings.serverHost());
 		dbController.setPort(theSettings.serverPort());
 		dbController.setServerUsername(theSettings.serverUsername());
 		dbController.setServerPassword(theSettings.serverPassword());

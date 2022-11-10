@@ -576,7 +576,7 @@ void ProjectDiffGenerator::compareProject(std::map<int, std::vector<std::shared_
 
 	db()->disableProgress();
 
-	db()->setHost(theSettings.serverIpAddress());
+	db()->setHost(theSettings.serverHost());
 	db()->setPort(theSettings.serverPort());
 	db()->setServerUsername(theSettings.serverUsername());
 	db()->setServerPassword(theSettings.serverPassword());

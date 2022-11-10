@@ -30,7 +30,7 @@ void DialogSettings::setSettings(const Settings& value)
 {
 	m_settings = value;
 
-	ui->editIpAddress->setText(m_settings.serverIpAddress());
+	ui->editHost->setText(m_settings.serverHost());
 	ui->editPort->setText(QString().setNum(m_settings.serverPort()));
 	ui->editUsername->setText(m_settings.serverUsername());
 	ui->editPassword->setText(m_settings.serverPassword());
@@ -56,17 +56,16 @@ void DialogSettings::on_ok_clicked()
 {
 	// Check ip address
 	//
-	QString serverIpAddress = ui->editIpAddress->text();
+	QString serverHost = ui->editHost->text();
 
-	QHostAddress ha;
-	if (ha.setAddress(serverIpAddress) == false)
+	if (serverHost.isEmpty() == true)
 	{
 		QMessageBox mb(this);
 		mb.setText(tr("Incorrect server IP Address."));
 		mb.exec();
 
-		ui->editIpAddress->setFocus();
-		ui->editIpAddress->selectAll();
+		ui->editHost->setFocus();
+		ui->editHost->selectAll();
 		return;
 	}
 
@@ -98,7 +97,7 @@ void DialogSettings::on_ok_clicked()
 
 	// --
 	//
-	m_settings.setServerIpAddress(serverIpAddress);
+	m_settings.setServerHost(serverHost);
 	m_settings.setServerPort(serverPort);
 	m_settings.setServerUsername(serverUsername);
 	m_settings.setServerPassword(serverPassword);

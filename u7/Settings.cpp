@@ -445,11 +445,11 @@ void Settings::loadSystemScope()
 	return;
 }
 
-QString Settings::serverIpAddress() const
+QString Settings::serverHost() const
 {
 	return m_databaseConnection.address();
 }
-void Settings::setServerIpAddress(const QString& value)
+void Settings::setServerHost(const QString& value)
 {
 	m_databaseConnection.setAddress(value);
 }

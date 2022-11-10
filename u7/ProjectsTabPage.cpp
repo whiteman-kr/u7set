@@ -200,7 +200,7 @@ void ProjectsTabPage::createProject()
 	DbController dbc;
 
 	dbc.enableProgress();
-	dbc.setHost(theSettings.serverIpAddress());
+	dbc.setHost(theSettings.serverHost());
 	dbc.setPort(theSettings.serverPort());
 	dbc.setServerUsername(theSettings.serverUsername());
 	dbc.setServerPassword(theSettings.serverPassword());

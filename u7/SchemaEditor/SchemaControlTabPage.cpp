@@ -4292,7 +4292,7 @@ void SchemaControlTabPage::exportToPdf()
 		return;
 	}
 
-	SchemasReportGeneratorThread r(theSettings.serverIpAddress(),
+	SchemasReportGeneratorThread r(theSettings.serverHost(),
 								   theSettings.serverPort(),
 								   theSettings.serverUsername(),
 								   theSettings.serverPassword(),
@@ -4341,7 +4341,7 @@ void SchemaControlTabPage::exportToAlbum()
 
 	QSettings{}.setValue("SchemeEditor/Export/AlbumPath", albumPath);
 
-	SchemasReportGeneratorThread r(theSettings.serverIpAddress(),
+	SchemasReportGeneratorThread r(theSettings.serverHost(),
 								   theSettings.serverPort(),
 								   theSettings.serverUsername(),
 								   theSettings.serverPassword(),

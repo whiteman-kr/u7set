@@ -48,8 +48,8 @@ public:
 	// Properties
 	//
 public:
-	QString serverIpAddress() const;
-	void setServerIpAddress(const QString& value);
+	QString serverHost() const;
+	void setServerHost(const QString& value);
 
 	int serverPort() const;
 	void setServerPort(int value);

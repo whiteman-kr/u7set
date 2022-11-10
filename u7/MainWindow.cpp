@@ -608,7 +608,7 @@ void MainWindow::showSettings()
 		theSettings = d.settings();
 		theSettings.writeSystemScope();
 
-		dbController()->setHost(theSettings.serverIpAddress());
+		dbController()->setHost(theSettings.serverHost());
 		dbController()->setPort(theSettings.serverPort());
 		dbController()->setServerUsername(theSettings.serverUsername());
 		dbController()->setServerPassword(theSettings.serverPassword());
@@ -1212,7 +1212,7 @@ void MainWindow::createSchemasAlbums()
 
 	QSettings{}.setValue("MainWindow/Export/AlbumPath", albumPath);
 
-	SchemasReportGeneratorThread r(theSettings.serverIpAddress(),
+	SchemasReportGeneratorThread r(theSettings.serverHost(),
 								   theSettings.serverPort(),
 								   theSettings.serverUsername(),
 								   theSettings.serverPassword(),
@@ -1259,7 +1259,7 @@ void MainWindow::projectOpened(DbProject project)
 	//
 	assert(m_statusBarConnectionState != nullptr);
 
-	m_statusBarConnectionState->setText(tr("Opened: ") + theSettings.serverIpAddress());
+	m_statusBarConnectionState->setText(tr("Opened: ") + theSettings.serverHost());
 
 	// Show and hide FilesTabPage
 	//
