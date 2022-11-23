@@ -127,11 +127,12 @@ namespace Hardware
 	const QString PropertyNames::valueOffset = "ValueOffset";
 	const QString PropertyNames::valueBit = "ValueBit";
 	const QString PropertyNames::validitySignalId = "ValiditySiganlID";
-
 	const QString PropertyNames::appSignalDataFormat = "AppAnalogSignalFormat";
-
 	const QString PropertyNames::appSignalBusTypeId = "BusTypeID";
 
+	const QString PropertyNames::hostname = "Hostname";
+
+	const QString PropertyNames::categoryCommon = "Common";
 	const QString PropertyNames::categoryAppSignal = "AppSignal";
 
 	//
@@ -2522,12 +2523,14 @@ R"DELIM({
 		//auto typeProp = ADD_PROPERTY_GETTER_SETTER(int, "Type", true, Workstation::type, Workstation::setType)
 		//typeProp->setUpdateFromPreset(true);
 
+		addProperty<QString, Workstation, &Workstation::hostname, &Workstation::setHostname>(PropertyNames::hostname, PropertyNames::categoryCommon, true)
+				->setUpdateFromPreset(false)
+				.setEssential(true)
+				.setExpert(false);
+
 		auto p = propertyByCaption(PropertyNames::equipmentIdTemplate);
-		if (p == nullptr)
-		{
-			Q_ASSERT(p);
-		}
-		else
+		Q_ASSERT(p);
+		if (p != nullptr)
 		{
 			p->setEssential(true);
 		}
@@ -2548,6 +2551,7 @@ R"DELIM({
 		Proto::Workstation* workstationMessage = message->mutable_deviceobject()->mutable_workstation();
 
 		workstationMessage->set_type(m_type);
+		workstationMessage->set_hostname(m_hostname.toStdString());
 
 		return true;
 	}
@@ -2576,7 +2580,8 @@ R"DELIM({
 
 		const Proto::Workstation& workstationMessage = message.deviceobject().workstation();
 
-		m_type =  workstationMessage.type();
+		m_type = workstationMessage.type();
+		m_hostname = QString::fromStdString(workstationMessage.hostname());
 
 		return true;
 	}
@@ -2589,6 +2594,16 @@ R"DELIM({
 	void Workstation::setType(int value)
 	{
 		m_type = value;
+	}
+
+	QString Workstation::hostname() const
+	{
+		return m_hostname;
+	}
+
+	void Workstation::setHostname(QString value)
+	{
+		m_hostname = value;
 	}
 
 

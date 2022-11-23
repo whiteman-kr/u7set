@@ -17775,8 +17775,29 @@ class Workstation PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
+    kHostnameFieldNumber = 2,
     kTypeFieldNumber = 1,
   };
+  // optional string hostname = 2;
+  bool has_hostname() const;
+  private:
+  bool _internal_has_hostname() const;
+  public:
+  void clear_hostname();
+  const std::string& hostname() const;
+  void set_hostname(const std::string& value);
+  void set_hostname(std::string&& value);
+  void set_hostname(const char* value);
+  void set_hostname(const char* value, size_t size);
+  std::string* mutable_hostname();
+  std::string* release_hostname();
+  void set_allocated_hostname(std::string* hostname);
+  private:
+  const std::string& _internal_hostname() const;
+  void _internal_set_hostname(const std::string& value);
+  std::string* _internal_mutable_hostname();
+  public:
+
   // optional int32 type = 1 [default = 0];
   bool has_type() const;
   private:
@@ -17799,6 +17820,7 @@ class Workstation PROTOBUF_FINAL :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr hostname_;
   ::PROTOBUF_NAMESPACE_ID::int32 type_;
   friend struct ::TableStruct_serialization_2eproto;
 };
@@ -47673,7 +47695,7 @@ inline void DeviceAppSignal::set_signalspecpropsstructwasfixed(bool value) {
 
 // optional int32 type = 1 [default = 0];
 inline bool Workstation::_internal_has_type() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
   return value;
 }
 inline bool Workstation::has_type() const {
@@ -47681,7 +47703,7 @@ inline bool Workstation::has_type() const {
 }
 inline void Workstation::clear_type() {
   type_ = 0;
-  _has_bits_[0] &= ~0x00000001u;
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 Workstation::_internal_type() const {
   return type_;
@@ -47691,12 +47713,85 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 Workstation::type() const {
   return _internal_type();
 }
 inline void Workstation::_internal_set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000001u;
+  _has_bits_[0] |= 0x00000002u;
   type_ = value;
 }
 inline void Workstation::set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_type(value);
   // @@protoc_insertion_point(field_set:Proto.Workstation.type)
+}
+
+// optional string hostname = 2;
+inline bool Workstation::_internal_has_hostname() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool Workstation::has_hostname() const {
+  return _internal_has_hostname();
+}
+inline void Workstation::clear_hostname() {
+  hostname_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& Workstation::hostname() const {
+  // @@protoc_insertion_point(field_get:Proto.Workstation.hostname)
+  return _internal_hostname();
+}
+inline void Workstation::set_hostname(const std::string& value) {
+  _internal_set_hostname(value);
+  // @@protoc_insertion_point(field_set:Proto.Workstation.hostname)
+}
+inline std::string* Workstation::mutable_hostname() {
+  // @@protoc_insertion_point(field_mutable:Proto.Workstation.hostname)
+  return _internal_mutable_hostname();
+}
+inline const std::string& Workstation::_internal_hostname() const {
+  return hostname_.Get();
+}
+inline void Workstation::_internal_set_hostname(const std::string& value) {
+  _has_bits_[0] |= 0x00000001u;
+  hostname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void Workstation::set_hostname(std::string&& value) {
+  _has_bits_[0] |= 0x00000001u;
+  hostname_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.Workstation.hostname)
+}
+inline void Workstation::set_hostname(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000001u;
+  hostname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.Workstation.hostname)
+}
+inline void Workstation::set_hostname(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000001u;
+  hostname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.Workstation.hostname)
+}
+inline std::string* Workstation::_internal_mutable_hostname() {
+  _has_bits_[0] |= 0x00000001u;
+  return hostname_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* Workstation::release_hostname() {
+  // @@protoc_insertion_point(field_release:Proto.Workstation.hostname)
+  if (!_internal_has_hostname()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return hostname_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void Workstation::set_allocated_hostname(std::string* hostname) {
+  if (hostname != nullptr) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  hostname_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), hostname,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.Workstation.hostname)
 }
 
 // -------------------------------------------------------------------

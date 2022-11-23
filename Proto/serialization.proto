@@ -1093,6 +1093,7 @@ message DeviceAppSignal
 message Workstation
 {
 	optional int32 type = 1 [default = 0];
+	optional string hostname = 2;
 }
 
 message Software

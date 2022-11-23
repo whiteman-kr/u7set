@@ -102,6 +102,9 @@ namespace Hardware
 		static const QString appSignalDataFormat;
 		static const QString appSignalBusTypeId;
 
+		static const QString hostname;
+
+		static const QString categoryCommon;
 		static const QString categoryAppSignal;
 	};
 
@@ -696,10 +699,14 @@ public:
 		[[nodiscard]] int type() const;
 		void setType(int value);
 
+		[[nodiscard]] QString hostname() const;
+		void setHostname(QString value);
+
 		// Data
 		//
 	private:
 		int m_type = 0;
+		QString m_hostname;
 	};
 
 
