@@ -10,6 +10,7 @@ SUBDIRS += Protobuf \
 	ServiceLib \
 	HardwareLib \
 	CommonLib \
+	qtkeychain \
 	VFrame30 \
 	DbLib \
 	Simulator \
@@ -33,6 +34,7 @@ SUBDIRS += Protobuf \
 	SimulatorTests \
 	u7databaseTests
 
+qtkeychain.subdir = ./Tools/qtkeychain
 PacketSource.subdir = ./Tools/PacketSource
 PacketViewer.subdir = ./Tools/PacketViewer
 UalTester.subdir = ./Test/UalTester

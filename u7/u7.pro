@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT += core gui widgets sql network qml svg serialport xml printsupport testlib concurrent
+QT += core gui widgets sql network qml svg serialport xml printsupport testlib concurrent dbus
 
 # --
 # In Qt 5 using testlib module adds a console option via the MODULE_CONFIG mechanism.
@@ -453,19 +453,24 @@ unix:PRE_TARGETDEPS += $$DESTDIR/libBuilder.a
 INCLUDEPATH += $$PWD/../Builder
 DEPENDPATH += $$PWD/../Builder
 
-# QtKeychain
+# QtKeychain Lib
 #
-INCLUDEPATH += ../Tools/qtkeychain-0.10
-include(../Tools/qtkeychain-0.10/qt5keychain.pri)
-
-DEFINES += QTKEYCHAIN_NO_EXPORT
-DEFINES += USE_CREDENTIAL_STORE
 
 win32 {
     LIBS += Advapi32.lib
 }
 unix {
+    LIBS += -lglib-2.0
 }
+
+LIBS += -lQtkeychain
+win32:PRE_TARGETDEPS += $$DESTDIR/Qtkeychain.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libQtkeychain.a
+INCLUDEPATH += $$PWD/../Tools/qtkeychain
+DEPENDPATH += $$PWD/../Tools/qtkeychain
+
+DEFINES += QTKEYCHAIN_NO_EXPORT
+DEFINES += USE_CREDENTIAL_STORE
 
 # Simulator Lib
 #
