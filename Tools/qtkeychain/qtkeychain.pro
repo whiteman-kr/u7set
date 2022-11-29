@@ -11,7 +11,7 @@ CONFIG += warn_off
 #
 win32 {
 	CONFIG(debug, debug|release): DESTDIR = ../../bin/debug
-	CONFIG(release, debug|release): DESTDIR = ../s../bin/release
+	CONFIG(release, debug|release): DESTDIR = ../../bin/release
 }
 unix {
 	CONFIG(debug, debug|release): DESTDIR = ../../bin_unix/debug
