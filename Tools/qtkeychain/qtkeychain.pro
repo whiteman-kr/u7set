@@ -18,4 +18,12 @@ unix {
 	CONFIG(release, debug|release): DESTDIR = ../../bin_unix/release
 }
 
+unix:!android:!macx:!ios {
+    packagesExist(libsecret-1) {
+    }
+    else {
+	!build_pass:error("Libsecret package is not installed!")
+    }
+}
+
 include(./qtkeychain.pri)
