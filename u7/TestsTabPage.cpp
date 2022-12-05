@@ -2899,6 +2899,10 @@ void TestsWidget::createTestsDock()
 	[[maybe_unused]]QAbstractItemModelTester* modelTester = new QAbstractItemModelTester(m_testsTreeModel,
 																	 QAbstractItemModelTester::FailureReportingMode::Fatal,
 																		 this);
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 4, 0)
+    modelTester->setUseFetchMore(false);
+#endif
 #endif
 
 	std::vector<FileTreeModel::Columns> columns;

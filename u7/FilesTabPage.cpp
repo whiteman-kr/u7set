@@ -3,7 +3,7 @@
 #include "GlobalMessanger.h"
 #include "Forms/ComparePropertyObjectDialog.h"
 
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 	#include <QAbstractItemModelTester>
 #endif
 //
@@ -30,10 +30,13 @@ FilesTabPage::FilesTabPage(DbController* dbcontroller, QWidget* parent) :
 									Db::File::systemDirToName(DbDir::RootDir),
 									this);
 
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 	[[maybe_unused]]QAbstractItemModelTester* modelTester = new QAbstractItemModelTester(m_fileModel,
 																		 QAbstractItemModelTester::FailureReportingMode::Fatal,
 																		 this);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 4, 0)
+    modelTester->setUseFetchMore(false);
+#endif
 #endif
 
 	m_fileView = new FileTreeView(dbcontroller, m_fileModel);
