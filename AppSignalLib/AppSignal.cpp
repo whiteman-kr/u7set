@@ -1311,6 +1311,9 @@ void AppSignal::loadProtoData(const Proto::ProtoAppSignalData& protoData)
 	m_tuningLowBound.load(protoData.tuninglowbound());
 	m_tuningHighBound.load(protoData.tuninghighbound());
 
+	updateTuningValuesType();			// For correction of bug RPCT-3324 consequences.
+										// In some databases in proto data were saved wrong tuning value types.
+
 	m_acquire = protoData.acquire();
 	m_archive = protoData.archive();
 	m_decimalPlaces = protoData.decimalplaces();
