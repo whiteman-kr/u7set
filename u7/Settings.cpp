@@ -342,6 +342,8 @@ void Settings::loadUserScope()
 
 void Settings::writeSystemScope() const
 {
+	QSettings fallbackSettings{};
+
 	// Database connection setting are sored in secure storage
 	//
 	{
@@ -349,6 +351,8 @@ void Settings::writeSystemScope() const
 			// Somehow credentials returns to first written state after log out/log in
 			//
 			QKeychain::DeletePasswordJob deleteJob(QLatin1String("u7keychain18"));
+			deleteJob.setInsecureFallback(true);
+			deleteJob.setSettings(&fallbackSettings);
 			deleteJob.setKey("f1646f45-238a-45ec-ad0c-0d0960067b96");
 
 			// Blocking job
@@ -365,7 +369,9 @@ void Settings::writeSystemScope() const
 			}
 		}
 
-		QKeychain::WritePasswordJob writeJob(QLatin1String("u7keychain18"));
+		QKeychain::WritePasswordJob writeJob("u7keychain18");
+		writeJob.setInsecureFallback(true);
+		writeJob.setSettings(&fallbackSettings);
 		writeJob.setKey("f1646f45-238a-45ec-ad0c-0d0960067b96");
 
 		QByteArray ba = QByteArray::fromRawData(reinterpret_cast<const char*>(&m_databaseConnection), sizeof(m_databaseConnection));
@@ -382,6 +388,7 @@ void Settings::writeSystemScope() const
 		if (writeJob.error() != QKeychain::Error::NoError)
 		{
 			qDebug() << "Storing keychain failed: " << writeJob.errorString();
+			qDebug() << "Suggestion: Install libsecret, gnome-keyring";
 		}
 	}
 
@@ -398,13 +405,15 @@ void Settings::writeSystemScope() const
 }
 void Settings::loadSystemScope()
 {
+	QSettings fallbackSettings{};
+
 	// Database connection setting are sored in secure storage
 	//
 	{
 		QKeychain::ReadPasswordJob readJob(QLatin1String("u7keychain18"));
-		//readJob.setAutoDelete(false);
+		readJob.setInsecureFallback(true);
+		readJob.setSettings(&fallbackSettings);
 		readJob.setKey("f1646f45-238a-45ec-ad0c-0d0960067b96");
-		//readJob.setInsecureFallback(true);
 
 		QEventLoop loop;
 		readJob.connect(&readJob, &QKeychain::ReadPasswordJob::finished, &loop, &QEventLoop::quit);
