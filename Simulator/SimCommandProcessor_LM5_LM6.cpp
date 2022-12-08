@@ -4325,8 +4325,9 @@ namespace Sim
 									 std::numeric_limits<quint16>().max();
 				}
 
-				if (result.mathNan())
+				if (std::isnan(floatValue) == true)
 				{
+					result.setMathOverflow(0);
 					uintValue16 = 0;
 				}
 
@@ -4382,8 +4383,9 @@ namespace Sim
 									 std::numeric_limits<qint32>().max();
 				}
 
-				if (result.mathNan())
+				if (std::isnan(floatValue) == true)
 				{
+					result.setMathOverflow(0);
 					intValue32 = 0;
 				}
 

@@ -106,7 +106,7 @@ namespace Sim
 		template<typename TYPE>
 		bool readData(quint32 offsetW, TYPE* data, E::ByteOrder byteOrder, bool applyOverride) const noexcept;
 
-		void applyOverride(quint32 offsetW, quint32 countW, quint16* dataPtr) const noexcept;
+		bool applyOverride(quint32 offsetW, quint32 countW, quint16* dataPtr) const noexcept;
 
 	public:
 		bool clearOnStartCycle();

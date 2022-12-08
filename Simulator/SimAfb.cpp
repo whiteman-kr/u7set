@@ -112,10 +112,9 @@ namespace Sim
 		//
 		resetMathFlags();
 
-		m_mathFlags.overflow = wideResult > std::numeric_limits<qint32>::max() ||
-							   wideResult < std::numeric_limits<qint32>::min();
-
-		m_mathFlags.zero = (result == 0);
+		setMathOverflow(wideResult > std::numeric_limits<qint32>::max() ||
+						wideResult < std::numeric_limits<qint32>::min());
+		setMathZero(result == 0);
 
 		return;
 	}
@@ -148,10 +147,10 @@ namespace Sim
 		//
 		resetMathFlags();
 
-		m_mathFlags.overflow = wideResult > std::numeric_limits<qint32>::max() ||
-							   wideResult < std::numeric_limits<qint32>::min();
+		setMathOverflow(wideResult > std::numeric_limits<qint32>::max() ||
+						wideResult < std::numeric_limits<qint32>::min());
 
-		m_mathFlags.zero = (result == 0);
+		setMathZero(result == 0);
 
 		return;
 	}
@@ -183,10 +182,10 @@ namespace Sim
 		//
 		resetMathFlags();
 
-		m_mathFlags.overflow = wideResult > std::numeric_limits<qint32>::max() ||
-							   wideResult < std::numeric_limits<qint32>::min();
+		setMathOverflow(wideResult > std::numeric_limits<qint32>::max() ||
+						wideResult < std::numeric_limits<qint32>::min());
 
-		m_mathFlags.zero = (result == 0);
+		setMathZero(result == 0);
 
 		return;
 	}
@@ -236,11 +235,11 @@ namespace Sim
 
 		if (op2 == 0)
 		{
-			m_mathFlags.divByZero = true;
+			setMathDivByZero(1);
 		}
 		else
 		{
-			m_mathFlags.zero = (result == 0);
+			setMathZero(result == 0);
 		}
 
 		return;
@@ -290,15 +289,15 @@ namespace Sim
 		//
 		int inf12 = std::isinf(op1) + std::isinf(op2);
 		int nan12 = std::isnan(op1) + std::isnan(op2);
-		m_mathFlags.overflow = std::fetestexcept(FE_OVERFLOW) || (inf12 != 0 && nan12 == 0);
-		m_mathFlags.underflow = std::fetestexcept(FE_UNDERFLOW);
-		m_mathFlags.divByZero = std::fetestexcept(FE_DIVBYZERO);
-		m_mathFlags.zero = (result == .0f) || m_mathFlags.underflow;
-		m_mathFlags.nan = std::isnan(result);
+		setMathOverflow(std::fetestexcept(FE_OVERFLOW) || (inf12 != 0 && nan12 == 0));
+		setMathUnderflow(std::fetestexcept(FE_UNDERFLOW));
+		setMathDivByZero(std::fetestexcept(FE_DIVBYZERO));
+		setMathZero((result == .0f) || mathUnderflow());
+		setMathNan(std::isnan(result));
 
 		// Altera's ip core sets 0 if operation result is denormalized number
 		//
-		if (m_mathFlags.underflow)
+		if (mathUnderflow() == true)
 		{
 			result = 0;
 		}
@@ -324,15 +323,15 @@ namespace Sim
 		//
 		int inf12 = std::isinf(op1) + std::isinf(op2);
 		int nan12 = std::isnan(op1) + std::isnan(op2);
-		m_mathFlags.overflow = std::fetestexcept(FE_OVERFLOW) || (inf12 != 0 && nan12 == 0);
-		m_mathFlags.underflow = std::fetestexcept(FE_UNDERFLOW);
-		m_mathFlags.divByZero = std::fetestexcept(FE_DIVBYZERO);
-		m_mathFlags.zero = (result == .0f) || m_mathFlags.underflow;
-		m_mathFlags.nan = std::isnan(result);
+		setMathOverflow(std::fetestexcept(FE_OVERFLOW) || (inf12 != 0 && nan12 == 0));
+		setMathUnderflow(std::fetestexcept(FE_UNDERFLOW));
+		setMathDivByZero(std::fetestexcept(FE_DIVBYZERO));
+		setMathZero((result == .0f) || mathUnderflow());
+		setMathNan(std::isnan(result));
 
 		// Altera's ip core sets 0 if operation result is denormalized number
 		//
-		if (m_mathFlags.underflow)
+		if (mathUnderflow() == true)
 		{
 			result = 0;
 		}
@@ -359,15 +358,15 @@ namespace Sim
 		int inf12 = std::isinf(op1) + std::isinf(op2);
 		int norm12 = std::isnormal(op1) + std::isnormal(op2);
 
-		m_mathFlags.overflow = std::fetestexcept(FE_OVERFLOW) || (inf12 == 2) || (inf12 == 1 && norm12 == 1);
-		m_mathFlags.underflow = std::fetestexcept(FE_UNDERFLOW);
-		m_mathFlags.divByZero = std::fetestexcept(FE_DIVBYZERO);
-		m_mathFlags.zero = (result == .0f) || m_mathFlags.underflow;
-		m_mathFlags.nan = std::isnan(result);
+		setMathOverflow(std::fetestexcept(FE_OVERFLOW) || (inf12 == 2) || (inf12 == 1 && norm12 == 1));
+		setMathUnderflow(std::fetestexcept(FE_UNDERFLOW));
+		setMathDivByZero(std::fetestexcept(FE_DIVBYZERO));
+		setMathZero((result == .0f) || mathUnderflow());
+		setMathNan(std::isnan(result));
 
 		// Altera's ip core sets 0 if operation result is denormalized number
 		//
-		if (m_mathFlags.underflow)
+		if (mathUnderflow() == true)
 		{
 			result = 0;
 		}
@@ -391,15 +390,15 @@ namespace Sim
 
 		// Setting math flags
 		//
-		m_mathFlags.overflow = std::fetestexcept(FE_OVERFLOW) || (std::isnormal(op1) && std::isnormal(op2) && std::isinf(result) );
-		m_mathFlags.underflow = std::fetestexcept(FE_UNDERFLOW);
-		m_mathFlags.divByZero = std::fetestexcept(FE_DIVBYZERO);
-		m_mathFlags.zero = (result == .0f) || m_mathFlags.underflow;
-		m_mathFlags.nan = std::isnan(result);
+		setMathOverflow(std::fetestexcept(FE_OVERFLOW) || (std::isnormal(op1) && std::isnormal(op2) && std::isinf(result)));
+		setMathUnderflow(std::fetestexcept(FE_UNDERFLOW));
+		setMathDivByZero(std::fetestexcept(FE_DIVBYZERO));
+		setMathZero((result == .0f) || mathUnderflow());
+		setMathNan(std::isnan(result));
 
 		// Altera's ip core sets 0 if operation result is denormalized number
 		//
-		if (m_mathFlags.underflow)
+		if (mathUnderflow() == true)
 		{
 			result = 0;
 		}
@@ -448,15 +447,15 @@ namespace Sim
 
 		// Setting math flags
 		//
-		m_mathFlags.overflow = std::fetestexcept(FE_OVERFLOW);
-		m_mathFlags.underflow = std::fetestexcept(FE_UNDERFLOW);
-		m_mathFlags.divByZero = std::fetestexcept(FE_DIVBYZERO);
-		m_mathFlags.zero = (result == .0f) || m_mathFlags.underflow;
-		m_mathFlags.nan = std::isnan(result);
+		setMathOverflow(std::fetestexcept(FE_OVERFLOW));
+		setMathUnderflow(std::fetestexcept(FE_UNDERFLOW));
+		setMathDivByZero(std::fetestexcept(FE_DIVBYZERO));
+		setMathZero((result == .0f) || mathUnderflow());
+		setMathNan(std::isnan(result));
 
 		// Altera's ip core sets 0 if operation result is denormalized number
 		//
-		if (m_mathFlags.underflow)
+		if (mathUnderflow() == true)
 		{
 			result = 0;
 		}
@@ -475,12 +474,12 @@ namespace Sim
 		if (result == std::numeric_limits<qint32>::min())
 		{
 			result = std::numeric_limits<qint32>::max();
-			m_mathFlags.overflow = true;
+			setMathOverflow(1);
 		}
 		else
 		{
 			result = std::abs(result);
-			m_mathFlags.zero = (result == 0);
+			setMathZero(result == 0);
 		}
 
 		setSignedIntValue(result);
@@ -533,8 +532,8 @@ namespace Sim
 
 		// Setting math flags
 		//
-		m_mathFlags.zero = (result == .0f) || std::isinf(fp) ;
-		m_mathFlags.nan = std::isnan(result);
+		setMathZero((result == .0f) || std::isinf(fp));
+		setMathNan(std::isnan(result));
 
 		setFloatValue(result);
 
@@ -552,14 +551,14 @@ namespace Sim
 
 		// Setting math flags
 		//
-		m_mathFlags.nan = std::isnan(result);
-		m_mathFlags.overflow = std::isnormal(fp) && std::isinf(result);
-		m_mathFlags.underflow = std::fetestexcept(FE_UNDERFLOW);
-		m_mathFlags.zero = std::isinf(fp) && std::signbit(fp);
+		setMathNan(std::isnan(result));
+		setMathOverflow(std::isnormal(fp) && std::isinf(result));
+		setMathUnderflow(std::fetestexcept(FE_UNDERFLOW));
+		setMathZero(std::isinf(fp) && std::signbit(fp));
 
 		// Altera's ip core sets 0 if operation result is denormalized number
 		//
-		if (m_mathFlags.underflow)
+		if (mathUnderflow() == false)
 		{
 			result = 0;
 		}
@@ -585,17 +584,17 @@ namespace Sim
 		if (value > std::numeric_limits<qint32>::max())
 		{
 			value = std::numeric_limits<qint32>::max();
-			m_mathFlags.overflow = true;
+			setMathOverflow(1);
 		}
 
 		if (value < std::numeric_limits<qint32>::lowest())
 		{
 			value = std::numeric_limits<qint32>::lowest();
-			m_mathFlags.overflow = true;
+			setMathOverflow(1);
 		}
 
 		setSignedIntValue(static_cast<int>(value));
-		m_mathFlags.zero = (value == 0);
+		setMathZero(value == 0);
 
 		return;
 	}
@@ -604,7 +603,7 @@ namespace Sim
 	{
 		resetMathFlags();
 
-		float data = static_cast<float>(m_data.asSignedInt);
+		float data = static_cast<float>(dataToType<qint32>());
 		setFloatValue(data);
 
 		return;
@@ -614,7 +613,7 @@ namespace Sim
 	{
 		resetMathFlags();
 
-		float data = static_cast<float>(m_data.asWord);
+		float data = static_cast<float>(dataToType<quint16>());
 		setFloatValue(data);
 
 		return;
@@ -624,7 +623,7 @@ namespace Sim
 	{
 		resetMathFlags();
 
-		qint32 data = static_cast<qint32>(m_data.asWord);
+		qint32 data = static_cast<qint32>(dataToType<quint16>());
 		setSignedIntValue(data);
 
 		return;

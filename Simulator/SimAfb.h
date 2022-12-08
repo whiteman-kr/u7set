@@ -46,10 +46,11 @@ namespace Sim
 	{
 	public:
 		AfbComponentParam() = default;
-		AfbComponentParam(const AfbComponentParam& that) = default;
+		AfbComponentParam(const AfbComponentParam& that) noexcept = default;
 		explicit AfbComponentParam(quint16 paramOpIndex) :
 			m_paramOpIndex(paramOpIndex)
 		{
+			std::fill(m_data.begin(), m_data.end(), 0);
 			static_assert(std::is_trivially_copyable_v<AfbComponentParam>);
 		}
 
@@ -71,62 +72,56 @@ namespace Sim
 
 		[[nodiscard]] quint16 wordValue() const noexcept
 		{
-			return m_data.asWord;
+			return dataToType<quint16>();
 		}
 		void setWordValue(quint16 value) noexcept
 		{
-			m_data.data = 0;
-			m_data.asWord = value;
+			setDataToType<quint16>(value);
 		}
 
 		[[nodiscard]] quint32 dwordValue() const  noexcept
 		{
-			return m_data.asDword;
+			return dataToType<quint32>();
 		}
 		void setDwordValue(quint32 value)  noexcept
 		{
-			m_data.data = 0;
-			m_data.asDword = value;
+			setDataToType<quint32>(value);
 		}
 
 		[[nodiscard]] float floatValue() const  noexcept
 		{
-			return m_data.asFloat;
+			return dataToType<float>();
 		}
 		void setFloatValue(float value) noexcept
 		{
-			m_data.data = 0;
-			m_data.asFloat = value;
+			setDataToType<float>(value);
 		}
 
 		[[nodiscard]] double doubleValue() const  noexcept
 		{
-			return m_data.asDouble;
+			return dataToType<double>();
 		}
 		void setDoubleValue(double value) noexcept
 		{
-			m_data.data = 0;
-			m_data.asDouble = value;
+			setDataToType<double>(value);
 		}
 
 		[[nodiscard]] qint32 signedIntValue() const noexcept
 		{
-			return m_data.asSignedInt;
+			return dataToType<qint32>();
 		}
 		void setSignedIntValue(qint32 value) noexcept
 		{
-			m_data.data = 0;
-			m_data.asSignedInt = value;
+			setDataToType<qint32>(value);
 		}
 
 		[[nodiscard]] qint64 signedInt64Value() const noexcept
 		{
-			return m_data.asSignedInt64;
+			return dataToType<qint64>();
 		}
 		void setSignedInt64Value(qint64 value) noexcept
 		{
-			m_data.data = 0;
-			m_data.asSignedInt64 = value;
+			setDataToType<qint64>(value);
 		}
 
 		// --
@@ -169,80 +164,118 @@ namespace Sim
 		//
 		void resetMathFlags() noexcept
 		{
-			m_mathFlags.data = 0;
+			m_mathFlags = 0;
 		}
 
 		[[nodiscard]] quint16 mathOverflow() const noexcept
 		{
-			return m_mathFlags.overflow ? 0x0001 : 0x0000;
+			return (m_mathFlags & FLAG_OVERFLOW) ? 1 : 0;
 		}
 		void setMathOverflow(quint16 value) noexcept
 		{
-			m_mathFlags.overflow = (value != 0);
+			if (value == 0)
+			{
+				m_mathFlags &= ~FLAG_OVERFLOW;
+			}
+			else
+			{
+				m_mathFlags |= FLAG_OVERFLOW;
+			}
 		}
 
 		[[nodiscard]] quint16 mathUnderflow() const noexcept
 		{
-			return m_mathFlags.underflow ? 0x0001 : 0x0000;
+			return (m_mathFlags & FLAG_UNDERFLOW) ? 1 : 0;
 		}
 		void setMathUnderflow(quint16 value) noexcept
 		{
-			m_mathFlags.underflow = (value != 0);
+			if (value == 0)
+			{
+				m_mathFlags &= ~FLAG_UNDERFLOW;
+			}
+			else
+			{
+				m_mathFlags |= FLAG_UNDERFLOW;
+			}
 		}
 
 		[[nodiscard]] quint16 mathZero() const noexcept
 		{
-			return m_mathFlags.zero ? 0x0001 : 0x0000;
+			return (m_mathFlags & FLAG_ZERO) ? 1 : 0;
 		}
 		void setMathZero(quint16 value) noexcept
 		{
-			m_mathFlags.zero = (value != 0);
+			if (value == 0)
+			{
+				m_mathFlags &= ~FLAG_ZERO;
+			}
+			else
+			{
+				m_mathFlags |= FLAG_ZERO;
+			}
 		}
 
 		[[nodiscard]] quint16 mathNan() const noexcept
 		{
-			return m_mathFlags.nan ? 0x0001 : 0x0000;
+			return (m_mathFlags & FLAG_NAN) ? 1 : 0;
 		}
 		void setMathNan(quint16 value) noexcept
 		{
-			m_mathFlags.nan = (value != 0);
+			if (value == 0)
+			{
+				m_mathFlags &= ~FLAG_NAN;
+			}
+			else
+			{
+				m_mathFlags |= FLAG_NAN;
+			}
 		}
 
 		[[nodiscard]] quint16 mathDivByZero() const noexcept
 		{
-			return m_mathFlags.divByZero ? 0x0001 : 0x0000;
+			return (m_mathFlags & FLAG_DIVBYZERO) ? 1 : 0;
 		}
 		void setMathDivByZero(quint16 value) noexcept
 		{
-			m_mathFlags.divByZero = (value != 0);
+			if (value == 0)
+			{
+				m_mathFlags &= ~FLAG_DIVBYZERO;
+			}
+			else
+			{
+				m_mathFlags |= FLAG_DIVBYZERO;
+			}
 		}
 
 	private:
-		union
+		template<typename T>
+		T dataToType() const
 		{
-			quint16 asWord;
-			quint32 asDword;
-			qint32 asSignedInt;
-			quint64 asSignedInt64;
-			float asFloat;
-			double asDouble;
-			quint64 data = 0;
-		} m_data;
+			static_assert(sizeof(T) <= 8);	// 8 is the size of m_data (bytes)
+			T value;
+			std::memcpy(&value, m_data.data(), sizeof(value));
+			return value;
+		}
+
+		template<typename T>
+		void setDataToType(T value)
+		{
+			static_assert(sizeof(T) <= 8);	// 8 is the size of m_data (bytes)
+			std::fill(m_data.begin(), m_data.end(), 0);
+			std::memcpy(m_data.data(), &value, sizeof(value));
+		}
+
+		std::array<char, 8> m_data;
 
 		// Math operations flags
 		//
-		union
-		{
-			struct
-			{
-				bool overflow : 1;
-				bool underflow  : 1;
-				bool zero : 1;
-				bool nan : 1;
-				bool divByZero : 1;
-			};
-			quint32 data = 0;
-		} m_mathFlags;
+		constexpr static quint16 FLAG_OVERFLOW = 0x0001;
+		constexpr static quint16 FLAG_UNDERFLOW = 0x0002;
+		constexpr static quint16 FLAG_ZERO = 0x0004;
+		constexpr static quint16 FLAG_NAN = 0x0008;
+		constexpr static quint16 FLAG_DIVBYZERO = 0x0010;
+
+		quint16 m_mathFlags = 0;
 
 		quint16 m_paramOpIndex = 0xFFFF;
 	};

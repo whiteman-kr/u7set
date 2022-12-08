@@ -1,5 +1,6 @@
 #include "SimRam.h"
 #include <cstring>
+#include <array>
 #include <QtEndian>
 #include "SimOverrideSignals.h"
 
@@ -351,12 +352,12 @@ namespace Sim
 
 	bool RamArea::writeFloat(quint32 offsetW, float data, E::ByteOrder byteOrder) noexcept
 	{
-		return writeDword(offsetW, *reinterpret_cast<quint32*>(&data), byteOrder);
+		return writeData<float>(offsetW, data, byteOrder);
 	}
 
 	bool RamArea::readFloat(quint32 offsetW, float* data, E::ByteOrder byteOrder, bool applyOverride) const noexcept
 	{
-		return readDword(offsetW, reinterpret_cast<quint32*>(data), byteOrder, applyOverride);
+		return readData<float>(offsetW, data, byteOrder, applyOverride);
 	}
 
 	bool RamArea::writeSignedInt(quint32 offsetW, qint32 data, E::ByteOrder byteOrder) noexcept
@@ -436,20 +437,31 @@ namespace Sim
 			return false;
 		}
 
+		constexpr int wordCount = sizeof(TYPE) / sizeof(quint16);
 		size_t byteOffset = (offsetW - offset()) * 2;
+
 		if (byteOffset > m_data.size() - sizeof(TYPE))
 		{
 			Q_ASSERT(false);
 			return false;
 		}
 
-		TYPE rawValue = *reinterpret_cast<const TYPE*>(m_data.constData() + byteOffset);
+		const char* dataOffset = m_data.constData() + byteOffset;
+		TYPE rawValue = *reinterpret_cast<const TYPE*>(dataOffset);
 
 		// Apply override
 		//
 		if (applyOverride == true)
 		{
-			this->applyOverride(offsetW, sizeof(TYPE) / 2, reinterpret_cast<quint16*>(&rawValue));
+			std::array<quint16, wordCount> rawValueWorded;
+			static_assert(sizeof(rawValueWorded) == sizeof(TYPE));
+
+			std::memcpy(rawValueWorded.data(), &rawValue, sizeof(TYPE));
+
+			bool ok = this->applyOverride(offsetW, wordCount, rawValueWorded.data());
+			Q_ASSERT(ok);
+
+			std::memcpy(&rawValue, rawValueWorded.data(), sizeof(TYPE));
 		}
 
 		switch (byteOrder)
@@ -471,19 +483,19 @@ namespace Sim
 		return true;
 	}
 
-	void RamArea::applyOverride(quint32 offsetW, quint32 countW, quint16* dataPtr) const noexcept
+	bool RamArea::applyOverride(quint32 offsetW, quint32 countW, quint16* dataPtr) const noexcept
 	{
 		if (dataPtr == nullptr)
 		{
 			assert(dataPtr);
-			return;
+			return false;
 		}
 
 		if (m_overrideData.empty() == true)
 		{
 			// No data to override
 			//
-			return;
+			return true;
 		}
 
 		int zeroBasedOffsetW = offsetW - offset();
@@ -494,7 +506,7 @@ namespace Sim
 		{
 			assert(zeroBasedOffsetW >= 0 && zeroBasedOffsetW < static_cast<int>(m_overrideData.size()));
 			assert(zeroBasedOffsetW + countW <= size());
-			return;
+			return false;
 		}
 
 		for (; countW > 0; countW--)
@@ -505,7 +517,7 @@ namespace Sim
 			dataPtr++;
 		}
 
-		return;
+		return true;
 	}
 
 

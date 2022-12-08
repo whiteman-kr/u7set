@@ -241,10 +241,12 @@ void SimRamTests::ramAreaWriteDwordTest()
 	QVERIFY(ok == true);
 
 	std::vector<Sim::OverrideRamRecord> ovr;
-	ovr.resize(s_ra_size);
 
+	// Overrida data must be the same size as RamArea
+	ovr.resize(s_ra_size);
 	ovr[s_ra_size / 2] = Sim::OverrideRamRecord{0xFFFF, qToBigEndian<quint16>(0x1122)};
 	ovr[s_ra_size / 2 + 1] = Sim::OverrideRamRecord{0xFFFF, qToBigEndian<quint16>(0x3344)};
+
 	m_ramArea->setOverrideData(std::move(ovr));
 
 	ok = m_ramArea->readDword(overrideDataOffset, &data, E::ByteOrder::BigEndian, false);		// Not apply override
