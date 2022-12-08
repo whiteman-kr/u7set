@@ -1844,7 +1844,7 @@ void TestsWidget::cursorPositionChanged(int line, int index)
 		return;
 	}
 
-	m_cursorPosButton->setText(tr(" Line: %1  Col: %2 ").arg(line + 1).arg(index + 1));
+	m_cursorPosButton->setText(tr(" Line: %1  Col: %2 ").arg(line).arg(index));
 
 	return;
 }
@@ -1908,7 +1908,6 @@ void TestsWidget::onGoToLine()
 {
 	if (documentIsOpen(m_currentFileId) == false)
 	{
-		Q_ASSERT(false);
 		return;
 	}
 
@@ -1926,7 +1925,7 @@ void TestsWidget::onGoToLine()
 
 	bool ok = false;
 
-	int newLine = QInputDialog::getInt(this, "Go to Line", tr("Enter line number:"), line + 1, 1, 2147483647, 1, &ok);
+	int newLine = QInputDialog::getInt(this, "Go to Line", tr("Enter line number:"), line, 1, 2147483647, 1, &ok);
 	if (ok == false)
 	{
 		return;
@@ -1945,7 +1944,7 @@ void TestsWidget::onGoToLine()
 		newLine  = maxLine;
 	}
 
-    codeEditor->setCurrentLine(newLine - 1);
+	codeEditor->setCurrentLine(newLine);
     codeEditor->setFocus();
 
 	return;
@@ -2518,7 +2517,7 @@ void TestsWidget::setCurrentDocument(int fileId)
 			int index = 0;
 			codeEditor->getCursorPosition(&line, &index);
 
-			m_cursorPosButton->setText(tr(" Line: %1  Col: %2").arg(line + 1).arg(index + 1));
+			m_cursorPosButton->setText(tr(" Line: %1  Col: %2").arg(line).arg(index));
 		}
 	}
 
@@ -3348,6 +3347,12 @@ void TestsWidget::createActions()
 	m_closeOpenDocumentAction = new QAction(tr("Close"), this);
 	m_closeOpenDocumentAction->setShortcut(QKeySequence("Ctrl+W"));
 	connect(m_closeOpenDocumentAction, &QAction::triggered, this, &TestsWidget::closeOpenFile);
+
+	m_goToLineAction = new QAction(tr("GoTo"), this);
+	m_goToLineAction->setShortcut(QKeySequence("Ctrl+G"));
+	connect(m_goToLineAction, &QAction::triggered, this, &TestsWidget::onGoToLine);
+	addAction(m_goToLineAction);
+
 
 	return;
 }

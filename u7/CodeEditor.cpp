@@ -146,8 +146,6 @@ void CodeEditor::setCurrentLine(int line)
         return;
     }
 
-    moveCursor(QTextCursor::End);
-
     QTextCursor cursor(document()->findBlockByLineNumber(line - 1));
     setTextCursor(cursor);
 
