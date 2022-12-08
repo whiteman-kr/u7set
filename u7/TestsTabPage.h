@@ -425,6 +425,7 @@ private:
 	QAction* m_saveOpenDocumentAction = nullptr;
 	QAction* m_closeOpenDocumentAction = nullptr;
 	QAction* m_runTestOpenDocumentAction = nullptr;
+	QAction* m_goToLineAction = nullptr;
 
 	// Build toolbar actions
 	//

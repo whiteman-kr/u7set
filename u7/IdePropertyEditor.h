@@ -150,10 +150,6 @@ private:
 private slots:
     void onCursorPositionChanged();
 
-
-private:
-    void adjustMarginWidth();
-
 private:
     QWidget* m_parent = nullptr;
 

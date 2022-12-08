@@ -146,8 +146,6 @@ void CodeEditor::setCurrentLine(int line)
         return;
     }
 
-    moveCursor(QTextCursor::End);
-
     QTextCursor cursor(document()->findBlockByLineNumber(line - 1));
     setTextCursor(cursor);
 
@@ -425,6 +423,9 @@ void CodeEditor::keyPressEvent(QKeyEvent* e)
                         //
                         QString currentLineStartWhiteSpace = documentContents.mid(currentLineStartIndex, currentTextStartIndex - currentLineStartIndex);
 
+						currentLineStartWhiteSpace.remove('\n');
+						currentLineStartWhiteSpace.remove('\r');
+
                         insertPlainText(currentLineStartWhiteSpace);
                     }
 
@@ -468,7 +469,19 @@ void CodeEditor::paintEvent(QPaintEvent *event)
 {
 	if (m_highlighter != nullptr)
 	{
+		bool b = signalsBlocked();
+
+		if (b == false)
+		{
+			blockSignals(true);
+		}
+
 		updateHighlighter();
+
+		if (b == false)
+		{
+			blockSignals(false);
+		}
 	}
 
 	QPlainTextEdit::paintEvent(event);

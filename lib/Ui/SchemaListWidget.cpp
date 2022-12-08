@@ -495,10 +495,6 @@ SchemaListWidget::SchemaListWidget(std::vector<SchemaListTreeColumns> columns, b
 	m_treeWidget->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
 	m_treeWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-	m_searchAction = new QAction(tr("Edit Search"), this);
-	m_searchAction->setShortcut(QKeySequence::Find);
-	addAction(m_searchAction);
-
 	m_searchEdit = new QLineEdit{this};
 	m_searchEdit->setPlaceholderText(tr("Search Text"));
 	m_searchEdit->setClearButtonEnabled(true);
@@ -572,7 +568,6 @@ SchemaListWidget::SchemaListWidget(std::vector<SchemaListTreeColumns> columns, b
 	//
 	//connect(m_simulator, &SimIdeSimulator::projectUpdated, this, &SchemaListWidget::updateData);
 
-	connect(m_searchAction, &QAction::triggered, this, &SchemaListWidget::ctrlF);
 	connect(m_searchEdit, &QLineEdit::returnPressed, this, &SchemaListWidget::search);
 	connect(m_filterEdit, &QLineEdit::returnPressed, this, &SchemaListWidget::filter);
 	connect(m_searchButton, &QPushButton::clicked, this, &SchemaListWidget::search);
@@ -614,16 +609,6 @@ void SchemaListWidget::setDetails(VFrame30::SchemaDetailsSet details)
 	}
 
 	m_treeWidget->setDetails(std::move(details));
-
-	return;
-}
-
-void SchemaListWidget::ctrlF()
-{
-	assert(m_searchEdit);
-
-	m_searchEdit->setFocus();
-	m_searchEdit->selectAll();
 
 	return;
 }
