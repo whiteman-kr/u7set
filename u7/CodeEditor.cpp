@@ -423,6 +423,9 @@ void CodeEditor::keyPressEvent(QKeyEvent* e)
                         //
                         QString currentLineStartWhiteSpace = documentContents.mid(currentLineStartIndex, currentTextStartIndex - currentLineStartIndex);
 
+						currentLineStartWhiteSpace.remove('\n');
+						currentLineStartWhiteSpace.remove('\r');
+
                         insertPlainText(currentLineStartWhiteSpace);
                     }
 
@@ -466,7 +469,19 @@ void CodeEditor::paintEvent(QPaintEvent *event)
 {
 	if (m_highlighter != nullptr)
 	{
+		bool b = signalsBlocked();
+
+		if (b == false)
+		{
+			blockSignals(true);
+		}
+
 		updateHighlighter();
+
+		if (b == false)
+		{
+			blockSignals(false);
+		}
 	}
 
 	QPlainTextEdit::paintEvent(event);
