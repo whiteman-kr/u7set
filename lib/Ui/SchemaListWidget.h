@@ -77,7 +77,6 @@ public:
 	void setDetails(VFrame30::SchemaDetailsSet details);
 
 private slots:
-	void ctrlF();
 	void search();
 	void filter();
 	void resetFilter();
@@ -91,7 +90,6 @@ signals:
 private:
 	SchemaListTreeWidget* m_treeWidget = nullptr;
 
-	QAction* m_searchAction = nullptr;
 	QLineEdit* m_searchEdit = nullptr;
 	QLineEdit* m_filterEdit = nullptr;
 	QCompleter* m_searchCompleter = nullptr;
