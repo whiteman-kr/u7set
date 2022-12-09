@@ -13,6 +13,7 @@ TEMPLATE = app
 
 include(../../compiler.pri)
 include(../../warnings.pri)
+include(../../sanitizer.pri)
 
 # DESTDIR
 #
@@ -98,15 +99,3 @@ LIBS += -lCommonLib
 win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libCommonLib.a
 
-# Visual Leak Detector
-#
-win32 {
-    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-}
-
-# AddressSanitizer for Linux
-#
-unix {
-    CONFIG(debug, debug|release): CONFIG += sanitizer sanitize_address
-}

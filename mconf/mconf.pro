@@ -5,6 +5,7 @@ TEMPLATE = app
 
 include(../compiler.pri)
 include(../warnings.pri)
+include(../sanitizer.pri)
 
 # Application icon
 win32:RC_ICONS += Images/MConf.ico
@@ -98,16 +99,3 @@ LIBS += -lprotobuf
 win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
 INCLUDEPATH += ./../Protobuf
-
-# Visual Leak Detector
-#
-win32 {
-    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-}
-
-# AddressSanitizer for Linux
-#
-unix {
-    CONFIG(debug, debug|release): CONFIG += sanitizer sanitize_address
-}

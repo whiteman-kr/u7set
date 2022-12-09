@@ -2098,7 +2098,7 @@ namespace Tuning
 
 		int arrayIndex = frameNo / 3;
 
-		if (arrayIndex < 0 || arrayIndex >= m_frameSignals.size())
+		if (arrayIndex < 0 || arrayIndex >= std::ssize(m_frameSignals))
 		{
 			assert(false);
 			return false;
@@ -2249,7 +2249,7 @@ namespace Tuning
 
 			Q_ASSERT(arrayIndex <= td->tuningDataFrameCount() / 3);
 
-			while (arrayIndex >= m_frameSignals.size())			// appends new arrays if need
+			while (arrayIndex >= std::ssize(m_frameSignals))			// appends new arrays if need
 			{
 				m_frameSignals.push_back(std::vector<int>());
 			}
@@ -2448,7 +2448,7 @@ namespace Tuning
 
 		int index = it->second;
 
-		if (index < 0 || index >= m_tuningSignals.size())
+		if (index < 0 || index >= std::ssize(m_tuningSignals))
 		{
 			Q_ASSERT(false);
 			return nullptr;

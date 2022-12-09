@@ -740,7 +740,7 @@ const LanControllerInfo& LanControllersInfo::find(const QString& equipmentID) co
 
 const LanControllerInfo& LanControllersInfo::findByIndex(int index) const
 {
-	if (index >=0 && index < m_lans.size())
+	if (index >=0 && index < std::ssize(m_lans))
 	{
 		return m_lans[index];
 	}

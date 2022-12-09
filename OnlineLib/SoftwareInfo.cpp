@@ -6,15 +6,6 @@
 
 const int SoftwareInfo::UNDEFINED_BUILD_NO = -1;
 
-SoftwareInfo::SoftwareInfo()
-{
-}
-
-SoftwareInfo::SoftwareInfo(const SoftwareInfo& si)
-{
-	*this = si;
-}
-
 void SoftwareInfo::init(E::SoftwareType softwareType,
 							 const QString& equipmentID,
 							 int majorVersion,
