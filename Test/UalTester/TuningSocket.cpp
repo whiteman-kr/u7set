@@ -100,7 +100,7 @@ void TuningSocket::replyTuningSourcesInfo(const char* replyData, quint32 replyDa
 		return;
 	}
 
-	bool result = m_tuningDataSourcesInfoReply.ParseFromArray(reinterpret_cast<const void*>(replyData), static_cast<int>(replyDataSize));
+	bool result = m_tuningDataSourcesInfoReply.ParseFromArray(replyData, static_cast<int>(replyDataSize));
 	if (result == false)
 	{
 		std::cout << __FUNCTION__ << " - error: ParseFromArray" << std::endl;
@@ -164,7 +164,7 @@ void TuningSocket::replyTuningSourcesState(const char* replyData, quint32 replyD
 		return;
 	}
 
-	bool result = m_tuningDataSourcesStatesReply.ParseFromArray(reinterpret_cast<const void*>(replyData), static_cast<int>(replyDataSize));
+	bool result = m_tuningDataSourcesStatesReply.ParseFromArray(replyData, static_cast<int>(replyDataSize));
 	if (result == false)
 	{
 		std::cout << __FUNCTION__ << " - error: ParseFromArray" << std::endl;
@@ -269,7 +269,7 @@ void TuningSocket::replyWriteStateTuningSignals(const char* replyData, quint32 r
 		return;
 	}
 
-	bool result = m_writeTuningSignalsReply.ParseFromArray(reinterpret_cast<const void*>(replyData), static_cast<int>(replyDataSize));
+	bool result = m_writeTuningSignalsReply.ParseFromArray(replyData, static_cast<int>(replyDataSize));
 	if (result == false)
 	{
 		//std::cout << __FUNCTION__ << " - error: ParseFromArray" << std::endl;
@@ -324,7 +324,7 @@ void TuningSocket::replyWriteStateDataSource(const char* replyData, quint32 repl
 		return;
 	}
 
-	bool result = m_dataSourceWriteReply.ParseFromArray(reinterpret_cast<const void*>(replyData), static_cast<int>(replyDataSize));
+	bool result = m_dataSourceWriteReply.ParseFromArray(replyData, static_cast<int>(replyDataSize));
 	if (result == false)
 	{
 		//std::cout << __FUNCTION__ << " - error: ParseFromArray" << std::endl;
@@ -369,7 +369,7 @@ void TuningSocket::replyPacketSourceExit(const char* replyData, quint32 replyDat
 		return;
 	}
 
-	bool result = m_packetSourceExitReply.ParseFromArray(reinterpret_cast<const void*>(replyData), static_cast<int>(replyDataSize));
+	bool result = m_packetSourceExitReply.ParseFromArray(replyData, static_cast<int>(replyDataSize));
 	if (result == false)
 	{
 		//std::cout << __FUNCTION__ << " - error: ParseFromArray" << std::endl;

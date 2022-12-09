@@ -208,31 +208,11 @@ double PS::Signal::state() const
 			switch (analogSignalFormat())
 			{
 				case E::AnalogAppSignalFormat::SignedInt32:
-					{
-						quint32* pDataPtr = reinterpret_cast<quint32*>(m_pValueData);
-						if (pDataPtr == nullptr)
-						{
-							break;
-						}
-
-						state = reverseUint32(*pDataPtr);
-					}
-
+					state = qFromBigEndian<quint32>(m_pValueData);
 					break;
 
 				case E::AnalogAppSignalFormat::Float32:
-					{
-						quint32* pDataPtr = reinterpret_cast<quint32*>(m_pValueData);
-						if (pDataPtr == nullptr)
-						{
-							break;
-						}
-
-						float fState = 0;
-						memcpy(&fState, &*pDataPtr, sizeof(float));
-						state = static_cast<double>(reverseFloat(fState));
-					}
-
+					state = std::bit_cast<float>(qFromBigEndian<quint32>(m_pValueData));
 					break;
 
 				default:
@@ -243,11 +223,9 @@ double PS::Signal::state() const
 
 		case E::SignalType::Discrete:
 			{
-				quint16* pDataPtr = reinterpret_cast<quint16*>(m_pValueData);
-				if (pDataPtr == nullptr)
-				{
-					break;
-				}
+				quint16 data = 0;
+
+				std::memcpy(&data, m_pValueData, sizeof(data));
 
 				int bitNo = regBufAddr().bit();
 
@@ -260,7 +238,7 @@ double PS::Signal::state() const
 					bitNo += 8;
 				}
 
-				if ((*pDataPtr & (0x1 << bitNo)) != 0)
+				if ((data & (0x1 << bitNo)) != 0)
 				{
 					state = 1;
 				}
@@ -295,14 +273,7 @@ bool PS::Signal::setState(double state)
 			{
 				case E::AnalogAppSignalFormat::SignedInt32:
 					{
-						quint32* pDataPtr = reinterpret_cast<quint32*>(m_pValueData);
-						if (pDataPtr == nullptr)
-						{
-							break;
-						}
-
-						quint32 iState = reverseUint32(static_cast<quint32>(state));
-						*pDataPtr = iState;
+						qToBigEndian<quint32>(state, m_pValueData);
 
 						signalChanged = true;
 					}
@@ -310,18 +281,12 @@ bool PS::Signal::setState(double state)
 
 				case E::AnalogAppSignalFormat::Float32:
 					{
-						quint32* pDataPtr = reinterpret_cast<quint32*>(m_pValueData);
-						if (pDataPtr == nullptr)
-						{
-							break;
-						}
+						quint32 data = std::bit_cast<quint32>(static_cast<float>(state));
 
-						float fState = reverseFloat(static_cast<float>(state));
-						memcpy(pDataPtr, &fState, sizeof(float));
+						qToBigEndian<quint32>(data, m_pValueData);
 
 						signalChanged = true;
 					}
-
 					break;
 
 				default:
@@ -332,12 +297,12 @@ bool PS::Signal::setState(double state)
 
 		case E::SignalType::Discrete:
 			{
-				quint16* pDataPtr = reinterpret_cast<quint16*>(m_pValueData);
-				if (pDataPtr == nullptr)
-				{
-					break;
-				}
+				quint16 data = 0;
 
+				std::memcpy(&data, m_pValueData, sizeof(data));
+
+				//
+				//
 				int bitNo = regBufAddr().bit();
 
 				if (bitNo >= 8)
@@ -349,14 +314,20 @@ bool PS::Signal::setState(double state)
 					bitNo += 8;
 				}
 
-				int iState = static_cast<int>(state);
-
-				switch(iState)
+				//
+				//
+				if (state == 0)
 				{
-					case 0: *pDataPtr &= ~(0x1 << bitNo);		break;
-					case 1: *pDataPtr |= (0x1 << bitNo);		break;
+					data &= ~(0x1 << bitNo);
+				}
+				else
+				{
+					data |= (0x1 << bitNo);
 				}
 
+				//
+				//
+				std::memcpy(m_pValueData, &data, sizeof(data));
 				signalChanged = true;
 			}
 			break;

@@ -93,8 +93,8 @@ void SourceWorker::process()
 
 			// version and IP of simFrame
 			//
-			m_simFrame.simVersion = reverseUint16(PS::SIM_FRAME_VERSION);
-			m_simFrame.sourceIP = reverseUint32(pSource->info().lmIP.address32());
+			m_simFrame.simVersion = qToBigEndian<quint16>(PS::SIM_FRAME_VERSION);
+			m_simFrame.sourceIP = qToBigEndian<quint32>(pSource->info().lmIP.address32());
 
 			// revers header
 			//
