@@ -34,6 +34,7 @@ TEMPLATE = app
 #
 include(../compiler.pri)
 include(../warnings.pri)
+include(../sanitizer.pri)
 
 #Application icon
 #
@@ -219,15 +220,3 @@ unix:PRE_TARGETDEPS += $$DESTDIR/libCommonLib.a
 #
 win32:LIBS += $$_PRO_FILE_PWD_/Visa/visa64.lib
 
-# Visual Leak Detector
-#
-win32 {
-    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-}
-
-# AddressSanitizer for Linux
-#
-unix {
-    CONFIG(debug, debug|release): CONFIG += sanitizer sanitize_address
-}

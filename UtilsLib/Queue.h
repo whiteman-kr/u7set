@@ -404,8 +404,8 @@ private:
 template <typename T>
 FastThreadSafeQueue<T>::FastThreadSafeQueue(int queueSize) :
 	m_queueSize(1),
-	m_readIndex(1),
-	m_writeIndex(1)
+	m_writeIndex(1),
+	m_readIndex(1)
 {
 	static_assert(std::is_trivially_copyable<T>::value == true);
 	resize(queueSize);

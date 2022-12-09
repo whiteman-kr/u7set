@@ -32,6 +32,7 @@ void SessionParams::loadFrom(const Network::SessionParams& sp)
 // -------------------------------------------------------------------------------------
 
 SoftwareSettings::SoftwareSettings(const SoftwareSettings& copy) :
+	QObject(),
 	profile(copy.profile)
 {
 }

@@ -389,6 +389,10 @@ void Settings::writeSystemScope() const
 		{
 			qDebug() << "Storing keychain failed: " << writeJob.errorString();
 			qDebug() << "Suggestion: Install libsecret, gnome-keyring";
+
+			// One more fallback, the final one
+			//
+			fallbackSettings.setValue(writeJob.key(), ba);
 		}
 	}
 
@@ -406,6 +410,7 @@ void Settings::writeSystemScope() const
 void Settings::loadSystemScope()
 {
 	QSettings fallbackSettings{};
+	QByteArray raw;
 
 	// Database connection setting are sored in secure storage
 	//
@@ -424,22 +429,34 @@ void Settings::loadSystemScope()
 		if (readJob.error() != QKeychain::Error::NoError)
 		{
 			qDebug() << "Restoring keychain failed: " << readJob.errorString();
-			qDebug() << "Default params will be used.";
 
-			// Set default params
+			// One more fallback, the final one
 			//
-			m_databaseConnection.setAddress("127.0.0.1");
-			m_databaseConnection.setPort(5432);
-			m_databaseConnection.setLogin("u7");
-			m_databaseConnection.setPassword("P2ssw0rd");
+			if (fallbackSettings.contains(readJob.key()) == true)
+			{
+				raw = fallbackSettings.value(readJob.key()).toByteArray();
+			}
 		}
 		else
 		{
-			QByteArray ba = readJob.binaryData();
-			const DatabaseConnectionParam* conn = reinterpret_cast<const DatabaseConnectionParam*>(ba.constData());
-
-			m_databaseConnection = *conn;
+			raw = readJob.binaryData();
 		}
+	}
+
+	if (raw.size() == sizeof(m_databaseConnection))
+	{
+		std::memcpy(&m_databaseConnection, raw.constData(), sizeof(m_databaseConnection));
+	}
+	else
+	{
+		qDebug() << "Default params will be used.";
+
+		// Set default params
+		//
+		m_databaseConnection.setAddress("127.0.0.1");
+		m_databaseConnection.setPort(5432);
+		m_databaseConnection.setLogin("u7");
+		m_databaseConnection.setPassword("P2ssw0rd");
 	}
 
 	// Other settings

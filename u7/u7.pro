@@ -25,6 +25,7 @@ INCLUDEPATH += $$PWD/../lib
 
 include(../compiler.pri)
 include(../warnings.pri)
+include(../sanitizer.pri)
 
 # Stable.h
 #
@@ -455,14 +456,6 @@ DEPENDPATH += $$PWD/../Builder
 
 # QtKeychain Lib
 #
-
-win32 {
-    LIBS += Advapi32.lib
-}
-unix {
-    LIBS += -lglib-2.0
-}
-
 LIBS += -lQtkeychain
 win32:PRE_TARGETDEPS += $$DESTDIR/Qtkeychain.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libQtkeychain.a
@@ -471,6 +464,13 @@ DEPENDPATH += $$PWD/../Tools/qtkeychain
 
 DEFINES += QTKEYCHAIN_NO_EXPORT
 DEFINES += USE_CREDENTIAL_STORE
+
+win32 {
+	LIBS += Advapi32.lib
+}
+unix {
+	LIBS += -lglib-2.0
+}
 
 # Simulator Lib
 #
@@ -531,15 +531,3 @@ LIBS += -lCommonLib
 win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libCommonLib.a
 
-# Visual Leak Detector
-#
-win32 {
-    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-}
-
-# AddressSanitizer for Linux
-#
-unix {
-    CONFIG(debug, debug|release): CONFIG += sanitizer sanitize_address
-}

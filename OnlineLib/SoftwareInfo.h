@@ -8,8 +8,7 @@ class SoftwareInfo
 public:
 	static const int UNDEFINED_BUILD_NO;
 
-	SoftwareInfo();
-	SoftwareInfo(const SoftwareInfo& si);
+	SoftwareInfo() = default;
 
 	void clear();
 

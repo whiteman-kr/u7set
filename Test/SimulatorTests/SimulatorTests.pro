@@ -8,6 +8,7 @@ TEMPLATE = app
 
 include(../../compiler.pri)
 include(../../warnings.pri)
+include(../../sanitizer.pri)
 
 # DESTDIR
 #
@@ -101,10 +102,3 @@ unix:PRE_TARGETDEPS += $$DESTDIR/libHardwareLib.a
 LIBS += -lAppSignalLib
 win32:PRE_TARGETDEPS += $$DESTDIR/AppSignalLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libAppSignalLib.a
-
-# Visual Leak Detector
-#
-win32 {
-    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-}
