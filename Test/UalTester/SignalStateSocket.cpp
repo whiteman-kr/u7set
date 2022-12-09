@@ -115,7 +115,7 @@ void SignalStateSocket::replySignalState(const char* replyData, quint32 replyDat
 		return;
 	}
 
-	bool result = m_getSignalStateReply.ParseFromArray(reinterpret_cast<const void*>(replyData), static_cast<int>(replyDataSize));
+	bool result = m_getSignalStateReply.ParseFromArray(replyData, static_cast<int>(replyDataSize));
 	if (result == false)
 	{
 		std::cout << "SignalStateSocket::replySignalState - error: ParseFromArray" << std::endl;

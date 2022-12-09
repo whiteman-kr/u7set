@@ -132,8 +132,7 @@ void SignalSocket::replySignalState(const char* replyData, quint32 replyDataSize
 		return;
 	}
 
-	bool result = m_getSignalStateReply.ParseFromArray(reinterpret_cast<const void*>(replyData),
-													   static_cast<int>(replyDataSize));
+	bool result = m_getSignalStateReply.ParseFromArray(replyData, static_cast<int>(replyDataSize));
 	if (result == false)
 	{
 		qDebug() << "SignalSocket::replySignalState - error: ParseFromArray";
