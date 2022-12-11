@@ -1138,9 +1138,9 @@ namespace TrendLib
 	{
 		QVariant v = m_timeCombo->currentData();
 
-		if (v.isValid() && v.metaType().id() == QMetaType::LongLong)
+		if (v.isValid() && v.canConvert<qint64>() == true)
 		{
-			qint64 t = v.value<qint64>();
+			qint64 t = v.toLongLong();
 
 			m_trendSlider->setSingleStep(t / singleStepSliderDivider);
 			m_trendSlider->setPageStep(t);
