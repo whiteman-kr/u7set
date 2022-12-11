@@ -1,14 +1,16 @@
-#ifndef TRENDVIEW_H
-#define TRENDVIEW_H
+#pragma once
 
 #include "Trend.h"
 #include "TrendRuler.h"
 #include "ITrendDataProvider.h"
+#include <mutex>
+#include <condition_variable>
 #include <QPixmap>
 #include <QImage>
 #include <QWidget>
 #include <QPageSize>
 #include <QPageLayout>
+
 
 class QPrinter;
 
@@ -32,7 +34,7 @@ namespace TrendLib
 		void render(const TrendParam& drawParam);
 
 	signals:
-		void renderedImage(const QImage& image, TrendParam drawParam);
+		void renderedImage(const QImage& image, TrendLib::TrendParam drawParam);
 
 	protected:
 		virtual void run() override;
@@ -40,10 +42,11 @@ namespace TrendLib
 	private:
 		Trend* m_trend = nullptr;
 
-		QMutex m_mutex;
-		TrendParam m_drawParam;
+		std::mutex m_mutex;
+		std::optional<TrendParam> m_drawParam;
+		bool m_interruptRequested = false;
 
-		std::atomic<bool> m_newJob = false;
+		std::condition_variable m_newJob;
 
 		// Draw cache
 		//
@@ -57,7 +60,7 @@ namespace TrendLib
 
 	public:
 		explicit TrendWidget(QWidget* parent = nullptr);
-		virtual ~TrendWidget();
+		virtual ~TrendWidget() = default;
 
 	public:
 		bool save(QString fileName, QString* errorMessage) const;
@@ -102,7 +105,7 @@ namespace TrendLib
 		void startSelectionViewArea();
 
 	protected slots:
-		void updatePixmap(const QImage& image, TrendParam drawParam);
+		void updatePixmap(const QImage& image, TrendLib::TrendParam drawParam);
 
 		// Signals
 	signals:
@@ -184,4 +187,3 @@ namespace TrendLib
 	};
 }
 
-#endif // TRENDVIEW_H

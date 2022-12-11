@@ -17,7 +17,11 @@ namespace TrendLib
 
 	RenderThread::~RenderThread()
 	{
-		requestInterruption();
+		m_mutex.lock();
+		m_interruptRequested = true;
+		m_mutex.unlock();
+
+		m_newJob.notify_one();
 
 		bool ok = wait(5000);
 		if (ok == false)
@@ -32,11 +36,12 @@ namespace TrendLib
 	void RenderThread::render(const TrendParam& drawParam)
 	{
 		{
-			QMutexLocker locker(&m_mutex);
+			std::unique_lock<std::mutex> locker(m_mutex);
 			m_drawParam = drawParam;
+			m_drawParam->signalDescriptionRect().clear();
 		}
 
-		m_newJob = true;
+		m_newJob.notify_one();
 
 		if (isRunning() == false)
 		{
@@ -50,46 +55,51 @@ namespace TrendLib
 	{
 		do
 		{
-			QThread::msleep(5);
+			std::unique_lock<std::mutex> locker(m_mutex);
 
-			if (m_newJob == false)
+			m_newJob.wait(locker, [this]()
 			{
-				continue;
+				return m_interruptRequested || m_drawParam.has_value();
+			});
+
+			if (m_interruptRequested == true)
+			{
+				break;
 			}
 
 			// Start new job
 			//
-			m_mutex.lock();
 
-			TrendParam drawParam = m_drawParam;
-			drawParam.signalDescriptionRect().clear();
-
-			m_mutex.unlock();
-
-			// Set m_newJob to false, so it can be raised again while current drawing in progress
+			// Copy draw param under locked mutex.
 			//
-			m_newJob = false;
+			std::optional<TrendParam> drawParam = std::move(m_drawParam.value());
+			m_drawParam.reset();
 
-			if (m_image.size() != drawParam.rect().size())
+			locker.unlock();
+
+			// --
+			//
+			if (m_image.size() != drawParam->rect().size())
 			{
-				QSize pixelSize = drawParam.rect().size().toSize();
+				QSize pixelSize = drawParam->rect().size().toSize();
 
 				m_image = QImage{pixelSize, QImage::Format_RGB32};
 
-				m_image.setDevicePixelRatio(1.0);
-				m_image.setDotsPerMeterX(static_cast<int>(drawParam.realDpiX() / 25.4 * 1000.0));
-				m_image.setDotsPerMeterY(static_cast<int>(drawParam.realDpiY() / 25.4 * 1000.0));
+				m_image.setDevicePixelRatio(drawParam->devicePixelRatio());
+				m_image.setDotsPerMeterX(static_cast<int>(m_image.physicalDpiX() / 25.4 * 1000.0));
+				m_image.setDotsPerMeterY(static_cast<int>(m_image.physicalDpiY() / 25.4 * 1000.0));
 			}
 
 			// All drawing are done in inches
 			//
-			drawParam.setDpi(m_image.dotsPerMeterX() / (1000.0 / 25.4), m_image.dotsPerMeterY() / (1000.0 / 25.4), m_image.devicePixelRatioF());
+			drawParam->setDpi(m_image.dotsPerMeterX() / (1000.0 / 25.4),
+							  m_image.dotsPerMeterY() / (1000.0 / 25.4),
+							  m_image.devicePixelRatioF());
 
-			m_trend->draw(&m_image, drawParam);
+			m_trend->draw(&m_image, drawParam.value());
 
-			emit renderedImage(m_image, drawParam);
-		}
-		while (isInterruptionRequested() == false);
+			emit renderedImage(m_image, std::move(drawParam.value()));
+		} while (true);
 
 		return;
 	}
@@ -105,20 +115,6 @@ namespace TrendLib
 		setMouseTracking(true);		// To enable mouseMoveEvent without pressed button
 
 		connect(&m_thread, &RenderThread::renderedImage, this, &TrendWidget::updatePixmap);
-	}
-
-	TrendWidget::~TrendWidget()
-	{
-		m_thread.requestInterruption();
-		bool finished = m_thread.wait(10000);
-
-		if (finished == false)
-		{
-			qDebug() << "Force thread termination TrendLib::RenderThread";
-			m_thread.terminate();
-		}
-
-		return;
 	}
 
 	bool TrendWidget::save(QString fileName, QString* errorMessage) const

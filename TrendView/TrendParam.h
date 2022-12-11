@@ -30,9 +30,12 @@ namespace TrendLib
 	{
 	public:
 		TrendParam();
+		TrendParam(const TrendParam&) = default;
+		TrendParam(TrendParam&&) = default;
 		TrendParam(ITrendDataProvider* dataProvider);
 
-		TrendParam& operator=(const TrendParam&)  = default;
+		TrendParam& operator=(const TrendParam&) = default;
+		TrendParam& operator=(TrendParam&&) = default;
 
 	public:
 		bool save(::Proto::TrendParam* message) const;

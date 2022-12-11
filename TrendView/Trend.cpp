@@ -1853,8 +1853,8 @@ namespace TrendLib
 
 	QRectF Trend::calcLaneRect(int laneIndex, const TrendParam& drawParam)
 	{
-		QSizeF inchSize(static_cast<double>(drawParam.rect().size().width()) / drawParam.realDpiX(),
-						static_cast<double>(drawParam.rect().size().height()) / drawParam.realDpiY());
+		QSizeF inchSize(drawParam.rect().size().width() / drawParam.realDpiX(),
+						drawParam.rect().size().height() / drawParam.realDpiY());
 
 		double laneMargin = 1.0 / 32.0;		// 1/16 inch
 		double laneHeight = (inchSize.height() - laneMargin) / static_cast<double>(drawParam.laneCount()) - laneMargin;
@@ -1862,7 +1862,7 @@ namespace TrendLib
 		QRectF laneRect;
 
 		laneRect.setLeft(laneMargin);
-		laneRect.setRight(inchSize.width() - laneMargin * 2.0);
+		laneRect.setWidth(inchSize.width() - laneMargin * 2.0);
 
 		laneRect.setTop(laneMargin + static_cast<double>(laneIndex) * (laneHeight + laneMargin));
 		laneRect.setHeight(laneHeight);
