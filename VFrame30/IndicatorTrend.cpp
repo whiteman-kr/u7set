@@ -286,9 +286,9 @@ namespace VFrame30
 
 			m_image = QImage{static_cast<int>(trendRect.width()), static_cast<int>(trendRect.height()), QImage::Format_RGB32};
 
-			m_image.setDevicePixelRatio(1.0);
-			m_image.setDotsPerMeterX(static_cast<int>(drawParam->realDpiX() / 25.4 * 1000.0));
-			m_image.setDotsPerMeterY(static_cast<int>(drawParam->realDpiY() / 25.4 * 1000.0));
+			m_image.setDevicePixelRatio(drawParam->devicePixelRatio());
+			m_image.setDotsPerMeterX(static_cast<int>(m_image.physicalDpiX() / 25.4 * 1000.0));
+			m_image.setDotsPerMeterY(static_cast<int>(m_image.physicalDpiY() / 25.4 * 1000.0));
 		}
 
 		// Draw trend to QImage and then copy it to painter
