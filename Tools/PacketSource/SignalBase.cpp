@@ -273,7 +273,8 @@ bool PS::Signal::setState(double state)
 			{
 				case E::AnalogAppSignalFormat::SignedInt32:
 					{
-						qToBigEndian<quint32>(state, m_pValueData);
+						quint32 data = static_cast<quint32>(state);
+						qToBigEndian<quint32>(data, m_pValueData);
 
 						signalChanged = true;
 					}
