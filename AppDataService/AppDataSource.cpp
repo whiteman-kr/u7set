@@ -70,7 +70,7 @@ AppDataSource::AppDataSource(const DataSource& dataSource) :
 {
 	// copy DataSource properties to THIS object
 	//
-	*(reinterpret_cast<DataSource*>(this)) = dataSource;
+	*static_cast<DataSource*>(this) = dataSource;
 
 	initQueue();
 }

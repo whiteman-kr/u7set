@@ -746,7 +746,7 @@ namespace Builder
 
 		m_result = true;
 
-		qint32 constInt32 = *reinterpret_cast<qint32*>(&constFloat);		// map binary code of float to qint32
+		qint32 constInt32 = std::bit_cast<qint32>(constFloat);		// map binary code of float to qint32
 
 		m_code.setOpCode(LmCommand::Code::MOVC32);
 		m_code.setWord2(addrTo);
@@ -825,7 +825,7 @@ namespace Builder
 
 		m_result = true;
 
-		qint32 constInt32 = *reinterpret_cast<qint32*>(&constFloat);		// map binary code of float to qint32
+		qint32 constInt32 = std::bit_cast<qint32>(constFloat);		// map binary code of float to qint32
 
 		m_code.setOpCode(LmCommand::Code::WRFBC32);
 		m_code.setFbType(fbType);
@@ -859,7 +859,7 @@ namespace Builder
 
 		m_result = true;
 
-		qint32 testInt32 = *reinterpret_cast<qint32*>(&testFloat);		// map binary code of float to qint32
+		qint32 testInt32 = std::bit_cast<qint32>(testFloat);		// map binary code of float to qint32
 
 		m_code.setOpCode(LmCommand::Code::RDFBCMP32);
 		m_code.setFbType(fbType);

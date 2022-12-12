@@ -77,43 +77,14 @@ QVariant SignalTableModel::data(const QModelIndex& index, int role) const
 				switch (signal.analogSignalFormat())
 				{
 				case E::AnalogAppSignalFormat::SignedInt32:
-					/*switch (signal.dataSize() / 8)
-					{
-					case sizeof(qint8): return getAdc<qint8>(signal);
-					case sizeof(qint16): return getAdc<qint16>(signal);
-					case sizeof(qint32): return getAdc<qint32>(signal);
-					case sizeof(qint64): return getAdc<qint64>(signal);
-					default: return "???";
-					}*/
-
 					assert(signal.dataSize() == SIGNED_INT32_SIZE);
 					return getAdc<qint32>(signal);
 
-				/*case E::DataFormat::UnsignedInt:
-					return getAdc<quint64>(signal);*/
-
 				case E::AnalogAppSignalFormat::Float32:
-					/*
-					static_assert(sizeof(float) == sizeof(quint32) && sizeof(double) == sizeof(quint64), "Please check size of basic types");
-					switch (signal.dataSize() / 8)
-					{
-					case sizeof(float):
-					{
-						quint32 value = getAdc<quint32>(signal);
-						return *reinterpret_cast<float*>(&value);
-					}
-					case sizeof(double):
-					{
-						quint64 value = getAdc<quint64>(signal);
-						return *reinterpret_cast<double*>(&value);
-					}
-					default:
-						return "???";
-					}*/
 					{
 						assert(signal.dataSize() == FLOAT32_SIZE);
 						quint32 value = getAdc<quint32>(signal);
-						return *reinterpret_cast<float*>(&value);
+						return std::bit_cast<float>(value);
 					}
 
 				default:

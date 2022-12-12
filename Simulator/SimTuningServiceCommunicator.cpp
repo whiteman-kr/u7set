@@ -1245,22 +1245,6 @@ namespace Sim
 
 		m_tuningDataMutex.unlock();
 
-/*		if (startFrameAddrW == 46336 ||``
-				startFrameAddrW == 46336 + 508 ||
-				startFrameAddrW == 46336 + 508 + 508)
-		{
-			for(int i = 0; i < 3; i++)
-			{
-				float* ptr = reinterpret_cast<float*>(m_tuningDataReadBuffer.data()) + i;
-
-				float value = reverseFloat(*ptr);
-
-				qDebug() << C_STR(QString("addr: %1 value %2").arg(startFrameAddrW + i).arg(value));
-			}
-		}
-
-		qDebug() << "\n";*/
-
 		if (m_tuningDataReadBuffer.size() == Fotip::TX_RX_DATA_SIZE)
 		{
 			memcpy(reply->data, m_tuningDataReadBuffer.data(), Fotip::TX_RX_DATA_SIZE);
