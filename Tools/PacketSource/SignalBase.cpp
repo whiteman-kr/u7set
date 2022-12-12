@@ -208,7 +208,7 @@ double PS::Signal::state() const
 			switch (analogSignalFormat())
 			{
 				case E::AnalogAppSignalFormat::SignedInt32:
-					state = qFromBigEndian<quint32>(m_pValueData);
+					state = qFromBigEndian<qint32>(m_pValueData);
 					break;
 
 				case E::AnalogAppSignalFormat::Float32:
