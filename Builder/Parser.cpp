@@ -544,9 +544,7 @@ namespace Builder
 
 			if (log != nullptr)
 			{
-				log->errINT1000(QString(__FUNCTION__) + QString(", schema %1, log %2.")
-								.arg(reinterpret_cast<size_t>(schema.get()))
-								.arg(reinterpret_cast<size_t>(log)));
+				log->errINT1000(QString(__FUNCTION__) + QString(", schema in nullptr."));
 			}
 
 			return false;
@@ -1602,9 +1600,10 @@ namespace Builder
 			assert(schema);
 			assert(log);
 
-			log->errINT1000(QString(__FUNCTION__) + QString(", schema %1, log %3")
-							.arg(reinterpret_cast<size_t>(schema.get()))
-							.arg(reinterpret_cast<size_t>(log)));
+			if (log != nullptr)
+			{
+				log->errINT1000(QString(__FUNCTION__) + QString(", schema is nullptr."));
+			}
 			return false;
 		}
 
@@ -1665,9 +1664,10 @@ namespace Builder
 			assert(schema);
 			assert(log);
 
-			log->errINT1000(QString(__FUNCTION__) + QString(", schema %1, log %3")
-							.arg(reinterpret_cast<size_t>(schema.get()))
-							.arg(reinterpret_cast<size_t>(log)));
+			if (log != nullptr)
+			{
+				log->errINT1000(QString(__FUNCTION__) + QString(", schema is nullptr."));
+			}
 			return false;
 		}
 
@@ -3111,7 +3111,7 @@ namespace Builder
 		if (out == nullptr)
 		{
 			Q_ASSERT(out);
-			m_log->errINT1000(QString(__FUNCTION__) + QString(", out %1").arg(reinterpret_cast<size_t>(out)));
+			m_log->errINT1000(QString(__FUNCTION__) + QString(", out is nullptr."));
 			return false;
 		}
 
@@ -3524,9 +3524,9 @@ namespace Builder
 			Q_ASSERT(logicSchema);
 			Q_ASSERT(m_equipmentSet);
 
-			m_log->errINT1000(QString(__FUNCTION__) + QString(", logicSchema %1, Parser::m_equipmentSet %2")
-							  .arg(reinterpret_cast<size_t>(logicSchema))
-							  .arg(reinterpret_cast<size_t>(m_equipmentSet)));
+			m_log->errINT1000(QString(__FUNCTION__) + QString(", logicSchema %1, Parser::m_equipmentSet %2.")
+							  .arg(logicSchema ? "ok" : "nullptr")
+							  .arg(m_equipmentSet ? "ok" : "nullptr"));
 			return false;
 		}
 
@@ -3597,9 +3597,9 @@ namespace Builder
 			Q_ASSERT(logicSchema);
 			Q_ASSERT(m_equipmentSet);
 
-			m_log->errINT1000(QString(__FUNCTION__) + QString(", logicSchema %1, Parser::m_equipmentSet %2")
-							  .arg(reinterpret_cast<size_t>(logicSchema))
-							  .arg(reinterpret_cast<size_t>(m_equipmentSet)));
+			m_log->errINT1000(QString(__FUNCTION__) + QString(", logicSchema %1, Parser::m_equipmentSet %2.")
+							  .arg(logicSchema ? "ok" : "nullptr")
+							  .arg(m_equipmentSet ? "ok" : "nullptr" ));
 			return false;
 		}
 
@@ -3662,9 +3662,9 @@ namespace Builder
 			Q_ASSERT(schema);
 			Q_ASSERT(m_lmDescriptions);
 
-			m_log->errINT1000(QString(__FUNCTION__) + QString(", logicSchema %1, Parser::m_lmDescriptions %2")
-							  .arg(reinterpret_cast<size_t>(schema))
-							  .arg(reinterpret_cast<size_t>(m_lmDescriptions)));
+			m_log->errINT1000(QString(__FUNCTION__) + QString(", logicSchema %1, Parser::m_lmDescriptions %2.")
+							  .arg(schema ? "ok" : "nullptr")
+							  .arg(m_lmDescriptions ? "ok" : "nullptr"));
 			return false;
 		}
 
@@ -3752,9 +3752,7 @@ namespace Builder
 		if (schema == nullptr)
 		{
 			Q_ASSERT(schema);
-
-			m_log->errINT1000(QString(__FUNCTION__) + QString(", logicSchema %1")
-							  .arg(reinterpret_cast<size_t>(schema)));
+			m_log->errINT1000(QString(__FUNCTION__) + QString(", logicSchema is nullptr."));
 			return false;
 		}
 
@@ -3813,9 +3811,7 @@ namespace Builder
 		if (logicSchema == nullptr)
 		{
 			Q_ASSERT(logicSchema);
-
-			m_log->errINT1000(QString(__FUNCTION__) + QString(", logicSchema %1")
-							  .arg(reinterpret_cast<size_t>(logicSchema)));
+			m_log->errINT1000(QString(__FUNCTION__) + QString(", logicSchema is nullptr."));
 			return false;
 		}
 
@@ -3879,8 +3875,7 @@ namespace Builder
 		if (schema == nullptr)
 		{
 			Q_ASSERT(schema);
-			m_log->errINT1000(QString(__FUNCTION__) + QString(", Schema %1")
-							  .arg(reinterpret_cast<size_t>(schema)));
+			m_log->errINT1000(QString(__FUNCTION__) + QString(", Schema is nulllptr."));
 			return false;
 		}
 
@@ -3929,8 +3924,7 @@ namespace Builder
 		if (module == nullptr)
 		{
 			Q_ASSERT(module);
-			m_log->errINT1000(QString(__FUNCTION__) + QString(", module %1")
-							  .arg(reinterpret_cast<size_t>(module.get())));
+			m_log->errINT1000(QString(__FUNCTION__) + QString(", module is nullptr."));
 			return false;
 		}
 
@@ -3970,8 +3964,7 @@ namespace Builder
 		if (module == nullptr)
 		{
 			Q_ASSERT(module);
-			m_log->errINT1000(QString(__FUNCTION__) + QString(", module %1")
-							  .arg(reinterpret_cast<size_t>(module.get())));
+			m_log->errINT1000(QString(__FUNCTION__) + QString(", module is nullptr."));
 			return false;
 		}
 
@@ -4439,9 +4432,9 @@ namespace Builder
 			Q_ASSERT(m_opticModuleStorage);
 
 			m_log->errINT1000(QString(__FUNCTION__) + QString(", schema %1, layer %2, m_signalSet %3.")
-							  .arg(reinterpret_cast<size_t>(schema.get()))
-							  .arg(reinterpret_cast<size_t>(layer.get()))
-							  .arg(reinterpret_cast<size_t>(m_signalSet)));
+							  .arg(schema ? "ok" : "nullptr")
+							  .arg(layer ? "ok" : "nullptr")
+							  .arg(m_signalSet ? "ok" : "nullptr"));
 
 			return false;
 		}
@@ -5074,9 +5067,9 @@ namespace Builder
 			Q_ASSERT(bushContainer);
 
 			log()->errINT1000(QString(__FUNCTION__) + QString(", schema %1, layer %2, bushContainer %3")
-							  .arg(reinterpret_cast<size_t>(schema.get()))
-							  .arg(reinterpret_cast<size_t>(layer.get()))
-							  .arg(reinterpret_cast<size_t>(bushContainer)));
+							  .arg(schema ? "ok" : "nullptr")
+							  .arg(layer ? "ok" : "nullptr")
+							  .arg(bushContainer ? "ok" : "nullptr"));
 
 			return false;
 		}
