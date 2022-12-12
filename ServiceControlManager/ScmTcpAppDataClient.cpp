@@ -208,7 +208,7 @@ Network::AppDataServiceState& TcpAppDataClient::serviceState()
 
 void TcpAppDataClient::onGetAppDataSourcesInfoReply(const char* replyData, quint32 replyDataSize)
 {
-	bool result = m_getDataSourcesInfoReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+	bool result = m_getDataSourcesInfoReply.ParseFromArray(replyData, replyDataSize);
 
 	if (result == false)
 	{
@@ -245,7 +245,7 @@ void TcpAppDataClient::onGetAppDataSourcesInfoReply(const char* replyData, quint
 
 void TcpAppDataClient::onGetAppDataSourcesStatesReply(const char* replyData, quint32 replyDataSize)
 {
-	bool result = m_getAppDataSourcesStatesReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+	bool result = m_getAppDataSourcesStatesReply.ParseFromArray(replyData, replyDataSize);
 
 	if (result == false)
 	{
@@ -283,7 +283,7 @@ void TcpAppDataClient::onGetAppDataSourcesStatesReply(const char* replyData, qui
 
 void TcpAppDataClient::onGetAppSignalListStartReply(const char* replyData, quint32 replyDataSize)
 {
-	bool result = m_getSignalListStartReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+	bool result = m_getSignalListStartReply.ParseFromArray(replyData, replyDataSize);
 
 	if (result == false)
 	{
@@ -309,7 +309,7 @@ void TcpAppDataClient::getNextItemsPart()
 
 void TcpAppDataClient::onGetAppSignalListNextReply(const char* replyData, quint32 replyDataSize)
 {
-	bool result = m_getSignalListNextReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+	bool result = m_getSignalListNextReply.ParseFromArray(replyData, replyDataSize);
 
 	if (result == false)
 	{
@@ -356,7 +356,7 @@ void TcpAppDataClient::getNextParamPart()
 
 void TcpAppDataClient::onGetAppSignalReply(const char* replyData, quint32 replyDataSize)
 {
-	bool result = m_getSignalsReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+	bool result = m_getSignalsReply.ParseFromArray(replyData, replyDataSize);
 
 	if (result == false)
 	{
@@ -428,7 +428,7 @@ void TcpAppDataClient::onGetClientList(const char *replyData, quint32 replyDataS
 
 void TcpAppDataClient::onGetAppSignalStateReply(const char* replyData, quint32 replyDataSize)
 {
-	bool result = m_getSignalStateReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+	bool result = m_getSignalStateReply.ParseFromArray(replyData, replyDataSize);
 
 	if (result == false)
 	{
@@ -468,7 +468,7 @@ void TcpAppDataClient::onGetAppSignalStateReply(const char* replyData, quint32 r
 
 void TcpAppDataClient::onGetServiceState(const char* replyData, quint32 replyDataSize)
 {
-	bool result = m_getAppDataServiceState.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+	bool result = m_getAppDataServiceState.ParseFromArray(replyData, replyDataSize);
 
 	if (result == false)
 	{

@@ -165,7 +165,7 @@ void TcpAppDataServer::onGetAppSignalListStartRequest()
 
 void TcpAppDataServer::onGetAppSignalListNextRequest(const char* requestData, quint32 requestDataSize)
 {
-	bool result = m_getSignalListNextRequest.ParseFromArray(reinterpret_cast<const void*>(requestData), requestDataSize);
+	bool result = m_getSignalListNextRequest.ParseFromArray(requestData, requestDataSize);
 
 	m_getSignalListNextReply.Clear();
 
@@ -210,7 +210,7 @@ void TcpAppDataServer::onGetAppSignalListNextRequest(const char* requestData, qu
 
 void TcpAppDataServer::onGetAppSignalParamRequest(const char* requestData, quint32 requestDataSize)
 {
-	bool result = m_getAppSignalParamRequest.ParseFromArray(reinterpret_cast<const void*>(requestData), requestDataSize);
+	bool result = m_getAppSignalParamRequest.ParseFromArray(requestData, requestDataSize);
 
 	m_getAppSignalParamReply.Clear();
 
@@ -251,7 +251,7 @@ void TcpAppDataServer::onGetAppSignalParamRequest(const char* requestData, quint
 
 void TcpAppDataServer::onGetAppSignalRequest(const char* requestData, quint32 requestDataSize)
 {
-	bool result = m_getAppSignalRequest.ParseFromArray(reinterpret_cast<const void*>(requestData), requestDataSize);
+	bool result = m_getAppSignalRequest.ParseFromArray(requestData, requestDataSize);
 
 	m_getAppSignalReply.Clear();
 
@@ -292,7 +292,7 @@ void TcpAppDataServer::onGetAppSignalRequest(const char* requestData, quint32 re
 
 void TcpAppDataServer::onGetAppSignalStateRequest(const char* requestData, quint32 requestDataSize)
 {
-	bool result = m_getAppSignalStateRequest.ParseFromArray(reinterpret_cast<const void*>(requestData), requestDataSize);
+	bool result = m_getAppSignalStateRequest.ParseFromArray(requestData, requestDataSize);
 
 	m_getAppSignalStateReply.Clear();
 
@@ -359,7 +359,7 @@ void TcpAppDataServer::onGetAppSignalStateChangesRequest(const char* requestData
 		m_signalStatesProcessingThread->registerDestSignalStatesQueue(m_signalStatesQueue, false, "TcpAppDataServer");
 	}
 
-	bool result = m_getAppSignalStateChangesRequest.ParseFromArray(reinterpret_cast<const void*>(requestData), requestDataSize);
+	bool result = m_getAppSignalStateChangesRequest.ParseFromArray(requestData, requestDataSize);
 
 	m_getAppSignalStateChangesReply.Clear();
 

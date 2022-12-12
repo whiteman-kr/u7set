@@ -323,7 +323,7 @@ namespace Tcp
 
 	void FileClient::processGetFileStartNextReply(bool startReply, const char* replyData, quint32 replyDataSize)
 	{
-		bool res = m_reply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+		bool res = m_reply.ParseFromArray(replyData, replyDataSize);
 
 		if (res == false)
 		{

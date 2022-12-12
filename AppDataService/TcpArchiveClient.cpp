@@ -127,7 +127,7 @@ void TcpArchiveClient::onSaveAppSignalsStatesReply(const char* replyData, quint3
 {
 	Network::SaveAppSignalsStatesToArchiveReply msg;
 
-	msg.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+	msg.ParseFromArray(replyData, replyDataSize);
 
 	NetworkError errorCode = static_cast<NetworkError>(msg.error());
 

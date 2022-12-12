@@ -32,7 +32,7 @@ void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData
 
 void TcpAppDataServer::onSaveAppSignalsStatesToArchive(const char* requestData, quint32 requestDataSize)
 {
-	bool result = m_saveStatesRequest.ParseFromArray(reinterpret_cast<const void*>(requestData), requestDataSize);
+	bool result = m_saveStatesRequest.ParseFromArray(requestData, requestDataSize);
 
 	m_saveStatesReply.Clear();
 

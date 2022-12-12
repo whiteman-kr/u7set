@@ -381,7 +381,7 @@ void TcpTuningServiceClient::orderTuningSignalParamPortion()
 
 void TcpTuningServiceClient::onGetTuningSignalParam(const char *replyData, quint32 replyDataSize)
 {
-	bool result = m_getAppSignalParamReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+	bool result = m_getAppSignalParamReply.ParseFromArray(replyData, replyDataSize);
 
 	if (result == false)
 	{
@@ -445,7 +445,7 @@ void TcpTuningServiceClient::orderTuningSignalStatePortion()
 
 void TcpTuningServiceClient::onGetTuningSignalState(const char *replyData, quint32 replyDataSize)
 {
-	bool result = m_getTuningSignalStateReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+	bool result = m_getTuningSignalStateReply.ParseFromArray(replyData, replyDataSize);
 
 	if (result == false)
 	{

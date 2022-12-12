@@ -77,7 +77,7 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveStart(const char* reques
 	Network::GetAppSignalStatesFromArchiveStartRequest request;
 	Network::GetAppSignalStatesFromArchiveStartReply reply;
 
-	bool result = request.ParseFromArray(reinterpret_cast<const void*>(requestData), requestDataSize);
+	bool result = request.ParseFromArray(requestData, requestDataSize);
 
 	if (result == false)
 	{
@@ -156,7 +156,7 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveNext(const char* request
 {
 	Network::GetAppSignalStatesFromArchiveNextRequest request;
 
-	bool result = request.ParseFromArray(reinterpret_cast<const void*>(requestData), requestDataSize);
+	bool result = request.ParseFromArray(requestData, requestDataSize);
 
 	Network::GetAppSignalStatesFromArchiveNextReply reply;
 
@@ -209,7 +209,7 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveCancel(const char* reque
 	Network::GetAppSignalStatesFromArchiveCancelRequest request;
 	Network::GetAppSignalStatesFromArchiveCancelReply reply;
 
-	bool result = request.ParseFromArray(reinterpret_cast<const void*>(requestData), requestDataSize);
+	bool result = request.ParseFromArray(requestData, requestDataSize);
 
 	if (result == false)
 	{

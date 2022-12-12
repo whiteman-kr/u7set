@@ -159,7 +159,7 @@ namespace RtTrends
 
 	void Server::onRtTrendsManagementRequest(const char* requestData, quint32 requestDataSize)
 	{
-		bool result = m_rtTrendsManagementRequest.ParseFromArray(reinterpret_cast<const void*>(requestData), requestDataSize);
+		bool result = m_rtTrendsManagementRequest.ParseFromArray(requestData, requestDataSize);
 
 		m_rtTrendsManagementReply.Clear();
 
@@ -316,7 +316,7 @@ namespace RtTrends
 
 	void Server::onRtTrendsGetStateChangesRequest(const char* requestData, quint32 requestDataSize)
 	{
-		bool result = m_rtTrendsGetStateChangesRequest.ParseFromArray(reinterpret_cast<const void*>(requestData), requestDataSize);
+		bool result = m_rtTrendsGetStateChangesRequest.ParseFromArray(requestData, requestDataSize);
 
 		m_rtTrendsGetStateChangesReply.Clear();
 
