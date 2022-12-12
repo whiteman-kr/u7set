@@ -181,12 +181,9 @@ void JobExecutor::jobFinished( Job* job ) {
     startNextIfNoneRunning();
 }
 
-JobExecutor* JobExecutor::s_instance = 0;
-
 JobExecutor* JobExecutor::instance() {
-    if ( !s_instance )
-        s_instance = new JobExecutor;
-    return s_instance;
+	static JobExecutor instance;
+	return &instance;
 }
 
 ReadPasswordJobPrivate::ReadPasswordJobPrivate(const QString &service_, ReadPasswordJob *qq) :
