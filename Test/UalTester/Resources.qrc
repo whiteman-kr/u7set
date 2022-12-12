@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>icons/UalTester.ico</file>
+        <file>docs/UalTester.docx</file>
     </qresource>
 </RCC>
