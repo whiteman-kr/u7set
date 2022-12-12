@@ -31,6 +31,9 @@ IF NOT EXIST ..\bin\release\docs\D11.6_RPCT-UM.pdf goto SvnError
 IF NOT EXIST "..\bin\release\docs\Appendixes\D11.6 RPCT User Manual Appendix A Warnings and Errors List.pdf"  goto SvnError
 IF NOT EXIST ..\bin\release\docs\D11.8_FSC_MATS_User_Manual.pdf goto SvnError
 IF NOT EXIST ..\bin\release\docs\D11.9_FSC_Tuning_User_Manual.pdf  goto SvnError
+IF NOT EXIST "..\bin\release\docs\Installing and configuring RPCT.pdf" goto SvnError
+IF NOT EXIST "..\bin\release\docs\RPCT Quick Start Guide.pdf" goto SvnError
+
 
 :SvnSuccess
 echo All files were successfully received from SVN.

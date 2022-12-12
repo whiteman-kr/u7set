@@ -315,6 +315,14 @@ void MainWindow::createActions()
 	m_manualRpctAction->setStatusTip(tr("Show RPCT User Manual"));
 	connect(m_manualRpctAction, &QAction::triggered, this, &MainWindow::showRpctUserManual);
 
+	m_installRpctAction = new QAction(tr("Installing and configuring RPCT"), this);
+	m_installRpctAction->setStatusTip(tr("Show Installing and configuring RPCT"));
+	connect(m_installRpctAction, &QAction::triggered, this, &MainWindow::showRpctInstallManual);
+
+	m_rpctQuickStartAction = new QAction(tr("RPCT Quick Start Guide"), this);
+	m_rpctQuickStartAction->setStatusTip(tr("Show RPCT Quick Start Guide"));
+	connect(m_rpctQuickStartAction, &QAction::triggered, this, &MainWindow::showRpctQuickStart);
+
 	m_manualRpctAppendixAAction = new QAction(tr("RPCT Errors and Warnings"), this);
 	m_manualRpctAppendixAAction->setStatusTip(tr("Show RPCT Errors and Warnings"));
 	connect(m_manualRpctAppendixAAction, &QAction::triggered, this, &MainWindow::showRpctUserManualAppendixA);
@@ -506,6 +514,11 @@ void MainWindow::createMenus()
 
 	pHelpMenu->addSeparator();
 
+	pHelpMenu->addAction(m_installRpctAction);
+	pHelpMenu->addAction(m_rpctQuickStartAction);
+
+	pHelpMenu->addSeparator();
+
 	pHelpMenu->addAction(m_scriptHelpAction);
 
 	pHelpMenu->addSeparator();
@@ -644,6 +657,16 @@ void MainWindow::showShortcuts()
 void MainWindow::showRpctUserManual()
 {
 	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/D11.6_RPCT-UM.pdf", this);
+}
+
+void MainWindow::showRpctInstallManual()
+{
+	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/Installing and configuring RPCT.pdf", this);
+}
+
+void MainWindow::showRpctQuickStart()
+{
+	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/RPCT Quick Start Guide.pdf", this);
 }
 
 void MainWindow::showRpctUserManualAppendixA()

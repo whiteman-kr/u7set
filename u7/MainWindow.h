@@ -70,8 +70,9 @@ protected slots:
 	void showLog();
 	void showSettings();
 	void showShortcuts();
-
 	void showRpctUserManual();
+	void showRpctInstallManual();
+	void showRpctQuickStart();
 	void showRpctUserManualAppendixA();
 	void showAfblReference();
 	void showScriptHelp();
@@ -121,6 +122,8 @@ private:
 	QAction* m_shortcutsAction = nullptr;
 
 	QAction* m_manualRpctAction = nullptr;
+	QAction* m_installRpctAction = nullptr;
+	QAction* m_rpctQuickStartAction = nullptr;
 	QAction* m_manualRpctAppendixAAction = nullptr;
 	QAction* m_manualAfblAction = nullptr;
 	QAction* m_scriptHelpAction = nullptr;
