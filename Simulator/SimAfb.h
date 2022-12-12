@@ -5,6 +5,7 @@
 #include <memory>
 #include <array>
 #include <optional>
+#include <concepts>
 #include <QObject>
 #include "../lib/LmDescription.h"
 #include "../VFrame30/Afb.h"
@@ -50,7 +51,7 @@ namespace Sim
 		explicit AfbComponentParam(quint16 paramOpIndex) :
 			m_paramOpIndex(paramOpIndex)
 		{
-			std::fill(m_data.begin(), m_data.end(), 0);
+			std::fill(m_data.begin(), m_data.end(), '\0');
 			static_assert(std::is_trivially_copyable_v<AfbComponentParam>);
 		}
 
@@ -169,85 +170,79 @@ namespace Sim
 
 		[[nodiscard]] quint16 mathOverflow() const noexcept
 		{
-			return (m_mathFlags & FLAG_OVERFLOW) ? 1 : 0;
+			return getMathFlag<FLAG_OVERFLOW>();
 		}
-		void setMathOverflow(quint16 value) noexcept
+
+		template <std::integral T>
+		void setMathOverflow(T value) noexcept
 		{
-			if (value == 0)
-			{
-				m_mathFlags &= ~FLAG_OVERFLOW;
-			}
-			else
-			{
-				m_mathFlags |= FLAG_OVERFLOW;
-			}
+			setMathFlag<FLAG_OVERFLOW>(value);
 		}
 
 		[[nodiscard]] quint16 mathUnderflow() const noexcept
 		{
-			return (m_mathFlags & FLAG_UNDERFLOW) ? 1 : 0;
+			return getMathFlag<FLAG_UNDERFLOW>();
 		}
-		void setMathUnderflow(quint16 value) noexcept
+
+		template <std::integral T>
+		void setMathUnderflow(T value) noexcept
 		{
-			if (value == 0)
-			{
-				m_mathFlags &= ~FLAG_UNDERFLOW;
-			}
-			else
-			{
-				m_mathFlags |= FLAG_UNDERFLOW;
-			}
+			setMathFlag<FLAG_UNDERFLOW>(value);
 		}
 
 		[[nodiscard]] quint16 mathZero() const noexcept
 		{
-			return (m_mathFlags & FLAG_ZERO) ? 1 : 0;
+			return getMathFlag<FLAG_ZERO>();
 		}
-		void setMathZero(quint16 value) noexcept
+
+		template <std::integral T>
+		void setMathZero(T value) noexcept
 		{
-			if (value == 0)
-			{
-				m_mathFlags &= ~FLAG_ZERO;
-			}
-			else
-			{
-				m_mathFlags |= FLAG_ZERO;
-			}
+			setMathFlag<FLAG_ZERO>(value);
 		}
 
 		[[nodiscard]] quint16 mathNan() const noexcept
 		{
-			return (m_mathFlags & FLAG_NAN) ? 1 : 0;
+			return getMathFlag<FLAG_NAN>();
 		}
-		void setMathNan(quint16 value) noexcept
+
+		template <std::integral T>
+		void setMathNan(T value) noexcept
 		{
-			if (value == 0)
-			{
-				m_mathFlags &= ~FLAG_NAN;
-			}
-			else
-			{
-				m_mathFlags |= FLAG_NAN;
-			}
+			setMathFlag<FLAG_NAN>(value);
 		}
 
 		[[nodiscard]] quint16 mathDivByZero() const noexcept
 		{
-			return (m_mathFlags & FLAG_DIVBYZERO) ? 1 : 0;
+			return getMathFlag<FLAG_DIVBYZERO>();
 		}
-		void setMathDivByZero(quint16 value) noexcept
+
+		template <std::integral T>
+		void setMathDivByZero(T value) noexcept
 		{
-			if (value == 0)
-			{
-				m_mathFlags &= ~FLAG_DIVBYZERO;
-			}
-			else
-			{
-				m_mathFlags |= FLAG_DIVBYZERO;
-			}
+			setMathFlag<FLAG_DIVBYZERO>(value);
 		}
 
 	private:
+		template<quint16 FLAG_MASK>
+		quint16 getMathFlag() const noexcept
+		{
+			return (m_mathFlags & FLAG_MASK) ? 1 : 0;
+		}
+
+		template<quint16 FLAG_MASK, std::integral T>
+		void setMathFlag(T value) noexcept
+		{
+			if (value == static_cast<T>(0))
+			{
+				m_mathFlags &= ~FLAG_MASK;
+			}
+			else
+			{
+				m_mathFlags |= FLAG_MASK;
+			}
+		}
+
 		template<typename T>
 		T dataToType() const
 		{
@@ -261,7 +256,7 @@ namespace Sim
 		void setDataToType(T value)
 		{
 			static_assert(sizeof(T) <= 8);	// 8 is the size of m_data (bytes)
-			std::fill(m_data.begin(), m_data.end(), 0);
+			std::fill(m_data.begin(), m_data.end(), '\0');
 			std::memcpy(m_data.data(), &value, sizeof(value));
 		}
 

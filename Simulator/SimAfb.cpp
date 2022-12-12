@@ -297,7 +297,7 @@ namespace Sim
 
 		// Altera's ip core sets 0 if operation result is denormalized number
 		//
-		if (mathUnderflow() == true)
+		if (mathUnderflow())
 		{
 			result = 0;
 		}
@@ -331,7 +331,7 @@ namespace Sim
 
 		// Altera's ip core sets 0 if operation result is denormalized number
 		//
-		if (mathUnderflow() == true)
+		if (mathUnderflow())
 		{
 			result = 0;
 		}
@@ -366,7 +366,7 @@ namespace Sim
 
 		// Altera's ip core sets 0 if operation result is denormalized number
 		//
-		if (mathUnderflow() == true)
+		if (mathUnderflow())
 		{
 			result = 0;
 		}
@@ -398,7 +398,7 @@ namespace Sim
 
 		// Altera's ip core sets 0 if operation result is denormalized number
 		//
-		if (mathUnderflow() == true)
+		if (mathUnderflow())
 		{
 			result = 0;
 		}
@@ -455,7 +455,7 @@ namespace Sim
 
 		// Altera's ip core sets 0 if operation result is denormalized number
 		//
-		if (mathUnderflow() == true)
+		if (mathUnderflow())
 		{
 			result = 0;
 		}
@@ -648,9 +648,9 @@ namespace Sim
 
 	bool AfbComponentInstance::addParam(const AfbComponentParam& param)
 	{
-		if (param.opIndex() >= m_params_a.size())
+		if (param.opIndex() >= std::ssize(m_params_a))
 		{
-			Q_ASSERT(param.opIndex() < m_params_a.size());
+			Q_ASSERT(param.opIndex() < std::ssize(m_params_a));
 			return false;
 		}
 
@@ -828,7 +828,7 @@ namespace Sim
 	bool ModelComponent::addParam(int instanceNo, AfbComponentParam&& instParam, QString* errorMessage)
 	{
 		if (instanceNo >= m_afbComp->maxInstCount() ||
-			instanceNo >= m_instances.size())					// NOLINT
+			instanceNo >= std::ssize(m_instances))
 		{
 			// Maximum of instatiator is reached
 			//
@@ -894,7 +894,7 @@ namespace Sim
 		{
 			Q_ASSERT(keyAfbOpCode == afbComp->opCode());
 
-			if (keyAfbOpCode >= m_components.size())					// NOLINT
+			if (keyAfbOpCode >= std::ssize(m_components))
 			{
 				m_components.resize(keyAfbOpCode + 1);
 			}
@@ -917,9 +917,9 @@ namespace Sim
 	{
 		Q_ASSERT(errorMessage);
 
-		if (afbOpCode >= m_components.size())
+		if (afbOpCode >= std::ssize(m_components))
 		{
-			Q_ASSERT(afbOpCode < m_components.size());
+			Q_ASSERT(afbOpCode < std::ssize(m_components));
 			*errorMessage = QString("AFB with opcode %1 is not forund").arg(afbOpCode);
 			return false;
 		}
@@ -940,9 +940,9 @@ namespace Sim
 	{
 		Q_ASSERT(errorMessage);
 
-		if (afbOpCode >= m_components.size())
+		if (afbOpCode >= std::ssize(m_components))
 		{
-			Q_ASSERT(afbOpCode < m_components.size());
+			Q_ASSERT(afbOpCode < std::ssize(m_components));
 			*errorMessage = QString("AFB with opcode %1 is not forund").arg(afbOpCode);
 			return false;
 		}
@@ -961,9 +961,9 @@ namespace Sim
 
 	AfbComponentInstance* AfbComponentSet::componentInstance(int componentOpCode, int instance) noexcept
 	{
-		if (componentOpCode < 0 || componentOpCode >= m_components.size())
+		if (componentOpCode < 0 || componentOpCode >= std::ssize(m_components))
 		{
-			Q_ASSERT(componentOpCode >= 0 && componentOpCode < m_components.size());
+			Q_ASSERT(componentOpCode >= 0 && componentOpCode < std::ssize(m_components));
 			return nullptr;
 		}
 
