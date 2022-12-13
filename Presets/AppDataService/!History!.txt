@@ -1,0 +1,4 @@
+ADS
+	13.12.2022	Version: 1	Application Data Service_v1.u7devp	RPCT-3357: Add property SecurityLevel to all software services
+
+

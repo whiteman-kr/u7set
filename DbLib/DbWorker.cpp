@@ -397,6 +397,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
     {":/DatabaseUpgrade/Upgrade0375.sql", "Upgrade to version 375, Added xmls for LMs SR05, SR20, where afb func changed to version 5"},
 	{":/DatabaseUpgrade/Upgrade0376.sql", "Upgrade to version 376, Shortened some math_afbs captions for LMs SR05, SR20"},
 	{":/DatabaseUpgrade/Upgrade0377.sql", "Upgrade to version 377, Added CheckHostname to ConfigService preset"},
+	{":/DatabaseUpgrade/Upgrade0378.sql", "Upgrade to version 378, Add property SecurityLevel to all software services"},
 };
 
 int DbWorker::counter = 0;
