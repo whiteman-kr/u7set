@@ -60,7 +60,7 @@ namespace Sim
 		RamArea(bool clearOnStartCycle);
 		RamArea(const RamArea&) = default;
 		RamArea(RamArea&&) noexcept = default;
-		virtual ~RamArea();
+		virtual ~RamArea() = default;
 
 		RamArea& operator=(const RamArea&) = default;
 		RamArea& operator=(RamArea&&) noexcept = default;
@@ -181,7 +181,7 @@ namespace Sim
 	public:
 		Ram();
 		Ram(const Ram& that);
-		~Ram();
+		~Ram() = default;
 
 		Ram& operator=(const Ram& that);
 

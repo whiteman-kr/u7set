@@ -362,16 +362,16 @@ namespace Sim
 	{
 		assert(m_dataSizeW == 2);
 
-		qint32 converted = qToBigEndian<qint32>(value);
-		quint16* ptr = reinterpret_cast<quint16*>(&converted);
-
 		if (m_byteOrder == E::ByteOrder::BigEndian)
 		{
+			qint32 beFloat = qToBigEndian(value);
+			quint32 asDword = std::bit_cast<quint32>(beFloat);
+
 			m_ramOverrides[0].mask = qToBigEndian<quint16>(0xFFFF);
-			m_ramOverrides[0].data = *ptr;
+			m_ramOverrides[0].data = static_cast<quint16>(asDword & 0xFFFF);
 
 			m_ramOverrides[1].mask = qToBigEndian<quint16>(0xFFFF);
-			m_ramOverrides[1].data = *(ptr + 1);
+			m_ramOverrides[1].data = static_cast<quint16>(asDword >> 16);
 		}
 		else
 		{
@@ -389,25 +389,16 @@ namespace Sim
 	{
 		assert(m_dataSizeW == 2);
 
-		union Converter
-		{
-			quint32 asDword;
-			float asFloat;
-		};
-
-		Converter c;
-		c.asFloat = value;
-		c.asDword = qToBigEndian(c.asDword);
-
-		quint16* ptr = reinterpret_cast<quint16*>(&c.asDword);
-
 		if (m_byteOrder == E::ByteOrder::BigEndian)
 		{
+			float beFloat = qToBigEndian(value);
+			quint32 asDword = std::bit_cast<quint32>(beFloat);
+
 			m_ramOverrides[0].mask = qToBigEndian<quint16>(0xFFFF);
-			m_ramOverrides[0].data = *ptr;
+			m_ramOverrides[0].data = static_cast<quint16>(asDword & 0xFFFF);
 
 			m_ramOverrides[1].mask = qToBigEndian<quint16>(0xFFFF);
-			m_ramOverrides[1].data = *(ptr + 1);
+			m_ramOverrides[1].data = static_cast<quint16>(asDword >> 16);
 		}
 		else
 		{
@@ -425,30 +416,20 @@ namespace Sim
 	{
 		assert(m_dataSizeW == 4);
 
-		union Converter
-		{
-			quint64 asDdword;
-			double asDouble;
-		};
-
-		Converter c;
-		c.asDouble = value;
-
-		quint16* ptr = reinterpret_cast<quint16*>(c.asDdword);
-
 		if (m_byteOrder == E::ByteOrder::BigEndian)
 		{
+			double beFloat = qToBigEndian(value);
+			quint64 asDwword = std::bit_cast<quint64>(beFloat);
+
 			m_ramOverrides[0].mask = qToBigEndian<quint16>(0xFFFF);
-			m_ramOverrides[0].data = *ptr;
-
 			m_ramOverrides[1].mask = qToBigEndian<quint16>(0xFFFF);
-			m_ramOverrides[1].data = *(ptr + 1);
-
 			m_ramOverrides[2].mask = qToBigEndian<quint16>(0xFFFF);
-			m_ramOverrides[2].data = *(ptr + 2);
-
 			m_ramOverrides[3].mask = qToBigEndian<quint16>(0xFFFF);
-			m_ramOverrides[3].data = *(ptr + 3);
+
+			m_ramOverrides[0].data = static_cast<quint16>(asDwword & 0xFFFF);
+			m_ramOverrides[1].data = static_cast<quint16>((asDwword >> 16) & 0xFFFF);
+			m_ramOverrides[2].data = static_cast<quint16>((asDwword >> 32) & 0xFFFF);
+			m_ramOverrides[3].data = static_cast<quint16>(asDwword >> 48);
 		}
 		else
 		{

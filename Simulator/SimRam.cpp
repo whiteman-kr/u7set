@@ -67,11 +67,6 @@ namespace Sim
 		return;
 	}
 
-	RamArea::~RamArea()
-	{
-		//qDebug() << "RamArea::~RamArea(), data ptr " << QString::number(reinterpret_cast<quint64>(m_data.data()), 16) << " name = " << name() << " offset = " << offset();
-	}
-
 	QString RamArea::dump() const
 	{
 		QString result = RamAreaInfo::dump() + QLatin1String("\n");
@@ -202,10 +197,11 @@ namespace Sim
 		}
 
 		int zeroBasedOffsetW = offsetW - offset();
-
-		for (quint32 i = 0; i < sizeW; i++)
 		{
-			*(reinterpret_cast<quint16*>(m_data.data()) + zeroBasedOffsetW + i) = qToBigEndian<quint16>(data);
+			quint16* writePtr = reinterpret_cast<quint16*>(m_data.data()) + zeroBasedOffsetW;
+			quint16 beData = qToBigEndian<quint16>(data);
+
+			std::fill(writePtr, writePtr + sizeW, beData);
 		}
 
 		// Apply override
@@ -250,7 +246,9 @@ namespace Sim
 			return false;
 		}
 
-		quint16 word = *reinterpret_cast<const quint16*>(m_data.constData() + byteOffset);
+		quint16 word;
+		std::memcpy(&word, m_data.constData() + byteOffset, sizeof(word));
+
 		applyOverride(offsetW, 1, &word);		// Apply override before converting data to target endian
 
 		if (byteOrder == E::ByteOrder::BigEndian)
@@ -281,7 +279,7 @@ namespace Sim
 
 		// Write to memory
 		//
-		*reinterpret_cast<quint16*>(m_data.data() + byteOffset) = targetWord;
+		std::memcpy(m_data.data() + byteOffset, &targetWord, sizeof(targetWord));
 
 		return true;
 	}
@@ -306,7 +304,8 @@ namespace Sim
 			return false;
 		}
 
-		quint16 word = *reinterpret_cast<const quint16*>(m_data.constData() + byteOffset);
+		quint16 word;
+		std::memcpy(&word, m_data.constData() + byteOffset, sizeof(word));
 
 		if (applyOverride == true)
 		{
@@ -418,12 +417,17 @@ namespace Sim
 		//
 		if (m_overrideData.empty() == false)
 		{
-			applyOverride(offsetW, sizeof(TYPE) / 2, reinterpret_cast<quint16*>(&valueToWrite));
+			quint16 v[sizeof(TYPE) / 2];
+			std::memcpy(v, &valueToWrite, sizeof(valueToWrite));
+
+			applyOverride(offsetW, sizeof(TYPE) / 2, v);
+
+			std::memcpy(&valueToWrite, v, sizeof(valueToWrite));
 		}
 
 		// Write data to memory
 		//
-		*reinterpret_cast<TYPE*>(m_data.data() + byteOffset) = valueToWrite;
+		std::memcpy(m_data.data() + byteOffset, &valueToWrite, sizeof(valueToWrite));
 
 		return true;
 	}
@@ -446,12 +450,12 @@ namespace Sim
 			return false;
 		}
 
-		const char* dataOffset = m_data.constData() + byteOffset;
-		TYPE rawValue = *reinterpret_cast<const TYPE*>(dataOffset);
+		TYPE rawValue;
+		std::memcpy(&rawValue, m_data.constData() + byteOffset, sizeof(TYPE));
 
 		// Apply override
 		//
-		if (applyOverride == true)
+		if (applyOverride == true && m_overrideData.empty() == false)
 		{
 			std::array<quint16, wordCount> rawValueWorded;
 			static_assert(sizeof(rawValueWorded) == sizeof(TYPE));
@@ -538,10 +542,6 @@ namespace Sim
 	Ram::Ram(const Ram& that)
 	{
 		*this = that;
-	}
-
-	Ram::~Ram()
-	{
 	}
 
 	Ram& Ram::operator=(const Ram& that)
@@ -987,12 +987,17 @@ namespace Sim
 
 	bool Ram::writeSignedInt(quint32 offsetW, qint32 data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access)
 	{
-		return writeDword(offsetW, *reinterpret_cast<quint32*>(&data), byteOrder, access);
+		return writeDword(offsetW, std::bit_cast<quint32>(data), byteOrder, access);
 	}
 
 	bool Ram::readSignedInt(quint32 offsetW, qint32* data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access, bool applyOverride) const
 	{
-		return readDword(offsetW, reinterpret_cast<quint32*>(data), byteOrder, access, applyOverride);
+		quint32 readValue = 0xcdcdcdcd;
+		bool ok = readDword(offsetW, &readValue, byteOrder, access, applyOverride);
+
+		*data = std::bit_cast<qint32>(readValue);
+
+		return ok;
 	}
 
 	RamArea* Ram::memoryArea(E::LogicModuleRamAccess access, quint32 offsetW) noexcept

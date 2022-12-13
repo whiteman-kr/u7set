@@ -14,14 +14,14 @@ protected:
 public:
 	struct Statisctics
 	{
-		Statisctics(size_t _id, QString _objectName, Tcp::ConnectionState _state) :
+		Statisctics(uintptr_t _id, QString _objectName, Tcp::ConnectionState _state) :
 			id(_id),
 			objectName(_objectName),
 			state(_state)
 		{
 		}
 
-		size_t id;		// is a pointer to TcpClientInstance
+		uintptr_t id;		// is a pointer to TcpClientInstance
 		QString objectName;
 		Tcp::ConnectionState state;
 	};

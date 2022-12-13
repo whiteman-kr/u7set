@@ -42,13 +42,6 @@ namespace Sim
 			*ptrW &= ~mask;
 			*ptrW |= data;
 		}
-
-//		quint16 overlappedValue(quint16 value) const
-//		{
-//			value &= ~mask;
-//			value |= data;
-//			return value;
-//		}
 	};
 
 	class OverrideSignalParam
