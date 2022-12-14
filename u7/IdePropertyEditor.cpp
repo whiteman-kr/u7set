@@ -643,6 +643,10 @@ IdeCodePropertyEditor::IdeCodePropertyEditor(CodeType codeType, QWidget* parent)
 {
     m_textEdit = new IdeCodeEditor(codeType, this);
 
+	connect(m_textEdit, &IdeCodeEditor::escapePressed, this, [this](){
+		emit escapePressed();
+	});
+
     QHBoxLayout* l = new QHBoxLayout(this);
     l->setContentsMargins(0, 0, 0, 0);
     l->addWidget(m_textEdit);
