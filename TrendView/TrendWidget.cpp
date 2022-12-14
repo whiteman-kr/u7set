@@ -804,10 +804,12 @@ namespace TrendLib
 		int horzDegrees = event->angleDelta().x() / 8;		// Horz degrees work with pressed Alt
 		int horzSteps = horzDegrees / 15;
 
-		if (vertSteps == 0 && horzSteps == 0)
+		// In some cases horz scroll is not supoorted, then just check Alt manualy
+		//
+		if (vertSteps != 0 && horzSteps == 0 && event->modifiers().testFlag(Qt::AltModifier) == true)
 		{
-			event->accept();
-			return;
+			horzSteps = vertSteps;
+			vertSteps = 0;
 		}
 
 		bool needUpdateWidget = false;
