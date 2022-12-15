@@ -161,7 +161,7 @@ double UnitsConvertor::conversion(double val, UnitsConvertType conversionType, c
 								break;
 							}
 
-							retVal = (val - signal.lowEngineeringUnits())*(signal.electricHighLimit() - signal.electricLowLimit())/(signal.highEngineeringUnits() - signal.lowEngineeringUnits()) + signal.electricLowLimit();
+							retVal = conversionLinearity(val, conversionType, signal.lowEngineeringUnits(), signal.highEngineeringUnits(), signal.electricLowLimit(), signal.electricHighLimit());
 
 							break;
 
@@ -203,7 +203,7 @@ double UnitsConvertor::conversion(double val, UnitsConvertType conversionType, c
 								break;
 							}
 
-							retVal = (val - signal.lowEngineeringUnits())*(signal.electricHighLimit() - signal.electricLowLimit())/(signal.highEngineeringUnits() - signal.lowEngineeringUnits()) + signal.electricLowLimit();
+							retVal = conversionLinearity(val, conversionType, signal.lowEngineeringUnits(), signal.highEngineeringUnits(), signal.electricLowLimit(), signal.electricHighLimit());
 
 							break;
 
@@ -242,7 +242,7 @@ double UnitsConvertor::conversion(double val, UnitsConvertType conversionType, c
 						break;
 					}
 
-					retVal = (val - signal.lowEngineeringUnits())*(signal.electricHighLimit() - signal.electricLowLimit())/(signal.highEngineeringUnits() - signal.lowEngineeringUnits()) + signal.electricLowLimit();
+					retVal = conversionLinearity(val, conversionType, signal.lowEngineeringUnits(), signal.highEngineeringUnits(), signal.electricLowLimit(), signal.electricHighLimit());
 
 					break;
 
@@ -273,7 +273,7 @@ double UnitsConvertor::conversion(double val, UnitsConvertType conversionType, c
 								break;
 							}
 
-							retVal = (val - signal.electricLowLimit())*(signal.highEngineeringUnits() - signal.lowEngineeringUnits())/(signal.electricHighLimit() - signal.electricLowLimit()) + signal.lowEngineeringUnits();
+							retVal = conversionLinearity(val, conversionType, signal.lowEngineeringUnits(), signal.highEngineeringUnits(), signal.electricLowLimit(), signal.electricHighLimit());
 
 							break;
 
@@ -315,7 +315,7 @@ double UnitsConvertor::conversion(double val, UnitsConvertType conversionType, c
 								break;
 							}
 
-							retVal = (val - signal.electricLowLimit())*(signal.highEngineeringUnits() - signal.lowEngineeringUnits())/(signal.electricHighLimit() - signal.electricLowLimit()) + signal.lowEngineeringUnits();
+							retVal = conversionLinearity(val, conversionType, signal.lowEngineeringUnits(), signal.highEngineeringUnits(), signal.electricLowLimit(), signal.electricHighLimit());
 
 							break;
 
@@ -354,7 +354,7 @@ double UnitsConvertor::conversion(double val, UnitsConvertType conversionType, c
 						break;
 					}
 
-					retVal = (val - signal.electricLowLimit())*(signal.highEngineeringUnits() - signal.lowEngineeringUnits())/(signal.electricHighLimit() - signal.electricLowLimit()) + signal.lowEngineeringUnits();
+					retVal = conversionLinearity(val, conversionType, signal.lowEngineeringUnits(), signal.highEngineeringUnits(), signal.electricLowLimit(), signal.electricHighLimit());
 
 					break;
 
@@ -373,6 +373,32 @@ double UnitsConvertor::conversion(double val, UnitsConvertType conversionType, c
 		case UnitsConvertType::FahrenheitToCelsius:
 
 			retVal = conversionDegree(val, UnitsConvertType::FahrenheitToCelsius);
+
+			break;
+
+		default:
+			assert(0);
+	}
+
+	return retVal;
+}
+
+double UnitsConvertor::conversionLinearity(double val, UnitsConvertType conversionType, double lowEn, double highEn, double lowEl, double highEl)
+{
+	double retVal = 0;
+
+	switch(conversionType)
+	{
+		case UnitsConvertType::PhysicalToElectric:
+
+			retVal = (val - lowEn)*(highEl - lowEl)/(highEn - lowEn) + lowEl;
+
+			break;
+
+
+		case UnitsConvertType::ElectricToPhysical:
+
+			retVal = (val - lowEl)*(highEn - lowEn)/(highEl - lowEl) + lowEn;
 
 			break;
 

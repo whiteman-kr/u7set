@@ -287,7 +287,7 @@ namespace Metrology
 
 	private:
 
-		SignalLocation			m_location;
+		SignalLocation m_location;
 
 		double m_electricLowLimit = 0;
 		double m_electricHighLimit = 0;
@@ -371,9 +371,9 @@ namespace Metrology
 
 	enum CmpValueType
 	{
-		NoCmpValueType	= -1,
-		SetPoint		= 0,
-		Hysteresis		= 1,
+		NoCmpValueType = -1,
+		SetPoint = 0,
+		Hysteresis = 1,
 	};
 
 	const int CmpValueTypeCount	= 2;

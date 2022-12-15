@@ -204,6 +204,7 @@ public:
 public:
 
 	double conversion(double val, UnitsConvertType conversionType, const AppSignal& signal);																					// universal conversion from electrical to physical and vice versa
+	double conversionLinearity(double val, UnitsConvertType conversionType, double lowEn, double highEn, double lowEl, double highEl);											// simple linearity conversion
 	double conversionDegree(double val, UnitsConvertType conversionType, E::ElectricUnit unitID, E::SensorType sensorType, double r0 = 0);										// conversion only ThermoCouple and ThermoResistor
 	double conversionDegree(double val, UnitsConvertType conversionType);																										// conversion only Celsius to Fahrenheit and vice versa
 

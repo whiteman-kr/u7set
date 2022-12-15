@@ -450,7 +450,7 @@ namespace OT
 		lo_ErrorType = 1,
 		lo_CalcErrorByRange = 2,
 		lo_MeasureTime = 3,
-		lo_MeasuresInPoint = 4,
+		lo_MaxMeasuresInPoint = 4,
 		lo_DivisionType = 5,
 		lo_PointCount = 6,
 		lo_LowLimit = 7,

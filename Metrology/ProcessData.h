@@ -30,25 +30,25 @@ public:
 
 public:
 
-	int				count() const { return m_count; }
-	bool			setFilterCount(int count);
+	int count() const { return m_count; }
+	bool setFilterCount(int count);
 
-	void			setFilterList(const QStringList& list);
+	void setFilterList(const QStringList& list);
 
-	bool			create(QObject* parent);
-	bool			appendFilter(const QString& text);
+	bool create(QObject* parent);
+	bool appendFilter(const QString& text);
 
-	void			load(const QString& optionsKey);
-	void			save(const QString& optionsKey);
+	void load(const QString& optionsKey);
+	void save(const QString& optionsKey);
 
-	QCompleter*		completer() const { return m_filterCompleter; }
+	QCompleter* completer() const { return m_filterCompleter; }
 
 private:
 
-	int				m_count = COMPLETER_STRING_COUNT;
+	int m_count = COMPLETER_STRING_COUNT;
 
-	QStringList		m_filterCompleterList;
-	QCompleter*		m_filterCompleter = nullptr;
+	QStringList m_filterCompleterList;
+	QCompleter* m_filterCompleter = nullptr;
 };
 
 // ==============================================================================================
@@ -64,21 +64,21 @@ public:
 
 public:
 
-	void			exec();
+	void exec();
 
 private:
 
-	QTableView*		m_pView = nullptr;
-	bool			m_copyHiddenColumn = false;
+	QTableView* m_pView = nullptr;
+	bool m_copyHiddenColumn = false;
 
-	bool			m_copyCancel = true;
+	bool m_copyCancel = true;
 
-	bool			copyToMemory();
+	bool copyToMemory();
 
 public slots:
 
-	void			copyCancel();
-	void			copyComplited();
+	void copyCancel();
+	void copyComplited();
 };
 
 // ==============================================================================================
@@ -98,32 +98,32 @@ public:
 
 public:
 
-	void			loadSettings();
-	void			saveSettings();
+	void loadSettings();
+	void saveSettings();
 
-	virtual void	reject() override;
+	virtual void reject() override;
 
 private:
 
-	QTableView*		m_pView = nullptr;
+	QTableView* m_pView = nullptr;
 
-	CompleterData	m_findCompleter;
-	QLineEdit*		m_pFindTextEdit = nullptr;
-	QPushButton*	m_findNextButton = nullptr;
+	CompleterData m_findCompleter;
+	QLineEdit* m_pFindTextEdit = nullptr;
+	QPushButton* m_findNextButton = nullptr;
 
-	QString			m_findText;
+	QString m_findText;
 
-	void			createInterface(QTableView* pView);
+	void createInterface(QTableView* pView);
 
-	int				firstVisibleColumn();
+	int firstVisibleColumn();
 
-	int				find(int start);
-	void			enableFindNextButton(int start);
+	int find(int start);
+	void enableFindNextButton(int start);
 
 public slots:
 
-	void			findTextChanged();
-	void			findNext();
+	void findTextChanged();
+	void findNext();
 };
 
 // ==============================================================================================
@@ -143,37 +143,37 @@ public:
 
 public:
 
-	void			exec();
+	void exec();
 
 private:
 
-	QTableView*		m_pView = nullptr;
-	bool			m_writeHiddenColumn = false;
-	QString			m_fileName;
+	QTableView* m_pView = nullptr;
+	bool m_writeHiddenColumn = false;
+	QString m_fileName;
 
-	QDialog*		m_pProgressDialog = nullptr;
-	QProgressBar*	m_progress = nullptr;
-	QPushButton*	m_cancelButton = nullptr;
+	QDialog* m_pProgressDialog = nullptr;
+	QProgressBar* m_progress = nullptr;
+	QPushButton* m_cancelButton = nullptr;
 
-	bool			m_exportCancel = true;
+	bool m_exportCancel = true;
 
-	void			createProgressDialog(QTableView* pView);
-	static void		startExportThread(ExportData* pThis, const QString& fileName);
+	void createProgressDialog(QTableView* pView);
+	static void startExportThread(ExportData* pThis, const QString& fileName);
 
-	bool			saveExcelFile(const QString& fileName);
-	bool			saveCsvFile(const QString& fileName);
+	bool saveExcelFile(const QString& fileName);
+	bool saveCsvFile(const QString& fileName);
 
 signals:
 
-	void			setValue(int);
-	void			setRange(int, int);
+	void setValue(int);
+	void setRange(int, int);
 
-	void			exportThreadFinish();
+	void exportThreadFinish();
 
 public slots:
 
-	void			exportCancel();
-	void			exportComplited();
+	void exportCancel();
+	void exportComplited();
 };
 
 // ==============================================================================================
