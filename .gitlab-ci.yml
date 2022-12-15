@@ -243,6 +243,7 @@ test job:
     - "# ----------------------------------------------"
     - "&$Env:CI_PROJECT_DIR/bin/release/u7databasetests.exe -o u7databasetests.xml,junitxml -o -,txt"
     - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorTests.exe -o SimulatorTests.xml,junitxml -o -,txt"
+    - "&$Env:CI_PROJECT_DIR/bin/release/MetrologyTests.exe -o MetrologyTests.xml,junitxml -o -,txt"
 
 #Run Builder test
     - "# ----------------------------------------------"
