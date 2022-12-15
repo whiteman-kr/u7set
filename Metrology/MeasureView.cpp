@@ -385,7 +385,7 @@ namespace Measure
 			case MVC_CMN_L_EL_RANGE:				result = m->limitStr(Measure::LimitType::Electric); break;
 			case MVC_CMN_L_EN_RANGE:				result = m->limitStr(Measure::LimitType::Engineering); break;
 
-			case MVC_CMN_L_VALUE_COUNT:				result = QString::number(m->measureCount()); break;
+			case MVC_CMN_L_VALUE_COUNT:				result = QString::number(m->measureInPoint()); break;
 			case MVC_CMN_L_VALUE_0:					result = m->measureItemStr(limitType, 0); break;
 			case MVC_CMN_L_VALUE_1:					result = m->measureItemStr(limitType, 1); break;
 			case MVC_CMN_L_VALUE_2:					result = m->measureItemStr(limitType, 2); break;
@@ -1142,7 +1142,7 @@ namespace Measure
 											arg(QString::number(pLinearityMeasurement->nominal(limitType), 'f',
 																pLinearityMeasurement->limitPrecision(limitType))));
 
-					for (int i = 0; i < pLinearityMeasurement->measureCount(); i++)
+					for (int i = 0; i < pLinearityMeasurement->measureInPoint(); i++)
 					{
 						QPointF pM(pointCount + 1, pLinearityMeasurement->measureItemArray(limitType ,i));
 						*pMeasureSeries << pM;

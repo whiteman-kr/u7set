@@ -72,6 +72,7 @@ SOURCES += \
 	DialogTuningSignalList.cpp \
 	DialogTuningSourceList.cpp \
 	ExcelHelper.cpp \
+	MetrologyFormula.cpp \
 	MetrologyMain.cpp \
 	MetrologyMainWindow.cpp \
 	MetrologyConnection.cpp \
@@ -113,6 +114,7 @@ HEADERS  += \
 	../lib/ComparatorSet.h \
     ChartView.h \
     ExcelHelper.h \
+    MetrologyFormula.h \
     Stable.h \
 	DialogCalculator.h \
 	DialogComparatorList.h \

@@ -5,7 +5,6 @@
 #include <QMessageBox>
 
 #include "UnitsConvertor.h"
-#include "UnitsConvertorTable.h"
 #include "Database.h"
 #include "Options.h"
 
@@ -54,20 +53,20 @@ namespace Measure
 
 		m_calibratorPrecision = DEFAULT_ELECTRIC_UNIT_PRECESION;
 
-		for(int t = 0; t < Measure::LIMIT_TYPE_COUNT; t++)
+		for(int limitType = 0; limitType < Measure::LIMIT_TYPE_COUNT; limitType++)
 		{
-			m_nominal[t] = 0;
-			m_measure[t] = 0;
+			m_nominal.setValue(limitType, 0);
+			m_measure.setValue(limitType, 0);
 
-			m_lowLimit[t] = 0;
-			m_highLimit[t] = 0;
-			m_unit[t].clear();
-			m_limitPrecision[t] = 0;
+			m_lowLimit.setValue(limitType, 0);
+			m_highLimit.setValue(limitType, 0);
+			m_unit.setValue(limitType, QString());
+			m_limitPrecision.setValue(limitType, 0);
 
 			for(int e = 0; e < MT::ERROR_TYPE_COUNT; e++)
 			{
-				m_error[t][e] = 0;
-				m_errorLimit[t][e] = 0;
+				m_error[e].setValue(limitType, 0);
+				m_errorLimit[e].setValue(limitType, 0);
 			}
 		}
 
@@ -199,7 +198,7 @@ namespace Measure
 			return 0;
 		}
 
-		return m_nominal[limitType];
+		return m_nominal.value(limitType);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -224,7 +223,7 @@ namespace Measure
 			}
 		}
 
-		return QString("%1 %2").arg(QString::number(m_nominal[limitType], 'f', precision), m_unit[limitType]);
+		return QString("%1 %2").arg(QString::number(m_nominal.value(limitType), 'f', precision), m_unit.value(limitType));
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -237,7 +236,7 @@ namespace Measure
 			return;
 		}
 
-		m_nominal[limitType] = value;
+		m_nominal.setValue(limitType, value);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -250,7 +249,7 @@ namespace Measure
 			return 0;
 		}
 
-		return m_measure[limitType];
+		return m_measure.value(limitType);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -283,7 +282,7 @@ namespace Measure
 			}
 		}
 
-		return QString("%1 %2").arg(QString::number(m_measure[limitType], 'f', precision), m_unit[limitType]);
+		return QString("%1 %2").arg(QString::number(m_measure.value(limitType), 'f', precision), m_unit.value(limitType));
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -296,7 +295,7 @@ namespace Measure
 			return;
 		}
 
-		m_measure[limitType] = value;
+		m_measure.setValue(limitType, value);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -422,7 +421,7 @@ namespace Measure
 			return 0;
 		}
 
-		return m_lowLimit[limitType];
+		return m_lowLimit.value(limitType);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -435,7 +434,7 @@ namespace Measure
 			return;
 		}
 
-		m_lowLimit[limitType] = lowLimit;
+		m_lowLimit.setValue(limitType, lowLimit);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -448,7 +447,7 @@ namespace Measure
 			return 0;
 		}
 
-		return m_highLimit[limitType];
+		return m_highLimit.value(limitType);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -461,7 +460,7 @@ namespace Measure
 			return;
 		}
 
-		m_highLimit[limitType] = highLimit;
+		m_highLimit.setValue(limitType, highLimit);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -474,7 +473,7 @@ namespace Measure
 			return QString();
 		}
 
-		return m_unit[limitType];
+		return m_unit.value(limitType);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -487,7 +486,7 @@ namespace Measure
 			return;
 		}
 
-		m_unit[limitType] = unit;
+		m_unit.setValue(limitType, unit);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -500,7 +499,7 @@ namespace Measure
 			return 0;
 		}
 
-		return m_limitPrecision[limitType];
+		return m_limitPrecision.value(limitType);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -513,7 +512,7 @@ namespace Measure
 			return;
 		}
 
-		m_limitPrecision[limitType] = precision;
+		m_limitPrecision.setValue(limitType, precision);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -526,28 +525,33 @@ namespace Measure
 			return QString();
 		}
 
-		QString low = QString::number(m_lowLimit[limitType], 'f', m_limitPrecision[limitType]);
-		QString high = QString::number(m_highLimit[limitType], 'f', m_limitPrecision[limitType]);
+		QString low = QString::number(m_lowLimit.value(limitType), 'f', m_limitPrecision.value(limitType));
+		QString high = QString::number(m_highLimit.value(limitType), 'f', m_limitPrecision.value(limitType));
 
-		return QString("%1 .. %2 %3").arg(low, high, m_unit[limitType]);
+		return QString("%1 .. %2 %3").arg(low, high, m_unit.value(limitType));
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
 	void Item::calcError()
 	{
-		// calc errors vlue
+		// calc errors value
 		//
-		for(int type = 0; type < Measure::LIMIT_TYPE_COUNT; type++)
+		for(int lType = 0; lType < Measure::LIMIT_TYPE_COUNT; lType++)
 		{
-			LimitType limitType = static_cast<LimitType>(type);
+			LimitType limitType = static_cast<LimitType>(lType);
 
-			setError(limitType, MT::ErrorType::Absolute,	std::abs(nominal(limitType)-measure(limitType)));
-			setError(limitType, MT::ErrorType::Reduce,		std::abs(((nominal(limitType)-measure(limitType)) / (highLimit(limitType) - lowLimit(limitType))) * 100.0));
-			setError(limitType, MT::ErrorType::Relative,	std::abs(((nominal(limitType)-measure(limitType)) / nominal(limitType)) * 100.0));
+			for(int eType = 0; eType < Measure::MT::ERROR_TYPE_COUNT; eType++)
+			{
+				MT::ErrorType errorType = static_cast<MT::ErrorType>(eType);
+
+				double errorValue = calcMetrologyError(errorType, nominal(limitType), measure(limitType), lowLimit(limitType), highLimit(limitType));
+
+				setError(limitType, errorType, errorValue);
+			}
 		}
 
-		// calc error limits vlue
+		// calc error limits value
 		//
 		if (ERR_MEASURE_TYPE(m_measureType) == true)
 		{
@@ -574,13 +578,18 @@ namespace Measure
 
 	void Item::calcErrorLimit(double errorLimit)
 	{
-		for(int type = 0; type < Measure::LIMIT_TYPE_COUNT; type++)
+		for(int lType = 0; lType < Measure::LIMIT_TYPE_COUNT; lType++)
 		{
-			LimitType limitType = static_cast<LimitType>(type);
+			LimitType limitType = static_cast<LimitType>(lType);
 
-			setErrorLimit(limitType, MT::ErrorType::Absolute,	std::abs((highLimit(limitType) - lowLimit(limitType)) * errorLimit / 100.0));
-			setErrorLimit(limitType, MT::ErrorType::Reduce,		errorLimit);
-			setErrorLimit(limitType, MT::ErrorType::Relative,	errorLimit);
+			for(int eType = 0; eType < Measure::MT::ERROR_TYPE_COUNT; eType++)
+			{
+				MT::ErrorType errorType = static_cast<MT::ErrorType>(eType);
+
+				double errorValue = calcMetrologyErrorLimit(errorType, errorLimit, lowLimit(limitType), highLimit(limitType));
+
+				setErrorLimit(limitType, errorType, errorValue);
+			}
 		}
 	}
 
@@ -600,7 +609,7 @@ namespace Measure
 			return 0;
 		}
 
-		return m_error[limitType][errorType];
+		return m_error[errorType].value(limitType);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -673,9 +682,9 @@ namespace Measure
 
 		switch(errorType)
 		{
-			case MT::ErrorType::Absolute:	str = QString::number(m_error[limitType][errorType], 'f', precision) + " " + m_unit[limitType];	break;
+			case MT::ErrorType::Absolute:	str = QString::number(m_error[errorType].value(limitType), 'f', precision) + " " + m_unit.value(limitType);	break;
 			case MT::ErrorType::Reduce:
-			case MT::ErrorType::Relative:	str = QString::number(m_error[limitType][errorType], 'f', 3) + " %" ;							break;
+			case MT::ErrorType::Relative:	str = QString::number(m_error[errorType].value(limitType), 'f', 3) + " %" ;							break;
 
 			default:
 				assert(0);
@@ -700,7 +709,7 @@ namespace Measure
 			return;
 		}
 
-		m_error[limitType][errorType] = value;
+		m_error[errorType].setValue(limitType, value);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -719,7 +728,7 @@ namespace Measure
 			return 0;
 		}
 
-		return m_errorLimit[limitType][errorType];
+		return m_errorLimit[errorType].value(limitType);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -772,9 +781,9 @@ namespace Measure
 
 		switch(errorType)
 		{
-			case MT::ErrorType::Absolute:	str = QString::number(m_errorLimit[limitType][errorType], 'f', m_limitPrecision[limitType]) + " " + m_unit[limitType];	break;
+			case MT::ErrorType::Absolute:	str = QString::number(m_errorLimit[errorType].value(limitType), 'f', m_limitPrecision.value(limitType)) + " " + m_unit.value(limitType);	break;
 			case MT::ErrorType::Reduce:
-			case MT::ErrorType::Relative:	str = QString::number(m_errorLimit[limitType][errorType], 'f', 3) + " %";												break;
+			case MT::ErrorType::Relative:	str = QString::number(m_errorLimit[errorType].value(limitType), 'f', 3) + " %";												break;
 
 			default:
 				assert(0);
@@ -799,7 +808,7 @@ namespace Measure
 			return;
 		}
 
-		m_errorLimit[limitType][errorType] = value;
+		m_errorLimit[errorType].setValue(limitType, value);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -848,7 +857,7 @@ namespace Measure
 			return Measure::ErrorResult::NoErrorResult;
 		}
 
-		if (m_error[limitType][errorType] > m_errorLimit[limitType][errorType])
+		if (m_error[errorType].value(limitType) > m_errorLimit[errorType].value(limitType))
 		{
 			return Measure::ErrorResult::Failed;
 		}
@@ -1094,21 +1103,18 @@ namespace Measure
 
 		m_calibratorPrecision = from.m_calibratorPrecision;
 
-		for(int l = 0; l < Measure::LIMIT_TYPE_COUNT; l++)
+		m_nominal = from.m_nominal;
+		m_measure = from.m_measure;
+
+		m_lowLimit = from.m_lowLimit;
+		m_highLimit = from.m_highLimit;
+		m_unit = from.m_unit;
+		m_limitPrecision = from.m_limitPrecision;
+
+		for(int e = 0; e < MT::ERROR_TYPE_COUNT; e++)
 		{
-			m_nominal[l] = from.m_nominal[l];
-			m_measure[l] = from.m_measure[l];
-
-			m_lowLimit[l] = from.m_lowLimit[l];
-			m_highLimit[l] = from.m_highLimit[l];
-			m_unit[l] = from.m_unit[l];
-			m_limitPrecision[l] = from.m_limitPrecision[l];
-
-			for(int e = 0; e < MT::ERROR_TYPE_COUNT; e++)
-			{
-				m_error[l][e] = from.m_error[l][e];
-				m_errorLimit[l][e] = from.m_errorLimit[l][e];
-			}
+			m_error[e] = from.m_error[e];
+			m_errorLimit[e] = from.m_errorLimit[e];
 		}
 
 		m_adjustment = from.m_adjustment;
@@ -1203,23 +1209,31 @@ namespace Measure
 
 		m_percent = 0;
 
-		for(int t = 0; t < Measure::LIMIT_TYPE_COUNT; t++)
+		//
+		//
+		m_measureInPoint = 0;
+		m_measureArray.resize(MAX_MEASUREMENT_IN_POINT);
+
+		for(int limitType = 0; limitType < Measure::LIMIT_TYPE_COUNT; limitType++)
 		{
-			for(int m = 0; m < Measure::MAX_MEASUREMENT_IN_POINT; m++)
+			int count = static_cast<int>(m_measureArray.size());
+			for(int m = 0; m < count; m++)
 			{
-				m_measureArray[t][m] = 0;
+				m_measureArray[m].setValue(limitType, 0);
 			}
 		}
 
-		m_measureCount = 0;
-
+		//
+		//
 		m_additionalParamCount = 0;
+		m_additionalParam.resize(ADDITIONAL_PARAM_COUNT);
 
-		for(int l = 0; l < Measure::LIMIT_TYPE_COUNT; l++)
+		for(int limitType = 0; limitType < Measure::LIMIT_TYPE_COUNT; limitType++)
 		{
-			for(int a = 0; a < Measure::ADDITIONAL_PARAM_COUNT; a++)
+			int count = static_cast<int>(m_additionalParam.size());
+			for(int a = 0; a < count; a++)
 			{
-				m_additionalParam[l][a] = 0;
+				m_additionalParam[a].setValue(limitType, 0);
 			}
 		}
 	}
@@ -1314,11 +1328,11 @@ namespace Measure
 		double averageElVal = 0;
 		double averageEnVal = 0;
 
-		int measureCount = theOptions.linearity().measureCountInPoint();
+		int measureInPoint = theOptions.linearity().measureCountInPoint();
 
-		setMeasureCount(measureCount);
+		setMeasureInPoint(measureInPoint);
 
-		for(int index = 0; index < measureCount; index++)
+		for(int index = 0; index < measureInPoint; index++)
 		{
 			double enVal = theSignalBase.signalState(inParam.hash()).value();
 			double elVal = uc.conversion(enVal, UnitsConvertType::PhysicalToElectric, inParam);
@@ -1329,11 +1343,11 @@ namespace Measure
 			averageElVal += elVal;
 			averageEnVal += enVal;
 
-			QThread::msleep(static_cast<unsigned long>((theOptions.linearity().measureTimeInPoint() * 1000) / measureCount));
+			QThread::msleep(static_cast<unsigned long>((theOptions.linearity().measureTimeInPoint() * 1000) / measureInPoint));
 		}
 
-		averageElVal /= measureCount;
-		averageEnVal /= measureCount;
+		averageElVal /= measureInPoint;
+		averageEnVal /= measureInPoint;
 
 		setMeasure(Measure::LimitType::Electric, averageElVal);
 		setMeasure(Measure::LimitType::Engineering, averageEnVal);
@@ -1449,11 +1463,11 @@ namespace Measure
 		double averageElVal = 0;
 		double averagePhVal = 0;
 
-		int measureCount = theOptions.linearity().measureCountInPoint();
+		int measureInPoint = theOptions.linearity().measureCountInPoint();
 
-		setMeasureCount(measureCount);
+		setMeasureInPoint(measureInPoint);
 
-		for(int index = 0; index < measureCount; index++)
+		for(int index = 0; index < measureInPoint; index++)
 		{
 			double enVal = theSignalBase.signalState(outParam.hash()).value();
 			double enCalcVal = conversionByConnection(enVal, ioParam, ConversionDirection::Inversion);
@@ -1465,11 +1479,11 @@ namespace Measure
 			averageElVal += elVal;
 			averagePhVal += enVal;
 
-			QThread::msleep(static_cast<unsigned long>((theOptions.linearity().measureTimeInPoint() * 1000) / measureCount));
+			QThread::msleep(static_cast<unsigned long>((theOptions.linearity().measureTimeInPoint() * 1000) / measureInPoint));
 		}
 
-		averageElVal /= measureCount;
-		averagePhVal /= measureCount;
+		averageElVal /= measureInPoint;
+		averagePhVal /= measureInPoint;
 
 		setMeasure(Measure::LimitType::Electric, averageElVal);
 		setMeasure(Measure::LimitType::Engineering, averagePhVal);
@@ -1585,11 +1599,11 @@ namespace Measure
 		double averageElVal = 0;
 		double averagePhVal = 0;
 
-		int measureCount = theOptions.linearity().measureCountInPoint();
+		int measureInPoint = theOptions.linearity().measureCountInPoint();
 
-		setMeasureCount(measureCount);
+		setMeasureInPoint(measureInPoint);
 
-		for(int index = 0; index < measureCount; index++)
+		for(int index = 0; index < measureInPoint; index++)
 		{
 			double elVal = 0;
 			double enVal = theSignalBase.signalState(outParam.hash()).value();
@@ -1608,11 +1622,11 @@ namespace Measure
 			averageElVal += elVal;
 			averagePhVal += enVal;
 
-			QThread::msleep(static_cast<unsigned long>((theOptions.linearity().measureTimeInPoint() * 1000) / measureCount));
+			QThread::msleep(static_cast<unsigned long>((theOptions.linearity().measureTimeInPoint() * 1000) / measureInPoint));
 		}
 
-		averageElVal /= measureCount;
-		averagePhVal /= measureCount;
+		averageElVal /= measureInPoint;
+		averagePhVal /= measureInPoint;
 
 		setMeasure(Measure::LimitType::Electric, averageElVal);
 		setMeasure(Measure::LimitType::Engineering, averagePhVal);
@@ -1640,77 +1654,51 @@ namespace Measure
 			return;
 		}
 
-		//
-		//
+		setAdditionalParamCount(Measure::ADDITIONAL_PARAM_COUNT);
 
-		for(int type = 0; type < Measure::LIMIT_TYPE_COUNT; type++)
+		//
+		//
+		for(int lType = 0; lType < Measure::LIMIT_TYPE_COUNT; lType++)
 		{
-			LimitType limitType = static_cast<LimitType>(type);
+			LimitType limitType = static_cast<LimitType>(lType);
+
+			// create array for calculate
+			//
+			std::vector<double> measureValueArray;
+
+			for (int index = 0; index < measureInPoint(); index++)
+			{
+				measureValueArray.push_back(measureItemArray(limitType, index));
+			}
 
 			// calc additional parameters
 			//
-
-			setAdditionalParamCount(Measure::ADDITIONAL_PARAM_COUNT);
-
-				// max deviation
 				//
-			double maxDeviation = 0;
-			int maxDeviationIndex = 0;
-
-			for(int index = 0; index < measureCount(); index++)
-			{
-				if (maxDeviation < std::abs(measure(limitType) - measureItemArray(limitType, index)))
-				{
-					maxDeviation = std::abs(measure(limitType) - measureItemArray(limitType, index));
-					maxDeviationIndex = index;
-				}
-			}
-
-			setAdditionalParam(limitType, Measure::AdditionalParam::MaxValue, measureItemArray(limitType, maxDeviationIndex));
-
-
-				// according to GOST 8.508-84 paragraph 3.4.1 formula 42
 				//
-			double systemError = measure(limitType) - nominal(limitType);
+			double maxDeviation = calcMaxDeviation(measure(limitType), measureValueArray);
+			setAdditionalParam(limitType, Measure::AdditionalParam::MaxDeviation, maxDeviation);
 
-			setAdditionalParam(limitType, Measure::AdditionalParam::SystemDeviation, systemError);
-
-
-				// according to GOST 8.736-2011 paragraph 5.3 formula 3
 				//
-			double sumDeviation = 0;
+				//
+			double systemDeviation = calcSystemDeviation(measure(limitType), nominal(limitType));
+			setAdditionalParam(limitType, Measure::AdditionalParam::SystemDeviation, systemDeviation);
 
-			for(int index = 0; index < measureCount(); index++)
-			{
-				sumDeviation += pow(measure(limitType) - measureItemArray(limitType, index), 2);		// 1. sum of deviations
-			}
-
-			sumDeviation /= static_cast<double>(measureCount() - 1);									// 2. divide on (count of measure - 1)
-			double sco = sqrt(sumDeviation);															// 3. sqrt
-
+				//
+				//
+			double sco = calcSCO(measure(limitType), measureValueArray);
 			setAdditionalParam(limitType, Measure::AdditionalParam::StandardDeviation, sco);
 
-
-			// Student's rate according to GOST 27.202 on P = 0.95
-				// or GOST 8.207-76 application 2 (last page)
 				//
-			double k_student = studentK(measureCount(), CT_PROPABILITY_95);
-
-				// according to RD 34.11.206-88
 				//
-			double lowBorder = systemError - k_student * sco;
-
+			double lowBorder = calcLowBorder(systemDeviation, sco, measureInPoint());
 			setAdditionalParam(limitType, Measure::AdditionalParam::LowBorder, lowBorder);
 
-			double highBorder = systemError + k_student * sco;
-
+			double highBorder = calcHighBorder(systemDeviation, sco, measureInPoint());
 			setAdditionalParam(limitType, Measure::AdditionalParam::HighBorder, highBorder);
-
 
 				// Uncertainty of measurement to Document: EA-04/02 M:2013
 				//
 			double uncertainty = calcUcertainty(ioParam, limitType);
-
 			setAdditionalParam(limitType, Measure::AdditionalParam::Uncertainty, uncertainty);
 		}
 	}
@@ -1767,7 +1755,7 @@ namespace Measure
 			case Metrology::ConnectionType::Input_DP_Internal_F:
 			case Metrology::ConnectionType::Input_C_Internal_F:
 				{
-					// this measurement have only electric input and have not electric output
+					// this measurement has only electric input and have not electric output
 					//
 					const Metrology::SignalParam& inParam = ioParam.param(Metrology::ConnectionIoType::Source);
 					if (inParam.isValid() == false)
@@ -1813,7 +1801,7 @@ namespace Measure
 
 								// this is formula 1 for item 2 from documet about uncertainty
 								//
-								uncertainty = Kox * sqrt( pow(sco, 2) + (pow(Kxj,2) * pow(dEj,2) / 3) + (pow(MPx,2) / 3) );
+								uncertainty = calcUcertainty1(Kox, sco, Kxj, dEj, MPx);
 							}
 							break;
 
@@ -1827,7 +1815,7 @@ namespace Measure
 
 								// this is formula 7 for item 3 from documet about uncertainty
 								//
-								uncertainty = Kox * sqrt( pow(sco, 2) + (pow(dEj,2) / 3) + (pow(MPe,2) / 3) );
+								uncertainty = calcUcertainty2(Kox, sco, dEj, MPe);
 							}
 							break;
 
@@ -1841,7 +1829,7 @@ namespace Measure
 			case Metrology::ConnectionType::Input_DP_Output_F:
 			case Metrology::ConnectionType::Input_C_Output_F:
 				{
-					// this measurement have electric input and have electric output
+					// this measurement has electric input and has electric output
 					//
 					const Metrology::SignalParam& inParam = ioParam.param(Metrology::ConnectionIoType::Source);
 					if (inParam.isValid() == false)
@@ -1903,7 +1891,7 @@ namespace Measure
 
 								// this is formula 1 for item 2 from documet about uncertainty
 								//
-								uncertainty = Kox * sqrt( pow(sco, 2) + (pow(Kxj,2) * pow(dEj,2) / 3) + (pow(MPx,2) / 3) );
+								uncertainty = calcUcertainty1(Kox, sco, Kxj, dEj, MPx);
 							}
 							break;
 
@@ -1929,13 +1917,13 @@ namespace Measure
 
 								}
 
-								// Least significant unit (Electric limit)
+								// Least significant unit (Electric measure limit)
 								//
 								double MPi = 1 / pow(10.0, measureLimit.precesion);
 
 								// this is formula 9 for item 5 from documet about uncertainty
 								//
-								uncertainty = Kox * sqrt( pow(sco, 2) + (pow(Kij,2) * pow(dEj,2) / 3) + (pow(dIj,2) / 3) + (pow(MPi,2) / 12) );
+								uncertainty = calcUcertainty4(Kox, sco, Kij, dEj, dIj, MPi);
 							}
 							break;
 
@@ -1947,7 +1935,7 @@ namespace Measure
 
 			case Metrology::ConnectionType::Tuning_Output:
 				{
-					// this measurement have not electric input and have only electric output
+					// this measurement dosent have electric input and has only electric output
 					//
 					CalibratorLimit measureLimit = pCalibrator->currentMeasureLimit();
 					if (measureLimit.isValid() == false)
@@ -1961,18 +1949,18 @@ namespace Measure
 
 					switch (limitType)
 					{
-						case Measure::LimitType::Engineering:	// because we have not electric input, therefore uncertainty we will be calc by output electric
+						case Measure::LimitType::Engineering:	// because we dont have electric input, therefore uncertainty we will be calc by output electric
 						case Measure::LimitType::Electric:		// output electric
 							{
 								// case 3 of instruction
 								//
-								// Least significant unit (Electric limit)
+								// Least significant unit (Electric measure limit)
 								//
 								double MPi = 1 / pow(10.0, measureLimit.precesion);
 
 								// this is formula 8 for item 4 from documet about uncertainty
 								//
-								uncertainty = Kox * sqrt( pow(sco, 2) + (pow(dIj,2) / 3) + (pow(MPi,2) / 12) );
+								uncertainty = calcUcertainty3(Kox, sco, dIj, MPi);
 							}
 							break;
 
@@ -2005,13 +1993,36 @@ namespace Measure
 			return 0;
 		}
 
-		return m_measureArray[limitType][index];
+		if (index < 0 || index >= static_cast<int>(m_measureArray.size()))
+		{
+			assert(0);
+			return 0;
+		}
+
+		return m_measureArray[index].value(limitType);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	void LinearityItem::setMeasureInPoint(int count)
+	{
+		if (count > MAX_MEASUREMENT_IN_POINT)
+		{
+			count = MAX_MEASUREMENT_IN_POINT;
+		}
+
+		m_measureInPoint = count;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
 	QString LinearityItem::measureItemStr(LimitType limitType, int index) const
 	{
+		if (index >= measureInPoint())
+		{
+			return QString();
+		}
+
 		if (theOptions.measureView().showNoValid() == false)
 		{
 			if (isSignalValid() == false)
@@ -2044,7 +2055,13 @@ namespace Measure
 			return QString();
 		}
 
-		return QString::number(m_measureArray[limitType][index], 'f', precision);
+		if (index < 0 || index >= static_cast<int>(m_measureArray.size()))
+		{
+			assert(0);
+			return QString();
+		}
+
+		return QString::number(m_measureArray[index].value(limitType), 'f', precision);
 	}
 
 
@@ -2064,7 +2081,13 @@ namespace Measure
 			return;
 		}
 
-		m_measureArray[limitType][index] = value;
+		if (index < 0 || index >= static_cast<int>(m_measureArray.size()))
+		{
+			assert(0);
+			return;
+		}
+
+		m_measureArray[index].setValue(limitType, value);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -2083,7 +2106,7 @@ namespace Measure
 			return 0;
 		}
 
-		return m_additionalParam[limitType][paramType];
+		return m_additionalParam[paramType].value(limitType);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -2110,7 +2133,13 @@ namespace Measure
 			return QString();
 		}
 
-		QString valueStr = QString::number(m_additionalParam[limitType][paramType], 'f', 4);
+		if (paramType < 0 || paramType >= static_cast<int>(m_additionalParam.size()))
+		{
+			assert(0);
+			return QString();
+		}
+
+		QString valueStr = QString::number(m_additionalParam[paramType].value(limitType), 'f', 4);
 
 		return valueStr;
 	}
@@ -2131,7 +2160,13 @@ namespace Measure
 			return;
 		}
 
-		m_additionalParam[limitType][paramType] = value;
+		if (paramType < 0 || paramType >= static_cast<int>(m_additionalParam.size()))
+		{
+			assert(0);
+			return;
+		}
+
+		m_additionalParam[paramType].setValue(limitType, value);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -2159,11 +2194,17 @@ namespace Measure
 			return;
 		}
 
-		m_measureCount = pLinearityMeasureItem->measureCount();
+		m_measureInPoint = pLinearityMeasureItem->measureInPoint();
+		if (m_measureInPoint > MAX_MEASUREMENT_IN_POINT)
+		{
+			m_measureInPoint = MAX_MEASUREMENT_IN_POINT;
+		}
+
+		setMeasureInPoint(pLinearityMeasureItem->measureInPoint());
 
 		for(int m = 0; m < Measure::MAX_MEASUREMENT_IN_POINT; m++)
 		{
-			m_measureArray[limitType][m] = pLinearityMeasureItem->measureItemArray(limitType, m);
+			setMeasureItemArray(limitType, m, pLinearityMeasureItem->measureItemArray(limitType, m));
 		}
 	}
 
@@ -2194,7 +2235,7 @@ namespace Measure
 
 		for(int a = 0; a < Measure::ADDITIONAL_PARAM_COUNT; a++)
 		{
-			m_additionalParam[limitType][a] = pLinearityMeasureItem->additionalParam(limitType, a);
+			m_additionalParam[a].setValue(limitType, pLinearityMeasureItem->additionalParam(limitType, a));
 		}
 	}
 
@@ -2218,25 +2259,11 @@ namespace Measure
 	{
 		m_percent = from.m_percent;
 
-		for(int t = 0; t < Measure::LIMIT_TYPE_COUNT; t++)
-		{
-			for(int m = 0; m < Measure::MAX_MEASUREMENT_IN_POINT; m++)
-			{
-				m_measureArray[t][m] = from.m_measureArray[t][m];
-			}
-		}
-
-		m_measureCount = from.m_measureCount;
+		m_measureInPoint = from.m_measureInPoint;
+		m_measureArray = from.m_measureArray;
 
 		m_additionalParamCount = from.m_additionalParamCount;
-
-		for(int l = 0; l < Measure::LIMIT_TYPE_COUNT; l++)
-		{
-			for(int a = 0; a < Measure::ADDITIONAL_PARAM_COUNT; a++)
-			{
-				m_additionalParam[l][a] = from.m_additionalParam[l][a];
-			}
-		}
+		m_additionalParam = from.m_additionalParam;
 
 		return *this;
 	}
@@ -3508,6 +3535,21 @@ namespace Measure
 	// -------------------------------------------------------------------------------------------------------------------
 	// -------------------------------------------------------------------------------------------------------------------
 
+	bool ERR_MEASURE_TYPE(Measure::Type measureType)
+	{
+		return ERR_MEASURE_TYPE(static_cast<int>(measureType));
+	}
+
+	bool ERR_MEASURE_TYPE(int measureType)
+	{
+		if (measureType < 0 || measureType >= Measure::TYPE_COUNT)
+		{
+			return true;
+		}
+
+		return false;
+	}
+
 	QString TypeCaption(Measure::Type measureType)
 	{
 		QString caption;
@@ -3523,7 +3565,22 @@ namespace Measure
 		}
 
 		return caption;
-	};
+	}
+
+	bool ERR_MEASURE_KIND(Measure::Kind measureKind)
+	{
+		return ERR_MEASURE_KIND(static_cast<int>(measureKind));
+	}
+
+	bool ERR_MEASURE_KIND(int measureKind)
+	{
+		if (measureKind < 0 || measureKind >= Measure::KIND_COUNT)
+		{
+			return true;
+		}
+
+		return false;
+	}
 
 	QString KindCaption(Measure::Kind measureKind)
 	{
@@ -3543,7 +3600,22 @@ namespace Measure
 		}
 
 		return caption;
-	};
+	}
+
+	bool ERR_MEASURE_LIMIT_TYPE(Measure::LimitType limitType)
+	{
+		return ERR_MEASURE_LIMIT_TYPE(static_cast<int>(limitType));
+	}
+
+	bool ERR_MEASURE_LIMIT_TYPE(int limitType)
+	{
+		if (limitType < 0 || limitType >= Measure::LIMIT_TYPE_COUNT)
+		{
+			return true;
+		}
+
+		return false;
+	}
 
 	QString LimitTypeCaption(Measure::LimitType limitType)
 	{
@@ -3562,77 +3634,20 @@ namespace Measure
 		return caption;
 	};
 
-	QString MT::CalcErrorRangeCaption(CalcErrorRange byRange)
+	bool ERR_MEASURE_ERROR_RESULT(Measure::ErrorResult errorResult)
 	{
-		QString caption;
+		return ERR_MEASURE_ERROR_RESULT(static_cast<int>(errorResult));
+	}
 
-		switch (byRange)
+	bool ERR_MEASURE_ERROR_RESULT(int errorResult)
+	{
+		if (errorResult < 0 || errorResult >= Measure::ERROR_RESULT_COUNT)
 		{
-			case By_Electric_Range:		caption = QT_TRANSLATE_NOOP("MeasureBase", "Electric range");				break;
-			case By_Engineering_Range:	caption = QT_TRANSLATE_NOOP("MeasureBase", "Engineering range");			break;
-			case By_Signal_Type:		caption = QT_TRANSLATE_NOOP("MeasureBase", "Depended from signal type");	break;
-
-			default:
-				Q_ASSERT(0);
-				caption = QT_TRANSLATE_NOOP("MeasureBase", "Unknown");
+			return true;
 		}
 
-		return qApp->translate("MeasureBase", caption.toUtf8());
-	};
-
-	QString MT::CalcErrorRangeCaptionTr(CalcErrorRange byRange)
-	{
-		QString caption;
-
-		switch (byRange)
-		{
-			case By_Electric_Range:		caption = QObject::tr("By_Electric_Range");		break;
-			case By_Engineering_Range:	caption = QObject::tr("By_Engineering_Range");	break;
-			case By_Signal_Type:		caption = QObject::tr("By_Signal_Type");		break;
-
-			default:
-				Q_ASSERT(0);
-				caption = QObject::tr("Unknown");
-		}
-
-		return caption;
-	};
-
-	QString MT::ErrorTypeCaption(ErrorType errorType)
-	{
-		QString caption;
-
-		switch (errorType)
-		{
-			case Absolute:	caption = QT_TRANSLATE_NOOP("MeasureBase", "Absolute");	break;
-			case Reduce:	caption = QT_TRANSLATE_NOOP("MeasureBase", "Reduce");	break;
-			case Relative:	caption = QT_TRANSLATE_NOOP("MeasureBase", "Relative");	break;
-
-			default:
-				Q_ASSERT(0);
-				caption = QT_TRANSLATE_NOOP("MeasureBase", "Unknown");
-		}
-
-		return qApp->translate("MeasureBase", caption.toUtf8());
-	};
-
-	QString MT::ErrorTypeCaptionTr(ErrorType errorType)
-	{
-		QString caption;
-
-		switch (errorType)
-		{
-			case Absolute:	caption = QObject::tr("Absolute");	break;
-			case Reduce:	caption = QObject::tr("Reduce");	break;
-			case Relative:	caption = QObject::tr("Relative");	break;
-
-			default:
-				Q_ASSERT(0);
-				caption = QObject::tr("Unknown");
-		}
-
-		return caption;
-	};
+		return false;
+	}
 
 	QString ErrorResultCaption(Measure::ErrorResult errorResult)
 	{
@@ -3651,13 +3666,28 @@ namespace Measure
 		return caption;
 	};
 
+	bool ERR_MEASURE_ADDITIONAL_PARAM(Measure::AdditionalParam param)
+	{
+		return ERR_MEASURE_ADDITIONAL_PARAM(static_cast<int>(param));
+	}
+
+	bool ERR_MEASURE_ADDITIONAL_PARAM(int param)
+	{
+		if (param < 0 || param >= Measure::ADDITIONAL_PARAM_COUNT)
+		{
+			return true;
+		}
+
+		return false;
+	}
+
 	QString MeasureAdditionalParamCaption(Measure::AdditionalParam param)
 	{
 		QString caption;
 
 		switch (param)
 		{
-			case Measure::AdditionalParam::MaxValue:			caption = QT_TRANSLATE_NOOP("MeasureBase", "Measure value max");	break;
+			case Measure::AdditionalParam::MaxDeviation:		caption = QT_TRANSLATE_NOOP("MeasureBase", "Maximum deviation");	break;
 			case Measure::AdditionalParam::SystemDeviation:		caption = QT_TRANSLATE_NOOP("MeasureBase", "System deviation");		break;
 			case Measure::AdditionalParam::StandardDeviation:	caption = QT_TRANSLATE_NOOP("MeasureBase", "Standard deviation");	break;
 			case Measure::AdditionalParam::LowBorder:			caption = QT_TRANSLATE_NOOP("MeasureBase", "Low border");			break;
@@ -3706,4 +3736,3 @@ double conversionByConnection(double val, const IoSignalParam &ioParam, Conversi
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
-

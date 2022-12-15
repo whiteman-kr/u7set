@@ -841,7 +841,7 @@ bool MultiChannelSignal::setMetrologySignal(int measureKind, int channel, Metrol
 {
 	QMutexLocker l(&m_mutex);
 
-	if (ERR_MEASURE_KIND(measureKind) == true)
+	if (Measure::ERR_MEASURE_KIND(measureKind) == true)
 	{
 		assert(0);
 		return false;
@@ -1087,7 +1087,7 @@ bool MeasureSignal::setMetrologySignal(int measureKind,
 									   int channel,
 									   Metrology::Signal* pSignal)
 {
-	if (ERR_MEASURE_KIND(measureKind) == true)
+	if (Measure::ERR_MEASURE_KIND(measureKind) == true)
 	{
 		assert(0);
 		return false;
@@ -1997,7 +1997,7 @@ QString SignalBase::findAppSignalIDforSerialNo(const QString& moduleID)
 
 int SignalBase::createRackListForMeasure(int measureKind, Metrology::ConnectionType connectionType)
 {
-	if (ERR_MEASURE_KIND(measureKind) == true)
+	if (Measure::ERR_MEASURE_KIND(measureKind) == true)
 	{
 		assert(false);
 		return 0;
@@ -2259,7 +2259,7 @@ bool SignalBase::setSignalForMeasure(int index, const MeasureSignal& signal)
 
 int SignalBase::createSignalListForMeasure(int measureKind, Metrology::ConnectionType connectionType, int rackIndex)
 {
-	if (ERR_MEASURE_KIND(measureKind) == true)
+	if (Measure::ERR_MEASURE_KIND(measureKind) == true)
 	{
 		assert(false);
 		return 0;

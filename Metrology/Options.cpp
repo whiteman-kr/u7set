@@ -1119,7 +1119,7 @@ QString OT::LinearityParamCaption(OT::LinearityParam param)
 		case OT::lo_ErrorType:			caption = QT_TRANSLATE_NOOP("Options", "Error type");							break;
 		case OT::lo_CalcErrorByRange:	caption = QT_TRANSLATE_NOOP("Options", "Error is calculated by the range");		break;
 		case OT::lo_MeasureTime:		caption = QT_TRANSLATE_NOOP("Options", "Measure time in a point, sec");			break;
-		case OT::lo_MeasuresInPoint:	caption = QT_TRANSLATE_NOOP("Options", "Count of measurements in a point");		break;
+		case OT::lo_MaxMeasuresInPoint:	caption = QT_TRANSLATE_NOOP("Options", "Count of measurements in a point");		break;
 		case OT::lo_DivisionType:		caption = QT_TRANSLATE_NOOP("Options", "Division of the measure range");		break;
 		case OT::lo_PointCount:			caption = QT_TRANSLATE_NOOP("Options", "Count of points");						break;
 		case OT::lo_LowLimit:			caption = QT_TRANSLATE_NOOP("Options", "Lower limit of the measure range, %");	break;

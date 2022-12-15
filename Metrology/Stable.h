@@ -132,6 +132,8 @@
 #include <QTreeWidget>
 
 #include <QScreen>
+#include <QCompleter>
+#include <QProgressBar>
 
 #ifdef _MSC_VER
 	#pragma warning(pop)

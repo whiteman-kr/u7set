@@ -458,19 +458,21 @@ void DialogCalculator::conversionLin()
 
 	if (m_pLinInRadio->isChecked() == true)
 	{
-		double val = (m_pLinInValEdit->text().toDouble() - irl)*(orh-orl)/(irh-irl)+orl;
+		double val = m_pLinInValEdit->text().toDouble();
+		double retVal = m_uc.conversionLinearity(val, UnitsConvertType::PhysicalToElectric, irl, irh, orl, orh);
 
 		m_pLinInValEdit->setReadOnly(false);
-		m_pLinOutValEdit->setText(QString::number(val, 'f', DEFAULT_ELECTRIC_UNIT_PRECESION));
+		m_pLinOutValEdit->setText(QString::number(retVal, 'f', DEFAULT_ELECTRIC_UNIT_PRECESION));
 		m_pLinOutValEdit->setReadOnly(true);
 	}
 
 	if (m_pLinOutRadio->isChecked() == true)
 	{
-		double val = (m_pLinOutValEdit->text().toDouble() - orl)*(irh-irl)/(orh-orl)+irl;
+		double val = m_pLinOutValEdit->text().toDouble();
+		double retVal = m_uc.conversionLinearity(val, UnitsConvertType::ElectricToPhysical, irl, irh, orl, orh);
 
 		m_pLinOutValEdit->setReadOnly(false);
-		m_pLinInValEdit->setText(QString::number(val, 'f', DEFAULT_ELECTRIC_UNIT_PRECESION));
+		m_pLinInValEdit->setText(QString::number(retVal, 'f', DEFAULT_ELECTRIC_UNIT_PRECESION));
 		m_pLinInValEdit->setReadOnly(true);
 	}
 }

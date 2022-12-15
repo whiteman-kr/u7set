@@ -199,7 +199,7 @@ void StatisticsBase::clear()
 
 int StatisticsBase::count() const
 {
-	if (ERR_MEASURE_TYPE(m_measureType) == true)
+	if (Measure::ERR_MEASURE_TYPE(m_measureType) == true)
 	{
 		return 0;
 	}
@@ -213,7 +213,7 @@ int StatisticsBase::count() const
 
 int StatisticsBase::count(int measureType) const
 {
-	if (ERR_MEASURE_TYPE(measureType) == true)
+	if (Measure::ERR_MEASURE_TYPE(measureType) == true)
 	{
 		return 0;
 	}
@@ -416,7 +416,7 @@ void StatisticsBase::createComparatorList(bool shownOnSchemas)
 
 StatisticsItem StatisticsBase::item(int index) const
 {
-	if (ERR_MEASURE_TYPE(m_measureType) == true)
+	if (Measure::ERR_MEASURE_TYPE(m_measureType) == true)
 	{
 		return StatisticsItem();
 	}
@@ -435,7 +435,7 @@ StatisticsItem StatisticsBase::item(int index) const
 
 StatisticsItem StatisticsBase::item(int measureType, int index) const
 {
-	if (ERR_MEASURE_TYPE(measureType) == true)
+	if (Measure::ERR_MEASURE_TYPE(measureType) == true)
 	{
 		return StatisticsItem();
 	}
@@ -454,7 +454,7 @@ StatisticsItem StatisticsBase::item(int measureType, int index) const
 
 StatisticsItem* StatisticsBase::itemPtr(int measureType, int index)
 {
-	if (ERR_MEASURE_TYPE(measureType) == true)
+	if (Measure::ERR_MEASURE_TYPE(measureType) == true)
 	{
 		return nullptr;
 	}
@@ -473,7 +473,7 @@ StatisticsItem* StatisticsBase::itemPtr(int measureType, int index)
 
 void StatisticsBase::setItem(int measureType, int index, const StatisticsItem& item)
 {
-	if (ERR_MEASURE_TYPE(measureType) == true)
+	if (Measure::ERR_MEASURE_TYPE(measureType) == true)
 	{
 		return;
 	}
