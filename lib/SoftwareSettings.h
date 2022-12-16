@@ -1,10 +1,16 @@
 #pragma once
 
+#include "../CommonLib/Types.h"
+#include "../CommonLib/HostAddressPort.h"
 #include "ConstStrings.h"
-#include "../UtilsLib/XmlHelper.h"
-#include "../OnlineLib/SocketIO.h"
-#include "../UtilsLib/WUtils.h"
-#include "../Proto/network.pb.h"
+
+class XmlWriteHelper;
+class XmlReadHelper;
+namespace Network
+{
+	class SessionParams;	// protobuf class
+}
+
 
 struct SessionParams
 {
@@ -14,6 +20,7 @@ struct SessionParams
 	void saveTo(Network::SessionParams* sp);
 	void loadFrom(const Network::SessionParams& sp);
 };
+
 
 class SoftwareSettings
 {

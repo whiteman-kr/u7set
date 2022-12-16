@@ -2,15 +2,18 @@
 #include <QXmlStreamWriter>
 #include <QObject>
 
-#include "SoftwareSettings.h"
+#include "../UtilsLib/XmlHelper.h"
 #include "../UtilsLib/WUtils.h"
+#include "../OnlineLib/SocketIO.h"
+#include "../Proto/network.pb.h"
+
+#include "SoftwareSettings.h"
 
 // -------------------------------------------------------------------------------------
 //
 // SessionParams struct implementation
 //
 // -------------------------------------------------------------------------------------
-
 void SessionParams::saveTo(Network::SessionParams* sp)
 {
 	TEST_PTR_RETURN(sp);
