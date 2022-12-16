@@ -236,10 +236,11 @@ namespace VFrame30
 		return QString("Const (%1)").arg(valueToString());
 	}
 
-	QString SchemaItemConst::toolTipText(int dpiX, int dpiY) const
+	QString SchemaItemConst::toolTipText(double dpiX, double dpiY, double devicePixelRatio) const
 	{
 		Q_UNUSED(dpiX);
 		Q_UNUSED(dpiY);
+		Q_UNUSED(devicePixelRatio);
 
 		QString typeStr;
 		switch (type())
