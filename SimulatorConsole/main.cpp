@@ -2,7 +2,7 @@
 #include <QDebug>
 
 #include "../Simulator/Simulator.h"
-#include "../Protobuf/google/protobuf/message.h"
+#include "../Protobuf/google/protobuf/message_lite.h"
 
 static QtMessageHandler originalMessageHandler = 0;
 

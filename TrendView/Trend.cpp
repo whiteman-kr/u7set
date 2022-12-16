@@ -956,7 +956,7 @@ namespace TrendLib
 		qint64 duration = drawParam.duration();
 
 		double dpiY = drawParam.realDpiY();
-		double dpiX = drawParam.realDpiX();
+		//double dpiX = drawParam.realDpiX();
 
 		double yPos0 = signalRect.bottom() - textBoundRect.height() / 2.0;
 		double yPos1 = signalRect.top() + textBoundRect.height() * 1.1;
