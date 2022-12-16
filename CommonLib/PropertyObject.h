@@ -1619,7 +1619,7 @@ public:
 	PropertyObject& operator=(const PropertyObject& src) noexcept;
 	PropertyObject& operator=(PropertyObject&& src) = delete;			// Fobidden to move properties as some (like PropertyTypedValue) has build in parent, which cannot be moved
 
-	virtual ~PropertyObject() noexcept = default;
+	virtual ~PropertyObject() = default;
 
 protected:
 	// Override in child to postpone property creation
