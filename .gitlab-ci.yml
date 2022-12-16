@@ -273,7 +273,9 @@ test job:
     paths:
       - u7databasetests.xml
       - SimulatorTests.xml
+      - MetrologyTests.xml
     reports:
       junit: 
         - u7databasetests.xml
         - SimulatorTests.xml
+        - MetrologyTests.xml
