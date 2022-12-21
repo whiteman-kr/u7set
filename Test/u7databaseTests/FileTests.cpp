@@ -3,7 +3,7 @@
 #include <QTest>
 #include "FileTests.h"
 #include "../../DbLib/DbController.h"
-
+#include "Settings.h"
 
 void FileTests::getObjectState(QSqlQuery& q, ObjectState& os)
 {
@@ -16,6 +16,7 @@ void FileTests::getObjectState(QSqlQuery& q, ObjectState& os)
 }
 
 FileTests::FileTests() :
+	TestDbBase(theSettings.dbTestsProjectName()),
 	m_user1{"User1", "UserP2ssw0rd", -1},
 	m_user2{"User2", "UserP2ssw0rd", -1}
 {

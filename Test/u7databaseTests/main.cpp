@@ -13,19 +13,14 @@
 #include "DbControllerVersionControlTests.h"
 #include "DeviceObjectTests.h"
 
+#include "Settings.h"
+
 const int DatabaseProjectVersion = 326;
 
-const char* DatabaseHost = "127.0.0.1";
-const char* DatabaseUser = "u7";
-const char* DatabaseUserPassword = "P2ssw0rd";
-
-const char* ProjectName = "testproject";
-const char* ProjectAdministratorName = "Administrator";
-const char* ProjectAdministratorPassword = "P2ssw0rd";
-
 const QString ARG_SIGNAL_TESTS("-signals");
+const QString CONFIG_FILE_PARAM("-config=");
 
-void filterCmdLineArgs(int argc, char *argv[], QStringList* cmdLineArgs, QStringList* specificArgs);
+void filterCmdLineArgs(int argc, char *argv[], QStringList* cmdLineArgs, QStringList* specificArgs, QString* configFileName);
 int runSpecificTest(const QStringList& stdArgs, QStringList& nativeArgs, bool* exit);
 
 int main(int argc, char *argv[])
@@ -36,8 +31,21 @@ int main(int argc, char *argv[])
 
 	QStringList cmdLineArgs;
 	QStringList specificArgs;
+	QString configFileName;
 
-	filterCmdLineArgs(argc, argv, &cmdLineArgs, &specificArgs);
+	filterCmdLineArgs(argc, argv, &cmdLineArgs, &specificArgs, &configFileName);
+
+	if (configFileName.isEmpty() == false)
+	{
+		returnCode = theSettings.loadConfigurationFile(configFileName);
+
+		if (returnCode != 0)
+		{
+			google::protobuf::ShutdownProtobufLibrary();
+
+			return returnCode;
+		}
+	}
 
 	if (specificArgs.isEmpty() == false)
 	{
@@ -47,6 +55,8 @@ int main(int argc, char *argv[])
 
 		if (exit == true)
 		{
+			google::protobuf::ShutdownProtobufLibrary();
+
 			return returnCode;
 		}
 	}
@@ -103,18 +113,18 @@ int main(int argc, char *argv[])
 	DbControllerUserTests dbControllerUserTests;
 	returnCode |= QTest::qExec(&dbControllerUserTests, cmdLineArgs);
 
-	DbControllerFileTests dbControllerFileTests;
+	DbControllerFileTests dbControllerFileTests(theSettings.fileManagementTestsProjectName());
 	returnCode |= QTest::qExec(&dbControllerFileTests, cmdLineArgs);
 
-	DbControllerHardwareConfigurationTests dbControllerHardwareConfigurationTests;
+	DbControllerHardwareConfigurationTests dbControllerHardwareConfigurationTests(theSettings.hardwareConfigurationTestsProjectName());
 	returnCode |= QTest::qExec(&dbControllerHardwareConfigurationTests, cmdLineArgs);
 
-	DbControllerVersionControlTests dbControllerVersionTests;
+	DbControllerVersionControlTests dbControllerVersionTests(theSettings.versionControlTestsProjectName());
 	returnCode |= QTest::qExec(&dbControllerVersionTests, cmdLineArgs);
 
 	//
 
-	DbControllerSignalTests dbControllerSignalTests;
+	DbControllerSignalTests dbControllerSignalTests(theSettings.signalTestsProjectName());
 	returnCode |= QTest::qExec(&dbControllerSignalTests, cmdLineArgs);
 
 	// Shutting down
@@ -126,14 +136,16 @@ int main(int argc, char *argv[])
 	return returnCode;
 }
 
-void filterCmdLineArgs(int argc, char *argv[], QStringList* cmdLineArgs, QStringList* specificArgs)
+void filterCmdLineArgs(int argc, char *argv[], QStringList* cmdLineArgs, QStringList* specificArgs, QString* configFileName)
 {
 	TEST_PTR_RETURN(argv);
 	TEST_PTR_RETURN(cmdLineArgs);
 	TEST_PTR_RETURN(specificArgs);
+	TEST_PTR_RETURN(configFileName);
 
 	cmdLineArgs->clear();
 	specificArgs->clear();
+	configFileName->clear();
 
 	cmdLineArgs->append(argv[0]);
 
@@ -145,6 +157,15 @@ void filterCmdLineArgs(int argc, char *argv[], QStringList* cmdLineArgs, QString
 	for(int i = 1; i < argc; i++)
 	{
 		QString arg(argv[i]);
+
+		if (arg.startsWith(CONFIG_FILE_PARAM, Qt::CaseInsensitive) == true)
+		{
+			*configFileName = arg;
+			configFileName->remove(CONFIG_FILE_PARAM).trimmed();
+			configFileName->remove('\"');
+			configFileName->remove('\'');
+			continue;
+		}
 
 		auto it = specificArgsSet.find(arg.trimmed().toLower());
 
@@ -173,7 +194,7 @@ int runSpecificTest(const QStringList& cmdLineArgs, QStringList& specificArgs, b
 	{
 		if (specArg == ARG_SIGNAL_TESTS)
 		{
-			testObject = new DbControllerSignalTests();
+			testObject = new DbControllerSignalTests(theSettings.signalTestsProjectName());
 			break;
 		}
 	};

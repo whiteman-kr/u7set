@@ -22,11 +22,4 @@ private slots:
 	void getUserDataTest();
 	void check_user_passwordTest();
 	void update_userTest();
-
-//private:
-//	QString m_dbHost = "127.0.0.1";
-//	QString m_dbUser = "u7";
-//	QString m_dbUserPassword = "P2ssw0rd";
-//	QString m_adminPassword = "P2ssw0rd";
-//	QString m_projectName = "testproject";
 };

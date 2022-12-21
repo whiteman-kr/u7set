@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<u7databasetestsArguments>
+    <DatabaseAddress>127.0.0.1</DatabaseAddress>
+    <DatabasePort>5432</DatabasePort>
+    <DatabaseUserName>u7</DatabaseUserName>
+    <DatabasePassword>P2ssw0rd</DatabasePassword>
+    <DatabaseAdministratorPassword>P2ssw0rd</DatabaseAdministratorPassword>
+    <ProjectAdministratorName>Administrator</ProjectAdministratorName>
+    <ProjectAdministratorPassword>P2ssw0rd</ProjectAdministratorPassword>
+    <SignalTestsProjectName>windowssignalstests</SignalTestsProjectName>
+    <DbTestsProjectName>windowsdbtests</DbTestsProjectName>
+    <FileManagementTestsProjectName>windowsdbfiletests</FileManagementTestsProjectName>
+    <HardwareConfigurationTestsProjectName>windowsdbbuildtests</HardwareConfigurationTestsProjectName>
+    <VersionControlTestsProjectName>windowsdbversiontests</VersionControlTestsProjectName>
+</u7databasetestsArguments>
