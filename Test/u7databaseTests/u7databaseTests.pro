@@ -20,7 +20,9 @@ include(../../compiler.pri)
 #include(../../warnings.pri)
 CONFIG -= warn_on
 CONFIG += warn_off
+
 include(../../sanitizer.pri)
+include(../../codecoverage.pri)
 
 # DESTDIR
 #
@@ -37,6 +39,7 @@ unix {
 
 SOURCES += main.cpp \
     DeviceObjectTests.cpp \
+    Settings.cpp \
 	UserPropertyTest.cpp \
 	UserTests.cpp \
 	FileTests.cpp \
@@ -53,6 +56,7 @@ SOURCES += main.cpp \
 
 HEADERS += \
     DeviceObjectTests.h \
+    Settings.h \
 	UserPropertyTest.h \
 	UserTests.h \
 	FileTests.h \

@@ -1,15 +1,17 @@
 #include "DbControllerSignalManagementTests.h"
+#include "Settings.h"
 
-DbControllerSignalTests::DbControllerSignalTests()
+DbControllerSignalTests::DbControllerSignalTests(const QString& projectName):
+	m_projectName(projectName),
+	m_databaseHost(theSettings.databaseHost()),
+	m_databasePort(theSettings.databasePort()),
+	m_databaseName("u7_" + projectName),
+	m_databaseUser(theSettings.databaseUser()),
+	m_adminPassword(theSettings.databaseAdministratorPassword())
+
 {
 	qRegisterMetaType<E::SignalType>("E::SignalType");
 	qRegisterMetaType<DbUser>("DbUser");
-
-	m_databaseHost = "127.0.0.1";
-	m_projectName = "signalstests";
-	m_databaseName = "u7_" + m_projectName;
-	m_databaseUser = "u7";
-	m_adminPassword = "P2ssw0rd";
 }
 
 void DbControllerSignalTests::initTestCase()
@@ -17,6 +19,7 @@ void DbControllerSignalTests::initTestCase()
 	QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL");
 
 	db.setHostName(m_databaseHost);
+	db.setPort(m_databasePort);
 	db.setUserName(m_databaseUser);
 	db.setPassword(m_adminPassword);
 	db.setDatabaseName("postgres");
@@ -61,6 +64,7 @@ void DbControllerSignalTests::initTestCase()
 		DbController* dbc = m_dbc[i];
 
 		dbc->setHost(m_databaseHost);
+		dbc->setPort(m_databasePort);
 		dbc->setServerUsername(m_databaseUser);
 		dbc->setServerPassword(m_adminPassword);
 

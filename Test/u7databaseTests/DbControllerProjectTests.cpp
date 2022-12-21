@@ -1,8 +1,10 @@
 #include "DbControllerProjectTests.h"
 #include <QSql>
 #include <QSqlError>
+#include "Settings.h"
 
-DbControllerProjectTests::DbControllerProjectTests()
+DbControllerProjectTests::DbControllerProjectTests():
+	TestDbBase(theSettings.dbTestsProjectName())
 {
 	m_db.disableProgress();
 	m_db.setHost(m_databaseHost);

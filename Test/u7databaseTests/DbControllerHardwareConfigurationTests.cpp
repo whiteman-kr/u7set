@@ -2,21 +2,32 @@
 #include <QSql>
 #include <QSqlError>
 #include <QDebug>
+#include "Settings.h"
 
 using namespace Hardware;
 
-DbControllerHardwareConfigurationTests::DbControllerHardwareConfigurationTests()
+DbControllerHardwareConfigurationTests::DbControllerHardwareConfigurationTests(const QString& projectName):
+	m_projectName(projectName),
+	m_databaseHost(theSettings.databaseHost()),
+	m_databasePort(theSettings.databasePort()),
+	m_databaseUser(theSettings.databaseUser()),
+	m_databasePassword(theSettings.databasePassword()),
+	m_adminPassword(theSettings.databaseAdministratorPassword())
+
 {
 }
 
 void DbControllerHardwareConfigurationTests::initTestCase()
 {
+	m_db.setHost(m_databaseHost);
+	m_db.setPort(m_databasePort);
 	m_db.setServerUsername(m_databaseUser);
 	m_db.setServerPassword(m_databasePassword);
 
 	QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL");
 
 	db.setHostName(m_databaseHost);
+	db.setPort(m_databasePort);
 	db.setUserName(m_databaseUser);
 	db.setPassword(m_adminPassword);
 	db.setDatabaseName("postgres");
@@ -29,7 +40,7 @@ void DbControllerHardwareConfigurationTests::initTestCase()
 
 	while (query.next() == true)
 	{
-		if (query.value(0).toString() == "u7_" + m_databaseName)
+		if (query.value(0).toString() == "u7_" + m_projectName)
 		{
 			ok = tempQuery.exec(QString("DROP DATABASE %1").arg(query.value(0).toString()));
 			QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
@@ -39,13 +50,13 @@ void DbControllerHardwareConfigurationTests::initTestCase()
 
 	db.close();
 
-	ok = m_db.createProject(m_databaseName, m_adminPassword, 0);
+	ok = m_db.createProject(m_projectName, m_adminPassword, 0);
 	QVERIFY2 (ok == true, qPrintable ("Error: can not create project: " + m_db.lastError()));
 
-	ok = m_db.upgradeProject(m_databaseName, m_adminPassword, true, 0);
+	ok = m_db.upgradeProject(m_projectName, m_adminPassword, true, 0);
 	QVERIFY2 (ok == true, qPrintable ("Error: can not upgrade project: " + m_db.lastError()));
 
-	ok = m_db.openProject(m_databaseName, "Administrator", m_adminPassword, nullptr);
+	ok = m_db.openProject(m_projectName, "Administrator", m_adminPassword, nullptr);
 	QVERIFY2 (ok == true, qPrintable ("Error: can not open project: " + m_db.lastError()));
 }
 
@@ -58,7 +69,7 @@ void DbControllerHardwareConfigurationTests::addAndRemoveDeviceObjectTest()
 	db.setHostName(m_databaseHost);
 	db.setUserName(m_databaseUser);
 	db.setPassword(m_adminPassword);
-	db.setDatabaseName("u7_" + m_databaseName);
+	db.setDatabaseName("u7_" + m_projectName);
 
 	QString dataForTest = "DataForFileFromAddDeviceObjectTest";
 
@@ -130,7 +141,7 @@ void DbControllerHardwareConfigurationTests::getDeviceTreeLatestVersionTest()
 	db.setHostName(m_databaseHost);
 	db.setUserName(m_databaseUser);
 	db.setPassword(m_adminPassword);
-	db.setDatabaseName("u7_" + m_databaseName);
+	db.setDatabaseName("u7_" + m_projectName);
 
 	std::shared_ptr<Hardware::DeviceObject> parentDeviceForTest =  std::make_shared<Hardware::DeviceRoot>();
 	std::shared_ptr<Hardware::DeviceObject> firstChildDeviceForTest = std::make_shared<Hardware::DeviceModule>();
@@ -222,5 +233,5 @@ void DbControllerHardwareConfigurationTests::cleanupTestCase()
 		QSqlDatabase::removeDatabase(connection);
 	}
 
-	m_db.deleteProject(m_databaseName, m_adminPassword, true, 0);
+	m_db.deleteProject(m_projectName, m_adminPassword, true, 0);
 }

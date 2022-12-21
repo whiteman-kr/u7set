@@ -15,7 +15,7 @@ before_script:
 #  - echo after_script
 
 
-linux build job:
+linux_build_job:
   stage: build
   only:
     - master
@@ -51,11 +51,18 @@ linux build job:
     - "# ----------------------------------------------"
     - "#               Build Project"
     - "# ----------------------------------------------"    
-    - "~/Qt/6.3.2/gcc_64/bin/qmake u7set.pro -spec linux-g++"
+    - "/opt/Qt/6.3.2/gcc_64/bin/qmake u7set.pro -spec linux-g++"
     - "make -j9"
 
+  artifacts:
+    name: "u7set_linux_0.9.$CI_PIPELINE_ID $CI_BUILD_REF_SLUG $CI_COMMIT_SHA"
+    paths:
+      - bin_unix/*
+    exclude:
+      - bin_unix/**/*.a
+#
 
-windows build job:
+windows_build_job:
   stage: build
   only:
     - master
@@ -194,7 +201,7 @@ windows build job:
     - "$K8S_SECRET_DIGITAL_SIGN_CERT="
 
   artifacts:
-    name: "u7set_0.9.$Env:CI_PIPELINE_ID $Env:CI_BUILD_REF_SLUG $Env:CI_COMMIT_SHA"
+    name: "u7set_0.9.$CI_PIPELINE_ID $CI_BUILD_REF_SLUG $CI_COMMIT_SHA"
     paths:
       - bin/*.exe
       - bin/release/*.exe
@@ -211,8 +218,9 @@ windows build job:
       - bin/release/docs/Appendixes/*.pdf
 
 
-test job:
+windows_test_job:
   stage: test
+  needs: ["windows_build_job"]
   tags:
     - test
   only:
@@ -241,7 +249,7 @@ test job:
     - "# ----------------------------------------------"
     - "#               Run unit tests"
     - "# ----------------------------------------------"
-    - "&$Env:CI_PROJECT_DIR/bin/release/u7databasetests.exe -o u7databasetests.xml,junitxml -o -,txt"
+    - "&$Env:CI_PROJECT_DIR/bin/release/u7databasetests.exe -config=\"$Env:CI_PROJECT_DIR/Test/u7databasetestsArgs.xml\" -o u7databasetests.xml,junitxml -o -,txt"
     - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorTests.exe -o SimulatorTests.xml,junitxml -o -,txt"
     - "&$Env:CI_PROJECT_DIR/bin/release/MetrologyTests.exe -o MetrologyTests.xml,junitxml -o -,txt"
 
@@ -270,6 +278,7 @@ test job:
     - "# ----------------------------------------------"
     - "#&C:/ROVT/ROVT_C.exe /b:C:\\Temp\\build\\test_simulator_v376\\build"
   artifacts:
+    name: "u7set_test_windows_0.9.$CI_PIPELINE_ID $CI_BUILD_REF_SLUG $CI_COMMIT_SHA"
     paths:
       - u7databasetests.xml
       - SimulatorTests.xml
@@ -279,3 +288,119 @@ test job:
         - u7databasetests.xml
         - SimulatorTests.xml
         - MetrologyTests.xml
+
+
+linux_test_job:
+  stage: test
+  needs: ["linux_build_job"]
+  tags:
+    - testlinux
+  only:
+    - master
+    - /^release.*$/
+    - develop
+    - /experimental/
+    - /^exp.*$/
+    - /^rpct-.*$/
+    - /^RPCT-.*$/
+  script:
+    - "printenv"
+    - "echo $CI_COMMIT_SHA"
+    - "cd $CI_PROJECT_DIR"
+    - "git status"
+    - "git log -1"
+#Run XML validation
+#    - "# ----------------------------------------------"
+#    - "#               Run XML validation"
+#    - "# ----------------------------------------------"
+    - "pushd $CI_PROJECT_DIR/Presets/LogicModuleDescription"
+    - "chmod a+x validate_xmls.sh"
+    - "./validate_xmls.sh"
+    - "popd"
+
+#Run unit tests
+    - "# ----------------------------------------------"
+    - "#               Run unit tests"
+    - "# ----------------------------------------------"
+    - "$CI_PROJECT_DIR/bin_unix/release/u7databasetests -config=$CI_PROJECT_DIR/Test/u7databasetestsArgsLinux.xml -o u7databasetestslinux.xml,junitxml -o -,txt"
+    - "$CI_PROJECT_DIR/bin_unix/release/SimulatorTests -o SimulatorTestsLinux.xml,junitxml -o -,txt"
+    - "$CI_PROJECT_DIR/bin_unix/MetrologyTests -o MetrologyTests.xml,junitxml -o -,txt"
+
+#Run Builder test
+    - "# ----------------------------------------------"
+    - "#               Run BuilderConsole tests"
+    - "# ----------------------------------------------"
+    - "if [ -d \"/tmp/build/test_simulator\" ]; then rm -Rf /tmp/build/test_simulator; fi"
+    - "$CI_PROJECT_DIR/bin_unix/release/BuilderConsole $CI_PROJECT_DIR/Test/BuilderConsoleArgsLinux.xml"
+    
+#Run Compiler tests
+    - "# ----------------------------------------------"
+    - "#               Run Compiler tests"
+    - "# ----------------------------------------------"
+    - "$CI_PROJECT_DIR/bin_unix/release/BuilderConsole $CI_PROJECT_DIR/Test/CompilerTestsArgsLinux.xml"
+
+#Run Sim AFB Tests
+    - "# ----------------------------------------------"
+    - "#               Run Simulator AFBs tests"
+    - "# ----------------------------------------------"
+    - "$CI_PROJECT_DIR/bin_unix/release/SimulatorConsole -build=/tmp/build/test_simulator_v376/build -script=\"$CI_PROJECT_DIR/Simulator/SimProjectTests.js\""
+
+#Run ROVT to check configuration generation
+#    - "# ----------------------------------------------"
+#    - "#               Run ROVT tests"
+#    - "# ----------------------------------------------"
+#    - "#&C:/ROVT/ROVT_C.exe /b:C:\\Temp\\build\\test_simulator_v376\\build"
+
+  artifacts:
+    name: "u7set_test_linux_0.9.$CI_PIPELINE_ID $CI_BUILD_REF_SLUG $CI_COMMIT_SHA"
+    paths:
+      - u7databasetestslinux.xml
+      - SimulatorTestsLinux.xml
+      - MetrologyTests.xml
+    reports:
+      junit: 
+        - u7databasetestslinux.xml
+        - SimulatorTestsLinux.xml
+        - MetrologyTests.xml
+
+
+linux_code_coverage_job:
+  stage: test
+  needs: []
+  tags:
+    - testlinux
+  only:
+    - master
+    - /^release.*$/
+    - develop
+    - /experimental/
+    - /^exp.*$/
+    - /^rpct-.*$/
+    - /^RPCT-.*$/
+  script:
+    - "printenv"
+    - "echo $CI_COMMIT_SHA"
+    - "cd $CI_PROJECT_DIR"
+    - "git status"
+    - "git log -1"
+    - "# ----------------------------------------------"
+    - "#               Build Test Project              "
+    - "# ----------------------------------------------"
+    - "/opt/Qt/6.3.2/gcc_64/bin/qmake u7set_tests.pro -spec linux-g++ CONFIG+=debug CONFIG-=qml_debug CONFIG-=qtquickcompiler CONFIG+=separate_debug_info CONFIG+=CODE_COVERAGE "
+    - "make -j9"
+    - "# ----------------------------------------------"
+    - "#           Collect Test Coverage Data          "
+    - "# ----------------------------------------------"
+    - "./Test/CodeCoverage.sh"
+
+  coverage: '/lines......: \d+\.\d+/'
+  artifacts:
+    name: "coverage_report.$CI_PIPELINE_ID $CI_BUILD_REF_SLUG $CI_COMMIT_SHA"
+    paths:
+      - CodeCoverage/coverage.xml
+      - CodeCoverage/Report/
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: CodeCoverage/coverage.xml
+

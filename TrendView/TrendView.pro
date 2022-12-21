@@ -16,6 +16,7 @@ PRECOMPILED_HEADER = Stable.h
 
 include(../compiler.pri)
 include(../warnings.pri)
+include(../codecoverage.pri)
 
 # DESTDIR
 #

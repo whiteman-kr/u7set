@@ -2,8 +2,11 @@
 #include <QtSql>
 #include <QString>
 #include <QDebug>
+#include "Settings.h"
 
 ProjectPropertyTests::ProjectPropertyTests()
+	:TestDbBase(theSettings.dbTestsProjectName())
+
 {
 
 }

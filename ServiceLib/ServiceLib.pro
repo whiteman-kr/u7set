@@ -8,6 +8,7 @@ CONFIG += staticlib
 include(../compiler.pri)
 include(../warnings.pri)
 include(./qtservice/src/qtservice.pri)
+include(../codecoverage.pri)
 
 DEFINES -= QT_DISABLE_DEPRECATED_BEFORE=0x060000
 

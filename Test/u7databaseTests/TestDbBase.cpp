@@ -1,6 +1,14 @@
 #include "TestDbBase.h"
+#include "Settings.h"
 
-TestDbBase::TestDbBase()
+TestDbBase::TestDbBase(const QString& projectName):
+	m_databaseHost(theSettings.databaseHost()),
+	m_databaseHostPort(theSettings.databasePort()),
+	m_databaseUser(theSettings.databaseUser()),
+	m_databaseUserPassword(theSettings.databasePassword()),
+	m_projectName(projectName),
+	m_projectAdministratorName(theSettings.projectAdministratorName()),
+	m_projectAdministratorPassword(theSettings.projectAdministratorPassword())
 {
 }
 
