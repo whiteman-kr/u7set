@@ -324,7 +324,7 @@ linux_test_job:
     - "# ----------------------------------------------"
     - "$CI_PROJECT_DIR/bin_unix/release/u7databasetests -config=$CI_PROJECT_DIR/Test/u7databasetestsArgsLinux.xml -o u7databasetestslinux.xml,junitxml -o -,txt"
     - "$CI_PROJECT_DIR/bin_unix/release/SimulatorTests -o SimulatorTestsLinux.xml,junitxml -o -,txt"
-    - "$CI_PROJECT_DIR/bin_unix/MetrologyTests -o MetrologyTests.xml,junitxml -o -,txt"
+    - "$CI_PROJECT_DIR/bin_unix/release/MetrologyTests -o MetrologyTests.xml,junitxml -o -,txt"
 
 #Run Builder test
     - "# ----------------------------------------------"
