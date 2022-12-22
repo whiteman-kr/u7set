@@ -6,19 +6,22 @@
 
 static QtMessageHandler originalMessageHandler = 0;
 
+std::atomic<bool> g_verbose = false;
+
 
 void messageOutputHandler(QtMsgType type, const QMessageLogContext& context, const QString& msg)
 {
 	if (QString(context.category) == QLatin1String("u7.sim"))
 	{
 		QByteArray localMsg = msg.toLocal8Bit();
-		switch (type)	// NOLINT
+		switch (type)
 		{
-#ifdef QT_DEBUG
 		case QtDebugMsg:
-			fprintf(stderr, "dbg: %s\n", localMsg.constData());
+			if (g_verbose.load(std::memory_order_relaxed) == true)
+			{
+				fprintf(stderr, "dbg: %s\n", localMsg.constData());
+			}
 			break;
-#endif
 		case QtInfoMsg:
 			fprintf(stderr, "inf: %s\n", localMsg.constData());
 			break;
@@ -44,7 +47,7 @@ void messageOutputHandler(QtMsgType type, const QMessageLogContext& context, con
 void showProgrammUsageHint()
 {
 	std::cout << "Programm usage:\n";
-	std::cout << "  SimulatorConsole [-build=build_dir] [-script=script_file] [-profile=profile_name] [-unlock_timer]\n";
+	std::cout << "  SimulatorConsole [-build=build_dir] [-script=script_file] [-profile=profile_name] [-unlock_timer] [-verbose]\n";
 	std::cout << "\n";
 	std::cout << "Create template simualtion script:\n";
 	std::cout << "  SimulatorConsole [-create=file_name]\n";
@@ -119,7 +122,6 @@ public:
 int main(int argc, char *argv[])
 {
 	ProtobufLibShutdowner pbLibShutdowner;
-
 	Q_UNUSED(pbLibShutdowner);
 
 	originalMessageHandler = qInstallMessageHandler(messageOutputHandler);
@@ -127,7 +129,7 @@ int main(int argc, char *argv[])
 	QCoreApplication app(argc, argv);
 
 	// Parse arguments
-	// SimulatorConsole.exe [-build=build_dir] [-script=script_file] [-profile=profile_name] [-unlock_timer]
+	// SimulatorConsole.exe [-build=build_dir] [-script=script_file] [-profile=profile_name] [-unlock_timer] [-verbose]
 	// SimulatorConsole.exe [-create=file_name]
 	//
 	QStringList args = QCoreApplication::arguments();
@@ -172,9 +174,15 @@ int main(int argc, char *argv[])
 			continue;
 		}
 
-		if (args[argIndex].startsWith("-unlock_timer", Qt::CaseInsensitive) == true)
+		if (args[argIndex].compare("-unlock_timer", Qt::CaseInsensitive) == 0)
 		{
 			unlockTimer = true;
+			continue;
+		}
+
+		if (args[argIndex].compare("-verbose", Qt::CaseInsensitive) == 0)
+		{
+			g_verbose.store(true);
 			continue;
 		}
 
@@ -186,10 +194,9 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-
 	// --
 	//
-	Sim::Simulator simulator{nullptr, scriptFile.isEmpty() == false, nullptr};		// Log to console
+	Sim::Simulator simulator{nullptr, g_verbose, nullptr};		// Log to console
 
 	if (bool ok = simulator.load(buildPath);
 		ok == false)
