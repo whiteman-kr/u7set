@@ -15,15 +15,13 @@ struct SessionParams
 	void loadFrom(const Network::SessionParams& sp);
 };
 
-class SoftwareSettings : public QObject
+class SoftwareSettings
 {
 public:
 	SoftwareSettings() = default;
-	SoftwareSettings(const SoftwareSettings& copy);
+	SoftwareSettings(const SoftwareSettings& copy) = default;
 	SoftwareSettings(const QString& profile);
 	virtual ~SoftwareSettings();
-
-	const SoftwareSettings& operator = (const SoftwareSettings& copy);
 
 protected:
 	void writeStartSettings(XmlWriteHelper& xml) const;
@@ -41,6 +39,7 @@ private:
 
 public:
 	QString profile;
+	QString hostname;
 };
 
 class SoftwareSettingsSet
@@ -122,13 +121,22 @@ std::shared_ptr<const T> SoftwareSettingsSet::getSettingsDefaultProfile() const
 	return getSettingsProfile<T>(SettingsProfile::DEFAULT);
 }
 
-class CfgServiceSettings : public SoftwareSettings
+class CfgServiceSettings : virtual public SoftwareSettings
 {
+public:
+	struct ClientInfo
+	{
+		QString equipmentID;
+		E::SoftwareType softwareType;
+		QString hostname;
+	};
+
 public:
 	HostAddressPort clientRequestIP;
 	QHostAddress clientRequestNetmask;
+	bool checkHostname = false;
 
-	QList<QPair<QString, E::SoftwareType>> clients;
+	QList<ClientInfo> clients;
 
 private:
 	// this methods should be call by SoftwareSettingsSet only
@@ -142,7 +150,7 @@ public:
 	QStringList knownClients() const;
 };
 
-class AppDataServiceSettings : public SoftwareSettings
+class AppDataServiceSettings : virtual public SoftwareSettings
 {
 public:
 	QString cfgServiceID1;
@@ -174,7 +182,7 @@ private:
 };
 
 
-class DiagDataServiceSettings : public SoftwareSettings
+class DiagDataServiceSettings : virtual public SoftwareSettings
 {
 public:
 	QString cfgServiceID1;
@@ -201,7 +209,7 @@ private:
 	friend class SoftwareSettingsSet;
 };
 
-class TuningServiceSettings : public SoftwareSettings
+class TuningServiceSettings : virtual public SoftwareSettings
 {
 public:
 	struct TuningSource
@@ -278,7 +286,7 @@ private:
 	static bool readTuningSourcesFromXml(XmlReadHelper& xml, std::vector<TuningSource>* sources);
 };
 
-class ArchivingServiceSettings : public SoftwareSettings
+class ArchivingServiceSettings : virtual public SoftwareSettings
 {
 public:
 	QString cfgServiceID1;
@@ -310,7 +318,7 @@ private:
 	friend class SoftwareSettingsSet;
 };
 
-class TestClientSettings : public SoftwareSettings
+class TestClientSettings : virtual public SoftwareSettings
 {
 public:
 	QString			cfgService1_equipmentID;
@@ -346,7 +354,7 @@ private:
 	friend class SoftwareSettingsSet;
 };
 
-class MetrologySettings : public SoftwareSettings
+class MetrologySettings : virtual public SoftwareSettings
 {
 public:
 	QString cfgServiceID1;
@@ -381,7 +389,7 @@ private:
 };
 
 
-class MonitorSettings : public SoftwareSettings
+class MonitorSettings : virtual public SoftwareSettings
 {
 public:
 	struct TuningService
@@ -445,7 +453,7 @@ public:
 	void clear();
 };
 
-class TuningClientSettings : public SoftwareSettings
+class TuningClientSettings : virtual public SoftwareSettings
 {
 public:
 	struct TuningService

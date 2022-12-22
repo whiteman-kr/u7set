@@ -89,7 +89,9 @@ signals:
 	void				socketConnected();
 	void				socketDisconnected();
 
-	void				unknownClient();
+	void				unknownClient(QString errMsg);
+	void				wrongClientHostname(QString errMsg);
+
 	void				configurationLoaded();
 	void				signalBaseLoading(int persentage);
 	void				signalBaseLoaded();

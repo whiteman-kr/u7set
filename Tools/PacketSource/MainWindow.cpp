@@ -484,6 +484,8 @@ void MainWindow::runConfigSocket()
 	connect(m_pConfigSocket, &ConfigSocket::socketDisconnected, this, &MainWindow::configSocketDisconnected, Qt::QueuedConnection);
 
 	connect(m_pConfigSocket, &ConfigSocket::unknownClient, this, &MainWindow::configSocketUnknownClient, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::wrongClientHostname, this, &MainWindow::configSocketWrongClientHostname, Qt::QueuedConnection);
+
 	connect(m_pConfigSocket, &ConfigSocket::unknownAdsEquipmentID, this, &MainWindow::configSocketUnknownAdsEquipmentID, Qt::QueuedConnection);
 
 	// loading
@@ -554,12 +556,24 @@ void MainWindow::configSocketDisconnected()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::configSocketUnknownClient()
+void MainWindow::configSocketUnknownClient(QString errMsg)
 {
 	QMessageBox::critical(this,
 						  windowTitle(),
 						  tr("Configuration Service does not recognize EquipmentID \"%1\" for software \"PacketSource\"")
 						  .arg(m_options.build().cfgSrvEquipmentID()));
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::configSocketWrongClientHostname(QString errMsg)
+{
+	Q_UNUSED(errMsg);
+
+	QMessageBox::critical(this,
+						  windowTitle(),
+						  tr("Configuration Service reported: software \"Metrology\" running on computer with wrong hostname"));
+	return;
 }
 
 // -------------------------------------------------------------------------------------------------------------------

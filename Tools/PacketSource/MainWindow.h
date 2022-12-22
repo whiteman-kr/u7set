@@ -190,7 +190,8 @@ private slots:
 	//
 	void					configSocketConnected();
 	void					configSocketDisconnected();
-	void					configSocketUnknownClient();
+	void					configSocketUnknownClient(QString errMsg);
+	void					configSocketWrongClientHostname(QString errMsg);
 	void					configSocketUnknownAdsEquipmentID(const QStringList& adsIDList);
 	void					configSocketConfigurationLoaded();
 	void					configSocketSignalBaseLoading(int persentage);

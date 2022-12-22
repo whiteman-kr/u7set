@@ -39,6 +39,7 @@ public:
 	QString userName() const { return m_userName; }
 	int buildNo() const { return m_buildNo; }
 	quint32 crc() const { return m_crc; }
+	QString hostname() const { return m_hostname; }
 
 private:
 	E::SoftwareType m_softwareType = E::SoftwareType::Unknown;
@@ -51,4 +52,5 @@ private:
 	QString m_userName;
 	int m_buildNo = UNDEFINED_BUILD_NO;
 	quint32 m_crc = 0;
+	QString m_hostname;
 };

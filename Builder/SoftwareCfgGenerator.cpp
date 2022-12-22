@@ -521,11 +521,26 @@ namespace Builder
 
 	void SoftwareCfgGenerator::writeSoftwareSection(QXmlStreamWriter& xmlWriter, bool finalizeSection)
 	{
+		TEST_PTR_RETURN(m_log);
+		TEST_PTR_LOG_RETURN(m_software, m_log);
+		TEST_PTR_LOG_RETURN(m_software->parent(), m_log);
+
 		xmlWriter.writeStartElement(XmlElement::SOFTWARE);
 
 		xmlWriter.writeAttribute(XmlAttribute::CAPTION, m_software->caption());
 		xmlWriter.writeAttribute(XmlAttribute::EQUIPMENT_ID, m_software->equipmentIdTemplate());
 		xmlWriter.writeAttribute(XmlAttribute::TYPE, QString("%1").arg(static_cast<int>(m_software->softwareType())));
+
+		std::shared_ptr<Hardware::Workstation> ws = m_software->parent()->toWorkstation();
+
+		if (ws == nullptr)
+		{
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Software %1 isn't placed in workstation.").arg(m_software->equipmentIdTemplate()));
+			return;
+		}
+
+		xmlWriter.writeAttribute(XmlAttribute::WORKSTATION_EQUIPMENT_ID, ws->equipmentIdTemplate());
+
 		xmlWriter.writeAttribute(XmlAttribute::SOFTWARE_CONTROLLERS,
 								 m_softwareControllersIDs.join(Separator::COMMA));
 

@@ -8,7 +8,7 @@
 
 // -------------------------------------------------------------------------------------------
 
-class SoftwareSettingsGetter
+class SoftwareSettingsGetter : virtual public SoftwareSettings
 {
 public:
 	virtual ~SoftwareSettingsGetter();
@@ -49,23 +49,29 @@ public:
 											const Builder::Context* context,
 											DataSource* ds);
 
-	virtual bool readFromDevice(const Builder::Context* context,
-								const Hardware::Software* software) = 0;
+	bool readSoftwareSettings(const Builder::Context* context,
+							  const Hardware::Software* software);
 
 	bool readFromDeviceByEquipmentID(const Builder::Context* context,
 									const QString& softwareID,
 									E::SoftwareType requiredSoftwareType = E::SoftwareType::Unknown);
+
+protected:
+	virtual bool readSettings(const Builder::Context* context,
+								const Hardware::Software* software) = 0;
 };
+
+#pragma warning(push)
+#pragma warning(disable: 4250)
 
 // -------------------------------------------------------------------------------------------
 
 class CfgServiceSettingsGetter : public CfgServiceSettings, public SoftwareSettingsGetter
 {
-public:
-	bool readFromDevice(const Builder::Context* context,
+private:
+	bool readSettings(const Builder::Context* context,
 						const Hardware::Software* software) override;
 
-private:
 	bool buildClientsList(const Builder::Context* context, const Hardware::Software* software);
 };
 
@@ -73,8 +79,8 @@ private:
 
 class AppDataServiceSettingsGetter : public AppDataServiceSettings, public SoftwareSettingsGetter
 {
-public:
-	bool readFromDevice(const Builder::Context* context,
+private:
+	bool readSettings(const Builder::Context* context,
 						const Hardware::Software* software) override;
 };
 
@@ -82,8 +88,8 @@ public:
 
 class DiagDataServiceSettingsGetter : public DiagDataServiceSettings, public SoftwareSettingsGetter
 {
-public:
-	bool readFromDevice(const Builder::Context* context,
+private:
+	bool readSettings(const Builder::Context* context,
 						const Hardware::Software* software) override;
 };
 
@@ -91,10 +97,9 @@ public:
 
 class TuningServiceSettingsGetter : public TuningServiceSettings, public SoftwareSettingsGetter
 {
-public:
-	bool readFromDevice(const Builder::Context* context,
-						const Hardware::Software* software) override;
 private:
+	bool readSettings(const Builder::Context* context,
+						const Hardware::Software* software) override;
 	bool fillTuningSourcesInfo(const Builder::Context* context,
 							   int channel);
 
@@ -107,11 +112,10 @@ private:
 
 class ArchivingServiceSettingsGetter : public ArchivingServiceSettings, public SoftwareSettingsGetter
 {
-public:
-	bool readFromDevice(const Builder::Context* context,
+private:
+	bool readSettings(const Builder::Context* context,
 						const Hardware::Software* software) override;
 
-private:
 	bool checkSettings(const Hardware::Software* software, Builder::IssueLogger* log);
 };
 
@@ -119,9 +123,8 @@ private:
 
 class TestClientSettingsGetter : public TestClientSettings, public SoftwareSettingsGetter
 {
-public:
-
-	bool readFromDevice(const Builder::Context* context,
+private:
+	bool readSettings(const Builder::Context* context,
 						const Hardware::Software* software) override;
 };
 
@@ -129,8 +132,8 @@ public:
 
 class MetrologySettingsGetter : public MetrologySettings, public SoftwareSettingsGetter
 {
-public:
-	bool readFromDevice(const Builder::Context* context,
+private:
+	bool readSettings(const Builder::Context* context,
 						const Hardware::Software* software) override;
 };
 
@@ -138,12 +141,10 @@ public:
 
 class MonitorSettingsGetter : public MonitorSettings, public SoftwareSettingsGetter
 {
-public:
-	bool readFromDevice(const Builder::Context* context,
+private:
+	bool readSettings(const Builder::Context* context,
 						const Hardware::Software* software) override;
 
-
-private:
 	bool readAppDataServiceAndArchiveSettings(const Builder::Context* context,
 											  const Hardware::Software* software);
 
@@ -155,10 +156,12 @@ private:
 
 class TuningClientSettingsGetter : public TuningClientSettings, public SoftwareSettingsGetter
 {
-public:
-	bool readFromDevice(const Builder::Context* context,
+private:
+	bool readSettings(const Builder::Context* context,
 						const Hardware::Software* software) override;
 };
+
+#pragma warning(pop)
 
 
 

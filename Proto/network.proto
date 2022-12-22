@@ -266,6 +266,20 @@ message SoftwareInfo
     required int32 buildNo = 9 [default = 0];
     required uint32 crc = 10 [default = 0];
 	optional string clientDescription = 11;
+	optional string hostname = 12;
+}
+
+message IntroduceMyselfRequest
+{
+	required SoftwareInfo clientSoftwareInfo = 1;
+}
+
+message IntroduceMyselfReply
+{
+	required SoftwareInfo serverSoftwareInfo = 1;
+
+	required int32 setConnectionError = 2;					// Tcp::SetConnectionError values
+	optional string errorMsg = 3;
 }
 
 // Get Service Info

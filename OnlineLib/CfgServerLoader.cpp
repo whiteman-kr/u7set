@@ -616,8 +616,6 @@ void CfgLoader::resetStatuses()
 	m_configurationXmlReady = false;
 	m_autoDownloadIndex = 1;		// index 0 - Configuration.xml
 	m_allFilesLoaded = false;
-
-	m_enableSignalUnknownClient = true;
 }
 
 void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResult errorCode, const QString md5)
@@ -629,11 +627,6 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 	if (errorCode != Tcp::FileTransferResult::Ok)
 	{
 		emit signal_onEndFileDownloadError(fileName, errorCode);
-
-		if (errorCode == Tcp::FileTransferResult::UnknownClient)
-		{
-			emitSignalUnknownClient();
-		}
 	}
 
 	//
@@ -1009,16 +1002,6 @@ QString CfgLoader::getFilePathNameByID(QString fileID) const
 	return pathFileName;
 }
 
-void CfgLoader::emitSignalUnknownClient()
-{
-	if (m_enableSignalUnknownClient == true)
-	{
-		m_enableSignalUnknownClient = false;
-		emit signal_unknownClient();
-	}
-}
-
-
 // -------------------------------------------------------------------------------------
 //
 // CfgLoaderThread class implementation
@@ -1221,7 +1204,9 @@ void CfgLoaderThread::initThread()
 
 	connect(m_cfgLoader, &CfgLoader::signal_configurationReady, this, &CfgLoaderThread::signal_configurationReady);
 
-	connect(m_cfgLoader, &CfgLoader::signal_unknownClient, this, &CfgLoaderThread::signal_unknownClient);
+	connect(m_cfgLoader, &CfgLoader::signal_unknownClientID, this, &CfgLoaderThread::signal_unknownClientID);
+	connect(m_cfgLoader, &CfgLoader::signal_wrongClientHostname, this, &CfgLoaderThread::signal_wrongClientHostname);
+
 	connect(m_cfgLoader, &CfgLoader::signal_onEndFileDownload, this, &CfgLoaderThread::signal_onEndFileDownload);
 	connect(m_cfgLoader, &CfgLoader::signal_onEndFileDownloadError, this, &CfgLoaderThread::signal_onEndFileDownloadError);
 }

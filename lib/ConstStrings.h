@@ -70,6 +70,10 @@ namespace EquipmentPropNames
 	inline const QString PRESET_NAME("PresetName");
 	inline const QString LM_DESCRIPTION_FILE("LmDescriptionFile");
 
+	// CfgService properties
+	//
+	inline const QString CHECK_HOSTNAME("CheckHostname");
+
 	// TuningService properties
 	//
 	inline const QString TUNING_DATA_NETMASK("TuningDataNetmask");
@@ -135,6 +139,7 @@ namespace EquipmentPropNames
 	inline const QString CFG_SERVICE_PORT2("ConfigurationServicePort2");
 
 	inline const QString SOFTWARE_TYPE("SoftwareType");
+	inline const QString HOSTNAME("Hostname");
 
 	inline const QString APP_DATA_SERVICE_ID1("AppDataServiceID1");
 	inline const QString APP_DATA_SERVICE_ID2("AppDataServiceID2");
@@ -242,6 +247,7 @@ namespace XmlAttribute
 	inline const QString DATA_FORMAT("DataFormat");
 	inline const QString DATA_SIZE("DataSize");
 	inline const QString SOFTWARE_CONTROLLERS("SoftwareControllers");
+	inline const QString WORKSTATION_EQUIPMENT_ID("WorkstationEquipmentID");
 
 	inline const QString DATA_ID("DataID");
 	inline const QString HEX_DATA_ID("HexDataID");

@@ -319,7 +319,8 @@ private slots:
 	//
 	void					configSocketConnected();
 	void					configSocketDisconnected();
-	void					configSocketUnknownClient();
+	void					configSocketUnknownClient(QString errMsg);
+	void					configSocketWrongClientHostname(QString errMsg);
 	void					configSocketConfigurationLoaded();
 	void					configSocketSignalBaseLoading(int persentage);
 	void					configSocketSignalBaseLoaded();

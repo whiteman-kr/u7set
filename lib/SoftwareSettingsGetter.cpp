@@ -297,6 +297,27 @@ bool SoftwareSettingsGetter::getLmPropertiesFromDevice(	const Hardware::DeviceMo
 	return result;
 }
 
+bool SoftwareSettingsGetter::readSoftwareSettings(const Builder::Context* context,
+						  const Hardware::Software* software)
+{
+	TEST_PTR_RETURN_FALSE(context);
+	TEST_PTR_RETURN_FALSE(software);
+
+	const Hardware::Workstation* ws = software->getParentWorkstation();
+
+	if (ws == nullptr)
+	{
+		Q_ASSERT(false);
+		LOG_INTERNAL_ERROR_MSG(context->m_log, QString("Software %1 hasn't parent Workstation").
+							arg(software->equipmentIdTemplate()));
+		return false;
+	}
+
+	hostname = ws->hostname();
+
+	return readSettings(context, software);
+}
+
 bool SoftwareSettingsGetter::readFromDeviceByEquipmentID(const Builder::Context* context,
 														const QString& softwareID,
 														E::SoftwareType requiredSoftwareType)
@@ -346,7 +367,7 @@ bool SoftwareSettingsGetter::readFromDeviceByEquipmentID(const Builder::Context*
 		}
 	}
 
-	return readFromDevice(context, software.get());
+	return readSettings(context, software.get());
 }
 
 
@@ -356,7 +377,7 @@ bool SoftwareSettingsGetter::readFromDeviceByEquipmentID(const Builder::Context*
 //
 // -------------------------------------------------------------------------------------
 
-bool CfgServiceSettingsGetter::readFromDevice(	const Builder::Context* context,
+bool CfgServiceSettingsGetter::readSettings(	const Builder::Context* context,
 												const Hardware::Software* software)
 {
 	TEST_PTR_RETURN_FALSE(context);
@@ -396,7 +417,7 @@ bool CfgServiceSettingsGetter::buildClientsList(const Builder::Context* context,
 
 		if (software == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			continue;
 		}
 
@@ -421,7 +442,9 @@ bool CfgServiceSettingsGetter::buildClientsList(const Builder::Context* context,
 
 		if (ID1 == cfgService->equipmentIdTemplate() || ID2 == cfgService->equipmentIdTemplate())
 		{
-			clients.append(QPair<QString, E::SoftwareType>(software->equipmentIdTemplate(), software->softwareType()));
+			clients.append({.equipmentID = software->equipmentIdTemplate(),
+							.softwareType = software->softwareType(),
+							.hostname = software->hostname()});
 		}
 	}
 
@@ -434,7 +457,7 @@ bool CfgServiceSettingsGetter::buildClientsList(const Builder::Context* context,
 //
 // -------------------------------------------------------------------------------------
 
-bool AppDataServiceSettingsGetter::readFromDevice(const Builder::Context* context,
+bool AppDataServiceSettingsGetter::readSettings(const Builder::Context* context,
 												  const Hardware::Software* software)
 {
 	TEST_PTR_RETURN_FALSE(context);
@@ -498,7 +521,7 @@ bool AppDataServiceSettingsGetter::readFromDevice(const Builder::Context* contex
 //
 // -------------------------------------------------------------------------------------
 
-bool DiagDataServiceSettingsGetter::readFromDevice(const Builder::Context* context,
+bool DiagDataServiceSettingsGetter::readSettings(const Builder::Context* context,
 												   const Hardware::Software* software)
 {
 	TEST_PTR_RETURN_FALSE(context);
@@ -552,7 +575,7 @@ bool DiagDataServiceSettingsGetter::readFromDevice(const Builder::Context* conte
 //
 // -------------------------------------------------------------------------------------
 
-bool TuningServiceSettingsGetter::readFromDevice(const Builder::Context* context,
+bool TuningServiceSettingsGetter::readSettings(const Builder::Context* context,
 												 const Hardware::Software* software)
 {
 	TEST_PTR_RETURN_FALSE(context);
@@ -945,7 +968,7 @@ bool TuningServiceSettingsGetter::fillTuningClientsInfo(const Builder::Context* 
 //
 // -------------------------------------------------------------------------------------
 
-bool ArchivingServiceSettingsGetter::readFromDevice(const Builder::Context* context,
+bool ArchivingServiceSettingsGetter::readSettings(const Builder::Context* context,
 													const Hardware::Software* software)
 {
 	TEST_PTR_RETURN_FALSE(context);
@@ -1029,7 +1052,7 @@ bool ArchivingServiceSettingsGetter::checkSettings(const Hardware::Software *sof
 //
 // -------------------------------------------------------------------------------------
 
-bool TestClientSettingsGetter::readFromDevice(const Builder::Context* context,
+bool TestClientSettingsGetter::readSettings(const Builder::Context* context,
 											  const Hardware::Software* software)
 {
 	TEST_PTR_RETURN_FALSE(context);
@@ -1203,7 +1226,7 @@ bool TestClientSettingsGetter::readFromDevice(const Builder::Context* context,
 // -------------------------------------------------------------------------------------
 
 
-bool MetrologySettingsGetter::readFromDevice(const Builder::Context* context,
+bool MetrologySettingsGetter::readSettings(const Builder::Context* context,
 											 const Hardware::Software* software)
 {
 	TEST_PTR_RETURN_FALSE(context);
@@ -1321,7 +1344,7 @@ bool MetrologySettingsGetter::readFromDevice(const Builder::Context* context,
 //
 // -------------------------------------------------------------------------------------
 
-bool MonitorSettingsGetter::readFromDevice(const Builder::Context* context,
+bool MonitorSettingsGetter::readSettings(const Builder::Context* context,
 										   const Hardware::Software* software)
 {
 	clear();
@@ -1352,7 +1375,7 @@ bool MonitorSettingsGetter::readFromDevice(const Builder::Context* context,
 
 	if (startSchemaId.isEmpty() == true)
 	{
-		QString errorStr = tr("Monitor configuration error %1, property startSchemaId is invalid").
+		QString errorStr = QString("Monitor configuration error %1, property startSchemaId is invalid").
 								arg(software->equipmentIdTemplate());
 
 		log->writeError(errorStr);
@@ -1471,7 +1494,7 @@ bool MonitorSettingsGetter::readAppDataServiceAndArchiveSettings(const Builder::
 	{
 		AppDataServiceSettingsGetter adsSettings1;
 
-		result &= adsSettings1.readFromDevice(context, appDataService1);
+		result &= adsSettings1.readSoftwareSettings(context, appDataService1);
 
 		RETURN_IF_FALSE(result);
 
@@ -1506,7 +1529,7 @@ bool MonitorSettingsGetter::readAppDataServiceAndArchiveSettings(const Builder::
 	{
 		AppDataServiceSettingsGetter adsSettings2;
 
-		result &= adsSettings2.readFromDevice(context, appDataService2);
+		result &= adsSettings2.readSoftwareSettings(context, appDataService2);
 
 		RETURN_IF_FALSE(result);
 
@@ -1614,7 +1637,7 @@ bool MonitorSettingsGetter::readTuningServiceSettings(const Builder::Context* co
 // -------------------------------------------------------------------------------------
 
 
-bool TuningClientSettingsGetter::readFromDevice(const Builder::Context* context,
+bool TuningClientSettingsGetter::readSettings(const Builder::Context* context,
 												const Hardware::Software* software)
 {
 	TEST_PTR_RETURN_FALSE(context);

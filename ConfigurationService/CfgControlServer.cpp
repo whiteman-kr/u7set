@@ -63,11 +63,11 @@ void CfgControlServer::processRequest(quint32 requestID, const char* requestData
 	}
 }
 
-bool CfgControlServer::checkClientID()
+Tcp::SetConnectionError CfgControlServer::checkClient(const QString& clientEquipmentID, const QString& clientHostname) const
 {
-	QString connectedClientID = connectedSoftwareInfo().equipmentID();
+	Q_ASSERT(false);		// TO DO real check
 
-	return m_knownClients.contains(connectedClientID.trimmed());
+	return Tcp::SetConnectionError::Ok;
 }
 
 void CfgControlServer::sendServiceState()

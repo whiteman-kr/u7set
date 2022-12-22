@@ -2674,12 +2674,26 @@ void MainWindow::configSocketDisconnected()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::configSocketUnknownClient()
+void MainWindow::configSocketUnknownClient(QString errMsg)
 {
+	Q_UNUSED(errMsg);
+
 	QMessageBox::critical(this,
 						  windowTitle(),
 						  tr("Configuration Service does not recognize EquipmentID \"%1\" for software \"Metrology\"")
 						  .arg(theOptions.socket().server(OT::ServerType::ConfigurationService).equipmentID(OT::ServerPriority::Primary)));
+	return;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::configSocketWrongClientHostname(QString errMsg)
+{
+	Q_UNUSED(errMsg);
+
+	QMessageBox::critical(this,
+						  windowTitle(),
+						  tr("Configuration Service reported: software \"Metrology\" running on computer with wrong hostname"));
 	return;
 }
 
@@ -3216,6 +3230,7 @@ void MainWindow::runConfigSocket()
 	connect(m_pConfigSocket, &ConfigSocket::socketDisconnected, this, &MainWindow::configSocketDisconnected, Qt::QueuedConnection);
 
 	connect(m_pConfigSocket, &ConfigSocket::unknownClient, this, &MainWindow::configSocketUnknownClient, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::wrongClientHostname, this, &MainWindow::configSocketWrongClientHostname, Qt::QueuedConnection);
 
 	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, this, &MainWindow::configSocketConfigurationLoaded, Qt::QueuedConnection);
 	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoading, this, &MainWindow::configSocketSignalBaseLoading, Qt::QueuedConnection);

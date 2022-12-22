@@ -199,10 +199,6 @@ namespace Tcp
 			str = QString(tr("Configuration is not ready"));
 			break;
 
-		case FileTransferResult::UnknownClient:
-			str = QString(tr("Unknown client's EquipmentID"));
-			break;
-
 		case FileTransferResult::InternalError:
 			str = QString(tr("Internal error"));
 			break;
@@ -498,23 +494,8 @@ namespace Tcp
 		return true;
 	}
 
-	bool FileServer::checkClientID()
-	{
-		return true;			// real checking will be implemented in derived classes (if required)
-	}
-
 	void FileServer::sendFirstFilePart(const QString& fileName)
 	{
-		bool res = checkClientID();
-
-		if (res == false)
-		{
-			m_reply.set_errorcode(static_cast<int>(FileTransferResult::UnknownClient));
-			sendReply(m_reply);
-			init();
-			return;
-		}
-
 		init();
 
 		// start upload process

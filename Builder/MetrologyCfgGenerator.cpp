@@ -24,7 +24,7 @@ namespace Builder
 	{
 		MetrologySettingsGetter settingsGetter;
 
-		if (settingsGetter.readFromDevice(m_context, m_software) == false)
+		if (settingsGetter.readSoftwareSettings(m_context, m_software) == false)
 		{
 			return false;
 		}

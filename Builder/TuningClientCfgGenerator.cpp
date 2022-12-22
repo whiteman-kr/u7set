@@ -18,7 +18,7 @@ namespace Builder
 	{
 		TuningClientSettingsGetter settingsGetter;
 
-		if (settingsGetter.readFromDevice(m_context, m_software) == false)
+		if (settingsGetter.readSoftwareSettings(m_context, m_software) == false)
 		{
 			return false;
 		}
@@ -208,7 +208,8 @@ namespace Builder
 			}
 
 			TuningServiceSettingsGetter tsg;
-			if (tsg.readFromDevice(m_context, tuningServiceSoftware.get()) == false)
+
+			if (tsg.readSoftwareSettings(m_context, tuningServiceSoftware.get()) == false)
 			{
 				result = false;
 				continue;

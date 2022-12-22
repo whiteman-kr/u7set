@@ -743,6 +743,14 @@ namespace Tcp
 		m_statesMutex.unlock();
 	}
 
+	Tcp::SetConnectionError Server::checkClient(const QString& clientEquipmentID, const QString& clientHostname) const
+	{
+		Q_UNUSED(clientEquipmentID);
+		Q_UNUSED(clientHostname);
+
+		return Tcp::SetConnectionError::Ok;			// real checking will be implemented in derived classes (if required)
+	}
+
 	void Server::onThreadStarted()
 	{
 		connect(&m_autoAckTimer, &QTimer::timeout, this, &Server::onAutoAckTimer);
@@ -834,9 +842,9 @@ namespace Tcp
 
 	void Server::processIntroduceMyselfRequest(const char* dataBuffer, int dataSize)
 	{
-		Network::SoftwareInfo inMessage;
+		Network::IntroduceMyselfRequest request;
 
-		bool result = inMessage.ParseFromArray(dataBuffer, dataSize);
+		bool result = request.ParseFromArray(dataBuffer, dataSize);
 
 		if (result == false)
 		{
@@ -846,20 +854,47 @@ namespace Tcp
 
 		m_stateMutex.lock();
 
-		m_state.connectedSoftwareInfo.serializeFrom(inMessage);
-		m_state.clientDescription = QString::fromStdString(inMessage.clientdescription());
+		m_state.connectedSoftwareInfo.serializeFrom(request.clientsoftwareinfo());
 
-		Network::SoftwareInfo outMessage;
+		Network::IntroduceMyselfReply reply;
 
-		m_state.localSoftwareInfo.serializeTo(&outMessage);
+		m_state.localSoftwareInfo.serializeTo(reply.mutable_serversoftwareinfo());
 
+		Tcp::SetConnectionError err = checkClient(m_state.connectedSoftwareInfo.equipmentID(),
+												  m_state.connectedSoftwareInfo.hostname());
 		m_stateMutex.unlock();
 
-		sendReply(outMessage);
+		reply.set_setconnectionerror(static_cast<::google::protobuf::int32>(err));
+
+		switch(err)
+		{
+		case Tcp::SetConnectionError::Ok:
+			break;
+
+		case Tcp::SetConnectionError::UnknownClientID:
+			reply.set_errormsg((QString("Unknown client equipmentID: %1").
+								arg(m_state.connectedSoftwareInfo.equipmentID())).toStdString());
+			break;
+
+		case Tcp::SetConnectionError::WrongClientHostname:
+			reply.set_errormsg((QString("Client %1 running on computer with wrong hostname").
+								arg(m_state.connectedSoftwareInfo.equipmentID())).toStdString());
+			break;
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		sendReply(reply);
 
 		onConnectedSoftwareInfoChanged();
 
 		emit connectedSoftwareInfoChanged();
+
+		if (err != Tcp::SetConnectionError::Ok)
+		{
+			closeConnection();
+		}
 	}
 
 	void Server::onAutoAckTimer()
@@ -1555,9 +1590,9 @@ namespace Tcp
 
 	void Client::processIntroduceMyselfReply(const char* dataBuffer, int dataSize)
 	{
-		Network::SoftwareInfo inMessage;
+		Network::IntroduceMyselfReply imr;
 
-		bool result = inMessage.ParseFromArray(dataBuffer, dataSize);
+		bool result = imr.ParseFromArray(dataBuffer, dataSize);
 
 		if (result == false)
 		{
@@ -1567,8 +1602,28 @@ namespace Tcp
 
 		m_stateMutex.lock();
 
-		m_state.connectedSoftwareInfo.serializeFrom(inMessage);
-		m_state.clientDescription = QString::fromStdString(inMessage.clientdescription());
+		m_state.connectedSoftwareInfo.serializeFrom(imr.serversoftwareinfo());
+
+		SetConnectionError err = static_cast<SetConnectionError>(imr.setconnectionerror());
+
+		switch(err)
+		{
+		case SetConnectionError::Ok:
+			break;
+
+		case SetConnectionError::UnknownClientID:
+			emit signal_unknownClientID(QString::fromStdString(imr.errormsg()));
+			break;
+
+		case SetConnectionError::WrongClientHostname:
+			emit signal_wrongClientHostname(QString::fromStdString(imr.errormsg()));
+			break;
+
+		default:
+			Q_ASSERT(false);
+		}
+
+
 
 		m_stateMutex.unlock();
 	}

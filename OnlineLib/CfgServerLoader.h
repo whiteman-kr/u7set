@@ -151,7 +151,6 @@ signals:
 	void signal_fileReady();					// emit only for manual requests
 	void signal_configurationChanged();
 
-	void signal_unknownClient();
 	void signal_onEndFileDownload(const QString& fileName, Tcp::FileTransferResult errorCode);
 	void signal_onEndFileDownloadError(const QString& fileName, Tcp::FileTransferResult errorCode);
 
@@ -188,8 +187,6 @@ private:
 	void emitFileReady();
 
 	QString getFilePathNameByID(QString fileID) const;
-
-	void emitSignalUnknownClient();
 
 private:
 	struct CfgFileInfo : public Builder::BuildFileInfo
@@ -260,8 +257,6 @@ private:
 	Tcp::FileTransferResult m_lastError = Tcp::FileTransferResult::Ok;
 
 	QMap<QString, QString> m_fileIDPathMap;
-
-	bool m_enableSignalUnknownClient = true;
 };
 
 template<typename T>
@@ -343,7 +338,9 @@ signals:
 								   SessionParams sessionParams,
 								   std::shared_ptr<const SoftwareSettings> currentSettingsProfile);
 
-	void signal_unknownClient();
+	void signal_unknownClientID(QString errMsg);
+	void signal_wrongClientHostname(QString errMsg);
+
 	void signal_onEndFileDownload(const QString& fileName, Tcp::FileTransferResult errorCode);
 	void signal_onEndFileDownloadError(const QString& fileName, Tcp::FileTransferResult errorCode);
 

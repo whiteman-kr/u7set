@@ -79,7 +79,9 @@ void ConfigSocket::start()
 	m_loadedFiles.clear();
 
 	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &ConfigSocket::slot_configurationReady);
+
 	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_unknownClient, this, &ConfigSocket::unknownClient);
+	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_wrongClientHostname, this, &ConfigSocket::wrongClientHostname);
 
 	m_cfgLoaderThread->start();
 	m_cfgLoaderThread->enableDownloadConfiguration();

@@ -799,6 +799,29 @@ namespace Hardware
 		return nullptr;
 	}
 
+	const Hardware::Workstation* DeviceObject::getParentWorkstation() const
+	{
+		const Hardware::DeviceObject* deviceObject = this;
+
+		do
+		{
+			deviceObject = deviceObject->parent().get();
+
+			if (deviceObject == nullptr)
+			{
+				break;
+			}
+
+			if (deviceObject->isWorkstation())
+			{
+				return deviceObject->toWorkstation().get();
+			}
+		}
+		while(deviceObject != nullptr);
+
+		return nullptr;
+	}
+
 	const Hardware::DeviceChassis* DeviceObject::getParentChassis() const
 	{
 		const Hardware::DeviceObject* deviceObject = this;
@@ -2666,6 +2689,19 @@ R"DELIM({
 		m_softwareType =  static_cast<E::SoftwareType>(softwareMessage.type());
 
 		return true;
+	}
+
+	QString Software::hostname() const
+	{
+		const Hardware::Workstation* ws = getParentWorkstation();
+
+		if (ws == nullptr)
+		{
+			Q_ASSERT(false);
+			return QString();
+		}
+
+		return ws->hostname();
 	}
 
 	E::SoftwareType Software::softwareType() const

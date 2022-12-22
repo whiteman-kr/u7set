@@ -58,6 +58,8 @@ void SoftwareInfo::init(E::SoftwareType softwareType,
 	}
 
 #endif
+
+	m_hostname = QSysInfo::machineHostName();
 }
 
 void SoftwareInfo::clear()
@@ -100,6 +102,7 @@ void SoftwareInfo::serializeTo(Network::SoftwareInfo* info) const
 	info->set_username(m_userName.toStdString());
 	info->set_buildno(m_buildNo);
 	info->set_crc(m_crc);
+	info->set_hostname(m_hostname.toStdString());
 }
 
 void SoftwareInfo::serializeFrom(const Network::SoftwareInfo& info)
@@ -114,4 +117,5 @@ void SoftwareInfo::serializeFrom(const Network::SoftwareInfo& info)
 	m_userName = QString::fromStdString(info.username());
 	m_buildNo = info.buildno();
 	m_crc = info.crc();
+	m_hostname = QString::fromStdString(info.hostname());
 }

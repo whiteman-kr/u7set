@@ -61,7 +61,7 @@ struct TableStruct_network_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[66]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[68]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -187,6 +187,12 @@ extern GetTuningSourcesStatesDefaultTypeInternal _GetTuningSourcesStates_default
 class GetTuningSourcesStatesReply;
 struct GetTuningSourcesStatesReplyDefaultTypeInternal;
 extern GetTuningSourcesStatesReplyDefaultTypeInternal _GetTuningSourcesStatesReply_default_instance_;
+class IntroduceMyselfReply;
+struct IntroduceMyselfReplyDefaultTypeInternal;
+extern IntroduceMyselfReplyDefaultTypeInternal _IntroduceMyselfReply_default_instance_;
+class IntroduceMyselfRequest;
+struct IntroduceMyselfRequestDefaultTypeInternal;
+extern IntroduceMyselfRequestDefaultTypeInternal _IntroduceMyselfRequest_default_instance_;
 class LanControllerInfo;
 struct LanControllerInfoDefaultTypeInternal;
 extern LanControllerInfoDefaultTypeInternal _LanControllerInfo_default_instance_;
@@ -309,6 +315,8 @@ template<> ::Network::GetTuningSourcesInfo* Arena::CreateMaybeMessage<::Network:
 template<> ::Network::GetTuningSourcesInfoReply* Arena::CreateMaybeMessage<::Network::GetTuningSourcesInfoReply>(Arena*);
 template<> ::Network::GetTuningSourcesStates* Arena::CreateMaybeMessage<::Network::GetTuningSourcesStates>(Arena*);
 template<> ::Network::GetTuningSourcesStatesReply* Arena::CreateMaybeMessage<::Network::GetTuningSourcesStatesReply>(Arena*);
+template<> ::Network::IntroduceMyselfReply* Arena::CreateMaybeMessage<::Network::IntroduceMyselfReply>(Arena*);
+template<> ::Network::IntroduceMyselfRequest* Arena::CreateMaybeMessage<::Network::IntroduceMyselfRequest>(Arena*);
 template<> ::Network::LanControllerInfo* Arena::CreateMaybeMessage<::Network::LanControllerInfo>(Arena*);
 template<> ::Network::PacketSourceExit* Arena::CreateMaybeMessage<::Network::PacketSourceExit>(Arena*);
 template<> ::Network::PacketSourceExitReply* Arena::CreateMaybeMessage<::Network::PacketSourceExitReply>(Arena*);
@@ -5185,6 +5193,7 @@ class SoftwareInfo PROTOBUF_FINAL :
     kCommitSHAFieldNumber = 7,
     kUserNameFieldNumber = 8,
     kClientDescriptionFieldNumber = 11,
+    kHostnameFieldNumber = 12,
     kMajorVersionFieldNumber = 3,
     kMinorVersionFieldNumber = 4,
     kCommitNoFieldNumber = 5,
@@ -5292,6 +5301,26 @@ class SoftwareInfo PROTOBUF_FINAL :
   std::string* _internal_mutable_clientdescription();
   public:
 
+  // optional string hostname = 12;
+  bool has_hostname() const;
+  private:
+  bool _internal_has_hostname() const;
+  public:
+  void clear_hostname();
+  const std::string& hostname() const;
+  void set_hostname(const std::string& value);
+  void set_hostname(std::string&& value);
+  void set_hostname(const char* value);
+  void set_hostname(const char* value, size_t size);
+  std::string* mutable_hostname();
+  std::string* release_hostname();
+  void set_allocated_hostname(std::string* hostname);
+  private:
+  const std::string& _internal_hostname() const;
+  void _internal_set_hostname(const std::string& value);
+  std::string* _internal_mutable_hostname();
+  public:
+
   // required int32 majorVersion = 3 [default = 0];
   bool has_majorversion() const;
   private:
@@ -5387,12 +5416,361 @@ class SoftwareInfo PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr commitsha_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr username_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr clientdescription_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr hostname_;
   ::PROTOBUF_NAMESPACE_ID::int32 majorversion_;
   ::PROTOBUF_NAMESPACE_ID::int32 minorversion_;
   ::PROTOBUF_NAMESPACE_ID::int32 commitno_;
   ::PROTOBUF_NAMESPACE_ID::int32 buildno_;
   ::PROTOBUF_NAMESPACE_ID::uint32 crc_;
   ::PROTOBUF_NAMESPACE_ID::int32 softwaretype_;
+  friend struct ::TableStruct_network_2eproto;
+};
+// -------------------------------------------------------------------
+
+class IntroduceMyselfRequest PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Network.IntroduceMyselfRequest) */ {
+ public:
+  inline IntroduceMyselfRequest() : IntroduceMyselfRequest(nullptr) {}
+  virtual ~IntroduceMyselfRequest();
+  explicit constexpr IntroduceMyselfRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  IntroduceMyselfRequest(const IntroduceMyselfRequest& from);
+  IntroduceMyselfRequest(IntroduceMyselfRequest&& from) noexcept
+    : IntroduceMyselfRequest() {
+    *this = ::std::move(from);
+  }
+
+  inline IntroduceMyselfRequest& operator=(const IntroduceMyselfRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline IntroduceMyselfRequest& operator=(IntroduceMyselfRequest&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
+    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
+  }
+  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
+    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const IntroduceMyselfRequest& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const IntroduceMyselfRequest* internal_default_instance() {
+    return reinterpret_cast<const IntroduceMyselfRequest*>(
+               &_IntroduceMyselfRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    21;
+
+  friend void swap(IntroduceMyselfRequest& a, IntroduceMyselfRequest& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(IntroduceMyselfRequest* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(IntroduceMyselfRequest* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline IntroduceMyselfRequest* New() const final {
+    return CreateMaybeMessage<IntroduceMyselfRequest>(nullptr);
+  }
+
+  IntroduceMyselfRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<IntroduceMyselfRequest>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const IntroduceMyselfRequest& from);
+  void MergeFrom(const IntroduceMyselfRequest& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(IntroduceMyselfRequest* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Network.IntroduceMyselfRequest";
+  }
+  protected:
+  explicit IntroduceMyselfRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_network_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kClientSoftwareInfoFieldNumber = 1,
+  };
+  // required .Network.SoftwareInfo clientSoftwareInfo = 1;
+  bool has_clientsoftwareinfo() const;
+  private:
+  bool _internal_has_clientsoftwareinfo() const;
+  public:
+  void clear_clientsoftwareinfo();
+  const ::Network::SoftwareInfo& clientsoftwareinfo() const;
+  ::Network::SoftwareInfo* release_clientsoftwareinfo();
+  ::Network::SoftwareInfo* mutable_clientsoftwareinfo();
+  void set_allocated_clientsoftwareinfo(::Network::SoftwareInfo* clientsoftwareinfo);
+  private:
+  const ::Network::SoftwareInfo& _internal_clientsoftwareinfo() const;
+  ::Network::SoftwareInfo* _internal_mutable_clientsoftwareinfo();
+  public:
+  void unsafe_arena_set_allocated_clientsoftwareinfo(
+      ::Network::SoftwareInfo* clientsoftwareinfo);
+  ::Network::SoftwareInfo* unsafe_arena_release_clientsoftwareinfo();
+
+  // @@protoc_insertion_point(class_scope:Network.IntroduceMyselfRequest)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::Network::SoftwareInfo* clientsoftwareinfo_;
+  friend struct ::TableStruct_network_2eproto;
+};
+// -------------------------------------------------------------------
+
+class IntroduceMyselfReply PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Network.IntroduceMyselfReply) */ {
+ public:
+  inline IntroduceMyselfReply() : IntroduceMyselfReply(nullptr) {}
+  virtual ~IntroduceMyselfReply();
+  explicit constexpr IntroduceMyselfReply(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  IntroduceMyselfReply(const IntroduceMyselfReply& from);
+  IntroduceMyselfReply(IntroduceMyselfReply&& from) noexcept
+    : IntroduceMyselfReply() {
+    *this = ::std::move(from);
+  }
+
+  inline IntroduceMyselfReply& operator=(const IntroduceMyselfReply& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline IntroduceMyselfReply& operator=(IntroduceMyselfReply&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
+    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
+  }
+  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
+    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const IntroduceMyselfReply& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const IntroduceMyselfReply* internal_default_instance() {
+    return reinterpret_cast<const IntroduceMyselfReply*>(
+               &_IntroduceMyselfReply_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    22;
+
+  friend void swap(IntroduceMyselfReply& a, IntroduceMyselfReply& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(IntroduceMyselfReply* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(IntroduceMyselfReply* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline IntroduceMyselfReply* New() const final {
+    return CreateMaybeMessage<IntroduceMyselfReply>(nullptr);
+  }
+
+  IntroduceMyselfReply* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<IntroduceMyselfReply>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const IntroduceMyselfReply& from);
+  void MergeFrom(const IntroduceMyselfReply& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(IntroduceMyselfReply* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Network.IntroduceMyselfReply";
+  }
+  protected:
+  explicit IntroduceMyselfReply(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_network_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kErrorMsgFieldNumber = 3,
+    kServerSoftwareInfoFieldNumber = 1,
+    kSetConnectionErrorFieldNumber = 2,
+  };
+  // optional string errorMsg = 3;
+  bool has_errormsg() const;
+  private:
+  bool _internal_has_errormsg() const;
+  public:
+  void clear_errormsg();
+  const std::string& errormsg() const;
+  void set_errormsg(const std::string& value);
+  void set_errormsg(std::string&& value);
+  void set_errormsg(const char* value);
+  void set_errormsg(const char* value, size_t size);
+  std::string* mutable_errormsg();
+  std::string* release_errormsg();
+  void set_allocated_errormsg(std::string* errormsg);
+  private:
+  const std::string& _internal_errormsg() const;
+  void _internal_set_errormsg(const std::string& value);
+  std::string* _internal_mutable_errormsg();
+  public:
+
+  // required .Network.SoftwareInfo serverSoftwareInfo = 1;
+  bool has_serversoftwareinfo() const;
+  private:
+  bool _internal_has_serversoftwareinfo() const;
+  public:
+  void clear_serversoftwareinfo();
+  const ::Network::SoftwareInfo& serversoftwareinfo() const;
+  ::Network::SoftwareInfo* release_serversoftwareinfo();
+  ::Network::SoftwareInfo* mutable_serversoftwareinfo();
+  void set_allocated_serversoftwareinfo(::Network::SoftwareInfo* serversoftwareinfo);
+  private:
+  const ::Network::SoftwareInfo& _internal_serversoftwareinfo() const;
+  ::Network::SoftwareInfo* _internal_mutable_serversoftwareinfo();
+  public:
+  void unsafe_arena_set_allocated_serversoftwareinfo(
+      ::Network::SoftwareInfo* serversoftwareinfo);
+  ::Network::SoftwareInfo* unsafe_arena_release_serversoftwareinfo();
+
+  // required int32 setConnectionError = 2;
+  bool has_setconnectionerror() const;
+  private:
+  bool _internal_has_setconnectionerror() const;
+  public:
+  void clear_setconnectionerror();
+  ::PROTOBUF_NAMESPACE_ID::int32 setconnectionerror() const;
+  void set_setconnectionerror(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_setconnectionerror() const;
+  void _internal_set_setconnectionerror(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:Network.IntroduceMyselfReply)
+ private:
+  class _Internal;
+
+  // helper for ByteSizeLong()
+  size_t RequiredFieldsByteSizeFallback() const;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr errormsg_;
+  ::Network::SoftwareInfo* serversoftwareinfo_;
+  ::PROTOBUF_NAMESPACE_ID::int32 setconnectionerror_;
   friend struct ::TableStruct_network_2eproto;
 };
 // -------------------------------------------------------------------
@@ -5447,7 +5825,7 @@ class GetServiceInfoRequest PROTOBUF_FINAL :
                &_GetServiceInfoRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    21;
+    23;
 
   friend void swap(GetServiceInfoRequest& a, GetServiceInfoRequest& b) {
     a.Swap(&b);
@@ -5578,7 +5956,7 @@ class SessionParams PROTOBUF_FINAL :
                &_SessionParams_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    22;
+    24;
 
   friend void swap(SessionParams& a, SessionParams& b) {
     a.Swap(&b);
@@ -5749,7 +6127,7 @@ class ServiceInfo PROTOBUF_FINAL :
                &_ServiceInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    23;
+    25;
 
   friend void swap(ServiceInfo& a, ServiceInfo& b) {
     a.Swap(&b);
@@ -5990,7 +6368,7 @@ class GetServiceInfoReply PROTOBUF_FINAL :
                &_GetServiceInfoReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    24;
+    26;
 
   friend void swap(GetServiceInfoReply& a, GetServiceInfoReply& b) {
     a.Swap(&b);
@@ -6162,7 +6540,7 @@ class ConfigurationServiceState PROTOBUF_FINAL :
                &_ConfigurationServiceState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    25;
+    27;
 
   friend void swap(ConfigurationServiceState& a, ConfigurationServiceState& b) {
     a.Swap(&b);
@@ -6351,7 +6729,7 @@ class ServiceClientInfo PROTOBUF_FINAL :
                &_ServiceClientInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    26;
+    28;
 
   friend void swap(ServiceClientInfo& a, ServiceClientInfo& b) {
     a.Swap(&b);
@@ -6568,7 +6946,7 @@ class ServiceClients PROTOBUF_FINAL :
                &_ServiceClients_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    27;
+    29;
 
   friend void swap(ServiceClients& a, ServiceClients& b) {
     a.Swap(&b);
@@ -6721,7 +7099,7 @@ class BuildInfo PROTOBUF_FINAL :
                &_BuildInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    28;
+    30;
 
   friend void swap(BuildInfo& a, BuildInfo& b) {
     a.Swap(&b);
@@ -6969,7 +7347,7 @@ class ConfigurationServiceSettings PROTOBUF_FINAL :
                &_ConfigurationServiceSettings_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    29;
+    31;
 
   friend void swap(ConfigurationServiceSettings& a, ConfigurationServiceSettings& b) {
     a.Swap(&b);
@@ -7172,7 +7550,7 @@ class ServiceSettings PROTOBUF_FINAL :
                &_ServiceSettings_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    30;
+    32;
 
   friend void swap(ServiceSettings& a, ServiceSettings& b) {
     a.Swap(&b);
@@ -7375,7 +7753,7 @@ class GetTuningSourcesInfo PROTOBUF_FINAL :
                &_GetTuningSourcesInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    31;
+    33;
 
   friend void swap(GetTuningSourcesInfo& a, GetTuningSourcesInfo& b) {
     a.Swap(&b);
@@ -7506,7 +7884,7 @@ class GetTuningSourcesInfoReply PROTOBUF_FINAL :
                &_GetTuningSourcesInfoReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    32;
+    34;
 
   friend void swap(GetTuningSourcesInfoReply& a, GetTuningSourcesInfoReply& b) {
     a.Swap(&b);
@@ -7734,7 +8112,7 @@ class GetTuningSourcesStates PROTOBUF_FINAL :
                &_GetTuningSourcesStates_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    33;
+    35;
 
   friend void swap(GetTuningSourcesStates& a, GetTuningSourcesStates& b) {
     a.Swap(&b);
@@ -7865,7 +8243,7 @@ class SignalsAssociatedToTuningSource PROTOBUF_FINAL :
                &_SignalsAssociatedToTuningSource_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    34;
+    36;
 
   friend void swap(SignalsAssociatedToTuningSource& a, SignalsAssociatedToTuningSource& b) {
     a.Swap(&b);
@@ -8038,7 +8416,7 @@ class TuningSourceFilling PROTOBUF_FINAL :
                &_TuningSourceFilling_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    35;
+    37;
 
   friend void swap(TuningSourceFilling& a, TuningSourceFilling& b) {
     a.Swap(&b);
@@ -8207,7 +8585,7 @@ class TuningSourceState PROTOBUF_FINAL :
                &_TuningSourceState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    36;
+    38;
 
   friend void swap(TuningSourceState& a, TuningSourceState& b) {
     a.Swap(&b);
@@ -9083,7 +9461,7 @@ class GetTuningSourcesStatesReply PROTOBUF_FINAL :
                &_GetTuningSourcesStatesReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    37;
+    39;
 
   friend void swap(GetTuningSourcesStatesReply& a, GetTuningSourcesStatesReply& b) {
     a.Swap(&b);
@@ -9311,7 +9689,7 @@ class ChangeConrolledTuningSourceRequest PROTOBUF_FINAL :
                &_ChangeConrolledTuningSourceRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    38;
+    40;
 
   friend void swap(ChangeConrolledTuningSourceRequest& a, ChangeConrolledTuningSourceRequest& b) {
     a.Swap(&b);
@@ -9497,7 +9875,7 @@ class ChangeConrolledTuningSourceReply PROTOBUF_FINAL :
                &_ChangeConrolledTuningSourceReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    39;
+    41;
 
   friend void swap(ChangeConrolledTuningSourceReply& a, ChangeConrolledTuningSourceReply& b) {
     a.Swap(&b);
@@ -9683,7 +10061,7 @@ class TuningSignalsRead PROTOBUF_FINAL :
                &_TuningSignalsRead_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    40;
+    42;
 
   friend void swap(TuningSignalsRead& a, TuningSignalsRead& b) {
     a.Swap(&b);
@@ -9840,7 +10218,7 @@ class TuningSignalState PROTOBUF_FINAL :
                &_TuningSignalState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    41;
+    43;
 
   friend void swap(TuningSignalState& a, TuningSignalState& b) {
     a.Swap(&b);
@@ -10259,7 +10637,7 @@ class TuningSignalsReadReply PROTOBUF_FINAL :
                &_TuningSignalsReadReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    42;
+    44;
 
   friend void swap(TuningSignalsReadReply& a, TuningSignalsReadReply& b) {
     a.Swap(&b);
@@ -10428,7 +10806,7 @@ class TuningWriteCommand PROTOBUF_FINAL :
                &_TuningWriteCommand_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    43;
+    45;
 
   friend void swap(TuningWriteCommand& a, TuningWriteCommand& b) {
     a.Swap(&b);
@@ -10597,7 +10975,7 @@ class TuningSignalsWrite PROTOBUF_FINAL :
                &_TuningSignalsWrite_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    44;
+    46;
 
   friend void swap(TuningSignalsWrite& a, TuningSignalsWrite& b) {
     a.Swap(&b);
@@ -10766,7 +11144,7 @@ class TuningSignalWriteResult PROTOBUF_FINAL :
                &_TuningSignalWriteResult_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    45;
+    47;
 
   friend void swap(TuningSignalWriteResult& a, TuningSignalWriteResult& b) {
     a.Swap(&b);
@@ -10930,7 +11308,7 @@ class TuningSignalsWriteReply PROTOBUF_FINAL :
                &_TuningSignalsWriteReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    46;
+    48;
 
   friend void swap(TuningSignalsWriteReply& a, TuningSignalsWriteReply& b) {
     a.Swap(&b);
@@ -11099,7 +11477,7 @@ class TuningSignalsApply PROTOBUF_FINAL :
                &_TuningSignalsApply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    47;
+    49;
 
   friend void swap(TuningSignalsApply& a, TuningSignalsApply& b) {
     a.Swap(&b);
@@ -11230,7 +11608,7 @@ class TuningSignalsApplyReply PROTOBUF_FINAL :
                &_TuningSignalsApplyReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    48;
+    50;
 
   friend void swap(TuningSignalsApplyReply& a, TuningSignalsApplyReply& b) {
     a.Swap(&b);
@@ -11379,7 +11757,7 @@ class DataSourceWrite PROTOBUF_FINAL :
                &_DataSourceWrite_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    49;
+    51;
 
   friend void swap(DataSourceWrite& a, DataSourceWrite& b) {
     a.Swap(&b);
@@ -11550,7 +11928,7 @@ class DataSourceWriteReply PROTOBUF_FINAL :
                &_DataSourceWriteReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    50;
+    52;
 
   friend void swap(DataSourceWriteReply& a, DataSourceWriteReply& b) {
     a.Swap(&b);
@@ -11699,7 +12077,7 @@ class PacketSourceExit PROTOBUF_FINAL :
                &_PacketSourceExit_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    51;
+    53;
 
   friend void swap(PacketSourceExit& a, PacketSourceExit& b) {
     a.Swap(&b);
@@ -11830,7 +12208,7 @@ class PacketSourceExitReply PROTOBUF_FINAL :
                &_PacketSourceExitReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    52;
+    54;
 
   friend void swap(PacketSourceExitReply& a, PacketSourceExitReply& b) {
     a.Swap(&b);
@@ -11979,7 +12357,7 @@ class SaveAppSignalsStatesToArchiveRequest PROTOBUF_FINAL :
                &_SaveAppSignalsStatesToArchiveRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    53;
+    55;
 
   friend void swap(SaveAppSignalsStatesToArchiveRequest& a, SaveAppSignalsStatesToArchiveRequest& b) {
     a.Swap(&b);
@@ -12155,7 +12533,7 @@ class SaveAppSignalsStatesToArchiveReply PROTOBUF_FINAL :
                &_SaveAppSignalsStatesToArchiveReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    54;
+    56;
 
   friend void swap(SaveAppSignalsStatesToArchiveReply& a, SaveAppSignalsStatesToArchiveReply& b) {
     a.Swap(&b);
@@ -12319,7 +12697,7 @@ class GetAppSignalStatesFromArchiveStartRequest PROTOBUF_FINAL :
                &_GetAppSignalStatesFromArchiveStartRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    55;
+    57;
 
   friend void swap(GetAppSignalStatesFromArchiveStartRequest& a, GetAppSignalStatesFromArchiveStartRequest& b) {
     a.Swap(&b);
@@ -12559,7 +12937,7 @@ class GetAppSignalStatesFromArchiveStartReply PROTOBUF_FINAL :
                &_GetAppSignalStatesFromArchiveStartReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    56;
+    58;
 
   friend void swap(GetAppSignalStatesFromArchiveStartReply& a, GetAppSignalStatesFromArchiveStartReply& b) {
     a.Swap(&b);
@@ -12760,7 +13138,7 @@ class GetAppSignalStatesFromArchiveNextRequest PROTOBUF_FINAL :
                &_GetAppSignalStatesFromArchiveNextRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    57;
+    59;
 
   friend void swap(GetAppSignalStatesFromArchiveNextRequest& a, GetAppSignalStatesFromArchiveNextRequest& b) {
     a.Swap(&b);
@@ -12909,7 +13287,7 @@ class GetAppSignalStatesFromArchiveNextReply PROTOBUF_FINAL :
                &_GetAppSignalStatesFromArchiveNextReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    58;
+    60;
 
   friend void swap(GetAppSignalStatesFromArchiveNextReply& a, GetAppSignalStatesFromArchiveNextReply& b) {
     a.Swap(&b);
@@ -13205,7 +13583,7 @@ class GetAppSignalStatesFromArchiveCancelRequest PROTOBUF_FINAL :
                &_GetAppSignalStatesFromArchiveCancelRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    59;
+    61;
 
   friend void swap(GetAppSignalStatesFromArchiveCancelRequest& a, GetAppSignalStatesFromArchiveCancelRequest& b) {
     a.Swap(&b);
@@ -13354,7 +13732,7 @@ class GetAppSignalStatesFromArchiveCancelReply PROTOBUF_FINAL :
                &_GetAppSignalStatesFromArchiveCancelReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    60;
+    62;
 
   friend void swap(GetAppSignalStatesFromArchiveCancelReply& a, GetAppSignalStatesFromArchiveCancelReply& b) {
     a.Swap(&b);
@@ -13540,7 +13918,7 @@ class RtTrendsManagementRequest PROTOBUF_FINAL :
                &_RtTrendsManagementRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    61;
+    63;
 
   friend void swap(RtTrendsManagementRequest& a, RtTrendsManagementRequest& b) {
     a.Swap(&b);
@@ -13759,7 +14137,7 @@ class RtTrendsManagementReply PROTOBUF_FINAL :
                &_RtTrendsManagementReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    62;
+    64;
 
   friend void swap(RtTrendsManagementReply& a, RtTrendsManagementReply& b) {
     a.Swap(&b);
@@ -13969,7 +14347,7 @@ class RtTrendsGetStateChangesRequest PROTOBUF_FINAL :
                &_RtTrendsGetStateChangesRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    63;
+    65;
 
   friend void swap(RtTrendsGetStateChangesRequest& a, RtTrendsGetStateChangesRequest& b) {
     a.Swap(&b);
@@ -14100,7 +14478,7 @@ class RtTrendsGetStateChangesReply PROTOBUF_FINAL :
                &_RtTrendsGetStateChangesReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    64;
+    66;
 
   friend void swap(RtTrendsGetStateChangesReply& a, RtTrendsGetStateChangesReply& b) {
     a.Swap(&b);
@@ -14291,7 +14669,7 @@ class GetFileReply PROTOBUF_FINAL :
                &_GetFileReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    65;
+    67;
 
   friend void swap(GetFileReply& a, GetFileReply& b) {
     a.Swap(&b);
@@ -19124,7 +19502,7 @@ inline void AppDataServiceState::set_allocated_appdatareceivestate(::Network::Ap
 
 // required int32 softwareType = 1 [default = 8000];
 inline bool SoftwareInfo::_internal_has_softwaretype() const {
-  bool value = (_has_bits_[0] & 0x00000400u) != 0;
+  bool value = (_has_bits_[0] & 0x00000800u) != 0;
   return value;
 }
 inline bool SoftwareInfo::has_softwaretype() const {
@@ -19132,7 +19510,7 @@ inline bool SoftwareInfo::has_softwaretype() const {
 }
 inline void SoftwareInfo::clear_softwaretype() {
   softwaretype_ = 8000;
-  _has_bits_[0] &= ~0x00000400u;
+  _has_bits_[0] &= ~0x00000800u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 SoftwareInfo::_internal_softwaretype() const {
   return softwaretype_;
@@ -19142,7 +19520,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 SoftwareInfo::softwaretype() const {
   return _internal_softwaretype();
 }
 inline void SoftwareInfo::_internal_set_softwaretype(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000400u;
+  _has_bits_[0] |= 0x00000800u;
   softwaretype_ = value;
 }
 inline void SoftwareInfo::set_softwaretype(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -19225,7 +19603,7 @@ inline void SoftwareInfo::set_allocated_equipmentid(std::string* equipmentid) {
 
 // required int32 majorVersion = 3 [default = 0];
 inline bool SoftwareInfo::_internal_has_majorversion() const {
-  bool value = (_has_bits_[0] & 0x00000020u) != 0;
+  bool value = (_has_bits_[0] & 0x00000040u) != 0;
   return value;
 }
 inline bool SoftwareInfo::has_majorversion() const {
@@ -19233,7 +19611,7 @@ inline bool SoftwareInfo::has_majorversion() const {
 }
 inline void SoftwareInfo::clear_majorversion() {
   majorversion_ = 0;
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000040u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 SoftwareInfo::_internal_majorversion() const {
   return majorversion_;
@@ -19243,7 +19621,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 SoftwareInfo::majorversion() const {
   return _internal_majorversion();
 }
 inline void SoftwareInfo::_internal_set_majorversion(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000040u;
   majorversion_ = value;
 }
 inline void SoftwareInfo::set_majorversion(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -19253,7 +19631,7 @@ inline void SoftwareInfo::set_majorversion(::PROTOBUF_NAMESPACE_ID::int32 value)
 
 // required int32 minorVersion = 4 [default = 0];
 inline bool SoftwareInfo::_internal_has_minorversion() const {
-  bool value = (_has_bits_[0] & 0x00000040u) != 0;
+  bool value = (_has_bits_[0] & 0x00000080u) != 0;
   return value;
 }
 inline bool SoftwareInfo::has_minorversion() const {
@@ -19261,7 +19639,7 @@ inline bool SoftwareInfo::has_minorversion() const {
 }
 inline void SoftwareInfo::clear_minorversion() {
   minorversion_ = 0;
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000080u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 SoftwareInfo::_internal_minorversion() const {
   return minorversion_;
@@ -19271,7 +19649,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 SoftwareInfo::minorversion() const {
   return _internal_minorversion();
 }
 inline void SoftwareInfo::_internal_set_minorversion(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000080u;
   minorversion_ = value;
 }
 inline void SoftwareInfo::set_minorversion(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -19281,7 +19659,7 @@ inline void SoftwareInfo::set_minorversion(::PROTOBUF_NAMESPACE_ID::int32 value)
 
 // required int32 commitNo = 5 [default = 0];
 inline bool SoftwareInfo::_internal_has_commitno() const {
-  bool value = (_has_bits_[0] & 0x00000080u) != 0;
+  bool value = (_has_bits_[0] & 0x00000100u) != 0;
   return value;
 }
 inline bool SoftwareInfo::has_commitno() const {
@@ -19289,7 +19667,7 @@ inline bool SoftwareInfo::has_commitno() const {
 }
 inline void SoftwareInfo::clear_commitno() {
   commitno_ = 0;
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000100u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 SoftwareInfo::_internal_commitno() const {
   return commitno_;
@@ -19299,7 +19677,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 SoftwareInfo::commitno() const {
   return _internal_commitno();
 }
 inline void SoftwareInfo::_internal_set_commitno(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000100u;
   commitno_ = value;
 }
 inline void SoftwareInfo::set_commitno(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -19528,7 +19906,7 @@ inline void SoftwareInfo::set_allocated_username(std::string* username) {
 
 // required int32 buildNo = 9 [default = 0];
 inline bool SoftwareInfo::_internal_has_buildno() const {
-  bool value = (_has_bits_[0] & 0x00000100u) != 0;
+  bool value = (_has_bits_[0] & 0x00000200u) != 0;
   return value;
 }
 inline bool SoftwareInfo::has_buildno() const {
@@ -19536,7 +19914,7 @@ inline bool SoftwareInfo::has_buildno() const {
 }
 inline void SoftwareInfo::clear_buildno() {
   buildno_ = 0;
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00000200u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 SoftwareInfo::_internal_buildno() const {
   return buildno_;
@@ -19546,7 +19924,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 SoftwareInfo::buildno() const {
   return _internal_buildno();
 }
 inline void SoftwareInfo::_internal_set_buildno(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000100u;
+  _has_bits_[0] |= 0x00000200u;
   buildno_ = value;
 }
 inline void SoftwareInfo::set_buildno(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -19556,7 +19934,7 @@ inline void SoftwareInfo::set_buildno(::PROTOBUF_NAMESPACE_ID::int32 value) {
 
 // required uint32 crc = 10 [default = 0];
 inline bool SoftwareInfo::_internal_has_crc() const {
-  bool value = (_has_bits_[0] & 0x00000200u) != 0;
+  bool value = (_has_bits_[0] & 0x00000400u) != 0;
   return value;
 }
 inline bool SoftwareInfo::has_crc() const {
@@ -19564,7 +19942,7 @@ inline bool SoftwareInfo::has_crc() const {
 }
 inline void SoftwareInfo::clear_crc() {
   crc_ = 0u;
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00000400u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint32 SoftwareInfo::_internal_crc() const {
   return crc_;
@@ -19574,7 +19952,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint32 SoftwareInfo::crc() const {
   return _internal_crc();
 }
 inline void SoftwareInfo::_internal_set_crc(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _has_bits_[0] |= 0x00000200u;
+  _has_bits_[0] |= 0x00000400u;
   crc_ = value;
 }
 inline void SoftwareInfo::set_crc(::PROTOBUF_NAMESPACE_ID::uint32 value) {
@@ -19653,6 +20031,354 @@ inline void SoftwareInfo::set_allocated_clientdescription(std::string* clientdes
   clientdescription_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), clientdescription,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:Network.SoftwareInfo.clientDescription)
+}
+
+// optional string hostname = 12;
+inline bool SoftwareInfo::_internal_has_hostname() const {
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
+  return value;
+}
+inline bool SoftwareInfo::has_hostname() const {
+  return _internal_has_hostname();
+}
+inline void SoftwareInfo::clear_hostname() {
+  hostname_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline const std::string& SoftwareInfo::hostname() const {
+  // @@protoc_insertion_point(field_get:Network.SoftwareInfo.hostname)
+  return _internal_hostname();
+}
+inline void SoftwareInfo::set_hostname(const std::string& value) {
+  _internal_set_hostname(value);
+  // @@protoc_insertion_point(field_set:Network.SoftwareInfo.hostname)
+}
+inline std::string* SoftwareInfo::mutable_hostname() {
+  // @@protoc_insertion_point(field_mutable:Network.SoftwareInfo.hostname)
+  return _internal_mutable_hostname();
+}
+inline const std::string& SoftwareInfo::_internal_hostname() const {
+  return hostname_.Get();
+}
+inline void SoftwareInfo::_internal_set_hostname(const std::string& value) {
+  _has_bits_[0] |= 0x00000020u;
+  hostname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void SoftwareInfo::set_hostname(std::string&& value) {
+  _has_bits_[0] |= 0x00000020u;
+  hostname_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Network.SoftwareInfo.hostname)
+}
+inline void SoftwareInfo::set_hostname(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000020u;
+  hostname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Network.SoftwareInfo.hostname)
+}
+inline void SoftwareInfo::set_hostname(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000020u;
+  hostname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Network.SoftwareInfo.hostname)
+}
+inline std::string* SoftwareInfo::_internal_mutable_hostname() {
+  _has_bits_[0] |= 0x00000020u;
+  return hostname_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* SoftwareInfo::release_hostname() {
+  // @@protoc_insertion_point(field_release:Network.SoftwareInfo.hostname)
+  if (!_internal_has_hostname()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000020u;
+  return hostname_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void SoftwareInfo::set_allocated_hostname(std::string* hostname) {
+  if (hostname != nullptr) {
+    _has_bits_[0] |= 0x00000020u;
+  } else {
+    _has_bits_[0] &= ~0x00000020u;
+  }
+  hostname_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), hostname,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Network.SoftwareInfo.hostname)
+}
+
+// -------------------------------------------------------------------
+
+// IntroduceMyselfRequest
+
+// required .Network.SoftwareInfo clientSoftwareInfo = 1;
+inline bool IntroduceMyselfRequest::_internal_has_clientsoftwareinfo() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  PROTOBUF_ASSUME(!value || clientsoftwareinfo_ != nullptr);
+  return value;
+}
+inline bool IntroduceMyselfRequest::has_clientsoftwareinfo() const {
+  return _internal_has_clientsoftwareinfo();
+}
+inline void IntroduceMyselfRequest::clear_clientsoftwareinfo() {
+  if (clientsoftwareinfo_ != nullptr) clientsoftwareinfo_->Clear();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const ::Network::SoftwareInfo& IntroduceMyselfRequest::_internal_clientsoftwareinfo() const {
+  const ::Network::SoftwareInfo* p = clientsoftwareinfo_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Network::SoftwareInfo&>(
+      ::Network::_SoftwareInfo_default_instance_);
+}
+inline const ::Network::SoftwareInfo& IntroduceMyselfRequest::clientsoftwareinfo() const {
+  // @@protoc_insertion_point(field_get:Network.IntroduceMyselfRequest.clientSoftwareInfo)
+  return _internal_clientsoftwareinfo();
+}
+inline void IntroduceMyselfRequest::unsafe_arena_set_allocated_clientsoftwareinfo(
+    ::Network::SoftwareInfo* clientsoftwareinfo) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(clientsoftwareinfo_);
+  }
+  clientsoftwareinfo_ = clientsoftwareinfo;
+  if (clientsoftwareinfo) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Network.IntroduceMyselfRequest.clientSoftwareInfo)
+}
+inline ::Network::SoftwareInfo* IntroduceMyselfRequest::release_clientsoftwareinfo() {
+  _has_bits_[0] &= ~0x00000001u;
+  ::Network::SoftwareInfo* temp = clientsoftwareinfo_;
+  clientsoftwareinfo_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::Network::SoftwareInfo* IntroduceMyselfRequest::unsafe_arena_release_clientsoftwareinfo() {
+  // @@protoc_insertion_point(field_release:Network.IntroduceMyselfRequest.clientSoftwareInfo)
+  _has_bits_[0] &= ~0x00000001u;
+  ::Network::SoftwareInfo* temp = clientsoftwareinfo_;
+  clientsoftwareinfo_ = nullptr;
+  return temp;
+}
+inline ::Network::SoftwareInfo* IntroduceMyselfRequest::_internal_mutable_clientsoftwareinfo() {
+  _has_bits_[0] |= 0x00000001u;
+  if (clientsoftwareinfo_ == nullptr) {
+    auto* p = CreateMaybeMessage<::Network::SoftwareInfo>(GetArena());
+    clientsoftwareinfo_ = p;
+  }
+  return clientsoftwareinfo_;
+}
+inline ::Network::SoftwareInfo* IntroduceMyselfRequest::mutable_clientsoftwareinfo() {
+  // @@protoc_insertion_point(field_mutable:Network.IntroduceMyselfRequest.clientSoftwareInfo)
+  return _internal_mutable_clientsoftwareinfo();
+}
+inline void IntroduceMyselfRequest::set_allocated_clientsoftwareinfo(::Network::SoftwareInfo* clientsoftwareinfo) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete clientsoftwareinfo_;
+  }
+  if (clientsoftwareinfo) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(clientsoftwareinfo);
+    if (message_arena != submessage_arena) {
+      clientsoftwareinfo = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, clientsoftwareinfo, submessage_arena);
+    }
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  clientsoftwareinfo_ = clientsoftwareinfo;
+  // @@protoc_insertion_point(field_set_allocated:Network.IntroduceMyselfRequest.clientSoftwareInfo)
+}
+
+// -------------------------------------------------------------------
+
+// IntroduceMyselfReply
+
+// required .Network.SoftwareInfo serverSoftwareInfo = 1;
+inline bool IntroduceMyselfReply::_internal_has_serversoftwareinfo() const {
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  PROTOBUF_ASSUME(!value || serversoftwareinfo_ != nullptr);
+  return value;
+}
+inline bool IntroduceMyselfReply::has_serversoftwareinfo() const {
+  return _internal_has_serversoftwareinfo();
+}
+inline void IntroduceMyselfReply::clear_serversoftwareinfo() {
+  if (serversoftwareinfo_ != nullptr) serversoftwareinfo_->Clear();
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline const ::Network::SoftwareInfo& IntroduceMyselfReply::_internal_serversoftwareinfo() const {
+  const ::Network::SoftwareInfo* p = serversoftwareinfo_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Network::SoftwareInfo&>(
+      ::Network::_SoftwareInfo_default_instance_);
+}
+inline const ::Network::SoftwareInfo& IntroduceMyselfReply::serversoftwareinfo() const {
+  // @@protoc_insertion_point(field_get:Network.IntroduceMyselfReply.serverSoftwareInfo)
+  return _internal_serversoftwareinfo();
+}
+inline void IntroduceMyselfReply::unsafe_arena_set_allocated_serversoftwareinfo(
+    ::Network::SoftwareInfo* serversoftwareinfo) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(serversoftwareinfo_);
+  }
+  serversoftwareinfo_ = serversoftwareinfo;
+  if (serversoftwareinfo) {
+    _has_bits_[0] |= 0x00000002u;
+  } else {
+    _has_bits_[0] &= ~0x00000002u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Network.IntroduceMyselfReply.serverSoftwareInfo)
+}
+inline ::Network::SoftwareInfo* IntroduceMyselfReply::release_serversoftwareinfo() {
+  _has_bits_[0] &= ~0x00000002u;
+  ::Network::SoftwareInfo* temp = serversoftwareinfo_;
+  serversoftwareinfo_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::Network::SoftwareInfo* IntroduceMyselfReply::unsafe_arena_release_serversoftwareinfo() {
+  // @@protoc_insertion_point(field_release:Network.IntroduceMyselfReply.serverSoftwareInfo)
+  _has_bits_[0] &= ~0x00000002u;
+  ::Network::SoftwareInfo* temp = serversoftwareinfo_;
+  serversoftwareinfo_ = nullptr;
+  return temp;
+}
+inline ::Network::SoftwareInfo* IntroduceMyselfReply::_internal_mutable_serversoftwareinfo() {
+  _has_bits_[0] |= 0x00000002u;
+  if (serversoftwareinfo_ == nullptr) {
+    auto* p = CreateMaybeMessage<::Network::SoftwareInfo>(GetArena());
+    serversoftwareinfo_ = p;
+  }
+  return serversoftwareinfo_;
+}
+inline ::Network::SoftwareInfo* IntroduceMyselfReply::mutable_serversoftwareinfo() {
+  // @@protoc_insertion_point(field_mutable:Network.IntroduceMyselfReply.serverSoftwareInfo)
+  return _internal_mutable_serversoftwareinfo();
+}
+inline void IntroduceMyselfReply::set_allocated_serversoftwareinfo(::Network::SoftwareInfo* serversoftwareinfo) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete serversoftwareinfo_;
+  }
+  if (serversoftwareinfo) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(serversoftwareinfo);
+    if (message_arena != submessage_arena) {
+      serversoftwareinfo = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, serversoftwareinfo, submessage_arena);
+    }
+    _has_bits_[0] |= 0x00000002u;
+  } else {
+    _has_bits_[0] &= ~0x00000002u;
+  }
+  serversoftwareinfo_ = serversoftwareinfo;
+  // @@protoc_insertion_point(field_set_allocated:Network.IntroduceMyselfReply.serverSoftwareInfo)
+}
+
+// required int32 setConnectionError = 2;
+inline bool IntroduceMyselfReply::_internal_has_setconnectionerror() const {
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  return value;
+}
+inline bool IntroduceMyselfReply::has_setconnectionerror() const {
+  return _internal_has_setconnectionerror();
+}
+inline void IntroduceMyselfReply::clear_setconnectionerror() {
+  setconnectionerror_ = 0;
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 IntroduceMyselfReply::_internal_setconnectionerror() const {
+  return setconnectionerror_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 IntroduceMyselfReply::setconnectionerror() const {
+  // @@protoc_insertion_point(field_get:Network.IntroduceMyselfReply.setConnectionError)
+  return _internal_setconnectionerror();
+}
+inline void IntroduceMyselfReply::_internal_set_setconnectionerror(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000004u;
+  setconnectionerror_ = value;
+}
+inline void IntroduceMyselfReply::set_setconnectionerror(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_setconnectionerror(value);
+  // @@protoc_insertion_point(field_set:Network.IntroduceMyselfReply.setConnectionError)
+}
+
+// optional string errorMsg = 3;
+inline bool IntroduceMyselfReply::_internal_has_errormsg() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool IntroduceMyselfReply::has_errormsg() const {
+  return _internal_has_errormsg();
+}
+inline void IntroduceMyselfReply::clear_errormsg() {
+  errormsg_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& IntroduceMyselfReply::errormsg() const {
+  // @@protoc_insertion_point(field_get:Network.IntroduceMyselfReply.errorMsg)
+  return _internal_errormsg();
+}
+inline void IntroduceMyselfReply::set_errormsg(const std::string& value) {
+  _internal_set_errormsg(value);
+  // @@protoc_insertion_point(field_set:Network.IntroduceMyselfReply.errorMsg)
+}
+inline std::string* IntroduceMyselfReply::mutable_errormsg() {
+  // @@protoc_insertion_point(field_mutable:Network.IntroduceMyselfReply.errorMsg)
+  return _internal_mutable_errormsg();
+}
+inline const std::string& IntroduceMyselfReply::_internal_errormsg() const {
+  return errormsg_.Get();
+}
+inline void IntroduceMyselfReply::_internal_set_errormsg(const std::string& value) {
+  _has_bits_[0] |= 0x00000001u;
+  errormsg_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void IntroduceMyselfReply::set_errormsg(std::string&& value) {
+  _has_bits_[0] |= 0x00000001u;
+  errormsg_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Network.IntroduceMyselfReply.errorMsg)
+}
+inline void IntroduceMyselfReply::set_errormsg(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000001u;
+  errormsg_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Network.IntroduceMyselfReply.errorMsg)
+}
+inline void IntroduceMyselfReply::set_errormsg(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000001u;
+  errormsg_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Network.IntroduceMyselfReply.errorMsg)
+}
+inline std::string* IntroduceMyselfReply::_internal_mutable_errormsg() {
+  _has_bits_[0] |= 0x00000001u;
+  return errormsg_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* IntroduceMyselfReply::release_errormsg() {
+  // @@protoc_insertion_point(field_release:Network.IntroduceMyselfReply.errorMsg)
+  if (!_internal_has_errormsg()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return errormsg_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void IntroduceMyselfReply::set_allocated_errormsg(std::string* errormsg) {
+  if (errormsg != nullptr) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  errormsg_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), errormsg,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Network.IntroduceMyselfReply.errorMsg)
 }
 
 // -------------------------------------------------------------------
@@ -26895,6 +27621,10 @@ inline void GetFileReply::set_allocated_filepartdata(std::string* filepartdata) 
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

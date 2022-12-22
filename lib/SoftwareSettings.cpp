@@ -31,11 +31,10 @@ void SessionParams::loadFrom(const Network::SessionParams& sp)
 //
 // -------------------------------------------------------------------------------------
 
-SoftwareSettings::SoftwareSettings(const SoftwareSettings& copy) :
-	QObject(),
-	profile(copy.profile)
+/*SoftwareSettings::SoftwareSettings(const SoftwareSettings& copy)
 {
-}
+	*this = copy;
+}*/
 
 SoftwareSettings::SoftwareSettings(const QString& profile) :
 	profile(profile)
@@ -46,18 +45,12 @@ SoftwareSettings::~SoftwareSettings()
 {
 }
 
-const SoftwareSettings& SoftwareSettings::operator = (const SoftwareSettings& copy)
-{
-	profile = copy.profile;
-
-	return *this;
-}
-
 void SoftwareSettings::writeStartSettings(XmlWriteHelper& xml) const
 {
 	xml.writeStartElement(XmlElement::SETTINGS);	//	<Settings>
 
 	xml.writeStringAttribute(XmlAttribute::PROFILE, profile);
+	xml.writeStringAttribute(EquipmentPropNames::HOSTNAME, hostname);
 }
 
 void SoftwareSettings::writeEndSettings(XmlWriteHelper &xml) const
@@ -72,6 +65,7 @@ bool SoftwareSettings::startSettingsReading(XmlReadHelper& xml)
 	RETURN_IF_FALSE(result);
 
 	result = xml.readStringAttribute(XmlAttribute::PROFILE, &profile);
+	result = xml.readStringAttribute(EquipmentPropNames::HOSTNAME, &hostname);
 
 	return result;
 }
@@ -314,15 +308,18 @@ bool CfgServiceSettings::writeToXml(XmlWriteHelper& xml) const
 
 	xml.writeHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, clientRequestNetmask);
 
+	xml.writeBoolElement(EquipmentPropNames::CHECK_HOSTNAME, checkHostname);
+
 	xml.writeStartElement(XmlElement::CLIENTS);
 	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(clients.count()));
 
-	for(const QPair<QString, E::SoftwareType>& pair : clients)
+	for(const ClientInfo& ci : clients)
 	{
 		xml.writeStartElement(XmlElement::CLIENT);
 
-		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, pair.first);
-		xml.writeStringAttribute(EquipmentPropNames::SOFTWARE_TYPE, E::valueToString(pair.second));
+		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, ci.equipmentID);
+		xml.writeStringAttribute(EquipmentPropNames::SOFTWARE_TYPE, E::valueToString(ci.softwareType));
+		xml.writeStringAttribute(EquipmentPropNames::HOSTNAME, ci.hostname);
 
 		xml.writeEndElement();	// </Client>
 	}
@@ -349,6 +346,8 @@ bool CfgServiceSettings::readFromXml(XmlReadHelper& xml)
 
 	result &= xml.readHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
 
+	result &= xml.readBoolElement(EquipmentPropNames::CHECK_HOSTNAME, &checkHostname);
+
 	result = xml.findElement(XmlElement::CLIENTS);
 
 	if (result == false)
@@ -364,26 +363,25 @@ bool CfgServiceSettings::readFromXml(XmlReadHelper& xml)
 	{
 		result &= xml.findElement(XmlElement::CLIENT);
 
-		QString equipmentID;
+		ClientInfo ci;
+
+		result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &ci.equipmentID);
+
 		QString softwareTypeStr;
 
-		result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &equipmentID);
 		result &= xml.readStringAttribute(EquipmentPropNames::SOFTWARE_TYPE, &softwareTypeStr);
-
-		QPair<QString, E::SoftwareType> pair;
-
-		pair.first = equipmentID;
 
 		bool ok = false;
 
-		pair.second = E::stringToValue<E::SoftwareType>(softwareTypeStr, &ok);
+		ci.softwareType = E::stringToValue<E::SoftwareType>(softwareTypeStr, &ok);
 
 		result &= ok;
 
-		if (result == true)
-		{
-			clients.append(pair);
-		}
+		result &= xml.readStringAttribute(EquipmentPropNames::HOSTNAME, &ci.hostname);
+
+		BREAK_IF_FALSE(result);
+
+		clients.append(ci);
 	}
 
 	return result;
@@ -393,9 +391,9 @@ QStringList CfgServiceSettings::knownClients() const
 {
 	QStringList knownClients;
 
-	for(const QPair<QString, E::SoftwareType>& client : clients)
+	for(const ClientInfo& client : clients)
 	{
-		knownClients.append(client.first.trimmed());
+		knownClients.append(client.equipmentID.trimmed());
 	}
 
 	return knownClients;

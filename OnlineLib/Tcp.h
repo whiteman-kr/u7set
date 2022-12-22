@@ -52,8 +52,6 @@ namespace Tcp
 		SoftwareInfo connectedSoftwareInfo;
 		SoftwareInfo localSoftwareInfo;
 
-		QString clientDescription;
-
 		bool isActual = false;
 
 		void dump();
@@ -194,6 +192,14 @@ namespace Tcp
 		bool m_headerAndDataReady = false;					// set to TRUE when full header and data read from socket
 	};
 
+	enum class SetConnectionError
+	{
+		Ok,
+
+		UnknownClientID,
+		WrongClientHostname
+	};
+
 	// -------------------------------------------------------------------------------------
 	//
 	// Tcp::Server class declaration
@@ -237,6 +243,9 @@ namespace Tcp
 
 	signals:
 		void connectedSoftwareInfoChanged();	// Inform listener that some connection state changed
+
+	protected:
+		virtual Tcp::SetConnectionError checkClient(const QString& clientEquipmentID, const QString& clientHostname) const;
 
 	protected:
 		std::list<Tcp::ConnectionState> m_connectionStates;
@@ -430,6 +439,10 @@ namespace Tcp
 		virtual void onReplyTimeout() { qDebug() << "Reply timeout"; }
 
 		void enableClientAliveRequest(bool enable);
+
+	signals:
+		void signal_unknownClientID(QString errMsg);
+		void signal_wrongClientHostname(QString errMsg);
 
 	private slots:
 		void onTimeoutTimer() override;

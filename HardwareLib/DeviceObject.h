@@ -243,6 +243,7 @@ namespace Hardware
 		[[nodiscard]] const Hardware::DeviceController* getParentController() const;
 		[[nodiscard]] const Hardware::DeviceModule* getParentModule() const;
 		[[nodiscard]] const Hardware::Software* getParentSoftware() const;
+		[[nodiscard]] const Hardware::Workstation* getParentWorkstation() const;
 		[[nodiscard]] const Hardware::DeviceChassis* getParentChassis() const;
 		[[nodiscard]] const Hardware::DeviceRack* getParentRack() const;
 		[[nodiscard]] const Hardware::DeviceSystem* getParentSystem() const;
@@ -732,6 +733,7 @@ public:
 		// Public Methods
 		//
 	public:
+		[[nodiscard]] QString hostname() const;
 
 		// Properties
 		//
