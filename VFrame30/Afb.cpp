@@ -231,87 +231,110 @@ namespace Afb
 		return false;
 	}
 
-//	int AfbComponent::opCode() const
-//	{
-//		return m_opCode;
-//	}
+	int AfbComponent::opCode() const noexcept
+	{
+		return m_opCode;
+	}
 
-//	void AfbComponent::setOpCode(int value)
-//	{
-//		m_opCode = value;
-//	}
+	void AfbComponent::setOpCode(int value) noexcept
+	{
+		m_opCode = value;
+	}
 
-//	const QString& AfbComponent::caption() const
-//	{
-//		return m_caption;
-//	}
+	bool AfbComponent::hasRam() const noexcept
+	{
+		return m_hasRam;
+	}
 
-//	void AfbComponent::setCaption(const QString& value)
-//	{
-//		m_caption = value;
-//	}
+	void AfbComponent::setHasRam(bool value) noexcept
+	{
+		m_hasRam = value;
+	}
 
-//	int AfbComponent::impVersion() const
-//	{
-//		return m_impVersion;
-//	}
+	const QString& AfbComponent::caption() const noexcept
+	{
+		return m_caption;
+	}
 
-//	void AfbComponent::setImpVersion(int value)
-//	{
-//		m_impVersion = value;
-//	}
+	void AfbComponent::setCaption(const QString& value) noexcept
+	{
+		m_caption = value;
+	}
 
-//	int AfbComponent::versionOpIndex() const
-//	{
-//		return m_versionOpIndex;
-//	}
+	int AfbComponent::impVersion() const noexcept
+	{
+		return m_impVersion;
+	}
 
-//	void AfbComponent::setVersionOpIndex(int value)
-//	{
-//		m_versionOpIndex = value;
-//	}
+	void AfbComponent::setImpVersion(int value) noexcept
+	{
+		m_impVersion = value;
+	}
 
-//	int AfbComponent::maxInstCount() const
-//	{
-//		return m_maxInstCount;
-//	}
+	int AfbComponent::versionOpIndex() const noexcept
+	{
+		return m_versionOpIndex;
+	}
 
-//	void AfbComponent::setMaxInstCount(int value)
-//	{
-//		m_maxInstCount = value;
-//	}
+	void AfbComponent::setVersionOpIndex(int value) noexcept
+	{
+		m_versionOpIndex = value;
+	}
 
-//	const QString& AfbComponent::simulationFunc() const
-//	{
-//		return m_simulationFunc;
-//	}
+	int AfbComponent::maxInstCount() const noexcept
+	{
+		return m_maxInstCount;
+	}
 
-//	void AfbComponent::setSimulationFunc(const QString& value)
-//	{
-//		m_simulationFunc = value;
-//	}
+	void AfbComponent::setMaxInstCount(int value) noexcept
+	{
+		m_maxInstCount = value;
+	}
 
-//	const std::unordered_map<int, AfbComponentPin>& AfbComponent::pins() const
-//	{
-//		return m_pins;
-//	}
+	const QString& AfbComponent::simulationFunc() const noexcept
+	{
+		return m_simulationFunc;
+	}
 
-//	bool AfbComponent::pinExists(int pinOpIndex) const
-//	{
-//		return (static_cast<size_t>(pinOpIndex) >= m_pinExists.size())
-//				? false: m_pinExists[pinOpIndex];
-//	}
+	void AfbComponent::setSimulationFunc(const QString& value) noexcept
+	{
+		m_simulationFunc = value;
+	}
 
-//	QString AfbComponent::pinCaption(int pinOpIndex) const
-//	{
-//		auto it = m_pins.find(pinOpIndex);
-//		if (it != m_pins.end())
-//		{
-//			return it->second.caption();
-//		}
+	const std::unordered_map<int, AfbComponentPin>& AfbComponent::pins() const noexcept
+	{
+		return m_pins;
+	}
 
-//		return QLatin1String("[UnknownPin ") + QString::number(pinOpIndex) + QLatin1String("]");
-//	}
+	bool AfbComponent::pinExists(int pinOpIndex) const noexcept
+	{
+		return (static_cast<size_t>(pinOpIndex) >= m_pinExists.size())
+				? false: m_pinExists[pinOpIndex];
+	}
+
+	QString AfbComponent::pinCaption(int pinOpIndex) const noexcept
+	{
+		auto it = m_pins.find(pinOpIndex);
+		if (it != m_pins.end())
+		{
+			return it->second.caption();
+		}
+
+		return QLatin1String("[UnknownPin ") + QString::number(pinOpIndex) + QLatin1String("]");
+	}
+
+	int AfbComponent::pinOpIndex(const QString& pinCaption) const noexcept
+	{
+		for(auto& pinInfo : m_pins)
+		{
+			if (pinInfo.second.caption() == pinCaption)
+			{
+				return pinInfo.first;	// pin opIndex
+			}
+		}
+
+		return -1;
+	}
 
 	//
 	//							AfbSignal

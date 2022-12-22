@@ -10,6 +10,7 @@
 #include "../lib/LmDescription.h"
 #include "../VFrame30/Afb.h"
 
+class SimAfbParamTests;
 
 namespace Sim
 {
@@ -30,13 +31,13 @@ namespace Sim
 	public:
 		[[nodiscard]] bool isNull() const;
 
-		[[nodiscard]]int opCode() const;
-		[[nodiscard]]QString caption() const;
-		[[nodiscard]]int maxInstCount() const;
-		[[nodiscard]]QString simulationFunc() const;
+		[[nodiscard]] int opCode() const;
+		[[nodiscard]] QString caption() const;
+		[[nodiscard]] int maxInstCount() const;
+		[[nodiscard]] QString simulationFunc() const;
 
-		[[nodiscard]]bool pinExists(int pinOpIndex) const;
-		[[nodiscard]]QString pinCaption(int pinOpIndex) const;
+		[[nodiscard]] bool pinExists(int pinOpIndex) const;
+		[[nodiscard]] QString pinCaption(int pinOpIndex) const;
 
 	private:
 		std::shared_ptr<Afb::AfbComponent> m_afbComponent;
@@ -46,120 +47,68 @@ namespace Sim
 	class AfbComponentParam final
 	{
 	public:
-		AfbComponentParam() = default;
+		AfbComponentParam();
 		AfbComponentParam(const AfbComponentParam& that) noexcept = default;
-		explicit AfbComponentParam(quint16 paramOpIndex) :
-			m_paramOpIndex(paramOpIndex)
-		{
-			std::fill(m_data.begin(), m_data.end(), '\0');
-			static_assert(std::is_trivially_copyable_v<AfbComponentParam>);
-		}
-
-		explicit AfbComponentParam(quint16 paramOpIndex, quint16 word) :
-			m_paramOpIndex(paramOpIndex)
-		{
-			setWordValue(word);
-		}
+		explicit AfbComponentParam(quint16 paramOpIndex);
+		explicit AfbComponentParam(quint16 paramOpIndex, quint16 word);
 
 	public:
-		[[nodiscard]] int opIndex() const noexcept
-		{
-			return m_paramOpIndex;
-		}
-		void setOpIndex(int index) noexcept
-		{
-			m_paramOpIndex = static_cast<quint16>(index);
-		}
+		[[nodiscard]] int opIndex() const noexcept;
+		void setOpIndex(int index) noexcept;
 
-		[[nodiscard]] quint16 wordValue() const noexcept
-		{
-			return dataToType<quint16>();
-		}
-		void setWordValue(quint16 value) noexcept
-		{
-			setDataToType<quint16>(value);
-		}
+		[[nodiscard]] quint16 wordValue() const noexcept;
+		void setWordValue(quint16 value) noexcept;
 
-		[[nodiscard]] quint32 dwordValue() const  noexcept
-		{
-			return dataToType<quint32>();
-		}
-		void setDwordValue(quint32 value)  noexcept
-		{
-			setDataToType<quint32>(value);
-		}
+		[[nodiscard]] quint32 dwordValue() const  noexcept;
+		void setDwordValue(quint32 value)  noexcept;
 
-		[[nodiscard]] float floatValue() const  noexcept
-		{
-			return dataToType<float>();
-		}
-		void setFloatValue(float value) noexcept
-		{
-			setDataToType<float>(value);
-		}
+		[[nodiscard]] float floatValue() const noexcept;
+		void setFloatValue(float value) noexcept;
 
-		[[nodiscard]] double doubleValue() const  noexcept
-		{
-			return dataToType<double>();
-		}
-		void setDoubleValue(double value) noexcept
-		{
-			setDataToType<double>(value);
-		}
+		[[nodiscard]] double doubleValue() const  noexcept;
+		void setDoubleValue(double value) noexcept;
 
-		[[nodiscard]] qint32 signedIntValue() const noexcept
-		{
-			return dataToType<qint32>();
-		}
-		void setSignedIntValue(qint32 value) noexcept
-		{
-			setDataToType<qint32>(value);
-		}
+		[[nodiscard]] qint32 signedIntValue() const noexcept;
+		void setSignedIntValue(qint32 value) noexcept;
 
-		[[nodiscard]] qint64 signedInt64Value() const noexcept
-		{
-			return dataToType<qint64>();
-		}
-		void setSignedInt64Value(qint64 value) noexcept
-		{
-			setDataToType<qint64>(value);
-		}
+		[[nodiscard]] qint64 signedInt64Value() const noexcept;
+		void setSignedInt64Value(qint64 value) noexcept;
 
 		// --
 		//
-		void addSignedInteger(const AfbComponentParam& operand);	// Tests+
-		void subSignedInteger(const AfbComponentParam& operand);	// Tests+
-		void mulSignedInteger(const AfbComponentParam& operand);	// Tests+
-		void divSignedInteger(const AfbComponentParam& operand);	// Tests+
+		void addSignedInteger(const AfbComponentParam& operand);
+		void subSignedInteger(const AfbComponentParam& operand);
+		void mulSignedInteger(const AfbComponentParam& operand);
+		void divSignedInteger(const AfbComponentParam& operand);
 
-		void addSignedIntegerNumber(qint32 operand);				// Tests+
-		void subSignedIntegerNumber(qint32 operand);				// Tests+
-		void mulSignedIntegerNumber(qint32 operand);				// Tests+
-		void divSignedIntegerNumber(qint32 operand);				// Tests+
+		void addSignedInteger(qint32 operand);
+		void subSignedInteger(qint32 operand);
+		void mulSignedInteger(qint32 operand);
+		void divSignedInteger(qint32 operand);
 
-		void addFloatingPoint(const AfbComponentParam& operand);	// Tests+
-		void subFloatingPoint(const AfbComponentParam& operand);	// Tests+
+		void addFloatingPoint(const AfbComponentParam& operand);
+		void subFloatingPoint(const AfbComponentParam& operand);
 		void mulFloatingPoint(const AfbComponentParam& operand);
 		void divFloatingPoint(const AfbComponentParam& operand);
 
-		void addFloatingPoint(float operand);						// Tests+
-		void subFloatingPoint(float operand);						// Tests+
+		void addFloatingPoint(float operand);
+		void subFloatingPoint(float operand);
 		void mulFloatingPoint(float operand);
 		void divFloatingPoint(float operand);
 
-		void absFloatingPoint();									// Tests+
-		void absSignedInt();										// Tests+
+		void absFloatingPoint();
+		void absSignedInt();
 
 		void sinFloatingPoint();
 		void cosFloatingPoint();
 		void logFloatingPoint();
 		void expFloatingPoint();
 
-		void convertSInt32ToSInt64();								// Tests+
-		void convertSInt64ToSInt32();								// Tests+
-		void convertSignedIntToFloat();								// Tests+
-		void convertWordToFloat();									// Tests+
-		void convertWordToSignedInt();								// Tests+
+		void convertSInt32ToSInt64();
+		void convertSInt64ToSInt32();
+		void convertSignedIntToFloat();
+		void convertWordToFloat();
+		void convertWordToSignedInt();
 
 		// --
 		//
@@ -173,8 +122,7 @@ namespace Sim
 			return getMathFlag<FLAG_OVERFLOW>();
 		}
 
-		template <std::integral T>
-		void setMathOverflow(T value) noexcept
+		void setMathOverflow(std::integral auto value) noexcept
 		{
 			setMathFlag<FLAG_OVERFLOW>(value);
 		}
@@ -184,8 +132,7 @@ namespace Sim
 			return getMathFlag<FLAG_UNDERFLOW>();
 		}
 
-		template <std::integral T>
-		void setMathUnderflow(T value) noexcept
+		void setMathUnderflow(std::integral auto value) noexcept
 		{
 			setMathFlag<FLAG_UNDERFLOW>(value);
 		}
@@ -195,8 +142,7 @@ namespace Sim
 			return getMathFlag<FLAG_ZERO>();
 		}
 
-		template <std::integral T>
-		void setMathZero(T value) noexcept
+		void setMathZero(std::integral auto value) noexcept
 		{
 			setMathFlag<FLAG_ZERO>(value);
 		}
@@ -206,8 +152,7 @@ namespace Sim
 			return getMathFlag<FLAG_NAN>();
 		}
 
-		template <std::integral T>
-		void setMathNan(T value) noexcept
+		void setMathNan(std::integral auto value) noexcept
 		{
 			setMathFlag<FLAG_NAN>(value);
 		}
@@ -217,15 +162,14 @@ namespace Sim
 			return getMathFlag<FLAG_DIVBYZERO>();
 		}
 
-		template <std::integral T>
-		void setMathDivByZero(T value) noexcept
+		void setMathDivByZero(std::integral auto value) noexcept
 		{
 			setMathFlag<FLAG_DIVBYZERO>(value);
 		}
 
 	private:
 		template<quint16 FLAG_MASK>
-		quint16 getMathFlag() const noexcept
+		[[nodiscard]] quint16 getMathFlag() const noexcept
 		{
 			return (m_mathFlags & FLAG_MASK) ? 1 : 0;
 		}
@@ -260,8 +204,6 @@ namespace Sim
 			std::memcpy(m_data.data(), &value, sizeof(value));
 		}
 
-		std::array<char, 8> m_data;
-
 		// Math operations flags
 		//
 		constexpr static quint16 FLAG_OVERFLOW = 0x0001;
@@ -270,8 +212,8 @@ namespace Sim
 		constexpr static quint16 FLAG_NAN = 0x0008;
 		constexpr static quint16 FLAG_DIVBYZERO = 0x0010;
 
+		std::array<char, 8> m_data;
 		quint16 m_mathFlags = 0;
-
 		quint16 m_paramOpIndex = 0xFFFF;
 	};
 
@@ -322,12 +264,8 @@ namespace Sim
 		[[nodiscard]] bool isNull() const;
 
 		bool addParam(int instanceNo, const AfbComponentParam& instParam, QString* errorMessage);
-		bool addParam(int instanceNo, AfbComponentParam&& instParam, QString* errorMessage);
 
-		[[nodiscard]] AfbComponentInstance* instance(quint16 instance) noexcept
-		{
-			return instance > m_instances.size() ? nullptr : &m_instances[instance];
-		}
+		[[nodiscard]] AfbComponentInstance* instance(quint16 instance) noexcept;
 
 	private:
 		std::vector<AfbComponentInstance> m_instances;			// Index is instNo
@@ -346,11 +284,12 @@ namespace Sim
 
 		bool init(const LmDescription& lmDescription);
 		bool addInstantiatorParam(int afbOpCode, int instanceNo, const AfbComponentParam& instParam, QString* errorMessage);
-		bool addInstantiatorParam(int afbOpCode, int instanceNo, AfbComponentParam&& instParam, QString* errorMessage);
 
 		[[nodiscard]] AfbComponentInstance* componentInstance(int componentOpCode, int instance) noexcept;
 
 	private:
 		std::vector<ModelComponent> m_components;		// Index is opcode of AFB
+
+		friend SimAfbParamTests;
 	};
 }

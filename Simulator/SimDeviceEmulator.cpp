@@ -1332,7 +1332,7 @@ namespace Sim
 
 		// --
 		//
-		m_ram.updateOverrideData(equipmentId(), m_simulator->overrideSignals());
+		m_simulator->overrideSignals().updateRamOverrideData(equipmentId(), m_ram);
 
 		// COMMENTED as for now there is no need to zero IO modules memory
 		// as there is no control of reading uninitialized memory.

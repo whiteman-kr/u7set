@@ -1271,7 +1271,7 @@ void TuningPage::fillObjectsList()
 		const std::pair<int, Qt::SortOrder>& sortData = m_sortData.at(m_pageFilter->ID());
 		m_objectList->sortByColumn(sortData.first, sortData.second);
 	}
-	catch (std::out_of_range)
+	catch (std::out_of_range&)
 	{
 		const std::pair<int, Qt::SortOrder> sortData = std::make_pair(0, Qt::AscendingOrder);
 		m_sortData[m_pageFilter->ID()] = sortData;

@@ -1,8 +1,9 @@
 #include "SimRam.h"
 #include <cstring>
 #include <array>
+#include <ranges>
+#include <type_traits>
 #include <QtEndian>
-#include "SimOverrideSignals.h"
 
 
 namespace Sim
@@ -32,7 +33,19 @@ namespace Sim
 		return result;
 	}
 
-	bool RamAreaInfo::overlapped(E::LogicModuleRamAccess access, quint32 offset, quint32 size) const
+	bool RamAreaInfo::contains(E::LogicModuleRamAccess access, quint32 offsetW) const noexcept
+	{
+		return  offsetW >= m_offset &&
+				offsetW < (m_offset + m_size) &&
+				(static_cast<int>(m_access) & static_cast<int>(access)) != 0;
+	}
+
+	bool RamAreaInfo::contains(quint32 offsetW) const noexcept
+	{
+		return  offsetW >= m_offset && offsetW < (m_offset + m_size);
+	}
+
+	bool RamAreaInfo::overlapped(E::LogicModuleRamAccess access, quint32 offset, quint32 size) const noexcept
 	{
 		quint32 startA = m_offset;
 		quint32 endA = m_offset + m_size;
@@ -40,7 +53,7 @@ namespace Sim
 		quint32 startB = offset;
 		quint32 endB = offset + size;
 
-		if ((static_cast<int>(m_access) & static_cast<int>(access)) != 0 &&
+		if ((std::underlying_type_t<E::LogicModuleRamAccess>(m_access) & std::underlying_type_t<E::LogicModuleRamAccess>(access)) != 0 &&
 			startA < endB &&
 			startB < endA)
 		{
@@ -73,15 +86,7 @@ namespace Sim
 
 		// Check if all 0's
 		//
-		bool allZeroes = true;
-		for (int i = 0; i < m_data.size(); i++)
-		{
-			if (m_data[i] != 0)
-			{
-				allZeroes = false;
-				break;
-			}
-		}
+		bool allZeroes = std::ranges::all_of(qAsConst(m_data), [](auto v) {return v == 0; });
 
 		// --
 		//
@@ -385,108 +390,6 @@ namespace Sim
 		m_overrideData = overrideData;
 	}
 
-	template<typename TYPE>
-	bool RamArea::writeData(quint32 offsetW, TYPE data, E::ByteOrder byteOrder) noexcept
-	{
-		size_t byteOffset = (offsetW - offset()) * 2;
-		if (byteOffset > m_data.size() - sizeof(TYPE))
-		{
-			Q_ASSERT(false);
-			return false;
-		}
-
-		TYPE valueToWrite;
-
-		switch (byteOrder)
-		{
-		case E::BigEndian:
-			valueToWrite = qToBigEndian<TYPE>(data);
-			break;
-		case E::LittleEndian:
-			valueToWrite = qToLittleEndian<TYPE>(data);
-			break;
-		case E::NoEndian:
-			valueToWrite = data;
-			break;
-		default:
-			assert(false);
-			valueToWrite = {};
-		}
-
-		// Apply override to data
-		//
-		if (m_overrideData.empty() == false)
-		{
-			quint16 v[sizeof(TYPE) / 2];
-			std::memcpy(v, &valueToWrite, sizeof(valueToWrite));
-
-			applyOverride(offsetW, sizeof(TYPE) / 2, v);
-
-			std::memcpy(&valueToWrite, v, sizeof(valueToWrite));
-		}
-
-		// Write data to memory
-		//
-		std::memcpy(m_data.data() + byteOffset, &valueToWrite, sizeof(valueToWrite));
-
-		return true;
-	}
-
-	template<typename TYPE>
-	bool RamArea::readData(quint32 offsetW, TYPE* data, E::ByteOrder byteOrder, bool applyOverride) const noexcept
-	{
-		if (data == nullptr)
-		{
-			Q_ASSERT(data);
-			return false;
-		}
-
-		constexpr int wordCount = sizeof(TYPE) / sizeof(quint16);
-		size_t byteOffset = (offsetW - offset()) * 2;
-
-		if (byteOffset > m_data.size() - sizeof(TYPE))
-		{
-			Q_ASSERT(false);
-			return false;
-		}
-
-		TYPE rawValue;
-		std::memcpy(&rawValue, m_data.constData() + byteOffset, sizeof(TYPE));
-
-		// Apply override
-		//
-		if (applyOverride == true && m_overrideData.empty() == false)
-		{
-			std::array<quint16, wordCount> rawValueWorded;
-			static_assert(sizeof(rawValueWorded) == sizeof(TYPE));
-
-			std::memcpy(rawValueWorded.data(), &rawValue, sizeof(TYPE));
-
-			bool ok = this->applyOverride(offsetW, wordCount, rawValueWorded.data());
-			Q_ASSERT(ok);
-
-			std::memcpy(&rawValue, rawValueWorded.data(), sizeof(TYPE));
-		}
-
-		switch (byteOrder)
-		{
-		case E::BigEndian:
-			*data = qFromBigEndian<TYPE>(rawValue);
-			break;
-		case E::LittleEndian:
-			*data = qFromLittleEndian<TYPE>(rawValue);
-			break;
-		case E::NoEndian:
-			*data = rawValue;
-			break;
-		default:
-			assert(false);
-			return false;
-		}
-
-		return true;
-	}
-
 	bool RamArea::applyOverride(quint32 offsetW, quint32 countW, quint16* dataPtr) const noexcept
 	{
 		if (dataPtr == nullptr)
@@ -533,10 +436,6 @@ namespace Sim
 	void RamArea::setOverrideData(std::vector<OverrideRamRecord>&& overrideData) noexcept
 	{
 		m_overrideData = std::move(overrideData);
-	}
-
-	Ram::Ram()
-	{
 	}
 
 	Ram::Ram(const Ram& that)
@@ -652,7 +551,7 @@ namespace Sim
 		result.reserve(1'024'000);
 
 		result += QObject::tr("RAM dump for Module %1\n").arg(equipmnetId);
-		result += QObject::tr("--------------------------------------------------------------------------------\n").arg(equipmnetId);
+		result += QObject::tr("--------------------------------------------------------------------------------\n");
 
 		for (const RamArea& area : m_memoryAreas)
 		{
@@ -661,40 +560,6 @@ namespace Sim
 		}
 
 		return result;
-	}
-
-	std::vector<RamAreaInfo> Ram::memoryAreasInfo() const
-	{
-		std::vector<RamAreaInfo> result;
-		for (const RamArea& area : m_memoryAreas)
-		{
-			result.emplace_back(area);
-		}
-
-		return result;
-	}
-
-	RamAreaInfo Ram::memoryAreaInfo(const QString& name) const
-	{
-		for (const RamArea& area : m_memoryAreas)
-		{
-			if (area.name() == name)
-			{
-				return area;
-			}
-		}
-
-		return {};
-	}
-
-	RamAreaInfo Ram::memoryAreaInfo(int index) const
-	{
-		if (index < 0 || static_cast<size_t>(index) >= m_memoryAreas.size())
-		{
-			return {};
-		}
-
-		return m_memoryAreas[index];
 	}
 
 	Ram::Handle Ram::memoryAreaHandle(E::LogicModuleRamAccess access, quint32 offsetW) const
@@ -729,6 +594,32 @@ namespace Sim
 		}
 
 		return &m_memoryAreas[handle];
+	}
+
+	std::vector<RamArea*> Ram::memoryAreas()
+	{
+		std::vector<RamArea*> result;
+		result.reserve(m_memoryAreas.size());
+
+		for (RamArea& ra : m_memoryAreas)
+		{
+			result.push_back(&ra);
+		}
+
+		return result;
+	}
+
+	std::vector<const RamArea*> Ram::memoryAreas() const
+	{
+		std::vector<const RamArea*> result;
+		result.reserve(m_memoryAreas.size());
+
+		for (const RamArea& ra : m_memoryAreas)
+		{
+			result.push_back(&ra);
+		}
+
+		return result;
 	}
 
 	bool Ram::clearMemoryAreasOnStartCycle()
@@ -768,7 +659,7 @@ namespace Sim
 
 	bool Ram::writeBuffer(quint32 offsetW, E::LogicModuleRamAccess access, const std::vector<char>& data) noexcept
 	{
-		QByteArray ba = QByteArray::fromRawData(data.data(), static_cast<int>(data.size()));
+		QByteArray ba = QByteArray::fromRawData(data.data(), std::ssize(data));
 		return writeBuffer(offsetW, access, ba);
 	}
 
@@ -811,13 +702,7 @@ namespace Sim
 
 	bool Ram::setMem(quint32 offsetW, quint32 sizeW, quint16 data)
 	{
-		RamArea* area = memoryArea(E::LogicModuleRamAccess::Write, offsetW);
-		if (area == nullptr)
-		{
-			return false;
-		}
-
-		return area->setMem(offsetW, sizeW, data);
+		return setMem(offsetW, sizeW, data, E::LogicModuleRamAccess::Write);
 	}
 
 	bool Ram::setMem(quint32 offsetW, quint32 sizeW, quint16 data, E::LogicModuleRamAccess access)
@@ -1084,23 +969,8 @@ namespace Sim
 		return ma;
 	}
 
-	void Ram::updateOverrideData(const QString& lmEquipmentId, const OverrideSignals& overrideSignals)
+	int Ram::overrideSignalsLastCounter(int newValue)
 	{
-		if (m_overrideSignalsLastCounter == overrideSignals.changesCounter())
-		{
-			// Data has not been changesd since last update
-			//
-			return;
-		}
-
-		for (RamArea& ramArea : m_memoryAreas)
-		{
-			std::vector<OverrideRamRecord> ovData = overrideSignals.ramOverrideData(lmEquipmentId, ramArea);
-			ramArea.setOverrideData(std::move(ovData));
-		}
-
-		m_overrideSignalsLastCounter = overrideSignals.changesCounter();
-		return;
+		return std::exchange(m_overrideSignalsLastCounter, newValue);
 	}
-
 }

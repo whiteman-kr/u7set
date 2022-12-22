@@ -22,9 +22,9 @@ linux_build_job:
     - /^release.*$/
     - develop
     - /experimental/
-    - /^exp.*$/
-    - /^rpct-.*$/
-    - /^RPCT-.*$/
+    - /^.*exp.*$/
+    - /^.*rpct-.*$/
+    - /^.*RPCT-.*$/
   tags:
     - gcc
   script:
@@ -69,9 +69,9 @@ windows_build_job:
     - /^release.*$/
     - develop
     - /experimental/
-    - /^exp.*$/
-    - /^rpct-.*$/
-    - /^RPCT-.*$/
+    - /^.*exp.*$/
+    - /^.*rpct-.*$/
+    - /^.*RPCT-.*$/
   tags:
     - vs2017
   script:
@@ -226,9 +226,9 @@ windows_test_job:
     - /^release.*$/
     - develop
     - /experimental/
-    - /^exp.*$/
-    - /^rpct-.*$/
-    - /^RPCT-.*$/
+    - /^.*exp.*$/
+    - /^.*rpct-.*$/
+    - /^.*RPCT-.*$/
   script:
     - "# dir env:"
     - "echo $Env:CI_COMMIT_SHA"
@@ -298,9 +298,9 @@ linux_test_job:
     - /^release.*$/
     - develop
     - /experimental/
-    - /^exp.*$/
-    - /^rpct-.*$/
-    - /^RPCT-.*$/
+    - /^.*exp.*$/
+    - /^.*rpct-.*$/
+    - /^.*RPCT-.*$/
   script:
     - "printenv"
     - "echo $CI_COMMIT_SHA"
@@ -372,9 +372,9 @@ linux_code_coverage_job:
     - /^release.*$/
     - develop
     - /experimental/
-    - /^exp.*$/
-    - /^rpct-.*$/
-    - /^RPCT-.*$/
+    - /^.*exp.*$/
+    - /^.*rpct-.*$/
+    - /^.*RPCT-.*$/
   script:
     - "printenv"
     - "echo $CI_COMMIT_SHA"
