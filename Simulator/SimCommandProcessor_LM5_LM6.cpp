@@ -4879,6 +4879,12 @@ namespace Sim
 
 				nan |= std::isnan(ri_const) ? 1 : 0;
 				nan |= std::isnan(x_tr) ? 1 : 0;
+
+				// Fixed an issue when integrator(v7) out is not limited to min/max in track or reset mode.
+				// https://jira.radiy.com/browse/RPCT-3361
+				//
+				ri_const = std::clamp(ri_const, minValue, maxValue);
+				x_tr = std::clamp(x_tr, minValue, maxValue);
 			}
 
 			if (ti < m_cycleDurationMs ||
@@ -4896,6 +4902,11 @@ namespace Sim
 			if (reset == 1)
 			{
 				result.setFloatValue(ri_const);
+				// Note, in version 8 suppose to set o_mix, o_max for this mode too,
+				// so this 'break' will go away for verion 8 or some care about o_min/o_max (outMin/outMax)
+				// should be added.
+				// https://jira.radiy.com/browse/RADIX-2211?focusedCommentId=72844&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-72844
+				//
 				break;
 			}
 
@@ -4907,6 +4918,11 @@ namespace Sim
 
 			if (track == 1)
 			{
+				// Note, in version 8 suppose to set o_mix, o_max for this mode too,
+				// so this 'break' will go away for verion 8 or some care about o_min/o_max (outMin/outMax)
+				// should be added.
+				// https://jira.radiy.com/browse/RADIX-2211?focusedCommentId=72844&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-72844
+				//
 				result.setFloatValue(x_tr);
 				break;
 			}
