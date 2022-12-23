@@ -694,6 +694,8 @@ namespace Tcp
 			}
 		}
 
+		m_tcpSocket->flush();
+
 		initReadStatusVariables();
 
 		return true;
@@ -848,7 +850,7 @@ namespace Tcp
 
 		if (result == false)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return;
 		}
 
@@ -891,10 +893,7 @@ namespace Tcp
 
 		emit connectedSoftwareInfoChanged();
 
-		if (err != Tcp::SetConnectionError::Ok)
-		{
-			closeConnection();
-		}
+		closeConnection();
 	}
 
 	void Server::onAutoAckTimer()
@@ -926,7 +925,6 @@ namespace Tcp
 	{
 		emit newConnection(socketDescriptor);
 	}
-
 
 	// -------------------------------------------------------------------------------------
 	//
@@ -1202,12 +1200,11 @@ namespace Tcp
 
 		SoftwareInfo locSoftwareInfo = localSoftwareInfo();
 
-		Network::SoftwareInfo message;
+		Network::IntroduceMyselfRequest imr;
 
-		locSoftwareInfo.serializeTo(&message);
-		message.set_clientdescription(m_clientDescription.toStdString());
+		locSoftwareInfo.serializeTo(imr.mutable_clientsoftwareinfo());
 
-		sendRequest(RQID_INTRODUCE_MYSELF, message);
+		sendRequest(RQID_INTRODUCE_MYSELF, imr);
 	}
 
 	void Client::onDisconnection()
@@ -1337,6 +1334,8 @@ namespace Tcp
 				return false;
 			}
 		}
+
+		m_tcpSocket->flush();
 
 		startTimeoutTimer();
 
@@ -1604,6 +1603,8 @@ namespace Tcp
 
 		m_state.connectedSoftwareInfo.serializeFrom(imr.serversoftwareinfo());
 
+		m_stateMutex.unlock();
+
 		SetConnectionError err = static_cast<SetConnectionError>(imr.setconnectionerror());
 
 		switch(err)
@@ -1622,10 +1623,6 @@ namespace Tcp
 		default:
 			Q_ASSERT(false);
 		}
-
-
-
-		m_stateMutex.unlock();
 	}
 
 	bool Client::sendClientAliveRequest()

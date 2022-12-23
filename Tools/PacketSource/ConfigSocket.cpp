@@ -80,7 +80,7 @@ void ConfigSocket::start()
 
 	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &ConfigSocket::slot_configurationReady);
 
-	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_unknownClient, this, &ConfigSocket::unknownClient);
+	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_unknownClientID, this, &ConfigSocket::unknownClient);
 	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_wrongClientHostname, this, &ConfigSocket::wrongClientHostname);
 
 	m_cfgLoaderThread->start();

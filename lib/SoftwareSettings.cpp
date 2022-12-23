@@ -31,11 +31,6 @@ void SessionParams::loadFrom(const Network::SessionParams& sp)
 //
 // -------------------------------------------------------------------------------------
 
-/*SoftwareSettings::SoftwareSettings(const SoftwareSettings& copy)
-{
-	*this = copy;
-}*/
-
 SoftwareSettings::SoftwareSettings(const QString& profile) :
 	profile(profile)
 {
@@ -346,7 +341,7 @@ bool CfgServiceSettings::readFromXml(XmlReadHelper& xml)
 
 	result &= xml.readHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
 
-	result &= xml.readBoolElement(EquipmentPropNames::CHECK_HOSTNAME, &checkHostname);
+	result &= xml.readBoolElement(EquipmentPropNames::CHECK_HOSTNAME, &checkHostname, true);
 
 	result = xml.findElement(XmlElement::CLIENTS);
 

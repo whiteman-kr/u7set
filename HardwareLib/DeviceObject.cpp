@@ -2701,7 +2701,7 @@ R"DELIM({
 			return QString();
 		}
 
-		return ws->hostname();
+		return ws->hostname().trimmed();
 	}
 
 	E::SoftwareType Software::softwareType() const

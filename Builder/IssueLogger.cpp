@@ -1622,6 +1622,27 @@ namespace Builder
 								arg(objectID).arg(propertyName)));
 	}
 
+	/// IssueCode: CFG3049
+	///
+	/// IssueType: Error
+	///
+	/// Title: %1.CheckHostname is set True but hostname of workstation %2 isn't set.
+	///
+	/// Parameters:
+	///         %1 Configuration service EquipmentID
+	///			%2 Workstation EquipmentID
+	///
+	/// Description:
+	///			Set Hostname of specified workstation or set False CheckHostname of configuration service.
+	///
+	void IssueLogger::errCFG3049(QString cfgServiceID, QString workstationID)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3049,
+				  QString(tr("%1.CheckHostname is set True but hostname of workstation %2 isn't set.").
+								arg(cfgServiceID).arg(workstationID)));
+	}
+
 	/// IssueCode: CFG3100
 	///
 	/// IssueType: Error

@@ -393,6 +393,8 @@ bool CfgServiceSettingsGetter::readSettings(	const Builder::Context* context,
 											  EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestIP, false, "", 0, log);
 	result &= DeviceHelper::getIPv4Property(software, EquipmentPropNames::CLIENT_REQUEST_NETMASK, &clientRequestNetmask, false, "", log);
 
+	result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::CHECK_HOSTNAME, &checkHostname, log);
+
 	RETURN_IF_FALSE(result);
 
 	result &= buildClientsList(context, software);
@@ -410,6 +412,8 @@ bool CfgServiceSettingsGetter::buildClientsList(const Builder::Context* context,
 	bool result = true;
 
 	clients.clear();
+
+	std::set<const Hardware::Workstation*> reportedWs;
 
 	for(auto p : context->m_software)
 	{
@@ -442,9 +446,34 @@ bool CfgServiceSettingsGetter::buildClientsList(const Builder::Context* context,
 
 		if (ID1 == cfgService->equipmentIdTemplate() || ID2 == cfgService->equipmentIdTemplate())
 		{
+			QString hostname = software->hostname();
+
+			if (checkHostname == true && hostname.isEmpty() == true)
+			{
+				const Hardware::Workstation* ws = software->getParentWorkstation();
+
+				if (ws != nullptr)
+				{
+					if (reportedWs.find(ws) == reportedWs.end())
+					{
+						// %1.CheckHostname is set True but hostname of workstation %2 isn't set.
+						//
+						log->errCFG3049(cfgService->equipmentIdTemplate(), ws->equipmentIdTemplate());
+						reportedWs.insert(ws);
+
+						result = false;
+					}
+				}
+				else
+				{
+					Q_ASSERT(false);
+					LOG_NULLPTR_ERROR(log);
+				}
+			}
+
 			clients.append({.equipmentID = software->equipmentIdTemplate(),
 							.softwareType = software->softwareType(),
-							.hostname = software->hostname()});
+							.hostname = hostname});
 		}
 	}
 

@@ -100,7 +100,8 @@ public:
 signals:
 	void configurationUpdate();
 	void configurationArrived(ConfigSettings configuration);
-	void unknownClient();										// Error if CfgService cannot find SoftwareID
+	void unknownClient(QString errMsg);										// Error if CfgService cannot find SoftwareID
+	void wrongClientHostname(QString errMsg);
 
 	// slots
 	//

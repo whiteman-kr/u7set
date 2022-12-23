@@ -110,7 +110,8 @@ public slots:
 	void slot_updateActions(bool schemaWidgetSelected);
 
 	void slot_configurationArrived(ConfigSettings configuration);
-	void slot_unknownClient();
+	void slot_unknownClient(QString errMsg);
+	void slot_wrongClientHostname(QString errMsg);
 
 	//void checkMonitorSingleInstance();
 	void activateRequested();

@@ -132,8 +132,10 @@ MonitorConfigController::MonitorConfigController(const SoftwareInfo& softwareInf
 
 	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &MonitorConfigController::slot_configurationReady);
 
-	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_unknownClient, this, &MonitorConfigController::unknownClient);
-	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_unknownClient, [this](){this->writeError(tr("Unknown client %1").arg(MonitorAppSettings::instance().equipmentId()));});
+	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_unknownClientID, this, &MonitorConfigController::unknownClient);
+	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_unknownClientID, [this](){this->writeError(tr("Unknown client %1").arg(MonitorAppSettings::instance().equipmentId()));});
+
+	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_wrongClientHostname, this, &MonitorConfigController::wrongClientHostname);
 
 	return;
 }

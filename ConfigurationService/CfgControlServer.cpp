@@ -13,7 +13,8 @@ CfgControlServer::CfgControlServer(const SoftwareInfo& softwareInfo,
 								   const QString& workDirectory,
 								   const QString& buildPath,
 								   const SessionParams& sessionParams,
-								   const QStringList& knownClients,
+								   const QList<CfgServiceSettings::ClientInfo>& clients,
+								   bool checkClientHostname,
 								   const CfgCheckerWorker& checkerWorker,
 								   std::shared_ptr<CircularLogger> logger) :
 	CfgServer(softwareInfo, buildPath, sessionParams, logger),
@@ -22,8 +23,9 @@ CfgControlServer::CfgControlServer(const SoftwareInfo& softwareInfo,
 	m_equipmentID(softwareInfo.equipmentID()),
 	m_autoloadBuildPath(autoloadBuildPath),
 	m_workDirectory(workDirectory),
-	m_knownClients(knownClients),
-	m_sessionParams(sessionParams)
+	m_sessionParams(sessionParams),
+	m_knownClients(clients),
+	m_checkClientHostname(checkClientHostname)
 {
 }
 
@@ -31,7 +33,8 @@ CfgControlServer* CfgControlServer::getNewInstance()
 {
 	return new CfgControlServer(localSoftwareInfo(), m_autoloadBuildPath, m_workDirectory,
 								m_rootFolder, m_sessionParams,
-								m_knownClients, m_checkerWorker, m_logger);
+								m_knownClients, m_checkClientHostname,
+								m_checkerWorker, m_logger);
 }
 
 void CfgControlServer::processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)
@@ -65,9 +68,30 @@ void CfgControlServer::processRequest(quint32 requestID, const char* requestData
 
 Tcp::SetConnectionError CfgControlServer::checkClient(const QString& clientEquipmentID, const QString& clientHostname) const
 {
-	Q_ASSERT(false);		// TO DO real check
+	for(const auto& ci : m_knownClients)
+	{
+		if (clientEquipmentID != ci.equipmentID)
+		{
+			continue;
+		}
 
-	return Tcp::SetConnectionError::Ok;
+		if (m_checkClientHostname == true &&
+			clientHostname != ci.hostname)
+		{
+			DEBUG_LOG_ERR(m_logger, QString("Client %1 check failed - wrong client hostname!").
+							arg(clientEquipmentID));
+			return Tcp::SetConnectionError::WrongClientHostname;
+		}
+
+		DEBUG_LOG_MSG(m_logger, QString("Client %1 with hostname %2 check passed!").
+					  arg(clientEquipmentID).arg(clientHostname));
+		return Tcp::SetConnectionError::Ok;
+	}
+
+	DEBUG_LOG_ERR(m_logger, QString("Client %1 check failed - unknown EquipmentID!").
+					arg(clientEquipmentID));
+
+	return Tcp::SetConnectionError::UnknownClientID;
 }
 
 void CfgControlServer::sendServiceState()

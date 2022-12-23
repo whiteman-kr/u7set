@@ -26,6 +26,7 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 
 	connect(&m_configController, &MonitorConfigController::configurationArrived, this, &MonitorMainWindow::slot_configurationArrived);
 	connect(&m_configController, &MonitorConfigController::unknownClient, this, &MonitorMainWindow::slot_unknownClient);
+	connect(&m_configController, &MonitorConfigController::wrongClientHostname, this, &MonitorMainWindow::slot_wrongClientHostname);
 
 	// TcpSignalClient
 	//
@@ -1585,15 +1586,28 @@ void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
 	return;
 }
 
-void MonitorMainWindow::slot_unknownClient()
+void MonitorMainWindow::slot_unknownClient(QString errMsg)
 {
+	Q_UNUSED(errMsg);
+
 	// CfgService did not find SoftwareID
 	//
 	QMessageBox::critical(this,
 						  qAppName(),
 						  tr("Configuration Service does not recognize Monitor EquipmentID %1")
 						  .arg(m_configController.softwareInfo().equipmentID()));
+	return;
+}
 
+void MonitorMainWindow::slot_wrongClientHostname(QString errMsg)
+{
+	Q_UNUSED(errMsg);
+
+	// CfgService did not find SoftwareID
+	//
+	QMessageBox::critical(this,
+						  qAppName(),
+						  tr("Configuration Service reporting - Monitor running on computer with wrong hostanme"));
 	return;
 }
 

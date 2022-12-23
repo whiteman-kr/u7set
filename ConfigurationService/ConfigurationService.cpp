@@ -139,7 +139,8 @@ bool ConfigurationServiceWorker::loadCfgServiceSettings(const QString& buildPath
 		return false;
 	}
 
-	m_cfgServiceSettings = *ptr.get();
+	const CfgServiceSettings* settingsPtr = ptr.get();
+	m_cfgServiceSettings = *settingsPtr;
 
 	DEBUG_LOG_MSG(m_logger, QString());
 	DEBUG_LOG_MSG(m_logger, QString("Loading settings for profile: %1 - Ok").arg(curProfile));
@@ -185,7 +186,8 @@ void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 															  m_workDirectory,
 															  buildPath,
 															  sessionParams(),
-															  m_cfgServiceSettings.knownClients(),
+															  m_cfgServiceSettings.clients,
+															  m_cfgServiceSettings.checkHostname,
 															  *m_cfgCheckerWorker,
 															  m_logger);
 
