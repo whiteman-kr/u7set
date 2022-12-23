@@ -910,7 +910,7 @@ namespace Sim
 
 	bool OverrideSignals::saveWorkspace(QString fileName) const
 	{
-		std::fstream output(fileName.toStdWString(), std::ios::out | std::ios::binary);
+        std::fstream output(std::filesystem::path(fileName.toStdWString()), std::ios::out | std::ios::binary);
 		if (output.is_open() == false || output.bad() == true)
 		{
 			return false;
@@ -942,7 +942,7 @@ namespace Sim
 	{
 		clear();
 
-		std::fstream input(fileName.toStdWString(), std::ios::in | std::ios::binary);
+        std::fstream input(std::filesystem::path(fileName.toStdWString()), std::ios::in | std::ios::binary);
 		if (input.is_open() == false || input.bad() == true)
 		{
 			return false;
