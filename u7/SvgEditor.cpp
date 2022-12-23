@@ -105,13 +105,9 @@ SvgEditor::SvgEditor(QWidget* parent):
     m_textEdit = new CodeEditor(this);
 
 #if defined(Q_OS_WIN)
-		QFont f = QFont("Consolas");
-#elif defined(Q_OS_MAC)
-		QFont f = QFont("Courier");
-		//f.setPixelSize(font().pixelSize());
+		QFont f = QFont("Consolas", 11);
 #else
 		QFont f = QFont("Courier");
-		//f.setPixelSize(font().pixelSize());
 #endif
 
 	m_textEdit->setFont(f);

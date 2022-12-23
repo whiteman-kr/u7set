@@ -399,16 +399,10 @@ IdeCodeEditor::IdeCodeEditor(CodeType codeType, QWidget* parent) :
     // Set up default font
     //
 #if defined(Q_OS_WIN)
-        QFont f = QFont("Consolas", 11);
-        //f.setPixelSize(font().pixelSize());
-#elif defined(Q_OS_MAC)
-        QFont f = QFont("Courier");
-        //f.setPixelSize(font().pixelSize());
+		QFont f = QFont("Consolas", 11);
 #else
-        QFont f = QFont("Courier");
-        //f.setPixelSize(font().pixelSize());
+		QFont f = QFont("Courier");
 #endif
-
     setFont(f);
 
     // Set up lexer

@@ -1692,7 +1692,7 @@ namespace ExtWidgets
 
 		textEdit->setReadOnly(true);
 
-		textEdit->setFont(QFont("Courier", font().pointSize() + 2));
+		textEdit->setFont(QFont("Consolas"));
 
 		QHBoxLayout* l = new QHBoxLayout(this);
 
@@ -1760,7 +1760,15 @@ namespace ExtWidgets
 		l->setContentsMargins(0, 0, 0, 0);
 
 		m_plainTextEdit->setTabChangesFocus(false);
-		m_plainTextEdit->setFont(QFont("Courier", font().pointSize() + 2));
+
+		// Set up default font
+		//
+#if defined(Q_OS_WIN)
+		QFont f = QFont("Consolas", 11);
+#else
+		QFont f = QFont("Courier");
+#endif
+		m_plainTextEdit->setFont(f);
 
 		QFontMetrics metrics(m_plainTextEdit->font());
 
