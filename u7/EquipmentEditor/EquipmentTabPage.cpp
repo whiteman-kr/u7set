@@ -1562,7 +1562,7 @@ void EquipmentTabPage::exportPreset()
 		compressedMessage.mutable_description()->operator=(*descriptionMessage);
 		compressedMessage.set_compressedthis(compressedData.toStdString());
 
-		std::fstream output(fileName.toStdString(), std::ios::out | std::ios::binary);
+		std::fstream output(fileName.toStdWString(), std::ios::out | std::ios::binary);
 
 		if (output.is_open() == false || output.bad() == true)
 		{
@@ -1595,7 +1595,7 @@ void EquipmentTabPage::importPreset()
 
 	// --
 	//
-	std::fstream input(fileName.toStdString(), std::ios::in | std::ios::binary);
+	std::fstream input(fileName.toStdWString(), std::ios::in | std::ios::binary);
 	if (input.is_open() == false || input.bad() == true)
 	{
 		QMessageBox::critical(this, qAppName(), tr("Load file %1 error.").arg(fileName));
