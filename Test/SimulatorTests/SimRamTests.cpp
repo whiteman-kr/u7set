@@ -1,7 +1,6 @@
 #include "SimRamTests.h"
-#include <QtTest>
 #include <algorithm>
-
+#include <QtTest>
 
 void SimRamTests::initTestCase()
 {
@@ -21,6 +20,38 @@ void SimRamTests::cleanup()
 {
 }
 
+void SimRamTests::ramAreaDump()
+{
+	QString dump = m_ramArea->dump();
+
+	// Just check that some dump is forming
+	QVERIFY(dump.startsWith("Memory Area: "));
+	QVERIFY(dump.endsWith(" All zeroes....\n"));	// Initially RAM is 0s
+
+	// Add non zero value
+	//
+	m_ramArea->writeWord(SimRamTests::s_ra_offset + SimRamTests::s_ra_size - 1, 0xFFFF, E::BigEndian);
+	dump = m_ramArea->dump();
+
+	QVERIFY(dump.startsWith("Memory Area: "));
+	QVERIFY(dump.endsWith(" 0000 ffff\n"));
+
+	return;
+}
+
+void SimRamTests::ramDump()
+{
+	Sim::Ram ram;
+
+	ram.addMemoryArea(E::LogicModuleRamAccess::Read, 0, 100, false, "RM0");
+	ram.addMemoryArea(E::LogicModuleRamAccess::Write, 0, 100, false, "WM0");
+
+	QString dump = ram.dump("LMID");
+	QVERIFY(dump.startsWith("RAM dump for Module LMID"));
+
+	return;
+}
+
 void SimRamTests::ramAreaCreateTest()
 {
 	QVERIFY(m_ramArea->access() == E::LogicModuleRamAccess::Read);
@@ -28,6 +59,7 @@ void SimRamTests::ramAreaCreateTest()
 	QVERIFY(m_ramArea->size() == s_ra_size);
 	QVERIFY(m_ramArea->name() == "RA0");
 	QVERIFY(m_ramArea->clearOnStartCycle() == true);
+
 	return;
 }
 
@@ -53,6 +85,115 @@ void SimRamTests::ramAreaClearTest()
 
 		QCOMPARE(data, 0);
 	}
+
+	return;
+}
+
+void SimRamTests::ramGetMemoryAreasTest()
+{
+	Sim::Ram ram;
+
+	ram.addMemoryArea(E::LogicModuleRamAccess::Read, 0, 100, false, "RM0");
+	ram.addMemoryArea(E::LogicModuleRamAccess::Write, 0, 100, false, "WM0");
+
+	std::vector<Sim::RamArea*> mutableMemoryAreas = ram.memoryAreas();
+	std::vector<const Sim::RamArea*> constMemoryAreas = std::as_const(ram).memoryAreas();
+
+	QCOMPARE(mutableMemoryAreas.size(), 2);
+	QCOMPARE(constMemoryAreas.size(), 2);
+
+	return;
+}
+
+void SimRamTests::ramGetMemoryAreaHandle()
+{
+	Sim::Ram ram;
+
+	ram.addMemoryArea(E::LogicModuleRamAccess::Read, 100, 100, false, "RM0");
+	ram.addMemoryArea(E::LogicModuleRamAccess::Read, 200, 100, false, "RM1");
+	ram.addMemoryArea(E::LogicModuleRamAccess::Write, 200, 100, false, "WM0");
+
+	{
+		Sim::Ram::Handle h = ram.memoryAreaHandle(E::LogicModuleRamAccess::Read, 100);
+		QVERIFY(h != Sim::Ram::InvalidHandle);
+
+		Sim::RamArea* area = ram.memoryArea(h);
+		QVERIFY(area != nullptr);
+		QCOMPARE(area->name(), "RM0");
+		QCOMPARE(area->offset(), 100);
+		QCOMPARE(area->size(), 100);
+
+		const Sim::RamArea* carea = std::as_const(ram).memoryArea(h);
+		QVERIFY(carea != nullptr);
+		QCOMPARE(carea->name(), "RM0");
+	}
+
+	{
+		Sim::Ram::Handle h = ram.memoryAreaHandle(E::LogicModuleRamAccess::Read, 200);
+		QVERIFY(h != Sim::Ram::InvalidHandle);
+
+		Sim::RamArea* area = ram.memoryArea(h);
+		QVERIFY(area != nullptr);
+		QCOMPARE(area->name(), "RM1");
+
+		const Sim::RamArea* carea = std::as_const(ram).memoryArea(h);
+		QVERIFY(carea != nullptr);
+		QCOMPARE(carea->name(), "RM1");
+	}
+
+	{
+		Sim::Ram::Handle h = ram.memoryAreaHandle(E::LogicModuleRamAccess::Write, 200);
+		QVERIFY(h != Sim::Ram::InvalidHandle);
+
+		Sim::RamArea* area = ram.memoryArea(h);
+		QVERIFY(area != nullptr);
+		QCOMPARE(area->name(), "WM0");
+
+		const Sim::RamArea* carea = std::as_const(ram).memoryArea(h);
+		QVERIFY(carea != nullptr);
+		QCOMPARE(carea->name(), "WM0");
+
+		h = ram.memoryAreaHandle(E::LogicModuleRamAccess::Write, 200 + 99);
+		QVERIFY(h != Sim::Ram::InvalidHandle);
+
+		area = ram.memoryArea(h);
+		QVERIFY(area != nullptr);
+		QCOMPARE(area->name(), "WM0");
+	}
+
+	{
+		Sim::Ram::Handle h = ram.memoryAreaHandle(E::LogicModuleRamAccess::Write, 100);
+		QCOMPARE(h, Sim::Ram::InvalidHandle);
+	}
+
+	{
+		Sim::Ram::Handle h = ram.memoryAreaHandle(E::LogicModuleRamAccess::Write, 200 + 100);
+		QCOMPARE(h, Sim::Ram::InvalidHandle);
+	}
+
+	return;
+}
+
+void SimRamTests::ramGetOverrideData()
+{
+	const quint32 overrideDataOffsetAreaW = s_ra_size / 2;
+	Sim::RamArea ramArea{E::LogicModuleRamAccess::Write, s_ra_offset, s_ra_size, true, "RA"};
+
+	std::vector<Sim::OverrideRamRecord> ovr;
+	ovr.resize(s_ra_size);
+
+	ovr[overrideDataOffsetAreaW + 0] = Sim::OverrideRamRecord{0xF00F, qToBigEndian<quint16>(0x1122)};
+	ovr[overrideDataOffsetAreaW + 1] = Sim::OverrideRamRecord{0x0FF0, qToBigEndian<quint16>(0x3344)};
+	ovr[overrideDataOffsetAreaW + 2] = Sim::OverrideRamRecord{0xFFF0, qToBigEndian<quint16>(0x5566)};
+
+	ramArea.setOverrideData(std::move(ovr));
+
+	// --
+	//
+	std::vector<Sim::OverrideRamRecord> newOverrideData = ramArea.overrideData();
+
+	bool areEqual = std::equal(ovr.begin(), ovr.end(), newOverrideData.begin());
+	QCOMPARE(areEqual, true);
 
 	return;
 }
@@ -368,6 +509,11 @@ void SimRamTests::ramCreate()
 		QVERIFY(ram.m_memoryAreas.size() == 4);
 		QVERIFY(ram.m_readAreas.size() == 3);
 		QVERIFY(ram.m_writeAreas.size() == 3);
+
+		// check copy
+		//
+		Sim::Ram copy = ram;
+		QCOMPARE(copy.memoryAreas().size(), 4);
 	}
 
 	// Test error for overlapping memory areas
@@ -481,15 +627,96 @@ void SimRamTests::ramMemoryAreaHandle()
 	return;
 }
 
+void SimRamTests::ramClearMemoryAreasOnStartCycle()
+{
+	Sim::Ram ram;
+	bool ok = true;
+
+	const quint32 offset = 200;
+	const quint32 size = 200;
+
+	ram.addMemoryArea(E::LogicModuleRamAccess::Read, offset, size, true, "RM0");
+	ram.addMemoryArea(E::LogicModuleRamAccess::Write, offset, size, false, "WM0");
+
+	for (quint32 i = 0; i < size; i++)
+	{
+		ok = ram.writeWord(offset + i, i % 0xFFFF, E::ByteOrder::BigEndian, E::LogicModuleRamAccess::Read);
+		QCOMPARE(ok, true);
+
+		ok = ram.writeWord(offset + i, i % 0xFFFF, E::ByteOrder::BigEndian, E::LogicModuleRamAccess::Write);
+		QCOMPARE(ok, true);
+	}
+
+	ram.clearMemoryAreasOnStartCycle();
+
+	for (quint32 i = 0; i < size; i++)
+	{
+		quint16 data;
+		ok = ram.readWord(offset + i, &data, E::ByteOrder::BigEndian, E::LogicModuleRamAccess::Read);
+		QCOMPARE(ok, true);
+		QCOMPARE(data, 0);
+
+		ok = ram.readWord(offset + i, &data, E::ByteOrder::BigEndian, E::LogicModuleRamAccess::Write);
+		QCOMPARE(ok, true);
+		QCOMPARE(data, i % 0xFFFF);
+	}
+
+	return;
+}
+
+void SimRamTests::ramClearMemoryAreas()
+{
+	Sim::Ram ram;
+	bool ok = true;
+
+	const quint32 offset = 200;
+	const quint32 size = 200;
+
+	ram.addMemoryArea(E::LogicModuleRamAccess::Read, offset, size, true, "RM0");
+	ram.addMemoryArea(E::LogicModuleRamAccess::Write, offset, size, false, "WM0");
+
+	for (quint32 i = 0; i < size; i++)
+	{
+		ok = ram.writeWord(offset + i, i % 0xFFFF, E::ByteOrder::BigEndian, E::LogicModuleRamAccess::Read);
+		QCOMPARE(ok, true);
+
+		ok = ram.writeWord(offset + i, i % 0xFFFF, E::ByteOrder::BigEndian, E::LogicModuleRamAccess::Write);
+		QCOMPARE(ok, true);
+	}
+
+	ram.clearMemoryArea(offset, E::LogicModuleRamAccess::Read);
+
+	for (quint32 i = 0; i < size; i++)
+	{
+		quint16 data;
+		ok = ram.readWord(offset + i, &data, E::ByteOrder::BigEndian, E::LogicModuleRamAccess::Read);
+		QCOMPARE(ok, true);
+		QCOMPARE(data, 0);
+
+		ok = ram.readWord(offset + i, &data, E::ByteOrder::BigEndian, E::LogicModuleRamAccess::Write);
+		QCOMPARE(ok, true);
+		QCOMPARE(data, i % 0xFFFF);
+	}
+
+	return;
+}
+
 void SimRamTests::ramReadWriteBuffer()
 {
 	Sim::Ram ram;
 	bool ok = true;
 
-	ram.addMemoryArea(E::LogicModuleRamAccess::Read, 0, 100, false, "RM0");
-	ram.addMemoryArea(E::LogicModuleRamAccess::Write, 0, 100, false, "WM0");
-	ram.addMemoryArea(E::LogicModuleRamAccess::ReadWrite, 100, 100, false, "RW100");
-	ram.addMemoryArea(E::LogicModuleRamAccess::ReadWrite, 200, 100, false, "RW200");
+	ok = ram.addMemoryArea(E::LogicModuleRamAccess::Read, 0, 100, false, "RM0");
+	QCOMPARE(ok, true);
+
+	ok = ram.addMemoryArea(E::LogicModuleRamAccess::Write, 0, 100, false, "WM0");
+	QCOMPARE(ok, true);
+
+	ok = ram.addMemoryArea(E::LogicModuleRamAccess::ReadWrite, 100, 100, false, "RW100");
+	QCOMPARE(ok, true);
+
+	ok = ram.addMemoryArea(E::LogicModuleRamAccess::ReadWrite, 200, 100, false, "RW200");
+	QCOMPARE(ok, true);
 
 	std::vector<char> buffer;
 	buffer.resize(100);
@@ -535,6 +762,92 @@ void SimRamTests::ramReadWriteBuffer()
 
 	m_ramArea->readData(s_ra_offset + s_ra_size - 1, &d, E::ByteOrder::BigEndian, true);
 	QCOMPARE(d, 0x5566);
+
+	return;
+}
+
+void SimRamTests::ramReadWriteBufferOverride()
+{
+	bool ok = true;
+	const quint32 overrideDataOffsetAreaW = s_ra_size / 2;
+
+	Sim::Ram ram;
+	ok = ram.addMemoryArea(E::LogicModuleRamAccess::Write, s_ra_offset, s_ra_size, true, "RA");
+	QVERIFY(ok == true);
+
+	Sim::RamArea* ramArea = ram.memoryArea(E::LogicModuleRamAccess::Write, s_ra_offset);
+	QVERIFY(ramArea != nullptr);
+
+	std::vector<Sim::OverrideRamRecord> ovr;
+	ovr.resize(s_ra_size);
+
+	ovr[overrideDataOffsetAreaW + 0] = Sim::OverrideRamRecord{0xF00F, qToBigEndian<quint16>(0x1122)};
+	ovr[overrideDataOffsetAreaW + 1] = Sim::OverrideRamRecord{0x0FF0, qToBigEndian<quint16>(0x3344)};
+	ovr[overrideDataOffsetAreaW + 2] = Sim::OverrideRamRecord{0xFFF0, qToBigEndian<quint16>(0x5566)};
+
+	ramArea->setOverrideData(std::move(ovr));
+
+	QByteArray buffer;
+	buffer.resize(s_ra_size * 2);
+	std::iota(buffer.begin(), buffer.end(), 0);
+
+	ok = ram.writeBuffer(s_ra_offset, E::LogicModuleRamAccess::Write, buffer);
+	QVERIFY(ok == true);
+
+	{
+		const QByteArray& rawData = ramArea->data();
+		QCOMPARE(rawData.size(), buffer.size());
+
+		char ch = 0;
+		for (qsizetype i = 0; i < s_ra_size * 2; i++, ch++)
+		{
+			if (i < overrideDataOffsetAreaW * 2 ||
+				i > (overrideDataOffsetAreaW + 3) * 2)
+			{
+				QCOMPARE(rawData[i], ch);
+			}
+		}
+
+		quint16 v = 0;
+
+		v = qFromBigEndian<quint16>(rawData.constData() + (overrideDataOffsetAreaW + 0) * 2);
+		QCOMPARE(v & ~0xF00F, 0x1122 & ~0xF00F);
+
+		v = qFromBigEndian<quint16>(rawData.constData() + (overrideDataOffsetAreaW + 1) * 2);
+		QCOMPARE(v & ~0x0FF0, 0x3344 & ~0x0FF0);
+
+		v = qFromBigEndian<quint16>(rawData.constData() + (overrideDataOffsetAreaW + 2) * 2);
+		QCOMPARE(v & ~0xFFF0, 0x5566 & ~0xFFF0);
+	}
+
+	{
+		QByteArray readBuffer;
+		ok = ram.readToBuffer(s_ra_offset, E::LogicModuleRamAccess::Write, s_ra_size, &readBuffer, true);
+
+		QCOMPARE(ok, true);
+		QCOMPARE(readBuffer.size(), buffer.size());
+
+		char ch = 0;
+		for (qsizetype i = 0; i < s_ra_size * 2; i++, ch++)
+		{
+			if (i < overrideDataOffsetAreaW * 2 ||
+				i > (overrideDataOffsetAreaW + 3) * 2)
+			{
+				QCOMPARE(readBuffer[i], ch);
+			}
+		}
+
+		quint16 v = 0;
+
+		v = qFromBigEndian<quint16>(readBuffer.constData() + (overrideDataOffsetAreaW + 0) * 2);
+		QCOMPARE(v & ~0xF00F, 0x1122 & ~0xF00F);
+
+		v = qFromBigEndian<quint16>(readBuffer.constData() + (overrideDataOffsetAreaW + 1) * 2);
+		QCOMPARE(v & ~0x0FF0, 0x3344 & ~0x0FF0);
+
+		v = qFromBigEndian<quint16>(readBuffer.constData() + (overrideDataOffsetAreaW + 2) * 2);
+		QCOMPARE(v & ~0xFFF0, 0x5566 & ~0xFFF0);
+	}
 
 	return;
 }
@@ -632,6 +945,63 @@ void SimRamTests::ramSetMem()
 
 		m_ramArea->readWord(s_ra_offset + s_ra_size - 1, &data, E::BigEndian, true);
 		QCOMPARE(data, 0x1234);
+	}
+
+	return;
+}
+
+void SimRamTests::ramSetMemWithOverride()
+{
+	bool ok = true;
+	const quint32 overrideDataOffsetAreaW = s_ra_size / 2;
+
+	Sim::Ram ram;
+	ok = ram.addMemoryArea(E::LogicModuleRamAccess::Write, s_ra_offset, s_ra_size, true, "RA");
+	QVERIFY(ok == true);
+
+	Sim::RamArea* ramArea = ram.memoryArea(E::LogicModuleRamAccess::Write, s_ra_offset);
+	QVERIFY(ramArea != nullptr);
+
+	std::vector<Sim::OverrideRamRecord> ovr;
+	ovr.resize(s_ra_size);
+
+	ovr[overrideDataOffsetAreaW + 0] = Sim::OverrideRamRecord{0xF00F, qToBigEndian<quint16>(0x1122)};
+	ovr[overrideDataOffsetAreaW + 1] = Sim::OverrideRamRecord{0x0FF0, qToBigEndian<quint16>(0x3344)};
+	ovr[overrideDataOffsetAreaW + 2] = Sim::OverrideRamRecord{0xFFF0, qToBigEndian<quint16>(0x5566)};
+
+	// setMem
+	//
+	ramArea->setOverrideData(std::move(ovr));
+
+	ok = ram.setMem(s_ra_offset, s_ra_size, 0xCECE);
+	QCOMPARE(ok, true);
+
+	// Checks
+	//
+	{
+		const QByteArray& rawData = ramArea->data();
+		QCOMPARE(rawData.size(), s_ra_size * 2);
+
+		char ch = static_cast<char>(0xCE);
+		for (qsizetype i = 0; i < s_ra_size * 2; i++)
+		{
+			if (i < overrideDataOffsetAreaW * 2 ||
+				i > (overrideDataOffsetAreaW + 3) * 2)
+			{
+				QCOMPARE(rawData[i], ch);
+			}
+		}
+
+		quint16 v = 0;
+
+		v = qFromBigEndian<quint16>(rawData.constData() + (overrideDataOffsetAreaW + 0) * 2);
+		QCOMPARE(v & ~0xF00F, 0x1122 & ~0xF00F);
+
+		v = qFromBigEndian<quint16>(rawData.constData() + (overrideDataOffsetAreaW + 1) * 2);
+		QCOMPARE(v & ~0x0FF0, 0x3344 & ~0x0FF0);
+
+		v = qFromBigEndian<quint16>(rawData.constData() + (overrideDataOffsetAreaW + 2) * 2);
+		QCOMPARE(v & ~0xFFF0, 0x5566 & ~0xFFF0);
 	}
 
 	return;
@@ -743,3 +1113,81 @@ void SimRamTests::ramReadWriteDword()
 
 	return;
 }
+
+void SimRamTests::ramReadWriteFloat()
+{
+	Sim::Ram ram;
+	bool ok = false;
+	float data = 0.0;
+
+	ok = ram.addMemoryArea(E::LogicModuleRamAccess::Read, 0, 100, false, "RM0");
+	QCOMPARE(ok, true);
+
+	ok = ram.addMemoryArea(E::LogicModuleRamAccess::Write, 0, 100, false, "WM0");
+	QCOMPARE(ok, true);
+
+	// --
+	//
+	ok = ram.writeFloat(10, 123.0, E::BigEndian, E::LogicModuleRamAccess::Write);
+	QCOMPARE(ok, true);
+
+	ok = ram.readFloat(10, &data, E::ByteOrder::BigEndian, E::LogicModuleRamAccess::Write);
+	QCOMPARE(ok, true);
+	QCOMPARE(data, 123.0);
+
+	ram.readFloat(8, &data, E::ByteOrder::BigEndian, E::LogicModuleRamAccess::Write);
+	QCOMPARE(data, 0);
+
+	ram.readFloat(12, &data, E::ByteOrder::BigEndian, E::LogicModuleRamAccess::Write);
+	QCOMPARE(data, 0);
+
+	ram.readFloat(10, &data, E::ByteOrder::BigEndian, E::LogicModuleRamAccess::Read);
+	QCOMPARE(data, 0);
+
+	return;
+}
+
+void SimRamTests::ramReadWriteSignedInt32()
+{
+	Sim::Ram ram;
+	bool ok = false;
+	qint32 data = 0;
+
+	ok = ram.addMemoryArea(E::LogicModuleRamAccess::Read, 0, 100, false, "RM0");
+	QCOMPARE(ok, true);
+
+	ok = ram.addMemoryArea(E::LogicModuleRamAccess::Write, 0, 100, false, "WM0");
+	QCOMPARE(ok, true);
+
+	// --
+	//
+	ok = ram.writeSignedInt(10, -123, E::BigEndian, E::LogicModuleRamAccess::Write);
+	QCOMPARE(ok, true);
+
+	ok = ram.readSignedInt(10, &data, E::ByteOrder::BigEndian, E::LogicModuleRamAccess::Write);
+	QCOMPARE(ok, true);
+	QCOMPARE(data, -123);
+
+	ram.readSignedInt(8, &data, E::ByteOrder::BigEndian, E::LogicModuleRamAccess::Write);
+	QCOMPARE(data, 0);
+
+	ram.readSignedInt(12, &data, E::ByteOrder::BigEndian, E::LogicModuleRamAccess::Write);
+	QCOMPARE(data, 0);
+
+	ram.readSignedInt(10, &data, E::ByteOrder::BigEndian, E::LogicModuleRamAccess::Read);
+	QCOMPARE(data, 0);
+
+	return;
+}
+
+void SimRamTests::ramOverrideSignalLastCounter()
+{
+	Sim::Ram ram;
+
+	QCOMPARE(ram.overrideSignalsLastCounter(0), -1);
+	QCOMPARE(ram.overrideSignalsLastCounter(1), 0);
+	QCOMPARE(ram.overrideSignalsLastCounter(2), 1);
+
+	return;
+}
+

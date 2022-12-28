@@ -80,6 +80,7 @@ namespace Afb
 		AfbComponentPinType m_type = AfbComponentPinType::Param;
 	};
 
+
 	class AfbComponent : public QObject
 	{
 		Q_OBJECT
@@ -97,103 +98,32 @@ namespace Afb
 		// Properties
 		//
 	public:
-		int opCode() const noexcept
-		{
-			return m_opCode;
-		}
-		void setOpCode(int value) noexcept
-		{
-			m_opCode = value;
-		}
+		[[nodiscard]] int opCode() const noexcept;
+		void setOpCode(int value) noexcept;
 
-		bool hasRam() const noexcept
-		{
-			return m_hasRam;
-		}
-		void setHasRam(bool value) noexcept
-		{
-			m_hasRam = value;
-		}
+		[[nodiscard]] bool hasRam() const noexcept;
+		void setHasRam(bool value) noexcept;
 
-		const QString& caption() const noexcept
-		{
-			return m_caption;
-		}
-		void setCaption(const QString& value) noexcept
-		{
-			m_caption = value;
-		}
+		[[nodiscard]] const QString& caption() const noexcept;
+		void setCaption(const QString& value) noexcept;
 
-		int impVersion() const noexcept
-		{
-			return m_impVersion;
-		}
-		void setImpVersion(int value) noexcept
-		{
-			m_impVersion = value;
-		}
+		[[nodiscard]] int impVersion() const noexcept;
+		void setImpVersion(int value) noexcept;
 
-		int versionOpIndex() const noexcept
-		{
-			return m_versionOpIndex;
-		}
-		void setVersionOpIndex(int value) noexcept
-		{
-			m_versionOpIndex = value;
-		}
+		[[nodiscard]] int versionOpIndex() const noexcept;
+		void setVersionOpIndex(int value) noexcept;
 
-		int maxInstCount() const noexcept
-		{
-			return m_maxInstCount;
-		}
-		void setMaxInstCount(int value) noexcept
-		{
-			m_maxInstCount = value;
-		}
+		[[nodiscard]] int maxInstCount() const noexcept;
+		void setMaxInstCount(int value) noexcept;
 
-		const QString& simulationFunc() const noexcept
-		{
-			return m_simulationFunc;
-		}
-		void setSimulationFunc(const QString& value) noexcept
-		{
-			m_simulationFunc = value;
-		}
+		[[nodiscard]] const QString& simulationFunc() const noexcept;
+		void setSimulationFunc(const QString& value) noexcept;
 
-		const std::unordered_map<int, AfbComponentPin>& pins() const noexcept
-		{
-			return m_pins;
-		}
+		[[nodiscard]] const std::unordered_map<int, AfbComponentPin>& pins() const noexcept;
 
-		bool pinExists(int pinOpIndex) const noexcept
-		{
-			return (static_cast<size_t>(pinOpIndex) >= m_pinExists.size())
-					? false: m_pinExists[pinOpIndex];
-		}
-
-		QString pinCaption(int pinOpIndex) const noexcept
-		{
-			auto it = m_pins.find(pinOpIndex);
-			if (it != m_pins.end())
-			{
-				return it->second.caption();
-			}
-
-			return QLatin1String("[UnknownPin ") + QString::number(pinOpIndex) + QLatin1String("]");
-		}
-
-		int pinOpIndex(const QString& pinCaption) const noexcept
-		{
-			for(auto& pinInfo : m_pins)
-			{
-				if (pinInfo.second.caption() == pinCaption)
-				{
-					return pinInfo.first;	// pin opIndex
-				}
-			}
-
-			return -1;
-		}
+		[[nodiscard]] bool pinExists(int pinOpIndex) const noexcept;
+		[[nodiscard]] QString pinCaption(int pinOpIndex) const noexcept;
+		[[nodiscard]] int pinOpIndex(const QString& pinCaption) const noexcept;
 
 	private:
 		// Operator= is present, don't forget to add new fields to it
@@ -207,7 +137,7 @@ namespace Afb
 		QString m_simulationFunc;
 
 		std::unordered_map<int, AfbComponentPin> m_pins;		// Key is OpIndex of pin - AfbComponentPin::opIndex()
-		std::vector<bool> m_pinExists;									// For fast searching of pin, intensively used in simulator
+		std::vector<bool> m_pinExists;							// For fast searching of pin, intensively used in simulator
 		// Operator= is present, don't forget to add new fields to it
 		//
 	};

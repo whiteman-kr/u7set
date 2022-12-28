@@ -971,6 +971,28 @@ namespace Sim
 		return true;
 	}
 
+	void OverrideSignals::updateRamOverrideData(const QString& lmEquipmentId, Ram& ram) const
+	{
+		if (int cs = changesCounter();
+			ram.overrideSignalsLastCounter(cs) == cs)
+		{
+			// Data has not been changesd since last update
+			//
+			return;
+		}
+
+		for (std::vector<RamArea*> memoryAreas = ram.memoryAreas();
+			 RamArea* ramArea : memoryAreas)
+		{
+			Q_ASSERT(ramArea);
+
+			std::vector<OverrideRamRecord> ovData = ramOverrideData(lmEquipmentId, *ramArea);
+			ramArea->setOverrideData(std::move(ovData));
+		}
+
+		return;
+	}
+
 	Sim::AppSignalManager& OverrideSignals::appSignalManager()
 	{
 		return m_simulator->appSignalManager();
@@ -1083,7 +1105,7 @@ namespace Sim
 
 			offsetW -= ramAreaInfo.offset();	// Make it 0-based
 
-			if (offsetW < 0 || offsetW + dataSizeW > result.size())
+			if (offsetW < 0 || offsetW + dataSizeW > std::ssize(result))
 			{
 				assert(false);
 				return result;

@@ -3,7 +3,7 @@
 #include "../AppSignalLib/AppSignal.h"
 #include "../lib/IAppSignalManager.h"
 #include "../TrendView/TrendSignal.h"
-#include "SimRam.h"
+#include "SimOverrideSignals.h"
 #include "SimScopedLog.h"
 
 
