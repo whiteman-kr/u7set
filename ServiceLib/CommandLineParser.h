@@ -88,7 +88,7 @@ private:
 	QString m_appPath;
 	QVector<QString> m_cmdLineArgs;
 
-	std::map<QString, Option> m_options;			// -opName => Option
+	std::map<QString, Option> m_options;			// opName => Option
 	QHash<QString, QString> m_settingsValues;
 	QStringList m_parsingErrors;
 

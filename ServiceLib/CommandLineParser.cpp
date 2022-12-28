@@ -99,8 +99,6 @@ void CommandLineParser::parse()
 
 	for(QString cmdLineArg : m_cmdLineArgs)
 	{
-		cmdLineArg = cmdLineArg.trimmed().toLower();
-
 		QStringList cmdLineArgAndValue = cmdLineArg.split("=", Qt::SkipEmptyParts);
 
 		if (cmdLineArgAndValue.isEmpty() == true)
@@ -108,7 +106,12 @@ void CommandLineParser::parse()
 			continue;
 		}
 
-		QString optionName = cmdLineArgAndValue.first();
+		QString optionName = cmdLineArgAndValue.first().trimmed().toLower();
+
+		while(optionName.isEmpty() == false && optionName[0].isLetterOrNumber() == false)
+		{
+			optionName.remove(0, 1);
+		}
 
 		auto it = m_options.find(optionName);
 
