@@ -461,7 +461,7 @@ namespace Tcp
 
 		virtual void onHeaderAndDataReady() final;
 
-		void processIntroduceMyselfReply(const char* dataBuffer, int dataSize);
+		bool processIntroduceMyselfReply(const char* dataBuffer, int dataSize);
 
 		virtual void initReadStatusVariables() final;
 
@@ -486,6 +486,9 @@ namespace Tcp
 		int m_noRequestsTimeout = 0;
 
 		bool m_enableClientAliveRequest = true;
+
+		bool m_enableSignalUnknownClientID = true;
+		bool m_enableSignalWrongClientHostname = true;
 
 		quint32 m_requestNumerator = 1;
 

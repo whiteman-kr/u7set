@@ -195,4 +195,5 @@ isDoubleEquals(T v1, T v2)
 							std::nextafter(v1, std::numeric_limits<double_t>::max()) >= v2;
 }
 
-
+using OptionalBool = std::optional<bool>;
+using OptionalQString = std::optional<QString>;

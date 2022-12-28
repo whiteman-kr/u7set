@@ -64,6 +64,7 @@ private:
 	QString m_autoloadBuildPath;
 	QString m_clientIPStr;
 	QString m_workDirectory;
+	OptionalBool m_checkHostname;
 
 	HostAddressPort m_clientIP;
 

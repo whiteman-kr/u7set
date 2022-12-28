@@ -5,6 +5,7 @@
 #include <QSettings>
 #include <memory>
 #include "../CommonLib/OrderedHash.h"
+#include "../UtilsLib/WUtils.h"
 
 class CircularLogger;
 
@@ -42,20 +43,23 @@ public:
 								 const QStringList& settingsNames,
 								 const QString& description,
 								 const QString& paramsExample);
-
 	void parse();
+	const QStringList& parsingErrors() { return m_parsingErrors; }
 
 	void processSettings(QSettings& settings, std::shared_ptr<CircularLogger> log);
 
 	static bool checkSettingWriteStatus(QSettings& settings, const QString& settingName, std::shared_ptr<CircularLogger> logger);
 
-	bool optionIsSet(const QString& optionName) const;					// use with all option types
-	QString optionValue(const QString& optionName) const;				// use only with OptionType::SingleValue
-	QStringList optionValues(const QString& optionName) const;			// use only with OptionType::MultipleValues
+	bool optionIsSet(const QString& optionName) const;						// use with all option types
+	QString optionValue(const QString& optionName) const;					// use only with OptionType::SingleValue
+	OptionalBool optionBoolValue(const QString& optionName) const;	// use only with OptionType::SingleValue
+	QStringList optionValues(const QString& optionName) const;				// use only with OptionType::MultipleValues
 
 	QString settingValue(const QString& settingName) const;
 
 	QString helpText() const;
+
+	static OptionalBool strToBool(QString str);
 
 private:
 	struct Option
@@ -68,24 +72,26 @@ private:
 
 		bool isSet = false;
 		QStringList values;
+
+		int order = -1;
 	};
 
 	bool addOption(OptionType type,
-				   const QString& name,
+				   QString name,
 				   const QStringList &settingsNames,
 				   const QString& description,
 				   const QString& paramsExample);
+
+	std::optional<Option> getOption(const QString& optionName) const;
 
 private:
 	QString m_appPath;
 	QVector<QString> m_cmdLineArgs;
 
-	HashedVector<QString, Option> m_options;
+	std::map<QString, Option> m_options;			// -opName => Option
 	QHash<QString, QString> m_settingsValues;
+	QStringList m_parsingErrors;
 
 	bool m_parsed = false;
 	bool m_cmdLineArgsIsSet = false;
-
-	const qsizetype MIN_OPTION_LEN = 2;
-	qsizetype m_maxOptionLen = 0;
 };

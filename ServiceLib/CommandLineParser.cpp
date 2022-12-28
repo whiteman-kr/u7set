@@ -49,8 +49,10 @@ void CommandLineParser::setCmdLineArgs(int argc, char** argv)
 		m_cmdLineArgs.append(arg);
 	}
 
-	for(Option& op : m_options)
+	for(auto& p : m_options)
 	{
+		Option& op = p.second;
+
 		op.isSet = false;
 		op.values.clear();
 	}
@@ -59,18 +61,15 @@ void CommandLineParser::setCmdLineArgs(int argc, char** argv)
 	m_parsed = false;
 }
 
-
 qsizetype CommandLineParser::argCount() const
 {
 	return m_cmdLineArgs.count() + 1;	// 1 == application path arg
 }
 
-
 bool CommandLineParser::addSimpleOption(const QString& optionName, const QString& description)
 {
 	return addOption(OptionType::Simple, optionName, QStringList(), description, QString(""));
 }
-
 
 bool CommandLineParser::addSingleValueOption(const QString& optionName,
 											 const QString& settingName,
@@ -84,7 +83,6 @@ bool CommandLineParser::addSingleValueOption(const QString& optionName,
 	return addOption(OptionType::SingleValue, optionName, settingsNames, description, paramExample);
 }
 
-
 bool CommandLineParser::addMultipleValuesOption(const QString& optionName,
 												const QStringList& settingsNames,
 												const QString& description,
@@ -93,94 +91,95 @@ bool CommandLineParser::addMultipleValuesOption(const QString& optionName,
 	return addOption(OptionType::MultipleValues, optionName, settingsNames, description, paramsExample);
 }
 
-
 void CommandLineParser::parse()
 {
-	assert(m_cmdLineArgsIsSet == true);
+	Q_ASSERT(m_cmdLineArgsIsSet == true);
 
-	QVector<QString> cmdLineArgs = m_cmdLineArgs;	// make copy
+	m_parsingErrors.clear();
 
-	for(qsizetype len = m_maxOptionLen; len >= MIN_OPTION_LEN; len--)
+	for(QString cmdLineArg : m_cmdLineArgs)
 	{
-		for(Option& op : m_options)
+		cmdLineArg = cmdLineArg.trimmed().toLower();
+
+		QStringList cmdLineArgAndValue = cmdLineArg.split("=", Qt::SkipEmptyParts);
+
+		if (cmdLineArgAndValue.isEmpty() == true)
 		{
-			if (op.name.length() != len)
-			{
-				continue;
-			}
+			continue;
+		}
 
-			for(int i = 0; i < cmdLineArgs.count(); i++)
-			{
-				const QString cmdLineArg = cmdLineArgs[i];
+		QString optionName = cmdLineArgAndValue.first();
 
-				if (cmdLineArg.mid(0, len).toLower() != op.name.toLower())
+		auto it = m_options.find(optionName);
+
+		if (it == m_options.end())
+		{
+			m_parsingErrors.append(QString("Unknown command line argument: %1").arg(cmdLineArg));
+			continue;
+		}
+
+		Option& op = it->second;
+
+		switch(op.type)
+		{
+		case OptionType::Simple:
+			op.isSet = true;
+			break;
+
+		case OptionType::SingleValue:
+			{
+				op.isSet = true;
+
+				QString cmdLineArgValue;
+
+				if (cmdLineArgAndValue.size() > 1)
 				{
-					continue;
+					cmdLineArgValue = cmdLineArgAndValue[1];
 				}
 
-				switch(op.type)
+				op.values.append(cmdLineArgValue);
+
+				if (op.settingsNames.count() > 0)
 				{
-				case OptionType::Simple:
-					op.isSet = true;
-					break;
+					Q_ASSERT(op.settingsNames.count() == 1);
 
-				case OptionType::SingleValue:
-					{
-						op.isSet = true;
+					m_settingsValues.insert(op.settingsNames.first(), cmdLineArgValue);
+				}
+			}
+			break;
 
-						qsizetype pos = cmdLineArg.indexOf("=");
+		case OptionType::MultipleValues:
+			{
+				op.isSet = true;
 
-						if (pos != -1)
-						{
-							op.values.append(cmdLineArg.mid(pos + 1));
+				QString cmdLineArgValue;
 
-							if (op.settingsNames.count() > 0)
-							{
-								assert(op.settingsNames.count() == 1);
-
-								m_settingsValues.insert(op.settingsNames.first(), op.values.first());
-							}
-						}
-					}
-					break;
-
-				case OptionType::MultipleValues:
-					{
-						op.isSet = true;
-
-						qsizetype pos = cmdLineArg.indexOf("=");
-
-						if (pos != -1)
-						{
-							QString value = cmdLineArg.mid(pos + 1);
-
-							op.values = value.split(",", Qt::KeepEmptyParts);
-
-							qsizetype valueIndex = 0;
-							qsizetype settingsCount = op.settingsNames.count();
-
-							for(QString opValue : op.values)
-							{
-								if (valueIndex >= settingsCount)
-								{
-									break;
-								}
-
-								m_settingsValues.insert(op.settingsNames.at(valueIndex), opValue);
-
-								valueIndex++;
-							}
-						}
-					}
-					break;
-
-				default:
-					assert(false);
+				if (cmdLineArgAndValue.size() > 1)
+				{
+					cmdLineArgValue = cmdLineArgAndValue[1];
 				}
 
-				cmdLineArgs.removeAt(i);			// Argument is processed. Remove it from list.
-				break;
+				op.values = cmdLineArgValue.split(",", Qt::SkipEmptyParts);
+
+				int valueIndex = 0;
+				int settingsCount = static_cast<int>(op.settingsNames.count());
+
+				for(QString& opValue : op.values)
+				{
+					opValue = opValue.trimmed();
+
+					if (valueIndex < settingsCount)
+					{
+						m_settingsValues.insert(op.settingsNames[valueIndex], opValue);
+					}
+
+					valueIndex++;
+				}
 			}
+			break;
+
+		default:
+			assert(false);
 		}
 	}
 
@@ -189,7 +188,7 @@ void CommandLineParser::parse()
 
 void CommandLineParser::processSettings(QSettings& settings, std::shared_ptr<CircularLogger> log)
 {
-	assert(m_parsed == true);
+	Q_ASSERT(m_parsed == true);
 
 	QList<QString> settingNames = m_settingsValues.keys();
 
@@ -210,7 +209,6 @@ void CommandLineParser::processSettings(QSettings& settings, std::shared_ptr<Cir
 		checkSettingWriteStatus(settings, settingName, log);
 	}
 }
-
 
 bool CommandLineParser::checkSettingWriteStatus(QSettings& settings, const QString& settingName, std::shared_ptr<CircularLogger> logger)
 {
@@ -257,58 +255,81 @@ bool CommandLineParser::checkSettingWriteStatus(QSettings& settings, const QStri
 	return false;
 }
 
-
 bool CommandLineParser::optionIsSet(const QString& optionName) const
 {
-	assert(m_parsed == true);
+	Q_ASSERT(m_parsed == true);
 
-	if (m_options.contains(optionName) == false)
+	auto it = m_options.find(optionName);
+
+	if (it == m_options.end())
 	{
-//		assert(false);				// option isn't defined
 		return false;
 	}
 
-	return m_options.value(optionName).isSet;
+	return it->second.isSet;
 }
-
 
 QString CommandLineParser::optionValue(const QString& optionName) const
 {
-	assert(m_parsed == true);
+	Q_ASSERT(m_parsed == true);
 
-	if (m_options.contains(optionName) == false)
+	std::optional<Option> oop = getOption(optionName);
+
+	if (oop.has_value() == false)
 	{
-//		assert(false);				// option isn't defined
 		return QString("");
 	}
 
-	Option op = m_options.value(optionName);
+	const Option& op = oop.value();
 
-	assert(op.type == OptionType::SingleValue);
+	Q_ASSERT(op.type == OptionType::SingleValue);
 
 	return op.values.first();
 }
 
+OptionalBool CommandLineParser::optionBoolValue(const QString& optionName) const
+{
+	Q_ASSERT(m_parsed == true);
+
+	std::optional<bool> result;
+
+	std::optional<Option> oop = getOption(optionName);
+
+	if (oop.has_value() == false)
+	{
+		return result;
+	}
+
+	const Option& op = oop.value();
+
+	Q_ASSERT(op.type == OptionType::SingleValue);
+
+	QString valueStr = op.values.first();
+
+	return strToBool(valueStr);
+}
+
 QStringList CommandLineParser::optionValues(const QString& optionName) const
 {
-	assert(m_parsed == true);
+	Q_ASSERT(m_parsed == true);
 
-	if (m_options.contains(optionName) == false)
+	std::optional<Option> oop = getOption(optionName);
+
+	if (oop.has_value() == false)
 	{
-//		assert(false);				// option isn't defined
 		return QStringList();
 	}
 
-	Option op = m_options.value(optionName);
+	const Option& op = oop.value();
 
-	assert(op.type == OptionType::MultipleValues);
+	Q_ASSERT(op.type == OptionType::MultipleValues);
 
 	return op.values;
 }
 
 QString CommandLineParser::settingValue(const QString& settingName) const
 {
-	assert(m_parsed == true);
+	Q_ASSERT(m_parsed == true);
 
 	if (m_settingsValues.contains(settingName) == false)
 	{
@@ -322,49 +343,66 @@ QString CommandLineParser::settingValue(const QString& settingName) const
 
 QString CommandLineParser::helpText() const
 {
-	QStringList opStrs;
+	std::list<std::pair<QString, QString>> opStrs;
 
-	qsizetype opMaxLen = 0;
+	int opCount = static_cast<int>(m_options.size());
 
-	for(const Option& op : m_options)
+	int opMaxLen = 0;
+
+	for(int i = 0; i < opCount; i++)
 	{
-		switch(op.type)
+		for(const auto& p : m_options)
 		{
-		case OptionType::Simple:
-			opStrs << op.name;
-			break;
+			const Option& op = p.second;
 
-		case OptionType::SingleValue:
-			if (op.paramsExample.isEmpty() == true)
+			if (op.order != i)
 			{
-				opStrs << (op.name + "=value");
+				continue;
 			}
-			else
+
+			QString opStr;
+
+			switch(op.type)
 			{
-				opStrs << (op.name + "=" + op.paramsExample);
-			}
-			break;
+			case OptionType::Simple:
+				opStr = op.name;
+				break;
 
-		case OptionType::MultipleValues:
-			if (op.paramsExample.isEmpty() == true)
+			case OptionType::SingleValue:
+				if (op.paramsExample.isEmpty() == true)
+				{
+					opStr = op.name + "=value";
+				}
+				else
+				{
+					opStr = op.name + "=" + op.paramsExample;
+				}
+				break;
+
+			case OptionType::MultipleValues:
+				if (op.paramsExample.isEmpty() == true)
+				{
+					opStr = op.name + "=value1,...,valueN";
+				}
+				else
+				{
+					opStr =  op.name + "=" + op.paramsExample;
+				}
+				break;
+
+			default:
+				Q_ASSERT(false);
+				continue;
+			}
+
+			opStrs.push_back({opStr, op.description});
+
+			int len = static_cast<int>(opStr.length());
+
+			if (len > opMaxLen)
 			{
-				opStrs << (op.name + "=value1,...,valueN");
+				opMaxLen = len;
 			}
-			else
-			{
-				opStrs << (op.name + "=" + op.paramsExample);
-			}
-			break;
-
-		default:
-			assert(false);
-		}
-
-		qsizetype len = opStrs.last().length();
-
-		if (len > opMaxLen)
-		{
-			opMaxLen = len;
 		}
 	}
 
@@ -376,11 +414,13 @@ QString CommandLineParser::helpText() const
 
 	int index = 0;
 
-	for(QString opStr : opStrs)
+	for(const auto& p : opStrs)
 	{
+		QString opStr = p.first;
+
 		opStr = QString("    ") + opStr.leftJustified(opMaxLen, ' ');
 
-		opStr += m_options[index].description;
+		opStr += p.second;
 
 		helpText += opStr + "\n";
 
@@ -392,21 +432,50 @@ QString CommandLineParser::helpText() const
 	return helpText;
 }
 
+OptionalBool CommandLineParser::strToBool(QString str)
+{
+	str = str.trimmed().toLower();
+
+	OptionalBool result;
+
+	if (str == "on" ||
+		str == "1" ||
+		str == "true" ||
+		str == "yes")
+	{
+		result = true;
+	}
+	else
+	{
+		if (str == "off" ||
+			str == "0" ||
+			str == "false" ||
+			str == "no")
+		{
+			result = false;
+		}
+	}
+
+	return result;
+}
 
 bool CommandLineParser::addOption(OptionType type,
-								  const QString& name,
+								  QString name,
 								  const QStringList& settingsNames,
-								  const QString& description, const QString& paramsExample)
+								  const QString& description,
+								  const QString& paramsExample)
 {
+	name = name.trimmed().toLower();
+
 	if (name.isEmpty() == true)
 	{
-		assert(false);				// option name can't be empty
+		Q_ASSERT(false);			// option name can't be empty
 		return false;
 	}
 
 	if (m_options.contains(name))
 	{
-		assert(false);				// option with same name already exists
+		Q_ASSERT(false);			// option with same name already exists
 		return false;
 	}
 
@@ -418,14 +487,28 @@ bool CommandLineParser::addOption(OptionType type,
 	op.description = description;
 	op.paramsExample = paramsExample;
 
-	m_options.insert(name, op);
+	op.order = static_cast<int>(m_options.size());
 
-	qsizetype optionLen = op.name.length();
-
-	if (optionLen > m_maxOptionLen)
-	{
-		m_maxOptionLen = optionLen;
-	}
+	m_options.insert({name, op});
 
 	return true;
 }
+
+std::optional<CommandLineParser::Option> CommandLineParser::getOption(const QString& optionName) const
+{
+	std::optional<Option> result;
+
+	Q_ASSERT(m_parsed == true);
+
+	auto it = m_options.find(optionName);
+
+	if (it == m_options.end())
+	{
+		return result;
+	}
+
+	result = it->second;
+
+	return result;
+}
+

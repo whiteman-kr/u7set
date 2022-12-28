@@ -65,6 +65,7 @@ void ConfigurationServiceWorker::initCmdLineParser()
 	cp.addSingleValueOption("b", SoftwareSetting::AUTOLOAD_BUILD_PATH, "Path to RPCT project's build  for auto load.", "PathToBuild");
 	cp.addSingleValueOption("ip", SoftwareSetting::CLIENT_REQUEST_IP, "Client request IP.", "IPv4");
 	cp.addSingleValueOption("w", SoftwareSetting::WORK_DIRECTORY, "Work directory of Configuration Service.", "Path");
+	cp.addSingleValueOption("checkhostname", SoftwareSetting::CHECK_HOSTNAME, "Check clients hostname", "оn/оff");
 	cp.addSingleValueOption("profile", SoftwareSetting::CURRENT_PROFILE, "Current software settings profile.", "ProfileID");
 	cp.addSingleValueOption("mode", SoftwareSetting::RUN_MODE, "Runs all software in simulation mode.", SoftwareSetting::SIMULATION);
 }
@@ -74,6 +75,7 @@ void ConfigurationServiceWorker::loadSettings()
 	m_autoloadBuildPath = getStrSetting(SoftwareSetting::AUTOLOAD_BUILD_PATH);
 	m_clientIPStr = getStrSetting(SoftwareSetting::CLIENT_REQUEST_IP);
 	m_workDirectory = getStrSetting(SoftwareSetting::WORK_DIRECTORY);
+	m_checkHostname = getBoolSetting(SoftwareSetting::CHECK_HOSTNAME);
 
 	SessionParams sp;
 
@@ -93,6 +95,13 @@ void ConfigurationServiceWorker::loadSettings()
 	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SoftwareSetting::AUTOLOAD_BUILD_PATH).arg(m_autoloadBuildPath));
 	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SoftwareSetting::CLIENT_REQUEST_IP).arg(m_clientIPStr));
 	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SoftwareSetting::WORK_DIRECTORY).arg(m_workDirectory));
+
+	if (m_checkHostname.has_value() == true)
+	{
+		QString checkHostnameValue = m_checkHostname.value() == true ? "On" : "Off";
+		DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SoftwareSetting::CHECK_HOSTNAME).arg(checkHostnameValue));
+	}
+
 	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SoftwareSetting::CURRENT_PROFILE).arg(sessionParams().currentSettingsProfile));
 	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SoftwareSetting::RUN_MODE).arg(E::valueToString<E::SoftwareRunMode>(sessionParams().softwareRunMode)));
 	DEBUG_LOG_MSG(m_logger, QString());
@@ -146,6 +155,8 @@ bool ConfigurationServiceWorker::loadCfgServiceSettings(const QString& buildPath
 	DEBUG_LOG_MSG(m_logger, QString("Loading settings for profile: %1 - Ok").arg(curProfile));
 	DEBUG_LOG_MSG(m_logger, QString());
 
+	// Overwriting some settings from configuration.xml by cmd line settings
+	//
 	if (m_clientIPStr.isEmpty() == true)
 	{
 		m_clientIP = m_cfgServiceSettings.clientRequestIP;
@@ -153,6 +164,14 @@ bool ConfigurationServiceWorker::loadCfgServiceSettings(const QString& buildPath
 	else
 	{
 		m_clientIP.setAddressPortStr(m_clientIPStr, PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
+	}
+
+	if (m_checkHostname.has_value() == true)
+	{
+		m_cfgServiceSettings.checkHostname = m_checkHostname.value();
+
+		DEBUG_LOG_MSG(m_logger, QString("CheckHostname is set to %1").
+					  arg(m_cfgServiceSettings.checkHostname == true ? "On" : "Off"));
 	}
 
 	DEBUG_LOG_MSG(m_logger, QString("%1 is set to %2").arg(SoftwareSetting::CLIENT_REQUEST_IP).arg(m_clientIP.addressPortStr()));

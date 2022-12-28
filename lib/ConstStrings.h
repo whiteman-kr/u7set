@@ -333,6 +333,7 @@ namespace SoftwareSetting
 	inline const QString AUTOLOAD_BUILD_PATH("AutoloadBuildPath");
 	inline const QString CLIENT_REQUEST_IP("ClientRequestIP");
 	inline const QString WORK_DIRECTORY("WorkDirectory");
+	inline const QString CHECK_HOSTNAME("CheckHostname");
 	inline const QString CURRENT_PROFILE("CurrentSoftwareSettingsProfile");
 
 	inline const QString RUN_MODE("RunMode");

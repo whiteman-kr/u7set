@@ -892,8 +892,6 @@ namespace Tcp
 		onConnectedSoftwareInfoChanged();
 
 		emit connectedSoftwareInfoChanged();
-
-		closeConnection();
 	}
 
 	void Server::onAutoAckTimer()
@@ -1563,8 +1561,10 @@ namespace Tcp
 
 			if (m_header.id == RQID_INTRODUCE_MYSELF)
 			{
-				processIntroduceMyselfReply(m_receiveDataBuffer, m_header.dataSize);
-				onConnection();
+				if (processIntroduceMyselfReply(m_receiveDataBuffer, m_header.dataSize) == true)
+				{
+					onConnection();
+				}
 			}
 			else
 			{
@@ -1587,7 +1587,7 @@ namespace Tcp
 		m_connectTimeout = 0;
 	}
 
-	void Client::processIntroduceMyselfReply(const char* dataBuffer, int dataSize)
+	bool Client::processIntroduceMyselfReply(const char* dataBuffer, int dataSize)
 	{
 		Network::IntroduceMyselfReply imr;
 
@@ -1595,8 +1595,8 @@ namespace Tcp
 
 		if (result == false)
 		{
-			assert(false);
-			return;
+			Q_ASSERT(false);
+			return false;
 		}
 
 		m_stateMutex.lock();
@@ -1605,24 +1605,40 @@ namespace Tcp
 
 		m_stateMutex.unlock();
 
+		result = false;
+
 		SetConnectionError err = static_cast<SetConnectionError>(imr.setconnectionerror());
 
 		switch(err)
 		{
 		case SetConnectionError::Ok:
+			result = true;
 			break;
 
 		case SetConnectionError::UnknownClientID:
-			emit signal_unknownClientID(QString::fromStdString(imr.errormsg()));
+
+			if (m_enableSignalUnknownClientID == true)
+			{
+				emit signal_unknownClientID(QString::fromStdString(imr.errormsg()));
+				m_enableSignalUnknownClientID = false;
+			}
+
 			break;
 
 		case SetConnectionError::WrongClientHostname:
-			emit signal_wrongClientHostname(QString::fromStdString(imr.errormsg()));
+
+			if (m_enableSignalWrongClientHostname == true)
+			{
+				emit signal_wrongClientHostname(QString::fromStdString(imr.errormsg()));
+				m_enableSignalWrongClientHostname = false;
+			}
 			break;
 
 		default:
 			Q_ASSERT(false);
 		}
+
+		return result;
 	}
 
 	bool Client::sendClientAliveRequest()
