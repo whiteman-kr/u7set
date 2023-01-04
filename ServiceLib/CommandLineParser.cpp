@@ -290,28 +290,6 @@ QString CommandLineParser::optionValue(const QString& optionName) const
 	return op.values.first();
 }
 
-OptionalBool CommandLineParser::optionBoolValue(const QString& optionName) const
-{
-	Q_ASSERT(m_parsed == true);
-
-	std::optional<bool> result;
-
-	std::optional<Option> oop = getOption(optionName);
-
-	if (oop.has_value() == false)
-	{
-		return result;
-	}
-
-	const Option& op = oop.value();
-
-	Q_ASSERT(op.type == OptionType::SingleValue);
-
-	QString valueStr = op.values.first();
-
-	return strToBool(valueStr);
-}
-
 QStringList CommandLineParser::optionValues(const QString& optionName) const
 {
 	Q_ASSERT(m_parsed == true);

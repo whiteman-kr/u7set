@@ -192,7 +192,7 @@ namespace Tcp
 		bool m_headerAndDataReady = false;					// set to TRUE when full header and data read from socket
 	};
 
-	enum class SetConnectionError
+	enum class SetConnectionResult
 	{
 		Ok,
 
@@ -245,7 +245,7 @@ namespace Tcp
 		void connectedSoftwareInfoChanged();	// Inform listener that some connection state changed
 
 	protected:
-		virtual Tcp::SetConnectionError checkClient(const QString& clientEquipmentID, const QString& clientHostname) const;
+		virtual Tcp::SetConnectionResult checkClient(const QString& clientEquipmentID, const QString& clientHostname) const;
 
 	protected:
 		std::list<Tcp::ConnectionState> m_connectionStates;
@@ -440,6 +440,8 @@ namespace Tcp
 
 		void enableClientAliveRequest(bool enable);
 
+		SetConnectionResult setConnectionResult() const { return m_setConnectionResult; }
+
 	signals:
 		void signal_unknownClientID(QString errMsg);
 		void signal_wrongClientHostname(QString errMsg);
@@ -487,6 +489,7 @@ namespace Tcp
 
 		bool m_enableClientAliveRequest = true;
 
+		SetConnectionResult m_setConnectionResult = SetConnectionResult::UnknownClientID;
 		bool m_enableSignalUnknownClientID = true;
 		bool m_enableSignalWrongClientHostname = true;
 

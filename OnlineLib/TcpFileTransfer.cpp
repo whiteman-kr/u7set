@@ -199,6 +199,14 @@ namespace Tcp
 			str = QString(tr("Configuration is not ready"));
 			break;
 
+		case FileTransferResult::UnknownClientID:
+			str = QString(tr("Unknown Client EquipmentID"));
+			break;
+
+		case FileTransferResult::WrongClientHostname:
+			str = QString(tr("Wrong Client hostname"));
+			break;
+
 		case FileTransferResult::InternalError:
 			str = QString(tr("Internal error"));
 			break;
@@ -217,6 +225,29 @@ namespace Tcp
 			emit signal_endFileDownload(fileName, FileTransferResult::NotConnectedToServer, QString());
 			onEndFileDownload(fileName, FileTransferResult::NotConnectedToServer, QString());
 			return;
+		}
+
+		SetConnectionResult scr = setConnectionResult();
+
+		switch(scr)
+		{
+		case SetConnectionResult::Ok:
+			break;
+
+		case SetConnectionResult::UnknownClientID:
+
+			emit signal_endFileDownload(fileName, FileTransferResult::UnknownClientID, QString());
+			onEndFileDownload(fileName, FileTransferResult::UnknownClientID, QString());
+			return;
+
+		case SetConnectionResult::WrongClientHostname:
+
+			emit signal_endFileDownload(fileName, FileTransferResult::WrongClientHostname, QString());
+			onEndFileDownload(fileName, FileTransferResult::WrongClientHostname, QString());
+			return;
+
+		default:
+			Q_ASSERT(false);
 		}
 
 		if (m_transferInProgress == true)

@@ -188,14 +188,18 @@ QString ServiceWorker::getStrSetting(const QString& settingName)
 
 OptionalBool ServiceWorker::getBoolSetting(const QString& settingName)
 {
-	OptionalBool cmdLineValue = m_cmdLineParser.optionBoolValue(settingName);
+	OptionalBool result;
 
-	if (cmdLineValue.has_value() == false)
+	QString cmdLineValue = m_cmdLineParser.settingValue(settingName);
+
+	if (cmdLineValue.isEmpty() == true)
 	{
-		cmdLineValue = CommandLineParser::strToBool(m_settings.value(settingName, QString()).toString());
+		cmdLineValue = m_settings.value(settingName).toString();
 	}
 
-	return cmdLineValue;
+	result = CommandLineParser::strToBool(cmdLineValue);
+
+	return result;
 }
 
 QString ServiceWorker::getCmdLineSetting(const QString& settingName)

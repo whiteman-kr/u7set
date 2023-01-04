@@ -30,7 +30,7 @@ public:
 	void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) final;
 
 private:
-	Tcp::SetConnectionError checkClient(const QString& clientEquipmentID, const QString& clientHostname) const override;
+	Tcp::SetConnectionResult checkClient(const QString& clientEquipmentID, const QString& clientHostname) const override;
 
 	void sendServiceState();
 	void sendLoadedBuildInfo();

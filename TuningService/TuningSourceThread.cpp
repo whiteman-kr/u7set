@@ -577,10 +577,6 @@ namespace Tuning
 
 		Q_UNUSED(srcChannel);
 
-//		DEBUG_STOP;
-//		qDebug() << C_STR(QString("STOP command %1 processing from channel %2 recieved in channel %3 (queuesize %4)").
-//						  arg(commandID).arg(srcChannel + 1).arg(m_channel + 1).arg(m_alreadyProcessedCommands.size()));
-
 		if (m_alreadyProcessedCommands.size() == 1000)
 		{
 			m_alreadyProcessedCommands.erase(m_alreadyProcessedCommands.begin());	// remove first element
@@ -599,10 +595,6 @@ namespace Tuning
 		{
 			return;
 		}
-
-//		DEBUG_STOP;
-//		qDebug() << C_STR(QString("CANCEL command %1 processing in channel %2").
-//						  arg(commandID).arg(m_channel + 1));
 
 		m_lastProcessedCommand.resetCommandID();
 		m_waitReply = false;
@@ -791,9 +783,6 @@ namespace Tuning
 			//
 			m_alreadyProcessedCommands.erase(it);
 
-//			DEBUG_STOP;
-//			qDebug() << C_STR(QString("SKIP command %1 processing, channel %2").
-//							  arg(newCommand.commandID()).arg(m_channel+1));
 			return true;
 		}
 
@@ -1418,10 +1407,6 @@ namespace Tuning
 			//result &= false;
 
 			qDebug() << C_STR(QString("Error time stamp: %1").arg(rupHeader.timeStamp.rawToString(false)));
-		}
-		else
-		{
-//			DEBUG_STOP;
 		}
 
 		if (rupHeader.flags.tuningData != 1 ||
@@ -2113,13 +2098,6 @@ namespace Tuning
 		bool ok = false;
 
 		qint64 lmTime = reply.rupHeader.timeStamp.toInt64(false, &ok);		// header already reversed!
-
-		if (ok == false)
-		{
-			//DEBUG_STOP;
-			//Q_ASSERT(false);		// this error should be detected early
-			//return false;
-		}
 
 		int tuningSignalsCount = TO_INT(m_tuningSignals.size());
 

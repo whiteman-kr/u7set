@@ -745,12 +745,12 @@ namespace Tcp
 		m_statesMutex.unlock();
 	}
 
-	Tcp::SetConnectionError Server::checkClient(const QString& clientEquipmentID, const QString& clientHostname) const
+	Tcp::SetConnectionResult Server::checkClient(const QString& clientEquipmentID, const QString& clientHostname) const
 	{
 		Q_UNUSED(clientEquipmentID);
 		Q_UNUSED(clientHostname);
 
-		return Tcp::SetConnectionError::Ok;			// real checking will be implemented in derived classes (if required)
+		return Tcp::SetConnectionResult::Ok;			// real checking will be implemented in derived classes (if required)
 	}
 
 	void Server::onThreadStarted()
@@ -862,7 +862,7 @@ namespace Tcp
 
 		m_state.localSoftwareInfo.serializeTo(reply.mutable_serversoftwareinfo());
 
-		Tcp::SetConnectionError err = checkClient(m_state.connectedSoftwareInfo.equipmentID(),
+		Tcp::SetConnectionResult err = checkClient(m_state.connectedSoftwareInfo.equipmentID(),
 												  m_state.connectedSoftwareInfo.hostname());
 		m_stateMutex.unlock();
 
@@ -870,15 +870,15 @@ namespace Tcp
 
 		switch(err)
 		{
-		case Tcp::SetConnectionError::Ok:
+		case Tcp::SetConnectionResult::Ok:
 			break;
 
-		case Tcp::SetConnectionError::UnknownClientID:
+		case Tcp::SetConnectionResult::UnknownClientID:
 			reply.set_errormsg((QString("Unknown client equipmentID: %1").
 								arg(m_state.connectedSoftwareInfo.equipmentID())).toStdString());
 			break;
 
-		case Tcp::SetConnectionError::WrongClientHostname:
+		case Tcp::SetConnectionResult::WrongClientHostname:
 			reply.set_errormsg((QString("Client %1 running on computer with wrong hostname").
 								arg(m_state.connectedSoftwareInfo.equipmentID())).toStdString());
 			break;
@@ -1607,15 +1607,15 @@ namespace Tcp
 
 		result = false;
 
-		SetConnectionError err = static_cast<SetConnectionError>(imr.setconnectionerror());
+		m_setConnectionResult = static_cast<SetConnectionResult>(imr.setconnectionerror());
 
-		switch(err)
+		switch(m_setConnectionResult)
 		{
-		case SetConnectionError::Ok:
+		case SetConnectionResult::Ok:
 			result = true;
 			break;
 
-		case SetConnectionError::UnknownClientID:
+		case SetConnectionResult::UnknownClientID:
 
 			if (m_enableSignalUnknownClientID == true)
 			{
@@ -1625,7 +1625,7 @@ namespace Tcp
 
 			break;
 
-		case SetConnectionError::WrongClientHostname:
+		case SetConnectionResult::WrongClientHostname:
 
 			if (m_enableSignalWrongClientHostname == true)
 			{

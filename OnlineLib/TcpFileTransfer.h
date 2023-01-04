@@ -36,7 +36,9 @@ namespace Tcp
 		TransferIsNotStarted,
 
 		ConfigurationIsNotReady,		// for CfgLoader class
-		//UnknownClient,
+
+		UnknownClientID,
+		WrongClientHostname,
 
 		InternalError,
 	};
