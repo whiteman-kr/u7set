@@ -722,7 +722,7 @@ Measure::View* MainWindow::measureView(Measure::Type measureType)
 
 void MainWindow::appendMeasureView(int measureType, Measure::View* pView)
 {
-	if (ERR_MEASURE_TYPE(measureType) == true)
+	if (Measure::ERR_MEASURE_TYPE(measureType) == true)
 	{
 		assert(0);
 		return;
@@ -1101,7 +1101,7 @@ void MainWindow::loadOnToolBar_Signals()
 
 void MainWindow::setMeasureType(int measureType)
 {
-	if (ERR_MEASURE_TYPE(measureType) == true)
+	if (Measure::ERR_MEASURE_TYPE(measureType) == true)
 	{
 		return;
 	}
@@ -2105,7 +2105,7 @@ void MainWindow::setMeasureKind(int index)
 	}
 
 	int measureKind = m_pMeasureKindList->itemData(index).toInt();
-	if (ERR_MEASURE_KIND(measureKind) == true)
+	if (Measure::ERR_MEASURE_KIND(measureKind) == true)
 	{
 		return;
 	}

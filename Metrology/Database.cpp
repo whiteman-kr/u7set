@@ -792,7 +792,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 
 					measure->setAdditionalParamCount(query.value(field++).toInt());
 
-					measure->setAdditionalParam(limitType, Measure::AdditionalParam::MaxValue, query.value(field++).toDouble());
+					measure->setAdditionalParam(limitType, Measure::AdditionalParam::MaxDeviation, query.value(field++).toDouble());
 					measure->setAdditionalParam(limitType, Measure::AdditionalParam::SystemDeviation, query.value(field++).toDouble());
 					measure->setAdditionalParam(limitType, Measure::AdditionalParam::StandardDeviation, query.value(field++).toDouble());
 					measure->setAdditionalParam(limitType, Measure::AdditionalParam::LowBorder, query.value(field++).toDouble());
@@ -829,7 +829,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 
 					measure->setMeasureID(query.value(field++).toInt());
 
-					measure->setMeasureCount(query.value(field++).toInt());
+					measure->setMeasureInPoint(query.value(field++).toInt());
 
 					measure->setMeasureItemArray(limitType, 0, query.value(field++).toDouble());
 					measure->setMeasureItemArray(limitType, 1, query.value(field++).toDouble());
@@ -1189,7 +1189,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
 
 					query.bindValue(field++, measure->additionalParamCount());
 
-					query.bindValue(field++, measure->additionalParam(limitType, Measure::AdditionalParam::MaxValue));
+					query.bindValue(field++, measure->additionalParam(limitType, Measure::AdditionalParam::MaxDeviation));
 					query.bindValue(field++, measure->additionalParam(limitType, Measure::AdditionalParam::SystemDeviation));
 					query.bindValue(field++, measure->additionalParam(limitType, Measure::AdditionalParam::StandardDeviation));
 					query.bindValue(field++, measure->additionalParam(limitType, Measure::AdditionalParam::LowBorder));
@@ -1236,7 +1236,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
 
 					query.bindValue(field++, measure->measureID());
 
-					query.bindValue(field++, measure->measureCount());
+					query.bindValue(field++, measure->measureInPoint());
 
 					query.bindValue(field++, measure->measureItemArray(limitType, 0));
 					query.bindValue(field++, measure->measureItemArray(limitType, 1));
@@ -1510,8 +1510,8 @@ bool Database::open()
 
 	switch(m_databaseOption.type())
 	{
-		case OT::DatabaseType::SQLite:		result = openSQLite();		break;
-		case OT::DatabaseType::PostgreSQL:	result = openPostgres();	break;
+		case OT::DatabaseType::SQLite:		result = openSQLite(DATABASE_NAME);		break;
+		case OT::DatabaseType::PostgreSQL:	result = openPostgres(DATABASE_NAME);	break;
 
 		default:
 			assert(0);
@@ -1562,8 +1562,13 @@ bool Database::open()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool Database::openSQLite()
+bool Database::openSQLite(const QString& databaseName)
 {
+	if (databaseName.isEmpty() == true)
+	{
+		return false;
+	}
+
 	//
 	//
 	m_database = QSqlDatabase::addDatabase("QSQLITE");
@@ -1583,7 +1588,7 @@ bool Database::openSQLite()
 
 	//
 	//
-	m_database.setDatabaseName(path + QDir::separator() + DATABASE_NAME + DATABASE_SQLLITE_EXT);
+	m_database.setDatabaseName(path + QDir::separator() + databaseName + DATABASE_SQLLITE_EXT);
 	if (m_database.open() == false)
 	{
 		qDebug() << m_database.lastError().text();
@@ -1610,8 +1615,13 @@ bool Database::openSQLite()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool Database::openPostgres()
+bool Database::openPostgres(const QString& databaseName)
 {
+	if (databaseName.isEmpty() == true)
+	{
+		return false;
+	}
+
 	QString connectionName = "default";
 	{
 		//
@@ -1655,8 +1665,8 @@ bool Database::openPostgres()
 
 		while (query.next())
 		{
-			QString databaseName = query.value(0).toString();
-			if (QString::compare(databaseName, DATABASE_NAME, Qt::CaseInsensitive) == 0)
+			QString existDatabaseName = query.value(0).toString();
+			if (QString::compare(existDatabaseName, databaseName, Qt::CaseInsensitive) == 0)
 			{
 				isExist = true;
 				break;
@@ -1668,7 +1678,7 @@ bool Database::openPostgres()
 		//
 		if (isExist == false)
 		{
-			result = query.exec("CREATE DATABASE " + QString(DATABASE_NAME));
+			result = query.exec("CREATE DATABASE " + QString(databaseName));
 			if (result == false)
 			{
 				qDebug() << query.lastError().text();
@@ -1691,7 +1701,7 @@ bool Database::openPostgres()
 
 	// set options our database
 	//
-	m_database.setDatabaseName(QString(DATABASE_NAME).toLower());
+	m_database.setDatabaseName(QString(databaseName).toLower());
 	m_database.setHostName(m_databaseOption.ip());
 	m_database.setPort(m_databaseOption.port());
 	m_database.setUserName(m_databaseOption.user());

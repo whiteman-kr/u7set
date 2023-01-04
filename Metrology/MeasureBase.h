@@ -3,6 +3,7 @@
 #include "../CommonLib/Hash.h"
 
 #include "MetrologySignal.h"
+#include "MetrologyFormula.h"
 #include "SignalBase.h"
 #include "UnitsConvertor.h"
 
@@ -19,7 +20,8 @@ namespace Measure
 
 	const int TYPE_COUNT = 2;
 
-	#define ERR_MEASURE_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= Measure::TYPE_COUNT)
+	bool ERR_MEASURE_TYPE(Measure::Type measureType);
+	bool ERR_MEASURE_TYPE(int measureType);
 
 	QString TypeCaption(Measure::Type measureType);
 
@@ -36,7 +38,8 @@ namespace Measure
 
 	const int KIND_COUNT	= 4;
 
-	#define ERR_MEASURE_KIND(kind) (static_cast<int>(kind) < 0 || static_cast<int>(kind) >= Measure::KIND_COUNT)
+	bool ERR_MEASURE_KIND(Measure::Kind measureKind);
+	bool ERR_MEASURE_KIND(int measureKind);
 
 	QString KindCaption(Measure::Kind measureKind);
 
@@ -51,48 +54,55 @@ namespace Measure
 
 	const int LIMIT_TYPE_COUNT = 2;
 
-	#define ERR_MEASURE_LIMIT_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= Measure::LIMIT_TYPE_COUNT)
+	bool ERR_MEASURE_LIMIT_TYPE(Measure::LimitType limitType);
+	bool ERR_MEASURE_LIMIT_TYPE(int limitType);
 
 	QString LimitTypeCaption(Measure::LimitType limitType);
 
 	// ==============================================================================================
 
-	namespace MT
+	template <typename TYPE>
+	class LimitValue
 	{
-		Q_NAMESPACE
+		public:
+			LimitValue() {}
 
-		enum CalcErrorRange
-		{
-			By_Electric_Range = 0,
-			By_Engineering_Range = 1,
-			By_Signal_Type = 2,
-		};
-		Q_ENUM_NS(CalcErrorRange)
+			TYPE value(LimitType limitType) const
+			{
+				return value(static_cast<int>(limitType));
+			}
 
-		const int CALC_ERROR_RANGE_COUNT = 3;
+			TYPE value(int limitType) const
+			{
+				if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
+				{
+					assert(0);
+					return 0;
+				}
 
-		#define ERR_MEASURE_CALC_ERROR_RANGE(byRange) (static_cast<int>(byRange) < 0 || static_cast<int>(byRange) >= Measure::MT::CALC_ERROR_RANGE_COUNT)
+				return m_value[limitType];
+			}
 
-		QString CalcErrorRangeCaption(CalcErrorRange byRange);
-		QString CalcErrorRangeCaptionTr(CalcErrorRange byRange);
+			void setValue(LimitType limitType, TYPE value)
+			{
+				setValue(static_cast<int>(limitType), value);
+			}
 
-		// ==============================================================================================
+			void setValue(int limitType, TYPE value)
+			{
+				if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
+				{
+					assert(0);
+					return;
+				}
 
-		enum ErrorType
-		{
-			Absolute = 0,
-			Reduce = 1,
-			Relative = 2,
-		};
-		Q_ENUM_NS(ErrorType)
+				m_value[limitType] = value;
+			}
 
-		const int ERROR_TYPE_COUNT = 3;
+		private:
 
-		#define ERR_MEASURE_ERROR_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= Measure::MT::ERROR_TYPE_COUNT)
-
-		QString ErrorTypeCaption(ErrorType errorType);
-		QString ErrorTypeCaptionTr(ErrorType errorType);
-	}
+			TYPE m_value[LIMIT_TYPE_COUNT];
+	};
 
 	// ==============================================================================================
 
@@ -105,7 +115,8 @@ namespace Measure
 
 	const int ERROR_RESULT_COUNT = 2;
 
-	#define ERR_MEASURE_ERROR_RESULT(result) (static_cast<int>(result) < 0 || static_cast<int>(result) >= Measure::ERROR_RESULT_COUNT)
+	bool ERR_MEASURE_ERROR_RESULT(Measure::ErrorResult errorResult);
+	bool ERR_MEASURE_ERROR_RESULT(int errorResult);
 
 	QString ErrorResultCaption(Measure::ErrorResult errorResult);
 
@@ -114,7 +125,7 @@ namespace Measure
 	enum AdditionalParam
 	{
 		NoAdditionalParam = -1,
-		MaxValue = 0,
+		MaxDeviation = 0,
 		SystemDeviation = 1,
 		StandardDeviation = 2,
 		LowBorder = 3,
@@ -127,7 +138,8 @@ namespace Measure
 				// now used 6 (1 .. 6)
 				// maximum 16 items (0 .. 15)
 
-	#define ERR_MEASURE_ADDITIONAL_PARAM(param) (static_cast<int>(param) < 0 || static_cast<int>(param) >= Measure::ADDITIONAL_PARAM_COUNT)
+	bool ERR_MEASURE_ADDITIONAL_PARAM(Measure::AdditionalParam param);
+	bool ERR_MEASURE_ADDITIONAL_PARAM(int param);
 
 	QString AdditionalParamCaption(Measure::AdditionalParam param);
 
@@ -296,18 +308,18 @@ namespace Measure
 
 		int m_calibratorPrecision = DEFAULT_ELECTRIC_UNIT_PRECESION;		// precision of electric range of calibrator
 
-		double m_nominal[LIMIT_TYPE_COUNT];
-		double m_measure[LIMIT_TYPE_COUNT];
+		LimitValue<double> m_nominal;
+		LimitValue<double> m_measure;
 
-		double m_lowLimit[LIMIT_TYPE_COUNT];
-		double m_highLimit[LIMIT_TYPE_COUNT];
-		QString m_unit[LIMIT_TYPE_COUNT];
-		int m_limitPrecision[LIMIT_TYPE_COUNT];
+		LimitValue<double> m_lowLimit;
+		LimitValue<double> m_highLimit;
+		LimitValue<QString> m_unit;
+		LimitValue<int> m_limitPrecision;
 
 		double m_adjustment = 0;
 
-		double m_error[LIMIT_TYPE_COUNT][MT::ERROR_TYPE_COUNT];
-		double m_errorLimit[LIMIT_TYPE_COUNT][MT::ERROR_TYPE_COUNT];
+		LimitValue<double> m_error[MT::ERROR_TYPE_COUNT];
+		LimitValue<double> m_errorLimit[MT::ERROR_TYPE_COUNT];
 
 		QDateTime m_measureTime;											// measure time
 		QString m_calibrator;												// calibrator name and calibrator SN
@@ -342,8 +354,8 @@ namespace Measure
 		double percent() const { return m_percent; }
 		void setPercent(double percent) { m_percent = percent; }
 
-		int measureCount() const { return m_measureCount; }
-		void setMeasureCount(int count) { m_measureCount = count; }
+		int measureInPoint() const { return m_measureInPoint; }
+		void setMeasureInPoint(int count);
 
 		double measureItemArray(LimitType limitType, int index) const;
 		QString measureItemStr(LimitType limitType, int index) const;
@@ -368,11 +380,15 @@ namespace Measure
 
 		double m_percent = 0;
 
-		int m_measureCount = 0;
-		double m_measureArray[LIMIT_TYPE_COUNT][MAX_MEASUREMENT_IN_POINT];
+		// vector m_measureArray must have size MAX_MEASUREMENT_IN_POINT
+		// but we will use only m_measureInPoint values from MAX_MEASUREMENT_IN_POINT
+		// thats why m_measureInPoint can not be more MAX_MEASUREMENT_IN_POINT
+		//
+		int m_measureInPoint = 0;
+		std::vector<LimitValue<double>> m_measureArray;
 
 		int	m_additionalParamCount = 0;
-		double m_additionalParam[LIMIT_TYPE_COUNT][ADDITIONAL_PARAM_COUNT];
+		std::vector<LimitValue<double>> m_additionalParam;
 	};
 
 	// ==============================================================================================

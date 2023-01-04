@@ -83,9 +83,9 @@ namespace VFrame30
 		// Public Methods
 		//
 	public:
-		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const final;
+		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 		virtual QString buildName() const final;
-		virtual QString toolTipText(int dpiX, int dpiY) const final;
+		virtual QString toolTipText(double dpiX, double dpiY, double devicePixelRatio) const override;
 
 		// Properties
 		//
@@ -130,9 +130,9 @@ namespace VFrame30
 		// Public Methods
 		//
 	public:
-		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const final;
+		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 		virtual QString buildName() const override;
-		virtual QString toolTipText(int dpiX, int dpiY) const final;
+		virtual QString toolTipText(double dpiX, double dpiY, double devicePixelRatio) const override;
 
 		// Properties
 		//

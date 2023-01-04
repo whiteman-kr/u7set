@@ -9365,11 +9365,17 @@ void EditSchemaWidget::toggleLock()
 
 void EditSchemaWidget::find()
 {
+	bool replaceEndbled = readOnly() == false;
+
+	if (m_findDialog != nullptr && m_findDialog->replaceEnabled() != replaceEndbled)
+	{
+		delete m_findDialog;
+		m_findDialog = nullptr;
+	}
+
 	if (m_findDialog == nullptr)
 	{
-		bool enableReplace = readOnly() == false;
-
-		m_findDialog = new SchemaFindDialog(enableReplace, this);
+		m_findDialog = new SchemaFindDialog(replaceEndbled, this);
 
 		connect(m_findDialog, &SchemaFindDialog::findPrev, this, &EditSchemaWidget::findPrev);
 		connect(m_findDialog, &SchemaFindDialog::findNext, this, &EditSchemaWidget::findNext);
@@ -9919,10 +9925,11 @@ void EditSchemaWidget::setCompareItemActions(const std::map<QUuid, CompareAction
 	editSchemaView()->m_itemsActions = itemsActions;
 }
 
-SchemaFindDialog::SchemaFindDialog(bool enableReplace, QWidget* parent) :
-	QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint)
+SchemaFindDialog::SchemaFindDialog(bool replaceEnabled, QWidget* parent) :
+	QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint),
+	m_replaceEnabled(replaceEnabled)
 {
-	if (enableReplace == true)
+	if (replaceEnabled == true)
 	{
 		setWindowTitle(tr("Find and Replace"));
 	}
@@ -9942,7 +9949,7 @@ SchemaFindDialog::SchemaFindDialog(bool enableReplace, QWidget* parent) :
 	connect(m_findTextEdit, &QLineEdit::textEdited, this, [=](){m_findCompleter->complete();});
 	connect(m_findCompleter, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), m_findTextEdit, &QLineEdit::setText);
 
-	if (enableReplace == true)
+	if (replaceEnabled == true)
 	{
 		m_replaceTextEdit = new QLineEdit();
 
@@ -9986,7 +9993,7 @@ SchemaFindDialog::SchemaFindDialog(bool enableReplace, QWidget* parent) :
 
 	// Replace buttons
 	//
-	if (enableReplace == true)
+	if (replaceEnabled == true)
 	{
 		m_replaceAllButton = new QPushButton(tr("Replace All"));
 		m_replaceButton = new QPushButton(tr("Replace && Find"));
@@ -10002,7 +10009,7 @@ SchemaFindDialog::SchemaFindDialog(bool enableReplace, QWidget* parent) :
 	layout->addWidget(new QLabel("Find:"), 0, 0, 1, 1);
 	layout->addWidget(m_findTextEdit, 0, 1, 1, 3);
 
-	if (enableReplace == true)
+	if (replaceEnabled == true)
 	{
 		layout->addWidget(new QLabel("Replace with:"), 1, 0, 1, 1);
 		layout->addWidget(m_replaceTextEdit, 1, 1, 1, 3);
@@ -10012,7 +10019,7 @@ SchemaFindDialog::SchemaFindDialog(bool enableReplace, QWidget* parent) :
 
 	layout->addWidget(m_findResult, 3, 0, 1, 4);
 
-	if (enableReplace == true)
+	if (replaceEnabled == true)
 	{
 		layout->addWidget(m_replaceAllButton, 4, 0);
 		layout->addWidget(m_replaceButton, 4, 1);
@@ -10120,6 +10127,11 @@ void SchemaFindDialog::ensureVisible()
 	}
 
 	return;
+}
+
+bool SchemaFindDialog::replaceEnabled() const
+{
+	return m_replaceEnabled;
 }
 
 void SchemaFindDialog::updateCompleter()

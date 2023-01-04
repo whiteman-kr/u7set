@@ -53,7 +53,7 @@ bool DbProgress::run(QWidget* parentWidget, const QString& description)
 
 	const bool isConsoleApp = (dynamic_cast<const QGuiApplication*>(QCoreApplication::instance()) == nullptr);
 
-	if (isProgressEnabled() == true)
+	if (isProgressEnabled() == true && parentWidget != nullptr)
 	{
 		assert(isGuiThread == true);
 		ProgressDialog::showProgressDialog(parentWidget, description, this);

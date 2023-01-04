@@ -291,8 +291,12 @@ namespace VFrame30
 		return minHeight;
 	}
 
-	QString SchemaItemBusComposer::toolTipText(int /*dpiX*/, int /*dpiY*/) const
+	QString SchemaItemBusComposer::toolTipText(double dpiX, double dpiY, double devicePixelRatio) const
 	{
+		Q_UNUSED(dpiX);
+		Q_UNUSED(dpiY);
+		Q_UNUSED(devicePixelRatio);
+
 		QString html = QString(
 R"(<p><b>BusComposer:</b> Create a bus signal</p>
 <p><b>BustTypeID:</b> %1</p>
@@ -573,8 +577,12 @@ R"(<p><b>BusComposer:</b> Create a bus signal</p>
 		return minHeight;
 	}
 
-	QString SchemaItemBusExtractor::toolTipText(int /*dpiX*/, int /*dpiY*/) const
+	QString SchemaItemBusExtractor::toolTipText(double dpiX, double dpiY, double devicePixelRatio) const
 	{
+		Q_UNUSED(dpiX);
+		Q_UNUSED(dpiY);
+		Q_UNUSED(devicePixelRatio);
+
 		QString html = QString(
 R"(<p><b>BusExtractor:</b> Get signal(s) from a bus</p>
 <p><b>BustTypeID:</b> %1</p>

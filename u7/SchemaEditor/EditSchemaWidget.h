@@ -567,13 +567,15 @@ class SchemaFindDialog : public QDialog
 	Q_OBJECT
 
 public:
-	explicit SchemaFindDialog(bool enableReplace, QWidget* parent);
+	explicit SchemaFindDialog(bool replaceEnabled, QWidget* parent);
 	virtual ~SchemaFindDialog();
 
 	QString findText() const;
 	void setFocusToEditLine();
 
 	void ensureVisible();
+
+	bool replaceEnabled() const;
 
 signals:
 	void findPrev(Qt::CaseSensitivity cs);
@@ -617,5 +619,6 @@ private:
 	QPushButton* m_replaceButton = nullptr;
 	QPushButton* m_replaceAllButton = nullptr;
 
+	bool m_replaceEnabled = false;
 };
 

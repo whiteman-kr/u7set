@@ -1,5 +1,9 @@
 #pragma once
 
+// c++ includes
+//
+#include <atomic>
+
 // Qt includes
 //
 #ifdef _MSC_VER

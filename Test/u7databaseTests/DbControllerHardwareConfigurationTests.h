@@ -8,7 +8,7 @@ class DbControllerHardwareConfigurationTests : public QObject
 	Q_OBJECT
 
 public:
-	DbControllerHardwareConfigurationTests();
+	DbControllerHardwareConfigurationTests(const QString& projectName);
 
 private slots:
 	void initTestCase();
@@ -18,9 +18,10 @@ private slots:
 
 private:
 	DbController m_db;
-	QString m_databaseHost = "127.0.0.1";
-	QString m_databaseName = "dbcontrollerbuildtesting";
-	QString m_databaseUser = "u7";
-	QString m_databasePassword = "P2ssw0rd";
-	QString m_adminPassword = "P2ssw0rd";
+	QString m_projectName;
+	QString m_databaseHost;
+	int m_databasePort = 5432;
+	QString m_databaseUser;
+	QString m_databasePassword;
+	QString m_adminPassword;
 };

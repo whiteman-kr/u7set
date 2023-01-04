@@ -201,10 +201,11 @@ namespace VFrame30
 		return QString("LoopbackSource %1").arg(loopbackId());
 	}
 
-	QString SchemaItemLoopbackSource::toolTipText(int dpiX, int dpiY) const
+	QString SchemaItemLoopbackSource::toolTipText(double dpiX, double dpiY, double devicePixelRatio) const
 	{
 		Q_UNUSED(dpiX);
 		Q_UNUSED(dpiY);
+		Q_UNUSED(devicePixelRatio);
 
 		QString str = QString("Loopback Source: "
 							  "\n\tLoopbackID: %1"
@@ -331,10 +332,11 @@ namespace VFrame30
 		return QString("LoopbackTarget %1").arg(loopbackId());
 	}
 
-	QString SchemaItemLoopbackTarget::toolTipText(int dpiX, int dpiY) const
+	QString SchemaItemLoopbackTarget::toolTipText(double dpiX, double dpiY, double devicePixelRatio) const
 	{
 		Q_UNUSED(dpiX);
 		Q_UNUSED(dpiY);
+		Q_UNUSED(devicePixelRatio);
 
 		QString str = QString("Loopback Target: "
 							  "\n\tLoopbackID: %1"

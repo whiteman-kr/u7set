@@ -32,6 +32,7 @@ SUBDIRS += Protobuf \
 	PacketViewer \
 	UalTester \
 	SimulatorTests \
+	MetrologyTests \
 	u7databaseTests
 
 qtkeychain.subdir = ./Tools/qtkeychain
@@ -39,6 +40,7 @@ PacketSource.subdir = ./Tools/PacketSource
 PacketViewer.subdir = ./Tools/PacketViewer
 UalTester.subdir = ./Test/UalTester
 SimulatorTests.subdir = ./Test/SimulatorTests
+MetrologyTests.subdir = ./Test/MetrologyTests
 u7databaseTests.subdir = ./Test/u7databaseTests
 
 #AppDataService.depends = Protobuf OnlineLib ServiceLib UtilsLib CommonLib

@@ -641,6 +641,9 @@ namespace Builder
 			LOG_SUCCESS(m_log, msg);
 		}
 
+		static_assert(BUILD_RESULT_COUNT == 2);
+		m_log->writeMessage(QString("Build output path: <a href=%1>%1</a>").arg(m_buildResults[1].fullPath()));
+
 		QString buildLogStr = m_log->finishStrLogging();
 
 		BuildFile* buildLogFile = addFile("", "build.log", buildLogStr);

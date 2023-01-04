@@ -8,7 +8,7 @@ class DbControllerVersionControlTests : public QObject
 	Q_OBJECT
 
 public:
-	DbControllerVersionControlTests();
+	DbControllerVersionControlTests(const QString& projectName);
 
 protected:
 	QString logIn(QString username, QString password);		// returns session_key
@@ -23,8 +23,9 @@ private slots:
 
 private:
 	std::unique_ptr<DbController> m_db;
-	QString m_databaseHost = "127.0.0.1";
-	QString m_databaseName = "dbcontrollerversiontesting";
-	QString m_databaseUser = "u7";
-	QString m_adminPassword = "P2ssw0rd";
+	QString m_projectName;
+	QString m_databaseHost;
+	int m_databasePort = 5432;
+	QString m_databaseUser;
+	QString m_adminPassword;
 };

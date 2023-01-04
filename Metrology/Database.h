@@ -295,8 +295,8 @@ public:
 
 	bool				isOpen() const { return m_database.isOpen(); }
 	bool				open();
-	bool				openSQLite();
-	bool				openPostgres();
+	bool				openSQLite(const QString& databaseName);
+	bool				openPostgres(const QString& databaseName);
 	void				close();
 
 	SqlTable*			openTable(int objectType);

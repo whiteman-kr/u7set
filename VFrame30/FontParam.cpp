@@ -24,6 +24,17 @@ namespace VFrame30
 		return true;
 	}
 
+	FontParam::operator QString() const
+	{
+		return QString{"FontParam{name: %1, size(in): %2, size(px): %3, drawSize: %4, bold: %5, italic: %6}"}
+				.arg(name())
+				.arg(size(SchemaUnit::Inch))
+				.arg(size(SchemaUnit::Display))
+				.arg(drawSize())
+				.arg(bold())
+				.arg(italic());
+	}
+
 	bool FontParam::LoadData(const Proto::FontParam& message)
 	{
 		if (message.has_name() == true)

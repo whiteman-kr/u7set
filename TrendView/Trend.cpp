@@ -956,6 +956,7 @@ namespace TrendLib
 		qint64 duration = drawParam.duration();
 
 		double dpiY = drawParam.realDpiY();
+		//double dpiX = drawParam.realDpiX();
 
 		double yPos0 = signalRect.bottom() - textBoundRect.height() / 2.0;
 		double yPos1 = signalRect.top() + textBoundRect.height() * 1.1;
@@ -993,6 +994,8 @@ namespace TrendLib
 					}
 
 					double x = TrendScale::timeToScaledPixel(ct, signalRect, startTimeStamp, duration);
+					//x = static_cast<double>(static_cast<int>(x * dpiX)) / dpiX;		// Make sure that X is proper alligned for nice look of cosmetic pen
+
 					double y = (state.value == 0) ? yPos0 : yPos1;
 
 					//painter->fillRect(QRectF(x - 1.0/64.0, y - 1.0/64.0, 1.0/32.0, 1.0/32.0), signal.color());
@@ -1002,7 +1005,7 @@ namespace TrendLib
 
 					if (lines.isEmpty() == true)
 					{
-						lines.push_back(QPointF(x, y));
+						lines.push_back(QPointF{x, y});
 
 						lastX = x;
 						lastY = y;
@@ -1013,12 +1016,12 @@ namespace TrendLib
 						{
 							if (lastY == y)
 							{
-								lines.push_back(QPointF(x, y));
+								lines.push_back(QPointF{x, y});
 							}
 							else
 							{
-								lines.push_back(QPointF(x, lastY));
-								lines.push_back(QPointF(x, y));
+								lines.push_back(QPointF{x, lastY});
+								lines.push_back(QPointF{x, y});
 							}
 
 							lastX = x;
@@ -1244,14 +1247,14 @@ namespace TrendLib
 			return;
 		}
 
-		drawParam.setDpi(painter->device()->physicalDpiX(), painter->device()->physicalDpiY(), painter->device()->devicePixelRatioF());
+		drawParam.setDpi(painter->device()->logicalDpiX(), painter->device()->logicalDpiY(), painter->device()->devicePixelRatioF());
 
 		adjustPainter(painter, drawParam);
 
 		// --
 		//
-		double dpiX = drawParam.realDpiX();
-		double dpiY = drawParam.realDpiY();
+		double dpiX = painter->device()->logicalDpiX();
+		double dpiY = painter->device()->logicalDpiY();
 
 		E::TimeType timeType = drawParam.timeType();
 
@@ -1272,7 +1275,7 @@ namespace TrendLib
 		TimeStamp selectedRulerTime;
 
 		if (selectedRulerIndex >= 0 &&
-			selectedRulerIndex < static_cast<int>(rulerSet().rulers().size()))
+			selectedRulerIndex < std::ssize(rulerSet().rulers()))
 		{
 			selectedRulerTime = rulerSet().rulers()[selectedRulerIndex].timeStamp();
 		}
@@ -1309,7 +1312,7 @@ namespace TrendLib
 			//
 			painter->setClipRect(laneRect);
 
-			double k = static_cast<double>(trendAreaRect.width()) / static_cast<double>(drawParam.duration());	// K is coefficient
+			double k = static_cast<double>(trendAreaRect.width()) / static_cast<double>(drawParam.duration());	// K is a coefficient
 
 			for (size_t i = 0; i < laneRulers.size(); i++)
 			{
@@ -1948,35 +1951,35 @@ namespace TrendLib
 
 	QRect Trend::inchRectToPixelRect(const QRectF& rect, const TrendParam& drawParam)
 	{
-		QRect result(static_cast<int>(rect.left() * drawParam.physicalDpiX()),
-					 static_cast<int>(rect.top() * drawParam.physicalDpiY()),
-					 static_cast<int>(rect.width() * drawParam.physicalDpiX()),
-					 static_cast<int>(rect.height() * drawParam.physicalDpiY()));
+		QRect result(static_cast<int>(rect.left() * drawParam.dpiX()),
+					 static_cast<int>(rect.top() * drawParam.dpiY()),
+					 static_cast<int>(rect.width() * drawParam.dpiX()),
+					 static_cast<int>(rect.height() * drawParam.dpiY()));
 
 		return result;
 	}
 
 	QRectF Trend::pixelRectToInchRect(const QRect& rect, const TrendParam& drawParam)
 	{
-		QRectF result(static_cast<double>(rect.left()) / static_cast<double>(drawParam.physicalDpiX()),
-					  static_cast<double>(rect.top()) / static_cast<double>(drawParam.physicalDpiY()),
-					  static_cast<double>(rect.width()) / static_cast<double>(drawParam.physicalDpiX()),
-					  static_cast<double>(rect.height()) / static_cast<double>(drawParam.physicalDpiY()));
+		QRectF result(static_cast<double>(rect.left()) / static_cast<double>(drawParam.dpiX()),
+					  static_cast<double>(rect.top()) / static_cast<double>(drawParam.dpiY()),
+					  static_cast<double>(rect.width()) / static_cast<double>(drawParam.dpiX()),
+					  static_cast<double>(rect.height()) / static_cast<double>(drawParam.dpiY()));
 
 		return result;
 	}
 
 	QPoint Trend::inchPointToPixelPoint(const QPointF& point, const TrendParam& drawParam)
 	{
-		QPoint result(static_cast<int>(point.x() * drawParam.physicalDpiX()),
-					  static_cast<int>(point.y() * drawParam.physicalDpiY()));
+		QPoint result(static_cast<int>(point.x() * drawParam.dpiX()),
+					  static_cast<int>(point.y() * drawParam.dpiY()));
 		return result;
 	}
 
 	QPointF Trend::pixelPointToInchPoint(const QPoint& point, const TrendParam& drawParam)
 	{
-		QPointF result(static_cast<double>(point.x()) / static_cast<double>(drawParam.physicalDpiX()),
-					   static_cast<double>(point.y()) / static_cast<double>(drawParam.physicalDpiY()));
+		QPointF result(static_cast<double>(point.x()) / static_cast<double>(drawParam.dpiX()),
+					   static_cast<double>(point.y()) / static_cast<double>(drawParam.dpiY()));
 		return result;
 	}
 
@@ -2002,8 +2005,8 @@ namespace TrendLib
 
 		// Transform mousePos to inches, as everything for drawing is done in inches
 		//
-		QPointF pos(static_cast<double>(mousePos.x()) / drawParam.physicalDpiX(),
-					static_cast<double>(mousePos.y()) / drawParam.physicalDpiY());
+		QPointF pos(static_cast<double>(mousePos.x()) / drawParam.dpiX(),
+					static_cast<double>(mousePos.y()) / drawParam.dpiY());
 
 		// MouseOn::Outside
 		//

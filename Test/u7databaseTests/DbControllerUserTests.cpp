@@ -1,8 +1,10 @@
 #include "DbControllerUserTests.h"
 #include <QSql>
 #include <QSqlError>
+#include "Settings.h"
 
-DbControllerUserTests::DbControllerUserTests()
+DbControllerUserTests::DbControllerUserTests():
+	TestDbBase(theSettings.dbTestsProjectName())
 {
 	qRegisterMetaType<DbUser>("DbUser");
 

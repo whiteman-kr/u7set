@@ -109,10 +109,10 @@ namespace TrendLib
 
 		m_trendSlider->setLaneDuration(t * theSettings.m_laneCount);
 
-		// Contect Menu
+		// Contect Menu is m_trendWidget as we need position for this partiecular widget
 		//
-		setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
-		connect(this, &QWidget::customContextMenuRequested, this, &TrendMainWindow::contextMenuRequested);
+		m_trendWidget->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
+		connect(m_trendWidget, &QWidget::customContextMenuRequested, this, &TrendMainWindow::contextMenuRequested);
 
 		return;
 	}
@@ -1268,15 +1268,16 @@ namespace TrendLib
 		return;
 	}
 
-	void TrendMainWindow::contextMenuRequested(const QPoint& /*pos*/)
+	void TrendMainWindow::contextMenuRequested(const QPoint& pos)
 	{
+		// pos - is cursor position within m_trendWidget
+		//
 		int analogsCount = signalSet().analogSignalsCount();
 		int discretesCount = signalSet().discretesSignalsCount();
 
 		int outLaneIndex = -1;
 		int rulerIndex = -1;
 		TimeStamp timeStamp;
-		QPoint pos = m_trendWidget->mapFromGlobal(QCursor::pos());
 		TrendSignalParam outSignal;
 
 		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(pos, &outLaneIndex, &timeStamp, &rulerIndex, &outSignal);
@@ -1365,8 +1366,7 @@ namespace TrendLib
 			menu.addAction(properties);
 			menu.addAction(signalAction);
 
-			menu.exec(QCursor::pos());
-
+			menu.exec(m_trendWidget->mapToGlobal(pos));
 			return;
 		}
 
@@ -1440,7 +1440,7 @@ namespace TrendLib
 			QAction* signalAction = menu.addAction(tr("Signals..."));
 			connect(signalAction, &QAction::triggered, this, &TrendMainWindow::signalsButton);
 
-			menu.exec(QCursor::pos());
+			menu.exec(m_trendWidget->mapToGlobal(pos));
 		}
 
 		return;

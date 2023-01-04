@@ -71,7 +71,7 @@ class DbControllerSignalTests : public QObject
 	Q_OBJECT
 
 public:
-	DbControllerSignalTests();
+	DbControllerSignalTests(const QString &projectName);
 
 private slots:
 	void initTestCase();
@@ -221,8 +221,9 @@ private:
 	DbController* m_dbcUser2 = nullptr;
 	DbController* m_dbcUser3 = nullptr;
 
-	QString m_databaseHost;
 	QString m_projectName;
+	QString m_databaseHost;
+	int m_databasePort = 5432;
 	QString m_databaseName;
 	QString m_databaseUser;
 	QString m_adminPassword;

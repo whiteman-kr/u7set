@@ -2,8 +2,10 @@
 #include <QtSql>
 #include <QString>
 #include <QDebug>
+#include "Settings.h"
 
-UserPropertyTests::UserPropertyTests()
+UserPropertyTests::UserPropertyTests():
+	TestDbBase(theSettings.dbTestsProjectName())
 {
 
 }

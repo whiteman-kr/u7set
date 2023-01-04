@@ -6,6 +6,7 @@ CONFIG += staticlib
 
 include(../compiler.pri)
 include(../warnings.pri)
+include(../codecoverage.pri)
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h

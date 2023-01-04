@@ -20,7 +20,7 @@ class TestDbBase : public QObject
 	Q_OBJECT
 
 protected:
-	TestDbBase();
+	TestDbBase(const QString& projectName);
 
 protected slots:
 	virtual void initTestCase();
@@ -61,14 +61,14 @@ public:
 protected:
 	static const int ProjectDatabaseVersion = 230;			// Supported Project DB version
 
-	QString m_databaseHost = "127.0.0.1";
+	QString m_databaseHost;
 	int m_databaseHostPort = 5432;
-	QString m_databaseUser = "u7";
-	QString m_databaseUserPassword = "P2ssw0rd";
+	QString m_databaseUser;
+	QString m_databaseUserPassword;
 
-	QString m_projectName = "testproject";
-	QString m_projectAdministratorName = "Administrator";
-	QString m_projectAdministratorPassword = "P2ssw0rd";
+	QString m_projectName;
+	QString m_projectAdministratorName;
+	QString m_projectAdministratorPassword;
 };
 
 #endif // TESTDBBASE_H

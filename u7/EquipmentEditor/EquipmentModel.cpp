@@ -1205,7 +1205,7 @@ void EquipmentModel::sortChildrenByCaption(std::shared_ptr<Hardware::DeviceObjec
 {
 	auto children = deviceObject->children();
 
-	std::sort(std::begin(children), std::end(children),
+	std::stable_sort(std::begin(children), std::end(children),
 		[order](const auto& o1, const auto& o2)
 		{
 			const auto& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
@@ -1241,7 +1241,7 @@ void EquipmentModel::sortChildrenByType(std::shared_ptr<Hardware::DeviceObject> 
 {
 	auto children = deviceObject->children();
 
-	std::sort(std::begin(children), std::end(children),
+	std::stable_sort(std::begin(children), std::end(children),
 		[order](const auto& o1, const auto& o2)
 		{
 			const auto& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
@@ -1277,7 +1277,7 @@ void EquipmentModel::sortChildrenByEquipmentId(std::shared_ptr<Hardware::DeviceO
 {
 	auto children = deviceObject->children();
 
-	std::sort(std::begin(children), std::end(children),
+	std::stable_sort(std::begin(children), std::end(children),
 		[order](const auto& o1, const auto& o2)
 		{
 			const auto& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
@@ -1313,7 +1313,7 @@ void EquipmentModel::sortChildrenByPlace(std::shared_ptr<Hardware::DeviceObject>
 {
 	auto children = deviceObject->children();
 
-	std::sort(std::begin(children), std::end(children),
+	std::stable_sort(std::begin(children), std::end(children),
 		[order](const auto& o1, const auto& o2)
 		{
 			const auto& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
@@ -1349,7 +1349,7 @@ void EquipmentModel::sortChildrenByState(std::shared_ptr<Hardware::DeviceObject>
 {
 	auto children = deviceObject->children();
 
-	std::sort(std::begin(children), std::end(children),
+	std::stable_sort(std::begin(children), std::end(children),
 		[order](const auto& o1, const auto& o2)
 		{
 			const auto& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
@@ -1390,7 +1390,7 @@ void EquipmentModel::sortChildrenByUser(std::shared_ptr<Hardware::DeviceObject> 
 {
 	auto children = deviceObject->children();
 
-	std::sort(std::begin(children), std::end(children),
+	std::stable_sort(std::begin(children), std::end(children),
 		[order, this](const auto& o1, const auto& o2)
 		{
 			const auto& ref1 = (order == Qt::AscendingOrder ? o1 : o2);

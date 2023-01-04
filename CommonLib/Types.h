@@ -645,6 +645,15 @@ public:
 	};
 	Q_ENUM(IndicatorScaleType)
 
+	// SecurityLevel
+	//
+	enum class SecurityLevel
+	{
+		Basic = 0,
+		Encoded = 1
+	};
+	Q_ENUM(SecurityLevel)
+
 public:
 	template <typename ENUM_TYPE>
 	static QMetaEnum metaEnum()

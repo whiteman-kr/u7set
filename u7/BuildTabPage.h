@@ -78,7 +78,7 @@ private:
 	};
 
 	QWidget* m_rightSideWidget = nullptr;
-	QTextEdit* m_outputWidget = nullptr;
+	QTextBrowser* m_outputWidget = nullptr;
 
 	QPushButton* m_prevIssueButton = nullptr;
 	QPushButton* m_nextIssueButton = nullptr;
@@ -95,6 +95,7 @@ private:
 	QWidget* m_settingsWidget = nullptr;
 
 	//QCheckBox* m_debugCheckBox = nullptr;
+	QLabel* m_buildLabel = nullptr;
 	QComboBox* m_warningsLevelComboBox = nullptr;
 
 	int m_logTimerId = -1;

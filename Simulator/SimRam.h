@@ -5,12 +5,33 @@
 #include <memory>
 #include <QByteArray>
 #include "../CommonLib/Types.h"
-#include "SimOverrideSignals.h"
 
 class SimRamTests;
 
 namespace Sim
 {
+
+	struct OverrideRamRecord
+	{
+		quint16 mask = 0;
+		quint16 data = 0;
+
+		void overlapRecord(OverrideRamRecord r) noexcept
+		{
+			mask |= r.mask;
+			data |= r.data;
+		}
+
+		void applyOverlapping(quint16* ptrW) const noexcept
+		{
+			assert(ptrW);
+			*ptrW &= ~mask;
+			*ptrW |= data;
+		}
+
+		auto operator<=>(const OverrideRamRecord&) const = default;
+	};
+
 
 	class RamAreaInfo
 	{
@@ -24,27 +45,18 @@ namespace Sim
 		virtual ~RamAreaInfo() = default;
 
 	public:
-		QString dump() const;
+		[[nodiscard]] QString dump() const;
 
-		bool contains(E::LogicModuleRamAccess access, quint32 offsetW) const noexcept
-		{
-			return  offsetW >= m_offset &&
-					offsetW < (m_offset + m_size) &&
-					(static_cast<int>(m_access) & static_cast<int>(access)) != 0;
-		}
+		[[nodiscard]] bool contains(E::LogicModuleRamAccess access, quint32 offsetW) const noexcept;
+		[[nodiscard]] bool contains(quint32 offsetW) const noexcept;
 
-		bool contains(quint32 offsetW) const noexcept
-		{
-			return  offsetW >= m_offset && offsetW < (m_offset + m_size);
-		}
-
-		bool overlapped(E::LogicModuleRamAccess access, quint32 offset, quint32 size) const;
+		[[nodiscard]] bool overlapped(E::LogicModuleRamAccess access, quint32 offset, quint32 size) const noexcept;
 
 	public:
-		const QString& name() const noexcept			{	return m_name;		}
-		E::LogicModuleRamAccess access() const noexcept	{	return m_access;	}
-		quint32 offset() const noexcept					{	return m_offset;	}
-		quint32 size() const noexcept					{	return m_size;		}
+		[[nodiscard]] const QString& name() const noexcept				{	return m_name;		}
+		[[nodiscard]] E::LogicModuleRamAccess access() const noexcept	{	return m_access;	}
+		[[nodiscard]] quint32 offset() const noexcept					{	return m_offset;	}
+		[[nodiscard]] quint32 size() const noexcept						{	return m_size;		}
 
 	private:
 		QString m_name;
@@ -60,7 +72,7 @@ namespace Sim
 		RamArea(bool clearOnStartCycle);
 		RamArea(const RamArea&) = default;
 		RamArea(RamArea&&) noexcept = default;
-		virtual ~RamArea();
+		virtual ~RamArea() = default;
 
 		RamArea& operator=(const RamArea&) = default;
 		RamArea& operator=(RamArea&&) noexcept = default;
@@ -68,7 +80,7 @@ namespace Sim
 		RamArea(E::LogicModuleRamAccess access, quint32 offset, quint32 size, bool clearOnStartCycle, QString name);
 
 	public:
-		QString dump() const;
+		[[nodiscard]] QString dump() const;
 
 		bool clear();
 
@@ -176,34 +188,136 @@ namespace Sim
 		return true;
 	}
 
+	template<typename TYPE>
+	bool RamArea::writeData(quint32 offsetW, TYPE data, E::ByteOrder byteOrder) noexcept
+	{
+		size_t byteOffset = (offsetW - offset()) * 2;
+		if (byteOffset > m_data.size() - sizeof(TYPE))
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		TYPE valueToWrite;
+
+		switch (byteOrder)
+		{
+		case E::BigEndian:
+			valueToWrite = qToBigEndian<TYPE>(data);
+			break;
+		case E::LittleEndian:
+			valueToWrite = qToLittleEndian<TYPE>(data);
+			break;
+		case E::NoEndian:
+			valueToWrite = data;
+			break;
+		default:
+			assert(false);
+			valueToWrite = {};
+		}
+
+		// Apply override to data
+		//
+		if (m_overrideData.empty() == false)
+		{
+			quint16 v[sizeof(TYPE) / 2];
+			std::memcpy(v, &valueToWrite, sizeof(valueToWrite));
+
+			applyOverride(offsetW, sizeof(TYPE) / 2, v);
+
+			std::memcpy(&valueToWrite, v, sizeof(valueToWrite));
+		}
+
+		// Write data to memory
+		//
+		std::memcpy(m_data.data() + byteOffset, &valueToWrite, sizeof(valueToWrite));
+
+		return true;
+	}
+
+	template<typename TYPE>
+	bool RamArea::readData(quint32 offsetW, TYPE* data, E::ByteOrder byteOrder, bool applyOverride) const noexcept
+	{
+		if (data == nullptr)
+		{
+			Q_ASSERT(data);
+			return false;
+		}
+
+		constexpr int wordCount = sizeof(TYPE) / sizeof(quint16);
+		size_t byteOffset = (offsetW - offset()) * 2;
+
+		if (byteOffset > m_data.size() - sizeof(TYPE))
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		TYPE rawValue;
+		std::memcpy(&rawValue, m_data.constData() + byteOffset, sizeof(TYPE));
+
+		// Apply override
+		//
+		if (applyOverride == true && m_overrideData.empty() == false)
+		{
+			std::array<quint16, wordCount> rawValueWorded;
+			static_assert(sizeof(rawValueWorded) == sizeof(TYPE));
+
+			std::memcpy(rawValueWorded.data(), &rawValue, sizeof(TYPE));
+
+			bool ok = this->applyOverride(offsetW, wordCount, rawValueWorded.data());
+			Q_ASSERT(ok);
+
+			std::memcpy(&rawValue, rawValueWorded.data(), sizeof(TYPE));
+		}
+
+		switch (byteOrder)
+		{
+		case E::BigEndian:
+			*data = qFromBigEndian<TYPE>(rawValue);
+			break;
+		case E::LittleEndian:
+			*data = qFromLittleEndian<TYPE>(rawValue);
+			break;
+		case E::NoEndian:
+			*data = rawValue;
+			break;
+		default:
+			assert(false);
+			return false;
+		}
+
+		return true;
+	}
+
+
 	class Ram
 	{
 	public:
-		Ram();
+		Ram() = default;
 		Ram(const Ram& that);
-		~Ram();
+		~Ram() = default;
 
 		Ram& operator=(const Ram& that);
 
 	public:
-		bool isNull() const;
+		[[nodiscard]] bool isNull() const;
 		void reset();
 
 		bool addMemoryArea(E::LogicModuleRamAccess access, quint32 offsetW, quint32 sizeW, bool clearOnStartCycle, QString name);			// offset and size in 16 bit words
 		void updateFrom(const Ram& source);
 
-		QString dump(QString equipmnetId) const;
+		[[nodiscard]] QString dump(QString equipmnetId) const;
 
-		std::vector<RamAreaInfo> memoryAreasInfo() const;
-		RamAreaInfo memoryAreaInfo(const QString& name) const;
-		RamAreaInfo memoryAreaInfo(int index) const;
-
-	using Handle = size_t;	// Handle is index in m_memoryAreas vector
-	static const Handle InvalidHandle = std::numeric_limits<Handle>::max();
+		using Handle = size_t;	// Handle is index in m_memoryAreas vector
+		constexpr static Handle InvalidHandle = std::numeric_limits<Handle>::max();
 
 		[[nodiscard]] Handle memoryAreaHandle(E::LogicModuleRamAccess access, quint32 offsetW) const;
 		[[nodiscard]] RamArea* memoryArea(Handle handle);
 		[[nodiscard]] const RamArea* memoryArea(Handle handle) const;
+
+		[[nodiscard]] std::vector<RamArea*> memoryAreas();
+		[[nodiscard]] std::vector<const RamArea*> memoryAreas() const;
 
 	public:
 		bool clearMemoryAreasOnStartCycle();
@@ -247,7 +361,7 @@ namespace Sim
 		[[nodiscard]] const RamArea* memoryArea(E::LogicModuleRamAccess access, quint32 offsetW) const noexcept;
 
 	public:
-		void updateOverrideData(const QString& lmEquipmentId, const OverrideSignals& overrideSignals);
+		int overrideSignalsLastCounter(int newValue);
 
 	private:
 		// Pay attention to copy operator

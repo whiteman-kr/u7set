@@ -1,0 +1,4 @@
+TUNS
+	13.12.2022	Version: 1	TuningService_v1.u7devp 	RPCT-3357: Add property SecurityLevel to all software services
+
+

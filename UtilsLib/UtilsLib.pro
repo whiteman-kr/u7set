@@ -7,6 +7,7 @@ CONFIG += staticlib
 
 include(../compiler.pri)
 include(../warnings.pri)
+include(../codecoverage.pri)
 
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ./../Protobuf

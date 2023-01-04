@@ -362,16 +362,16 @@ namespace Sim
 	{
 		assert(m_dataSizeW == 2);
 
-		qint32 converted = qToBigEndian<qint32>(value);
-		quint16* ptr = reinterpret_cast<quint16*>(&converted);
-
 		if (m_byteOrder == E::ByteOrder::BigEndian)
 		{
+			qint32 beFloat = qToBigEndian(value);
+			quint32 asDword = std::bit_cast<quint32>(beFloat);
+
 			m_ramOverrides[0].mask = qToBigEndian<quint16>(0xFFFF);
-			m_ramOverrides[0].data = *ptr;
+			m_ramOverrides[0].data = static_cast<quint16>(asDword & 0xFFFF);
 
 			m_ramOverrides[1].mask = qToBigEndian<quint16>(0xFFFF);
-			m_ramOverrides[1].data = *(ptr + 1);
+			m_ramOverrides[1].data = static_cast<quint16>(asDword >> 16);
 		}
 		else
 		{
@@ -389,25 +389,16 @@ namespace Sim
 	{
 		assert(m_dataSizeW == 2);
 
-		union Converter
-		{
-			quint32 asDword;
-			float asFloat;
-		};
-
-		Converter c;
-		c.asFloat = value;
-		c.asDword = qToBigEndian(c.asDword);
-
-		quint16* ptr = reinterpret_cast<quint16*>(&c.asDword);
-
 		if (m_byteOrder == E::ByteOrder::BigEndian)
 		{
+			float beFloat = qToBigEndian(value);
+			quint32 asDword = std::bit_cast<quint32>(beFloat);
+
 			m_ramOverrides[0].mask = qToBigEndian<quint16>(0xFFFF);
-			m_ramOverrides[0].data = *ptr;
+			m_ramOverrides[0].data = static_cast<quint16>(asDword & 0xFFFF);
 
 			m_ramOverrides[1].mask = qToBigEndian<quint16>(0xFFFF);
-			m_ramOverrides[1].data = *(ptr + 1);
+			m_ramOverrides[1].data = static_cast<quint16>(asDword >> 16);
 		}
 		else
 		{
@@ -425,30 +416,20 @@ namespace Sim
 	{
 		assert(m_dataSizeW == 4);
 
-		union Converter
-		{
-			quint64 asDdword;
-			double asDouble;
-		};
-
-		Converter c;
-		c.asDouble = value;
-
-		quint16* ptr = reinterpret_cast<quint16*>(c.asDdword);
-
 		if (m_byteOrder == E::ByteOrder::BigEndian)
 		{
+			double beFloat = qToBigEndian(value);
+			quint64 asDwword = std::bit_cast<quint64>(beFloat);
+
 			m_ramOverrides[0].mask = qToBigEndian<quint16>(0xFFFF);
-			m_ramOverrides[0].data = *ptr;
-
 			m_ramOverrides[1].mask = qToBigEndian<quint16>(0xFFFF);
-			m_ramOverrides[1].data = *(ptr + 1);
-
 			m_ramOverrides[2].mask = qToBigEndian<quint16>(0xFFFF);
-			m_ramOverrides[2].data = *(ptr + 2);
-
 			m_ramOverrides[3].mask = qToBigEndian<quint16>(0xFFFF);
-			m_ramOverrides[3].data = *(ptr + 3);
+
+			m_ramOverrides[0].data = static_cast<quint16>(asDwword & 0xFFFF);
+			m_ramOverrides[1].data = static_cast<quint16>((asDwword >> 16) & 0xFFFF);
+			m_ramOverrides[2].data = static_cast<quint16>((asDwword >> 32) & 0xFFFF);
+			m_ramOverrides[3].data = static_cast<quint16>(asDwword >> 48);
 		}
 		else
 		{
@@ -929,7 +910,7 @@ namespace Sim
 
 	bool OverrideSignals::saveWorkspace(QString fileName) const
 	{
-		std::fstream output(fileName.toStdString(), std::ios::out | std::ios::binary);
+        std::fstream output(std::filesystem::path(fileName.toStdWString()), std::ios::out | std::ios::binary);
 		if (output.is_open() == false || output.bad() == true)
 		{
 			return false;
@@ -961,7 +942,7 @@ namespace Sim
 	{
 		clear();
 
-		std::fstream input(fileName.toStdString(), std::ios::in | std::ios::binary);
+        std::fstream input(std::filesystem::path(fileName.toStdWString()), std::ios::in | std::ios::binary);
 		if (input.is_open() == false || input.bad() == true)
 		{
 			return false;
@@ -988,6 +969,28 @@ namespace Sim
 		}
 
 		return true;
+	}
+
+	void OverrideSignals::updateRamOverrideData(const QString& lmEquipmentId, Ram& ram) const
+	{
+		if (int cs = changesCounter();
+			ram.overrideSignalsLastCounter(cs) == cs)
+		{
+			// Data has not been changesd since last update
+			//
+			return;
+		}
+
+		for (std::vector<RamArea*> memoryAreas = ram.memoryAreas();
+			 RamArea* ramArea : memoryAreas)
+		{
+			Q_ASSERT(ramArea);
+
+			std::vector<OverrideRamRecord> ovData = ramOverrideData(lmEquipmentId, *ramArea);
+			ramArea->setOverrideData(std::move(ovData));
+		}
+
+		return;
 	}
 
 	Sim::AppSignalManager& OverrideSignals::appSignalManager()
@@ -1102,7 +1105,7 @@ namespace Sim
 
 			offsetW -= ramAreaInfo.offset();	// Make it 0-based
 
-			if (offsetW < 0 || offsetW + dataSizeW > result.size())
+			if (offsetW < 0 || offsetW + dataSizeW > std::ssize(result))
 			{
 				assert(false);
 				return result;

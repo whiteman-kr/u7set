@@ -271,9 +271,17 @@ namespace TrendLib
 		QRectF hdRect{0, 0, rect().width() * devicePixelRatio, rect().height() * devicePixelRatio};
 
 		m_trendParam.setRect(hdRect);
-		m_trendParam.setDpi(physicalDpiX(), physicalDpiY(), devicePixelRatio);
+		m_trendParam.setDpi(logicalDpiX(), logicalDpiY(), devicePixelRatio);
 
-		m_thread.render(m_trendParam);
+		// Somehow we draw image in physicalDpiX (for clear picture)
+		// and use logical dpi for calculation mouse areas and all widget positioning
+		//
+		TrendParam trendParam{m_trendParam};
+		trendParam.setDpi(physicalDpiX(), physicalDpiY(), devicePixelRatio);
+
+		m_thread.render(trendParam);
+
+		return;
 	}
 
 	bool TrendWidget::saveImageToFile(QString fileName) const
@@ -308,12 +316,10 @@ namespace TrendLib
 		TrendParam drawParam = m_trendParam;
 
 		QRectF rc(pdfWriter.pageLayout().paintRect(QPageLayout::Inch));
-		int resolution = pdfWriter.resolution();
+		double resolution = static_cast<double>(pdfWriter.resolution());
 
-		QRectF drawRect(rc.left() * static_cast<double>(resolution),
-						rc.top() * static_cast<double>(resolution),
-						rc.width() * static_cast<double>(resolution),
-						rc.height() * static_cast<double>(resolution));
+		QRectF drawRect{rc.left() * resolution, rc.top() * resolution,
+						rc.width() * resolution,rc.height() * resolution};
 
 		drawParam.setRect(drawRect);
 		drawParam.setDpi(resolution, resolution, 1.0);
@@ -413,7 +419,7 @@ namespace TrendLib
 		if (m_mouseAction == MouseAction::SelectViewSelectSecondPoint)
 		{
 			TrendParam drawParam = m_pixmapDrawParam;
-			drawParam.setDpi(this->physicalDpiX(), this->physicalDpiY(), this->devicePixelRatioF());
+			drawParam.setDpi(this->logicalDpiX(), this->logicalDpiY(), this->devicePixelRatioF());
 
 			Trend::adjustPainter(&painter, drawParam);
 
@@ -607,7 +613,7 @@ namespace TrendLib
 			TrendSignalParam onSignal;
 
 			TrendParam tp = m_pixmapDrawParam;
-			tp.setDpi(this->physicalDpiX(), this->physicalDpiY(), this->devicePixelRatioF());
+			tp.setDpi(this->logicalDpiX(), this->logicalDpiY(), this->devicePixelRatioF());
 
 			Trend::MouseOn mouseOn = m_trend.mouseIsOver(event->pos(), tp, &laneIndex, &timeStamp, &rulerIndex, &onSignal);
 
@@ -798,10 +804,12 @@ namespace TrendLib
 		int horzDegrees = event->angleDelta().x() / 8;		// Horz degrees work with pressed Alt
 		int horzSteps = horzDegrees / 15;
 
-		if (vertSteps == 0 && horzSteps == 0)
+		// In some cases horz scroll is not supoorted, then just check Alt manualy
+		//
+		if (vertSteps != 0 && horzSteps == 0 && event->modifiers().testFlag(Qt::AltModifier) == true)
 		{
-			event->accept();
-			return;
+			horzSteps = vertSteps;
+			vertSteps = 0;
 		}
 
 		bool needUpdateWidget = false;
@@ -943,7 +951,6 @@ namespace TrendLib
 	Trend::MouseOn TrendWidget::mouseIsOver(const QPoint& mousePos, int* outLaneIndex, TimeStamp* timeStamp, int* rulerIndex, TrendSignalParam* onSignal)
 	{
 		TrendParam tp = m_pixmapDrawParam;
-		tp.setDpi(this->physicalDpiX(), this->physicalDpiY(), this->devicePixelRatioF());
 
 		return m_trend.mouseIsOver(mousePos, tp, outLaneIndex, timeStamp, rulerIndex, onSignal);
 	}

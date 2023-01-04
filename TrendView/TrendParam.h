@@ -45,12 +45,12 @@ namespace TrendLib
 		QRectF rect() const;
 		void setRect(const QRectF& value);
 
-		double physicalDpiX() const;
-		double physicalDpiY() const;
+		double dpiX() const;
+		double dpiY() const;
 		double realDpiX() const;
 		double realDpiY() const;
 		double devicePixelRatio() const;
-		void setDpi(double physicalDpiX, double physicalDpiY, double devicePixelRatio);
+		void setDpi(double dpiX, double dpiY, double devicePixelRatio);
 
 		TrendViewMode viewMode() const;
 		void setViewMode(TrendViewMode value);
@@ -97,8 +97,8 @@ namespace TrendLib
 
 	private:
 		QRectF m_rect;
-		double m_physicalDpiX = 96;
-		double m_physicalDpiY = 96;
+		double m_dpiX = 96;
+		double m_dpiY = 96;
 		double m_devicePixelRatio = 1.0;
 
 		TrendViewMode m_viewMode = TrendViewMode::Separated;

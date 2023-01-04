@@ -1,7 +1,9 @@
 #include "UserTests.h"
 #include <assert.h>
+#include "Settings.h"
 
-UserTests::UserTests()
+UserTests::UserTests():
+	TestDbBase(theSettings.dbTestsProjectName())
 {
 }
 

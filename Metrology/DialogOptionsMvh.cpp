@@ -191,7 +191,7 @@ void DialogOptionsMeasureViewHeader::clearList()
 
 void DialogOptionsMeasureViewHeader::setMeasureType(int measureType)
 {
-	if (ERR_MEASURE_TYPE(measureType) == true)
+	if (Measure::ERR_MEASURE_TYPE(measureType) == true)
 	{
 		return;
 	}

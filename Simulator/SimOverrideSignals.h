@@ -7,6 +7,7 @@
 #include "../CommonLib/Types.h"
 #include "../AppSignalLib/AppSignal.h"
 #include "SimScopedLog.h"
+#include "SimRam.h"
 
 
 class QJSValue;
@@ -23,32 +24,6 @@ namespace Sim
 	{
 		Value,			// Override signal with static value
 		Script,			// Script is used to define override value
-	};
-
-	struct OverrideRamRecord
-	{
-		quint16 mask = 0;
-		quint16 data = 0;
-
-		void overlapRecord(const OverrideRamRecord& r)
-		{
-			mask |= r.mask;
-			data |= r.data;
-		}
-
-		void applyOverlapping(quint16* ptrW) const
-		{
-			assert(ptrW);
-			*ptrW &= ~mask;
-			*ptrW |= data;
-		}
-
-//		quint16 overlappedValue(quint16 value) const
-//		{
-//			value &= ~mask;
-//			value |= data;
-//			return value;
-//		}
 	};
 
 	class OverrideSignalParam
@@ -186,6 +161,8 @@ R"+++((function(lastOverrideValue, workcycle)
 
 		bool saveWorkspace(QString fileName) const;
 		bool loadWorkspace(QString fileName);
+
+		void updateRamOverrideData(const QString& lmEquipmentId, Sim::Ram& ram) const;
 
 	signals:
 		void signalsChanged(QStringList addedAppSignalIds);	// Added or deleted signal

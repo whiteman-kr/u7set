@@ -52,10 +52,14 @@ bool TrendSlider::isTimeInRange(const TimeStamp& value) const
 
 void TrendSlider::setTimeClicked()
 {
-	QDateEdit* dateEdit = new QDateEdit(TimeStamp(m_value).toDateTime().date());
+	QDateTime valueTime = TimeStamp(m_value).toDateTime();
+
+	QDateEdit* dateEdit = new QDateEdit(valueTime.date());
+	dateEdit->setDate(valueTime.date());	// Set one date more time to resolve qt bug https://bugreports.qt.io/browse/QTBUG-106075
 	dateEdit->setCalendarPopup(true);
 
-	QTimeEdit* timeEdit = new QTimeEdit(TimeStamp(m_value).toDateTime().time());
+	QTimeEdit* timeEdit = new QTimeEdit(valueTime.time());
+	timeEdit->setTime(valueTime.time());	// Set one date more time to resolve qt bug https://bugreports.qt.io/browse/QTBUG-106075
 	timeEdit->setDisplayFormat("hh:mm:ss");
 
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);

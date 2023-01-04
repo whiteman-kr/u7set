@@ -93,7 +93,7 @@ namespace VFrame30
 	public:
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 
-		virtual QString toolTipText(int dpiX, int dpiY) const final;
+		virtual QString toolTipText(double dpiX, double dpiY, double devicePixelRatio) const override;
 		virtual QString buildName() const final;
 
 	protected:
@@ -141,7 +141,7 @@ namespace VFrame30
 	public:
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const final;
 
-		virtual QString toolTipText(int dpiX, int dpiY) const final;
+		virtual QString toolTipText(double dpiX, double dpiY, double devicePixelRatio) const override;
 		virtual QString buildName() const final;
 
 		void specificPropertyCouldBeChanged(QString propertyName, const QVariant& value);

@@ -3,9 +3,15 @@
 #include <QSqlError>
 #include <QFile>
 #include <QDebug>
+#include "Settings.h"
 
-DbControllerFileTests::DbControllerFileTests() :
-	m_db(new DbController())
+DbControllerFileTests::DbControllerFileTests(const QString& projectName):
+	m_db(new DbController()),
+	m_projectName(projectName),
+	m_databaseHost(theSettings.databaseHost()),
+	m_databasePort(theSettings.databasePort()),
+	m_databaseUser(theSettings.databaseUser()),
+	m_adminPassword(theSettings.databaseAdministratorPassword())
 {
 }
 
@@ -40,12 +46,15 @@ bool DbControllerFileTests::logOut()
 
 void DbControllerFileTests::initTestCase()
 {
+	m_db->setHost(m_databaseHost);
+	m_db->setPort(m_databasePort);
 	m_db->setServerUsername(m_databaseUser);
 	m_db->setServerPassword(m_adminPassword);
 
 	QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL");
 
 	db.setHostName(m_databaseHost);
+	db.setPort(m_databasePort);
 	db.setUserName(m_databaseUser);
 	db.setPassword(m_adminPassword);
 	db.setDatabaseName("postgres");
@@ -58,7 +67,7 @@ void DbControllerFileTests::initTestCase()
 
 	while (query.next() == true)
 	{
-		if (query.value(0).toString() == "u7_" + m_databaseName)
+		if (query.value(0).toString() == "u7_" + m_projectName)
 		{
 			ok = tempQuery.exec(QString("DROP DATABASE %1").arg(query.value(0).toString()));
 			QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
@@ -68,13 +77,13 @@ void DbControllerFileTests::initTestCase()
 
 	db.close();
 
-	ok = m_db->createProject(m_databaseName, m_adminPassword, 0);
+	ok = m_db->createProject(m_projectName, m_adminPassword, 0);
 	QVERIFY2 (ok == true, qPrintable ("Error: can not create project: " + m_db->lastError()));
 
-	ok = m_db->upgradeProject(m_databaseName, m_adminPassword, true, 0);
+	ok = m_db->upgradeProject(m_projectName, m_adminPassword, true, 0);
 	QVERIFY2 (ok == true, qPrintable ("Error: can not upgrade project: " + m_db->lastError()));
 
-	ok = m_db->openProject(m_databaseName, "Administrator", m_adminPassword, 0);
+	ok = m_db->openProject(m_projectName, "Administrator", m_adminPassword, 0);
 	QVERIFY2 (ok == true, qPrintable ("Error: can not open project: " + m_db->lastError()));
 }
 
@@ -90,9 +99,9 @@ void DbControllerFileTests::getFileListTest()
 	db.setHostName(m_databaseHost);
 	db.setUserName(m_databaseUser);
 	db.setPassword(m_adminPassword);
-	db.setDatabaseName("u7_" + m_databaseName);
+	db.setDatabaseName("u7_" + m_projectName);
 
-	QVERIFY2 (db.open() == true, qPrintable(QString("Error: Can not connect to %1 database! ").arg("u7_" + m_databaseName) + db.lastError().databaseText()));
+	QVERIFY2 (db.open() == true, qPrintable(QString("Error: Can not connect to %1 database! ").arg("u7_" + m_projectName) + db.lastError().databaseText()));
 
 	QSqlQuery query;
 
@@ -128,9 +137,9 @@ void DbControllerFileTests::getFileListTreeTest()
 		db.setHostName(m_databaseHost);
 		db.setUserName(m_databaseUser);
 		db.setPassword(m_adminPassword);
-		db.setDatabaseName("u7_" + m_databaseName);
+		db.setDatabaseName("u7_" + m_projectName);
 
-		QVERIFY2 (db.open() == true, qPrintable(QString("Error: Can not connect to %1 database! ").arg("u7_" + m_databaseName) + db.lastError().databaseText()));
+		QVERIFY2 (db.open() == true, qPrintable(QString("Error: Can not connect to %1 database! ").arg("u7_" + m_projectName) + db.lastError().databaseText()));
 
 		// 1. LogIn as User1
 		//
@@ -290,7 +299,7 @@ void DbControllerFileTests::addFileTest()
 	db.setHostName(m_databaseHost);
 	db.setUserName(m_databaseUser);
 	db.setPassword(m_adminPassword);
-	db.setDatabaseName("u7_" + m_databaseName);
+	db.setDatabaseName("u7_" + m_projectName);
 
 	QSqlQuery query;
 	QString nameForDb = testFileName;
@@ -394,7 +403,7 @@ void DbControllerFileTests::addFilesTest()
 	db.setHostName(m_databaseHost);
 	db.setUserName(m_databaseUser);
 	db.setPassword(m_adminPassword);
-	db.setDatabaseName("u7_" + m_databaseName);
+	db.setDatabaseName("u7_" + m_projectName);
 
 	QSqlQuery query;
 	QString nameForDb;
@@ -431,7 +440,7 @@ void DbControllerFileTests::deleteFileTest()
 	db.setHostName(m_databaseHost);
 	db.setUserName(m_databaseUser);
 	db.setPassword(m_adminPassword);
-	db.setDatabaseName("u7_" + m_databaseName);
+	db.setDatabaseName("u7_" + m_projectName);
 
 	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
 
@@ -568,7 +577,7 @@ void DbControllerFileTests::getFileInfo()
 	db.setHostName(m_databaseHost);
 	db.setUserName(m_databaseUser);
 	db.setPassword(m_adminPassword);
-	db.setDatabaseName("u7_" + m_databaseName);
+	db.setDatabaseName("u7_" + m_projectName);
 
 	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
 	// LogIn
@@ -626,7 +635,7 @@ void DbControllerFileTests::getFullPathFileInfo()
 	db.setHostName(m_databaseHost);
 	db.setUserName(m_databaseUser);
 	db.setPassword(m_adminPassword);
-	db.setDatabaseName("u7_" + m_databaseName);
+	db.setDatabaseName("u7_" + m_projectName);
 
 	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
 	// LogIn
@@ -674,7 +683,7 @@ void DbControllerFileTests::checkInTest()
 	db.setHostName(m_databaseHost);
 	db.setUserName(m_databaseUser);
 	db.setPassword(m_adminPassword);
-	db.setDatabaseName("u7_" + m_databaseName);
+	db.setDatabaseName("u7_" + m_projectName);
 
 	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
 
@@ -909,7 +918,7 @@ void DbControllerFileTests::checkOutTest()
 	db.setHostName(m_databaseHost);
 	db.setUserName(m_databaseUser);
 	db.setPassword(m_adminPassword);
-	db.setDatabaseName("u7_" + m_databaseName);
+	db.setDatabaseName("u7_" + m_projectName);
 
 	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
 
@@ -1042,7 +1051,7 @@ void DbControllerFileTests::fileHasChildrenTest()
 	db.setHostName(m_databaseHost);
 	db.setUserName(m_databaseUser);
 	db.setPassword(m_adminPassword);
-	db.setDatabaseName("u7_" + m_databaseName);
+	db.setDatabaseName("u7_" + m_projectName);
 
 	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
 
@@ -1128,7 +1137,7 @@ void DbControllerFileTests::getCheckedOutFilesTest()
 	db.setHostName(m_databaseHost);
 	db.setUserName(m_databaseUser);
 	db.setPassword(m_adminPassword);
-	db.setDatabaseName("u7_" + m_databaseName);
+	db.setDatabaseName("u7_" + m_projectName);
 
 	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
 
@@ -1237,7 +1246,7 @@ void DbControllerFileTests::getFileHistoryTest()
 	db.setHostName(m_databaseHost);
 	db.setUserName(m_databaseUser);
 	db.setPassword(m_adminPassword);
-	db.setDatabaseName("u7_" + m_databaseName);
+	db.setDatabaseName("u7_" + m_projectName);
 
 	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
 
@@ -1340,7 +1349,7 @@ void DbControllerFileTests::getLatestFileVersionTest()
 	db.setHostName(m_databaseHost);
 	db.setUserName(m_databaseUser);
 	db.setPassword(m_adminPassword);
-	db.setDatabaseName("u7_" + m_databaseName);
+	db.setDatabaseName("u7_" + m_projectName);
 
 	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
 
@@ -1499,7 +1508,7 @@ void DbControllerFileTests::getLatestTreeVersionTest()
 	db.setHostName(m_databaseHost);
 	db.setUserName(m_databaseUser);
 	db.setPassword(m_adminPassword);
-	db.setDatabaseName("u7_" + m_databaseName);
+	db.setDatabaseName("u7_" + m_projectName);
 
 	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
 
@@ -1634,7 +1643,7 @@ void DbControllerFileTests::getWorkcopyTest()
 	db.setHostName(m_databaseHost);
 	db.setUserName(m_databaseUser);
 	db.setPassword(m_adminPassword);
-	db.setDatabaseName("u7_" + m_databaseName);
+	db.setDatabaseName("u7_" + m_projectName);
 
 	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
 
@@ -1775,7 +1784,7 @@ void DbControllerFileTests::setWorkcopyTest()
 	db.setHostName(m_databaseHost);
 	db.setUserName(m_databaseUser);
 	db.setPassword(m_adminPassword);
-	db.setDatabaseName("u7_" + m_databaseName);
+	db.setDatabaseName("u7_" + m_projectName);
 
 	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
 
@@ -1932,7 +1941,7 @@ void DbControllerFileTests::getSpecificCopyTest()
 	db.setHostName(m_databaseHost);
 	db.setUserName(m_databaseUser);
 	db.setPassword(m_adminPassword);
-	db.setDatabaseName("u7_" + m_databaseName);
+	db.setDatabaseName("u7_" + m_projectName);
 
 	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
 
@@ -2067,7 +2076,7 @@ void DbControllerFileTests::checkInTreeTest()
 	db.setHostName(m_databaseHost);
 	db.setUserName(m_databaseUser);
 	db.setPassword(m_adminPassword);
-	db.setDatabaseName("u7_" + m_databaseName);
+	db.setDatabaseName("u7_" + m_projectName);
 
 	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
 
@@ -2247,7 +2256,7 @@ void DbControllerFileTests::undoChangestest()
 	db.setHostName(m_databaseHost);
 	db.setUserName(m_databaseUser);
 	db.setPassword(m_adminPassword);
-	db.setDatabaseName("u7_" + m_databaseName);
+	db.setDatabaseName("u7_" + m_projectName);
 
 	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
 
@@ -2348,7 +2357,7 @@ void DbControllerFileTests::systemFilesTest()
 	db.setHostName(m_databaseHost);
 	db.setUserName(m_databaseUser);
 	db.setPassword(m_adminPassword);
-	db.setDatabaseName("u7_" + m_databaseName);
+	db.setDatabaseName("u7_" + m_projectName);
 
 	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
 
@@ -2451,6 +2460,6 @@ void DbControllerFileTests::cleanupTestCase()
 		QSqlDatabase::removeDatabase(connection);
 	}
 
-	m_db->deleteProject(m_databaseName, m_adminPassword, true, 0);
+	m_db->deleteProject(m_projectName, m_adminPassword, true, 0);
 }
 

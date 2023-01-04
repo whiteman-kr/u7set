@@ -66,24 +66,24 @@ namespace TrendLib
 		return;
 	}
 
-	double TrendParam::physicalDpiX() const
+	double TrendParam::dpiX() const
 	{
-		return m_physicalDpiX;
+		return m_dpiX;
 	}
 
-	double TrendParam::physicalDpiY() const
+	double TrendParam::dpiY() const
 	{
-		return m_physicalDpiY;
+		return m_dpiY;
 	}
 
 	double TrendParam::realDpiX() const
 	{
-		return m_physicalDpiX * m_devicePixelRatio;
+		return m_dpiX * m_devicePixelRatio;
 	}
 
 	double TrendParam::realDpiY() const
 	{
-		return m_physicalDpiY * m_devicePixelRatio;
+		return m_dpiY * m_devicePixelRatio;
 	}
 
 	double TrendParam::devicePixelRatio() const
@@ -91,13 +91,13 @@ namespace TrendLib
 		return m_devicePixelRatio;
 	}
 
-	void TrendParam::setDpi(double physicalDpiX, double physicalDpiY, double devicePixelRatio)
+	void TrendParam::setDpi(double dpiX, double dpiY, double devicePixelRatio)
 	{
-		m_physicalDpiX = physicalDpiX;
-		m_physicalDpiY = physicalDpiY;
+		m_dpiX = dpiX;
+		m_dpiY = dpiY;
 		m_devicePixelRatio = devicePixelRatio;
 
-		m_cosmeticPenWidth = (m_physicalDpiX >= 600) ? (1.0 / 128.0) : 0.0;
+		m_cosmeticPenWidth = (m_dpiX >= 600) ? (1.0 / 128.0) : 0.0;
 
 		return;
 	}

@@ -32,11 +32,14 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	// Output windows
 	//
-	m_outputWidget = new QTextEdit();
+	m_outputWidget = new QTextBrowser();
 	m_outputWidget->setReadOnly(true);
 	m_outputWidget->setLineWrapMode(QTextEdit::NoWrap);
 	m_outputWidget->setAutoFormatting(QTextEdit::AutoNone);
 	m_outputWidget->document()->setUndoRedoEnabled(false);
+	m_outputWidget->setTextInteractionFlags(Qt::TextBrowserInteraction);
+	m_outputWidget->setOpenExternalLinks(true);
+
 
 	auto p = qApp->palette("QListView");
 
@@ -102,6 +105,12 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 //	m_debugCheckBox = new QCheckBox(tr("Debug build"), m_settingsWidget);
 //	m_debugCheckBox->setChecked(true);
 //	settingsWidgetLayout->addWidget(m_debugCheckBox);
+	m_buildLabel = new QLabel("Build: Project is not opened");
+	m_buildLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Minimum);
+	m_buildLabel->setTextFormat(Qt::RichText);
+	m_buildLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
+	m_buildLabel->setOpenExternalLinks(true);
+	settingsWidgetLayout->addWidget(m_buildLabel);
 
 	m_warningsLevelComboBox = new QComboBox(m_settingsWidget);
 
@@ -304,6 +313,18 @@ void BuildTabPage::timerEvent(QTimerEvent* event)
 
 void BuildTabPage::projectOpened()
 {
+	QString buildPath = QDir::fromNativeSeparators(QString("%1/%2/build")
+			.arg(theSettings.buildOutputPath())
+			.arg(db()->currentProject().projectName()));
+	if (QDir().exists(buildPath) == true)
+	{
+		m_buildLabel->setText(tr("Build: <a href=\"%1\">%1</a>").arg(buildPath));
+	}
+	else
+	{
+		m_buildLabel->setText(tr("Build: No build performed yet"));
+	}
+
 	this->setEnabled(true);
 	return;
 }
@@ -311,6 +332,8 @@ void BuildTabPage::projectOpened()
 void BuildTabPage::projectClosed()
 {
 	cancelBuild();
+
+	m_buildLabel->setText(tr("Build: Project is not opened"));
 
 	m_findTextEdit->clear();
 	m_outputWidget->clear();
@@ -380,6 +403,11 @@ void BuildTabPage::buildWasFinished(int errorCount)
 	m_itemsIssues.clear();
 
 	GlobalMessanger::instance().fireBuildFinished(errorCount);
+
+	QString buildPath = QDir::fromNativeSeparators(QString("%1/%2/build")
+			.arg(theSettings.buildOutputPath())
+			.arg(db()->currentProject().projectName()));
+	m_buildLabel->setText(tr("Build: <a href=\"%1\">%1</a>").arg(buildPath));
 
 	return;
 }

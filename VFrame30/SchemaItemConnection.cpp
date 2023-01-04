@@ -269,10 +269,11 @@ namespace VFrame30
 		return QString("Transmitter %1").arg(connectionIds());
 	}
 
-	QString SchemaItemTransmitter::toolTipText(int dpiX, int dpiY) const
+	QString SchemaItemTransmitter::toolTipText(double dpiX, double dpiY, double devicePixelRatio) const
 	{
 		Q_UNUSED(dpiX);
 		Q_UNUSED(dpiY);
+		Q_UNUSED(devicePixelRatio);
 
 		QString str = QString("Transmitter: "
 							  "\n\tConnectionID: %1"
@@ -590,10 +591,11 @@ namespace VFrame30
 		return QString("Receiver %1").arg(connectionIds());
 	}
 
-	QString SchemaItemReceiver::toolTipText(int dpiX, int dpiY) const
+	QString SchemaItemReceiver::toolTipText(double dpiX, double dpiY, double devicePixelRatio) const
 	{
 		Q_UNUSED(dpiX);
 		Q_UNUSED(dpiY);
+		Q_UNUSED(devicePixelRatio);
 
 		QString str = QString("Receiver: "
 							  "\n\tConnectionID: %1"

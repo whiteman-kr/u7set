@@ -110,7 +110,7 @@ PropertyPage::PropertyPage(Options* options, PropertyPageType pageType, ExtWidge
 					ADD_PROPERTY_GETTER_SETTER(int, OT::LinearityParamCaption(OT::lo_MeasureTime), true, m_options->linearity().measureTimeInPoint, m_options->linearity().setMeasureTimeInPoint)
 						->setCategory(categoryMeasure)
 						.setViewOrder(0);
-					ADD_PROPERTY_GETTER_SETTER(int, OT::LinearityParamCaption(OT::lo_MeasuresInPoint), true, m_options->linearity().measureCountInPoint, m_options->linearity().setMeasureCountInPoint)
+					ADD_PROPERTY_GETTER_SETTER(int, OT::LinearityParamCaption(OT::lo_MaxMeasuresInPoint), true, m_options->linearity().measureCountInPoint, m_options->linearity().setMeasureCountInPoint)
 						->setCategory(categoryMeasure)
 						.setViewOrder(1);
 
