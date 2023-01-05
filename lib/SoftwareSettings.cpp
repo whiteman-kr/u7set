@@ -303,8 +303,7 @@ bool CfgServiceSettings::writeToXml(XmlWriteHelper& xml) const
 
 	xml.writeHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, clientRequestNetmask);
 
-	xml.writeStringElement(EquipmentPropNames::SECURITY_LEVEL,
-							 E::valueToString<E::SecurityLevel>(securityLevel));
+	xml.writeEnumKeyElement<E::SecurityLevel>(EquipmentPropNames::SECURITY_LEVEL, securityLevel);
 
 	xml.writeBoolElement(EquipmentPropNames::CHECK_HOSTNAME, checkHostname);
 
@@ -343,6 +342,8 @@ bool CfgServiceSettings::readFromXml(XmlReadHelper& xml)
 									  EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestIP);
 
 	result &= xml.readHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
+
+	result &= xml.readEnumKeyElement<E::SecurityLevel>(EquipmentPropNames::SECURITY_LEVEL, &securityLevel);
 
 	result &= xml.readBoolElement(EquipmentPropNames::CHECK_HOSTNAME, &checkHostname, true);
 
@@ -432,8 +433,7 @@ bool AppDataServiceSettings::writeToXml(XmlWriteHelper& xml) const
 	xml.writeHostAddressPort(EquipmentPropNames::RT_TRENDS_REQUEST_IP,
 							 EquipmentPropNames::RT_TRENDS_REQUEST_PORT, rtTrendsRequestIP);
 
-	xml.writeStringElement(EquipmentPropNames::SECURITY_LEVEL,
-							 E::valueToString<E::SecurityLevel>(securityLevel));
+	xml.writeEnumKeyElement<E::SecurityLevel>(EquipmentPropNames::SECURITY_LEVEL, securityLevel);
 
 	writeEndSettings(xml);	// </Settings>
 
@@ -472,6 +472,9 @@ bool AppDataServiceSettings::readFromXml(XmlReadHelper& xml)
 
 	result &= xml.readHostAddressPort(EquipmentPropNames::RT_TRENDS_REQUEST_IP,
 									  EquipmentPropNames::RT_TRENDS_REQUEST_PORT, &rtTrendsRequestIP);
+
+	result &= xml.readEnumKeyElement<E::SecurityLevel>(EquipmentPropNames::SECURITY_LEVEL, &securityLevel);
+
 	return result;
 }
 
@@ -505,8 +508,7 @@ bool DiagDataServiceSettings::writeToXml(XmlWriteHelper& xml) const
 							 EquipmentPropNames::CLIENT_REQUEST_PORT, clientRequestIP);
 	xml.writeHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, clientRequestNetmask);
 
-	xml.writeStringElement(EquipmentPropNames::SECURITY_LEVEL,
-							 E::valueToString<E::SecurityLevel>(securityLevel));
+	xml.writeEnumKeyElement<E::SecurityLevel>(EquipmentPropNames::SECURITY_LEVEL, securityLevel);
 
 	writeEndSettings(xml);	// </Settings>
 
@@ -540,6 +542,8 @@ bool DiagDataServiceSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.readHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
 									  EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestIP);
 	result &= xml.readHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
+
+	result &= xml.readEnumKeyElement<E::SecurityLevel>(EquipmentPropNames::SECURITY_LEVEL, &securityLevel);
 
 	return result;
 }
@@ -634,8 +638,7 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml) const
 	xml.writeHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK,
 						 clientRequestNetmask);
 
-	xml.writeStringElement(EquipmentPropNames::SECURITY_LEVEL,
-							 E::valueToString<E::SecurityLevel>(securityLevel));
+	xml.writeEnumKeyElement<E::SecurityLevel>(EquipmentPropNames::SECURITY_LEVEL, securityLevel);
 
 	xml.writeStringElement(EquipmentPropNames::CFG_SERVICE_ID1, cfgServiceID1);
 	xml.writeHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
@@ -711,6 +714,8 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 
 	result &= xml.readHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK,
 								  &clientRequestNetmask);
+
+	result &= xml.readEnumKeyElement<E::SecurityLevel>(EquipmentPropNames::SECURITY_LEVEL, &securityLevel);
 
 	result &= xml.readStringElement(EquipmentPropNames::CFG_SERVICE_ID1, &cfgServiceID1, true);
 	result &= xml.readHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
@@ -879,8 +884,7 @@ bool ArchivingServiceSettings::writeToXml(XmlWriteHelper& xml) const
 							 EquipmentPropNames::DIAG_DATA_RECEIVING_PORT, diagDataReceivingIP);
 	xml.writeHostAddress(EquipmentPropNames::DIAG_DATA_RECEIVING_NETMASK, diagDataReceivingNetmask);
 
-	xml.writeStringElement(EquipmentPropNames::SECURITY_LEVEL,
-							 E::valueToString<E::SecurityLevel>(securityLevel));
+	xml.writeEnumKeyElement<E::SecurityLevel>(EquipmentPropNames::SECURITY_LEVEL, securityLevel);
 
 	xml.writeIntElement(EquipmentPropNames::ARCHIVE_SHORT_TERM_PERIOD, shortTermArchivePeriod);
 	xml.writeIntElement(EquipmentPropNames::ARCHIVE_LONG_TERM_PERIOD, longTermArchivePeriod);
@@ -918,6 +922,8 @@ bool ArchivingServiceSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.readHostAddressPort(EquipmentPropNames::DIAG_DATA_RECEIVING_IP,
 									  EquipmentPropNames::DIAG_DATA_RECEIVING_PORT, &diagDataReceivingIP);
 	result &= xml.readHostAddress(EquipmentPropNames::DIAG_DATA_RECEIVING_NETMASK, &diagDataReceivingNetmask);
+
+	result &= xml.readEnumKeyElement<E::SecurityLevel>(EquipmentPropNames::SECURITY_LEVEL, &securityLevel);
 
 	result &= xml.readIntElement(EquipmentPropNames::ARCHIVE_SHORT_TERM_PERIOD, &shortTermArchivePeriod, true);
 	result &= xml.readIntElement(EquipmentPropNames::ARCHIVE_LONG_TERM_PERIOD, &longTermArchivePeriod, true);

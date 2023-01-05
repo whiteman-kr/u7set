@@ -56,6 +56,9 @@ public:
 	void writeQVariantAttribute(const QString& name, const QVariant& qv);
 
 	template<typename ENUM_TYPE>
+	void writeEnumKeyElement(const QString& name, ENUM_TYPE value);
+
+	template<typename ENUM_TYPE>
 	void writeEnumKeyAttribute(const QString& name, ENUM_TYPE value);		// writes Str name of enum item
 
 	template<typename ENUM_TYPE>
@@ -68,6 +71,14 @@ private:
 	QXmlStreamWriter* m_xmlWriter = nullptr;
 	QXmlStreamWriter* m_xmlLocalWriter = nullptr;
 };
+
+template<typename ENUM_TYPE>
+void XmlWriteHelper::writeEnumKeyElement(const QString& name, ENUM_TYPE value)
+{
+	static_assert(std::is_enum<ENUM_TYPE>::value == true);
+
+	writeStringElement(name, E::valueToString<ENUM_TYPE>(value));
+}
 
 template<typename ENUM_TYPE>
 void XmlWriteHelper::writeEnumKeyAttribute(const QString& name, ENUM_TYPE value)
@@ -142,6 +153,9 @@ public:
 	bool readQVariantAttribute(const QString& name, QVariant* qv);
 
 	template<typename ENUM_TYPE>
+	bool readEnumKeyElement(const QString& name, ENUM_TYPE* value, bool find = false);
+
+	template<typename ENUM_TYPE>
 	bool readEnumKeyAttribute(const QString& name, ENUM_TYPE* value);
 
 	template<typename ENUM_TYPE>
@@ -151,6 +165,25 @@ private:
 	QXmlStreamReader* m_xmlReader = nullptr;
 	QXmlStreamReader* m_xmlLocalReader = nullptr;
 };
+
+
+template<typename ENUM_TYPE>
+bool XmlReadHelper::readEnumKeyElement(const QString& name, ENUM_TYPE* value, bool find)
+{
+	static_assert(std::is_enum<ENUM_TYPE>::value == true);
+
+	TEST_PTR_RETURN_FALSE(value);
+
+	QString valueStr;
+
+	bool res = readStringElement(name, &valueStr, find);
+
+	RETURN_IF_FALSE(res);
+
+	*value = E::stringToValue<ENUM_TYPE>(valueStr, &res);
+
+	return res;
+}
 
 template<typename ENUM_TYPE>
 bool XmlReadHelper::readEnumKeyAttribute(const QString& name, ENUM_TYPE* value)

@@ -42,6 +42,9 @@ public:
 	static bool getStrListPropertyAsString(const Hardware::DeviceObject* device, const QString& name, QString* str, Builder::IssueLogger* log);
 	static bool getBoolProperty(const Hardware::DeviceObject* device, const QString& name, bool* value, Builder::IssueLogger* log);
 
+	template<typename ENUM_TYPE>
+	static bool getEnumValueProperty(const Hardware::DeviceObject* device, const QString& name, ENUM_TYPE* value, Builder::IssueLogger* log);
+
 	static bool getIPv4Property(const Hardware::DeviceObject* device,
 								const QString& name,
 								QString* value,
@@ -107,6 +110,32 @@ private:
 private:
 //	static ModulesRawDataDescriptionMap m_modulesRawDataDescription;
 };
+
+template<typename ENUM_TYPE>
+bool DeviceHelper::getEnumValueProperty(const Hardware::DeviceObject* device, const QString& name, ENUM_TYPE* value, Builder::IssueLogger* log)
+{
+	static_assert(std::is_enum<ENUM_TYPE>::value == true);
+
+	int intValue = 0;
+
+	bool result = getIntProperty(device, name, &intValue, log);
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	if (E::contains<ENUM_TYPE>(intValue) == false)
+	{
+		LOG_INTERNAL_ERROR_MSG(log, QString("Unknown enum value of property %1.%2").
+							arg(device->equipmentIdTemplate()).arg(name));
+		return false;
+	}
+
+	*value = static_cast<ENUM_TYPE>(intValue);
+
+	return true;
+}
 
 template<typename T>
 bool DeviceHelper::getProperty(const Hardware::DeviceObject* device, const QString& name, T* value, Builder::IssueLogger* log)

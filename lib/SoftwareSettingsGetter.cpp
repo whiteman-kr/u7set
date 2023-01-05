@@ -395,6 +395,8 @@ bool CfgServiceSettingsGetter::readSettings(	const Builder::Context* context,
 
 	result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::CHECK_HOSTNAME, &checkHostname, log);
 
+	result &= DeviceHelper::getEnumValueProperty<E::SecurityLevel>(software, EquipmentPropNames::SECURITY_LEVEL, &securityLevel, log);
+
 	RETURN_IF_FALSE(result);
 
 	result &= buildClientsList(context, software);
@@ -527,6 +529,8 @@ bool AppDataServiceSettingsGetter::readSettings(const Builder::Context* context,
 	result &= DeviceHelper::getIPv4Property(software, EquipmentPropNames::CLIENT_REQUEST_NETMASK,
 											&clientRequestNetmask, false, "", log);
 
+	result &= DeviceHelper::getEnumValueProperty<E::SecurityLevel>(software, EquipmentPropNames::SECURITY_LEVEL, &securityLevel, log);
+
 	result &= getSoftwareConnection(equipment, software,
 									EquipmentPropNames::ARCH_SERVICE_ID,
 									EquipmentPropNames::APP_DATA_RECEIVING_IP,
@@ -584,6 +588,8 @@ bool DiagDataServiceSettingsGetter::readSettings(const Builder::Context* context
 	result &= DeviceHelper::getIPv4Property(software, EquipmentPropNames::CLIENT_REQUEST_NETMASK,
 											&clientRequestNetmask, false, "", log);
 
+	result &= DeviceHelper::getEnumValueProperty<E::SecurityLevel>(software, EquipmentPropNames::SECURITY_LEVEL, &securityLevel, log);
+
 	result &= getSoftwareConnection(equipment, software,
 									EquipmentPropNames::ARCH_SERVICE_ID,
 									EquipmentPropNames::DIAG_DATA_RECEIVING_IP,
@@ -630,6 +636,8 @@ bool TuningServiceSettingsGetter::readSettings(const Builder::Context* context,
 	result &= DeviceHelper::getIPv4Property(software,
 											EquipmentPropNames::CLIENT_REQUEST_NETMASK,
 											&clientRequestNetmask, false, "", log);
+
+	result &= DeviceHelper::getEnumValueProperty<E::SecurityLevel>(software, EquipmentPropNames::SECURITY_LEVEL, &securityLevel, log);
 
 	result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::SINGLE_LM_CONTROL, &singleLmControl, log);
 	result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::DISABLE_MODULES_TYPE_CHECKING, &disableModulesTypeChecking, log);
@@ -1044,6 +1052,9 @@ bool ArchivingServiceSettingsGetter::readSettings(const Builder::Context* contex
 											EquipmentPropNames::DIAG_DATA_RECEIVING_NETMASK,
 											&diagDataReceivingNetmask,
 											false, "", log);
+
+	result &= DeviceHelper::getEnumValueProperty<E::SecurityLevel>(software, EquipmentPropNames::SECURITY_LEVEL, &securityLevel, log);
+
 	//
 
 	result &= DeviceHelper::getIntProperty(software, EquipmentPropNames::ARCHIVE_SHORT_TERM_PERIOD, &shortTermArchivePeriod, log);
