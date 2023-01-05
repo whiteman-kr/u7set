@@ -268,13 +268,13 @@ windows_test_job:
     - "# ----------------------------------------------"
     - "#               Run Simulator AFBs tests"
     - "# ----------------------------------------------"
-    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorConsole.exe -build=c:/temp/build/test_simulator_v376/build -script=\"$Env:CI_PROJECT_DIR/Simulator/SimProjectTests.js\""
+    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorConsole.exe -build=c:/temp/build/test_simulator_v378/build -script=\"$Env:CI_PROJECT_DIR/Simulator/SimProjectTests.js\""
 
 #Run ROVT to check configuration generation
     - "# ----------------------------------------------"
     - "#               Run ROVT tests"
     - "# ----------------------------------------------"
-    - "#&C:/ROVT/ROVT_C.exe /b:C:\\Temp\\build\\test_simulator_v376\\build"
+    - "#&C:/ROVT/ROVT_C.exe /b:C:\\Temp\\build\\test_simulator_v378\\build"
   artifacts:
     name: "u7set_test_windows_0.9.$CI_PIPELINE_ID $CI_BUILD_REF_SLUG $CI_COMMIT_SHA"
     paths:
@@ -341,13 +341,13 @@ linux_test_job:
     - "# ----------------------------------------------"
     - "#               Run Simulator AFBs tests"
     - "# ----------------------------------------------"
-    - "$CI_PROJECT_DIR/bin_unix/release/SimulatorConsole -build=/tmp/build/test_simulator_v376/build -script=\"$CI_PROJECT_DIR/Simulator/SimProjectTests.js\""
+    - "$CI_PROJECT_DIR/bin_unix/release/SimulatorConsole -build=/tmp/build/test_simulator_v378/build -script=\"$CI_PROJECT_DIR/Simulator/SimProjectTests.js\""
 
 #Run ROVT to check configuration generation
 #    - "# ----------------------------------------------"
 #    - "#               Run ROVT tests"
 #    - "# ----------------------------------------------"
-#    - "#&C:/ROVT/ROVT_C.exe /b:C:\\Temp\\build\\test_simulator_v376\\build"
+#    - "#&C:/ROVT/ROVT_C.exe /b:C:\\Temp\\build\\test_simulator_v378\\build"
 
   artifacts:
     name: "u7set_test_linux_0.9.$CI_PIPELINE_ID $CI_BUILD_REF_SLUG $CI_COMMIT_SHA"
