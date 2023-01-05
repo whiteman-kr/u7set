@@ -75,16 +75,21 @@ Tcp::SetConnectionResult CfgControlServer::checkClient(const QString& clientEqui
 			continue;
 		}
 
-		if (m_checkClientHostname == true &&
-			clientHostname != ci.hostname)
+		if (m_checkClientHostname == true)
 		{
-			DEBUG_LOG_ERR(m_logger, QString("Client %1 check failed - wrong client hostname!").
-							arg(clientEquipmentID));
-			return Tcp::SetConnectionResult::WrongClientHostname;
+			if (clientHostname != ci.hostname)
+			{
+				DEBUG_LOG_ERR(m_logger, QString("Client %1 check failed - wrong client hostname!").
+								arg(clientEquipmentID));
+				return Tcp::SetConnectionResult::WrongClientHostname;
+			}
+			else
+			{
+				DEBUG_LOG_MSG(m_logger, QString("Client %1 with hostname %2 check passed!").
+							  arg(clientEquipmentID).arg(clientHostname));
+			}
 		}
 
-		DEBUG_LOG_MSG(m_logger, QString("Client %1 with hostname %2 check passed!").
-					  arg(clientEquipmentID).arg(clientHostname));
 		return Tcp::SetConnectionResult::Ok;
 	}
 
