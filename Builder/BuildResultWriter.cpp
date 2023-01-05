@@ -439,7 +439,7 @@ namespace Builder
 
 		clearDirectory(m_fullPath);
 
-		LOG_MESSAGE(m_log, QString(tr("Build directory was created: %1")).arg(m_fullPath));
+		LOG_MESSAGE(m_log, QString(tr("Build directory was created: <a href=\"%1\">%1</a>")).arg(m_fullPath));
 
 		return true;
 	}
@@ -642,6 +642,7 @@ namespace Builder
 		}
 
 		static_assert(BUILD_RESULT_COUNT == 2);
+		m_log->writeMessage(QString("Build output path: <a href=%1>%1</a>").arg(m_buildResults[0].fullPath()));
 		m_log->writeMessage(QString("Build output path: <a href=%1>%1</a>").arg(m_buildResults[1].fullPath()));
 
 		QString buildLogStr = m_log->finishStrLogging();

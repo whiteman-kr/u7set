@@ -105,12 +105,19 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 //	m_debugCheckBox = new QCheckBox(tr("Debug build"), m_settingsWidget);
 //	m_debugCheckBox->setChecked(true);
 //	settingsWidgetLayout->addWidget(m_debugCheckBox);
-	m_buildLabel = new QLabel("Build: Project is not opened");
-	m_buildLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Minimum);
-	m_buildLabel->setTextFormat(Qt::RichText);
-	m_buildLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
-	m_buildLabel->setOpenExternalLinks(true);
-	settingsWidgetLayout->addWidget(m_buildLabel);
+	QLabel* buildLabel = new QLabel("Build:");
+	buildLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Minimum);
+	settingsWidgetLayout->addWidget(buildLabel);
+
+	for (int i = 0; i < 2; i++)
+	{
+		m_buildLabel[i] = new QLabel(i == 0 ? "Project is not opened" : QString());
+		m_buildLabel[i]->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Minimum);
+		m_buildLabel[i]->setTextFormat(Qt::RichText);
+		m_buildLabel[i]->setTextInteractionFlags(Qt::TextBrowserInteraction);
+		m_buildLabel[i]->setOpenExternalLinks(true);
+		settingsWidgetLayout->addWidget(m_buildLabel[i]);
+	}
 
 	m_warningsLevelComboBox = new QComboBox(m_settingsWidget);
 
@@ -313,16 +320,26 @@ void BuildTabPage::timerEvent(QTimerEvent* event)
 
 void BuildTabPage::projectOpened()
 {
-	QString buildPath = QDir::fromNativeSeparators(QString("%1/%2/build")
-			.arg(theSettings.buildOutputPath())
-			.arg(db()->currentProject().projectName()));
-	if (QDir().exists(buildPath) == true)
+	QString buildCurrentPath;
+	QString buildLastPath;
+	getProjectBuildPath(&buildCurrentPath, &buildLastPath);
+
+	if (buildLastPath.isEmpty() == false)
 	{
-		m_buildLabel->setText(tr("Build: <a href=\"%1\">%1</a>").arg(buildPath));
+		m_buildLabel[0]->setText(QStringLiteral("<a href=\"%1\">%1</a>").arg(buildLastPath));
 	}
 	else
 	{
-		m_buildLabel->setText(tr("Build: No build performed yet"));
+		m_buildLabel[0]->setText(tr("No build performed yet"));
+	}
+
+	if (buildCurrentPath.isEmpty() == false)
+	{
+		m_buildLabel[1]->setText(QStringLiteral("<a href=\"%1\">%1</a>").arg(buildCurrentPath));
+	}
+	else
+	{
+		m_buildLabel[1]->setText(QString());
 	}
 
 	this->setEnabled(true);
@@ -333,7 +350,8 @@ void BuildTabPage::projectClosed()
 {
 	cancelBuild();
 
-	m_buildLabel->setText(tr("Build: Project is not opened"));
+	m_buildLabel[0]->setText(tr("Project is not opened"));
+	m_buildLabel[1]->setText(QString());
 
 	m_findTextEdit->clear();
 	m_outputWidget->clear();
@@ -404,10 +422,27 @@ void BuildTabPage::buildWasFinished(int errorCount)
 
 	GlobalMessanger::instance().fireBuildFinished(errorCount);
 
-	QString buildPath = QDir::fromNativeSeparators(QString("%1/%2/build")
-			.arg(theSettings.buildOutputPath())
-			.arg(db()->currentProject().projectName()));
-	m_buildLabel->setText(tr("Build: <a href=\"%1\">%1</a>").arg(buildPath));
+	QString buildCurrentPath;
+	QString buildLastPath;
+	getProjectBuildPath(&buildCurrentPath, &buildLastPath);
+
+	if (buildLastPath.isEmpty() == false)
+	{
+		m_buildLabel[0]->setText(QStringLiteral("<a href=\"%1\">%1</a>").arg(buildLastPath));
+	}
+	else
+	{
+		m_buildLabel[0]->setText(tr("No build performed yet"));
+	}
+
+	if (buildCurrentPath.isEmpty() == false)
+	{
+		m_buildLabel[1]->setText(QStringLiteral("<a href=\"%1\">%1</a>").arg(buildCurrentPath));
+	}
+	else
+	{
+		m_buildLabel[1]->setText(tr("No build performed yet"));
+	}
 
 	return;
 }
@@ -614,3 +649,37 @@ void BuildTabPage::search()
 	return;
 }
 
+void BuildTabPage::getProjectBuildPath(QString* buildCurrentPath, QString* buildLastPath) const
+{
+	if (buildCurrentPath == nullptr || buildLastPath == nullptr)
+	{
+		Q_ASSERT(buildCurrentPath);
+		Q_ASSERT(buildLastPath);
+	}
+
+	buildCurrentPath->clear();
+	buildLastPath->clear();
+
+	QString buildBasePath = QDir::fromNativeSeparators(QStringLiteral("%1/%2")
+			.arg(theSettings.buildOutputPath())
+			.arg(db()->currentProject().projectName()));
+
+	// Current build path (/build)
+	//
+	*buildCurrentPath = QStringLiteral("%1/build").arg(buildBasePath);
+	if (QDir().exists(*buildCurrentPath) == false)
+	{
+		buildCurrentPath->clear();
+	}
+
+	// Last build path (/build-xxxxxx)
+	//
+	QStringList buildDirsList = QDir(buildBasePath).entryList({QStringLiteral("build-*")}, QDir::Dirs, QDir::Name);
+
+	if (buildDirsList.isEmpty() == false)
+	{
+		*buildLastPath = QStringLiteral("%1/%2").arg(buildBasePath).arg(buildDirsList.last());
+	}
+
+	return;
+}
