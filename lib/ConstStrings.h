@@ -130,6 +130,8 @@ namespace EquipmentPropNames
 	inline const QString CLIENT_REQUEST_NETMASK("ClientRequestNetmask");
 	inline const QString CLIENT_REQUEST_PORT("ClientRequestPort");
 
+	inline const QString SECURITY_LEVEL("SecurityLevel");
+
 	inline const QString CFG_SERVICE_ID1("ConfigurationServiceID1");
 	inline const QString CFG_SERVICE_IP1("ConfigurationServiceIP1");
 	inline const QString CFG_SERVICE_PORT1("ConfigurationServicePort1");

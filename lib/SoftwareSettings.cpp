@@ -303,6 +303,9 @@ bool CfgServiceSettings::writeToXml(XmlWriteHelper& xml) const
 
 	xml.writeHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, clientRequestNetmask);
 
+	xml.writeStringElement(EquipmentPropNames::SECURITY_LEVEL,
+							 E::valueToString<E::SecurityLevel>(securityLevel));
+
 	xml.writeBoolElement(EquipmentPropNames::CHECK_HOSTNAME, checkHostname);
 
 	xml.writeStartElement(XmlElement::CLIENTS);
@@ -429,6 +432,9 @@ bool AppDataServiceSettings::writeToXml(XmlWriteHelper& xml) const
 	xml.writeHostAddressPort(EquipmentPropNames::RT_TRENDS_REQUEST_IP,
 							 EquipmentPropNames::RT_TRENDS_REQUEST_PORT, rtTrendsRequestIP);
 
+	xml.writeStringElement(EquipmentPropNames::SECURITY_LEVEL,
+							 E::valueToString<E::SecurityLevel>(securityLevel));
+
 	writeEndSettings(xml);	// </Settings>
 
 	return true;
@@ -498,6 +504,9 @@ bool DiagDataServiceSettings::writeToXml(XmlWriteHelper& xml) const
 	xml.writeHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
 							 EquipmentPropNames::CLIENT_REQUEST_PORT, clientRequestIP);
 	xml.writeHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, clientRequestNetmask);
+
+	xml.writeStringElement(EquipmentPropNames::SECURITY_LEVEL,
+							 E::valueToString<E::SecurityLevel>(securityLevel));
 
 	writeEndSettings(xml);	// </Settings>
 
@@ -624,6 +633,9 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml) const
 
 	xml.writeHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK,
 						 clientRequestNetmask);
+
+	xml.writeStringElement(EquipmentPropNames::SECURITY_LEVEL,
+							 E::valueToString<E::SecurityLevel>(securityLevel));
 
 	xml.writeStringElement(EquipmentPropNames::CFG_SERVICE_ID1, cfgServiceID1);
 	xml.writeHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
@@ -866,6 +878,9 @@ bool ArchivingServiceSettings::writeToXml(XmlWriteHelper& xml) const
 	xml.writeHostAddressPort(EquipmentPropNames::DIAG_DATA_RECEIVING_IP,
 							 EquipmentPropNames::DIAG_DATA_RECEIVING_PORT, diagDataReceivingIP);
 	xml.writeHostAddress(EquipmentPropNames::DIAG_DATA_RECEIVING_NETMASK, diagDataReceivingNetmask);
+
+	xml.writeStringElement(EquipmentPropNames::SECURITY_LEVEL,
+							 E::valueToString<E::SecurityLevel>(securityLevel));
 
 	xml.writeIntElement(EquipmentPropNames::ARCHIVE_SHORT_TERM_PERIOD, shortTermArchivePeriod);
 	xml.writeIntElement(EquipmentPropNames::ARCHIVE_LONG_TERM_PERIOD, longTermArchivePeriod);

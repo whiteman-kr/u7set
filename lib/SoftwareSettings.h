@@ -135,6 +135,7 @@ public:
 	HostAddressPort clientRequestIP;
 	QHostAddress clientRequestNetmask;
 	bool checkHostname = false;
+	E::SecurityLevel securityLevel = E::SecurityLevel::Basic;
 
 	QList<ClientInfo> clients;
 
@@ -172,6 +173,8 @@ public:
 
 	HostAddressPort rtTrendsRequestIP;
 
+	E::SecurityLevel securityLevel = E::SecurityLevel::Basic;
+
 private:
 	// this methods should be call by SoftwareSettingsSet only
 	//
@@ -180,7 +183,6 @@ private:
 
 	friend class SoftwareSettingsSet;
 };
-
 
 class DiagDataServiceSettings : virtual public SoftwareSettings
 {
@@ -199,6 +201,7 @@ public:
 
 	HostAddressPort clientRequestIP;
 	QHostAddress clientRequestNetmask;
+	E::SecurityLevel securityLevel = E::SecurityLevel::Basic;
 
 private:
 	// this methods should be call by SoftwareSettingsSet only
@@ -254,6 +257,8 @@ public:
 	HostAddressPort clientRequestIP;
 	QHostAddress clientRequestNetmask;
 
+	E::SecurityLevel securityLevel = E::SecurityLevel::Basic;
+
 	int channelCount = 0;
 
 	QString cfgServiceID1;
@@ -303,6 +308,8 @@ public:
 
 	HostAddressPort diagDataReceivingIP;
 	QHostAddress diagDataReceivingNetmask;
+
+	E::SecurityLevel securityLevel = E::SecurityLevel::Basic;
 
 	int shortTermArchivePeriod = 10;
 	int longTermArchivePeriod = 365;
@@ -387,7 +394,6 @@ private:
 
 	friend class SoftwareSettingsSet;
 };
-
 
 class MonitorSettings : virtual public SoftwareSettings
 {
