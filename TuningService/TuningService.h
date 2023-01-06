@@ -59,6 +59,8 @@ namespace Tuning
 
 		void logTuningPacket(bool request, Fotip::OpCode opCode, quint16 rupNumerator, quint64 fotipNumerator);
 
+		E::SecurityLevel securityLevel() const;
+
 	signals:
 
 	public slots:

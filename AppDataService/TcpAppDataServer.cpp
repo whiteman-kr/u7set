@@ -9,9 +9,10 @@
 // -------------------------------------------------------------------------------
 
 TcpAppDataServer::TcpAppDataServer(const SoftwareInfo& softwareInfo,
+								   E::SecurityLevel securityLevel,
 								   AppDataReceiverThread* appDataReceiverThread,
 								   SignalStatesProcessingThread* signalStatesProcessingThread) :
-	Tcp::Server(softwareInfo),
+	Tcp::Server(softwareInfo, securityLevel),
 	m_appDataReceiverThread(appDataReceiverThread),
 	m_signalStatesProcessingThread(signalStatesProcessingThread)
 {
@@ -106,6 +107,7 @@ void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData
 Tcp::Server* TcpAppDataServer::getNewInstance()
 {
 	TcpAppDataServer* newServer =  new TcpAppDataServer(localSoftwareInfo(),
+														securityLevel(),
 														m_appDataReceiverThread,
 														m_signalStatesProcessingThread);
 	newServer->setThread(m_thread);

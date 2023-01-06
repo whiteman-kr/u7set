@@ -447,8 +447,11 @@ namespace Tcp
 	//
 	// -------------------------------------------------------------------------------------
 
-	FileServer::FileServer(const QString& rootFolder, const SoftwareInfo& softwareInfo, std::shared_ptr<CircularLogger> logger) :
-		Server(softwareInfo),
+	FileServer::FileServer(const QString& rootFolder,
+						   const SoftwareInfo& softwareInfo,
+						   E::SecurityLevel securityLevel,
+						   std::shared_ptr<CircularLogger> logger) :
+		Server(softwareInfo, securityLevel),
 		m_logger(logger),
 		m_transmitionFilesTimer(this)
 	{
@@ -460,7 +463,7 @@ namespace Tcp
 
 	Server* FileServer::getNewInstance()
 	{
-		return new FileServer(m_rootFolder, localSoftwareInfo(), m_logger);
+		return new FileServer(m_rootFolder, localSoftwareInfo(), securityLevel(), m_logger);
 	}
 
 	void FileServer::processSuccessorRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)

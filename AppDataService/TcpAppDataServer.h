@@ -23,6 +23,7 @@ class TcpAppDataServer : public Tcp::Server
 {
 public:
 	TcpAppDataServer(const SoftwareInfo& softwareInfo,
+					 E::SecurityLevel securityLevel,
 					 AppDataReceiverThread* appDataReceiverThread,
 					 SignalStatesProcessingThread* signalStatesProcessingThread);
 

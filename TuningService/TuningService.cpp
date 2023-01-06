@@ -319,6 +319,11 @@ namespace Tuning
 				arg(fotipNumerator, sizeof(fotipNumerator) * 2, 16, Latin1Char::ZERO));
 	}
 
+	E::SecurityLevel TuningServiceWorker::securityLevel() const
+	{
+		return m_settings.securityLevel;
+	}
+
 	void TuningServiceWorker::initialize()
 	{
 //		m_tuningPacketLog = std::make_shared<CircularLogger>();

@@ -36,11 +36,12 @@ CfgServerLoaderBase::CfgServerLoaderBase()
 //
 // -------------------------------------------------------------------------------------
 
-CfgServer::CfgServer(const SoftwareInfo& softwareInfo,
-					 const QString& buildFolder,
+CfgServer::CfgServer(const QString& buildFolder,
+					 const SoftwareInfo& softwareInfo,
+					 E::SecurityLevel securityLevel,
 					 const SessionParams& sessionParams,
 					 std::shared_ptr<CircularLogger> logger) :
-	Tcp::FileServer(buildFolder, softwareInfo, logger),
+	Tcp::FileServer(buildFolder, softwareInfo, securityLevel, logger),
 	m_logger(logger),
 	m_sessionParams(sessionParams)
 {
@@ -48,8 +49,9 @@ CfgServer::CfgServer(const SoftwareInfo& softwareInfo,
 
 CfgServer* CfgServer::getNewInstance()
 {
-	return new CfgServer(localSoftwareInfo(),
-						 m_rootFolder,
+	return new CfgServer(m_rootFolder,
+						 localSoftwareInfo(),
+						 securityLevel(),
 						 m_sessionParams,
 						 m_logger);
 }

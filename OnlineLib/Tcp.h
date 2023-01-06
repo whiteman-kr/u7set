@@ -211,7 +211,7 @@ namespace Tcp
 		Q_OBJECT
 
 	public:
-		Server(const SoftwareInfo& sotwareInfo);
+		Server(const SoftwareInfo& sotwareInfo, E::SecurityLevel securityLevel);
 		virtual ~Server();
 
 		virtual Server* getNewInstance() = 0;	// ServerDerivedClass::getNewInstance() must be implemented as:
@@ -220,6 +220,8 @@ namespace Tcp
 		void setConnectedSocketDescriptor(qintptr connectedSocketDescriptor);
 
 		int id() const { return m_id; }
+
+		E::SecurityLevel securityLevel() const { return m_securityLevel; }
 
 		virtual void onServerThreadStarted() {}
 		virtual void onServerThreadFinished() {}
@@ -280,6 +282,8 @@ namespace Tcp
 		qintptr m_connectedSocketDescriptor = 0;
 
 		ServerState m_serverState = ServerState::WainigForRequest;
+
+		E::SecurityLevel m_securityLevel = E::SecurityLevel::Basic;
 
 		double m_requestProcessingPorgress = 0;
 

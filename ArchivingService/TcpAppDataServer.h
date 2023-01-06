@@ -14,7 +14,9 @@
 class TcpAppDataServer : public Tcp::Server
 {
 public:
-	TcpAppDataServer(const SoftwareInfo& softwareInfo, Archive* archive);
+	TcpAppDataServer(const SoftwareInfo& softwareInfo,
+					 E::SecurityLevel securityLevel,
+					 Archive* archive);
 
 	virtual Tcp::Server* getNewInstance() override;
 	virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) override;

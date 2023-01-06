@@ -9,6 +9,7 @@
 // -------------------------------------------------------------------------------------
 
 CfgControlServer::CfgControlServer(const SoftwareInfo& softwareInfo,
+								   E::SecurityLevel securityLevel,
 								   const QString& autoloadBuildPath,
 								   const QString& workDirectory,
 								   const QString& buildPath,
@@ -17,7 +18,7 @@ CfgControlServer::CfgControlServer(const SoftwareInfo& softwareInfo,
 								   bool checkClientHostname,
 								   const CfgCheckerWorker& checkerWorker,
 								   std::shared_ptr<CircularLogger> logger) :
-	CfgServer(softwareInfo, buildPath, sessionParams, logger),
+	CfgServer(buildPath, softwareInfo, securityLevel, sessionParams, logger),
 	m_logger(logger),
 	m_checkerWorker(checkerWorker),
 	m_equipmentID(softwareInfo.equipmentID()),
@@ -31,7 +32,8 @@ CfgControlServer::CfgControlServer(const SoftwareInfo& softwareInfo,
 
 CfgControlServer* CfgControlServer::getNewInstance()
 {
-	return new CfgControlServer(localSoftwareInfo(), m_autoloadBuildPath, m_workDirectory,
+	return new CfgControlServer(localSoftwareInfo(), securityLevel(),
+								m_autoloadBuildPath, m_workDirectory,
 								m_rootFolder, m_sessionParams,
 								m_knownClients, m_checkClientHostname,
 								m_checkerWorker, m_logger);

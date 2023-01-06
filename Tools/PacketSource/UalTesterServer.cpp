@@ -8,8 +8,11 @@
 //
 // -------------------------------------------------------------------------------
 
-UalTesterServer::UalTesterServer(const SoftwareInfo& sotwareInfo, SourceBase* sourceBase, SignalBase* signalBase) :
-	Tcp::Server(sotwareInfo),
+UalTesterServer::UalTesterServer(const SoftwareInfo& sotwareInfo,
+								 E::SecurityLevel securityLevel,
+								 SourceBase* sourceBase,
+								 SignalBase* signalBase) :
+	Tcp::Server(sotwareInfo, securityLevel),
 	m_sotwareInfo(sotwareInfo),
 	m_sourceBase(sourceBase),
 	m_signalBase(signalBase)
@@ -56,7 +59,8 @@ Tcp::Server* UalTesterServer::getNewInstance()
 		return nullptr;
 	}
 
-	UalTesterServer* newServer = new UalTesterServer(m_sotwareInfo, m_sourceBase, m_signalBase);
+	UalTesterServer* newServer = new UalTesterServer(m_sotwareInfo, E::SecurityLevel::Basic,
+													 m_sourceBase, m_signalBase);
 
 	connect(newServer, &UalTesterServer::connectionChanged, this, &UalTesterServer::clientConnectionChanged, Qt::QueuedConnection);
 	connect(newServer, &UalTesterServer::signalStateChanged, this, &UalTesterServer::clientSignalStateChanged, Qt::QueuedConnection);

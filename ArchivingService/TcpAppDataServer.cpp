@@ -6,15 +6,17 @@
 //
 // -------------------------------------------------------------------------------
 
-TcpAppDataServer::TcpAppDataServer(const SoftwareInfo& softwareInfo, Archive* archive) :
-	Tcp::Server(softwareInfo),
+TcpAppDataServer::TcpAppDataServer(const SoftwareInfo& softwareInfo,
+								   E::SecurityLevel securityLevel,
+								   Archive* archive) :
+	Tcp::Server(softwareInfo, securityLevel),
 	m_archive(archive)
 {
 }
 
 Tcp::Server* TcpAppDataServer::getNewInstance()
 {
-	return new TcpAppDataServer(localSoftwareInfo(), m_archive);
+	return new TcpAppDataServer(localSoftwareInfo(), securityLevel(), m_archive);
 }
 
 void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)

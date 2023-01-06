@@ -16,6 +16,7 @@ class CfgControlServer : public CfgServer
 
 public:
 	CfgControlServer(const SoftwareInfo& softwareInfo,
+					 E::SecurityLevel securityLevel,
 					 const QString& autoloadBuildPath,
 					 const QString& workDirectory,
 					 const QString& buildPath,

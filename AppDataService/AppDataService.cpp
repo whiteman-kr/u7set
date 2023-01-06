@@ -89,6 +89,11 @@ bool AppDataServiceWorker::isConnectedToArchiveService(quint32 &ip, quint16 &por
 	return false;
 }
 
+E::SecurityLevel AppDataServiceWorker::securityLevel() const
+{
+	return m_curSettingsProfile.securityLevel;
+}
+
 void AppDataServiceWorker::initCmdLineParser()
 {
 	CommandLineParser& cp = cmdLineParser();
@@ -187,6 +192,7 @@ void AppDataServiceWorker::runTcpAppDataServer()
 	assert(m_tcpAppDataServerThread == nullptr);
 
 	TcpAppDataServer* tcpAppDataSever = new TcpAppDataServer(softwareInfo(),
+															 m_curSettingsProfile.securityLevel,
 															 m_appDataReceiverThread,
 															 m_signalStatesProcessingThread);
 
@@ -249,7 +255,9 @@ void AppDataServiceWorker::runRtTrendsServerThread()
 {
 	assert(m_rtTrendsServerThread == nullptr);
 
-	m_rtTrendsServerThread = new RtTrends::ServerThread(m_curSettingsProfile.rtTrendsRequestIP, *this);
+	m_rtTrendsServerThread = new RtTrends::ServerThread(m_curSettingsProfile.rtTrendsRequestIP,
+														*this,
+														m_curSettingsProfile.securityLevel);
 
 	m_rtTrendsServerThread->start();
 }

@@ -50,6 +50,8 @@ public:
 
 	DynamicAppSignalStates& signalStates() { return m_signalStates; }
 
+	E::SecurityLevel securityLevel() const;
+
 private:
 	virtual void initCmdLineParser() override;
 	virtual void loadSettings() override;

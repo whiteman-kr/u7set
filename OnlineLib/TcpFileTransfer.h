@@ -157,7 +157,10 @@ namespace Tcp
 	class FileServer : public Server, public FileTransfer
 	{
 	public:
-		FileServer(const QString& rootFolder, const SoftwareInfo& softwareInfo, std::shared_ptr<CircularLogger> logger);
+		FileServer(const QString& rootFolder,
+				   const SoftwareInfo& softwareInfo,
+				   E::SecurityLevel securityLevel,
+				   std::shared_ptr<CircularLogger> logger);
 
 		virtual Server* getNewInstance() override;
 

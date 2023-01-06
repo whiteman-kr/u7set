@@ -44,8 +44,9 @@ class CfgServer : public Tcp::FileServer, public CfgServerLoaderBase
 	Q_OBJECT
 
 public:
-	CfgServer(const SoftwareInfo& softwareInfo,
-			  const QString& buildFolder,
+	CfgServer(const QString& buildFolder,
+			  const SoftwareInfo& softwareInfo,
+			  E::SecurityLevel securityLevel,
 			  const SessionParams& sessionParams,
 			  std::shared_ptr<CircularLogger> logger);
 

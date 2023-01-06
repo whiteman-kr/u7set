@@ -109,8 +109,8 @@ namespace RtTrends
 	// -----------------------------------------------------------------------------------------------
 
 
-	Server::Server(AppDataServiceWorker& appDataService) :
-		Tcp::Server(appDataService.softwareInfo()),
+	Server::Server(AppDataServiceWorker& appDataService, E::SecurityLevel securityLevel) :
+		Tcp::Server(appDataService.softwareInfo(), securityLevel),
 		m_appDataService(appDataService),
 		m_signalsToSources(appDataService.signalsToSources()),
 		m_signalStates(appDataService.signalStates()),
@@ -121,7 +121,7 @@ namespace RtTrends
 
 	Tcp::Server* Server::getNewInstance()
 	{
-		return new Server(m_appDataService);
+		return new Server(m_appDataService, securityLevel());
 	}
 
 	void Server::onServerThreadStarted()
@@ -442,9 +442,10 @@ namespace RtTrends
 	// -----------------------------------------------------------------------------------------------
 
 	ServerThread::ServerThread(	const HostAddressPort& listenAddressPort,
-								AppDataServiceWorker& appDataService) :
+								AppDataServiceWorker& appDataService,
+								E::SecurityLevel securityLevel) :
 		Tcp::ServerThread(listenAddressPort,
-						  new Server(appDataService),
+						  new Server(appDataService, securityLevel),
 						  appDataService.logger())
 	{
 	}

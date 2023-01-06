@@ -535,8 +535,9 @@ namespace Tcp
 
 	int Server::staticId = 0;
 
-	Server::Server(const SoftwareInfo& sotwareInfo) :
+	Server::Server(const SoftwareInfo& sotwareInfo, E::SecurityLevel securityLevel) :
 		SocketWorker(sotwareInfo),
+		m_securityLevel(securityLevel),
 		m_autoAckTimer(this)
 	{
 		m_timeout = TCP_CLIENT_REQUEST_TIMEOUT;

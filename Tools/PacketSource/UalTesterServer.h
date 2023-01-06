@@ -16,7 +16,10 @@ class UalTesterServer  : public Tcp::Server
 	Q_OBJECT
 
 public:
-	UalTesterServer(const SoftwareInfo& sotwareInfo, SourceBase* sourceBase, SignalBase* signalBase);
+	UalTesterServer(const SoftwareInfo& sotwareInfo,
+					E::SecurityLevel securityLevel,
+					SourceBase* sourceBase,
+					SignalBase* signalBase);
 
 private:
 	virtual void onServerThreadStarted() override;
