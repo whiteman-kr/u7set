@@ -62,6 +62,7 @@
 #include <QQueue>
 
 #include <QSettings>
+#include <QSslSocket>
 #include <QString>
 #include <QStringList>
 

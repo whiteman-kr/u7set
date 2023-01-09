@@ -6,20 +6,20 @@
 #include <QHash>
 #include <QMutex>
 #include <QTcpServer>
-#include <QTcpSocket>
+#include <QSslSocket>
 #include <cassert>
 
 #include "../Proto/serialization.pb.h"
 #include "../Proto/network.pb.h"
 
-#include "SocketIO.h"
 #include "../UtilsLib/SimpleThread.h"
 #include "../UtilsLib/WUtils.h"
 #include "../UtilsLib/Crc.h"
-#include "CircularLogger.h"
-#include "SoftwareInfo.h"
 #include "../CommonLib/HostAddressPort.h"
 
+#include "SocketIO.h"
+#include "CircularLogger.h"
+#include "SoftwareInfo.h"
 
 namespace Tcp
 {
@@ -103,6 +103,8 @@ namespace Tcp
 		void setWatchdogTimerTimeout(int timeout_ms) { m_timeout = timeout_ms; }
 		void enableWatchdogTimer(bool enable);
 
+		void setLogger(CircularLoggerShared logger);
+
 		HostAddressPort localAddressPort() const;
 
 		ConnectionState getConnectionState() const;
@@ -111,6 +113,12 @@ namespace Tcp
 		SoftwareInfo connectedSoftwareInfo() const;
 
 		HostAddressPort peerAddr() const;
+
+		QString sslModeStr(QSslSocket::SslMode mode) const;
+
+		virtual void logError(const QString& err);
+		virtual void logWarning(const QString& wrn);
+		virtual void logMessage(const QString& msg);
 
 	signals:
 		void disconnected(const SocketWorker* socketWorker);
@@ -165,7 +173,7 @@ namespace Tcp
 			WaitingNothing
 		};
 
-		QTcpSocket* m_tcpSocket = nullptr;
+		QSslSocket* m_socket = nullptr;
 
 		ConnectionState m_state;
 
@@ -190,6 +198,9 @@ namespace Tcp
 		char* m_receiveDataBuffer = nullptr;
 
 		bool m_headerAndDataReady = false;					// set to TRUE when full header and data read from socket
+
+	private:
+		std::shared_ptr<CircularLogger> m_log;
 	};
 
 	enum class SetConnectionResult
@@ -249,6 +260,14 @@ namespace Tcp
 	protected:
 		virtual Tcp::SetConnectionResult checkClient(const QString& clientEquipmentID, const QString& clientHostname) const;
 
+		virtual void encrypted();
+		virtual void sslErrors(const QList<QSslError>& errors);
+		virtual void errorOccurred(QAbstractSocket::SocketError socketError);
+		virtual void handshakeInterruptedOnError(const QSslError& error);
+		virtual void modeChanged(QSslSocket::SslMode mode);
+		virtual void peerVerifyError(const QSslError& error);
+		virtual void preSharedKeyAuthenticationRequired(QSslPreSharedKeyAuthenticator* authenticator);
+
 	protected:
 		std::list<Tcp::ConnectionState> m_connectionStates;
 
@@ -279,6 +298,7 @@ namespace Tcp
 
 		int m_id = 0;
 
+		CircularLoggerShared m_log;
 		qintptr m_connectedSocketDescriptor = 0;
 
 		ServerState m_serverState = ServerState::WainigForRequest;
@@ -298,18 +318,24 @@ namespace Tcp
 
 	// -------------------------------------------------------------------------------------
 	//
-	// Tcp::TcpServer class declaration
+	// Tcp::TcpServer class declaration and implementation
+	//
+	// Deriving from QTcpServer required to overload incomingConnection()
+	// because new connected socket will be used in another thread and not in Listener's thread
 	//
 	// -------------------------------------------------------------------------------------
-
-	class Listener;
 
 	class TcpServer : public QTcpServer
 	{
 		Q_OBJECT
 
 	public:
-		virtual void incomingConnection(qintptr socketDescriptor) final;
+		TcpServer(QObject* parent) : QTcpServer(parent) {}
+
+		virtual void incomingConnection(qintptr socketDescriptor) final
+		{
+			emit newConnection(socketDescriptor);
+		}
 
 	signals:
 		void newConnection(qintptr socketDescriptor);
@@ -326,7 +352,7 @@ namespace Tcp
 		Q_OBJECT
 
 	public:
-		Listener(const HostAddressPort& listenAddressPort, Server* server, std::shared_ptr<CircularLogger> logger);
+		Listener(const HostAddressPort& listenAddressPort, Server* server, CircularLoggerShared logger);
 		virtual ~Listener();
 
 		virtual void onListenerThreadStarted() {}
@@ -352,9 +378,9 @@ namespace Tcp
 
 	private:
 		HostAddressPort m_listenAddressPort;
-		TcpServer* m_tcpServer = nullptr;
+		CircularLoggerShared m_log;
 
-		std::shared_ptr<CircularLogger> m_logger;
+		TcpServer* m_tcpServer = nullptr;
 
 		QTimer m_periodicTimer;
 
@@ -445,6 +471,15 @@ namespace Tcp
 		void enableClientAliveRequest(bool enable);
 
 		SetConnectionResult setConnectionResult() const { return m_setConnectionResult; }
+
+	protected slots:
+		virtual void encrypted();
+		virtual void sslErrors(const QList<QSslError>& errors);
+		virtual void errorOccurred(QAbstractSocket::SocketError socketError);
+		virtual void handshakeInterruptedOnError(const QSslError& error);
+		virtual void modeChanged(QSslSocket::SslMode mode);
+		virtual void peerVerifyError(const QSslError& error);
+		virtual void preSharedKeyAuthenticationRequired(QSslPreSharedKeyAuthenticator* authenticator);
 
 	signals:
 		void signal_unknownClientID(QString errMsg);

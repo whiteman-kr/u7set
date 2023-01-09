@@ -650,7 +650,8 @@ public:
 	enum class SecurityLevel
 	{
 		Basic = 0,
-		Encoded = 1
+		Encoded = 1,
+		SSL = 2
 	};
 	Q_ENUM(SecurityLevel)
 

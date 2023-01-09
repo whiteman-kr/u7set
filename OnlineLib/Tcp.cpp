@@ -54,19 +54,19 @@ namespace Tcp
 	{
 		delete [] m_receiveDataBuffer;
 
-		Q_ASSERT(m_tcpSocket == nullptr);
+		Q_ASSERT(m_socket == nullptr);
 	}
 
 	bool SocketWorker::isConnected() const
 	{
 		AUTO_LOCK(m_mutex)
 
-		if (m_tcpSocket == nullptr)
+		if (m_socket == nullptr)
 		{
 			return false;
 		}
 
-		return m_tcpSocket->state() == QAbstractSocket::ConnectedState;
+		return m_socket->state() == QAbstractSocket::ConnectedState;
 	}
 
 	void SocketWorker::closeConnection()
@@ -76,27 +76,27 @@ namespace Tcp
 
 	void SocketWorker::onInitConnection()
 	{
-		if (m_tcpSocket == nullptr)
+		if (m_socket == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return;
 		}
 
 		qDebug() << C_STR(QString(tr("Socket connected with %1 (descriptor = %2)")).
 						  arg(peerAddr().addressStr()).
-						  arg(m_tcpSocket->socketDescriptor()));
+						  arg(m_socket->socketDescriptor()));
 	}
 
 	void SocketWorker::onConnection()
 	{
 		qDebug() << C_STR(QString(tr("Socket connected (descriptor = %1)")).
-						  arg(m_tcpSocket->socketDescriptor()));
+						  arg(m_socket->socketDescriptor()));
 	}
 
 	void SocketWorker::onDisconnection()
 	{
 		qDebug() << C_STR(QString(tr("Socket disconnected (descriptor = %1)")).
-						  arg(m_tcpSocket->socketDescriptor()));
+						  arg(m_socket->socketDescriptor()));
 	}
 
 	void SocketWorker::enableWatchdogTimer(bool enable)
@@ -111,17 +111,22 @@ namespace Tcp
 		}
 	}
 
+	void SocketWorker::setLogger(CircularLoggerShared logger)
+	{
+		m_log = logger;
+	}
+
 	HostAddressPort SocketWorker::localAddressPort() const
 	{
 		AUTO_LOCK(m_mutex);
 
-		if (m_tcpSocket == nullptr)
+		if (m_socket == nullptr)
 		{
 			return HostAddressPort();
 		}
 
-		QHostAddress locAddr = m_tcpSocket->localAddress();
-		quint16 locPort = m_tcpSocket->localPort();
+		QHostAddress locAddr = m_socket->localAddress();
+		quint16 locPort = m_socket->localPort();
 
 		return HostAddressPort(locAddr, locPort);
 	}
@@ -158,30 +163,86 @@ namespace Tcp
 		return peerAddr;
 	}
 
+	QString SocketWorker::sslModeStr(QSslSocket::SslMode mode) const
+	{
+		switch(mode)
+		{
+		case QSslSocket::SslMode::UnencryptedMode:
+			return QString("UnencryptedMode");
+
+		case QSslSocket::SslMode::SslServerMode:
+			return QString("SslServerMode");
+
+		case QSslSocket::SslMode::SslClientMode:
+			return QString("SslClientMode");
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		return QString();
+	}
+
+	void SocketWorker::logError(const QString& err)
+	{
+		if (m_log == nullptr)
+		{
+			qDebug() << err.toStdString().c_str();
+		}
+		else
+		{
+			DEBUG_LOG_ERR(m_log, err);
+		}
+	}
+
+	void SocketWorker::logWarning(const QString& wrn)
+	{
+		if (m_log == nullptr)
+		{
+			qDebug() << wrn.toStdString().c_str();
+		}
+		else
+		{
+			DEBUG_LOG_WRN(m_log, wrn);
+		}
+	}
+
+	void SocketWorker::logMessage(const QString& msg)
+	{
+		if (m_log == nullptr)
+		{
+			qDebug() << msg.toStdString().c_str();
+		}
+		else
+		{
+			DEBUG_LOG_MSG(m_log, msg);
+		}
+	}
+
 	void SocketWorker::createSocket()
 	{
 		AUTO_LOCK(m_mutex)
 
 		deleteSocket();
 
-		m_tcpSocket = new QTcpSocket;
+		m_socket = new QSslSocket;
 
-		m_tcpSocket->setSocketOption(QAbstractSocket::LowDelayOption, QVariant(1));
+		m_socket->setSocketOption(QAbstractSocket::LowDelayOption, QVariant(1));
 
-		connect(m_tcpSocket, &QTcpSocket::stateChanged, this, &SocketWorker::onSocketStateChanged);
-		connect(m_tcpSocket, &QTcpSocket::connected, this, &SocketWorker::onSocketConnected);
-		connect(m_tcpSocket, &QTcpSocket::disconnected, this, &SocketWorker::onSocketDisconnected);
-		connect(m_tcpSocket, &QTcpSocket::readyRead, this, &SocketWorker::onSocketReadyRead);
-		connect(m_tcpSocket, &QTcpSocket::bytesWritten, this, &SocketWorker::onSocketBytesWritten);
+		connect(m_socket, &QSslSocket::stateChanged, this, &SocketWorker::onSocketStateChanged);
+		connect(m_socket, &QSslSocket::connected, this, &SocketWorker::onSocketConnected);
+		connect(m_socket, &QSslSocket::disconnected, this, &SocketWorker::onSocketDisconnected);
+		connect(m_socket, &QSslSocket::readyRead, this, &SocketWorker::onSocketReadyRead);
+		connect(m_socket, &QSslSocket::bytesWritten, this, &SocketWorker::onSocketBytesWritten);
 	}
 
 	void SocketWorker::deleteSocket()
 	{
-		if (m_tcpSocket != nullptr)
+		if (m_socket != nullptr)
 		{
-			m_tcpSocket->close();
-			delete m_tcpSocket;
-			m_tcpSocket = nullptr;
+			m_socket->close();
+			delete m_socket;
+			m_socket = nullptr;
 		}
 	}
 
@@ -200,13 +261,13 @@ namespace Tcp
 
 	qint64 SocketWorker::socketWrite(const char* data, qint64 size)
 	{
-		if (m_tcpSocket == nullptr)
+		if (m_socket == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return -1;
 		}
 
-		qint64 written = m_tcpSocket->write(data, size);
+		qint64 written = m_socket->write(data, size);
 
 		if (written == -1)
 		{
@@ -298,11 +359,12 @@ namespace Tcp
 		qDebug() << "SocketWorker::onTimeoutTimer()";
 	}
 
+
 	int SocketWorker::readHeader(int bytesAvailable)
 	{
 		if (m_readState != ReadState::WaitingForHeader)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return 0;
 		}
 
@@ -313,11 +375,11 @@ namespace Tcp
 			bytesToRead = bytesAvailable;
 		}
 
-		qint64 bytesRead = m_tcpSocket->read(reinterpret_cast<char*>(&m_header) + m_readHeaderSize, bytesToRead);
+		qint64 bytesRead = m_socket->read(reinterpret_cast<char*>(&m_header) + m_readHeaderSize, bytesToRead);
 
 		m_readHeaderSize += static_cast<quint32>(bytesRead);
 
-		assert(m_readHeaderSize <= sizeof(SocketWorker::Header));
+		Q_ASSERT(m_readHeaderSize <= sizeof(SocketWorker::Header));
 
 		if (m_readHeaderSize < sizeof(SocketWorker::Header))
 		{
@@ -328,7 +390,7 @@ namespace Tcp
 		//
 		if (m_header.checkCRC() == false)
 		{
-			assert(false);
+			Q_ASSERT(false);
 
 			closeConnection();
 
@@ -348,7 +410,7 @@ namespace Tcp
 
 		if (m_header.dataSize > TCP_MAX_DATA_SIZE)
 		{
-			assert(false);
+			Q_ASSERT(false);
 
 			closeConnection();
 
@@ -366,7 +428,7 @@ namespace Tcp
 	{
 		if (m_readState != ReadState::WaitingForData)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return 0;
 		}
 
@@ -379,7 +441,7 @@ namespace Tcp
 
 		if (m_readDataSize + bytesToRead > TCP_MAX_DATA_SIZE)
 		{
-			assert(false);
+			Q_ASSERT(false);
 
 			closeConnection();
 
@@ -388,11 +450,11 @@ namespace Tcp
 			return 0;
 		}
 
-		qint64 bytesRead = m_tcpSocket->read(m_receiveDataBuffer + m_readDataSize, bytesToRead);
+		qint64 bytesRead = m_socket->read(m_receiveDataBuffer + m_readDataSize, bytesToRead);
 
 		m_readDataSize += static_cast<quint32>(bytesRead);
 
-		assert(m_readDataSize <= m_header.dataSize);
+		Q_ASSERT(m_readDataSize <= m_header.dataSize);
 
 		if (m_readDataSize == m_header.dataSize)
 		{
@@ -438,7 +500,7 @@ namespace Tcp
 //			break;
 
 //		default:
-//			assert(false);
+//			Q_ASSERT(false);
 //		}
 
 //		qDebug() << qPrintable(stateStr);
@@ -448,7 +510,7 @@ namespace Tcp
 	{
 		initReadStatusVariables();
 
-		setStateConnected(HostAddressPort(m_tcpSocket->peerAddress(), m_tcpSocket->peerPort()));
+		setStateConnected(HostAddressPort(m_socket->peerAddress(), m_socket->peerPort()));
 
 		onInitConnection();
 	}
@@ -464,13 +526,13 @@ namespace Tcp
 
 	void SocketWorker::onSocketReadyRead()
 	{
-		if (m_tcpSocket == nullptr)
+		if (m_socket == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return;
 		}
 
-		qint64 bytesAvailable = m_tcpSocket->bytesAvailable();
+		qint64 bytesAvailable = m_socket->bytesAvailable();
 
 		addReceivedBytes(bytesAvailable);
 
@@ -481,7 +543,7 @@ namespace Tcp
 			switch(m_readState)
 			{
 			case ReadState::WaitingNothing:
-				assert(false);
+				Q_ASSERT(false);
 				return;
 
 			case ReadState::WaitingForHeader:
@@ -493,7 +555,7 @@ namespace Tcp
 				break;
 
 			default:
-				assert(false);
+				Q_ASSERT(false);
 			}
 
 			bytesAvailable -= bytesRead;
@@ -518,13 +580,13 @@ namespace Tcp
 
 	void SocketWorker::onCloseConnection()
 	{
-		if (m_tcpSocket == nullptr)
+		if (m_socket == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return;
 		}
 
-		m_tcpSocket->close();
+		m_socket->close();
 	}
 
 	// -------------------------------------------------------------------------------------
@@ -570,9 +632,9 @@ namespace Tcp
 
 	void Server::sendAck()
 	{
-		if (m_tcpSocket == nullptr)
+		if (m_socket == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return;
 		}
 
@@ -594,13 +656,13 @@ namespace Tcp
 
 		if (written == -1)
 		{
-			qDebug() << qPrintable(QString("Socket write error: %1").arg(m_tcpSocket->errorString()));
+			qDebug() << qPrintable(QString("Socket write error: %1").arg(m_socket->errorString()));
 			return;
 		}
 
 		if (written < static_cast<qint64>(sizeof(header)))
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return;
 		}
 	}
@@ -621,7 +683,7 @@ namespace Tcp
 
 		if (messageSize > TCP_MAX_DATA_SIZE)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return false;
 		}
 
@@ -629,7 +691,7 @@ namespace Tcp
 		{
 			m_protobufBuffer = new char [TCP_MAX_DATA_SIZE];
 
-			assert(m_protobufBuffer != nullptr);
+			Q_ASSERT(m_protobufBuffer != nullptr);
 		}
 
 		protobufMessage.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(m_protobufBuffer));
@@ -641,15 +703,15 @@ namespace Tcp
 	{
 		m_autoAckTimer.stop();
 
-		if (m_tcpSocket == nullptr)
+		if (m_socket == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return false;
 		}
 
 		if (m_serverState != ServerState::RequestProcessing)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return false;
 		}
 
@@ -668,13 +730,13 @@ namespace Tcp
 
 		if (written == -1)
 		{
-			qDebug() << qPrintable(QString("Socket write error: %1").arg(m_tcpSocket->errorString()));
+			qDebug() << qPrintable(QString("Socket write error: %1").arg(m_socket->errorString()));
 			return false;
 		}
 
 		if (written < static_cast<qint64>(sizeof(header)))
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return false;
 		}
 
@@ -684,18 +746,18 @@ namespace Tcp
 
 			if (written == -1)
 			{
-				qDebug() << qPrintable(QString("Socket write error: %1").arg(m_tcpSocket->errorString()));
+				qDebug() << qPrintable(QString("Socket write error: %1").arg(m_socket->errorString()));
 				return false;
 			}
 
 			if (written < replyDataSize)
 			{
-				assert(false);
+				Q_ASSERT(false);
 				return false;
 			}
 		}
 
-		m_tcpSocket->flush();
+		m_socket->flush();
 
 		initReadStatusVariables();
 
@@ -754,9 +816,71 @@ namespace Tcp
 		return Tcp::SetConnectionResult::Ok;			// real checking will be implemented in derived classes (if required)
 	}
 
+	void Server::encrypted()
+	{
+		logMessage(QString("Connection %1 encrypted").arg(m_id));
+	}
+
+	void Server::sslErrors(const QList<QSslError>& errors)
+	{
+		logError(QString("Ssl errors occured on connection %1:").
+							arg(m_id));
+
+		for(const QSslError& err : errors)
+		{
+			logError(QString("(%1) %2").
+						  arg(static_cast<int>(err.error())).arg(err.errorString()));
+
+/*			switch(err.error())
+			{
+			case QSslError::SelfSignedCertificate:
+				m_socket.ignoreSslErrors();
+			}*/
+		}
+	}
+
+	void Server::errorOccurred(QAbstractSocket::SocketError socketError)
+	{
+		logError(QString("Connection %1 errorOccured: (%2) %3").
+								arg(m_id).arg(static_cast<int>(socketError)).arg(m_socket->errorString()));
+	}
+
+	void Server::handshakeInterruptedOnError(const QSslError& error)
+	{
+		logError(QString("Connection %1 handshake interrupted on error: (%2) %3").
+						arg(m_id).arg(static_cast<int>(error.error())).arg(error.errorString()));
+	}
+
+	void Server::modeChanged(QSslSocket::SslMode mode)
+	{
+		logMessage(QString("Connection %1 mode changed to %2").
+						arg(m_id).arg(sslModeStr(mode)));
+	}
+
+	void Server::peerVerifyError(const QSslError &error)
+	{
+		logError(QString("Connection %1 peer verify error: (%2) %3").
+					arg(m_id).arg(static_cast<int>(error.error())).arg(error.errorString()));
+	}
+
+	void Server::preSharedKeyAuthenticationRequired(QSslPreSharedKeyAuthenticator* authenticator)
+	{
+		Q_UNUSED(authenticator);
+
+		logWarning(QString("Connection %1 preSharedKeyAuthenticationRequired").arg(m_id));
+	}
+
 	void Server::onThreadStarted()
 	{
 		connect(&m_autoAckTimer, &QTimer::timeout, this, &Server::onAutoAckTimer);
+
+		connect(m_socket, &QSslSocket::encrypted, this, &Server::encrypted);
+		connect(m_socket, &QSslSocket::sslErrors, this, &Server::sslErrors);
+		connect(m_socket, &QSslSocket::errorOccurred, this, &Server::errorOccurred);
+		connect(m_socket, &QSslSocket::handshakeInterruptedOnError, this, &Server::handshakeInterruptedOnError);
+		connect(m_socket, &QSslSocket::modeChanged, this, &Server::modeChanged);
+		connect(m_socket, &QSslSocket::peerVerifyError, this, &Server::peerVerifyError);
+		connect(m_socket, &QSslSocket::preSharedKeyAuthenticationRequired, this, &Server::preSharedKeyAuthenticationRequired);
 
 		SocketWorker::onThreadStarted();
 
@@ -784,24 +908,24 @@ namespace Tcp
 
 	void Server::createSocket()
 	{
-		assert(m_connectedSocketDescriptor != 0);
+		Q_ASSERT(m_connectedSocketDescriptor != 0);
 
 		SocketWorker::createSocket();
 
-		m_tcpSocket->setSocketDescriptor(m_connectedSocketDescriptor);
+		m_socket->setSocketDescriptor(m_connectedSocketDescriptor);
 
 		// added 20_01_2017 by WhiteMan
 		//
-		setStateConnected(HostAddressPort(m_tcpSocket->peerAddress(), m_tcpSocket->peerPort()));
+		setStateConnected(HostAddressPort(m_socket->peerAddress(), m_socket->peerPort()));
 	}
 
 	void Server::onHeaderAndDataReady()
 	{
-		assert(m_serverState == ServerState::WainigForRequest);
+		Q_ASSERT(m_serverState == ServerState::WainigForRequest);
 
 		if (m_header.type != Header::Request)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return;
 		}
 
@@ -916,28 +1040,17 @@ namespace Tcp
 
 	// -------------------------------------------------------------------------------------
 	//
-	// Tcp::TcpServer class implementation
-	//
-	// -------------------------------------------------------------------------------------
-
-	void TcpServer::incomingConnection(qintptr socketDescriptor)
-	{
-		emit newConnection(socketDescriptor);
-	}
-
-	// -------------------------------------------------------------------------------------
-	//
 	// Tcp::Listener class implementation
 	//
 	// -------------------------------------------------------------------------------------
 
-	Listener::Listener(const HostAddressPort& listenAddressPort, Server* server, std::shared_ptr<CircularLogger> logger) :
+	Listener::Listener(const HostAddressPort& listenAddressPort, Server* server, CircularLoggerShared logger) :
 		m_listenAddressPort(listenAddressPort),
-		m_logger(logger),
+		m_log(logger),
 		m_periodicTimer(this),
 		m_serverInstance(server)
 	{
-		assert(m_serverInstance != nullptr);
+		Q_ASSERT(m_serverInstance != nullptr);
 
 		qRegisterMetaType<std::list<ConnectionState>>("std::list<ConnectionState>");
 
@@ -969,11 +1082,11 @@ namespace Tcp
 	{
 		if (startOk == true)
 		{
-			DEBUG_LOG_MSG(m_logger, QString("Start listening %1 OK").arg(addr.addressPortStr()));
+			DEBUG_LOG_MSG(m_log, QString("Start listening %1 OK").arg(addr.addressPortStr()));
 		}
 		else
 		{
-			DEBUG_LOG_ERR(m_logger, QString("Error on start listening %1: %2").arg(addr.addressPortStr()).arg(errStr));
+			DEBUG_LOG_ERR(m_log, QString("Error on start listening %1: %2").arg(addr.addressPortStr()).arg(errStr));
 		}
 	}
 
@@ -1006,7 +1119,7 @@ namespace Tcp
 	{
 		if (m_tcpServer == nullptr)
 		{
-			m_tcpServer = new TcpServer();
+			m_tcpServer = new TcpServer(this);
 
 			connect(m_tcpServer, &TcpServer::newConnection, this, &Listener::onNewConnection);
 		}
@@ -1026,6 +1139,8 @@ namespace Tcp
 		// accept new connection
 		//
 		Server* newServerInstance = m_serverInstance->getNewInstance();
+
+		newServerInstance->setLogger(m_log);
 
 		connect(this, &Listener::connectedClientsListChanged, newServerInstance, &Server::updateClientsInfo);
 
@@ -1059,7 +1174,7 @@ namespace Tcp
 
 		if (thread == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return;
 		}
 
@@ -1177,7 +1292,7 @@ namespace Tcp
 	{
 		if (serverIndex < 0 || serverIndex > 1)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return HostAddressPort();
 		}
 
@@ -1277,13 +1392,13 @@ namespace Tcp
 
 		if (isClearToSendRequest() == false)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return false;
 		}
 
-		if (m_tcpSocket == nullptr)
+		if (m_socket == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return false;
 		}
 
@@ -1301,13 +1416,13 @@ namespace Tcp
 
 		if (written == -1)
 		{
-			qDebug() << qPrintable(QString("Socket write error: %1").arg(m_tcpSocket->errorString()));
+			qDebug() << qPrintable(QString("Socket write error: %1").arg(m_socket->errorString()));
 			return false;
 		}
 
 		if (written < static_cast<qint64>(sizeof(m_sentRequestHeader)))
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return false;
 		}
 
@@ -1315,7 +1430,7 @@ namespace Tcp
 		{
 			if (requestData == nullptr)
 			{
-				assert(false);
+				Q_ASSERT(false);
 				return false;
 			}
 
@@ -1323,18 +1438,18 @@ namespace Tcp
 
 			if (written == -1)
 			{
-				qDebug() << qPrintable(QString("Socket write error: %1").arg(m_tcpSocket->errorString()));
+				qDebug() << qPrintable(QString("Socket write error: %1").arg(m_socket->errorString()));
 				return false;
 			}
 
 			if (written < requestDataSize)
 			{
-				assert(false);
+				Q_ASSERT(false);
 				return false;
 			}
 		}
 
-		m_tcpSocket->flush();
+		m_socket->flush();
 
 		startTimeoutTimer();
 
@@ -1359,7 +1474,7 @@ namespace Tcp
 		{
 			m_protobufBuffer = new char [TCP_MAX_DATA_SIZE];
 
-			assert(m_protobufBuffer != nullptr);
+			Q_ASSERT(m_protobufBuffer != nullptr);
 		}
 
 		protobufMessage.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(m_protobufBuffer));
@@ -1372,6 +1487,59 @@ namespace Tcp
 		AUTO_LOCK(m_mutex);
 
 		m_enableClientAliveRequest = enable;
+	}
+
+	void Client::encrypted()
+	{
+		logMessage(QString("Connection encrypted"));
+	}
+
+	void Client::sslErrors(const QList<QSslError>& errors)
+	{
+		logError(QString("Ssl errors occured on connection"));
+
+		for(const QSslError& err : errors)
+		{
+			logError(QString("(%1) %2").
+						  arg(static_cast<int>(err.error())).arg(err.errorString()));
+
+/*			switch(err.error())
+			{
+			case QSslError::SelfSignedCertificate:
+				m_socket.ignoreSslErrors();
+			}*/
+		}
+	}
+
+	void Client::errorOccurred(QAbstractSocket::SocketError socketError)
+	{
+		logError(QString("Connection error occured: (%1) %2").
+					arg(static_cast<int>(socketError)).arg(m_socket->errorString()));
+	}
+
+	void Client::handshakeInterruptedOnError(const QSslError& error)
+	{
+		logError(QString("Connection handshake interrupted on error: (%1) %2").
+						arg(static_cast<int>(error.error())).arg(error.errorString()));
+	}
+
+	void Client::modeChanged(QSslSocket::SslMode mode)
+	{
+		logMessage(QString("Connection mode changed to %1").
+						arg(sslModeStr(mode)));
+	}
+
+	void Client::peerVerifyError(const QSslError &error)
+	{
+		logError(QString("Connection peer verify error: (%1) %2").
+					arg(static_cast<int>(error.error())).arg(error.errorString()));
+	}
+
+	void Client::preSharedKeyAuthenticationRequired(QSslPreSharedKeyAuthenticator* authenticator)
+	{
+		Q_UNUSED(authenticator);
+
+		logWarning(QString("Connection preSharedKeyAuthenticationRequired"));
 	}
 
 	void Client::onTimeoutTimer()
@@ -1480,9 +1648,9 @@ namespace Tcp
 	{
 		AUTO_LOCK(m_mutex);
 
-		if (m_tcpSocket == nullptr)
+		if (m_socket == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return;
 		}
 
@@ -1490,12 +1658,20 @@ namespace Tcp
 
 		if (m_selectedServer.isSet() == true)
 		{
-			m_tcpSocket->connectToHost(m_selectedServer.address(), m_selectedServer.port());
+			m_socket->connectToHost(m_selectedServer.address(), m_selectedServer.port());
 		}
 	}
 
 	void Client::onThreadStarted()
 	{
+		connect(m_socket, &QSslSocket::encrypted, this, &Client::encrypted);
+		connect(m_socket, &QSslSocket::sslErrors, this, &Client::sslErrors);
+		connect(m_socket, &QSslSocket::errorOccurred, this, &Client::errorOccurred);
+		connect(m_socket, &QSslSocket::handshakeInterruptedOnError, this, &Client::handshakeInterruptedOnError);
+		connect(m_socket, &QSslSocket::modeChanged, this, &Client::modeChanged);
+		connect(m_socket, &QSslSocket::peerVerifyError, this, &Client::peerVerifyError);
+		connect(m_socket, &QSslSocket::preSharedKeyAuthenticationRequired, this, &Client::preSharedKeyAuthenticationRequired);
+
 		onClientThreadStarted();
 
 		SocketWorker::onThreadStarted();
@@ -1512,14 +1688,14 @@ namespace Tcp
 	{
 		onClientThreadFinished();
 
-		if (m_tcpSocket != nullptr)
+		if (m_socket != nullptr)
 		{
-			m_tcpSocket->disconnectFromHost();
-			m_tcpSocket->close();
+			m_socket->disconnectFromHost();
+			m_socket->close();
 		}
 		else
 		{
-			assert(false);
+			Q_ASSERT(false);
 		}
 
 		SocketWorker::onThreadFinished();
@@ -1529,7 +1705,7 @@ namespace Tcp
 	{
 		if (m_clientState != ClientState::WaitingForReply)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			closeConnection();
 			return;
 		}
@@ -1539,7 +1715,7 @@ namespace Tcp
 		if (m_header.id != m_sentRequestHeader.id ||
 			m_header.numerator != m_sentRequestHeader.numerator)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			closeConnection();
 			return;
 		}
@@ -1575,7 +1751,7 @@ namespace Tcp
 			break;
 
 		default:
-			assert(false);
+			Q_ASSERT(false);
 		}
 	}
 
@@ -1656,7 +1832,7 @@ namespace Tcp
 			return false;
 		}
 
-		if (m_tcpSocket == nullptr)
+		if (m_socket == nullptr)
 		{
 			return false;
 		}
@@ -1678,13 +1854,13 @@ namespace Tcp
 
 		if (written == -1)
 		{
-			qDebug() << qPrintable(QString("Socket write error: %1").arg(m_tcpSocket->errorString()));
+			qDebug() << qPrintable(QString("Socket write error: %1").arg(m_socket->errorString()));
 			return false;
 		}
 
 		if (written < static_cast<qint64>(sizeof(m_sentRequestHeader)))
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return false;
 		}
 

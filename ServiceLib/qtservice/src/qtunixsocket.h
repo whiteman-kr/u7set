@@ -43,7 +43,7 @@
 
 #include <QTcpSocket>
 
-class QtUnixSocket : public QTcpSocket
+class QtUnixSocket : public QSslSocket
 {
     Q_OBJECT
 public:

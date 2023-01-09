@@ -51,7 +51,7 @@
 #endif
 
 QtUnixSocket::QtUnixSocket(QObject *parent)
-    : QTcpSocket(parent)
+    : QSslSocket(parent)
 {
 }
 

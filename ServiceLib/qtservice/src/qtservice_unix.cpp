@@ -288,8 +288,8 @@ private slots:
     void slotClosed();
 
 private:
-    QString getCommand(const QTcpSocket *socket);
-    QMap<const QTcpSocket *, QString> cache;
+    QString getCommand(const QSslSocket *socket);
+    QMap<const QSslSocket *, QString> cache;
 };
 
 QtServiceSysPrivate::QtServiceSysPrivate()
@@ -305,7 +305,7 @@ QtServiceSysPrivate::~QtServiceSysPrivate()
 
 void QtServiceSysPrivate::incomingConnection(int socketDescriptor)
 {
-    QTcpSocket *s = new QTcpSocket(this);
+    QSslSocket *s = new QSslSocket(this);
     s->setSocketDescriptor(socketDescriptor);
     connect(s, SIGNAL(readyRead()), this, SLOT(slotReady()));
     connect(s, SIGNAL(disconnected()), this, SLOT(slotClosed()));
@@ -313,7 +313,7 @@ void QtServiceSysPrivate::incomingConnection(int socketDescriptor)
 
 void QtServiceSysPrivate::slotReady()
 {
-    QTcpSocket *s = (QTcpSocket *)sender();
+    QSslSocket *s = (QSslSocket *)sender();
     cache[s] += QString(s->readAll());
     QString cmd = getCommand(s);
     while (!cmd.isEmpty()) {
@@ -354,11 +354,11 @@ void QtServiceSysPrivate::slotReady()
 
 void QtServiceSysPrivate::slotClosed()
 {
-    QTcpSocket *s = (QTcpSocket *)sender();
+    QSslSocket *s = (QSslSocket *)sender();
     s->deleteLater();
 }
 
-QString QtServiceSysPrivate::getCommand(const QTcpSocket *socket)
+QString QtServiceSysPrivate::getCommand(const QSslSocket *socket)
 {
     int pos = cache[socket].indexOf("\r\n");
     if (pos >= 0) {

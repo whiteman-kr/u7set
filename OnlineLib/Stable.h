@@ -57,9 +57,13 @@
 
 #include <QObject>
 
+#include <QSslPreSharedKeyAuthenticator>
+
 #include <QQueue>
 
 #include <QSettings>
+#include <QSslCertificate>
+#include <QSslSocket>
 #include <QString>
 #include <QStringList>
 
