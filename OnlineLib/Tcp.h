@@ -7,6 +7,7 @@
 #include <QMutex>
 #include <QTcpServer>
 #include <QSslSocket>
+#include <QSslKey>
 #include <cassert>
 
 #include "../Proto/serialization.pb.h"
@@ -148,6 +149,8 @@ namespace Tcp
 		void startTimeoutTimer();
 		void stopTimeoutTimer();
 
+		bool loadCertificate(bool isClient);
+
 	protected slots:
 		virtual void onTimeoutTimer();
 
@@ -174,6 +177,11 @@ namespace Tcp
 		};
 
 		QSslSocket* m_socket = nullptr;
+
+		E::SecurityLevel m_securityLevel = E::SecurityLevel::Basic;
+
+		QSslCertificate m_cert;			// self-signed or trusted (CA) SSL certificate
+		QSslKey m_pkey;					// private key of m_cert
 
 		ConnectionState m_state;
 
@@ -281,6 +289,7 @@ namespace Tcp
 
 		void onHeaderAndDataReady() final;
 
+		void processSecurityLevelRequest();
 		void processIntroduceMyselfRequest(const char* dataBuffer, int dataSize);
 
 	private slots:
@@ -302,8 +311,6 @@ namespace Tcp
 		qintptr m_connectedSocketDescriptor = 0;
 
 		ServerState m_serverState = ServerState::WainigForRequest;
-
-		E::SecurityLevel m_securityLevel = E::SecurityLevel::Basic;
 
 		double m_requestProcessingPorgress = 0;
 
@@ -502,11 +509,16 @@ namespace Tcp
 
 		virtual void onHeaderAndDataReady() final;
 
+		bool processSecurityLevelReply(const char* dataBuffer, int dataSize);
 		bool processIntroduceMyselfReply(const char* dataBuffer, int dataSize);
+
+		void sendIntroduceMyselfRequest();
 
 		virtual void initReadStatusVariables() final;
 
 		bool sendClientAliveRequest();
+
+		bool isIgnoredSslError(const QSslError& sslErr) const;
 
 	private:
 		enum ClientState
@@ -514,6 +526,12 @@ namespace Tcp
 			ClearToSendRequest,
 			WaitingForReply,
 		};
+
+		//
+
+		static const std::set<QSslError::SslError> m_ignoredErrors;
+
+		//
 
 		QString m_clientDescription;
 

@@ -391,6 +391,15 @@ namespace File
 	inline const QString LOGIC_MODULES_XML("LogicModules.xml");
 
 	inline const QString SIM_PROFILES = "SimProfiles.txt";
+
+	inline const QString CRYPTO_SS_SERVER_CERTIFICATE = "/Crypto/ss_server.crt";
+	inline const QString CRYPTO_SS_SERVER_PRIVATE_KEY = "/Crypto/ss_server_private.key";
+
+	inline const QString CRYPTO_CA_SERVER_CERTIFICATE = "/Crypto/ca_server.crt";
+	inline const QString CRYPTO_CA_SERVER_PRIVATE_KEY = "/Crypto/ca_server_private.key";
+
+	inline const QString CRYPTO_CA_CLIENT_CERTIFICATE = "/Crypto/ca_client.crt";
+	inline const QString CRYPTO_CA_CLIENT_PRIVATE_KEY = "/Crypto/ca_client_private.key";
 }
 
 namespace Separator
