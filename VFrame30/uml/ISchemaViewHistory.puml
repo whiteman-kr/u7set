@@ -1,0 +1,8 @@
+@startuml VFrame30
+set namespaceSeparator ::
+
+interface VFrame30::ISchemaViewHistory
+{
+}
+
+@enduml

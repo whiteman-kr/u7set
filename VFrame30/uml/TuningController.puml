@@ -1,0 +1,19 @@
+@startuml VFrame30
+set namespaceSeparator ::
+
+!include ../../lib/Tuning/uml/ITuningSignalManager.puml
+!include ../../lib/Tuning/uml/ITuningTcpClient.puml
+
+
+class VFrame30::TuningController
+{
+	public QObject
+	--
+	ITuningSignalManager* m_signalManager = nullptr;
+	std::vector<ITuningTcpClient*> m_tcpClients;
+}
+
+TuningLib::ITuningSignalManager --o VFrame30::TuningController
+TuningLib::ITuningTcpClient "*" --o "1" VFrame30::TuningController
+
+@enduml

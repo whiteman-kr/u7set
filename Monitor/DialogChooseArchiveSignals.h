@@ -1,7 +1,7 @@
 #ifndef DIALOGCHOOSEARCHIVESIGNALS_H
 #define DIALOGCHOOSEARCHIVESIGNALS_H
 
-#include "../lib/AppSignalManager.h"
+#include "../AppSignalLib/AppSignalManager.h"
 #include "../VFrame30/Schema.h"
 #include "ArchiveData.h"
 

@@ -1,0 +1,17 @@
+@startuml VFrame30
+
+!include AppSignalController.puml
+!include SchemaView.puml
+!include ClientSchemaView.puml
+!include BaseSchemaWidget.puml
+!include ClientSchemaWidget.puml
+!include Schema.puml
+!include SchemaLayer.puml
+!include SchemaItem.puml
+!include SchemaManager.puml
+
+!include LogController.puml
+
+!include TuningController.puml
+
+@enduml

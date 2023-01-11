@@ -1,0 +1,14 @@
+@startuml VFrame30
+set namespaceSeparator ::
+
+class VFrame30::ClientSchemaWidget extends VFrame30::BaseSchemaWidget implements VFrame30::ISchemaViewHistory
+{
+	VFrame30::SchemaManager* m_schemaManager
+	
+	std::list<SchemaHistoryItem> : m_backHistory
+	std::list<SchemaHistoryItem> : m_forwardHistory
+}
+
+VFrame30::SchemaManager ..o VFrame30::ClientSchemaWidget
+
+@enduml

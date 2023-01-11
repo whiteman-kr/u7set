@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../AppSignalLib/AppSignalParam.h"
-#include "../lib/IAppSignalManager.h"
+#include "../AppSignalLib/IAppSignalManager.h"
 #include "DragDropHelper.h"
 
 class SignalSearchSorter	// later move this class to some library file, it can be used in other cases

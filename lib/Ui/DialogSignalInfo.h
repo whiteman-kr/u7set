@@ -2,7 +2,7 @@
 
 #include <optional>
 #include "../VFrame30/TuningController.h"
-#include "../lib/AppSignalManager.h"
+#include "../AppSignalLib/AppSignalManager.h"
 #include "../lib/Ui/DragDropHelper.h"
 #include "../../AppSignalLib/AppSignal.h"
 

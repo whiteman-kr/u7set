@@ -1,0 +1,8 @@
+@startuml TrendLib
+set namespaceSeparator ::
+
+interface TrendLib::ITrendDataProvider
+{
+}
+
+@enduml

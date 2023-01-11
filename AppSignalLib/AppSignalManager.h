@@ -7,7 +7,7 @@
 #include <vector>
 #include <unordered_map>
 #include <QReadWriteLock>
-#include "../lib/IAppSignalManager.h"
+#include "../AppSignalLib/IAppSignalManager.h"
 #include "../lib/ComparatorSet.h"
 
 

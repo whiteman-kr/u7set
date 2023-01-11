@@ -1,0 +1,35 @@
+@startuml VFrame30
+set namespaceSeparator ::
+
+'
+' class ScriptSchemaLayer
+'
+class VFrame30::ScriptSchemaLayer
+{
+	public QObject
+	--
+	SchemaLayerPtr : m_schemaLayer
+}
+
+VFrame30::SchemaLayer .o VFrame30::ScriptSchemaLayer
+
+'
+' class ScriptSchemaLayer
+'
+class VFrame30::SchemaLayer
+{
+	public QObject
+	--
+	std::vector<SchemaItemPtr> : m_items
+}
+
+VFrame30::SchemaItem "*" ..* "1" VFrame30::SchemaLayer
+
+
+'
+together {
+  class VFrame30::ScriptSchemaLayer
+  class VFrame30::SchemaLayer
+}
+
+@enduml

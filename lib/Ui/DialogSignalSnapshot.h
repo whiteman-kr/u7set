@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../lib/AppSignalManager.h"
+#include "../AppSignalLib/AppSignalManager.h"
 #include "../lib/ExportPrint.h"
 #include "../VFrame30/Schema.h"
 #include "DragDropHelper.h"

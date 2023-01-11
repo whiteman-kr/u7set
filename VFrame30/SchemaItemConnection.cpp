@@ -3,7 +3,7 @@
 #include "PropertyNames.h"
 #include "DrawParam.h"
 #include "AppSignalController.h"
-#include "../lib/AppSignalManager.h"
+#include "../AppSignalLib/AppSignalManager.h"
 
 namespace VFrame30
 {

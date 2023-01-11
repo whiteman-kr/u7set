@@ -1,0 +1,29 @@
+@startuml VFrame30
+set namespaceSeparator ::
+
+!include Session.puml
+
+'
+' class VFrame30::SchemaView
+'
+class VFrame30::SchemaView
+{
+    std::shared_ptr<VFrame30::Schema> : m_schema
+    double : m_zoom
+    Session : m_session
+}
+
+VFrame30::Schema ..* VFrame30::SchemaView
+VFrame30::Session ..* VFrame30::SchemaView
+
+
+'
+' class VFrame30::SchemaViewWidget
+'
+class VFrame30::SchemaViewWidget extends VFrame30::SchemaView, VFrame30::QWidget
+{
+}
+
+'VFrame30::SchemaViewWidget -up-|> VFrame30::QWidget
+
+@enduml

@@ -1,0 +1,13 @@
+@startuml VFrame30
+set namespaceSeparator ::
+
+!include ../../TrendView/uml/ITrendDataProvider.puml
+
+abstract class VFrame30::SchemaManager implements TrendLib::ITrendDataProvider
+{
+	public QObject
+	--
+	QString : m_globalScript
+}
+
+@enduml

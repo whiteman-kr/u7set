@@ -1,0 +1,16 @@
+@startuml VFrame30
+set namespaceSeparator ::
+
+!include ../../UtilsLib/uml/ILogFile.puml
+
+class VFrame30::LogController
+{
+	public QObject
+	--
+	-ILogFile* m_logFile
+}
+
+UtilsLib::ILogFile ..o VFrame30::LogController
+
+
+@enduml

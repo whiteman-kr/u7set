@@ -1,0 +1,9 @@
+@startuml VFrame30
+set namespaceSeparator ::
+
+class VFrame30::Session
+{
+	public PropertyObject
+}
+
+@enduml

@@ -1,0 +1,38 @@
+@startuml VFrame30
+set namespaceSeparator ::
+
+!include ../../AppSignalLib/uml/AppSignalLib.puml
+
+
+'
+'
+'
+class VFrame30::AppSignalController
+{
+	public QObject
+	--
+	-IAppSignalManager : m_appSignalManager
+}
+
+AppSignalLib::IAppSignalManager "1" ..o  "1" VFrame30::AppSignalController
+
+
+'
+'
+'
+class VFrame30::ScriptAppSignalController
+{
+	public QObject
+	--
+	-IAppSignalManager m_appSignalManager
+}
+
+AppSignalLib::IAppSignalManager "1" ..o "1" VFrame30::ScriptAppSignalController
+
+
+together {
+	class VFrame30::AppSignalController
+	class VFrame30::ScriptAppSignalController
+}
+
+@enduml

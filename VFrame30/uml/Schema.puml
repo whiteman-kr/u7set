@@ -1,0 +1,63 @@
+@startuml VFrame30
+set namespaceSeparator ::
+
+class VFrame30::ScriptSchema
+{
+	public QObject
+	--
+	std::shared_ptr<Schema> : m_schema
+}
+
+VFrame30::Schema .o VFrame30::ScriptSchema
+
+'
+'  class Schema
+'
+class VFrame30::Schema
+{
+	public PropertyObject
+	--
+	SchemaUnit : m_unit	
+
+	std::vector<SchemaLayerPtr> : m_layers
+}
+
+VFrame30::SchemaLayer "*" ..* "1" VFrame30::Schema
+
+
+' LogicSchema
+class VFrame30::LogicSchema extends VFrame30::Schema
+{
+}
+
+
+' UfbSchema
+class VFrame30::UfbSchema extends VFrame30::Schema
+{
+}
+
+
+' MonitorSchema
+class VFrame30::MonitorSchema extends VFrame30::Schema
+{
+}
+
+
+' TuningSchema
+class VFrame30::TuningSchema extends VFrame30::Schema
+{
+}
+
+together {
+	class VFrame30::Schema
+	class VFrame30::ScriptSchema
+}
+
+together {
+	class VFrame30::LogicSchema
+	class VFrame30::UfbSchema
+	class VFrame30::MonitorSchema
+	class VFrame30::TuningSchema
+}
+
+@enduml

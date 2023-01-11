@@ -1,0 +1,52 @@
+@startuml VFrame30
+set namespaceSeparator ::
+
+!include ISchemaViewHistory.puml
+!include AppSignalController.puml
+
+'
+' class ScriptSchemaView
+'
+class VFrame30::ScriptSchemaView
+{
+	public QObject
+	--
+	ClientSchemaView* : m_clientSchemaView;
+	ISchemaViewHistory* : m_schemaViewHistory;	
+}
+
+VFrame30::ClientSchemaView ..o VFrame30::ScriptSchemaView
+VFrame30::ISchemaViewHistory ..o VFrame30::ScriptSchemaView
+
+
+'
+' class ClientSchemaView
+'
+class VFrame30::ClientSchemaView extends VFrame30::SchemaViewWidget
+{
+	VFrame30::SchemaManager* : m_schemaManager
+	VFrame30::ISchemaViewHistory* : m_schemaViewHistory
+
+	TuningController* m_tuningController = nullptr;
+	AppSignalController* m_appSignalController = nullptr;
+	std::unique_ptr<ScriptAppSignalController> m_scriptAppSignalController;
+	LogController* m_logController = nullptr;
+
+	std::unique_ptr<ScriptSchemaView> : m_scriptSchemaView
+
+	QJSEngine : m_jsEngine
+
+	QVariantHash : m_variables
+}
+
+VFrame30::SchemaManager ..o VFrame30::ClientSchemaView
+VFrame30::ISchemaViewHistory ..o VFrame30::ClientSchemaView
+
+VFrame30::TuningController ..o VFrame30::ClientSchemaView
+VFrame30::AppSignalController ..o VFrame30::ClientSchemaView
+VFrame30::ScriptAppSignalController ..* VFrame30::ClientSchemaView
+VFrame30::LogController .o VFrame30::ClientSchemaView
+
+VFrame30::ScriptSchemaView ..* VFrame30::ClientSchemaView
+
+@enduml

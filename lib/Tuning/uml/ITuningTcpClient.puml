@@ -1,0 +1,9 @@
+@startuml TuningLib
+set namespaceSeparator ::
+
+interface TuningLib::ITuningTcpClient
+{
+}
+
+@enduml
+

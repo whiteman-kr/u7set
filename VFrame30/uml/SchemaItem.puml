@@ -1,0 +1,18 @@
+@startuml VFrame30
+set namespaceSeparator ::
+
+interface VFrame30::ISchemaItemPropertiesPos
+{
+}
+
+interface VFrame30::IPointList
+{
+}
+
+class VFrame30::SchemaItem implements VFrame30::ISchemaItemPropertiesPos, VFrame30::IPointList
+{
+	public PropertyObject
+	--
+}
+
+@enduml

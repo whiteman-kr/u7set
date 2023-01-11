@@ -1,0 +1,8 @@
+@startuml UtilsLib
+set namespaceSeparator ::
+
+interface UtilsLib::ILogFile
+{
+}
+
+@enduml

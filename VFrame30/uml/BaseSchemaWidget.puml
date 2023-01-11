@@ -1,0 +1,11 @@
+@startuml VFrame30
+set namespaceSeparator ::
+
+class VFrame30::BaseSchemaWidget extends VFrame30::QScrollArea
+{
+	SchemaViewWidget* m_schemaView;
+}
+
+VFrame30::SchemaViewWidget ..* VFrame30::BaseSchemaWidget
+
+@enduml

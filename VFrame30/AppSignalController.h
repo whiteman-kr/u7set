@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../lib/IAppSignalManager.h"
+#include "../AppSignalLib/IAppSignalManager.h"
 
 class AppSignalParam;
 class AppSignalState;
