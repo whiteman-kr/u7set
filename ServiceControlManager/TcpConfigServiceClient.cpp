@@ -58,7 +58,7 @@ void TcpConfigServiceClient::onDisconnection()
 	m_serviceStateIsReady = false;
 	m_buildInfoIsReady = false;
 	m_settingsIsReady = false;
-	emit disconnected();
+	emit socketDisconnected();
 }
 
 

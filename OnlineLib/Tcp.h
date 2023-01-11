@@ -93,7 +93,7 @@ namespace Tcp
 		SocketWorker(const SoftwareInfo& softwareInfo);
 		virtual ~SocketWorker();
 
-		bool isConnected() const;
+		virtual bool isConnected() const;
 		void closeConnection();
 
 		virtual void onInitConnection();
@@ -122,7 +122,7 @@ namespace Tcp
 		virtual void logMessage(const QString& msg);
 
 	signals:
-		void disconnected(const SocketWorker* socketWorker);
+		void socketDisconnected(const SocketWorker* socketWorker);
 		void closeConnectionSignal();
 
 	protected:
@@ -161,12 +161,20 @@ namespace Tcp
 		virtual void initReadStatusVariables() = 0;
 
 	private slots:
-		void onSocketStateChanged(QAbstractSocket::SocketState newState);
-		void onSocketConnected();
-		void onSocketDisconnected();
-		void onSocketReadyRead();
-		void onSocketBytesWritten();
+		void stateChanged(QAbstractSocket::SocketState newState);
+		void connected();
+		void disconnected();
+		void readyRead();
+		void bytesWritten();
 		void onCloseConnection();
+
+		virtual void encrypted() = 0;
+		virtual void sslErrors(const QList<QSslError>& errors) = 0;
+		virtual void errorOccurred(QAbstractSocket::SocketError socketError) = 0;
+		virtual void handshakeInterruptedOnError(const QSslError& error) = 0;
+		virtual void modeChanged(QSslSocket::SslMode mode) = 0;
+		virtual void peerVerifyError(const QSslError& error) = 0;
+		virtual void preSharedKeyAuthenticationRequired(QSslPreSharedKeyAuthenticator* authenticator) = 0;
 
 	protected:
 		enum ReadState
@@ -268,7 +276,8 @@ namespace Tcp
 	protected:
 		virtual Tcp::SetConnectionResult checkClient(const QString& clientEquipmentID, const QString& clientHostname) const;
 
-		virtual void encrypted();
+		virtual void encrypted() override;
+
 		virtual void sslErrors(const QList<QSslError>& errors);
 		virtual void errorOccurred(QAbstractSocket::SocketError socketError);
 		virtual void handshakeInterruptedOnError(const QSslError& error);
@@ -465,6 +474,8 @@ namespace Tcp
 
 		virtual void onAck(quint32 requestID, const char* replyData, quint32 replyDataSize);
 
+		virtual bool isConnected() const override;
+
 		bool isClearToSendRequest() const;
 
 		bool sendRequest(quint32 requestID);
@@ -480,7 +491,8 @@ namespace Tcp
 		SetConnectionResult setConnectionResult() const { return m_setConnectionResult; }
 
 	protected slots:
-		virtual void encrypted();
+		virtual void encrypted() override;
+
 		virtual void sslErrors(const QList<QSslError>& errors);
 		virtual void errorOccurred(QAbstractSocket::SocketError socketError);
 		virtual void handshakeInterruptedOnError(const QSslError& error);
@@ -529,7 +541,7 @@ namespace Tcp
 
 		//
 
-		static const std::set<QSslError::SslError> m_ignoredErrors;
+		std::set<QSslError::SslError> m_ignoredErrors;
 
 		//
 

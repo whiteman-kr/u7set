@@ -90,7 +90,7 @@ void TcpTuningServiceClient::onDisconnection()
 
 	m_loadedSignalParamQuantity = 0;
 
-	emit disconnected();
+	emit socketDisconnected();
 }
 
 

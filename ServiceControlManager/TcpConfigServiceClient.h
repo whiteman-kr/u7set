@@ -56,7 +56,7 @@ signals:
 	void buildInfoLoaded();
 	void settingsLoaded();
 
-	void disconnected();
+	void socketDisconnected();
 
 private slots:
 	void updateState();

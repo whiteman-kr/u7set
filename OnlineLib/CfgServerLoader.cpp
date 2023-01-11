@@ -495,6 +495,11 @@ void CfgLoader::slot_getFile(QString fileName, QByteArray* fileData)
 
 void CfgLoader::slot_onTimer()
 {
+	if (isConnected() == false)
+	{
+		return;
+	}
+
 	if (m_configurationXmlReady == false)
 	{
 		startConfigurationXmlLoading();

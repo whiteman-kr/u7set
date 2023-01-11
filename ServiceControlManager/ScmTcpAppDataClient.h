@@ -65,7 +65,7 @@ signals:
 
 	void stateLoaded();
 
-	void disconnected();
+	void socketDisconnected();
 
 private:
 	void init();

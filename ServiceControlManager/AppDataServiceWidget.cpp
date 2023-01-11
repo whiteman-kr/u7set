@@ -777,20 +777,20 @@ void AppDataServiceWidget::createTcpConnection(quint32 ip, quint16 port)
 
 	connect(m_tcpClientSocket, &TcpAppDataClient::dataSourcesInfoLoaded, m_dataSourcesStateModel, &DataSourcesStateModel::reloadList);
 	connect(m_tcpClientSocket, &TcpAppDataClient::dataSoursesStateUpdated, this, &AppDataServiceWidget::updateSourceStateColumns);
-	connect(m_tcpClientSocket, &TcpAppDataClient::disconnected, m_dataSourcesStateModel, &DataSourcesStateModel::invalidateData);
+	connect(m_tcpClientSocket, &TcpAppDataClient::socketDisconnected, m_dataSourcesStateModel, &DataSourcesStateModel::invalidateData);
 
 	connect(m_tcpClientSocket, &TcpAppDataClient::appSignalListLoaded, m_signalStateModel, &SignalStateModel::reloadList);
 	connect(m_tcpClientSocket, &TcpAppDataClient::appSignalsStateUpdated, this, &AppDataServiceWidget::updateSignalStateColumns);
-	connect(m_tcpClientSocket, &TcpAppDataClient::disconnected, m_signalStateModel, &SignalStateModel::invalidateData);
+	connect(m_tcpClientSocket, &TcpAppDataClient::socketDisconnected, m_signalStateModel, &SignalStateModel::invalidateData);
 
 	connect(m_tcpClientSocket, &TcpAppDataClient::clientsLoaded, this, &AppDataServiceWidget::updateClientsInfo);
-	connect(m_tcpClientSocket, &TcpAppDataClient::disconnected, [this](){ clientsTabModel()->removeRows(0, clientsTabModel()->rowCount()); });
+	connect(m_tcpClientSocket, &TcpAppDataClient::socketDisconnected, [this](){ clientsTabModel()->removeRows(0, clientsTabModel()->rowCount()); });
 
 	connect(m_tcpClientSocket, &TcpAppDataClient::stateLoaded, this, &AppDataServiceWidget::updateServiceState);
 
 	connect(m_tcpClientSocket, &TcpAppDataClient::settingsLoaded, this, &AppDataServiceWidget::updateServiceParameters);
 
-	connect(m_tcpClientSocket, &TcpAppDataClient::disconnected, this, &AppDataServiceWidget::clearServiceData);
+	connect(m_tcpClientSocket, &TcpAppDataClient::socketDisconnected, this, &AppDataServiceWidget::clearServiceData);
 
 	m_tcpClientThread->start();
 

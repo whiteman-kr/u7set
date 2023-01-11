@@ -97,7 +97,7 @@ void TcpAppDataClient::onDisconnection()
 	m_signalParams.clear();
 	m_states.clear();
 
-	emit disconnected();
+	emit socketDisconnected();
 }
 
 

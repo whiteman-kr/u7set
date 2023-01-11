@@ -229,7 +229,7 @@ void ConfigurationServiceWidget::createTcpConnection(quint32 ip, quint16 port)
 	connect(m_tcpClientSocket, &TcpConfigServiceClient::buildInfoLoaded, this, &ConfigurationServiceWidget::updateBuildInfo);
 	connect(m_tcpClientSocket, &TcpConfigServiceClient::settingsLoaded, this, &ConfigurationServiceWidget::updateServiceParameters);
 
-	connect(m_tcpClientSocket, &TcpConfigServiceClient::disconnected, this, &ConfigurationServiceWidget::clearServiceData);
+	connect(m_tcpClientSocket, &TcpConfigServiceClient::socketDisconnected, this, &ConfigurationServiceWidget::clearServiceData);
 
 	m_tcpClientThread->start();
 }

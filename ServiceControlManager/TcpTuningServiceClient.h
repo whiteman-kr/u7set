@@ -63,7 +63,7 @@ signals:
 	void tuningSignalsInfoLoaded();
 	void tuningSignalsStateUpdated();
 
-	void disconnected();
+	void socketDisconnected();
 
 private:
 	void init();

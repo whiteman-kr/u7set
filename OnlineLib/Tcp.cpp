@@ -230,11 +230,23 @@ namespace Tcp
 
 		m_socket->setSocketOption(QAbstractSocket::LowDelayOption, QVariant(1));
 
-		connect(m_socket, &QSslSocket::stateChanged, this, &SocketWorker::onSocketStateChanged);
-		connect(m_socket, &QSslSocket::connected, this, &SocketWorker::onSocketConnected);
-		connect(m_socket, &QSslSocket::disconnected, this, &SocketWorker::onSocketDisconnected);
-		connect(m_socket, &QSslSocket::readyRead, this, &SocketWorker::onSocketReadyRead);
-		connect(m_socket, &QSslSocket::bytesWritten, this, &SocketWorker::onSocketBytesWritten);
+		// QTcpSocket signals
+		//
+		connect(m_socket, &QSslSocket::stateChanged, this, &SocketWorker::stateChanged);
+		connect(m_socket, &QSslSocket::connected, this, &SocketWorker::connected);
+		connect(m_socket, &QSslSocket::disconnected, this, &SocketWorker::disconnected);
+		connect(m_socket, &QSslSocket::readyRead, this, &SocketWorker::readyRead);
+		connect(m_socket, &QSslSocket::bytesWritten, this, &SocketWorker::bytesWritten);
+
+		// QSslSocket signals
+		//
+		connect(m_socket, &QSslSocket::encrypted, this, &SocketWorker::encrypted);
+		connect(m_socket, &QSslSocket::sslErrors, this, &SocketWorker::sslErrors);
+		connect(m_socket, &QSslSocket::errorOccurred, this, &SocketWorker::errorOccurred);
+		connect(m_socket, &QSslSocket::handshakeInterruptedOnError, this, &SocketWorker::handshakeInterruptedOnError);
+		connect(m_socket, &QSslSocket::modeChanged, this, &SocketWorker::modeChanged);
+		connect(m_socket, &QSslSocket::peerVerifyError, this, &SocketWorker::peerVerifyError);
+		connect(m_socket, &QSslSocket::preSharedKeyAuthenticationRequired, this, &SocketWorker::preSharedKeyAuthenticationRequired);
 	}
 
 	void SocketWorker::deleteSocket()
@@ -257,6 +269,8 @@ namespace Tcp
 
 	void SocketWorker::onThreadFinished()
 	{
+		m_timeoutTimer.stop();
+
 		deleteSocket();
 	}
 
@@ -594,8 +608,7 @@ namespace Tcp
 		return static_cast<int>(bytesRead);
 	}
 
-
-	void SocketWorker::onSocketStateChanged(QAbstractSocket::SocketState newState)
+	void SocketWorker::stateChanged(QAbstractSocket::SocketState newState)
 	{
 		Q_UNUSED(newState);
 		return;			// its Ok!
@@ -635,7 +648,7 @@ namespace Tcp
 //		qDebug() << qPrintable(stateStr);
 	}
 
-	void SocketWorker::onSocketConnected()
+	void SocketWorker::connected()
 	{
 		initReadStatusVariables();
 
@@ -644,16 +657,16 @@ namespace Tcp
 		onInitConnection();
 	}
 
-	void SocketWorker::onSocketDisconnected()
+	void SocketWorker::disconnected()
 	{
 		onDisconnection();
 
 		setStateDisconnected();
 
-		emit disconnected(this);
+		emit socketDisconnected(this);
 	}
 
-	void SocketWorker::onSocketReadyRead()
+	void SocketWorker::readyRead()
 	{
 		if (m_socket == nullptr)
 		{
@@ -702,7 +715,7 @@ namespace Tcp
 		}
 	}
 
-	void SocketWorker::onSocketBytesWritten()
+	void SocketWorker::bytesWritten()
 	{
 		m_bytesWritten = true;
 	}
@@ -717,6 +730,12 @@ namespace Tcp
 
 		m_socket->close();
 	}
+
+	void SocketWorker::encrypted()
+	{
+		qDebug() << "SocketWorker::encrypted()";
+	}
+
 
 	// -------------------------------------------------------------------------------------
 	//
@@ -1006,14 +1025,6 @@ namespace Tcp
 
 		SocketWorker::onThreadStarted();
 
-		connect(m_socket, &QSslSocket::encrypted, this, &Server::encrypted);
-		connect(m_socket, &QSslSocket::sslErrors, this, &Server::sslErrors);
-		connect(m_socket, &QSslSocket::errorOccurred, this, &Server::errorOccurred);
-		connect(m_socket, &QSslSocket::handshakeInterruptedOnError, this, &Server::handshakeInterruptedOnError);
-		connect(m_socket, &QSslSocket::modeChanged, this, &Server::modeChanged);
-		connect(m_socket, &QSslSocket::peerVerifyError, this, &Server::peerVerifyError);
-		connect(m_socket, &QSslSocket::preSharedKeyAuthenticationRequired, this, &Server::preSharedKeyAuthenticationRequired);
-
 		onServerThreadStarted();
 
 		onConnection();
@@ -1023,6 +1034,8 @@ namespace Tcp
 
 	void Server::onThreadFinished()
 	{
+		m_autoAckTimer.stop();
+
 		onServerThreadFinished();
 
 		SocketWorker::onThreadFinished();
@@ -1312,7 +1325,7 @@ namespace Tcp
 
 		connect(this, &Listener::connectedClientsListChanged, newServerInstance, &Server::updateClientsInfo);
 
-		connect(newServerInstance, &Server::disconnected, this, &Listener::onServerDisconnected);
+		connect(newServerInstance, &Server::socketDisconnected, this, &Listener::onServerDisconnected);
 		connect(newServerInstance, &Server::connectedSoftwareInfoChanged, this, &Listener::updateClientsList);
 
 		newServerInstance->setConnectedSocketDescriptor(socketDescriptor);
@@ -1395,11 +1408,6 @@ namespace Tcp
 	// Tcp::ClientWorker class implementation
 	//
 	// -------------------------------------------------------------------------------------
-
-	const std::set<QSslError::SslError> Client::m_ignoredErrors = {
-																	QSslError::SslError::SelfSignedCertificate,
-																	QSslError::SslError::HostNameMismatch
-																  };
 
 	Client::Client(const SoftwareInfo& softwareInfo,
 				   const HostAddressPort &serverAddressPort,
@@ -1538,6 +1546,11 @@ namespace Tcp
 		Q_UNUSED(replyDataSize);
 	}
 
+	bool Client::isConnected() const
+	{
+		return SocketWorker::isConnected() && (m_setConnectionResult == SetConnectionResult::Ok);
+	}
+
 	bool Client::isClearToSendRequest() const
 	{
 		return isConnected() && m_clientState == ClientState::ClearToSendRequest;
@@ -1557,10 +1570,23 @@ namespace Tcp
 	{
 		AUTO_LOCK(m_mutex);
 
-		if (isClearToSendRequest() == false)
+		if (requestID == RQID_SECURITY_LEVEL ||
+			requestID == RQID_INTRODUCE_MYSELF)
 		{
-			Q_ASSERT(false);
-			return false;
+			if (SocketWorker::isConnected() == false ||
+				m_clientState != ClientState::ClearToSendRequest)
+			{
+				Q_ASSERT(false);
+				return false;
+			}
+		}
+		else
+		{
+			if (isClearToSendRequest() == false)
+			{
+				Q_ASSERT(false);
+				return false;
+			}
 		}
 
 		if (m_socket == nullptr)
@@ -1847,14 +1873,6 @@ namespace Tcp
 
 		SocketWorker::onThreadStarted();
 
-		connect(m_socket, &QSslSocket::encrypted, this, &Client::encrypted);
-		connect(m_socket, &QSslSocket::sslErrors, this, &Client::sslErrors);
-		connect(m_socket, &QSslSocket::errorOccurred, this, &Client::errorOccurred);
-		connect(m_socket, &QSslSocket::handshakeInterruptedOnError, this, &Client::handshakeInterruptedOnError);
-		connect(m_socket, &QSslSocket::modeChanged, this, &Client::modeChanged);
-		connect(m_socket, &QSslSocket::peerVerifyError, this, &Client::peerVerifyError);
-		connect(m_socket, &QSslSocket::preSharedKeyAuthenticationRequired, this, &Client::preSharedKeyAuthenticationRequired);
-
 		connect(&m_periodicTimer, &QTimer::timeout, this, &Client::slot_onPeriodicTimer);
 
 		m_periodicTimer.setInterval(TCP_PERIODIC_TIMER_INTERVAL);
@@ -1865,6 +1883,8 @@ namespace Tcp
 
 	void Client::onThreadFinished()
 	{
+		m_periodicTimer.stop();
+
 		onClientThreadFinished();
 
 		if (m_socket != nullptr)
@@ -1978,22 +1998,29 @@ namespace Tcp
 			return true;
 
 		case E::SecurityLevel::Encoded:
-			{
-				QList<QSslError> errList;
 
-				for(auto errCode : m_ignoredErrors)
-				{
-					errList.append(QSslError(errCode));
-				}
+			m_ignoredErrors.insert(QSslError::SslError::SelfSignedCertificate);
 
-				m_socket->ignoreSslErrors(errList);
-			}
+			// No break, it is Ok!
 
 		case E::SecurityLevel::SSL:
+
+			m_ignoredErrors.insert(QSslError::SslError::HostNameMismatch);
 
 			if (loadCertificate(true) == false)
 			{
 				return false;
+			}
+
+			{
+				QList<QSslError> errList;
+
+				for(QSslError::SslError err : m_ignoredErrors)
+				{
+					errList.append(QSslError(err));
+				}
+
+				m_socket->ignoreSslErrors(errList);
 			}
 
 			m_socket->setPeerVerifyMode(m_securityLevel == E::SecurityLevel::Encoded ?
@@ -2139,10 +2166,8 @@ namespace Tcp
 			return true;
 
 		case E::SecurityLevel::Encoded:
-			return m_ignoredErrors.contains(sslErr.error());
-
 		case E::SecurityLevel::SSL:
-			break;
+			return m_ignoredErrors.contains(sslErr.error());
 
 		default:
 			Q_ASSERT(false);

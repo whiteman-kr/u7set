@@ -180,7 +180,7 @@ void TuningServiceWidget::createTcpConnection(quint32 ip, quint16 port)
 	connect(m_tcpClientSocket, &TcpTuningServiceClient::tuningSignalsInfoLoaded, this, &TuningServiceWidget::reloadTuningSignalsList);
 	connect(m_tcpClientSocket, &TcpTuningServiceClient::tuningSignalsStateUpdated, this, &TuningServiceWidget::updateTuningSignalsState);
 
-	connect(m_tcpClientSocket, &TcpTuningServiceClient::disconnected, this, &TuningServiceWidget::clearServiceData);
+	connect(m_tcpClientSocket, &TcpTuningServiceClient::socketDisconnected, this, &TuningServiceWidget::clearServiceData);
 
 	m_tcpClientThread->start();
 

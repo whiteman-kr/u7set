@@ -201,7 +201,10 @@ void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 {
 
 	CfgControlServer* cfgControlServer = new CfgControlServer(softwareInfo(),
-															  m_cfgServiceSettings.securityLevel,
+
+															  /* DEBUG_STOP */
+															  //m_cfgServiceSettings.securityLevel,
+															  E::SecurityLevel::SSL,
 															  m_autoloadBuildPath,
 															  m_workDirectory,
 															  buildPath,
