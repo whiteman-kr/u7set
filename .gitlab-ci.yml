@@ -298,7 +298,7 @@ linux_test_job:
   stage: test
   needs: ["linux_build_job"]
   tags:
-    - testlinux
+    - gcctest
   only:
     - master
     - /^release.*$/
