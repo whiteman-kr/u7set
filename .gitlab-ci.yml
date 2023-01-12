@@ -322,6 +322,14 @@ linux_test_job:
     - "./validate_xmls.sh"
     - "popd"
 
+#Run Create databases for compiler and simulator tests
+    - echo Creating PostgreSQL databases...
+    - "pushd /mnt/f/TestDatabase"
+    - "chmod a+x $CI_PROJECT_DIR/Test/ImportDatabase.sh"
+    - echo P2ssw0rd | su postgres $CI_PROJECT_DIR/Test/ImportDatabase.sh u7_compiler_tests_v378
+    - echo P2ssw0rd | su postgres $CI_PROJECT_DIR/Test/ImportDatabase.sh u7_test_simulator_v378
+    - "popd"
+    - echo Creating PostgreSQL databases complete
 #Run unit tests
     - "# ----------------------------------------------"
     - "#               Run unit tests"
