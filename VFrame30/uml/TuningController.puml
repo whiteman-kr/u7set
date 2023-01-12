@@ -1,11 +1,11 @@
 @startuml VFrame30
-set namespaceSeparator ::
+!include ../../doc/uml/Namespace.puml
 
 !include ../../lib/Tuning/uml/ITuningSignalManager.puml
 !include ../../lib/Tuning/uml/ITuningTcpClient.puml
 
 
-class VFrame30::TuningController
+class VFrame30::TuningController #F0FFF0
 {
 	public QObject
 	--
@@ -13,7 +13,7 @@ class VFrame30::TuningController
 	std::vector<ITuningTcpClient*> m_tcpClients;
 }
 
-TuningLib::ITuningSignalManager --o VFrame30::TuningController
+TuningLib::ITuningSignalManager -[#green]-o VFrame30::TuningController
 TuningLib::ITuningTcpClient "*" --o "1" VFrame30::TuningController
 
 @enduml

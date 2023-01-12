@@ -1,19 +1,19 @@
 @startuml VFrame30
-set namespaceSeparator ::
+!include ../../doc/uml/Namespace.puml
 
-class VFrame30::ScriptSchema
+class VFrame30::ScriptSchema #F0FFF0
 {
 	public QObject
 	--
 	std::shared_ptr<Schema> : m_schema
 }
 
-VFrame30::Schema .o VFrame30::ScriptSchema
+VFrame30::Schema ..o VFrame30::ScriptSchema
 
 '
 '  class Schema
 '
-class VFrame30::Schema
+class VFrame30::Schema #F0FFF0
 {
 	public PropertyObject
 	--
@@ -26,38 +26,38 @@ VFrame30::SchemaLayer "*" ..* "1" VFrame30::Schema
 
 
 ' LogicSchema
-class VFrame30::LogicSchema extends VFrame30::Schema
+class VFrame30::LogicSchema #F0FFF0 extends VFrame30::Schema
 {
 }
 
 
 ' UfbSchema
-class VFrame30::UfbSchema extends VFrame30::Schema
+class VFrame30::UfbSchema #F0FFF0 extends VFrame30::Schema
 {
 }
 
 
 ' MonitorSchema
-class VFrame30::MonitorSchema extends VFrame30::Schema
+class VFrame30::MonitorSchema #F0FFF0 extends VFrame30::Schema
 {
 }
 
 
 ' TuningSchema
-class VFrame30::TuningSchema extends VFrame30::Schema
+class VFrame30::TuningSchema #F0FFF0 extends VFrame30::Schema
 {
 }
 
 together {
-	class VFrame30::Schema
-	class VFrame30::ScriptSchema
+	class VFrame30::Schema #F0FFF0
+	class VFrame30::ScriptSchema #F0FFF0
 }
 
 together {
-	class VFrame30::LogicSchema
-	class VFrame30::UfbSchema
-	class VFrame30::MonitorSchema
-	class VFrame30::TuningSchema
+	class VFrame30::LogicSchema #F0FFF0
+	class VFrame30::UfbSchema #F0FFF0
+	class VFrame30::MonitorSchema #F0FFF0
+	class VFrame30::TuningSchema #F0FFF0
 }
 
 @enduml

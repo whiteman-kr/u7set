@@ -1,7 +1,7 @@
 @startuml VFrame30
-set namespaceSeparator ::
+!include ../../doc/uml/Namespace.puml
 
-class VFrame30::Session
+class VFrame30::Session #F0FFF0
 {
 	public PropertyObject
 }

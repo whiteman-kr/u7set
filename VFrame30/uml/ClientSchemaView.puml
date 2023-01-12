@@ -1,5 +1,5 @@
 @startuml VFrame30
-set namespaceSeparator ::
+!include ../../doc/uml/Namespace.puml
 
 !include ISchemaViewHistory.puml
 !include AppSignalController.puml
@@ -7,7 +7,7 @@ set namespaceSeparator ::
 '
 ' class ScriptSchemaView
 '
-class VFrame30::ScriptSchemaView
+class VFrame30::ScriptSchemaView #F0FFF0
 {
 	public QObject
 	--
@@ -22,15 +22,15 @@ VFrame30::ISchemaViewHistory ..o VFrame30::ScriptSchemaView
 '
 ' class ClientSchemaView
 '
-class VFrame30::ClientSchemaView extends VFrame30::SchemaViewWidget
+class VFrame30::ClientSchemaView #F0FFF0 extends VFrame30::SchemaViewWidget
 {
 	VFrame30::SchemaManager* : m_schemaManager
 	VFrame30::ISchemaViewHistory* : m_schemaViewHistory
 
-	TuningController* m_tuningController = nullptr;
-	AppSignalController* m_appSignalController = nullptr;
-	std::unique_ptr<ScriptAppSignalController> m_scriptAppSignalController;
-	LogController* m_logController = nullptr;
+	TuningController* : m_tuningController
+	AppSignalController* : m_appSignalController
+	std::unique_ptr<ScriptAppSignalController> : m_scriptAppSignalController
+	LogController* : m_logController
 
 	std::unique_ptr<ScriptSchemaView> : m_scriptSchemaView
 
@@ -39,7 +39,7 @@ class VFrame30::ClientSchemaView extends VFrame30::SchemaViewWidget
 	QVariantHash : m_variables
 }
 
-VFrame30::SchemaManager ..o VFrame30::ClientSchemaView
+VFrame30::SchemaManager .[#green].o VFrame30::ClientSchemaView
 VFrame30::ISchemaViewHistory ..o VFrame30::ClientSchemaView
 
 VFrame30::TuningController ..o VFrame30::ClientSchemaView
@@ -47,6 +47,6 @@ VFrame30::AppSignalController ..o VFrame30::ClientSchemaView
 VFrame30::ScriptAppSignalController ..* VFrame30::ClientSchemaView
 VFrame30::LogController .o VFrame30::ClientSchemaView
 
-VFrame30::ScriptSchemaView ..* VFrame30::ClientSchemaView
+VFrame30::ScriptSchemaView --* VFrame30::ClientSchemaView
 
 @enduml

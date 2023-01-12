@@ -1,9 +1,9 @@
 @startuml VFrame30
-set namespaceSeparator ::
+!include ../../doc/uml/Namespace.puml
 
 !include ../../UtilsLib/uml/ILogFile.puml
 
-class VFrame30::LogController
+class VFrame30::LogController #F0FFF0
 {
 	public QObject
 	--

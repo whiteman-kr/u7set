@@ -1,9 +1,9 @@
 @startuml VFrame30
-set namespaceSeparator ::
+!include ../../doc/uml/Namespace.puml
 
 !include ../../TrendView/uml/ITrendDataProvider.puml
 
-abstract class VFrame30::SchemaManager implements TrendLib::ITrendDataProvider
+abstract class VFrame30::SchemaManager #F0FFF0 implements TrendLib::ITrendDataProvider
 {
 	public QObject
 	--

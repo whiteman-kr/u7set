@@ -1,0 +1,15 @@
+@startuml
+
+!include ../../VFrame30/uml/SchemaManager.puml
+
+class MonitorSchemaManager #F0FFF0 extends VFrame30::SchemaManager 
+{
+	
+	MonitorConfigController* : m_configController
+	QString : m_onConfigurationArrivedScript
+
+	RtTrendSchema : m_rtTrendSchemas
+}
+
+
+@enduml

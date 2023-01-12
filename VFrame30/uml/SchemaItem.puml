@@ -1,15 +1,15 @@
 @startuml VFrame30
-set namespaceSeparator ::
+!include ../../doc/uml/Namespace.puml
 
-interface VFrame30::ISchemaItemPropertiesPos
+interface VFrame30::ISchemaItemPropertiesPos #F0FFF0
 {
 }
 
-interface VFrame30::IPointList
+interface VFrame30::IPointList #F0FFF0
 {
 }
 
-class VFrame30::SchemaItem implements VFrame30::ISchemaItemPropertiesPos, VFrame30::IPointList
+class VFrame30::SchemaItem #F0FFF0 implements VFrame30::ISchemaItemPropertiesPos, VFrame30::IPointList
 {
 	public PropertyObject
 	--

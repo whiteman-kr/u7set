@@ -1,5 +1,5 @@
 @startuml TuningLib
-set namespaceSeparator ::
+!include ../../../doc/uml/Namespace.puml
 
 interface TuningLib::ITuningSignalManager
 {

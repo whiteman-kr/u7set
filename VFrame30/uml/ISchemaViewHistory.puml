@@ -1,7 +1,7 @@
 @startuml VFrame30
-set namespaceSeparator ::
+!include ../../doc/uml/Namespace.puml
 
-interface VFrame30::ISchemaViewHistory
+interface VFrame30::ISchemaViewHistory #F0FFF0
 {
 }
 

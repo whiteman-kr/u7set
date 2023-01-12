@@ -1,7 +1,7 @@
 @startuml TrendLib
-set namespaceSeparator ::
+!include ../../doc/uml/Namespace.puml
 
-interface TrendLib::ITrendDataProvider
+interface TrendLib::ITrendDataProvider #F0FFF0
 {
 }
 

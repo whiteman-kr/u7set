@@ -1,7 +1,7 @@
 @startuml VFrame30
-set namespaceSeparator ::
+!include ../../doc/uml/Namespace.puml
 
-class VFrame30::ClientSchemaWidget extends VFrame30::BaseSchemaWidget implements VFrame30::ISchemaViewHistory
+class VFrame30::ClientSchemaWidget #F0FFF0 extends VFrame30::BaseSchemaWidget implements VFrame30::ISchemaViewHistory
 {
 	VFrame30::SchemaManager* m_schemaManager
 	

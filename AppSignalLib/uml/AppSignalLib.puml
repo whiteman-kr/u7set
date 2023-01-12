@@ -1,5 +1,5 @@
 @startuml AppSignalLib
-set namespaceSeparator ::
+!include ../../doc/uml/Namespace.puml
 
 interface AppSignalLib::IAppSignalManager
 {

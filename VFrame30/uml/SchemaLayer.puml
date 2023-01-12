@@ -1,10 +1,10 @@
 @startuml VFrame30
-set namespaceSeparator ::
+!include ../../doc/uml/Namespace.puml
 
 '
 ' class ScriptSchemaLayer
 '
-class VFrame30::ScriptSchemaLayer
+class VFrame30::ScriptSchemaLayer #F0FFF0
 {
 	public QObject
 	--
@@ -16,7 +16,7 @@ VFrame30::SchemaLayer .o VFrame30::ScriptSchemaLayer
 '
 ' class ScriptSchemaLayer
 '
-class VFrame30::SchemaLayer
+class VFrame30::SchemaLayer #F0FFF0
 {
 	public QObject
 	--
@@ -28,8 +28,8 @@ VFrame30::SchemaItem "*" ..* "1" VFrame30::SchemaLayer
 
 '
 together {
-  class VFrame30::ScriptSchemaLayer
-  class VFrame30::SchemaLayer
+  class VFrame30::ScriptSchemaLayer #F0FFF0
+  class VFrame30::SchemaLayer #F0FFF0
 }
 
 @enduml

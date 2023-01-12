@@ -1,0 +1,14 @@
+@startuml
+
+!include ../../VFrame30/uml/ClientSchemaView.puml
+!include ../../VFrame30/uml/BaseSchemaWidget.puml
+
+class MonitorSchemaView extends VFrame30::ClientSchemaView
+{
+}
+
+
+BaseSchemaWidget_m_schemaView *-- MonitorSchemaView
+
+
+@enduml

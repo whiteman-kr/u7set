@@ -1,5 +1,5 @@
 @startuml UtilsLib
-set namespaceSeparator ::
+!include ../../doc/uml/Namespace.puml
 
 interface UtilsLib::ILogFile
 {
