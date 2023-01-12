@@ -237,9 +237,9 @@ windows_test_job:
 #Run Create databases for compiler and simulator tests
     - echo Creating PostgreSQL databases...
     - psql -U postgres -c "CREATE DATABASE u7_compiler_tests_v378 OWNER u7;"
-    - psql -U postgres u7_compiler_tests_v378 < c:\Data\u7_compiler_tests_v378.sql
+    - cmd '/c psql -U postgres u7_compiler_tests_v378 < c:\Data\u7_compiler_tests_v378.sql'
     - psql -U postgres -c "CREATE DATABASE u7_test_simulator_v378 OWNER u7;"
-    - psql -U postgres u7_test_simulator_v378 < c:\Data\u7_test_simulator_v378.sql
+    - cmd '/c psql -U postgres u7_test_simulator_v378 < c:\Data\u7_test_simulator_v378.sql'
 #Run XML validation
     - "# ----------------------------------------------"
     - "#               Run XML validation"
