@@ -61,7 +61,7 @@ struct TableStruct_network_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[68]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[69]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -220,6 +220,9 @@ extern SaveAppSignalsStatesToArchiveReplyDefaultTypeInternal _SaveAppSignalsStat
 class SaveAppSignalsStatesToArchiveRequest;
 struct SaveAppSignalsStatesToArchiveRequestDefaultTypeInternal;
 extern SaveAppSignalsStatesToArchiveRequestDefaultTypeInternal _SaveAppSignalsStatesToArchiveRequest_default_instance_;
+class SecurityLevelReply;
+struct SecurityLevelReplyDefaultTypeInternal;
+extern SecurityLevelReplyDefaultTypeInternal _SecurityLevelReply_default_instance_;
 class ServiceClientInfo;
 struct ServiceClientInfoDefaultTypeInternal;
 extern ServiceClientInfoDefaultTypeInternal _ServiceClientInfo_default_instance_;
@@ -326,6 +329,7 @@ template<> ::Network::RtTrendsManagementReply* Arena::CreateMaybeMessage<::Netwo
 template<> ::Network::RtTrendsManagementRequest* Arena::CreateMaybeMessage<::Network::RtTrendsManagementRequest>(Arena*);
 template<> ::Network::SaveAppSignalsStatesToArchiveReply* Arena::CreateMaybeMessage<::Network::SaveAppSignalsStatesToArchiveReply>(Arena*);
 template<> ::Network::SaveAppSignalsStatesToArchiveRequest* Arena::CreateMaybeMessage<::Network::SaveAppSignalsStatesToArchiveRequest>(Arena*);
+template<> ::Network::SecurityLevelReply* Arena::CreateMaybeMessage<::Network::SecurityLevelReply>(Arena*);
 template<> ::Network::ServiceClientInfo* Arena::CreateMaybeMessage<::Network::ServiceClientInfo>(Arena*);
 template<> ::Network::ServiceClients* Arena::CreateMaybeMessage<::Network::ServiceClients>(Arena*);
 template<> ::Network::ServiceInfo* Arena::CreateMaybeMessage<::Network::ServiceInfo>(Arena*);
@@ -5427,6 +5431,173 @@ class SoftwareInfo PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class SecurityLevelReply PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Network.SecurityLevelReply) */ {
+ public:
+  inline SecurityLevelReply() : SecurityLevelReply(nullptr) {}
+  virtual ~SecurityLevelReply();
+  explicit constexpr SecurityLevelReply(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  SecurityLevelReply(const SecurityLevelReply& from);
+  SecurityLevelReply(SecurityLevelReply&& from) noexcept
+    : SecurityLevelReply() {
+    *this = ::std::move(from);
+  }
+
+  inline SecurityLevelReply& operator=(const SecurityLevelReply& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline SecurityLevelReply& operator=(SecurityLevelReply&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
+    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
+  }
+  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
+    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const SecurityLevelReply& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const SecurityLevelReply* internal_default_instance() {
+    return reinterpret_cast<const SecurityLevelReply*>(
+               &_SecurityLevelReply_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    21;
+
+  friend void swap(SecurityLevelReply& a, SecurityLevelReply& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(SecurityLevelReply* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(SecurityLevelReply* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline SecurityLevelReply* New() const final {
+    return CreateMaybeMessage<SecurityLevelReply>(nullptr);
+  }
+
+  SecurityLevelReply* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<SecurityLevelReply>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const SecurityLevelReply& from);
+  void MergeFrom(const SecurityLevelReply& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(SecurityLevelReply* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Network.SecurityLevelReply";
+  }
+  protected:
+  explicit SecurityLevelReply(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_network_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kConnectionNoFieldNumber = 1,
+    kSecurityLevelFieldNumber = 2,
+  };
+  // required int32 connectionNo = 1;
+  bool has_connectionno() const;
+  private:
+  bool _internal_has_connectionno() const;
+  public:
+  void clear_connectionno();
+  ::PROTOBUF_NAMESPACE_ID::int32 connectionno() const;
+  void set_connectionno(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_connectionno() const;
+  void _internal_set_connectionno(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // required int32 securityLevel = 2 [default = 0];
+  bool has_securitylevel() const;
+  private:
+  bool _internal_has_securitylevel() const;
+  public:
+  void clear_securitylevel();
+  ::PROTOBUF_NAMESPACE_ID::int32 securitylevel() const;
+  void set_securitylevel(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_securitylevel() const;
+  void _internal_set_securitylevel(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:Network.SecurityLevelReply)
+ private:
+  class _Internal;
+
+  // helper for ByteSizeLong()
+  size_t RequiredFieldsByteSizeFallback() const;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::int32 connectionno_;
+  ::PROTOBUF_NAMESPACE_ID::int32 securitylevel_;
+  friend struct ::TableStruct_network_2eproto;
+};
+// -------------------------------------------------------------------
+
 class IntroduceMyselfRequest PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Network.IntroduceMyselfRequest) */ {
  public:
@@ -5477,7 +5648,7 @@ class IntroduceMyselfRequest PROTOBUF_FINAL :
                &_IntroduceMyselfRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    21;
+    22;
 
   friend void swap(IntroduceMyselfRequest& a, IntroduceMyselfRequest& b) {
     a.Swap(&b);
@@ -5631,7 +5802,7 @@ class IntroduceMyselfReply PROTOBUF_FINAL :
                &_IntroduceMyselfReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    22;
+    23;
 
   friend void swap(IntroduceMyselfReply& a, IntroduceMyselfReply& b) {
     a.Swap(&b);
@@ -5825,7 +5996,7 @@ class GetServiceInfoRequest PROTOBUF_FINAL :
                &_GetServiceInfoRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    23;
+    24;
 
   friend void swap(GetServiceInfoRequest& a, GetServiceInfoRequest& b) {
     a.Swap(&b);
@@ -5956,7 +6127,7 @@ class SessionParams PROTOBUF_FINAL :
                &_SessionParams_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    24;
+    25;
 
   friend void swap(SessionParams& a, SessionParams& b) {
     a.Swap(&b);
@@ -6127,7 +6298,7 @@ class ServiceInfo PROTOBUF_FINAL :
                &_ServiceInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    25;
+    26;
 
   friend void swap(ServiceInfo& a, ServiceInfo& b) {
     a.Swap(&b);
@@ -6368,7 +6539,7 @@ class GetServiceInfoReply PROTOBUF_FINAL :
                &_GetServiceInfoReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    26;
+    27;
 
   friend void swap(GetServiceInfoReply& a, GetServiceInfoReply& b) {
     a.Swap(&b);
@@ -6540,7 +6711,7 @@ class ConfigurationServiceState PROTOBUF_FINAL :
                &_ConfigurationServiceState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    27;
+    28;
 
   friend void swap(ConfigurationServiceState& a, ConfigurationServiceState& b) {
     a.Swap(&b);
@@ -6729,7 +6900,7 @@ class ServiceClientInfo PROTOBUF_FINAL :
                &_ServiceClientInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    28;
+    29;
 
   friend void swap(ServiceClientInfo& a, ServiceClientInfo& b) {
     a.Swap(&b);
@@ -6946,7 +7117,7 @@ class ServiceClients PROTOBUF_FINAL :
                &_ServiceClients_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    29;
+    30;
 
   friend void swap(ServiceClients& a, ServiceClients& b) {
     a.Swap(&b);
@@ -7099,7 +7270,7 @@ class BuildInfo PROTOBUF_FINAL :
                &_BuildInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    30;
+    31;
 
   friend void swap(BuildInfo& a, BuildInfo& b) {
     a.Swap(&b);
@@ -7347,7 +7518,7 @@ class ConfigurationServiceSettings PROTOBUF_FINAL :
                &_ConfigurationServiceSettings_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    31;
+    32;
 
   friend void swap(ConfigurationServiceSettings& a, ConfigurationServiceSettings& b) {
     a.Swap(&b);
@@ -7550,7 +7721,7 @@ class ServiceSettings PROTOBUF_FINAL :
                &_ServiceSettings_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    32;
+    33;
 
   friend void swap(ServiceSettings& a, ServiceSettings& b) {
     a.Swap(&b);
@@ -7753,7 +7924,7 @@ class GetTuningSourcesInfo PROTOBUF_FINAL :
                &_GetTuningSourcesInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    33;
+    34;
 
   friend void swap(GetTuningSourcesInfo& a, GetTuningSourcesInfo& b) {
     a.Swap(&b);
@@ -7884,7 +8055,7 @@ class GetTuningSourcesInfoReply PROTOBUF_FINAL :
                &_GetTuningSourcesInfoReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    34;
+    35;
 
   friend void swap(GetTuningSourcesInfoReply& a, GetTuningSourcesInfoReply& b) {
     a.Swap(&b);
@@ -8112,7 +8283,7 @@ class GetTuningSourcesStates PROTOBUF_FINAL :
                &_GetTuningSourcesStates_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    35;
+    36;
 
   friend void swap(GetTuningSourcesStates& a, GetTuningSourcesStates& b) {
     a.Swap(&b);
@@ -8243,7 +8414,7 @@ class SignalsAssociatedToTuningSource PROTOBUF_FINAL :
                &_SignalsAssociatedToTuningSource_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    36;
+    37;
 
   friend void swap(SignalsAssociatedToTuningSource& a, SignalsAssociatedToTuningSource& b) {
     a.Swap(&b);
@@ -8416,7 +8587,7 @@ class TuningSourceFilling PROTOBUF_FINAL :
                &_TuningSourceFilling_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    37;
+    38;
 
   friend void swap(TuningSourceFilling& a, TuningSourceFilling& b) {
     a.Swap(&b);
@@ -8585,7 +8756,7 @@ class TuningSourceState PROTOBUF_FINAL :
                &_TuningSourceState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    38;
+    39;
 
   friend void swap(TuningSourceState& a, TuningSourceState& b) {
     a.Swap(&b);
@@ -9461,7 +9632,7 @@ class GetTuningSourcesStatesReply PROTOBUF_FINAL :
                &_GetTuningSourcesStatesReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    39;
+    40;
 
   friend void swap(GetTuningSourcesStatesReply& a, GetTuningSourcesStatesReply& b) {
     a.Swap(&b);
@@ -9689,7 +9860,7 @@ class ChangeConrolledTuningSourceRequest PROTOBUF_FINAL :
                &_ChangeConrolledTuningSourceRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    40;
+    41;
 
   friend void swap(ChangeConrolledTuningSourceRequest& a, ChangeConrolledTuningSourceRequest& b) {
     a.Swap(&b);
@@ -9875,7 +10046,7 @@ class ChangeConrolledTuningSourceReply PROTOBUF_FINAL :
                &_ChangeConrolledTuningSourceReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    41;
+    42;
 
   friend void swap(ChangeConrolledTuningSourceReply& a, ChangeConrolledTuningSourceReply& b) {
     a.Swap(&b);
@@ -10061,7 +10232,7 @@ class TuningSignalsRead PROTOBUF_FINAL :
                &_TuningSignalsRead_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    42;
+    43;
 
   friend void swap(TuningSignalsRead& a, TuningSignalsRead& b) {
     a.Swap(&b);
@@ -10218,7 +10389,7 @@ class TuningSignalState PROTOBUF_FINAL :
                &_TuningSignalState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    43;
+    44;
 
   friend void swap(TuningSignalState& a, TuningSignalState& b) {
     a.Swap(&b);
@@ -10637,7 +10808,7 @@ class TuningSignalsReadReply PROTOBUF_FINAL :
                &_TuningSignalsReadReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    44;
+    45;
 
   friend void swap(TuningSignalsReadReply& a, TuningSignalsReadReply& b) {
     a.Swap(&b);
@@ -10806,7 +10977,7 @@ class TuningWriteCommand PROTOBUF_FINAL :
                &_TuningWriteCommand_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    45;
+    46;
 
   friend void swap(TuningWriteCommand& a, TuningWriteCommand& b) {
     a.Swap(&b);
@@ -10975,7 +11146,7 @@ class TuningSignalsWrite PROTOBUF_FINAL :
                &_TuningSignalsWrite_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    46;
+    47;
 
   friend void swap(TuningSignalsWrite& a, TuningSignalsWrite& b) {
     a.Swap(&b);
@@ -11144,7 +11315,7 @@ class TuningSignalWriteResult PROTOBUF_FINAL :
                &_TuningSignalWriteResult_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    47;
+    48;
 
   friend void swap(TuningSignalWriteResult& a, TuningSignalWriteResult& b) {
     a.Swap(&b);
@@ -11308,7 +11479,7 @@ class TuningSignalsWriteReply PROTOBUF_FINAL :
                &_TuningSignalsWriteReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    48;
+    49;
 
   friend void swap(TuningSignalsWriteReply& a, TuningSignalsWriteReply& b) {
     a.Swap(&b);
@@ -11477,7 +11648,7 @@ class TuningSignalsApply PROTOBUF_FINAL :
                &_TuningSignalsApply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    49;
+    50;
 
   friend void swap(TuningSignalsApply& a, TuningSignalsApply& b) {
     a.Swap(&b);
@@ -11608,7 +11779,7 @@ class TuningSignalsApplyReply PROTOBUF_FINAL :
                &_TuningSignalsApplyReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    50;
+    51;
 
   friend void swap(TuningSignalsApplyReply& a, TuningSignalsApplyReply& b) {
     a.Swap(&b);
@@ -11757,7 +11928,7 @@ class DataSourceWrite PROTOBUF_FINAL :
                &_DataSourceWrite_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    51;
+    52;
 
   friend void swap(DataSourceWrite& a, DataSourceWrite& b) {
     a.Swap(&b);
@@ -11928,7 +12099,7 @@ class DataSourceWriteReply PROTOBUF_FINAL :
                &_DataSourceWriteReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    52;
+    53;
 
   friend void swap(DataSourceWriteReply& a, DataSourceWriteReply& b) {
     a.Swap(&b);
@@ -12077,7 +12248,7 @@ class PacketSourceExit PROTOBUF_FINAL :
                &_PacketSourceExit_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    53;
+    54;
 
   friend void swap(PacketSourceExit& a, PacketSourceExit& b) {
     a.Swap(&b);
@@ -12208,7 +12379,7 @@ class PacketSourceExitReply PROTOBUF_FINAL :
                &_PacketSourceExitReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    54;
+    55;
 
   friend void swap(PacketSourceExitReply& a, PacketSourceExitReply& b) {
     a.Swap(&b);
@@ -12357,7 +12528,7 @@ class SaveAppSignalsStatesToArchiveRequest PROTOBUF_FINAL :
                &_SaveAppSignalsStatesToArchiveRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    55;
+    56;
 
   friend void swap(SaveAppSignalsStatesToArchiveRequest& a, SaveAppSignalsStatesToArchiveRequest& b) {
     a.Swap(&b);
@@ -12533,7 +12704,7 @@ class SaveAppSignalsStatesToArchiveReply PROTOBUF_FINAL :
                &_SaveAppSignalsStatesToArchiveReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    56;
+    57;
 
   friend void swap(SaveAppSignalsStatesToArchiveReply& a, SaveAppSignalsStatesToArchiveReply& b) {
     a.Swap(&b);
@@ -12697,7 +12868,7 @@ class GetAppSignalStatesFromArchiveStartRequest PROTOBUF_FINAL :
                &_GetAppSignalStatesFromArchiveStartRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    57;
+    58;
 
   friend void swap(GetAppSignalStatesFromArchiveStartRequest& a, GetAppSignalStatesFromArchiveStartRequest& b) {
     a.Swap(&b);
@@ -12937,7 +13108,7 @@ class GetAppSignalStatesFromArchiveStartReply PROTOBUF_FINAL :
                &_GetAppSignalStatesFromArchiveStartReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    58;
+    59;
 
   friend void swap(GetAppSignalStatesFromArchiveStartReply& a, GetAppSignalStatesFromArchiveStartReply& b) {
     a.Swap(&b);
@@ -13138,7 +13309,7 @@ class GetAppSignalStatesFromArchiveNextRequest PROTOBUF_FINAL :
                &_GetAppSignalStatesFromArchiveNextRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    59;
+    60;
 
   friend void swap(GetAppSignalStatesFromArchiveNextRequest& a, GetAppSignalStatesFromArchiveNextRequest& b) {
     a.Swap(&b);
@@ -13287,7 +13458,7 @@ class GetAppSignalStatesFromArchiveNextReply PROTOBUF_FINAL :
                &_GetAppSignalStatesFromArchiveNextReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    60;
+    61;
 
   friend void swap(GetAppSignalStatesFromArchiveNextReply& a, GetAppSignalStatesFromArchiveNextReply& b) {
     a.Swap(&b);
@@ -13583,7 +13754,7 @@ class GetAppSignalStatesFromArchiveCancelRequest PROTOBUF_FINAL :
                &_GetAppSignalStatesFromArchiveCancelRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    61;
+    62;
 
   friend void swap(GetAppSignalStatesFromArchiveCancelRequest& a, GetAppSignalStatesFromArchiveCancelRequest& b) {
     a.Swap(&b);
@@ -13732,7 +13903,7 @@ class GetAppSignalStatesFromArchiveCancelReply PROTOBUF_FINAL :
                &_GetAppSignalStatesFromArchiveCancelReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    62;
+    63;
 
   friend void swap(GetAppSignalStatesFromArchiveCancelReply& a, GetAppSignalStatesFromArchiveCancelReply& b) {
     a.Swap(&b);
@@ -13918,7 +14089,7 @@ class RtTrendsManagementRequest PROTOBUF_FINAL :
                &_RtTrendsManagementRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    63;
+    64;
 
   friend void swap(RtTrendsManagementRequest& a, RtTrendsManagementRequest& b) {
     a.Swap(&b);
@@ -14137,7 +14308,7 @@ class RtTrendsManagementReply PROTOBUF_FINAL :
                &_RtTrendsManagementReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    64;
+    65;
 
   friend void swap(RtTrendsManagementReply& a, RtTrendsManagementReply& b) {
     a.Swap(&b);
@@ -14347,7 +14518,7 @@ class RtTrendsGetStateChangesRequest PROTOBUF_FINAL :
                &_RtTrendsGetStateChangesRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    65;
+    66;
 
   friend void swap(RtTrendsGetStateChangesRequest& a, RtTrendsGetStateChangesRequest& b) {
     a.Swap(&b);
@@ -14478,7 +14649,7 @@ class RtTrendsGetStateChangesReply PROTOBUF_FINAL :
                &_RtTrendsGetStateChangesReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    66;
+    67;
 
   friend void swap(RtTrendsGetStateChangesReply& a, RtTrendsGetStateChangesReply& b) {
     a.Swap(&b);
@@ -14669,7 +14840,7 @@ class GetFileReply PROTOBUF_FINAL :
                &_GetFileReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    67;
+    68;
 
   friend void swap(GetFileReply& a, GetFileReply& b) {
     a.Swap(&b);
@@ -20104,6 +20275,66 @@ inline void SoftwareInfo::set_allocated_hostname(std::string* hostname) {
   hostname_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), hostname,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:Network.SoftwareInfo.hostname)
+}
+
+// -------------------------------------------------------------------
+
+// SecurityLevelReply
+
+// required int32 connectionNo = 1;
+inline bool SecurityLevelReply::_internal_has_connectionno() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool SecurityLevelReply::has_connectionno() const {
+  return _internal_has_connectionno();
+}
+inline void SecurityLevelReply::clear_connectionno() {
+  connectionno_ = 0;
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SecurityLevelReply::_internal_connectionno() const {
+  return connectionno_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SecurityLevelReply::connectionno() const {
+  // @@protoc_insertion_point(field_get:Network.SecurityLevelReply.connectionNo)
+  return _internal_connectionno();
+}
+inline void SecurityLevelReply::_internal_set_connectionno(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000001u;
+  connectionno_ = value;
+}
+inline void SecurityLevelReply::set_connectionno(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_connectionno(value);
+  // @@protoc_insertion_point(field_set:Network.SecurityLevelReply.connectionNo)
+}
+
+// required int32 securityLevel = 2 [default = 0];
+inline bool SecurityLevelReply::_internal_has_securitylevel() const {
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline bool SecurityLevelReply::has_securitylevel() const {
+  return _internal_has_securitylevel();
+}
+inline void SecurityLevelReply::clear_securitylevel() {
+  securitylevel_ = 0;
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SecurityLevelReply::_internal_securitylevel() const {
+  return securitylevel_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SecurityLevelReply::securitylevel() const {
+  // @@protoc_insertion_point(field_get:Network.SecurityLevelReply.securityLevel)
+  return _internal_securitylevel();
+}
+inline void SecurityLevelReply::_internal_set_securitylevel(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000002u;
+  securitylevel_ = value;
+}
+inline void SecurityLevelReply::set_securitylevel(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_securitylevel(value);
+  // @@protoc_insertion_point(field_set:Network.SecurityLevelReply.securityLevel)
 }
 
 // -------------------------------------------------------------------
@@ -27621,6 +27852,8 @@ inline void GetFileReply::set_allocated_filepartdata(std::string* filepartdata) 
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

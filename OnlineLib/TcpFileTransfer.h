@@ -68,6 +68,7 @@ namespace Tcp
 	{
 	public:
 		FileTransfer();
+		virtual ~FileTransfer();
 
 	protected:
 		QString m_rootFolder;
@@ -104,6 +105,8 @@ namespace Tcp
 				   const QString& rootFolder,
 				   const HostAddressPort& serverAddressPort1,
 				   const HostAddressPort& serverAddressPort2);
+
+		virtual ~FileClient();
 
 		void downloadFile(const QString& fileName) { emit signal_downloadFile(fileName); }
 

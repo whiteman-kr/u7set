@@ -64,6 +64,10 @@ namespace Tcp
 		}
 	}
 
+	FileTransfer::~FileTransfer()
+	{
+	}
+
 	// -------------------------------------------------------------------------------------
 	//
 	// Tcp::FileClient class implementation
@@ -92,6 +96,10 @@ namespace Tcp
 		m_file.setParent(this);
 
 		init();
+	}
+
+	FileClient::~FileClient()
+	{
 	}
 
 	void FileClient::processSuccessorReply(quint32 requestID, const char* replyData, quint32 replyDataSize)

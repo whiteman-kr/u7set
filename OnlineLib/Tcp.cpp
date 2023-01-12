@@ -60,14 +60,7 @@ namespace Tcp
 
 	bool SocketWorker::isConnected() const
 	{
-		AUTO_LOCK(m_mutex)
-
-		if (m_socket == nullptr)
-		{
-			return false;
-		}
-
-		return m_socket->state() == QAbstractSocket::ConnectedState;
+		return isSocketConnected() || m_setConnResult == SetConnectionResult::Ok;
 	}
 
 	void SocketWorker::closeConnection()
@@ -164,6 +157,16 @@ namespace Tcp
 		return peerAddr;
 	}
 
+	void SocketWorker::setSslCertificateFileName(const QString& fileName)
+	{
+		m_certificateFileName = fileName;
+	}
+
+	void SocketWorker::setSslPrivateKeyFileName(const QString& fileName)
+	{
+		m_privateKeyFileName = fileName;
+	}
+
 	QString SocketWorker::sslModeStr(QSslSocket::SslMode mode) const
 	{
 		switch(mode)
@@ -186,37 +189,43 @@ namespace Tcp
 
 	void SocketWorker::logError(const QString& err)
 	{
+		QString str = QString("Connection #%1: %2").arg(m_connNo).arg(err);
+
 		if (m_log == nullptr)
 		{
-			qDebug() << err.toStdString().c_str();
+			qDebug() << str.toStdString().c_str();
 		}
 		else
 		{
-			DEBUG_LOG_ERR(m_log, err);
+			DEBUG_LOG_ERR(m_log, str);
 		}
 	}
 
 	void SocketWorker::logWarning(const QString& wrn)
 	{
+		QString str = QString("Connection #%1: %2").arg(m_connNo).arg(wrn);
+
 		if (m_log == nullptr)
 		{
-			qDebug() << wrn.toStdString().c_str();
+			qDebug() << str.toStdString().c_str();
 		}
 		else
 		{
-			DEBUG_LOG_WRN(m_log, wrn);
+			DEBUG_LOG_WRN(m_log, str);
 		}
 	}
 
 	void SocketWorker::logMessage(const QString& msg)
 	{
+		QString str = QString("Connection #%1: %2").arg(m_connNo).arg(msg);
+
 		if (m_log == nullptr)
 		{
-			qDebug() << msg.toStdString().c_str();
+			qDebug() << str.toStdString().c_str();
 		}
 		else
 		{
-			DEBUG_LOG_MSG(m_log, msg);
+			DEBUG_LOG_MSG(m_log, str);
 		}
 	}
 
@@ -236,12 +245,12 @@ namespace Tcp
 		connect(m_socket, &QSslSocket::connected, this, &SocketWorker::connected);
 		connect(m_socket, &QSslSocket::disconnected, this, &SocketWorker::disconnected);
 		connect(m_socket, &QSslSocket::readyRead, this, &SocketWorker::readyRead);
-		connect(m_socket, &QSslSocket::bytesWritten, this, &SocketWorker::bytesWritten);
+//		connect(m_socket, &QSslSocket::bytesWritten, this, &SocketWorker::bytesWritten);
 
 		// QSslSocket signals
 		//
 		connect(m_socket, &QSslSocket::encrypted, this, &SocketWorker::encrypted);
-		connect(m_socket, &QSslSocket::sslErrors, this, &SocketWorker::sslErrors);
+		connect(m_socket, &QSslSocket::sslErrors, this, &SocketWorker::sslErrors, Qt::DirectConnection);  // don't change connection type!!!
 		connect(m_socket, &QSslSocket::errorOccurred, this, &SocketWorker::errorOccurred);
 		connect(m_socket, &QSslSocket::handshakeInterruptedOnError, this, &SocketWorker::handshakeInterruptedOnError);
 		connect(m_socket, &QSslSocket::modeChanged, this, &SocketWorker::modeChanged);
@@ -257,6 +266,18 @@ namespace Tcp
 			delete m_socket;
 			m_socket = nullptr;
 		}
+	}
+
+	bool SocketWorker::isSocketConnected() const
+	{
+		AUTO_LOCK(m_mutex)
+
+		if (m_socket == nullptr)
+		{
+			return false;
+		}
+
+		return m_socket->state() == QAbstractSocket::ConnectedState;
 	}
 
 	void SocketWorker::onThreadStarted()
@@ -289,7 +310,7 @@ namespace Tcp
 			return -1;
 		}
 
-		m_bytesWritten = false;
+//		m_bytesWritten = false;
 
 		addSentBytes(size);
 
@@ -396,8 +417,24 @@ namespace Tcp
 
 			// Server use self-signed certificate
 			//
-			certFilePath = appPath + File::CRYPTO_SS_SERVER_CERTIFICATE;
-			pkeyFilePath = appPath + File::CRYPTO_SS_SERVER_PRIVATE_KEY;
+
+			if (m_certificateFileName.isEmpty() == true)
+			{
+				certFilePath = appPath + File::CRYPTO_SS_SERVER_CERTIFICATE;
+			}
+			else
+			{
+				certFilePath = m_certificateFileName;
+			}
+
+			if (m_privateKeyFileName.isEmpty() == true)
+			{
+				pkeyFilePath = appPath + File::CRYPTO_SS_SERVER_PRIVATE_KEY;
+			}
+			else
+			{
+				pkeyFilePath = m_privateKeyFileName;
+			}
 
 			break;
 
@@ -715,9 +752,78 @@ namespace Tcp
 		}
 	}
 
-	void SocketWorker::bytesWritten()
+	void SocketWorker::errorOccurred(QAbstractSocket::SocketError socketError)
 	{
-		m_bytesWritten = true;
+		logError(QString("socket error - (%1) %2").
+				 arg(static_cast<int>(socketError)).arg(m_socket->errorString()));
+	}
+
+	void SocketWorker::encrypted()
+	{
+		AUTO_LOCK(m_mutex);
+
+		TEST_PTR_RETURN(m_socket);
+
+		QList<QSslError> sslErrors = m_socket->sslHandshakeErrors();
+
+		bool result = true;
+
+		for(const QSslError& err : sslErrors)
+		{
+			if (m_ignoredSslErrors.contains(err.error()))
+			{
+				logWarning(QString("ignored SSL error - (%1) %2.").
+							arg(static_cast<int>(err.error())).
+							arg(err.errorString()));
+			}
+			else
+			{
+				logError(QString("critical SSL error - (%1) %2.").
+							arg(static_cast<int>(err.error())).
+							arg(err.errorString()));
+				result = false;
+			}
+		}
+
+		if (result == true)
+		{
+			logMessage("encrypted");
+
+			onConnectionEncrypted();
+		}
+		else
+		{
+			closeConnection();
+		}
+	}
+
+	void SocketWorker::sslErrors(const QList<QSslError>& errors)
+	{
+		Q_UNUSED(errors);
+	}
+
+	void SocketWorker::handshakeInterruptedOnError(const QSslError& error)
+	{
+		logError(QString("Connection handshake interrupted on error: (%1) %2").
+						arg(static_cast<int>(error.error())).arg(error.errorString()));
+	}
+
+	void SocketWorker::modeChanged(QSslSocket::SslMode mode)
+	{
+		logMessage(QString("mode changed to %1").arg(sslModeStr(mode)));
+	}
+
+	void SocketWorker::peerVerifyError(const QSslError&error)
+	{
+		logError(QString("peer verify error: (%1) %2").
+						arg(static_cast<int>(error.error())).arg(error.errorString()));
+	}
+
+	void SocketWorker::preSharedKeyAuthenticationRequired(QSslPreSharedKeyAuthenticator* authenticator)
+	{
+		Q_UNUSED(authenticator);
+		Q_ASSERT(false);
+		logWarning(QString("preSharedKeyAuthenticationRequired"));
 	}
 
 	void SocketWorker::onCloseConnection()
@@ -731,19 +837,13 @@ namespace Tcp
 		m_socket->close();
 	}
 
-	void SocketWorker::encrypted()
-	{
-		qDebug() << "SocketWorker::encrypted()";
-	}
-
-
 	// -------------------------------------------------------------------------------------
 	//
 	// Tcp::Server class implementation
 	//
 	// -------------------------------------------------------------------------------------
 
-	int Server::staticId = 0;
+	int Server::m_staticConnNo = 0;
 
 	Server::Server(const SoftwareInfo& sotwareInfo, E::SecurityLevel securityLevel) :
 		SocketWorker(sotwareInfo),
@@ -753,8 +853,8 @@ namespace Tcp
 
 		m_timeout = TCP_CLIENT_REQUEST_TIMEOUT;
 
-		m_id = staticId;
-		staticId++;
+		m_connNo = m_staticConnNo;
+		m_staticConnNo++;
 
 		initReadStatusVariables();
 
@@ -965,60 +1065,6 @@ namespace Tcp
 		return Tcp::SetConnectionResult::Ok;			// real checking will be implemented in derived classes (if required)
 	}
 
-	void Server::encrypted()
-	{
-		logMessage(QString("Connection %1 encrypted").arg(m_id));
-	}
-
-	void Server::sslErrors(const QList<QSslError>& errors)
-	{
-		logError(QString("Ssl errors occured on connection #%1:").
-							arg(m_id));
-
-		for(const QSslError& err : errors)
-		{
-			logError(QString("(%1) %2").
-						  arg(static_cast<int>(err.error())).arg(err.errorString()));
-
-/*			switch(err.error())
-			{
-			case QSslError::SelfSignedCertificate:
-				m_socket.ignoreSslErrors();
-			}*/
-		}
-	}
-
-	void Server::errorOccurred(QAbstractSocket::SocketError socketError)
-	{
-		logError(QString("Connection %1 errorOccured: (%2) %3").
-								arg(m_id).arg(static_cast<int>(socketError)).arg(m_socket->errorString()));
-	}
-
-	void Server::handshakeInterruptedOnError(const QSslError& error)
-	{
-		logError(QString("Connection %1 handshake interrupted on error: (%2) %3").
-						arg(m_id).arg(static_cast<int>(error.error())).arg(error.errorString()));
-	}
-
-	void Server::modeChanged(QSslSocket::SslMode mode)
-	{
-		logMessage(QString("Connection %1 mode changed to %2").
-						arg(m_id).arg(sslModeStr(mode)));
-	}
-
-	void Server::peerVerifyError(const QSslError &error)
-	{
-		logError(QString("Connection %1 peer verify error: (%2) %3").
-					arg(m_id).arg(static_cast<int>(error.error())).arg(error.errorString()));
-	}
-
-	void Server::preSharedKeyAuthenticationRequired(QSslPreSharedKeyAuthenticator* authenticator)
-	{
-		Q_UNUSED(authenticator);
-
-		logWarning(QString("Connection %1 preSharedKeyAuthenticationRequired").arg(m_id));
-	}
-
 	void Server::onThreadStarted()
 	{
 		connect(&m_autoAckTimer, &QTimer::timeout, this, &Server::onAutoAckTimer);
@@ -1057,8 +1103,6 @@ namespace Tcp
 
 		m_socket->setSocketDescriptor(m_connectedSocketDescriptor);
 
-		// added 20_01_2017 by WhiteMan
-		//
 		setStateConnected(HostAddressPort(m_socket->peerAddress(), m_socket->peerPort()));
 	}
 
@@ -1116,9 +1160,12 @@ namespace Tcp
 
 	void Server::processSecurityLevelRequest()
 	{
-		qint32 securityLevelInt = static_cast<qint32>(m_securityLevel);
+		Network::SecurityLevelReply slr;
 
-		sendReply(reinterpret_cast<const char*>(&securityLevelInt), sizeof (securityLevelInt));
+		slr.set_connectionno(m_connNo);
+		slr.set_securitylevel(static_cast<qint32>(m_securityLevel));
+
+		sendReply(slr);
 
 		switch(m_securityLevel)
 		{
@@ -1546,13 +1593,10 @@ namespace Tcp
 		Q_UNUSED(replyDataSize);
 	}
 
-	bool Client::isConnected() const
-	{
-		return SocketWorker::isConnected() && (m_setConnectionResult == SetConnectionResult::Ok);
-	}
-
 	bool Client::isClearToSendRequest() const
 	{
+		AUTO_LOCK(m_mutex);
+
 		return isConnected() && m_clientState == ClientState::ClearToSendRequest;
 	}
 
@@ -1570,10 +1614,16 @@ namespace Tcp
 	{
 		AUTO_LOCK(m_mutex);
 
+		if (m_socket == nullptr)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
 		if (requestID == RQID_SECURITY_LEVEL ||
 			requestID == RQID_INTRODUCE_MYSELF)
 		{
-			if (SocketWorker::isConnected() == false ||
+			if (isSocketConnected() == false ||
 				m_clientState != ClientState::ClearToSendRequest)
 			{
 				Q_ASSERT(false);
@@ -1587,12 +1637,6 @@ namespace Tcp
 				Q_ASSERT(false);
 				return false;
 			}
-		}
-
-		if (m_socket == nullptr)
-		{
-			Q_ASSERT(false);
-			return false;
 		}
 
 		addRequest();
@@ -1682,69 +1726,9 @@ namespace Tcp
 		m_enableClientAliveRequest = enable;
 	}
 
-	void Client::encrypted()
+	void Client::onConnectionEncrypted()
 	{
-		logMessage(QString("Connection encrypted"));
-
 		sendIntroduceMyselfRequest();
-	}
-
-	void Client::sslErrors(const QList<QSslError>& errors)
-	{
-		int notIgnoredErrCount = 0;
-
-		for(const QSslError& err : errors)
-		{
-			if (isIgnoredSslError(err) == false)
-			{
-				notIgnoredErrCount++;
-			}
-		}
-
-		if (notIgnoredErrCount > 0)
-		{
-			logError(QString("Ssl errors occured on connection:"));
-
-			for(const QSslError& err : errors)
-			{
-				logError(QString("(%1) %2").
-							  arg(static_cast<int>(err.error())).arg(err.errorString()));
-			}
-		}
-	}
-
-	void Client::errorOccurred(QAbstractSocket::SocketError socketError)
-	{
-		logError(QString("Connection error occured: (%1) %2").
-					arg(static_cast<int>(socketError)).arg(m_socket->errorString()));
-	}
-
-	void Client::handshakeInterruptedOnError(const QSslError& error)
-	{
-		logError(QString("Connection handshake interrupted on error: (%1) %2").
-						arg(static_cast<int>(error.error())).arg(error.errorString()));
-	}
-
-	void Client::modeChanged(QSslSocket::SslMode mode)
-	{
-		logMessage(QString("Connection mode changed to %1").
-						arg(sslModeStr(mode)));
-	}
-
-	void Client::peerVerifyError(const QSslError&error)
-	{
-		if (isIgnoredSslError(error) == false)
-		{
-			logError(QString("Connection peer verify error: (%1) %2").
-						arg(static_cast<int>(error.error())).arg(error.errorString()));
-		}
-	}
-
-	void Client::preSharedKeyAuthenticationRequired(QSslPreSharedKeyAuthenticator* authenticator)
-	{
-		Q_UNUSED(authenticator);
-
-		logWarning(QString("Connection preSharedKeyAuthenticationRequired"));
 	}
 
 	void Client::onTimeoutTimer()
@@ -1973,13 +1957,18 @@ namespace Tcp
 
 	bool Client::processSecurityLevelReply(const char* dataBuffer, int dataSize)
 	{
-		if (dataSize != sizeof(qint32))
+		Network::SecurityLevelReply slr;
+
+		bool result = slr.ParseFromArray(dataBuffer, dataSize);
+
+		if (result == false)
 		{
-			logError(QString("Wrong format of reply on SecurityLevel request!"));
+			Q_ASSERT(false);
 			return false;
 		}
+		m_connNo = slr.connectionno();
 
-		qint32 securityLevelInt = *reinterpret_cast<const qint32*>(dataBuffer);
+		qint32 securityLevelInt = slr.securitylevel();
 
 		if (E::contains<E::SecurityLevel>(securityLevelInt) == false)
 		{
@@ -1999,36 +1988,23 @@ namespace Tcp
 
 		case E::SecurityLevel::Encoded:
 
-			m_ignoredErrors.insert(QSslError::SslError::SelfSignedCertificate);
+			m_ignoredSslErrors.insert(QSslError::SslError::SelfSignedCertificate);
 
 			// No break, it is Ok!
 
 		case E::SecurityLevel::SSL:
 
-			m_ignoredErrors.insert(QSslError::SslError::HostNameMismatch);
+			m_ignoredSslErrors.insert(QSslError::SslError::HostNameMismatch);
 
 			if (loadCertificate(true) == false)
 			{
 				return false;
 			}
 
-			{
-				QList<QSslError> errList;
-
-				for(QSslError::SslError err : m_ignoredErrors)
-				{
-					errList.append(QSslError(err));
-				}
-
-				m_socket->ignoreSslErrors(errList);
-			}
-
-			m_socket->setPeerVerifyMode(m_securityLevel == E::SecurityLevel::Encoded ?
-											QSslSocket::QueryPeer :
-											QSslSocket::VerifyPeer);
-
+			m_socket->ignoreSslErrors();
 			m_socket->startClientEncryption();
 
+			// Ssl errors
 			// sendIntroduceMyselfRequest() will be called in encrypted() slot after SSL handshake done
 			//
 
@@ -2061,9 +2037,9 @@ namespace Tcp
 
 		result = false;
 
-		m_setConnectionResult = static_cast<SetConnectionResult>(imr.setconnectionerror());
+		m_setConnResult = static_cast<SetConnectionResult>(imr.setconnectionerror());
 
-		switch(m_setConnectionResult)
+		switch(m_setConnResult)
 		{
 		case SetConnectionResult::Ok:
 			result = true;
@@ -2156,24 +2132,4 @@ namespace Tcp
 
 		return true;
 	}
-
-	bool Client::isIgnoredSslError(const QSslError& sslErr) const
-	{
-		switch(m_securityLevel)
-		{
-		case E::SecurityLevel::Basic:
-			Q_ASSERT(false);				// in this mode no SSL errors should be detected
-			return true;
-
-		case E::SecurityLevel::Encoded:
-		case E::SecurityLevel::SSL:
-			return m_ignoredErrors.contains(sslErr.error());
-
-		default:
-			Q_ASSERT(false);
-		}
-
-		return false;
-	}
-
 }

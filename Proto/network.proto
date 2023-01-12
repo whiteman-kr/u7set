@@ -269,6 +269,12 @@ message SoftwareInfo
 	optional string hostname = 12;
 }
 
+message SecurityLevelReply
+{
+	required int32 connectionNo = 1;
+	required int32 securityLevel = 2 [default = 0];			// E::securityLevel::Base
+}
+
 message IntroduceMyselfRequest
 {
 	required SoftwareInfo clientSoftwareInfo = 1;
