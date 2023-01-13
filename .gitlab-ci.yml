@@ -324,12 +324,12 @@ linux_test_job:
 
 #Run Create databases for compiler and simulator tests
     - "echo Creating PostgreSQL databases..."
+    - "cp $CI_PROJECT_DIR/Test/ImportDatabase.sh /tmp"
     - "pushd /mnt/f/TestDatabase"
-    - "cp $CI_PROJECT_DIR/Test/ImportDatabase.sh ."
-    - "echo P2ssw0rd | su postgres ./ImportDatabase.sh u7_compiler_tests_v378"
-    - "echo P2ssw0rd | su postgres ./ImportDatabase.sh u7_test_simulator_v378"
-    - "rm ./ImportDatabase.sh"
+    - "echo P2ssw0rd | su postgres /tmp/ImportDatabase.sh u7_compiler_tests_v378"
+    - "echo P2ssw0rd | su postgres /tmp/ImportDatabase.sh u7_test_simulator_v378"
     - "popd"
+    - "rm /tmp/ImportDatabase.sh"
     - "echo Creating PostgreSQL databases complete
 #Run unit tests
     - "# ----------------------------------------------"
