@@ -109,12 +109,9 @@ namespace Tcp
 															// successfully processed
 		void closeConnection();
 
-		virtual void onInitConnection();
 		virtual void onConnection();
 		virtual void onDisconnection();
 
-//		int watchdogTimerTimeout() const { return m_timeout; }
-//		void setWatchdogTimerTimeout(int timeout_ms) { m_timeout = timeout_ms; }
 		void enableWatchdogTimer(bool enable);
 
 		void setLogger(CircularLoggerShared logger);
@@ -172,16 +169,6 @@ namespace Tcp
 		virtual void onConnectionEncrypted() {}
 
 	protected slots:
-		virtual void onTimeoutTimer();
-
-	private:
-		int readHeader(int bytesAvailable);
-		int readData(int bytesAvailable);
-
-		virtual void initReadStatusVariables() = 0;
-
-	private slots:
-
 		// QTcpSocket processing slots
 		//
 		virtual void stateChanged(QAbstractSocket::SocketState newState);
@@ -200,6 +187,13 @@ namespace Tcp
 		virtual void preSharedKeyAuthenticationRequired(QSslPreSharedKeyAuthenticator* authenticator);
 
 		void onCloseConnection();
+		virtual void onTimeoutTimer();
+
+	private:
+		int readHeader(int bytesAvailable);
+		int readData(int bytesAvailable);
+
+		virtual void initReadStatusVariables() = 0;
 
 	protected:
 		enum ReadState
@@ -325,6 +319,8 @@ namespace Tcp
 		void processIntroduceMyselfRequest(const char* dataBuffer, int dataSize);
 
 	private slots:
+		virtual void connected() final;
+
 		void onAutoAckTimer();
 		void onTimeoutTimer() override;
 
@@ -475,7 +471,6 @@ namespace Tcp
 
 		HostAddressPort currentServerAddressPort() const;
 		HostAddressPort serverAddressPort(int serverIndex) const;
-
 		HostAddressPort serverAddressPort1() const { return serverAddressPort(0); }
 		HostAddressPort serverAddressPort2() const { return serverAddressPort(1); }
 
@@ -487,7 +482,6 @@ namespace Tcp
 		virtual void onClientThreadStarted() {}
 		virtual void onClientThreadFinished() {}
 
-		virtual void onInitConnection() final;
 		virtual void onDisconnection() override;
 
 		virtual void onTryConnectToServer(const HostAddressPort& serverAddr);
@@ -512,14 +506,7 @@ namespace Tcp
 		virtual void onConnectionEncrypted() override;
 
 	protected slots:
-		virtual void encrypted() override;
-
-		virtual void sslErrors(const QList<QSslError>& errors);
-		virtual void errorOccurred(QAbstractSocket::SocketError socketError);
-		virtual void handshakeInterruptedOnError(const QSslError& error);
-		virtual void modeChanged(QSslSocket::SslMode mode);
-		virtual void peerVerifyError(const QSslError& error);
-		virtual void preSharedKeyAuthenticationRequired(QSslPreSharedKeyAuthenticator* authenticator);
+		virtual void connected() override;
 
 	signals:
 		void signal_unknownClientID(QString errMsg);
@@ -557,7 +544,6 @@ namespace Tcp
 			ClearToSendRequest,
 			WaitingForReply,
 		};
-
 
 		QString m_clientDescription;
 

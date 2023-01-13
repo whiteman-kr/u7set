@@ -68,19 +68,6 @@ namespace Tcp
 		emit closeConnectionSignal();
 	}
 
-	void SocketWorker::onInitConnection()
-	{
-		if (m_socket == nullptr)
-		{
-			Q_ASSERT(false);
-			return;
-		}
-
-		qDebug() << C_STR(QString(tr("Socket connected with %1 (descriptor = %2)")).
-						  arg(peerAddr().addressStr()).
-						  arg(m_socket->socketDescriptor()));
-	}
-
 	void SocketWorker::onConnection()
 	{
 		qDebug() << C_STR(QString(tr("Socket connected (descriptor = %1)")).
@@ -245,7 +232,6 @@ namespace Tcp
 		connect(m_socket, &QSslSocket::connected, this, &SocketWorker::connected);
 		connect(m_socket, &QSslSocket::disconnected, this, &SocketWorker::disconnected);
 		connect(m_socket, &QSslSocket::readyRead, this, &SocketWorker::readyRead);
-//		connect(m_socket, &QSslSocket::bytesWritten, this, &SocketWorker::bytesWritten);
 
 		// QSslSocket signals
 		//
@@ -418,9 +404,25 @@ namespace Tcp
 			// Server use self-signed certificate
 			//
 
+			certFilePath = (m_certificateFileName.isEmpty() == true ?
+								appPath + File::CRYPTO_SS_SERVER_CERTIFICATE :
+								m_certificateFileName);
+
+			pkeyFilePath = (m_privateKeyFileName.isEmpty() == true ?
+								appPath + File::CRYPTO_SS_SERVER_PRIVATE_KEY :
+								pkeyFilePath = m_privateKeyFileName);
+
+			break;
+
+		case E::SecurityLevel::SSL:
+
+			// In this mode both Server and Client require trusted (CA) certificates
+			//
 			if (m_certificateFileName.isEmpty() == true)
 			{
-				certFilePath = appPath + File::CRYPTO_SS_SERVER_CERTIFICATE;
+				certFilePath = (isClient == true ?
+									appPath + File::CRYPTO_CA_CLIENT_CERTIFICATE :
+									appPath + File::CRYPTO_CA_SERVER_CERTIFICATE);
 			}
 			else
 			{
@@ -429,28 +431,13 @@ namespace Tcp
 
 			if (m_privateKeyFileName.isEmpty() == true)
 			{
-				pkeyFilePath = appPath + File::CRYPTO_SS_SERVER_PRIVATE_KEY;
+				pkeyFilePath = (isClient == true ?
+									appPath + File::CRYPTO_CA_CLIENT_PRIVATE_KEY :
+									appPath + File::CRYPTO_CA_SERVER_PRIVATE_KEY);
 			}
 			else
 			{
 				pkeyFilePath = m_privateKeyFileName;
-			}
-
-			break;
-
-		case E::SecurityLevel::SSL:
-
-			// In this mode both Server and Client require trusted (CA) certificates
-			//
-			if (isClient == true)
-			{
-				certFilePath = appPath + File::CRYPTO_CA_CLIENT_CERTIFICATE;
-				pkeyFilePath = appPath + File::CRYPTO_CA_CLIENT_PRIVATE_KEY;
-			}
-			else
-			{
-				certFilePath = appPath + File::CRYPTO_CA_SERVER_CERTIFICATE;
-				pkeyFilePath = appPath + File::CRYPTO_CA_SERVER_PRIVATE_KEY;
 			}
 
 			break;
@@ -477,28 +464,6 @@ namespace Tcp
 		}
 
 		RETURN_IF_FALSE(result);
-
-		// Private Key loading
-		//
-		QFile pkeyFile(pkeyFilePath);
-
-		if (pkeyFile.open(QIODeviceBase::ReadOnly | QIODeviceBase::Text) == false)
-		{
-			logError(QString("Can't open private key file %1 !").arg(pkeyFilePath));
-			return false;
-		}
-
-		m_pkey = QSslKey(pkeyFile.readAll(), QSsl::Rsa, QSsl::Pem, QSsl::PrivateKey);
-
-		if (m_pkey.isNull() == true)
-		{
-			logError(QString("Private key %1 loading error or key file is corrupted!").arg(pkeyFilePath));
-			return false;
-		}
-		else
-		{
-			logMessage(QString("Server private key loaded."));
-		}
 
 		// Certificate loading
 		//
@@ -527,122 +492,32 @@ namespace Tcp
 			logMessage(QString("CA certificate loaded. Issuer - %1.").arg(m_cert.issuerDisplayName()));
 		}
 
+		// Private Key loading
+		//
+		QFile pkeyFile(pkeyFilePath);
+
+		if (pkeyFile.open(QIODeviceBase::ReadOnly | QIODeviceBase::Text) == false)
+		{
+			logError(QString("Can't open private key file %1 !").arg(pkeyFilePath));
+			return false;
+		}
+
+		m_pkey = QSslKey(pkeyFile.readAll(), QSsl::Rsa, QSsl::Pem, QSsl::PrivateKey);
+
+		if (m_pkey.isNull() == true)
+		{
+			logError(QString("Private key %1 loading error or key file is corrupted!").arg(pkeyFilePath));
+			return false;
+		}
+		else
+		{
+			logMessage(QString("Server private key loaded."));
+		}
+
 		m_socket->setLocalCertificate(m_cert);
 		m_socket->setPrivateKey(m_pkey);
 
 		return true;
-	}
-
-	void SocketWorker::onTimeoutTimer()
-	{
-		qDebug() << "SocketWorker::onTimeoutTimer()";
-	}
-
-
-	int SocketWorker::readHeader(int bytesAvailable)
-	{
-		if (m_readState != ReadState::WaitingForHeader)
-		{
-			Q_ASSERT(false);
-			return 0;
-		}
-
-		int bytesToRead = sizeof(SocketWorker::Header) - m_readHeaderSize;
-
-		if (bytesToRead > bytesAvailable)
-		{
-			bytesToRead = bytesAvailable;
-		}
-
-		qint64 bytesRead = m_socket->read(reinterpret_cast<char*>(&m_header) + m_readHeaderSize, bytesToRead);
-
-		m_readHeaderSize += static_cast<quint32>(bytesRead);
-
-		Q_ASSERT(m_readHeaderSize <= sizeof(SocketWorker::Header));
-
-		if (m_readHeaderSize < sizeof(SocketWorker::Header))
-		{
-			return static_cast<int>(bytesRead);
-		}
-
-		// Full requestHeader is read
-		//
-		if (m_header.checkCRC() == false)
-		{
-			Q_ASSERT(false);
-
-			closeConnection();
-
-			qDebug() << "Request header CRC error!";
-
-			return 0;
-		}
-
-		if (m_header.dataSize == 0)
-		{
-			m_headerAndDataReady = true;
-
-			m_readState = ReadState::WaitingNothing;
-
-			return static_cast<int>(bytesRead);
-		}
-
-		if (m_header.dataSize > TCP_MAX_DATA_SIZE)
-		{
-			Q_ASSERT(false);
-
-			closeConnection();
-
-			qDebug() << "Request" << m_header.id << "dataSize too big - " << m_header.dataSize;
-
-			return 0;
-		}
-
-		m_readState = ReadState::WaitingForData;
-
-		return static_cast<int>(bytesRead);
-	}
-
-	int SocketWorker::readData(int bytesAvailable)
-	{
-		if (m_readState != ReadState::WaitingForData)
-		{
-			Q_ASSERT(false);
-			return 0;
-		}
-
-		int bytesToRead = m_header.dataSize - m_readDataSize;
-
-		if (bytesToRead > bytesAvailable)
-		{
-			bytesToRead = bytesAvailable;
-		}
-
-		if (m_readDataSize + bytesToRead > TCP_MAX_DATA_SIZE)
-		{
-			Q_ASSERT(false);
-
-			closeConnection();
-
-			qDebug() << "Out of buffer m_requestData";
-
-			return 0;
-		}
-
-		qint64 bytesRead = m_socket->read(m_receiveDataBuffer + m_readDataSize, bytesToRead);
-
-		m_readDataSize += static_cast<quint32>(bytesRead);
-
-		Q_ASSERT(m_readDataSize <= m_header.dataSize);
-
-		if (m_readDataSize == m_header.dataSize)
-		{
-			m_headerAndDataReady = true;
-
-			m_readState = ReadState::WaitingNothing;
-		}
-
-		return static_cast<int>(bytesRead);
 	}
 
 	void SocketWorker::stateChanged(QAbstractSocket::SocketState newState)
@@ -690,8 +565,6 @@ namespace Tcp
 		initReadStatusVariables();
 
 		setStateConnected(HostAddressPort(m_socket->peerAddress(), m_socket->peerPort()));
-
-		onInitConnection();
 	}
 
 	void SocketWorker::disconnected()
@@ -813,10 +686,11 @@ namespace Tcp
 		logMessage(QString("mode changed to %1").arg(sslModeStr(mode)));
 	}
 
-	void SocketWorker::peerVerifyError(const QSslError&error)
+	void SocketWorker::peerVerifyError(const QSslError& error)
 	{
-		logError(QString("peer verify error: (%1) %2").
-						arg(static_cast<int>(error.error())).arg(error.errorString()));
+		Q_UNUSED(error);
+		/*logError(QString("peer verify error: (%1) %2").
+						arg(static_cast<int>(error.error())).arg(error.errorString()));*/
 	}
 
 	void SocketWorker::preSharedKeyAuthenticationRequired(QSslPreSharedKeyAuthenticator* authenticator)
@@ -835,6 +709,116 @@ namespace Tcp
 		}
 
 		m_socket->close();
+	}
+	void SocketWorker::onTimeoutTimer()
+	{
+		qDebug() << "SocketWorker::onTimeoutTimer()";
+	}
+
+	int SocketWorker::readHeader(int bytesAvailable)
+	{
+		if (m_readState != ReadState::WaitingForHeader)
+		{
+			Q_ASSERT(false);
+			return 0;
+		}
+
+		int bytesToRead = sizeof(SocketWorker::Header) - m_readHeaderSize;
+
+		if (bytesToRead > bytesAvailable)
+		{
+			bytesToRead = bytesAvailable;
+		}
+
+		qint64 bytesRead = m_socket->read(reinterpret_cast<char*>(&m_header) + m_readHeaderSize, bytesToRead);
+
+		m_readHeaderSize += static_cast<quint32>(bytesRead);
+
+		Q_ASSERT(m_readHeaderSize <= sizeof(SocketWorker::Header));
+
+		if (m_readHeaderSize < sizeof(SocketWorker::Header))
+		{
+			return static_cast<int>(bytesRead);
+		}
+
+		// Full requestHeader is read
+		//
+		if (m_header.checkCRC() == false)
+		{
+			Q_ASSERT(false);
+
+			closeConnection();
+
+			qDebug() << "Request header CRC error!";
+
+			return 0;
+		}
+
+		if (m_header.dataSize == 0)
+		{
+			m_headerAndDataReady = true;
+
+			m_readState = ReadState::WaitingNothing;
+
+			return static_cast<int>(bytesRead);
+		}
+
+		if (m_header.dataSize > TCP_MAX_DATA_SIZE)
+		{
+			Q_ASSERT(false);
+
+			closeConnection();
+
+			qDebug() << "Request" << m_header.id << "dataSize too big - " << m_header.dataSize;
+
+			return 0;
+		}
+
+		m_readState = ReadState::WaitingForData;
+
+		return static_cast<int>(bytesRead);
+	}
+
+	int SocketWorker::readData(int bytesAvailable)
+	{
+		if (m_readState != ReadState::WaitingForData)
+		{
+			Q_ASSERT(false);
+			return 0;
+		}
+
+		int bytesToRead = m_header.dataSize - m_readDataSize;
+
+		if (bytesToRead > bytesAvailable)
+		{
+			bytesToRead = bytesAvailable;
+		}
+
+		if (m_readDataSize + bytesToRead > TCP_MAX_DATA_SIZE)
+		{
+			Q_ASSERT(false);
+
+			closeConnection();
+
+			qDebug() << "Out of buffer m_requestData";
+
+			return 0;
+		}
+
+		qint64 bytesRead = m_socket->read(m_receiveDataBuffer + m_readDataSize, bytesToRead);
+
+		m_readDataSize += static_cast<quint32>(bytesRead);
+
+		Q_ASSERT(m_readDataSize <= m_header.dataSize);
+
+		if (m_readDataSize == m_header.dataSize)
+		{
+			m_headerAndDataReady = true;
+
+			m_readState = ReadState::WaitingNothing;
+		}
+
+		return static_cast<int>(bytesRead);
 	}
 
 	// -------------------------------------------------------------------------------------
@@ -1063,6 +1047,11 @@ namespace Tcp
 		Q_UNUSED(clientHostname);
 
 		return Tcp::SetConnectionResult::Ok;			// real checking will be implemented in derived classes (if required)
+	}
+
+	void Server::connected()
+	{
+		SocketWorker::connected();
 	}
 
 	void Server::onThreadStarted()
@@ -1518,29 +1507,14 @@ namespace Tcp
 
 	HostAddressPort Client::serverAddressPort(int serverIndex) const
 	{
-		if (serverIndex < 0 || serverIndex > 1)
+		if ((serverIndex < 0) ||
+			(serverIndex > 1))
 		{
 			Q_ASSERT(false);
 			return HostAddressPort();
 		}
 
 		return m_serversAddressPort[serverIndex];
-	}
-
-	void Client::onInitConnection()
-	{
-		if (objectName().isEmpty() == true)
-		{
-			qDebug() << qPrintable(QString("Socket connected to server %1").arg(m_selectedServer.addressPortStr()));
-		}
-		else
-		{
-			qDebug() << qPrintable(QString("%1: Socket connected to server %2")
-										.arg(objectName())
-										.arg(m_selectedServer.addressPortStr()));
-		}
-
-		sendRequest(RQID_SECURITY_LEVEL);
 	}
 
 	void Client::onDisconnection()
@@ -1551,7 +1525,7 @@ namespace Tcp
 		}
 		else
 		{
-			qDebug() << qPrintable(QString("%1: Socket disconnected from server %2")
+			qDebug() << qPrintable(QString("%1: socket disconnected from server %2")
 										.arg(objectName())
 										.arg(m_selectedServer.addressPortStr()));
 		}
@@ -1729,6 +1703,24 @@ namespace Tcp
 	void Client::onConnectionEncrypted()
 	{
 		sendIntroduceMyselfRequest();
+	}
+
+	void Client::connected()
+	{
+		SocketWorker::connected();
+
+		if (objectName().isEmpty() == true)
+		{
+			qDebug() << qPrintable(QString("Socket connected to server %1").arg(m_selectedServer.addressPortStr()));
+		}
+		else
+		{
+			qDebug() << qPrintable(QString("%1: socket connected to server %2")
+										.arg(objectName())
+										.arg(m_selectedServer.addressPortStr()));
+		}
+
+		sendRequest(RQID_SECURITY_LEVEL);
 	}
 
 	void Client::onTimeoutTimer()
