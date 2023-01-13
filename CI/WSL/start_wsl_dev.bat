@@ -1,0 +1,1 @@
+start /min wsl.exe -d Ubuntu-22.04.dev -u root echo "This is a development machine with gcc gitlab runner.";gitlab-runner start;su bv;/bin/bash

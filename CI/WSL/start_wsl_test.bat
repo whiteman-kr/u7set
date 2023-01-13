@@ -1,0 +1,1 @@
+start /min wsl.exe -d Ubuntu-22.04.test -u root echo "This is a test machine with gcctest gitlab runner.";service postgresql start;gitlab-runner start;su test;/bin/bash
