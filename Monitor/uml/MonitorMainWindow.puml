@@ -4,6 +4,7 @@
 !include ../../UtilsLib/uml/LogFile.puml
 !include ../../VFrame30/uml/AppSignalController.puml
 !include MonitorSchemaManager.puml
+!include MonitorCentralWidget.puml
 
 class MonitorMainWindow
 {
@@ -28,5 +29,6 @@ MonitorSchemaManager --* MonitorMainWindow
 
 VFrame30::AppSignalController --* MonitorMainWindow
 
+MonitorCentralWidget --* MonitorMainWindow
 
 @enduml

@@ -3,6 +3,7 @@
 
 !include ISchemaViewHistory.puml
 !include AppSignalController.puml
+!include SchemaView.puml
 
 '
 ' class ScriptSchemaView

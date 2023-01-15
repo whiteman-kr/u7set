@@ -1,6 +1,7 @@
 @startuml ' Monitor
 
 '!include ../../VFrame30/uml/VFrame30.puml
+!include ../../VFrame30/uml/BaseSchemaWidget.puml
 !include ../../VFrame30/uml/SchemaView.puml
 !include ../../VFrame30/uml/Schema.puml
 !include ../../VFrame30/uml/LogController.puml
@@ -10,7 +11,6 @@ remove VFrame30::LogicSchema
 remove VFrame30::UfbSchema
 remove VFrame30::TuningSchema
 remove VFrame30::MonitorSchema
-
 
 !include MonitorMainWindow.puml
 !include MonitorSchemaView.puml

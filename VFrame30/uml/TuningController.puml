@@ -14,6 +14,6 @@ class VFrame30::TuningController #F0FFF0
 }
 
 TuningLib::ITuningSignalManager -[#green]-o VFrame30::TuningController
-TuningLib::ITuningTcpClient "*" --o "1" VFrame30::TuningController
+TuningLib::ITuningTcpClient "*" --* "1" VFrame30::TuningController
 
 @enduml

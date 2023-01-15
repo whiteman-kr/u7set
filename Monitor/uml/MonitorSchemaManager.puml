@@ -1,8 +1,10 @@
 @startuml
+!include ../../doc/uml/Namespace.puml
 
 !include ../../VFrame30/uml/SchemaManager.puml
+!include MonitorConfigController.puml
 
-class MonitorSchemaManager #F0FFF0 extends VFrame30::SchemaManager 
+class MonitorSchemaManager extends VFrame30::SchemaManager 
 {
 	
 	MonitorConfigController* : m_configController
@@ -10,6 +12,8 @@ class MonitorSchemaManager #F0FFF0 extends VFrame30::SchemaManager
 
 	RtTrendSchema : m_rtTrendSchemas
 }
+
+MonitorConfigController --o MonitorSchemaManager : GetSchema
 
 
 @enduml
