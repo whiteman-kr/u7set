@@ -37,7 +37,15 @@ namespace Tcp
 
 	struct ConnectionState
 	{
-		bool isConnected = false;
+		bool isSocketConnected = false;					// True - if TCP connection is etablished
+
+		bool isConnected = false;						// True - if TCP connection is etablished and
+														// requests/reply RQID_SECURITY_LEVEL and RQID_INTRODUCE_MYSELF
+														// successfully processed
+
+		E::SecurityLevel securityLevel = E::SecurityLevel::Basic;
+		SetConnectionResult setConnectionResult = SetConnectionResult::Undefined;
+		int connectionNo = 0;
 
 		// nex data is valid if isConnected == true
 		//
@@ -55,6 +63,8 @@ namespace Tcp
 
 		bool isActual = false;
 
+		void clear() { *this = ConnectionState(); }
+
 		void dump();
 	};
 
@@ -67,7 +77,6 @@ namespace Tcp
 
 		Ok
 	};
-
 
 	class SocketWorker : public SimpleThreadWorker
 	{
@@ -101,7 +110,7 @@ namespace Tcp
 		#pragma pack(pop)
 
 	public:
-		SocketWorker(const SoftwareInfo& softwareInfo);
+		SocketWorker(const SoftwareInfo& softwareInfo, const QString& socketDescription);
 		virtual ~SocketWorker();
 
 		bool isConnected() const;							// returns True if isSocketConnected() == True and
@@ -128,9 +137,17 @@ namespace Tcp
 		void setSslCertificateFileName(const QString& fileName);
 		void setSslPrivateKeyFileName(const QString& fileName);
 
-		virtual void logError(const QString& err);
-		virtual void logWarning(const QString& wrn);
-		virtual void logMessage(const QString& msg);
+		// may be overridden to use logger other than CircularLogger
+		//
+		virtual void logError(const QString& err) const;
+		virtual void logWarning(const QString& wrn) const;
+		virtual void logMessage(const QString& msg) const;
+
+		virtual QString getLogStr(const QString& str) const;
+
+		CircularLoggerShared log();
+
+		QString socketDescription() const;
 
 	signals:
 		void socketDisconnected(const SocketWorker* socketWorker);
@@ -165,6 +182,8 @@ namespace Tcp
 		void stopTimeoutTimer();
 
 		bool loadCertificate(bool isClient);
+
+		QString socketStateStr(QAbstractSocket::SocketState state) const;
 
 		virtual void onConnectionEncrypted() {}
 
@@ -211,6 +230,7 @@ namespace Tcp
 
 		int m_connNo = 0;
 		E::SecurityLevel m_securityLevel = E::SecurityLevel::Basic;
+		QString m_socketDescription;
 
 		SetConnectionResult m_setConnResult = SetConnectionResult::Undefined;
 
@@ -249,7 +269,7 @@ namespace Tcp
 		bool m_headerAndDataReady = false;					// set to TRUE when full header and data read from socket
 
 	private:
-		std::shared_ptr<CircularLogger> m_log;
+		mutable CircularLoggerShared m_log;
 	};
 
 
@@ -264,7 +284,9 @@ namespace Tcp
 		Q_OBJECT
 
 	public:
-		Server(const SoftwareInfo& sotwareInfo, E::SecurityLevel securityLevel);
+		Server(const SoftwareInfo& sotwareInfo,
+			   E::SecurityLevel securityLevel,
+			   const QString& serverDescription);
 		virtual ~Server();
 
 		virtual Server* getNewInstance() = 0;	// ServerDerivedClass::getNewInstance() must be implemented as:
@@ -293,6 +315,8 @@ namespace Tcp
 
 		void sendClientList();
 
+		void initConnectionNo();
+
 	public slots:
 		void updateClientsInfo(const std::list<Tcp::ConnectionState> connectionStates);	// Update connection states of all clients from listener
 
@@ -306,20 +330,20 @@ namespace Tcp
 		std::list<Tcp::ConnectionState> m_connectionStates;
 
 	private:
-		virtual void onThreadStarted() final;
-		virtual void onThreadFinished() final;
+		virtual void onThreadStarted() override final;
+		virtual void onThreadFinished() override final;
 
-		virtual void initReadStatusVariables() final;
+		virtual void initReadStatusVariables() override final;
 
-		virtual void createSocket() final;
+		virtual void createSocket() override final;
 
-		void onHeaderAndDataReady() final;
+		void onHeaderAndDataReady() override final;
 
 		void processSecurityLevelRequest();
 		void processIntroduceMyselfRequest(const char* dataBuffer, int dataSize);
 
 	private slots:
-		virtual void connected() final;
+		virtual void connected() override final;
 
 		void onAutoAckTimer();
 		void onTimeoutTimer() override;
@@ -364,7 +388,7 @@ namespace Tcp
 	public:
 		TcpServer(QObject* parent) : QTcpServer(parent) {}
 
-		virtual void incomingConnection(qintptr socketDescriptor) final
+		virtual void incomingConnection(qintptr socketDescriptor) override final
 		{
 			emit newConnection(socketDescriptor);
 		}
@@ -410,7 +434,6 @@ namespace Tcp
 
 	private:
 		HostAddressPort m_listenAddressPort;
-		CircularLoggerShared m_log;
 
 		TcpServer* m_tcpServer = nullptr;
 
@@ -524,17 +547,17 @@ namespace Tcp
 
 		void connectToServer();
 
-		virtual void onThreadStarted() final;
-		virtual void onThreadFinished() final;
+		virtual void onThreadStarted() override final;
+		virtual void onThreadFinished() override final;
 
-		virtual void onHeaderAndDataReady() final;
+		virtual void onHeaderAndDataReady() override final;
 
 		bool processSecurityLevelReply(const char* dataBuffer, int dataSize);
 		bool processIntroduceMyselfReply(const char* dataBuffer, int dataSize);
 
 		void sendIntroduceMyselfRequest();
 
-		virtual void initReadStatusVariables() final;
+		virtual void initReadStatusVariables() override final;
 
 		bool sendClientAliveRequest();
 
@@ -544,8 +567,6 @@ namespace Tcp
 			ClearToSendRequest,
 			WaitingForReply,
 		};
-
-		QString m_clientDescription;
 
 		HostAddressPort m_serversAddressPort[2];
 		HostAddressPort m_selectedServer;

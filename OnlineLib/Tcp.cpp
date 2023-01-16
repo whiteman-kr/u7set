@@ -43,8 +43,9 @@ namespace Tcp
 	//
 	// -------------------------------------------------------------------------------------
 
-	SocketWorker::SocketWorker(const SoftwareInfo& softwareInfo) :
-		m_timeoutTimer(this)
+	SocketWorker::SocketWorker(const SoftwareInfo& softwareInfo, const QString& socketDescription) :
+		m_timeoutTimer(this),
+		m_socketDescription(socketDescription)
 	{
 		m_state.localSoftwareInfo = softwareInfo;
 
@@ -60,6 +61,8 @@ namespace Tcp
 
 	bool SocketWorker::isConnected() const
 	{
+		AUTO_LOCK(m_mutex);
+
 		return isSocketConnected() || m_setConnResult == SetConnectionResult::Ok;
 	}
 
@@ -70,14 +73,10 @@ namespace Tcp
 
 	void SocketWorker::onConnection()
 	{
-		qDebug() << C_STR(QString(tr("Socket connected (descriptor = %1)")).
-						  arg(m_socket->socketDescriptor()));
 	}
 
 	void SocketWorker::onDisconnection()
 	{
-		qDebug() << C_STR(QString(tr("Socket disconnected (descriptor = %1)")).
-						  arg(m_socket->socketDescriptor()));
 	}
 
 	void SocketWorker::enableWatchdogTimer(bool enable)
@@ -174,9 +173,9 @@ namespace Tcp
 		return QString();
 	}
 
-	void SocketWorker::logError(const QString& err)
+	void SocketWorker::logError(const QString& err) const
 	{
-		QString str = QString("Connection #%1: %2").arg(m_connNo).arg(err);
+		QString str = getLogStr(err);
 
 		if (m_log == nullptr)
 		{
@@ -188,9 +187,9 @@ namespace Tcp
 		}
 	}
 
-	void SocketWorker::logWarning(const QString& wrn)
+	void SocketWorker::logWarning(const QString& wrn) const
 	{
-		QString str = QString("Connection #%1: %2").arg(m_connNo).arg(wrn);
+		QString str = getLogStr(wrn);
 
 		if (m_log == nullptr)
 		{
@@ -202,9 +201,9 @@ namespace Tcp
 		}
 	}
 
-	void SocketWorker::logMessage(const QString& msg)
+	void SocketWorker::logMessage(const QString& msg) const
 	{
-		QString str = QString("Connection #%1: %2").arg(m_connNo).arg(msg);
+		QString str = getLogStr(msg);
 
 		if (m_log == nullptr)
 		{
@@ -214,6 +213,31 @@ namespace Tcp
 		{
 			DEBUG_LOG_MSG(m_log, str);
 		}
+	}
+
+	QString SocketWorker::getLogStr(const QString& str) const
+	{
+		QString connNoStr;
+
+		if (m_connNo != 0)
+		{
+			connNoStr = QString(" #%1").arg(m_connNo);
+		}
+
+		return QString("%1%2: %3").
+					arg(m_socketDescription.isEmpty() == true ? "Connection" : m_socketDescription).
+					arg(connNoStr).
+					arg(str);
+	}
+
+	CircularLoggerShared SocketWorker::log()
+	{
+		return m_log;
+	}
+
+	QString SocketWorker::socketDescription() const
+	{
+		return m_socketDescription;
 	}
 
 	void SocketWorker::createSocket()
@@ -246,6 +270,8 @@ namespace Tcp
 
 	void SocketWorker::deleteSocket()
 	{
+		AUTO_LOCK(m_mutex);
+
 		if (m_socket != nullptr)
 		{
 			m_socket->close();
@@ -296,8 +322,6 @@ namespace Tcp
 			return -1;
 		}
 
-//		m_bytesWritten = false;
-
 		addSentBytes(size);
 
 		return written;
@@ -340,7 +364,13 @@ namespace Tcp
 	{
 		AUTO_LOCK(m_stateMutex);
 
+		m_state.isSocketConnected = true;
 		m_state.isConnected = true;
+
+		m_state.securityLevel = m_securityLevel;
+		m_state.setConnectionResult = m_setConnResult;
+		m_state.connectionNo = m_connNo;
+
 		m_state.peerAddr = peerAddr;
 		m_state.startTime = QDateTime::currentMSecsSinceEpoch();
 		m_state.sentBytes = 0;
@@ -352,14 +382,7 @@ namespace Tcp
 	void SocketWorker::setStateDisconnected()
 	{
 		AUTO_LOCK(m_stateMutex);
-
-		m_state.isConnected = false;
-		m_state.peerAddr.clear();
-		m_state.startTime = 0;
-		m_state.sentBytes = 0;
-		m_state.receivedBytes = 0;
-		m_state.requestCount = 0;
-		m_state.replyCount = 0;
+		m_state.clear();
 	}
 
 	void SocketWorker::startTimeoutTimer()
@@ -520,56 +543,64 @@ namespace Tcp
 		return true;
 	}
 
+	QString SocketWorker::socketStateStr(QAbstractSocket::SocketState state) const
+	{
+		switch(newState)
+		{
+		case QAbstractSocket::UnconnectedState:
+			return QString("UnconnectedState");
+
+		case QAbstractSocket::HostLookupState:
+			return QString("HostLookupState");
+
+		case QAbstractSocket::ConnectingState:
+			return QString("ConnectingState");
+
+		case QAbstractSocket::ConnectedState:
+			return QString("ConnectedState");
+
+		case QAbstractSocket::BoundState:
+			return QString("BoundState");
+
+		case QAbstractSocket::ClosingState:
+			return QString("ClosingState");
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		return QString();
+	}
+
 	void SocketWorker::stateChanged(QAbstractSocket::SocketState newState)
 	{
-		Q_UNUSED(newState);
-		return;			// its Ok!
-
-//		QString stateStr;
-
-//		switch(newState)
-//		{
-//		case QAbstractSocket::UnconnectedState:
-//			stateStr = "Socket state: UnconnectedState";
-//			break;
-
-//		case QAbstractSocket::HostLookupState:
-//			stateStr = "Socket state: HostLookupState";
-//			break;
-
-//		case QAbstractSocket::ConnectingState:
-//			stateStr = "Socket state: ConnectingState";
-//			break;
-
-//		case QAbstractSocket::ConnectedState:
-//			stateStr = "Socket state: ConnectedState";
-//			break;
-
-//		case QAbstractSocket::BoundState:
-//			stateStr = "Socket state: BoundState";
-//			break;
-
-//		case QAbstractSocket::ClosingState:
-//			stateStr = "Socket state: ClosingState";
-//			break;
-
-//		default:
-//			Q_ASSERT(false);
-//		}
-
-//		qDebug() << qPrintable(stateStr);
+		logMessage(QString("socket state - %1").arg(socketStateStr(newState)));
 	}
 
 	void SocketWorker::connected()
 	{
 		initReadStatusVariables();
 
+
+		asd;lkasdlkamnsldkaskld
+
 		setStateConnected(HostAddressPort(m_socket->peerAddress(), m_socket->peerPort()));
+
+
+		asd;kmasl;kdmas
 	}
 
 	void SocketWorker::disconnected()
 	{
 		onDisconnection();
+
+		m_mutex.lock();
+
+		m_securityLevel = E::SecurityLevel::Basic;
+		m_setConnResult = SetConnectionResult::Undefined;
+		m_connNo = 0;
+
+		m_mutex.unlock();
 
 		setStateDisconnected();
 
@@ -827,18 +858,17 @@ namespace Tcp
 	//
 	// -------------------------------------------------------------------------------------
 
-	int Server::m_staticConnNo = 0;
+	int Server::m_staticConnNo = 1;
 
-	Server::Server(const SoftwareInfo& sotwareInfo, E::SecurityLevel securityLevel) :
-		SocketWorker(sotwareInfo),
+	Server::Server(const SoftwareInfo& sotwareInfo,
+				   E::SecurityLevel securityLevel,
+				   const QString& serverDescription) :
+		SocketWorker(sotwareInfo, serverDescription),
 		m_autoAckTimer(this)
 	{
 		m_securityLevel = securityLevel;
 
 		m_timeout = TCP_CLIENT_REQUEST_TIMEOUT;
-
-		m_connNo = m_staticConnNo;
-		m_staticConnNo++;
 
 		initReadStatusVariables();
 
@@ -1032,6 +1062,12 @@ namespace Tcp
 		sendReply(message);
 	}
 
+	void Server::initConnectionNo()
+	{
+		m_connNo = m_staticConnNo;
+		m_staticConnNo++;
+	}
+
 	void Server::updateClientsInfo(const std::list<Tcp::ConnectionState> connectionStates)
 	{
 		m_statesMutex.lock();
@@ -1196,32 +1232,45 @@ namespace Tcp
 		}
 
 		m_stateMutex.lock();
-
 		m_state.connectedSoftwareInfo.serializeFrom(request.clientsoftwareinfo());
+		m_stateMutex.unlock();
+
+		QString clientEquipmentID = m_state.connectedSoftwareInfo.equipmentID();
+		QString clientHostname = m_state.connectedSoftwareInfo.hostname();
 
 		Network::IntroduceMyselfReply reply;
 
 		m_state.localSoftwareInfo.serializeTo(reply.mutable_serversoftwareinfo());
 
-		Tcp::SetConnectionResult err = checkClient(m_state.connectedSoftwareInfo.equipmentID(),
-												  m_state.connectedSoftwareInfo.hostname());
-		m_stateMutex.unlock();
+		m_setConnResult = checkClient(clientEquipmentID, clientHostname);
 
-		reply.set_setconnectionerror(static_cast<::google::protobuf::int32>(err));
+		reply.set_setconnectionerror(static_cast<::google::protobuf::int32>(m_setConnResult));
 
-		switch(err)
+		switch(m_setConnResult)
 		{
 		case Tcp::SetConnectionResult::Ok:
+			logMessage(QString("client %1 with hostname %2 - check PASSED").
+							  arg(clientEquipmentID).arg(clientHostname));
+
+			logMessage(QString("ready to work"));
 			break;
 
 		case Tcp::SetConnectionResult::UnknownClientID:
-			reply.set_errormsg((QString("Unknown client equipmentID: %1").
-								arg(m_state.connectedSoftwareInfo.equipmentID())).toStdString());
+
+			logError(QString("unknown client EquipmentID '%1' - check FAILED!").
+							arg(clientEquipmentID));
+
+			reply.set_errormsg((QString("Unknown client equipmentID '%1'").
+								arg(clientEquipmentID)).toStdString());
 			break;
 
 		case Tcp::SetConnectionResult::WrongClientHostname:
-			reply.set_errormsg((QString("Client %1 running on computer with wrong hostname").
-								arg(m_state.connectedSoftwareInfo.equipmentID())).toStdString());
+
+			logError(QString("wrong client '%1' hostname '%2' - check FAILED!").
+							arg(clientEquipmentID).arg(clientHostname));
+
+			reply.set_errormsg((QString("Client '%1' running on computer with wrong hostname '%2'").
+								arg(clientEquipmentID).arg(clientHostname)).toStdString());
 			break;
 
 		default:
@@ -1234,7 +1283,6 @@ namespace Tcp
 
 		emit connectedSoftwareInfoChanged();
 	}
-
 
 	void Server::onAutoAckTimer()
 	{
@@ -1263,7 +1311,6 @@ namespace Tcp
 
 	Listener::Listener(const HostAddressPort& listenAddressPort, Server* server, CircularLoggerShared logger) :
 		m_listenAddressPort(listenAddressPort),
-		m_log(logger),
 		m_periodicTimer(this),
 		m_serverInstance(server)
 	{
@@ -1272,6 +1319,7 @@ namespace Tcp
 		qRegisterMetaType<std::list<ConnectionState>>("std::list<ConnectionState>");
 
 		m_serverInstance->setParent(this);
+		m_serverInstance->setLogger(logger);
 	}
 
 	Listener::~Listener()
@@ -1299,11 +1347,11 @@ namespace Tcp
 	{
 		if (startOk == true)
 		{
-			DEBUG_LOG_MSG(m_log, QString("Start listening %1 OK").arg(addr.addressPortStr()));
+			m_serverInstance->logMessage(QString("start listening %1 OK").arg(addr.addressPortStr()));
 		}
 		else
 		{
-			DEBUG_LOG_ERR(m_log, QString("Error on start listening %1: %2").arg(addr.addressPortStr()).arg(errStr));
+			m_serverInstance->logError(QString("error on start listening %1 - %2").arg(addr.addressPortStr()).arg(errStr));
 		}
 	}
 
@@ -1357,7 +1405,8 @@ namespace Tcp
 		//
 		Server* newServerInstance = m_serverInstance->getNewInstance();
 
-		newServerInstance->setLogger(m_log);
+		newServerInstance->initConnectionNo();
+		newServerInstance->setLogger(m_serverInstance->log());
 
 		connect(this, &Listener::connectedClientsListChanged, newServerInstance, &Server::updateClientsInfo);
 
@@ -1448,8 +1497,7 @@ namespace Tcp
 	Client::Client(const SoftwareInfo& softwareInfo,
 				   const HostAddressPort &serverAddressPort,
 				   const QString& clientDescription) :
-		SocketWorker(softwareInfo),
-		m_clientDescription(clientDescription),
+		SocketWorker(softwareInfo, clientDescription),
 		m_periodicTimer(this)
 	{
 		m_timeout = TCP_SERVER_REPLY_TIMEOUT;
@@ -1461,9 +1509,9 @@ namespace Tcp
 
 	Client::Client(const SoftwareInfo& softwareInfo,
 				   const HostAddressPort& serverAddressPort1,
-				   const HostAddressPort& serverAddressPort2, const QString &clientDescription) :
-		SocketWorker(softwareInfo),
-		m_clientDescription(clientDescription),
+				   const HostAddressPort& serverAddressPort2,
+				   const QString& clientDescription) :
+		SocketWorker(softwareInfo, clientDescription),
 		m_periodicTimer(this)
 	{
 		m_timeout = TCP_SERVER_REPLY_TIMEOUT;
@@ -1519,44 +1567,19 @@ namespace Tcp
 
 	void Client::onDisconnection()
 	{
-		if (objectName().isEmpty() == true)
-		{
-			qDebug() << qPrintable(QString("Socket disconnected from server %1").arg(m_selectedServer.addressPortStr()));
-		}
-		else
-		{
-			qDebug() << qPrintable(QString("%1: socket disconnected from server %2")
-										.arg(objectName())
-										.arg(m_selectedServer.addressPortStr()));
-		}
+		logMessage(QString("disconnected from server %1").arg(m_selectedServer.addressPortStr()));
 	}
 
 	void Client::onTryConnectToServer(const HostAddressPort& serverAddr)
 	{
-		if (objectName().isEmpty() == true)
+		if (serverAddr.isSet() == true)
 		{
-			if (serverAddr.isSet() == true)
-			{
-				qDebug() << qPrintable(QString("Try connect to server %1").arg(serverAddr.addressPortStr()));
-			}
-			else
-			{
-				qDebug() << qPrintable(QString("IP address of server is NOT SET! Connection is impossible!"));
-			}
+			logMessage(QString("try connect to server %1")
+							.arg(serverAddr.addressPortStr()));
 		}
 		else
 		{
-			if (serverAddr.isSet() == true)
-			{
-				qDebug() << qPrintable(QString("%1: Try connect to server %2")
-											.arg(objectName())
-											.arg(serverAddr.addressPortStr()));
-			}
-			else
-			{
-				qDebug() << qPrintable(QString("%1: IP address of server is NOT SET! Connection is impossible!")
-											.arg(objectName()));
-			}
+			logWarning(QString("IP address of server is NOT SET! Connection isn't possible!"));
 		}
 	}
 
@@ -1709,16 +1732,7 @@ namespace Tcp
 	{
 		SocketWorker::connected();
 
-		if (objectName().isEmpty() == true)
-		{
-			qDebug() << qPrintable(QString("Socket connected to server %1").arg(m_selectedServer.addressPortStr()));
-		}
-		else
-		{
-			qDebug() << qPrintable(QString("%1: socket connected to server %2")
-										.arg(objectName())
-										.arg(m_selectedServer.addressPortStr()));
-		}
+		logMessage(QString("connected to server %1").arg(m_selectedServer.addressPortStr()));
 
 		sendRequest(RQID_SECURITY_LEVEL);
 	}
@@ -1923,6 +1937,7 @@ namespace Tcp
 			case RQID_INTRODUCE_MYSELF:
 				if (processIntroduceMyselfReply(m_receiveDataBuffer, m_header.dataSize) == true)
 				{
+					logMessage("ready to work");
 					onConnection();
 				}
 				break;

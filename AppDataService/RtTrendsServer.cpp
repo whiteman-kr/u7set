@@ -110,7 +110,7 @@ namespace RtTrends
 
 
 	Server::Server(AppDataServiceWorker& appDataService, E::SecurityLevel securityLevel) :
-		Tcp::Server(appDataService.softwareInfo(), securityLevel),
+		Tcp::Server(appDataService.softwareInfo(), securityLevel, "RtTrendsServer"),
 		m_appDataService(appDataService),
 		m_signalsToSources(appDataService.signalsToSources()),
 		m_signalStates(appDataService.signalStates()),

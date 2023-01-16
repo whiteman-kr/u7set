@@ -12,7 +12,7 @@ UalTesterServer::UalTesterServer(const SoftwareInfo& sotwareInfo,
 								 E::SecurityLevel securityLevel,
 								 SourceBase* sourceBase,
 								 SignalBase* signalBase) :
-	Tcp::Server(sotwareInfo, securityLevel),
+	Tcp::Server(sotwareInfo, securityLevel, "UalTesterServer"),
 	m_sotwareInfo(sotwareInfo),
 	m_sourceBase(sourceBase),
 	m_signalBase(signalBase)

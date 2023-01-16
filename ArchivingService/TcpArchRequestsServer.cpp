@@ -5,7 +5,7 @@ TcpArchRequestsServer::TcpArchRequestsServer(const SoftwareInfo& softwareInfo,
 											 E::SecurityLevel securityLevel,
 											 Archive* archive,
 											 CircularLoggerShared logger) :
-	Tcp::Server(softwareInfo, securityLevel),
+	Tcp::Server(softwareInfo, securityLevel, "ArchRequestsServer"),
 	m_archive(archive),
 	m_logger(logger)
 {

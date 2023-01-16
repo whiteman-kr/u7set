@@ -75,8 +75,9 @@ namespace Tcp
 	// -------------------------------------------------------------------------------------
 
 	FileClient::FileClient(const SoftwareInfo& softwareInfo, const QString& rootFolder,
-						   const HostAddressPort &serverAddressPort) :
-		Client(softwareInfo, serverAddressPort, "FileClient")
+						   const HostAddressPort &serverAddressPort,
+						   const QString& clientDescription) :
+		Client(softwareInfo, serverAddressPort, clientDescription)
 	{
 		m_rootFolder = rootFolder;
 
@@ -88,8 +89,9 @@ namespace Tcp
 	FileClient::FileClient(const SoftwareInfo& softwareInfo,
 						   const QString &rootFolder,
 						   const HostAddressPort& serverAddressPort1,
-						   const HostAddressPort& serverAddressPort2) :
-		Client(softwareInfo, serverAddressPort1, serverAddressPort2,  "FileClient")
+						   const HostAddressPort& serverAddressPort2,
+						   const QString& clientDescription) :
+		Client(softwareInfo, serverAddressPort1, serverAddressPort2, clientDescription)
 	{
 		m_rootFolder = rootFolder;
 
@@ -458,11 +460,13 @@ namespace Tcp
 	FileServer::FileServer(const QString& rootFolder,
 						   const SoftwareInfo& softwareInfo,
 						   E::SecurityLevel securityLevel,
-						   std::shared_ptr<CircularLogger> logger) :
-		Server(softwareInfo, securityLevel),
-		m_logger(logger),
+						   CircularLoggerShared logger,
+						   const QString& serverDescription) :
+		Server(softwareInfo, securityLevel, serverDescription),
 		m_transmitionFilesTimer(this)
 	{
+		setLogger(logger);
+
 		m_rootFolder = QDir::fromNativeSeparators(rootFolder);
 		m_file.setParent(this);
 
@@ -471,7 +475,7 @@ namespace Tcp
 
 	Server* FileServer::getNewInstance()
 	{
-		return new FileServer(m_rootFolder, localSoftwareInfo(), securityLevel(), m_logger);
+		return new FileServer(m_rootFolder, localSoftwareInfo(), securityLevel(), log(), socketDescription());
 	}
 
 	void FileServer::processSuccessorRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)
@@ -488,7 +492,7 @@ namespace Tcp
 
 	void FileServer::onFileSent(const QString& fileName, const QString &ip)
 	{
-		DEBUG_LOG_MSG(m_logger,  QString(tr("File '%1' has been sent to %2")).arg(fileName).arg(ip));
+		DEBUG_LOG_MSG(log(),  QString(tr("File '%1' has been sent to %2")).arg(fileName).arg(ip));
 	}
 
 	void FileServer::init()

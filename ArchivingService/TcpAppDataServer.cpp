@@ -9,7 +9,7 @@
 TcpAppDataServer::TcpAppDataServer(const SoftwareInfo& softwareInfo,
 								   E::SecurityLevel securityLevel,
 								   Archive* archive) :
-	Tcp::Server(softwareInfo, securityLevel),
+	Tcp::Server(softwareInfo, securityLevel, "ArchiveAppDataServer"),
 	m_archive(archive)
 {
 }

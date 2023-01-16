@@ -12,7 +12,7 @@ TcpAppDataServer::TcpAppDataServer(const SoftwareInfo& softwareInfo,
 								   E::SecurityLevel securityLevel,
 								   AppDataReceiverThread* appDataReceiverThread,
 								   SignalStatesProcessingThread* signalStatesProcessingThread) :
-	Tcp::Server(softwareInfo, securityLevel),
+	Tcp::Server(softwareInfo, securityLevel, "AppDataServer"),
 	m_appDataReceiverThread(appDataReceiverThread),
 	m_signalStatesProcessingThread(signalStatesProcessingThread)
 {

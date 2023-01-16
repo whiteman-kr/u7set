@@ -99,12 +99,14 @@ namespace Tcp
 	public:
 		FileClient(const SoftwareInfo& softwareInfo,
 				   const QString& rootFolder,
-				   const HostAddressPort& serverAddressPort);
+				   const HostAddressPort& serverAddressPort,
+				   const QString& clientDescription);
 
 		FileClient(const SoftwareInfo& softwareInfo,
 				   const QString& rootFolder,
 				   const HostAddressPort& serverAddressPort1,
-				   const HostAddressPort& serverAddressPort2);
+				   const HostAddressPort& serverAddressPort2,
+				   const QString& clientDescription);
 
 		virtual ~FileClient();
 
@@ -163,7 +165,8 @@ namespace Tcp
 		FileServer(const QString& rootFolder,
 				   const SoftwareInfo& softwareInfo,
 				   E::SecurityLevel securityLevel,
-				   std::shared_ptr<CircularLogger> logger);
+				   CircularLoggerShared logger,
+				   const QString& serverDescription);
 
 		virtual Server* getNewInstance() override;
 
@@ -186,8 +189,6 @@ namespace Tcp
 		void restartTransmitionFilesTimer();
 
 	private:
-		std::shared_ptr<CircularLogger> m_logger;
-
 		QByteArray m_fileData;
 
 		Network::GetFileReply m_reply;

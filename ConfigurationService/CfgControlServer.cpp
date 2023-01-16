@@ -19,7 +19,6 @@ CfgControlServer::CfgControlServer(const SoftwareInfo& softwareInfo,
 								   const CfgCheckerWorker& checkerWorker,
 								   std::shared_ptr<CircularLogger> logger) :
 	CfgServer(buildPath, softwareInfo, securityLevel, sessionParams, logger),
-	m_logger(logger),
 	m_checkerWorker(checkerWorker),
 	m_equipmentID(softwareInfo.equipmentID()),
 	m_autoloadBuildPath(autoloadBuildPath),
@@ -36,7 +35,7 @@ CfgControlServer* CfgControlServer::getNewInstance()
 								m_autoloadBuildPath, m_workDirectory,
 								m_rootFolder, m_sessionParams,
 								m_knownClients, m_checkClientHostname,
-								m_checkerWorker, m_logger);
+								m_checkerWorker, log());
 }
 
 void CfgControlServer::processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)
@@ -81,22 +80,12 @@ Tcp::SetConnectionResult CfgControlServer::checkClient(const QString& clientEqui
 		{
 			if (clientHostname != ci.hostname)
 			{
-				DEBUG_LOG_ERR(m_logger, QString("Client %1 check failed - wrong client hostname!").
-								arg(clientEquipmentID));
 				return Tcp::SetConnectionResult::WrongClientHostname;
-			}
-			else
-			{
-				DEBUG_LOG_MSG(m_logger, QString("Client %1 with hostname %2 check passed!").
-							  arg(clientEquipmentID).arg(clientHostname));
 			}
 		}
 
 		return Tcp::SetConnectionResult::Ok;
 	}
-
-	DEBUG_LOG_ERR(m_logger, QString("Client %1 check failed - unknown EquipmentID!").
-					arg(clientEquipmentID));
 
 	return Tcp::SetConnectionResult::UnknownClientID;
 }
@@ -141,5 +130,4 @@ void CfgControlServer::sendSettings()
 
 void CfgControlServer::sendServiceLog()
 {
-
 }

@@ -70,8 +70,6 @@ private:
 	void processGetSessionParamsRequest();
 
 private:
-	std::shared_ptr<CircularLogger> m_logger;
-
 	SessionParams m_sessionParams;
 
 	QString m_buildXmlPathFileName;
@@ -120,7 +118,6 @@ public:
 	SoftwareInfo softwareInfo() const { return localSoftwareInfo(); }
 	int appInstance() const { return m_appInstance; }
 	bool enableDownloadCfg() const { return m_enableDownloadConfiguration; }
-	std::shared_ptr<CircularLogger> logger() { return m_logger; }
 
 	SessionParams sessionParams() const;
 	QString curSoftwareSettingsProfileName() const;
@@ -134,9 +131,9 @@ public:
 	template<typename T>
 	std::shared_ptr<const T> getCurrentSettingsProfile() const;
 
-	virtual void onTryConnectToServer(const HostAddressPort& serverAddr) override;
+//	virtual void onTryConnectToServer(const HostAddressPort& serverAddr) override;
 	virtual void onConnection() override;
-	virtual void onDisconnection() override;
+//	virtual void onDisconnection() override;
 	virtual void onStartDownload(const QString& fileName);
 	virtual void onEndDownload(const QString& fileName, Tcp::FileTransferResult errorCode);
 
@@ -235,8 +232,6 @@ private:
 	QString m_configurationXmlMd5;
 
 	QByteArray m_localFileData;
-
-	std::shared_ptr<CircularLogger> m_logger;
 
 	QList<FileDownloadRequest> m_downloadQueue;
 	FileDownloadRequest m_currentDownloadRequest;

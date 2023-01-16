@@ -768,7 +768,6 @@ int ServiceStarter::runAsRegularApplication()
 	// run service
 	//
 	Service* service = new Service(m_serviceWorker, m_logger);
-
 	service->start();
 
 	int result = m_app.exec();

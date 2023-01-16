@@ -41,8 +41,7 @@ CfgServer::CfgServer(const QString& buildFolder,
 					 E::SecurityLevel securityLevel,
 					 const SessionParams& sessionParams,
 					 std::shared_ptr<CircularLogger> logger) :
-	Tcp::FileServer(buildFolder, softwareInfo, securityLevel, logger),
-	m_logger(logger),
+	Tcp::FileServer(buildFolder, softwareInfo, securityLevel, logger, "CfgServer"),
 	m_sessionParams(sessionParams)
 {
 }
@@ -53,7 +52,7 @@ CfgServer* CfgServer::getNewInstance()
 						 localSoftwareInfo(),
 						 securityLevel(),
 						 m_sessionParams,
-						 m_logger);
+						 log());
 }
 
 void CfgServer::processSuccessorRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)
@@ -85,12 +84,12 @@ void CfgServer::onServerThreadFinished()
 
 void CfgServer::onConnection()
 {
-	DEBUG_LOG_MSG(m_logger, QString(tr("CfgServer new connection #%1 accepted from %2")).arg(id()).arg(peerAddr().addressStr()));
+	logMessage(QString("new connection accepted from %1").arg(peerAddr().addressStr()));
 }
 
 void CfgServer::onDisconnection()
 {
-	DEBUG_LOG_MSG(m_logger, QString(tr("CfgServer connection #%1 closed")).arg(id()));
+	logMessage(QString("connection closed"));
 }
 
 void CfgServer::readBuildXml()
@@ -219,11 +218,11 @@ CfgLoader::CfgLoader(const SoftwareInfo& softwareInfo,
 						const HostAddressPort& serverAddressPort2,
 						bool enableDownloadCfg,
 						std::shared_ptr<CircularLogger> logger) :
-	Tcp::FileClient(softwareInfo, "", serverAddressPort1, serverAddressPort2),
+	Tcp::FileClient(softwareInfo, "", serverAddressPort1, serverAddressPort2, "CfgLoader"),
 	m_enableDownloadConfiguration(enableDownloadCfg),
-	m_logger(logger),
 	m_timer(this)
 {
+	setLogger(logger);
 	changeApp(softwareInfo.equipmentID(), appInstance);
 }
 
@@ -391,47 +390,47 @@ QStringList CfgLoader::getSettingsProfiles() const
 	return profiles;
 }
 
-void CfgLoader::onTryConnectToServer(const HostAddressPort& serverAddr)
+/*void CfgLoader::onTryConnectToServer(const HostAddressPort& serverAddr)
 {
 	if (serverAddr.isSet() == true)
 	{
-		DEBUG_LOG_MSG(m_logger, QString(tr("Try connect to CfgService on %1").arg(serverAddr.addressPortStr())));
+		logMessage(QString(tr("try connect to CfgService on %1").arg(serverAddr.addressPortStr())));
 	}
 	else
 	{
 		DEBUG_LOG_MSG(m_logger, QString(tr("IP address of CfgService is NOT SET! Configuration loading is impossible!")));
 	}
 }
-
+*/
 void CfgLoader::onConnection()
 {
-	DEBUG_LOG_MSG(m_logger, QString(tr("CfgLoader connected to server %1").arg(peerAddr().addressStr())));
+//	DEBUG_LOG_MSG(m_logger, QString(tr("CfgLoader connected to server %1").arg(peerAddr().addressStr())));
 
 	resetStatuses();
 
 	sendGetSessionParamsRequest();
 }
 
-void CfgLoader::onDisconnection()
+/*void CfgLoader::onDisconnection()
 {
 	DEBUG_LOG_MSG(m_logger, QString(tr("CfgLoader disconnected from server %1")).arg(peerAddr().addressStr()));
-}
+}*/
 
 
 void CfgLoader::onStartDownload(const QString& fileName)
 {
-	DEBUG_LOG_MSG(m_logger, QString(tr("Start download: %1")).arg(fileName));
+	logMessage(QString("start download: %1").arg(fileName));
 }
 
 void CfgLoader::onEndDownload(const QString& fileName, Tcp::FileTransferResult errorCode)
 {
 	if (errorCode == Tcp::FileTransferResult::Ok)
 	{
-		DEBUG_LOG_MSG(m_logger, QString("File %1 download Ok").arg(fileName));
+		logMessage(QString("file %1 download Ok").arg(fileName));
 	}
 	else
 	{
-		DEBUG_LOG_ERR(m_logger, QString("File %1 download error - %2").arg(fileName).arg(getErrorStr(errorCode)));
+		logError(QString("file %1 download error - %2").arg(fileName).arg(getErrorStr(errorCode)));
 	}
 }
 
@@ -524,7 +523,7 @@ void CfgLoader::slot_onTimer()
 		{
 			// file exists from previous downloads, nothing to do
 			//
-			DEBUG_LOG_MSG(m_logger, QString("File %1 already exists, md5 = %2").
+			logMessage(QString("file %1 already exists, md5 = %2").
 										arg(cfi.pathFileName).arg(cfi.md5));
 		}
 		else
@@ -580,7 +579,7 @@ void CfgLoader::processGetSessionParamsReply(const char* replyData, quint32 repl
 
 	m_mutex.unlock();
 
-	DEBUG_LOG_MSG(m_logger, QString("Current software settings profile - %1, run mode - %2").
+	logMessage(QString("current software settings profile - %1, run mode - %2").
 				  arg(m_sessionParams.currentSettingsProfile).
 				  arg(E::valueToString<E::SoftwareRunMode>(m_sessionParams.softwareRunMode)));
 
@@ -677,7 +676,7 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 		}
 		else
 		{
-			DEBUG_LOG_MSG(m_logger, "Downloaded Configuration.xml - Ok");
+			logMessage("downloaded Configuration.xml - Ok");
 
 			bool result = true;
 
@@ -698,10 +697,10 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 
 				if (curSettingsProfile != nullptr)
 				{
-					DEBUG_LOG_MSG(m_logger, QString("Current software settings profile '%1' read - Ok").
+					logMessage(QString("current software settings profile '%1' read - Ok").
 												arg(m_sessionParams.currentSettingsProfile));
 
-					DEBUG_LOG_MSG(m_logger, "Read Configuration.xml - Ok");
+					logMessage("read Configuration.xml - Ok");
 
 					emit signal_configurationReady(m_cfgFilesInfo[CONFIGURATION_XML_FILE_INDEX].fileData,
 												   bfiArray,
@@ -710,7 +709,7 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 				}
 				else
 				{
-					DEBUG_LOG_ERR(m_logger, QString("ERROR reading software settings profile - %1").
+					logError(QString("reading software settings profile '%1' - FAILED").
 												arg(m_sessionParams.currentSettingsProfile));
 					result = false;
 				}
@@ -722,13 +721,13 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 
 			if (result == false)
 			{
-				DEBUG_LOG_ERR(m_logger, "ERROR reading Configuration.xml");
+				logError("reading Configuration.xml - FAILED");
 			}
 		}
 	}
 	else
 	{
-		DEBUG_LOG_MSG(m_logger, QString("Downloaded %1 %2").
+		logMessage(QString("downloaded %1 %2").
 									arg(m_currentDownloadRequest.isAutoRequest ? "(auto) :" : "(manual) :").
 									arg(fileName));
 
@@ -823,7 +822,7 @@ bool CfgLoader::readConfigurationXml()
 
 	if (result == false)
 	{
-		DEBUG_LOG_ERR(m_logger, "ERROR reading software settings set!");
+		logError("reading software settings set - FAILED!");
 		return false;
 	}
 

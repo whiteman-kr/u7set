@@ -38,7 +38,6 @@ private:
 	void sendSettings();
 	void sendServiceLog();
 
-	std::shared_ptr<CircularLogger> m_logger;
 	const CfgCheckerWorker& m_checkerWorker;
 	QString m_equipmentID;
 	QString m_autoloadBuildPath;
