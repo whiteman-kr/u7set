@@ -43,27 +43,6 @@ namespace Tcp
 		InternalError,
 	};
 
-/*
-#pragma pack(push, 1)
-
-	struct GetFileReply
-	{
-		FileTransferResult errorCode = FileTransferResult::Ok;
-		qint64 fileSize = 0;
-		qint32 totalParts = 0;				// == fileSize / FILE_PART_SIZE + (fileSize % FILE_PART_SIZE ? 1 : 0)
-		qint32 currentPart = 0;			// from 1
-		qint32 currentPartSize = 0;		// <= FILE_PART_SIZE
-		char md5[MD5_LEN];				// current MD5 code
-
-		GetFileReply();
-
-		void setMD5(const QByteArray& md5);
-		operator const char* () { return reinterpret_cast<const char*>(this); }
-		void clear();
-	};
-
-#pragma pack(pop) */
-
 	class FileTransfer
 	{
 	public:

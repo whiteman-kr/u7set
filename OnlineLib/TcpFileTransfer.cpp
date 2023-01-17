@@ -10,42 +10,6 @@
 
 namespace Tcp
 {
-
-	// -------------------------------------------------------------------------------------
-	//
-	// Tcp::GetFileReply structure implementation
-	//
-	// -------------------------------------------------------------------------------------
-
-/*	GetFileReply::GetFileReply()
-	{
-		clear();
-	}
-
-
-	void GetFileReply::clear()
-	{
-		errorCode = FileTransferResult::Ok;
-		fileSize = 0;
-		totalParts = 0;
-		currentPart = 0;
-		currentPartSize = 0;
-		memset(md5, 0, MD5_LEN);
-	}
-
-
-	void GetFileReply::setMD5(const QByteArray& md5)
-	{
-		if (md5.size() < MD5_LEN)
-		{
-			assert(false);
-			return;
-		}
-
-		memcpy(this->md5, md5.constData(), MD5_LEN);
-	}
-*/
-
 	// -------------------------------------------------------------------------------------
 	//
 	// Tcp::FileTransfer class implementation
@@ -492,7 +456,7 @@ namespace Tcp
 
 	void FileServer::onFileSent(const QString& fileName, const QString &ip)
 	{
-		DEBUG_LOG_MSG(log(),  QString(tr("File '%1' has been sent to %2")).arg(fileName).arg(ip));
+		logMessage(QString(tr("file '%1' sent to %2")).arg(fileName).arg(ip));
 	}
 
 	void FileServer::init()

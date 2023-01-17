@@ -20,7 +20,6 @@ ConfigurationServiceWorker::ConfigurationServiceWorker(const SoftwareInfo& softw
 {
 }
 
-
 ServiceWorker* ConfigurationServiceWorker::createInstance() const
 {
 	ConfigurationServiceWorker* newInstance = new ConfigurationServiceWorker(softwareInfo(),
@@ -186,7 +185,6 @@ void ConfigurationServiceWorker::initialize()
 	DEBUG_LOG_MSG(m_logger, QString(tr("ServiceWorker is initialized")));
 }
 
-
 void ConfigurationServiceWorker::shutdown()
 {
 	stopCfgCheckerThread();
@@ -196,15 +194,11 @@ void ConfigurationServiceWorker::shutdown()
 	DEBUG_LOG_MSG(m_logger, QString(tr("ServiceWorker is shutting down")));
 }
 
-
 void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 {
 
 	CfgControlServer* cfgControlServer = new CfgControlServer(softwareInfo(),
-
-															  /* DEBUG_STOP */
 															  m_cfgServiceSettings.securityLevel,
-															  //E::SecurityLevel::SSL,
 															  m_autoloadBuildPath,
 															  m_workDirectory,
 															  buildPath,
@@ -214,13 +208,10 @@ void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 															  *m_cfgCheckerWorker,
 															  m_logger);
 
-	Tcp::Listener* listener = new Tcp::Listener(m_clientIP, cfgControlServer, m_logger);
-
-	m_cfgServerThread = new Tcp::ServerThread(listener);
+	m_cfgServerThread = new Tcp::ServerThread(m_clientIP, cfgControlServer, m_logger);
 
 	m_cfgServerThread->start();
 }
-
 
 void ConfigurationServiceWorker::stopCfgServerThread()
 {

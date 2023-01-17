@@ -48,7 +48,7 @@ public:
 			  const SoftwareInfo& softwareInfo,
 			  E::SecurityLevel securityLevel,
 			  const SessionParams& sessionParams,
-			  std::shared_ptr<CircularLogger> logger);
+			  CircularLoggerShared logger);
 
 	virtual CfgServer* getNewInstance() override;
 
@@ -56,9 +56,6 @@ public:
 
 	virtual void onServerThreadStarted() override;
 	virtual void onServerThreadFinished() override;
-
-	virtual void onConnection() override;
-	virtual void onDisconnection() override;
 
 	const Builder::BuildInfo& buildInfo() { return m_buildInfo; }
 
@@ -79,7 +76,6 @@ private:
 
 	ErrorCode m_errorCode = ErrorCode::Ok;
 };
-
 
 // -------------------------------------------------------------------------------------
 //
@@ -131,9 +127,7 @@ public:
 	template<typename T>
 	std::shared_ptr<const T> getCurrentSettingsProfile() const;
 
-//	virtual void onTryConnectToServer(const HostAddressPort& serverAddr) override;
 	virtual void onConnection() override;
-//	virtual void onDisconnection() override;
 	virtual void onStartDownload(const QString& fileName);
 	virtual void onEndDownload(const QString& fileName, Tcp::FileTransferResult errorCode);
 

@@ -60,10 +60,6 @@ void TcpArchiveClient::onClientThreadFinished()
 								arg(serverAddressPort(0).addressPortStr()));
 }
 
-void TcpArchiveClient::onConnection()
-{
-}
-
 bool TcpArchiveClient::sendSignalStatesToArchiveRequest(bool sendNow)
 {
 	if (isClearToSendRequest() == false)

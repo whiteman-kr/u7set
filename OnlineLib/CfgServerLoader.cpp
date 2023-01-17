@@ -40,7 +40,7 @@ CfgServer::CfgServer(const QString& buildFolder,
 					 const SoftwareInfo& softwareInfo,
 					 E::SecurityLevel securityLevel,
 					 const SessionParams& sessionParams,
-					 std::shared_ptr<CircularLogger> logger) :
+					 CircularLoggerShared logger) :
 	Tcp::FileServer(buildFolder, softwareInfo, securityLevel, logger, "CfgServer"),
 	m_sessionParams(sessionParams)
 {
@@ -80,16 +80,6 @@ void CfgServer::onServerThreadStarted()
 
 void CfgServer::onServerThreadFinished()
 {
-}
-
-void CfgServer::onConnection()
-{
-	logMessage(QString("new connection accepted from %1").arg(peerAddr().addressStr()));
-}
-
-void CfgServer::onDisconnection()
-{
-	logMessage(QString("connection closed"));
 }
 
 void CfgServer::readBuildXml()
@@ -390,32 +380,14 @@ QStringList CfgLoader::getSettingsProfiles() const
 	return profiles;
 }
 
-/*void CfgLoader::onTryConnectToServer(const HostAddressPort& serverAddr)
-{
-	if (serverAddr.isSet() == true)
-	{
-		logMessage(QString(tr("try connect to CfgService on %1").arg(serverAddr.addressPortStr())));
-	}
-	else
-	{
-		DEBUG_LOG_MSG(m_logger, QString(tr("IP address of CfgService is NOT SET! Configuration loading is impossible!")));
-	}
-}
-*/
 void CfgLoader::onConnection()
 {
-//	DEBUG_LOG_MSG(m_logger, QString(tr("CfgLoader connected to server %1").arg(peerAddr().addressStr())));
+	Client::onConnection();
 
 	resetStatuses();
 
 	sendGetSessionParamsRequest();
 }
-
-/*void CfgLoader::onDisconnection()
-{
-	DEBUG_LOG_MSG(m_logger, QString(tr("CfgLoader disconnected from server %1")).arg(peerAddr().addressStr()));
-}*/
-
 
 void CfgLoader::onStartDownload(const QString& fileName)
 {
@@ -676,8 +648,6 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 		}
 		else
 		{
-			logMessage("downloaded Configuration.xml - Ok");
-
 			bool result = true;
 
 			if (readConfigurationXml() == true)

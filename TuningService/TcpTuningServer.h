@@ -25,7 +25,6 @@ namespace Tuning
 		virtual void onServerThreadStarted() override;
 		virtual void onServerThreadFinished() override;
 
-		virtual void onConnection() override;
 		virtual void onDisconnection() override;
 
 		Tcp::Server* getNewInstance() override;

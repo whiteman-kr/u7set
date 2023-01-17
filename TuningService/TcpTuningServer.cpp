@@ -31,12 +31,10 @@ namespace Tuning
 	{
 	}
 
-	void TcpTuningServer::onConnection()
-	{
-	}
-
 	void TcpTuningServer::onDisconnection()
 	{
+		Tcp::Server::onDisconnection();
+
 		m_service.clientIsDisconnected(connectedSoftwareInfo(), peerAddr().addressStr());
 	}
 

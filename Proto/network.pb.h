@@ -5874,7 +5874,7 @@ class IntroduceMyselfReply PROTOBUF_FINAL :
   enum : int {
     kErrorMsgFieldNumber = 3,
     kServerSoftwareInfoFieldNumber = 1,
-    kSetConnectionErrorFieldNumber = 2,
+    kSetConnectionResultFieldNumber = 2,
   };
   // optional string errorMsg = 3;
   bool has_errormsg() const;
@@ -5914,17 +5914,17 @@ class IntroduceMyselfReply PROTOBUF_FINAL :
       ::Network::SoftwareInfo* serversoftwareinfo);
   ::Network::SoftwareInfo* unsafe_arena_release_serversoftwareinfo();
 
-  // required int32 setConnectionError = 2;
-  bool has_setconnectionerror() const;
+  // required int32 setConnectionResult = 2;
+  bool has_setconnectionresult() const;
   private:
-  bool _internal_has_setconnectionerror() const;
+  bool _internal_has_setconnectionresult() const;
   public:
-  void clear_setconnectionerror();
-  ::PROTOBUF_NAMESPACE_ID::int32 setconnectionerror() const;
-  void set_setconnectionerror(::PROTOBUF_NAMESPACE_ID::int32 value);
+  void clear_setconnectionresult();
+  ::PROTOBUF_NAMESPACE_ID::int32 setconnectionresult() const;
+  void set_setconnectionresult(::PROTOBUF_NAMESPACE_ID::int32 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_setconnectionerror() const;
-  void _internal_set_setconnectionerror(::PROTOBUF_NAMESPACE_ID::int32 value);
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_setconnectionresult() const;
+  void _internal_set_setconnectionresult(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
   // @@protoc_insertion_point(class_scope:Network.IntroduceMyselfReply)
@@ -5941,7 +5941,7 @@ class IntroduceMyselfReply PROTOBUF_FINAL :
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr errormsg_;
   ::Network::SoftwareInfo* serversoftwareinfo_;
-  ::PROTOBUF_NAMESPACE_ID::int32 setconnectionerror_;
+  ::PROTOBUF_NAMESPACE_ID::int32 setconnectionresult_;
   friend struct ::TableStruct_network_2eproto;
 };
 // -------------------------------------------------------------------
@@ -20511,32 +20511,32 @@ inline void IntroduceMyselfReply::set_allocated_serversoftwareinfo(::Network::So
   // @@protoc_insertion_point(field_set_allocated:Network.IntroduceMyselfReply.serverSoftwareInfo)
 }
 
-// required int32 setConnectionError = 2;
-inline bool IntroduceMyselfReply::_internal_has_setconnectionerror() const {
+// required int32 setConnectionResult = 2;
+inline bool IntroduceMyselfReply::_internal_has_setconnectionresult() const {
   bool value = (_has_bits_[0] & 0x00000004u) != 0;
   return value;
 }
-inline bool IntroduceMyselfReply::has_setconnectionerror() const {
-  return _internal_has_setconnectionerror();
+inline bool IntroduceMyselfReply::has_setconnectionresult() const {
+  return _internal_has_setconnectionresult();
 }
-inline void IntroduceMyselfReply::clear_setconnectionerror() {
-  setconnectionerror_ = 0;
+inline void IntroduceMyselfReply::clear_setconnectionresult() {
+  setconnectionresult_ = 0;
   _has_bits_[0] &= ~0x00000004u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 IntroduceMyselfReply::_internal_setconnectionerror() const {
-  return setconnectionerror_;
+inline ::PROTOBUF_NAMESPACE_ID::int32 IntroduceMyselfReply::_internal_setconnectionresult() const {
+  return setconnectionresult_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 IntroduceMyselfReply::setconnectionerror() const {
-  // @@protoc_insertion_point(field_get:Network.IntroduceMyselfReply.setConnectionError)
-  return _internal_setconnectionerror();
+inline ::PROTOBUF_NAMESPACE_ID::int32 IntroduceMyselfReply::setconnectionresult() const {
+  // @@protoc_insertion_point(field_get:Network.IntroduceMyselfReply.setConnectionResult)
+  return _internal_setconnectionresult();
 }
-inline void IntroduceMyselfReply::_internal_set_setconnectionerror(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void IntroduceMyselfReply::_internal_set_setconnectionresult(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000004u;
-  setconnectionerror_ = value;
+  setconnectionresult_ = value;
 }
-inline void IntroduceMyselfReply::set_setconnectionerror(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _internal_set_setconnectionerror(value);
-  // @@protoc_insertion_point(field_set:Network.IntroduceMyselfReply.setConnectionError)
+inline void IntroduceMyselfReply::set_setconnectionresult(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_setconnectionresult(value);
+  // @@protoc_insertion_point(field_set:Network.IntroduceMyselfReply.setConnectionResult)
 }
 
 // optional string errorMsg = 3;

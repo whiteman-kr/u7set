@@ -19,8 +19,6 @@ private:
 	virtual void onClientThreadStarted() override;
 	virtual void onClientThreadFinished() override;
 
-	virtual void onConnection() override;
-
 	bool sendSignalStatesToArchiveRequest(bool sendNow);
 	void onSaveAppSignalsStatesReply(const char* replyData, quint32 replyDataSize);
 

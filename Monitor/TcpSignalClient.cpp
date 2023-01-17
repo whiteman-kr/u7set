@@ -56,7 +56,7 @@ void TcpSignalClient::onClientThreadFinished()
 void TcpSignalClient::onConnection()
 {
 	qDebug() << "TcpSignalClient::onConnection()";
-	m_logFile.writeMessage("oConnection()");
+	m_logFile.writeMessage("onConnection()");
 
 	Q_ASSERT(isClearToSendRequest() == true);
 

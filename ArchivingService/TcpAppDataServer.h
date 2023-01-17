@@ -24,9 +24,6 @@ public:
 private:
 	void onSaveAppSignalsStatesToArchive(const char* requestData, quint32 requestDataSize);
 
-	void onConnection() override;
-	void onDisconnection() override;
-
 private:
 	Archive* m_archive = nullptr;
 

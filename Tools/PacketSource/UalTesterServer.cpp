@@ -29,6 +29,8 @@ void UalTesterServer::onServerThreadFinished()
 
 void UalTesterServer::onConnection()
 {
+	Tcp::Server::onConnection();
+
 	emit connectionChanged(true);
 }
 

@@ -64,15 +64,3 @@ void TcpAppDataServer::onSaveAppSignalsStatesToArchive(const char* requestData, 
 
 	sendReply(m_saveStatesReply);
 }
-
-void TcpAppDataServer::onConnection()
-{
-	qDebug() << C_STR(QString(tr("TcpAppDataServer connected")));
-}
-
-void TcpAppDataServer::onDisconnection()
-{
-	qDebug() << C_STR(QString(tr("TcpAppDataServer disconnected")));
-}
-
-

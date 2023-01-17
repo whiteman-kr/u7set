@@ -35,6 +35,16 @@ namespace Tcp
 
 	const int TCP_AUTO_ACK_TIMER_INTERVAL = 500;
 
+	enum class SetConnectionResult
+	{
+		Undefined,
+
+		UnknownClientID,
+		WrongClientHostname,
+
+		Ok
+	};
+
 	struct ConnectionState
 	{
 		bool isSocketConnected = false;					// True - if TCP connection is etablished
@@ -66,16 +76,6 @@ namespace Tcp
 		void clear() { *this = ConnectionState(); }
 
 		void dump();
-	};
-
-	enum class SetConnectionResult
-	{
-		Undefined,
-
-		UnknownClientID,
-		WrongClientHostname,
-
-		Ok
 	};
 
 	class SocketWorker : public SimpleThreadWorker
@@ -113,13 +113,14 @@ namespace Tcp
 		SocketWorker(const SoftwareInfo& softwareInfo, const QString& socketDescription);
 		virtual ~SocketWorker();
 
-		bool isConnected() const;							// returns True if isSocketConnected() == True and
-															// requests/reply RQID_SECURITY_LEVEL and RQID_INTRODUCE_MYSELF
-															// successfully processed
+		bool isConnected() const;					// returns True if isSocketConnected() == True and
+													// requests/reply RQID_SECURITY_LEVEL and RQID_INTRODUCE_MYSELF
+													// successfully processed
 		void closeConnection();
 
-		virtual void onConnection();
-		virtual void onDisconnection();
+		virtual void onConnection() = 0;			// called after request/reply RQID_SECURITY_LEVEL and RQID_INTRODUCE_MYSELF
+													// successfully processed
+		virtual void onDisconnection() = 0;
 
 		void enableWatchdogTimer(bool enable);
 
@@ -175,8 +176,8 @@ namespace Tcp
 		void addRequest();
 		void addReply();
 
-		void setStateConnected(const HostAddressPort& peerAddr);
-		void setStateDisconnected();
+		void setSocketStateConnected(const HostAddressPort& peerAddr);
+		void setSocketStateDisconnected();
 
 		void startTimeoutTimer();
 		void stopTimeoutTimer();
@@ -223,6 +224,9 @@ namespace Tcp
 		};
 
 		//
+
+		SoftwareInfo m_localSoftwareInfo;
+		SoftwareInfo m_connectedSoftwareInfo;
 
 		mutable QRecursiveMutex m_mutex;
 
@@ -303,6 +307,9 @@ namespace Tcp
 
 		virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) = 0;
 
+		virtual void onConnection() override;
+		virtual void onDisconnection() override;
+
 		virtual void onConnectedSoftwareInfoChanged();		// called after processing RQID_INTRODUCE_MYSELF
 
 		void setAutoAck(bool autoAck) { m_autoAck = autoAck; }
@@ -326,9 +333,6 @@ namespace Tcp
 	protected:
 		virtual Tcp::SetConnectionResult checkClient(const QString& clientEquipmentID, const QString& clientHostname) const;
 
-	protected:
-		std::list<Tcp::ConnectionState> m_connectionStates;
-
 	private:
 		virtual void onThreadStarted() override final;
 		virtual void onThreadFinished() override final;
@@ -343,10 +347,11 @@ namespace Tcp
 		void processIntroduceMyselfRequest(const char* dataBuffer, int dataSize);
 
 	private slots:
-		virtual void connected() override final;
-
 		void onAutoAckTimer();
 		void onTimeoutTimer() override;
+
+	protected:
+		std::list<Tcp::ConnectionState> m_connectionStates;
 
 	private:
 		enum ServerState
@@ -414,7 +419,6 @@ namespace Tcp
 		virtual void onListenerThreadStarted() {}
 		virtual void onListenerThreadFinished() {}
 
-		virtual void onNewConnectionAccepted(const HostAddressPort& peerAddr, int connectionNo);
 		virtual void onStartListening(const HostAddressPort& addr, bool startOk, const QString& errStr);
 
 	signals:
@@ -460,7 +464,7 @@ namespace Tcp
 	public:
 		ServerThread(const HostAddressPort& listenAddressPort,
 					 Server* server,
-					 std::shared_ptr<CircularLogger> logger);
+					 CircularLoggerShared logger);
 		ServerThread(Listener* listener);
 
 		virtual ~ServerThread();
@@ -505,6 +509,7 @@ namespace Tcp
 		virtual void onClientThreadStarted() {}
 		virtual void onClientThreadFinished() {}
 
+		virtual void onConnection() override;
 		virtual void onDisconnection() override;
 
 		virtual void onTryConnectToServer(const HostAddressPort& serverAddr);

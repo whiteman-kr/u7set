@@ -44,8 +44,9 @@ namespace Tcp
 	// -------------------------------------------------------------------------------------
 
 	SocketWorker::SocketWorker(const SoftwareInfo& softwareInfo, const QString& socketDescription) :
-		m_timeoutTimer(this),
-		m_socketDescription(socketDescription)
+		m_localSoftwareInfo(softwareInfo),
+		m_socketDescription(socketDescription),
+		m_timeoutTimer(this)
 	{
 		m_state.localSoftwareInfo = softwareInfo;
 
@@ -63,16 +64,12 @@ namespace Tcp
 	{
 		AUTO_LOCK(m_mutex);
 
-		return isSocketConnected() || m_setConnResult == SetConnectionResult::Ok;
+		return isSocketConnected() && m_setConnResult == SetConnectionResult::Ok;
 	}
 
 	void SocketWorker::closeConnection()
 	{
 		emit closeConnectionSignal();
-	}
-
-	void SocketWorker::onConnection()
-	{
 	}
 
 	void SocketWorker::onDisconnection()
@@ -124,12 +121,12 @@ namespace Tcp
 
 	SoftwareInfo SocketWorker::localSoftwareInfo() const
 	{
-		return getConnectionState().localSoftwareInfo;
+		return m_localSoftwareInfo;
 	}
 
 	SoftwareInfo SocketWorker::connectedSoftwareInfo() const
 	{
-		return getConnectionState().connectedSoftwareInfo;
+		return m_connectedSoftwareInfo;
 	}
 
 	HostAddressPort SocketWorker::peerAddr() const
@@ -360,16 +357,20 @@ namespace Tcp
 		m_state.replyCount++;
 	}
 
-	void SocketWorker::setStateConnected(const HostAddressPort& peerAddr)
+	void SocketWorker::setSocketStateConnected(const HostAddressPort& peerAddr)
 	{
 		AUTO_LOCK(m_stateMutex);
 
 		m_state.isSocketConnected = true;
-		m_state.isConnected = true;
+		m_state.isConnected = false;
 
 		m_state.securityLevel = m_securityLevel;
 		m_state.setConnectionResult = m_setConnResult;
 		m_state.connectionNo = m_connNo;
+		m_state.localSoftwareInfo = m_localSoftwareInfo;
+
+		m_state.connectedSoftwareInfo.clear();			// will be sets after RQID_INTRODUCE_MYSELF processing
+		m_connectedSoftwareInfo.clear();				//
 
 		m_state.peerAddr = peerAddr;
 		m_state.startTime = QDateTime::currentMSecsSinceEpoch();
@@ -379,10 +380,13 @@ namespace Tcp
 		m_state.replyCount = 0;
 	}
 
-	void SocketWorker::setStateDisconnected()
+	void SocketWorker::setSocketStateDisconnected()
 	{
 		AUTO_LOCK(m_stateMutex);
 		m_state.clear();
+
+		m_state.localSoftwareInfo = m_localSoftwareInfo;
+		m_connectedSoftwareInfo.clear();
 	}
 
 	void SocketWorker::startTimeoutTimer()
@@ -545,7 +549,7 @@ namespace Tcp
 
 	QString SocketWorker::socketStateStr(QAbstractSocket::SocketState state) const
 	{
-		switch(newState)
+		switch(state)
 		{
 		case QAbstractSocket::UnconnectedState:
 			return QString("UnconnectedState");
@@ -574,20 +578,16 @@ namespace Tcp
 
 	void SocketWorker::stateChanged(QAbstractSocket::SocketState newState)
 	{
-		logMessage(QString("socket state - %1").arg(socketStateStr(newState)));
+		Q_UNUSED(newState);
+
+		//logMessage(QString("socket state - %1").arg(socketStateStr(newState)));
 	}
 
 	void SocketWorker::connected()
 	{
 		initReadStatusVariables();
 
-
-		asd;lkasdlkamnsldkaskld
-
-		setStateConnected(HostAddressPort(m_socket->peerAddress(), m_socket->peerPort()));
-
-
-		asd;kmasl;kdmas
+		setSocketStateConnected(HostAddressPort(m_socket->peerAddress(), m_socket->peerPort()));
 	}
 
 	void SocketWorker::disconnected()
@@ -602,7 +602,7 @@ namespace Tcp
 
 		m_mutex.unlock();
 
-		setStateDisconnected();
+		setSocketStateDisconnected();
 
 		emit socketDisconnected(this);
 	}
@@ -691,7 +691,7 @@ namespace Tcp
 
 		if (result == true)
 		{
-			logMessage("encrypted");
+			logMessage("connection encrypted");
 
 			onConnectionEncrypted();
 		}
@@ -708,7 +708,7 @@ namespace Tcp
 
 	void SocketWorker::handshakeInterruptedOnError(const QSslError& error)
 	{
-		logError(QString("Connection handshake interrupted on error: (%1) %2").
+		logError(QString("connection handshake interrupted on error: (%1) %2").
 						arg(static_cast<int>(error.error())).arg(error.errorString()));
 	}
 
@@ -733,6 +733,8 @@ namespace Tcp
 
 	void SocketWorker::onCloseConnection()
 	{
+		AUTO_LOCK(m_mutex);
+
 		if (m_socket == nullptr)
 		{
 			Q_ASSERT(false);
@@ -743,7 +745,7 @@ namespace Tcp
 	}
 	void SocketWorker::onTimeoutTimer()
 	{
-		qDebug() << "SocketWorker::onTimeoutTimer()";
+		logWarning("onTimeoutTimer()");
 	}
 
 	int SocketWorker::readHeader(int bytesAvailable)
@@ -831,7 +833,7 @@ namespace Tcp
 
 			closeConnection();
 
-			qDebug() << "Out of buffer m_requestData";
+			logError("out of buffer m_requestData");
 
 			return 0;
 		}
@@ -888,6 +890,20 @@ namespace Tcp
 		m_connectedSocketDescriptor = connectedSocketDescriptor;
 	}
 
+	void Server::onConnection()
+	{
+		logMessage(QString("client %1 (%2) connected").
+				   arg(m_connectedSoftwareInfo.equipmentID()).
+				   arg(peerAddr().addressStr()));
+	}
+
+	void Server::onDisconnection()
+	{
+		logMessage(QString("client %1 (%2) disconnected").
+				   arg(m_connectedSoftwareInfo.equipmentID()).
+				   arg(peerAddr().addressStr()));
+	}
+
 	void Server::onConnectedSoftwareInfoChanged()
 	{
 		// called after processing RQID_INTRODUCE_MYSELF
@@ -919,7 +935,7 @@ namespace Tcp
 
 		if (written == -1)
 		{
-			qDebug() << qPrintable(QString("Socket write error: %1").arg(m_socket->errorString()));
+			logError(QString("Socket write error: %1").arg(m_socket->errorString()));
 			return;
 		}
 
@@ -954,7 +970,11 @@ namespace Tcp
 		{
 			m_protobufBuffer = new char [TCP_MAX_DATA_SIZE];
 
-			Q_ASSERT(m_protobufBuffer != nullptr);
+			if (m_protobufBuffer == nullptr)
+			{
+				Q_ASSERT(false);
+				return false;
+			}
 		}
 
 		protobufMessage.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(m_protobufBuffer));
@@ -993,7 +1013,7 @@ namespace Tcp
 
 		if (written == -1)
 		{
-			qDebug() << qPrintable(QString("Socket write error: %1").arg(m_socket->errorString()));
+			logError(QString("socket write error: %1").arg(m_socket->errorString()));
 			return false;
 		}
 
@@ -1009,7 +1029,7 @@ namespace Tcp
 
 			if (written == -1)
 			{
-				qDebug() << qPrintable(QString("Socket write error: %1").arg(m_socket->errorString()));
+				logError(QString("socket write error: %1").arg(m_socket->errorString()));
 				return false;
 			}
 
@@ -1082,12 +1102,7 @@ namespace Tcp
 		Q_UNUSED(clientEquipmentID);
 		Q_UNUSED(clientHostname);
 
-		return Tcp::SetConnectionResult::Ok;			// real checking will be implemented in derived classes (if required)
-	}
-
-	void Server::connected()
-	{
-		SocketWorker::connected();
+		return Tcp::SetConnectionResult::Ok;	// real checking will be implemented in derived classes (if required)
 	}
 
 	void Server::onThreadStarted()
@@ -1098,7 +1113,9 @@ namespace Tcp
 
 		onServerThreadStarted();
 
-		onConnection();
+		logMessage(QString("incoming connection from %1, security level - %2").
+					arg(peerAddr().addressStr()).
+					arg(E::valueToString<E::SecurityLevel>(m_securityLevel)));
 
 		startTimeoutTimer();
 	}
@@ -1128,7 +1145,7 @@ namespace Tcp
 
 		m_socket->setSocketDescriptor(m_connectedSocketDescriptor);
 
-		setStateConnected(HostAddressPort(m_socket->peerAddress(), m_socket->peerPort()));
+		setSocketStateConnected(HostAddressPort(m_socket->peerAddress(), m_socket->peerPort()));
 	}
 
 	void Server::onHeaderAndDataReady()
@@ -1232,27 +1249,27 @@ namespace Tcp
 		}
 
 		m_stateMutex.lock();
-		m_state.connectedSoftwareInfo.serializeFrom(request.clientsoftwareinfo());
-		m_stateMutex.unlock();
 
-		QString clientEquipmentID = m_state.connectedSoftwareInfo.equipmentID();
-		QString clientHostname = m_state.connectedSoftwareInfo.hostname();
+		m_connectedSoftwareInfo.serializeFrom(request.clientsoftwareinfo());
 
-		Network::IntroduceMyselfReply reply;
+		m_state.connectedSoftwareInfo = m_connectedSoftwareInfo;
 
-		m_state.localSoftwareInfo.serializeTo(reply.mutable_serversoftwareinfo());
+		QString clientEquipmentID = m_connectedSoftwareInfo.equipmentID();
+		QString clientHostname = m_connectedSoftwareInfo.hostname();
 
 		m_setConnResult = checkClient(clientEquipmentID, clientHostname);
 
-		reply.set_setconnectionerror(static_cast<::google::protobuf::int32>(m_setConnResult));
+		m_state.setConnectionResult = m_setConnResult;
+
+		m_stateMutex.unlock();
+
+		Network::IntroduceMyselfReply reply;
 
 		switch(m_setConnResult)
 		{
 		case Tcp::SetConnectionResult::Ok:
 			logMessage(QString("client %1 with hostname %2 - check PASSED").
 							  arg(clientEquipmentID).arg(clientHostname));
-
-			logMessage(QString("ready to work"));
 			break;
 
 		case Tcp::SetConnectionResult::UnknownClientID:
@@ -1277,11 +1294,19 @@ namespace Tcp
 			Q_ASSERT(false);
 		}
 
+		m_state.localSoftwareInfo.serializeTo(reply.mutable_serversoftwareinfo());
+		reply.set_setconnectionresult(static_cast<::google::protobuf::int32>(m_setConnResult));
+
 		sendReply(reply);
 
 		onConnectedSoftwareInfoChanged();
 
 		emit connectedSoftwareInfoChanged();
+
+		if (m_setConnResult == Tcp::SetConnectionResult::Ok)
+		{
+			onConnection();
+		}
 	}
 
 	void Server::onAutoAckTimer()
@@ -1298,7 +1323,7 @@ namespace Tcp
 
 	void Server::onTimeoutTimer()
 	{
-		qDebug() << "Tcp::Server::onTimeoutTimer()";
+		logWarning("onTimeoutTimer()");
 
 		closeConnection();
 	}
@@ -1335,12 +1360,6 @@ namespace Tcp
 		m_runningServers.clear();
 
 		delete m_serverInstance;
-	}
-
-	void Listener::onNewConnectionAccepted(const HostAddressPort& peerAddr, int connectionNo)
-	{
-		Q_UNUSED(peerAddr)
-		Q_UNUSED(connectionNo)
 	}
 
 	void Listener::onStartListening(const HostAddressPort& addr, bool startOk, const QString& errStr)
@@ -1415,8 +1434,6 @@ namespace Tcp
 
 		newServerInstance->setConnectedSocketDescriptor(socketDescriptor);
 
-		onNewConnectionAccepted(newServerInstance->peerAddr(), newServerInstance->id());
-
 		SimpleThread* newThread = new SimpleThread(newServerInstance);
 
 		m_runningServers.insert(newServerInstance, newThread);
@@ -1474,7 +1491,7 @@ namespace Tcp
 
 	ServerThread::ServerThread(const HostAddressPort &listenAddressPort,
 							   Server* server,
-							   std::shared_ptr<CircularLogger> logger) :
+							   CircularLoggerShared logger) :
 		SimpleThread(new Listener(listenAddressPort, server, logger))
 	{
 	}
@@ -1565,17 +1582,25 @@ namespace Tcp
 		return m_serversAddressPort[serverIndex];
 	}
 
+	void Client::onConnection()
+	{
+		logMessage(QString("connected to server %1 (%2)").
+				   arg(m_connectedSoftwareInfo.equipmentID()).
+				   arg(peerAddr().addressStr()));
+	}
+
 	void Client::onDisconnection()
 	{
-		logMessage(QString("disconnected from server %1").arg(m_selectedServer.addressPortStr()));
+		logMessage(QString("disconnected from server %1 (%2)").
+					   arg(m_connectedSoftwareInfo.equipmentID()).
+					   arg(peerAddr().addressStr()));
 	}
 
 	void Client::onTryConnectToServer(const HostAddressPort& serverAddr)
 	{
 		if (serverAddr.isSet() == true)
 		{
-			logMessage(QString("try connect to server %1")
-							.arg(serverAddr.addressPortStr()));
+			logMessage(QString("try connect to server %1").arg(serverAddr.addressPortStr()));
 		}
 		else
 		{
@@ -1708,7 +1733,11 @@ namespace Tcp
 		{
 			m_protobufBuffer = new char [TCP_MAX_DATA_SIZE];
 
-			Q_ASSERT(m_protobufBuffer != nullptr);
+			if (m_protobufBuffer == nullptr)
+			{
+				Q_ASSERT(false);
+				return false;
+			}
 		}
 
 		protobufMessage.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(m_protobufBuffer));
@@ -1739,8 +1768,10 @@ namespace Tcp
 
 	void Client::onTimeoutTimer()
 	{
-		qDebug() << "Tcp::Client::onTimeoutTimer()";
+		logWarning("onTimeoutTimer()");
+
 		onReplyTimeout();
+
 		closeConnection();
 	}
 
@@ -1937,7 +1968,6 @@ namespace Tcp
 			case RQID_INTRODUCE_MYSELF:
 				if (processIntroduceMyselfReply(m_receiveDataBuffer, m_header.dataSize) == true)
 				{
-					logMessage("ready to work");
 					onConnection();
 				}
 				break;
@@ -1979,11 +2009,20 @@ namespace Tcp
 
 		if (E::contains<E::SecurityLevel>(securityLevelInt) == false)
 		{
-			logError(QString("Unknown socket SecurityLevel value - %1!").arg(securityLevelInt));
+			logError(QString("unknown socket SecurityLevel value - %1!").arg(securityLevelInt));
 			return false;
 		}
 
 		m_securityLevel = static_cast<E::SecurityLevel>(securityLevelInt);
+
+		m_stateMutex.lock();
+
+		m_state.connectionNo = m_connNo;
+		m_state.securityLevel = m_securityLevel;
+
+		m_stateMutex.unlock();
+
+		logMessage(QString("security level - %1").arg(E::valueToString<E::SecurityLevel>(m_securityLevel)));
 
 		switch(m_securityLevel)
 		{
@@ -2028,31 +2067,22 @@ namespace Tcp
 	{
 		Network::IntroduceMyselfReply imr;
 
-		bool result = imr.ParseFromArray(dataBuffer, dataSize);
-
-		if (result == false)
+		if (imr.ParseFromArray(dataBuffer, dataSize) == false)
 		{
 			Q_ASSERT(false);
 			return false;
 		}
 
-		m_stateMutex.lock();
-
-		m_state.connectedSoftwareInfo.serializeFrom(imr.serversoftwareinfo());
-
-		m_stateMutex.unlock();
-
-		result = false;
-
-		m_setConnResult = static_cast<SetConnectionResult>(imr.setconnectionerror());
+		m_setConnResult = static_cast<SetConnectionResult>(imr.setconnectionresult());
 
 		switch(m_setConnResult)
 		{
 		case SetConnectionResult::Ok:
-			result = true;
 			break;
 
 		case SetConnectionResult::UnknownClientID:
+
+			logError(QString("set connection error reported by server - UnknownClientID!"));
 
 			if (m_enableSignalUnknownClientID == true)
 			{
@@ -2063,6 +2093,8 @@ namespace Tcp
 			break;
 
 		case SetConnectionResult::WrongClientHostname:
+
+			logError(QString("set connection error reported by server - WrongClientHostname!"));
 
 			if (m_enableSignalWrongClientHostname == true)
 			{
@@ -2075,7 +2107,17 @@ namespace Tcp
 			Q_ASSERT(false);
 		}
 
-		return result;
+		m_stateMutex.lock();
+
+		m_connectedSoftwareInfo.serializeFrom(imr.serversoftwareinfo());
+
+		m_state.connectedSoftwareInfo = m_connectedSoftwareInfo;
+		m_state.setConnectionResult = m_setConnResult;
+		m_state.isConnected = (m_setConnResult == SetConnectionResult::Ok);
+
+		m_stateMutex.unlock();
+
+		return (m_setConnResult == SetConnectionResult::Ok);
 	}
 
 	void Client::sendIntroduceMyselfRequest()
