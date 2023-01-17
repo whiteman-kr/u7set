@@ -2,5 +2,6 @@ TUNING_SERVICE_2CH
 	27.10.2021	Version: 0	TUNING_SERVICE_2CH_v0.u7devp	RPCT-3178: Added new preset for 2-channel TuningService.
 	19.11.2021	Version: 1	TUNING_SERVICE_2CH_v1.u7devp	RPCT-3178: ClientRequest* properties are moved from controllers to preset
 	13.12.2022	Version: 2	TUNING_SERVICE_2CH_v2.u7devp	RPCT-3357: Add property SecurityLevel to all software services
+	17.01.2022	Version: 3	TUNING_SERVICE_2CH_v3.u7devp	RPCT-3357: Property SecurityLevel has SSL=2
 
 

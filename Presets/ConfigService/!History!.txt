@@ -1,5 +1,6 @@
 CFGS
 	18.11.2022	Version: 1	Configuration Service_v1.u7devp	RPCT-3331: Added property CheckHostname to ConfigService preset
 	13.12.2022	Version: 2	Configuration Service_v2.u7devp	RPCT-3357: Add property SecurityLevel to all software services
+	17.01.2022	Version: 3	Configuration Service_v3.u7devp	RPCT-3357: Property SecurityLevel has SSL=2, RPCT-3331: CheckHostname is not expert
 
 
