@@ -538,7 +538,7 @@ namespace Tcp
 		}
 		else
 		{
-			logMessage(QString("Server private key loaded."));
+			logMessage(QString("Private key loaded."));
 		}
 
 		m_socket->setLocalCertificate(m_cert);

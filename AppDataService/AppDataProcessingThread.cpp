@@ -108,8 +108,8 @@ void AppDataProcessingThreadsPool::startProcessingThreads(int poolSizeFromSettin
 		processingThread->start();
 	}
 
-	DEBUG_LOG_MSG(log, QString("AppDataProcessingThreadsPool started. Running threads count %1%2 (count from settings %3)").
-							arg(poolSize).arg(poolSize == idealThreadCount ? " (ideal)" : "").arg(poolSizeFromSettings));
+	DEBUG_LOG_MSG(log, QString("AppDataProcessingThreadsPool started. Running threads count %1%2").
+							arg(poolSize).arg(poolSize == idealThreadCount ? " (ideal)" : ""));
 }
 
 void AppDataProcessingThreadsPool::stopProcessingThreads()

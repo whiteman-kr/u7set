@@ -27,7 +27,7 @@ void TcpArchiveClient::processReply(quint32 requestID, const char* replyData, qu
 
 void TcpArchiveClient::onClientThreadStarted()
 {
-	DEBUG_LOG_MSG(m_logger, QString("TcpArchiveClient thread started, archive server %1)").
+	DEBUG_LOG_MSG(m_logger, QString("TcpArchiveClient thread started, archive server %1").
 								arg(serverAddressPort(0).addressPortStr()));
 
 	m_signalStatesQueue = std::make_shared<SimpleAppSignalStatesQueue>(10000);
@@ -56,7 +56,7 @@ void TcpArchiveClient::onClientThreadFinished()
 		m_signalStatesProcessingThread->unregisterDestSignalStatesQueue(m_signalStatesQueue, "TcpArchiveClient");
 	}
 
-	DEBUG_LOG_MSG(m_logger, QString("TcpArchiveClient thread finished, archive server %1)").
+	DEBUG_LOG_MSG(m_logger, QString("TcpArchiveClient thread finished, archive server %1").
 								arg(serverAddressPort(0).addressPortStr()));
 }
 

@@ -89,7 +89,7 @@ void CfgServer::readBuildXml()
 	if (dir.exists(m_buildXmlPathFileName) == false)
 	{
 		m_errorCode = ErrorCode::BuildNotFound;
-		qDebug() << "File not found: " << m_buildXmlPathFileName;
+		logError(QString("file %1 not found!").arg(m_buildXmlPathFileName));
 		return;
 	}
 
@@ -140,9 +140,7 @@ void CfgServer::readBuildXml()
 		m_buildFileInfo.insert(bfi.pathFileName, bfi);
 	}
 
-	QString str = QString("File %1 has been read").arg(m_buildXmlPathFileName);
-
-	qDebug() << C_STR(str);
+	logMessage(QString("file %1 has been read").arg(m_buildXmlPathFileName));
 }
 
 bool CfgServer::checkFile(QString& pathFileName, QByteArray& fileData)
@@ -239,9 +237,7 @@ void CfgLoader::changeApp(const QString& appEquipmentID, int appInstance)
 
 	m_rootFolder = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + m_appDataPath;
 
-	qDebug() << "App cfg data root folder: " << C_STR(m_rootFolder);
-
-	//m_rootFolder = "d:/cfgloader" + m_appDataPath;		// for debugging only!!!
+	logMessage(QString("app cfg data root folder - %1").arg(m_rootFolder));
 
 	setRootFolder(m_rootFolder);
 
@@ -437,7 +433,8 @@ void CfgLoader::slot_getFile(QString fileName, QByteArray* fileData)
 
 	if (readCfgFileIfExists(fileName, fileData, m_cfgFilesInfo[fileName].md5, m_cfgFilesInfo[fileName].compressed) == true)
 	{
-		qDebug() << "File " << fileName << " already exists, md5 = " << m_cfgFilesInfo[fileName].md5;
+		logMessage(QString("file %1 already exists, md5 = %2").
+					arg(fileName).arg(m_cfgFilesInfo[fileName].md5));
 
 		m_lastError = Tcp::FileTransferResult::Ok;
 		emitFileReady();

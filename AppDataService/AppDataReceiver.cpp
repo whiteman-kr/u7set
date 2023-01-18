@@ -15,8 +15,6 @@ AppDataReceiverThread::AppDataReceiverThread(const HostAddressPort& dataReceivin
 	m_log(log)
 {
 	m_isSimulationMode = (swRunMode == E::SoftwareRunMode::Simulation);
-
-	setPriority(QThread::Priority::HighPriority);
 }
 
 AppDataReceiverThread::~AppDataReceiverThread()
@@ -42,6 +40,8 @@ void AppDataReceiverThread::fillAppDataReceiveState(Network::AppDataReceiveState
 
 void AppDataReceiverThread::run()
 {
+	setPriority(QThread::Priority::HighPriority);
+
 	DEBUG_LOG_MSG(m_log, QString("AppDataReceiver thread is started (receiving IP %1)").arg(m_dataReceivingIP.addressPortStr()));
 
 	m_thisThread = QThread::currentThread();
