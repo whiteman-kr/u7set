@@ -4,7 +4,7 @@
 #include "../OnlineLib/TcpClientStatistics.h"
 #include "../CommonLib/Hash.h"
 #include "../Proto/network.pb.h"
-#include "../lib/AppSignalManager.h"
+#include "../AppSignalLib/AppSignalManager.h"
 #include "MonitorConfigController.h"
 
 class AppDataSourceState

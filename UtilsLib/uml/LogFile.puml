@@ -1,0 +1,12 @@
+@startuml UtilsLib
+!include ../../doc/uml/Namespace.puml
+
+!include ILogFile.puml
+
+class Log::LogFile implements UtilsLib::ILogFile
+{
+	public QObject
+	--
+}
+
+@enduml

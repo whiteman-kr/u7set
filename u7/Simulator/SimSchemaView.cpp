@@ -2,7 +2,7 @@
 #include "SimSchemaManager.h"
 #include "SimIdeSimulator.h"
 #include "../../Simulator/SimOverrideSignals.h"
-#include "../lib/AppSignalManager.h"
+#include "../AppSignalLib/AppSignalManager.h"
 #include "../VFrame30/PropertyNames.h"
 
 

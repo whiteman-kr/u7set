@@ -1,0 +1,16 @@
+ Volume in drive D has no label.
+ Volume Serial Number is 6621-AE8D
+
+ Directory of D:\Docker\Windows-postgres\INSTALL
+
+13.01.2023  11:39    <DIR>          .
+13.01.2023  11:39    <DIR>          ..
+12.01.2023  13:22               248 autoexec.bat
+28.10.2022  09:31         9ÿ737ÿ955 Far.zip
+22.11.2022  18:19       129ÿ952ÿ194 git.zip
+21.11.2022  09:44        52ÿ948ÿ992 gitlab-runner-windows-amd64.exe
+13.01.2023  11:39                 0 install.txt
+01.12.2022  12:37       328ÿ840ÿ928 postgresql-15.1-1-windows-x64.exe
+28.11.2022  11:29           451ÿ327 ROVT.zip
+               7 File(s)    521ÿ931ÿ644 bytes
+               2 Dir(s)  178ÿ462ÿ543ÿ872 bytes free

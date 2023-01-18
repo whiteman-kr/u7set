@@ -76,7 +76,6 @@ SOURCES += main.cpp \
     MonitorConfigController.cpp \
     ScriptMonitorApplication.cpp \
     TcpSignalClient.cpp \
-    ../lib/AppSignalManager.cpp \
     ../lib/Ui/DialogSignalInfo.cpp \
     ../lib/Ui/DialogSignalSearch.cpp \
     DialogColumns.cpp \
@@ -137,7 +136,6 @@ HEADERS  += \
     MonitorConfigController.h \
     TcpSignalClient.h \
     ../CommonLib/PropertyObject.h \
-    ../lib/AppSignalManager.h \
     ../lib/Ui/DialogSignalInfo.h \
     ../lib/Ui/DialogSignalSearch.h \
     DialogColumns.h \

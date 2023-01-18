@@ -49,9 +49,11 @@ HEADERS += \
 	Stable.h \
 	AppSignal.h \
 	AppSignalParam.h \
+	AppSignalManager.h \
 	TuningValue.h \
 
 SOURCES += \
 	AppSignal.cpp \
 	AppSignalParam.cpp \
+	AppSignalManager.cpp \
 	TuningValue.cpp \

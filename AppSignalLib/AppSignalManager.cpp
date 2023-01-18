@@ -1,4 +1,4 @@
-#include "../lib/AppSignalManager.h"
+#include "../AppSignalLib/AppSignalManager.h"
 
 
 AppSignalManager::AppSignalManager(QObject* parent) :

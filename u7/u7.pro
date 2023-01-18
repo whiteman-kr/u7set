@@ -100,7 +100,6 @@ HEADERS  += \
 	../lib/Tuning/TuningModel.h \
 	../lib/WidgetUtils.h \
 	../lib/Ui/DialogAbout.h \
-	../lib/AppSignalManager.h \
 	../lib/Ui/TextEditCompleter.h \
 	../lib/PropertyTable.h \
 	../Metrology/MetrologyConnection.h \
@@ -217,7 +216,6 @@ SOURCES +=\
 	../lib/Configurator.cpp \
 	../lib/Tuning/TuningFilterEditor.cpp \
 	../lib/Tuning/TuningModel.cpp \
-	../lib/AppSignalManager.cpp \
 	../lib/Ui/DialogAbout.cpp \
 	../lib/WidgetUtils.cpp \
 	../lib/Ui/TextEditCompleter.cpp \

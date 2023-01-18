@@ -11,7 +11,17 @@ unix {
 
 # Optimization flags
 #
-CONFIG(release, debug|release) {
-    CONFIG += optimize_speed
-	CONFIG += ltcg					# LTO
+win32 {
+	CONFIG(release, debug|release) {
+		CONFIG += optimize_speed
+		CONFIG += ltcg					# LTO
+	}
+}
+
+
+unix {
+	CONFIG(release, debug|release) {
+		CONFIG += optimize_speed
+#		CONFIG += ltcg					# LTO is disabled for faster build by CI/CD
+	}
 }

@@ -66,6 +66,9 @@ signals:
 	void buildStarted();					// Just retranslate signal from Builder
 	void buildFinished(int errorCount);		// Just retranslate signal from Builder
 
+private:
+	void getProjectBuildPath(QString* buildCurrentPath, QString* buildLastPath) const;
+
 	// Data
 	//
 private:
@@ -95,7 +98,7 @@ private:
 	QWidget* m_settingsWidget = nullptr;
 
 	//QCheckBox* m_debugCheckBox = nullptr;
-	QLabel* m_buildLabel = nullptr;
+	QLabel* m_buildLabel[2] = {nullptr, nullptr};
 	QComboBox* m_warningsLevelComboBox = nullptr;
 
 	int m_logTimerId = -1;

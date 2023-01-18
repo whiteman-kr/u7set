@@ -1,0 +1,9 @@
+@startuml TuningLib
+!include ../../../doc/uml/Namespace.puml
+
+interface TuningLib::ITuningSignalManager
+{
+}
+
+@enduml
+

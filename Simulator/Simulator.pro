@@ -49,7 +49,6 @@ SOURCES += \
 	../lib/LogicModulesInfo.cpp \
     ../lib/SoftwareSettings.cpp \
     ../lib/SoftwareXmlReader.cpp \
-	../lib/AppSignalManager.cpp \
 	../lib/Tuning/TuningSignalManager.cpp \
 	../lib/Tuning/TuningSignalState.cpp \
     SimAppDataLanInterface.cpp \
@@ -96,8 +95,6 @@ HEADERS += \
     ../lib/SoftwareXmlReader.h \
 	../Proto/serialization.pb.h \
 	../lib/LmDescription.h \
-	../lib/AppSignalManager.h \
-	../lib/IAppSignalManager.h \
 	../lib/Tuning/ITuningSignalManager.h \
 	../lib/Tuning/TuningSignalManager.h \
 	../lib/Tuning/TuningSignalState.h \

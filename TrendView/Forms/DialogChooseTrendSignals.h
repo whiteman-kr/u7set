@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../lib/IAppSignalManager.h"
+#include "../../AppSignalLib/IAppSignalManager.h"
 #include "../TrendView/TrendSignal.h"
 
 namespace Ui {
