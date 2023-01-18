@@ -541,6 +541,8 @@ void IdeCodeEditor::onReplaceAll(QString findText, QString replaceText, bool sel
     else
     {
         setText(st);
+
+		setModified(true);
     }
 
     QMessageBox::information(this, qAppName(), tr("%1 replacements occured.").arg(counter));
