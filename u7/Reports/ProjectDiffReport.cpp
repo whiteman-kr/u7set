@@ -3,6 +3,7 @@
 #include "../Builder/AppSignalProperties.h"
 #include "../lib/PropertyEditor.h"
 #include "../HardwareLib/Connection.h"
+#include "../UtilsLib/Ui/UiTools.h"
 #include "../VFrame30/Bus.h"
 #include "../VFrame30/Schema.h"
 
@@ -266,7 +267,7 @@ void ProjectDiffGeneratorThread::run(const QString& fileName,
 
 	// Create Progress Dialog
 
-	DialogProgress* dialogProgress = new DialogProgress(QObject::tr("Creating Project Differences Report"), 3, parent);
+	DialogProgress dialogProgress(QObject::tr("Creating Project Differences Report"), 3, parent);
 
 	// Create thread
 
@@ -275,29 +276,25 @@ void ProjectDiffGeneratorThread::run(const QString& fileName,
 	worker->moveToThread(thread);
 
 	QObject::connect(thread, &QThread::started, worker, &ProjectDiffGenerator::process);
-
 	QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);	// Schedule thread deleting
 
-	QObject::connect(dialogProgress, &DialogProgress::getProgress, worker, &ProjectDiffGenerator::progressRequested, Qt::DirectConnection);
+	QObject::connect(&dialogProgress, &DialogProgress::getProgress, worker, &ProjectDiffGenerator::progressRequested, Qt::DirectConnection);
+	QObject::connect(&dialogProgress, &DialogProgress::cancelClicked, worker, &ProjectDiffGenerator::stop, Qt::DirectConnection);
 
-	QObject::connect(dialogProgress, &DialogProgress::cancelClicked, worker, &ProjectDiffGenerator::stop, Qt::DirectConnection);
-
-	QObject::connect(worker, &ProjectDiffGenerator::progressChanged, dialogProgress, &DialogProgress::setProgressMultiple);
+	QObject::connect(worker, &ProjectDiffGenerator::progressChanged, &dialogProgress, &DialogProgress::setProgressMultiple);
 
 	//  Schedule objects deleting
 
-	QObject::connect(worker, &ProjectDiffGenerator::finished, [thread, dialogProgress, worker, schemaView](const QString& errorMessage)
+	QObject::connect(worker, &ProjectDiffGenerator::finished, [thread, &dialogProgress, worker, schemaView](const QString& errorMessage)
 	{
 		thread->quit();
 
 		if (errorMessage.isEmpty() == false)
 		{
-			dialogProgress->setErrorMessage(errorMessage);
+			dialogProgress.setErrorMessage(errorMessage);
 		}
-		else
-		{
-			dialogProgress->deleteLater();
-		}
+
+		dialogProgress.exit();
 
 		worker->deleteLater();
 	});
@@ -306,7 +303,31 @@ void ProjectDiffGeneratorThread::run(const QString& fileName,
 
 	thread->start();
 
-	dialogProgress->exec();
+	dialogProgress.exec();
+
+	if (dialogProgress.hasErrorMessage() == false)
+	{
+		if (settings.multipleFiles == false)
+		{
+			if (QMessageBox::question(parent, qAppName(), QObject::tr("Report generating has been finished.\n\nDo you with to open it?")) == QMessageBox::Yes)
+			{
+				UiTools::openHelp(fileName, parent);
+			}
+		}
+		else
+		{
+			if (QMessageBox::question(parent, qAppName(), QObject::tr("Report generating has been finished.\n\nDo you with to open the containing folder?")) == QMessageBox::Yes)
+			{
+				QFileInfo f(fileName);
+				QUrl url = QUrl::fromLocalFile(f.absolutePath());
+				QDesktopServices::openUrl(url);
+			}
+		}
+	}
+	else
+	{
+		QMessageBox::critical(parent, qAppName(), dialogProgress.errorMessage());
+	}
 
 	return;
 
