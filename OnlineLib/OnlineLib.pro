@@ -69,3 +69,10 @@ SOURCES += \
 	CircularLogger.cpp \
 	SimpleAppSignalState.cpp \
 	DataProtocols.cpp \
+
+DISTFILES += \
+	../Tools/SslCertificates/ReadMe.txt \
+	../Tools/SslCertificates/gen_ca_client_cert.bat \
+	../Tools/SslCertificates/gen_ca_root_cert.bat \
+	../Tools/SslCertificates/gen_ca_server_cert.bat \
+	../Tools/SslCertificates/gen_ss_server_cert.bat

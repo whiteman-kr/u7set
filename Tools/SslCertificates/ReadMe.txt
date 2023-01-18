@@ -4,7 +4,7 @@
 
 	This files should be placed in folder <PathToServiceExe>/Crypto.
 
-	To generate this files run gen_ss_server_vert.bat
+	To generate this files run gen_ss_server_cert.bat
 
 --
 	Connections with security level SSL require trusted (CA) certificates.
