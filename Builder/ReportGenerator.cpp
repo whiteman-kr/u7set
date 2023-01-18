@@ -675,7 +675,7 @@ void ReportGenerator::printSchema(QPdfWriter* pdfWriter,
 		compareActions.value() != nullptr &&
 		compareActions.value()->empty() == false)
 	{
-		drawParam.setControlBarSize(CONTROL_BAR(schema->unit(), drawParam.device()->devicePixelRatioF(), zoom * 100.0));
+		drawParam.setControlBarSize(CONTROL_BAR_MM);
 		m_schemaView->drawCompareOutlines(&drawParam, clipRect, *(compareActions.value()));
 	}
 
