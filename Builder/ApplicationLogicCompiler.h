@@ -41,6 +41,9 @@ namespace Builder
 		Hardware::OptoModuleStorage* opticModuleStorage();
 		std::vector<Hardware::DeviceModule*>& lmModules();
 		std::vector<Hardware::DeviceModule*>& lmAndBvbModules();
+		BuildInfo buildInfo();
+
+		static QStringList getInfoFileHeader(const Context* context);
 
 		//
 

@@ -14295,7 +14295,9 @@ namespace Builder
 
 	bool ModuleLogicCompiler::calculateCodeRunTime()
 	{
-		bool result = m_code.getRunTimes(&m_idrPhaseClockCount, &m_alpPhaseClockCount);
+		bool result = m_code.calcRunTimes();
+
+		result &= m_code.getCachedRunTimes(&m_idrPhaseClockCount, &m_alpPhaseClockCount);
 
 		if (result == false)
 		{
@@ -14328,6 +14330,8 @@ namespace Builder
 
 			RETURN_IF_FALSE(result);
 		}
+
+		//
 
 		if (m_context->generateExtraDebugInfo() == true)
 		{
@@ -14363,6 +14367,8 @@ namespace Builder
 			result = false;
 		}
 
+		//
+
 		QStringList memFile;
 
 		m_memoryMap.getFile(memFile,
@@ -14371,11 +14377,14 @@ namespace Builder
 
 		buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
 												QString("%1-%2.mem").arg(m_lmSubsystemID.toLower()).arg(m_lmNumber), memFile);
-
 		if (buildFile == nullptr)
 		{
 			result = false;
 		}
+
+		//
+
+		result &= writeStatisticsFile();
 
 		result &= writeTuningInfoFile();
 
@@ -14873,6 +14882,23 @@ namespace Builder
 												QString("HeapsLog.txt"), file);
 
 		return bf != nullptr;
+	}
+
+	bool ModuleLogicCompiler::writeStatisticsFile()
+	{
+		QStringList file;
+
+		//
+
+		file << ApplicationLogicCompiler::getInfoFileHeader(m_context);
+
+		m_code
+
+		//
+
+		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
+												QString("%1-%2.stat").arg(m_lmSubsystemID.toLower()).arg(m_lmNumber), file);
+		return buildFile != nullptr;
 	}
 
 	bool ModuleLogicCompiler::displayResourcesUsageInfo()

@@ -165,7 +165,7 @@ namespace Builder
 		bool expertMode() const;
 		bool generateExtraDebugInfo() const;
 
-		const ResourcesUsageInfo& resourcesUsageInfo() { return m_resourcesUsageInfo; }
+		const ResourcesUsageInfo& resourcesUsageInfo() const { return m_resourcesUsageInfo; }
 
 		void setModuleCompilersRef(const QVector<ModuleLogicCompiler*>* moduleCompilers);
 
@@ -676,6 +676,7 @@ namespace Builder
 		bool writeOcmRsSignalsXml();
 		bool writeLooopbacksReport();
 		bool writeHeapsLog();
+		bool writeStatisticsFile();
 
 		bool displayResourcesUsageInfo();
 		void calcOptoDiscretesStatistics();

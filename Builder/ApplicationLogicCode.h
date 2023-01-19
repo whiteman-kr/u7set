@@ -42,7 +42,6 @@ namespace Builder
 		};
 
 		static const int CALC_RUNTIME = 99999;
-		static const quint16 MIN_FB_TYPE = 1;
 		static const quint16 MAX_FB_TYPE = 64 - 1;
 
 		static const quint16 MIN_FB_PARAM_NO = 0;
@@ -60,7 +59,7 @@ namespace Builder
 		int runTime;
 	};
 
-	const LmCommand lmCommandSet[] =
+	inline const LmCommand lmCommandSet[] =
 	{
 		{	LmCommand::Code::NoCommand,	0,	"NO_CMD",		false,	0,	0						},
 		{	LmCommand::Code::NOP,		1,	"NOP",			false,	5,	2						},
@@ -92,19 +91,19 @@ namespace Builder
 		{	LmCommand::Code::FILL,		4,	"FILL",			false,	11,	14						},
 	};
 
-	class LmCommands : public QHash<int, LmCommand>
+	class LmCommands : public std::map<int, const LmCommand>
 	{
 	public:
 		LmCommands();
 
-		bool isValidCode(LmCommand::Code commandCode);
-		bool isValidCode(int commandCode);
+		bool isValidCode(LmCommand::Code commandCode) const;
+		bool isValidCode(int commandCode) const;
 
-		int getSizeW(LmCommand::Code commandCode);
-		int getSizeW(int commandCode);
+		int getSizeW(LmCommand::Code commandCode) const;
+		int getSizeW(int commandCode) const;
 
-		QString getMnemo(LmCommand::Code commandCode);
-		QString getMnemo(int commandCode);
+		QString getMnemo(LmCommand::Code commandCode) const;
+		QString getMnemo(int commandCode) const;
 	};
 
 	extern LmCommands lmCommands;
@@ -230,6 +229,18 @@ namespace Builder
 		void clear();
 	};
 
+	struct CommandStatistics
+	{
+		LmCommand::Code code;
+
+		int usedCount = 0;
+		int codeSize = 0;
+		int taktsUsed = 0;
+
+		CommandStatistics() = delete;
+		CommandStatistics(LmCommand::Code cd) { code = cd; }
+	};
+
 	class CodeItem
 	{
 	public:
@@ -352,7 +363,8 @@ namespace Builder
 		QString mnemoCode() const;
 		QString getConstValueString() const;
 
-		bool getTimes(const LmMemoryMap* lmMemMap, int prevCmdExecTime, int* waitTime, int* execTime) const;
+		bool calcRunTime(const LmMemoryMap* lmMemMap, int prevCmdExecTime);
+		bool getTimes(int* waitTime, int* execTime) const;
 
 	private:
 		void initCommand();
@@ -383,6 +395,9 @@ namespace Builder
 		int m_fbExecTime = 0;			// != 0 for commands START and NSTART only
 
 		bool m_result = true;
+
+		int m_waitTime = -1;
+		int m_execTime = -1;
 
 		static QHash<int, int> m_executedFb;				// fbType => remaining FB exec time
 
@@ -423,7 +438,6 @@ namespace Builder
 		CodeSnippet& operator << (const CodeItem& ci);
 	};
 
-
 	class ApplicationLogicCode : public QObject
 	{
 		Q_OBJECT
@@ -448,7 +462,10 @@ namespace Builder
 		void getAsmMetadataFields(QStringList* metadataFields, int* metadataVersion) const;
 		void getAsmMetadata(std::vector<QVariantList>* metadata) const;
 
-		bool getRunTimes(int* idrPhaseClockCount, int* alpPhaseClockCount) const;
+		bool calcRunTimes();
+		bool getCachedRunTimes(int* idrPhaseClockCount, int* alpPhaseClockCount) const;
+
+		bool getCommandsStatistics(std::map<LmCommand::Code, CommandStatistics>* stat) const;
 
 		int commandAddress() const { return m_commandAddress; }
 
@@ -458,6 +475,9 @@ namespace Builder
 
 		LmMemoryMap* m_lmMemoryMap = nullptr;
 		IssueLogger* m_log = nullptr;
+
+		int m_idrPhaseClockCount = -1;
+		int m_alpPhaseClockCount = -1;
 	};
 
 }

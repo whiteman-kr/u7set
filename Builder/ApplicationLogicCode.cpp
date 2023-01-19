@@ -18,59 +18,65 @@ namespace Builder
 		{
 			if (contains(TO_INT(lmCommand.code)) == true)
 			{
-				assert(false);			// duplicate command code
+				Q_ASSERT(false);			// duplicate command code
 				continue;
 			}
 
-			insert(TO_INT(lmCommand.code), lmCommand);
+			insert({TO_INT(lmCommand.code), lmCommand});
 		}
 	}
 
-	bool LmCommands::isValidCode(LmCommand::Code commandCode)
+	bool LmCommands::isValidCode(LmCommand::Code commandCode) const
 	{
 		return isValidCode(TO_INT(commandCode));
 	}
 
-	bool LmCommands::isValidCode(int commandCode)
+	bool LmCommands::isValidCode(int commandCode) const
 	{
 		bool codeExists = contains(commandCode);
 
 		if (codeExists == false)
 		{
-			assert(false);
+			Q_ASSERT(false);
 		}
 
 		return codeExists;
 	}
 
-	int LmCommands::getSizeW(LmCommand::Code commandCode)
+	int LmCommands::getSizeW(LmCommand::Code commandCode) const
 	{
 		return getSizeW(TO_INT(commandCode));
 	}
 
-	int LmCommands::getSizeW(int commandCode)
+	int LmCommands::getSizeW(int commandCode) const
 	{
-		if (isValidCode(commandCode) == false)
+		auto it = find(commandCode);
+
+		if (it == end())
 		{
+			Q_ASSERT(false);
 			return 0;
 		}
 
-		return value(commandCode).sizeW;
+		return it->second.sizeW;
 	}
 
-	QString LmCommands::getMnemo(LmCommand::Code commandCode)
+	QString LmCommands::getMnemo(LmCommand::Code commandCode) const
 	{
 		return getMnemo(TO_INT(commandCode));
 	}
 
-	QString LmCommands::getMnemo(int commandCode)
+	QString LmCommands::getMnemo(int commandCode) const
 	{
-		if (isValidCode(commandCode) == false)
+		auto it = find(commandCode);
+
+		if (it == end())
 		{
-			return "";
+			Q_ASSERT(false);
+			return QString();
 		}
 
-		return QString(value(commandCode).mnemo);
+		return it->second.mnemo;
 	}
 
 	// ---------------------------------------------------------------------------------------
@@ -108,7 +114,7 @@ namespace Builder
 	{
 		if (lmCommands.isValidCode(code) == false)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			setNoCommand();
 		}
 		else
@@ -121,7 +127,7 @@ namespace Builder
 	{
 		if (fbType > LmCommand::MAX_FB_TYPE)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			setNoCommand();
 		}
 		else
@@ -139,7 +145,7 @@ namespace Builder
 	{
 		if (fbParamNo > LmCommand::MAX_FB_PARAM_NO)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			setNoCommand();
 		}
 		else
@@ -152,7 +158,7 @@ namespace Builder
 	{
 		if (bitNo < 0 || bitNo > LmCommand::MAX_BIT_NO_16)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			setNoCommand();
 		}
 		else
@@ -165,7 +171,7 @@ namespace Builder
 	{
 		if (bitNo < 0 || bitNo > LmCommand::MAX_BIT_NO_16)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			setNoCommand();
 		}
 		else
@@ -178,7 +184,7 @@ namespace Builder
 	{
 		if (bitNo < 0 || bitNo > LmCommand::MAX_BIT_NO_16)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			setNoCommand();
 		}
 		else
@@ -204,7 +210,7 @@ namespace Builder
 			return word4;
 
 		default:
-			assert(false);
+			Q_ASSERT(false);
 		}
 
 		return 0;
@@ -223,7 +229,7 @@ namespace Builder
 			return m_const.floatValue;
 		}
 
-		assert(false);
+		Q_ASSERT(false);
 
 		return 0;
 	}
@@ -241,7 +247,7 @@ namespace Builder
 			return m_const.int32Value;
 		}
 
-		assert(false);
+		Q_ASSERT(false);
 
 		return 0;
 	}
@@ -259,7 +265,7 @@ namespace Builder
 			return m_const.uint32Value;
 		}
 
-		assert(false);
+		Q_ASSERT(false);
 
 		return 0;
 	}
@@ -365,7 +371,7 @@ namespace Builder
 
 		if (fbRunTime == 0)
 		{
-			assert(false);		// fbRunTime can't be 0
+			Q_ASSERT(false);		// fbRunTime can't be 0
 		}
 	}
 
@@ -466,7 +472,7 @@ namespace Builder
 
 	void CodeItem::movBitConst(Address16 addr16, int constBit)
 	{
-		assert(addr16.isValid() == true);
+		Q_ASSERT(addr16.isValid() == true);
 
 		movBitConst(addr16.offset(), addr16.bit(), constBit);
 	}
@@ -601,7 +607,7 @@ namespace Builder
 
 		m_result = true;
 
-		assert(sizeW > 0);
+		Q_ASSERT(sizeW > 0);
 
 		m_code.setOpCode(LmCommand::Code::SETMEM);
 		m_code.setWord2(addr);
@@ -659,7 +665,7 @@ namespace Builder
 
 		if (fbRunTime == 0)
 		{
-			assert(false);		// fbRunTime can't be 0
+			Q_ASSERT(false);		// fbRunTime can't be 0
 		}
 	}
 
@@ -948,14 +954,14 @@ namespace Builder
 	bool CodeItem::checkStart()
 	{
 		// need check fbType and fbInstance
-		assert(false);
+		Q_ASSERT(false);
 		return false;
 	}
 
 	bool CodeItem::checkStop()
 	{
 		// need check fbType and fbInstance
-		assert(false);
+		Q_ASSERT(false);
 		return false;
 	}
 
@@ -965,7 +971,7 @@ namespace Builder
 
 		//read16(addrFrom);
 		//write16(addrTo);
-		assert(false);
+		Q_ASSERT(false);
 		return false;
 	}
 
@@ -982,14 +988,14 @@ namespace Builder
 
 		readArea(addrFrom, sizeW);
 		writeArea(addrTo, sizeW);*/
-		assert(false);
+		Q_ASSERT(false);
 		return false;
 	}
 
 	bool CodeItem::checkMovConst()
 	{
 		//write16(addrTo);
-		assert(false);
+		Q_ASSERT(false);
 		return false;
 	}
 
@@ -1008,35 +1014,35 @@ namespace Builder
 		}
 
 		write16(addrTo);*/
-		assert(false);
+		Q_ASSERT(false);
 		return false;
 	}
 
 	bool CodeItem::checkWriteFuncBlock()
 	{
 		//	read16(addrFrom);
-		assert(false);
+		Q_ASSERT(false);
 		return false;
 	}
 
 	bool CodeItem::checkReadFuncBlock()
 	{
 		// write16(addrTo);
-		assert(false);
+		Q_ASSERT(false);
 		return false;
 	}
 
 	bool CodeItem::checkWriteFuncBlockConst()
 	{
 		// ??
-		assert(false);
+		Q_ASSERT(false);
 		return false;
 	}
 
 	bool CodeItem::checkWriteFuncBlockBit()
 	{
 		// read16(addrFrom);
-		assert(false);
+		Q_ASSERT(false);
 		return false;
 	}
 
@@ -1046,20 +1052,20 @@ namespace Builder
 		if (addressInBitMemory(addrTo) == false &&
 			addressInWordMemory(addrTo) == false)
 		{
-			assert(false);			// RDFBB command can write only in bit- or word-addressed memory
+			Q_ASSERT(false);			// RDFBB command can write only in bit- or word-addressed memory
 			m_result = false;
 			return;
 		}
 
 		m_memoryMap->write16(addrTo);*/
-		assert(false);
+		Q_ASSERT(false);
 		return false;
 	}
 
 	bool CodeItem::checkReadFuncBlockTest()
 	{
 		// ??
-		assert(false);
+		Q_ASSERT(false);
 		return false;
 	}
 
@@ -1069,12 +1075,12 @@ namespace Builder
 		if (addressInBitMemory(addr) ||
 			addressInBitMemory(addr + sizeW - 1))
 		{
-			assert(false);			// SETMEM command can't write to bit-addressed memory
+			Q_ASSERT(false);			// SETMEM command can't write to bit-addressed memory
 			m_result = false;
 		}
 
 		writeArea(addr, sizeW);*/
-		assert(false);
+		Q_ASSERT(false);
 		return false;
 	}
 
@@ -1095,21 +1101,21 @@ namespace Builder
 
 		read16(addrFrom);
 		write16(addrTo);*/
-		assert(false);
+		Q_ASSERT(false);
 		return false;
 	}
 
 	bool CodeItem::checkNstart()
 	{
 		// ??
-		assert(false);
+		Q_ASSERT(false);
 		return false;
 	}
 
 	bool CodeItem::checkAppStart()
 	{
 		// ??
-		assert(false);
+		Q_ASSERT(false);
 		return false;
 	}
 
@@ -1117,70 +1123,70 @@ namespace Builder
 	{
 		/*read32(addrFrom);
 		write32(addrTo);*/
-		assert(false);
+		Q_ASSERT(false);
 		return false;
 	}
 
 	bool CodeItem::checkMovConst32()
 	{
 		// write32(addrTo);
-		assert(false);
+		Q_ASSERT(false);
 		return false;
 	}
 
 	bool CodeItem::checkWriteFuncBlock32()
 	{
 		// read32(addrFrom);
-		assert(false);
+		Q_ASSERT(false);
 		return false;
 	}
 
 	bool CodeItem::checkReadFuncBlock32()
 	{
 		// write32(addrTo);
-		assert(false);
+		Q_ASSERT(false);
 		return false;
 	}
 
 	bool CodeItem::checkWriteFuncBlockConst32()
 	{
 		// ??
-		assert(false);
+		Q_ASSERT(false);
 		return false;
 	}
 
 	bool CodeItem::checkReadFuncBlockTest32()
 	{
 		// ??
-		assert(false);
+		Q_ASSERT(false);
 		return false;
 	}
 
 	bool CodeItem::checkMovConstIfFlag()
 	{
 		// ??
-		assert(false);
+		Q_ASSERT(false);
 		return false;
 	}
 
 	bool CodeItem::checkPrevMov()
 	{
 		// ??
-		assert(false);
+		Q_ASSERT(false);
 		return false;
 	}
 
 	bool CodeItem::checkPrevMov32()
 	{
 		// ??
-		assert(false);
+		Q_ASSERT(false);
 		return false;
 	}
 
 	bool CodeItem::checkFill()
 	{
 		// ??
-		assert(false);
+		Q_ASSERT(false);
 		return false;
 	}
 
@@ -1275,7 +1281,7 @@ namespace Builder
 //		Execution times printing
 //		Commented while refactoring!!!
 //
-//		assert(m_execTime != 0);			// check that times already calculated
+//		Q_ASSERT(m_execTime != 0);			// check that times already calculated
 //		str.sprintf("[%02d:%02d]", m_waitTime, m_execTime);
 //		str = str.leftJustified(12, ' ');
 //		cmdStr += str;
@@ -1472,7 +1478,7 @@ namespace Builder
 
 
 		default:
-			assert(false);
+			Q_ASSERT(false);
 		}
 
 		return mnemoCode + params;
@@ -1492,24 +1498,22 @@ namespace Builder
 			return QString("%1").arg(m_code.getConstUInt32());
 
 		default:
-			assert(false);
+			Q_ASSERT(false);
 		}
 
 		return QString();
 	}
 
-	bool CodeItem::getTimes(const LmMemoryMap* lmMemMap, int prevCmdExecTime, int* waitTime, int* execTime) const
+	bool CodeItem::calcRunTime(const LmMemoryMap* lmMemMap, int prevCmdExecTime)
 	{
 		TEST_PTR_RETURN_FALSE(lmMemMap);
-		TEST_PTR_RETURN_FALSE(waitTime);
-		TEST_PTR_RETURN_FALSE(execTime);
 
-		*waitTime = 0;
-		*execTime = 0;
+		m_waitTime = 0;
+		m_execTime = 0;
 
 		if (lmCommands.contains(m_code.getOpCodeInt()) == false)
 		{
-			assert(false);			// unknown command code!
+			Q_ASSERT(false);			// unknown command code!
 			return false;
 		}
 
@@ -1519,24 +1523,24 @@ namespace Builder
 
 		if (prevCmdExecTime > cmdReadTime)
 		{
-			*waitTime = prevCmdExecTime - cmdReadTime;
+			m_waitTime = prevCmdExecTime - cmdReadTime;
 
 			decFbExecTime(prevCmdExecTime);
 		}
 		else
 		{
-			*waitTime = cmdReadTime - prevCmdExecTime;
+			m_waitTime = cmdReadTime - prevCmdExecTime;
 
 			decFbExecTime(cmdReadTime);
 		}
 
-		assert(*waitTime >= 0);
+		Q_ASSERT(m_waitTime >= 0);
 
 		if (lmCommand.waitFbExecution == true)
 		{
 			int fbType = m_code.getFbType();
 
-			*waitTime += getFbRemainingExecTime(fbType);
+			m_waitTime += getFbRemainingExecTime(fbType);
 		}
 
 		int cmdExecTime = 0;
@@ -1544,7 +1548,7 @@ namespace Builder
 		switch(m_code.getOpCode())
 		{
 		case LmCommand::Code::NoCommand:
-			assert(false);
+			Q_ASSERT(false);
 			break;
 
 			// commands with const runtime
@@ -1566,7 +1570,7 @@ namespace Builder
 		case LmCommand::Code::MOVCMPF:
 		case LmCommand::Code::PMOV32:
 		case LmCommand::Code::FILL:
-			assert(lmCommand.runTime != LmCommand::CALC_RUNTIME);
+			Q_ASSERT(lmCommand.runTime != LmCommand::CALC_RUNTIME);
 			cmdExecTime = lmCommand.runTime;
 			break;
 
@@ -1574,7 +1578,7 @@ namespace Builder
 			//
 		case LmCommand::Code::START:
 			{
-				assert(lmCommand.runTime != LmCommand::CALC_RUNTIME);
+				Q_ASSERT(lmCommand.runTime != LmCommand::CALC_RUNTIME);
 
 				cmdExecTime = lmCommand.runTime;
 
@@ -1584,7 +1588,7 @@ namespace Builder
 
 		case LmCommand::Code::NSTART:
 			{
-				assert(lmCommand.runTime == LmCommand::CALC_RUNTIME);
+				Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
 
 				quint16 n = m_code.getWord3();
 
@@ -1597,64 +1601,82 @@ namespace Builder
 			// commands with calculated runtime
 			//
 		case LmCommand::Code::MOV:
-			assert(lmCommand.runTime == LmCommand::CALC_RUNTIME);
+			Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
 			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord2()) == true ? 53 : 8;
 			break;
 
 		case LmCommand::Code::MOVMEM:
 			{
-				assert(lmCommand.runTime == LmCommand::CALC_RUNTIME);
+				Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
 
 				quint16 n = m_code.getWord4();
 
-				assert(n > 0);
+				Q_ASSERT(n > 0);
 
 				cmdExecTime = 7 + (n - 1) * 6 + 1;
 			}
 			break;
 
 		case LmCommand::Code::MOVC:
-			assert(lmCommand.runTime == LmCommand::CALC_RUNTIME);
+			Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
 			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord2()) == true ? 50 : 5;
 			break;
 
 		case LmCommand::Code::MOVBC:
-			assert(lmCommand.runTime == LmCommand::CALC_RUNTIME);
+			Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
 			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord2()) == true ? 5 : 10;
 			break;
 
 		case LmCommand::Code::RDFBB:
-			assert(lmCommand.runTime == LmCommand::CALC_RUNTIME);
+			Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
 			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord3()) == true ? 7 : 9;
 			break;
 
 		case LmCommand::Code::SETMEM:
 			{
-				assert(lmCommand.runTime == LmCommand::CALC_RUNTIME);
+				Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
 
 				quint16 n = m_code.getWord4();
 
-				assert(n > 0);
+				Q_ASSERT(n > 0);
 
 				cmdExecTime = 4 + (n - 1) * 3 + 1;
 			}
 			break;
 
 		case LmCommand::Code::MOVB:
-			assert(lmCommand.runTime == LmCommand::CALC_RUNTIME);
+			Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
 			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord2()) == true ? 9 : 13;
 			break;
 
 		case LmCommand::Code::PMOV:
-			assert(lmCommand.runTime == LmCommand::CALC_RUNTIME);
+			Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
 			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord2()) == true ? 8 : 53;
 			break;
 
 		default:
-			assert(false);								// unknown command code
+			Q_ASSERT(false);								// unknown command code
 		}
 
-		*execTime = cmdExecTime;
+		m_execTime = cmdExecTime;
+
+		return true;
+	}
+
+	bool CodeItem::getTimes(int* waitTime, int* execTime) const
+	{
+		TEST_PTR_RETURN_FALSE(waitTime);
+		TEST_PTR_RETURN_FALSE(execTime);
+
+		if (m_waitTime == -1 ||
+			m_execTime == -1)
+		{
+			Q_ASSERT(false);			// calcRunTime() must be called before
+			return false;
+		}
+
+		*waitTime = m_waitTime;
+		*execTime = m_execTime;
 
 		return true;
 	}
@@ -1675,7 +1697,7 @@ namespace Builder
 
 		if (binCode.count() < (wordNo + 1) * WORD_SIZE_IN_BYTES)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return str;
 		}
 
@@ -1750,7 +1772,7 @@ namespace Builder
 	{
 /*		if (m_memoryMap == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			m_result = false;
 		}
 		else
@@ -1767,7 +1789,7 @@ namespace Builder
 	{
 /*		if (m_memoryMap == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			m_result = false;
 		}
 		else
@@ -1784,7 +1806,7 @@ namespace Builder
 	{
 /*		if (m_memoryMap == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			m_result = false;
 		}
 		else
@@ -1801,7 +1823,7 @@ namespace Builder
 	{
 /*		if (m_memoryMap == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			m_result = false;
 		}
 		else
@@ -1818,7 +1840,7 @@ namespace Builder
 	{
 /*		if (m_memoryMap == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			m_result = false;
 		}
 		else
@@ -1835,7 +1857,7 @@ namespace Builder
 	{
 /*		if (m_memoryMap == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			m_result = false;
 		}
 		else
@@ -1890,7 +1912,7 @@ namespace Builder
 	{
 		if (codeFragmentMetrics == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return;
 		}
 
@@ -1901,7 +1923,7 @@ namespace Builder
 	{
 		if (codeFragmentMetrics == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return;
 		}
 
@@ -2012,7 +2034,7 @@ namespace Builder
 	{
 		if (commandIndex < 0 && commandIndex >= m_codeItems.count())
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return;
 		}
 
@@ -2022,7 +2044,7 @@ namespace Builder
 
 		if (oldCommand == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return;
 		}
 
@@ -2053,7 +2075,7 @@ namespace Builder
 
 				if (cmd == nullptr)
 				{
-					assert(false);
+					Q_ASSERT(false);
 					continue;
 				}
 
@@ -2190,7 +2212,7 @@ namespace Builder
 
 			codeItem.generateBinCode(&binCode);
 
-			assert((binCode.count() % 2) == 0);
+			Q_ASSERT((binCode.count() % 2) == 0);
 
 			qsizetype bytesCount = binCode.count();
 
@@ -2312,13 +2334,10 @@ namespace Builder
 		}
 	}
 
-	bool ApplicationLogicCode::getRunTimes(int* idrPhaseClockCount, int* alpPhaseClockCount) const
+	bool ApplicationLogicCode::calcRunTimes()
 	{
-		TEST_PTR_RETURN_FALSE(idrPhaseClockCount);
-		TEST_PTR_RETURN_FALSE(alpPhaseClockCount);
-
-		*idrPhaseClockCount = 0;
-		*alpPhaseClockCount = 0;
+		m_idrPhaseClockCount = 0;
+		m_alpPhaseClockCount = 0;
 
 		if (m_codeItems.isEmpty() == true)
 		{
@@ -2345,7 +2364,7 @@ namespace Builder
 
 		if (appLogicProcessingCodeStartAddress == -1)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return false;
 		}
 
@@ -2355,7 +2374,7 @@ namespace Builder
 
 		int prevCmdExecTime = 0;
 
-		for(const CodeItem& codeItem : m_codeItems)
+		for(CodeItem& codeItem : m_codeItems)
 		{
 			if (codeItem.isCommand() == false)
 			{
@@ -2364,7 +2383,7 @@ namespace Builder
 
 			if (codeItem.address() == appLogicProcessingCodeStartAddress)
 			{
-				*idrPhaseClockCount += prevCmdExecTime;
+				m_idrPhaseClockCount += prevCmdExecTime;
 
 				prevCmdExecTime = 0;
 
@@ -2374,21 +2393,75 @@ namespace Builder
 			int waitTime = 0;
 			int execTime = 0;
 
-			codeItem.getTimes(m_lmMemoryMap, prevCmdExecTime, &waitTime, &execTime);
+			codeItem.calcRunTime(m_lmMemoryMap, prevCmdExecTime);
+			codeItem.getTimes(&waitTime, &execTime);
 
 			if (idrPhaseCode == true)
 			{
-				*idrPhaseClockCount += (waitTime + execTime);
+				m_idrPhaseClockCount += (waitTime + execTime);
 			}
 			else
 			{
-				*alpPhaseClockCount +=  (waitTime + execTime);
+				m_alpPhaseClockCount +=  (waitTime + execTime);
 			}
 
 			prevCmdExecTime = execTime;
 		}
 
-		*alpPhaseClockCount += prevCmdExecTime;
+		m_alpPhaseClockCount += prevCmdExecTime;
+
+		return true;
+	}
+
+	bool ApplicationLogicCode::getCachedRunTimes(int* idrPhaseClockCount, int* alpPhaseClockCount) const
+	{
+		TEST_PTR_RETURN_FALSE(idrPhaseClockCount);
+		TEST_PTR_RETURN_FALSE(alpPhaseClockCount);
+
+		if (m_idrPhaseClockCount == -1 ||
+			m_alpPhaseClockCount == -1)
+		{
+			Q_ASSERT(false);					// calcRunTimes must be called before
+			return false;
+		}
+
+		*idrPhaseClockCount = m_idrPhaseClockCount;
+		*alpPhaseClockCount = m_alpPhaseClockCount;
+
+		return true;
+	}
+
+	bool ApplicationLogicCode::getCommandsStatistics(std::map<LmCommand::Code, CommandStatistics>* stat) const
+	{
+		TEST_PTR_RETURN_FALSE(stat);
+
+		int waitTime = 0;
+		int execTime = 0;
+
+		for(auto const& p : lmCommands)
+		{
+			const LmCommand& lmc = p.second;
+
+			if (lmc.code == LmCommand::Code::NoCommand)
+			{
+				continue;
+			}
+
+			stat->insert({lmc.code, CommandStatistics(lmc.code) });
+		}
+
+		m_codeItems
+
+				auto it = stat->find(lmc.code);
+
+				CommandStatistics& cs = it->second;
+
+				cs.usedCount++;
+				cs.codeSize += lmc.sizeW();
+
+
+
+de;wed,w;eldwel;d,w;ed,w;eld
 
 		return true;
 	}

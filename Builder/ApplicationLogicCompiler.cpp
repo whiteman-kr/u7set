@@ -176,6 +176,26 @@ namespace Builder
 		return m_context->m_lmAndBvbModules;
 	}
 
+	BuildInfo ApplicationLogicCompiler::buildInfo()
+	{
+		return m_context->m_buildResultWriter->buildInfo();
+	}
+
+	QStringList ApplicationLogicCompiler::getInfoFileHeader(const Context* context)
+	{
+		TEST_PTR_RETURN_VALUE(context, QStringList());
+		TEST_PTR_RETURN_VALUE(context->m_buildResultWriter, QStringList());
+
+		QStringList out;
+
+		BuildInfo bi = context->m_buildResultWriter->buildInfo();
+
+		out << QString("Project: %1 BuildNo: %2 Build time: %3").
+					arg(bi.project).arg(bi.id).arg(bi.dateStr());
+		out << "";
+
+		return out;
+	}
 
 	bool ApplicationLogicCompiler::isBuildCancelled()
 	{
@@ -386,7 +406,7 @@ namespace Builder
 		LOG_MESSAGE(log(), QString(tr("Resources usage report generation...")));
 
 		QList<std::tuple<QString, QString, double, double, double, double, double>> fileContent;
-		QStringList fileContentStringList;
+		QStringList file;
 
 		QString header = "LM Equipment ID";
 
@@ -429,11 +449,9 @@ namespace Builder
 			return "  ";
 		};
 
-		for(int i = 0; i < m_moduleCompilers.count(); i++)
+		for(const ModuleLogicCompiler* moduleCompiler : m_moduleCompilers)
 		{
-			ModuleLogicCompiler* moduleCompiler = m_moduleCompilers[i];
-
-			ModuleLogicCompiler::ResourcesUsageInfo info = moduleCompiler->resourcesUsageInfo();
+			const ModuleLogicCompiler::ResourcesUsageInfo& info = moduleCompiler->resourcesUsageInfo();
 
 			double maxValue = info.bitMemoryUsed;
 			maxValue = std::max(maxValue, info.wordMemoryUsed);
@@ -545,52 +563,54 @@ namespace Builder
 			return result;
 		};
 
-		fileContentStringList = reportGenerator("LM's resources usage", []
+		file << getInfoFileHeader(m_context);
+
+		file << reportGenerator("LM's resources usage", []
 												(std::tuple<QString, QString, double, double, double, double, double>& first,
 												std::tuple<QString, QString, double, double, double, double, double>& second)
 		{
 			return std::get<1>(first) < std::get<1>(second);
 		});
 
-		fileContentStringList << reportGenerator("Top LMs of BitMemory usage", []
+		file << reportGenerator("Top LMs of BitMemory usage", []
 												(std::tuple<QString, QString, double, double, double, double, double>& first,
 												std::tuple<QString, QString, double, double, double, double, double>& second)
 		{
 			return std::get<2>(first) > std::get<2>(second);
 		}, 10);
 
-		fileContentStringList << reportGenerator("Top LMs of WordMemory usage", []
+		file << reportGenerator("Top LMs of WordMemory usage", []
 												(std::tuple<QString, QString, double, double, double, double, double>& first,
 												std::tuple<QString, QString, double, double, double, double, double>& second)
 		{
 			return std::get<3>(first) > std::get<3>(second);
 		}, 10);
 
-		fileContentStringList << reportGenerator("Top LMs of CodeMemory usage", []
+		file << reportGenerator("Top LMs of CodeMemory usage", []
 												(std::tuple<QString, QString, double, double, double, double, double>& first,
 												std::tuple<QString, QString, double, double, double, double, double>& second)
 		{
 			return std::get<4>(first) > std::get<4>(second);
 		}, 10);
 
-		fileContentStringList << reportGenerator("Top LMs of IdrPhase Time usage", []
+		file << reportGenerator("Top LMs of IdrPhase Time usage", []
 												(std::tuple<QString, QString, double, double, double, double, double>& first,
 												std::tuple<QString, QString, double, double, double, double, double>& second)
 		{
 			return std::get<5>(first) > std::get<5>(second);
 		}, 10);
 
-		fileContentStringList << reportGenerator("Top LMs of AlpPhase Time usage", []
+		file << reportGenerator("Top LMs of AlpPhase Time usage", []
 												(std::tuple<QString, QString, double, double, double, double, double>& first,
 												std::tuple<QString, QString, double, double, double, double, double>& second)
 		{
 			return std::get<6>(first) > std::get<6>(second);
 		}, 10);
 
-		fileContentStringList.append("");
-		fileContentStringList.append(afbsUsage);
+		file.append("");
+		file.append(afbsUsage);
 
-		buildResultWriter()->addFile(Directory::REPORTS, "Resources.txt", fileContentStringList);
+		buildResultWriter()->addFile(Directory::REPORTS, File::RESOURCES_TXT, file);
 
 		return result;
 	}
@@ -817,7 +837,7 @@ namespace Builder
 		list.append("-- This file has been generated automatically by RPCT software");
 		list.append("--");
 
-		BuildInfo bi = buildResultWriter()->buildInfo();
+		BuildInfo bi = buildInfo();
 
 		str = QString("-- Project:\t%1").arg(bi.project);
 		list.append(str);
@@ -999,7 +1019,7 @@ namespace Builder
 		list.append("-- This file has been generated automatically by RPCT software");
 		list.append("--");
 
-		BuildInfo bi = buildResultWriter()->buildInfo();
+		BuildInfo bi = buildInfo();
 
 		str = QString("-- Project:\t%1").arg(bi.project);
 		list.append(str);
@@ -1362,7 +1382,7 @@ namespace Builder
 		xml.setAutoFormatting(true);
 		xml.writeStartDocument();
 
-		buildResultWriter()->buildInfo().writeToXml(*xml.xmlStreamWriter());
+		buildInfo().writeToXml(*xml.xmlStreamWriter());
 
 		xml.writeStartElement("Subsystems");
 		xml.writeIntAttribute("Count", subsystemsCount);

@@ -391,6 +391,7 @@ namespace File
 	inline const QString LOGIC_MODULES_XML("LogicModules.xml");
 
 	inline const QString SIM_PROFILES = "SimProfiles.txt";
+	inline const QString RESOURCES_TXT = "Resources.txt";
 
 	inline const QString CRYPTO_SS_SERVER_CERTIFICATE = "/Crypto/ss_server.crt";
 	inline const QString CRYPTO_SS_SERVER_PRIVATE_KEY = "/Crypto/ss_server_private.key";

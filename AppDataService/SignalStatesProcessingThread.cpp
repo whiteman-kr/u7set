@@ -44,6 +44,8 @@ void SignalStatesProcessingThread::unregisterDestSignalStatesQueue(SimpleAppSign
 {
     TEST_PTR_RETURN(destQueue);
 
+	Q_UNUSED(description);
+
 	int curIndex = 0;
 	bool removeOk = false;
 
