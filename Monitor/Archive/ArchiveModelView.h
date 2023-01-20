@@ -29,12 +29,16 @@ enum class ArchiveColumns
 
 Q_DECLARE_METATYPE(ArchiveColumns);
 
-class ArchiveSignalParam : public AppSignalParam
+struct ArchiveSignalParam : public ArchiveSignal
 {
-public:
 	ArchiveSignalParam() = default;
-	explicit ArchiveSignalParam(const AppSignalParam& _appSignalParam) :
-		AppSignalParam(_appSignalParam), precision(_appSignalParam.precision()), analogAppSignalParam(_appSignalParam.analogSignalFormat()) {}
+
+	explicit ArchiveSignalParam(const ArchiveSignal& archiveSignal) :
+		ArchiveSignal(archiveSignal),
+		precision(archiveSignal.signalParam.precision()),
+		analogAppSignalParam(archiveSignal.signalParam.analogSignalFormat())
+	{
+	}
 
 	E::ValueViewType viewType = E::ValueViewType::Dec;
 	int precision = 2;
@@ -68,26 +72,27 @@ private:
 	// Data manipultaion
 	//
 public:
-	void setParams(const std::vector<AppSignalParam>& appSignals, E::TimeType timeType);
-	void addData(const std::shared_ptr<ArchiveChunk>& chunk);
+	void setParams(const std::vector<ArchiveSignal>& archiveSignals, E::TimeType timeType);
+	void addData(ArchiveRequestResult&& chunk);
 	void clear();
 
 	std::vector<ArchiveSignalParam> appSignals();
-	ArchiveSignalParam signalParam(int row) const;
+	const ArchiveSignalParam& signalParam(int row) const;
 
 	bool setShowParams(Hash signalHash, E::ValueViewType viewType, int precision);
 
 	// Data
 	//
 private:
-	std::map<Hash, ArchiveSignalParam> m_appSignals;
+	std::map<Hash, ArchiveSignalParam> m_archiveSignals;
 	E::TimeType m_timeType = E::TimeType::Local;
 	ArchiveData m_archive;
 
 	mutable int m_cachedStateIndex = -1;
 	mutable AppSignalState m_cachedSignalState;
 
-	QString nonValidString = "?";
+	inline static const QString NonValidString{"LowLimit"};
+	inline static const ArchiveSignalParam InvalidSignalParam{};
 };
 
 

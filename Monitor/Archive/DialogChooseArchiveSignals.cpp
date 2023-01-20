@@ -1,6 +1,7 @@
 #include "DialogChooseArchiveSignals.h"
 #include "ui_DialogChooseArchiveSignals.h"
 #include "MonitorSignalManager.h"
+#include "../OnlineLib/SocketIO.h"
 
 
 namespace	// Anonymous namespace, as this class is used just in this translation unit
@@ -170,10 +171,11 @@ DialogChooseArchiveSignals::DialogChooseArchiveSignals(MonitorSignalManager* sig
 
 	// Fill added signals
 	//
-	for (const ArchiveSignal& appSignal : init.acceptedSignals)
-	{
-		addSignal(appSignal);
-	}
+	std::ranges::for_each(init.acceptedSignals,
+		[this](const ArchiveSignal& appSignal)
+		{
+			addSignal(appSignal);
+		});
 
 	return;
 }

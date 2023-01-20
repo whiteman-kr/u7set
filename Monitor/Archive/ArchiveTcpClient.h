@@ -1,6 +1,6 @@
 #ifndef ARCHIVETCPCLIENT_H
 #define ARCHIVETCPCLIENT_H
-
+/*
 #include "../OnlineLib/Tcp.h"
 #include "../AppSignalLib/AppSignalParam.h"
 #include "../CommonLib/Hash.h"
@@ -9,6 +9,9 @@
 #include "MonitorConfigController.h"
 #include "ArchiveData.h"
 #include "../OnlineLib/TcpClientStatistics.h"
+
+namespace AAA
+{
 
 
 struct ArchiveRequest
@@ -20,25 +23,33 @@ struct ArchiveRequest
 	std::map<Hash, QString> appSignals;
 };
 
+struct ArchiveRequestResult
+{
 
-// Getting data freom archive, can process only one request in a time
+};
+
+// Getting data from archive
+// Single use thread, it can procces only one request
+// Subscribe to signals:
 //
 class ArchiveTcpClient : public Tcp::Client, public TcpClientStatistics
 {
 	Q_OBJECT
 
 public:
-	ArchiveTcpClient(MonitorConfigController* configController, ILogFile* logFile);
+	ArchiveTcpClient(const ArchiveSource& request,
+					 QPromise<ArchiveRequestResult>&& promise,
+					 const SoftwareInfo& softwareInfo,
+					 const MonitorSettings::ArchiveService& archiveService,
+					 ILogFile* logFile);
 	virtual ~ArchiveTcpClient();
 
 	// Methods
 	//
+private:
+	bool setRequestData(const ArchiveSource& request);
+
 public:
-	bool requestData(TimeStamp startTime,
-					 TimeStamp endTime,
-					 E::TimeType timeType,
-					 bool removePeriodicRecords,
-					 const std::vector<AppSignalParam>& appSignals);
 	bool cancelRequest();
 	bool isRequestInProgress() const;
 
@@ -54,6 +65,7 @@ protected:
 	virtual void onClientThreadStarted() override;
 	virtual void onClientThreadFinished() override;
 
+	virtual void onTryConnectToServer(const HostAddressPort& serverAddr) override;
 	virtual void onConnection() override;
 	virtual void onDisconnection() override;
 	virtual void onReplyTimeout() override;
@@ -71,8 +83,8 @@ protected:
 	void processCancel(const QByteArray& data);
 
 signals:
-	void signal_connectionEstablished();
-	void signal_startRequest();
+	//void signal_connectionEstablished();
+	//void signal_startRequest();
 	void signal_cancelRequest();
 
 	void dataReady(std::shared_ptr<ArchiveChunk> chunk);
@@ -85,25 +97,24 @@ public slots:
 //	void slot_requestData(QString appSignalId, TimeStamp hourToRequest, TimeType timeType);
 
 protected slots:
-	void slot_startRequest();
+	//void slot_startRequest();
 	void slot_cancelRequest();
-
-	void slot_configurationArrived(ConfigSettings configuration);
 
 	// Data
 	//
 private:
-	MonitorConfigController* m_cfgController = nullptr;
 	HasLogFile m_logFile;
 	int m_periodicTimerId = 0;
 
 	// State
 	//
 private:
-	volatile bool m_requestInProgress = false;
+	std::atomic<bool> m_requestInProgress{false};
 	quint32 m_currentRequestId = 0;
 	ArchiveRequest m_requestData;
 	bool m_needCancelRequest = false;
+	int m_tryToConnectCounter = 5;	// Try to connect to server 5 times, if connection was not established, then
+									// report error and stop any attempts to connect
 
 	QElapsedTimer m_startRequestTime;
 
@@ -128,4 +139,7 @@ private:
 	int m_statTcpReplyCount = 0;
 };
 
+
+}
+*/
 #endif // ARCHIVETCPCLIENT_H

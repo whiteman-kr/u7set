@@ -733,8 +733,12 @@ void MonitorMainWindow::runTuningTcpClients()
 	{
 		// TuningClientTcpClient
 		//
-        MonitorTuningTcpClient* client = new MonitorTuningTcpClient(m_configController.softwareInfo(), ts.equipmentId, &theTuningSignals,
-                                                                    &m_LogFile, &m_tuningLogFile, &m_tuningUserManager);
+		MonitorTuningTcpClient* client = new MonitorTuningTcpClient(m_configController.softwareInfo(),
+																	ts.equipmentId,
+																	&theTuningSignals,
+																	&m_LogFile,
+																	&m_tuningLogFile,
+																	&m_tuningUserManager);
 
 		const HostAddressPort addrPort = HostAddressPort(ts.clientRequestIP, ts.clientRequestPort);
 		client->setServers(addrPort, addrPort, false);

@@ -64,8 +64,10 @@ SOURCES += main.cpp \
     ../lib/Ui/TabWidgetEx.cpp \
     ../lib/Ui/TagSelectorWidget.cpp \
     AdsConnection.cpp \
+    Archive/ArchiveConnection.cpp \
+    Archive/ArchiveTcpClient2.cpp \
+    Archive/ArchiveWidget.cpp \
     Archive/MonitorArchive.cpp \
-    Archive/MonitorArchiveWidget.cpp \
     InstanceResolver.cpp \
     MonitorAppSettings.cpp \
     MonitorMainWindow.cpp \
@@ -125,8 +127,10 @@ HEADERS  += \
     ../lib/Ui/TabWidgetEx.h \
     ../lib/Ui/TagSelectorWidget.h \
     AdsConnection.h \
+    Archive/ArchiveConnection.h \
+    Archive/ArchiveTcpClient2.h \
+    Archive/ArchiveWidget.h \
     Archive/MonitorArchive.h \
-    Archive/MonitorArchiveWidget.h \
     Globals.h \
     InstanceResolver.h \
     MonitorAppSettings.h \

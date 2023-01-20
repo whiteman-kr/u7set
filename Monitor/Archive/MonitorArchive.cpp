@@ -1,19 +1,19 @@
 #include "MonitorArchive.h"
-#include "MonitorArchiveWidget.h"
+#include "ArchiveWidget.h"
 
 //
 //
 // MonitorArchive
 //
 //
-std::map<QString, MonitorArchiveWidget*> MonitorArchive::s_archiveList;
+std::map<QString, ArchiveWidget*> MonitorArchive::s_archiveList;
 
 std::vector<QString> MonitorArchive::getArchiveList()
 {
 	std::vector<QString> result;
 	result.reserve(s_archiveList.size());
 
-	for (std::pair<QString, MonitorArchiveWidget*> p : s_archiveList)
+	for (std::pair<QString, ArchiveWidget*> p : s_archiveList)
 	{
 		result.push_back(p.first);
 	}
@@ -29,7 +29,7 @@ bool MonitorArchive::activateWindow(QString archiveName)
 		return false;
 	}
 
-	MonitorArchiveWidget* widget = s_archiveList[archiveName];
+	ArchiveWidget* widget = s_archiveList[archiveName];
 	Q_ASSERT(widget);
 
 	widget->activateWindow();
@@ -46,7 +46,7 @@ bool MonitorArchive::startNewWidget(MonitorSignalManager* signalManager,
 	Q_ASSERT(signalManager);
 	Q_ASSERT(configController);
 
-	MonitorArchiveWidget* window = new MonitorArchiveWidget(signalManager, configController, parent);
+	ArchiveWidget* window = new ArchiveWidget(signalManager, configController, parent);
 	window->setSignals(appSignals);
 	window->show();
 
@@ -64,7 +64,7 @@ bool MonitorArchive::requestArchiveWithNewWidget(MonitorSignalManager* signalMan
 	Q_ASSERT(signalManager);
 	Q_ASSERT(configController);
 
-	MonitorArchiveWidget* window = new MonitorArchiveWidget(signalManager, configController, parent);
+	ArchiveWidget* window = new ArchiveWidget(signalManager, configController, parent);
 
 	window->setSignals(appSignals);
 	window->setTime(startTime, endTime, timeType);
@@ -76,7 +76,7 @@ bool MonitorArchive::requestArchiveWithNewWidget(MonitorSignalManager* signalMan
 	return false;
 }
 
-void MonitorArchive::registerWindow(QString name, MonitorArchiveWidget* window)
+void MonitorArchive::registerWindow(QString name, ArchiveWidget* window)
 {
 	Q_ASSERT(s_archiveList.count(name) == 0);
 	s_archiveList[name] = window;

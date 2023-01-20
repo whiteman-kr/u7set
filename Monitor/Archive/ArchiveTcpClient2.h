@@ -1,5 +1,4 @@
 #pragma once
-#include <future>
 #include "../../lib/SoftwareSettings.h"
 #include "../../CommonLib/Times.h"
 #include "../OnlineLib/Tcp.h"
@@ -15,17 +14,14 @@ struct ArchiveRequest
 	std::map<Hash, QString> appSignals;
 };
 
-struct ArchiveRequestResult
-{
-	std::deque<AppSignalState> states;
-};
 
 // Request data from archive service
-//	Any object state and control via QFuture
-//	Note: One time use object
+//		Note: One time use object
 //
 class ArchiveTcpClient2 : public Tcp::Client, public TcpClientStatistics
 {
+	Q_OBJECT
+
 public:
 	ArchiveTcpClient2(const ArchiveSource& request,
 					  const SoftwareInfo& softwareInfo,
@@ -35,30 +31,29 @@ public:
 	virtual ~ArchiveTcpClient2();
 
 public:
-	// Take result or exception via this future object.
-	//
-	[[nodiscard]] std::future<ArchiveRequestResult> future();
+	/// Call to cancel request.
 	void cancelRequest();
+
+signals:
+	/// Reports if data ready or error occured.
+	void dataReady(std::shared_ptr<ArchiveRequestResult> result, QString error);
 
 private:
 	void setRequestData(const ArchiveSource& request);
 
+	void finish(QString error = QString{});
+
 	// Tcp::Client implementation
 	//
 private:
-	virtual void onClientThreadStarted() override;
-	virtual void onClientThreadFinished() override;
-
 	virtual void onTryConnectToServer(const HostAddressPort& serverAddr) override;
 	virtual void onConnection() override;
 	virtual void onDisconnection() override;
 	virtual void onReplyTimeout() override;
 
-	void finish(QString error = QString{});
-
-private:
 	virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
 
+private:
 	void requestStart();
 	void processStart(const QByteArray& data);
 
@@ -74,11 +69,10 @@ private:
 	HasLogFile m_logFile;
 	MonitorSettings::ArchiveService m_serverSettings;
 
-	std::promise<ArchiveRequestResult> m_promise;
-	std::atomic<bool> m_needCancelRequest{false};
-
 	// State
 	//
+	std::atomic<bool> m_needCancelRequest{false};
+
 	ArchiveRequest m_requestData;
 	ArchiveRequestResult m_result;
 
@@ -87,22 +81,16 @@ private:
 									// report error and stop any attempts to connect
 	QElapsedTimer m_startRequestTime;
 
-	// Protobufer messages
+	// Protobufer messages for use and reuse
 	//
 private:
-	Network::GetAppSignalStatesFromArchiveStartRequest m_startRequest;
-	Network::GetAppSignalStatesFromArchiveStartReply m_startReply;
-
 	Network::GetAppSignalStatesFromArchiveNextRequest m_nextRequest;
 	Network::GetAppSignalStatesFromArchiveNextReply m_nextReply;
-
-	Network::GetAppSignalStatesFromArchiveCancelRequest m_cancelRequest;
-	Network::GetAppSignalStatesFromArchiveCancelReply m_cancelReply;
 
 	// Statisctics
 	//
 private:
-	QString m_statRequestDescription;
+	//QString m_statRequestDescription;
 	int m_statStateReceived = 0;
 	int m_statTcpRequestCount = 0;
 	int m_statTcpReplyCount = 0;

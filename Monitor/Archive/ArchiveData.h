@@ -11,6 +11,7 @@ struct ArchiveSignal
 	QString archiveServiceShortenId;
 };
 
+
 struct ArchiveSource
 {
 	std::vector<ArchiveSignal> acceptedSignals;
@@ -20,31 +21,36 @@ struct ArchiveSource
 	TimeStamp requestEndTime;
 	bool removePeriodicRecords;
 };
+Q_DECLARE_METATYPE(ArchiveSource)
 
-
-struct ArchiveChunk
+// The request result of one or several signals from one ArchiveServiceService
+//
+struct ArchiveRequestResult
 {
-	std::vector<AppSignalState> states;
+	QString archiveServiceId;
+	std::deque<AppSignalState> states;
 };
-
-Q_DECLARE_METATYPE(ArchiveChunk)
+Q_DECLARE_METATYPE(std::shared_ptr<ArchiveRequestResult>)
 
 
 class ArchiveData
 {
 public:
-	ArchiveData();
+	ArchiveData() = default;
+	~ArchiveData() = default;
 
 public:
-	void addChunk(const std::shared_ptr<ArchiveChunk>& chunk);
+	bool addChunk(ArchiveRequestResult&& ArchiveRequestResult, E::TimeType timeType);
 
 	[[nodiscard]] int size() const;
 	void clear();
 
-	[[nodiscard]] AppSignalState state(int index) const;
+	[[nodiscard]] const AppSignalState& state(int index) const;
 
 private:
-	std::vector<std::shared_ptr<ArchiveChunk>> m_chunks;
-	int m_cachedSize = 0;
+	std::deque<AppSignalState> m_archive;
+
+	static constexpr int MaxArchiveStates = 100'000;
+	static constexpr AppSignalState NullState;
 };
 

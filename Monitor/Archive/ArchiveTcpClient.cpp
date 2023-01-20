@@ -1,34 +1,37 @@
 #include "ArchiveTcpClient.h"
 #include "MonitorAppSettings.h"
-
-ArchiveTcpClient::ArchiveTcpClient(MonitorConfigController* configController, ILogFile* logFile) :
-	// TO DO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	Tcp::Client(configController->softwareInfo(), {}, {}),
-//	Tcp::Client(configController->softwareInfo(),
-//				configController->configuration().archiveService1.address(),
-//				configController->configuration().archiveService2.address(),
-//				"ArchiveTcpClient"),
-	TcpClientStatistics(this),
-	m_cfgController(configController),
-	m_logFile(logFile, "ArchiveTcpClient")
+/*
+namespace AAA
 {
-	Q_ASSERT(configController);
+
+ArchiveTcpClient::ArchiveTcpClient(const ArchiveSource& request,
+								   const SoftwareInfo& softwareInfo,
+								   const MonitorSettings::ArchiveService& archiveService,
+								   ILogFile* logFile) :
+	Tcp::Client(softwareInfo, archiveService.address, "ArchiveTcpClient"),
+	TcpClientStatistics(this),
+	m_logFile(logFile, QString("ArchTcp(%1)").arg(archiveService.address.addressPortStr()))
+{
 	Q_ASSERT(logFile);
 
 	setObjectName("ArchiveTcpClient");
 
-//	qDebug()
-//			<< "ArchiveTcpClient::ArchiveTcpClient("
-//			<< configController->configuration().archiveService1.address().addressPortStr()
-//			<< ", "
-//			<< configController->configuration().archiveService2.address().addressPortStr()
-//			<< ");";
-
-	connect(this, &ArchiveTcpClient::signal_startRequest, this, &ArchiveTcpClient::slot_startRequest);
-	connect(this, &ArchiveTcpClient::signal_cancelRequest, this, &ArchiveTcpClient::slot_cancelRequest);
+	qDebug()
+			<< "ArchiveTcpClient::ArchiveTcpClient("
+			<< archiveService.equipmentId
+			<< ", "
+			<< archiveService.address.addressPortStr()
+			<< ");";
 
 	qRegisterMetaType<ArchiveChunk>("ArchiveChunk");
 	qRegisterMetaType<std::shared_ptr<ArchiveChunk>>("std::shared_ptr<ArchiveChunk>");
+
+	//connect(this, &ArchiveTcpClient::signal_startRequest, this, &ArchiveTcpClient::slot_startRequest);
+	connect(this, &ArchiveTcpClient::signal_cancelRequest, this, &ArchiveTcpClient::slot_cancelRequest);
+
+	// --
+	//
+	setRequestData(request);
 
 	return;
 }
@@ -38,33 +41,29 @@ ArchiveTcpClient::~ArchiveTcpClient()
 	qDebug() << "ArchiveTcpClient::~ArchiveTcpClient()";
 }
 
-bool ArchiveTcpClient::requestData(TimeStamp startTime,
-								   TimeStamp endTime,
-								   E::TimeType timeType,
-								   bool removePeriodicRecords,
-								   const std::vector<AppSignalParam>& appSignals)
+bool ArchiveTcpClient::setRequestData(const ArchiveSource& request)
 {
 	m_logFile.writeMessage(QString("requestData(), startTime %1, endTime %2, timeType %3, removePeriodicRecords %4, appSignals: %5")
-							.arg(startTime.toDateTime().toString())
-							.arg(endTime.toDateTime().toString())
-							.arg(E::valueToString(timeType))
-							.arg(removePeriodicRecords)
+							.arg(request.requestStartTime.toDateTime().toString())
+							.arg(request.requestEndTime.toDateTime().toString())
+							.arg(E::valueToString(request.timeType))
+							.arg(request.removePeriodicRecords)
 							.arg([](const auto& appSignals) -> QString
 									{
 										QStringList result;
 										result.reserve(static_cast<int>(appSignals.size()));
-										for (const AppSignalParam& s : appSignals)
+										for (const ArchiveSignal& as : appSignals)
 										{
-											result.push_back(s.appSignalId());
+											result.push_back(as.signalParam.appSignalId());
 										}
 										return result.join(", ");
-									}(appSignals))
+									}(request.acceptedSignals))
 						   );
 
-	if (appSignals.size() > ARCH_REQUEST_MAX_SIGNALS)
+	if (request.acceptedSignals.size() > ARCH_REQUEST_MAX_SIGNALS)
 	{
 		m_logFile.writeWarning(QString("requestData() appSignals.size()(%1) > ARCH_REQUEST_MAX_SIGNALS(%2), cancel request")
-								.arg(appSignals.size())
+								.arg(request.acceptedSignals.size())
 								.arg(ARCH_REQUEST_MAX_SIGNALS));
 		return false;
 	}
@@ -76,23 +75,22 @@ bool ArchiveTcpClient::requestData(TimeStamp startTime,
 		return false;
 	}
 
-	m_requestData.startTime = qMin(startTime, endTime);
-	m_requestData.endTime = qMax(startTime, endTime);
-	m_requestData.timeType = timeType;
-	m_requestData.removePrioodicRecords = removePeriodicRecords;
+	m_requestData.startTime = qMin(request.requestStartTime, request.requestEndTime);
+	m_requestData.endTime = qMax(request.requestStartTime, request.requestEndTime);
+	m_requestData.timeType = request.timeType;
+	m_requestData.removePrioodicRecords = request.removePeriodicRecords;
 
 	m_requestData.appSignals.clear();
-	for (const AppSignalParam& sp : appSignals)
+	for (const ArchiveSignal& as : request.acceptedSignals)
 	{
-		Hash appSignalHash = ::calcHash(sp.appSignalId());
-		m_requestData.appSignals[appSignalHash] = sp.appSignalId();
+		Hash appSignalHash = ::calcHash(as.signalParam.appSignalId());
+		m_requestData.appSignals[appSignalHash] = as.signalParam.appSignalId();
 	}
 
-	emit signal_startRequest();		// emit signal as requestData func can be called from other thread
+	//emit signal_startRequest();		// emit signal as requestData func can be called from other thread
 
 	return true;
 }
-
 
 bool ArchiveTcpClient::cancelRequest()
 {
@@ -161,10 +159,6 @@ void ArchiveTcpClient::onClientThreadStarted()
 	qDebug() << "ArchiveTcpClient::onClientThreadStarted()";
 	m_logFile.writeMessage(QString("onClientThreadStarted()"));
 
-	connect(m_cfgController, &MonitorConfigController::configurationArrived,
-			this, &ArchiveTcpClient::slot_configurationArrived,
-			Qt::QueuedConnection);
-
 	startTimer(50);		// If timer starten in constructor it will not always work, as constructor runs in another thread
 
 	return;
@@ -180,6 +174,27 @@ void ArchiveTcpClient::onClientThreadFinished()
 	return;
 }
 
+void ArchiveTcpClient::onTryConnectToServer(const HostAddressPort& serverAddr)
+{
+	Tcp::Client::onTryConnectToServer(serverAddr);
+
+	if (m_tryToConnectCounter > 0)
+	{
+		m_tryToConnectCounter--;
+	}
+	else
+	{
+		// The connection was not established, report an error
+		//
+		QString error = tr("Connection to ArchiveService %1 cannot be established.")
+							.arg(this->currentServerAddressPort().addressPortStr());
+
+		emitErrorResetState(error);
+	}
+
+	return;
+}
+
 void ArchiveTcpClient::onConnection()
 {
 	qDebug() << "ArchiveTcpClient::onConnection()";
@@ -187,9 +202,12 @@ void ArchiveTcpClient::onConnection()
 
 	Q_ASSERT(isClearToSendRequest() == true);
 
-	resetState();
+	// Start data requesting
+	//
+	requestStart();
 
-	emit signal_connectionEstablished();
+	//resetState();
+	//emit signal_connectionEstablished();
 
 	return;
 }
@@ -479,7 +497,7 @@ void ArchiveTcpClient::processNext(const QByteArray& data)
 	if (stateCount != 0)
 	{
 		std::shared_ptr<ArchiveChunk> chunk = std::make_shared<ArchiveChunk>();
-		chunk->states.swap(states);
+		chunk->swap(states);
 		emit dataReady(chunk);
 	}
 
@@ -489,7 +507,11 @@ void ArchiveTcpClient::processNext(const QByteArray& data)
 	{
 		qDebug() << "ARCHS_GET_APP_SIGNALS_STATES_NEXT Reqest->Reply time: " << m_startRequestTime.elapsed();
 		m_logFile.writeMessage(QString("processNext() End of request, time %1 ms, requestId %2").arg(m_startRequestTime.elapsed()).arg(m_currentRequestId));
-		resetState();							// END OF REQUEST COMMUNICATION!
+
+		//
+		// THE END OF REQUEST COMMUNICATION!
+		//
+		resetState();	// It emmits requestIsFinished
 	}
 	else
 	{
@@ -571,40 +593,31 @@ void ArchiveTcpClient::processCancel(const QByteArray& data)
 	return;
 }
 
-void ArchiveTcpClient::slot_startRequest()
-{
-	Q_ASSERT(m_requestInProgress == false);
-	requestStart();
-	return;
-}
+//void ArchiveTcpClient::slot_startRequest()
+//{
+//	Q_ASSERT(m_requestInProgress == false);
+//	requestStart();
+//	return;
+//}
 
 void ArchiveTcpClient::slot_cancelRequest()
 {
-	Q_ASSERT(m_requestInProgress == true);
-
-	if (m_requestInProgress == false)
-	{
-		resetState();
-		return;
-	}
-
+	resetState();
 	m_needCancelRequest = true;
-
 	return;
+
+//	Q_ASSERT(m_requestInProgress == true);
+//
+//	if (m_requestInProgress == false)
+//	{
+//		resetState();
+//		return;
+//	}
+//
+//	m_needCancelRequest = true;
+//
+//	return;
 }
 
-void ArchiveTcpClient::slot_configurationArrived(ConfigSettings configuration)
-{
-	// TO DO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	HostAddressPort s1, s2;
-//	HostAddressPort s1 = configuration.archiveService1.address();
-//	HostAddressPort s2 = configuration.archiveService2.address();
-
-	if (serverAddressPort(0) != s1 ||
-		serverAddressPort(1) != s2)
-	{
-		setServers(s1, s2, true);
-	}
-
-	return;
 }
+*/

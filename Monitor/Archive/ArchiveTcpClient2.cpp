@@ -13,12 +13,16 @@ ArchiveTcpClient2::ArchiveTcpClient2(const ArchiveSource& request,
 
 	setObjectName("ArchiveTcpClient");
 
+	qRegisterMetaType<std::shared_ptr<ArchiveRequestResult>>();
+
 	qDebug()
 			<< "ArchiveTcpClient::ArchiveTcpClient("
 			<< archiveService.equipmentId
 			<< ", "
 			<< archiveService.address.addressPortStr()
 			<< ");";
+
+	m_result.archiveServiceId = m_serverSettings.equipmentId;
 
 	setRequestData(request);
 
@@ -28,11 +32,6 @@ ArchiveTcpClient2::ArchiveTcpClient2(const ArchiveSource& request,
 ArchiveTcpClient2::~ArchiveTcpClient2()
 {
 	qDebug() << Q_FUNC_INFO;
-}
-
-std::future<ArchiveRequestResult> ArchiveTcpClient2::future()
-{
-	return m_promise.get_future();
 }
 
 void ArchiveTcpClient2::cancelRequest()
@@ -77,16 +76,23 @@ void ArchiveTcpClient2::setRequestData(const ArchiveSource& request)
 	return;
 }
 
-void ArchiveTcpClient2::onClientThreadStarted()
+void ArchiveTcpClient2::finish(QString error /*= QString{}*/)
 {
-	qDebug() << Q_FUNC_INFO;
-	m_logFile.writeMessage(Q_FUNC_INFO);
-}
+	setServers({}, {}, false);	// This stops trying to connect to server
+	closeConnection();
 
-void ArchiveTcpClient2::onClientThreadFinished()
-{
-	qDebug() << Q_FUNC_INFO;
-	m_logFile.writeMessage(Q_FUNC_INFO);
+	if (error.isEmpty() == false)
+	{
+		m_logFile.writeError(error);
+	}
+
+	auto result = std::make_shared<ArchiveRequestResult>(std::move(m_result));
+	m_result = {};
+
+	emit dataReady(result, error);
+
+	error.clear();
+	return;
 }
 
 void ArchiveTcpClient2::onTryConnectToServer(const HostAddressPort& serverAddr)
@@ -103,7 +109,7 @@ void ArchiveTcpClient2::onTryConnectToServer(const HostAddressPort& serverAddr)
 	{
 		// The connection was not established, report an error
 		//
-		QString error = tr("Cannot establish connection to ArchiveService (%1)").arg(serverAddr.addressPortStr());
+		QString error = tr("Cannot establish connection to ArchiveService %1.)").arg(serverAddr.addressPortStr());
 		finish(error);
 	}
 	else
@@ -153,42 +159,9 @@ void ArchiveTcpClient2::onReplyTimeout()
 
 	finish(error);
 
-
-
 	return;
 }
 
-
-
-void ArchiveTcpClient2::finish(QString error /*= QString{}*/)
-{
-	// This stops trying to connect to server
-	//
-	setServers({}, {}, false);
-	closeConnection();
-
-	if (error.isEmpty() == false)
-	{
-		m_logFile.writeError(error);
-
-		try
-		{
-			throw std::runtime_error(error.toStdString());
-		}
-		catch(...)
-		{
-			m_promise.set_exception(std::current_exception());
-		}
-	}
-	else
-	{
-		// Finish or cancel -> save result to future
-		//
-		m_promise.set_value(std::move(m_result));
-	}
-
-	return;
-}
 
 void ArchiveTcpClient2::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
 {
@@ -253,27 +226,27 @@ void ArchiveTcpClient2::requestStart()
 
 	m_statTcpRequestCount ++;
 	m_statStateReceived = 0;
-	//m_requestInProgress = true;
 
-	m_startRequest.Clear();
-	m_startRequest.set_clientequipmentid(this->localSoftwareInfo().equipmentID().toStdString());
+	Network::GetAppSignalStatesFromArchiveStartRequest startRequest;
 
-	m_startRequest.set_timetype(static_cast<int>(m_requestData.timeType));		// enum TymeType: 0 Plan, 1 SystemTime, 2 LocalTyme, 3 ArchiveId
-	m_startRequest.set_starttime(m_requestData.startTime.timeStamp);
-	m_startRequest.set_endtime(m_requestData.endTime.timeStamp);
+	startRequest.set_clientequipmentid(this->localSoftwareInfo().equipmentID().toStdString());
 
-	m_startRequest.set_removeperiodic(m_requestData.removePrioodicRecords);
+	startRequest.set_timetype(static_cast<int>(m_requestData.timeType));		// enum TymeType: 0 Plan, 1 SystemTime, 2 LocalTyme, 3 ArchiveId
+	startRequest.set_starttime(m_requestData.startTime.timeStamp);
+	startRequest.set_endtime(m_requestData.endTime.timeStamp);
+
+	startRequest.set_removeperiodic(m_requestData.removePrioodicRecords);
 
 	QStringList appSignlList;
 	appSignlList.reserve(static_cast<int>(m_requestData.appSignals.size()));
 
 	for (const std::pair<Hash, QString> sp : m_requestData.appSignals)
 	{
-		m_startRequest.add_signalhashes(sp.first);
+		startRequest.add_signalhashes(sp.first);
 		appSignlList.push_back(sp.second);
 	}
 
-	sendRequest(ARCHS_GET_APP_SIGNALS_STATES_START, m_startRequest);
+	sendRequest(ARCHS_GET_APP_SIGNALS_STATES_START, startRequest);
 
 	m_startRequestTime.start();
 
@@ -298,7 +271,9 @@ void ArchiveTcpClient2::processStart(const QByteArray& data)
 
 	// Parse protobuffer message
 	//
-	bool ok = m_startReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
+	Network::GetAppSignalStatesFromArchiveStartReply startReply;
+
+	bool ok = startReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 	if (ok == false)
 	{
 		QString error = tr("processStart() StartReply data parsing error.");
@@ -309,9 +284,9 @@ void ArchiveTcpClient2::processStart(const QByteArray& data)
 
 	// Process received data
 	//
-	int error = m_startReply.error();
-	QString errorString = QString::fromStdString(m_startReply.errorstring());
-	m_currentRequestId = m_startReply.requestid();
+	int error = startReply.error();
+	QString errorString = QString::fromStdString(startReply.errorstring());
+	m_currentRequestId = startReply.requestid();
 
 	if (errorString.isEmpty() == false ||
 		error != 0)
@@ -359,7 +334,6 @@ void ArchiveTcpClient2::requestNext()
 	}
 
 	Q_ASSERT(m_currentRequestId != 0);
-	//Q_ASSERT(m_requestInProgress == true);
 
 	m_nextRequest.Clear();
 	m_nextRequest.set_requestid(m_currentRequestId);
@@ -439,20 +413,15 @@ void ArchiveTcpClient2::processNext(const QByteArray& data)
 	qDebug() << "ArchiveTcpClient::processNext, stateCount " << stateCount;
 	m_logFile.writeMessage(QString("processNext() stateCount = %1, requestId = %2").arg(stateCount).arg(m_currentRequestId));
 
-	for (int i = 0; i < stateCount; i++)
+	for (const auto& stateMessage : m_nextReply.appsignalstates())
 	{
-		const ::Proto::AppSignalState& stateMessage = m_nextReply.appsignalstates(i);
-
-		// Save states to result, later it'll be transfered via promise/future in finish()
-		//
 		m_result.states.emplace_back(stateMessage);
 	}
 
 	if (stateCount != 0)
 	{
-//		std::shared_ptr<ArchiveChunk> chunk = std::make_shared<ArchiveChunk>();
-//		chunk->swap(states);
-//		emit dataReady(chunk);
+		// Some data left, if you want to send incomplete data, send it from here
+		//
 	}
 
 	// Request next or stop communication
@@ -479,16 +448,9 @@ void ArchiveTcpClient2::processNext(const QByteArray& data)
 
 void ArchiveTcpClient2::requestCancel()
 {
-	if (isConnected() == false)
+	if (isConnected() == false || isClearToSendRequest() == false)
 	{
-		finish(tr("requestCancel() No connection to Archive Service"));
-		return;
-	}
-
-	if (isClearToSendRequest() == false)
-	{
-		Q_ASSERT(isClearToSendRequest());
-		finish(tr("requestCancel() isClearToSendRequest() == false"));
+		finish();
 		return;
 	}
 
@@ -496,10 +458,10 @@ void ArchiveTcpClient2::requestCancel()
 
 	m_statTcpRequestCount ++;
 
-	m_cancelRequest.Clear();
-	m_cancelRequest.set_requestid(m_currentRequestId);
+	Network::GetAppSignalStatesFromArchiveCancelRequest cancelRequest;
+	cancelRequest.set_requestid(m_currentRequestId);
 
-	sendRequest(ARCHS_GET_APP_SIGNALS_STATES_CANCEL, m_cancelRequest);
+	sendRequest(ARCHS_GET_APP_SIGNALS_STATES_CANCEL, cancelRequest);
 
 	m_logFile.writeMessage(QString("processCancel() sendRequest(ARCHS_GET_APP_SIGNALS_STATES_CANCEL), m_currentRequestId = %1").arg(m_currentRequestId));
 
@@ -512,9 +474,10 @@ void ArchiveTcpClient2::processCancel(const QByteArray& data)
 
 	// Parse protobuffer message
 	//
-	bool ok = m_cancelReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
+	Network::GetAppSignalStatesFromArchiveCancelReply cancelReply;
 
-	if (ok == false)
+	if (bool ok = cancelReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
+		ok == false)
 	{
 		finish(tr("CancelReply data parsing error."));
 		return;
@@ -522,7 +485,7 @@ void ArchiveTcpClient2::processCancel(const QByteArray& data)
 
 	// Process received data
 	//
-	QString errorString = QString::fromStdString(m_cancelReply.errorstring());
+	QString errorString = QString::fromStdString(cancelReply.errorstring());
 
 	if (errorString.isEmpty() == false)
 	{

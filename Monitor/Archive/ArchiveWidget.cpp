@@ -262,11 +262,12 @@ ArchiveWidget::ArchiveWidget(MonitorSignalManager* signalManager,
 	connect(m_view, &ArchiveView::requestToRemoveSignal, this, &ArchiveWidget::removeSignal);
 	connect(m_view, &ArchiveView::requestToSetSignals, this, &ArchiveWidget::signalsButton);
 
+	connect(&m_archiveConnection, &ArchiveConnection::dataReady, this, &ArchiveWidget::dataReceived);
+	connect(&m_archiveConnection, &ArchiveConnection::requestError, this, &ArchiveWidget::requestError);
+	connect(&m_archiveConnection, &ArchiveConnection::done, this, &ArchiveWidget::requestFinished);
+
 //	connect(m_tcpClient, &ArchiveTcpClient::signal_connectionEstablished, this, &MonitorArchiveWidget::tcpConnectionEstablished);
-//	connect(m_tcpClient, &ArchiveTcpClient::dataReady, this, &MonitorArchiveWidget::dataReceived);
-//	connect(m_tcpClient, &ArchiveTcpClient::requestError, this, &MonitorArchiveWidget::tcpClientError);
 //	connect(m_tcpClient, &ArchiveTcpClient::statusUpdate, this, &MonitorArchiveWidget::tcpStatus);
-//	connect(m_tcpClient, &ArchiveTcpClient::requestIsFinished, this, &MonitorArchiveWidget::tcpRequestFinished);
 
 	// --
 	//
@@ -368,7 +369,7 @@ void ArchiveWidget::requestData()
 {
 	if (m_source.acceptedSignals.empty() == true)
 	{
-		QMessageBox::warning(this, qAppName(), tr("Select at least one signal to request archive data."));
+		QMessageBox::warning(this, qAppName(), tr("Select signal(s) to request data from archive."));
 		return;
 	}
 
@@ -383,7 +384,7 @@ void ArchiveWidget::requestData()
 
 	// Request data from archive
 	//
-	m_archiveConnection.startRequest(m_source);
+	m_archiveConnection.request(m_source);
 
 	// Update user interface
 	//
@@ -502,12 +503,22 @@ void ArchiveWidget::restoreWindowState()
 void ArchiveWidget::updateUiState()
 {
 	bool disable = m_archiveConnection.requestInProgress();
+	bool requestInProgress = disable;
 
 	m_exportButton->setDisabled(disable);
 	m_printButton->setDisabled(disable);
 	m_signalsButton->setDisabled(disable);
 
-	m_updateButton->setText(disable ? tr("Update") : tr("Cancel"));
+	if (requestInProgress == true)
+	{
+		m_updateButton->setText(tr("Cancel"));
+		m_updateButton->setShortcut(QKeySequence(QKeySequence::StandardKey::Cancel));
+	}
+	else
+	{
+		m_updateButton->setText(tr("Update"));
+		m_updateButton->setShortcut(QKeySequence(QKeySequence::StandardKey::Refresh));
+	}
 
 	return;
 }
@@ -678,6 +689,8 @@ void ArchiveWidget::slot_configurationArrived(ConfigSettings configuration)
 
 void ArchiveWidget::tcpConnectionEstablished()
 {
+	int to_do_;// It shpudl be done in another way, as request, I think no need in this functions
+
 	if (m_requestDataOnConnection == true)
 	{
 		m_requestDataOnConnection = false;
@@ -686,7 +699,7 @@ void ArchiveWidget::tcpConnectionEstablished()
 	}
 }
 
-void ArchiveWidget::dataReceived(std::shared_ptr<ArchiveChunk> chunk)
+void ArchiveWidget::dataReceived(std::shared_ptr<ArchiveRequestResult> chunk)
 {
 	if (chunk == nullptr)
 	{
@@ -694,19 +707,20 @@ void ArchiveWidget::dataReceived(std::shared_ptr<ArchiveChunk> chunk)
 		return;
 	}
 
-	m_model->addData(std::move(chunk));
+	m_model->addData(std::move(*chunk));
 
 	return;
 }
 
-void ArchiveWidget::tcpClientError(QString errorMessage)
+void ArchiveWidget::requestError(QString errorMessage)
 {
 	QMessageBox::critical(this, qAppName(), errorMessage);
 	return;
 }
 
-void ArchiveWidget::tcpStatus(QString status, int statesReceived, int requestCount, int repliesCount)
+void ArchiveWidget::requestStatus(QString status, int statesReceived, int requestCount, int repliesCount)
 {
+	int to_do; // who will send it?
 //	Q_ASSERT(m_statusBar);
 
 //	m_statusBarTextLabel->setText(status);
@@ -729,14 +743,8 @@ void ArchiveWidget::tcpStatus(QString status, int statesReceived, int requestCou
 //	return;
 }
 
-void ArchiveWidget::tcpRequestFinished()
+void ArchiveWidget::requestFinished()
 {
-	m_exportButton->setEnabled(true);
-	m_printButton->setEnabled(true);
-	m_signalsButton->setEnabled(true);
-
-	m_updateButton->setText(tr("Update"));
-	m_updateButton->setShortcut(QKeySequence(QKeySequence::StandardKey::Refresh));
-
+	updateUiState();
 	return;
 }

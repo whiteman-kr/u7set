@@ -25,18 +25,19 @@ public:
 	ArchiveConnectionTask& operator=(const ArchiveConnectionTask&) = delete;
 	ArchiveConnectionTask& operator=(ArchiveConnectionTask&&) = delete;
 
-	~ArchiveConnectionTask();
+	virtual ~ArchiveConnectionTask();
 
 public:
-	bool dataReady() const;
-	ArchiveRequestResult data();	// Throws std::runtime_error if communication error accured
+	[[nodiscard]] QString archiveServiceId() const;
+	[[nodiscard]] HostAddressPort address() const;
+
+signals:
+	void dataReady(std::shared_ptr<ArchiveRequestResult> result, QString error);
 
 private:
 	MonitorSettings::ArchiveService m_archiveService;
 	ArchiveTcpClient2* m_tcpClient = nullptr;
 	SimpleThread* m_clientThread = nullptr;
-
-	std::future<ArchiveRequestResult> m_future;
 };
 
 
@@ -45,37 +46,38 @@ class ArchiveConnection : public QObject
 	Q_OBJECT
 
 public:
-	explicit ArchiveConnection(MonitorConfigController& configController,
+	explicit ArchiveConnection(const MonitorConfigController& configController,
 							   ILogFile* logFile,
-							   QObject *parent = nullptr);
+							   QObject* parent = nullptr);
 	virtual ~ArchiveConnection() = default;
 
 public:
-	// Request Data from archive
-	//
+	/// Request Data from archive.
 	void request(ArchiveSource requestData);
 
+	/// Cancel request if any in progress.
+	void cancelRequest();
+
+	/// Check if request in progress
 	[[nodiscard]] bool requestInProgress() const;
 
-//public slots:
-//	void dataReady(std::shared_ptr<ArchiveChunk> chunk);
-//	void statusUpdate(QString status, int statesReceived, int requestCount, int repliesCount);
-//	void requestIsFinished();
-
-
 signals:
-	void startRequest(ArchiveSource requestData);
-	void cancelRequest();
-	void requestError(QString errorMessage);
+	// Use these there signals to control requests to ArchiveService
+	//
+	void dataReady(std::shared_ptr<ArchiveRequestResult> result);	///< Archive request result is reqdy
+	void requestError(QString errorMessage);						///< Emited when request has an error
+	void done();													///< All tasks are done, request finished
 
-	//	connect(m_tcpClient, &ArchiveTcpClient::dataReady, this, &MonitorArchiveWidget::dataReceived);
-	//	connect(m_tcpClient, &ArchiveTcpClient::requestError, this, &MonitorArchiveWidget::tcpClientError);
-	//	connect(m_tcpClient, &ArchiveTcpClient::statusUpdate, this, &MonitorArchiveWidget::tcpStatus);
-	//	connect(m_tcpClient, &ArchiveTcpClient::requestIsFinished, this, &MonitorArchiveWidget::tcpRequestFinished);
+	// Private signals, used for inner communications
+	//
+	void private_startRequest(ArchiveSource requestData);	///< Start request command, can be issued from any thread
+	void private_cancelRequest();							///< Cancel request command, can be issued from any thread
 
 private slots:
 	void slot_startRequest(ArchiveSource requestData);
 	void slot_cancelRequest();
+
+	void slot_taskDataReady(std::shared_ptr<ArchiveRequestResult> result, QString error);
 
 private:
 	const MonitorConfigController& m_configController;

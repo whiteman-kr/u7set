@@ -54,10 +54,11 @@ protected slots:
 	void slot_configurationArrived(ConfigSettings configuration);
 
 	void tcpConnectionEstablished();
-	void dataReceived(std::shared_ptr<ArchiveChunk> chunk);
-	void tcpClientError(QString errorMessage);
-	void tcpStatus(QString status, int statesReceived, int requestCount, int repliesCount);
-	void tcpRequestFinished();
+
+	void dataReceived(std::shared_ptr<ArchiveRequestResult> chunk);
+	void requestError(QString errorMessage);
+	void requestStatus(QString status, int statesReceived, int requestCount, int repliesCount);
+	void requestFinished();
 
 	// Data
 	//

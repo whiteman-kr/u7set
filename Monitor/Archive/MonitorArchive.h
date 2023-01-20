@@ -1,7 +1,7 @@
 #pragma once
 #include "../../AppSignalLib/AppSignalParam.h"
 
-class MonitorArchiveWidget;
+class ArchiveWidget;
 class MonitorSignalManager;
 class MonitorConfigController;
 
@@ -28,9 +28,9 @@ public:
 											E::TimeType timeType,
 											QWidget* parent);
 
-	static void registerWindow(QString name, MonitorArchiveWidget* window);
+	static void registerWindow(QString name, ArchiveWidget* window);
 	static void unregisterWindow(QString name);
 
 private:
-	static std::map<QString, MonitorArchiveWidget*> s_archiveList;
+	static std::map<QString, ArchiveWidget*> s_archiveList;
 };
