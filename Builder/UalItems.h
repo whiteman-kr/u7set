@@ -251,7 +251,27 @@ namespace Builder
 		double m_floatValue = 0;
 	};
 
-	typedef HashedVector<QString, AppFbParamValue> AppFbParamValuesArray;
+	// typedef HashedVector<QString, AppFbParamValue> AppFbParamValuesArray;
+
+	class AppFbParamValuesArray : public std::vector<AppFbParamValue>
+	{
+	public:
+		void insert(const QString& opName, const AppFbParamValue& value);
+		bool contains(const QString& opName) const;
+		bool isEmpty() const;
+		bool hasParamsToInitialization() const;
+
+		AppFbParamValue& operator [] (const QString& opName);
+		const AppFbParamValue& operator [] (const QString& opName) const;
+
+	private:
+		const AppFbParamValue& find(const QString& opName) const;
+
+	private:
+		std::map<QString, size_t> m_opNameToIndex;			// opName -> index in vector
+
+		static AppFbParamValue m_nullValue;
+	};
 
 	class ModuleLogicCompiler;
 

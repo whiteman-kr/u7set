@@ -709,6 +709,67 @@ namespace Builder
 
 	// ---------------------------------------------------------------------------------------
 	//
+	// AppFbParamValuesArray class implementation
+	//
+	// ---------------------------------------------------------------------------------------
+
+	AppFbParamValue AppFbParamValuesArray::m_nullValue;
+
+	void AppFbParamValuesArray::insert(const QString& opName, const AppFbParamValue& value)
+	{
+		size_t index = size();
+		push_back(value);
+		m_opNameToIndex.insert({opName, index});
+	}
+
+	bool AppFbParamValuesArray::contains(const QString& opName) const
+	{
+		return m_opNameToIndex.contains(opName);
+	}
+
+	bool AppFbParamValuesArray::isEmpty() const
+	{
+		return empty();
+	}
+
+	bool AppFbParamValuesArray::hasParamsToInitialization() const
+	{
+		for(const AppFbParamValue& pv : *this)
+		{
+			if (pv.operandIndex() != AppFbParamValue::NOT_FB_OPERAND_INDEX)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	AppFbParamValue& AppFbParamValuesArray::operator [] (const QString& opName)
+	{
+		return const_cast<AppFbParamValue&>(find(opName));
+	}
+
+	const AppFbParamValue& AppFbParamValuesArray::operator [] (const QString& opName) const
+	{
+		return find(opName);
+	}
+
+	const AppFbParamValue& AppFbParamValuesArray::find(const QString& opName) const
+	{
+		auto it = m_opNameToIndex.find(opName);
+
+		if (it == m_opNameToIndex.end())
+		{
+			Q_ASSERT(false);
+			return m_nullValue;
+		}
+
+		return at(it->second);
+	}
+
+	// ---------------------------------------------------------------------------------------
+	//
 	// AppFb class implementation
 	//
 	// ---------------------------------------------------------------------------------------

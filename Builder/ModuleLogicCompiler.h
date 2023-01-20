@@ -676,7 +676,12 @@ namespace Builder
 		bool writeOcmRsSignalsXml();
 		bool writeLooopbacksReport();
 		bool writeHeapsLog();
-		bool writeStatisticsFile();
+		bool writeStatisticsFile() const;
+		void printStat(const std::vector<CommandStatistics>& stat, QStringList& file) const;
+		QString getStatStr(const QString& mnemo,
+						   int used, float usedPercent,
+						   int sizeW, float sizePercent,
+						   int execTime, float execPercent) const;
 
 		bool displayResourcesUsageInfo();
 		void calcOptoDiscretesStatistics();

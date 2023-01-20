@@ -2334,10 +2334,12 @@ namespace Builder
 		}
 	}
 
-	bool ApplicationLogicCode::calcRunTimes()
+	bool ApplicationLogicCode::calcStatistics()
 	{
 		m_idrPhaseClockCount = 0;
 		m_alpPhaseClockCount = 0;
+		m_commandsCount = 0;
+		m_codeSizeW = 0;
 
 		if (m_codeItems.isEmpty() == true)
 		{
@@ -2381,14 +2383,8 @@ namespace Builder
 				continue;
 			}
 
-			if (codeItem.address() == appLogicProcessingCodeStartAddress)
-			{
-				m_idrPhaseClockCount += prevCmdExecTime;
-
-				prevCmdExecTime = 0;
-
-				idrPhaseCode = false;
-			}
+			m_commandsCount++;
+			m_codeSizeW += codeItem.sizeW();
 
 			int waitTime = 0;
 			int execTime = 0;
@@ -2406,14 +2402,29 @@ namespace Builder
 			}
 
 			prevCmdExecTime = execTime;
-		}
 
-		m_alpPhaseClockCount += prevCmdExecTime;
+			if (codeItem.getOpcode() == LmCommand::Code::STOP)
+			{
+				codeItem.addExecTime(prevCmdExecTime);
+
+				if (idrPhaseCode == true)
+				{
+					m_idrPhaseClockCount += prevCmdExecTime;
+					idrPhaseCode = false;
+				}
+				else
+				{
+					m_alpPhaseClockCount += prevCmdExecTime;
+				}
+
+				prevCmdExecTime = 0;
+			}
+		}
 
 		return true;
 	}
 
-	bool ApplicationLogicCode::getCachedRunTimes(int* idrPhaseClockCount, int* alpPhaseClockCount) const
+	bool ApplicationLogicCode::getExecTimes(int* idrPhaseClockCount, int* alpPhaseClockCount) const
 	{
 		TEST_PTR_RETURN_FALSE(idrPhaseClockCount);
 		TEST_PTR_RETURN_FALSE(alpPhaseClockCount);
@@ -2431,12 +2442,21 @@ namespace Builder
 		return true;
 	}
 
+	int ApplicationLogicCode::getTotalExecTime() const
+	{
+		if (m_idrPhaseClockCount == -1 ||
+			m_alpPhaseClockCount == -1)
+		{
+			Q_ASSERT(false);					// calcRunTimes must be called before
+			return -1;
+		}
+
+		return m_idrPhaseClockCount + m_alpPhaseClockCount;
+	}
+
 	bool ApplicationLogicCode::getCommandsStatistics(std::map<LmCommand::Code, CommandStatistics>* stat) const
 	{
 		TEST_PTR_RETURN_FALSE(stat);
-
-		int waitTime = 0;
-		int execTime = 0;
 
 		for(auto const& p : lmCommands)
 		{
@@ -2450,18 +2470,27 @@ namespace Builder
 			stat->insert({lmc.code, CommandStatistics(lmc.code) });
 		}
 
-		m_codeItems
+		for(const CodeItem& ci : m_codeItems)
+		{
+			if (ci.isCommand() == false)
+			{
+				continue;
+			}
 
-				auto it = stat->find(lmc.code);
+			auto it = stat->find(ci.getOpcode());
 
-				CommandStatistics& cs = it->second;
+			if (it == stat->end())
+			{
+				Q_ASSERT(false);
+				continue;
+			}
 
-				cs.usedCount++;
-				cs.codeSize += lmc.sizeW();
+			CommandStatistics& cs = it->second;
 
-
-
-de;wed,w;eldwel;d,w;ed,w;eld
+			cs.usedCount++;
+			cs.codeSizeW += ci.sizeW();
+			cs.execTime += ci.waitTime() + ci.execTime();
+		}
 
 		return true;
 	}

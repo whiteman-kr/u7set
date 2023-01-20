@@ -181,20 +181,15 @@ namespace Builder
 		return m_context->m_buildResultWriter->buildInfo();
 	}
 
-	QStringList ApplicationLogicCompiler::getInfoFileHeader(const Context* context)
+	QString ApplicationLogicCompiler::getInfoFileHeader(const Context* context)
 	{
-		TEST_PTR_RETURN_VALUE(context, QStringList());
-		TEST_PTR_RETURN_VALUE(context->m_buildResultWriter, QStringList());
-
-		QStringList out;
+		TEST_PTR_RETURN_VALUE(context, QString());
+		TEST_PTR_RETURN_VALUE(context->m_buildResultWriter, QString());
 
 		BuildInfo bi = context->m_buildResultWriter->buildInfo();
 
-		out << QString("Project: %1 BuildNo: %2 Build time: %3").
+		return QString("Project: %1   BuildNo: %2   Build time: %3").
 					arg(bi.project).arg(bi.id).arg(bi.dateStr());
-		out << "";
-
-		return out;
 	}
 
 	bool ApplicationLogicCompiler::isBuildCancelled()

@@ -234,8 +234,8 @@ namespace Builder
 		LmCommand::Code code;
 
 		int usedCount = 0;
-		int codeSize = 0;
-		int taktsUsed = 0;
+		int codeSizeW = 0;
+		int execTime = 0;					// waitTime + execTime
 
 		CommandStatistics() = delete;
 		CommandStatistics(LmCommand::Code cd) { code = cd; }
@@ -366,6 +366,11 @@ namespace Builder
 		bool calcRunTime(const LmMemoryMap* lmMemMap, int prevCmdExecTime);
 		bool getTimes(int* waitTime, int* execTime) const;
 
+		int waitTime() const { Q_ASSERT(m_waitTime != -1); return m_waitTime; }
+		int execTime() const { Q_ASSERT(m_execTime != -1); return m_execTime; }
+
+		void addExecTime(int execTime) { Q_ASSERT(m_execTime != -1); m_execTime += execTime; }
+
 	private:
 		void initCommand();
 
@@ -462,12 +467,16 @@ namespace Builder
 		void getAsmMetadataFields(QStringList* metadataFields, int* metadataVersion) const;
 		void getAsmMetadata(std::vector<QVariantList>* metadata) const;
 
-		bool calcRunTimes();
-		bool getCachedRunTimes(int* idrPhaseClockCount, int* alpPhaseClockCount) const;
+		bool calcStatistics();
+		bool getExecTimes(int* idrPhaseClockCount, int* alpPhaseClockCount) const;
+		int getTotalExecTime() const;
 
 		bool getCommandsStatistics(std::map<LmCommand::Code, CommandStatistics>* stat) const;
 
 		int commandAddress() const { return m_commandAddress; }
+
+		int commandsCount() const { Q_ASSERT(m_commandsCount != -1); return m_commandsCount; }
+		int codeSizeW() const { Q_ASSERT(m_codeSizeW != -1); return m_codeSizeW; }
 
 	private:
 		QVector<CodeItem> m_codeItems;
@@ -478,6 +487,8 @@ namespace Builder
 
 		int m_idrPhaseClockCount = -1;
 		int m_alpPhaseClockCount = -1;
+		int m_commandsCount = -1;
+		int m_codeSizeW = -1;
 	};
 
 }

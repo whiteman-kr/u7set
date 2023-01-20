@@ -7739,7 +7739,7 @@ namespace Builder
 
 		const AppFbParamValuesArray& appFbParamValues = appFb.paramValuesArray();
 
-		if (appFbParamValues.isEmpty() == true)
+		if (appFbParamValues.hasParamsToInitialization() == true)
 		{
 			return true;
 		}
@@ -7772,6 +7772,7 @@ namespace Builder
 
 			if (operandIndex == AppFbParamValue::NOT_FB_OPERAND_INDEX)
 			{
+				Q_ASSERT(false);	// appFbParamValues.hasParamsToInitialization() should prevent this!
 				continue;
 			}
 
@@ -14295,9 +14296,9 @@ namespace Builder
 
 	bool ModuleLogicCompiler::calculateCodeRunTime()
 	{
-		bool result = m_code.calcRunTimes();
+		bool result = m_code.calcStatistics();
 
-		result &= m_code.getCachedRunTimes(&m_idrPhaseClockCount, &m_alpPhaseClockCount);
+		result &= m_code.getExecTimes(&m_idrPhaseClockCount, &m_alpPhaseClockCount);
 
 		if (result == false)
 		{
@@ -14884,21 +14885,183 @@ namespace Builder
 		return bf != nullptr;
 	}
 
-	bool ModuleLogicCompiler::writeStatisticsFile()
+	bool ModuleLogicCompiler::writeStatisticsFile() const
 	{
+		TEST_PTR_RETURN_FALSE(m_lmDescription);
+
 		QStringList file;
+
+		std::map<LmCommand::Code, CommandStatistics> statMap;
+
+		m_code.getCommandsStatistics(&statMap);
+
+		std::vector<CommandStatistics> stat;
+
+		for(auto const& p : statMap)
+		{
+			stat.push_back(p.second);
+		}
 
 		//
 
 		file << ApplicationLogicCompiler::getInfoFileHeader(m_context);
 
-		m_code
+		//
+
+		double codeMemoryUsage = static_cast<double>(m_code.codeSizeW() * 100) /
+									static_cast<double>(m_lmDescription->memory().m_codeMemorySize);
+
+		static const QString EMPTY_STR = QStringLiteral("");
+
+		file << EMPTY_STR;
+		file << EMPTY_STR;
+		file << QString("Code statistics ordered by commands code size descending.");
+		file << EMPTY_STR;
+		file << QString("Code memory used %1 of %2 words (%3%).").
+					arg(m_code.codeSizeW()).
+					arg(m_lmDescription->memory().m_codeMemorySize).
+					arg(codeMemoryUsage);
+		file << EMPTY_STR;
+
+		std::sort(stat.begin(), stat.end(), [] (const CommandStatistics& a,
+												const CommandStatistics& b) -> bool
+												{ return a.codeSizeW > b.codeSizeW; });
+		printStat(stat, file);
+
+		//
+
+		int idrClocks = 0;
+		int alpClocks = 0;
+
+		m_code.getExecTimes(&idrClocks, &alpClocks);
+
+		file << EMPTY_STR;
+		file << EMPTY_STR;
+		file << QString("Code statistics ordered by commands execution time descending");
+		file << EMPTY_STR;
+		file << QString("IDR phase execution time used %1 of %2 clocks, %3 of %4 ms (%5%).").
+					arg(idrClocks).arg(m_lmDescription->idrPhaseClocks()).
+					arg(idrClocks * m_lmDescription->clockTimeSecs() * 1000, 0, 'f', 3).
+					arg(m_lmDescription->logicUnit().m_idrPhaseTime / 1000.0, 0, 'f', 3).
+					arg(static_cast<double>(idrClocks * 100) /
+								static_cast<double>(m_lmDescription->idrPhaseClocks()), 0, 'f', 2);
+
+		file << QString("ALP phase execution time used %1 of %2 clocks, %3 of %4 ms (%5%).").
+					arg(alpClocks).arg(m_lmDescription->alpPhaseClocks()).
+					arg(alpClocks * m_lmDescription->clockTimeSecs() * 1000, 0, 'f', 3).
+					arg(m_lmDescription->logicUnit().m_alpPhaseTime / 1000.0, 0, 'f', 3).
+					arg(static_cast<double>(alpClocks * 100) /
+								static_cast<double>(m_lmDescription->alpPhaseClocks()), 0, 'f', 2);
+
+		file << QString("");
+
+		std::sort(stat.begin(), stat.end(), [] (const CommandStatistics& a,
+												const CommandStatistics& b) -> bool
+												{ return a.execTime > b.execTime; });
+		printStat(stat, file);
 
 		//
 
 		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
 												QString("%1-%2.stat").arg(m_lmSubsystemID.toLower()).arg(m_lmNumber), file);
 		return buildFile != nullptr;
+	}
+
+	void ModuleLogicCompiler::printStat(const std::vector<CommandStatistics>& stat, QStringList& file) const
+	{
+		file << QString("            |       Used       |     Code size    |    Exec time     ");
+		file << QString("  Command   |------------------+------------------+------------------");
+		file << QString("            | Count  | Percent | Words  | Percent | Tacts  | Percent ");
+		file << QString("------------+--------+---------+--------+---------+--------+---------");
+
+		float usedPercentTotal = 0;
+		float sizePercentTotal = 0;
+		float execPercentTotal = 0;
+
+		int usedCountTotal = 0;
+		int codeSizeWTotal = 0;
+		int execTimeTotal = 0;
+
+		for(const CommandStatistics& cs : stat)
+		{
+			//
+
+			usedCountTotal += cs.usedCount;
+			float usedPercent = static_cast<float>(cs.usedCount * 100) /
+										static_cast<float>(m_code.commandsCount());
+			usedPercentTotal += usedPercent;
+
+			//
+
+			codeSizeWTotal += cs.codeSizeW;
+			float sizePercent = static_cast<float>(cs.codeSizeW * 100) /
+										static_cast<float>(m_code.codeSizeW());
+			sizePercentTotal += sizePercent;
+
+			//
+
+			execTimeTotal += cs.execTime;
+			float execPercent = static_cast<float>(cs.execTime * 100) /
+										static_cast<float>(m_code.getTotalExecTime());
+			execPercentTotal += execPercent;
+
+			//
+
+			file << getStatStr(lmCommands.getMnemo(cs.code),
+							   cs.usedCount, usedPercent,
+							   cs.codeSizeW, sizePercent,
+							   cs.execTime, execPercent);
+		}
+
+		Q_ASSERT(m_code.commandsCount() == usedCountTotal);
+		Q_ASSERT(m_code.codeSizeW() == codeSizeWTotal);
+		Q_ASSERT(m_code.getTotalExecTime() == execTimeTotal);
+
+		file << QString("------------+--------+---------+--------+---------+--------+---------");
+
+		file << getStatStr(QString("Total"),
+						 usedCountTotal, usedPercentTotal,
+						 codeSizeWTotal, sizePercentTotal,
+						 execTimeTotal, execPercentTotal);
+	}
+
+	QString ModuleLogicCompiler::getStatStr(const QString& mnemo,
+											int used, float usedPercent,
+											int sizeW, float sizePercent,
+											int execTime, float execPercent) const
+	{
+		const int CSTR_SIZE = 16;
+		char cstr[CSTR_SIZE];
+
+		QString str;
+
+		str += " " + mnemo.leftJustified(11) + "|";
+
+		//
+
+		str += " " + QString::number(used).rightJustified(6) + " |";
+
+		snprintf(cstr, CSTR_SIZE, "%5.2f", usedPercent);
+
+		str += " " +(QString("%1").arg(cstr)).rightJustified(7) + " |";
+
+		//
+
+		str += " " + QString::number(sizeW).rightJustified(6) + " |";
+
+		snprintf(cstr, CSTR_SIZE, "%5.2f", sizePercent);
+
+		str += " " +(QString("%1").arg(cstr)).rightJustified(7) + " |";
+
+		//
+
+		str += " " + QString::number(execTime).rightJustified(6) + " |";
+
+		snprintf(cstr, CSTR_SIZE, "%5.2f", execPercent);
+
+		str += " " +(QString("%1").arg(cstr)).rightJustified(7);
+
+		return str;
 	}
 
 	bool ModuleLogicCompiler::displayResourcesUsageInfo()

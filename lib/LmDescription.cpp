@@ -1373,3 +1373,19 @@ std::vector<LmCommand> LmDescription::commandsAsVector() const
 
 	return result;
 }
+
+double LmDescription::clockTimeSecs() const
+{
+	return 1.0 / static_cast<double>(m_logicUnit.m_clockFrequency);
+}
+
+int LmDescription::idrPhaseClocks() const
+{
+	return static_cast<int>(m_logicUnit.m_idrPhaseTime / (clockTimeSecs() * 1000000.0));
+}
+
+int LmDescription::alpPhaseClocks() const
+{
+	return static_cast<int>(m_logicUnit.m_alpPhaseTime / (clockTimeSecs() * 1000000.0));
+}
+

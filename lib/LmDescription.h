@@ -138,10 +138,10 @@ public:
 
 	struct LogicUnit
 	{
-		quint32 m_alpPhaseTime = 0xFFFFFFFF;
-		quint32 m_clockFrequency = 0xFFFFFFFF;
-		quint32 m_cycleDuration = 0xFFFFFFFF;
-		quint32 m_idrPhaseTime = 0xFFFFFFFF;
+		quint32 m_alpPhaseTime = 0xFFFFFFFF;			// in microseconds
+		quint32 m_clockFrequency = 0xFFFFFFFF;			// in Hz
+		quint32 m_cycleDuration = 0xFFFFFFFF;			// in microseconds
+		quint32 m_idrPhaseTime = 0xFFFFFFFF;			// in microseconds
 
 		bool load(const QDomDocument& document, QString* errorMessage);
 	};
@@ -222,6 +222,10 @@ public:
 	LmCommand command(int commandCode) const;
 	const std::map<int, LmCommand>& commands() const;
 	std::vector<LmCommand> commandsAsVector() const;
+
+	double clockTimeSecs() const;
+	int idrPhaseClocks() const;
+	int alpPhaseClocks() const;
 
 	// Data
 	//
