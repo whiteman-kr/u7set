@@ -1109,7 +1109,7 @@ namespace Builder
 		clear();
 	}
 
-	UalAfb* UalAfbsMap::insert(UalAfb *appFb)
+	UalAfb* UalAfbsMap::insert(UalAfb* appFb)
 	{
 		if (appFb == nullptr)
 		{
@@ -1125,7 +1125,6 @@ namespace Builder
 
 		return appFb;
 	}
-
 
 	void UalAfbsMap::clear()
 	{

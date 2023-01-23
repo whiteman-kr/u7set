@@ -251,8 +251,6 @@ namespace Builder
 		double m_floatValue = 0;
 	};
 
-	// typedef HashedVector<QString, AppFbParamValue> AppFbParamValuesArray;
-
 	class AppFbParamValuesArray : public std::vector<AppFbParamValue>
 	{
 	public:
@@ -389,7 +387,7 @@ namespace Builder
 	public:
 		virtual ~UalAfbsMap();
 
-		UalAfb* insert(UalAfb *appFb);
+		UalAfb* insert(UalAfb* appFb);
 		void clear();
 
 	private:

@@ -1569,7 +1569,6 @@ namespace Builder
 		case LmCommand::Code::RDFBCMP32:
 		case LmCommand::Code::MOVCMPF:
 		case LmCommand::Code::PMOV32:
-		case LmCommand::Code::FILL:
 			Q_ASSERT(lmCommand.runTime != LmCommand::CALC_RUNTIME);
 			cmdExecTime = lmCommand.runTime;
 			break;
@@ -1602,7 +1601,7 @@ namespace Builder
 			//
 		case LmCommand::Code::MOV:
 			Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
-			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord2()) == true ? 53 : 8;
+			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord2()) == true ? 69 : 10;
 			break;
 
 		case LmCommand::Code::MOVMEM:
@@ -1613,23 +1612,23 @@ namespace Builder
 
 				Q_ASSERT(n > 0);
 
-				cmdExecTime = 7 + (n - 1) * 6 + 1;
+				cmdExecTime = 7 + (n - 1) * 7 + 1;
 			}
 			break;
 
 		case LmCommand::Code::MOVC:
 			Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
-			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord2()) == true ? 50 : 5;
+			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord2()) == true ? 66 : 6;
 			break;
 
 		case LmCommand::Code::MOVBC:
 			Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
-			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord2()) == true ? 5 : 10;
+			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord2()) == true ? 7 : 14;
 			break;
 
 		case LmCommand::Code::RDFBB:
 			Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
-			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord3()) == true ? 7 : 9;
+			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord3()) == true ? 7 : 12;
 			break;
 
 		case LmCommand::Code::SETMEM:
@@ -1640,18 +1639,23 @@ namespace Builder
 
 				Q_ASSERT(n > 0);
 
-				cmdExecTime = 4 + (n - 1) * 3 + 1;
+				cmdExecTime = 4 + (n - 1) * 4 + 1;
 			}
 			break;
 
 		case LmCommand::Code::MOVB:
 			Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
-			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord2()) == true ? 9 : 13;
+			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord2()) == true ? 10 : 17;
 			break;
 
 		case LmCommand::Code::PMOV:
 			Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
-			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord2()) == true ? 8 : 53;
+			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord2()) == true ? 70 : 10;
+			break;
+
+		case LmCommand::Code::FILL:
+			Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
+			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord2()) == true ? 69 : 10;
 			break;
 
 		default:

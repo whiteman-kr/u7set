@@ -7739,7 +7739,7 @@ namespace Builder
 
 		const AppFbParamValuesArray& appFbParamValues = appFb.paramValuesArray();
 
-		if (appFbParamValues.hasParamsToInitialization() == true)
+		if (appFbParamValues.hasParamsToInitialization() == false)
 		{
 			return true;
 		}
@@ -7772,7 +7772,6 @@ namespace Builder
 
 			if (operandIndex == AppFbParamValue::NOT_FB_OPERAND_INDEX)
 			{
-				Q_ASSERT(false);	// appFbParamValues.hasParamsToInitialization() should prevent this!
 				continue;
 			}
 

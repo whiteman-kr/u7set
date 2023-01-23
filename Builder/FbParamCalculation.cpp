@@ -541,7 +541,7 @@ namespace Builder
 		switch(i_conf.unsignedIntValue())
 		{
 		case 1:
-			m_runTime = 6 + 34;		// for signed int input
+			m_runTime = 10 + 34;	// for signed int input
 			break;
 
 		case 2:
@@ -590,7 +590,7 @@ namespace Builder
 		{
 		case 1:
 			{
-				int siTiming[] = { 4, 17, 23, 30, 38, 47 };		// exec time for signed int inputs
+				const int siTiming[] = { 4, 17, 23, 30, 38, 47 };		// exec time for signed int inputs
 
 				if (index < 0 || index >= static_cast<int>(sizeof(siTiming) / sizeof(int)) )
 				{
@@ -605,7 +605,7 @@ namespace Builder
 
 		case 2:
 			{
-				int fpTiming[] = { 21, 36, 44, 49, 57, 66 };	// exec time for float inputs
+				const int fpTiming[] = { 21, 36, 44, 49, 57, 66 };	// exec time for float inputs
 
 				if (index < 0 || index >= static_cast<int>(sizeof(fpTiming) / sizeof(int)) )
 				{
@@ -713,7 +713,7 @@ namespace Builder
 			break;
 
 		case 6:
-			m_runTime = 14 + 4;
+			m_runTime = 17 + 4;
 			break;
 
 		default:
@@ -1385,7 +1385,7 @@ namespace Builder
 				(iConf == CMP_32SI_GREAT_EQU || iConf == CMP_32SI_LESS_EQU))
 			)
 		{
-			m_runTime = 5 + 14;
+			m_runTime = 6 + 14;
 
 			if (hasHysteresisParam == true)
 			{
@@ -1418,7 +1418,7 @@ namespace Builder
 				(iConf == CMP_32FP_GREAT_EQU || iConf == CMP_32FP_LESS_EQU))
 			)
 		{
-			m_runTime = 16 + 14;
+			m_runTime = 53 + 14;
 
 			if (hasHysteresisParam == true)
 			{
@@ -1867,8 +1867,6 @@ namespace Builder
 
 	bool UalAfb::calculate_POL_paramValues()
 	{
-		m_runTime = 24 + 4;
-
 		const quint32 COEF_MAX_NUM = 10;
 
 		QStringList requiredParams;
@@ -1887,6 +1885,8 @@ namespace Builder
 		CHECK_UNSIGNED_INT(i_conf);
 
 		quint32 coefCount = i_conf.unsignedIntValue();
+
+		m_runTime = 2 + 21 * coefCount + 4;
 
 		for(quint32 n = 1; n <= COEF_MAX_NUM; n++)
 		{
