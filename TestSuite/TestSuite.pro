@@ -40,11 +40,14 @@ CONFIG(release, debug|release) {
 }
 
 SOURCES += \
+    Settings.cpp \
     main.cpp \
     TestSuiteMainWindow.cpp
 
 HEADERS += \
-    TestSuiteMainWindow.h
+    Settings.h \
+    TestSuiteMainWindow.h \
+    main.h
 
 FORMS += \
     TestSuiteMainWindow.ui
@@ -58,6 +61,19 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 LIBS += -L$$DESTDIR
 LIBS += -L.
 
+# Protobuf
+#
+LIBS += -lprotobuf
+win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
+INCLUDEPATH += ./../Protobuf
+
+# OnlineLib
+#
+LIBS += -lOnlineLib
+win32:PRE_TARGETDEPS += $$DESTDIR/OnlineLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libOnlineLib.a
+
 # TestSuiteLib
 #
 LIBS += -lTestSuiteLib
@@ -65,4 +81,3 @@ win32:PRE_TARGETDEPS += $$DESTDIR/TestSuiteLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libTestSuiteLib.a
 INCLUDEPATH += $$PWD/../TestSuiteLib
 DEPENDPATH += $$PWD/../TestSuiteLib
-

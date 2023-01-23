@@ -1,10 +1,7 @@
-#ifndef TESTSUITELIB_H
-#define TESTSUITELIB_H
+#pragma once
 
 class TestSuiteLib
 {
 public:
 	TestSuiteLib();
 };
-
-#endif // TESTSUITELIB_H

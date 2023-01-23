@@ -37,7 +37,7 @@ SUBDIRS += Protobuf \
 	TestSuiteLib \
 	TestSuite \
 	TestSuiteConsole \
-	TestSuiteTests \
+	TestSuiteTests
 
 qtkeychain.subdir = ./Tools/qtkeychain
 PacketSource.subdir = ./Tools/PacketSource

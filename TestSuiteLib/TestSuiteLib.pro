@@ -1,5 +1,7 @@
 QT -= gui
 
+QT += qml
+
 TARGET = TestSuiteLib
 
 TEMPLATE = lib
@@ -45,9 +47,24 @@ CONFIG(release, debug|release) {
 }
 
 SOURCES += \
-    TestSuiteLib.cpp
+    InputController.cpp \
+    OutputController.cpp \
+    TestEngine.cpp \
+    TestLogController.cpp \
+    TestResultLog.cpp \
+    TestSuiteLib.cpp \
+    TestWorker.cpp
 
 HEADERS += \
+    InputController.h \
+    OutputController.h \
     Stable.h \
-    TestSuiteLib.h
+    TestEngine.h \
+    TestLogController.h \
+    TestResultLog.h \
+    TestSuiteLib.h \
+    TestWorker.h
 
+# protobuf
+#
+INCLUDEPATH += ./../Protobuf

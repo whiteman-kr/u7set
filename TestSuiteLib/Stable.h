@@ -35,6 +35,8 @@
 
 #include <QVector>
 #include <QVariant>
+#include <QJSEngine>
+#include <QJSValue>
 
 #ifdef _MSC_VER
 	#pragma warning(pop)

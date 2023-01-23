@@ -38,6 +38,7 @@ CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
 SOURCES += \
+        TestTask.cpp \
         main.cpp
 
 # Add curent dir to a list of library directory paths
@@ -48,6 +49,13 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 #
 LIBS += -L$$DESTDIR
 LIBS += -L.
+
+# Protobuf
+#
+LIBS += -lprotobuf
+win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
+INCLUDEPATH += ./../Protobuf
 
 # TestSuiteLib
 #
@@ -115,4 +123,6 @@ DEPENDPATH += $$PWD/../TestSuiteLib
 #unix:PRE_TARGETDEPS += $$DESTDIR/libAppSignalLib.a
 
 HEADERS += \
-    Stable.h
+    Stable.h \
+    TestTask.h
+
