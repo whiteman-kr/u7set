@@ -17,7 +17,6 @@ namespace VFrame30
 
 	void SchemaManager::clear()
 	{
-		m_globalScript.clear();
 		emit schemasWereReseted();
 		return;
 	}
@@ -36,7 +35,7 @@ namespace VFrame30
 						 << " Requsted SchemaID: " << schemaId
 						 << ", Loaded SchemaID: " << schema->schemaId();
 
-				return std::shared_ptr<VFrame30::Schema>();
+				return {};
 			}
 		}
 		else
@@ -108,16 +107,6 @@ namespace VFrame30
 		Q_UNUSED(schemaId);
 		Q_ASSERT(false);
 		return std::shared_ptr<VFrame30::Schema>();
-	}
-
-	const QString& SchemaManager::globalScript() const
-	{
-		return m_globalScript;
-	}
-
-	void SchemaManager::setGlobalScript(const QString& value)
-	{
-		m_globalScript = value + QChar::LineFeed;
 	}
 
 }

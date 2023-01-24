@@ -314,15 +314,22 @@ namespace VFrame30
 
 		void setLogController(LogController* value);
 
-
+		// User must provide GlobalScript and onConfigurationArrivedScript
+		//
+		void setGlobalScript(QString value);
+		void setOnConfigurationArrivedScript(QString value);
 
 		// --
 		//
 		[[nodiscard]] QJSEngine* jsEngine();
-		[[nodiscard]] QString globalScript() const;
 
 		bool runScript(QJSValue& evaluatedJs, QString where, bool reportError);
+
+	private:
 		bool reEvaluateGlobalScript();
+		bool execOnConfigurationArrived();
+
+	public:
 		QJSValue evaluateScript(QString script, QString where, bool reportError);
 		[[nodiscard]] QString formatScriptError(const QJSValue& scriptValue) const;
 		void reportScriptError(const QJSValue& scriptValue, QString where);
@@ -374,6 +381,9 @@ namespace VFrame30
 		QJSEngine m_jsEngine;
 
 		bool m_alloScriptMessageBox = false;// Allow or disable using message box in scripts
+
+		QString m_globalScript;
+		QString m_onConfigurationArrivedScript;
 
 		// --
 		//

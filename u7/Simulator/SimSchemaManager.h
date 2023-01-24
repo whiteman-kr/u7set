@@ -25,23 +25,13 @@ public:
 						   E::TimeType timeType,
 						   std::list<std::shared_ptr<TrendLib::OneHourData>>* outData) const override;
 
-	// Slots
-	//
-protected slots:
-	void slot_projectUpdated();
-
 public:
 	SimIdeSimulator* simulator();
 	const SimIdeSimulator* simulator() const;
-
-	QString monitorId() const;
-	void setMonitorId(QString equipmentId, bool emitUpdate);
 
 	// Data
 	//
 private:
 	SimIdeSimulator* m_simulator = nullptr;
-
-	QString m_monitorId;
 };
 

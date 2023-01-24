@@ -51,14 +51,7 @@ namespace VFrame30
 	signals:
 		void schemasWereReseted();
 
-	public:
-		// User must provide GlobalScript
-		//
-		const QString& globalScript() const;
-		void setGlobalScript(const QString& value);
-
 	private:
-		QString m_globalScript;
 	};
 
 }

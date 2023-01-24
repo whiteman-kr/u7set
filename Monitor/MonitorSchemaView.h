@@ -41,6 +41,7 @@ public slots:
 	// Data
 	//
 private:
+	int m_configurationId = -1;
 };
 
 

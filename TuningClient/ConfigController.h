@@ -44,7 +44,7 @@ signals:
 	void signalsArrived(QByteArray data);
 	void filtersArrived(QByteArray data);
 
-	void configurationArrived();
+	void configurationArrived(ConfigSettings configuration);
 
 	// slots
 	//
@@ -70,6 +70,8 @@ public:
 	// Data section
 	//
 private:
+	inline static int s_configurationId = 0;
+
 	QSharedMemory m_appInstanceSharedMemory;
 	int m_appInstanceNo = -1;
 

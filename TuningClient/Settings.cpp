@@ -1,6 +1,5 @@
 #include "Settings.h"
 #include "../OnlineLib/SocketIO.h"
-#include "../lib/PropertyEditor.h"
 
 
 QColor redColor = QColor(192, 0, 0);
