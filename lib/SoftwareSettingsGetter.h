@@ -161,6 +161,21 @@ private:
 						const Hardware::Software* software) override;
 };
 
+// -------------------------------------------------------------------------------------------
+
+class TestSuiteSettingsGetter : public TestSuiteSettings, public SoftwareSettingsGetter
+{
+private:
+	bool readSettings(const Builder::Context* context,
+						const Hardware::Software* software) override;
+
+	bool readAppDataServiceAndArchiveSettings(const Builder::Context* context,
+											  const Hardware::Software* software);
+
+	bool readTuningServiceSettings(const Builder::Context* context,
+											  const Hardware::Software* software);
+};
+
 #pragma warning(pop)
 
 

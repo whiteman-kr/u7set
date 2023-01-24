@@ -91,6 +91,71 @@ namespace Builder
 
 		QString softwareCfgSubdir() const { return m_software->equipmentIdTemplate(); }
 
+		template <typename TYPE>
+		TYPE getObjectProperty(QString strId, QString property, bool* ok)
+		{
+			if (ok == nullptr)
+			{
+				assert(false);
+				return TYPE();
+			}
+
+			*ok = true;
+
+			Hardware::DeviceObject* object = m_equipment->deviceObject(strId).get();
+			if (object == nullptr)
+			{
+				m_log->errCFG3021(m_software->equipmentId(), property, strId);
+
+				QString errorStr = tr("Object %1 is not found")
+								   .arg(strId);
+
+				m_cfgXml->xmlWriter().writeTextElement("Error", errorStr);
+
+				*ok = false;
+				return TYPE();
+			}
+
+			bool exists = object->propertyExists(property);
+			if (exists == false)
+			{
+				QString errorStr = tr("Object %1 does not have property %2").arg(strId).arg(property);
+
+				m_log->writeError(errorStr);
+				m_cfgXml->xmlWriter().writeTextElement("Error", errorStr);
+
+				*ok = false;
+				return TYPE();
+			}
+
+			QVariant v = object->propertyValue(property);
+			if (v.isValid() == false)
+			{
+				QString errorStr = tr("Object %1, property %2 is invalid").arg(strId).arg(property);
+
+				m_log->writeError(errorStr);
+				m_cfgXml->xmlWriter().writeTextElement("Error", errorStr);
+
+				*ok = false;
+				return TYPE();
+			}
+
+			if (v.canConvert<TYPE>() == false)
+			{
+				QString errorStr = tr("Object %1, property %2 has wrong type").arg(strId).arg(property);
+
+				m_log->writeError(errorStr);
+				m_cfgXml->xmlWriter().writeTextElement("Error", errorStr);
+
+				*ok = false;
+				return TYPE();
+			}
+
+			TYPE t = v.value<TYPE>();
+
+			return t;
+		}
+
 	private:
 
 	protected:

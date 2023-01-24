@@ -519,3 +519,57 @@ public:
 	bool appearanceChanged(const TuningClientSettings& src) const;
 	bool connectionChanged(const TuningClientSettings& src) const;
 };
+
+class TestSuiteSettings : virtual public SoftwareSettings
+{
+public:
+	struct TuningService
+	{
+		QString tuningServiceID;
+		QString clientRequestIP;
+		int clientRequestPort = 0;
+		QStringList drivenSources;
+	};
+
+public:
+	QString cfgServiceID1;
+	HostAddressPort cfgServiceIP1;
+
+	QString cfgServiceID2;
+	HostAddressPort cfgServiceIP2;
+
+	QString appDataServiceID1;
+	QString appDataServiceIP1;
+	int appDataServicePort1 = 0;
+	QString realtimeDataIP1;
+	int realtimeDataPort1 = 0;
+
+	QString appDataServiceID2;
+	QString appDataServiceIP2;
+	int appDataServicePort2 = 0;
+	QString realtimeDataIP2;
+	int realtimeDataPort2 = 0;
+
+	QString archiveServiceID1;
+	QString archiveServiceIP1;
+	int archiveServicePort1 = 0;
+
+	QString archiveServiceID2;
+	QString archiveServiceIP2;
+	int archiveServicePort2 = 0;
+
+	bool tuningEnabled = false;
+
+	std::vector<TuningService> tuningServices;
+
+private:
+	// this methods should be call by SoftwareSettingsSet only
+	//
+	bool writeToXml(XmlWriteHelper& xml) const override;
+	bool readFromXml(XmlReadHelper& xml) override;
+
+	friend class SoftwareSettingsSet;
+
+public:
+	void clear();
+};

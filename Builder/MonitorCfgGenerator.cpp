@@ -313,11 +313,6 @@ namespace Builder
 		return result;
 	}
 
-	void MonitorCfgGenerator::writeErrorSection(QXmlStreamWriter& xmlWriter, QString error)
-	{
-		xmlWriter.writeTextElement("Error", error);
-	}
-
 	bool MonitorCfgGenerator::writeTuningSignals()
 	{
 		if (m_tuningSources.empty() == true)

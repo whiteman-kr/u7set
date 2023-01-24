@@ -8,6 +8,7 @@
 #include "MonitorCfgGenerator.h"
 #include "TuningServiceCfgGenerator.h"
 #include "TuningClientCfgGenerator.h"
+#include "TestSuiteCfgGenerator.h"
 #include "ConfigurationServiceCfgGenerator.h"
 #include "ArchivingServiceCfgGenerator.h"
 #include "MetrologyCfgGenerator.h"
@@ -1907,6 +1908,10 @@ namespace Builder
 
 			case E::SoftwareType::TestClient:
 				swCfgGen = std::make_shared<TestClientCfgGenerator>(context, software);
+				break;
+
+			case E::SoftwareType::TestSuite:
+				swCfgGen = std::make_shared<TestSuiteCfgGenerator>(context, software);
 				break;
 
 			default:
