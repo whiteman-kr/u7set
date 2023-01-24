@@ -95,9 +95,11 @@ namespace  Sim
 
 	public:
 		QString globalScript() const;
+		QString onConfigurationArrivedScript() const;
 
 	private:
 		QString m_globalScript;
+		QString m_onConfigurationArrivedScript;
 	};
 
 

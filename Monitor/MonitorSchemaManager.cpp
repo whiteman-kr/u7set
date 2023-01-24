@@ -98,9 +98,6 @@ void MonitorSchemaManager::slot_configurationArrived(ConfigSettings configuratio
 {
 	clear();
 
-	setGlobalScript(configuration.globalScript);
-	setOnConfigurationArrivedScript(configuration.onConfigurationArrivedScript);
-
 	// Schemas Realtime Trends
 	// At this point m_configController already has SchemaDetails.pbuf,so we can use it
 	//
@@ -130,12 +127,3 @@ const MonitorConfigController* MonitorSchemaManager::monitorConfigController() c
 	return m_configController;
 }
 
-QString MonitorSchemaManager::onConfigurationArrivedScript() const
-{
-	return m_onConfigurationArrivedScript;
-}
-
-void MonitorSchemaManager::setOnConfigurationArrivedScript(QString value)
-{
-	m_onConfigurationArrivedScript = std::move(value);
-}

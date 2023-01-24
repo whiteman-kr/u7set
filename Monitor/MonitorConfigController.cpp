@@ -559,6 +559,7 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 	//
 	{
 		QWriteLocker locker(&m_confugurationLock);
+		readSettings.configurationId = s_configurationIdCounter++;
 		m_configuration = readSettings;		// Cannot move readSettings here as it is used later for `emit configurationArrived(readSettings)`
 	}
 
@@ -737,6 +738,12 @@ QStringList MonitorConfigController::schemasByLoopbackId(const QString& loopback
 {
 	QReadLocker l(&m_schemaDetailsLock);
 	return m_schemaDetailsSet.schemasByLoopbackId(loopbackId);
+}
+
+int MonitorConfigController::configurationId() const
+{
+	QReadLocker locker(&m_confugurationLock);
+	return m_configuration.configurationId;
 }
 
 ConfigSettings MonitorConfigController::configuration() const

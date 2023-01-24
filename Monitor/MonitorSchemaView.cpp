@@ -36,6 +36,16 @@ VFrame30::DrawMode MonitorSchemaView::drawMode() const
 
 void MonitorSchemaView::paintEvent(QPaintEvent* event)
 {
+	// It is possible that arrived configuration was not yet applied, it can happen in the very beginning,
+	// as the first tab page is created by timer in MonitorCentralWidget::timerEvent, see comment there for
+	// details.
+	//
+	if (int cid = monitorSchemaManager()->monitorConfigController()->configurationId();
+		cid != m_configurationId)
+	{
+		configurationArrived(monitorSchemaManager()->monitorConfigController()->configuration());
+	}
+
 	setInfoMode(MonitorAppSettings::instance().showItemsLabels());
 	return ClientSchemaView::paintEvent(event);
 }
@@ -78,32 +88,12 @@ void MonitorSchemaView::updateScriptGlobalVars(QJSEngine& engine)
 
 void MonitorSchemaView::configurationArrived(ConfigSettings configuration)
 {
-	// --
-	//
+	m_configurationId = configuration.configurationId;
+
+	setGlobalScript(configuration.globalScript);
+	setOnConfigurationArrivedScript(configuration.onConfigurationArrivedScript);
+
 	setMonitorBehavior(std::move(configuration.monitorBeahvior));
-
-	// --
-	//
-	QJSEngine* engine = jsEngine();
-
-	if (engine == nullptr)
-	{
-		Q_ASSERT(engine);
-		return ;
-	}
-
-	reEvaluateGlobalScript();
-
-	QJSValue scriptValue = evaluateScript(configuration.onConfigurationArrivedScript, "evaluate onConfigurationArrivedScript", true);
-	if (scriptValue.isError() == true ||
-		scriptValue.isUndefined() == true)
-	{
-		return;
-	}
-
-	// --
-	//
-	runScript(scriptValue, "run onConfigurationArrivedScript", true);
 
 	return;
 }

@@ -473,6 +473,8 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 		serversUpdated = true;
 	}
 
+	readSettings.configurationId = s_configurationId ++;
+
 	theConfigSettings = readSettings;
 
 	for (const QString& str : updateInformation)
@@ -497,7 +499,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 													   theConfigSettings.clientSettings.loginPerOperation,
 													   theConfigSettings.clientSettings.tuningSessionTimeout);
 
-		emit configurationArrived();
+		emit configurationArrived(theConfigSettings);
 	}
 
 	return;
