@@ -7,6 +7,7 @@ namespace VFrame30
 	class CDrawParam;
 	class Schema;
 	class SchemaLayer;
+	class Context;
 
 	//
 	// IndicatorComponent base class
@@ -26,7 +27,7 @@ namespace VFrame30
 		virtual bool load(const Proto::SchemaItemIndicator& message, SchemaUnit unit) = 0;
 		virtual bool save(Proto::SchemaItemIndicator* message) const = 0;
 
-		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer, const SchemaItemIndicator* item) const = 0;
+		virtual void draw(CDrawParam* drawParam, const SchemaItemIndicator* schemaItem) const = 0;
 
 	signals:
 		void updatePropertiesList();

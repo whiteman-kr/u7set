@@ -58,7 +58,9 @@ HEADERS += \
     ../lib/ClientBehavior.h \
     ../lib/ComparatorSet.h \
 	../UtilsLib/ILogFile.h \
+    Context.h \
     ISchemaViewHistory.h \
+    IViewVariables.h \
     Indicator.h \
     IndicatorArrowIndicator.h \
     IndicatorHistogramVert.h \
@@ -129,6 +131,7 @@ HEADERS += \
     ../lib/OutputLog.h
 
 SOURCES += \
+    Context.cpp \
     Indicator.cpp \
     IndicatorArrowIndicator.cpp \
     IndicatorHistogramVert.cpp \
@@ -190,5 +193,7 @@ SOURCES += \
     SchemaItemImage.cpp \
     SchemaItemImageValue.cpp \
 	ImageItem.cpp
+
+DISTFILES +=
 
 

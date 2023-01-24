@@ -110,7 +110,7 @@ namespace VFrame30
 	// Item is drawn in 100% scale
 	// Graphcis must have scrren coordinate system (0, 0 - left upper corner, down and right - positive pos)
 	//
-	void SchemaItemLine::draw(CDrawParam* drawParam, const Schema*, const SchemaLayer*) const
+	void SchemaItemLine::draw(CDrawParam* drawParam) const
 	{
 		if (drawParam == nullptr)
 		{

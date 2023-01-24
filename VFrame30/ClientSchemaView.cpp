@@ -55,9 +55,9 @@ namespace VFrame30
 			return nullptr;
 		}
 
-		for (auto layer : schema->Layers)
+		for (const auto& layer : schema->layers())
 		{
-			for (auto item : layer->Items)
+			for (const auto& item : layer->items())
 			{
 				if (item->objectName() == objectName)
 				{
@@ -223,9 +223,10 @@ namespace VFrame30
 			return nullptr;
 		}
 
-		auto s = m_clientSchemaView->schemaManager()->schemaByIndex(schemaIndex);
+		auto context = Context::create(m_clientSchemaView);
+		auto schema = m_clientSchemaView->schemaManager()->schemaByIndex(schemaIndex, std::move(context));
 
-		return s ? new ScriptSchema(s) : nullptr;
+		return schema ? new ScriptSchema(schema) : nullptr;
 	}
 
 	QString ScriptSchemaView::schemaCaptionById(const QString& schemaId) const
@@ -259,6 +260,8 @@ namespace VFrame30
 		{
 			return nullptr;
 		}
+
+		auto context = VFrame30::Context::create(m_clientSchemaView);
 
 		return new ScriptSchema(m_clientSchemaView->schemaSharedPtr());
 	}
@@ -323,13 +326,10 @@ namespace VFrame30
 		QPainter p;
 		p.begin(this);
 
-		VFrame30::CDrawParam drawParam(&p, schema(), this, schema()->gridSize(), schema()->pinGridStep());
+		VFrame30::CDrawParam drawParam(&p, this, schema()->gridSize(), schema()->pinGridStep(), schema()->unit());
 
 		drawParam.setControlBarSize(CONTROL_BAR(schema()->unit(), p.device()->devicePixelRatioF(), zoom()));		// Is required for drawing highlights on items
 		drawParam.setBlinkPhase(static_cast<bool>((QTime::currentTime().msec() / 250) % 2));	// 0-249 : false, 250-499 : true, 500-749 : false, 750-999 : true
-
-		drawParam.setAppSignalController(m_appSignalController);
-		drawParam.setTuningController(m_tuningController);
 		drawParam.setInfoMode(m_infoMode);
 
 		drawParam.setHightlightIds(hightlightIds());
@@ -428,19 +428,15 @@ namespace VFrame30
 		double x = docPoint.x();
 		double y = docPoint.y();
 
-		for (auto layer = schema()->Layers.crbegin(); layer != schema()->Layers.crend(); layer++)
+		for (const auto& layer : schema()->layers() | std::views::reverse)
 		{
-			const VFrame30::SchemaLayer* pLayer = layer->get();
-
-			if (pLayer->show() == false)
+			if (layer->show() == false)
 			{
 				continue;
 			}
 
-			for (auto vi = pLayer->Items.crbegin(); vi != pLayer->Items.crend(); vi++)
+			for (const auto& item: layer->items() | std::views::reverse)
 			{
-				const SchemaItemPtr& item = *vi;
-
 				if (item->acceptClick() == true &&
 				    item->isIntersectPoint(x, y) == true &&
 					item->clickScript().isEmpty() == false)
@@ -487,19 +483,15 @@ namespace VFrame30
 			double x = docPoint.x();
 			double y = docPoint.y();
 
-			for (auto layer = schema()->Layers.crbegin(); layer != schema()->Layers.crend(); layer++)
+			for (const auto& layer : schema()->layers() | std::views::reverse)
 			{
-				const VFrame30::SchemaLayer* pLayer = layer->get();
-
-				if (pLayer->show() == false)
+				if (layer->show() == false)
 				{
 					continue;
 				}
 
-				for (auto vi = pLayer->Items.crbegin(); vi != pLayer->Items.crend(); vi++)
+				for (const auto& item : layer->items() | std::views::reverse)
 				{
-					const SchemaItemPtr& item = *vi;
-
 					if (item == m_leftClickOverItem &&
 						item->acceptClick() == true &&
 					    item->isIntersectPoint(x, y) == true &&
@@ -763,6 +755,13 @@ namespace VFrame30
 			return false;
 		}
 
+		if (schema() != nullptr)
+		{
+			// Context must have already been set, it sould be done after creation of the schema.
+			//
+			Q_ASSERT(schema()->context());
+		}
+
 		// Run script
 		//
 		QJSValue jsResult = evaluatedJs.call();
@@ -875,17 +874,17 @@ namespace VFrame30
 		return prevState;
 	}
 
-	bool ClientSchemaView::variableExists(QString name) const
+	bool ClientSchemaView::variableExists(const QString& name) const
 	{
 		return m_variables.contains(name);
 	}
 
-	QVariant ClientSchemaView::variable(QString name) const
+	QVariant ClientSchemaView::variable(const QString& name) const
 	{
 		return m_variables.value(name);
 	}
 
-	void ClientSchemaView::setVariable(QString name, const QVariant& value)
+	void ClientSchemaView::setVariable(const QString& name, const QVariant& value)
 	{
 		m_variables[name] = value;
 	}

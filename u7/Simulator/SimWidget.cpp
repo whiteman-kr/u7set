@@ -170,7 +170,12 @@ void SimWidget::openSchemaTabPage(QString schemaId, QStringList highlightIds)
 
 	// There is no such schema, load it and create a widget for it
 	//
-	std::shared_ptr<VFrame30::Schema> schema = m_schemaManager.schema(schemaId);
+
+	// Create a fake context, later it will be changed in SimSchemaWidget::SimSchemaWidget(...)
+	//
+	auto fakeContext = VFrame30::Context::create(nullptr, nullptr, nullptr, nullptr);
+
+	std::shared_ptr<VFrame30::Schema> schema = m_schemaManager.schema(schemaId, std::move(fakeContext));
 	if (schema == nullptr)
 	{
 		QMessageBox::critical(this, qAppName(), tr("Cannot open file %1").arg(schemaId));

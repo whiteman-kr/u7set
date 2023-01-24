@@ -1,6 +1,7 @@
 #pragma once
 #include "Indicator.h"
 #include "FontParam.h"
+#include "Context.h"
 #include "../AppSignalLib/AppSignalParam.h"
 #include "../lib/Tuning/TuningSignalState.h"
 
@@ -108,7 +109,7 @@ namespace VFrame30
 		virtual bool save(Proto::SchemaItemIndicator* message) const override;
 		virtual bool load(const Proto::SchemaItemIndicator& message, SchemaUnit unit) override;
 
-		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer, const SchemaItemIndicator* schemaItem) const override;
+		virtual void draw(CDrawParam* drawParam, const SchemaItemIndicator* schemaItem) const override;
 
 	private:
 		void drawBar(CDrawParam* drawParam,
@@ -128,18 +129,20 @@ namespace VFrame30
 		};
 		void drawGrids(const std::vector<DrawGridStruct>& grids, CDrawParam* drawParam, const QRectF barRect, const SchemaItemIndicator* item) const;
 
-		std::set<QString> getSignalTags(CDrawParam* drawParam, const QString& appSignalId) const;
-		bool getSignalParam(CDrawParam* drawParam, AppSignalParam* signalParam) const;
-		bool getSignalState(CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const;
-		std::optional<double> getSignalState(CDrawParam* drawParam, const QString& appSignalId) const;
+		std::set<QString> getSignalTags(const Context* context, const QString& appSignalId) const;
+		bool getSignalParam(const Context* context, AppSignalParam* signalParam) const;
+		bool getSignalState(const Context* context, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const;
+		std::optional<double> getSignalState(const Context* context, const QString& appSignalId) const;
 
 		// Setpoints drawing
 		//
 		std::vector<IndicatorSetpoint> comparators(CDrawParam* drawParam,
+												   const Context* context,
 												   const QString& appSignalId) const;
 
 		std::optional<QBrush> getAlertBrush(const std::vector<IndicatorSetpoint>& setpoints,
 											CDrawParam* drawParam,
+											const Context* context,
 											const AppSignalState& appSignalState,
 											const TuningSignalState& tuningSignalState,
 											const SchemaItemIndicator* schemaItem) const;
@@ -151,7 +154,7 @@ namespace VFrame30
 							   const IndicatorSetpoint& indicatorSetpoint_) :
 				signalIndex(signalIndex_),
 				barRect(barRect_),
-				indicatorSetpoint(indicatorSetpoint_)
+				indicatorSetpoint(std::move(indicatorSetpoint_))
 			{
 			}
 

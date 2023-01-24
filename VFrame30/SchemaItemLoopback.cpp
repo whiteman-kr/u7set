@@ -69,9 +69,9 @@ namespace VFrame30
 		return true;
 	}
 
-	void SchemaItemLoopback::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
+	void SchemaItemLoopback::draw(CDrawParam* drawParam) const
 	{
-		FblItemRect::draw(drawParam, schema, layer);
+		FblItemRect::draw(drawParam);
 		return;
 	}
 
@@ -151,9 +151,9 @@ namespace VFrame30
 		return true;
 	}
 
-	void SchemaItemLoopbackSource::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
+	void SchemaItemLoopbackSource::draw(CDrawParam* drawParam) const
 	{
-		SchemaItemLoopback::draw(drawParam, schema, layer);
+		SchemaItemLoopback::draw(drawParam);
 
 		QPainter* painter = drawParam->painter();
 		QRectF r = itemRectPinIndent(drawParam);
@@ -282,9 +282,9 @@ namespace VFrame30
 		return true;
 	}
 
-	void SchemaItemLoopbackTarget::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
+	void SchemaItemLoopbackTarget::draw(CDrawParam* drawParam) const
 	{
-		SchemaItemLoopback::draw(drawParam, schema, layer);
+		SchemaItemLoopback::draw(drawParam);
 
 		QPainter* painter = drawParam->painter();
 		QRectF r = itemRectPinIndent(drawParam);

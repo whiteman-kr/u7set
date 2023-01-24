@@ -136,18 +136,19 @@ namespace VFrame30
 			return;
 		}
 
-		QPen pen(Qt::black);
-		pen.setWidthF(drawParam->cosmeticPenWidth());
-
 		QPainter* painter = drawParam->painter();
 
+		QPen pen(Qt::black);
+		pen.setWidthF(drawParam->cosmeticPenWidth());
 		painter->setPen(pen);
+		painter->setBrush(Qt::NoBrush);
+
 		painter->drawRect(rect);
 
 		QFont f;		// Default application font
 		painter->setFont(f);
 
-		DrawHelper::drawText(painter, drawParam->schema()->unit(), errorText, rect, Qt::AlignCenter | Qt::AlignVCenter);
+		DrawHelper::drawText(painter, drawParam->schemaUnit(), errorText, rect, Qt::AlignCenter | Qt::AlignVCenter);
 		return;
 	}
 
@@ -199,7 +200,7 @@ namespace VFrame30
 		{
 			QRectF imageRect{rect.left(), rect.top(), static_cast<qreal>(m_image.width()), static_cast<qreal>(m_image.height())};
 
-			switch (drawParam->schema()->unit())
+			switch (drawParam->schemaUnit())
 			{
 			case SchemaUnit::Display:
 				// Do nothing

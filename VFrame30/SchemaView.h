@@ -1,5 +1,5 @@
 #pragma once
-#include "Session.h"
+#include "Context.h"
 #include "DrawParam.h"
 
 namespace VFrame30
@@ -7,11 +7,12 @@ namespace VFrame30
 	class Schema;
 	class SchemaItem;
 
-	static constexpr double ZoomStep = 10;
+	static constexpr double ZoomStep = 10.0;
 
-	class SchemaView
+
+	class SchemaView : public std::enable_shared_from_this<SchemaView>
 	{
-	public:
+	protected:
 		SchemaView();
 		explicit SchemaView(std::shared_ptr<Schema> schema);
 
@@ -53,8 +54,8 @@ namespace VFrame30
 		double m_zoom = 100.0;
 
 		Session m_session;
-
 	};
+
 
 	class SchemaViewWidget : public QWidget, public SchemaView
 	{

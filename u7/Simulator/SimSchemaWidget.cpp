@@ -30,9 +30,13 @@ SimSchemaWidget::SimSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
 	m_simulator(simulator)
 {
 	Q_ASSERT(m_simulator);
+	Q_ASSERT(schema);
 
 	clientSchemaView()->setAppSignalController(appSignalController);
 	clientSchemaView()->setTuningController(tuningController);
+
+	auto context = VFrame30::Context::create(clientSchemaView());
+	schema->setContext(std::move(context));
 
 	setFrameShape(QFrame::NoFrame);
 
@@ -130,6 +134,8 @@ void SimSchemaWidget::contextMenuRequested(const QPoint& pos)
 	QStringList impactSignals;
 	QString loopbackId;
 
+	auto context = VFrame30::Context::create(simSchemaView());
+
 	if (items.empty() == false)
 	{
 		for (const SchemaItemPtr& item : items)
@@ -145,21 +151,21 @@ void SimSchemaWidget::contextMenuRequested(const QPoint& pos)
 			if (VFrame30::SchemaItemValue* schemaItem = dynamic_cast<VFrame30::SchemaItemValue*>(item.get());
 				schemaItem != nullptr)
 			{
-				appSignals = VFrame30::MacrosExpander::parse(schemaItem->signalIds(), clientSchemaView(), &clientSchemaView()->session(), schema(), schemaItem);
+				appSignals = schemaItem->signalIds(context.get());
 				break;
 			}
 
 			if (VFrame30::SchemaItemImageValue* schemaItem = dynamic_cast<VFrame30::SchemaItemImageValue*>(item.get());
 				schemaItem != nullptr)
 			{
-				appSignals = VFrame30::MacrosExpander::parse(schemaItem->signalIds(), clientSchemaView(), &clientSchemaView()->session(), schema(), schemaItem);
+				appSignals = schemaItem->signalIds(context.get());
 				break;
 			}
 
 			if (VFrame30::SchemaItemIndicator* schemaItem = dynamic_cast<VFrame30::SchemaItemIndicator*>(item.get());
 				schemaItem != nullptr)
 			{
-				appSignals = VFrame30::MacrosExpander::parse(schemaItem->signalIds(), clientSchemaView(), &clientSchemaView()->session(), schema(), schemaItem);
+				appSignals = schemaItem->signalIds(context.get());
 				break;
 			}
 
@@ -440,7 +446,8 @@ void SimSchemaWidget::updateProject()
 	//
 	if (m_simulator->isLoaded() == true)
 	{
-		auto newSchema = schemaManager()->schema(schemaId());
+		auto context = VFrame30::Context::create(clientSchemaView());
+		auto newSchema = schemaManager()->schema(schemaId(), std::move(context));
 
 		if (newSchema == nullptr)
 		{

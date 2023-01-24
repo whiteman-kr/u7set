@@ -78,9 +78,9 @@ namespace VFrame30
 		return true;
 	}
 
-	void SchemaItemBus::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
+	void SchemaItemBus::draw(CDrawParam* drawParam) const
 	{
-		FblItemRect::draw(drawParam, schema, layer);
+		FblItemRect::draw(drawParam);
 
 		QPainter* painter = drawParam->painter();
 		QRectF r = itemRectPinIndent(drawParam);
@@ -201,9 +201,9 @@ namespace VFrame30
 		return true;
 	}
 
-	void SchemaItemBusComposer::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
+	void SchemaItemBusComposer::draw(CDrawParam* drawParam) const
 	{
-		SchemaItemBus::draw(drawParam, schema, layer);
+		SchemaItemBus::draw(drawParam);
 
 		QPainter* painter = drawParam->painter();
 
@@ -250,6 +250,9 @@ namespace VFrame30
 
 		painter->setPen(pen);
 		painter->drawLine(pt1, pt2);
+
+		auto layer = parentLayer();
+		Q_ASSERT(layer);
 
 		int connectionCount = layer->GetPinPosConnectinCount(vip, itemUnit());
 
@@ -485,9 +488,9 @@ R"(<p><b>BusComposer:</b> Create a bus signal</p>
 		return true;
 	}
 
-	void SchemaItemBusExtractor::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
+	void SchemaItemBusExtractor::draw(CDrawParam* drawParam) const
 	{
-		SchemaItemBus::draw(drawParam, schema, layer);
+		SchemaItemBus::draw(drawParam);
 
 		QPainter* painter = drawParam->painter();
 
@@ -536,6 +539,9 @@ R"(<p><b>BusComposer:</b> Create a bus signal</p>
 
 		painter->setPen(pen);
 		painter->drawLine(pt1, pt2);
+
+		auto layer = parentLayer();
+		Q_ASSERT(layer);
 
 		int connectionCount = layer->GetPinPosConnectinCount(vip, itemUnit());
 

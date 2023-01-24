@@ -1,6 +1,7 @@
 #pragma once
 
 #include "FblItemRect.h"
+#include "DrawParam.h"
 #include "../AppSignalLib/AppSignalParam.h"
 
 namespace VFrame30
@@ -133,9 +134,10 @@ namespace VFrame30
 		// Draw Functions
 		//
 	public:
-		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const override;
+		virtual void draw(CDrawParam* drawParam) const override;
 
-		static QString getCoulumnText(CDrawParam* drawParam,
+		static QString getCoulumnText(const Context* context,
+									  DrawMode drawMode,
 									  const SchemaItem* schemaItem,
 									  const E::ColumnData& data,
 									  const AppSignalParam& signal,
@@ -146,10 +148,10 @@ namespace VFrame30
 									  int precision);
 
 	protected:
-		void drawFullLineIds(CDrawParam* drawParam) const;
+		void drawFullLineIds(const Context* context, CDrawParam* drawParam) const;
 
-		void drawMultichannelValues(CDrawParam* drawParam, QPen& linePen) const;
-		void drawSinglechannelValues(CDrawParam* drawParam, QPen& linePen) const;
+		void drawMultichannelValues(const Context* context, CDrawParam* drawParam, QPen& linePen) const;
+		void drawSinglechannelValues(const Context* context, CDrawParam* drawParam, QPen& linePen) const;
 
 		void createColumnProperties();
 
@@ -298,7 +300,7 @@ namespace VFrame30
 	//
 	// SchemaItemInput
 	//
-	class SchemaItemInput : public SchemaItemSignal
+	class SchemaItemInput final : public SchemaItemSignal
 	{
 		Q_OBJECT
 
@@ -314,8 +316,8 @@ namespace VFrame30
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message) const final;
-		virtual bool LoadData(const Proto::Envelope& message) final;
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
 		bool loadData(const Proto::Envelope& message, bool loadOwnData);
 
 		// Properties and Data
@@ -327,7 +329,7 @@ namespace VFrame30
 	//
 	// SchemaItemOutput
 	//
-	class SchemaItemOutput : public SchemaItemSignal
+	class SchemaItemOutput final : public SchemaItemSignal
 	{
 		Q_OBJECT
 
@@ -343,8 +345,8 @@ namespace VFrame30
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message) const final;
-		virtual bool LoadData(const Proto::Envelope& message) final;
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
 		bool loadData(const Proto::Envelope& message, bool loadOwnData);
 
 		// Properties and Data
@@ -355,7 +357,7 @@ namespace VFrame30
 	//
 	// SchemaItemInOut
 	//
-	class SchemaItemInOut : public SchemaItemSignal
+	class SchemaItemInOut final : public SchemaItemSignal
 	{
 		Q_OBJECT
 
@@ -371,8 +373,8 @@ namespace VFrame30
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message) const final;
-		virtual bool LoadData(const Proto::Envelope& message) final;
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
 		bool loadData(const Proto::Envelope& message, bool loadOwnData);
 
 		// Properties and Data

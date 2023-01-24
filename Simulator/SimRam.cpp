@@ -94,7 +94,9 @@ namespace Sim
 
 		if (allZeroes == true)
 		{
-			for (int i = 0; i < std::min(static_cast<int>(m_data.size()), 32) / 2; i++, offest++)
+			for (int i = 0, sz = std::min(static_cast<int>(m_data.size()), 32) / 2;
+				 i < sz;
+				 i++, offest++)
 			{
 				quint16 data;
 				readWord(offest, &data, E::ByteOrder::BigEndian, true);

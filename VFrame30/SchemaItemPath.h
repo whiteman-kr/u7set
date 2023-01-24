@@ -47,7 +47,7 @@ namespace VFrame30
 		})
 		\endcode
 	*/
-	class SchemaItemPath : public PosConnectionImpl
+	class SchemaItemPath final : public PosConnectionImpl
 	{
 		Q_OBJECT
 
@@ -67,8 +67,8 @@ namespace VFrame30
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message) const final;
-		virtual bool LoadData(const Proto::Envelope& message) final;
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
 
 		// Draw Functions
 		//
@@ -77,7 +77,7 @@ namespace VFrame30
 		// Рисование элемента, выполняется в 100% масштабе.
 		// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 		//
-		virtual void draw(CDrawParam* drawParam, const Schema* pFrame, const SchemaLayer* pLayer) const final;
+		virtual void draw(CDrawParam* drawParam) const override;
 
 		// Properties and Data
 		//

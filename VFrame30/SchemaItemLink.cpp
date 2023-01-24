@@ -82,7 +82,7 @@ namespace VFrame30
 	// Рисование элемента, выполняется в 100% масштабе.
 	// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 	//
-	void SchemaItemLink::draw(CDrawParam* drawParam, const Schema*, const SchemaLayer* pLayer) const
+	void SchemaItemLink::draw(CDrawParam* drawParam) const
 	{
 		if (drawParam == nullptr)
 		{
@@ -134,11 +134,13 @@ namespace VFrame30
 		QPen redPen(QColor(0xE0D00000));
 		redPen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);	// Don't use getter!
 
+		auto layer = parentLayer();
+
 		// in/out - red cross
 		//
 		auto drawPin = [&](SchemaPoint pt)
 			{
-				int connectionCount = pLayer->GetPinPosConnectinCount(pt, itemUnit());
+				int connectionCount = layer->GetPinPosConnectinCount(pt, itemUnit());
 
 				if (connectionCount > 1)
 				{

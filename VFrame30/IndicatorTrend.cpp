@@ -209,21 +209,24 @@ namespace VFrame30
 
 	// Draw trend
 	//
-	void IndicatorTrend::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer, const SchemaItemIndicator* schemaItem) const
+	void IndicatorTrend::draw(CDrawParam* drawParam, const SchemaItemIndicator* schemaItem) const
 	{
 		if (drawParam == nullptr ||
-			schema == nullptr ||
-			layer == nullptr ||
 			schemaItem == nullptr)
 		{
 			Q_ASSERT(drawParam);
-			Q_ASSERT(schema);
-			Q_ASSERT(layer);
 			Q_ASSERT(schemaItem);
 			return;
 		}
 
-		Q_ASSERT(schema->unit() == m_itemUnit);
+		auto context = schemaItem->context();
+		if (context == nullptr)
+		{
+			Q_ASSERT(context);
+			return;
+		}
+
+		Q_ASSERT(drawParam->schemaUnit() == m_itemUnit);
 
 		QPainter* painter = drawParam->painter();
 		Q_ASSERT(painter);
@@ -304,10 +307,10 @@ namespace VFrame30
 			{
 				std::list<TrendLib::TrendSignalParam> signalParams;
 
-				AppSignalController* appSignalController = drawParam->appSignalController();
+				const AppSignalController* appSignalController = context->appSignalController();
 				Q_ASSERT(appSignalController);
 
-				for (int index = 0;
+				for (size_t index = 0;
 					 const QString& appSignalId : qAsConst(itemSignalIds))
 				{
 					bool signalFound = false;

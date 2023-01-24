@@ -46,29 +46,29 @@ namespace VFrame30
 		m_tcpClients.clear();
 	}
 
-	AppSignalParam TuningController::signalParam(const QString& appSignalId, bool* ok)
+	AppSignalParam TuningController::signalParam(const QString& appSignalId, bool* ok) const
 	{
 		if (m_signalManager == nullptr)
 		{
 			assert(m_signalManager);
-			return AppSignalParam();
+			return {};
 		}
 
 		return m_signalManager->signalParam(appSignalId, ok);
 	}
 
-	TuningSignalState TuningController::signalState(const QString& appSignalId, bool* ok)
+	TuningSignalState TuningController::signalState(const QString& appSignalId, bool* ok) const
 	{
 		if (m_signalManager == nullptr)
 		{
 			assert(m_signalManager);
-			return TuningSignalState();
+			return {};
 		}
 
 		return m_signalManager->state(appSignalId, ok);
 	}
 
-	QVariant TuningController::signalParam(const QString& appSignalId)
+	QVariant TuningController::signalParam(const QString& appSignalId) const
 	{
 		bool ok = true;
 		QVariant result = QVariant::fromValue(signalParam(appSignalId, &ok));
@@ -81,7 +81,7 @@ namespace VFrame30
 		return result;
 	}
 
-	QVariant TuningController::signalState(const QString& appSignalId)
+	QVariant TuningController::signalState(const QString& appSignalId) const
 	{
 		bool ok = true;
 		QVariant result = QVariant::fromValue(signalState(appSignalId, &ok));

@@ -22,7 +22,7 @@ namespace EditEngine
 		//
 		static bool checkIfCommandChangesOrder(SetOrder setOrder,
 				const std::vector<SchemaItemPtr>& items,
-				const std::list<SchemaItemPtr>& layerItems);
+				const std::vector<SchemaItemPtr>& layerItems);
 
 	protected:
 		virtual void executeCommand(std::vector<SchemaItemPtr>* itemsToSelect) override;

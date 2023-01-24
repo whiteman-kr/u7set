@@ -20,31 +20,17 @@ namespace EditEngine
 
 	void AddItemCommand::executeCommand(std::vector<SchemaItemPtr>* itemsToSelect)
 	{
-		m_layer->Items.insert(m_layer->Items.end(), m_items.begin(), m_items.end());
-
+		m_layer->pushBackItems(m_items.begin(), m_items.end());
 		itemsToSelect->assign(m_items.begin(), m_items.end());
-
 		return;
 	}
 
 	void AddItemCommand::unExecuteCommand(std::vector<SchemaItemPtr>* itemsToSelect)
 	{
-		for (auto si = m_items.begin(); si != m_items.end(); ++si)
+		for (const auto& item : m_items)
 		{
-			auto findResult = std::find_if(m_layer->Items.begin(), m_layer->Items.end(),
-				[&si](SchemaItemPtr item)
-				{
-					return item.get() == si->get();
-				});
-
-			if(findResult != m_layer->Items.end())
-			{
-				m_layer->Items.erase(findResult);
-			}
-			else
-			{
-				assert(findResult != m_layer->Items.end());
-			}
+			bool ok = m_layer->removeItem(item);
+			assert(ok);
 		}
 
 		itemsToSelect->assign(m_selectedItems.begin(), m_selectedItems.end());
