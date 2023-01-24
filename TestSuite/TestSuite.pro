@@ -40,16 +40,23 @@ CONFIG(release, debug|release) {
 }
 
 SOURCES += \
+    ../lib/BuildInfo.cpp \
+    ../lib/SoftwareSettings.cpp \
     Settings.cpp \
+    TestSuiteDialogSettings.cpp \
     main.cpp \
     TestSuiteMainWindow.cpp
 
 HEADERS += \
+    ../lib/BuildInfo.h \
+    ../lib/SoftwareSettings.h \
     Settings.h \
+    TestSuiteDialogSettings.h \
     TestSuiteMainWindow.h \
     main.h
 
 FORMS += \
+    TestSuiteDialogSettings.ui \
     TestSuiteMainWindow.ui
 
 # Add curent dir to a list of library directory paths

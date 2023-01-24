@@ -17,6 +17,7 @@
 #include <QtCore>
 #include <QJSValue>
 #include <QJSEngine>
+#include <QDomNode>
 
 #ifdef _MSC_VER
 	#pragma warning(pop)

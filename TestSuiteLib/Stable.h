@@ -33,10 +33,15 @@
 	#pragma warning(disable : 6385)		// Static analyzer warning: qhash.h:367: warning: C6385: Reading invalid data from 'this->offsets':  the readable size is '128' bytes, but 'i' bytes may be read.: Lines: 366, 367
 #endif
 
+#include <QtCore>
+#include <QtQml>
 #include <QVector>
 #include <QVariant>
 #include <QJSEngine>
 #include <QJSValue>
+#include <QDomNode>
+
+
 
 #ifdef _MSC_VER
 	#pragma warning(pop)

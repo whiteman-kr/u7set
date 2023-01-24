@@ -1,6 +1,6 @@
 QT -= gui
 
-QT += qml
+QT += qml xml
 
 TARGET = TestSuiteLib
 
@@ -52,6 +52,7 @@ SOURCES += \
     TestEngine.cpp \
     TestLogController.cpp \
     TestResultLog.cpp \
+    TestSuiteConfigController.cpp \
     TestSuiteLib.cpp \
     TestWorker.cpp
 
@@ -62,6 +63,7 @@ HEADERS += \
     TestEngine.h \
     TestLogController.h \
     TestResultLog.h \
+    TestSuiteConfigController.h \
     TestSuiteLib.h \
     TestWorker.h
 

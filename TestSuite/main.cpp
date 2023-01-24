@@ -12,7 +12,7 @@ QSharedMemory* theSharedMemorySingleApp = nullptr;
 int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
-	a.setApplicationName("TuningClient");
+	a.setApplicationName("TestSuite");
 	a.setOrganizationName(Manufacturer::RADIY);
 	a.setOrganizationDomain(Manufacturer::SITE);
 
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 
 	SoftwareInfo softwareInfo;
 
-	softwareInfo.init(E::SoftwareType::TuningClient, theSettings.instanceStrId(), 0, 1);
+	softwareInfo.init(E::SoftwareType::TestSuite, theSettings.instanceStrId(), 0, 1);
 
 	// Check to run the application in one instance
 	//
@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
 
 			// Run the application
 			//
-			theMainWindow = new TestSuiteMainWindow(/*softwareInfo*/);
+			theMainWindow = new TestSuiteMainWindow(softwareInfo);
 			theMainWindow->show();
 
 			result = a.exec();

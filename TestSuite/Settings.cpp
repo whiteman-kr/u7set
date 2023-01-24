@@ -1,7 +1,5 @@
 #include "Settings.h"
 #include "../OnlineLib/SocketIO.h"
-#include "../lib/PropertyEditor.h"
-
 
 QColor redColor = QColor(192, 0, 0);
 
@@ -10,7 +8,7 @@ QColor redColor = QColor(192, 0, 0);
 //
 
 Settings::Settings():
-	m_instanceStrId("SYSTEMID_WS00_TUN"),
+	m_instanceStrId("SYSTEMID_WS00_TESTSUITE"),
 	m_configuratorIpAddress1("127.0.0.1"),
 	m_configuratorPort1(PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST),
 	m_configuratorIpAddress2("127.0.0.1"),
@@ -19,18 +17,15 @@ Settings::Settings():
 {
 }
 
+Settings::Settings(const Settings& That):
+	Settings()
+{
+	*this = That;
+}
+
 void Settings::StoreSystem()
 {
-#ifdef USE_ADMIN_REGISTRY_AREA
-	if (admin() == false)
-	{
-		return;
-	}
-
-	QSettings s(QSettings::SystemScope, qApp->organizationName(), qApp->applicationName());
-#else
 	QSettings s(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
-#endif
 
 	QString instanceHistoryString = m_instanceHistory.join(';');
 	s.setValue("m_instanceHistory", instanceHistoryString);
@@ -46,36 +41,14 @@ void Settings::StoreSystem()
 
 void Settings::RestoreSystem()
 {
-	// determine if is running as administrator
-	//
-#ifdef USE_ADMIN_REGISTRY_AREA
-	QSettings adminSettings(QSettings::SystemScope, qApp->organizationName(), qApp->applicationName());
-	adminSettings.setValue("ApplicationName", qApp->applicationName());
-
-	adminSettings.sync();
-
-	if (adminSettings.status() == QSettings::AccessError)
-	{
-		m_admin = false;
-	}
-	else
-	{
-		m_admin = true;
-	}
-#endif
-
 	// read system settings
 	//
-#ifdef USE_ADMIN_REGISTRY_AREA
-	QSettings s(QSettings::SystemScope, qApp->organizationName(), qApp->applicationName());
-#else
 	QSettings s(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
-#endif
 
 	QString instanceHistoryString = s.value("m_instanceHistory", QString()).toString();
 	m_instanceHistory = instanceHistoryString.split(';', Qt::SkipEmptyParts);
 
-	m_instanceStrId = s.value("m_instanceStrId", "SYSTEM_RACKID_WS00_TUN").toString();
+	m_instanceStrId = s.value("m_instanceStrId", m_instanceStrId).toString();
 
 	m_configuratorIpAddress1 = s.value("m_configuratorIpAddress1", "127.0.0.1").toString();
 	m_configuratorPort1 = s.value("m_configuratorPort1", PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST).toInt();
@@ -124,7 +97,7 @@ void Settings::RestoreUser()
 	m_language = s.value("MainWindow/language", m_language).toString();
 }
 
-QStringList Settings::instanceHistory()
+QStringList Settings::instanceHistory() const
 {
 	QMutexLocker l(&m);
 	return m_instanceHistory;
@@ -136,7 +109,7 @@ void Settings::setInstanceHistory(const QStringList& value)
 	m_instanceHistory = value;
 }
 
-QString Settings::instanceStrId()
+QString Settings::instanceStrId() const
 {
 	QMutexLocker l(&m);
 	return m_instanceStrId;
@@ -148,7 +121,7 @@ void Settings::setInstanceStrId(const QString& value)
 	m_instanceStrId = value;
 }
 
-HostAddressPort Settings::configuratorAddress1()
+HostAddressPort Settings::configuratorAddress1() const
 {
 	QMutexLocker l(&m);
 	return HostAddressPort(m_configuratorIpAddress1, m_configuratorPort1);
@@ -160,7 +133,7 @@ void Settings::setConfiguratorAddress1(const QString& address, int port)
 	m_configuratorPort1 = port;
 }
 
-HostAddressPort Settings::configuratorAddress2()
+HostAddressPort Settings::configuratorAddress2() const
 {
 	QMutexLocker l(&m);
 	return HostAddressPort(m_configuratorIpAddress2, m_configuratorPort2);
@@ -183,13 +156,6 @@ void Settings::setLanguage(const QString& value)
 	m_language = value;
 }
 
-#ifdef USE_ADMIN_REGISTRY_AREA
-bool Settings::admin() const
-{
-	return m_admin;
-}
-#endif
-
 QString Settings::localAppDataPath()
 {
 	return m_localAppDataPath;
@@ -197,4 +163,3 @@ QString Settings::localAppDataPath()
 
 Settings theSettings;
 
-ConfigSettings theConfigSettings;

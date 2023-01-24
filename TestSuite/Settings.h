@@ -1,5 +1,4 @@
-#ifndef SETTINGS_H
-#define SETTINGS_H
+#pragma once
 
 #include "../CommonLib/HostAddressPort.h"
 #include "../lib/Tuning/TuningUserManager.h"
@@ -18,7 +17,7 @@
 //
 // BuildInfo
 //
-struct BuildInfo
+/*struct BuildInfo
 {
 	QString projectName;
 	int buildNo = -1;
@@ -28,26 +27,26 @@ struct BuildInfo
 	QString user;
 	QString workstation;
 
-};
+};*/
 
 //
-// ConfigSettings
+// AppConfigSettings
 //
 
-struct ConfigSettings
+/*struct AppConfigSettings
 {
 	//TuningClientSettings clientSettings;
 
 	QString errorMessage;				// Parsing error message, empty if no errors
 
-	ConfigSettings& operator = (const ConfigSettings& That)
+	AppConfigSettings& operator = (const AppConfigSettings& That)
 	{
 		//clientSettings = That.clientSettings;
 
 		return *this;
 	}
 
-};
+};*/
 
 //
 // Settings
@@ -57,6 +56,7 @@ class Settings
 {
 public:
 	Settings();
+	Settings(const Settings& That);
 
 	void StoreUser();
 	void RestoreUser();
@@ -64,29 +64,24 @@ public:
 	void StoreSystem();
 	void RestoreSystem();
 
-	QStringList instanceHistory();
+	QStringList instanceHistory() const;
 	void setInstanceHistory(const QStringList& value);
 
-	QString instanceStrId();
+	QString instanceStrId() const;
 	void setInstanceStrId(const QString& value);
 
 	void setConfiguratorAddress1(const QString& address, int port);
-	HostAddressPort configuratorAddress1();
+	HostAddressPort configuratorAddress1() const;
 
 	void setConfiguratorAddress2(const QString& address, int port);
-	HostAddressPort configuratorAddress2();
+	HostAddressPort configuratorAddress2() const;
 
 	QString language() const;
 	void setLanguage(const QString& value);
 
-#ifdef USE_ADMIN_REGISTRY_AREA
-	bool admin() const;
-#endif
-
 	QString localAppDataPath();
 
 public:
-
 	int m_requestInterval = 100;
 
 	// MainWindow options
@@ -97,11 +92,8 @@ public:
 
 private:
 
-#ifdef USE_ADMIN_REGISTRY_AREA
-	bool m_admin = false;
-#endif
+	// System settings set by operator
 
-	QStringList m_instanceHistory;
 	QString m_instanceStrId;
 
 	QString m_configuratorIpAddress1;
@@ -112,14 +104,30 @@ private:
 
 	QString m_language = "en";
 
+	// User settings
+
+	QStringList m_instanceHistory;
 	QString m_localAppDataPath;
 
-	QMutex m;
+	mutable QMutex m;
+
+public:
+	Settings& operator =(const Settings& That)
+	{
+		m_instanceStrId = That.m_instanceStrId;
+
+		m_configuratorIpAddress1 = That.m_configuratorIpAddress1;
+		m_configuratorPort1 = That.m_configuratorPort1;
+
+		m_configuratorIpAddress2 = That.m_configuratorIpAddress2;
+		m_configuratorPort2 = That.m_configuratorPort2;
+
+		m_language = That.m_language;
+
+		return *this;
+	};
 
 };
 
 extern Settings theSettings;
 
-extern ConfigSettings theConfigSettings;
-
-#endif // SETTINGS_H

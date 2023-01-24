@@ -29,35 +29,25 @@ void createTemplateFile(const QString& fileName)
 
 	writer.setAutoFormatting(true);
 	writer.writeStartDocument();
-	writer.writeStartElement("TestSuiteConsole Arguments");
+	writer.writeStartElement("TestSuiteConsoleArguments");
 
-	/*
-	writer.writeComment("Postgresql IP-address");
-	writer.writeTextElement("DatabaseAddress", "127.0.0.1");
 
-	writer.writeComment("Postgresql access port");
-	writer.writeTextElement("DatabasePort", "5432");
+	writer.writeComment("TestSuite InstanceStrID");
+	writer.writeTextElement("InstanceStrID", "SYSTEMID_RACKID_WS00_TESTSUITE");
 
-	writer.writeComment("Postgresql user name");
-	writer.writeTextElement("DatabaseUserName", "u7");
+	writer.writeComment("Configurator IP Address 1");
+	writer.writeTextElement("ConfiguratorIPAddress1", "127.0.0.1");
 
-	writer.writeComment("Postgresql user password");
-	writer.writeTextElement("DatabasePassword", "Password");
+	writer.writeComment("Configurator Port 1");
+	writer.writeTextElement("ConfiguratorPort1", "13312");
 
-	writer.writeComment("u7 project name");
-	writer.writeTextElement("ProjectName", "ProjectName");
+	writer.writeComment("Configurator IP Address 2");
+	writer.writeTextElement("ConfiguratorIPAddress2", "127.0.0.1");
 
-	writer.writeComment("u7 project user name");
-	writer.writeTextElement("ProjectUserName", "Administrator");
+	writer.writeComment("Configurator Port 2");
+	writer.writeTextElement("ConfiguratorPort2", "13312");
 
-	writer.writeComment("u7 project user password");
-	writer.writeTextElement("ProjectUserPassword", "Password");
-
-	writer.writeComment("Build result path, default current directory");
-	writer.writeTextElement("BuildOutputPath", "");
-	*/
-
-	writer.writeEndElement();	// TestSuiteConsole Arguments
+	writer.writeEndElement();	// TestSuiteConsoleArguments
 	writer.writeEndDocument();
 
 	QFile f(fileName);
@@ -149,131 +139,85 @@ int startTests(QString testArgsFileName)
 		return 1;
 	}
 
-	/*
+
 	if (doc.setContent(&file) == false)
 	{
 		QString errorMsg = QObject::tr("Failed to load contents of the file %1.").arg(testArgsFileName);
 		std::cout << errorMsg.toStdString() << std::endl;
 		file.close();
 		return 1;
-	}*/
+	}
 	file.close();
 
 	// Read and set task arguments
 	//
-	//QDomElement docElem = doc.documentElement();
+	QDomElement docElem = doc.documentElement();
 
-	/*
+
 	// DatabaseAddress
 	//
-	QString dbAddress;
-	bool ok = getArgumentFromXml(docElem, "DatabaseAddress", &dbAddress);
+	QString instanceStrId;
+	bool ok = getArgumentFromXml(docElem, "InstanceStrID", &instanceStrId);
 	if (ok == false)
 	{
-		std::cout << "Failed to read DatabaseAddress argument from file!" << std::endl;
+		std::cout << "Failed to read InstanceStrID argument from file!" << std::endl;
 		return 1;
 	}
-	if (dbAddress.isEmpty() == true)
+	if (instanceStrId.isEmpty() == true)
 	{
-		std::cout << "DatabaseAddress argument can't be empty!" << std::endl;
+		std::cout << "InstanceStrID argument can't be empty!" << std::endl;
 		return 1;
 	}
 
-	// DatabasePort
+	// ConfiguratorIPAddress1
 	//
-	int port = 0;
-	ok = getArgumentFromXml(docElem, "DatabasePort", &port);
+	QString configuratorIPAddress1;
+	ok = getArgumentFromXml(docElem, "ConfiguratorIPAddress1", &configuratorIPAddress1);
 	if (ok == false)
 	{
-		std::cout << "Failed to read DatabasePort argument from file!" << std::endl;
+		std::cout << "Failed to read ConfiguratorIPAddress1 argument from file!" << std::endl;
+		return 1;
+	}
+	if (configuratorIPAddress1.isEmpty() == true)
+	{
+		std::cout << "ConfiguratorIPAddress1 argument can't be empty!" << std::endl;
 		return 1;
 	}
 
-	// DatabaseUserName
+	// ConfiguratorPort1
 	//
-	QString dbUserName;
-	ok = getArgumentFromXml(docElem, "DatabaseUserName", &dbUserName);
+	int configuratorPort1 = 0;
+	ok = getArgumentFromXml(docElem, "ConfiguratorPort1", &configuratorPort1);
 	if (ok == false)
 	{
-		std::cout << "Failed to read DatabaseUserName argument from file!" << std::endl;
-		return 1;
-	}
-	if (dbUserName.isEmpty() == true)
-	{
-		std::cout << "DatabaseUserName argument can't be empty!" << std::endl;
+		std::cout << "Failed to read ConfiguratorPort1 argument from file!" << std::endl;
 		return 1;
 	}
 
-	// DatabasePassword
+	// ConfiguratorIPAddress2
 	//
-	QString dbPassword;
-	ok = getArgumentFromXml(docElem, "DatabasePassword", &dbPassword);
+	QString configuratorIPAddress2;
+	ok = getArgumentFromXml(docElem, "ConfiguratorIPAddress2", &configuratorIPAddress2);
 	if (ok == false)
 	{
-		std::cout << "Failed to read DatabasePassword argument from file!" << std::endl;
+		std::cout << "Failed to read ConfiguratorIPAddress2 argument from file!" << std::endl;
 		return 1;
 	}
-	if (dbPassword.isEmpty() == true)
+	if (configuratorIPAddress2.isEmpty() == true)
 	{
-		std::cout << "DatabasePassword argument can't be empty!" << std::endl;
+		std::cout << "ConfiguratorIPAddress2 argument can't be empty!" << std::endl;
 		return 1;
 	}
 
-	// ProjectName
+	// ConfiguratorPort2
 	//
-	QString projectName;
-	ok = getArgumentFromXml(docElem, "ProjectName", &projectName);
+	int configuratorPort2 = 0;
+	ok = getArgumentFromXml(docElem, "ConfiguratorPort2", &configuratorPort2);
 	if (ok == false)
 	{
-		std::cout << "Failed to read ProjectName argument from file!" << std::endl;
+		std::cout << "Failed to read ConfiguratorPort2 argument from file!" << std::endl;
 		return 1;
 	}
-	if (projectName.isEmpty() == true)
-	{
-		std::cout << "ProjectName argument can't be empty!" << std::endl;
-		return 1;
-	}
-
-	// ProjectUserName
-	//
-	QString projectUserName;
-	ok = getArgumentFromXml(docElem, "ProjectUserName", &projectUserName);
-	if (ok == false)
-	{
-		std::cout << "Failed to read ProjectUserName argument from file!" << std::endl;
-		return 1;
-	}
-	if (projectUserName.isEmpty() == true)
-	{
-		std::cout << "ProjectUserName argument can't be empty!" << std::endl;
-		return 1;
-	}
-
-	// ProjectUserPassword
-	//
-	QString projectUserPassword;
-	ok = getArgumentFromXml(docElem, "ProjectUserPassword", &projectUserPassword);
-	if (ok == false)
-	{
-		std::cout << "Failed to read ProjectUserPassword argument from file!" << std::endl;
-		return 1;
-	}
-	if (projectUserPassword.isEmpty() == true)
-	{
-		std::cout << "ProjectUserPassword argument can't be empty!" << std::endl;
-		return 1;
-	}
-
-	// BuildOutputPath
-	//
-	QString buildPath;
-	ok = getArgumentFromXml(docElem, "BuildOutputPath", &buildPath);
-	if (ok == false)
-	{
-		std::cout << "Failed to read BuildOutputPath argument from file!" << std::endl;
-		return 1;
-	}
-	*/
 
 	// Some inititializations
 	//
@@ -281,8 +225,14 @@ int startTests(QString testArgsFileName)
 	//Hardware::init();
 	//DbController::init();
 	//Builder::init();
+	SoftwareInfo softwareInfo;
 
-	TestTask* testTask = new TestTask(nullptr /* QCoreApplication::instance() */);
+	softwareInfo.init(E::SoftwareType::TestSuite, instanceStrId, 0, 1);
+
+	HostAddressPort addr1(configuratorIPAddress1, configuratorPort1);
+	HostAddressPort addr2(configuratorIPAddress2, configuratorPort2);
+
+	TestTask* testTask = new TestTask(softwareInfo, addr1, addr2, nullptr /* QCoreApplication::instance() */);
 
 	/*testTask->setDatabaseAddress(dbAddress);
 	testTask->setDatabasePort(port);
@@ -303,7 +253,7 @@ int startTests(QString testArgsFileName)
 
 	// Start build process
 	//
-	testTask->start();
+	//testTask->start();
 
 	// Run message loop
 	//
