@@ -7,6 +7,7 @@
 #include "LogController.h"
 #include "SchemaItem.h"
 #include "ISchemaViewHistory.h"
+#include "IViewVariables.h"
 #include "../lib/ClientBehavior.h"
 
 class QPaintEvent;
@@ -249,7 +250,7 @@ namespace VFrame30
 	//
 	// ClientSchemaView
 	//
-	class ClientSchemaView : public VFrame30::SchemaViewWidget
+	class ClientSchemaView : public VFrame30::SchemaViewWidget, public IViewVariables
 	{
 		Q_OBJECT
 
@@ -337,12 +338,12 @@ namespace VFrame30
 		bool scriptMessageBoxAllowed() const;
 		bool setScriptMessageBoxAllowed(bool enable);
 
-		// Variables
+		// IViewVariables implementation
 		//
-		bool variableExists(QString name) const;
+		bool variableExists(const QString& name) const override;
 
-		QVariant variable(QString name) const;
-		void setVariable(QString name, const QVariant& value);
+		QVariant variable(const QString& name) const override;
+		void setVariable(const QString& name, const QVariant& value) override;
 
 		const QVariantHash& variables() const;
 		void setVariables(const QVariantHash& values);

@@ -20,10 +20,10 @@ namespace VFrame30
 
 		// Get loaded schema
 		//
-		virtual std::shared_ptr<VFrame30::Schema> schema(QString schemaId);
+		std::shared_ptr<VFrame30::Schema> schema(QString schemaId, std::shared_ptr<Context> context);
 
 		virtual int schemaCount() const;
-		virtual std::shared_ptr<VFrame30::Schema> schemaByIndex(int schemaIndex);
+		virtual std::shared_ptr<VFrame30::Schema> schemaByIndex(int schemaIndex, std::shared_ptr<Context> context);
 
 		virtual QString schemaCaptionById(const QString& schemaId) const;
 		virtual QString schemaCaptionByIndex(int schemaIndex) const;

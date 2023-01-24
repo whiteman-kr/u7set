@@ -468,9 +468,9 @@ namespace Builder
 
 		bool result = true;
 
-		for (std::shared_ptr<VFrame30::SchemaLayer> layer : schema->Layers)
+		for (const auto& layer : schema->layers())
 		{
-			for (const SchemaItemPtr& item : layer->Items)
+			for (const SchemaItemPtr& item : layer->items())
 			{
 				std::vector<std::shared_ptr<Property>> props = item->properties();
 
@@ -839,7 +839,7 @@ namespace Builder
 		//
 		if (schemaRect.topLeft().isNull() == false)
 		{
-			for (std::shared_ptr<VFrame30::SchemaLayer> layer :  schema->Layers)
+			for (const auto& layer :  schema->layers())
 			{
 				if (layer == nullptr)
 				{
@@ -848,7 +848,7 @@ namespace Builder
 					return false;
 				}
 
-				for (SchemaItemPtr& item :  layer->Items)
+				for (const SchemaItemPtr& item :  layer->items())
 				{
 					if (item == nullptr)
 					{
@@ -864,28 +864,28 @@ namespace Builder
 
 		// Add pannel items to pannelRect
 		//
-		for (std::shared_ptr<VFrame30::SchemaLayer> pannelLayer : pannel->Layers)
+		for (const auto& pannelLayer : pannel->layers())
 		{
 			Q_ASSERT(pannelLayer);
 
-			auto foundDestLayerIt = std::find_if(schema->Layers.begin(), schema->Layers.end(),
+			auto foundDestLayerIt = std::find_if(schema->layers().begin(), schema->layers().end(),
 												 [pannelLayer](auto l) { return l->name() == pannelLayer->name(); } );
 
-			if (foundDestLayerIt == schema->Layers.end())
+			if (foundDestLayerIt == schema->layers().end())
 			{
 				// Source layer is not found in destination, copy to compile layer,
 				// if compile layer does not exists either, then copy to the first layer
 				//
-				foundDestLayerIt = std::find_if(schema->Layers.begin(), schema->Layers.end(),
+				foundDestLayerIt = std::find_if(schema->layers().begin(), schema->layers().end(),
 												[](auto l) { return l->compile(); } );
 
-				if (foundDestLayerIt == schema->Layers.end())
+				if (foundDestLayerIt == schema->layers().end())
 				{
-					foundDestLayerIt = schema->Layers.begin();
+					foundDestLayerIt = schema->layers().begin();
 				}
 			}
 
-			Q_ASSERT(foundDestLayerIt != schema->Layers.end());
+			Q_ASSERT(foundDestLayerIt != schema->layers().end());
 
 			// Copy all form sourceLayer to destLayer, keep the order of items and insert all them right at the end of items
 			//
@@ -897,7 +897,7 @@ namespace Builder
 				return false;
 			}
 
-			for (SchemaItemPtr sourceItem : pannelLayer->Items)
+			for (const SchemaItemPtr& sourceItem : pannelLayer->items())
 			{
 				// Make a deep copy of source item, set new guid and label to it
 				//
@@ -929,7 +929,7 @@ namespace Builder
 
 				// --
 				//
-				destLayer->Items.push_back(newItem);
+				destLayer->pushBackItem(newItem);
 			}
 		}
 

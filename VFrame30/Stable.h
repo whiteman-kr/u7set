@@ -37,6 +37,7 @@
 #include <optional>
 #include <iterator>
 #include <type_traits>
+#include <ranges>
 //#ifdef _MSC_VER
 //	#pragma warning(pop)
 //#endif

@@ -2,6 +2,7 @@
 #include "SchemaItemSignal.h"
 #include "PropertyNames.h"
 #include "DrawParam.h"
+#include "Context.h"
 #include "AppSignalController.h"
 #include "../AppSignalLib/AppSignalManager.h"
 
@@ -73,9 +74,9 @@ namespace VFrame30
 		return true;
 	}
 
-	void SchemaItemConnection::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
+	void SchemaItemConnection::draw(CDrawParam* drawParam) const
 	{
-		FblItemRect::draw(drawParam, schema, layer);
+		FblItemRect::draw(drawParam);
 		return;
 	}
 
@@ -194,9 +195,9 @@ namespace VFrame30
 		return true;
 	}
 
-	void SchemaItemTransmitter::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
+	void SchemaItemTransmitter::draw(CDrawParam* drawParam) const
 	{
-		SchemaItemConnection::draw(drawParam, schema, layer);
+		SchemaItemConnection::draw(drawParam);
 
 		// Custom draw
 		//
@@ -449,9 +450,12 @@ namespace VFrame30
 		return true;
 	}
 
-	void SchemaItemReceiver::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
+	void SchemaItemReceiver::draw(CDrawParam* drawParam) const
 	{
-		SchemaItemConnection::draw(drawParam, schema, layer);
+		SchemaItemConnection::draw(drawParam);
+
+		auto context = this->context();
+		Q_ASSERT(context);
 
 		// Custom draw
 		//
@@ -517,15 +521,16 @@ namespace VFrame30
 			signal.setAppSignalId(appSignalId);
 			signalState.m_flags.valid = false;
 
-			if (drawParam->appSignalController() != nullptr)
+			if (context->appSignalController() != nullptr)
 			{
-				signal = drawParam->appSignalController()->signalParam(appSignalId, nullptr);
-				signalState = drawParam->appSignalController()->signalState(appSignalId, nullptr);
+				signal = context->appSignalController()->signalParam(appSignalId, nullptr);
+				signalState = context->appSignalController()->signalState(appSignalId, nullptr);
 			}
 
 			QRectF signalRect = {r.left(), r.top() + lineHeight * textRow, r.width(), lineHeight};
 
-			QString dataText = SchemaItemSignal::getCoulumnText(drawParam,
+			QString dataText = SchemaItemSignal::getCoulumnText(context.get(),
+																drawParam->drawMode(),
 																this,
 																m_dataType,
 																signal,

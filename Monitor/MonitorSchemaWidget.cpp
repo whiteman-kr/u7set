@@ -64,9 +64,13 @@ MonitorSchemaWidget::MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schem
 
 	createActions();
 
+	Q_ASSERT(schema);
+
+	auto context = VFrame30::Context::create(clientSchemaView());
+	schema->setContext(std::move(context));
+
 	// Run onShowScript
 	//
-	Q_ASSERT(schema);
 	schema->onShowEvent(clientSchemaView()->jsEngine(), clientSchemaView()->logFile());
 
 	return;
@@ -95,6 +99,8 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 	QStringList impactSignalList;
 	QStringList loopbacks;
 
+	auto context = VFrame30::Context::create(clientSchemaView());
+
 	for (const SchemaItemPtr& item : items)
 	{
 		if (VFrame30::SchemaItemSignal* schemaItemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
@@ -108,21 +114,21 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 		if (VFrame30::SchemaItemValue* schemaItem = dynamic_cast<VFrame30::SchemaItemValue*>(item.get());
 			schemaItem != nullptr)
 		{
-			signalList.append(VFrame30::MacrosExpander::parse(schemaItem->signalIds(), clientSchemaView(), &clientSchemaView()->session(), schema(), schemaItem));
+			signalList.append(schemaItem->signalIds(context.get()));
 			continue;
 		}
 
 		if (VFrame30::SchemaItemImageValue* schemaItem = dynamic_cast<VFrame30::SchemaItemImageValue*>(item.get());
 			schemaItem != nullptr)
 		{
-			signalList.append(VFrame30::MacrosExpander::parse(schemaItem->signalIds(), clientSchemaView(), &clientSchemaView()->session(), schema(), schemaItem));
+			signalList.append(schemaItem->signalIds(context.get()));
 			continue;
 		}
 
 		if (VFrame30::SchemaItemIndicator* schemaItem = dynamic_cast<VFrame30::SchemaItemIndicator*>(item.get());
 			schemaItem != nullptr)
 		{
-			signalList.append(VFrame30::MacrosExpander::parse(schemaItem->signalIds(), clientSchemaView(), &clientSchemaView()->session(), schema(), schemaItem));
+			signalList.append(schemaItem->signalIds(context.get()));
 			continue;
 		}
 

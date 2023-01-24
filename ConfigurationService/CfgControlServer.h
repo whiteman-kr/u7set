@@ -28,7 +28,7 @@ public:
 
 	virtual CfgControlServer* getNewInstance() override;
 
-	void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) final;
+	void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) override final;
 
 private:
 	Tcp::SetConnectionResult checkClient(const QString& clientEquipmentID, const QString& clientHostname) const override;

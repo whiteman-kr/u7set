@@ -17,7 +17,7 @@ namespace EditEngine
 		m_layer = layer;
 
 		m_items.assign(items.begin(), items.end());
-		m_prevOrder.assign(layer->Items.begin(), layer->Items.end());
+		m_prevOrder.assign(layer->items().begin(), layer->items().end());
 
 		m_selectedItems = schemaView->selectedItems();
 
@@ -26,22 +26,20 @@ namespace EditEngine
 
 	void DeleteItemCommand::executeCommand(std::vector<SchemaItemPtr>* itemsToSelect)
 	{
-		std::for_each(m_items.begin(), m_items.end(),
-			[this](SchemaItemPtr item)
-			{
-				m_layer->Items.erase(std::remove(m_layer->Items.begin(), m_layer->Items.end(), item), m_layer->Items.end());
-			}
-			);
-
-		//schemaView->clearSelection();
 		Q_UNUSED(itemsToSelect);
+
+		std::for_each(m_items.begin(), m_items.end(),
+			[this](const SchemaItemPtr& item)
+			{
+				m_layer->removeItem(item);
+			});
 
 		return;
 	}
 
 	void DeleteItemCommand::unExecuteCommand(std::vector<SchemaItemPtr>* itemsToSelect)
 	{
-		m_layer->Items.assign(m_prevOrder.begin(), m_prevOrder.end());
+		m_layer->setItems(m_prevOrder.begin(), m_prevOrder.end());
 
 		*itemsToSelect = m_items;
 

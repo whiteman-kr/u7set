@@ -318,7 +318,7 @@ namespace VFrame30
 
 	// Drawing Functions
 	//
-	void FblItemRect::draw(CDrawParam* drawParam, const Schema*, const SchemaLayer* layer) const
+	void FblItemRect::draw(CDrawParam* drawParam) const
 	{
 		QPainter* p = drawParam->painter();
 		p->setBrush(Qt::NoBrush);
@@ -382,8 +382,6 @@ namespace VFrame30
 
 		// Draw input pins
 		//
-		const std::vector<AfbPin>& inputPins = inputs();
-
 		QPen redPen{QColor(0xE0B00000)};
 		redPen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);	// Don't use getter!
 
@@ -391,7 +389,10 @@ namespace VFrame30
 		redBusPen.setWidthF(BusSideLineWidth);
 		redBusPen.setCapStyle(Qt::FlatCap);
 
-		for (const AfbPin& input : inputPins)
+		auto layer = parentLayer().get();
+		Q_ASSERT(layer);
+
+		for (const AfbPin& input : inputs())
 		{
 			// Get pin position
 			//
@@ -469,9 +470,7 @@ namespace VFrame30
 
 		// Drawing output pins
 		//
-		const std::vector<AfbPin>& outputPins = outputs();
-
-		for (const AfbPin& output : outputPins)
+		for (const AfbPin& output : outputs())
 		{
 			// Get pin position
 			//

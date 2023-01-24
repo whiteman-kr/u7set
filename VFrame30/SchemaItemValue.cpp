@@ -1,11 +1,9 @@
 #include "SchemaItemValue.h"
-#include "SchemaView.h"
 #include "MacrosExpander.h"
 #include "PropertyNames.h"
 #include "DrawParam.h"
 #include "TuningController.h"
 #include "AppSignalController.h"
-#include "ClientSchemaView.h"
 #include "../AppSignalLib/AppSignalParam.h"
 #include "../lib/Tuning/TuningSignalState.h"
 
@@ -97,7 +95,7 @@ namespace VFrame30
 		//
 		Proto::SchemaItemValue* valueMessage = message->mutable_schemaitem()->mutable_value();
 
-		valueMessage->set_signalids(signalIdsString().toStdString());
+		valueMessage->set_signalids(signalIdsString(nullptr).toStdString());	// Set context to nullptr so ids WILL NOT be expanded
 		valueMessage->set_signalsource(static_cast<int32_t>(m_signalSource));
 
 		valueMessage->set_lineweight(m_lineWeight);
@@ -173,9 +171,16 @@ namespace VFrame30
 
 	// Drawing Functions
 	//
-	void SchemaItemValue::draw(CDrawParam* drawParam, const Schema* /*schema*/, const SchemaLayer* /*layer*/) const
+	void SchemaItemValue::draw(CDrawParam* drawParam) const
 	{
-		QPainter* p = drawParam->painter();
+		QPainter* painter = drawParam->painter();
+
+		const std::shared_ptr<Context> context = this->context();
+		if (context == nullptr)
+		{
+			Q_ASSERT(context);
+			return;
+		}
 
 		// Initialization drawing resources
 		//
@@ -192,11 +197,11 @@ namespace VFrame30
 
 		// Drawing text
 		//
-		drawText(drawParam, r);
+		drawText(drawParam, context.get(), r);
 
 		// Remove brush to draw non-filled rects
 		//
-		p->setBrush(Qt::NoBrush);
+		painter->setBrush(Qt::NoBrush);
 
 		// Drawing frame rect
 		//
@@ -204,8 +209,8 @@ namespace VFrame30
 		{
 			m_rectPen->setWidthF(m_lineWeight == 0.0 ? drawParam->cosmeticPenWidth() : m_lineWeight);
 
-			p->setPen(*m_rectPen);
-			p->drawRect(r);
+			painter->setPen(*m_rectPen);
+			painter->drawRect(r);
 		}
 
 		// Draw highlights for m_appSignalIds
@@ -245,8 +250,11 @@ namespace VFrame30
 		return;
 	}
 
-	void SchemaItemValue::drawText(CDrawParam* drawParam, const QRectF& rect) const
+	void SchemaItemValue::drawText(CDrawParam* drawParam, const Context* context, const QRectF& rect) const
 	{
+		Q_ASSERT(drawParam);
+		Q_ASSERT(context);
+
 		QPainter* painter = drawParam->painter();
 		QString text;
 
@@ -269,17 +277,18 @@ namespace VFrame30
 
 				QString signalId;
 
-				if (signalIds().empty() == false)
+				if (auto signalIdList = signalIds(context);
+					signalIdList.empty() == false)
 				{
-					signalId = signalIds().front();
+					signalId = signalIdList.front();
 
 					signalParam.setAppSignalId(signalId);
 					signalParam.setCustomSignalId(signalId);
 				}
 
-				getSignalState(signalId, drawParam, &signalParam, &signalState, &tuningSignalState);
+				getSignalState(signalId, context, &signalParam, &signalState, &tuningSignalState);
 
-				text = parseText(m_text, drawParam, signalParam, signalState);
+				text = parseText(m_text, context, drawParam->session(), signalParam, signalState);
 			}
 			else
 			{
@@ -303,14 +312,19 @@ namespace VFrame30
 		return;
 	}
 
-	QString SchemaItemValue::parseText(QString text, CDrawParam* drawParam, const AppSignalParam& signal, const AppSignalState& signalState) const
+	QString SchemaItemValue::parseText(QString text,
+									   const Context* context,
+									   const Session& session,
+									   const AppSignalParam& signal,
+									   const AppSignalState& signalState) const
 	{
-		if (drawParam == nullptr)
-		{
-			Q_ASSERT(drawParam);
-		}
-
 		QString result = text;
+
+		if (context == nullptr)
+		{
+			Q_ASSERT(context);
+			return result;
+		}
 
 		QRegularExpression reStartIndex("\\$\\([a-zA-Z0-9]+");	// Search for $([SomeText])
 
@@ -406,7 +420,7 @@ namespace VFrame30
 
 		// Expand all other macroses
 		//
-		result = MacrosExpander::parse(result, drawParam, this);
+		result = MacrosExpander::parse(result, context, &session, this);
 
 		return result;
 	}
@@ -429,14 +443,14 @@ namespace VFrame30
 		return QString::number(value, static_cast<char>(analogFormat()), p);
 	}
 
-	bool SchemaItemValue::getSignalState(QString appSignalId, CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const
+	bool SchemaItemValue::getSignalState(QString appSignalId, const Context* context, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const
 	{
-		if (drawParam == nullptr ||
+		if (context == nullptr ||
 			signalParam == nullptr ||
 			appSignalState == nullptr ||
 			tuningSignalState == nullptr)
 		{
-			Q_ASSERT(drawParam);
+			Q_ASSERT(context);
 			Q_ASSERT(signalParam);
 			Q_ASSERT(appSignalState);
 			Q_ASSERT(tuningSignalState);
@@ -448,7 +462,7 @@ namespace VFrame30
 		switch (signalSource())
 		{
 		case E::SignalSource::AppDataService:
-			if (auto appSignalController = drawParam->appSignalController();
+			if (auto appSignalController = context->appSignalController();
 				appSignalController == nullptr)
 			{
 			}
@@ -459,19 +473,19 @@ namespace VFrame30
 					appSignalId = appSignalController->appSignalManager()->equipmentToAppSiganlId(appSignalId);
 				}
 
-				*signalParam = drawParam->appSignalController()->signalParam(appSignalId, &ok);
-				*appSignalState = drawParam->appSignalController()->signalState(appSignalId, nullptr);
+				*signalParam = context->appSignalController()->signalParam(appSignalId, &ok);
+				*appSignalState = context->appSignalController()->signalState(appSignalId, nullptr);
 			}
 			break;
 
 		case E::SignalSource::TuningService:
-			if (drawParam->tuningController() == nullptr)
+			if (context->tuningController() == nullptr)
 			{
 			}
 			else
 			{
-				*signalParam = drawParam->tuningController()->signalParam(appSignalId, &ok);
-				*tuningSignalState = drawParam->tuningController()->signalState(appSignalId, nullptr);
+				*signalParam = context->tuningController()->signalParam(appSignalId, &ok);
+				*tuningSignalState = context->tuningController()->signalState(appSignalId, nullptr);
 
 				appSignalState->m_hash = signalParam->hash();
 				appSignalState->m_flags.valid = tuningSignalState->valid();
@@ -503,21 +517,27 @@ namespace VFrame30
 
 	QString SchemaItemValue::signalIdsString() const
 	{
+		auto context = this->context();
+		return signalIdsString(context.get());
+	}
+
+	QString SchemaItemValue::signalIdsString(const Context* context) const
+	{
 		QStringList resultList = m_signalIds;
 
-		// Expand variables in AppSignalIDs in Monitor or Simulator modes, if applicable (m_drawParam is set and is monitor mode)
+		// Expand variables in AppSignalIDs in Monitor or Simulator modes.
 		//
-		if (m_drawParam != nullptr &&
-			m_drawParam->drawMode() != DrawMode::Editor &&
-			m_drawParam->clientSchemaView() != nullptr)
+		if (context != nullptr &&
+			context->viewVariables() != nullptr &&
+			context->appSignalController() != nullptr)
 		{
-			resultList = MacrosExpander::parse(resultList, m_drawParam, this);
+			resultList = MacrosExpander::parse(resultList, context, nullptr, this);
 
 			for (QString& s : resultList)
 			{
 				if (s.startsWith('@') == true)
 				{
-					s = m_drawParam->clientSchemaView()->appSignalController()->appSignalManager()->equipmentToAppSiganlId(s);
+					s = context->appSignalController()->appSignalManager()->equipmentToAppSiganlId(s);
 				}
 			}
 		}
@@ -532,21 +552,27 @@ namespace VFrame30
 
 	QStringList SchemaItemValue::signalIds() const
 	{
+		auto context = this->context().get();
+		return signalIds(context);
+	}
+
+	QStringList SchemaItemValue::signalIds(const Context* context) const
+	{
 		QStringList resultList = m_signalIds;
 
 		// Expand variables in AppSignalIDs in MonitorMode, if applicable
 		//
-		if (m_drawParam != nullptr &&
-			m_drawParam->drawMode() != DrawMode::Editor &&
-			m_drawParam->clientSchemaView() != nullptr)
+		if (context != nullptr &&
+			context->viewVariables() != nullptr &&
+			context->appSignalController() != nullptr)
 		{
-			resultList = MacrosExpander::parse(resultList, m_drawParam, this);
+			resultList = MacrosExpander::parse(resultList, context, nullptr, this);
 
 			for (QString& s : resultList)
 			{
 				if (s.startsWith('@') == true)
 				{
-					s = m_drawParam->clientSchemaView()->appSignalController()->appSignalManager()->equipmentToAppSiganlId(s);
+					s = context->appSignalController()->appSignalManager()->equipmentToAppSiganlId(s);
 				}
 			}
 		}
@@ -673,7 +699,7 @@ namespace VFrame30
 	}
 	void SchemaItemValue::setText(QString value)
 	{
-		m_text = value;
+		m_text = std::move(value);
 	}
 
 	int SchemaItemValue::precision() const

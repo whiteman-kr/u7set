@@ -30,13 +30,13 @@ namespace VFrame30
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message) const final;
-		virtual bool LoadData(const Proto::Envelope& message) final;
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
 
 		// Draw Functions
 		//
 	public:
-		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const final;
+		virtual void draw(CDrawParam* drawParam) const override;
 
 		// Trend functions, only if IndicatorType == E::IndicatorType::Trend
 		//
@@ -54,9 +54,11 @@ namespace VFrame30
 		//
 	public:
 		QString signalIdsString() const;
+		QString signalIdsString(const Context* context) const;
 		void setSignalIdsString(const QString& value);
 
 		QStringList signalIds() const;
+		QStringList signalIds(const Context* context) const;
 		void setSignalIds(const QStringList& value);
 
 		E::IndicatorType indicatorType() const;

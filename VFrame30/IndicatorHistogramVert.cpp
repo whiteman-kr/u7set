@@ -4,6 +4,7 @@
 #include "DrawParam.h"
 #include "../AppSignalLib/AppSignalParam.h"
 #include "../lib/ComparatorSet.h"
+#include "Schema.h"
 #include "TuningController.h"
 #include "AppSignalController.h"
 
@@ -460,23 +461,25 @@ namespace VFrame30
 		return true;
 	}
 
-	void IndicatorHistogramVert::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer, const SchemaItemIndicator* schemaItem) const
+	void IndicatorHistogramVert::draw(CDrawParam* drawParam, const SchemaItemIndicator* schemaItem) const
 	{
 		if (drawParam == nullptr ||
-
-			schema == nullptr ||
-			layer == nullptr ||
 			schemaItem == nullptr)
 		{
 			Q_ASSERT(drawParam);
-			Q_ASSERT(schema);
-			Q_ASSERT(layer);
 			Q_ASSERT(schemaItem);
 			return;
 		}
 
 		QPainter* p = drawParam->painter();
 		Q_ASSERT(p);
+
+		auto context = schemaItem->context();
+		if (context == nullptr)
+		{
+			Q_ASSERT(context);
+			return;
+		}
 
 		// --
 		//
@@ -563,17 +566,22 @@ namespace VFrame30
 
 			QBrush barBrush = QBrush(signalColorsVector[barIndex]);
 
-			if (drawParam->appSignalController() != nullptr)
+			if (context->appSignalController() != nullptr)
 			{
-				getSignalState(drawParam, &signalParam, &appSignalState, &tuningSignalState);
+				getSignalState(context.get(), &signalParam, &appSignalState, &tuningSignalState);
 
-				std::vector<IndicatorSetpoint> signalSetpoints = comparators(drawParam, appSignalId);
+				std::vector<IndicatorSetpoint> signalSetpoints = comparators(drawParam, context.get(), appSignalId);
 
 				// Get bar color
 				// signalColors[barIndex] - is Ba base color
 				// if any setpoint is alerted and it has tag, try to fetch alertedColor for this tag from behavior
 				//
-				std::optional<QBrush> alertedBrush = getAlertBrush(signalSetpoints, drawParam, appSignalState, tuningSignalState, schemaItem);
+				std::optional<QBrush> alertedBrush = getAlertBrush(signalSetpoints,
+																   drawParam,
+																   context.get(),
+																   appSignalState,
+																   tuningSignalState,
+																   schemaItem);
 
 				if (alertedBrush.has_value() == true)
 				{
@@ -896,22 +904,22 @@ namespace VFrame30
 		return;
 	}
 
-	std::set<QString> IndicatorHistogramVert::getSignalTags(CDrawParam* drawParam, const QString& appSignalId) const
+	std::set<QString> IndicatorHistogramVert::getSignalTags(const Context* context, const QString& appSignalId) const
 	{
-		Q_ASSERT(drawParam);
+		Q_ASSERT(context);
 
 		std::set<QString> result;
 
 		switch (signalSource())
 		{
 		case E::SignalSource::AppDataService:
-			if (drawParam->appSignalController() == nullptr)
+			if (context->appSignalController() == nullptr)
 			{
-				Q_ASSERT(drawParam->appSignalController());
+				Q_ASSERT(context->appSignalController());
 			}
 			else
 			{
-				QStringList tags = drawParam->appSignalController()->signalTags(appSignalId);
+				QStringList tags = context->appSignalController()->signalTags(appSignalId);
 				for (const QString& t : tags)
 				{
 					result.insert(t);
@@ -920,7 +928,7 @@ namespace VFrame30
 			break;
 
 		case E::SignalSource::TuningService:
-			if (drawParam->tuningController() == nullptr)
+			if (context->tuningController() == nullptr)
 			{
 			}
 			else
@@ -928,7 +936,7 @@ namespace VFrame30
 				AppSignalParam param;
 				param.setAppSignalId(appSignalId);
 
-				bool ok = getSignalParam(drawParam, &param);
+				bool ok = getSignalParam(context, &param);
 				if (ok == true)
 				{
 					for (const QString& t : param.tags())
@@ -947,19 +955,19 @@ namespace VFrame30
 		return result;
 	}
 
-	bool IndicatorHistogramVert::getSignalParam(CDrawParam* drawParam, AppSignalParam* signalParam) const
+	bool IndicatorHistogramVert::getSignalParam(const Context* context, AppSignalParam* signalParam) const
 	{
-		if (drawParam == nullptr ||
+		if (context == nullptr ||
 			signalParam == nullptr)
 		{
-			Q_ASSERT(drawParam);
+			Q_ASSERT(context);
 			Q_ASSERT(signalParam);
 			return false;
 		}
 
-		if (drawParam->appSignalController() != nullptr)
+		if (context->appSignalController() != nullptr)
 		{
-			Q_ASSERT(drawParam->appSignalController() != nullptr);
+			Q_ASSERT(context->appSignalController() != nullptr);
 			return false;
 		}
 
@@ -968,22 +976,22 @@ namespace VFrame30
 		switch (signalSource())
 		{
 		case E::SignalSource::AppDataService:
-			if (drawParam->appSignalController() == nullptr)
+			if (context->appSignalController() == nullptr)
 			{
 			}
 			else
 			{
-				*signalParam = drawParam->appSignalController()->signalParam(signalParam->appSignalId(), &ok);
+				*signalParam = context->appSignalController()->signalParam(signalParam->appSignalId(), &ok);
 			}
 			break;
 
 		case E::SignalSource::TuningService:
-			if (drawParam->tuningController() == nullptr)
+			if (context->tuningController() == nullptr)
 			{
 			}
 			else
 			{
-				*signalParam = drawParam->tuningController()->signalParam(signalParam->appSignalId(), &ok);
+				*signalParam = context->tuningController()->signalParam(signalParam->appSignalId(), &ok);
 			}
 			break;
 
@@ -995,23 +1003,23 @@ namespace VFrame30
 		return ok;
 	}
 
-	bool IndicatorHistogramVert::getSignalState(CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const
+	bool IndicatorHistogramVert::getSignalState(const Context* context, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const
 	{
-		if (drawParam == nullptr ||
+		if (context == nullptr ||
 			signalParam == nullptr ||
 			appSignalState == nullptr ||
 			tuningSignalState == nullptr)
 		{
-			Q_ASSERT(drawParam);
+			Q_ASSERT(context);
 			Q_ASSERT(signalParam);
 			Q_ASSERT(appSignalState);
 			Q_ASSERT(tuningSignalState);
 			return false;
 		}
 
-		if (drawParam->appSignalController() == nullptr)
+		if (context->appSignalController() == nullptr)
 		{
-			Q_ASSERT(drawParam->appSignalController() != nullptr);
+			Q_ASSERT(context->appSignalController() != nullptr);
 			return false;
 		}
 
@@ -1020,24 +1028,24 @@ namespace VFrame30
 		switch (signalSource())
 		{
 		case E::SignalSource::AppDataService:
-			if (drawParam->appSignalController() == nullptr)
+			if (context->appSignalController() == nullptr)
 			{
 			}
 			else
 			{
-				*signalParam = drawParam->appSignalController()->signalParam(signalParam->appSignalId(), &ok);
-				*appSignalState = drawParam->appSignalController()->signalState(signalParam->appSignalId(), nullptr);
+				*signalParam = context->appSignalController()->signalParam(signalParam->appSignalId(), &ok);
+				*appSignalState = context->appSignalController()->signalState(signalParam->appSignalId(), nullptr);
 			}
 			break;
 
 		case E::SignalSource::TuningService:
-			if (drawParam->tuningController() == nullptr)
+			if (context->tuningController() == nullptr)
 			{
 			}
 			else
 			{
-				*signalParam = drawParam->tuningController()->signalParam(signalParam->appSignalId(), &ok);
-				*tuningSignalState = drawParam->tuningController()->signalState(signalParam->appSignalId(), nullptr);
+				*signalParam = context->tuningController()->signalParam(signalParam->appSignalId(), &ok);
+				*tuningSignalState = context->tuningController()->signalState(signalParam->appSignalId(), nullptr);
 
 				appSignalState->m_hash = signalParam->hash();
 				appSignalState->m_flags.valid = tuningSignalState->valid();
@@ -1053,20 +1061,26 @@ namespace VFrame30
 		return ok;
 	}
 
-	std::optional<double> IndicatorHistogramVert::getSignalState(CDrawParam* drawParam, const QString& appSignalId) const
+	std::optional<double> IndicatorHistogramVert::getSignalState(const Context* context, const QString& appSignalId) const
 	{
+		if (context == nullptr)
+		{
+			Q_ASSERT(context);
+			return std::nullopt;
+		}
+
 		bool valid = false;
 		double value = -1;
 
 		switch (signalSource())
 		{
 		case E::SignalSource::AppDataService:
-			if (drawParam->appSignalController() == nullptr)
+			if (context->appSignalController() == nullptr)
 			{
 			}
 			else
 			{
-				AppSignalState state = drawParam->appSignalController()->signalState(appSignalId, nullptr);
+				AppSignalState state = context->appSignalController()->signalState(appSignalId, nullptr);
 
 				valid = state.isValid();
 				value = state.value();
@@ -1074,12 +1088,12 @@ namespace VFrame30
 			break;
 
 		case E::SignalSource::TuningService:
-			if (drawParam->tuningController() == nullptr)
+			if (context->tuningController() == nullptr)
 			{
 			}
 			else
 			{
-				TuningSignalState state = drawParam->tuningController()->signalState(appSignalId, nullptr);
+				TuningSignalState state = context->tuningController()->signalState(appSignalId, nullptr);
 
 				valid = state.valid();
 				value = state.value().toDouble();
@@ -1092,7 +1106,7 @@ namespace VFrame30
 
 		if (valid == false)
 		{
-			return {};
+			return std::nullopt;
 		}
 		else
 		{
@@ -1101,15 +1115,21 @@ namespace VFrame30
 	}
 
 	std::vector<IndicatorSetpoint> IndicatorHistogramVert::comparators(CDrawParam* drawParam,
+																	   const Context* context,
 																	   const QString& appSignalId) const
 	{
-		Q_ASSERT(drawParam);
-
 		std::vector<IndicatorSetpoint> result;
 		result.reserve(8);
 
+		if (drawParam == nullptr || context == nullptr)
+		{
+			Q_ASSERT(drawParam);
+			Q_ASSERT(context);
+			return result;
+		}
+
 		if (drawParam->drawMode() == DrawMode::Editor ||
-			drawParam->appSignalController() == nullptr)
+			context->appSignalController() == nullptr)
 		{
 			return result;
 		}
@@ -1118,7 +1138,7 @@ namespace VFrame30
 		{
 		case E::IndicatorDrawSetpoints::AutoGenerated:
 			{
-				std::vector<std::shared_ptr<Comparator>> setpoints = drawParam->appSignalController()->setpointsByInputSignalId(appSignalId);
+				std::vector<std::shared_ptr<Comparator>> setpoints = context->appSignalController()->setpointsByInputSignalId(appSignalId);
 
 				for (const std::shared_ptr<Comparator>& sp : setpoints)
 				{
@@ -1144,7 +1164,7 @@ namespace VFrame30
 			{
 				for (const std::shared_ptr<CustomSetPoint>& csp : m_customSetPoints)
 				{
-					std::vector<std::shared_ptr<Comparator>> setpoints = drawParam->appSignalController()->setpointsByInputSignalId(appSignalId);
+					std::vector<std::shared_ptr<Comparator>> setpoints = context->appSignalController()->setpointsByInputSignalId(appSignalId);
 					for (const std::shared_ptr<Comparator>& sp : setpoints)
 					{
 						if (sp == nullptr)
@@ -1195,7 +1215,7 @@ namespace VFrame30
 			}
 			else
 			{
-				comparatorValue = getSignalState(drawParam, valueSignal.appSignalID());
+				comparatorValue = getSignalState(context, valueSignal.appSignalID());
 			}
 
 			if (comparatorValue.has_value() == true)
@@ -1207,7 +1227,7 @@ namespace VFrame30
 
 				if (stateSignal.isAcquired() == true)
 				{
-					alertedValue = getSignalState(drawParam, stateSignal.appSignalID());
+					alertedValue = getSignalState(context, stateSignal.appSignalID());
 				}
 
 				// if setting outputs state is not valid it is also indicated as alerted
@@ -1237,7 +1257,7 @@ namespace VFrame30
 
 				if (overrideColor.has_value() == false)
 				{
-					QStringList setpointSignalTags = drawParam->appSignalController()->signalTags(stateSignal.appSignalID());
+					QStringList setpointSignalTags = context->appSignalController()->signalTags(stateSignal.appSignalID());
 
 					const MonitorBehavior& monitorBehavior = drawParam->monitorBehavor();
 
@@ -1266,11 +1286,13 @@ namespace VFrame30
 
 	std::optional<QBrush> IndicatorHistogramVert::getAlertBrush(const std::vector<IndicatorSetpoint>& setpoints,
 																CDrawParam* drawParam,
+																const Context* context,
 																const AppSignalState& appSignalState,
 																const TuningSignalState& tuningSignalState,
 																const SchemaItemIndicator* schemaItem) const
 	{
 		Q_ASSERT(drawParam);
+		Q_ASSERT(context);
 		Q_ASSERT(schemaItem);
 
 		if (drawParam->drawMode() == DrawMode::Editor)
@@ -1359,7 +1381,7 @@ namespace VFrame30
 
 				if (output.isAcquired() == true)
 				{
-					auto signalTags = getSignalTags(drawParam, output.appSignalID());
+					auto signalTags = getSignalTags(context, output.appSignalID());
 
 					for (const QString& t : signalTags)
 					{

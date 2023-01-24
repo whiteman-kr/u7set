@@ -13,7 +13,7 @@ namespace VFrame30
 		Session();
 		Session(QString project, QString username, QString host);
 
-		Session& operator= (const Session&);
+		Session& operator=(const Session&);
 
 	public:
 		QString project() const;
@@ -29,13 +29,14 @@ namespace VFrame30
 		QString time() const;
 
 	private:
-		// !!! Pay Attention to operator = !!!
-		//
-		QString m_project;
-		QString m_username;
-		QString m_host;
-		// !!! Pay Attention to operator = !!!
-		//
+		struct Data
+		{
+			// Separate struct to make it copyiable
+			//
+			QString project;
+			QString username;
+			QString host;
+		} m_data;
 	};
 
 }

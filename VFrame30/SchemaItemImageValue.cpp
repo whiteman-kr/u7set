@@ -1,5 +1,6 @@
 #include "SchemaItemImageValue.h"
 #include "SchemaView.h"
+#include "Schema.h"
 #include "MacrosExpander.h"
 #include "PropertyNames.h"
 #include "DrawParam.h"
@@ -68,10 +69,10 @@ namespace VFrame30
 		//
 		Proto::SchemaItemImageValue* valueMessage = message->mutable_schemaitem()->mutable_imagevalue();
 
-		valueMessage->set_signalids(signalIdsString().toStdString());
+		valueMessage->set_signalids(signalIdsString(nullptr).toStdString());	// nullptr avoid macro expansion
 		valueMessage->set_signalsource(static_cast<int32_t>(m_signalSource));
 
-		for (auto image : m_images)
+		for (const auto& image : m_images)
 		{
 			image->save(valueMessage->add_images());
 		}
@@ -135,7 +136,7 @@ namespace VFrame30
 
 	// Drawing Functions
 	//
-	void SchemaItemImageValue::draw(CDrawParam* drawParam, const Schema* /*schema*/, const SchemaLayer* /*layer*/) const
+	void SchemaItemImageValue::draw(CDrawParam* drawParam) const
 	{
 		QPainter* p = drawParam->painter();
 
@@ -279,21 +280,27 @@ namespace VFrame30
 
 	QString SchemaItemImageValue::signalIdsString() const
 	{
+		std::shared_ptr<Context> context = this->context();
+		return signalIdsString(context.get());
+	}
+
+	QString SchemaItemImageValue::signalIdsString(const Context* context) const
+	{
 		QStringList resultList = m_signalIds;
 
 		// Expand variables in AppSignalIDs in MonitorMode, if applicable
 		//
-		if (m_drawParam != nullptr &&
-			m_drawParam->drawMode() != DrawMode::Editor &&
-			m_drawParam->clientSchemaView() != nullptr)
+		if (context != nullptr &&
+			context->appSignalController() != nullptr &&
+			context->viewVariables() != nullptr)
 		{
-			resultList = MacrosExpander::parse(resultList, m_drawParam, this);
+			resultList = MacrosExpander::parse(resultList, context, nullptr, this);
 
 			for (QString& s : resultList)
 			{
 				if (s.startsWith('@') == true)
 				{
-					s = m_drawParam->appSignalController()->appSignalManager()->equipmentToAppSiganlId(s);
+					s = context->appSignalController()->appSignalManager()->equipmentToAppSiganlId(s);
 				}
 			}
 		}
@@ -308,21 +315,27 @@ namespace VFrame30
 
 	QStringList SchemaItemImageValue::signalIds() const
 	{
+		std::shared_ptr<Context> context = this->context();
+		return signalIds(context.get());
+	}
+
+	QStringList SchemaItemImageValue::signalIds(const Context* context) const
+	{
 		QStringList resultList = m_signalIds;
 
 		// Expand variables in AppSignalIDs in MonitorMode, if applicable
 		//
-		if (m_drawParam != nullptr &&
-			m_drawParam->drawMode() != DrawMode::Editor &&
-			m_drawParam->clientSchemaView() != nullptr)
+		if (context != nullptr &&
+			context->appSignalController() != nullptr &&
+			context->viewVariables() != nullptr)
 		{
-			resultList = MacrosExpander::parse(resultList, m_drawParam, this);
+			resultList = MacrosExpander::parse(resultList, context, nullptr, this);
 
 			for (QString& s : resultList)
 			{
 				if (s.startsWith('@') == true)
 				{
-					s = m_drawParam->appSignalController()->appSignalManager()->equipmentToAppSiganlId(s);
+					s = context->appSignalController()->appSignalManager()->equipmentToAppSiganlId(s);
 				}
 			}
 		}

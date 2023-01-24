@@ -1,5 +1,4 @@
 #include "DiagSchema.h"
-#include "Settings.h"
 
 namespace VFrame30
 {
@@ -10,8 +9,8 @@ namespace VFrame30
 		setDocWidth(1000);
 		setDocHeight(750);
 
-		Layers.push_back(std::make_shared<SchemaLayer>("Drawing", true));
-		Layers.push_back(std::make_shared<SchemaLayer>("Notes", false));
+		addLayer(std::make_shared<SchemaLayer>(this, "Drawing", true));
+		addLayer(std::make_shared<SchemaLayer>(this, "Notes", false));
 
 		setTagsList(QStringList{"diagnostics"});
 

@@ -21,7 +21,8 @@ protected:
 
 public:
 	[[nodiscard]] virtual int schemaCount() const override;
-	[[nodiscard]] virtual std::shared_ptr<VFrame30::Schema> schemaByIndex(int schemaIndex) override;
+	[[nodiscard]] virtual std::shared_ptr<VFrame30::Schema> schemaByIndex(int schemaIndex,
+																		  std::shared_ptr<VFrame30::Context> context) override;
 
 	[[nodiscard]] virtual QString schemaCaptionById(const QString& schemaId) const override;
 	[[nodiscard]] virtual QString schemaCaptionByIndex(int schemaIndex) const override;

@@ -84,7 +84,7 @@ namespace VFrame30
 
 		SchemaItemPtr schemaItem;
 
-		for (auto layer : schema()->Layers)
+		for (const auto& layer : schema()->layers())
 		{
 			if (layer->compile() == false)
 			{
@@ -208,19 +208,15 @@ namespace VFrame30
 		double x = docPoint.x();
 		double y = docPoint.y();
 
-		for (auto layer = schema()->Layers.crbegin(); layer != schema()->Layers.crend(); layer++)
+		for (const auto& layer : schema()->layers() | std::views::reverse)
 		{
-			const VFrame30::SchemaLayer* pLayer = layer->get();
-
-			if (pLayer->show() == false)
+			if (layer->show() == false)
 			{
 				continue;
 			}
 
-			for (auto vi = pLayer->Items.crbegin(); vi != pLayer->Items.crend(); vi++)
+			for (const auto& item : layer->items() | std::views::reverse)
 			{
-				const SchemaItemPtr& item = *vi;
-
 				if (item->isIntersectPoint(x, y) == true)
 				{
 					result.push_back(item);
@@ -399,7 +395,9 @@ namespace VFrame30
 
 		// --
 		//
-		std::shared_ptr<VFrame30::Schema> schema = schemaManager()->schema(schemaId);
+		auto context = VFrame30::Context::create(clientSchemaView());
+
+		std::shared_ptr<VFrame30::Schema> schema = schemaManager()->schema(schemaId, context);
 
 		// Run onShowScript
 		//

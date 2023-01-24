@@ -369,14 +369,14 @@ void EditSchemaWidget::createActions()
 				addItem(image);
 			});
 
-	m_addFrameAction = new QAction(tr("Frame"), this);
-	m_addFrameAction->setEnabled(true);
-	m_addFrameAction->setIcon(QIcon(":/Images/Images/SchemaItemFrame.svg"));
-	connect(m_addFrameAction, &QAction::triggered,
-			[this](bool)
-			{
-				addItem(std::make_shared<VFrame30::SchemaItemFrame>(schema()->unit()));
-			});
+//	m_addFrameAction = new QAction(tr("Frame"), this);
+//	m_addFrameAction->setEnabled(true);
+//	m_addFrameAction->setIcon(QIcon(":/Images/Images/SchemaItemFrame.svg"));
+//	connect(m_addFrameAction, &QAction::triggered,
+//			[this](bool)
+//			{
+//				addItem(std::make_shared<VFrame30::SchemaItemFrame>(schema()->unit()));
+//			});
 
 	// ----------------------------------------
 	m_addSeparatorAction0 = new QAction(this);
@@ -1540,7 +1540,7 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 			double gridSize = schema()->gridSize();
 			double pinGridStep = static_cast<double>(schema()->pinGridStep());
 
-			for (SchemaItemPtr item : activeLayer()->Items)
+			for (const SchemaItemPtr& item : activeLayer()->items())
 			{
 				VFrame30::FblItemRect* fbRect = dynamic_cast<VFrame30::FblItemRect*>(item.get());
 				VFrame30::SchemaItemLink* link = dynamic_cast<VFrame30::SchemaItemLink*>(item.get());
@@ -3416,7 +3416,7 @@ QPointF EditSchemaWidget::magnetPointToPin(QPointF docPoint)
 	std::vector<VFrame30::AfbPin> itemPins;
 	itemPins.reserve(64);
 
-	for (const SchemaItemPtr& item : activeLayer()->Items)
+	for (const SchemaItemPtr& item : activeLayer()->items())
 	{
 		VFrame30::FblItemRect* fblItemRect = dynamic_cast<VFrame30::FblItemRect*>(item.get());
 
@@ -5719,7 +5719,7 @@ void EditSchemaWidget::f2KeyForValue(SchemaItemPtr item)
 		return;
 	}
 
-	QString appSignalIds = valueItem->signalIdsString();
+	QString appSignalIds = valueItem->signalIdsString(nullptr);
 	QString text = valueItem->text();
 	QString preDrawScript = valueItem->preDrawScript();
 
@@ -5867,7 +5867,7 @@ void EditSchemaWidget::f2KeyForImageValue(SchemaItemPtr item)
 		return;
 	}
 
-	QString appSignalIds = valueItem->signalIdsString();
+	QString appSignalIds = valueItem->signalIdsString(nullptr);
 	QString currentImageId = valueItem->currentImageId();
 	QString preDrawScript = valueItem->preDrawScript();
 
@@ -6175,7 +6175,7 @@ void EditSchemaWidget::selectAll()
 	editSchemaView()->clearSelection();
 
 	std::vector<SchemaItemPtr> items;
-	items.assign(editSchemaView()->activeLayer()->Items.begin(), editSchemaView()->activeLayer()->Items.end());
+	items.assign(editSchemaView()->activeLayer()->items().begin(), editSchemaView()->activeLayer()->items().end());
 
 	editSchemaView()->setSelectedItems(items);
 
@@ -7788,7 +7788,7 @@ bool EditSchemaWidget::selectNextLeftItem(NextSelectionItem switchToLeftItem)
 		};
 
 
-	for (SchemaItemPtr item : editSchemaView()->activeLayer()->Items)
+	for (const SchemaItemPtr& item : editSchemaView()->activeLayer()->items())
 	{
 		if (item == selectedItem ||
 			item == m_nextSelectionFromLeft.schemaItem ||
@@ -7996,7 +7996,7 @@ bool EditSchemaWidget::selectNextRightItem(NextSelectionItem switchToRightItem)
 		};
 
 
-	for (SchemaItemPtr item : editSchemaView()->activeLayer()->Items)
+	for (const SchemaItemPtr& item : editSchemaView()->activeLayer()->items())
 	{
 		if (item == selectedItem ||
 			item == m_nextSelectionFromLeft.schemaItem ||
@@ -8221,7 +8221,7 @@ void EditSchemaWidget::selectNextUpItem()
 		};
 
 
-	for (SchemaItemPtr item : editSchemaView()->activeLayer()->Items)
+	for (const SchemaItemPtr& item : editSchemaView()->activeLayer()->items())
 	{
 		if (item == selectedItem)
 		{
@@ -8444,7 +8444,7 @@ void EditSchemaWidget::selectNextDownItem()
 		};
 
 
-	for (SchemaItemPtr item : editSchemaView()->activeLayer()->Items)
+	for (const SchemaItemPtr& item : editSchemaView()->activeLayer()->items())
 	{
 		if (item == selectedItem)
 		{
@@ -9420,7 +9420,7 @@ void EditSchemaWidget::findNext(Qt::CaseSensitivity cs)
 	std::shared_ptr<VFrame30::SchemaLayer> layer = activeLayer();
 	assert(layer);
 
-	if (layer->Items.empty() == true)
+	if (layer->items().empty() == true)
 	{
 		clearSelection();
 		return;
@@ -9430,19 +9430,19 @@ void EditSchemaWidget::findNext(Qt::CaseSensitivity cs)
 
 	// Get start iterator
 	//
-	auto searchStartIterator = layer->Items.begin();
+	auto searchStartIterator = layer->items().begin();
 	if (selected.size() != 1)
 	{
-		searchStartIterator = layer->Items.begin();
+		searchStartIterator = layer->items().begin();
 	}
 	else
 	{
 		assert(selected.size() == 1);
 
-		searchStartIterator = std::find(layer->Items.begin(), layer->Items.end(), selected.front());
-		if (searchStartIterator == layer->Items.end())
+		searchStartIterator = std::find(layer->items().begin(), layer->items().end(), selected.front());
+		if (searchStartIterator == layer->items().end())
 		{
-			searchStartIterator = layer->Items.begin();
+			searchStartIterator = layer->items().begin();
 		}
 		else
 		{
@@ -9450,14 +9450,14 @@ void EditSchemaWidget::findNext(Qt::CaseSensitivity cs)
 		}
 	}
 
-	if (searchStartIterator == layer->Items.end())
+	if (searchStartIterator == layer->items().end())
 	{
-		searchStartIterator = layer->Items.begin();
+		searchStartIterator = layer->items().begin();
 	}
 
 	// Search the text from the selected
 	//
-	for (auto it = searchStartIterator; it != layer->Items.end(); ++it)
+	for (auto it = searchStartIterator; it != layer->items().end(); ++it)
 	{
 		SchemaItemPtr item = *it;
 
@@ -9473,7 +9473,7 @@ void EditSchemaWidget::findNext(Qt::CaseSensitivity cs)
 
 	// Serach text from the beginning to selected
 	//
-	for (auto it = layer->Items.begin(); it != searchStartIterator; ++it)
+	for (auto it = layer->items().begin(); it != searchStartIterator; ++it)
 	{
 		SchemaItemPtr item = *it;
 
@@ -9528,7 +9528,7 @@ void EditSchemaWidget::findPrev(Qt::CaseSensitivity cs)
 	std::shared_ptr<VFrame30::SchemaLayer> layer = activeLayer();
 	assert(layer);
 
-	if (layer->Items.empty() == true)
+	if (layer->items().empty() == true)
 	{
 		clearSelection();
 		return;
@@ -9538,19 +9538,19 @@ void EditSchemaWidget::findPrev(Qt::CaseSensitivity cs)
 
 	// Get start iterator
 	//
-	auto searchStartIterator = layer->Items.rbegin();
+	auto searchStartIterator = layer->items().rbegin();
 	if (selected.size() != 1)
 	{
-		searchStartIterator = layer->Items.rbegin();
+		searchStartIterator = layer->items().rbegin();
 	}
 	else
 	{
 		assert(selected.size() == 1);
 
-		searchStartIterator = std::find(layer->Items.rbegin(), layer->Items.rend(), selected.front());
-		if (searchStartIterator == layer->Items.rend())
+		searchStartIterator = std::find(layer->items().rbegin(), layer->items().rend(), selected.front());
+		if (searchStartIterator == layer->items().rend())
 		{
-			searchStartIterator = layer->Items.rbegin();
+			searchStartIterator = layer->items().rbegin();
 		}
 		else
 		{
@@ -9558,14 +9558,14 @@ void EditSchemaWidget::findPrev(Qt::CaseSensitivity cs)
 		}
 	}
 
-	if (searchStartIterator == layer->Items.rend())
+	if (searchStartIterator == layer->items().rend())
 	{
-		searchStartIterator = layer->Items.rbegin();
+		searchStartIterator = layer->items().rbegin();
 	}
 
 	// Search the text from the selected
 	//
-	for (auto it = searchStartIterator; it != layer->Items.rend(); ++it)
+	for (auto it = searchStartIterator; it != layer->items().rend(); ++it)
 	{
 		SchemaItemPtr item = *it;
 
@@ -9581,7 +9581,7 @@ void EditSchemaWidget::findPrev(Qt::CaseSensitivity cs)
 
 	// Serach text from the beginning to selected
 	//
-	for (auto it = layer->Items.rbegin(); it != searchStartIterator; ++it)
+	for (auto it = layer->items().rbegin(); it != searchStartIterator; ++it)
 	{
 		SchemaItemPtr item = *it;
 
@@ -9642,7 +9642,7 @@ void EditSchemaWidget::replaceAndFind(QString findText, QString replaceWith, Qt:
 	std::shared_ptr<VFrame30::SchemaLayer> layer = activeLayer();
 	assert(layer);
 
-	if (layer->Items.empty() == true)
+	if (layer->items().empty() == true)
 	{
 		clearSelection();
 		return;
@@ -9652,19 +9652,19 @@ void EditSchemaWidget::replaceAndFind(QString findText, QString replaceWith, Qt:
 
 	// Get start iterator
 	//
-	auto searchStartIterator = layer->Items.begin();
+	auto searchStartIterator = layer->items().begin();
 
 	if (selected.empty() == true)
 	{
-		searchStartIterator = layer->Items.begin();
+		searchStartIterator = layer->items().begin();
 	}
 	else
 	{
-		searchStartIterator = std::find(layer->Items.begin(), layer->Items.end(), selected.front());
+		searchStartIterator = std::find(layer->items().begin(), layer->items().end(), selected.front());
 
-		if (searchStartIterator == layer->Items.end())
+		if (searchStartIterator == layer->items().end())
 		{
-			searchStartIterator = layer->Items.begin();
+			searchStartIterator = layer->items().begin();
 		}
 		else
 		{
@@ -9677,12 +9677,12 @@ void EditSchemaWidget::replaceAndFind(QString findText, QString replaceWith, Qt:
 
 	// Text in current selected item replaced, find and select next item
 	//
-	if (searchStartIterator == layer->Items.end())
+	if (searchStartIterator == layer->items().end())
 	{
-		searchStartIterator = layer->Items.begin();
+		searchStartIterator = layer->items().begin();
 	}
 
-	for (auto it = searchStartIterator; it != layer->Items.end(); ++it)
+	for (auto it = searchStartIterator; it != layer->items().end(); ++it)
 	{
 		SchemaItemPtr item = *it;
 
@@ -9702,7 +9702,7 @@ void EditSchemaWidget::replaceAndFind(QString findText, QString replaceWith, Qt:
 
 	// Serach text from the beginning
 	//
-	for (auto it = layer->Items.begin(); it != searchStartIterator; ++it)
+	for (auto it = layer->items().begin(); it != searchStartIterator; ++it)
 	{
 		SchemaItemPtr item = *it;
 
@@ -9744,7 +9744,7 @@ void EditSchemaWidget::replaceAll(QString findText, QString replaceWith, Qt::Cas
 	std::shared_ptr<VFrame30::SchemaLayer> layer = activeLayer();
 	assert(layer);
 
-	if (layer->Items.empty() == true)
+	if (layer->items().empty() == true)
 	{
 		clearSelection();
 		return;
@@ -9756,7 +9756,7 @@ void EditSchemaWidget::replaceAll(QString findText, QString replaceWith, Qt::Cas
 	std::vector<SchemaItemPtr> items = selectedItems();
 	if (items.empty() == true)
 	{
-		items.assign(layer->Items.begin(), layer->Items.end());
+		items.assign(layer->items().begin(), layer->items().end());
 	}
 
 	// Replace

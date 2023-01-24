@@ -47,7 +47,7 @@ namespace VFrame30
 	{
 	}
 
-	void SchemaItemAfb::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
+	void SchemaItemAfb::draw(CDrawParam* drawParam) const
 	{
 		QPainter* p = drawParam->painter();
 
@@ -59,7 +59,7 @@ namespace VFrame30
 
 		// Draw rect and pins
 		//
-		FblItemRect::draw(drawParam, schema, layer);
+		FblItemRect::draw(drawParam);
 
 		// Draw other
 		//

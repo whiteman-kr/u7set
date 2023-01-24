@@ -26,7 +26,7 @@ namespace VFrame30
 		// Draw Functions
 		//
 	public:
-		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const override;
+		virtual void draw(CDrawParam* drawParam) const override;
 
 		// Methods
 		//
@@ -49,7 +49,7 @@ namespace VFrame30
 	//		SchemaItemLoopbackSource
 	//
 	//
-	class SchemaItemLoopbackSource : public SchemaItemLoopback
+	class SchemaItemLoopbackSource final : public SchemaItemLoopback
 	{
 		Q_OBJECT
 
@@ -63,18 +63,18 @@ namespace VFrame30
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message) const final;
-		virtual bool LoadData(const Proto::Envelope& message) final;
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
 
 		// Draw Functions
 		//
 	public:
-		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const final;
+		virtual void draw(CDrawParam* drawParam) const override;
 
 		// Public Methods
 		//
 	public:
-		virtual QString buildName() const final;
+		virtual QString buildName() const override;
 		virtual QString toolTipText(double dpiX, double dpiY, double devicePixelRatio) const override;
 
 		// Properties
@@ -92,7 +92,7 @@ namespace VFrame30
 	//		SchemaItemLoopbackTarget
 	//
 	//
-	class SchemaItemLoopbackTarget : public SchemaItemLoopback
+	class SchemaItemLoopbackTarget final : public SchemaItemLoopback
 	{
 		Q_OBJECT
 
@@ -106,18 +106,18 @@ namespace VFrame30
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message) const final;
-		virtual bool LoadData(const Proto::Envelope& message) final;
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
 
 		// Draw Functions
 		//
 	public:
-		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const final;
+		virtual void draw(CDrawParam* drawParam) const override;
 
 		// Public Methods
 		//
 	public:
-		virtual QString buildName() const final;
+		virtual QString buildName() const override;
 		virtual QString toolTipText(double dpiX, double dpiY, double devicePixelRatio) const override;
 
 		// Properties

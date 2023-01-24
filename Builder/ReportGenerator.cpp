@@ -53,19 +53,15 @@ void ReportSchemaView::drawCompareOutlines(VFrame30::CDrawParam* drawParam, cons
 
 	// Find compile layer
 	//
-	for (auto layer = schema()->Layers.cbegin(); layer != schema()->Layers.cend(); ++layer)
+	for (const auto& layer : schema()->layers())
 	{
-		const VFrame30::SchemaLayer* pLayer = layer->get();
-
-		if (pLayer->show() == false)
+		if (layer->show() == false)
 		{
 			continue;
 		}
 
-		for (auto vi = pLayer->Items.cbegin(); vi != pLayer->Items.cend(); ++vi)
+		for (const auto& item : layer->items())
 		{
-			const SchemaItemPtr& item = *vi;
-
 			auto actionIt = compareActions.find(item->guid());
 			if (actionIt == compareActions.end())
 			{
@@ -486,6 +482,16 @@ void ReportGenerator::setResolution(int value)
 	m_pageResolution = value;
 }
 
+const VFrame30::AppSignalController& ReportGenerator::appSignalController() const
+{
+	return m_appSignalController;
+}
+
+const ReportSchemaView* ReportGenerator::schemaView() const
+{
+	return m_schemaView.get();
+}
+
 void ReportGenerator::addMarginItem(const ReportMarginItem& item)
 {
 	m_marginItems.push_back(item);
@@ -658,11 +664,9 @@ void ReportGenerator::printSchema(QPdfWriter* pdfWriter,
 	painter->save();
 	painter->setRenderHint(QPainter::Antialiasing);
 
-	VFrame30::CDrawParam drawParam(painter, schema.get(), m_schemaView.get(), schema->gridSize(), schema->pinGridStep());
+	VFrame30::CDrawParam drawParam(painter, m_schemaView.get(), schema->gridSize(), schema->pinGridStep(), schema->unit());
 	drawParam.setInfoMode(false);
 	drawParam.setPdfMode(true);
-	drawParam.session() = m_schemaView->session();
-	drawParam.setAppSignalController(&m_appSignalController);
 
 	m_schemaView->setSchemaInternal(schema);
 	m_schemaView->adjust(painter, schemaLeft, schemaTop, zoom * 100.0);		// Export 100% zoom
@@ -1551,6 +1555,8 @@ void SchemasReportGenerator::loadSchemas(const std::vector<DbFileInfo>& files, s
 
 	// Load schemas from files
 	//
+	auto context = VFrame30::Context::create(&appSignalController(), nullptr, nullptr, nullptr);
+
 	for (std::shared_ptr<DbFile> dbFile : out)
 	{
 		if (m_stop == true)
@@ -1563,6 +1569,8 @@ void SchemasReportGenerator::loadSchemas(const std::vector<DbFileInfo>& files, s
 		{
 			throw(tr("Failed to load schema from '%1'!").arg(dbFile->fileName()));
 		}
+
+		schema->setContext(context);
 
 		{
 			QMutexLocker l(&m_statisticsMutex);

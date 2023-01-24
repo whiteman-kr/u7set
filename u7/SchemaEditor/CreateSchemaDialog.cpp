@@ -431,11 +431,11 @@ void CreateSchemaDialog::accept()
 		//
 		m_schema->setGuid(QUuid::createUuid());
 
-		for (auto layer : m_schema->Layers)
+		for (const auto& layer : m_schema->layers())
 		{
 			layer->setGuid(QUuid::createUuid());
 
-			for (SchemaItemPtr& item : layer->Items)
+			for (const SchemaItemPtr& item : layer->items())
 			{
 				item->setNewGuid();
 

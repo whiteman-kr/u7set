@@ -1,5 +1,4 @@
 #include "TuningSchema.h"
-#include "Settings.h"
 #include "SchemaItemValue.h"
 
 namespace VFrame30
@@ -14,8 +13,8 @@ namespace VFrame30
 
 		setBackgroundColor(qRgb(0xF8, 0xF8, 0xF8));
 
-		Layers.push_back(std::make_shared<SchemaLayer>("Drawing", true));
-		Layers.push_back(std::make_shared<SchemaLayer>("Notes", false));
+		addLayer(std::make_shared<SchemaLayer>(this, "Drawing", true));
+		addLayer(std::make_shared<SchemaLayer>(this, "Notes", false));
 
 		setTagsList(QStringList{"tuning"});
 
@@ -30,11 +29,11 @@ namespace VFrame30
 	{
 		std::set<QString> signalMap;	// signal ids can be duplicated, std::set removes dupilcates
 
-		for (std::shared_ptr<SchemaLayer> layer : Layers)
+		for (const auto& layer : layers())
 		{
 			// Get all signals
 			//
-			for (std::shared_ptr<SchemaItem> item : layer->Items)
+			for (const auto& item : layer->items())
 			{
 				if (item->isType<VFrame30::SchemaItemValue>() == true)
 				{

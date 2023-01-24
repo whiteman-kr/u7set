@@ -73,7 +73,10 @@ namespace VFrame30
 			return result;
 		}
 
-		result = engine->newQObject(new ScriptSchemaLayer(m_schema->Layers[index]));
+		auto layer = m_schema->layers()[index];
+		Q_ASSERT(layer->parentSchema() == m_schema.get());
+
+		result = engine->newQObject(new ScriptSchemaLayer{layer});
 
 		return result;
 	}
@@ -94,7 +97,7 @@ namespace VFrame30
 			return result;
 		}
 
-		for (auto& l : m_schema->Layers)
+		for (const auto& l : m_schema->layers())
 		{
 			if (l->name() == caption)
 			{
@@ -109,6 +112,7 @@ namespace VFrame30
 	QVariantList ScriptSchema::itemsByTag(QString tag)
 	{
 		QVariantList result;
+		result.reserve(8);
 
 		if (m_schema == nullptr)
 		{
@@ -124,14 +128,14 @@ namespace VFrame30
 
 		// --
 		//
-		for (auto& l : m_schema->Layers)
+		for (const auto& layer : m_schema->layers())
 		{
-			for (auto& i : l->Items)
+			for (const auto& item : layer->items())
 			{
-				if (i->hasTag(tag) == true)
+				if (item->hasTag(tag) == true)
 				{
-					result.push_back(QVariant::fromValue<VFrame30::SchemaItem*>(i.get()));
-					QQmlEngine::setObjectOwnership(i.get(), QQmlEngine::CppOwnership);
+					result.push_back(QVariant::fromValue<VFrame30::SchemaItem*>(item.get()));
+					QQmlEngine::setObjectOwnership(item.get(), QQmlEngine::CppOwnership);
 				}
 			}
 		}
@@ -153,9 +157,9 @@ namespace VFrame30
 			return QJSValue::NullValue;
 		}
 
-		for (auto layer : m_schema->Layers)
+		for (const auto& layer : m_schema->layers())
 		{
-			for (auto& item : layer->Items)
+			for (const auto& item : layer->items())
 			{
 				if (item->objectName() == objectName)
 				{
@@ -198,7 +202,7 @@ namespace VFrame30
 	int ScriptSchema::layerCount() const
 	{
 		return m_schema ?
-					static_cast<int>(m_schema->Layers.size()) :
+					static_cast<int>(m_schema->layers().size()) :
 					0;
 	}
 
@@ -212,6 +216,7 @@ namespace VFrame30
 
 	Schema::~Schema(void)
 	{
+		clearLayers();	// It sets no parent to layers.
 	}
 
 	void Schema::Init(void)
@@ -315,10 +320,10 @@ namespace VFrame30
 		//
 		bool saveLayersResult = true;
 
-		for (auto layer = Layers.begin(); layer != Layers.end(); ++layer)
+		for (const auto& layer : layers())
 		{
 			Proto::Envelope* pLayerMessage = mutableSchema->add_layers();
-			saveLayersResult &= layer->get()->Save(pLayerMessage);
+			saveLayersResult &= layer->Save(pLayerMessage);
 		}
 
 		// Save fake empty Afb Collection, keep for compatibility
@@ -375,7 +380,7 @@ namespace VFrame30
 
 		// Layers
 		//
-		Layers.clear();
+		clearLayers();
 
 		for (int i = 0; i < schema.layers().size(); i++)
 		{
@@ -387,7 +392,7 @@ namespace VFrame30
 				continue;
 			}
 
-			Layers.push_back(layer);
+			addLayer(layer);
 
 			if (layer->compile() == true)
 			{
@@ -395,16 +400,12 @@ namespace VFrame30
 			}
 		}
 
-		if (schema.layers().size() != (int)Layers.size())
+		if (schema.layers().size() != std::ssize(m_layers))
 		{
-			assert(schema.layers().size() == (int)Layers.size());
-			Layers.clear();
+			assert(schema.layers().size() == std::ssize(m_layers));
+			clearLayers();
 			return false;
 		}
-
-		// Load fake empty Afb Collection,
-		//
-		//m_afbCollection.LoadData(schema.afbs());
 
 //		int elapsed = t.elapsed();
 //		qDebug() << "        Schema " << schemaId() << " is loaded for " << elapsed << " ms";
@@ -438,9 +439,11 @@ namespace VFrame30
 
 	void Schema::Draw(CDrawParam* drawParam, const QRectF& clipRect)
 	{
-		if (drawParam == nullptr)
+		if (drawParam == nullptr ||
+			context() == nullptr)
 		{
 			Q_ASSERT(drawParam);
+			Q_ASSERT(context());
 			return;
 		}
 
@@ -448,7 +451,7 @@ namespace VFrame30
 										   nullptr :
 										   drawParam->clientSchemaView();
 
-		ILogFile* log = clientView ? clientView->logFile() : nullptr;
+		ILogFile* log = context()->log();
 
 		if (clientView != nullptr)
 		{
@@ -456,7 +459,7 @@ namespace VFrame30
 			//
 			bool mbe = clientView->setScriptMessageBoxAllowed(false);
 
-			this->preDrawEvent(clientView->jsEngine(), log);
+			this->preDrawEvent(clientView->jsEngine());
 
 			clientView->setScriptMessageBoxAllowed(mbe);
 		}
@@ -483,7 +486,28 @@ namespace VFrame30
 
 		bool isClientMode = clientView != nullptr;
 
-		for (const SchemaLayerPtr& layer : Layers)
+		// DrawParam requires for preDrawScript and for draw itself
+		// Set it for all items in schema, it allowes to cross use of items.
+		//
+		auto setDrawParam = [this](CDrawParam* drawParam)
+		{
+			for (const SchemaLayerPtr& layer : layers())
+			{
+				std::ranges::for_each(layer->items(), [drawParam](auto& item)
+				{
+					item->setDrawParam(drawParam);
+				});
+			}
+		};
+
+		setDrawParam(drawParam);
+
+		std::shared_ptr<void> finalizer(nullptr, [schema = this, &setDrawParam](void*)
+		{
+			setDrawParam(nullptr);}
+		);
+
+		for (const SchemaLayerPtr& layer : layers())
 		{
 			Q_ASSERT(layer);
 
@@ -498,7 +522,7 @@ namespace VFrame30
 				continue;
 			}
 
-			for (const SchemaItemPtr& item : layer->Items)
+			for (const auto& item : layer->items())
 			{
 				Q_ASSERT(item);
 
@@ -506,12 +530,6 @@ namespace VFrame30
 				{
 					continue;
 				}
-
-				// DrawParam requires for preDrawScript and for draw itself
-				//
-				item->setDrawParam(drawParam);
-
-				std::shared_ptr<void> finalizer(nullptr, [item](void*){item->setDrawParam(nullptr);});
 
 				// --
 				//
@@ -539,7 +557,7 @@ namespace VFrame30
 
 				if (item->isIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
 				{
-					item->draw(drawParam, this, layer.get());	// Drawing item is here
+					item->draw(drawParam);	// Drawing item is here
 
 					if (item->isCommented() == true)
 					{
@@ -595,38 +613,27 @@ namespace VFrame30
 		}
 	}
 
-	int Schema::GetLayerCount() const
-	{
-		return (int)Layers.size();
-	}
-
 	void Schema::BuildFblConnectionMap() const
 	{
-		// --
-		//
 		CHorzVertLinks horzVertLinks;
 
-		// ?????? ?? ???? ???????????, ????????? horzlinks ? vertlinks
-		//
-		for (auto layer = Layers.begin(); layer != Layers.end(); ++layer)
+		for (const auto& layer : layers())
 		{
-			SchemaLayer* pLayer = layer->get();
-
-			for (auto item = pLayer->Items.begin(); item != pLayer->Items.end(); ++item)
+			for (const auto& item : layer->items())
 			{
-				if (item->get()->isFblItem() == false)
+				if (item->isFblItem() == false)
 				{
 					continue;
 				}
 
-				FblItem* pFblItem = dynamic_cast<FblItem*>(item->get());
+				FblItem* pFblItem = dynamic_cast<FblItem*>(item.get());
 				if (pFblItem == nullptr)
 				{
 					assert(pFblItem);
 					continue;
 				}
 
-				SchemaItemLink* schemaItemLink = dynamic_cast<SchemaItemLink*>(item->get());
+				SchemaItemLink* schemaItemLink = dynamic_cast<SchemaItemLink*>(item.get());
 				if (schemaItemLink != nullptr)
 				{
 					const std::list<SchemaPoint>& pointList = schemaItemLink->GetPointList();
@@ -637,8 +644,6 @@ namespace VFrame30
 						continue;
 					}
 
-					// ????????? ?????? ?? ????????? ??????? ? ??????? ?? ? horzlinks ? vertlinks
-					//
 					horzVertLinks.AddLinks(pointList, schemaItemLink->guid());
 				}
 			}
@@ -646,20 +651,18 @@ namespace VFrame30
 
 		// --
 		//
-		for (auto layer = Layers.begin(); layer != Layers.end(); ++layer)
+		for (auto layer : layers())
 		{
-			SchemaLayer* pLayer = layer->get();
+			layer->connectionMap.clear();
 
-			pLayer->connectionMap.clear();
-
-			for (auto item = pLayer->Items.begin(); item != pLayer->Items.end(); ++item)
+			for (const auto& item : layer->items())
 			{
-				if (item->get()->isFblItem() == false)
+				if (item->isFblItem() == false)
 				{
 					continue;
 				}
 
-				FblItem* pFblItem = dynamic_cast<FblItem*>(item->get());
+				FblItem* pFblItem = dynamic_cast<FblItem*>(item.get());
 
 				if (pFblItem == nullptr)
 				{
@@ -667,10 +670,7 @@ namespace VFrame30
 					continue;
 				}
 
-
-				// ???? ??????? SchemaItemLink, ?? ? ???????? ????????? ????? ????? ??????? ?????
-				//
-				SchemaItemLink* schemaItemLink = dynamic_cast<SchemaItemLink*>(item->get());
+				SchemaItemLink* schemaItemLink = dynamic_cast<SchemaItemLink*>(item.get());
 
 				if (schemaItemLink != nullptr)
 				{
@@ -682,43 +682,34 @@ namespace VFrame30
 						continue;
 					}
 
-					pLayer->ConnectionMapPosInc(pointList.front());
-					pLayer->ConnectionMapPosInc(pointList.back());
+					layer->ConnectionMapPosInc(pointList.front());
+					layer->ConnectionMapPosInc(pointList.back());
 
-					// ?????????, ?? ????? ?? ??? ?? ?????????????? ?????
-					//
 					if (horzVertLinks.IsPointOnLink(pointList.front(), schemaItemLink->guid()) == true)
 					{
-						pLayer->ConnectionMapPosInc(pointList.front());
+						layer->ConnectionMapPosInc(pointList.front());
 					}
 
 					if (horzVertLinks.IsPointOnLink(pointList.back(), schemaItemLink->guid()) == true)
 					{
-						pLayer->ConnectionMapPosInc(pointList.back());
+						layer->ConnectionMapPosInc(pointList.back());
 					}
 
 					continue;
 				}
 
-				// ?????????? ? ?????????? ????????? ????? ??? ???????? Fbl ????????
-				//
 				pFblItem->SetConnectionsPos(gridSize(), pinGridStep());
 
-				// ????? ? connectionMap ????? ?????????? ? ???? ??? ???? ?? ????????? ??????? ?????,
-				// ???? ???, ?? ??????? ?????? ? ??????
-				//
 				const std::vector<AfbPin>& inputs = pFblItem->inputs();
 				for (auto pin = inputs.begin(); pin != inputs.end(); ++pin)
 				{
 					SchemaPoint pinPos = pin->point();
 
-					pLayer->ConnectionMapPosInc(pinPos);
+					layer->ConnectionMapPosInc(pinPos);
 
-					// ?????????, ?? ????? ?? ??? ?? ?????????????? ?????
-					//
-					if (horzVertLinks.IsPinOnLink(pinPos, item->get()->guid()) == true)
+					if (horzVertLinks.IsPinOnLink(pinPos, item->guid()) == true)
 					{
-						pLayer->ConnectionMapPosInc(pinPos);
+						layer->ConnectionMapPosInc(pinPos);
 					}
 				}
 
@@ -727,13 +718,11 @@ namespace VFrame30
 				{
 					SchemaPoint pinPos = pin->point();
 
-					pLayer->ConnectionMapPosInc(pinPos);
+					layer->ConnectionMapPosInc(pinPos);
 
-					// ?????????, ?? ????? ?? ??? ?? ?????????????? ?????
-					//
-					if (horzVertLinks.IsPinOnLink(pinPos, item->get()->guid()) == true)
+					if (horzVertLinks.IsPinOnLink(pinPos, item->guid()) == true)
 					{
-						pLayer->ConnectionMapPosInc(pinPos);
+						layer->ConnectionMapPosInc(pinPos);
 					}
 				}
 			}
@@ -758,9 +747,9 @@ namespace VFrame30
 		//
 		std::list<std::shared_ptr<VFrame30::SchemaItemAfb>> schemaAfbItems;
 
-		for (std::shared_ptr<SchemaLayer> l : Layers)
+		for (const std::shared_ptr<SchemaLayer>& l : layers())
 		{
-			for (std::shared_ptr<SchemaItem>& si : l->Items)
+			for (const auto& si : l->items())
 			{
 				std::shared_ptr<VFrame30::SchemaItemAfb> schemaAfbItem = std::dynamic_pointer_cast<VFrame30::SchemaItemAfb>(si);
 
@@ -819,9 +808,9 @@ namespace VFrame30
 		//
 		std::list<std::shared_ptr<VFrame30::SchemaItemUfb>> schemaUfbItems;
 
-		for (std::shared_ptr<SchemaLayer> l : Layers)
+		for (const std::shared_ptr<SchemaLayer>& l : layers())
 		{
-			for (const std::shared_ptr<SchemaItem>& si : l->Items)
+			for (const auto& si : l->items())
 			{
 				std::shared_ptr<VFrame30::SchemaItemUfb> schemaUfbItem = std::dynamic_pointer_cast<VFrame30::SchemaItemUfb>(si);
 
@@ -880,9 +869,9 @@ namespace VFrame30
 		//
 		std::vector<std::shared_ptr<VFrame30::SchemaItemBus>> schemaItemBusses;
 
-		for (std::shared_ptr<SchemaLayer> l : Layers)
+		for (const std::shared_ptr<SchemaLayer>& l : layers())
 		{
-			for (std::shared_ptr<SchemaItem>& si : l->Items)
+			for (const auto& si : l->items())
 			{
 				std::shared_ptr<VFrame30::SchemaItemBus> schemaItemBus = std::dynamic_pointer_cast<VFrame30::SchemaItemBus>(si);
 
@@ -936,9 +925,9 @@ namespace VFrame30
 		QStringList labels;
 		labels.reserve(1024);
 
-		for (std::shared_ptr<SchemaLayer> layer : Layers)
+		for (const std::shared_ptr<SchemaLayer>& layer : layers())
 		{
-			for (const SchemaItemPtr& item : layer->Items)
+			for (const auto& item : layer->items())
 			{
 				QString itemLabel = item->label();
 
@@ -957,9 +946,9 @@ namespace VFrame30
 		std::vector<QUuid> result;
 		result.reserve(2048);
 
-		for (std::shared_ptr<SchemaLayer> layer : Layers)
+		for (const std::shared_ptr<SchemaLayer>& layer : layers())
 		{
-			for (const std::shared_ptr<SchemaItem>& item : layer->Items)
+			for (const auto& item : layer->items())
 			{
 				result.push_back(item->guid());
 			}
@@ -980,7 +969,7 @@ namespace VFrame30
 
 	std::shared_ptr<SchemaItem> Schema::getItemById(const QUuid& id) const
 	{
-		for (std::shared_ptr<VFrame30::SchemaLayer> layer : Layers)
+		for (const std::shared_ptr<VFrame30::SchemaLayer>& layer : layers())
 		{
 			std::shared_ptr<SchemaItem> result = layer->getItemById(id);
 
@@ -996,9 +985,9 @@ namespace VFrame30
 	template<typename SchemaItemType>
 	bool Schema::hasSchemaItemType() const
 	{
-		for (std::shared_ptr<VFrame30::SchemaLayer> layer : Layers)
+		for (const std::shared_ptr<VFrame30::SchemaLayer>& layer : layers())
 		{
-			for (const SchemaItemPtr& item : layer->Items)
+			for (const SchemaItemPtr& item : layer->items())
 			{
 				if (dynamic_cast<SchemaItemType>(item) != nullptr)
 				{
@@ -1012,11 +1001,13 @@ namespace VFrame30
 
 	// Scripting
 	//
-	bool Schema::preDrawEvent(QJSEngine* engine, ILogFile* log)
+	bool Schema::preDrawEvent(QJSEngine* engine)
 	{
-		if (engine == nullptr)
+		if (engine == nullptr ||
+			context() == nullptr)
 		{
 			Q_ASSERT(engine);
+			Q_ASSERT(context());
 			return false;
 		}
 
@@ -1041,9 +1032,9 @@ namespace VFrame30
 
 		bool result = runScript(m_jsPreDrawScript, engine);
 
-		if (m_lastScriptError.isEmpty() == false && log != nullptr)
+		if (m_lastScriptError.isEmpty() == false && context()->log() != nullptr)
 		{
-			log->writeWarning(tr("Schema %1, preDrawEvent script error: %2")
+			context()->log()->writeWarning(tr("Schema %1, preDrawEvent script error: %2")
 							  .arg(schemaId())
 							  .arg(m_lastScriptError));
 		}
@@ -1053,9 +1044,11 @@ namespace VFrame30
 
 	bool Schema::onShowEvent(QJSEngine* engine, ILogFile* log)
 	{
-		if (engine == nullptr)
+		if (engine == nullptr ||
+			context() == nullptr)
 		{
 			Q_ASSERT(engine);
+			Q_ASSERT(context());
 			return false;
 		}
 
@@ -1094,9 +1087,11 @@ namespace VFrame30
 	{
 		if (evaluatedJs.isUndefined() == true ||
 			evaluatedJs.isError() == true ||
-			engine == nullptr)
+			engine == nullptr ||
+			context() == nullptr)
 		{
 			Q_ASSERT(engine);
+			Q_ASSERT(context());
 			return false;
 		}
 
@@ -1204,6 +1199,93 @@ namespace VFrame30
 
 	// Properties and Data
 	//
+
+	const std::vector<std::shared_ptr<SchemaLayer>>& Schema::layers() const
+	{
+#ifdef QT_DEBUG
+		for (const auto& layer : m_layers)
+		{
+			Q_ASSERT(layer->parentSchema() == this);
+		}
+#endif
+		return m_layers;
+	}
+
+	int Schema::activeLayerIndex() const
+	{
+		return m_activeLayer;
+	}
+
+	QUuid Schema::activeLayerGuid() const
+	{
+		Q_ASSERT(m_layers.at(m_activeLayer)->parentSchema() == this);
+
+		try
+		{
+			return m_layers.at(m_activeLayer)->guid();
+		}
+		catch (...)
+		{
+			Q_ASSERT(false);
+			return {};
+		}
+	}
+
+	std::shared_ptr<VFrame30::SchemaLayer> Schema::activeLayer() const
+	{
+		Q_ASSERT(m_layers.at(m_activeLayer)->parentSchema() == this);
+
+		try
+		{
+			return m_layers.at(m_activeLayer);
+		}
+		catch (...)
+		{
+			assert(false);
+			return {};
+		}
+	}
+
+	void Schema::setActiveLayer(std::shared_ptr<VFrame30::SchemaLayer> layer)
+	{
+		Q_ASSERT(layer->parentSchema() == this);
+
+		for (int index = 0;
+			 const auto& l : m_layers)
+		{
+			Q_ASSERT(l->parentSchema() == this);
+
+			if (l == layer)
+			{
+				m_activeLayer = index;
+				return;
+			}
+
+			index ++;
+		}
+
+		// Layer was not found
+		//
+		assert(false);
+		return;
+	}
+
+	void Schema::clearLayers()
+	{
+		std::ranges::for_each(m_layers, [](const auto& l)
+		{
+			l->setParentSchema({});
+		});
+		m_layers.clear();
+	}
+
+	void Schema::addLayer(std::shared_ptr<SchemaLayer> layer)
+	{
+		layer->setParentSchema(this);
+		m_layers.push_back(layer);
+
+		return;
+	}
 
 	// Guid
 	//
@@ -1546,54 +1628,6 @@ namespace VFrame30
 		}
 	}
 
-	int Schema::activeLayerIndex() const
-	{
-		return m_activeLayer;
-	}
-
-	QUuid Schema::activeLayerGuid() const
-	{
-		try
-		{
-			return Layers.at(m_activeLayer)->guid();
-		}
-		catch (...)
-		{
-			assert(false);
-			return {};
-		}
-	}
-
-	std::shared_ptr<VFrame30::SchemaLayer> Schema::activeLayer() const
-	{
-		try
-		{
-			return Layers.at(m_activeLayer);
-		}
-		catch (...)
-		{
-			assert(false);
-			return {};
-		}
-	}
-
-	void Schema::setActiveLayer(std::shared_ptr<VFrame30::SchemaLayer> layer)
-	{
-		for (int i = 0; i < static_cast<int>(Layers.size()); i++)
-		{
-			if (Layers[i] == layer)
-			{
-				m_activeLayer = i;
-				return;
-			}
-		}
-
-		// Layer was not found
-		//
-		assert(false);
-		return;
-	}
-
 	double Schema::gridSize() const
 	{
 		return m_gridSize;
@@ -1709,6 +1743,17 @@ namespace VFrame30
 		m_onShowScript = std::move(value);
 	}
 
+
+	const std::shared_ptr<VFrame30::Context>& Schema::context() const
+	{
+		return m_context;
+	}
+
+	void Schema::setContext(std::shared_ptr<VFrame30::Context> context)
+	{
+		m_context = std::move(context);
+	}
+
 	//
 	//
 	//				SchemaDetails
@@ -1751,11 +1796,11 @@ namespace VFrame30
 		QSet<QString> loopbacks;
 		std::vector<TrendIndicatorSchemaItems> realTimeTrends;
 
-		for (const std::shared_ptr<SchemaLayer>& layer : schema->Layers)
+		for (const std::shared_ptr<SchemaLayer>& layer : schema->layers())
 		{
 			if (layer->compile() == true)
 			{
-				for (const std::shared_ptr<SchemaItem>& item : layer->Items)
+				for (const auto& item : layer->items())
 				{
 					// Items on LogicSchemas
 					//
