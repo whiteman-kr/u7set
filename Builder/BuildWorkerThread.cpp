@@ -1034,6 +1034,60 @@ namespace Builder
 					return false;
 				}
 
+				QString runScriptWindowsTemplate;
+				QString runScriptLinuxTemplate;
+				QString folderPath = Db::File::systemDirToName(DbDir::RootDir) + "/";
+
+				{
+					QStringList pathList;
+					std::shared_ptr<DbFileInfo> f = fileTree.file(fileId);
+
+					while (f != nullptr)
+					{
+						f = fileTree.file(f->parentId());
+
+						if (f != nullptr)
+						{
+							pathList.push_front(f->fileName());
+						}
+					}
+
+					folderPath += pathList.join(QChar('/'));
+				}
+
+				if (folderPath.startsWith(Db::File::systemDirToName(DbDir::SimTestsDir)))
+				{
+					runScriptWindowsTemplate = "SimulatorConsole.exe -build=%1 -script=%2 -profile=Default\n"
+											   "@if %ERRORLEVEL% NEQ 0 goto ERROR";
+					runScriptLinuxTemplate = "./SimulatorConsole -build=%1 -script=%2 -profile=Default\n"
+											 "if [ $? -ne 0 ]; then\n"
+											 "echo \"Script execution failed!\"\n"
+											 "exit 1\n"
+											 "fi\n";
+				}
+				else
+				{
+					if (folderPath.startsWith(Db::File::systemDirToName(DbDir::HardwareTestsDir)))
+					{
+						runScriptWindowsTemplate = "TestSuiteConsole.exe -build=%1 -script=%2 -profile=Default\n"
+												   "@if %ERRORLEVEL% NEQ 0 goto ERROR";
+						runScriptLinuxTemplate = "./TestSuiteConsole -build=%1 -script=%2 -profile=Default\n"
+												 "if [ $? -ne 0 ]; then\n"
+												 "echo \"Script execution failed!\"\n"
+												 "exit 1\n"
+												 "fi\n";
+
+						int todo_Create_Separate_Run_Scripts_For_HardwareTests=1;
+						//continue;
+					}
+					else
+					{
+						qDebug() << "Unknown script template for " << file->fileName();
+						Q_ASSERT(false);
+						continue;
+					}
+				}
+
 				// Create run script
 				//
 				QString scriptFileName = file->fileName();
@@ -1055,8 +1109,7 @@ namespace Builder
 
 				// Windows script
 				//
-				QString runScriptWindows = tr("SimulatorConsole.exe -build=%1 -script=%2 -profile=Default\n"
-                                              "@if %ERRORLEVEL% NEQ 0 goto ERROR")
+				QString runScriptWindows = tr(runScriptWindowsTemplate.toLocal8Bit())
 						.arg(QDir::toNativeSeparators(buildDir))
 						.arg(QDir::toNativeSeparators(scriptDir + "/" + file->fileName()));
 
@@ -1064,11 +1117,7 @@ namespace Builder
 
 				// Linux script
 				//
-                QString runScriptLinux = tr("./SimulatorConsole -build=%1 -script=%2 -profile=Default\n"
-                                            "if [ $? -ne 0 ]; then\n"
-                                            "echo \"Script execution failed!\"\n"
-                                            "exit 1\n"
-                                            "fi\n")
+				QString runScriptLinux = tr(runScriptLinuxTemplate.toLocal8Bit())
 						.arg(buildDir)
 						.arg(scriptDir + "/" + file->fileName());
 
@@ -1080,7 +1129,6 @@ namespace Builder
 				return false;
 			}
 		}
-
 
 		// Add script files
 		//
