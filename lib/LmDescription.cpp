@@ -885,6 +885,27 @@ bool LmDescription::LogicUnit::load(const QDomDocument& document, QString* error
 	return errorMessage->isEmpty();
 }
 
+double LmDescription::LogicUnit::clockTimeSecs() const
+{
+	if (m_clockFrequency == 0)
+	{
+		Q_ASSERT(false);
+		return 0;
+	}
+
+	return 1.0 / static_cast<double>(m_clockFrequency);
+}
+
+int LmDescription::LogicUnit::idrPhaseClocks() const
+{
+	return static_cast<int>(m_idrPhaseTime / (clockTimeSecs() * 1000000.0));
+}
+
+int LmDescription::LogicUnit::alpPhaseClocks() const
+{
+	return static_cast<int>(m_alpPhaseTime / (clockTimeSecs() * 1000000.0));
+}
+
 bool LmDescription::OptoInterface::load(const QDomDocument& document, QString* errorMessage)
 {
 	if (errorMessage == nullptr)
@@ -1372,20 +1393,5 @@ std::vector<LmCommand> LmDescription::commandsAsVector() const
 	}
 
 	return result;
-}
-
-double LmDescription::clockTimeSecs() const
-{
-	return 1.0 / static_cast<double>(m_logicUnit.m_clockFrequency);
-}
-
-int LmDescription::idrPhaseClocks() const
-{
-	return static_cast<int>(m_logicUnit.m_idrPhaseTime / (clockTimeSecs() * 1000000.0));
-}
-
-int LmDescription::alpPhaseClocks() const
-{
-	return static_cast<int>(m_logicUnit.m_alpPhaseTime / (clockTimeSecs() * 1000000.0));
 }
 

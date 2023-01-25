@@ -143,7 +143,7 @@ namespace Builder
 
 		LOG_MESSAGE(m_log, QString(tr("Compilation pass #2 for LM %1 was started...")).arg(lmEquipmentID()));
 
-		m_code.setMemoryMap(&m_memoryMap, m_log);
+		m_code.setMemoryMapAndLogger(&m_memoryMap, m_log);
 
 		ProcsToCallArray procs =
 		{
@@ -165,14 +165,13 @@ namespace Builder
 
 			PROC_TO_CALL(ModuleLogicCompiler::makeAppLogicCode),
 
-			PROC_TO_CALL(ModuleLogicCompiler::finalizeAppLogicCodeGeneration),
+			PROC_TO_CALL(ModuleLogicCompiler::cleanupHeaps),
 
 			//
 
 			PROC_TO_CALL(ModuleLogicCompiler::setLmAppLANDataSize),
 			PROC_TO_CALL(ModuleLogicCompiler::detectUnusedSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::fillAnalogSignalsOnSchemas),
-			PROC_TO_CALL(ModuleLogicCompiler::calculateCodeRunTime),
 			PROC_TO_CALL(ModuleLogicCompiler::writeResult)
 		};
 
@@ -7441,7 +7440,27 @@ namespace Builder
 
 	bool ModuleLogicCompiler::generateIdrPhaseCode()
 	{
+		TEST_PTR_RETURN_FALSE(m_log);
+		TEST_PTR_RETURN_FALSE(m_lmDescription);
+
 		m_idrCode.clear();
+
+		m_idrCode.setMemoryMapAndLogger(&m_memoryMap, m_log);
+
+		//
+
+		m_idrCode.comment("Start of IDR phase code");
+		m_idrCode.newLine();
+
+		CodeItem appStartCmd;
+
+		appStartCmd.appStart(0);			// ALP phase code start addr will set to actual value later
+		appStartCmd.setComment("set address of ALP phase code start");
+
+		m_idrCode.append(appStartCmd);
+		m_idrCode.newLine();
+
+		//
 
 		CodeGenProcsToCallArray procs =
 		{
@@ -7452,12 +7471,35 @@ namespace Builder
 
 		bool result = runCodeGenProcs(procs, &m_idrCode);
 
+		//
+
+		CodeItem stopCmd;
+
+		stopCmd.stop();
+		stopCmd.setComment("end of IDR phase code");
+
+		m_idrCode.append(stopCmd);
+		m_idrCode.newLine();
+
+		m_idrCode.finalize(CodeSnippet::CodeType::IDR_Code, *m_lmDescription.get());	// required to calc codeSizeW
+
+		int alpCodeStartAddr = m_idrCode.codeSizeW();
+
+		m_idrCode.setAppStartAddr(alpCodeStartAddr);
+
 		return result;
 	}
 
 	bool ModuleLogicCompiler::generateAlpPhaseCode()
 	{
 		m_alpCode.clear();
+
+		m_alpCode.setMemoryMapAndLogger(&m_memoryMap, m_log);
+
+		m_alpCode.comment("Start of ALP phase code");
+		m_alpCode.newLine();
+
+		//
 
 		CodeGenProcsToCallArray procs =
 		{
@@ -7487,54 +7529,37 @@ namespace Builder
 
 		bool result = runCodeGenProcs(procs, &m_alpCode);
 
+		//
+
+		CodeItem stopCmd;
+
+		stopCmd.stop();
+		stopCmd.setComment("end of ALP phase code");
+
+		m_alpCode.append(stopCmd);
+
+		m_alpCode.finalize(CodeSnippet::CodeType::ALP_Code, *m_lmDescription.get());
+
 		return result;
 	}
 
 	bool ModuleLogicCompiler::makeAppLogicCode()
 	{
-		CodeItem appStartCmd;
+		m_code.clear();
 
-		appStartCmd.appStart(0);					// init appStartCmd with address 0
+		m_code.setMemoryMapAndLogger(&m_memoryMap, m_log);
 
-		CodeItem stopCmd;
-
-		stopCmd.stop();
-
-		int alpCodeStartAddr = appStartCmd.sizeW() + m_idrCode.sizeW() + stopCmd.sizeW();
-
-		//
-
-		m_code.comment("Start of IDR phase code");
-		m_code.newLine();
-
-		appStartCmd.appStart(alpCodeStartAddr);		// init appStartCmd with real address
-		appStartCmd.setComment("set address of ALP phase code start");
-
-		m_code.append(appStartCmd);
-		m_code.newLine();
+		m_code.reserve(m_idrCode.itemsCount() + m_alpCode.itemsCount());
 
 		m_code.append(m_idrCode);
-
-		stopCmd.setComment("end of IDR phase code");
-
-		m_code.append(stopCmd);
-		m_code.newLine();
-
-		//
-
-		m_code.comment("Start of ALP phase code");
-		m_code.newLine();
-
 		m_code.append(m_alpCode);
 
-		stopCmd.setComment("end of ALP phase code");
-
-		m_code.append(stopCmd);
+		m_code.finalize(CodeSnippet::CodeType::AllCode, *m_lmDescription.get());
 
 		return true;
 	}
 
-	bool ModuleLogicCompiler::finalizeAppLogicCodeGeneration()
+	bool ModuleLogicCompiler::cleanupHeaps()
 	{
 		m_ualSignals.finalizeHeaps();
 
@@ -13580,7 +13605,11 @@ namespace Builder
 
 	bool ModuleLogicCompiler::isCopyOptimizationAllowed(const CodeSnippet& copyCode, int* srcAddr)
 	{
-		if (srcAddr == nullptr)
+		Q_UNUSED(copyCode);
+		Q_UNUSED(srcAddr);
+
+		return false;
+/*		if (srcAddr == nullptr)
 		{
 			assert(false);
 			return false;
@@ -13641,7 +13670,7 @@ namespace Builder
 
 		*srcAddr = srcOffset;
 
-		return true;
+		return true;*/
 	}
 
 	bool ModuleLogicCompiler::copyOptoPortAllNativeRawData(CodeSnippet* code, Hardware::OptoPortShared port, int* rawDataOffset)
@@ -14293,20 +14322,6 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::calculateCodeRunTime()
-	{
-		bool result = m_code.calcStatistics();
-
-		result &= m_code.getExecTimes(&m_idrPhaseClockCount, &m_alpPhaseClockCount);
-
-		if (result == false)
-		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("Code runtime calculcation error!")))
-		}
-
-		return result;
-	}
-
 	QString ModuleLogicCompiler::lmSubsystemEquipmentIdPath() const
 	{
 		return QString("%1/%2").arg(m_lmSubsystemID).arg(lmEquipmentID());
@@ -14890,74 +14905,18 @@ namespace Builder
 
 		QStringList file;
 
-		std::map<LmCommand::Code, CommandStatistics> statMap;
-
-		m_code.getCommandsStatistics(&statMap);
-
-		std::vector<CommandStatistics> stat;
-
-		for(auto const& p : statMap)
-		{
-			stat.push_back(p.second);
-		}
-
 		//
 
 		file << ApplicationLogicCompiler::getInfoFileHeader(m_context);
+		file << Separator::EMPTY_STR;
+
+		file << QString("LM equipmentID: %1").arg(lmEquipmentID());
 
 		//
 
-		double codeMemoryUsage = static_cast<double>(m_code.codeSizeW() * 100) /
-									static_cast<double>(m_lmDescription->memory().m_codeMemorySize);
-
-		static const QString EMPTY_STR = QStringLiteral("");
-
-		file << EMPTY_STR;
-		file << EMPTY_STR;
-		file << QString("Code statistics ordered by commands code size descending.");
-		file << EMPTY_STR;
-		file << QString("Code memory used %1 of %2 words (%3%).").
-					arg(m_code.codeSizeW()).
-					arg(m_lmDescription->memory().m_codeMemorySize).
-					arg(codeMemoryUsage);
-		file << EMPTY_STR;
-
-		std::sort(stat.begin(), stat.end(), [] (const CommandStatistics& a,
-												const CommandStatistics& b) -> bool
-												{ return a.codeSizeW > b.codeSizeW; });
-		printStat(stat, file);
-
-		//
-
-		int idrClocks = 0;
-		int alpClocks = 0;
-
-		m_code.getExecTimes(&idrClocks, &alpClocks);
-
-		file << EMPTY_STR;
-		file << EMPTY_STR;
-		file << QString("Code statistics ordered by commands execution time descending");
-		file << EMPTY_STR;
-		file << QString("IDR phase execution time used %1 of %2 clocks, %3 of %4 ms (%5%).").
-					arg(idrClocks).arg(m_lmDescription->idrPhaseClocks()).
-					arg(idrClocks * m_lmDescription->clockTimeSecs() * 1000, 0, 'f', 3).
-					arg(m_lmDescription->logicUnit().m_idrPhaseTime / 1000.0, 0, 'f', 3).
-					arg(static_cast<double>(idrClocks * 100) /
-								static_cast<double>(m_lmDescription->idrPhaseClocks()), 0, 'f', 2);
-
-		file << QString("ALP phase execution time used %1 of %2 clocks, %3 of %4 ms (%5%).").
-					arg(alpClocks).arg(m_lmDescription->alpPhaseClocks()).
-					arg(alpClocks * m_lmDescription->clockTimeSecs() * 1000, 0, 'f', 3).
-					arg(m_lmDescription->logicUnit().m_alpPhaseTime / 1000.0, 0, 'f', 3).
-					arg(static_cast<double>(alpClocks * 100) /
-								static_cast<double>(m_lmDescription->alpPhaseClocks()), 0, 'f', 2);
-
-		file << QString("");
-
-		std::sort(stat.begin(), stat.end(), [] (const CommandStatistics& a,
-												const CommandStatistics& b) -> bool
-												{ return a.execTime > b.execTime; });
-		printStat(stat, file);
+		printCodeStatistics(m_idrCode, file, true);
+		printCodeStatistics(m_alpCode, file, true);
+		printCodeStatistics(m_code, file, false);
 
 		//
 
@@ -14966,9 +14925,111 @@ namespace Builder
 		return buildFile != nullptr;
 	}
 
-	void ModuleLogicCompiler::printStat(const std::vector<CommandStatistics>& stat, QStringList& file) const
+	void ModuleLogicCompiler::printCodeStatistics(const CodeSnippet& code,
+												QStringList& file,
+												bool exludeNotUsedCommands) const
 	{
-		file << QString("            |       Used       |     Code size    |    Exec time     ");
+		std::vector<CommandStatistics> stat;
+
+		code.getCommandsStatistics(&stat);
+
+		QString phaseStr;
+		int phaseClocks = 0;
+		double phaseTime = 0;
+
+		switch(code.codeType())
+		{
+		case CodeSnippet::CodeType::IDR_Code:
+			phaseStr = QString("IDR phase");
+			phaseClocks = m_lmDescription->logicUnit().idrPhaseClocks();
+			phaseTime = m_lmDescription->logicUnit().m_idrPhaseTime;
+			break;
+
+		case CodeSnippet::CodeType::ALP_Code:
+			phaseStr = QString("ALP phase");
+			phaseClocks = m_lmDescription->logicUnit().alpPhaseClocks();
+			phaseTime = m_lmDescription->logicUnit().m_alpPhaseTime;
+			break;
+
+		case CodeSnippet::CodeType::AllCode:
+			phaseStr = QString("All");
+			phaseClocks = m_lmDescription->logicUnit().idrPhaseClocks() +
+						  m_lmDescription->logicUnit().alpPhaseClocks();
+			phaseTime = m_lmDescription->logicUnit().m_idrPhaseTime +
+						m_lmDescription->logicUnit().m_alpPhaseTime;
+			break;
+
+		default:
+			Q_ASSERT(false);
+			return;
+		}
+
+		file << Separator::EMPTY_STR;
+		file << Separator::EMPTY_STR;
+		file << QString("%1 code statistics ordered by commands execution time descending").arg(phaseStr);
+		file << Separator::EMPTY_STR;
+		file << QString("%1 code execution time used %2 of %3 clocks, %4 of %5 mcs (%6%).").
+					arg(phaseStr).
+					arg(code.clockCount()).
+					arg(phaseClocks).
+					arg(code.execTimeMcs(), 0, 'f', 1).
+					arg(phaseTime, 0, 'f', 1).
+					arg(code.lmCycleTimeUsage(), 0, 'f', 2);
+		file << Separator::EMPTY_STR;
+
+		std::sort(stat.begin(), stat.end(), [] (const CommandStatistics& a,
+												const CommandStatistics& b) -> bool
+												{ return a.execTime > b.execTime; });
+
+		printCodeStatisticsTable(code, stat, file, exludeNotUsedCommands);
+
+		//
+
+		file << Separator::EMPTY_STR << Separator::EMPTY_STR;
+		file << QString("%1 code statistics ordered by commands code size descending.").arg(phaseStr);
+		file << Separator::EMPTY_STR;
+		file << QString("%1 code memory used %2 of %3 words (%4%).").
+					arg(phaseStr).
+					arg(code.codeSizeW()).
+					arg(m_lmDescription->memory().m_codeMemorySize).
+					arg(code.lmCodeMemoryUsage(), 0, 'f', 2);
+		file << Separator::EMPTY_STR;
+
+		std::sort(stat.begin(), stat.end(), [] (const CommandStatistics& a,
+												const CommandStatistics& b) -> bool
+												{ return a.codeSizeW > b.codeSizeW; });
+
+		printCodeStatisticsTable(code, stat, file, exludeNotUsedCommands);
+	}
+
+	void ModuleLogicCompiler::printCodeStatisticsTable(const CodeSnippet& code,
+												const std::vector<CommandStatistics>& stat,
+												QStringList& file,
+												bool exludeNotUsedCommands) const
+	{
+
+		QString headerStr;
+
+		switch(code.codeType())
+		{
+		case CodeSnippet::CodeType::IDR_Code:
+			headerStr = QString("            | Used in IDR code |  IDR code size   |  IDR exec time   ");
+			break;
+
+		case CodeSnippet::CodeType::ALP_Code:
+			headerStr = QString("            | Used in ALP code |  ALP code size   |  ALP exec time   ");
+			break;
+
+		case CodeSnippet::CodeType::AllCode:
+			headerStr = QString("            |       Used       |     Code size    |    Exec time     ");
+			break;
+
+		default:
+			Q_ASSERT(false);
+			return;
+		}
+
+		file << headerStr;
 		file << QString("  Command   |------------------+------------------+------------------");
 		file << QString("            | Count  | Percent | Words  | Percent | Tacts  | Percent ");
 		file << QString("------------+--------+---------+--------+---------+--------+---------");
@@ -14983,25 +15044,31 @@ namespace Builder
 
 		for(const CommandStatistics& cs : stat)
 		{
+			if (exludeNotUsedCommands == true && cs.usedCount == 0)
+			{
+				continue;
+			}
+
 			//
 
 			usedCountTotal += cs.usedCount;
 			float usedPercent = static_cast<float>(cs.usedCount * 100) /
-										static_cast<float>(m_code.commandsCount());
+										static_cast<float>(code.commandsCount());
 			usedPercentTotal += usedPercent;
 
 			//
 
 			codeSizeWTotal += cs.codeSizeW;
 			float sizePercent = static_cast<float>(cs.codeSizeW * 100) /
-										static_cast<float>(m_code.codeSizeW());
+										static_cast<float>(code.codeSizeW());
 			sizePercentTotal += sizePercent;
 
 			//
 
 			execTimeTotal += cs.execTime;
+
 			float execPercent = static_cast<float>(cs.execTime * 100) /
-										static_cast<float>(m_code.getTotalExecTime());
+										static_cast<float>(code.clockCount());
 			execPercentTotal += execPercent;
 
 			//
@@ -15009,25 +15076,26 @@ namespace Builder
 			file << getStatStr(lmCommands.getMnemo(cs.code),
 							   cs.usedCount, usedPercent,
 							   cs.codeSizeW, sizePercent,
-							   cs.execTime, execPercent);
+							   cs.execTime, execPercent, false);
 		}
 
-		Q_ASSERT(m_code.commandsCount() == usedCountTotal);
-		Q_ASSERT(m_code.codeSizeW() == codeSizeWTotal);
-		Q_ASSERT(m_code.getTotalExecTime() == execTimeTotal);
+		Q_ASSERT(code.commandsCount() == usedCountTotal);
+		Q_ASSERT(code.codeSizeW() == codeSizeWTotal);
+		Q_ASSERT(code.clockCount() == execTimeTotal);
 
 		file << QString("------------+--------+---------+--------+---------+--------+---------");
 
 		file << getStatStr(QString("Total"),
 						 usedCountTotal, usedPercentTotal,
 						 codeSizeWTotal, sizePercentTotal,
-						 execTimeTotal, execPercentTotal);
+						 execTimeTotal, execPercentTotal, true);
 	}
 
 	QString ModuleLogicCompiler::getStatStr(const QString& mnemo,
 											int used, float usedPercent,
 											int sizeW, float sizePercent,
-											int execTime, float execPercent) const
+											int execTime, float execPercent,
+											bool isTotal) const
 	{
 		const int CSTR_SIZE = 16;
 		char cstr[CSTR_SIZE];
@@ -15040,7 +15108,14 @@ namespace Builder
 
 		str += " " + QString::number(used).rightJustified(6) + " |";
 
-		snprintf(cstr, CSTR_SIZE, "%5.2f", usedPercent);
+		if (isTotal == true)
+		{
+			cstr[0] = 0;
+		}
+		else
+		{
+			snprintf(cstr, CSTR_SIZE, "%5.2f", usedPercent);
+		}
 
 		str += " " +(QString("%1").arg(cstr)).rightJustified(7) + " |";
 
@@ -15048,7 +15123,14 @@ namespace Builder
 
 		str += " " + QString::number(sizeW).rightJustified(6) + " |";
 
-		snprintf(cstr, CSTR_SIZE, "%5.2f", sizePercent);
+		if (isTotal == true)
+		{
+			cstr[0] = 0;
+		}
+		else
+		{
+			snprintf(cstr, CSTR_SIZE, "%5.2f", sizePercent);
+		}
 
 		str += " " +(QString("%1").arg(cstr)).rightJustified(7) + " |";
 
@@ -15056,7 +15138,14 @@ namespace Builder
 
 		str += " " + QString::number(execTime).rightJustified(6) + " |";
 
-		snprintf(cstr, CSTR_SIZE, "%5.2f", execPercent);
+		if (isTotal == true)
+		{
+			cstr[0] = 0;
+		}
+		else
+		{
+			snprintf(cstr, CSTR_SIZE, "%5.2f", execPercent);
+		}
 
 		str += " " +(QString("%1").arg(cstr)).rightJustified(7);
 
@@ -15067,7 +15156,7 @@ namespace Builder
 	{
 		QString str;
 
-		double percentOfUsedCodeMemory = (m_code.commandAddress() * 100.0) / m_lmCodeMemorySize;
+		double percentOfUsedCodeMemory = (m_code.codeSizeW() * 100.0) / m_lmCodeMemorySize;
 
 		bool result = true;
 
@@ -15152,7 +15241,7 @@ namespace Builder
 
 		// display IDR phase timing
 		//
-		double idrPhaseTime = (1.0/m_lmClockFrequency) * m_idrPhaseClockCount;
+		double idrPhaseTime = (1.0/m_lmClockFrequency) * m_idrCode.clockCount();
 		double idrPhaseTimeUsed = 0;
 
 		assert(m_lmIDRPhaseTime != 0);
@@ -15166,7 +15255,7 @@ namespace Builder
 		str.setNum(static_cast<float>(idrPhaseTime * 1000000), 'g', 2);
 
 		LOG_MESSAGE(m_log, QString(tr("Input Data Receive phase time - %1% (%2 clocks or %3 &micro;s of %4 &micro;s)")).
-					arg(str_percent).arg(m_idrPhaseClockCount).arg(str).arg(m_lmIDRPhaseTime));
+					arg(str_percent).arg(m_idrCode.clockCount()).arg(str).arg(m_lmIDRPhaseTime));
 
 		if (idrPhaseTimeUsed > 90)
 		{
@@ -15187,7 +15276,7 @@ namespace Builder
 
 		// display ALP phase timing
 		//
-		double alpPhaseTime = (1.0/m_lmClockFrequency) * m_alpPhaseClockCount;
+		double alpPhaseTime = (1.0/m_lmClockFrequency) * m_alpCode.clockCount();
 		double alpPhaseTimeUsed = 0;
 
 		assert(m_lmALPPhaseTime != 0);
@@ -15201,7 +15290,7 @@ namespace Builder
 		str.setNum(static_cast<float>(alpPhaseTime * 1000000), 'g', 2);
 
 		LOG_MESSAGE(m_log, QString(tr("Application Logic Processing phase time - %1% (%2 clocks or %3 &micro;s of %4 &micro;s)")).
-					arg(str_percent).arg(m_alpPhaseClockCount).arg(str).arg(m_lmALPPhaseTime));
+					arg(str_percent).arg(m_alpCode.clockCount()).arg(str).arg(m_lmALPPhaseTime));
 
 		if (alpPhaseTimeUsed > 90)
 		{

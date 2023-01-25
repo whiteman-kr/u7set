@@ -2,6 +2,7 @@
 
 #include "../CommonLib/Types.h"
 #include "../UtilsLib/WUtils.h"
+#include "../Lib/LmDescription.h"
 
 #include "LmMemoryMap.h"
 
@@ -409,6 +410,84 @@ namespace Builder
 		static qint32 m_codeItemsNumerator;
 	};
 
+	class CodeSnippet
+	{
+	public:
+		enum class CodeType
+		{
+			Unknown,
+			IDR_Code,
+			ALP_Code,
+			AllCode
+		};
+
+	public:
+		CodeSnippet();
+
+		// code snippet modification methods
+		//
+		void append(const CodeItem& codeItem);
+		void append(const CodeSnippet& codeShippet);
+
+		CodeSnippet& operator << (const CodeItem& ci);
+		CodeSnippet& operator << (const CodeSnippet& codeShippet);
+
+		void comment(const QString& cmt);
+		void newLine();
+		void comment_nl(const QString& cmt);
+		void finalizeByNewLine();
+
+		void setAppStartAddr(int addr);
+
+		void finalize(CodeType codeType, const LmDescription& lmDesc);
+
+		void clear();
+
+		void setMemoryMapAndLogger(const LmMemoryMap* lmMemory, IssueLogger* log);
+
+		void reserve(int size);
+
+		//
+
+		bool isEmpty() const;
+
+		void getAsmCode(QStringList* asmCode) const;
+		void getBinCode(QByteArray* binCode) const;
+		void getMifCode(QStringList* mifCode) const;
+
+		void getAsmMetadataFields(QStringList* metadataFields, int* metadataVersion) const;
+		void getAsmMetadata(std::vector<QVariantList>* metadata) const;
+
+		CodeType codeType() const;
+
+		int codeSizeW() const;
+		int clockCount() const;
+		int commandsCount() const;
+		int itemsCount() const;
+		double lmCodeMemoryUsage() const;
+		double execTimeMcs() const;
+		double lmCycleTimeUsage() const;
+
+		bool getCommandsStatistics(std::vector<CommandStatistics>* stat) const;
+
+	private:
+		const LmMemoryMap* m_lmMemoryMap = nullptr;
+		IssueLogger* m_log = nullptr;
+
+		std::vector<CodeItem> m_code;
+
+		// code snippet statistics
+		//
+		CodeType m_codeType = CodeType::Unknown;
+		int m_codeSizeW = -1;
+		int m_clockCount = -1;
+		int m_commandsCount = -1;
+
+		double m_lmCodeMemUsage = 0;
+		double m_execTimeMcs = 0;
+		double m_lmCycleTimeUsage = 0;
+	};
+
 	struct CodeSnippetMetrics
 	{
 		void setStartAddr(int startAddr) { m_startAddr = startAddr; }
@@ -424,71 +503,4 @@ namespace Builder
 
 		double m_codePercent = 0;
 	};
-
-	class CodeSnippet : public QVector<CodeItem>
-	{
-	public:
-		CodeSnippet();
-
-		void comment(const QString& cmt);
-		void newLine();
-		void comment_nl(const QString& cmt);
-		void finalizeByNewLine();
-
-		void init(CodeSnippetMetrics* codeFragmentMetrics);
-		void calculate(CodeSnippetMetrics* codeFragmentMetrics);
-
-		int sizeW() const;
-
-		CodeSnippet& operator << (const CodeItem& ci);
-	};
-
-	class ApplicationLogicCode : public QObject
-	{
-		Q_OBJECT
-
-	public:
-		ApplicationLogicCode();
-		~ApplicationLogicCode();
-
-		void setMemoryMap(LmMemoryMap* lmMemory, IssueLogger* log);
-
-		void append(const CodeItem& codeItem);
-		void append(const CodeSnippet& codeShippet);
-		void comment(const QString& str);
-		void newLine();
-
-		void clear();
-
-		void getAsmCode(QStringList* asmCode) const;
-		void getBinCode(QByteArray* binCode) const;
-		void getMifCode(QStringList* mifCode) const;
-
-		void getAsmMetadataFields(QStringList* metadataFields, int* metadataVersion) const;
-		void getAsmMetadata(std::vector<QVariantList>* metadata) const;
-
-		bool calcStatistics();
-		bool getExecTimes(int* idrPhaseClockCount, int* alpPhaseClockCount) const;
-		int getTotalExecTime() const;
-
-		bool getCommandsStatistics(std::map<LmCommand::Code, CommandStatistics>* stat) const;
-
-		int commandAddress() const { return m_commandAddress; }
-
-		int commandsCount() const { Q_ASSERT(m_commandsCount != -1); return m_commandsCount; }
-		int codeSizeW() const { Q_ASSERT(m_codeSizeW != -1); return m_codeSizeW; }
-
-	private:
-		QVector<CodeItem> m_codeItems;
-		int m_commandAddress = 0;
-
-		LmMemoryMap* m_lmMemoryMap = nullptr;
-		IssueLogger* m_log = nullptr;
-
-		int m_idrPhaseClockCount = -1;
-		int m_alpPhaseClockCount = -1;
-		int m_commandsCount = -1;
-		int m_codeSizeW = -1;
-	};
-
 }

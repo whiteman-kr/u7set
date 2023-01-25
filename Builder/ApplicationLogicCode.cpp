@@ -1277,14 +1277,11 @@ namespace Builder
 			}
 		}
 
-//		QString str;
-//		Execution times printing
-//		Commented while refactoring!!!
-//
-//		Q_ASSERT(m_execTime != 0);			// check that times already calculated
-//		str.sprintf("[%02d:%02d]", m_waitTime, m_execTime);
-//		str = str.leftJustified(12, ' ');
-//		cmdStr += str;
+		Q_ASSERT(m_execTime >= 0);			// check that times already calculated
+
+		char cstr[16];
+		snprintf(cstr, 16, "[%02d:%02d]", m_waitTime, m_execTime);
+		cmdStr += QString(cstr).leftJustified(12, ' '); ;
 
 		QString mnemo = mnemoCode();
 
@@ -1884,6 +1881,28 @@ namespace Builder
 	{
 	}
 
+	void CodeSnippet::append(const CodeItem& codeItem)
+	{
+		m_code.emplace_back(codeItem);
+	}
+
+	void CodeSnippet::append(const CodeSnippet& codeSnippet)
+	{
+		m_code.insert(m_code.end(), codeSnippet.m_code.begin(), codeSnippet.m_code.end());
+	}
+
+	CodeSnippet& CodeSnippet::operator << (const CodeItem& ci)
+	{
+		append(ci);
+		return *this;
+	}
+
+	CodeSnippet& CodeSnippet::operator << (const CodeSnippet& codeShippet)
+	{
+		append(codeShippet);
+		return *this;
+	}
+
 	void CodeSnippet::comment(const QString& cmt)
 	{
 		CodeItem commentItem;
@@ -1906,226 +1925,155 @@ namespace Builder
 
 	void CodeSnippet::finalizeByNewLine()
 	{
-		if (last().isNewLine() == false)
+		if (m_code.back().isNewLine() == false)
 		{
 			newLine();
 		}
 	}
-
-	void CodeSnippet::init(CodeSnippetMetrics* codeFragmentMetrics)
+	void CodeSnippet::setAppStartAddr(int addr)
 	{
-		if (codeFragmentMetrics == nullptr)
+		for(CodeItem& codeItem : m_code)
 		{
+			if (codeItem.getOpcode() == LmCommand::Code::APPSTART)
+			{
+				codeItem.appStart(addr);
+				return;
+			}
+		}
+
+		Q_ASSERT(false);
+	}
+
+	void CodeSnippet::finalize(CodeType codeType, const LmDescription& lmDesc)
+	{
+		m_codeType = codeType;
+
+		m_codeSizeW = 0;
+		m_clockCount = 0;
+		m_commandsCount = 0;
+
+		m_lmCodeMemUsage = 0;
+		m_execTimeMcs = 0;
+		m_lmCycleTimeUsage = 0;
+
+		if (m_code.empty() == true)
+		{
+			return;
+		}
+
+		// read commands and calculate code runtime
+		//
+		int prevCmdExecTime = 0;
+
+		for(CodeItem& codeItem : m_code)
+		{
+			if (codeItem.isCommand() == false)
+			{
+				continue;
+			}
+
+			m_commandsCount++;
+
+			codeItem.setAddress(m_codeSizeW);
+
+			m_codeSizeW += codeItem.sizeW();
+
+			int waitTime = 0;
+			int execTime = 0;
+
+			codeItem.calcRunTime(m_lmMemoryMap, prevCmdExecTime);
+			codeItem.getTimes(&waitTime, &execTime);
+
+			m_clockCount += (waitTime + execTime);		// !!!
+
+			prevCmdExecTime = execTime;
+
+			if (codeItem.getOpcode() == LmCommand::Code::STOP)
+			{
+				codeItem.addExecTime(prevCmdExecTime);
+				m_clockCount += prevCmdExecTime;
+				prevCmdExecTime = 0;
+			}
+		}
+
+		if (lmDesc.memory().m_codeMemorySize != 0)
+		{
+			m_lmCodeMemUsage = static_cast<double>(m_codeSizeW * 100) /
+								static_cast<double>(lmDesc.memory().m_codeMemorySize);
+		}
+
+		m_execTimeMcs = m_clockCount * lmDesc.logicUnit().clockTimeSecs() * 1000000.0;
+
+		double totalTimeMcs = 0;
+
+		switch(codeType)
+		{
+		case CodeType::IDR_Code:
+			totalTimeMcs = lmDesc.logicUnit().m_idrPhaseTime;
+			break;
+
+		case CodeType::ALP_Code:
+			totalTimeMcs = lmDesc.logicUnit().m_alpPhaseTime;
+			break;
+
+		case CodeType::AllCode:
+			totalTimeMcs =	lmDesc.logicUnit().m_idrPhaseTime +
+							lmDesc.logicUnit().m_alpPhaseTime;
+			break;
+
+		default:
 			Q_ASSERT(false);
 			return;
 		}
 
-		//codeFragmentMetrics->setStartAddr(m_commandAddress);
-	}
-
-	void CodeSnippet::calculate(CodeSnippetMetrics* codeFragmentMetrics)
-	{
-		if (codeFragmentMetrics == nullptr)
+		if (totalTimeMcs !=  0)
 		{
-			Q_ASSERT(false);
-			return;
+			m_lmCycleTimeUsage = static_cast<double>(m_execTimeMcs * 100) / totalTimeMcs;
 		}
-
-		//codeFragmentMetrics->setEndAddr(m_commandAddress);
 	}
 
-	int CodeSnippet::sizeW() const
+	void CodeSnippet::clear()
 	{
-		int sizeW = 0;
-
-		for(const CodeItem& codeItem : *this)
-		{
-			sizeW += codeItem.sizeW();
-		}
-
-		return sizeW;
+		m_lmMemoryMap = nullptr;
+		m_log = nullptr;
+		m_code.clear();
+		m_codeSizeW = -1;
+		m_clockCount = -1;
+		m_commandsCount = -1;
 	}
 
-	CodeSnippet& CodeSnippet::operator << (const CodeItem& ci)
-	{
-		append(ci);
-		return *this;
-	}
-
-	// -----------------------------------------------------------------------------------------------
-	//
-	// CodeSnippetMetrics struct implementation
-	//
-	// -----------------------------------------------------------------------------------------------
-
-	void CodeSnippetMetrics::setEndAddr(int endAddr)
-	{
-		m_endAddr = endAddr;
-
-		m_codePercent = static_cast<double>(m_endAddr - m_startAddr) * 100.0 / 65536.0 ;
-	}
-
-
-	QString CodeSnippetMetrics::codePercentStr() const
-	{
-		return QString("%1%%").arg(m_codePercent, 0, 'g', 2);
-	}
-
-	// ---------------------------------------------------------------------------------------
-	//
-	// ApplicationLogicCode structure static members implementation
-	//
-	// ---------------------------------------------------------------------------------------
-
-	ApplicationLogicCode::ApplicationLogicCode()
-	{
-	}
-
-	ApplicationLogicCode::~ApplicationLogicCode()
-	{
-	}
-
-	void ApplicationLogicCode::setMemoryMap(LmMemoryMap* lmMemory, IssueLogger* log)
+	void CodeSnippet::setMemoryMapAndLogger(const LmMemoryMap* lmMemory, IssueLogger* log)
 	{
 		TEST_PTR_RETURN(lmMemory);
 		TEST_PTR_RETURN(log);
 
 		m_lmMemoryMap = lmMemory;
+		m_log = log;
 	}
 
-	void ApplicationLogicCode::clear()
+	void CodeSnippet::reserve(int size)
 	{
-		m_codeItems.clear();
-		m_commandAddress = 0;
+		m_code.reserve(size);
 	}
 
-	void ApplicationLogicCode::append(const CodeItem& codeItem)
+	bool CodeSnippet::isEmpty() const
 	{
-		m_codeItems.append(codeItem);
-
-		qsizetype lastIndex = m_codeItems.size() - 1;
-
-		m_codeItems[lastIndex].setAddress(m_commandAddress);
-
-		m_commandAddress += m_codeItems[lastIndex].sizeW();
+		return m_code.empty();
 	}
 
-	void ApplicationLogicCode::append(const CodeSnippet& codeSnippet)
-	{
-		for(const CodeItem& codeItem : codeSnippet)
-		{
-			append(codeItem);
-		}
-	}
-
-	void ApplicationLogicCode::comment(const QString& str)
-	{
-		CodeItem comment;
-
-		comment.setComment(str);
-
-		append(comment);
-	}
-
-	void ApplicationLogicCode::newLine()
-	{
-		CodeItem emptyComment;
-
-		append(emptyComment);
-	}
-
-/*	void ApplicationLogicCode::replaceAt(int commandIndex, const Command &cmd)
-	{
-		if (commandIndex < 0 && commandIndex >= m_codeItems.count())
-		{
-			Q_ASSERT(false);
-			return;
-		}
-
-		CodeItem* codeItem = m_codeItems[commandIndex];
-
-		Command* oldCommand = dynamic_cast<Command*>(codeItem);
-
-		if (oldCommand == nullptr)
-		{
-			Q_ASSERT(false);
-			return;
-		}
-
-		Command* newCommand = new Command(cmd);
-
-		m_codeItems[commandIndex] = newCommand;
-
-		if (oldCommand->sizeW() == newCommand->sizeW())
-		{
-			// no need recalc commands addresses
-			//
-			newCommand->setAddress(oldCommand->address());
-		}
-		else
-		{
-			// recalc commands addresses
-			//
-			m_commandAddress = 0;
-
-			for(CodeItem* codeItem : m_codeItems)
-			{
-				if (codeItem->isComment())
-				{
-					continue;
-				}
-
-				Command* cmd = dynamic_cast<Command*>(codeItem);
-
-				if (cmd == nullptr)
-				{
-					Q_ASSERT(false);
-					continue;
-				}
-
-				cmd->setAddress(m_commandAddress);
-
-				m_commandAddress += cmd->sizeW();
-			}
-		}
-
-		delete oldCommand;
-	}
-
-
-	void ApplicationLogicCode::comment(const QString& commentStr)
-	{
-		CodeItem comment;
-
-		comment.setComment(commentStr);
-
-		m_codeItems.append(comment);
-	}
-
-
-	void ApplicationLogicCode::newLine()
-	{
-		CodeItem emptyComment;
-
-		m_codeItems.append(emptyComment);
-	} */
-
-
-	/*void ApplicationLogicCode::generateBinCode()
-	{
-		for(const CodeItem& codeItem : m_codeItems)
-		{
-			codeItem.generateBinCode(m_byteOrder);
-		}
-	}*/
-
-	void ApplicationLogicCode::getAsmCode(QStringList* asmCode) const
+	void CodeSnippet::getAsmCode(QStringList* asmCode) const
 	{
 		TEST_PTR_RETURN(asmCode);
 
+		if (m_codeSizeW == -1)
+		{
+			Q_ASSERT(false);		// finalize() should be called first
+			return;
+		}
+
 		asmCode->clear();
 
-		for(const CodeItem& codeItem : m_codeItems)
+		for(const CodeItem& codeItem : m_code)
 		{
 			QString str = codeItem.getAsmCode(true);
 
@@ -2133,13 +2081,19 @@ namespace Builder
 		}
 	}
 
-	void ApplicationLogicCode::getBinCode(QByteArray* binCode) const
+	void CodeSnippet::getBinCode(QByteArray* binCode) const
 	{
 		TEST_PTR_RETURN(binCode);
 
+		if (m_codeSizeW == -1)
+		{
+			Q_ASSERT(false);		// finalize() should be called first
+			return;
+		}
+
 		binCode->clear();
 
-		for(const CodeItem& codeItem : m_codeItems)
+		for(const CodeItem& codeItem : m_code)
 		{
 			QByteArray cmdBinCode;
 
@@ -2149,13 +2103,19 @@ namespace Builder
 		}
 	}
 
-	void ApplicationLogicCode::getMifCode(QStringList* mifCode) const
+	void CodeSnippet::getMifCode(QStringList* mifCode) const
 	{
 		TEST_PTR_RETURN(mifCode);
 
+		if (m_codeSizeW == -1)
+		{
+			Q_ASSERT(false);		// finalize() should be called first
+			return;
+		}
+
 		mifCode->clear();
 
-		if (m_codeItems.count() < 1)
+		if (m_code.size() < 1)
 		{
 			return;
 		}
@@ -2165,16 +2125,16 @@ namespace Builder
 
 		// find last command for compute address depth
 		//
-		qsizetype codeItemsCount = m_codeItems.count();
+		qsizetype codeItemsCount = m_code.size();
 
 		for(qsizetype i = codeItemsCount - 1; i >= 0; i--)
 		{
-			if (m_codeItems[i].isComment() == true)
+			if (m_code[i].isComment() == true)
 			{
 				continue;
 			}
 
-			depth = m_codeItems[i].address() + m_codeItems[i].sizeW() - 1;
+			depth = m_code[i].address() + m_code[i].sizeW() - 1;
 			break;
 		}
 
@@ -2194,7 +2154,7 @@ namespace Builder
 		QString codeStr;
 		QString str;
 
-		for(const CodeItem& codeItem : m_codeItems)
+		for(const CodeItem& codeItem : m_code)
 		{
 			if (codeItem.isComment() == true)
 			{
@@ -2269,7 +2229,7 @@ namespace Builder
 		mifCode->append("END;");
 	}
 
-	void ApplicationLogicCode::getAsmMetadataFields(QStringList* metadataFields, int* metadataVersion) const
+	void CodeSnippet::getAsmMetadataFields(QStringList* metadataFields, int* metadataVersion) const
 	{
 		TEST_PTR_RETURN(metadataFields);
 		TEST_PTR_RETURN(metadataVersion);
@@ -2286,13 +2246,13 @@ namespace Builder
 		metadataFields->append("Comment");
 	}
 
-	void ApplicationLogicCode::getAsmMetadata(std::vector<QVariantList>* metadata) const
+	void CodeSnippet::getAsmMetadata(std::vector<QVariantList>* metadata) const
 	{
 		TEST_PTR_RETURN(metadata);
 
 		metadata->clear();
 
-		for(const CodeItem& codeItem : m_codeItems)
+		for(const CodeItem& codeItem : m_code)
 		{
 			QVariantList data;
 
@@ -2338,129 +2298,60 @@ namespace Builder
 		}
 	}
 
-	bool ApplicationLogicCode::calcStatistics()
+	CodeSnippet::CodeType CodeSnippet::codeType() const
 	{
-		m_idrPhaseClockCount = 0;
-		m_alpPhaseClockCount = 0;
-		m_commandsCount = 0;
-		m_codeSizeW = 0;
-
-		if (m_codeItems.isEmpty() == true)
-		{
-			return true;
-		}
-
-		// find appStart command and read application logic processing code start address
-		//
-		int appLogicProcessingCodeStartAddress = -1;
-
-		for(const CodeItem& codeItem : m_codeItems)
-		{
-			if (codeItem.isCommand() == false)
-			{
-				continue;
-			}
-
-			if (codeItem.isOpCode(LmCommand::Code::APPSTART))
-			{
-				appLogicProcessingCodeStartAddress = codeItem.getWord2();
-				break;
-			}
-		}
-
-		if (appLogicProcessingCodeStartAddress == -1)
-		{
-			Q_ASSERT(false);
-			return false;
-		}
-
-		// read commands and calculate code runtime
-		//
-		bool idrPhaseCode = true;
-
-		int prevCmdExecTime = 0;
-
-		for(CodeItem& codeItem : m_codeItems)
-		{
-			if (codeItem.isCommand() == false)
-			{
-				continue;
-			}
-
-			m_commandsCount++;
-			m_codeSizeW += codeItem.sizeW();
-
-			int waitTime = 0;
-			int execTime = 0;
-
-			codeItem.calcRunTime(m_lmMemoryMap, prevCmdExecTime);
-			codeItem.getTimes(&waitTime, &execTime);
-
-			if (idrPhaseCode == true)
-			{
-				m_idrPhaseClockCount += (waitTime + execTime);
-			}
-			else
-			{
-				m_alpPhaseClockCount +=  (waitTime + execTime);
-			}
-
-			prevCmdExecTime = execTime;
-
-			if (codeItem.getOpcode() == LmCommand::Code::STOP)
-			{
-				codeItem.addExecTime(prevCmdExecTime);
-
-				if (idrPhaseCode == true)
-				{
-					m_idrPhaseClockCount += prevCmdExecTime;
-					idrPhaseCode = false;
-				}
-				else
-				{
-					m_alpPhaseClockCount += prevCmdExecTime;
-				}
-
-				prevCmdExecTime = 0;
-			}
-		}
-
-		return true;
+		return m_codeType;
 	}
 
-	bool ApplicationLogicCode::getExecTimes(int* idrPhaseClockCount, int* alpPhaseClockCount) const
+	int CodeSnippet::codeSizeW() const
 	{
-		TEST_PTR_RETURN_FALSE(idrPhaseClockCount);
-		TEST_PTR_RETURN_FALSE(alpPhaseClockCount);
-
-		if (m_idrPhaseClockCount == -1 ||
-			m_alpPhaseClockCount == -1)
-		{
-			Q_ASSERT(false);					// calcRunTimes must be called before
-			return false;
-		}
-
-		*idrPhaseClockCount = m_idrPhaseClockCount;
-		*alpPhaseClockCount = m_alpPhaseClockCount;
-
-		return true;
+		Q_ASSERT(m_codeSizeW != -1);		// finalize() should be called first
+		return m_codeSizeW;
 	}
 
-	int ApplicationLogicCode::getTotalExecTime() const
+	int CodeSnippet::clockCount() const
 	{
-		if (m_idrPhaseClockCount == -1 ||
-			m_alpPhaseClockCount == -1)
-		{
-			Q_ASSERT(false);					// calcRunTimes must be called before
-			return -1;
-		}
-
-		return m_idrPhaseClockCount + m_alpPhaseClockCount;
+		Q_ASSERT(m_clockCount != -1);		// finalize() should be called first
+		return m_clockCount;
 	}
 
-	bool ApplicationLogicCode::getCommandsStatistics(std::map<LmCommand::Code, CommandStatistics>* stat) const
+	int CodeSnippet::commandsCount() const
+	{
+		Q_ASSERT(m_commandsCount != -1);	// finalize() should be called first
+		return m_commandsCount;
+	}
+
+	int CodeSnippet::itemsCount() const
+	{
+		Q_ASSERT(m_codeSizeW != -1);		// finalize() should be called first
+		return static_cast<int>(m_code.size());
+	}
+
+	double CodeSnippet::lmCodeMemoryUsage() const
+	{
+		Q_ASSERT(m_codeSizeW != -1);		// finalize() should be called first
+		return m_lmCodeMemUsage;
+	}
+
+	double CodeSnippet::execTimeMcs() const
+	{
+		Q_ASSERT(m_codeSizeW != -1);		// finalize() should be called first
+		return m_execTimeMcs;
+	}
+
+	double CodeSnippet::lmCycleTimeUsage() const
+	{
+		Q_ASSERT(m_codeSizeW != -1);		// finalize() should be called first
+		return m_lmCycleTimeUsage;
+	}
+
+	bool CodeSnippet::getCommandsStatistics(std::vector<CommandStatistics>* stat) const
 	{
 		TEST_PTR_RETURN_FALSE(stat);
+
+		stat->clear();
+
+		std::map<LmCommand::Code, CommandStatistics> statMap;
 
 		for(auto const& p : lmCommands)
 		{
@@ -2471,19 +2362,19 @@ namespace Builder
 				continue;
 			}
 
-			stat->insert({lmc.code, CommandStatistics(lmc.code) });
+			statMap.insert({lmc.code, CommandStatistics(lmc.code) });
 		}
 
-		for(const CodeItem& ci : m_codeItems)
+		for(const CodeItem& ci : m_code)
 		{
 			if (ci.isCommand() == false)
 			{
 				continue;
 			}
 
-			auto it = stat->find(ci.getOpcode());
+			auto it = statMap.find(ci.getOpcode());
 
-			if (it == stat->end())
+			if (it == statMap.end())
 			{
 				Q_ASSERT(false);
 				continue;
@@ -2496,6 +2387,34 @@ namespace Builder
 			cs.execTime += ci.waitTime() + ci.execTime();
 		}
 
+		stat->reserve(statMap.size());
+
+		for(auto const& p : statMap)
+		{
+			stat->emplace_back(p.second);
+		}
+
 		return true;
 	}
+
+	// -----------------------------------------------------------------------------------------------
+	//
+	// CodeSnippetMetrics struct implementation
+	//
+	// -----------------------------------------------------------------------------------------------
+
+	void CodeSnippetMetrics::setEndAddr(int endAddr)
+	{
+		m_endAddr = endAddr;
+
+		Q_ASSERT(false);			// wrong calc !~!! 65536.0!!!!
+		m_codePercent = static_cast<double>(m_endAddr - m_startAddr) * 100.0 / 65536.0 ;
+	}
+
+
+	QString CodeSnippetMetrics::codePercentStr() const
+	{
+		return QString("%1%%").arg(m_codePercent, 0, 'g', 2);
+	}
+
 }

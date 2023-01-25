@@ -412,6 +412,7 @@ namespace Separator
 	inline const QString LINE("-------------------------------------------------------------------------------");
 	inline const QString DIR("/");
 	inline const QString BACK_DIR("\\");
+	inline const QString EMPTY_STR("");
 }
 
 namespace FormatStr

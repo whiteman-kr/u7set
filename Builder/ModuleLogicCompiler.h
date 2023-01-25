@@ -423,7 +423,7 @@ namespace Builder
 		bool generateIdrPhaseCode();
 		bool generateAlpPhaseCode();
 		bool makeAppLogicCode();
-		bool finalizeAppLogicCodeGeneration();
+		bool cleanupHeaps();
 
 		bool generateAfbsVersionCheckingCode(CodeSnippet* code);
 		bool generateInitAfbsCode(CodeSnippet* code);
@@ -677,11 +677,20 @@ namespace Builder
 		bool writeLooopbacksReport();
 		bool writeHeapsLog();
 		bool writeStatisticsFile() const;
-		void printStat(const std::vector<CommandStatistics>& stat, QStringList& file) const;
+
+		void printCodeStatistics(const CodeSnippet& code,
+								 QStringList& file,
+								 bool exludeNotUsedCommands) const;
+
+		void printCodeStatisticsTable(const CodeSnippet& code,
+									  const std::vector<CommandStatistics>& stat,
+									  QStringList& file,
+									  bool exludeNotUsedCommands) const;
+
 		QString getStatStr(const QString& mnemo,
 						   int used, float usedPercent,
 						   int sizeW, float sizePercent,
-						   int execTime, float execPercent) const;
+						   int execTime, float execPercent, bool isTotal) const;
 
 		bool displayResourcesUsageInfo();
 		void calcOptoDiscretesStatistics();
@@ -788,13 +797,10 @@ namespace Builder
 
 		//
 
-		ApplicationLogicCode m_code;
+		CodeSnippet m_code;
 
 		CodeSnippet m_idrCode;
 		CodeSnippet m_alpCode;
-
-		int m_idrPhaseClockCount = 0;		// input data receive phase clock count
-		int m_alpPhaseClockCount = 0;		// application logic processing clock count
 
 		AfblsMap m_afbls;
 

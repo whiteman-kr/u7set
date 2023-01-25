@@ -144,6 +144,10 @@ public:
 		quint32 m_idrPhaseTime = 0xFFFFFFFF;			// in microseconds
 
 		bool load(const QDomDocument& document, QString* errorMessage);
+
+		double clockTimeSecs() const;
+		int idrPhaseClocks() const;
+		int alpPhaseClocks() const;
 	};
 
 	struct OptoInterface
@@ -222,10 +226,6 @@ public:
 	LmCommand command(int commandCode) const;
 	const std::map<int, LmCommand>& commands() const;
 	std::vector<LmCommand> commandsAsVector() const;
-
-	double clockTimeSecs() const;
-	int idrPhaseClocks() const;
-	int alpPhaseClocks() const;
 
 	// Data
 	//
