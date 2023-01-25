@@ -1520,7 +1520,7 @@ bool MonitorSettingsGetter::readAppDataServiceAndArchiveSettings(const Builder::
 		// Get AppDataService connection settings
 		//
 		AppDataServiceSettingsGetter adsSettings;
-		result &= adsSettings.readFromDevice(context, appDataService);
+		result &= adsSettings.readSoftwareSettings(context, appDataService);
 
 		if (result == false)
 		{

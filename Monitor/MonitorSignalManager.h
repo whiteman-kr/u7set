@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include <QReadWriteLock>
 #include "../UtilsLib/ILogFile.h"
-#include "../lib/IAppSignalManager.h"
+#include "../AppSignalLib/IAppSignalManager.h"
 #include "../lib/ComparatorSet.h"
 
 

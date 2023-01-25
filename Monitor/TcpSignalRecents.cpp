@@ -1,8 +1,7 @@
 #include "TcpSignalRecents.h"
-#include "Settings.h"
 
 
-RecentUsed::RecentUsed(int maxSize /*= 750*/) :
+RecentUsed::RecentUsed(size_t maxSize /*= 750*/) :
 	m_maxSize(maxSize)
 {
 }
@@ -102,9 +101,14 @@ bool RecentUsed::remove(const std::vector<Hash>& hashes)
 	return ok;
 }
 
-int RecentUsed::size() const
+size_t RecentUsed::size() const
 {
-	return static_cast<int>(m_signalToTime.size());
+	return std::size(m_signalToTime);
+}
+
+ptrdiff_t RecentUsed::ssize() const
+{
+	return std::ssize(m_signalToTime);
 }
 
 const std::map<Hash, qint64>& RecentUsed::rawHashes() const

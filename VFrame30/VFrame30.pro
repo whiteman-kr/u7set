@@ -112,7 +112,6 @@ HEADERS += \
     MacrosExpander.h \
     Session.h \
     ../CommonLib/PropertyObject.h \
-	../lib/IAppSignalManager.h \
     SchemaItemBus.h \
     Bus.h \
     ClientSchemaWidget.h \

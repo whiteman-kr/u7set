@@ -7,6 +7,7 @@
 
 // C++ includes
 //
+#include <chrono>
 #include <concepts>
 #include <array>
 #include <memory>
