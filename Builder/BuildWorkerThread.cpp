@@ -1034,8 +1034,6 @@ namespace Builder
 					return false;
 				}
 
-				QString runScriptWindowsTemplate;
-				QString runScriptLinuxTemplate;
 				QString folderPath = Db::File::systemDirToName(DbDir::RootDir) + "/";
 
 				{
@@ -1055,38 +1053,18 @@ namespace Builder
 					folderPath += pathList.join(QChar('/'));
 				}
 
-				if (folderPath.startsWith(Db::File::systemDirToName(DbDir::SimTestsDir)))
+				if (folderPath.startsWith(Db::File::systemDirToName(DbDir::SimTestsDir)) == false)
 				{
-					runScriptWindowsTemplate = "SimulatorConsole.exe -build=%1 -script=%2 -profile=Default\n"
-											   "@if %ERRORLEVEL% NEQ 0 goto ERROR";
-					runScriptLinuxTemplate = "./SimulatorConsole -build=%1 -script=%2 -profile=Default\n"
-											 "if [ $? -ne 0 ]; then\n"
-											 "echo \"Script execution failed!\"\n"
-											 "exit 1\n"
-											 "fi\n";
+					continue;
 				}
-				else
-				{
-					if (folderPath.startsWith(Db::File::systemDirToName(DbDir::HardwareTestsDir)))
-					{
-						runScriptWindowsTemplate = "TestSuiteConsole.exe -build=%1 -script=%2 -profile=Default\n"
-												   "@if %ERRORLEVEL% NEQ 0 goto ERROR";
-						runScriptLinuxTemplate = "./TestSuiteConsole -build=%1 -script=%2 -profile=Default\n"
-												 "if [ $? -ne 0 ]; then\n"
-												 "echo \"Script execution failed!\"\n"
-												 "exit 1\n"
-												 "fi\n";
 
-						int todo_Create_Separate_Run_Scripts_For_HardwareTests=1;
-						//continue;
-					}
-					else
-					{
-						qDebug() << "Unknown script template for " << file->fileName();
-						Q_ASSERT(false);
-						continue;
-					}
-				}
+				QString runScriptWindowsTemplate = "SimulatorConsole.exe -build=%1 -script=%2 -profile=Default\n"
+										   "@if %ERRORLEVEL% NEQ 0 goto ERROR";
+				QString runScriptLinuxTemplate = "./SimulatorConsole -build=%1 -script=%2 -profile=Default\n"
+										 "if [ $? -ne 0 ]; then\n"
+										 "echo \"Script execution failed!\"\n"
+										 "exit 1\n"
+										 "fi\n";
 
 				// Create run script
 				//
