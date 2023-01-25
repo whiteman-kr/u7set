@@ -118,8 +118,6 @@ TestSuiteConfigController::TestSuiteConfigController(const SoftwareInfo& softwar
 		}
 	}
 
-	qDebug() << "TestSuiteInstanceNo: " << m_appInstanceNo;
-
 	// --
 	//
 	m_cfgLoaderThread = new CfgLoaderThread(m_softwareInfo,
@@ -131,10 +129,10 @@ TestSuiteConfigController::TestSuiteConfigController(const SoftwareInfo& softwar
 
 	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &TestSuiteConfigController::slot_configurationReady);
 
-	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_unknownClientID, this, &TestSuiteConfigController::unknownClient);
+	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_unknownClientID, this, &TestSuiteConfigController::logErrorunknownClient);
 	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_unknownClientID, [this](){this->writeError(tr("Unknown client %1").arg(m_softwareInfo.equipmentID()));});
 
-	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_wrongClientHostname, this, &TestSuiteConfigController::wrongClientHostname);
+	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_wrongClientHostname, this, &TestSuiteConfigController::logErrorwrongClientHostname);
 
 	return;
 }
@@ -305,49 +303,18 @@ void TestSuiteConfigController::slot_configurationReady(const QByteArray configu
 	Q_UNUSED(buildFileInfoArray);
 	Q_UNUSED(sessionParams);
 
-	qDebug() << "TestSuiteConfigThread::slot_configurationReady";
+	emit logMessage("New configuration arrived");
+	writeMessage(tr("New configuration arrived"));
 
-	/*
-	// Get GlobalScript.js file
-	//
-	auto getScriptFunc = [cfgLoaderThread = m_cfgLoaderThread](QString scriptFileName) -> QString
-		{
-			QString parsingError;
-			QByteArray ba;
+	{
+		QWriteLocker locker(&m_confugurationLock);
+		m_testScripts.clear();
+	}
 
-			if (bool ok = cfgLoaderThread->getFileBlocked(scriptFileName, &ba, &parsingError);
-				ok == true)
-			{
-				return QString{ba};
-			}
-			else
-			{
-				return {};
-			}
-		};
-
-	// Get image file
-	//
-	auto getImageFunc = [cfgLoaderThread = m_cfgLoaderThread](QString fileId) -> QImage
-		{
-			QString parsingError;
-			QByteArray ba;
-
-			if (bool ok = cfgLoaderThread->getFileBlockedByID(fileId, &ba, &parsingError);
-				ok == true)
-			{
-				return QImage::fromData(ba);
-			}
-			else
-			{
-				return {};
-			}
-		};*/
+	// Load settings
 
 	ConfigSettings readSettings;
 
-	// Parse XML
-	//
 	{
 		QString parsingError;
 		QDomDocument xml;
@@ -403,47 +370,36 @@ void TestSuiteConfigController::slot_configurationReady(const QByteArray configu
 			readSettings.errorMessage.isEmpty() == false)
 		{
 			QString completeErrorMessage = tr("Parsing configuration file error: %1").arg(readSettings.errorMessage);
-			qDebug() << completeErrorMessage;
+			emit logError(completeErrorMessage);
 		}
 	}
 
-	// Get tuning signal files
-	//
-	/*
-	theTuningSignals.reset();
+	// Get test files
 
-	if (readSettings.tuningEnabled == true)
+	for (const Builder::BuildFileInfo& buildFileInfo: buildFileInfoArray)
 	{
-		QByteArray data;
-		QString errorString;
-
-		bool result = getFileBlockedById(CfgFileId::TUNING_SIGNALS, &data, &errorString);
-
-		if (result == false)
+		if (buildFileInfo.ID != CfgFileId::TESTSUITE_TESTSCRIPT)
 		{
-			readSettings.errorMessage += errorString + QStringLiteral("\n");
+			continue;
+		}
+
+		QByteArray data;
+		QString errorStr;
+		if (getFileBlockedById(buildFileInfo.ID, &data, &errorStr) == false)
+		{
+			QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error:\n%2").arg(buildFileInfo.pathFileName).arg(errorStr);
+			emit logError(completeErrorMessage);
 		}
 		else
 		{
-			theTuningSignals.load(data);
+			emit logMessage("Test file: " + buildFileInfo.pathFileName);
+			QReadLocker locker(&m_confugurationLock);
+			m_testScripts[buildFileInfo.pathFileName] = data;
 		}
 	}
-	*/
 
 	// Trace received params
 	//
-	qDebug() << "New configuration arrived";
-
-	qDebug() << "ADS1 (id, ip, port): " << readSettings.appDataService1.equipmentId() << ", " << readSettings.appDataService1.ip() << ", " << readSettings.appDataService1.port();
-	qDebug() << "ADS2 (id, ip, port): " << readSettings.appDataService2.equipmentId() << ", " << readSettings.appDataService2.ip() << ", " << readSettings.appDataService2.port();
-
-	qDebug() << "ADS RT Trends 1 (id, ip, port): " << readSettings.appDataServiceRealtimeTrend1.equipmentId() << ", " << readSettings.appDataServiceRealtimeTrend1.ip() << ", " << readSettings.appDataServiceRealtimeTrend1.port();
-	qDebug() << "ADS RT Trends 2 (id, ip, port): " << readSettings.appDataServiceRealtimeTrend2.equipmentId() << ", " << readSettings.appDataServiceRealtimeTrend2.ip() << ", " << readSettings.appDataServiceRealtimeTrend2.port();
-
-	qDebug() << "ArchiveService1 (id, ip, port): " << readSettings.archiveService1.equipmentId() << ", " << readSettings.archiveService1.ip() << ", " << readSettings.archiveService1.port();
-	qDebug() << "ArchiveService2 (id, ip, port): " << readSettings.archiveService2.equipmentId() << ", " << readSettings.archiveService2.ip() << ", " << readSettings.archiveService2.port();
-
-	writeMessage(tr("New configuration arrived"));
 	writeMessage(tr("ADS1 (id, ip, port): %1, %2, %3").arg(readSettings.appDataService1.equipmentId()).arg(readSettings.appDataService1.ip()).arg(readSettings.appDataService1.port()));
 	writeMessage(tr("ADS2 (id, ip, port): %1, %2, %3").arg(readSettings.appDataService2.equipmentId()).arg(readSettings.appDataService2.ip()).arg(readSettings.appDataService2.port()));
 
@@ -465,6 +421,7 @@ void TestSuiteConfigController::slot_configurationReady(const QByteArray configu
 
 	if (readSettings.errorMessage.isEmpty() == false)
 	{
+		emit logMessage(tr("Error: %1").arg(readSettings.errorMessage));
 		writeError(tr("Error: %1").arg(readSettings.errorMessage));
 	}
 
@@ -611,3 +568,31 @@ ConfigSettings TestSuiteConfigController::configuration() const
 	return m_configuration;
 }
 
+qsizetype TestSuiteConfigController::testScriptCount() const
+{
+	QWriteLocker locker(&m_confugurationLock);
+	return m_testScripts.size();
+}
+
+QStringList TestSuiteConfigController::testScriptList() const
+{
+	QStringList result;
+	for (const auto& it : m_testScripts)
+	{
+		result.push_back(it.first);
+	}
+	return result;
+}
+
+const QByteArray& TestSuiteConfigController::testScript(const QString& fileName) const
+{
+	auto it = m_testScripts.find(fileName);
+	if (it == m_testScripts.end())
+	{
+		Q_ASSERT(false);
+		static QByteArray err;
+		return err;
+	}
+
+	return it->second;
+}

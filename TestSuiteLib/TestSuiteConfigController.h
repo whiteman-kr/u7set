@@ -84,8 +84,11 @@ public:
 signals:
 	void configurationUpdate();
 	void configurationArrived(ConfigSettings configuration);
-	void unknownClient(QString errMsg);										// Error if CfgService cannot find SoftwareID
-	void wrongClientHostname(QString errMsg);
+
+	void logMessage(const QString& msg);
+	void logError(const QString& errMsg);
+	void logErrorunknownClient(const QString& errMsg);
+	void logErrorwrongClientHostname(const QString& errMsg);
 
 	// slots
 	//
@@ -109,6 +112,10 @@ private:
 public:
 	ConfigSettings configuration() const;
 
+	qsizetype testScriptCount() const;
+	QStringList testScriptList() const;
+	const QByteArray& testScript(const QString& fileName) const;
+
 	// Data section
 	//
 private:
@@ -118,6 +125,8 @@ private:
 
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
-	mutable QReadWriteLock m_confugurationLock;		// for access only to m_configuration
+	mutable QReadWriteLock m_confugurationLock;		// for access to m_configuration and m_testScripts
+
 	ConfigSettings m_configuration;
+	std::map<QString, QByteArray> m_testScripts;
 };

@@ -20,8 +20,11 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 	connect(m_testEngine, &TestEngine::finished, this, &TestSuiteMainWindow::testFinished);
 
 	connect(&m_configController, &TestSuiteConfigController::configurationArrived, this, &TestSuiteMainWindow::slot_configurationArrived);
-	connect(&m_configController, &TestSuiteConfigController::unknownClient, this, &TestSuiteMainWindow::slot_unknownClient);
-	connect(&m_configController, &TestSuiteConfigController::wrongClientHostname, this, &TestSuiteMainWindow::slot_wrongClientHostname);
+
+	connect(&m_configController, &TestSuiteConfigController::logMessage, this, &TestSuiteMainWindow::slot_configLogMessage);
+	connect(&m_configController, &TestSuiteConfigController::logError, this, &TestSuiteMainWindow::slot_configLogError);
+	connect(&m_configController, &TestSuiteConfigController::logErrorunknownClient, this, &TestSuiteMainWindow::slot_configUnknownClient);
+	connect(&m_configController, &TestSuiteConfigController::logErrorwrongClientHostname, this, &TestSuiteMainWindow::slot_configWrongClientHostname);
 	m_configController.start();
 
 	createActions();
@@ -228,6 +231,7 @@ void TestSuiteMainWindow::testFinished(int result)
 void TestSuiteMainWindow::slot_configurationArrived(ConfigSettings configuration)
 {
 	qDebug() << "slot_configurationArrived";
+
 	// Log out from tuning
 	//
 	/*if (m_tuningUserManager.isLoggedIn() == true)
@@ -273,7 +277,15 @@ void TestSuiteMainWindow::slot_configurationArrived(ConfigSettings configuration
 	return;
 }
 
-void TestSuiteMainWindow::slot_unknownClient(QString errMsg)
+void TestSuiteMainWindow::slot_configLogMessage(const QString& msg)
+{
+	ui->outputLog->moveCursor (QTextCursor::End);
+	ui->outputLog->insertPlainText(msg);
+	ui->outputLog->insertPlainText("\n");
+	ui->outputLog->moveCursor (QTextCursor::End);
+}
+
+void TestSuiteMainWindow::slot_configUnknownClient(const QString& errMsg)
 {
 	Q_UNUSED(errMsg);
 
@@ -286,7 +298,7 @@ void TestSuiteMainWindow::slot_unknownClient(QString errMsg)
 	return;
 }
 
-void TestSuiteMainWindow::slot_wrongClientHostname(QString errMsg)
+void TestSuiteMainWindow::slot_configWrongClientHostname(const QString &errMsg)
 {
 	Q_UNUSED(errMsg);
 
@@ -295,6 +307,14 @@ void TestSuiteMainWindow::slot_wrongClientHostname(QString errMsg)
 	QMessageBox::critical(this,
 						  qAppName(),
 						  tr("Configuration Service reporting - TestSuite running on computer with wrong hostanme"));
+	return;
+}
+
+void TestSuiteMainWindow::slot_configLogError(const QString& errMsg)
+{
+	QMessageBox::critical(this,
+						  qAppName(),
+						  tr("Configuration Service reporting - %1").arg(errMsg));
 	return;
 }
 

@@ -25,8 +25,11 @@ public:
 
 private slots:
 	void slot_configurationArrived(ConfigSettings configuration);
-	void slot_unknownClient(QString errMsg);
-	void slot_wrongClientHostname(QString errMsg);
+
+	void slot_configUnknownClient(const QString& errMsg);
+	void slot_configWrongClientHostname(const QString& errMsg);
+	void slot_configLogMessage(const QString& errMsg);
+	void slot_configLogError(const QString& errMsg);
 
 	void newLogItem(const TestLogItem& logItem);
 

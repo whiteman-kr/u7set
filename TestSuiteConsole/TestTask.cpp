@@ -15,8 +15,12 @@ TestTask::TestTask(const SoftwareInfo& softwareInfo,
 	connect(&m_testEngine, &TestEngine::finished, this, &TestTask::finished);
 
 	connect(&m_configController, &TestSuiteConfigController::configurationArrived, this, &TestTask::slot_configurationArrived);
-	connect(&m_configController, &TestSuiteConfigController::unknownClient, this, &TestTask::slot_unknownClient);
-	connect(&m_configController, &TestSuiteConfigController::wrongClientHostname, this, &TestTask::slot_wrongClientHostname);
+
+	connect(&m_configController, &TestSuiteConfigController::logMessage, this, &TestTask::slot_configLogMessage);
+	connect(&m_configController, &TestSuiteConfigController::logError, this, &TestTask::slot_configLogError);
+	connect(&m_configController, &TestSuiteConfigController::logErrorunknownClient, this, &TestTask::slot_configUnknownClient);
+	connect(&m_configController, &TestSuiteConfigController::logErrorwrongClientHostname, this, &TestTask::slot_configWrongClientHostname);
+
 	m_configController.start();
 
 	std::cout << "Waiting for connection with Configuration Service...\n";
@@ -34,34 +38,45 @@ const TestSuiteConfigController& TestTask::configController() const
 
 void TestTask::slot_configurationArrived(ConfigSettings configuration)
 {
-	std::cout<< "slot_configurationArrived\n";
-
 	start();
 
 
 	return;
 }
 
-void TestTask::slot_unknownClient(QString errMsg)
+void TestTask::slot_configUnknownClient(const QString& errMsg)
 {
 	Q_UNUSED(errMsg);
 
 	// CfgService did not find SoftwareID
 	//
-	std::cout << tr("Configuration Service does not recognize TestSuite EquipmentID %1\n")
-						  .arg(m_configController.softwareInfo().equipmentID()).toStdString();
+	std::cout << tr("Configuration Service does not recognize TestSuite EquipmentID %1")
+						  .arg(m_configController.softwareInfo().equipmentID()).toStdString() << std::endl;
 	return;
 }
 
-void TestTask::slot_wrongClientHostname(QString errMsg)
+void TestTask::slot_configWrongClientHostname(const QString& errMsg)
 {
 	Q_UNUSED(errMsg);
 
 	// CfgService did not find SoftwareID
 	//
-	std::cout << tr("Configuration Service reporting - TestSuite running on computer with wrong hostanme\n").toStdString();
+	std::cout << tr("Configuration Service reporting - TestSuite running on computer with wrong hostanme").toStdString() << std::endl;
 	return;
 }
+
+void TestTask::slot_configLogMessage(const QString& msg)
+{
+	std::cout << tr("Configuration Service: %1").arg(msg).toStdString() << std::endl;
+	return;
+}
+
+void TestTask::slot_configLogError(const QString& errMsg)
+{
+	std::cout << tr("Configuration Service error: %1").arg(errMsg).toStdString() << std::endl;
+	return;
+}
+
 
 void TestTask::start()
 {
