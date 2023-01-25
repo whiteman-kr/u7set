@@ -62,6 +62,8 @@ bool TestSuiteCfgGenerator::generateConfigurationStep1()
 		result &= writeTuningSignals();
 	}
 
+	result &= writeTestScripts();
+
 	return result;
 }
 
@@ -173,6 +175,94 @@ bool TestSuiteCfgGenerator::writeTuningSignals()
 
 	ok = m_cfgXml->addLinkToFile(buildFile);
 	return ok;
+}
+
+bool TestSuiteCfgGenerator::writeTestScripts()
+{
+	Q_ASSERT(m_context->m_buildResultWriter);
+
+	DbFileTree fileTree;
+
+	if (bool ok = m_context->m_db.getFileListTree(&fileTree, DbDir::TestsDir, true, nullptr);
+		ok == false)
+	{
+		m_context->m_log->errPDB2001(m_context->m_db.systemFileId(DbDir::TestsDir), "", m_context->m_db.lastError());
+		return false;
+	}
+
+	// Script comments
+	//
+	//BuildInfo b = m_context->m_buildResultWriter->buildInfo();
+
+	// --
+	//
+	const std::map<int, std::shared_ptr<DbFileInfo>>& files = fileTree.files();
+
+	QString javaScriptFileExtension{Db::File::JavaScriptFileExtension};
+
+	for (auto& [fileId, fileInfo] : files)
+	{
+		if (fileInfo->isFolder() == true)
+		{
+			continue;
+		}
+
+		QString fileExt = fileInfo->extension();
+
+		if (fileExt.compare(javaScriptFileExtension, Qt::CaseInsensitive) != 0)
+		{
+			continue;
+		}
+
+		std::shared_ptr<DbFile> file;
+
+		bool ok = m_context->m_db.getLatestVersion(*fileInfo, &file, nullptr);
+		if (ok == true)
+		{
+			QString folderPath = Db::File::systemDirToName(DbDir::RootDir) + "/";
+
+			{
+				QStringList pathList;
+				std::shared_ptr<DbFileInfo> f = fileTree.file(fileId);
+
+				while (f != nullptr)
+				{
+					f = fileTree.file(f->parentId());
+
+					if (f != nullptr)
+					{
+						pathList.push_front(f->fileName());
+					}
+				}
+
+				folderPath += pathList.join(QChar('/'));
+			}
+
+			if (folderPath.startsWith(Db::File::systemDirToName(DbDir::HardwareTestsDir)))
+			{
+				BuildFile* buildFile = m_context->m_buildResultWriter->addFile(m_software->equipmentIdTemplate() + fileTree.filePath(fileId),
+																			   file->fileName(),
+																			   CfgFileId::TESTSUITE_TESTSCRIPT,
+																			   "",
+																			   file->data(), false);
+				if (buildFile == nullptr)
+				{
+					Q_ASSERT(buildFile);
+					return false;
+				}
+
+				m_cfgXml->addLinkToFile(buildFile);
+			}
+		}
+		else
+		{
+			m_context->m_log->errPDB2002(fileInfo->fileId(), fileInfo->fileName(), m_context->m_db.lastError());
+			return false;
+		}
+	}
+
+	return true;
+
 }
 
 }
