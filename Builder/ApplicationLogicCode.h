@@ -51,13 +51,13 @@ namespace Builder
 		static const quint16 MAX_BIT_NO_16 = 16 - 1;
 
 		LmCommand::Code code;
-		int sizeW;
-		const char* mnemo;
+		int sizeW = 0;
+		const char* mnemo = nullptr;
 
-		bool waitFbExecution;
+		bool waitFbExecution = false;
 
-		int readTime;
-		int runTime;
+		int readTime = 0;
+		int runTime = 0;
 	};
 
 	inline const LmCommand lmCommandSet[] =
@@ -349,6 +349,7 @@ namespace Builder
 		bool isNoCommand() const { return m_code.isNoCommand(); }
 
 		bool isOpCode(LmCommand::Code code) const { return m_code.getOpCode() == code; }
+		bool isWaitingForFbExecution() const;
 
 		quint16 getWord2() const { return m_code.getWord2(); }
 		quint16 getWord3() const { return m_code.getWord3(); }
@@ -356,15 +357,22 @@ namespace Builder
 		quint16 getBitNo1() const { return m_code.getBitNo1(); }
 		quint16 getBitNo2() const { return m_code.getBitNo2(); }
 
+		int getFbType() const { return m_code.getFbType(); }
+
 		bool isValidCommand() const { return m_code.getOpCode() != LmCommand::Code::NoCommand; }
 
 		bool generateBinCode(QByteArray* binCode) const;
 
-		QString getAsmCode(bool printCmdCode) const;
+		QString getAsmCode(bool printCmdCode, int* clockCount) const;
 		QString mnemoCode() const;
 		QString getConstValueString() const;
 
-		bool calcRunTime(const LmMemoryMap* lmMemMap, int prevCmdExecTime);
+		bool calcRunTime(const LmMemoryMap* lmMemMap,
+						 int prevCmdExecTime,
+						 int* waitTime,
+						 int* execTime,
+						 int* fbExecTime);
+
 		bool getTimes(int* waitTime, int* execTime) const;
 
 		int waitTime() const { Q_ASSERT(m_waitTime != -1); return m_waitTime; }
@@ -374,10 +382,6 @@ namespace Builder
 
 	private:
 		void initCommand();
-
-		static int startFbExec(int fbType, int fbRuntime);
-		static void decFbExecTime(int time);
-		static int getFbRemainingExecTime(int fbType);
 
 		QString getCodeWordStr(int wordNo) const;
 
@@ -396,31 +400,16 @@ namespace Builder
 		CommandCode m_code;
 		QString m_comment;
 
-		qint32 m_numerator = 0;			// unique number of codeItems for debugging purposes
-
 		int m_fbExecTime = 0;			// != 0 for commands START and NSTART only
 
 		bool m_result = true;
 
 		int m_waitTime = -1;
 		int m_execTime = -1;
-
-		static QHash<int, int> m_executedFb;				// fbType => remaining FB exec time
-
-		static qint32 m_codeItemsNumerator;
 	};
 
 	class CodeSnippet
 	{
-	public:
-		enum class CodeType
-		{
-			Unknown,
-			IDR_Code,
-			ALP_Code,
-			AllCode
-		};
-
 	public:
 		CodeSnippet();
 
@@ -436,20 +425,15 @@ namespace Builder
 		void newLine();
 		void comment_nl(const QString& cmt);
 		void finalizeByNewLine();
-
-		void setAppStartAddr(int addr);
-
-		void finalize(CodeType codeType, const LmDescription& lmDesc);
-
 		void clear();
-
-		void setMemoryMapAndLogger(const LmMemoryMap* lmMemory, IssueLogger* log);
-
 		void reserve(int size);
 
 		//
 
 		bool isEmpty() const;
+		int itemsCount() const;
+
+		//
 
 		void getAsmCode(QStringList* asmCode) const;
 		void getBinCode(QByteArray* binCode) const;
@@ -458,12 +442,35 @@ namespace Builder
 		void getAsmMetadataFields(QStringList* metadataFields, int* metadataVersion) const;
 		void getAsmMetadata(std::vector<QVariantList>* metadata) const;
 
-		CodeType codeType() const;
+	protected:
+		std::vector<CodeItem> m_code;
+	};
+
+	class AppLogicCode : public CodeSnippet
+	{
+	public:
+		enum class Type
+		{
+			Unknown,
+			IDR_Code,
+			ALP_Code,
+			AllCode
+		};
+
+	public:
+		AppLogicCode(Type type);
+
+		void setMemoryMapAndLogger(const LmMemoryMap* lmMemory, IssueLogger* log);
+		void setAppStartAddr(int addr);
+		void finalize(const LmDescription& lmDesc);
+		void clear();
+
+		Type codeType() const;
 
 		int codeSizeW() const;
 		int clockCount() const;
 		int commandsCount() const;
-		int itemsCount() const;
+
 		double lmCodeMemoryUsage() const;
 		double execTimeMcs() const;
 		double lmCycleTimeUsage() const;
@@ -471,17 +478,22 @@ namespace Builder
 		bool getCommandsStatistics(std::vector<CommandStatistics>* stat) const;
 
 	private:
+		int startFbExec(int fbOpCode, int fbRuntime);
+		void decFbExecTime(int time);
+		int getFbRemainingExecTime(int fbOpCode);
+		int getMaxFbRemainingExecTimeAndClear();
+
+	private:
+		Type m_codeType = Type::Unknown;
+
 		const LmMemoryMap* m_lmMemoryMap = nullptr;
 		IssueLogger* m_log = nullptr;
 
-		std::vector<CodeItem> m_code;
+		std::map<int, int> m_runningAfbs;		// AFB opCode -> AFB runtime
 
-		// code snippet statistics
-		//
-		CodeType m_codeType = CodeType::Unknown;
 		int m_codeSizeW = -1;
-		int m_clockCount = -1;
 		int m_commandsCount = -1;
+		int m_clockCount = -1;
 
 		double m_lmCodeMemUsage = 0;
 		double m_execTimeMcs = 0;

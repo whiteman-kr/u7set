@@ -35,7 +35,11 @@ namespace Builder
 		m_lm(lm),
 		m_memoryMap(appLogicCompiler.log()),
 		m_ualSignals(*this, appLogicCompiler.log()),
-		m_loopbacks(*this)
+		m_loopbacks(*this),
+		m_code(AppLogicCode::Type::AllCode),
+		m_idrCode(AppLogicCode::Type::IDR_Code),
+		m_alpCode(AppLogicCode::Type::ALP_Code)
+
 	{
 		m_equipmentSet = appLogicCompiler.equipmentSet();
 		m_deviceRoot = m_equipmentSet->root().get();
@@ -7481,7 +7485,7 @@ namespace Builder
 		m_idrCode.append(stopCmd);
 		m_idrCode.newLine();
 
-		m_idrCode.finalize(CodeSnippet::CodeType::IDR_Code, *m_lmDescription.get());	// required to calc codeSizeW
+		m_idrCode.finalize(*m_lmDescription.get());	// required to calc codeSizeW
 
 		int alpCodeStartAddr = m_idrCode.codeSizeW();
 
@@ -7538,7 +7542,7 @@ namespace Builder
 
 		m_alpCode.append(stopCmd);
 
-		m_alpCode.finalize(CodeSnippet::CodeType::ALP_Code, *m_lmDescription.get());
+		m_alpCode.finalize(*m_lmDescription.get());
 
 		return result;
 	}
@@ -7554,7 +7558,7 @@ namespace Builder
 		m_code.append(m_idrCode);
 		m_code.append(m_alpCode);
 
-		m_code.finalize(CodeSnippet::CodeType::AllCode, *m_lmDescription.get());
+		m_code.finalize(*m_lmDescription.get());
 
 		return true;
 	}
@@ -14925,7 +14929,7 @@ namespace Builder
 		return buildFile != nullptr;
 	}
 
-	void ModuleLogicCompiler::printCodeStatistics(const CodeSnippet& code,
+	void ModuleLogicCompiler::printCodeStatistics(const AppLogicCode& code,
 												QStringList& file,
 												bool exludeNotUsedCommands) const
 	{
@@ -14939,19 +14943,19 @@ namespace Builder
 
 		switch(code.codeType())
 		{
-		case CodeSnippet::CodeType::IDR_Code:
+		case AppLogicCode::Type::IDR_Code:
 			phaseStr = QString("IDR phase");
 			phaseClocks = m_lmDescription->logicUnit().idrPhaseClocks();
 			phaseTime = m_lmDescription->logicUnit().m_idrPhaseTime;
 			break;
 
-		case CodeSnippet::CodeType::ALP_Code:
+		case AppLogicCode::Type::ALP_Code:
 			phaseStr = QString("ALP phase");
 			phaseClocks = m_lmDescription->logicUnit().alpPhaseClocks();
 			phaseTime = m_lmDescription->logicUnit().m_alpPhaseTime;
 			break;
 
-		case CodeSnippet::CodeType::AllCode:
+		case AppLogicCode::Type::AllCode:
 			phaseStr = QString("All");
 			phaseClocks = m_lmDescription->logicUnit().idrPhaseClocks() +
 						  m_lmDescription->logicUnit().alpPhaseClocks();
@@ -15002,25 +15006,24 @@ namespace Builder
 		printCodeStatisticsTable(code, stat, file, exludeNotUsedCommands);
 	}
 
-	void ModuleLogicCompiler::printCodeStatisticsTable(const CodeSnippet& code,
+	void ModuleLogicCompiler::printCodeStatisticsTable(const AppLogicCode& code,
 												const std::vector<CommandStatistics>& stat,
 												QStringList& file,
 												bool exludeNotUsedCommands) const
 	{
-
 		QString headerStr;
 
 		switch(code.codeType())
 		{
-		case CodeSnippet::CodeType::IDR_Code:
+		case AppLogicCode::Type::IDR_Code:
 			headerStr = QString("            | Used in IDR code |  IDR code size   |  IDR exec time   ");
 			break;
 
-		case CodeSnippet::CodeType::ALP_Code:
+		case AppLogicCode::Type::ALP_Code:
 			headerStr = QString("            | Used in ALP code |  ALP code size   |  ALP exec time   ");
 			break;
 
-		case CodeSnippet::CodeType::AllCode:
+		case AppLogicCode::Type::AllCode:
 			headerStr = QString("            |       Used       |     Code size    |    Exec time     ");
 			break;
 

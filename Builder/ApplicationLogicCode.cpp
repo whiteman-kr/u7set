@@ -337,14 +337,8 @@ namespace Builder
 	//
 	// ---------------------------------------------------------------------------------------
 
-	QHash<int, int> CodeItem::m_executedFb;
-
-	qint32 CodeItem::m_codeItemsNumerator = 0;
-
 	CodeItem::CodeItem()
 	{
-		m_numerator = m_codeItemsNumerator;
-		m_codeItemsNumerator++;
 	}
 
 	void CodeItem::nop()
@@ -1190,6 +1184,17 @@ namespace Builder
 		return false;
 	}
 
+	bool CodeItem::isWaitingForFbExecution() const
+	{
+/*		return lmCommands[m_code.getOpCodeInt()].;
+
+		if (lmCommand.waitFbExecution == true)
+		{
+			int fbType = m_code.getFbType();*/
+
+		return lmCommands[m_code.getOpCodeInt()].waitFbExecution;
+	}
+
 	bool CodeItem::generateBinCode(QByteArray* binCode) const
 	{
 		TEST_PTR_RETURN_FALSE(binCode);
@@ -1234,8 +1239,10 @@ namespace Builder
 		return true;
 	}
 
-	QString CodeItem::getAsmCode(bool printCmdCode) const
+	QString CodeItem::getAsmCode(bool printCmdCode, int* clockCount) const
 	{
+		TEST_PTR_RETURN_VALUE(clockCount, QString());
+
 		if (m_isCommand == false)
 		{
 			// this is a comment
@@ -1279,9 +1286,11 @@ namespace Builder
 
 		Q_ASSERT(m_execTime >= 0);			// check that times already calculated
 
-		char cstr[16];
-		snprintf(cstr, 16, "[%02d:%02d]", m_waitTime, m_execTime);
-		cmdStr += QString(cstr).leftJustified(12, ' '); ;
+		*clockCount += m_waitTime + m_execTime;
+
+		char cstr[32];
+		snprintf(cstr, 32, "[%02d:%02d %6d]", m_waitTime, m_execTime, *clockCount);
+		cmdStr += QString(cstr).leftJustified(16, ' ');
 
 		QString mnemo = mnemoCode();
 
@@ -1501,9 +1510,17 @@ namespace Builder
 		return QString();
 	}
 
-	bool CodeItem::calcRunTime(const LmMemoryMap* lmMemMap, int prevCmdExecTime)
+	bool CodeItem::calcRunTime(const LmMemoryMap* lmMemMap,
+							   int prevCmdExecTime,
+							   int* waitTime,
+							   int* execTime,
+							   int* fbExecTime)
 	{
 		TEST_PTR_RETURN_FALSE(lmMemMap);
+
+		*waitTime = 0;
+		*execTime = 0;
+		*fbExecTime = 0;
 
 		m_waitTime = 0;
 		m_execTime = 0;
@@ -1518,27 +1535,16 @@ namespace Builder
 
 		int cmdReadTime = lmCommand.readTime;
 
-		if (prevCmdExecTime > cmdReadTime)
+		if (prevCmdExecTime >= cmdReadTime)
 		{
-			m_waitTime = prevCmdExecTime - cmdReadTime;
-
-			decFbExecTime(prevCmdExecTime);
+			m_waitTime = 0;
 		}
 		else
 		{
 			m_waitTime = cmdReadTime - prevCmdExecTime;
-
-			decFbExecTime(cmdReadTime);
 		}
 
 		Q_ASSERT(m_waitTime >= 0);
-
-		if (lmCommand.waitFbExecution == true)
-		{
-			int fbType = m_code.getFbType();
-
-			m_waitTime += getFbRemainingExecTime(fbType);
-		}
 
 		int cmdExecTime = 0;
 
@@ -1578,7 +1584,7 @@ namespace Builder
 
 				cmdExecTime = lmCommand.runTime;
 
-				startFbExec(m_code.getFbType(), m_fbExecTime);
+				*fbExecTime = m_fbExecTime;
 			}
 			break;
 
@@ -1590,7 +1596,7 @@ namespace Builder
 
 				cmdExecTime = 3 + n * 2;
 
-				startFbExec(m_code.getFbType(), m_fbExecTime * n);
+				*fbExecTime = m_fbExecTime * n;
 			}
 			break;
 
@@ -1661,6 +1667,9 @@ namespace Builder
 
 		m_execTime = cmdExecTime;
 
+		*waitTime = m_waitTime;
+		*execTime = m_execTime;
+
 		return true;
 	}
 
@@ -1711,62 +1720,6 @@ namespace Builder
 		str = QString("%1%2").arg(lowByte, 2, 16, Latin1Char::ZERO).arg(highByte, 2, 16, Latin1Char::ZERO);
 
 		return str;
-	}
-
-	int CodeItem::startFbExec(int fbType, int fbRuntime)
-	{
-		int waitTime = 0;
-
-		int fbRemainingExecTime = m_executedFb.value(fbType, -1);
-
-		if (fbRemainingExecTime != -1)
-		{
-			// FB of fbType is executed now!
-			//
-			waitTime = fbRemainingExecTime;
-		}
-		else
-		{
-			// FB of fbType is NOT executed now!
-			//
-			waitTime = 0;
-		}
-
-		// add FB to exec map
-		//
-		m_executedFb.insert(fbType, fbRuntime);
-
-		return waitTime;
-	}
-
-	void CodeItem::decFbExecTime(int time)
-	{
-		QHash<int, int>::iterator i = m_executedFb.begin();
-
-		while(i != m_executedFb.end())
-		{
-			int remainingFbExecTime = i.value() - time;
-
-			if (remainingFbExecTime > 0)
-			{
-				// update FB remaining exec time
-				//
-				m_executedFb.insert(i.key(), remainingFbExecTime);
-
-				i++;		// move to next elem
-			}
-			else
-			{
-				// remove FB from map
-				//
-				i = m_executedFb.erase(i);
-			}
-		}
-	}
-
-	int CodeItem::getFbRemainingExecTime(int fbType)
-	{
-		return m_executedFb.value(fbType, 0);
 	}
 
 	bool CodeItem::read16(int /*addrFrom*/)
@@ -1930,125 +1883,10 @@ namespace Builder
 			newLine();
 		}
 	}
-	void CodeSnippet::setAppStartAddr(int addr)
-	{
-		for(CodeItem& codeItem : m_code)
-		{
-			if (codeItem.getOpcode() == LmCommand::Code::APPSTART)
-			{
-				codeItem.appStart(addr);
-				return;
-			}
-		}
-
-		Q_ASSERT(false);
-	}
-
-	void CodeSnippet::finalize(CodeType codeType, const LmDescription& lmDesc)
-	{
-		m_codeType = codeType;
-
-		m_codeSizeW = 0;
-		m_clockCount = 0;
-		m_commandsCount = 0;
-
-		m_lmCodeMemUsage = 0;
-		m_execTimeMcs = 0;
-		m_lmCycleTimeUsage = 0;
-
-		if (m_code.empty() == true)
-		{
-			return;
-		}
-
-		// read commands and calculate code runtime
-		//
-		int prevCmdExecTime = 0;
-
-		for(CodeItem& codeItem : m_code)
-		{
-			if (codeItem.isCommand() == false)
-			{
-				continue;
-			}
-
-			m_commandsCount++;
-
-			codeItem.setAddress(m_codeSizeW);
-
-			m_codeSizeW += codeItem.sizeW();
-
-			int waitTime = 0;
-			int execTime = 0;
-
-			codeItem.calcRunTime(m_lmMemoryMap, prevCmdExecTime);
-			codeItem.getTimes(&waitTime, &execTime);
-
-			m_clockCount += (waitTime + execTime);		// !!!
-
-			prevCmdExecTime = execTime;
-
-			if (codeItem.getOpcode() == LmCommand::Code::STOP)
-			{
-				codeItem.addExecTime(prevCmdExecTime);
-				m_clockCount += prevCmdExecTime;
-				prevCmdExecTime = 0;
-			}
-		}
-
-		if (lmDesc.memory().m_codeMemorySize != 0)
-		{
-			m_lmCodeMemUsage = static_cast<double>(m_codeSizeW * 100) /
-								static_cast<double>(lmDesc.memory().m_codeMemorySize);
-		}
-
-		m_execTimeMcs = m_clockCount * lmDesc.logicUnit().clockTimeSecs() * 1000000.0;
-
-		double totalTimeMcs = 0;
-
-		switch(codeType)
-		{
-		case CodeType::IDR_Code:
-			totalTimeMcs = lmDesc.logicUnit().m_idrPhaseTime;
-			break;
-
-		case CodeType::ALP_Code:
-			totalTimeMcs = lmDesc.logicUnit().m_alpPhaseTime;
-			break;
-
-		case CodeType::AllCode:
-			totalTimeMcs =	lmDesc.logicUnit().m_idrPhaseTime +
-							lmDesc.logicUnit().m_alpPhaseTime;
-			break;
-
-		default:
-			Q_ASSERT(false);
-			return;
-		}
-
-		if (totalTimeMcs !=  0)
-		{
-			m_lmCycleTimeUsage = static_cast<double>(m_execTimeMcs * 100) / totalTimeMcs;
-		}
-	}
 
 	void CodeSnippet::clear()
 	{
-		m_lmMemoryMap = nullptr;
-		m_log = nullptr;
 		m_code.clear();
-		m_codeSizeW = -1;
-		m_clockCount = -1;
-		m_commandsCount = -1;
-	}
-
-	void CodeSnippet::setMemoryMapAndLogger(const LmMemoryMap* lmMemory, IssueLogger* log)
-	{
-		TEST_PTR_RETURN(lmMemory);
-		TEST_PTR_RETURN(log);
-
-		m_lmMemoryMap = lmMemory;
-		m_log = log;
 	}
 
 	void CodeSnippet::reserve(int size)
@@ -2061,35 +1899,35 @@ namespace Builder
 		return m_code.empty();
 	}
 
+	int CodeSnippet::itemsCount() const
+	{
+		return static_cast<int>(m_code.size());
+	}
+
 	void CodeSnippet::getAsmCode(QStringList* asmCode) const
 	{
 		TEST_PTR_RETURN(asmCode);
 
-		if (m_codeSizeW == -1)
-		{
-			Q_ASSERT(false);		// finalize() should be called first
-			return;
-		}
-
 		asmCode->clear();
+
+		int clockCount = 0;
 
 		for(const CodeItem& codeItem : m_code)
 		{
-			QString str = codeItem.getAsmCode(true);
+			QString str = codeItem.getAsmCode(true, &clockCount);
 
 			asmCode->append(str);
+
+			if (codeItem.getOpcode() == LmCommand::Code::STOP)
+			{
+				clockCount = 0;
+			}
 		}
 	}
 
 	void CodeSnippet::getBinCode(QByteArray* binCode) const
 	{
 		TEST_PTR_RETURN(binCode);
-
-		if (m_codeSizeW == -1)
-		{
-			Q_ASSERT(false);		// finalize() should be called first
-			return;
-		}
 
 		binCode->clear();
 
@@ -2106,12 +1944,6 @@ namespace Builder
 	void CodeSnippet::getMifCode(QStringList* mifCode) const
 	{
 		TEST_PTR_RETURN(mifCode);
-
-		if (m_codeSizeW == -1)
-		{
-			Q_ASSERT(false);		// finalize() should be called first
-			return;
-		}
 
 		mifCode->clear();
 
@@ -2298,54 +2130,208 @@ namespace Builder
 		}
 	}
 
-	CodeSnippet::CodeType CodeSnippet::codeType() const
+	AppLogicCode::AppLogicCode(Type type) :
+		m_codeType(type)
+	{
+	}
+
+	void AppLogicCode::setMemoryMapAndLogger(const LmMemoryMap* lmMemory, IssueLogger* log)
+	{
+		TEST_PTR_RETURN(lmMemory);
+		TEST_PTR_RETURN(log);
+
+		m_lmMemoryMap = lmMemory;
+		m_log = log;
+	}
+
+	void AppLogicCode::setAppStartAddr(int addr)
+	{
+		Q_ASSERT(m_codeType == Type::IDR_Code);
+
+		for(CodeItem& codeItem : m_code)
+		{
+			if (codeItem.getOpcode() == LmCommand::Code::APPSTART)
+			{
+				codeItem.appStart(addr);
+				return;
+			}
+		}
+
+		Q_ASSERT(false);
+	}
+
+	void AppLogicCode::finalize(const LmDescription& lmDesc)
+	{
+		m_codeSizeW = 0;
+		m_clockCount = 0;
+		m_commandsCount = 0;
+
+		m_lmCodeMemUsage = 0;
+		m_execTimeMcs = 0;
+		m_lmCycleTimeUsage = 0;
+
+		if (m_code.empty() == true)
+		{
+			return;
+		}
+
+		// read commands and calculate code runtime
+		//
+		int prevCmdExecTime = 0;
+		int waitTime = 0;
+		int execTime = 0;
+		int fbExecTime = 0;
+		int waitFbTime = 0;
+
+		for(CodeItem& codeItem : m_code)
+		{
+			if (codeItem.isCommand() == false)
+			{
+				continue;
+			}
+
+			m_commandsCount++;
+
+			codeItem.setAddress(m_codeSizeW);
+
+			m_codeSizeW += codeItem.sizeW();
+
+			//
+
+			if (codeItem.isWaitingForFbExecution() == true)
+			{
+				waitFbTime = getFbRemainingExecTime(codeItem.getFbType());
+			}
+
+			prevCmdExecTime = std::max(prevCmdExecTime, waitFbTime);
+
+			codeItem.calcRunTime(m_lmMemoryMap, prevCmdExecTime,
+								 &waitTime, &execTime, &fbExecTime);
+
+			m_clockCount += (waitTime + execTime);		// !!!
+
+			decFbExecTime(waitTime + execTime);
+
+			prevCmdExecTime = execTime;
+
+			if (fbExecTime != 0)
+			{
+				Q_ASSERT(codeItem.getOpcode() == LmCommand::Code::START ||
+						 codeItem.getOpcode() == LmCommand::Code::NSTART);
+
+				startFbExec(codeItem.getFbType(), fbExecTime);
+			}
+
+			//
+
+			if (codeItem.getOpcode() == LmCommand::Code::STOP)
+			{
+				int maxTime = getMaxFbRemainingExecTimeAndClear();
+
+				prevCmdExecTime = std::max(prevCmdExecTime, maxTime);
+
+				codeItem.addExecTime(prevCmdExecTime);
+				m_clockCount += prevCmdExecTime;
+				prevCmdExecTime = 0;
+			}
+		}
+
+		if (lmDesc.memory().m_codeMemorySize != 0)
+		{
+			m_lmCodeMemUsage = static_cast<double>(m_codeSizeW * 100) /
+								static_cast<double>(lmDesc.memory().m_codeMemorySize);
+		}
+
+		m_execTimeMcs = m_clockCount * lmDesc.logicUnit().clockTimeSecs() * 1000000.0;
+
+		double totalTimeMcs = 0;
+
+		switch(m_codeType)
+		{
+		case Type::IDR_Code:
+			totalTimeMcs = lmDesc.logicUnit().m_idrPhaseTime;
+			break;
+
+		case Type::ALP_Code:
+			totalTimeMcs = lmDesc.logicUnit().m_alpPhaseTime;
+			break;
+
+		case Type::AllCode:
+			totalTimeMcs =	lmDesc.logicUnit().m_idrPhaseTime +
+							lmDesc.logicUnit().m_alpPhaseTime;
+			break;
+
+		default:
+			Q_ASSERT(false);
+			return;
+		}
+
+		if (totalTimeMcs !=  0)
+		{
+			m_lmCycleTimeUsage = static_cast<double>(m_execTimeMcs * 100) / totalTimeMcs;
+		}
+	}
+
+	void AppLogicCode::clear()
+	{
+		CodeSnippet::clear();
+
+		m_lmMemoryMap = nullptr;
+		m_log = nullptr;
+
+		m_runningAfbs.clear();
+
+		m_codeSizeW = -1;
+		m_clockCount = -1;
+		m_commandsCount = -1;
+
+		m_lmCodeMemUsage = 0;
+		m_execTimeMcs = 0;
+		m_lmCycleTimeUsage = 0;
+	}
+
+	AppLogicCode::Type AppLogicCode::codeType() const
 	{
 		return m_codeType;
 	}
 
-	int CodeSnippet::codeSizeW() const
+	int AppLogicCode::codeSizeW() const
 	{
 		Q_ASSERT(m_codeSizeW != -1);		// finalize() should be called first
 		return m_codeSizeW;
 	}
 
-	int CodeSnippet::clockCount() const
+	int AppLogicCode::clockCount() const
 	{
 		Q_ASSERT(m_clockCount != -1);		// finalize() should be called first
 		return m_clockCount;
 	}
 
-	int CodeSnippet::commandsCount() const
+	int AppLogicCode::commandsCount() const
 	{
 		Q_ASSERT(m_commandsCount != -1);	// finalize() should be called first
 		return m_commandsCount;
 	}
 
-	int CodeSnippet::itemsCount() const
-	{
-		Q_ASSERT(m_codeSizeW != -1);		// finalize() should be called first
-		return static_cast<int>(m_code.size());
-	}
-
-	double CodeSnippet::lmCodeMemoryUsage() const
+	double AppLogicCode::lmCodeMemoryUsage() const
 	{
 		Q_ASSERT(m_codeSizeW != -1);		// finalize() should be called first
 		return m_lmCodeMemUsage;
 	}
 
-	double CodeSnippet::execTimeMcs() const
+	double AppLogicCode::execTimeMcs() const
 	{
 		Q_ASSERT(m_codeSizeW != -1);		// finalize() should be called first
 		return m_execTimeMcs;
 	}
 
-	double CodeSnippet::lmCycleTimeUsage() const
+	double AppLogicCode::lmCycleTimeUsage() const
 	{
 		Q_ASSERT(m_codeSizeW != -1);		// finalize() should be called first
 		return m_lmCycleTimeUsage;
 	}
 
-	bool CodeSnippet::getCommandsStatistics(std::vector<CommandStatistics>* stat) const
+	bool AppLogicCode::getCommandsStatistics(std::vector<CommandStatistics>* stat) const
 	{
 		TEST_PTR_RETURN_FALSE(stat);
 
@@ -2395,6 +2381,88 @@ namespace Builder
 		}
 
 		return true;
+	}
+
+	int AppLogicCode::startFbExec(int fbOpCode, int fbRuntime)
+	{
+		int waitTime = 0;
+
+		auto it = m_runningAfbs.find(fbOpCode);
+
+		if (it == m_runningAfbs.end())
+		{
+			// FB with fbOpCode is NOT running now!
+			//
+			m_runningAfbs.insert({fbOpCode, fbRuntime});
+			waitTime = 0;
+		}
+		else
+		{
+			Q_ASSERT(it->second > 0);
+
+			// FB with fbOpCode is running now!
+			//
+			waitTime = it->second;			// fb remaining exec time
+			it->second = fbRuntime;
+		}
+
+		return waitTime;
+	}
+
+	void AppLogicCode::decFbExecTime(int time)
+	{
+		if (m_runningAfbs.empty() == true)
+		{
+			return;
+		}
+
+		std::map<int, int> stillRunningAfbs;
+
+		for(auto& p : m_runningAfbs)
+		{
+			Q_ASSERT(p.second > 0);
+
+			p.second -= time;
+
+			if (p.second > 0)
+			{
+				stillRunningAfbs.emplace(p);
+			}
+		}
+
+		m_runningAfbs.swap(stillRunningAfbs);
+	}
+
+	int AppLogicCode::getFbRemainingExecTime(int fbOpCode)
+	{
+		int remainingTime = 0;
+
+		auto it = m_runningAfbs.find(fbOpCode);
+
+		if (it != m_runningAfbs.end())
+		{
+			remainingTime = it->second;
+			m_runningAfbs.erase(it);
+		}
+
+		return remainingTime;
+	}
+
+	int AppLogicCode::getMaxFbRemainingExecTimeAndClear()
+	{
+		int maxTime = 0;
+
+		for(auto& p : m_runningAfbs)
+		{
+			if (p.second > maxTime)
+			{
+				maxTime = p.second;
+			}
+		}
+
+		m_runningAfbs.clear();
+
+		return maxTime;
 	}
 
 	// -----------------------------------------------------------------------------------------------

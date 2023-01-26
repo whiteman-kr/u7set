@@ -678,11 +678,11 @@ namespace Builder
 		bool writeHeapsLog();
 		bool writeStatisticsFile() const;
 
-		void printCodeStatistics(const CodeSnippet& code,
+		void printCodeStatistics(const AppLogicCode& code,
 								 QStringList& file,
 								 bool exludeNotUsedCommands) const;
 
-		void printCodeStatisticsTable(const CodeSnippet& code,
+		void printCodeStatisticsTable(const AppLogicCode& code,
 									  const std::vector<CommandStatistics>& stat,
 									  QStringList& file,
 									  bool exludeNotUsedCommands) const;
@@ -797,10 +797,10 @@ namespace Builder
 
 		//
 
-		CodeSnippet m_code;
+		AppLogicCode m_code;
 
-		CodeSnippet m_idrCode;
-		CodeSnippet m_alpCode;
+		AppLogicCode m_idrCode;
+		AppLogicCode m_alpCode;
 
 		AfblsMap m_afbls;
 
