@@ -551,6 +551,7 @@ namespace VFrame30
 
 		// Create global variable "log"
 		//
+		if (m_logController != nullptr)
 		{
 			QJSValue jsLog = engine.newQObject(m_logController);
 			QQmlEngine::setObjectOwnership(m_logController, QQmlEngine::CppOwnership);
@@ -856,7 +857,10 @@ namespace VFrame30
 			logController()->writeError(message);
 		}
 
-		QMessageBox::critical(this, QApplication::applicationDisplayName(), message);
+		if (m_alloScriptMessageBox == true)
+		{
+			QMessageBox::critical(this, QApplication::applicationDisplayName(), message);
+		}
 
 		return;
 	}

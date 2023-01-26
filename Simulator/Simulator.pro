@@ -55,6 +55,7 @@ SOURCES += \
     SimAppDataTransmitter.cpp \
     SimCommandProcessor_LM5_LM6.cpp \
     SimConnections.cpp \
+    SimConsoleLogFile.cpp \
     SimDiagDataLanInterface.cpp \
     SimLanInterface.cpp \
     SimLans.cpp \
@@ -86,6 +87,7 @@ SOURCES += \
 	SimOverrideSignals.cpp
 
 HEADERS += \
+    SimConsoleLogFile.h \
 	Stable.h \
     ../lib/ConnectionsInfo.h \
 	../UtilsLib/ILogFile.h \

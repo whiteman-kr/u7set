@@ -1102,18 +1102,23 @@ namespace VFrame30
 
 		// Run script
 		//
-		QJSValue jsResult = evaluatedJs.call(args);
-		if (jsResult.isError() == true)
+		m_lastScriptError.clear();
+
+		try
 		{
-			m_lastScriptError = formatSqriptError(jsResult);
-			return false;
+			QJSValue jsResult = evaluatedJs.call(args);
+
+			if (jsResult.isError() == true)
+			{
+				m_lastScriptError = formatSqriptError(jsResult);
+			}
 		}
-		else
+		catch (std::exception& e)
 		{
-			m_lastScriptError.clear();
+			m_lastScriptError = QString::fromStdString(e.what());
 		}
 
-		return true;
+		return m_lastScriptError.isEmpty();
 	}
 
 	QJSValue Schema::evaluateScript(QString script, QJSEngine* engine, QWidget* parentWidget) const

@@ -2,6 +2,7 @@
 #include <QtTest>
 #include <algorithm>
 #include "../../Simulator/Simulator.h"
+#include "../../Simulator/SimConsoleLogFile.h"
 #include "../../Simulator/SimDeviceEmulator.h"
 #include "../../Simulator/SimException.h"
 
@@ -11,7 +12,8 @@ SimCommandTest_LM5_LM6::SimCommandTest_LM5_LM6()
 
 void SimCommandTest_LM5_LM6::initTestCase()
 {
-	Sim::Simulator simulator{nullptr, false, nullptr};
+	Sim::ConsoleLogFile consoleLog;
+	Sim::Simulator simulator{&consoleLog, false, nullptr};
 
 	m_device = std::make_unique<Sim::DeviceEmulator>(&simulator);
 
