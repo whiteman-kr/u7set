@@ -308,9 +308,11 @@ PendingChangesDialog::PendingChangesDialog(DbController* db, QWidget* parent) :
 	setWindowTitle(tr("Pending Changes"));
 
 #ifdef _DEBUG
+#if QT_VERSION >= QT_VERSION_CHECK(6, 4, 0)
 	[[maybe_unused]]QAbstractItemModelTester* modelTester = new QAbstractItemModelTester(&m_model,
 																		 QAbstractItemModelTester::FailureReportingMode::Fatal,
 																		 this);
+#endif
 #endif
 
 	// --

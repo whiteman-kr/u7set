@@ -1412,9 +1412,11 @@ SchemaFileView::SchemaFileView(DbController* dbc, QWidget* parent) :
 	setModel(&m_proxyModel);
 
 #ifdef _DEBUG
+#if QT_VERSION >= QT_VERSION_CHECK(6, 4, 0)
 	[[maybe_unused]]QAbstractItemModelTester* modelTester = new QAbstractItemModelTester(&m_filesModel,
 																		 QAbstractItemModelTester::FailureReportingMode::Fatal,
 																		 this);
+#endif
 #endif
 
 	// --
