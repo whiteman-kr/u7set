@@ -236,10 +236,10 @@ windows_test_job:
     - "git log -1"
 #Run Create databases for compiler and simulator tests
     - echo Creating PostgreSQL databases...
-    - psql -U postgres -c "CREATE DATABASE u7_compiler_tests_v380_testsuite OWNER u7;"
-    - cmd '/c psql -U postgres u7_compiler_tests_v380_testsuite < c:\Data\u7_compiler_tests_v380_testsuite.sql'
-    - psql -U postgres -c "CREATE DATABASE u7_test_simulator_v380_testsuite OWNER u7;"
-    - cmd '/c psql -U postgres u7_test_simulator_v380_testsuite < c:\Data\u7_test_simulator_v380_testsuite.sql'
+    - psql -U postgres -c "CREATE DATABASE u7_compiler_tests_v378 OWNER u7;"
+    - cmd '/c psql -U postgres u7_compiler_tests_v378 < c:\Data\u7_compiler_tests_v378.sql'
+    - psql -U postgres -c "CREATE DATABASE u7_test_simulator_v378 OWNER u7;"
+    - cmd '/c psql -U postgres u7_test_simulator_v378 < c:\Data\u7_test_simulator_v378.sql'
 #Run XML validation
     - "# ----------------------------------------------"
     - "#               Run XML validation"
@@ -274,13 +274,13 @@ windows_test_job:
     - "# ----------------------------------------------"
     - "#               Run Simulator AFBs tests"
     - "# ----------------------------------------------"
-    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorConsole.exe -build=c:/temp/build/test_simulator_v380_testsuite/build -script=\"$Env:CI_PROJECT_DIR/Simulator/SimProjectTests.js\""
+    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorConsole.exe -build=c:/temp/build/test_simulator_v378/build -script=\"$Env:CI_PROJECT_DIR/Simulator/SimProjectTests.js\""
 
 #Run ROVT to check configuration generation
     - "# ----------------------------------------------"
     - "#               Run ROVT tests"
     - "# ----------------------------------------------"
-    - "#&C:/ROVT/ROVT_C.exe /b:C:\\Temp\\build\\test_simulator_v380_testsuite\\build"
+    - "#&C:/ROVT/ROVT_C.exe /b:C:\\Temp\\build\\test_simulator_v378\\build"
   artifacts:
     name: "u7set_test_windows_0.9.$CI_PIPELINE_ID $CI_BUILD_REF_SLUG $CI_COMMIT_SHA"
     paths:
@@ -326,8 +326,8 @@ linux_test_job:
     - "echo Creating PostgreSQL databases..."
     - "cp $CI_PROJECT_DIR/Test/ImportDatabase.sh /tmp"
     - "pushd /mnt/f/TestDatabase"
-    - "echo P2ssw0rd | su postgres /tmp/ImportDatabase.sh u7_compiler_tests_v380_testsuite"
-    - "echo P2ssw0rd | su postgres /tmp/ImportDatabase.sh u7_test_simulator_v380_testsuite"
+    - "echo P2ssw0rd | su postgres /tmp/ImportDatabase.sh u7_compiler_tests_v378"
+    - "echo P2ssw0rd | su postgres /tmp/ImportDatabase.sh u7_test_simulator_v378"
     - "popd"
     - "rm /tmp/ImportDatabase.sh"
     - "echo Creating PostgreSQL databases complete
@@ -356,13 +356,13 @@ linux_test_job:
     - "# ----------------------------------------------"
     - "#               Run Simulator AFBs tests"
     - "# ----------------------------------------------"
-    - "$CI_PROJECT_DIR/bin_unix/release/SimulatorConsole -build=/tmp/build/test_simulator_v380_testsuite/build -script=\"$CI_PROJECT_DIR/Simulator/SimProjectTests.js\""
+    - "$CI_PROJECT_DIR/bin_unix/release/SimulatorConsole -build=/tmp/build/test_simulator_v378/build -script=\"$CI_PROJECT_DIR/Simulator/SimProjectTests.js\""
 
 #Run ROVT to check configuration generation
 #    - "# ----------------------------------------------"
 #    - "#               Run ROVT tests"
 #    - "# ----------------------------------------------"
-#    - "#&C:/ROVT/ROVT_C.exe /b:C:\\Temp\\build\\test_simulator_v380_testsuite\\build"
+#    - "#&C:/ROVT/ROVT_C.exe /b:C:\\Temp\\build\\test_simulator_v378\\build"
 
   artifacts:
     name: "u7set_test_linux_0.9.$CI_PIPELINE_ID $CI_BUILD_REF_SLUG $CI_COMMIT_SHA"
