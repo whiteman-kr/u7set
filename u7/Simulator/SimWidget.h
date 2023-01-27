@@ -1,9 +1,9 @@
 #pragma once
 
 #include "../DbLib/DbController.h"
+#include "../../Simulator/SimConsoleLogFile.h"
 #include "SimIdeSimulator.h"
 #include "SimSchemaManager.h"
-#include "../Simulator/SimAppSignalManager.h"
 #include "SimTuningTcpClient.h"
 #include "../../VFrame30/AppSignalController.h"
 #include "../../VFrame30/TuningController.h"
@@ -100,6 +100,7 @@ private:
 	SimProjectWidget* m_projectWidget = nullptr;
 	std::vector<SimMemoryWidget*> m_memoryWidgets;
 
+	Sim::ConsoleLogFile m_ideLogFile;
 	std::shared_ptr<SimIdeSimulator> m_simulator;
 
 	QDockWidget* m_overridePaneDock = nullptr;

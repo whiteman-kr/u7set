@@ -12,7 +12,6 @@
 #include "../VFrame30/SchemaItemUfb.h"
 #include "../VFrame30/SchemaItemLoopback.h"
 #include "../VFrame30/AppSignalController.h"
-#include "../VFrame30/MacrosExpander.h"
 
 
 //
@@ -27,13 +26,15 @@ SimSchemaWidget::SimSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
                                  SimIdeSimulator* simulator,
                                  QWidget* parent) :
     VFrame30::ClientSchemaWidget(new SimSchemaView{schemaManager}, schema, schemaManager, parent),
-	m_simulator(simulator)
+	m_simulator(simulator),
+	m_logController(simulator->log().logInterface())
 {
 	Q_ASSERT(m_simulator);
 	Q_ASSERT(schema);
 
 	clientSchemaView()->setAppSignalController(appSignalController);
 	clientSchemaView()->setTuningController(tuningController);
+	clientSchemaView()->setLogController(&m_logController);
 
 	auto context = VFrame30::Context::create(clientSchemaView());
 	schema->setContext(std::move(context));
@@ -47,15 +48,12 @@ SimSchemaWidget::SimSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
 
 	createActions();
 
-	// Run onShowScript
-	//
-	schema->onShowEvent(clientSchemaView()->jsEngine(), clientSchemaView()->logFile());
-
 	// --
 	//
 	connect(m_simulator, &SimIdeSimulator::projectUpdated, this, &SimSchemaWidget::updateProject);
 
 	// If the project was already loaded and we open another SimWidget then call this slot manually.
+	// It sets monitorId ans calls OnShwoScript
 	//
 	updateProject();
 
@@ -404,11 +402,14 @@ void SimSchemaWidget::signalContextMenu(QStringList appSignals,
 			QAction* a = monitorsSubMenu->addAction(m);
 
 			a->setCheckable(true);
-			a->setChecked(m == monitorId());
+			a->setChecked(m == simSchemaView()->monitorId());
 
 			auto f = [m, this]()
 					 {
-						setMonitorId(m, true);
+						QSettings s;
+						s.setValue("Simulator/" + m_simulator->projectName(), m);
+
+						simSchemaView()->setMonitorId(m, true);
 					 };
 
 			connect(a, &QAction::triggered, this, f);
@@ -440,7 +441,7 @@ void SimSchemaWidget::updateProject()
 		monitorId = monitors.front();
 	}
 
-	setMonitorId(monitorId, false);		// Do not emit update (false) as it will lead to recursion
+	simSchemaView()->setMonitorId(monitorId, false);		// Do not emit update (false) as it will lead to recursion
 
 	// Update schema
 	//
@@ -481,38 +482,4 @@ const SimSchemaView* SimSchemaWidget::simSchemaView() const
 	return result;
 }
 
-QString SimSchemaWidget::monitorId() const
-{
-	return m_monitorId;
-}
-
-void SimSchemaWidget::setMonitorId(QString equipmentId, bool emitUpdate)
-{
-	if (m_simulator == nullptr)
-	{
-		assert(m_simulator);
-		return;
-	}
-
-	m_monitorId = equipmentId;
-
-	QSettings s;
-	s.setValue("Simulator/" + m_simulator->projectName(), m_monitorId);
-
-	if (auto monitor = m_simulator->software().monitor(m_monitorId);
-		monitor != nullptr)
-	{
-		clientSchemaView()->setGlobalScript(monitor->globalScript());
-		clientSchemaView()->setOnConfigurationArrivedScript(monitor->onConfigurationArrivedScript());
-	}
-
-	if (emitUpdate == true)
-	{
-		// It will update all schemas, evaluate new GlobalScript and execute onConfigurationArrived
-		//
-		m_simulator->projectUpdated();
-	}
-
-	return;
-}
 

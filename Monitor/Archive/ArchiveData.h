@@ -50,7 +50,7 @@ public:
 private:
 	std::deque<AppSignalState> m_archive;
 
-	static constexpr int MaxArchiveStates = 100'000;
-	static constexpr AppSignalState NullState;
+	inline static constexpr int MaxArchiveStates = 100'000;
+	inline static constexpr AppSignalState NullState{};
 };
 

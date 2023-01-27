@@ -27,6 +27,10 @@ MonitorSchemaView::MonitorSchemaView(MonitorSchemaManager* schemaManager,
 
 	connect(schemaManager->monitorConfigController(), &MonitorConfigController::configurationArrived, this, &MonitorSchemaView::configurationArrived);
 
+	// Updates scripts
+	//
+	configurationArrived(monitorSchemaManager()->monitorConfigController()->configuration());
+
 	return;
 }
 
