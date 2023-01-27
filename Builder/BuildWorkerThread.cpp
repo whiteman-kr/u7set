@@ -185,7 +185,10 @@ namespace Builder
 
 		// Final message about build is here
 		//
-		m_context->m_buildResultWriter->finish(m_finalizedErrorCount, m_finalizedWarningCount);
+		if (m_context->m_buildResultWriter != nullptr)
+		{
+			m_context->m_buildResultWriter->finish(m_finalizedErrorCount, m_finalizedWarningCount);
+		}
 
 		// --
 		//

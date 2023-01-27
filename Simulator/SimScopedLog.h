@@ -3,12 +3,8 @@
 #include "../UtilsLib/ILogFile.h"
 
 
-Q_DECLARE_LOGGING_CATEGORY(u7sim)
-
-
 namespace Sim
 {
-
 	class ScopedLog : public QObject
 	{
 		Q_OBJECT
@@ -37,12 +33,13 @@ namespace Sim
 		bool debugMessagesEnabled() const;
 		void setDebugMessagesEnabled(bool value);
 
+		ILogFile* logInterface();
+
 	private:
 		mutable ILogFile* m_log = nullptr;
 		QString m_scope;
 		std::atomic<bool> m_debugMessagesEnabled = true;
 	};
-
 }
 
 

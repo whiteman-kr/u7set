@@ -19,8 +19,8 @@ namespace VFrame30
 		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::specificProperties, true, UfbSchema::specificProperties, UfbSchema::setSpecificProperties)
 			->setSpecificEditor(E::PropertySpecificEditor::SpecificPropertyStruct);
 
-		Layers.push_back(std::make_shared<SchemaLayer>("Logic", true));
-		Layers.push_back(std::make_shared<SchemaLayer>("Frame", false));
+		addLayer(std::make_shared<SchemaLayer>(this, "Logic", true));
+		addLayer(std::make_shared<SchemaLayer>(this, "Frame", false));
 
 		setTagsList(QStringList{"ufb"});
 

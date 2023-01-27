@@ -63,13 +63,13 @@ namespace VFrame30
 	{
 	}
 
-	void SchemaItemPushButton::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
+	void SchemaItemPushButton::draw(CDrawParam* drawParam) const
 	{
 		// Control is drawn only in PDF mode
 		//
 		if (drawParam->pdfMode() == true)
 		{
-			drawButtonControl(drawParam, schema, layer);
+			drawButtonControl(drawParam, parentSchema(), parentLayer().get());
 		}
 
 		return;

@@ -19,9 +19,9 @@ namespace VFrame30
 		setDocWidth(mm2in(420));
 		setDocHeight(mm2in(297));
 
-		Layers.push_back(std::make_shared<SchemaLayer>("Frame", false));
-		Layers.push_back(std::make_shared<SchemaLayer>("Logic", true));
-		Layers.push_back(std::make_shared<SchemaLayer>("Notes", false));
+		addLayer(std::make_shared<SchemaLayer>(this, "Frame", false));
+		addLayer(std::make_shared<SchemaLayer>(this, "Logic", true));
+		addLayer(std::make_shared<SchemaLayer>(this, "Notes", false));
 
 		setTagsList(QStringList{"applogic"});
 
@@ -79,28 +79,61 @@ namespace VFrame30
 		// Set the right order for layers, a lot of layers were saved in wrong order (logic, frame, notes)
 		// We need order Frame, Logic, Notes
 		//
-		int frameLayerIndex = -1;
-		int logicLayerIndex = -1;
+		auto layersCopy = layers();
 
-		for (size_t layerIndex = 0; layerIndex < Layers.size(); layerIndex++)
+		std::stable_sort(layersCopy.begin(), layersCopy.end(), [](const SchemaLayerPtr& left, const SchemaLayerPtr& right)
 		{
-			if (Layers[layerIndex]->name() == QLatin1String("Frame"))
+			int l = 99;
+			do
 			{
-				frameLayerIndex = static_cast<int>(layerIndex);
-			}
+				if (left->name() == QLatin1String("Frame"))
+				{
+					l = 0;
+					break;
+				}
 
-			if (Layers[layerIndex]->name() == QLatin1String("Logic"))
+				if (left->name() == QLatin1String("Logic"))
+				{
+					l = 1;
+					break;
+				}
+
+				if (left->name() == QLatin1String("Notes"))
+				{
+					l = 2;
+					break;
+				}
+			} while (false);
+
+			int r = 99;
+			do
 			{
-				logicLayerIndex = static_cast<int>(layerIndex);
-			}
-		}
+				if (right->name() == QLatin1String("Frame"))
+				{
+					r = 0;
+					break;
+				}
 
-		if (frameLayerIndex != -1 &&
-			logicLayerIndex != -1 &&
-			logicLayerIndex < frameLayerIndex)
+				if (right->name() == QLatin1String("Logic"))
+				{
+					r = 1;
+					break;
+				}
+
+				if (right->name() == QLatin1String("Notes"))
+				{
+					r = 2;
+					break;
+				}
+			} while (false);
+
+			return l < r;
+		});
+
+		clearLayers();
+		for (const auto &l : layersCopy)
 		{
-			std::swap(Layers[frameLayerIndex], Layers[logicLayerIndex]);
-			setActiveLayer(Layers[frameLayerIndex]);	// frameLayerIndex after swap points to LogicLayer
+			addLayer(l);
 		}
 
 		// --
@@ -127,11 +160,11 @@ namespace VFrame30
 
 		// Initialize Labels for SchemaItemAfbs (if they were not created with label)
 		//
-		for (std::shared_ptr<SchemaLayer> layer : Layers)
+		for (const auto& layer : layers())
 		{
 			Q_ASSERT(layer);
 
-			for (std::shared_ptr<SchemaItem> item : layer->Items)
+			for (const auto& item : layer->items())
 			{
 				if (item->label().isEmpty() == true)
 				{
@@ -158,13 +191,13 @@ namespace VFrame30
 	{
 		std::set<QString> signalMap;	// signal ids can be duplicated, std::set removes dupilcates
 
-		for (std::shared_ptr<SchemaLayer> layer : Layers)
+		for (const auto& layer : layers())
 		{
 			if (layer->compile() == true)
 			{
 				// Get all signals
 				//
-				for (std::shared_ptr<SchemaItem> item : layer->Items)
+				for (const auto& item : layer->items())
 				{
 					if (item->isType<VFrame30::SchemaItemSignal>() == true)
 					{

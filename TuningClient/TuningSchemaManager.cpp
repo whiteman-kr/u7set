@@ -6,21 +6,7 @@ TuningSchemaManager::TuningSchemaManager(ConfigController* configController, QOb
 {
 	assert(m_configController);
 
-	setGlobalScript(theConfigSettings.scriptGlobal);
-
-	setConfigurationArrivedScript(theConfigSettings.scriptConfigArrived);
-
 	return;
-}
-
-QString TuningSchemaManager::configurationArrivedScript() const
-{
-	return m_configurationArrivedScript;
-}
-
-void TuningSchemaManager::setConfigurationArrivedScript(const QString& script)
-{
-	m_configurationArrivedScript = script;
 }
 
 int TuningSchemaManager::schemaCount() const
@@ -28,10 +14,13 @@ int TuningSchemaManager::schemaCount() const
 	return m_configController->schemaCount();
 }
 
-std::shared_ptr<VFrame30::Schema> TuningSchemaManager::schemaByIndex(int schemaIndex)
+std::shared_ptr<VFrame30::Schema> TuningSchemaManager::schemaByIndex(int schemaIndex,
+																	 std::shared_ptr<VFrame30::Context> context)
 {
-	if (schemaIndex < 0)
+	if (schemaIndex < 0 ||
+		context == nullptr)
 	{
+		Q_ASSERT(context);
 		return {};
 	}
 
@@ -41,7 +30,7 @@ std::shared_ptr<VFrame30::Schema> TuningSchemaManager::schemaByIndex(int schemaI
 		return {};
 	}
 
-	return schema(schemaId);
+	return schema(schemaId, std::move(context));
 }
 
 QString TuningSchemaManager::schemaCaptionById(const QString& schemaId) const
@@ -57,6 +46,16 @@ QString TuningSchemaManager::schemaCaptionByIndex(int schemaIndex) const
 QString TuningSchemaManager::schemaIdByIndex(int schemaIndex) const
 {
 	return m_configController->schemaIdByIndex(schemaIndex);
+}
+
+ConfigController* TuningSchemaManager::configController()
+{
+	return m_configController;
+}
+
+const ConfigController* TuningSchemaManager::configController() const
+{
+	return m_configController;
 }
 
 std::shared_ptr<VFrame30::Schema> TuningSchemaManager::loadSchema(QString schemaId)

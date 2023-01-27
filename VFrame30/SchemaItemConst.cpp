@@ -123,9 +123,9 @@ namespace VFrame30
 		return true;
 	}
 
-	void SchemaItemConst::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
+	void SchemaItemConst::draw(CDrawParam* drawParam) const
 	{
-		FblItemRect::draw(drawParam, schema, layer);
+		FblItemRect::draw(drawParam);
 
 		//--
 		//

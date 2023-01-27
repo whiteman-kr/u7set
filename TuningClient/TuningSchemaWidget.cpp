@@ -45,6 +45,8 @@ TuningSchemaWidget::TuningSchemaWidget(TuningSignalManager* tuningSignalManager,
 	// Run onShowScript
 	//
 	Q_ASSERT(schema);
+	schema->setContext(VFrame30::Context::create(clientSchemaView()));
+
 	schema->onShowEvent(clientSchemaView()->jsEngine(), clientSchemaView()->logFile());
 
 	return;

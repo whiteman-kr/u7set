@@ -26,7 +26,7 @@ namespace EditEngine
 	bool SetOrderCommand::checkIfCommandChangesOrder(
 			SetOrder /*setOrder*/,
 			const std::vector<SchemaItemPtr>& /*items*/,
-			const std::list<SchemaItemPtr>& /*layerItems*/)
+			const std::vector<SchemaItemPtr>& /*layerItems*/)
 	{
 		return true;
 /*
@@ -106,7 +106,7 @@ namespace EditEngine
 
 	void SetOrderCommand::executeCommand(std::vector<SchemaItemPtr>* itemsToSelect)
 	{
-		m_oldOrder = m_layer->Items;
+		m_oldOrder.assign(m_layer->items().begin(), m_layer->items().end());
 
 		switch (m_setOrder)
 		{
@@ -116,7 +116,7 @@ namespace EditEngine
 				std::list<SchemaItemPtr> newOrder;
 				selectedItemsOrder.reserve(m_items.size());
 
-				for (SchemaItemPtr si : m_layer->Items)
+				for (const SchemaItemPtr& si : m_layer->items())
 				{
 					auto found = std::find(m_items.begin(), m_items.end(), si);
 
@@ -141,8 +141,7 @@ namespace EditEngine
 
 				// Add real order to the end of Layer->Items
 				//
-				m_layer->Items.clear();
-				m_layer->Items = newOrder;
+				m_layer->setItems(newOrder.begin(), newOrder.end());
 			}
 			break;
 
@@ -158,7 +157,7 @@ namespace EditEngine
 
 				// --
 				//
-				for (auto i : m_layer->Items)
+				for (const auto& i : m_layer->items())
 				{
 					bool isSelected = std::find(m_items.begin(), m_items.end(), i) != m_items.end();
 					newOrder.push_back(SetOrderItemStruct{isSelected, i});
@@ -195,11 +194,11 @@ namespace EditEngine
 
 				// Add real order to the end of Layer->Items
 				//
-				m_layer->Items.clear();
+				m_layer->clearItems();
 
 				for (auto i : newOrder)
 				{
-					m_layer->Items.push_back(i.item);
+					m_layer->pushBackItem(i.item);
 				}
 			}
 			break;
@@ -210,7 +209,7 @@ namespace EditEngine
 
 				std::list<SchemaItemPtr> newOrder;
 
-				for (SchemaItemPtr si : m_layer->Items)
+				for (const SchemaItemPtr& si : m_layer->items())
 				{
 					auto found = std::find(m_items.begin(), m_items.end(), si);
 
@@ -235,8 +234,7 @@ namespace EditEngine
 
 				// Add real order to the end of Layer->Items
 				//
-				m_layer->Items.clear();
-				m_layer->Items = newOrder;
+				m_layer->setItems(newOrder.begin(), newOrder.end());
 			}
 			break;
 
@@ -252,7 +250,7 @@ namespace EditEngine
 
 				// --
 				//
-				for (auto i : m_layer->Items)
+				for (const auto& i : m_layer->items())
 				{
 					bool isSelected = std::find(m_items.begin(), m_items.end(), i) != m_items.end();
 					newOrder.push_back(SetOrderItemStruct{isSelected, i});
@@ -289,11 +287,11 @@ namespace EditEngine
 
 				// Add real order to the end of Layer->Items
 				//
-				m_layer->Items.clear();
+				m_layer->clearItems();
 
-				for (auto i : newOrder)
+				for (const auto& i : newOrder)
 				{
-					m_layer->Items.push_back(i.item);
+					m_layer->pushBackItem(i.item);
 				}
 			}
 			break;
@@ -310,10 +308,9 @@ namespace EditEngine
 	{
 		*itemsToSelect = m_items;
 
-		assert(m_layer->Items.size() == m_oldOrder.size());
+		assert(m_layer->items().size() == m_oldOrder.size());
 
-		m_layer->Items.clear();
-		m_layer->Items = m_oldOrder;
+		m_layer->setItems(m_oldOrder.begin(), m_oldOrder.end());
 
 		return;
 	}

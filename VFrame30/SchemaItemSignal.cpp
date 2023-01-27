@@ -152,11 +152,9 @@ namespace VFrame30
 	}
 
 
-	void SchemaItemSignal::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
+	void SchemaItemSignal::draw(CDrawParam* drawParam) const
 	{
-//		///!!!!!!!!!!!!!!!!!!!!!!!!!
-
-//		qDebug() << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@";
+//		qDebug() << "--------";
 //		int hhh = cellRowCount();
 //		int www = cellColumnCount();
 
@@ -173,7 +171,12 @@ namespace VFrame30
 //			qDebug() << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ";
 //		}
 
-//		///!!!!!!!!!!!!!!!!!!!!!!!!!
+		auto context = this->context();
+		if (context == nullptr)
+		{
+			Q_ASSERT(context);
+			return;
+		}
 
 		if (multiChannel() == true)
 		{
@@ -212,15 +215,12 @@ namespace VFrame30
 			}
 		}
 
-		FblItemRect::draw(drawParam, schema, layer);
+		FblItemRect::draw(drawParam);
 
-		if (drawParam->drawMode() != DrawMode::Editor)
+		if (drawParam->drawMode() != DrawMode::Editor && context->appSignalController() == nullptr)
 		{
-			if (drawParam->appSignalController() ==  nullptr)
-			{
-				assert(drawParam->appSignalController() != nullptr);
-				return;
-			}
+			Q_ASSERT(context->appSignalController() != nullptr);
+			return;
 		}
 
 		//--
@@ -243,17 +243,17 @@ namespace VFrame30
 		//
 		if (columnCount() == 0)
 		{
-			drawFullLineIds(drawParam);
+			drawFullLineIds(context.get(), drawParam);
 		}
 		else
 		{
 			if (multiChannel() == true)
 			{
-				drawMultichannelValues(drawParam, linePen);
+				drawMultichannelValues(context.get(), drawParam, linePen);
 			}
 			else
 			{
-				drawSinglechannelValues(drawParam, linePen);
+				drawSinglechannelValues(context.get(), drawParam, linePen);
 			}
 		}
 
@@ -274,7 +274,8 @@ namespace VFrame30
 		return;
 	}
 
-	QString SchemaItemSignal::getCoulumnText(CDrawParam* drawParam,
+	QString SchemaItemSignal::getCoulumnText(const Context* context,
+											 DrawMode drawMode,
 											 const SchemaItem* schemaItem,
 											 const E::ColumnData& data,
 											 const AppSignalParam& signal,
@@ -285,6 +286,12 @@ namespace VFrame30
 											 int precision)
 	{
 		QString text;
+
+		if (context == nullptr)
+		{
+			Q_ASSERT(context);
+			return text;
+		}
 
 		switch (data)
 		{
@@ -297,12 +304,12 @@ namespace VFrame30
 			break;
 
 		case E::ColumnData::CustomSignalID:
-			if (drawParam->appSignalController() != nullptr)
+			if (context->appSignalController() != nullptr)
 			{
 				text = signal.customSignalId();
 				if (text.isEmpty() == true)
 				{
-					text = drawParam->drawMode() == DrawMode::Editor ?
+					text = drawMode == DrawMode::Editor ?
 							   signal.appSignalId() :
 							   QLatin1String("?");
 				}
@@ -314,12 +321,12 @@ namespace VFrame30
 			break;
 
 		case E::ColumnData::ImpactCustomSignalID:
-			if (drawParam->appSignalController() != nullptr)
+			if (context->appSignalController() != nullptr)
 			{
 				text = impactSignal.customSignalId();
 				if (text.isEmpty() == true)
 				{
-					text = drawParam->drawMode() == DrawMode::Editor ?
+					text = drawMode == DrawMode::Editor ?
 							   impactSignal.appSignalId() :
 							   QLatin1String("?");
 				}
@@ -331,13 +338,13 @@ namespace VFrame30
 			break;
 
 		case E::ColumnData::Caption:
-			if (drawParam->appSignalController() != nullptr)
+			if (context->appSignalController() != nullptr)
 			{
 				text = signal.caption();
 
 				if (text.isEmpty() == true)
 				{
-					text = drawParam->drawMode() == DrawMode::Editor ?
+					text = drawMode == DrawMode::Editor ?
 							   signal.appSignalId() :
 							   QLatin1String("?");
 				}
@@ -349,12 +356,12 @@ namespace VFrame30
 			break;
 
 		case E::ColumnData::ImpactCaption:
-			if (drawParam->appSignalController() != nullptr)
+			if (context->appSignalController() != nullptr)
 			{
 				text = impactSignal.caption();
 				if (text.isEmpty() == true)
 				{
-					text = drawParam->drawMode() == DrawMode::Editor ?
+					text = drawMode == DrawMode::Editor ?
 							   impactSignal.appSignalId() :
 							   QLatin1String("?");
 				}
@@ -367,10 +374,10 @@ namespace VFrame30
 
 		case E::ColumnData::State:
 			{
-				if (drawParam->appSignalController() != nullptr)
+				if (context->appSignalController() != nullptr)
 				{
-					if ((drawParam->drawMode() == DrawMode::Monitor && signalState.m_flags.valid == false) ||
-						(drawParam->drawMode() == DrawMode::Simulator && signalState.m_flags.stateAvailable == false))
+					if ((drawMode == DrawMode::Monitor && signalState.m_flags.valid == false) ||
+						(drawMode == DrawMode::Simulator && signalState.m_flags.stateAvailable == false))
 					{
 						const static QString nonValidStr = "?";
 						text = nonValidStr;
@@ -396,10 +403,10 @@ namespace VFrame30
 
 		case E::ColumnData::ImpactState:
 			{
-				if (drawParam->appSignalController() != nullptr)
+				if (context->appSignalController() != nullptr)
 				{
-					if ((drawParam->drawMode() == DrawMode::Monitor && impactSignalState.m_flags.valid == false) ||
-						(drawParam->drawMode() == DrawMode::Simulator && impactSignalState.m_flags.stateAvailable == false))
+					if ((drawMode == DrawMode::Monitor && impactSignalState.m_flags.valid == false) ||
+						(drawMode == DrawMode::Simulator && impactSignalState.m_flags.stateAvailable == false))
 					{
 						const static QString nonValidStr = "?";
 						text = nonValidStr;
@@ -448,11 +455,12 @@ namespace VFrame30
 		return text;
 	}
 
-	void SchemaItemSignal::drawFullLineIds(CDrawParam* drawParam) const
+	void SchemaItemSignal::drawFullLineIds(const Context* context, CDrawParam* drawParam) const
 	{
-		if (drawParam == nullptr)
+		if (context == nullptr || drawParam == nullptr)
 		{
-			assert(drawParam);
+			Q_ASSERT(context);
+			Q_ASSERT(drawParam);
 			return;
 		}
 
@@ -467,7 +475,7 @@ namespace VFrame30
 
 		QString text;
 
-		const VFrame30::LogicSchema* logicSchema = dynamic_cast<const VFrame30::LogicSchema*>(drawParam->schema());
+		const VFrame30::LogicSchema* logicSchema = dynamic_cast<const VFrame30::LogicSchema*>(parentSchema());
 
 		if (multiChannel() == true && logicSchema != nullptr && appSignalIds().size() >= 1)
 		{
@@ -477,10 +485,10 @@ namespace VFrame30
 		{
 			text = appSignalIds();
 
-			if (drawParam->appSignalController() != nullptr)
+			if (context->appSignalController() != nullptr)
 			{
 				bool stateOk;
-				AppSignalState signalState = drawParam->appSignalController()->signalState(text, &stateOk);
+				AppSignalState signalState = context->appSignalController()->signalState(text, &stateOk);
 
 				if (signalState.m_flags.valid == false)
 				{
@@ -496,7 +504,7 @@ namespace VFrame30
 		DrawHelper::drawText(painter, m_font, itemUnit(), text, rect, Qt::AlignLeft | Qt::AlignTop);
 	}
 
-	void SchemaItemSignal::drawMultichannelValues(CDrawParam* drawParam, QPen& linePen) const
+	void SchemaItemSignal::drawMultichannelValues(const Context* context, CDrawParam* drawParam, QPen& linePen) const
 	{
 		if (drawParam == nullptr)
 		{
@@ -531,11 +539,11 @@ namespace VFrame30
 			appSignals[signalIndex].setCustomSignalId(id);
 			appSignalStates[signalIndex].m_flags.valid = false;
 
-			if (drawParam->appSignalController() != nullptr)
+			if (context->appSignalController() != nullptr)
 			{
 				// Get signal description/state
 				//
-				if (drawParam->schema()->isUfbSchema() == true)
+				if (parentSchema()->isUfbSchema() == true)
 				{
 					appSignals[signalIndex] = AppSignalParam();
 					appSignalStates[signalIndex] = AppSignalState();
@@ -547,8 +555,8 @@ namespace VFrame30
 				{
 					bool signalFound = false;
 
-					appSignals[signalIndex] = drawParam->appSignalController()->signalParam(id, &signalFound);
-					appSignalStates[signalIndex] = drawParam->appSignalController()->signalState(id, nullptr);
+					appSignals[signalIndex] = context->appSignalController()->signalParam(id, &signalFound);
+					appSignalStates[signalIndex] = context->appSignalController()->signalState(id, nullptr);
 
 					if (signalFound == false)
 					{
@@ -588,14 +596,14 @@ namespace VFrame30
 		signalIndex = 0;
 		for (const QString& id : impactSignalIds)
 		{
-			if (drawParam->appSignalController() != nullptr)
+			if (context->appSignalController() != nullptr)
 			{
 				// Get signal description/state
 				//
 				bool signalFound = false;
 
-				impactAppSignals[signalIndex] = drawParam->appSignalController()->signalParam(id, nullptr);
-				impactAppSignalStates[signalIndex] = drawParam->appSignalController()->signalState(id, nullptr);
+				impactAppSignals[signalIndex] = context->appSignalController()->signalParam(id, nullptr);
+				impactAppSignalStates[signalIndex] = context->appSignalController()->signalState(id, nullptr);
 
 				if (signalFound == false)
 				{
@@ -717,7 +725,8 @@ namespace VFrame30
 							}
 							else
 							{
-								text = getCoulumnText(drawParam,
+								text = getCoulumnText(context,
+													  drawParam->drawMode(),
 													  this,
 													  column.data,
 													  appSignals[f],
@@ -757,7 +766,8 @@ namespace VFrame30
 							}
 							else
 							{
-								text = getCoulumnText(drawParam,
+								text = getCoulumnText(context,
+													  drawParam->drawMode(),
 													  this,
 													  column.data,
 													  AppSignalParam{},
@@ -794,7 +804,8 @@ namespace VFrame30
 					}
 					else
 					{
-						text = getCoulumnText(drawParam,
+						text = getCoulumnText(context,
+											  drawParam->drawMode(),
 											  this,
 											  column.data,
 											  appSignals[row],
@@ -966,13 +977,15 @@ namespace VFrame30
 		return;
 	}
 
-	void SchemaItemSignal::drawSinglechannelValues(CDrawParam* drawParam, QPen& linePen) const
+	void SchemaItemSignal::drawSinglechannelValues(const Context* context, CDrawParam* drawParam, QPen& linePen) const
 	{
-		if (drawParam == nullptr ||
+		if (context == nullptr ||
+			drawParam == nullptr ||
 			multiChannel() == true)
 		{
-			assert(drawParam);
-			assert(multiChannel() == false);
+			Q_ASSERT(context);
+			Q_ASSERT(drawParam);
+			Q_ASSERT(multiChannel() == false);
 			return;
 		}
 
@@ -995,17 +1008,17 @@ namespace VFrame30
 		AppSignalState signalState;
 		signalState.m_flags.valid = false;
 
-		if (drawParam->appSignalController() != nullptr && isCommented() == false)
+		if (context->appSignalController() != nullptr && isCommented() == false)
 		{
-			if (drawParam->schema()->isUfbSchema() == true)
+			if (parentSchema()->isUfbSchema() == true)
 			{
 			}
 			else
 			{
 				bool signalFound = false;
 
-				signal = drawParam->appSignalController()->signalParam(appSignalId, &signalFound);
-				signalState = drawParam->appSignalController()->signalState(appSignalId, nullptr);
+				signal = context->appSignalController()->signalParam(appSignalId, &signalFound);
+				signalState = context->appSignalController()->signalState(appSignalId, nullptr);
 
 				if (signalFound == false)
 				{
@@ -1026,12 +1039,12 @@ namespace VFrame30
 		AppSignalState impactSignalState;
 		impactSignalState.m_flags.valid = false;
 
-		if (drawParam->appSignalController() != nullptr && isCommented() == false)
+		if (context->appSignalController() != nullptr && isCommented() == false)
 		{
 			bool signalFound = false;
 
-			impactSignal = drawParam->appSignalController()->signalParam(impactAppSignalId, nullptr);
-			impactSignalState = drawParam->appSignalController()->signalState(impactAppSignalId, nullptr);
+			impactSignal = context->appSignalController()->signalParam(impactAppSignalId, nullptr);
+			impactSignalState = context->appSignalController()->signalState(impactAppSignalId, nullptr);
 
 			if (signalFound == false)
 			{
@@ -1102,7 +1115,8 @@ namespace VFrame30
 			}
 			else
 			{
-				text = getCoulumnText(drawParam,
+				text = getCoulumnText(context,
+									  drawParam->drawMode(),
 									  this,
 									  c.data,
 									  signal,

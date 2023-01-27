@@ -2,6 +2,7 @@
 #include <QDebug>
 
 #include "../Simulator/Simulator.h"
+#include "../Simulator/SimConsoleLogFile.h"
 #include "../Protobuf/google/protobuf/message_lite.h"
 
 static QtMessageHandler originalMessageHandler = 0;
@@ -196,7 +197,8 @@ int main(int argc, char *argv[])
 
 	// --
 	//
-	Sim::Simulator simulator{nullptr, g_verbose, nullptr};		// Log to console
+	Sim::ConsoleLogFile consoleLog;
+	Sim::Simulator simulator{&consoleLog, g_verbose, nullptr};		// Log to console
 
 	if (bool ok = simulator.load(buildPath);
 		ok == false)

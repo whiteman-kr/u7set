@@ -3,19 +3,13 @@
 #include "SchemaItemControl.h"
 #include "DrawParam.h"
 #include "PropertyNames.h"
-#include "SchemaView.h"
+#include "Schema.h"
+//#include "SchemaLayer.h"
+//#include "SchemaView.h"
 
 namespace VFrame30
 {
 	::Factory<VFrame30::SchemaItem> SchemaItemFactory;
-
-	const QColor SchemaItem::errorColor(0xE0, 0x33, 0x33, 0xFF);
-	const QColor SchemaItem::warningColor(0xF8, 0x72, 0x17, 0xFF);
-	const QColor SchemaItem::selectionColor(0x33, 0x99, 0xFF, 0x80);
-	const QColor SchemaItem::lockedSelectionColor(0xF0, 0x80, 0x80, 0xB0);
-	const QColor SchemaItem::commentedColor(0xE0, 0xE0, 0xEF, 0xC0);
-	const QColor SchemaItem::highlightColor1(0x33, 0x99, 0xFF, 0xF0);
-	const QColor SchemaItem::highlightColor2(0x33, 0x99, 0xFF, 0x60);	// Transparent
 
 	// SchemaItem
 	//
@@ -90,7 +84,7 @@ namespace VFrame30
 		const std::string& className = this->metaObject()->className();
 		quint32 classnamehash = ::ClassNameHashCode(className);
 
-		message->set_classnamehash(classnamehash);	// Обязательное поле, хш имени класса, по нему восстанавливается класс.
+		message->set_classnamehash(classnamehash);	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ.
 
 		Proto::SchemaItem* schemaItem = message->mutable_schemaitem();
 
@@ -525,11 +519,9 @@ namespace VFrame30
 	// Рисование элемента, выполняется в 100% масштабе.
 	// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 	//
-	void SchemaItem::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
+	void SchemaItem::draw(CDrawParam* drawParam) const
 	{
 		Q_UNUSED(drawParam)
-		Q_UNUSED(schema)
-		Q_UNUSED(layer)
 	}
 
 	void SchemaItem::drawLabel(CDrawParam* /*drawParam*/) const
@@ -720,6 +712,39 @@ namespace VFrame30
 
 	// Properties and Data
 	//
+	std::shared_ptr<SchemaLayer> SchemaItem::parentLayer()
+	{
+		return m_parentLayer.lock();
+	}
+
+	std::shared_ptr<const SchemaLayer> SchemaItem::parentLayer() const
+	{
+		return m_parentLayer.lock();
+	}
+
+	void SchemaItem::setParentLayer(const std::shared_ptr<SchemaLayer>& parentLayer)
+	{
+		m_parentLayer = parentLayer;
+	}
+
+	const Schema* SchemaItem::parentSchema() const
+	{
+		auto layer = parentLayer();
+		return layer ? layer->parentSchema() : nullptr;
+	}
+
+	const std::shared_ptr<Context> SchemaItem::context() const
+	{
+		std::shared_ptr<Context> result;
+
+		if (auto schema = parentSchema();
+			schema != nullptr)
+		{
+			result = schema->context();
+		}
+
+		return result;
+	}
 
 	bool SchemaItem::IsStatic() const noexcept
 	{

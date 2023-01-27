@@ -49,12 +49,6 @@ AppSignalState ArchiveData::state(int index) const
 		return {};
 	}
 
-	if (index >= 20000)
-	{
-		int uiiu = 0;
-		uiiu ++;
-	}
-
 	int currentIndex = 0;
 	for (const std::shared_ptr<ArchiveChunk>& c : m_chunks)
 	{

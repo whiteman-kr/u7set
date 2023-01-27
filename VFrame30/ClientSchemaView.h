@@ -7,6 +7,7 @@
 #include "LogController.h"
 #include "SchemaItem.h"
 #include "ISchemaViewHistory.h"
+#include "IViewVariables.h"
 #include "../lib/ClientBehavior.h"
 
 class QPaintEvent;
@@ -249,7 +250,7 @@ namespace VFrame30
 	//
 	// ClientSchemaView
 	//
-	class ClientSchemaView : public VFrame30::SchemaViewWidget
+	class ClientSchemaView : public VFrame30::SchemaViewWidget, public IViewVariables
 	{
 		Q_OBJECT
 
@@ -314,15 +315,22 @@ namespace VFrame30
 
 		void setLogController(LogController* value);
 
-
+		// User must provide GlobalScript and onConfigurationArrivedScript
+		//
+		void setGlobalScript(QString value);
+		void setOnConfigurationArrivedScript(QString value);
 
 		// --
 		//
 		[[nodiscard]] QJSEngine* jsEngine();
-		[[nodiscard]] QString globalScript() const;
 
 		bool runScript(QJSValue& evaluatedJs, QString where, bool reportError);
+
+	private:
 		bool reEvaluateGlobalScript();
+		bool execOnConfigurationArrived();
+
+	public:
 		QJSValue evaluateScript(QString script, QString where, bool reportError);
 		[[nodiscard]] QString formatScriptError(const QJSValue& scriptValue) const;
 		void reportScriptError(const QJSValue& scriptValue, QString where);
@@ -330,12 +338,12 @@ namespace VFrame30
 		bool scriptMessageBoxAllowed() const;
 		bool setScriptMessageBoxAllowed(bool enable);
 
-		// Variables
+		// IViewVariables implementation
 		//
-		bool variableExists(QString name) const;
+		bool variableExists(const QString& name) const override;
 
-		QVariant variable(QString name) const;
-		void setVariable(QString name, const QVariant& value);
+		QVariant variable(const QString& name) const override;
+		void setVariable(const QString& name, const QVariant& value) override;
 
 		const QVariantHash& variables() const;
 		void setVariables(const QVariantHash& values);
@@ -374,6 +382,9 @@ namespace VFrame30
 		QJSEngine m_jsEngine;
 
 		bool m_alloScriptMessageBox = false;// Allow or disable using message box in scripts
+
+		QString m_globalScript;
+		QString m_onConfigurationArrivedScript;
 
 		// --
 		//

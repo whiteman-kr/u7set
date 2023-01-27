@@ -57,7 +57,7 @@ namespace VFrame30
 	{
 	}
 
-	void SchemaItemUfb::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* pLayer) const
+	void SchemaItemUfb::draw(CDrawParam* drawParam) const
 	{
 		QPainter* p = drawParam->painter();
 
@@ -69,7 +69,7 @@ namespace VFrame30
 
 		// Draw rect and pins
 		//
-		FblItemRect::draw(drawParam, schema, pLayer);
+		FblItemRect::draw(drawParam);
 
 		// Draw other
 		//
@@ -385,11 +385,11 @@ namespace VFrame30
 		ufbInputs.reserve(16);
 		ufbOutputs.reserve(16);
 
-		for (std::shared_ptr<SchemaLayer> layer : ufbSchema->Layers)
+		for (const auto& layer : ufbSchema->layers())
 		{
 			if (layer->compile() == true)
 			{
-				for (std::shared_ptr<SchemaItem>& item : layer->Items)
+				for (const auto& item : layer->items())
 				{
 					const SchemaItemSignal* itemSignal = item->toType<SchemaItemSignal>();
 					if (itemSignal == nullptr)

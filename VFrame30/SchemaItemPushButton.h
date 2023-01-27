@@ -160,7 +160,7 @@ namespace VFrame30
 		})
 		\endcode
 	*/
-	class SchemaItemPushButton : public SchemaItemControl
+	class SchemaItemPushButton final : public SchemaItemControl
 	{
 		Q_OBJECT
 
@@ -172,18 +172,18 @@ namespace VFrame30
 		// Draw Functions
 		//
 	public:
-		virtual void draw(CDrawParam* drawParam, const Schema*schema, const SchemaLayer* layer) const final;
+		virtual void draw(CDrawParam* drawParam) const override;
 
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message) const final;
-		virtual bool LoadData(const Proto::Envelope& message) final;
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
 
 		// Methods
 	public:
-		virtual QWidget* createWidget(QWidget* parent, bool editMode, double zoom) override final;
-		virtual void updateWidgetProperties(QWidget* widget) const override final;
+		virtual QWidget* createWidget(QWidget* parent, bool editMode, double zoom) override;
+		virtual void updateWidgetProperties(QWidget* widget) const override;
 
 	protected slots:
 		void afterCreate(QPushButton* control);

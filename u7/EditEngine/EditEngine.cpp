@@ -348,7 +348,7 @@ namespace EditEngine
 
 	void EditEngine::runSetOrder(SetOrder setOrder, const std::vector<SchemaItemPtr>& items, std::shared_ptr<VFrame30::SchemaLayer> layer)
 	{
-		bool willThisChangeTheActualOrder = SetOrderCommand::checkIfCommandChangesOrder(setOrder, items, layer->Items);
+		bool willThisChangeTheActualOrder = SetOrderCommand::checkIfCommandChangesOrder(setOrder, items, layer->items());
 		if (willThisChangeTheActualOrder == false)
 		{
 			return;

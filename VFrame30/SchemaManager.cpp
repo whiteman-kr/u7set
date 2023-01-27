@@ -17,26 +17,25 @@ namespace VFrame30
 
 	void SchemaManager::clear()
 	{
-		m_globalScript.clear();
 		emit schemasWereReseted();
 		return;
 	}
 
-	std::shared_ptr<VFrame30::Schema> SchemaManager::schema(QString schemaId)
+	std::shared_ptr<VFrame30::Schema> SchemaManager::schema(QString schemaId, std::shared_ptr<Context> context)
 	{
+		Q_ASSERT(context);
+
 		std::shared_ptr<VFrame30::Schema> schema = loadSchema(schemaId);
 
 		if (schema != nullptr)
 		{
-			// Add schema to map
-			//
 			if (schema->schemaId() != schemaId)
 			{
 				qDebug() << "Requested schema is not loaded one, "
 						 << " Requsted SchemaID: " << schemaId
 						 << ", Loaded SchemaID: " << schema->schemaId();
 
-				return std::shared_ptr<VFrame30::Schema>();
+				return {};
 			}
 		}
 		else
@@ -44,12 +43,17 @@ namespace VFrame30
 			qDebug() << "SchemaManager::schema: Can't load schema " << schemaId;
 
 			// and there is no such scheme (((
-			// Just create an empty one, so wi can display at least blank space
+			// Just create an empty one, so ww can display at least blank space
 			//
 			schema = std::make_shared<VFrame30::LogicSchema>();
 			schema->setSchemaId("EMPTYSCHEMA");
 			schema->setCaption("Empty Schema");
 		}
+
+		// Set context to the newly created schema, this should be the only place for setting context
+		// for cleints.
+		//
+		schema->setContext(std::move(context));
 
 		return schema;
 	}
@@ -60,7 +64,7 @@ namespace VFrame30
 		return 0;
 	}
 
-	std::shared_ptr<VFrame30::Schema> SchemaManager::schemaByIndex(int /*schemaIndex*/)
+	std::shared_ptr<VFrame30::Schema> SchemaManager::schemaByIndex(int /*schemaIndex*/, std::shared_ptr<Context> /*context*/)
 	{
 		Q_ASSERT(false);		// "Must be implemented in derived class";
 		return {};
@@ -108,16 +112,6 @@ namespace VFrame30
 		Q_UNUSED(schemaId);
 		Q_ASSERT(false);
 		return std::shared_ptr<VFrame30::Schema>();
-	}
-
-	const QString& SchemaManager::globalScript() const
-	{
-		return m_globalScript;
-	}
-
-	void SchemaManager::setGlobalScript(const QString& value)
-	{
-		m_globalScript = value + QChar::LineFeed;
 	}
 
 }

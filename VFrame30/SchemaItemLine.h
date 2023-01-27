@@ -47,7 +47,7 @@ namespace VFrame30
 		})
 		\endcode
 	*/
-	class SchemaItemLine : public PosLineImpl
+	class SchemaItemLine final : public PosLineImpl
 	{
 		Q_OBJECT
 
@@ -67,8 +67,8 @@ namespace VFrame30
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message) const final;
-		virtual bool LoadData(const Proto::Envelope& message) final;
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
 
 		// Draw Functions
 		//
@@ -77,7 +77,7 @@ namespace VFrame30
 		// Item is drawn in 100% scale
 		// Graphcis must have scrren coordinate system (0, 0 - left upper corner, down and right - positive pos)
 		//
-		virtual void draw(CDrawParam* drawParam, const Schema* pFrame, const SchemaLayer* pLayer) const final;
+		virtual void draw(CDrawParam* drawParam) const override;
 
 		// Draw line cap, Pen and Brush MUST be already selected in the Painter
 		//

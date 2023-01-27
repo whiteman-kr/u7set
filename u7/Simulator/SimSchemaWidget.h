@@ -58,7 +58,7 @@ public slots:
 						   const QList<QMenu*> customMenu);
 
 protected slots:
-	void updateSchema();
+	void updateProject();
 
 	// Properties
 	//
@@ -70,6 +70,7 @@ public:
 	//
 private:
 	SimIdeSimulator* m_simulator = nullptr;
+	VFrame30::LogController m_logController;
 
 	// Actions
 	//

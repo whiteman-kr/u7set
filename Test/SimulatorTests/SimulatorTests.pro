@@ -74,7 +74,7 @@ win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
 INCLUDEPATH += ./../../Protobuf
 
-# UtilsLib
+# CommonLib
 #
 LIBS += -lCommonLib
 win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib

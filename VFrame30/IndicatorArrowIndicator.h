@@ -20,7 +20,7 @@ namespace VFrame30
 		virtual bool load(const Proto::SchemaItemIndicator& message, SchemaUnit unit) override;
 		virtual bool save(Proto::SchemaItemIndicator* message) const override;
 
-		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer, const SchemaItemIndicator* item) const override;
+		virtual void draw(CDrawParam* drawParam, const SchemaItemIndicator* schemaItem) const override;
 
 	public:
 		double startValue() const;

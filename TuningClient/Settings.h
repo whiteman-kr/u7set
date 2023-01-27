@@ -68,6 +68,8 @@ struct SchemaInfo
 
 struct ConfigSettings
 {
+	int configurationId = -1;
+
 	TuningClientSettings clientSettings;
 
 	std::vector<SchemaInfo> schemas;
@@ -75,7 +77,6 @@ struct ConfigSettings
 	BuildInfo buildInfo;
 
 	QString scriptGlobal;
-
 	QString scriptConfigArrived;
 
 	QString errorMessage;				// Parsing error message, empty if no errors

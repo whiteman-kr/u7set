@@ -162,7 +162,7 @@ private:
 	void startDownload();
 	void resetStatuses();
 
-	virtual void onEndFileDownload(const QString fileName, Tcp::FileTransferResult errorCode, const QString md5) final;
+	virtual void onEndFileDownload(const QString fileName, Tcp::FileTransferResult errorCode, const QString md5) override final;
 
 	bool startConfigurationXmlLoading();
 	bool readConfigurationXml();

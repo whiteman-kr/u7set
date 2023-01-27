@@ -1,46 +1,53 @@
 #include "MacrosExpander.h"
-#include "../CommonLib/PropertyObject.h"
-#include "Session.h"
 #include "Schema.h"
-#include "DrawParam.h"
-#include "ClientSchemaView.h"
 
 namespace VFrame30
 {
-	QStringList MacrosExpander::parse(const QStringList& stringList, const CDrawParam* drawParam, const PropertyObject* schemaItem)
+	QStringList MacrosExpander::parse(const QStringList& stringList,
+									  const Context* context,
+									  const Session* session,
+									  const VFrame30::SchemaItem* schemaItem)
 	{
 		QStringList resultList;
 		resultList.reserve(stringList.size());
 
+		if (context == nullptr)
+		{
+			Q_ASSERT(context);
+			return resultList;
+		}
+
 		for (const QString& str : stringList)
 		{
-			QString parsedString = parse(str, drawParam, schemaItem);
+			QString parsedString = parse(str, context, session, schemaItem);
 			resultList.push_back(parsedString);
 		}
 
 		return resultList;
 	}
 
-	QString MacrosExpander::parse(const QString& str, const CDrawParam* drawParam, const PropertyObject* schemaItem)
+	QString MacrosExpander::parse(const QString& str,
+								  const Context* context,
+								  const Session* session,
+								  const VFrame30::SchemaItem* schemaItem)
 	{
-		if (drawParam == nullptr)
+		if (context == nullptr)
 		{
-			Q_ASSERT(drawParam);
+			Q_ASSERT(context);
 			return str;
 		}
 
-		const ClientSchemaView* clientView = (drawParam->drawMode() == DrawMode::Editor) ?
-												nullptr :
-												drawParam->clientSchemaView();
+		const Schema* schema = schemaItem->parentSchema();
+
 		return parse(str,
-					 clientView,
-					 &drawParam->session(),
-					 drawParam->schema(),
+					 context->viewVariables(),
+					 session,
+					 schema,
 					 schemaItem);
 	}
 
 	QStringList MacrosExpander::parse(const QStringList& stringList,
-									  const ClientSchemaView* clientView,
+									  const IViewVariables* viewVariables,
 									  const Session* session,
 									  const VFrame30::Schema* schema,
 									  const PropertyObject* thisObject)
@@ -50,7 +57,7 @@ namespace VFrame30
 
 		for (const QString& str : stringList)
 		{
-			QString parsedString = parse(str, clientView, session, schema, thisObject);
+			QString parsedString = parse(str, viewVariables, session, schema, thisObject);
 			resultList.push_back(parsedString);
 		}
 
@@ -58,14 +65,14 @@ namespace VFrame30
 	}
 
 	QString MacrosExpander::parse(const QString& str,
-								  const ClientSchemaView* clientView,
+								  const IViewVariables* viewVariables,
 								  const Session* session,
 								  const VFrame30::Schema* schema,
 								  const PropertyObject* thisObject)
 	{
 		QString result = str;
 
-		QRegularExpression reStartIndex("\\$\\([a-zA-Z0-9]+[\\.]?[a-zA-Z0-9]*");	// Search for $(SomeText[.][SomeText])
+		QRegularExpression reStartIndex(R"(\$\([a-zA-Z0-9]+[\.]?[a-zA-Z0-9]*)");	// Search for $(SomeText[.][SomeText])
 
 		qsizetype index = 0;
 		while (index < result.size())
@@ -144,9 +151,9 @@ namespace VFrame30
 
 				// Look for variables
 				//
-				if (clientView != nullptr)
+				if (viewVariables != nullptr)
 				{
-					QVariant var = clientView->variable(macro);
+					QVariant var = viewVariables->variable(macro);
 
 					if (var.isValid() == true)
 					{

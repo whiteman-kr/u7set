@@ -697,7 +697,11 @@ SignalsTabPage::SignalsTabPage(AppSignalSetProvider* signalSetProvider, DbContro
 
 	//For testing purposes
 	//
+	// #ifdef QT_DEBUG
+	// #if QT_VERSION >= QT_VERSION_CHECK(6, 4, 0)
 	// new QAbstractItemModelTester(m_signalsModel, QAbstractItemModelTester::FailureReportingMode::Fatal, this);
+	// #endif
+	// #endif
 	//
 
 	m_signalsProxyModel = new SignalsProxyModel(m_signalsModel, this);

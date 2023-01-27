@@ -44,7 +44,7 @@ SchemaLayersDialog::SchemaLayersDialog(EditSchemaView* schemaView, QWidget *pare
 	connect(m_printAction, &QAction::triggered, this, &SchemaLayersDialog::onPrintClick);
 
 	int index = 0;
-	for (std::shared_ptr<VFrame30::SchemaLayer> l : m_schemaView->schema()->Layers)
+	for (const auto& l : m_schemaView->schema()->layers())
 	{
 		m_name << l->name();
 		m_show << l->show();
@@ -224,7 +224,7 @@ void SchemaLayersDialog::on_SchemaLayersDialog_accepted()
 {
 	int index = 0;
 
-	for (std::shared_ptr<VFrame30::SchemaLayer> l : m_schemaView->schema()->Layers)
+	for (const auto& l : m_schemaView->schema()->layers())
 	{
 		l->setShow(m_show[index]);
 		l->setPrint(m_print[index]);
@@ -232,10 +232,10 @@ void SchemaLayersDialog::on_SchemaLayersDialog_accepted()
 		index++;
 	}
 
-	if (m_activeIndex >= 0  && m_activeIndex < m_schemaView->schema()->Layers.size() &&
-		m_schemaView->activeLayer() != m_schemaView->schema()->Layers[m_activeIndex])
+	if (m_activeIndex >= 0  && m_activeIndex < m_schemaView->schema()->layers().size() &&
+		m_schemaView->activeLayer() != m_schemaView->schema()->layers()[m_activeIndex])
 	{
-		m_schemaView->setActiveLayer(m_schemaView->schema()->Layers[m_activeIndex]);
+		m_schemaView->setActiveLayer(m_schemaView->schema()->layers()[m_activeIndex]);
 		m_schemaView->clearSelection();
 	}
 

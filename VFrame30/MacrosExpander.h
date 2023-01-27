@@ -1,31 +1,35 @@
 #pragma once
-#include <QVariant>
-
-class PropertyObject;
+#include "Context.h"
+#include "Session.h"
 
 namespace VFrame30
 {
-	class CDrawParam;
-	class Session;
 	class Schema;
-	class ClientSchemaView;
+	class SchemaItem;
 
 	class MacrosExpander
 	{
 	public:
 		MacrosExpander() = delete;
 
-		static QStringList parse(const QStringList& stringList, const CDrawParam* drawParam, const PropertyObject* schemaItem);
-		static QString parse(const QString& str, const CDrawParam* drawParam, const PropertyObject* schemaItem);
+		static QStringList parse(const QStringList& stringList,
+								 const Context* context,
+								 const Session* session,
+								 const VFrame30::SchemaItem* schemaItem);
+
+		static QString parse(const QString& str,
+							 const Context* context,
+							 const Session* session,
+							 const VFrame30::SchemaItem* schemaItem);
 
 		static QStringList parse(const QStringList& stringList,
-								 const ClientSchemaView* clientView,
+								 const IViewVariables* viewVariables,
 								 const Session* session,
 								 const VFrame30::Schema* schema,
 								 const PropertyObject* thisObject);
 
 		static QString parse(const QString& str,
-							 const ClientSchemaView* clientView,
+							 const IViewVariables* viewVariables,
 							 const Session* session,
 							 const VFrame30::Schema* schema,
 							 const PropertyObject* thisObject);

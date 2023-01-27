@@ -41,6 +41,9 @@ EditSchemaView::EditSchemaView(AppSignalSetProvider* signalSetProvider, std::sha
 {
 	Q_ASSERT(signalSetProvider);
 
+	auto context = VFrame30::Context::create(&m_appSignalController, &m_tuningController, nullptr, nullptr);
+	schema->setContext(std::move(context));
+
 	// Timer for updates of WRN/ERR count
 	//
 	m_updateDuringBuildTimer = startTimer(50);
@@ -109,12 +112,9 @@ void EditSchemaView::paintEvent(QPaintEvent* paintEvent)
 	{
 		QPainter p(this);
 
-		VFrame30::CDrawParam drawParam(&p, schema(), this, schema()->gridSize(), schema()->pinGridStep());
+		VFrame30::CDrawParam drawParam(&p, this, schema()->gridSize(), schema()->pinGridStep(), schema()->unit());
 		drawParam.setControlBarSize(CONTROL_BAR(schema()->unit(), p.device()->devicePixelRatioF(), zoom()));
 		drawParam.setInfoMode(theSettings.infoMode());
-		drawParam.session() = session();
-
-		drawParam.setAppSignalController(&m_appSignalController);
 
 		//QElapsedTimer et;
 		//et.start();
@@ -129,7 +129,7 @@ void EditSchemaView::paintEvent(QPaintEvent* paintEvent)
 	QPainter p;
 	p.begin(this);
 
-	VFrame30::CDrawParam drawParam(&p, schema(), this, schema()->gridSize(), schema()->pinGridStep());
+	VFrame30::CDrawParam drawParam(&p, this, schema()->gridSize(), schema()->pinGridStep(), schema()->unit());
 	drawParam.setInfoMode(theSettings.infoMode());
 
 	// Calc size
@@ -228,19 +228,15 @@ void EditSchemaView::drawBuildIssues(VFrame30::CDrawParam* drawParam, QRectF cli
 
 	// Find compile layer
 	//
-	for (auto layer = schema()->Layers.cbegin(); layer != schema()->Layers.cend(); ++layer)
+	for (const auto& layer : schema()->layers())
 	{
-		const VFrame30::SchemaLayer* pLayer = layer->get();
-
-		if (pLayer->compile() == false || pLayer->show() == false)
+		if (layer->compile() == false || layer->show() == false)
 		{
 			continue;
 		}
 
-		for (auto vi = pLayer->Items.cbegin(); vi != pLayer->Items.cend(); ++vi)
+		for (const auto& item : layer->items())
 		{
-			const SchemaItemPtr& item = *vi;
-
 			OutputMessageLevel issue = GlobalMessanger::instance().issueForSchemaItem(item->guid());
 
 			if ((issue == OutputMessageLevel::Warning0 ||
@@ -282,19 +278,15 @@ void EditSchemaView::drawRunOrder(VFrame30::CDrawParam* drawParam, QRectF clipRe
 
 	// Find compile layer
 	//
-	for (auto layer = schema()->Layers.cbegin(); layer != schema()->Layers.cend(); ++layer)
+	for (const auto& layer : schema()->layers())
 	{
-		const VFrame30::SchemaLayer* pLayer = layer->get();
-
-		if (pLayer->compile() == false || pLayer->show() == false)
+		if (layer->compile() == false || layer->show() == false)
 		{
 			continue;
 		}
 
-		for (auto vi = pLayer->Items.cbegin(); vi != pLayer->Items.cend(); ++vi)
+		for (const auto& item : layer->items())
 		{
-			const SchemaItemPtr& item = *vi;
-
 			QString orderIndexText;
 			orderIndexText.reserve(32);
 
@@ -947,19 +939,15 @@ void EditSchemaView::drawCompareOutlines(VFrame30::CDrawParam* drawParam, const 
 
 	// Find compile layer
 	//
-	for (auto layer = schema()->Layers.cbegin(); layer != schema()->Layers.cend(); ++layer)
+	for (const auto& layer : schema()->layers())
 	{
-		const VFrame30::SchemaLayer* pLayer = layer->get();
-
-		if (pLayer->show() == false)
+		if (layer->show() == false)
 		{
 			continue;
 		}
 
-		for (auto vi = pLayer->Items.cbegin(); vi != pLayer->Items.cend(); ++vi)
+		for (const auto& item : layer->items())
 		{
-			const SchemaItemPtr& item = *vi;
-
 			auto actionIt = m_itemsActions.find(item->guid());
 			if (actionIt == m_itemsActions.end())
 			{
@@ -1683,12 +1671,10 @@ void EditSchemaView::exportToPdf(const QString& fileName, bool infoMode)
 	// --
 	//
 	QPainter p(&pdfWriter);
-	VFrame30::CDrawParam drawParam(&p, schema(), this, schema()->gridSize(), schema()->pinGridStep());
+	VFrame30::CDrawParam drawParam(&p, this, schema()->gridSize(), schema()->pinGridStep(), schema()->unit());
 
 	drawParam.setInfoMode(infoMode);
 	drawParam.setPdfMode(true);
-	drawParam.session() = session();
-	drawParam.setAppSignalController(&m_appSignalController);
 
 	// Calc size
 	//

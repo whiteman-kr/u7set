@@ -136,9 +136,9 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 
 	connect(m_schemaManager.monitorConfigController(), &MonitorConfigController::configurationUpdate,
 			[this, schemaListWidget]()
-	{
-		schemaListWidget->setDetails(m_schemaManager.monitorConfigController()->schemasDetailsSet());
-	});
+			{
+				schemaListWidget->setDetails(m_schemaManager.monitorConfigController()->schemasDetailsSet());
+			});
 
 	return;
 }
@@ -1125,26 +1125,26 @@ void MonitorMainWindow::showMatsUserManual()
 void MonitorMainWindow::debug()
 {
 #ifdef QT_DEBUG
-	QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
-													"./",
-													tr("Monitor schemas (*.mvs);; All files (*.*)"));
+//	QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
+//													"./",
+//													tr("Monitor schemas (*.mvs);; All files (*.*)"));
 
-	if (fileName.isNull() == true)
-	{
-		return;
-	}
+//	if (fileName.isNull() == true)
+//	{
+//		return;
+//	}
 
-	QFileInfo fileInfo(fileName);
+//	QFileInfo fileInfo(fileName);
 
-	// Load schema
-	//
-	std::shared_ptr<VFrame30::Schema> schema = std::shared_ptr<VFrame30::Schema>(VFrame30::Schema::Create(fileName.toStdWString().c_str()));
+//	// Load schema
+//	//
+//	std::shared_ptr<VFrame30::Schema> schema = std::shared_ptr<VFrame30::Schema>(VFrame30::Schema::Create(fileName.toStdWString().c_str()));
 
-	if (schema == nullptr)
-	{
-		QMessageBox::critical(this, "Monitor", "Cannot load file");
-		return;
-	}
+//	if (schema == nullptr)
+//	{
+//		QMessageBox::critical(this, "Monitor", "Cannot load file");
+//		return;
+//	}
 
 	// Create tab
 	//

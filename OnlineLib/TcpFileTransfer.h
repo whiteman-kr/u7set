@@ -124,7 +124,7 @@ namespace Tcp
 		void init();
 		void faultyFileDownload(FileTransferResult errorCode);
 
-		virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) final;
+		virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override final;
 
 		void processGetFileStartNextReply(bool startReply, const char* replyData, quint32 replyDataSize);
 

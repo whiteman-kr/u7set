@@ -1532,9 +1532,9 @@ void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 
 	std::map<std::shared_ptr<VFrame30::SchemaItem>, std::shared_ptr<ReportTable>> itemsTables;
 
-	for (std::shared_ptr<VFrame30::SchemaLayer> targetLayer : targetSchema->Layers)
+	for (const auto& targetLayer : targetSchema->layers())
 	{
-		for (SchemaItemPtr targetItem : targetLayer->Items)
+		for (const SchemaItemPtr& targetItem : targetLayer->items())
 		{
 			// Look for this item in source
 			//
@@ -1614,9 +1614,9 @@ void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 
 	// Look for deteled items (in target)
 	//
-	for (std::shared_ptr<VFrame30::SchemaLayer> sourceLayer : sourceSchema->Layers)
+	for (const auto& sourceLayer : sourceSchema->layers())
 	{
-		for (SchemaItemPtr sourceItem : sourceLayer->Items)
+		for (const SchemaItemPtr& sourceItem : sourceLayer->items())
 		{
 			// Look for this item in source
 			//
@@ -1636,11 +1636,11 @@ void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 				// Add item to target
 				//
 				bool layerFound = false;
-				for (std::shared_ptr<VFrame30::SchemaLayer> targetLayer : targetSchema->Layers)
+				for (const auto& targetLayer : targetSchema->layers())
 				{
 					if (targetLayer->guid() == sourceLayer->guid())
 					{
-						targetLayer->Items.push_back(sourceItem);
+						targetLayer->pushBackItem(sourceItem);
 						layerFound = true;
 						break;
 					}

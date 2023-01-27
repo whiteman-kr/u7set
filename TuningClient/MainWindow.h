@@ -66,7 +66,7 @@ public:
 	DialogAlert* m_dialogAlert = nullptr;
 
 private slots:
-	void slot_configurationArrived();
+	void slot_configurationArrived(ConfigSettings configuration);
 	void slot_projectFiltersUpdated(QByteArray data);
 	void slot_signalsUpdated(QByteArray data);
 

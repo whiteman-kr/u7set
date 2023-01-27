@@ -1,7 +1,6 @@
 #include "SimScopedLog.h"
 #include <QTime>
 
-Q_LOGGING_CATEGORY(u7sim, "u7.sim")
 
 namespace Sim
 {
@@ -50,15 +49,11 @@ namespace Sim
 
 	bool ScopedLog::writeAlert(QString text)
 	{
-		QString logText = m_scope.isEmpty() ? text : m_scope + QStringLiteral(" ") + text;
 		bool ok = true;
 
-		if (m_log == nullptr)
+		if (m_log != nullptr)
 		{
-			qCCritical(u7sim).noquote() << logText;
-		}
-		else
-		{
+			QString logText = m_scope.isEmpty() ? text : m_scope + QStringLiteral(" ") + text;
 			ok = m_log->writeAlert(logText);
 		}
 
@@ -67,15 +62,11 @@ namespace Sim
 
 	bool ScopedLog::writeError(QString text)
 	{
-		QString logText = m_scope.isEmpty() ? text : m_scope + QStringLiteral(" ") + text;
 		bool ok = true;
 
-		if (m_log == nullptr)
+		if (m_log != nullptr)
 		{
-			qCCritical(u7sim).noquote() << logText;
-		}
-		else
-		{
+			QString logText = m_scope.isEmpty() ? text : m_scope + QStringLiteral(" ") + text;
 			ok = m_log->writeError(logText);
 		}
 
@@ -84,15 +75,11 @@ namespace Sim
 
 	bool ScopedLog::writeWarning(QString text)
 	{
-		QString logText = m_scope.isEmpty() ? text : m_scope + QStringLiteral(" ") + text;
 		bool ok = true;
 
-		if (m_log == nullptr)
+		if (m_log != nullptr)
 		{
-			qCWarning(u7sim).noquote() << logText;
-		}
-		else
-		{
+			QString logText = m_scope.isEmpty() ? text : m_scope + QStringLiteral(" ") + text;
 			ok = m_log->writeWarning(logText);
 		}
 
@@ -101,15 +88,11 @@ namespace Sim
 
 	bool ScopedLog::writeMessage(QString text)
 	{
-		QString logText = m_scope.isEmpty() ? text : m_scope + QStringLiteral(" ") + text;
 		bool ok = true;
 
-		if (m_log == nullptr)
+		if (m_log != nullptr)
 		{
-			qCInfo(u7sim).noquote() << logText;
-		}
-		else
-		{
+			QString logText = m_scope.isEmpty() ? text : m_scope + QStringLiteral(" ") + text;
 			ok = m_log->writeMessage(logText);
 		}
 
@@ -118,15 +101,11 @@ namespace Sim
 
 	bool ScopedLog::writeText(QString text)
 	{
-		QString logText = m_scope.isEmpty() ? text : m_scope + QStringLiteral(" ") + text;
 		bool ok = true;
 
-		if (m_log == nullptr)
+		if (m_log != nullptr)
 		{
-			qCDebug(u7sim).noquote() << logText;
-		}
-		else
-		{
+			QString logText = m_scope.isEmpty() ? text : m_scope + QStringLiteral(" ") + text;
 			ok = m_log->writeText(logText);
 		}
 
@@ -163,5 +142,8 @@ namespace Sim
 		m_debugMessagesEnabled = value;
 	}
 
-
+	ILogFile* ScopedLog::logInterface()
+	{
+		return m_log;
+	}
 }
