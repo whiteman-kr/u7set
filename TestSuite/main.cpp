@@ -2,7 +2,6 @@
 #include "main.h"
 #include "TestSuiteMainWindow.h"
 
-#include "../OnlineLib/SoftwareInfo.h"
 #include "Settings.h"
 
 #include <QApplication>

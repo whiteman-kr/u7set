@@ -3,7 +3,7 @@
 #include <QObject>
 #include <QDebug>
 #include "../UtilsLib/LogFile.h"
-#include "../TestSuiteLib/TestEngine.h"
+#include "../TestSuiteLib/TestLibrary.h"
 #include "../TestSuiteLib/TestSuiteConfigController.h"
 
 class TestTask : public QObject
@@ -24,12 +24,10 @@ public:
 	const TestSuiteConfigController& configController() const;
 
 private slots:
-	void slot_configurationArrived(ConfigSettings configuration);
+	void slot_startTests();
 
-	void slot_configUnknownClient(const QString& errMsg);
-	void slot_configWrongClientHostname(const QString& errMsg);
-	void slot_configLogMessage(const QString& errMsg);
-	void slot_configLogError(const QString& errMsg);
+	void slot_logMessage(const QString& errMsg);
+	void slot_logError(const QString& errMsg);
 
 	void newLogItem(const TestLogItem& logItem);
 
@@ -52,10 +50,9 @@ public:
 	//
 private:
 
-	TestEngine m_testEngine;
 	Log::LogFile m_LogFile;						// Must be initialized first
 
-	TestSuiteConfigController m_configController;
+	TestLibrary m_testLibrary;
 
 	/*Builder::Builder m_builder{nullptr, this};
 

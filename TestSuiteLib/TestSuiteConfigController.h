@@ -3,7 +3,7 @@
 #include "../OnlineLib/CfgServerLoader.h"
 #include "../OnlineLib/SocketIO.h"
 #include "../UtilsLib/ILogFile.h"
-
+#include "TestScriptsStorage.h"
 
 class ConfigConnection
 {
@@ -59,7 +59,7 @@ class TestSuiteConfigController : public QObject, public HasLogFile
 public:
 	TestSuiteConfigController() = delete;
 
-	TestSuiteConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2, ILogFile* logFile);
+	TestSuiteConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2, ILogFile *appLogFile);
 	virtual ~TestSuiteConfigController();
 
 	// Methods
@@ -87,8 +87,6 @@ signals:
 
 	void logMessage(const QString& msg);
 	void logError(const QString& errMsg);
-	void logErrorunknownClient(const QString& errMsg);
-	void logErrorwrongClientHostname(const QString& errMsg);
 
 	// slots
 	//
@@ -107,14 +105,14 @@ private:
 
 	bool applyCurSettingsProfile(std::shared_ptr<const SoftwareSettings> curSettingsProfile, ConfigSettings* outSetting);
 
+	void emitMessage(const QString& msg);
+	void emitError(const QString& errorMsg);
+
 	// Public properties
 	//
 public:
 	ConfigSettings configuration() const;
-
-	qsizetype testScriptCount() const;
-	QStringList testScriptList() const;
-	const QByteArray& testScript(const QString& fileName) const;
+	TestScriptsStorage& testScriptsStorage();
 
 	// Data section
 	//
@@ -125,8 +123,10 @@ private:
 
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
-	mutable QReadWriteLock m_confugurationLock;		// for access to m_configuration and m_testScripts
-
+	mutable QReadWriteLock m_confugurationLock;		// for access to m_configuration
 	ConfigSettings m_configuration;
-	std::map<QString, QByteArray> m_testScripts;
+
+	mutable QReadWriteLock m_testScriptsLock;		// for access to m_testScriptsStorage
+	TestScriptsStorage m_testScriptsStorage;
+
 };

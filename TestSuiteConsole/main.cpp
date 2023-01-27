@@ -2,7 +2,7 @@
 #include <QCoreApplication>
 #include <QTimer>
 #include "TestTask.h"
-#include "../TestSuiteLib/TestEngine.h"
+#include "../TestSuiteLib/TestLibrary.h"
 #include <QFile>
 #include <QXmlStreamWriter>
 #include <QDomDocument>

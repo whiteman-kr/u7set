@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include "../UtilsLib/LogFile.h"
-#include "../TestSuiteLib/TestEngine.h"
+#include "../TestSuiteLib/TestLibrary.h"
 #include "../TestSuiteLib/TestSuiteConfigController.h"
 
 QT_BEGIN_NAMESPACE
@@ -18,13 +18,12 @@ public:
 	TestSuiteMainWindow(const SoftwareInfo &softwareInfo, QWidget *parent = nullptr);
 	~TestSuiteMainWindow();
 
-	TestSuiteConfigController& configController();
-	const TestSuiteConfigController& configController() const;
-
 private:
 	void createActions();
 	void createMenu();
 	void createStatusBar();
+
+	void fillTestsTree();
 
 private slots:
 	void exit();
@@ -34,25 +33,23 @@ private slots:
 
 	void showSettings();
 
-	void slot_configurationArrived(ConfigSettings configuration);
+	void slot_configurationArrived();
 
-	void slot_configLogMessage(const QString &msg);
-	void slot_configUnknownClient(const QString& errMsg);
-	void slot_configWrongClientHostname(const QString& errMsg);
-	void slot_configLogError(const QString &errMsg);
-
+	void slot_logMessage(const QString &msg);
+	void slot_logError(const QString &errMsg);
 
 private:
-	Log::LogFile m_LogFile;						// Must be initialized first
-
+	// Ui
 	Ui::TestSuiteMainWindow *ui;
 
 	QAction* m_pExitAction = nullptr;
 	QAction* m_pSettingsAction = nullptr;
 
-	TestEngine* m_testEngine = nullptr;
+	// Main objects
+	Log::LogFile m_LogFile;						// Must be initialized first
 
-	TestSuiteConfigController m_configController;
+	TestLibrary m_testLibrary;
+
 };
 
 extern TestSuiteMainWindow* theMainWindow;

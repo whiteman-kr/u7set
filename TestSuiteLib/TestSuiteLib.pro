@@ -49,9 +49,10 @@ CONFIG(release, debug|release) {
 SOURCES += \
     InputController.cpp \
     OutputController.cpp \
-    TestEngine.cpp \
+    TestLibrary.cpp \
+    TestLog.cpp \
     TestLogController.cpp \
-    TestResultLog.cpp \
+    TestScriptsStorage.cpp \
     TestSuiteConfigController.cpp \
     TestSuiteLib.cpp \
     TestWorker.cpp
@@ -60,9 +61,10 @@ HEADERS += \
     InputController.h \
     OutputController.h \
     Stable.h \
-    TestEngine.h \
+    TestLibrary.h \
+    TestLog.h \
     TestLogController.h \
-    TestResultLog.h \
+    TestScriptsStorage.h \
     TestSuiteConfigController.h \
     TestSuiteLib.h \
     TestWorker.h

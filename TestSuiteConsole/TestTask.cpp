@@ -9,78 +9,43 @@ TestTask::TestTask(const SoftwareInfo& softwareInfo,
 				   QObject* parent) :
 	QObject(parent),
 	m_LogFile(qAppName(), QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + softwareInfo.equipmentID()),
-	m_configController(softwareInfo, configurationServiceAddress1, configurationServiceAddress2, &m_LogFile)
+	m_testLibrary(softwareInfo, configurationServiceAddress1, configurationServiceAddress2, &m_LogFile)
 {
-	QObject::connect(&m_testEngine.testResultLog(), &TestResultLog::newLogItem, this, &TestTask::newLogItem);
-	connect(&m_testEngine, &TestEngine::finished, this, &TestTask::finished);
+	connect(&m_testLibrary.testResultLog(), &TestLog::newLogItem, this, &TestTask::newLogItem);
+	connect(&m_testLibrary, &TestLibrary::readyForTesting, this, &TestTask::slot_startTests);
+	connect(&m_testLibrary, &TestLibrary::finished, this, &TestTask::finished);
 
-	connect(&m_configController, &TestSuiteConfigController::configurationArrived, this, &TestTask::slot_configurationArrived);
-
-	connect(&m_configController, &TestSuiteConfigController::logMessage, this, &TestTask::slot_configLogMessage);
-	connect(&m_configController, &TestSuiteConfigController::logError, this, &TestTask::slot_configLogError);
-	connect(&m_configController, &TestSuiteConfigController::logErrorunknownClient, this, &TestTask::slot_configUnknownClient);
-	connect(&m_configController, &TestSuiteConfigController::logErrorwrongClientHostname, this, &TestTask::slot_configWrongClientHostname);
-
-	m_configController.start();
+	connect(&m_testLibrary, &TestLibrary::logMessage, this, &TestTask::slot_logMessage);
+	connect(&m_testLibrary, &TestLibrary::logError, this, &TestTask::slot_logError);
+	connect(&m_testLibrary.configController(), &TestSuiteConfigController::logMessage, this, &TestTask::slot_logMessage);
+	connect(&m_testLibrary.configController(), &TestSuiteConfigController::logError, this, &TestTask::slot_logError);
 
 	std::cout << "Waiting for connection with Configuration Service...\n";
 }
 
-TestSuiteConfigController& TestTask::configController()
-{
-	return m_configController;
-}
-
-const TestSuiteConfigController& TestTask::configController() const
-{
-	return m_configController;
-}
-
-void TestTask::slot_configurationArrived(ConfigSettings configuration)
+void TestTask::slot_startTests()
 {
 	start();
 
-
 	return;
 }
 
-void TestTask::slot_configUnknownClient(const QString& errMsg)
+void TestTask::slot_logMessage(const QString& msg)
 {
-	Q_UNUSED(errMsg);
-
-	// CfgService did not find SoftwareID
-	//
-	std::cout << tr("Configuration Service does not recognize TestSuite EquipmentID %1")
-						  .arg(m_configController.softwareInfo().equipmentID()).toStdString() << std::endl;
+	std::cout << msg.toStdString() << std::endl;
 	return;
 }
 
-void TestTask::slot_configWrongClientHostname(const QString& errMsg)
+void TestTask::slot_logError(const QString& errMsg)
 {
-	Q_UNUSED(errMsg);
-
-	// CfgService did not find SoftwareID
-	//
-	std::cout << tr("Configuration Service reporting - TestSuite running on computer with wrong hostanme").toStdString() << std::endl;
-	return;
-}
-
-void TestTask::slot_configLogMessage(const QString& msg)
-{
-	std::cout << tr("Configuration Service: %1").arg(msg).toStdString() << std::endl;
-	return;
-}
-
-void TestTask::slot_configLogError(const QString& errMsg)
-{
-	std::cout << tr("Configuration Service error: %1").arg(errMsg).toStdString() << std::endl;
+	std::cout << "[ERR] " << errMsg.toStdString() << std::endl;
 	return;
 }
 
 
 void TestTask::start()
 {
-	m_testEngine.start();
+	m_testLibrary.start();
 
 	/*
 	m_builder.start(m_databaseAddress,
@@ -98,12 +63,12 @@ void TestTask::start()
 
 void TestTask::stop()
 {
-	m_testEngine.stop();
+	m_testLibrary.stop();
 }
 
 bool TestTask::isRunning() const
 {
-	return m_testEngine.isRunning();
+	return m_testLibrary.isRunning();
 }
 
 void TestTask::newLogItem(const TestLogItem& logItem)

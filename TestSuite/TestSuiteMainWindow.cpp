@@ -11,21 +11,25 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 	: QMainWindow(parent),
 	ui(new Ui::TestSuiteMainWindow),
 	m_LogFile(qAppName(), QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + softwareInfo.equipmentID()),
-	m_configController(softwareInfo, theSettings.configuratorAddress1(), theSettings.configuratorAddress2(), &m_LogFile)
+	m_testLibrary(softwareInfo, theSettings.configuratorAddress1(), theSettings.configuratorAddress2(), &m_LogFile)
 {
 	ui->setupUi(this);
 
-	m_testEngine = new TestEngine();
-	connect(&m_testEngine->testResultLog(), &TestResultLog::newLogItem, this, &TestSuiteMainWindow::newLogItem);
-	connect(m_testEngine, &TestEngine::finished, this, &TestSuiteMainWindow::testFinished);
+	ui->testsTree->setRootIsDecorated(false);
+	QStringList headerLabels;
+	headerLabels << tr("Test");
+	ui->testsTree->setColumnCount(static_cast<int>(headerLabels.size()));
+	ui->testsTree->setHeaderLabels(headerLabels);
+	ui->testsTree->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
-	connect(&m_configController, &TestSuiteConfigController::configurationArrived, this, &TestSuiteMainWindow::slot_configurationArrived);
+	connect(&m_testLibrary.testResultLog(), &TestLog::newLogItem, this, &TestSuiteMainWindow::newLogItem);
+	connect(&m_testLibrary, &TestLibrary::readyForTesting, this, &TestSuiteMainWindow::slot_configurationArrived);
+	connect(&m_testLibrary, &TestLibrary::finished, this, &TestSuiteMainWindow::testFinished);
 
-	connect(&m_configController, &TestSuiteConfigController::logMessage, this, &TestSuiteMainWindow::slot_configLogMessage);
-	connect(&m_configController, &TestSuiteConfigController::logError, this, &TestSuiteMainWindow::slot_configLogError);
-	connect(&m_configController, &TestSuiteConfigController::logErrorunknownClient, this, &TestSuiteMainWindow::slot_configUnknownClient);
-	connect(&m_configController, &TestSuiteConfigController::logErrorwrongClientHostname, this, &TestSuiteMainWindow::slot_configWrongClientHostname);
-	m_configController.start();
+	connect(&m_testLibrary, &TestLibrary::logMessage, this, &TestSuiteMainWindow::slot_logMessage);
+	connect(&m_testLibrary, &TestLibrary::logError, this, &TestSuiteMainWindow::slot_logError);
+	connect(&m_testLibrary.configController(), &TestSuiteConfigController::logMessage, this, &TestSuiteMainWindow::slot_logMessage);
+	connect(&m_testLibrary.configController(), &TestSuiteConfigController::logError, this, &TestSuiteMainWindow::slot_logError);
 
 	createActions();
 	createMenu();
@@ -49,8 +53,6 @@ TestSuiteMainWindow::~TestSuiteMainWindow()
 	theSettings.m_mainWindowPos = pos();
 	theSettings.m_mainWindowGeometry = saveGeometry();
 	theSettings.m_mainWindowState = saveState();
-
-	delete m_testEngine;
 
 	delete ui;
 }
@@ -193,14 +195,19 @@ void TestSuiteMainWindow::createStatusBar()
 	statusBar()->addPermanentWidget(m_statusBarLogAlerts, 0);*/
 }
 
-TestSuiteConfigController& TestSuiteMainWindow::configController()
+void TestSuiteMainWindow::fillTestsTree()
 {
-	return m_configController;
-}
+	ui->testsTree->clear();
 
-const TestSuiteConfigController& TestSuiteMainWindow::configController() const
-{
-	return m_configController;
+	const TestScriptsStorage& ts = m_testLibrary.testScripts();
+
+	QStringList l = ts.testScriptList();
+	for (const QString& s : l)
+	{
+		QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << s);
+		item->setCheckState(0, Qt::Checked);
+		ui->testsTree->addTopLevelItem(item);
+	}
 }
 
 void TestSuiteMainWindow::exit()
@@ -211,16 +218,18 @@ void TestSuiteMainWindow::exit()
 void TestSuiteMainWindow::on_m_run_clicked()
 {
 
-	if (m_testEngine->isRunning() == false)
+	if (m_testLibrary.isRunning() == false)
 	{
-		m_testEngine->start();
+		m_testLibrary.start();
 	}
 }
 
 void TestSuiteMainWindow::newLogItem(const TestLogItem& item)
 {
-	QString text = ui->m_resultsLog->toPlainText() + "\n" + item.toText();
-	ui->m_resultsLog->setText(text);
+	ui->resultsLog->moveCursor (QTextCursor::End);
+	ui->resultsLog->insertPlainText(item.toText());
+	ui->resultsLog->insertPlainText("\n");
+	ui->resultsLog->moveCursor (QTextCursor::End);
 }
 
 void TestSuiteMainWindow::testFinished(int result)
@@ -228,56 +237,14 @@ void TestSuiteMainWindow::testFinished(int result)
 
 }
 
-void TestSuiteMainWindow::slot_configurationArrived(ConfigSettings configuration)
+void TestSuiteMainWindow::slot_configurationArrived()
 {
-	qDebug() << "slot_configurationArrived";
-
-	// Log out from tuning
-	//
-	/*if (m_tuningUserManager.isLoggedIn() == true)
-	{
-		m_tuningUserManager.logout();
-	}
-
-	// Refresh TuningUserManager configuration
-	//
-	m_tuningUserManager.setConfiguration(configuration.tuningLogin,
-										 configuration.tuningUserAccounts,
-										 false,
-										 configuration.tuningSessionTimeout);
-
-	showTuningLoginControls();
-
-	m_pTuningLogAction->setVisible(configuration.tuningEnabled == true);
-
-	// Close TuningTcpClients
-	//
-	stopTuningTcpClients();
-
-	// Create TuningTcpClients if tuning is enabled
-	//
-	if (configuration.tuningEnabled == true)
-	{
-		runTuningTcpClients();
-	}
-
-	m_tuningController->setTcpClients({m_tuningTcpClients.begin(),m_tuningTcpClients.end()});
-
-	if (m_dialogDataSources != nullptr)
-	{
-		m_dialogDataSources->setTuningTcpClients(configuration.tuningEnabled, {m_tuningTcpClients.begin(),m_tuningTcpClients.end()}, false);
-	}
-
-	m_statusBarTuningConnection->setVisible(configuration.tuningEnabled == true);
-
-	m_logoImage = configuration.logoImage;
-
-	showLogo();*/
+	fillTestsTree();
 
 	return;
 }
 
-void TestSuiteMainWindow::slot_configLogMessage(const QString& msg)
+void TestSuiteMainWindow::slot_logMessage(const QString& msg)
 {
 	ui->outputLog->moveCursor (QTextCursor::End);
 	ui->outputLog->insertPlainText(msg);
@@ -285,36 +252,14 @@ void TestSuiteMainWindow::slot_configLogMessage(const QString& msg)
 	ui->outputLog->moveCursor (QTextCursor::End);
 }
 
-void TestSuiteMainWindow::slot_configUnknownClient(const QString& errMsg)
+void TestSuiteMainWindow::slot_logError(const QString& errMsg)
 {
-	Q_UNUSED(errMsg);
+	ui->outputLog->moveCursor (QTextCursor::End);
+	ui->outputLog->insertPlainText(errMsg);
+	ui->outputLog->insertPlainText("\n");
+	ui->outputLog->moveCursor (QTextCursor::End);
 
-	// CfgService did not find SoftwareID
-	//
-	QMessageBox::critical(this,
-						  qAppName(),
-						  tr("Configuration Service does not recognize TestSuite EquipmentID %1")
-						  .arg(m_configController.softwareInfo().equipmentID()));
-	return;
-}
-
-void TestSuiteMainWindow::slot_configWrongClientHostname(const QString &errMsg)
-{
-	Q_UNUSED(errMsg);
-
-	// CfgService did not find SoftwareID
-	//
-	QMessageBox::critical(this,
-						  qAppName(),
-						  tr("Configuration Service reporting - TestSuite running on computer with wrong hostanme"));
-	return;
-}
-
-void TestSuiteMainWindow::slot_configLogError(const QString& errMsg)
-{
-	QMessageBox::critical(this,
-						  qAppName(),
-						  tr("Configuration Service reporting - %1").arg(errMsg));
+	QMessageBox::critical(this, qAppName(), errMsg);
 	return;
 }
 
@@ -352,7 +297,7 @@ void TestSuiteMainWindow::showSettings()
 		//
 		if (needReconnect == true)
 		{
-			m_configController.setConnectionParams(theSettings.instanceStrId(),
+			m_testLibrary.configController().setConnectionParams(theSettings.instanceStrId(),
 												   theSettings.configuratorAddress1(),
 												   theSettings.configuratorAddress2());
 		}
