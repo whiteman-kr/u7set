@@ -1672,11 +1672,9 @@ namespace Sim
 		qint32 time = instance->param(i_counter)->signedIntValue();
 		quint32 counter = instance->paramExists(i_prev_counter) ? instance->param(i_prev_counter)->dwordValue() : 0;
 
-		quint16 prevInputValue = instance->paramExists(i_saved_data) ?
-									 instance->param(i_saved_data)->wordValue() & 0x0001 : 0x0000;
-
-		quint16 prevResultValue = instance->paramExists(i_saved_data) ?
-									  (instance->param(i_saved_data)->wordValue() >> 1) & 0x0001 : 0x0000;
+		quint16 prevState = instance->paramExists(i_saved_data) ? instance->param(i_saved_data)->wordValue() : 0x0000;
+		quint16 prevResultValue = prevState & 0x0001;
+		quint16 prevInputValue = (prevState >> 1) & 0x0001;
 
 		quint16 currentInputValue = instance->param(i_input)->wordValue();
 
@@ -1912,8 +1910,8 @@ namespace Sim
 		instance->addParamDword(o_counter, counter);
 		instance->addParamDword(i_prev_counter, counter);
 
-		instance->addParamWord(o_saved_data, currentInputValue | (result << 1));
-		instance->addParamWord(i_saved_data, currentInputValue | (result << 1));
+		instance->addParamWord(o_saved_data, (currentInputValue << 1) | result);
+		instance->addParamWord(i_saved_data, (currentInputValue << 1) | result);
 
 		instance->addParamWord(o_parem_err, paramError);
 
@@ -1943,11 +1941,9 @@ namespace Sim
 		qint32 time = instance->param(i_counter)->signedIntValue();
 		quint32 counter = instance->paramExists(i_prev_counter) ? instance->param(i_prev_counter)->dwordValue() : 0;
 
-		quint16 prevInputValue = instance->paramExists(i_saved_data) ?
-									 (instance->param(i_saved_data)->wordValue() & 0x0001) : 0x0000;
-
-		quint16 prevResultValue = instance->paramExists(i_saved_data) ?
-									  ((instance->param(i_saved_data)->wordValue() >> 1) & 0x0001) : 0x0000;
+		quint16 prevState = instance->paramExists(i_saved_data) ? instance->param(i_saved_data)->wordValue() : 0x0000;
+		quint16 prevResultValue = prevState & 0x0001;
+		quint16 prevInputValue = (prevState >> 1) & 0x0001;
 
 		quint16 currentInputValue = instance->param(i_input)->wordValue();
 
@@ -2219,8 +2215,8 @@ namespace Sim
 		instance->addParamDword(o_counter, counter);
 		instance->addParamDword(i_prev_counter, counter);
 
-		instance->addParamWord(o_saved_data, currentInputValue | (result << 1));
-		instance->addParamWord(i_saved_data, currentInputValue | (result << 1));
+		instance->addParamWord(o_saved_data, (currentInputValue << 1) | result);
+		instance->addParamWord(i_saved_data, (currentInputValue << 1) | result);
 
 		instance->addParamWord(o_parem_err, paramError);
 
@@ -2250,11 +2246,10 @@ namespace Sim
 		qint32 time = instance->param(i_counter)->signedIntValue();
 		quint32 counter = instance->paramExists(i_prev_counter) ? instance->param(i_prev_counter)->dwordValue() : 0;
 
-		quint16 prevInputValue = instance->paramExists(i_saved_data) ?
-									 instance->param(i_saved_data)->wordValue() & 0x0001 : 0x0000;
-
-		quint16 prevResultValue = instance->paramExists(i_saved_data) ?
-									  (instance->param(i_saved_data)->wordValue() >> 1) & 0x0001 : 0x0000;
+		// i_wave_dff (bit 0), i_wave_in (bit 1)
+		quint16 prevState = instance->paramExists(i_saved_data) ? instance->param(i_saved_data)->wordValue() : 0x0000;
+		quint16 prevResultValue = prevState & 0x0001;
+		quint16 prevInputValue = (prevState >> 1) & 0x0001;
 
 		quint16 currentInputValue = instance->param(i_input)->wordValue();
 
@@ -2526,8 +2521,8 @@ namespace Sim
 		instance->addParamDword(o_counter, counter);
 		instance->addParamDword(i_prev_counter, counter);
 
-		instance->addParamWord(o_saved_data, currentInputValue | (result << 1));
-		instance->addParamWord(i_saved_data, currentInputValue | (result << 1));
+		instance->addParamWord(o_saved_data, (currentInputValue << 1) | result);
+		instance->addParamWord(i_saved_data, (currentInputValue << 1) | result);
 
 		instance->addParamWord(o_parem_err, paramError);
 
