@@ -98,13 +98,10 @@ class Property
 {
 protected:
 	Property() noexcept = default;
-
 	Property(const Property&) noexcept = default;
 	Property(Property&&) noexcept = default;
-
 	Property& operator=(const Property&) noexcept = default;
 	Property& operator=(Property&&) noexcept = default;
-
 	virtual ~Property() = default;
 
 public:
@@ -119,7 +116,7 @@ public:
 	{
 		return m_caption;
 	}
-	Property& setCaption(const QString& value) &
+	Property& setCaption(const QString& value) noexcept
 	{
 		m_caption = value;
 		return *this;
@@ -129,7 +126,7 @@ public:
 	{
 		return m_description;
 	}
-	Property& setDescription(const QString& value) &
+	Property& setDescription(const QString& value) noexcept
 	{
 		m_description = value;
 		return *this;
@@ -139,7 +136,7 @@ public:
 	{
 		return m_category;
 	}
-	Property& setCategory(const QString& value) &
+	Property& setCategory(const QString& value) noexcept
 	{
 		m_category = value;
 		return *this;
@@ -149,12 +146,12 @@ public:
 	{
 		return m_validator;
 	}
-	Property& setValidator(const QString& value) &
+	Property& setValidator(const QString& value) noexcept
 	{
 		m_validator = value;
 		return *this;
 	}
-	Property& setValidator(const QLatin1String value) &
+	Property& setValidator(const QLatin1String value) noexcept
 	{
 		m_validator = value;
 		return *this;
@@ -164,7 +161,7 @@ public:
 	{
 		return m_readOnly;
 	}
-	Property& setReadOnly(bool value) & noexcept
+	Property& setReadOnly(bool value) noexcept
 	{
 		m_readOnly = value;
 		return *this;
@@ -174,7 +171,7 @@ public:
 	{
 		return m_updateFromPreset;
 	}
-	Property& setUpdateFromPreset(bool value) & noexcept
+	Property& setUpdateFromPreset(bool value) noexcept
 	{
 		m_updateFromPreset = value;
 		return *this;
@@ -184,7 +181,7 @@ public:
 	{
 		return m_specific;
 	}
-	Property& setSpecific(bool value) & noexcept
+	Property& setSpecific(bool value) noexcept
 	{
 		m_specific = value;
 		return *this;
@@ -198,7 +195,7 @@ public:
 	{
 		return m_visible;
 	}
-	Property& setVisible(bool value) & noexcept
+	Property& setVisible(bool value) noexcept
 	{
 		m_visible = value;
 		return *this;
@@ -208,7 +205,7 @@ public:
 	{
 		return m_expert;
 	}
-	Property& setExpert(bool value) & noexcept
+	Property& setExpert(bool value) noexcept
 	{
 		m_expert = value;
 		return *this;
@@ -218,7 +215,7 @@ public:
 	{
 		return m_essential;
 	}
-	Property& setEssential(bool value) & noexcept
+	Property& setEssential(bool value) noexcept
 	{
 		m_essential = value;
 		return *this;
@@ -228,7 +225,7 @@ public:
 	{
 		return m_disableTableEditor;
 	}
-	Property& setDisableTableEditor(bool value) & noexcept
+	Property& setDisableTableEditor(bool value) noexcept
 	{
 		m_disableTableEditor = value;
 		return *this;
@@ -238,7 +235,7 @@ public:
 	{
 		return m_specificEditor;
 	}
-	Property& setSpecificEditor(E::PropertySpecificEditor value) & noexcept
+	Property& setSpecificEditor(E::PropertySpecificEditor value) noexcept
 	{
 		m_specificEditor = value;
 		return *this;
@@ -248,7 +245,7 @@ public:
 	{
 		return m_specificEditor == E::PropertySpecificEditor::Password;
 	}
-	Property& setPassword(bool value) & noexcept
+	Property& setPassword(bool value) noexcept
 	{
 		m_specificEditor = value ? E::PropertySpecificEditor::Password : E::PropertySpecificEditor::None;
 		return *this;
@@ -259,7 +256,7 @@ public:
 		return m_specificEditor == E::PropertySpecificEditor::Script ||
 				caption().contains(QLatin1String("Script")) == true;
 	}
-	Property& setIsScript(bool value) & noexcept
+	Property& setIsScript(bool value) noexcept
 	{
 		m_specificEditor = value ? E::PropertySpecificEditor::Script : E::PropertySpecificEditor::None;
 		return *this;
@@ -269,7 +266,7 @@ public:
 	{
 		return m_precision;
 	}
-	Property& setPrecision(int value) & noexcept
+	Property& setPrecision(int value) noexcept
 	{
 		m_precision = std::clamp<qint16>(static_cast<qint16>(value), 0, 128);
 		return *this;
@@ -279,7 +276,7 @@ public:
 	{
 		return m_viewOrder;
 	}
-	Property& setViewOrder(int value) & noexcept
+	Property& setViewOrder(int value) noexcept
 	{
 		m_viewOrder = static_cast<quint16>(value);
 		return *this;
