@@ -10,7 +10,7 @@
 // MonitorView
 //
 SimSchemaView::SimSchemaView(SimSchemaManager* schemaManager, QWidget* parent)
-	: VFrame30::ClientSchemaView(schemaManager, nullptr/*History navigation is not supported (now)*/, parent),
+	: VFrame30::ClientSchemaView(schemaManager, nullptr/*History navigation is not supported (now)*/, nullptr, parent),
 	  m_simulator(schemaManager->simulator())
 {
 	Q_ASSERT(schemaManager);

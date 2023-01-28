@@ -3,7 +3,7 @@
 #include "../VFrame30/PropertyNames.h"
 
 TuningSchemaView::TuningSchemaView(TuningSchemaManager* schemaManager, QWidget* parent /*= nullptr*/)
-	:  VFrame30::ClientSchemaView(schemaManager, nullptr, parent)
+	:  VFrame30::ClientSchemaView(schemaManager, nullptr, nullptr, parent)
 {
 
 	QJSEngine* engine = jsEngine();

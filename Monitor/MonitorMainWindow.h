@@ -8,6 +8,7 @@
 #include "SelectSchemaWidget.h"
 #include "MonitorTuningTcpClient.h"
 #include "InstanceResolver.h"
+#include "SchemaDrawStatistics.h"
 #include "../VFrame30/ClientSchemaView.h"
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/TuningController.h"
@@ -171,6 +172,8 @@ private:
 	SimpleThread* m_sourcesStateClientThread = nullptr;
 
 	DialogAlert m_dialogAlert;
+
+	SchemaDrawStatistics m_schemaStats;
 
 	// File menu
 	//
