@@ -277,10 +277,12 @@ namespace VFrame30
 	//
 	ClientSchemaView::ClientSchemaView(VFrame30::SchemaManager* schemaManager,
 									   ISchemaViewHistory* schemaViewHistory,
+									   ITimeStats* timeStats,
 									   QWidget* parent) :
 		VFrame30::SchemaViewWidget(parent),
 		m_schemaManager(schemaManager),
-		m_schemaViewHistory(schemaViewHistory)
+		m_schemaViewHistory(schemaViewHistory),
+		m_timeStats(timeStats)
 	{
 		assert(schemaManager);
 
@@ -298,6 +300,14 @@ namespace VFrame30
 
 	void ClientSchemaView::paintEvent(QPaintEvent* paintEvent)
 	{
+		Q_ASSERT(schema());
+
+		if (m_timeStats != nullptr)
+		{
+			m_timeStats->clear("ClientSchemaView", schema()->schemaId());
+		}
+		auto startTime = std::chrono::system_clock::now();
+
 		// Draw schema
 		//
 		QRectF clipRect(0, 0, schema()->docWidth(), schema()->docHeight());
@@ -341,6 +351,16 @@ namespace VFrame30
 		// --
 		//
 		p.end();
+
+		if (m_timeStats != nullptr)
+		{
+			using namespace std::chrono;
+
+			auto now = system_clock::now();
+			auto ellapsed = duration_cast<microseconds>(now - startTime);
+
+			m_timeStats->addRecord("ClientSchemaView", schema()->schemaId(), "paintEvent", ellapsed);
+		}
 
 		return;
 	}
@@ -901,6 +921,16 @@ namespace VFrame30
 	void ClientSchemaView::setVariables(const QVariantHash& values)
 	{
 		m_variables = values;
+	}
+
+	ITimeStats* ClientSchemaView::timeStats()
+	{
+		return m_timeStats;
+	}
+
+	ITimeStats* ClientSchemaView::timeStats() const
+	{
+		return m_timeStats;
 	}
 
 	const MonitorBehavior& ClientSchemaView::monitorBehavor() const noexcept

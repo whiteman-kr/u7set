@@ -69,6 +69,7 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 																		  m_appSignalController.get(),
 																		  m_tuningController.get(),
 																		  m_logController.get(),
+																		  &m_schemaStats,
 																		  this);
 	setCentralWidget(monitorCentralWidget);
 
@@ -613,9 +614,9 @@ void MonitorMainWindow::createMenus()
 	menuBar()->addSeparator();
 	QMenu* helpMenu = menuBar()->addMenu(tr("&?"));
 
-#ifdef QT_DEBUG
-	//helpMenu->addAction(m_pDebugAction);
-#endif	// QT_DEBUG
+//#ifdef QT_DEBUG
+	helpMenu->addAction(m_pDebugAction);
+//#endif	// QT_DEBUG
 
 	helpMenu->addAction(m_pDataSourcesAction);
 	helpMenu->addAction(m_pStatisticsAction);
@@ -1124,7 +1125,44 @@ void MonitorMainWindow::showMatsUserManual()
 
 void MonitorMainWindow::debug()
 {
-#ifdef QT_DEBUG
+	QDialog statsDialog{this};
+
+	QVBoxLayout* layout = new QVBoxLayout{};
+
+	QTextEdit* textEdit = new QTextEdit{};
+	layout->addWidget(textEdit);
+
+	// --
+	//
+	QString str;
+
+	for (auto modules = m_schemaStats.modules();
+		 const QString& module : modules)
+	{
+		for (auto items = m_schemaStats.items(module);
+			 const QString& item : items)
+		{
+			for (auto records = m_schemaStats.itemRecords(module, item);
+				 const auto& record: records)
+			{
+				str += QString("%1;%2;%3;%4\n")
+					   .arg(module)
+					   .arg(item)
+					   .arg(record.action)
+					   .arg(record.time.count());
+			}
+		}
+	}
+
+	textEdit->setText(str);
+
+	// --
+	//
+	statsDialog.setLayout(layout);
+	statsDialog.exec();
+
+
+//#ifdef QT_DEBUG
 //	QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
 //													"./",
 //													tr("Monitor schemas (*.mvs);; All files (*.*)"));
@@ -1153,7 +1191,7 @@ void MonitorMainWindow::debug()
 	//	MonitorSchemaWidget* schemaWidget = new MonitorSchemaWidget(schema);
 	//	tabWidget->addTab(schemaWidget, "Debug tab: " + fileInfo.fileName());
 
-#endif	// QT_DEBUG
+//#endif	// QT_DEBUG
 }
 
 void MonitorMainWindow::slot_archive()

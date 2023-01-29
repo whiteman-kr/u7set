@@ -15,8 +15,9 @@ MonitorSchemaView::MonitorSchemaView(MonitorSchemaManager* schemaManager,
 									 VFrame30::AppSignalController* appSignalController,
 									 VFrame30::TuningController* tuningController,
 									 VFrame30::LogController* logController,
+									 ITimeStats* timeStats,
 									 QWidget* parent)
-	: VFrame30::ClientSchemaView(schemaManager, schemaViewHistory, parent)
+	: VFrame30::ClientSchemaView(schemaManager, schemaViewHistory, timeStats, parent)
 {
 	setAppSignalController(appSignalController);
 	setTuningController(tuningController);

@@ -3,6 +3,7 @@
 #include "MonitorSchemaWidget.h"
 #include "MonitorSchemaManager.h"
 #include "../lib/Ui/TabWidgetEx.h"
+#include "../lib/ITimeStats.h"
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/TuningController.h"
 
@@ -16,6 +17,7 @@ public:
 						 VFrame30::AppSignalController* appSignalController,
 						 VFrame30::TuningController* tuningController,
 						 VFrame30::LogController* logController,
+						 ITimeStats* timeStats,
 						 QWidget* parent);
 	~MonitorCentralWidget();
 
@@ -73,6 +75,8 @@ private:
 	VFrame30::AppSignalController* m_appSignalController = nullptr;
 	VFrame30::TuningController* m_tuningController = nullptr;
 	VFrame30::LogController* m_logController = nullptr;
+
+	ITimeStats* m_timeStats = nullptr;
 
 	int m_eventLoopTimerId = 0;				// We need to cathc event loop. Start timer, as we enter event loop timerEvent comes
 	int m_eventLoopTimerCounter = 0;		// We need to cathc event loop. Start timer, as we enter event loop timerEvent comes

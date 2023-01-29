@@ -2,6 +2,7 @@
 
 #include "../CommonLib/Types.h"
 #include "../lib/ClientBehavior.h"
+#include "../lib/ITimeStats.h"
 #include "Session.h"
 #include "FontParam.h"
 
@@ -46,6 +47,9 @@ namespace VFrame30
 
 		const ClientSchemaView* clientSchemaView() const;	// Can be used only in Client mode (Monitor/Tuning/...)
 		ClientSchemaView* clientSchemaView();
+
+		ITimeStats* timeStats();
+		ITimeStats* timeStats() const;
 
 		// Params for drawing
 		//
