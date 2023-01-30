@@ -91,6 +91,7 @@ protected slots:
 	void showAboutQt();
 	void showAbout();
 	void showMatsUserManual();
+	void devTools();
 	void debug();
 
 	// Slots
@@ -187,6 +188,7 @@ private:
 
 	// ? menu
 	//
+	QAction* m_pDevToolsAction = nullptr;
 	QAction* m_pDebugAction = nullptr;
 	QAction* m_pLogAction = nullptr;
     QAction* m_pTuningLogAction = nullptr;
