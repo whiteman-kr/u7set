@@ -9,18 +9,14 @@ void SchemaDrawStatistics::clear(const QString& module)
 
 void SchemaDrawStatistics::clear(const QString& module, const QString& item)
 {
-	m_modules[module].clear();
-	m_modules[module].operator[](item).clear();
+	ItemsMap& itemMap = m_modules[module];
+	itemMap[item].clear();
 }
 
 void SchemaDrawStatistics::addRecord(const QString& module, const QString& item, QString action, std::chrono::microseconds us)
 {
-	m_modules[module].at(item).emplace_back(std::move(action), us);
-}
-
-void SchemaDrawStatistics::addRecord(const QString& module, const QString& item, QString action, std::chrono::milliseconds ms)
-{
-	m_modules[module].at(item).emplace_back(std::move(action), ms);
+	ItemsMap& itemMap = m_modules[module];
+	itemMap[item].emplace_back(std::move(action), us);
 }
 
 std::vector<QString> SchemaDrawStatistics::modules() const

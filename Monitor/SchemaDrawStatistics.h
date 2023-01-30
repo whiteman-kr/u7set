@@ -10,7 +10,6 @@ public:
 	virtual void clear(const QString& module) override;
 	virtual void clear(const QString& module, const QString& item) override;
 	virtual void addRecord(const QString& module, const QString& item, QString action, std::chrono::microseconds us) override;
-	virtual void addRecord(const QString& module, const QString& item, QString action, std::chrono::milliseconds ms) override;
 
 	[[nodiscard]] virtual std::vector<QString> modules() const override;
 	[[nodiscard]] virtual std::vector<QString> items(const QString& module) const override;

@@ -467,10 +467,6 @@ namespace VFrame30
 		{
 			// Start stats
 			//
-			if (drawParam->timeStats() != nullptr)
-			{
-				drawParam->timeStats()->clear("Schema", schemaId());
-			}
 			auto startTime = std::chrono::system_clock::now();
 
 			// Monitor or Simulator

@@ -304,7 +304,7 @@ namespace VFrame30
 
 		if (m_timeStats != nullptr)
 		{
-			m_timeStats->clear("ClientSchemaView", schema()->schemaId());
+			m_timeStats->clear("ClientSchemaView");
 		}
 		auto startTime = std::chrono::system_clock::now();
 
