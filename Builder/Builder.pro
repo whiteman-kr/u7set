@@ -70,6 +70,7 @@ SOURCES += \
 	../Metrology/UnitsConvertorTable.cpp \
     Builder.cpp \
 	AppSignalProperties.cpp \
+	CodeChecker.cpp \
 	DbMetrologyConnection.cpp \
     ConnectionStorage.cpp \
     IssueLogger.cpp \
@@ -139,6 +140,7 @@ HEADERS += \
 	../Metrology/UnitsConvertorTable.h \
 	Builder.h \
 	AppSignalProperties.h \
+	CodeChecker.h \
 	DbMetrologyConnection.h \
     ConnectionStorage.h \
     Loopbacks.h \

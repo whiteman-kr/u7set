@@ -92,6 +92,8 @@ namespace Builder
 		{	LmCommand::Code::FILL,		4,	"FILL",			false,	11,	LmCommand::CALC_RUNTIME	},
 	};
 
+	const int LM_COMMANDS_COUNT = sizeof(lmCommandSet) / sizeof(LmCommand);
+
 	class LmCommands : public std::map<int, const LmCommand>
 	{
 	public:
@@ -297,38 +299,6 @@ namespace Builder
 		void fill(int addrTo, int addrFrom, int addrBit);
 		void fill(Address16 addrTo, Address16 addrFrom);
 
-		//
-
-		bool checkNop();
-		bool checkStart();
-		bool checkStop();
-		bool checkMov();
-		bool checkMovMem();
-		bool checkMovConst();
-		bool checkMovBitConst();
-		bool checkWriteFuncBlock();
-		bool checkReadFuncBlock();
-		bool checkWriteFuncBlockConst();
-		bool checkWriteFuncBlockBit();
-		bool checkReadFuncBlockBit();
-		bool checkReadFuncBlockTest();
-		bool checkSetMem();
-		bool checkMovBit();
-		bool checkNstart();
-		bool checkAppStart();
-		bool checkMov32();
-		bool checkMovConst32();
-		bool checkWriteFuncBlock32();
-		bool checkReadFuncBlock32();
-		bool checkWriteFuncBlockConst32();
-		bool checkReadFuncBlockTest32();
-		bool checkMovConstIfFlag();
-		bool checkPrevMov();
-		bool checkPrevMov32();
-		bool checkFill();
-
-		//
-
 		LmCommand::Code getOpcode() const { return m_code.getOpCode(); }
 
 		int address() const { assert(m_isCommand == true); return m_address; }
@@ -337,6 +307,8 @@ namespace Builder
 		QString comment() const { return m_comment; }
 		void setComment(const QString& comment) { m_comment = comment; }
 		void clearComment() { m_comment.clear(); }
+
+		void setClockCount(int clockCount) { m_clockCount = clockCount; }
 
 		int sizeW() const { return m_code.sizeW(); }
 
@@ -358,16 +330,17 @@ namespace Builder
 		quint16 getBitNo2() const { return m_code.getBitNo2(); }
 
 		int getFbType() const { return m_code.getFbType(); }
+		int getFbInstance() const { return m_code.getFbInstance(); }
 
 		bool isValidCommand() const { return m_code.getOpCode() != LmCommand::Code::NoCommand; }
 
 		bool generateBinCode(QByteArray* binCode) const;
 
-		QString getAsmCode(bool printCmdCode, int* clockCount) const;
+		QString getAsmCode(bool printCmdCode) const;
 		QString mnemoCode() const;
 		QString getConstValueString() const;
 
-		bool calcRunTime(const LmMemoryMap* lmMemMap,
+		bool calcRunTime(const LmDescription& lmDesc,
 						 int prevCmdExecTime,
 						 int* waitTime,
 						 int* execTime,
@@ -378,7 +351,7 @@ namespace Builder
 		int waitTime() const { Q_ASSERT(m_waitTime != -1); return m_waitTime; }
 		int execTime() const { Q_ASSERT(m_execTime != -1); return m_execTime; }
 
-		void addExecTime(int execTime) { Q_ASSERT(m_execTime != -1); m_execTime += execTime; }
+		void addExecTime(int execTime);
 
 	private:
 		void initCommand();
@@ -393,6 +366,9 @@ namespace Builder
 		bool write32(int addrTo);
 		bool writeArea(int addrTo, int sizeW);
 
+		bool isAddrInBitMem(const LmDescription& lmDesc, quint32 addr) const;
+		bool isAddrInWordMem(const LmDescription& lmDesc, quint32 addr) const;
+
 	private:
 		bool m_isCommand = false;
 
@@ -406,6 +382,7 @@ namespace Builder
 
 		int m_waitTime = -1;
 		int m_execTime = -1;
+		int m_clockCount = -1;			// total code execution time after this command running
 	};
 
 	class CodeSnippet
@@ -442,6 +419,8 @@ namespace Builder
 		void getAsmMetadataFields(QStringList* metadataFields, int* metadataVersion) const;
 		void getAsmMetadata(std::vector<QVariantList>* metadata) const;
 
+		const std::vector<CodeItem>& code() const;
+
 	protected:
 		std::vector<CodeItem> m_code;
 	};
@@ -460,9 +439,10 @@ namespace Builder
 	public:
 		AppLogicCode(Type type);
 
-		void setMemoryMapAndLogger(const LmMemoryMap* lmMemory, IssueLogger* log);
 		void setAppStartAddr(int addr);
-		void finalize(const LmDescription& lmDesc);
+
+		[[nodiscard]] bool finalize(std::shared_ptr<const LmDescription> lmDesc);
+
 		void clear();
 
 		Type codeType() const;
@@ -485,9 +465,6 @@ namespace Builder
 
 	private:
 		Type m_codeType = Type::Unknown;
-
-		const LmMemoryMap* m_lmMemoryMap = nullptr;
-		IssueLogger* m_log = nullptr;
 
 		std::map<int, int> m_runningAfbs;		// AFB opCode -> AFB runtime
 

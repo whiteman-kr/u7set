@@ -9,6 +9,7 @@
 #include "SoftwareCfgGenerator.h"
 #include "Parser.h"
 #include "LmDescriptionSet.h" 
+#include "CodeChecker.h"
 
 #define LOG_UNDEFINED_UAL_ADDRESS(log, ualSignal) log->writeError(QString("Undefined signal's ualAddress: %1 (File: %2 Line: %3 Function: %4)").arg(ualSignal->refSignalIDs().join(", ")).arg(__FILE__).arg(__LINE__).arg(SHORT_FUNC_INFO));
 
@@ -147,8 +148,6 @@ namespace Builder
 
 		LOG_MESSAGE(m_log, QString(tr("Compilation pass #2 for LM %1 was started...")).arg(lmEquipmentID()));
 
-		m_code.setMemoryMapAndLogger(&m_memoryMap, m_log);
-
 		ProcsToCallArray procs =
 		{
 			PROC_TO_CALL(ModuleLogicCompiler::initComparatorSignals),
@@ -168,6 +167,7 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::generateIdrPhaseCode),
 
 			PROC_TO_CALL(ModuleLogicCompiler::makeAppLogicCode),
+			PROC_TO_CALL(ModuleLogicCompiler::checkAppLogicCode),
 
 			PROC_TO_CALL(ModuleLogicCompiler::cleanupHeaps),
 
@@ -288,11 +288,18 @@ namespace Builder
 		return 	m_lmShared;
 	}
 
-	std::shared_ptr<LmDescription> ModuleLogicCompiler::getLmDescription()
+/*	std::shared_ptr<LmDescription> ModuleLogicCompiler::getLmDescription()
 	{
 		TEST_PTR_LOG_RETURN_NULLPTR(m_lmDescription, m_log);
 
 		return m_lmDescription;
+	}*/
+
+	std::shared_ptr<const LmDescription> ModuleLogicCompiler::getLmDescription() const
+	{
+		TEST_PTR_LOG_RETURN_NULLPTR(m_lmDescription, m_log);
+
+		return std::const_pointer_cast<const LmDescription>(m_lmDescription);
 	}
 
 	BusShared ModuleLogicCompiler::getBusShared(const QString& busTypeID)
@@ -7449,8 +7456,6 @@ namespace Builder
 
 		m_idrCode.clear();
 
-		m_idrCode.setMemoryMapAndLogger(&m_memoryMap, m_log);
-
 		//
 
 		m_idrCode.comment("Start of IDR phase code");
@@ -7485,7 +7490,7 @@ namespace Builder
 		m_idrCode.append(stopCmd);
 		m_idrCode.newLine();
 
-		m_idrCode.finalize(*m_lmDescription.get());	// required to calc codeSizeW
+		result &= m_idrCode.finalize(getLmDescription());	// required to calc codeSizeW
 
 		int alpCodeStartAddr = m_idrCode.codeSizeW();
 
@@ -7497,8 +7502,6 @@ namespace Builder
 	bool ModuleLogicCompiler::generateAlpPhaseCode()
 	{
 		m_alpCode.clear();
-
-		m_alpCode.setMemoryMapAndLogger(&m_memoryMap, m_log);
 
 		m_alpCode.comment("Start of ALP phase code");
 		m_alpCode.newLine();
@@ -7542,7 +7545,7 @@ namespace Builder
 
 		m_alpCode.append(stopCmd);
 
-		m_alpCode.finalize(*m_lmDescription.get());
+		result &= m_alpCode.finalize(getLmDescription());
 
 		return result;
 	}
@@ -7551,16 +7554,21 @@ namespace Builder
 	{
 		m_code.clear();
 
-		m_code.setMemoryMapAndLogger(&m_memoryMap, m_log);
-
 		m_code.reserve(m_idrCode.itemsCount() + m_alpCode.itemsCount());
 
 		m_code.append(m_idrCode);
 		m_code.append(m_alpCode);
 
-		m_code.finalize(*m_lmDescription.get());
+		bool result = m_code.finalize(getLmDescription());
 
-		return true;
+		return result;
+	}
+
+	bool ModuleLogicCompiler::checkAppLogicCode()
+	{
+		CodeChecker checker(*this);
+
+		return checker.check(m_code);
 	}
 
 	bool ModuleLogicCompiler::cleanupHeaps()

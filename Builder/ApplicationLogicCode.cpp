@@ -1,6 +1,9 @@
 #include "ApplicationLogicCode.h"
+#include "ModuleLogicCompiler.h"
+
 #include "../VFrame30/Afb.h"
 #include "../lib/ConstStrings.h"
+
 
 namespace Builder
 {
@@ -377,7 +380,6 @@ namespace Builder
 
 		m_code.setOpCode(LmCommand::Code::STOP);
 	}
-
 
 	void CodeItem::mov(int addrTo, int addrFrom)
 	{
@@ -940,249 +942,6 @@ namespace Builder
 		fill(addrTo.offset(), addrFrom.offset(), addrFrom.bit());
 	}
 
-	bool CodeItem::checkNop()
-	{
-		return true;
-	}
-
-	bool CodeItem::checkStart()
-	{
-		// need check fbType and fbInstance
-		Q_ASSERT(false);
-		return false;
-	}
-
-	bool CodeItem::checkStop()
-	{
-		// need check fbType and fbInstance
-		Q_ASSERT(false);
-		return false;
-	}
-
-	bool CodeItem::checkMov()
-	{
-		// chek addresses
-
-		//read16(addrFrom);
-		//write16(addrTo);
-		Q_ASSERT(false);
-		return false;
-	}
-
-	bool CodeItem::checkMovMem()
-	{
-		/*if (addressInBitMemory(addrTo) ||
-			addressInBitMemory(addrTo + sizeW - 1))
-		{
-			// Command 'MOVEMEM %1, %2, %3' can't write to bit-addressed memory.
-			//
-			m_log->errALC5066(addrTo, addrFrom, sizeW);
-			m_result = false;
-		}
-
-		readArea(addrFrom, sizeW);
-		writeArea(addrTo, sizeW);*/
-		Q_ASSERT(false);
-		return false;
-	}
-
-	bool CodeItem::checkMovConst()
-	{
-		//write16(addrTo);
-		Q_ASSERT(false);
-		return false;
-	}
-
-	bool CodeItem::checkMovBitConst()
-	{
-		/*
-		if (addressInBitMemory(addrTo) == false &&
-			addressInWordMemory(addrTo) == false)
-		{
-
-			//	Command 'MOVBC %1, %2, #%3' can't write out of application bit- or word-addressed memory.
-			//
-			m_log->errALC5067(addrTo, bitNo, constBit);
-
-			m_result = false;
-		}
-
-		write16(addrTo);*/
-		Q_ASSERT(false);
-		return false;
-	}
-
-	bool CodeItem::checkWriteFuncBlock()
-	{
-		//	read16(addrFrom);
-		Q_ASSERT(false);
-		return false;
-	}
-
-	bool CodeItem::checkReadFuncBlock()
-	{
-		// write16(addrTo);
-		Q_ASSERT(false);
-		return false;
-	}
-
-	bool CodeItem::checkWriteFuncBlockConst()
-	{
-		// ??
-		Q_ASSERT(false);
-		return false;
-	}
-
-	bool CodeItem::checkWriteFuncBlockBit()
-	{
-		// read16(addrFrom);
-		Q_ASSERT(false);
-		return false;
-	}
-
-	bool CodeItem::checkReadFuncBlockBit()
-	{
-		/*
-		if (addressInBitMemory(addrTo) == false &&
-			addressInWordMemory(addrTo) == false)
-		{
-			Q_ASSERT(false);			// RDFBB command can write only in bit- or word-addressed memory
-			m_result = false;
-			return;
-		}
-
-		m_memoryMap->write16(addrTo);*/
-		Q_ASSERT(false);
-		return false;
-	}
-
-	bool CodeItem::checkReadFuncBlockTest()
-	{
-		// ??
-		Q_ASSERT(false);
-		return false;
-	}
-
-	bool CodeItem::checkSetMem()
-	{
-		/*
-		if (addressInBitMemory(addr) ||
-			addressInBitMemory(addr + sizeW - 1))
-		{
-			Q_ASSERT(false);			// SETMEM command can't write to bit-addressed memory
-			m_result = false;
-		}
-
-		writeArea(addr, sizeW);*/
-		Q_ASSERT(false);
-		return false;
-	}
-
-	bool CodeItem::checkMovBit()
-	{
-		/*if (addressInBitMemory(addrTo) == false &&
-			addressInWordMemory(addrTo) == false)
-		{
-
-			// Command 'MOVB %1[%2], %3[%4]' can't write out of application bit- or word-addressed memory.
-			//
-			m_log->errALC5089(addrTo, bitTo, addrFrom, bitFrom);
-
-			m_result = false;
-		}
-
-		//
-
-		read16(addrFrom);
-		write16(addrTo);*/
-		Q_ASSERT(false);
-		return false;
-	}
-
-	bool CodeItem::checkNstart()
-	{
-		// ??
-		Q_ASSERT(false);
-		return false;
-	}
-
-	bool CodeItem::checkAppStart()
-	{
-		// ??
-		Q_ASSERT(false);
-		return false;
-	}
-
-	bool CodeItem::checkMov32()
-	{
-		/*read32(addrFrom);
-		write32(addrTo);*/
-		Q_ASSERT(false);
-		return false;
-	}
-
-	bool CodeItem::checkMovConst32()
-	{
-		// write32(addrTo);
-		Q_ASSERT(false);
-		return false;
-	}
-
-	bool CodeItem::checkWriteFuncBlock32()
-	{
-		// read32(addrFrom);
-		Q_ASSERT(false);
-		return false;
-	}
-
-	bool CodeItem::checkReadFuncBlock32()
-	{
-		// write32(addrTo);
-		Q_ASSERT(false);
-		return false;
-	}
-
-	bool CodeItem::checkWriteFuncBlockConst32()
-	{
-		// ??
-		Q_ASSERT(false);
-		return false;
-	}
-
-	bool CodeItem::checkReadFuncBlockTest32()
-	{
-		// ??
-		Q_ASSERT(false);
-		return false;
-	}
-
-	bool CodeItem::checkMovConstIfFlag()
-	{
-		// ??
-		Q_ASSERT(false);
-		return false;
-	}
-
-	bool CodeItem::checkPrevMov()
-	{
-		// ??
-		Q_ASSERT(false);
-		return false;
-	}
-
-	bool CodeItem::checkPrevMov32()
-	{
-		// ??
-		Q_ASSERT(false);
-		return false;
-	}
-
-	bool CodeItem::checkFill()
-	{
-		// ??
-		Q_ASSERT(false);
-		return false;
-	}
 
 	bool CodeItem::isWaitingForFbExecution() const
 	{
@@ -1239,10 +998,8 @@ namespace Builder
 		return true;
 	}
 
-	QString CodeItem::getAsmCode(bool printCmdCode, int* clockCount) const
+	QString CodeItem::getAsmCode(bool printCmdCode) const
 	{
-		TEST_PTR_RETURN_VALUE(clockCount, QString());
-
 		if (m_isCommand == false)
 		{
 			// this is a comment
@@ -1286,10 +1043,8 @@ namespace Builder
 
 		Q_ASSERT(m_execTime >= 0);			// check that times already calculated
 
-		*clockCount += m_waitTime + m_execTime;
-
 		char cstr[32];
-		snprintf(cstr, 32, "[%02d:%02d %6d]", m_waitTime, m_execTime, *clockCount);
+		snprintf(cstr, 32, "[%02d:%02d %6d]", m_waitTime, m_execTime, m_clockCount);
 		cmdStr += QString(cstr).leftJustified(16, ' ');
 
 		QString mnemo = mnemoCode();
@@ -1510,14 +1265,12 @@ namespace Builder
 		return QString();
 	}
 
-	bool CodeItem::calcRunTime(const LmMemoryMap* lmMemMap,
+	bool CodeItem::calcRunTime(const LmDescription& lmDesc,
 							   int prevCmdExecTime,
 							   int* waitTime,
 							   int* execTime,
 							   int* fbExecTime)
 	{
-		TEST_PTR_RETURN_FALSE(lmMemMap);
-
 		*waitTime = 0;
 		*execTime = 0;
 		*fbExecTime = 0;
@@ -1604,7 +1357,7 @@ namespace Builder
 			//
 		case LmCommand::Code::MOV:
 			Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
-			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord2()) == true ? 69 : 10;
+			cmdExecTime = isAddrInBitMem(lmDesc, m_code.getWord2()) == true ? 69 : 10;
 			break;
 
 		case LmCommand::Code::MOVMEM:
@@ -1621,17 +1374,17 @@ namespace Builder
 
 		case LmCommand::Code::MOVC:
 			Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
-			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord2()) == true ? 66 : 6;
+			cmdExecTime = isAddrInBitMem(lmDesc, m_code.getWord2()) == true ? 66 : 6;
 			break;
 
 		case LmCommand::Code::MOVBC:
 			Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
-			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord2()) == true ? 7 : 14;
+			cmdExecTime = isAddrInBitMem(lmDesc, m_code.getWord2()) == true ? 7 : 14;
 			break;
 
 		case LmCommand::Code::RDFBB:
 			Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
-			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord3()) == true ? 7 : 12;
+			cmdExecTime = isAddrInBitMem(lmDesc, m_code.getWord3()) == true ? 7 : 12;
 			break;
 
 		case LmCommand::Code::SETMEM:
@@ -1648,17 +1401,17 @@ namespace Builder
 
 		case LmCommand::Code::MOVB:
 			Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
-			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord2()) == true ? 10 : 17;
+			cmdExecTime = isAddrInBitMem(lmDesc, m_code.getWord2()) == true ? 10 : 17;
 			break;
 
 		case LmCommand::Code::PMOV:
 			Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
-			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord2()) == true ? 70 : 10;
+			cmdExecTime = isAddrInBitMem(lmDesc, m_code.getWord2()) == true ? 70 : 10;
 			break;
 
 		case LmCommand::Code::FILL:
 			Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
-			cmdExecTime = lmMemMap->addressInBitMemory(m_code.getWord2()) == true ? 69 : 10;
+			cmdExecTime = isAddrInBitMem(lmDesc, m_code.getWord2()) == true ? 69 : 10;
 			break;
 
 		default:
@@ -1671,6 +1424,13 @@ namespace Builder
 		*execTime = m_execTime;
 
 		return true;
+	}
+
+	void CodeItem::addExecTime(int execTime)
+	{
+		Q_ASSERT(m_execTime != -1);
+		m_execTime += execTime;
+		m_clockCount += execTime;
 	}
 
 	bool CodeItem::getTimes(int* waitTime, int* execTime) const
@@ -1824,6 +1584,20 @@ namespace Builder
 		return false;
 	}
 
+	bool CodeItem::isAddrInBitMem(const LmDescription& lmDesc, quint32 addr) const
+	{
+		return (addr >= lmDesc.memory().m_appLogicBitDataOffset &&
+				addr < (lmDesc.memory().m_appLogicBitDataOffset +
+						lmDesc.memory().m_appLogicBitDataSize));
+	}
+
+	bool CodeItem::isAddrInWordMem(const LmDescription& lmDesc, quint32 addr) const
+	{
+		return (addr >= lmDesc.memory().m_appLogicWordDataOffset &&
+				addr < (lmDesc.memory().m_appLogicWordDataOffset +
+						lmDesc.memory().m_appLogicWordDataSize));
+	}
+
 	// -----------------------------------------------------------------------------------------------
 	//
 	// CodeSnippet class implementation
@@ -1910,18 +1684,11 @@ namespace Builder
 
 		asmCode->clear();
 
-		int clockCount = 0;
-
 		for(const CodeItem& codeItem : m_code)
 		{
-			QString str = codeItem.getAsmCode(true, &clockCount);
+			QString str = codeItem.getAsmCode(true);
 
 			asmCode->append(str);
-
-			if (codeItem.getOpcode() == LmCommand::Code::STOP)
-			{
-				clockCount = 0;
-			}
 		}
 	}
 
@@ -2130,18 +1897,20 @@ namespace Builder
 		}
 	}
 
+	const std::vector<CodeItem>& CodeSnippet::code() const
+	{
+		return m_code;
+	}
+
+	// ----------------------------------------------------------------------------------
+	//
+	// AppLogicCode class implementation
+	//
+	// ----------------------------------------------------------------------------------
+
 	AppLogicCode::AppLogicCode(Type type) :
 		m_codeType(type)
 	{
-	}
-
-	void AppLogicCode::setMemoryMapAndLogger(const LmMemoryMap* lmMemory, IssueLogger* log)
-	{
-		TEST_PTR_RETURN(lmMemory);
-		TEST_PTR_RETURN(log);
-
-		m_lmMemoryMap = lmMemory;
-		m_log = log;
 	}
 
 	void AppLogicCode::setAppStartAddr(int addr)
@@ -2160,8 +1929,10 @@ namespace Builder
 		Q_ASSERT(false);
 	}
 
-	void AppLogicCode::finalize(const LmDescription& lmDesc)
+	bool AppLogicCode::finalize(std::shared_ptr<const LmDescription> lmDesc)
 	{
+		TEST_PTR_RETURN_FALSE(lmDesc);
+
 		m_codeSizeW = 0;
 		m_clockCount = 0;
 		m_commandsCount = 0;
@@ -2172,7 +1943,7 @@ namespace Builder
 
 		if (m_code.empty() == true)
 		{
-			return;
+			return true;
 		}
 
 		// read commands and calculate code runtime
@@ -2182,6 +1953,9 @@ namespace Builder
 		int execTime = 0;
 		int fbExecTime = 0;
 		int waitFbTime = 0;
+		int phaseClockCount = 0;
+
+		const LmDescription& lmDescRef = *lmDesc.get();
 
 		for(CodeItem& codeItem : m_code)
 		{
@@ -2205,10 +1979,13 @@ namespace Builder
 
 			prevCmdExecTime = std::max(prevCmdExecTime, waitFbTime);
 
-			codeItem.calcRunTime(m_lmMemoryMap, prevCmdExecTime,
+			codeItem.calcRunTime(lmDescRef, prevCmdExecTime,
 								 &waitTime, &execTime, &fbExecTime);
 
-			m_clockCount += (waitTime + execTime);		// !!!
+			m_clockCount += (waitTime + execTime);
+			phaseClockCount += (waitTime + execTime);
+
+			codeItem.setClockCount(phaseClockCount);
 
 			decFbExecTime(waitTime + execTime);
 
@@ -2222,8 +1999,6 @@ namespace Builder
 				startFbExec(codeItem.getFbType(), fbExecTime);
 			}
 
-			//
-
 			if (codeItem.getOpcode() == LmCommand::Code::STOP)
 			{
 				int maxTime = getMaxFbRemainingExecTimeAndClear();
@@ -2233,51 +2008,51 @@ namespace Builder
 				codeItem.addExecTime(prevCmdExecTime);
 				m_clockCount += prevCmdExecTime;
 				prevCmdExecTime = 0;
+				phaseClockCount = 0;
 			}
 		}
 
-		if (lmDesc.memory().m_codeMemorySize != 0)
+		if (lmDesc->memory().m_codeMemorySize != 0)
 		{
 			m_lmCodeMemUsage = static_cast<double>(m_codeSizeW * 100) /
-								static_cast<double>(lmDesc.memory().m_codeMemorySize);
+								static_cast<double>(lmDesc->memory().m_codeMemorySize);
 		}
 
-		m_execTimeMcs = m_clockCount * lmDesc.logicUnit().clockTimeSecs() * 1000000.0;
+		m_execTimeMcs = m_clockCount * lmDesc->logicUnit().clockTimeSecs() * 1000000.0;
 
 		double totalTimeMcs = 0;
 
 		switch(m_codeType)
 		{
 		case Type::IDR_Code:
-			totalTimeMcs = lmDesc.logicUnit().m_idrPhaseTime;
+			totalTimeMcs = lmDesc->logicUnit().m_idrPhaseTime;
 			break;
 
 		case Type::ALP_Code:
-			totalTimeMcs = lmDesc.logicUnit().m_alpPhaseTime;
+			totalTimeMcs = lmDesc->logicUnit().m_alpPhaseTime;
 			break;
 
 		case Type::AllCode:
-			totalTimeMcs =	lmDesc.logicUnit().m_idrPhaseTime +
-							lmDesc.logicUnit().m_alpPhaseTime;
+			totalTimeMcs =	lmDesc->logicUnit().m_idrPhaseTime +
+							lmDesc->logicUnit().m_alpPhaseTime;
 			break;
 
 		default:
 			Q_ASSERT(false);
-			return;
+			return false;
 		}
 
 		if (totalTimeMcs !=  0)
 		{
 			m_lmCycleTimeUsage = static_cast<double>(m_execTimeMcs * 100) / totalTimeMcs;
 		}
+
+		return true;
 	}
 
 	void AppLogicCode::clear()
 	{
 		CodeSnippet::clear();
-
-		m_lmMemoryMap = nullptr;
-		m_log = nullptr;
 
 		m_runningAfbs.clear();
 

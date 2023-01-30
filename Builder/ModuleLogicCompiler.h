@@ -153,7 +153,7 @@ namespace Builder
 		SignalSet* signalSet() { return m_signals; }
 		AppSignal* getSignal(const QString& appSignalID);
 
-		IssueLogger* log() { return m_log; }
+		IssueLogger* log() const { return m_log; }
 
 		bool pass1();
 		bool pass2();
@@ -175,7 +175,9 @@ namespace Builder
 										   std::map<QUuid, const UalItem*>* linkedPins);
 
 		std::shared_ptr<Hardware::DeviceModule> getLmSharedPtr();
-		std::shared_ptr<LmDescription> getLmDescription();
+
+//		std::shared_ptr<LmDescription> getLmDescription();
+		std::shared_ptr<const LmDescription> getLmDescription() const;
 
 		BusShared getBusShared(const QString& busTypeID);
 
@@ -423,6 +425,7 @@ namespace Builder
 		bool generateIdrPhaseCode();
 		bool generateAlpPhaseCode();
 		bool makeAppLogicCode();
+		bool checkAppLogicCode();
 		bool cleanupHeaps();
 
 		bool generateAfbsVersionCheckingCode(CodeSnippet* code);
