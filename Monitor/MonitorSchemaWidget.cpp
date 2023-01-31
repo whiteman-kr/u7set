@@ -70,10 +70,6 @@ MonitorSchemaWidget::MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schem
 	auto context = VFrame30::Context::create(clientSchemaView());
 	schema->setContext(std::move(context));
 
-	// Run onShowScript
-	//
-	schema->onShowEvent(clientSchemaView()->jsEngine(), clientSchemaView()->logFile());
-
 	return;
 }
 

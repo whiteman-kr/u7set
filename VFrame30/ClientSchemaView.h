@@ -350,7 +350,8 @@ namespace VFrame30
 		const QVariantHash& variables() const;
 		void setVariables(const QVariantHash& values);
 
-		// TimStats
+		// TimeStats
+		//
 		ITimeStats* timeStats();
 		ITimeStats* timeStats() const;
 

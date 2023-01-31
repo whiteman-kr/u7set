@@ -135,6 +135,15 @@ int MonitorCentralWidget::addSchemaTabPage(const QString& schemaId, const QVaria
 		setMovable(true);
 	}
 
+	//  clientSchemaView->setVariables() (line 125) may override already created variables in scripts,
+	// so run onShowScript here, after setting view variables(!). Also onShowScript triggers
+	// running onConfigurationArrivedScript
+	//
+	schemaWidget->schema()->onShowEvent(schemaWidget->clientSchemaView()->jsEngine(),
+										schemaWidget->clientSchemaView()->logFile());
+
+	// --
+	//
 	emit signal_actionCloseTabUpdated(count() > 1);
 
 	return index;
