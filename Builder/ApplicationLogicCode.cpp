@@ -1267,6 +1267,7 @@ namespace Builder
 
 	bool CodeItem::calcRunTime(const LmDescription& lmDesc,
 							   int prevCmdExecTime,
+							   int waitFbTime,
 							   int* waitTime,
 							   int* execTime,
 							   int* fbExecTime)
@@ -1288,6 +1289,8 @@ namespace Builder
 
 		int cmdReadTime = lmCommand.readTime;
 
+		//
+
 		if (prevCmdExecTime >= cmdReadTime)
 		{
 			m_waitTime = 0;
@@ -1297,7 +1300,10 @@ namespace Builder
 			m_waitTime = cmdReadTime - prevCmdExecTime;
 		}
 
-		Q_ASSERT(m_waitTime >= 0);
+		if (m_waitTime < 2)
+		{
+			m_waitTime = 2;
+		}
 
 		int cmdExecTime = 0;
 
@@ -1312,18 +1318,15 @@ namespace Builder
 		case LmCommand::Code::NOP:
 		case LmCommand::Code::STOP:
 		case LmCommand::Code::WRFB:
-		case LmCommand::Code::RDFB:
 		case LmCommand::Code::WRFBC:
 		case LmCommand::Code::WRFBB:
-		case LmCommand::Code::RDFBCMP:
 		case LmCommand::Code::APPSTART:
 		case LmCommand::Code::MOV32:
 		case LmCommand::Code::MOVC32:
 		case LmCommand::Code::WRFB32:
-		case LmCommand::Code::RDFB32:
 		case LmCommand::Code::WRFBC32:
+		case LmCommand::Code::RDFBCMP:
 		case LmCommand::Code::RDFBCMP32:
-		case LmCommand::Code::MOVCMPF:
 		case LmCommand::Code::PMOV32:
 			Q_ASSERT(lmCommand.runTime != LmCommand::CALC_RUNTIME);
 			cmdExecTime = lmCommand.runTime;
@@ -1337,7 +1340,14 @@ namespace Builder
 
 				cmdExecTime = lmCommand.runTime;
 
-				*fbExecTime = m_fbExecTime;
+				if (waitFbTime == 0)
+				{
+					*fbExecTime = m_fbExecTime;
+				}
+				else
+				{
+					Q_ASSERT(false);		// AFB is running now, why it STARTed again?
+				}
 			}
 			break;
 
@@ -1347,14 +1357,34 @@ namespace Builder
 
 				quint16 n = m_code.getWord3();
 
-				cmdExecTime = 3 + n * 2;
-
-				*fbExecTime = m_fbExecTime * n;
+				cmdExecTime = 2 + (2 + m_fbExecTime) * n;
 			}
 			break;
 
 			// commands with calculated runtime
 			//
+		case LmCommand::Code::RDFB:
+			Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
+			cmdExecTime = calcRdFbRuntime(m_waitTime, 2, waitFbTime, 7);
+			break;
+
+		case LmCommand::Code::RDFB32:
+			Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
+			cmdExecTime = calcRdFbRuntime(m_waitTime, 2, waitFbTime, 18);
+			break;
+
+		case LmCommand::Code::RDFBB:
+			Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
+			if (isAddrInBitMem(lmDesc, m_code.getWord3()) == true)
+			{
+				cmdExecTime = calcRdFbRuntime(m_waitTime, 4, waitFbTime, 7);
+			}
+			else
+			{
+				cmdExecTime = calcRdFbRuntime(m_waitTime, 6, waitFbTime, 8);
+			}
+			break;
+
 		case LmCommand::Code::MOV:
 			Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
 			cmdExecTime = isAddrInBitMem(lmDesc, m_code.getWord2()) == true ? 69 : 10;
@@ -1368,7 +1398,7 @@ namespace Builder
 
 				Q_ASSERT(n > 0);
 
-				cmdExecTime = 7 + (n - 1) * 7 + 1;
+				cmdExecTime = 8 + (n - 1) * 8 + 2;
 			}
 			break;
 
@@ -1379,12 +1409,7 @@ namespace Builder
 
 		case LmCommand::Code::MOVBC:
 			Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
-			cmdExecTime = isAddrInBitMem(lmDesc, m_code.getWord2()) == true ? 7 : 14;
-			break;
-
-		case LmCommand::Code::RDFBB:
-			Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
-			cmdExecTime = isAddrInBitMem(lmDesc, m_code.getWord3()) == true ? 7 : 12;
+			cmdExecTime = isAddrInBitMem(lmDesc, m_code.getWord2()) == true ? 6 : 14;
 			break;
 
 		case LmCommand::Code::SETMEM:
@@ -1395,7 +1420,7 @@ namespace Builder
 
 				Q_ASSERT(n > 0);
 
-				cmdExecTime = 4 + (n - 1) * 4 + 1;
+				cmdExecTime = 6 + (n - 1) * 4 + 1;
 			}
 			break;
 
@@ -1404,14 +1429,19 @@ namespace Builder
 			cmdExecTime = isAddrInBitMem(lmDesc, m_code.getWord2()) == true ? 10 : 17;
 			break;
 
+		case LmCommand::Code::MOVCMPF:
+			Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
+			cmdExecTime = isAddrInBitMem(lmDesc, m_code.getWord2()) == true ? 6 : 14;
+			break;
+
 		case LmCommand::Code::PMOV:
 			Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
-			cmdExecTime = isAddrInBitMem(lmDesc, m_code.getWord2()) == true ? 70 : 10;
+			cmdExecTime = isAddrInBitMem(lmDesc, m_code.getWord2()) == true ? 69 : 10;
 			break;
 
 		case LmCommand::Code::FILL:
 			Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
-			cmdExecTime = isAddrInBitMem(lmDesc, m_code.getWord2()) == true ? 69 : 10;
+			cmdExecTime = isAddrInBitMem(lmDesc, m_code.getWord2()) == true ? 69 : 11;
 			break;
 
 		default:
@@ -1596,6 +1626,25 @@ namespace Builder
 		return (addr >= lmDesc.memory().m_appLogicWordDataOffset &&
 				addr < (lmDesc.memory().m_appLogicWordDataOffset +
 						lmDesc.memory().m_appLogicWordDataSize));
+	}
+
+	int CodeItem::calcRdFbRuntime(int cmdWaitTime,
+								  int preFbReadTime,
+								  int fbExecTime,
+								  int postFbReadTime) const
+	{
+		int runtime = preFbReadTime;
+
+		int fbExecTimeBeforeRead = cmdWaitTime + preFbReadTime;
+
+		if (fbExecTimeBeforeRead < fbExecTime)
+		{
+			runtime += (fbExecTime - fbExecTimeBeforeRead);
+		}
+
+		runtime += postFbReadTime;
+
+		return runtime;
 	}
 
 	// -----------------------------------------------------------------------------------------------
@@ -1970,16 +2019,14 @@ namespace Builder
 
 			m_codeSizeW += codeItem.sizeW();
 
-			//
+			waitFbTime = 0;
 
 			if (codeItem.isWaitingForFbExecution() == true)
 			{
 				waitFbTime = getFbRemainingExecTime(codeItem.getFbType());
 			}
 
-			prevCmdExecTime = std::max(prevCmdExecTime, waitFbTime);
-
-			codeItem.calcRunTime(lmDescRef, prevCmdExecTime,
+			codeItem.calcRunTime(lmDescRef, prevCmdExecTime, waitFbTime,
 								 &waitTime, &execTime, &fbExecTime);
 
 			m_clockCount += (waitTime + execTime);
@@ -2158,30 +2205,20 @@ namespace Builder
 		return true;
 	}
 
-	int AppLogicCode::startFbExec(int fbOpCode, int fbRuntime)
+	void AppLogicCode::startFbExec(int fbOpCode, int fbRuntime)
 	{
-		int waitTime = 0;
-
 		auto it = m_runningAfbs.find(fbOpCode);
 
 		if (it == m_runningAfbs.end())
 		{
-			// FB with fbOpCode is NOT running now!
+			// FB with fbOpCode is NOT running now
 			//
 			m_runningAfbs.insert({fbOpCode, fbRuntime});
-			waitTime = 0;
 		}
 		else
 		{
-			Q_ASSERT(it->second > 0);
-
-			// FB with fbOpCode is running now!
-			//
-			waitTime = it->second;			// fb remaining exec time
-			it->second = fbRuntime;
+			Q_ASSERT(false);
 		}
-
-		return waitTime;
 	}
 
 	void AppLogicCode::decFbExecTime(int time)

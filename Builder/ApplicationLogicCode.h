@@ -71,24 +71,24 @@ namespace Builder
 		{	LmCommand::Code::MOVC,		3,	"MOVC",			false,	11, LmCommand::CALC_RUNTIME	},
 		{	LmCommand::Code::MOVBC,		4,	"MOVBC",		false,	14, LmCommand::CALC_RUNTIME	},
 		{	LmCommand::Code::WRFB,		3,	"WRFB",			false,	11,	13						},
-		{	LmCommand::Code::RDFB,		3,	"RDFB",			true,	11,	8						},
+		{	LmCommand::Code::RDFB,		3,	"RDFB",			true,	11,	LmCommand::CALC_RUNTIME	},
 		{	LmCommand::Code::WRFBC,		3,	"WRFBC",		false,	11,	9						},
-		{	LmCommand::Code::WRFBB,		4,	"WRFBB",		false,	14,	12						},
+		{	LmCommand::Code::WRFBB,		4,	"WRFBB",		false,	14,	13						},
 		{	LmCommand::Code::RDFBB,		4,	"RDFBB",		true,	14,	LmCommand::CALC_RUNTIME	},
-		{	LmCommand::Code::RDFBCMP,	3,	"RDFBCMP",		true,	11,	4						},
+		{	LmCommand::Code::RDFBCMP,	3,	"RDFBCMP",		true,	11,	6						},
 		{	LmCommand::Code::SETMEM,	4,	"SETMEM",		false,	14, LmCommand::CALC_RUNTIME	},
 		{	LmCommand::Code::MOVB,		4,	"MOVB",			false,	14,	LmCommand::CALC_RUNTIME	},
 		{	LmCommand::Code::NSTART,	3,	"NSTART",		true,	11,	LmCommand::CALC_RUNTIME	},
 		{	LmCommand::Code::APPSTART,	2,	"APPSTART",		false,	8,	2						},
-		{	LmCommand::Code::MOV32,		3,	"MOV32",		false,	11,	16						},
-		{	LmCommand::Code::MOVC32,	4,	"MOVC32",		false,	14, 9						},
-		{	LmCommand::Code::WRFB32,	3,	"WRFB32",		false,	11,	22						},
-		{	LmCommand::Code::RDFB32,	3,	"RDFB32",		true,	11,	15						},
-		{	LmCommand::Code::WRFBC32,	4,	"WRFBC32",		false,	14,	17						},
-		{	LmCommand::Code::RDFBCMP32,	4,	"RDFBCMP32",	true,	14,	6						},
-		{	LmCommand::Code::MOVCMPF,	3,	"MOVCMPF",		false,	11,	6						},
+		{	LmCommand::Code::MOV32,		3,	"MOV32",		false,	11,	20						},
+		{	LmCommand::Code::MOVC32,	4,	"MOVC32",		false,	14, 10						},
+		{	LmCommand::Code::WRFB32,	3,	"WRFB32",		false,	11,	24						},
+		{	LmCommand::Code::RDFB32,	3,	"RDFB32",		true,	11,	LmCommand::CALC_RUNTIME	},
+		{	LmCommand::Code::WRFBC32,	4,	"WRFBC32",		false,	14,	18						},
+		{	LmCommand::Code::RDFBCMP32,	4,	"RDFBCMP32",	true,	14,	LmCommand::CALC_RUNTIME	},
+		{	LmCommand::Code::MOVCMPF,	3,	"MOVCMPF",		false,	11,	LmCommand::CALC_RUNTIME	},
 		{	LmCommand::Code::PMOV,		3,	"PMOV",			false,	11,	LmCommand::CALC_RUNTIME	},
-		{	LmCommand::Code::PMOV32,	3,	"PMOV32",		false,	11,	16						},
+		{	LmCommand::Code::PMOV32,	3,	"PMOV32",		false,	11,	18						},
 		{	LmCommand::Code::FILL,		4,	"FILL",			false,	11,	LmCommand::CALC_RUNTIME	},
 	};
 
@@ -342,6 +342,7 @@ namespace Builder
 
 		bool calcRunTime(const LmDescription& lmDesc,
 						 int prevCmdExecTime,
+						 int waitFbTime,
 						 int* waitTime,
 						 int* execTime,
 						 int* fbExecTime);
@@ -368,6 +369,11 @@ namespace Builder
 
 		bool isAddrInBitMem(const LmDescription& lmDesc, quint32 addr) const;
 		bool isAddrInWordMem(const LmDescription& lmDesc, quint32 addr) const;
+
+		int calcRdFbRuntime(int cmdWaitTime,
+							int preFbReadTime,
+							int fbExecTime,
+							int postFbReadTime) const;
 
 	private:
 		bool m_isCommand = false;
@@ -458,7 +464,7 @@ namespace Builder
 		bool getCommandsStatistics(std::vector<CommandStatistics>* stat) const;
 
 	private:
-		int startFbExec(int fbOpCode, int fbRuntime);
+		void startFbExec(int fbOpCode, int fbRuntime);
 		void decFbExecTime(int time);
 		int getFbRemainingExecTime(int fbOpCode);
 		int getMaxFbRemainingExecTimeAndClear();

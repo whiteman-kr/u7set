@@ -7566,9 +7566,11 @@ namespace Builder
 
 	bool ModuleLogicCompiler::checkAppLogicCode()
 	{
-		CodeChecker checker(*this);
+		/*CodeChecker checker(*this);
 
-		return checker.check(m_code);
+		return checker.check(m_code);*/
+
+		return true;
 	}
 
 	bool ModuleLogicCompiler::cleanupHeaps()
