@@ -41,7 +41,7 @@ namespace  Tuning
 		TYPES_COUNT(E::metaEnum<E::TuningSignalType>().keyCount())
 	{
 		m_tuningSignals.resize(TYPES_COUNT);
-		m_tuningSignalSizes.fill(0, TYPES_COUNT);
+		m_tuningSignalSizesB.fill(0, TYPES_COUNT);
 	}
 
 	TuningData::TuningData(const QString& lmID,
@@ -65,7 +65,7 @@ namespace  Tuning
 		m_tuningDataFrameSizeW(tuningDataFrameSizeW)
 	{
 		m_tuningSignals.resize(TYPES_COUNT);
-		m_tuningSignalSizes.fill(0, TYPES_COUNT);
+		m_tuningSignalSizesB.fill(0, TYPES_COUNT);
 	}
 
 	// constructor for IPEN tuning only
@@ -81,7 +81,7 @@ namespace  Tuning
 		m_tuningDataFramePayloadW(508),
 		m_tuningDataFrameSizeW(512)
 	{
-		for(int& v : m_tuningSignalSizes)
+		for(int& v : m_tuningSignalSizesB)
 		{
 			v = 0;
 		}
@@ -142,22 +142,22 @@ namespace  Tuning
 			switch(t)
 			{
 			case TYPE_ANALOG_FLOAT:
-				m_tuningSignalSizes[t] = signalCount * sizeof(float);
+				m_tuningSignalSizesB[t] = signalCount * sizeof(float);
 				break;
 
 			case TYPE_ANALOG_INT32:
-				m_tuningSignalSizes[t] = signalCount * sizeof(qint32);
+				m_tuningSignalSizesB[t] = signalCount * sizeof(qint32);
 				break;
 
 			case TYPE_DISCRETE:
-				m_tuningSignalSizes[t] = signalCount / SIZE_8BIT + ((signalCount % SIZE_8BIT) == 0 ? 0 : 1) ;
+				m_tuningSignalSizesB[t] = signalCount / SIZE_8BIT + ((signalCount % SIZE_8BIT) == 0 ? 0 : 1) ;
 				break;
 
 			default:
 				assert(false);
 			}
 
-			totalSize += m_tuningSignalSizes[t];
+			totalSize += m_tuningSignalSizesB[t];
 		}
 
 		// calculate used tuning frames count
@@ -397,6 +397,52 @@ namespace  Tuning
 		m_uniqueID = crc.result();
 
 		return m_uniqueID;
+	}
+
+	int TuningData::usedTuningDataSizeW() const
+	{
+		int sizeW = 0;
+
+		if (m_tuningSignalSizesB.size() != TYPES_COUNT)
+		{
+			Q_ASSERT(false);
+			return 0;
+		}
+
+		for(int t = TYPE_ANALOG_FLOAT; t < TYPES_COUNT; t++)
+		{
+			switch(t)
+			{
+			case TYPE_ANALOG_FLOAT:
+				Q_ASSERT((m_tuningSignalSizesB[t] % sizeof(float)) == 0);
+				sizeW += m_tuningSignalSizesB[t] / sizeof(quint16);	// it's Ok! size returned in words!
+				break;
+
+			case TYPE_ANALOG_INT32:
+				Q_ASSERT((m_tuningSignalSizesB[t] % sizeof(qint32)) == 0);
+				sizeW += m_tuningSignalSizesB[t] / sizeof(quint16);	// it's Ok! size returned in words!
+				break;
+
+			case TYPE_DISCRETE:
+				{
+					int sizeB = m_tuningSignalSizesB[t];
+
+					sizeW += sizeB / sizeof(quint16);
+
+					if ((sizeB % sizeof(quint32)) != 0)		// it's Ok! size for discretes reserved by
+															// 32-bit
+					{
+						sizeW += 2;		// sizeof(quint32) / sizeof(quint16)!
+					}
+				}
+				break;
+
+			default:
+				Q_ASSERT(false);
+			}
+		}
+
+		return sizeW;
 	}
 
 	void TuningData::getSignals(QVector<AppSignal*>* signalList) const
@@ -676,7 +722,7 @@ namespace  Tuning
 		*data32Ptr = reverseUint32(value);
 	}
 
-	void TuningData::sortSignalsByAcquiredProperty(QVector<AppSignal *>& tuningSignals)
+	void TuningData::sortSignalsByAcquiredProperty(QVector<AppSignal*>& tuningSignals)
 	{
 		qsizetype count = tuningSignals.count();
 

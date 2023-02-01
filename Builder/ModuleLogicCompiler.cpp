@@ -9,7 +9,6 @@
 #include "SoftwareCfgGenerator.h"
 #include "Parser.h"
 #include "LmDescriptionSet.h" 
-#include "CodeChecker.h"
 
 #define LOG_UNDEFINED_UAL_ADDRESS(log, ualSignal) log->writeError(QString("Undefined signal's ualAddress: %1 (File: %2 Line: %3 Function: %4)").arg(ualSignal->refSignalIDs().join(", ")).arg(__FILE__).arg(__LINE__).arg(SHORT_FUNC_INFO));
 
@@ -37,7 +36,7 @@ namespace Builder
 		m_memoryMap(appLogicCompiler.log()),
 		m_ualSignals(*this, appLogicCompiler.log()),
 		m_loopbacks(*this),
-		m_code(AppLogicCode::Type::AllCode),
+		m_appLogicCode(AppLogicCode::Type::AllCode),
 		m_idrCode(AppLogicCode::Type::IDR_Code),
 		m_alpCode(AppLogicCode::Type::ALP_Code)
 
@@ -288,13 +287,6 @@ namespace Builder
 		return 	m_lmShared;
 	}
 
-/*	std::shared_ptr<LmDescription> ModuleLogicCompiler::getLmDescription()
-	{
-		TEST_PTR_LOG_RETURN_NULLPTR(m_lmDescription, m_log);
-
-		return m_lmDescription;
-	}*/
-
 	std::shared_ptr<const LmDescription> ModuleLogicCompiler::getLmDescription() const
 	{
 		TEST_PTR_LOG_RETURN_NULLPTR(m_lmDescription, m_log);
@@ -305,6 +297,72 @@ namespace Builder
 	BusShared ModuleLogicCompiler::getBusShared(const QString& busTypeID)
 	{
 		return m_signals->getBus(busTypeID);
+	}
+
+	bool ModuleLogicCompiler::getLmUsedTuningArea(CodeChecker::MemArea* tuningArea) const
+	{
+		TEST_PTR_RETURN_FALSE(m_log);
+		TEST_PTR_LOG_RETURN_FALSE(tuningArea, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(m_tuningDataStorage, m_log);
+
+		Tuning::TuningDataShared tuningData = m_tuningDataStorage->getTuningData(lmEquipmentID());
+
+		TEST_PTR_LOG_RETURN_FALSE(tuningData, m_log);
+
+		tuningArea->setStartAddr(tuningData->tuningDataOffsetW());
+
+		Q_ASSERT(tuningData->usedTuningDataSizeW() <= tuningData->tuningDataSizeW());
+
+		tuningArea->setSizeW(tuningData->usedTuningDataSizeW());
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::getLmOptoPortsRxAreas(std::vector<CodeChecker::MemArea>* optoRxAreas) const
+	{
+		return getLmOptoPortsAreas(optoRxAreas, true);
+	}
+
+	bool ModuleLogicCompiler::getLmOptoPortsTxAreas(std::vector<CodeChecker::MemArea>* optoTxAreas) const
+	{
+		return getLmOptoPortsAreas(optoTxAreas, false);
+	}
+
+	bool ModuleLogicCompiler::getLmOptoPortsAreas(std::vector<CodeChecker::MemArea>* optoAreas, bool rx) const
+	{
+		TEST_PTR_RETURN_FALSE(m_log);
+		TEST_PTR_LOG_RETURN_FALSE(optoAreas, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(m_optoModuleStorage, m_log);
+
+		Hardware::OptoModuleShared lmOpto = m_optoModuleStorage->getOptoModule(lmEquipmentID());
+
+		TEST_PTR_LOG_RETURN_FALSE(lmOpto, m_log);
+
+		QList<Hardware::OptoPortShared> optoPorts;
+
+		lmOpto->getOptoPorts(optoPorts);
+
+		for(Hardware::OptoPortShared& port : optoPorts)
+		{
+			TEST_PTR_CONTINUE(port);
+
+			if (rx == true)
+			{
+				if (port->rxDataSizeW() > 0)
+				{
+					optoAreas->emplace_back(port->rxBufAbsAddress(), port->rxDataSizeW());
+				}
+			}
+			else
+			{
+				if (port->txDataSizeW() > 0)
+				{
+					optoAreas->emplace_back(port->txBufAbsAddress(), port->txDataSizeW());
+				}
+			}
+		}
+
+		return true;
 	}
 
 	bool ModuleLogicCompiler::loadLMSettings()
@@ -7552,25 +7610,23 @@ namespace Builder
 
 	bool ModuleLogicCompiler::makeAppLogicCode()
 	{
-		m_code.clear();
+		m_appLogicCode.clear();
 
-		m_code.reserve(m_idrCode.itemsCount() + m_alpCode.itemsCount());
+		m_appLogicCode.reserve(m_idrCode.itemsCount() + m_alpCode.itemsCount());
 
-		m_code.append(m_idrCode);
-		m_code.append(m_alpCode);
+		m_appLogicCode.append(m_idrCode);
+		m_appLogicCode.append(m_alpCode);
 
-		bool result = m_code.finalize(getLmDescription());
+		bool result = m_appLogicCode.finalize(getLmDescription());
 
 		return result;
 	}
 
 	bool ModuleLogicCompiler::checkAppLogicCode()
 	{
-		/*CodeChecker checker(*this);
+		CodeChecker checker(*this);
 
-		return checker.check(m_code);*/
-
-		return true;
+		return checker.check(m_appLogicCode);
 	}
 
 	bool ModuleLogicCompiler::cleanupHeaps()
@@ -12684,7 +12740,7 @@ namespace Builder
 		//
 		bool firstModule = true;
 
-		for(Module& module : m_modules)
+		for(const Module& module : m_modules)
 		{
 			if (module.isOutputModule() == false)
 			{
@@ -14347,7 +14403,7 @@ namespace Builder
 
 		QByteArray binCode;
 
-		m_code.getBinCode(&binCode);
+		m_appLogicCode.getBinCode(&binCode);
 
 		result &= calcAppLogicUniqueID(binCode);
 
@@ -14386,7 +14442,7 @@ namespace Builder
 
 		QStringList asmCode;
 
-		m_code.getAsmCode(&asmCode);
+		m_appLogicCode.getAsmCode(&asmCode);
 
 		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
 													   QString("%1-%2.asm").arg(m_lmSubsystemID.toLower()).arg(m_lmNumber), asmCode);
@@ -14436,7 +14492,7 @@ namespace Builder
 
 		QStringList metadataFields;
 
-		m_code.getAsmMetadataFields(&metadataFields, &metadataFieldsVersion);
+		m_appLogicCode.getAsmMetadataFields(&metadataFields, &metadataFieldsVersion);
 
 		Hardware::ModuleFirmwareWriter* firmwareWriter = m_resultWriter->firmwareWriter();
 
@@ -14461,11 +14517,11 @@ namespace Builder
 
 		QByteArray binCode;
 
-		m_code.getBinCode(&binCode);
+		m_appLogicCode.getBinCode(&binCode);
 
 		std::vector<QVariantList> metadata;
 
-		m_code.getAsmMetadata(&metadata);
+		m_appLogicCode.getAsmMetadata(&metadata);
 
 		result &= firmwareWriter->setChannelData(m_lmSubsystemID,
 												 appLogicUartID,
@@ -14930,7 +14986,7 @@ namespace Builder
 
 		printCodeStatistics(m_idrCode, file, true);
 		printCodeStatistics(m_alpCode, file, true);
-		printCodeStatistics(m_code, file, false);
+		printCodeStatistics(m_appLogicCode, file, false);
 
 		//
 
@@ -15169,7 +15225,7 @@ namespace Builder
 	{
 		QString str;
 
-		double percentOfUsedCodeMemory = (m_code.codeSizeW() * 100.0) / m_lmCodeMemorySize;
+		double percentOfUsedCodeMemory = (m_appLogicCode.codeSizeW() * 100.0) / m_lmCodeMemorySize;
 
 		bool result = true;
 

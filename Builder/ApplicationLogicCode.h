@@ -325,6 +325,7 @@ namespace Builder
 
 		quint16 getWord2() const { return m_code.getWord2(); }
 		quint16 getWord3() const { return m_code.getWord3(); }
+		quint16 getWord4() const { return m_code.getWord4(); }
 
 		quint16 getBitNo1() const { return m_code.getBitNo1(); }
 		quint16 getBitNo2() const { return m_code.getBitNo2(); }

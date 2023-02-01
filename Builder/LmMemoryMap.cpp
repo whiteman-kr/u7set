@@ -398,7 +398,7 @@ namespace Builder
 			return 0;
 		}
 
-		return m_modules.module[place - 1].startAddress();;
+		return m_modules.module[place - 1].startAddress();
 	}
 
 	void LmMemoryMap::getFile(QStringList& memFile,

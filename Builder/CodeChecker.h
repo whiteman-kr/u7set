@@ -4,7 +4,6 @@
 
 namespace Builder
 {
-
 	class ModuleLogicCompiler;
 
 	class CodeChecker;
@@ -14,32 +13,46 @@ namespace Builder
 	class CodeChecker
 	{
 	public:
+
+		class MemArea
+		{
+		public:
+			MemArea();
+			MemArea(quint32 startAddr, quint32 sizeW);
+
+			bool isValid() const;
+
+			void setStartAddr(quint32 startAddr);
+			quint32 startAddr() const;
+
+			void setSizeW(quint32 sizeW);
+			quint32 sizeW() const;
+
+			bool addressInArea(quint32 addr, quint32 sizeW) const;
+
+		private:
+			inline static const quint32 NOT_INIT = 0xFFFFFFFF;
+
+			quint32 m_startAddr = NOT_INIT;
+			quint32 m_sizeW = NOT_INIT;
+		};
+
+
+	public:
 		CodeChecker(const ModuleLogicCompiler& compiler);
 		~CodeChecker();
 
 		bool check(const AppLogicCode& appLogicCode);
 
 	private:
-
-		inline static const quint32 NOT_VALUE = 0xFFFFFFFF;
-
-		struct MemArea
-		{
-			quint32 startAddr = NOT_VALUE;
-			quint32 sizeW = NOT_VALUE;
-
-			bool isValid() const { return (startAddr != NOT_VALUE && sizeW != NOT_VALUE); }
-		};
-
-	private:
 		bool init();
 
 		bool initReadableAreas();
-		void initToRead(const MemArea& ma);
-
 		bool initWritableAreas();
 
-		void logError(const QString& err, const CodeItem& cmd);
+		void initToRead(const MemArea& ma);
+
+		void logError(const CodeItem& cmd, const QString& err) const;
 
 		bool check(const CodeItem& cmd);
 
@@ -77,14 +90,24 @@ namespace Builder
 		//
 
 		bool checkFbTypeAndInstance(const CodeItem& cmd);
-		bool checkCanRead(const CodeItem& cmd, quint32 readAddr, quint32 sizeW);
-		bool checkCanWrite(const CodeItem& cmd, quint32 writeAddr, quint32 sizeW);
 
+		bool checkCanRead16(const CodeItem& cmd, quint32 readAddr) const;
+		bool checkCanRead32(const CodeItem& cmd, quint32 readAddr) const;
+		bool checkCanRead(const CodeItem& cmd, quint32 readAddr, quint32 sizeW) const;
+
+		bool checkCanWrite16(const CodeItem& cmd, quint32 writeAddr) const;
+		bool checkCanWrite32(const CodeItem& cmd, quint32 writeAddr) const;
+		bool checkCanWrite(const CodeItem& cmd, quint32 writeAddr, quint32 sizeW) const;
+
+		const MemArea& findMemAreaToWrite(quint32 writeAddr, quint32 sizeW) const;
+		const MemArea& findMemAreaToRead(quint32 readAddr, quint32 sizeW) const;
+		const MemArea& findMemArea(const std::map<quint32, MemArea>& areas,
+								   quint32 addr, quint32 sizeW) const;
 
 	private:
 		const ModuleLogicCompiler& m_compiler;
 		const LmDescription* m_lmDesc = nullptr;
-		IssueLogger* m_log = nullptr;
+		mutable IssueLogger* m_log = nullptr;
 
 		static CheckFuncPtr m_checkFunc[LM_COMMANDS_COUNT];
 
@@ -93,5 +116,7 @@ namespace Builder
 
 		std::map<quint32, MemArea> m_readAreas;
 		std::map<quint32, MemArea> m_writeAreas;
+
+		inline static const MemArea m_notValidArea;
 	};
 }

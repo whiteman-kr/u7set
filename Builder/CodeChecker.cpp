@@ -3,6 +3,56 @@
 
 namespace Builder
 {
+
+	// ----------------------------------------------------------------------------------
+	//
+	// CodeChecker::MemArea class implementation
+	//
+	// ----------------------------------------------------------------------------------
+
+	CodeChecker::MemArea::MemArea()
+	{
+	}
+
+	CodeChecker::MemArea::MemArea(quint32 startAddr, quint32 sizeW) :
+		m_startAddr(startAddr),
+		m_sizeW(sizeW)
+	{
+	}
+
+	bool CodeChecker::MemArea::isValid() const
+	{
+		return (m_startAddr != NOT_INIT && m_sizeW != NOT_INIT);
+	}
+
+	void CodeChecker::MemArea::setStartAddr(quint32 startAddr)
+	{
+		m_startAddr = startAddr;
+	}
+
+	quint32 CodeChecker::MemArea::startAddr() const
+	{
+		Q_ASSERT(m_startAddr != NOT_INIT);
+		return m_startAddr;
+	}
+
+	void CodeChecker::MemArea::setSizeW(quint32 sizeW)
+	{
+		m_sizeW = sizeW;
+	}
+
+	quint32 CodeChecker::MemArea::sizeW() const
+	{
+		Q_ASSERT(m_sizeW != NOT_INIT);
+		return m_sizeW;
+	}
+
+	bool CodeChecker::MemArea::addressInArea(quint32 addr, quint32 sizeW) const
+	{
+		return addr >= m_startAddr &&
+			   (addr + sizeW) <= (m_startAddr + m_sizeW);
+	}
+
 	// ----------------------------------------------------------------------------------
 	//
 	// CodeChecker class implementation
@@ -53,6 +103,8 @@ namespace Builder
 
 	bool CodeChecker::check(const AppLogicCode& appLogicCode)
 	{
+		Q_ASSERT(appLogicCode.codeType() == AppLogicCode::Type::AllCode);
+
 		bool result = init();
 
 		RETURN_IF_FALSE(result);
@@ -92,56 +144,159 @@ namespace Builder
 
 	bool CodeChecker::initReadableAreas()
 	{
-/*		// I/O modules input data
+		// Input data areas of I/O modules actual installed in chassis
 		//
-		for(quint32 i = 0; i < m_lmDesc.memory().m_moduleCount; i++)
+		for(const ModuleLogicCompiler::Module& module : m_compiler.modules())
 		{
-			MemArea ma(m_lmDesc.memory().m_moduleDataOffset + i * m_lmDesc.memory().m_moduleDataSize,
-					   m_lmDesc.memory().m_moduleDataSize);
+			quint32 place = module.place;
 
-			m_readAreas.push_back(ma);
+			if (place > m_lmDesc->memory().m_moduleCount)
+			{
+				Q_ASSERT(false);
+				continue;
+			}
 
+			MemArea ma;
+
+			if (place == 0)
+			{
+				// LM module
+				//
+				ma.setStartAddr(module.txAppDataOffset);
+				ma.setSizeW(module.txAppDataSize);
+			}
+			else
+			{
+				quint32 moduleDataOffset = m_lmDesc->memory().m_moduleDataOffset +
+											(place - 1)  * m_lmDesc->memory().m_moduleDataSize;
+
+				Q_ASSERT(static_cast<quint32>(module.moduleDataOffset) == moduleDataOffset);
+				Q_ASSERT(static_cast<quint32>(module.txDataSize) <= m_lmDesc->memory().m_moduleDataSize);
+
+				ma.setStartAddr(module.moduleDataOffset);
+				ma.setSizeW(module.txDataSize);
+			}
+
+			m_readAreas.insert({ma.startAddr(), ma});
 			initToRead(ma);
 		}
 
-		// Opto interface input data
+		// LM's opto interface actual rx data
 		//
-		for(quint32 i = 0; i < m_lmDesc.optoInterface().m_optoPortCount; i++)
+		std::vector<MemArea> lmOptoRxAreas;
+
+		bool result = m_compiler.getLmOptoPortsRxAreas(&lmOptoRxAreas);
+
+		RETURN_IF_FALSE(result);
+
+		for(const MemArea& ma : lmOptoRxAreas)
 		{
-			MemArea ma(m_lmDesc.optoInterface().m_optoInterfaceDataOffset +
-							i * (m_lmDesc.optoInterface().m_optoPortAppDataOffset +
-								 m_lmDesc.optoInterface().m_optoPortAppDataSize),
-					   m_lmDesc.optoInterface().m_optoPortAppDataSize);
-
-			m_readAreas.push_back(ma);
-
+			m_readAreas.insert({ma.startAddr(), ma});
 			initToRead(ma);
 		}
 
 		// Bit memory
 		//
-		MemArea bitMem(m_lmDesc.memory().m_appLogicBitDataOffset,
-					   m_lmDesc.memory().m_appLogicBitDataSize);
+		MemArea bitMem(m_lmDesc->memory().m_appLogicBitDataOffset,
+					   m_lmDesc->memory().m_appLogicBitDataSize);
 
-		m_readAreas.push_back(bitMem);
+		m_readAreas.insert({bitMem.startAddr(), bitMem});
 
-		// Tuning memory
+		// Actual used tuning memory
 		//
-		MemArea tuningMem(m_lmDesc.memory().m_tuningDataOffset,
-						  m_lmDesc.memory().m_tuningDataSize);
+		MemArea usedTuningMem;
 
-		m_readAreas.push_back(tuningMem);
-		initToRead(tuningMem);
+		result = m_compiler.getLmUsedTuningArea(&usedTuningMem);
+
+		RETURN_IF_FALSE(result);
+
+		if (usedTuningMem.sizeW() > 0)
+		{
+			m_readAreas.insert({usedTuningMem.startAddr(), usedTuningMem});
+			initToRead(usedTuningMem);
+		}
 
 		// Word memory
 		//
-		MemArea wordMem(m_lmDesc.memory().m_appLogicWordDataOffset,
-						m_lmDesc.memory().m_appLogicWordDataSize);
+		MemArea wordMem(m_lmDesc->memory().m_appLogicWordDataOffset,
+						m_lmDesc->memory().m_appLogicWordDataSize);
 
-		m_readAreas.push_back(wordMem);
+		m_readAreas.insert({wordMem.startAddr(), wordMem});
 
+		// LM diagnostics data
+		//
+		MemArea lmDiagData(m_lmDesc->memory().m_txDiagDataOffset,
+						   m_lmDesc->memory().m_txDiagDataSize);
 
-*/
+		m_readAreas.insert({lmDiagData.startAddr(), lmDiagData});
+		initToRead(lmDiagData);
+
+		return true;
+	}
+
+	bool CodeChecker::initWritableAreas()
+	{
+		// Output data areas of I/O modules actual installed in chassis
+		//
+		for(const ModuleLogicCompiler::Module& module : m_compiler.modules())
+		{
+			quint32 place = module.place;
+
+			if (place > m_lmDesc->memory().m_moduleCount)
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			MemArea ma;
+
+			if (place == 0)
+			{
+				ma.setStartAddr(module.txAppDataOffset);		// ! its Ok
+				ma.setSizeW(module.txAppDataSize);
+			}
+			else
+			{
+				quint32 moduleDataOffset = m_lmDesc->memory().m_moduleDataOffset +
+											(place - 1) * m_lmDesc->memory().m_moduleDataSize;
+
+				Q_ASSERT(static_cast<quint32>(module.moduleDataOffset) == moduleDataOffset);
+				Q_ASSERT(static_cast<quint32>(module.txDataSize) <= m_lmDesc->memory().m_moduleDataSize);
+
+				ma.setStartAddr(module.moduleDataOffset + module.rxAppDataOffset);
+				ma.setSizeW(module.rxAppDataSize);
+			}
+
+			m_writeAreas.insert({ma.startAddr(), ma});
+		}
+
+		// LM's opto interface actual tx data
+		//
+		std::vector<MemArea> lmOptoTxAreas;
+
+		bool result = m_compiler.getLmOptoPortsTxAreas(&lmOptoTxAreas);
+
+		RETURN_IF_FALSE(result);
+
+		for(const MemArea& ma : lmOptoTxAreas)
+		{
+			m_writeAreas.insert({ma.startAddr(), ma});
+		}
+
+		// Bit memory
+		//
+		MemArea bitMem(m_lmDesc->memory().m_appLogicBitDataOffset,
+					   m_lmDesc->memory().m_appLogicBitDataSize);
+
+		m_writeAreas.insert({bitMem.startAddr(), bitMem});
+
+		// Word memory
+		//
+		MemArea wordMem(m_lmDesc->memory().m_appLogicWordDataOffset,
+						m_lmDesc->memory().m_appLogicWordDataSize);
+
+		m_writeAreas.insert({wordMem.startAddr(), wordMem});
+
 		return true;
 	}
 
@@ -153,27 +308,21 @@ namespace Builder
 			return;
 		}
 
-		if (ma.startAddr >= m_memSizeW ||
-			(ma.startAddr + ma.sizeW - 1) > m_memSizeW)
+		if (ma.startAddr() >= m_memSizeW ||
+			(ma.startAddr() + ma.sizeW() - 1) > m_memSizeW)
 		{
 			Q_ASSERT(false);
 			return;
 		}
 
-		std::memset(m_mem + ma.startAddr, 0xFF, ma.sizeW * sizeof(quint16));
+		std::memset(m_mem + ma.startAddr(), 0xFF, ma.sizeW() * sizeof(quint16));
 	}
 
-	bool CodeChecker::initWritableAreas()
-	{
-		return true;
-	}
-
-	void CodeChecker::logError(const QString& err, const CodeItem& cmd)
+	void CodeChecker::logError(const CodeItem& cmd, const QString& err) const
 	{
 		TEST_PTR_RETURN(m_log);
 
 		LOG_INTERNAL_ERROR_MSG(m_log, QString("%1, command: %2").arg(err).arg(cmd.getAsmCode(false)));
-
 	}
 
 	bool CodeChecker::check(const CodeItem& cmd)
@@ -190,7 +339,7 @@ namespace Builder
 
 		if (res == false)
 		{
-			logError("Command address out of range", cmd);
+			logError(cmd, "Command address out of range");
 			return false;
 		}
 
@@ -200,7 +349,7 @@ namespace Builder
 
 		if (funcIndex < 0 && funcIndex >= LM_COMMANDS_COUNT)
 		{
-			logError("Invalid command OpCode", cmd);
+			logError(cmd, "Invalid command OpCode");
 			return false;
 		}
 
@@ -234,228 +383,133 @@ namespace Builder
 
 	bool CodeChecker::checkMov(const CodeItem& cmd)
 	{
-		// check addresses
-		//
 		int readAddr = cmd.getWord3();
 		int writeAddr = cmd.getWord2();
 
-		return checkCanRead(cmd, readAddr, 1) &&
-			   checkCanWrite(cmd, writeAddr, 1);
+		return checkCanRead16(cmd, readAddr) &&
+			   checkCanWrite16(cmd, writeAddr);
 	}
 
 	bool CodeChecker::checkMovMem(const CodeItem& cmd)
 	{
-		/*if (addressInBitMemory(addrTo) ||
-			addressInBitMemory(addrTo + sizeW - 1))
-		{
-			// Command 'MOVEMEM %1, %2, %3' can't write to bit-addressed memory.
-			//
-			m_log->errALC5066(addrTo, addrFrom, sizeW);
-			m_result = false;
-		}
+		int readAddr = cmd.getWord3();
+		int writeAddr = cmd.getWord2();
+		int n = cmd.getWord4();
 
-		readArea(addrFrom, sizeW);
-		writeArea(addrTo, sizeW);*/
-		Q_ASSERT(false);
-		return false;
+		return checkCanRead(cmd, readAddr, n) &&
+			   checkCanWrite(cmd, writeAddr, n);
 	}
 
 	bool CodeChecker::checkMovConst(const CodeItem& cmd)
 	{
-		//write16(addrTo);
-		Q_ASSERT(false);
-		return false;
+		int writeAddr = cmd.getWord2();
+
+		return checkCanWrite16(cmd, writeAddr);
 	}
 
 	bool CodeChecker::checkMovBitConst(const CodeItem& cmd)
 	{
-		/*
-		if (addressInBitMemory(addrTo) == false &&
-			addressInWordMemory(addrTo) == false)
-		{
-
-			//	Command 'MOVBC %1, %2, #%3' can't write out of application bit- or word-addressed memory.
-			//
-			m_log->errALC5067(addrTo, bitNo, constBit);
-
-			m_result = false;
-		}
-
-		write16(addrTo);*/
-		Q_ASSERT(false);
-		return false;
+		return true;
 	}
 
 	bool CodeChecker::checkWriteFuncBlock(const CodeItem& cmd)
 	{
-		//	read16(addrFrom);
-		Q_ASSERT(false);
-		return false;
+		return true;
 	}
 
 	bool CodeChecker::checkReadFuncBlock(const CodeItem& cmd)
 	{
-		// write16(addrTo);
-		Q_ASSERT(false);
-		return false;
+		return true;
 	}
 
 	bool CodeChecker::checkWriteFuncBlockConst(const CodeItem& cmd)
 	{
-		// ??
-		Q_ASSERT(false);
-		return false;
+		return true;
 	}
 
 	bool CodeChecker::checkWriteFuncBlockBit(const CodeItem& cmd)
 	{
-		// read16(addrFrom);
-		Q_ASSERT(false);
-		return false;
+		return true;
 	}
 
 	bool CodeChecker::checkReadFuncBlockBit(const CodeItem& cmd)
 	{
-		/*
-		if (addressInBitMemory(addrTo) == false &&
-			addressInWordMemory(addrTo) == false)
-		{
-			Q_ASSERT(false);			// RDFBB command can write only in bit- or word-addressed memory
-			m_result = false;
-			return;
-		}
-
-		m_memoryMap->write16(addrTo);*/
-		Q_ASSERT(false);
-		return false;
+		return true;
 	}
 
 	bool CodeChecker::checkReadFuncBlockTest(const CodeItem& cmd)
 	{
-		// ??
-		Q_ASSERT(false);
-		return false;
+		return true;
 	}
 
 	bool CodeChecker::checkSetMem(const CodeItem& cmd)
 	{
-		/*
-		if (addressInBitMemory(addr) ||
-			addressInBitMemory(addr + sizeW - 1))
-		{
-			Q_ASSERT(false);			// SETMEM command can't write to bit-addressed memory
-			m_result = false;
-		}
-
-		writeArea(addr, sizeW);*/
-		Q_ASSERT(false);
-		return false;
+		return true;
 	}
 
 	bool CodeChecker::checkMovBit(const CodeItem& cmd)
 	{
-		/*if (addressInBitMemory(addrTo) == false &&
-			addressInWordMemory(addrTo) == false)
-		{
-
-			// Command 'MOVB %1[%2], %3[%4]' can't write out of application bit- or word-addressed memory.
-			//
-			m_log->errALC5089(addrTo, bitTo, addrFrom, bitFrom);
-
-			m_result = false;
-		}
-
-		//
-
-		read16(addrFrom);
-		write16(addrTo);*/
-		Q_ASSERT(false);
-		return false;
+		return true;
 	}
 
 	bool CodeChecker::checkNstart(const CodeItem& cmd)
 	{
-		// ??
-		Q_ASSERT(false);
-		return false;
+		return true;
 	}
 
 	bool CodeChecker::checkAppStart(const CodeItem& cmd)
 	{
-		// ??
-		Q_ASSERT(false);
-		return false;
+		return true;
 	}
 
 	bool CodeChecker::checkMov32(const CodeItem& cmd)
 	{
-		/*read32(addrFrom);
-		write32(addrTo);*/
-		Q_ASSERT(false);
-		return false;
+		return true;
 	}
 
 	bool CodeChecker::checkMovConst32(const CodeItem& cmd)
 	{
-		// write32(addrTo);
-		Q_ASSERT(false);
-		return false;
+		return true;
 	}
 
 	bool CodeChecker::checkWriteFuncBlock32(const CodeItem& cmd)
 	{
-		// read32(addrFrom);
-		Q_ASSERT(false);
-		return false;
+		return true;
 	}
 
 	bool CodeChecker::checkReadFuncBlock32(const CodeItem& cmd)
 	{
-		// write32(addrTo);
-		Q_ASSERT(false);
-		return false;
+		return true;
 	}
 
 	bool CodeChecker::checkWriteFuncBlockConst32(const CodeItem& cmd)
 	{
-		// ??
-		Q_ASSERT(false);
-		return false;
+		return true;
 	}
 
 	bool CodeChecker::checkReadFuncBlockTest32(const CodeItem& cmd)
 	{
-		// ??
-		Q_ASSERT(false);
-		return false;
+		return true;
 	}
 
 	bool CodeChecker::checkMovConstIfFlag(const CodeItem& cmd)
 	{
-		// ??
-		Q_ASSERT(false);
-		return false;
+		return true;
 	}
 
 	bool CodeChecker::checkPrevMov(const CodeItem& cmd)
 	{
-		// ??
-		Q_ASSERT(false);
-		return false;
+		return true;
 	}
 
 	bool CodeChecker::checkPrevMov32(const CodeItem& cmd)
 	{
-		// ??
-		Q_ASSERT(false);
-		return false;
+		return true;
 	}
 
 	bool CodeChecker::checkFill(const CodeItem& cmd)
 	{
-		// ??
-		Q_ASSERT(false);
-		return false;
+		return true;
 	}
 
 	bool CodeChecker::checkFbTypeAndInstance(const CodeItem& cmd)
@@ -466,7 +520,7 @@ namespace Builder
 
 		if (afb == nullptr)
 		{
-			logError("Unknown AFB OpCode", cmd);
+			logError(cmd, "Unknown AFB OpCode");
 			return false;
 		}
 
@@ -474,20 +528,130 @@ namespace Builder
 
 		if (fbInstance >= afb->maxInstCount())
 		{
-			logError("AFB instance exceeds max instance count", cmd);
+			logError(cmd, "AFB instance exceeds max instance count");
 			return false;
 		}
 
 		return true;
 	}
 
-	bool CodeChecker::checkCanRead(const CodeItem& cmd, quint32 readAddr, quint32 sizeW)
+	bool CodeChecker::checkCanRead16(const CodeItem& cmd, quint32 readAddr) const
 	{
+		return checkCanRead(cmd, readAddr, 1);
+	}
+
+	bool CodeChecker::checkCanRead32(const CodeItem& cmd, quint32 readAddr) const
+	{
+		return checkCanRead(cmd, readAddr, 2);
+	}
+
+	bool CodeChecker::checkCanRead(const CodeItem& cmd, quint32 readAddr, quint32 sizeW) const
+	{
+		const MemArea& areaToRead = findMemAreaToRead(readAddr, sizeW);
+
+		if (areaToRead.isValid() == false)
+		{
+			logError(cmd, QString("Can't read address %1").arg(readAddr));
+			return false;
+		}
+
+		for(int i = 0; i < sizeW; i++)
+		{
+			if (readAddr + i >= m_memSizeW)
+			{
+				Q_ASSERT(false);
+				logError(cmd, QString("Read address %1 out of range").arg(readAddr + i));
+				return false;
+			}
+			else
+			{
+				if (m_mem[readAddr + i] != 0xFFFF)
+				{
+					logError(cmd, QString("Unwritten memory read on address %1").arg(readAddr + i));
+					return false;
+				}
+			}
+		}
+
 		return true;
 	}
 
-	bool CodeChecker::checkCanWrite(const CodeItem& cmd, quint32 writeAddr, quint32 sizeW)
+	bool CodeChecker::checkCanWrite16(const CodeItem& cmd, quint32 writeAddr) const
 	{
+		return checkCanWrite(cmd, writeAddr, 1);
+	}
+
+	bool CodeChecker::checkCanWrite32(const CodeItem& cmd, quint32 writeAddr) const
+	{
+		return checkCanWrite(cmd, writeAddr, 2);
+	}
+
+	bool CodeChecker::checkCanWrite(const CodeItem& cmd, quint32 writeAddr, quint32 sizeW) const
+	{
+		const MemArea& areaToWrite = findMemAreaToWrite(writeAddr, sizeW);
+
+		if (areaToWrite.isValid() == false)
+		{
+			logError(cmd, QString("Can't write address %1").arg(writeAddr));
+			return false;
+		}
+
+		for(int i = 0; i < sizeW; i++)
+		{
+			if (writeAddr + i >= m_memSizeW)
+			{
+				Q_ASSERT(false);
+				logError(cmd, QString("Write address %1 out of range").arg(writeAddr + i));
+			}
+			else
+			{
+				m_mem[writeAddr + i] = 0xFFFF;
+			}
+		}
+
 		return true;
+	}
+
+	const CodeChecker::MemArea& CodeChecker::findMemAreaToWrite(quint32 writeAddr, quint32 sizeW) const
+	{
+		return findMemArea(m_writeAreas, writeAddr, sizeW);
+	}
+
+	const CodeChecker::MemArea& CodeChecker::findMemAreaToRead(quint32 readAddr, quint32 sizeW) const
+	{
+		return findMemArea(m_readAreas, readAddr, sizeW);
+	}
+
+	const CodeChecker::MemArea& CodeChecker::findMemArea(const std::map<quint32, MemArea>& areas,
+							   quint32 addr, quint32 sizeW) const
+	{
+		auto it = areas.upper_bound(addr);
+
+		bool result = true;
+
+		if (it == areas.begin())
+		{
+			result = false;
+		}
+		else
+		{
+			it--;
+
+			if (it == areas.end())
+			{
+				result = false;
+			}
+			else
+			{
+				result = it->second.addressInArea(addr, sizeW);
+			}
+		}
+
+		if (result == false)
+		{
+			return m_notValidArea;
+		}
+
+		return it->second;
 	}
 }

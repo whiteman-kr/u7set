@@ -88,7 +88,6 @@ namespace Builder
 
 		Address16 m_nextSignalAddress;
 		QVector<SignalAddress16> m_signals;
-
 	};
 
 	class LmMemoryMap : public QObject

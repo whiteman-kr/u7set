@@ -56,6 +56,10 @@ namespace Tuning
 		int tuningDataFramePayloadW() const { return m_tuningDataFramePayloadW; }
 		int tuningDataFrameSizeW() const { return m_tuningDataFrameSizeW; }
 
+		//
+
+		int usedTuningDataSizeW() const;
+
 		int usedFramesCount() const { return m_tuningDataUsedFramesCount; }
 
 		void getSignals(QVector<AppSignal *>* signalList) const;
@@ -112,7 +116,7 @@ namespace Tuning
 
 		QVector<QVector<AppSignal*>> m_tuningSignals;
 
-		QVector<int> m_tuningSignalSizes;
+		QVector<int> m_tuningSignalSizesB;
 
 		quint8* m_tuningData = nullptr;
 		int m_tuningDataSizeB = 0;

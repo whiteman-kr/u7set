@@ -16,6 +16,7 @@
 #include "MemWriteMap.h"
 #include "Loopbacks.h"
 #include "SignalSet.h"
+#include "CodeChecker.h"
 
 class LmDescription;
 
@@ -83,7 +84,6 @@ namespace Builder
 			QVector<AfblUsageInfo> afblUsageInfo;
 		};
 
-	private:
 		struct Module
 		{
 			bool isInputModule() const;
@@ -114,6 +114,8 @@ namespace Builder
 
 			int appRegDataOffset = 0;	// offset of module application data in registration buffer
 		};
+
+	private:
 
 		struct FbScal
 		{
@@ -176,14 +178,22 @@ namespace Builder
 
 		std::shared_ptr<Hardware::DeviceModule> getLmSharedPtr();
 
-//		std::shared_ptr<LmDescription> getLmDescription();
 		std::shared_ptr<const LmDescription> getLmDescription() const;
 
 		BusShared getBusShared(const QString& busTypeID);
 
 		Builder::Context* builderContext() const { return m_context; }
 
+		const HashedVector<QString, Module>& modules() const { return  m_modules; }
+
+		bool getLmUsedTuningArea(CodeChecker::MemArea* tuningArea) const;
+
+		bool getLmOptoPortsRxAreas(std::vector<CodeChecker::MemArea>* optoRxAreas) const;
+		bool getLmOptoPortsTxAreas(std::vector<CodeChecker::MemArea>* optoTxAreas) const;
+
 	private:
+		bool getLmOptoPortsAreas(std::vector<CodeChecker::MemArea>* optoAreas, bool rx) const;
+
 		// pass #1 compilation functions
 		//
 		bool loadLMSettings();
@@ -800,7 +810,7 @@ namespace Builder
 
 		//
 
-		AppLogicCode m_code;
+		AppLogicCode m_appLogicCode;
 
 		AppLogicCode m_idrCode;
 		AppLogicCode m_alpCode;
