@@ -8,12 +8,14 @@ MonitorCentralWidget::MonitorCentralWidget(MonitorSchemaManager* schemaManager,
 										   VFrame30::AppSignalController* appSignalController,
 										   VFrame30::TuningController* tuningController,
                                            VFrame30::LogController* logController,
+										   ITimeStats* timeStats,
 										   QWidget* parent) :
 	TabWidgetEx(parent),
 	m_schemaManager(schemaManager),
 	m_appSignalController(appSignalController),
     m_tuningController(tuningController),
-    m_logController(logController)
+	m_logController(logController),
+	m_timeStats(timeStats)
 {
 	Q_ASSERT(m_schemaManager);
 
@@ -117,6 +119,7 @@ int MonitorCentralWidget::addSchemaTabPage(const QString& schemaId, const QVaria
 																m_appSignalController,
 																m_tuningController,
 	                                                            m_logController,
+																m_timeStats,
 																this);
 
 	schemaWidget->clientSchemaView()->setVariables(variables);
@@ -132,6 +135,15 @@ int MonitorCentralWidget::addSchemaTabPage(const QString& schemaId, const QVaria
 		setMovable(true);
 	}
 
+	//  clientSchemaView->setVariables() (line 125) may override already created variables in scripts,
+	// so run onShowScript here, after setting view variables(!). Also onShowScript triggers
+	// running onConfigurationArrivedScript
+	//
+	schemaWidget->schema()->onShowEvent(schemaWidget->clientSchemaView()->jsEngine(),
+										schemaWidget->clientSchemaView()->logFile());
+
+	// --
+	//
 	emit signal_actionCloseTabUpdated(count() > 1);
 
 	return index;

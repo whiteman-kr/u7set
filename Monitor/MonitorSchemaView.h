@@ -3,6 +3,7 @@
 #include "MonitorSchemaManager.h"
 #include "../VFrame30/ClientSchemaView.h"
 #include "../VFrame30/AppSignalController.h"
+#include "../lib/ITimeStats.h"
 
 
 namespace VFrame30
@@ -22,6 +23,7 @@ public:
 							   VFrame30::AppSignalController* appSignalController,
 							   VFrame30::TuningController* tuningController,
 							   VFrame30::LogController* logController,
+							   ITimeStats* timeStats,
 							   QWidget* parent = nullptr);
 	virtual ~MonitorSchemaView() = default;
 

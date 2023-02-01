@@ -6,6 +6,7 @@
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/TuningController.h"
 #include "../lib/Tuning/TuningUserManager.h"
+#include "../lib/ITimeStats.h"
 
 
 class MonitorSchemaView;
@@ -44,6 +45,7 @@ public:
 						VFrame30::AppSignalController* appSignalController,
 						VFrame30::TuningController* tuningController,
 						VFrame30::LogController* logController,
+						ITimeStats* timeStats,
 						QWidget* parent);
 	virtual ~MonitorSchemaWidget();
 

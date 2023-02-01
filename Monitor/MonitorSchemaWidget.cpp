@@ -54,8 +54,9 @@ MonitorSchemaWidget::MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schem
 										 VFrame30::AppSignalController* appSignalController,
 										 VFrame30::TuningController* tuningController,
                                          VFrame30::LogController* logController,
+										 ITimeStats* timeStats,
 										 QWidget* parent) :
-	VFrame30::ClientSchemaWidget(new MonitorSchemaView(schemaManager, this, appSignalController, tuningController, logController),
+	VFrame30::ClientSchemaWidget(new MonitorSchemaView(schemaManager, this, appSignalController, tuningController, logController, timeStats),
 								 schema,
 								 schemaManager,
 								 parent)
@@ -69,10 +70,6 @@ MonitorSchemaWidget::MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schem
 
 	auto context = VFrame30::Context::create(clientSchemaView());
 	schema->setContext(std::move(context));
-
-	// Run onShowScript
-	//
-	schema->onShowEvent(clientSchemaView()->jsEngine(), clientSchemaView()->logFile());
 
 	return;
 }

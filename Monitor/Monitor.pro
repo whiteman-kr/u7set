@@ -80,6 +80,7 @@ SOURCES += main.cpp \
     ../lib/BuildInfo.cpp \
     MonitorSchemaWidget.cpp \
     MonitorConfigController.cpp \
+    SchemaDrawStatistics.cpp \
     ScriptMonitorApplication.cpp \
     TcpSignalClient.cpp \
     ../lib/Ui/DialogSignalInfo.cpp \
@@ -140,6 +141,7 @@ HEADERS  += \
     MonitorSignalInfo.h \
     MonitorSignalManager.h \
     MonitorSignalSnapshot.h \
+    SchemaDrawStatistics.h \
     ScriptMonitorApplication.h \
 	Stable.h \
     DialogSettings.h \

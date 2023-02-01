@@ -9,6 +9,7 @@
 #include "ISchemaViewHistory.h"
 #include "IViewVariables.h"
 #include "../lib/ClientBehavior.h"
+#include "../lib/ITimeStats.h"
 
 class QPaintEvent;
 class QTimerEvent;
@@ -257,6 +258,7 @@ namespace VFrame30
 	public:
 		explicit ClientSchemaView(VFrame30::SchemaManager* schemaManager,
 								  ISchemaViewHistory* schemaViewHistory,
+								  ITimeStats* timeStats,
 								  QWidget* parent = nullptr);
 		virtual ~ClientSchemaView();
 
@@ -348,6 +350,11 @@ namespace VFrame30
 		const QVariantHash& variables() const;
 		void setVariables(const QVariantHash& values);
 
+		// TimeStats
+		//
+		ITimeStats* timeStats();
+		ITimeStats* timeStats() const;
+
 		// ClientBehavior
 		//
 		const MonitorBehavior& monitorBehavor() const noexcept;
@@ -385,6 +392,8 @@ namespace VFrame30
 
 		QString m_globalScript;
 		QString m_onConfigurationArrivedScript;
+
+		mutable ITimeStats* m_timeStats = nullptr;
 
 		// --
 		//

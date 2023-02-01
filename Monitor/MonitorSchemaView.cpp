@@ -1,8 +1,6 @@
 #include "MonitorSchemaView.h"
 #include "MonitorSchemaManager.h"
 #include "MonitorAppSettings.h"
-#include "MonitorSignalManager.h"
-#include "Globals.h"
 #include "../VFrame30/DrawParam.h"
 #include "../VFrame30/PropertyNames.h"
 #include "../VFrame30/AppSignalController.h"
@@ -16,8 +14,9 @@ MonitorSchemaView::MonitorSchemaView(MonitorSchemaManager* schemaManager,
 									 VFrame30::AppSignalController* appSignalController,
 									 VFrame30::TuningController* tuningController,
 									 VFrame30::LogController* logController,
+									 ITimeStats* timeStats,
 									 QWidget* parent)
-	: VFrame30::ClientSchemaView(schemaManager, schemaViewHistory, parent)
+	: VFrame30::ClientSchemaView(schemaManager, schemaViewHistory, timeStats, parent)
 {
 	setAppSignalController(appSignalController);
 	setTuningController(tuningController);

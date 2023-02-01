@@ -58,6 +58,7 @@ HEADERS += \
     ../lib/ClientBehavior.h \
     ../lib/ComparatorSet.h \
 	../UtilsLib/ILogFile.h \
+    ../lib/ITimeStats.h \
     Context.h \
     ISchemaViewHistory.h \
     IViewVariables.h \
