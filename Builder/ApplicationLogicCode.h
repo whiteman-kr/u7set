@@ -65,7 +65,7 @@ namespace Builder
 		{	LmCommand::Code::NoCommand,	0,	"NO_CMD",		false,	0,	0						},
 		{	LmCommand::Code::NOP,		1,	"NOP",			false,	5,	2						},
 		{	LmCommand::Code::START,		2,	"START",		true,	8,	6						},
-		{	LmCommand::Code::STOP,		1,	"STOP",			false,	5,	2						},
+		{	LmCommand::Code::STOP,		1,	"STOP",			false,	5,	1						},
 		{	LmCommand::Code::MOV,		3,	"MOV",			false,	11,	LmCommand::CALC_RUNTIME	},
 		{	LmCommand::Code::MOVMEM,	4,	"MOVMEM",		false,	14,	LmCommand::CALC_RUNTIME	},
 		{	LmCommand::Code::MOVC,		3,	"MOVC",			false,	11, LmCommand::CALC_RUNTIME	},
@@ -346,7 +346,8 @@ namespace Builder
 						 int waitFbTime,
 						 int* waitTime,
 						 int* execTime,
-						 int* fbExecTime);
+						 int* fbExecTime,
+						 bool firstAlpCommand);
 
 		bool getTimes(int* waitTime, int* execTime) const;
 

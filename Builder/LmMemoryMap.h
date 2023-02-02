@@ -152,8 +152,10 @@ namespace Builder
 		int getModuleDataOffset(int place) const;
 
 		void getFile(QStringList& memFile,
-					 const std::vector<std::tuple<QString, Address16, int>>& discreteSignalHeapItems,
-					 const std::vector<std::tuple<QString, Address16, int>>& analogAndBusSignalHeapItems);
+					 const std::vector<std::tuple<QString,
+									Address16, int>>& discreteSignalHeapItems,
+					 const std::vector<std::tuple<QString,
+									Address16, int>>& analogAndBusSignalHeapItems) const;
 
 		bool appendUalSignals(MemoryArea& memArea, const QVector<UalSignal*>& ualSignals);
 		bool appendRegSignals(MemoryArea& memArea, const QVector<UalSignal*>& ualSignals, bool setUalAddrEqualToRegBufAddr);
@@ -219,10 +221,17 @@ namespace Builder
 		bool addressInWordMemory(int address) const;
 
 	private:
-		void addSection(QStringList& memFile, MemoryArea& memArea, const QString& title, int sectionStartAddrW = -1);
-		void addRecordSignals(QStringList& memFile, MemoryArea& memArea, const QString& title);
-		void addRecord(QStringList& memFile, MemoryArea& memArea, const QString& title);
-		void addSignals(QStringList& memFile, MemoryArea& memArea);
+		void addSection(QStringList& memFile, const MemoryArea& memArea,
+						const QString& title) const;
+
+		void addRecordSignals(QStringList& memFile, const MemoryArea& memArea,
+							  const QString& title, int sectionStartAddrW) const;
+
+		void addRecord(QStringList& memFile, const MemoryArea& memArea,
+						const QString& title, int sectionStartAddrW) const;
+
+		void addSignals(QStringList& memFile, const MemoryArea& memArea,
+						int sectionStartAddrW) const;
 
 	private:
 
@@ -317,8 +326,6 @@ namespace Builder
 		QVector<ReadWriteAccess> m_memory;
 
 		IssueLogger* m_log = nullptr;
-
-		int m_sectionStartAddrW = -1;
 	};
 
 }

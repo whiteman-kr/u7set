@@ -402,19 +402,24 @@ namespace Builder
 	}
 
 	void LmMemoryMap::getFile(QStringList& memFile,
-							  const std::vector<std::tuple<QString, Address16, int>>& discreteSignalHeapItems,
-							  const std::vector<std::tuple<QString, Address16, int>>& analogAndBusSignalHeapItems)
+							  const std::vector<std::tuple<QString,
+												Address16, int>>& discreteSignalHeapItems,
+							  const std::vector<std::tuple<QString,
+												Address16, int>>& analogAndBusSignalHeapItems) const
 	{
 		memFile.append(QString(" LM's memory map"));
 		memFile.append("");
 
 		//
 
+		int sectionStartAddrW = -1;
+
 		addSection(memFile, m_modules.memory, "I/O modules controller memory");
 
 		for(int i = 0; i < m_modules.module.size(); i++)
 		{
-			addRecord(memFile, m_modules.module[i], QString("I/O module %1").arg(i + 1, 2, 10, Latin1Char::ZERO));
+			addRecord(memFile, m_modules.module[i],
+					  QString("I/O module %1").arg(i + 1, 2, 10, Latin1Char::ZERO), sectionStartAddrW);
 		}
 
 		memFile.append("");
@@ -425,12 +430,13 @@ namespace Builder
 
 		for(int i = 0; i < m_optoInterface.channel.size(); i++)
 		{
-			addRecord(memFile, m_optoInterface.channel[i], QString("opto port %1").arg(i + 1, 2, 10, Latin1Char::ZERO));
+			addRecord(memFile, m_optoInterface.channel[i],
+					  QString("opto port %1").arg(i + 1, 2, 10, Latin1Char::ZERO), sectionStartAddrW);
 		}
 
 		memFile.append("");
 
-		addRecord(memFile, m_optoInterface.reserv, "reserv");
+		addRecord(memFile, m_optoInterface.reserv, "reserv", sectionStartAddrW);
 
 		memFile.append("");
 
@@ -438,17 +444,23 @@ namespace Builder
 
 		addSection(memFile, m_appBitAdressed.memory, "Application logic bit-addressed memory");
 
-		addRecord(memFile, m_appBitAdressed.bitAccumulator, "bit accumulator");
-		addRecord(memFile, m_appBitAdressed.constBits, "const bits");
+		addRecord(memFile, m_appBitAdressed.bitAccumulator, "bit accumulator", sectionStartAddrW);
+		addRecord(memFile, m_appBitAdressed.constBits, "const bits", sectionStartAddrW);
 
 		memFile.append("");
 
-		addRecordSignals(memFile, m_appBitAdressed.acquiredDiscreteOutputSignals, "acquired discrete output signals");
-		addRecordSignals(memFile, m_appBitAdressed.acquiredDiscreteInternalSignals, "acquired discrete internal signals");
-		addRecordSignals(memFile, m_appBitAdressed.nonAcquiredDiscreteOutputSignals, "non acquired discrete output signals");
-		addRecordSignals(memFile, m_appBitAdressed.nonAcquiredDiscreteInternalSignals, "non acquired discrete internal signals");
+		addRecordSignals(memFile, m_appBitAdressed.acquiredDiscreteOutputSignals,
+						 "acquired discrete output signals", sectionStartAddrW);
+		addRecordSignals(memFile, m_appBitAdressed.acquiredDiscreteInternalSignals,
+						 "acquired discrete internal signals", sectionStartAddrW);
+		addRecordSignals(memFile, m_appBitAdressed.nonAcquiredDiscreteOutputSignals,
+						 "non acquired discrete output signals", sectionStartAddrW);
+		addRecordSignals(memFile, m_appBitAdressed.nonAcquiredDiscreteInternalSignals,
+						 "non acquired discrete internal signals", sectionStartAddrW);
 
-		addRecord(memFile, m_appBitAdressed.discreteSignalsHeap, "discrete signals heap");
+		addRecord(memFile, m_appBitAdressed.discreteSignalsHeap,
+					"discrete signals heap", sectionStartAddrW);
+
 		memFile.append("");
 
 		for(auto [appSignalID, addr16, sizeBits] : discreteSignalHeapItems)
@@ -467,53 +479,57 @@ namespace Builder
 
 		//
 
-		addSection(memFile, m_tuningInterface.memory, "Tuning interface memory", m_tuningInterface.memory.startAddress());
+		sectionStartAddrW = m_tuningInterface.memory.startAddress();
 
-		addRecordSignals(memFile, m_tuningInterface.memory,  "tunable signals");
+		addSection(memFile, m_tuningInterface.memory, "Tuning interface memory");
+
+		addRecordSignals(memFile, m_tuningInterface.memory,  "tunable signals", sectionStartAddrW);
 
 		//
 
-		addSection(memFile, m_appWordAdressed.memory, "Application logic word-addressed memory", m_appWordAdressed.memory.startAddress());
+		sectionStartAddrW = m_appWordAdressed.memory.startAddress();
+
+		addSection(memFile, m_appWordAdressed.memory, "Application logic word-addressed memory");
 
 		if (m_appWordAdressed.acquiredRawData.sizeW() > 0)
 		{
-			addRecord(memFile, m_appWordAdressed.acquiredRawData, "acquired raw data");
+			addRecord(memFile, m_appWordAdressed.acquiredRawData, "acquired raw data", sectionStartAddrW);
 			memFile.append("");
 		}
 
-		addRecordSignals(memFile, m_appWordAdressed.acquiredAnalogInputSignals, "acquired analog input signals");
-		addRecordSignals(memFile, m_appWordAdressed.acquiredAnalogOutputSignals, "acquired analog output signals");
-		addRecordSignals(memFile, m_appWordAdressed.acquiredAnalogInternalSignals, "acquired analog internal signals");
-		addRecordSignals(memFile, m_appWordAdressed.acquiredAnalogOptoSignals, "acquired analog opto signals");
-		addRecordSignals(memFile, m_appWordAdressed.acquiredAnalogBusChildSignals, "acquired analog bus child signals");
-		addRecordSignals(memFile, m_appWordAdressed.acquiredAnalogTuningSignals, "acquired analog tunable signals");
-		addRecordSignals(memFile, m_appWordAdressed.acquiredAnalogConstSignals, "acquired analog const signals");
+		addRecordSignals(memFile, m_appWordAdressed.acquiredAnalogInputSignals, "acquired analog input signals", sectionStartAddrW);
+		addRecordSignals(memFile, m_appWordAdressed.acquiredAnalogOutputSignals, "acquired analog output signals", sectionStartAddrW);
+		addRecordSignals(memFile, m_appWordAdressed.acquiredAnalogInternalSignals, "acquired analog internal signals", sectionStartAddrW);
+		addRecordSignals(memFile, m_appWordAdressed.acquiredAnalogOptoSignals, "acquired analog opto signals", sectionStartAddrW);
+		addRecordSignals(memFile, m_appWordAdressed.acquiredAnalogBusChildSignals, "acquired analog bus child signals", sectionStartAddrW);
+		addRecordSignals(memFile, m_appWordAdressed.acquiredAnalogTuningSignals, "acquired analog tunable signals", sectionStartAddrW);
+		addRecordSignals(memFile, m_appWordAdressed.acquiredAnalogConstSignals, "acquired analog const signals", sectionStartAddrW);
 
-		addRecordSignals(memFile, m_appWordAdressed.acquiredInputBuses, "acquired input buses");
-		addRecordSignals(memFile, m_appWordAdressed.acquiredOutputBuses, "acquired output buses");
-		addRecordSignals(memFile, m_appWordAdressed.acquiredInternalBuses, "acquired internal buses");
-		addRecordSignals(memFile, m_appWordAdressed.acquiredBusChildBuses, "acquired bus child buses");
-		addRecordSignals(memFile, m_appWordAdressed.acquiredOptoBuses, "acquired opto buses");
+		addRecordSignals(memFile, m_appWordAdressed.acquiredInputBuses, "acquired input buses", sectionStartAddrW);
+		addRecordSignals(memFile, m_appWordAdressed.acquiredOutputBuses, "acquired output buses", sectionStartAddrW);
+		addRecordSignals(memFile, m_appWordAdressed.acquiredInternalBuses, "acquired internal buses", sectionStartAddrW);
+		addRecordSignals(memFile, m_appWordAdressed.acquiredBusChildBuses, "acquired bus child buses", sectionStartAddrW);
+		addRecordSignals(memFile, m_appWordAdressed.acquiredOptoBuses, "acquired opto buses", sectionStartAddrW);
 
-		addRecordSignals(memFile, m_appWordAdressed.acquiredDiscreteInputSignals, "acquired discrete input signals");
-		addRecordSignals(memFile, m_appWordAdressed.acquiredDiscreteOutputSignals, "acquired discrete output signals (from bit memory)");
-		addRecordSignals(memFile, m_appWordAdressed.acquiredDiscreteInternalSignals, "acquired discrete internal signals (from bit memory)");
-		addRecordSignals(memFile, m_appWordAdressed.acquiredDiscreteOptoSignals, "acquired discrete opto signals");
-		addRecordSignals(memFile, m_appWordAdressed.acquiredDiscreteBusChildSignals, "acquired discrete bus child signals");
-		addRecordSignals(memFile, m_appWordAdressed.acquiredDiscreteTuningSignals, "acquired discrete tunable signals");
-		addRecordSignals(memFile, m_appWordAdressed.acquiredDiscreteConstSignals, "acquired discrete const signals");
+		addRecordSignals(memFile, m_appWordAdressed.acquiredDiscreteInputSignals, "acquired discrete input signals", sectionStartAddrW);
+		addRecordSignals(memFile, m_appWordAdressed.acquiredDiscreteOutputSignals, "acquired discrete output signals (from bit memory)", sectionStartAddrW);
+		addRecordSignals(memFile, m_appWordAdressed.acquiredDiscreteInternalSignals, "acquired discrete internal signals (from bit memory)", sectionStartAddrW);
+		addRecordSignals(memFile, m_appWordAdressed.acquiredDiscreteOptoSignals, "acquired discrete opto signals", sectionStartAddrW);
+		addRecordSignals(memFile, m_appWordAdressed.acquiredDiscreteBusChildSignals, "acquired discrete bus child signals", sectionStartAddrW);
+		addRecordSignals(memFile, m_appWordAdressed.acquiredDiscreteTuningSignals, "acquired discrete tunable signals", sectionStartAddrW);
+		addRecordSignals(memFile, m_appWordAdressed.acquiredDiscreteConstSignals, "acquired discrete const signals", sectionStartAddrW);
 
-		addRecordSignals(memFile, m_appWordAdressed.nonAcquiredAnalogInputSignals, "non acquired analog input signals");
-		addRecordSignals(memFile, m_appWordAdressed.nonAcquiredAnalogOutputSignals, "non acquired analog output signals");
-		addRecordSignals(memFile, m_appWordAdressed.nonAcquiredAnalogInternalSignals, "non acquired analog internal signals");
+		addRecordSignals(memFile, m_appWordAdressed.nonAcquiredAnalogInputSignals, "non acquired analog input signals", sectionStartAddrW);
+		addRecordSignals(memFile, m_appWordAdressed.nonAcquiredAnalogOutputSignals, "non acquired analog output signals", sectionStartAddrW);
+		addRecordSignals(memFile, m_appWordAdressed.nonAcquiredAnalogInternalSignals, "non acquired analog internal signals", sectionStartAddrW);
 
-		addRecordSignals(memFile, m_appWordAdressed.nonAcquiredOutputBuses, "non acquired output buses");
-		addRecordSignals(memFile, m_appWordAdressed.nonAcquiredInternalBuses, "non acquired internal buses");
+		addRecordSignals(memFile, m_appWordAdressed.nonAcquiredOutputBuses, "non acquired output buses", sectionStartAddrW);
+		addRecordSignals(memFile, m_appWordAdressed.nonAcquiredInternalBuses, "non acquired internal buses", sectionStartAddrW);
 
-		addRecord(memFile, m_appWordAdressed.wordAccumulator, "2 word accumulators ");
+		addRecord(memFile, m_appWordAdressed.wordAccumulator, "2 word accumulators ", sectionStartAddrW);
 		memFile.append("");
 
-		addRecord(memFile, m_appWordAdressed.analogAndBusSignalsHeap, "analog and bus signals heap");
+		addRecord(memFile, m_appWordAdressed.analogAndBusSignalsHeap, "analog and bus signals heap", sectionStartAddrW);
 		memFile.append("");
 
 		for(auto [appSignalID, addr16, sizeBits] : analogAndBusSignalHeapItems)
@@ -531,10 +547,9 @@ namespace Builder
 		}
 	}
 
-	void LmMemoryMap::addSection(QStringList& memFile, MemoryArea& memArea, const QString& title, int sectionStartAddrW)
+	void LmMemoryMap::addSection(QStringList& memFile, const MemoryArea& memArea,
+								 const QString& title) const
 	{
-		m_sectionStartAddrW = sectionStartAddrW;
-
 		memFile.append(QString().rightJustified(80, '-'));
 		memFile.append(QString(" Address   Offset    Size      Description"));
 		memFile.append(QString().rightJustified(80, '-'));
@@ -549,18 +564,20 @@ namespace Builder
 		memFile.append("");
 	}
 
-	void LmMemoryMap::addRecordSignals(QStringList& memFile, MemoryArea& memArea, const QString& title)
+	void LmMemoryMap::addRecordSignals(QStringList& memFile, const MemoryArea& memArea,
+											const QString& title, int sectionStartAddrW) const
 	{
-		addRecord(memFile, memArea, title);
+		addRecord(memFile, memArea, title, sectionStartAddrW);
 		memFile.append("");
-		addSignals(memFile, memArea);
+		addSignals(memFile, memArea, sectionStartAddrW);
 	}
 
-	void LmMemoryMap::addRecord(QStringList& memFile, MemoryArea& memArea, const QString& title)
+	void LmMemoryMap::addRecord(QStringList& memFile, const MemoryArea& memArea,
+								const QString& title, int sectionStartAddrW) const
 	{
 		QString str;
 
-		if (m_sectionStartAddrW == -1)
+		if (sectionStartAddrW == -1)
 		{
 			str = QString(" %1               %2     %3").
 						arg(memArea.startAddress(), 5, 10, Latin1Char::ZERO).
@@ -571,7 +588,7 @@ namespace Builder
 		{
 			str = QString(" %1     %2     %3     %4").
 						arg(memArea.startAddress(), 5, 10, Latin1Char::ZERO).
-						arg(memArea.startAddress() - m_sectionStartAddrW, 5, 10, Latin1Char::ZERO).
+						arg(memArea.startAddress() - sectionStartAddrW, 5, 10, Latin1Char::ZERO).
 						arg(memArea.sizeW(), 5, 10, Latin1Char::ZERO).
 						arg(title);
 		}
@@ -580,7 +597,8 @@ namespace Builder
 	}
 
 
-	void LmMemoryMap::addSignals(QStringList& memFile, MemoryArea& memArea)
+	void LmMemoryMap::addSignals(QStringList& memFile, const MemoryArea& memArea,
+								 int sectionStartAddrW) const
 	{
 		if (memArea.hasSignals() == false)
 		{
@@ -595,7 +613,7 @@ namespace Builder
 
 			if (signal.isDiscrete())
 			{
-				if (m_sectionStartAddrW == -1)
+				if (sectionStartAddrW == -1)
 				{
 					str = QString(" %1.%2            00000.01  - %3").
 								arg(signal.address().offset(), 5, 10, Latin1Char::ZERO).
@@ -607,14 +625,14 @@ namespace Builder
 					str = QString(" %1.%2  %3.%4  00000.01  - %5").
 								arg(signal.address().offset(), 5, 10, Latin1Char::ZERO).
 								arg(signal.address().bit(), 2, 10, Latin1Char::ZERO).
-								arg(signal.address().offset() - m_sectionStartAddrW, 5, 10, Latin1Char::ZERO).
+								arg(signal.address().offset() - sectionStartAddrW, 5, 10, Latin1Char::ZERO).
 								arg(signal.address().bit(), 2, 10, Latin1Char::ZERO).
 								arg(signal.signalStrID());
 				}
 			}
 			else
 			{
-				if (m_sectionStartAddrW == -1)
+				if (sectionStartAddrW == -1)
 				{
 					str = QString(" %1               %2     - %3").
 								arg(signal.address().offset(), 5, 10, Latin1Char::ZERO).
@@ -625,7 +643,7 @@ namespace Builder
 				{
 					str = QString(" %1     %2     %3     - %4").
 								arg(signal.address().offset(), 5, 10, Latin1Char::ZERO).
-								arg(signal.address().offset() - m_sectionStartAddrW, 5, 10, Latin1Char::ZERO).
+								arg(signal.address().offset() - sectionStartAddrW, 5, 10, Latin1Char::ZERO).
 								arg(signal.sizeW(), 5, 10, Latin1Char::ZERO).
 								arg(signal.signalStrID());
 				}

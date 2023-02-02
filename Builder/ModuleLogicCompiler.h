@@ -682,14 +682,19 @@ namespace Builder
 
 		QString lmSubsystemEquipmentIdPath() const;
 
+		bool writeCodeInfoFiles();
+		bool writeAsmFile() const;
+		bool writeMemFile() const;
+		bool writeStatisticsFile() const;
+		bool writeTuningInfoFile() const;
+
 		bool writeResult();
 		bool writeBinCodeForLm();
 		bool calcAppLogicUniqueID(const QByteArray& lmAppCode);
-		bool writeTuningInfoFile();
+
 		bool writeOcmRsSignalsXml();
 		bool writeLooopbacksReport();
 		bool writeHeapsLog();
-		bool writeStatisticsFile() const;
 
 		void printCodeStatistics(const AppLogicCode& code,
 								 QStringList& file,

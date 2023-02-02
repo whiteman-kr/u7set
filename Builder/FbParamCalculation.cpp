@@ -188,7 +188,7 @@ namespace Builder
 
 		CHECK_UNSIGNED_INT(i_conf)
 
-		m_runTime = 3 + 4;
+		m_runTime = 3 + 2;
 
 		switch(i_conf.unsignedIntValue())
 		{
@@ -209,13 +209,13 @@ namespace Builder
 
 	bool UalAfb::calculate_NOT_paramValues()
 	{
-		m_runTime = 3 + 4;
+		m_runTime = 3 + 2;
 		return true;
 	}
 
 	bool UalAfb::calculate_TCT_paramValues()
 	{
-		m_runTime = 4 + 34;
+		m_runTime = 4 + 32;
 
 		QStringList requiredParams;
 
@@ -259,7 +259,7 @@ namespace Builder
 
 		CHECK_UNSIGNED_INT(i_conf)
 
-		m_runTime = 3 + 24;
+		m_runTime = 3 + 22;
 
 		switch(i_conf.unsignedIntValue())
 		{
@@ -293,7 +293,7 @@ namespace Builder
 
 		CHECK_UNSIGNED_INT(i_conf)
 
-		m_runTime = 3 + 34;
+		m_runTime = 3 + 32;
 
 		switch(i_conf.unsignedIntValue())
 		{
@@ -323,7 +323,7 @@ namespace Builder
 
 		CHECK_UNSIGNED_INT(i_conf_y)
 
-		m_runTime = 3;
+		m_runTime = 3 + 2;
 
 		if (i_conf_y.unsignedIntValue() > 3)
 		{
@@ -335,25 +335,25 @@ namespace Builder
 
 	bool UalAfb::calculate_SRSST_paramValues()
 	{
-		m_runTime = 3 + 4;
+		m_runTime = 3 + 2;
 		return true;
 	}
 
 	bool UalAfb::calculate_BCOD_paramValues()
 	{
-		m_runTime = 3 + 4;
+		m_runTime = 3 + 2;
 		return true;
 	}
 
 	bool UalAfb::calculate_BDEC_paramValues()
 	{
-		m_runTime = 3 + 4;
+		m_runTime = 3 + 2;
 		return true;
 	}
 
 	bool UalAfb::calculate_BCOMP_paramValues()
 	{
-		m_runTime = 3 + 14;
+		m_runTime = 3 + 12;
 
 		QStringList requiredParams;
 
@@ -541,11 +541,11 @@ namespace Builder
 		switch(i_conf.unsignedIntValue())
 		{
 		case 1:
-			m_runTime = 10 + 34;	// for signed int input
+			m_runTime = 10 + 32;	// for signed int input
 			break;
 
 		case 2:
-			m_runTime = 24 + 34;	// for float input
+			m_runTime = 24 + 32;	// for float input
 			break;
 
 		default:
@@ -598,7 +598,7 @@ namespace Builder
 				}
 				else
 				{
-					m_runTime = siTiming[index] + 4;
+					m_runTime = siTiming[index] + 2;
 				}
 			}
 			break;
@@ -613,7 +613,7 @@ namespace Builder
 				}
 				else
 				{
-					m_runTime = fpTiming[index] + 4;
+					m_runTime = fpTiming[index] + 2;
 				}
 			}
 			break;
@@ -648,14 +648,14 @@ namespace Builder
 		case 2:			// sub_si
 		case 3:			// mul_si
 		case 4:			// div_si
-			m_runTime = 3 + 4;
+			m_runTime = 3 + 2;
 			break;
 
 		case 5:			// add_fp
 		case 6:			// sub_fp
 		case 7:			// mul_fp
 		case 8:			// div_fb
-			m_runTime = 9 + 4;
+			m_runTime = 9 + 2;
 			break;
 
 		default:
@@ -702,18 +702,18 @@ namespace Builder
 		case 2:
 		case 3:
 		case 4:
-			m_runTime = 4 + 4;
+			m_runTime = 4 + 2;
 			break;
 
 		case 5:
 		case 7:
 		case 8:
 		case 9:
-			m_runTime = 21 + 4;
+			m_runTime = 24 + 2;
 			break;
 
 		case 6:
-			m_runTime = 17 + 4;
+			m_runTime = 17 + 2;
 			break;
 
 		default:
@@ -977,7 +977,7 @@ namespace Builder
 		{
 			// signed int scale
 			//
-			m_runTime = 4 + 4;
+			m_runTime = 4 + 2;
 
 			// get parameters that defined by user
 			//
@@ -1089,7 +1089,7 @@ namespace Builder
 		{
 			// float scale
 			//
-			m_runTime = 20 + 4;
+			m_runTime = 20 + 2;
 
 			// get parameters that defined by user
 			//
@@ -1219,55 +1219,55 @@ namespace Builder
 		switch(i_conf.unsignedIntValue())
 		{
 		case 1:
-			m_runTime = 20 + 4;		// sqrt
+			m_runTime = 20 + 2;		// sqrt
 			break;
 
 		case 2:
-			m_runTime = 4 + 4;		// abs fp
+			m_runTime = 4 + 2;		// abs fp
 			break;
 
 		case 3:
-			m_runTime = 40 + 4;		// sin
+			m_runTime = 40 + 2;		// sin
 			break;
 
 		case 4:
-			m_runTime = 40 + 4;		// cos
+			m_runTime = 40 + 2;		// cos
 			break;
 
 		case 5:
-			m_runTime = 25 + 4;		// log
+			m_runTime = 25 + 2;		// log
 			break;
 
 		case 6:
-			m_runTime = 21 + 4;		// exp
+			m_runTime = 21 + 2;		// exp
 			break;
 
 		case 7:
-			m_runTime = 25 + 4;		// inv
+			m_runTime = 25 + 2;		// inv
 			break;
 
 		case 8:
-			m_runTime = 4 + 4;		// abs si
+			m_runTime = 4 + 2;		// abs si
 			break;
 
 		case 9:
-			m_runTime = 4 + 4;		// sign inversion fp
+			m_runTime = 4 + 2;		// sign inversion fp
 			break;
 
 		case 10:
-			m_runTime = 4 + 4;		// sign inversion si
+			m_runTime = 4 + 2;		// sign inversion si
 			break;
 
 		case 11:
-			m_runTime = 4 + 4;		// negate fp
+			m_runTime = 4 + 2;		// negate fp
 			break;
 
 		case 12:
-			m_runTime = 4 + 4;		// negate si
+			m_runTime = 4 + 2;		// negate si
 			break;
 
 		case 13:
-			m_runTime = 4 + 4;		// get sign fp/si
+			m_runTime = 4 + 2;		// get sign fp/si
 			break;
 
 		default:
@@ -1323,7 +1323,7 @@ namespace Builder
 			}
 		}
 
-		m_runTime = 27 + 24;
+		m_runTime = 27 + 22;
 
 		return true;
 	}
@@ -1385,7 +1385,7 @@ namespace Builder
 				(iConf == CMP_32SI_GREAT_EQU || iConf == CMP_32SI_LESS_EQU))
 			)
 		{
-			m_runTime = 6 + 14;
+			m_runTime = 6 + 12;
 
 			if (hasHysteresisParam == true)
 			{
@@ -1418,7 +1418,7 @@ namespace Builder
 				(iConf == CMP_32FP_GREAT_EQU || iConf == CMP_32FP_LESS_EQU))
 			)
 		{
-			m_runTime = 53 + 14;
+			m_runTime = 53 + 12;
 
 			if (hasHysteresisParam == true)
 			{
@@ -1460,7 +1460,7 @@ namespace Builder
 
 	bool UalAfb::calculate_MUX_paramValues()
 	{
-		m_runTime = 3 + 4;
+		m_runTime = 3 + 2;
 
 		return true;
 	}
@@ -1477,7 +1477,7 @@ namespace Builder
 
 		CHECK_UNSIGNED_INT(i_conf)
 
-		m_runTime = 3 + 34;
+		m_runTime = 3 + 32;
 
 		switch(i_conf.unsignedIntValue())
 		{
@@ -1522,7 +1522,7 @@ namespace Builder
 		switch(i_conf.unsignedIntValue())
 		{
 		case 1:								// signed int limiter
-			m_runTime = 3 + 4;
+			m_runTime = 3 + 2;
 
 			if (isConstLimiter == true)
 			{
@@ -1545,7 +1545,7 @@ namespace Builder
 			break;
 
 		case 2:								// float limiter
-			m_runTime = 4 + 4;
+			m_runTime = 4 + 2;
 
 			if (isConstLimiter == true)
 			{
@@ -1602,7 +1602,7 @@ namespace Builder
 
 		CHECK_UNSIGNED_INT(i_conf);
 
-		m_runTime = 5 + 4;
+		m_runTime = 5 + 2;
 
 		switch(i_conf.unsignedIntValue())
 		{
@@ -1663,7 +1663,7 @@ namespace Builder
 
 		CHECK_UNSIGNED_INT(i_conf);
 
-		m_runTime = 5 + 4;
+		m_runTime = 5 + 2;
 
 		switch(i_conf.unsignedIntValue())
 		{
@@ -1770,7 +1770,7 @@ namespace Builder
 			CHECK_REQUIRED_PARAMETERS(requiredParams);
 		}
 
-		m_runTime = 5 + 4;
+		m_runTime = 5 + 2;
 
 		switch(i_conf.unsignedIntValue())
 		{
@@ -1886,7 +1886,7 @@ namespace Builder
 
 		quint32 coefCount = i_conf.unsignedIntValue();
 
-		m_runTime = 2 + 21 * coefCount + 4;
+		m_runTime = 2 + 21 * coefCount + 2;
 
 		for(quint32 n = 1; n <= COEF_MAX_NUM; n++)
 		{
@@ -1915,7 +1915,7 @@ namespace Builder
 
 	bool UalAfb::calculate_DERIV_paramValues()
 	{
-		m_runTime = 35 + 44;
+		m_runTime = 35 + 42;
 
 		bool isConstDerivative = caption() == "derivc";
 
@@ -2019,7 +2019,7 @@ namespace Builder
 		switch(i_conf->unsignedIntValue())
 		{
 		case 1:				// SI
-			m_runTime = 5 + 4;
+			m_runTime = 5 + 2;
 
 			if (mismatchWithRange == true)
 			{
@@ -2075,7 +2075,7 @@ namespace Builder
 			break;
 
 		case 2:				// FP
-			m_runTime = 14 + 4;
+			m_runTime = 14 + 2;
 
 			if (mismatchWithRange == true)
 			{
@@ -2172,12 +2172,12 @@ namespace Builder
 		{
 		case 1:
 		case 2:
-			m_runTime = 3;
+			m_runTime = 3 + 2;
 			break;
 
 		case 3:
 		case 4:
-			m_runTime = 7;
+			m_runTime = 7 + 2;
 			break;
 
 		default:
@@ -2192,7 +2192,7 @@ namespace Builder
 
 	bool UalAfb::calculate_INDICATION_paramValues()
 	{
-		m_runTime = 3 + 34;
+		m_runTime = 3 + 32;
 
 		AppFbParamValue* i_conf = nullptr;
 
@@ -2219,7 +2219,7 @@ namespace Builder
 	{
 		bool result = true;
 
-		m_runTime = 10 + 34;
+		m_runTime = 10 + 32;
 
 		AppFbParamValue* i_conf = nullptr;
 		AppFbParamValue* i_t_high = nullptr;

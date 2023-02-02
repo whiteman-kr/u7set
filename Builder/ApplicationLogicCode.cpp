@@ -1270,7 +1270,8 @@ namespace Builder
 							   int waitFbTime,
 							   int* waitTime,
 							   int* execTime,
-							   int* fbExecTime)
+							   int* fbExecTime,
+							   bool firstAlpCommand)
 	{
 		*waitTime = 0;
 		*execTime = 0;
@@ -1304,6 +1305,8 @@ namespace Builder
 		{
 			m_waitTime = 2;
 		}
+
+		m_waitTime += (firstAlpCommand == true ? 3 : 0);
 
 		int cmdExecTime = 0;
 
@@ -1404,7 +1407,7 @@ namespace Builder
 
 		case LmCommand::Code::MOVC:
 			Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
-			cmdExecTime = isAddrInBitMem(lmDesc, m_code.getWord2()) == true ? 66 : 6;
+			cmdExecTime = isAddrInBitMem(lmDesc, m_code.getWord2()) == true ? 67 : 6;
 			break;
 
 		case LmCommand::Code::MOVBC:
@@ -1633,13 +1636,15 @@ namespace Builder
 								  int fbExecTime,
 								  int postFbReadTime) const
 	{
+		fbExecTime -= cmdWaitTime;
+
 		int runtime = preFbReadTime;
 
-		int fbExecTimeBeforeRead = cmdWaitTime + preFbReadTime;
+		fbExecTime -= preFbReadTime;
 
-		if (fbExecTimeBeforeRead < fbExecTime)
+		if (fbExecTime > 0)
 		{
-			runtime += (fbExecTime - fbExecTimeBeforeRead);
+			runtime += fbExecTime;
 		}
 
 		runtime += postFbReadTime;
@@ -2003,6 +2008,7 @@ namespace Builder
 		int fbExecTime = 0;
 		int waitFbTime = 0;
 		int phaseClockCount = 0;
+		bool firstAlpCommand = false;
 
 		const LmDescription& lmDescRef = *lmDesc.get();
 
@@ -2017,6 +2023,11 @@ namespace Builder
 
 			codeItem.setAddress(m_codeSizeW);
 
+//			if (m_codeSizeW == 0xFF)
+//			{
+//				DEBUG_STOP;
+//			}
+
 			m_codeSizeW += codeItem.sizeW();
 
 			waitFbTime = 0;
@@ -2027,7 +2038,9 @@ namespace Builder
 			}
 
 			codeItem.calcRunTime(lmDescRef, prevCmdExecTime, waitFbTime,
-								 &waitTime, &execTime, &fbExecTime);
+								 &waitTime, &execTime, &fbExecTime, firstAlpCommand);
+
+			firstAlpCommand = false;
 
 			m_clockCount += (waitTime + execTime);
 			phaseClockCount += (waitTime + execTime);
@@ -2048,14 +2061,18 @@ namespace Builder
 
 			if (codeItem.getOpcode() == LmCommand::Code::STOP)
 			{
-				int maxTime = getMaxFbRemainingExecTimeAndClear();
+				int addTime = getMaxFbRemainingExecTimeAndClear() - prevCmdExecTime;
 
-				prevCmdExecTime = std::max(prevCmdExecTime, maxTime);
+				if (addTime > 0)
+				{
+					codeItem.addExecTime(addTime);
+					m_clockCount += addTime;
+				}
 
-				codeItem.addExecTime(prevCmdExecTime);
-				m_clockCount += prevCmdExecTime;
 				prevCmdExecTime = 0;
 				phaseClockCount = 0;
+
+				firstAlpCommand = true;
 			}
 		}
 

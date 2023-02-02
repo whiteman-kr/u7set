@@ -166,8 +166,8 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::generateIdrPhaseCode),
 
 			PROC_TO_CALL(ModuleLogicCompiler::makeAppLogicCode),
-			PROC_TO_CALL(ModuleLogicCompiler::checkAppLogicCode),
-
+			PROC_TO_CALL(ModuleLogicCompiler::writeCodeInfoFiles),
+//			PROC_TO_CALL(ModuleLogicCompiler::checkAppLogicCode),
 			PROC_TO_CALL(ModuleLogicCompiler::cleanupHeaps),
 
 			//
@@ -14397,6 +14397,208 @@ namespace Builder
 		return QString("%1/%2").arg(m_lmSubsystemID).arg(lmEquipmentID());
 	}
 
+	bool ModuleLogicCompiler::writeCodeInfoFiles()
+	{
+		bool result = true;
+
+		result &= writeAsmFile();
+
+		result &= writeMemFile();
+
+		result &= writeStatisticsFile();
+
+		result &= writeTuningInfoFile();
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::writeAsmFile() const
+	{
+		QStringList asmCode;
+
+		m_appLogicCode.getAsmCode(&asmCode);
+
+		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
+													   QString("%1-%2.asm").arg(m_lmSubsystemID.toLower()).arg(m_lmNumber), asmCode);
+
+		return (buildFile != nullptr);
+	}
+
+	bool ModuleLogicCompiler::writeMemFile() const
+	{
+		QStringList memFile;
+
+		m_memoryMap.getFile(memFile,
+							m_ualSignals.discreteSignalsHeap().getHeapItemsLog(),
+							m_ualSignals.analogAndBusSignalsHeap().getHeapItemsLog());
+
+		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
+												QString("%1-%2.mem").arg(m_lmSubsystemID.toLower()).arg(m_lmNumber), memFile);
+		return (buildFile != nullptr);
+	}
+
+	bool ModuleLogicCompiler::writeStatisticsFile() const
+	{
+		TEST_PTR_RETURN_FALSE(m_lmDescription);
+
+		QStringList file;
+
+		//
+
+		file << ApplicationLogicCompiler::getInfoFileHeader(m_context);
+		file << Separator::EMPTY_STR;
+
+		file << QString("LM equipmentID: %1").arg(lmEquipmentID());
+
+		//
+
+		printCodeStatistics(m_idrCode, file, true);
+		printCodeStatistics(m_alpCode, file, true);
+		printCodeStatistics(m_appLogicCode, file, false);
+
+		//
+
+		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
+												QString("%1-%2.stat").arg(m_lmSubsystemID.toLower()).arg(m_lmNumber), file);
+		return (buildFile != nullptr);
+	}
+
+	bool ModuleLogicCompiler::writeTuningInfoFile() const
+	{
+		if (m_tuningData == nullptr)
+		{
+			return true;
+		}
+
+		QStringList file;
+		QString line = QString("----------------------------------------------------------------------------------------------------------");
+
+		file.append(QString("Tuning information file: %1\n").arg(lmEquipmentID()));
+		file.append(QString("LM eqipmentID: %1").arg(lmEquipmentID()));
+		file.append(QString("LM caption: %1").arg(m_lm->caption()));
+		file.append(QString("LM number: %1\n").arg(m_lmNumber));
+		file.append(QString("Frames used total: %1").arg(m_tuningData->usedFramesCount()));
+
+		QString s;
+
+		quint64 uniqueID = m_tuningData->uniqueID();
+
+		file.append(QString("Unique data ID: %1 (0x%2)").arg(uniqueID).arg(uniqueID, 16, 16, Latin1Char::ZERO));
+
+		const QVector<AppSignal*>& analogFloatSignals = m_tuningData->getAnalogFloatSignals();
+
+		if (analogFloatSignals.count() > 0)
+		{
+			file.append(QString("\nAnalog signals, type Float (32 bits)"));
+			file.append(line);
+			file.append(QString("Address\t\tOffset\t\tAppSignalID\t\t\t\t\t\tDefault\t\tLow Limit\tHigh Limit"));
+			file.append(line);
+
+			for(AppSignal* signal : analogFloatSignals)
+			{
+				if (signal == nullptr)
+				{
+					assert(false);
+					continue;
+				}
+
+				file.append(QString("%1:%2\t%3:%4\t%5\t%6\t%7\t%8").
+							arg(signal->tuningAbsAddr().offset(), 5, 10, Latin1Char::ZERO).
+							arg(signal->tuningAbsAddr().bit(), 2, 10, Latin1Char::ZERO).
+							arg(signal->tuningAbsAddr().offset() - m_tuningData->tuningDataOffsetW(), 5, 10, Latin1Char::ZERO).
+							arg(signal->tuningAbsAddr().bit(), 2, 10, Latin1Char::ZERO).
+							arg(signal->appSignalID(), -48, Latin1Char::SPACE).
+							arg(signal->tuningDefaultValue().toFloat()).
+							arg(signal->tuningLowBound().floatValue()).
+							arg(signal->tuningHighBound().floatValue()));
+			}
+		}
+
+		const QVector<AppSignal*>& analogIntSignals = m_tuningData->getAnalogIntSignals();
+
+		if (analogIntSignals.count() > 0)
+		{
+			file.append(QString("\nAnalog signals, type Signed Integer (32 bits)"));
+			file.append(line);
+			file.append(QString("Address\t\tOffset\t\tAppSignalID\t\t\t\t\t\tDefault\t\tLow Limit\tHigh Limit"));
+			file.append(line);
+
+			for(AppSignal* signal : analogIntSignals)
+			{
+				if (signal == nullptr)
+				{
+					assert(false);
+					continue;
+				}
+
+				file.append(QString("%1:%2\t%3:%4\t%5\t%6\t%7\t\t%8").
+								arg(signal->tuningAbsAddr().offset(), 5, 10, Latin1Char::ZERO).
+								arg(signal->tuningAbsAddr().bit(), 2, 10, Latin1Char::ZERO).
+								arg(signal->tuningAbsAddr().offset() - m_tuningData->tuningDataOffsetW(), 5, 10, Latin1Char::ZERO).
+								arg(signal->tuningAbsAddr().bit(), 2, 10, Latin1Char::ZERO).
+								arg(signal->appSignalID(), -48, Latin1Char::SPACE).
+								arg(signal->tuningDefaultValue().int32Value()).
+								arg(signal->tuningLowBound().int32Value()).
+								arg(signal->tuningHighBound().int32Value()));
+			}
+		}
+
+		QVector<AppSignal*> discreteSignals = m_tuningData->getDiscreteSignals();
+
+		if (discreteSignals.count() > 0)
+		{
+			// sort signals by tuningAbsAddr ascending
+			//
+			for(int i = 0; i < discreteSignals.count() - 1; i++)
+			{
+				for(int k = i + 1; k < discreteSignals.count(); k++)
+				{
+					AppSignal* s1 = discreteSignals[i];
+					AppSignal* s2 = discreteSignals[k];
+
+					TEST_PTR_CONTINUE(s1);
+					TEST_PTR_CONTINUE(s2);
+
+					if (s1->tuningAbsAddr().bitAddress() > s2->tuningAbsAddr().bitAddress())
+					{
+						discreteSignals[i] = s2;
+						discreteSignals[k] = s1;
+					}
+				}
+			}
+
+			file.append(QString("\nDiscrete signals (1 bit)"));
+			file.append(line);
+			file.append(QString("Address\t\tOffset\t\tAppSignalID\t\t\t\t\t\tDefault\t\tLow Limit\tHigh Limit"));
+			file.append(line);
+
+			for(AppSignal* signal : discreteSignals)
+			{
+				if (signal == nullptr)
+				{
+					assert(false);
+					continue;
+				}
+
+				QString str;
+
+				file.append(QString("%1:%2\t%3:%4\t%5\t%6\t%7\t%8").
+								arg(signal->tuningAbsAddr().offset(), 5, 10, Latin1Char::ZERO).
+								arg(signal->tuningAbsAddr().bit(), 2, 10, Latin1Char::ZERO).
+								arg(signal->tuningAbsAddr().offset() - m_tuningData->tuningDataOffsetW(), 5, 10, Latin1Char::ZERO).
+								arg(signal->tuningAbsAddr().bit(), 2, 10, Latin1Char::ZERO).
+								arg(signal->appSignalID(), -48, Latin1Char::SPACE).
+								arg(signal->tuningDefaultValue().discreteValue()).
+								arg(0).
+								arg(1));
+			}
+		}
+
+		bool result = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
+											  QString("%1-%2.tun").arg(m_lmSubsystemID.toLower()).arg(m_lmNumber), file);
+		return result;
+	}
+
 	bool ModuleLogicCompiler::writeResult()
 	{
 		bool result = true;
@@ -14439,39 +14641,6 @@ namespace Builder
 		{
 			result = false;
 		}*/
-
-		QStringList asmCode;
-
-		m_appLogicCode.getAsmCode(&asmCode);
-
-		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
-													   QString("%1-%2.asm").arg(m_lmSubsystemID.toLower()).arg(m_lmNumber), asmCode);
-
-		if (buildFile == nullptr)
-		{
-			result = false;
-		}
-
-		//
-
-		QStringList memFile;
-
-		m_memoryMap.getFile(memFile,
-							m_ualSignals.discreteSignalsHeap().getHeapItemsLog(),
-							m_ualSignals.analogAndBusSignalsHeap().getHeapItemsLog());
-
-		buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
-												QString("%1-%2.mem").arg(m_lmSubsystemID.toLower()).arg(m_lmNumber), memFile);
-		if (buildFile == nullptr)
-		{
-			result = false;
-		}
-
-		//
-
-		result &= writeStatisticsFile();
-
-		result &= writeTuningInfoFile();
 
 		result &= writeOcmRsSignalsXml();
 
@@ -14618,136 +14787,6 @@ namespace Builder
 											m_log);
 	}
 
-	bool ModuleLogicCompiler::writeTuningInfoFile()
-	{
-		if (m_tuningData == nullptr)
-		{
-			return true;
-		}
-
-		QStringList file;
-		QString line = QString("----------------------------------------------------------------------------------------------------------");
-
-		file.append(QString("Tuning information file: %1\n").arg(lmEquipmentID()));
-		file.append(QString("LM eqipmentID: %1").arg(lmEquipmentID()));
-		file.append(QString("LM caption: %1").arg(m_lm->caption()));
-		file.append(QString("LM number: %1\n").arg(m_lmNumber));
-		file.append(QString("Frames used total: %1").arg(m_tuningData->usedFramesCount()));
-
-		QString s;
-
-		quint64 uniqueID = m_tuningData->uniqueID();
-
-		file.append(QString("Unique data ID: %1 (0x%2)").arg(uniqueID).arg(uniqueID, 16, 16, Latin1Char::ZERO));
-
-		const QVector<AppSignal*>& analogFloatSignals = m_tuningData->getAnalogFloatSignals();
-
-		if (analogFloatSignals.count() > 0)
-		{
-			file.append(QString("\nAnalog signals, type Float (32 bits)"));
-			file.append(line);
-			file.append(QString("Address\t\tOffset\t\tAppSignalID\t\t\t\t\t\tDefault\t\tLow Limit\tHigh Limit"));
-			file.append(line);
-
-			for(AppSignal* signal : analogFloatSignals)
-			{
-				if (signal == nullptr)
-				{
-					assert(false);
-					continue;
-				}
-
-				file.append(QString("%1:%2\t%3:%4\t%5\t%6\t%7\t%8").
-							arg(signal->tuningAbsAddr().offset(), 5, 10, Latin1Char::ZERO).
-							arg(signal->tuningAbsAddr().bit(), 2, 10, Latin1Char::ZERO).
-							arg(signal->tuningAbsAddr().offset() - m_tuningData->tuningDataOffsetW(), 5, 10, Latin1Char::ZERO).
-							arg(signal->tuningAbsAddr().bit(), 2, 10, Latin1Char::ZERO).
-							arg(signal->appSignalID(), -48, Latin1Char::SPACE).
-							arg(signal->tuningDefaultValue().toFloat()).
-							arg(signal->tuningLowBound().floatValue()).
-							arg(signal->tuningHighBound().floatValue()));
-			}
-		}
-
-		const QVector<AppSignal*>& analogIntSignals = m_tuningData->getAnalogIntSignals();
-
-		if (analogIntSignals.count() > 0)
-		{
-			file.append(QString("\nAnalog signals, type Signed Integer (32 bits)"));
-			file.append(line);
-			file.append(QString("Address\t\tOffset\t\tAppSignalID\t\t\t\t\t\tDefault\t\tLow Limit\tHigh Limit"));
-			file.append(line);
-
-			for(AppSignal* signal : analogIntSignals)
-			{
-				if (signal == nullptr)
-				{
-					assert(false);
-					continue;
-				}
-
-				file.append(QString("%1:%2\t%3:%4\t%5\t%6\t%7\t\t%8").
-								arg(signal->tuningAbsAddr().offset(), 5, 10, Latin1Char::ZERO).
-								arg(signal->tuningAbsAddr().bit(), 2, 10, Latin1Char::ZERO).
-								arg(signal->tuningAbsAddr().offset() - m_tuningData->tuningDataOffsetW(), 5, 10, Latin1Char::ZERO).
-								arg(signal->tuningAbsAddr().bit(), 2, 10, Latin1Char::ZERO).
-								arg(signal->appSignalID(), -48, Latin1Char::SPACE).
-								arg(signal->tuningDefaultValue().int32Value()).
-								arg(signal->tuningLowBound().int32Value()).
-								arg(signal->tuningHighBound().int32Value()));
-			}
-		}
-
-		QVector<AppSignal*> discreteSignals = m_tuningData->getDiscreteSignals();
-
-		if (discreteSignals.count() > 0)
-		{
-			// sort signals by tuningAbsAddr ascending
-			//
-			for(int i = 0; i < discreteSignals.count() - 1; i++)
-			{
-				for(int k = i + 1; k < discreteSignals.count(); k++)
-				{
-					AppSignal* s1 = discreteSignals[i];
-					AppSignal* s2 = discreteSignals[k];
-
-					TEST_PTR_CONTINUE(s1);
-					TEST_PTR_CONTINUE(s2);
-
-					if (s1->tuningAbsAddr().bitAddress() > s2->tuningAbsAddr().bitAddress())
-					{
-						discreteSignals[i] = s2;
-						discreteSignals[k] = s1;
-					}
-				}
-			}
-
-			file.append(QString("\nDiscrete signals (1 bit)"));
-			file.append(line);
-			file.append(QString("Address\t\tOffset\t\tAppSignalID\t\t\t\t\t\tDefault\t\tLow Limit\tHigh Limit"));
-			file.append(line);
-
-			for(AppSignal* signal : discreteSignals)
-			{
-				if (signal == nullptr)
-				{
-					assert(false);
-					continue;
-				}
-
-				QString str;
-
-				file.append(QString("%1:%2\t%3:%4\t%5\t%6\t%7\t%8").
-								arg(signal->tuningAbsAddr().offset(), 5, 10, Latin1Char::ZERO).
-								arg(signal->tuningAbsAddr().bit(), 2, 10, Latin1Char::ZERO).
-								arg(signal->tuningAbsAddr().offset() - m_tuningData->tuningDataOffsetW(), 5, 10, Latin1Char::ZERO).
-								arg(signal->tuningAbsAddr().bit(), 2, 10, Latin1Char::ZERO).
-								arg(signal->appSignalID(), -48, Latin1Char::SPACE).
-								arg(signal->tuningDefaultValue().discreteValue()).
-								arg(0).
-								arg(1));
-			}
-		}
 
 /*
  * Generation of binary representation of tuning frames data
@@ -14810,10 +14849,6 @@ namespace Builder
 			}
 		}
 */
-		bool result = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
-											  QString("%1-%2.tun").arg(m_lmSubsystemID.toLower()).arg(m_lmNumber), file);
-		return result;
-	}
 
 	bool ModuleLogicCompiler::writeOcmRsSignalsXml()
 	{
@@ -14937,11 +14972,6 @@ namespace Builder
 
 	bool ModuleLogicCompiler::writeLooopbacksReport()
 	{
-		if (m_context->generateExtraDebugInfo() == false)
-		{
-			return true;
-		}
-
 		QStringList file;
 
 		m_loopbacks.writeReport(&file);
@@ -14967,32 +14997,6 @@ namespace Builder
 												QString("HeapsLog.txt"), file);
 
 		return bf != nullptr;
-	}
-
-	bool ModuleLogicCompiler::writeStatisticsFile() const
-	{
-		TEST_PTR_RETURN_FALSE(m_lmDescription);
-
-		QStringList file;
-
-		//
-
-		file << ApplicationLogicCompiler::getInfoFileHeader(m_context);
-		file << Separator::EMPTY_STR;
-
-		file << QString("LM equipmentID: %1").arg(lmEquipmentID());
-
-		//
-
-		printCodeStatistics(m_idrCode, file, true);
-		printCodeStatistics(m_alpCode, file, true);
-		printCodeStatistics(m_appLogicCode, file, false);
-
-		//
-
-		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
-												QString("%1-%2.stat").arg(m_lmSubsystemID.toLower()).arg(m_lmNumber), file);
-		return buildFile != nullptr;
 	}
 
 	void ModuleLogicCompiler::printCodeStatistics(const AppLogicCode& code,
