@@ -1,15 +1,18 @@
 #include "TestWorker.h"
 
-TestWorker::TestWorker(OutputController* outputController,
-					   InputController* inputController,
-					   TestLogController* testLogController,
-					   const QString& testScript,
-					   QObject *parent):
-	QObject(parent),
+TestWorkerContext::TestWorkerContext(OutputController* outputController, InputController* inputController, TestLogController* testLogController):
 	m_outputController(outputController),
 	m_inputController(inputController),
-	m_testLogController(testLogController),
-	m_testScript(testScript)
+	m_testLogController(testLogController)
+{
+
+}
+
+//
+// ----------------------------------- TestWorker -----------------------------
+//
+TestWorker::TestWorker(const TestWorkerContext& context):
+	m_context(context)
 {
 	m_jsEngine = std::make_unique<QJSEngine>();
 
@@ -63,6 +66,100 @@ TestWorker::TestWorker(OutputController* outputController,
 	{
 		return false;
 	}*/
+}
+
+void TestWorker::run()
+{
+	m_context.m_testLogController->addMessage("TestWorker::run");
+
+	for (const TestScript& ts :  m_context.scripts)
+	{
+		m_context.m_testLogController->addMessage("Executing test: " + ts.fileName);
 
 
+		for (int i = 0; i < 10; i++)
+		{
+			m_context.m_testLogController->addMessage(tr("Executing test: %1").arg(i));
+			QThread::msleep(100);
+
+			if (m_jsStop == true)
+			{
+				break;
+			}
+		}
+
+		if (m_jsStop == true)
+		{
+			break;
+		}
+	}
+
+
+	if (m_jsStop == true)
+	{
+		m_context.m_testLogController->addMessage("TestWorker::execution interrupted");
+	}
+	else
+	{
+		m_context.m_testLogController->addMessage("TestWorker::finished");
+	}
+
+	emit finished();
+}
+
+void TestWorker::stop()
+{
+	m_jsStop = true;
+}
+
+//
+// ----------------------------------- TestWorkerThread -----------------------------
+//
+
+TestWorkerThread::TestWorkerThread(const TestWorkerContext& context, QObject *parent):
+	m_testWorker(context)
+{
+	Q_UNUSED(parent);
+
+	m_testWorker.moveToThread(&m_thread);
+
+	QObject::connect(&m_thread, &QThread::started, &m_testWorker, &TestWorker::run);
+	QObject::connect(&m_testWorker, &TestWorker::finished, this, &TestWorkerThread::workerFinished);
+
+	return;
+}
+
+void TestWorkerThread::run()
+{
+	if (m_thread.isRunning() == true)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	m_thread.start();
+
+	return;
+}
+
+void TestWorkerThread::stop()
+{
+	m_testWorker.stop();
+
+	return;
+}
+
+bool TestWorkerThread::isRunning() const
+{
+	return m_thread.isRunning();
+}
+
+void TestWorkerThread::workerFinished()
+{
+	m_thread.quit();
+	m_thread.wait();
+
+	emit finished(0);
+
+	return;
 }

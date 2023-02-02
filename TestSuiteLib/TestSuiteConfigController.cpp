@@ -397,7 +397,12 @@ void TestSuiteConfigController::slot_configurationReady(const QByteArray configu
 
 			{
 				QWriteLocker l(&m_testScriptsLock);
-				m_testScriptsStorage.add(buildFileInfo.pathFileName, data);
+
+				TestScript ts;
+				ts.fileName = buildFileInfo.pathFileName;
+				ts.script = data;
+
+				m_testScriptsStorage.add(ts);
 			}
 		}
 	}

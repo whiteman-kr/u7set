@@ -24,13 +24,13 @@ public:
 	TestSuiteConfigController& configController();
 	const TestSuiteConfigController& configController() const;
 
-	const TestScriptsStorage &testScripts() const;
-	void setTestScripts(TestScriptsStorage &testScriptsStorage);
+	TestScriptsStorage& testScriptsStorage();
+	const TestScriptsStorage& testScriptsStorage() const;
 
 	//void setAppSignalTcpClients(std::vector<TcpSignalClient*> tcpClients);
 	//void setTuningTcpClients(std::vector<TuningTcpClient*> tcpClients);
 
-	void start();
+	void execute();
 	void stop();
 
 	bool isRunning() const;
@@ -47,6 +47,7 @@ public:
 
 private slots:
 	void slot_configurationArrived(ConfigSettings configuration);
+	void slot_finished(int errorCode);
 
 private:
 	void emitMessage(const QString& msg);
@@ -56,12 +57,12 @@ private:
 	InputController* m_inputController = nullptr;
 	OutputController* m_outputController = nullptr;
 
-	TestWorker* m_testWorker = nullptr;	// Main test worker
+	TestWorkerThread* m_testWorkerThread = nullptr;	// Main test worker thread
 
 	TestLog m_testLog;
-	TestLogController* m_testLogController = nullptr;
+	TestLogController m_testLogController;
 
-//	ILogFile* m_appLogFile = nullptr;
+	ILogFile* m_appLogFile = nullptr;
 
 private:
 	TestScriptsStorage m_testScriptsStorage;

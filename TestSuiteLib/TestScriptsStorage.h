@@ -2,22 +2,43 @@
 #define TESTSCRIPTSSTORAGE_H
 
 
+struct TestScript
+{
+	QString fileName;
+	QByteArray script;
+};
+
+
 class TestScriptsStorage
 {
 public:
 	TestScriptsStorage();
 
-	void move(TestScriptsStorage& That);
+	// Script access operations
+	//
+	std::vector<TestScript>& scripts();
+	const std::vector<TestScript>& scripts() const;
+	const TestScript& script(int index) const;
 
-	void add(const QString& name, QByteArray& data);
+	qsizetype count() const;
+	QStringList scriptList() const;
+
+	// Script add/remove operations
+	//
 	void clear();
+	void add(const TestScript &script);
+	void move(std::vector<TestScript>& scripts);	// Sets scripts by moving them from source
 
-	qsizetype testScriptCount() const;
-	QStringList testScriptList() const;
-	const QByteArray& testScript(const QString& fileName) const;
+	bool loadFromPath(const QString& path, QString *errorMsg);
+
+	bool isLoadedFromFiles() const;
 
 private:
-	std::map<QString, QByteArray> m_scripts;
+	mutable QReadWriteLock m_lock;
+
+	std::vector<TestScript> m_scripts;
+
+	bool m_loadedFromFiles = false;
 
 };
 

@@ -5,45 +5,108 @@ TestScriptsStorage::TestScriptsStorage()
 
 }
 
-void TestScriptsStorage::move(TestScriptsStorage& That)
+std::vector<TestScript>& TestScriptsStorage::scripts()
 {
-	m_scripts = std::move(That.m_scripts);
+	QReadLocker l(&m_lock);
+	return m_scripts;
 }
 
-void TestScriptsStorage::add(const QString& name, QByteArray& data)
+const std::vector<TestScript>& TestScriptsStorage::scripts() const
 {
-	m_scripts[name] = std::move(data);
+	QReadLocker l(&m_lock);
+	return m_scripts;
 }
 
-void TestScriptsStorage::clear()
+const TestScript& TestScriptsStorage::script(int index) const
 {
-	m_scripts.clear();
+	QReadLocker l(&m_lock);
+	if (index >= m_scripts.size())
+	{
+		static TestScript err;
+		return err;
+	}
+
+	return m_scripts[index];
 }
 
-qsizetype TestScriptsStorage::testScriptCount() const
+qsizetype TestScriptsStorage::count() const
 {
+	QReadLocker l(&m_lock);
 	return m_scripts.size();
 }
 
-QStringList TestScriptsStorage::testScriptList() const
+QStringList TestScriptsStorage::scriptList() const
 {
+	QReadLocker l(&m_lock);
+
 	QStringList result;
-	for (const auto& it : m_scripts)
+	for (const TestScript& ts : m_scripts)
 	{
-		result.push_back(it.first);
+		result.push_back(ts.fileName);
 	}
 	return result;
 }
 
-const QByteArray& TestScriptsStorage::testScript(const QString& fileName) const
+void TestScriptsStorage::clear()
 {
-	auto it = m_scripts.find(fileName);
-	if (it == m_scripts.end())
+	QWriteLocker l(&m_lock);
+	m_scripts.clear();
+
+	m_loadedFromFiles = false;
+}
+
+void TestScriptsStorage::add(const TestScript& script)
+{
+	QWriteLocker l(&m_lock);
+	m_scripts.push_back(script);
+}
+
+void TestScriptsStorage::move(std::vector<TestScript>& scripts)
+{
+	QWriteLocker l(&m_lock);
+	m_scripts = std::move(scripts);
+}
+
+
+bool TestScriptsStorage::loadFromPath(const QString& path, QString* errorMsg)
+{
+	if (errorMsg == nullptr)
 	{
-		Q_ASSERT(false);
-		static QByteArray err;
-		return err;
+		Q_ASSERT(errorMsg);
+		return false;
 	}
 
-	return it->second;
+	QDir dir(path);
+	if (dir.exists() == false)
+	{
+		*errorMsg = QObject::tr("Error: Scripts path \"%1\" does not exist!").arg(path);
+		return false;
+	}
+
+	QStringList files = dir.entryList(QStringList() << "*.js", QDir::Files, QDir::Name);
+	for (const QString& file : files)
+	{
+		TestScript ts;
+		ts.fileName = QDir::fromNativeSeparators(path + "\\" + file);
+
+		QFile f(ts.fileName);
+		if (f.open(QFile::ReadOnly) == false)
+		{
+			*errorMsg = QObject::tr("Error: Can't open file \"%1\" for reading!").arg(ts.fileName);
+			return false;
+		}
+		ts.script = f.readAll();
+
+		add(ts);
+	}
+
+	m_loadedFromFiles = true;
+
+	return true;
+
+}
+
+bool TestScriptsStorage::isLoadedFromFiles() const
+{
+	return m_loadedFromFiles;
 }

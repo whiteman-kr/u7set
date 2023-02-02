@@ -2,7 +2,9 @@
 
 TestLibrary::TestLibrary(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2, ILogFile *appLogFile):
 	HasLogFile(appLogFile, "TestLibrary"),
-	m_configController(softwareInfo, address1, address2, appLogFile)
+	m_appLogFile(appLogFile),
+	m_configController(softwareInfo, address1, address2, appLogFile),
+	m_testLogController(&m_testLog)
 {
 	connect(&m_configController, &TestSuiteConfigController::configurationArrived, this, &TestLibrary::slot_configurationArrived);
 
@@ -22,35 +24,64 @@ const TestSuiteConfigController& TestLibrary::configController() const
 	return m_configController;
 }
 
-
-const TestScriptsStorage& TestLibrary::testScripts() const
+TestScriptsStorage& TestLibrary::testScriptsStorage()
 {
 	return m_testScriptsStorage;
 }
 
-void TestLibrary::setTestScripts(TestScriptsStorage& testScriptsStorage)
+const TestScriptsStorage& TestLibrary::testScriptsStorage() const
 {
-	m_testScriptsStorage.move(testScriptsStorage);
+	return m_testScriptsStorage;
 }
 
-void TestLibrary::start()
+void TestLibrary::execute()
 {
-	m_testLog.addMessage("TestLibrary started.");
+	if (isRunning() == true)
+	{
+		Q_ASSERT(false);
+		return;
+	}
 
-	QTimer::singleShot(1000, this, [this](){
-	emit finished(-2);
-	});
+	if (m_testWorkerThread != nullptr)
+	{
+		Q_ASSERT(m_testWorkerThread == nullptr);
+		return;
+	}
 
+	m_testLog.addMessage("TestLibrary::execute");
+
+	TestWorkerContext context(m_outputController, m_inputController, &m_testLogController);
+	context.scripts = m_testScriptsStorage.scripts();	// Set all scripts to the context
+
+	m_testWorkerThread = new TestWorkerThread(context, this);
+	connect(m_testWorkerThread, &TestWorkerThread::finished, this, &TestLibrary::slot_finished);
+	m_testWorkerThread->run();
 }
 
 void TestLibrary::stop()
 {
+	if (isRunning() == false)
+	{
+		return;
+	}
 
+	if (m_testWorkerThread == nullptr)
+	{
+		Q_ASSERT(m_testWorkerThread == nullptr);
+		return;
+	}
+
+	m_testWorkerThread->stop();
 }
 
 bool TestLibrary::isRunning() const
 {
-	return false;
+	if (m_testWorkerThread == nullptr)
+	{
+		return false;
+	}
+
+	return m_testWorkerThread->isRunning();
 }
 
 const TestLog& TestLibrary::testResultLog() const
@@ -65,7 +96,10 @@ void TestLibrary::slot_configurationArrived(ConfigSettings configuration)
 		stop();
 	}
 
-	setTestScripts(m_configController.testScriptsStorage());
+	if (m_testScriptsStorage.isLoadedFromFiles() == false)
+	{
+		m_testScriptsStorage.move(m_configController.testScriptsStorage().scripts());
+	}
 
 	emit readyForTesting();
 
@@ -116,14 +150,29 @@ void TestLibrary::slot_configurationArrived(ConfigSettings configuration)
 	return;
 }
 
+void TestLibrary::slot_finished(int errorCode)
+{
+	if (m_testWorkerThread == nullptr)
+	{
+		Q_ASSERT(m_testWorkerThread);
+		return;
+	}
+
+	m_testLog.addMessage("TestLibrary::finished");
+	m_testWorkerThread->deleteLater();
+	m_testWorkerThread = nullptr;
+
+	emit finished(errorCode);
+}
+
 void TestLibrary::emitMessage(const QString& msg)
 {
-	this->writeMessage(msg);
+	writeMessage(msg);
 	emit logMessage(msg);
 }
 
 void TestLibrary::emitError(const QString& errorMsg)
 {
-	this->writeError(errorMsg);
+	writeError(errorMsg);
 	emit logError(errorMsg);
 }
