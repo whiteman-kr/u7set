@@ -35,6 +35,9 @@ public:
 	void cancelRequest();
 
 signals:
+	/// Report connection statistics.
+	void statistics(QString archServiceShortId, QString state, int requests, int replies, int states);
+
 	/// Reports if data ready or error occured.
 	void dataReady(std::shared_ptr<ArchiveRequestResult> result, QString error);
 
@@ -63,6 +66,10 @@ private:
 	void requestCancel();
 	void processCancel(const QByteArray& data);
 
+private:
+	void updateStatistics(QString state);
+	void updateStatistics(int incRequests, int incReplies, int incStates);
+
 	// Data
 	//
 private:
@@ -90,7 +97,7 @@ private:
 	// Statisctics
 	//
 private:
-	//QString m_statRequestDescription;
+	QString m_statState;
 	int m_statStateReceived = 0;
 	int m_statTcpRequestCount = 0;
 	int m_statTcpReplyCount = 0;

@@ -17,6 +17,7 @@ ArchiveConnectionTask::ArchiveConnectionTask(ArchiveSource request,
 
 	m_clientThread->start();
 
+	connect(m_tcpClient, &ArchiveTcpClient2::statistics, this, &ArchiveConnectionTask::statistics);
 	connect(m_tcpClient, &ArchiveTcpClient2::dataReady, this, &ArchiveConnectionTask::dataReady);
 
 	return;
@@ -66,6 +67,12 @@ ArchiveConnection::ArchiveConnection(const MonitorConfigController& configContro
 
 void ArchiveConnection::request(ArchiveSource requestData)
 {
+	{
+		m_statisticsMutext.lock();
+		m_statistics.clear();
+		m_statisticsMutext.unlock();
+	}
+
 	if (requestData.acceptedSignals.size() > ARCH_REQUEST_MAX_SIGNALS)
 	{
 		QString errorMessage = QString("requestData() appSignals.size()(%1) > ARCH_REQUEST_MAX_SIGNALS(%2), cancel request")
@@ -208,6 +215,46 @@ void ArchiveConnection::slot_cancelRequest()
 
 	m_connections.clear();
 
+	return;
+}
+
+void ArchiveConnection::slot_statistics(QString archServiceShortId, QString state, int requests, int replies, int states)
+{
+	QString totalServersSatus;
+	int totalRequests = 0;
+	int totalReplies = 0;
+	int totalStates = 0;
+
+	{
+		QMutexLocker locker(&m_statisticsMutext);
+
+		m_statistics[archServiceShortId] =
+			{
+				.serviceId = archServiceShortId,
+				.state = state,
+				.requests = requests,
+				.replies = replies,
+				.states = states
+			};
+
+		for (const auto& [serverId, stats] : m_statistics)
+		{
+			if (totalServersSatus.isEmpty() == true)
+			{
+				totalServersSatus = serverId + ": " + stats.state;
+			}
+			else
+			{
+				totalServersSatus += ", " + serverId + ": " + stats.state;
+			}
+
+			totalRequests += stats.requests;
+			totalReplies += stats.replies;
+			totalStates += stats.states;
+		}
+	}
+
+	emit stats(totalServersSatus, totalRequests, totalReplies, totalStates);
 	return;
 }
 

@@ -32,6 +32,7 @@ public:
 	[[nodiscard]] HostAddressPort address() const;
 
 signals:
+	void statistics(QString archServiceShortId, QString state, int requests, int replies, int states);
 	void dataReady(std::shared_ptr<ArchiveRequestResult> result, QString error);
 
 private:
@@ -68,6 +69,8 @@ signals:
 	void requestError(QString errorMessage);						///< Emited when request has an error
 	void done();													///< All tasks are done, request finished
 
+	void stats(QString serverStatus, int requests, int replies, int states);	///< Reports connection statistics
+
 	// Private signals, used for inner communications
 	//
 	void private_startRequest(ArchiveSource requestData);	///< Start request command, can be issued from any thread
@@ -76,6 +79,7 @@ signals:
 private slots:
 	void slot_startRequest(ArchiveSource requestData);
 	void slot_cancelRequest();
+	void slot_statistics(QString archServiceShortId, QString state, int requests, int replies, int states);
 
 	void slot_taskDataReady(std::shared_ptr<ArchiveRequestResult> result, QString error);
 
@@ -87,5 +91,19 @@ private:
 	//
 	ArchiveSource m_requestData;
 	std::list<ArchiveConnectionTask> m_connections;
+
+	// --
+	//
+	struct Statistics
+	{
+		QString serviceId;
+		QString state;
+		int requests = 0;
+		int replies = 0;
+		int states = 0;
+	};
+
+	QMutex m_statisticsMutext;
+	std::map<QString, Statistics> m_statistics;
 };
 

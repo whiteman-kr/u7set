@@ -25,6 +25,7 @@ ArchiveTcpClient2::ArchiveTcpClient2(const ArchiveSource& request,
 	m_result.archiveServiceId = m_serverSettings.equipmentId;
 
 	setRequestData(request);
+	updateStatistics("Construction");
 
 	return;
 }
@@ -36,6 +37,7 @@ ArchiveTcpClient2::~ArchiveTcpClient2()
 
 void ArchiveTcpClient2::cancelRequest()
 {
+	updateStatistics("CancelRequest");
 	m_logFile.writeMessage(tr("cancelRequest()"));
 	m_needCancelRequest = true;
 	return;
@@ -83,7 +85,12 @@ void ArchiveTcpClient2::finish(QString error /*= QString{}*/)
 
 	if (error.isEmpty() == false)
 	{
+		updateStatistics("Finish: " + error);
 		m_logFile.writeError(error);
+	}
+	else
+	{
+		updateStatistics("Finish");
 	}
 
 	auto result = std::make_shared<ArchiveRequestResult>(std::move(m_result));
@@ -97,6 +104,7 @@ void ArchiveTcpClient2::finish(QString error /*= QString{}*/)
 
 void ArchiveTcpClient2::onTryConnectToServer(const HostAddressPort& serverAddr)
 {
+	updateStatistics("TryConnect");
 	Tcp::Client::onTryConnectToServer(serverAddr);
 
 	if (m_needCancelRequest == true)
@@ -122,6 +130,8 @@ void ArchiveTcpClient2::onTryConnectToServer(const HostAddressPort& serverAddr)
 
 void ArchiveTcpClient2::onConnection()
 {
+	updateStatistics("Connected");
+
 	qDebug() << "ArchiveTcpClient::onConnection()";
 	m_logFile.writeMessage(QString("onConnection()"));
 
@@ -146,6 +156,8 @@ void ArchiveTcpClient2::onConnection()
 
 void ArchiveTcpClient2::onDisconnection()
 {
+	updateStatistics("Disconnected");
+
 	qDebug() << "ArchiveTcpClient::onDisconnection";
 	m_logFile.writeMessage(QString("onDisconnection()"));
 
@@ -154,6 +166,8 @@ void ArchiveTcpClient2::onDisconnection()
 
 void ArchiveTcpClient2::onReplyTimeout()
 {
+	updateStatistics("Timeout");
+
 	QString error = tr("ArchiveService (%1) reply timeout.").arg(currentServerAddressPort().toString());
 	qDebug() << error;
 
@@ -165,7 +179,7 @@ void ArchiveTcpClient2::onReplyTimeout()
 
 void ArchiveTcpClient2::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
 {
-	m_statTcpReplyCount ++;
+	updateStatistics(0, 1, 0);
 
 	if (replyData == nullptr)
 	{
@@ -224,8 +238,7 @@ void ArchiveTcpClient2::requestStart()
 		return;
 	}
 
-	m_statTcpRequestCount ++;
-	m_statStateReceived = 0;
+	updateStatistics(1, 0, 0);
 
 	Network::GetAppSignalStatesFromArchiveStartRequest startRequest;
 
@@ -342,7 +355,7 @@ void ArchiveTcpClient2::requestNext()
 
 	m_logFile.writeMessage(QString("requestNext() sendRequest(ARCHS_GET_APP_SIGNALS_STATES_NEXT), m_currentRequestId = %1").arg(m_currentRequestId));
 
-	m_statTcpRequestCount ++;
+	updateStatistics(1, 0, 0);
 
 	return;
 }
@@ -403,7 +416,7 @@ void ArchiveTcpClient2::processNext(const QByteArray& data)
 	// Parse data
 	//
 	int stateCount = m_nextReply.appsignalstates_size();
-	m_statStateReceived += stateCount;
+	updateStatistics(0, 0, stateCount);
 
 	// --
 	//
@@ -458,7 +471,7 @@ void ArchiveTcpClient2::requestCancel()
 
 	Q_ASSERT(m_currentRequestId != 0);
 
-	m_statTcpRequestCount ++;
+	updateStatistics(1, 0, 0);
 
 	Network::GetAppSignalStatesFromArchiveCancelRequest cancelRequest;
 	cancelRequest.set_requestid(m_currentRequestId);
@@ -503,6 +516,22 @@ void ArchiveTcpClient2::processCancel(const QByteArray& data)
 
 	finish();					// END OF REQUEST COMMUNICATION!
 
+	return;
+}
+
+void ArchiveTcpClient2::updateStatistics(QString state)
+{
+	m_statState = state;
+	updateStatistics(0, 0, 0);
+}
+
+void ArchiveTcpClient2::updateStatistics(int incRequests, int incReplies, int incStates)
+{
+	m_statTcpRequestCount += incRequests;
+	m_statTcpReplyCount += incReplies;
+	m_statStateReceived += incStates;
+
+	emit statistics(m_serverSettings.shortenId, m_statState, m_statTcpRequestCount, m_statTcpReplyCount, m_statStateReceived);
 	return;
 }
 

@@ -102,8 +102,8 @@ private:
 	QLabel* m_statusBarTextLabel = nullptr;
 	QLabel* m_statusBarStatesReceivedLabel = nullptr;
 	QLabel* m_statusBarNetworkRequestsLabel = nullptr;
-	QLabel* m_statusBarServerLabel = nullptr;
-	QLabel* m_statusBarConnectionStateLabel = nullptr;
+	//QLabel* m_statusBarServerLabel = nullptr;
+	//QLabel* m_statusBarConnectionStateLabel = nullptr;
 
 	ArchiveSource m_source;
 

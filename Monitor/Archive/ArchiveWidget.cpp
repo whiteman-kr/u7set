@@ -210,14 +210,14 @@ ArchiveWidget::ArchiveWidget(MonitorSignalManager* signalManager,
 	m_statusBarTextLabel = new QLabel(m_statusBar);
 	m_statusBarStatesReceivedLabel = new QLabel(m_statusBar);
 	m_statusBarNetworkRequestsLabel = new QLabel(m_statusBar);
-	m_statusBarServerLabel = new QLabel(m_statusBar);
-	m_statusBarConnectionStateLabel = new QLabel(m_statusBar);
+	//m_statusBarServerLabel = new QLabel(m_statusBar);
+	//m_statusBarConnectionStateLabel = new QLabel(m_statusBar);
 
 	m_statusBar->addWidget(m_statusBarTextLabel, 1);
 	m_statusBar->addWidget(m_statusBarStatesReceivedLabel, 0);
 	m_statusBar->addWidget(m_statusBarNetworkRequestsLabel, 0);
-	m_statusBar->addWidget(m_statusBarServerLabel, 0);
-	m_statusBar->addWidget(m_statusBarConnectionStateLabel, 0);
+	//m_statusBar->addWidget(m_statusBarServerLabel, 0);
+	//m_statusBar->addWidget(m_statusBarConnectionStateLabel, 0);
 
 	setStatusBar(m_statusBar);
 
@@ -720,27 +720,14 @@ void ArchiveWidget::requestError(QString errorMessage)
 
 void ArchiveWidget::requestStatus(QString status, int statesReceived, int requestCount, int repliesCount)
 {
-	int to_do; // who will send it?
-//	Q_ASSERT(m_statusBar);
+	Q_ASSERT(m_statusBar);
 
-//	m_statusBarTextLabel->setText(status);
-//	m_statusBarStatesReceivedLabel->setText(QString("States received: %1").arg(statesReceived));
+	m_statusBarTextLabel->setText(status);
+	m_statusBarStatesReceivedLabel->setText(QString("States received: %1").arg(statesReceived));
 
-//	m_statusBarNetworkRequestsLabel->setText(QString(" Network requests/replies: %1/%2 ").arg(requestCount).arg(repliesCount));
+	m_statusBarNetworkRequestsLabel->setText(QString(" Network requests/replies: %1 / %2 ").arg(requestCount).arg(repliesCount));
 
-//	HostAddressPort server = m_tcpClient->currentServerAddressPort();
-//	m_statusBarServerLabel->setText(QString(" ArchiveServer: %1 ").arg(server.addressPortStr()));
-
-//	if (m_tcpClient->isConnected() == true)
-//	{
-//		m_statusBarConnectionStateLabel->setText(" Connected ");
-//	}
-//	else
-//	{
-//		m_statusBarConnectionStateLabel->setText(" NoConnection ");
-//	}
-
-//	return;
+	return;
 }
 
 void ArchiveWidget::requestFinished()
