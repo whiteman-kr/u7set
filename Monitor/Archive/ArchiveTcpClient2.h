@@ -11,7 +11,7 @@ struct ArchiveRequest
 	TimeStamp endTime;
 	E::TimeType timeType;
 	bool removePrioodicRecords;
-	std::map<Hash, QString> appSignals;
+	std::map<Hash, QString> appSignals;		// Key is signal hash, value is appSignalId
 };
 
 

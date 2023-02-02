@@ -405,18 +405,20 @@ void ArchiveTcpClient2::processNext(const QByteArray& data)
 	int stateCount = m_nextReply.appsignalstates_size();
 	m_statStateReceived += stateCount;
 
-	std::vector<AppSignalState> states;
-	states.reserve(stateCount);
-
 	// --
 	//
 	qDebug() << "ArchiveTcpClient::processNext, stateCount " << stateCount;
 	m_logFile.writeMessage(QString("processNext() stateCount = %1, requestId = %2").arg(stateCount).arg(m_currentRequestId));
 
+	std::vector<AppSignalState> states;
+	states.reserve(stateCount);
+
 	for (const auto& stateMessage : m_nextReply.appsignalstates())
 	{
-		m_result.states.emplace_back(stateMessage);
+		states.emplace_back(stateMessage);
 	}
+
+	m_result.states.push_back(std::move(states));
 
 	if (stateCount != 0)
 	{

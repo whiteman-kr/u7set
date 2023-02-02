@@ -10,6 +10,8 @@ ArchiveConnectionTask::ArchiveConnectionTask(ArchiveSource request,
 	m_tcpClient(new ArchiveTcpClient2(request, softwareInfo, archiveService, logFile)),
 	m_clientThread(new SimpleThread(m_tcpClient))
 {
+	qDebug() << Q_FUNC_INFO << ", AcrhiveService: " << m_archiveService.shortenId;
+
 	qRegisterMetaType<ArchiveRequestResult>();
 	qRegisterMetaType<std::shared_ptr<ArchiveRequestResult>>();
 
@@ -22,6 +24,8 @@ ArchiveConnectionTask::ArchiveConnectionTask(ArchiveSource request,
 
 ArchiveConnectionTask::~ArchiveConnectionTask()
 {
+	qDebug() << Q_FUNC_INFO << ", AcrhiveService: " << m_archiveService.shortenId;
+
 	Q_ASSERT(m_clientThread);
 
 	if (m_clientThread != nullptr)
@@ -141,11 +145,11 @@ void ArchiveConnection::slot_startRequest(ArchiveSource requestData)
 
 	// Split all signals by archive services
 	//
-	std::map<QString, std::vector<ArchiveSignal>> m_tasks; // Key is ArchiveServiceId
+	std::map<QString, std::vector<ArchiveSignal>> tasks; // Key is ArchiveServiceId
 
 	for (const ArchiveSignal &s : m_requestData.acceptedSignals)
 	{
-		m_tasks[s.archiveServiceId].push_back(s);
+		tasks[s.archiveServiceId].push_back(s);
 	}
 
 	// Add tasks splitted by archive services
@@ -153,7 +157,7 @@ void ArchiveConnection::slot_startRequest(ArchiveSource requestData)
 	//
 	const auto archiveService = m_configController.configuration().archiveServices;
 
-	for (const auto& [archiveServiceId, archiveSignals] : m_tasks)
+	for (const auto& [archiveServiceId, archiveSignals] : tasks)
 	{
 		ArchiveSource request = m_requestData;
 		request.acceptedSignals = archiveSignals; // Set signals from this ArchiveService
@@ -216,7 +220,8 @@ void ArchiveConnection::slot_taskDataReady(std::shared_ptr<ArchiveRequestResult>
 	else
 	{
 		emit requestError(error);
-		cancelRequest();
+		cancelRequest();	// cancelRequest() clears m_connections
+		return;
 	}
 
 	// Task is done, remove it

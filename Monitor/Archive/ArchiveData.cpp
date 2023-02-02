@@ -3,21 +3,31 @@
 
 bool ArchiveData::addChunk(ArchiveRequestResult&& chunk, E::TimeType timeType)
 {
-	if (m_archive.size() >= MaxArchiveStates)
-	{
-		return false;
-	}
-
-	if (m_archive.size() + chunk.states.size() > MaxArchiveStates)
-	{
-		chunk.states.resize(MaxArchiveStates - m_archive.size());
-	}
-
 	try
 	{
-		m_archive.insert(m_archive.end(),
-						 std::make_move_iterator(chunk.states.begin()),
-						 std::make_move_iterator(chunk.states.end()));
+		// Calc required size
+		//
+		size_t sizeRequired = 0;
+		for (const auto& stateVector : chunk.states)
+		{
+			sizeRequired += stateVector.size();
+		}
+
+		// Preallocate space in the archive
+		//
+		if (m_archive.capacity() < m_archive.size() + sizeRequired)
+		{
+			m_archive.reserve(m_archive.size() + sizeRequired);
+		}
+
+		// Copy states to the archive
+		//
+		for (const auto& stateVector : chunk.states)
+		{
+			m_archive.insert(m_archive.end(),
+							 std::make_move_iterator(stateVector.begin()),
+							 std::make_move_iterator(stateVector.end()));
+		}
 	}
 	catch (const std::exception&)
 	{
@@ -43,6 +53,15 @@ bool ArchiveData::addChunk(ArchiveRequestResult&& chunk, E::TimeType timeType)
 	};
 
 	std::stable_sort(m_archive.begin(), m_archive.end(), functor);
+
+	// Limit the size of archive.
+	// We need to add new itesm, sort them, and only them can resize vector, as these items can be from
+	// different archive services.
+	//
+	if (m_archive.size() > MaxArchiveStates)
+	{
+		m_archive.resize(MaxArchiveStates);
+	}
 
 	return true;
 }

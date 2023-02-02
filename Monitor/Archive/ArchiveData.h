@@ -28,7 +28,7 @@ Q_DECLARE_METATYPE(ArchiveSource)
 struct ArchiveRequestResult
 {
 	QString archiveServiceId;
-	std::deque<AppSignalState> states;
+	std::list<std::vector<AppSignalState>> states;
 };
 Q_DECLARE_METATYPE(std::shared_ptr<ArchiveRequestResult>)
 
@@ -48,9 +48,9 @@ public:
 	[[nodiscard]] const AppSignalState& state(int index) const;
 
 private:
-	std::deque<AppSignalState> m_archive;
+	std::vector<AppSignalState> m_archive;
 
-	inline static constexpr int MaxArchiveStates = 100'000;
+	inline static constexpr int MaxArchiveStates = 250'000;
 	inline static constexpr AppSignalState NullState{};
 };
 

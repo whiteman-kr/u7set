@@ -236,6 +236,11 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 				result = ts.toDateTime().toString("dd/MM/yyyy HH:mm:ss.zzz");
 			}
 			break;
+//		case ArchiveColumns::ArchiveService:
+//			{
+//				result = m_cachedSignalState.;
+//			}
+			break;
 		default:
 			Q_ASSERT(false);
 		}

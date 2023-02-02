@@ -23,6 +23,7 @@ enum class ArchiveColumns
 	// Next are visible by default
 	//
 	Time,
+	//ArchiveService,
 
 	ColumnCount
 };
