@@ -11,7 +11,7 @@ class TestTask : public QObject
 	Q_OBJECT
 
 public:
-	TestTask(const SoftwareInfo &softwareInfo, HostAddressPort address1, HostAddressPort address2, QObject* parent = nullptr);
+	TestTask(const SoftwareInfo &softwareInfo, HostAddressPort address1, HostAddressPort address2, const QString& scriptsPath, QObject* parent = nullptr);
 
 public slots:
 	void start();

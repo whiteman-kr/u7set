@@ -6,6 +6,7 @@
 TestTask::TestTask(const SoftwareInfo& softwareInfo,
 				   HostAddressPort configurationServiceAddress1,
 				   HostAddressPort configurationServiceAddress2,
+				   const QString& scriptsPath,
 				   QObject* parent) :
 	QObject(parent),
 	m_LogFile(qAppName(), QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + softwareInfo.equipmentID()),
@@ -19,6 +20,25 @@ TestTask::TestTask(const SoftwareInfo& softwareInfo,
 	connect(&m_testLibrary, &TestLibrary::logError, this, &TestTask::slot_logError);
 	connect(&m_testLibrary.configController(), &TestSuiteConfigController::logMessage, this, &TestTask::slot_logMessage);
 	connect(&m_testLibrary.configController(), &TestSuiteConfigController::logError, this, &TestTask::slot_logError);
+
+
+	// Load test scripts from files if specified
+	//
+	if (scriptsPath.isEmpty() == false)
+	{
+		QString errorMsg;
+
+		bool result = m_testLibrary.testScriptsStorage().loadFromPath(scriptsPath, &errorMsg);
+		if (result == false)
+		{
+			std::cout << errorMsg.toStdString() << std::endl;
+		}
+		else
+		{
+			std::cout << "Loaded " << m_testLibrary.testScriptsStorage().count()
+					  << " test scripts from \"" << scriptsPath.toStdString() << "\"." << std::endl;
+		}
+	}
 
 	std::cout << "Waiting for connection with Configuration Service...\n";
 }
@@ -45,7 +65,7 @@ void TestTask::slot_logError(const QString& errMsg)
 
 void TestTask::start()
 {
-	m_testLibrary.start();
+	m_testLibrary.execute();
 
 	/*
 	m_builder.start(m_databaseAddress,

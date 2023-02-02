@@ -66,6 +66,7 @@
 #include <QScrollArea>
 #include <QMouseEvent>
 #include <QtQml>
+#include <QFileDialog>
 
 #ifdef _MSC_VER
 	#pragma warning(pop)

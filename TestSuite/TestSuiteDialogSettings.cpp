@@ -25,6 +25,10 @@ void TestSuiteDialogSettings::setSettings(const Settings& settings)
 
 	ui->m_IP2->setText(m_settings.configuratorAddress2().addressStr());
 	ui->m_port2->setText(QString::number(m_settings.configuratorAddress2().port()));
+
+	ui->loadSciptsPathCheck->setChecked(m_settings.loadScriptsFromPath());
+	ui->loadSciptsPath->setEnabled(m_settings.loadScriptsFromPath());
+	ui->loadSciptsPath->setText(m_settings.loadScriptsPath());
 }
 
 const Settings& TestSuiteDialogSettings::settings() const
@@ -56,6 +60,9 @@ void TestSuiteDialogSettings::on_TestSuiteDialogSettings_accepted()
 
 	m_settings.setInstanceHistory(instanceHistory);
 	m_settings.setInstanceStrId(instanceStrId);
+
+	m_settings.setLoadScriptsFromPath(ui->loadSciptsPathCheck->isChecked() == true);
+	m_settings.setLoadScriptsPath(ui->loadSciptsPath->text());
 
 	// IP Configuration
 
@@ -90,6 +97,25 @@ void TestSuiteDialogSettings::on_TestSuiteDialogSettings_accepted()
 	}
 */
 	//
+}
+
+
+void TestSuiteDialogSettings::on_loadSciptsPathBrowse_clicked()
+{
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Scripts Directory"),
+												 ui->loadSciptsPath->text(),
+												 QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+	if (dir.isEmpty() == false)
+	{
+		ui->loadSciptsPath->setText(QDir::toNativeSeparators(dir));
+	}
+}
+
+
+void TestSuiteDialogSettings::on_loadSciptsPathCheck_stateChanged(int /*arg1*/)
+{
+	ui->loadSciptsPath->setEnabled(ui->loadSciptsPathCheck->isChecked() == true);
 
 }
 

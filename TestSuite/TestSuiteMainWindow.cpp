@@ -35,6 +35,21 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 	createMenu();
 	createStatusBar();
 
+	if (theSettings.loadScriptsFromPath() == true)
+	{
+		QString errorMsg;
+		bool result = m_testLibrary.testScriptsStorage().loadFromPath(theSettings.loadScriptsPath(), &errorMsg);
+		if (result == false)
+		{
+			slot_logError(errorMsg);
+		}
+		else
+		{
+			slot_logMessage(tr("%1 test script(s) were loaded from \"%2\".").arg(m_testLibrary.testScriptsStorage().count()).arg(theSettings.loadScriptsPath()));
+			fillTestsTree();
+		}
+	}
+
 	if (theSettings.m_mainWindowPos.x() != -1 && theSettings.m_mainWindowPos.y() != -1)
 	{
 		move(theSettings.m_mainWindowPos);
@@ -199,12 +214,11 @@ void TestSuiteMainWindow::fillTestsTree()
 {
 	ui->testsTree->clear();
 
-	const TestScriptsStorage& ts = m_testLibrary.testScripts();
+	QStringList l = m_testLibrary.testScriptsStorage().scriptList();
 
-	QStringList l = ts.testScriptList();
 	for (const QString& s : l)
 	{
-		QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << s);
+		QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << QDir::toNativeSeparators(s));
 		item->setCheckState(0, Qt::Checked);
 		ui->testsTree->addTopLevelItem(item);
 	}
@@ -217,10 +231,17 @@ void TestSuiteMainWindow::exit()
 
 void TestSuiteMainWindow::on_m_run_clicked()
 {
-
 	if (m_testLibrary.isRunning() == false)
 	{
-		m_testLibrary.start();
+		m_testLibrary.execute();
+	}
+}
+
+void TestSuiteMainWindow::on_m_stop_clicked()
+{
+	if (m_testLibrary.isRunning() == true)
+	{
+		m_testLibrary.stop();
 	}
 }
 
@@ -311,3 +332,5 @@ void TestSuiteMainWindow::showSettings()
 }
 
 TestSuiteMainWindow* theMainWindow = nullptr;
+
+

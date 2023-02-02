@@ -81,6 +81,12 @@ public:
 
 	QString localAppDataPath();
 
+	bool loadScriptsFromPath();
+	void setLoadScriptsFromPath(bool value);
+
+	QString loadScriptsPath();
+	void setLoadScriptsPath(const QString& path);
+
 public:
 	int m_requestInterval = 100;
 
@@ -104,6 +110,9 @@ private:
 
 	QString m_language = "en";
 
+	bool m_loadScriptsFromPath = false;
+	QString m_loadScriptsPath;
+
 	// User settings
 
 	QStringList m_instanceHistory;
@@ -123,6 +132,9 @@ public:
 		m_configuratorPort2 = That.m_configuratorPort2;
 
 		m_language = That.m_language;
+
+		m_loadScriptsFromPath = That.m_loadScriptsFromPath;
+		m_loadScriptsPath = That.m_loadScriptsPath;
 
 		return *this;
 	};

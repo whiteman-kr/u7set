@@ -72,14 +72,17 @@ void showHelp()
 	//
 	std::cout << "TestSuiteConsole is a command-line tool that performs hardware testing of RPCT projects." << std::endl;
 	std::cout << std::endl << "Command line parameters:" << std::endl;
-	std::cout << "\tTestSuiteConsole <FileName.xml> - run build task with arguments taken from <FileName.xml> file" << std::endl;
+	std::cout << "\tTestSuiteConsole --config <FileName.xml> [--scriptspath <ScriptsPath>] - run build task with arguments taken from <FileName.xml> file." << std::endl;
+	std::cout << "\t\t\t(optional --scriptspath parameter specifies a directory where test scripts are stored)." << std::endl;
 	std::cout << "or" << std::endl;
-	std::cout << "\tTestSuiteConsole [/create <FileName.xml>] - create arguments template in <FileName.xml> file" << std::endl;
+	std::cout << "\tTestSuiteConsole [--create <FileName.xml>] - create arguments template in <FileName.xml> file." << std::endl;
 	std::cout << std::endl;
-	std::cout << "Example 1:" << std::endl;
-	std::cout << "\tTestSuiteConsole.exe MyProjectTestArgs.xml" << std::endl;
-	std::cout << "Example 2:" << std::endl;
-	std::cout << "\tTestSuiteConsole.exe /create NewProjectTestArgs.xml" << std::endl;
+	std::cout << "Example 1 - run tests contained in the project:" << std::endl;
+	std::cout << "\tTestSuiteConsole.exe --config MyProjectTestArgs.xml" << std::endl;
+	std::cout << "Example 2 - run tests from specified folder:" << std::endl;
+	std::cout << "\tTestSuiteConsole.exe --config MyProjectTestArgs.xml --scriptspath D:\\ProjectTests" << std::endl;
+	std::cout << "Example 3 - create configuration file template:" << std::endl;
+	std::cout << "\tTestSuiteConsole.exe --create NewProjectTestArgs.xml" << std::endl;
 
 	return;
 }
@@ -125,7 +128,7 @@ bool getArgumentFromXml(QDomElement& docElem, QString name, int* result)
 	return ok;
 }
 
-int startTests(QString testArgsFileName)
+int startTests(QString testArgsFileName, QString scriptsPath, QCoreApplication& a)
 {
 	// Read arguments from XML document
 	//
@@ -221,10 +224,6 @@ int startTests(QString testArgsFileName)
 
 	// Some inititializations
 	//
-	//VFrame30::init();
-	//Hardware::init();
-	//DbController::init();
-	//Builder::init();
 	SoftwareInfo softwareInfo;
 
 	softwareInfo.init(E::SoftwareType::TestSuite, instanceStrId, 0, 1);
@@ -232,41 +231,21 @@ int startTests(QString testArgsFileName)
 	HostAddressPort addr1(configuratorIPAddress1, configuratorPort1);
 	HostAddressPort addr2(configuratorIPAddress2, configuratorPort2);
 
-	TestTask* testTask = new TestTask(softwareInfo, addr1, addr2, nullptr /* QCoreApplication::instance() */);
-
-	/*testTask->setDatabaseAddress(dbAddress);
-	testTask->setDatabasePort(port);
-	testTask->setDatabaseUserName(dbUserName);
-	testTask->setDatabasePassword(dbPassword);
-	testTask->setProjectName(projectName);
-	testTask->setProjectUserName(projectUserName);
-	testTask->setProjectUserPassword(projectUserPassword);
-	if (buildPath.isEmpty() == false)
-	{
-		testTask->setBuildOutputPath(buildPath);
-	}*/
+	TestTask* testTask = new TestTask(softwareInfo, addr1, addr2, scriptsPath, nullptr /* QCoreApplication::instance() */);
 
 	// This will cause the application to exit when
 	// the testTask signals finished.
 	//
 	QObject::connect(testTask, &TestTask::finished, QCoreApplication::instance(), &QCoreApplication::exit);
 
-	// Start build process
-	//
-	//testTask->start();
-
 	// Run message loop
 	//
-	int result = QCoreApplication::instance()->exec();
+	int result = a.exec();
 
 	delete testTask;
 
 	// Shutting down
 	//
-	//Builder::shutdown();
-	//DbController::shutdown();
-	//VFrame30::shutdown();
-	//Hardware::shutdown();
 
 	return result;
 }
@@ -289,34 +268,41 @@ int main(int argc, char *argv[])
 	a.setApplicationVersion(QString("0.9.LOCALBUILD"));
 #endif
 
-	QStringList args = a.arguments();
+	QCommandLineParser parser;
+
+	QCommandLineOption createOption("create", "Create configuration file template in <FileName.xml>", "<FileName.xml>");
+	parser.addOption(createOption);
+
+	QCommandLineOption configFileOption("config", "Configuration file name", "<FileName.xml>");
+	parser.addOption(configFileOption);
+
+	QCommandLineOption scriptPathOption("scriptspath", "Specify path where script files are stored", ".");
+	parser.addOption(scriptPathOption);
+
+	parser.process(*qApp);
 
 	int result = 0;
 
-	switch (args.size())
+	QString templateFile = parser.value(createOption);
+	if (templateFile.isEmpty() == false)
 	{
-	case 2:
-		result = startTests(args[1]);
-		break;
+		createTemplateFile(templateFile);
+		result = 1;
+	}
+	else
+	{
+		QString configFileName = parser.value(configFileOption);
 
-	case 3:
-		// Create a template file?
-		//
-		if (args[1].trimmed().compare(QLatin1String("/create"), Qt::CaseInsensitive) == 0)
+		if (configFileName.isEmpty() == false)
 		{
-			createTemplateFile(args[2]);
-			result = 0;
+			QString scriptPath = parser.value(scriptPathOption);
+			result = startTests(configFileName, scriptPath, a);
 		}
 		else
 		{
 			showHelp();
-			result = 1;
+			result = 2;
 		}
-		break;
-
-	default:
-		showHelp();
-		result = 2;
 	}
 
 	google::protobuf::ShutdownProtobufLibrary();

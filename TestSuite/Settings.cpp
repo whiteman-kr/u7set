@@ -37,6 +37,9 @@ void Settings::StoreSystem()
 
 	s.setValue("m_configuratorIpAddress2", m_configuratorIpAddress2);
 	s.setValue("m_configuratorPort2", m_configuratorPort2);
+
+	s.setValue("m_loadScriptsFromPath", m_loadScriptsFromPath);
+	s.setValue("m_loadScriptsPath", m_loadScriptsPath);
 }
 
 void Settings::RestoreSystem()
@@ -55,6 +58,9 @@ void Settings::RestoreSystem()
 
 	m_configuratorIpAddress2 = s.value("m_configuratorIpAddress2", "127.0.0.1").toString();
 	m_configuratorPort2 = s.value("m_configuratorPort2", PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST).toInt();
+
+	m_loadScriptsFromPath = s.value("m_loadScriptsFromPath", false).toBool();
+	m_loadScriptsPath = s.value("m_loadScriptsPath", QString()).toString();
 
 	// Determine the Local settings folder
 
@@ -159,6 +165,26 @@ void Settings::setLanguage(const QString& value)
 QString Settings::localAppDataPath()
 {
 	return m_localAppDataPath;
+}
+
+bool Settings::loadScriptsFromPath()
+{
+	return m_loadScriptsFromPath;
+}
+
+void Settings::setLoadScriptsFromPath(bool value)
+{
+	m_loadScriptsFromPath = value;
+}
+
+QString Settings::loadScriptsPath()
+{
+	return m_loadScriptsPath;
+}
+
+void Settings::setLoadScriptsPath(const QString& path)
+{
+	m_loadScriptsPath = path;
 }
 
 Settings theSettings;

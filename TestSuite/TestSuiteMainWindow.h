@@ -38,6 +38,8 @@ private slots:
 	void slot_logMessage(const QString &msg);
 	void slot_logError(const QString &errMsg);
 
+	void on_m_stop_clicked();
+
 private:
 	// Ui
 	Ui::TestSuiteMainWindow *ui;
