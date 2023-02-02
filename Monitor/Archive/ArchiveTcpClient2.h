@@ -32,6 +32,7 @@ public:
 
 public:
 	/// Call to cancel request.
+	///
 	void cancelRequest();
 
 signals:
@@ -84,7 +85,7 @@ private:
 	ArchiveRequestResult m_result;
 
 	quint32 m_currentRequestId = 0;
-	int m_tryToConnectCounter = 5;	// Try to connect to server 5 times, if connection was not established, then
+	int m_tryToConnectCounter = 3;	// Try to connect to server 3 times, if connection was not established, then
 									// report error and stop any attempts to connect
 	QElapsedTimer m_startRequestTime;
 
@@ -97,6 +98,7 @@ private:
 	// Statisctics
 	//
 private:
+	QMutex m_statMutex;
 	QString m_statState;
 	int m_statStateReceived = 0;
 	int m_statTcpRequestCount = 0;

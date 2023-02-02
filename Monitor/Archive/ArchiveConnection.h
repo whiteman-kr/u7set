@@ -28,6 +28,8 @@ public:
 	virtual ~ArchiveConnectionTask();
 
 public:
+	void cancelRequest();
+
 	[[nodiscard]] QString archiveServiceId() const;
 	[[nodiscard]] HostAddressPort address() const;
 
@@ -82,6 +84,9 @@ private slots:
 	void slot_statistics(QString archServiceShortId, QString state, int requests, int replies, int states);
 
 	void slot_taskDataReady(std::shared_ptr<ArchiveRequestResult> result, QString error);
+
+private:
+	void emitStatistics();
 
 private:
 	const MonitorConfigController& m_configController;

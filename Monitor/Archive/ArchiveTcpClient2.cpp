@@ -37,9 +37,11 @@ ArchiveTcpClient2::~ArchiveTcpClient2()
 
 void ArchiveTcpClient2::cancelRequest()
 {
-	updateStatistics("CancelRequest");
 	m_logFile.writeMessage(tr("cancelRequest()"));
 	m_needCancelRequest = true;
+
+	updateStatistics("Canceled");
+
 	return;
 }
 
@@ -85,12 +87,12 @@ void ArchiveTcpClient2::finish(QString error /*= QString{}*/)
 
 	if (error.isEmpty() == false)
 	{
-		updateStatistics("Finish: " + error);
+		updateStatistics("Finished: " + error);
 		m_logFile.writeError(error);
 	}
 	else
 	{
-		updateStatistics("Finish");
+		updateStatistics("Finished");
 	}
 
 	auto result = std::make_shared<ArchiveRequestResult>(std::move(m_result));
@@ -117,7 +119,9 @@ void ArchiveTcpClient2::onTryConnectToServer(const HostAddressPort& serverAddr)
 	{
 		// The connection was not established, report an error
 		//
-		QString error = tr("Cannot establish connection to ArchiveService %1.)").arg(serverAddr.addressPortStr());
+		QString error = tr("Cannot establish connection to ArchiveService %1, %2.")
+				.arg(m_serverSettings.shortenId)
+				.arg(serverAddr.addressPortStr());
 		finish(error);
 	}
 	else
@@ -137,7 +141,7 @@ void ArchiveTcpClient2::onConnection()
 
 	if (m_serverSettings.equipmentId != connectedSoftwareInfo().equipmentID())
 	{
-		m_logFile.writeError(tr("Connected to wrong ArchSrv, expected %1, connected to %2")
+		m_logFile.writeError(tr("Connected to wrong ArchiveService, expected %1, connected to %2")
 							 .arg(m_serverSettings.equipmentId)
 							 .arg(connectedSoftwareInfo().equipmentID()));
 
@@ -168,7 +172,9 @@ void ArchiveTcpClient2::onReplyTimeout()
 {
 	updateStatistics("Timeout");
 
-	QString error = tr("ArchiveService (%1) reply timeout.").arg(currentServerAddressPort().toString());
+	QString error = tr("ArchiveService (%1, %2) reply timeout.")
+			.arg(m_serverSettings.shortenId)
+			.arg(currentServerAddressPort().toString());
 	qDebug() << error;
 
 	finish(error);
@@ -289,7 +295,7 @@ void ArchiveTcpClient2::processStart(const QByteArray& data)
 	bool ok = startReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 	if (ok == false)
 	{
-		QString error = tr("processStart() StartReply data parsing error.");
+		QString error = tr("processStart() StartReply data parsing error, ArchiveService %1.").arg(m_serverSettings.shortenId);
 		finish(error);
 
 		return;
@@ -521,17 +527,24 @@ void ArchiveTcpClient2::processCancel(const QByteArray& data)
 
 void ArchiveTcpClient2::updateStatistics(QString state)
 {
+	m_statMutex.lock();
 	m_statState = state;
+	m_statMutex.unlock();
+
 	updateStatistics(0, 0, 0);
 }
 
 void ArchiveTcpClient2::updateStatistics(int incRequests, int incReplies, int incStates)
 {
+	m_statMutex.lock();
+
 	m_statTcpRequestCount += incRequests;
 	m_statTcpReplyCount += incReplies;
 	m_statStateReceived += incStates;
 
 	emit statistics(m_serverSettings.shortenId, m_statState, m_statTcpRequestCount, m_statTcpReplyCount, m_statStateReceived);
+
+	m_statMutex.unlock();
 	return;
 }
 

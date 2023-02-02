@@ -17,7 +17,9 @@ public:
 public:
 	void ensureVisible();
 
-	bool setSignals(const std::vector<AppSignalParam>& appSignals);
+	bool setSignals(const std::vector<AppSignalParam>& appSignals, bool);
+	bool setSignals(std::vector<ArchiveSignal> archiveSignals);
+
 	bool setTime(QDateTime startTime, QDateTime endTime, E::TimeType timeType);
 	void requestDataOnConnection();
 
@@ -57,7 +59,7 @@ protected slots:
 
 	void dataReceived(std::shared_ptr<ArchiveRequestResult> chunk);
 	void requestError(QString errorMessage);
-	void requestStatus(QString status, int statesReceived, int requestCount, int repliesCount);
+	void requestStatus(QString serverStatus, int requests, int replies, int states);
 	void requestFinished();
 
 	// Data
@@ -102,12 +104,10 @@ private:
 	QLabel* m_statusBarTextLabel = nullptr;
 	QLabel* m_statusBarStatesReceivedLabel = nullptr;
 	QLabel* m_statusBarNetworkRequestsLabel = nullptr;
-	//QLabel* m_statusBarServerLabel = nullptr;
-	//QLabel* m_statusBarConnectionStateLabel = nullptr;
 
 	ArchiveSource m_source;
 
-	bool m_requestDataOnConnection = false;
+	//bool m_requestDataOnConnection = false;		// TODO Imple
 };
 
 

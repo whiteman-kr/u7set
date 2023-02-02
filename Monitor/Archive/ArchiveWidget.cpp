@@ -210,14 +210,10 @@ ArchiveWidget::ArchiveWidget(MonitorSignalManager* signalManager,
 	m_statusBarTextLabel = new QLabel(m_statusBar);
 	m_statusBarStatesReceivedLabel = new QLabel(m_statusBar);
 	m_statusBarNetworkRequestsLabel = new QLabel(m_statusBar);
-	//m_statusBarServerLabel = new QLabel(m_statusBar);
-	//m_statusBarConnectionStateLabel = new QLabel(m_statusBar);
 
 	m_statusBar->addWidget(m_statusBarTextLabel, 1);
 	m_statusBar->addWidget(m_statusBarStatesReceivedLabel, 0);
 	m_statusBar->addWidget(m_statusBarNetworkRequestsLabel, 0);
-	//m_statusBar->addWidget(m_statusBarServerLabel, 0);
-	//m_statusBar->addWidget(m_statusBarConnectionStateLabel, 0);
 
 	setStatusBar(m_statusBar);
 
@@ -264,10 +260,8 @@ ArchiveWidget::ArchiveWidget(MonitorSignalManager* signalManager,
 
 	connect(&m_archiveConnection, &ArchiveConnection::dataReady, this, &ArchiveWidget::dataReceived);
 	connect(&m_archiveConnection, &ArchiveConnection::requestError, this, &ArchiveWidget::requestError);
+	connect(&m_archiveConnection, &ArchiveConnection::stats, this, &ArchiveWidget::requestStatus);
 	connect(&m_archiveConnection, &ArchiveConnection::done, this, &ArchiveWidget::requestFinished);
-
-//	connect(m_tcpClient, &ArchiveTcpClient::signal_connectionEstablished, this, &MonitorArchiveWidget::tcpConnectionEstablished);
-//	connect(m_tcpClient, &ArchiveTcpClient::statusUpdate, this, &MonitorArchiveWidget::tcpStatus);
 
 	// --
 	//
@@ -316,11 +310,40 @@ void ArchiveWidget::ensureVisible()
 	}
 }
 
-bool ArchiveWidget::setSignals(const std::vector<AppSignalParam>& appSignals)
+bool ArchiveWidget::setSignals(const std::vector<AppSignalParam>& appSignals, bool)
 {
-	// TO DO
-	int to_do_uncomment_and_make_it_work;
-	//m_source.acceptedSignals = appSignals;
+	std::vector<ArchiveSignal> acceptedSignals;
+	acceptedSignals.reserve(appSignals.size());
+
+	// Convert AppSignalParam to ArchiveSignals
+	// if two or more archive services have this signla, pick up the first one
+	//
+	for (const AppSignalParam& signalParam : appSignals)
+	{
+		auto sit = std::find_if(m_archiveServices.begin(), m_archiveServices.end(),
+					[&signalParam, signalManager = m_signalManager](const MonitorSettings::ArchiveService& archiveService)
+					{
+						return signalManager->appDataServiceHasSignal(archiveService.appDataServiceId, signalParam.appSignalId());
+					});
+
+		if (sit != m_archiveServices.end())
+		{
+			acceptedSignals.emplace_back(signalParam, sit->equipmentId, sit->shortenId);
+		}
+	}
+
+	if (acceptedSignals.size() != appSignals.size())
+	{
+		// Not all signals have assigned archive service
+		//
+	}
+
+	return setSignals(std::move(acceptedSignals));
+}
+
+bool ArchiveWidget::setSignals(std::vector<ArchiveSignal> archiveSignals)
+{
+	m_source.acceptedSignals = std::move(archiveSignals);
 	return true;
 }
 
@@ -396,6 +419,7 @@ void ArchiveWidget::requestData()
 void ArchiveWidget::cancelRequest()
 {
 	m_archiveConnection.cancelRequest();
+	updateUiState();
 	return;
 }
 
@@ -445,29 +469,50 @@ void ArchiveWidget::dropEvent(QDropEvent* event)
 	{
 		const ::Proto::AppSignal& appSignalMessage = protoSetMessage.appsignal(i);
 
-		AppSignalParam appSignalParam;
-		ok = appSignalParam.load(appSignalMessage);
+		AppSignalParam signalParam;
+		ok = signalParam.load(appSignalMessage);
 
-		if (ok == true)
+		if (ok == false)
 		{
-//			auto foundId = std::find_if(m_source.acceptedSignals.begin(), m_source.acceptedSignals.end(),
-//										[&appSignalParam](const AppSignalParam& sp)
-//			{
-//				return sp.appSignalId() == appSignalParam.appSignalId();
-//			});
+			Q_ASSERT(false);
+			continue;
+		}
 
-//			if (foundId == m_source.acceptedSignals.end())
-//			{
-				// TO DO
-				int to_do_uncomment_and_make_it_work;
-				//m_source.acceptedSignals.push_back(appSignalParam);
-//			}
+		// Check if such signal already present in the signal list
+		//
+		auto foundId = std::find_if(m_source.acceptedSignals.begin(), m_source.acceptedSignals.end(),
+			[signalParam](const ArchiveSignal& sp)
+			{
+				return sp.signalParam.appSignalId() == signalParam.appSignalId();
+			});
+
+		if (foundId != m_source.acceptedSignals.end())
+		{
+			// The signal already in the list
+			//
+			continue;
+		}
+
+		// Find an archive service for the signal and add it to the signal list
+		//
+		auto sit = std::find_if(m_archiveServices.begin(), m_archiveServices.end(),
+						[&signalParam, signalManager = m_signalManager](const MonitorSettings::ArchiveService& archiveService)
+						{
+							return signalManager->appDataServiceHasSignal(archiveService.appDataServiceId, signalParam.appSignalId());
+						});
+
+		if (sit != m_archiveServices.end())
+		{
+			m_source.acceptedSignals.emplace_back(signalParam, sit->equipmentId, sit->shortenId);
+		}
+		else
+		{
+			// Archive service not found for this signal
+			//
 		}
 	}
 
-	// TO DO
-	int to_do_uncomment_and_make_it_work;
-	//m_model->setParams(m_source.acceptedSignals, m_source.timeType);
+	m_model->setParams(m_source.acceptedSignals, m_source.timeType);
 
 	return;
 }
@@ -594,12 +639,12 @@ void ArchiveWidget::updateOrCancelButton()
 	}
 	else
 	{
-		if (m_requestDataOnConnection == true)
-		{
-			// If request on connection is pending - cancel it
-			//
-			m_requestDataOnConnection = false;
-		}
+//		if (m_requestDataOnConnection == true)
+//		{
+//			// If request on connection is pending - cancel it
+//			//
+//			m_requestDataOnConnection = false;
+//		}
 
 		cancelRequest();
 	}
@@ -689,14 +734,14 @@ void ArchiveWidget::slot_configurationArrived(ConfigSettings configuration)
 
 void ArchiveWidget::tcpConnectionEstablished()
 {
-	int to_do_;// It shpudl be done in another way, as request, I think no need in this functions
+//	int to_do_;// It shpudl be done in another way, as request, I think no need in this functions
 
-	if (m_requestDataOnConnection == true)
-	{
-		m_requestDataOnConnection = false;
+//	if (m_requestDataOnConnection == true)
+//	{
+//		m_requestDataOnConnection = false;
 
-		requestData();
-	}
+//		requestData();
+//	}
 }
 
 void ArchiveWidget::dataReceived(std::shared_ptr<ArchiveRequestResult> chunk)
@@ -709,24 +754,27 @@ void ArchiveWidget::dataReceived(std::shared_ptr<ArchiveRequestResult> chunk)
 
 	m_model->addData(std::move(*chunk));
 
+	updateUiState();
 	return;
 }
 
 void ArchiveWidget::requestError(QString errorMessage)
 {
 	QMessageBox::critical(this, qAppName(), errorMessage);
+	updateUiState();
 	return;
 }
 
-void ArchiveWidget::requestStatus(QString status, int statesReceived, int requestCount, int repliesCount)
+void ArchiveWidget::requestStatus(QString serverStatus, int requests, int replies, int states)
 {
 	Q_ASSERT(m_statusBar);
 
-	m_statusBarTextLabel->setText(status);
-	m_statusBarStatesReceivedLabel->setText(QString("States received: %1").arg(statesReceived));
+	m_statusBarTextLabel->setText(serverStatus);
+	m_statusBarStatesReceivedLabel->setText(QString("States received: %1").arg(states));
 
-	m_statusBarNetworkRequestsLabel->setText(QString(" Network requests/replies: %1 / %2 ").arg(requestCount).arg(repliesCount));
+	m_statusBarNetworkRequestsLabel->setText(QString(" Network requests/replies: %1 / %2 ").arg(requests).arg(replies));
 
+	updateUiState();
 	return;
 }
 

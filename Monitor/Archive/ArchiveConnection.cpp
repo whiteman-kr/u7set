@@ -31,10 +31,19 @@ ArchiveConnectionTask::~ArchiveConnectionTask()
 
 	if (m_clientThread != nullptr)
 	{
-		m_tcpClient->cancelRequest();
 		m_clientThread->quitAndWait(5000);
 
 		delete m_clientThread;
+	}
+
+	return;
+}
+
+void ArchiveConnectionTask::cancelRequest()
+{
+	if (m_tcpClient != nullptr)
+	{
+		m_tcpClient->cancelRequest();
 	}
 
 	return;
@@ -91,7 +100,7 @@ void ArchiveConnection::request(ArchiveSource requestData)
 
 void ArchiveConnection::cancelRequest()
 {
-	emit slot_cancelRequest();
+	emit private_cancelRequest();
 }
 
 bool ArchiveConnection::requestInProgress() const
@@ -196,6 +205,7 @@ void ArchiveConnection::slot_startRequest(ArchiveSource requestData)
 																 *archServiceIt,
 																 m_logFile.logFile());
 
+		connect(&conn, &ArchiveConnectionTask::statistics, this, &ArchiveConnection::slot_statistics);
 		connect(&conn, &ArchiveConnectionTask::dataReady, this, &ArchiveConnection::slot_taskDataReady);
 	}
 
@@ -213,18 +223,19 @@ void ArchiveConnection::slot_cancelRequest()
 
 	m_logFile.writeMessage(tr("Cancel %1 archive request connections.").arg(m_connections.size()));
 
+	for (auto& conn : m_connections)
+	{
+		conn.cancelRequest();
+	}
+
 	m_connections.clear();
+	emitStatistics();
 
 	return;
 }
 
 void ArchiveConnection::slot_statistics(QString archServiceShortId, QString state, int requests, int replies, int states)
 {
-	QString totalServersSatus;
-	int totalRequests = 0;
-	int totalReplies = 0;
-	int totalStates = 0;
-
 	{
 		QMutexLocker locker(&m_statisticsMutext);
 
@@ -236,25 +247,10 @@ void ArchiveConnection::slot_statistics(QString archServiceShortId, QString stat
 				.replies = replies,
 				.states = states
 			};
-
-		for (const auto& [serverId, stats] : m_statistics)
-		{
-			if (totalServersSatus.isEmpty() == true)
-			{
-				totalServersSatus = serverId + ": " + stats.state;
-			}
-			else
-			{
-				totalServersSatus += ", " + serverId + ": " + stats.state;
-			}
-
-			totalRequests += stats.requests;
-			totalReplies += stats.replies;
-			totalStates += stats.states;
-		}
 	}
 
-	emit stats(totalServersSatus, totalRequests, totalReplies, totalStates);
+	emitStatistics();
+
 	return;
 }
 
@@ -296,5 +292,36 @@ void ArchiveConnection::slot_taskDataReady(std::shared_ptr<ArchiveRequestResult>
 		emit done();
 	}
 
+	return;
+}
+
+void ArchiveConnection::emitStatistics()
+{
+	QString totalServersSatus;
+	int totalRequests = 0;
+	int totalReplies = 0;
+	int totalStates = 0;
+
+	{
+		QMutexLocker locker(&m_statisticsMutext);
+
+		for (const auto& [serverId, stats] : m_statistics)
+		{
+			if (totalServersSatus.isEmpty() == true)
+			{
+				totalServersSatus = serverId + ": " + stats.state;
+			}
+			else
+			{
+				totalServersSatus += ", " + serverId + ": " + stats.state;
+			}
+
+			totalRequests += stats.requests;
+			totalReplies += stats.replies;
+			totalStates += stats.states;
+		}
+	}
+
+	emit stats(totalServersSatus, totalRequests, totalReplies, totalStates);
 	return;
 }
