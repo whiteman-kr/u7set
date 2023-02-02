@@ -23,7 +23,7 @@ enum class ArchiveColumns
 	// Next are visible by default
 	//
 	Time,
-	//ArchiveService,
+	Server,
 
 	ColumnCount
 };
@@ -90,7 +90,7 @@ private:
 	ArchiveData m_archive;
 
 	mutable int m_cachedStateIndex = -1;
-	mutable AppSignalState m_cachedSignalState;
+	mutable ArchiveSignalState m_cachedSignalState;
 
 	inline static const QString NonValidString{"LowLimit"};
 	inline static const ArchiveSignalParam InvalidSignalParam{};

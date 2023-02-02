@@ -12,6 +12,14 @@ struct ArchiveSignal
 };
 
 
+struct ArchiveSignalState
+{
+	AppSignalState appState;
+	QString archiveServiceId;
+	QString archiveServiceShortenId;
+};
+
+
 struct ArchiveSource
 {
 	std::vector<ArchiveSignal> acceptedSignals;
@@ -28,7 +36,7 @@ Q_DECLARE_METATYPE(ArchiveSource)
 struct ArchiveRequestResult
 {
 	QString archiveServiceId;
-	std::list<std::vector<AppSignalState>> states;
+	std::list<std::vector<ArchiveSignalState>> states;
 };
 Q_DECLARE_METATYPE(std::shared_ptr<ArchiveRequestResult>)
 
@@ -45,12 +53,12 @@ public:
 	[[nodiscard]] int size() const;
 	void clear();
 
-	[[nodiscard]] const AppSignalState& state(int index) const;
+	[[nodiscard]] const ArchiveSignalState& state(int index) const;
 
 private:
-	std::vector<AppSignalState> m_archive;
+	std::vector<ArchiveSignalState> m_archive;
 
 	inline static constexpr int MaxArchiveStates = 250'000;
-	inline static constexpr AppSignalState NullState{};
+	inline static const ArchiveSignalState NullState{};
 };
 

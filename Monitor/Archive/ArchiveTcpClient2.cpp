@@ -410,12 +410,12 @@ void ArchiveTcpClient2::processNext(const QByteArray& data)
 	qDebug() << "ArchiveTcpClient::processNext, stateCount " << stateCount;
 	m_logFile.writeMessage(QString("processNext() stateCount = %1, requestId = %2").arg(stateCount).arg(m_currentRequestId));
 
-	std::vector<AppSignalState> states;
+	std::vector<ArchiveSignalState> states;
 	states.reserve(stateCount);
 
 	for (const auto& stateMessage : m_nextReply.appsignalstates())
 	{
-		states.emplace_back(stateMessage);
+		states.emplace_back(AppSignalState{stateMessage}, m_serverSettings.equipmentId, m_serverSettings.shortenId);
 	}
 
 	m_result.states.push_back(std::move(states));

@@ -67,6 +67,9 @@ QVariant ArchiveModel::headerData(int section, Qt::Orientation /*orientation*/, 
 
 	case ArchiveColumns::Time:
 		return tr("Time");
+
+	case ArchiveColumns::Server:
+		return tr("Server");
 	}
 
 	Q_ASSERT(false);
@@ -98,7 +101,7 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 
 		case ArchiveColumns::AppSignalId:
 			{
-				auto sit = m_archiveSignals.find(m_cachedSignalState.hash());
+				auto sit = m_archiveSignals.find(m_cachedSignalState.appState.hash());
 				if (sit == m_archiveSignals.end())
 				{
 					// State from differtent signal!!! ArchiveService has returned something wrong?
@@ -114,7 +117,7 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 
 		case ArchiveColumns::CustomSignalId:
 			{
-				auto sit = m_archiveSignals.find(m_cachedSignalState.hash());
+				auto sit = m_archiveSignals.find(m_cachedSignalState.appState.hash());
 				if (sit == m_archiveSignals.end())
 				{
 					// State from differtent signal!!! ArchiveService has returned something wrong?
@@ -129,7 +132,7 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 			break;
 		case ArchiveColumns::Caption:
 			{
-				auto sit = m_archiveSignals.find(m_cachedSignalState.hash());
+				auto sit = m_archiveSignals.find(m_cachedSignalState.appState.hash());
 				if (sit == m_archiveSignals.end())
 				{
 					// State from differtent signal!!! ArchiveService has returned something wrong?
@@ -144,7 +147,7 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 			break;
 		case ArchiveColumns::State:
 			{
-				auto sit = m_archiveSignals.find(m_cachedSignalState.hash());
+				auto sit = m_archiveSignals.find(m_cachedSignalState.appState.hash());
 				if (sit == m_archiveSignals.end())
 				{
 					// State from differtent signal!!! ArchiveService has returned something wrong?
@@ -153,44 +156,44 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 				}
 				else
 				{
-					result = getValueString(m_cachedSignalState, sit->second);
+					result = getValueString(m_cachedSignalState.appState, sit->second);
 				}
 			}
 			break;
 		case ArchiveColumns::Valid:
 			{
-				result = m_cachedSignalState.isValid() ? QString() : QStringLiteral("no");
+				result = m_cachedSignalState.appState.isValid() ? QString() : QStringLiteral("no");
 			}
 			break;
 		case ArchiveColumns::StateAvailable:
 			{
-				result = m_cachedSignalState.m_flags.stateAvailable ? QString() : QStringLiteral("no");
+				result = m_cachedSignalState.appState.m_flags.stateAvailable ? QString() : QStringLiteral("no");
 			}
 			break;
 		case ArchiveColumns::Simulated:
 			{
-				result = m_cachedSignalState.m_flags.simulated ? QStringLiteral("yes") : QString();
+				result = m_cachedSignalState.appState.m_flags.simulated ? QStringLiteral("yes") : QString();
 			}
 			break;
 		case ArchiveColumns::Blocked:
 			{
-				result = m_cachedSignalState.m_flags.blocked ? QStringLiteral("yes") : QString();
+				result = m_cachedSignalState.appState.m_flags.blocked ? QStringLiteral("yes") : QString();
 			}
 			break;
 		case ArchiveColumns::Mismatch:
 			{
-				result = m_cachedSignalState.m_flags.mismatch ? QStringLiteral("yes") : QString();
+				result = m_cachedSignalState.appState.m_flags.mismatch ? QStringLiteral("yes") : QString();
 			}
 			break;
 		case ArchiveColumns::OutOfLimits:
 			{
 				QStringList resultString;
 
-				if (m_cachedSignalState.m_flags.belowLowLimit == true)
+				if (m_cachedSignalState.appState.m_flags.belowLowLimit == true)
 				{
 					resultString << QStringLiteral("LOW ");
 				}
-				if (m_cachedSignalState.m_flags.aboveHighLimit == true)
+				if (m_cachedSignalState.appState.m_flags.aboveHighLimit == true)
 				{
 					resultString << QStringLiteral("HIGH ");
 				}
@@ -202,27 +205,27 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 			{
 				QStringList resultString;
 
-				if (m_cachedSignalState.m_flags.validityChange == true)
+				if (m_cachedSignalState.appState.m_flags.validityChange == true)
 				{
 					resultString << QStringLiteral("VAL");
 				}
-				if (m_cachedSignalState.m_flags.simBlockMismatchChange == true)
+				if (m_cachedSignalState.appState.m_flags.simBlockMismatchChange == true)
 				{
 					resultString << QStringLiteral("SIMLOCK");
 				}
-				if (m_cachedSignalState.m_flags.limitFlagsChange == true)
+				if (m_cachedSignalState.appState.m_flags.limitFlagsChange == true)
 				{
 					resultString << QStringLiteral("LIMIT");
 				}
-				if (m_cachedSignalState.m_flags.autoPoint == true)
+				if (m_cachedSignalState.appState.m_flags.autoPoint == true)
 				{
 					resultString << QStringLiteral("AUTO");
 				}
-				if (m_cachedSignalState.m_flags.fineAperture == true)
+				if (m_cachedSignalState.appState.m_flags.fineAperture == true)
 				{
 					resultString << QStringLiteral("FINEAP");
 				}
-				if (m_cachedSignalState.m_flags.coarseAperture == true)
+				if (m_cachedSignalState.appState.m_flags.coarseAperture == true)
 				{
 					resultString << QStringLiteral("COARSEAP");
 				}
@@ -232,14 +235,14 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 			break;
 		case ArchiveColumns::Time:
 			{
-				const TimeStamp& ts = m_cachedSignalState.time(m_timeType);
+				const TimeStamp& ts = m_cachedSignalState.appState.time(m_timeType);
 				result = ts.toDateTime().toString("dd/MM/yyyy HH:mm:ss.zzz");
 			}
 			break;
-//		case ArchiveColumns::ArchiveService:
-//			{
-//				result = m_cachedSignalState.;
-//			}
+		case ArchiveColumns::Server:
+			{
+				result = m_cachedSignalState.archiveServiceShortenId;
+			}
 			break;
 		default:
 			Q_ASSERT(false);
@@ -265,7 +268,7 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 		updateCachedState(row);		// m_cachedSignalState -- state for row
 		ArchiveSignalParam signalParam;
 
-		auto sit = m_archiveSignals.find(m_cachedSignalState.hash());
+		auto sit = m_archiveSignals.find(m_cachedSignalState.appState.hash());
 		if (sit == m_archiveSignals.end())
 		{
 			// State from differtent signal!!! ArchiveService has returned something wrong?
@@ -309,14 +312,14 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 						  .arg(signalParam.signalParam.appSignalId())
 						  .arg(signalParam.signalParam.caption())
 						  .arg(typeStr)
-						  .arg(getValueString(m_cachedSignalState, signalParam))
-								.arg(m_cachedSignalState.m_value)
-						  .arg(QString::number(m_cachedSignalState.m_flags.all, 2))
-						  .arg(m_cachedSignalState.time(m_timeType).toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz"))
+						  .arg(getValueString(m_cachedSignalState.appState, signalParam))
+								.arg(m_cachedSignalState.appState.m_value)
+						  .arg(QString::number(m_cachedSignalState.appState.m_flags.all, 2))
+						  .arg(m_cachedSignalState.appState.time(m_timeType).toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz"))
 								.arg(E::valueToString<E::TimeType>(m_timeType))
-						  .arg(m_cachedSignalState.time().system.toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz"))			//"ServerTime: %12\n"
-						  .arg(m_cachedSignalState.time().local.toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz"))			//"ServerTime +0UTC: %13\n"
-						  .arg(m_cachedSignalState.time().plant.toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz"));			//"PlantTime: %14"
+						  .arg(m_cachedSignalState.appState.time().system.toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz"))			//"ServerTime: %12\n"
+						  .arg(m_cachedSignalState.appState.time().local.toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz"))			//"ServerTime +0UTC: %13\n"
+						  .arg(m_cachedSignalState.appState.time().plant.toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz"));			//"PlantTime: %14"
 
 
 
@@ -334,7 +337,7 @@ QString ArchiveModel::getValueString(const AppSignalState& state, const ArchiveS
 	switch (signalType)
 	{
 	case E::SignalType::Analog:
-		if (m_cachedSignalState.isValid() == false)
+		if (m_cachedSignalState.appState.isValid() == false)
 		{
 			result = QString("%1 (%2)")
 						.arg(NonValidString)
@@ -354,7 +357,7 @@ QString ArchiveModel::getValueString(const AppSignalState& state, const ArchiveS
 		}
 		break;
 	case E::SignalType::Discrete:
-		if (m_cachedSignalState.isValid() == false)
+		if (m_cachedSignalState.appState.isValid() == false)
 		{
 			result = QString("%1 (%2)")
 						.arg(NonValidString)
@@ -467,7 +470,7 @@ std::vector<ArchiveSignalParam> ArchiveModel::appSignals()
 const ArchiveSignalParam& ArchiveModel::signalParam(int row) const
 {
 	Q_ASSERT(row < m_archive.size());
-	const AppSignalState& signalState = m_archive.state(row);
+	const AppSignalState& signalState = m_archive.state(row).appState;
 
 	if (auto it = m_archiveSignals.find(signalState.hash());
 		 it == m_archiveSignals.end())
