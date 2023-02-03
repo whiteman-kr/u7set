@@ -71,7 +71,7 @@ bool MonitorArchive::requestArchiveWithNewWidget(MonitorSignalManager* signalMan
 
 	window->show();
 
-	window->requestDataOnConnection();
+	window->requestData();
 
 	return false;
 }

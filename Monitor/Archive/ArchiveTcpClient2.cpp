@@ -434,6 +434,14 @@ void ArchiveTcpClient2::processNext(const QByteArray& data)
 
 	for (const auto& stateMessage : m_nextReply.appsignalstates())
 	{
+		// Filter Periodic points
+		//
+		if (m_requestData.removePrioodicRecords == true &&
+			(stateMessage.flags() & AppSignalStateFlags::MASK_AUTO_POINT_REASONE) != 0)
+		{
+			continue;
+		}
+
 		states.emplace_back(AppSignalState{stateMessage}, m_serverSettings.equipmentId, m_serverSettings.shortenId);
 	}
 

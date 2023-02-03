@@ -88,7 +88,6 @@ SOURCES += main.cpp \
     DialogColumns.cpp \
     Trend/MonitorTrends.cpp \
 	Archive/DialogChooseArchiveSignals.cpp \
-	Archive/ArchiveTcpClient.cpp \
 	Archive/ArchiveModelView.cpp \
 	Archive/ArchiveData.cpp \
     TcpSignalRecents.cpp \
@@ -155,7 +154,6 @@ HEADERS  += \
     DialogColumns.h \
     Trend/MonitorTrends.h \
 	Archive/DialogChooseArchiveSignals.h \
-	Archive/ArchiveTcpClient.h \
 	Archive/ArchiveModelView.h \
 	Archive/ArchiveData.h \
     TcpSignalRecents.h \

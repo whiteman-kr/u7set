@@ -328,7 +328,7 @@ bool ArchiveWidget::setSignals(const std::vector<AppSignalParam>& appSignals)
 	acceptedSignals.reserve(appSignals.size());
 
 	// Convert AppSignalParam to ArchiveSignals
-	// if two or more archive services have this signla, pick up the first one
+	// if two or more archive services have this signal, pick up the first one
 	//
 	for (const AppSignalParam& signalParam : appSignals)
 	{
@@ -378,26 +378,6 @@ bool ArchiveWidget::setTime(QDateTime startTime, QDateTime endTime, E::TimeType 
 	}
 
 	return true;
-}
-
-void ArchiveWidget::requestDataOnConnection()
-{
-//	if (m_source.acceptedSignals.empty() == true)
-//	{
-//		Q_ASSERT(false);
-//		return;
-//	}
-
-//	if (m_tcpClient->isConnected() == true)
-//	{
-//		requestData();
-//	}
-//	else
-//	{
-//		m_requestDataOnConnection = true;
-
-//		m_updateButton->setText(tr("Cancel"));
-//	}
 }
 
 void ArchiveWidget::requestData()
@@ -651,13 +631,6 @@ void ArchiveWidget::updateOrCancelButton()
 	}
 	else
 	{
-//		if (m_requestDataOnConnection == true)
-//		{
-//			// If request on connection is pending - cancel it
-//			//
-//			m_requestDataOnConnection = false;
-//		}
-
 		cancelRequest();
 	}
 	return;
@@ -731,18 +704,6 @@ void ArchiveWidget::slot_configurationArrived(ConfigSettings configuration)
 	m_softwareId = configuration.softwareEquipmentId;
 
 	return;
-}
-
-void ArchiveWidget::tcpConnectionEstablished()
-{
-//	int to_do_;// It shpudl be done in another way, as request, I think no need in this functions
-
-//	if (m_requestDataOnConnection == true)
-//	{
-//		m_requestDataOnConnection = false;
-
-//		requestData();
-//	}
 }
 
 void ArchiveWidget::dataReceived(std::shared_ptr<ArchiveRequestResult> chunk)

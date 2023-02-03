@@ -17,13 +17,13 @@ public:
 public:
 	void ensureVisible();
 
+	// Call these functions only from the main thread
+	//
 	bool setSignals(const std::vector<AppSignalParam>& appSignals);
 	bool setSignals(std::vector<ArchiveSignal> archiveSignals);
 
 	bool setTime(QDateTime startTime, QDateTime endTime, E::TimeType timeType);
-	void requestDataOnConnection();
 
-protected:
 	void requestData();
 	void cancelRequest();
 
@@ -54,8 +54,6 @@ protected slots:
 	void removeSignal(QString appSignalId, QString archiveServiceId);	// Slot to ArchiveView::requestToRemoveSignal
 
 	void slot_configurationArrived(ConfigSettings configuration);
-
-	void tcpConnectionEstablished();
 
 	void dataReceived(std::shared_ptr<ArchiveRequestResult> chunk);
 	void requestError(QString errorMessage);
@@ -106,8 +104,6 @@ private:
 	QLabel* m_statusBarNetworkRequestsLabel = nullptr;
 
 	ArchiveSource m_source;
-
-	//bool m_requestDataOnConnection = false;		// TODO Imple
 };
 
 

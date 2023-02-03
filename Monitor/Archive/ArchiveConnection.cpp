@@ -268,7 +268,7 @@ void ArchiveConnection::slot_taskDataReady(std::shared_ptr<ArchiveRequestResult>
 	}
 
 	// Task is done, remove it
-	// Ñheck taht slot is in right thread as m_connections is not protected with mutex
+	// Check that slot is in the right thread as m_connections is not protected with mutex
 	//
 	Q_ASSERT(this->thread() == QThread::currentThread());
 

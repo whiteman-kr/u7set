@@ -8,8 +8,15 @@ bool ArchiveData::addChunk(ArchiveRequestResult&& chunk, E::TimeType timeType)
 		// Calc required size
 		//
 		size_t sizeRequired = 0;
-		for (const auto& stateVector : chunk.states)
+		for (auto& stateVector : chunk.states)
 		{
+			if (sizeRequired > MaxArchiveStates)
+			{
+				// Limit imput data
+				//
+				stateVector.clear();
+			}
+
 			sizeRequired += stateVector.size();
 		}
 
@@ -43,12 +50,12 @@ bool ArchiveData::addChunk(ArchiveRequestResult&& chunk, E::TimeType timeType)
 		case E::TimeType::Local:
 			return lhs.appState.m_time.local < rhs.appState.m_time.local;
 		case E::TimeType::Plant:
-			return lhs.appState.m_time.plant< rhs.appState.m_time.plant;
+			return lhs.appState.m_time.plant < rhs.appState.m_time.plant;
 		case E::TimeType::System:
-			return lhs.appState.m_time.system< rhs.appState.m_time.system;
+			return lhs.appState.m_time.system < rhs.appState.m_time.system;
 		default:
 			Q_ASSERT(false);
-			return lhs.appState.m_time.system< rhs.appState.m_time.system;
+			return lhs.appState.m_time.system < rhs.appState.m_time.system;
 		}
 	};
 

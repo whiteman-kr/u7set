@@ -27,7 +27,7 @@ struct ArchiveSource
 	E::TimeType timeType = E::TimeType::Local;
 	TimeStamp requestStartTime;
 	TimeStamp requestEndTime;
-	bool removePeriodicRecords;
+	bool removePeriodicRecords = true;
 };
 Q_DECLARE_METATYPE(ArchiveSource)
 

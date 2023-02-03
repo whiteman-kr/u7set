@@ -1176,6 +1176,18 @@ void MonitorMainWindow::devTools()
 void MonitorMainWindow::debug()
 {
 //#ifdef QT_DEBUG
+//	std::vector<AppSignalParam> appSignals;
+
+//	appSignals.push_back(m_signalManager.signalParam("#TEST1_000035", nullptr));
+//	appSignals.push_back(m_signalManager.signalParam("#SYSTEMID_SRT3_CH01_MD00_CTRLIN_INH02A", nullptr));
+
+//	QDateTime start = QDateTime{QDate{2023, 2, 1}, QTime{0, 0, 0, 0}};
+//	QDateTime now = QDateTime::currentDateTime();
+
+//	MonitorArchive::requestArchiveWithNewWidget(&m_signalManager, &m_configController, appSignals, start, now, E::TimeType::Local, this);
+
+	// --
+	//
 //	QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
 //													"./",
 //													tr("Monitor schemas (*.mvs);; All files (*.*)"));

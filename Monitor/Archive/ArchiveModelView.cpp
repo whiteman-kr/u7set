@@ -298,21 +298,22 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 								  "Time: %9 (%10)\n"
 								  "ServerTime: %11\n"
 								  "ServerTime +0UTC: %12\n"
-								  "PlantTime: %13")
+								  "PlantTime: %13\n"
+								  "Server: %14")
 						  .arg(row + 1)
 						  .arg(signalParam.signalParam.customSignalId())
 						  .arg(signalParam.signalParam.appSignalId())
 						  .arg(signalParam.signalParam.caption())
 						  .arg(typeStr)
 						  .arg(getValueString(m_cachedSignalState.appState, signalParam))
-								.arg(m_cachedSignalState.appState.m_value)
+						  .arg(m_cachedSignalState.appState.m_value)
 						  .arg(QString::number(m_cachedSignalState.appState.m_flags.all, 2))
 						  .arg(m_cachedSignalState.appState.time(m_timeType).toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz"))
-								.arg(E::valueToString<E::TimeType>(m_timeType))
+						  .arg(E::valueToString<E::TimeType>(m_timeType))
 						  .arg(m_cachedSignalState.appState.time().system.toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz"))			//"ServerTime: %12\n"
 						  .arg(m_cachedSignalState.appState.time().local.toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz"))			//"ServerTime +0UTC: %13\n"
-						  .arg(m_cachedSignalState.appState.time().plant.toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz"));			//"PlantTime: %14"
-
+						  .arg(m_cachedSignalState.appState.time().plant.toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz"))			//"PlantTime: %14"
+						  .arg(m_cachedSignalState.archiveServiceShortenId);
 
 
 		return toolTip;
