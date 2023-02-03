@@ -17,7 +17,7 @@ public:
 public:
 	void ensureVisible();
 
-	bool setSignals(const std::vector<AppSignalParam>& appSignals, bool);
+	bool setSignals(const std::vector<AppSignalParam>& appSignals);
 	bool setSignals(std::vector<ArchiveSignal> archiveSignals);
 
 	bool setTime(QDateTime startTime, QDateTime endTime, E::TimeType timeType);

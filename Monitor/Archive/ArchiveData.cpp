@@ -76,6 +76,19 @@ void ArchiveData::clear()
 	m_archive.clear();
 }
 
+void ArchiveData::removeSignal(QString appSignalId)
+{
+	Hash signalHash = calcHash(appSignalId);
+
+	std::erase_if(m_archive,
+			[signalHash](const ArchiveSignalState& state)
+			{
+				return state.appState.hash() == signalHash;
+			});
+
+	return;
+}
+
 const ArchiveSignalState& ArchiveData::state(int index) const
 {
 	if (index < 0 || index >= size())

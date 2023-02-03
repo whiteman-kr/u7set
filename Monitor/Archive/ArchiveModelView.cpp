@@ -454,6 +454,17 @@ void ArchiveModel::clear()
 	return;
 }
 
+void ArchiveModel::removeSignal(QString appSignalId)
+{
+	beginResetModel();
+
+	m_archive.removeSignal(appSignalId);
+	updateCachedState(-1);
+
+	endResetModel();
+	return;
+}
+
 std::vector<ArchiveSignalParam> ArchiveModel::appSignals()
 {
 	std::vector<ArchiveSignalParam> result;

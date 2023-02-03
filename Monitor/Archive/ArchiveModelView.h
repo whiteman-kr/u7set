@@ -75,7 +75,9 @@ private:
 public:
 	void setParams(const std::vector<ArchiveSignal>& archiveSignals, E::TimeType timeType);
 	void addData(ArchiveRequestResult&& chunk);
+
 	void clear();
+	void removeSignal(QString appSignalId);
 
 	std::vector<ArchiveSignalParam> appSignals();
 	const ArchiveSignalParam& signalParam(int row) const;

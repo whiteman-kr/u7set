@@ -51,7 +51,9 @@ public:
 	bool addChunk(ArchiveRequestResult&& ArchiveRequestResult, E::TimeType timeType);
 
 	[[nodiscard]] int size() const;
+
 	void clear();
+	void removeSignal(QString appSignalId);
 
 	[[nodiscard]] const ArchiveSignalState& state(int index) const;
 

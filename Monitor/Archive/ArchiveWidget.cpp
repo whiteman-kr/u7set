@@ -21,7 +21,7 @@ namespace
 						   QWidget* parent);
 		virtual ~MonitorExportPrint() = default;
 
-	private:
+	protected:
 		virtual void generateHeader(QTextCursor& cursor) override;
 
 		ArchiveSource* m_source = nullptr;
@@ -85,20 +85,32 @@ namespace
 			cursor.insertText(tr("Requested interval:: %1 - %2\n").arg(from.toString("dd/MM/yyyy  HH:mm:ss")).arg(to.toString("dd/MM/yyyy  HH:mm:ss")));
 		}
 
-		cursor.insertText("Signal(s): ");
-
+		std::map<QString, std::vector<QString>> serviceToSignals;
 		for (const ArchiveSignal& s : m_source->acceptedSignals)
 		{
-			int display_arch_rsv_id_question;	// display s.archiveServiceShortenId?
-			//s.archiveServiceShortenId
-
-			cursor.insertText(QString(" %1,").arg(s.signalParam.customSignalId()));
+			serviceToSignals[s.archiveServiceShortenId].push_back(s.signalParam.customSignalId());
 		}
-		cursor.deletePreviousChar();	// Delete last comma
-		cursor.insertText("\n");
-		cursor.insertText("\n");
-	}
 
+		for (const auto& [service, signalIds] : serviceToSignals)
+		{
+			cursor.insertText(QString("Archive Service: %1\n").arg(service));
+
+			auto sortedIds = signalIds;
+			std::sort(sortedIds.begin(), sortedIds.end());
+
+			cursor.insertText("Signal(s): ");
+			for (const auto& signalId : sortedIds)
+			{
+				cursor.insertText(QString(" %1,").arg(signalId));
+			}
+			cursor.deletePreviousChar();	// Delete last comma
+			cursor.insertText("\n");
+
+		}
+
+		cursor.insertText("\n");
+		return;
+	}
 }
 
 //
@@ -310,7 +322,7 @@ void ArchiveWidget::ensureVisible()
 	}
 }
 
-bool ArchiveWidget::setSignals(const std::vector<AppSignalParam>& appSignals, bool)
+bool ArchiveWidget::setSignals(const std::vector<AppSignalParam>& appSignals)
 {
 	std::vector<ArchiveSignal> acceptedSignals;
 	acceptedSignals.reserve(appSignals.size());
@@ -699,28 +711,17 @@ void ArchiveWidget::showSignalInfo(QString appSignalId)
 
 void ArchiveWidget::removeSignal(QString appSignalId)
 {
-	// TO DO
-	int to_do_uncomment_and_make_it_work;
+	std::erase_if(m_source.acceptedSignals,
+				[&appSignalId](const ArchiveSignal& as)
+				{
+					return as.signalParam.appSignalId() == appSignalId;
+				});
 
-//	std::vector<AppSignalParam> result;
-//	result.reserve(m_source.acceptedSignals.size());
-
-//	for (const AppSignalParam& sp : m_source.acceptedSignals)
-//	{
-//		if (sp.appSignalId() != appSignalId)
-//		{
-//			result.push_back(sp);
-//		}
-//	}
-
-//	m_source.acceptedSignals.swap(result);
-
-//	m_model->clear();
-//	m_model->setParams(m_source.acceptedSignals, m_source.timeType);
+	m_model->removeSignal(appSignalId);
+	m_model->setParams(m_source.acceptedSignals, m_source.timeType);
 
 	return;
 }
-
 
 
 void ArchiveWidget::slot_configurationArrived(ConfigSettings configuration)
