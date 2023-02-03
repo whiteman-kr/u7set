@@ -50,8 +50,8 @@ protected slots:
 	void updateOrCancelButton();
 	void signalsButton();
 
-	void showSignalInfo(QString appSignalId);	// Slot to ArchiveView::requestToShowSignalInfo
-	void removeSignal(QString appSignalId);		// Slot to ArchiveView::requestToRemoveSignal
+	void showSignalInfo(QString appSignalId);							// Slot to ArchiveView::requestToShowSignalInfo
+	void removeSignal(QString appSignalId, QString archiveServiceId);	// Slot to ArchiveView::requestToRemoveSignal
 
 	void slot_configurationArrived(ConfigSettings configuration);
 

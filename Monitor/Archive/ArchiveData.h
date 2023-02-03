@@ -53,7 +53,7 @@ public:
 	[[nodiscard]] int size() const;
 
 	void clear();
-	void removeSignal(QString appSignalId);
+	void removeSignal(QString appSignalId, QString archiveServiceId);
 
 	[[nodiscard]] const ArchiveSignalState& state(int index) const;
 

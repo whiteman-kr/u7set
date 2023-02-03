@@ -709,15 +709,15 @@ void ArchiveWidget::showSignalInfo(QString appSignalId)
 								  theApp.mainWindow()->monitorCentralWidget());
 }
 
-void ArchiveWidget::removeSignal(QString appSignalId)
+void ArchiveWidget::removeSignal(QString appSignalId, QString archiveServiceId)
 {
 	std::erase_if(m_source.acceptedSignals,
-				[&appSignalId](const ArchiveSignal& as)
+				[&appSignalId, &archiveServiceId](const ArchiveSignal& as)
 				{
-					return as.signalParam.appSignalId() == appSignalId;
+					return as.signalParam.appSignalId() == appSignalId && as.archiveServiceId == archiveServiceId;
 				});
 
-	m_model->removeSignal(appSignalId);
+	m_model->removeSignal(appSignalId, archiveServiceId);
 	m_model->setParams(m_source.acceptedSignals, m_source.timeType);
 
 	return;

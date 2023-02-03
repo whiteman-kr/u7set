@@ -77,9 +77,11 @@ public:
 	void addData(ArchiveRequestResult&& chunk);
 
 	void clear();
-	void removeSignal(QString appSignalId);
+	void removeSignal(QString appSignalId, QString archiveServiceId);
 
+	std::vector<ArchiveSignal> archiveSignals();
 	std::vector<ArchiveSignalParam> appSignals();
+
 	const ArchiveSignalParam& signalParam(int row) const;
 
 	bool setShowParams(Hash signalHash, E::ValueViewType viewType, int precision);
@@ -87,7 +89,9 @@ public:
 	// Data
 	//
 private:
-	std::map<Hash, ArchiveSignalParam> m_archiveSignals;
+	std::map<Hash, ArchiveSignalParam> m_archiveSignalsMap;
+	std::vector<ArchiveSignal> m_archiveSignalsVector;
+
 	E::TimeType m_timeType = E::TimeType::Local;
 	ArchiveData m_archive;
 
@@ -125,7 +129,7 @@ signals:
 	void removeAppSignal(QString appSignalId);
 
 	void requestToShowSignalInfo(QString appSignalId);
-	void requestToRemoveSignal(QString appSignalId);
+	void requestToRemoveSignal(QString appSignalId, QString archiveServiceId);
 	void requestToCopySelection();
 	void requestToSetSignals();
 
