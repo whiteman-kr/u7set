@@ -191,6 +191,10 @@ namespace Builder
 		bool getLmOptoPortsRxAreas(std::vector<CodeChecker::MemArea>* optoRxAreas) const;
 		bool getLmOptoPortsTxAreas(std::vector<CodeChecker::MemArea>* optoTxAreas) const;
 
+		const LmMemoryMap& lmMemoryMap() const { return m_memoryMap; }
+
+		QList<const UalSignal*> getLoopbacksUalSignals() const;
+
 	private:
 		bool getLmOptoPortsAreas(std::vector<CodeChecker::MemArea>* optoAreas, bool rx) const;
 

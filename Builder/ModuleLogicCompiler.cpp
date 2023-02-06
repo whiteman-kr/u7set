@@ -167,7 +167,7 @@ namespace Builder
 
 			PROC_TO_CALL(ModuleLogicCompiler::makeAppLogicCode),
 			PROC_TO_CALL(ModuleLogicCompiler::writeCodeInfoFiles),
-//			PROC_TO_CALL(ModuleLogicCompiler::checkAppLogicCode),
+			PROC_TO_CALL(ModuleLogicCompiler::checkAppLogicCode),
 			PROC_TO_CALL(ModuleLogicCompiler::cleanupHeaps),
 
 			//
@@ -326,6 +326,11 @@ namespace Builder
 	bool ModuleLogicCompiler::getLmOptoPortsTxAreas(std::vector<CodeChecker::MemArea>* optoTxAreas) const
 	{
 		return getLmOptoPortsAreas(optoTxAreas, false);
+	}
+
+	QList<const UalSignal*> ModuleLogicCompiler::getLoopbacksUalSignals() const
+	{
+		return m_loopbacks.getLoopbacksUalSignals();
 	}
 
 	bool ModuleLogicCompiler::getLmOptoPortsAreas(std::vector<CodeChecker::MemArea>* optoAreas, bool rx) const
@@ -7661,9 +7666,18 @@ namespace Builder
 
 		cd.comment_nl("Commands testing code START");
 
-		cd << cmd.movConst(wordAcc1, 0, "init word accumulator");
-		cd << cmd.movConst(wordAcc2, 0);
-		cd << cmd.movConst(bitAcc, 0, "init bit accumulator");
+		cd << cmd.movConstInt32(wordAcc1, 0, "init word accumulator 1 (4 words)");
+		cd << cmd.movConstInt32(wordAcc1 + 2, 0);
+
+		cd.newLine();
+
+		cd << cmd.movConstInt32(wordAcc2, 0, "init word accumulator 2 (4 words)");
+		cd << cmd.movConstInt32(wordAcc2 + 2, 0);
+
+		cd.newLine();
+
+		cd << cmd.movConst(bitAcc, 0, "init bit accumulator (2 words)");
+		cd << cmd.movConst(bitAcc + 1, 0);
 
 		cd.newLine();
 

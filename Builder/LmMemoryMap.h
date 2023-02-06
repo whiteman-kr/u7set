@@ -94,8 +94,9 @@ namespace Builder
 	{
 		Q_OBJECT
 
-		const int WORD_ACCUMULATOR_SIZE_W = 4;			// 4 words is reserved for Int64 and Double processing
-		const int BIT_ACCUMULATOR_SIZE_W = 2;
+	public:
+		static const int WORD_ACCUMULATOR_SIZE_W = 4;			// 4 words is reserved for Int64 and Double processing
+		static const int BIT_ACCUMULATOR_SIZE_W = 2;
 
 	public:
 		LmMemoryMap(IssueLogger* log);
@@ -112,9 +113,9 @@ namespace Builder
 		bool recalculateAddresses();
 
 		int acquiredDiscreteOutputSignalsAddress() const { return m_appBitAdressed.acquiredDiscreteOutputSignals.startAddress(); }
-		int acquiredDiscreteInternalSignalsAddress() const { return m_appBitAdressed.acquiredDiscreteInternalSignals.startAddress(); }
-
 		int acquiredDiscreteOutputSignalsSizeW() const { return m_appBitAdressed.acquiredDiscreteOutputSignals.sizeW(); }
+
+		int acquiredDiscreteInternalSignalsAddress() const { return m_appBitAdressed.acquiredDiscreteInternalSignals.startAddress(); }
 		int acquiredDiscreteInternalSignalsSizeW() const { return m_appBitAdressed.acquiredDiscreteInternalSignals.sizeW(); }
 
 		int appBitMemoryStart() const { return m_appBitAdressed.memory.startAddress(); }
@@ -124,6 +125,8 @@ namespace Builder
 		void setAppBitMemoryDiscreteSignalsHeapSizeW(int sizeW) { m_appBitAdressed.discreteSignalsHeap.setSizeW(sizeW); }
 
 		int bitAccumulatorAddress() const { return m_appBitAdressed.bitAccumulator.startAddress(); }
+		int constBitsAddress() const { return m_appBitAdressed.constBits.startAddress(); }
+
 		int wordAccumulatorAddress() const { return m_appWordAdressed.wordAccumulator.startAddress(); }
 		int wordAccumulator2Address() const { return m_appWordAdressed.wordAccumulator.startAddress() + WORD_ACCUMULATOR_SIZE_W; }
 

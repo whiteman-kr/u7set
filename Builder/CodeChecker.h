@@ -49,6 +49,8 @@ namespace Builder
 
 		bool initReadableAreas();
 		bool initWritableAreas();
+		bool initPartialWrittenAddresses();
+		bool initLoopbackDiscretes();
 
 		void initToRead(const MemArea& ma);
 
@@ -82,7 +84,7 @@ namespace Builder
 		bool checkReadFuncBlock32(const CodeItem& cmd);
 		bool checkWriteFuncBlockConst32(const CodeItem& cmd);
 		bool checkReadFuncBlockTest32(const CodeItem& cmd);
-		bool checkMovConstIfFlag(const CodeItem& cmd);
+		bool checkMovCompareFlag(const CodeItem& cmd);
 		bool checkPrevMov(const CodeItem& cmd);
 		bool checkPrevMov32(const CodeItem& cmd);
 		bool checkFill(const CodeItem& cmd);
@@ -93,11 +95,15 @@ namespace Builder
 
 		bool checkCanRead16(const CodeItem& cmd, quint32 readAddr) const;
 		bool checkCanRead32(const CodeItem& cmd, quint32 readAddr) const;
-		bool checkCanRead(const CodeItem& cmd, quint32 readAddr, quint32 sizeW) const;
+		bool checkCanRead(const CodeItem& cmd, quint32 readAddr, quint32 sizeW, bool enableReadUnwritten = false) const;
+		bool checkCanReadBit(const CodeItem& cmd, quint32 readAddr, quint32 bitNo) const;
+		bool addrCanBePartialWritten(quint32 readAddr) const;
 
 		bool checkCanWrite16(const CodeItem& cmd, quint32 writeAddr) const;
 		bool checkCanWrite32(const CodeItem& cmd, quint32 writeAddr) const;
 		bool checkCanWrite(const CodeItem& cmd, quint32 writeAddr, quint32 sizeW) const;
+		bool checkCanWriteBit(const CodeItem& cmd, quint32 writeAddr, quint32 bitNo) const;
+		void writeBit(quint32 writeAddr, quint32 bitNo) const;
 
 		const MemArea& findMemAreaToWrite(quint32 writeAddr, quint32 sizeW) const;
 		const MemArea& findMemAreaToRead(quint32 readAddr, quint32 sizeW) const;
@@ -116,6 +122,8 @@ namespace Builder
 
 		std::map<quint32, MemArea> m_readAreas;
 		std::map<quint32, MemArea> m_writeAreas;
+
+		std::set<quint32> m_addrCanBeParialWritten;
 
 		inline static const MemArea m_notValidArea;
 	};

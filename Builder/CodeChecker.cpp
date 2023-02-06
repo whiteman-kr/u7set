@@ -85,7 +85,7 @@ namespace Builder
 		&CodeChecker::checkReadFuncBlock32,
 		&CodeChecker::checkWriteFuncBlockConst32,
 		&CodeChecker::checkReadFuncBlockTest32,
-		&CodeChecker::checkMovConstIfFlag,
+		&CodeChecker::checkMovCompareFlag,
 		&CodeChecker::checkPrevMov,
 		&CodeChecker::checkPrevMov32,
 		&CodeChecker::checkFill
@@ -138,6 +138,8 @@ namespace Builder
 
 		result &= initReadableAreas();
 		result &= initWritableAreas();
+		result &= initPartialWrittenAddresses();
+		result &= initLoopbackDiscretes();
 
 		return result;
 	}
@@ -300,6 +302,64 @@ namespace Builder
 		return true;
 	}
 
+	bool CodeChecker::initPartialWrittenAddresses()
+	{
+		const LmMemoryMap& mem = m_compiler.lmMemoryMap();
+
+		for(int i = 0; i < LmMemoryMap::BIT_ACCUMULATOR_SIZE_W; i++)
+		{
+			m_addrCanBeParialWritten.insert(mem.bitAccumulatorAddress() + i);
+		}
+
+		m_addrCanBeParialWritten.insert(mem.constBitsAddress());
+
+		if (mem.acquiredDiscreteOutputSignalsSizeW() > 0)
+		{
+			m_addrCanBeParialWritten.insert(mem.acquiredDiscreteOutputSignalsAddress() +
+											mem.acquiredDiscreteOutputSignalsSizeW() - 1);
+		}
+
+		if (mem.acquiredDiscreteInternalSignalsSizeW() > 0)
+		{
+			m_addrCanBeParialWritten.insert(mem.acquiredDiscreteInternalSignalsAddress() +
+											mem.acquiredDiscreteInternalSignalsSizeW() - 1);
+		}
+
+		return true;
+	}
+
+	bool CodeChecker::initLoopbackDiscretes()
+	{
+		bool result = true;
+
+		QList<const UalSignal*> loopbackSignals = m_compiler.getLoopbacksUalSignals();
+
+		for(const UalSignal* s : loopbackSignals)
+		{
+			TEST_PTR_CONTINUE(s);
+
+			if (s->isConst() == true ||
+				s->isDiscrete() == false)
+			{
+				continue;
+			}
+
+			if (s->ualAddrIsValid() == false)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			if (m_compiler.lmMemoryMap().addressInBitMemory(s->ualAddr().offset()) == true)
+			{
+				writeBit(s->ualAddr().offset(), s->ualAddr().bit());
+			}
+		}
+
+		return result;
+	}
+
 	void CodeChecker::initToRead(const MemArea& ma)
 	{
 		if (ma.isValid() == false)
@@ -383,8 +443,8 @@ namespace Builder
 
 	bool CodeChecker::checkMov(const CodeItem& cmd)
 	{
-		int readAddr = cmd.getWord3();
-		int writeAddr = cmd.getWord2();
+		quint32 readAddr = cmd.getWord3();
+		quint32 writeAddr = cmd.getWord2();
 
 		return checkCanRead16(cmd, readAddr) &&
 			   checkCanWrite16(cmd, writeAddr);
@@ -392,9 +452,9 @@ namespace Builder
 
 	bool CodeChecker::checkMovMem(const CodeItem& cmd)
 	{
-		int readAddr = cmd.getWord3();
-		int writeAddr = cmd.getWord2();
-		int n = cmd.getWord4();
+		quint32 readAddr = cmd.getWord3();
+		quint32 writeAddr = cmd.getWord2();
+		quint32 n = cmd.getWord4();
 
 		return checkCanRead(cmd, readAddr, n) &&
 			   checkCanWrite(cmd, writeAddr, n);
@@ -402,114 +462,172 @@ namespace Builder
 
 	bool CodeChecker::checkMovConst(const CodeItem& cmd)
 	{
-		int writeAddr = cmd.getWord2();
+		quint32 writeAddr = cmd.getWord2();
 
 		return checkCanWrite16(cmd, writeAddr);
 	}
 
 	bool CodeChecker::checkMovBitConst(const CodeItem& cmd)
 	{
-		return true;
+		quint32 writeAddr = cmd.getWord2();
+		quint32 bitNo = cmd.getWord4();
+
+		return checkCanWriteBit(cmd, writeAddr, bitNo);
 	}
 
 	bool CodeChecker::checkWriteFuncBlock(const CodeItem& cmd)
 	{
-		return true;
+		quint32 readAddr = cmd.getWord3();
+
+		return  checkCanRead16(cmd, readAddr) &&
+				checkFbTypeAndInstance(cmd);
 	}
 
 	bool CodeChecker::checkReadFuncBlock(const CodeItem& cmd)
 	{
-		return true;
+		quint32 writeAddr = cmd.getWord3();
+
+		return  checkFbTypeAndInstance(cmd) &&
+				checkCanWrite16(cmd, writeAddr);
 	}
 
 	bool CodeChecker::checkWriteFuncBlockConst(const CodeItem& cmd)
 	{
-		return true;
+		return checkFbTypeAndInstance(cmd);
 	}
 
 	bool CodeChecker::checkWriteFuncBlockBit(const CodeItem& cmd)
 	{
-		return true;
+		quint32 readAddr = cmd.getWord3();
+		quint32 bitNo = cmd.getWord4();
+
+		return  checkCanReadBit(cmd, readAddr, bitNo) &&
+				checkFbTypeAndInstance(cmd);
 	}
 
 	bool CodeChecker::checkReadFuncBlockBit(const CodeItem& cmd)
 	{
-		return true;
+		quint32 writeAddr = cmd.getWord3();
+		quint32 bitNo = cmd.getWord4();
+
+		return  checkFbTypeAndInstance(cmd) &&
+				checkCanWriteBit(cmd, writeAddr,  bitNo);
 	}
 
 	bool CodeChecker::checkReadFuncBlockTest(const CodeItem& cmd)
 	{
-		return true;
+		return checkFbTypeAndInstance(cmd);
 	}
 
 	bool CodeChecker::checkSetMem(const CodeItem& cmd)
 	{
-		return true;
+		quint32 writeAddr = cmd.getWord2();
+		quint32 sizeW = cmd.getWord4();
+
+		return checkCanWrite(cmd, writeAddr, sizeW);
 	}
 
 	bool CodeChecker::checkMovBit(const CodeItem& cmd)
 	{
-		return true;
+		quint32 readAddr = cmd.getWord3();
+		quint32 readBitNo = cmd.getBitNo1();
+
+		quint32 writeAddr = cmd.getWord2();
+		quint32 writeBitNo = cmd.getBitNo2();
+
+		return  checkCanReadBit(cmd, readAddr, readBitNo) &&
+				checkCanWriteBit(cmd, writeAddr, writeBitNo);
 	}
 
 	bool CodeChecker::checkNstart(const CodeItem& cmd)
 	{
+		checkFbTypeAndInstance(cmd);
 		return true;
 	}
 
 	bool CodeChecker::checkAppStart(const CodeItem& cmd)
 	{
+		Q_UNUSED(cmd);
 		return true;
 	}
 
 	bool CodeChecker::checkMov32(const CodeItem& cmd)
 	{
-		return true;
+		quint32 readAddr = cmd.getWord3();
+		quint32 writeAddr = cmd.getWord2();
+
+		return checkCanRead32(cmd, readAddr) &&
+			   checkCanWrite32(cmd, writeAddr);
 	}
 
 	bool CodeChecker::checkMovConst32(const CodeItem& cmd)
 	{
-		return true;
+		quint32 writeAddr = cmd.getWord2();
+
+		return checkCanWrite32(cmd, writeAddr);
 	}
 
 	bool CodeChecker::checkWriteFuncBlock32(const CodeItem& cmd)
 	{
-		return true;
+		quint32 readAddr = cmd.getWord3();
+
+		return  checkCanRead32(cmd, readAddr) &&
+				checkFbTypeAndInstance(cmd);
 	}
 
 	bool CodeChecker::checkReadFuncBlock32(const CodeItem& cmd)
 	{
-		return true;
+		quint32 writeAddr = cmd.getWord3();
+
+		return  checkFbTypeAndInstance(cmd) &&
+				checkCanWrite32(cmd, writeAddr);
 	}
 
 	bool CodeChecker::checkWriteFuncBlockConst32(const CodeItem& cmd)
 	{
-		return true;
+		return checkFbTypeAndInstance(cmd);
 	}
 
 	bool CodeChecker::checkReadFuncBlockTest32(const CodeItem& cmd)
 	{
-		return true;
+		return checkFbTypeAndInstance(cmd);
 	}
 
-	bool CodeChecker::checkMovConstIfFlag(const CodeItem& cmd)
+	bool CodeChecker::checkMovCompareFlag(const CodeItem& cmd)
 	{
-		return true;
+		quint32 writeAddr = cmd.getWord2();
+		quint32 bitNo = cmd.getWord3();
+
+		return checkCanWriteBit(cmd, writeAddr, bitNo);
 	}
 
 	bool CodeChecker::checkPrevMov(const CodeItem& cmd)
 	{
-		return true;
+		quint32 readAddr = cmd.getWord3();
+		quint32 writeAddr = cmd.getWord2();
+
+		return checkCanRead(cmd, readAddr, 1, true) &&
+			   checkCanWrite16(cmd, writeAddr);
 	}
 
 	bool CodeChecker::checkPrevMov32(const CodeItem& cmd)
 	{
-		return true;
+		quint32 readAddr = cmd.getWord3();
+		quint32 writeAddr = cmd.getWord2();
+
+		return checkCanRead(cmd, readAddr, 2, true) &&
+			   checkCanWrite32(cmd, writeAddr);
 	}
 
 	bool CodeChecker::checkFill(const CodeItem& cmd)
 	{
-		return true;
+		quint32 readAddr = cmd.getWord3();
+		quint32 readBitNo = cmd.getWord4();
+
+		quint32 writeAddr = cmd.getWord2();
+
+		return  checkCanReadBit(cmd, readAddr, readBitNo) &&
+				checkCanWrite16(cmd, writeAddr);
 	}
 
 	bool CodeChecker::checkFbTypeAndInstance(const CodeItem& cmd)
@@ -545,7 +663,7 @@ namespace Builder
 		return checkCanRead(cmd, readAddr, 2);
 	}
 
-	bool CodeChecker::checkCanRead(const CodeItem& cmd, quint32 readAddr, quint32 sizeW) const
+	bool CodeChecker::checkCanRead(const CodeItem& cmd, quint32 readAddr, quint32 sizeW, bool enableReadUnwritten) const
 	{
 		const MemArea& areaToRead = findMemAreaToRead(readAddr, sizeW);
 
@@ -565,15 +683,55 @@ namespace Builder
 			}
 			else
 			{
-				if (m_mem[readAddr + i] != 0xFFFF)
+				if (enableReadUnwritten == false)
 				{
-					logError(cmd, QString("Unwritten memory read on address %1").arg(readAddr + i));
-					return false;
+					quint16 memValue = m_mem[readAddr + i];
+
+					if (memValue != 0xFFFF)
+					{
+						if (addrCanBePartialWritten(readAddr + i) == false || memValue == 0)
+						{
+							logError(cmd, QString("Unwritten memory read on address %1").arg(readAddr + i));
+							return false;
+						}
+					}
 				}
 			}
 		}
 
 		return true;
+	}
+
+	bool CodeChecker::checkCanReadBit(const CodeItem& cmd, quint32 readAddr, quint32 bitNo) const
+	{
+		const MemArea& areaToRead = findMemAreaToRead(readAddr, 1);
+
+		if (areaToRead.isValid() == false)
+		{
+			logError(cmd, QString("Can't read address %1[%2]").arg(readAddr).arg(bitNo));
+			return false;
+		}
+
+		if (bitNo > 15)
+		{
+			logError(cmd, QString("Can't read address %1[%2], bitNo out ouf range").arg(readAddr).arg(bitNo));
+			return false;
+		}
+
+		quint16 result = m_mem[readAddr] & (0x0001 << bitNo);
+
+		if (result == 0)
+		{
+			logError(cmd, QString("Unwritten memory read on address %1[%2]").arg(readAddr).arg(bitNo));
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CodeChecker::addrCanBePartialWritten(quint32 readAddr) const
+	{
+		return (m_addrCanBeParialWritten.find(readAddr) != m_addrCanBeParialWritten.end());
 	}
 
 	bool CodeChecker::checkCanWrite16(const CodeItem& cmd, quint32 writeAddr) const
@@ -610,6 +768,36 @@ namespace Builder
 		}
 
 		return true;
+	}
+
+	bool CodeChecker::checkCanWriteBit(const CodeItem& cmd, quint32 writeAddr, quint32 bitNo) const
+	{
+		const MemArea& areaToWrite = findMemAreaToWrite(writeAddr, 1);
+
+		if (areaToWrite.isValid() == false)
+		{
+			logError(cmd, QString("Can't write address %1[%2]").arg(writeAddr).arg(bitNo));
+			return false;
+		}
+
+		if (bitNo > 15)
+		{
+			logError(cmd, QString("Can't write address %1[%2], bitNo out ouf range").arg(writeAddr).arg(bitNo));
+			return false;
+		}
+
+		writeBit(writeAddr, bitNo);
+
+		return true;
+	}
+
+	void CodeChecker::writeBit(quint32 writeAddr, quint32 bitNo) const
+	{
+		TEST_PTR_RETURN(m_mem);
+		Q_ASSERT(writeAddr < m_memSizeW);
+		Q_ASSERT(bitNo < 16);
+
+		m_mem[writeAddr] |= (0x0001 << bitNo);
 	}
 
 	const CodeChecker::MemArea& CodeChecker::findMemAreaToWrite(quint32 writeAddr, quint32 sizeW) const
