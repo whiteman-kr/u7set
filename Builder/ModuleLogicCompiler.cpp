@@ -7515,9 +7515,12 @@ namespace Builder
 		m_idrCode.clear();
 
 		//
-
-		m_idrCode.comment("Start of IDR phase code");
-		m_idrCode.newLine();
+		m_idrCode.comment_nl(ApplicationLogicCompiler::getInfoFileHeader(m_context));
+		m_idrCode.comment(QString("LM equipmentID: %1").arg(lmEquipmentID()));
+		m_idrCode.comment_nl(QString("LM description: %1, version %2").
+								arg(m_lmDescription->name()).
+								arg(m_lmDescription->version()));
+		m_idrCode.comment_nl("Start of IDR phase code");
 
 		CodeItem appStartCmd;
 
@@ -7531,6 +7534,7 @@ namespace Builder
 
 		CodeGenProcsToCallArray procs =
 		{
+			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateCustomCode),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateAfbsVersionCheckingCode),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateInitAfbsCode),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateLoopbacksRefreshingCode),
@@ -7632,6 +7636,138 @@ namespace Builder
 	bool ModuleLogicCompiler::cleanupHeaps()
 	{
 		m_ualSignals.finalizeHeaps();
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::generateCustomCode(CodeSnippet* code)
+	{
+		TEST_PTR_RETURN_FALSE(code);
+		TEST_PTR_RETURN_FALSE(m_context);
+		TEST_PTR_RETURN_FALSE(m_context->m_buildResultWriter);
+
+		if (m_context->m_buildResultWriter->buildInfo().project != "time_tests")
+		{
+			return true;
+		}
+
+		int wordAcc1 = m_memoryMap.wordAccumulatorAddress();
+		int wordAcc2 = m_memoryMap.wordAccumulator2Address();
+
+		int bitAcc = m_memoryMap.bitAccumulatorAddress();
+
+		CodeSnippet& cd = *code;
+		CodeItem cmd;
+
+		cd.comment_nl("Commands testing code START");
+
+		cd << cmd.movConst(wordAcc1, 0, "init word accumulator");
+		cd << cmd.movConst(wordAcc2, 0);
+		cd << cmd.movConst(bitAcc, 0, "init bit accumulator");
+
+		cd.newLine();
+
+		cd << cmd.mov(wordAcc1, wordAcc2, "word <= word");
+		cd << cmd.mov(bitAcc, wordAcc2, "bit <= word");
+		cd << cmd.mov(wordAcc1, bitAcc, "word <= bit");
+		cd << cmd.mov(bitAcc, bitAcc, "bit <= bit");
+
+		cd.newLine();
+
+		cd << cmd.movMem(wordAcc1, wordAcc1, 2, "word <= word");
+
+		cd.newLine();
+
+		cd << cmd.movConst(wordAcc1, 1234, "word <= const");
+		cd << cmd.movConst(bitAcc, 5678, "bit <= const");
+
+		cd.newLine();
+
+		cd << cmd.movBitConst(wordAcc1, 3, 1, "word <= const bit");
+		cd << cmd.movBitConst(bitAcc, 3, 1, "bit <= const bit");
+
+		cd.newLine();
+
+		cd << cmd.writeFuncBlockConst(14, 1, 0, 1, "SCALE_16UI_16UI", "init SCALE_16UI_16UI");
+		cd << cmd.writeFuncBlock(14, 1, 5, wordAcc1, "SCALE_16UI_16UI", "fb.input16 <= word");
+		cd << cmd.writeFuncBlock(14, 1, 5, bitAcc, "SCALE_16UI_16UI", "fb.input16 <= bit");
+		cd << cmd.start(14, 1, "SCALE_16UI_16UI", 4);
+		cd << cmd.readFuncBlock(wordAcc1, 14, 1, 8, "SCALE_16UI_16UI", "word <= fb.output16");
+		cd << cmd.readFuncBlock(bitAcc, 14, 1, 8, "SCALE_16UI_16UI", "bit <= fb.output16");
+
+		cd.newLine();
+
+		cd << cmd.writeFuncBlockConst(1, 0, 0, 2, "AND", "init 2 AND");
+		cd << cmd.writeFuncBlockConst(1, 0, 1, 1, "AND");
+		cd << cmd.writeFuncBlockConst(1, 0, 2, 1, "AND");
+
+		cd << cmd.writeFuncBlockBit(1, 0, 3, bitAcc, 7, "AND", "fb.input <= bit");
+		cd << cmd.writeFuncBlockBit(1, 0, 4, wordAcc1, 11, "AND", "fb.input <= word");
+
+		cd << cmd.start(1, 0, "AND", 5);
+
+		cd << cmd.readFuncBlockBit(wordAcc1, 12, 1, 0, 20, "AND", "word <= fb.output");
+		cd << cmd.readFuncBlockBit(bitAcc,4, 1, 0, 20, "AND", "bit <= fb.output");
+
+		cd.newLine();
+
+		cd << cmd.setMem(wordAcc1, 3456, 3);
+
+		cd.newLine();
+
+		cd << cmd.movBit(wordAcc1, 3, wordAcc2, 3, "word bit <= word bit");
+		cd << cmd.movBit(wordAcc1, 5, bitAcc, 5, "word bit <= bit bit");
+		cd << cmd.movBit(bitAcc, 6, wordAcc1, 6, "bit bit <= word bit");
+		cd << cmd.movBit(bitAcc, 15, bitAcc + 1, 15, "bit <= bit");
+
+		cd.newLine();
+
+		cd << cmd.nstart(1, 0, 3, "AND", 5);
+
+		cd.newLine();
+
+		cd << cmd.mov32(wordAcc1 + 2, wordAcc1, "word <= word");
+
+		cd.newLine();
+
+		cd << cmd.movConstInt32(wordAcc1, 23456, "word <= const32");
+
+		cd.newLine();
+
+		cd << cmd.writeFuncBlockConst(14, 2, 0, 2, "SCALE_16UI_SI", "init SCALE_16UI_SI");
+		cd << cmd.writeFuncBlockConstInt32(14, 2, 1, 32768, "SCALE_16UI_SI", "fb.input32 <= const32");
+		cd << cmd.writeFuncBlock32(14, 2, 2, wordAcc1, "SCALE_16UI_SI", "fb.input32 <= word");
+		cd << cmd.start(14, 2, "SCALE_16UI_SI", 4);
+		cd << cmd.readFuncBlock32(wordAcc1, 14, 2, 9, "SCALE_16UI_SI", "word <= fb.output32");
+
+		cd.newLine();
+
+		cd << cmd.readFuncBlockCompareInt32(1, 0, 22, 2345678, "LOGIC");
+
+		cd.newLine();
+
+		cd << cmd.movCompareFlag(wordAcc1, 10, "word <= cmp flag");
+		cd << cmd.movCompareFlag(bitAcc, 10, "bit <= cmp flag");
+
+		cd.newLine();
+
+		cd << cmd.prevMov(wordAcc1, wordAcc2, "word <= word");
+		cd << cmd.prevMov(bitAcc, wordAcc2, "bit <= word");
+
+		cd.newLine();
+
+		cd << cmd.prevMov32(wordAcc1, wordAcc1 + 2, "word <= word");
+
+		cd.newLine();
+
+		cd << cmd.fill(wordAcc1, bitAcc, 3, "word <= bit");
+		cd << cmd.fill(wordAcc1, wordAcc2, 3, "word <= from word");
+		cd << cmd.fill(bitAcc, wordAcc2, 3, "bit <= from word");
+		cd << cmd.fill(bitAcc, bitAcc + 1, 4, "bit <= from bit");
+
+		cd.newLine();
+
+		cd.comment_nl("Commands testing code END");
 
 		return true;
 	}

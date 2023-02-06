@@ -555,7 +555,7 @@ namespace Builder
 			return false;
 		}
 
-		for(int i = 0; i < sizeW; i++)
+		for(quint32 i = 0; i < sizeW; i++)
 		{
 			if (readAddr + i >= m_memSizeW)
 			{
@@ -596,7 +596,7 @@ namespace Builder
 			return false;
 		}
 
-		for(int i = 0; i < sizeW; i++)
+		for(quint32 i = 0; i < sizeW; i++)
 		{
 			if (writeAddr + i >= m_memSizeW)
 			{

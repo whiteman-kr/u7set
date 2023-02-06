@@ -438,6 +438,7 @@ namespace Builder
 		bool checkAppLogicCode();
 		bool cleanupHeaps();
 
+		bool generateCustomCode(CodeSnippet* code);
 		bool generateAfbsVersionCheckingCode(CodeSnippet* code);
 		bool generateInitAfbsCode(CodeSnippet* code);
 		bool generateInitAppFbParamsCode(CodeSnippet* code, const UalAfb& appFb, const QString& usedBy);

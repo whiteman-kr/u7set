@@ -541,11 +541,11 @@ namespace Builder
 		switch(i_conf.unsignedIntValue())
 		{
 		case 1:
-			m_runTime = 10 + 32;	// for signed int input
+			m_runTime = 11 + 32;	// for signed int input
 			break;
 
 		case 2:
-			m_runTime = 24 + 32;	// for float input
+			m_runTime = 25 + 32;	// for float input
 			break;
 
 		default:

@@ -344,16 +344,21 @@ namespace Builder
 	{
 	}
 
-	void CodeItem::nop()
+	CodeItem &CodeItem::nop(const QString& comment)
 	{
 		initCommand();
 
 		m_result = true;
 
 		m_code.setOpCode(LmCommand::Code::NOP);
+
+		setComment(comment);
+
+		return *this;
 	}
 
-	void CodeItem::start(int fbType, int fbInstance, const QString& fbCaption, int fbRunTime)
+	CodeItem& CodeItem::start(int fbType, int fbInstance, const QString& fbCaption, int fbRunTime,
+						 const QString& comment)
 	{
 		initCommand();
 
@@ -370,18 +375,26 @@ namespace Builder
 		{
 			Q_ASSERT(false);		// fbRunTime can't be 0
 		}
+
+		setComment(comment);
+
+		return *this;
 	}
 
-	void CodeItem::stop()
+	CodeItem& CodeItem::stop(const QString& comment)
 	{
 		initCommand();
 
 		m_result = true;
 
 		m_code.setOpCode(LmCommand::Code::STOP);
+
+		setComment(comment);
+
+		return *this;
 	}
 
-	void CodeItem::mov(int addrTo, int addrFrom)
+	CodeItem& CodeItem::mov(int addrTo, int addrFrom, const QString& comment)
 	{
 		Q_ASSERT(addrTo >= 0);
 		Q_ASSERT(addrFrom >= 0);
@@ -393,9 +406,13 @@ namespace Builder
 		m_code.setOpCode(LmCommand::Code::MOV);
 		m_code.setWord2(addrTo);
 		m_code.setWord3(addrFrom);
+
+		setComment(comment);
+
+		return *this;
 	}
 
-	void CodeItem::mov(Address16 addrTo, Address16 addrFrom)
+	CodeItem& CodeItem::mov(Address16 addrTo, Address16 addrFrom, const QString& comment)
 	{
 		Q_ASSERT(addrTo.isValid() == true);
 		Q_ASSERT(addrTo.bit() == 0);
@@ -403,10 +420,10 @@ namespace Builder
 		Q_ASSERT(addrFrom.isValid() == true);
 		Q_ASSERT(addrFrom.bit() == 0);
 
-		mov(addrTo.offset(), addrFrom.offset());
+		return mov(addrTo.offset(), addrFrom.offset(), comment);
 	}
 
-	void CodeItem::movMem(int addrTo, int addrFrom, int sizeW)
+	CodeItem& CodeItem::movMem(int addrTo, int addrFrom, int sizeW, const QString& comment)
 	{
 		initCommand();
 
@@ -418,9 +435,13 @@ namespace Builder
 		m_code.setWord2(addrTo);
 		m_code.setWord3(addrFrom);
 		m_code.setWord4(sizeW);
+
+		setComment(comment);
+
+		return *this;
 	}
 
-	void CodeItem::movMem(Address16 addrTo, Address16 addrFrom, int sizeW)
+	CodeItem& CodeItem::movMem(Address16 addrTo, Address16 addrFrom, int sizeW, const QString& comment)
 	{
 		Q_ASSERT(addrTo.isValid() == true);
 		Q_ASSERT(addrTo.bit() == 0);
@@ -428,10 +449,10 @@ namespace Builder
 		Q_ASSERT(addrFrom.isValid() == true);
 		Q_ASSERT(addrFrom.bit() == 0);
 
-		movMem(addrTo.offset(), addrFrom.offset(), sizeW);
+		return movMem(addrTo.offset(), addrFrom.offset(), sizeW, comment);
 	}
 
-	void CodeItem::movConst(int addrTo, int constVal)
+	CodeItem& CodeItem::movConst(int addrTo, int constVal, const QString& comment)
 	{
 		Q_ASSERT(addrTo >= 0);
 
@@ -442,17 +463,21 @@ namespace Builder
 		m_code.setOpCode(LmCommand::Code::MOVC);
 		m_code.setWord2(addrTo);
 		m_code.setWord3(constVal);
+
+		setComment(comment);
+
+		return *this;
 	}
 
-	void CodeItem::movConst(Address16 addrTo, int constVal)
+	CodeItem& CodeItem::movConst(Address16 addrTo, int constVal, const QString& comment)
 	{
 		Q_ASSERT(addrTo.isValid() == true);
 		Q_ASSERT(addrTo.bit() == 0);
 
-		movConst(addrTo.offset(), constVal);
+		return movConst(addrTo.offset(), constVal, comment);
 	}
 
-	void CodeItem::movBitConst(int addrTo, int bitNo, int constBit)
+	CodeItem& CodeItem::movBitConst(int addrTo, int bitNo, int constBit, const QString& comment)
 	{
 		Q_ASSERT(addrTo >=0);
 
@@ -464,23 +489,29 @@ namespace Builder
 		m_code.setWord2(addrTo);
 		m_code.setWord3(constBit);
 		m_code.setBitNo(bitNo);
+
+		setComment(comment);
+
+		return *this;
 	}
 
-	void CodeItem::movBitConst(Address16 addr16, int constBit)
+	CodeItem& CodeItem::movBitConst(Address16 addr16, int constBit, const QString& comment)
 	{
 		Q_ASSERT(addr16.isValid() == true);
 
-		movBitConst(addr16.offset(), addr16.bit(), constBit);
+		return movBitConst(addr16.offset(), addr16.bit(), constBit, comment);
 	}
 
-	void CodeItem::writeFuncBlock(int fbType, int fbInstance, int fbParamNo, const Address16& addrFrom, const QString& fbCaption)
+	CodeItem& CodeItem::writeFuncBlock(int fbType, int fbInstance, int fbParamNo, const Address16& addrFrom,
+									   const QString& fbCaption, const QString& comment)
 	{
 		Q_ASSERT(addrFrom.bit() == 0);
 
-		writeFuncBlock(fbType, fbInstance, fbParamNo, addrFrom.offset(), fbCaption);
+		return writeFuncBlock(fbType, fbInstance, fbParamNo, addrFrom.offset(), fbCaption, comment);
 	}
 
-	void CodeItem::writeFuncBlock(int fbType, int fbInstance, int fbParamNo, int addrFrom, const QString& fbCaption)
+	CodeItem& CodeItem::writeFuncBlock(int fbType, int fbInstance, int fbParamNo, int addrFrom,
+									   const QString& fbCaption, const QString& comment)
 	{
 		Q_ASSERT(addrFrom >= 0);
 
@@ -494,16 +525,22 @@ namespace Builder
 		m_code.setFbParamNo(fbParamNo);
 		m_code.setWord3(addrFrom);
 		m_code.setFbCaption(fbCaption);
+
+		setComment(comment);
+
+		return *this;
 	}
 
-	void CodeItem::readFuncBlock(const Address16& addrTo, int fbType, int fbInstance, int fbParamNo, const QString& fbCaption)
+	CodeItem& CodeItem::readFuncBlock(const Address16& addrTo, int fbType, int fbInstance, int fbParamNo,
+									  const QString& fbCaption, const QString& comment)
 	{
 		Q_ASSERT(addrTo.bit() == 0);
 
-		readFuncBlock(addrTo.offset(), fbType, fbInstance, fbParamNo, fbCaption);
+		return readFuncBlock(addrTo.offset(), fbType, fbInstance, fbParamNo, fbCaption, comment);
 	}
 
-	void CodeItem::readFuncBlock(int addrTo, int fbType, int fbInstance, int fbParamNo, const QString& fbCaption)
+	CodeItem& CodeItem::readFuncBlock(int addrTo, int fbType, int fbInstance, int fbParamNo,
+									  const QString& fbCaption, const QString& comment)
 	{
 		Q_ASSERT(addrTo >= 0);
 
@@ -517,9 +554,14 @@ namespace Builder
 		m_code.setFbParamNo(fbParamNo);
 		m_code.setWord3(addrTo);
 		m_code.setFbCaption(fbCaption);
+
+		setComment(comment);
+
+		return *this;
 	}
 
-	void CodeItem::writeFuncBlockConst(int fbType, int fbInstance, int fbParamNo, int constVal, const QString& fbCaption)
+	CodeItem& CodeItem::writeFuncBlockConst(int fbType, int fbInstance, int fbParamNo, int constVal,
+											const QString& fbCaption, const QString& comment)
 	{
 		initCommand();
 
@@ -531,9 +573,14 @@ namespace Builder
 		m_code.setFbParamNo(fbParamNo);
 		m_code.setWord3(constVal);
 		m_code.setFbCaption(fbCaption);
+
+		setComment(comment);
+
+		return *this;
 	}
 
-	void CodeItem::writeFuncBlockBit(int fbType, int fbInstance, int fbParamNo, int addrFrom, int bitNo, const QString& fbCaption)
+	CodeItem& CodeItem::writeFuncBlockBit(int fbType, int fbInstance, int fbParamNo, int addrFrom, int bitNo,
+										  const QString& fbCaption, const QString& comment)
 	{
 		Q_ASSERT(addrFrom >= 0);
 
@@ -548,16 +595,23 @@ namespace Builder
 		m_code.setWord3(addrFrom);
 		m_code.setBitNo(bitNo);
 		m_code.setFbCaption(fbCaption);
+
+		setComment(comment);
+
+		return *this;
 	}
 
-	void CodeItem::writeFuncBlockBit(int fbType, int fbInstance, int fbParamNo, Address16 addrFrom, const QString& fbCaption)
+	CodeItem& CodeItem::writeFuncBlockBit(int fbType, int fbInstance, int fbParamNo, Address16 addrFrom,
+										  const QString& fbCaption, const QString& comment)
 	{
 		Q_ASSERT(addrFrom.isValid() == true);
 
-		writeFuncBlockBit(fbType, fbInstance, fbParamNo, addrFrom.offset(), addrFrom.bit(), fbCaption);
+		return writeFuncBlockBit(fbType, fbInstance, fbParamNo, addrFrom.offset(), addrFrom.bit(),
+								 fbCaption, comment);
 	}
 
-	void CodeItem::readFuncBlockBit(int addrTo, int bitNo, int fbType, int fbInstance, int fbParamNo, const QString& fbCaption)
+	CodeItem& CodeItem::readFuncBlockBit(int addrTo, int bitNo, int fbType, int fbInstance, int fbParamNo,
+										 const QString& fbCaption, const QString& comment)
 	{
 		Q_ASSERT(addrTo >= 0);
 
@@ -572,16 +626,23 @@ namespace Builder
 		m_code.setWord3(addrTo);
 		m_code.setBitNo(bitNo);
 		m_code.setFbCaption(fbCaption);
+
+		setComment(comment);
+
+		return *this;
 	}
 
-	void CodeItem::readFuncBlockBit(Address16 addrTo, int fbType, int fbInstance, int fbParamNo, const QString& fbCaption)
+	CodeItem& CodeItem::readFuncBlockBit(Address16 addrTo, int fbType, int fbInstance, int fbParamNo,
+										 const QString& fbCaption, const QString& comment)
 	{
 		Q_ASSERT(addrTo.isValid() == true);
 
-		readFuncBlockBit(addrTo.offset(), addrTo.bit(), fbType, fbInstance, fbParamNo, fbCaption);
+		return readFuncBlockBit(addrTo.offset(), addrTo.bit(), fbType, fbInstance, fbParamNo,
+								fbCaption, comment);
 	}
 
-	void CodeItem::readFuncBlockCompare(int fbType, int fbInstance, int fbParamNo, int testValue, const QString& fbCaption)
+	CodeItem& CodeItem::readFuncBlockCompare(int fbType, int fbInstance, int fbParamNo, int testValue,
+											 const QString& fbCaption, const QString& comment)
 	{
 		initCommand();
 
@@ -591,11 +652,15 @@ namespace Builder
 		m_code.setFbType(fbType);
 		m_code.setFbInstance(fbInstance);
 		m_code.setFbParamNo(fbParamNo);
-		m_code.setWord3(testValue);
+		m_code.setWord3(CHECK_AND_CAST_TO_QUINT16(testValue));
 		m_code.setFbCaption(fbCaption);
+
+		setComment(comment);
+
+		return *this;
 	}
 
-	void CodeItem::setMem(int addr, int constValue, int sizeW)
+	CodeItem& CodeItem::setMem(int addr, int constValue, int sizeW, const QString& comment)
 	{
 		Q_ASSERT(addr >=0);
 
@@ -609,17 +674,21 @@ namespace Builder
 		m_code.setWord2(addr);
 		m_code.setWord3(constValue);
 		m_code.setWord4(sizeW);
+
+		setComment(comment);
+
+		return *this;
 	}
 
-	void CodeItem::setMem(Address16 addr, int constValue, int sizeW)
+	CodeItem& CodeItem::setMem(Address16 addr, int constValue, int sizeW, const QString& comment)
 	{
 		Q_ASSERT(addr.isValid() == true);
 		Q_ASSERT(addr.bit() == 0);
 
-		setMem(addr.offset(), constValue, sizeW);
+		return setMem(addr.offset(), constValue, sizeW, comment);
 	}
 
-	void CodeItem::movBit(int addrTo, int bitTo, int addrFrom, int bitFrom)
+	CodeItem& CodeItem::movBit(int addrTo, int bitTo, int addrFrom, int bitFrom, const QString& comment)
 	{
 		Q_ASSERT(addrTo >=0);
 		Q_ASSERT(addrFrom >=0);
@@ -633,17 +702,22 @@ namespace Builder
 		m_code.setBitNo2(bitTo);
 		m_code.setWord3(addrFrom);
 		m_code.setBitNo1(bitFrom);
+
+		setComment(comment);
+
+		return *this;
 	}
 
-	void CodeItem::movBit(Address16 addrTo, Address16 addrFrom)
+	CodeItem& CodeItem::movBit(Address16 addrTo, Address16 addrFrom, const QString& comment)
 	{
 		Q_ASSERT(addrTo.isValid() == true);
 		Q_ASSERT(addrFrom.isValid() == true);
 
-		movBit(addrTo.offset(), addrTo.bit(), addrFrom.offset(), addrFrom.bit());
+		return movBit(addrTo.offset(), addrTo.bit(), addrFrom.offset(), addrFrom.bit(), comment);
 	}
 
-	void CodeItem::nstart(int fbType, int fbInstance, int startCount, const QString& fbCaption, int fbRunTime)
+	CodeItem& CodeItem::nstart(int fbType, int fbInstance, int startCount,
+							   const QString& fbCaption, int fbRunTime, const QString& comment)
 	{
 		initCommand();
 
@@ -663,9 +737,13 @@ namespace Builder
 		{
 			Q_ASSERT(false);		// fbRunTime can't be 0
 		}
+
+		setComment(comment);
+
+		return *this;
 	}
 
-	void CodeItem::appStart(int appStartAddr)
+	CodeItem& CodeItem::appStart(int appStartAddr, const QString& comment)
 	{
 		Q_ASSERT(appStartAddr >= 0);
 
@@ -675,9 +753,13 @@ namespace Builder
 
 		m_code.setOpCode(LmCommand::Code::APPSTART);
 		m_code.setWord2(CHECK_AND_CAST_TO_QUINT16(appStartAddr));
+
+		setComment(comment);
+
+		return *this;
 	}
 
-	void CodeItem::mov32(int addrTo, int addrFrom)
+	CodeItem& CodeItem::mov32(int addrTo, int addrFrom, const QString& comment)
 	{
 		Q_ASSERT(addrTo >= 0);
 		Q_ASSERT(addrFrom >= 0);
@@ -689,9 +771,13 @@ namespace Builder
 		m_code.setOpCode(LmCommand::Code::MOV32);
 		m_code.setWord2(addrTo);
 		m_code.setWord3(addrFrom);
+
+		setComment(comment);
+
+		return *this;
 	}
 
-	void CodeItem::mov32(Address16 addrTo, Address16 addrFrom)
+	CodeItem& CodeItem::mov32(Address16 addrTo, Address16 addrFrom, const QString& comment)
 	{
 		Q_ASSERT(addrTo.isValid() == true);
 		Q_ASSERT(addrTo.bit() == 0);
@@ -699,10 +785,10 @@ namespace Builder
 		Q_ASSERT(addrFrom.isValid() == true);
 		Q_ASSERT(addrFrom.bit() == 0);
 
-		mov32(addrTo.offset(), addrFrom.offset());
+		return mov32(addrTo.offset(), addrFrom.offset(), comment);
 	}
 
-	void CodeItem::movConstInt32(int addrTo, qint32 constInt32)
+	CodeItem& CodeItem::movConstInt32(int addrTo, qint32 constInt32, const QString& comment)
 	{
 		Q_ASSERT(addrTo >= 0);
 
@@ -715,9 +801,13 @@ namespace Builder
 		m_code.setWord3((constInt32 >> 16) & 0xFFFF);
 		m_code.setWord4(constInt32 & 0xFFFF);
 		m_code.setConstInt32(constInt32);
+
+		setComment(comment);
+
+		return *this;
 	}
 
-	void CodeItem::movConstUInt32(int addrTo, quint32 constUInt32)
+	CodeItem& CodeItem::movConstUInt32(int addrTo, quint32 constUInt32, const QString& comment)
 	{
 		Q_ASSERT(addrTo >= 0);
 
@@ -730,17 +820,21 @@ namespace Builder
 		m_code.setWord3(static_cast<quint16>((constUInt32 >> 16) & 0xFFFF));
 		m_code.setWord4(static_cast<quint16>(constUInt32 & 0xFFFF));
 		m_code.setConstUInt32(constUInt32);
+
+		setComment(comment);
+
+		return *this;
 	}
 
-	void CodeItem::movConstUInt32(Address16 addrTo, quint32 constUInt32)
+	CodeItem& CodeItem::movConstUInt32(Address16 addrTo, quint32 constUInt32, const QString& comment)
 	{
 		Q_ASSERT(addrTo.isValid() == true);
 		Q_ASSERT(addrTo.bit() == 0);
 
-		movConstUInt32(addrTo.offset(), constUInt32);
+		return movConstUInt32(addrTo.offset(), constUInt32, comment);
 	}
 
-	void CodeItem::movConstFloat(int addrTo, float constFloat)
+	CodeItem& CodeItem::movConstFloat(int addrTo, float constFloat, const QString& comment)
 	{
 		Q_ASSERT(addrTo >= 0);
 
@@ -755,9 +849,14 @@ namespace Builder
 		m_code.setWord3((constInt32 >> 16) & 0xFFFF);
 		m_code.setWord4(constInt32 & 0xFFFF);
 		m_code.setConstFloat(constFloat);
+
+		setComment(comment);
+
+		return *this;
 	}
 
-	void CodeItem::writeFuncBlock32(int fbType, int fbInstance, int fbParamNo, int addrFrom, const QString& fbCaption)
+	CodeItem& CodeItem::writeFuncBlock32(int fbType, int fbInstance, int fbParamNo, int addrFrom,
+										 const QString& fbCaption, const QString& comment)
 	{
 		Q_ASSERT(addrFrom >= 0);
 
@@ -771,17 +870,23 @@ namespace Builder
 		m_code.setFbParamNo(fbParamNo);
 		m_code.setWord3(addrFrom);
 		m_code.setFbCaption(fbCaption);
+
+		setComment(comment);
+
+		return *this;
 	}
 
-	void CodeItem::writeFuncBlock32(int fbType, int fbInstance, int fbParamNo, Address16 addrFrom, const QString& fbCaption)
+	CodeItem& CodeItem::writeFuncBlock32(int fbType, int fbInstance, int fbParamNo, Address16 addrFrom,
+										 const QString& fbCaption, const QString& comment)
 	{
 		Q_ASSERT(addrFrom.isValid() == true);
 		Q_ASSERT(addrFrom.bit() == 0);
 
-		writeFuncBlock32(fbType, fbInstance, fbParamNo, addrFrom.offset(), fbCaption);
+		return writeFuncBlock32(fbType, fbInstance, fbParamNo, addrFrom.offset(), fbCaption, comment);
 	}
 
-	void CodeItem::readFuncBlock32(int addrTo, int fbType, int fbInstance, int fbParamNo, const QString& fbCaption)
+	CodeItem& CodeItem::readFuncBlock32(int addrTo, int fbType, int fbInstance, int fbParamNo,
+										const QString& fbCaption, const QString& comment)
 	{
 		Q_ASSERT(addrTo >=0 );
 
@@ -795,17 +900,23 @@ namespace Builder
 		m_code.setFbParamNo(fbParamNo);
 		m_code.setWord3(addrTo);
 		m_code.setFbCaption(fbCaption);
+
+		setComment(comment);
+
+		return *this;
 	}
 
-	void CodeItem::readFuncBlock32(Address16 addrTo, int fbType, int fbInstance, int fbParamNo, const QString& fbCaption)
+	CodeItem& CodeItem::readFuncBlock32(Address16 addrTo, int fbType, int fbInstance, int fbParamNo,
+										const QString& fbCaption, const QString& comment)
 	{
 		Q_ASSERT(addrTo.isValid() == true);
 		Q_ASSERT(addrTo.bit() == 0);
 
-		readFuncBlock32(addrTo.offset(), fbType, fbInstance, fbParamNo, fbCaption);
+		return readFuncBlock32(addrTo.offset(), fbType, fbInstance, fbParamNo, fbCaption, comment);
 	}
 
-	void CodeItem::writeFuncBlockConstInt32(int fbType, int fbInstance, int fbParamNo, qint32 constInt32, const QString& fbCaption)
+	CodeItem& CodeItem::writeFuncBlockConstInt32(int fbType, int fbInstance, int fbParamNo, qint32 constInt32,
+												 const QString& fbCaption, const QString& comment)
 	{
 		initCommand();
 
@@ -819,9 +930,14 @@ namespace Builder
 		m_code.setWord4(constInt32 & 0xFFFF);
 		m_code.setFbCaption(fbCaption);
 		m_code.setConstInt32(constInt32);
+
+		setComment(comment);
+
+		return *this;
 	}
 
-	void CodeItem::writeFuncBlockConstFloat(int fbType, int fbInstance, int fbParamNo, float constFloat, const QString& fbCaption)
+	CodeItem& CodeItem::writeFuncBlockConstFloat(int fbType, int fbInstance, int fbParamNo, float constFloat,
+												 const QString& fbCaption, const QString& comment)
 	{
 		initCommand();
 
@@ -837,9 +953,14 @@ namespace Builder
 		m_code.setWord4(constInt32 & 0xFFFF);
 		m_code.setFbCaption(fbCaption);
 		m_code.setConstFloat(constFloat);
+
+		setComment(comment);
+
+		return *this;
 	}
 
-	void CodeItem::readFuncBlockCompareInt32(int fbType, int fbInstance, int fbParamNo, qint32 testInt32, const QString& fbCaption)
+	CodeItem& CodeItem::readFuncBlockCompareInt32(int fbType, int fbInstance, int fbParamNo, qint32 testInt32,
+												  const QString& fbCaption, const QString& comment)
 	{
 		initCommand();
 
@@ -853,9 +974,14 @@ namespace Builder
 		m_code.setWord4(testInt32 & 0xFFFF);
 		m_code.setFbCaption(fbCaption);
 		m_code.setConstInt32(testInt32);
+
+		setComment(comment);
+
+		return *this;
 	}
 
-	void CodeItem::readFuncBlockCompareFloat(int fbType, int fbInstance, int fbParamNo, float testFloat, const QString& fbCaption)
+	CodeItem& CodeItem::readFuncBlockCompareFloat(int fbType, int fbInstance, int fbParamNo, float testFloat,
+												  const QString& fbCaption, const QString& comment)
 	{
 		initCommand();
 
@@ -871,9 +997,13 @@ namespace Builder
 		m_code.setWord4(testInt32 & 0xFFFF);
 		m_code.setFbCaption(fbCaption);
 		m_code.setConstFloat(testFloat);
+
+		setComment(comment);
+
+		return *this;
 	}
 
-	void CodeItem::movCompareFlag(int addrTo, int bitNo)
+	CodeItem& CodeItem::movCompareFlag(int addrTo, int bitNo, const QString& comment)
 	{
 		Q_ASSERT(addrTo >= 0);
 		Q_ASSERT(bitNo >= 0 && bitNo <= LmCommand::MAX_BIT_NO_16);
@@ -885,9 +1015,13 @@ namespace Builder
 		m_code.setOpCode(LmCommand::Code::MOVCMPF);
 		m_code.setWord2(addrTo);
 		m_code.setWord3(bitNo);
+
+		setComment(comment);
+
+		return *this;
 	}
 
-	void CodeItem::prevMov(int addrTo, int addrFrom)
+	CodeItem& CodeItem::prevMov(int addrTo, int addrFrom, const QString& comment)
 	{
 		Q_ASSERT(addrTo >= 0);
 		Q_ASSERT(addrFrom >= 0);
@@ -899,9 +1033,13 @@ namespace Builder
 		m_code.setOpCode(LmCommand::Code::PMOV);
 		m_code.setWord2(addrTo);
 		m_code.setWord3(addrFrom);
+
+		setComment(comment);
+
+		return *this;
 	}
 
-	void CodeItem::prevMov32(int addrTo, int addrFrom)
+	CodeItem& CodeItem::prevMov32(int addrTo, int addrFrom, const QString& comment)
 	{
 		Q_ASSERT(addrTo >= 0);
 		Q_ASSERT(addrFrom >= 0);
@@ -913,9 +1051,13 @@ namespace Builder
 		m_code.setOpCode(LmCommand::Code::PMOV32);
 		m_code.setWord2(addrTo);
 		m_code.setWord3(addrFrom);
+
+		setComment(comment);
+
+		return *this;
 	}
 
-	void CodeItem::fill(int addrTo, int addrFrom, int addrFromBit)
+	CodeItem& CodeItem::fill(int addrTo, int addrFrom, int addrFromBit, const QString& comment)
 	{
 		Q_ASSERT(addrTo >= 0);
 
@@ -930,18 +1072,26 @@ namespace Builder
 		m_code.setWord2(addrTo);
 		m_code.setWord3(addrFrom);
 		m_code.setWord4(addrFromBit);
+
+		setComment(comment);
+
+		return *this;
 	}
 
-	void CodeItem::fill(Address16 addrTo, Address16 addrFrom)
+	CodeItem& CodeItem::fill(Address16 addrTo, Address16 addrFrom, const QString& comment)
 	{
 		Q_ASSERT(addrTo.isValid() == true);
 		Q_ASSERT(addrTo.bit() == 0);
 
 		Q_ASSERT(addrFrom.isValid() == true);
 
-		fill(addrTo.offset(), addrFrom.offset(), addrFrom.bit());
+		return fill(addrTo.offset(), addrFrom.offset(), addrFrom.bit(), comment);
 	}
 
+	void CodeItem::setComment(const QString& comment)
+	{
+		m_comment = comment;
+	}
 
 	bool CodeItem::isWaitingForFbExecution() const
 	{
@@ -1681,6 +1831,12 @@ namespace Builder
 	CodeSnippet& CodeSnippet::operator << (const CodeSnippet& codeShippet)
 	{
 		append(codeShippet);
+		return *this;
+	}
+
+	CodeSnippet& CodeSnippet::operator << (const QString& commentStr)
+	{
+		comment(commentStr);
 		return *this;
 	}
 

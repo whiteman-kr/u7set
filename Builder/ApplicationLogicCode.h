@@ -85,7 +85,7 @@ namespace Builder
 		{	LmCommand::Code::WRFB32,	3,	"WRFB32",		false,	11,	24						},
 		{	LmCommand::Code::RDFB32,	3,	"RDFB32",		true,	11,	LmCommand::CALC_RUNTIME	},
 		{	LmCommand::Code::WRFBC32,	4,	"WRFBC32",		false,	14,	18						},
-		{	LmCommand::Code::RDFBCMP32,	4,	"RDFBCMP32",	true,	14,	LmCommand::CALC_RUNTIME	},
+		{	LmCommand::Code::RDFBCMP32,	4,	"RDFBCMP32",	true,	14,	10						},
 		{	LmCommand::Code::MOVCMPF,	3,	"MOVCMPF",		false,	11,	LmCommand::CALC_RUNTIME	},
 		{	LmCommand::Code::PMOV,		3,	"PMOV",			false,	11,	LmCommand::CALC_RUNTIME	},
 		{	LmCommand::Code::PMOV32,	3,	"PMOV32",		false,	11,	18						},
@@ -249,55 +249,98 @@ namespace Builder
 	public:
 		CodeItem();
 
-		void nop();
-		void start(int fbType, int fbInstance, const QString& fbCaption, int fbRunTime);
-		void stop();
-		void mov(int addrTo, int addrFrom);
-		void mov(Address16 addrTo, Address16 addrFrom);
-		void movMem(int addrTo, int addrFrom, int sizeW);
-		void movMem(Address16 addrTo, Address16 addrFrom, int sizeW);
-		void movConst(int addrTo, int constVal);
-		void movConst(Address16 addrTo, int constVal);
-		void movBitConst(int addrTo, int bitNo, int constBit);
-		void movBitConst(Address16 addr16, int constBit);
-		void writeFuncBlock(int fbType, int fbInstance, int fbParamNo, int addrFrom, const QString& fbCaption);
-		void writeFuncBlock(int fbType, int fbInstance, int fbParamNo, const Address16& addrFrom, const QString& fbCaption);
-		void readFuncBlock(int addrTo, int fbType, int fbInstance, int fbParamNo, const QString& fbCaption);
-		void readFuncBlock(const Address16& addrTo, int fbType, int fbInstance, int fbParamNo, const QString& fbCaption);
-		void writeFuncBlockConst(int fbType, int fbInstance, int fbParamNo, int constVal, const QString& fbCaption);
-		void writeFuncBlockBit(int fbType, int fbInstance, int fbParamNo, int addrFrom, int bitNo, const QString& fbCaption);
-		void writeFuncBlockBit(int fbType, int fbInstance, int fbParamNo, Address16 addrFrom, const QString& fbCaption);
-		void readFuncBlockBit(int addrTo, int bitNo, int fbType, int fbInstance, int fbParamNo, const QString& fbCaption);
-		void readFuncBlockBit(Address16 addrTo, int fbType, int fbInstance, int fbParamNo, const QString& fbCaption);
-		void readFuncBlockCompare(int fbType, int fbInstance, int fbParamNo, int testValue, const QString& fbCaption);
-		void setMem(int addr, int constValue, int sizeW);
-		void setMem(Address16 addr, int constValue, int sizeW);
-		void movBit(int addrTo, int bitTo, int addrFrom, int bitFrom);
-		void movBit(Address16 addrTo, Address16 addrFrom);
-		void nstart(int fbType, int fbInstance, int startCount, const QString& fbCaption, int fbRunTime);
+		CodeItem& nop(const QString& comment = Separator::EMPTY_STR);
+		CodeItem& start(int fbType, int fbInstance, const QString& fbCaption, int fbRunTime,
+				   const QString& comment = Separator::EMPTY_STR);
+		CodeItem& stop(const QString& comment = Separator::EMPTY_STR);
+		CodeItem& mov(int addrTo, int addrFrom, const QString& comment = Separator::EMPTY_STR);
+		CodeItem& mov(Address16 addrTo, Address16 addrFrom,
+					  const QString& comment = Separator::EMPTY_STR);
+		CodeItem& movMem(int addrTo, int addrFrom, int sizeW,
+						 const QString& comment = Separator::EMPTY_STR);
+		CodeItem& movMem(Address16 addrTo, Address16 addrFrom, int sizeW,
+						 const QString& comment = Separator::EMPTY_STR);
 
-		void appStart(int appStartAddr);
+		CodeItem& movConst(int addrTo, int constVal,
+						   const QString& comment = Separator::EMPTY_STR);
 
-		void mov32(int addrTo, int addrFrom);
-		void mov32(Address16 addrTo, Address16 addrFrom);
-		void movConstInt32(int addrTo, qint32 constInt32);
-		void movConstUInt32(int addrTo, quint32 constUInt32);
-		void movConstUInt32(Address16 addrTo, quint32 constUInt32);
-		void movConstFloat(int addrTo, float constFloat);
-		void writeFuncBlock32(int fbType, int fbInstance, int fbParamNo, int addrFrom, const QString& fbCaption);
-		void writeFuncBlock32(int fbType, int fbInstance, int fbParamNo, Address16 addrFrom, const QString& fbCaption);
-		void readFuncBlock32(int addrTo, int fbType, int fbInstance, int fbParamNo, const QString& fbCaption);
-		void readFuncBlock32(Address16 addrTo, int fbType, int fbInstance, int fbParamNo, const QString& fbCaption);
-		void writeFuncBlockConstInt32(int fbType, int fbInstance, int fbParamNo, qint32 constInt32, const QString& fbCaption);
-		void writeFuncBlockConstFloat(int fbType, int fbInstance, int fbParamNo, float constFloat, const QString& fbCaption);
-		void readFuncBlockCompareInt32(int fbType, int fbInstance, int fbParamNo, qint32 testInt32, const QString& fbCaption);
-		void readFuncBlockCompareFloat(int fbType, int fbInstance, int fbParamNo, float testFloat, const QString& fbCaption);
+		CodeItem& movConst(Address16 addrTo, int constVal,
+						   const QString& comment = Separator::EMPTY_STR);
 
-		void movCompareFlag(int addrTo, int bitNo);
-		void prevMov(int addrTo, int addrFrom);
-		void prevMov32(int addrTo, int addrFrom);
-		void fill(int addrTo, int addrFrom, int addrBit);
-		void fill(Address16 addrTo, Address16 addrFrom);
+		CodeItem& movBitConst(int addrTo, int bitNo, int constBit,
+							  const QString& comment = Separator::EMPTY_STR);
+		CodeItem& movBitConst(Address16 addr16, int constBit,
+							  const QString& comment = Separator::EMPTY_STR);
+		CodeItem& writeFuncBlock(int fbType, int fbInstance, int fbParamNo, int addrFrom, const QString& fbCaption,
+								 const QString& comment = Separator::EMPTY_STR);
+		CodeItem& writeFuncBlock(int fbType, int fbInstance, int fbParamNo, const Address16& addrFrom, const QString& fbCaption,
+								 const QString& comment = Separator::EMPTY_STR);
+		CodeItem& readFuncBlock(int addrTo, int fbType, int fbInstance, int fbParamNo,
+								const QString& fbCaption, const QString& comment = Separator::EMPTY_STR);
+		CodeItem& readFuncBlock(const Address16& addrTo, int fbType, int fbInstance, int fbParamNo,
+								const QString& fbCaption, const QString& comment = Separator::EMPTY_STR);
+		CodeItem& writeFuncBlockConst(int fbType, int fbInstance, int fbParamNo, int constVal,
+									  const QString& fbCaption, const QString& comment = Separator::EMPTY_STR);
+		CodeItem& writeFuncBlockBit(int fbType, int fbInstance, int fbParamNo, int addrFrom, int bitNo,
+									const QString& fbCaption, const QString& comment = Separator::EMPTY_STR);
+		CodeItem& writeFuncBlockBit(int fbType, int fbInstance, int fbParamNo, Address16 addrFrom,
+									const QString& fbCaption, const QString& comment = Separator::EMPTY_STR);
+		CodeItem& readFuncBlockBit(int addrTo, int bitNo, int fbType, int fbInstance, int fbParamNo,
+								   const QString& fbCaption, const QString& comment = Separator::EMPTY_STR);
+		CodeItem& readFuncBlockBit(Address16 addrTo, int fbType, int fbInstance, int fbParamNo,
+								   const QString& fbCaption, const QString& comment = Separator::EMPTY_STR);
+		CodeItem& readFuncBlockCompare(int fbType, int fbInstance, int fbParamNo, int testValue,
+									   const QString& fbCaption, const QString& comment = Separator::EMPTY_STR);
+		CodeItem& setMem(int addr, int constValue, int sizeW,
+						 const QString& comment = Separator::EMPTY_STR);
+		CodeItem& setMem(Address16 addr, int constValue, int sizeW,
+						 const QString& comment = Separator::EMPTY_STR);
+		CodeItem& movBit(int addrTo, int bitTo, int addrFrom, int bitFrom,
+						 const QString& comment = Separator::EMPTY_STR);
+		CodeItem& movBit(Address16 addrTo, Address16 addrFrom,
+						 const QString& comment = Separator::EMPTY_STR);
+		CodeItem& nstart(int fbType, int fbInstance, int startCount, const QString& fbCaption,
+						 int fbRunTime, const QString& comment = Separator::EMPTY_STR);
+
+		CodeItem& appStart(int appStartAddr, const QString& comment = Separator::EMPTY_STR);
+
+		CodeItem& mov32(int addrTo, int addrFrom, const QString& comment = Separator::EMPTY_STR);
+		CodeItem& mov32(Address16 addrTo, Address16 addrFrom,
+						const QString& comment = Separator::EMPTY_STR);
+		CodeItem& movConstInt32(int addrTo, qint32 constInt32,
+								const QString& comment = Separator::EMPTY_STR);
+		CodeItem& movConstUInt32(int addrTo, quint32 constUInt32,
+								 const QString& comment = Separator::EMPTY_STR);
+		CodeItem& movConstUInt32(Address16 addrTo, quint32 constUInt32,
+								 const QString& comment = Separator::EMPTY_STR);
+		CodeItem& movConstFloat(int addrTo, float constFloat, const QString& comment = Separator::EMPTY_STR);
+		CodeItem& writeFuncBlock32(int fbType, int fbInstance, int fbParamNo, int addrFrom,
+								   const QString& fbCaption, const QString& comment = Separator::EMPTY_STR);
+		CodeItem& writeFuncBlock32(int fbType, int fbInstance, int fbParamNo, Address16 addrFrom,
+								   const QString& fbCaption, const QString& comment = Separator::EMPTY_STR);
+		CodeItem& readFuncBlock32(int addrTo, int fbType, int fbInstance, int fbParamNo,
+								  const QString& fbCaption, const QString& comment = Separator::EMPTY_STR);
+		CodeItem& readFuncBlock32(Address16 addrTo, int fbType, int fbInstance, int fbParamNo,
+								  const QString& fbCaption, const QString& comment = Separator::EMPTY_STR);
+		CodeItem& writeFuncBlockConstInt32(int fbType, int fbInstance, int fbParamNo, qint32 constInt32,
+										   const QString& fbCaption, const QString& comment = Separator::EMPTY_STR);
+		CodeItem& writeFuncBlockConstFloat(int fbType, int fbInstance, int fbParamNo, float constFloat,
+										   const QString& fbCaption, const QString& comment = Separator::EMPTY_STR);
+		CodeItem& readFuncBlockCompareInt32(int fbType, int fbInstance, int fbParamNo, qint32 testInt32,
+											const QString& fbCaption, const QString& comment = Separator::EMPTY_STR);
+		CodeItem& readFuncBlockCompareFloat(int fbType, int fbInstance, int fbParamNo, float testFloat,
+											const QString& fbCaption, const QString& comment = Separator::EMPTY_STR);
+
+		CodeItem& movCompareFlag(int addrTo, int bitNo,
+								 const QString& comment = Separator::EMPTY_STR);
+		CodeItem& prevMov(int addrTo, int addrFrom,
+						  const QString& comment = Separator::EMPTY_STR);
+		CodeItem& prevMov32(int addrTo, int addrFrom,
+							const QString& comment = Separator::EMPTY_STR);
+		CodeItem& fill(int addrTo, int addrFrom, int addrBit,
+					   const QString& comment = Separator::EMPTY_STR);
+		CodeItem& fill(Address16 addrTo, Address16 addrFrom,
+					   const QString& comment = Separator::EMPTY_STR);
 
 		LmCommand::Code getOpcode() const { return m_code.getOpCode(); }
 
@@ -305,7 +348,7 @@ namespace Builder
 		void setAddress(int address) { m_address = address; }
 
 		QString comment() const { return m_comment; }
-		void setComment(const QString& comment) { m_comment = comment; }
+		void setComment(const QString& comment);
 		void clearComment() { m_comment.clear(); }
 
 		void setClockCount(int clockCount) { m_clockCount = clockCount; }
@@ -405,6 +448,7 @@ namespace Builder
 
 		CodeSnippet& operator << (const CodeItem& ci);
 		CodeSnippet& operator << (const CodeSnippet& codeShippet);
+		CodeSnippet& operator << (const QString& commentStr);
 
 		void comment(const QString& cmt);
 		void newLine();
