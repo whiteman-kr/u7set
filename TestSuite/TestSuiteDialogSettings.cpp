@@ -13,25 +13,25 @@ TestSuiteDialogSettings::~TestSuiteDialogSettings()
 	delete ui;
 }
 
-void TestSuiteDialogSettings::setSettings(const Settings& settings)
+void TestSuiteDialogSettings::setSettings(const AppConfigSettings& settings)
 {
 	m_settings = settings;
 
 	ui->m_instanceCombo->addItems(m_settings.instanceHistory());
-	ui->m_instanceCombo->setCurrentText(m_settings.instanceStrId().toUpper());
+	ui->m_instanceCombo->setCurrentText(m_settings.librarySettings().instanceStrId().toUpper());
 
-	ui->m_IP1->setText(m_settings.configuratorAddress1().addressStr());
-	ui->m_port1->setText(QString::number(m_settings.configuratorAddress1().port()));
+	ui->m_IP1->setText(m_settings.librarySettings().configuratorAddress1().addressStr());
+	ui->m_port1->setText(QString::number(m_settings.librarySettings().configuratorAddress1().port()));
 
-	ui->m_IP2->setText(m_settings.configuratorAddress2().addressStr());
-	ui->m_port2->setText(QString::number(m_settings.configuratorAddress2().port()));
+	ui->m_IP2->setText(m_settings.librarySettings().configuratorAddress2().addressStr());
+	ui->m_port2->setText(QString::number(m_settings.librarySettings().configuratorAddress2().port()));
 
-	ui->loadSciptsPathCheck->setChecked(m_settings.loadScriptsFromPath());
-	ui->loadSciptsPath->setEnabled(m_settings.loadScriptsFromPath());
-	ui->loadSciptsPath->setText(m_settings.loadScriptsPath());
+	ui->loadSciptsPathCheck->setChecked(m_settings.librarySettings().loadScriptsFromPath());
+	ui->loadSciptsPath->setEnabled(m_settings.librarySettings().loadScriptsFromPath());
+	ui->loadSciptsPath->setText(m_settings.librarySettings().scriptsPath());
 }
 
-const Settings& TestSuiteDialogSettings::settings() const
+const AppConfigSettings& TestSuiteDialogSettings::settings() const
 {
 	return m_settings;
 }
@@ -59,10 +59,11 @@ void TestSuiteDialogSettings::on_TestSuiteDialogSettings_accepted()
 	}
 
 	m_settings.setInstanceHistory(instanceHistory);
-	m_settings.setInstanceStrId(instanceStrId);
 
-	m_settings.setLoadScriptsFromPath(ui->loadSciptsPathCheck->isChecked() == true);
-	m_settings.setLoadScriptsPath(ui->loadSciptsPath->text());
+	m_settings.librarySettings().setInstanceStrId(instanceStrId);
+
+	m_settings.librarySettings().setLoadScriptsFromPath(ui->loadSciptsPathCheck->isChecked() == true);
+	m_settings.librarySettings().setScriptsPath(ui->loadSciptsPath->text());
 
 	// IP Configuration
 
@@ -72,12 +73,12 @@ void TestSuiteDialogSettings::on_TestSuiteDialogSettings_accepted()
 	QString configIP2 = ui->m_IP2->text();
 	int configPort2 = ui->m_port2->text().toInt();
 
-	if (configIP1 != m_settings.configuratorAddress1().addressStr() || configIP2 != m_settings.configuratorAddress2().addressStr()
-			|| configPort1 != m_settings.configuratorAddress1().port() || configPort2 != m_settings.configuratorAddress2().port())
+	if (configIP1 != m_settings.librarySettings().configuratorAddress1().addressStr() || configIP2 != m_settings.librarySettings().configuratorAddress2().addressStr()
+			|| configPort1 != m_settings.librarySettings().configuratorAddress1().port() || configPort2 != m_settings.librarySettings().configuratorAddress2().port())
 	{
 
-		m_settings.setConfiguratorAddress1(configIP1, configPort1);
-		m_settings.setConfiguratorAddress2(configIP2, configPort2);
+		m_settings.librarySettings().setConfiguratorAddress1(configIP1, configPort1);
+		m_settings.librarySettings().setConfiguratorAddress2(configIP2, configPort2);
 
 		QMessageBox::warning(this, qAppName(), tr("Configurator address has been changed, please restart the application."));
 	}

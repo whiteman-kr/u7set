@@ -2,9 +2,10 @@
 #define TESTSUITEMAINWINDOW_H
 
 #include <QMainWindow>
-#include "../UtilsLib/LogFile.h"
 #include "../TestSuiteLib/TestLibrary.h"
 #include "../TestSuiteLib/TestSuiteConfigController.h"
+
+#include "TestSuiteLog.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class TestSuiteMainWindow; }
@@ -15,7 +16,7 @@ class TestSuiteMainWindow : public QMainWindow
 	Q_OBJECT
 
 public:
-	TestSuiteMainWindow(const SoftwareInfo &softwareInfo, QWidget *parent = nullptr);
+	TestSuiteMainWindow(QWidget *parent = nullptr);
 	~TestSuiteMainWindow();
 
 private:
@@ -29,14 +30,20 @@ private slots:
 	void exit();
 	void on_m_run_clicked();
 	void newLogItem(const TestLogItem& item);
-	void testFinished(int result);
+	void onTestingFinished(int result);
 
 	void showSettings();
 
-	void slot_configurationArrived();
+	void onConfigurationArrived();
 
-	void slot_logMessage(const QString &msg);
-	void slot_logError(const QString &errMsg);
+	void onLogError(const QString &errMsg);
+	void onLogWarning(const QString &msg);
+	void onLogMessage(const QString &msg);
+	void onLogText(const QString &msg);
+
+	void onOutputLogError(const QString &errMsg);
+	void onOutputLogWarning(const QString &msg);
+	void onOutputLogMessage(const QString &msg);
 
 	void on_m_stop_clicked();
 
@@ -48,7 +55,9 @@ private:
 	QAction* m_pSettingsAction = nullptr;
 
 	// Main objects
-	Log::LogFile m_LogFile;						// Must be initialized first
+	TestSuiteLogFile m_logFile;						// Must be initialized first
+
+	TestSuiteOutputLog m_outputLog;
 
 	TestLibrary m_testLibrary;
 

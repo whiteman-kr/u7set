@@ -1,5 +1,4 @@
-#include "Settings.h"
-#include "../OnlineLib/SocketIO.h"
+#include "AppConfigSettings.h"
 
 QColor redColor = QColor(192, 0, 0);
 
@@ -7,60 +6,39 @@ QColor redColor = QColor(192, 0, 0);
 // Settings
 //
 
-Settings::Settings():
-	m_instanceStrId("SYSTEMID_WS00_TESTSUITE"),
-	m_configuratorIpAddress1("127.0.0.1"),
-	m_configuratorPort1(PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST),
-	m_configuratorIpAddress2("127.0.0.1"),
-	m_configuratorPort2(PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST),
+AppConfigSettings::AppConfigSettings():
 	m_language("en")
 {
 }
 
-Settings::Settings(const Settings& That):
-	Settings()
+AppConfigSettings::AppConfigSettings(const AppConfigSettings& That):
+	AppConfigSettings()
 {
 	*this = That;
 }
 
-void Settings::StoreSystem()
+void AppConfigSettings::StoreSystem()
 {
+	// save system settings
+	//
+	m_librarySettings.saveToRegistry();
+
 	QSettings s(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
 
 	QString instanceHistoryString = m_instanceHistory.join(';');
 	s.setValue("m_instanceHistory", instanceHistoryString);
-
-	s.setValue("m_instanceStrId", m_instanceStrId);
-
-	s.setValue("m_configuratorIpAddress1", m_configuratorIpAddress1);
-	s.setValue("m_configuratorPort1", m_configuratorPort1);
-
-	s.setValue("m_configuratorIpAddress2", m_configuratorIpAddress2);
-	s.setValue("m_configuratorPort2", m_configuratorPort2);
-
-	s.setValue("m_loadScriptsFromPath", m_loadScriptsFromPath);
-	s.setValue("m_loadScriptsPath", m_loadScriptsPath);
 }
 
-void Settings::RestoreSystem()
+void AppConfigSettings::RestoreSystem()
 {
 	// read system settings
 	//
+	m_librarySettings.restoreFromRegistry();
+
 	QSettings s(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
 
 	QString instanceHistoryString = s.value("m_instanceHistory", QString()).toString();
 	m_instanceHistory = instanceHistoryString.split(';', Qt::SkipEmptyParts);
-
-	m_instanceStrId = s.value("m_instanceStrId", m_instanceStrId).toString();
-
-	m_configuratorIpAddress1 = s.value("m_configuratorIpAddress1", "127.0.0.1").toString();
-	m_configuratorPort1 = s.value("m_configuratorPort1", PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST).toInt();
-
-	m_configuratorIpAddress2 = s.value("m_configuratorIpAddress2", "127.0.0.1").toString();
-	m_configuratorPort2 = s.value("m_configuratorPort2", PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST).toInt();
-
-	m_loadScriptsFromPath = s.value("m_loadScriptsFromPath", false).toBool();
-	m_loadScriptsPath = s.value("m_loadScriptsPath", QString()).toString();
 
 	// Determine the Local settings folder
 
@@ -72,11 +50,10 @@ void Settings::RestoreSystem()
 	{
 		dir.mkpath(m_localAppDataPath);
 	}
-
 }
 
 
-void Settings::StoreUser()
+void AppConfigSettings::StoreUser()
 {
 	QSettings s(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
 
@@ -90,7 +67,7 @@ void Settings::StoreUser()
 
 }
 
-void Settings::RestoreUser()
+void AppConfigSettings::RestoreUser()
 {
 	QSettings s(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
 
@@ -103,89 +80,43 @@ void Settings::RestoreUser()
 	m_language = s.value("MainWindow/language", m_language).toString();
 }
 
-QStringList Settings::instanceHistory() const
+TestLibrarySettings& AppConfigSettings::librarySettings()
+{
+	return m_librarySettings;
+}
+
+const TestLibrarySettings& AppConfigSettings::librarySettings() const
+{
+	return m_librarySettings;
+}
+
+QStringList AppConfigSettings::instanceHistory() const
 {
 	QMutexLocker l(&m);
 	return m_instanceHistory;
 }
 
-void Settings::setInstanceHistory(const QStringList& value)
+void AppConfigSettings::setInstanceHistory(const QStringList& value)
 {
 	QMutexLocker l(&m);
 	m_instanceHistory = value;
 }
 
-QString Settings::instanceStrId() const
-{
-	QMutexLocker l(&m);
-	return m_instanceStrId;
-}
 
-void Settings::setInstanceStrId(const QString& value)
-{
-	QMutexLocker l(&m);
-	m_instanceStrId = value;
-}
-
-HostAddressPort Settings::configuratorAddress1() const
-{
-	QMutexLocker l(&m);
-	return HostAddressPort(m_configuratorIpAddress1, m_configuratorPort1);
-}
-
-void Settings::setConfiguratorAddress1(const QString& address, int port)
-{
-	m_configuratorIpAddress1 = address;
-	m_configuratorPort1 = port;
-}
-
-HostAddressPort Settings::configuratorAddress2() const
-{
-	QMutexLocker l(&m);
-	return HostAddressPort(m_configuratorIpAddress2, m_configuratorPort2);
-}
-
-void Settings::setConfiguratorAddress2(const QString& address, int port)
-{
-	m_configuratorIpAddress2 = address;
-	m_configuratorPort2 = port;
-}
-
-
-QString Settings::language() const
+QString AppConfigSettings::language() const
 {
 	return m_language;
 }
 
-void Settings::setLanguage(const QString& value)
+void AppConfigSettings::setLanguage(const QString& value)
 {
 	m_language = value;
 }
 
-QString Settings::localAppDataPath()
+QString AppConfigSettings::localAppDataPath()
 {
 	return m_localAppDataPath;
 }
 
-bool Settings::loadScriptsFromPath()
-{
-	return m_loadScriptsFromPath;
-}
-
-void Settings::setLoadScriptsFromPath(bool value)
-{
-	m_loadScriptsFromPath = value;
-}
-
-QString Settings::loadScriptsPath()
-{
-	return m_loadScriptsPath;
-}
-
-void Settings::setLoadScriptsPath(const QString& path)
-{
-	m_loadScriptsPath = path;
-}
-
-Settings theSettings;
+AppConfigSettings theSettings;
 

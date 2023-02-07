@@ -42,18 +42,19 @@ CONFIG(release, debug|release) {
 SOURCES += \
     ../lib/BuildInfo.cpp \
     ../lib/SoftwareSettings.cpp \
-    Settings.cpp \
+    AppConfigSettings.cpp \
     TestSuiteDialogSettings.cpp \
+    TestSuiteLog.cpp \
     main.cpp \
     TestSuiteMainWindow.cpp
 
 HEADERS += \
     ../lib/BuildInfo.h \
     ../lib/SoftwareSettings.h \
-    Settings.h \
+    AppConfigSettings.h \
     TestSuiteDialogSettings.h \
-    TestSuiteMainWindow.h \
-    main.h
+    TestSuiteLog.h \
+    TestSuiteMainWindow.h
 
 FORMS += \
     TestSuiteDialogSettings.ui \

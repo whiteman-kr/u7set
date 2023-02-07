@@ -1,17 +1,17 @@
 #include "TestSuiteMainWindow.h"
 #include "ui_TestSuiteMainWindow.h"
-#include "Settings.h"
+#include "AppConfigSettings.h"
 #include "TestSuiteDialogSettings.h"
 
 #if __has_include("../gitlabci_version.h")
 #	include "../gitlabci_version.h"
 #endif
 
-TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidget *parent)
+TestSuiteMainWindow::TestSuiteMainWindow(QWidget *parent)
 	: QMainWindow(parent),
 	ui(new Ui::TestSuiteMainWindow),
-	m_LogFile(qAppName(), QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + softwareInfo.equipmentID()),
-	m_testLibrary(softwareInfo, theSettings.configuratorAddress1(), theSettings.configuratorAddress2(), &m_LogFile)
+	m_logFile(qAppName(), QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + theSettings.librarySettings().instanceStrId()),
+	m_testLibrary(theSettings.librarySettings(), &m_logFile, &m_outputLog)
 {
 	ui->setupUi(this);
 
@@ -22,32 +22,25 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 	ui->testsTree->setHeaderLabels(headerLabels);
 	ui->testsTree->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
-	connect(&m_testLibrary.testResultLog(), &TestLog::newLogItem, this, &TestSuiteMainWindow::newLogItem);
-	connect(&m_testLibrary, &TestLibrary::readyForTesting, this, &TestSuiteMainWindow::slot_configurationArrived);
-	connect(&m_testLibrary, &TestLibrary::finished, this, &TestSuiteMainWindow::testFinished);
+	connect(&m_testLibrary.configController(), &TestSuiteConfigController::configurationArrived, this, &TestSuiteMainWindow::onConfigurationArrived);
+	connect(&m_testLibrary, &TestLibrary::testingFinished, this, &TestSuiteMainWindow::onTestingFinished);
 
-	connect(&m_testLibrary, &TestLibrary::logMessage, this, &TestSuiteMainWindow::slot_logMessage);
-	connect(&m_testLibrary, &TestLibrary::logError, this, &TestSuiteMainWindow::slot_logError);
-	connect(&m_testLibrary.configController(), &TestSuiteConfigController::logMessage, this, &TestSuiteMainWindow::slot_logMessage);
-	connect(&m_testLibrary.configController(), &TestSuiteConfigController::logError, this, &TestSuiteMainWindow::slot_logError);
+	connect(&m_logFile, &TestSuiteLogFile::errorArrived, this, &TestSuiteMainWindow::onLogError, Qt::QueuedConnection);
+	connect(&m_logFile, &TestSuiteLogFile::warningArrived, this, &TestSuiteMainWindow::onLogWarning, Qt::QueuedConnection);
+	connect(&m_logFile, &TestSuiteLogFile::messageArrived, this, &TestSuiteMainWindow::onLogMessage, Qt::QueuedConnection);
+	connect(&m_logFile, &TestSuiteLogFile::textArrived, this, &TestSuiteMainWindow::onLogText, Qt::QueuedConnection);
+
+	connect(&m_outputLog, &TestSuiteOutputLog::errorArrived, this, &TestSuiteMainWindow::onOutputLogError, Qt::QueuedConnection);
+	connect(&m_outputLog, &TestSuiteOutputLog::warningArrived, this, &TestSuiteMainWindow::onOutputLogWarning, Qt::QueuedConnection);
+	connect(&m_outputLog, &TestSuiteOutputLog::messageArrived, this, &TestSuiteMainWindow::onOutputLogMessage, Qt::QueuedConnection);
 
 	createActions();
 	createMenu();
 	createStatusBar();
 
-	if (theSettings.loadScriptsFromPath() == true)
+	if (theSettings.librarySettings().loadScriptsFromPath() == true)
 	{
-		QString errorMsg;
-		bool result = m_testLibrary.testScriptsStorage().loadFromPath(theSettings.loadScriptsPath(), &errorMsg);
-		if (result == false)
-		{
-			slot_logError(errorMsg);
-		}
-		else
-		{
-			slot_logMessage(tr("%1 test script(s) were loaded from \"%2\".").arg(m_testLibrary.testScriptsStorage().count()).arg(theSettings.loadScriptsPath()));
-			fillTestsTree();
-		}
+		fillTestsTree();
 	}
 
 	if (theSettings.m_mainWindowPos.x() != -1 && theSettings.m_mainWindowPos.y() != -1)
@@ -253,27 +246,19 @@ void TestSuiteMainWindow::newLogItem(const TestLogItem& item)
 	ui->resultsLog->moveCursor (QTextCursor::End);
 }
 
-void TestSuiteMainWindow::testFinished(int result)
+void TestSuiteMainWindow::onTestingFinished(int result)
 {
 
 }
 
-void TestSuiteMainWindow::slot_configurationArrived()
+void TestSuiteMainWindow::onConfigurationArrived()
 {
 	fillTestsTree();
 
 	return;
 }
 
-void TestSuiteMainWindow::slot_logMessage(const QString& msg)
-{
-	ui->outputLog->moveCursor (QTextCursor::End);
-	ui->outputLog->insertPlainText(msg);
-	ui->outputLog->insertPlainText("\n");
-	ui->outputLog->moveCursor (QTextCursor::End);
-}
-
-void TestSuiteMainWindow::slot_logError(const QString& errMsg)
+void TestSuiteMainWindow::onLogError(const QString& errMsg)
 {
 	ui->outputLog->moveCursor (QTextCursor::End);
 	ui->outputLog->insertPlainText(errMsg);
@@ -282,6 +267,57 @@ void TestSuiteMainWindow::slot_logError(const QString& errMsg)
 
 	QMessageBox::critical(this, qAppName(), errMsg);
 	return;
+}
+
+void TestSuiteMainWindow::onLogWarning(const QString& msg)
+{
+	ui->outputLog->moveCursor (QTextCursor::End);
+	ui->outputLog->insertPlainText(msg);
+	ui->outputLog->insertPlainText("\n");
+	ui->outputLog->moveCursor (QTextCursor::End);
+}
+
+void TestSuiteMainWindow::onLogMessage(const QString& msg)
+{
+	ui->outputLog->moveCursor (QTextCursor::End);
+	ui->outputLog->insertPlainText(msg);
+	ui->outputLog->insertPlainText("\n");
+	ui->outputLog->moveCursor (QTextCursor::End);
+}
+
+void TestSuiteMainWindow::onLogText(const QString& msg)
+{
+	ui->outputLog->moveCursor (QTextCursor::End);
+	ui->outputLog->insertPlainText(msg);
+	ui->outputLog->insertPlainText("\n");
+	ui->outputLog->moveCursor (QTextCursor::End);
+}
+
+void TestSuiteMainWindow::onOutputLogError(const QString& errMsg)
+{
+	ui->resultsLog->moveCursor (QTextCursor::End);
+	ui->resultsLog->insertPlainText(errMsg);
+	ui->resultsLog->insertPlainText("\n");
+	ui->resultsLog->moveCursor (QTextCursor::End);
+
+	QMessageBox::critical(this, qAppName(), errMsg);
+	return;
+}
+
+void TestSuiteMainWindow::onOutputLogWarning(const QString& msg)
+{
+	ui->resultsLog->moveCursor (QTextCursor::End);
+	ui->resultsLog->insertPlainText(msg);
+	ui->resultsLog->insertPlainText("\n");
+	ui->resultsLog->moveCursor (QTextCursor::End);
+}
+
+void TestSuiteMainWindow::onOutputLogMessage(const QString& msg)
+{
+	ui->resultsLog->moveCursor (QTextCursor::End);
+	ui->resultsLog->insertPlainText(msg);
+	ui->resultsLog->insertPlainText("\n");
+	ui->resultsLog->moveCursor (QTextCursor::End);
 }
 
 void TestSuiteMainWindow::showSettings()
@@ -299,11 +335,11 @@ void TestSuiteMainWindow::showSettings()
 
 		auto currentSettings = theSettings;
 
-		if (currentSettings.instanceStrId() != d.settings().instanceStrId() ||
-			currentSettings.configuratorAddress1().address() != d.settings().configuratorAddress1().address() ||
-			currentSettings.configuratorAddress1().port() != d.settings().configuratorAddress1().port() ||
-			currentSettings.configuratorAddress2().address() != d.settings().configuratorAddress2().address() ||
-			currentSettings.configuratorAddress2().port() != d.settings().configuratorAddress2().port())
+		if (currentSettings.librarySettings().instanceStrId() != d.settings().librarySettings().instanceStrId() ||
+			currentSettings.librarySettings().configuratorAddress1().address() != d.settings().librarySettings().configuratorAddress1().address() ||
+			currentSettings.librarySettings().configuratorAddress1().port() != d.settings().librarySettings().configuratorAddress1().port() ||
+			currentSettings.librarySettings().configuratorAddress2().address() != d.settings().librarySettings().configuratorAddress2().address() ||
+			currentSettings.librarySettings().configuratorAddress2().port() != d.settings().librarySettings().configuratorAddress2().port())
 		{
 			needReconnect = true;
 		}
@@ -318,9 +354,9 @@ void TestSuiteMainWindow::showSettings()
 		//
 		if (needReconnect == true)
 		{
-			m_testLibrary.configController().setConnectionParams(theSettings.instanceStrId(),
-												   theSettings.configuratorAddress1(),
-												   theSettings.configuratorAddress2());
+			m_testLibrary.configController().setConnectionParams(theSettings.librarySettings().instanceStrId(),
+												   theSettings.librarySettings().configuratorAddress1(),
+												   theSettings.librarySettings().configuratorAddress2());
 		}
 
 		//setWindowTitle(MonitorAppSettings::instance().windowCaption());

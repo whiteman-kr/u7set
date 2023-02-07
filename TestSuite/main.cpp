@@ -2,11 +2,19 @@
 #include "main.h"
 #include "TestSuiteMainWindow.h"
 
-#include "Settings.h"
+#include "AppConfigSettings.h"
 
 #include <QApplication>
 
 QSharedMemory* theSharedMemorySingleApp = nullptr;
+
+#pragma pack(1)
+struct TestSuiteSharedData
+{
+	int version = 1;
+	bool showCommand = false;
+};
+#pragma pack()
 
 int main(int argc, char *argv[])
 {
@@ -31,7 +39,6 @@ int main(int argc, char *argv[])
 	// Parse the command line
 	//
 
-
 	QCommandLineParser parser;
 
 	parser.addHelpOption();
@@ -50,7 +57,7 @@ int main(int argc, char *argv[])
 
 	if (clientID.isEmpty() == false)
 	{
-		theSettings.setInstanceStrId(clientID);
+		theSettings.librarySettings().setInstanceStrId(clientID);
 	}
 
 	//
@@ -59,11 +66,11 @@ int main(int argc, char *argv[])
 
 	SoftwareInfo softwareInfo;
 
-	softwareInfo.init(E::SoftwareType::TestSuite, theSettings.instanceStrId(), 0, 1);
+	softwareInfo.init(E::SoftwareType::TestSuite, theSettings.librarySettings().instanceStrId(), 0, 1);
 
 	// Check to run the application in one instance
 	//
-	theSharedMemorySingleApp = new QSharedMemory(QString("TestSuite") + theSettings.instanceStrId());
+	theSharedMemorySingleApp = new QSharedMemory(QString("TestSuite") + theSettings.librarySettings().instanceStrId());
 
 	if(theSharedMemorySingleApp->attach(QSharedMemory::ReadWrite) == false)
 	{
@@ -97,7 +104,7 @@ int main(int argc, char *argv[])
 
 			// Run the application
 			//
-			theMainWindow = new TestSuiteMainWindow(softwareInfo);
+			theMainWindow = new TestSuiteMainWindow();
 			theMainWindow->show();
 
 			result = a.exec();

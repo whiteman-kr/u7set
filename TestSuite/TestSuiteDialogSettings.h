@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QDialog>
-#include "Settings.h"
+#include "AppConfigSettings.h"
 
 namespace Ui {
 class TestSuiteDialogSettings;
@@ -15,8 +15,8 @@ public:
 	explicit TestSuiteDialogSettings(QWidget *parent = nullptr);
 	~TestSuiteDialogSettings();
 
-	void setSettings(const Settings& settings);
-	const Settings& settings() const;
+	void setSettings(const AppConfigSettings& settings);
+	const AppConfigSettings& settings() const;
 
 private slots:
 	void on_TestSuiteDialogSettings_accepted();
@@ -28,6 +28,6 @@ private slots:
 private:
 	Ui::TestSuiteDialogSettings *ui;
 
-	Settings m_settings;
+	AppConfigSettings m_settings;
 };
 
