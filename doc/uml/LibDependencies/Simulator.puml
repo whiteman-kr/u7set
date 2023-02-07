@@ -1,0 +1,28 @@
+@startuml
+
+!include ./CommonLib.puml
+!include ./UtilsLib.puml
+!include ./Protobuf.puml
+!include ./OnlineLib.puml
+!include ./AppSignalLib.puml
+!include ./HardwareLib.puml
+
+'!include ./Builder.puml
+'!include ./VFrame30.puml
+'!include ./TrendView.puml
+
+[Simulator]
+Simulator -up-> [CommonLib]
+Simulator -up-> [UtilsLib]
+Simulator -up-> [Protobuf]
+Simulator -up-> [OnlineLib]
+Simulator -up-> [AppSignalLib]
+Simulator -up-> [HardwareLib]
+
+Simulator -up-> [Builder]
+Simulator <-up- [Builder] : SimTests
+
+Simulator -up-> [VFrame30]
+Simulator -up-> [TrendView]
+
+@enduml

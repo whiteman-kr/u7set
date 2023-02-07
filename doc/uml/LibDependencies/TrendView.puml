@@ -1,0 +1,14 @@
+@startuml
+
+!include ./CommonLib.puml
+!include ./UtilsLib.puml
+!include ./AppSignalLib.puml
+!include ./Protobuf.puml
+
+[TrendView]
+TrendView -up-> CommonLib
+TrendView -up-> UtilsLib
+TrendView -up-> AppSignalLib
+TrendView -up-> Protobuf
+
+@enduml  

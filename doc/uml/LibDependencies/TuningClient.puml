@@ -1,0 +1,19 @@
+@startuml
+
+!include ./CommonLib.puml
+!include ./UtilsLib.puml
+!include ./OnlineLib.puml
+!include ./Protobuf.puml
+!include ./AppSignalLib.puml
+!include ./VFrame30.puml
+
+
+[TuningClient]
+TuningClient -up-> [CommonLib]
+TuningClient -up-> [UtilsLib]
+TuningClient -up-> [OnlineLib]
+TuningClient -up-> [Protobuf]
+TuningClient -up-> [AppSignalLib]
+TuningClient -up-> [VFrame30]
+
+@enduml

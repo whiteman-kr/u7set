@@ -1,10 +1,6 @@
 #pragma once
 
-//#include "../QScintilla/src/Qsci/qsciscintilla.h"
-//#include "../lib/QScintillaLexers/LexerXML.h"
-//#include "../lib/QScintillaLexers/LexerJavaScript.h"
 #include "CodeEditor.h"
-
 #include "../lib/PropertyEditor.h"
 #include "../lib/PropertyTable.h"
 #include "../lib/Tuning/TuningFilterEditor.h"
