@@ -71,12 +71,22 @@ namespace VFrame30
 
 	ITimeStats* CDrawParam::timeStats()
 	{
+		if (drawMode() == DrawMode::Editor)
+		{
+			return nullptr;
+		}
+
 		auto c = clientSchemaView();
 		return c ? c->timeStats() : nullptr;
 	}
 
 	ITimeStats* CDrawParam::timeStats() const
 	{
+		if (drawMode() == DrawMode::Editor)
+		{
+			return nullptr;
+		}
+
 		auto c = clientSchemaView();
 		return c ? c->timeStats() : nullptr;
 	}
