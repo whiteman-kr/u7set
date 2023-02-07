@@ -1510,7 +1510,7 @@ namespace Builder
 
 				quint16 n = m_code.getWord3();
 
-				cmdExecTime = 2 + (2 + m_fbExecTime) * n;
+				cmdExecTime = 2 + (m_fbExecTime + 3) * n + 2;
 			}
 			break;
 
@@ -1540,7 +1540,7 @@ namespace Builder
 
 		case LmCommand::Code::MOV:
 			Q_ASSERT(lmCommand.runTime == LmCommand::CALC_RUNTIME);
-			cmdExecTime = isAddrInBitMem(lmDesc, m_code.getWord2()) == true ? 69 : 10;
+			cmdExecTime = isAddrInBitMem(lmDesc, m_code.getWord2()) == true ? 70 : 10;
 			break;
 
 		case LmCommand::Code::MOVMEM:
@@ -1573,7 +1573,7 @@ namespace Builder
 
 				Q_ASSERT(n > 0);
 
-				cmdExecTime = 6 + (n - 1) * 4 + 1;
+				cmdExecTime = 5 + (n - 1) * 4 + 1;
 			}
 			break;
 
@@ -1663,108 +1663,6 @@ namespace Builder
 		str = QString("%1%2").arg(lowByte, 2, 16, Latin1Char::ZERO).arg(highByte, 2, 16, Latin1Char::ZERO);
 
 		return str;
-	}
-
-	bool CodeItem::read16(int /*addrFrom*/)
-	{
-/*		if (m_memoryMap == nullptr)
-		{
-			Q_ASSERT(false);
-			m_result = false;
-		}
-		else
-		{
-			m_result &= m_memoryMap->read16(addrFrom);
-		}
-
-		return m_result;*/
-
-		return false;
-	}
-
-	bool CodeItem::read32(int /*addrFrom*/)
-	{
-/*		if (m_memoryMap == nullptr)
-		{
-			Q_ASSERT(false);
-			m_result = false;
-		}
-		else
-		{
-			m_result &= m_memoryMap->read32(addrFrom);
-		}
-
-		return m_result;*/
-
-		return false;
-	}
-
-	bool CodeItem::readArea(int /*addrFrom*/, int /*sizeW*/)
-	{
-/*		if (m_memoryMap == nullptr)
-		{
-			Q_ASSERT(false);
-			m_result = false;
-		}
-		else
-		{
-			m_result &= m_memoryMap->readArea(addrFrom, sizeW);
-		}
-
-		return m_result;*/
-
-		return false;
-	}
-
-	bool CodeItem::write16(int /*addrTo*/)
-	{
-/*		if (m_memoryMap == nullptr)
-		{
-			Q_ASSERT(false);
-			m_result = false;
-		}
-		else
-		{
-			m_result &= m_memoryMap->write16(addrTo);
-		}
-
-		return m_result;*/
-
-		return false;
-	}
-
-	bool CodeItem::write32(int /*addrTo*/)
-	{
-/*		if (m_memoryMap == nullptr)
-		{
-			Q_ASSERT(false);
-			m_result = false;
-		}
-		else
-		{
-			m_result &= m_memoryMap->write32(addrTo);
-		}
-
-		return m_result;*/
-
-		return false;
-	}
-
-	bool CodeItem::writeArea(int /*addrTo*/, int /*sizeW*/)
-	{
-/*		if (m_memoryMap == nullptr)
-		{
-			Q_ASSERT(false);
-			m_result = false;
-		}
-		else
-		{
-			m_result &= m_memoryMap->writeArea(addrTo, sizeW);
-		}
-
-		return m_result;*/
-
-		return false;
 	}
 
 	bool CodeItem::isAddrInBitMem(const LmDescription& lmDesc, quint32 addr) const

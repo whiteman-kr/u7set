@@ -88,6 +88,7 @@ namespace Builder
 		{
 			bool isInputModule() const;
 			bool isOutputModule() const;
+			bool isOptoModule() const;
 			Hardware::DeviceModule::FamilyType familyType() const;
 
 			//
@@ -97,13 +98,13 @@ namespace Builder
 
 			// properties loaded from Hardware::DeviceModule::dynamicProperties
 			//
-			int txDataSize = 0;			// size of data transmitted from module to LM
+			int txDataSize = 0;			// overall size of data transmitted from module to LM
 			int txDiagDataOffset = 0;
 			int txDiagDataSize = 0;
 			int txAppDataOffset = 0;
 			int txAppDataSize = 0;
 
-			int rxDataSize = 0;			// size of data transmitted from LM to module
+			int rxDataSize = 0;			// overall size of data transmitted from LM to module
 			int rxAppDataOffset = 0;
 			int rxAppDataSize = 0;
 
@@ -182,21 +183,23 @@ namespace Builder
 
 		BusShared getBusShared(const QString& busTypeID);
 
+		bool getTuningSignalsFramesInfo(std::vector<std::pair<quint32, quint32>>* framesInfo) const;
+
 		Builder::Context* builderContext() const { return m_context; }
 
 		const HashedVector<QString, Module>& modules() const { return  m_modules; }
 
-		bool getLmUsedTuningArea(CodeChecker::MemArea* tuningArea) const;
+		bool getLmUsedTuningArea(std::vector<CodeChecker::MemArea>* tuningAreas) const;
 
-		bool getLmOptoPortsRxAreas(std::vector<CodeChecker::MemArea>* optoRxAreas) const;
-		bool getLmOptoPortsTxAreas(std::vector<CodeChecker::MemArea>* optoTxAreas) const;
+		bool getLmAssociatedOptoPortsRxAreas(std::vector<CodeChecker::MemArea>* optoRxAreas) const;
+		bool getLmAssociatedOptoPortsTxAreas(std::vector<CodeChecker::MemArea>* optoTxAreas) const;
 
 		const LmMemoryMap& lmMemoryMap() const { return m_memoryMap; }
 
 		QList<const UalSignal*> getLoopbacksUalSignals() const;
 
 	private:
-		bool getLmOptoPortsAreas(std::vector<CodeChecker::MemArea>* optoAreas, bool rx) const;
+		bool getLmAssociatedOptoPortsAreas(std::vector<CodeChecker::MemArea>* optoAreas, bool rx) const;
 
 		// pass #1 compilation functions
 		//
@@ -687,11 +690,12 @@ namespace Builder
 
 		QString lmSubsystemEquipmentIdPath() const;
 
-		bool writeCodeInfoFiles();
+		bool writeInfoFiles();
 		bool writeAsmFile() const;
 		bool writeMemFile() const;
 		bool writeStatisticsFile() const;
 		bool writeTuningInfoFile() const;
+		bool writeOptoModulesReport() const;
 
 		bool writeResult();
 		bool writeBinCodeForLm();

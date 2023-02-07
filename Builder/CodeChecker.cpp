@@ -175,23 +175,33 @@ namespace Builder
 				Q_ASSERT(static_cast<quint32>(module.moduleDataOffset) == moduleDataOffset);
 				Q_ASSERT(static_cast<quint32>(module.txDataSize) <= m_lmDesc->memory().m_moduleDataSize);
 
-				ma.setStartAddr(module.moduleDataOffset);
-				ma.setSizeW(module.txDataSize);
+				if (module.isOptoModule() == true)
+				{
+					// append only diag data area
+					//
+					ma.setStartAddr(module.txDiagDataOffset);
+					ma.setSizeW(module.txDiagDataSize);
+				}
+				else
+				{
+					ma.setStartAddr(module.moduleDataOffset);
+					ma.setSizeW(module.txDataSize);
+				}
 			}
 
 			m_readAreas.insert({ma.startAddr(), ma});
 			initToRead(ma);
 		}
 
-		// LM's opto interface actual rx data
+		// Opto ports actual rx data
 		//
-		std::vector<MemArea> lmOptoRxAreas;
+		std::vector<MemArea> optoRxAreas;
 
-		bool result = m_compiler.getLmOptoPortsRxAreas(&lmOptoRxAreas);
+		bool result = m_compiler.getLmAssociatedOptoPortsRxAreas(&optoRxAreas);
 
 		RETURN_IF_FALSE(result);
 
-		for(const MemArea& ma : lmOptoRxAreas)
+		for(const MemArea& ma : optoRxAreas)
 		{
 			m_readAreas.insert({ma.startAddr(), ma});
 			initToRead(ma);
@@ -206,16 +216,27 @@ namespace Builder
 
 		// Actual used tuning memory
 		//
-		MemArea usedTuningMem;
+		std::vector<std::pair<quint32, quint32>> framesInfo;
 
-		result = m_compiler.getLmUsedTuningArea(&usedTuningMem);
+		result = m_compiler.getTuningSignalsFramesInfo(&framesInfo);
 
-		RETURN_IF_FALSE(result);
-
-		if (usedTuningMem.sizeW() > 0)
+		for(auto const& p : framesInfo)
 		{
-			m_readAreas.insert({usedTuningMem.startAddr(), usedTuningMem});
-			initToRead(usedTuningMem);
+			MemArea tuningFrame;
+
+			tuningFrame.setStartAddr(p.first);
+			tuningFrame.setSizeW(p.second);
+
+/*			LOG_MESSAGE(m_log, QString("----- Tuning frame start %1 end %2 sizeW %3").
+							arg(tuningFrame.startAddr()).
+							arg(tuningFrame.startAddr() + tuningFrame.sizeW() - 1).
+							arg(tuningFrame.sizeW()));
+
+			if (tuningFrame.sizeW() > 0)
+			{
+				m_readAreas.insert({tuningFrame.startAddr(), tuningFrame});
+				initToRead(tuningFrame);
+			}*/
 		}
 
 		// Word memory
@@ -254,33 +275,41 @@ namespace Builder
 
 			if (place == 0)
 			{
-				ma.setStartAddr(module.txAppDataOffset);		// ! its Ok
+				ma.setStartAddr(module.txAppDataOffset);		// tx... -  its Ok!
 				ma.setSizeW(module.txAppDataSize);
 			}
 			else
 			{
-				quint32 moduleDataOffset = m_lmDesc->memory().m_moduleDataOffset +
-											(place - 1) * m_lmDesc->memory().m_moduleDataSize;
+				if (module.isOptoModule() == false)
+				{
+					quint32 moduleDataOffset = m_lmDesc->memory().m_moduleDataOffset +
+												(place - 1) * m_lmDesc->memory().m_moduleDataSize;
 
-				Q_ASSERT(static_cast<quint32>(module.moduleDataOffset) == moduleDataOffset);
-				Q_ASSERT(static_cast<quint32>(module.txDataSize) <= m_lmDesc->memory().m_moduleDataSize);
+					Q_ASSERT(static_cast<quint32>(module.moduleDataOffset) == moduleDataOffset);
+					Q_ASSERT(static_cast<quint32>(module.txDataSize) <= m_lmDesc->memory().m_moduleDataSize);
 
-				ma.setStartAddr(module.moduleDataOffset + module.rxAppDataOffset);
-				ma.setSizeW(module.rxAppDataSize);
+					ma.setStartAddr(module.moduleDataOffset + module.rxAppDataOffset);
+					ma.setSizeW(module.rxAppDataSize);
+				}
 			}
 
 			m_writeAreas.insert({ma.startAddr(), ma});
+
+/*			LOG_MESSAGE(m_log, QString("Module %1 write area %2 sizeW %3").
+						arg(module.device->equipmentIdTemplate()).
+						arg(ma.startAddr()).
+						arg(ma.sizeW()));*/
 		}
 
-		// LM's opto interface actual tx data
+		// Opto ports actual tx data
 		//
-		std::vector<MemArea> lmOptoTxAreas;
+		std::vector<MemArea> optoTxAreas;
 
-		bool result = m_compiler.getLmOptoPortsTxAreas(&lmOptoTxAreas);
+		bool result = m_compiler.getLmAssociatedOptoPortsTxAreas(&optoTxAreas);
 
 		RETURN_IF_FALSE(result);
 
-		for(const MemArea& ma : lmOptoTxAreas)
+		for(const MemArea& ma : optoTxAreas)
 		{
 			m_writeAreas.insert({ma.startAddr(), ma});
 		}

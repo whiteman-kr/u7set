@@ -2175,23 +2175,6 @@ namespace Hardware
 		return m_deviceModule->isBvb();
 	}
 
-	void OptoModule::getSerialPorts(QList<OptoPortShared>& serialPortsList) const
-	{
-		for(const OptoPortShared& port : m_ports)
-		{
-			if (port == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			if (port->isSinglePortConnection() == true)
-			{
-				serialPortsList.append(port);
-			}
-		}
-	}
-
 	void OptoModule::getOptoPorts(QList<OptoPortShared>& optoPortsList) const
 	{
 		for(const OptoPortShared& port : m_ports)
@@ -2202,10 +2185,7 @@ namespace Hardware
 				continue;
 			}
 
-			if (port->isPortToPortConnection() == true)
-			{
-				optoPortsList.append(port);
-			}
+			optoPortsList.append(port);
 		}
 	}
 
@@ -3579,6 +3559,37 @@ namespace Hardware
 		}
 
 		return m_modulesRawDataDescription.value(module->equipmentIdTemplate(), nullptr);
+	}
+
+	void OptoModuleStorage::getAllOptoPorts(std::vector<OptoPortShared>* optoPorts) const
+	{
+		TEST_PTR_RETURN(optoPorts);
+
+		optoPorts->clear();
+
+		for(OptoModuleShared optoModule : m_modules)
+		{
+			if (optoModule == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			QList<OptoPortShared> ports;
+
+			optoModule->getOptoPorts(ports);
+
+			for(auto& port : ports)
+			{
+				optoPorts->push_back(port);
+			}
+		}
+
+		std::sort(optoPorts->begin(), optoPorts->end(),
+					[] (OptoPortShared a, OptoPortShared b)
+					{
+						return a->equipmentID() < b->equipmentID();
+					});
 	}
 
 	bool OptoModuleStorage::processConnection(ConnectionShared connection)

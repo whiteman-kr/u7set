@@ -404,14 +404,6 @@ namespace Builder
 
 		QString getCodeWordStr(int wordNo) const;
 
-		bool read16(int addrFrom);
-		bool read32(int addrFrom);
-		bool readArea(int addrFrom, int sizeW);
-
-		bool write16(int addrTo);
-		bool write32(int addrTo);
-		bool writeArea(int addrTo, int sizeW);
-
 		bool isAddrInBitMem(const LmDescription& lmDesc, quint32 addr) const;
 		bool isAddrInWordMem(const LmDescription& lmDesc, quint32 addr) const;
 

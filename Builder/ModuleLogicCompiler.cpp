@@ -166,7 +166,7 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::generateIdrPhaseCode),
 
 			PROC_TO_CALL(ModuleLogicCompiler::makeAppLogicCode),
-			PROC_TO_CALL(ModuleLogicCompiler::writeCodeInfoFiles),
+			PROC_TO_CALL(ModuleLogicCompiler::writeInfoFiles),
 			PROC_TO_CALL(ModuleLogicCompiler::checkAppLogicCode),
 			PROC_TO_CALL(ModuleLogicCompiler::cleanupHeaps),
 
@@ -299,33 +299,34 @@ namespace Builder
 		return m_signals->getBus(busTypeID);
 	}
 
-	bool ModuleLogicCompiler::getLmUsedTuningArea(CodeChecker::MemArea* tuningArea) const
+	bool ModuleLogicCompiler::getTuningSignalsFramesInfo(std::vector<std::pair<quint32, quint32>>* framesInfo) const
 	{
 		TEST_PTR_RETURN_FALSE(m_log);
-		TEST_PTR_LOG_RETURN_FALSE(tuningArea, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(m_tuningDataStorage, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(framesInfo, m_log);
+
+		framesInfo->clear();
 
 		Tuning::TuningDataShared tuningData = m_tuningDataStorage->getTuningData(lmEquipmentID());
 
-		TEST_PTR_LOG_RETURN_FALSE(tuningData, m_log);
+		if (tuningData == nullptr)
+		{
+			return true;
+		}
 
-		tuningArea->setStartAddr(tuningData->tuningDataOffsetW());
-
-		Q_ASSERT(tuningData->usedTuningDataSizeW() <= tuningData->tuningDataSizeW());
-
-		tuningArea->setSizeW(tuningData->usedTuningDataSizeW());
+		tuningData->getTuningSignalsFramesInfo(framesInfo);
 
 		return true;
 	}
 
-	bool ModuleLogicCompiler::getLmOptoPortsRxAreas(std::vector<CodeChecker::MemArea>* optoRxAreas) const
+	bool ModuleLogicCompiler::getLmAssociatedOptoPortsRxAreas(std::vector<CodeChecker::MemArea>* optoRxAreas) const
 	{
-		return getLmOptoPortsAreas(optoRxAreas, true);
+		return getLmAssociatedOptoPortsAreas(optoRxAreas, true);
 	}
 
-	bool ModuleLogicCompiler::getLmOptoPortsTxAreas(std::vector<CodeChecker::MemArea>* optoTxAreas) const
+	bool ModuleLogicCompiler::getLmAssociatedOptoPortsTxAreas(std::vector<CodeChecker::MemArea>* optoTxAreas) const
 	{
-		return getLmOptoPortsAreas(optoTxAreas, false);
+		return getLmAssociatedOptoPortsAreas(optoTxAreas, false);
 	}
 
 	QList<const UalSignal*> ModuleLogicCompiler::getLoopbacksUalSignals() const
@@ -333,21 +334,17 @@ namespace Builder
 		return m_loopbacks.getLoopbacksUalSignals();
 	}
 
-	bool ModuleLogicCompiler::getLmOptoPortsAreas(std::vector<CodeChecker::MemArea>* optoAreas, bool rx) const
+	bool ModuleLogicCompiler::getLmAssociatedOptoPortsAreas(std::vector<CodeChecker::MemArea>* optoAreas, bool rx) const
 	{
 		TEST_PTR_RETURN_FALSE(m_log);
 		TEST_PTR_LOG_RETURN_FALSE(optoAreas, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(m_optoModuleStorage, m_log);
 
-		Hardware::OptoModuleShared lmOpto = m_optoModuleStorage->getOptoModule(lmEquipmentID());
+		QList<Hardware::OptoPortShared> ports;
 
-		TEST_PTR_LOG_RETURN_FALSE(lmOpto, m_log);
+		m_optoModuleStorage->getLmAssociatedOptoPorts(lmEquipmentID(), ports);
 
-		QList<Hardware::OptoPortShared> optoPorts;
-
-		lmOpto->getOptoPorts(optoPorts);
-
-		for(Hardware::OptoPortShared& port : optoPorts)
+		for(Hardware::OptoPortShared& port : ports)
 		{
 			TEST_PTR_CONTINUE(port);
 
@@ -1750,7 +1747,7 @@ namespace Builder
 		TEST_PTR_LOG_RETURN_FALSE(m_optoModuleStorage, m_log);
 
 		//
-		// Appending OptoValidity signals for ALL opto ports in current LM and associated OptoModules
+		// Appending OptoValidity signals for USED opto ports in current LM and associated OptoModules
 		//
 
 		bool result = true;
@@ -1767,6 +1764,11 @@ namespace Builder
 			{
 				LOG_NULLPTR_ERROR(m_log);
 				result = false;
+				continue;
+			}
+
+			if (optoPort->isUsedInConnection() == false)
+			{
 				continue;
 			}
 
@@ -14547,7 +14549,7 @@ namespace Builder
 		return QString("%1/%2").arg(m_lmSubsystemID).arg(lmEquipmentID());
 	}
 
-	bool ModuleLogicCompiler::writeCodeInfoFiles()
+	bool ModuleLogicCompiler::writeInfoFiles()
 	{
 		bool result = true;
 
@@ -14558,6 +14560,8 @@ namespace Builder
 		result &= writeStatisticsFile();
 
 		result &= writeTuningInfoFile();
+
+		result &= writeOptoModulesReport();
 
 		return result;
 	}
@@ -14747,6 +14751,88 @@ namespace Builder
 		bool result = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
 											  QString("%1-%2.tun").arg(m_lmSubsystemID.toLower()).arg(m_lmNumber), file);
 		return result;
+	}
+
+	bool ModuleLogicCompiler::writeOptoModulesReport() const
+	{
+		TEST_PTR_RETURN_FALSE(m_log);
+		TEST_PTR_LOG_RETURN_FALSE(m_optoModuleStorage, m_log);
+
+		QVector<Hardware::OptoModuleShared> modules;
+
+		modules = m_optoModuleStorage->getLmAssociatedOptoModules(lmEquipmentID());
+
+		qsizetype count = modules.count();
+
+		if (count == 0)
+		{
+			return true;
+		}
+
+		std::vector<Hardware::OptoModuleShared> optoModules;
+
+		for(auto& m : modules)
+		{
+			optoModules.push_back(m);
+		}
+
+		std::sort(optoModules.begin(), optoModules.end(),
+					[] (Hardware::OptoModuleShared a, Hardware::OptoModuleShared b)
+					{
+						return a->place() < b->place();
+					});
+
+		QStringList file;
+
+		QString delim = "--------------------------------------------------------------------";
+
+		QString str;
+
+		for(qsizetype i = 0; i < count; i++)
+		{
+			Hardware::OptoModuleShared module = modules[i];
+
+			if (module == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			file.append(delim);
+
+			if (module->isLmOrBvb())
+			{
+				str = QString(tr("Opto module LM (or BVB) %1")).arg(module->equipmentID());
+			}
+			else
+			{
+				if (module->isOcm())
+				{
+					str = QString(tr("Opto module OCM %1")).arg(module->equipmentID());
+				}
+				else
+				{
+					assert(false);
+				}
+			}
+
+			file.append(str);
+			file.append(delim);
+			file.append("");
+
+			// write module's opto ports information
+			//
+			const HashedVector<QString, Hardware::OptoPortShared>& ports = module->ports();
+
+			for(const Hardware::OptoPortShared& port : ports)
+			{
+				port->writeInfo(file);
+			}
+		}
+
+		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
+												QString("%1-%2.opto").arg(m_lmSubsystemID.toLower()).arg(m_lmNumber), file);
+		return (buildFile != nullptr);
 	}
 
 	bool ModuleLogicCompiler::writeResult()
@@ -16464,6 +16550,17 @@ namespace Builder
 		}
 
 		return device->isOutputModule();
+	}
+
+	bool ModuleLogicCompiler::Module::isOptoModule() const
+	{
+		if (device == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		return device->isOptoModule();
 	}
 
 	Hardware::DeviceModule::FamilyType ModuleLogicCompiler::Module::familyType() const

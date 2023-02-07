@@ -129,7 +129,7 @@ namespace  Tuning
 	{
 		// calculate tuning signals sizes
 		//
-		int totalSize = 0;
+		int totalSizeB = 0;
 
 		for(int t = TYPE_ANALOG_FLOAT; t < TYPES_COUNT; t++)
 		{
@@ -157,7 +157,7 @@ namespace  Tuning
 				assert(false);
 			}
 
-			totalSize += m_tuningSignalSizesB[t];
+			totalSizeB += m_tuningSignalSizesB[t];
 		}
 
 		// calculate used tuning frames count
@@ -170,7 +170,7 @@ namespace  Tuning
 		}
 		else
 		{
-			m_tuningDataUsedFramesCount = (totalSize / tuningFramePayloadBytes + ((totalSize % tuningFramePayloadBytes) == 0 ? 0 : 1)) * TRIPLE_FRAMES;
+			m_tuningDataUsedFramesCount = (totalSizeB / tuningFramePayloadBytes + ((totalSizeB % tuningFramePayloadBytes) == 0 ? 0 : 1)) * TRIPLE_FRAMES;
 		}
 
 		// allocate m_tuningData
@@ -688,6 +688,59 @@ namespace  Tuning
 		}
 
 		return result;
+	}
+
+	void TuningData::getTuningSignalsFramesInfo(std::vector<std::pair<quint32, quint32>>* framesInfo) const
+	{
+		// pair - <frameAbsStartAddrW, frameUsedSizeW>
+		//
+		TEST_PTR_RETURN(framesInfo);
+
+		framesInfo->clear();
+
+		int totalSizeB = 0;
+
+		Q_ASSERT((m_tuningSignalSizesB[TYPE_ANALOG_FLOAT] % sizeof(float)) == 0);
+
+		totalSizeB += m_tuningSignalSizesB[TYPE_ANALOG_FLOAT];
+
+		Q_ASSERT((m_tuningSignalSizesB[TYPE_ANALOG_INT32] % sizeof(qint32)) == 0);
+
+		totalSizeB += m_tuningSignalSizesB[TYPE_ANALOG_INT32];
+
+		// discrete tuning signals allocated by 32 bits
+		//
+		totalSizeB += m_tuningSignalSizesB[TYPE_DISCRETE] +
+						(sizeof(quint32) - (m_tuningSignalSizesB[TYPE_DISCRETE] % sizeof(quint32)));
+
+		Q_ASSERT(m_tuningFlashFramePayloadB == m_tuningDataFramePayloadW * sizeof(quint16));
+
+		quint32 frameStartAddrW = m_tuningDataOffsetW;
+
+		while(totalSizeB > 0)
+		{
+			Q_ASSERT((totalSizeB % sizeof(quint32)) == 0);
+
+			int frameUsedSizeW = 0;
+
+			if (totalSizeB >= m_tuningFlashFramePayloadB)
+			{
+				frameUsedSizeW = m_tuningFlashFramePayloadB / sizeof(quint16);		// bytes => words
+				totalSizeB -= m_tuningFlashFramePayloadB;
+			}
+			else
+			{
+				frameUsedSizeW = totalSizeB / sizeof(quint16);		// bytes => words
+				totalSizeB = 0;
+			}
+
+			framesInfo->push_back({frameStartAddrW, frameUsedSizeW});
+
+			frameStartAddrW += m_tuningDataFramePayloadW * 3;	// skip 3 frames:
+																//		1) tuning signal values
+																//		2) tuning signal low bound
+																//		3) tuning signal high bound
+		}
 	}
 
 	void TuningData::writeBigEndianUint32Bit(quint8* dataPtr, int bitNo, quint32 bitValue)

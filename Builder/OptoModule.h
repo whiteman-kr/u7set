@@ -388,7 +388,6 @@ namespace Hardware
 		QString lmID() const { return m_lmID; }
 		const DeviceModule* lmDeviceModule() const { return m_lm; }
 
-		void getSerialPorts(QList<OptoPortShared>& serialPortsList) const;
 		void getOptoPorts(QList<OptoPortShared>& optoPortsList) const;
 
 		const HashedVector<QString, OptoPortShared>& ports() const { return m_ports; }
@@ -543,6 +542,8 @@ namespace Hardware
 		int getModuleRawDataSize(const Hardware::DeviceModule* module, Builder::IssueLogger* log);
 
 		ModuleRawDataDescription* getModuleRawDataDescription(const Hardware::DeviceModule* module) const;
+
+		void getAllOptoPorts(std::vector<OptoPortShared>* optoPorts) const;
 
 	private:
 		bool processConnection(ConnectionShared connection);

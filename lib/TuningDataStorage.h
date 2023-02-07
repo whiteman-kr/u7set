@@ -81,6 +81,8 @@ namespace Tuning
 		void writeToXml(XmlWriteHelper& xml);
 		bool readFromXml(XmlReadHelper& xml);
 
+		void getTuningSignalsFramesInfo(std::vector<std::pair<quint32, quint32>>* framesInfo) const;
+
 		static const int TYPE_ANALOG_FLOAT = static_cast<int>(E::TuningSignalType::AnalogFloat);
 		static const int TYPE_ANALOG_INT32 = static_cast<int>(E::TuningSignalType::AnalogInt32);
 		static const int TYPE_DISCRETE = static_cast<int>(E::TuningSignalType::Discrete);

@@ -66,7 +66,6 @@ namespace Builder
 			&ApplicationLogicCompiler::writeSerialDataXml,
 			&ApplicationLogicCompiler::writeOptoConnectionsReport,
 			&ApplicationLogicCompiler::writeOptoConnectionsXml,
-//			&ApplicationLogicCompiler::writeOptoModulesReport,
 			&ApplicationLogicCompiler::writeOptoVhdFiles,
 			&ApplicationLogicCompiler::checkSignalsHashes,
 			&ApplicationLogicCompiler::writeAppSignalSetFile,
@@ -1150,74 +1149,6 @@ namespace Builder
 		buildResultWriter()->addFile(Directory::OPTO_VHD, vhdFileName, list);
 
 		buildResultWriter()->addFile(Directory::OPTO_VHD, bdfFileName, bdfFile.stringList());
-
-		return true;
-	}
-
-
-
-	bool ApplicationLogicCompiler::writeOptoModulesReport()
-	{
-		QVector<Hardware::OptoModuleShared> modules;
-
-		opticModuleStorage()->getOptoModulesSorted(modules);
-
-		qsizetype count = modules.count();
-
-		if (count == 0)
-		{
-			return true;
-		}
-
-		QStringList list;
-
-		QString delim = "--------------------------------------------------------------------";
-
-		QString str;
-
-		for(qsizetype i = 0; i < count; i++)
-		{
-			Hardware::OptoModuleShared module = modules[i];
-
-			if (module == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			list.append(delim);
-
-			if (module->isLmOrBvb())
-			{
-				str = QString(tr("Opto module LM (or BVB) %1")).arg(module->equipmentID());
-			}
-			else
-			{
-				if (module->isOcm())
-				{
-					str = QString(tr("Opto module OCM %1")).arg(module->equipmentID());
-				}
-				else
-				{
-					assert(false);
-				}
-			}
-
-			list.append(str);
-			list.append(delim);
-			list.append("");
-
-			// write module's opto ports information
-			//
-			const HashedVector<QString, Hardware::OptoPortShared>& ports = module->ports();
-
-			for(const Hardware::OptoPortShared& port : ports)
-			{
-				port->writeInfo(list);
-			}
-		}
-
-		buildResultWriter()->addFile(Directory::REPORTS, "Opto-modules.txt", "", "", list);
 
 		return true;
 	}
