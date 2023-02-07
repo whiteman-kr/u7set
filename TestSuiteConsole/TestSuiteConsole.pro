@@ -40,14 +40,12 @@ PRECOMPILED_HEADER = Stable.h
 SOURCES += \
         ../lib/BuildInfo.cpp \
         ../lib/SoftwareSettings.cpp \
-        TestTask.cpp \
         main.cpp
 
 HEADERS += \
     ../lib/BuildInfo.h \
     ../lib/SoftwareSettings.h \
-    Stable.h \
-    TestTask.h
+    Stable.h
 
 # Add curent dir to a list of library directory paths
 #

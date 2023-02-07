@@ -1,8 +1,10 @@
 #include <iostream>
 #include <QCoreApplication>
 #include <QTimer>
-#include "TestTask.h"
+#include "../TestSuiteLib/TestLibrarySettings.h"
 #include "../TestSuiteLib/TestLibrary.h"
+#include "../UtilsLib/LogFile.h"
+
 #include <QFile>
 #include <QXmlStreamWriter>
 #include <QDomDocument>
@@ -21,50 +23,6 @@ void messageOutputHandler(QtMsgType /*type*/, const QMessageLogContext& /*contex
 	return;
 }
 
-void createTemplateFile(const QString& fileName)
-{
-	QByteArray data;
-
-	QXmlStreamWriter writer(&data);
-
-	writer.setAutoFormatting(true);
-	writer.writeStartDocument();
-	writer.writeStartElement("TestSuiteConsoleArguments");
-
-
-	writer.writeComment("TestSuite InstanceStrID");
-	writer.writeTextElement("InstanceStrID", "SYSTEMID_RACKID_WS00_TESTSUITE");
-
-	writer.writeComment("Configurator IP Address 1");
-	writer.writeTextElement("ConfiguratorIPAddress1", "127.0.0.1");
-
-	writer.writeComment("Configurator Port 1");
-	writer.writeTextElement("ConfiguratorPort1", "13312");
-
-	writer.writeComment("Configurator IP Address 2");
-	writer.writeTextElement("ConfiguratorIPAddress2", "127.0.0.1");
-
-	writer.writeComment("Configurator Port 2");
-	writer.writeTextElement("ConfiguratorPort2", "13312");
-
-	writer.writeEndElement();	// TestSuiteConsoleArguments
-	writer.writeEndDocument();
-
-	QFile f(fileName);
-
-	if (f.open(QFile::WriteOnly) == false)
-	{
-		QString errorMsg = QObject::tr("Failed to save file %1.").arg(fileName);
-		std::cout << errorMsg.toStdString() << std::endl;
-		return;
-	}
-
-	f.write(data);
-
-	std::cout << "Arguments template has been written to: " << fileName.toStdString() << std::endl;
-
-	return;
-}
 
 void showHelp()
 {
@@ -87,171 +45,46 @@ void showHelp()
 	return;
 }
 
-bool getArgumentFromXml(QDomElement& docElem, QString name, QString* result)
+class ProtobufLibShutdowner
 {
-	if (result == nullptr)
+public:
+	~ProtobufLibShutdowner()
 	{
-		Q_ASSERT(result);
-		return false;
+		google::protobuf::ShutdownProtobufLibrary();
 	}
+};
 
-	QDomNodeList softwareNodes = docElem.elementsByTagName(name);
-	if (softwareNodes.size() != 1)
-	{
-		return false;
-	}
-
-
-	QDomElement elem = softwareNodes.item(0).toElement();
-	*result = elem.text();
-
-	return true;
-}
-
-bool getArgumentFromXml(QDomElement& docElem, QString name, int* result)
+class ConsoleLogFile : public Log::LogFile
 {
-	if (result == nullptr)
-	{
-		Q_ASSERT(result);
-		return false;
-	}
+public:
+	ConsoleLogFile(const QString& fileName, const QString& path, int maxFileSize = 1048576, int maxFilesCount = 64, bool addAppInfoOnStart = true)
+		:Log::LogFile(fileName, path, maxFileSize, maxFilesCount, addAppInfoOnStart){}
 
-	QString str;
-	if (getArgumentFromXml(docElem, name, &str) == false)
-	{
-		return false;
-	}
+	bool writeAlert(const QString& text) override	{	std::cout << text.toStdString() << std::endl; return Log::LogFile::writeAlert(text);	}
+	bool writeError(const QString& text) override	{	std::cout << text.toStdString() << std::endl; return Log::LogFile::writeError(text);	}
+	bool writeWarning(const QString& text) override	{	std::cout << text.toStdString() << std::endl; return Log::LogFile::writeWarning(text);	}
+	bool writeMessage(const QString& text) override	{	std::cout << text.toStdString() << std::endl; return Log::LogFile::writeMessage(text);	}
+	bool writeText(const QString& text) override	{	std::cout << text.toStdString() << std::endl; return Log::LogFile::writeText(text);	}
+};
 
-	bool ok = false;
-	*result = str.toInt(&ok);
-
-	return ok;
-}
-
-int startTests(QString testArgsFileName, QString scriptsPath, QCoreApplication& a)
+class ConsoleOutputLog : public IOutputLog
 {
-	// Read arguments from XML document
-	//
-	QDomDocument doc("Document");
-
-	QFile file(testArgsFileName);
-	if (file.open(QIODevice::ReadOnly) == false)
-	{
-		QString errorMsg = QObject::tr("Failed to open file %1.").arg(testArgsFileName);
-		std::cout << errorMsg.toStdString() << std::endl;
-		return 1;
-	}
-
-
-	if (doc.setContent(&file) == false)
-	{
-		QString errorMsg = QObject::tr("Failed to load contents of the file %1.").arg(testArgsFileName);
-		std::cout << errorMsg.toStdString() << std::endl;
-		file.close();
-		return 1;
-	}
-	file.close();
-
-	// Read and set task arguments
-	//
-	QDomElement docElem = doc.documentElement();
-
-
-	// DatabaseAddress
-	//
-	QString instanceStrId;
-	bool ok = getArgumentFromXml(docElem, "InstanceStrID", &instanceStrId);
-	if (ok == false)
-	{
-		std::cout << "Failed to read InstanceStrID argument from file!" << std::endl;
-		return 1;
-	}
-	if (instanceStrId.isEmpty() == true)
-	{
-		std::cout << "InstanceStrID argument can't be empty!" << std::endl;
-		return 1;
-	}
-
-	// ConfiguratorIPAddress1
-	//
-	QString configuratorIPAddress1;
-	ok = getArgumentFromXml(docElem, "ConfiguratorIPAddress1", &configuratorIPAddress1);
-	if (ok == false)
-	{
-		std::cout << "Failed to read ConfiguratorIPAddress1 argument from file!" << std::endl;
-		return 1;
-	}
-	if (configuratorIPAddress1.isEmpty() == true)
-	{
-		std::cout << "ConfiguratorIPAddress1 argument can't be empty!" << std::endl;
-		return 1;
-	}
-
-	// ConfiguratorPort1
-	//
-	int configuratorPort1 = 0;
-	ok = getArgumentFromXml(docElem, "ConfiguratorPort1", &configuratorPort1);
-	if (ok == false)
-	{
-		std::cout << "Failed to read ConfiguratorPort1 argument from file!" << std::endl;
-		return 1;
-	}
-
-	// ConfiguratorIPAddress2
-	//
-	QString configuratorIPAddress2;
-	ok = getArgumentFromXml(docElem, "ConfiguratorIPAddress2", &configuratorIPAddress2);
-	if (ok == false)
-	{
-		std::cout << "Failed to read ConfiguratorIPAddress2 argument from file!" << std::endl;
-		return 1;
-	}
-	if (configuratorIPAddress2.isEmpty() == true)
-	{
-		std::cout << "ConfiguratorIPAddress2 argument can't be empty!" << std::endl;
-		return 1;
-	}
-
-	// ConfiguratorPort2
-	//
-	int configuratorPort2 = 0;
-	ok = getArgumentFromXml(docElem, "ConfiguratorPort2", &configuratorPort2);
-	if (ok == false)
-	{
-		std::cout << "Failed to read ConfiguratorPort2 argument from file!" << std::endl;
-		return 1;
-	}
-
-	// Some inititializations
-	//
-	SoftwareInfo softwareInfo;
-
-	softwareInfo.init(E::SoftwareType::TestSuite, instanceStrId, 0, 1);
-
-	HostAddressPort addr1(configuratorIPAddress1, configuratorPort1);
-	HostAddressPort addr2(configuratorIPAddress2, configuratorPort2);
-
-	TestTask* testTask = new TestTask(softwareInfo, addr1, addr2, scriptsPath, nullptr /* QCoreApplication::instance() */);
-
-	// This will cause the application to exit when
-	// the testTask signals finished.
-	//
-	QObject::connect(testTask, &TestTask::finished, QCoreApplication::instance(), &QCoreApplication::exit);
-
-	// Run message loop
-	//
-	int result = a.exec();
-
-	delete testTask;
-
-	// Shutting down
-	//
-
-	return result;
-}
+	void writeMessage(const QString& text)	{	std::cout << text.toStdString() << std::endl; }
+	void writeWarning(const QString& text)	{	std::cout << text.toStdString() << std::endl; }
+	void writeError(const QString& text)	{	std::cout << text.toStdString() << std::endl; }
+};
 
 int main(int argc, char *argv[])
 {
+	ProtobufLibShutdowner protobufLibShutdowner;
+	Q_UNUSED(protobufLibShutdowner);
+
+	if (argc < 2)
+	{
+		showHelp();
+		return EXIT_FAILURE;
+	}
+
 	//originalMessageHandler = qInstallMessageHandler(messageOutputHandler);
 
 	QCoreApplication a(argc, argv);
@@ -276,35 +109,53 @@ int main(int argc, char *argv[])
 	QCommandLineOption configFileOption("config", "Configuration file name", "<FileName.xml>");
 	parser.addOption(configFileOption);
 
-	QCommandLineOption scriptPathOption("scriptspath", "Specify path where script files are stored", ".");
-	parser.addOption(scriptPathOption);
-
 	parser.process(*qApp);
-
-	int result = 0;
 
 	QString templateFile = parser.value(createOption);
 	if (templateFile.isEmpty() == false)
 	{
-		createTemplateFile(templateFile);
-		result = 1;
+		if (TestLibrarySettings::createTemplateConfigurationFile(templateFile) == false)
+		{
+			std::cout << "Error creating configuration file template: " << templateFile.toStdString() << std::endl;
+			return EXIT_FAILURE;
+		}
+
+		std::cout << "Arguments template has been written to: " << templateFile.toStdString() << std::endl;
+		return EXIT_SUCCESS;
 	}
-	else
+
+	QString configFileName = parser.value(configFileOption);
+	if (configFileName.isEmpty() == true)
 	{
-		QString configFileName = parser.value(configFileOption);
-
-		if (configFileName.isEmpty() == false)
-		{
-			QString scriptPath = parser.value(scriptPathOption);
-			result = startTests(configFileName, scriptPath, a);
-		}
-		else
-		{
-			showHelp();
-			result = 2;
-		}
+		std::cout << "Error: configuration file is not specified.\n";
+		showHelp();
+		return EXIT_FAILURE;
 	}
 
-	google::protobuf::ShutdownProtobufLibrary();
+	TestLibrarySettings settings;
+
+	QString errorMsg;
+	bool ok = settings.restoreFromFile(configFileName, &errorMsg);
+	if (ok == false)
+	{
+		std::cout << errorMsg.toStdString() << std::endl;
+		return EXIT_FAILURE;
+	}
+
+	ConsoleLogFile logFile(qAppName(), QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + settings.instanceStrId());
+
+	ConsoleOutputLog consoleLog;
+
+	TestLibrary testLibrary(settings, &logFile, &consoleLog);
+
+	testLibrary.execute();
+
+	QObject::connect(&testLibrary, &TestLibrary::testingFinished, &a, &QCoreApplication::quit);
+
+	int result = a.exec();
+
 	return result;
 }
+
+
+
