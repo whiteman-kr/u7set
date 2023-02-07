@@ -242,9 +242,7 @@ bool TestSuiteCfgGenerator::writeTestScripts()
 			{
 				BuildFile* buildFile = m_context->m_buildResultWriter->addFile(m_software->equipmentIdTemplate() + fileTree.filePath(fileId),
 																			   file->fileName(),
-																			   CfgFileId::TESTSUITE_TESTSCRIPT,
-																			   "",
-																			   file->data(), false);
+																			   file->data());
 				if (buildFile == nullptr)
 				{
 					Q_ASSERT(buildFile);
