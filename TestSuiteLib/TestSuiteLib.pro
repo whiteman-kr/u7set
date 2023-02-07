@@ -50,6 +50,7 @@ SOURCES += \
     InputController.cpp \
     OutputController.cpp \
     TestLibrary.cpp \
+    TestLibrarySettings.cpp \
     TestLog.cpp \
     TestLogController.cpp \
     TestScriptsStorage.cpp \
@@ -62,6 +63,7 @@ HEADERS += \
     OutputController.h \
     Stable.h \
     TestLibrary.h \
+    TestLibrarySettings.h \
     TestLog.h \
     TestLogController.h \
     TestScriptsStorage.h \

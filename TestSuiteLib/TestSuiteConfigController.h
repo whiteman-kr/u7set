@@ -30,6 +30,10 @@ protected:
 
 struct ConfigSettings
 {
+	int id = -1;
+
+	bool isValid() { return id != -1; }
+
 	int buildNo = -1;
 	QString softwareEquipmentId;
 	QString project;
@@ -48,6 +52,10 @@ struct ConfigSettings
 	bool tuningEnabled = false;
 	std::vector<TestSuiteSettings::TuningService> tuningServices;
 
+	// Scripts list
+	//
+	QStringList scriptFiles;
+
 	QString errorMessage;				// Parsing error message, empty if no errors
 };
 
@@ -59,7 +67,7 @@ class TestSuiteConfigController : public QObject, public HasLogFile
 public:
 	TestSuiteConfigController() = delete;
 
-	TestSuiteConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2, ILogFile *appLogFile);
+	TestSuiteConfigController(const QString& instanceId, HostAddressPort address1, HostAddressPort address2, ILogFile *appLogFile);
 	virtual ~TestSuiteConfigController();
 
 	// Methods
@@ -82,11 +90,7 @@ public:
 	// signals
 	//
 signals:
-	void configurationUpdate();
-	void configurationArrived(ConfigSettings configuration);
-
-	void logMessage(const QString& msg);
-	void logError(const QString& errMsg);
+	void configurationArrived();
 
 	// slots
 	//
@@ -94,7 +98,7 @@ public slots:
 	void start();
 
 private slots:
-	void slot_configurationReady(const QByteArray configurationXmlData,
+	void onConfigurationReady(const QByteArray configurationXmlData,
 								 const BuildFileInfoArray buildFileInfoArray,
 								 SessionParams sessionParams,
 								 std::shared_ptr<const SoftwareSettings> curSettingsProfile);
@@ -105,14 +109,10 @@ private:
 
 	bool applyCurSettingsProfile(std::shared_ptr<const SoftwareSettings> curSettingsProfile, ConfigSettings* outSetting);
 
-	void emitMessage(const QString& msg);
-	void emitError(const QString& errorMsg);
-
 	// Public properties
 	//
 public:
 	ConfigSettings configuration() const;
-	TestScriptsStorage& testScriptsStorage();
 
 	// Data section
 	//
@@ -125,8 +125,4 @@ private:
 
 	mutable QReadWriteLock m_confugurationLock;		// for access to m_configuration
 	ConfigSettings m_configuration;
-
-	mutable QReadWriteLock m_testScriptsLock;		// for access to m_testScriptsStorage
-	TestScriptsStorage m_testScriptsStorage;
-
 };

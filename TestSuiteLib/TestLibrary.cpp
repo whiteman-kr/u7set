@@ -1,17 +1,20 @@
 #include "TestLibrary.h"
 
-TestLibrary::TestLibrary(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2, ILogFile *appLogFile):
+TestLibrary::TestLibrary(const TestLibrarySettings& settings, ILogFile* appLogFile, IOutputLog* outputLog):
 	HasLogFile(appLogFile, "TestLibrary"),
-	m_appLogFile(appLogFile),
-	m_configController(softwareInfo, address1, address2, appLogFile),
+	m_librarySettings(settings),
+	m_configController(settings.instanceStrId(), settings.configuratorAddress1(), settings.configuratorAddress2(), appLogFile),
+	m_testLog(outputLog),
 	m_testLogController(&m_testLog)
 {
-	connect(&m_configController, &TestSuiteConfigController::configurationArrived, this, &TestLibrary::slot_configurationArrived);
+	connect(&m_configController, &TestSuiteConfigController::configurationArrived, this, &TestLibrary::onConfigurationArrived);
 
 	m_configController.start();
 
-	emitMessage("Waiting for connection with Configuration Service...");
-
+	if (m_librarySettings.loadScriptsFromPath() == true)
+	{
+		loadTestsFromPath();
+	}
 }
 
 TestSuiteConfigController& TestLibrary::configController()
@@ -34,9 +37,85 @@ const TestScriptsStorage& TestLibrary::testScriptsStorage() const
 	return m_testScriptsStorage;
 }
 
+const TestLog& TestLibrary::testResultLog() const
+{
+	return m_testLog;
+}
+
 void TestLibrary::execute()
 {
-	if (isRunning() == true)
+	if (configController().configuration().isValid() == false)
+	{
+		m_state = TestLibraryState::WaitingForConfiguration;
+		return;
+	}
+
+	runTests();
+
+	// An error has occurred
+	//
+	//m_state = TestLibraryState::Error;
+	return;
+}
+
+bool TestLibrary::loadTestsFromPath()
+{
+	Q_ASSERT (m_librarySettings.loadScriptsFromPath() == true);
+
+	m_testScriptsStorage.clear();
+
+	QString errorMsg;
+
+	bool loadResult = m_testScriptsStorage.loadFromPath(m_librarySettings.scriptsPath(), &errorMsg);
+	if (loadResult == false)
+	{
+		writeError(errorMsg);
+	}
+	else
+	{
+		writeMessage(tr("Loaded %1 test scripts from \"%2\"").arg(m_testScriptsStorage.count()).arg(m_librarySettings.scriptsPath()));
+	}
+
+	return loadResult;
+}
+
+bool TestLibrary::loadTestsFromConfiguration()
+{
+	Q_ASSERT (m_librarySettings.loadScriptsFromPath() == false);
+
+	bool loadResult = true;
+
+	m_testScriptsStorage.clear();
+
+	ConfigSettings configuration = m_configController.configuration();
+
+	for (const QString& sf : configuration.scriptFiles)
+	{
+		QByteArray data;
+		QString errorMsg;
+
+		loadResult &= m_configController.getFileBlocked(sf, &data, &errorMsg);
+
+		if (loadResult == false)
+		{
+			QString completeErrorMessage = tr("ConfigController::getFileBlocked: Get %1 file error:\n%2").arg(sf).arg(errorMsg);
+			writeError(completeErrorMessage);
+			break;
+		}
+
+		writeMessage("Test file: " + sf);
+
+		TestScript ts;
+		ts.fileName = sf;
+		ts.script = data;
+		m_testScriptsStorage.add(ts);
+	}
+	return loadResult;
+}
+
+void TestLibrary::runTests()
+{
+	if (state() == TestLibraryState::Running)
 	{
 		Q_ASSERT(false);
 		return;
@@ -48,20 +127,23 @@ void TestLibrary::execute()
 		return;
 	}
 
+	m_state = TestLibraryState::Running;
+
 	m_testLog.addMessage("TestLibrary::execute");
 
 	TestWorkerContext context(m_outputController, m_inputController, &m_testLogController);
 	context.scripts = m_testScriptsStorage.scripts();	// Set all scripts to the context
 
 	m_testWorkerThread = new TestWorkerThread(context, this);
-	connect(m_testWorkerThread, &TestWorkerThread::finished, this, &TestLibrary::slot_finished);
+	connect(m_testWorkerThread, &TestWorkerThread::finished, this, &TestLibrary::onTestingFinished);
 	m_testWorkerThread->run();
 }
 
 void TestLibrary::stop()
 {
-	if (isRunning() == false)
+	if (state() != TestLibraryState::Running)
 	{
+		Q_ASSERT(false);
 		return;
 	}
 
@@ -76,32 +158,33 @@ void TestLibrary::stop()
 
 bool TestLibrary::isRunning() const
 {
-	if (m_testWorkerThread == nullptr)
-	{
-		return false;
-	}
-
-	return m_testWorkerThread->isRunning();
+	return state() == TestLibraryState::Running;
 }
 
-const TestLog& TestLibrary::testResultLog() const
+TestLibraryState TestLibrary::state() const
 {
-	return m_testLog;
+	return m_state;
 }
 
-void TestLibrary::slot_configurationArrived(ConfigSettings configuration)
+void TestLibrary::onConfigurationArrived()
 {
-	if (isRunning() == true)
+	if (state() == TestLibraryState::Running)
 	{
 		stop();
 	}
 
-	if (m_testScriptsStorage.isLoadedFromFiles() == false)
+	if (m_librarySettings.loadScriptsFromPath() == false)
 	{
-		m_testScriptsStorage.move(m_configController.testScriptsStorage().scripts());
+		if (loadTestsFromConfiguration() == false)
+		{
+			m_state = TestLibraryState::Error;
+		}
 	}
 
-	emit readyForTesting();
+	if (state() == TestLibraryState::WaitingForConfiguration)
+	{
+		execute();
+	}
 
 	// Log out from tuning
 	//
@@ -150,7 +233,7 @@ void TestLibrary::slot_configurationArrived(ConfigSettings configuration)
 	return;
 }
 
-void TestLibrary::slot_finished(int errorCode)
+void TestLibrary::onTestingFinished(int errorCode)
 {
 	if (m_testWorkerThread == nullptr)
 	{
@@ -162,17 +245,8 @@ void TestLibrary::slot_finished(int errorCode)
 	m_testWorkerThread->deleteLater();
 	m_testWorkerThread = nullptr;
 
-	emit finished(errorCode);
+	m_state = TestLibraryState::Idle;
+
+	emit testingFinished(errorCode);
 }
 
-void TestLibrary::emitMessage(const QString& msg)
-{
-	writeMessage(msg);
-	emit logMessage(msg);
-}
-
-void TestLibrary::emitError(const QString& errorMsg)
-{
-	writeError(errorMsg);
-	emit logError(errorMsg);
-}

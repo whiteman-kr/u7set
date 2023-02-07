@@ -18,6 +18,9 @@ QString TestLogItem::toText() const
 	case TestLogItemType::Message:
 		type = "MSG";
 		break;
+	case TestLogItemType::Warning:
+		type = "WRN";
+		break;
 	case TestLogItemType::Error:
 		type = "ERR";
 		break;
@@ -29,25 +32,55 @@ QString TestLogItem::toText() const
 	return QObject::tr("%1 [%2] %3").arg(time).arg(type).arg(m_message);
 }
 
-TestLog::TestLog()
+TestLog::TestLog(IOutputLog* outputLog):
+	m_outputLog(outputLog)
 {
+	Q_ASSERT(m_outputLog);
 	qRegisterMetaType<TestLogItem>();
-}
-
-void TestLog::addMessage(const QString& text)
-{
-	TestLogItem ti(text, TestLogItemType::Message);
-	emit newLogItem(ti);
-
-	QMutexLocker l(&m_itemsMutex);
-	m_items.push_back(ti);
 }
 
 void TestLog::addError(const QString& text)
 {
+	if (m_outputLog == nullptr)
+	{
+		Q_ASSERT(m_outputLog);
+		return;
+	}
+
 	TestLogItem ti(text, TestLogItemType::Error);
-	emit newLogItem(ti);
+	m_outputLog->writeError(ti.toText());
 
 	QMutexLocker l(&m_itemsMutex);
 	m_items.push_back(ti);
 }
+
+void TestLog::addWarning(const QString& text)
+{
+	if (m_outputLog == nullptr)
+	{
+		Q_ASSERT(m_outputLog);
+		return;
+	}
+
+	TestLogItem ti(text, TestLogItemType::Warning);
+	m_outputLog->writeWarning(ti.toText());
+
+	QMutexLocker l(&m_itemsMutex);
+	m_items.push_back(ti);
+}
+
+void TestLog::addMessage(const QString& text)
+{
+	if (m_outputLog == nullptr)
+	{
+		Q_ASSERT(m_outputLog);
+		return;
+	}
+
+	TestLogItem ti(text, TestLogItemType::Message);
+	m_outputLog->writeMessage(ti.toText());
+
+	QMutexLocker l(&m_itemsMutex);
+	m_items.push_back(ti);
+}
+

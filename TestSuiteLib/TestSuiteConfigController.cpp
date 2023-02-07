@@ -32,13 +32,14 @@ HostAddressPort ConfigConnection::address() const
 
 // ------------------------- TestSuiteConfigController -----------------------------------
 
-TestSuiteConfigController::TestSuiteConfigController(const SoftwareInfo& softwareInfo,
+TestSuiteConfigController::TestSuiteConfigController(const QString& instanceId,
 													 HostAddressPort address1,
 													 HostAddressPort address2,
-													 ILogFile *appLogFile) :
-	HasLogFile(appLogFile, "ConfigController"),
-	m_softwareInfo(softwareInfo)
+													 ILogFile* appLogFile) :
+	HasLogFile(appLogFile, "ConfigController")
 {
+	m_softwareInfo.init(E::SoftwareType::TestSuite, instanceId, 0, 1);
+
 	qRegisterMetaType<ConfigSettings>("ConfigSettings");
 
 	// Communication instance no
@@ -132,15 +133,15 @@ TestSuiteConfigController::TestSuiteConfigController(const SoftwareInfo& softwar
 
 	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_unknownClientID, this, [this]()
 	{
-		emitError(tr("Unknown client %1").arg(m_softwareInfo.equipmentID()));
+		writeError(tr("Unknown client %1").arg(m_softwareInfo.equipmentID()));
 	});
 
 	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_wrongClientHostname, this, [this]()
 	{
-		emitError(tr("Running on computer with wrong hostanme %1").arg(m_softwareInfo.equipmentID()));
+		writeError(tr("Running on computer with wrong hostanme %1").arg(m_softwareInfo.equipmentID()));
 	});
 
-	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &TestSuiteConfigController::slot_configurationReady);
+	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &TestSuiteConfigController::onConfigurationReady);
 
 	return;
 }
@@ -200,11 +201,11 @@ bool TestSuiteConfigController::getFileBlocked(const QString& pathFileName, QByt
 	bool result = m_cfgLoaderThread->getFileBlocked(pathFileName, fileData, errorStr);
 	if (result == false)
 	{
-		emitError(tr("getFileBlocked() Can't get file %1").arg(pathFileName));
+		writeError(tr("getFileBlocked() Can't get file %1").arg(pathFileName));
 	}
 	else
 	{
-		emitMessage(tr("getFileBlocked('%1') Success").arg(pathFileName));
+		writeMessage(tr("getFileBlocked('%1') Success").arg(pathFileName));
 	}
 
 	return result;
@@ -233,7 +234,7 @@ bool TestSuiteConfigController::getFileBlockedById(const QString& id, QByteArray
 
 	if (result == false)
 	{
-		emitError(tr("getFileBlockedById() Can't get fileid %1").arg(id));
+		writeError(tr("getFileBlockedById() Can't get fileid %1").arg(id));
 	}
 
 	return result;
@@ -297,7 +298,7 @@ void TestSuiteConfigController::start()
 	return;
 }
 
-void TestSuiteConfigController::slot_configurationReady(const QByteArray configurationXmlData,
+void TestSuiteConfigController::onConfigurationReady(const QByteArray configurationXmlData,
 													  const BuildFileInfoArray buildFileInfoArray,
 													  SessionParams sessionParams,
 													  std::shared_ptr<const SoftwareSettings> curSettingsProfile)
@@ -306,12 +307,7 @@ void TestSuiteConfigController::slot_configurationReady(const QByteArray configu
 	Q_UNUSED(sessionParams);
 
 
-	emitMessage(tr("New configuration arrived"));
-
-	{
-		QWriteLocker l(&m_testScriptsLock);
-		m_testScriptsStorage.clear();
-	}
+	writeMessage(tr("New configuration arrived"));
 
 	// Load settings
 
@@ -371,79 +367,59 @@ void TestSuiteConfigController::slot_configurationReady(const QByteArray configu
 		if (result == false ||
 			readSettings.errorMessage.isEmpty() == false)
 		{
-			emitError(tr("Parsing configuration file error: %1").arg(readSettings.errorMessage));
+			writeError(tr("Parsing configuration file error: %1").arg(readSettings.errorMessage));
 		}
 	}
 
-	// Get test files
+	// Get test files list
 
 	for (const Builder::BuildFileInfo& buildFileInfo: buildFileInfoArray)
 	{
-		if (buildFileInfo.ID != CfgFileId::TESTSUITE_TESTSCRIPT)
+		if (buildFileInfo.pathFileName.endsWith(".js") == false)
 		{
 			continue;
 		}
 
-		QByteArray data;
-		QString errorStr;
-		if (getFileBlockedById(buildFileInfo.ID, &data, &errorStr) == false)
-		{
-			QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error:\n%2").arg(buildFileInfo.pathFileName).arg(errorStr);
-			emitError(completeErrorMessage);
-		}
-		else
-		{
-			emitMessage("Test file: " + buildFileInfo.pathFileName);
-
-			{
-				QWriteLocker l(&m_testScriptsLock);
-
-				TestScript ts;
-				ts.fileName = buildFileInfo.pathFileName;
-				ts.script = data;
-
-				m_testScriptsStorage.add(ts);
-			}
-		}
+		readSettings.scriptFiles.push_back(buildFileInfo.pathFileName);
 	}
 
 	// Trace received params
 	//
-	emitMessage(tr("ADS1 (id, ip, port): %1, %2, %3").arg(readSettings.appDataService1.equipmentId()).arg(readSettings.appDataService1.ip()).arg(readSettings.appDataService1.port()));
-	emitMessage(tr("ADS2 (id, ip, port): %1, %2, %3").arg(readSettings.appDataService2.equipmentId()).arg(readSettings.appDataService2.ip()).arg(readSettings.appDataService2.port()));
+	writeMessage(tr("ADS1 (id, ip, port): %1, %2, %3").arg(readSettings.appDataService1.equipmentId()).arg(readSettings.appDataService1.ip()).arg(readSettings.appDataService1.port()));
+	writeMessage(tr("ADS2 (id, ip, port): %1, %2, %3").arg(readSettings.appDataService2.equipmentId()).arg(readSettings.appDataService2.ip()).arg(readSettings.appDataService2.port()));
 
-	emitMessage(tr("ADS RT Trends 1 (id, ip, port): %1, %2, %3").arg(readSettings.appDataServiceRealtimeTrend1.equipmentId()).arg(readSettings.appDataServiceRealtimeTrend1.ip()).arg(readSettings.appDataServiceRealtimeTrend1.port()));
-	emitMessage(tr("ADS RT Trends 2 (id, ip, port): %1, %2, %3").arg(readSettings.appDataServiceRealtimeTrend2.equipmentId()).arg(readSettings.appDataServiceRealtimeTrend2.ip()).arg(readSettings.appDataServiceRealtimeTrend2.port()));
+	writeMessage(tr("ADS RT Trends 1 (id, ip, port): %1, %2, %3").arg(readSettings.appDataServiceRealtimeTrend1.equipmentId()).arg(readSettings.appDataServiceRealtimeTrend1.ip()).arg(readSettings.appDataServiceRealtimeTrend1.port()));
+	writeMessage(tr("ADS RT Trends 2 (id, ip, port): %1, %2, %3").arg(readSettings.appDataServiceRealtimeTrend2.equipmentId()).arg(readSettings.appDataServiceRealtimeTrend2.ip()).arg(readSettings.appDataServiceRealtimeTrend2.port()));
 
-	emitMessage(tr("ArchiveService1 (id, ip, port): %1, %2, %3").arg(readSettings.archiveService1.equipmentId()).arg(readSettings.archiveService1.ip()).arg(readSettings.archiveService1.port()));
-	emitMessage(tr("ArchiveService2 (id, ip, port): %1, %2, %3").arg(readSettings.archiveService2.equipmentId()).arg(readSettings.archiveService2.ip()).arg(readSettings.archiveService2.port()));
+	writeMessage(tr("ArchiveService1 (id, ip, port): %1, %2, %3").arg(readSettings.archiveService1.equipmentId()).arg(readSettings.archiveService1.ip()).arg(readSettings.archiveService1.port()));
+	writeMessage(tr("ArchiveService2 (id, ip, port): %1, %2, %3").arg(readSettings.archiveService2.equipmentId()).arg(readSettings.archiveService2.ip()).arg(readSettings.archiveService2.port()));
 
-	emitMessage(QString("TuningEnabled = %1").arg(readSettings.tuningEnabled));
+	writeMessage(QString("TuningEnabled = %1").arg(readSettings.tuningEnabled));
 	if (readSettings.tuningEnabled == true)
 	{
 		for (const TestSuiteSettings::TuningService& ts : readSettings.tuningServices)
 		{
-			emitMessage(tr("TuningService (id, ip, port): %1, %2, %3").arg(ts.tuningServiceID).arg(ts.clientRequestIP).arg(ts.clientRequestPort));
-			emitMessage(tr("TuningSources: %1").arg(ts.drivenSources.join(", ")));
+			writeMessage(tr("TuningService (id, ip, port): %1, %2, %3").arg(ts.tuningServiceID).arg(ts.clientRequestIP).arg(ts.clientRequestPort));
+			writeMessage(tr("TuningSources: %1").arg(ts.drivenSources.join(", ")));
 		}
 	}
 
 	if (readSettings.errorMessage.isEmpty() == false)
 	{
-		emitError(tr("%1").arg(readSettings.errorMessage));
+		writeError(tr("%1").arg(readSettings.errorMessage));
 	}
 
 	// --
 	//
 	{
 		QWriteLocker locker(&m_confugurationLock);
-		m_configuration = readSettings;		// Cannot move readSettings here as it is used later for `emit configurationArrived(readSettings)`
+		readSettings.id = m_configuration.id + 1;
+		m_configuration = std::move(readSettings);		// Cannot move readSettings here as it is used later for `emit configurationArrived(readSettings)`
 	}
 
 	// Emit signal to inform everybody about new configuration
 	//
-	emit configurationArrived(readSettings);
-	emit configurationUpdate();
+	emit configurationArrived();
 
 	return;
 }
@@ -570,26 +546,8 @@ bool TestSuiteConfigController::applyCurSettingsProfile(std::shared_ptr<const So
 	return true;
 }
 
-void TestSuiteConfigController::emitMessage(const QString& msg)
-{
-	this->writeMessage(msg);
-	emit logMessage(msg);
-}
-
-void TestSuiteConfigController::emitError(const QString& errorMsg)
-{
-	this->writeError(errorMsg);
-	emit logError(errorMsg);
-}
-
 ConfigSettings TestSuiteConfigController::configuration() const
 {
 	QReadLocker locker(&m_confugurationLock);
 	return m_configuration;
-}
-
-TestScriptsStorage& TestSuiteConfigController::testScriptsStorage()
-{
-	QReadLocker locker(&m_testScriptsLock);
-	return m_testScriptsStorage;
 }

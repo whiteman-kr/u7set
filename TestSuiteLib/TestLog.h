@@ -1,8 +1,18 @@
 #pragma once
 
+
+class IOutputLog
+{
+public:
+	virtual void writeMessage(const QString& text) = 0;
+	virtual void writeWarning(const QString& text) = 0;
+	virtual void writeError(const QString& text) = 0;
+};
+
 enum class TestLogItemType
 {
 	Message,
+	Warning,
 	Error
 };
 
@@ -20,21 +30,20 @@ private:
 	QDateTime m_dateTime;
 
 };
-
 class TestLog : public QObject
 {
 	Q_OBJECT
 public:
-	TestLog();
+	TestLog(IOutputLog* outputLog);
 
-	void addMessage(const QString& text);
 	void addError(const QString& text);
-
-signals:
-	void newLogItem(const TestLogItem& item);
+	void addWarning(const QString& text);
+	void addMessage(const QString& text);
 
 private:
 	QMutex m_itemsMutex;	// For access to m_itemsMutex
 	std::vector<TestLogItem> m_items;
+
+	IOutputLog* m_outputLog = nullptr;
 };
 

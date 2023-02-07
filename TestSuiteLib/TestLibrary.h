@@ -9,23 +9,29 @@
 #include "TestScriptsStorage.h"
 #include "../OnlineLib/SoftwareInfo.h"
 #include "TestSuiteConfigController.h"
+#include "TestLibrarySettings.h"
 
-class TestEngineThread
+enum class TestLibraryState
 {
-
+	Idle,
+	WaitingForConfiguration,
+	Running,
+	Error
 };
 
 class TestLibrary : public QObject, public HasLogFile
 {
 	Q_OBJECT
 public:
-	TestLibrary(const SoftwareInfo &softwareInfo, HostAddressPort address1, HostAddressPort address2, ILogFile* appLogFile);
+	TestLibrary(const TestLibrarySettings& settings, ILogFile* appLogFile, IOutputLog* outputLog);
 
 	TestSuiteConfigController& configController();
 	const TestSuiteConfigController& configController() const;
 
 	TestScriptsStorage& testScriptsStorage();
 	const TestScriptsStorage& testScriptsStorage() const;
+
+	const TestLog& testResultLog() const;
 
 	//void setAppSignalTcpClients(std::vector<TcpSignalClient*> tcpClients);
 	//void setTuningTcpClients(std::vector<TuningTcpClient*> tcpClients);
@@ -34,24 +40,19 @@ public:
 	void stop();
 
 	bool isRunning() const;
+	TestLibraryState state() const;
 
 signals:
-	void logMessage(const QString& msg);
-	void logError(const QString& errMsg);
-
-	void readyForTesting();
-	void finished(int result);
-
-public:
-	const TestLog& testResultLog() const;
-
-private slots:
-	void slot_configurationArrived(ConfigSettings configuration);
-	void slot_finished(int errorCode);
+	void testingFinished(int result);
 
 private:
-	void emitMessage(const QString& msg);
-	void emitError(const QString& errorMsg);
+	bool loadTestsFromPath();
+	bool loadTestsFromConfiguration();
+	void runTests();
+
+private slots:
+	void onConfigurationArrived();
+	void onTestingFinished(int errorCode);
 
 private:
 	InputController* m_inputController = nullptr;
@@ -62,12 +63,14 @@ private:
 	TestLog m_testLog;
 	TestLogController m_testLogController;
 
-	ILogFile* m_appLogFile = nullptr;
-
 private:
 	TestScriptsStorage m_testScriptsStorage;
 
 	TestSuiteConfigController m_configController;
+
+	TestLibrarySettings m_librarySettings;
+
+	TestLibraryState m_state = TestLibraryState::Idle;
 
 
 };
