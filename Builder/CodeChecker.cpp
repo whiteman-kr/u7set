@@ -162,10 +162,21 @@ namespace Builder
 
 			if (place == 0)
 			{
-				// LM module
+				// LM diagnostics data
+				//
+				ma.setStartAddr(m_lmDesc->memory().m_txDiagDataOffset);
+				ma.setSizeW(m_lmDesc->memory().m_txDiagDataSize);
+
+				m_readAreas.insert({ma.startAddr(), ma});
+				initToRead(ma);
+
+				// LM module app data
 				//
 				ma.setStartAddr(module.txAppDataOffset);
 				ma.setSizeW(module.txAppDataSize);
+
+				m_readAreas.insert({ma.startAddr(), ma});
+				initToRead(ma);
 			}
 			else
 			{
@@ -175,22 +186,25 @@ namespace Builder
 				Q_ASSERT(static_cast<quint32>(module.moduleDataOffset) == moduleDataOffset);
 				Q_ASSERT(static_cast<quint32>(module.txDataSize) <= m_lmDesc->memory().m_moduleDataSize);
 
-				if (module.isOptoModule() == true)
+				// append module diag data area
+				//
+				ma.setStartAddr(moduleDataOffset + module.txDiagDataOffset);
+				ma.setSizeW(module.txDiagDataSize);
+
+				m_readAreas.insert({ma.startAddr(), ma});
+				initToRead(ma);
+
+				if (module.isOptoModule() == false)
 				{
-					// append only diag data area
+					// for non-opto modules also append App data area
 					//
-					ma.setStartAddr(module.txDiagDataOffset);
-					ma.setSizeW(module.txDiagDataSize);
-				}
-				else
-				{
-					ma.setStartAddr(module.moduleDataOffset);
-					ma.setSizeW(module.txDataSize);
+					ma.setStartAddr(moduleDataOffset + module.txAppDataOffset);
+					ma.setSizeW(module.txAppDataSize);
+
+					m_readAreas.insert({ma.startAddr(), ma});
+					initToRead(ma);
 				}
 			}
-
-			m_readAreas.insert({ma.startAddr(), ma});
-			initToRead(ma);
 		}
 
 		// Opto ports actual rx data
@@ -230,13 +244,13 @@ namespace Builder
 /*			LOG_MESSAGE(m_log, QString("----- Tuning frame start %1 end %2 sizeW %3").
 							arg(tuningFrame.startAddr()).
 							arg(tuningFrame.startAddr() + tuningFrame.sizeW() - 1).
-							arg(tuningFrame.sizeW()));
+							arg(tuningFrame.sizeW())); */
 
 			if (tuningFrame.sizeW() > 0)
 			{
 				m_readAreas.insert({tuningFrame.startAddr(), tuningFrame});
 				initToRead(tuningFrame);
-			}*/
+			}
 		}
 
 		// Word memory
@@ -245,14 +259,6 @@ namespace Builder
 						m_lmDesc->memory().m_appLogicWordDataSize);
 
 		m_readAreas.insert({wordMem.startAddr(), wordMem});
-
-		// LM diagnostics data
-		//
-		MemArea lmDiagData(m_lmDesc->memory().m_txDiagDataOffset,
-						   m_lmDesc->memory().m_txDiagDataSize);
-
-		m_readAreas.insert({lmDiagData.startAddr(), lmDiagData});
-		initToRead(lmDiagData);
 
 		return true;
 	}
@@ -277,6 +283,8 @@ namespace Builder
 			{
 				ma.setStartAddr(module.txAppDataOffset);		// tx... -  its Ok!
 				ma.setSizeW(module.txAppDataSize);
+
+				m_writeAreas.insert({ma.startAddr(), ma});
 			}
 			else
 			{
@@ -288,12 +296,12 @@ namespace Builder
 					Q_ASSERT(static_cast<quint32>(module.moduleDataOffset) == moduleDataOffset);
 					Q_ASSERT(static_cast<quint32>(module.txDataSize) <= m_lmDesc->memory().m_moduleDataSize);
 
-					ma.setStartAddr(module.moduleDataOffset + module.rxAppDataOffset);
+					ma.setStartAddr(moduleDataOffset + module.rxAppDataOffset);
 					ma.setSizeW(module.rxAppDataSize);
+
+					m_writeAreas.insert({ma.startAddr(), ma});
 				}
 			}
-
-			m_writeAreas.insert({ma.startAddr(), ma});
 
 /*			LOG_MESSAGE(m_log, QString("Module %1 write area %2 sizeW %3").
 						arg(module.device->equipmentIdTemplate()).

@@ -90,6 +90,7 @@ namespace Builder
 			bool isOutputModule() const;
 			bool isOptoModule() const;
 			Hardware::DeviceModule::FamilyType familyType() const;
+			QString equipmentID() const;
 
 			//
 

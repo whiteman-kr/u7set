@@ -16573,4 +16573,16 @@ namespace Builder
 
 		return device->moduleFamily();
 	}
+
+	QString ModuleLogicCompiler::Module::equipmentID() const
+	{
+		if (device == nullptr)
+		{
+			Q_ASSERT(false);
+			return QString();
+		}
+
+		return device->equipmentIdTemplate();
+	}
+
 }

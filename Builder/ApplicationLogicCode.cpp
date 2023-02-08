@@ -1493,14 +1493,12 @@ namespace Builder
 
 				cmdExecTime = lmCommand.runTime;
 
-				if (waitFbTime == 0)
+				if (waitFbTime != 0)
 				{
-					*fbExecTime = m_fbExecTime;
+					m_waitTime += waitFbTime;
 				}
-				else
-				{
-					Q_ASSERT(false);		// AFB is running now, why it STARTed again?
-				}
+
+				*fbExecTime = m_fbExecTime;
 			}
 			break;
 
@@ -2076,11 +2074,6 @@ namespace Builder
 			m_commandsCount++;
 
 			codeItem.setAddress(m_codeSizeW);
-
-//			if (m_codeSizeW == 0xFF)
-//			{
-//				DEBUG_STOP;
-//			}
 
 			m_codeSizeW += codeItem.sizeW();
 
