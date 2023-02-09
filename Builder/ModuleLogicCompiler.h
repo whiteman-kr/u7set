@@ -690,6 +690,7 @@ namespace Builder
 		bool calculateCodeRunTime();
 
 		QString lmSubsystemEquipmentIdPath() const;
+		QString getInfoFileName(const QString& fileNameExtension) const;
 
 		bool writeInfoFiles();
 		bool writeAsmFile() const;
@@ -697,14 +698,14 @@ namespace Builder
 		bool writeStatisticsFile() const;
 		bool writeTuningInfoFile() const;
 		bool writeOptoModulesReport() const;
+		bool writeLoopbacksReport();
+		bool writeHeapsLog();
 
 		bool writeResult();
 		bool writeBinCodeForLm();
 		bool calcAppLogicUniqueID(const QByteArray& lmAppCode);
 
 		bool writeOcmRsSignalsXml();
-		bool writeLooopbacksReport();
-		bool writeHeapsLog();
 
 		void printCodeStatistics(const AppLogicCode& code,
 								 QStringList& file,

@@ -14549,6 +14549,14 @@ namespace Builder
 		return QString("%1/%2").arg(m_lmSubsystemID).arg(lmEquipmentID());
 	}
 
+	QString ModuleLogicCompiler::getInfoFileName(const QString& fileNameExtension) const
+	{
+		return (QString("%1-%2.%3").
+					arg(m_lmSubsystemID).
+					arg(m_lmNumber).
+					arg(fileNameExtension)).toLower();
+	}
+
 	bool ModuleLogicCompiler::writeInfoFiles()
 	{
 		bool result = true;
@@ -14563,6 +14571,10 @@ namespace Builder
 
 		result &= writeOptoModulesReport();
 
+		result &= writeLoopbacksReport();
+
+		result &= writeHeapsLog();
+
 		return result;
 	}
 
@@ -14573,7 +14585,7 @@ namespace Builder
 		m_appLogicCode.getAsmCode(&asmCode);
 
 		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
-													   QString("%1-%2.asm").arg(m_lmSubsystemID.toLower()).arg(m_lmNumber), asmCode);
+													   getInfoFileName("asm"), asmCode);
 
 		return (buildFile != nullptr);
 	}
@@ -14587,7 +14599,7 @@ namespace Builder
 							m_ualSignals.analogAndBusSignalsHeap().getHeapItemsLog());
 
 		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
-												QString("%1-%2.mem").arg(m_lmSubsystemID.toLower()).arg(m_lmNumber), memFile);
+												getInfoFileName("mem"), memFile);
 		return (buildFile != nullptr);
 	}
 
@@ -14613,7 +14625,7 @@ namespace Builder
 		//
 
 		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
-												QString("%1-%2.stat").arg(m_lmSubsystemID.toLower()).arg(m_lmNumber), file);
+												getInfoFileName("stat"), file);
 		return (buildFile != nullptr);
 	}
 
@@ -14749,7 +14761,7 @@ namespace Builder
 		}
 
 		bool result = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
-											  QString("%1-%2.tun").arg(m_lmSubsystemID.toLower()).arg(m_lmNumber), file);
+											  getInfoFileName("tun"), file);
 		return result;
 	}
 
@@ -14831,8 +14843,37 @@ namespace Builder
 		}
 
 		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
-												QString("%1-%2.opto").arg(m_lmSubsystemID.toLower()).arg(m_lmNumber), file);
+												getInfoFileName("opto"), file);
 		return (buildFile != nullptr);
+	}
+
+	bool ModuleLogicCompiler::writeLoopbacksReport()
+	{
+		QStringList file;
+
+		m_loopbacks.writeReport(&file);
+
+		BuildFile* bf = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
+												getInfoFileName("loopbacks"), file);
+
+		return bf != nullptr;
+	}
+
+	bool ModuleLogicCompiler::writeHeapsLog()
+	{
+		if (m_context->generateExtraDebugInfo() == false)
+		{
+			return true;
+		}
+
+		QStringList file;
+
+		m_ualSignals.getHeapsLog(&file);
+
+		BuildFile* bf = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(lmSubsystemEquipmentIdPath()),
+												getInfoFileName("heaps"), file);
+
+		return bf != nullptr;
 	}
 
 	bool ModuleLogicCompiler::writeResult()
@@ -14879,10 +14920,6 @@ namespace Builder
 		}*/
 
 		result &= writeOcmRsSignalsXml();
-
-		result &= writeLooopbacksReport();
-
-		result &= writeHeapsLog();
 
 		//
 
@@ -14938,10 +14975,8 @@ namespace Builder
 												 binCode,
 												 metadata,
 												 log());
-
 		return result;
 	}
-
 
 	bool ModuleLogicCompiler::calcAppLogicUniqueID(const QByteArray& lmAppCode)
 	{
@@ -15204,35 +15239,6 @@ namespace Builder
 		});*/
 
 		return true;
-	}
-
-	bool ModuleLogicCompiler::writeLooopbacksReport()
-	{
-		QStringList file;
-
-		m_loopbacks.writeReport(&file);
-
-		BuildFile* bf = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(lmSubsystemEquipmentIdPath()),
-												QString("Loopbacks.csv"), file);
-
-		return bf != nullptr;
-	}
-
-	bool ModuleLogicCompiler::writeHeapsLog()
-	{
-		if (m_context->generateExtraDebugInfo() == false)
-		{
-			return true;
-		}
-
-		QStringList file;
-
-		m_ualSignals.getHeapsLog(&file);
-
-		BuildFile* bf = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(lmSubsystemEquipmentIdPath()),
-												QString("HeapsLog.txt"), file);
-
-		return bf != nullptr;
 	}
 
 	void ModuleLogicCompiler::printCodeStatistics(const AppLogicCode& code,
