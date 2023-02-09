@@ -278,20 +278,6 @@ void MonitorSignalManager::setSetpoints(const ComparatorSet& setpoints)
 	return;
 }
 
-
-bool MonitorSignalManager::appDataServiceHasSignal(const QString& appDataServiceId, const QString& appSignalId) const
-{
-	QReadLocker rl(&m_paramsLocker);
-
-	auto it = m_appDataServiceToSignalLis.find(appDataServiceId);
-	if (it == m_appDataServiceToSignalLis.end())
-	{
-		return false;
-	}
-
-	return it->second.contains(appSignalId);
-}
-
 int MonitorSignalManager::signalsCount() const
 {
 	QReadLocker rl(&m_paramsLocker);
@@ -562,6 +548,53 @@ std::vector<std::shared_ptr<Comparator>> MonitorSignalManager::setpointsByInputS
 	return result;
 }
 
+/// Get AppDataService EquipmentIDs list by AppSignalID.
+///
+QStringList MonitorSignalManager::dataServiceIds(const QString& appSignalId) const
+{
+	QStringList result;
+	for (const auto& [appDataServcieId, signalSet] : m_appDataServiceToSignalLis)
+	{
+		if (signalSet.contains(appSignalId) == true)
+		{
+			result.push_back(appDataServcieId);
+		}
+	}
+
+	return result;
+}
+
+/// Return true if AppDataService contains signal.
+///
+bool MonitorSignalManager::dataServiceHasSignal(const QString& serviceEquipmentId, const QString& appSignalId) const
+{
+	QReadLocker rl(&m_paramsLocker);
+
+	auto it = m_appDataServiceToSignalLis.find(serviceEquipmentId);
+	if (it == m_appDataServiceToSignalLis.end())
+	{
+		return false;
+	}
+
+	return it->second.contains(appSignalId);
+}
+
+QStringList MonitorSignalManager::tags() const
+{
+	QReadLocker rl(&m_paramsLocker);
+
+	QStringList result;
+	result.reserve(m_tags.size());
+
+	for (const QString& t : m_tags)
+	{
+		result.push_back(t);
+	}
+
+	return result;
+}
+
+
 AppSignalParam MonitorSignalManager::signalParamByEquipemntId(const QString& equipmentId, bool* found) const
 {
 	Hash appSignalIdHash = UNDEFINED_HASH;
@@ -583,21 +616,6 @@ void MonitorSignalManager::emitSignalParamsUpdated()
 {
 	emit signalParamsUpdated();
 	return;
-}
-
-QStringList MonitorSignalManager::tags() const
-{
-	QReadLocker rl(&m_paramsLocker);
-
-	QStringList result;
-	result.reserve(m_tags.size());
-
-	for (const QString& t : m_tags)
-	{
-		result.push_back(t);
-	}
-
-	return result;
 }
 
 void MonitorSignalManager::configurationUpdated()

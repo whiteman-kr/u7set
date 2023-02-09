@@ -321,7 +321,7 @@ namespace VFrame30
 						appSignalParam.setAppSignalId(appSignalId);
 					}
 
-					TrendLib::TrendSignalParam& trensSignalParam = signalParams.emplace_back(appSignalParam);
+					TrendLib::TrendSignalParam& trensSignalParam = signalParams.emplace_back(appSignalParam, TrendLib::ArchiveServer{});
 
 					// Set trend line draw params
 					//

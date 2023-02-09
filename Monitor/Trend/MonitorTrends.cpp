@@ -1,6 +1,7 @@
 #include "MonitorTrends.h"
-#include "../TrendView/Forms/DialogChooseTrendSignals.h"
+#include "../lib/ISignalHasTag.h"
 #include "../TrendView/TrendWidget.h"
+#include "../TrendView/DialogChooseTrendSignals.h"
 
 std::map<QString, MonitorTrendsWidget*> MonitorTrends::m_trendsList;
 
@@ -34,8 +35,8 @@ bool MonitorTrends::activateTrendWindow(QString trendName)
 	return true;
 }
 
-bool MonitorTrends::startTrendApp(IAppSignalManager* signalManager,
-								  MonitorConfigController* configController,
+bool MonitorTrends::startTrendApp(const MonitorSignalManager* signalManager,
+								  const MonitorConfigController* configController,
                                   const std::vector<AppSignalParam>& appSignals,
                                   QWidget* parent)
 {
@@ -44,10 +45,21 @@ bool MonitorTrends::startTrendApp(IAppSignalManager* signalManager,
 	std::vector<TrendLib::TrendSignalParam> trendSignals;
 	trendSignals.reserve(appSignals.size());
 
+	auto archiveServers = configController->configuration().archiveServices;
+
 	for (const AppSignalParam& appSignal : appSignals)
 	{
-		TrendLib::TrendSignalParam tsp(appSignal);
-		trendSignals.push_back(tsp);
+		// Take the firss available srchive server for the signal
+		//
+		for (const auto& server : archiveServers)
+		{
+			if (signalManager->dataServiceHasSignal(server.appDataServiceId, appSignal.appSignalId()) == true)
+			{
+				TrendLib::ArchiveServer trendArchiveServer{server.equipmentId, server.shortenId, server.appDataServiceId};
+				trendSignals.emplace_back(appSignal, std::move(trendArchiveServer));
+				break;
+			}
+		}
 	}
 
 	window->addSignals(trendSignals, true);
@@ -70,13 +82,12 @@ void MonitorTrends::unregisterTrendWindow(QString name)
 }
 
 
-MonitorTrendsWidget::MonitorTrendsWidget(IAppSignalManager* appSignalManager,
-                                         MonitorConfigController* configController,
-                                         QWidget* parent) :
+MonitorTrendsWidget::MonitorTrendsWidget(const MonitorSignalManager* m_signalManager,
+										 const MonitorConfigController* configController,
+										 QWidget* parent) :
 	TrendLib::TrendMainWindow(parent),
-    m_appSignalManager(appSignalManager),
-	m_configController(configController),
-	m_archiveServices(configController->configuration().archiveServices)
+	m_signalManager(m_signalManager),
+	m_configController(configController)
 {
 static int no = 1;
 	QString trendName = QString("Monitor Trends %1").arg(no++);
@@ -200,11 +211,65 @@ void MonitorTrendsWidget::timerEvent(QTimerEvent*)
 
 void MonitorTrendsWidget::signalsButton()
 {
-	std::vector<TrendLib::TrendSignalParam> trendSignals = signalSet().trendSignals();
+	// Get archiev services
+	//
+	std::vector<MonitorSettings::ArchiveService> archiveServers = m_configController->configuration().archiveServices;
+	std::vector<TrendLib::ArchiveServer> trendArchiveServers;
+	trendArchiveServers.reserve(archiveServers.size());
+
+	for (const auto& as : archiveServers)
+	{
+		trendArchiveServers.emplace_back(as.equipmentId, as.shortenId, as.appDataServiceId);
+	}
+
+	// Create signal list converted to TrendSignalParam	and expanded to diffrent archive services
+	//
+	std::vector<TrendLib::TrendSignalParam> trendSignals;
+	trendSignals.reserve(m_signalManager->signalsCount());
+
+	// Create additional signals for archive services
+	//
+	for (const AppSignalParam& sp : m_signalManager->signalList())
+	{
+		// Make signal copy for each ArchiveService which has this signal
+		//
+		for (const TrendLib::ArchiveServer& archiveService : trendArchiveServers)
+		{
+			if (m_signalManager->dataServiceHasSignal(archiveService.dataServiceId, sp.appSignalId()) == true)
+			{
+				trendSignals.emplace_back(sp, archiveService);
+			}
+		}
+	}
+
+	// Get alread added signals
+	//
+	std::vector<TrendLib::TrendSignalParam> addedTrendSignals = signalSet().trendSignals();
+
+	// Implement ISignalHasTag
+	//
+	struct SignalHasTag : ISignalHasTag
+	{
+		SignalHasTag(const MonitorSignalManager* ms) : monitorSignalManager(ms)
+		{
+		}
+
+		virtual bool signalHasTag(const QString& signalId, const QString& tag) const  override
+		{
+			Q_ASSERT(monitorSignalManager);
+			return monitorSignalManager->signalHasTag(signalId, tag);
+		}
+
+		const MonitorSignalManager* monitorSignalManager = nullptr;
+	} signalHasTag{m_signalManager};
 
 	// --
 	//
-	DialogChooseTrendSignals dialog(m_appSignalManager, trendSignals, this);
+	TrendLib::DialogChooseTrendSignals dialog(&signalHasTag,
+											  trendSignals,
+											  addedTrendSignals,
+											  trendArchiveServers,
+											  this);
 	
 	int result = dialog.exec();
 	
@@ -213,7 +278,7 @@ void MonitorTrendsWidget::signalsButton()
 		return;
 	}
 
-	std::vector<AppSignalParam> acceptedSignals = dialog.acceptedSignals();
+	std::vector<TrendLib::TrendSignalParam> acceptedSignals = dialog.acceptedSignals();
 
 	// Remove signals
 	//
@@ -223,7 +288,7 @@ void MonitorTrendsWidget::signalsButton()
 	for (const TrendLib::TrendSignalParam& ds : discreteSignals)
 	{
 		auto it = std::find_if(acceptedSignals.begin(), acceptedSignals.end(),
-						[&ds](const AppSignalParam& trendSignal)
+						[&ds](const auto& trendSignal)
 						{
 							return trendSignal.appSignalId() == ds.appSignalId();
 						});
@@ -237,7 +302,7 @@ void MonitorTrendsWidget::signalsButton()
 	for (const TrendLib::TrendSignalParam& as : analogSignals)
 	{
 		auto it = std::find_if(acceptedSignals.begin(), acceptedSignals.end(),
-						[&as](const AppSignalParam& trendSignal)
+						[&as](const auto& trendSignal)
 						{
 							return trendSignal.appSignalId() == as.appSignalId();
 						});
@@ -250,10 +315,9 @@ void MonitorTrendsWidget::signalsButton()
 
 	// Add new signals
 	//
-	for (const AppSignalParam& signal : acceptedSignals)
+	for (const auto& signal : acceptedSignals)
 	{
-		TrendLib::TrendSignalParam tsp(signal);
-		addSignal(tsp, false);
+		addSignal(signal, false);
 	}
 
 	// Set default scale type if analog signals are empty and selected signals have special tags

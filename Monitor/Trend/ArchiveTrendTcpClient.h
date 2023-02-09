@@ -14,7 +14,7 @@ class ArchiveTrendTcpClient : public Tcp::Client, public TcpClientStatistics
 	Q_OBJECT
 
 public:
-	ArchiveTrendTcpClient(MonitorConfigController* configController, ILogFile* logFile);
+	ArchiveTrendTcpClient(const MonitorConfigController* configController, ILogFile* logFile);
 	virtual ~ArchiveTrendTcpClient();
 
 protected:
@@ -73,7 +73,7 @@ public:
 private:
 	int m_periodicTimerId = 0;
 
-	MonitorConfigController* m_cfgController = nullptr;
+	const MonitorConfigController* m_cfgController = nullptr;
 	HasLogFile m_logFile;
 
 	struct RequestQueue

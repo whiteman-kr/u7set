@@ -6,9 +6,10 @@
 #include <vector>
 #include <unordered_map>
 #include <QReadWriteLock>
+#include "../lib/ISignalDataServer.h"
+#include "../lib/ComparatorSet.h"
 #include "../UtilsLib/ILogFile.h"
 #include "../AppSignalLib/IAppSignalManager.h"
-#include "../lib/ComparatorSet.h"
 
 
 
@@ -33,7 +34,7 @@ struct Sources
 };
 
 
-class MonitorSignalManager final : public QObject, public IAppSignalManager
+class MonitorSignalManager final : public QObject, public IAppSignalManager, public ISignalDataServer
 {
 	Q_OBJECT
 
@@ -67,13 +68,6 @@ public:
 	//
 	void setSetpoints(ComparatorSet&& setpoints);
 	void setSetpoints(const ComparatorSet& setpoints);
-
-	// Signals by sources (AppSignalIDs)
-	//
-
-	// Returns true if appDataServiceId has appSignalId
-	//
-	bool appDataServiceHasSignal(const QString& appDataServiceId, const QString& appSignalId) const;
 
 	// IAppSignalManager implememntation - AppSignals
 	//
@@ -109,6 +103,17 @@ public:
 	//
 	virtual std::vector<std::shared_ptr<Comparator>> setpointsByInputSignalId(const QString& appSignalId) const final;
 
+	// ISignalDataServer implementation
+	//
+
+	/// Get AppDataService EquipmentIDs list by AppSignalID.
+	///
+	virtual QStringList dataServiceIds(const QString& appSignalId) const override;
+
+	/// Return true if AppDataService contains signal.
+	///
+	virtual bool dataServiceHasSignal(const QString& serviceEquipmentId, const QString& appSignalId) const override;
+
 	// Tags
 	//
 	virtual QStringList tags() const final;
@@ -134,11 +139,11 @@ private:
 	HasLogFile m_logFile;
 
 	mutable QReadWriteLock m_paramsLocker;
-	std::unordered_map<Hash, AppSignalParam, VoidHasher<Hash>> m_signalParams;	// Key is hash from AppSignalID (hash from hash here, not nice)
+	std::unordered_map<Hash, AppSignalParam, VoidHasher<Hash>> m_signalParams;	// Key is hash from AppSignalID
 	std::unordered_map<QString, QString> m_signalParamByEquipmentId;			// Key is EquipmentId - value is AppSignalID
 	std::unordered_map<QString, QStringList> m_tagToAppSignals;					// Key is tag - value is list of AppSignalIDs with this tag
 	std::set<QString> m_tags;													// All tags for received AppSignals
-	std::map<QString, std::set<QString>> m_appDataServiceToSignalLis;			// Key is AppDataServiceID, key is AppSignals received via this AppDataService
+	std::map<QString, std::set<QString>> m_appDataServiceToSignalLis;			// Key is AppDataServiceID, value is AppSignals received via this AppDataService
 
 	mutable QReadWriteLock m_statesLocker;
 	std::unordered_map<Hash, Sources, VoidHasher<Hash>> m_states;

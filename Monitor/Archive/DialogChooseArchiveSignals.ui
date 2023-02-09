@@ -110,7 +110,7 @@
        <item row="3" column="1">
         <widget class="QLineEdit" name="filterEdit">
          <property name="placeholderText">
-          <string>Start type SignalID</string>
+          <string>Start typing SignalID</string>
          </property>
          <property name="clearButtonEnabled">
           <bool>true</bool>

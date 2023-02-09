@@ -3,20 +3,21 @@
 
 #include "TrendMainWindow.h"
 #include "MonitorConfigController.h"
+#include "MonitorSignalManager.h"
 #include "ArchiveTrendTcpClient.h"
 #include "RtTrendTcpClient.h"
 
 class MonitorTrendsWidget;
 class QLabel;
-class IAppSignalManager;
+
 
 class MonitorTrends
 {
 public:
 	static std::vector<QString> getTrendsList();
 	static bool activateTrendWindow(QString trendName);
-	static bool startTrendApp(IAppSignalManager* signalManager,
-							  MonitorConfigController* configController,
+	static bool startTrendApp(const MonitorSignalManager* signalManager,
+							  const MonitorConfigController* configController,
 							  const std::vector<AppSignalParam>& appSignals,
 							  QWidget* parent);
 
@@ -31,8 +32,8 @@ private:
 class MonitorTrendsWidget : public TrendLib::TrendMainWindow
 {
 public:
-	MonitorTrendsWidget(IAppSignalManager* appSignalManager,
-						MonitorConfigController* configController,
+	MonitorTrendsWidget(const MonitorSignalManager* m_signalManager,
+						const MonitorConfigController* configController,
 						QWidget* parent);
 	virtual ~MonitorTrendsWidget();
 
@@ -57,12 +58,8 @@ protected slots:
 	// Data
 	//
 private:
-	IAppSignalManager* m_appSignalManager = nullptr;
-	MonitorConfigController* m_configController = nullptr;
-
-	std::vector<MonitorSettings::ArchiveService> m_archiveServices;
-//	ConfigConnection m_archiveService1;
-//	ConfigConnection m_archiveService2;
+	const MonitorSignalManager* m_signalManager = nullptr;
+	const MonitorConfigController* m_configController = nullptr;
 
 	ArchiveTrendTcpClient* m_archiveTcpClient = nullptr;
 	SimpleThread* m_archiveTcpClientThread = nullptr;

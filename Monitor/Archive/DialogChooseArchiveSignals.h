@@ -15,7 +15,7 @@ class DialogChooseArchiveSignals : public QDialog
 	Q_OBJECT
 
 public:
-	DialogChooseArchiveSignals(MonitorSignalManager* signalManager,
+	DialogChooseArchiveSignals(const MonitorSignalManager* signalManager,
 							   const std::vector<MonitorSettings::ArchiveService>& archiveServices,
 							   const ArchiveSource& init,
 							   QWidget* parent);

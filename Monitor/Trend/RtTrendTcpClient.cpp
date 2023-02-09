@@ -1,7 +1,7 @@
 #include "RtTrendTcpClient.h"
 #include "MonitorAppSettings.h"
 
-RtTrendTcpClient::RtTrendTcpClient(MonitorConfigController* configController, ILogFile* logFile) :
+RtTrendTcpClient::RtTrendTcpClient(const MonitorConfigController* configController, ILogFile* logFile) :
 //	Tcp::Client(configController->softwareInfo(),
 //				configController->configuration().appDataServiceRealtimeTrend1.address(),		// TO DO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //				configController->configuration().appDataServiceRealtimeTrend2.address(),

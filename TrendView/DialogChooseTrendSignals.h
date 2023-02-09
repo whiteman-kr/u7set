@@ -1,0 +1,93 @@
+#pragma once
+
+#include "../lib/ISignalHasTag.h"
+#include "../TrendView/TrendSignal.h"
+
+namespace Ui {
+	class DialogChooseTrendSignals;
+}
+
+namespace TrendLib
+{
+
+	class DialogChooseTrendSignals : public QDialog
+	{
+		Q_OBJECT
+
+	public:
+
+		// Constructor for TrendLib::TrendSignalParam
+		//
+		DialogChooseTrendSignals(const ISignalHasTag* signalHasTag,
+								 std::vector<TrendLib::TrendSignalParam> trendSignals,
+								 const std::vector<TrendLib::TrendSignalParam>& acceptedSignals,
+								 const std::vector<TrendLib::ArchiveServer>& archiveServers,
+								 QWidget* parent);
+
+		virtual ~DialogChooseTrendSignals();
+
+	protected:
+		void init(const ISignalHasTag* signalHasTag,
+				  std::vector<TrendLib::TrendSignalParam> signalss,
+				  const std::vector<TrendLib::TrendSignalParam>& acceptedSignals,
+				  const std::vector<TrendLib::ArchiveServer>& archiveServers);
+
+	public:
+		std::vector<TrendLib::TrendSignalParam> acceptedSignals() const;
+
+	protected:
+		virtual void resizeEvent(QResizeEvent* event) override;
+
+		void fillServerCombo();
+		void fillSignalList();
+
+		void addSignal(const TrendSignalParam& signal);
+		void removeSelectedSignal();
+
+		bool trendSignalsHasSignalId(QString signalId);
+
+		void disableControls();
+
+	private slots:
+		void serverCurrentIndexChanged(int index);
+
+		void on_addSignalButton_clicked();
+		void on_removeSignalButton_clicked();
+		void on_removeAllSignalsButton_clicked();
+
+		void on_filterEdit_textChanged(const QString &arg);
+		void on_filterEdit_editingFinished();
+
+		void on_tagsEdit_textChanged(const QString &arg);
+		void on_tagsEdit_editingFinished();
+
+		void on_filteredSignals_doubleClicked(const QModelIndex &index);
+		void slot_filteredSignalsSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+
+		void on_trendSignals_doubleClicked(const QModelIndex &index);
+		void slot_trendSignalsSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+
+		void on_buttonBox_accepted();
+
+	private:
+		Ui::DialogChooseTrendSignals* ui = nullptr;
+
+		const ISignalHasTag* m_signalHasTag = nullptr;
+
+		std::vector<TrendLib::TrendSignalParam> m_acceptedSignals;
+		std::vector<TrendLib::ArchiveServer> m_archiveServers;
+
+		// --
+		//
+		QCompleter* m_filterCompleter = nullptr;
+		QCompleter* m_tagsCompleter = nullptr;
+
+		const QString m_filterCompleterSettingsName = "DialogChooseTrendSignals/trendSignalsDialogFilterCompleter";
+		const QString m_tagsCompleterSettingsName = "DialogChooseTrendSignals/trendSignalsDialogTagsCompleter";
+		const QString m_sizeSettingsName = "DialogChooseTrendSignals/size";
+
+		inline static const QString s_allServers{"All Servers"};
+		inline static QString s_lastServer;
+	};
+
+}

@@ -47,7 +47,7 @@ DialogChooseArchiveSignals::ArchiveSignalType DialogChooseArchiveSignals::s_last
 QString DialogChooseArchiveSignals::s_lastServer;
 
 
-DialogChooseArchiveSignals::DialogChooseArchiveSignals(MonitorSignalManager* signalManager,
+DialogChooseArchiveSignals::DialogChooseArchiveSignals(const MonitorSignalManager* signalManager,
 													   const std::vector<MonitorSettings::ArchiveService>& archiveServices,
 													   const ArchiveSource& init,
 													   QWidget* parent) :
@@ -143,7 +143,7 @@ DialogChooseArchiveSignals::DialogChooseArchiveSignals(MonitorSignalManager* sig
 		//
 		for (const MonitorSettings::ArchiveService& archiveService : m_archiveServices)
 		{
-			if (signalManager->appDataServiceHasSignal(archiveService.appDataServiceId, sp.appSignalId()) == true)
+			if (signalManager->dataServiceHasSignal(archiveService.appDataServiceId, sp.appSignalId()) == true)
 			{
 				signalParamsSources.emplace_back(sp, archiveService.equipmentId, archiveService.shortenId);
 			}

@@ -29,7 +29,7 @@ class RtTrendTcpClient : public Tcp::Client, public TcpClientStatistics
 	Q_OBJECT
 
 public:
-	RtTrendTcpClient(MonitorConfigController* configController, ILogFile* logFile);
+	RtTrendTcpClient(const MonitorConfigController* configController, ILogFile* logFile);
 	virtual ~RtTrendTcpClient();
 
 	// Methods
@@ -92,7 +92,7 @@ public:
 	// Data
 	//
 private:
-	MonitorConfigController* m_cfgController = nullptr;
+	const MonitorConfigController* m_cfgController = nullptr;
 	HasLogFile m_logFile;
 
 	mutable QMutex m_dataMutex;

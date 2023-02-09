@@ -42,7 +42,7 @@ namespace TrendLib
 
 		void setRealtimeAutoShift(const TimeStamp& ts);
 
-		void autoSelectScaleType(const std::vector<AppSignalParam>& acceptedSignals);
+		void autoSelectScaleType(const std::vector<TrendLib::TrendSignalParam>& acceptedSignals);
 
 		// Events
 		//

@@ -335,7 +335,7 @@ bool ArchiveWidget::setSignals(const std::vector<AppSignalParam>& appSignals)
 		auto sit = std::find_if(m_archiveServices.begin(), m_archiveServices.end(),
 					[&signalParam, signalManager = m_signalManager](const MonitorSettings::ArchiveService& archiveService)
 					{
-						return signalManager->appDataServiceHasSignal(archiveService.appDataServiceId, signalParam.appSignalId());
+						return signalManager->dataServiceHasSignal(archiveService.appDataServiceId, signalParam.appSignalId());
 					});
 
 		if (sit != m_archiveServices.end())
@@ -490,7 +490,7 @@ void ArchiveWidget::dropEvent(QDropEvent* event)
 		auto sit = std::find_if(m_archiveServices.begin(), m_archiveServices.end(),
 						[&signalParam, signalManager = m_signalManager](const MonitorSettings::ArchiveService& archiveService)
 						{
-							return signalManager->appDataServiceHasSignal(archiveService.appDataServiceId, signalParam.appSignalId());
+							return signalManager->dataServiceHasSignal(archiveService.appDataServiceId, signalParam.appSignalId());
 						});
 
 		if (sit != m_archiveServices.end())

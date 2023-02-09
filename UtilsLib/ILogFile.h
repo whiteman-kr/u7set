@@ -96,12 +96,12 @@ public:
 		return m_logFile;
 	}
 
-	[[nodiscard]] const ILogFile* logFile() const
+	[[nodiscard]] ILogFile* logFile() const
 	{
 		return m_logFile;
 	}
 
 private:
-	ILogFile* m_logFile = nullptr;
+	mutable ILogFile* m_logFile = nullptr;
 	QString m_context;
 };

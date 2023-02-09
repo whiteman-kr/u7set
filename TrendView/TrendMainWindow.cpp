@@ -432,13 +432,13 @@ namespace TrendLib
 		return;
 	}
 
-	void TrendMainWindow::autoSelectScaleType(const std::vector<AppSignalParam>& acceptedSignals)
+	void TrendMainWindow::autoSelectScaleType(const std::vector<TrendLib::TrendSignalParam>& acceptedSignals)
 	{
 		E::TrendScaleType defaultScaleType = E::TrendScaleType::Linear;
 
 		bool defaultScaleTypeFound = false;
 
-		for (const AppSignalParam& acceptedSignal : acceptedSignals)
+		for (const TrendLib::TrendSignalParam& acceptedSignal : acceptedSignals)
 		{
 			if (acceptedSignal.isAnalog() == false)
 			{
@@ -518,6 +518,9 @@ namespace TrendLib
 
 	void TrendMainWindow::dropEvent(QDropEvent* event)
 	{
+		int to_do_TrendMainWindow_dropEvent;	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		int add_deifferent_drop_format;;
+
 		if (event->mimeData()->hasFormat(AppSignalParamMimeType::value) == false)
 		{
 			Q_ASSERT(event->mimeData()->hasFormat(AppSignalParamMimeType::value) == true);
@@ -548,8 +551,9 @@ namespace TrendLib
 
 			if (ok == true)
 			{
-				TrendSignalParam tsp(appSignalParam);
-				addSignal(tsp, false);
+				int to_do_TrendMainWindow_dropEvent;  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				//TrendSignalParam tsp(appSignalParam);
+				//addSignal(tsp, false);
 			}
 		}
 

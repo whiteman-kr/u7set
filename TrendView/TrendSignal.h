@@ -46,11 +46,7 @@ namespace TrendLib
 
 		void clear()
 		{
-			system = 0;
-			local = 0;
-			plant = 0;
-			flags = 0;
-			value = 0;
+			*this = TrendStateItem_v1{};
 		}
 
 		[[nodiscard]] bool isValid() const
@@ -102,6 +98,7 @@ namespace TrendLib
 	};
 #pragma pack(pop)
 
+
 	using TrendStateItem = TrendStateItem_v1;
 
 	struct TrendStateRecord
@@ -115,16 +112,19 @@ namespace TrendLib
 		bool load(const Proto::TrendStateRecord& message);
 	};
 
+
 	struct RealtimeDataChunk
 	{
 		Hash appSignalHash = UNDEFINED_HASH;
 		std::vector<TrendStateItem> states;
 	};
 
+
 	struct RealtimeData
 	{
-		std::list<RealtimeDataChunk> signalData;	// Each item is a signal with vecro of states
+		std::list<RealtimeDataChunk> signalData;	// Each item is a signal with the vector of states
 	};
+
 
 	struct OneHourData
 	{
@@ -144,12 +144,32 @@ namespace TrendLib
 		bool load(const Proto::TrendArchiveHour& message);
 	};
 
+
+	struct ArchiveServer
+	{
+		ArchiveServer() = default;
+		ArchiveServer(QString equipmentId, QString shortEquipmentId, QString dataServiceId) :
+			equipmentId(std::move(equipmentId)),
+			shortEquipmentId(std::move(shortEquipmentId)),
+			dataServiceId(std::move(dataServiceId))
+		{
+		}
+
+		QString equipmentId;			///< ArchiveServiceDataID
+		QString shortEquipmentId;		///< Shortened ArchiveServiceDataID
+		QString dataServiceId;			///< AppDataServiceID or DiagDataServiceID
+	};
+
+
 	struct TrendArchive
 	{
 		TrendArchive() = delete;
-		TrendArchive(QString _appSignalId) : appSignalId(_appSignalId) {}
+		TrendArchive(QString _appSignalId) :
+			appSignalId(std::move(_appSignalId))
+		{}
 
 		QString appSignalId;
+		ArchiveServer archiveServer;
 		std::map<TimeStamp, std::shared_ptr<OneHourData>> m_hours;		// Key is rounded to hour (like 9:00, 14:00, ...)
 																		// DO NOT CHANGE type to unordered_map, as it is suppose to be ordered
 
@@ -159,17 +179,20 @@ namespace TrendLib
 		bool load(const Proto::TrendArchive& message);
 	};
 
+
 	struct TrendViewLimits
 	{
-		double highLimit = 1;
-		double lowLimit = 0;
+		double highLimit = 1.0;
+		double lowLimit = 0.0;
 	};
+
 
 	class TrendSignalParam
 	{
 	public:
 		TrendSignalParam();
-		TrendSignalParam(const AppSignalParam& appSignal);
+		TrendSignalParam(const AppSignalParam& appSignal,
+						 const TrendLib::ArchiveServer& archiveServer);
 
 	public:
 		bool save(Proto::TrendSignalParam* message) const;
@@ -178,32 +201,48 @@ namespace TrendLib
 		// Methods
 		//
 	public:
-		[[nodiscard]] AppSignalParam toAppSignalParam() const;
+		//[[nodiscard]] AppSignalParam toAppSignalParam() const;
 
 		// Properties
 		//
 	public:
-		[[nodiscard]] QString signalId() const;
+		[[nodiscard]] const QString& signalId() const;
 		void setSignalId(const QString& value);
 
-		[[nodiscard]] QString appSignalId() const;
+		[[nodiscard]] const QString& appSignalId() const;
 		void setAppSignalId(const QString& value);
 
 		[[nodiscard]] Hash appSignalHash() const;
 
-		[[nodiscard]] QString caption() const;
+		[[nodiscard]] const QString& caption() const;
 		void setCaption(const QString& value);
 
-		[[nodiscard]] QString equipmnetId() const;
+		[[nodiscard]] const QString& equipmnetId() const;
 		void setEquipmnetId(const QString& value);
+
+		[[nodiscard]] const QString& archiveServerId() const;
+		void setArchiveServerId(const QString& value);
+
+		[[nodiscard]] const QString& archiveServerShortId() const;
+		void setArchiveServerShortId(const QString& value);
+
+		void setArchiveServer(const ArchiveServer& value);
 
 		[[nodiscard]] bool isAnalog() const;
 		[[nodiscard]] bool isDiscrete() const;
 		[[nodiscard]] E::SignalType type() const;
 		void setType(E::SignalType value);
 
-		[[nodiscard]] QString unit() const;
+		[[nodiscard]] const QString& unit() const;
 		void setUnit(const QString& value);
+
+		[[nodiscard]] const std::set<QString>& tags() const;
+		[[nodiscard]] std::set<QString>& mutableTags();
+		[[nodiscard]] QStringList tagStringList() const;
+
+		void setTags(std::set<QString> tags);
+
+		[[nodiscard]] bool hasTag(const QString& tag) const;
 
 		[[nodiscard]] E::AnalogFormat analogFormat() const;
 		void setAnalogFormat(E::AnalogFormat analogFormat);
@@ -234,7 +273,7 @@ namespace TrendLib
 		[[nodiscard]] int tempSignalIndex() const;
 		void setTempSignalIndex(int value);
 
-		[[nodiscard]] QRectF tempDrawRect() const;
+		[[nodiscard]] const QRectF& tempDrawRect() const;
 		void setTempDrawRect(const QRectF& value);
 
 		// Data
@@ -245,8 +284,12 @@ namespace TrendLib
 		QString m_caption;
 		QString m_equipmentId;
 
+		ArchiveServer m_archiveServer;	// This field is set if data was aquired from the archive
+
 		E::SignalType m_type = E::SignalType::Analog;
 		QString m_unit;
+
+		std::set<QString> m_tags;
 
 		E::AnalogFormat m_analogFormat = E::AnalogFormat::g_9_or_9e;
 		int m_precision = 0;
@@ -352,6 +395,7 @@ namespace TrendLib
 	};
 }
 
+Q_DECLARE_METATYPE(TrendLib::TrendSignalParam)
 Q_DECLARE_METATYPE(TrendLib::TrendStateItem)
 Q_DECLARE_METATYPE(std::shared_ptr<TrendLib::OneHourData>)
 Q_DECLARE_METATYPE(std::shared_ptr<TrendLib::RealtimeData>)

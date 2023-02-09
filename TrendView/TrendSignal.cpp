@@ -133,35 +133,38 @@ namespace TrendLib
 	{
 	}
 
-	TrendSignalParam::TrendSignalParam(const AppSignalParam& appSignal) :
+	TrendSignalParam::TrendSignalParam(const AppSignalParam& appSignal,
+									   const TrendLib::ArchiveServer& archiveServer) :
 		m_signalId(appSignal.customSignalId()),
 		m_appSignalId(appSignal.appSignalId()),
 		m_caption(appSignal.caption()),
 		m_equipmentId(appSignal.equipmentId()),
+		m_archiveServer{archiveServer},
 		m_type(appSignal.type()),
 		m_unit(appSignal.unit()),
+		m_tags(appSignal.tags()),
 		m_precision(appSignal.precision()),
 		m_highLimit(appSignal.highEngineeringUnits()),
 		m_lowLimit(appSignal.lowEngineeringUnits())
 	{
 	}
 
-	AppSignalParam TrendSignalParam::toAppSignalParam() const
-	{
-		AppSignalParam result;
+//	AppSignalParam TrendSignalParam::toAppSignalParam() const
+//	{
+//		AppSignalParam result;
 
-		result.setCustomSignalId(m_signalId);
-		result.setAppSignalId(m_appSignalId);
-		result.setCaption(m_caption);
-		result.setEquipmentId(m_equipmentId);
-		result.setType(m_type);
-		result.setUnit(m_unit);
-		result.setPrecision(m_precision);
-		result.setHighEngineeringUnits(m_highLimit);
-		result.setLowEngineeringUnits(m_lowLimit);
+//		result.setCustomSignalId(m_signalId);
+//		result.setAppSignalId(m_appSignalId);
+//		result.setCaption(m_caption);
+//		result.setEquipmentId(m_equipmentId);
+//		result.setType(m_type);
+//		result.setUnit(m_unit);
+//		result.setPrecision(m_precision);
+//		result.setHighEngineeringUnits(m_highLimit);
+//		result.setLowEngineeringUnits(m_lowLimit);
 
-		return result;
-	}
+//		return result;
+//	}
 
 	bool TrendSignalParam::save(::Proto::TrendSignalParam* message) const
 	{
@@ -176,6 +179,10 @@ namespace TrendLib
 		message->set_caption(m_caption.toStdString());
 		message->set_equipment_id(m_equipmentId.toStdString());
 
+		message->set_archive_service_id(m_archiveServer.equipmentId.toStdString());
+		message->set_archive_service_short_id(m_archiveServer.shortEquipmentId.toStdString());
+		message->set_data_service_id(m_archiveServer.dataServiceId.toStdString());
+
 		message->set_type(static_cast<int>(m_type));
 		message->set_unit(m_unit.toStdString());
 		message->set_analog_format(E::valueToString<E::AnalogFormat>(m_analogFormat).toStdString());
@@ -188,8 +195,16 @@ namespace TrendLib
 
 		message->set_color(m_color);
 
-		// View limits
+		// Tags
+		//
+		message->clear_tags();
+		for (const QString& tag : m_tags)
+		{
+			message->add_tags(tag.toStdString());
+		}
 
+		// View limits
+		//
 		for (const auto& it : m_viewLimits)
 		{
 		  ::Proto::TrendViewLimit* l = message->add_view_limits();
@@ -210,6 +225,10 @@ namespace TrendLib
 		m_caption = QString::fromStdString(message.caption());
 		m_equipmentId = QString::fromStdString(message.equipment_id());
 
+		m_archiveServer.equipmentId = QString::fromStdString(message.archive_service_id());
+		m_archiveServer.shortEquipmentId = QString::fromStdString(message.archive_service_short_id());
+		m_archiveServer.dataServiceId = QString::fromStdString(message.archive_service_short_id());
+
 		m_type = static_cast<E::SignalType>(message.type());
 		m_unit = QString::fromStdString(message.unit());
 		m_precision = message.precision();
@@ -228,8 +247,16 @@ namespace TrendLib
 
 		m_color = message.color();
 
-		// View limits
+		// Tags
+		//
+		m_tags.clear();
+		for (const auto& t : message.tags())
+		{
+			m_tags.insert(QString::fromStdString(t));
+		}
 
+		// View limits
+		//
 		if (message.has_view_high_limit() == true && message.has_view_low_limit() == true)
 		{
 			// Legacy trends before 21.04.2020
@@ -254,7 +281,7 @@ namespace TrendLib
 		return true;
 	}
 
-	QString TrendSignalParam::signalId() const
+	const QString& TrendSignalParam::signalId() const
 	{
 		return m_signalId;
 	}
@@ -264,7 +291,7 @@ namespace TrendLib
 		m_signalId = value;
 	}
 
-	QString TrendSignalParam::appSignalId() const
+	const QString& TrendSignalParam::appSignalId() const
 	{
 		return m_appSignalId;
 	}
@@ -279,7 +306,7 @@ namespace TrendLib
 		return ::calcHash(m_appSignalId);
 	}
 
-	QString TrendSignalParam::caption() const
+	const QString& TrendSignalParam::caption() const
 	{
 		return m_caption;
 	}
@@ -289,7 +316,7 @@ namespace TrendLib
 		m_caption = value;
 	}
 
-	QString TrendSignalParam::equipmnetId() const
+	const QString& TrendSignalParam::equipmnetId() const
 	{
 		return m_equipmentId;
 	}
@@ -297,6 +324,31 @@ namespace TrendLib
 	void TrendSignalParam::setEquipmnetId(const QString& value)
 	{
 		m_equipmentId = value;
+	}
+
+	const QString& TrendSignalParam::archiveServerId() const
+	{
+		return m_archiveServer.equipmentId;
+	}
+
+	void TrendSignalParam::setArchiveServerId(const QString& value)
+	{
+		m_archiveServer.equipmentId = value;
+	}
+
+	const QString& TrendSignalParam::archiveServerShortId() const
+	{
+		return m_archiveServer.shortEquipmentId;
+	}
+
+	void TrendSignalParam::setArchiveServerShortId(const QString& value)
+	{
+		m_archiveServer.shortEquipmentId = value;
+	}
+
+	void TrendSignalParam::setArchiveServer(const ArchiveServer& value)
+	{
+		m_archiveServer = value;
 	}
 
 	bool TrendSignalParam::isAnalog() const
@@ -319,7 +371,7 @@ namespace TrendLib
 		m_type = value;
 	}
 
-	QString TrendSignalParam::unit() const
+	const QString& TrendSignalParam::unit() const
 	{
 		return m_unit;
 	}
@@ -327,6 +379,39 @@ namespace TrendLib
 	void TrendSignalParam::setUnit(const QString& value)
 	{
 		m_unit = value;
+	}
+
+	const std::set<QString>& TrendSignalParam::tags() const
+	{
+		return m_tags;
+	}
+
+	std::set<QString>& TrendSignalParam::mutableTags()
+	{
+		return m_tags;
+	}
+
+	QStringList TrendSignalParam::tagStringList() const
+	{
+		QStringList result;
+		result.reserve(static_cast<int>(m_tags.size()));
+
+		for (const QString& tag : m_tags)
+		{
+			result << tag;
+		}
+
+		return result;
+	}
+
+	void TrendSignalParam::setTags(std::set<QString> tags)
+	{
+		m_tags = std::move(tags);
+	}
+
+	bool TrendSignalParam::hasTag(const QString& tag) const
+	{
+		return m_tags.contains(tag);
 	}
 
 	E::AnalogFormat TrendSignalParam::analogFormat() const
@@ -435,7 +520,7 @@ namespace TrendLib
 		m_tempSignalIndex = value;
 	}
 
-	QRectF TrendSignalParam::tempDrawRect() const
+	const QRectF& TrendSignalParam::tempDrawRect() const
 	{
 		return m_tempDrawRect;
 	}

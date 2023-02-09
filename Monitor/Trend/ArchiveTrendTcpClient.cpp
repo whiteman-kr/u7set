@@ -1,7 +1,7 @@
 #include "ArchiveTrendTcpClient.h"
 #include "MonitorAppSettings.h"
 
-ArchiveTrendTcpClient::ArchiveTrendTcpClient(MonitorConfigController* configController, ILogFile* logFile) :
+ArchiveTrendTcpClient::ArchiveTrendTcpClient(const MonitorConfigController* configController, ILogFile* logFile) :
 	// TO DO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	Tcp::Client(configController->softwareInfo(), {}, {}),
 //	Tcp::Client(configController->softwareInfo(),

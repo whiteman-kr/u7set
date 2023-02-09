@@ -1,6 +1,6 @@
 #include "SimTrends.h"
 #include "../SimIdeSimulator.h"
-#include "../../TrendView/Forms/DialogChooseTrendSignals.h"
+#include "../../TrendView/DialogChooseTrendSignals.h"
 #include "../../TrendView/TrendWidget.h"
 
 
@@ -45,7 +45,7 @@ bool SimTrends::startTrendApp(std::shared_ptr<SimIdeSimulator> simulator, const 
 
 	for (const AppSignalParam& appSignal : appSignals)
 	{
-		TrendLib::TrendSignalParam tsp(appSignal);
+		TrendLib::TrendSignalParam tsp(appSignal, {});
 		trendSignals.push_back(tsp);
 	}
 
@@ -217,11 +217,41 @@ void SimTrendsWidget::timerEvent(QTimerEvent*)
 
 void SimTrendsWidget::signalsButton()
 {
-	std::vector<TrendLib::TrendSignalParam> trendSignals = signalSet().trendSignals();
+	std::vector<TrendLib::TrendSignalParam> acceptedTrendSignals = signalSet().trendSignals();
+	std::vector<TrendLib::ArchiveServer> archiveServers;	// Simulation does not have acrhve servers;
 
 	// --
 	//
-	DialogChooseTrendSignals dialog(&m_simulator->appSignalManager(), trendSignals, this);
+	std::vector<TrendLib::TrendSignalParam> trendSignals;
+	trendSignals.reserve(m_simulator->appSignalManager().signalsCount());
+
+	for (const auto& appSignal : m_simulator->appSignalManager().signalList())
+	{
+		trendSignals.emplace_back(appSignal, TrendLib::ArchiveServer{});
+	}
+
+	// Implement ISignalHasTag
+	//
+	struct SignalHasTag : ISignalHasTag
+	{
+		SignalHasTag(const Sim::AppSignalManager* sm) : signalManager(sm)
+		{
+		}
+
+		virtual bool signalHasTag(const QString& signalId, const QString& tag) const  override
+		{
+			Q_ASSERT(signalManager);
+			return signalManager->signalHasTag(signalId, tag);
+		}
+
+		const Sim::AppSignalManager* signalManager = nullptr;
+	} signalHasTag{&m_simulator->appSignalManager()};
+
+	TrendLib::DialogChooseTrendSignals dialog(&signalHasTag,
+											  trendSignals,
+											  acceptedTrendSignals,
+											  archiveServers,
+											  this);
 	
 	int result = dialog.exec();
 	
@@ -230,7 +260,7 @@ void SimTrendsWidget::signalsButton()
 		return;
 	}
 
-	std::vector<AppSignalParam> acceptedSignals = dialog.acceptedSignals();
+	std::vector<TrendLib::TrendSignalParam> acceptedSignals = dialog.acceptedSignals();
 
 	// Remove signals
 	//
@@ -240,7 +270,7 @@ void SimTrendsWidget::signalsButton()
 	for (const TrendLib::TrendSignalParam& ds : discreteSignals)
 	{
 		auto it = std::find_if(acceptedSignals.begin(), acceptedSignals.end(),
-						[&ds](const AppSignalParam& trendSignal)
+						[&ds](const auto& trendSignal)
 						{
 							return trendSignal.appSignalId() == ds.appSignalId();
 						});
@@ -254,7 +284,7 @@ void SimTrendsWidget::signalsButton()
 	for (const TrendLib::TrendSignalParam& as : analogSignals)
 	{
 		auto it = std::find_if(acceptedSignals.begin(), acceptedSignals.end(),
-						[&as](const AppSignalParam& trendSignal)
+						[&as](const auto& trendSignal)
 						{
 							return trendSignal.appSignalId() == as.appSignalId();
 						});
@@ -267,10 +297,9 @@ void SimTrendsWidget::signalsButton()
 
 	// Add new signals
 	//
-	for (const AppSignalParam& signal : acceptedSignals)
+	for (const auto& signal : acceptedSignals)
 	{
-		TrendLib::TrendSignalParam tsp(signal);
-		addSignal(tsp, false);
+		addSignal(signal, false);
 	}
 
 	// Set default scale type if analog signals are empty and selected signals have special tags
