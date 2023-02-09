@@ -15,6 +15,9 @@ public:
 public:
 	virtual VFrame30::DrawMode drawMode() const override;
 
+	QString monitorId() const;
+	void setMonitorId(QString equipmentId, bool emitUpdate);
+
 protected:
 	virtual void updateScriptGlobalVars(QJSEngine& engine) override;
 
@@ -23,6 +26,7 @@ public slots:
 
 private:
 	SimIdeSimulator* m_simulator = nullptr;
+	QString m_monitorId;
 };
 
 

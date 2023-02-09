@@ -16,11 +16,11 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
     connect(this, &CodeEditor::updateRequest, this, &CodeEditor::updateLineNumberArea);
     connect(this, &CodeEditor::cursorPositionChanged, this, &CodeEditor::highlightCurrentLine);
 
-    updateLineNumberAreaWidth();
+	updateLineNumberAreaWidth();
 
-    highlightCurrentLine();
+	highlightCurrentLine();
 
-    setWordWrapMode(QTextOption::NoWrap);
+	setWordWrapMode(QTextOption::NoWrap);
 
     // Selection color
     //
@@ -85,6 +85,8 @@ void CodeEditor::setFont(const QFont& f)
     setTabStopDistance(fm.horizontalAdvance(m_tabSymbol));
 
     setLineNumberOffset(static_cast<int>(fm.horizontalAdvance(QChar::Space) * 0.75));
+
+	updateLineNumberAreaWidth();
 }
 
 void CodeEditor::setHighlighter(Highlighter* highlighter)
@@ -201,7 +203,7 @@ int CodeEditor::getLineNumberAreaWidth()
 
 	int space = static_cast<int>(fontMetrics().horizontalAdvance(QLatin1Char('9')) * digits) + m_lineNumberOffset * 2;
 
-    return space;
+	return space;
 }
 
 int CodeEditor::customLineNumberAreaWidth()

@@ -140,8 +140,8 @@ protected:
 	virtual void shutdown() = 0;					// calls on ServiceWorker's thread shutdown
 
 private:
-	void onThreadStarted() final;
-	void onThreadFinished() final;
+	void onThreadStarted() override final;
+	void onThreadFinished() override final;
 
 private:
 	QString m_equipmentID;
@@ -256,8 +256,8 @@ public:
 	int exec();
 
 private:
-	void start() final;				// override QtService::start
-	void stop() final;				// override QtService::stop
+	void start() override final;			// override QtService::start
+	void stop() override final;				// override QtService::stop
 
 	void stopAndDeleteService();
 

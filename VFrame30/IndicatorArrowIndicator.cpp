@@ -75,17 +75,13 @@ namespace VFrame30
 		return true;
 	}
 
-	void IndicatorArrowIndicator::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer, const SchemaItemIndicator* item) const
+	void IndicatorArrowIndicator::draw(CDrawParam* drawParam, const SchemaItemIndicator* schemaItem) const
 	{
 		if (drawParam == nullptr ||
-			schema == nullptr ||
-			layer == nullptr ||
-			item == nullptr)
+			schemaItem == nullptr)
 		{
 			Q_ASSERT(drawParam);
-			Q_ASSERT(schema);
-			Q_ASSERT(layer);
-			Q_ASSERT(item);
+			Q_ASSERT(schemaItem);
 
 			return;
 		}
@@ -93,7 +89,7 @@ namespace VFrame30
 		QPainter* p = drawParam->painter();
 		Q_ASSERT(p);
 
-		QRectF rect{item->boundingRectInDocPt(drawParam)};
+		QRectF rect{schemaItem->boundingRectInDocPt(drawParam)};
 
 		p->fillRect(rect, Qt::lightGray);
 

@@ -253,12 +253,23 @@ namespace  Sim
 			m_globalScript = file.readAll();
 		}
 
+		if (QFile file(appDir + "OnConfigurationArrived.js");
+			file.open(QIODevice::ReadOnly | QIODevice::Text) == true)
+		{
+			m_onConfigurationArrivedScript = file.readAll();
+		}
+
 		return true;
 	}
 
 	QString AppMonitor::globalScript() const
 	{
 		return m_globalScript;
+	}
+
+	QString AppMonitor::onConfigurationArrivedScript() const
+	{
+		return m_onConfigurationArrivedScript;
 	}
 
 }

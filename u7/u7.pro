@@ -78,6 +78,7 @@ HEADERS  += \
     SchemaEditor/SchemasTabPage.h \
     Reports/DialogReportFileTypeParams.h \
     Reports/SchemasReport.h \
+    Simulator/ScriptSimApplication.h \
 	Stable.h \
     ../lib/ExportPrint.h \
     ../lib/QDoublevalidatorEx.h \
@@ -252,6 +253,7 @@ SOURCES +=\
     SchemaEditor/SchemaControlTabPage.cpp \
     SchemaEditor/SchemasTabPage.cpp \
 	Settings.cpp \
+    Simulator/ScriptSimApplication.cpp \
 	Simulator/SimConnectionPage.cpp \
 	Simulator/SimLogicModulePage.cpp \
 	Simulator/SimOverridePane.cpp \

@@ -9,7 +9,7 @@ namespace VFrame30
 	//
 	// SchemaItemAfb
 	//
-	class SchemaItemAfb : public FblItemRect
+	class SchemaItemAfb final : public FblItemRect
 	{
 		Q_OBJECT
 
@@ -23,20 +23,20 @@ namespace VFrame30
 		// Draw Functions
 		//
 	public:
-		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const final;
+		virtual void draw(CDrawParam* drawParam) const override;
 		void drawAfbHelp(QPainter* painter, const QRect& drawRect) const;
 
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message) const final;
-		virtual bool LoadData(const Proto::Envelope& message) final;
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
 
 		// Methods
 		//
 	public:
 		virtual QString toolTipText(double dpiX, double dpiY, double devicePixelRatio) const override;
-		virtual QString buildName() const final;
+		virtual QString buildName() const override;
 
 		bool setAfbParam(const QString& name, QVariant value, std::shared_ptr<VFrame30::Schema> schema, QString* errorMsg);
 		bool setAfbParamByOpName(const QString& opName, const Afb::AfbParamValue& value);
@@ -52,8 +52,8 @@ namespace VFrame30
 
 		bool updateAfbElement(const Afb::AfbElement& sourceAfb, QString* errorMessage);
 
-		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const final;
-		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const final;
+		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
+		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
 
 	protected:
 		void addSpecificParamProperties();

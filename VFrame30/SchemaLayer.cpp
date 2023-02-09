@@ -8,7 +8,7 @@ namespace VFrame30
 	::Factory<VFrame30::SchemaLayer> VideoLayerFactory;
 
 	ScriptSchemaLayer::ScriptSchemaLayer(SchemaLayerPtr schemaLayer) :
-		m_schemaLayer(schemaLayer)
+		m_schemaLayer(std::move(schemaLayer))
 	{
 		Q_ASSERT(m_schemaLayer);
 	}
@@ -43,18 +43,21 @@ namespace VFrame30
 		Init("Undifined Layer", false);
 	}
 
-	SchemaLayer::SchemaLayer(const QString& name, bool compile) :
-		Proto::ObjectSerialization<SchemaLayer>(Proto::ProtoCompress::Never)
+	SchemaLayer::SchemaLayer(Schema* parentSchema, const QString& name, bool compile) :
+		Proto::ObjectSerialization<SchemaLayer>(Proto::ProtoCompress::Never),
+		m_parentSchema(parentSchema)
 	{
 		Init(name, compile);
 	}
 
 	SchemaLayer::~SchemaLayer(void)
 	{
+		clearItems();	// It will reset parents for items.
 	}
 
 	void SchemaLayer::Init(const QString& name, bool compile)
 	{
+		m_items.reserve(64);
 		m_guid = QUuid::createUuid();
 		m_name = name;
 		m_compile = compile;
@@ -79,13 +82,13 @@ namespace VFrame30
 		layer->set_show(m_show);
 		layer->set_print(m_print);
 
-		// Сохранить Items
+		// Save Items
 		//
-		for (auto item = Items.begin(); item != Items.end(); ++item)
+		for (const auto& item : m_items)
 		{
 			Proto::Envelope* pItemMessage = layer->add_items();
 
-			if (item->get()->Save(pItemMessage) == false)
+			if (item->Save(pItemMessage) == false)
 			{
 				return false;
 			}
@@ -113,7 +116,7 @@ namespace VFrame30
 
 		// Read schema items
 		//
-		Items.clear();
+		m_items.clear();
 
 		for (int i = 0; i < layer.items().size(); i++)
 		{
@@ -136,7 +139,7 @@ namespace VFrame30
 				}
 			}
 			
-			Items.push_back(item);
+			pushBackItem(item);
 		}
 
 		return true;
@@ -168,15 +171,15 @@ namespace VFrame30
 
 	// Methods
 	//
-	std::shared_ptr<SchemaItem> SchemaLayer::getItemById(const QUuid& id) const
+	std::shared_ptr<SchemaItem> SchemaLayer::getItemById(const QUuid id) const
 	{
-		auto foundItem = std::find_if(Items.begin(), Items.end(),
+		auto foundItem = std::find_if(m_items.begin(), m_items.end(),
 			[&](const std::shared_ptr<SchemaItem>& vi)
 			{
 				return vi->guid() == id;
 			});
 
-		if (foundItem != Items.end())
+		if (foundItem != m_items.end())
 		{
 			return *foundItem;
 		}
@@ -217,56 +220,54 @@ namespace VFrame30
 	template<typename SchemaItemType>
 	std::shared_ptr<SchemaItemType> SchemaLayer::getItemUnderPointByType(QPointF point) const
 	{
+		std::shared_ptr<SchemaItemType> result;
 		double x = point.x();
 		double y = point.y();
 
-		for (auto it = Items.rbegin(); it != Items.rend(); it ++)
+		for (const auto& item : m_items | std::views::reverse)
 		{
-			const SchemaItemPtr& item = *it;
-
 			if (qobject_cast<SchemaItemType>(item.get()) != nullptr &&
 				item->isIntersectPoint(x, y) == true)
 			{
-				return std::dynamic_pointer_cast<SchemaItemType>(item);
+				result = std::dynamic_pointer_cast<SchemaItemType>(item);
+				break;
 			}
 		}
 
-		return std::shared_ptr<SchemaItem>();
+		return result;
 	}
 
-	std::shared_ptr<SchemaItem> SchemaLayer::getItemUnderPoint(QPointF point, QString className) const
+	std::shared_ptr<SchemaItem> SchemaLayer::getItemUnderPoint(QPointF point, const QString& className /*= QString{}*/) const
 	{
+		std::shared_ptr<SchemaItem> result;
 		double x = point.x();
 		double y = point.y();
 
-		for (auto it = Items.rbegin(); it != Items.rend(); it ++)
+		for (const auto& item : m_items | std::views::reverse)
 		{
-			const SchemaItemPtr& item = *it;
-
 			if (item->isIntersectPoint(x, y) == true)
 			{
 				if ((className.isEmpty() == true) ||
 					(className == item->metaObject()->className()))
 				{
-					return item;
+					result = item;
+					break;
 				}
 			}
 		}
 
-		return std::shared_ptr<SchemaItem>();
+		return result;
 	}
 
-	std::list<std::shared_ptr<SchemaItem>> SchemaLayer::getItemListUnderPoint(QPointF point, QString className /*= ""*/) const
+	std::list<std::shared_ptr<SchemaItem>> SchemaLayer::getItemListUnderPoint(QPointF point, const QString& className /*= QString{}*/) const
 	{
 		double x = point.x();
 		double y = point.y();
 
 		std::list<std::shared_ptr<SchemaItem>> out;
 
-		for (auto it = Items.rbegin(); it != Items.rend(); it ++)
+		for (const auto& item : m_items | std::views::reverse)
 		{
-			const SchemaItemPtr& item = *it;
-
 			if (item->isIntersectPoint(x, y) == true)
 			{
 				if ((className.isEmpty() == true) ||
@@ -284,7 +285,7 @@ namespace VFrame30
 	{
 		std::list<std::shared_ptr<SchemaItem>> out;
 
-		std::copy_if(Items.begin(), Items.end(), std::back_inserter(out),
+		std::copy_if(m_items.begin(), m_items.end(), std::back_inserter(out),
 				[&rect](std::shared_ptr<SchemaItem> item)
 				{
 			        return item->isIntersectRect(rect.x(), rect.y(), rect.width(), rect.height());
@@ -296,13 +297,12 @@ namespace VFrame30
 
 	std::shared_ptr<SchemaItem> SchemaLayer::findPinUnderPoint(QPointF point, double gridSize, int pinGridStep) const
 	{
+		std::shared_ptr<SchemaItem> result;
 		double x = point.x();
 		double y = point.y();
 
-		for (auto it = Items.rbegin(); it != Items.rend(); it ++)
+		for (const auto& item : m_items | std::views::reverse)
 		{
-			const SchemaItemPtr& item = *it;
-
 			if (dynamic_cast<VFrame30::FblItemRect*>(item.get()) != nullptr &&
 			    item->isIntersectPoint(x, y) == true)
 			{
@@ -310,39 +310,90 @@ namespace VFrame30
 
 				fbl->SetConnectionsPos(gridSize, pinGridStep);
 
-				const std::vector<VFrame30::AfbPin>& inputs = fbl->inputs();
-				const std::vector<VFrame30::AfbPin>& outputs = fbl->outputs();
-
-				for (const VFrame30::AfbPin& pin : inputs)
+				for (const VFrame30::AfbPin& pin : fbl->inputs())
 				{
 					if (pin.point() == point)
 					{
-						return item;
+						result = item;
+						return result;
 					}
 				}
 
-				for (const VFrame30::AfbPin& pin : outputs)
+				for (const VFrame30::AfbPin& pin : fbl->outputs())
 				{
 					if (pin.point() == point)
 					{
-						return item;
+						result = item;
+						return result;
 					}
 				}
 			}
 		}
 
-		return std::shared_ptr<SchemaItem>();
+		return result;
+	}
+
+	void SchemaLayer::clearItems()
+	{
+		std::ranges::for_each(m_items, [](auto& item)
+		{
+			item->setParentLayer({});
+		});
+		m_items.clear();
+		return;
+	}
+
+	bool SchemaLayer::removeItem(const SchemaItemPtr& item)
+	{
+		auto removed = std::erase(m_items, item);
+		if (removed != 0)
+		{
+			item->setParentLayer({});
+		}
+
+		return removed != 0;
+	}
+
+	void SchemaLayer::pushBackItem(SchemaItemPtr item)
+	{
+		Q_ASSERT(item);
+		Q_ASSERT(shared_from_this());
+
+		item->setParentLayer(shared_from_this());
+		m_items.push_back(std::move(item));
+
+		return;
+	}
+
+	const std::vector<std::shared_ptr<SchemaItem>>& SchemaLayer::items() const
+	{
+		return m_items;
 	}
 
 	// Properties
 	//
+	Schema* SchemaLayer::parentSchema()
+	{
+		return m_parentSchema;
+	}
+
+	const Schema* SchemaLayer::parentSchema() const
+	{
+		return m_parentSchema;
+	}
+
+	void SchemaLayer::setParentSchema(Schema* parentSchema)
+	{
+		m_parentSchema = parentSchema;
+	}
+
 	QUuid SchemaLayer::guid() const
 	{
 		return m_guid;
 	}
-	void SchemaLayer::setGuid(const QUuid& guid)
+	void SchemaLayer::setGuid(QUuid value)
 	{
-		m_guid = guid;
+		m_guid = value;
 	}
 
 	QString SchemaLayer::name() const

@@ -7,7 +7,6 @@ DialogProgress::DialogProgress(const QString& caption, int statusLinesCount, QWi
 
 	setMinimumWidth(400);
 	setWindowTitle(caption);
-	setAttribute(Qt::WA_DeleteOnClose);
 
 	m_progressBar = new QProgressBar();
 	m_progressBar->setMinimum(0);
@@ -77,6 +76,23 @@ void DialogProgress::setErrorMessage(const QString& message)
 	m_errorMessage = message;
 }
 
+QString DialogProgress::errorMessage() const
+{
+	QMutexLocker l(&m_mutex);
+	return m_errorMessage;
+}
+
+bool DialogProgress::hasErrorMessage() const
+{
+	QMutexLocker l(&m_mutex);
+	return m_errorMessage.isEmpty() == false;
+}
+
+void DialogProgress::exit()
+{
+	m_exitFlag = true;
+}
+
 void DialogProgress::accept()
 {
 }
@@ -87,18 +103,11 @@ void DialogProgress::reject()
 
 void DialogProgress::onTimer()
 {
-	// Display error message and quit
+	// Close dialog if required
 	//
-	QMutexLocker l(&m_mutex);
-
-	if (m_errorMessage.isEmpty() == false)
+	if (m_exitFlag == true)
 	{
-		QString errorMsg = m_errorMessage;
-
-		l.unlock();
 		m_timer->stop();
-
-		QMessageBox::critical(this, qAppName(), errorMsg);
 
 		QDialog::accept();
 		return;
@@ -106,6 +115,9 @@ void DialogProgress::onTimer()
 
 	// Update progress
 	//
+
+	QMutexLocker l(&m_mutex);
+
 	if (m_progressMax != m_progressBar->maximum() || m_progressMin != m_progressBar->minimum())
 	{
 		m_progressBar->setMaximum(m_progressMax);

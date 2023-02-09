@@ -16,6 +16,9 @@
   <layout class="QGridLayout" name="gridLayout_10">
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
      <property name="currentIndex">
       <number>0</number>
      </property>
@@ -60,9 +63,9 @@
               <hour>0</hour>
               <minute>0</minute>
               <second>0</second>
-              <year>2000</year>
-              <month>1</month>
-              <day>3</day>
+              <year>1999</year>
+              <month>12</month>
+              <day>27</day>
              </datetime>
             </property>
             <property name="currentSection">
@@ -310,6 +313,12 @@
            <layout class="QGridLayout" name="gridLayout_6">
             <item row="0" column="0">
              <widget class="QCheckBox" name="multipleFilesCheck">
+              <property name="mouseTracking">
+               <bool>true</bool>
+              </property>
+              <property name="focusPolicy">
+               <enum>Qt::TabFocus</enum>
+              </property>
               <property name="text">
                <string>Split Report to Multiple Files</string>
               </property>
@@ -364,9 +373,12 @@
         <rect>
          <x>30</x>
          <y>30</y>
-         <width>153</width>
+         <width>361</width>
          <height>17</height>
         </rect>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::TabFocus</enum>
        </property>
        <property name="text">
         <string>Compare Expert properties</string>

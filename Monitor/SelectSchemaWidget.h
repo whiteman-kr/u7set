@@ -99,9 +99,9 @@ public:
 	explicit SelectSchemaModel(const std::vector<SelectSchemaItem>& schemas, QObject* parent = nullptr);
 
 public:
-	virtual int rowCount(const QModelIndex &parent) const final;
-	virtual int columnCount(const QModelIndex &parent) const final;
-	virtual QVariant data(const QModelIndex &modelIndex, int role) const final;
+	virtual int rowCount(const QModelIndex &parent) const override;
+	virtual int columnCount(const QModelIndex &parent) const override;
+	virtual QVariant data(const QModelIndex &modelIndex, int role) const override;
 
 public:
 	int applyFilter(QString filterText, QString defaultSchemaId);

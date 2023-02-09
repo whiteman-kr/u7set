@@ -1,19 +1,18 @@
 #include "DrawParam.h"
-#include "Schema.h"
 #include "ClientSchemaView.h"
 
 
 namespace VFrame30
 {
-	CDrawParam::CDrawParam(QPainter* painter, Schema* schema, const SchemaView* view, double gridSize, int pinGridStep) :
+	CDrawParam::CDrawParam(QPainter* painter, const SchemaView* view, double gridSize, int pinGridStep, SchemaUnit schemaUnit) :
 		m_painter(painter),
-		m_schema(schema),
 		m_schemaView(view),
+		m_session(view ? view->session() : Session{}),
+		m_schemaUnit(schemaUnit),
 		m_gridSize(gridSize),
 		m_pinGridStep(pinGridStep)
 	{
 		Q_ASSERT(m_painter != nullptr);
-		Q_ASSERT(m_schema != nullptr);
 
 		if (dynamic_cast<const QPdfWriter*>(painter->device()) != nullptr)
 		{
@@ -47,11 +46,6 @@ namespace VFrame30
 		return m_painter->device();
 	}
 
-	const Schema* CDrawParam::schema() const
-	{
-		return m_schema;
-	}
-
 	const SchemaView* CDrawParam::schemaView() const
 	{
 		return m_schemaView;
@@ -73,6 +67,33 @@ namespace VFrame30
 		Q_ASSERT(drawMode() != DrawMode::Editor);
 		auto ptr = dynamic_cast<const ClientSchemaView*>(m_schemaView);
 		return const_cast<ClientSchemaView*>(ptr);
+	}
+
+	ITimeStats* CDrawParam::timeStats()
+	{
+		if (drawMode() == DrawMode::Editor)
+		{
+			return nullptr;
+		}
+
+		auto c = clientSchemaView();
+		return c ? c->timeStats() : nullptr;
+	}
+
+	ITimeStats* CDrawParam::timeStats() const
+	{
+		if (drawMode() == DrawMode::Editor)
+		{
+			return nullptr;
+		}
+
+		auto c = clientSchemaView();
+		return c ? c->timeStats() : nullptr;
+	}
+
+	SchemaUnit CDrawParam::schemaUnit() const
+	{
+		return m_schemaUnit;
 	}
 
 	double CDrawParam::controlBarSize() const
@@ -145,12 +166,12 @@ namespace VFrame30
 
 		const double zoom = schemaView()->zoom() / 100.0;
 
-		if (schema()->unit() == SchemaUnit::Display)
+		if (m_schemaUnit == SchemaUnit::Display)
 		{
 			return (double)qRound(pos * zoom) / zoom;
 		}
 
-		if (schema()->unit() == SchemaUnit::Inch)
+		if (m_schemaUnit == SchemaUnit::Inch)
 		{
 			double dpix = this->realDpiX();
 			return (static_cast<double>(static_cast<int>(pos * zoom * dpix)) / dpix) / zoom;
@@ -171,12 +192,12 @@ namespace VFrame30
 
 		const double zoom = schemaView()->zoom() / 100.0;
 
-		if (schema()->unit() == SchemaUnit::Display)
+		if (m_schemaUnit == SchemaUnit::Display)
 		{
 			return (double)qRound(pos * zoom) / zoom;
 		}
 
-		if (schema()->unit() == SchemaUnit::Inch)
+		if (m_schemaUnit == SchemaUnit::Inch)
 		{
 			const double dpiy = this->realDpiY();
 			return (static_cast<double>(static_cast<int>(pos * zoom * dpiy)) / dpiy) / zoom;
@@ -200,14 +221,14 @@ namespace VFrame30
 
 		const double zoom = schemaView()->zoom() / 100.0;
 
-		if (schema()->unit() == SchemaUnit::Display)
+		if (m_schemaUnit == SchemaUnit::Display)
 		{
 			result = QPointF((double)qRound(x * zoom) / zoom,
 							 (double)qRound(y * zoom) / zoom);
 		}
 		else
 		{
-			Q_ASSERT(schema()->unit() == SchemaUnit::Inch);
+			Q_ASSERT(m_schemaUnit == SchemaUnit::Inch);
 
 			const double dpix = this->realDpiX();
 			const double dpiy = this->realDpiY();
@@ -231,14 +252,14 @@ namespace VFrame30
 
 		const double zoom = schemaView()->zoom() / 100.0;
 
-		if (schema()->unit() == SchemaUnit::Display)
+		if (m_schemaUnit == SchemaUnit::Display)
 		{
 			result = QPointF((double)qRound(pos.x() * zoom) / zoom,
 							 (double)qRound(pos.y() * zoom) / zoom);
 		}
 		else
 		{
-			Q_ASSERT(schema()->unit() == SchemaUnit::Inch);
+			Q_ASSERT(m_schemaUnit == SchemaUnit::Inch);
 
 			const double dpix = this->realDpiX();
 			const double dpiy = this->realDpiY();
@@ -298,26 +319,6 @@ namespace VFrame30
 	void CDrawParam::setDrawNotesLayer(bool value)
 	{
 		m_drawNotesLayer = value;
-	}
-
-	AppSignalController* CDrawParam::appSignalController() noexcept
-	{
-		return m_appSignalController;
-	}
-
-	void CDrawParam::setAppSignalController(AppSignalController* value)
-	{
-		m_appSignalController = value;
-	}
-
-	TuningController* CDrawParam::tuningController() noexcept
-	{
-		return m_tuningController;
-	}
-
-	void CDrawParam::setTuningController(TuningController* value)
-	{
-		m_tuningController = value;
 	}
 
 	const Session& CDrawParam::session() const noexcept

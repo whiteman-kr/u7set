@@ -41,9 +41,17 @@ DialogProjectDiff::DialogProjectDiff(DbController* db, QWidget *parent) :
 	ui->targetTypeComboBox->addItems(versionTypes);
 
 	int sourceTypeIndex = s.value("ProjectDiffGenerator/sourceType", static_cast<int>(CompareVersionType::Changeset)).toInt();
+	if (sourceTypeIndex < 0 || sourceTypeIndex > static_cast<int>(CompareVersionType::Changeset))
+	{
+		sourceTypeIndex = static_cast<int>(CompareVersionType::Changeset);
+	}
 	ui->sourceTypeComboBox->setCurrentIndex(sourceTypeIndex);
 
 	int targetTypeIndex = s.value("ProjectDiffGenerator/targetType", static_cast<int>(CompareVersionType::LatestVersion)).toInt();
+	if (targetTypeIndex < 0 || targetTypeIndex > static_cast<int>(CompareVersionType::Changeset))
+	{
+		targetTypeIndex = static_cast<int>(CompareVersionType::LatestVersion);
+	}
 	ui->targetTypeComboBox->setCurrentIndex(targetTypeIndex);
 
 	int sourceChangeset = s.value("ProjectDiffGenerator/sourceChangeset", 1).toInt();
@@ -106,9 +114,17 @@ DialogProjectDiff::~DialogProjectDiff()
 	s.setValue("ProjectDiffGenerator/fileName", fileName());
 
 	int sourceTypeIndex = ui->sourceTypeComboBox->currentIndex();
+	if (sourceTypeIndex < 0 || sourceTypeIndex > static_cast<int>(CompareVersionType::Changeset))
+	{
+		sourceTypeIndex = static_cast<int>(CompareVersionType::Changeset);
+	}
 	s.setValue("ProjectDiffGenerator/sourceType", sourceTypeIndex);
 
 	int targetTypeIndex = ui->targetTypeComboBox->currentIndex();
+	if (targetTypeIndex < 0 || targetTypeIndex > static_cast<int>(CompareVersionType::Changeset))
+	{
+		targetTypeIndex = static_cast<int>(CompareVersionType::LatestVersion);
+	}
 	s.setValue("ProjectDiffGenerator/targetType", targetTypeIndex);
 
 	int sourceChangeset = ui->sourceChangesetLineEdit->text().toInt();

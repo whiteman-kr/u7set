@@ -3,6 +3,7 @@
 #include <QPageSetupDialog>
 #include <QPrinter>
 #include "DialogReportFileTypeParams.h"
+#include "../UtilsLib/Ui/UiTools.h"
 
 //
 // SchemasReportDialog
@@ -281,7 +282,7 @@ void SchemasReportGeneratorThread::run(TaskType task,
 
 	// Create Progress Dialog
 
-	DialogProgress* dialogProgress = new DialogProgress(QObject::tr("Exporting Schemas to PDF"), 1, m_parent);
+	DialogProgress dialogProgress(QObject::tr("Exporting Schemas to PDF"), 1, m_parent);
 
 	// Create thread
 
@@ -311,26 +312,23 @@ void SchemasReportGeneratorThread::run(TaskType task,
 
 	QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);	// Schedule thread deleting
 
-	QObject::connect(dialogProgress, &DialogProgress::getProgress, worker, &SchemasReportGenerator::progressRequested, Qt::DirectConnection);
+	QObject::connect(&dialogProgress, &DialogProgress::getProgress, worker, &SchemasReportGenerator::progressRequested, Qt::DirectConnection);
+	QObject::connect(&dialogProgress, &DialogProgress::cancelClicked, worker, &SchemasReportGenerator::stop, Qt::DirectConnection);
 
-	QObject::connect(dialogProgress, &DialogProgress::cancelClicked, worker, &SchemasReportGenerator::stop, Qt::DirectConnection);
-
-	QObject::connect(worker, &SchemasReportGenerator::progressChanged, dialogProgress, &DialogProgress::setProgressSingle);
+	QObject::connect(worker, &SchemasReportGenerator::progressChanged, &dialogProgress, &DialogProgress::setProgressSingle);
 
 	//  Schedule objects deleting
 
-	QObject::connect(worker, &SchemasReportGenerator::finished, worker, [thread, dialogProgress, worker, schemaView](const QString& errorMessage)
+	QObject::connect(worker, &SchemasReportGenerator::finished, worker, [thread, &dialogProgress, worker, schemaView](const QString& errorMessage)
 	{
 		thread->quit();
 
 		if (errorMessage.isEmpty() == false)
 		{
-			dialogProgress->setErrorMessage(errorMessage);
+			dialogProgress.setErrorMessage(errorMessage);
 		}
-		else
-		{
-			dialogProgress->deleteLater();
-		}
+
+		dialogProgress.exit();
 
 		worker->deleteLater();
 	});
@@ -339,7 +337,33 @@ void SchemasReportGeneratorThread::run(TaskType task,
 
 	thread->start();
 
-	dialogProgress->exec();
+	dialogProgress.exec();
+
+	if (dialogProgress.hasErrorMessage() == false)
+	{
+		if (task == TaskType::ExportFilesToAlbum)
+		{
+			if (QMessageBox::question(m_parent, qAppName(), QObject::tr("Album generating has been finished.\n\nDo you with to open it?")) == QMessageBox::Yes)
+			{
+				UiTools::openHelp(filePath, m_parent);
+			}
+		}
+		else
+		{
+			if (task == TaskType::ExportFilesToPdf || task == TaskType::ExportAllSchemasToAlbum)
+			{
+				if (QMessageBox::question(m_parent, qAppName(), QObject::tr("Album generating has been finished.\n\nDo you with to open the containing folder?")) == QMessageBox::Yes)
+				{
+					QUrl url = QUrl::fromLocalFile(filePath);
+					QDesktopServices::openUrl(url);
+				}
+			}
+		}
+	}
+	else
+	{
+		QMessageBox::critical(m_parent, qAppName(), dialogProgress.errorMessage());
+	}
 
 	return;
 }

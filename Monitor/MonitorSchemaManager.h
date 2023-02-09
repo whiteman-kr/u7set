@@ -21,7 +21,8 @@ protected:
 
 public:
 	[[nodiscard]] virtual int schemaCount() const override;
-	[[nodiscard]] virtual std::shared_ptr<VFrame30::Schema> schemaByIndex(int schemaIndex) override;
+	[[nodiscard]] virtual std::shared_ptr<VFrame30::Schema> schemaByIndex(int schemaIndex,
+																		  std::shared_ptr<VFrame30::Context> context) override;
 
 	[[nodiscard]] virtual QString schemaCaptionById(const QString& schemaId) const override;
 	[[nodiscard]] virtual QString schemaCaptionByIndex(int schemaIndex) const override;
@@ -51,15 +52,10 @@ public:
 	[[nodiscard]] MonitorConfigController* monitorConfigController();
 	[[nodiscard]] const MonitorConfigController* monitorConfigController() const;
 
-	[[nodiscard]] QString onConfigurationArrivedScript() const;
-	void setOnConfigurationArrivedScript(QString value);
-
 	// Data
 	//
 private:
 	MonitorConfigController* const m_configController = nullptr;
-
-	QString m_onConfigurationArrivedScript;
 
 	// Data for RealTimeTrends on schemas, SchemaItemIndicator, type = Trend
 	//

@@ -1412,9 +1412,11 @@ SchemaFileView::SchemaFileView(DbController* dbc, QWidget* parent) :
 	setModel(&m_proxyModel);
 
 #ifdef _DEBUG
+#if QT_VERSION >= QT_VERSION_CHECK(6, 4, 0)
 	[[maybe_unused]]QAbstractItemModelTester* modelTester = new QAbstractItemModelTester(&m_filesModel,
 																		 QAbstractItemModelTester::FailureReportingMode::Fatal,
 																		 this);
+#endif
 #endif
 
 	// --
@@ -3297,11 +3299,11 @@ void SchemaControlTabPage::cloneFile()
 	std::vector<QUuid> oldGuids = schema->getGuids();
 	std::set<QUuid> oldGuidsMap = {oldGuids.begin(), oldGuids.end()};
 
-	for (std::shared_ptr<VFrame30::SchemaLayer> layer : schema->Layers)
+	for (const auto& layer : schema->layers())
 	{
 		layer->setGuid(QUuid::createUuid());
 
-		for (SchemaItemPtr item : layer->Items)
+		for (const SchemaItemPtr& item : layer->items())
 		{
 			item->setNewGuid();
 
@@ -4024,9 +4026,9 @@ void SchemaControlTabPage::compareObject(DbChangesetObject object, CompareData c
 	//
 	std::map<QUuid, CompareAction> itemsActions;
 
-	for (std::shared_ptr<VFrame30::SchemaLayer> targetLayer : target->Layers)
+	for (const auto& targetLayer : target->layers())
 	{
-		for (SchemaItemPtr targetItem : targetLayer->Items)
+		for (const SchemaItemPtr& targetItem : targetLayer->items())
 		{
 			// Look for this item in source
 			//
@@ -4078,9 +4080,9 @@ void SchemaControlTabPage::compareObject(DbChangesetObject object, CompareData c
 
 	// Look for deteled items (in target)
 	//
-	for (std::shared_ptr<VFrame30::SchemaLayer> sourceLayer : source->Layers)
+	for (const auto& sourceLayer : source->layers())
 	{
-		for (SchemaItemPtr sourceItem : sourceLayer->Items)
+		for (const SchemaItemPtr& sourceItem : sourceLayer->items())
 		{
 			// Look for this item in source
 			//
@@ -4095,11 +4097,11 @@ void SchemaControlTabPage::compareObject(DbChangesetObject object, CompareData c
 				// Add item to target
 				//
 				bool layerFound = false;
-				for (std::shared_ptr<VFrame30::SchemaLayer> targetLayer : target->Layers)
+				for (const auto& targetLayer : target->layers())
 				{
 					if (targetLayer->guid() == sourceLayer->guid())
 					{
-						targetLayer->Items.push_back(sourceItem);
+						targetLayer->pushBackItem(sourceItem);
 						layerFound = true;
 						break;
 					}

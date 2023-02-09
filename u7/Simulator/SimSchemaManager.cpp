@@ -7,15 +7,6 @@ SimSchemaManager::SimSchemaManager(SimIdeSimulator* simulator, QObject* parent) 
 	m_simulator(simulator)
 {
 	Q_ASSERT(m_simulator);
-
-	// --
-	//
-	connect(m_simulator, &Sim::Simulator::projectUpdated, this, &SimSchemaManager::slot_projectUpdated);
-
-	// If project is already loaded and we open another SimWidget then call this manually
-	//
-	slot_projectUpdated();
-
 	return;
 }
 
@@ -69,29 +60,6 @@ bool SimSchemaManager::trendData(QUuid /*trendUuid*/,
 	return false;
 }
 
-void SimSchemaManager::slot_projectUpdated()
-{
-	// Set MonitorID
-	//
-	QSettings s;
-	QString monitorId = s.value("Simulator/" + m_simulator->projectName()).toString();
-
-	QStringList monitors = m_simulator->software().monitors();
-	if (monitors.contains(monitorId) == false)
-	{
-		monitorId.clear();
-	}
-
-	if (monitorId.isEmpty() == true && monitors.isEmpty() == false)
-	{
-		monitorId = monitors.front();
-	}
-
-	setMonitorId(monitorId, false);		// Do not emit update as it will lead to recursion
-
-	return;
-}
-
 SimIdeSimulator* SimSchemaManager::simulator()
 {
 	return m_simulator;
@@ -102,28 +70,3 @@ const SimIdeSimulator* SimSchemaManager::simulator() const
 	return m_simulator;
 }
 
-QString SimSchemaManager::monitorId() const
-{
-	return m_monitorId;
-}
-
-void SimSchemaManager::setMonitorId(QString equipmentId, bool emitUpdate)
-{
-	m_monitorId = equipmentId;
-
-	QSettings s;
-	s.setValue("Simulator/" + m_simulator->projectName(), m_monitorId);
-
-	if (auto monitor = m_simulator->software().monitor(m_monitorId);
-		monitor != nullptr)
-	{
-		setGlobalScript(monitor->globalScript());
-	}
-
-	if (emitUpdate == true)
-	{
-		m_simulator->projectUpdated();	// It'll update all schemas
-	}
-
-	return;
-}

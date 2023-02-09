@@ -19,7 +19,13 @@ public slots:
 	//
 	void setProgressSingle(int progress, int progressMin, int progressMax, const QString& status);
 	void setProgressMultiple(int progress, int progressMin, int progressMax, const QStringList& status);
-	void setErrorMessage(const QString& message);	// Displays an error message and exits the dialog
+
+public:
+	void setErrorMessage(const QString& message);
+	QString errorMessage() const;
+	bool hasErrorMessage() const;
+
+	void exit();
 
 protected:
 	virtual void accept() override;
@@ -35,7 +41,7 @@ private:
 
 	QTimer* m_timer = nullptr;
 
-	QMutex m_mutex;
+	mutable QMutex m_mutex;
 
 	// Data protected by m_mutex
 	//
@@ -44,6 +50,8 @@ private:
 	int m_progressValue = 0;
 	QStringList m_status;
 	QString m_errorMessage;
+
+	bool m_exitFlag = false;
 
 };
 

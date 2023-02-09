@@ -121,10 +121,13 @@ namespace VFrame30
 
 	// Drawing Functions
 	//
-	void SchemaItemIndicator::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
+	void SchemaItemIndicator::draw(CDrawParam* drawParam) const
 	{
 		QPainter* p = drawParam->painter();
 		Q_ASSERT(p);
+
+		auto context = this->context();
+		Q_ASSERT(context);
 
 		const Indicator* io = indicatorObject();
 
@@ -134,7 +137,7 @@ namespace VFrame30
 			return;
 		}
 
-		io->draw(drawParam,  schema, layer, this);
+		io->draw(drawParam, this);
 
 		return;
 	}
@@ -203,15 +206,21 @@ namespace VFrame30
 	//
 	QString SchemaItemIndicator::signalIdsString() const
 	{
+		auto context = this->context();
+		return signalIdsString(context.get());
+	}
+
+	QString SchemaItemIndicator::signalIdsString(const Context* context) const
+	{
 		QString result = m_signalIds.join(QChar::LineFeed);
 
-		// Expand variables in AppSignalIDs in MonitorMode, if applicable (m_drawParam is set and is monitor mode)
+		// Expand variables in AppSignalIDs in MonitorMode
 		//
-		if (m_drawParam != nullptr &&
-			m_drawParam->drawMode() != DrawMode::Editor &&
-			m_drawParam->clientSchemaView() != nullptr)
+		if (context != nullptr &&
+			context->appSignalController() != nullptr &&
+			context->viewVariables() != nullptr)
 		{
-			result = MacrosExpander::parse(result, m_drawParam, this);
+			result = MacrosExpander::parse(result, context, nullptr, this);
 		}
 
 		return result;
@@ -224,15 +233,21 @@ namespace VFrame30
 
 	QStringList SchemaItemIndicator::signalIds() const
 	{
+		auto context = this->context();
+		return signalIds(context.get());
+	}
+
+	QStringList SchemaItemIndicator::signalIds(const Context* context) const
+	{
 		QStringList resultList = m_signalIds;
 
-		// Expand variables in AppSignalIDs in MonitorMode, if applicable
+		// Expand variables in AppSignalIDs in MonitorMode
 		//
-		if (m_drawParam != nullptr &&
-			m_drawParam->drawMode() != DrawMode::Editor &&
-			m_drawParam->clientSchemaView() != nullptr)
+		if (context != nullptr &&
+			context->appSignalController() != nullptr &&
+			context->viewVariables() != nullptr)
 		{
-			resultList = MacrosExpander::parse(resultList, m_drawParam, this);
+			resultList = MacrosExpander::parse(resultList, context, nullptr, this);
 		}
 
 		return resultList;

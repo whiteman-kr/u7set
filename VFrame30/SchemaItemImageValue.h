@@ -179,13 +179,13 @@ namespace VFrame30
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message) const final;
-		virtual bool LoadData(const Proto::Envelope& message) final;
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
 
 		// Draw Functions
 		//
 	public:
-		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const final;
+		virtual void draw(CDrawParam* drawParam) const override;
 
 	protected:
 		void initDrawingResources() const;
@@ -194,8 +194,8 @@ namespace VFrame30
 		void drawImage(CDrawParam* drawParam, const QString& imageId, const QRectF& rect);
 
 	protected:
-		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const final;
-		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const final;
+		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
+		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
 
 		// Java Script invocables specific for SchemaItemImageValue
 		//
@@ -208,9 +208,11 @@ namespace VFrame30
 		//
 	public:
 		QString signalIdsString() const;
+		QString signalIdsString(const Context* context) const;
 		void setSignalIdsString(const QString& value);
 
 		QStringList signalIds() const;
+		QStringList signalIds(const Context* context) const;
 		void setSignalIds(const QStringList& value);
 
 		E::SignalSource signalSource() const;

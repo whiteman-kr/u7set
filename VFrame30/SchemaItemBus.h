@@ -30,7 +30,7 @@ namespace VFrame30
 		// Draw Functions
 		//
 	public:
-		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const override;
+		virtual void draw(CDrawParam* drawParam) const override;
 
 		// Methods
 		//
@@ -66,7 +66,7 @@ namespace VFrame30
 	//		SchemaItemBusComposer
 	//
 	//
-	class SchemaItemBusComposer : public SchemaItemBus
+	class SchemaItemBusComposer final : public SchemaItemBus
 	{
 		Q_OBJECT
 
@@ -86,7 +86,7 @@ namespace VFrame30
 		// Draw Functions
 		//
 	public:
-		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const override;
+		virtual void draw(CDrawParam* drawParam) const override;
 
 		// Public Methods
 		//
@@ -94,10 +94,10 @@ namespace VFrame30
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 
 		virtual QString toolTipText(double dpiX, double dpiY, double devicePixelRatio) const override;
-		virtual QString buildName() const final;
+		virtual QString buildName() const override;
 
 	protected:
-		virtual void setBusPins(const VFrame30::Bus& bus) final;
+		virtual void setBusPins(const VFrame30::Bus& bus) override;
 
 		// Properties
 		//
@@ -114,7 +114,7 @@ namespace VFrame30
 	//		SchemaItemBusExtractor
 	//
 	//
-	class SchemaItemBusExtractor : public SchemaItemBus
+	class SchemaItemBusExtractor final : public SchemaItemBus
 	{
 		Q_OBJECT
 
@@ -128,26 +128,26 @@ namespace VFrame30
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message) const final;
-		virtual bool LoadData(const Proto::Envelope& message) final;
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
 
 		// Draw Functions
 		//
 	public:
-		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const final;
+		virtual void draw(CDrawParam* drawParam) const override;
 
 		// Public Methods
 		//
 	public:
-		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const final;
+		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 
 		virtual QString toolTipText(double dpiX, double dpiY, double devicePixelRatio) const override;
-		virtual QString buildName() const final;
+		virtual QString buildName() const override;
 
 		void specificPropertyCouldBeChanged(QString propertyName, const QVariant& value);
 
 	protected:
-		virtual void setBusPins(const VFrame30::Bus& bus) final;
+		virtual void setBusPins(const VFrame30::Bus& bus) override;
 
 		// Properties
 		//

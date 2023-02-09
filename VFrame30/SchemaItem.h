@@ -1,12 +1,12 @@
 #pragma once
 
-#include "SchemaPoint.h"
+#include <QJSValue>
 #include "../CommonLib/PropertyObject.h"
 #include "../CommonLib/Factory.h"
 #include "../CommonLib/DebugInstCounter.h"
 #include "../UtilsLib/ILogFile.h"
 #include "../Proto/ProtoSerialization.h"
-#include <QJSValue>
+#include "SchemaPoint.h"
 
 
 class QJSEngine;
@@ -24,6 +24,7 @@ namespace VFrame30
 	class FblItemRect;
 	class FblItem;
 
+	class Context;
 	class CDrawParam;
 }
 
@@ -33,13 +34,16 @@ namespace VFrame30
 {
 	extern ::Factory<VFrame30::SchemaItem> SchemaItemFactory;
 
-	// Интерфейс для SchemaItem который перводит любой тип хранения координат (ISchemaPosRect, ISchemaPosLine, ...) в
-	// прямоугольник, для отображения в СВОЙСТВАХ ОБЪЕКТА. ВНИМАНИЕ! возврат элементов происходит в единицах мм, дюймы, точки.
-	// ВНИМАНИЕ! Эти свойства нельзя использовать для рисования и вычисления новых координат!
+	// An interface for SchemaItem for translating any kind of position and size (ISchemaPosRect, ISchemaPosLine, ...)
+	// to a rectangle. Used for displaying the item's position in object properties.
+	// Returned values depend on regional item units, which can be: mm, inches or pixels.
+	// THESE PROPERTIES CANNOT BE USED FOR DRAWING.
 	//
 	class ISchemaItemPropertiesPos
 	{
 	public:
+		virtual ~ISchemaItemPropertiesPos() = default;
+
 		[[nodiscard]] virtual double left() const = 0;
 		virtual void setLeft(double value) = 0;
 
@@ -58,6 +62,8 @@ namespace VFrame30
 	class IPointList
 	{
 	public:
+		virtual ~IPointList() = default;
+
 		[[nodiscard]] virtual std::vector<SchemaPoint> getPointList() const = 0;
 		virtual void setPointList(const std::vector<SchemaPoint>& points) = 0;
 	};
@@ -181,8 +187,7 @@ namespace VFrame30
 		// Drawing item is in 100% scale
 		// Graphcis must have sceen coordinate system (0, 0 - left up corner, down and right - positive coordinate values)
 		//
-		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const;
-
+		virtual void draw(CDrawParam* drawParam) const;
 
 	public:
 		// Draw item's label
@@ -217,13 +222,7 @@ namespace VFrame30
 		// Determine and Calculation Functions
 		//
 	public:
-		// Определение, входит ли точка в элемент, x и y в дюймах или в пикселях
-		//
 		virtual bool isIntersectPoint(double x, double y) const;
-
-		// Определение, пересекает ли элемент указанный прямоугольник (использовать для выделения),
-		// координаты и размер прямоугольника заданы в дюймах или пикселях
-		//
 		virtual bool isIntersectRect(double x, double y, double width, double height) const;
 
 		static double penDeviceWidth(const QPaintDevice* device, double penWidth);
@@ -252,6 +251,15 @@ namespace VFrame30
 		// Properties and Data
 		//
 	public:
+		std::shared_ptr<SchemaLayer> parentLayer();
+		std::shared_ptr<const SchemaLayer> parentLayer() const;
+		void setParentLayer(const std::shared_ptr<SchemaLayer>& parentLayer);
+
+		const Schema* parentSchema() const;
+
+		const std::shared_ptr<Context> context() const;
+
+
 		bool IsStatic() const noexcept;
 		bool IsDynamic() const noexcept;
 
@@ -349,6 +357,8 @@ namespace VFrame30
 		// Data
 		//
 	protected:
+		std::weak_ptr<SchemaLayer> m_parentLayer;
+
 		bool m_static = true;
 		bool m_locked = false;
 		bool m_commented = false;
@@ -368,6 +378,7 @@ namespace VFrame30
 		// Runtime stuff
 		//
 		bool m_blinkPhase = false;			// Taken from m_drawParam
+
 		CDrawParam* m_drawParam = nullptr;	// Is filled before PreDrawScript (in Schema::draw) to have ability to call MacroExpander::expand in AppSiganlIDs getter from script
 
 		QJSValue m_jsClickScript;		// Evaluated m_clickScript
@@ -376,12 +387,12 @@ namespace VFrame30
 		mutable QString m_lastScriptError;
 
 	public:
-		static const QColor errorColor;
-		static const QColor warningColor;
-		static const QColor selectionColor;
-		static const QColor lockedSelectionColor;
-		static const QColor commentedColor;
-		static const QColor highlightColor1;
-		static const QColor highlightColor2;
+		static constexpr QColor errorColor{0xE0, 0x33, 0x33, 0xFF};
+		static constexpr QColor warningColor{0xF8, 0x72, 0x17, 0xFF};
+		static constexpr QColor selectionColor{0x33, 0x99, 0xFF, 0x80};
+		static constexpr QColor lockedSelectionColor{0xF0, 0x80, 0x80, 0xB0};
+		static constexpr QColor commentedColor{0xE0, 0xE0, 0xEF, 0xC0};
+		static constexpr QColor highlightColor1{0x33, 0x99, 0xFF, 0xF0};
+		static constexpr QColor highlightColor2{0x33, 0x99, 0xFF, 0x60};
 	};
 }

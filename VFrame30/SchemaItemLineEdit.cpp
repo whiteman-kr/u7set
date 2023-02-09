@@ -58,13 +58,13 @@ namespace VFrame30
 	{
 	}
 
-	void SchemaItemLineEdit::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
+	void SchemaItemLineEdit::draw(CDrawParam* drawParam) const
 	{
 		// Control is drawn only in PDF mode
 		//
 		if (drawParam->pdfMode() == true)
 		{
-			drawLineEditControl(drawParam, schema, layer);
+			drawLineEditControl(drawParam, parentSchema(), parentLayer().get());
 		}
 
 		return;

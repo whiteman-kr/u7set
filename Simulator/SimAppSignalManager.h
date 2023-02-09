@@ -31,7 +31,7 @@ namespace Sim
 	//	AppSignalManager
 	//
 	//
-	class AppSignalManager : public QObject, public IAppSignalManager
+	class AppSignalManager final : public QObject, public IAppSignalManager
 	{
 		Q_OBJECT
 
@@ -90,10 +90,10 @@ namespace Sim
 
 		virtual QStringList signalIdsByTag(const QString& tag) const override;
 
-		virtual E::SignalType signalType(Hash signalHash, bool* found) const final;
-		virtual E::SignalType signalType(const QString& appSignalId, bool* found) const final;
+		virtual E::SignalType signalType(Hash signalHash, bool* found) const override;
+		virtual E::SignalType signalType(const QString& appSignalId, bool* found) const override;
 
-		virtual QString equipmentToAppSiganlId(const QString& equipmentId) const final;
+		virtual QString equipmentToAppSiganlId(const QString& equipmentId) const override;
 
 		// Implementing IAppSignalManager - Setpoints/Comparators
 		//
@@ -101,7 +101,7 @@ namespace Sim
 
 		// Tags
 		//
-		virtual QStringList tags() const final;
+		virtual QStringList tags() const override;
 
 		// Data Acess
 		//

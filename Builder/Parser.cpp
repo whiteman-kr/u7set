@@ -2245,7 +2245,7 @@ namespace Builder
 									bool convertOk = propertyValue.convert(param.afbParamValue().value().metaType());
 									if (convertOk == false)
 									{
-										// Properties haû eincompatible types
+										// Properties have incompatible types
 										//
 										log->errALP4201(logicSchema->schemaId(), ufbItem->label(), reference, ufbItem->guid());
 										continue;
@@ -2963,7 +2963,22 @@ namespace Builder
 			QFuture<bool> task =  QtConcurrent::run(
 				[this, schema, &readyParseDataContainer, &iterruptRequest]() -> bool
 				{
-					return this->parseAppLogicSchema(schema, &readyParseDataContainer, &iterruptRequest);
+					try
+					{
+						return this->parseAppLogicSchema(schema, &readyParseDataContainer, &iterruptRequest);
+					}
+					catch (std::exception& e)
+					{
+						m_log->errINT1001(tr("Please, report to developers: parseAppLogicSchema(...) uncatched std::exception %1").arg(e.what()),
+										  schema->schemaId());
+						return false;
+					}
+					catch (...)
+					{
+						m_log->errINT1001(tr("Please, report to developers: parseAppLogicSchema(...) unknown exception"),
+								  		  schema->schemaId());
+						return false;
+					}
 				});
 
 			parseTasks.push_back(task);
@@ -3291,11 +3306,11 @@ namespace Builder
 			//
 			std::vector<QUuid> commentedItems;
 
-			for (std::shared_ptr<VFrame30::SchemaLayer> layer :  schema->Layers)
+			for (const auto& layer :  schema->layers())
 			{
 				std::list<SchemaItemPtr> newItemList;
 
-				for (SchemaItemPtr& item :  layer->Items)
+				for (const SchemaItemPtr& item : layer->items())
 				{
 					Q_ASSERT(item);
 
@@ -3310,7 +3325,7 @@ namespace Builder
 					}
 				}
 
-				layer->Items.swap(newItemList);
+				layer->setItems(newItemList.begin(), newItemList.end());
 			}
 
 			if (commentedItems.empty() == false)
@@ -3345,7 +3360,7 @@ namespace Builder
 
 			uuids.insert(std::make_pair(schema->guid(), schema->schemaId()));			// Schema guid is also included in check
 
-			for (const std::shared_ptr<VFrame30::SchemaLayer> layer : schema->Layers)
+			for (const auto& layer : schema->layers())
 			{
 				if (layer->compile() == false)
 				{
@@ -3354,7 +3369,7 @@ namespace Builder
 
 				uuids.insert(std::make_pair(layer->guid(), schema->schemaId()));		// Layer guid is also included in check
 
-				for (const SchemaItemPtr& item : layer->Items)
+				for (const SchemaItemPtr& item : layer->items())
 				{
 					if (item->isFblItem() == false)
 					{
@@ -3429,14 +3444,14 @@ namespace Builder
 
 			std::set<QString> pins;
 
-			for (const std::shared_ptr<VFrame30::SchemaLayer>& layer : ufb->Layers)
+			for (const auto& layer : ufb->layers())
 			{
 				if (layer->compile() == false)
 				{
 					continue;
 				}
 
-				for (const SchemaItemPtr& item : layer->Items)
+				for (const SchemaItemPtr& item : layer->items())
 				{
 					if (item->isType<VFrame30::SchemaItemSignal>() == false)
 					{
@@ -3479,14 +3494,14 @@ namespace Builder
 				continue;
 			}
 
-			for (const std::shared_ptr<VFrame30::SchemaLayer>& layer : ufb->Layers)
+			for (const auto& layer : ufb->layers())
 			{
 				if (layer->compile() == false)
 				{
 					continue;
 				}
 
-				for (const SchemaItemPtr& item : layer->Items)
+				for (const SchemaItemPtr& item : layer->items())
 				{
 					if (VFrame30::SchemaItemAfb* afbItem = item->toSchemaItemAfb();
 						afbItem != nullptr)
@@ -3702,11 +3717,11 @@ namespace Builder
 
 		// Check AFBs
 		//
-		for (std::shared_ptr<VFrame30::SchemaLayer> l : schema->Layers)
+		for (const auto& l : schema->layers())
 		{
 			if (l->compile() == true)
 			{
-				for (SchemaItemPtr& si : l->Items)
+				for (const SchemaItemPtr& si : l->items())
 				{
 					if (dynamic_cast<VFrame30::SchemaItemAfb*>(si.get()) != nullptr)
 					{
@@ -3760,11 +3775,11 @@ namespace Builder
 
 		// Check SchemaItemBus
 		//
-		for (std::shared_ptr<VFrame30::SchemaLayer> l : schema->Layers)
+		for (const auto& l : schema->layers())
 		{
 			if (l->compile() == true)
 			{
-				for (SchemaItemPtr& si : l->Items)
+				for (const SchemaItemPtr& si : l->items())
 				{
 					if (dynamic_cast<VFrame30::SchemaItemBus*>(si.get()) != nullptr)
 					{
@@ -3823,11 +3838,11 @@ namespace Builder
 
 		bool ok = true;
 
-		for (std::shared_ptr<VFrame30::SchemaLayer> l : logicSchema->Layers)
+		for (const auto& l : logicSchema->layers())
 		{
 			if (l->compile() == true)
 			{
-				for (SchemaItemPtr& si : l->Items)
+				for (const SchemaItemPtr& si : l->items())
 				{
 					if (si->isType<VFrame30::SchemaItemUfb>() == true)
 					{
@@ -3883,11 +3898,11 @@ namespace Builder
 
 		std::map<QString, SchemaItemPtr> loopbackIds;		// Key is LoopbackID
 
-		for (std::shared_ptr<VFrame30::SchemaLayer> l : schema->Layers)
+		for (const auto& l : schema->layers())
 		{
 			if (l->compile() == true)
 			{
-				for (const SchemaItemPtr& si : l->Items)
+				for (const SchemaItemPtr& si : l->items())
 				{
 					VFrame30::SchemaItemLoopbackSource* loopbackItem = dynamic_cast<VFrame30::SchemaItemLoopbackSource*>(si.get());
 
@@ -4048,7 +4063,7 @@ namespace Builder
 		bool layerFound = false;
 		bool ok = false;
 
-		for (std::shared_ptr<VFrame30::SchemaLayer> l : ufbSchema->Layers)
+		for (const auto& l : ufbSchema->layers())
 		{
 			if (l->compile() == true)
 			{
@@ -4091,7 +4106,7 @@ namespace Builder
 		//
 		bool result = true;
 
-		for (const SchemaItemPtr& item : layer->Items)
+		for (const SchemaItemPtr& item : layer->items())
 		{
 			// Check for nested UFBs
 			//
@@ -4211,7 +4226,7 @@ namespace Builder
 		bool layerFound = false;
 		bool ok = false;
 
-		for (std::shared_ptr<VFrame30::SchemaLayer> l : logicSchema->Layers)
+		for (const auto& l : logicSchema->layers())
 		{
 			if (l->compile() == true)
 			{
@@ -4263,7 +4278,7 @@ namespace Builder
 		// Check if all connection elements are from related Logic Module
 		//
 		bool alienLmIds = false;
-		for (SchemaItemPtr& item : layer->Items)
+		for (const SchemaItemPtr& item : layer->items())
 		{
 			// Checking signals
 			//
@@ -4465,7 +4480,7 @@ namespace Builder
 
 		bool result = true;
 
-		for (SchemaItemPtr item : layer->Items)
+		for (const SchemaItemPtr& item : layer->items())
 		{
 			// Filter signals
 			//
@@ -4810,58 +4825,62 @@ namespace Builder
 		// then create fake link for it.
 		// This is for special case, when input connects to output without link.
 		//
-		for (auto item = layer->Items.begin(); item != layer->Items.end(); ++item)
 		{
-			VFrame30::FblItemRect* fblItem = dynamic_cast<VFrame30::FblItemRect*>(item->get());
+			std::list<SchemaItemPtr> fakeLinks;
 
-			if (fblItem != nullptr)
+			for (const auto& item : layer->items())
 			{
-				fblItem->SetConnectionsPos(schema->gridSize(), schema->pinGridStep());	// Calculate pins positions
-
-				const std::vector<VFrame30::AfbPin>& inputs = fblItem->inputs();
-				const std::vector<VFrame30::AfbPin>& outputs = fblItem->outputs();
-
-				for (const VFrame30::AfbPin& pt : inputs)
+				if (VFrame30::FblItemRect* fblItem = item->toFblItemRect();
+					fblItem != nullptr)
 				{
-					std::shared_ptr<VFrame30::SchemaItemLink> fakeLink = std::make_shared<VFrame30::SchemaItemLink>(fblItem->itemUnit());
+					fblItem->SetConnectionsPos(schema->gridSize(), schema->pinGridStep());	// Calculate pins positions
 
-					fakeLink->setGuid(Uuid::getNextId(Uuid::Area::Link));	// fake links must have the same uuid from build to build (if schema was not changed)
+					for (const VFrame30::AfbPin& pt : fblItem->inputs())
+					{
+						std::shared_ptr<VFrame30::SchemaItemLink> fakeLink = std::make_shared<VFrame30::SchemaItemLink>(fblItem->itemUnit());
 
-					VFrame30::SchemaPoint pos = pt.point();
+						fakeLink->setGuid(Uuid::getNextId(Uuid::Area::Link));	// fake links must have the same uuid from build to build (if schema was not changed)
 
-					fakeLink->AddPoint(pos.X, pos.Y);
-					fakeLink->AddPoint(pos.X, pos.Y);
+						VFrame30::SchemaPoint pos = pt.point();
 
-					layer->Items.push_back(fakeLink);
+						fakeLink->AddPoint(pos.X, pos.Y);
+						fakeLink->AddPoint(pos.X, pos.Y);
+
+						fakeLinks.push_back(fakeLink);
+					}
+
+					for (const VFrame30::AfbPin& pt : fblItem->outputs())
+					{
+						std::shared_ptr<VFrame30::SchemaItemLink> fakeLink = std::make_shared<VFrame30::SchemaItemLink>(fblItem->itemUnit());
+
+						fakeLink->setGuid(Uuid::getNextId(Uuid::Area::Link));	// fake links must have the same uuid from build to build (if schema was not changed)
+
+						VFrame30::SchemaPoint pos = pt.point();
+
+						fakeLink->AddPoint(pos.X, pos.Y);
+						fakeLink->AddPoint(pos.X, pos.Y);
+
+						fakeLinks.push_back(fakeLink);
+					}
+
+					continue;
 				}
-
-				for (const VFrame30::AfbPin& pt : outputs)
-				{
-					std::shared_ptr<VFrame30::SchemaItemLink> fakeLink = std::make_shared<VFrame30::SchemaItemLink>(fblItem->itemUnit());
-
-					fakeLink->setGuid(Uuid::getNextId(Uuid::Area::Link));	// fake links must have the same uuid from build to build (if schema was not changed)
-
-					VFrame30::SchemaPoint pos = pt.point();
-
-					fakeLink->AddPoint(pos.X, pos.Y);
-					fakeLink->AddPoint(pos.X, pos.Y);
-
-					layer->Items.push_back(fakeLink);
-				}
-
-				continue;
 			}
+
+			// Add fake links to the layer
+			//
+			layer->pushBackItems(fakeLinks.begin(), fakeLinks.end());
 		}
 
 		// Enum all links and get all horzlinks and vertlinks
 		//
 		VFrame30::CHorzVertLinks horzVertLinks;
 
-		for (auto item = layer->Items.begin(); item != layer->Items.end(); ++item)
+		for (const auto& item : layer->items())
 		{
 			// Decompose link to parts
 			//
-			VFrame30::SchemaItemLink* link = dynamic_cast<VFrame30::SchemaItemLink*>(item->get());
+			VFrame30::SchemaItemLink* link = dynamic_cast<VFrame30::SchemaItemLink*>(item.get());
 
 			if (link != nullptr)
 			{
@@ -4885,9 +4904,9 @@ namespace Builder
 		//
 		std::list<std::set<QUuid>> bushes;
 
-		for (auto item = layer->Items.begin(); item != layer->Items.end(); ++item)
+		for (const auto& item : layer->items())
 		{
-			VFrame30::SchemaItemLink* link = dynamic_cast<VFrame30::SchemaItemLink*>(item->get());
+			VFrame30::SchemaItemLink* link = dynamic_cast<VFrame30::SchemaItemLink*>(item.get());
 
 			if (link == nullptr)
 			{
@@ -5076,7 +5095,7 @@ namespace Builder
 
 		bool result = true;
 
-		for (const SchemaItemPtr& item : layer->Items)
+		for (const SchemaItemPtr& item : layer->items())
 		{
 			if (dynamic_cast<VFrame30::FblItemLine*>(item.get()) != nullptr)
 			{
@@ -5181,7 +5200,7 @@ namespace Builder
 		bool result = true;
 		int hasFblItems = false;
 
-		for (auto& item : layer->Items)
+		for (const auto& item : layer->items())
 		{
 			VFrame30::FblItemRect* fblirect = dynamic_cast<VFrame30::FblItemRect*>(item.get());
 

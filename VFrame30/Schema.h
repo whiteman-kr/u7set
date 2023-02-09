@@ -1,10 +1,10 @@
 #pragma once
 
+#include <QColor>
 #include "SchemaLayer.h"
+#include "Context.h"
 #include "../CommonLib/PropertyObject.h"
 #include "../UtilsLib/ILogFile.h"
-#include <QColor>
-
 
 namespace Afb
 {
@@ -96,6 +96,9 @@ namespace VFrame30
 	};
 
 
+	//
+	//	Schema
+	//
 	class Schema :
 		public PropertyObject,
 		public Proto::ObjectSerialization<Schema>,
@@ -131,8 +134,6 @@ namespace VFrame30
 		int GetDocumentWidth(double DpiX, double zoom) const;
 		int GetDocumentHeight(double DpiY, double zoom) const;
 
-		int GetLayerCount() const;
-
 		void BuildFblConnectionMap() const;
 
 		bool updateAllSchemaItemFbs(const std::vector<std::shared_ptr<Afb::AfbElement>>& afbs, int* updatedItemCount, QString* errorMessage);
@@ -154,7 +155,7 @@ namespace VFrame30
 		// Scripting
 		//
 	public:
-		bool preDrawEvent(QJSEngine* engine, ILogFile* log);
+		bool preDrawEvent(QJSEngine* engine);
 		bool onShowEvent(QJSEngine* engine, ILogFile* log);
 
 	protected:
@@ -164,6 +165,22 @@ namespace VFrame30
 		void reportSqriptError(const QJSValue& scriptValue, QWidget* parent) const;
 
 		void drawScriptError(CDrawParam* drawParam) const;
+
+		// Layers
+		//
+	public:
+		// Do not change to value semantic, as iterator from this getter are used in algs
+		//
+		const std::vector<std::shared_ptr<SchemaLayer>>& layers() const;
+
+		[[nodiscard]] int activeLayerIndex() const;
+		[[nodiscard]] QUuid activeLayerGuid() const;
+		[[nodiscard]] std::shared_ptr<VFrame30::SchemaLayer> activeLayer() const;
+		void setActiveLayer(std::shared_ptr<VFrame30::SchemaLayer> layer);
+
+	protected:
+		void clearLayers();
+		void addLayer(std::shared_ptr<SchemaLayer> layer);
 
 		// Properties and Datas
 		//
@@ -213,11 +230,6 @@ namespace VFrame30
 		[[nodiscard]] SchemaUnit unit() const;
 		void setUnit(SchemaUnit value);
 
-		[[nodiscard]] int activeLayerIndex() const;
-		[[nodiscard]] QUuid activeLayerGuid() const;
-		[[nodiscard]] std::shared_ptr<VFrame30::SchemaLayer> activeLayer() const;
-		void setActiveLayer(std::shared_ptr<VFrame30::SchemaLayer> layer);
-
 		[[nodiscard]] double gridSize() const;
 		void setGridSize(double value);
 
@@ -251,13 +263,15 @@ namespace VFrame30
 		[[nodiscard]] QString onShowScript() const;
 		void setOnShowScript(QString value);
 
-	public:
-		std::vector<std::shared_ptr<SchemaLayer>> Layers;
+		const std::shared_ptr<VFrame30::Context>& context() const;
+		void setContext(std::shared_ptr<VFrame30::Context> context);
 
 	private:
 		QUuid m_guid;
 		QString m_schemaID;
 		QString m_caption;
+
+		std::vector<std::shared_ptr<SchemaLayer>> m_layers;
 
 		QStringList m_tags;
 
@@ -287,9 +301,11 @@ namespace VFrame30
 		QString m_preDrawScript;
 		QString m_onShowScript;
 
-		// Cached scripting staff
+		// Online stuff
 		//
 	private:
+		std::shared_ptr<VFrame30::Context> m_context;
+
 		mutable QJSValue m_jsPreDrawScript;				// Evaluated m_preDrawScript
 		mutable size_t m_evaluatedPreDrawScript = 0;	//
 
@@ -322,21 +338,21 @@ namespace VFrame30
 		bool operator<(const SchemaDetails& b) const noexcept;
 
 	public:
-		static QString getDetailsString(const Schema* schema, const QString& path);
+		[[nodiscard]] static QString getDetailsString(const Schema* schema, const QString& path);
 		bool parseDetails(const QString& details);
 
 		bool saveData(Proto::SchemaDetails* message) const;
 		bool loadData(const Proto::SchemaDetails& message);
 
-		bool searchForString(const QString& searchText) const;
+		[[nodiscard]] bool searchForString(const QString& searchText) const;
 
-		bool hasTag(const QString& tag) const;
-		bool hasTag(const QStringList& tags) const;
-		const std::set<QString>& tags() const;
+		[[nodiscard]] bool hasTag(const QString& tag) const;
+		[[nodiscard]] bool hasTag(const QStringList& tags) const;
+		[[nodiscard]] const std::set<QString>& tags() const;
 
-		bool hasEquipmentId(const QString& equipmentId) const;
-		bool hasSignal(const QString& signalId) const;
-		bool hasLoopback(const QString& loopbackId) const;
+		[[nodiscard]] bool hasEquipmentId(const QString& equipmentId) const;
+		[[nodiscard]] bool hasSignal(const QString& signalId) const;
+		[[nodiscard]] bool hasLoopback(const QString& loopbackId) const;
 
 	public:
 		int m_version = 0;

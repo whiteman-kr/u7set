@@ -31,10 +31,10 @@ FilesTabPage::FilesTabPage(DbController* dbcontroller, QWidget* parent) :
 									this);
 
 #ifdef QT_DEBUG
+#if QT_VERSION >= QT_VERSION_CHECK(6, 4, 0)
 	[[maybe_unused]]QAbstractItemModelTester* modelTester = new QAbstractItemModelTester(m_fileModel,
 																		 QAbstractItemModelTester::FailureReportingMode::Fatal,
 																		 this);
-#if QT_VERSION >= QT_VERSION_CHECK(6, 4, 0)
     modelTester->setUseFetchMore(false);
 #endif
 #endif

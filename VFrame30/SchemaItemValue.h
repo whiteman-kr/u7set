@@ -2,6 +2,7 @@
 
 #include "PosRectImpl.h"
 #include "FontParam.h"
+#include "Session.h"
 
 class QPen;
 class QBrush;
@@ -96,7 +97,7 @@ namespace VFrame30
 		})
 		\endcode
 	*/
-	class SchemaItemValue : public PosRectImpl
+	class SchemaItemValue final : public PosRectImpl
 	{
 		Q_OBJECT
 
@@ -177,26 +178,26 @@ namespace VFrame30
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message) const final;
-		virtual bool LoadData(const Proto::Envelope& message) final;
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
 
 		// Draw Functions
 		//
 	public:
-		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const final;
+		virtual void draw(CDrawParam* drawParam) const override;
 
 	protected:
 		void initDrawingResources() const;
-		void drawText(CDrawParam* drawParam, const QRectF& rect) const;
+		void drawText(CDrawParam* drawParam, const Context* context, const QRectF& rect) const;
 
-		bool getSignalState(QString appSignalId, CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const;
+		bool getSignalState(QString appSignalId, const Context* context, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const;
 
-		QString parseText(QString text, CDrawParam* drawParam, const AppSignalParam& signal, const AppSignalState& signalState) const;
+		QString parseText(QString text, const Context* context, const Session& session, const AppSignalParam& signal, const AppSignalState& signalState) const;
 		QString formatNumber(double value, const AppSignalParam& signal) const;
 
 	protected:
-		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const final;
-		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const final;
+		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
+		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
 
 		// Java Script invocables specific for SchemaItemValue
 		//
@@ -206,9 +207,11 @@ namespace VFrame30
 		//
 	public:
 		QString signalIdsString() const;
+		QString signalIdsString(const Context* context) const;
 		void setSignalIdsString(const QString& value);
 
 		QStringList signalIds() const;
+		QStringList signalIds(const Context* context) const;
 		void setSignalIds(const QStringList& value);
 
 		E::SignalSource signalSource() const;

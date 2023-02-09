@@ -33,6 +33,7 @@ std::shared_ptr<VFrame30::Schema> MonitorSchemaManager::loadSchema(QString schem
 {
 	QByteArray data;
 	QString errorString;
+	std::shared_ptr<VFrame30::Schema> schema;
 
 	bool result = m_configController->getFileBlockedById(schemaId, &data, &errorString);
 	if (result == false)
@@ -48,10 +49,13 @@ int MonitorSchemaManager::schemaCount() const
 	return m_configController->schemaCount();
 }
 
-std::shared_ptr<VFrame30::Schema> MonitorSchemaManager::schemaByIndex(int schemaIndex)
+std::shared_ptr<VFrame30::Schema> MonitorSchemaManager::schemaByIndex(int schemaIndex,
+																	  std::shared_ptr<VFrame30::Context> context)
 {
-	if (schemaIndex < 0)
+	if (schemaIndex < 0 ||
+		context == nullptr)
 	{
+		Q_ASSERT(context);
 		return {};
 	}
 
@@ -61,7 +65,7 @@ std::shared_ptr<VFrame30::Schema> MonitorSchemaManager::schemaByIndex(int schema
 		return {};
 	}
 
-	return schema(schemaId);
+	return schema(schemaId, std::move(context));
 }
 
 QString MonitorSchemaManager::schemaCaptionById(const QString& schemaId) const
@@ -98,9 +102,6 @@ void MonitorSchemaManager::slot_configurationArrived(ConfigSettings configuratio
 {
 	clear();
 
-	setGlobalScript(configuration.globalScript);
-	setOnConfigurationArrivedScript(configuration.onConfigurationArrivedScript);
-
 	// Schemas Realtime Trends
 	// At this point m_configController already has SchemaDetails.pbuf,so we can use it
 	//
@@ -130,12 +131,3 @@ const MonitorConfigController* MonitorSchemaManager::monitorConfigController() c
 	return m_configController;
 }
 
-QString MonitorSchemaManager::onConfigurationArrivedScript() const
-{
-	return m_onConfigurationArrivedScript;
-}
-
-void MonitorSchemaManager::setOnConfigurationArrivedScript(QString value)
-{
-	m_onConfigurationArrivedScript = std::move(value);
-}

@@ -1,8 +1,11 @@
 #pragma once
 
-#include "FontParam.h"
-#include "Session.h"
+#include "../CommonLib/Types.h"
 #include "../lib/ClientBehavior.h"
+#include "../lib/ITimeStats.h"
+#include "Session.h"
+#include "FontParam.h"
+
 
 #define CONTROL_BAR_PX		10
 #define CONTROL_BAR_MM		(VFrame30::mm2in(2.4))
@@ -32,14 +35,12 @@ namespace VFrame30
 	{
 	public:
 		CDrawParam(void) = delete;
-		CDrawParam(QPainter* painter, Schema* schema, const SchemaView* view, double gridSize, int pinGridStep);
+		CDrawParam(QPainter* painter, const SchemaView* view, double gridSize, int pinGridStep, SchemaUnit schemaUnit);
 
 	public:
 		QPainter* painter();
 		QPaintDevice* device();
 		const QPaintDevice* device() const;
-
-		const Schema* schema() const;
 
 		const SchemaView* schemaView() const;
 		SchemaView* schemaView();
@@ -47,11 +48,16 @@ namespace VFrame30
 		const ClientSchemaView* clientSchemaView() const;	// Can be used only in Client mode (Monitor/Tuning/...)
 		ClientSchemaView* clientSchemaView();
 
+		ITimeStats* timeStats();
+		ITimeStats* timeStats() const;
+
 		// Params for drawing
 		//
 	public:
 		double GetMinFblGridSize() const;
 		void SetMinFblGridSize(double val);
+
+		SchemaUnit schemaUnit() const;
 
 		double controlBarSize() const;
 		void setControlBarSize(double value);
@@ -91,12 +97,6 @@ namespace VFrame30
 		bool drawNotesLayer() const noexcept;
 		void setDrawNotesLayer(bool value);
 
-		AppSignalController* appSignalController() noexcept;
-		void setAppSignalController(AppSignalController* value);
-
-		TuningController* tuningController() noexcept;
-		void setTuningController(TuningController* value);
-
 		const Session& session() const noexcept;
 		Session& session();
 
@@ -108,16 +108,13 @@ namespace VFrame30
 
 	private:
 		QPainter* m_painter = nullptr;
-		Schema* m_schema = nullptr;
 		const SchemaView* m_schemaView = nullptr;
-
-		AppSignalController* m_appSignalController = nullptr;
-		TuningController* m_tuningController = nullptr;
 
 		Session m_session;
 
 		QStringList m_highlightIds;
 
+		SchemaUnit m_schemaUnit = SchemaUnit::Inch;
 		double m_controlBarSize = 0.0;
 		double m_gridSize = 0.0;
 		int m_pinGridStep = 0;

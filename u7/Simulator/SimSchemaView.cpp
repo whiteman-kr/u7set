@@ -1,8 +1,8 @@
 #include "SimSchemaView.h"
 #include "SimSchemaManager.h"
 #include "SimIdeSimulator.h"
+#include "ScriptSimApplication.h"
 #include "../../Simulator/SimOverrideSignals.h"
-#include "../AppSignalLib/AppSignalManager.h"
 #include "../VFrame30/PropertyNames.h"
 
 
@@ -10,7 +10,7 @@
 // MonitorView
 //
 SimSchemaView::SimSchemaView(SimSchemaManager* schemaManager, QWidget* parent)
-	: VFrame30::ClientSchemaView(schemaManager, nullptr/*History navigation is not supported (now)*/, parent),
+	: VFrame30::ClientSchemaView(schemaManager, nullptr/*History navigation is not supported (now)*/, nullptr, parent),
 	  m_simulator(schemaManager->simulator())
 {
 	Q_ASSERT(schemaManager);
@@ -31,18 +31,50 @@ VFrame30::DrawMode SimSchemaView::drawMode() const
 	return VFrame30::DrawMode::Simulator;
 }
 
+QString SimSchemaView::monitorId() const
+{
+	return m_monitorId;
+}
+
+void SimSchemaView::setMonitorId(QString equipmentId, bool emitUpdate)
+{
+	if (m_simulator == nullptr)
+	{
+		assert(m_simulator);
+		return;
+	}
+
+	m_monitorId = equipmentId;
+
+	if (auto monitor = m_simulator->software().monitor(m_monitorId);
+		monitor != nullptr)
+	{
+		setGlobalScript(monitor->globalScript());
+		setOnConfigurationArrivedScript(monitor->onConfigurationArrivedScript());
+	}
+
+	if (emitUpdate == true)
+	{
+		// It will update all schemas, evaluate new GlobalScript and execute onConfigurationArrived
+		//
+		m_simulator->projectUpdated();
+	}
+
+	return;
+}
+
 void SimSchemaView::updateScriptGlobalVars(QJSEngine& engine)
 {
 	VFrame30::ClientSchemaView::updateScriptGlobalVars(engine);
 
-//	// create global variable "app"
-//	//
-//	{
-//		QJSValue jsApp = engine.newQObject(&theApp);
-//		QQmlEngine::setObjectOwnership(&theApp, QQmlEngine::CppOwnership);
+	// create global variable "app"
+	//
+	{
+		ScriptSimApplication* scriptApp = new ScriptSimApplication(this);
+		QJSValue jsApp = engine.newQObject(scriptApp);
 
-//		engine.globalObject().setProperty(VFrame30::PropertyNames::scriptGlobalVariableApp, jsApp);
-//	}
+		engine.globalObject().setProperty(VFrame30::PropertyNames::scriptGlobalVariableApp, jsApp);
+	}
 
 	// create global variable "tuning"
 	//

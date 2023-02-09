@@ -164,8 +164,8 @@ private slots:
 private:
 	void retryRequest();
 
-	virtual void onThreadStarted() final;
-	virtual void onThreadFinished() final;
+	virtual void onThreadStarted() override final;
+	virtual void onThreadFinished() override final;
 
 private:
 	enum State
@@ -269,8 +269,8 @@ private slots:
 	void onSocketReadyRead();
 
 private:
-	virtual void onThreadStarted() final;
-	virtual void onThreadFinished() final;
+	virtual void onThreadStarted() override final;
+	virtual void onThreadFinished() override final;
 
 	void bind();
 

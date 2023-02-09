@@ -2,19 +2,20 @@
 #include "MonitorSchemaManager.h"
 #include "MonitorAppSettings.h"
 #include "../VFrame30/MonitorSchema.h"
-#include "../VFrame30/LogicSchema.h"
-#include "../lib/Ui/SchemaListWidget.h"
+
 
 MonitorCentralWidget::MonitorCentralWidget(MonitorSchemaManager* schemaManager,
 										   VFrame30::AppSignalController* appSignalController,
 										   VFrame30::TuningController* tuningController,
                                            VFrame30::LogController* logController,
+										   ITimeStats* timeStats,
 										   QWidget* parent) :
 	TabWidgetEx(parent),
 	m_schemaManager(schemaManager),
 	m_appSignalController(appSignalController),
     m_tuningController(tuningController),
-    m_logController(logController)
+	m_logController(logController),
+	m_timeStats(timeStats)
 {
 	Q_ASSERT(m_schemaManager);
 
@@ -81,11 +82,16 @@ void MonitorCentralWidget::timerEvent(QTimerEvent* event)
 
 int MonitorCentralWidget::addSchemaTabPage(const QString& schemaId, const QVariantHash& variables)
 {
+	// Create a dummy context, later it will be changed to the normal one inside MonitorSchemaWidget
+	// constructor, as MonitorSchemaView is cretaed inside MonitorSchemaView().
+	//
+	auto dummyContext = VFrame30::Context::create(nullptr, nullptr, nullptr, nullptr);
+
 	std::shared_ptr<VFrame30::Schema> tabSchema;
 
 	if (m_schemaManager->hasSchema(schemaId) == true)
 	{
-		tabSchema = m_schemaManager->schema(schemaId);
+		tabSchema = m_schemaManager->schema(schemaId, dummyContext);
 	}
 	else
 	{
@@ -95,7 +101,7 @@ int MonitorCentralWidget::addSchemaTabPage(const QString& schemaId, const QVaria
 		{
 			// If schema is not found try to set StartSchemaID
 			//
-			tabSchema = m_schemaManager->schema(startSchemaId);
+			tabSchema = m_schemaManager->schema(startSchemaId, dummyContext);
 		}
 	}
 
@@ -113,7 +119,9 @@ int MonitorCentralWidget::addSchemaTabPage(const QString& schemaId, const QVaria
 																m_appSignalController,
 																m_tuningController,
 	                                                            m_logController,
+																m_timeStats,
 																this);
+
 	schemaWidget->clientSchemaView()->setVariables(variables);
 
 	connect(schemaWidget, &MonitorSchemaWidget::signal_schemaChanged, this, &MonitorCentralWidget::slot_schemaChanged);
@@ -127,6 +135,15 @@ int MonitorCentralWidget::addSchemaTabPage(const QString& schemaId, const QVaria
 		setMovable(true);
 	}
 
+	//  clientSchemaView->setVariables() (line 125) may override already created variables in scripts,
+	// so run onShowScript here, after setting view variables(!). Also onShowScript triggers
+	// running onConfigurationArrivedScript
+	//
+	schemaWidget->schema()->onShowEvent(schemaWidget->clientSchemaView()->jsEngine(),
+										schemaWidget->clientSchemaView()->logFile());
+
+	// --
+	//
 	emit signal_actionCloseTabUpdated(count() > 1);
 
 	return index;
@@ -404,7 +421,9 @@ void MonitorCentralWidget::slot_resetSchema()
 
 		// Reload schema in widget
 		//
-		std::shared_ptr<VFrame30::Schema> schema = m_schemaManager->schema(schemaToLoad);
+		auto context = VFrame30::Context::create(tabPage->clientSchemaView());
+
+		std::shared_ptr<VFrame30::Schema> schema = m_schemaManager->schema(schemaToLoad, std::move(context));
 		static_cast<VFrame30::BaseSchemaWidget*>(tabPage)->setSchema(schema, false);		// cast to BaseSchemaWidget as this function is hidden in ClientSchemaWidget
 
 		// Set schema for client widget

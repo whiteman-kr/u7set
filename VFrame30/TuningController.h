@@ -97,15 +97,15 @@ namespace VFrame30
 		void resetTcpClient();
 
 	public:
-		AppSignalParam signalParam(const QString& appSignalId, bool* ok);
-		TuningSignalState signalState(const QString& appSignalId, bool* ok);
+		AppSignalParam signalParam(const QString& appSignalId, bool* ok) const;
+		TuningSignalState signalState(const QString& appSignalId, bool* ok) const;
 
 	public slots:
 		/// \brief Returns AppSignalParam structure or undefined if signal does not exist.
-		QVariant signalParam(const QString& appSignalId);	// If no signal with specified appSignalID found, QVariant is undefined
+		QVariant signalParam(const QString& appSignalId) const;	// If no signal with specified appSignalID found, QVariant is undefined
 
 		/// \brief Returns TuningSignalState structure or undefined if signal does not exist.
-		QVariant signalState(const QString& appSignalId);	// If no signal with specified appSignalID found, QVariant is undefined
+		QVariant signalState(const QString& appSignalId) const;	// If no signal with specified appSignalID found, QVariant is undefined
 
 		/// \brief Returns list of AppSignalIDs with specified <b>tag</b>.
 		QStringList signalIdsByTag(QString tag) const;

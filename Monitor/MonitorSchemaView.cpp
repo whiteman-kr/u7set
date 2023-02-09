@@ -1,7 +1,6 @@
 #include "MonitorSchemaView.h"
 #include "MonitorSchemaManager.h"
 #include "MonitorAppSettings.h"
-#include "../AppSignalLib/AppSignalManager.h"
 #include "../VFrame30/DrawParam.h"
 #include "../VFrame30/PropertyNames.h"
 #include "../VFrame30/AppSignalController.h"
@@ -15,8 +14,9 @@ MonitorSchemaView::MonitorSchemaView(MonitorSchemaManager* schemaManager,
 									 VFrame30::AppSignalController* appSignalController,
 									 VFrame30::TuningController* tuningController,
 									 VFrame30::LogController* logController,
+									 ITimeStats* timeStats,
 									 QWidget* parent)
-	: VFrame30::ClientSchemaView(schemaManager, schemaViewHistory, parent)
+	: VFrame30::ClientSchemaView(schemaManager, schemaViewHistory, timeStats, parent)
 {
 	setAppSignalController(appSignalController);
 	setTuningController(tuningController);
@@ -25,6 +25,10 @@ MonitorSchemaView::MonitorSchemaView(MonitorSchemaManager* schemaManager,
 	Q_ASSERT(schemaManager && schemaManager->monitorConfigController());
 
 	connect(schemaManager->monitorConfigController(), &MonitorConfigController::configurationArrived, this, &MonitorSchemaView::configurationArrived);
+
+	// Updates scripts
+	//
+	configurationArrived(monitorSchemaManager()->monitorConfigController()->configuration());
 
 	return;
 }
@@ -36,6 +40,16 @@ VFrame30::DrawMode MonitorSchemaView::drawMode() const
 
 void MonitorSchemaView::paintEvent(QPaintEvent* event)
 {
+	// It is possible that arrived configuration was not yet applied, it can happen in the very beginning,
+	// as the first tab page is created by timer in MonitorCentralWidget::timerEvent, see comment there for
+	// details.
+	//
+	if (int cid = monitorSchemaManager()->monitorConfigController()->configurationId();
+		cid != m_configurationId)
+	{
+		configurationArrived(monitorSchemaManager()->monitorConfigController()->configuration());
+	}
+
 	setInfoMode(MonitorAppSettings::instance().showItemsLabels());
 	return ClientSchemaView::paintEvent(event);
 }
@@ -78,32 +92,12 @@ void MonitorSchemaView::updateScriptGlobalVars(QJSEngine& engine)
 
 void MonitorSchemaView::configurationArrived(ConfigSettings configuration)
 {
-	// --
-	//
+	m_configurationId = configuration.configurationId;
+
+	setGlobalScript(configuration.globalScript);
+	setOnConfigurationArrivedScript(configuration.onConfigurationArrivedScript);
+
 	setMonitorBehavior(std::move(configuration.monitorBeahvior));
-
-	// --
-	//
-	QJSEngine* engine = jsEngine();
-
-	if (engine == nullptr)
-	{
-		Q_ASSERT(engine);
-		return ;
-	}
-
-	reEvaluateGlobalScript();
-
-	QJSValue scriptValue = evaluateScript(configuration.onConfigurationArrivedScript, "evaluate onConfigurationArrivedScript", true);
-	if (scriptValue.isError() == true ||
-		scriptValue.isUndefined() == true)
-	{
-		return;
-	}
-
-	// --
-	//
-	runScript(scriptValue, "run onConfigurationArrivedScript", true);
 
 	return;
 }

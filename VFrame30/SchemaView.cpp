@@ -7,13 +7,11 @@ namespace VFrame30
 
 SchemaView::SchemaView()
 {
-
 }
 
 SchemaView::SchemaView(std::shared_ptr<Schema> schema):
 	m_schema(schema)
 {
-
 }
 
 void SchemaView::Ajust(QPainter* painter, double startX, double startY, double zoom) const
@@ -149,11 +147,11 @@ void SchemaViewWidget::updateControlWidgets(bool editMode)
 	//
 	std::map<QUuid, std::shared_ptr<VFrame30::SchemaItemControl>> controlItems;
 
-	for (const std::shared_ptr<VFrame30::SchemaLayer>& layer : schema()->Layers)
+	for (const auto& layer : schema()->layers())
 	{
 		// Control items on Compile layer are ok, but on other layers they must be disabled (grayed)
 		//
-		for (SchemaItemPtr& item : layer->Items)
+		for (const auto& item : layer->items())
 		{
 			if (item->isControl() == false)
 			{
@@ -235,9 +233,9 @@ void SchemaViewWidget::deleteControlWidgets()
 	//
 	std::map<QUuid, std::shared_ptr<VFrame30::SchemaItemControl>> controlItems;
 
-	for (const std::shared_ptr<VFrame30::SchemaLayer>& layer : schema()->Layers)
+	for (const auto& layer : schema()->layers())
 	{
-		for (SchemaItemPtr& item : layer->Items)
+		for (const auto& item : layer->items())
 		{
 			if (item->isControl() == false)
 			{
@@ -367,7 +365,7 @@ void SchemaViewWidget::paintEvent(QPaintEvent* /*paintEvent*/)
 	}
 
 	QPainter p(this);
-	CDrawParam drawParam(&p, schema(), this, schema()->gridSize(), schema()->pinGridStep());
+	CDrawParam drawParam(&p, this, schema()->gridSize(), schema()->pinGridStep(), schema()->unit());
 
 	QRectF clipRect{0, 0, schema()->docWidth(), schema()->docHeight()};
 
@@ -411,19 +409,15 @@ void SchemaViewWidget::mouseMoveEvent(QMouseEvent* event)
 	double x = docPoint.x();
 	double y = docPoint.y();
 
-	for (auto layer = schema()->Layers.crbegin(); layer != schema()->Layers.crend(); layer++)
+	for (const auto& layer :schema()->layers() | std::views::reverse)
 	{
-		const SchemaLayer* pLayer = layer->get();
-
-		if (pLayer->show() == false)
+		if (layer->show() == false)
 		{
 			continue;
 		}
 
-		for (auto vi = pLayer->Items.crbegin(); vi != pLayer->Items.crend(); vi++)
+		for (const auto& item : layer->items() | std::views::reverse)
 		{
-			const std::shared_ptr<SchemaItem>& item = *vi;
-
 			if (item->acceptClick() == true &&
 				item->isIntersectPoint(x, y) == true &&
 				item->clickScript().isEmpty() == false)

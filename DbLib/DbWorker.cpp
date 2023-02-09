@@ -399,6 +399,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0377.sql", "Upgrade to version 377, Added CheckHostname to ConfigService preset"},
 	{":/DatabaseUpgrade/Upgrade0378.sql", "Upgrade to version 378, Add property SecurityLevel to all software services"},
 	{":/DatabaseUpgrade/Upgrade0379.sql", "Upgrade to version 379, Add SSL to property SecurityLevel to all software services"},
+	{":/DatabaseUpgrade/Upgrade0380.sql", "Upgrade to version 380, Add HardwareTests folder to Tests tree"},
 };
 
 int DbWorker::counter = 0;

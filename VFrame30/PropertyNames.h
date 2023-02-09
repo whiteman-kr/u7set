@@ -184,7 +184,7 @@ namespace VFrame30
 		inline static const QString signalIDs{"SignalIDs"};
 		inline static const QString appSignalIDs{"AppSignalIDs"};
 		inline static const QString appSignalIDsValidator{"^[#]?([A-Za-z\\d_]+((;[#]?)?\\r?(\\n[#]?)?))+$"};
-		inline static const QString appSignalIDsOrReferenceValidator{"^([#]?([A-Za-z\\d_]+((;[#]?)?\\r?(\\n[#]?)?))+)|(\\$\\(([A-Za-z_]+[A-Za-z\\d_]*\\.)*[A-Za-z_]+[A-Za-z\\d_]*\\))$"};
+		inline static const QString appSignalIDsOrReferenceValidator{R"(^[#a-zA-Z0-9\$_\(\).;\n\r]*$)"};
 
 		inline static const QString appSignalId{"AppSignalID"};
 		inline static const QString appSignalIdValidator{"^[#]?[A-Za-z\\d_]+$"};

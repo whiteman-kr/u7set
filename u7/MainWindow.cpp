@@ -1202,6 +1202,7 @@ void MainWindow::projectDifference()
 		return;
 	}
 
+
 	DialogProjectDiff dialog(db(), this);
 
 	if (dialog.exec() == QDialog::Accepted)

@@ -1,9 +1,7 @@
 #pragma once
 
 #include "../OnlineLib/CfgServerLoader.h"
-#include "../OnlineLib/SocketIO.h"
 #include "../UtilsLib/ILogFile.h"
-#include "../lib/ComparatorSet.h"
 #include "../lib/ClientBehavior.h"
 #include "../VFrame30/Schema.h"
 
@@ -33,6 +31,7 @@ protected:
 
 struct ConfigSettings
 {
+	int configurationId = -1;
 	int buildNo = -1;
 	QString softwareEquipmentId;
 	QString project;
@@ -130,6 +129,8 @@ public:
 	QStringList schemasByAppSignalId(const QString& appSignalId) const;
 	QStringList schemasByLoopbackId(const QString& loopbackId) const;
 
+	int configurationId() const;
+
 	ConfigSettings configuration() const;
 	QString configurationStartSchemaId() const;
 
@@ -151,6 +152,8 @@ private:
 
 	mutable QReadWriteLock m_schemaDetailsLock;
 	VFrame30::SchemaDetailsSet m_schemaDetailsSet;
+
+	inline static int s_configurationIdCounter = 0;
 
 	mutable QReadWriteLock m_confugurationLock;		// for access only to m_configuration
 	ConfigSettings m_configuration;

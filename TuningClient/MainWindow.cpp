@@ -1061,7 +1061,7 @@ void MainWindow::updateStatusBar()
 	}
 }
 
-void MainWindow::slot_configurationArrived()
+void MainWindow::slot_configurationArrived(ConfigSettings /*configuration*/)
 {
 	QWidget* wm = QApplication::activeModalWidget();
 	QWidget* wp = QApplication::activePopupWidget();
