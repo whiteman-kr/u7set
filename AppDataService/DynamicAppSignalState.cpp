@@ -796,9 +796,9 @@ bool DynamicAppSignalStates::getCurrentState(Hash hash, AppSignalState& state) c
 	{
 		const DynamicAppSignalState* stateEx = m_hash2State[hash];
 
-		state = stateEx->current();
+		stateEx->current().copyTo(state);
 
-		assert(state.m_hash == hash);
+		Q_ASSERT(state.m_hash == hash);
 
 		return true;
 	}

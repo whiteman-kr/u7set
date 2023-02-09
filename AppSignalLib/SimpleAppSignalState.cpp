@@ -1,15 +1,31 @@
 #ifndef ONLINE_LIB_DOMAIN
-#error Don't include this file in the project! Link OnlineLib instead.
+#error Don't include this file in the project! Link AppSignalLib instead.
 #endif
 
 #include "SimpleAppSignalState.h"
-#include "../Proto/serialization.pb.h"
 
 // ---------------------------------------------------------------------------------------------------------
 //
 // SimpleAppSignalState struct implementation
 //
 // ---------------------------------------------------------------------------------------------------------
+
+SimpleAppSignalState::operator AppSignalState() const
+{
+	AppSignalState state;
+
+	copyTo(state);
+
+	return state;
+}
+
+void SimpleAppSignalState::copyTo(AppSignalState& state) const
+{
+	state.m_hash = hash;
+	state.m_time = time;
+	state.m_flags = flags;
+	state.m_value = value;
+}
 
 void SimpleAppSignalState::save(Proto::AppSignalState* protoState)
 {

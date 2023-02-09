@@ -8,20 +8,14 @@
 #include "../CommonLib/Times.h"
 #include "../CommonLib/Types.h"
 #include "../UtilsLib/Queue.h"
-#include "../OnlineLib/SimpleAppSignalState.h"
+#include "../Proto/serialization.pb.h"
 #include "AppSignal.h"
+#include "AppSignalStateFlags.h"
 
 struct AppSignalParamMimeType
 {
 	static const char* value;	// = "application/x-appsignalparam";	Data in format ::Proto::AppSiagnalParamSet
 };
-
-namespace Proto
-{
-	class AppSignalState;
-	class AppSignal;
-}
-
 
 /*! \class AppSignalState
 	\ingroup groupParamsStates
@@ -133,7 +127,7 @@ public:
 	~AppSignalState() = default;
 
 	AppSignalState& operator= (const AppSignalState& state) = default;
-	AppSignalState& operator= (const SimpleAppSignalState& smState);
+//	AppSignalState& operator= (const SimpleAppSignalState& smState);
 
 	[[nodiscard]] Hash hash() const;
 	[[nodiscard]] const Times& time() const;
