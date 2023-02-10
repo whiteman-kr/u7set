@@ -321,7 +321,7 @@ namespace Hardware
 
 		//
 
-		int m_txBufAddress = BAD_ADDRESS;				// address of port's Tx buffer relative to opto module appDataOffset
+		int m_txBufAddress = BAD_ADDRESS;				// address of port's Tx buffer relative to opto module txAppDataOffset
 		quint32 m_txDataID = 0;							// range 0..0xFFFFFFFF
 		int m_txDataSizeW = 0;							// size of port's Tx data
 		int m_txUsedDataSizeW = 0;						// for ports with manual settings may be m_txUsedDataSizeW < m_txDataSizeW
@@ -338,7 +338,7 @@ namespace Hardware
 
 		//
 
-		int m_rxBufAddress = BAD_ADDRESS;				// address of port's Rx buffer relative to opto module appDataOffset
+		int m_rxBufAddress = BAD_ADDRESS;				// address of port's Rx buffer relative to opto module rxApppDataOffset
 		quint32 m_rxDataID = 0;							// range 0..0xFFFFFFFF
 		int m_rxDataSizeW = 0;							// size of Rx data
 		int m_rxUsedDataSizeW = 0;						// for ports with manual settings may be m_rxUsedDataSizeW < m_rxDataSizeW
@@ -376,14 +376,20 @@ namespace Hardware
 		bool isOcm() const;
 		bool isBvb() const;
 
-		QString equipmentID() const { return m_equipmentID; }
-		const DeviceModule* deviceModule() const { return m_deviceModule; }
+		QString equipmentID() const;
+		const DeviceModule* deviceModule() const;
 
-		int place() const { return m_place; }
-		int optoInterfaceDataOffset() const { return m_optoInterfaceDataOffset; }
-		int optoPortDataSize() const { return m_optoPortDataSize; }
-		int optoPortAppDataOffset() const { return m_optoPortAppDataOffset; }
-		int optoPortAppDataSize() const { return m_optoPortAppDataSize; }
+		int place() const;
+		int moduleDataAddr() const;
+
+		int txDataOffset() const;
+		int txDataSizeW() const;
+
+		int rxDataOffset() const;
+		int rxDataSizeW() const;
+
+		int diagDataOffset() const;
+		int diagDataSizeW() const;
 
 		QString lmID() const { return m_lmID; }
 		const DeviceModule* lmDeviceModule() const { return m_lm; }
@@ -417,13 +423,28 @@ namespace Hardware
 		DeviceModule* m_deviceModule = nullptr;
 		LmDescription* m_lmDescription = nullptr;
 
-		int m_place = 0;
+		int m_place = -1;
 
-		int m_optoInterfaceDataOffset = 0;
-		int m_optoPortDataSize = 0;
-		int m_optoPortAppDataOffset = 0;
-		int m_optoPortAppDataSize = 0;
-		int m_optoPortCount = 0;
+		int m_moduleDataAddr = BAD_ADDRESS;		// for LM - mem area of LM's opto ports TxRx buffers beginning (35840)
+												// for other modules - mem area according to module place
+		int m_optoPortCount = BAD_ADDRESS;
+
+		// opto module App Data placement and sizes
+		//
+		int m_txDataOffset = BAD_ADDRESS;		// relative to m_moduleDataOffset
+		int m_txDataSizeW = BAD_ADDRESS;
+
+		int m_rxDataOffset = BAD_ADDRESS;		// relative to m_moduleDataOffset
+		int m_rxDataSizeW = BAD_ADDRESS;
+
+		// opto module Diag Data placement and size
+		//
+		int m_diagDataOffset = BAD_ADDRESS;
+		int m_diagDataSizeW = BAD_ADDRESS;
+
+//		int m_optoPortDataSize = 0;
+//		int m_optoPortAppDataOffset = 0;
+//		int m_optoPortAppDataSize = 0;
 
 		//
 
@@ -434,7 +455,6 @@ namespace Hardware
 		Builder::IssueLogger* m_log = nullptr;
 
 		bool m_valid = false;
-
 	};
 
 	typedef std::shared_ptr<OptoModule> OptoModuleShared;

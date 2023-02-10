@@ -2030,7 +2030,7 @@ namespace Hardware
 
 		if (module->isLogicModule() == true || module->isBvb() == true)
 		{
-			m_optoInterfaceDataOffset = m_lmDescription->optoInterface().m_optoInterfaceDataOffset;
+			m_moduleDataAddr = m_lmDescription->optoInterface().m_optoInterfaceDataOffset;
 			m_optoPortDataSize = m_lmDescription->optoInterface().m_optoPortDataSize;
 			m_optoPortAppDataOffset = m_lmDescription->optoInterface().m_optoPortAppDataOffset;
 			m_optoPortAppDataSize = m_lmDescription->optoInterface().m_optoPortAppDataSize;
@@ -2040,7 +2040,7 @@ namespace Hardware
 		{
 			assert(module->isOptoModule() == true);
 
-			result &= DeviceHelper::getIntProperty(module, "OptoInterfaceDataOffset", &m_optoInterfaceDataOffset, log);
+			result &= DeviceHelper::getIntProperty(module, "OptoInterfaceDataOffset", &m_moduleDataAddr, log);
 			result &= DeviceHelper::getIntProperty(module, "OptoPortDataSize", &m_optoPortDataSize, log);
 			result &= DeviceHelper::getIntProperty(module, "OptoPortAppDataOffset", &m_optoPortAppDataOffset, log);
 			result &= DeviceHelper::getIntProperty(module, "OptoPortAppDataSize", &m_optoPortAppDataSize, log);
@@ -2058,7 +2058,7 @@ namespace Hardware
 		{
 			// OCM's OptoPortDataSize property (m_optoPortDataSize) is equal to LM's ModuleDataSize property
 			//
-			m_optoInterfaceDataOffset = (m_deviceModule->place() - 1) * m_optoPortDataSize;
+			m_moduleDataAddr = (m_deviceModule->place() - 1) * m_optoPortDataSize;
 		}
 
 		int findPortCount = 0;
@@ -2174,6 +2174,60 @@ namespace Hardware
 
 		return m_deviceModule->isBvb();
 	}
+
+	QString OptoModule::equipmentID() const
+	{
+		Q_ASSERT(m_equipmentID.isEmpty() == false);
+		return m_equipmentID;
+	}
+
+	const DeviceModule* OptoModule::deviceModule() const
+	{
+		Q_ASSERT(m_deviceModule != nullptr);
+		return m_deviceModule;
+	}
+
+
+	int OptoModule::place() const
+	{
+		Q_ASSERT(m_place != -1);
+		return m_place;
+	}
+
+	int OptoModule::moduleDataAddr() const
+	{
+		Q_ASSERT(m_moduleDataAddr != BAD_ADDRESS);
+		return m_moduleDataAddr;
+	}
+
+	int OptoModule::txDataOffset() const
+	{
+		Q_ASSERT(m_txDataOffset != BAD_ADDRESS);
+		return m_txDataOffset;
+	}
+
+	int OptoModule::txDataSizeW() const
+	{
+		Q_ASSERT(m_txDataSizeW != BAD_ADDRESS);
+		return m_txDataSizeW;
+	}
+
+	int OptoModule::rxDataOffset() const
+	{
+		Q_ASSERT(m_txDataOffset != BAD_ADDRESS);
+		return m_txDataOffset;
+	}
+
+	int OptoModule::rxDataSizeW() const
+	{
+		Q_ASSERT(m_txDataSizeW != BAD_ADDRESS);
+		return m_txDataSizeW;
+	}
+
+
+
+	int diagDataOffset() const;
+	int diagDataSizeW() const;
 
 	void OptoModule::getOptoPorts(QList<OptoPortShared>& optoPortsList) const
 	{
