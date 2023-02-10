@@ -1,3 +1,7 @@
+#ifndef APP_SIGNAL_LIB_DOMAIN
+#error Don't include this file in the project! Link AppSignalLib instead.
+#endif
+
 #include "AppSignal.h"
 #include "../UtilsLib/XmlHelper.h"
 
