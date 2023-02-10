@@ -2,6 +2,7 @@
 
 #include "../AppSignalLib/AppSignalParam.h"
 #include "../AppSignalLib/TuningValue.h"
+#include "../AppSignalLib/SimpleAppSignalState.h"
 
 namespace RtTrends
 {

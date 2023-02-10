@@ -1,5 +1,4 @@
 #include "AppSignalParam.h"
-#include "../Proto/serialization.pb.h"
 
 const char* AppSignalParamMimeType::value ="application/x-appsignalparam";		// Data in format ::Proto::AppSiagnalParamSet
 
@@ -12,16 +11,6 @@ AppSignalState::AppSignalState(const Proto::AppSignalState& protoState)
 	catch(...)
 	{
 	}
-}
-
-AppSignalState& AppSignalState::operator= (const SimpleAppSignalState& smState)
-{
-	m_hash = smState.hash;
-	m_time = smState.time;
-	m_flags = smState.flags;
-	m_value = smState.value;
-
-	return *this;
 }
 
 Hash AppSignalState::hash() const
