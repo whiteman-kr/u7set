@@ -19,14 +19,6 @@ SimpleAppSignalState::operator AppSignalState() const
 	return state;
 }
 
-inline void SimpleAppSignalState::copyTo(AppSignalState& state) const
-{
-	state.m_hash = hash;
-	state.m_time = time;
-	state.m_flags = flags;
-	state.m_value = value;
-}
-
 void SimpleAppSignalState::save(Proto::AppSignalState* protoState)
 {
 	if (protoState == nullptr)
