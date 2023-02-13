@@ -23,9 +23,9 @@ namespace
 
 	private:
 		const ISignalHasTag* m_signalHasTag = nullptr;
-		std::vector<int> m_signalIndexes;
+		std::vector<size_t> m_signalIndexes;
 		std::vector<TrendLib::TrendSignalParam> m_signals;
-		std::map<QString, std::vector<int>> m_startWithArrays;	// Key is startWith, in lowercase. Values are indexes in m_signals for stratWith
+		std::map<QString, std::vector<size_t>> m_startWithArrays;	// Key is startWith, in lowercase. Values are indexes in m_signals for stratWith
 	};
 
 
@@ -72,7 +72,7 @@ namespace
 			auto foundStartWithIt = m_startWithArrays.find(firstLetter);
 			if (foundStartWithIt == m_startWithArrays.end())
 			{
-				std::vector<int> signalIndexes;
+				std::vector<size_t> signalIndexes;
 				signalIndexes.reserve(8192);
 
 				signalIndexes.push_back(static_cast<int>(index));
@@ -81,7 +81,7 @@ namespace
 			}
 			else
 			{
-				std::vector<int>& signalIndexes = foundStartWithIt->second;
+				std::vector<size_t>& signalIndexes = foundStartWithIt->second;
 				signalIndexes.push_back(static_cast<int>(index));
 			}
 		}
@@ -96,7 +96,7 @@ namespace
 
 	int FilteredTrendSignalsModel::columnCount(const QModelIndex& /*parent*/) const
 	{
-		return 3;	// Columns: SignalID, Typem Caption
+		return 4;	// Columns: SignalID, Type, Caption, Server
 	}
 
 	QVariant FilteredTrendSignalsModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
@@ -113,6 +113,8 @@ namespace
 					return QString("Type");
 				case 2:
 					return QString("Caption");
+				case 3:
+					return QString("Server");
 				}
 			}
 		}
@@ -135,12 +137,11 @@ namespace
 					return {};
 				}
 
-				int signalIndex = m_signalIndexes[row];
+				size_t signalIndex = m_signalIndexes[row];
 
-				if (signalIndex < 0 ||
-					signalIndex >= static_cast<int>(m_signals.size()))
+				if (signalIndex >= m_signals.size())
 				{
-					Q_ASSERT(signalIndex >= 0 &&  signalIndex < static_cast<int>(m_signals.size()));
+					Q_ASSERT(signalIndex < m_signals.size());
 					return {};
 				}
 
@@ -162,6 +163,8 @@ namespace
 					}
 				case 2:
 					return trendSignal.caption();
+				case 3:
+					return trendSignal.archiveServerShortId();
 				default:
 					Q_ASSERT(false);
 					return {};
@@ -170,27 +173,27 @@ namespace
 			break;
 		case Qt::ToolTipRole:
 			{
-				if (row < 0 || row >= static_cast<int>(m_signalIndexes.size()))
+				if (row < 0 || row >= std::ssize(m_signalIndexes))
 				{
-					Q_ASSERT(row >= 0 && row < static_cast<int>(m_signalIndexes.size()));
+					Q_ASSERT(row >= 0 && row < std::ssize(m_signalIndexes));
 					return {};
 				}
 
-				int signalIndex = m_signalIndexes[row];
+				size_t signalIndex = m_signalIndexes[row];
 
-				if (signalIndex < 0 ||
-					signalIndex >= static_cast<int>(m_signals.size()))
+				if (signalIndex >= m_signals.size())
 				{
-					Q_ASSERT(signalIndex >= 0 &&  signalIndex < static_cast<int>(m_signals.size()));
+					Q_ASSERT(signalIndex < m_signals.size());
 					return {};
 				}
 
 				const auto& trendSignal = m_signals[signalIndex];
 
-				QString toolTip = QString("%1\n%2\n%3")
+				QString toolTip = QString("%1\n%2\n%3\n%4")
 								  .arg(trendSignal.signalId())
 								  .arg(trendSignal.appSignalId())
-								  .arg(trendSignal.caption());
+								  .arg(trendSignal.caption())
+								  .arg(trendSignal.archiveServerShortId());
 
 				return toolTip;
 
@@ -213,8 +216,7 @@ namespace
 			//
 			m_signalIndexes.clear();
 
-			int signalCount = static_cast<int>(m_signals.size());
-			for (int i = 0; i < signalCount; i++)
+			for (size_t i = 0, signalCount = m_signals.size(); i < signalCount; i++)
 			{
 				const auto& s = m_signals[i];
 
@@ -232,7 +234,6 @@ namespace
 				{
 					for (const QString& t : tagList)
 					{
-
 						if (m_signalHasTag->signalHasTag(s.appSignalId(), t) == true)
 						{
 							m_signalIndexes.push_back(i);
@@ -256,13 +257,13 @@ namespace
 		}
 		else
 		{
-			const std::vector<int>& signalIndexes = foundStartWithIt->second;
+			const std::vector<size_t>& signalIndexes = foundStartWithIt->second;
 
-			for (int index : signalIndexes)
+			for (size_t index : signalIndexes)
 			{
-				if (index < 0 || index >= static_cast<int>(m_signals.size()))
+				if (index >= m_signals.size())
 				{
-					Q_ASSERT(index >= 0 && index < static_cast<int>(m_signals.size()));
+					Q_ASSERT(index < m_signals.size());
 					continue;
 				}
 
@@ -309,10 +310,13 @@ namespace
 
 	const TrendLib::TrendSignalParam& FilteredTrendSignalsModel::signalByRow(int row) const
 	{
-		auto index = static_cast<size_t>(row);
-		Q_ASSERT(index >= m_signals.size());
+		size_t indexInIndex = static_cast<size_t>(row);
+		Q_ASSERT(indexInIndex < m_signalIndexes.size());
 
-		return m_signals[index];
+		size_t signalIndex = m_signalIndexes[indexInIndex];
+		Q_ASSERT(signalIndex < m_signals.size());
+
+		return m_signals[signalIndex];
 	}
 }
 
@@ -481,7 +485,7 @@ namespace TrendLib
 
 	void DialogChooseTrendSignals::addSignal(const TrendSignalParam& signal)
 	{
-		if (trendSignalsHasSignalId(signal.signalId()) == true)
+		if (trendSignalsHasSignalId(signal.signalId(), signal.archiveServerShortId()) == true)
 		{
 			// SignaID already presnt in TrenSignals
 			//
@@ -548,7 +552,7 @@ namespace TrendLib
 		return;
 	}
 
-	bool DialogChooseTrendSignals::trendSignalsHasSignalId(QString signalId)
+	bool DialogChooseTrendSignals::trendSignalsHasSignalId(QString signalId, QString archiveServerShortId)
 	{
 		int itemCount = ui->trendSignals->topLevelItemCount();
 
@@ -557,7 +561,9 @@ namespace TrendLib
 			QTreeWidgetItem* item = ui->trendSignals->topLevelItem(i);
 			Q_ASSERT(item);
 
-			if (item->text(0) == signalId)
+			// 0 is signalid, 3 is a archive service short id
+			//
+			if (item->text(0) == signalId && item->text(3) == archiveServerShortId)
 			{
 				return true;
 			}
@@ -592,7 +598,7 @@ namespace TrendLib
 			if (index.isValid() == true)
 			{
 				const TrendLib::TrendSignalParam& signal = fileterModel->signalByRow(index.row());
-				enableAddButton = !trendSignalsHasSignalId(signal.signalId());
+				enableAddButton = !trendSignalsHasSignalId(signal.signalId(), signal.archiveServerShortId());
 			}
 			else
 			{

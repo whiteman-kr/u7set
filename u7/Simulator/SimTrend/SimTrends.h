@@ -34,6 +34,9 @@ protected:
 	virtual void timerEvent(QTimerEvent* event) override;
 	virtual void signalsButton() override;
 
+	virtual void dragEnterEvent(QDragEnterEvent* event) override;
+	virtual void dropEvent(QDropEvent* event) override;
+
 	// Slots
 	//
 protected slots:

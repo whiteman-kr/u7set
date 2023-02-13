@@ -6,7 +6,7 @@
 #include "../CommonLib/Hash.h"
 #include "../CommonLib/Times.h"
 #include "../Proto/network.pb.h"
-#include "../TrendView/TrendSignal.h"
+#include "../TrendView/TrendSignalSet.h"
 #include "MonitorConfigController.h"
 
 

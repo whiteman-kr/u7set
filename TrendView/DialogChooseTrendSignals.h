@@ -44,7 +44,7 @@ namespace TrendLib
 		void addSignal(const TrendSignalParam& signal);
 		void removeSelectedSignal();
 
-		bool trendSignalsHasSignalId(QString signalId);
+		bool trendSignalsHasSignalId(QString signalId, QString archiveServerShortId);
 
 		void disableControls();
 

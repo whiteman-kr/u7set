@@ -434,6 +434,8 @@ public:
 		QString shortenId;			// Short version of equipmentId
 		QString appDataServiceId;	// ID of the source AppDataService for this ArchiveService
 		HostAddressPort address;	// ArchiveService ip address and port
+
+		auto operator<=>(const ArchiveService&) const = default;
 	};
 
 public:

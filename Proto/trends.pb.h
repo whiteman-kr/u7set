@@ -582,6 +582,7 @@ class TrendArchive PROTOBUF_FINAL :
   enum : int {
     kHoursFieldNumber = 10,
     kAppSignalIdFieldNumber = 2,
+    kArchiveServerIdFieldNumber = 3,
   };
   // repeated .Proto.TrendArchiveHour hours = 10;
   int hours_size() const;
@@ -621,6 +622,26 @@ class TrendArchive PROTOBUF_FINAL :
   std::string* _internal_mutable_app_signal_id();
   public:
 
+  // optional string archive_server_id = 3;
+  bool has_archive_server_id() const;
+  private:
+  bool _internal_has_archive_server_id() const;
+  public:
+  void clear_archive_server_id();
+  const std::string& archive_server_id() const;
+  void set_archive_server_id(const std::string& value);
+  void set_archive_server_id(std::string&& value);
+  void set_archive_server_id(const char* value);
+  void set_archive_server_id(const char* value, size_t size);
+  std::string* mutable_archive_server_id();
+  std::string* release_archive_server_id();
+  void set_allocated_archive_server_id(std::string* archive_server_id);
+  private:
+  const std::string& _internal_archive_server_id() const;
+  void _internal_set_archive_server_id(const std::string& value);
+  std::string* _internal_mutable_archive_server_id();
+  public:
+
   // @@protoc_insertion_point(class_scope:Proto.TrendArchive)
  private:
   class _Internal;
@@ -632,6 +653,7 @@ class TrendArchive PROTOBUF_FINAL :
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::TrendArchiveHour > hours_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr app_signal_id_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr archive_server_id_;
   friend struct ::TableStruct_trends_2eproto;
 };
 // -------------------------------------------------------------------
@@ -2717,6 +2739,79 @@ inline void TrendArchive::set_allocated_app_signal_id(std::string* app_signal_id
   app_signal_id_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), app_signal_id,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:Proto.TrendArchive.app_signal_id)
+}
+
+// optional string archive_server_id = 3;
+inline bool TrendArchive::_internal_has_archive_server_id() const {
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline bool TrendArchive::has_archive_server_id() const {
+  return _internal_has_archive_server_id();
+}
+inline void TrendArchive::clear_archive_server_id() {
+  archive_server_id_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline const std::string& TrendArchive::archive_server_id() const {
+  // @@protoc_insertion_point(field_get:Proto.TrendArchive.archive_server_id)
+  return _internal_archive_server_id();
+}
+inline void TrendArchive::set_archive_server_id(const std::string& value) {
+  _internal_set_archive_server_id(value);
+  // @@protoc_insertion_point(field_set:Proto.TrendArchive.archive_server_id)
+}
+inline std::string* TrendArchive::mutable_archive_server_id() {
+  // @@protoc_insertion_point(field_mutable:Proto.TrendArchive.archive_server_id)
+  return _internal_mutable_archive_server_id();
+}
+inline const std::string& TrendArchive::_internal_archive_server_id() const {
+  return archive_server_id_.Get();
+}
+inline void TrendArchive::_internal_set_archive_server_id(const std::string& value) {
+  _has_bits_[0] |= 0x00000002u;
+  archive_server_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void TrendArchive::set_archive_server_id(std::string&& value) {
+  _has_bits_[0] |= 0x00000002u;
+  archive_server_id_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.TrendArchive.archive_server_id)
+}
+inline void TrendArchive::set_archive_server_id(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000002u;
+  archive_server_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.TrendArchive.archive_server_id)
+}
+inline void TrendArchive::set_archive_server_id(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000002u;
+  archive_server_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.TrendArchive.archive_server_id)
+}
+inline std::string* TrendArchive::_internal_mutable_archive_server_id() {
+  _has_bits_[0] |= 0x00000002u;
+  return archive_server_id_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* TrendArchive::release_archive_server_id() {
+  // @@protoc_insertion_point(field_release:Proto.TrendArchive.archive_server_id)
+  if (!_internal_has_archive_server_id()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000002u;
+  return archive_server_id_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void TrendArchive::set_allocated_archive_server_id(std::string* archive_server_id) {
+  if (archive_server_id != nullptr) {
+    _has_bits_[0] |= 0x00000002u;
+  } else {
+    _has_bits_[0] &= ~0x00000002u;
+  }
+  archive_server_id_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), archive_server_id,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.TrendArchive.archive_server_id)
 }
 
 // repeated .Proto.TrendArchiveHour hours = 10;

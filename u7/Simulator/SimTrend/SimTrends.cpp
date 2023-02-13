@@ -277,7 +277,7 @@ void SimTrendsWidget::signalsButton()
 
 		if (it == acceptedSignals.end())
 		{
-			signalSet().removeSignal(ds.appSignalId());
+			signalSet().removeSignal(ds);
 		}
 	}
 
@@ -291,7 +291,7 @@ void SimTrendsWidget::signalsButton()
 
 		if (it == acceptedSignals.end())
 		{
-			signalSet().removeSignal(as.appSignalId());
+			signalSet().removeSignal(as);
 		}
 	}
 
@@ -308,6 +308,62 @@ void SimTrendsWidget::signalsButton()
 	if (analogSignals.empty() == true)
 	{
 		autoSelectScaleType(acceptedSignals);
+	}
+
+	updateWidget();
+
+	return;
+}
+
+void SimTrendsWidget::dragEnterEvent(QDragEnterEvent* event)
+{
+	if (event->mimeData()->hasFormat(AppSignalParamMimeType::value))
+	{
+		event->acceptProposedAction();
+	}
+
+	return;
+}
+
+void SimTrendsWidget::dropEvent(QDropEvent* event)
+{
+	if (event->mimeData()->hasFormat(AppSignalParamMimeType::value) == false)
+	{
+		Q_ASSERT(event->mimeData()->hasFormat(AppSignalParamMimeType::value) == true);
+		event->setDropAction(Qt::DropAction::IgnoreAction);
+		event->accept();
+		return;
+	}
+
+	QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
+
+	::Proto::AppSignalSet protoSetMessage;
+	bool ok = protoSetMessage.ParseFromArray(data.constData(), static_cast<int>(data.size()));
+
+	if (ok == false)
+	{
+		event->acceptProposedAction();
+		return;
+	}
+
+	// Parse data
+	//
+	for (int i = 0; i < protoSetMessage.appsignal_size(); i++)
+	{
+		const ::Proto::AppSignal& appSignalMessage = protoSetMessage.appsignal(i);
+
+		AppSignalParam appSignalParam;
+		ok = appSignalParam.load(appSignalMessage);
+
+		if (ok == true)
+		{
+			// Simulator trends work only with realtime trends, so no need to set some archive server
+			//
+			TrendLib::ArchiveServer trendArchiveServer{};
+
+			TrendLib::TrendSignalParam tsp{appSignalParam, trendArchiveServer};
+			addSignal(tsp, false);
+		}
 	}
 
 	updateWidget();

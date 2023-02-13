@@ -84,13 +84,13 @@ QString MonitorSchemaManager::schemaIdByIndex(int schemaIndex) const
 }
 
 bool MonitorSchemaManager::trendData(QUuid trendUuid,
-									 QString appSignalId,
+									 const TrendLib::TrendSignalParam& trendSignal,
 									 QDateTime /*from*/,
 									 QDateTime /*to*/,
 									 E::TimeType /*timeType*/,
 									 std::list<std::shared_ptr<TrendLib::OneHourData>>* outData) const
 {
-	return m_rtTrendSchemas.trendData(trendUuid, appSignalId, outData);
+	return m_rtTrendSchemas.trendData(trendUuid, trendSignal.appSignalId(), outData);
 }
 
 TimeStamp MonitorSchemaManager::maxTimeStamp(QUuid trendUuid, E::TimeType /*timeType*/) const

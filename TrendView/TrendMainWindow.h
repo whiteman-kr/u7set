@@ -51,14 +51,11 @@ namespace TrendLib
 		virtual void timerEvent(QTimerEvent* event) override;
 		virtual void showEvent(QShowEvent*) override;
 
-		virtual void dragEnterEvent(QDragEnterEvent* event) override;
-		virtual void dropEvent(QDropEvent* event) override;
-
 	protected slots:
 		virtual void signalsButton();
 		void updateWidget();
 
-		void signalProperties(QString appSignalId);
+		void signalProperties(QString appSignalId, QString archiveServerId);
 
 		void actionOpenTriggered();
 		void actionSaveTriggered();

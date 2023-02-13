@@ -86,6 +86,7 @@ SOURCES += main.cpp \
     ../lib/Ui/DialogSignalInfo.cpp \
     ../lib/Ui/DialogSignalSearch.cpp \
     DialogColumns.cpp \
+    Trend/MonitorTrendArchiveConnections.cpp \
     Trend/MonitorTrends.cpp \
 	Archive/DialogChooseArchiveSignals.cpp \
 	Archive/ArchiveModelView.cpp \
@@ -152,6 +153,7 @@ HEADERS  += \
     ../lib/Ui/DialogSignalInfo.h \
     ../lib/Ui/DialogSignalSearch.h \
     DialogColumns.h \
+    Trend/MonitorTrendArchiveConnections.h \
     Trend/MonitorTrends.h \
 	Archive/DialogChooseArchiveSignals.h \
 	Archive/ArchiveModelView.h \

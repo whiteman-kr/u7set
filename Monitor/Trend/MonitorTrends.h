@@ -4,7 +4,7 @@
 #include "TrendMainWindow.h"
 #include "MonitorConfigController.h"
 #include "MonitorSignalManager.h"
-#include "ArchiveTrendTcpClient.h"
+#include "MonitorTrendArchiveConnections.h"
 #include "RtTrendTcpClient.h"
 
 class MonitorTrendsWidget;
@@ -33,13 +33,16 @@ class MonitorTrendsWidget : public TrendLib::TrendMainWindow
 {
 public:
 	MonitorTrendsWidget(const MonitorSignalManager* m_signalManager,
-						const MonitorConfigController* configController,
+						const MonitorConfigController& configController,
 						QWidget* parent);
 	virtual ~MonitorTrendsWidget();
 
 protected:
 	virtual void timerEvent(QTimerEvent* event) override;
 	virtual void signalsButton() override;
+
+	virtual void dragEnterEvent(QDragEnterEvent* event) override;
+	virtual void dropEvent(QDropEvent* event) override;
 
 private:
 	void createArchiveConnection();
@@ -51,7 +54,9 @@ public:
 	// Slots
 	//
 protected slots:
-	void slot_archiveDataReceived(QString appSignalId, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
+	void slot_requestData(TrendLib::TrendSignalPlusServerId signalPlusServerId, TimeStamp hourToRequest, E::TimeType timeType);
+
+	void slot_archiveDataReceived(TrendLib::TrendSignalPlusServerId, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
 	void slot_realtimeDataReceived(std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState);
 	void slot_trendModeChanged();
 
@@ -59,10 +64,9 @@ protected slots:
 	//
 private:
 	const MonitorSignalManager* m_signalManager = nullptr;
-	const MonitorConfigController* m_configController = nullptr;
+	const MonitorConfigController& m_configController;
 
-	ArchiveTrendTcpClient* m_archiveTcpClient = nullptr;
-	SimpleThread* m_archiveTcpClientThread = nullptr;
+	MonitorTrendArchiveConnections m_conn;
 
 	RtTrendTcpClient* m_rtTcpClient = nullptr;
 	SimpleThread* m_rtTcpClientThread = nullptr;
@@ -78,7 +82,6 @@ private:
 	QLabel* m_statusBarTextLabel = nullptr;
 	QLabel* m_statusBarQueueSizeLabel = nullptr;
 	QLabel* m_statusBarNetworkRequestsLabel = nullptr;
-	QLabel* m_statusBarServerLabel = nullptr;
 	QLabel* m_statusBarConnectionStateLabel = nullptr;
 };
 

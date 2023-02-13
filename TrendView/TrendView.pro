@@ -31,7 +31,9 @@ unix {
 
 SOURCES += \
     DialogChooseTrendSignals.cpp \
+    TrendArchiveServer.cpp \
     TrendScale.cpp \
+    TrendSignalSet.cpp \
     TrendWidget.cpp \
 	TrendSignal.cpp \
     TrendSlider.cpp \
@@ -50,7 +52,9 @@ HEADERS += \
     DialogChooseTrendSignals.h \
     ITrendDataProvider.h \
     Stable.h \
+    TrendArchiveServer.h \
     TrendScale.h \
+    TrendSignalSet.h \
     TrendWidget.h \
     TrendSignal.h \
     TrendSlider.h \

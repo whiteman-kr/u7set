@@ -17,6 +17,7 @@ message TrendArchiveHour				//  Reflected to c++ struct OneHourData
 message TrendArchive
 {
     optional string app_signal_id = 2;
+	optional string archive_server_id = 3;
 	repeated TrendArchiveHour hours = 10;
 }
 

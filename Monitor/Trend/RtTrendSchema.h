@@ -9,14 +9,14 @@ class RtSignal
 {
 public:
 	RtSignal(const QString& appSignalId) :
-		m_archive(appSignalId)
+		m_archive(appSignalId, "")		// Realtime trend does not care about archive server, it ignores it
 	{
 	}
 	RtSignal(const RtSignal& src) = default;
 
 	const QString& appSignalId() const
 	{
-		return m_archive.appSignalId;
+		return m_archive.trendSignalPlusServerId.archiveServerId;
 	}
 
 	const TrendLib::TrendArchive& archive() const
