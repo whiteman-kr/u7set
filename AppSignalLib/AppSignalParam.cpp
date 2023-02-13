@@ -1,3 +1,7 @@
+#ifndef APP_SIGNAL_LIB_DOMAIN
+#error Don't include this file in the project! Link AppSignalLib instead.
+#endif
+
 #include "AppSignalParam.h"
 
 const char* AppSignalParamMimeType::value ="application/x-appsignalparam";		// Data in format ::Proto::AppSiagnalParamSet

@@ -1,5 +1,8 @@
-#include "../AppSignalLib/AppSignalManager.h"
+#ifndef APP_SIGNAL_LIB_DOMAIN
+#error Don't include this file in the project! Link AppSignalLib instead.
+#endif
 
+#include "../AppSignalLib/AppSignalManager.h"
 
 AppSignalManager::AppSignalManager(QObject* parent) :
 	QObject(parent)

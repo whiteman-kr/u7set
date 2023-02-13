@@ -17,7 +17,14 @@ struct SimpleAppSignalState
 	quint16 packetNo = 0;
 
 	operator AppSignalState() const;
-	inline void copyTo(AppSignalState& state) const;
+
+	inline void copyTo(AppSignalState& state) const
+	{
+		state.m_hash = hash;
+		state.m_time = time;
+		state.m_flags = flags;
+		state.m_value = value;
+	}
 
 	bool isValid() const { return flags.valid == 1; }
 

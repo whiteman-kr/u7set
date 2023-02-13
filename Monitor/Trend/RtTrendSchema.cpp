@@ -39,6 +39,7 @@ bool RtConnection::trendData(const QString& appSignalId, std::list<std::shared_p
 	}
 	catch(std::out_of_range& e)
 	{
+		Q_UNUSED(e);
 		Q_ASSERT(false);
 		return false;
 	}
@@ -212,6 +213,7 @@ void RtConnection::appendRealtimeData(Hash signalHash, const std::vector<TrendLi
 	}
 	catch (std::out_of_range& e)
 	{
+		Q_UNUSED(e);
 		// Connection not found or signal not found
 		//
 		Q_ASSERT(false);
@@ -399,6 +401,7 @@ bool RtTrendSchema::trendData(QUuid trendUuid,
 	}
 	catch (std::out_of_range& e)
 	{
+		Q_UNUSED(e);
 		Q_ASSERT(false);
 		return false;
 	}
@@ -415,6 +418,7 @@ TimeStamp RtTrendSchema::maxTimeStamp(QUuid trendUuid) const
 	}
 	catch (std::out_of_range& e)
 	{
+		Q_UNUSED(e);
 		Q_ASSERT(false);
 		return {};
 	}

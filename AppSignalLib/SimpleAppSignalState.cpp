@@ -1,4 +1,4 @@
-#ifndef ONLINE_LIB_DOMAIN
+#ifndef APP_SIGNAL_LIB_DOMAIN
 #error Don't include this file in the project! Link AppSignalLib instead.
 #endif
 
@@ -17,14 +17,6 @@ SimpleAppSignalState::operator AppSignalState() const
 	copyTo(state);
 
 	return state;
-}
-
-void SimpleAppSignalState::copyTo(AppSignalState& state) const
-{
-	state.m_hash = hash;
-	state.m_time = time;
-	state.m_flags = flags;
-	state.m_value = value;
 }
 
 void SimpleAppSignalState::save(Proto::AppSignalState* protoState)
