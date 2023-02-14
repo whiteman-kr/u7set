@@ -26,7 +26,7 @@ namespace Hardware
 	{
 		if (ualSignal == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return false;
 		}
 
@@ -52,7 +52,7 @@ namespace Hardware
 
 			if (ualSignal->bus() == nullptr)
 			{
-				assert(false);
+				Q_ASSERT(false);
 				return false;
 			}
 
@@ -62,7 +62,7 @@ namespace Hardware
 			break;
 
 		default:
-			assert(false);		// wtf?
+			Q_ASSERT(false);		// wtf?
 			return false;
 		}
 
@@ -106,7 +106,6 @@ namespace Hardware
 		return m_nearestSignalID;
 	}
 
-
 	bool TxRxSignal::hasSignalID(const QString& signalID) const
 	{
 		for(const QString& appSignalID : m_appSignalIDs)
@@ -125,35 +124,39 @@ namespace Hardware
 		m_addrInBuf = addr;
 	}
 
-
 	// --------------------------------------------------------------------------------------
 	//
 	// OptoPort class implementation
 	//
 	// --------------------------------------------------------------------------------------
 
-	OptoPort::OptoPort(OptoModuleStorage& storage) :
-		m_storage(storage)
+	OptoPort::OptoPort(const OptoModule& optoModule) :
+		m_optoModule(optoModule)
 	{
 	}
 
 	OptoPort::~OptoPort()
 	{
-
 	}
 
-	bool OptoPort::init(const DeviceController* controller, int portNo, LmDescription* lmDescription, Builder::IssueLogger* log)
+	bool OptoPort::init(const DeviceController* controller,
+						int portNo,
+						LmDescription* lmDescription,
+						Builder::IssueLogger* log)
 	{
 		if (controller == nullptr ||
 			log == nullptr ||
 			lmDescription == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return false;
 		}
 
 		m_controller = controller;
+
+		Q_ASSERT(portNo >= 0 && portNo < m_optoModule.optoPortCount());
 		m_portNo = portNo;
+
 		m_log = log;
 
 		m_equipmentID = m_controller->equipmentIdTemplate();
@@ -162,17 +165,15 @@ namespace Hardware
 
 		if (module == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return false;
 		}
-
-		m_optoModuleID = module->equipmentIdTemplate();
 
 		const DeviceModule* lm = DeviceHelper::getAssociatedLmOrBvb(m_controller);
 
 		if (lm == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return false;
 		}
 
@@ -187,7 +188,17 @@ namespace Hardware
 			return false;
 		}
 
-		QString optoPortValiditySignalSuffix = QString("_OPTOPORT0%1VALID").arg(portNo);
+		if (m_optoModule.isLmOrBvb() == true)
+		{
+			Q_ASSERT(m_optoModule.txDataSizeW() == m_optoModule.rxDataSizeW());
+			m_portBaseAddr = m_optoModule.moduleDataAddr() + portNo * m_optoModule.txDataSizeW();
+		}
+		else
+		{
+			m_portBaseAddr = m_optoModule.moduleDataAddr();
+		}
+
+		QString optoPortValiditySignalSuffix = QString("_OPTOPORT0%1VALID").arg(portNo + 1);
 
 		const DeviceObject* validityObject = DeviceHelper::getChildDeviceObjectBySuffix(platformInterface,
 																			  optoPortValiditySignalSuffix,
@@ -201,7 +212,7 @@ namespace Hardware
 
 		if (validitySignal == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return false;
 		}
 
@@ -209,7 +220,7 @@ namespace Hardware
 
 		if (validitySignal->memoryArea() != E::MemoryArea::DiagnosticsData)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			LOG_INTERNAL_ERROR(m_log);
 			return false;
 		}
@@ -227,28 +238,13 @@ namespace Hardware
 				addr.addWord(lmDescription->memory().m_moduleDataOffset +
 							 lmDescription->memory().m_moduleDataSize * (module->place() - 1));
 
-				int txDiagDataOffset = BAD_ADDRESS;
-
-				bool res = DeviceHelper::getIntProperty(module, "TxDiagDataOffset", &txDiagDataOffset, m_log);
-
-				if (res == false)
-				{
-					return false;
-				}
-
-				if (txDiagDataOffset == BAD_ADDRESS)
-				{
-					assert(false);
-					return false;
-				}
-
-				addr.addWord(txDiagDataOffset);
+				addr.addWord(m_optoModule.diagDataOffset());
 			}
 			else
 			{
 				// unknown opto module
 				//
-				assert(false);
+				Q_ASSERT(false);
 				return false;
 			}
 		}
@@ -553,7 +549,7 @@ namespace Hardware
 
 		if (isSinglePortConnection() == false)
 		{
-			assert(false);				// port is not Serial!
+			Q_ASSERT(false);				// port is not Serial!
 			return false;
 		}
 
@@ -646,7 +642,7 @@ namespace Hardware
 			if (rxSignal->addrInBuf().offset() < 0 ||
 				rxSignal->addrInBuf().offset() >= m_rxRawDataSizeW + OptoPort::TX_DATA_ID_SIZE_W)
 			{
-				assert(false);			// address out of range of raw data area
+				Q_ASSERT(false);			// address out of range of raw data area
 				return false;
 			}
 		}
@@ -796,7 +792,7 @@ namespace Hardware
 
 		assert(m_rxSignals.count() == 0);				// before this m_rxSignals must be clear!
 
-		OptoPortShared linkedPort = m_storage.getOptoPort(m_linkedPortID);
+		OptoPortShared linkedPort = storage().getOptoPort(m_linkedPortID);
 
 		//qDebug() << "This port " << m_equipmentID;
 
@@ -843,7 +839,7 @@ namespace Hardware
 
 		if (isSinglePortConnection() == false)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return false;
 		}
 
@@ -853,7 +849,7 @@ namespace Hardware
 			rs232Port == nullptr)
 		{
 			LOG_INTERNAL_ERROR(m_log);
-			assert(false);
+			Q_ASSERT(false);
 			return false;
 		}
 
@@ -931,7 +927,7 @@ namespace Hardware
 		{
 			if (s == nullptr)
 			{
-				assert(false);
+				Q_ASSERT(false);
 				continue;
 			}
 
@@ -947,7 +943,7 @@ namespace Hardware
 		{
 			if (s == nullptr)
 			{
-				assert(false);
+				Q_ASSERT(false);
 				continue;
 			}
 
@@ -963,7 +959,7 @@ namespace Hardware
 		{
 			if (txSignal == nullptr)
 			{
-				assert(false);
+				Q_ASSERT(false);
 				continue;
 			}
 
@@ -987,7 +983,7 @@ namespace Hardware
 		{
 			if (txSignal == nullptr)
 			{
-				assert(false);
+				Q_ASSERT(false);
 				continue;
 			}
 
@@ -1012,7 +1008,7 @@ namespace Hardware
 	{
 		if (ualSignal == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return false;
 		}
 
@@ -1040,7 +1036,7 @@ namespace Hardware
 	{
 		if (ualSignal == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return false;
 		}
 
@@ -1092,7 +1088,7 @@ namespace Hardware
 			return false;
 		}
 
-		int absTxBufAddr = txBufAbsAddress();
+		int absTxBufAddr = txBufAddress();
 
 		if (absTxBufAddr == BAD_ADDRESS)
 		{
@@ -1134,7 +1130,7 @@ namespace Hardware
 			return false;
 		}
 
-		int rxBufAbsAddr = rxBufAbsAddress();
+		int rxBufAbsAddr = rxBufAddress();
 
 		if (rxBufAbsAddr == BAD_ADDRESS)
 		{
@@ -1200,7 +1196,7 @@ namespace Hardware
 				break;
 
 			default:
-				assert(false);
+				Q_ASSERT(false);
 			}
 		}
 
@@ -1269,7 +1265,7 @@ namespace Hardware
 
 			case RawDataDescriptionItem::Type::TxAllModulesRawData:
 
-				partSizeW = m_storage.getAllNativeRawDataSize(lm, m_log);;
+				partSizeW = storage().getAllNativeRawDataSize(lm, m_log);
 
 				size += partSizeW;
 
@@ -1279,7 +1275,7 @@ namespace Hardware
 				{
 					bool moduleIsFound = false;
 
-					partSizeW = m_storage.getModuleRawDataSize(lm, item.modulePlace, &moduleIsFound, m_log);
+					partSizeW = storage().getModuleRawDataSize(lm, item.modulePlace, &moduleIsFound, m_log);
 
 					size += partSizeW;
 
@@ -1295,7 +1291,7 @@ namespace Hardware
 
 			case RawDataDescriptionItem::Type::TxPortRawData:
 				{
-					OptoPortShared portRxRawData = m_storage.getOptoPort(item.portEquipmentID);
+					OptoPortShared portRxRawData = storage().getOptoPort(item.portEquipmentID);
 
 					if (portRxRawData == nullptr)
 					{
@@ -1305,7 +1301,7 @@ namespace Hardware
 						break;
 					}
 
-					OptoPortShared portTxRawData = m_storage.getOptoPort(portRxRawData->linkedPortID());
+					OptoPortShared portTxRawData = storage().getOptoPort(portRxRawData->linkedPortID());
 
 					if (portTxRawData == nullptr)
 					{
@@ -1355,7 +1351,7 @@ namespace Hardware
 				break;
 
 			default:
-				assert(false);
+				Q_ASSERT(false);
 				result = false;
 			}
 
@@ -1381,56 +1377,33 @@ namespace Hardware
 		return Connection::serialModeStr(m_serialMode);
 	}
 
-	int OptoPort::txBufAbsAddress() const
+	int OptoPort::txBufAddress() const
 	{
-		if (m_txBufAddress == BAD_ADDRESS)
+		if (m_portBaseAddr == BAD_ADDRESS ||
+			m_txBufOffset == BAD_ADDRESS)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return BAD_ADDRESS;
 		}
 
-		OptoModuleShared module = m_storage.getOptoModule(m_optoModuleID);
-
-		if (module == nullptr)
-		{
-			assert(false);
-			return BAD_ADDRESS;
-		}
-
-		if (module->isLmOrBvb() == true)
-		{
-			return module->optoInterfaceDataOffset() + (m_portNo - 1) * module->optoPortAppDataSize() + m_txBufAddress;
-		}
-
-		assert(module->isOcm() == true);
-
-		return module->optoInterfaceDataOffset() + m_txBufAddress;
+		return m_portBaseAddr + m_txBufOffset;
 	}
 
-	int OptoPort::rxBufAbsAddress() const
+	int OptoPort::rxBufAddress() const
 	{
-		if (m_rxBufAddress == BAD_ADDRESS)
+		if (m_portBaseAddr == BAD_ADDRESS ||
+			m_rxBufOffset == BAD_ADDRESS)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return BAD_ADDRESS;
 		}
 
-		OptoModuleShared module = m_storage.getOptoModule(m_optoModuleID);
+		return m_portBaseAddr + m_rxBufOffset;
+	}
 
-		if (module == nullptr)
-		{
-			assert(false);
-			return BAD_ADDRESS;
-		}
-
-		if (module->isLmOrBvb() == true)
-		{
-			return module->optoInterfaceDataOffset() + (m_portNo - 1) * module->optoPortAppDataSize() + m_rxBufAddress;
-		}
-
-		assert(module->isOcm() == true);
-
-		return module->optoInterfaceDataOffset() + m_rxBufAddress;
+	QString OptoPort::optoModuleID() const
+	{
+		return m_optoModule.equipmentID();
 	}
 
 	void OptoPort::setTxRawDataSizeW(int rawDataSizeW)
@@ -1477,8 +1450,8 @@ namespace Hardware
 			list.append("");
 		}
 
-		list.append(QString(tr("Tx buffer abs address:\t\t%1")).arg(txBufAbsAddress()));
-		list.append(QString(tr("Tx buffer offset:\t\t%1")).arg(txBufAddress()));
+		list.append(QString(tr("Tx buffer abs address:\t\t%1")).arg(txBufAddress()));
+		list.append(QString(tr("Tx buffer offset:\t\t%1")).arg(txBufOffset()));
 		list.append(QString(tr("Tx data full size:\t\t%1")).arg(txDataSizeW()));
 		list.append(QString(tr("Tx data used size:\t\t%1")).arg(txUsedDataSizeW()));
 		list.append(QString("\t\t\t\t-----"));
@@ -1498,7 +1471,7 @@ namespace Hardware
 		list.append(QString(tr("Port Tx data:\n")));
 
 		list.append(QString("%1:%2  [%3:%4]  TxDataID = 0x%5 (%6)\n").
-		                arg(format_04d(txBufAbsAddress())).
+						arg(format_04d(txBufAddress())).
 		                arg(format_02d(0)).
 		                arg(format_04d(0)).
 		                arg(format_02d(0)).
@@ -1514,7 +1487,7 @@ namespace Hardware
 			if (tx->isRaw() == true)
 			{
 				list.append(QString("%1:%2  [%3:%4]  %5").
-				                arg(format_04d(txBufAbsAddress() + tx->addrInBuf().offset())).
+								arg(format_04d(txBufAddress() + tx->addrInBuf().offset())).
 				                arg(format_02d(tx->addrInBuf().bit())).
 				                arg(format_04d(tx->addrInBuf().offset())).
 				                arg(format_02d(tx->addrInBuf().bit())).
@@ -1539,7 +1512,7 @@ namespace Hardware
 			if (tx->isRegular() == true && tx->isAnalog() == true)
 			{
 				list.append(QString("%1:%2  [%3:%4]  %5").
-				                arg(format_04d(txBufAbsAddress() + tx->addrInBuf().offset())).
+								arg(format_04d(txBufAddress() + tx->addrInBuf().offset())).
 				                arg(format_02d(tx->addrInBuf().bit())).
 				                arg(format_04d(tx->addrInBuf().offset())).
 				                arg(format_02d(tx->addrInBuf().bit())).
@@ -1564,7 +1537,7 @@ namespace Hardware
 			if (tx->isRegular() == true && tx->isBus() == true)
 			{
 				list.append(QString("%1:%2  [%3:%4]  %5").
-				                arg(format_04d(txBufAbsAddress() + tx->addrInBuf().offset())).
+								arg(format_04d(txBufAddress() + tx->addrInBuf().offset())).
 				                arg(format_02d(tx->addrInBuf().bit())).
 				                arg(format_04d(tx->addrInBuf().offset())).
 				                arg(format_02d(tx->addrInBuf().bit())).
@@ -1589,7 +1562,7 @@ namespace Hardware
 			if (tx->isRegular() == true && tx->isDiscrete() == true)
 			{
 				list.append(QString("%1:%2  [%3:%4]  %5").
-				                arg(format_04d(txBufAbsAddress() + tx->addrInBuf().offset())).
+								arg(format_04d(txBufAddress() + tx->addrInBuf().offset())).
 				                arg(format_02d(tx->addrInBuf().bit())).
 				                arg(format_04d(tx->addrInBuf().offset())).
 				                arg(format_02d(tx->addrInBuf().bit())).
@@ -1607,8 +1580,8 @@ namespace Hardware
 
 		list.append("-------------------------------------\n");
 
-		list.append(QString(tr("Rx buffer abs address:\t\t%1")).arg(rxBufAbsAddress()));
-		list.append(QString(tr("Rx buffer offset:\t\t%1")).arg(rxBufAddress()));
+		list.append(QString(tr("Rx buffer abs address:\t\t%1")).arg(rxBufAddress()));
+		list.append(QString(tr("Rx buffer offset:\t\t%1")).arg(rxBufOffset()));
 		list.append(QString(tr("Rx data full size:\t\t%1")).arg(rxDataSizeW()));
 		list.append(QString(tr("Rx data used size:\t\t%1")).arg(rxUsedDataSizeW()));
 		list.append(QString("\t\t\t\t-----"));
@@ -1634,7 +1607,7 @@ namespace Hardware
 		QString linkedPort = linkedPortID();
 
 		list.append(QString("%1:%2  [%3:%4]  TxDataID = 0x%5 (%6)\n").
-		                arg(format_04d(rxBufAbsAddress())).
+						arg(format_04d(rxBufAddress())).
 		                arg(format_02d(0)).
 		                arg(format_04d(0)).
 		                arg(format_02d(0)).
@@ -1650,7 +1623,7 @@ namespace Hardware
 			if (rx->isRaw() == true)
 			{
 				list.append(QString("%1:%2  [%3:%4]  %5").
-				                arg(format_04d(rxBufAbsAddress() + rx->addrInBuf().offset())).
+								arg(format_04d(rxBufAddress() + rx->addrInBuf().offset())).
 				                arg(format_02d(rx->addrInBuf().bit())).
 				                arg(format_04d(rx->addrInBuf().offset())).
 				                arg(format_02d(rx->addrInBuf().bit())).
@@ -1675,7 +1648,7 @@ namespace Hardware
 			if (rx->isRegular() == true && rx->isAnalog() == true)
 			{
 				list.append(QString("%1:%2  [%3:%4]  %5").
-				                arg(format_04d(rxBufAbsAddress() + rx->addrInBuf().offset())).
+								arg(format_04d(rxBufAddress() + rx->addrInBuf().offset())).
 				                arg(format_02d(rx->addrInBuf().bit())).
 				                arg(format_04d(rx->addrInBuf().offset())).
 				                arg(format_02d(rx->addrInBuf().bit())).
@@ -1700,7 +1673,7 @@ namespace Hardware
 			if (rx->isRegular() == true && rx->isBus() == true)
 			{
 				list.append(QString("%1:%2  [%3:%4]  %5").
-				                arg(format_04d(rxBufAbsAddress() + rx->addrInBuf().offset())).
+								arg(format_04d(rxBufAddress() + rx->addrInBuf().offset())).
 				                arg(format_02d(rx->addrInBuf().bit())).
 				                arg(format_04d(rx->addrInBuf().offset())).
 				                arg(format_02d(rx->addrInBuf().bit())).
@@ -1725,7 +1698,7 @@ namespace Hardware
 			if (rx->isRegular() == true && rx->isDiscrete() == true)
 			{
 				list.append(QString("%1:%2  [%3:%4]  %5").
-				                arg(format_04d(rxBufAbsAddress() + rx->addrInBuf().offset())).
+								arg(format_04d(rxBufAddress() + rx->addrInBuf().offset())).
 				                arg(format_02d(rx->addrInBuf().bit())).
 				                arg(format_04d(rx->addrInBuf().offset())).
 				                arg(format_02d(rx->addrInBuf().bit())).
@@ -1780,6 +1753,10 @@ namespace Hardware
 		return true;
 	}
 
+	const OptoModuleStorage& OptoPort::storage() const
+	{
+		return m_optoModule.storage();
+	}
 
 	bool OptoPort::appendRxSignal(const Builder::UalSignal* ualSignal)
 	{
@@ -1793,7 +1770,7 @@ namespace Hardware
 
 		if (m_rxSignalIDs.contains(ualSignalID) == true)
 		{
-			assert(false);					// for debug
+			Q_ASSERT(false);					// for debug
 			return true;					// signal already in rs list
 		}
 
@@ -1826,21 +1803,6 @@ namespace Hardware
 											{
 												return a->addrInBuf().bitAddress() < b->addrInBuf().bitAddress();
 											});
-
-//		int count = static_cast<int>(list.count());
-
-//		for(int i = 0; i < count - 1; i++)
-//		{
-//			for(int k = i + 1; k < count; k++)
-//			{
-//				if (list[i]->addrInBuf().bitAddress() > list[k]->addrInBuf().bitAddress())
-//				{
-//					TxRxSignalShared temp = list[i];
-//					list[i] = list[k];
-//					list[k] = temp;
-//				}
-//			}
-//		}
 	}
 
 	void OptoPort::sortByAppSignalIdAscending(QVector<TxRxSignalShared>& list)
@@ -1849,20 +1811,6 @@ namespace Hardware
 											{
 												return a->appSignalID() < b->appSignalID();
 											});
-//		int count = list.count();
-
-//		for(int i = 0; i < count - 1; i++)
-//		{
-//			for(int k = i + 1; k < count; k++)
-//			{
-//				if (list[i]->appSignalID() > list[k]->appSignalID())
-//				{
-//					TxRxSignalShared temp = list[i];
-//					list[i] =  list[k];
-//					list[k] = temp;
-//				}
-//			}
-//		}
 	}
 
 	bool OptoPort::checkSignalsOffsets(const QVector<TxRxSignalShared>& signalList, int startIndex, int count) const
@@ -2015,7 +1963,7 @@ namespace Hardware
 	{
 		if (module == nullptr || lmDescription == nullptr || log == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return false;
 		}
 
@@ -2030,35 +1978,44 @@ namespace Hardware
 
 		if (module->isLogicModule() == true || module->isBvb() == true)
 		{
+			Q_ASSERT(m_place == 0);
+
 			m_moduleDataAddr = m_lmDescription->optoInterface().m_optoInterfaceDataOffset;
-			m_optoPortDataSize = m_lmDescription->optoInterface().m_optoPortDataSize;
-			m_optoPortAppDataOffset = m_lmDescription->optoInterface().m_optoPortAppDataOffset;
-			m_optoPortAppDataSize = m_lmDescription->optoInterface().m_optoPortAppDataSize;
+
+			m_rxDataOffset = m_txDataOffset = m_lmDescription->optoInterface().m_optoPortAppDataOffset;
+
+			m_rxDataSizeW = m_txDataSizeW = m_lmDescription->optoInterface().m_optoPortDataSize;
+
 			m_optoPortCount = m_lmDescription->optoInterface().m_optoPortCount;
+
+			m_diagDataOffset = (m_lmDescription->memory().m_txDiagDataOffset - m_moduleDataAddr);
+			m_diagDataSizeW = m_lmDescription->memory().m_txDiagDataSize;
 		}
 		else
 		{
-			assert(module->isOptoModule() == true);
+			Q_ASSERT(module->isOptoModule() == true);
+			Q_ASSERT(m_place >= 1 && m_place <= static_cast<int>(m_lmDescription->memory().m_moduleCount));
 
-			result &= DeviceHelper::getIntProperty(module, "OptoInterfaceDataOffset", &m_moduleDataAddr, log);
-			result &= DeviceHelper::getIntProperty(module, "OptoPortDataSize", &m_optoPortDataSize, log);
-			result &= DeviceHelper::getIntProperty(module, "OptoPortAppDataOffset", &m_optoPortAppDataOffset, log);
-			result &= DeviceHelper::getIntProperty(module, "OptoPortAppDataSize", &m_optoPortAppDataSize, log);
+			m_moduleDataAddr = m_lmDescription->memory().m_moduleDataOffset +
+								(m_place - 1) * m_lmDescription->memory().m_moduleDataSize;
+
+			// Modules rx- and tx- properties are respectively tx- and rx- for LM memory
+			//
+			result &= DeviceHelper::getIntProperty(module, "RxAppDataOffset", &m_txDataOffset, log);
+			result &= DeviceHelper::getIntProperty(module, "RxAppDataSize", &m_txDataSizeW, log);
+
+			result &= DeviceHelper::getIntProperty(module, "TxAppDataOffset", &m_rxDataOffset, log);
+			result &= DeviceHelper::getIntProperty(module, "TxAppDataSize", &m_rxDataSizeW, log);
+
 			result &= DeviceHelper::getIntProperty(module, "OptoPortCount", &m_optoPortCount, log);
+
+			result &= DeviceHelper::getIntProperty(module, "TxDiagDataOffset", &m_diagDataOffset, log);
+			result &= DeviceHelper::getIntProperty(module, "TxDiagDataSize", &m_diagDataSizeW, log);
 
 			if (result == false)
 			{
 				return false;
 			}
-		}
-
-		// set actual OptoInterfaceDataOffset for OCM module according to place of module
-		//
-		if (isOcm() == true)
-		{
-			// OCM's OptoPortDataSize property (m_optoPortDataSize) is equal to LM's ModuleDataSize property
-			//
-			m_moduleDataAddr = (m_deviceModule->place() - 1) * m_optoPortDataSize;
 		}
 
 		int findPortCount = 0;
@@ -2075,7 +2032,7 @@ namespace Hardware
 
 				if (child == nullptr)
 				{
-					assert(false);
+					Q_ASSERT(false);
 					continue;
 				}
 
@@ -2085,14 +2042,14 @@ namespace Hardware
 
 					if (optoPortController == nullptr)
 					{
-						assert(false);
+						Q_ASSERT(false);
 						LOG_INTERNAL_ERROR(m_log);
 						return false;
 					}
 
-					OptoPortShared optoPort = std::make_shared<OptoPort>(m_storage);
+					OptoPortShared optoPort = std::make_shared<OptoPort>(*this);
 
-					result &= optoPort->init(optoPortController, i + 1, m_lmDescription, log);
+					result &= optoPort->init(optoPortController, i, m_lmDescription, log);
 
 					m_ports.insert(optoPortController->equipmentIdTemplate(), optoPort);
 
@@ -2110,14 +2067,14 @@ namespace Hardware
 
 		if (findPortCount != m_optoPortCount)
 		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							   QString(tr("Not all opto-port controllers found in module '%1'")).arg(module->equipmentIdTemplate()));
+			LOG_INTERNAL_ERROR_MSG(m_log,
+				QString(tr("Not all opto-port controllers found in module '%1'")).
+								   arg(module->equipmentIdTemplate()));
 			return false;
 		}
 
 		if (isLmOrBvb() == true)
 		{
-			m_lmID = module->equipmentIdTemplate();
 			m_lm = module;
 		}
 		else
@@ -2128,13 +2085,12 @@ namespace Hardware
 
 			if (lm == nullptr)
 			{
-				assert(false);
+				Q_ASSERT(false);
 				LOG_INTERNAL_ERROR(log);
 				return false;
 			}
 
 			m_lm = lm;
-			m_lmID = lm->equipmentIdTemplate();
 		}
 
 		m_valid = true;
@@ -2146,7 +2102,7 @@ namespace Hardware
 	{
 		if (m_deviceModule == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return false;
 		}
 
@@ -2157,7 +2113,7 @@ namespace Hardware
 	{
 		if (m_deviceModule == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return false;
 		}
 
@@ -2168,7 +2124,7 @@ namespace Hardware
 	{
 		if (m_deviceModule == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return false;
 		}
 
@@ -2212,22 +2168,68 @@ namespace Hardware
 		return m_txDataSizeW;
 	}
 
+	int OptoModule::txDataAddr() const
+	{
+		Q_ASSERT(m_moduleDataAddr != BAD_ADDRESS);
+		Q_ASSERT(m_txDataOffset != BAD_ADDRESS);
+
+		return m_moduleDataAddr + m_txDataOffset;
+	}
+
 	int OptoModule::rxDataOffset() const
 	{
-		Q_ASSERT(m_txDataOffset != BAD_ADDRESS);
-		return m_txDataOffset;
+		Q_ASSERT(m_rxDataOffset != BAD_ADDRESS);
+		return m_rxDataOffset;
 	}
 
 	int OptoModule::rxDataSizeW() const
 	{
-		Q_ASSERT(m_txDataSizeW != BAD_ADDRESS);
-		return m_txDataSizeW;
+		Q_ASSERT(m_rxDataSizeW != BAD_ADDRESS);
+		return m_rxDataSizeW;
 	}
 
+	int OptoModule::rxDataAddr() const
+	{
+		Q_ASSERT(m_moduleDataAddr != BAD_ADDRESS);
+		Q_ASSERT(m_rxDataOffset != BAD_ADDRESS);
 
+		return m_moduleDataAddr + m_rxDataOffset;
+	}
 
-	int diagDataOffset() const;
-	int diagDataSizeW() const;
+	int OptoModule::diagDataOffset() const
+	{
+		Q_ASSERT(m_diagDataOffset != BAD_ADDRESS);
+		return m_diagDataOffset;
+	}
+
+	int OptoModule::diagDataSizeW() const
+	{
+		Q_ASSERT(m_diagDataSizeW != BAD_ADDRESS);
+		return m_diagDataSizeW;
+	}
+
+	int OptoModule::optoPortCount() const
+	{
+		return m_optoPortCount;
+	}
+
+	QString OptoModule::lmID() const
+	{
+		if (m_lm == nullptr)
+		{
+			Q_ASSERT(false);
+			return QString();
+		}
+
+		return m_lm->equipmentIdTemplate();
+	}
+
+	const DeviceModule* OptoModule::lmDeviceModule() const
+	{
+		Q_ASSERT(m_lm != nullptr);
+
+		return m_lm;
+	}
 
 	void OptoModule::getOptoPorts(QList<OptoPortShared>& optoPortsList) const
 	{
@@ -2235,12 +2237,17 @@ namespace Hardware
 		{
 			if (port == nullptr)
 			{
-				assert(false);
+				Q_ASSERT(false);
 				continue;
 			}
 
 			optoPortsList.append(port);
 		}
+	}
+
+	const HashedVector<QString, OptoPortShared>& OptoModule::ports() const
+	{
+		return m_ports;
 	}
 
 	bool OptoModule::calculateTxBufAddresses()
@@ -2249,7 +2256,7 @@ namespace Hardware
 
 		if (isLmOrBvb() == true)
 		{
-			// calculate tx buffers absolute addresses for ports of LM module
+			// calculate tx buffers offsets for ports of LM module
 			//
 			for(OptoPortShared& port : m_ports)
 			{
@@ -2268,24 +2275,24 @@ namespace Hardware
 				{
 					int manualTxStartAddr = port->manualTxStartAddressW();
 
-					if (manualTxStartAddr < 0 || manualTxStartAddr >= optoPortDataSize())
+					if (manualTxStartAddr < 0 || manualTxStartAddr >= m_txDataSizeW)
 					{
 						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 										   QString(tr("Manual TxStartAddress of port '%1' out of range 0..%2 (connection %3)")).
-										   arg(port->equipmentID()).arg(optoPortDataSize()).arg(port->connectionID()));
+										   arg(port->equipmentID()).arg(m_txDataSizeW).arg(port->connectionID()));
 						return false;
 					}
 
 					// exotic 'manual' settings for LMs tx buffers
 					// ok, user is always right
 					//
-					port->setTxBufAddress(manualTxStartAddr);
+					port->setTxBufOffset(manualTxStartAddr);
 
-					if (manualTxStartAddr + port->manualTxSizeW() > optoPortAppDataSize())
+					if (manualTxStartAddr + port->manualTxSizeW() > m_txDataSizeW)
 					{
 						// TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
 						//
-						m_log->errALC5032(port->txDataSizeW(), port->equipmentID(), equipmentID(), optoPortAppDataSize());
+						m_log->errALC5032(port->txDataSizeW(), port->equipmentID(), equipmentID(), m_txDataSizeW);
 						result = false;
 						break;
 					}
@@ -2295,13 +2302,13 @@ namespace Hardware
 					// each LMs opto-port has separate memory area for tx/rx buffer
 					// so, tx buffers offset in this area always equal to 0
 					//
-					port->setTxBufAddress(0);
+					port->setTxBufOffset(0);
 
-					if (port->txDataSizeW() > optoPortAppDataSize())
+					if (port->txDataSizeW() > m_txDataSizeW)
 					{
 						// TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
 						//
-						m_log->errALC5032(port->txDataSizeW(), port->equipmentID(), equipmentID(), optoPortAppDataSize());
+						m_log->errALC5032(port->txDataSizeW(), port->equipmentID(), equipmentID(), m_txDataSizeW);
 						result = false;
 						break;
 					}
@@ -2315,12 +2322,12 @@ namespace Hardware
 
 		if (isOcm() == true)
 		{
-			// calculate tx addresses for ports of OCM module
+			// calculate tx buffers offsets for ports of OCM module
 			//
 			// all OCM's ports tx buffers is disposed in one memory area with max size - OptoPortAppDataSize
 			// tx buffers begin place from offset 0
 			//
-			int txBufAddress = 0;
+			int txBufOffset = 0;
 
 			int txDataSizeW = 0;
 
@@ -2339,39 +2346,39 @@ namespace Hardware
 
 				if (port->manualSettings() == true)
 				{
-					txBufAddress = port->manualTxStartAddressW();
+					txBufOffset = port->manualTxStartAddressW();
 
-					port->setTxBufAddress(txBufAddress);
+					port->setTxBufOffset(txBufOffset);
 
-					if (port->manualTxStartAddressW() + port->manualTxSizeW() > optoPortAppDataSize())
+					if (port->manualTxStartAddressW() + port->manualTxSizeW() > m_txDataSizeW)
 					{
 						// TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
 						//
-						m_log->errALC5032(port->txDataSizeW(), port->equipmentID(), equipmentID(), optoPortAppDataSize());
+						m_log->errALC5032(port->txDataSizeW(), port->equipmentID(), equipmentID(), m_txDataSizeW);
 						return false;
 					}
 
 					// calculate TxStartAddr for next port with auto settings (if exists)
 					//
-					txBufAddress += port->manualTxSizeW();
+					txBufOffset += port->manualTxSizeW();
 
 					txDataSizeW = port->manualTxStartAddressW() + port->manualTxSizeW();
 				}
 				else
 				{
 					//
-					port->setTxBufAddress(txBufAddress);
+					port->setTxBufOffset(txBufOffset);
 
-					txBufAddress += port->txDataSizeW();
+					txBufOffset += port->txDataSizeW();
 
 					txDataSizeW += port->txDataSizeW();
 				}
 
-				if (txDataSizeW > optoPortAppDataSize())
+				if (txDataSizeW > m_txDataSizeW)
 				{
 					// TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
 					//
-					m_log->errALC5032(port->txDataSizeW(), port->equipmentID(), equipmentID(), optoPortAppDataSize());
+					m_log->errALC5032(port->txDataSizeW(), port->equipmentID(), equipmentID(), m_txDataSizeW);
 					result = false;
 					break;
 				}
@@ -2403,7 +2410,7 @@ namespace Hardware
 			if (port1 == nullptr)
 			{
 				LOG_INTERNAL_ERROR(m_log);
-				assert(false);
+				Q_ASSERT(false);
 				result = false;
 				continue;
 			}
@@ -2420,7 +2427,7 @@ namespace Hardware
 				if (port2 == nullptr)
 				{
 					LOG_INTERNAL_ERROR(m_log);
-					assert(false);
+					Q_ASSERT(false);
 					result = false;
 					continue;
 				}
@@ -2430,11 +2437,11 @@ namespace Hardware
 					continue;
 				}
 
-				if (	(port1->txBufAbsAddress() >= port2->txBufAbsAddress() &&
-						port1->txBufAbsAddress() < port2->txBufAbsAddress() + port2->txDataSizeW()) ||
+				if (	(port1->txBufAddress() >= port2->txBufAddress() &&
+						port1->txBufAddress() < port2->txBufAddress() + port2->txDataSizeW()) ||
 
-						(port2->txBufAbsAddress() >= port1->txBufAbsAddress() &&
-						port2->txBufAbsAddress() < port1->txBufAbsAddress() + port1->txDataSizeW())	)
+						(port2->txBufAddress() >= port1->txBufAddress() &&
+						port2->txBufAddress() < port1->txBufAddress() + port1->txDataSizeW())	)
 				{
 					// ports memory areas are overlapped
 					//
@@ -2465,18 +2472,18 @@ namespace Hardware
 	{
 		if (isLmOrBvb() == true)
 		{
-			// calculate rx addresses for ports of LM module
+			// calculate rx buf offsets for ports of LM module
 			//
 			for(OptoPortShared& port : m_ports)
 			{
 				if (port == nullptr)
 				{
 					LOG_INTERNAL_ERROR(m_log);
-					assert(false);
+					Q_ASSERT(false);
 					return false;
 				}
 
-				port->setRxBufAddress(0);
+				port->setRxBufOffset(0);
 
 				if (port->isUsedInConnection() == false)
 				{
@@ -2487,7 +2494,7 @@ namespace Hardware
 
 				if (connection == nullptr)
 				{
-					assert(false);
+					Q_ASSERT(false);
 					continue;
 				}
 
@@ -2502,18 +2509,18 @@ namespace Hardware
 
 				if (linkedPort != nullptr)
 				{
-					if (linkedPort->txDataSizeW() > optoPortAppDataSize())
+					if (linkedPort->txDataSizeW() > m_rxDataSizeW)
 					{
-						// RxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
+						// RxData size (%1 words) of opto port '%2' exceed value of RxAppDataSize property of module '%3' (%4 words).
 						//
-						m_log->errALC5035(linkedPort->txDataSizeW(), port->equipmentID(), equipmentID(), optoPortAppDataSize());
+						m_log->errALC5035(linkedPort->txDataSizeW(), port->equipmentID(), equipmentID(), m_rxDataSizeW);
 						return false;
 					}
 				}
 				else
 				{
 					LOG_INTERNAL_ERROR(m_log);
-					assert(false);
+					Q_ASSERT(false);
 					return false;
 				}
 			}
@@ -2523,9 +2530,9 @@ namespace Hardware
 
 		if (isOcm() == true)
 		{
-			// calculate rx addresses for ports of OCM module
+			// calculate rx buf offsets for ports of OCM module
 			//
-			int rxStartAddress = optoPortAppDataOffset();				// offset on OCMs diag data size
+			int rxBufOffset = m_rxDataOffset;
 
 			int rxDataSizeW = 0;
 
@@ -2534,11 +2541,11 @@ namespace Hardware
 				if (port == nullptr)
 				{
 					LOG_INTERNAL_ERROR(m_log);
-					assert(false);
+					Q_ASSERT(false);
 					return false;
 				}
 
-				port->setRxBufAddress(0);			// initilaize to 0
+				port->setRxBufOffset(0);			// initilaize to 0
 
 				// all OCM's ports data disposed in one buffer with max size - OptoPortAppDataSize
 				//
@@ -2552,7 +2559,7 @@ namespace Hardware
 
 				if (connection == nullptr)
 				{
-					assert(false);
+					Q_ASSERT(false);
 					continue;
 				}
 
@@ -2563,15 +2570,15 @@ namespace Hardware
 						continue;
 					}
 
-					port->setRxBufAddress(rxStartAddress);
+					port->setRxBufOffset(rxBufOffset);
 
 					if (port->manualSettings() == true)
 					{
-						rxStartAddress += port->manualRxSizeW();
+						rxBufOffset += port->manualRxSizeW();
 					}
 					else
 					{
-						rxStartAddress += port->rxDataSizeW();
+						rxBufOffset += port->rxDataSizeW();
 					}
 
 					continue;
@@ -2579,28 +2586,28 @@ namespace Hardware
 
 				assert(connection->isPortToPort() == true);
 
-				port->setRxBufAddress(rxStartAddress);
+				port->setRxBufOffset(rxBufOffset);
 
 				OptoPortShared linkedPort = m_storage.getOptoPort(port->linkedPortID());
 
 				if (linkedPort != nullptr)
 				{
-					rxStartAddress += linkedPort->txDataSizeW();
+					rxBufOffset += linkedPort->txDataSizeW();
 
 					rxDataSizeW += linkedPort->txDataSizeW();
 
-					if (rxDataSizeW > optoPortAppDataSize())
+					if (rxDataSizeW > m_rxDataSizeW)
 					{
 						// RxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
 						//
-						m_log->errALC5035(rxDataSizeW, port->equipmentID(), equipmentID(), optoPortAppDataSize());
+						m_log->errALC5035(rxDataSizeW, port->equipmentID(), equipmentID(), m_rxDataSizeW);
 						return false;
 					}
 				}
 				else
 				{
 					LOG_INTERNAL_ERROR(m_log);
-					assert(false);
+					Q_ASSERT(false);
 					return false;
 				}
 			}
@@ -2704,27 +2711,22 @@ namespace Hardware
 		return allowInchassisOptoConnections;
 	}
 
+	OptoModuleStorage& OptoModule::storage()
+	{
+		return m_storage;
+	}
+
+	const OptoModuleStorage& OptoModule::storage() const
+	{
+		return m_storage;
+	}
+
 	void OptoModule::sortPortsByEquipmentIDAscending(QVector<OptoPort*>& ports)
 	{
 		std::sort(ports.begin(), ports.end(), [](OptoPort* a, OptoPort* b)
 											{
 												return a->equipmentID() < b->equipmentID();
 											});
-
-//		int count = ports.count();
-
-//		for(int i = 0; i < count - 1; i++)
-//		{
-//			for(int k = i + 1; k < count; k++)
-//			{
-//				if (ports[i]->equipmentID() > ports[k]->equipmentID())
-//				{
-//					OptoPort* temp = ports[i];
-//					ports[i] = ports[k];
-//					ports[k] = temp;
-//				}
-//			}
-//		}
 	}
 
 	// --------------------------------------------------------------------------------------
@@ -2788,7 +2790,7 @@ namespace Hardware
 			{
 				if (currentDevice == nullptr)
 				{
-					assert(false);
+					Q_ASSERT(false);
 					result = false;
 					return;
 				}
@@ -2825,7 +2827,7 @@ namespace Hardware
 
 			if (connection == nullptr)
 			{
-				assert(false);
+				Q_ASSERT(false);
 				continue;
 			}
 
@@ -2926,7 +2928,7 @@ namespace Hardware
 		{
 			if (port == nullptr)
 			{
-				assert(false);
+				Q_ASSERT(false);
 				return false;
 			}
 
@@ -2970,7 +2972,7 @@ namespace Hardware
 
 			if (p1 == nullptr)
 			{
-				assert(false);
+				Q_ASSERT(false);
 				return false;
 			}
 
@@ -2978,7 +2980,7 @@ namespace Hardware
 
 			if (m1 == nullptr)
 			{
-				assert(false);
+				Q_ASSERT(false);
 				return false;
 			}
 
@@ -3011,7 +3013,7 @@ namespace Hardware
 
 		if (p1 == nullptr || p2 == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return false;
 		}
 
@@ -3020,7 +3022,7 @@ namespace Hardware
 
 		if (m1 == nullptr || m2 == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return false;
 		}
 
@@ -3214,7 +3216,7 @@ namespace Hardware
 	{
 		if (optoPort == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return nullptr;
 		}
 
@@ -3227,7 +3229,7 @@ namespace Hardware
 
 		if (optoPort == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return QString();
 		}
 
@@ -3249,7 +3251,7 @@ namespace Hardware
 		{
 			if (optoModule == nullptr)
 			{
-				assert(false);
+				Q_ASSERT(false);
 				continue;
 			}
 
@@ -3260,21 +3262,6 @@ namespace Hardware
 													{
 														return a->equipmentID() < b->equipmentID();
 													});
-
-//		int count = modules.count();
-
-//		for(int i = 0; i < count - 1; i++)
-//		{
-//			for(int k = i + 1; k < count; k++)
-//			{
-//				if (modules[i]->equipmentID() > modules[k]->equipmentID())
-//				{
-//					OptoModuleShared temp = modules[i];
-//					modules[i] = modules[k];
-//					modules[k] = temp;
-//				}
-//			}
-//		}
 	}
 
 	OptoPortShared OptoModuleStorage::getOptoPort(const QString& optoPortID) const
@@ -3290,7 +3277,7 @@ namespace Hardware
 		{
 			if (module == nullptr)
 			{
-				assert(false);
+				Q_ASSERT(false);
 				continue;
 			}
 
@@ -3350,7 +3337,7 @@ namespace Hardware
 	{
 		if (optoPort == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return "";
 		}
 
@@ -3358,7 +3345,7 @@ namespace Hardware
 
 		if (optoModule == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return "";
 		}
 
@@ -3371,7 +3358,7 @@ namespace Hardware
 
 		if (optoPort == nullptr)
 		{
-			assert(false);		// unknown optoPortEquipmentID
+			Q_ASSERT(false);		// unknown optoPortEquipmentID
 			return QString();
 		}
 
@@ -3474,11 +3461,11 @@ namespace Hardware
 		return m_lmsAccessibleConnections[lmEquipmentID].contains(connectionID);
 	}
 
-	int OptoModuleStorage::getAllNativeRawDataSize(const Hardware::DeviceModule* lm, Builder::IssueLogger* log)
+	int OptoModuleStorage::getAllNativeRawDataSize(const Hardware::DeviceModule* lm, Builder::IssueLogger* log) const
 	{
 		if (lm == nullptr || log == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return 0;
 		}
 
@@ -3488,7 +3475,7 @@ namespace Hardware
 
 		if (chassis == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return 0;
 		}
 
@@ -3500,7 +3487,7 @@ namespace Hardware
 
 			if (device == nullptr)
 			{
-				assert(false);
+				Q_ASSERT(false);
 				continue;
 			}
 
@@ -3513,7 +3500,7 @@ namespace Hardware
 
 			if (module == nullptr)
 			{
-				assert(false);
+				Q_ASSERT(false);
 				continue;
 			}
 
@@ -3526,12 +3513,11 @@ namespace Hardware
 		return size;
 	}
 
-
-	int OptoModuleStorage::getModuleRawDataSize(const Hardware::DeviceModule* lm, int modulePlace, bool* moduleIsFound, Builder::IssueLogger* log)
+	int OptoModuleStorage::getModuleRawDataSize(const Hardware::DeviceModule* lm, int modulePlace, bool* moduleIsFound, Builder::IssueLogger* log) const
 	{
 		if (lm == nullptr || log == nullptr || moduleIsFound == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return 0;
 		}
 
@@ -3556,11 +3542,12 @@ namespace Hardware
 		return size;
 	}
 
-	int OptoModuleStorage::getModuleRawDataSize(const Hardware::DeviceModule* module, Builder::IssueLogger* log)
+	int OptoModuleStorage::getModuleRawDataSize(const Hardware::DeviceModule* module,
+												Builder::IssueLogger* log) const
 	{
 		if (module == nullptr || log == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return false;
 		}
 
@@ -3608,7 +3595,7 @@ namespace Hardware
 	{
 		if (module == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return nullptr;
 		}
 
@@ -3625,7 +3612,7 @@ namespace Hardware
 		{
 			if (optoModule == nullptr)
 			{
-				assert(false);
+				Q_ASSERT(false);
 				continue;
 			}
 
@@ -3698,7 +3685,7 @@ namespace Hardware
 
 		if (optoModule == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return false;
 		}
 
@@ -4017,7 +4004,4 @@ namespace Hardware
 
 		m_modulesRawDataDescription.clear();
 	}
-
-
-
 }

@@ -600,7 +600,7 @@ QString ConnectionsInfo::portTag(int portNo)
 
 		TEST_PTR_RETURN_FALSE(optoPort);
 
-		cpi->txBufferAbsAddr = optoPort->txBufAbsAddress();
+		cpi->txBufferAbsAddr = optoPort->txBufAddress();
 		cpi->txDataSizeW = optoPort->txDataSizeW();
 		cpi->txDataID = optoPort->txDataID();
 
@@ -626,7 +626,7 @@ QString ConnectionsInfo::portTag(int portNo)
 
 		//
 
-		cpi->rxBufferAbsAddr = optoPort->rxBufAbsAddress();
+		cpi->rxBufferAbsAddr = optoPort->rxBufAddress();
 		cpi->rxDataSizeW = optoPort->rxDataSizeW();
 		cpi->rxDataID = optoPort->rxDataID();
 

@@ -352,14 +352,14 @@ namespace Builder
 			{
 				if (port->rxDataSizeW() > 0)
 				{
-					optoAreas->emplace_back(port->rxBufAbsAddress(), port->rxDataSizeW());
+					optoAreas->emplace_back(port->rxBufAddress(), port->rxDataSizeW());
 				}
 			}
 			else
 			{
 				if (port->txDataSizeW() > 0)
 				{
-					optoAreas->emplace_back(port->txBufAbsAddress(), port->txDataSizeW());
+					optoAreas->emplace_back(port->txBufAddress(), port->txDataSizeW());
 				}
 			}
 		}
@@ -13354,7 +13354,7 @@ namespace Builder
 
 		// write data port txData identifier
 		//
-		cmd.movConstUInt32(port->txBufAbsAddress(), port->txDataID());
+		cmd.movConstUInt32(port->txBufAddress(), port->txDataID());
 		cmd.setComment("txData ID");
 
 		code->append(cmd);
@@ -13387,7 +13387,7 @@ namespace Builder
 
 		int rawDataOffset = Hardware::OptoPort::TX_DATA_ID_SIZE_W;		// txDataID
 
-		int txRawDataStartAddr = port->txBufAbsAddress() + rawDataOffset;
+		int txRawDataStartAddr = port->txBufAddress() + rawDataOffset;
 		int txRawDataSizeW = port->txRawDataSizeW();
 
 		MemWriteMap memWriteMap(txRawDataStartAddr, txRawDataSizeW, true);
@@ -13787,7 +13787,7 @@ namespace Builder
 			{
 				// txSignal.address.offset() the same for all signals in one word
 
-				int txSignalAddress = port->txBufAbsAddress() + txSignal->addrInBuf().offset();
+				int txSignalAddress = port->txBufAddress() + txSignal->addrInBuf().offset();
 
 				int srcAddr = 0;
 
@@ -13985,7 +13985,7 @@ namespace Builder
 		{
 			CodeItem cmd;
 
-			toAddr = port->txBufAbsAddress() + *rawDataOffset + localOffset;
+			toAddr = port->txBufAddress() + *rawDataOffset + localOffset;
 
 			int sizeW = 0;
 
@@ -14124,10 +14124,10 @@ namespace Builder
 
 		CodeItem cmd;
 
-		int writeAddr = port->txBufAbsAddress() + *rawDataOffset;
+		int writeAddr = port->txBufAddress() + *rawDataOffset;
 		int writeSizeW = portTxRawDataSizeW;
 
-		cmd.movMem(writeAddr, portWithRxRawData->rxBufAbsAddress() + Hardware::OptoPort::TX_DATA_ID_SIZE_W, writeSizeW);
+		cmd.movMem(writeAddr, portWithRxRawData->rxBufAddress() + Hardware::OptoPort::TX_DATA_ID_SIZE_W, writeSizeW);
 		cmd.setComment(QString("copying raw data received on port %1").arg(portWithRxRawData->equipmentID()));
 
 		code->append(cmd);
@@ -14146,7 +14146,7 @@ namespace Builder
 
 		CodeItem cmd;
 
-		int writeAddr = port->txBufAbsAddress() + *rawDataOffset;
+		int writeAddr = port->txBufAddress() + *rawDataOffset;
 
 		cmd.movConst(writeAddr, const16value);
 
@@ -14210,7 +14210,7 @@ namespace Builder
 				continue;
 			}
 
-			int writeAddr = port->txBufAbsAddress() + txSignal->addrInBuf().offset();
+			int writeAddr = port->txBufAddress() + txSignal->addrInBuf().offset();
 
 			if (ualSignal->isConst() == true)
 			{
@@ -14348,7 +14348,7 @@ namespace Builder
 
 			if (count > 0)
 			{
-				int writeAddr = port->txBufAbsAddress() + offset;
+				int writeAddr = port->txBufAddress() + offset;
 
 				cmd.mov(writeAddr, bitAccAddr);
 				cmd.clearComment();
@@ -14441,7 +14441,7 @@ namespace Builder
 				continue;
 			}
 
-			int writeAddr = port->txBufAbsAddress() + txSignal->addrInBuf().offset();
+			int writeAddr = port->txBufAddress() + txSignal->addrInBuf().offset();
 			int writeSizeW = 0;
 
 			switch(txSignal->dataSize())

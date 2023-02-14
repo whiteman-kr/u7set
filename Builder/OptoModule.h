@@ -99,6 +99,8 @@ namespace Hardware
 	//
 	// --------------------------------------------------------------------------------------
 
+	class OptoModule;
+
 	class OptoPort : public QObject
 	{
 		Q_OBJECT
@@ -109,10 +111,13 @@ namespace Hardware
 		static const int TX_DATA_ID_SIZE_W = sizeof(quint32) / sizeof(quint16);		// size of opto port's txDataID in words
 
 	public:
-		OptoPort(OptoModuleStorage& storage);
+		OptoPort(const OptoModule& optoModule);
 		virtual ~OptoPort();
 
-		bool init(const DeviceController* controller, int portNo, LmDescription *lmDescription, Builder::IssueLogger* log);
+		bool init(const DeviceController* controller,
+				  int portNo,
+				  LmDescription* lmDescription,
+				  Builder::IssueLogger* log);
 
 		bool initSettings(ConnectionShared cn);
 
@@ -192,16 +197,16 @@ namespace Hardware
 
 		QString serialModeStr() const;
 
-		int txBufAddress() const { return m_txBufAddress; }
-		void setTxBufAddress(int address) { m_txBufAddress = address; }
+		int txBufOffset() const { return m_txBufOffset; }
+		void setTxBufOffset(int offset) { m_txBufOffset = offset; }
 
-		Q_INVOKABLE int txStartAddress() const { return txBufAddress(); }		// rename in java!
+		Q_INVOKABLE int txStartAddress() const { return txBufOffset(); }		// rename in java!
 
-		int rxBufAddress() const { return m_rxBufAddress; }
-		void setRxBufAddress(int address) { m_rxBufAddress = address; }
+		int rxBufOffset() const { return m_rxBufOffset; }
+		void setRxBufOffset(int offset) { m_rxBufOffset = offset; }
 
-		int txBufAbsAddress() const;
-		int rxBufAbsAddress() const;
+		int txBufAddress() const;
+		int rxBufAddress() const;
 
 		Q_INVOKABLE bool enableDuplex() const { return m_enableDuplex; }
 		void setEnableDuplex(bool enable) { m_enableDuplex = enable; }
@@ -211,7 +216,7 @@ namespace Hardware
 
 		const DeviceController* deviceController() const { return m_controller; }
 
-		QString optoModuleID() const { return m_optoModuleID; }
+		QString optoModuleID() const;
 
 		QString rawDataDescriptionStr() const { return m_rawDataDescriptionStr; }
 		void setRawDataDescriptionStr(const QString& description) { m_rawDataDescriptionStr = description; }
@@ -265,6 +270,8 @@ namespace Hardware
 		void writeInfo(QStringList& list) const;
 
 	private:
+		const OptoModuleStorage& storage() const;
+
 		bool appendRxSignal(const Builder::UalSignal* ualSignal);
 
 		void sortByOffsetBitNoAscending(QVector<TxRxSignalShared>& list);
@@ -278,10 +285,10 @@ namespace Hardware
 		QString format_02d(int v) const;
 
 	private:
-		OptoModuleStorage& m_storage;
+		const OptoModule& m_optoModule;
 
 		QString m_equipmentID;
-		int m_portNo = 0;
+		int m_portNo = -1;							// beginning from 0
 
 		Connection::Type m_connectionType = Connection::Type::PortToPort;
 
@@ -308,7 +315,6 @@ namespace Hardware
 		QString m_validitySignalEquipmentID;
 		Address16 m_validitySignalAbsAddr;
 
-		QString m_optoModuleID;
 		QString m_linkedPortID;
 		QString m_connectionID;
 
@@ -319,9 +325,16 @@ namespace Hardware
 		HashedVector<QString, RawDataDescriptionItem> m_rawTxSignals;
 		HashedVector<QString, RawDataDescriptionItem> m_rawRxSignals;
 
+		// for OCM ports this address equal to optoModule.moduleDataAddr()
+		//
+		// for LM ports this address equal to lm.moduleDataAddr() + portNo * lm.txDataSizeW(),
+		// so m_txBufOffset/m_rxBufOffset for all LM ports are equal to 0
+		//
+		int m_portBaseAddr = BAD_ADDRESS;
+
 		//
 
-		int m_txBufAddress = BAD_ADDRESS;				// address of port's Tx buffer relative to opto module txAppDataOffset
+		int m_txBufOffset = BAD_ADDRESS;				// address of port's Tx buffer relative to optoModule.txDataAddr()
 		quint32 m_txDataID = 0;							// range 0..0xFFFFFFFF
 		int m_txDataSizeW = 0;							// size of port's Tx data
 		int m_txUsedDataSizeW = 0;						// for ports with manual settings may be m_txUsedDataSizeW < m_txDataSizeW
@@ -338,7 +351,7 @@ namespace Hardware
 
 		//
 
-		int m_rxBufAddress = BAD_ADDRESS;				// address of port's Rx buffer relative to opto module rxApppDataOffset
+		int m_rxBufOffset = BAD_ADDRESS;				// address of port's Rx buffer relative to optoModule.rxDataAddr()
 		quint32 m_rxDataID = 0;							// range 0..0xFFFFFFFF
 		int m_rxDataSizeW = 0;							// size of Rx data
 		int m_rxUsedDataSizeW = 0;						// for ports with manual settings may be m_rxUsedDataSizeW < m_rxDataSizeW
@@ -380,23 +393,27 @@ namespace Hardware
 		const DeviceModule* deviceModule() const;
 
 		int place() const;
+
 		int moduleDataAddr() const;
 
 		int txDataOffset() const;
 		int txDataSizeW() const;
+		int txDataAddr() const;
 
 		int rxDataOffset() const;
 		int rxDataSizeW() const;
+		int rxDataAddr() const;
 
 		int diagDataOffset() const;
 		int diagDataSizeW() const;
 
-		QString lmID() const { return m_lmID; }
-		const DeviceModule* lmDeviceModule() const { return m_lm; }
+		int optoPortCount() const;
+
+		QString lmID() const;
+		const DeviceModule* lmDeviceModule() const;
 
 		void getOptoPorts(QList<OptoPortShared>& optoPortsList) const;
-
-		const HashedVector<QString, OptoPortShared>& ports() const { return m_ports; }
+		const HashedVector<QString, OptoPortShared>& ports() const;
 
 		bool calculateTxBufAddresses();
 		bool checkPortsAddressesOverlapping() const;
@@ -410,6 +427,9 @@ namespace Hardware
 		bool copyOpticalPortsTxInRxSignals();
 
 		bool allowInchassisOptoConnections() const;
+
+		OptoModuleStorage& storage();
+		const OptoModuleStorage& storage() const;
 
 	private:
 		void sortPortsByEquipmentIDAscending(QVector<OptoPort*>& getPorts);
@@ -439,16 +459,11 @@ namespace Hardware
 
 		// opto module Diag Data placement and size
 		//
-		int m_diagDataOffset = BAD_ADDRESS;
+		int m_diagDataOffset = BAD_ADDRESS;		// relative to m_moduleDataOffset
 		int m_diagDataSizeW = BAD_ADDRESS;
-
-//		int m_optoPortDataSize = 0;
-//		int m_optoPortAppDataOffset = 0;
-//		int m_optoPortAppDataSize = 0;
 
 		//
 
-		QString m_lmID;
 		const DeviceModule* m_lm = nullptr;
 
 		HashedVector<QString, OptoPortShared> m_ports;
@@ -557,9 +572,9 @@ namespace Hardware
 
 		bool isConnectionAccessible(const QString& lmEquipmentID, const QString& connectionID) const;
 
-		int getAllNativeRawDataSize(const Hardware::DeviceModule* lm, Builder::IssueLogger* log);
-		int getModuleRawDataSize(const Hardware::DeviceModule* lm, int modulePlace, bool* moduleIsFound, Builder::IssueLogger* log);
-		int getModuleRawDataSize(const Hardware::DeviceModule* module, Builder::IssueLogger* log);
+		int getAllNativeRawDataSize(const Hardware::DeviceModule* lm, Builder::IssueLogger* log) const;
+		int getModuleRawDataSize(const Hardware::DeviceModule* lm, int modulePlace, bool* moduleIsFound, Builder::IssueLogger* log) const;
+		int getModuleRawDataSize(const Hardware::DeviceModule* module, Builder::IssueLogger* log) const;
 
 		ModuleRawDataDescription* getModuleRawDataDescription(const Hardware::DeviceModule* module) const;
 
@@ -591,7 +606,7 @@ namespace Hardware
 
 		QHash<QString, QHash<QString, bool>> m_lmsAccessibleConnections;
 
-		QHash<QString, ModuleRawDataDescription*> m_modulesRawDataDescription;
+		mutable QHash<QString, ModuleRawDataDescription*> m_modulesRawDataDescription;
 	};
 
 	typedef std::shared_ptr<Hardware::Connection> SharedConnection;
