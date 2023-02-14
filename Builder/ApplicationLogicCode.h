@@ -481,7 +481,7 @@ namespace Builder
 		};
 
 	public:
-		AppLogicCode(Type type);
+		AppLogicCode(Type type, bool optimized);
 
 		void setAppStartAddr(int addr);
 
@@ -490,6 +490,9 @@ namespace Builder
 		void clear();
 
 		Type codeType() const;
+
+		bool optimized() const;
+		void setOptimized( bool optimized);
 
 		int codeSizeW() const;
 		int clockCount() const;
@@ -509,6 +512,7 @@ namespace Builder
 
 	private:
 		Type m_codeType = Type::Unknown;
+		bool m_optimized = false;
 
 		std::map<int, int> m_runningAfbs;		// AFB opCode -> AFB runtime
 

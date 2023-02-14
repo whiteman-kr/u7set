@@ -442,9 +442,14 @@ namespace Builder
 
 		bool generateIdrPhaseCode();
 		bool generateAlpPhaseCode();
+
 		bool makeAppLogicCode();
 		bool checkAppLogicCode();
 		bool cleanupHeaps();
+
+		bool optimizeAppLogicCode();
+		bool writeInfoFilesAfterOptimization();
+		bool checkOptimizedAppLogicCode();
 
 		bool generateCustomCode(CodeSnippet* code);
 		bool generateAfbsVersionCheckingCode(CodeSnippet* code);
@@ -690,12 +695,12 @@ namespace Builder
 		bool calculateCodeRunTime();
 
 		QString lmSubsystemEquipmentIdPath() const;
-		QString getInfoFileName(const QString& fileNameExtension) const;
+		QString getInfoFileName(const QString& fileNameExtension, bool optimized) const;
 
 		bool writeInfoFiles();
-		bool writeAsmFile() const;
+		bool writeAsmFile(const AppLogicCode& code) const;
 		bool writeMemFile() const;
-		bool writeStatisticsFile() const;
+		bool writeStatisticsFile(const AppLogicCode& code) const;
 		bool writeTuningInfoFile() const;
 		bool writeOptoModulesReport() const;
 		bool writeLoopbacksReport();
@@ -827,6 +832,7 @@ namespace Builder
 		//
 
 		AppLogicCode m_appLogicCode;
+		AppLogicCode m_optimizedAppLogicCode;
 
 		AppLogicCode m_idrCode;
 		AppLogicCode m_alpCode;

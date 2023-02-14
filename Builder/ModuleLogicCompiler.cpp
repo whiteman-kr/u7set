@@ -36,10 +36,10 @@ namespace Builder
 		m_memoryMap(appLogicCompiler.log()),
 		m_ualSignals(*this, appLogicCompiler.log()),
 		m_loopbacks(*this),
-		m_appLogicCode(AppLogicCode::Type::AllCode),
-		m_idrCode(AppLogicCode::Type::IDR_Code),
-		m_alpCode(AppLogicCode::Type::ALP_Code)
-
+		m_appLogicCode(AppLogicCode::Type::AllCode, false),
+		m_optimizedAppLogicCode(AppLogicCode::Type::AllCode, true),
+		m_idrCode(AppLogicCode::Type::IDR_Code, false),
+		m_alpCode(AppLogicCode::Type::ALP_Code, false)
 	{
 		m_equipmentSet = appLogicCompiler.equipmentSet();
 		m_deviceRoot = m_equipmentSet->root().get();
@@ -164,11 +164,15 @@ namespace Builder
 			// called AFTER generateAlpPhaseCode!
 			//
 			PROC_TO_CALL(ModuleLogicCompiler::generateIdrPhaseCode),
+			PROC_TO_CALL(ModuleLogicCompiler::cleanupHeaps),
 
 			PROC_TO_CALL(ModuleLogicCompiler::makeAppLogicCode),
 			PROC_TO_CALL(ModuleLogicCompiler::writeInfoFiles),
 			PROC_TO_CALL(ModuleLogicCompiler::checkAppLogicCode),
-			PROC_TO_CALL(ModuleLogicCompiler::cleanupHeaps),
+
+			PROC_TO_CALL(ModuleLogicCompiler::optimizeAppLogicCode),
+			PROC_TO_CALL(ModuleLogicCompiler::writeInfoFilesAfterOptimization),
+			PROC_TO_CALL(ModuleLogicCompiler::checkOptimizedAppLogicCode),
 
 			//
 
@@ -7545,6 +7549,7 @@ namespace Builder
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateAfbsVersionCheckingCode),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateInitAfbsCode),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateLoopbacksRefreshingCode),
+			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::constBitsInitialization),
 		};
 
 		bool result = runCodeGenProcs(procs, &m_idrCode);
@@ -7579,7 +7584,6 @@ namespace Builder
 
 		CodeGenProcsToCallArray procs =
 		{
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::constBitsInitialization),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredRawDataInRegBuf),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::convertAnalogInputSignals),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateAppLogicCode),
@@ -7645,6 +7649,36 @@ namespace Builder
 		m_ualSignals.finalizeHeaps();
 
 		return true;
+	}
+
+	bool ModuleLogicCompiler::optimizeAppLogicCode()
+	{
+		m_optimizedAppLogicCode = m_appLogicCode;
+		m_optimizedAppLogicCode.setOptimized(true);
+
+		// do optimization
+
+		m_optimizedAppLogicCode.finalize(m_lmDescription);
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::writeInfoFilesAfterOptimization()
+	{
+		bool result = true;
+
+		result &= writeAsmFile(m_optimizedAppLogicCode);
+
+		result &= writeStatisticsFile(m_optimizedAppLogicCode);
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::checkOptimizedAppLogicCode()
+	{
+		CodeChecker checker(*this);
+
+		return checker.check(m_optimizedAppLogicCode);
 	}
 
 	bool ModuleLogicCompiler::generateCustomCode(CodeSnippet* code)
@@ -14549,8 +14583,17 @@ namespace Builder
 		return QString("%1/%2").arg(m_lmSubsystemID).arg(lmEquipmentID());
 	}
 
-	QString ModuleLogicCompiler::getInfoFileName(const QString& fileNameExtension) const
+	QString ModuleLogicCompiler::getInfoFileName(const QString& fileNameExtension, bool optimized) const
 	{
+		if (optimized == true)
+		{
+			return (QString("%1-%2-opti.%3").
+						arg(m_lmSubsystemID).
+						arg(m_lmNumber).
+						arg(fileNameExtension)).toLower();
+
+		}
+
 		return (QString("%1-%2.%3").
 					arg(m_lmSubsystemID).
 					arg(m_lmNumber).
@@ -14561,11 +14604,11 @@ namespace Builder
 	{
 		bool result = true;
 
-		result &= writeAsmFile();
+		result &= writeAsmFile(m_appLogicCode);
 
 		result &= writeMemFile();
 
-		result &= writeStatisticsFile();
+		result &= writeStatisticsFile(m_appLogicCode);
 
 		result &= writeTuningInfoFile();
 
@@ -14578,14 +14621,14 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::writeAsmFile() const
+	bool ModuleLogicCompiler::writeAsmFile(const AppLogicCode& code) const
 	{
 		QStringList asmCode;
 
-		m_appLogicCode.getAsmCode(&asmCode);
+		code.getAsmCode(&asmCode);
 
 		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
-													   getInfoFileName("asm"), asmCode);
+													   getInfoFileName("asm", code.optimized()), asmCode);
 
 		return (buildFile != nullptr);
 	}
@@ -14599,11 +14642,11 @@ namespace Builder
 							m_ualSignals.analogAndBusSignalsHeap().getHeapItemsLog());
 
 		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
-												getInfoFileName("mem"), memFile);
+												getInfoFileName("mem", false), memFile);
 		return (buildFile != nullptr);
 	}
 
-	bool ModuleLogicCompiler::writeStatisticsFile() const
+	bool ModuleLogicCompiler::writeStatisticsFile(const AppLogicCode& code) const
 	{
 		TEST_PTR_RETURN_FALSE(m_lmDescription);
 
@@ -14618,14 +14661,18 @@ namespace Builder
 
 		//
 
-		printCodeStatistics(m_idrCode, file, true);
-		printCodeStatistics(m_alpCode, file, true);
-		printCodeStatistics(m_appLogicCode, file, false);
+		if (code.optimized() == false)
+		{
+			printCodeStatistics(m_idrCode, file, true);
+			printCodeStatistics(m_alpCode, file, true);
+		}
+
+		printCodeStatistics(code, file, false);
 
 		//
 
 		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
-												getInfoFileName("stat"), file);
+												getInfoFileName("stat", code.optimized()), file);
 		return (buildFile != nullptr);
 	}
 
@@ -14761,7 +14808,7 @@ namespace Builder
 		}
 
 		bool result = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
-											  getInfoFileName("tun"), file);
+											  getInfoFileName("tun", false), file);
 		return result;
 	}
 
@@ -14843,7 +14890,7 @@ namespace Builder
 		}
 
 		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
-												getInfoFileName("opto"), file);
+												getInfoFileName("opto", false), file);
 		return (buildFile != nullptr);
 	}
 
@@ -14854,7 +14901,7 @@ namespace Builder
 		m_loopbacks.writeReport(&file);
 
 		BuildFile* bf = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
-												getInfoFileName("loopbacks"), file);
+												getInfoFileName("loopbacks", false), file);
 
 		return bf != nullptr;
 	}
@@ -14871,7 +14918,7 @@ namespace Builder
 		m_ualSignals.getHeapsLog(&file);
 
 		BuildFile* bf = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(lmSubsystemEquipmentIdPath()),
-												getInfoFileName("heaps"), file);
+												getInfoFileName("heaps", false), file);
 
 		return bf != nullptr;
 	}

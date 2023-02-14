@@ -2014,8 +2014,9 @@ namespace Builder
 	//
 	// ----------------------------------------------------------------------------------
 
-	AppLogicCode::AppLogicCode(Type type) :
-		m_codeType(type)
+	AppLogicCode::AppLogicCode(Type type, bool optimized) :
+		m_codeType(type),
+		m_optimized(optimized)
 	{
 	}
 
@@ -2179,6 +2180,16 @@ namespace Builder
 	AppLogicCode::Type AppLogicCode::codeType() const
 	{
 		return m_codeType;
+	}
+
+	bool AppLogicCode::optimized() const
+	{
+		return m_optimized;
+	}
+
+	void AppLogicCode::setOptimized( bool optimized)
+	{
+		m_optimized = optimized;
 	}
 
 	int AppLogicCode::codeSizeW() const
