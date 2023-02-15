@@ -70,7 +70,7 @@ const AppSignalState& Sources::get() const
 			if (stateAvailable == nullptr ||
 				stateAvailable->state.time().plant < sourceState.state.time().plant)
 			{
-				stateAvailable = &sourceState;	// the first stae with state available flag
+				stateAvailable = &sourceState;	// the first state with state available flag
 			}
 		}
 		else
@@ -80,7 +80,7 @@ const AppSignalState& Sources::get() const
 			if (stateNewest == nullptr ||
 				stateNewest->lastUpdateTime < sourceState.lastUpdateTime)
 			{
-				stateNewest = &sourceState;	// the first state with state available flag
+				stateNewest = &sourceState;
 			}
 		}
 	}

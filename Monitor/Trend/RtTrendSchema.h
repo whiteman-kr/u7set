@@ -1,6 +1,7 @@
 #pragma once
 #include <map>
 #include "./Trend/RtTrendTcpClient.h"
+#include "../MonitorConfigController.h"
 
 //
 // RtSignal: Data for RealTimeTrends on schemas, SchemaItemIndicator, type = Trend

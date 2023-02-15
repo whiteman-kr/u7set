@@ -9,7 +9,7 @@ MonitorTrendArchiveConnection::MonitorTrendArchiveConnection(const SoftwareInfo&
 	m_archiveServer(server.equipmentId, server.shortenId, server.appDataServiceId)
 {
 	Q_ASSERT(m_logFile);
-	m_logFile->writeMessage(QString("MonitorTrendArchiveConnection %1 ctor.").arg(m_archiveServer.equipmentId));
+	m_logFile->writeMessage(QString("TrendArchive %1 ctor.").arg(m_archiveServer.equipmentId));
 
 	// --
 	//
@@ -30,7 +30,7 @@ MonitorTrendArchiveConnection::MonitorTrendArchiveConnection(const SoftwareInfo&
 
 MonitorTrendArchiveConnection::~MonitorTrendArchiveConnection()
 {
-	m_logFile->writeMessage(QString("MonitorTrendArchiveConnection %1 dtor.").arg(m_archiveServer.equipmentId));
+	m_logFile->writeMessage(QString("TrendArchive %1 dtor.").arg(m_archiveServer.equipmentId));
 
 	m_archiveTcpClientThread->quitAndWait(10000);
 
@@ -68,7 +68,6 @@ MonitorTrendArchiveConnections::MonitorTrendArchiveConnections(const MonitorConf
 	m_configController(configController),
 	m_logFile(logFile)
 {
-	connect(&m_configController, &MonitorConfigController::configurationArrived, this, &MonitorTrendArchiveConnections::slot_configurationArrived);
 	return;
 }
 
@@ -78,6 +77,15 @@ MonitorTrendArchiveConnections::~MonitorTrendArchiveConnections()
 	return;
 }
 
+void MonitorTrendArchiveConnections::clear()
+{
+	Q_ASSERT(QThread::currentThreadId() == this->thread()->currentThreadId());
+
+	m_createdConnectionsServers.clear();
+	m_connections.clear();
+
+	return;
+}
 
 void MonitorTrendArchiveConnections::createConnections()
 {
@@ -100,15 +108,26 @@ void MonitorTrendArchiveConnections::createConnections()
 	return;
 }
 
-void MonitorTrendArchiveConnections::clear()
+void MonitorTrendArchiveConnections::updateConnections()
 {
 	Q_ASSERT(QThread::currentThreadId() == this->thread()->currentThreadId());
 
-	m_createdConnectionsServers.clear();
-	m_connections.clear();
+	// New configuration arrived, server configuration could be changed,
+	// if so, restart comminications threads.
+	//
+	m_logFile->writeMessage("TrendArchive: New configuration arrived.");
+
+	auto archiveSecrvices = m_configController.configuration().archiveServices;
+
+	if (std::ranges::equal(m_createdConnectionsServers, archiveSecrvices) == false)
+	{
+		clear();
+		createConnections();
+	}
 
 	return;
 }
+
 
 size_t MonitorTrendArchiveConnections::size() const
 {
@@ -170,23 +189,4 @@ ArchiveTrendTcpClient::Stat MonitorTrendArchiveConnections::statistics() const
 	}
 
 	return result;
-}
-
-void MonitorTrendArchiveConnections::slot_configurationArrived(ConfigSettings configuration)
-{
-	Q_ASSERT(QThread::currentThreadId() == this->thread()->currentThreadId());
-
-	// New configuration arrived, server configuration could be changed,
-	// if so, restart comminications threads.
-	//
-	m_logFile->writeMessage("MonitorTrendArchiveConnections: New configuration arrived.");
-
-	if (std::ranges::equal(m_createdConnectionsServers,
-						   configuration.archiveServices) == false)
-	{
-		clear();
-		createConnections();
-	}
-
-	return;
 }

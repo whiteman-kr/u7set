@@ -426,6 +426,8 @@ public:
 		QString shortenId;			// Short version of equipmentId
 		HostAddressPort address;
 		HostAddressPort realtimeAddress;
+
+		bool operator==(const AppDataService&) const = default;
 	};
 
 	struct ArchiveService
@@ -435,7 +437,7 @@ public:
 		QString appDataServiceId;	// ID of the source AppDataService for this ArchiveService
 		HostAddressPort address;	// ArchiveService ip address and port
 
-		auto operator<=>(const ArchiveService&) const = default;
+		bool operator==(const ArchiveService&) const = default;
 	};
 
 public:

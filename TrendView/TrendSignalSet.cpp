@@ -1,5 +1,6 @@
 #include "TrendSignalSet.h"
 #include <type_traits>
+#include <ranges>
 #include "../Proto/trends.pb.h"
 
 namespace TrendLib
@@ -1172,7 +1173,8 @@ namespace TrendLib
 					//
 					TrendStateRecord& record = hour->data.back();
 
-					if (record.states.empty() == false)
+					if (record.states.empty() == false &&
+						record.states.back().isValid() == true)		// Do not add another nonvalid point if it is already present.
 					{
 						// Just duplicate last state with invalid flag
 						//
@@ -1357,6 +1359,30 @@ namespace TrendLib
 		{
 			if (::calcHash(trendSignalPlusServerId.appSignalId) == signalhash)
 			{
+				// Find the very last recorded state, it is required to filter already added data as
+				// real time trends can have one or two data sources (app data services).
+				//
+				TrendStateItem veryLastState{};
+
+				for (const auto&[hourTimeStamp, hour] : archive.m_hours | std::views::reverse)
+				{
+					Q_ASSERT(hour);
+
+					for (const TrendStateRecord& data : hour->data | std::views::reverse)
+					{
+						if (data.states.empty() == false)
+						{
+							veryLastState = data.states.back();
+							break;
+						}
+					}
+
+					if (veryLastState.plant != 0)
+					{
+						break;
+					}
+				}
+
 				// Add realtime data to all signals with the same AppSignalID, no matter which archive server it is from
 				//
 				TimeStamp lastHourTime{0};
@@ -1364,6 +1390,22 @@ namespace TrendLib
 
 				for (const TrendStateItem& state : states)
 				{
+					// Check if this state is outdated, this can happen if two or more sources of real timne data present.
+					//
+					if ((veryLastState.plant == 0) ||	// There is no privious state, we can add any new state
+						(veryLastState.plant < state.plant) ||
+						(veryLastState.plant - state.plant > 60 * 1000))	// 60 sec for changed day-saving time or time adjustment
+					{
+						// Add state
+						//
+					}
+					else
+					{
+						continue;
+					}
+
+					// --
+					//
 					TimeStamp ts = state.getTime(timeType).roundedToHour();
 					if (ts == TimeStamp{0})
 					{
@@ -1379,7 +1421,7 @@ namespace TrendLib
 					{
 						hourData = archive.m_hours[ts];
 
-						if (hourData.get() == nullptr)	// Just created
+						if (hourData == nullptr)	// Just created
 						{
 							hourData = std::make_shared<TrendLib::OneHourData>();
 							archive.m_hours[ts] = hourData;
@@ -1410,6 +1452,8 @@ namespace TrendLib
 					//
 					TrendLib::TrendStateRecord& recordToAddState = hourData->data.back();
 					recordToAddState.states.push_back(state);
+
+					veryLastState = state;
 				}
 			}
 		}

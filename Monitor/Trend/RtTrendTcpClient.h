@@ -4,10 +4,8 @@
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"
 #include "../CommonLib/Hash.h"
-#include "../CommonLib/Times.h"
 #include "../Proto/network.pb.h"
 #include "../TrendView/TrendSignalSet.h"
-#include "MonitorConfigController.h"
 
 
 //     onConnection()
@@ -29,7 +27,7 @@ class RtTrendTcpClient : public Tcp::Client, public TcpClientStatistics
 	Q_OBJECT
 
 public:
-	RtTrendTcpClient(const MonitorConfigController* configController, ILogFile* logFile);
+	RtTrendTcpClient(const SoftwareInfo& softwareInfo, const HostAddressPort& serverAddressPort, ILogFile* logFile);
 	virtual ~RtTrendTcpClient();
 
 	// Methods
@@ -42,7 +40,7 @@ public:
 	void setSamplePeriod(E::RtTrendsSamplePeriod samplePeriod);
 	E::RtTrendsSamplePeriod samplePeriod() const;
 
-public:
+protected:
 	virtual void onClientThreadStarted() override;
 	virtual void onClientThreadFinished() override;
 
@@ -61,9 +59,6 @@ protected:
 	void requestTrendStateChanges();
 	void processTrendStateChanges(const QByteArray& data);
 
-protected slots:
-	void slot_configurationArrived(ConfigSettings configuration);
-
 signals:
 	void dataReady(std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState);
 	void requestError(QString text);
@@ -78,6 +73,7 @@ public:
 		int requestQueueSize = 0;
 		int requestCount = 0;
 		int replyCount = 0;
+		int isConnected = 0;		// It must be int for summing up statistcics for several connections
 	};
 
 	Stat stat() const;
@@ -92,7 +88,6 @@ public:
 	// Data
 	//
 private:
-	const MonitorConfigController* m_cfgController = nullptr;
 	HasLogFile m_logFile;
 
 	mutable QMutex m_dataMutex;

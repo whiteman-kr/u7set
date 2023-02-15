@@ -1,25 +1,15 @@
 #include "RtTrendTcpClient.h"
 #include "MonitorAppSettings.h"
 
-RtTrendTcpClient::RtTrendTcpClient(const MonitorConfigController* configController, ILogFile* logFile) :
-//	Tcp::Client(configController->softwareInfo(),
-//				configController->configuration().appDataServiceRealtimeTrend1.address(),		// TO DO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//				configController->configuration().appDataServiceRealtimeTrend2.address(),
-//				"RtTrendTcpClient"),
-	Tcp::Client(configController->softwareInfo(),
-				{},		// TO DO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-				{},
-				"RtTrendTcpClient"),
+RtTrendTcpClient::RtTrendTcpClient(const SoftwareInfo& softwareInfo, const HostAddressPort& serverAddressPort, ILogFile* logFile) :
+	Tcp::Client(softwareInfo, serverAddressPort,"RtTrendTcpClient"),
 	TcpClientStatistics(this),
-	m_cfgController(configController),
 	m_logFile(logFile, "RtTrendTcpClient")
 {
-	Q_ASSERT(configController);
 	Q_ASSERT(logFile);
 
-	qDebug() << "RtTrendTcpClient::RtTrendTcpClient(...)";
-
-	setObjectName("RtTrendTcpClient");
+	setObjectName("RtTrendTcpClient::~RtTrendTcpClient(...)");
+	qDebug() << "ctor()";
 
 	return;
 }
@@ -85,10 +75,6 @@ void RtTrendTcpClient::onClientThreadStarted()
 {
 	qDebug() << "RtTrendTcpClient::onClientThreadStarted()";
 	m_logFile.writeMessage("onClientThreadStarted()");
-
-	connect(m_cfgController, &MonitorConfigController::configurationArrived,
-			this, &RtTrendTcpClient::slot_configurationArrived,
-			Qt::QueuedConnection);
 
 	return;
 }
@@ -362,28 +348,13 @@ void RtTrendTcpClient::processTrendStateChanges(const QByteArray& data)
 	return;
 }
 
-void RtTrendTcpClient::slot_configurationArrived(ConfigSettings configuration)
-{
-	// TO DO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	HostAddressPort s1, s2;
-//	HostAddressPort s1 = configuration.appDataServiceRealtimeTrend1.address();
-//	HostAddressPort s2 = configuration.appDataServiceRealtimeTrend2.address();
-
-	if (serverAddressPort(0) != s1 ||
-		serverAddressPort(1) != s2)
-	{
-		setServers(s1, s2, true);
-	}
-
-	return;
-}
-
 RtTrendTcpClient::Stat RtTrendTcpClient::stat() const
 {
 	RtTrendTcpClient::Stat result;
 
 	m_statMutex.lock();
 	result = m_stat;
+	result.isConnected = static_cast<int>(this->isConnected());
 	m_statMutex.unlock();
 
 	return result;

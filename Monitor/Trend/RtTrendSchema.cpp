@@ -78,7 +78,9 @@ void RtConnection::createConnectionThread(MonitorConfigController* configControl
 
 	QMutexLocker locker(&m_mutex);
 
-	m_tcpClient = new RtTrendTcpClient(configController, configController->logFile());
+	int to_do_pass_server_in_the_next_line;
+
+	m_tcpClient = new RtTrendTcpClient(configController->softwareInfo(), {}, configController->logFile());
 	m_tcpClientThread = new SimpleThread(m_tcpClient);
 	m_tcpClientThread->start();
 

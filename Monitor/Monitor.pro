@@ -87,6 +87,7 @@ SOURCES += main.cpp \
     ../lib/Ui/DialogSignalSearch.cpp \
     DialogColumns.cpp \
     Trend/MonitorTrendArchiveConnections.cpp \
+    Trend/MonitorTrendRealtimeConnections.cpp \
     Trend/MonitorTrends.cpp \
 	Archive/DialogChooseArchiveSignals.cpp \
 	Archive/ArchiveModelView.cpp \
@@ -116,6 +117,7 @@ HEADERS  += \
     ../lib/ComparatorSet.h \
     ../lib/ConstStrings.h \
 	../UtilsLib/ILogFile.h \
+    ../lib/ISignalDataServer.h \
     ../lib/SoftwareSettings.h \
     ../lib/Tuning/TuningLog.h \
     ../lib/Tuning/TuningSourcesHelper.h \
@@ -154,6 +156,7 @@ HEADERS  += \
     ../lib/Ui/DialogSignalSearch.h \
     DialogColumns.h \
     Trend/MonitorTrendArchiveConnections.h \
+    Trend/MonitorTrendRealtimeConnections.h \
     Trend/MonitorTrends.h \
 	Archive/DialogChooseArchiveSignals.h \
 	Archive/ArchiveModelView.h \

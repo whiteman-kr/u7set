@@ -26,7 +26,7 @@ struct SourceState
 struct Sources
 {
 	size_t size = 0;
-	std::array<SourceState, 4> sources{};		// 4 is maximum possible ways of getting signal (2 with regular channel, 2 with recent channel)
+	std::array<SourceState, 4> sources{};	// 4 maximum possible channels of getting signal (2 regular, 2 recent)
 
 	void set(const AppSignalState& state, Qt::HANDLE sourceThreadId);
 	void invalidateSource(Qt::HANDLE sourceThreadId);

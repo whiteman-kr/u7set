@@ -5,6 +5,7 @@
 #include "MonitorConfigController.h"
 #include "MonitorSignalManager.h"
 #include "MonitorTrendArchiveConnections.h"
+#include "MonitorTrendRealtimeConnections.h"
 #include "RtTrendTcpClient.h"
 
 class MonitorTrendsWidget;
@@ -16,8 +17,8 @@ class MonitorTrends
 public:
 	static std::vector<QString> getTrendsList();
 	static bool activateTrendWindow(QString trendName);
-	static bool startTrendApp(const MonitorSignalManager* signalManager,
-							  const MonitorConfigController* configController,
+	static bool startTrendApp(const MonitorSignalManager& signalManager,
+							  const MonitorConfigController& configController,
 							  const std::vector<AppSignalParam>& appSignals,
 							  QWidget* parent);
 
@@ -32,7 +33,7 @@ private:
 class MonitorTrendsWidget : public TrendLib::TrendMainWindow
 {
 public:
-	MonitorTrendsWidget(const MonitorSignalManager* m_signalManager,
+	MonitorTrendsWidget(const MonitorSignalManager& signalManager,
 						const MonitorConfigController& configController,
 						QWidget* parent);
 	virtual ~MonitorTrendsWidget();
@@ -60,16 +61,16 @@ protected slots:
 	void slot_realtimeDataReceived(std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState);
 	void slot_trendModeChanged();
 
+	void slot_configurationArrived(ConfigSettings configuration);
+
 	// Data
 	//
 private:
-	const MonitorSignalManager* m_signalManager = nullptr;
+	const MonitorSignalManager& m_signalManager;
 	const MonitorConfigController& m_configController;
 
-	MonitorTrendArchiveConnections m_conn;
-
-	RtTrendTcpClient* m_rtTcpClient = nullptr;
-	SimpleThread* m_rtTcpClientThread = nullptr;
+	MonitorTrendArchiveConnections m_archiveDataProvider;
+	MonitorTrendRealtimeConnections m_realtimeDataProvider;
 
 	enum  StatusBarColumns
 	{

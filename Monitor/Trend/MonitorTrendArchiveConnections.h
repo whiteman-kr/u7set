@@ -61,8 +61,9 @@ public:
 	~MonitorTrendArchiveConnections();
 
 public:
-	void createConnections();
 	void clear();
+	void createConnections();
+	void updateConnections();
 
 	size_t size() const;
 
@@ -75,9 +76,6 @@ public:
 signals:
 	void dataReady(TrendLib::TrendSignalPlusServerId trendSignalPlusServerId, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
 	void requestError(TrendLib::TrendSignalPlusServerId trendSignalPlusServerId, TimeStamp requestedHour, E::TimeType timeType);
-
-protected slots:
-	void slot_configurationArrived(ConfigSettings configuration);
 
 private:
 	const MonitorConfigController& m_configController;

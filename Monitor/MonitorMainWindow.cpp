@@ -206,7 +206,7 @@ bool MonitorMainWindow::eventFilter(QObject *object, QEvent *event)
 
 void MonitorMainWindow::showTrends(const std::vector<AppSignalParam>& appSignals)
 {
-	MonitorTrends::startTrendApp(&m_signalManager, &m_configController, appSignals, this);
+	MonitorTrends::startTrendApp(m_signalManager, m_configController, appSignals, this);
 }
 
 void MonitorMainWindow::saveWindowState()
@@ -1435,7 +1435,7 @@ void MonitorMainWindow::slot_trends()
 	if (trendToActivate.isEmpty() == true)
 	{
 		std::vector<AppSignalParam> appSignals;
-		MonitorTrends::startTrendApp(&m_signalManager, &m_configController, appSignals, this);
+		MonitorTrends::startTrendApp(m_signalManager, m_configController, appSignals, this);
 	}
 	else
 	{
@@ -1448,8 +1448,8 @@ void MonitorMainWindow::slot_trends()
 void MonitorMainWindow::slot_signalSnapshot()
 {
 	MonitorDialogSignalSnapshot* d = MonitorDialogSignalSnapshot::createDialog(&m_configController,
-											&m_signalManager,
-											monitorCentralWidget());
+																			   &m_signalManager,
+																			   monitorCentralWidget());
 	d->show();
 
 	return;
