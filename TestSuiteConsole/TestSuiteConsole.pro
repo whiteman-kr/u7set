@@ -76,11 +76,11 @@ LIBS += -lUtilsLib
 win32:PRE_TARGETDEPS += $$DESTDIR/UtilsLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libUtilsLib.a
 
-# CommonLib
+# HardwareLib
 #
-LIBS += -lCommonLib
-win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
-unix:PRE_TARGETDEPS += $$DESTDIR/libCommonLib.a
+LIBS += -lHardwareLib
+win32:PRE_TARGETDEPS += $$DESTDIR/HardwareLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libHardwareLib.a
 
 # AppSignalLib
 #
@@ -88,11 +88,11 @@ LIBS += -lAppSignalLib
 win32:PRE_TARGETDEPS += $$DESTDIR/AppSignalLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libAppSignalLib.a
 
-# HardwareLib
+# CommonLib
 #
-LIBS += -lHardwareLib
-win32:PRE_TARGETDEPS += $$DESTDIR/HardwareLib.lib
-unix:PRE_TARGETDEPS += $$DESTDIR/libHardwareLib.a
+LIBS += -lCommonLib
+win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libCommonLib.a
 
 # Protobuf
 #
@@ -100,5 +100,3 @@ LIBS += -lprotobuf
 win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
 INCLUDEPATH += ./../Protobuf
-
-
