@@ -67,7 +67,7 @@ void CfgServer::processSuccessorRequest(quint32 requestID, const char* requestDa
 		break;
 
 	default:
-		Q_ASSERT(false);
+		logError(QString("unknown request ID = %1 (ignored)").arg(requestID));
 	}
 }
 

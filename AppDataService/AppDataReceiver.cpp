@@ -195,7 +195,7 @@ void AppDataReceiverThread::receivePackets()
 				return;
 			}
 
-			msleep(5);
+			usleep(5);
 			continue;
 		}
 

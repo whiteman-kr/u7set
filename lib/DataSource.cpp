@@ -776,7 +776,15 @@ bool DataSourceOnline::collect(const RupFrameTime& rupFrameTime)
 
 	if (frameNumber == 0)
 	{
-		m_frame0ServerTime = rupFrameTime.serverTime;
+		qint64 rupFrameServerTime = rupFrameTime.serverTime;
+
+		if (rupFrameServerTime <= m_frame0ServerTime)
+		{
+			rupFrameServerTime = m_frame0ServerTime + 1;
+		}
+
+		m_frame0ServerTime = rupFrameServerTime;
+
 		m_isSimPacket = rupFrameTime.isSimFrame;
 	}
 	else
