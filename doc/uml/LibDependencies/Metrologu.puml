@@ -1,0 +1,19 @@
+@startuml
+
+!include ./CommonLib.puml
+!include ./UtilsLib.puml
+!include ./OnlineLib.puml
+!include ./Protobuf.puml
+!include ./AppSignalLib.puml
+!include ./HardwareLib.puml
+
+
+[Metrology]
+Metrology -up-> [CommonLib]
+Metrology -up-> [UtilsLib]
+Metrology -up-> [OnlineLib]
+Metrology -up-> [Protobuf]  
+Metrology -up-> [AppSignalLib]
+Metrology -up-> [HardwareLib]
+
+@enduml

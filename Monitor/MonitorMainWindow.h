@@ -8,6 +8,7 @@
 #include "SelectSchemaWidget.h"
 #include "MonitorTuningTcpClient.h"
 #include "InstanceResolver.h"
+#include "SchemaDrawStatistics.h"
 #include "../VFrame30/ClientSchemaView.h"
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/TuningController.h"
@@ -90,6 +91,7 @@ protected slots:
 	void showAboutQt();
 	void showAbout();
 	void showMatsUserManual();
+	void devTools();
 	void debug();
 
 	// Slots
@@ -172,6 +174,8 @@ private:
 
 	DialogAlert m_dialogAlert;
 
+	SchemaDrawStatistics m_schemaStats;
+
 	// File menu
 	//
 	QAction* m_pExitAction = nullptr;
@@ -184,6 +188,7 @@ private:
 
 	// ? menu
 	//
+	QAction* m_pDevToolsAction = nullptr;
 	QAction* m_pDebugAction = nullptr;
 	QAction* m_pLogAction = nullptr;
     QAction* m_pTuningLogAction = nullptr;

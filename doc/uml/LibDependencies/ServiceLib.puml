@@ -1,0 +1,14 @@
+@startuml
+
+!include ./CommonLib.puml
+!include ./UtilsLib.puml
+!include ./OnlineLib.puml
+!include ./Protobuf.puml
+
+[ServiceLib]
+ServiceLib -up-> UtilsLib
+ServiceLib -up-> CommonLib
+ServiceLib -up-> OnlineLib
+ServiceLib -up-> Protobuf
+
+@enduml  

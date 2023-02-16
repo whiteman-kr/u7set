@@ -1,0 +1,12 @@
+@startuml
+
+!include ./CommonLib.puml
+!include ./UtilsLib.puml
+!include ./Protobuf.puml
+
+[HardwareLib]
+HardwareLib -up-> CommonLib
+HardwareLib -up-> Protobuf
+HardwareLib -up-> UtilsLib
+
+@enduml  

@@ -1,6 +1,5 @@
 #include "AppSignalProperties.h"
 #include "../UtilsLib/WUtils.h"
-#include "../u7/Settings.h"
 
 
 #define ADD_SIGNAL_PROPERTY_GETTER(TYPE, NAME, VISIBLE, GETTER, OWNER) \

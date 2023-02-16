@@ -1,0 +1,20 @@
+@startuml
+
+!include ./CommonLib.puml
+!include ./UtilsLib.puml
+!include ./OnlineLib.puml
+!include ./Protobuf.puml
+!include ./AppSignalLib.puml
+!include ./TrendView.puml
+!include ./VFrame30.puml
+
+[Monitor]
+Monitor -up-> [CommonLib]
+Monitor -up-> [UtilsLib]
+Monitor -up-> [OnlineLib]
+Monitor -up-> [Protobuf]
+Monitor -up-> [AppSignalLib]
+Monitor -up-> [TrendView]
+Monitor -up-> [VFrame30]
+
+@enduml

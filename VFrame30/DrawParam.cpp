@@ -69,6 +69,28 @@ namespace VFrame30
 		return const_cast<ClientSchemaView*>(ptr);
 	}
 
+	ITimeStats* CDrawParam::timeStats()
+	{
+		if (drawMode() == DrawMode::Editor)
+		{
+			return nullptr;
+		}
+
+		auto c = clientSchemaView();
+		return c ? c->timeStats() : nullptr;
+	}
+
+	ITimeStats* CDrawParam::timeStats() const
+	{
+		if (drawMode() == DrawMode::Editor)
+		{
+			return nullptr;
+		}
+
+		auto c = clientSchemaView();
+		return c ? c->timeStats() : nullptr;
+	}
+
 	SchemaUnit CDrawParam::schemaUnit() const
 	{
 		return m_schemaUnit;

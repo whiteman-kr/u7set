@@ -3,12 +3,8 @@
 #include "../CommonLib/Hash.h"
 #include "../CommonLib/Times.h"
 #include "../UtilsLib/Queue.h"
-#include "../AppSignalLib/AppSignal.h"
-
-namespace Proto
-{
-	class AppSignalState;
-}
+#include "../Proto/serialization.pb.h"
+#include "AppSignalParam.h"
 
 struct SimpleAppSignalState
 {
@@ -19,6 +15,16 @@ struct SimpleAppSignalState
 	AppSignalStateFlags flags;
 	double value = 0;
 	quint16 packetNo = 0;
+
+	operator AppSignalState() const;
+
+	inline void copyTo(AppSignalState& state) const
+	{
+		state.m_hash = hash;
+		state.m_time = time;
+		state.m_flags = flags;
+		state.m_value = value;
+	}
 
 	bool isValid() const { return flags.valid == 1; }
 
@@ -47,7 +53,6 @@ private:
 };
 
 typedef std::shared_ptr<SimpleAppSignalStatesQueue> SimpleAppSignalStatesQueueShared;
-
 
 struct SimpleAppSignalStateArchiveFlag
 {

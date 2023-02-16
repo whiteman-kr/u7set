@@ -447,6 +447,16 @@ namespace VFrame30
 			return;
 		}
 
+		// Start stats
+		//
+		if (drawParam->timeStats() != nullptr)
+		{
+			drawParam->timeStats()->clear("Schema", schemaId());
+		}
+		auto startTime = std::chrono::system_clock::now();
+
+		// --
+		//
 		ClientSchemaView* clientView = drawParam->drawMode() == DrawMode::Editor ?
 										   nullptr :
 										   drawParam->clientSchemaView();
@@ -455,6 +465,10 @@ namespace VFrame30
 
 		if (clientView != nullptr)
 		{
+			// Start stats
+			//
+			auto startTime = std::chrono::system_clock::now();
+
 			// Monitor or Simulator
 			//
 			bool mbe = clientView->setScriptMessageBoxAllowed(false);
@@ -462,6 +476,16 @@ namespace VFrame30
 			this->preDrawEvent(clientView->jsEngine());
 
 			clientView->setScriptMessageBoxAllowed(mbe);
+
+			// Collect stats
+			//
+			if (drawParam->timeStats() != nullptr)
+			{
+				using namespace std::chrono;
+				auto now = system_clock::now();
+				auto ellapsed = duration_cast<microseconds>(now - startTime);
+				drawParam->timeStats()->addRecord("Schema", schemaId(), "preDrawEvent", ellapsed);
+			}
 		}
 
 		// Cleare client area by "grey" color
@@ -526,6 +550,13 @@ namespace VFrame30
 			{
 				Q_ASSERT(item);
 
+				// Start stats
+				//
+				if (drawParam->timeStats() != nullptr)
+				{
+					drawParam->timeStats()->clear(schemaId(), item->label());
+				}
+
 				if (isClientMode == true && item->visible() == false)
 				{
 					continue;
@@ -535,6 +566,8 @@ namespace VFrame30
 				//
 				if (isClientMode == true && item->isCommented() == false)
 				{
+					auto startTime = std::chrono::system_clock::now();
+
 					// Call preDrawEvent for all items, even if they out of screen
 					// Some items preDrawEvents may have scipt for caching reasons
 					//
@@ -553,10 +586,24 @@ namespace VFrame30
 										  .arg(item->label())
 										  .arg(item->lastScriptError()));
 					}
+
+					// Collect stats
+					//
+					if (drawParam->timeStats() != nullptr)
+					{
+						using namespace std::chrono;
+						auto now = system_clock::now();
+						auto ellapsed = duration_cast<microseconds>(now - startTime);
+						drawParam->timeStats()->addRecord(schemaId(), item->label(), "preDrawEvent", ellapsed);
+					}
 				}
 
 				if (item->isIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
 				{
+					// Start stats
+					//
+					auto startTime = std::chrono::system_clock::now();
+
 					item->draw(drawParam);	// Drawing item is here
 
 					if (item->isCommented() == true)
@@ -575,6 +622,17 @@ namespace VFrame30
 					{
 						item->drawScriptError(drawParam);
 					}
+
+
+					// Collect stats
+					//
+					if (drawParam->timeStats() != nullptr)
+					{
+						using namespace std::chrono;
+						auto now = system_clock::now();
+						auto ellapsed = duration_cast<microseconds>(now - startTime);
+						drawParam->timeStats()->addRecord(schemaId(), item->label(), "draw", ellapsed);
+					}
 				}
 			}
 		}
@@ -582,6 +640,18 @@ namespace VFrame30
 		if (isClientMode == true)
 		{
 			drawScriptError(drawParam);
+		}
+
+		// Collect stats
+		//
+		if (drawParam->timeStats() != nullptr)
+		{
+			using namespace std::chrono;
+
+			auto now = system_clock::now();
+			auto ellapsed = duration_cast<microseconds>(now - startTime);
+
+			drawParam->timeStats()->addRecord("Schema", schemaId(), "Draw", ellapsed);
 		}
 
 		//qDebug() << "Schema::Draw " << timer.elapsed();

@@ -52,4 +52,4 @@
 #endif
 #endif
 
-#define ONLINE_LIB_DOMAIN
+#define APP_SIGNAL_LIB_DOMAIN

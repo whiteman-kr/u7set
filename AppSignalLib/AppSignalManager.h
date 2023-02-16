@@ -7,9 +7,8 @@
 #include <vector>
 #include <unordered_map>
 #include <QReadWriteLock>
-#include "../AppSignalLib/IAppSignalManager.h"
+#include "IAppSignalManager.h"
 #include "../lib/ComparatorSet.h"
-
 
 
 class AppSignalManager final : public QObject, public IAppSignalManager
