@@ -49,10 +49,10 @@ CONFIG(release, debug|release) {
 SOURCES += \
     InputController.cpp \
     OutputController.cpp \
+    ScriptTestLog.cpp \
     TestLibrary.cpp \
     TestLibrarySettings.cpp \
     TestLog.cpp \
-    TestLogController.cpp \
     TestScriptsStorage.cpp \
     TestSuiteConfigController.cpp \
     TestSuiteLib.cpp \
@@ -61,11 +61,11 @@ SOURCES += \
 HEADERS += \
     InputController.h \
     OutputController.h \
+    ScriptTestLog.h \
     Stable.h \
     TestLibrary.h \
     TestLibrarySettings.h \
     TestLog.h \
-    TestLogController.h \
     TestScriptsStorage.h \
     TestSuiteConfigController.h \
     TestSuiteLib.h \

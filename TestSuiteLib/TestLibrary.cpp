@@ -5,7 +5,7 @@ TestLibrary::TestLibrary(const TestLibrarySettings& settings, ILogFile* appLogFi
 	m_librarySettings(settings),
 	m_configController(settings.instanceStrId(), settings.configuratorAddress1(), settings.configuratorAddress2(), appLogFile),
 	m_testLog(outputLog),
-	m_testLogController(&m_testLog)
+	m_scriptTestLog(&m_testLog)
 {
 	connect(&m_configController, &TestSuiteConfigController::configurationArrived, this, &TestLibrary::onConfigurationArrived);
 
@@ -44,20 +44,39 @@ const TestLog& TestLibrary::testResultLog() const
 
 void TestLibrary::execute()
 {
-	if (configController().configuration().isValid() == false)
+	if (state() == TestLibraryState::Running)
 	{
-		m_state = TestLibraryState::WaitingForConfiguration;
 		return;
 	}
 
-	runTests();
+	if (configController().configuration().isValid() == false)
+	{
+		setState(TestLibraryState::WaitingForConfiguration);
+	}
+	else
+	{
+		runTests();
+	}
 
-	// An error has occurred
-	//
-	//m_state = TestLibraryState::Error;
 	return;
 }
-
+void TestLibrary::stop()
+{
+	switch (state())
+	{
+	case TestLibraryState::WaitingForConfiguration:
+	case TestLibraryState::Error:
+		{
+			setState(TestLibraryState::Idle);
+			break;
+		}
+	case TestLibraryState::Running:
+		{
+			stopTests();
+			break;
+		}
+	}
+}
 bool TestLibrary::loadTestsFromPath()
 {
 	Q_ASSERT (m_librarySettings.loadScriptsFromPath() == true);
@@ -127,19 +146,17 @@ void TestLibrary::runTests()
 		return;
 	}
 
-	m_state = TestLibraryState::Running;
+	setState(TestLibraryState::Running);
 
-	m_testLog.addMessage("TestLibrary::execute");
+	m_testLog.writeMessage("TestLibrary::execute");
 
-	TestWorkerContext context(m_outputController, m_inputController, &m_testLogController);
-	context.scripts = m_testScriptsStorage.scripts();	// Set all scripts to the context
-
-	m_testWorkerThread = new TestWorkerThread(context, this);
+	m_testWorkerThread = new TestWorkerThread(&m_testController, &m_scriptTestLog, this);
 	connect(m_testWorkerThread, &TestWorkerThread::finished, this, &TestLibrary::onTestingFinished);
+	m_testWorkerThread->worker().setScripts(m_testScriptsStorage.scripts());	// Set all scripts to the worker
 	m_testWorkerThread->run();
 }
 
-void TestLibrary::stop()
+void TestLibrary::stopTests()
 {
 	if (state() != TestLibraryState::Running)
 	{
@@ -156,28 +173,29 @@ void TestLibrary::stop()
 	m_testWorkerThread->stop();
 }
 
-bool TestLibrary::isRunning() const
-{
-	return state() == TestLibraryState::Running;
-}
-
 TestLibraryState TestLibrary::state() const
 {
 	return m_state;
+}
+
+void TestLibrary::setState(TestLibraryState state)
+{
+	m_state = state;
 }
 
 void TestLibrary::onConfigurationArrived()
 {
 	if (state() == TestLibraryState::Running)
 	{
-		stop();
+		stopTests();
 	}
 
 	if (m_librarySettings.loadScriptsFromPath() == false)
 	{
-		if (loadTestsFromConfiguration() == false)
+		bool ok = loadTestsFromConfiguration();
+		if (ok == false)
 		{
-			m_state = TestLibraryState::Error;
+			setState(TestLibraryState::Error);
 		}
 	}
 
@@ -241,11 +259,11 @@ void TestLibrary::onTestingFinished(int errorCode)
 		return;
 	}
 
-	m_testLog.addMessage("TestLibrary::finished");
+	m_testLog.writeMessage("TestLibrary::finished");
 	m_testWorkerThread->deleteLater();
 	m_testWorkerThread = nullptr;
 
-	m_state = TestLibraryState::Idle;
+	setState(TestLibraryState::Idle);
 
 	emit testingFinished(errorCode);
 }

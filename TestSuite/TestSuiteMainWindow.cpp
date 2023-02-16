@@ -224,18 +224,12 @@ void TestSuiteMainWindow::exit()
 
 void TestSuiteMainWindow::on_m_run_clicked()
 {
-	if (m_testLibrary.isRunning() == false)
-	{
-		m_testLibrary.execute();
-	}
+	m_testLibrary.execute();
 }
 
 void TestSuiteMainWindow::on_m_stop_clicked()
 {
-	if (m_testLibrary.isRunning() == true)
-	{
-		m_testLibrary.stop();
-	}
+	m_testLibrary.stop();
 }
 
 void TestSuiteMainWindow::newLogItem(const TestLogItem& item)

@@ -36,10 +36,9 @@ TestLog::TestLog(IOutputLog* outputLog):
 	m_outputLog(outputLog)
 {
 	Q_ASSERT(m_outputLog);
-	qRegisterMetaType<TestLogItem>();
 }
 
-void TestLog::addError(const QString& text)
+void TestLog::writeError(const QString& text)
 {
 	if (m_outputLog == nullptr)
 	{
@@ -54,7 +53,7 @@ void TestLog::addError(const QString& text)
 	m_items.push_back(ti);
 }
 
-void TestLog::addWarning(const QString& text)
+void TestLog::writeWarning(const QString& text)
 {
 	if (m_outputLog == nullptr)
 	{
@@ -69,7 +68,7 @@ void TestLog::addWarning(const QString& text)
 	m_items.push_back(ti);
 }
 
-void TestLog::addMessage(const QString& text)
+void TestLog::writeMessage(const QString& text)
 {
 	if (m_outputLog == nullptr)
 	{

@@ -2,7 +2,7 @@
 
 #include "InputController.h"
 #include "OutputController.h"
-#include "TestLogController.h"
+#include "ScriptTestLog.h"
 #include "TestWorker.h"
 #include "TestLog.h"
 #include "../UtilsLib/ILogFile.h"
@@ -39,8 +39,8 @@ public:
 	void execute();
 	void stop();
 
-	bool isRunning() const;
 	TestLibraryState state() const;
+	void setState(TestLibraryState state);
 
 signals:
 	void testingFinished(int result);
@@ -49,21 +49,23 @@ private:
 	bool loadTestsFromPath();
 	bool loadTestsFromConfiguration();
 	void runTests();
+	void stopTests();
 
 private slots:
 	void onConfigurationArrived();
 	void onTestingFinished(int errorCode);
 
 private:
-	InputController* m_inputController = nullptr;
-	OutputController* m_outputController = nullptr;
+	//InputController* m_inputController = nullptr;
+	//OutputController* m_outputController = nullptr;
+
+	TestController m_testController;
+
+	TestLog m_testLog;
+	ScriptTestLog m_scriptTestLog;
 
 	TestWorkerThread* m_testWorkerThread = nullptr;	// Main test worker thread
 
-	TestLog m_testLog;
-	TestLogController m_testLogController;
-
-private:
 	TestScriptsStorage m_testScriptsStorage;
 
 	TestSuiteConfigController m_configController;

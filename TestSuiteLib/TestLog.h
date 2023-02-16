@@ -30,15 +30,14 @@ private:
 	QDateTime m_dateTime;
 
 };
-class TestLog : public QObject
+class TestLog
 {
-	Q_OBJECT
 public:
 	TestLog(IOutputLog* outputLog);
 
-	void addError(const QString& text);
-	void addWarning(const QString& text);
-	void addMessage(const QString& text);
+	void writeError(const QString& text);
+	void writeWarning(const QString& text);
+	void writeMessage(const QString& text);
 
 private:
 	QMutex m_itemsMutex;	// For access to m_itemsMutex
