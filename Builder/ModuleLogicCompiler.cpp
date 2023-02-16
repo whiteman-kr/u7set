@@ -37,9 +37,11 @@ namespace Builder
 		m_ualSignals(*this, appLogicCompiler.log()),
 		m_loopbacks(*this),
 		m_appLogicCode(AppLogicCode::Type::AllCode, false),
-		m_optimizedAppLogicCode(AppLogicCode::Type::AllCode, true),
 		m_idrCode(AppLogicCode::Type::IDR_Code, false),
-		m_alpCode(AppLogicCode::Type::ALP_Code, false)
+		m_alpCode(AppLogicCode::Type::ALP_Code, false),
+		m_optiAppLogicCode(AppLogicCode::Type::AllCode, true),
+		m_optiIdrCode(AppLogicCode::Type::IDR_Code, true),
+		m_optiAlpCode(AppLogicCode::Type::ALP_Code, true)
 	{
 		m_equipmentSet = appLogicCompiler.equipmentSet();
 		m_deviceRoot = m_equipmentSet->root().get();
@@ -171,6 +173,7 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::checkAppLogicCode),
 
 			PROC_TO_CALL(ModuleLogicCompiler::optimizeAppLogicCode),
+			PROC_TO_CALL(ModuleLogicCompiler::makeOptimizedAppLogicCode),
 			PROC_TO_CALL(ModuleLogicCompiler::writeInfoFilesAfterOptimization),
 			PROC_TO_CALL(ModuleLogicCompiler::checkOptimizedAppLogicCode),
 
@@ -7526,49 +7529,19 @@ namespace Builder
 		m_idrCode.clear();
 
 		//
-		m_idrCode.comment_nl(ApplicationLogicCompiler::getInfoFileHeader(m_context));
-		m_idrCode.comment(QString("LM equipmentID: %1").arg(lmEquipmentID()));
-		m_idrCode.comment_nl(QString("LM description: %1, version %2").
-								arg(m_lmDescription->name()).
-								arg(m_lmDescription->version()));
-		m_idrCode.comment_nl("Start of IDR phase code");
-
-		CodeItem appStartCmd;
-
-		appStartCmd.appStart(0);			// ALP phase code start addr will set to actual value later
-		appStartCmd.setComment("set address of ALP phase code start");
-
-		m_idrCode.append(appStartCmd);
-		m_idrCode.newLine();
-
-		//
 
 		CodeGenProcsToCallArray procs =
 		{
+			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateIdrCodeStart),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateCustomCode),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateAfbsVersionCheckingCode),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateInitAfbsCode),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateLoopbacksRefreshingCode),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::constBitsInitialization),
+			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateConstBitsInitialization),
+			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateIdrCodeStop),
 		};
 
 		bool result = runCodeGenProcs(procs, &m_idrCode);
-
-		//
-
-		CodeItem stopCmd;
-
-		stopCmd.stop();
-		stopCmd.setComment("end of IDR phase code");
-
-		m_idrCode.append(stopCmd);
-		m_idrCode.newLine();
-
-		result &= m_idrCode.finalize(getLmDescription());	// required to calc codeSizeW
-
-		int alpCodeStartAddr = m_idrCode.codeSizeW();
-
-		m_idrCode.setAppStartAddr(alpCodeStartAddr);
 
 		return result;
 	}
@@ -7625,14 +7598,33 @@ namespace Builder
 
 	bool ModuleLogicCompiler::makeAppLogicCode()
 	{
-		m_appLogicCode.clear();
+		return makeAppLogicCode(m_idrCode, m_alpCode, &m_appLogicCode);
+	}
 
-		m_appLogicCode.reserve(m_idrCode.itemsCount() + m_alpCode.itemsCount());
+	bool ModuleLogicCompiler::makeAppLogicCode(AppLogicCode& idrCode,
+											   AppLogicCode& alpCode,
+											   AppLogicCode* appCode)
+	{
+		TEST_PTR_RETURN_FALSE(appCode);
 
-		m_appLogicCode.append(m_idrCode);
-		m_appLogicCode.append(m_alpCode);
+		appCode->clear();
 
-		bool result = m_appLogicCode.finalize(getLmDescription());
+		bool result = true;
+
+		result &= idrCode.finalize(getLmDescription());		// required to calc codeSizeW
+
+		int alpCodeStartAddr = idrCode.codeSizeW();
+
+		idrCode.setAppStartAddr(alpCodeStartAddr);
+
+		result &= alpCode.finalize(getLmDescription());
+
+		appCode->reserve(idrCode.itemsCount() + alpCode.itemsCount());
+
+		appCode->append(idrCode);
+		appCode->append(alpCode);
+
+		result &= appCode->finalize(getLmDescription());
 
 		return result;
 	}
@@ -7653,32 +7645,155 @@ namespace Builder
 
 	bool ModuleLogicCompiler::optimizeAppLogicCode()
 	{
-		m_optimizedAppLogicCode = m_appLogicCode;
-		m_optimizedAppLogicCode.setOptimized(true);
+		m_optiIdrCode = m_idrCode;
+		m_optiAlpCode = m_alpCode;
 
-		// do optimization
+		m_optiIdrCode.setOptimized(true);
+		m_optiAlpCode.setOptimized(true);
 
-		m_optimizedAppLogicCode.finalize(m_lmDescription);
+		m_optiIdrCode.removeStopCommand();
 
-		return true;
+		CodeOptimizationProcsToCallArray procs =
+		{
+			CODE_OPTIMIZATION_PROC_TO_CALL(ModuleLogicCompiler::optimizeSequentialMoves),
+		};
+
+		bool result = true;
+
+		for(const CodeOptimizationProcToCall& proc : procs)
+		{
+			result &= (this->*proc.first)(m_optiIdrCode);
+			result &= (this->*proc.first)(m_optiAlpCode);
+
+			if (result == false)
+			{
+				// %1 has been finished with errors.
+				//
+				m_log->errALC5999(proc.second);
+				break;
+			}
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::makeOptimizedAppLogicCode()
+	{
+		return makeAppLogicCode(m_optiIdrCode, m_optiAlpCode, &m_optiAppLogicCode);
 	}
 
 	bool ModuleLogicCompiler::writeInfoFilesAfterOptimization()
 	{
 		bool result = true;
 
-		result &= writeAsmFile(m_optimizedAppLogicCode);
+		result &= writeAsmFile(m_optiAppLogicCode);
 
-		result &= writeStatisticsFile(m_optimizedAppLogicCode);
-
+		result &= writeStatisticsFile(m_optiAppLogicCode,
+									  m_optiIdrCode,
+									  m_optiAlpCode);
 		return result;
+	}
+
+	bool ModuleLogicCompiler::optimizeSequentialMoves(CodeSnippet& code)
+	{
+		int sequenceSize;				// commands in sequence
+		quint16 moveSizeW;
+
+		quint16 srcAddr;
+		quint16 destAddr;
+		quint16 prevSrcAddr;
+		quint16 prevDestAddr;
+
+		CodeSnippetIterator sequenceBegin;
+		CodeSnippetIterator prevIt;
+
+		auto reinitVars =	[&]() -> void
+							{
+								sequenceSize = 0;
+								moveSizeW = 0;
+								srcAddr = 0;
+								destAddr = 0;
+								prevSrcAddr = 0;
+								prevDestAddr = 0;
+								sequenceBegin = code.end();
+								prevIt = code.end();
+		};
+
+		reinitVars();
+
+		for(auto it = code.begin(); it != code.end(); it++)
+		{
+			CodeItem& ci = *it;
+
+			LmCommand::Code cmdCode = ci.getOpcode();
+
+			if (cmdCode != LmCommand::Code::MOV &&
+				cmdCode != LmCommand::Code::MOV32 &&
+				cmdCode != LmCommand::Code::MOVMEM)
+			{
+				if (sequenceSize == 0)
+				{
+					continue;
+				}
+
+				if (sequenceSize > 1)
+				{
+					// gen optimized code
+				}
+sdv'\ed,vb;'d,fb;'d,fb;'d'b
+				reinitVars();
+				continue;
+			}
+
+			srcAddr = ci.srcAddr();
+			destAddr = ci.destAddr();
+
+			if (addressAllowSequentialMoveOptimization(srcAddr, true) == true &&
+				addressAllowSequentialMoveOptimization(destAddr, false) == true)
+
+
+			if (sequenceBegin == code.end())
+			{
+				sequenceBegin = it;
+				prevIt = it;
+				sequenceSize = 1;
+			}
+
+
+		}
+
+		return true;
 	}
 
 	bool ModuleLogicCompiler::checkOptimizedAppLogicCode()
 	{
 		CodeChecker checker(*this);
 
-		return checker.check(m_optimizedAppLogicCode);
+		return checker.check(m_optiAppLogicCode);
+	}
+
+	bool ModuleLogicCompiler::generateIdrCodeStart(CodeSnippet* code)
+	{
+		TEST_PTR_RETURN_FALSE(code);
+
+		code->comment_nl(ApplicationLogicCompiler::getInfoFileHeader(m_context));
+		code->comment(QString("LM equipmentID: %1").arg(lmEquipmentID()));
+		code->comment_nl(QString("LM description: %1, version %2").
+								arg(m_lmDescription->name()).
+								arg(m_lmDescription->version()));
+
+		code->comment_nl("Start of IDR phase code");
+
+		CodeItem appStartCmd;
+
+		// ALP phase code start addr will set to actual value later
+		//
+		appStartCmd.appStart(0, "set address of ALP phase code start");
+
+		code->append(appStartCmd);
+		code->newLine();
+
+		return true;
 	}
 
 	bool ModuleLogicCompiler::generateCustomCode(CodeSnippet* code)
@@ -8330,7 +8445,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::constBitsInitialization(CodeSnippet* code)
+	bool ModuleLogicCompiler::generateConstBitsInitialization(CodeSnippet* code)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 
@@ -8348,6 +8463,20 @@ namespace Builder
 		cmd.setComment("const bit 1");
 
 		code->append(cmd);
+		code->newLine();
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::generateIdrCodeStop(CodeSnippet* code)
+	{
+		TEST_PTR_RETURN_FALSE(code);
+
+		CodeItem stopCmd;
+
+		stopCmd.stop("end of IDR phase code");
+
+		code->append(stopCmd);
 		code->newLine();
 
 		return true;
@@ -14608,7 +14737,9 @@ namespace Builder
 
 		result &= writeMemFile();
 
-		result &= writeStatisticsFile(m_appLogicCode);
+		result &= writeStatisticsFile(m_appLogicCode,
+									  m_idrCode,
+									  m_alpCode);
 
 		result &= writeTuningInfoFile();
 
@@ -14646,7 +14777,9 @@ namespace Builder
 		return (buildFile != nullptr);
 	}
 
-	bool ModuleLogicCompiler::writeStatisticsFile(const AppLogicCode& code) const
+	bool ModuleLogicCompiler::writeStatisticsFile(const AppLogicCode& code,
+												  const AppLogicCode& idrCode,
+												  const AppLogicCode& alpCode) const
 	{
 		TEST_PTR_RETURN_FALSE(m_lmDescription);
 
@@ -14661,11 +14794,8 @@ namespace Builder
 
 		//
 
-		if (code.optimized() == false)
-		{
-			printCodeStatistics(m_idrCode, file, true);
-			printCodeStatistics(m_alpCode, file, true);
-		}
+		printCodeStatistics(idrCode, file, true);
+		printCodeStatistics(alpCode, file, true);
 
 		printCodeStatistics(code, file, false);
 

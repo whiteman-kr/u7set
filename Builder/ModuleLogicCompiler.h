@@ -37,6 +37,13 @@ namespace Builder
 
 #define CODE_GEN_PROC_TO_CALL(procName)		{ &procName, #procName }
 
+	typedef bool (ModuleLogicCompiler::*CodeOptimizationProc)(CodeSnippet&);
+	typedef std::pair<CodeOptimizationProc, const char*> CodeOptimizationProcToCall;
+	typedef std::vector<CodeOptimizationProcToCall> CodeOptimizationProcsToCallArray;
+
+#define CODE_OPTIMIZATION_PROC_TO_CALL(procName)	{ &procName, #procName }
+
+
 	class ModuleLogicCompiler : public QObject
 	{
 		Q_OBJECT
@@ -444,13 +451,23 @@ namespace Builder
 		bool generateAlpPhaseCode();
 
 		bool makeAppLogicCode();
+
+		bool makeAppLogicCode(AppLogicCode& idrCode,
+							  AppLogicCode& alpCode,
+							  AppLogicCode* appCode);
+
 		bool checkAppLogicCode();
 		bool cleanupHeaps();
 
 		bool optimizeAppLogicCode();
+		bool makeOptimizedAppLogicCode();
+
+		bool optimizeSequentialMoves(CodeSnippet& code);
+
 		bool writeInfoFilesAfterOptimization();
 		bool checkOptimizedAppLogicCode();
 
+		bool generateIdrCodeStart(CodeSnippet* code);
 		bool generateCustomCode(CodeSnippet* code);
 		bool generateAfbsVersionCheckingCode(CodeSnippet* code);
 		bool generateInitAfbsCode(CodeSnippet* code);
@@ -458,7 +475,8 @@ namespace Builder
 		bool displayAfbParams(CodeSnippet* code, const UalAfb& appFb);
 		bool generateLoopbacksRefreshingCode(CodeSnippet* code);
 		bool getRefreshingCode(CodeSnippet* code, const QString& loopbackID, const UalSignal* lbSignal);
-		bool constBitsInitialization(CodeSnippet*code);
+		bool generateConstBitsInitialization(CodeSnippet* code);
+		bool generateIdrCodeStop(CodeSnippet* code);
 
 		bool copyAcquiredRawDataInRegBuf(CodeSnippet* code);
 		bool convertAnalogInputSignals(CodeSnippet* code);
@@ -700,7 +718,9 @@ namespace Builder
 		bool writeInfoFiles();
 		bool writeAsmFile(const AppLogicCode& code) const;
 		bool writeMemFile() const;
-		bool writeStatisticsFile(const AppLogicCode& code) const;
+		bool writeStatisticsFile(const AppLogicCode& code,
+								 const AppLogicCode& idrCode,
+								 const AppLogicCode& alpCode) const;
 		bool writeTuningInfoFile() const;
 		bool writeOptoModulesReport() const;
 		bool writeLoopbacksReport();
@@ -832,10 +852,12 @@ namespace Builder
 		//
 
 		AppLogicCode m_appLogicCode;
-		AppLogicCode m_optimizedAppLogicCode;
-
 		AppLogicCode m_idrCode;
 		AppLogicCode m_alpCode;
+
+		AppLogicCode m_optiAppLogicCode;
+		AppLogicCode m_optiIdrCode;
+		AppLogicCode m_optiAlpCode;
 
 		AfblsMap m_afbls;
 

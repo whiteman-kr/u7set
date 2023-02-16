@@ -376,6 +376,14 @@ namespace Builder
 		int getFbType() const { return m_code.getFbType(); }
 		int getFbInstance() const { return m_code.getFbInstance(); }
 
+		quint16 srcAddr() const;
+		Address16 srcAddrBit() const;
+
+		quint16 destAddr() const;
+		Address16 destAddrBit() const;
+
+		quint16 getMoveSizeW() const;
+
 		bool isValidCommand() const { return m_code.getOpCode() != LmCommand::Code::NoCommand; }
 
 		bool generateBinCode(QByteArray* binCode) const;
@@ -428,6 +436,8 @@ namespace Builder
 		int m_clockCount = -1;			// total code execution time after this command running
 	};
 
+	using CodeSnippetIterator = std::vector<CodeItem>::iterator;
+
 	class CodeSnippet
 	{
 	public:
@@ -464,6 +474,9 @@ namespace Builder
 		void getAsmMetadata(std::vector<QVariantList>* metadata) const;
 
 		const std::vector<CodeItem>& code() const;
+
+		CodeSnippetIterator begin();
+		CodeSnippetIterator end();
 
 	protected:
 		std::vector<CodeItem> m_code;
@@ -503,6 +516,8 @@ namespace Builder
 		double lmCycleTimeUsage() const;
 
 		bool getCommandsStatistics(std::vector<CommandStatistics>* stat) const;
+
+		void removeStopCommand();
 
 	private:
 		void startFbExec(int fbOpCode, int fbRuntime);

@@ -1104,6 +1104,113 @@ namespace Builder
 		return lmCommands[m_code.getOpCodeInt()].waitFbExecution;
 	}
 
+	quint16 CodeItem::srcAddr() const
+	{
+		switch(getOpcode())
+		{
+		case LmCommand::Code::MOV:
+		case LmCommand::Code::PMOV:
+		case LmCommand::Code::WRFB:
+
+		case LmCommand::Code::MOV32:
+		case LmCommand::Code::PMOV32:
+		case LmCommand::Code::WRFB32:
+
+		case LmCommand::Code::MOVMEM:
+
+			return getWord3();
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		return 0;
+	}
+
+	Address16 CodeItem::srcAddrBit() const
+	{
+		switch(getOpcode())
+		{
+		case LmCommand::Code::MOVB:
+		case LmCommand::Code::WRFBB:
+		case LmCommand::Code::FILL:
+			return Address16(getWord3(), getBitNo1());
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		return Address16();
+	}
+
+	quint16 CodeItem::destAddr() const
+	{
+		switch(getOpcode())
+		{
+		case LmCommand::Code::MOV:
+		case LmCommand::Code::MOVC:
+		case LmCommand::Code::PMOV:
+		case LmCommand::Code::WRFB:
+
+		case LmCommand::Code::MOV32:
+		case LmCommand::Code::MOVC32:
+		case LmCommand::Code::PMOV32:
+		case LmCommand::Code::WRFB32:
+
+		case LmCommand::Code::MOVMEM:
+		case LmCommand::Code::SETMEM:
+		case LmCommand::Code::FILL:
+			return getWord2();
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		return 0;
+	}
+
+	Address16 CodeItem::destAddrBit() const
+	{
+		switch(getOpcode())
+		{
+		case LmCommand::Code::MOVBC:
+			return Address16(getWord2(), getBitNo1());
+
+		case LmCommand::Code::MOVB:
+			return Address16(getWord2(), getBitNo2());
+
+		case LmCommand::Code::RDFBB:
+			return Address16(getWord3(), getBitNo1());
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		return Address16();
+	}
+
+	quint16 CodeItem::getMoveSizeW() const
+	{
+		switch(getOpcode())
+		{
+		case LmCommand::Code::MOV:
+		case LmCommand::Code::PMOV:
+			return 1;
+
+		case LmCommand::Code::MOV32:
+		case LmCommand::Code::PMOV32:
+			return 2;
+
+		case LmCommand::Code::MOVMEM:
+			return getWord4();
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		return 0;
+	}
+
 	bool CodeItem::generateBinCode(QByteArray* binCode) const
 	{
 		TEST_PTR_RETURN_FALSE(binCode);
@@ -2008,6 +2115,16 @@ namespace Builder
 		return m_code;
 	}
 
+	CodeSnippetIterator CodeSnippet::begin()
+	{
+		return m_code.begin();
+	}
+
+	CodeSnippetIterator CodeSnippet::end()
+	{
+		return m_code.end();
+	}
+
 	// ----------------------------------------------------------------------------------
 	//
 	// AppLogicCode class implementation
@@ -2278,6 +2395,23 @@ namespace Builder
 		}
 
 		return true;
+	}
+
+	void AppLogicCode::removeStopCommand()
+	{
+		auto it = std::find_if(m_code.end(), m_code.begin(),
+								[] (const CodeItem& ci)
+								{
+									return ci.getOpcode() == LmCommand::Code::STOP;
+								});
+
+		if (it == m_code.end())
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		m_code.erase(it, m_code.end());
 	}
 
 	void AppLogicCode::startFbExec(int fbOpCode, int fbRuntime)
