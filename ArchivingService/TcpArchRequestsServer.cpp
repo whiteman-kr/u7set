@@ -36,7 +36,7 @@ void TcpArchRequestsServer::processRequest(quint32 requestID, const char* reques
 		break;
 
 	default:
-		assert(false);
+		logError(QString("unknown request ID = %1 (ignored)").arg(requestID));
 	}
 }
 

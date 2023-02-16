@@ -75,25 +75,28 @@ void UalTesterServer::processRequest(quint32 requestID, const char* requestData,
 {
 	switch(requestID)
 	{
-		case TDS_GET_TUNING_SOURCES_INFO:
-			onGetTuningSourcesInfoRequest(requestData, requestDataSize);
-			break;
+	case TDS_GET_TUNING_SOURCES_INFO:
+		onGetTuningSourcesInfoRequest(requestData, requestDataSize);
+		break;
 
-		case TDS_GET_TUNING_SOURCES_STATES:
-			onGetTuningSourcesStateRequest(requestData, requestDataSize);
-			break;
+	case TDS_GET_TUNING_SOURCES_STATES:
+		onGetTuningSourcesStateRequest(requestData, requestDataSize);
+		break;
 
-		case TDS_TUNING_SIGNALS_WRITE:
-			onTuningSignalsWriteRequest(requestData, requestDataSize);
-			break;
+	case TDS_TUNING_SIGNALS_WRITE:
+		onTuningSignalsWriteRequest(requestData, requestDataSize);
+		break;
 
-		case TDS_DATA_SOURCE_WRITE:
-			onDataSourceWriteRequest(requestData, requestDataSize);
-			break;
+	case TDS_DATA_SOURCE_WRITE:
+		onDataSourceWriteRequest(requestData, requestDataSize);
+		break;
 
-		case TDS_PACKETSOURCE_EXIT:
-			onPacketSourceExitRequest(requestData, requestDataSize);
-			break;
+	case TDS_PACKETSOURCE_EXIT:
+		onPacketSourceExitRequest(requestData, requestDataSize);
+		break;
+
+	default:
+		logError(QString("unknown request ID = %1 (ignored)").arg(requestID));
 	}
 }
 

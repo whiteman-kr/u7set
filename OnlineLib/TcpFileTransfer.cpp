@@ -447,6 +447,7 @@ namespace Tcp
 		Q_UNUSED(requestID);
 		Q_UNUSED(requestData);
 		Q_UNUSED(requestDataSize);
+		logError(QString("unknown request ID = %1 (ignored)").arg(requestID));
 	}
 
 	QString FileServer::rootFolder() const
