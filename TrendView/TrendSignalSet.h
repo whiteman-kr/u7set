@@ -153,6 +153,8 @@ namespace TrendLib
 		TrendSignalPlusServerId trendSignalPlusServerId;
 		std::map<TimeStamp, std::shared_ptr<OneHourData>> m_hours;		// Key is rounded to hour (like 9:00, 14:00, ...)
 																		// DO NOT CHANGE type to unordered_map, as it is suppose to be ordered
+		QString realTimeActiveServiceId;		// Current active realtime service id, resets to "" when non vlid
+												// points arrived, and set to the new value for service with valid points
 
 		// Serialization
 		//
@@ -230,11 +232,15 @@ namespace TrendLib
 		void slot_archiveDataReceived(TrendSignalPlusServerId trendSignalPlusServerId, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
 		void slot_archiveRequestError(TrendSignalPlusServerId trendSignalPlusServerId, TimeStamp requestedHour, E::TimeType timeType);
 
-		void slot_realtimeDataReceived(std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState);
+		void slot_realtimeDataReceived(QString sourceEquipmentId,
+									   std::shared_ptr<TrendLib::RealtimeData> data,
+									   TrendLib::TrendStateItem minState,
+									   TrendLib::TrendStateItem maxState);
 		void slot_realtimeRequestError(QString errorText);
 
 	private:
-		void appendRealtimeDataToArchive(E::TimeType timeType,
+		void appendRealtimeDataToArchive(QString sourceEquipmentId,
+										 E::TimeType timeType,
 										 Hash signalhash,
 										 const std::vector<TrendStateItem>& states);
 

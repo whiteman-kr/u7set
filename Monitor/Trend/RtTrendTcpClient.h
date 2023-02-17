@@ -27,7 +27,10 @@ class RtTrendTcpClient : public Tcp::Client, public TcpClientStatistics
 	Q_OBJECT
 
 public:
-	RtTrendTcpClient(const SoftwareInfo& softwareInfo, const HostAddressPort& serverAddressPort, ILogFile* logFile);
+	RtTrendTcpClient(const SoftwareInfo& softwareInfo,
+					 const HostAddressPort& serverAddressPort,
+					 QString serviceEquipmentId,
+					 ILogFile* logFile);
 	virtual ~RtTrendTcpClient();
 
 	// Methods
@@ -60,7 +63,10 @@ protected:
 	void processTrendStateChanges(const QByteArray& data);
 
 signals:
-	void dataReady(std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState);
+	void dataReady(QString sourceEquipmentId,
+				   std::shared_ptr<TrendLib::RealtimeData> data,
+				   TrendLib::TrendStateItem minState,
+				   TrendLib::TrendStateItem maxState);
 	void requestError(QString text);
 	void connectionLost();
 

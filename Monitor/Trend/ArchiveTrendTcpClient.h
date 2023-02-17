@@ -6,6 +6,7 @@
 #include "../CommonLib/Times.h"
 #include "../Proto/network.pb.h"
 #include "../TrendView/TrendSignalSet.h"
+#include "../../lib/SoftwareSettings.h"
 
 
 class ArchiveTrendTcpClient : public Tcp::Client, public TcpClientStatistics
@@ -13,7 +14,9 @@ class ArchiveTrendTcpClient : public Tcp::Client, public TcpClientStatistics
 	Q_OBJECT
 
 public:
-	ArchiveTrendTcpClient(const SoftwareInfo& softwareInfo, const HostAddressPort& serverAddressPort, ILogFile* logFile);
+	ArchiveTrendTcpClient(const SoftwareInfo& softwareInfo,
+						  const MonitorSettings::ArchiveService& server,
+						  ILogFile* logFile);
 	virtual ~ArchiveTrendTcpClient();
 
 protected:
@@ -70,6 +73,7 @@ public:
 private:
 	int m_periodicTimerId = 0;
 
+	const MonitorSettings::ArchiveService m_server;
 	HasLogFile m_logFile;
 
 	struct RequestQueue

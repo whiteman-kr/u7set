@@ -9,11 +9,12 @@ MonitorTrendArchiveConnection::MonitorTrendArchiveConnection(const SoftwareInfo&
 	m_archiveServer(server.equipmentId, server.shortenId, server.appDataServiceId)
 {
 	Q_ASSERT(m_logFile);
-	m_logFile->writeMessage(QString("TrendArchive %1 ctor.").arg(m_archiveServer.equipmentId));
+	m_logFile->writeMessage(QString("TrendArchive::TrendArchive, server %1 (%2), address %3.")
+							.arg(server.equipmentId, server.shortenId, server.address.toString()));
 
 	// --
 	//
-	m_archiveTcpClient = new ArchiveTrendTcpClient{softwareInfo, server.address, m_logFile};
+	m_archiveTcpClient = new ArchiveTrendTcpClient{softwareInfo, server, m_logFile};
 
 	m_archiveTcpClientThread = std::make_unique<SimpleThread>(m_archiveTcpClient);
 	m_archiveTcpClientThread->start();
@@ -99,7 +100,7 @@ void MonitorTrendArchiveConnections::createConnections()
 
 	for (const MonitorSettings::ArchiveService& server : m_createdConnectionsServers)
 	{
-		MonitorTrendArchiveConnection& conn = m_connections.emplace_back(softwareInfo, server,m_logFile);
+		MonitorTrendArchiveConnection& conn = m_connections.emplace_back(softwareInfo, server, m_logFile);
 
 		connect(&conn, &MonitorTrendArchiveConnection::dataReady, this, &MonitorTrendArchiveConnections::dataReady);
 		connect(&conn, &MonitorTrendArchiveConnection::requestError, this, &MonitorTrendArchiveConnections::requestError);

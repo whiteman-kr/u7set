@@ -8,11 +8,12 @@ MonitorTrendRealtimeConnection::MonitorTrendRealtimeConnection(const SoftwareInf
 	m_server(server)
 {
 	Q_ASSERT(m_logFile);
-	m_logFile->writeMessage(QString("RtTrend %1 ctor.").arg(m_server.equipmentId));
+	m_logFile->writeMessage(QString("TrendRtConn::TrendRtConn, server %1 (%2), address %3.")
+							.arg(m_server.equipmentId, m_server.shortenId, m_server.realtimeAddress.toString()));
 
 	// --
 	//
-	m_rtTcpClient = new RtTrendTcpClient(softwareInfo, server.address, m_logFile);
+	m_rtTcpClient = new RtTrendTcpClient(softwareInfo, m_server.realtimeAddress, server.equipmentId, m_logFile);
 
 	m_rtTcpClientThread = std::make_unique<SimpleThread>(m_rtTcpClient);
 	m_rtTcpClientThread->start();
@@ -93,7 +94,7 @@ void MonitorTrendRealtimeConnections::createConnections()
 
 	for (const MonitorSettings::AppDataService& server : m_createdConnectionsServers)
 	{
-		MonitorTrendRealtimeConnection& conn = m_connections.emplace_back(softwareInfo, server,m_logFile);
+		MonitorTrendRealtimeConnection& conn = m_connections.emplace_back(softwareInfo, server, m_logFile);
 
 		connect(&conn, &MonitorTrendRealtimeConnection::dataReady, this, &MonitorTrendRealtimeConnections::dataReady);
 		connect(&conn, &MonitorTrendRealtimeConnection::requestError, this, &MonitorTrendRealtimeConnections::requestError);

@@ -55,13 +55,14 @@ public:
 	void updateSignals(const QStringList appSignalIds);
 
 private slots:
-	void slot_realtimeDataReceived(std::shared_ptr<TrendLib::RealtimeData> data,
+	void slot_realtimeDataReceived(QString sourceEquipmentId,
+								   std::shared_ptr<TrendLib::RealtimeData> data,
 								   TrendLib::TrendStateItem /*minState*/,
 								   TrendLib::TrendStateItem /*maxState*/);
 	void slot_connectionLost();
 
 private:
-	void appendRealtimeData(Hash signalHash, const std::vector<TrendLib::TrendStateItem>& states);
+	void appendRealtimeData(QString sourceEquipmentId, Hash signalHash, const std::vector<TrendLib::TrendStateItem>& states);
 	void appendRealtimeData_unsafe(E::TimeType timeType, const std::vector<TrendLib::TrendStateItem>& states, TrendLib::TrendArchive* archive);
 	void trimArchive_unsafe(int durationSeconds, TrendLib::TrendArchive* archive);
 

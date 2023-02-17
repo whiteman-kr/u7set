@@ -2,14 +2,18 @@
 #include "MonitorAppSettings.h"
 
 
-ArchiveTrendTcpClient::ArchiveTrendTcpClient(const SoftwareInfo& softwareInfo, const HostAddressPort& serverAddressPort, ILogFile* logFile) :
-	Tcp::Client(softwareInfo, serverAddressPort, "ArchiveTrendTcpClient"),
+ArchiveTrendTcpClient::ArchiveTrendTcpClient(const SoftwareInfo& softwareInfo,
+											 const MonitorSettings::ArchiveService& server,
+											 ILogFile* logFile) :
+	Tcp::Client(softwareInfo, server.address, server.address, "ArchiveTrendTcpClient"),
 	TcpClientStatistics(this),
+	m_server(server),
 	m_logFile(logFile, "ArchiveTrendTcpClient")
 {
 	Q_ASSERT(logFile);
 
-	qDebug() << "ArchiveTrendTcpClient::ArchiveTrendTcpClient(...)";
+	m_logFile.writeMessage("ArchiveTrendTcpClient::ArchiveTrendTcpClient(), address " + m_server.address.toString());
+	qDebug() << "ArchiveTrendTcpClient::ArchiveTrendTcpClient(...), address " << m_server.address.toString();
 
 	setObjectName("ArchiveTrendTcpClient");
 

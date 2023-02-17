@@ -181,12 +181,12 @@ void MonitorTrendsWidget::timerEvent(QTimerEvent*)
 		RtTrendTcpClient::Stat stat = m_realtimeDataProvider.statistics();
 
 		m_statusBarTextLabel->setText(stat.text);
-		m_statusBarQueueSizeLabel->setText("");
+		m_statusBarQueueSizeLabel->setText("             ");
 		m_statusBarNetworkRequestsLabel->setText(QString(" Requests/replies: %1/%2 ")
 												 .arg(stat.requestCount)
 												 .arg(stat.replyCount));
 
-		m_statusBarConnectionStateLabel->setText(QString(" Connected %1/%2").arg(stat.isConnected).arg(m_archiveDataProvider.size()));
+		m_statusBarConnectionStateLabel->setText(QString(" Connected %1/%2").arg(stat.isConnected).arg(m_realtimeDataProvider.size()));
 	}
 
 	return;
@@ -506,7 +506,10 @@ void MonitorTrendsWidget::slot_archiveDataReceived(TrendLib::TrendSignalPlusServ
 	return;
 }
 
-void MonitorTrendsWidget::slot_realtimeDataReceived(std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState)
+void MonitorTrendsWidget::slot_realtimeDataReceived(QString /*sourceEquipmentId*/,
+													std::shared_ptr<TrendLib::RealtimeData> data,
+													TrendLib::TrendStateItem minState,
+													TrendLib::TrendStateItem maxState)
 {
 	Q_ASSERT(m_trendWidget);
 	Q_ASSERT(m_trendSlider);

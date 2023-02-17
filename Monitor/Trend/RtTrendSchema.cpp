@@ -80,7 +80,7 @@ void RtConnection::createConnectionThread(MonitorConfigController* configControl
 
 	int to_do_pass_server_in_the_next_line;
 
-	m_tcpClient = new RtTrendTcpClient(configController->softwareInfo(), {}, configController->logFile());
+	m_tcpClient = new RtTrendTcpClient(configController->softwareInfo(), {}, {}, configController->logFile());
 	m_tcpClientThread = new SimpleThread(m_tcpClient);
 	m_tcpClientThread->start();
 
@@ -144,7 +144,8 @@ void RtConnection::updateSignals(const QStringList appSignalIds)
 	return;
 }
 
-void RtConnection::slot_realtimeDataReceived(std::shared_ptr<TrendLib::RealtimeData> data,
+void RtConnection::slot_realtimeDataReceived(QString sourceEquipmentId,
+											 std::shared_ptr<TrendLib::RealtimeData> data,
 											 TrendLib::TrendStateItem minState,
 											 TrendLib::TrendStateItem maxState)
 {
@@ -160,7 +161,7 @@ void RtConnection::slot_realtimeDataReceived(std::shared_ptr<TrendLib::RealtimeD
 		const Hash signalHash = chunk.appSignalHash;
 		const std::vector<TrendLib::TrendStateItem>& states = chunk.states;
 
-		appendRealtimeData(signalHash, states);
+		appendRealtimeData(sourceEquipmentId, signalHash, states);
 	}
 
 	return;
@@ -195,7 +196,9 @@ void RtConnection::slot_connectionLost()
 	return;
 }
 
-void RtConnection::appendRealtimeData(Hash signalHash, const std::vector<TrendLib::TrendStateItem>& states)
+void RtConnection::appendRealtimeData(QString sourceEquipmentId,
+									  Hash signalHash,
+									  const std::vector<TrendLib::TrendStateItem>& states)
 {
 	try
 	{

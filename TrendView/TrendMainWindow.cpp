@@ -402,6 +402,7 @@ namespace TrendLib
 
 		Q_ASSERT(m_timeTypeCombo);
 		m_timeTypeCombo->setCurrentIndex(theSettings.m_timeTypeIndex);
+		timeTypeComboCurrentIndexChanged(theSettings.m_timeTypeIndex);
 
 		// Ensure widget is visible
 		//

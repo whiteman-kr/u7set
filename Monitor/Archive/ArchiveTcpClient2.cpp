@@ -139,16 +139,6 @@ void ArchiveTcpClient2::onConnection()
 	qDebug() << "ArchiveTcpClient::onConnection()";
 	m_logFile.writeMessage(QString("onConnection()"));
 
-	if (m_serverSettings.equipmentId != connectedSoftwareInfo().equipmentID())
-	{
-		m_logFile.writeError(tr("Connected to wrong ArchiveService, expected %1, connected to %2")
-							 .arg(m_serverSettings.equipmentId)
-							 .arg(connectedSoftwareInfo().equipmentID()));
-
-		closeConnection();
-		return;
-	}
-
 	Q_ASSERT(isClearToSendRequest() == true);
 
 	// Start data requesting

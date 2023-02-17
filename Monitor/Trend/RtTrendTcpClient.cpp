@@ -1,22 +1,28 @@
 #include "RtTrendTcpClient.h"
 #include "MonitorAppSettings.h"
 
-RtTrendTcpClient::RtTrendTcpClient(const SoftwareInfo& softwareInfo, const HostAddressPort& serverAddressPort, ILogFile* logFile) :
-	Tcp::Client(softwareInfo, serverAddressPort,"RtTrendTcpClient"),
+RtTrendTcpClient::RtTrendTcpClient(const SoftwareInfo& softwareInfo,
+								   const HostAddressPort& serverAddressPort,
+								   QString /*serviceEquipmentId*/,
+								   ILogFile* logFile) :
+	Tcp::Client(softwareInfo, serverAddressPort, serverAddressPort, "RtTrendTcpClient"),
 	TcpClientStatistics(this),
 	m_logFile(logFile, "RtTrendTcpClient")
 {
 	Q_ASSERT(logFile);
 
 	setObjectName("RtTrendTcpClient::~RtTrendTcpClient(...)");
-	qDebug() << "ctor()";
+
+	m_logFile.writeMessage("RtTrendTcpClient::RtTrendTcpClient(), address " + serverAddressPort.toString());
+	qDebug() << "RtTrendTcpClient::RtTrendTcpClient(...), address " << serverAddressPort.toString();
 
 	return;
 }
 
 RtTrendTcpClient::~RtTrendTcpClient()
 {
-	qDebug() << "RtTrendTcpClient::~RtTrendTcpClient()";
+	m_logFile.writeMessage("RtTrendTcpClient::~RtTrendTcpClient(), address " + serverAddressPort1().toString());
+	qDebug() << "RtTrendTcpClient::~RtTrendTcpClient(...), address " << serverAddressPort1().toString();
 }
 
 bool RtTrendTcpClient::addSignals(const QStringList& appSignalIds)
@@ -87,8 +93,8 @@ void RtTrendTcpClient::onClientThreadFinished()
 
 void RtTrendTcpClient::onConnection()
 {
-	qDebug() << "RtTrendTcpClient::onConnection()";
-	m_logFile.writeMessage("onConnection()");
+	qDebug() << "RtTrendTcpClient::onConnection()" << serverAddressPort1().toString();
+	m_logFile.writeMessage("onConnection() " + serverAddressPort1().toString());
 
 	Q_ASSERT(isClearToSendRequest() == true);
 
@@ -101,15 +107,15 @@ void RtTrendTcpClient::onDisconnection()
 {
 	emit connectionLost();
 
-	qDebug() << "TrendTcpClient::onDisconnection";
-	m_logFile.writeMessage("onDisconnection()");
+	qDebug() << "TrendTcpClient::onDisconnection " << serverAddressPort1().toString();
+	m_logFile.writeMessage("onDisconnection() " + serverAddressPort1().toString());
 	return;
 }
 
 void RtTrendTcpClient::onReplyTimeout()
 {
-	qDebug() << "RtTrendTcpClient::onReplyTimeout()";
-	m_logFile.writeWarning("onReplyTimeout()");
+	qDebug() << "RtTrendTcpClient::onReplyTimeout() " << serverAddressPort1().toString();
+	m_logFile.writeWarning("onReplyTimeout() " + serverAddressPort1().toString());
 	return;
 }
 
@@ -338,7 +344,7 @@ void RtTrendTcpClient::processTrendStateChanges(const QByteArray& data)
 	//
 	if (realtimeData->signalData.empty() == false)
 	{
-		emit dataReady(realtimeData, minState, maxState);
+		emit dataReady(connectedSoftwareInfo().equipmentID(), realtimeData, minState, maxState);
 	}
 
 	// New network data exchange cycle

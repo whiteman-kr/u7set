@@ -1315,7 +1315,10 @@ namespace TrendLib
 		return;
 	}
 
-	void TrendSignalSet::slot_realtimeDataReceived(std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem /*minState*/, TrendLib::TrendStateItem /*maxState*/)
+	void TrendSignalSet::slot_realtimeDataReceived(QString sourceEquipmentId,
+												   std::shared_ptr<TrendLib::RealtimeData> data,
+												   TrendLib::TrendStateItem /*minState*/,
+												   TrendLib::TrendStateItem /*maxState*/)
 	{
 		for (const TrendLib::RealtimeDataChunk& chunk : data->signalData)
 		{
@@ -1325,9 +1328,9 @@ namespace TrendLib
 			// For now add all three times, maybe later it will be changed to add just for one time
 			// I just don't know whick kind of time is used now
 			//
-			appendRealtimeDataToArchive(E::TimeType::Local, signalHash, states);
-			appendRealtimeDataToArchive(E::TimeType::System, signalHash, states);
-			appendRealtimeDataToArchive(E::TimeType::Plant, signalHash, states);
+			appendRealtimeDataToArchive(sourceEquipmentId, E::TimeType::Local, signalHash, states);
+			appendRealtimeDataToArchive(sourceEquipmentId, E::TimeType::System, signalHash, states);
+			appendRealtimeDataToArchive(sourceEquipmentId, E::TimeType::Plant, signalHash, states);
 		}
 
 		return;
@@ -1337,10 +1340,16 @@ namespace TrendLib
 	{
 	}
 
-	void TrendSignalSet::appendRealtimeDataToArchive(E::TimeType timeType,
+	void TrendSignalSet::appendRealtimeDataToArchive(QString sourceEquipmentId,
+													 E::TimeType timeType,
 													 Hash signalhash,
 													 const std::vector<TrendStateItem>& states)
 	{
+		if (states.empty() == true)
+		{
+			return;
+		}
+
 		QMutexLocker locker(&m_archiveMutex);
 
 		std::map<TrendSignalPlusServerId, TrendArchive>* m_archive = nullptr;
@@ -1359,27 +1368,45 @@ namespace TrendLib
 		{
 			if (::calcHash(trendSignalPlusServerId.appSignalId) == signalhash)
 			{
-				// Find the very last recorded state, it is required to filter already added data as
-				// real time trends can have one or two data sources (app data services).
-				//
-				TrendStateItem veryLastState{};
-
-				for (const auto&[hourTimeStamp, hour] : archive.m_hours | std::views::reverse)
+				if (archive.realTimeActiveServiceId == sourceEquipmentId)
 				{
-					Q_ASSERT(hour);
-
-					for (const TrendStateRecord& data : hour->data | std::views::reverse)
+					// Ok, this is correcect source, check if it is still valid
+					//
+					if (states.back().isValid() == false)
 					{
-						if (data.states.empty() == false)
+						// This source has lost connections, reset active source
+						//
+						archive.realTimeActiveServiceId.clear();
+
+						// Do not return, add these non valid points to the trend
+						//
+					}
+				}
+				else
+				{
+					if (archive.realTimeActiveServiceId.isEmpty() == true)
+					{
+						if (states.back().isValid() == true)
 						{
-							veryLastState = data.states.back();
-							break;
+							// This source has valid points, set it as active
+							//
+							archive.realTimeActiveServiceId = sourceEquipmentId;
+
+							// Source is changed, we can add these points to the trend
+							//
+						}
+						else
+						{
+							// This source is not valid either, ingore it
+							//
+							return;
 						}
 					}
-
-					if (veryLastState.plant != 0)
+					else
 					{
-						break;
+						// This is the wrong source, skip it
+						//
+						return;
 					}
 				}
 
@@ -1390,22 +1417,6 @@ namespace TrendLib
 
 				for (const TrendStateItem& state : states)
 				{
-					// Check if this state is outdated, this can happen if two or more sources of real timne data present.
-					//
-					if ((veryLastState.plant == 0) ||	// There is no privious state, we can add any new state
-						(veryLastState.plant < state.plant) ||
-						(veryLastState.plant - state.plant > 60 * 1000))	// 60 sec for changed day-saving time or time adjustment
-					{
-						// Add state
-						//
-					}
-					else
-					{
-						continue;
-					}
-
-					// --
-					//
 					TimeStamp ts = state.getTime(timeType).roundedToHour();
 					if (ts == TimeStamp{0})
 					{
@@ -1452,8 +1463,6 @@ namespace TrendLib
 					//
 					TrendLib::TrendStateRecord& recordToAddState = hourData->data.back();
 					recordToAddState.states.push_back(state);
-
-					veryLastState = state;
 				}
 			}
 		}

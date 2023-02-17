@@ -27,7 +27,7 @@ public:
 	RtTrendTcpClient::Stat statistics() const;
 
 signals:
-	void dataReady(std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState);
+	void dataReady(QString sourceEquipmentId, std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState);
 	void requestError(QString text);
 	void connectionLost();
 
@@ -69,7 +69,7 @@ public:
 	RtTrendTcpClient::Stat statistics() const;
 
 signals:
-	void dataReady(std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState);
+	void dataReady(QString sourceEquipmentId, std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState);
 	void requestError(QString text);
 	void connectionLost();
 

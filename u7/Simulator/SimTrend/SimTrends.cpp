@@ -390,14 +390,17 @@ void SimTrendsWidget::fetchTrendData()
 
 	if (data != nullptr)
 	{
-		signalSet().slot_realtimeDataReceived(data, minState, maxState);
-		this->slot_realtimeDataReceived(data, minState, maxState);
+		signalSet().slot_realtimeDataReceived(QLatin1String{"SIM"}, data, minState, maxState);
+		this->slot_realtimeDataReceived(QLatin1String{"SIM"}, data, minState, maxState);
 	}
 
 	return;
 }
 
-void SimTrendsWidget::slot_realtimeDataReceived(std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState)
+void SimTrendsWidget::slot_realtimeDataReceived(QString /*sourceEquipmentId*/,
+												std::shared_ptr<TrendLib::RealtimeData> data,
+												TrendLib::TrendStateItem minState,
+												TrendLib::TrendStateItem maxState)
 {
 	Q_ASSERT(m_trendWidget);
 	Q_ASSERT(m_trendSlider);
