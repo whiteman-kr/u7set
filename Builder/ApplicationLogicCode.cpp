@@ -1211,6 +1211,21 @@ namespace Builder
 		return 0;
 	}
 
+	bool CodeItem::isMoveCmd() const
+	{
+		return getOpcode() == LmCommand::Code::MOV;
+	}
+
+	bool CodeItem::isMove32Cmd() const
+	{
+		return getOpcode() == LmCommand::Code::MOV32;
+	}
+
+	bool CodeItem::isMoveMemCmd() const
+	{
+		return getOpcode() == LmCommand::Code::MOVMEM;
+	}
+
 	bool CodeItem::generateBinCode(QByteArray* binCode) const
 	{
 		TEST_PTR_RETURN_FALSE(binCode);
@@ -2399,19 +2414,19 @@ namespace Builder
 
 	void AppLogicCode::removeStopCommand()
 	{
-		auto it = std::find_if(m_code.end(), m_code.begin(),
+		auto it = std::find_if(m_code.rbegin(), m_code.rend(),
 								[] (const CodeItem& ci)
 								{
 									return ci.getOpcode() == LmCommand::Code::STOP;
 								});
 
-		if (it == m_code.end())
+		if (it == m_code.rend())
 		{
 			Q_ASSERT(false);
 			return;
 		}
 
-		m_code.erase(it, m_code.end());
+		m_code.erase((it + 1).base(), m_code.end());
 	}
 
 	void AppLogicCode::startFbExec(int fbOpCode, int fbRuntime)

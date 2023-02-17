@@ -384,6 +384,10 @@ namespace Builder
 
 		quint16 getMoveSizeW() const;
 
+		bool isMoveCmd() const;
+		bool isMove32Cmd() const;
+		bool isMoveMemCmd() const;
+
 		bool isValidCommand() const { return m_code.getOpCode() != LmCommand::Code::NoCommand; }
 
 		bool generateBinCode(QByteArray* binCode) const;

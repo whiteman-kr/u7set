@@ -7697,69 +7697,105 @@ namespace Builder
 	bool ModuleLogicCompiler::optimizeSequentialMoves(CodeSnippet& code)
 	{
 		int sequenceSize;				// commands in sequence
-		quint16 moveSizeW;
-
-		quint16 srcAddr;
-		quint16 destAddr;
-		quint16 prevSrcAddr;
-		quint16 prevDestAddr;
+		quint16 sequenceMoveSizeW;
 
 		CodeSnippetIterator sequenceBegin;
-		CodeSnippetIterator prevIt;
+		CodeSnippetIterator lastSequenceCmd;
+
+		quint16 sequenceStartSrcAddr;
+		quint16 sequenceStartDestAddr;
+
+		CodeSnippet optiCode;
+
+		CodeSnippetIterator it;
 
 		auto reinitVars =	[&]() -> void
 							{
 								sequenceSize = 0;
-								moveSizeW = 0;
-								srcAddr = 0;
-								destAddr = 0;
-								prevSrcAddr = 0;
-								prevDestAddr = 0;
+								sequenceMoveSizeW = 0;
+
 								sequenceBegin = code.end();
-								prevIt = code.end();
-		};
+								lastSequenceCmd = code.end();
+
+								sequenceStartSrcAddr = 0;
+								sequenceStartDestAddr = 0;
+							};
+
+		auto finalizeSequence =	[&]() -> void
+							{
+								if (sequenceSize > 0)
+								{
+									if (sequenceSize > 1)
+									{
+										//optimizeCode();
+										qwdqwd;,lq;wld
+									}
+
+									reinitVars();
+								}
+
+								optiCode.append(*it);
+							};
+
 
 		reinitVars();
 
-		for(auto it = code.begin(); it != code.end(); it++)
+		for(it = code.begin(); it != code.end(); it++)
 		{
 			CodeItem& ci = *it;
 
-			LmCommand::Code cmdCode = ci.getOpcode();
-
-			if (cmdCode != LmCommand::Code::MOV &&
-				cmdCode != LmCommand::Code::MOV32 &&
-				cmdCode != LmCommand::Code::MOVMEM)
+			if (ci.isMoveCmd() == false &&
+				ci.isMove32Cmd() == false &&
+				ci.isMoveMemCmd() == false)
 			{
-				if (sequenceSize == 0)
-				{
-					continue;
-				}
-
-				if (sequenceSize > 1)
-				{
-					// gen optimized code
-				}
-sdv'\ed,vb;'d,fb;'d,fb;'d'b
-				reinitVars();
+				finalizeSequence();
 				continue;
 			}
 
-			srcAddr = ci.srcAddr();
-			destAddr = ci.destAddr();
+			quint16 srcAddr = ci.srcAddr();
+			quint16 destAddr = ci.destAddr();
 
-			if (addressAllowSequentialMoveOptimization(srcAddr, true) == true &&
-				addressAllowSequentialMoveOptimization(destAddr, false) == true)
+			if (srcAddr == 15478)
+			{
+				DEBUG_STOP;
+			}
 
+			if (m_memoryMap.addressInBitMemory(destAddr) == true)
+			{
+				finalizeSequence();
+				continue;
+			}
+
+			quint16 moveSizeW = ci.getMoveSizeW();
 
 			if (sequenceBegin == code.end())
 			{
-				sequenceBegin = it;
-				prevIt = it;
+				// start sequence
+				//
 				sequenceSize = 1;
+				sequenceMoveSizeW = moveSizeW;
+
+				sequenceBegin = it;
+				lastSequenceCmd = it;
+
+				sequenceStartSrcAddr = srcAddr;
+				sequenceStartDestAddr = destAddr;
+				continue;
 			}
 
+			if (sequenceStartSrcAddr + sequenceMoveSizeW == srcAddr &&
+				sequenceStartDestAddr + sequenceMoveSizeW == destAddr)
+			{
+				// continue sequence
+				//
+				sequenceSize++;
+				sequenceMoveSizeW += moveSizeW;
 
+				lastSequenceCmd = it;
+				continue;
+			}
+
+			finalizeSequence();
 		}
 
 		return true;
