@@ -38,11 +38,12 @@ namespace Tcp
 	enum class SetConnectionResult
 	{
 		Undefined,
+		Ok,
 
 		UnknownClientID,
 		WrongClientHostname,
 
-		Ok
+		WrongServerID,
 	};
 
 	struct ConnectionState
@@ -130,8 +131,8 @@ namespace Tcp
 
 		ConnectionState getConnectionState() const;
 
-		SoftwareInfo localSoftwareInfo() const;
-		SoftwareInfo connectedSoftwareInfo() const;
+		const SoftwareInfo& localSoftwareInfo() const;
+		const SoftwareInfo& connectedSoftwareInfo() const;
 
 		HostAddressPort peerAddr() const;
 
@@ -472,7 +473,7 @@ namespace Tcp
 
 	// -------------------------------------------------------------------------------------
 	//
-	// Tcp::ClientWorker class declaration
+	// Tcp::Client class declaration
 	//
 	// -------------------------------------------------------------------------------------
 
@@ -483,12 +484,14 @@ namespace Tcp
 	public:
 		Client(const SoftwareInfo& softwareInfo,
 			   const HostAddressPort& serverAddressPort,
-			   const QString& clientDescription);
+			   const QString& clientDescription,
+			   const QString& serverEquipmentID = QString());
 
 		Client(const SoftwareInfo& softwareInfo,
 			   const HostAddressPort& serverAddressPort1,
 			   const HostAddressPort& serverAddressPort2,
-			   const QString& clientDescription);
+			   const QString& clientDescription,
+			   const QString& serverEquipmentID = QString());
 
 		virtual ~Client() override;
 
@@ -539,6 +542,7 @@ namespace Tcp
 	signals:
 		void signal_unknownClientID(QString errMsg);
 		void signal_wrongClientHostname(QString errMsg);
+		void signal_wrongServerID(QString errMsg);
 
 	private slots:
 		void onTimeoutTimer() override;
@@ -577,6 +581,8 @@ namespace Tcp
 		HostAddressPort m_selectedServer;
 		int m_selectedServerIndex = 0;
 
+		QString m_serverEquipmentID;
+
 		QTimer m_periodicTimer;
 
 		int m_connectTimeout = 0;
@@ -586,6 +592,7 @@ namespace Tcp
 
 		bool m_enableSignalUnknownClientID = true;
 		bool m_enableSignalWrongClientHostname = true;
+		bool m_enableSignalWrongServerID = true;
 
 		quint32 m_requestNumerator = 1;
 
