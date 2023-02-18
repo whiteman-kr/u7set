@@ -70,7 +70,7 @@ void ArchUtils::dump(const QString& archFile, bool lt, bool st, bool pt)
 	}
 
 	dump << QString("State Flags").leftJustified(35, ' ') << SEPARATOR;
-	dump << QString("Archive Reason").leftJustified(23, ' ') << SEPARATOR;
+	dump << QString("Archive Reason").leftJustified(24, ' ') << SEPARATOR;
 	dump << QString("Value");
 
 	dump << "\n\n";
@@ -116,9 +116,9 @@ void ArchUtils::dump(const QString& archFile, bool lt, bool st, bool pt)
 			dump << getTimeStr(record.getTime(E::TimeType::Plant)) << SEPARATOR;
 		}
 
-		dump << getFlagsStr(record) << "    ";
+		dump << getFlagsStr(record) << SEPARATOR;
 
-		dump << getValueStr(record) << "    ";
+		dump << getValueStr(record);
 
 		dump << "\n";
 	}
