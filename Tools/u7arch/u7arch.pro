@@ -1,37 +1,64 @@
-QT -= gui
+QT  += core
+QT  -= gui
+QT  += network
 
-CONFIG += c++11 console
+TARGET = u7arch
+CONFIG += console
 CONFIG -= app_bundle
 
-# The following define makes your compiler emit warnings if you use
-# any Qt feature that has been marked deprecated (the exact warnings
-# depend on your compiler). Please consult the documentation of the
-# deprecated API in order to know how to port your code away from it.
-DEFINES += QT_DEPRECATED_WARNINGS
+TEMPLATE = app
 
-# You can also make your code fail to compile if it uses deprecated APIs.
-# In order to do so, uncomment the following line.
-# You can also select to disable deprecated APIs only up to a certain version of Qt.
-#DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
+include(../../compiler.pri)
+include(../../warnings.pri)
+include(../../sanitizer.pri)
+
+CONFIG += precompile_header
+PRECOMPILED_HEADER = Stable.h
+
+
+# DESTDIR
+#
+win32 {
+	CONFIG(debug, debug|release): DESTDIR = ../../bin/debug
+	CONFIG(release, debug|release): DESTDIR = ../../bin/release
+}
+unix {
+	CONFIG(debug, debug|release): DESTDIR = ../../bin_unix/debug
+	CONFIG(release, debug|release): DESTDIR = ../../bin_unix/release
+}
+
 
 SOURCES += \
-        main.cpp \
-    ArchUtils.cpp \
-    ../../lib/AppSignalStateFlags.cpp \
-    ../../ArchivingService/ArchFileRecord.cpp \
-    ../../lib/Types.cpp \
-    ../../lib/Crc16.cpp \
-    ../../ArchivingService/ArchFileRecord.cpp
-
-# Default rules for deployment.
-qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target
+	../../ArchivingService/ArchFileRecord.cpp \
+	ArchUtils.cpp \
+	main.cpp \
 
 HEADERS += \
-    ArchUtils.h \
-    ../../lib/AppSignalStateFlags.h \
-    ../../ArchivingService/ArchFileRecord.h \
-    ../../lib/Types.h \
-    ../../lib/Crc16.h \
-    ../../ArchivingService/ArchFileRecord.h
+	../../ArchivingService/ArchFileRecord.h \
+	Stable.h \
+	ArchUtils.h \
+
+# Add curent dir to a list of library directory paths
+#
+unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
+
+INCLUDEPATH += ./../../Protobuf
+
+# --
+#
+LIBS += -L$$DESTDIR
+LIBS += -L.
+
+CONFIG(release, debug|release): unix:QMAKE_CXXFLAGS += -DNDEBUG
+
+# UtilsLib
+#
+LIBS += -lUtilsLib
+
+# AppSignalLib
+#
+LIBS += -lAppSignalLib
+
+# CommonLib
+#
+LIBS += -lCommonLib

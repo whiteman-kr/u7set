@@ -7,7 +7,7 @@
 #include "../AppSignalLib/AppSignalStateFlags.h"
 #include "../UtilsLib/Crc.h"
 
-static const QString ARCH_FILE_NAME_TEMPLATE("2[0-9][0-9][0-9]_[0-1][0-9]_[0-3][0-9]_[0-2][0-9]_[0-5][0-9].[ls]ta");
+static const QString ARCH_FILE_NAME_TEMPLATE("2\\d\\d\\d_[0-1][0-9]_[0-3][0-9]_[0-2][0-9]_[0-5][0-9]\\.[sta|lta]");
 
 static const QString LONG_TERM_ARCHIVE_EXTENSION("lta");			// Long Term Archive
 static const QString SHORT_TERM_ARCHIVE_EXTENSION("sta");			// Short Term Archive
