@@ -1088,9 +1088,11 @@ namespace Builder
 		return fill(addrTo.offset(), addrFrom.offset(), addrFrom.bit(), comment);
 	}
 
-	void CodeItem::setComment(const QString& comment)
+	CodeItem& CodeItem::setComment(const QString& comment)
 	{
 		m_comment = comment;
+
+		return *this;
 	}
 
 	bool CodeItem::isWaitingForFbExecution() const
@@ -1896,6 +1898,11 @@ namespace Builder
 		m_code.reserve(size);
 	}
 
+	void CodeSnippet::swap(CodeSnippet& code)
+	{
+		m_code.swap(code.m_code);
+	}
+
 	bool CodeSnippet::isEmpty() const
 	{
 		return m_code.empty();
@@ -2135,7 +2142,17 @@ namespace Builder
 		return m_code.begin();
 	}
 
+	CodeSnippetConstIterator CodeSnippet::begin() const
+	{
+		return m_code.begin();
+	}
+
 	CodeSnippetIterator CodeSnippet::end()
+	{
+		return m_code.end();
+	}
+
+	CodeSnippetConstIterator CodeSnippet::end() const
 	{
 		return m_code.end();
 	}

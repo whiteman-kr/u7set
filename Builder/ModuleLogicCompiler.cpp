@@ -7694,28 +7694,28 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::optimizeSequentialMoves(CodeSnippet& code)
+	bool ModuleLogicCompiler::optimizeSequentialMoves(CodeSnippet& srcCode)
 	{
 		int sequenceSize;				// commands in sequence
 		quint16 sequenceMoveSizeW;
 
-		CodeSnippetIterator sequenceBegin;
-		CodeSnippetIterator lastSequenceCmd;
+		CodeSnippetConstIterator sequenceBegin;
+		CodeSnippetConstIterator lastSequenceCmd;
 
 		quint16 sequenceStartSrcAddr;
 		quint16 sequenceStartDestAddr;
 
 		CodeSnippet optiCode;
 
-		CodeSnippetIterator it;
+		CodeSnippetConstIterator it;
 
 		auto reinitVars =	[&]() -> void
 							{
 								sequenceSize = 0;
 								sequenceMoveSizeW = 0;
 
-								sequenceBegin = code.end();
-								lastSequenceCmd = code.end();
+								sequenceBegin = srcCode.end();
+								lastSequenceCmd = srcCode.end();
 
 								sequenceStartSrcAddr = 0;
 								sequenceStartDestAddr = 0;
@@ -7727,63 +7727,62 @@ namespace Builder
 								{
 									if (sequenceSize > 1)
 									{
-										//optimizeCode();
-										qwdqwd;,lq;wld
+										CodeSnippet rc;		// replacement code
+
+										rc << CodeItem().movMem(sequenceStartDestAddr,
+																sequenceStartSrcAddr,
+																sequenceMoveSizeW);
+
+										optimizeCode(srcCode,
+													 sequenceBegin,
+													 lastSequenceCmd,
+													 optiCode, rc);
+									}
+									else
+									{
+										// sequenceSize == 1
+										//
+										optiCode.append(*sequenceBegin);
 									}
 
 									reinitVars();
 								}
-
-								optiCode.append(*it);
 							};
 
 
 		reinitVars();
 
-		for(it = code.begin(); it != code.end(); it++)
+		for(it = srcCode.begin(); it != srcCode.end(); it++)
 		{
-			CodeItem& ci = *it;
+			const CodeItem& ci = *it;
 
 			if (ci.isMoveCmd() == false &&
 				ci.isMove32Cmd() == false &&
 				ci.isMoveMemCmd() == false)
 			{
 				finalizeSequence();
+
+				optiCode.append(*it);
+
 				continue;
 			}
 
 			quint16 srcAddr = ci.srcAddr();
 			quint16 destAddr = ci.destAddr();
 
-			if (srcAddr == 15478)
-			{
-				DEBUG_STOP;
-			}
-
 			if (m_memoryMap.addressInBitMemory(destAddr) == true)
 			{
 				finalizeSequence();
+
+				optiCode.append(*it);
+
 				continue;
 			}
 
 			quint16 moveSizeW = ci.getMoveSizeW();
 
-			if (sequenceBegin == code.end())
-			{
-				// start sequence
-				//
-				sequenceSize = 1;
-				sequenceMoveSizeW = moveSizeW;
-
-				sequenceBegin = it;
-				lastSequenceCmd = it;
-
-				sequenceStartSrcAddr = srcAddr;
-				sequenceStartDestAddr = destAddr;
-				continue;
-			}
-
-			if (sequenceStartSrcAddr + sequenceMoveSizeW == srcAddr &&
+			if (sequenceBegin != srcCode.end() &&
+				sequenceStartSrcAddr + sequenceMoveSizeW == srcAddr &&
 				sequenceStartDestAddr + sequenceMoveSizeW == destAddr)
 			{
 				// continue sequence
@@ -7796,6 +7795,89 @@ namespace Builder
 			}
 
 			finalizeSequence();
+
+			// start sequence
+			//
+			sequenceSize = 1;
+			sequenceMoveSizeW = moveSizeW;
+
+			sequenceBegin = it;
+			lastSequenceCmd = it;
+
+			sequenceStartSrcAddr = srcAddr;
+			sequenceStartDestAddr = destAddr;
+		}
+
+		srcCode.swap(optiCode);
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::optimizeCode( const CodeSnippet& srcCode,
+											CodeSnippetConstIterator start,
+											CodeSnippetConstIterator end,
+											CodeSnippet& optiCode,
+											const CodeSnippet& replacementCode)
+	{
+		m_optiNo++;
+
+		Q_ASSERT(start != end && start != srcCode.end());
+
+		CodeSnippetConstIterator prev = start - 1;
+
+		if (prev != srcCode.end())
+		{
+			if (prev->isNewLine() == false)
+			{
+				optiCode << CodeItem();
+			}
+		}
+
+		optiCode << CodeItem().setComment(QString("Optimization (%1) --------- Begin ---------").
+												arg(m_optiNo));
+		optiCode << CodeItem();
+
+		do
+		{
+			if (start == srcCode.end())
+			{
+				break;
+			}
+
+			const CodeItem& srcCodeItem = *start;
+
+			QString mnemo = srcCodeItem.getAsmCode(false);
+
+			optiCode << CodeItem().setComment(mnemo);
+
+			if (start == end)
+			{
+				break;
+			}
+
+			start++;
+		}
+		while(true);
+
+		optiCode << CodeItem();
+
+		optiCode << replacementCode;
+
+		optiCode << CodeItem();
+
+		optiCode << CodeItem().setComment(QString("Optimization (%1) ---------- End ----------").
+											  arg(m_optiNo));
+		if (start != srcCode.end())
+		{
+			CodeSnippetConstIterator next = start + 1;
+
+			if (next != srcCode.end())
+			{
+				if (next->isNewLine() == false)
+				{
+					optiCode << CodeItem();
+				}
+			}
 		}
 
 		return true;

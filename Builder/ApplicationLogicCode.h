@@ -348,7 +348,7 @@ namespace Builder
 		void setAddress(int address) { m_address = address; }
 
 		QString comment() const { return m_comment; }
-		void setComment(const QString& comment);
+		CodeItem& setComment(const QString& comment);
 		void clearComment() { m_comment.clear(); }
 
 		void setClockCount(int clockCount) { m_clockCount = clockCount; }
@@ -441,6 +441,7 @@ namespace Builder
 	};
 
 	using CodeSnippetIterator = std::vector<CodeItem>::iterator;
+	using CodeSnippetConstIterator = std::vector<CodeItem>::const_iterator;
 
 	class CodeSnippet
 	{
@@ -463,6 +464,8 @@ namespace Builder
 		void clear();
 		void reserve(int size);
 
+		void swap(CodeSnippet& code);
+
 		//
 
 		bool isEmpty() const;
@@ -480,7 +483,10 @@ namespace Builder
 		const std::vector<CodeItem>& code() const;
 
 		CodeSnippetIterator begin();
+		CodeSnippetConstIterator begin() const;
+
 		CodeSnippetIterator end();
+		CodeSnippetConstIterator end() const;
 
 	protected:
 		std::vector<CodeItem> m_code;

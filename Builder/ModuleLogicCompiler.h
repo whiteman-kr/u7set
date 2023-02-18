@@ -462,7 +462,13 @@ namespace Builder
 		bool optimizeAppLogicCode();
 		bool makeOptimizedAppLogicCode();
 
-		bool optimizeSequentialMoves(CodeSnippet& code);
+		bool optimizeSequentialMoves(CodeSnippet& srcCode);
+
+		bool optimizeCode(const CodeSnippet& srcCode,
+						  CodeSnippetConstIterator start,
+						  CodeSnippetConstIterator end,
+						  CodeSnippet& optiCode,
+						  const CodeSnippet& replacementCode);
 
 		bool writeInfoFilesAfterOptimization();
 		bool checkOptimizedAppLogicCode();
@@ -858,6 +864,8 @@ namespace Builder
 		AppLogicCode m_optiAppLogicCode;
 		AppLogicCode m_optiIdrCode;
 		AppLogicCode m_optiAlpCode;
+
+		int m_optiNo = 0;
 
 		AfblsMap m_afbls;
 
