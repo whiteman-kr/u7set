@@ -119,12 +119,12 @@ namespace Tcp
 		return state;
 	}
 
-	SoftwareInfo SocketWorker::localSoftwareInfo() const
+	const SoftwareInfo& SocketWorker::localSoftwareInfo() const
 	{
 		return m_localSoftwareInfo;
 	}
 
-	SoftwareInfo SocketWorker::connectedSoftwareInfo() const
+	const SoftwareInfo& SocketWorker::connectedSoftwareInfo() const
 	{
 		return m_connectedSoftwareInfo;
 	}
@@ -1513,8 +1513,10 @@ namespace Tcp
 
 	Client::Client(const SoftwareInfo& softwareInfo,
 				   const HostAddressPort &serverAddressPort,
-				   const QString& clientDescription) :
+				   const QString& clientDescription,
+				   const QString& serverEquipmentID) :
 		SocketWorker(softwareInfo, clientDescription),
+		m_serverEquipmentID(serverEquipmentID.trimmed()),
 		m_periodicTimer(this)
 	{
 		m_timeout = TCP_SERVER_REPLY_TIMEOUT;
@@ -1527,8 +1529,10 @@ namespace Tcp
 	Client::Client(const SoftwareInfo& softwareInfo,
 				   const HostAddressPort& serverAddressPort1,
 				   const HostAddressPort& serverAddressPort2,
-				   const QString& clientDescription) :
+				   const QString& clientDescription,
+				   const QString& serverEquipmentID) :
 		SocketWorker(softwareInfo, clientDescription),
+		m_serverEquipmentID(serverEquipmentID),
 		m_periodicTimer(this)
 	{
 		m_timeout = TCP_SERVER_REPLY_TIMEOUT;
@@ -2073,7 +2077,34 @@ namespace Tcp
 			return false;
 		}
 
-		m_setConnResult = static_cast<SetConnectionResult>(imr.setconnectionresult());
+		m_connectedSoftwareInfo.serializeFrom(imr.serversoftwareinfo());
+
+		if (m_serverEquipmentID.isEmpty() == false)
+		{
+			DEBUG_STOP;
+		}
+
+		if (m_serverEquipmentID.isEmpty() == false &&
+			m_serverEquipmentID != m_connectedSoftwareInfo.equipmentID())
+		{
+			m_setConnResult = SetConnectionResult::WrongServerID;
+
+			logError(QString("wrong server ID - %1 (expected ID - %2)").
+							arg(m_connectedSoftwareInfo.equipmentID()).
+							arg(m_serverEquipmentID));
+
+			if (m_enableSignalWrongServerID == true)
+			{
+				emit signal_wrongServerID(QString("Wrong server ID - %1 (expected ID - %2)").
+										  arg(m_connectedSoftwareInfo.equipmentID()).
+										  arg(m_serverEquipmentID));
+				m_enableSignalWrongServerID = false;
+			}
+		}
+		else
+		{
+			m_setConnResult = static_cast<SetConnectionResult>(imr.setconnectionresult());
+		}
 
 		switch(m_setConnResult)
 		{
@@ -2103,13 +2134,14 @@ namespace Tcp
 			}
 			break;
 
+		case SetConnectionResult::WrongServerID:
+			break;		// already processed
+
 		default:
 			Q_ASSERT(false);
 		}
 
 		m_stateMutex.lock();
-
-		m_connectedSoftwareInfo.serializeFrom(imr.serversoftwareinfo());
 
 		m_state.connectedSoftwareInfo = m_connectedSoftwareInfo;
 		m_state.setConnectionResult = m_setConnResult;
