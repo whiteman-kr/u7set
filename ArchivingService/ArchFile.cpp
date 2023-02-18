@@ -573,7 +573,7 @@ QVector<ArchFilePartition::Info> ArchFile::getArchPartitionsInfo(const QString& 
 {
 	QVector<ArchFilePartition::Info> partitionsInfo;
 
-	// Arch file name format: 2018_12_31_23_59.sta (or lta))
+	// Arch file name format: 2018_12_31_23_59.sta (or *.lta)
 
 	QRegularExpression archFileNameTemplate(ARCH_FILE_NAME_TEMPLATE);
 
