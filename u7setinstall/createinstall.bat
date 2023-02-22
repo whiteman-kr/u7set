@@ -35,7 +35,7 @@ xcopy ..\bin\release\scripting packages\u7set.develop.rpct\data\scripting /sy
 
 copy ..\bin\release\docs\D11.5_AFBL_RM.pdf packages\u7set.develop.rpct.docs\data\docs
 copy ..\bin\release\docs\D11.6_RPCT-UM.pdf packages\u7set.develop.rpct.docs\data\docs
-copy "..\bin\release\docs\Appendixes\D11.6 RPCT User Manual Appendix A Warnings and Errors List.pdf" packages\u7set.develop.rpct.docs\data\docs\Appendixes
+copy "..\bin\release\docs\*.pdf" packages\u7set.develop.rpct.docs\data\docs\Appendixes
 copy "..\bin\release\docs\Installing and configuring RPCT.pdf" packages\u7set.develop.rpct.docs\data\docs
 copy "..\bin\release\docs\RPCT Quick Start Guide.pdf" packages\u7set.develop.rpct.docs\data\docs
 
