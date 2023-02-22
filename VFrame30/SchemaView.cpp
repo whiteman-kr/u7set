@@ -1,5 +1,6 @@
 #include "SchemaView.h"
 #include "Schema.h"
+#include "SchemaLayer.h"
 #include "SchemaItemControl.h"
 
 namespace VFrame30

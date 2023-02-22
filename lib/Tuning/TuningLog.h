@@ -8,6 +8,7 @@ namespace TuningLog
 	class TuningLog : public Log::LogFile
 	{
 		Q_OBJECT
+
 	public:
 		TuningLog(const QString& logName, const QString& path = QString(), int maxFileSize = 1048576, int maxFilesCount = 10);
 		virtual ~TuningLog();

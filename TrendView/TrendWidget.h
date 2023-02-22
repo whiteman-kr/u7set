@@ -111,7 +111,7 @@ namespace TrendLib
 	signals:
 		void startTimeChanged(TimeStamp startTime);
 		void durationChanged(qint64 duration);
-		void showSignalProperties(QString appSignalId);
+		void showSignalProperties(QString appSignalId, QString archiveServerId);
 
 		void trendModeChanged();
 

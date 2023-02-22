@@ -7,6 +7,8 @@
 
 // C++ includes
 //
+#include <chrono>
+#include <concepts>
 #include <array>
 #include <memory>
 #include <vector>
@@ -79,7 +81,6 @@
 
 // Defined in main.cpp
 //
-extern AppSignalManager theSignals;
 extern TuningSignalManager theTuningSignals;
 extern ScriptMonitorApplication theApp;
 

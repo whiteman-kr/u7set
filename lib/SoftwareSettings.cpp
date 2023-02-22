@@ -2,15 +2,18 @@
 #include <QXmlStreamWriter>
 #include <QObject>
 
-#include "SoftwareSettings.h"
+#include "../UtilsLib/XmlHelper.h"
 #include "../UtilsLib/WUtils.h"
+#include "../OnlineLib/SocketIO.h"
+#include "../Proto/network.pb.h"
+
+#include "SoftwareSettings.h"
 
 // -------------------------------------------------------------------------------------
 //
 // SessionParams struct implementation
 //
 // -------------------------------------------------------------------------------------
-
 void SessionParams::saveTo(Network::SessionParams* sp)
 {
 	TEST_PTR_RETURN(sp);
@@ -1162,67 +1165,69 @@ bool MonitorSettings::writeToXml(XmlWriteHelper& xml) const
 {
 	writeStartSettings(xml);
 
+	// ConfigServices (1/2)
 	//
+	{
+		xml.writeStartElement(XmlElement::CFG_SERVICE1);
 
-	xml.writeStringElement(EquipmentPropNames::CFG_SERVICE_ID1, cfgServiceID1);
-	xml.writeHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
-							 EquipmentPropNames::CFG_SERVICE_PORT1, cfgServiceIP1);
+		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, configService1.equipmentId);
 
-	xml.writeStringElement(EquipmentPropNames::CFG_SERVICE_ID2, cfgServiceID2);
-	xml.writeHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP2,
-							 EquipmentPropNames::CFG_SERVICE_PORT2, cfgServiceIP2);
+		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, configService1.address.addressStr());
+		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, configService1.address.port());
 
+		xml.writeEndElement();			// </CfgService1>
+	}
+
+	{
+		xml.writeStartElement(XmlElement::CFG_SERVICE2);
+
+		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, configService2.equipmentId);
+
+		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, configService2.address.addressStr());
+		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, configService2.address.port());
+
+		xml.writeEndElement();			// </CfgService2>
+	}
+
+	// Some Schema staff
 	//
-
 	xml.writeStringElement(EquipmentPropNames::START_SCHEMA_ID, startSchemaId);
 	xml.writeStringElement(EquipmentPropNames::SCHEMA_TAGS, schemaTags);
 
+	// AppDataServices
 	//
+	for (const AppDataService& ads : appDataServices)
+	{
+		xml.writeStartElement(XmlElement::APP_DATA_SERVICE);
 
-	xml.writeStartElement(XmlElement::APP_DATA_SERVICE1);
+		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, ads.equipmentId);
 
-	xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, appDataServiceID1);
-	xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, appDataServiceIP1);
-	xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, appDataServicePort1);
-	xml.writeStringAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_IP, realtimeDataIP1);
-	xml.writeIntAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_PORT, realtimeDataPort1);
+		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, ads.address.addressStr());
+		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, ads.address.port());
 
-	xml.writeEndElement();			// </AppDataService1>
+		xml.writeStringAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_IP, ads.realtimeAddress.addressStr());
+		xml.writeIntAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_PORT, ads.realtimeAddress.port());
 
+		xml.writeEndElement();			// </AppDataService>
+	}
+
+	// ArchiveServices
 	//
+	for (const ArchiveService& as : archiveServices)
+	{
+		xml.writeStartElement(XmlElement::ARCHIVE_SERVICE);
 
-	xml.writeStartElement(XmlElement::APP_DATA_SERVICE2);
+		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, as.equipmentId);
+		xml.writeStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_ID, as.appDataServiceId);
 
-	xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, appDataServiceID2);
-	xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, appDataServiceIP2);
-	xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, appDataServicePort2);
-	xml.writeStringAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_IP, realtimeDataIP2);
-	xml.writeIntAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_PORT, realtimeDataPort2);
+		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, as.address.addressStr());
+		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, as.address.port());
 
-	xml.writeEndElement();			// </AppDataService2>
+		xml.writeEndElement();			// </ArchiveService>
+	}
 
+	// Tunings
 	//
-
-	xml.writeStartElement(XmlElement::ARCHIVE_SERVICE1);
-
-	xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, archiveServiceID1);
-	xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, archiveServiceIP1);
-	xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, archiveServicePort1);
-
-	xml.writeEndElement();			// </ArchiveService1>
-
-	//
-
-	xml.writeStartElement(XmlElement::ARCHIVE_SERVICE2);
-
-	xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, archiveServiceID2);
-	xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, archiveServiceIP2);
-	xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, archiveServicePort2);
-
-	xml.writeEndElement();			// </ArchiveService2>
-
-	//
-
 	xml.writeStartElement(XmlElement::TUNING_SERVICES);
 	xml.writeBoolAttribute(EquipmentPropNames::TUNING_ENABLE, tuningEnabled);
 	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(tuningServices.size()));
@@ -1231,7 +1236,7 @@ bool MonitorSettings::writeToXml(XmlWriteHelper& xml) const
 	{
 		xml.writeStartElement(XmlElement::TUNING_SERVICE);
 
-		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, tsc.tuningServiceID);
+		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, tsc.equipmentId);
 		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, tsc.clientRequestIP);
 		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, tsc.clientRequestPort);
 		xml.writeStringListAttribute(XmlAttribute::DRIVEN_SOURCES, tsc.drivenSources);
@@ -1241,8 +1246,8 @@ bool MonitorSettings::writeToXml(XmlWriteHelper& xml) const
 
 	xml.writeEndElement();		// </TuningServices>
 
+	// --
 	//
-
 	xml.writeStartElement(XmlElement::SECURITY);
 
 	xml.writeBoolAttribute(EquipmentPropNames::TUNING_LOGIN, tuningLogin);
@@ -1251,8 +1256,8 @@ bool MonitorSettings::writeToXml(XmlWriteHelper& xml) const
 
 	xml.writeEndElement();			// </TuningSecurity>
 
+	// --
 	//
-
 	writeEndSettings(xml);;			// </Settings>
 
 	return true;
@@ -1268,87 +1273,147 @@ bool MonitorSettings::readFromXml(XmlReadHelper& xml)
 
 	RETURN_IF_FALSE(result);
 
-	//
-
-	result &= xml.readStringElement(EquipmentPropNames::CFG_SERVICE_ID1, &cfgServiceID1, true);
-	result &= xml.readHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
-									  EquipmentPropNames::CFG_SERVICE_PORT1, &cfgServiceIP1);
-
-	result &= xml.readStringElement(EquipmentPropNames::CFG_SERVICE_ID2, &cfgServiceID2, true);
-	result &= xml.readHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP2,
-									  EquipmentPropNames::CFG_SERVICE_PORT2, &cfgServiceIP2);
-	//
-
-	result &= xml.findElement(EquipmentPropNames::START_SCHEMA_ID);
-	result &= xml.readStringElement(EquipmentPropNames::START_SCHEMA_ID, &startSchemaId);
-
-	result &= xml.findElement(EquipmentPropNames::SCHEMA_TAGS);
-	result &= xml.readStringElement(EquipmentPropNames::SCHEMA_TAGS, &schemaTags);
-
-	//
-
-	result &= xml.findElement(XmlElement::APP_DATA_SERVICE1);
-	result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &appDataServiceID1);
-	result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &appDataServiceIP1);
-	result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &appDataServicePort1);
-	result &= xml.readStringAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_IP, &realtimeDataIP1);
-	result &= xml.readIntAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_PORT, &realtimeDataPort1);
-
-	//
-
-	result &= xml.findElement(XmlElement::APP_DATA_SERVICE2);
-	result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &appDataServiceID2);
-	result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &appDataServiceIP2);
-	result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &appDataServicePort2);
-	result &= xml.readStringAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_IP, &realtimeDataIP2);
-	result &= xml.readIntAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_PORT, &realtimeDataPort2);
-
-	//
-
-	result &= xml.findElement(XmlElement::ARCHIVE_SERVICE1);
-	result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &archiveServiceID1);
-	result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &archiveServiceIP1);
-	result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &archiveServicePort1);
-
-	//
-
-	result &=  xml.findElement(XmlElement::ARCHIVE_SERVICE2);
-	result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &archiveServiceID2);
-	result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &archiveServiceIP2);
-	result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &archiveServicePort2);
-
-	//
-
-	result &= xml.findElement(XmlElement::TUNING_SERVICES);
-
-	RETURN_IF_FALSE(result);
-
-	result &= xml.readBoolAttribute(EquipmentPropNames::TUNING_ENABLE, &tuningEnabled);
-
-	int count = 0;
-
-	result &= xml.readIntAttribute(XmlAttribute::COUNT, &count);
-
-	tuningServices.clear();
-
-	for(int i = 0; i < count; i++)
+	while (xml.readNextStartElement() == true)
 	{
-		TuningService tsc;
+		if (xml.name() == XmlElement::CFG_SERVICE1)
+		{
+			ConfigService cs;
+			QString clientIp;
+			int clientPort = 0;
 
-		result &= xml.findElement(XmlElement::TUNING_SERVICE);
+			result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &cs.equipmentId);
+			result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &clientIp);
+			result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &clientPort);
 
-		result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &tsc.tuningServiceID);
-		result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &tsc.clientRequestIP);
-		result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &tsc.clientRequestPort);
-		result &= xml.readStringListAttribute(XmlAttribute::DRIVEN_SOURCES, &tsc.drivenSources);
+			cs.address.setAddressPort(clientIp, clientPort);
+			configService1 = cs;
 
-		tuningServices.push_back(tsc);
+			xml.skipCurrentElement();
+			continue;
+		}
+
+		if (xml.name() == XmlElement::CFG_SERVICE2)
+		{
+			ConfigService cs;
+			QString clientIp;
+			int clientPort = 0;
+
+			result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &cs.equipmentId);
+			result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &clientIp);
+			result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &clientPort);
+
+			cs.address.setAddressPort(clientIp, clientPort);
+			configService2 = cs;
+
+			xml.skipCurrentElement();
+			continue;
+		}
+
+		if (xml.name() == EquipmentPropNames::START_SCHEMA_ID)
+		{
+			startSchemaId = xml.elementText();
+			xml.skipCurrentElement();
+			continue;
+		}
+
+		if (xml.name() == EquipmentPropNames::SCHEMA_TAGS)
+		{
+			schemaTags = xml.elementText();
+			xml.skipCurrentElement();
+			continue;
+		}
+
+		if (xml.name() == XmlElement::APP_DATA_SERVICE)
+		{
+			AppDataService ads;
+			QString clientIp;
+			int clientPort = 0;
+			QString rtIp;
+			int rtPort = 0;
+
+			result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &ads.equipmentId);
+			result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &clientIp);
+			result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &clientPort);
+			result &= xml.readStringAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_IP, &rtIp);
+			result &= xml.readIntAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_PORT, &rtPort);
+
+			ads.address.setAddressPort(clientIp, clientPort);
+			ads.realtimeAddress.setAddressPort(rtIp, rtPort);
+
+			appDataServices.push_back(ads);
+
+			xml.skipCurrentElement();
+			continue;
+		}
+
+		if (xml.name() == XmlElement::ARCHIVE_SERVICE)
+		{
+			ArchiveService archiveService;
+
+			QString clientRequestIp;
+			int clientRequestPort = 0;
+
+
+			result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &archiveService.equipmentId);
+			result &= xml.readStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_ID, &archiveService.appDataServiceId);
+
+			result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &clientRequestIp);
+			result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestPort);
+
+			archiveService.address.setAddressPort(clientRequestIp, clientRequestPort);
+
+			archiveServices.push_back(archiveService);
+
+			xml.skipCurrentElement();
+			continue;
+		}
+
+		if (xml.name() == XmlElement::TUNING_SERVICES)
+		{
+			result &= xml.readBoolAttribute(EquipmentPropNames::TUNING_ENABLE, &tuningEnabled);
+
+			int count = 0;
+			result &= xml.readIntAttribute(XmlAttribute::COUNT, &count);
+
+			for(int i = 0; i < count; i++)
+			{
+				TuningService tsc;
+
+				result &= xml.findElement(XmlElement::TUNING_SERVICE);
+
+				result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &tsc.equipmentId);
+				result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &tsc.clientRequestIP);
+				result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &tsc.clientRequestPort);
+				result &= xml.readStringListAttribute(XmlAttribute::DRIVEN_SOURCES, &tsc.drivenSources);
+
+				tuningServices.push_back(tsc);
+			}
+
+			xml.skipCurrentElement();
+			continue;
+		}
+
+		if (xml.name() == XmlElement::SECURITY)
+		{
+			result &= xml.readBoolAttribute(EquipmentPropNames::TUNING_LOGIN, &tuningLogin);
+			result &= xml.readStringAttribute(EquipmentPropNames::TUNING_USER_ACCOUNTS, &tuningUserAccounts);
+			result &= xml.readIntAttribute(EquipmentPropNames::TUNING_SESSION_TIMEOUT, &tuningSessionTimeout);
+
+			xml.skipCurrentElement();
+			continue;
+		}
+
+		// Unknown element
+		//
+		qDebug() << "MonitorSettings::readFromXml UnknownElement " << xml.name();
+		xml.skipCurrentElement();
 	}
 
-	result &= xml.findElement(XmlElement::SECURITY);
-	result &= xml.readBoolAttribute(EquipmentPropNames::TUNING_LOGIN, &tuningLogin);
-	result &= xml.readStringAttribute(EquipmentPropNames::TUNING_USER_ACCOUNTS, &tuningUserAccounts);
-	result &= xml.readIntAttribute(EquipmentPropNames::TUNING_SESSION_TIMEOUT, &tuningSessionTimeout);
+	MonitorSettings::setShortId<AppDataService>(&appDataServices);
+	MonitorSettings::setShortId<ArchiveService>(&archiveServices);
+	MonitorSettings::setShortId<TuningService>(&tuningServices);
+
+	result &= (appDataServices.empty() == false);
 
 	return result;
 }
@@ -1365,31 +1430,92 @@ QStringList MonitorSettings::getUsersAccounts() const
 
 void MonitorSettings::clear()
 {
-	startSchemaId.clear();
-	schemaTags.clear();
+	*this = MonitorSettings{};
+}
 
-	appDataServiceID1.clear();
-	appDataServiceIP1.clear();
-	appDataServicePort1 = 0;
-	realtimeDataIP1.clear();
-	realtimeDataPort1 = 0;
+template<typename SERVICETYPE>		// SERVICETYPE is one of TuningService, AppDataService, ArchiveService
+void MonitorSettings::setShortId(std::vector<SERVICETYPE>* services)
+{
+	if (services == nullptr)
+	{
+		Q_ASSERT(services);
+		return;
+	}
 
-	appDataServiceID2.clear();
-	appDataServiceIP2.clear();
-	appDataServicePort2 = 0;
-	realtimeDataIP2.clear();
-	realtimeDataPort2 = 0;
+	if (services->empty() == true)
+	{
+		return;
+	}
 
-	archiveServiceID1.clear();
-	archiveServiceIP1.clear();
-	archiveServicePort1 = 0;
+	struct ServiceRecord
+	{
+		QString serviceId;		// Full ArchiveServiceID
+		QString shortId;		// Shorted ArchiveServiceID
+		QString currentId;		// Current work version (used for creating shortId)
+	};
 
-	archiveServiceID2.clear();
-	archiveServiceIP2.clear();
-	archiveServicePort2 = 0;
+	std::vector<ServiceRecord> ss;
+	ss.reserve(services->size());
 
-	tuningEnabled = false;
-	tuningServices.clear();
+	for (const SERVICETYPE& as : *services)
+	{
+		ss.push_back({as.equipmentId, as.equipmentId, as.equipmentId});
+	}
+
+	if (ss.size() == 1)
+	{
+		// If there is just one service then make it a bit shorter (remove system)
+		//
+		QString shortId = ss[0].shortId;
+
+		if (qsizetype underscoreIndex = shortId.indexOf('_');
+			underscoreIndex != -1)
+		{
+			ss[0].shortId = shortId.right(shortId.size() - (underscoreIndex + 1));
+		}
+		else
+		{
+			// ss[0].shortId = shortId;
+		}
+	}
+	else
+	{
+		for (qsizetype i = 0; i < ss[0].serviceId.size(); i++)
+		{
+			QChar firstLetter = ss[0].currentId[0];
+
+			if (firstLetter == QChar('_'))
+			{
+				std::ranges::for_each(ss, [](ServiceRecord& sr){	sr.shortId = sr.currentId; sr.shortId.remove(0, 1);});
+			}
+
+			bool firstLetterIsSame = std::all_of(ss.begin(), ss.end(),
+												 [firstLetter](const ServiceRecord& sr)
+												 {
+													return sr.currentId[0] == firstLetter;
+												 });
+
+			if (firstLetterIsSame == true)
+			{
+				std::ranges::for_each(ss, [](ServiceRecord& sr){	sr.currentId.remove(0, 1);});
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+
+	// Set result
+	//
+	Q_ASSERT(services->size() == ss.size());
+
+	for (size_t i = 0; i < services->size(); i++)
+	{
+		services->at(i).shortenId = ss.at(i).shortId;
+	}
+
+	return;
 }
 
 // -------------------------------------------------------------------------------------

@@ -1,16 +1,19 @@
 #ifndef MONITORSIGNALINFO_H
 #define MONITORSIGNALINFO_H
 
+#include "MonitorSignalManager.h"
 #include "../lib/Ui/DialogSignalInfo.h"
 
 class MonitorCentralWidget;
 class MonitorConfigController;
-class TcpSignalClient;
 
 class MonitorSignalInfo : public DialogSignalInfo
 {
 public:
-	static bool showDialog(QString appSignalId, MonitorConfigController* configController, TcpSignalClient* tcpSignalClient, MonitorCentralWidget* centralWidget);
+	static bool showDialog(QString appSignalId,
+						   MonitorSignalManager* signalManager,
+						   MonitorConfigController* configController,
+						   MonitorCentralWidget* centralWidget);
 
 private:
 	MonitorSignalInfo(const AppSignalParam& signal,

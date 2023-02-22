@@ -180,7 +180,7 @@ bool SoftwareSettingsGetter::getSoftwareConnectionBySoftwareID(const Hardware::E
 	return result;
 }
 
-bool SoftwareSettingsGetter::getCfgServiceConnection(	const Hardware::EquipmentSet *equipment,
+bool SoftwareSettingsGetter::getCfgServiceConnection(	const Hardware::EquipmentSet* equipment,
 												const Hardware::Software* software,
 												QString* cfgServiceID1, HostAddressPort* cfgServiceAddrPort1,
 												QString* cfgServiceID2, HostAddressPort* cfgServiceAddrPort2,
@@ -1402,8 +1402,10 @@ bool MonitorSettingsGetter::readSettings(const Builder::Context* context,
 
 	bool result = true;
 
-	result &= getCfgServiceConnection(equipment, software, &cfgServiceID1, &cfgServiceIP1,
-									  &cfgServiceID2, &cfgServiceIP2, log);
+	result &= getCfgServiceConnection(equipment, software,
+									  &configService1.equipmentId, &configService1.address,
+									  &configService2.equipmentId, &configService2.address,
+									  log);
 
 	// StartSchemaID
 	//
@@ -1458,146 +1460,120 @@ bool MonitorSettingsGetter::readAppDataServiceAndArchiveSettings(const Builder::
 
 	// AppDataService settings reading
 	//
-	result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::APP_DATA_SERVICE_ID1, &appDataServiceID1, log);
-	result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::APP_DATA_SERVICE_ID2, &appDataServiceID2, log);
+	QStringList appDataServiceIds;
+	result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::APP_DATA_SERVICE_IDS, &appDataServiceIds, log);
 
-	appDataServiceID1 = appDataServiceID1.trimmed();
-	appDataServiceID2 = appDataServiceID2.trimmed();
-
-	if (appDataServiceID1.isEmpty() == true &&
-		appDataServiceID2.isEmpty() == true)
+	if (appDataServiceIds.isEmpty() == true)
 	{
-		// at least one of this properties shouldn't be empty
-		//
-
-		// Property %1.%2 is empty.
-		//
-		log->errCFG3022(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_ID1);
-		log->errCFG3022(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_ID2);
-
+		log->errCFG3022(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS);
 		return false;
 	}
 
-	// AppDataServiceStrID1->ClientRequestIP, ClientRequestPort
+	// Get all AppDataServices
 	//
-	const Hardware::Software* appDataService1 = nullptr;
+	std::map<QString, const Hardware::Software*> appDataServices;
 
-	if (appDataServiceID1.isEmpty() == false)
+	for (const QString& appDataServiceId : appDataServiceIds)
 	{
-		appDataService1 = equipment->deviceObject(appDataServiceID1)->toSoftware().get();
+		// ADS->ClientRequestIP, ClientRequestPort
+		//
+		const Hardware::Software* appDataService = nullptr;
 
-		if (appDataService1 == nullptr)
+		if (auto appDataServiceDevice = equipment->deviceObject(appDataServiceId);
+			appDataServiceDevice == nullptr)
 		{
-			log->errCFG3021(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_ID1, appDataServiceID1);
-
+			// Property %1.%2 is linked to undefined software ID %3.
+			//
+			log->errCFG3021(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS, appDataServiceId);
 			result = false;
 		}
 		else
 		{
-			if (appDataService1->softwareType() != E::SoftwareType::AppDataService)
+			if (appDataService = appDataServiceDevice->toSoftware().get();
+				appDataService == nullptr)
 			{
-				log->errCFG3017(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_ID1, appDataServiceID1);
-
+				// Property %1.%2 is linked to undefined software ID %3.
+				//
+				log->errCFG3021(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS, appDataServiceId);
 				result = false;
+			}
+			else
+			{
+				if (appDataService->softwareType() != E::SoftwareType::AppDataService)
+				{
+					// Property %1.%2 is linked to not compatible software %3.
+					//
+					log->errCFG3017(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS, appDataServiceId);
+					result = false;
+				}
+				else
+				{
+					appDataServices[appDataServiceId] = appDataService;
+				}
 			}
 		}
 	}
 
-	const Hardware::Software* appDataService2 = nullptr;
-
-	if (appDataServiceID2.isEmpty() == false)
+	if (result == false || appDataServices.empty() == true)
 	{
-		appDataService2 = equipment->deviceObject(appDataServiceID2)->toSoftware().get();
-
-		if (appDataService2 == nullptr)
-		{
-			log->errCFG3021(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_ID2, appDataServiceID2);
-
-			result = false;
-		}
-		else
-		{
-			if (appDataService2->softwareType() != E::SoftwareType::AppDataService)
-			{
-				log->errCFG3017(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_ID2, appDataServiceID2);
-
-				result = false;
-			}
-		}
+		return false;
 	}
-
-	RETURN_IF_FALSE(result);
 
 	// Reading AppDataService Settings
 	//
-	if (appDataService1 != nullptr)
+	for (const auto&[appDataServiceId, appDataService] : appDataServices)
 	{
-		AppDataServiceSettingsGetter adsSettings1;
-
-		result &= adsSettings1.readSoftwareSettings(context, appDataService1);
-
-		RETURN_IF_FALSE(result);
-
-		appDataServiceIP1 = adsSettings1.clientRequestIP.addressStr();
-		appDataServicePort1 = adsSettings1.clientRequestIP.port();
-		realtimeDataIP1 = adsSettings1.rtTrendsRequestIP.addressStr();
-		realtimeDataPort1 = adsSettings1.rtTrendsRequestIP.port();
-
+		// Get AppDataService connection settings
 		//
+		AppDataServiceSettingsGetter adsSettings;
+		result &= adsSettings.readSoftwareSettings(context, appDataService);
 
-		HostAddressPort archClientRequestIP1;
+		if (result == false)
+		{
+			return false;
+		}
+
+		AppDataService ads;
+		ads.equipmentId = appDataServiceId;
+		ads.address = adsSettings.clientRequestIP;
+		ads.realtimeAddress = adsSettings.rtTrendsRequestIP;
+
+		this->appDataServices.push_back(ads);
+
+		// Get ArchiveService connection settings
+		//
+		QString archiveServiceId;
+		HostAddressPort archClientRequestAddress;
 
 		result &= getSoftwareConnection(equipment,
-										appDataService1,
+										appDataService,
 										EquipmentPropNames::ARCH_SERVICE_ID,
 										EquipmentPropNames::CLIENT_REQUEST_IP,
 										EquipmentPropNames::CLIENT_REQUEST_PORT,
-										&archiveServiceID1,
-										&archClientRequestIP1,
+										&archiveServiceId,
+										&archClientRequestAddress,
 										true,
 										Socket::IP_NULL,
 										PORT_ARCHIVING_SERVICE_CLIENT_REQUEST,
 										E::SoftwareType::ArchiveService,
 										log);
-		RETURN_IF_FALSE(result);
 
-		archiveServiceIP1 = archClientRequestIP1.addressStr();
-		archiveServicePort1 = archClientRequestIP1.port();
-	}
+		if (result == false)
+		{
+			return false;
+		}
 
-	if (appDataService2 != nullptr)
-	{
-		AppDataServiceSettingsGetter adsSettings2;
+		if (archiveServiceId.isEmpty() == true)
+		{
+			continue;
+		}
 
-		result &= adsSettings2.readSoftwareSettings(context, appDataService2);
+		ArchiveService as;
+		as.equipmentId = archiveServiceId;
+		as.appDataServiceId = appDataServiceId;
+		as.address = archClientRequestAddress;
 
-		RETURN_IF_FALSE(result);
-
-		appDataServiceIP2 = adsSettings2.clientRequestIP.addressStr();
-		appDataServicePort2 = adsSettings2.clientRequestIP.port();
-		realtimeDataIP2 = adsSettings2.rtTrendsRequestIP.addressStr();
-		realtimeDataPort2 = adsSettings2.rtTrendsRequestIP.port();
-
-		//
-
-		HostAddressPort archClientRequestIP2;
-
-		result &= getSoftwareConnection(equipment,
-										appDataService2,
-										EquipmentPropNames::ARCH_SERVICE_ID,
-										EquipmentPropNames::CLIENT_REQUEST_IP,
-										EquipmentPropNames::CLIENT_REQUEST_PORT,
-										&archiveServiceID2,
-										&archClientRequestIP2,
-										true,
-										Socket::IP_NULL,
-										PORT_ARCHIVING_SERVICE_CLIENT_REQUEST,
-										E::SoftwareType::ArchiveService,
-										log);
-		RETURN_IF_FALSE(result);
-
-		archiveServiceIP2 = archClientRequestIP2.addressStr();
-		archiveServicePort2 = archClientRequestIP2.port();
+		this->archiveServices.push_back(as);
 	}
 
 	return result;
@@ -1641,7 +1617,7 @@ bool MonitorSettingsGetter::readTuningServiceSettings(const Builder::Context* co
 
 		TuningService tsc;
 
-		tsc.tuningServiceID = tuningServiceID;
+		tsc.equipmentId = tuningServiceID;
 		tsc.clientRequestIP = tuningServiceClientIP.addressStr();
 		tsc.clientRequestPort = tuningServiceClientIP.port();
 

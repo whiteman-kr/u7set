@@ -9,6 +9,9 @@ using Hash = quint64;
 
 #define UNDEFINED_HASH 0x0000000000000000ULL
 
+
+
+
 inline Hash calcHash(const QString& str)
 {
 	Hash hash = 0;
@@ -143,3 +146,23 @@ inline quint32 ClassNameHashCode(const std::string& className)
 
 	return nHash;
 }
+
+namespace hash_h
+{
+	template<typename Type>
+	struct hasher
+	{
+		// Calc hasher for unordered_map
+		// No need to calc hash on hash for std::unourdered_map, in this way it is significantly faster
+		// Usage: std::unordered_map<Hash, AppSignalState, HashHasher> m_states;
+		//
+		std::size_t operator()(Type u) const noexcept
+		{
+			return u;
+		}
+	};
+}
+
+template<typename T>
+using VoidHasher = hash_h::hasher<T>;
+

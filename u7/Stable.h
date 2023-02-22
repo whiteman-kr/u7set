@@ -20,6 +20,7 @@
 //
 #include <cassert>
 #include <cstdint>
+#include <cfloat>
 
 // C++ includes
 //

@@ -1,4 +1,5 @@
 #include "LogicSchema.h"
+#include "SchemaLayer.h"
 #include "SchemaItemAfb.h"
 #include "SchemaItemUfb.h"
 #include "SchemaItemSignal.h"

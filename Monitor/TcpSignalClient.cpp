@@ -1,62 +1,53 @@
 #include "TcpSignalClient.h"
 #include "MonitorAppSettings.h"
+#include "MonitorConfigController.h"
+#include "MonitorSignalManager.h"
 
-TcpSignalClient::TcpSignalClient(MonitorConfigController* configController, ILogFile* logFile) :
-	Tcp::Client(configController->softwareInfo(),
-				HostAddressPort{configController->configuration().appDataService1.address()},
-				HostAddressPort{configController->configuration().appDataService2.address()},
-				"TcpSignalClient"),
+TcpSignalClient::TcpSignalClient(const MonitorConfigController& configController,
+								 const MonitorSettings::AppDataService& adsInfo,
+								 MonitorSignalManager& signalManager,
+								 ILogFile* logFile) :
+	Tcp::Client(configController.softwareInfo(), adsInfo.address, "TcpSignalClient"),
 	TcpClientStatistics(this),
+	HasLogFile(logFile, QString("ADS ") + adsInfo.equipmentId),
 	m_cfgController(configController),
-	m_logFile(logFile, "TcpSignalClient")
+	m_serverSettings(adsInfo),
+	m_signalManager(signalManager)
 {
-	Q_ASSERT(m_cfgController);
-	Q_ASSERT(logFile);
+	setObjectName("TcpSignalClient " + adsInfo.equipmentId);
 
-	setObjectName("TcpSignalClient");
+	Q_ASSERT(this->logFile());
+	qDebug() << "TcpSignalClient::TcpSignalClient() " << adsInfo.equipmentId << ", " << this->serverAddressPort1().addressPortStr();
 
-	qDebug() << "TcpSignalClient::TcpSignalClient(...)";
-
-	qDebug() << m_cfgController->configuration().appDataService1.ip();
-	qDebug() << m_cfgController->configuration().appDataService2.ip();
-
-	m_startStateTimerId = startTimer(MonitorAppSettings::instance().requestTimeInterval());
+	return;
 }
 
 TcpSignalClient::~TcpSignalClient()
 {
-	qDebug() << "TcpSignalClient::~TcpSignalClient()";
-}
-
-void TcpSignalClient::timerEvent(QTimerEvent* /*event*/)
-{
-	return;
+	qDebug() << "TcpSignalClient::~TcpSignalClient() " << this->serverAddressPort1().addressPortStr();
 }
 
 void TcpSignalClient::onClientThreadStarted()
 {
-	qDebug() << "TcpSignalClient::onClientThreadStarted()";
-	m_logFile.writeMessage("onClientThreadStarted()");
-
-	connect(m_cfgController, &MonitorConfigController::configurationArrived,
-			this, &TcpSignalClient::slot_configurationArrived,
-			Qt::QueuedConnection);
+	qDebug() << "TcpSignalClient::onClientThreadStarted()" << this->serverAddressPort1().addressPortStr();
+	writeMessage("TcpSignalClient::onClientThreadStarted()");
 
 	return;
 }
 
 void TcpSignalClient::onClientThreadFinished()
 {
-	qDebug() << "TcpSignalClient::onClientThreadFinished()";
-	m_logFile.writeMessage("onClientThreadFinished()");
+	qDebug() << "TcpSignalClient::onClientThreadFinished()" << this->serverAddressPort1().addressPortStr();
+	writeMessage("TcpSignalClient::onClientThreadFinished()");
 
-	theSignals.reset();
+	//theSignals.reset();	!signal reset moved to AdsConnection::configurationArrived
+	return;
 }
 
 void TcpSignalClient::onConnection()
 {
-	qDebug() << "TcpSignalClient::onConnection()";
-	m_logFile.writeMessage("onConnection()");
+	qDebug() << "TcpSignalClient::onConnection()" << this->serverAddressPort1().addressPortStr();
+	writeMessage("TcpSignalClient::onConnection()");
 
 	Q_ASSERT(isClearToSendRequest() == true);
 
@@ -67,18 +58,20 @@ void TcpSignalClient::onConnection()
 
 void TcpSignalClient::onDisconnection()
 {
-	qDebug() << "TcpSignalClient::onDisconnection";
-	m_logFile.writeMessage("onDisconnection()");
+	qDebug() << "TcpSignalClient::onDisconnection" << this->serverAddressPort1().addressPortStr();
+	writeMessage("onDisconnection()");
 
-	theSignals.invalidateSignalStates();
+	m_signalManager.invalidateSignalStates(QThread::currentThreadId());
 
 	emit connectionReset();
+
+	return;
 }
 
 void TcpSignalClient::onReplyTimeout()
 {
-	qDebug() << "TcpSignalClient::onReplyTimeout()";
-	m_logFile.writeWarning("onReplyTimeout()");
+	qDebug() << "TcpSignalClient::onReplyTimeout()" << this->serverAddressPort1().addressPortStr();
+	writeWarning("TcpSignalClient::onReplyTimeout()");
 }
 
 void TcpSignalClient::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
@@ -115,8 +108,8 @@ void TcpSignalClient::processReply(quint32 requestID, const char* replyData, qui
 
 	default:
 		Q_ASSERT(false);
-		qDebug() << "Wrong requestID in TcpSignalClient::processReply()";
-		m_logFile.writeError(QString("Wrong requestID in TcpSignalClient::processReply(), %1").arg(requestID));
+		qDebug() << "Wrong requestID in TcpSignalClient::processReply()" << this->serverAddressPort1().addressPortStr();
+		writeError(QString("Wrong requestID in TcpSignalClient::processReply(), %1").arg(requestID));
 
 		resetToGetState(true);
 	}
@@ -124,14 +117,29 @@ void TcpSignalClient::processReply(quint32 requestID, const char* replyData, qui
 	return;
 }
 
+bool TcpSignalClient::hasSignal(const QString& appSignalId) const
+{
+	return hasSignal(::calcHash(appSignalId));
+}
+
+bool TcpSignalClient::hasSignal(Hash signalHash) const
+{
+	QWriteLocker wl(&m_hasSignalLock);
+	return m_hasSignalList.contains(signalHash);
+}
+
 void TcpSignalClient::resetToGetSignalList()
 {
 	QThread::msleep(MonitorAppSettings::instance().requestTimeInterval());
 
-	theSignals.reset();
 	m_signalList.clear();
 	m_lastSignalParamStartIndex = 0;
 	m_lastSignalStateStartIndex = 0;
+
+	{
+		QWriteLocker wl(&m_hasSignalLock);
+		m_hasSignalList.clear();
+	}
 
 	requestSignalListStart();
 	return;
@@ -179,7 +187,7 @@ void TcpSignalClient::processSignalListStart(const QByteArray& data)
 	if (m_getSignalListStartReply.error() != 0)
 	{
 		qDebug() << "TcpSignalClient::processSignalListNext, error received: " << m_getSignalListStartReply.error();
-		m_logFile.writeError(QString("processSignalListNext, error received: %1").arg(m_getSignalListStartReply.error()));
+		writeError(QString("processSignalListNext, error received: %1").arg(m_getSignalListStartReply.error()));
 
 		Q_ASSERT(m_getSignalListStartReply.error() != 0);
 
@@ -187,24 +195,24 @@ void TcpSignalClient::processSignalListStart(const QByteArray& data)
 		return;
 	}
 
-	qDebug() << "----------------- processSignalListStart -----------------";
+	qDebug() << "----------------- processSignalListStart -----------------"  << this->serverAddressPort1().addressPortStr();;
 	qDebug() << "error: " << m_getSignalListStartReply.error();
 	qDebug() << "totalItemCount: " << m_getSignalListStartReply.totalitemcount();
 	qDebug() << "partCount: " << m_getSignalListStartReply.partcount();
 	qDebug() << "itemsPerPart: " << m_getSignalListStartReply.itemsperpart();
 
-	m_logFile.writeMessage("----------------- processSignalListStart -----------------");
+	writeMessage("----------------- processSignalListStart -----------------");
 	if (m_getSignalListStartReply.error() == 0)
 	{
-		m_logFile.writeMessage(QString("-- error: %1").arg(m_getSignalListStartReply.error()));
+		writeMessage(QString("-- error: %1").arg(m_getSignalListStartReply.error()));
 	}
 	else
 	{
-		m_logFile.writeError(QString("-- error: %1").arg(m_getSignalListStartReply.error()));
+		writeError(QString("-- error: %1").arg(m_getSignalListStartReply.error()));
 	}
-	m_logFile.writeMessage(QString("-- totalItemCount: %1").arg(m_getSignalListStartReply.totalitemcount()));
-	m_logFile.writeMessage(QString("-- partCount: %1").arg(m_getSignalListStartReply.partcount()));
-	m_logFile.writeMessage(QString("-- itemsPerPart: %1").arg(m_getSignalListStartReply.itemsperpart()));
+	writeMessage(QString("-- totalItemCount: %1").arg(m_getSignalListStartReply.totalitemcount()));
+	writeMessage(QString("-- partCount: %1").arg(m_getSignalListStartReply.partcount()));
+	writeMessage(QString("-- itemsPerPart: %1").arg(m_getSignalListStartReply.itemsperpart()));
 
 	if (m_getSignalListStartReply.totalitemcount() == 0 ||
 		m_getSignalListStartReply.partcount() == 0)
@@ -216,6 +224,11 @@ void TcpSignalClient::processSignalListStart(const QByteArray& data)
 
 		m_signalList.clear();
 
+		{
+			QWriteLocker wl(&m_hasSignalLock);
+			m_hasSignalList.clear();
+		}
+
 		// request params
 		//
 		requestSignalParam(0);
@@ -224,6 +237,11 @@ void TcpSignalClient::processSignalListStart(const QByteArray& data)
 
 	m_signalList.clear();
 	m_signalList.reserve(m_getSignalListStartReply.totalitemcount());
+
+	{
+		QWriteLocker wl(&m_hasSignalLock);
+		m_hasSignalList.clear();
+	}
 
 	requestSignalListNext(0);
 
@@ -234,13 +252,15 @@ void TcpSignalClient::requestSignalListNext(int part)
 {
 	Q_ASSERT(isClearToSendRequest());
 
-	// if all parts were requested then sitch to next reply
+	// if all parts were requested then switch to next reply
 	//
 	if (part >= m_getSignalListStartReply.partcount())
 	{
-		if (m_signalList.size() != m_getSignalListStartReply.totalitemcount())
+		Q_ASSERT(m_signalList.size() == m_getSignalListStartReply.totalitemcount());
+
 		{
-			Q_ASSERT(m_signalList.size() != m_getSignalListStartReply.totalitemcount());
+			QWriteLocker wl(&m_hasSignalLock);
+			Q_ASSERT(m_hasSignalList.size() == m_getSignalListStartReply.totalitemcount());
 		}
 
 		// Request params
@@ -271,7 +291,7 @@ void TcpSignalClient::processSignalListNext(const QByteArray& data)
 	if (m_getSignalListNextReply.error() != 0)
 	{
 		qDebug() << "TcpSignalClient::processSignalListNext, error received: " << m_getSignalListNextReply.error();
-		m_logFile.writeError(QString("processSignalListNext, error received: %1").arg(m_getSignalListNextReply.error()));
+		writeError(QString("processSignalListNext, error received: %1").arg(m_getSignalListNextReply.error()));
 
 		Q_ASSERT(m_getSignalListNextReply.error() != 0);
 
@@ -292,20 +312,24 @@ void TcpSignalClient::processSignalListNext(const QByteArray& data)
 	qDebug() << "error: " << m_getSignalListNextReply.error();
 	qDebug() << "part: " << m_getSignalListNextReply.part();
 
-	m_logFile.writeMessage("----------------- processSignalListNext -----------------");
+	writeMessage("----------------- processSignalListNext -----------------");
 	if (m_getSignalListNextReply.error() == 0)
 	{
-		m_logFile.writeMessage(QString("-- error: %1").arg(m_getSignalListNextReply.error()));
+		writeMessage(QString("-- error: %1").arg(m_getSignalListNextReply.error()));
 	}
 	else
 	{
-		m_logFile.writeError(QString("-- error: %1").arg(m_getSignalListNextReply.error()));
+		writeError(QString("-- error: %1").arg(m_getSignalListNextReply.error()));
 	}
-	m_logFile.writeMessage(QString("-- part: %1").arg(m_getSignalListNextReply.part()));
+	writeMessage(QString("-- part: %1").arg(m_getSignalListNextReply.part()));
 
-	for (int i = 0; i < m_getSignalListNextReply.appsignalids_size(); i++)
 	{
-		m_signalList.push_back(QString::fromStdString(m_getSignalListNextReply.appsignalids(i)));
+		QWriteLocker wl(&m_hasSignalLock);
+		for (int i = 0; i < m_getSignalListNextReply.appsignalids_size(); i++)
+		{
+			const QString& signalId = m_signalList.emplace_back(QString::fromStdString(m_getSignalListNextReply.appsignalids(i)));
+			m_hasSignalList.insert(::calcHash(signalId));
+		}
 	}
 
 	// Next request
@@ -324,12 +348,15 @@ void TcpSignalClient::requestSignalParam(int startIndex)
 
 	if (startIndex == 0)
 	{
-		theSignals.reset();
+		//theSignals.reset();	no need to reset signal list, signals will be just updates,
+		// if new configuration arrives (ONLY than signal list can be changed) then all signals will be reset in
+		// AdsConnection::configurationArrived
+		//
 	}
 
 	if (startIndex >= m_signalList.size())
 	{
-		emit signalParamAndUnitsArrived();
+		m_signalManager.emitSignalParamsUpdated();
 
 		resetToGetState(true);	// END OF RECEIVING SIGNALS PARAMS,
 								// Here the new loop starts!!!
@@ -365,7 +392,7 @@ void TcpSignalClient::processSignalParam(const QByteArray& data)
 	if (m_getSignalParamReply.error() != 0)
 	{
 		qDebug() << "TcpSignalClient::processSignalParam, error received: " << m_getSignalParamReply.error();
-		m_logFile.writeError(QString("processSignalParam, error received: %1").arg(m_getSignalParamReply.error()));
+		writeError(QString("processSignalParam, error received: %1").arg(m_getSignalParamReply.error()));
 
 		Q_ASSERT(m_getSignalParamReply.error() != 0);
 
@@ -385,9 +412,6 @@ void TcpSignalClient::processSignalParam(const QByteArray& data)
 
 		if (s.hash() == 0 || s.appSignalId().isEmpty() == true)
 		{
-			qDebug() << s.appSignalId();
-			qDebug() << s.caption();
-
 			Q_ASSERT(s.hash() != 0);
 			Q_ASSERT(s.appSignalId().isEmpty() == false);
 
@@ -395,7 +419,7 @@ void TcpSignalClient::processSignalParam(const QByteArray& data)
 		}
 	}
 
-	theSignals.addSignals(appSignals);
+	m_signalManager.addSignals(appSignals, m_serverSettings.equipmentId);
 
 	requestSignalParam(m_lastSignalParamStartIndex + ADS_GET_APP_SIGNAL_PARAM_MAX);
 
@@ -432,7 +456,7 @@ void TcpSignalClient::processSignalStateChanges(const QByteArray& data)
 	if (m_getSignalStateChangesReply.error() != 0)
 	{
 		qDebug() << "TcpSignalClient::processSignalStateChanges, error received: " << m_getSignalStateChangesReply.error();
-		m_logFile.writeError(QString("processSignalStateChanges, error received: %1").arg(m_getSignalStateChangesReply.error()));
+		writeError(QString("processSignalStateChanges, error received: %1").arg(m_getSignalStateChangesReply.error()));
 		Q_ASSERT(m_getSignalStateChangesReply.error() != 0);
 
 		resetToGetState(true);
@@ -450,7 +474,7 @@ void TcpSignalClient::processSignalStateChanges(const QByteArray& data)
 		Q_ASSERT(state.hash() != 0);
 	}
 
-	theSignals.setState(states);
+	m_signalManager.setState(states, QThread::currentThreadId());
 
 	if (m_getSignalStateChangesReply.pendingstatescount() >= ADS_GET_APP_SIGNAL_STATE_MAX)
 	{
@@ -509,7 +533,7 @@ void TcpSignalClient::processSignalState(const QByteArray& data)
 	if (m_getSignalStateReply.error() != 0)
 	{
 		qDebug() << "TcpSignalClient::processSignalState, error received: " << m_getSignalStateReply.error();
-		m_logFile.writeError(QString("processSignalState, error received: %1").arg(m_getSignalStateReply.error()));
+		writeError(QString("processSignalState, error received: %1").arg(m_getSignalStateReply.error()));
 
 		Q_ASSERT(m_getSignalStateReply.error() != 0);
 
@@ -528,23 +552,9 @@ void TcpSignalClient::processSignalState(const QByteArray& data)
 		Q_ASSERT(state.m_hash != 0);
 	}
 
-	theSignals.setState(states);
+	m_signalManager.setState(states, QThread::currentThreadId());
 
 	resetToGetState(false);
-	return;
-}
-
-void TcpSignalClient::slot_configurationArrived(ConfigSettings configuration)
-{
-	HostAddressPort s1 = configuration.appDataService1.address();
-	HostAddressPort s2 = configuration.appDataService2.address();
-
-	if (serverAddressPort(0) != s1 ||
-		serverAddressPort(1) != s2)
-	{
-		setServers(s1, s2, true);
-	}
-
 	return;
 }
 

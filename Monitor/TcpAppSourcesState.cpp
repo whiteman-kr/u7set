@@ -106,10 +106,12 @@ const ::Network::AppDataSourceState& AppDataSourceState::previousState() const
 //
 
 TcpAppSourcesState::TcpAppSourcesState(MonitorConfigController* configController, ILogFile* logFile) :
-	Tcp::Client(configController->softwareInfo(),
-				configController->configuration().appDataService1.address(),
-				configController->configuration().appDataService2.address(),
-				"TcpAppSourcesState"),
+	// TO DO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	Tcp::Client(configController->softwareInfo(), {}, {}),
+//	Tcp::Client(configController->softwareInfo(),
+//				configController->configuration().appDataService1.address(),
+//				configController->configuration().appDataService2.address(),
+//				"TcpAppSourcesState"),
 	TcpClientStatistics(this),
 	m_cfgController(configController),
 	m_logFile(logFile, "TcpAppSourcesState")
@@ -430,8 +432,10 @@ void TcpAppSourcesState::processAppDataSourcesState(const QByteArray& data)
 }
 void TcpAppSourcesState::slot_configurationArrived(ConfigSettings configuration)
 {
-	HostAddressPort s1 = configuration.appDataService1.address();
-	HostAddressPort s2 = configuration.appDataService2.address();
+	// TO DO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	HostAddressPort s1, s2;
+//	HostAddressPort s1 = configuration.appDataService1.address();
+//	HostAddressPort s2 = configuration.appDataService2.address();
 
 	if (serverAddressPort(0) != s1 ||
 		serverAddressPort(1) != s2)

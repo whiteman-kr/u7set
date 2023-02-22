@@ -1,5 +1,5 @@
 #include "MonitorSchema.h"
-#include "Settings.h"
+#include "SchemaLayer.h"
 #include "SchemaItemValue.h"
 #include "SchemaItemImageValue.h"
 

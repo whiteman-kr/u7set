@@ -9,6 +9,7 @@
 #include "SignalPropertiesDialog.h"
 #include "GlobalMessanger.h"
 #include "../Builder/ConnectionStorage.h"
+#include "../VFrame30/SchemaLayer.h"
 #include "../VFrame30/UfbSchema.h"
 #include "../VFrame30/SchemaItemLine.h"
 #include "../VFrame30/SchemaItemRect.h"
@@ -28,7 +29,6 @@
 #include "../VFrame30/SchemaItemIndicator.h"
 #include "../VFrame30/SchemaItemLoopback.h"
 #include "../VFrame30/Session.h"
-#include "../VFrame30/DrawParam.h"
 #include "../VFrame30/Bus.h"
 #include "../lib/LmDescription.h"
 #include "../AppSignalSetProvider.h"
@@ -3798,6 +3798,14 @@ void EditSchemaWidget::finishMoveAfbsConnectionLinks()
 
 		std::list<VFrame30::SchemaPoint> uniquePoints(points.begin(), points.end());
 		uniquePoints.unique();
+
+		if (uniquePoints.size() == 1)
+		{
+			// It can happen theat connection line is zero length and all points except the first one were filtered,
+			// but still we expect line to have at least two points.
+			//
+			uniquePoints.push_back(uniquePoints.front());
+		}
 
 		uniquePoints = EditConnectionLine::removeUnwantedPoints(uniquePoints);
 

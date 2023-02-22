@@ -2,8 +2,7 @@
 #define DIALOGTRENDSIGNALPOINT_H
 
 #include <QDialog>
-#include "TrendSignal.h"
-#include "TrendScale.h"
+#include "TrendSignalSet.h"
 
 namespace Ui {
 	class DialogTrendSignalPoint;

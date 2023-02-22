@@ -526,7 +526,7 @@ namespace TrendLib
 					return;
 				}
 
-				emit showSignalProperties(outSignal.appSignalId());
+				emit showSignalProperties(outSignal.appSignalId(), outSignal.archiveServerId());
 			}
 		}
 

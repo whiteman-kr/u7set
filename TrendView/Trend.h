@@ -2,6 +2,7 @@
 #define TREND_H
 
 #include "TrendSignal.h"
+#include "TrendSignalSet.h"
 #include "TrendParam.h"
 #include "TrendRuler.h"
 
@@ -69,7 +70,7 @@ namespace TrendLib
 		void drawSignalTrendAnalog(QPainter* painter, const TrendSignalParam& signal, const TrendParam& drawParam, const std::list<std::shared_ptr<OneHourData>>& signalData) const;
 
 		void drawRulers(QPainter* painter, TrendParam drawParam) const;
-		TrendStateItem rulerSignalState(const TrendRuler& ruler, QString appSignalId, E::TimeType timeType) const;
+		TrendStateItem rulerSignalState(const TrendRuler& ruler, const TrendSignalParam& signal, E::TimeType timeType) const;
 
 		static void adjustPainter(QPainter* painter, const TrendParam& trendParam);
 

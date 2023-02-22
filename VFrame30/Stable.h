@@ -95,10 +95,6 @@
 // Project stable includes
 //
 #include "VFrameTools.h"
-#include "../CommonLib/Factory.h"
-#include "../CommonLib/Types.h"
-#include "../CommonLib/PropertyObject.h"
-#include "../CommonLib/DebugInstCounter.h"
 #include "../Proto/ProtoSerialization.h"
 
 #ifdef _MSC_VER

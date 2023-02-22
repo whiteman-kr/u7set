@@ -582,6 +582,7 @@ class TrendArchive PROTOBUF_FINAL :
   enum : int {
     kHoursFieldNumber = 10,
     kAppSignalIdFieldNumber = 2,
+    kArchiveServerIdFieldNumber = 3,
   };
   // repeated .Proto.TrendArchiveHour hours = 10;
   int hours_size() const;
@@ -621,6 +622,26 @@ class TrendArchive PROTOBUF_FINAL :
   std::string* _internal_mutable_app_signal_id();
   public:
 
+  // optional string archive_server_id = 3;
+  bool has_archive_server_id() const;
+  private:
+  bool _internal_has_archive_server_id() const;
+  public:
+  void clear_archive_server_id();
+  const std::string& archive_server_id() const;
+  void set_archive_server_id(const std::string& value);
+  void set_archive_server_id(std::string&& value);
+  void set_archive_server_id(const char* value);
+  void set_archive_server_id(const char* value, size_t size);
+  std::string* mutable_archive_server_id();
+  std::string* release_archive_server_id();
+  void set_allocated_archive_server_id(std::string* archive_server_id);
+  private:
+  const std::string& _internal_archive_server_id() const;
+  void _internal_set_archive_server_id(const std::string& value);
+  std::string* _internal_mutable_archive_server_id();
+  public:
+
   // @@protoc_insertion_point(class_scope:Proto.TrendArchive)
  private:
   class _Internal;
@@ -632,6 +653,7 @@ class TrendArchive PROTOBUF_FINAL :
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::TrendArchiveHour > hours_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr app_signal_id_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr archive_server_id_;
   friend struct ::TableStruct_trends_2eproto;
 };
 // -------------------------------------------------------------------
@@ -935,22 +957,50 @@ class TrendSignalParam PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
+    kTagsFieldNumber = 13,
     kViewLimitsFieldNumber = 33,
     kSignalIdFieldNumber = 2,
     kAppSignalIdFieldNumber = 3,
     kCaptionFieldNumber = 4,
     kEquipmentIdFieldNumber = 5,
+    kArchiveServiceIdFieldNumber = 6,
+    kArchiveServiceShortIdFieldNumber = 7,
+    kDataServiceIdFieldNumber = 8,
     kUnitFieldNumber = 11,
     kAnalogFormatFieldNumber = 41,
     kTypeFieldNumber = 10,
     kPrecisionFieldNumber = 12,
-    kColorFieldNumber = 40,
     kLineWeightFieldNumber = 19,
     kHighLimitFieldNumber = 20,
+    kColorFieldNumber = 40,
     kLowLimitFieldNumber = 21,
     kViewHighLimitFieldNumber = 31,
     kViewLowLimitFieldNumber = 32,
   };
+  // repeated string tags = 13;
+  int tags_size() const;
+  private:
+  int _internal_tags_size() const;
+  public:
+  void clear_tags();
+  const std::string& tags(int index) const;
+  std::string* mutable_tags(int index);
+  void set_tags(int index, const std::string& value);
+  void set_tags(int index, std::string&& value);
+  void set_tags(int index, const char* value);
+  void set_tags(int index, const char* value, size_t size);
+  std::string* add_tags();
+  void add_tags(const std::string& value);
+  void add_tags(std::string&& value);
+  void add_tags(const char* value);
+  void add_tags(const char* value, size_t size);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& tags() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_tags();
+  private:
+  const std::string& _internal_tags(int index) const;
+  std::string* _internal_add_tags();
+  public:
+
   // repeated .Proto.TrendViewLimit view_limits = 33;
   int view_limits_size() const;
   private:
@@ -1049,6 +1099,66 @@ class TrendSignalParam PROTOBUF_FINAL :
   std::string* _internal_mutable_equipment_id();
   public:
 
+  // optional string archive_service_id = 6;
+  bool has_archive_service_id() const;
+  private:
+  bool _internal_has_archive_service_id() const;
+  public:
+  void clear_archive_service_id();
+  const std::string& archive_service_id() const;
+  void set_archive_service_id(const std::string& value);
+  void set_archive_service_id(std::string&& value);
+  void set_archive_service_id(const char* value);
+  void set_archive_service_id(const char* value, size_t size);
+  std::string* mutable_archive_service_id();
+  std::string* release_archive_service_id();
+  void set_allocated_archive_service_id(std::string* archive_service_id);
+  private:
+  const std::string& _internal_archive_service_id() const;
+  void _internal_set_archive_service_id(const std::string& value);
+  std::string* _internal_mutable_archive_service_id();
+  public:
+
+  // optional string archive_service_short_id = 7;
+  bool has_archive_service_short_id() const;
+  private:
+  bool _internal_has_archive_service_short_id() const;
+  public:
+  void clear_archive_service_short_id();
+  const std::string& archive_service_short_id() const;
+  void set_archive_service_short_id(const std::string& value);
+  void set_archive_service_short_id(std::string&& value);
+  void set_archive_service_short_id(const char* value);
+  void set_archive_service_short_id(const char* value, size_t size);
+  std::string* mutable_archive_service_short_id();
+  std::string* release_archive_service_short_id();
+  void set_allocated_archive_service_short_id(std::string* archive_service_short_id);
+  private:
+  const std::string& _internal_archive_service_short_id() const;
+  void _internal_set_archive_service_short_id(const std::string& value);
+  std::string* _internal_mutable_archive_service_short_id();
+  public:
+
+  // optional string data_service_id = 8;
+  bool has_data_service_id() const;
+  private:
+  bool _internal_has_data_service_id() const;
+  public:
+  void clear_data_service_id();
+  const std::string& data_service_id() const;
+  void set_data_service_id(const std::string& value);
+  void set_data_service_id(std::string&& value);
+  void set_data_service_id(const char* value);
+  void set_data_service_id(const char* value, size_t size);
+  std::string* mutable_data_service_id();
+  std::string* release_data_service_id();
+  void set_allocated_data_service_id(std::string* data_service_id);
+  private:
+  const std::string& _internal_data_service_id() const;
+  void _internal_set_data_service_id(const std::string& value);
+  std::string* _internal_mutable_data_service_id();
+  public:
+
   // optional string unit = 11;
   bool has_unit() const;
   private:
@@ -1115,19 +1225,6 @@ class TrendSignalParam PROTOBUF_FINAL :
   void _internal_set_precision(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
-  // optional uint32 color = 40;
-  bool has_color() const;
-  private:
-  bool _internal_has_color() const;
-  public:
-  void clear_color();
-  ::PROTOBUF_NAMESPACE_ID::uint32 color() const;
-  void set_color(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_color() const;
-  void _internal_set_color(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  public:
-
   // optional double line_weight = 19 [default = 0];
   bool has_line_weight() const;
   private:
@@ -1152,6 +1249,19 @@ class TrendSignalParam PROTOBUF_FINAL :
   private:
   double _internal_high_limit() const;
   void _internal_set_high_limit(double value);
+  public:
+
+  // optional uint32 color = 40;
+  bool has_color() const;
+  private:
+  bool _internal_has_color() const;
+  public:
+  void clear_color();
+  ::PROTOBUF_NAMESPACE_ID::uint32 color() const;
+  void set_color(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_color() const;
+  void _internal_set_color(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
   // optional double low_limit = 21;
@@ -1202,19 +1312,23 @@ class TrendSignalParam PROTOBUF_FINAL :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> tags_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::TrendViewLimit > view_limits_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr signal_id_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr app_signal_id_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr caption_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr equipment_id_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr archive_service_id_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr archive_service_short_id_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr data_service_id_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr unit_;
   static const ::PROTOBUF_NAMESPACE_ID::internal::LazyString _i_give_permission_to_break_this_code_default_analog_format_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr analog_format_;
   ::PROTOBUF_NAMESPACE_ID::int32 type_;
   ::PROTOBUF_NAMESPACE_ID::int32 precision_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 color_;
   double line_weight_;
   double high_limit_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 color_;
   double low_limit_;
   double view_high_limit_;
   double view_low_limit_;
@@ -2627,6 +2741,79 @@ inline void TrendArchive::set_allocated_app_signal_id(std::string* app_signal_id
   // @@protoc_insertion_point(field_set_allocated:Proto.TrendArchive.app_signal_id)
 }
 
+// optional string archive_server_id = 3;
+inline bool TrendArchive::_internal_has_archive_server_id() const {
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline bool TrendArchive::has_archive_server_id() const {
+  return _internal_has_archive_server_id();
+}
+inline void TrendArchive::clear_archive_server_id() {
+  archive_server_id_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline const std::string& TrendArchive::archive_server_id() const {
+  // @@protoc_insertion_point(field_get:Proto.TrendArchive.archive_server_id)
+  return _internal_archive_server_id();
+}
+inline void TrendArchive::set_archive_server_id(const std::string& value) {
+  _internal_set_archive_server_id(value);
+  // @@protoc_insertion_point(field_set:Proto.TrendArchive.archive_server_id)
+}
+inline std::string* TrendArchive::mutable_archive_server_id() {
+  // @@protoc_insertion_point(field_mutable:Proto.TrendArchive.archive_server_id)
+  return _internal_mutable_archive_server_id();
+}
+inline const std::string& TrendArchive::_internal_archive_server_id() const {
+  return archive_server_id_.Get();
+}
+inline void TrendArchive::_internal_set_archive_server_id(const std::string& value) {
+  _has_bits_[0] |= 0x00000002u;
+  archive_server_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void TrendArchive::set_archive_server_id(std::string&& value) {
+  _has_bits_[0] |= 0x00000002u;
+  archive_server_id_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.TrendArchive.archive_server_id)
+}
+inline void TrendArchive::set_archive_server_id(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000002u;
+  archive_server_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.TrendArchive.archive_server_id)
+}
+inline void TrendArchive::set_archive_server_id(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000002u;
+  archive_server_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.TrendArchive.archive_server_id)
+}
+inline std::string* TrendArchive::_internal_mutable_archive_server_id() {
+  _has_bits_[0] |= 0x00000002u;
+  return archive_server_id_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* TrendArchive::release_archive_server_id() {
+  // @@protoc_insertion_point(field_release:Proto.TrendArchive.archive_server_id)
+  if (!_internal_has_archive_server_id()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000002u;
+  return archive_server_id_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void TrendArchive::set_allocated_archive_server_id(std::string* archive_server_id) {
+  if (archive_server_id != nullptr) {
+    _has_bits_[0] |= 0x00000002u;
+  } else {
+    _has_bits_[0] &= ~0x00000002u;
+  }
+  archive_server_id_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), archive_server_id,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.TrendArchive.archive_server_id)
+}
+
 // repeated .Proto.TrendArchiveHour hours = 10;
 inline int TrendArchive::_internal_hours_size() const {
   return hours_.size();
@@ -3050,9 +3237,228 @@ inline void TrendSignalParam::set_allocated_equipment_id(std::string* equipment_
   // @@protoc_insertion_point(field_set_allocated:Proto.TrendSignalParam.equipment_id)
 }
 
+// optional string archive_service_id = 6;
+inline bool TrendSignalParam::_internal_has_archive_service_id() const {
+  bool value = (_has_bits_[0] & 0x00000010u) != 0;
+  return value;
+}
+inline bool TrendSignalParam::has_archive_service_id() const {
+  return _internal_has_archive_service_id();
+}
+inline void TrendSignalParam::clear_archive_service_id() {
+  archive_service_id_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline const std::string& TrendSignalParam::archive_service_id() const {
+  // @@protoc_insertion_point(field_get:Proto.TrendSignalParam.archive_service_id)
+  return _internal_archive_service_id();
+}
+inline void TrendSignalParam::set_archive_service_id(const std::string& value) {
+  _internal_set_archive_service_id(value);
+  // @@protoc_insertion_point(field_set:Proto.TrendSignalParam.archive_service_id)
+}
+inline std::string* TrendSignalParam::mutable_archive_service_id() {
+  // @@protoc_insertion_point(field_mutable:Proto.TrendSignalParam.archive_service_id)
+  return _internal_mutable_archive_service_id();
+}
+inline const std::string& TrendSignalParam::_internal_archive_service_id() const {
+  return archive_service_id_.Get();
+}
+inline void TrendSignalParam::_internal_set_archive_service_id(const std::string& value) {
+  _has_bits_[0] |= 0x00000010u;
+  archive_service_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void TrendSignalParam::set_archive_service_id(std::string&& value) {
+  _has_bits_[0] |= 0x00000010u;
+  archive_service_id_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.TrendSignalParam.archive_service_id)
+}
+inline void TrendSignalParam::set_archive_service_id(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000010u;
+  archive_service_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.TrendSignalParam.archive_service_id)
+}
+inline void TrendSignalParam::set_archive_service_id(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000010u;
+  archive_service_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.TrendSignalParam.archive_service_id)
+}
+inline std::string* TrendSignalParam::_internal_mutable_archive_service_id() {
+  _has_bits_[0] |= 0x00000010u;
+  return archive_service_id_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* TrendSignalParam::release_archive_service_id() {
+  // @@protoc_insertion_point(field_release:Proto.TrendSignalParam.archive_service_id)
+  if (!_internal_has_archive_service_id()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000010u;
+  return archive_service_id_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void TrendSignalParam::set_allocated_archive_service_id(std::string* archive_service_id) {
+  if (archive_service_id != nullptr) {
+    _has_bits_[0] |= 0x00000010u;
+  } else {
+    _has_bits_[0] &= ~0x00000010u;
+  }
+  archive_service_id_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), archive_service_id,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.TrendSignalParam.archive_service_id)
+}
+
+// optional string archive_service_short_id = 7;
+inline bool TrendSignalParam::_internal_has_archive_service_short_id() const {
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
+  return value;
+}
+inline bool TrendSignalParam::has_archive_service_short_id() const {
+  return _internal_has_archive_service_short_id();
+}
+inline void TrendSignalParam::clear_archive_service_short_id() {
+  archive_service_short_id_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline const std::string& TrendSignalParam::archive_service_short_id() const {
+  // @@protoc_insertion_point(field_get:Proto.TrendSignalParam.archive_service_short_id)
+  return _internal_archive_service_short_id();
+}
+inline void TrendSignalParam::set_archive_service_short_id(const std::string& value) {
+  _internal_set_archive_service_short_id(value);
+  // @@protoc_insertion_point(field_set:Proto.TrendSignalParam.archive_service_short_id)
+}
+inline std::string* TrendSignalParam::mutable_archive_service_short_id() {
+  // @@protoc_insertion_point(field_mutable:Proto.TrendSignalParam.archive_service_short_id)
+  return _internal_mutable_archive_service_short_id();
+}
+inline const std::string& TrendSignalParam::_internal_archive_service_short_id() const {
+  return archive_service_short_id_.Get();
+}
+inline void TrendSignalParam::_internal_set_archive_service_short_id(const std::string& value) {
+  _has_bits_[0] |= 0x00000020u;
+  archive_service_short_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void TrendSignalParam::set_archive_service_short_id(std::string&& value) {
+  _has_bits_[0] |= 0x00000020u;
+  archive_service_short_id_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.TrendSignalParam.archive_service_short_id)
+}
+inline void TrendSignalParam::set_archive_service_short_id(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000020u;
+  archive_service_short_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.TrendSignalParam.archive_service_short_id)
+}
+inline void TrendSignalParam::set_archive_service_short_id(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000020u;
+  archive_service_short_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.TrendSignalParam.archive_service_short_id)
+}
+inline std::string* TrendSignalParam::_internal_mutable_archive_service_short_id() {
+  _has_bits_[0] |= 0x00000020u;
+  return archive_service_short_id_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* TrendSignalParam::release_archive_service_short_id() {
+  // @@protoc_insertion_point(field_release:Proto.TrendSignalParam.archive_service_short_id)
+  if (!_internal_has_archive_service_short_id()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000020u;
+  return archive_service_short_id_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void TrendSignalParam::set_allocated_archive_service_short_id(std::string* archive_service_short_id) {
+  if (archive_service_short_id != nullptr) {
+    _has_bits_[0] |= 0x00000020u;
+  } else {
+    _has_bits_[0] &= ~0x00000020u;
+  }
+  archive_service_short_id_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), archive_service_short_id,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.TrendSignalParam.archive_service_short_id)
+}
+
+// optional string data_service_id = 8;
+inline bool TrendSignalParam::_internal_has_data_service_id() const {
+  bool value = (_has_bits_[0] & 0x00000040u) != 0;
+  return value;
+}
+inline bool TrendSignalParam::has_data_service_id() const {
+  return _internal_has_data_service_id();
+}
+inline void TrendSignalParam::clear_data_service_id() {
+  data_service_id_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline const std::string& TrendSignalParam::data_service_id() const {
+  // @@protoc_insertion_point(field_get:Proto.TrendSignalParam.data_service_id)
+  return _internal_data_service_id();
+}
+inline void TrendSignalParam::set_data_service_id(const std::string& value) {
+  _internal_set_data_service_id(value);
+  // @@protoc_insertion_point(field_set:Proto.TrendSignalParam.data_service_id)
+}
+inline std::string* TrendSignalParam::mutable_data_service_id() {
+  // @@protoc_insertion_point(field_mutable:Proto.TrendSignalParam.data_service_id)
+  return _internal_mutable_data_service_id();
+}
+inline const std::string& TrendSignalParam::_internal_data_service_id() const {
+  return data_service_id_.Get();
+}
+inline void TrendSignalParam::_internal_set_data_service_id(const std::string& value) {
+  _has_bits_[0] |= 0x00000040u;
+  data_service_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void TrendSignalParam::set_data_service_id(std::string&& value) {
+  _has_bits_[0] |= 0x00000040u;
+  data_service_id_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.TrendSignalParam.data_service_id)
+}
+inline void TrendSignalParam::set_data_service_id(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000040u;
+  data_service_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.TrendSignalParam.data_service_id)
+}
+inline void TrendSignalParam::set_data_service_id(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000040u;
+  data_service_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.TrendSignalParam.data_service_id)
+}
+inline std::string* TrendSignalParam::_internal_mutable_data_service_id() {
+  _has_bits_[0] |= 0x00000040u;
+  return data_service_id_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* TrendSignalParam::release_data_service_id() {
+  // @@protoc_insertion_point(field_release:Proto.TrendSignalParam.data_service_id)
+  if (!_internal_has_data_service_id()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000040u;
+  return data_service_id_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void TrendSignalParam::set_allocated_data_service_id(std::string* data_service_id) {
+  if (data_service_id != nullptr) {
+    _has_bits_[0] |= 0x00000040u;
+  } else {
+    _has_bits_[0] &= ~0x00000040u;
+  }
+  data_service_id_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), data_service_id,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.TrendSignalParam.data_service_id)
+}
+
 // optional int32 type = 10;
 inline bool TrendSignalParam::_internal_has_type() const {
-  bool value = (_has_bits_[0] & 0x00000040u) != 0;
+  bool value = (_has_bits_[0] & 0x00000200u) != 0;
   return value;
 }
 inline bool TrendSignalParam::has_type() const {
@@ -3060,7 +3466,7 @@ inline bool TrendSignalParam::has_type() const {
 }
 inline void TrendSignalParam::clear_type() {
   type_ = 0;
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000200u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 TrendSignalParam::_internal_type() const {
   return type_;
@@ -3070,7 +3476,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 TrendSignalParam::type() const {
   return _internal_type();
 }
 inline void TrendSignalParam::_internal_set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000200u;
   type_ = value;
 }
 inline void TrendSignalParam::set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -3080,7 +3486,7 @@ inline void TrendSignalParam::set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
 
 // optional string unit = 11;
 inline bool TrendSignalParam::_internal_has_unit() const {
-  bool value = (_has_bits_[0] & 0x00000010u) != 0;
+  bool value = (_has_bits_[0] & 0x00000080u) != 0;
   return value;
 }
 inline bool TrendSignalParam::has_unit() const {
@@ -3088,7 +3494,7 @@ inline bool TrendSignalParam::has_unit() const {
 }
 inline void TrendSignalParam::clear_unit() {
   unit_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000080u;
 }
 inline const std::string& TrendSignalParam::unit() const {
   // @@protoc_insertion_point(field_get:Proto.TrendSignalParam.unit)
@@ -3106,30 +3512,30 @@ inline const std::string& TrendSignalParam::_internal_unit() const {
   return unit_.Get();
 }
 inline void TrendSignalParam::_internal_set_unit(const std::string& value) {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000080u;
   unit_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void TrendSignalParam::set_unit(std::string&& value) {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000080u;
   unit_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:Proto.TrendSignalParam.unit)
 }
 inline void TrendSignalParam::set_unit(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000080u;
   unit_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:Proto.TrendSignalParam.unit)
 }
 inline void TrendSignalParam::set_unit(const char* value,
     size_t size) {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000080u;
   unit_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:Proto.TrendSignalParam.unit)
 }
 inline std::string* TrendSignalParam::_internal_mutable_unit() {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000080u;
   return unit_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* TrendSignalParam::release_unit() {
@@ -3137,23 +3543,97 @@ inline std::string* TrendSignalParam::release_unit() {
   if (!_internal_has_unit()) {
     return nullptr;
   }
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000080u;
   return unit_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void TrendSignalParam::set_allocated_unit(std::string* unit) {
   if (unit != nullptr) {
-    _has_bits_[0] |= 0x00000010u;
+    _has_bits_[0] |= 0x00000080u;
   } else {
-    _has_bits_[0] &= ~0x00000010u;
+    _has_bits_[0] &= ~0x00000080u;
   }
   unit_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), unit,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:Proto.TrendSignalParam.unit)
 }
 
+// repeated string tags = 13;
+inline int TrendSignalParam::_internal_tags_size() const {
+  return tags_.size();
+}
+inline int TrendSignalParam::tags_size() const {
+  return _internal_tags_size();
+}
+inline void TrendSignalParam::clear_tags() {
+  tags_.Clear();
+}
+inline std::string* TrendSignalParam::add_tags() {
+  // @@protoc_insertion_point(field_add_mutable:Proto.TrendSignalParam.tags)
+  return _internal_add_tags();
+}
+inline const std::string& TrendSignalParam::_internal_tags(int index) const {
+  return tags_.Get(index);
+}
+inline const std::string& TrendSignalParam::tags(int index) const {
+  // @@protoc_insertion_point(field_get:Proto.TrendSignalParam.tags)
+  return _internal_tags(index);
+}
+inline std::string* TrendSignalParam::mutable_tags(int index) {
+  // @@protoc_insertion_point(field_mutable:Proto.TrendSignalParam.tags)
+  return tags_.Mutable(index);
+}
+inline void TrendSignalParam::set_tags(int index, const std::string& value) {
+  // @@protoc_insertion_point(field_set:Proto.TrendSignalParam.tags)
+  tags_.Mutable(index)->assign(value);
+}
+inline void TrendSignalParam::set_tags(int index, std::string&& value) {
+  // @@protoc_insertion_point(field_set:Proto.TrendSignalParam.tags)
+  tags_.Mutable(index)->assign(std::move(value));
+}
+inline void TrendSignalParam::set_tags(int index, const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  tags_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:Proto.TrendSignalParam.tags)
+}
+inline void TrendSignalParam::set_tags(int index, const char* value, size_t size) {
+  tags_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:Proto.TrendSignalParam.tags)
+}
+inline std::string* TrendSignalParam::_internal_add_tags() {
+  return tags_.Add();
+}
+inline void TrendSignalParam::add_tags(const std::string& value) {
+  tags_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add:Proto.TrendSignalParam.tags)
+}
+inline void TrendSignalParam::add_tags(std::string&& value) {
+  tags_.Add(std::move(value));
+  // @@protoc_insertion_point(field_add:Proto.TrendSignalParam.tags)
+}
+inline void TrendSignalParam::add_tags(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  tags_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:Proto.TrendSignalParam.tags)
+}
+inline void TrendSignalParam::add_tags(const char* value, size_t size) {
+  tags_.Add()->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:Proto.TrendSignalParam.tags)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>&
+TrendSignalParam::tags() const {
+  // @@protoc_insertion_point(field_list:Proto.TrendSignalParam.tags)
+  return tags_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
+TrendSignalParam::mutable_tags() {
+  // @@protoc_insertion_point(field_mutable_list:Proto.TrendSignalParam.tags)
+  return &tags_;
+}
+
 // optional int32 precision = 12;
 inline bool TrendSignalParam::_internal_has_precision() const {
-  bool value = (_has_bits_[0] & 0x00000080u) != 0;
+  bool value = (_has_bits_[0] & 0x00000400u) != 0;
   return value;
 }
 inline bool TrendSignalParam::has_precision() const {
@@ -3161,7 +3641,7 @@ inline bool TrendSignalParam::has_precision() const {
 }
 inline void TrendSignalParam::clear_precision() {
   precision_ = 0;
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000400u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 TrendSignalParam::_internal_precision() const {
   return precision_;
@@ -3171,7 +3651,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 TrendSignalParam::precision() const {
   return _internal_precision();
 }
 inline void TrendSignalParam::_internal_set_precision(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000400u;
   precision_ = value;
 }
 inline void TrendSignalParam::set_precision(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -3181,7 +3661,7 @@ inline void TrendSignalParam::set_precision(::PROTOBUF_NAMESPACE_ID::int32 value
 
 // optional double line_weight = 19 [default = 0];
 inline bool TrendSignalParam::_internal_has_line_weight() const {
-  bool value = (_has_bits_[0] & 0x00000200u) != 0;
+  bool value = (_has_bits_[0] & 0x00000800u) != 0;
   return value;
 }
 inline bool TrendSignalParam::has_line_weight() const {
@@ -3189,7 +3669,7 @@ inline bool TrendSignalParam::has_line_weight() const {
 }
 inline void TrendSignalParam::clear_line_weight() {
   line_weight_ = 0;
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00000800u;
 }
 inline double TrendSignalParam::_internal_line_weight() const {
   return line_weight_;
@@ -3199,7 +3679,7 @@ inline double TrendSignalParam::line_weight() const {
   return _internal_line_weight();
 }
 inline void TrendSignalParam::_internal_set_line_weight(double value) {
-  _has_bits_[0] |= 0x00000200u;
+  _has_bits_[0] |= 0x00000800u;
   line_weight_ = value;
 }
 inline void TrendSignalParam::set_line_weight(double value) {
@@ -3209,7 +3689,7 @@ inline void TrendSignalParam::set_line_weight(double value) {
 
 // optional double high_limit = 20;
 inline bool TrendSignalParam::_internal_has_high_limit() const {
-  bool value = (_has_bits_[0] & 0x00000400u) != 0;
+  bool value = (_has_bits_[0] & 0x00001000u) != 0;
   return value;
 }
 inline bool TrendSignalParam::has_high_limit() const {
@@ -3217,7 +3697,7 @@ inline bool TrendSignalParam::has_high_limit() const {
 }
 inline void TrendSignalParam::clear_high_limit() {
   high_limit_ = 0;
-  _has_bits_[0] &= ~0x00000400u;
+  _has_bits_[0] &= ~0x00001000u;
 }
 inline double TrendSignalParam::_internal_high_limit() const {
   return high_limit_;
@@ -3227,7 +3707,7 @@ inline double TrendSignalParam::high_limit() const {
   return _internal_high_limit();
 }
 inline void TrendSignalParam::_internal_set_high_limit(double value) {
-  _has_bits_[0] |= 0x00000400u;
+  _has_bits_[0] |= 0x00001000u;
   high_limit_ = value;
 }
 inline void TrendSignalParam::set_high_limit(double value) {
@@ -3237,7 +3717,7 @@ inline void TrendSignalParam::set_high_limit(double value) {
 
 // optional double low_limit = 21;
 inline bool TrendSignalParam::_internal_has_low_limit() const {
-  bool value = (_has_bits_[0] & 0x00000800u) != 0;
+  bool value = (_has_bits_[0] & 0x00004000u) != 0;
   return value;
 }
 inline bool TrendSignalParam::has_low_limit() const {
@@ -3245,7 +3725,7 @@ inline bool TrendSignalParam::has_low_limit() const {
 }
 inline void TrendSignalParam::clear_low_limit() {
   low_limit_ = 0;
-  _has_bits_[0] &= ~0x00000800u;
+  _has_bits_[0] &= ~0x00004000u;
 }
 inline double TrendSignalParam::_internal_low_limit() const {
   return low_limit_;
@@ -3255,7 +3735,7 @@ inline double TrendSignalParam::low_limit() const {
   return _internal_low_limit();
 }
 inline void TrendSignalParam::_internal_set_low_limit(double value) {
-  _has_bits_[0] |= 0x00000800u;
+  _has_bits_[0] |= 0x00004000u;
   low_limit_ = value;
 }
 inline void TrendSignalParam::set_low_limit(double value) {
@@ -3265,7 +3745,7 @@ inline void TrendSignalParam::set_low_limit(double value) {
 
 // optional double view_high_limit = 31;
 inline bool TrendSignalParam::_internal_has_view_high_limit() const {
-  bool value = (_has_bits_[0] & 0x00001000u) != 0;
+  bool value = (_has_bits_[0] & 0x00008000u) != 0;
   return value;
 }
 inline bool TrendSignalParam::has_view_high_limit() const {
@@ -3273,7 +3753,7 @@ inline bool TrendSignalParam::has_view_high_limit() const {
 }
 inline void TrendSignalParam::clear_view_high_limit() {
   view_high_limit_ = 0;
-  _has_bits_[0] &= ~0x00001000u;
+  _has_bits_[0] &= ~0x00008000u;
 }
 inline double TrendSignalParam::_internal_view_high_limit() const {
   return view_high_limit_;
@@ -3283,7 +3763,7 @@ inline double TrendSignalParam::view_high_limit() const {
   return _internal_view_high_limit();
 }
 inline void TrendSignalParam::_internal_set_view_high_limit(double value) {
-  _has_bits_[0] |= 0x00001000u;
+  _has_bits_[0] |= 0x00008000u;
   view_high_limit_ = value;
 }
 inline void TrendSignalParam::set_view_high_limit(double value) {
@@ -3293,7 +3773,7 @@ inline void TrendSignalParam::set_view_high_limit(double value) {
 
 // optional double view_low_limit = 32;
 inline bool TrendSignalParam::_internal_has_view_low_limit() const {
-  bool value = (_has_bits_[0] & 0x00002000u) != 0;
+  bool value = (_has_bits_[0] & 0x00010000u) != 0;
   return value;
 }
 inline bool TrendSignalParam::has_view_low_limit() const {
@@ -3301,7 +3781,7 @@ inline bool TrendSignalParam::has_view_low_limit() const {
 }
 inline void TrendSignalParam::clear_view_low_limit() {
   view_low_limit_ = 0;
-  _has_bits_[0] &= ~0x00002000u;
+  _has_bits_[0] &= ~0x00010000u;
 }
 inline double TrendSignalParam::_internal_view_low_limit() const {
   return view_low_limit_;
@@ -3311,7 +3791,7 @@ inline double TrendSignalParam::view_low_limit() const {
   return _internal_view_low_limit();
 }
 inline void TrendSignalParam::_internal_set_view_low_limit(double value) {
-  _has_bits_[0] |= 0x00002000u;
+  _has_bits_[0] |= 0x00010000u;
   view_low_limit_ = value;
 }
 inline void TrendSignalParam::set_view_low_limit(double value) {
@@ -3360,7 +3840,7 @@ TrendSignalParam::view_limits() const {
 
 // optional uint32 color = 40;
 inline bool TrendSignalParam::_internal_has_color() const {
-  bool value = (_has_bits_[0] & 0x00000100u) != 0;
+  bool value = (_has_bits_[0] & 0x00002000u) != 0;
   return value;
 }
 inline bool TrendSignalParam::has_color() const {
@@ -3368,7 +3848,7 @@ inline bool TrendSignalParam::has_color() const {
 }
 inline void TrendSignalParam::clear_color() {
   color_ = 0u;
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00002000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint32 TrendSignalParam::_internal_color() const {
   return color_;
@@ -3378,7 +3858,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint32 TrendSignalParam::color() const {
   return _internal_color();
 }
 inline void TrendSignalParam::_internal_set_color(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _has_bits_[0] |= 0x00000100u;
+  _has_bits_[0] |= 0x00002000u;
   color_ = value;
 }
 inline void TrendSignalParam::set_color(::PROTOBUF_NAMESPACE_ID::uint32 value) {
@@ -3388,7 +3868,7 @@ inline void TrendSignalParam::set_color(::PROTOBUF_NAMESPACE_ID::uint32 value) {
 
 // optional string analog_format = 41 [default = "g_9_or_9e"];
 inline bool TrendSignalParam::_internal_has_analog_format() const {
-  bool value = (_has_bits_[0] & 0x00000020u) != 0;
+  bool value = (_has_bits_[0] & 0x00000100u) != 0;
   return value;
 }
 inline bool TrendSignalParam::has_analog_format() const {
@@ -3396,7 +3876,7 @@ inline bool TrendSignalParam::has_analog_format() const {
 }
 inline void TrendSignalParam::clear_analog_format() {
   analog_format_.ClearToDefault(::Proto::TrendSignalParam::_i_give_permission_to_break_this_code_default_analog_format_, GetArena());
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000100u;
 }
 inline const std::string& TrendSignalParam::analog_format() const {
   // @@protoc_insertion_point(field_get:Proto.TrendSignalParam.analog_format)
@@ -3415,30 +3895,30 @@ inline const std::string& TrendSignalParam::_internal_analog_format() const {
   return analog_format_.Get();
 }
 inline void TrendSignalParam::_internal_set_analog_format(const std::string& value) {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000100u;
   analog_format_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::NonEmptyDefault{}, value, GetArena());
 }
 inline void TrendSignalParam::set_analog_format(std::string&& value) {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000100u;
   analog_format_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::NonEmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:Proto.TrendSignalParam.analog_format)
 }
 inline void TrendSignalParam::set_analog_format(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000100u;
   analog_format_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::NonEmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:Proto.TrendSignalParam.analog_format)
 }
 inline void TrendSignalParam::set_analog_format(const char* value,
     size_t size) {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000100u;
   analog_format_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::NonEmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:Proto.TrendSignalParam.analog_format)
 }
 inline std::string* TrendSignalParam::_internal_mutable_analog_format() {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000100u;
   return analog_format_.Mutable(::Proto::TrendSignalParam::_i_give_permission_to_break_this_code_default_analog_format_, GetArena());
 }
 inline std::string* TrendSignalParam::release_analog_format() {
@@ -3446,14 +3926,14 @@ inline std::string* TrendSignalParam::release_analog_format() {
   if (!_internal_has_analog_format()) {
     return nullptr;
   }
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000100u;
   return analog_format_.ReleaseNonDefault(nullptr, GetArena());
 }
 inline void TrendSignalParam::set_allocated_analog_format(std::string* analog_format) {
   if (analog_format != nullptr) {
-    _has_bits_[0] |= 0x00000020u;
+    _has_bits_[0] |= 0x00000100u;
   } else {
-    _has_bits_[0] &= ~0x00000020u;
+    _has_bits_[0] &= ~0x00000100u;
   }
   analog_format_.SetAllocated(nullptr, analog_format,
       GetArena());

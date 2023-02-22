@@ -1,6 +1,7 @@
 #include "PosConnectionImpl.h"
 #include "DrawParam.h"
 #include "PropertyNames.h"
+#include "Settings.h"
 
 namespace VFrame30
 {

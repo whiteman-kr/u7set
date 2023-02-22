@@ -7,6 +7,7 @@
 #include "Schema.h"
 #include "TuningController.h"
 #include "AppSignalController.h"
+#include "Settings.h"
 
 
 namespace VFrame30

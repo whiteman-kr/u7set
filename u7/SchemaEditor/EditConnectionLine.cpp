@@ -912,6 +912,12 @@ void EditConnectionLine::moveToPin_init(std::shared_ptr<VFrame30::PosConnectionI
 	m_moveToPin.schemaItem = link;
 
 	std::list<VFrame30::SchemaPoint> itemPoints = removeUnwantedPoints(link->GetPointList());
+	if (itemPoints.size() < 2)
+	{
+		assert(itemPoints.size() >= 2);
+		clear();
+		return;
+	}
 
 	m_moveToPin.initialState.reserve(itemPoints.size());
 	m_moveToPin.initialState.assign(itemPoints.begin(), itemPoints.end());
@@ -931,8 +937,13 @@ void EditConnectionLine::moveToPin_init(std::shared_ptr<VFrame30::PosConnectionI
 		m_moveToPin.moveLinkBack = true;
 	}
 
-	assert(m_basePoints.size() >= 2);
-	assert(m_extensionPoints.empty() == true);
+	if (m_basePoints.size() < 2 ||  m_extensionPoints.empty() == false)
+	{
+		assert(m_basePoints.size() >= 2);
+		assert(m_extensionPoints.empty() == true);
+		clear();
+		return;
+	}
 
 	// --
 	//
@@ -1072,6 +1083,11 @@ bool EditConnectionLine::isVert(const QPointF& pt1, const QPointF& pt2)
 std::vector<VFrame30::SchemaPoint> EditConnectionLine::removeUnwantedPoints(const std::vector<VFrame30::SchemaPoint>& source)
 {
 	std::vector<VFrame30::SchemaPoint> result = source;
+
+	if (result.size() <= 2)
+	{
+		return result;
+	}
 
 	int horzCount = 0;
 	int vertCount = 0;

@@ -1,6 +1,7 @@
 #include "FblItemRect.h"
 #include "SchemaLayer.h"
 #include "PropertyNames.h"
+#include "Settings.h"
 #include "DrawParam.h"
 #include "SchemaItemSignal.h"
 #include "SchemaItemConst.h"

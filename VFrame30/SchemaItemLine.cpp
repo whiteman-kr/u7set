@@ -1,6 +1,7 @@
 #include "SchemaItemLine.h"
 #include "PropertyNames.h"
 #include "DrawParam.h"
+#include "Settings.h"
 
 namespace VFrame30
 {

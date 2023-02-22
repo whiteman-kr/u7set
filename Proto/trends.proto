@@ -17,6 +17,7 @@ message TrendArchiveHour				//  Reflected to c++ struct OneHourData
 message TrendArchive
 {
     optional string app_signal_id = 2;
+	optional string archive_server_id = 3;
 	repeated TrendArchiveHour hours = 10;
 }
 
@@ -34,8 +35,13 @@ message TrendSignalParam
 	optional string caption = 4;
 	optional string equipment_id = 5;
 
+    optional string archive_service_id = 6;
+	optional string archive_service_short_id = 7;
+	optional string data_service_id = 8;
+
 	optional int32 type = 10;				// enum E::SignalType
 	optional string unit = 11;
+	repeated string tags = 13;
 	optional int32 precision = 12;
 
 	optional double line_weight = 19 [default = 0];

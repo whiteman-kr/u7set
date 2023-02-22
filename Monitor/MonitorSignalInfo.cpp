@@ -1,15 +1,23 @@
 #include "MonitorSignalInfo.h"
 #include "MonitorCentralWidget.h"
-#include "TcpSignalClient.h"
 #include "../UtilsLib/Ui/UiTools.h"
 #include "ui_DialogSignalInfo.h"
 
-bool MonitorSignalInfo::showDialog(QString appSignalId, MonitorConfigController* configController, TcpSignalClient* tcpSignalClient, MonitorCentralWidget* centralWidget)
+class MonitorSignalManager;
+
+bool MonitorSignalInfo::showDialog(QString appSignalId,
+								   MonitorSignalManager* signalManager,
+								   MonitorConfigController* configController,
+								   MonitorCentralWidget* centralWidget)
 {
+	Q_ASSERT(signalManager);
+	Q_ASSERT(configController);
+	Q_ASSERT(centralWidget);
+
 	if (appSignalId.startsWith('@') == true)
 	{
 		bool ok = true;
-		AppSignalParam s = theSignals.signalParamByEquipemntId(appSignalId, &ok);
+		AppSignalParam s = signalManager->signalParamByEquipemntId(appSignalId, &ok);
 
 		if (ok == true)
 		{
@@ -29,7 +37,7 @@ bool MonitorSignalInfo::showDialog(QString appSignalId, MonitorConfigController*
 	else
 	{
 		bool ok = false;
-		AppSignalParam signal = theSignals.signalParam(appSignalId, &ok);
+		AppSignalParam signal = signalManager->signalParam(appSignalId, &ok);
 
 		if (ok == true)
 		{
@@ -37,12 +45,12 @@ bool MonitorSignalInfo::showDialog(QString appSignalId, MonitorConfigController*
 
 			MonitorSignalInfo* msi = new MonitorSignalInfo(signal,
 														   configController,
-														   &theSignals,
+														   signalManager,
 														   centralWidget->tuningController(),
 														   tuningEnabled,
 														   centralWidget);
 
-			connect(tcpSignalClient, &TcpSignalClient::signalParamAndUnitsArrived, msi, &MonitorSignalInfo::onSignalParamAndUnitsArrived);
+			connect(signalManager, &MonitorSignalManager::signalParamsUpdated, msi, &MonitorSignalInfo::onSignalParamAndUnitsArrived);
 
 			msi->show();
 			msi->raise();
@@ -93,7 +101,7 @@ void MonitorSignalInfo::onSignalParamAndUnitsArrived()
 
 	bool ok = false;
 
-	AppSignalParam newSignal = theSignals.signalParam(signal().hash(), &ok);
+	AppSignalParam newSignal = signalManager()->signalParam(signal().hash(), &ok);
 
 	if (ok == false)
 	{
