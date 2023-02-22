@@ -1461,11 +1461,11 @@ bool MonitorSettingsGetter::readAppDataServiceAndArchiveSettings(const Builder::
 	// AppDataService settings reading
 	//
 	QStringList appDataServiceIds;
-	result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::APP_DATA_SERVICE_ID, &appDataServiceIds, log);
+	result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::APP_DATA_SERVICE_IDS, &appDataServiceIds, log);
 
 	if (appDataServiceIds.isEmpty() == true)
 	{
-		log->errCFG3022(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_ID);
+		log->errCFG3022(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS);
 		return false;
 	}
 
@@ -1482,7 +1482,9 @@ bool MonitorSettingsGetter::readAppDataServiceAndArchiveSettings(const Builder::
 		if (auto appDataServiceDevice = equipment->deviceObject(appDataServiceId);
 			appDataServiceDevice == nullptr)
 		{
-			log->errCFG3021(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_ID, appDataServiceId);
+			// Property %1.%2 is linked to undefined software ID %3.
+			//
+			log->errCFG3021(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS, appDataServiceId);
 			result = false;
 		}
 		else
@@ -1490,14 +1492,18 @@ bool MonitorSettingsGetter::readAppDataServiceAndArchiveSettings(const Builder::
 			if (appDataService = appDataServiceDevice->toSoftware().get();
 				appDataService == nullptr)
 			{
-				log->errCFG3021(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_ID, appDataServiceId);
+				// Property %1.%2 is linked to undefined software ID %3.
+				//
+				log->errCFG3021(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS, appDataServiceId);
 				result = false;
 			}
 			else
 			{
 				if (appDataService->softwareType() != E::SoftwareType::AppDataService)
 				{
-					log->errCFG3017(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_ID, appDataServiceId);
+					// Property %1.%2 is linked to not compatible software %3.
+					//
+					log->errCFG3017(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS, appDataServiceId);
 					result = false;
 				}
 				else

@@ -22,6 +22,7 @@ namespace EquipmentPropNames
 	inline const QString APP_DATA_IP("AppDataIP");
 	inline const QString APP_DATA_PORT("AppDataPort");
 	inline const QString APP_DATA_SERVICE_ID("AppDataServiceID");
+	inline const QString APP_DATA_SERVICE_IDS("AppDataServiceIDs");
 	inline const QString APP_DATA_SERVICE_IP("AppDataServiceIP");
 	inline const QString APP_DATA_SERVICE_PORT("AppDataServicePort");
 	inline const QString APP_DATA_SERVICE_NETMASK("AppDataServiceNetmask");

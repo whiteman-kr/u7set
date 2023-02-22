@@ -53,7 +53,7 @@ bool RtSchemaTrendDataProvider::trendData(const QString& appSignalId, std::list<
 			outData->push_back(copiedHourData);
 		}
 	}
-	catch(std::out_of_range& e)
+	catch(std::out_of_range& /*e*/)
 	{
 		Q_ASSERT(false);
 		return false;
@@ -194,7 +194,7 @@ void RtSchemaTrendDataProvider::appendRealtimeData(QString sourceEquipmentId,
 		appendRealtimeData_unsafe(sourceEquipmentId, m_timeType, states, &archive);
 		trimArchive_unsafe(m_durationSeconds, &archive);
 	}
-	catch (std::out_of_range& e)
+	catch (std::out_of_range& /*e*/)
 	{
 		// Connection not found or signal not found
 		//
@@ -450,7 +450,7 @@ bool RtSchemaTrend::trendData(QUuid trendUuid,
 		const RtSchemaTrendDataProvider& rtc = m_dataProviders.at(trendUuid);
 		return rtc.trendData(appSignalId, outData);
 	}
-	catch (std::out_of_range& e)
+	catch (std::out_of_range& /*e*/)
 	{
 		Q_ASSERT(false);
 		return false;
@@ -467,7 +467,7 @@ TimeStamp RtSchemaTrend::maxTimeStamp(QUuid trendUuid) const
 		const RtSchemaTrendDataProvider& rtc = m_dataProviders.at(trendUuid);
 		return rtc.maxTimeStamp();
 	}
-	catch (std::out_of_range& e)
+	catch (std::out_of_range& /*e*/)
 	{
 		Q_ASSERT(false);
 		return {};
