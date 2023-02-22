@@ -1,6 +1,7 @@
 #ifndef RTTRENDTCPCLIENT_H
 #define RTTRENDTCPCLIENT_H
 
+#include "../../lib/ISignalDataServer.h"
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"
 #include "../CommonLib/Hash.h"
@@ -30,14 +31,14 @@ public:
 	RtTrendTcpClient(const SoftwareInfo& softwareInfo,
 					 const HostAddressPort& serverAddressPort,
 					 QString serviceEquipmentId,
+					 const ISignalDataServer& signalDataServer,
 					 ILogFile* logFile);
 	virtual ~RtTrendTcpClient();
 
 	// Methods
 	//
 public:
-	bool addSignals(const QStringList& appSignalIds);
-	bool setData(const QStringList& trendSignals);
+	bool setSignals(const QStringList& appSignalIds);
 	bool setData(E::RtTrendsSamplePeriod samplePeriod, const QStringList& trendSignals);
 
 	void setSamplePeriod(E::RtTrendsSamplePeriod samplePeriod);
@@ -68,7 +69,7 @@ signals:
 				   TrendLib::TrendStateItem minState,
 				   TrendLib::TrendStateItem maxState);
 	void requestError(QString text);
-	void connectionLost();
+	void connectionLost(QString sourceEquipmentId);
 
 	// Staticstic
 	//
@@ -94,12 +95,13 @@ public:
 	// Data
 	//
 private:
+	const ISignalDataServer& m_signalDataServer;
 	HasLogFile m_logFile;
 
 	mutable QMutex m_dataMutex;
 
 	E::RtTrendsSamplePeriod m_samplePeriod;
-	std::set<Hash> m_signalSet;
+	std::set<QString> m_signalSet;
 
 private:
 	Network::RtTrendsManagementRequest m_managementRequest;

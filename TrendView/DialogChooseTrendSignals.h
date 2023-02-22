@@ -15,7 +15,6 @@ namespace TrendLib
 		Q_OBJECT
 
 	public:
-
 		// Constructor for TrendLib::TrendSignalParam
 		//
 		DialogChooseTrendSignals(const ISignalHasTag* signalHasTag,
@@ -68,6 +67,8 @@ namespace TrendLib
 		void slot_trendSignalsSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
 		void on_buttonBox_accepted();
+
+		void on_trendSignals_customContextMenuRequested(const QPoint &pos);
 
 	private:
 		Ui::DialogChooseTrendSignals* ui = nullptr;

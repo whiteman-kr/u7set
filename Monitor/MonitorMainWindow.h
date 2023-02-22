@@ -155,8 +155,8 @@ private:
 	InstanceResolver& m_instanceResolver;
 
 	MonitorConfigController m_configController;
-	MonitorSchemaManager m_schemaManager;
 	MonitorSignalManager m_signalManager;
+	MonitorSchemaManager m_schemaManager;
 
 	std::unique_ptr<VFrame30::AppSignalController> m_appSignalController;
 	std::unique_ptr<MonitorTuningController> m_tuningController;

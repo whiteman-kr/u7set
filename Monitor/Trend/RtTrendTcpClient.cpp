@@ -1,17 +1,20 @@
+#include <ranges>
 #include "RtTrendTcpClient.h"
 #include "MonitorAppSettings.h"
 
 RtTrendTcpClient::RtTrendTcpClient(const SoftwareInfo& softwareInfo,
 								   const HostAddressPort& serverAddressPort,
 								   QString /*serviceEquipmentId*/,
+								   const ISignalDataServer& signalDataServer,
 								   ILogFile* logFile) :
 	Tcp::Client(softwareInfo, serverAddressPort, serverAddressPort, "RtTrendTcpClient"),
 	TcpClientStatistics(this),
+	m_signalDataServer(signalDataServer),
 	m_logFile(logFile, "RtTrendTcpClient")
 {
 	Q_ASSERT(logFile);
 
-	setObjectName("RtTrendTcpClient::~RtTrendTcpClient(...)");
+	setObjectName("RtTrendTcpClient");
 
 	m_logFile.writeMessage("RtTrendTcpClient::RtTrendTcpClient(), address " + serverAddressPort.toString());
 	qDebug() << "RtTrendTcpClient::RtTrendTcpClient(...), address " << serverAddressPort.toString();
@@ -25,25 +28,17 @@ RtTrendTcpClient::~RtTrendTcpClient()
 	qDebug() << "RtTrendTcpClient::~RtTrendTcpClient(...), address " << serverAddressPort1().toString();
 }
 
-bool RtTrendTcpClient::addSignals(const QStringList& appSignalIds)
+bool RtTrendTcpClient::setSignals(const QStringList& appSignalIds)
 {
+	// Add all signals, now it does not matter if this signal is from a differents sorce,
+	// It is imposiibple to know which source for signal till all signal params are loaded
+	//
 	QMutexLocker ml(&m_dataMutex);
 
 	m_signalSet.clear();
 	for (const QString& s : appSignalIds)
 	{
-		m_signalSet.insert(::calcHash(s));
-	}
-
-	return true;
-}
-
-bool RtTrendTcpClient::setData(const QStringList& trendSignals)
-{
-	m_signalSet.clear();
-	for (const QString& s : trendSignals)
-	{
-		m_signalSet.insert(::calcHash(s));
+		m_signalSet.insert(s);
 	}
 
 	return true;
@@ -55,10 +50,13 @@ bool RtTrendTcpClient::setData(E::RtTrendsSamplePeriod samplePeriod, const QStri
 
 	m_samplePeriod = samplePeriod;
 
+	// Add all signals, now it does not matter if this signal is from a differents sorce,
+	// It is imposiibple to know which source for signal till all signal params are loaded
+	//
 	m_signalSet.clear();
 	for (const QString& s : trendSignals)
 	{
-		m_signalSet.insert(::calcHash(s));
+		m_signalSet.insert(s);
 	}
 
 	return true;
@@ -105,7 +103,7 @@ void RtTrendTcpClient::onConnection()
 
 void RtTrendTcpClient::onDisconnection()
 {
-	emit connectionLost();
+	emit connectionLost(connectedSoftwareInfo().equipmentID());
 
 	qDebug() << "TrendTcpClient::onDisconnection " << serverAddressPort1().toString();
 	m_logFile.writeMessage("onDisconnection() " + serverAddressPort1().toString());
@@ -174,11 +172,24 @@ void RtTrendTcpClient::requestTrendManagement()
 
 	m_managementRequest.Clear();
 
+	// --
+	//
 	m_dataMutex.lock();
 
 	E::RtTrendsSamplePeriod samplePeriod = m_samplePeriod;
-	std::set<Hash> signalSet = m_signalSet;
+
+	std::set<Hash> signalSet;
+	for (const QString& signalId : m_signalSet)
+	{
+		if (m_signalDataServer.dataServiceHasSignal(connectedSoftwareInfo().equipmentID(), signalId) == true)
+		{
+			signalSet.insert(::calcHash(signalId));
+		}
+	}
+
 	m_dataMutex.unlock();
+	// --
+	//
 
 	m_managementRequest.set_clientequipmentid(MonitorAppSettings::instance().equipmentId().toStdString());
 	m_managementRequest.set_sampleperiod(static_cast<int>(samplePeriod));

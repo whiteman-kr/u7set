@@ -1,13 +1,15 @@
 #include "MonitorSchemaManager.h"
 
-MonitorSchemaManager::MonitorSchemaManager(MonitorConfigController* configController, QObject* parent /*= nullptr*/) :
+MonitorSchemaManager::MonitorSchemaManager(MonitorConfigController& configController,
+										   const ISignalDataServer& signalDataServer,
+										   QObject* parent /*= nullptr*/) :
 	VFrame30::SchemaManager(parent),
 	m_configController(configController),
-	m_rtTrendSchemas(configController)
+	m_signalDataServer(signalDataServer),
+	m_rtTrendSchemas(configController, signalDataServer)
 {
-	Q_ASSERT(m_configController);
 
-	connect(m_configController, &MonitorConfigController::configurationArrived, this, &MonitorSchemaManager::slot_configurationArrived);
+	connect(&m_configController, &MonitorConfigController::configurationArrived, this, &MonitorSchemaManager::slot_configurationArrived);
 
 	return;
 }
@@ -19,13 +21,7 @@ MonitorSchemaManager::~MonitorSchemaManager()
 
 bool MonitorSchemaManager::hasSchema(QString schemaId) const
 {
-	if (m_configController == nullptr)
-	{
-		Q_ASSERT(m_configController);
-		return false;
-	}
-
-	return m_configController->hasFileId(schemaId);
+	return m_configController.hasFileId(schemaId);
 }
 
 
@@ -35,7 +31,7 @@ std::shared_ptr<VFrame30::Schema> MonitorSchemaManager::loadSchema(QString schem
 	QString errorString;
 	std::shared_ptr<VFrame30::Schema> schema;
 
-	bool result = m_configController->getFileBlockedById(schemaId, &data, &errorString);
+	bool result = m_configController.getFileBlockedById(schemaId, &data, &errorString);
 	if (result == false)
 	{
 		return {};
@@ -46,7 +42,7 @@ std::shared_ptr<VFrame30::Schema> MonitorSchemaManager::loadSchema(QString schem
 
 int MonitorSchemaManager::schemaCount() const
 {
-	return m_configController->schemaCount();
+	return m_configController.schemaCount();
 }
 
 std::shared_ptr<VFrame30::Schema> MonitorSchemaManager::schemaByIndex(int schemaIndex,
@@ -70,17 +66,17 @@ std::shared_ptr<VFrame30::Schema> MonitorSchemaManager::schemaByIndex(int schema
 
 QString MonitorSchemaManager::schemaCaptionById(const QString& schemaId) const
 {
-	return m_configController->schemaCaptionById(schemaId);
+	return m_configController.schemaCaptionById(schemaId);
 }
 
 QString MonitorSchemaManager::schemaCaptionByIndex(int schemaIndex) const
 {
-	return m_configController->schemaCaptionByIndex(schemaIndex);
+	return m_configController.schemaCaptionByIndex(schemaIndex);
 }
 
 QString MonitorSchemaManager::schemaIdByIndex(int schemaIndex) const
 {
-	return m_configController->schemaIdByIndex(schemaIndex);
+	return m_configController.schemaIdByIndex(schemaIndex);
 }
 
 bool MonitorSchemaManager::trendData(QUuid trendUuid,
@@ -98,7 +94,7 @@ TimeStamp MonitorSchemaManager::maxTimeStamp(QUuid trendUuid, E::TimeType /*time
 	return m_rtTrendSchemas.maxTimeStamp(trendUuid);
 }
 
-void MonitorSchemaManager::slot_configurationArrived(ConfigSettings configuration)
+void MonitorSchemaManager::slot_configurationArrived(ConfigSettings /*configuration*/)
 {
 	clear();
 
@@ -109,25 +105,13 @@ void MonitorSchemaManager::slot_configurationArrived(ConfigSettings configuratio
 	return;
 }
 
-MonitorConfigController* MonitorSchemaManager::monitorConfigController()
+MonitorConfigController& MonitorSchemaManager::monitorConfigController()
 {
-	if (m_configController == nullptr)
-	{
-		Q_ASSERT(m_configController);
-		return nullptr;
-	}
-
 	return m_configController;
 }
 
-const MonitorConfigController* MonitorSchemaManager::monitorConfigController() const
+const MonitorConfigController& MonitorSchemaManager::monitorConfigController() const
 {
-	if (m_configController == nullptr)
-	{
-		Q_ASSERT(m_configController);
-		return nullptr;
-	}
-
 	return m_configController;
 }
 

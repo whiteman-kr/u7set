@@ -809,4 +809,42 @@ namespace TrendLib
 		return;
 	}
 
+
+	void DialogChooseTrendSignals::on_trendSignals_customContextMenuRequested(const QPoint& pos)
+	{
+		Q_ASSERT(ui->trendSignals);
+
+		QModelIndex index = ui->trendSignals->indexAt(pos);
+		if (index.isValid() == false)
+		{
+			return;
+		}
+
+		QModelIndex signalIdIndex = index.siblingAtColumn(0);
+		if (signalIdIndex.isValid() == false)
+		{
+			return;
+		}
+
+		QString appSignalId = ui->trendSignals->model()->data(signalIdIndex).toString();
+		if (appSignalId.isEmpty() == true)
+		{
+			return;
+		}
+
+		QAction action{tr("Copy SignalID")};
+		QObject::connect(&action, &QAction::triggered,
+			[appSignalId]()
+			{
+				QClipboard* clipboard = QGuiApplication::clipboard();
+				clipboard->setText(appSignalId);
+			});
+
+		QMenu menu;
+		menu.insertAction(nullptr, &action);
+		menu.exec(ui->trendSignals->mapToGlobal(pos));
+
+		return;
+	}
+
 }

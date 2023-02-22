@@ -1,31 +1,31 @@
 #pragma once
 #include <map>
-#include "./Trend/RtTrendTcpClient.h"
 #include "../MonitorConfigController.h"
+#include "RtDataProvider.h"
 
 //
 // RtSignal: Data for RealTimeTrends on schemas, SchemaItemIndicator, type = Trend
 //
-class RtSignal
+class RtSchemaTrendSignal
 {
 public:
-	RtSignal(const QString& appSignalId) :
+	RtSchemaTrendSignal(const QString& appSignalId) :
 		m_archive(appSignalId, "")		// Realtime trend does not care about archive server, it ignores it
 	{
 	}
-	RtSignal(const RtSignal& src) = default;
+	RtSchemaTrendSignal(const RtSchemaTrendSignal& src) = default;
 
-	const QString& appSignalId() const
+	[[nodiscard]] const QString& appSignalId() const
 	{
-		return m_archive.trendSignalPlusServerId.archiveServerId;
+		return m_archive.trendSignalPlusServerId.appSignalId;
 	}
 
-	const TrendLib::TrendArchive& archive() const
+	[[nodiscard]] const TrendLib::TrendArchive& archive() const
 	{
 		return m_archive;
 	}
 
-	TrendLib::TrendArchive& archive()
+	[[nodiscard]] TrendLib::TrendArchive& archive()
 	{
 		return m_archive;
 	}
@@ -34,64 +34,68 @@ private:
 	TrendLib::TrendArchive m_archive;
 };
 
+
 //
-// RtConnection
+// RtSchemaTrendDataProvider
 //
-class RtConnection : public QObject
+class RtSchemaTrendDataProvider : public QObject
 {
 	Q_OBJECT
 
 public:
-	RtConnection() = default;
-	~RtConnection();
+	RtSchemaTrendDataProvider(const MonitorConfigController& configController,
+							const ISignalDataServer& signalDataServer,
+							ILogFile* logFile);
+	~RtSchemaTrendDataProvider();
+
+public:
+	void updateConnections();
 
 	bool trendData(const QString& appSignalId, std::list<std::shared_ptr<TrendLib::OneHourData>>* outData) const;
 	TimeStamp maxTimeStamp() const;
 
-	bool hasConnectionThread() const;
-	void createConnectionThread(MonitorConfigController* configController);
 	
 	void setParams(E::RtTrendsSamplePeriod samplePeriod, E::TimeType timeType, int durationSeconds);
-	void updateSignals(const QStringList appSignalIds);
+	void updateSignals(const QStringList& appSignalIds);
 
 private slots:
 	void slot_realtimeDataReceived(QString sourceEquipmentId,
 								   std::shared_ptr<TrendLib::RealtimeData> data,
 								   TrendLib::TrendStateItem /*minState*/,
 								   TrendLib::TrendStateItem /*maxState*/);
-	void slot_connectionLost();
+	void slot_connectionLost(QString sourceEquipmentId);
 
 private:
 	void appendRealtimeData(QString sourceEquipmentId, Hash signalHash, const std::vector<TrendLib::TrendStateItem>& states);
-	void appendRealtimeData_unsafe(E::TimeType timeType, const std::vector<TrendLib::TrendStateItem>& states, TrendLib::TrendArchive* archive);
+	void appendRealtimeData_unsafe(QString sourceEquipmentId, E::TimeType timeType, const std::vector<TrendLib::TrendStateItem>& states, TrendLib::TrendArchive* archive);
 	void trimArchive_unsafe(int durationSeconds, TrendLib::TrendArchive* archive);
 
 private:
-	mutable QMutex m_mutex;
+	RtDataProvider m_dataProvider;
 
-	RtTrendTcpClient* m_tcpClient = nullptr;
-	SimpleThread* m_tcpClientThread = nullptr;
+	mutable QMutex m_signalMutex;
 
 	int m_durationSeconds = 0;
 	E::RtTrendsSamplePeriod m_samplePeriod = E::RtTrendsSamplePeriod::sp_1s;
 	E::TimeType m_timeType = E::TimeType::Local;
-	std::map<Hash, RtSignal> m_trendSignals;		// Key is hash from appSignalId
+	std::map<Hash, RtSchemaTrendSignal> m_trendSignals;		// Key is hash from appSignalId
 
 	TrendLib::TrendStateItem m_minState{};
 	TrendLib::TrendStateItem m_maxState{};
 };
 
+
 //
 // RealTime trend class for SchemaItemIndicator, type Trend
+// Each schema item contains it's own RtDataProvider
 //
-class RtTrendSchema : public QObject
+class RtSchemaTrend : public QObject
 {
 	Q_OBJECT
 
 public:
-	RtTrendSchema();
-	RtTrendSchema(MonitorConfigController* configController);
-	virtual ~RtTrendSchema();
+	RtSchemaTrend(const MonitorConfigController& configController, const ISignalDataServer& signalDataServer);
+	virtual ~RtSchemaTrend();
 
 public:
 	void updateRealtimeConnections();		// Updates m_rtConnections from SchemaDetaisSet
@@ -103,9 +107,14 @@ public:
 	TimeStamp maxTimeStamp(QUuid trendUuid) const;
 
 private:
-	MonitorConfigController* const m_configController = nullptr;
+	const MonitorConfigController& m_configController;
+	const ISignalDataServer& m_signalDataServer;
 
+	// trendData() is called from other thread, so we don't wnat to delete data provider
+	// while trendData() is working
+	//
 	mutable QMutex m_mutex;
-	std::map<QUuid, RtConnection> m_rtConnections;	// Key is SchemaItem uuid, receiver of data
+
+	std::map<QUuid, RtSchemaTrendDataProvider> m_dataProviders;	// Key is SchemaItem uuid, receiver of data
 };
 

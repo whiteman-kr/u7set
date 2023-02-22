@@ -3,25 +3,29 @@
 #include "../../lib/ISignalDataServer.h"
 #include "RtTrendTcpClient.h"
 
-
-class MonitorTrendRealtimeConnection : public QObject
+//
+// Signle connection to AppDataService for providing real time data for trends
+//
+class RtConnection : public QObject
 {
 	Q_OBJECT
 public:
-	MonitorTrendRealtimeConnection() = delete;
-	MonitorTrendRealtimeConnection(const MonitorTrendRealtimeConnection&) = delete;
-	MonitorTrendRealtimeConnection(MonitorTrendRealtimeConnection&&) = delete;
-	MonitorTrendRealtimeConnection& operator=(const MonitorTrendRealtimeConnection&) = delete;
-	MonitorTrendRealtimeConnection& operator=(MonitorTrendRealtimeConnection&&) = delete;
+	RtConnection() = delete;
+	RtConnection(const RtConnection&) = delete;
+	RtConnection(RtConnection&&) = delete;
+	RtConnection& operator=(const RtConnection&) = delete;
+	RtConnection& operator=(RtConnection&&) = delete;
 
-	MonitorTrendRealtimeConnection(const SoftwareInfo& softwareInfo,
-								  MonitorSettings::AppDataService server,
-								  ILogFile* logFile);
+	RtConnection(const SoftwareInfo& softwareInfo,
+				 MonitorSettings::AppDataService server,
+				 const ISignalDataServer& signalDataServer,
+				 ILogFile* logFile);
 
-	~MonitorTrendRealtimeConnection();
+	~RtConnection();
 
 public:
 	bool setData(E::RtTrendsSamplePeriod samplePeriod, const QStringList& trendSignals);
+	void setSamplePeriod(E::RtTrendsSamplePeriod samplePeriod);
 
 	const MonitorSettings::AppDataService& server() const;
 	RtTrendTcpClient::Stat statistics() const;
@@ -29,7 +33,7 @@ public:
 signals:
 	void dataReady(QString sourceEquipmentId, std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState);
 	void requestError(QString text);
-	void connectionLost();
+	void connectionLost(QString sourceEquipmentId);
 
 private:
 	ILogFile* m_logFile = nullptr;
@@ -41,37 +45,40 @@ private:
 };
 
 
-class MonitorTrendRealtimeConnections : public QObject
+//
+// Real time trends data provdider - connects to all real time sources (app data service)
+//
+class RtDataProvider : public QObject
 {
 	Q_OBJECT
 
 public:
-	MonitorTrendRealtimeConnections() = delete;
-	MonitorTrendRealtimeConnections(const MonitorTrendRealtimeConnections&) = delete;
-	MonitorTrendRealtimeConnections(MonitorTrendRealtimeConnections&&) = delete;
-	MonitorTrendRealtimeConnections& operator=(const MonitorTrendRealtimeConnections&) = delete;
-	MonitorTrendRealtimeConnections& operator=(MonitorTrendRealtimeConnections&&) = delete;
+	RtDataProvider() = delete;
+	RtDataProvider(const RtDataProvider&) = delete;
+	RtDataProvider(RtDataProvider&&) = delete;
+	RtDataProvider& operator=(const RtDataProvider&) = delete;
+	RtDataProvider& operator=(RtDataProvider&&) = delete;
 
-	MonitorTrendRealtimeConnections(const MonitorConfigController& configController,
-									const ISignalDataServer& signalDataServer,
-									ILogFile* logFile);
-	~MonitorTrendRealtimeConnections();
+	RtDataProvider(const MonitorConfigController& configController,
+				   const ISignalDataServer& signalDataServer,
+				   ILogFile* logFile);
+	~RtDataProvider();
 
 public:
 	void clear();
 	void createConnections();
 	void updateConnections();
 
-	[[nodiscard]] size_t size() const;
-
 	bool setData(E::RtTrendsSamplePeriod samplePeriod, const QStringList& trendSignals);
+	void setSamplePeriod(E::RtTrendsSamplePeriod samplePeriod);
 
-	RtTrendTcpClient::Stat statistics() const;
+	[[nodiscard]] size_t size() const;
+	[[nodiscard]] RtTrendTcpClient::Stat statistics() const;
 
 signals:
 	void dataReady(QString sourceEquipmentId, std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState);
 	void requestError(QString text);
-	void connectionLost();
+	void connectionLost(QString sourceEquipmentId);
 
 private:
 	const MonitorConfigController& m_configController;
@@ -80,7 +87,7 @@ private:
 
 	// All manipulations to m_connections must be done from the main thread as it is not protected with a mutex.
 	//
-	std::list<MonitorTrendRealtimeConnection> m_connections;
+	std::list<RtConnection> m_connections;
 
 	// Connections were created for these servers, keep this vector to detect when the servers really changed
 	//

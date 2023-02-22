@@ -37,6 +37,9 @@
      </property>
      <item row="4" column="3" rowspan="7">
       <widget class="QTreeWidget" name="trendSignals">
+       <property name="contextMenuPolicy">
+        <enum>Qt::CustomContextMenu</enum>
+       </property>
        <property name="rootIsDecorated">
         <bool>false</bool>
        </property>

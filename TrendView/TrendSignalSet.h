@@ -155,6 +155,8 @@ namespace TrendLib
 																		// DO NOT CHANGE type to unordered_map, as it is suppose to be ordered
 		QString realTimeActiveServiceId;		// Current active realtime service id, resets to "" when non vlid
 												// points arrived, and set to the new value for service with valid points
+		QElapsedTimer serviceUpdateTimer;		// If active service was not update too long, then switch to another server,
+												// This can happen when server shutdown process does not send non-valid point
 
 		// Serialization
 		//
@@ -237,6 +239,7 @@ namespace TrendLib
 									   TrendLib::TrendStateItem minState,
 									   TrendLib::TrendStateItem maxState);
 		void slot_realtimeRequestError(QString errorText);
+		void slot_realtimeConnectionLost(QString sourceEquipmentId);
 
 	private:
 		void appendRealtimeDataToArchive(QString sourceEquipmentId,

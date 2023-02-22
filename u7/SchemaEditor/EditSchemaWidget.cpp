@@ -3799,6 +3799,14 @@ void EditSchemaWidget::finishMoveAfbsConnectionLinks()
 		std::list<VFrame30::SchemaPoint> uniquePoints(points.begin(), points.end());
 		uniquePoints.unique();
 
+		if (uniquePoints.size() == 1)
+		{
+			// It can happen theat connection line is zero length and all points except the first one were filtered,
+			// but still we expect line to have at least two points.
+			//
+			uniquePoints.push_back(uniquePoints.front());
+		}
+
 		uniquePoints = EditConnectionLine::removeUnwantedPoints(uniquePoints);
 
 		std::vector<VFrame30::SchemaPoint> resultPoinst(uniquePoints.begin(), uniquePoints.end());

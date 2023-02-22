@@ -1,16 +1,19 @@
 #pragma once
 
+#include "../lib/ISignalDataServer.h"
 #include "../VFrame30/Schema.h"
 #include "../VFrame30/SchemaManager.h"
 #include "MonitorConfigController.h"
-#include "./Trend/RtTrendSchema.h"
+#include "./Trend/RtSchemaTrend.h"
 
 class MonitorSchemaManager : public VFrame30::SchemaManager
 {
 	Q_OBJECT
 
 public:
-	explicit MonitorSchemaManager(MonitorConfigController* configController, QObject* parent = nullptr);
+	explicit MonitorSchemaManager(MonitorConfigController& configController,
+								  const ISignalDataServer& signalDataServer,
+								  QObject* parent = nullptr);
 	virtual ~MonitorSchemaManager();
 
 public:
@@ -49,16 +52,17 @@ protected slots:
 	void slot_configurationArrived(ConfigSettings configuration);
 
 public:
-	[[nodiscard]] MonitorConfigController* monitorConfigController();
-	[[nodiscard]] const MonitorConfigController* monitorConfigController() const;
+	[[nodiscard]] MonitorConfigController& monitorConfigController();
+	[[nodiscard]] const MonitorConfigController& monitorConfigController() const;
 
 	// Data
 	//
 private:
-	MonitorConfigController* const m_configController = nullptr;
+	MonitorConfigController& m_configController;
+	const ISignalDataServer& m_signalDataServer;
 
 	// Data for RealTimeTrends on schemas, SchemaItemIndicator, type = Trend
 	//
-	RtTrendSchema m_rtTrendSchemas;
+	RtSchemaTrend m_rtTrendSchemas;
 };
 

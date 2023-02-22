@@ -5,7 +5,7 @@
 #include "MonitorConfigController.h"
 #include "MonitorSignalManager.h"
 #include "MonitorTrendArchiveConnections.h"
-#include "MonitorTrendRealtimeConnections.h"
+#include "RtDataProvider.h"
 #include "RtTrendTcpClient.h"
 
 class MonitorTrendsWidget;
@@ -73,7 +73,7 @@ private:
 	const MonitorConfigController& m_configController;
 
 	MonitorTrendArchiveConnections m_archiveDataProvider;
-	MonitorTrendRealtimeConnections m_realtimeDataProvider;
+	RtDataProvider m_realtimeDataProvider;
 
 	enum  StatusBarColumns
 	{

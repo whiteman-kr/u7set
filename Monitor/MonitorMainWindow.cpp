@@ -19,8 +19,8 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
     m_tuningLogFile(qAppName() + "Tuning", QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + softwareInfo.equipmentID()),
     m_instanceResolver(instanceResolver),
 	m_configController(softwareInfo, MonitorAppSettings::instance().configuratorAddress1(), MonitorAppSettings::instance().configuratorAddress2(), &m_LogFile),
-	m_schemaManager(&m_configController),
 	m_signalManager{m_configController, &m_LogFile},
+	m_schemaManager(m_configController, m_signalManager),
 	m_dialogAlert(this)
 {
 	setWindowTitle(MonitorAppSettings::instance().windowCaption());
@@ -119,10 +119,10 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	//
 	connect(schemaListWidget, &SchemaListWidget::openSchemaRequest, monitorCentralWidget, &MonitorCentralWidget::slot_selectSchemaForCurrentTab);
 
-	connect(m_schemaManager.monitorConfigController(), &MonitorConfigController::configurationUpdate,
+	connect(&m_configController, &MonitorConfigController::configurationUpdate,
 			[this, schemaListWidget]()
 			{
-				schemaListWidget->setDetails(m_schemaManager.monitorConfigController()->schemasDetailsSet());
+				schemaListWidget->setDetails(m_configController.schemasDetailsSet());
 			});
 
 	return;

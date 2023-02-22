@@ -1340,6 +1340,43 @@ namespace TrendLib
 	{
 	}
 
+	void TrendSignalSet::slot_realtimeConnectionLost(QString sourceEquipmentId)
+	{
+		auto addNunValidFunc = [this, sourceEquipmentId](E::TimeType timeType)
+			{
+				// Add non valid points to all signals, useful in switching mode Archive/RealTime
+				//
+				QMutexLocker locker(&m_archiveMutex);
+
+				std::map<TrendSignalPlusServerId, TrendArchive>* archive = nullptr;
+				switch (timeType)
+				{
+				case E::TimeType::Local:	archive = &m_archiveLocalTime;	break;
+				case E::TimeType::System:	archive = &m_archiveSystemTime;	break;
+				case E::TimeType::Plant:	archive = &m_archivePlantTime;	break;
+				default:
+					Q_ASSERT(false);
+					return;
+				}
+
+				for (auto& [hash, trendArchive] : *archive)
+				{
+					if (sourceEquipmentId == trendArchive.realTimeActiveServiceId)
+					{
+						TrendSignalSet::addNonValidPoint(&trendArchive);
+					}
+				}
+
+				return;
+			};
+
+		addNunValidFunc(E::TimeType::Local);
+		addNunValidFunc(E::TimeType::System);
+		addNunValidFunc(E::TimeType::Plant);
+
+		return;
+	}
+
 	void TrendSignalSet::appendRealtimeDataToArchive(QString sourceEquipmentId,
 													 E::TimeType timeType,
 													 Hash signalhash,
@@ -1366,6 +1403,13 @@ namespace TrendLib
 
 		for (auto&[trendSignalPlusServerId, archive] : *m_archive)
 		{
+			if (archive.serviceUpdateTimer.isValid() == false)
+			{
+				// The first start. Timer is created invalid, using anything before start() is UB.
+				//
+				archive.serviceUpdateTimer.start();
+			}
+
 			if (::calcHash(trendSignalPlusServerId.appSignalId) == signalhash)
 			{
 				if (archive.realTimeActiveServiceId == sourceEquipmentId)
@@ -1404,11 +1448,25 @@ namespace TrendLib
 					}
 					else
 					{
-						// This is the wrong source, skip it
+						// This is the wrong source, skip it, but check timeouit firts
 						//
-						return;
+						if (archive.serviceUpdateTimer.hasExpired(2000) == true)
+						{
+							// We have not received from the active server data some time,
+							// switch to another server
+							//
+							archive.realTimeActiveServiceId = sourceEquipmentId;
+						}
+						else
+						{
+							// This is the wrong source and data is comming for active connection (to timeout)
+							//
+							return;
+						}
 					}
 				}
+
+				archive.serviceUpdateTimer.restart();
 
 				// Add realtime data to all signals with the same AppSignalID, no matter which archive server it is from
 				//

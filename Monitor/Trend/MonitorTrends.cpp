@@ -129,10 +129,10 @@ static int no = 1;
 
 	// Realtime Trends connections
 	//
-	connect(&m_realtimeDataProvider, &MonitorTrendRealtimeConnections::dataReady, &signalSet(), &TrendLib::TrendSignalSet::slot_realtimeDataReceived);
-	connect(&m_realtimeDataProvider, &MonitorTrendRealtimeConnections::requestError, &signalSet(), &TrendLib::TrendSignalSet::slot_realtimeRequestError);
-	connect(&m_realtimeDataProvider, &MonitorTrendRealtimeConnections::connectionLost, &signalSet(), qOverload<>(&TrendLib::TrendSignalSet::addNonValidPoint));
-	connect(&m_realtimeDataProvider, &MonitorTrendRealtimeConnections::dataReady, this, &MonitorTrendsWidget::slot_realtimeDataReceived);
+	connect(&m_realtimeDataProvider, &RtDataProvider::dataReady, &signalSet(), &TrendLib::TrendSignalSet::slot_realtimeDataReceived);
+	connect(&m_realtimeDataProvider, &RtDataProvider::requestError, &signalSet(), &TrendLib::TrendSignalSet::slot_realtimeRequestError);
+	connect(&m_realtimeDataProvider, &RtDataProvider::connectionLost, &signalSet(), &TrendLib::TrendSignalSet::slot_realtimeConnectionLost);
+	connect(&m_realtimeDataProvider, &RtDataProvider::dataReady, this, &MonitorTrendsWidget::slot_realtimeDataReceived);
 
 	// --
 	//

@@ -87,7 +87,6 @@ SOURCES += main.cpp \
     ../lib/Ui/DialogSignalSearch.cpp \
     DialogColumns.cpp \
     Trend/MonitorTrendArchiveConnections.cpp \
-    Trend/MonitorTrendRealtimeConnections.cpp \
     Trend/MonitorTrends.cpp \
 	Archive/DialogChooseArchiveSignals.cpp \
 	Archive/ArchiveModelView.cpp \
@@ -95,11 +94,12 @@ SOURCES += main.cpp \
     TcpSignalRecents.cpp \
 	MonitorSchemaManager.cpp \
 	SelectSchemaWidget.cpp \
-	Trend/RtTrendSchema.cpp \
 	../lib/Tuning/TuningSignalManager.cpp \
     ../lib/Tuning/TuningTcpClient.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
+    Trend/RtDataProvider.cpp \
+    Trend/RtSchemaTrend.cpp \
     Trend/RtTrendTcpClient.cpp \
     Trend/ArchiveTrendTcpClient.cpp \
     MonitorTuningTcpClient.cpp \
@@ -156,7 +156,6 @@ HEADERS  += \
     ../lib/Ui/DialogSignalSearch.h \
     DialogColumns.h \
     Trend/MonitorTrendArchiveConnections.h \
-    Trend/MonitorTrendRealtimeConnections.h \
     Trend/MonitorTrends.h \
 	Archive/DialogChooseArchiveSignals.h \
 	Archive/ArchiveModelView.h \
@@ -167,7 +166,8 @@ HEADERS  += \
     ../lib/Tuning/TuningSignalManager.h \
     ../lib/Tuning/TuningTcpClient.h \
     ../lib/Tuning/TuningSourceState.h \
-    Trend/RtTrendSchema.h \
+    Trend/RtDataProvider.h \
+    Trend/RtSchemaTrend.h \
     Trend/RtTrendTcpClient.h \
     Trend/ArchiveTrendTcpClient.h \
     MonitorTuningTcpClient.h \
