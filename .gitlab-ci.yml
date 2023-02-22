@@ -100,42 +100,10 @@ windows_build_job:
     - "# ----------------------------------------------"
     - "#               Copy Qt DLL's"
     - "# ----------------------------------------------"
-    - "copy \"C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Redist\\MSVC\\v143\\vc_redist.x64.exe\" \"$Env:CI_PROJECT_DIR/bin/release/\""
+    - "& './CI/windeploy.bat'"
+#Copy PostgreSQL DLL to bin/release
     - "copy C:\\libpq_my_build\\libpq.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
-    - "copy $Env:QT_BIN_DIR\\bin\\Qt6Core.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
-    - "copy $Env:QT_BIN_DIR\\bin\\Qt6Gui.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
-    - "copy $Env:QT_BIN_DIR\\bin\\Qt6Network.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
-    - "copy $Env:QT_BIN_DIR\\bin\\Qt6PrintSupport.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
-    - "copy $Env:QT_BIN_DIR\\bin\\Qt6Qml.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
-    - "copy $Env:QT_BIN_DIR\\bin\\Qt6Quick.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
-    - "copy $Env:QT_BIN_DIR\\bin\\Qt6SerialPort.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
-    - "copy $Env:QT_BIN_DIR\\bin\\Qt6Sql.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
-    - "copy $Env:QT_BIN_DIR\\bin\\Qt6Svg.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
-    - "copy $Env:QT_BIN_DIR\\bin\\Qt6Test.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
-    - "copy $Env:QT_BIN_DIR\\bin\\Qt6Widgets.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
-    - "copy $Env:QT_BIN_DIR\\bin\\Qt6Xml.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
-    - "copy $Env:QT_BIN_DIR\\bin\\Qt6Charts.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
-    - "copy $Env:QT_BIN_DIR\\bin\\Qt6OpenGL.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
-    - "copy $Env:QT_BIN_DIR\\bin\\Qt6OpenGLWidgets.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
-# Copy Qt plugins
-    - "mkdir \"$Env:CI_PROJECT_DIR\\bin\\release\\iconengines\""
-    - "copy $Env:QT_BIN_DIR\\plugins\\iconengines\\qsvgicon.dll \"$Env:CI_PROJECT_DIR/bin/release/iconengines/\""
-    - "mkdir \"$Env:CI_PROJECT_DIR\\bin\\release\\imageformats\""
-    - "copy $Env:QT_BIN_DIR\\plugins\\imageformats\\qgif.dll \"$Env:CI_PROJECT_DIR/bin/release/imageformats/\""
-    - "copy $Env:QT_BIN_DIR\\plugins\\imageformats\\qico.dll \"$Env:CI_PROJECT_DIR/bin/release/imageformats/\""
-    - "copy $Env:QT_BIN_DIR\\plugins\\imageformats\\qjpeg.dll \"$Env:CI_PROJECT_DIR/bin/release/imageformats/\""
-    - "copy $Env:QT_BIN_DIR\\plugins\\imageformats\\qsvg.dll \"$Env:CI_PROJECT_DIR/bin/release/imageformats/\""
-    - "mkdir \"$Env:CI_PROJECT_DIR\\bin\\release\\platforms\""
-    - "copy $Env:QT_BIN_DIR\\plugins\\platforms\\qdirect2d.dll \"$Env:CI_PROJECT_DIR/bin/release/platforms/\""
-    - "copy $Env:QT_BIN_DIR\\plugins\\platforms\\qminimal.dll \"$Env:CI_PROJECT_DIR/bin/release/platforms/\""
-    - "copy $Env:QT_BIN_DIR\\plugins\\platforms\\qoffscreen.dll \"$Env:CI_PROJECT_DIR/bin/release/platforms/\""
-    - "copy $Env:QT_BIN_DIR\\plugins\\platforms\\qwindows.dll \"$Env:CI_PROJECT_DIR/bin/release/platforms/\""
-    - "mkdir \"$Env:CI_PROJECT_DIR\\bin\\release\\sqldrivers\""
-    - "copy $Env:QT_BIN_DIR\\plugins\\sqldrivers\\qsqlite.dll \"$Env:CI_PROJECT_DIR/bin/release/sqldrivers/\""
-    - "copy $Env:QT_BIN_DIR\\plugins\\sqldrivers\\qsqlpsql.dll \"$Env:CI_PROJECT_DIR/bin/release/sqldrivers/\""
-    - "mkdir \"$Env:CI_PROJECT_DIR\\bin\\release\\styles\""
-    - "copy $Env:QT_BIN_DIR\\plugins\\styles\\qwindowsvistastyle.dll \"$Env:CI_PROJECT_DIR/bin/release/styles/\""
-
+# Copy Metrology plugins
     - "copy $Env:CI_PROJECT_DIR\\bin_Win64\\visa64.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
     - "copy $Env:CI_PROJECT_DIR\\bin_Win64\\visaConfMgr.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
     - "copy $Env:CI_PROJECT_DIR\\bin_Win64\\visaUtilities.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
@@ -206,9 +174,12 @@ windows_build_job:
       - bin/release/*.dll
       - bin/release/iconengines/*.dll
       - bin/release/imageformats/*.dll
+      - bin/release/networkinformation/*.dll
       - bin/release/platforms/*.dll
       - bin/release/sqldrivers/*.dll
       - bin/release/styles/*.dll
+      - bin/release/tls/*.dll
+      - bin/release/translations/*.qm
       - bin/release/scripting/*.*
       - bin/release/scripthelp/*.*
       - bin/release/scripthelp/search/*.*
