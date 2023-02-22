@@ -152,9 +152,8 @@ namespace RtTrends
 			break;
 
 		default:
-			assert(false);
+			logError(QString("unknown request ID = %1 (ignored)").arg(requestID));
 		}
-
 	}
 
 	void Server::onRtTrendsManagementRequest(const char* requestData, quint32 requestDataSize)

@@ -1,0 +1,18 @@
+@startuml
+
+!include ./CommonLib.puml
+!include ./UtilsLib.puml
+!include ./OnlineLib.puml
+!include ./Protobuf.puml
+!include ./ServiceLib.puml
+!include ./AppSignalLib.puml
+
+[TuningService]
+TuningService -up-> [CommonLib]
+TuningService -up-> [UtilsLib]
+TuningService -up-> [OnlineLib]
+TuningService -up-> [Protobuf]
+TuningService -up-> [ServiceLib]
+TuningService -up-> [AppSignalLib]
+
+@enduml

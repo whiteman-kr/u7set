@@ -32,7 +32,7 @@ mkdir -p $OUTPUT_DIR
 #
 ./bin_unix/debug/SimulatorTests
 ./bin_unix/debug/MetrologyTests
-./bin_unix/debug/u7databasetests -config=$CI_PROJECT_DIR/Test/u7databasetestsArgsLinux.xml
+./bin_unix/debug/u7databasetests -config=$CI_PROJECT_DIR/Test/u7databasetestsArgsCoverage.xml
 
 # Get code coverage data
 #

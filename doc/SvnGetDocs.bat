@@ -29,6 +29,8 @@ FOR /F "delims=|" %%d  IN (SvnDocList.txt) DO (
 IF NOT EXIST ..\bin\release\docs\D11.5_AFBL_RM.pdf goto SvnError
 IF NOT EXIST ..\bin\release\docs\D11.6_RPCT-UM.pdf goto SvnError
 IF NOT EXIST "..\bin\release\docs\Appendixes\D11.6 RPCT User Manual Appendix A Warnings and Errors List.pdf"  goto SvnError
+IF NOT EXIST "..\bin\release\docs\Appendixes\D11.6 RPCT User Manual Appendix B Build Directory and Output Bitstream File Description.pdf"  goto SvnError
+IF NOT EXIST "..\bin\release\docs\Appendixes\D11.6 RPCT User Manual Appendix C JavaScript Manual.pdf"  goto SvnError
 IF NOT EXIST ..\bin\release\docs\D11.8_FSC_MATS_User_Manual.pdf goto SvnError
 IF NOT EXIST ..\bin\release\docs\D11.9_FSC_Tuning_User_Manual.pdf  goto SvnError
 IF NOT EXIST "..\bin\release\docs\Installing and configuring RPCT.pdf" goto SvnError

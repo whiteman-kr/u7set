@@ -2,9 +2,12 @@ TEMPLATE = subdirs
 
 CONFIG += ordered
 
-win32:SUBDIRS += Protobuf
-SUBDIRS += ./Tools/PacketSource \
-	   ./Test/UalTester
-
-
-
+SUBDIRS +=	./Protobuf \
+			./UtilsLib \
+			./OnlineLib \
+			./CommonLib \
+			./AppSignalLib \
+			./ServiceLib \
+			./Tools/PacketSource \
+			./Tools/u7arch \
+			./Test/UalTester

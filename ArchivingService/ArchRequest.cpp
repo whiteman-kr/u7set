@@ -215,7 +215,10 @@ ArchFindResult ArchFileToRead::openPartitionToStartReading()
 
 			if (result == ArchFindResult::Found)
 			{
+				Q_ASSERT(m_startReadFromRecord >= 0 && m_startReadFromRecord < m_partitionToRead.recordsCount());
+
 				m_hasDataToRead = true;
+				m_partitionToRead.gotoRecord(m_startReadFromRecord);
 			}
 			else
 			{

@@ -1,0 +1,20 @@
+@startuml
+
+!include ./CommonLib.puml
+!include ./UtilsLib.puml
+!include ./OnlineLib.puml
+!include ./Protobuf.puml
+!include ./ServiceLib.puml
+!include ./AppSignalLib.puml
+!include ./AppDataService.puml
+
+[ServiceControlManager]
+ServiceControlManager -up-> [CommonLib]
+ServiceControlManager -up-> [UtilsLib]
+ServiceControlManager -up-> [OnlineLib]
+ServiceControlManager -up-> [Protobuf]
+ServiceControlManager -up-> [ServiceLib]
+ServiceControlManager -up-> [AppSignalLib]
+ServiceControlManager -up-> [AppDataService]
+
+@enduml

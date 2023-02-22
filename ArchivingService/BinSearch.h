@@ -156,7 +156,7 @@ BinSearchResult BinSearch<TYPE>::checkNextItem(TYPE nextItem)
 	}
 	else
 	{
-		// distance <= 2
+		// distance < 2
 		//
 		if (distance != 1 ||
 			m_leftItem >= m_soughtItem ||

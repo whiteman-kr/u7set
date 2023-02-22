@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<u7databasetestsArguments>
+    <DatabaseAddress>127.0.0.1</DatabaseAddress>
+    <DatabasePort>5434</DatabasePort>
+    <DatabaseUserName>u7</DatabaseUserName>
+    <DatabasePassword>P2ssw0rd</DatabasePassword>
+    <DatabaseAdministratorPassword>P2ssw0rd</DatabaseAdministratorPassword>
+    <ProjectAdministratorName>Administrator</ProjectAdministratorName>
+    <ProjectAdministratorPassword>P2ssw0rd</ProjectAdministratorPassword>
+    <SignalTestsProjectName>linuxsignalstests</SignalTestsProjectName>
+    <DbTestsProjectName>linuxdbtests</DbTestsProjectName>
+    <FileManagementTestsProjectName>linuxdbfiletests</FileManagementTestsProjectName>
+    <HardwareConfigurationTestsProjectName>linuxdbbuildtests</HardwareConfigurationTestsProjectName>
+    <VersionControlTestsProjectName>linuxdbversiontests</VersionControlTestsProjectName>
+</u7databasetestsArguments>

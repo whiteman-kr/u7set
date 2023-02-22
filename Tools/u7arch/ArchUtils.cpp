@@ -9,7 +9,7 @@ ArchUtils::ArchUtils(const QString& workDir) :
 
 void ArchUtils::dump(const QString& archFile, bool lt, bool st, bool pt)
 {
-	QRegExp archFileNameTemplate(ARCH_FILE_NAME_TEMPLATE);
+	QRegularExpression archFileNameTemplate(ARCH_FILE_NAME_TEMPLATE);
 
 	if (archFile.contains(archFileNameTemplate) == false)
 	{
@@ -25,7 +25,9 @@ void ArchUtils::dump(const QString& archFile, bool lt, bool st, bool pt)
 		return;
 	}
 
-	QFile wrFile(archFile + ".dump");
+	QString dumpFileName = archFile + ".dump";
+
+	QFile wrFile(dumpFileName);
 
 	if (wrFile.open(QIODevice::WriteOnly | QIODevice::Text) == false)
 	{
@@ -35,9 +37,9 @@ void ArchUtils::dump(const QString& archFile, bool lt, bool st, bool pt)
 
 	QTextStream dump(&wrFile);
 
-	QDateTime dt;
+	QDateTime dateTime;
 
-	bool res = getFileStartTime(archFile, &dt);
+	bool res = getFileStartTime(archFile, &dateTime);
 
 	if (res == false)
 	{
@@ -45,7 +47,33 @@ void ArchUtils::dump(const QString& archFile, bool lt, bool st, bool pt)
 		return;
 	}
 
-	dump << QString("Partition start time: %1 sys\n\n").arg(getTimeStr(dt));
+	dump << QString("Partition start time: %1 UTC+0\n\n").arg(getTimeStr(dateTime));
+
+	const QString SEPARATOR("   ");
+
+	dump << "PcktNo  ";
+
+	if (lt == true)
+	{
+		dump << QString("Local Time").leftJustified(23, ' ') << SEPARATOR;
+	}
+
+	if (st == true)
+	{
+		dump << QString("System Time (UTC+0)").leftJustified(23, ' ') << SEPARATOR;
+	}
+
+	if (pt == true ||
+		(pt == false && lt == false && st == false))
+	{
+		dump << QString("Plant Time").leftJustified(23, ' ') << SEPARATOR;
+	}
+
+	dump << QString("State Flags").leftJustified(35, ' ') << SEPARATOR;
+	dump << QString("Archive Reason").leftJustified(24, ' ') << SEPARATOR;
+	dump << QString("Value");
+
+	dump << "\n\n";
 
 	int recordNo = 0;
 
@@ -69,45 +97,37 @@ void ArchUtils::dump(const QString& archFile, bool lt, bool st, bool pt)
 
 		recordNo++;
 
-		dump << QString("%1    ").arg(record.state.packetNo, 5, 10, QChar('0'));
+		dump << QString("%1").arg(record.state.packetNo, 5, 10, QChar('0'));
+		dump << SEPARATOR;
 
-		QDateTime dt;
-
-		if (lt == false && st == false && pt == false)
+		if (lt == true)
 		{
-			dump << getLocalTimeStr(record) << "    ";
-			dump << getSystemTimeStr(record) << "    ";
-			dump << getPlantTimeStr(record) << "    ";
-		}
-		else
-		{
-			if (lt == true)
-			{
-				dump << getLocalTimeStr(record) << "    ";
-			}
-
-			if (st == true)
-			{
-				dump << getSystemTimeStr(record) << "    ";
-			}
-
-			if (pt == true)
-			{
-				dump << getPlantTimeStr(record) << "    ";
-			}
+			dump << getTimeStr(record.getTime(E::TimeType::Local)) << SEPARATOR;
 		}
 
-		dump << getFlagsStr(record) << "    ";
+		if (st == true)
+		{
+			dump << getTimeStr(record.getTime(E::TimeType::System)) << SEPARATOR;
+		}
 
-		dump << getValueStr(record) << "    ";
+		if (pt == true ||
+			(pt == false && lt == false && st == false))
+		{
+			dump << getTimeStr(record.getTime(E::TimeType::Plant)) << SEPARATOR;
+		}
+
+		dump << getFlagsStr(record) << SEPARATOR;
+
+		dump << getValueStr(record);
 
 		dump << "\n";
 	}
 	while(1);
 
 	dump << QString("\nRecords processed: %1").arg(recordNo);
-}
 
+	std::cout << (QString("Dump file - %1").arg(dumpFileName)).toStdString();
+}
 
 bool ArchUtils::getFileStartTime(const QString& fileName, QDateTime* dt)
 {
@@ -167,7 +187,7 @@ QString ArchUtils::getPlantTimeStr(const ArchFileRecord& ar)
 
 QString ArchUtils::getFlagsStr(const ArchFileRecord& ar)
 {
-	return QString("st = [ %1 %2 %3 %4 %5 %6 %7 ] rs = [ %8 %9 %10 %11 %12 %13 ]").
+	return QString("[ %1 %2 %3 %4 %5 %6 %7 ]   [ %8 %9 %10 %11 %12 %13 ]").
 
 			arg(ar.state.flags.valid == 1 ? "VLD" : "NVL").
 			arg(ar.state.flags.stateAvailable == 1 ? "AVL " : "NAVL").

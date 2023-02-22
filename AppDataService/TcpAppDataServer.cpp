@@ -89,8 +89,7 @@ void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData
 		break;
 
 	default:
-		assert(false);
-		break;
+		logError(QString("unknown request ID = %1 (ignored)").arg(requestID));
 	}
 }
 

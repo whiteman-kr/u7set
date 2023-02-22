@@ -1,0 +1,18 @@
+@startuml
+
+!include ./CommonLib.puml
+!include ./OnlineLib.puml
+!include ./UtilsLib.puml
+!include ./Protobuf.puml
+!include ./ServiceLib.puml
+!include ./AppSignalLib.puml
+
+[AppDataService]
+AppDataService -up-> [CommonLib]
+AppDataService -up-> [OnlineLib]
+AppDataService -up-> [UtilsLib]
+AppDataService -up-> [Protobuf]
+AppDataService -up-> [ServiceLib]
+AppDataService -up-> [AppSignalLib]
+
+@enduml

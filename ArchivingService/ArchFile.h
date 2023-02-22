@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../OnlineLib/CircularLogger.h"
-#include "../OnlineLib/SimpleAppSignalState.h"
+#include "../AppSignalLib/SimpleAppSignalState.h"
 #include "ArchFileBuffer.h"
 
 enum class ArchFindResult

@@ -68,7 +68,7 @@ void SignalStatesProcessingThread::unregisterDestSignalStatesQueue(SimpleAppSign
 		assert(false);			// destQueue is not found in m_queues
 	}
 
-//    DEBUG_LOG_MSG(m_log, QString("SignalStatesProcessingThread: unregister queue '%1'").arg(description));
+	DEBUG_LOG_MSG(m_log, QString("SignalStatesProcessingThread: unregister queue '%1'").arg(description));
 }
 
 void SignalStatesProcessingThread::run()
