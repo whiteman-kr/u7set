@@ -29,13 +29,6 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	connect(&m_configController, &MonitorConfigController::unknownClient, this, &MonitorMainWindow::slot_unknownClient);
 	connect(&m_configController, &MonitorConfigController::wrongClientHostname, this, &MonitorMainWindow::slot_wrongClientHostname);
 
-	// TcpSourcesStateClient
-	//
-	m_tcpSourcesStateClient = new TcpAppSourcesState(&m_configController, &m_LogFile);
-
-	m_sourcesStateClientThread = new SimpleThread(m_tcpSourcesStateClient);
-	m_sourcesStateClientThread->start();
-
 	// DialogAlert
 	//
 	connect(&m_LogFile, &Log::LogFile::alertArrived, &m_dialogAlert, &DialogAlert::onAlertArrived);
@@ -130,12 +123,6 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 
 MonitorMainWindow::~MonitorMainWindow()
 {
-	if (m_sourcesStateClientThread != nullptr)
-	{
-		m_sourcesStateClientThread->quitAndWait(10000);
-		delete m_sourcesStateClientThread;
-	}
-
 	if (m_dialogDataSources != nullptr)
 	{
 		m_dialogDataSources->close();
@@ -1003,11 +990,7 @@ void MonitorMainWindow::showDataSources()
 			tuningTcpClients.push_back(tc);
 		}
 
-		m_dialogDataSources = new DialogDataSources(m_tcpSourcesStateClient,
-													m_configController.configuration().tuningEnabled,
-													tuningTcpClients,
-													false,
-													this);
+		m_dialogDataSources = new DialogDataSources(&m_configController, tuningTcpClients, &m_LogFile, this);
 		m_dialogDataSources->show();
 
 		auto f = [this]() -> void
@@ -1633,7 +1616,7 @@ void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
 
 	if (m_dialogDataSources != nullptr)
 	{
-		m_dialogDataSources->setTuningTcpClients(configuration.tuningEnabled, {m_tuningTcpClients.begin(),m_tuningTcpClients.end()}, false);
+		m_dialogDataSources->setTuningTcpClients({m_tuningTcpClients.begin(),m_tuningTcpClients.end()});
 	}
 
 	m_statusBarTuningConnection->setVisible(configuration.tuningEnabled == true);

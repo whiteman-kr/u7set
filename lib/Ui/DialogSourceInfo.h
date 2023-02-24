@@ -36,10 +36,10 @@ public:
 	static QColor dataItemErrorColor;
 
 protected:
-	Hash m_uniqueHash;
+	Hash m_sourceHash;
 	QTreeWidget* m_treeWidget = nullptr;
 
-private:
+public:
 	virtual void accept() override;
 	virtual void reject() override;
 

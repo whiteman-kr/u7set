@@ -167,9 +167,6 @@ private:
 	std::vector<MonitorTuningTcpClient*> m_tuningTcpClients;
 	std::vector<SimpleThread*> m_tuningTcpClientThreads;
 
-	TcpAppSourcesState* m_tcpSourcesStateClient = nullptr;
-	SimpleThread* m_sourcesStateClientThread = nullptr;
-
 	DialogAlert m_dialogAlert;
 
 	SchemaDrawStatistics m_schemaStats;

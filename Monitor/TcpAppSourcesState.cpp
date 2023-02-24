@@ -105,18 +105,11 @@ const ::Network::AppDataSourceState& AppDataSourceState::previousState() const
 //
 //
 
-TcpAppSourcesState::TcpAppSourcesState(MonitorConfigController* configController, ILogFile* logFile) :
-	// TO DO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	Tcp::Client(configController->softwareInfo(), {}, {}),
-//	Tcp::Client(configController->softwareInfo(),
-//				configController->configuration().appDataService1.address(),
-//				configController->configuration().appDataService2.address(),
-//				"TcpAppSourcesState"),
+TcpAppSourcesState::TcpAppSourcesState(const SoftwareInfo& softwareInfo, HostAddressPort address, ILogFile* logFile) :
+	Tcp::Client(softwareInfo, address, address, "TcpAppSourcesState"),
 	TcpClientStatistics(this),
-	m_cfgController(configController),
 	m_logFile(logFile, "TcpAppSourcesState")
 {
-	Q_ASSERT(m_cfgController);
 	Q_ASSERT(logFile);
 
 	setObjectName("TcpSourcesStateClient");
@@ -129,13 +122,13 @@ TcpAppSourcesState::~TcpAppSourcesState()
 	qDebug() << "TcpSourcesStateClient::~TcpSourcesStateClient()";
 }
 
-std::vector<Hash> TcpAppSourcesState::appDataSourceHashes()
+std::vector<Hash> TcpAppSourcesState::appDataSourceHashes() const
 {
 	std::vector<Hash> result;
 
 	QReadLocker l(&m_appDataSourceStatesLock);
 
-	for (auto it : m_appDataSourceStates)
+	for (const auto& it : m_appDataSourceStates)
 	{
 		result.push_back(it.first);
 	}
@@ -143,7 +136,7 @@ std::vector<Hash> TcpAppSourcesState::appDataSourceHashes()
 	return result;
 }
 
-AppDataSourceState TcpAppSourcesState::appDataSourceState(Hash id, bool* ok)
+AppDataSourceState TcpAppSourcesState::appDataSourceState(Hash id, bool* ok) const
 {
 	QReadLocker l(&m_appDataSourceStatesLock);
 
@@ -191,10 +184,6 @@ void TcpAppSourcesState::onClientThreadStarted()
 {
 	qDebug() << "TcpSourcesStateClient::onClientThreadStarted()";
 	m_logFile.writeMessage("onClientThreadStarted()");
-
-	connect(m_cfgController, &MonitorConfigController::configurationArrived,
-			this, &TcpAppSourcesState::slot_configurationArrived,
-			Qt::QueuedConnection);
 
 	return;
 }
@@ -430,19 +419,3 @@ void TcpAppSourcesState::processAppDataSourcesState(const QByteArray& data)
 
 	return;
 }
-void TcpAppSourcesState::slot_configurationArrived(ConfigSettings configuration)
-{
-	// TO DO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	HostAddressPort s1, s2;
-//	HostAddressPort s1 = configuration.appDataService1.address();
-//	HostAddressPort s2 = configuration.appDataService2.address();
-
-	if (serverAddressPort(0) != s1 ||
-		serverAddressPort(1) != s2)
-	{
-		setServers(s1, s2, true);
-	}
-
-	return;
-}
-
