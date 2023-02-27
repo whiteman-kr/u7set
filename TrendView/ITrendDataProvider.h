@@ -8,6 +8,7 @@
 namespace TrendLib
 {
 	struct OneHourData;
+	class TrendSignalParam;
 
 	class ITrendDataProvider
 	{
@@ -16,7 +17,7 @@ namespace TrendLib
 		// trendUuid: is used in case of SchemaItemIndicator in Trend mode to identify Connection by SchemaItem::guid()
 		//
 		virtual bool trendData(QUuid trendUuid,
-							   QString appSignalId,
+							   const TrendLib::TrendSignalParam& trendSignal,
 							   QDateTime from,
 							   QDateTime to,
 							   E::TimeType timeType,

@@ -1,49 +1,44 @@
+#include <ranges>
 #include "RtTrendTcpClient.h"
 #include "MonitorAppSettings.h"
 
-RtTrendTcpClient::RtTrendTcpClient(MonitorConfigController* configController, ILogFile* logFile) :
-	Tcp::Client(configController->softwareInfo(),
-				configController->configuration().appDataServiceRealtimeTrend1.address(),
-				configController->configuration().appDataServiceRealtimeTrend2.address(),
-				"RtTrendTcpClient"),
+RtTrendTcpClient::RtTrendTcpClient(const SoftwareInfo& softwareInfo,
+								   const HostAddressPort& serverAddressPort,
+								   QString /*serviceEquipmentId*/,
+								   const ISignalDataServer& signalDataServer,
+								   ILogFile* logFile) :
+	Tcp::Client(softwareInfo, serverAddressPort, serverAddressPort, "RtTrendTcpClient"),
 	TcpClientStatistics(this),
-	m_cfgController(configController),
+	m_signalDataServer(signalDataServer),
 	m_logFile(logFile, "RtTrendTcpClient")
 {
-	Q_ASSERT(configController);
 	Q_ASSERT(logFile);
 
-	qDebug() << "RtTrendTcpClient::RtTrendTcpClient(...)";
-
 	setObjectName("RtTrendTcpClient");
+
+	m_logFile.writeMessage("RtTrendTcpClient::RtTrendTcpClient(), address " + serverAddressPort.toString());
+	qDebug() << "RtTrendTcpClient::RtTrendTcpClient(...), address " << serverAddressPort.toString();
 
 	return;
 }
 
 RtTrendTcpClient::~RtTrendTcpClient()
 {
-	qDebug() << "RtTrendTcpClient::~RtTrendTcpClient()";
+	m_logFile.writeMessage("RtTrendTcpClient::~RtTrendTcpClient(), address " + serverAddressPort1().toString());
+	qDebug() << "RtTrendTcpClient::~RtTrendTcpClient(...), address " << serverAddressPort1().toString();
 }
 
-bool RtTrendTcpClient::addSignals(const QStringList& appSignalIds)
+bool RtTrendTcpClient::setSignals(const QStringList& appSignalIds)
 {
+	// Add all signals, now it does not matter if this signal is from a differents sorce,
+	// It is imposiibple to know which source for signal till all signal params are loaded
+	//
 	QMutexLocker ml(&m_dataMutex);
 
 	m_signalSet.clear();
 	for (const QString& s : appSignalIds)
 	{
-		m_signalSet.insert(::calcHash(s));
-	}
-
-	return true;
-}
-
-bool RtTrendTcpClient::setData(const QStringList& trendSignals)
-{
-	m_signalSet.clear();
-	for (const QString& s : trendSignals)
-	{
-		m_signalSet.insert(::calcHash(s));
+		m_signalSet.insert(s);
 	}
 
 	return true;
@@ -55,10 +50,13 @@ bool RtTrendTcpClient::setData(E::RtTrendsSamplePeriod samplePeriod, const QStri
 
 	m_samplePeriod = samplePeriod;
 
+	// Add all signals, now it does not matter if this signal is from a differents sorce,
+	// It is imposiibple to know which source for signal till all signal params are loaded
+	//
 	m_signalSet.clear();
 	for (const QString& s : trendSignals)
 	{
-		m_signalSet.insert(::calcHash(s));
+		m_signalSet.insert(s);
 	}
 
 	return true;
@@ -82,10 +80,6 @@ void RtTrendTcpClient::onClientThreadStarted()
 	qDebug() << "RtTrendTcpClient::onClientThreadStarted()";
 	m_logFile.writeMessage("onClientThreadStarted()");
 
-	connect(m_cfgController, &MonitorConfigController::configurationArrived,
-			this, &RtTrendTcpClient::slot_configurationArrived,
-			Qt::QueuedConnection);
-
 	return;
 }
 
@@ -97,8 +91,8 @@ void RtTrendTcpClient::onClientThreadFinished()
 
 void RtTrendTcpClient::onConnection()
 {
-	qDebug() << "RtTrendTcpClient::onConnection()";
-	m_logFile.writeMessage("onConnection()");
+	qDebug() << "RtTrendTcpClient::onConnection()" << serverAddressPort1().toString();
+	m_logFile.writeMessage("onConnection() " + serverAddressPort1().toString());
 
 	Q_ASSERT(isClearToSendRequest() == true);
 
@@ -109,17 +103,17 @@ void RtTrendTcpClient::onConnection()
 
 void RtTrendTcpClient::onDisconnection()
 {
-	emit connectionLost();
+	emit connectionLost(connectedSoftwareInfo().equipmentID());
 
-	qDebug() << "TrendTcpClient::onDisconnection";
-	m_logFile.writeMessage("onDisconnection()");
+	qDebug() << "TrendTcpClient::onDisconnection " << serverAddressPort1().toString();
+	m_logFile.writeMessage("onDisconnection() " + serverAddressPort1().toString());
 	return;
 }
 
 void RtTrendTcpClient::onReplyTimeout()
 {
-	qDebug() << "RtTrendTcpClient::onReplyTimeout()";
-	m_logFile.writeWarning("onReplyTimeout()");
+	qDebug() << "RtTrendTcpClient::onReplyTimeout() " << serverAddressPort1().toString();
+	m_logFile.writeWarning("onReplyTimeout() " + serverAddressPort1().toString());
 	return;
 }
 
@@ -178,11 +172,24 @@ void RtTrendTcpClient::requestTrendManagement()
 
 	m_managementRequest.Clear();
 
+	// --
+	//
 	m_dataMutex.lock();
 
 	E::RtTrendsSamplePeriod samplePeriod = m_samplePeriod;
-	std::set<Hash> signalSet = m_signalSet;
+
+	std::set<Hash> signalSet;
+	for (const QString& signalId : m_signalSet)
+	{
+		if (m_signalDataServer.dataServiceHasSignal(connectedSoftwareInfo().equipmentID(), signalId) == true)
+		{
+			signalSet.insert(::calcHash(signalId));
+		}
+	}
+
 	m_dataMutex.unlock();
+	// --
+	//
 
 	m_managementRequest.set_clientequipmentid(MonitorAppSettings::instance().equipmentId().toStdString());
 	m_managementRequest.set_sampleperiod(static_cast<int>(samplePeriod));
@@ -348,26 +355,12 @@ void RtTrendTcpClient::processTrendStateChanges(const QByteArray& data)
 	//
 	if (realtimeData->signalData.empty() == false)
 	{
-		emit dataReady(realtimeData, minState, maxState);
+		emit dataReady(connectedSoftwareInfo().equipmentID(), realtimeData, minState, maxState);
 	}
 
 	// New network data exchange cycle
 	//
 	startRequestCycle();
-
-	return;
-}
-
-void RtTrendTcpClient::slot_configurationArrived(ConfigSettings configuration)
-{
-	HostAddressPort s1 = configuration.appDataServiceRealtimeTrend1.address();
-	HostAddressPort s2 = configuration.appDataServiceRealtimeTrend2.address();
-
-	if (serverAddressPort(0) != s1 ||
-		serverAddressPort(1) != s2)
-	{
-		setServers(s1, s2, true);
-	}
 
 	return;
 }
@@ -378,6 +371,7 @@ RtTrendTcpClient::Stat RtTrendTcpClient::stat() const
 
 	m_statMutex.lock();
 	result = m_stat;
+	result.isConnected = static_cast<int>(this->isConnected());
 	m_statMutex.unlock();
 
 	return result;

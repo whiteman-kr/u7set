@@ -1,5 +1,6 @@
 #include "FblItemLine.h"
 #include "PropertyNames.h"
+#include "Settings.h"
 
 namespace VFrame30
 {

@@ -1,4 +1,5 @@
 #include "SchemaLayer.h"
+#include "SchemaItem.h"
 #include "FblItemRect.h"
 #include "PosConnectionImpl.h"
 

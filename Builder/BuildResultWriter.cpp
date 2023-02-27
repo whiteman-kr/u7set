@@ -201,6 +201,16 @@ namespace Builder
 		}
 	}
 
+	const QString& BuildFile::lowercasePathFileName() const
+	{
+		if (m_lowercasePathFileName.isEmpty() == true)
+		{
+			m_lowercasePathFileName = pathFileName().toLower();
+		}
+
+		return m_lowercasePathFileName;
+	}
+
 	bool BuildFile::getFileInfo(IssueLogger* log)
 	{
 		if (log == nullptr)
@@ -501,12 +511,28 @@ namespace Builder
 		return true;
 	}
 
-	bool BuildResult::writeBuildXmlFilesSection(const HashedVector<QString, BuildFile *>& buildFiles)
+	bool BuildResult::writeBuildXmlFilesSection(const HashedVector<QString, BuildFile*>& buildFiles)
 	{
-		m_xmlWriter.writeStartElement("Files");
-		m_xmlWriter.writeAttribute("Count", QString("%1").arg(buildFiles.size()));
+		std::vector<const BuildFile*> files;
 
-		for(BuildFile* buildFile : buildFiles)
+		files.reserve(buildFiles.size());
+
+		for(const BuildFile* buildFile : buildFiles)
+		{
+			TEST_PTR_CONTINUE(buildFile);
+			files.push_back(buildFile);
+		}
+
+		std::sort(files.begin(), files.end(),
+					[](const BuildFile* f1, const BuildFile* f2)
+					{
+						return f1->lowercasePathFileName() < f2->lowercasePathFileName();
+					});
+
+		m_xmlWriter.writeStartElement("Files");
+		m_xmlWriter.writeAttribute("Count", QString::number(files.size()));
+
+		for(const BuildFile* buildFile : files)
 		{
 			if (buildFile == nullptr)
 			{

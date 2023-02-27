@@ -1,20 +1,22 @@
-#ifndef ARCHIVETRENDTCPCLIENT_H
-#define ARCHIVETRENDTCPCLIENT_H
+#pragma once
 
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"
 #include "../CommonLib/Hash.h"
 #include "../CommonLib/Times.h"
 #include "../Proto/network.pb.h"
-#include "../TrendView/TrendSignal.h"
-#include "MonitorConfigController.h"
+#include "../TrendView/TrendSignalSet.h"
+#include "../../lib/SoftwareSettings.h"
+
 
 class ArchiveTrendTcpClient : public Tcp::Client, public TcpClientStatistics
 {
 	Q_OBJECT
 
 public:
-	ArchiveTrendTcpClient(MonitorConfigController* configController, ILogFile* logFile);
+	ArchiveTrendTcpClient(const SoftwareInfo& softwareInfo,
+						  const MonitorSettings::ArchiveService& server,
+						  ILogFile* logFile);
 	virtual ~ArchiveTrendTcpClient();
 
 protected:
@@ -40,14 +42,11 @@ protected:
 	void processNext(const QByteArray& data);
 
 public slots:
-	void slot_requestData(QString appSignalId, TimeStamp hourToRequest, E::TimeType timeType);
-
-protected slots:
-	void slot_configurationArrived(ConfigSettings configuration);
+	void slot_requestData(TrendLib::TrendSignalPlusServerId signalPlusServerId, TimeStamp hourToRequest, E::TimeType timeType);
 
 signals:
-	void dataReady(QString appSignalId, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
-	void requestError(QString appSignalId, TimeStamp requestedHour, E::TimeType timeType);
+	void dataReady(TrendLib::TrendSignalPlusServerId trendSignalPlusServerId, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
+	void requestError(TrendLib::TrendSignalPlusServerId trendSignalPlusServerId, TimeStamp requestedHour, E::TimeType timeType);
 
 	// Staticstic
 	//
@@ -58,6 +57,7 @@ public:
 		int requestQueueSize = 0;
 		int requestCount = 0;
 		int replyCount = 0;
+		int isConnected = 0;		// do not make it bool please, it is convenient to propogate the summ of statistics later
 	};
 
 	Stat stat() const;
@@ -73,18 +73,18 @@ public:
 private:
 	int m_periodicTimerId = 0;
 
-	MonitorConfigController* m_cfgController = nullptr;
+	const MonitorSettings::ArchiveService m_server;
 	HasLogFile m_logFile;
 
 	struct RequestQueue
 	{
-		QString appSignalId;
+		TrendLib::TrendSignalPlusServerId signalPlusServerId;
 		TimeStamp hourToRequest;
 		E::TimeType timeType;
 
 		bool operator== (const RequestQueue& r) const
 		{
-			return	this->appSignalId == r.appSignalId &&
+			return	this->signalPlusServerId == r.signalPlusServerId &&
 					this->hourToRequest == r.hourToRequest &&
 					this->timeType == r.timeType;
 		}
@@ -92,7 +92,7 @@ private:
 		QString toString()
 		{
 			return QString{"RequestQueue{'%1', TimeType %2, HourToRequest %3}"}
-						.arg(appSignalId, E::valueToString(timeType), hourToRequest.toDateTime().toString());
+						.arg(signalPlusServerId.appSignalId, E::valueToString(timeType), hourToRequest.toDateTime().toString());
 		}
 	};
 
@@ -119,5 +119,3 @@ private:
 	mutable QMutex m_statMutex;
 	Stat m_stat;
 };
-
-#endif // ARCHIVETRENDTCPCLIENT_H

@@ -1,6 +1,5 @@
 #include "UfbSchema.h"
-#include "SchemaItemAfb.h"
-#include "SchemaItemSignal.h"
+#include "SchemaLayer.h"
 #include "PropertyNames.h"
 
 namespace VFrame30

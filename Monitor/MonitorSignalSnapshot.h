@@ -11,13 +11,12 @@ class MonitorDialogSignalSnapshot : public DialogSignalSnapshot
 
 public:
 	static MonitorDialogSignalSnapshot* createDialog(MonitorConfigController *configController,
-						   TcpSignalClient* tcpSignalClient,
-						   AppSignalManager* appSignalManager,
+						   MonitorSignalManager* monitorSignalManager,
 						   MonitorCentralWidget* centralWidget);
 
 private:
 	explicit MonitorDialogSignalSnapshot(MonitorConfigController *configController,
-								  AppSignalManager* appSignalManager,
+								  MonitorSignalManager* monitorSignalManager,
 								  QWidget *parent);
 
 private:

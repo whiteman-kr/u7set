@@ -13,6 +13,16 @@ public:
 };
 
 
+class ILogFileStub : public ILogFile
+{
+public:
+	virtual bool writeAlert(const QString&) override { return true; };
+	virtual bool writeError(const QString&)  override { return true; };
+	virtual bool writeWarning(const QString&)  override { return true; };
+	virtual bool writeMessage(const QString&)  override { return true; };
+	virtual bool writeText(const QString&)  override { return true; };
+};
+
 class HasLogFile
 {
 public:
@@ -86,12 +96,12 @@ public:
 		return m_logFile;
 	}
 
-	[[nodiscard]] const ILogFile* logFile() const
+	[[nodiscard]] ILogFile* logFile() const
 	{
 		return m_logFile;
 	}
 
 private:
-	ILogFile* m_logFile = nullptr;
+	mutable ILogFile* m_logFile = nullptr;
 	QString m_context;
 };

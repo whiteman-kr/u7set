@@ -5,7 +5,7 @@
 #include "../OnlineLib/TcpClientStatistics.h"
 #include "../CommonLib/Hash.h"
 #include "../Proto/network.pb.h"
-#include "../AppSignalLib/AppSignalManager.h"
+#include "MonitorSignalManager.h"
 #include "MonitorConfigController.h"
 
 
@@ -17,7 +17,7 @@
 class RecentUsed
 {
 public:
-	explicit RecentUsed(int maxSize = 750);
+	explicit RecentUsed(size_t maxSize = 750);
 
 public:
 	void add(Hash h);
@@ -26,24 +26,28 @@ public:
 	bool remove(Hash hash);
 	bool remove(const std::vector<Hash>& hashes);
 
-	int size() const;
+	size_t size() const;
+	ptrdiff_t ssize() const;
 	const std::map<Hash, qint64>& rawHashes() const;	// Just faster access to map
 	std::vector<Hash> hashes() const;
 
 private:
-	int m_maxSize = 750;
-	std::map<Hash, qint64> m_signalToTile;				// first - signal hash, second - time of last update
-	std::multimap<qint64, Hash> m_timeToSignal;			// second - time of last update, first - signal hash
+	size_t m_maxSize = 750;
+	std::map<Hash, qint64> m_signalToTime;				// key - signal hash, value - time of last update
+	std::multimap<qint64, Hash> m_timeToSignal;			// key - time of last update, value - signal hash
 };
 
 
 
-class TcpSignalRecents : public Tcp::Client, public TcpClientStatistics
+class TcpSignalRecents : public Tcp::Client, public TcpClientStatistics, public HasLogFile
 {
 	Q_OBJECT
 
 public:
-	TcpSignalRecents(MonitorConfigController* configController, ILogFile* logFile);
+	TcpSignalRecents(const MonitorConfigController& configController,
+					 const MonitorSettings::AppDataService& adsInfo,
+					 MonitorSignalManager& signalManager,
+					 ILogFile* logFile);
 	virtual ~TcpSignalRecents();
 
 public:
@@ -63,12 +67,14 @@ protected:
 	void requestSignalState();
 	void processSignalState(const QByteArray& data);
 
-protected slots:
-	void slot_configurationArrived(ConfigSettings configuration);
+signals:
+	void connectionReset();
 
 private:
-	MonitorConfigController* m_cfgController = nullptr;
-	HasLogFile m_logFile;
+	const MonitorConfigController& m_cfgController;
+	MonitorSettings::AppDataService m_serverSettings;
+	MonitorSignalManager& m_signalManager;
+
 	RecentUsed m_recents = RecentUsed(ADS_GET_APP_SIGNAL_STATE_MAX);
 
 private:

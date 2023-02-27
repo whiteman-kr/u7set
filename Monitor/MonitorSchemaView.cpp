@@ -22,13 +22,13 @@ MonitorSchemaView::MonitorSchemaView(MonitorSchemaManager* schemaManager,
 	setTuningController(tuningController);
 	setLogController(logController);
 
-	Q_ASSERT(schemaManager && schemaManager->monitorConfigController());
+	Q_ASSERT(schemaManager);
 
-	connect(schemaManager->monitorConfigController(), &MonitorConfigController::configurationArrived, this, &MonitorSchemaView::configurationArrived);
+	connect(&schemaManager->monitorConfigController(), &MonitorConfigController::configurationArrived, this, &MonitorSchemaView::configurationArrived);
 
 	// Updates scripts
 	//
-	configurationArrived(monitorSchemaManager()->monitorConfigController()->configuration());
+	configurationArrived(monitorSchemaManager()->monitorConfigController().configuration());
 
 	return;
 }
@@ -44,10 +44,10 @@ void MonitorSchemaView::paintEvent(QPaintEvent* event)
 	// as the first tab page is created by timer in MonitorCentralWidget::timerEvent, see comment there for
 	// details.
 	//
-	if (int cid = monitorSchemaManager()->monitorConfigController()->configurationId();
+	if (int cid = monitorSchemaManager()->monitorConfigController().configurationId();
 		cid != m_configurationId)
 	{
-		configurationArrived(monitorSchemaManager()->monitorConfigController()->configuration());
+		configurationArrived(monitorSchemaManager()->monitorConfigController().configuration());
 	}
 
 	setInfoMode(MonitorAppSettings::instance().showItemsLabels());

@@ -1,13 +1,12 @@
 #ifndef RTTRENDTCPCLIENT_H
 #define RTTRENDTCPCLIENT_H
 
+#include "../../lib/ISignalDataServer.h"
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"
 #include "../CommonLib/Hash.h"
-#include "../CommonLib/Times.h"
 #include "../Proto/network.pb.h"
-#include "../TrendView/TrendSignal.h"
-#include "MonitorConfigController.h"
+#include "../TrendView/TrendSignalSet.h"
 
 
 //     onConnection()
@@ -29,20 +28,23 @@ class RtTrendTcpClient : public Tcp::Client, public TcpClientStatistics
 	Q_OBJECT
 
 public:
-	RtTrendTcpClient(MonitorConfigController* configController, ILogFile* logFile);
+	RtTrendTcpClient(const SoftwareInfo& softwareInfo,
+					 const HostAddressPort& serverAddressPort,
+					 QString serviceEquipmentId,
+					 const ISignalDataServer& signalDataServer,
+					 ILogFile* logFile);
 	virtual ~RtTrendTcpClient();
 
 	// Methods
 	//
 public:
-	bool addSignals(const QStringList& appSignalIds);
-	bool setData(const QStringList& trendSignals);
+	bool setSignals(const QStringList& appSignalIds);
 	bool setData(E::RtTrendsSamplePeriod samplePeriod, const QStringList& trendSignals);
 
 	void setSamplePeriod(E::RtTrendsSamplePeriod samplePeriod);
 	E::RtTrendsSamplePeriod samplePeriod() const;
 
-public:
+protected:
 	virtual void onClientThreadStarted() override;
 	virtual void onClientThreadFinished() override;
 
@@ -61,13 +63,13 @@ protected:
 	void requestTrendStateChanges();
 	void processTrendStateChanges(const QByteArray& data);
 
-protected slots:
-	void slot_configurationArrived(ConfigSettings configuration);
-
 signals:
-	void dataReady(std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState);
+	void dataReady(QString sourceEquipmentId,
+				   std::shared_ptr<TrendLib::RealtimeData> data,
+				   TrendLib::TrendStateItem minState,
+				   TrendLib::TrendStateItem maxState);
 	void requestError(QString text);
-	void connectionLost();
+	void connectionLost(QString sourceEquipmentId);
 
 	// Staticstic
 	//
@@ -78,6 +80,7 @@ public:
 		int requestQueueSize = 0;
 		int requestCount = 0;
 		int replyCount = 0;
+		int isConnected = 0;		// It must be int for summing up statistcics for several connections
 	};
 
 	Stat stat() const;
@@ -92,13 +95,13 @@ public:
 	// Data
 	//
 private:
-	MonitorConfigController* m_cfgController = nullptr;
+	const ISignalDataServer& m_signalDataServer;
 	HasLogFile m_logFile;
 
 	mutable QMutex m_dataMutex;
 
 	E::RtTrendsSamplePeriod m_samplePeriod;
-	std::set<Hash> m_signalSet;
+	std::set<QString> m_signalSet;
 
 private:
 	Network::RtTrendsManagementRequest m_managementRequest;

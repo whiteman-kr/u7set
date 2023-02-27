@@ -4,7 +4,7 @@
 #include "../OnlineLib/TcpClientStatistics.h"
 #include "../CommonLib/Hash.h"
 #include "../Proto/network.pb.h"
-#include "../AppSignalLib/AppSignalManager.h"
+#include "MonitorSignalManager.h"
 #include "MonitorConfigController.h"
 
 class AppDataSourceState
@@ -50,11 +50,11 @@ class TcpAppSourcesState : public Tcp::Client, public TcpClientStatistics
 	Q_OBJECT
 
 public:
-	TcpAppSourcesState(MonitorConfigController* configController, ILogFile* logFile);
+	TcpAppSourcesState(const SoftwareInfo& softwareInfo, HostAddressPort address, ILogFile* logFile);
 	virtual ~TcpAppSourcesState();
 
-	std::vector<Hash> appDataSourceHashes();
-	AppDataSourceState appDataSourceState(Hash id, bool* ok);
+	std::vector<Hash> appDataSourceHashes() const;
+	AppDataSourceState appDataSourceState(Hash id, bool* ok) const;
 
 	int sourceErrorCount();
 public:
@@ -78,20 +78,16 @@ protected:
 	void requestAppDataSourcesState();
 	void processAppDataSourcesState(const QByteArray& data);
 
-protected slots:
-	void slot_configurationArrived(ConfigSettings configuration);
-
 signals:
 	void connectionReset();
 
 private:
-	MonitorConfigController* m_cfgController = nullptr;
 	HasLogFile m_logFile;
 
 private:
 	int m_requestPeriod = 100;
 
-	QReadWriteLock m_appDataSourceStatesLock;	// For access to m_appDataSourceStates
+	mutable QReadWriteLock m_appDataSourceStatesLock;	// For access to m_appDataSourceStates
 	std::map<Hash, AppDataSourceState> m_appDataSourceStates;
 
 	// Cache protobuf messages

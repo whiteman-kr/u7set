@@ -149,7 +149,7 @@ private:
 											  const Hardware::Software* software);
 
 	bool readTuningServiceSettings(const Builder::Context* context,
-											  const Hardware::Software* software);
+								   const Hardware::Software* software);
 };
 
 // -------------------------------------------------------------------------------------------

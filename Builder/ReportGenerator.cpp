@@ -6,6 +6,8 @@
 
 #include "../VFrame30/VFrameTools.h"
 #include "../VFrame30/Schema.h"
+#include "../VFrame30/SchemaLayer.h"
+#include "../VFrame30/SchemaItem.h"
 #include "../VFrame30/DrawParam.h"
 
 namespace  Builder

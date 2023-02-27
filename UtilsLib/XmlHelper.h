@@ -145,6 +145,8 @@ public:
 	bool readHostAddressPort(const QString& nameIP, const QString &namePort, HostAddressPort *hostAddressPort);
 	bool readHostAddress(const QString& name, QHostAddress *hostAddress);
 
+	QString elementText();
+
 	bool findElement(const QString& elementName);
 	bool checkElement(const QString& elementName);
 

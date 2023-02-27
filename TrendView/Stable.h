@@ -7,6 +7,7 @@
 
 // Add C++ includes here
 //
+#include <type_traits>
 #include <cassert>
 #include <vector>
 #include <array>

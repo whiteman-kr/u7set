@@ -1,5 +1,6 @@
 #include "DialogTrendSignalPoint.h"
 #include "ui_DialogTrendSignalPoint.h"
+#include "TrendScale.h"
 
 DialogTrendSignalPoint::DialogTrendSignalPoint(std::vector<TrendLib::TrendStateItem>* stateItems,
 											   E::TimeType timeType,

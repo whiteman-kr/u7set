@@ -24,7 +24,7 @@ private:
 private:
 	QWidget* m_parent = nullptr;
 
-	const int m_maxReportStates = 10000;
+	const int m_maxReportStates = 100000;
 	const int m_maxReportStatesForCsv = 5000000;
 };
 

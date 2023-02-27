@@ -4,7 +4,7 @@ QColor DialogSourceInfo::dataItemErrorColor = QColor(0xc0, 0, 0);
 
 DialogSourceInfo::DialogSourceInfo(QWidget *parent, Hash uniqueHash)
 	:QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
-	  m_uniqueHash(uniqueHash)
+	  m_sourceHash(uniqueHash)
 {
 	setAttribute(Qt::WA_DeleteOnClose);
 
@@ -164,14 +164,14 @@ void DialogSourceInfo::prepareContextMenu(const QPoint& pos)
 
 void DialogSourceInfo::accept()
 {
-	emit dialogClosed(m_uniqueHash);
+	emit dialogClosed(m_sourceHash);
 
 	QDialog::accept();
 }
 
 void DialogSourceInfo::reject()
 {
-	emit dialogClosed(m_uniqueHash);
+	emit dialogClosed(m_sourceHash);
 
 	QDialog::reject();
 }

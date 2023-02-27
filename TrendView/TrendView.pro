@@ -30,8 +30,10 @@ unix {
 }
 
 SOURCES += \
+    DialogChooseTrendSignals.cpp \
+    TrendArchiveServer.cpp \
     TrendScale.cpp \
-    Forms/DialogChooseTrendSignals.cpp \
+    TrendSignalSet.cpp \
     TrendWidget.cpp \
 	TrendSignal.cpp \
     TrendSlider.cpp \
@@ -45,10 +47,14 @@ SOURCES += \
     DialogTrendSignalPoint.cpp
 
 HEADERS += \
-    Forms/DialogChooseTrendSignals.h \
+    ../lib/ISignalDataServer.h \
+    ../lib/ISignalHasTag.h \
+    DialogChooseTrendSignals.h \
     ITrendDataProvider.h \
     Stable.h \
+    TrendArchiveServer.h \
     TrendScale.h \
+    TrendSignalSet.h \
     TrendWidget.h \
     TrendSignal.h \
     TrendSlider.h \
@@ -70,7 +76,7 @@ RESOURCES += \
     TrendView.qrc
 
 FORMS += \
-    Forms/DialogChooseTrendSignals.ui \
+    DialogChooseTrendSignals.ui \
     TrendsMainWindow.ui \
     DialogTrendSignalProperties.ui \
     DialogTrendSignalPoints.ui \

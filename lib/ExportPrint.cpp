@@ -48,21 +48,6 @@ void ExportPrint::printTable(QTableView* tableView)
 
 		doc.print(printer);
 	}
-
-//	QPrintPreviewDialog printDialog(this);
-
-//	printDialog.setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
-//	printDialog.setWindowFlags(windowFlags() | Qt::WindowMaximizeButtonHint);
-
-//	if (m_view->selectionModel()->hasSelection() == true)
-//	{
-//		qDebug() << "Print selection enabled";
-//		printDialog.printer()->setPrintRange(QPrinter::PrintRange::Selection);
-//	}
-
-	//connect(&printDialog, &QPrintPreviewDialog::paintRequested, this, &MonitorArchiveWidget::printRequested);
-
-//	printDialog.exec();
 }
 
 void ExportPrint::exportTable(QTableView* tableView, QString fileName, QString extension)
@@ -397,12 +382,10 @@ bool ExportPrint::saveArchiveToCsv(QTableView* tableView, QString fileName)
 	std::vector<int> shownColums;
 	shownColums.reserve(columnCount);
 
-	int shownColumnCount = 0;
 	for (int column = 0; column < columnCount; column++)
 	{
 		if (tableView->isColumnHidden(column) == false)
 		{
-			shownColumnCount ++;
 			shownColums.push_back(column);
 		}
 	}

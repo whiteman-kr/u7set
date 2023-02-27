@@ -6,29 +6,6 @@
 #include "../VFrame30/Schema.h"
 
 
-class ConfigConnection
-{
-public:
-	ConfigConnection() = default;
-	ConfigConnection(const ConfigConnection&) = default;
-	ConfigConnection(QString EquipmentId, QString ipAddress, int port);
-	ConfigConnection& operator=(const ConfigConnection&) = default;
-
-	QString equipmentId() const;
-	QString ip() const;
-	int port() const;
-
-	HostAddressPort address() const;
-
-protected:
-	QString m_equipmentId = "UNKNOWN";
-	QString m_ip = "0.0.0.0";
-	int m_port = 0;
-
-	friend struct ConfigSettings;
-};
-
-
 struct ConfigSettings
 {
 	int configurationId = -1;
@@ -37,14 +14,10 @@ struct ConfigSettings
 	QString project;
 	QString startSchemaId;
 
-	ConfigConnection appDataService1;
-	ConfigConnection appDataService2;
+	std::vector<MonitorSettings::AppDataService> appDataServices;
+	std::vector<MonitorSettings::AppDataService> appDataRealTimeServices;
 
-	ConfigConnection appDataServiceRealtimeTrend1;
-	ConfigConnection appDataServiceRealtimeTrend2;
-
-	ConfigConnection archiveService1;
-	ConfigConnection archiveService2;
+	std::vector<MonitorSettings::ArchiveService> archiveServices;
 
 	// Tuning settings
 	//
@@ -141,6 +114,8 @@ public:
 
 	std::vector<VFrame30::SchemaDetails::TrendIndicatorSchemaItems> trendSchemaItems() const;
 
+	const ComparatorSet& setpoints() const;
+
 	// Data section
 	//
 private:
@@ -157,6 +132,8 @@ private:
 
 	mutable QReadWriteLock m_confugurationLock;		// for access only to m_configuration
 	ConfigSettings m_configuration;
+
+	ComparatorSet m_setpoints;
 };
 
 

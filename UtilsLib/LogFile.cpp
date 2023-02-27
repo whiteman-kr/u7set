@@ -1546,12 +1546,24 @@ namespace Log
 	{
 		QStyledItemDelegate::initStyleOption(option, index);
 
+		bool active = option->state & QStyle::State_Active;
+		bool selected = option->state & QStyle::State_Selected;
+
 		// Set background color for selected item (by default it is displayed by white)
 		//
-		if (option->state & QStyle::State_Selected)
+		if (selected == true)
 		{
             QBrush br = m_model->color(m_proxyModel->mapToSource(index));
-			option->palette.setColor(QPalette::HighlightedText, br.color());
+			if (br.style() == Qt::NoBrush && active == true)
+			{
+				// Use white color on selected items if control is active
+				//
+				option->palette.setColor(QPalette::HighlightedText, Qt::white);
+			}
+			else
+			{
+				option->palette.setColor(QPalette::HighlightedText, br.color());
+			}
 		}
 	}
 

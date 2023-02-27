@@ -1,4 +1,5 @@
 #include "DiagSchema.h"
+#include "SchemaLayer.h"
 
 namespace VFrame30
 {

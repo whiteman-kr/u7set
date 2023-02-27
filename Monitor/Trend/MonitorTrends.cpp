@@ -1,6 +1,7 @@
 #include "MonitorTrends.h"
-#include "../TrendView/Forms/DialogChooseTrendSignals.h"
+#include "../lib/ISignalHasTag.h"
 #include "../TrendView/TrendWidget.h"
+#include "../TrendView/DialogChooseTrendSignals.h"
 
 std::map<QString, MonitorTrendsWidget*> MonitorTrends::m_trendsList;
 
@@ -34,19 +35,31 @@ bool MonitorTrends::activateTrendWindow(QString trendName)
 	return true;
 }
 
-bool MonitorTrends::startTrendApp(MonitorConfigController* configController,
+bool MonitorTrends::startTrendApp(const MonitorSignalManager& signalManager,
+								  const MonitorConfigController& configController,
                                   const std::vector<AppSignalParam>& appSignals,
                                   QWidget* parent)
 {
-	MonitorTrendsWidget* window = new MonitorTrendsWidget(&theSignals, configController, parent);
+	MonitorTrendsWidget* window = new MonitorTrendsWidget(signalManager, configController, parent);
 
 	std::vector<TrendLib::TrendSignalParam> trendSignals;
 	trendSignals.reserve(appSignals.size());
 
+	auto archiveServers = configController.configuration().archiveServices;
+
 	for (const AppSignalParam& appSignal : appSignals)
 	{
-		TrendLib::TrendSignalParam tsp(appSignal);
-		trendSignals.push_back(tsp);
+		// Take the firss available srchive server for the signal
+		//
+		for (const auto& server : archiveServers)
+		{
+			if (signalManager.dataServiceHasSignal(server.appDataServiceId, appSignal.appSignalId()) == true)
+			{
+				TrendLib::ArchiveServer trendArchiveServer{server.equipmentId, server.shortenId, server.appDataServiceId};
+				trendSignals.emplace_back(appSignal, std::move(trendArchiveServer));
+				break;
+			}
+		}
 	}
 
 	window->addSignals(trendSignals, true);
@@ -69,14 +82,14 @@ void MonitorTrends::unregisterTrendWindow(QString name)
 }
 
 
-MonitorTrendsWidget::MonitorTrendsWidget(IAppSignalManager* appSignalManager,
-                                         MonitorConfigController* configController,
-                                         QWidget* parent) :
+MonitorTrendsWidget::MonitorTrendsWidget(const MonitorSignalManager& signalManager,
+										 const MonitorConfigController& configController,
+										 QWidget* parent) :
 	TrendLib::TrendMainWindow(parent),
-    m_appSignalManager(appSignalManager),
+	m_signalManager(signalManager),
 	m_configController(configController),
-	m_archiveService1(configController->configuration().archiveService1),
-	m_archiveService2(configController->configuration().archiveService2)
+	m_archiveDataProvider(m_configController, m_configController.logFile()),
+	m_realtimeDataProvider(m_configController, m_signalManager, m_configController.logFile())
 {
 static int no = 1;
 	QString trendName = QString("Monitor Trends %1").arg(no++);
@@ -92,13 +105,11 @@ static int no = 1;
 	m_statusBarTextLabel = new QLabel(sb);
 	m_statusBarQueueSizeLabel = new QLabel(sb);
 	m_statusBarNetworkRequestsLabel = new QLabel(sb);
-	m_statusBarServerLabel = new QLabel(sb);
 	m_statusBarConnectionStateLabel = new QLabel(sb);
 
 	sb->addWidget(m_statusBarTextLabel, 1);
 	sb->addWidget(m_statusBarQueueSizeLabel, 0);
 	sb->addWidget(m_statusBarNetworkRequestsLabel, 0);
-	sb->addWidget(m_statusBarServerLabel, 0);
 	sb->addWidget(m_statusBarConnectionStateLabel, 0);
 
 	// Communication thread
@@ -108,9 +119,25 @@ static int no = 1;
 	// --
 	//
 	connect(m_trendWidget, &TrendLib::TrendWidget::trendModeChanged, this, &MonitorTrendsWidget::slot_trendModeChanged);
-	//connect(m_tcpClient, &TcpSignalClient::connectionReset, this, &MonitorMainWindow::tcpSignalClient_connectionReset);
+
+	// Acrhive connection
+	//
+	connect(&m_trendWidget->signalSet(), &TrendLib::TrendSignalSet::requestData, this, &MonitorTrendsWidget::slot_requestData);
+	connect(&m_archiveDataProvider, &MonitorTrendArchiveConnections::dataReady, &signalSet(), &TrendLib::TrendSignalSet::slot_archiveDataReceived);
+	connect(&m_archiveDataProvider, &MonitorTrendArchiveConnections::requestError, &signalSet(), &TrendLib::TrendSignalSet::slot_archiveRequestError);
+	connect(&m_archiveDataProvider, &MonitorTrendArchiveConnections::dataReady, this, &MonitorTrendsWidget::slot_archiveDataReceived);	// For updating widget
+
+	// Realtime Trends connections
+	//
+	connect(&m_realtimeDataProvider, &RtDataProvider::dataReady, &signalSet(), &TrendLib::TrendSignalSet::slot_realtimeDataReceived);
+	connect(&m_realtimeDataProvider, &RtDataProvider::requestError, &signalSet(), &TrendLib::TrendSignalSet::slot_realtimeRequestError);
+	connect(&m_realtimeDataProvider, &RtDataProvider::connectionLost, &signalSet(), &TrendLib::TrendSignalSet::slot_realtimeConnectionLost);
+	connect(&m_realtimeDataProvider, &RtDataProvider::dataReady, this, &MonitorTrendsWidget::slot_realtimeDataReceived);
+
 	// --
 	//
+	connect(&m_configController, &MonitorConfigController::configurationArrived, this, &MonitorTrendsWidget::slot_configurationArrived);
+
 	startTimer(100);
 
 	return;
@@ -120,17 +147,8 @@ MonitorTrendsWidget::~MonitorTrendsWidget()
 {
 	MonitorTrends::unregisterTrendWindow(this->windowTitle());
 
-	if (m_archiveTcpClientThread != nullptr)
-	{
-		m_archiveTcpClientThread->quitAndWait(10000);
-		delete m_archiveTcpClientThread;
-	}
-
-	if (m_rtTcpClientThread != nullptr)
-	{
-		m_rtTcpClientThread->quitAndWait(10000);
-		delete m_rtTcpClientThread;
-	}
+	m_archiveDataProvider.clear();
+	m_realtimeDataProvider.clear();
 
 	return;
 }
@@ -142,57 +160,33 @@ void MonitorTrendsWidget::timerEvent(QTimerEvent*)
 
 	if (trendMode() == E::TrendMode::Archive)
 	{
-		Q_ASSERT(m_archiveTcpClient);
-
-		ArchiveTrendTcpClient::Stat stat = m_archiveTcpClient->stat();
+		ArchiveTrendTcpClient::Stat stat = m_archiveDataProvider.statistics();
 
 		m_statusBarTextLabel->setText(stat.text);
-		m_statusBarQueueSizeLabel->setText(QString(" Queue size: %1 ").arg(stat.requestQueueSize));
-		m_statusBarNetworkRequestsLabel->setText(QString(" Network requests/replies: %1/%2 ")
+		m_statusBarQueueSizeLabel->setText(QString(" Queue: %1 ").arg(stat.requestQueueSize));
+		m_statusBarNetworkRequestsLabel->setText(QString(" Requests/replies: %1/%2 ")
 												 .arg(stat.requestCount)
 												 .arg(stat.replyCount));
 
-		HostAddressPort server = m_archiveTcpClient->currentServerAddressPort();
-		m_statusBarServerLabel->setText(QString(" ArchiveServer: %1 ").arg(server.addressPortStr()));
-
-		if (m_archiveTcpClient->isConnected() == true)
-		{
-			m_statusBarConnectionStateLabel->setText(" Connected ");
-		}
-		else
-		{
-			m_statusBarConnectionStateLabel->setText(" NoConnection ");
-		}
+		m_statusBarConnectionStateLabel->setText(QString(" Connected %1/%2").arg(stat.isConnected).arg(m_archiveDataProvider.size()));
 	}
 	else
 	{
-		Q_ASSERT(m_rtTcpClient);
-
 		// --
 		//
 		setRealtimeParams();
 
 		// --
 		//
-		RtTrendTcpClient::Stat stat = m_rtTcpClient->stat();
+		RtTrendTcpClient::Stat stat = m_realtimeDataProvider.statistics();
 
 		m_statusBarTextLabel->setText(stat.text);
-		m_statusBarQueueSizeLabel->setText("");
-		m_statusBarNetworkRequestsLabel->setText(QString(" Network requests/replies: %1/%2 ")
+		m_statusBarQueueSizeLabel->setText("             ");
+		m_statusBarNetworkRequestsLabel->setText(QString(" Requests/replies: %1/%2 ")
 												 .arg(stat.requestCount)
 												 .arg(stat.replyCount));
 
-		HostAddressPort server = m_rtTcpClient->currentServerAddressPort();
-		m_statusBarServerLabel->setText(QString(" RtSource: %1 ").arg(server.addressPortStr()));
-
-		if (m_rtTcpClient->isConnected() == true)
-		{
-			m_statusBarConnectionStateLabel->setText(" Connected ");
-		}
-		else
-		{
-			m_statusBarConnectionStateLabel->setText(" NoConnection ");
-		}
+		m_statusBarConnectionStateLabel->setText(QString(" Connected %1/%2").arg(stat.isConnected).arg(m_realtimeDataProvider.size()));
 	}
 
 	return;
@@ -200,11 +194,65 @@ void MonitorTrendsWidget::timerEvent(QTimerEvent*)
 
 void MonitorTrendsWidget::signalsButton()
 {
-	std::vector<TrendLib::TrendSignalParam> trendSignals = signalSet().trendSignals();
+	// Get archiev services
+	//
+	std::vector<MonitorSettings::ArchiveService> archiveServers = m_configController.configuration().archiveServices;
+	std::vector<TrendLib::ArchiveServer> trendArchiveServers;
+	trendArchiveServers.reserve(archiveServers.size());
+
+	for (const auto& as : archiveServers)
+	{
+		trendArchiveServers.emplace_back(as.equipmentId, as.shortenId, as.appDataServiceId);
+	}
+
+	// Create signal list converted to TrendSignalParam	and expanded to diffrent archive services
+	//
+	std::vector<TrendLib::TrendSignalParam> trendSignals;
+	trendSignals.reserve(m_signalManager.signalsCount());
+
+	// Create additional signals for archive services
+	//
+	for (const AppSignalParam& sp : m_signalManager.signalList())
+	{
+		// Make signal copy for each ArchiveService which has this signal
+		//
+		for (const TrendLib::ArchiveServer& archiveService : trendArchiveServers)
+		{
+			if (m_signalManager.dataServiceHasSignal(archiveService.dataServiceId, sp.appSignalId()) == true)
+			{
+				trendSignals.emplace_back(sp, archiveService);
+			}
+		}
+	}
+
+	// Get alread added signals
+	//
+	std::vector<TrendLib::TrendSignalParam> addedTrendSignals = signalSet().trendSignals();
+
+	// Implement ISignalHasTag
+	//
+	struct SignalHasTag : ISignalHasTag
+	{
+		SignalHasTag(const MonitorSignalManager& ms) :
+			monitorSignalManager(ms)
+		{
+		}
+
+		virtual bool signalHasTag(const QString& signalId, const QString& tag) const  override
+		{
+			return monitorSignalManager.signalHasTag(signalId, tag);
+		}
+
+		const MonitorSignalManager& monitorSignalManager;
+	} signalHasTag{m_signalManager};
 
 	// --
 	//
-	DialogChooseTrendSignals dialog(m_appSignalManager, trendSignals, this);
+	TrendLib::DialogChooseTrendSignals dialog(&signalHasTag,
+											  trendSignals,
+											  addedTrendSignals,
+											  trendArchiveServers,
+											  this);
 	
 	int result = dialog.exec();
 	
@@ -213,7 +261,7 @@ void MonitorTrendsWidget::signalsButton()
 		return;
 	}
 
-	std::vector<AppSignalParam> acceptedSignals = dialog.acceptedSignals();
+	std::vector<TrendLib::TrendSignalParam> acceptedSignals = dialog.acceptedSignals();
 
 	// Remove signals
 	//
@@ -223,42 +271,42 @@ void MonitorTrendsWidget::signalsButton()
 	for (const TrendLib::TrendSignalParam& ds : discreteSignals)
 	{
 		auto it = std::find_if(acceptedSignals.begin(), acceptedSignals.end(),
-						[&ds](const AppSignalParam& trendSignal)
+						[&ds](const auto& trendSignal)
 						{
-							return trendSignal.appSignalId() == ds.appSignalId();
+							return trendSignal.appSignalId() == ds.appSignalId() &&
+								   trendSignal.archiveServerShortId() == ds.archiveServerShortId();
 						});
 
 		if (it == acceptedSignals.end())
 		{
-			signalSet().removeSignal(ds.appSignalId());
+			signalSet().removeSignal(ds);
 		}
 	}
 
 	for (const TrendLib::TrendSignalParam& as : analogSignals)
 	{
 		auto it = std::find_if(acceptedSignals.begin(), acceptedSignals.end(),
-						[&as](const AppSignalParam& trendSignal)
+						[&as](const auto& trendSignal)
 						{
-							return trendSignal.appSignalId() == as.appSignalId();
+							return trendSignal.appSignalId() == as.appSignalId() &&
+								   trendSignal.archiveServerShortId() == as.archiveServerShortId();
 						});
 
 		if (it == acceptedSignals.end())
 		{
-			signalSet().removeSignal(as.appSignalId());
+			signalSet().removeSignal(as);
 		}
 	}
 
 	// Add new signals
 	//
-	for (const AppSignalParam& signal : acceptedSignals)
+	for (const auto& signal : acceptedSignals)
 	{
-		TrendLib::TrendSignalParam tsp(signal);
-		addSignal(tsp, false);
+		addSignal(signal, false);
 	}
 
 	// Set default scale type if analog signals are empty and selected signals have special tags
 	//
-
 	if (analogSignals.empty() == true)
 	{
 		autoSelectScaleType(acceptedSignals);
@@ -269,44 +317,87 @@ void MonitorTrendsWidget::signalsButton()
 	return;
 }
 
+void MonitorTrendsWidget::dragEnterEvent(QDragEnterEvent* event)
+{
+	if (event->mimeData()->hasFormat(AppSignalParamMimeType::value))
+	{
+		event->acceptProposedAction();
+	}
+
+	return;
+}
+
+void MonitorTrendsWidget::dropEvent(QDropEvent* event)
+{
+	if (event->mimeData()->hasFormat(AppSignalParamMimeType::value) == false)
+	{
+		Q_ASSERT(event->mimeData()->hasFormat(AppSignalParamMimeType::value) == true);
+		event->setDropAction(Qt::DropAction::IgnoreAction);
+		event->accept();
+		return;
+	}
+
+	QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
+
+	::Proto::AppSignalSet protoSetMessage;
+	bool ok = protoSetMessage.ParseFromArray(data.constData(), static_cast<int>(data.size()));
+
+	if (ok == false)
+	{
+		event->acceptProposedAction();
+		return;
+	}
+
+	auto archiveServers = m_configController.configuration().archiveServices;
+
+	// Parse data
+	//
+	for (int i = 0; i < protoSetMessage.appsignal_size(); i++)
+	{
+		const ::Proto::AppSignal& appSignalMessage = protoSetMessage.appsignal(i);
+
+		AppSignalParam appSignalParam;
+		ok = appSignalParam.load(appSignalMessage);
+
+		if (ok == true)
+		{
+			// Find the first suitable archive server
+			//
+			auto sit = std::find_if(archiveServers.begin(), archiveServers.end(),
+						[&appSignalParam, this](const MonitorSettings::ArchiveService& as)
+						{
+							return m_signalManager.dataServiceHasSignal(as.appDataServiceId, appSignalParam.appSignalId());
+						});
+
+			if (sit != archiveServers.end())
+			{
+				const MonitorSettings::ArchiveService& as = *sit;
+				TrendLib::ArchiveServer trendArchiveServer{as.equipmentId, as.shortenId, as.appDataServiceId};
+
+				TrendLib::TrendSignalParam tsp{appSignalParam, trendArchiveServer};
+				addSignal(tsp, false);
+			}
+			else
+			{
+				qDebug() << "MonitorTrendsWidget::dropEvent: Archive server for signal " << appSignalParam.appSignalId() << " is not found.";
+			}
+		}
+	}
+
+	updateWidget();
+
+	return;
+}
+
 void MonitorTrendsWidget::createArchiveConnection()
 {
-	Q_ASSERT(m_configController);
-	Q_ASSERT(m_archiveTcpClient == nullptr);
-	Q_ASSERT(m_archiveTcpClientThread == nullptr);
-
-	m_archiveTcpClient = new ArchiveTrendTcpClient(m_configController, m_configController->logFile());
-
-	m_archiveTcpClientThread = new SimpleThread(m_archiveTcpClient);	// Archive mode is default one
-	m_archiveTcpClientThread->start();
-
-	connect(&signalSet(), &TrendLib::TrendSignalSet::requestData, m_archiveTcpClient, &ArchiveTrendTcpClient::slot_requestData);
-
-	connect(m_archiveTcpClient, &ArchiveTrendTcpClient::dataReady, &signalSet(), &TrendLib::TrendSignalSet::slot_archiveDataReceived);
-	connect(m_archiveTcpClient, &ArchiveTrendTcpClient::requestError, &signalSet(), &TrendLib::TrendSignalSet::slot_archiveRequestError);
-
-	connect(m_archiveTcpClient, &ArchiveTrendTcpClient::dataReady, this, &MonitorTrendsWidget::slot_archiveDataReceived);	// Fpr updating widget
-
+	m_archiveDataProvider.createConnections();
 	return;
 }
 
 void MonitorTrendsWidget::createRealtimeConnection()
 {
-	Q_ASSERT(m_configController);
-	Q_ASSERT(m_rtTcpClient == nullptr);
-	Q_ASSERT(m_rtTcpClientThread == nullptr);
-
-	m_rtTcpClient = new RtTrendTcpClient(m_configController, m_configController->logFile());
-
-	m_rtTcpClientThread = new SimpleThread(m_rtTcpClient);	// Archive mode is default one
-	m_rtTcpClientThread->start();
-
-	connect(m_rtTcpClient, &RtTrendTcpClient::dataReady, &signalSet(), &TrendLib::TrendSignalSet::slot_realtimeDataReceived);
-	connect(m_rtTcpClient, &RtTrendTcpClient::requestError, &signalSet(), &TrendLib::TrendSignalSet::slot_realtimeRequestError);
-	connect(m_rtTcpClient, &RtTrendTcpClient::connectionLost, &signalSet(), qOverload<>(&TrendLib::TrendSignalSet::addNonValidPoint));
-
-	connect(m_rtTcpClient, &RtTrendTcpClient::dataReady, this, &MonitorTrendsWidget::slot_realtimeDataReceived);
-
+	m_realtimeDataProvider.createConnections();
 	setRealtimeParams();
 
 	return;
@@ -314,14 +405,6 @@ void MonitorTrendsWidget::createRealtimeConnection()
 
 void MonitorTrendsWidget::setRealtimeParams()
 {
-	if (m_rtTcpClient == nullptr ||
-		m_rtTcpClientThread == nullptr)
-	{
-		Q_ASSERT(m_rtTcpClient);
-		Q_ASSERT(m_rtTcpClientThread);
-		return;
-	}
-
 	E::RtTrendsSamplePeriod samplePeriod = E::RtTrendsSamplePeriod::sp_100ms;
 	qint64 duration = m_trendWidget->duration();
 
@@ -392,12 +475,18 @@ void MonitorTrendsWidget::setRealtimeParams()
 
 	QStringList trendSignals = trend().signalSet().trendSignalIds();
 
-	m_rtTcpClient->setData(samplePeriod, trendSignals);
+	m_realtimeDataProvider.setData(samplePeriod, trendSignals);
 
 	return;
 }
 
-void MonitorTrendsWidget::slot_archiveDataReceived(QString /*appSignalId*/, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> /*data*/)
+void MonitorTrendsWidget::slot_requestData(TrendLib::TrendSignalPlusServerId signalPlusServerId, TimeStamp hourToRequest, E::TimeType timeType)
+{
+	m_archiveDataProvider.requestData(signalPlusServerId, hourToRequest, timeType);
+	return;
+}
+
+void MonitorTrendsWidget::slot_archiveDataReceived(TrendLib::TrendSignalPlusServerId /*appSignalId*/, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> /*data*/)
 {
 	Q_ASSERT(m_trendWidget);
 	Q_ASSERT(m_trendSlider);
@@ -417,7 +506,10 @@ void MonitorTrendsWidget::slot_archiveDataReceived(QString /*appSignalId*/, Time
 	return;
 }
 
-void MonitorTrendsWidget::slot_realtimeDataReceived(std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState)
+void MonitorTrendsWidget::slot_realtimeDataReceived(QString /*sourceEquipmentId*/,
+													std::shared_ptr<TrendLib::RealtimeData> data,
+													TrendLib::TrendStateItem minState,
+													TrendLib::TrendStateItem maxState)
 {
 	Q_ASSERT(m_trendWidget);
 	Q_ASSERT(m_trendSlider);
@@ -459,23 +551,8 @@ void MonitorTrendsWidget::slot_trendModeChanged()
 {
 	qDebug() << __FUNCTION__ << ", TrendMode = " << trendMode();
 
-	if (m_archiveTcpClientThread != nullptr)
-	{
-		m_archiveTcpClientThread->quitAndWait(10000);
-		delete m_archiveTcpClientThread;
-
-		m_archiveTcpClient = nullptr;
-		m_archiveTcpClientThread = nullptr;
-	}
-
-	if (m_rtTcpClientThread != nullptr)
-	{
-		m_rtTcpClientThread->quitAndWait(10000);
-		delete m_rtTcpClientThread;
-
-		m_rtTcpClient = nullptr;
-		m_rtTcpClientThread = nullptr;
-	}
+	m_archiveDataProvider.clear();
+	m_realtimeDataProvider.clear();
 
 	if (trendMode() == E::TrendMode::Archive)
 	{
@@ -487,4 +564,17 @@ void MonitorTrendsWidget::slot_trendModeChanged()
 	}
 
 	return;
+}
+
+void MonitorTrendsWidget::slot_configurationArrived(ConfigSettings configuration)
+{
+	if (trendMode() == E::TrendMode::Archive)
+	{
+		m_archiveDataProvider.updateConnections();
+	}
+	else
+	{
+		m_realtimeDataProvider.updateConnections();
+	}
+
 }

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "SchemaItem.h"
-#include "Settings.h"
 
 namespace VFrame30
 {

@@ -6,6 +6,8 @@
 #include "../UtilsLib/Ui/UiTools.h"
 #include "../VFrame30/Bus.h"
 #include "../VFrame30/Schema.h"
+#include "../VFrame30/SchemaLayer.h"
+#include "../VFrame30/SchemaItem.h"
 
 #include "../lib/Ui/DialogProgress.h"
 

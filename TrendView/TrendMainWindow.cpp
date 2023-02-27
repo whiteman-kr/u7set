@@ -177,16 +177,16 @@ namespace TrendLib
 		}
 
 		auto dit = std::find_if(discreteSignals.begin(), discreteSignals.end(),
-								[&trendSignal](const TrendLib::TrendSignalParam& t)
-		{
-			return t.appSignalId() == trendSignal.appSignalId();
-		});
+				[&trendSignal](const TrendLib::TrendSignalParam& t)
+				{
+					return t.appSignalId() == trendSignal.appSignalId() && t.archiveServerId() == trendSignal.archiveServerId();
+				});
 
 		auto ait = std::find_if(analogSignals.begin(), analogSignals.end(),
-								[&trendSignal](const TrendLib::TrendSignalParam& t)
-		{
-			return t.appSignalId() == trendSignal.appSignalId();
-		});
+				[&trendSignal](const TrendLib::TrendSignalParam& t)
+				{
+					return t.appSignalId() == trendSignal.appSignalId()  && t.archiveServerId() == trendSignal.archiveServerId();
+				});
 
 		if (dit != discreteSignals.end() ||
 			ait != analogSignals.end())
@@ -402,6 +402,7 @@ namespace TrendLib
 
 		Q_ASSERT(m_timeTypeCombo);
 		m_timeTypeCombo->setCurrentIndex(theSettings.m_timeTypeIndex);
+		timeTypeComboCurrentIndexChanged(theSettings.m_timeTypeIndex);
 
 		// Ensure widget is visible
 		//
@@ -432,13 +433,13 @@ namespace TrendLib
 		return;
 	}
 
-	void TrendMainWindow::autoSelectScaleType(const std::vector<AppSignalParam>& acceptedSignals)
+	void TrendMainWindow::autoSelectScaleType(const std::vector<TrendLib::TrendSignalParam>& acceptedSignals)
 	{
 		E::TrendScaleType defaultScaleType = E::TrendScaleType::Linear;
 
 		bool defaultScaleTypeFound = false;
 
-		for (const AppSignalParam& acceptedSignal : acceptedSignals)
+		for (const TrendLib::TrendSignalParam& acceptedSignal : acceptedSignals)
 		{
 			if (acceptedSignal.isAnalog() == false)
 			{
@@ -506,58 +507,6 @@ namespace TrendLib
 	{
 	}
 
-	void TrendMainWindow::dragEnterEvent(QDragEnterEvent* event)
-	{
-		if (event->mimeData()->hasFormat(AppSignalParamMimeType::value))
-		{
-			event->acceptProposedAction();
-		}
-
-		return;
-	}
-
-	void TrendMainWindow::dropEvent(QDropEvent* event)
-	{
-		if (event->mimeData()->hasFormat(AppSignalParamMimeType::value) == false)
-		{
-			Q_ASSERT(event->mimeData()->hasFormat(AppSignalParamMimeType::value) == true);
-			event->setDropAction(Qt::DropAction::IgnoreAction);
-			event->accept();
-			return;
-		}
-
-		QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
-
-		::Proto::AppSignalSet protoSetMessage;
-		bool ok = protoSetMessage.ParseFromArray(data.constData(), static_cast<int>(data.size()));
-
-		if (ok == false)
-		{
-			event->acceptProposedAction();
-			return;
-		}
-
-		// Parse data
-		//
-		for (int i = 0; i < protoSetMessage.appsignal_size(); i++)
-		{
-			const ::Proto::AppSignal& appSignalMessage = protoSetMessage.appsignal(i);
-
-			AppSignalParam appSignalParam;
-			ok = appSignalParam.load(appSignalMessage);
-
-			if (ok == true)
-			{
-				TrendSignalParam tsp(appSignalParam);
-				addSignal(tsp, false);
-			}
-		}
-
-		updateWidget();
-
-		return;
-	}
-
 	void TrendMainWindow::signalsButton()
 	{
 		// Override in derived class to set signals
@@ -576,12 +525,12 @@ namespace TrendLib
 		return;
 	}
 
-	void TrendMainWindow::signalProperties(QString appSignalId)
+	void TrendMainWindow::signalProperties(QString appSignalId, QString archiveServerId)
 	{
-		qDebug() << "Show signal " << appSignalId << " properties";
+		qDebug() << "Show signal " << appSignalId << ", archiev server "<< archiveServerId << " properties";
 
 		bool ok = false;
-		TrendLib::TrendSignalParam signal = signalSet().signalParam(appSignalId, &ok);
+		TrendLib::TrendSignalParam signal = signalSet().signalParam(appSignalId, archiveServerId, &ok);
 
 		if (ok == false)
 		{
@@ -595,9 +544,8 @@ namespace TrendLib
 									  m_trendWidget->scaleType(),
 									  m_trendWidget->trendMode(),
 									  this);
-#pragma warning( push )
-
-#pragma warning (disable: 6326)
+//#pragma warning( push )
+//#pragma warning (disable: 6326)
 		connect(&d, &DialogTrendSignalProperties::signalPropertiesChanged, this,
 				[&d, this]()
 		{
@@ -605,7 +553,7 @@ namespace TrendLib
 			Q_ASSERT(ok);
 			this->updateWidget();
 		});
-#pragma warning( pop )
+//#pragma warning( pop )
 
 		d.exec();
 
@@ -922,7 +870,7 @@ namespace TrendLib
 		for (TrendLib::TrendSignalParam& ts : analogs)
 		{
 			std::list<std::shared_ptr<OneHourData>> signalData;
-			signalSet().getExistingTrendData(ts.appSignalId(), startTime, finishTime, timeType, &signalData);
+			signalSet().getExistingTrendData(ts, startTime, finishTime, timeType, &signalData);
 
 			double minValue = 0;
 			double maxValue = 0;
@@ -1323,7 +1271,7 @@ namespace TrendLib
 			connect(remove, &QAction::triggered, this,
 					[this, &outSignal]()
 			{
-				this->signalSet().removeSignal(outSignal.appSignalId());
+				this->signalSet().removeSignal(outSignal);
 				this->updateWidget();
 			});
 
@@ -1331,7 +1279,7 @@ namespace TrendLib
 			connect(properties, &QAction::triggered, this,
 					[this, &outSignal]()
 			{
-				signalProperties(outSignal.appSignalId());
+				signalProperties(outSignal.appSignalId(), outSignal.archiveServerId());
 			});
 
 			QAction* signalAction = menu.addAction(tr("Signals..."));
@@ -1423,7 +1371,7 @@ namespace TrendLib
 				connect(signalPropertiesAction, &QAction::triggered, this,
 						[this, s]()
 				{
-					signalProperties(s.appSignalId());
+					signalProperties(s.appSignalId(), s.archiveServerId());
 				});
 			}
 
@@ -1433,7 +1381,7 @@ namespace TrendLib
 				connect(signalPropertiesAction, &QAction::triggered, this,
 						[this, s]()
 				{
-					signalProperties(s.appSignalId());
+					signalProperties(s.appSignalId(), s.archiveServerId());
 				});
 			}
 

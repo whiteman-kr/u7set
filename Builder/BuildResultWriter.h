@@ -49,6 +49,8 @@ namespace Builder
 		void addMetadata(const QString& name, const QString& value);
 		void addMetadata(QList<StringPair>& nameValueList);
 
+		const QString& lowercasePathFileName() const;
+
 	private:
 		bool getFileInfo(IssueLogger* log);
 
@@ -60,6 +62,10 @@ namespace Builder
 		BuildFileInfo m_info;
 
 		QFile m_file;
+
+		//
+
+		mutable QString m_lowercasePathFileName;
 	};
 
 	class ConfigurationXmlFile : public QObject

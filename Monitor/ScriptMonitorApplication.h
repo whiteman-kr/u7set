@@ -1,7 +1,8 @@
 #pragma once
 
 #include <QObject>
-#include "MonitorMainWindow.h"
+
+class MonitorMainWindow;
 
 /*! \class ScriptMonitorApplication
 	\ingroup controllers

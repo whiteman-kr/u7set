@@ -63,12 +63,18 @@ SOURCES += main.cpp \
     ../lib/Ui/SchemaListWidget.cpp \
     ../lib/Ui/TabWidgetEx.cpp \
     ../lib/Ui/TagSelectorWidget.cpp \
+    AdsConnection.cpp \
+    Archive/ArchiveConnection.cpp \
+    Archive/ArchiveTcpClient2.cpp \
+    Archive/ArchiveWidget.cpp \
+    Archive/MonitorArchive.cpp \
     InstanceResolver.cpp \
     MonitorAppSettings.cpp \
     MonitorMainWindow.cpp \
 	MonitorCentralWidget.cpp \
     MonitorSchemaView.cpp \
     MonitorSignalInfo.cpp \
+    MonitorSignalManager.cpp \
     MonitorSignalSnapshot.cpp \
     DialogSettings.cpp \
     ../lib/BuildInfo.cpp \
@@ -80,20 +86,20 @@ SOURCES += main.cpp \
     ../lib/Ui/DialogSignalInfo.cpp \
     ../lib/Ui/DialogSignalSearch.cpp \
     DialogColumns.cpp \
+    Trend/MonitorTrendArchiveConnections.cpp \
     Trend/MonitorTrends.cpp \
-    MonitorArchive.cpp \
-    DialogChooseArchiveSignals.cpp \
-    ArchiveTcpClient.cpp \
-    ArchiveModelView.cpp \
-    ArchiveData.cpp \
+	Archive/DialogChooseArchiveSignals.cpp \
+	Archive/ArchiveModelView.cpp \
+	Archive/ArchiveData.cpp \
     TcpSignalRecents.cpp \
 	MonitorSchemaManager.cpp \
 	SelectSchemaWidget.cpp \
-	Trend/RtTrendSchema.cpp \
 	../lib/Tuning/TuningSignalManager.cpp \
     ../lib/Tuning/TuningTcpClient.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
+    Trend/RtDataProvider.cpp \
+    Trend/RtSchemaTrend.cpp \
     Trend/RtTrendTcpClient.cpp \
     Trend/ArchiveTrendTcpClient.cpp \
     MonitorTuningTcpClient.cpp \
@@ -111,6 +117,7 @@ HEADERS  += \
     ../lib/ComparatorSet.h \
     ../lib/ConstStrings.h \
 	../UtilsLib/ILogFile.h \
+    ../lib/ISignalDataServer.h \
     ../lib/SoftwareSettings.h \
     ../lib/Tuning/TuningLog.h \
     ../lib/Tuning/TuningSourcesHelper.h \
@@ -122,12 +129,19 @@ HEADERS  += \
     ../lib/Ui/SchemaListWidget.h \
     ../lib/Ui/TabWidgetEx.h \
     ../lib/Ui/TagSelectorWidget.h \
+    AdsConnection.h \
+    Archive/ArchiveConnection.h \
+    Archive/ArchiveTcpClient2.h \
+    Archive/ArchiveWidget.h \
+    Archive/MonitorArchive.h \
+    Globals.h \
     InstanceResolver.h \
     MonitorAppSettings.h \
     MonitorMainWindow.h \
     MonitorCentralWidget.h \
     MonitorSchemaView.h \
     MonitorSignalInfo.h \
+    MonitorSignalManager.h \
     MonitorSignalSnapshot.h \
     SchemaDrawStatistics.h \
     ScriptMonitorApplication.h \
@@ -141,19 +155,19 @@ HEADERS  += \
     ../lib/Ui/DialogSignalInfo.h \
     ../lib/Ui/DialogSignalSearch.h \
     DialogColumns.h \
+    Trend/MonitorTrendArchiveConnections.h \
     Trend/MonitorTrends.h \
-    MonitorArchive.h \
-    DialogChooseArchiveSignals.h \
-    ArchiveTcpClient.h \
-    ArchiveModelView.h \
-    ArchiveData.h \
+	Archive/DialogChooseArchiveSignals.h \
+	Archive/ArchiveModelView.h \
+	Archive/ArchiveData.h \
     TcpSignalRecents.h \
     SelectSchemaWidget.h \
     MonitorSchemaManager.h \
     ../lib/Tuning/TuningSignalManager.h \
     ../lib/Tuning/TuningTcpClient.h \
     ../lib/Tuning/TuningSourceState.h \
-    Trend/RtTrendSchema.h \
+    Trend/RtDataProvider.h \
+    Trend/RtSchemaTrend.h \
     Trend/RtTrendTcpClient.h \
     Trend/ArchiveTrendTcpClient.h \
     MonitorTuningTcpClient.h \
@@ -172,7 +186,7 @@ FORMS    += \
     DialogSettings.ui \
     ../lib/Ui/DialogSignalInfo.ui \
     DialogColumns.ui \
-    DialogChooseArchiveSignals.ui
+	Archive/DialogChooseArchiveSignals.ui
 
 RESOURCES += \
     Monitor.qrc

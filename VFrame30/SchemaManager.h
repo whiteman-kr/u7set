@@ -32,7 +32,7 @@ namespace VFrame30
 		// RealTime Trends (ITrendDataProvider)
 		//
 		virtual bool trendData(QUuid trendUuid,
-							   QString appSignalId,
+							   const TrendLib::TrendSignalParam& trendSignal,
 							   QDateTime from,
 							   QDateTime to,
 							   E::TimeType timeType,

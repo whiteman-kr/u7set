@@ -89,7 +89,7 @@ namespace VFrame30
 	}
 
 	bool SchemaManager::trendData(QUuid /*trendUuid*/,
-								  QString /*appSignalId*/,
+								  const TrendLib::TrendSignalParam& /*trendSignal*/,
 								  QDateTime /*from*/,
 								  QDateTime /*to*/,
 								  E::TimeType /*timeType*/,

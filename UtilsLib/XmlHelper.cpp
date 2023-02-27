@@ -619,6 +619,11 @@ bool XmlReadHelper::readHostAddress(const QString& nameIP, QHostAddress* hostAdd
 	return hostAddress->setAddress(addressStr);
 }
 
+QString XmlReadHelper::elementText()
+{
+	return m_xmlReader->text().toString();
+}
+
 bool XmlReadHelper::findElement(const QString& elementName)
 {
 	while(m_xmlReader->atEnd() == false)

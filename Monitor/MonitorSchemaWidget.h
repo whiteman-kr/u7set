@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MonitorSchemaManager.h"
+#include "MonitorSignalManager.h"
 #include "../VFrame30/ClientSchemaWidget.h"
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/TuningController.h"
@@ -68,6 +69,12 @@ public slots:
 	// Properties
 	//
 public:
+	IAppSignalManager* signalManager();
+	const IAppSignalManager* signalManager() const;
+
+	MonitorSignalManager* monitorSignalManager();
+	const MonitorSignalManager* monitorSignalManager() const;
+
 	MonitorSchemaView* monitorSchemaView();
 	const MonitorSchemaView* monitorSchemaView() const;
 

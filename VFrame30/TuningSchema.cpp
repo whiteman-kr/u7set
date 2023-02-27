@@ -1,4 +1,5 @@
 #include "TuningSchema.h"
+#include "SchemaLayer.h"
 #include "SchemaItemValue.h"
 
 namespace VFrame30

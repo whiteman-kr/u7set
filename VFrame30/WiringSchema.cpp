@@ -1,4 +1,6 @@
 #include "WiringSchema.h"
+#include "SchemaLayer.h"
+#include "Settings.h"
 
 namespace VFrame30
 {

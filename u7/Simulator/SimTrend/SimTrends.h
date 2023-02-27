@@ -34,11 +34,17 @@ protected:
 	virtual void timerEvent(QTimerEvent* event) override;
 	virtual void signalsButton() override;
 
+	virtual void dragEnterEvent(QDragEnterEvent* event) override;
+	virtual void dropEvent(QDropEvent* event) override;
+
 	// Slots
 	//
 protected slots:
 	void fetchTrendData();
-	void slot_realtimeDataReceived(std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState);
+	void slot_realtimeDataReceived(QString sourceEquipmentId,
+								   std::shared_ptr<TrendLib::RealtimeData> data,
+								   TrendLib::TrendStateItem minState,
+								   TrendLib::TrendStateItem maxState);
 
 	// Data
 	//

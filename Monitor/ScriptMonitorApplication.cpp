@@ -1,4 +1,5 @@
 #include "ScriptMonitorApplication.h"
+#include "MonitorMainWindow.h"
 
 ScriptMonitorApplication::ScriptMonitorApplication() :
 	QObject(nullptr)
