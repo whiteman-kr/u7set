@@ -1,4 +1,5 @@
 #include "FontParam.h"
+#include "Settings.h"
 
 namespace VFrame30
 {

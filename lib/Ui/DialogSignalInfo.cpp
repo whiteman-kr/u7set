@@ -1,6 +1,7 @@
 #include "DialogSignalInfo.h"
 #include "ui_DialogSignalInfo.h"
 #include "../CommonLib/Types.h"
+#include "../lib/ComparatorSet.h"
 #include "../Proto/serialization.pb.h"
 #include "../UtilsLib/Ui/UiTools.h"
 
@@ -684,6 +685,16 @@ void DialogSignalInfo::updateSignal(const AppSignalParam& signal)
 	fillSignalData();
 
 	return;
+}
+
+IAppSignalManager* DialogSignalInfo::signalManager()
+{
+	return m_appSignalManager;
+}
+
+const IAppSignalManager* DialogSignalInfo::signalManager() const
+{
+	return m_appSignalManager;
 }
 
 void DialogSignalInfo::preparePropertiesContextMenu(const QPoint& pos)

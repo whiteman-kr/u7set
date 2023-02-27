@@ -119,6 +119,7 @@ namespace VFrame30
 		Indicator(itemUnit)
 	{
 		m_drawTimer.start();
+		m_updateSignalsTimer.start();
 	}
 
 	void IndicatorTrend::createProperties(SchemaItemIndicator* propertyObject, int /*signalCount*/)
@@ -278,14 +279,14 @@ namespace VFrame30
 
 		// Detect if image update is required
 		//
-		bool requiredRedraw = (m_redrawInterval < 250_ms) ||
+		bool needRedraw = (m_redrawInterval < 250_ms) ||
 							  m_drawTimer.hasExpired(m_redrawInterval) ||
 							  drawParam->drawMode() == DrawMode::Editor;
 
 		if (m_image.width() != static_cast<int>(trendRect.width()) ||
 			m_image.height() != static_cast<int>(trendRect.height()))
 		{
-			requiredRedraw = true;
+			needRedraw = true;
 
 			m_image = QImage{static_cast<int>(trendRect.width()), static_cast<int>(trendRect.height()), QImage::Format_RGB32};
 
@@ -296,14 +297,17 @@ namespace VFrame30
 
 		// Draw trend to QImage and then copy it to painter
 		//
-		if (requiredRedraw == true)
+		if (needRedraw == true)
 		{
 			// Check if there are any new signals
 			//
 			QStringList itemSignalIds = schemaItem->signalIds();
 			QStringList trendSignalIds = m_trend.signalSet().trendSignalIds();
 
-			if (itemSignalIds != trendSignalIds)
+			bool signalsAreTheSame = (itemSignalIds != trendSignalIds) ||
+									 m_updateSignalsTimer.hasExpired(10'000);
+
+			if (signalsAreTheSame)
 			{
 				std::list<TrendLib::TrendSignalParam> signalParams;
 
@@ -319,9 +323,10 @@ namespace VFrame30
 					if (signalFound == false)
 					{
 						appSignalParam.setAppSignalId(appSignalId);
+						appSignalParam.setCustomSignalId(appSignalId);
 					}
 
-					TrendLib::TrendSignalParam& trensSignalParam = signalParams.emplace_back(appSignalParam);
+					TrendLib::TrendSignalParam& trensSignalParam = signalParams.emplace_back(appSignalParam, TrendLib::ArchiveServer{});
 
 					// Set trend line draw params
 					//
@@ -337,6 +342,8 @@ namespace VFrame30
 				}
 
 				m_trend.signalSet().addSignals(std::move(signalParams));
+
+				m_updateSignalsTimer.restart();
 			}
 
 			//	--

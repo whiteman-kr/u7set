@@ -1,7 +1,6 @@
 #include "SchemaItemPropertiesDialog.h"
 #include "ui_SchemaItemPropertiesDialog.h"
 #include "EditEngine/EditEngine.h"
-#include "../VFrame30/SchemaItemSignal.h"
 #include "Settings.h"
 
 

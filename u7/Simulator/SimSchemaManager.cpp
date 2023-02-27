@@ -47,7 +47,7 @@ std::shared_ptr<VFrame30::Schema> SimSchemaManager::loadSchema(QString schemaId)
 }
 
 bool SimSchemaManager::trendData(QUuid /*trendUuid*/,
-								 QString /*appSignalId*/,
+								 const TrendLib::TrendSignalParam& /*trendSignal*/,
 								 QDateTime /*from*/,
 								 QDateTime /*to*/,
 								 E::TimeType /*timeType*/,

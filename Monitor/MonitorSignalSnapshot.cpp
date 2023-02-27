@@ -2,27 +2,25 @@
 #include "MonitorConfigController.h"
 
 MonitorDialogSignalSnapshot* MonitorDialogSignalSnapshot::createDialog(MonitorConfigController *configController,
-											 TcpSignalClient* tcpSignalClient,
-											 AppSignalManager* appSignalManager,
+											 MonitorSignalManager* monitorSignalManager,
 											 MonitorCentralWidget* centralWidget)
 {
-	if (configController == nullptr || tcpSignalClient == nullptr || appSignalManager == nullptr || centralWidget == nullptr)
+	if (configController == nullptr || monitorSignalManager == nullptr || centralWidget == nullptr)
 	{
 		Q_ASSERT(configController);
-		Q_ASSERT(tcpSignalClient);
-		Q_ASSERT(appSignalManager);
+		Q_ASSERT(monitorSignalManager);
 		Q_ASSERT(centralWidget);
 		return nullptr;
 	}
 
 	MonitorDialogSignalSnapshot* dss = new MonitorDialogSignalSnapshot(configController,
-																	   appSignalManager,
+																	   monitorSignalManager,
 																	   centralWidget);
 
 	connect(dss, &DialogSignalSnapshot::signalContextMenu, centralWidget, &MonitorCentralWidget::slot_signalContextMenu);
 	connect(dss, &DialogSignalSnapshot::signalInfo, centralWidget, &MonitorCentralWidget::slot_signalInfo);
 
-	connect(tcpSignalClient, &TcpSignalClient::signalParamAndUnitsArrived, dss, &MonitorDialogSignalSnapshot::signalsUpdated);
+	connect(monitorSignalManager, &MonitorSignalManager::signalParamsUpdated, dss, &MonitorDialogSignalSnapshot::signalsUpdated);
 	connect(configController, &MonitorConfigController::configurationUpdate, dss, &MonitorDialogSignalSnapshot::schemasUpdated);
 
 	return dss;
@@ -30,9 +28,9 @@ MonitorDialogSignalSnapshot* MonitorDialogSignalSnapshot::createDialog(MonitorCo
 
 
 MonitorDialogSignalSnapshot::MonitorDialogSignalSnapshot(MonitorConfigController *configController,
-														 AppSignalManager* appSignalManager,
+														 MonitorSignalManager* monitorSignalManager,
 														 QWidget *parent)
-	:DialogSignalSnapshot(appSignalManager,
+	:DialogSignalSnapshot(monitorSignalManager,
 						  configController->configuration().project,
 						  configController->configuration().softwareEquipmentId,
 						  parent),

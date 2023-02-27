@@ -1,10 +1,13 @@
 #pragma once
 
-#include <QColor>
 #include "SchemaLayer.h"
 #include "Context.h"
 #include "../CommonLib/PropertyObject.h"
+#include "../CommonLib/DebugInstCounter.h"
+#include "../CommonLib/Factory.h"
 #include "../UtilsLib/ILogFile.h"
+#include "../Proto/ProtoSerialization.h"
+
 
 namespace Afb
 {
@@ -14,8 +17,7 @@ namespace Afb
 
 namespace VFrame30
 {
-	extern ::Factory<VFrame30::Schema> SchemaFactory;
-
+	class Schema;
 	class SchemaLayer;
 	class CDrawParam;
 	class SchemaItem;
@@ -23,7 +25,8 @@ namespace VFrame30
 	class UfbSchema;
 	class Bus;
 	class SchemaDetails;
-	class Schema;
+
+	extern ::Factory<VFrame30::Schema> SchemaFactory;
 
 	// Proxy class for using in scripts
 	//
@@ -446,6 +449,7 @@ namespace VFrame30
 	private:
 		std::map<QString, std::shared_ptr<SchemaDetails>> m_details;	// Key is schemaId
 	};
+
 }
 
 

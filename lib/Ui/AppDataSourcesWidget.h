@@ -16,14 +16,17 @@ class DialogAppDataSourceInfo : public DialogSourceInfo
 	Q_OBJECT
 
 public:
-	explicit DialogAppDataSourceInfo(TcpAppSourcesState* tcpClient, QWidget* parent, Hash sourceHash);
+	explicit DialogAppDataSourceInfo(std::vector<TcpAppSourcesState*> tcpClients, QWidget* parent, Hash sourceHash);
 	virtual ~DialogAppDataSourceInfo();
+
+	void setAppSourceTcpClients(std::vector<TcpAppSourcesState*> tcpClients);
 
 private:
 	void updateData() override;
 
 private:
-	TcpAppSourcesState* m_tcpClient = nullptr;
+	std::vector<TcpAppSourcesState*> m_tcpClients;
+	int m_noStateInfoTimeout = 0;
 
 };
 
@@ -36,8 +39,10 @@ class AppDataSourcesWidget : public QWidget
 	Q_OBJECT
 
 public:
-	explicit AppDataSourcesWidget(TcpAppSourcesState* tcpClient,  bool hasCloseButton, QWidget* parent);
+	explicit AppDataSourcesWidget(std::vector<TcpAppSourcesState*> tcpClients, bool hasCloseButton, QWidget* parent);
 	virtual ~AppDataSourcesWidget();
+
+	void setAppSourceTcpClients(std::vector<TcpAppSourcesState*> tcpClients);
 
 	void showCloseButton(bool show);
 
@@ -61,6 +66,9 @@ private slots:
 	void onDetailsDialogClosed(Hash hash);
 
 private:
+
+	TcpAppSourcesState* clientByHash(Hash hash) const;
+
 	void update(bool refreshOnly);
 
 	enum class Columns
@@ -91,7 +99,7 @@ private:
 
 	bool m_singleControlMode = true;
 
-	TcpAppSourcesState* m_stateTcpClient = nullptr;
+	std::vector<TcpAppSourcesState*> m_stateTcpClients;
 
 	QWidget* m_parent = nullptr;
 

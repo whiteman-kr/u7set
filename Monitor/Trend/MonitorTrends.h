@@ -3,18 +3,22 @@
 
 #include "TrendMainWindow.h"
 #include "MonitorConfigController.h"
-#include "ArchiveTrendTcpClient.h"
+#include "MonitorSignalManager.h"
+#include "MonitorTrendArchiveConnections.h"
+#include "RtDataProvider.h"
 #include "RtTrendTcpClient.h"
 
 class MonitorTrendsWidget;
 class QLabel;
+
 
 class MonitorTrends
 {
 public:
 	static std::vector<QString> getTrendsList();
 	static bool activateTrendWindow(QString trendName);
-	static bool startTrendApp(MonitorConfigController* configController,
+	static bool startTrendApp(const MonitorSignalManager& signalManager,
+							  const MonitorConfigController& configController,
 							  const std::vector<AppSignalParam>& appSignals,
 							  QWidget* parent);
 
@@ -29,14 +33,17 @@ private:
 class MonitorTrendsWidget : public TrendLib::TrendMainWindow
 {
 public:
-	MonitorTrendsWidget(IAppSignalManager* appSignalManager,
-						MonitorConfigController* configController,
+	MonitorTrendsWidget(const MonitorSignalManager& signalManager,
+						const MonitorConfigController& configController,
 						QWidget* parent);
 	virtual ~MonitorTrendsWidget();
 
 protected:
 	virtual void timerEvent(QTimerEvent* event) override;
 	virtual void signalsButton() override;
+
+	virtual void dragEnterEvent(QDragEnterEvent* event) override;
+	virtual void dropEvent(QDropEvent* event) override;
 
 private:
 	void createArchiveConnection();
@@ -48,24 +55,25 @@ public:
 	// Slots
 	//
 protected slots:
-	void slot_archiveDataReceived(QString appSignalId, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
-	void slot_realtimeDataReceived(std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState);
+	void slot_requestData(TrendLib::TrendSignalPlusServerId signalPlusServerId, TimeStamp hourToRequest, E::TimeType timeType);
+	void slot_archiveDataReceived(TrendLib::TrendSignalPlusServerId, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
+
+	void slot_realtimeDataReceived(QString sourceEquipmentId,
+								   std::shared_ptr<TrendLib::RealtimeData> data,
+								   TrendLib::TrendStateItem minState,
+								   TrendLib::TrendStateItem maxState);
 	void slot_trendModeChanged();
+
+	void slot_configurationArrived(ConfigSettings configuration);
 
 	// Data
 	//
 private:
-	IAppSignalManager* m_appSignalManager = nullptr;
-	MonitorConfigController* m_configController = nullptr;
+	const MonitorSignalManager& m_signalManager;
+	const MonitorConfigController& m_configController;
 
-	ConfigConnection m_archiveService1;
-	ConfigConnection m_archiveService2;
-
-	ArchiveTrendTcpClient* m_archiveTcpClient = nullptr;
-	SimpleThread* m_archiveTcpClientThread = nullptr;
-
-	RtTrendTcpClient* m_rtTcpClient = nullptr;
-	SimpleThread* m_rtTcpClientThread = nullptr;
+	MonitorTrendArchiveConnections m_archiveDataProvider;
+	RtDataProvider m_realtimeDataProvider;
 
 	enum  StatusBarColumns
 	{
@@ -78,7 +86,6 @@ private:
 	QLabel* m_statusBarTextLabel = nullptr;
 	QLabel* m_statusBarQueueSizeLabel = nullptr;
 	QLabel* m_statusBarNetworkRequestsLabel = nullptr;
-	QLabel* m_statusBarServerLabel = nullptr;
 	QLabel* m_statusBarConnectionStateLabel = nullptr;
 };
 

@@ -6,6 +6,7 @@
 
 #include "../VFrame30/UfbSchema.h"
 #include "../VFrame30/SchemaPoint.h"
+#include "../VFrame30/SchemaLayer.h"
 #include "../VFrame30/LogicSchema.h"
 #include "../VFrame30/SchemaItemLink.h"
 #include "../VFrame30/FblItemRect.h"

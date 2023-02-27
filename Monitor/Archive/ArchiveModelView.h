@@ -1,5 +1,5 @@
-#ifndef ARCHIVEMODELVIEW_H
-#define ARCHIVEMODELVIEW_H
+#pragma once
+
 #include "ArchiveData.h"
 
 enum class ArchiveColumns
@@ -23,18 +23,23 @@ enum class ArchiveColumns
 	// Next are visible by default
 	//
 	Time,
+	Server,
 
 	ColumnCount
 };
 
 Q_DECLARE_METATYPE(ArchiveColumns);
 
-class ArchiveSignalParam : public AppSignalParam
+struct ArchiveSignalParam : public ArchiveSignal
 {
-public:
 	ArchiveSignalParam() = default;
-	explicit ArchiveSignalParam(const AppSignalParam& _appSignalParam) :
-		AppSignalParam(_appSignalParam), precision(_appSignalParam.precision()), analogAppSignalParam(_appSignalParam.analogSignalFormat()) {}
+
+	explicit ArchiveSignalParam(const ArchiveSignal& archiveSignal) :
+		ArchiveSignal(archiveSignal),
+		precision(archiveSignal.signalParam.precision()),
+		analogAppSignalParam(archiveSignal.signalParam.analogSignalFormat())
+	{
+	}
 
 	E::ValueViewType viewType = E::ValueViewType::Dec;
 	int precision = 2;
@@ -68,26 +73,33 @@ private:
 	// Data manipultaion
 	//
 public:
-	void setParams(const std::vector<AppSignalParam>& appSignals, E::TimeType timeType);
-	void addData(const std::shared_ptr<ArchiveChunk>& chunk);
-	void clear();
+	void setParams(const std::vector<ArchiveSignal>& archiveSignals, E::TimeType timeType);
+	void addData(ArchiveRequestResult&& chunk);
 
+	void clear();
+	void removeSignal(QString appSignalId, QString archiveServiceId);
+
+	std::vector<ArchiveSignal> archiveSignals();
 	std::vector<ArchiveSignalParam> appSignals();
-	ArchiveSignalParam signalParam(int row) const;
+
+	const ArchiveSignalParam& signalParam(int row) const;
 
 	bool setShowParams(Hash signalHash, E::ValueViewType viewType, int precision);
 
 	// Data
 	//
 private:
-	std::map<Hash, ArchiveSignalParam> m_appSignals;
+	std::map<Hash, ArchiveSignalParam> m_archiveSignalsMap;
+	std::vector<ArchiveSignal> m_archiveSignalsVector;
+
 	E::TimeType m_timeType = E::TimeType::Local;
 	ArchiveData m_archive;
 
 	mutable int m_cachedStateIndex = -1;
-	mutable AppSignalState m_cachedSignalState;
+	mutable ArchiveSignalState m_cachedSignalState;
 
-	QString nonValidString = "?";
+	inline static const QString NonValidString{"LowLimit"};
+	inline static const ArchiveSignalParam InvalidSignalParam{};
 };
 
 
@@ -117,7 +129,7 @@ signals:
 	void removeAppSignal(QString appSignalId);
 
 	void requestToShowSignalInfo(QString appSignalId);
-	void requestToRemoveSignal(QString appSignalId);
+	void requestToRemoveSignal(QString appSignalId, QString archiveServiceId);
 	void requestToCopySelection();
 	void requestToSetSignals();
 
@@ -129,4 +141,3 @@ private:
 	QAction* copyAction = nullptr;
 };
 
-#endif // ARCHIVEMODELVIEW_H

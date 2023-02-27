@@ -323,9 +323,17 @@ void MainWindow::createActions()
 	m_rpctQuickStartAction->setStatusTip(tr("Show RPCT Quick Start Guide"));
 	connect(m_rpctQuickStartAction, &QAction::triggered, this, &MainWindow::showRpctQuickStart);
 
-	m_manualRpctAppendixAAction = new QAction(tr("RPCT Errors and Warnings"), this);
-	m_manualRpctAppendixAAction->setStatusTip(tr("Show RPCT Errors and Warnings"));
+	m_manualRpctAppendixAAction = new QAction(tr("Appendix A - Errors and Warnings List"), this);
+	m_manualRpctAppendixAAction->setStatusTip(tr("Show Appendix A - Errors and Warnings List"));
 	connect(m_manualRpctAppendixAAction, &QAction::triggered, this, &MainWindow::showRpctUserManualAppendixA);
+
+	m_manualRpctAppendixBAction = new QAction(tr("Appendix B - Build Directory and Output Bitstream File"), this);
+	m_manualRpctAppendixBAction->setStatusTip(tr("Show Appendix B - Build Directory and Output Bitstream File"));
+	connect(m_manualRpctAppendixBAction, &QAction::triggered, this, &MainWindow::showRpctUserManualAppendixB);
+
+	m_manualRpctAppendixCAction = new QAction(tr("Appendix C - JavaScript Manual"), this);
+	m_manualRpctAppendixCAction->setStatusTip(tr("Show Appendix C - JavaScript Manual"));
+	connect(m_manualRpctAppendixCAction, &QAction::triggered, this, &MainWindow::showRpctUserManualAppendixC);
 
 	m_manualAfblAction = new QAction(tr("AFB Library Reference"), this);
 	m_manualAfblAction->setStatusTip(tr("Show AFB Library Reference"));
@@ -510,7 +518,11 @@ void MainWindow::createMenus()
 
 	pHelpMenu->addAction(m_manualAfblAction);
 	pHelpMenu->addAction(m_manualRpctAction);
-	pHelpMenu->addAction(m_manualRpctAppendixAAction);
+
+	QMenu* pRpctAppendixesMenu = pHelpMenu->addMenu(tr("RPCT User Manual Appendixes"));
+	pRpctAppendixesMenu->addAction(m_manualRpctAppendixAAction);
+	pRpctAppendixesMenu->addAction(m_manualRpctAppendixBAction);
+	pRpctAppendixesMenu->addAction(m_manualRpctAppendixCAction);
 
 	pHelpMenu->addSeparator();
 
@@ -672,6 +684,16 @@ void MainWindow::showRpctQuickStart()
 void MainWindow::showRpctUserManualAppendixA()
 {
 	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/Appendixes/D11.6 RPCT User Manual Appendix A Warnings and Errors List.pdf", this);
+}
+
+void MainWindow::showRpctUserManualAppendixB()
+{
+	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/Appendixes/D11.6 RPCT User Manual Appendix B Build Directory and Output Bitstream File Description.pdf", this);
+}
+
+void MainWindow::showRpctUserManualAppendixC()
+{
+	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/Appendixes/D11.6 RPCT User Manual Appendix C JavaScript Manual.pdf", this);
 }
 
 void MainWindow::showAfblReference()

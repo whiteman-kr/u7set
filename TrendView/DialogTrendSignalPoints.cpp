@@ -295,7 +295,7 @@ void DialogTrendSignalPoints::updatePoints()
 {
 	std::list<std::shared_ptr<TrendLib::OneHourData>> signalData;
 
-	m_trendSignalSet->getFullExistingTrendData(m_trendSignal.appSignalId(), m_timeType, &signalData);
+	m_trendSignalSet->getFullExistingTrendData(m_trendSignal, m_timeType, &signalData);
 
 	m_pointsModel.setSignalData(signalData, m_trendSignal, m_timeType);
 }
@@ -319,7 +319,7 @@ void DialogTrendSignalPoints::on_buttonAdd_clicked()
 	//
 	m_editStateItem = stateItems[0];
 
-	m_trendSignalSet->addTrendPoint(m_trendSignal.appSignalId(), m_timeType, m_editStateItem);
+	m_trendSignalSet->addTrendPoint(m_trendSignal, m_timeType, m_editStateItem);
 
 	updatePoints();
 
@@ -394,7 +394,7 @@ void DialogTrendSignalPoints::on_buttonEdit_clicked()
 
 	for (int row : selectedRows)
 	{
-		if (m_trendSignalSet->removeTrendPoint(m_trendSignal.appSignalId(), row, m_timeType) == false)
+		if (m_trendSignalSet->removeTrendPoint(m_trendSignal, row, m_timeType) == false)
 		{
 			Q_ASSERT(false);
 			return;
@@ -405,7 +405,7 @@ void DialogTrendSignalPoints::on_buttonEdit_clicked()
 	//
 	for (TrendLib::TrendStateItem stateItem : stateItems)
 	{
-		m_trendSignalSet->addTrendPoint(m_trendSignal.appSignalId(), m_timeType, stateItem);
+		m_trendSignalSet->addTrendPoint(m_trendSignal, m_timeType, stateItem);
 	}
 
 	if (stateItems.size() == 1)
@@ -453,7 +453,7 @@ void DialogTrendSignalPoints::on_buttonRemove_clicked()
 
 	for (int row : selectedRows)
 	{
-		if (m_trendSignalSet->removeTrendPoint(m_trendSignal.appSignalId(), row, m_timeType) == false)
+		if (m_trendSignalSet->removeTrendPoint(m_trendSignal, row, m_timeType) == false)
 		{
 			Q_ASSERT(false);
 			return;

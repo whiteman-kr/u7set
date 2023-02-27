@@ -1,5 +1,4 @@
 #include "ArchiveModelView.h"
-#include "MonitorAppSettings.h"
 
 //
 //
@@ -9,7 +8,6 @@
 ArchiveModel::ArchiveModel(QObject* parent) :
 	QAbstractTableModel(parent)
 {
-
 }
 
 int ArchiveModel::rowCount(const QModelIndex& /*parent*/) const
@@ -69,6 +67,9 @@ QVariant ArchiveModel::headerData(int section, Qt::Orientation /*orientation*/, 
 
 	case ArchiveColumns::Time:
 		return tr("Time");
+
+	case ArchiveColumns::Server:
+		return tr("Server");
 	}
 
 	Q_ASSERT(false);
@@ -77,10 +78,7 @@ QVariant ArchiveModel::headerData(int section, Qt::Orientation /*orientation*/, 
 
 QVariant ArchiveModel::data(const QModelIndex& index, int role) const
 {
-	int row = index.row();
-	int column = index.column();
-
-	return data(row, column, role);
+	return data(index.row(), index.column(), role);
 }
 
 QVariant ArchiveModel::data(int row, int column, int role) const
@@ -102,100 +100,92 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 			break;
 
 		case ArchiveColumns::AppSignalId:
+			if (auto sit = m_archiveSignalsMap.find(m_cachedSignalState.appState.hash());
+				sit == m_archiveSignalsMap.end())
 			{
-				auto sit = m_appSignals.find(m_cachedSignalState.hash());
-				if (sit == m_appSignals.end())
-				{
-					// State from differtent signal!!! ArchiveService has returned something wrong?
-					//
-					Q_ASSERT(false);
-				}
-				else
-				{
-					result = sit->second.appSignalId();
-				}
+				// State from differtent signal!!! ArchiveService has returned something wrong?
+				//
+				Q_ASSERT(false);
+			}
+			else
+			{
+				result = sit->second.signalParam.appSignalId();
 			}
 			break;
 
 		case ArchiveColumns::CustomSignalId:
+			if (auto sit = m_archiveSignalsMap.find(m_cachedSignalState.appState.hash());
+				sit == m_archiveSignalsMap.end())
 			{
-				auto sit = m_appSignals.find(m_cachedSignalState.hash());
-				if (sit == m_appSignals.end())
-				{
-					// State from differtent signal!!! ArchiveService has returned something wrong?
-					//
-					Q_ASSERT(false);
-				}
-				else
-				{
-					result = sit->second.customSignalId();
-				}
+				// State from differtent signal!!! ArchiveService has returned something wrong?
+				//
+				Q_ASSERT(false);
+			}
+			else
+			{
+				result = sit->second.signalParam.customSignalId();
 			}
 			break;
 		case ArchiveColumns::Caption:
+			if (auto sit = m_archiveSignalsMap.find(m_cachedSignalState.appState.hash());
+				sit == m_archiveSignalsMap.end())
 			{
-				auto sit = m_appSignals.find(m_cachedSignalState.hash());
-				if (sit == m_appSignals.end())
-				{
-					// State from differtent signal!!! ArchiveService has returned something wrong?
-					//
-					Q_ASSERT(false);
-				}
-				else
-				{
-					result = sit->second.caption();
-				}
+				// State from differtent signal!!! ArchiveService has returned something wrong?
+				//
+				Q_ASSERT(false);
+			}
+			else
+			{
+				result = sit->second.signalParam.caption();
 			}
 			break;
 		case ArchiveColumns::State:
+			if (auto sit = m_archiveSignalsMap.find(m_cachedSignalState.appState.hash());
+				sit == m_archiveSignalsMap.end())
 			{
-				auto sit = m_appSignals.find(m_cachedSignalState.hash());
-				if (sit == m_appSignals.end())
-				{
-					// State from differtent signal!!! ArchiveService has returned something wrong?
-					//
-					Q_ASSERT(false);
-				}
-				else
-				{
-					result = getValueString(m_cachedSignalState, sit->second);
-				}
+				// State from differtent signal!!! ArchiveService has returned something wrong?
+				//
+				Q_ASSERT(false);
+			}
+			else
+			{
+				result = getValueString(m_cachedSignalState.appState, sit->second);
 			}
 			break;
 		case ArchiveColumns::Valid:
 			{
-				result = m_cachedSignalState.isValid() ? QString() : QStringLiteral("no");
+				result = m_cachedSignalState.appState.isValid() ? QString() : QStringLiteral("no");
 			}
 			break;
 		case ArchiveColumns::StateAvailable:
 			{
-				result = m_cachedSignalState.m_flags.stateAvailable ? QString() : QStringLiteral("no");
+				result = m_cachedSignalState.appState.m_flags.stateAvailable ? QString() : QStringLiteral("no");
 			}
 			break;
 		case ArchiveColumns::Simulated:
 			{
-				result = m_cachedSignalState.m_flags.simulated ? QStringLiteral("yes") : QString();
+				result = m_cachedSignalState.appState.m_flags.simulated ? QStringLiteral("yes") : QString();
 			}
 			break;
 		case ArchiveColumns::Blocked:
 			{
-				result = m_cachedSignalState.m_flags.blocked ? QStringLiteral("yes") : QString();
+				result = m_cachedSignalState.appState.m_flags.blocked ? QStringLiteral("yes") : QString();
 			}
 			break;
 		case ArchiveColumns::Mismatch:
 			{
-				result = m_cachedSignalState.m_flags.mismatch ? QStringLiteral("yes") : QString();
+				result = m_cachedSignalState.appState.m_flags.mismatch ? QStringLiteral("yes") : QString();
 			}
 			break;
 		case ArchiveColumns::OutOfLimits:
 			{
 				QStringList resultString;
 
-				if (m_cachedSignalState.m_flags.belowLowLimit == true)
+				if (m_cachedSignalState.appState.m_flags.belowLowLimit == true)
 				{
 					resultString << QStringLiteral("LOW ");
 				}
-				if (m_cachedSignalState.m_flags.aboveHighLimit == true)
+				if (m_cachedSignalState.appState.m_flags.aboveHighLimit == true)
 				{
 					resultString << QStringLiteral("HIGH ");
 				}
@@ -207,27 +197,27 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 			{
 				QStringList resultString;
 
-				if (m_cachedSignalState.m_flags.validityChange == true)
+				if (m_cachedSignalState.appState.m_flags.validityChange == true)
 				{
-					resultString << QStringLiteral("VAL");
+					resultString << QStringLiteral("VALIDITY");
 				}
-				if (m_cachedSignalState.m_flags.simBlockMismatchChange == true)
+				if (m_cachedSignalState.appState.m_flags.simBlockMismatchChange == true)
 				{
 					resultString << QStringLiteral("SIMLOCK");
 				}
-				if (m_cachedSignalState.m_flags.limitFlagsChange == true)
+				if (m_cachedSignalState.appState.m_flags.limitFlagsChange == true)
 				{
 					resultString << QStringLiteral("LIMIT");
 				}
-				if (m_cachedSignalState.m_flags.autoPoint == true)
+				if (m_cachedSignalState.appState.m_flags.autoPoint == true)
 				{
 					resultString << QStringLiteral("AUTO");
 				}
-				if (m_cachedSignalState.m_flags.fineAperture == true)
+				if (m_cachedSignalState.appState.m_flags.fineAperture == true)
 				{
 					resultString << QStringLiteral("FINEAP");
 				}
-				if (m_cachedSignalState.m_flags.coarseAperture == true)
+				if (m_cachedSignalState.appState.m_flags.coarseAperture == true)
 				{
 					resultString << QStringLiteral("COARSEAP");
 				}
@@ -237,8 +227,13 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 			break;
 		case ArchiveColumns::Time:
 			{
-				const TimeStamp& ts = m_cachedSignalState.time(m_timeType);
+				const TimeStamp& ts = m_cachedSignalState.appState.time(m_timeType);
 				result = ts.toDateTime().toString("dd/MM/yyyy HH:mm:ss.zzz");
+			}
+			break;
+		case ArchiveColumns::Server:
+			{
+				result = m_cachedSignalState.archiveServiceShortenId;
 			}
 			break;
 		default:
@@ -265,8 +260,8 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 		updateCachedState(row);		// m_cachedSignalState -- state for row
 		ArchiveSignalParam signalParam;
 
-		auto sit = m_appSignals.find(m_cachedSignalState.hash());
-		if (sit == m_appSignals.end())
+		if (auto sit = m_archiveSignalsMap.find(m_cachedSignalState.appState.hash());
+			sit == m_archiveSignalsMap.end())
 		{
 			// State from differtent signal!!! ArchiveService has returned something wrong?
 			//
@@ -278,7 +273,7 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 		}
 
 		QString typeStr;
-		switch (signalParam.type())
+		switch (signalParam.signalParam.type())
 		{
 		case E::SignalType::Analog:
 			typeStr = tr("Analog");
@@ -303,21 +298,22 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 								  "Time: %9 (%10)\n"
 								  "ServerTime: %11\n"
 								  "ServerTime +0UTC: %12\n"
-								  "PlantTime: %13")
+								  "PlantTime: %13\n"
+								  "Server: %14")
 						  .arg(row + 1)
-						  .arg(signalParam.customSignalId())
-						  .arg(signalParam.appSignalId())
-						  .arg(signalParam.caption())
+						  .arg(signalParam.signalParam.customSignalId())
+						  .arg(signalParam.signalParam.appSignalId())
+						  .arg(signalParam.signalParam.caption())
 						  .arg(typeStr)
-						  .arg(getValueString(m_cachedSignalState, signalParam))
-								.arg(m_cachedSignalState.m_value)
-						  .arg(QString::number(m_cachedSignalState.m_flags.all, 2))
-						  .arg(m_cachedSignalState.time(m_timeType).toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz"))
-								.arg(E::valueToString<E::TimeType>(m_timeType))
-						  .arg(m_cachedSignalState.time().system.toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz"))			//"ServerTime: %12\n"
-						  .arg(m_cachedSignalState.time().local.toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz"))			//"ServerTime +0UTC: %13\n"
-						  .arg(m_cachedSignalState.time().plant.toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz"));			//"PlantTime: %14"
-
+						  .arg(getValueString(m_cachedSignalState.appState, signalParam))
+						  .arg(m_cachedSignalState.appState.m_value)
+						  .arg(QString::number(m_cachedSignalState.appState.m_flags.all, 2))
+						  .arg(m_cachedSignalState.appState.time(m_timeType).toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz"))
+						  .arg(E::valueToString<E::TimeType>(m_timeType))
+						  .arg(m_cachedSignalState.appState.time().system.toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz"))			//"ServerTime: %12\n"
+						  .arg(m_cachedSignalState.appState.time().local.toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz"))			//"ServerTime +0UTC: %13\n"
+						  .arg(m_cachedSignalState.appState.time().plant.toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz"))			//"PlantTime: %14"
+						  .arg(m_cachedSignalState.archiveServiceShortenId);
 
 
 		return toolTip;
@@ -328,28 +324,36 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 
 QString ArchiveModel::getValueString(const AppSignalState& state, const ArchiveSignalParam& signalParam) const
 {
-	E::SignalType signalType = signalParam.type();
+	E::SignalType signalType = signalParam.signalParam.type();
 	QString result;
 
 	switch (signalType)
 	{
 	case E::SignalType::Analog:
-		if (m_cachedSignalState.isValid() == false)
+		if (m_cachedSignalState.appState.isValid() == false)
 		{
 			result = QString("%1 (%2)")
-						.arg(nonValidString)
-						.arg(AppSignalState::toString(state.value(), signalParam.viewType, E::AnalogFormat::f_9, signalParam.analogSignalFormat(), signalParam.precision));
+						.arg(NonValidString)
+						.arg(AppSignalState::toString(state.value(),
+													  signalParam.viewType,
+													  E::AnalogFormat::f_9,
+													  signalParam.signalParam.analogSignalFormat(),
+													  signalParam.precision));
 		}
 		else
 		{
-			result = AppSignalState::toString(state.value(), signalParam.viewType, E::AnalogFormat::f_9, signalParam.analogSignalFormat(), signalParam.precision);
+			result = AppSignalState::toString(state.value(),
+											  signalParam.viewType,
+											  E::AnalogFormat::f_9,
+											  signalParam.signalParam.analogSignalFormat(),
+											  signalParam.precision);
 		}
 		break;
 	case E::SignalType::Discrete:
-		if (m_cachedSignalState.isValid() == false)
+		if (m_cachedSignalState.appState.isValid() == false)
 		{
 			result = QString("%1 (%2)")
-						.arg(nonValidString)
+						.arg(NonValidString)
 						.arg(QString::number(state.value()));
 		}
 		else
@@ -374,56 +378,92 @@ void ArchiveModel::updateCachedState(int row) const
 		return;
 	}
 
-	m_cachedSignalState = m_archive.state(row);
+	if (row < 0)
+	{
+		m_cachedStateIndex = -1;
+		return;
+	}
+
 	m_cachedStateIndex = row;
+	m_cachedSignalState = m_archive.state(row);
 
 	return;
 }
 
-void ArchiveModel::setParams(const std::vector<AppSignalParam>& appSignals, E::TimeType timeType)
+void ArchiveModel::setParams(const std::vector<ArchiveSignal>& archiveSignals, E::TimeType timeType)
 {
-	std::map<Hash, ArchiveSignalParam> oldAppSignals;
-	oldAppSignals.swap(m_appSignals);
-
-	for (const AppSignalParam& asp : appSignals)
+	// Update m_appSignalsMap with new records and remove unwanted ones
+	//
 	{
-		Hash h = ::calcHash(asp.appSignalId());
+		std::map<Hash, ArchiveSignalParam> oldAppSignalsMap;
+		oldAppSignalsMap.swap(m_archiveSignalsMap);
 
-		if (auto oldSignalIt = oldAppSignals.find(h);
-			oldSignalIt != oldAppSignals.end())
+		for (const ArchiveSignal& archSignal : archiveSignals)
 		{
-			auto nh = oldAppSignals.extract(oldSignalIt);
-			m_appSignals.insert(std::move(nh));
-		}
-		else
-		{
-			m_appSignals.emplace(h, asp);
+			Hash h = ::calcHash(archSignal.signalParam.appSignalId());
+
+			if (auto oldSignalIt = oldAppSignalsMap.find(h);
+				oldSignalIt != oldAppSignalsMap.end())
+			{
+				auto nh = oldAppSignalsMap.extract(oldSignalIt);
+				m_archiveSignalsMap.insert(std::move(nh));
+			}
+			else
+			{
+				m_archiveSignalsMap.emplace(h, archSignal);
+			}
 		}
 	}
 
+	// Update m_archiveSignalsVector
+	//
+	{
+		std::vector<ArchiveSignal> oldVector = std::move(m_archiveSignalsVector);
+		m_archiveSignalsVector.clear();
+
+		for (const ArchiveSignal& archSignal : archiveSignals)
+		{
+			auto oldSignalIt = std::find_if(oldVector.begin(), oldVector.end(),
+				[&archSignal](const ArchiveSignal& as)
+				{
+					return as.signalParam.appSignalId() == archSignal.signalParam.appSignalId() &&
+						   as.archiveServiceShortenId == archSignal.archiveServiceShortenId;
+				});
+
+			if (oldSignalIt != oldVector.end())
+			{
+				m_archiveSignalsVector.push_back(*oldSignalIt);
+			}
+			else
+			{
+				m_archiveSignalsVector.push_back(archSignal);
+			}
+		}
+	}
+
+
+	// Set time type
+	//
 	m_timeType = timeType;
 
 	return;
 }
 
-void ArchiveModel::addData(const std::shared_ptr<ArchiveChunk>& chunk)
+void ArchiveModel::addData(ArchiveRequestResult&& chunk)
 {
-	if (chunk == nullptr)
+	if (chunk.states.empty() == true)
 	{
-		Q_ASSERT(chunk);
 		return;
 	}
 
-	qDebug() << "ArchiveModel::addData, chunk size " << chunk->states.size();
+	qDebug() << "ArchiveModel::addData, chunk size " << chunk.states.size();
 
-	int first = m_archive.size();
-	int last = first + static_cast<int>(chunk->states.size()) - 1;
+	beginResetModel();
 
-	beginInsertRows(QModelIndex(), first, last);
+	m_archive.addChunk(std::move(chunk), m_timeType);
+	updateCachedState(-1);
 
-	m_archive.addChunk(chunk);
-
-	endInsertRows();
+	endResetModel();
 	return;
 }
 
@@ -432,18 +472,34 @@ void ArchiveModel::clear()
 	beginResetModel();
 
 	m_archive.clear();
-	m_cachedStateIndex = -1;
+	updateCachedState(-1);
 
 	endResetModel();
 	return;
 }
 
+void ArchiveModel::removeSignal(QString appSignalId, QString archiveServiceId)
+{
+	beginResetModel();
+
+	m_archive.removeSignal(appSignalId, archiveServiceId);
+	updateCachedState(-1);
+
+	endResetModel();
+	return;
+}
+
+std::vector<ArchiveSignal> ArchiveModel::archiveSignals()
+{
+	return m_archiveSignalsVector;
+}
+
 std::vector<ArchiveSignalParam> ArchiveModel::appSignals()
 {
 	std::vector<ArchiveSignalParam> result;
-	result.reserve(m_appSignals.size());
+	result.reserve(m_archiveSignalsMap.size());
 
-	for (const auto& p : m_appSignals)
+	for (const auto& p : m_archiveSignalsMap)
 	{
 		result.push_back(p.second);
 	}
@@ -451,14 +507,15 @@ std::vector<ArchiveSignalParam> ArchiveModel::appSignals()
 	return result;
 }
 
-ArchiveSignalParam ArchiveModel::signalParam(int row) const
+const ArchiveSignalParam& ArchiveModel::signalParam(int row) const
 {
-	AppSignalState signalState = m_archive.state(row);
+	Q_ASSERT(row < m_archive.size());
+	const AppSignalState& signalState = m_archive.state(row).appState;
 
-	if (auto it = m_appSignals.find(signalState.hash());
-		 it == m_appSignals.end())
+	if (auto it = m_archiveSignalsMap.find(signalState.hash());
+		 it == m_archiveSignalsMap.end())
 	{
-		return {};
+		return InvalidSignalParam;
 	}
 	else
 	{
@@ -468,8 +525,8 @@ ArchiveSignalParam ArchiveModel::signalParam(int row) const
 
 bool ArchiveModel::setShowParams(Hash signalHash, E::ValueViewType viewType, int precision)
 {
-	if (auto it = m_appSignals.find(signalHash);
-		 it == m_appSignals.end())
+	if (auto it = m_archiveSignalsMap.find(signalHash);
+		it == m_archiveSignalsMap.end())
 	{
 		return false;
 	}
@@ -553,11 +610,11 @@ void ArchiveView::contextMenuEvent(QContextMenuEvent* event)
 		{
 			// Show View sub menu only for one row
 			//
-			ArchiveSignalParam signalParam = archiveModel->signalParam(*selectedRows.begin());
+			ArchiveSignalParam archiveSignalParam = archiveModel->signalParam(*selectedRows.begin());
 
-			if (signalParam.isAnalog() == true)
+			if (archiveSignalParam.signalParam.isAnalog() == true)
 			{
-				QMenu* viewMenu = menu.addMenu(QString("View %1").arg(signalParam.customSignalId()));
+				QMenu* viewMenu = menu.addMenu(QString("View %1").arg(archiveSignalParam.signalParam.customSignalId()));
 				QList<QAction*> actions;
 
 				// Precision
@@ -572,16 +629,16 @@ void ArchiveView::contextMenuEvent(QContextMenuEvent* event)
 				{
 					QAction* a = new QAction(strPrecision, &menu);
 
-					auto f = [&signalParam, i, archiveModel]() -> void
+					auto f = [&archiveSignalParam, i, archiveModel]() -> void
 							 {
-								archiveModel->setShowParams(signalParam.hash(), signalParam.viewType, i);
+								archiveModel->setShowParams(archiveSignalParam.signalParam.hash(), archiveSignalParam.viewType, i);
 							 };
 
 					connect(a, &QAction::triggered, this, f);
 
 					a->setCheckable(true);
 
-					if (i == signalParam.precision)
+					if (i == archiveSignalParam.precision)
 					{
 						a->setChecked(true);
 					}
@@ -607,16 +664,16 @@ void ArchiveView::contextMenuEvent(QContextMenuEvent* event)
 				{
 					QAction* a = new QAction(E::valueToString<E::ValueViewType>(i), &menu);
 
-					auto f = [&signalParam, i, archiveModel]() -> void
+					auto f = [&archiveSignalParam, i, archiveModel]() -> void
 							 {
-								archiveModel->setShowParams(signalParam.hash(), static_cast<E::ValueViewType>(i), signalParam.precision);
+								archiveModel->setShowParams(archiveSignalParam.signalParam.hash(), static_cast<E::ValueViewType>(i), archiveSignalParam.precision);
 							 };
 
 					connect(a, &QAction::triggered, this, f);
 
 					a->setCheckable(true);
 
-					if (i == static_cast<int>(signalParam.viewType))
+					if (i == static_cast<int>(archiveSignalParam.viewType))
 					{
 						a->setChecked(true);
 					}
@@ -629,18 +686,16 @@ void ArchiveView::contextMenuEvent(QContextMenuEvent* event)
 		}
 	}
 
-
 	// Add action to show "SignalInfoDialog"
 	//
-	std::vector<ArchiveSignalParam> apppSignals = archiveModel->appSignals();
-
-	if (apppSignals.empty() == false)
+	if (std::vector<ArchiveSignalParam> appSignals = archiveModel->appSignals();
+		appSignals.empty() == false)
 	{
-		for (const AppSignalParam& signal : apppSignals)
+		for (const ArchiveSignalParam& archSignal : appSignals)
 		{
-			QAction* action = menu.addAction(signal.customSignalId() + " - " + signal.caption());
+			QAction* action = menu.addAction(archSignal.signalParam.customSignalId() + " - " + archSignal.signalParam.caption());
 
-			QString appSignalId = signal.appSignalId();
+			QString appSignalId = archSignal.signalParam.appSignalId();
 			connect(action, &QAction::triggered, this, [this, appSignalId]()
 				{
 					qDebug() << "emit requestToShowSignalInfo " << appSignalId ;
@@ -653,16 +708,18 @@ void ArchiveView::contextMenuEvent(QContextMenuEvent* event)
 
 	// Add actions to "Remove" specific signal from archive model
 	//
-	if (apppSignals.empty() == false)
+	if (std::vector<ArchiveSignal> archiveSignals = archiveModel->archiveSignals();
+		archiveSignals.empty() == false)
 	{
-		for (const AppSignalParam& signal : apppSignals)
+		for (const ArchiveSignal& archSignal : archiveSignals)
 		{
-			QAction* action = menu.addAction(QLatin1String("Remove ") + signal.customSignalId());
+			QAction* action = menu.addAction(QLatin1String("Remove ") + archSignal.signalParam.customSignalId() + "(" + archSignal.archiveServiceShortenId + ")");
 
-			QString appSignalId = signal.appSignalId();
-			connect(action, &QAction::triggered, this, [this, appSignalId]()
+			QString appSignalId = archSignal.signalParam.appSignalId();
+			QString archiveServiceId = archSignal.archiveServiceId;
+			connect(action, &QAction::triggered, this, [this, appSignalId, archiveServiceId]()
 				{
-					emit requestToRemoveSignal(appSignalId);
+					emit requestToRemoveSignal(appSignalId, archiveServiceId);
 				});
 		}
 

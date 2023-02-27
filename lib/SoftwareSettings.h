@@ -1,10 +1,16 @@
 #pragma once
 
+#include "../CommonLib/Types.h"
+#include "../CommonLib/HostAddressPort.h"
 #include "ConstStrings.h"
-#include "../UtilsLib/XmlHelper.h"
-#include "../OnlineLib/SocketIO.h"
-#include "../UtilsLib/WUtils.h"
-#include "../Proto/network.pb.h"
+
+class XmlWriteHelper;
+class XmlReadHelper;
+namespace Network
+{
+	class SessionParams;	// protobuf class
+}
+
 
 struct SessionParams
 {
@@ -14,6 +20,7 @@ struct SessionParams
 	void saveTo(Network::SessionParams* sp);
 	void loadFrom(const Network::SessionParams& sp);
 };
+
 
 class SoftwareSettings
 {
@@ -398,46 +405,52 @@ private:
 class MonitorSettings : virtual public SoftwareSettings
 {
 public:
+	struct ConfigService
+	{
+		QString equipmentId;
+		HostAddressPort address;
+	};
+
 	struct TuningService
 	{
-		QString tuningServiceID;
+		QString equipmentId;
+		QString shortenId;			// Short version of tuningServiceID
 		QString clientRequestIP;
 		int clientRequestPort = 0;
 		QStringList drivenSources;
 	};
 
-public:
-	QString cfgServiceID1;
-	HostAddressPort cfgServiceIP1;
+	struct AppDataService
+	{
+		QString equipmentId;
+		QString shortenId;			// Short version of equipmentId
+		HostAddressPort address;
+		HostAddressPort realtimeAddress;
 
-	QString cfgServiceID2;
-	HostAddressPort cfgServiceIP2;
+		bool operator==(const AppDataService&) const = default;
+	};
+
+	struct ArchiveService
+	{
+		QString equipmentId;		// ArchiveService equipmentId
+		QString shortenId;			// Short version of equipmentId
+		QString appDataServiceId;	// ID of the source AppDataService for this ArchiveService
+		HostAddressPort address;	// ArchiveService ip address and port
+
+		bool operator==(const ArchiveService&) const = default;
+	};
+
+public:
+	ConfigService configService1;
+	ConfigService configService2;
+
+	std::vector<AppDataService> appDataServices;
+	std::vector<ArchiveService> archiveServices;
 
 	QString startSchemaId;
 	QString schemaTags;
 
-	QString appDataServiceID1;
-	QString appDataServiceIP1;
-	int appDataServicePort1 = 0;
-	QString realtimeDataIP1;
-	int realtimeDataPort1 = 0;
-
-	QString appDataServiceID2;
-	QString appDataServiceIP2;
-	int appDataServicePort2 = 0;
-	QString realtimeDataIP2;
-	int realtimeDataPort2 = 0;
-
-	QString archiveServiceID1;
-	QString archiveServiceIP1;
-	int archiveServicePort1 = 0;
-
-	QString archiveServiceID2;
-	QString archiveServiceIP2;
-	int archiveServicePort2 = 0;
-
 	bool tuningEnabled = false;
-
 	std::vector<TuningService> tuningServices;
 
 	bool tuningLogin = false;
@@ -445,7 +458,7 @@ public:
 	int tuningSessionTimeout = 0;
 
 private:
-	// this methods should be call by SoftwareSettingsSet only
+	// these methods should be call by SoftwareSettingsSet only
 	//
 	bool writeToXml(XmlWriteHelper& xml) const override;
 	bool readFromXml(XmlReadHelper& xml) override;
@@ -457,7 +470,11 @@ public:
 	QStringList getUsersAccounts() const;
 
 	void clear();
+
+	template<typename SERVICETYPE>
+	static void setShortId(std::vector<SERVICETYPE>* services);
 };
+
 
 class TuningClientSettings : virtual public SoftwareSettings
 {

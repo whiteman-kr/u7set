@@ -1,5 +1,5 @@
 #include "ClientSchemaView.h"
-#include "ClientSchemaWidget.h"
+#include "SchemaLayer.h"
 #include "DrawParam.h"
 #include "PropertyNames.h"
 #include "../CommonLib/Times.h"

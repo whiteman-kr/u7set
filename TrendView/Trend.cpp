@@ -411,7 +411,9 @@ namespace TrendLib
 				break;
 			}
 
-			QString signalText = QString("  %1 - %2").arg(ts.signalId()).arg(ts.caption());
+			QString signalText = ts.archiveServerShortId().isEmpty() == true ?
+						QString("  %1 - %2").arg(ts.signalId()).arg(ts.caption()) :
+						QString("  %1 - %2 (%3)").arg(ts.signalId()).arg(ts.caption()).arg(ts.archiveServerShortId());
 
 			painter->setPen(ts.color());
 
@@ -448,11 +450,16 @@ namespace TrendLib
 				QString signalText;
 				if (ts.unit().isEmpty() == true)
 				{
-					signalText = QString("  %1 - %2").arg(ts.signalId()).arg(ts.caption());
+					signalText = ts.archiveServerShortId().isEmpty() == true ?
+							QString("  %1 - %2").arg(ts.signalId()).arg(ts.caption()) :
+							QString("  %1 - %2 (%3)").arg(ts.signalId()).arg(ts.caption()).arg(ts.archiveServerShortId());
 				}
 				else
 				{
-					signalText = QString("  %1 - %2, %3").arg(ts.signalId()).arg(ts.caption()).arg(ts.unit());
+					signalText = ts.archiveServerShortId().isEmpty() == true ?
+							QString("  %1 - %2, %3").arg(ts.signalId()).arg(ts.caption()).arg(ts.unit()) :
+							QString("  %1 - %2, %3 (%4)").arg(ts.signalId()).arg(ts.caption()).arg(ts.unit()).arg(ts.archiveServerShortId());
+
 				}
 
 				// Check the scale view limits
@@ -499,11 +506,16 @@ namespace TrendLib
 				QString signalText;
 				if (ts.unit().isEmpty() == true)
 				{
-					signalText = QString("  %1 - %2").arg(ts.signalId()).arg(ts.caption());
+					signalText = ts.archiveServerShortId().isEmpty() == true ?
+							QString("  %1 - %2").arg(ts.signalId()).arg(ts.caption()) :
+							QString("  %1 - %2 (%3)").arg(ts.signalId()).arg(ts.caption()).arg(ts.archiveServerShortId());
 				}
 				else
 				{
-					signalText = QString("  %1 - %2, %3").arg(ts.signalId()).arg(ts.caption()).arg(ts.unit());
+					signalText = ts.archiveServerShortId().isEmpty() == true ?
+							QString("  %1 - %2, %3").arg(ts.signalId()).arg(ts.caption()).arg(ts.unit()) :
+							QString("  %1 - %2, %3 (%4)").arg(ts.signalId()).arg(ts.caption()).arg(ts.unit()).arg(ts.archiveServerShortId());
+
 				}
 
 				// Check the scale view limits
@@ -896,7 +908,7 @@ namespace TrendLib
 		if (drawParam.trendDataProvider() != nullptr)
 		{
 			requestResult = drawParam.trendDataProvider()->trendData(uuid(),
-																	 signal.appSignalId(),
+																	 signal,
 																	 startTime,
 																	 finishTime,
 																	 drawParam.timeType(),
@@ -1463,7 +1475,7 @@ namespace TrendLib
 							continue;
 						}
 
-						TrendStateItem state = rulerSignalState(ruler, trendSignal.appSignalId(), timeType);
+						TrendStateItem state = rulerSignalState(ruler, trendSignal, timeType);
 
 						bool ok = false;
 
@@ -1584,7 +1596,7 @@ namespace TrendLib
 		return;
 	}
 
-	TrendStateItem Trend::rulerSignalState(const TrendRuler& ruler, QString appSignalId, E::TimeType timeType) const
+	TrendStateItem Trend::rulerSignalState(const TrendRuler& ruler, const TrendSignalParam& signal, E::TimeType timeType) const
 	{
 		const TimeStamp& rulerTime = ruler.timeStamp();
 
@@ -1595,7 +1607,7 @@ namespace TrendLib
 		TimeStamp minus1hour(rulerTime.timeStamp - 1_hour);
 		TimeStamp plus1hour(rulerTime.timeStamp + 1_hour);
 
-		signalSet().getExistingTrendData(appSignalId, minus1hour.toDateTime(), plus1hour.toDateTime(), timeType, &signalData);
+		signalSet().getExistingTrendData(signal, minus1hour.toDateTime(), plus1hour.toDateTime(), timeType, &signalData);
 
 		// Look for state at point ruler.timeStamp
 		//

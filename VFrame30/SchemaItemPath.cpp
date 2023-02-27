@@ -1,5 +1,6 @@
 #include "SchemaItemPath.h"
 #include "PropertyNames.h"
+#include "Settings.h"
 #include "DrawParam.h"
 #include "SchemaItemLine.h"
 

@@ -146,15 +146,16 @@ Tcp::ConnectionState ConfigController::getConnectionState() const
 
 QString ConfigController::getStateToolTip()
 {
+	QString result;
+
 	if (m_cfgLoaderThread == nullptr)
 	{
 		assert(m_cfgLoaderThread);
-		return QString();
+		return result;
 	}
 
 	HostAddressPort currentConnection = m_cfgLoaderThread->getCurrentServerAddressPort();
 
-	QString result;
 	result += tr("Address (primary): %1\n").arg(m_address1.addressPortStr());
 	result += tr("Address (secondary): %1\n").arg(m_address2.addressPortStr());
 	result += tr("Address (current): %1").arg(currentConnection.addressPortStr());

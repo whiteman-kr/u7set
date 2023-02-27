@@ -1,5 +1,4 @@
-#ifndef TCPSIGNALCLIENT_H
-#define TCPSIGNALCLIENT_H
+#pragma once
 
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"
@@ -7,6 +6,9 @@
 #include "../Proto/network.pb.h"
 #include "../AppSignalLib/AppSignalManager.h"
 #include "MonitorConfigController.h"
+#include "../lib/SoftwareSettings.h"
+
+class MonitorSignalManager;
 
 //
 //		ADS_GET_APP_SIGNAL_LIST_START
@@ -22,16 +24,16 @@
 //				+-----------------------------+
 //
 //
-class TcpSignalClient : public Tcp::Client, public TcpClientStatistics
+class TcpSignalClient : public Tcp::Client, public TcpClientStatistics, public HasLogFile
 {
 	Q_OBJECT
 
 public:
-	TcpSignalClient(MonitorConfigController* configController, ILogFile* logFile);
+	TcpSignalClient(const MonitorConfigController& configController,
+					const MonitorSettings::AppDataService& adsInfo,
+					MonitorSignalManager& signalManager,
+					ILogFile* logFile);
 	virtual ~TcpSignalClient();
-
-protected:
-	virtual void timerEvent(QTimerEvent* event) override;
 
 public:
 	virtual void onClientThreadStarted() override;
@@ -43,6 +45,9 @@ public:
 	virtual void onReplyTimeout() override;
 
 	virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
+
+	bool hasSignal(const QString& appSignalId) const;
+	bool hasSignal(Hash signalHash) const;
 
 protected:
 	void resetToGetSignalList();
@@ -63,22 +68,22 @@ protected:
 	void requestSignalState(int startIndex);
 	void processSignalState(const QByteArray& data);
 
-protected slots:
-	void slot_configurationArrived(ConfigSettings configuration);
-
 signals:
-	void signalParamAndUnitsArrived();
 	void connectionReset();
 
 private:
-	int m_startStateTimerId = -1;
-	MonitorConfigController* m_cfgController = nullptr;
+	const MonitorConfigController& m_cfgController;		// Do we really need MonitorConfigController, or SoftwareInfo is just enough?
+	MonitorSettings::AppDataService m_serverSettings;
+	MonitorSignalManager& m_signalManager;
 
-	HasLogFile m_logFile;
+	// Keep own signal list, so MonitorSignalManager can understand if this connstion has a signal
+	//
+	mutable QReadWriteLock m_hasSignalLock;
+	std::set<Hash> m_hasSignalList;			// Key is hash from signal internal id
 
-private:
 	// Cache protobug messages
 	//
+private:
 	::Network::GetSignalListStartReply m_getSignalListStartReply;
 
 	::Network::GetSignalListNextRequest m_getSignalListNextRequest;
@@ -97,4 +102,3 @@ private:
 	int m_lastSignalStateStartIndex = 0;
 };
 
-#endif // TCPSIGNALCLIENT_H

@@ -2793,7 +2793,7 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 				std::shared_ptr<Property> deviceProperty = *dit;
 
 				auto pit = std::find_if(presetProperties.begin(), presetProperties.end(),
-										[&deviceProperty](std::shared_ptr<Property> preset)
+										[&deviceProperty](const std::shared_ptr<Property>& preset)
 										{
 											return preset->caption() == deviceProperty->caption();
 										});
@@ -2847,7 +2847,7 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 				std::shared_ptr<Property> presetProperty = *pit;
 
 				auto dit = std::find_if(deviceProperties.begin(), deviceProperties.end(),
-										[presetProperty](std::shared_ptr<Property> device)
+										[presetProperty](const std::shared_ptr<Property>& device)
 					{
 						return device->caption() == presetProperty->caption();
 					});

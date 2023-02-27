@@ -47,6 +47,7 @@ CONFIG(release, debug|release) {
 
 HEADERS += \
 	AppSignalStateFlags.h \
+    IAppSignalManager.h \
 	Stable.h \
 	AppSignal.h \
 	AppSignalParam.h \

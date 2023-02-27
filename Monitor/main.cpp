@@ -1,19 +1,12 @@
-#include "../UtilsLib/SimpleThread.h"
-#include "../lib/Tuning/TuningSignalManager.h"
 #include "../VFrame30/VFrame30Library.h"
+#include "Globals.h"
 #include "MonitorAppSettings.h"
 #include "MonitorMainWindow.h"
-#include "MonitorConfigController.h"
-#include "TcpSignalClient.h"
-#include "ScriptMonitorApplication.h"
 
 #if __has_include("../gitlabci_version.h")
 #include "../gitlabci_version.h"
 #endif
 
-AppSignalManager theSignals;
-TuningSignalManager theTuningSignals;
-ScriptMonitorApplication theApp;
 
 int main(int argc, char *argv[])
 {
@@ -79,8 +72,8 @@ int main(int argc, char *argv[])
 	VFrame30::init();
 	//Hardware::Init();
 
-	SoftwareInfo si;
-	si.init(E::SoftwareType::Monitor, MonitorAppSettings::instance().equipmentId(), 0, 1);
+	SoftwareInfo softwareInfo;
+	softwareInfo.init(E::SoftwareType::Monitor, MonitorAppSettings::instance().equipmentId(), 0, 1);
 
 	// --
 	//
@@ -99,11 +92,11 @@ int main(int argc, char *argv[])
 	//
 	int result = 0;
 	{
-		MonitorMainWindow w(instanceResover, si);
+		MonitorMainWindow mainWindow(instanceResover, softwareInfo);
 
-		theApp.setMainWindow(&w);
+		theApp.setMainWindow(&mainWindow);
 
-		w.show();
+		mainWindow.show();
 
 		// --
 		//

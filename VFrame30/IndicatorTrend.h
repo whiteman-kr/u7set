@@ -107,6 +107,11 @@ namespace VFrame30
 
 		mutable QImage m_image;
 		mutable QElapsedTimer m_drawTimer;
+
+		mutable QElapsedTimer m_updateSignalsTimer;		// We need to update signal params, as program can start without
+														// AppDataServices, and when connections is established the signals
+														// should be updates. There is no suitable way to do it now,
+														// so we just use update time and it will update signals every 10 secs.
 	};
 }
 

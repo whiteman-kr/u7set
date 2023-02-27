@@ -60,7 +60,8 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT TrendArchiveHourDefaultTypeInte
 constexpr TrendArchive::TrendArchive(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : hours_()
-  , app_signal_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string){}
+  , app_signal_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , archive_server_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string){}
 struct TrendArchiveDefaultTypeInternal {
   constexpr TrendArchiveDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -86,18 +87,22 @@ struct TrendViewLimitDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT TrendViewLimitDefaultTypeInternal _TrendViewLimit_default_instance_;
 constexpr TrendSignalParam::TrendSignalParam(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : view_limits_()
+  : tags_()
+  , view_limits_()
   , signal_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , app_signal_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , caption_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , equipment_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , archive_service_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , archive_service_short_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , data_service_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , unit_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , analog_format_(nullptr)
   , type_(0)
   , precision_(0)
-  , color_(0u)
   , line_weight_(0)
   , high_limit_(0)
+  , color_(0u)
   , low_limit_(0)
   , view_high_limit_(0)
   , view_low_limit_(0){}
@@ -226,8 +231,10 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_trends_2eproto::offsets[] PROT
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::Proto::TrendArchive, app_signal_id_),
+  PROTOBUF_FIELD_OFFSET(::Proto::TrendArchive, archive_server_id_),
   PROTOBUF_FIELD_OFFSET(::Proto::TrendArchive, hours_),
   0,
+  1,
   ~0u,
   PROTOBUF_FIELD_OFFSET(::Proto::TrendViewLimit, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::Proto::TrendViewLimit, _internal_metadata_),
@@ -249,8 +256,12 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_trends_2eproto::offsets[] PROT
   PROTOBUF_FIELD_OFFSET(::Proto::TrendSignalParam, app_signal_id_),
   PROTOBUF_FIELD_OFFSET(::Proto::TrendSignalParam, caption_),
   PROTOBUF_FIELD_OFFSET(::Proto::TrendSignalParam, equipment_id_),
+  PROTOBUF_FIELD_OFFSET(::Proto::TrendSignalParam, archive_service_id_),
+  PROTOBUF_FIELD_OFFSET(::Proto::TrendSignalParam, archive_service_short_id_),
+  PROTOBUF_FIELD_OFFSET(::Proto::TrendSignalParam, data_service_id_),
   PROTOBUF_FIELD_OFFSET(::Proto::TrendSignalParam, type_),
   PROTOBUF_FIELD_OFFSET(::Proto::TrendSignalParam, unit_),
+  PROTOBUF_FIELD_OFFSET(::Proto::TrendSignalParam, tags_),
   PROTOBUF_FIELD_OFFSET(::Proto::TrendSignalParam, precision_),
   PROTOBUF_FIELD_OFFSET(::Proto::TrendSignalParam, line_weight_),
   PROTOBUF_FIELD_OFFSET(::Proto::TrendSignalParam, high_limit_),
@@ -264,17 +275,21 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_trends_2eproto::offsets[] PROT
   1,
   2,
   3,
-  6,
   4,
-  7,
+  5,
+  6,
   9,
+  7,
+  ~0u,
   10,
   11,
   12,
-  13,
+  14,
+  15,
+  16,
   ~0u,
+  13,
   8,
-  5,
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::Proto::TrendSignalSet, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -344,15 +359,15 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_trends_2eproto::offsets[] PROT
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, 6, sizeof(::Proto::TrendStateRecord)},
   { 7, 15, sizeof(::Proto::TrendArchiveHour)},
-  { 18, 25, sizeof(::Proto::TrendArchive)},
-  { 27, 35, sizeof(::Proto::TrendViewLimit)},
-  { 38, 58, sizeof(::Proto::TrendSignalParam)},
-  { 73, -1, sizeof(::Proto::TrendSignalSet)},
-  { 82, 90, sizeof(::Proto::TrendRuler)},
-  { 93, -1, sizeof(::Proto::TrendRulerSet)},
-  { 99, 106, sizeof(::Proto::Trend)},
-  { 108, 121, sizeof(::Proto::TrendParam)},
-  { 129, 136, sizeof(::Proto::TrendWidget)},
+  { 18, 26, sizeof(::Proto::TrendArchive)},
+  { 29, 37, sizeof(::Proto::TrendViewLimit)},
+  { 40, 64, sizeof(::Proto::TrendSignalParam)},
+  { 83, -1, sizeof(::Proto::TrendSignalSet)},
+  { 92, 100, sizeof(::Proto::TrendRuler)},
+  { 103, -1, sizeof(::Proto::TrendRulerSet)},
+  { 109, 116, sizeof(::Proto::Trend)},
+  { 118, 131, sizeof(::Proto::TrendParam)},
+  { 139, 146, sizeof(::Proto::TrendWidget)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -374,41 +389,45 @@ const char descriptor_table_protodef_trends_2eproto[] PROTOBUF_SECTION_VARIABLE(
   "d\022\034\n\024states_raw_buffer_v1\030\004 \001(\014\"_\n\020Trend"
   "ArchiveHour\022\022\n\ntime_stamp\030\002 \001(\006\022\r\n\005state"
   "\030\003 \001(\005\022(\n\007records\030\004 \003(\0132\027.Proto.TrendSta"
-  "teRecord\"M\n\014TrendArchive\022\025\n\rapp_signal_i"
-  "d\030\002 \001(\t\022&\n\005hours\030\n \003(\0132\027.Proto.TrendArch"
-  "iveHour\"E\n\016TrendViewLimit\022\014\n\004type\030\001 \001(\005\022"
-  "\022\n\nhigh_limit\030\002 \001(\001\022\021\n\tlow_limit\030\003 \001(\001\"\337"
-  "\002\n\020TrendSignalParam\022\021\n\tsignal_id\030\002 \001(\t\022\025"
-  "\n\rapp_signal_id\030\003 \001(\t\022\017\n\007caption\030\004 \001(\t\022\024"
-  "\n\014equipment_id\030\005 \001(\t\022\014\n\004type\030\n \001(\005\022\014\n\004un"
-  "it\030\013 \001(\t\022\021\n\tprecision\030\014 \001(\005\022\026\n\013line_weig"
-  "ht\030\023 \001(\001:\0010\022\022\n\nhigh_limit\030\024 \001(\001\022\021\n\tlow_l"
-  "imit\030\025 \001(\001\022\027\n\017view_high_limit\030\037 \001(\001\022\026\n\016v"
-  "iew_low_limit\030  \001(\001\022*\n\013view_limits\030! \003(\013"
-  "2\025.Proto.TrendViewLimit\022\r\n\005color\030( \001(\r\022 "
-  "\n\ranalog_format\030) \001(\t:\tg_9_or_9e\"\324\001\n\016Tre"
-  "ndSignalSet\022.\n\rsignal_params\030\002 \003(\0132\027.Pro"
-  "to.TrendSignalParam\022/\n\022archive_local_tim"
-  "e\030\n \003(\0132\023.Proto.TrendArchive\0220\n\023archive_"
-  "system_time\030\013 \003(\0132\023.Proto.TrendArchive\022/"
-  "\n\022archive_plant_time\030\014 \003(\0132\023.Proto.Trend"
-  "Archive\"V\n\nTrendRuler\022\022\n\ntime_stamp\030\002 \001("
-  "\006\022\022\n\004show\030\003 \001(\010:\004true\022 \n\022show_signal_val"
-  "ues\030\004 \001(\010:\004true\"2\n\rTrendRulerSet\022!\n\006rule"
-  "rs\030\002 \003(\0132\021.Proto.TrendRuler\"[\n\005Trend\022)\n\n"
-  "signal_set\030\002 \001(\0132\025.Proto.TrendSignalSet\022"
-  "\'\n\truler_set\030\003 \001(\0132\024.Proto.TrendRulerSet"
-  "\"\274\001\n\nTrendParam\022\024\n\tview_mode\030\002 \001(\005:\0010\022\024\n"
-  "\ttime_type\030\003 \001(\005:\0012\022\025\n\nlane_count\030\004 \001(\005:"
-  "\0011\022\022\n\nstart_time\0302 \001(\006\022\020\n\010duration\0303 \001(\003"
-  "\022\026\n\016back_color_1st\030F \001(\r\022\026\n\016back_color_2"
-  "nd\030G \001(\r\022\025\n\nscale_type\030\005 \001(\005:\0010\"R\n\013Trend"
-  "Widget\022\033\n\005trend\030\002 \001(\0132\014.Proto.Trend\022&\n\013t"
-  "rend_param\030\003 \001(\0132\021.Proto.TrendParam"
+  "teRecord\"h\n\014TrendArchive\022\025\n\rapp_signal_i"
+  "d\030\002 \001(\t\022\031\n\021archive_server_id\030\003 \001(\t\022&\n\005ho"
+  "urs\030\n \003(\0132\027.Proto.TrendArchiveHour\"E\n\016Tr"
+  "endViewLimit\022\014\n\004type\030\001 \001(\005\022\022\n\nhigh_limit"
+  "\030\002 \001(\001\022\021\n\tlow_limit\030\003 \001(\001\"\304\003\n\020TrendSigna"
+  "lParam\022\021\n\tsignal_id\030\002 \001(\t\022\025\n\rapp_signal_"
+  "id\030\003 \001(\t\022\017\n\007caption\030\004 \001(\t\022\024\n\014equipment_i"
+  "d\030\005 \001(\t\022\032\n\022archive_service_id\030\006 \001(\t\022 \n\030a"
+  "rchive_service_short_id\030\007 \001(\t\022\027\n\017data_se"
+  "rvice_id\030\010 \001(\t\022\014\n\004type\030\n \001(\005\022\014\n\004unit\030\013 \001"
+  "(\t\022\014\n\004tags\030\r \003(\t\022\021\n\tprecision\030\014 \001(\005\022\026\n\013l"
+  "ine_weight\030\023 \001(\001:\0010\022\022\n\nhigh_limit\030\024 \001(\001\022"
+  "\021\n\tlow_limit\030\025 \001(\001\022\027\n\017view_high_limit\030\037 "
+  "\001(\001\022\026\n\016view_low_limit\030  \001(\001\022*\n\013view_limi"
+  "ts\030! \003(\0132\025.Proto.TrendViewLimit\022\r\n\005color"
+  "\030( \001(\r\022 \n\ranalog_format\030) \001(\t:\tg_9_or_9e"
+  "\"\324\001\n\016TrendSignalSet\022.\n\rsignal_params\030\002 \003"
+  "(\0132\027.Proto.TrendSignalParam\022/\n\022archive_l"
+  "ocal_time\030\n \003(\0132\023.Proto.TrendArchive\0220\n\023"
+  "archive_system_time\030\013 \003(\0132\023.Proto.TrendA"
+  "rchive\022/\n\022archive_plant_time\030\014 \003(\0132\023.Pro"
+  "to.TrendArchive\"V\n\nTrendRuler\022\022\n\ntime_st"
+  "amp\030\002 \001(\006\022\022\n\004show\030\003 \001(\010:\004true\022 \n\022show_si"
+  "gnal_values\030\004 \001(\010:\004true\"2\n\rTrendRulerSet"
+  "\022!\n\006rulers\030\002 \003(\0132\021.Proto.TrendRuler\"[\n\005T"
+  "rend\022)\n\nsignal_set\030\002 \001(\0132\025.Proto.TrendSi"
+  "gnalSet\022\'\n\truler_set\030\003 \001(\0132\024.Proto.Trend"
+  "RulerSet\"\274\001\n\nTrendParam\022\024\n\tview_mode\030\002 \001"
+  "(\005:\0010\022\024\n\ttime_type\030\003 \001(\005:\0012\022\025\n\nlane_coun"
+  "t\030\004 \001(\005:\0011\022\022\n\nstart_time\0302 \001(\006\022\020\n\010durati"
+  "on\0303 \001(\003\022\026\n\016back_color_1st\030F \001(\r\022\026\n\016back"
+  "_color_2nd\030G \001(\r\022\025\n\nscale_type\030\005 \001(\005:\0010\""
+  "R\n\013TrendWidget\022\033\n\005trend\030\002 \001(\0132\014.Proto.Tr"
+  "end\022&\n\013trend_param\030\003 \001(\0132\021.Proto.TrendPa"
+  "ram"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_trends_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_trends_2eproto = {
-  false, false, 1395, descriptor_table_protodef_trends_2eproto, "trends.proto", 
+  false, false, 1523, descriptor_table_protodef_trends_2eproto, "trends.proto", 
   &descriptor_table_trends_2eproto_once, nullptr, 0, 11,
   schemas, file_default_instances, TableStruct_trends_2eproto::offsets,
   file_level_metadata_trends_2eproto, file_level_enum_descriptors_trends_2eproto, file_level_service_descriptors_trends_2eproto,
@@ -919,6 +938,9 @@ class TrendArchive::_Internal {
   static void set_has_app_signal_id(HasBits* has_bits) {
     (*has_bits)[0] |= 1u;
   }
+  static void set_has_archive_server_id(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
+  }
 };
 
 TrendArchive::TrendArchive(::PROTOBUF_NAMESPACE_ID::Arena* arena)
@@ -938,11 +960,17 @@ TrendArchive::TrendArchive(const TrendArchive& from)
     app_signal_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_app_signal_id(), 
       GetArena());
   }
+  archive_server_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_archive_server_id()) {
+    archive_server_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_archive_server_id(), 
+      GetArena());
+  }
   // @@protoc_insertion_point(copy_constructor:Proto.TrendArchive)
 }
 
 void TrendArchive::SharedCtor() {
 app_signal_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+archive_server_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
 TrendArchive::~TrendArchive() {
@@ -954,6 +982,7 @@ TrendArchive::~TrendArchive() {
 void TrendArchive::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
   app_signal_id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  archive_server_id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
 void TrendArchive::ArenaDtor(void* object) {
@@ -974,8 +1003,13 @@ void TrendArchive::Clear() {
 
   hours_.Clear();
   cached_has_bits = _has_bits_[0];
-  if (cached_has_bits & 0x00000001u) {
-    app_signal_id_.ClearNonDefaultToEmpty();
+  if (cached_has_bits & 0x00000003u) {
+    if (cached_has_bits & 0x00000001u) {
+      app_signal_id_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000002u) {
+      archive_server_id_.ClearNonDefaultToEmpty();
+    }
   }
   _has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -996,6 +1030,17 @@ const char* TrendArchive::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_I
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           #ifndef NDEBUG
           ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.TrendArchive.app_signal_id");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional string archive_server_id = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
+          auto str = _internal_mutable_archive_server_id();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.TrendArchive.archive_server_id");
           #endif  // !NDEBUG
           CHK_(ptr);
         } else goto handle_unusual;
@@ -1052,6 +1097,16 @@ failure:
         2, this->_internal_app_signal_id(), target);
   }
 
+  // optional string archive_server_id = 3;
+  if (cached_has_bits & 0x00000002u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_archive_server_id().data(), static_cast<int>(this->_internal_archive_server_id().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Proto.TrendArchive.archive_server_id");
+    target = stream->WriteStringMaybeAliased(
+        3, this->_internal_archive_server_id(), target);
+  }
+
   // repeated .Proto.TrendArchiveHour hours = 10;
   for (unsigned int i = 0,
       n = static_cast<unsigned int>(this->_internal_hours_size()); i < n; i++) {
@@ -1083,14 +1138,23 @@ size_t TrendArchive::ByteSizeLong() const {
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
-  // optional string app_signal_id = 2;
   cached_has_bits = _has_bits_[0];
-  if (cached_has_bits & 0x00000001u) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_app_signal_id());
-  }
+  if (cached_has_bits & 0x00000003u) {
+    // optional string app_signal_id = 2;
+    if (cached_has_bits & 0x00000001u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_app_signal_id());
+    }
 
+    // optional string archive_server_id = 3;
+    if (cached_has_bits & 0x00000002u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_archive_server_id());
+    }
+
+  }
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
         _internal_metadata_, total_size, &_cached_size_);
@@ -1123,8 +1187,14 @@ void TrendArchive::MergeFrom(const TrendArchive& from) {
   (void) cached_has_bits;
 
   hours_.MergeFrom(from.hours_);
-  if (from._internal_has_app_signal_id()) {
-    _internal_set_app_signal_id(from._internal_app_signal_id());
+  cached_has_bits = from._has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    if (cached_has_bits & 0x00000001u) {
+      _internal_set_app_signal_id(from._internal_app_signal_id());
+    }
+    if (cached_has_bits & 0x00000002u) {
+      _internal_set_archive_server_id(from._internal_archive_server_id());
+    }
   }
 }
 
@@ -1152,6 +1222,7 @@ void TrendArchive::InternalSwap(TrendArchive* other) {
   swap(_has_bits_[0], other->_has_bits_[0]);
   hours_.InternalSwap(&other->hours_);
   app_signal_id_.Swap(&other->app_signal_id_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  archive_server_id_.Swap(&other->archive_server_id_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata TrendArchive::GetMetadata() const {
@@ -1448,41 +1519,51 @@ class TrendSignalParam::_Internal {
   static void set_has_equipment_id(HasBits* has_bits) {
     (*has_bits)[0] |= 8u;
   }
-  static void set_has_type(HasBits* has_bits) {
-    (*has_bits)[0] |= 64u;
-  }
-  static void set_has_unit(HasBits* has_bits) {
+  static void set_has_archive_service_id(HasBits* has_bits) {
     (*has_bits)[0] |= 16u;
   }
-  static void set_has_precision(HasBits* has_bits) {
-    (*has_bits)[0] |= 128u;
+  static void set_has_archive_service_short_id(HasBits* has_bits) {
+    (*has_bits)[0] |= 32u;
   }
-  static void set_has_line_weight(HasBits* has_bits) {
+  static void set_has_data_service_id(HasBits* has_bits) {
+    (*has_bits)[0] |= 64u;
+  }
+  static void set_has_type(HasBits* has_bits) {
     (*has_bits)[0] |= 512u;
   }
-  static void set_has_high_limit(HasBits* has_bits) {
+  static void set_has_unit(HasBits* has_bits) {
+    (*has_bits)[0] |= 128u;
+  }
+  static void set_has_precision(HasBits* has_bits) {
     (*has_bits)[0] |= 1024u;
   }
-  static void set_has_low_limit(HasBits* has_bits) {
+  static void set_has_line_weight(HasBits* has_bits) {
     (*has_bits)[0] |= 2048u;
   }
-  static void set_has_view_high_limit(HasBits* has_bits) {
+  static void set_has_high_limit(HasBits* has_bits) {
     (*has_bits)[0] |= 4096u;
   }
+  static void set_has_low_limit(HasBits* has_bits) {
+    (*has_bits)[0] |= 16384u;
+  }
+  static void set_has_view_high_limit(HasBits* has_bits) {
+    (*has_bits)[0] |= 32768u;
+  }
   static void set_has_view_low_limit(HasBits* has_bits) {
-    (*has_bits)[0] |= 8192u;
+    (*has_bits)[0] |= 65536u;
   }
   static void set_has_color(HasBits* has_bits) {
-    (*has_bits)[0] |= 256u;
+    (*has_bits)[0] |= 8192u;
   }
   static void set_has_analog_format(HasBits* has_bits) {
-    (*has_bits)[0] |= 32u;
+    (*has_bits)[0] |= 256u;
   }
 };
 
 const ::PROTOBUF_NAMESPACE_ID::internal::LazyString TrendSignalParam::_i_give_permission_to_break_this_code_default_analog_format_{{{"g_9_or_9e", 9}}, {nullptr}};
 TrendSignalParam::TrendSignalParam(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena),
+  tags_(arena),
   view_limits_(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
@@ -1491,6 +1572,7 @@ TrendSignalParam::TrendSignalParam(::PROTOBUF_NAMESPACE_ID::Arena* arena)
 TrendSignalParam::TrendSignalParam(const TrendSignalParam& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
       _has_bits_(from._has_bits_),
+      tags_(from.tags_),
       view_limits_(from.view_limits_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   signal_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
@@ -1511,6 +1593,21 @@ TrendSignalParam::TrendSignalParam(const TrendSignalParam& from)
   equipment_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (from._internal_has_equipment_id()) {
     equipment_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_equipment_id(), 
+      GetArena());
+  }
+  archive_service_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_archive_service_id()) {
+    archive_service_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_archive_service_id(), 
+      GetArena());
+  }
+  archive_service_short_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_archive_service_short_id()) {
+    archive_service_short_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_archive_service_short_id(), 
+      GetArena());
+  }
+  data_service_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_data_service_id()) {
+    data_service_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_data_service_id(), 
       GetArena());
   }
   unit_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
@@ -1534,6 +1631,9 @@ signal_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAl
 app_signal_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 caption_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 equipment_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+archive_service_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+archive_service_short_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+data_service_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 unit_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 analog_format_.UnsafeSetDefault(nullptr);
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
@@ -1554,6 +1654,9 @@ void TrendSignalParam::SharedDtor() {
   app_signal_id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   caption_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   equipment_id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  archive_service_id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  archive_service_short_id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  data_service_id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   unit_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   analog_format_.DestroyNoArena(nullptr);
 }
@@ -1574,9 +1677,10 @@ void TrendSignalParam::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
+  tags_.Clear();
   view_limits_.Clear();
   cached_has_bits = _has_bits_[0];
-  if (cached_has_bits & 0x0000003fu) {
+  if (cached_has_bits & 0x000000ffu) {
     if (cached_has_bits & 0x00000001u) {
       signal_id_.ClearNonDefaultToEmpty();
     }
@@ -1590,22 +1694,27 @@ void TrendSignalParam::Clear() {
       equipment_id_.ClearNonDefaultToEmpty();
     }
     if (cached_has_bits & 0x00000010u) {
-      unit_.ClearNonDefaultToEmpty();
+      archive_service_id_.ClearNonDefaultToEmpty();
     }
     if (cached_has_bits & 0x00000020u) {
-      analog_format_.ClearToDefault(::Proto::TrendSignalParam::_i_give_permission_to_break_this_code_default_analog_format_, GetArena());
-       }
+      archive_service_short_id_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000040u) {
+      data_service_id_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000080u) {
+      unit_.ClearNonDefaultToEmpty();
+    }
   }
-  if (cached_has_bits & 0x000000c0u) {
+  if (cached_has_bits & 0x00000100u) {
+    analog_format_.ClearToDefault(::Proto::TrendSignalParam::_i_give_permission_to_break_this_code_default_analog_format_, GetArena());
+     }
+  if (cached_has_bits & 0x0000fe00u) {
     ::memset(&type_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&precision_) -
-        reinterpret_cast<char*>(&type_)) + sizeof(precision_));
+        reinterpret_cast<char*>(&view_high_limit_) -
+        reinterpret_cast<char*>(&type_)) + sizeof(view_high_limit_));
   }
-  if (cached_has_bits & 0x00003f00u) {
-    ::memset(&color_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&view_low_limit_) -
-        reinterpret_cast<char*>(&color_)) + sizeof(view_low_limit_));
-  }
+  view_low_limit_ = 0;
   _has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
@@ -1662,6 +1771,39 @@ const char* TrendSignalParam::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPA
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
+      // optional string archive_service_id = 6;
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 50)) {
+          auto str = _internal_mutable_archive_service_id();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.TrendSignalParam.archive_service_id");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional string archive_service_short_id = 7;
+      case 7:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 58)) {
+          auto str = _internal_mutable_archive_service_short_id();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.TrendSignalParam.archive_service_short_id");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional string data_service_id = 8;
+      case 8:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 66)) {
+          auto str = _internal_mutable_data_service_id();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.TrendSignalParam.data_service_id");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
       // optional int32 type = 10;
       case 10:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 80)) {
@@ -1687,6 +1829,22 @@ const char* TrendSignalParam::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPA
           _Internal::set_has_precision(&has_bits);
           precision_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // repeated string tags = 13;
+      case 13:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 106)) {
+          ptr -= 1;
+          do {
+            ptr += 1;
+            auto str = _internal_add_tags();
+            ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+            #ifndef NDEBUG
+            ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.TrendSignalParam.tags");
+            #endif  // !NDEBUG
+            CHK_(ptr);
+            if (!ctx->DataAvailable(ptr)) break;
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<106>(ptr));
         } else goto handle_unusual;
         continue;
       // optional double line_weight = 19 [default = 0];
@@ -1830,14 +1988,44 @@ failure:
         5, this->_internal_equipment_id(), target);
   }
 
-  // optional int32 type = 10;
+  // optional string archive_service_id = 6;
+  if (cached_has_bits & 0x00000010u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_archive_service_id().data(), static_cast<int>(this->_internal_archive_service_id().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Proto.TrendSignalParam.archive_service_id");
+    target = stream->WriteStringMaybeAliased(
+        6, this->_internal_archive_service_id(), target);
+  }
+
+  // optional string archive_service_short_id = 7;
+  if (cached_has_bits & 0x00000020u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_archive_service_short_id().data(), static_cast<int>(this->_internal_archive_service_short_id().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Proto.TrendSignalParam.archive_service_short_id");
+    target = stream->WriteStringMaybeAliased(
+        7, this->_internal_archive_service_short_id(), target);
+  }
+
+  // optional string data_service_id = 8;
   if (cached_has_bits & 0x00000040u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_data_service_id().data(), static_cast<int>(this->_internal_data_service_id().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Proto.TrendSignalParam.data_service_id");
+    target = stream->WriteStringMaybeAliased(
+        8, this->_internal_data_service_id(), target);
+  }
+
+  // optional int32 type = 10;
+  if (cached_has_bits & 0x00000200u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(10, this->_internal_type(), target);
   }
 
   // optional string unit = 11;
-  if (cached_has_bits & 0x00000010u) {
+  if (cached_has_bits & 0x00000080u) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_unit().data(), static_cast<int>(this->_internal_unit().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
@@ -1847,37 +2035,47 @@ failure:
   }
 
   // optional int32 precision = 12;
-  if (cached_has_bits & 0x00000080u) {
+  if (cached_has_bits & 0x00000400u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(12, this->_internal_precision(), target);
   }
 
+  // repeated string tags = 13;
+  for (int i = 0, n = this->_internal_tags_size(); i < n; i++) {
+    const auto& s = this->_internal_tags(i);
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      s.data(), static_cast<int>(s.length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Proto.TrendSignalParam.tags");
+    target = stream->WriteString(13, s, target);
+  }
+
   // optional double line_weight = 19 [default = 0];
-  if (cached_has_bits & 0x00000200u) {
+  if (cached_has_bits & 0x00000800u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(19, this->_internal_line_weight(), target);
   }
 
   // optional double high_limit = 20;
-  if (cached_has_bits & 0x00000400u) {
+  if (cached_has_bits & 0x00001000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(20, this->_internal_high_limit(), target);
   }
 
   // optional double low_limit = 21;
-  if (cached_has_bits & 0x00000800u) {
+  if (cached_has_bits & 0x00004000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(21, this->_internal_low_limit(), target);
   }
 
   // optional double view_high_limit = 31;
-  if (cached_has_bits & 0x00001000u) {
+  if (cached_has_bits & 0x00008000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(31, this->_internal_view_high_limit(), target);
   }
 
   // optional double view_low_limit = 32;
-  if (cached_has_bits & 0x00002000u) {
+  if (cached_has_bits & 0x00010000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(32, this->_internal_view_low_limit(), target);
   }
@@ -1891,13 +2089,13 @@ failure:
   }
 
   // optional uint32 color = 40;
-  if (cached_has_bits & 0x00000100u) {
+  if (cached_has_bits & 0x00002000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(40, this->_internal_color(), target);
   }
 
   // optional string analog_format = 41 [default = "g_9_or_9e"];
-  if (cached_has_bits & 0x00000020u) {
+  if (cached_has_bits & 0x00000100u) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_analog_format().data(), static_cast<int>(this->_internal_analog_format().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
@@ -1921,6 +2119,14 @@ size_t TrendSignalParam::ByteSizeLong() const {
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
+
+  // repeated string tags = 13;
+  total_size += 1 *
+      ::PROTOBUF_NAMESPACE_ID::internal::FromIntSize(tags_.size());
+  for (int i = 0, n = tags_.size(); i < n; i++) {
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+      tags_.Get(i));
+  }
 
   // repeated .Proto.TrendViewLimit view_limits = 33;
   total_size += 2UL * this->_internal_view_limits_size();
@@ -1959,69 +2165,90 @@ size_t TrendSignalParam::ByteSizeLong() const {
           this->_internal_equipment_id());
     }
 
-    // optional string unit = 11;
+    // optional string archive_service_id = 6;
     if (cached_has_bits & 0x00000010u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_archive_service_id());
+    }
+
+    // optional string archive_service_short_id = 7;
+    if (cached_has_bits & 0x00000020u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_archive_service_short_id());
+    }
+
+    // optional string data_service_id = 8;
+    if (cached_has_bits & 0x00000040u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_data_service_id());
+    }
+
+    // optional string unit = 11;
+    if (cached_has_bits & 0x00000080u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
           this->_internal_unit());
     }
 
+  }
+  if (cached_has_bits & 0x0000ff00u) {
     // optional string analog_format = 41 [default = "g_9_or_9e"];
-    if (cached_has_bits & 0x00000020u) {
+    if (cached_has_bits & 0x00000100u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
           this->_internal_analog_format());
     }
 
     // optional int32 type = 10;
-    if (cached_has_bits & 0x00000040u) {
+    if (cached_has_bits & 0x00000200u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_type());
     }
 
     // optional int32 precision = 12;
-    if (cached_has_bits & 0x00000080u) {
+    if (cached_has_bits & 0x00000400u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_precision());
     }
 
-  }
-  if (cached_has_bits & 0x00003f00u) {
+    // optional double line_weight = 19 [default = 0];
+    if (cached_has_bits & 0x00000800u) {
+      total_size += 2 + 8;
+    }
+
+    // optional double high_limit = 20;
+    if (cached_has_bits & 0x00001000u) {
+      total_size += 2 + 8;
+    }
+
     // optional uint32 color = 40;
-    if (cached_has_bits & 0x00000100u) {
+    if (cached_has_bits & 0x00002000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
           this->_internal_color());
     }
 
-    // optional double line_weight = 19 [default = 0];
-    if (cached_has_bits & 0x00000200u) {
-      total_size += 2 + 8;
-    }
-
-    // optional double high_limit = 20;
-    if (cached_has_bits & 0x00000400u) {
-      total_size += 2 + 8;
-    }
-
     // optional double low_limit = 21;
-    if (cached_has_bits & 0x00000800u) {
+    if (cached_has_bits & 0x00004000u) {
       total_size += 2 + 8;
     }
 
     // optional double view_high_limit = 31;
-    if (cached_has_bits & 0x00001000u) {
-      total_size += 2 + 8;
-    }
-
-    // optional double view_low_limit = 32;
-    if (cached_has_bits & 0x00002000u) {
+    if (cached_has_bits & 0x00008000u) {
       total_size += 2 + 8;
     }
 
   }
+  // optional double view_low_limit = 32;
+  if (cached_has_bits & 0x00010000u) {
+    total_size += 2 + 8;
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
         _internal_metadata_, total_size, &_cached_size_);
@@ -2053,6 +2280,7 @@ void TrendSignalParam::MergeFrom(const TrendSignalParam& from) {
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
+  tags_.MergeFrom(from.tags_);
   view_limits_.MergeFrom(from.view_limits_);
   cached_has_bits = from._has_bits_[0];
   if (cached_has_bits & 0x000000ffu) {
@@ -2069,39 +2297,47 @@ void TrendSignalParam::MergeFrom(const TrendSignalParam& from) {
       _internal_set_equipment_id(from._internal_equipment_id());
     }
     if (cached_has_bits & 0x00000010u) {
-      _internal_set_unit(from._internal_unit());
+      _internal_set_archive_service_id(from._internal_archive_service_id());
     }
     if (cached_has_bits & 0x00000020u) {
-      _internal_set_analog_format(from._internal_analog_format());
+      _internal_set_archive_service_short_id(from._internal_archive_service_short_id());
     }
     if (cached_has_bits & 0x00000040u) {
-      type_ = from.type_;
+      _internal_set_data_service_id(from._internal_data_service_id());
     }
     if (cached_has_bits & 0x00000080u) {
+      _internal_set_unit(from._internal_unit());
+    }
+  }
+  if (cached_has_bits & 0x0000ff00u) {
+    if (cached_has_bits & 0x00000100u) {
+      _internal_set_analog_format(from._internal_analog_format());
+    }
+    if (cached_has_bits & 0x00000200u) {
+      type_ = from.type_;
+    }
+    if (cached_has_bits & 0x00000400u) {
       precision_ = from.precision_;
+    }
+    if (cached_has_bits & 0x00000800u) {
+      line_weight_ = from.line_weight_;
+    }
+    if (cached_has_bits & 0x00001000u) {
+      high_limit_ = from.high_limit_;
+    }
+    if (cached_has_bits & 0x00002000u) {
+      color_ = from.color_;
+    }
+    if (cached_has_bits & 0x00004000u) {
+      low_limit_ = from.low_limit_;
+    }
+    if (cached_has_bits & 0x00008000u) {
+      view_high_limit_ = from.view_high_limit_;
     }
     _has_bits_[0] |= cached_has_bits;
   }
-  if (cached_has_bits & 0x00003f00u) {
-    if (cached_has_bits & 0x00000100u) {
-      color_ = from.color_;
-    }
-    if (cached_has_bits & 0x00000200u) {
-      line_weight_ = from.line_weight_;
-    }
-    if (cached_has_bits & 0x00000400u) {
-      high_limit_ = from.high_limit_;
-    }
-    if (cached_has_bits & 0x00000800u) {
-      low_limit_ = from.low_limit_;
-    }
-    if (cached_has_bits & 0x00001000u) {
-      view_high_limit_ = from.view_high_limit_;
-    }
-    if (cached_has_bits & 0x00002000u) {
-      view_low_limit_ = from.view_low_limit_;
-    }
-    _has_bits_[0] |= cached_has_bits;
+  if (cached_has_bits & 0x00010000u) {
+    _internal_set_view_low_limit(from._internal_view_low_limit());
   }
 }
 
@@ -2127,11 +2363,15 @@ void TrendSignalParam::InternalSwap(TrendSignalParam* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   swap(_has_bits_[0], other->_has_bits_[0]);
+  tags_.InternalSwap(&other->tags_);
   view_limits_.InternalSwap(&other->view_limits_);
   signal_id_.Swap(&other->signal_id_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   app_signal_id_.Swap(&other->app_signal_id_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   caption_.Swap(&other->caption_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   equipment_id_.Swap(&other->equipment_id_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  archive_service_id_.Swap(&other->archive_service_id_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  archive_service_short_id_.Swap(&other->archive_service_short_id_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  data_service_id_.Swap(&other->data_service_id_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   unit_.Swap(&other->unit_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   analog_format_.Swap(&other->analog_format_, nullptr, GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<

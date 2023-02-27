@@ -1,5 +1,6 @@
 #include "ClientSchemaWidget.h"
 #include "LogicSchema.h"
+#include "SchemaLayer.h"
 #include "../VFrame30/SchemaItemSignal.h"
 #include "../VFrame30/PropertyNames.h"
 

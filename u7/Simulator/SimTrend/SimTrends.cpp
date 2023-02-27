@@ -1,6 +1,6 @@
 #include "SimTrends.h"
 #include "../SimIdeSimulator.h"
-#include "../../TrendView/Forms/DialogChooseTrendSignals.h"
+#include "../../TrendView/DialogChooseTrendSignals.h"
 #include "../../TrendView/TrendWidget.h"
 
 
@@ -45,7 +45,7 @@ bool SimTrends::startTrendApp(std::shared_ptr<SimIdeSimulator> simulator, const 
 
 	for (const AppSignalParam& appSignal : appSignals)
 	{
-		TrendLib::TrendSignalParam tsp(appSignal);
+		TrendLib::TrendSignalParam tsp(appSignal, {});
 		trendSignals.push_back(tsp);
 	}
 
@@ -217,11 +217,41 @@ void SimTrendsWidget::timerEvent(QTimerEvent*)
 
 void SimTrendsWidget::signalsButton()
 {
-	std::vector<TrendLib::TrendSignalParam> trendSignals = signalSet().trendSignals();
+	std::vector<TrendLib::TrendSignalParam> acceptedTrendSignals = signalSet().trendSignals();
+	std::vector<TrendLib::ArchiveServer> archiveServers;	// Simulation does not have acrhve servers;
 
 	// --
 	//
-	DialogChooseTrendSignals dialog(&m_simulator->appSignalManager(), trendSignals, this);
+	std::vector<TrendLib::TrendSignalParam> trendSignals;
+	trendSignals.reserve(m_simulator->appSignalManager().signalsCount());
+
+	for (const auto& appSignal : m_simulator->appSignalManager().signalList())
+	{
+		trendSignals.emplace_back(appSignal, TrendLib::ArchiveServer{});
+	}
+
+	// Implement ISignalHasTag
+	//
+	struct SignalHasTag : ISignalHasTag
+	{
+		SignalHasTag(const Sim::AppSignalManager* sm) : signalManager(sm)
+		{
+		}
+
+		virtual bool signalHasTag(const QString& signalId, const QString& tag) const  override
+		{
+			Q_ASSERT(signalManager);
+			return signalManager->signalHasTag(signalId, tag);
+		}
+
+		const Sim::AppSignalManager* signalManager = nullptr;
+	} signalHasTag{&m_simulator->appSignalManager()};
+
+	TrendLib::DialogChooseTrendSignals dialog(&signalHasTag,
+											  trendSignals,
+											  acceptedTrendSignals,
+											  archiveServers,
+											  this);
 	
 	int result = dialog.exec();
 	
@@ -230,7 +260,7 @@ void SimTrendsWidget::signalsButton()
 		return;
 	}
 
-	std::vector<AppSignalParam> acceptedSignals = dialog.acceptedSignals();
+	std::vector<TrendLib::TrendSignalParam> acceptedSignals = dialog.acceptedSignals();
 
 	// Remove signals
 	//
@@ -240,37 +270,36 @@ void SimTrendsWidget::signalsButton()
 	for (const TrendLib::TrendSignalParam& ds : discreteSignals)
 	{
 		auto it = std::find_if(acceptedSignals.begin(), acceptedSignals.end(),
-						[&ds](const AppSignalParam& trendSignal)
+						[&ds](const auto& trendSignal)
 						{
 							return trendSignal.appSignalId() == ds.appSignalId();
 						});
 
 		if (it == acceptedSignals.end())
 		{
-			signalSet().removeSignal(ds.appSignalId());
+			signalSet().removeSignal(ds);
 		}
 	}
 
 	for (const TrendLib::TrendSignalParam& as : analogSignals)
 	{
 		auto it = std::find_if(acceptedSignals.begin(), acceptedSignals.end(),
-						[&as](const AppSignalParam& trendSignal)
+						[&as](const auto& trendSignal)
 						{
 							return trendSignal.appSignalId() == as.appSignalId();
 						});
 
 		if (it == acceptedSignals.end())
 		{
-			signalSet().removeSignal(as.appSignalId());
+			signalSet().removeSignal(as);
 		}
 	}
 
 	// Add new signals
 	//
-	for (const AppSignalParam& signal : acceptedSignals)
+	for (const auto& signal : acceptedSignals)
 	{
-		TrendLib::TrendSignalParam tsp(signal);
-		addSignal(tsp, false);
+		addSignal(signal, false);
 	}
 
 	// Set default scale type if analog signals are empty and selected signals have special tags
@@ -279,6 +308,62 @@ void SimTrendsWidget::signalsButton()
 	if (analogSignals.empty() == true)
 	{
 		autoSelectScaleType(acceptedSignals);
+	}
+
+	updateWidget();
+
+	return;
+}
+
+void SimTrendsWidget::dragEnterEvent(QDragEnterEvent* event)
+{
+	if (event->mimeData()->hasFormat(AppSignalParamMimeType::value))
+	{
+		event->acceptProposedAction();
+	}
+
+	return;
+}
+
+void SimTrendsWidget::dropEvent(QDropEvent* event)
+{
+	if (event->mimeData()->hasFormat(AppSignalParamMimeType::value) == false)
+	{
+		Q_ASSERT(event->mimeData()->hasFormat(AppSignalParamMimeType::value) == true);
+		event->setDropAction(Qt::DropAction::IgnoreAction);
+		event->accept();
+		return;
+	}
+
+	QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
+
+	::Proto::AppSignalSet protoSetMessage;
+	bool ok = protoSetMessage.ParseFromArray(data.constData(), static_cast<int>(data.size()));
+
+	if (ok == false)
+	{
+		event->acceptProposedAction();
+		return;
+	}
+
+	// Parse data
+	//
+	for (int i = 0; i < protoSetMessage.appsignal_size(); i++)
+	{
+		const ::Proto::AppSignal& appSignalMessage = protoSetMessage.appsignal(i);
+
+		AppSignalParam appSignalParam;
+		ok = appSignalParam.load(appSignalMessage);
+
+		if (ok == true)
+		{
+			// Simulator trends work only with realtime trends, so no need to set some archive server
+			//
+			TrendLib::ArchiveServer trendArchiveServer{};
+
+			TrendLib::TrendSignalParam tsp{appSignalParam, trendArchiveServer};
+			addSignal(tsp, false);
+		}
 	}
 
 	updateWidget();
@@ -305,14 +390,17 @@ void SimTrendsWidget::fetchTrendData()
 
 	if (data != nullptr)
 	{
-		signalSet().slot_realtimeDataReceived(data, minState, maxState);
-		this->slot_realtimeDataReceived(data, minState, maxState);
+		signalSet().slot_realtimeDataReceived(QLatin1String{"SIM"}, data, minState, maxState);
+		this->slot_realtimeDataReceived(QLatin1String{"SIM"}, data, minState, maxState);
 	}
 
 	return;
 }
 
-void SimTrendsWidget::slot_realtimeDataReceived(std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState)
+void SimTrendsWidget::slot_realtimeDataReceived(QString /*sourceEquipmentId*/,
+												std::shared_ptr<TrendLib::RealtimeData> data,
+												TrendLib::TrendStateItem minState,
+												TrendLib::TrendStateItem maxState)
 {
 	Q_ASSERT(m_trendWidget);
 	Q_ASSERT(m_trendSlider);

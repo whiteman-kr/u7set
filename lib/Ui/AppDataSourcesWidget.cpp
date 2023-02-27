@@ -8,27 +8,22 @@
 // DialogAppDataSourceInfo
 //
 
-DialogAppDataSourceInfo::DialogAppDataSourceInfo(TcpAppSourcesState* tcpClient, QWidget* parent,  Hash sourceHash) :
+DialogAppDataSourceInfo::DialogAppDataSourceInfo(std::vector<TcpAppSourcesState*> tcpClients, QWidget* parent,  Hash sourceHash) :
 	DialogSourceInfo(parent, sourceHash),
-	m_tcpClient(tcpClient)
+	m_tcpClients(tcpClients)
 {
-	if (m_tcpClient == nullptr)
-	{
-		assert(m_tcpClient);
-		return;
-	}
-
 	bool ok = false;
 
-	AppDataSourceState adsState = m_tcpClient->appDataSourceState(sourceHash, &ok);
+	setWindowTitle("Application Data Source");
 
-	if (ok == true)
+	for (TcpAppSourcesState* client : m_tcpClients)
 	{
-		setWindowTitle(tr("Application Data Source - ") + adsState.state.lmequipmentid().c_str());
-	}
-	else
-	{
-		setWindowTitle("???");
+		AppDataSourceState adsState = client->appDataSourceState(sourceHash, &ok);
+		if (ok == true)
+		{
+			setWindowTitle(tr("Application Data Source - ") + adsState.state.lmequipmentid().c_str());
+			break;
+		}
 	}
 
 	//
@@ -132,28 +127,47 @@ DialogAppDataSourceInfo::~DialogAppDataSourceInfo()
 
 }
 
+void DialogAppDataSourceInfo::setAppSourceTcpClients(std::vector<TcpAppSourcesState*> tcpClients)
+{
+	m_tcpClients = tcpClients;
+}
+
 void DialogAppDataSourceInfo::updateData()
 {
-	if (m_tcpClient == nullptr)
-	{
-		assert(m_tcpClient);
-		return;
-	}
+	AppDataSourceState ds;
 
+	// Find state in TCP clients
+	//
 	bool ok = false;
 
-	AppDataSourceState ds = m_tcpClient->appDataSourceState(m_uniqueHash, &ok);
+	for (TcpAppSourcesState* client : m_tcpClients)
+	{
+		ds = client->appDataSourceState(m_sourceHash, &ok);
+		if (ok == true)
+		{
+			break;
+		}
+	}
+
+	// If state was not found in 10 seconds - close dialog
 	if (ok == false)
 	{
+		m_noStateInfoTimeout++;
+		if (m_noStateInfoTimeout > 40/*10 seconds*/)
+		{
+			//Close dialog if no information is received
+			reject();
+		}
 		return;
 	}
+	m_noStateInfoTimeout = 0;
 
 	// info
 
 	QTreeWidgetItem* item = m_treeWidget->topLevelItem(0);
 	if (item == nullptr)
 	{
-		assert(item);
+		Q_ASSERT(item);
 		return;
 	}
 
@@ -183,7 +197,7 @@ void DialogAppDataSourceInfo::updateData()
 		QTreeWidgetItem* dataReceivesItem = dataItem("DataReceives");
 		if (dataReceivesItem == nullptr)
 		{
-			assert(dataReceivesItem);
+			Q_ASSERT(dataReceivesItem);
 			return;
 		}
 
@@ -235,7 +249,7 @@ void DialogAppDataSourceInfo::updateData()
 	item = m_treeWidget->topLevelItem(1);
 	if (item == nullptr)
 	{
-		assert(item);
+		Q_ASSERT(item);
 		return;
 	}
 
@@ -254,17 +268,11 @@ void DialogAppDataSourceInfo::updateData()
 // DialogAppDataSources
 //
 
-AppDataSourcesWidget::AppDataSourcesWidget(TcpAppSourcesState* tcpClient,  bool hasCloseButton, QWidget* parent) :
+AppDataSourcesWidget::AppDataSourcesWidget(std::vector<TcpAppSourcesState*> tcpClients,  bool hasCloseButton, QWidget* parent) :
 	QWidget(parent),
-	m_stateTcpClient(tcpClient),
+	m_stateTcpClients(tcpClients),
 	m_parent(parent)
 {
-	if (m_stateTcpClient == nullptr)
-	{
-		assert(m_stateTcpClient);
-		return;
-	}
-
 	//
 
 	QVBoxLayout* mainLayout = new QVBoxLayout();
@@ -326,6 +334,23 @@ AppDataSourcesWidget::~AppDataSourcesWidget()
 {
 }
 
+void AppDataSourcesWidget::setAppSourceTcpClients(std::vector<TcpAppSourcesState*> tcpClients)
+{
+	m_stateTcpClients = tcpClients;
+
+	for (auto it : m_sourceInfoDialogsMap)
+	{
+		DialogAppDataSourceInfo* d = it.second;
+		if (d == nullptr)
+		{
+			Q_ASSERT(d);
+			return;
+		}
+
+		d->setAppSourceTcpClients(m_stateTcpClients);
+	}
+}
+
 void AppDataSourcesWidget::showCloseButton(bool show)
 {
 	m_closeButton->setVisible(show);
@@ -333,7 +358,7 @@ void AppDataSourcesWidget::showCloseButton(bool show)
 
 void AppDataSourcesWidget::timerEvent(QTimerEvent* event)
 {
-	assert(event);
+	Q_ASSERT(event);
 
 	if  (event->timerId() == m_updateStateTimerId)
 	{
@@ -346,15 +371,28 @@ void AppDataSourcesWidget::slot_tuningSourcesArrived()
 	update(false);
 }
 
+TcpAppSourcesState* AppDataSourcesWidget::clientByHash(Hash hash) const
+{
+	for (TcpAppSourcesState* client : m_stateTcpClients)
+	{
+		const auto hashes = client->appDataSourceHashes();
+		if (std::find(hashes.begin(), hashes.end(), hash) != hashes.end())
+		{
+			return client;
+		}
+	}
+	return nullptr;
+}
+
 void AppDataSourcesWidget::update(bool refreshOnly)
 {
-	if (m_stateTcpClient == nullptr)
-	{
-		assert(m_stateTcpClient);
-		return;
-	}
+	std::vector<Hash> appDataSourceHashes;
 
-	std::vector<Hash> appDataSourceHashes = m_stateTcpClient->appDataSourceHashes();
+	for (TcpAppSourcesState* stateTcpClient : m_stateTcpClients)
+	{
+		std::vector<Hash> clientHashes = stateTcpClient->appDataSourceHashes();
+		appDataSourceHashes.insert(appDataSourceHashes.end(), clientHashes.begin(), clientHashes.end());
+	}
 
 	int count = static_cast<int>(appDataSourceHashes.size());
 
@@ -371,14 +409,21 @@ void AppDataSourcesWidget::update(bool refreshOnly)
 		{
 			QStringList connectionStrings;
 
-			bool ok = false;
-
 			Hash hash = appDataSourceHashes[i];
 
-			AppDataSourceState adsState = m_stateTcpClient->appDataSourceState(hash, &ok);
+			const TcpAppSourcesState* stateTcpClient = clientByHash(hash);
+			if (stateTcpClient == nullptr)
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			bool ok = false;
+
+			AppDataSourceState adsState = stateTcpClient->appDataSourceState(hash, &ok);
 			if (ok == false)
 			{
-				assert(false);
+				Q_ASSERT(false);
 				continue;
 			}
 
@@ -404,18 +449,25 @@ void AppDataSourcesWidget::update(bool refreshOnly)
 		QTreeWidgetItem* item = m_treeWidget->topLevelItem(i);
 		if (item == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			continue;
 		}
 
 		Hash hash = item->data(columnIndex_Hash, Qt::UserRole).toULongLong();
 
+		const TcpAppSourcesState* stateTcpClient = clientByHash(hash);
+		if (stateTcpClient == nullptr)
+		{
+			Q_ASSERT(false);
+			continue;
+		}
+
 		bool ok = false;
 
-		AppDataSourceState adsState = m_stateTcpClient->appDataSourceState(hash, &ok);
+		AppDataSourceState adsState = stateTcpClient->appDataSourceState(hash, &ok);
 		if (ok == false)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			continue;
 		}
 
@@ -482,12 +534,6 @@ void AppDataSourcesWidget::on_btnClose_clicked()
 
 void AppDataSourcesWidget::on_btnDetails_clicked()
 {
-	if (m_stateTcpClient == nullptr)
-	{
-		assert(m_stateTcpClient);
-		return;
-	}
-
 	QTreeWidgetItem* item = m_treeWidget->currentItem();
 
 	if (item == nullptr)
@@ -500,7 +546,7 @@ void AppDataSourcesWidget::on_btnDetails_clicked()
 	auto it = m_sourceInfoDialogsMap.find(hash);
 	if (it == m_sourceInfoDialogsMap.end())
 	{
-		DialogAppDataSourceInfo* dlg = new DialogAppDataSourceInfo(m_stateTcpClient, this, hash);
+		DialogAppDataSourceInfo* dlg = new DialogAppDataSourceInfo(m_stateTcpClients, this, hash);
 		connect(dlg, &DialogAppDataSourceInfo::dialogClosed, this, &AppDataSourcesWidget::onDetailsDialogClosed);
 		dlg->show();
 		dlg->activateWindow();
@@ -512,7 +558,7 @@ void AppDataSourcesWidget::on_btnDetails_clicked()
 		DialogAppDataSourceInfo* dlg = it->second;
 		if (dlg == nullptr)
 		{
-			assert(dlg);
+			Q_ASSERT(dlg);
 			return;
 		}
 
@@ -542,7 +588,7 @@ void AppDataSourcesWidget::onDetailsDialogClosed(Hash hash)
 	auto it = m_sourceInfoDialogsMap.find(hash);
 	if (it == m_sourceInfoDialogsMap.end())
 	{
-		//assert(false);
+		//Q_ASSERT(false);
 		return;
 	}
 
