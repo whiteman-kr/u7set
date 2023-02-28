@@ -430,7 +430,7 @@ namespace Sim
 		{
 			double beFloat = qToBigEndian(value);
 #ifdef __cpp_lib_bit_cast
-			quint64 asDwword = std::bit_cast<quint32>(beFloat);
+			quint64 asDwword = std::bit_cast<quint64>(beFloat);
 #else
 			quint64 asDwword;
 			std::memcpy(&asDwword, &beFloat, sizeof(beFloat));
