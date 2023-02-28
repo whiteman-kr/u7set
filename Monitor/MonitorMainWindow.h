@@ -21,7 +21,6 @@ class MonitorCentralWidget;
 class MonitorToolBar;
 class QLabel;
 class QComboBox;
-class DialogDataSources;
 
 class MonitorMainWindow : public QMainWindow
 {
@@ -242,7 +241,6 @@ private:
 	int m_logErrorsCounter = -1;
 	int m_logWarningsCounter = -1;
 
-	DialogDataSources* m_dialogDataSources = nullptr;
 	DialogTcpStatistics* m_dialogStatistics = nullptr;
 
 	TuningUserManager m_tuningUserManager;

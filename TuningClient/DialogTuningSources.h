@@ -9,7 +9,7 @@ class ClientTuningSourcesWidget : public TuningSourcesWidget
 	Q_OBJECT
 public:
 
-	explicit ClientTuningSourcesWidget(std::vector<TuningTcpClient*> tcpClients, bool hasActivationControls, bool hasCloseButton, QWidget* parent);
+	explicit ClientTuningSourcesWidget(std::vector<TuningTcpClient*> tcpClients, bool hasActivationControls, QWidget* parent);
 	virtual ~ClientTuningSourcesWidget();
 
 protected:

@@ -148,3 +148,121 @@ void AdsConnection::configurationArrived(const ConfigSettings& conf)
 
 	return;
 }
+
+AdsSourceStateConnection::Connection::Connection(const MonitorConfigController& configController, const MonitorSettings::AppDataService& ads,
+									  ILogFile* logFile)
+{
+	tcpAppSourceStateClient = new TcpAppSourcesState{configController, ads, logFile};
+	tcpAppSourceStateThread = new SimpleThread{tcpAppSourceStateClient};
+	tcpAppSourceStateThread->start();
+
+	return;
+}
+
+AdsSourceStateConnection::Connection::~Connection()
+{
+	stopAndDestroy();
+	return;
+}
+
+AdsSourceStateConnection::Connection::Connection(Connection&& src) noexcept
+{
+	operator=(std::move(src));
+	return;
+}
+
+AdsSourceStateConnection::Connection& AdsSourceStateConnection::Connection::operator=(Connection&& src) noexcept
+{
+	if (this == &src)
+	{
+		Q_ASSERT(this != &src);
+		return *this;
+	}
+
+	tcpAppSourceStateClient = src.tcpAppSourceStateClient;
+	tcpAppSourceStateThread = src.tcpAppSourceStateThread;
+
+	src.tcpAppSourceStateClient = nullptr;
+	src.tcpAppSourceStateThread = nullptr;
+
+	return *this;
+}
+
+void AdsSourceStateConnection::Connection::stopAndDestroy()
+{
+	if (tcpAppSourceStateThread != nullptr)
+	{
+		tcpAppSourceStateThread->quitAndWait(10000);
+		delete tcpAppSourceStateThread;
+	}
+
+	tcpAppSourceStateClient = nullptr;
+	tcpAppSourceStateThread = nullptr;
+
+	return;
+}
+
+HostAddressPort AdsSourceStateConnection::Connection::address() const
+{
+	Q_ASSERT(tcpAppSourceStateClient);
+
+	return tcpAppSourceStateClient->serverAddressPort1();
+}
+
+AdsSourceStateConnection::AdsSourceStateConnection(const MonitorConfigController& configController, ILogFile* logFile) :
+	m_logFile(logFile, "AdsConnection"),
+	m_configController(configController)
+{
+	createAndStart();
+
+	connect(&m_configController, &MonitorConfigController::configurationArrived, this, &AdsSourceStateConnection::configurationArrived);
+
+	return;
+}
+
+std::vector<AppDataSourceState> AdsSourceStateConnection::appDataSourceStates() const
+{
+	std::vector<AppDataSourceState> result;
+	result.reserve(m_conns.size());
+
+	for (const Connection& c : m_conns)
+	{
+		const std::vector<AppDataSourceState> states = c.tcpAppSourceStateClient->appDataSourceStates();
+		result.insert(result.end(), states.begin(), states.end());
+	}
+
+	return result;
+}
+
+void AdsSourceStateConnection::createAndStart()
+{
+	m_conns.clear();	// it will stop all connection threads and destroy them
+
+	for (const MonitorSettings::AppDataService& ads : m_configController.configuration().appDataServices)
+	{
+		auto it = std::find_if(m_conns.begin(), m_conns.end(), [&ads](const Connection& c)
+		{
+			return c.address() == ads.address;
+		});
+
+		if (it != m_conns.end())
+		{
+			// Such connection already exists
+			//
+			continue;
+		}
+
+		m_conns.emplace_back(m_configController, ads, m_logFile.logFile());
+	}
+}
+
+void AdsSourceStateConnection::configurationArrived(const ConfigSettings& conf)
+{
+	Q_UNUSED(conf);
+
+	m_logFile.writeMessage("configurationArrived");
+
+	createAndStart();
+
+	return;
+}

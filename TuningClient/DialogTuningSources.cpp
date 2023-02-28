@@ -1,8 +1,8 @@
 #include "DialogTuningSources.h"
 #include "MainWindow.h"
 
-ClientTuningSourcesWidget::ClientTuningSourcesWidget(std::vector<TuningTcpClient*> tcpClients, bool hasActivationControls, bool hasCloseButton, QWidget* parent):
-	TuningSourcesWidget(tcpClients, hasActivationControls, hasCloseButton, parent)
+ClientTuningSourcesWidget::ClientTuningSourcesWidget(std::vector<TuningTcpClient*> tcpClients, bool hasActivationControls, QWidget* parent):
+	TuningSourcesWidget(tcpClients, hasActivationControls, parent)
 {
 
 }
@@ -33,9 +33,7 @@ DialogTuningSources::DialogTuningSources(std::vector<TuningTcpClient*> tcpClient
 
 	setAttribute(Qt::WA_DeleteOnClose);
 
-	m_tuningSourcesWidget = new ClientTuningSourcesWidget(tcpClients, hasActivationControls, true, this);
-
-	connect(m_tuningSourcesWidget, &TuningSourcesWidget::closeButtonPressed, this, &DialogTuningSources::reject);
+	m_tuningSourcesWidget = new ClientTuningSourcesWidget(tcpClients, hasActivationControls, this);
 
 	QHBoxLayout* l = new QHBoxLayout();
 	l->addWidget(m_tuningSourcesWidget);
