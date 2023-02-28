@@ -470,6 +470,7 @@ namespace Builder
 
 		bool isEmpty() const;
 		int itemsCount() const;
+		int codeSizeW() const;
 
 		//
 

@@ -17,6 +17,7 @@
 #include "Loopbacks.h"
 #include "SignalSet.h"
 #include "CodeChecker.h"
+#include "CodeOptimization.h"
 
 class LmDescription;
 
@@ -206,6 +207,12 @@ namespace Builder
 
 		QList<const UalSignal*> getLoopbacksUalSignals() const;
 
+		bool optimizeCode(CodeOptimizationType optimizationType,
+						  const CodeSnippet& srcCode,
+						  CodeSnippetConstIterator start,
+						  CodeSnippetConstIterator end,
+						  CodeSnippet& optimizedCode,
+						  const CodeSnippet& replacementCode);
 	private:
 		bool getLmAssociatedOptoPortsAreas(std::vector<CodeChecker::MemArea>* optoAreas, bool rx) const;
 
@@ -464,12 +471,6 @@ namespace Builder
 
 		bool optimizeSequentialMoves(CodeSnippet& srcCode);
 
-		bool optimizeCode(const CodeSnippet& srcCode,
-						  CodeSnippetConstIterator start,
-						  CodeSnippetConstIterator end,
-						  CodeSnippet& optiCode,
-						  const CodeSnippet& replacementCode);
-
 		bool writeInfoFilesAfterOptimization();
 		bool checkOptimizedAppLogicCode();
 
@@ -727,6 +728,10 @@ namespace Builder
 		bool writeStatisticsFile(const AppLogicCode& code,
 								 const AppLogicCode& idrCode,
 								 const AppLogicCode& alpCode) const;
+		bool writeOptimizationReportFile() const;
+		void printOptiStatistics(const AppLogicCode& code,
+								 const AppLogicCode& optiCode,
+								 QStringList* outFile) const;
 		bool writeTuningInfoFile() const;
 		bool writeOptoModulesReport() const;
 		bool writeLoopbacksReport();
@@ -865,7 +870,8 @@ namespace Builder
 		AppLogicCode m_optiIdrCode;
 		AppLogicCode m_optiAlpCode;
 
-		int m_optiNo = 0;
+		int m_optimizationNo = 0;
+		std::map<CodeOptimizationType, OptimizationInfo> m_optimizationsInfo;
 
 		AfblsMap m_afbls;
 

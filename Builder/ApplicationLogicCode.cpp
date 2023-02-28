@@ -1913,6 +1913,18 @@ namespace Builder
 		return static_cast<int>(m_code.size());
 	}
 
+	int CodeSnippet::codeSizeW() const
+	{
+		int sizeW = 0;
+
+		for(const auto& ci : m_code)
+		{
+			sizeW += ci.sizeW();
+		}
+
+		return sizeW;
+	}
+
 	void CodeSnippet::getAsmCode(QStringList* asmCode) const
 	{
 		TEST_PTR_RETURN(asmCode);

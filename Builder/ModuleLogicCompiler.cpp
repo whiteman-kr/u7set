@@ -341,6 +341,102 @@ namespace Builder
 		return m_loopbacks.getLoopbacksUalSignals();
 	}
 
+	bool ModuleLogicCompiler::optimizeCode(CodeOptimizationType optimizationType,
+											const CodeSnippet& srcCode,
+											CodeSnippetConstIterator start,
+											CodeSnippetConstIterator end,
+											CodeSnippet& optimizedCode,
+											const CodeSnippet& replacementCode)
+	{
+		m_optimizationNo++;
+
+		Q_ASSERT(start != end && start != srcCode.end());
+
+		CodeSnippetConstIterator prev = start - 1;
+
+		if (prev != srcCode.end())
+		{
+			if (prev->isNewLine() == false)
+			{
+				optimizedCode << CodeItem();
+			}
+		}
+
+		optimizedCode << CodeItem().setComment(QString("Optimization (%1) --------- Begin ---------").
+												arg(m_optimizationNo));
+		optimizedCode << CodeItem();
+
+		int replacedCodeSizeW = 0;
+
+		do
+		{
+			if (start == srcCode.end())
+			{
+				break;
+			}
+
+			const CodeItem& srcCodeItem = *start;
+
+			replacedCodeSizeW += srcCodeItem.sizeW();
+
+			QString mnemo = srcCodeItem.getAsmCode(false);
+
+			optimizedCode << CodeItem().setComment(mnemo);
+
+			if (start == end)
+			{
+				break;
+			}
+
+			start++;
+		}
+		while(true);
+
+		optimizedCode << CodeItem();
+
+		optimizedCode << replacementCode;
+
+		optimizedCode << CodeItem();
+
+		optimizedCode << CodeItem().setComment(QString("Optimization (%1) ---------- End ----------").
+											  arg(m_optimizationNo));
+		if (start != srcCode.end())
+		{
+			CodeSnippetConstIterator next = start + 1;
+
+			if (next != srcCode.end())
+			{
+				if (next->isNewLine() == false)
+				{
+					optimizedCode << CodeItem();
+				}
+			}
+		}
+
+		//
+
+		auto it = m_optimizationsInfo.find(optimizationType);
+
+		if (it == m_optimizationsInfo.end())
+		{
+			auto p = m_optimizationsInfo.insert({optimizationType, OptimizationInfo(optimizationType)});
+
+			it = p.first;
+		}
+
+		OptimizationInfo& optiInfo = it->second;
+
+		int replacementCodeSizeW  = replacementCode.codeSizeW();
+
+		Q_ASSERT(replacedCodeSizeW > replacementCodeSizeW);
+
+		optiInfo.optimizationsCount++;
+		optiInfo.decreasingCodeSizeW += replacedCodeSizeW - replacementCodeSizeW;
+
+		return true;
+	}
+
+
 	bool ModuleLogicCompiler::getLmAssociatedOptoPortsAreas(std::vector<CodeChecker::MemArea>* optoAreas, bool rx) const
 	{
 		TEST_PTR_RETURN_FALSE(m_log);
@@ -7651,7 +7747,7 @@ namespace Builder
 		m_optiIdrCode.setOptimized(true);
 		m_optiAlpCode.setOptimized(true);
 
-		m_optiIdrCode.removeStopCommand();
+		//m_optiIdrCode.removeStopCommand();
 
 		CodeOptimizationProcsToCallArray procs =
 		{
@@ -7691,15 +7787,22 @@ namespace Builder
 		result &= writeStatisticsFile(m_optiAppLogicCode,
 									  m_optiIdrCode,
 									  m_optiAlpCode);
+
+		result &= writeOptimizationReportFile();
+
 		return result;
 	}
 
 	bool ModuleLogicCompiler::optimizeSequentialMoves(CodeSnippet& srcCode)
 	{
-		int sequenceSize;				// commands in sequence
+		SequentialMovesOptimization smo(*this, srcCode, m_memoryMap);
+
+		return smo.optimize();
+
+/*		int commandsInSequence;
 		quint16 sequenceMoveSizeW;
 
-		CodeSnippetConstIterator sequenceBegin;
+		CodeSnippetConstIterator firstSequenceCmd;
 		CodeSnippetConstIterator lastSequenceCmd;
 
 		quint16 sequenceStartSrcAddr;
@@ -7711,10 +7814,10 @@ namespace Builder
 
 		auto reinitVars =	[&]() -> void
 							{
-								sequenceSize = 0;
+								commandsInSequence = 0;
 								sequenceMoveSizeW = 0;
 
-								sequenceBegin = srcCode.end();
+								firstSequenceCmd = srcCode.end();
 								lastSequenceCmd = srcCode.end();
 
 								sequenceStartSrcAddr = 0;
@@ -7723,9 +7826,9 @@ namespace Builder
 
 		auto finalizeSequence =	[&]() -> void
 							{
-								if (sequenceSize > 0)
+								if (commandsInSequence > 0)
 								{
-									if (sequenceSize > 1)
+									if (commandsInSequence > 1)
 									{
 										CodeSnippet rc;		// replacement code
 
@@ -7734,7 +7837,7 @@ namespace Builder
 																sequenceMoveSizeW);
 
 										optimizeCode(srcCode,
-													 sequenceBegin,
+													 firstSequenceCmd,
 													 lastSequenceCmd,
 													 optiCode, rc);
 									}
@@ -7742,7 +7845,7 @@ namespace Builder
 									{
 										// sequenceSize == 1
 										//
-										optiCode.append(*sequenceBegin);
+										optiCode.append(*firstSequenceCmd);
 									}
 
 									reinitVars();
@@ -7781,13 +7884,13 @@ namespace Builder
 
 			quint16 moveSizeW = ci.getMoveSizeW();
 
-			if (sequenceBegin != srcCode.end() &&
+			if (firstSequenceCmd != srcCode.end() &&
 				sequenceStartSrcAddr + sequenceMoveSizeW == srcAddr &&
 				sequenceStartDestAddr + sequenceMoveSizeW == destAddr)
 			{
 				// continue sequence
 				//
-				sequenceSize++;
+				commandsInSequence++;
 				sequenceMoveSizeW += moveSizeW;
 
 				lastSequenceCmd = it;
@@ -7798,10 +7901,10 @@ namespace Builder
 
 			// start sequence
 			//
-			sequenceSize = 1;
+			commandsInSequence = 1;
 			sequenceMoveSizeW = moveSizeW;
 
-			sequenceBegin = it;
+			firstSequenceCmd = it;
 			lastSequenceCmd = it;
 
 			sequenceStartSrcAddr = srcAddr;
@@ -7810,77 +7913,7 @@ namespace Builder
 
 		srcCode.swap(optiCode);
 
-		return true;
-	}
-
-	bool ModuleLogicCompiler::optimizeCode( const CodeSnippet& srcCode,
-											CodeSnippetConstIterator start,
-											CodeSnippetConstIterator end,
-											CodeSnippet& optiCode,
-											const CodeSnippet& replacementCode)
-	{
-		m_optiNo++;
-
-		Q_ASSERT(start != end && start != srcCode.end());
-
-		CodeSnippetConstIterator prev = start - 1;
-
-		if (prev != srcCode.end())
-		{
-			if (prev->isNewLine() == false)
-			{
-				optiCode << CodeItem();
-			}
-		}
-
-		optiCode << CodeItem().setComment(QString("Optimization (%1) --------- Begin ---------").
-												arg(m_optiNo));
-		optiCode << CodeItem();
-
-		do
-		{
-			if (start == srcCode.end())
-			{
-				break;
-			}
-
-			const CodeItem& srcCodeItem = *start;
-
-			QString mnemo = srcCodeItem.getAsmCode(false);
-
-			optiCode << CodeItem().setComment(mnemo);
-
-			if (start == end)
-			{
-				break;
-			}
-
-			start++;
-		}
-		while(true);
-
-		optiCode << CodeItem();
-
-		optiCode << replacementCode;
-
-		optiCode << CodeItem();
-
-		optiCode << CodeItem().setComment(QString("Optimization (%1) ---------- End ----------").
-											  arg(m_optiNo));
-		if (start != srcCode.end())
-		{
-			CodeSnippetConstIterator next = start + 1;
-
-			if (next != srcCode.end())
-			{
-				if (next->isNewLine() == false)
-				{
-					optiCode << CodeItem();
-				}
-			}
-		}
-
-		return true;
+		return true;  */
 	}
 
 	bool ModuleLogicCompiler::checkOptimizedAppLogicCode()
@@ -14924,6 +14957,90 @@ namespace Builder
 		return (buildFile != nullptr);
 	}
 
+	bool ModuleLogicCompiler::writeOptimizationReportFile() const
+	{
+		QStringList file;
+
+		file << ApplicationLogicCompiler::getInfoFileHeader(m_context);
+		file << Separator::EMPTY_STR;
+		file << QString("LM equipmentID: %1").arg(lmEquipmentID());
+		file << Separator::EMPTY_STR;
+		file << Separator::EMPTY_STR;
+
+		printOptiStatistics(m_idrCode, m_optiIdrCode, &file);
+		printOptiStatistics(m_alpCode, m_optiAlpCode, &file);
+		printOptiStatistics(m_appLogicCode, m_optiAppLogicCode, &file);
+
+		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
+												getInfoFileName("rpt", true), file);
+		return (buildFile != nullptr);
+	}
+
+	void ModuleLogicCompiler::printOptiStatistics(const AppLogicCode& code,
+												  const AppLogicCode& optiCode,
+												  QStringList* outFile) const
+	{
+		TEST_PTR_RETURN(outFile);
+		Q_ASSERT(code.codeType() == optiCode.codeType());
+
+		QStringList& file = *outFile;
+
+		switch(code.codeType())
+		{
+		case AppLogicCode::Type::IDR_Code:
+			file << QString("IDR phase code metrics before and after optimization");
+			break;
+
+		case AppLogicCode::Type::ALP_Code:
+			file << QString("ALP phase code metrics before and after optimization");
+			break;
+
+		case AppLogicCode::Type::AllCode:
+			file << QString("All code metrics before and after optimization");
+			break;
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		file << Separator::EMPTY_STR;
+
+		file << QString("         Metrics        |  Before  |  After   |   Diff   |  Diff, %");
+		file << QString("------------------------+----------+----------+----------+------------");
+
+		int intDiff = optiCode.codeSizeW() - code.codeSizeW();
+		double percentDiff = (static_cast<double>(intDiff) * 100.0) /
+							  static_cast<double>(code.codeSizeW());
+
+		file << QString(" Code size              | %1 | %2 | %3 | %4").
+					arg(code.codeSizeW(), 8).
+					arg(optiCode.codeSizeW(), 8).
+					arg(intDiff, 8).
+					arg(percentDiff, 8, 'f', 3);
+
+		intDiff = optiCode.clockCount() - code.clockCount();
+		percentDiff = (static_cast<double>(intDiff) * 100.0) /
+						  static_cast<double>(code.clockCount());
+
+		file << QString(" Code exec time, clocks | %1 | %2 | %3 | %4").
+					arg(code.clockCount(), 8).
+					arg(optiCode.clockCount(), 8).
+					arg(intDiff, 8).
+					arg(percentDiff, 8, 'f', 3);
+
+		double doubleDiff = optiCode.execTimeMcs() - code.execTimeMcs();
+		percentDiff = (doubleDiff * 100.0) / code.execTimeMcs();
+
+		file << QString(" Code exec time, mcs    | %1 | %2 | %3 | %4").
+					arg(code.execTimeMcs(), 8, 'f', 2).
+					arg(optiCode.execTimeMcs(), 8, 'f', 2).
+					arg(doubleDiff, 8, 'f', 2).
+					arg(percentDiff, 8, 'f', 3);
+
+		file << Separator::EMPTY_STR;
+		file << Separator::EMPTY_STR;
+	}
+
 	bool ModuleLogicCompiler::writeTuningInfoFile() const
 	{
 		if (m_tuningData == nullptr)
@@ -15641,7 +15758,7 @@ namespace Builder
 
 		file << headerStr;
 		file << QString("  Command   |------------------+------------------+------------------");
-		file << QString("            | Count  | Percent | Words  | Percent | Tacts  | Percent ");
+		file << QString("            | Count  | Percent | Words  | Percent | Clocks | Percent ");
 		file << QString("------------+--------+---------+--------+---------+--------+---------");
 
 		float usedPercentTotal = 0;

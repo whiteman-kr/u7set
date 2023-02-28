@@ -71,6 +71,7 @@ SOURCES += \
     Builder.cpp \
 	AppSignalProperties.cpp \
 	CodeChecker.cpp \
+	CodeOptimization.cpp \
 	DbMetrologyConnection.cpp \
     ConnectionStorage.cpp \
     IssueLogger.cpp \
@@ -141,6 +142,7 @@ HEADERS += \
 	Builder.h \
 	AppSignalProperties.h \
 	CodeChecker.h \
+	CodeOptimization.h \
 	DbMetrologyConnection.h \
     ConnectionStorage.h \
     Loopbacks.h \
