@@ -1129,7 +1129,7 @@ namespace Builder
 		return 0;
 	}
 
-	Address16 CodeItem::srcAddrBit() const
+	Address16 CodeItem::srcBitAddr() const
 	{
 		switch(getOpcode())
 		{
@@ -1171,7 +1171,7 @@ namespace Builder
 		return 0;
 	}
 
-	Address16 CodeItem::destAddrBit() const
+	Address16 CodeItem::destBitAddr() const
 	{
 		switch(getOpcode())
 		{
@@ -1196,16 +1196,49 @@ namespace Builder
 		switch(getOpcode())
 		{
 		case LmCommand::Code::MOV:
+		case LmCommand::Code::MOVC:
 		case LmCommand::Code::PMOV:
 			return 1;
 
 		case LmCommand::Code::MOV32:
+		case LmCommand::Code::MOVC32:
 		case LmCommand::Code::PMOV32:
 			return 2;
 
 		case LmCommand::Code::MOVMEM:
+		case LmCommand::Code::SETMEM:
 			return getWord4();
 
+		default:
+			Q_ASSERT(false);
+		}
+
+		return 0;
+	}
+
+	quint16 CodeItem::getConst16() const
+	{
+		switch(getOpcode())
+		{
+		case LmCommand::Code::MOVC:
+		case LmCommand::Code::WRFBC:
+		case LmCommand::Code::SETMEM:
+			return getWord3();
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		return 0;
+	}
+
+	quint32 CodeItem::getConst32() const
+	{
+		switch(getOpcode())
+		{
+		case LmCommand::Code::MOVC32:
+		case LmCommand::Code::WRFBC32:
+				return (static_cast<quint32>(getWord3()) << 16) | getWord4();
 		default:
 			Q_ASSERT(false);
 		}
@@ -1226,6 +1259,26 @@ namespace Builder
 	bool CodeItem::isMoveMemCmd() const
 	{
 		return getOpcode() == LmCommand::Code::MOVMEM;
+	}
+
+	bool CodeItem::isMoveBitCmd() const
+	{
+		return getOpcode() == LmCommand::Code::MOVB;
+	}
+
+	bool CodeItem::isMoveConstCmd() const
+	{
+		return getOpcode() == LmCommand::Code::MOVC;
+	}
+
+	bool CodeItem::isMoveConst32Cmd() const
+	{
+		return getOpcode() == LmCommand::Code::MOVC32;
+	}
+
+	bool CodeItem::isSetMemCmd() const
+	{
+		return getOpcode() == LmCommand::Code::SETMEM;
 	}
 
 	bool CodeItem::generateBinCode(QByteArray* binCode) const

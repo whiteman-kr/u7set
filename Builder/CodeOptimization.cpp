@@ -3,6 +3,34 @@
 
 namespace Builder
 {
+
+	QString OptimizationInfo::typeStr(CodeOptimizationType t)
+	{
+		switch(t)
+		{
+		case CodeOptimizationType::None:
+			Q_ASSERT(false);
+			return "None";
+
+		case CodeOptimizationType::SequentialMoves:
+			return "SequentialMoves";
+
+		case CodeOptimizationType::SequentialConstMoves:
+			return "SequentialConstMoves";
+
+		case CodeOptimizationType::SequentialBitMoves:
+			return "SequentialBitMoves";
+
+		case CodeOptimizationType::BitFilling:
+			return "BitFilling";
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		return QString();
+	}
+
 	// ---------------------------------------------------------------------------------------
 	//
 	// SequenceOptimization class implementation
@@ -24,8 +52,11 @@ namespace Builder
 
 		CodeSnippetConstIterator firstSequenceCmd;
 		CodeSnippetConstIterator lastSequenceCmd;
+		CodeSnippetConstIterator it;
 
 		CodeSnippet optiCode;
+
+		optiCode.reserve(static_cast<int>(m_srcCode.itemsCount() * 1.2));
 
 		auto sequenceReinitVars =	[&]() -> void
 							{
@@ -43,22 +74,54 @@ namespace Builder
 								{
 									if (commandsInSequence > 1)
 									{
-										CodeSnippet replacementCode;
+										if (canOptimize() == true)
+										{
+											CodeSnippet replacementCode;
 
-										getReplacementCode(replacementCode);
+											getReplacementCode(replacementCode);
 
-										m_compiler.optimizeCode(m_optimizationType,
-																m_srcCode,
-																firstSequenceCmd,
-																lastSequenceCmd,
-																optiCode,
-																replacementCode);
+											m_compiler.optimizeCode(m_optimizationType,
+																	m_srcCode,
+																	firstSequenceCmd,
+																	lastSequenceCmd,
+																	optiCode,
+																	replacementCode);
+											lastSequenceCmd++;
+
+											while(lastSequenceCmd != it &&
+												  lastSequenceCmd != m_srcCode.end())
+											{
+												optiCode.append(*lastSequenceCmd);
+												lastSequenceCmd++;
+											}
+										}
+										else
+										{
+											// no optimization possible
+											//
+											while(firstSequenceCmd != it &&
+												  firstSequenceCmd != m_srcCode.end())
+											{
+												optiCode.append(*firstSequenceCmd);
+												firstSequenceCmd++;
+											}
+										}
 									}
 									else
 									{
-										// sequenceSize == 1
+										// commandsInSequence == 1
 										//
-										optiCode.append(*firstSequenceCmd);
+										do
+										{
+											optiCode.append(*firstSequenceCmd);
+											firstSequenceCmd++;
+
+											if (firstSequenceCmd == it)
+											{
+												break;
+											}
+										}
+										while(true);
 									}
 
 									sequenceReinitVars();
@@ -72,7 +135,7 @@ namespace Builder
 
 		sequenceReinitVars();
 
-		for(CodeSnippetConstIterator it = m_srcCode.begin(); it != m_srcCode.end(); it++)
+		for(it = m_srcCode.begin(); it != m_srcCode.end(); it++)
 		{
 			const CodeItem& cmd = *it;
 
@@ -82,7 +145,6 @@ namespace Builder
 				{
 					// continue sequence
 					//
-					lastSequenceCmd = it;
 				}
 				else
 				{
@@ -94,6 +156,8 @@ namespace Builder
 				continue;
 			}
 
+			// Commands processing
+
 			if (inSequence() == true)
 			{
 				if (isSequenceContinue(cmd) == true)
@@ -102,14 +166,12 @@ namespace Builder
 					//
 					commandsInSequence++;
 					lastSequenceCmd = it;
+					continue;
 				}
 				else
 				{
 					finalizeSequence();
-					optiCode.append(cmd);
 				}
-
-				continue;
 			}
 
 			if (canStartSequence(cmd) == true)
@@ -130,6 +192,11 @@ namespace Builder
 		m_srcCode.swap(optiCode);
 
 		return true;
+	}
+
+	const ModuleLogicCompiler& SequenceOptimization::compiler() const
+	{
+		return m_compiler;
 	}
 
 	// ---------------------------------------------------------------------------------------
@@ -197,6 +264,11 @@ namespace Builder
 		return false;
 	}
 
+	bool SequentialMovesOptimization::canOptimize() const
+	{
+		return inSequence();
+	}
+
 	void SequentialMovesOptimization::getReplacementCode(CodeSnippet& code)
 	{
 		Q_ASSERT(m_sequenceMoveSizeW > 1);
@@ -226,6 +298,377 @@ namespace Builder
 	bool SequentialMovesOptimization::inSequence() const
 	{
 		return (m_sequenceMoveSizeW != 0);
+	}
+
+	// ---------------------------------------------------------------------------------------
+	//
+	// SequentialConstMovesOptimization class implementation
+	//
+	// ---------------------------------------------------------------------------------------
+
+	SequentialConstMovesOptimization::SequentialConstMovesOptimization(ModuleLogicCompiler& compiler,
+															 CodeSnippet& srcCode,
+															 const LmMemoryMap& memoryMap) :
+		SequenceOptimization(CodeOptimizationType::SequentialConstMoves, compiler, srcCode),
+		m_memoryMap(memoryMap)
+	{
+	}
+
+	void SequentialConstMovesOptimization::reinitVars()
+	{
+		m_moveConst = 0;
+		m_sequenceMoveSizeW = 0;
+		m_sequenceStartDestAddr = 0;
+	}
+
+	bool SequentialConstMovesOptimization::canStartSequence(const CodeItem& cmd)
+	{
+		if (isAppropriateMoveCmd(cmd) == false)
+		{
+			return false;
+		}
+
+		if (cmd.isMoveConst32Cmd() == true)
+		{
+			quint32 const32 = cmd.getConst32();
+
+			if (( const32 >> 16) != (const32 & 0xFFFF))		// upper and lower words of const32 should be equal
+			{
+				return false;
+			}
+
+			m_moveConst = const32 & 0xFFFF;
+		}
+		else
+		{
+			m_moveConst = cmd.getConst16();
+		}
+
+		// init sequence vars
+		//
+		m_sequenceMoveSizeW = cmd.getMoveSizeW();
+		m_sequenceStartDestAddr = cmd.destAddr();
+
+		return true;
+	}
+
+	bool SequentialConstMovesOptimization::isSequenceContinue(const CodeItem& cmd)
+	{
+		Q_ASSERT(cmd.isCommand() == true);
+		Q_ASSERT(inSequence() == true);
+
+		if (isAppropriateMoveCmd(cmd) == false)
+		{
+			return false;
+		}
+
+		if (cmd.isMoveConst32Cmd() == true)
+		{
+			quint32 const32 = cmd.getConst32();
+
+			if (m_moveConst != (const32 >> 16) ||
+				m_moveConst != (const32 & 0xFFFF))
+			{
+				return false;
+			}
+		}
+		else
+		{
+			if (m_moveConst != cmd.getConst16())
+			{
+				return false;
+			}
+		}
+
+		quint16 destAddr = cmd.destAddr();
+
+		if (m_memoryMap.addressInBitMemory(destAddr) == true)
+		{
+			return false;
+		}
+
+		if (m_sequenceStartDestAddr + m_sequenceMoveSizeW == destAddr)
+		{
+			m_sequenceMoveSizeW += cmd.getMoveSizeW();
+			return true;
+		}
+
+		return false;
+	}
+
+	bool SequentialConstMovesOptimization::canOptimize() const
+	{
+		return inSequence();
+	}
+
+	void SequentialConstMovesOptimization::getReplacementCode(CodeSnippet& code)
+	{
+		Q_ASSERT(m_sequenceMoveSizeW > 1);
+
+		code.clear();
+
+		if (m_sequenceMoveSizeW == 2)
+		{
+			code << CodeItem().movConstUInt32(m_sequenceStartDestAddr,
+									  (static_cast<quint32>(m_moveConst) << 16) | m_moveConst);
+		}
+		else
+		{
+			code << CodeItem().setMem(m_sequenceStartDestAddr,
+									  static_cast<int>(m_moveConst),
+									  m_sequenceMoveSizeW);
+		}
+	}
+
+	bool SequentialConstMovesOptimization::isAppropriateMoveCmd(const CodeItem& cmd) const
+	{
+		return 	cmd.isMoveConstCmd() ||
+				cmd.isMoveConst32Cmd() ||
+				cmd.isSetMemCmd();
+	}
+
+	bool SequentialConstMovesOptimization::inSequence() const
+	{
+		return (m_sequenceMoveSizeW != 0);
+	}
+
+	// ---------------------------------------------------------------------------------------
+	//
+	// SequentialBitMovesOptimization class implementation
+	//
+	// ---------------------------------------------------------------------------------------
+
+	SequentialBitMovesOptimization::SequentialBitMovesOptimization(ModuleLogicCompiler& compiler,
+									CodeSnippet& srcCode) :
+		SequenceOptimization(CodeOptimizationType::SequentialBitMoves, compiler, srcCode),
+		m_bitAccAddr(compiler.bitAccumulatorAddress())
+	{
+	}
+
+	void SequentialBitMovesOptimization::reinitVars()
+	{
+		m_srcAddr = 0;
+		m_destAddr = 0;
+
+		m_bitField = 0;
+		m_bitCount = 0;
+
+		m_directMoveDestAddr = BAD_ADDRESS;
+	}
+
+	bool SequentialBitMovesOptimization::canStartSequence(const CodeItem& cmd)
+	{
+		if (cmd.isMoveBitCmd() == false)
+		{
+			return false;
+		}
+
+		auto srcAddr = cmd.srcBitAddr();
+		auto destAddr = cmd.destBitAddr();
+
+		if (srcAddr.bit() != destAddr.bit())
+		{
+			return false;
+		}
+
+		m_srcAddr = srcAddr.offset();
+		m_destAddr = destAddr.offset();
+
+		m_bitField = 0;
+		m_bitCount = 0;
+
+		return setBit(srcAddr.bit());
+	}
+
+	bool SequentialBitMovesOptimization::isSequenceContinue(const CodeItem& cmd)
+	{
+		if (cmd.isMoveBitCmd() == true)
+		{
+			auto srcAddr = cmd.srcBitAddr();
+			auto destAddr = cmd.destBitAddr();
+
+			if (srcAddr.bit() != destAddr.bit())
+			{
+				return false;
+			}
+
+			if (m_srcAddr != srcAddr.offset() ||
+				m_destAddr != destAddr.offset())
+			{
+				return false;
+			}
+
+			return setBit(srcAddr.bit());
+		}
+
+		// include command: mov memAddr, bitAcc
+		//
+		if (cmd.isMoveCmd() && cmd.srcAddr() == m_bitAccAddr &&		// this is a move command from bitAcc to memory
+			m_destAddr == m_bitAccAddr &&							// bits sequence was written in bit accumulator
+			m_bitCount == 16 &&	m_bitField == 0xFFFF)				// all bits already written
+		{
+			m_directMoveDestAddr = cmd.destAddr();
+			return true;
+		}
+
+		return false;
+	}
+
+	bool SequentialBitMovesOptimization::canOptimize() const
+	{
+		return m_bitCount == 16 && m_bitField == 0xFFFF;
+	}
+
+	void SequentialBitMovesOptimization::getReplacementCode(CodeSnippet& code)
+	{
+		if (m_directMoveDestAddr != BAD_ADDRESS)
+		{
+			code << CodeItem().mov(m_directMoveDestAddr, m_srcAddr);
+		}
+		else
+		{
+			code << CodeItem().mov(m_destAddr, m_srcAddr);
+		}
+	}
+
+	bool SequentialBitMovesOptimization::setBit(int bitNo)
+	{
+		if (bitNo < 0 || bitNo > 15)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		quint16 mask = 0x0001 << bitNo;
+
+		if ((m_bitField & mask) != 0)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		m_bitField |= mask;
+		m_bitCount++;
+
+		return true;
+	}
+
+	bool SequentialBitMovesOptimization::inSequence() const
+	{
+		return m_bitField != 0;
+	}
+
+	// ---------------------------------------------------------------------------------------
+	//
+	// BitFillingOptimization class implementation
+	//
+	// ---------------------------------------------------------------------------------------
+
+	BitFillingOptimization::BitFillingOptimization(ModuleLogicCompiler& compiler,
+									CodeSnippet& srcCode) :
+		SequenceOptimization(CodeOptimizationType::BitFilling, compiler, srcCode),
+		m_bitAccAddr(compiler.bitAccumulatorAddress())
+	{
+	}
+
+	void BitFillingOptimization::reinitVars()
+	{
+		m_srcBitAddr.reset();
+		m_destAddr = 0;
+
+		m_bitField = 0;
+		m_bitCount = 0;
+
+		m_directMoveDestAddr = BAD_ADDRESS;
+	}
+
+	bool BitFillingOptimization::canStartSequence(const CodeItem& cmd)
+	{
+		if (cmd.isMoveBitCmd() == false)
+		{
+			return false;
+		}
+
+		m_srcBitAddr = cmd.srcBitAddr();
+		m_destAddr = cmd.destBitAddr().offset();
+
+		m_bitField = 0;
+		m_bitCount = 0;
+
+		return setBit(cmd.destBitAddr().bit());
+	}
+
+	bool BitFillingOptimization::isSequenceContinue(const CodeItem& cmd)
+	{
+		if (cmd.isMoveBitCmd() == true)
+		{
+			auto srcBitAddr = cmd.srcBitAddr();
+			auto destBitAddr = cmd.destBitAddr();
+
+			if (srcBitAddr != m_srcBitAddr ||
+				destBitAddr.offset() != m_destAddr)
+			{
+				return false;
+			}
+
+			return setBit(destBitAddr.bit());
+		}
+
+		// include command: mov memAddr, bitAcc
+		//
+		if (cmd.isMoveCmd() && cmd.srcAddr() == m_bitAccAddr &&		// this is a move command from bitAcc to memory
+			m_destAddr == m_bitAccAddr &&							// bits sequence was written in bit accumulator
+			m_bitCount == 16 &&	m_bitField == 0xFFFF)				// all bits already written
+		{
+			m_directMoveDestAddr = cmd.destAddr();
+			return true;
+		}
+
+		return false;
+	}
+
+	bool BitFillingOptimization::canOptimize() const
+	{
+		return m_bitCount == 16 && m_bitField == 0xFFFF;
+	}
+
+	void BitFillingOptimization::getReplacementCode(CodeSnippet& code)
+	{
+		if (m_directMoveDestAddr != BAD_ADDRESS)
+		{
+			code << CodeItem().fill(Address16(m_directMoveDestAddr, 0), m_srcBitAddr);
+		}
+		else
+		{
+			code << CodeItem().fill(Address16(m_destAddr, 0), m_srcBitAddr);
+		}
+	}
+
+	bool BitFillingOptimization::setBit(int bitNo)
+	{
+		if (bitNo < 0 || bitNo > 15)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		quint16 mask = 0x0001 << bitNo;
+
+		if ((m_bitField & mask) != 0)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		m_bitField |= mask;
+		m_bitCount++;
+
+		return true;
+	}
+
+	bool BitFillingOptimization::inSequence() const
+	{
+		return m_bitField != 0;
 	}
 
 }

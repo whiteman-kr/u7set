@@ -213,6 +213,11 @@ namespace Builder
 						  CodeSnippetConstIterator end,
 						  CodeSnippet& optimizedCode,
 						  const CodeSnippet& replacementCode);
+
+		int bitAccumulatorAddress() const;
+		int wordAccumulatorAddress() const;
+		int wordAccumulator2Address() const;
+
 	private:
 		bool getLmAssociatedOptoPortsAreas(std::vector<CodeChecker::MemArea>* optoAreas, bool rx) const;
 
@@ -384,8 +389,11 @@ namespace Builder
 
 		bool listsUniquenessCheck() const;
 		bool listUniquenessCheck(QHash<UalSignal*, UalSignal*>& signalsMap, const QVector<UalSignal*>& signalList) const;
+
 		void sortSignalList(QVector<UalSignal*>& signalList);
 		void sortSignalList(QVector<const UalSignal*>& signalList);
+
+		void sortSignalListByUalAddr(QVector<UalSignal*>& signalList);
 
 		bool disposeSignalsInMemory();
 
@@ -470,6 +478,9 @@ namespace Builder
 		bool makeOptimizedAppLogicCode();
 
 		bool optimizeSequentialMoves(CodeSnippet& srcCode);
+		bool optimizeSequentialConstMoves(CodeSnippet& srcCode);
+		bool optimizeSequentialBitMoves(CodeSnippet& srcCode);
+		bool optimizeBitFilling(CodeSnippet& srcCode);
 
 		bool writeInfoFilesAfterOptimization();
 		bool checkOptimizedAppLogicCode();
@@ -720,7 +731,8 @@ namespace Builder
 		bool calculateCodeRunTime();
 
 		QString lmSubsystemEquipmentIdPath() const;
-		QString getInfoFileName(const QString& fileNameExtension, bool optimized) const;
+		QString getInfoFileName(const QString& fileNameExtension) const;
+		QString getSrcInfoFileName(const QString& fileNameExtension) const;
 
 		bool writeInfoFiles();
 		bool writeAsmFile(const AppLogicCode& code) const;
@@ -732,6 +744,8 @@ namespace Builder
 		void printOptiStatistics(const AppLogicCode& code,
 								 const AppLogicCode& optiCode,
 								 QStringList* outFile) const;
+		void printOptimizationsInfo(QStringList* outFile) const;
+
 		bool writeTuningInfoFile() const;
 		bool writeOptoModulesReport() const;
 		bool writeLoopbacksReport();
@@ -805,10 +819,6 @@ namespace Builder
 		bool partitionOfInteger(int number, const QVector<int>& availableParts, QVector<int>* partition);
 
 		void getChassisSignalsWithEquipmentID(QString& equipmentID, std::vector<const AppSignal *>* resultSignalList);
-
-		int bitAccumulatorAddress() const;
-		int wordAccumulatorAddress() const;
-		int wordAccumulator2Address() const;
 
 	private:
 		// input parameters
@@ -935,7 +945,7 @@ namespace Builder
 		QVector<UalSignal*> m_acquiredOutputBuses;						// acquired entirely Output Buses (in end of ALP phase should be copied from regBuf to IO modules memory)
 		QVector<UalSignal*> m_acquiredInternalBuses;					// acquired entirely Internal Buses
 		QVector<UalSignal*> m_acquiredOptoBuses;						// acquired entirely Opto Buses
-		QVector<UalSignal*> m_acquiredBusChildBuses;				// acquired entirely bus child Buses
+		QVector<UalSignal*> m_acquiredBusChildBuses;					// acquired entirely bus child Buses
 
 		QVector<UalSignal*> m_nonAcquiredOutputBuses;
 		QVector<UalSignal*> m_nonAcquiredInternalBuses;					// non acquired internal buses AND!

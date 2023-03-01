@@ -51,7 +51,20 @@ public:
 private:
 	int m_offset = BAD_ADDRESS;
 	int m_bit = BAD_ADDRESS;
+
+	friend bool operator < (const Address16& a, const Address16& b);
 };
+
+inline bool operator < (const Address16& a, const Address16& b)
+{
+	Q_ASSERT(a.m_offset != BAD_ADDRESS);
+	Q_ASSERT(a.m_bit != BAD_ADDRESS);
+
+	Q_ASSERT(b.m_offset != BAD_ADDRESS);
+	Q_ASSERT(b.m_bit != BAD_ADDRESS);
+
+	return a.bitAddress() < b.bitAddress();
+}
 
 //
 

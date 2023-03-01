@@ -43,8 +43,6 @@ namespace Builder
 		std::vector<Hardware::DeviceModule*>& lmAndBvbModules();
 		BuildInfo buildInfo();
 
-		static QString getInfoFileHeader(const Context* context);
-
 		//
 
 	private:

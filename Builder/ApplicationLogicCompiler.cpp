@@ -180,17 +180,6 @@ namespace Builder
 		return m_context->m_buildResultWriter->buildInfo();
 	}
 
-	QString ApplicationLogicCompiler::getInfoFileHeader(const Context* context)
-	{
-		TEST_PTR_RETURN_VALUE(context, QString());
-		TEST_PTR_RETURN_VALUE(context->m_buildResultWriter, QString());
-
-		BuildInfo bi = context->m_buildResultWriter->buildInfo();
-
-		return QString("Project: %1   BuildNo: %2   Build time: %3").
-					arg(bi.project).arg(bi.id).arg(bi.dateStr());
-	}
-
 	bool ApplicationLogicCompiler::isBuildCancelled()
 	{
 		if (QThread::currentThread()->isInterruptionRequested() == true)
@@ -556,8 +545,6 @@ namespace Builder
 
 			return result;
 		};
-
-		file << getInfoFileHeader(m_context);
 
 		file << reportGenerator("LM's resources usage", []
 												(std::tuple<QString, QString, double, double, double, double, double>& first,

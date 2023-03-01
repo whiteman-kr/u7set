@@ -377,16 +377,23 @@ namespace Builder
 		int getFbInstance() const { return m_code.getFbInstance(); }
 
 		quint16 srcAddr() const;
-		Address16 srcAddrBit() const;
+		Address16 srcBitAddr() const;
 
 		quint16 destAddr() const;
-		Address16 destAddrBit() const;
+		Address16 destBitAddr() const;
 
 		quint16 getMoveSizeW() const;
+
+		quint16 getConst16() const;
+		quint32 getConst32() const;
 
 		bool isMoveCmd() const;
 		bool isMove32Cmd() const;
 		bool isMoveMemCmd() const;
+		bool isMoveBitCmd() const;
+		bool isMoveConstCmd() const;
+		bool isMoveConst32Cmd() const;
+		bool isSetMemCmd() const;
 
 		bool isValidCommand() const { return m_code.getOpCode() != LmCommand::Code::NoCommand; }
 

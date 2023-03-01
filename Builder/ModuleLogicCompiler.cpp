@@ -362,8 +362,9 @@ namespace Builder
 			}
 		}
 
-		optimizedCode << CodeItem().setComment(QString("Optimization (%1) --------- Begin ---------").
-												arg(m_optimizationNo));
+		optimizedCode << CodeItem().setComment(QString("Optimization (%1) ----- Begin ----- %2").
+												arg(m_optimizationNo).
+												arg(OptimizationInfo::typeStr(optimizationType)));
 		optimizedCode << CodeItem();
 
 		int replacedCodeSizeW = 0;
@@ -398,7 +399,7 @@ namespace Builder
 
 		optimizedCode << CodeItem();
 
-		optimizedCode << CodeItem().setComment(QString("Optimization (%1) ---------- End ----------").
+		optimizedCode << CodeItem().setComment(QString("Optimization (%1) ------ End ------").
 											  arg(m_optimizationNo));
 		if (start != srcCode.end())
 		{
@@ -431,11 +432,25 @@ namespace Builder
 		Q_ASSERT(replacedCodeSizeW > replacementCodeSizeW);
 
 		optiInfo.optimizationsCount++;
-		optiInfo.decreasingCodeSizeW += replacedCodeSizeW - replacementCodeSizeW;
+		optiInfo.codeReductionSizeW += replacedCodeSizeW - replacementCodeSizeW;
 
 		return true;
 	}
 
+	int ModuleLogicCompiler::bitAccumulatorAddress() const
+	{
+		return m_memoryMap.bitAccumulatorAddress();
+	}
+
+	int ModuleLogicCompiler::wordAccumulatorAddress() const
+	{
+		return m_memoryMap.wordAccumulatorAddress();
+	}
+
+	int ModuleLogicCompiler::wordAccumulator2Address() const
+	{
+		return m_memoryMap.wordAccumulator2Address();
+	}
 
 	bool ModuleLogicCompiler::getLmAssociatedOptoPortsAreas(std::vector<CodeChecker::MemArea>* optoAreas, bool rx) const
 	{
@@ -4709,7 +4724,7 @@ namespace Builder
 		sortSignalList(m_acquiredDiscreteOptoSignals);
 		sortSignalList(m_acquiredDiscreteBusChildSignals);
 		sortSignalList(m_acquiredDiscreteConstSignals);
-		// m_acquiredDiscreteTuningSignals						// Not need to sort!
+		//	m_acquiredDiscreteTuningSignals;		sorting not required
 
 		sortSignalList(m_nonAcquiredDiscreteInputSignals);
 		sortSignalList(m_nonAcquiredDiscreteStrictOutputSignals);
@@ -4720,7 +4735,7 @@ namespace Builder
 		sortSignalList(m_acquiredAnalogInternalSignals);
 		sortSignalList(m_acquiredAnalogOptoSignals);
 		sortSignalList(m_acquiredAnalogBusChildSignals);
-		// m_acquiredAnalogTuningSignals						// Not need to sort!
+		//	m_acquiredAnalogTuningSignals;			sorting not required
 
 		sortSignalList(m_nonAcquiredAnalogInputSignals);
 		sortSignalList(m_nonAcquiredAnalogStrictOutputSignals);
@@ -4729,6 +4744,9 @@ namespace Builder
 		sortSignalList(m_acquiredInputBuses);
 		sortSignalList(m_acquiredOutputBuses);
 		sortSignalList(m_acquiredInternalBuses);
+
+		sortSignalList(m_acquiredOptoBuses);		// To DO sorting - group by OptoPortID, and next by addr in port buf for sequential move optimization
+
 		sortSignalList(m_acquiredBusChildBuses);
 
 		sortSignalList(m_nonAcquiredOutputBuses);
@@ -5774,6 +5792,15 @@ namespace Builder
 				  [] (const UalSignal* a, const UalSignal* b)
 					{
 						return a->appSignalID() < b->appSignalID();
+					});
+	}
+
+	void ModuleLogicCompiler::sortSignalListByUalAddr(QVector<UalSignal*>& signalList)
+	{
+		std::sort(signalList.begin(), signalList.end(),
+				  [] (UalSignal* a, UalSignal* b)
+					{
+						return a->ualAddr() < b->ualAddr();
 					});
 	}
 
@@ -7752,6 +7779,9 @@ namespace Builder
 		CodeOptimizationProcsToCallArray procs =
 		{
 			CODE_OPTIMIZATION_PROC_TO_CALL(ModuleLogicCompiler::optimizeSequentialMoves),
+			CODE_OPTIMIZATION_PROC_TO_CALL(ModuleLogicCompiler::optimizeSequentialConstMoves),
+			CODE_OPTIMIZATION_PROC_TO_CALL(ModuleLogicCompiler::optimizeSequentialBitMoves),
+			CODE_OPTIMIZATION_PROC_TO_CALL(ModuleLogicCompiler::optimizeBitFilling),
 		};
 
 		bool result = true;
@@ -7798,122 +7828,27 @@ namespace Builder
 		SequentialMovesOptimization smo(*this, srcCode, m_memoryMap);
 
 		return smo.optimize();
+	}
 
-/*		int commandsInSequence;
-		quint16 sequenceMoveSizeW;
+	bool ModuleLogicCompiler::optimizeSequentialConstMoves(CodeSnippet& srcCode)
+	{
+		SequentialConstMovesOptimization scmo(*this, srcCode, m_memoryMap);
 
-		CodeSnippetConstIterator firstSequenceCmd;
-		CodeSnippetConstIterator lastSequenceCmd;
+		return scmo.optimize();
+	}
 
-		quint16 sequenceStartSrcAddr;
-		quint16 sequenceStartDestAddr;
+	bool ModuleLogicCompiler::optimizeSequentialBitMoves(CodeSnippet& srcCode)
+	{
+		SequentialBitMovesOptimization sbmo(*this, srcCode);
 
-		CodeSnippet optiCode;
+		return sbmo.optimize();
+	}
 
-		CodeSnippetConstIterator it;
+	bool ModuleLogicCompiler::optimizeBitFilling(CodeSnippet& srcCode)
+	{
+		BitFillingOptimization bfo(*this, srcCode);
 
-		auto reinitVars =	[&]() -> void
-							{
-								commandsInSequence = 0;
-								sequenceMoveSizeW = 0;
-
-								firstSequenceCmd = srcCode.end();
-								lastSequenceCmd = srcCode.end();
-
-								sequenceStartSrcAddr = 0;
-								sequenceStartDestAddr = 0;
-							};
-
-		auto finalizeSequence =	[&]() -> void
-							{
-								if (commandsInSequence > 0)
-								{
-									if (commandsInSequence > 1)
-									{
-										CodeSnippet rc;		// replacement code
-
-										rc << CodeItem().movMem(sequenceStartDestAddr,
-																sequenceStartSrcAddr,
-																sequenceMoveSizeW);
-
-										optimizeCode(srcCode,
-													 firstSequenceCmd,
-													 lastSequenceCmd,
-													 optiCode, rc);
-									}
-									else
-									{
-										// sequenceSize == 1
-										//
-										optiCode.append(*firstSequenceCmd);
-									}
-
-									reinitVars();
-								}
-							};
-
-
-		reinitVars();
-
-		for(it = srcCode.begin(); it != srcCode.end(); it++)
-		{
-			const CodeItem& ci = *it;
-
-			if (ci.isMoveCmd() == false &&
-				ci.isMove32Cmd() == false &&
-				ci.isMoveMemCmd() == false)
-			{
-				finalizeSequence();
-
-				optiCode.append(*it);
-
-				continue;
-			}
-
-			quint16 srcAddr = ci.srcAddr();
-			quint16 destAddr = ci.destAddr();
-
-			if (m_memoryMap.addressInBitMemory(destAddr) == true)
-			{
-				finalizeSequence();
-
-				optiCode.append(*it);
-
-				continue;
-			}
-
-			quint16 moveSizeW = ci.getMoveSizeW();
-
-			if (firstSequenceCmd != srcCode.end() &&
-				sequenceStartSrcAddr + sequenceMoveSizeW == srcAddr &&
-				sequenceStartDestAddr + sequenceMoveSizeW == destAddr)
-			{
-				// continue sequence
-				//
-				commandsInSequence++;
-				sequenceMoveSizeW += moveSizeW;
-
-				lastSequenceCmd = it;
-				continue;
-			}
-
-			finalizeSequence();
-
-			// start sequence
-			//
-			commandsInSequence = 1;
-			sequenceMoveSizeW = moveSizeW;
-
-			firstSequenceCmd = it;
-			lastSequenceCmd = it;
-
-			sequenceStartSrcAddr = srcAddr;
-			sequenceStartDestAddr = destAddr;
-		}
-
-		srcCode.swap(optiCode);
-
-		return true;  */
+		return bfo.optimize();
 	}
 
 	bool ModuleLogicCompiler::checkOptimizedAppLogicCode()
@@ -7927,7 +7862,6 @@ namespace Builder
 	{
 		TEST_PTR_RETURN_FALSE(code);
 
-		code->comment_nl(ApplicationLogicCompiler::getInfoFileHeader(m_context));
 		code->comment(QString("LM equipmentID: %1").arg(lmEquipmentID()));
 		code->comment_nl(QString("LM description: %1, version %2").
 								arg(m_lmDescription->name()).
@@ -12604,11 +12538,11 @@ namespace Builder
 
 		QString commentStr;
 
-		for(UalSignal* ualAddr : m_acquiredDiscreteTuningSignals)
+		for(UalSignal* ualSignal : m_acquiredDiscreteTuningSignals)
 		{
-			TEST_PTR_CONTINUE(ualAddr);
+			TEST_PTR_CONTINUE(ualSignal);
 
-			AppSignal* s = ualAddr->getTunableSignal();
+			AppSignal* s = ualSignal->getTunableSignal();
 
 			TEST_PTR_CONTINUE(s);
 
@@ -12836,17 +12770,17 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyAcquiredInputBusesInRegBuf(CodeSnippet* code)
 	{
-		return copyBusesToRegBuf("Copy aquired Input Buses to RegBuf", m_acquiredInputBuses, code);
+		return copyBusesToRegBuf("Copy acquired Input Buses to RegBuf", m_acquiredInputBuses, code);
 	}
 
 	bool ModuleLogicCompiler::copyAcquiredBusChildBusesInRegBuf(CodeSnippet* code)
 	{
-		return copyBusesToRegBuf("Copy aquired bus child Buses to RegBuf", m_acquiredBusChildBuses, code);
+		return copyBusesToRegBuf("Copy acquired bus child Buses to RegBuf", m_acquiredBusChildBuses, code);
 	}
 
 	bool ModuleLogicCompiler::copyAcquiredOptoBusesInRegBuf(CodeSnippet* code)
 	{
-		return copyBusesToRegBuf("Copy aquired opto Buses to regBuf", m_acquiredOptoBuses, code);
+		return copyBusesToRegBuf("Copy acquired opto Buses to regBuf", m_acquiredOptoBuses, code);
 	}
 
 	bool ModuleLogicCompiler::copyBusesToRegBuf(const QString& comment, const QVector<UalSignal*>& buses, CodeSnippet* code)
@@ -14863,18 +14797,17 @@ namespace Builder
 		return QString("%1/%2").arg(m_lmSubsystemID).arg(lmEquipmentID());
 	}
 
-	QString ModuleLogicCompiler::getInfoFileName(const QString& fileNameExtension, bool optimized) const
+	QString ModuleLogicCompiler::getInfoFileName(const QString& fileNameExtension) const
 	{
-		if (optimized == true)
-		{
-			return (QString("%1-%2-opti.%3").
-						arg(m_lmSubsystemID).
-						arg(m_lmNumber).
-						arg(fileNameExtension)).toLower();
-
-		}
-
 		return (QString("%1-%2.%3").
+					arg(m_lmSubsystemID).
+					arg(m_lmNumber).
+					arg(fileNameExtension)).toLower();
+	}
+
+	QString ModuleLogicCompiler::getSrcInfoFileName(const QString& fileNameExtension) const
+	{
+		return (QString("%1-%2-src.%3").
 					arg(m_lmSubsystemID).
 					arg(m_lmNumber).
 					arg(fileNameExtension)).toLower();
@@ -14910,7 +14843,8 @@ namespace Builder
 		code.getAsmCode(&asmCode);
 
 		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
-													   getInfoFileName("asm", code.optimized()), asmCode);
+									(code.optimized() ? getInfoFileName("asm") : getSrcInfoFileName("asm")),
+									 asmCode);
 
 		return (buildFile != nullptr);
 	}
@@ -14924,7 +14858,7 @@ namespace Builder
 							m_ualSignals.analogAndBusSignalsHeap().getHeapItemsLog());
 
 		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
-												getInfoFileName("mem", false), memFile);
+												getInfoFileName("mem"), memFile);
 		return (buildFile != nullptr);
 	}
 
@@ -14936,14 +14870,7 @@ namespace Builder
 
 		QStringList file;
 
-		//
-
-		file << ApplicationLogicCompiler::getInfoFileHeader(m_context);
-		file << Separator::EMPTY_STR;
-
 		file << QString("LM equipmentID: %1").arg(lmEquipmentID());
-
-		//
 
 		printCodeStatistics(idrCode, file, true);
 		printCodeStatistics(alpCode, file, true);
@@ -14953,7 +14880,8 @@ namespace Builder
 		//
 
 		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
-												getInfoFileName("stat", code.optimized()), file);
+										(code.optimized() ? getInfoFileName("stat") : getSrcInfoFileName("stat")),
+										 file);
 		return (buildFile != nullptr);
 	}
 
@@ -14961,8 +14889,6 @@ namespace Builder
 	{
 		QStringList file;
 
-		file << ApplicationLogicCompiler::getInfoFileHeader(m_context);
-		file << Separator::EMPTY_STR;
 		file << QString("LM equipmentID: %1").arg(lmEquipmentID());
 		file << Separator::EMPTY_STR;
 		file << Separator::EMPTY_STR;
@@ -14970,9 +14896,10 @@ namespace Builder
 		printOptiStatistics(m_idrCode, m_optiIdrCode, &file);
 		printOptiStatistics(m_alpCode, m_optiAlpCode, &file);
 		printOptiStatistics(m_appLogicCode, m_optiAppLogicCode, &file);
+		printOptimizationsInfo(&file);
 
 		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
-												getInfoFileName("rpt", true), file);
+												getInfoFileName("orpt"), file);
 		return (buildFile != nullptr);
 	}
 
@@ -15006,7 +14933,7 @@ namespace Builder
 		file << Separator::EMPTY_STR;
 
 		file << QString("         Metrics        |  Before  |  After   |   Diff   |  Diff, %");
-		file << QString("------------------------+----------+----------+----------+------------");
+		file << QString("------------------------+----------+----------+----------+----------");
 
 		int intDiff = optiCode.codeSizeW() - code.codeSizeW();
 		double percentDiff = (static_cast<double>(intDiff) * 100.0) /
@@ -15039,6 +14966,37 @@ namespace Builder
 
 		file << Separator::EMPTY_STR;
 		file << Separator::EMPTY_STR;
+	}
+
+	void ModuleLogicCompiler::printOptimizationsInfo(QStringList* outFile) const
+	{
+		TEST_PTR_RETURN(outFile);
+
+		QStringList& file = *outFile;
+
+		file << QString("   Optimization type    |  Count   | Code reduction");
+		file << QString("------------------------+----------+----------------");
+
+		int totalOptimizationCount = 0;
+		int totalCodeReduction = 0;
+
+		for(const auto& p : m_optimizationsInfo)
+		{
+			const OptimizationInfo& oi = p.second;
+
+			file << QString(" %1 | %2 | %3").
+							arg(OptimizationInfo::typeStr(oi.type), -22).
+							arg(oi.optimizationsCount, 8).
+							arg(oi.codeReductionSizeW, 8);
+
+			totalOptimizationCount += oi.optimizationsCount;
+			totalCodeReduction += oi.codeReductionSizeW;
+		}
+
+		file << QString("------------------------+----------+----------------");
+		file << QString("         Total          | %1 | %2").
+						arg(totalOptimizationCount, 8).
+						arg(totalCodeReduction, 8);
 	}
 
 	bool ModuleLogicCompiler::writeTuningInfoFile() const
@@ -15173,7 +15131,7 @@ namespace Builder
 		}
 
 		bool result = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
-											  getInfoFileName("tun", false), file);
+											  getInfoFileName("tun"), file);
 		return result;
 	}
 
@@ -15255,7 +15213,7 @@ namespace Builder
 		}
 
 		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
-												getInfoFileName("opto", false), file);
+												getInfoFileName("opto"), file);
 		return (buildFile != nullptr);
 	}
 
@@ -15266,7 +15224,7 @@ namespace Builder
 		m_loopbacks.writeReport(&file);
 
 		BuildFile* bf = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
-												getInfoFileName("loopbacks", false), file);
+												getInfoFileName("loopbacks"), file);
 
 		return bf != nullptr;
 	}
@@ -15283,7 +15241,7 @@ namespace Builder
 		m_ualSignals.getHeapsLog(&file);
 
 		BuildFile* bf = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(lmSubsystemEquipmentIdPath()),
-												getInfoFileName("heaps", false), file);
+												getInfoFileName("heaps"), file);
 
 		return bf != nullptr;
 	}
@@ -15294,7 +15252,7 @@ namespace Builder
 
 		QByteArray binCode;
 
-		m_appLogicCode.getBinCode(&binCode);
+		m_optiAppLogicCode.getBinCode(&binCode);
 
 		result &= calcAppLogicUniqueID(binCode);
 
@@ -16925,21 +16883,6 @@ namespace Builder
 
 			resultSignalList->push_back(it->second);
 		}
-	}
-
-	int ModuleLogicCompiler::bitAccumulatorAddress() const
-	{
-		return m_memoryMap.bitAccumulatorAddress();
-	}
-
-	int ModuleLogicCompiler::wordAccumulatorAddress() const
-	{
-		return m_memoryMap.wordAccumulatorAddress();
-	}
-
-	int ModuleLogicCompiler::wordAccumulator2Address() const
-	{
-		return m_memoryMap.wordAccumulator2Address();
 	}
 
 	// ---------------------------------------------------------------------------------------
