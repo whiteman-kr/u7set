@@ -41,6 +41,8 @@ public:
 	explicit AppDataSourcesWidget(const AdsSourceStateConnection& connection, QWidget* parent);
 	virtual ~AppDataSourcesWidget();
 
+	bool treeIsFocused() const;
+
 public slots:
 	void detailsClicked();
 
@@ -48,11 +50,10 @@ protected:
 	void timerEvent(QTimerEvent* event);
 
 private slots:
-	void slot_tuningSourcesArrived();
-
-	void on_treeWidget_itemDoubleClicked(QTreeWidgetItem *item, int column);
-
+	void tuningSourcesArrived();
+	void treeWidgetItemDoubleClicked(QTreeWidgetItem *item, int column);
 	void detailsDialogClosed(quint64 id);
+	void contextMenuRequested();
 
 private:
 	void update(bool refreshOnly);

@@ -40,6 +40,9 @@ signals:
 
 private:
 	ClientTuningSourcesWidget* m_tuningSourcesWidget = nullptr;
+	QPushButton* m_btnEnableControl = nullptr;
+	QPushButton* m_btnDisableControl = nullptr;
+
 
 
 };

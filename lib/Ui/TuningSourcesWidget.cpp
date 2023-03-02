@@ -15,7 +15,6 @@ DialogTuningSourceInfo::DialogTuningSourceInfo(std::vector<TuningTcpClient*> tcp
 	QHBoxLayout* l = new QHBoxLayout();
 
 	m_treeWidget = new QTreeWidget();
-
 	m_treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(m_treeWidget, &QTreeWidget::customContextMenuRequested,this, &DialogSourceInfo::prepareContextMenu);
 
@@ -430,26 +429,11 @@ TuningSourcesWidget::TuningSourcesWidget(std::vector<TuningTcpClient*> tcpClient
 	m_treeWidget = new QTreeWidget();
 	mainLayout->addWidget(m_treeWidget);
 
-	connect(m_treeWidget, &QTreeWidget::itemDoubleClicked, this, &TuningSourcesWidget::treeWidget_itemDoubleClicked);
-	connect(m_treeWidget, &QTreeWidget::itemSelectionChanged, this, &TuningSourcesWidget::treeWidget_itemSelectionChanged);
+	connect(m_treeWidget, &QTreeWidget::itemDoubleClicked, this, &TuningSourcesWidget::treeWidgetItemDoubleClicked);
+	connect(m_treeWidget, &QTreeWidget::itemSelectionChanged, this, &TuningSourcesWidget::treeWidgetItemSelectionChanged);
 
-	QHBoxLayout* bottomLayout = new QHBoxLayout();
-	mainLayout->addLayout(bottomLayout);
-
-	if (m_hasActivationControls == true)
-	{
-		m_btnEnableControl = new QPushButton(tr("Activate Control..."));
-		m_btnEnableControl->setEnabled(false);
-		connect(m_btnEnableControl, &QPushButton::clicked, this, &TuningSourcesWidget::enableControl_clicked);
-		bottomLayout->addWidget(m_btnEnableControl);
-
-		m_btnDisableControl = new QPushButton(tr("Deactivate Control..."));
-		m_btnDisableControl->setEnabled(false);
-		connect(m_btnDisableControl, &QPushButton::clicked, this, &TuningSourcesWidget::disableControl_clicked);
-		bottomLayout->addWidget(m_btnDisableControl);
-	}
-
-	bottomLayout->addStretch();
+	m_treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(m_treeWidget, &QTreeWidget::customContextMenuRequested, this, &TuningSourcesWidget::contextMenuRequested);
 
 	setLayout(mainLayout);
 
@@ -485,6 +469,11 @@ TuningSourcesWidget::~TuningSourcesWidget()
 {
 }
 
+bool TuningSourcesWidget::treeIsFocused() const
+{
+	return m_treeWidget->hasFocus();
+}
+
 void TuningSourcesWidget::setTuningTcpClients(std::vector<TuningTcpClient*> tcpClients)
 {
 	m_tuningTcpClients = tcpClients;
@@ -513,17 +502,15 @@ void TuningSourcesWidget::setTuningTcpClients(std::vector<TuningTcpClient*> tcpC
 
 void TuningSourcesWidget::detailsClicked()
 {
-	quint64 sourceId  = selectedSourceId();
-	if (sourceId == UNDEFINED_HASH)
+	auto sel = m_treeWidget->selectedItems();
+	if (sel.size() != 1)
 	{
 		return;
 	}
 
-	Hash lanControllerHash  = selectedLanControllerHash();
-	if (lanControllerHash == UNDEFINED_HASH)
-	{
-		return;
-	}
+	quint64 sourceId = sel[0]->data(columnIndex_SourceHash, Qt::UserRole).toULongLong();
+
+	Hash lanControllerHash = sel[0]->data(columnIndex_ControllerHash, Qt::UserRole).toULongLong();
 
 	auto it = m_sourceInfoDialogsMap.find(lanControllerHash);
 	if (it == m_sourceInfoDialogsMap.end())
@@ -542,6 +529,16 @@ void TuningSourcesWidget::detailsClicked()
 
 		UiTools::adjustDialogPlacement(dlg);
 	}
+}
+
+void TuningSourcesWidget::enableControlClicked()
+{
+	activateControl(true);
+}
+
+void TuningSourcesWidget::disableControlClicked()
+{
+	activateControl(false);
 }
 
 void TuningSourcesWidget::timerEvent(QTimerEvent* event)
@@ -564,6 +561,46 @@ void TuningSourcesWidget::tuningSourcesInfoArrived()
 	m_tuningSourcesInfoArrived = true;
 }
 
+void TuningSourcesWidget::contextMenuRequested()
+{
+	if (m_treeWidget->selectedItems().empty() == true)
+	{
+		return;
+	}
+
+	QMenu menu(this);
+
+	QAction action(tr("Details..."));
+	connect(&action, &QAction::triggered, this, [this](){
+		detailsClicked();
+	});
+
+	QAction actionActivate(tr("Activate..."));
+	actionActivate.setEnabled(m_buttonActivateEnabled);
+	connect(&actionActivate, &QAction::triggered, this, [this](){
+		enableControlClicked();
+	});
+
+	QAction actionDeactivate(tr("Deactivate..."));
+	actionDeactivate.setEnabled(m_buttonDeactivateEnabled);
+	connect(&actionDeactivate, &QAction::triggered, this, [this](){
+		disableControlClicked();
+	});
+
+	menu.addAction(&action);
+	if (m_hasActivationControls == true)
+	{
+		menu.addSeparator();
+		menu.addAction(&actionActivate);
+		menu.addAction(&actionDeactivate);
+
+	}
+
+	menu.exec(this->cursor().pos());
+
+	return;
+}
+
 void TuningSourcesWidget::updateAll()
 {
 	if (m_tuningSourcesInfoArrived == true)
@@ -577,27 +614,17 @@ void TuningSourcesWidget::updateAll()
 	enableActivationControls();
 }
 
-void TuningSourcesWidget::treeWidget_itemSelectionChanged()
+void TuningSourcesWidget::treeWidgetItemSelectionChanged()
 {
 	enableActivationControls();
 }
 
-void TuningSourcesWidget::treeWidget_itemDoubleClicked(QTreeWidgetItem *item, int column)
+void TuningSourcesWidget::treeWidgetItemDoubleClicked(QTreeWidgetItem *item, int column)
 {
 	Q_UNUSED(item);
 	Q_UNUSED(column);
 
 	QTimer::singleShot(10, this, &TuningSourcesWidget::detailsClicked);
-}
-
-void TuningSourcesWidget::enableControl_clicked()
-{
-	activateControl(true);
-}
-
-void TuningSourcesWidget::disableControl_clicked()
-{
-	activateControl(false);
 }
 
 void TuningSourcesWidget::detailsDialogClosed(Hash lanControllerHash)
@@ -615,8 +642,6 @@ void TuningSourcesWidget::detailsDialogClosed(Hash lanControllerHash)
 void TuningSourcesWidget::fillTuningSourcesInfo()
 {
 	m_treeWidget->clear();
-	m_sourceIdToSourceItemMap.clear();
-	m_controllerHashToControllerItemMap.clear();
 
 	for (const TuningTcpClient* client : m_tuningTcpClients)
 	{
@@ -624,33 +649,6 @@ void TuningSourcesWidget::fillTuningSourcesInfo()
 
 		for (const TuningSource& ts: sources)
 		{
-			// Create and fill source item
-			//
-
-			quint64 sourceId = ::calcHash(ts.equipmentId());
-
-			QTreeWidgetItem* sourceItem = nullptr;
-
-			auto sit = m_sourceIdToSourceItemMap.find(sourceId);
-			if (sit == m_sourceIdToSourceItemMap.end())
-			{
-				sourceItem = new QTreeWidgetItem();
-				sourceItem->setText(0, ts.equipmentId());
-				sourceItem->setData(columnIndex_SourceId, Qt::UserRole, sourceId);
-				m_sourceIdToSourceItemMap[sourceId] = sourceItem;
-				m_treeWidget->addTopLevelItem(sourceItem);
-			}
-			else
-			{
-				sourceItem = sit->second;
-			}
-
-			if (sourceItem == nullptr)
-			{
-				Q_ASSERT(false);
-				return;
-			}
-
 			// Create and fill controllers info items
 			//
 
@@ -658,32 +656,24 @@ void TuningSourcesWidget::fillTuningSourcesInfo()
 
 			for (int c = 0; c < ts.controllersCount(); c++)
 			{
-				Hash controllerHash = ::calcHash(ts.controllerEquipmentId(c));
-
 				QTreeWidgetItem* controllerItem = nullptr;
 
-				auto cit = m_controllerHashToControllerItemMap.find(controllerHash);
-				if (cit == m_controllerHashToControllerItemMap.end())
-				{
-					QStringList connectionStrings;
+				QString lanEquipmentId = ts.controllerEquipmentId(c);
 
-					QString lanEquipmentId = ts.controllerEquipmentId(c);
+				QStringList connectionStrings;
+				connectionStrings << lanEquipmentId;
+				connectionStrings << info.lancontrollerinfo()[c].tuningip().c_str();
+				connectionStrings << QString::number(info.lancontrollerinfo()[c].tuningport());
+				connectionStrings << info.subsystemchannel().c_str();
+				connectionStrings << info.subsystemid().c_str();
+				connectionStrings << QString::number(info.lmnumber());
 
-					connectionStrings << lanEquipmentId;
-					connectionStrings << info.lancontrollerinfo()[c].tuningip().c_str();
-					connectionStrings << QString::number(info.lancontrollerinfo()[c].tuningport());
-					connectionStrings << info.subsystemchannel().c_str();
-					connectionStrings << info.subsystemid().c_str();
-					connectionStrings << QString::number(info.lmnumber());
-
-					controllerItem = new QTreeWidgetItem(connectionStrings);
-					controllerItem->setData(columnIndex_ControllerHash, Qt::UserRole, controllerHash);
-					m_controllerHashToControllerItemMap[controllerHash] = controllerItem;
-					sourceItem->addChild(controllerItem);
-				}
+				controllerItem = new QTreeWidgetItem(connectionStrings);
+				controllerItem->setData(columnIndex_SourceHash, Qt::UserRole, ::calcHash(ts.equipmentId()));
+				controllerItem->setData(columnIndex_SourceEquipmentId, Qt::UserRole, ts.equipmentId());
+				controllerItem->setData(columnIndex_ControllerHash, Qt::UserRole, ::calcHash(lanEquipmentId));
+				m_treeWidget->addTopLevelItem(controllerItem);
 			}
-
-			sourceItem->setExpanded(true);
 		}
 	}
 
@@ -695,22 +685,6 @@ void TuningSourcesWidget::fillTuningSourcesInfo()
 	m_treeWidget->sortByColumn(static_cast<int>(Columns::EquipmentId), Qt::AscendingOrder);
 
 	m_treeWidget->setColumnWidth(static_cast<int>(Columns::State), 120);
-
-	if (m_hasActivationControls == true)
-	{
-		// Single control mode controls
-
-		if (m_btnEnableControl == nullptr || m_btnDisableControl == nullptr)
-		{
-			Q_ASSERT(m_btnEnableControl);
-			Q_ASSERT(m_btnDisableControl);
-			return;
-		}
-
-		m_btnEnableControl->setEnabled(false);
-		m_btnDisableControl->setEnabled(false);
-	}
-
 }
 
 void TuningSourcesWidget::updateTuningSourcesStates()
@@ -727,15 +701,23 @@ void TuningSourcesWidget::updateTuningSourcesStates()
 
 				Hash controllerHash = ::calcHash(QString::fromStdString(state.lanequipmentid()));
 
-				int here_asserts = 1;
-				auto it = m_controllerHashToControllerItemMap.find(controllerHash);
-				if (it == m_controllerHashToControllerItemMap.end())
+				QTreeWidgetItem* controllerItem = nullptr;
+				for (int h = 0; h < m_treeWidget->topLevelItemCount(); h++)
 				{
-					Q_ASSERT(false);
-					continue;
+					QTreeWidgetItem* item = m_treeWidget->topLevelItem((h));
+					if (item->data(columnIndex_ControllerHash, Qt::UserRole).toULongLong() == controllerHash)
+					{
+						controllerItem = item;
+						break;
+					}
 				}
 
-				QTreeWidgetItem* controllerItem = it->second;
+				if (controllerItem == nullptr)
+				{
+					int todo_source_reloading = 1;
+					//Q_ASSERT(controllerItem);
+					continue;
+				}
 
 				if (ts.valid() == false)
 				{
@@ -795,119 +777,52 @@ void TuningSourcesWidget::enableActivationControls()
 {
 	if (m_hasActivationControls == false)
 	{
+		Q_ASSERT(false);
 		return;
 	}
 
-	quint64 sourceId  = selectedSourceId();
-	if (sourceId == UNDEFINED_HASH)
+	bool buttonActivateEnabled = false;
+	bool buttonDeactivateEnabled = false;
+
+	auto sel = m_treeWidget->selectedItems();
+	if (sel.size() == 1)
 	{
-		return;
+		QString sourceEquipmentId = sel[0]->data(columnIndex_SourceEquipmentId, Qt::UserRole).toString();
+
+		TuningSourcesHelper::isActivationActionsAvailable(m_tuningTcpClients, sourceEquipmentId, &buttonActivateEnabled, &buttonDeactivateEnabled);
 	}
 
-	QTreeWidgetItem* item = m_sourceIdToSourceItemMap.at(sourceId);
-	if (item == nullptr)
+	if (buttonActivateEnabled != m_buttonActivateEnabled ||	buttonDeactivateEnabled != m_buttonDeactivateEnabled)
 	{
-		Q_ASSERT(item);
-		return;
+		m_buttonActivateEnabled = buttonActivateEnabled;
+		m_buttonDeactivateEnabled = buttonDeactivateEnabled;
+		emit activationControlsAccessChanged(m_buttonActivateEnabled, m_buttonDeactivateEnabled);
 	}
-
-	QString sourceEquipmentId = item->text(static_cast<int>(Columns::EquipmentId));
-
-	bool buttonEnableEnabled = false;
-	bool buttonDisableEnabled = false;
-
-	TuningSourcesHelper::isActivationActionsAvailable(m_tuningTcpClients, sourceEquipmentId, &buttonEnableEnabled, &buttonDisableEnabled);
-
-	m_btnEnableControl->setEnabled(buttonEnableEnabled);
-	m_btnDisableControl->setEnabled(buttonDisableEnabled);
 
 	return;
 }
 
 void TuningSourcesWidget::activateControl(bool enable)
 {
-	quint64 sourceId  = selectedSourceId();
-	if (sourceId == UNDEFINED_HASH)
+	if (m_hasActivationControls == false)
 	{
+		Q_ASSERT(false);
 		return;
 	}
 
-	QTreeWidgetItem* item = m_sourceIdToSourceItemMap.at(sourceId);
-	if (item == nullptr)
-	{
-		Q_ASSERT(item);
-		return;
-	}
-
-	QString sourceEquipmentId = item->text(static_cast<int>(Columns::EquipmentId));
-
-	if (login() == false)
-	{
-		return;
-	}
-
-	TuningSourcesHelper::activateTuningSourceControl(m_tuningTcpClients, sourceEquipmentId, enable, this);
-}
-
-quint64 TuningSourcesWidget::selectedSourceId() const
-{
 	auto sel = m_treeWidget->selectedItems();
-	if (sel.size() != 1)
+	if (sel.size() == 1)
 	{
-		return UNDEFINED_HASH;
-	}
+		QString sourceEquipmentId = sel[0]->data(columnIndex_SourceEquipmentId, Qt::UserRole).toString();
 
-	QTreeWidgetItem* item = sel[0];
-
-	if (item != nullptr)
-	{
-		if (item->parent() != nullptr)
+		if (login() == false)
 		{
-			// LAN controller is selected, parent item is source item
-			//
-			item = item->parent();
+			return;
 		}
 
-		auto findResult = std::find_if(std::begin(m_sourceIdToSourceItemMap),
-									   std::end(m_sourceIdToSourceItemMap),
-									   [item](const std::pair<quint64, QTreeWidgetItem*> &pair)
-		{
-			return pair.second == item;
-		});
-
-		if (findResult != std::end(m_sourceIdToSourceItemMap))
-		{
-			return findResult->first;
-		}
+		TuningSourcesHelper::activateTuningSourceControl(m_tuningTcpClients, sourceEquipmentId, enable, this);
 	}
 
-	return UNDEFINED_HASH;
+	return;
 }
 
-Hash TuningSourcesWidget::selectedLanControllerHash() const
-{
-	auto sel = m_treeWidget->selectedItems();
-	if (sel.size() != 1)
-	{
-		return UNDEFINED_HASH;
-	}
-
-	QTreeWidgetItem* item = sel[0];
-
-	if (item != nullptr && item->parent() != nullptr)
-	{
-		auto findResult = std::find_if(std::begin(m_controllerHashToControllerItemMap),
-									   std::end(m_controllerHashToControllerItemMap),
-									   [item](const std::pair<Hash, QTreeWidgetItem*> &pair)
-		{
-			return pair.second == item;
-		});
-
-		if (findResult != std::end(m_controllerHashToControllerItemMap))
-		{
-			return findResult->first;
-		}
-	}
-
-	return UNDEFINED_HASH;
-}

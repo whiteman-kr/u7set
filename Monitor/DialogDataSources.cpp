@@ -70,17 +70,31 @@ DialogDataSources::DialogDataSources(const MonitorConfigController& configContro
 
 	connect(&m_configController, &MonitorConfigController::configurationArrived, this, &DialogDataSources::slot_configurationArrived);
 
+	QHBoxLayout* buttonsLayout = new QHBoxLayout();
+	m_mainLayout->addLayout(buttonsLayout);
+
+	QPushButton* detailsButton = new QPushButton(tr("Details..."));
+	buttonsLayout->addWidget(detailsButton);
+	detailsButton->setFocusPolicy(Qt::NoFocus);
+	connect(detailsButton, &QPushButton::clicked, this, &DialogDataSources::detailsClicked);
+
+	buttonsLayout->addStretch();
+
+	QPushButton* closeButton = new QPushButton(tr("Close"));
+	buttonsLayout->addWidget(closeButton);
+	connect(closeButton, &QPushButton::clicked, this, &QDialog::reject);
+
 	// --
 	//
 	setLayout(m_mainLayout);
 
 	if (m_configController.configuration().tuningEnabled == true)
 	{
-		setMinimumSize(1024, 500);
+		setMinimumSize(1100, 500);
 	}
 	else
 	{
-		setMinimumSize(1024, 300);
+		setMinimumSize(1100, 300);
 	}
 
 	return;
@@ -105,11 +119,23 @@ void DialogDataSources::slot_configurationArrived(ConfigSettings configuration)
 
 	if (configuration.tuningEnabled == true)
 	{
-		setMinimumSize(1024, 500);
+		setMinimumSize(1100, 500);
 	}
 	{
-		setMinimumSize(1024, 300);
+		setMinimumSize(1100, 300);
 	}
 
 	return;
+}
+
+void DialogDataSources::detailsClicked()
+{
+	if (m_tuningSourcesWidget->treeIsFocused())
+	{
+		m_tuningSourcesWidget->detailsClicked();
+	}
+	else
+	{
+		m_appDataSourcesWidget->detailsClicked();
+	}
 }

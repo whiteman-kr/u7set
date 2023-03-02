@@ -49,10 +49,14 @@ public:
 	explicit TuningSourcesWidget(std::vector<TuningTcpClient*> tcpClients, bool hasActivationControls, QWidget* parent);
 	virtual ~TuningSourcesWidget();
 
+	bool treeIsFocused() const;
+
 	void setTuningTcpClients(std::vector<TuningTcpClient*> tcpClients);
 
 public slots:
 	void detailsClicked();
+	void enableControlClicked();
+	void disableControlClicked();
 
 protected:
 	void timerEvent(QTimerEvent* event);
@@ -60,32 +64,23 @@ protected:
 	virtual bool login();	// Override this function to ask password before activating/deactivating sources
 
 private slots:
-	void treeWidget_itemSelectionChanged();
-
-	void treeWidget_itemDoubleClicked(QTreeWidgetItem *item, int column);
-
-	void enableControl_clicked();
-
-	void disableControl_clicked();
-
+	void treeWidgetItemSelectionChanged();
+	void treeWidgetItemDoubleClicked(QTreeWidgetItem *item, int column);
 	void detailsDialogClosed(Hash lanControllerHash);
-
 	void tuningSourcesInfoArrived();
+	void contextMenuRequested();
 
 private:
 	void updateAll();
-
 	void fillTuningSourcesInfo();
-
 	void updateTuningSourcesStates();
-
 	void enableActivationControls();
-
 	void activateControl(bool enable);
 
-	quint64 selectedSourceId() const;
-	Hash selectedLanControllerHash() const;
+signals:
+	void activationControlsAccessChanged(bool activateEnabled, bool deactivateEnabled);
 
+private:
 	enum class Columns
 	{
 		EquipmentId,
@@ -103,30 +98,25 @@ private:
 
 		ColumnCount
 	};
-
-private:
-
 	QWidget* m_parent = nullptr;
 	QTreeWidget* m_treeWidget = nullptr;
-	QPushButton* m_btnEnableControl = nullptr;
-	QPushButton* m_btnDisableControl = nullptr;
 
 	int m_updateStateTimerId = -1;
 
 	bool m_hasActivationControls = false;
+	bool m_buttonActivateEnabled = false;
+	bool m_buttonDeactivateEnabled = false;
+
 
 	std::vector<TuningTcpClient*> m_tuningTcpClients;
 
-	static const int columnIndex_SourceId = 0;
-
-	static const int columnIndex_ControllerHash = 0;
+	static const int columnIndex_SourceHash = 0;
+	static const int columnIndex_SourceEquipmentId = 1;
+	static const int columnIndex_ControllerHash = 2;
 
 	bool m_tuningSourcesInfoArrived = false;
 
 	std::map<Hash, DialogTuningSourceInfo*> m_sourceInfoDialogsMap;	// Used for managing details dialogs. Key is LAN controller hash
-
-	std::map<quint64, QTreeWidgetItem*> m_sourceIdToSourceItemMap;
-	std::map<Hash, QTreeWidgetItem*> m_controllerHashToControllerItemMap;
 };
 
 

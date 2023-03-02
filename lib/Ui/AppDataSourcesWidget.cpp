@@ -42,7 +42,7 @@ DialogAppDataSourceInfo::DialogAppDataSourceInfo(const AdsSourceStateConnection&
 
 	setLayout(l);
 
-	setMinimumSize(640, 600);
+	setMinimumSize(700, 600);
 
 	QStringList headerLabels;
 	headerLabels << tr("Parameter");
@@ -273,8 +273,10 @@ AppDataSourcesWidget::AppDataSourcesWidget(const AdsSourceStateConnection& conne
 
 	m_treeWidget = new QTreeWidget();
 	mainLayout->addWidget(m_treeWidget);
+	connect(m_treeWidget, &QTreeWidget::itemDoubleClicked, this, &AppDataSourcesWidget::treeWidgetItemDoubleClicked);
 
-	connect(m_treeWidget, &QTreeWidget::itemDoubleClicked, this, &AppDataSourcesWidget::on_treeWidget_itemDoubleClicked);
+	m_treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(m_treeWidget, &QTreeWidget::customContextMenuRequested,this, &AppDataSourcesWidget::contextMenuRequested);
 
 	QHBoxLayout* bottomLayout = new QHBoxLayout();
 	mainLayout->addLayout(bottomLayout);
@@ -311,6 +313,11 @@ AppDataSourcesWidget::AppDataSourcesWidget(const AdsSourceStateConnection& conne
 
 AppDataSourcesWidget::~AppDataSourcesWidget()
 {
+}
+
+bool AppDataSourcesWidget::treeIsFocused() const
+{
+	return m_treeWidget->hasFocus();
 }
 
 void AppDataSourcesWidget::detailsClicked()
@@ -359,7 +366,7 @@ void AppDataSourcesWidget::timerEvent(QTimerEvent* event)
 	}
 }
 
-void AppDataSourcesWidget::slot_tuningSourcesArrived()
+void AppDataSourcesWidget::tuningSourcesArrived()
 {
 	update(false);
 }
@@ -383,7 +390,7 @@ void AppDataSourcesWidget::update(bool refreshOnly)
 		{
 			QStringList connectionStrings;
 
-			connectionStrings << adsState.info.moduleequipmentid().c_str();
+			connectionStrings << adsState.info.lancontrollerinfo()[0].equipmentid().c_str();
 			connectionStrings << adsState.info.lancontrollerinfo()[0].appdataip().c_str();
 			connectionStrings << QString::number(adsState.info.lancontrollerinfo()[0].appdataport());
 
@@ -479,7 +486,7 @@ void AppDataSourcesWidget::update(bool refreshOnly)
 	}
 }
 
-void AppDataSourcesWidget::on_treeWidget_itemDoubleClicked(QTreeWidgetItem *item, int column)
+void AppDataSourcesWidget::treeWidgetItemDoubleClicked(QTreeWidgetItem *item, int column)
 {
 	Q_UNUSED(item);
 	Q_UNUSED(column);
@@ -497,5 +504,24 @@ void AppDataSourcesWidget::detailsDialogClosed(quint64 id)
 	}
 
 	m_sourceInfoDialogsMap.erase(it);
-
 }
+
+void AppDataSourcesWidget::contextMenuRequested()
+{
+	if (m_treeWidget->selectedItems().empty() == true)
+	{
+		return;
+	}
+
+	QAction action(tr("Details..."));
+	connect(&action, &QAction::triggered, this, [this](){
+		detailsClicked();
+	});
+
+	QMenu menu(this);
+	menu.addAction(&action);
+	menu.exec(this->cursor().pos());
+
+	return;
+}
+
