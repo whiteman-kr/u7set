@@ -60,11 +60,9 @@ namespace Builder
 		std::vector<std::shared_ptr<VFrame30::LogicSchema>> m_appLogicSchemas;
 
 		std::shared_ptr<LmDescriptionSet> m_lmDescriptions;
-		std::shared_ptr<LmDescriptionSet> m_fscDescriptions;
 
 		std::vector<Hardware::DeviceModule*> m_lmModules;
-		std::vector<Hardware::DeviceModule*> m_lmAndBvbModules;
-		std::vector<Hardware::DeviceModule*> m_fscModules;
+		std::vector<Hardware::DeviceModule*> m_fscModules;		// includes LM and BVB modules
 
 		Sim::Profiles m_simProfiles;
 

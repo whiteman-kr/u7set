@@ -223,7 +223,7 @@ namespace Builder
 		m_db(&context->m_db),
 		m_deviceRoot(context->m_equipmentSet->root().get()),
 		m_fscModules(context->m_fscModules),
-		m_lmDescriptions(context->m_fscDescriptions.get()),
+		m_lmDescriptions(context->m_lmDescriptions.get()),
 		m_signalSet(context->m_signalSet.get()),
 		m_subsystems(context->m_subsystems.get()),
 		m_opticModuleStorage(context->m_opticModuleStorage.get()),
