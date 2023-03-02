@@ -6,10 +6,10 @@
 
 #include <QTreeWidget>
 
-DialogTuningSourceInfo::DialogTuningSourceInfo(std::vector<TuningTcpClient*> tcpClients, QWidget* parent, Hash m_sourceHash, Hash lanEquipmentHash) :
+DialogTuningSourceInfo::DialogTuningSourceInfo(std::vector<TuningTcpClient*> tcpClients, QWidget* parent, quint64 sourceId, Hash lanEquipmentHash) :
 	DialogSourceInfo(parent, lanEquipmentHash /*this is unique identifier, NOT sourceHash!*/),
 	m_tcpClients(tcpClients),
-	m_sourceHash(m_sourceHash),
+	m_sourceHash(sourceId),
 	m_lanEquipmentHash(lanEquipmentHash)
 {
 	QHBoxLayout* l = new QHBoxLayout();
@@ -513,8 +513,8 @@ void TuningSourcesWidget::setTuningTcpClients(std::vector<TuningTcpClient*> tcpC
 
 void TuningSourcesWidget::detailsClicked()
 {
-	Hash sourceHash  = selectedSourceHash();
-	if (sourceHash == UNDEFINED_HASH)
+	quint64 sourceId  = selectedSourceId();
+	if (sourceId == UNDEFINED_HASH)
 	{
 		return;
 	}
@@ -528,7 +528,7 @@ void TuningSourcesWidget::detailsClicked()
 	auto it = m_sourceInfoDialogsMap.find(lanControllerHash);
 	if (it == m_sourceInfoDialogsMap.end())
 	{
-		DialogTuningSourceInfo* dlg = new DialogTuningSourceInfo(m_tuningTcpClients, this, sourceHash, lanControllerHash);
+		DialogTuningSourceInfo* dlg = new DialogTuningSourceInfo(m_tuningTcpClients, this, sourceId, lanControllerHash);
 		connect(dlg, &DialogTuningSourceInfo::dialogClosed, this, &TuningSourcesWidget::detailsDialogClosed);
 		dlg->show();
 		dlg->activateWindow();
@@ -600,9 +600,9 @@ void TuningSourcesWidget::disableControl_clicked()
 	activateControl(false);
 }
 
-void TuningSourcesWidget::detailsDialogClosed(Hash hash)
+void TuningSourcesWidget::detailsDialogClosed(Hash lanControllerHash)
 {
-	auto it = m_sourceInfoDialogsMap.find(hash);
+	auto it = m_sourceInfoDialogsMap.find(lanControllerHash);
 	if (it == m_sourceInfoDialogsMap.end())
 	{
 		assert(false);
@@ -615,7 +615,7 @@ void TuningSourcesWidget::detailsDialogClosed(Hash hash)
 void TuningSourcesWidget::fillTuningSourcesInfo()
 {
 	m_treeWidget->clear();
-	m_sourceHashToSourceItemMap.clear();
+	m_sourceIdToSourceItemMap.clear();
 	m_controllerHashToControllerItemMap.clear();
 
 	for (const TuningTcpClient* client : m_tuningTcpClients)
@@ -626,17 +626,18 @@ void TuningSourcesWidget::fillTuningSourcesInfo()
 		{
 			// Create and fill source item
 			//
-			Hash sourceHash = ::calcHash(ts.equipmentId());
+
+			quint64 sourceId = ::calcHash(ts.equipmentId());
 
 			QTreeWidgetItem* sourceItem = nullptr;
 
-			auto sit = m_sourceHashToSourceItemMap.find(sourceHash);
-			if (sit == m_sourceHashToSourceItemMap.end())
+			auto sit = m_sourceIdToSourceItemMap.find(sourceId);
+			if (sit == m_sourceIdToSourceItemMap.end())
 			{
 				sourceItem = new QTreeWidgetItem();
 				sourceItem->setText(0, ts.equipmentId());
-				sourceItem->setData(columnIndex_SourceHash, Qt::UserRole, sourceHash);
-				m_sourceHashToSourceItemMap[sourceHash] = sourceItem;
+				sourceItem->setData(columnIndex_SourceId, Qt::UserRole, sourceId);
+				m_sourceIdToSourceItemMap[sourceId] = sourceItem;
 				m_treeWidget->addTopLevelItem(sourceItem);
 			}
 			else
@@ -726,6 +727,7 @@ void TuningSourcesWidget::updateTuningSourcesStates()
 
 				Hash controllerHash = ::calcHash(QString::fromStdString(state.lanequipmentid()));
 
+				int here_asserts = 1;
 				auto it = m_controllerHashToControllerItemMap.find(controllerHash);
 				if (it == m_controllerHashToControllerItemMap.end())
 				{
@@ -796,13 +798,13 @@ void TuningSourcesWidget::enableActivationControls()
 		return;
 	}
 
-	Hash sourceHash  = selectedSourceHash();
-	if (sourceHash == UNDEFINED_HASH)
+	quint64 sourceId  = selectedSourceId();
+	if (sourceId == UNDEFINED_HASH)
 	{
 		return;
 	}
 
-	QTreeWidgetItem* item = m_sourceHashToSourceItemMap.at(sourceHash);
+	QTreeWidgetItem* item = m_sourceIdToSourceItemMap.at(sourceId);
 	if (item == nullptr)
 	{
 		Q_ASSERT(item);
@@ -824,13 +826,13 @@ void TuningSourcesWidget::enableActivationControls()
 
 void TuningSourcesWidget::activateControl(bool enable)
 {
-	Hash sourceHash  = selectedSourceHash();
-	if (sourceHash == UNDEFINED_HASH)
+	quint64 sourceId  = selectedSourceId();
+	if (sourceId == UNDEFINED_HASH)
 	{
 		return;
 	}
 
-	QTreeWidgetItem* item = m_sourceHashToSourceItemMap.at(sourceHash);
+	QTreeWidgetItem* item = m_sourceIdToSourceItemMap.at(sourceId);
 	if (item == nullptr)
 	{
 		Q_ASSERT(item);
@@ -847,7 +849,7 @@ void TuningSourcesWidget::activateControl(bool enable)
 	TuningSourcesHelper::activateTuningSourceControl(m_tuningTcpClients, sourceEquipmentId, enable, this);
 }
 
-Hash TuningSourcesWidget::selectedSourceHash() const
+quint64 TuningSourcesWidget::selectedSourceId() const
 {
 	auto sel = m_treeWidget->selectedItems();
 	if (sel.size() != 1)
@@ -866,14 +868,14 @@ Hash TuningSourcesWidget::selectedSourceHash() const
 			item = item->parent();
 		}
 
-		auto findResult = std::find_if(std::begin(m_sourceHashToSourceItemMap),
-									   std::end(m_sourceHashToSourceItemMap),
-									   [item](const std::pair<Hash, QTreeWidgetItem*> &pair)
+		auto findResult = std::find_if(std::begin(m_sourceIdToSourceItemMap),
+									   std::end(m_sourceIdToSourceItemMap),
+									   [item](const std::pair<quint64, QTreeWidgetItem*> &pair)
 		{
 			return pair.second == item;
 		});
 
-		if (findResult != std::end(m_sourceHashToSourceItemMap))
+		if (findResult != std::end(m_sourceIdToSourceItemMap))
 		{
 			return findResult->first;
 		}

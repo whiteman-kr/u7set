@@ -8,16 +8,16 @@
 // DialogAppDataSourceInfo
 //
 
-DialogAppDataSourceInfo::DialogAppDataSourceInfo(const AdsSourceStateConnection& adsSourceStateConnection, QWidget* parent,  Hash sourceHash) :
-	DialogSourceInfo(parent, sourceHash),
+DialogAppDataSourceInfo::DialogAppDataSourceInfo(const AdsSourceStateConnection& adsSourceStateConnection, QWidget* parent,  quint64 id) :
+	DialogSourceInfo(parent, id),
 	m_adsSourceStateConnection(adsSourceStateConnection)
 {
 	std::vector<AppDataSourceState> adsStates = m_adsSourceStateConnection.appDataSourceStates();
 
 	auto foundState = std::find_if(adsStates.begin(), adsStates.end(),
-		[&sourceHash](const AppDataSourceState& state)
+		[&id](const AppDataSourceState& state)
 		{
-			return state.id() == sourceHash;
+			return state.id() == id;
 		});
 
 	if (foundState == adsStates.end())
@@ -137,7 +137,7 @@ void DialogAppDataSourceInfo::updateData()
 	auto adsState = std::find_if(adsStates.begin(), adsStates.end(),
 		[this](const AppDataSourceState& state)
 		{
-			return state.id() == m_sourceHash;
+			return state.id() == m_dialogId;
 		});
 
 	// If state was not found in <closeInterval> seconds - close the dialog
@@ -322,17 +322,17 @@ void AppDataSourcesWidget::detailsClicked()
 		return;
 	}
 
-	Hash hash = item->data(columnIndex_Hash, Qt::UserRole).value<Hash>();
+	quint64 id = item->data(columnIndex_Id, Qt::UserRole).value<quint64>();
 
-	auto it = m_sourceInfoDialogsMap.find(hash);
+	auto it = m_sourceInfoDialogsMap.find(id);
 	if (it == m_sourceInfoDialogsMap.end())
 	{
-		DialogAppDataSourceInfo* dlg = new DialogAppDataSourceInfo(m_adsSourceStateConnection, this, hash);
+		DialogAppDataSourceInfo* dlg = new DialogAppDataSourceInfo(m_adsSourceStateConnection, this, id);
 		connect(dlg, &DialogAppDataSourceInfo::dialogClosed, this, &AppDataSourcesWidget::detailsDialogClosed);
 		dlg->show();
 		dlg->activateWindow();
 
-		m_sourceInfoDialogsMap[hash] = dlg;
+		m_sourceInfoDialogsMap[id] = dlg;
 	}
 	else
 	{
@@ -394,7 +394,7 @@ void AppDataSourcesWidget::update(bool refreshOnly)
 
 			QTreeWidgetItem* item = new QTreeWidgetItem(connectionStrings);
 
-			item->setData(columnIndex_Hash, Qt::UserRole, adsState.id());
+			item->setData(columnIndex_Id, Qt::UserRole, adsState.id());
 
 			m_treeWidget->addTopLevelItem(item);
 		}
@@ -409,12 +409,12 @@ void AppDataSourcesWidget::update(bool refreshOnly)
 			continue;
 		}
 
-		Hash hash = item->data(columnIndex_Hash, Qt::UserRole).toULongLong();
+		quint64 id = item->data(columnIndex_Id, Qt::UserRole).toULongLong();
 
 		auto adsState = std::find_if(adsStates.begin(), adsStates.end(),
-			[&hash](const AppDataSourceState& state)
+			[&id](const AppDataSourceState& state)
 			{
-				return state.id() == hash;
+				return state.id() == id;
 			});
 
 		if (adsState == adsStates.end())
@@ -487,12 +487,12 @@ void AppDataSourcesWidget::on_treeWidget_itemDoubleClicked(QTreeWidgetItem *item
 	QTimer::singleShot(10, this, &AppDataSourcesWidget::detailsClicked);
 }
 
-void AppDataSourcesWidget::detailsDialogClosed(Hash hash)
+void AppDataSourcesWidget::detailsDialogClosed(quint64 id)
 {
-	auto it = m_sourceInfoDialogsMap.find(hash);
+	auto it = m_sourceInfoDialogsMap.find(id);
 	if (it == m_sourceInfoDialogsMap.end())
 	{
-		//Q_ASSERT(false);
+		Q_ASSERT(false);
 		return;
 	}
 

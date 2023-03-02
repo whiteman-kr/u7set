@@ -2,14 +2,13 @@
 #define DIALOGSOURCEINFO_H
 
 #include <QDialog>
-#include "../CommonLib/Hash.h"
 
 class DialogSourceInfo : public QDialog
 {
 	Q_OBJECT
 
 protected:
-	DialogSourceInfo(QWidget* parent, Hash uniqueHash);
+	DialogSourceInfo(QWidget* parent, quint64 dialogId);
 	virtual ~DialogSourceInfo();
 
 protected:
@@ -30,13 +29,13 @@ public slots:
 	void prepareContextMenu(const QPoint& pos);
 
 signals:
-	void dialogClosed(Hash sourceHash);
+	void dialogClosed(quint64 dialogId);
 
 public:
 	static QColor dataItemErrorColor;
 
 protected:
-	Hash m_sourceHash;
+	quint64 m_dialogId;
 	QTreeWidget* m_treeWidget = nullptr;
 
 public:

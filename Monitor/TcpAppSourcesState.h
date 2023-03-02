@@ -12,7 +12,7 @@ class AppDataSourceState
 public:
 	AppDataSourceState();
 
-	Hash id() const;
+	quint64 id() const;
 	QString equipmentId() const;
 
 	void setNewState(const ::Network::AppDataSourceState& newState);
@@ -53,7 +53,6 @@ public:
 	TcpAppSourcesState(const MonitorConfigController& configController, const MonitorSettings::AppDataService& ads, ILogFile* logFile);
 	virtual ~TcpAppSourcesState();
 
-	std::vector<Hash> appDataSourceHashes() const;
 	std::vector<AppDataSourceState> appDataSourceStates() const;
 
 	int sourceErrorCount();
@@ -88,7 +87,7 @@ private:
 	int m_requestPeriod = 100;
 
 	mutable QReadWriteLock m_appDataSourceStatesLock;	// For access to m_appDataSourceStates
-	std::map<Hash, AppDataSourceState> m_appDataSourceStates;
+	std::map<quint64, AppDataSourceState> m_appDataSourceStates;	// Key is source unique id
 
 	// Cache protobuf messages
 	//

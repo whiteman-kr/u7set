@@ -17,7 +17,7 @@ class DialogAppDataSourceInfo : public DialogSourceInfo
 	Q_OBJECT
 
 public:
-	explicit DialogAppDataSourceInfo(const AdsSourceStateConnection& adsSourceStateConnection, QWidget* parent, Hash sourceHash);
+	explicit DialogAppDataSourceInfo(const AdsSourceStateConnection& adsSourceStateConnection, QWidget* parent, quint64 id);
 	virtual ~DialogAppDataSourceInfo();
 
 private:
@@ -52,7 +52,7 @@ private slots:
 
 	void on_treeWidget_itemDoubleClicked(QTreeWidgetItem *item, int column);
 
-	void detailsDialogClosed(Hash hash);
+	void detailsDialogClosed(quint64 id);
 
 private:
 	void update(bool refreshOnly);
@@ -89,10 +89,10 @@ private:
 
 	QWidget* m_parent = nullptr;
 
-	static const int columnIndex_Hash = 0;
+	static const int columnIndex_Id = 0;
 	static const int columnIndex_EquipmentId = 1;
 
-	std::map<Hash, DialogAppDataSourceInfo*> m_sourceInfoDialogsMap;
+	std::map<quint64, DialogAppDataSourceInfo*> m_sourceInfoDialogsMap; // Used for managing details dialogs. Key is source id (64-bit value)
 };
 
 #endif // DialogAppDataSources_H

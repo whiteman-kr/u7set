@@ -4,6 +4,7 @@
 #include <QDialog>
 
 #include "DialogSourceInfo.h"
+#include "../CommonLib/Hash.h"
 
 class TuningTcpClient;
 class TuningSource;
@@ -17,7 +18,7 @@ class DialogTuningSourceInfo : public DialogSourceInfo
 	Q_OBJECT
 
 public:
-	explicit DialogTuningSourceInfo(std::vector<TuningTcpClient*> tcpClients, QWidget* parent, Hash m_sourceHash, Hash lanEquipmentHash);
+	explicit DialogTuningSourceInfo(std::vector<TuningTcpClient*> tcpClients, QWidget* parent, quint64 sourceId, Hash lanEquipmentHash);
 	virtual ~DialogTuningSourceInfo();
 
 	void setTuningTcpClients(std::vector<TuningTcpClient*> tcpClients);
@@ -32,6 +33,7 @@ private:
 
 private:
 	std::vector<TuningTcpClient*> m_tcpClients;
+	int m_noStateInfoTimeout = 0;
 
 	TuningTcpClient* m_activeTcpClient = nullptr;
 
@@ -66,7 +68,7 @@ private slots:
 
 	void disableControl_clicked();
 
-	void detailsDialogClosed(Hash hash);
+	void detailsDialogClosed(Hash lanControllerHash);
 
 	void tuningSourcesInfoArrived();
 
@@ -81,7 +83,7 @@ private:
 
 	void activateControl(bool enable);
 
-	Hash selectedSourceHash() const;
+	quint64 selectedSourceId() const;
 	Hash selectedLanControllerHash() const;
 
 	enum class Columns
@@ -115,15 +117,15 @@ private:
 
 	std::vector<TuningTcpClient*> m_tuningTcpClients;
 
-	static const int columnIndex_SourceHash = 0;
+	static const int columnIndex_SourceId = 0;
 
 	static const int columnIndex_ControllerHash = 0;
 
 	bool m_tuningSourcesInfoArrived = false;
 
-	std::map<Hash, DialogTuningSourceInfo*> m_sourceInfoDialogsMap;	// Used for managing details dialogs. Key is "Source ID + Channel" Hash.
+	std::map<Hash, DialogTuningSourceInfo*> m_sourceInfoDialogsMap;	// Used for managing details dialogs. Key is LAN controller hash
 
-	std::map<Hash, QTreeWidgetItem*> m_sourceHashToSourceItemMap;
+	std::map<quint64, QTreeWidgetItem*> m_sourceIdToSourceItemMap;
 	std::map<Hash, QTreeWidgetItem*> m_controllerHashToControllerItemMap;
 };
 

@@ -12,7 +12,7 @@ AppDataSourceState::AppDataSourceState()
 	m_perviousStateLastUpdateTime = QDateTime::currentDateTime();
 }
 
-Hash AppDataSourceState::id() const
+quint64 AppDataSourceState::id() const
 {
 	return info.id();
 }
@@ -120,20 +120,6 @@ TcpAppSourcesState::TcpAppSourcesState(const MonitorConfigController& configCont
 TcpAppSourcesState::~TcpAppSourcesState()
 {
 	qDebug() << "TcpSourcesStateClient::~TcpSourcesStateClient()";
-}
-
-std::vector<Hash> TcpAppSourcesState::appDataSourceHashes() const
-{
-	std::vector<Hash> result;
-
-	QReadLocker l(&m_appDataSourceStatesLock);
-
-	for (const auto& it : m_appDataSourceStates)
-	{
-		result.push_back(it.first);
-	}
-
-	return result;
 }
 
 std::vector<AppDataSourceState> TcpAppSourcesState::appDataSourceStates() const
@@ -330,14 +316,10 @@ void TcpAppSourcesState::processAppDataSourcesInfo(const QByteArray& data)
 			AppDataSourceState ads;
 			ads.info = dsi;
 
-			Hash hash = ::calcHash(QString::fromStdString(ads.info.moduleequipmentid()));
+			quint64 id = dsi.id();
 
-			// TO DO
-			// Fix this bug https://jira.radiy.com/browse/RPCT-3273
-			//
-			//assert(m_appDataSourceStates.count(hash) == 0);
-
-			m_appDataSourceStates[hash] = ads;
+			assert(m_appDataSourceStates.count(id) == 0);
+			m_appDataSourceStates[id] = ads;
 		}
 	}
 
@@ -381,7 +363,7 @@ void TcpAppSourcesState::processAppDataSourcesState(const QByteArray& data)
 		{
 			const ::Network::AppDataSourceState& state = m_getAppDataSourcesStateReply.appdatasourcesstates(i);
 
-			Hash id = state.id();
+			quint64 id = state.id();
 
 			bool found = false;
 
