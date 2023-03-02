@@ -82,6 +82,7 @@ DialogDataSources::DialogDataSources(const MonitorConfigController& configContro
 
 	QPushButton* closeButton = new QPushButton(tr("Close"));
 	buttonsLayout->addWidget(closeButton);
+	closeButton->setFocusPolicy(Qt::NoFocus);
 	connect(closeButton, &QPushButton::clicked, this, &QDialog::reject);
 
 	// --

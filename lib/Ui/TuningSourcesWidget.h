@@ -67,14 +67,13 @@ private slots:
 	void treeWidgetItemSelectionChanged();
 	void treeWidgetItemDoubleClicked(QTreeWidgetItem *item, int column);
 	void detailsDialogClosed(Hash lanControllerHash);
-	void tuningSourcesInfoArrived();
 	void contextMenuRequested();
 
 private:
-	void updateAll();
-	void fillTuningSourcesInfo();
+	void updateData();
 	void updateTuningSourcesStates();
 	void enableActivationControls();
+
 	void activateControl(bool enable);
 
 signals:
@@ -113,8 +112,6 @@ private:
 	static const int columnIndex_SourceHash = 0;
 	static const int columnIndex_SourceEquipmentId = 1;
 	static const int columnIndex_ControllerHash = 2;
-
-	bool m_tuningSourcesInfoArrived = false;
 
 	std::map<Hash, DialogTuningSourceInfo*> m_sourceInfoDialogsMap;	// Used for managing details dialogs. Key is LAN controller hash
 };

@@ -65,6 +65,7 @@ DialogTuningSources::DialogTuningSources(std::vector<TuningTcpClient*> tcpClient
 
 	QPushButton* closeButton = new QPushButton(tr("Close"));
 	bottomLayout->addWidget(closeButton);
+	closeButton->setFocusPolicy(Qt::NoFocus);
 	connect(closeButton, &QPushButton::clicked, this, &QDialog::reject);
 
 	QVBoxLayout* l = new QVBoxLayout();

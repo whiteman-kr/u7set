@@ -478,13 +478,6 @@ void TuningSourcesWidget::setTuningTcpClients(std::vector<TuningTcpClient*> tcpC
 {
 	m_tuningTcpClients = tcpClients;
 
-	for (TuningTcpClient* client : m_tuningTcpClients)
-	{
-		connect(client, &TuningTcpClient::tuningSourcesInfoArrived, this, &TuningSourcesWidget::tuningSourcesInfoArrived);
-	}
-
-	fillTuningSourcesInfo();
-
 	// Set tuningTcpClients for open Details dialogs
 
 	for (auto it : m_sourceInfoDialogsMap)
@@ -547,18 +540,13 @@ void TuningSourcesWidget::timerEvent(QTimerEvent* event)
 
 	if  (event->timerId() == m_updateStateTimerId)
 	{
-		updateAll();
+		updateData();
 	}
 }
 
 bool TuningSourcesWidget::login()
 {
 	return true;
-}
-
-void TuningSourcesWidget::tuningSourcesInfoArrived()
-{
-	m_tuningSourcesInfoArrived = true;
 }
 
 void TuningSourcesWidget::contextMenuRequested()
@@ -601,22 +589,22 @@ void TuningSourcesWidget::contextMenuRequested()
 	return;
 }
 
-void TuningSourcesWidget::updateAll()
+void TuningSourcesWidget::updateData()
 {
-	if (m_tuningSourcesInfoArrived == true)
-	{
-		m_tuningSourcesInfoArrived = false;
-		fillTuningSourcesInfo();
-	}
-
 	updateTuningSourcesStates();
 
-	enableActivationControls();
+	if (m_hasActivationControls == true)
+	{
+		enableActivationControls();
+	}
 }
 
 void TuningSourcesWidget::treeWidgetItemSelectionChanged()
 {
-	enableActivationControls();
+	if (m_hasActivationControls == true)
+	{
+		enableActivationControls();
+	}
 }
 
 void TuningSourcesWidget::treeWidgetItemDoubleClicked(QTreeWidgetItem *item, int column)
@@ -639,9 +627,11 @@ void TuningSourcesWidget::detailsDialogClosed(Hash lanControllerHash)
 	m_sourceInfoDialogsMap.erase(it);
 }
 
-void TuningSourcesWidget::fillTuningSourcesInfo()
+void TuningSourcesWidget::updateTuningSourcesStates()
 {
-	m_treeWidget->clear();
+	bool newItemsCreated = false;
+
+	int controllersCount = 0;
 
 	for (const TuningTcpClient* client : m_tuningTcpClients)
 	{
@@ -649,21 +639,39 @@ void TuningSourcesWidget::fillTuningSourcesInfo()
 
 		for (const TuningSource& ts: sources)
 		{
-			// Create and fill controllers info items
-			//
-
 			const ::Network::DataSourceInfo& info = ts.info();
 
-			for (int c = 0; c < ts.controllersCount(); c++)
+			controllersCount += info.lancontrollerinfo_size();
+
+			// Find items which contain every LAN controller. If such item does not exist - create it
+			//
+			for (int i = 0; i < info.lancontrollerinfo_size(); i++)
 			{
+				QString lanEquipmentId = QString::fromStdString(info.lancontrollerinfo()[i].equipmentid());
+				Hash controllerHash = ::calcHash(lanEquipmentId);
+
 				QTreeWidgetItem* controllerItem = nullptr;
+				for (int h = 0; h < m_treeWidget->topLevelItemCount(); h++)
+				{
+					QTreeWidgetItem* item = m_treeWidget->topLevelItem((h));
+					if (item->data(columnIndex_ControllerHash, Qt::UserRole).toULongLong() == controllerHash)
+					{
+						controllerItem = item;
+						break;
+					}
+				}
 
-				QString lanEquipmentId = ts.controllerEquipmentId(c);
+				if (controllerItem != nullptr)
+				{
+					continue;	// Item for controller already exists
+				}
 
+				// Controller item does not exist - create and fill
+				//
 				QStringList connectionStrings;
 				connectionStrings << lanEquipmentId;
-				connectionStrings << info.lancontrollerinfo()[c].tuningip().c_str();
-				connectionStrings << QString::number(info.lancontrollerinfo()[c].tuningport());
+				connectionStrings << info.lancontrollerinfo()[i].tuningip().c_str();
+				connectionStrings << QString::number(info.lancontrollerinfo()[i].tuningport());
 				connectionStrings << info.subsystemchannel().c_str();
 				connectionStrings << info.subsystemid().c_str();
 				connectionStrings << QString::number(info.lmnumber());
@@ -673,28 +681,12 @@ void TuningSourcesWidget::fillTuningSourcesInfo()
 				controllerItem->setData(columnIndex_SourceEquipmentId, Qt::UserRole, ts.equipmentId());
 				controllerItem->setData(columnIndex_ControllerHash, Qt::UserRole, ::calcHash(lanEquipmentId));
 				m_treeWidget->addTopLevelItem(controllerItem);
+
+				newItemsCreated = true;
 			}
-		}
-	}
 
-	for (int i = 0; i < m_treeWidget->columnCount(); i++)
-	{
-		m_treeWidget->resizeColumnToContents(i);
-	}
+			// Find an item for each state and update it
 
-	m_treeWidget->sortByColumn(static_cast<int>(Columns::EquipmentId), Qt::AscendingOrder);
-
-	m_treeWidget->setColumnWidth(static_cast<int>(Columns::State), 120);
-}
-
-void TuningSourcesWidget::updateTuningSourcesStates()
-{
-	for (const TuningTcpClient* client : m_tuningTcpClients)
-	{
-		std::vector<TuningSource> sources = client->tuningSourcesInfo();
-
-		for (const TuningSource& ts: sources)
-		{
 			for (int i = 0; i < ts.statesCount(); i++)
 			{
 				const Network::TuningSourceState& state = ts.state(i);
@@ -714,8 +706,7 @@ void TuningSourcesWidget::updateTuningSourcesStates()
 
 				if (controllerItem == nullptr)
 				{
-					int todo_source_reloading = 1;
-					//Q_ASSERT(controllerItem);
+					Q_ASSERT(controllerItem);
 					continue;
 				}
 
@@ -768,6 +759,27 @@ void TuningSourcesWidget::updateTuningSourcesStates()
 				controllerItem->setText(static_cast<int>(Columns::ReplyCount), QString::number(state.replycount()));
 			}
 		}
+	}
+
+	// If items were created - adjust their width
+	//
+	if (newItemsCreated == true)
+	{
+		for (int i = 0; i < m_treeWidget->columnCount(); i++)
+		{
+			m_treeWidget->resizeColumnToContents(i);
+		}
+
+		m_treeWidget->sortByColumn(static_cast<int>(Columns::EquipmentId), Qt::AscendingOrder);
+
+		m_treeWidget->setColumnWidth(static_cast<int>(Columns::State), 120);
+	}
+
+	// If items count is more than controllers count - delete all and re-create them on next step
+	//
+	if (m_treeWidget->topLevelItemCount() > controllersCount)
+	{
+		m_treeWidget->clear();
 	}
 
 	return;
