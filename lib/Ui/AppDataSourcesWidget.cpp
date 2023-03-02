@@ -8,22 +8,25 @@
 // DialogAppDataSourceInfo
 //
 
-DialogAppDataSourceInfo::DialogAppDataSourceInfo(std::vector<TcpAppSourcesState*> tcpClients, QWidget* parent,  Hash sourceHash) :
+DialogAppDataSourceInfo::DialogAppDataSourceInfo(const AdsSourceStateConnection& adsSourceStateConnection, QWidget* parent,  Hash sourceHash) :
 	DialogSourceInfo(parent, sourceHash),
-	m_tcpClients(tcpClients)
+	m_adsSourceStateConnection(adsSourceStateConnection)
 {
-	bool ok = false;
+	std::vector<AppDataSourceState> adsStates = m_adsSourceStateConnection.appDataSourceStates();
 
-	setWindowTitle("Application Data Source");
-
-	for (TcpAppSourcesState* client : m_tcpClients)
-	{
-		AppDataSourceState adsState = client->appDataSourceState(sourceHash, &ok);
-		if (ok == true)
+	auto foundState = std::find_if(adsStates.begin(), adsStates.end(),
+		[&sourceHash](const AppDataSourceState& state)
 		{
-			setWindowTitle(tr("Application Data Source - ") + adsState.state.lmequipmentid().c_str());
-			break;
-		}
+			return state.id() == sourceHash;
+		});
+
+	if (foundState == adsStates.end())
+	{
+		setWindowTitle("Application Data Source - unknown");
+	}
+	else
+	{
+		setWindowTitle(tr("Application Data Source - ") + foundState->state.lmequipmentid().c_str());
 	}
 
 	//
@@ -127,35 +130,25 @@ DialogAppDataSourceInfo::~DialogAppDataSourceInfo()
 
 }
 
-void DialogAppDataSourceInfo::setAppSourceTcpClients(std::vector<TcpAppSourcesState*> tcpClients)
-{
-	m_tcpClients = tcpClients;
-}
-
 void DialogAppDataSourceInfo::updateData()
 {
-	AppDataSourceState ds;
+	std::vector<AppDataSourceState> adsStates = m_adsSourceStateConnection.appDataSourceStates();
 
-	// Find state in TCP clients
-	//
-	bool ok = false;
-
-	for (TcpAppSourcesState* client : m_tcpClients)
-	{
-		ds = client->appDataSourceState(m_sourceHash, &ok);
-		if (ok == true)
+	auto adsState = std::find_if(adsStates.begin(), adsStates.end(),
+		[this](const AppDataSourceState& state)
 		{
-			break;
-		}
-	}
+			return state.id() == m_sourceHash;
+		});
 
-	// If state was not found in 10 seconds - close dialog
-	if (ok == false)
+	// If state was not found in <closeInterval> seconds - close the dialog
+	//
+	if (adsState == adsStates.end())
 	{
-		m_noStateInfoTimeout++;
-		if (m_noStateInfoTimeout > 40/*10 seconds*/)
+		const int closeInterval = 10 * (1000 / 250); // 10 seconds
+		if (m_noStateInfoTimeout++ > closeInterval)
 		{
 			//Close dialog if no information is received
+			//
 			reject();
 		}
 		return;
@@ -163,7 +156,7 @@ void DialogAppDataSourceInfo::updateData()
 	m_noStateInfoTimeout = 0;
 
 	// info
-
+	//
 	QTreeWidgetItem* item = m_treeWidget->topLevelItem(0);
 	if (item == nullptr)
 	{
@@ -173,25 +166,25 @@ void DialogAppDataSourceInfo::updateData()
 
 	item->setData(0, Qt::UserRole, 0);
 
-	setDataItemText("ID", tr("%1 (%2h)").arg(QString::number(ds.info.id())).arg(QString::number(ds.info.id(), 16)));
-	setDataItemText("EquipmentID", QString::fromStdString(ds.info.moduleequipmentid()));
-	setDataItemText("Caption", QString::fromStdString(ds.info.modulecaption()));
-	setDataItemNumber("DataType", ds.info.lancontrollerinfo()[0].lancontrollertype());
-	setDataItemText("IP", QString::fromStdString(ds.info.lancontrollerinfo()[0].appdataip()));
-	setDataItemNumber("Port", ds.info.lancontrollerinfo()[0].appdataport());
-	setDataItemText("Channel", QString::fromStdString(ds.info.subsystemchannel()));
-	setDataItemNumber("SubsystemID", ds.info.subsystemkey());
-	setDataItemText("Subsystem", QString::fromStdString(ds.info.subsystemid()));
+	setDataItemText("ID", tr("%1 (%2h)").arg(QString::number(adsState->info.id())).arg(QString::number(adsState->info.id(), 16)));
+	setDataItemText("EquipmentID", QString::fromStdString(adsState->info.moduleequipmentid()));
+	setDataItemText("Caption", QString::fromStdString(adsState->info.modulecaption()));
+	setDataItemNumber("DataType", adsState->info.lancontrollerinfo()[0].lancontrollertype());
+	setDataItemText("IP", QString::fromStdString(adsState->info.lancontrollerinfo()[0].appdataip()));
+	setDataItemNumber("Port", adsState->info.lancontrollerinfo()[0].appdataport());
+	setDataItemText("Channel", QString::fromStdString(adsState->info.subsystemchannel()));
+	setDataItemNumber("SubsystemID", adsState->info.subsystemkey());
+	setDataItemText("Subsystem", QString::fromStdString(adsState->info.subsystemid()));
 
-	setDataItemNumber("LmNumber", ds.info.lmnumber());
-	setDataItemText("LmModuleType", tr("%1 (%2h)").arg(QString::number(ds.info.moduletype())).arg(QString::number(ds.info.moduletype(), 16)));
-	setDataItemText("LmAdapterID", QString::fromStdString(ds.info.lancontrollerinfo()[0].equipmentid()));
-	setDataItemNumber("LmDataEnable", ds.info.lancontrollerinfo()[0].appdataenable());
+	setDataItemNumber("LmNumber", adsState->info.lmnumber());
+	setDataItemText("LmModuleType", tr("%1 (%2h)").arg(QString::number(adsState->info.moduletype())).arg(QString::number(adsState->info.moduletype(), 16)));
+	setDataItemText("LmAdapterID", QString::fromStdString(adsState->info.lancontrollerinfo()[0].equipmentid()));
+	setDataItemNumber("LmDataEnable", adsState->info.lancontrollerinfo()[0].appdataenable());
 	setDataItemText("LmDataID", tr("%1 (%2h)").
-						arg(QString::number(ds.info.lancontrollerinfo()[0].appdatauid())).
-						arg(QString::number(ds.info.lancontrollerinfo()[0].appdatauid(), 16)));
+						arg(QString::number(adsState->info.lancontrollerinfo()[0].appdatauid())).
+						arg(QString::number(adsState->info.lancontrollerinfo()[0].appdatauid(), 16)));
 
-	setDataItemText("DataReceives", ds.state.datareceives() ? "Yes" : "No");
+	setDataItemText("DataReceives", adsState->state.datareceives() ? "Yes" : "No");
 
 	{
 		QTreeWidgetItem* dataReceivesItem = dataItem("DataReceives");
@@ -201,7 +194,7 @@ void DialogAppDataSourceInfo::updateData()
 			return;
 		}
 
-		if (ds.state.datareceives() == false)
+		if (adsState->state.datareceives() == false)
 		{
 			dataReceivesItem->setForeground(1, QBrush(DialogSourceInfo::dataItemErrorColor));
 		}
@@ -211,38 +204,38 @@ void DialogAppDataSourceInfo::updateData()
 		}
 	}
 
-	auto time = ds.state.uptime();
+	auto time = adsState->state.uptime();
 	int s = time % 60; time /= 60;
 	int m = time % 60; time /= 60;
 	int h = time % 24; time /= 24;
 	setDataItemText("Uptime", QString("%1d %2:%3:%4").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0')));
 
-	setDataItemNumber("ReceivedDataID", ds.state.receiveddataid());
-	setDataItemNumber("RupFramesQueueCurSize", ds.state.rupframesqueuecursize());
-	setDataItemNumber("RupFramesQueueCurMaxSize", ds.state.rupframesqueuecurmaxsize());
-	double datareceivingrate = ds.state.datareceivingrate();
+	setDataItemNumber("ReceivedDataID", adsState->state.receiveddataid());
+	setDataItemNumber("RupFramesQueueCurSize", adsState->state.rupframesqueuecursize());
+	setDataItemNumber("RupFramesQueueCurMaxSize", adsState->state.rupframesqueuecurmaxsize());
+	double datareceivingrate = adsState->state.datareceivingrate();
 	setDataItemText("DataReceivingRate", QString::number(datareceivingrate / 1024.0, 'f', 1));
-	setDataItemNumber("ReceivedDataSize", ds.state.receiveddatasize());
-	setDataItemNumber("ReceivedFramesCount", ds.state.receivedframescount());
-	setDataItemNumber("ReceivedPacketCount", ds.state.receivedpacketcount());
-	setDataItemNumber("LostPacketCount", ds.state.lostpacketcount());
-	setDataItemText("DataProcessingEnabled", ds.state.dataprocessingenabled() ? "Yes" : "No");
-	setDataItemNumber("ProcessedPacketCount", ds.state.processedpacketcount());
+	setDataItemNumber("ReceivedDataSize", adsState->state.receiveddatasize());
+	setDataItemNumber("ReceivedFramesCount", adsState->state.receivedframescount());
+	setDataItemNumber("ReceivedPacketCount", adsState->state.receivedpacketcount());
+	setDataItemNumber("LostPacketCount", adsState->state.lostpacketcount());
+	setDataItemText("DataProcessingEnabled", adsState->state.dataprocessingenabled() ? "Yes" : "No");
+	setDataItemNumber("ProcessedPacketCount", adsState->state.processedpacketcount());
 
 	QDateTime tm;
 
 	tm.setTimeSpec(Qt::UTC);
 
-	tm.setMSecsSinceEpoch(ds.state.lastpacketsystemtime());
+	tm.setMSecsSinceEpoch(adsState->state.lastpacketsystemtime());
 	setDataItemText("LastPacketSystemTime", tm.toString("dd/MM/yyyy HH:mm:ss.zzz"));
 
-	tm.setMSecsSinceEpoch(ds.state.rupframeplanttime());
+	tm.setMSecsSinceEpoch(adsState->state.rupframeplanttime());
 	setDataItemText("RupFramePlantTime", tm.toString("dd/MM/yyyy HH:mm:ss.zzz"));
 
-	setDataItemNumber("RupFrameNumerator", ds.state.rupframenumerator());
-	setDataItemNumber("SignalStatesQueueCurSize", ds.state.signalstatesqueuecursize());
-	setDataItemNumber("SignalStatesQueueCurMaxSize", ds.state.signalstatesqueuecurmaxsize());
-	setDataItemNumber("AcquiredSignalsCount", ds.state.acquiredsignalscount());
+	setDataItemNumber("RupFrameNumerator", adsState->state.rupframenumerator());
+	setDataItemNumber("SignalStatesQueueCurSize", adsState->state.signalstatesqueuecursize());
+	setDataItemNumber("SignalStatesQueueCurMaxSize", adsState->state.signalstatesqueuecurmaxsize());
+	setDataItemNumber("AcquiredSignalsCount", adsState->state.acquiredsignalscount());
 
 	// errors
 
@@ -255,22 +248,22 @@ void DialogAppDataSourceInfo::updateData()
 
 	item->setData(0, Qt::UserRole, 0);
 
-	setDataItemNumberCompare(item, "ErrorProtocolVersion", ds.state.errorprotocolversion(), ds.previousState().errorprotocolversion());
-	setDataItemNumberCompare(item, "ErrorFramesQuantity", ds.state.errorframesquantity(), ds.previousState().errorframesquantity());
-	setDataItemNumberCompare(item, "ErrorFrameNo", ds.state.errorframeno(), ds.previousState().errorframeno());
-	setDataItemNumberCompare(item, "ErrorDataID", ds.state.errordataid(), ds.previousState().errordataid());
-	setDataItemNumberCompare(item, "ErrorFrameSize", ds.state.errorframesize(), ds.previousState().errorframesize());
-	setDataItemNumberCompare(item, "ErrorDuplicatePlantTime", ds.state.errorduplicateplanttime(), ds.previousState().errorduplicateplanttime());
-	setDataItemNumberCompare(item, "ErrorNonmonotonicPlantTime", ds.state.errornonmonotonicplanttime(), ds.previousState().errornonmonotonicplanttime());
+	setDataItemNumberCompare(item, "ErrorProtocolVersion", adsState->state.errorprotocolversion(), adsState->previousState().errorprotocolversion());
+	setDataItemNumberCompare(item, "ErrorFramesQuantity", adsState->state.errorframesquantity(), adsState->previousState().errorframesquantity());
+	setDataItemNumberCompare(item, "ErrorFrameNo", adsState->state.errorframeno(), adsState->previousState().errorframeno());
+	setDataItemNumberCompare(item, "ErrorDataID", adsState->state.errordataid(), adsState->previousState().errordataid());
+	setDataItemNumberCompare(item, "ErrorFrameSize", adsState->state.errorframesize(), adsState->previousState().errorframesize());
+	setDataItemNumberCompare(item, "ErrorDuplicatePlantTime", adsState->state.errorduplicateplanttime(), adsState->previousState().errorduplicateplanttime());
+	setDataItemNumberCompare(item, "ErrorNonmonotonicPlantTime", adsState->state.errornonmonotonicplanttime(), adsState->previousState().errornonmonotonicplanttime());
 }
 
 //
 // DialogAppDataSources
 //
 
-AppDataSourcesWidget::AppDataSourcesWidget(std::vector<TcpAppSourcesState*> tcpClients,  bool hasCloseButton, QWidget* parent) :
+AppDataSourcesWidget::AppDataSourcesWidget(const AdsSourceStateConnection& connection,  QWidget* parent) :
 	QWidget(parent),
-	m_stateTcpClients(tcpClients),
+	m_adsSourceStateConnection(connection),
 	m_parent(parent)
 {
 	//
@@ -282,23 +275,9 @@ AppDataSourcesWidget::AppDataSourcesWidget(std::vector<TcpAppSourcesState*> tcpC
 	mainLayout->addWidget(m_treeWidget);
 
 	connect(m_treeWidget, &QTreeWidget::itemDoubleClicked, this, &AppDataSourcesWidget::on_treeWidget_itemDoubleClicked);
-	connect(m_treeWidget, &QTreeWidget::itemSelectionChanged, this, &AppDataSourcesWidget::on_treeWidget_itemSelectionChanged);
 
 	QHBoxLayout* bottomLayout = new QHBoxLayout();
 	mainLayout->addLayout(bottomLayout);
-
-	m_btnDetails = new QPushButton(tr("Details..."));
-	m_btnDetails->setEnabled(false);
-	connect(m_btnDetails, &QPushButton::clicked, this, &AppDataSourcesWidget::on_btnDetails_clicked);
-	bottomLayout->addWidget(m_btnDetails);
-
-	bottomLayout->addStretch();
-
-	m_closeButton = new QPushButton(tr("Close"));
-	connect(m_closeButton, &QPushButton::clicked, this, &AppDataSourcesWidget::on_btnClose_clicked);
-	bottomLayout->addWidget(m_closeButton);
-
-	showCloseButton(hasCloseButton);
 
 	setLayout(mainLayout);
 
@@ -327,33 +306,47 @@ AppDataSourcesWidget::AppDataSourcesWidget(std::vector<TcpAppSourcesState*> tcpC
 	m_treeWidget->setSortingEnabled(true);
 	m_treeWidget->sortByColumn(0, Qt::AscendingOrder);
 
-	m_updateStateTimerId = startTimer(250);
+	m_updateStateTimerId = startTimer(m_updateIntervalMs);
 }
 
 AppDataSourcesWidget::~AppDataSourcesWidget()
 {
 }
 
-void AppDataSourcesWidget::setAppSourceTcpClients(std::vector<TcpAppSourcesState*> tcpClients)
+void AppDataSourcesWidget::detailsClicked()
 {
-	m_stateTcpClients = tcpClients;
+	QTreeWidgetItem* item = m_treeWidget->currentItem();
 
-	for (auto it : m_sourceInfoDialogsMap)
+	if (item == nullptr)
 	{
-		DialogAppDataSourceInfo* d = it.second;
-		if (d == nullptr)
+		return;
+	}
+
+	Hash hash = item->data(columnIndex_Hash, Qt::UserRole).value<Hash>();
+
+	auto it = m_sourceInfoDialogsMap.find(hash);
+	if (it == m_sourceInfoDialogsMap.end())
+	{
+		DialogAppDataSourceInfo* dlg = new DialogAppDataSourceInfo(m_adsSourceStateConnection, this, hash);
+		connect(dlg, &DialogAppDataSourceInfo::dialogClosed, this, &AppDataSourcesWidget::detailsDialogClosed);
+		dlg->show();
+		dlg->activateWindow();
+
+		m_sourceInfoDialogsMap[hash] = dlg;
+	}
+	else
+	{
+		DialogAppDataSourceInfo* dlg = it->second;
+		if (dlg == nullptr)
 		{
-			Q_ASSERT(d);
+			Q_ASSERT(dlg);
 			return;
 		}
 
-		d->setAppSourceTcpClients(m_stateTcpClients);
-	}
-}
+		dlg->activateWindow();
 
-void AppDataSourcesWidget::showCloseButton(bool show)
-{
-	m_closeButton->setVisible(show);
+		UiTools::adjustDialogPlacement(dlg);
+	}
 }
 
 void AppDataSourcesWidget::timerEvent(QTimerEvent* event)
@@ -371,30 +364,11 @@ void AppDataSourcesWidget::slot_tuningSourcesArrived()
 	update(false);
 }
 
-TcpAppSourcesState* AppDataSourcesWidget::clientByHash(Hash hash) const
-{
-	for (TcpAppSourcesState* client : m_stateTcpClients)
-	{
-		const auto hashes = client->appDataSourceHashes();
-		if (std::find(hashes.begin(), hashes.end(), hash) != hashes.end())
-		{
-			return client;
-		}
-	}
-	return nullptr;
-}
-
 void AppDataSourcesWidget::update(bool refreshOnly)
 {
-	std::vector<Hash> appDataSourceHashes;
+	std::vector<AppDataSourceState> adsStates = m_adsSourceStateConnection.appDataSourceStates();
 
-	for (TcpAppSourcesState* stateTcpClient : m_stateTcpClients)
-	{
-		std::vector<Hash> clientHashes = stateTcpClient->appDataSourceHashes();
-		appDataSourceHashes.insert(appDataSourceHashes.end(), clientHashes.begin(), clientHashes.end());
-	}
-
-	int count = static_cast<int>(appDataSourceHashes.size());
+	int count = static_cast<int>(adsStates.size());
 
 	if (m_treeWidget->topLevelItemCount() != count)
 	{
@@ -405,27 +379,9 @@ void AppDataSourcesWidget::update(bool refreshOnly)
 	{
 		m_treeWidget->clear();
 
-		for (int i = 0; i < count; i++)
+		for (const AppDataSourceState& adsState : adsStates)
 		{
 			QStringList connectionStrings;
-
-			Hash hash = appDataSourceHashes[i];
-
-			const TcpAppSourcesState* stateTcpClient = clientByHash(hash);
-			if (stateTcpClient == nullptr)
-			{
-				Q_ASSERT(false);
-				continue;
-			}
-
-			bool ok = false;
-
-			AppDataSourceState adsState = stateTcpClient->appDataSourceState(hash, &ok);
-			if (ok == false)
-			{
-				Q_ASSERT(false);
-				continue;
-			}
 
 			connectionStrings << adsState.info.moduleequipmentid().c_str();
 			connectionStrings << adsState.info.lancontrollerinfo()[0].appdataip().c_str();
@@ -438,7 +394,7 @@ void AppDataSourcesWidget::update(bool refreshOnly)
 
 			QTreeWidgetItem* item = new QTreeWidgetItem(connectionStrings);
 
-			item->setData(columnIndex_Hash, Qt::UserRole, hash);
+			item->setData(columnIndex_Hash, Qt::UserRole, adsState.id());
 
 			m_treeWidget->addTopLevelItem(item);
 		}
@@ -455,33 +411,29 @@ void AppDataSourcesWidget::update(bool refreshOnly)
 
 		Hash hash = item->data(columnIndex_Hash, Qt::UserRole).toULongLong();
 
-		const TcpAppSourcesState* stateTcpClient = clientByHash(hash);
-		if (stateTcpClient == nullptr)
+		auto adsState = std::find_if(adsStates.begin(), adsStates.end(),
+			[&hash](const AppDataSourceState& state)
+			{
+				return state.id() == hash;
+			});
+
+		if (adsState == adsStates.end())
 		{
 			Q_ASSERT(false);
 			continue;
 		}
 
-		bool ok = false;
-
-		AppDataSourceState adsState = stateTcpClient->appDataSourceState(hash, &ok);
-		if (ok == false)
-		{
-			Q_ASSERT(false);
-			continue;
-		}
-
-		auto time = adsState.state.uptime();
+		auto time = adsState->state.uptime();
 		int s = time % 60; time /= 60;
 		int m = time % 60; time /= 60;
 		int h = time % 24; time /= 24;
 
 		item->setText(static_cast<int>(Columns::Uptime), QString("%1d %2:%3:%4").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0')));
-		item->setText(static_cast<int>(Columns::ReceivedPacketCount), QString::number(adsState.state.receivedpacketcount()));
-		double datareceivingrate = adsState.state.datareceivingrate();
+		item->setText(static_cast<int>(Columns::ReceivedPacketCount), QString::number(adsState->state.receivedpacketcount()));
+		double datareceivingrate = adsState->state.datareceivingrate();
 		item->setText(static_cast<int>(Columns::DataReceivingRate), QString::number(datareceivingrate, 'f', 1));
 
-		if (adsState.valid() == false)
+		if (adsState->valid() == false)
 		{
 			item->setForeground(static_cast<int>(Columns::State), QBrush(DialogSourceInfo::dataItemErrorColor));
 
@@ -489,7 +441,7 @@ void AppDataSourcesWidget::update(bool refreshOnly)
 		}
 		else
 		{
-			if (adsState.state.datareceives() == false)
+			if (adsState->state.datareceives() == false)
 			{
 				item->setForeground(static_cast<int>(Columns::State), QBrush(DialogSourceInfo::dataItemErrorColor));
 
@@ -497,7 +449,7 @@ void AppDataSourcesWidget::update(bool refreshOnly)
 			}
 			else
 			{
-				int errorsCount = adsState.getErrorsCount();
+				int errorsCount = adsState->getErrorsCount();
 
 				if (errorsCount == 0)
 				{
@@ -527,63 +479,15 @@ void AppDataSourcesWidget::update(bool refreshOnly)
 	}
 }
 
-void AppDataSourcesWidget::on_btnClose_clicked()
-{
-	emit closeButtonPressed();
-}
-
-void AppDataSourcesWidget::on_btnDetails_clicked()
-{
-	QTreeWidgetItem* item = m_treeWidget->currentItem();
-
-	if (item == nullptr)
-	{
-		return;
-	}
-
-	Hash hash = item->data(columnIndex_Hash, Qt::UserRole).value<Hash>();
-
-	auto it = m_sourceInfoDialogsMap.find(hash);
-	if (it == m_sourceInfoDialogsMap.end())
-	{
-		DialogAppDataSourceInfo* dlg = new DialogAppDataSourceInfo(m_stateTcpClients, this, hash);
-		connect(dlg, &DialogAppDataSourceInfo::dialogClosed, this, &AppDataSourcesWidget::onDetailsDialogClosed);
-		dlg->show();
-		dlg->activateWindow();
-
-		m_sourceInfoDialogsMap[hash] = dlg;
-	}
-	else
-	{
-		DialogAppDataSourceInfo* dlg = it->second;
-		if (dlg == nullptr)
-		{
-			Q_ASSERT(dlg);
-			return;
-		}
-
-		dlg->activateWindow();
-
-		UiTools::adjustDialogPlacement(dlg);
-	}
-}
-
-void AppDataSourcesWidget::on_treeWidget_itemSelectionChanged()
-{
-	QTreeWidgetItem* item = m_treeWidget->currentItem();
-
-	m_btnDetails->setEnabled(item != nullptr);
-}
-
 void AppDataSourcesWidget::on_treeWidget_itemDoubleClicked(QTreeWidgetItem *item, int column)
 {
 	Q_UNUSED(item);
 	Q_UNUSED(column);
 
-	QTimer::singleShot(10, this, &AppDataSourcesWidget::on_btnDetails_clicked);
+	QTimer::singleShot(10, this, &AppDataSourcesWidget::detailsClicked);
 }
 
-void AppDataSourcesWidget::onDetailsDialogClosed(Hash hash)
+void AppDataSourcesWidget::detailsDialogClosed(Hash hash)
 {
 	auto it = m_sourceInfoDialogsMap.find(hash);
 	if (it == m_sourceInfoDialogsMap.end())

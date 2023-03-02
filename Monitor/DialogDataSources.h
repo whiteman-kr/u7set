@@ -5,31 +5,29 @@
 #include "../lib/Tuning/TuningTcpClient.h"
 #include "../lib/Ui/TuningSourcesWidget.h"
 #include "MonitorConfigController.h"
-#include "TcpAppSourcesState.h"
+#include "AdsConnection.h"
 
 class DialogDataSources : public QDialog
 {
 	Q_OBJECT
+
 public:
-	explicit DialogDataSources(MonitorConfigController* configController, std::vector<TuningTcpClient*> tcpTuningClients, ILogFile* logFile, QWidget* parent);
+	static void create(const MonitorConfigController& configController, std::vector<TuningTcpClient*> tcpTuningClients, ILogFile* logFile, QWidget* parent);
+	static void updateTuningTcpClients(std::vector<TuningTcpClient*> tcpTuningClients);
+
+private:
+	explicit DialogDataSources(const MonitorConfigController& configController, std::vector<TuningTcpClient*> tcpTuningClients, ILogFile* logFile, QWidget* parent);
 	virtual ~DialogDataSources();
 
+private:
 	void setTuningTcpClients(std::vector<TuningTcpClient*> tcpTuningClients);
 
-protected:
-	virtual void reject() override;
-
-protected slots:
+private slots:
 	void slot_configurationArrived(ConfigSettings configuration);
 
-signals:
-	void dialogClosed();
-
 private:
-	void createAppSourceStateClients();
-	void deleteAppSourceStateClients();
+	static inline DialogDataSources* s_dialogDataSources = nullptr;
 
-private:
 	AppDataSourcesWidget* m_appDataSourcesWidget = nullptr;
 
 	QLabel* m_tuningSourcesLabel = nullptr;
@@ -37,11 +35,10 @@ private:
 
 	QVBoxLayout* m_mainLayout = nullptr;
 
-	std::vector<TcpAppSourcesState*> m_tcpSourcesStateClients;
-	std::vector<SimpleThread*> m_sourcesStateClientThreads;
-
-	MonitorConfigController* m_configController = nullptr;
+	const MonitorConfigController& m_configController;
 	ILogFile* m_logFile = nullptr;
+
+	AdsSourceStateConnection m_tcpSignalClientCtrl{m_configController, m_logFile};
 };
 
 #endif // DIALOGDATASOURCES_H

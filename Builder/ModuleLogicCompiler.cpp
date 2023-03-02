@@ -13434,7 +13434,7 @@ namespace Builder
 		{
 			QList<AppSignal*> writeSignals = writeAddressesMap.values(writeAddr);
 
-			// signals sorting by ioBufAddr  via std::map
+			// signals sorting by ioBufAddr via std::map
 			//
 			std::map<int, AppSignal*> sortedWriteSignals;
 

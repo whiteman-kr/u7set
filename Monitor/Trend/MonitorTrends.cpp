@@ -349,6 +349,7 @@ void MonitorTrendsWidget::dropEvent(QDropEvent* event)
 	}
 
 	auto archiveServers = m_configController.configuration().archiveServices;
+	auto appDataServers = m_configController.configuration().appDataRealTimeServices;
 
 	// Parse data
 	//
@@ -363,15 +364,21 @@ void MonitorTrendsWidget::dropEvent(QDropEvent* event)
 		{
 			// Find the first suitable archive server
 			//
-			auto sit = std::find_if(archiveServers.begin(), archiveServers.end(),
+			auto archServerIt = std::find_if(archiveServers.begin(), archiveServers.end(),
 						[&appSignalParam, this](const MonitorSettings::ArchiveService& as)
 						{
 							return m_signalManager.dataServiceHasSignal(as.appDataServiceId, appSignalParam.appSignalId());
 						});
 
-			if (sit != archiveServers.end())
+			auto appDataServerIt = std::find_if(appDataServers.begin(), appDataServers.end(),
+						[&appSignalParam, this](const MonitorSettings::AppDataService& ads)
+						{
+							return m_signalManager.dataServiceHasSignal(ads.equipmentId, appSignalParam.appSignalId());
+						});						
+
+			if (archServerIt != archiveServers.end())
 			{
-				const MonitorSettings::ArchiveService& as = *sit;
+				const MonitorSettings::ArchiveService& as = *archServerIt;
 				TrendLib::ArchiveServer trendArchiveServer{as.equipmentId, as.shortenId, as.appDataServiceId};
 
 				TrendLib::TrendSignalParam tsp{appSignalParam, trendArchiveServer};
@@ -380,6 +387,18 @@ void MonitorTrendsWidget::dropEvent(QDropEvent* event)
 			else
 			{
 				qDebug() << "MonitorTrendsWidget::dropEvent: Archive server for signal " << appSignalParam.appSignalId() << " is not found.";
+
+				// This situation is possible if archive service is not configured, but still realtime trends is possible, add it as is.
+				// 
+				if (appDataServerIt != appDataServers.end())
+				{
+					const MonitorSettings::AppDataService& ads = *appDataServerIt;
+
+					TrendLib::ArchiveServer trendArchiveServer{"", "", ads.equipmentId};
+					TrendLib::TrendSignalParam tsp{appSignalParam, trendArchiveServer};
+
+					addSignal(tsp, false);
+				}
 			}
 		}
 	}

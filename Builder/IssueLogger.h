@@ -192,6 +192,8 @@ namespace Builder
 		void errCFG3100(QString equipmentId, int devicePresetVersion, QString presetName, int presetVersion);		// Device %1 has preset version mismatch (%1.PresetVersion = %2, %3.PresetVersion = %4). For updating presets select 'Update from Preset' in Equipmemt Editor.
 		void wrnCFG3101(QString equipmentId, int devicePresetVersion, QString presetName, int presetVersion);		// Device %1 has preset version mismatch (%1.PresetVersion = %2, %3.PresetVersion = %4). For updating presets select 'Update from Preset' in Equipmemt Editor.
 
+		void errCFG3103(int LMNumber, QString module1, QString module2);	// Property System\\LMNumber (%1) is not uinique in logic modules %2 and %3.
+
 		// ALP			Application Logic Parsing				4000-4999
 		//
 		void errALP4000(QString schema, const std::vector<QUuid>& itemsUuids);

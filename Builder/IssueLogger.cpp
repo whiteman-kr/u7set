@@ -774,7 +774,6 @@ namespace Builder
 				  .arg(module));
 	}
 
-
 	/// IssueCode: CFG3004
 	///
 	/// IssueType: Error
@@ -1722,6 +1721,27 @@ namespace Builder
 					.arg(presetName)
 					.arg(presetVersion)
 				  );
+	}
+
+	/// IssueCode: CFG3103
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property System\\LMNumber (%1) is not uinique in logic modules %2 and %3.
+	///
+	/// Parameters:
+	///         %1 LMNumber
+	///			%2 Module1 ID
+	///			%3 Module2 ID
+	///
+	/// Description:
+	///			Property System\\LMNumber in logic modules for same subsystem must be unique.
+	///
+	void IssueLogger::errCFG3103(int LMNumber, QString module1, QString module2)
+	{
+		LOG_ERROR(IssueType::FscConfiguration, 3103,
+				  tr("Property System\\LMNumber (%1) is not uinique in logic modules %2 and %3.").
+					arg(LMNumber).arg(module1).arg(module2));
 	}
 
 	//

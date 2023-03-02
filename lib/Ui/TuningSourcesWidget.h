@@ -44,13 +44,13 @@ class TuningSourcesWidget : public QWidget
 	Q_OBJECT
 public:
 
-	explicit TuningSourcesWidget(std::vector<TuningTcpClient*> tcpClients, bool hasActivationControls, bool hasCloseButton, QWidget* parent);
+	explicit TuningSourcesWidget(std::vector<TuningTcpClient*> tcpClients, bool hasActivationControls, QWidget* parent);
 	virtual ~TuningSourcesWidget();
 
 	void setTuningTcpClients(std::vector<TuningTcpClient*> tcpClients);
 
-signals:
-	void closeButtonPressed();
+public slots:
+	void detailsClicked();
 
 protected:
 	void timerEvent(QTimerEvent* event);
@@ -58,10 +58,6 @@ protected:
 	virtual bool login();	// Override this function to ask password before activating/deactivating sources
 
 private slots:
-	void closeClicked();
-
-	void detailsClicked();
-
 	void treeWidget_itemSelectionChanged();
 
 	void treeWidget_itemDoubleClicked(QTreeWidgetItem *item, int column);
@@ -110,7 +106,6 @@ private:
 
 	QWidget* m_parent = nullptr;
 	QTreeWidget* m_treeWidget = nullptr;
-	QPushButton* m_btnDetails = nullptr;
 	QPushButton* m_btnEnableControl = nullptr;
 	QPushButton* m_btnDisableControl = nullptr;
 

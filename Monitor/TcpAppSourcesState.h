@@ -50,11 +50,11 @@ class TcpAppSourcesState : public Tcp::Client, public TcpClientStatistics
 	Q_OBJECT
 
 public:
-	TcpAppSourcesState(const SoftwareInfo& softwareInfo, HostAddressPort address, ILogFile* logFile);
+	TcpAppSourcesState(const MonitorConfigController& configController, const MonitorSettings::AppDataService& ads, ILogFile* logFile);
 	virtual ~TcpAppSourcesState();
 
 	std::vector<Hash> appDataSourceHashes() const;
-	AppDataSourceState appDataSourceState(Hash id, bool* ok) const;
+	std::vector<AppDataSourceState> appDataSourceStates() const;
 
 	int sourceErrorCount();
 public:

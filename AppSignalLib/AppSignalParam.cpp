@@ -146,9 +146,17 @@ QString AppSignalState::toString(double value, E::ValueViewType viewType, E::Ana
 	int p = 4;
 
 	float floatValue = static_cast<float>(value);
-	quint32 floatValueBits = std::bit_cast<quint32>(floatValue);
 
+#ifdef __cpp_lib_bit_cast
+	quint32 floatValueBits = std::bit_cast<quint32>(floatValue);
 	quint64 doubleValueBits = std::bit_cast<quint64>(value);
+#else
+	quint32 floatValueBits;
+	quint64 doubleValueBits;
+	
+	std::memcpy(&floatValueBits, &floatValue, sizeof(floatValue));
+	std::memcpy(&doubleValueBits, &value, sizeof(value));
+#endif
 
 	switch (viewType)
 	{

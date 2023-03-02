@@ -170,9 +170,9 @@ namespace Builder
 		return m_context->m_lmModules;
 	}
 
-	std::vector<Hardware::DeviceModule*>& ApplicationLogicCompiler::lmAndBvbModules()
+	std::vector<Hardware::DeviceModule*>& ApplicationLogicCompiler::fscModules()
 	{
-		return m_context->m_lmAndBvbModules;
+		return m_context->m_fscModules;
 	}
 
 	BuildInfo ApplicationLogicCompiler::buildInfo()
@@ -205,11 +205,6 @@ namespace Builder
 				LOG_INTERNAL_ERROR(log());
 				assert(false);
 				return false;
-			}
-
-			if (lm->isBvb() == true)
-			{
-				continue;
 			}
 
 			std::shared_ptr<LmDescription> lmDescription = lmDescriptions()->get(lm);
@@ -319,7 +314,7 @@ namespace Builder
 
 		// first compiler pass
 		//
-		for(const Hardware::DeviceModule* lm : lmAndBvbModules())
+		for(const Hardware::DeviceModule* lm : fscModules())
 		{
 			if (lm == nullptr)
 			{
@@ -1281,6 +1276,7 @@ namespace Builder
 			if (subsys.contains(lmSubsystem) == false)
 			{
 				// Subsystem '%1' is not found in subsystem set (Logic Module '%2').
+				//
 				log()->errCFG3001(lmSubsystem, module->equipmentIdTemplate());
 				result = false;
 				continue;

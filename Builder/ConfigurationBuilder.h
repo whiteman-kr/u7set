@@ -137,10 +137,10 @@ namespace Builder
 		DbController* m_db = nullptr;
 		Hardware::DeviceRoot* m_deviceRoot = nullptr;
 		std::vector<Hardware::DeviceModule*> m_fscModules;
-        LmDescriptionSet *m_lmDescriptions = nullptr;
+		LmDescriptionSet* m_lmDescriptions = nullptr;
         SignalSet* m_signalSet = nullptr;
 		SubsystemStorage* m_subsystems = nullptr;
-		Hardware::OptoModuleStorage *m_opticModuleStorage = nullptr;
+		Hardware::OptoModuleStorage* m_opticModuleStorage = nullptr;
 		mutable IssueLogger* m_log = nullptr;
 		bool m_generateExtraDebugInfo = false;
 	};

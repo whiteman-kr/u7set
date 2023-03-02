@@ -636,43 +636,27 @@ namespace Builder
 
 	bool BuildWorkerThread::taskLoadLmDescriptions()
 	{
-		// Find all LM Modules and load their descriptions
-		//
 		m_context->m_lmDescriptions = std::make_shared<LmDescriptionSet>();
-		m_context->m_fscDescriptions = std::make_shared<LmDescriptionSet>();
 
-		findModulesByFamily(m_context->m_equipmentSet->root().get(), &m_context->m_lmModules, Hardware::DeviceModule::FamilyType::LM);
-
-		findModulesByFamily(m_context->m_equipmentSet->root().get(), &m_context->m_lmAndBvbModules, Hardware::DeviceModule::FamilyType::LM);
-		findModulesByFamily(m_context->m_equipmentSet->root().get(), &m_context->m_lmAndBvbModules, Hardware::DeviceModule::FamilyType::BVB);
-
-		LOG_MESSAGE(m_context->m_log, tr("Loading to m_lmAndBvbModules..."))
-		bool ok = true;
-		for (Hardware::DeviceModule* lm : m_context->m_lmAndBvbModules)
-		{
-			ok &= loadLogicModuleDescription(lm, m_context->m_lmDescriptions.get());
-		}
-
-		if (ok == false)
-		{
-			return false;
-		}
+		// find LM and BVB modules and load their descriptions
+		//
+		LOG_MESSAGE(m_context->m_log, tr("Loading to m_fscModules..."))
 
 		findFSCConfigurationModules(m_context->m_equipmentSet->root().get(), &m_context->m_fscModules);
 
-		LOG_MESSAGE(m_context->m_log, tr("Loading to m_fscModules..."))
-		ok = true;
+		bool result = true;
+
 		for (Hardware::DeviceModule* lm : m_context->m_fscModules)
 		{
-			ok &= loadLogicModuleDescription(lm, m_context->m_fscDescriptions.get());
+			result &= loadLogicModuleDescription(lm, m_context->m_lmDescriptions.get());
+
+			if (lm->isLogicModule() == true)
+			{
+				m_context->m_lmModules.push_back(lm);
+			}
 		}
 
-		if (ok == false)
-		{
-			return false;
-		}
-
-		return true;
+		return result;
 	}
 
 	bool BuildWorkerThread::taskLoadSubsystems()
@@ -728,6 +712,8 @@ namespace Builder
 			}
 		}
 
+		RETURN_IF_FALSE(result);
+
 		// Check if all LMs in subsystem have the same version and LmDescriptionFile
 		//
 		for (std::shared_ptr<Hardware::Subsystem> subsystem : m_context->m_subsystems->subsystems())
@@ -737,23 +723,54 @@ namespace Builder
 			Hardware::DeviceModule::FamilyType moduleFamily = Hardware::DeviceModule::FamilyType::OTHER;
 			int moduleVersion = -1;
 			QString LmDescriptionFile;
+			std::map<int, QString> lmNumbers;		// lmNumber -> lmEquipmentID
 
-			for (const Hardware::DeviceModule* lm : m_context->m_lmAndBvbModules)
+			for (const Hardware::DeviceModule* lm : m_context->m_fscModules)
 			{
 				Q_ASSERT(lm);
 				Q_ASSERT(lm->isFSCConfigurationModule() == true);
 
 				auto lmSubsystemIdProp = lm->propertyByCaption(Hardware::PropertyNames::lmSubsystemID);
+
 				if (lmSubsystemIdProp == nullptr)
 				{
 					m_context->m_log->errCFG3000(Hardware::PropertyNames::lmSubsystemID, lm->equipmentIdTemplate());
-					return false;
+					result = false;
+					continue;
 				}
 
 				if (lmSubsystemIdProp->value() != subsystem->subsystemId())
 				{
 					continue;
 				}
+
+				// Check module LMNumber
+				//
+
+				auto lmNumberProp = lm->propertyByCaption(Hardware::PropertyNames::lmNumber);
+
+				if (lmNumberProp == nullptr)
+				{
+					m_context->m_log->errCFG3000(Hardware::PropertyNames::lmNumber, lm->equipmentIdTemplate());
+					result = false;
+					continue;
+				}
+
+				int lmNumber = lmNumberProp->value().toInt();
+
+				auto it = lmNumbers.find(lmNumber);
+
+				if (it != lmNumbers.end())
+				{
+					// Property System\\LMNumber (%1) is not uinique in logic modules %2 and %3.
+					//
+					m_context->m_log->errCFG3103(lmNumber, it->second, lm->equipmentIdTemplate());
+
+					result = false;
+					continue;
+				}
+
+				lmNumbers.insert({lmNumber, lm->equipmentIdTemplate()});
 
 				// Check moduleFamily
 				//
@@ -812,7 +829,10 @@ namespace Builder
 			}
 		}
 
-		LOG_MESSAGE(m_context->m_log, tr("Loaded %1 subsystem(s)").arg(m_context->m_subsystems->count()))
+		if (result == true)
+		{
+			LOG_MESSAGE(m_context->m_log, tr("Loaded %1 subsystem(s)").arg(m_context->m_subsystems->count()));
+		}
 
 		return result;
 	}
@@ -1137,7 +1157,7 @@ namespace Builder
 			return false;
 		}
 
-		generateModulesInformation(*m_context->m_buildResultWriter, m_context->m_lmAndBvbModules);
+		generateModulesInformation(*m_context->m_buildResultWriter, m_context->m_fscModules);
 
 		ok &= generateLmsUniqueIDs(m_context.get());
 		ok &= writeLogicModulesInfoXml(m_context.get());

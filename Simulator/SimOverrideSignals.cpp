@@ -365,7 +365,13 @@ namespace Sim
 		if (m_byteOrder == E::ByteOrder::BigEndian)
 		{
 			qint32 beFloat = qToBigEndian(value);
+
+#ifdef __cpp_lib_bit_cast
 			quint32 asDword = std::bit_cast<quint32>(beFloat);
+#else
+			quint32 asDword;
+			std::memcpy(&asDword, &beFloat, sizeof(beFloat));
+#endif
 
 			m_ramOverrides[0].mask = qToBigEndian<quint16>(0xFFFF);
 			m_ramOverrides[0].data = static_cast<quint16>(asDword & 0xFFFF);
@@ -392,8 +398,12 @@ namespace Sim
 		if (m_byteOrder == E::ByteOrder::BigEndian)
 		{
 			float beFloat = qToBigEndian(value);
+#ifdef __cpp_lib_bit_cast
 			quint32 asDword = std::bit_cast<quint32>(beFloat);
-
+#else
+			quint32 asDword;
+			std::memcpy(&asDword, &beFloat, sizeof(beFloat));
+#endif
 			m_ramOverrides[0].mask = qToBigEndian<quint16>(0xFFFF);
 			m_ramOverrides[0].data = static_cast<quint16>(asDword & 0xFFFF);
 
@@ -419,8 +429,12 @@ namespace Sim
 		if (m_byteOrder == E::ByteOrder::BigEndian)
 		{
 			double beFloat = qToBigEndian(value);
+#ifdef __cpp_lib_bit_cast
 			quint64 asDwword = std::bit_cast<quint64>(beFloat);
-
+#else
+			quint64 asDwword;
+			std::memcpy(&asDwword, &beFloat, sizeof(beFloat));
+#endif
 			m_ramOverrides[0].mask = qToBigEndian<quint16>(0xFFFF);
 			m_ramOverrides[1].mask = qToBigEndian<quint16>(0xFFFF);
 			m_ramOverrides[2].mask = qToBigEndian<quint16>(0xFFFF);

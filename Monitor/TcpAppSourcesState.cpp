@@ -105,8 +105,8 @@ const ::Network::AppDataSourceState& AppDataSourceState::previousState() const
 //
 //
 
-TcpAppSourcesState::TcpAppSourcesState(const SoftwareInfo& softwareInfo, HostAddressPort address, ILogFile* logFile) :
-	Tcp::Client(softwareInfo, address, address, "TcpAppSourcesState"),
+TcpAppSourcesState::TcpAppSourcesState(const MonitorConfigController& configController, const MonitorSettings::AppDataService& ads, ILogFile* logFile) :
+	Tcp::Client(configController.softwareInfo(), ads.address, ads.address, "TcpAppSourcesState"),
 	TcpClientStatistics(this),
 	m_logFile(logFile, "TcpAppSourcesState")
 {
@@ -136,26 +136,19 @@ std::vector<Hash> TcpAppSourcesState::appDataSourceHashes() const
 	return result;
 }
 
-AppDataSourceState TcpAppSourcesState::appDataSourceState(Hash id, bool* ok) const
+std::vector<AppDataSourceState> TcpAppSourcesState::appDataSourceStates() const
 {
 	QReadLocker l(&m_appDataSourceStatesLock);
 
-	auto it = m_appDataSourceStates.find(id);
-	if (it == m_appDataSourceStates.end())
+	std::vector<AppDataSourceState> result;
+	result.reserve(m_appDataSourceStates.size());
+
+	for (const auto& it : m_appDataSourceStates)
 	{
-		if (ok != nullptr)
-		{
-			*ok = false;
-		}
-		return AppDataSourceState();
+		result.push_back(it.second);
 	}
 
-	if (ok != nullptr)
-	{
-		*ok = true;
-	}
-
-	return it->second;
+	return result;
 }
 
 int TcpAppSourcesState::sourceErrorCount()
