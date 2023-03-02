@@ -4679,14 +4679,24 @@ namespace Sim
 		case 9:		// FP sign inversion
 			{
 				float floatData = instance->param(i_data)->floatValue();
+
+#ifdef __cpp_lib_bit_cast
 				quint32 asBinary = std::bit_cast<quint32>(floatData);
+#else
+				quint32 asBinary;
+				std::memcpy(&asBinary, &floatData, sizeof(floatData));
+#endif
 
 				if (asBinary != 0)				// 0 must not become negative zero
 				{
 					asBinary ^= 0x80000000;		// flip sign bin
 				}
 
+#ifdef __cpp_lib_bit_cast
 				floatData = std::bit_cast<float>(asBinary);
+#else
+				std::memcpy(&floatData, &asBinary, sizeof(asBinary));
+#endif
 				result.setFloatValue(floatData);
 
 				zero = asBinary == 0;
@@ -4711,14 +4721,24 @@ namespace Sim
 		case 11:		// FP negate
 			{
 				float floatData = instance->param(i_data)->floatValue();
+
+#ifdef __cpp_lib_bit_cast
 				quint32 asBinary = std::bit_cast<quint32>(floatData);
+#else
+				quint32 asBinary;
+				std::memcpy(&asBinary, &floatData, sizeof(floatData));
+#endif				
 
 				if (asBinary != 0)				// 0 must not become negative zero
 				{
 					asBinary |= 0x80000000;		// flip sign bin
 				}
 
+#ifdef __cpp_lib_bit_cast
 				floatData = std::bit_cast<float>(asBinary);
+#else
+				std::memcpy(&floatData, &asBinary, sizeof(asBinary));
+#endif				
 				result.setFloatValue(floatData);
 
 				zero = asBinary == 0;

@@ -874,7 +874,14 @@ namespace Sim
 
 	bool Ram::writeSignedInt(quint32 offsetW, qint32 data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access)
 	{
+#ifdef __cpp_lib_bit_cast
 		return writeDword(offsetW, std::bit_cast<quint32>(data), byteOrder, access);
+#else
+		quint32 unsignedData;
+		std::memcpy(&unsignedData, &data, sizeof(data));
+
+		return writeDword(offsetW, unsignedData, byteOrder, access);
+#endif						
 	}
 
 	bool Ram::readSignedInt(quint32 offsetW, qint32* data, E::ByteOrder byteOrder, E::LogicModuleRamAccess access, bool applyOverride) const
@@ -882,7 +889,11 @@ namespace Sim
 		quint32 readValue = 0xcdcdcdcd;
 		bool ok = readDword(offsetW, &readValue, byteOrder, access, applyOverride);
 
+#ifdef __cpp_lib_bit_cast
 		*data = std::bit_cast<qint32>(readValue);
+#else
+		std::memcpy(data, &readValue, sizeof(readValue));
+#endif
 
 		return ok;
 	}

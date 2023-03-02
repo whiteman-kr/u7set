@@ -468,7 +468,7 @@ namespace VFrame30
 		{
 			// Start stats
 			//
-			auto startTime = std::chrono::system_clock::now();
+			auto startTimePreDraw = std::chrono::system_clock::now();
 
 			// Monitor or Simulator
 			//
@@ -484,7 +484,7 @@ namespace VFrame30
 			{
 				using namespace std::chrono;
 				auto now = system_clock::now();
-				auto ellapsed = duration_cast<microseconds>(now - startTime);
+				auto ellapsed = duration_cast<microseconds>(now - startTimePreDraw);
 				drawParam->timeStats()->addRecord("Schema", schemaId(), "preDrawEvent", ellapsed);
 			}
 		}
@@ -527,10 +527,11 @@ namespace VFrame30
 
 		setDrawParam(drawParam);
 
-		std::shared_ptr<void> finalizer(nullptr, [schema = this, &setDrawParam](void*)
-		{
-			setDrawParam(nullptr);}
-		);
+		std::shared_ptr<void> finalizer(nullptr,
+			[&setDrawParam](void*)
+			{
+				setDrawParam(nullptr);
+			});
 
 		for (const SchemaLayerPtr& layer : layers())
 		{
@@ -567,7 +568,7 @@ namespace VFrame30
 				//
 				if (isClientMode == true && item->isCommented() == false)
 				{
-					auto startTime = std::chrono::system_clock::now();
+					auto startTimePreDraw = std::chrono::system_clock::now();
 
 					// Call preDrawEvent for all items, even if they out of screen
 					// Some items preDrawEvents may have scipt for caching reasons
@@ -594,7 +595,7 @@ namespace VFrame30
 					{
 						using namespace std::chrono;
 						auto now = system_clock::now();
-						auto ellapsed = duration_cast<microseconds>(now - startTime);
+						auto ellapsed = duration_cast<microseconds>(now - startTimePreDraw);
 						drawParam->timeStats()->addRecord(schemaId(), item->label(), "preDrawEvent", ellapsed);
 					}
 				}
@@ -603,7 +604,7 @@ namespace VFrame30
 				{
 					// Start stats
 					//
-					auto startTime = std::chrono::system_clock::now();
+					auto startTimeDraw = std::chrono::system_clock::now();
 
 					item->draw(drawParam);	// Drawing item is here
 
@@ -631,7 +632,7 @@ namespace VFrame30
 					{
 						using namespace std::chrono;
 						auto now = system_clock::now();
-						auto ellapsed = duration_cast<microseconds>(now - startTime);
+						auto ellapsed = duration_cast<microseconds>(now - startTimeDraw);
 						drawParam->timeStats()->addRecord(schemaId(), item->label(), "draw", ellapsed);
 					}
 				}

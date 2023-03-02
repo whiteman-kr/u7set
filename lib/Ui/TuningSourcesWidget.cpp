@@ -413,7 +413,7 @@ void DialogTuningSourceInfo::updateState()
 //
 
 
-TuningSourcesWidget::TuningSourcesWidget(std::vector<TuningTcpClient*> tcpClients, bool hasActivationControls, bool hasCloseButton, QWidget* parent) :
+TuningSourcesWidget::TuningSourcesWidget(std::vector<TuningTcpClient*> tcpClients, bool hasActivationControls, QWidget* parent) :
 	QWidget(parent),
 	m_hasActivationControls(hasActivationControls),
 	m_parent(parent)
@@ -436,11 +436,6 @@ TuningSourcesWidget::TuningSourcesWidget(std::vector<TuningTcpClient*> tcpClient
 	QHBoxLayout* bottomLayout = new QHBoxLayout();
 	mainLayout->addLayout(bottomLayout);
 
-	m_btnDetails = new QPushButton(tr("Details..."));
-	m_btnDetails->setEnabled(false);
-	connect(m_btnDetails, &QPushButton::clicked, this, &TuningSourcesWidget::detailsClicked);
-	bottomLayout->addWidget(m_btnDetails);
-
 	if (m_hasActivationControls == true)
 	{
 		m_btnEnableControl = new QPushButton(tr("Activate Control..."));
@@ -455,13 +450,6 @@ TuningSourcesWidget::TuningSourcesWidget(std::vector<TuningTcpClient*> tcpClient
 	}
 
 	bottomLayout->addStretch();
-
-	if (hasCloseButton == true)
-	{
-		QPushButton* b = new QPushButton(tr("Close"));
-		connect(b, &QPushButton::clicked, this, &TuningSourcesWidget::closeClicked);
-		bottomLayout->addWidget(b);
-	}
 
 	setLayout(mainLayout);
 
@@ -523,44 +511,6 @@ void TuningSourcesWidget::setTuningTcpClients(std::vector<TuningTcpClient*> tcpC
 	}
 }
 
-void TuningSourcesWidget::timerEvent(QTimerEvent* event)
-{
-	assert(event);
-
-	if  (event->timerId() == m_updateStateTimerId)
-	{
-		updateAll();
-	}
-}
-
-bool TuningSourcesWidget::login()
-{
-	return true;
-}
-
-void TuningSourcesWidget::tuningSourcesInfoArrived()
-{
-	m_tuningSourcesInfoArrived = true;
-}
-
-void TuningSourcesWidget::updateAll()
-{
-	if (m_tuningSourcesInfoArrived == true)
-	{
-		m_tuningSourcesInfoArrived = false;
-		fillTuningSourcesInfo();
-	}
-
-	updateTuningSourcesStates();
-
-	enableActivationControls();
-}
-
-void TuningSourcesWidget::closeClicked()
-{
-	emit closeButtonPressed();
-}
-
 void TuningSourcesWidget::detailsClicked()
 {
 	Hash sourceHash  = selectedSourceHash();
@@ -594,10 +544,41 @@ void TuningSourcesWidget::detailsClicked()
 	}
 }
 
+void TuningSourcesWidget::timerEvent(QTimerEvent* event)
+{
+	assert(event);
+
+	if  (event->timerId() == m_updateStateTimerId)
+	{
+		updateAll();
+	}
+}
+
+bool TuningSourcesWidget::login()
+{
+	return true;
+}
+
+void TuningSourcesWidget::tuningSourcesInfoArrived()
+{
+	m_tuningSourcesInfoArrived = true;
+}
+
+void TuningSourcesWidget::updateAll()
+{
+	if (m_tuningSourcesInfoArrived == true)
+	{
+		m_tuningSourcesInfoArrived = false;
+		fillTuningSourcesInfo();
+	}
+
+	updateTuningSourcesStates();
+
+	enableActivationControls();
+}
+
 void TuningSourcesWidget::treeWidget_itemSelectionChanged()
 {
-	m_btnDetails->setEnabled(selectedLanControllerHash() != UNDEFINED_HASH);
-
 	enableActivationControls();
 }
 

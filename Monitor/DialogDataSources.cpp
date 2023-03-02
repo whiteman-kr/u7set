@@ -1,13 +1,41 @@
 #include "DialogDataSources.h"
+#include "../UtilsLib/Ui/UiTools.h"
 
-DialogDataSources::DialogDataSources(MonitorConfigController* configController, std::vector<TuningTcpClient*> tcpTuningClients, ILogFile* logFile, QWidget* parent)
-	:QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
+
+void DialogDataSources::create(const MonitorConfigController& configController, std::vector<TuningTcpClient*> tcpTuningClients, ILogFile* logFile, QWidget* parent)
+{
+	if (s_dialogDataSources == nullptr)
+	{
+		s_dialogDataSources = new DialogDataSources(configController, std::move(tcpTuningClients), logFile, parent);
+		s_dialogDataSources->show();
+	}
+	else
+	{
+		s_dialogDataSources->activateWindow();
+	}
+
+	UiTools::adjustDialogPlacement(s_dialogDataSources);
+
+	return;
+}
+
+void DialogDataSources::updateTuningTcpClients(std::vector<TuningTcpClient*> tcpTuningClients)
+{
+	if (s_dialogDataSources != nullptr)
+	{
+		s_dialogDataSources->setTuningTcpClients(std::move(tcpTuningClients));
+	}
+
+	return;
+}
+
+DialogDataSources::DialogDataSources(const MonitorConfigController& configController, std::vector<TuningTcpClient*> tcpTuningClients, ILogFile* logFile, QWidget* parent) :
+	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	  m_configController(configController),
 	  m_logFile(logFile)
 {
-	if (m_configController == nullptr || m_logFile == nullptr)
+	if (m_logFile == nullptr)
 	{
-		Q_ASSERT(m_configController);
 		Q_ASSERT(m_logFile);
 		return;
 	}
@@ -21,84 +49,32 @@ DialogDataSources::DialogDataSources(MonitorConfigController* configController, 
 	QLabel* l = new QLabel(tr("Application Data Sources"));
 	m_mainLayout->addWidget(l);
 
-	createAppSourceStateClients();
-
 	// AppDataSourcesWidget
 	//
-	m_appDataSourcesWidget = new AppDataSourcesWidget(m_tcpSourcesStateClients, m_configController->configuration().tuningEnabled == false /*closeButton*/, this);
-
-	connect(m_appDataSourcesWidget, &AppDataSourcesWidget::closeButtonPressed, this, &DialogDataSources::reject);
-
+	m_appDataSourcesWidget = new AppDataSourcesWidget(m_tcpSignalClientCtrl, this);
 	m_mainLayout->addWidget(m_appDataSourcesWidget);
 
-	// Tuning
+	// TuningSourcesWidget
 	//
-	setTuningTcpClients(std::move(tcpTuningClients));
+	m_tuningSourcesLabel = new QLabel(tr("Tuning Data Sources"));
+	m_mainLayout->addWidget(m_tuningSourcesLabel);
 
-	//
-	connect(m_configController, &MonitorConfigController::configurationArrived,
-			this, &DialogDataSources::slot_configurationArrived,
-			Qt::QueuedConnection);
+	m_tuningSourcesWidget = new TuningSourcesWidget(std::move(tcpTuningClients), false/*hasActivationControls*/, this);
+	m_mainLayout->addWidget(m_tuningSourcesWidget);
+
+	if (m_configController.configuration().tuningEnabled == false)
+	{
+		m_tuningSourcesLabel->setVisible(false);
+		m_tuningSourcesWidget->setVisible(false);
+	}
+
+	connect(&m_configController, &MonitorConfigController::configurationArrived, this, &DialogDataSources::slot_configurationArrived);
 
 	// --
 	//
 	setLayout(m_mainLayout);
 
-	return;
-}
-
-DialogDataSources::~DialogDataSources()
-{
-	deleteAppSourceStateClients();
-}
-
-void DialogDataSources::setTuningTcpClients(std::vector<TuningTcpClient*> tcpTuningClients)
-{
-	bool showTuningWidget = m_configController->configuration().tuningEnabled;
-
-	if (showTuningWidget == true)
-	{
-		// Show tuning widget
-
-		if (m_tuningSourcesLabel == nullptr)
-		{
-			m_tuningSourcesLabel = new QLabel(tr("Tuning Data Sources"));
-			m_mainLayout->addWidget(m_tuningSourcesLabel);
-		}
-
-		if (m_tuningSourcesWidget == nullptr)
-		{
-			m_tuningSourcesWidget = new TuningSourcesWidget(std::move(tcpTuningClients), false/*hasActivationControls*/, true/*hasCloseButton*/, this);
-
-			connect(m_tuningSourcesWidget, &TuningSourcesWidget::closeButtonPressed, this, &DialogDataSources::reject);
-
-			m_mainLayout->addWidget(m_tuningSourcesWidget);
-		}
-		else
-		{
-			m_tuningSourcesWidget->setTuningTcpClients(std::move(tcpTuningClients));
-		}
-	}
-	else
-	{
-		// Delete tuning widget
-
-		if (m_tuningSourcesLabel != nullptr)
-		{
-			delete m_tuningSourcesLabel;
-			m_tuningSourcesLabel = nullptr;
-		}
-
-		if (m_tuningSourcesWidget != nullptr)
-		{
-			delete m_tuningSourcesWidget;
-			m_tuningSourcesWidget = nullptr;
-		}
-	}
-
-	m_appDataSourcesWidget->showCloseButton(showTuningWidget == false);
-
-	if (showTuningWidget == true)
+	if (m_configController.configuration().tuningEnabled == true)
 	{
 		setMinimumSize(1024, 500);
 	}
@@ -106,78 +82,34 @@ void DialogDataSources::setTuningTcpClients(std::vector<TuningTcpClient*> tcpTun
 	{
 		setMinimumSize(1024, 300);
 	}
-}
-
-void DialogDataSources::reject()
-{
-	emit dialogClosed();
-	QDialog::reject();
-}
-
-void DialogDataSources::slot_configurationArrived(ConfigSettings configuration)
-{
-	m_appDataSourcesWidget->showCloseButton(configuration.tuningEnabled == false);
-
-	size_t appDataServicesCount = configuration.appDataServices.size();
-	if (appDataServicesCount == m_tcpSourcesStateClients.size())
-	{
-		// AppDataServices count was not changed, just update their addresses
-		//
-		for (int i = 0; i < appDataServicesCount; i++)
-		{
-			const MonitorSettings::AppDataService& ads = configuration.appDataServices[i];
-
-			if (m_tcpSourcesStateClients[i]->serverAddressPort(0) != ads.address ||
-					m_tcpSourcesStateClients[i]->serverAddressPort(1) != ads.address)
-			{
-				m_tcpSourcesStateClients[i]->setServers(ads.address, ads.address, true);
-			}
-		}
-	}
-	else
-	{
-		// Re-create TcpAppSourcesState clients because number of AppDataServices was changed
-		//
-
-		deleteAppSourceStateClients();
-		createAppSourceStateClients();
-
-		m_appDataSourcesWidget->setAppSourceTcpClients(m_tcpSourcesStateClients);
-	}
 
 	return;
 }
 
-void DialogDataSources::createAppSourceStateClients()
+DialogDataSources::~DialogDataSources()
 {
-	if (m_sourcesStateClientThreads.empty() == false)
-	{
-		Q_ASSERT(m_sourcesStateClientThreads.empty() == true);
-		return;
-	}
+	Q_ASSERT(s_dialogDataSources);
+	s_dialogDataSources = nullptr;
 
-	for (const MonitorSettings::AppDataService& ads : m_configController->configuration().appDataServices)
-	{
-		TcpAppSourcesState* client = new TcpAppSourcesState(m_configController->softwareInfo(), ads.address, m_logFile);
-		m_tcpSourcesStateClients.push_back(client);
-
-		SimpleThread* thread = new SimpleThread(client);
-		m_sourcesStateClientThreads.push_back(thread);
-
-		thread->start();
-	}
 }
 
-void DialogDataSources::deleteAppSourceStateClients()
+void DialogDataSources::setTuningTcpClients(std::vector<TuningTcpClient*> tcpTuningClients)
 {
-	for (SimpleThread* thread : m_sourcesStateClientThreads)
+	m_tuningSourcesWidget->setTuningTcpClients(std::move(tcpTuningClients));
+}
+
+void DialogDataSources::slot_configurationArrived(ConfigSettings configuration)
+{
+	m_tuningSourcesLabel->setVisible(configuration.tuningEnabled);
+	m_tuningSourcesWidget->setVisible(configuration.tuningEnabled);
+
+	if (configuration.tuningEnabled == true)
 	{
-		thread->quitAndWait(10000);
+		setMinimumSize(1024, 500);
 	}
-	for (SimpleThread* thread : m_sourcesStateClientThreads)
 	{
-		delete thread;
+		setMinimumSize(1024, 300);
 	}
-	m_sourcesStateClientThreads.clear();
-	m_tcpSourcesStateClients.clear();
+
+	return;
 }

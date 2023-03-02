@@ -123,10 +123,7 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 
 MonitorMainWindow::~MonitorMainWindow()
 {
-	if (m_dialogDataSources != nullptr)
-	{
-		m_dialogDataSources->close();
-	}
+	DialogDataSources::updateTuningTcpClients({});
 
 	stopTuningTcpClients();
 
@@ -976,36 +973,10 @@ void MonitorMainWindow::showTuningLog()
 
 void MonitorMainWindow::showDataSources()
 {
-	if (m_dialogDataSources == nullptr)
-	{
-		std::vector<TuningTcpClient*> tuningTcpClients;
-		for (const auto& c: m_tuningTcpClients)
-		{
-			TuningTcpClient* tc = dynamic_cast<TuningTcpClient*>(c);
-			if (tc == nullptr)
-			{
-				Q_ASSERT(tc);
-				return;
-			}
-			tuningTcpClients.push_back(tc);
-		}
-
-		m_dialogDataSources = new DialogDataSources(&m_configController, tuningTcpClients, &m_LogFile, this);
-		m_dialogDataSources->show();
-
-		auto f = [this]() -> void
-		{
-			m_dialogDataSources = nullptr;
-		};
-
-		connect(m_dialogDataSources, &DialogDataSources::dialogClosed, this, f);
-	}
-	else
-	{
-		m_dialogDataSources->activateWindow();
-	}
-
-	UiTools::adjustDialogPlacement(m_dialogDataSources);
+	DialogDataSources::create(m_configController,
+							  {m_tuningTcpClients.begin(), m_tuningTcpClients.end()},
+							  &m_LogFile,
+							  this);
 }
 
 
@@ -1613,11 +1584,7 @@ void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
 	}
 
 	m_tuningController->setTcpClients({m_tuningTcpClients.begin(),m_tuningTcpClients.end()});
-
-	if (m_dialogDataSources != nullptr)
-	{
-		m_dialogDataSources->setTuningTcpClients({m_tuningTcpClients.begin(),m_tuningTcpClients.end()});
-	}
+	DialogDataSources::updateTuningTcpClients({m_tuningTcpClients.begin(),m_tuningTcpClients.end()});
 
 	m_statusBarTuningConnection->setVisible(configuration.tuningEnabled == true);
 

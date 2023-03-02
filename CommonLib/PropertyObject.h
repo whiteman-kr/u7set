@@ -1637,7 +1637,9 @@ public:
 			  void(CLASS::*set)(TYPE)>
 	auto addProperty(const QString& caption, const QString& category, bool visible)
 	{
+#if !defined(__GNUC__) || (__GNUC___ > 10)
 		static_assert(get != nullptr);
+#endif
 
 		auto property = std::make_shared<PropertyTypedValue<TYPE, CLASS, get, set>>(dynamic_cast<CLASS*>(this));
 
