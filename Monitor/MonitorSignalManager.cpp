@@ -116,7 +116,7 @@ MonitorSignalManager::MonitorSignalManager(MonitorConfigController& configContro
 		m_states.reserve(64000);
 	}
 
-	connect(&configController, &MonitorConfigController::configurationUpdate, this, &MonitorSignalManager::configurationUpdated);
+	connect(&configController, &MonitorConfigController::configurationUpdated, this, &MonitorSignalManager::configurationUpdated);
 
 	return;
 }

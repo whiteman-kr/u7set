@@ -10,6 +10,7 @@ SUBDIRS += Protobuf \
 	ServiceLib \
 	HardwareLib \
 	CommonLib \
+	ClientLib \
 	qtkeychain \
 	VFrame30 \
 	DbLib \

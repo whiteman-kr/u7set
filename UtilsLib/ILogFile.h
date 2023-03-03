@@ -23,6 +23,7 @@ public:
 	virtual bool writeText(const QString&)  override { return true; };
 };
 
+
 class HasLogFile
 {
 public:

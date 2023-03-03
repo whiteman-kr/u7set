@@ -26,8 +26,7 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	setWindowTitle(MonitorAppSettings::instance().windowCaption());
 
 	connect(&m_configController, &MonitorConfigController::configurationArrived, this, &MonitorMainWindow::slot_configurationArrived);
-	connect(&m_configController, &MonitorConfigController::unknownClient, this, &MonitorMainWindow::slot_unknownClient);
-	connect(&m_configController, &MonitorConfigController::wrongClientHostname, this, &MonitorMainWindow::slot_wrongClientHostname);
+	connect(&m_configController, &MonitorConfigController::error, this, &MonitorMainWindow::slot_configurationError);
 
 	// DialogAlert
 	//
@@ -112,7 +111,7 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	//
 	connect(schemaListWidget, &SchemaListWidget::openSchemaRequest, monitorCentralWidget, &MonitorCentralWidget::slot_selectSchemaForCurrentTab);
 
-	connect(&m_configController, &MonitorConfigController::configurationUpdate,
+	connect(&m_configController, &MonitorConfigController::configurationUpdated,
 			[this, schemaListWidget]()
 			{
 				schemaListWidget->setDetails(m_configController.schemasDetailsSet());
@@ -841,9 +840,11 @@ void MonitorMainWindow::updateStatusBar()
 	// BuildNo
 	//
 	{
+		auto configInfo = m_configController.configInfo();
+
 		QString text = QString(" Project: %1   Build: %2  ")
-					   .arg(m_configController.configuration().project)
-					   .arg(m_configController.configuration().buildNo);
+					   .arg(configInfo.project)
+					   .arg(configInfo.buildNo);
 
 		m_statusBarProjectInfo->setText(text);
 	}
@@ -1595,28 +1596,12 @@ void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
 	return;
 }
 
-void MonitorMainWindow::slot_unknownClient(QString errMsg)
+void MonitorMainWindow::slot_configurationError(QString error)
 {
-	Q_UNUSED(errMsg);
-
-	// CfgService did not find SoftwareID
-	//
 	QMessageBox::critical(this,
 						  qAppName(),
-						  tr("Configuration Service does not recognize Monitor EquipmentID %1")
-						  .arg(m_configController.softwareInfo().equipmentID()));
-	return;
-}
-
-void MonitorMainWindow::slot_wrongClientHostname(QString errMsg)
-{
-	Q_UNUSED(errMsg);
-
-	// CfgService did not find SoftwareID
-	//
-	QMessageBox::critical(this,
-						  qAppName(),
-						  tr("Configuration Service reporting - Monitor running on computer with wrong hostanme"));
+						  tr("Configuration error: %1")
+						  .arg(error));
 	return;
 }
 

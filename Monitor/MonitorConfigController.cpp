@@ -5,285 +5,56 @@
 
 
 MonitorConfigController::MonitorConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2, ILogFile* logFile) :
-	HasLogFile(logFile, "ConfigController"),
-	m_softwareInfo(softwareInfo)
+	Client::ConfigController{softwareInfo, address1, address2, logFile}
 {
 	qRegisterMetaType<ConfigSettings>("ConfigSettings");
 
-	// Communication instance no
+	return;
+}
+
+bool MonitorConfigController::updateConfiguration(const Client::ConfigurationInfo& conf, const MonitorSettings& settings)
+{
+	ConfigSettings config{};
+
+	config.configInfo = conf;
+
+	config.startSchemaId = settings.startSchemaId;
+
+	config.appDataServices = settings.appDataServices;
+	config.appDataRealTimeServices = settings.appDataServices;
+	config.archiveServices = settings.archiveServices;
+
+	//  --
 	//
-	m_appInstanceSharedMemory.setKey("MonitorInstanceNo");
-	int maxInstanceCount = 512;
+	config.tuningEnabled = settings.tuningEnabled;
 
-	bool ok = m_appInstanceSharedMemory.create(maxInstanceCount * sizeof(qint64));
-
-	if (ok == true)
+	if (config.tuningEnabled == true)
 	{
-		// Shared memory created, initialize it
+		config.tuningServices = settings.tuningServices;
+		config.tuningLogin = settings.tuningLogin;
+		config.tuningUserAccounts = settings.getUsersAccounts();
+		config.tuningSessionTimeout = settings.tuningSessionTimeout;
+	}
+	else
+	{
+		// tuning disabled
 		//
-		m_appInstanceSharedMemory.lock();
-
-		qint64* sharedData = static_cast<qint64*>(m_appInstanceSharedMemory.data());
-
-		for (int i = 0; i < maxInstanceCount; i++)
-		{
-			sharedData[i] = 0;
-		}
-
-		sharedData[0] = qApp->applicationPid();
-		m_appInstanceNo = 0;
-
-		m_appInstanceSharedMemory.unlock();
-	}
-	else
-	{
-		if (m_appInstanceSharedMemory.error() == QSharedMemory::SharedMemoryError::AlreadyExists)
-		{
-			ok = m_appInstanceSharedMemory.attach();
-		}
-
-		if (ok == false)
-		{
-			QMessageBox::critical(nullptr,
-								  qApp->applicationName(),
-								  QString("Cannot create or attach to shared memory to determine software instance no. Error: %1")
-								  .arg(m_appInstanceSharedMemory.errorString()));
-
-			// Set "Some" Application Instance No
-			//
-			m_appInstanceNo = static_cast<int>(QDateTime::currentMSecsSinceEpoch());		// cut the highest bytes
-		}
-		else
-		{
-			// Get empty slot from shared memory
-			//
-			Q_ASSERT(m_appInstanceSharedMemory.isAttached() == true);
-
-			m_appInstanceSharedMemory.lock();
-
-			qint64* sharedData = static_cast<qint64*>(m_appInstanceSharedMemory.data());
-			m_appInstanceNo = -1;
-
-			for (int i = 0; i < maxInstanceCount; i++)
-			{
-				if (sharedData[i] == 0)
-				{
-					// This is an empty slot, use it
-					//
-					sharedData[i] = qApp->applicationPid();	// 1 means
-					m_appInstanceNo = i;
-
-					break;
-				}
-			}
-
-			if (m_appInstanceNo == -1)
-			{
-				Q_ASSERT(m_appInstanceNo > 0);
-
-				QMessageBox::critical(nullptr,
-									  qApp->applicationName(),
-									  tr("Cannot determine software instance no. It seems all slots are occupied"));
-
-				// Set "Some" Application Instance No
-				//
-				m_appInstanceNo = static_cast<int>(QDateTime::currentMSecsSinceEpoch());		// cut the highest bytes
-			}
-
-			m_appInstanceSharedMemory.unlock();
-		}
+		config.tuningServices.clear();
+		config.tuningLogin = false;
+		config.tuningUserAccounts.clear();
+		config.tuningSessionTimeout = 0;
 	}
 
-	qDebug() << "MonitorInstanceNo: " << m_appInstanceNo;
-
-	// --
+	//--
 	//
-	m_cfgLoaderThread = new CfgLoaderThread(m_softwareInfo,
-											m_appInstanceNo,
-											address1,
-											address2,
-											false,
-											std::make_shared<CircularLogger>(logFile, "CfgLoaderThread"));
-
-	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &MonitorConfigController::slot_configurationReady);
-
-	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_unknownClientID, this, &MonitorConfigController::unknownClient);
-	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_unknownClientID, [this](){this->writeError(tr("Unknown client %1").arg(MonitorAppSettings::instance().equipmentId()));});
-
-	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_wrongClientHostname, this, &MonitorConfigController::wrongClientHostname);
-
-	return;
-}
-
-MonitorConfigController::~MonitorConfigController()
-{
-	// Release application instance slot
-	//
-	if (m_appInstanceNo != -1)
-	{
-		Q_ASSERT(m_appInstanceSharedMemory.isAttached() == true);
-
-		m_appInstanceSharedMemory.lock();
-
-		qint64* sharedData = static_cast<qint64*>(m_appInstanceSharedMemory.data());
-		sharedData[m_appInstanceNo] = 0;
-
-		m_appInstanceSharedMemory.unlock();
-	}
-
-	// Stop communication
-	//
-	m_cfgLoaderThread->quit();
-	delete m_cfgLoaderThread;
-}
-
-void MonitorConfigController::setConnectionParams(QString equipmentId, HostAddressPort address1, HostAddressPort address2)
-{
-	if (m_cfgLoaderThread == nullptr)
-	{
-		Q_ASSERT(m_cfgLoaderThread);
-		return;
-	}
-
-	m_softwareInfo.setEquipmentID(equipmentId);
-
-	m_cfgLoaderThread->setConnectionParams(m_softwareInfo, address1, address2, true);
-
-	return;
-}
-
-bool MonitorConfigController::getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr)
-{
-	if (m_cfgLoaderThread == nullptr)
-	{
-		Q_ASSERT(m_cfgLoaderThread != nullptr);
-		return false;
-	}
-
-	bool result = m_cfgLoaderThread->getFileBlocked(pathFileName, fileData, errorStr);
-	if (result == false)
-	{
-		writeError(tr("getFileBlocked() Can't get file %1").arg(pathFileName));
-	}
-	else
-	{
-		writeMessage(tr("getFileBlocked('%1') Success").arg(pathFileName));
-	}
-
-	return result;
-}
-
-bool MonitorConfigController::getFile(const QString& pathFileName, QByteArray* fileData)
-{
-	Q_UNUSED(pathFileName);
-	Q_UNUSED(fileData);
-
-	// To do
-	//
-	Q_ASSERT(false);
-	return false;
-}
-
-bool MonitorConfigController::getFileBlockedById(const QString& id, QByteArray* fileData, QString* errorStr)
-{
-	if (m_cfgLoaderThread == nullptr)
-	{
-		Q_ASSERT(m_cfgLoaderThread != nullptr);
-		return false;
-	}
-
-	bool result = m_cfgLoaderThread->getFileBlockedByID(id, fileData, errorStr);
-
-	if (result == false)
-	{
-		writeError(tr("getFileBlockedById() Can't get fileid %1").arg(id));
-	}
-	else
-	{
-		writeMessage(tr("getFileBlockedById('%1') Success").arg(id));
-	}
-
-	return result;
-}
-
-bool MonitorConfigController::getFileById(const QString& id, QByteArray* fileData)
-{
-	Q_UNUSED(id);
-	Q_UNUSED(fileData);
-
-	// To do
-	//
-	Q_ASSERT(false);
-	return false;
-}
-
-bool MonitorConfigController::hasFileId(QString fileId) const
-{
-	if (m_cfgLoaderThread == nullptr)
-	{
-		Q_ASSERT(m_cfgLoaderThread != nullptr);
-		return false;
-	}
-
-	return m_cfgLoaderThread->hasFileID(std::move(fileId));
-}
-
-Tcp::ConnectionState MonitorConfigController::getConnectionState() const
-{
-	Tcp::ConnectionState result;
-
-	if (m_cfgLoaderThread == nullptr)
-	{
-		Q_ASSERT(m_cfgLoaderThread);
-
-		result.isConnected = false;
-		return result;
-	}
-
-	result = m_cfgLoaderThread->getConnectionState();
-
-	return result;
-}
-
-const SoftwareInfo& MonitorConfigController::softwareInfo() const
-{
-	return m_softwareInfo;
-}
-
-void MonitorConfigController::start()
-{
-	if (m_cfgLoaderThread == nullptr)
-	{
-		Q_ASSERT(m_cfgLoaderThread);
-		return;
-	}
-
-	writeMessage(tr("MonitorConfigController::start()"));
-
-	m_cfgLoaderThread->start();
-	m_cfgLoaderThread->enableDownloadConfiguration();
-
-	return;
-}
-
-void MonitorConfigController::slot_configurationReady(const QByteArray configurationXmlData,
-													  const BuildFileInfoArray buildFileInfoArray,
-													  SessionParams sessionParams,
-													  std::shared_ptr<const SoftwareSettings> curSettingsProfile)
-{
-	Q_UNUSED(buildFileInfoArray);
-	Q_UNUSED(sessionParams);
-
-	qDebug() << "MonitorConfigThread::slot_configurationReady";
-
 	// Get GlobalScript.js file
 	//
-	auto getScriptFunc = [cfgLoaderThread = m_cfgLoaderThread](QString scriptFileName) -> QString
+	auto getScriptFunc = [this](const QString& scriptFileName) -> QString
 		{
 			QString parsingError;
 			QByteArray ba;
 
-			if (bool ok = cfgLoaderThread->getFileBlocked(scriptFileName, &ba, &parsingError);
+			if (bool ok = getFileBlocked(scriptFileName, &ba, &parsingError);
 				ok == true)
 			{
 				return QString{ba};
@@ -296,12 +67,11 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 
 	// Get image file
 	//
-	auto getImageFunc = [cfgLoaderThread = m_cfgLoaderThread](QString fileId) -> QImage
+	auto getImageFunc = [this](const QString& fileId) -> QImage
 		{
-			QString parsingError;
 			QByteArray ba;
 
-			if (bool ok = cfgLoaderThread->getFileBlockedByID(fileId, &ba, &parsingError);
+			if (bool ok = getFileBlockedById(fileId, &ba, nullptr);
 				ok == true)
 			{
 				return QImage::fromData(ba);
@@ -312,91 +82,20 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 			}
 		};
 
-	ConfigSettings readSettings;
-
-	readSettings.globalScript = getScriptFunc("/" + MonitorAppSettings::instance().equipmentId() + "/GlobalScript.js");
-	readSettings.logoImage = getImageFunc(CfgFileId::LOGO);
-	readSettings.onConfigurationArrivedScript = getScriptFunc("/" + MonitorAppSettings::instance().equipmentId() + "/OnConfigurationArrived.js");
-
-	// Parse XML
-	//
-	{
-		QString parsingError;
-		QDomDocument xml;
-
-		int errorLine = 0;
-		int errorColumn = 0;
-
-		bool result = xml.setContent(configurationXmlData, false, &parsingError, &errorLine, &errorColumn);
-
-		if (result == false)
-		{
-			QString errorStr = tr("%1, line %2, column %3").arg(parsingError).arg(errorLine).arg(errorColumn);
-			readSettings.errorMessage += errorStr + "\n";
-		}
-		else
-		{
-			// Get <Configuration>
-			//
-			QDomElement configElement = xml.documentElement();
-
-			// BuildInfo node
-			//
-			QDomNodeList buildInfoNodes = configElement.elementsByTagName("BuildInfo");
-			if (buildInfoNodes.size() != 1)
-			{
-				readSettings.errorMessage += tr("Parsing BuildInfo node error.\n");
-			}
-			else
-			{
-				result &= xmlReadBuildInfoNode(buildInfoNodes.item(0), &readSettings);
-			}
-
-			// Software node
-			//
-			QDomNodeList softwareNodes = configElement.elementsByTagName("Software");
-			if (softwareNodes.size() != 1)
-			{
-				readSettings.errorMessage += tr("Parsing Software node error.\n");
-			}
-			else
-			{
-				result &= xmlReadSoftwareNode(softwareNodes.item(0), &readSettings);
-			}
-
-			// Settings node
-			//
-			result &= applyCurSettingsProfile(curSettingsProfile, &readSettings);
-		}
-
-		// Error handling
-		//
-		if (result == false ||
-			readSettings.errorMessage.isEmpty() == false)
-		{
-			QString completeErrorMessage = tr("Parsing configuration file error: %1").arg(readSettings.errorMessage);
-
-			qDebug() << completeErrorMessage;
-			QMessageBox::critical(nullptr, qApp->applicationName(), completeErrorMessage);
-		}
-	}
+	config.globalScript = getScriptFunc("/" + MonitorAppSettings::instance().equipmentId() + "/GlobalScript.js");
+	config.logoImage = getImageFunc(CfgFileId::LOGO);
+	config.onConfigurationArrivedScript = getScriptFunc("/" + MonitorAppSettings::instance().equipmentId() + "/OnConfigurationArrived.js");
 
 	// Get tuning signal files
 	//
 	theTuningSignals.reset();
 
-	if (readSettings.tuningEnabled == true)
+	if (config.tuningEnabled == true)
 	{
 		QByteArray data;
-		QString errorString;
 
-		bool result = getFileBlockedById(CfgFileId::TUNING_SIGNALS, &data, &errorString);
-
-		if (result == false)
-		{
-			readSettings.errorMessage += errorString + QStringLiteral("\n");
-		}
-		else
+		bool result = getFileBlockedById(CfgFileId::TUNING_SIGNALS, &data, nullptr);
+		if (result == true)
 		{
 			theTuningSignals.load(data);
 		}
@@ -407,83 +106,18 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 	{
 		// Get SchemaDetails.pbuf file
 		//
-		QString parsingError;
-
 		QByteArray ba;
-		QString fileName = "/" + MonitorAppSettings::instance().equipmentId() + QStringLiteral("/SchemaDetails.pbuf");
-		bool ok = m_cfgLoaderThread->getFileBlocked(fileName, &ba, &parsingError);
+		QString fileName = "/" + m_softwareInfo.equipmentID() + QStringLiteral("/SchemaDetails.pbuf");
 
-		if (ok == false)
-		{
-			qDebug() << "ERROR: Cannot get " << fileName << ", " << parsingError;
+		bool ok = getFileBlocked(fileName, &ba, nullptr);
 
-			QWriteLocker locker(&m_schemaDetailsLock);
-			m_schemaDetailsSet.clear();
-		}
-		else
+		QWriteLocker locker(&m_schemaDetailsLock);
+		m_schemaDetailsSet.clear();
+
+		if (ok == true)
 		{
-			QWriteLocker locker(&m_schemaDetailsLock);
-			m_schemaDetailsSet.clear();
 			m_schemaDetailsSet.Load(ba);
 		}
-	}
-
-	// Trace received params
-	//
-	qDebug() << "New configuration arrived";
-	writeMessage(tr("New configuration arrived: StartSchemaID %1").arg(readSettings.startSchemaId));
-
-	qDebug() << "StartSchemaID: " << readSettings.startSchemaId;
-
-	// --
-	//
-	writeMessage(tr("AppDatService(s): %1").arg(readSettings.appDataServices.size()));
-	qDebug() << "AppDatService(s):";
-
-	for (const MonitorSettings::AppDataService& service : readSettings.appDataServices)
-	{
-		qDebug() << "Service: id, address: " << service.equipmentId << ", " << service.address.addressPortStr();
-		writeMessage(tr("Service: id, address: %1, %2").arg(service.equipmentId).arg(service.address.addressPortStr()));
-	}
-
-	// --
-	//
-	writeMessage(tr("AppDataRealTimeService(s): %1").arg(readSettings.appDataRealTimeServices.size()));
-	qDebug() << "AppDataRealTimeService(s):";
-
-	for (const MonitorSettings::AppDataService& service : readSettings.appDataRealTimeServices)
-	{
-		qDebug() << "Service: id, address: " << service.equipmentId << ", " << service.address.addressPortStr();
-		writeMessage(tr("Service: id, address: %1, %2").arg(service.equipmentId).arg(service.address.addressPortStr()));
-	}
-
-	// --
-	//
-	writeMessage(tr("ArchiveService(s): %1").arg(readSettings.archiveServices.size()));
-	qDebug() << "ArchiveService(s):";
-	for (const MonitorSettings::ArchiveService& service : readSettings.archiveServices)
-	{
-		qDebug() << "Service: id, address: " << service.equipmentId << ", " << service.address.addressPortStr();
-		writeMessage(tr("Service: id, address: %1, %2").arg(service.equipmentId).arg(service.address.addressPortStr()));
-	}
-
-	// --
-	//
-	writeMessage(QString("TuningEnabled = %1").arg(readSettings.tuningEnabled));
-	if (readSettings.tuningEnabled == true)
-	{
-		for (const MonitorSettings::TuningService& ts : readSettings.tuningServices)
-		{
-			writeMessage(tr("TuningService (id, ip, port): %1, %2, %3").arg(ts.equipmentId).arg(ts.clientRequestIP).arg(ts.clientRequestPort));
-			writeMessage(tr("TuningSources: %1").arg(ts.drivenSources.join(", ")));
-		}
-		writeMessage(tr("TuningUserAccounts: %1").arg(readSettings.tuningUserAccounts.join(", ")));
-		writeMessage(tr("TuningSessionTimeout: %1").arg(readSettings.tuningSessionTimeout));
-	}
-
-	if (readSettings.errorMessage.isEmpty() == false)
-	{
-		writeError(tr("Error: %1").arg(readSettings.errorMessage));
 	}
 
 	// New setpoints
@@ -495,7 +129,7 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 		if (bool result = getFileBlockedById(CfgFileId::COMPARATOR_SET, &data, &errorString);
 			result == false)
 		{
-			readSettings.errorMessage += errorString + QStringLiteral("\n");
+			m_logFile.writeError(errorString);
 		}
 		else
 		{
@@ -504,7 +138,7 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 			if (bool readOk = setpoints.serializeFrom(data);
 				readOk == false)
 			{
-				readSettings.errorMessage += tr("Serialize set point list file error") + QStringLiteral("\n");
+				m_logFile.writeError(tr("Serialize set point list file error.") + QStringLiteral("\n"));
 			}
 			else
 			{
@@ -522,7 +156,7 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 		if (bool result = getFileBlockedById(CfgFileId::CLIENT_BEHAVIOR, &data, &errorString);
 			result == false)
 		{
-			readSettings.errorMessage += errorString + QStringLiteral("\n");
+			m_logFile.writeError("Serialize set point list file error.");
 		}
 		else
 		{
@@ -533,7 +167,7 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 
 			if (ok == false)
 			{
-				readSettings.errorMessage += tr("Read/parse Behavior file errror: ") + errorString + QStringLiteral("\n");
+				m_logFile.writeError("Read/parse Behavior file errror: " + errorString + QStringLiteral("."));
 			}
 			else
 			{
@@ -541,149 +175,86 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 
 				if (mb.empty() == false)
 				{
-					readSettings.monitorBeahvior = std::move(*mb[0]);
+					config.monitorBeahvior = std::move(*mb[0]);
 				}
 			}
 		}
 	}
 
+	// Trace received params
+	//
+	qDebug() << "New configuration arrived.";
+	m_logFile.writeMessage(tr("New configuration arrived:"));
+
+	dump(config);
+
 	// --
 	//
 	{
 		QWriteLocker locker(&m_confugurationLock);
-		readSettings.configurationId = s_configurationIdCounter++;
-		m_configuration = readSettings;		// Cannot move readSettings here as it is used later for `emit configurationArrived(readSettings)`
+		config.configurationId = s_configurationIdCounter++;
+		m_configuration = config;		// Cannot move config here as it is used later for `emit configurationArrived(config)`
 	}
 
 	// Emit signal to inform everybody about new configuration
 	//
-	emit configurationArrived(readSettings);
-	emit configurationUpdate();
+	emit configurationArrived(config);
+	emit configurationUpdated();
+
+	return true;
+}
+
+void MonitorConfigController::dump(const ConfigSettings& config) const
+{
+	qDebug() << "StartSchemaID: " << config.startSchemaId;
+
+	// --
+	//
+	m_logFile.writeMessage(tr("AppDatService(s): %1.").arg(config.appDataServices.size()));
+	qDebug() << "AppDatService(s):";
+
+	for (const MonitorSettings::AppDataService& service : config.appDataServices)
+	{
+		qDebug() << "Service: id, address: " << service.equipmentId << ", " << service.address.addressPortStr();
+		m_logFile.writeMessage(tr("Service: id, address: %1, %2.").arg(service.equipmentId).arg(service.address.addressPortStr()));
+	}
+
+	// --
+	//
+	m_logFile.writeMessage(tr("AppDataRealTimeService(s): %1.").arg(config.appDataRealTimeServices.size()));
+	qDebug() << "AppDataRealTimeService(s):";
+
+	for (const MonitorSettings::AppDataService& service : config.appDataRealTimeServices)
+	{
+		qDebug() << "Service: id, address: " << service.equipmentId << ", " << service.address.addressPortStr();
+		m_logFile.writeMessage(tr("Service: id, address: %1, %2.").arg(service.equipmentId).arg(service.address.addressPortStr()));
+	}
+
+	// --
+	//
+	m_logFile.writeMessage(tr("ArchiveService(s): %1.").arg(config.archiveServices.size()));
+	qDebug() << "ArchiveService(s):";
+	for (const MonitorSettings::ArchiveService& service : config.archiveServices)
+	{
+		qDebug() << "Service: id, address: " << service.equipmentId << ", " << service.address.addressPortStr();
+		m_logFile.writeMessage(tr("Service: id, address: %1, %2.").arg(service.equipmentId).arg(service.address.addressPortStr()));
+	}
+
+	// --
+	//
+	m_logFile.writeMessage(QString("TuningEnabled = %.1").arg(config.tuningEnabled));
+	if (config.tuningEnabled == true)
+	{
+		for (const MonitorSettings::TuningService& ts : config.tuningServices)
+		{
+			m_logFile.writeMessage(tr("TuningService (id, ip, port): %1, %2, %3.").arg(ts.equipmentId).arg(ts.clientRequestIP).arg(ts.clientRequestPort));
+			m_logFile.writeMessage(tr("TuningSources: %1.").arg(ts.drivenSources.join(", ")));
+		}
+		m_logFile.writeMessage(tr("TuningUserAccounts: %1.").arg(config.tuningUserAccounts.join(", ")));
+		m_logFile.writeMessage(tr("TuningSessionTimeout: %1.").arg(config.tuningSessionTimeout));
+	}
 
 	return;
-}
-
-bool MonitorConfigController::xmlReadBuildInfoNode(const QDomNode& buildInfoNode, ConfigSettings* outSetting)
-{
-	if (outSetting == nullptr)
-	{
-		Q_ASSERT(outSetting);
-		return false;
-	}
-
-	if (buildInfoNode.nodeName() != "BuildInfo")
-	{
-		Q_ASSERT(buildInfoNode.nodeName() == "BuildInfo");
-		return false;
-	}
-
-	QDomElement element = buildInfoNode.toElement();
-
-	outSetting->buildNo = element.attribute(QLatin1String("ID")).toInt();
-	outSetting->project = element.attribute(QLatin1String("Project"));
-
-	return true;
-}
-
-bool MonitorConfigController::xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigSettings* outSetting)
-{
-	if (outSetting == nullptr)
-	{
-		Q_ASSERT(outSetting);
-		return false;
-	}
-
-	if (softwareNode.nodeName() != "Software")
-	{
-		Q_ASSERT(softwareNode.nodeName() == "Software");
-		return false;
-	}
-
-	QDomElement softwareElement = softwareNode.toElement();
-
-	// Read StrID attribute
-	//
-	QString appEquipmentId = softwareElement.attribute(EquipmentPropNames::EQUIPMENT_ID);
-
-	if (MonitorAppSettings::instance().equipmentId() != appEquipmentId)
-	{
-		// The received file has different StrID then expected
-		//
-		outSetting->errorMessage += "The received file has different EquipmentID then expected.\n";
-		return false;
-	}
-
-	outSetting->softwareEquipmentId = appEquipmentId;
-
-	// Read Type attribute
-	//
-	int softwareType = softwareElement.attribute("Type").toInt();
-
-	if (softwareType != E::SoftwareType::Monitor)
-	{
-		// The received file has different type then expected,
-		//
-		outSetting->errorMessage += "The received file has different software type then expected.\n";
-		return false;
-	}
-
-	return outSetting->errorMessage.isEmpty();
-}
-
-bool MonitorConfigController::applyCurSettingsProfile(std::shared_ptr<const SoftwareSettings> curSettingsProfile, ConfigSettings* outSetting)
-{
-	if (curSettingsProfile == nullptr)
-	{
-		Q_ASSERT(curSettingsProfile);
-		return false;
-	}
-
-	if (outSetting == nullptr)
-	{
-		Q_ASSERT(outSetting);
-		return false;
-	}
-
-	const MonitorSettings* ms = dynamic_cast<const MonitorSettings*>(curSettingsProfile.get());
-
-	if (ms == nullptr)
-	{
-		Q_ASSERT(ms);
-		return false;
-	}
-
-	// --
-	//
-	outSetting->startSchemaId = ms->startSchemaId;
-
-	// --
-	//
-	outSetting->appDataServices = ms->appDataServices;
-	outSetting->appDataRealTimeServices = ms->appDataServices;
-	outSetting->archiveServices = ms->archiveServices;
-
-	//  --
-	//
-	outSetting->tuningEnabled = ms->tuningEnabled;
-
-	if (ms->tuningEnabled == true)
-	{
-		outSetting->tuningServices = ms->tuningServices;
-		outSetting->tuningLogin = ms->tuningLogin;
-		outSetting->tuningUserAccounts = ms->getUsersAccounts();
-		outSetting->tuningSessionTimeout = ms->tuningSessionTimeout;
-	}
-	else
-	{
-		// tuning disabled
-		//
-		outSetting->tuningServices.clear();
-		outSetting->tuningLogin = false;
-		outSetting->tuningUserAccounts.clear();
-		outSetting->tuningSessionTimeout = 0;
-	}
-
-	return true;
 }
 
 VFrame30::SchemaDetailsSet MonitorConfigController::schemasDetailsSet() const
@@ -733,6 +304,12 @@ ConfigSettings MonitorConfigController::configuration() const
 {
 	QReadLocker locker(&m_confugurationLock);
 	return m_configuration;
+}
+
+Client::ConfigurationInfo MonitorConfigController::configInfo() const
+{
+	QReadLocker locker(&m_confugurationLock);
+	return m_configuration.configInfo;
 }
 
 QString MonitorConfigController::configurationStartSchemaId() const
