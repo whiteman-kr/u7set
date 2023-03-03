@@ -2,7 +2,7 @@
 
 #include "../CommonLib/Types.h"
 #include "../UtilsLib/WUtils.h"
-#include "../Lib/LmDescription.h"
+#include "../lib/LmDescription.h"
 
 #include "LmMemoryMap.h"
 
