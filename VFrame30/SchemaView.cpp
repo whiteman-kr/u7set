@@ -129,8 +129,7 @@ Session& SchemaView::session()
 // SchemaViewWidget
 //
 SchemaViewWidget::SchemaViewWidget(QWidget* parent) :
-	QWidget(parent),
-	SchemaView(std::shared_ptr<Schema>())
+	SchemaViewWidget(std::shared_ptr<Schema>(), parent)
 {
 }
 
