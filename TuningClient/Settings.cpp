@@ -304,4 +304,3 @@ void Settings::setCustomFiltersFile(const QString& value)
 
 Settings theSettings;
 
-ConfigSettings theConfigSettings;

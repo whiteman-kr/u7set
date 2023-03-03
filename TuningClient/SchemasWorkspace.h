@@ -14,7 +14,7 @@ class SchemasWorkspace : public QWidget
 	Q_OBJECT
 
 public:
-	SchemasWorkspace(ConfigController* configController,
+	SchemasWorkspace(TuningConfigController* configController,
 					 TuningSignalManager* tuningSignalManager,
 					 std::vector<ITuningTcpClient*> tuningTcpClients,
 					 const QString& caption,

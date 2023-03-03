@@ -1,4 +1,5 @@
 #include "DialogFilterEditor.h"
+#include "Settings.h"
 #include "MainWindow.h"
 
 

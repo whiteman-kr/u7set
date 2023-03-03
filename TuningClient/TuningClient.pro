@@ -60,12 +60,12 @@ SOURCES +=\
     LogonWorkspace.cpp \
 	MainWindow.cpp \
     ScriptTuningClientApplication.cpp \
+    TuningConfigController.cpp \
     TuningPage.cpp \
     Settings.cpp \
     TuningSignalInfo.cpp \
     ../lib/Tuning/TuningSourcesHelper.cpp \
     TuningWorkspace.cpp \
-    ConfigController.cpp \
     ../lib/BuildInfo.cpp \
     DialogSettings.cpp \
     ../lib/PropertyEditor.cpp \
@@ -107,12 +107,12 @@ HEADERS  += MainWindow.h \
     LogonWorkspace.h \
     ScriptTuningClientApplication.h \
     Stable.h \
+    TuningConfigController.h \
     TuningPage.h \
     Settings.h \
     TuningSignalInfo.h \
     ../lib/Tuning/TuningSourcesHelper.h \
     TuningWorkspace.h \
-    ConfigController.h \
     ../lib/BuildInfo.h \
     DialogSettings.h \
     ../lib/PropertyEditor.h \

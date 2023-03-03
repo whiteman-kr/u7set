@@ -12,7 +12,7 @@ MonitorConfigController::MonitorConfigController(const SoftwareInfo& softwareInf
 	return;
 }
 
-bool MonitorConfigController::updateConfiguration(const Client::ConfigurationInfo& conf, const MonitorSettings& settings)
+bool MonitorConfigController::updateConfiguration(const Client::ConfigurationInfo& conf, const MonitorSettings& settings, const BuildFileInfoArray& /*files*/)
 {
 	ConfigSettings config{};
 
@@ -46,8 +46,6 @@ bool MonitorConfigController::updateConfiguration(const Client::ConfigurationInf
 	}
 
 	//--
-	//
-	// Get GlobalScript.js file
 	//
 	auto getScriptFunc = [this](const QString& scriptFileName) -> QString
 		{

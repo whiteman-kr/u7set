@@ -14,7 +14,7 @@ TuningSchemaView::TuningSchemaView(TuningSchemaManager* schemaManager, QWidget* 
 		return ;
 	}
 
-	connect(schemaManager->configController(), &ConfigController::configurationArrived, this, &TuningSchemaView::configurationArrived);
+	connect(schemaManager->configController(), &TuningConfigController::configurationArrived, this, &TuningSchemaView::configurationArrived);
 
 	// Updates scripts
 	//

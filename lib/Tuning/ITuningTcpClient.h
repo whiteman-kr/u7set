@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TuningSignalState.h"
+#include "../../AppSignalLib/TuningValue.h"
 
 class ITuningTcpClient
 {

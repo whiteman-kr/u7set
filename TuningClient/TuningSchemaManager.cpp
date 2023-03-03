@@ -1,6 +1,6 @@
 #include "TuningSchemaManager.h"
 
-TuningSchemaManager::TuningSchemaManager(ConfigController* configController, QObject* parent) :
+TuningSchemaManager::TuningSchemaManager(TuningConfigController* configController, QObject* parent) :
 	VFrame30::SchemaManager(parent),
 	m_configController(configController)
 {
@@ -48,12 +48,12 @@ QString TuningSchemaManager::schemaIdByIndex(int schemaIndex) const
 	return m_configController->schemaIdByIndex(schemaIndex);
 }
 
-ConfigController* TuningSchemaManager::configController()
+TuningConfigController* TuningSchemaManager::configController()
 {
 	return m_configController;
 }
 
-const ConfigController* TuningSchemaManager::configController() const
+const TuningConfigController* TuningSchemaManager::configController() const
 {
 	return m_configController;
 }

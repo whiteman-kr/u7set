@@ -124,7 +124,7 @@ namespace Client
 		return m_logFile.logFile();
 	}
 
-	bool ConfigController::updateConfiguration(const Client::ConfigurationInfo& /*conf*/, const MonitorSettings& /*settings*/)
+	bool ConfigController::updateConfiguration(const Client::ConfigurationInfo& /*conf*/, const MonitorSettings& /*settings*/, const BuildFileInfoArray& /*files*/)
 	{
 		// Reimplement in the derviced class
 		//
@@ -132,7 +132,7 @@ namespace Client
 		return false;
 	}
 
-	bool ConfigController::updateConfiguration(const Client::ConfigurationInfo& /*conf*/, const TuningClientSettings& /*settings*/)
+	bool ConfigController::updateConfiguration(const Client::ConfigurationInfo& /*conf*/, const TuningClientSettings& /*settings*/, const BuildFileInfoArray& /*files*/)
 	{
 		// Reimplement in the derviced class
 		//
@@ -140,7 +140,7 @@ namespace Client
 		return false;
 	}
 
-	bool ConfigController::updateConfiguration(const Client::ConfigurationInfo& /*conf*/, const TestClientSettings& /*settings*/)
+	bool ConfigController::updateConfiguration(const Client::ConfigurationInfo& /*conf*/, const TestClientSettings& /*settings*/, const BuildFileInfoArray& /*files*/)
 	{
 		// Reimplement in the derviced class
 		//
@@ -312,7 +312,7 @@ namespace Client
 	}
 
 	void ConfigController::slot_configurationReady(const QByteArray configurationXmlData,
-												   const BuildFileInfoArray /*buildFileInfoArray*/,
+												   const BuildFileInfoArray buildFileInfoArray,
 												   SessionParams /*sessionParams*/,
 												   std::shared_ptr<const SoftwareSettings> curSettingsProfile)
 	{
@@ -378,26 +378,26 @@ namespace Client
 
 		// Call specific updateConfiguration
 		//
-		auto callFunc = [this, &conf] <typename T> (const T* settings)
+		auto callUpdateFunc = [this, &conf, &buildFileInfoArray] <typename T> (const T* settings)
 			{
 				if (settings != nullptr)
 				{
-					updateConfiguration(conf, *settings);
+					updateConfiguration(conf, *settings, buildFileInfoArray);
 				}
 			};
 
 		switch (m_softwareInfo.softwareType())
 		{
 		case E::SoftwareType::Monitor:
-			callFunc(dynamic_cast<const MonitorSettings*>(curSettingsProfile.get()));
+			callUpdateFunc(dynamic_cast<const MonitorSettings*>(curSettingsProfile.get()));
 			return;
 
 		case E::SoftwareType::TuningClient:
-			callFunc(dynamic_cast<const TuningClientSettings*>(curSettingsProfile.get()));
+			callUpdateFunc(dynamic_cast<const TuningClientSettings*>(curSettingsProfile.get()));
 			return;
 
 		case E::SoftwareType::TestClient:
-			callFunc(dynamic_cast<const TestClientSettings*>(curSettingsProfile.get()));
+			callUpdateFunc(dynamic_cast<const TestClientSettings*>(curSettingsProfile.get()));
 			return;
 
 		case E::SoftwareType::Unknown:

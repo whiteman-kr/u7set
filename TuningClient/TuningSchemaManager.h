@@ -2,13 +2,13 @@
 #define SCHEMASTORAGE_H
 
 #include <QObject>
-#include "ConfigController.h"
+#include "TuningConfigController.h"
 #include "../VFrame30/SchemaManager.h"
 
 class TuningSchemaManager : public VFrame30::SchemaManager
 {
 public:
-	explicit TuningSchemaManager(ConfigController* configController, QObject* parent = nullptr);
+	explicit TuningSchemaManager(TuningConfigController* configController, QObject* parent = nullptr);
 
 public:
 	virtual int schemaCount() const override;
@@ -20,14 +20,14 @@ public:
 	virtual QString schemaIdByIndex(int schemaIndex) const override;
 
 public:
-	[[nodiscard]] ConfigController* configController();
-	[[nodiscard]] const ConfigController* configController() const;
+	[[nodiscard]] TuningConfigController* configController();
+	[[nodiscard]] const TuningConfigController* configController() const;
 
 protected:
 	virtual std::shared_ptr<VFrame30::Schema> loadSchema(QString schemaId) override;
 
 private:
-	ConfigController* m_configController = nullptr;
+	TuningConfigController* m_configController = nullptr;
 };
 
 #endif // SCHEMASTORAGE_H

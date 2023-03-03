@@ -4,7 +4,7 @@
 
 #include <QTreeWidget>
 
-SchemasWorkspace::SchemasWorkspace(ConfigController* configController,
+SchemasWorkspace::SchemasWorkspace(TuningConfigController* configController,
 								   TuningSignalManager* tuningSignalManager,
 								   std::vector<ITuningTcpClient*> tuningTcpClients,
 								   const QString& caption,

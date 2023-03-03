@@ -32,78 +32,6 @@ struct BuildInfo
 
 
 //
-// SchemaSettings
-//
-
-struct SchemaInfo
-{
-	SchemaInfo(const QString& id, const QString& caption, const std::set<QString>& tags)
-	{
-		m_id = id;
-		m_caption = caption;
-		m_tags = tags;
-	}
-
-	bool hasAnyTag(const QStringList& tags) const
-	{
-		for (const QString& tag : tags)
-		{
-			if (m_tags.find(tag.trimmed().toLower()) != m_tags.end())
-			{
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	QString m_id;
-	QString m_caption;
-	std::set<QString> m_tags;
-};
-
-//
-// ConfigSettings
-//
-
-struct ConfigSettings
-{
-	int configurationId = -1;
-
-	TuningClientSettings clientSettings;
-
-	std::vector<SchemaInfo> schemas;
-
-	BuildInfo buildInfo;
-
-	QString scriptGlobal;
-	QString scriptConfigArrived;
-
-	QString errorMessage;				// Parsing error message, empty if no errors
-
-	// Warning! Add new values to copy operator!!!
-
-	LmStatusFlagMode lmStatusFlagMode() const
-	{
-		return static_cast<LmStatusFlagMode>(clientSettings.statusFlagFunction);
-	}
-
-	ConfigSettings& operator = (const ConfigSettings& That)
-	{
-		clientSettings = That.clientSettings;
-
-		schemas = That.schemas;
-		buildInfo = That.buildInfo;
-
-		scriptGlobal = That.scriptGlobal;
-		scriptConfigArrived = That.scriptConfigArrived;
-
-		return *this;
-	}
-
-};
-
-//
 // Settings
 //
 
@@ -227,7 +155,5 @@ private:
 };
 
 extern Settings theSettings;
-
-extern ConfigSettings theConfigSettings;
 
 #endif // SETTINGS_H

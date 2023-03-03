@@ -47,7 +47,7 @@ protected:
 	/// This function is called when the new configuarion arrives, it is overrided to get specific Monitor
 	/// configuration, after it signal `configurationArrived` is emitted
 	///
-	virtual bool updateConfiguration(const Client::ConfigurationInfo& conf, const MonitorSettings& settings) override;
+	virtual bool updateConfiguration(const Client::ConfigurationInfo& conf, const MonitorSettings& settings, const BuildFileInfoArray& files) override;
 
 	void dump(const ConfigSettings& conf) const;
 

@@ -5,7 +5,7 @@
 
 #include "TuningWorkspace.h"
 #include "SchemasWorkspace.h"
-#include "ConfigController.h"
+#include "TuningConfigController.h"
 #include "LogonWorkspace.h"
 #include "../lib/Tuning/TuningUserManager.h"
 #include "DialogTuningSources.h"
@@ -34,32 +34,27 @@ private:
 	void createStatusBar();
 
 private:
-
 	TuningSignalManager m_tuningSignalManager;
 
 	std::vector<TuningClientTcpClient*> m_tcpClients;
-
 	std::vector<SimpleThread*> m_tcpClientThreads;
 
 	TuningClientFilterStorage m_filterStorage;
 
-	ConfigController m_configController;
+	TuningConfigController m_configController;
 
 	QVBoxLayout* m_mainLayout = nullptr;
-
 	QTabWidget* m_tabWidget = nullptr;
 
 	LogonWorkspace* m_logonWorkspace = nullptr;
-
 	TuningWorkspace* m_tuningWorkspace = nullptr;
-
 	std::vector<SchemasWorkspace*> m_schemasWorkspaces;
 
 	QLabel* m_noWorkspaceLabel = nullptr;
 
 	TuningUserManager m_userManager;
-public:
 
+public:
 	int m_mainWindowTimerId_250ms = -1;
 	int m_mainWindowTimerId_500ms = -1;
 
@@ -69,6 +64,8 @@ private slots:
 	void slot_configurationArrived(ConfigSettings configuration);
 	void slot_projectFiltersUpdated(QByteArray data);
 	void slot_signalsUpdated(QByteArray data);
+
+	void slot_configurationError(QString error);
 
 public slots:
 	void exit();
@@ -108,7 +105,6 @@ signals:
 	void timerTick500();
 
 private:
-
 	QAction* m_pExitAction = nullptr;
 	QAction* m_pPresetEditorAction = nullptr;
 	QAction* m_pSettingsAction = nullptr;

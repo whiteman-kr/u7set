@@ -20,7 +20,7 @@
 
 MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow(parent),
-	m_configController(softwareInfo, theSettings.configuratorAddress1(), theSettings.configuratorAddress2(), this)
+	m_configController(softwareInfo, theSettings.configuratorAddress1(), theSettings.configuratorAddress2(), theLogFile)
 {
 	m_singleLmControlModeText = QObject::tr("Single LM Control Mode");
 	m_multipleLmControlModeText = QObject::tr("Multiple LM Control Mode");
@@ -54,9 +54,10 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 
 	// Global connections
 
-	connect(&m_configController, &ConfigController::filtersArrived, this, &MainWindow::slot_projectFiltersUpdated, Qt::DirectConnection);
-	connect(&m_configController, &ConfigController::signalsArrived, this, &MainWindow::slot_signalsUpdated, Qt::DirectConnection);
-	connect(&m_configController, &ConfigController::configurationArrived, this, &MainWindow::slot_configurationArrived);
+	connect(&m_configController, &TuningConfigController::filtersArrived, this, &MainWindow::slot_projectFiltersUpdated, Qt::DirectConnection);
+	connect(&m_configController, &TuningConfigController::signalsArrived, this, &MainWindow::slot_signalsUpdated, Qt::DirectConnection);
+	connect(&m_configController, &TuningConfigController::configurationArrived, this, &MainWindow::slot_configurationArrived);
+	connect(&m_configController, &TuningConfigController::error, this, &MainWindow::slot_configurationError);
 
 	// DialogAlert
 
@@ -394,7 +395,9 @@ void MainWindow::runTcpClients()
 		return;
 	}
 
-	for (const TuningClientSettings::TuningService& ts : theConfigSettings.clientSettings.tuningServices)
+	auto configuration = m_configController.configuration();
+
+	for (const TuningClientSettings::TuningService& ts : configuration.clientSettings.tuningServices)
 	{
 		// TuningClientTcpClient
 		//
@@ -411,8 +414,8 @@ void MainWindow::runTcpClients()
 		const HostAddressPort addrPort = HostAddressPort(ts.clientRequestIP, ts.clientRequestPort);
 
 		client->setServers(addrPort, addrPort, true);
-		client->setAutoApply(theConfigSettings.clientSettings.autoApply);
-		client->setLmStatusFlagMode(theConfigSettings.lmStatusFlagMode());
+		client->setAutoApply(configuration.clientSettings.autoApply);
+		client->setLmStatusFlagMode(configuration.lmStatusFlagMode());
 
 		SimpleThread* thread = new SimpleThread(client);
 		thread->start();
@@ -492,7 +495,7 @@ void MainWindow::createWorkspace()
 
 	// Create new workspaces
 
-	if (theConfigSettings.clientSettings.showSchemas == true && theConfigSettings.schemas.empty() == false)
+	if (m_configController.showSchemas() == true && m_configController.schemaCount() != 0)
 	{
 		bool schemaFiltersFound = false;
 
@@ -545,14 +548,14 @@ void MainWindow::createWorkspace()
 			SchemasWorkspace* sw = new SchemasWorkspace(&m_configController, &m_tuningSignalManager, clientInterfaces,
 														tr("Schemas"),
 														{},
-														theConfigSettings.clientSettings.startSchemaID,
+														m_configController.startSchemaId(),
 														theLogFile,
 														this);
 			m_schemasWorkspaces.push_back(sw);
 		}
 	}
 
-	if (theConfigSettings.clientSettings.showSignals == true)
+	if (m_configController.showSignals() == true)
 	{
 		m_tuningWorkspace = new TuningWorkspace(nullptr, m_filterStorage.root(), &m_tuningSignalManager, m_tcpClients, &m_filterStorage, this);
 	}
@@ -685,8 +688,9 @@ void MainWindow::updateStatusBar()
 	assert(m_statusBarConfigConnection);
 
 	// BuildInfo
-
-	QString text = tr("Project %1, build %2").arg(theConfigSettings.buildInfo.projectName).arg(theConfigSettings.buildInfo.buildNo);
+	//
+	auto configInfo = m_configController.configInfo();
+	QString text = tr("Project %1, build %2").arg(configInfo.project).arg(configInfo.buildNo);
 
 	if (m_statusBarBuildInfo->text() != text)
 	{
@@ -787,7 +791,9 @@ void MainWindow::updateStatusBar()
 		m_statusBarConfigConnection->setText(text);
 	}
 
-	QString tooltip = m_configController.getStateToolTip();
+	// --
+	//
+	QString tooltip = tr("Address: %1").arg(configConnState.peerAddr.toString());
 
 	if (tooltip != m_statusBarConfigConnection->toolTip())
 	{
@@ -975,7 +981,7 @@ void MainWindow::updateStatusBar()
 
 	// SOR counter
 
-	if (theConfigSettings.lmStatusFlagMode() == LmStatusFlagMode::SOR)
+	if (m_configController.lmStatusFlagMode() == LmStatusFlagMode::SOR)
 	{
 		if (rootCounters.sorActive == false)
 		{
@@ -1061,10 +1067,25 @@ void MainWindow::updateStatusBar()
 	}
 }
 
-void MainWindow::slot_configurationArrived(ConfigSettings /*configuration*/)
+void MainWindow::slot_configurationArrived(ConfigSettings configuration)
 {
+	// Modify logon mode
+	//
+	if (userManager()->isLoggedIn() == true)
+	{
+		userManager()->logout();
+	}
+
+	userManager()->setConfiguration(configuration.clientSettings.tuningLogin,
+									configuration.clientSettings.getUsersAccounts(),
+									configuration.clientSettings.loginPerOperation,
+									configuration.clientSettings.tuningSessionTimeout);
+
+	// --
+	//
 	QWidget* wm = QApplication::activeModalWidget();
 	QWidget* wp = QApplication::activePopupWidget();
+
 	if (wm != nullptr || wp != nullptr)
 	{
 		// Some modal or popup window is active, so deleting workspace is not available.
@@ -1130,6 +1151,14 @@ void MainWindow::slot_signalsUpdated(QByteArray data)
 		QString completeErrorMessage = QObject::tr("Tuning signals file loading error.");
 		theLogFile->writeError(completeErrorMessage);
 	}
+}
+
+void MainWindow::slot_configurationError(QString error)
+{
+	QMessageBox::critical(this,
+						  qAppName(),
+						  tr("Configuration error: %1")
+						  .arg(error));
 }
 
 void MainWindow::exit()
