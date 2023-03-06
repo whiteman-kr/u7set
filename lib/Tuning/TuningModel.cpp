@@ -34,7 +34,7 @@ int TuningModelHashSet::hashCount() const
 // TuningItemSorter
 //
 
-TuningModelSorter::TuningModelSorter(TuningModelColumns column, const TuningModel* model, const TuningSignalManager* tuningSignalManager):
+TuningModelSorter::TuningModelSorter(TuningModelColumns column, const TuningModel* model, TuningSignalManager& tuningSignalManager):
 	m_column(column),
 	m_tuningSignalManager(tuningSignalManager),
 	m_model(model)
@@ -69,17 +69,17 @@ bool TuningModelSorter::sortFunction(const TuningModelHashSet& set1, const Tunin
 	bool ok1 = false;
 	bool ok2 = false;
 
-	asp1 = m_tuningSignalManager->signalParam(set1.firstHash(), &ok1);
-	asp2 = m_tuningSignalManager->signalParam(set2.firstHash(), &ok2);
+	asp1 = m_tuningSignalManager.signalParam(set1.firstHash(), &ok1);
+	asp2 = m_tuningSignalManager.signalParam(set2.firstHash(), &ok2);
 
 	if (ok1 == true && set1.hash[valueColumnIndex] != UNDEFINED_HASH)
 	{
-		tss1 = m_tuningSignalManager->state(set1.hash[valueColumnIndex], &ok1);
+		tss1 = m_tuningSignalManager.state(set1.hash[valueColumnIndex], &ok1);
 	}
 
 	if (ok2 == true && set2.hash[valueColumnIndex] != UNDEFINED_HASH)
 	{
-		tss2 = m_tuningSignalManager->state(set2.hash[valueColumnIndex], &ok2);
+		tss2 = m_tuningSignalManager.state(set2.hash[valueColumnIndex], &ok2);
 	}
 
 	//
@@ -268,7 +268,7 @@ bool TuningModelSorter::sortFunction(const TuningModelHashSet& set1, const Tunin
 // TuningItemModel
 //
 
-TuningModel::TuningModel(TuningSignalManager* tuningSignalManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent)
+TuningModel::TuningModel(TuningSignalManager& tuningSignalManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent)
 	:QAbstractTableModel(parent),
 	  m_tuningSignalManager(tuningSignalManager)
 {
@@ -403,7 +403,7 @@ void TuningModel::setHashes(std::vector<Hash>& hashes)
 
 				bool ok = false;
 
-				AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+				AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
 
 				QString appSignalId = asp.appSignalId();
 
@@ -577,7 +577,7 @@ const TuningModelHashSet& TuningModel::hashSetByIndex(int row) const
 	return m_hashSets[row];
 }
 
-TuningSignalManager* TuningModel::tuningSignalManager()
+TuningSignalManager& TuningModel::tuningSignalManager()
 {
 	return m_tuningSignalManager;
 }
@@ -823,7 +823,7 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 
 		bool ok = false;
 
-		const AppSignalParam asp = m_tuningSignalManager->signalParam(aspHash, &ok);
+		const AppSignalParam asp = m_tuningSignalManager.signalParam(aspHash, &ok);
 
 		int columnType = static_cast<int>(m_columnsTypes[col]);
 
@@ -904,7 +904,7 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 				return QVariant();
 			}
 
-			const TuningSignalState tss = m_tuningSignalManager->state(tssHash, &ok);
+			const TuningSignalState tss = m_tuningSignalManager.state(tssHash, &ok);
 
 			if (tss.controlIsEnabled() == false)
 			{
@@ -914,13 +914,13 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 			{
 				if (tss.valid() == true)
 				{
-					TuningValue newValue = m_tuningSignalManager->newValue(tssHash);
+					TuningValue newValue = m_tuningSignalManager.newValue(tssHash);
 
 					if (asp.isAnalog() == false)
 					{
 						QString valueString = tss.value().toString();
 
-						if (m_tuningSignalManager->newValueIsUnapplied(tssHash) == true)
+						if (m_tuningSignalManager.newValueIsUnapplied(tssHash) == true)
 						{
 							QString editValueString = newValue.toString();
 							return tr("%1 => %2").arg(valueString).arg(editValueString);
@@ -937,7 +937,7 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 					{
 						QString valueString = tss.value().toString(m_analogFormat, asp.precision());
 
-						if (m_tuningSignalManager->newValueIsUnapplied(tssHash) == true)
+						if (m_tuningSignalManager.newValueIsUnapplied(tssHash) == true)
 						{
 							QString editValueString = newValue.toString(m_analogFormat, asp.precision());
 							return QString("%1 => %2").arg(valueString).arg(editValueString);
@@ -976,7 +976,7 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 				continue;
 			}
 
-			const TuningSignalState tss = m_tuningSignalManager->state(tssHash, &ok);
+			const TuningSignalState tss = m_tuningSignalManager.state(tssHash, &ok);
 
 			if (columnType == static_cast<int>(TuningModelColumns::LowLimit))
 			{

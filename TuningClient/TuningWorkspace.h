@@ -5,6 +5,7 @@
 #include "SwitchFiltersPage.h"
 #include "TuningClientTcpClient.h"
 #include "TuningClientFilterStorage.h"
+#include "TuningConfigController.h"
 
 class FilterButton : public QPushButton
 {
@@ -34,11 +35,13 @@ class TuningWorkspace : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter,
-							 std::shared_ptr<TuningFilter> workspaceFilter,
-							 TuningSignalManager* tuningSignalManager,
+	explicit TuningWorkspace(TuningConfigController& configController,
+							 TuningSignalManager& tuningSignalManager,
+							 TuningClientFilterStorage& tuningFilterStorage,
+							 TuningUserManager& userManager,
 							 std::vector<TuningClientTcpClient*> tcpClients,
-							 TuningClientFilterStorage* tuningFilterStorage,
+							 std::shared_ptr<TuningFilter> treeFilter,
+							 std::shared_ptr<TuningFilter> workspaceFilter,
 							 QWidget* parent);
 
 	virtual ~TuningWorkspace();
@@ -89,11 +92,12 @@ private:
 
 	// Data
 
-	TuningSignalManager* m_tuningSignalManager = nullptr;
+	TuningConfigController& m_configController;
+	TuningSignalManager& m_tuningSignalManager;
+	TuningClientFilterStorage& m_tuningFilterStorage;
+	TuningUserManager& m_userManager;
 
 	std::vector<TuningClientTcpClient*> m_tuningTcpClients;
-
-	TuningClientFilterStorage* m_tuningFilterStorage = nullptr;
 
 	std::shared_ptr<TuningFilter> m_workspaceFilter;
 

@@ -4,10 +4,10 @@
 TuningClientTcpClient::TuningClientTcpClient(const SoftwareInfo& softwareInfo,
 											 const QString& tuningServiceId,
 											 int singleLmControlMode,
-											 TuningSignalManager* signalManager,
+											 TuningSignalManager& signalManager,
 											 Log::LogFile* log,
 											 TuningLog::TuningLog* tuningLog,
-											 TuningUserManager* userManager) :
+											 TuningUserManager& userManager) :
 	TuningTcpClient(softwareInfo, tuningServiceId, singleLmControlMode, signalManager),
 	TcpClientStatistics(this),
 	m_log(log),
@@ -18,8 +18,6 @@ TuningClientTcpClient::TuningClientTcpClient(const SoftwareInfo& softwareInfo,
 
 	assert(m_log);
 	assert(m_tuningLog);
-	assert(m_userManager);
-
 }
 
 void TuningClientTcpClient::writeLogAlert(const QString& message)
@@ -44,12 +42,12 @@ void TuningClientTcpClient::writeLogMessage(const QString& message)
 
 void TuningClientTcpClient::writeLogSignalChange(const AppSignalParam& param, const TuningValue& oldValue, const TuningValue& newValue)
 {
-	m_tuningLog->write(param, oldValue, newValue, m_userManager->loggedInUser());
+	m_tuningLog->write(param, oldValue, newValue, m_userManager.loggedInUser());
 }
 
 void TuningClientTcpClient::writeLogSignalChange(const QString& message)
 {
-	m_tuningLog->write(message, m_userManager->loggedInUser());
+	m_tuningLog->write(message, m_userManager.loggedInUser());
 }
 
 

@@ -26,39 +26,10 @@ public:
 	explicit MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent = 0);
 	~MainWindow();
 
-	TuningUserManager* userManager();
-
 private:
 	void createActions();
 	void createMenu();
 	void createStatusBar();
-
-private:
-	TuningSignalManager m_tuningSignalManager;
-
-	std::vector<TuningClientTcpClient*> m_tcpClients;
-	std::vector<SimpleThread*> m_tcpClientThreads;
-
-	TuningClientFilterStorage m_filterStorage;
-
-	TuningConfigController m_configController;
-
-	QVBoxLayout* m_mainLayout = nullptr;
-	QTabWidget* m_tabWidget = nullptr;
-
-	LogonWorkspace* m_logonWorkspace = nullptr;
-	TuningWorkspace* m_tuningWorkspace = nullptr;
-	std::vector<SchemasWorkspace*> m_schemasWorkspaces;
-
-	QLabel* m_noWorkspaceLabel = nullptr;
-
-	TuningUserManager m_userManager;
-
-public:
-	int m_mainWindowTimerId_250ms = -1;
-	int m_mainWindowTimerId_500ms = -1;
-
-	DialogAlert* m_dialogAlert = nullptr;
 
 private slots:
 	void slot_configurationArrived(ConfigSettings configuration);
@@ -104,7 +75,45 @@ private:
 signals:
 	void timerTick500();
 
+public:
+	int m_mainWindowTimerId_250ms = -1;
+	int m_mainWindowTimerId_500ms = -1;
+
 private:
+	// Logs, must be initialized first
+	//
+	Log::LogFile m_logFile;
+	TuningLog::TuningLog m_tuningLog;
+
+	// Base objects
+	//
+	TuningConfigController m_configController;
+	TuningSignalManager m_tuningSignalManager;
+	TuningClientFilterStorage m_filterStorage;
+	TuningUserManager m_userManager;
+
+	// Connections
+	//
+	std::vector<TuningClientTcpClient*> m_tcpClients;
+	std::vector<SimpleThread*> m_tcpClientThreads;
+
+	// Workspace items
+	//
+	LogonWorkspace* m_logonWorkspace = nullptr;
+	TuningWorkspace* m_tuningWorkspace = nullptr;
+	std::vector<SchemasWorkspace*> m_schemasWorkspaces;
+
+	DialogTuningSources* m_dialogTuningSources = nullptr;
+	DialogTcpStatistics* m_dialogStatistics = nullptr;
+	DialogAlert* m_dialogAlert = nullptr;
+
+	// User interface
+	//
+	QLabel* m_noWorkspaceLabel = nullptr;
+
+	QVBoxLayout* m_mainLayout = nullptr;
+	QTabWidget* m_tabWidget = nullptr;
+
 	QAction* m_pExitAction = nullptr;
 	QAction* m_pPresetEditorAction = nullptr;
 	QAction* m_pSettingsAction = nullptr;
@@ -125,8 +134,8 @@ private:
 	QLabel* m_statusBarTuningConnection = nullptr;
 	QLabel* m_statusBarLogAlerts = nullptr;
 
-	TuningLog::TuningLog* m_tuningLog = nullptr;
-
+	// Status bar counters
+	//
 	int m_discreteCounter = -1;
 	QString m_sorStatus;
 	int m_logErrorsCounter = -1;
@@ -135,15 +144,11 @@ private:
 	QString m_singleLmControlModeText;
 	QString m_multipleLmControlModeText;
 	QString m_mixedLmControlModeText;
-
-	DialogTuningSources* m_dialogTuningSources = nullptr;
-	DialogTcpStatistics* m_dialogStatistics = nullptr;
+	QString m_sorTooltipText;
 };
 
 // Global definitions
 
 extern MainWindow* theMainWindow;
-
-extern Log::LogFile* theLogFile;
 
 

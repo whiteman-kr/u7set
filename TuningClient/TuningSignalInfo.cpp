@@ -4,17 +4,17 @@
 #include "../lib/Tuning/TuningSignalState.h"
 #include "../lib/Tuning/TuningSignalManager.h"
 #include "../lib/Tuning/TuningFilter.h"
-#include "TuningClientTcpClient.h"
 #include "Settings.h"
 
 TuningSignalInfo::TuningSignalInfo(Hash appSignalHash, E::AnalogFormat analogFormat, Hash instanceIdHash,
-								   TuningSignalManager* signalManager, std::vector<TuningTcpClient*> tuningTcpClients, QWidget *parent) :
+								   TuningSignalManager& signalManager, std::vector<TuningTcpClient*> tuningTcpClients, LmStatusFlagMode lmStatusFlagMode, QWidget *parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::TuningSignalInfo),
 	m_appSignalHash(appSignalHash),
 	m_analogFormat(analogFormat),
 	m_instanceIdHash(instanceIdHash),
-	m_signalManager(signalManager)
+	m_signalManager(signalManager),
+	m_lmStatusFlagMode(lmStatusFlagMode)
 {
 	ui->setupUi(this);
 
@@ -22,12 +22,10 @@ TuningSignalInfo::TuningSignalInfo(Hash appSignalHash, E::AnalogFormat analogFor
 
 	setAttribute(Qt::WA_DeleteOnClose);
 
-	assert(m_signalManager);
-
 	setTuningTcpClients(tuningTcpClients);
 
 	bool found = false;
-	AppSignalParam asp = m_signalManager->signalParam(m_appSignalHash, &found);
+	AppSignalParam asp = m_signalManager.signalParam(m_appSignalHash, &found);
 
 	ui->m_lineAppSignalId->setText(asp.appSignalId());
 	ui->m_lineCustomAppSignalId->setText(asp.customSignalId());
@@ -112,7 +110,7 @@ void TuningSignalInfo::updateInfo()
 		controlIsEnabledStrings.push_back(clientState.controlIsEnabled() == true ? tr("Yes") : tr("No"));
 		isTuningDefaultStrings.push_back(clientState.isTuningDefault() == true ? tr("Yes") : tr("No"));
 
-		if (theConfigSettings.lmStatusFlagMode() == LmStatusFlagMode::AccessKey)
+		if (m_lmStatusFlagMode == LmStatusFlagMode::AccessKey)
 		{
 			writingIsEnabledStrings.push_back(clientState.writingIsEnabled() == true ? tr("Yes") : tr("No"));
 		}
@@ -135,7 +133,7 @@ void TuningSignalInfo::updateInfo()
 
 	// Fill the data that is received from TuningSignalManager
 
-	TuningSignalState managerState = m_signalManager->state(m_appSignalHash, &found);
+	TuningSignalState managerState = m_signalManager.state(m_appSignalHash, &found);
 
 	{
 		stateServices.push_back(tr("TuningSignalManager"));
@@ -146,7 +144,7 @@ void TuningSignalInfo::updateInfo()
 		controlIsEnabledStrings.push_back(managerState.controlIsEnabled() == true ? tr("Yes") : tr("No"));
 		isTuningDefaultStrings.push_back(managerState.isTuningDefault() == true ? tr("Yes") : tr("No"));
 
-		if (theConfigSettings.lmStatusFlagMode() == LmStatusFlagMode::AccessKey)
+		if (m_lmStatusFlagMode == LmStatusFlagMode::AccessKey)
 		{
 			writingIsEnabledStrings.push_back(managerState.writingIsEnabled() == true ? tr("Yes") : tr("No"));
 		}
@@ -170,7 +168,7 @@ void TuningSignalInfo::updateInfo()
 	// Print data to the dialog
 	//
 
-	AppSignalParam asp = m_signalManager->signalParam(m_appSignalHash, &found);
+	AppSignalParam asp = m_signalManager.signalParam(m_appSignalHash, &found);
 
 	QString text;
 
@@ -209,7 +207,7 @@ void TuningSignalInfo::updateInfo()
 	}
 	else
 	{
-		if (m_signalManager->newValueIsUnapplied(m_appSignalHash) == true)
+		if (m_signalManager.newValueIsUnapplied(m_appSignalHash) == true)
 		{
 			int precision = 0;
 
@@ -218,7 +216,7 @@ void TuningSignalInfo::updateInfo()
 				precision = asp.precision();
 			}
 
-			text += tr("NewValue:\t\t%1\n").arg(m_signalManager->newValue(m_appSignalHash).toString(m_analogFormat, precision));
+			text += tr("NewValue:\t\t%1\n").arg(m_signalManager.newValue(m_appSignalHash).toString(m_analogFormat, precision));
 		}
 		else
 		{
@@ -240,7 +238,7 @@ void TuningSignalInfo::updateInfo()
 
 	text += "\n";
 
-	if (theConfigSettings.lmStatusFlagMode() == LmStatusFlagMode::AccessKey)
+	if (m_lmStatusFlagMode == LmStatusFlagMode::AccessKey)
 	{
 		text += tr("WritingIsEnabled:\t%1\n").arg(writingIsEnabledStrings.join(" / "));
 	}

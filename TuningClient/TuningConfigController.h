@@ -44,6 +44,8 @@ public:
 	QString schemaCaptionById(const QString& schemaId) const;
 	QString schemaCaptionByIndex(int schemaIndex) const;
 	QString schemaIdByIndex(int schemaIndex) const;
+	std::set<QString> schemaTagsByIndex(int schemaIndex) const;
+	bool schemaHasTags(int schemaIndex, const QStringList& tags) const;
 
 protected:
 	virtual bool updateConfiguration(const Client::ConfigurationInfo& conf, const TuningClientSettings& settings, const BuildFileInfoArray& files) override;

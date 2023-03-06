@@ -10,9 +10,9 @@
 // DialogChooseTuningSignals
 //
 
-ChooseTuningSignalsWidget::ChooseTuningSignalsWidget(TuningSignalManager* signalStorage, bool requestValuesEnabled, QWidget* parent)
+ChooseTuningSignalsWidget::ChooseTuningSignalsWidget(TuningSignalManager& signalManager, bool requestValuesEnabled, QWidget* parent)
 	:QWidget(parent),
-		m_signalManager(signalStorage)
+		m_signalManager(signalManager)
 {
 
 	setWindowTitle(tr("Filter Signals"));
@@ -238,12 +238,6 @@ void ChooseTuningSignalsWidget::setFilter(std::shared_ptr<TuningFilter> selected
 
 void ChooseTuningSignalsWidget::fillBaseSignalsList()
 {
-	if (m_signalManager == nullptr)
-	{
-		assert(m_signalManager);
-		return;
-	}
-
 	SignalType signalType = SignalType::All;
 	QVariant data = m_baseSignalTypeCombo->currentData();
 	if (data.isNull() == false && data.isValid() == true)
@@ -270,7 +264,7 @@ void ChooseTuningSignalsWidget::fillBaseSignalsList()
 
 	QString filterText = m_baseFilterText->text().trimmed();
 
-	std::vector<Hash> hashes = m_signalManager->signalHashes();
+	std::vector<Hash> hashes = m_signalManager.signalHashes();
 
 	std::vector<Hash> filteredHashes;
 	filteredHashes.reserve(hashes.size());
@@ -279,7 +273,7 @@ void ChooseTuningSignalsWidget::fillBaseSignalsList()
 
 	for (Hash hash : hashes)
 	{
-		if (m_signalManager->signalParam(hash, &asp) == false)
+		if (m_signalManager.signalParam(hash, &asp) == false)
 		{
 			assert(false);
 			continue;
@@ -302,7 +296,7 @@ void ChooseTuningSignalsWidget::fillBaseSignalsList()
 		{
 			bool ok = false;
 
-			const TuningSignalState state = m_signalManager->state(hash, &ok);
+			const TuningSignalState state = m_signalManager.state(hash, &ok);
 
 			if (ok == true && state.valid() == true)
 			{
@@ -434,14 +428,14 @@ void ChooseTuningSignalsWidget::on_m_add_clicked()
 
 		bool ok = false;
 
-		const AppSignalParam p = m_signalManager->signalParam(hash, &ok);
+		const AppSignalParam p = m_signalManager.signalParam(hash, &ok);
 		if (ok == false)
 		{
 			Q_ASSERT(false);
 			return;
 		}
 
-		const TuningSignalState s = m_signalManager->state(hash, &ok);
+		const TuningSignalState s = m_signalManager.state(hash, &ok);
 
 		if (m_filter == nullptr)
 		{
@@ -571,13 +565,13 @@ void ChooseTuningSignalsWidget::on_m_setValue_clicked()
 			Q_UNUSED(ok);
 		}
 
-		if (m_signalManager->signalExists(hash) == false)
+		if (m_signalManager.signalExists(hash) == false)
 		{
 			continue;
 		}
 
 		AppSignalParam asp;
-		if (m_signalManager->signalParam(hash, &asp) == false)
+		if (m_signalManager.signalParam(hash, &asp) == false)
 		{
 			assert(false);
 			return;
@@ -646,7 +640,7 @@ void ChooseTuningSignalsWidget::on_m_setValue_clicked()
 		Hash hash = selectedItem->data(static_cast<int>(Columns::AppSignalID), Qt::UserRole).value<Hash>();
 
 		AppSignalParam asp;
-		if (m_signalManager->signalParam(hash, &asp) == false)
+		if (m_signalManager.signalParam(hash, &asp) == false)
 		{
 			Q_ASSERT(false);
 			return;
@@ -694,7 +688,7 @@ void ChooseTuningSignalsWidget::on_m_setCurrent_clicked()
 		}
 
 		AppSignalParam asp;
-		if (m_signalManager->signalParam(hash, &asp) == false)
+		if (m_signalManager.signalParam(hash, &asp) == false)
 		{
 			Q_ASSERT(false);
 			return;
@@ -855,7 +849,7 @@ void ChooseTuningSignalsWidget::on_m_importValues_clicked()
 
 		bool ok = false;
 
-		const AppSignalParam p = m_signalManager->signalParam(hash, &ok);
+		const AppSignalParam p = m_signalManager.signalParam(hash, &ok);
 
 		if (ok == false)
 		{
@@ -1035,7 +1029,7 @@ void ChooseTuningSignalsWidget::setFilterValueItemText(QTreeWidgetItem* item, co
 
 	item->setData(static_cast<int>(Columns::AppSignalID), Qt::UserRole, value.appSignalHash());
 
-	if (m_signalManager->signalExists(value.appSignalHash()) == false)
+	if (m_signalManager.signalExists(value.appSignalHash()) == false)
 	{
 		QStringList l;
 		l.push_back("?");
@@ -1054,7 +1048,7 @@ void ChooseTuningSignalsWidget::setFilterValueItemText(QTreeWidgetItem* item, co
 	}
 
 	AppSignalParam asp;
-	if (m_signalManager->signalParam(value.appSignalHash(), &asp) == false)
+	if (m_signalManager.signalParam(value.appSignalHash(), &asp) == false)
 	{
 		assert(false);
 		return;
@@ -1085,7 +1079,7 @@ void ChooseTuningSignalsWidget::setFilterValueItemText(QTreeWidgetItem* item, co
 // TuningFilterEditor
 //
 
-TuningFilterEditor::TuningFilterEditor(TuningFilterStorage* filterStorage, TuningSignalManager* signalManager,
+TuningFilterEditor::TuningFilterEditor(TuningFilterStorage& filterStorage, TuningSignalManager& signalManager,
 									   bool readOnly,
 									   bool requestValuesEnabled,
 									   bool typeTreeEnabled,
@@ -1107,19 +1101,15 @@ TuningFilterEditor::TuningFilterEditor(TuningFilterStorage* filterStorage, Tunin
 	m_typeSchemasTabsEnabled(typeSchemasTabsEnabled),
 	m_source(source)
 {
-
-	assert(filterStorage);
-	assert(m_signalManager);
-
 	initUserInterface(mainSplitterState, propertyEditorSplitterPos);
 
 
 	// Add presets to tree
 	//
 
-	for (int i = 0; i < m_filterStorage->root()->childFiltersCount(); i++)
+	for (int i = 0; i < m_filterStorage.root()->childFiltersCount(); i++)
 	{
-		std::shared_ptr<TuningFilter> f = m_filterStorage->root()->childFilter(i);
+		std::shared_ptr<TuningFilter> f = m_filterStorage.root()->childFilter(i);
 		if (f == nullptr)
 		{
 			assert(f);
@@ -1413,7 +1403,7 @@ void TuningFilterEditor::on_m_removePreset_clicked()
 		QTreeWidgetItem* parentItem = item->parent();
 		if (parentItem == nullptr)
 		{
-			m_filterStorage->root()->removeChild(filter);
+			m_filterStorage.root()->removeChild(filter);
 
 			QTreeWidgetItem* deleteItem = m_presetsTree->takeTopLevelItem(m_presetsTree->indexOfTopLevelItem(item));
 			delete deleteItem;
@@ -1472,7 +1462,7 @@ void TuningFilterEditor::on_m_copyPreset_clicked()
 		return;
 	}
 
-	m_filterStorage->copyToClipboard(filters);
+	m_filterStorage.copyToClipboard(filters);
 
 }
 
@@ -1500,7 +1490,7 @@ void TuningFilterEditor::on_m_pastePreset_clicked()
 		parentItem = firstTreeItem;
 	}
 
-	std::shared_ptr<TuningFilter> pastedRoot = m_filterStorage->pasteFromClipboard();
+	std::shared_ptr<TuningFilter> pastedRoot = m_filterStorage.pasteFromClipboard();
 
 	if (pastedRoot == nullptr)
 	{
@@ -1530,7 +1520,7 @@ void TuningFilterEditor::on_m_pastePreset_clicked()
 		{
 			// no item was selected, add top level item
 			//
-			m_filterStorage->root()->addChild(newFilter);
+			m_filterStorage.root()->addChild(newFilter);
 			m_presetsTree->addTopLevelItem(newPresetItem);
 		}
 		else
@@ -1851,7 +1841,7 @@ void TuningFilterEditor::addPreset(TuningFilter::InterfaceType interfaceType)
 	{
 		// no item was selected, add top level item
 		//
-		m_filterStorage->root()->addChild(newFilter);
+		m_filterStorage.root()->addChild(newFilter);
 
 		m_presetsTree->addTopLevelItem(newPresetItem);
 
@@ -2004,7 +1994,7 @@ void TuningFilterEditor::movePresets(int direction)
 
 	if (parentItem == nullptr)
 	{
-		parentFilter = m_filterStorage->root();
+		parentFilter = m_filterStorage.root();
 	}
 	else
 	{

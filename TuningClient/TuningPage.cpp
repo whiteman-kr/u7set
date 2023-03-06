@@ -17,7 +17,7 @@ int todo_crash_if_modal_dialog_in_reload_config;
 //
 // TuningItemModelMain
 //
-TuningModelClient::TuningModelClient(TuningSignalManager* tuningSignalManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent):
+TuningModelClient::TuningModelClient(TuningSignalManager& tuningSignalManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent):
 	TuningModel(tuningSignalManager, valueColumnsAppSignalIdSuffixes, parent)
 {
 }
@@ -33,7 +33,7 @@ bool TuningModelClient::hasPendingChanges()
 	{
 		Hash hash = m_allHashes[i];
 
-		if (m_tuningSignalManager->newValueIsUnapplied(hash) == true)
+		if (m_tuningSignalManager.newValueIsUnapplied(hash) == true)
 		{
 			return true;
 		}
@@ -72,7 +72,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 			return QBrush();
 		}
 
-		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+		TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
 
 		if (state.controlIsEnabled() == false)
 		{
@@ -92,7 +92,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 			return QBrush(color);
 		}
 
-		if (m_blink == true && m_tuningSignalManager->newValueIsUnapplied(hash) == true)
+		if (m_blink == true && m_tuningSignalManager.newValueIsUnapplied(hash) == true)
 		{
 			QColor color = theSettings.m_columnUnappliedBackColor;
 			return QBrush(color);
@@ -120,7 +120,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 
 		if (columnType == static_cast<int>(TuningModelColumns::Valid))
 		{
-			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+			TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
 
 			if (state.valid() == false)
 			{
@@ -131,9 +131,9 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 
 		if (columnType == static_cast<int>(TuningModelColumns::LowLimit) || columnType == static_cast<int>(TuningModelColumns::HighLimit))
 		{
-			AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+			AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
 
-			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+			TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
 
 			if (state.limitsUnbalance(asp) == true)
 			{
@@ -144,7 +144,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 
 		if (columnType == static_cast<int>(TuningModelColumns::OutOfRange))
 		{
-			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+			TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
 
 			if (state.outOfRange() == true)
 			{
@@ -155,7 +155,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 
 		if (columnType == static_cast<int>(TuningModelColumns::Default))
 		{
-			AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+			AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
 
 			TuningValue defaultVal = defaultValue(asp);
 
@@ -205,7 +205,7 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 			return QBrush();
 		}
 
-		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+		TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
 
 		if (state.controlIsEnabled() == false)
 		{
@@ -225,7 +225,7 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
             return QBrush(color);
         }
 
-		if (m_blink == true && m_tuningSignalManager->newValueIsUnapplied(hash) == true)
+		if (m_blink == true && m_tuningSignalManager.newValueIsUnapplied(hash) == true)
 		{
 			QColor color = theSettings.m_columnUnappliedTextColor;
 			return QBrush(color);
@@ -247,7 +247,7 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 
 		if (columnType == static_cast<int>(TuningModelColumns::Valid))
 		{
-			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+			TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
 
 			if (state.valid() == false)
 			{
@@ -258,9 +258,9 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 
 		if (columnType == static_cast<int>(TuningModelColumns::LowLimit) || columnType == static_cast<int>(TuningModelColumns::HighLimit))
 		{
-			AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+			AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
 
-			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+			TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
 
 			if (state.limitsUnbalance(asp) == true)
 			{
@@ -271,7 +271,7 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 
 		if (columnType == static_cast<int>(TuningModelColumns::OutOfRange))
 		{
-			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+			TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
 
 			if (state.outOfRange() == true)
 			{
@@ -319,16 +319,16 @@ Qt::ItemFlags TuningModelClient::flags(const QModelIndex& index) const
 			return f;
 		}
 
-		if (m_tuningSignalManager->newValueIsUnapplied(hash) == true)
+		if (m_tuningSignalManager.newValueIsUnapplied(hash) == true)
 		{
 			f &= ~Qt::ItemIsSelectable;
 		}
 
 		bool ok = false;
 
-		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+		AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
 
-		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+		TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
 
 		if (state.valid() == true)
 		{
@@ -390,17 +390,17 @@ QVariant TuningModelClient::data(const QModelIndex& index, int role) const
 
 		bool ok = false;
 
-		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+		AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
 
-		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+		TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
 
 		if (asp.isDiscrete() == true && state.valid() == true)
 		{
 			quint32 discreteValue = 0;
 
-			if (m_tuningSignalManager->newValueIsUnapplied(hash) == true)
+			if (m_tuningSignalManager.newValueIsUnapplied(hash) == true)
 			{
-				discreteValue = m_tuningSignalManager->newValue(hash).discreteValue();
+				discreteValue = m_tuningSignalManager.newValue(hash).discreteValue();
 			}
 			else
 			{
@@ -450,9 +450,9 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 
 		bool ok = false;
 
-		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+		AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
 
-		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+		TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
 
 		if (role == Qt::EditRole &&
 				state.valid() == true &&
@@ -466,7 +466,7 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 				return false;
 			}
 
-			m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(asp.tuningType(), v));
+			m_tuningSignalManager.setNewValue(asp.hash(), TuningValue(asp.tuningType(), v));
 			return true;
 		}
 
@@ -477,12 +477,12 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 		{
 			if ((Qt::CheckState)value.toInt() == Qt::Checked)
 			{
-				m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(asp.tuningType(), 1));
+				m_tuningSignalManager.setNewValue(asp.hash(), TuningValue(asp.tuningType(), 1));
 				return true;
 			}
 			else
 			{
-				m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(asp.tuningType(), 0));
+				m_tuningSignalManager.setNewValue(asp.hash(), TuningValue(asp.tuningType(), 0));
 				return true;
 			}
 		}
@@ -540,9 +540,9 @@ bool TuningTableView::edit(const QModelIndex&  index, EditTrigger trigger, QEven
 
 		if (row >= 0)
 		{
-			AppSignalParam asp = m_model->tuningSignalManager()->signalParam(hash, &ok);
+			AppSignalParam asp = m_model->tuningSignalManager().signalParam(hash, &ok);
 
-			TuningSignalState state = m_model->tuningSignalManager()->state(hash, &ok);
+			TuningSignalState state = m_model->tuningSignalManager().state(hash, &ok);
 
 			if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
 			{
@@ -679,15 +679,20 @@ void TuningPageColumnsWidth::setWidth(TuningModelColumns column, int width)
 
 int TuningPage::m_instanceCounter = 0;
 
-TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
+TuningPage::TuningPage(TuningConfigController& configController,
+					   TuningSignalManager& tuningSignalManager,
+					   TuningClientFilterStorage& tuningFilterStorage,
+					   TuningUserManager& userManager,
+					   std::vector<TuningClientTcpClient*> tcpClients,
+					   std::shared_ptr<TuningFilter> treeFilter,
 					   std::shared_ptr<TuningFilter> pageFilter,
-					   TuningSignalManager* tuningSignalManager,
-					   std::vector<TuningClientTcpClient*> tuningTcpClients, TuningFilterStorage* tuningFilterStorage,
 					   QWidget* parent) :
 	QWidget(parent),
+	m_configController(configController),
 	m_tuningSignalManager(tuningSignalManager),
-	m_tuningTcpClients(tuningTcpClients),
 	m_tuningFilterStorage(tuningFilterStorage),
+	m_userManager(userManager),
+	m_tuningTcpClients(tcpClients),
 	m_treeFilter(treeFilter),
 	m_pageFilter(pageFilter)
 {
@@ -704,9 +709,6 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 		Q_ASSERT(m_pageFilter);
 		return;
 	}
-
-	assert(m_tuningSignalManager);
-	assert(m_tuningFilterStorage);
 
 	// Object List
 	//
@@ -890,7 +892,7 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 	m_bottomLayout->addWidget(m_undoButton);
 	connect(m_undoButton, &QPushButton::clicked, this, &TuningPage::slot_undo);
 
-	if (theConfigSettings.clientSettings.autoApply == false)
+	if (m_configController.configuration().clientSettings.autoApply == false)
 	{
 		m_applyButton = new QPushButton(tr("Apply"));
 		connect(m_applyButton, &QPushButton::clicked, this, &TuningPage::slot_Apply);
@@ -1080,7 +1082,7 @@ void TuningPage::fillObjectsList()
 
 	for (Hash hash : hashes)
 	{
-		const AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+		const AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
 
 		if (ok == false)
 		{
@@ -1157,7 +1159,7 @@ void TuningPage::fillObjectsList()
 			{
 				ok = false;
 
-				const TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+				const TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
 
 				if (ok == false || state.valid() == false)
 				{
@@ -1181,7 +1183,7 @@ void TuningPage::fillObjectsList()
 				{
 					ok = false;
 
-					const TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+					const TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
 
 					if (ok == false || state.valid() == false)
 					{
@@ -1322,7 +1324,7 @@ bool TuningPage::askForSavePendingChanges()
 
 bool TuningPage::write()
 {
-	if (theMainWindow->userManager()->login(this) == false)
+	if (m_userManager.login(this) == false)
 	{
 		return false;
 	}
@@ -1339,12 +1341,12 @@ bool TuningPage::write()
 
 	for (Hash hash : allHashes)
 	{
-		if (m_tuningSignalManager->newValueIsUnapplied(hash) == false)
+		if (m_tuningSignalManager.newValueIsUnapplied(hash) == false)
 		{
 			continue;
 		}
 
-		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+		TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
 
 		if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
 		{
@@ -1396,7 +1398,7 @@ bool TuningPage::write()
 
 	for (Hash hash : modifiedHashes)
 	{
-		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+		AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
 
 		if (listCount >= 10)
 		{
@@ -1406,11 +1408,11 @@ bool TuningPage::write()
 
 		if (asp.isAnalog() == true)
 		{
-			strValue = m_tuningSignalManager->newValue(hash).toString(m_model->analogFormat(), asp.precision());
+			strValue = m_tuningSignalManager.newValue(hash).toString(m_model->analogFormat(), asp.precision());
 		}
 		else
 		{
-			strValue = m_tuningSignalManager->newValue(hash).toString();
+			strValue = m_tuningSignalManager.newValue(hash).toString();
 		}
 
 		str += tr("%1 (%2) = %3\n").arg(asp.appSignalId()).arg(asp.caption()).arg(strValue);
@@ -1443,7 +1445,7 @@ bool TuningPage::write()
 
 		for (Hash hash : clientHashes)
 		{
-			if (m_tuningSignalManager->newValueIsUnapplied(hash) == false)
+			if (m_tuningSignalManager.newValueIsUnapplied(hash) == false)
 			{
 				continue;
 			}
@@ -1457,7 +1459,7 @@ bool TuningPage::write()
 				continue;
 			}
 
-			TuningWriteCommand cmd(hash, m_tuningSignalManager->newValue(hash));
+			TuningWriteCommand cmd(hash, m_tuningSignalManager.newValue(hash));
 
 			commands.push_back(cmd);
 		}
@@ -1474,7 +1476,7 @@ bool TuningPage::write()
 
 void TuningPage::apply()
 {
-	if (theMainWindow->userManager()->login(this) == false)
+	if (m_userManager.login(this) == false)
 	{
 		return;
 	}
@@ -1518,7 +1520,7 @@ void TuningPage::apply()
 
 	// Get SOR counters
 
-	TuningCounters rootCounters = m_tuningFilterStorage->root()->counters();
+	TuningCounters rootCounters = m_tuningFilterStorage.root()->counters();
 
 	if (rootCounters.sorCounter > 0)
 	{
@@ -1604,9 +1606,9 @@ void TuningPage::slot_setValue()
 
 			bool ok = false;
 
-			AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+			AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
 
-			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+			TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
 
 			if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
 			{
@@ -1686,7 +1688,7 @@ void TuningPage::slot_setValue()
 
 	for (Hash hash : selectedHashes)
 	{
-		m_tuningSignalManager->setNewValue(hash, newValue);
+		m_tuningSignalManager.setNewValue(hash, newValue);
 	}
 }
 
@@ -1754,7 +1756,7 @@ void TuningPage::slot_listContextMenuRequested(const QPoint& pos)
 
 			bool found = false;
 
-			AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &found);
+			AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &found);
 
 			if (found == false)
 			{
@@ -1780,6 +1782,7 @@ void TuningPage::slot_listContextMenuRequested(const QPoint& pos)
 				TuningSignalInfo* d = new TuningSignalInfo(hash, m_model->analogFormat(), instanceIdHash,
 														   m_tuningSignalManager,
 														   {m_tuningTcpClients.begin(), m_tuningTcpClients.end()},
+														   m_configController.lmStatusFlagMode(),
 														   this);
 				d->show();
 			};
@@ -1850,7 +1853,7 @@ void TuningPage::slot_listContextMenuRequested(const QPoint& pos)
 
 	// If AutoFilter filter exists, add Restore command
 
-	std::shared_ptr<TuningFilter> root = m_tuningFilterStorage->root();
+	std::shared_ptr<TuningFilter> root = m_tuningFilterStorage.root();
 
 	if (root == nullptr)
 	{
@@ -1880,7 +1883,7 @@ void TuningPage::slot_listContextMenuRequested(const QPoint& pos)
 
 void TuningPage::slot_saveSignalsToNewFilter()
 {
-	if (theMainWindow->userManager()->login(this) == false)
+	if (m_userManager.login(this) == false)
 	{
 		return;
 	}
@@ -1895,7 +1898,7 @@ void TuningPage::slot_saveSignalsToNewFilter()
 		return;
 	}
 
-	std::shared_ptr<TuningFilter> root = m_tuningFilterStorage->root();
+	std::shared_ptr<TuningFilter> root = m_tuningFilterStorage.root();
 
 	if (root == nullptr)
 	{
@@ -1936,12 +1939,12 @@ void TuningPage::slot_saveSignalsToNewFilter()
 
 void TuningPage::slot_saveSignalsToExistingFilter()
 {
-	if (theMainWindow->userManager()->login(this) == false)
+	if (m_userManager.login(this) == false)
 	{
 		return;
 	}
 
-	std::shared_ptr<TuningFilter> root = m_tuningFilterStorage->root();
+	std::shared_ptr<TuningFilter> root = m_tuningFilterStorage.root();
 
 	if (root == nullptr)
 	{
@@ -2027,7 +2030,7 @@ void TuningPage::slot_exportContentsToCSV()
 
 void TuningPage::slot_restoreValuesFromExistingFilter()
 {
-	std::shared_ptr<TuningFilter> root = m_tuningFilterStorage->root();
+	std::shared_ptr<TuningFilter> root = m_tuningFilterStorage.root();
 
 	if (root == nullptr)
 	{
@@ -2153,9 +2156,9 @@ void TuningPage::invertValue()
 				continue;
 			}
 
-			AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+			AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
 
-			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+			TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
 
 			if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
 			{
@@ -2170,12 +2173,12 @@ void TuningPage::invertValue()
 
 				tv.setDiscreteValue(0);
 
-				if (m_tuningSignalManager->newValue(hash).discreteValue() == 0)
+				if (m_tuningSignalManager.newValue(hash).discreteValue() == 0)
 				{
 					tv.setDiscreteValue(1);
 				}
 
-				m_tuningSignalManager->setNewValue(hash, tv);
+				m_tuningSignalManager.setNewValue(hash, tv);
 			}
 		}
 	}
@@ -2214,7 +2217,7 @@ void TuningPage::addSelectedSignalsToFilter(TuningFilter* filter)
 
 			bool found = false;
 
-			AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &found);
+			AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &found);
 
 			if (found == false)
 			{
@@ -2222,7 +2225,7 @@ void TuningPage::addSelectedSignalsToFilter(TuningFilter* filter)
 				return;
 			}
 
-			TuningSignalState state = m_tuningSignalManager->state(hash, &found);
+			TuningSignalState state = m_tuningSignalManager.state(hash, &found);
 
 			if (found == false)
 			{
@@ -2253,9 +2256,8 @@ void TuningPage::addSelectedSignalsToFilter(TuningFilter* filter)
 
 	QString errorMsg;
 
-	if (m_tuningFilterStorage->save(theSettings.userFiltersFile(), &errorMsg, TuningFilter::Source::User) == false)
+	if (m_tuningFilterStorage.save(theSettings.userFiltersFile(), &errorMsg, TuningFilter::Source::User) == false)
 	{
-		theLogFile->writeError(errorMsg);
 		QMessageBox::critical(this, tr("Error"), errorMsg);
 	}
 
@@ -2299,7 +2301,7 @@ void TuningPage::restoreSignalsFromFilter(TuningFilter* filter)
 
 				bool found = false;
 
-				TuningSignalState state = m_tuningSignalManager->state(hash, &found);
+				TuningSignalState state = m_tuningSignalManager.state(hash, &found);
 				if (found == false)
 				{
 					continue;
@@ -2312,7 +2314,7 @@ void TuningPage::restoreSignalsFromFilter(TuningFilter* filter)
 
 				if (state.value() != tv.value())
 				{
-					m_tuningSignalManager->setNewValue(hash, tv.value());
+					m_tuningSignalManager.setNewValue(hash, tv.value());
 					restoredCount++;
 				}
 			}
@@ -2386,9 +2388,9 @@ void TuningPage::slot_setAll()
 
 		for (Hash hash : hashes)
 		{
-			AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+			AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
 
-			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+			TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
 
 			if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
 			{
@@ -2417,9 +2419,9 @@ void TuningPage::slot_setAll()
 
 		for (Hash hash : hashes)
 		{
-			AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+			AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
 
-			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+			TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
 
 			if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
 			{
@@ -2431,7 +2433,7 @@ void TuningPage::slot_setAll()
 				TuningValue tv;
 				tv.setType(TuningValueType::Discrete);
 				tv.setDiscreteValue(1);
-				m_tuningSignalManager->setNewValue(hash, tv);
+				m_tuningSignalManager.setNewValue(hash, tv);
 			}
 		}
 	};
@@ -2448,9 +2450,9 @@ void TuningPage::slot_setAll()
 
 		for (Hash hash : hashes)
 		{
-			AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+			AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
 
-			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+			TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
 
 			if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
 			{
@@ -2462,7 +2464,7 @@ void TuningPage::slot_setAll()
 				TuningValue tv;
 				tv.setType(TuningValueType::Discrete);
 				tv.setDiscreteValue(0);
-				m_tuningSignalManager->setNewValue(hash, tv);
+				m_tuningSignalManager.setNewValue(hash, tv);
 			}
 		}
 	};
@@ -2480,9 +2482,9 @@ void TuningPage::slot_setAll()
 
 		for (Hash hash : hashes)
 		{
-			AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+			AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
 
-			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+			TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
 
 			if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
 			{
@@ -2503,7 +2505,7 @@ void TuningPage::slot_setAll()
 				}
 				else
 				{
-					m_tuningSignalManager->setNewValue(hash, tvDefault);
+					m_tuningSignalManager.setNewValue(hash, tvDefault);
 				}
 			}
 		}
@@ -2530,8 +2532,8 @@ void TuningPage::slot_undo()
 
 	for (Hash hash : hashes)
 	{
-		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
-		m_tuningSignalManager->setNewValue(hash, state.value());
+		TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
+		m_tuningSignalManager.setNewValue(hash, state.value());
 	}
 }
 

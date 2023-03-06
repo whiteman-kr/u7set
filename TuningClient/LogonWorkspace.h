@@ -6,7 +6,7 @@ class LogonWorkspace : public QWidget
 {
 	Q_OBJECT
 public:
-	LogonWorkspace(TuningUserManager* userManager, QWidget* parent);
+	LogonWorkspace(TuningUserManager& userManager, QWidget* parent);
 
 private slots:
 	void onButtonLogin();
@@ -24,7 +24,7 @@ private:
 	QLabel* m_loginUserName = nullptr;
 	QLabel* m_logoutPendingTime = nullptr;
 
-	TuningUserManager* m_userManager = nullptr;
+	TuningUserManager& m_userManager;
 
 	const QLatin1String zeroTimeString = QLatin1String("00:00:00");
 	const QString loggedOutString = tr("Logged Out");

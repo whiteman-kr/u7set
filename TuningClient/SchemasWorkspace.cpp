@@ -4,8 +4,9 @@
 
 #include <QTreeWidget>
 
-SchemasWorkspace::SchemasWorkspace(TuningConfigController* configController,
-								   TuningSignalManager* tuningSignalManager,
+SchemasWorkspace::SchemasWorkspace(TuningConfigController& configController,
+								   TuningSignalManager& tuningSignalManager,
+								   TuningUserManager& userManager,
 								   std::vector<ITuningTcpClient*> tuningTcpClients,
 								   const QString& caption,
 								   const QStringList& schemasTags,
@@ -13,7 +14,8 @@ SchemasWorkspace::SchemasWorkspace(TuningConfigController* configController,
 								   ILogFile* logFile,
 								   QWidget* parent) :
 	QWidget(parent),
-	m_tuningController(tuningSignalManager, tuningTcpClients),
+	m_configController(configController),
+	m_tuningController(&tuningSignalManager, userManager, tuningTcpClients),
 	m_logController(logFile),
 	m_tuningSignalManager(tuningSignalManager),
 	m_schemaManager(configController),
@@ -21,28 +23,22 @@ SchemasWorkspace::SchemasWorkspace(TuningConfigController* configController,
 	m_startSchemaId(startSchemaId),
 	m_schemasTags(schemasTags)
 {
-
-	if (configController == nullptr || m_tuningSignalManager== nullptr)
-	{
-		assert(configController);
-		assert(m_tuningSignalManager);
-		return;
-	}
-
-	if (theConfigSettings.schemas.empty() == true)
+	if (configController.schemaCount() == 0)
 	{
 		return;
 	}
 
 	// Create schema widgets and navigation controls
 
-	if (theConfigSettings.clientSettings.showSchemasList == true)
+	const TuningClientSettings& clientSettings = m_configController.configuration().clientSettings;
+
+	if (clientSettings.showSchemasList == true)
 	{
 		createSchemasList();
 	}
 	else
 	{
-		if (theConfigSettings.clientSettings.showSchemasTabs == true)
+		if (clientSettings.showSchemasTabs == true)
 		{
 			createSchemasTabs();
 		}
@@ -108,10 +104,12 @@ void SchemasWorkspace::slot_schemaChanged(VFrame30::ClientSchemaWidget* widget, 
 		return;
 	}
 
+	const TuningClientSettings& clientSettings = m_configController.configuration().clientSettings;
+
 	QString id = schema->schemaId();
 	QString caption = schema->caption();
 
-	if (theConfigSettings.clientSettings.showSchemasList == true)
+	if (clientSettings.showSchemasList == true)
 	{
 		if (m_schemasList == nullptr)
 		{
@@ -138,7 +136,7 @@ void SchemasWorkspace::slot_schemaChanged(VFrame30::ClientSchemaWidget* widget, 
 	}
 	else
 	{
-		if (theConfigSettings.clientSettings.showSchemasTabs == true)
+		if (clientSettings.showSchemasTabs == true)
 		{
 			if (m_tabWidget == nullptr)
 			{
@@ -235,22 +233,19 @@ void SchemasWorkspace::createSchemasList()
 	m_schemasList->setHeaderLabels(headerLabels);
 	m_schemasList->setSelectionMode(QAbstractItemView::SingleSelection);
 
-	for (const SchemaInfo& schemaInfo : theConfigSettings.schemas)
+	for (int i = 0; i < m_configController.schemaCount(); i++)
 	{
-		if (schemaInfo.m_id.isEmpty() == true)
+		if (m_schemasTags.empty() == false)
 		{
-			assert(false);
-			continue;
-		}
-
-		if (m_schemasTags.empty() == false && schemaInfo.hasAnyTag(m_schemasTags) == false)
-		{
-			continue;
+			if (m_configController.schemaHasTags(i, m_schemasTags) == false)
+			{
+				continue;
+			}
 		}
 
 		QStringList l;
-		l << schemaInfo.m_id;
-		l << schemaInfo.m_caption;
+		l << m_configController.schemaIdByIndex(i);
+		l << m_configController.schemaCaptionByIndex(i);
 
 		QTreeWidgetItem* item = new QTreeWidgetItem(l);
 		m_schemasList->addTopLevelItem(item);
@@ -319,7 +314,7 @@ void SchemasWorkspace::createSchemasList()
 			return;
 		}
 
-		m_schemaWidget = new TuningSchemaWidget(m_tuningSignalManager, &m_tuningController, &m_logController, schema, &m_schemaManager, this);
+		m_schemaWidget = new TuningSchemaWidget(m_configController, m_tuningSignalManager, &m_tuningController, &m_logController, schema, m_schemaManager, this);
 
 		// Make sure the new context was set
 		//
@@ -349,22 +344,18 @@ void SchemasWorkspace::createSchemasTabs()
 
 	std::map<QString, TuningSchemaWidget*> widgets;
 
-	for (const SchemaInfo& schemaInfo : theConfigSettings.schemas)
+	for (int i = 0; i < m_configController.schemaCount(); i++)
 	{
-		if (schemaInfo.m_id.isEmpty() == true)
-		{
-			assert(false);
-			continue;
-		}
-
-		if (m_schemasTags.empty() == false && schemaInfo.hasAnyTag(m_schemasTags) == false)
+		if (m_schemasTags.empty() == false && m_configController.schemaHasTags(i, m_schemasTags) == false)
 		{
 			continue;
 		}
 
-		std::shared_ptr<VFrame30::Schema> schema = m_schemaManager.schema(schemaInfo.m_id, dummyContext);
+		QString schemaId = m_configController.schemaIdByIndex(i);
 
-		TuningSchemaWidget* schemaWidget = new TuningSchemaWidget(m_tuningSignalManager, &m_tuningController, &m_logController,schema, &m_schemaManager, this);
+		std::shared_ptr<VFrame30::Schema> schema = m_schemaManager.schema(schemaId, dummyContext);
+
+		TuningSchemaWidget* schemaWidget = new TuningSchemaWidget(m_configController, m_tuningSignalManager, &m_tuningController, &m_logController,schema, m_schemaManager, this);
 
 		// Make sure the new context was set
 		//
@@ -372,7 +363,7 @@ void SchemasWorkspace::createSchemasTabs()
 
 		connect(schemaWidget, &TuningSchemaWidget::signal_schemaChanged, this, &SchemasWorkspace::slot_schemaChanged);
 
-		widgets[schemaInfo.m_id] = schemaWidget;
+		widgets[schemaId] = schemaWidget;
 	}
 
 	// Add widgets to tab
@@ -410,45 +401,45 @@ void SchemasWorkspace::createSchemasView()
 
 	// No tab
 
-	QString schemaID;
+	QString startSchemaID;
 
-	for (const SchemaInfo& schemaInfo : theConfigSettings.schemas)
+	for (int i = 0; i < m_configController.schemaCount(); i++)
 	{
-		if (m_schemasTags.empty() == false && schemaInfo.hasAnyTag(m_schemasTags) == false)
+		if (m_schemasTags.empty() == false && m_configController.schemaHasTags(i, m_schemasTags) == false)
 		{
 			continue;
 		}
 
-		if (schemaInfo.m_id == m_startSchemaId)
+		QString schemaId = m_configController.schemaIdByIndex(i);
+		if (schemaId == m_startSchemaId)
 		{
-			schemaID = schemaInfo.m_id;
+			startSchemaID = schemaId;
 		}
 	}
 
-	if (schemaID.isEmpty() == true)
+	if (startSchemaID.isEmpty() == true)
 	{
 		// No startSchemaID was found, show first
 
-		for (const SchemaInfo& schemaInfo : theConfigSettings.schemas)
+		for (int i = 0; i < m_configController.schemaCount(); i++)
 		{
-			if (m_schemasTags.empty() == false && schemaInfo.hasAnyTag(m_schemasTags) == false)
+			if (m_schemasTags.empty() == false && m_configController.schemaHasTags(i, m_schemasTags) == false)
 			{
 				continue;
 			}
 
-			schemaID = schemaInfo.m_id;
+			startSchemaID = m_configController.schemaIdByIndex(i);
 			break;
 		}
 	}
 
-	if (schemaID.isEmpty() == true)
+	if (startSchemaID.isEmpty() == true)
 	{
 		// No schema to view
 
 		QLabel* emptyLabel = new QLabel(tr("No schemas exist for current page"));
 		emptyLabel->setAlignment(Qt::AlignCenter);
 		mainLayout->addWidget(emptyLabel);
-
 		return;
 	}
 
@@ -456,9 +447,9 @@ void SchemasWorkspace::createSchemasView()
 	// constructor, as TuningSchemaView is cretaed inside TuningSchemaWidget().
 	//
 	auto dummyContext = VFrame30::Context::create(nullptr, nullptr, nullptr, nullptr);
-	std::shared_ptr<VFrame30::Schema> schema = m_schemaManager.schema(schemaID, dummyContext);
+	std::shared_ptr<VFrame30::Schema> schema = m_schemaManager.schema(startSchemaID, dummyContext);
 
-	m_schemaWidget = new TuningSchemaWidget(m_tuningSignalManager, &m_tuningController, &m_logController, schema, &m_schemaManager, this);
+	m_schemaWidget = new TuningSchemaWidget(m_configController, m_tuningSignalManager, &m_tuningController, &m_logController, schema, m_schemaManager, this);
 
 	// Make sure the new context was set
 	//

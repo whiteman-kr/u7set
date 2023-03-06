@@ -2232,19 +2232,3 @@ void TuningFilterStorage::checkFilterSignals(const std::vector<Hash>& signalHash
 	m_root->checkSignals(signalHashes, notFoundSignalsAndFilters);
 }
 
-void TuningFilterStorage::writeLogError(const QString& message)
-{
-	Q_UNUSED(message);
-}
-
-void TuningFilterStorage::writeLogWarning(const QString& message)
-{
-	Q_UNUSED(message);
-}
-
-void TuningFilterStorage::writeLogMessage(const QString& message)
-{
-	Q_UNUSED(message);
-}
-
-

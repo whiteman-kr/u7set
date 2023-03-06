@@ -8,7 +8,7 @@
 class TuningSchemaManager : public VFrame30::SchemaManager
 {
 public:
-	explicit TuningSchemaManager(TuningConfigController* configController, QObject* parent = nullptr);
+	explicit TuningSchemaManager(TuningConfigController& configController, QObject* parent = nullptr);
 
 public:
 	virtual int schemaCount() const override;
@@ -20,14 +20,14 @@ public:
 	virtual QString schemaIdByIndex(int schemaIndex) const override;
 
 public:
-	[[nodiscard]] TuningConfigController* configController();
-	[[nodiscard]] const TuningConfigController* configController() const;
+	[[nodiscard]] TuningConfigController& configController();
+	[[nodiscard]] const TuningConfigController& configController() const;
 
 protected:
 	virtual std::shared_ptr<VFrame30::Schema> loadSchema(QString schemaId) override;
 
 private:
-	TuningConfigController* m_configController = nullptr;
+	TuningConfigController& m_configController;
 };
 
 #endif // SCHEMASTORAGE_H

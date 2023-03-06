@@ -21,7 +21,7 @@ bool TuningWriteCommand::load(const Network::TuningWriteCommand& message)
 //
 // TuningTcpClient
 //
-TuningTcpClient::TuningTcpClient(const SoftwareInfo& softwareInfo, const QString& tuningServiceId, bool singleLmControlMode, TuningSignalManager* signalManager) :
+TuningTcpClient::TuningTcpClient(const SoftwareInfo& softwareInfo, const QString& tuningServiceId, bool singleLmControlMode, TuningSignalManager& signalManager) :
 	Tcp::Client(softwareInfo, HostAddressPort("0.0.0.0", 0), "TuningTcpClient"),
 	m_tuningServiceId(tuningServiceId),
 	m_singleLmControlMode(singleLmControlMode),
@@ -29,8 +29,6 @@ TuningTcpClient::TuningTcpClient(const SoftwareInfo& softwareInfo, const QString
 	m_instanceIdHash(::calcHash(softwareInfo.equipmentID())),
 	m_signals(signalManager)
 {
-	assert(m_signals);
-
 	qRegisterMetaType<LmStatusFlagMode>("LmStatusFlagMode");
 
 	return;
@@ -173,14 +171,14 @@ void TuningTcpClient::writeTuningSignal(const std::vector<TuningWriteCommand>& d
 	{
 		// Write command to log
 		//
-		AppSignalParam param = m_signals->signalParam(command.m_hash, &found);
+		AppSignalParam param = m_signals.signalParam(command.m_hash, &found);
 		if (found == false)
 		{
 			assert(false);
 			return;
 		}
 
-		TuningSignalState state = m_signals->state(command.m_hash, &found);
+		TuningSignalState state = m_signals.state(command.m_hash, &found);
 		if (found == false)
 		{
 			assert(false);
@@ -261,7 +259,7 @@ TuningSignalState TuningTcpClient::state(Hash hash, bool* found) const
 
 void TuningTcpClient::onClientThreadStarted()
 {
-	connect(m_signals, &TuningSignalManager::signalsLoaded, this, &TuningTcpClient::slot_signalsUpdated);
+	connect(&m_signals, &TuningSignalManager::signalsLoaded, this, &TuningTcpClient::slot_signalsUpdated);
 
 	return;
 }
@@ -297,7 +295,7 @@ void TuningTcpClient::onDisconnection()
 {
 	writeLogMessage(tr("onDisconnection(), connection closed."));
 
-	m_signals->invalidateStates();
+	m_signals.invalidateStates();
 
 	{
 		QWriteLocker l(&m_tuningSourcesLock);
@@ -530,7 +528,7 @@ void TuningTcpClient::processTuningSourcesInfo(const QByteArray& data)
 
 		QWriteLocker l(&m_signalHashesLock);
 
-		m_signalHashes = m_signals->signalHashes(equipmentHashes);
+		m_signalHashes = m_signals.signalHashes(equipmentHashes);
 
 		m_signalHashesSet.reserve(m_signalHashes.size());
 		for (const Hash& hash : m_signalHashes)
@@ -959,7 +957,7 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 				{
 					if (arrivedState.successfulWriteTime() > clientCurrentState.successfulWriteTime())
 					{
-						m_signals->setNewValueAsApplied(arrivedState.hash());
+						m_signals.setNewValueAsApplied(arrivedState.hash());
 					}
 				}
 				else
@@ -970,11 +968,11 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 						//						qDebug() << "previousState.unsuccessfulWriteTime() " << previousState.unsuccessfulWriteTime().toMSecsSinceEpoch();
 						//						qDebug() << "stateMessage.writeerrorcode() " << stateMessage.writeerrorcode();
 
-						m_signals->setNewValueAsApplied(arrivedState.hash());
+						m_signals.setNewValueAsApplied(arrivedState.hash());
 
 						bool paramFound = false;
 
-						AppSignalParam param = m_signals->signalParam(stateMessage.signalhash(), &paramFound);
+						AppSignalParam param = m_signals.signalParam(stateMessage.signalhash(), &paramFound);
 						if (paramFound == false)
 						{
 							assert(false);
@@ -982,7 +980,7 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 						}
 
 						writeLogAlert(tr("processReadTuningSignals(), Error writing value '%1' to signal '%2' (%3), logic module '%4': %5")
-									  .arg(m_signals->newValue(arrivedState.hash()).toString())
+									  .arg(m_signals.newValue(arrivedState.hash()).toString())
 									  .arg(param.customSignalId())
 									  .arg(param.caption())
 									  .arg(param.lmEquipmentId())
@@ -996,7 +994,7 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 			//
 			bool currentStateFound = false;
 
-			TuningSignalState currentState = m_signals->state(stateMessage.signalhash(), &currentStateFound);
+			TuningSignalState currentState = m_signals.state(stateMessage.signalhash(), &currentStateFound);
 
 			if (currentStateFound == true)
 			{
@@ -1024,7 +1022,7 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 		arrivedStates.push_back(arrivedState);
 	}
 
-	m_signals->setState(arrivedStates);
+	m_signals.setState(arrivedStates);
 
 	// Increase the requested signal index, wrap the request index if needed
 	//

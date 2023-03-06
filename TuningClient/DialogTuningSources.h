@@ -3,18 +3,22 @@
 
 #include "../lib/Tuning/TuningTcpClient.h"
 #include "../lib/Ui/TuningSourcesWidget.h"
+#include "../lib/Tuning/TuningUserManager.h"
 
 class ClientTuningSourcesWidget : public TuningSourcesWidget
 {
 	Q_OBJECT
 public:
 
-	explicit ClientTuningSourcesWidget(std::vector<TuningTcpClient*> tcpClients, bool hasActivationControls, QWidget* parent);
+	explicit ClientTuningSourcesWidget(std::vector<TuningTcpClient*> tcpClients, TuningUserManager& userManager, bool hasActivationControls, QWidget* parent);
 	virtual ~ClientTuningSourcesWidget();
 
 protected:
 
 	virtual bool login() override;
+
+private:
+	TuningUserManager& m_userManager;
 };
 
 
@@ -27,7 +31,7 @@ class DialogTuningSources : public QDialog
 	Q_OBJECT
 
 public:
-	explicit DialogTuningSources(std::vector<TuningTcpClient*> tcpClients, bool hasActivationControls, QWidget* parent);
+	explicit DialogTuningSources(std::vector<TuningTcpClient*> tcpClients, TuningUserManager& userManager, bool hasActivationControls, QWidget* parent);
 	virtual ~DialogTuningSources();
 
 	void setTuningSources(std::vector<TuningTcpClient*> tcpClients);

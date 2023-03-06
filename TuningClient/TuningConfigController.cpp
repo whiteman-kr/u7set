@@ -39,6 +39,40 @@ QString TuningConfigController::schemaIdByIndex(int schemaIndex) const
 	return m_schemaDetailsSet.schemaIdByIndex(schemaIndex);
 }
 
+std::set<QString> TuningConfigController::schemaTagsByIndex(int schemaIndex) const
+{
+	QReadLocker l(&m_lock);
+	auto details = m_schemaDetailsSet.schemaDetails(schemaIndex);
+	if (details == nullptr)
+	{
+		Q_ASSERT(details);
+		return {};
+	}
+	return details->tags();
+}
+
+
+bool TuningConfigController::schemaHasTags(int schemaIndex, const QStringList& tags) const
+{
+	QReadLocker l(&m_lock);
+	auto details = m_schemaDetailsSet.schemaDetails(schemaIndex);
+	if (details == nullptr)
+	{
+		Q_ASSERT(details);
+		return false;
+	}
+
+	const std::set<QString>& detailsTags = details->tags();
+	for (const QString& tag : tags)
+	{
+		if (detailsTags.find(tag.trimmed().toLower()) != detailsTags.end())
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 bool TuningConfigController::updateConfiguration(const Client::ConfigurationInfo& conf, const TuningClientSettings& settings, const BuildFileInfoArray& files)
 {
 	// Copy old settings to new settings, EXCEPT schemas information!
@@ -118,8 +152,10 @@ bool TuningConfigController::updateConfiguration(const Client::ConfigurationInfo
 	bool uiFilesUpdated = false;
 	for (const auto& file : files)
 	{
-		bool to_do_chech_if_configuration_xml_is_here;
-		qDebug() << Q_FUNC_INFO << ", file: " << file.pathFileName;
+		if (file.pathFileName.endsWith("Configuration.xml"))
+		{
+			continue;
+		}
 
 		auto it = m_filesMD5Map.find(file.pathFileName);
 

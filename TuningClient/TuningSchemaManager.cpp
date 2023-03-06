@@ -1,17 +1,15 @@
 #include "TuningSchemaManager.h"
 
-TuningSchemaManager::TuningSchemaManager(TuningConfigController* configController, QObject* parent) :
+TuningSchemaManager::TuningSchemaManager(TuningConfigController& configController, QObject* parent) :
 	VFrame30::SchemaManager(parent),
 	m_configController(configController)
 {
-	assert(m_configController);
-
 	return;
 }
 
 int TuningSchemaManager::schemaCount() const
 {
-	return m_configController->schemaCount();
+	return m_configController.schemaCount();
 }
 
 std::shared_ptr<VFrame30::Schema> TuningSchemaManager::schemaByIndex(int schemaIndex,
@@ -35,25 +33,25 @@ std::shared_ptr<VFrame30::Schema> TuningSchemaManager::schemaByIndex(int schemaI
 
 QString TuningSchemaManager::schemaCaptionById(const QString& schemaId) const
 {
-	return m_configController->schemaCaptionById(schemaId);
+	return m_configController.schemaCaptionById(schemaId);
 }
 
 QString TuningSchemaManager::schemaCaptionByIndex(int schemaIndex) const
 {
-	return m_configController->schemaCaptionByIndex(schemaIndex);
+	return m_configController.schemaCaptionByIndex(schemaIndex);
 }
 
 QString TuningSchemaManager::schemaIdByIndex(int schemaIndex) const
 {
-	return m_configController->schemaIdByIndex(schemaIndex);
+	return m_configController.schemaIdByIndex(schemaIndex);
 }
 
-TuningConfigController* TuningSchemaManager::configController()
+TuningConfigController& TuningSchemaManager::configController()
 {
 	return m_configController;
 }
 
-const TuningConfigController* TuningSchemaManager::configController() const
+const TuningConfigController& TuningSchemaManager::configController() const
 {
 	return m_configController;
 }
@@ -63,7 +61,7 @@ std::shared_ptr<VFrame30::Schema> TuningSchemaManager::loadSchema(QString schema
 	QByteArray data;
 	QString errorString;
 
-	bool result = m_configController->getFileBlockedById(schemaId, &data, &errorString);
+	bool result = m_configController.getFileBlockedById(schemaId, &data, &errorString);
 
 	if (result == false)
 	{

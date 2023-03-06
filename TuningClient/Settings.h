@@ -2,34 +2,9 @@
 #define SETTINGS_H
 
 #include "../CommonLib/HostAddressPort.h"
-#include "../lib/Tuning/TuningUserManager.h"
-#include "../lib/Tuning/TuningTcpClient.h"
 #include "../lib/SoftwareSettings.h"
 
-// Enable the next line to access the admin functions
-//#define USE_ADMIN_REGISTRY_AREA
-
 extern QColor redColor;
-
-//
-// ConfigConnection
-//
-
-//
-// BuildInfo
-//
-struct BuildInfo
-{
-	QString projectName;
-	int buildNo = -1;
-	QString configuration;
-	QString date;
-	int changeset = -1;
-	QString user;
-	QString workstation;
-
-};
-
 
 //
 // Settings
@@ -127,11 +102,6 @@ public:
 	QStringList m_tuningWorkspaceMasks;
 
 private:
-
-#ifdef USE_ADMIN_REGISTRY_AREA
-	bool m_admin = false;
-#endif
-
 	QStringList m_instanceHistory;
 	QString m_instanceStrId;
 

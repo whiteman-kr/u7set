@@ -15,10 +15,10 @@ public:
 	TuningClientTcpClient(const SoftwareInfo& softwareInfo,
 						  const QString& tuningServiceId,
 						  int singleLmControlMode,
-						  TuningSignalManager* signalManager,
+						  TuningSignalManager& signalManager,
 						  Log::LogFile* log,
 						  TuningLog::TuningLog* tuningLog,
-						  TuningUserManager* userManager);
+						  TuningUserManager& userManager);
 
 	virtual void writeLogAlert(const QString& message) override;
 	virtual void writeLogError(const QString& message) override;
@@ -39,11 +39,10 @@ public:
 	std::vector<Hash> getProcessedHashes(const std::vector<Hash>& hashes);	// Returns hashes that are processed by this client among specified hashes
 
 private:
-
 	Log::LogFile* m_log = nullptr;
 
 	TuningLog::TuningLog* m_tuningLog = nullptr;
 
-	TuningUserManager* m_userManager = nullptr;
+	TuningUserManager& m_userManager;
 
 };

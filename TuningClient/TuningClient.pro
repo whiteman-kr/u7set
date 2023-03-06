@@ -171,6 +171,12 @@ LIBS += -L.
 win32:LIBS += -lKernel32 -lAdvapi32
 unix:LIBS += -lpam -lpam_misc
 
+# ClientLib
+#
+LIBS += -lClientLib
+win32:PRE_TARGETDEPS += $$DESTDIR/ClientLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libClientLib.a
+
 # VFrame30 library
 #
 LIBS += -lVFrame30

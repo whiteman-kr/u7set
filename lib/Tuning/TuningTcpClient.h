@@ -85,7 +85,7 @@ public:
 	TuningTcpClient(const SoftwareInfo& softwareInfo,
 					const QString& tuningServiceId,
 					bool singleLmControlMode,
-					TuningSignalManager* signalManager);
+					TuningSignalManager& signalManager);
 
 	virtual ~TuningTcpClient();
 
@@ -218,7 +218,7 @@ private:
 
 	LmStatusFlagMode m_lmStatusFlagMode = LmStatusFlagMode::SOR;
 
-	TuningSignalManager* m_signals = nullptr;
+	TuningSignalManager& m_signals;
 
 	mutable QReadWriteLock m_statesLocker;				// For access to m_states
 	std::map<Hash, TuningSignalState> m_states;

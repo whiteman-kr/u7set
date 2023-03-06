@@ -420,12 +420,6 @@ public:
 
 protected:
 
-	virtual void writeLogError(const QString& message);
-	virtual void writeLogWarning(const QString& message);
-	virtual void writeLogMessage(const QString& message);
-
-protected:
-
 	std::shared_ptr<TuningFilter> m_root = nullptr;
 
 	std::vector<VFrame30::SchemaDetails> m_schemasDetails;

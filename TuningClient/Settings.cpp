@@ -20,16 +20,7 @@ Settings::Settings():
 
 void Settings::StoreSystem()
 {
-#ifdef USE_ADMIN_REGISTRY_AREA
-	if (admin() == false)
-	{
-		return;
-	}
-
-	QSettings s(QSettings::SystemScope, qApp->organizationName(), qApp->applicationName());
-#else
 	QSettings s(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
-#endif
 
 	QString instanceHistoryString = m_instanceHistory.join(';');
 	s.setValue("m_instanceHistory", instanceHistoryString);
@@ -48,31 +39,9 @@ void Settings::StoreSystem()
 
 void Settings::RestoreSystem()
 {
-	// determine if is running as administrator
-	//
-#ifdef USE_ADMIN_REGISTRY_AREA
-	QSettings adminSettings(QSettings::SystemScope, qApp->organizationName(), qApp->applicationName());
-	adminSettings.setValue("ApplicationName", qApp->applicationName());
-
-	adminSettings.sync();
-
-	if (adminSettings.status() == QSettings::AccessError)
-	{
-		m_admin = false;
-	}
-	else
-	{
-		m_admin = true;
-	}
-#endif
-
 	// read system settings
 	//
-#ifdef USE_ADMIN_REGISTRY_AREA
-	QSettings s(QSettings::SystemScope, qApp->organizationName(), qApp->applicationName());
-#else
 	QSettings s(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
-#endif
 
 	QString instanceHistoryString = s.value("m_instanceHistory", QString()).toString();
 	m_instanceHistory = instanceHistoryString.split(';', Qt::SkipEmptyParts);
@@ -258,13 +227,6 @@ void Settings::setLanguage(const QString& value)
 {
 	m_language = value;
 }
-
-#ifdef USE_ADMIN_REGISTRY_AREA
-bool Settings::admin() const
-{
-	return m_admin;
-}
-#endif
 
 QString Settings::localAppDataPath()
 {

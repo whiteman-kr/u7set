@@ -746,8 +746,8 @@ void IdeTuningFiltersEditor::setText(const QString& text)
 
 
 
-	m_tuningFilterEditor = new TuningFilterEditor(&m_filters,
-												  &m_signals,
+	m_tuningFilterEditor = new TuningFilterEditor(m_filters,
+												  m_signals,
 												  false,	/*readOnly*/
 												  false,	/*setCurrentEnabled*/
 												  true,		/*typeTreeEnabled*/

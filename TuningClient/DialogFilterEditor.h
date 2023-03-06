@@ -10,14 +10,14 @@ class DialogFilterEditor : public QDialog
 	Q_OBJECT
 public:
 
-	explicit DialogFilterEditor(TuningSignalManager* tuningSignalManager, TuningFilterStorage* filterStorage, QWidget* parent);
+	explicit DialogFilterEditor(TuningSignalManager& tuningSignalManager, TuningFilterStorage& filterStorage, QWidget* parent);
 
     ~DialogFilterEditor();
 
 private:
 
-    TuningFilterEditor* m_tuningFilterEditor = nullptr;
-	TuningSignalManager* m_tuningSignalManager = nullptr;
+	TuningFilterEditor* m_tuningFilterEditor = nullptr;
+	TuningSignalManager& m_tuningSignalManager;
 
     QPushButton* m_okButton = nullptr;
     QPushButton* m_cancelButton = nullptr;
