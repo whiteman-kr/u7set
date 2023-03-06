@@ -152,6 +152,7 @@ module VFrame30 {
 
 		lineStyle: E.LineStyle;
 
+		textFormat: E.TextFormat;
 		textColor: QColor;
 		text: string;
 

@@ -112,6 +112,16 @@ public:
 	};
 	Q_ENUM(TextPos)
 
+	// TextFormat
+	//
+	enum class TextFormat
+	{
+		PlainText,
+		Markdown,
+		HtmlSubset
+	};
+	Q_ENUM(TextFormat)
+
 	// Version Control State
 	//
 	enum class VcsState

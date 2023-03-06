@@ -59,6 +59,8 @@ namespace VFrame30
 		inline static const QString backgroundColor{"BackgroundColor"};
 		inline static const QString fill{"Fill"};
 		inline static const QString drawRect{"DrawRect"};
+		inline static const QString textFormat{"TextFormat"};
+		inline static const QString textFormatDescription{"PlainText - Manual formatting.\nMarkdown - Markdown formatting, supports GitHub-style Markdown.\nHtmlSubset - HTML-formatted text in the html string. Support of the limited HTML Subset."};
 		inline static const QString textColor{"TextColor"};
 		inline static const QString text{"Text"};
 		inline static const QString wordWrap{"WordWrap"};

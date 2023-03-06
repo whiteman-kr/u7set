@@ -7403,6 +7403,7 @@ class SchemaItemRect PROTOBUF_FINAL :
     kTextColorFieldNumber = 5,
     kFillFieldNumber = 7,
     kWordWrapFieldNumber = 11,
+    kTextFormatFieldNumber = 13,
     kDrawrectFieldNumber = 8,
     kHorzAlignFieldNumber = 9,
     kVertAlignFieldNumber = 10,
@@ -7522,6 +7523,19 @@ class SchemaItemRect PROTOBUF_FINAL :
   void _internal_set_wordwrap(bool value);
   public:
 
+  // optional int32 textFormat = 13 [default = 0];
+  bool has_textformat() const;
+  private:
+  bool _internal_has_textformat() const;
+  public:
+  void clear_textformat();
+  ::PROTOBUF_NAMESPACE_ID::int32 textformat() const;
+  void set_textformat(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_textformat() const;
+  void _internal_set_textformat(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
   // optional bool drawrect = 8 [default = true];
   bool has_drawrect() const;
   private:
@@ -7594,6 +7608,7 @@ class SchemaItemRect PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint32 textcolor_;
   bool fill_;
   bool wordwrap_;
+  ::PROTOBUF_NAMESPACE_ID::int32 textformat_;
   bool drawrect_;
   ::PROTOBUF_NAMESPACE_ID::int32 horzalign_;
   ::PROTOBUF_NAMESPACE_ID::int32 vertalign_;
@@ -37365,7 +37380,7 @@ inline void SchemaItemRect::set_fill(bool value) {
 
 // optional bool drawrect = 8 [default = true];
 inline bool SchemaItemRect::_internal_has_drawrect() const {
-  bool value = (_has_bits_[0] & 0x00000100u) != 0;
+  bool value = (_has_bits_[0] & 0x00000200u) != 0;
   return value;
 }
 inline bool SchemaItemRect::has_drawrect() const {
@@ -37373,7 +37388,7 @@ inline bool SchemaItemRect::has_drawrect() const {
 }
 inline void SchemaItemRect::clear_drawrect() {
   drawrect_ = true;
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00000200u;
 }
 inline bool SchemaItemRect::_internal_drawrect() const {
   return drawrect_;
@@ -37383,7 +37398,7 @@ inline bool SchemaItemRect::drawrect() const {
   return _internal_drawrect();
 }
 inline void SchemaItemRect::_internal_set_drawrect(bool value) {
-  _has_bits_[0] |= 0x00000100u;
+  _has_bits_[0] |= 0x00000200u;
   drawrect_ = value;
 }
 inline void SchemaItemRect::set_drawrect(bool value) {
@@ -37393,7 +37408,7 @@ inline void SchemaItemRect::set_drawrect(bool value) {
 
 // optional int32 horzAlign = 9 [default = 4];
 inline bool SchemaItemRect::_internal_has_horzalign() const {
-  bool value = (_has_bits_[0] & 0x00000200u) != 0;
+  bool value = (_has_bits_[0] & 0x00000400u) != 0;
   return value;
 }
 inline bool SchemaItemRect::has_horzalign() const {
@@ -37401,7 +37416,7 @@ inline bool SchemaItemRect::has_horzalign() const {
 }
 inline void SchemaItemRect::clear_horzalign() {
   horzalign_ = 4;
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00000400u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemRect::_internal_horzalign() const {
   return horzalign_;
@@ -37411,7 +37426,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemRect::horzalign() const {
   return _internal_horzalign();
 }
 inline void SchemaItemRect::_internal_set_horzalign(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000200u;
+  _has_bits_[0] |= 0x00000400u;
   horzalign_ = value;
 }
 inline void SchemaItemRect::set_horzalign(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -37421,7 +37436,7 @@ inline void SchemaItemRect::set_horzalign(::PROTOBUF_NAMESPACE_ID::int32 value) 
 
 // optional int32 vertAlign = 10 [default = 128];
 inline bool SchemaItemRect::_internal_has_vertalign() const {
-  bool value = (_has_bits_[0] & 0x00000400u) != 0;
+  bool value = (_has_bits_[0] & 0x00000800u) != 0;
   return value;
 }
 inline bool SchemaItemRect::has_vertalign() const {
@@ -37429,7 +37444,7 @@ inline bool SchemaItemRect::has_vertalign() const {
 }
 inline void SchemaItemRect::clear_vertalign() {
   vertalign_ = 128;
-  _has_bits_[0] &= ~0x00000400u;
+  _has_bits_[0] &= ~0x00000800u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemRect::_internal_vertalign() const {
   return vertalign_;
@@ -37439,7 +37454,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemRect::vertalign() const {
   return _internal_vertalign();
 }
 inline void SchemaItemRect::_internal_set_vertalign(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000400u;
+  _has_bits_[0] |= 0x00000800u;
   vertalign_ = value;
 }
 inline void SchemaItemRect::set_vertalign(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -37477,7 +37492,7 @@ inline void SchemaItemRect::set_wordwrap(bool value) {
 
 // optional int32 lineStyle = 12 [default = 1];
 inline bool SchemaItemRect::_internal_has_linestyle() const {
-  bool value = (_has_bits_[0] & 0x00000800u) != 0;
+  bool value = (_has_bits_[0] & 0x00001000u) != 0;
   return value;
 }
 inline bool SchemaItemRect::has_linestyle() const {
@@ -37485,7 +37500,7 @@ inline bool SchemaItemRect::has_linestyle() const {
 }
 inline void SchemaItemRect::clear_linestyle() {
   linestyle_ = 1;
-  _has_bits_[0] &= ~0x00000800u;
+  _has_bits_[0] &= ~0x00001000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemRect::_internal_linestyle() const {
   return linestyle_;
@@ -37495,12 +37510,40 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemRect::linestyle() const {
   return _internal_linestyle();
 }
 inline void SchemaItemRect::_internal_set_linestyle(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000800u;
+  _has_bits_[0] |= 0x00001000u;
   linestyle_ = value;
 }
 inline void SchemaItemRect::set_linestyle(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_linestyle(value);
   // @@protoc_insertion_point(field_set:Proto.SchemaItemRect.lineStyle)
+}
+
+// optional int32 textFormat = 13 [default = 0];
+inline bool SchemaItemRect::_internal_has_textformat() const {
+  bool value = (_has_bits_[0] & 0x00000100u) != 0;
+  return value;
+}
+inline bool SchemaItemRect::has_textformat() const {
+  return _internal_has_textformat();
+}
+inline void SchemaItemRect::clear_textformat() {
+  textformat_ = 0;
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemRect::_internal_textformat() const {
+  return textformat_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemRect::textformat() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemRect.textFormat)
+  return _internal_textformat();
+}
+inline void SchemaItemRect::_internal_set_textformat(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000100u;
+  textformat_ = value;
+}
+inline void SchemaItemRect::set_textformat(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_textformat(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemRect.textFormat)
 }
 
 // -------------------------------------------------------------------

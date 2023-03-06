@@ -35,26 +35,32 @@ module E {
 	}
 
 	export enum LineStyle {
-		NoPen = 0,						/**< NoPen = 0. No line at all, for example rect fills but does not draw any boundary line.*/
-		SolidLine = 1,				/**< SolidLine = 1. A plain line.*/
-		DashLine = 2,				/**< DashLine = 2. Dashes separated by a few pixels.*/
-		DotLine = 3,					/**< DotLine = 3. Dots separated by a few pixels.*/
-		DashDotLine = 4,			/**< DashDotLine = 4. Alternate dots and dashes.*/
-		DashDotDotLine = 5	/**< DashDotDotLine = 5. One dash, two dots, one dash, two dots.*/
+		NoPen = 0,				/**< NoPen = 0. No line at all, for example rect fills but does not draw any boundary line.*/
+		SolidLine = 1,			/**< SolidLine = 1. A plain line.*/
+		DashLine = 2,			/**< DashLine = 2. Dashes separated by a few pixels.*/
+		DotLine = 3,			/**< DotLine = 3. Dots separated by a few pixels.*/
+		DashDotLine = 4,		/**< DashDotLine = 4. Alternate dots and dashes.*/
+		DashDotDotLine = 5		/**< DashDotDotLine = 5. One dash, two dots, one dash, two dots.*/
+	}
+
+	export enum TextFormat {
+		PlainText = 0,			/**< PlainText = 0. Manual formatting.*/
+		Markdown = 1,			/**< Markdown = 1. Markdown formatting, supports GitHub-style Markdown.*/
+		HtmlSubset = 2			/**< HtmlSubset = 2. HTML-formatted text in the html string. Support of the limited HTML Subset.*/
 	}
 
 	export enum HorzAlign {
-		AlignLeft = 0x01,			/**< AlignLeft = 0x01*/
+		AlignLeft = 0x01,		/**< AlignLeft = 0x01*/
 		AlignRight = 0x02,		/**< AlignRight = 0x02*/
 		AlignHCenter = 0x04,	/**< AlignHCenter = 0x04*/
 		AlignJustify = 0x08		/**< AlignJustify = 0x08*/
 	}
 
 	export enum VertAlign {
-		AlignTop = 0x20,				/**< AlignTop = 0x20*/
-		AlignBottom = 0x40,			/**< AlignBottom = 0x40*/
-		AlignVCenter = 0x80,		/**< AlignVCenter = 0x80*/
-		AlignBaseline = 0x100		/**< AlignBaseline = 0x100*/
+		AlignTop = 0x20,		/**< AlignTop = 0x20*/
+		AlignBottom = 0x40,		/**< AlignBottom = 0x40*/
+		AlignVCenter = 0x80,	/**< AlignVCenter = 0x80*/
+		AlignBaseline = 0x100	/**< AlignBaseline = 0x100*/
 	}
 
 	export enum Alignment {

@@ -2,15 +2,14 @@
 #include "MacrosExpander.h"
 #include "PropertyNames.h"
 #include "DrawParam.h"
+#include "SchemaView.h"
+#include <QAbstractTextDocumentLayout>
 
 namespace VFrame30
 {
 	SchemaItemRect::SchemaItemRect(void) :
 		SchemaItemRect(SchemaUnit::Inch)
 	{
-		// Вызов этого конструктора возможен при сериализации объектов такого типа.
-		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
-		//
 	}
 
 	SchemaItemRect::SchemaItemRect(SchemaUnit unit) :
@@ -30,6 +29,9 @@ namespace VFrame30
 
 		// Text Category Properties
 		//
+		ADD_PROPERTY_GET_SET_CAT(E::TextFormat, PropertyNames::textFormat, PropertyNames::textCategory, true, SchemaItemRect::textFormat, SchemaItemRect::setTextFormat)
+			->setDescription(PropertyNames::textFormatDescription);
+
 		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColor, PropertyNames::textCategory, true, SchemaItemRect::textColor, SchemaItemRect::setTextColor);
 
 		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::text, PropertyNames::textCategory, true, SchemaItemRect::text, SchemaItemRect::setText);
@@ -66,10 +68,6 @@ namespace VFrame30
 		setItemUnit(unit);
 	}
 
-	SchemaItemRect::~SchemaItemRect(void)
-	{
-	}
-
 	// Serialization
 	//
 	bool SchemaItemRect::SaveData(Proto::Envelope* message) const
@@ -94,6 +92,7 @@ namespace VFrame30
 
 		rectMessage->set_linestyle(static_cast<int>(m_lineStyle));
 
+		rectMessage->set_textformat(static_cast<int32_t>(m_textFormat));
 		rectMessage->set_horzalign(static_cast<int32_t>(m_horzAlign));
 		rectMessage->set_vertalign(static_cast<int32_t>(m_vertAlign));
 
@@ -142,6 +141,7 @@ namespace VFrame30
 
 		m_lineStyle = static_cast<E::LineStyle>(rectMessage.linestyle());
 
+		setTextFormat(static_cast<E::TextFormat>(rectMessage.textformat()));
 		m_horzAlign = static_cast<E::HorzAlign>(rectMessage.horzalign());
 		m_vertAlign = static_cast<E::VertAlign>(rectMessage.vertalign());
 
@@ -154,13 +154,9 @@ namespace VFrame30
 
 	// Drawing Functions
 	//
-
-	// Рисование элемента, выполняется в 100% масштабе.
-	// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
-	//
 	void SchemaItemRect::draw(CDrawParam* drawParam) const
 	{
-		QPainter* p = drawParam->painter();
+		QPainter* painter = drawParam->painter();
 
 		// Initialization drawing resources
 		//
@@ -186,22 +182,22 @@ namespace VFrame30
 						
 		// Calculate rectangle
 		//
-		QRectF r = boundingRectInDocPt(drawParam);
+		QRectF boundingRect = boundingRectInDocPt(drawParam);
 
 		// Filling rect 
 		//
 		if (fill() == true)
 		{
-			p->setBrush(*m_fillBrush);
+			painter->setBrush(*m_fillBrush);
 
 			if (drawRect() == false)
 			{
-				p->fillRect(r, *m_fillBrush);
+				painter->fillRect(boundingRect, *m_fillBrush);
 			}
 		}
 		else
 		{
-			p->setBrush(Qt::NoBrush);
+			painter->setBrush(Qt::NoBrush);
 		}
 
 		// Drawing rect 
@@ -211,8 +207,8 @@ namespace VFrame30
 			m_rectPen->setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);
 			m_rectPen->setStyle(static_cast<Qt::PenStyle>(m_lineStyle));
 
-			p->setPen(*m_rectPen);
-			p->drawRect(r);
+			painter->setPen(*m_rectPen);
+			painter->drawRect(boundingRect);
 		}
 
 		// Drawing Text
@@ -222,16 +218,98 @@ namespace VFrame30
 
 		QString text = MacrosExpander::parse(m_text, context.get(), &drawParam->session(), this);
 
-		// --
-		//
-		p->setPen(m_textColor);
+		QFont font(m_font.name());
+		font.setBold(m_font.bold());
+		font.setItalic(m_font.italic());
 
-		DrawHelper::drawText(p,
-							 m_font,
-							 itemUnit(),
-							 text,
-							 r,
-							 horzAlign() | vertAlign() | (wordWrap() ? Qt::TextWordWrap : 0));
+		int flags = static_cast<int>(horzAlign()) |
+					static_cast<int>(vertAlign()) |
+					static_cast<int>((wordWrap() ? Qt::TextWordWrap : 0));
+
+		if (itemUnit() == SchemaUnit::Display)
+		{
+			// Pixels
+			//
+			const double zoom = m_drawParam->schemaView()->zoom() / 100.0;
+			const double imageWidth = widthDocPt() * zoom;
+			const double imageHeight = heightDocPt()  * zoom;
+
+			QRectF clipRect{0, 0, imageWidth, imageHeight};
+			QRect clipRectInt{0, 0, static_cast<int>(imageWidth), static_cast<int>(imageHeight)};
+
+			if (m_cacheTextImage.isNull() == true || m_cacheTextImage.size() != clipRectInt.size())
+			{
+				m_cacheTextImage = QImage{clipRectInt.size(), QImage::Format_ARGB32_Premultiplied};
+				m_cacheTextImage.fill(qRgba(0, 0, 0, 0));	// Transparent
+
+				QPainter p{&m_cacheTextImage};
+
+				const int pixelSize = static_cast<int>(m_font.drawSize() * zoom);
+				font.setPixelSize(pixelSize > 0 ? pixelSize : 1);
+
+				if (textFormat() == E::TextFormat::PlainText)
+				{
+					p.setPen(m_textColor);
+					p.setFont(font);
+
+					p.drawText(clipRectInt, flags, text);
+				}
+				else
+				{
+					m_cacheTextDocument.documentLayout()->setPaintDevice(p.device());
+					m_cacheTextDocument.setDefaultFont(font);
+
+					m_cacheTextDocument.drawContents(&p, clipRect);
+				}
+			}
+
+			QRectF sourceRect = m_cacheTextImage.rect();
+			painter->drawImage(boundingRect, m_cacheTextImage, sourceRect);
+		}
+		else
+		{
+			// Inches
+			//
+			const double dpiX = CDrawParam::realDpiX(painter);
+			const double dpiY = CDrawParam::realDpiY(painter);
+
+			const double zoom = m_drawParam->schemaView()->zoom() / 100.0;
+			const double imageWidth = widthDocPt() * dpiX * zoom;
+			const double imageHeight = heightDocPt() * dpiY * zoom;
+
+			QRectF clipRect{0, 0, imageWidth, imageHeight};
+			QRect clipRectInt{0, 0, static_cast<int>(imageWidth), static_cast<int>(imageHeight)};
+
+			if (m_cacheTextImage.isNull() == true || m_cacheTextImage.size() != clipRectInt.size())
+			{
+				m_cacheTextImage = QImage{clipRectInt.size(), QImage::Format_ARGB32_Premultiplied};
+				m_cacheTextImage.setDevicePixelRatio(painter->device()->devicePixelRatioF());
+				m_cacheTextImage.fill(qRgba(0, 0, 0, 0));	// Transparent
+
+				QPainter p{&m_cacheTextImage};
+
+				const int pixelSize = static_cast<int>(m_font.drawSize() * dpiY * zoom / m_cacheTextImage.devicePixelRatioF());
+				font.setPixelSize(pixelSize > 0 ? pixelSize : 1);
+
+				if (textFormat() == E::TextFormat::PlainText)
+				{
+					p.setPen(m_textColor);
+					p.setFont(font);
+
+					p.drawText(clipRectInt, flags, text);
+				}
+				else
+				{
+					m_cacheTextDocument.documentLayout()->setPaintDevice(p.device());
+					m_cacheTextDocument.setDefaultFont(font);
+
+					m_cacheTextDocument.drawContents(&p, clipRect);
+				}
+			}
+
+			QRectF sourceRect = m_cacheTextImage.rect();
+			painter->drawImage(boundingRect, m_cacheTextImage, sourceRect);
+		}
 
 		return;
 	}
@@ -314,7 +392,11 @@ namespace VFrame30
 	}
 	void SchemaItemRect::setTextColor(QColor color)
 	{
-		m_textColor = color;
+		if (m_textColor != color)
+		{
+			m_textColor = color;
+			m_cacheTextImage = {};
+		}
 	}
 
 	// LineStyle property
@@ -331,13 +413,61 @@ namespace VFrame30
 
 	// Text property
 	//
+	E::TextFormat SchemaItemRect::textFormat() const
+	{
+		return m_textFormat;
+	}
+
+	void SchemaItemRect::setTextFormat(E::TextFormat value)
+	{
+		if (m_textFormat != value)
+		{
+			m_textFormat = value;
+
+			switch (m_textFormat)
+			{
+			case E::TextFormat::PlainText:
+				m_cacheTextDocument.setPlainText({});
+				break;
+			case E::TextFormat::Markdown:
+				m_cacheTextDocument.setMarkdown(m_text);
+				break;
+			case E::TextFormat::HtmlSubset:
+				m_cacheTextDocument.setHtml(m_text);
+				break;
+			}
+
+			m_cacheTextImage = {};
+		}
+	}
+
 	const QString& SchemaItemRect::text() const
 	{
 		return m_text;
 	}
 	void SchemaItemRect::setText(QString value)
 	{
-		m_text = std::move(value);
+		if (m_text != value)
+		{
+			m_text = std::move(value);
+
+			switch (m_textFormat)
+			{
+			case E::TextFormat::PlainText:
+				m_cacheTextDocument.setPlainText({});
+				break;
+			case E::TextFormat::Markdown:
+				m_cacheTextDocument.setMarkdown(m_text);
+				break;
+			case E::TextFormat::HtmlSubset:
+				m_cacheTextDocument.setHtml(m_text);
+				break;
+			}
+
+			m_cacheTextImage = {};
+		}
+
+		return;
 	}
 
 	bool SchemaItemRect::wordWrap() const
@@ -348,6 +478,7 @@ namespace VFrame30
 	void SchemaItemRect::setWordWrap(bool value)
 	{
 		m_wordWrap = value;
+		m_cacheTextImage = {};
 	}
 
 	// Align propertis
@@ -359,6 +490,7 @@ namespace VFrame30
 	void SchemaItemRect::setHorzAlign(E::HorzAlign align)
 	{
 		m_horzAlign = align;
+		m_cacheTextImage = {};
 	}
 
 	E::VertAlign SchemaItemRect::vertAlign() const
@@ -369,6 +501,7 @@ namespace VFrame30
 	void SchemaItemRect::setVertAlign(E::VertAlign align)
 	{
 		m_vertAlign = align;
+		m_cacheTextImage = {};
 	}
 
 	// Fill property
