@@ -218,6 +218,17 @@ namespace VFrame30
 
 		QString text = MacrosExpander::parse(m_text, context.get(), &drawParam->session(), this);
 
+		bool textChanged = (text != m_cacheDrewText) ||
+						   (m_cachetextFormat != m_textFormat) ||
+						   (m_cachedFont != m_font);
+
+		if (textChanged == true)
+		{
+			m_cacheDrewText = text;
+			m_cachetextFormat = m_textFormat;
+			m_cachedFont = m_font;
+		}
+
 		QFont font(m_font.name());
 		font.setBold(m_font.bold());
 		font.setItalic(m_font.italic());
@@ -237,9 +248,15 @@ namespace VFrame30
 			QRectF clipRect{0, 0, imageWidth, imageHeight};
 			QRect clipRectInt{0, 0, static_cast<int>(imageWidth), static_cast<int>(imageHeight)};
 
-			if (m_cacheTextImage.isNull() == true || m_cacheTextImage.size() != clipRectInt.size())
+			if (textChanged == true ||
+				m_cacheTextImage.isNull() == true ||
+				m_cacheTextImage.size() != clipRectInt.size())
 			{
-				m_cacheTextImage = QImage{clipRectInt.size(), QImage::Format_ARGB32_Premultiplied};
+				if (m_cacheTextImage.size() != clipRectInt.size())
+				{
+					m_cacheTextImage = QImage{clipRectInt.size(), QImage::Format_ARGB32_Premultiplied};
+				}
+
 				m_cacheTextImage.fill(qRgba(0, 0, 0, 0));	// Transparent
 
 				QPainter p{&m_cacheTextImage};
@@ -258,6 +275,29 @@ namespace VFrame30
 				{
 					m_cacheTextDocument.documentLayout()->setPaintDevice(p.device());
 					m_cacheTextDocument.setDefaultFont(font);
+
+					auto dto = m_cacheTextDocument.defaultTextOption();
+					dto.setWrapMode(m_wordWrap ? QTextOption::WrapMode::WrapAtWordBoundaryOrAnywhere : QTextOption::WrapMode::NoWrap);
+					m_cacheTextDocument.setTextWidth(clipRect.width() / m_cacheTextImage.devicePixelRatioF());
+					m_cacheTextDocument.setDefaultTextOption(dto);
+
+					// Set new text to m_cacheTextDocument only after setting paint device and font
+					// or it will calculate wrong line indents.
+					//
+					if (textChanged == true)
+					{
+						switch (m_textFormat)
+						{
+						case E::TextFormat::PlainText:
+							break;
+						case E::TextFormat::Markdown:
+							m_cacheTextDocument.setMarkdown(text);
+							break;
+						case E::TextFormat::HtmlSubset:
+							m_cacheTextDocument.setHtml(text);
+							break;
+						}
+					}
 
 					m_cacheTextDocument.drawContents(&p, clipRect);
 				}
@@ -280,7 +320,9 @@ namespace VFrame30
 			QRectF clipRect{0, 0, imageWidth, imageHeight};
 			QRect clipRectInt{0, 0, static_cast<int>(imageWidth), static_cast<int>(imageHeight)};
 
-			if (m_cacheTextImage.isNull() == true || m_cacheTextImage.size() != clipRectInt.size())
+			if (textChanged == true ||
+				m_cacheTextImage.isNull() == true ||
+				m_cacheTextImage.size() != clipRectInt.size())
 			{
 				m_cacheTextImage = QImage{clipRectInt.size(), QImage::Format_ARGB32_Premultiplied};
 				m_cacheTextImage.setDevicePixelRatio(painter->device()->devicePixelRatioF());
@@ -296,12 +338,39 @@ namespace VFrame30
 					p.setPen(m_textColor);
 					p.setFont(font);
 
-					p.drawText(clipRectInt, flags, text);
+					QRect drawClipRect{0, 0,
+									   static_cast<int>(clipRect.width() / m_cacheTextImage.devicePixelRatioF()),
+									   static_cast<int>(clipRectInt.height() / m_cacheTextImage.devicePixelRatioF())};
+
+					p.drawText(drawClipRect, flags, text);
 				}
 				else
 				{
 					m_cacheTextDocument.documentLayout()->setPaintDevice(p.device());
 					m_cacheTextDocument.setDefaultFont(font);
+
+					auto dto = m_cacheTextDocument.defaultTextOption();
+					dto.setWrapMode(m_wordWrap ? QTextOption::WrapMode::WrapAtWordBoundaryOrAnywhere : QTextOption::WrapMode::NoWrap);
+					m_cacheTextDocument.setTextWidth(clipRect.width() / m_cacheTextImage.devicePixelRatioF());
+					m_cacheTextDocument.setDefaultTextOption(dto);
+
+					// Set new text to m_cacheTextDocument only after setting paint device and font
+					// or it will calculate wrong line indents.
+					//
+					if (textChanged == true)
+					{
+						switch (m_textFormat)
+						{
+						case E::TextFormat::PlainText:
+							break;
+						case E::TextFormat::Markdown:
+							m_cacheTextDocument.setMarkdown(text);
+							break;
+						case E::TextFormat::HtmlSubset:
+							m_cacheTextDocument.setHtml(text);
+							break;
+						}
+					}
 
 					m_cacheTextDocument.drawContents(&p, clipRect);
 				}
@@ -423,20 +492,6 @@ namespace VFrame30
 		if (m_textFormat != value)
 		{
 			m_textFormat = value;
-
-			switch (m_textFormat)
-			{
-			case E::TextFormat::PlainText:
-				m_cacheTextDocument.setPlainText({});
-				break;
-			case E::TextFormat::Markdown:
-				m_cacheTextDocument.setMarkdown(m_text);
-				break;
-			case E::TextFormat::HtmlSubset:
-				m_cacheTextDocument.setHtml(m_text);
-				break;
-			}
-
 			m_cacheTextImage = {};
 		}
 	}
@@ -450,20 +505,6 @@ namespace VFrame30
 		if (m_text != value)
 		{
 			m_text = std::move(value);
-
-			switch (m_textFormat)
-			{
-			case E::TextFormat::PlainText:
-				m_cacheTextDocument.setPlainText({});
-				break;
-			case E::TextFormat::Markdown:
-				m_cacheTextDocument.setMarkdown(m_text);
-				break;
-			case E::TextFormat::HtmlSubset:
-				m_cacheTextDocument.setHtml(m_text);
-				break;
-			}
-
 			m_cacheTextImage = {};
 		}
 

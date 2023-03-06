@@ -240,5 +240,8 @@ namespace VFrame30
 
 		mutable QImage m_cacheTextImage;
 		mutable QTextDocument m_cacheTextDocument;
+		mutable QString m_cacheDrewText;
+		mutable E::TextFormat m_cachetextFormat = E::TextFormat::PlainText;
+		mutable FontParam m_cachedFont{};
 	};
 }
