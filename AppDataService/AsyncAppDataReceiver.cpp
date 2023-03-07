@@ -18,6 +18,8 @@ AsyncAppDataReceiver::AsyncAppDataReceiver(const HostAddressPort& dataReceivingI
 	m_appDataReceivingIP = udp::endpoint(
 								ip::address::from_string(dataReceivingIP.addressStr().toStdString()),
 								dataReceivingIP.port());
+
+	setObjectName("AsynAppDataReceiver");
 }
 
 AsyncAppDataReceiver::~AsyncAppDataReceiver()
@@ -106,16 +108,8 @@ void AsyncAppDataReceiver::onTimer1s(const error_code& error)
 	{
 		if (isSocketWorkable() == false)
 		{
-			bool res = createAndBindSocket();
-
+			createAndBindSocket();
 			clearStatistics();
-
-			if (res == false)
-			{
-				return;
-			}
-
-			startReceive();
 		}
 		else
 		{
@@ -127,8 +121,12 @@ void AsyncAppDataReceiver::onTimer1s(const error_code& error)
 
 				if (m_noReceiveCtr == 3)
 				{
+					m_noReceiveCtr = 0;
+
 					qDebug() << "No RUP frames received in 3 seconds";
+
 					closeSocket();
+					clearStatistics();
 					createAndBindSocket();
 				}
 			}
@@ -197,7 +195,7 @@ bool AsyncAppDataReceiver::createAndBindSocket()
 		{
 			m_socketBound = true;
 
-			DEBUG_LOG_MSG(m_log, QString("AsyncAppDataReceiver listening socket is created and bound to %1").
+			DEBUG_LOG_MSG(m_log, QString("AsyncAppDataReceiver socket created and bound to %1").
 							arg(appDataReceivingIPStr()));
 			startReceive();
 		}
@@ -289,9 +287,9 @@ void AsyncAppDataReceiver::closeSocket()
 		delete m_socket;
 		m_socket = nullptr;
 		m_socketBound = false;
-	}
 
-	qDebug() << "AsyncAppDataReceiver listening socket closed";
+		qDebug() << "AsyncAppDataReceiver socket closed";
+	}
 }
 
 void AsyncAppDataReceiver::startReceive()
@@ -413,5 +411,7 @@ void AsyncAppDataReceiver::receivePackets(const error_code& error, size_t bytesR
 
 QString AsyncAppDataReceiver::appDataReceivingIPStr() const
 {
-	return QString::fromStdString(m_appDataReceivingIP.address().to_string());
+	return QString("%1:%2").
+				arg(QString::fromStdString(m_appDataReceivingIP.address().to_string())).
+				arg(m_appDataReceivingIP.port());
 }

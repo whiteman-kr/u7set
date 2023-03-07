@@ -156,6 +156,7 @@ TcpArchiveClientThread::TcpArchiveClientThread(TcpArchiveClient* tcpArchiveClien
 	SimpleThread(tcpArchiveClient),
 	m_tcpArchiveClient(tcpArchiveClient)
 {
+	setObjectName("TcpArchiveClientThread");
 }
 
 Tcp::ConnectionState TcpArchiveClientThread::getConnectionState()

@@ -15,6 +15,7 @@ AppDataProcessingThread::AppDataProcessingThread(int number,
 	m_appDataSourcesIP(appDataSourcesIP),
 	m_log(log)
 {
+	setObjectName(QString("AppDataProcessingThread #%1").arg(number));
 }
 
 void AppDataProcessingThread::run()

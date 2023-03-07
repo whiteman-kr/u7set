@@ -7,7 +7,7 @@ SignalStatesProcessingThread::SignalStatesProcessingThread(const AppDataSources&
     m_appDataSources(appDataSources),
     m_log(log)
 {
-
+	setObjectName("SignalStatesProcessingThread");
 }
 
 void SignalStatesProcessingThread::registerDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue,

@@ -447,5 +447,6 @@ namespace RtTrends
 						  new Server(appDataService, securityLevel),
 						  appDataService.logger())
 	{
+		setObjectName("RtTrends::ServerThread");
 	}
 }

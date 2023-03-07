@@ -16,6 +16,7 @@ TcpAppDataServer::TcpAppDataServer(const SoftwareInfo& softwareInfo,
 	m_appDataReceiverThread(appDataReceiverThread),
 	m_signalStatesProcessingThread(signalStatesProcessingThread)
 {
+	setObjectName("TcpAppDataServer");
 }
 
 TcpAppDataServer::~TcpAppDataServer()
