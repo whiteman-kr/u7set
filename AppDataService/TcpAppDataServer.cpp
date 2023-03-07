@@ -418,8 +418,12 @@ void TcpAppDataServer::onGetAppDataSourcesInfoRequest()
 
 	const AppDataSourcesIP& dataSources = appDataSources();
 
-	for(const AppDataSourceShared source : dataSources)
+	for(const auto& p : dataSources)
 	{
+		AppDataSource* source = p.second;
+
+		TEST_PTR_CONTINUE(source);
+
 		Network::DataSourceInfo* protoInfo = m_getDataSourcesInfoReply.add_datasourceinfo();
 		source->saveToProto(protoInfo);
 	}
@@ -435,8 +439,12 @@ void TcpAppDataServer::onGetAppDataSourcesStatesRequest()
 
 	const AppDataSourcesIP& dataSources = appDataSources();
 
-	for (const AppDataSourceShared& source : dataSources)
+	for(const auto& p : dataSources)
 	{
+		const AppDataSource* source = p.second;
+
+		TEST_PTR_CONTINUE(source);
+
 		Network::AppDataSourceState* state = m_getAppDataSourcesStatesReply.add_appdatasourcesstates();
 		source->getState(state);
 	}

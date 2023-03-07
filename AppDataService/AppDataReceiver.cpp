@@ -261,9 +261,9 @@ void AppDataReceiver::receivePackets()
 		m_rupFramesReceivedPerSecond++;
 		m_rupFramesCount++;
 
-		AppDataSourceShared dataSource = m_appDataSourcesIP.value(sourceIP, nullptr);
+		auto it = m_appDataSourcesIP.find(sourceIP);
 
-		if (dataSource == nullptr)
+		if (it == m_appDataSourcesIP.end())
 		{
 			m_errUnknownAppDataSourceIP++;
 
@@ -274,6 +274,10 @@ void AppDataReceiver::receivePackets()
 
 			continue;
 		}
+
+		AppDataSource* dataSource = it->second;
+
+		TEST_PTR_CONTINUE(dataSource);
 
 		dataSource->pushRupFrame(sourceIP, serverTime, isSimFrame, simFrame.rupFrame, m_thisThread);
 	}

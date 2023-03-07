@@ -81,8 +81,12 @@ void SignalStatesProcessingThread::run()
     {
 		bool hasNoStatesToProcessing = true;
 
-		for(AppDataSourceShared appDataSource : m_appDataSources)
+		int TO_DO_refactor_to_condition_variable_to_avoid_cycling_on_m_appDataSources;
+
+		for(auto& p : m_appDataSources)
 		{
+			AppDataSource* appDataSource = p.second;
+
 			TEST_PTR_CONTINUE(appDataSource);
 
 			SimpleAppSignalStateArchiveFlag state;

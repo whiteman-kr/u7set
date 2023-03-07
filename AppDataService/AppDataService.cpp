@@ -200,11 +200,16 @@ void AppDataServiceWorker::runAppDataProcessingThreads()
 //														  m_appDataSourcesIP,
 //														  m_appDataReceiverThread,
 //														  logger());
-	assert(m_asyncAppDataReceiver != nullptr);
-
-	m_appDataProcessingThreadsPool.startProcessingThreads(m_appDataProcessingThreadCount,
-														  m_appDataSourcesIP,
-														  logger());
+	if (m_asyncAppDataReceiver != nullptr)
+	{
+		m_appDataProcessingThreadsPool.startProcessingThreads(m_appDataProcessingThreadCount,
+															  *m_asyncAppDataReceiver,
+															  logger());
+	}
+	else
+	{
+		Q_ASSERT(false);
+	}
 }
 
 void AppDataServiceWorker::stopAppDataProcessingThreads()
@@ -461,7 +466,7 @@ bool AppDataServiceWorker::readAppDataSources(const QByteArray& fileData, const 
 			continue;
 		}
 
-		AppDataSourceShared appDataSource = std::make_shared<AppDataSource>(dataSource);
+		AppDataSource* appDataSource = new AppDataSource(dataSource);
 
 		bool appDataProvided = false;
 		bool appDataEnabled = false;
@@ -496,14 +501,14 @@ bool AppDataServiceWorker::readAppDataSources(const QByteArray& fileData, const 
 				continue;
 			}
 
-			m_appDataSourcesIP.insert(lci.appDataIP32(), appDataSource);
+			m_appDataSourcesIP.insert({lci.appDataIP32(), appDataSource});
 		}
 
 		Q_ASSERT(appDataProvided == true);
 
-		if (appDataEnabled == true)
+		if (appDataProvided && appDataEnabled)
 		{
-			m_appDataSources.insert(appDataSource->moduleEquipmentID(), appDataSource);
+			m_appDataSources.insert({appDataSource->moduleEquipmentID(), appDataSource});
 		}
 	}
 
@@ -624,10 +629,12 @@ void AppDataServiceWorker::prepareAppDataSources()
 {
 	m_signalsToSources.clear();
 
-	m_signalsToSources.reserve(static_cast<int>(m_appSignals.size() * 1.3));
-
-	for(AppDataSourceShared appDataSource : m_appDataSources)
+	for(auto& p : m_appDataSources)
 	{
+		AppDataSource* appDataSource = p.second;
+
+		TEST_PTR_CONTINUE(appDataSource);
+
 		appDataSource->prepare(m_appSignals, &m_signalStates, m_autoArchivingGroupsCount, m_timeErrLog);
 
 		const QStringList& sourceSignals = appDataSource->associatedSignals(E::LanControllerType::AppData);
@@ -636,9 +643,9 @@ void AppDataServiceWorker::prepareAppDataSources()
 		{
 			Hash signalHash = calcHash(signalID);
 
-			assert(m_signalsToSources.contains(signalHash) == false);
+			Q_ASSERT(m_signalsToSources.contains(signalHash) == false);
 
-			m_signalsToSources.insert(signalHash, appDataSource);
+			m_signalsToSources.insert({signalHash, appDataSource});
 		}
 	}
 }
@@ -673,7 +680,14 @@ void AppDataServiceWorker::clearConfiguration()
 
 	m_appSignals.clear();
 	m_appDataSources.clear();
+
+	for(auto& p : m_appDataSourcesIP)
+	{
+		DELETE_IF_NOT_NULL(p.second);
+	}
+
 	m_appDataSourcesIP.clear();
+
 	m_signalStates.clear();
 	m_signalsToSources.clear();
 }

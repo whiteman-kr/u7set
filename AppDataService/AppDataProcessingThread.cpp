@@ -1,5 +1,6 @@
 #include "AppDataProcessingThread.h"
 #include "../UtilsLib/WUtils.h"
+#include "AsyncAppDataReceiver.h"
 
 // -------------------------------------------------------------------------------
 //
@@ -7,12 +8,12 @@
 //
 // -------------------------------------------------------------------------------
 
-
-AppDataProcessingThread::AppDataProcessingThread(int number,
-												 const AppDataSourcesIP& appDataSourcesIP,
+AppDataProcessingThread::AppDataProcessingThread(AsyncAppDataReceiver& appDataReceiver,
+												 int number,
 												 CircularLoggerShared log) :
+	m_appDataReceiver(appDataReceiver),
+	m_appDataSourcesIP(appDataReceiver.appDataSourcesIP()),
 	m_number(number),
-	m_appDataSourcesIP(appDataSourcesIP),
 	m_log(log)
 {
 	setObjectName(QString("AppDataProcessingThread #%1").arg(number));
@@ -28,11 +29,13 @@ void AppDataProcessingThread::run()
 	{
 		bool hasNoDataToProcessing = true;
 
-		for(AppDataSourceShared appDataSource : m_appDataSourcesIP)
+		for(auto& p : m_appDataSourcesIP)
 		{
+			AppDataSource* appDataSource = p.second;
+
 			if (appDataSource == nullptr)
 			{
-				assert(false);
+				Q_ASSERT(false);
 				continue;
 			}
 
@@ -82,7 +85,7 @@ void AppDataProcessingThread::run()
 // -------------------------------------------------------------------------------
 
 void AppDataProcessingThreadsPool::startProcessingThreads(int poolSizeFromSettings,
-														  const AppDataSourcesIP& appDataSourcesIP,
+														  AsyncAppDataReceiver& appDataReciever,
 														  CircularLoggerShared log)
 {
 	assert(count() == 0);
@@ -98,7 +101,7 @@ void AppDataProcessingThreadsPool::startProcessingThreads(int poolSizeFromSettin
 
 	for(int i = 0; i < poolSize; i++)
 	{
-		AppDataProcessingThread* processingThread = new AppDataProcessingThread(i + 1, appDataSourcesIP, log);
+		AppDataProcessingThread* processingThread = new AppDataProcessingThread(appDataReciever, i + 1, log);
 
 		append(processingThread);
 

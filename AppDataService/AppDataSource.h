@@ -78,8 +78,8 @@ private:
 
 typedef std::shared_ptr<AppDataSource> AppDataSourceShared;
 
-typedef QHash<QString, AppDataSourceShared> AppDataSources;		// app data source EquipmentID => AppDataSourceShared
+typedef std::map<QString, AppDataSource*> AppDataSources;		// app data source EquipmentID => AppDataSourceShared
 
-typedef QHash<quint32, AppDataSourceShared> AppDataSourcesIP;	// app data source IP => AppDataSourceShared
+typedef std::map<quint32, AppDataSource*> AppDataSourcesIP;		// app data source IP => AppDataSourceShared
 
-typedef QHash<Hash, AppDataSourceShared> SignalsToSources;		// signal Hash => AppDataSourceShared
+typedef std::map<Hash, AppDataSource*> SignalsToSources;		// signal Hash => AppDataSourceShared

@@ -17,12 +17,14 @@ class AsyncAppDataReceiver : public RunOverrideThread
 public:
 	AsyncAppDataReceiver(const HostAddressPort& dataReceivingIP,
 					const AppDataSourcesIP& appDataSourcesIP,
-						  E::SoftwareRunMode swRunMode,
+					E::SoftwareRunMode swRunMode,
 					CircularLoggerShared log);
 
 	virtual ~AsyncAppDataReceiver() override;
 
 	void fillAppDataReceiveState(Network::AppDataReceiveState* adrs);
+
+	const AppDataSourcesIP& appDataSourcesIP() { return m_appDataSourcesIP; }
 
 private:
 	virtual void run() override;

@@ -209,7 +209,15 @@ namespace RtTrends
 
 		for(Hash signalHash : trackedSignalHashes)
 		{
-			AppDataSourceShared source = m_signalsToSources.value(signalHash, nullptr);
+			auto it = m_signalsToSources.find(signalHash);
+
+			if (it == m_signalsToSources.end())
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			AppDataSource* source = it->second;
 
 			TEST_PTR_CONTINUE(source);
 
@@ -244,7 +252,14 @@ namespace RtTrends
 			return true;
 		}
 
-		AppDataSourceShared source = m_signalsToSources.value(signalHash, nullptr);
+		auto it = m_signalsToSources.find(signalHash);
+
+		if (it == m_signalsToSources.end())
+		{
+			return false;
+		}
+
+		AppDataSource* source = it->second;
 
 		if (source == nullptr)
 		{

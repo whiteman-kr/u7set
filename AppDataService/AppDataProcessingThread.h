@@ -1,18 +1,22 @@
 #pragma once
 
 #include "../UtilsLib/SimpleThread.h"
-#include "AppDataReceiver.h"
+#include "../OnlineLib/CircularLogger.h"
+#include "AppDataSource.h"
+
+class AsyncAppDataReceiver;
 
 class AppDataProcessingThread : public RunOverrideThread
 {
 public:
-	AppDataProcessingThread(int number,
-							const AppDataSourcesIP& appDataSourcesIP,
+	AppDataProcessingThread(AsyncAppDataReceiver& appDataReceiver,
+							int number,
 							CircularLoggerShared log);
 
 	void run() override;
 
 private:
+	AsyncAppDataReceiver& m_appDataReceiver;
 	int m_number = 0;
 	const AppDataSourcesIP& m_appDataSourcesIP;
 	CircularLoggerShared m_log;
@@ -31,7 +35,7 @@ public:
 
 public:
 	void startProcessingThreads(int poolSize,
-								const AppDataSourcesIP& appDataSourcesIP,
+								AsyncAppDataReceiver& appDataReciever,
 								CircularLoggerShared log);
 
 	void stopProcessingThreads();

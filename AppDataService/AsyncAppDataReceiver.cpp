@@ -390,12 +390,14 @@ void AsyncAppDataReceiver::receivePackets(const error_code& error, size_t bytesR
 		m_rupFramesReceivedPerSecond++;
 		m_rupFramesCount++;
 
-		AppDataSourceShared dataSource = m_appDataSourcesIP.value(sourceIP, nullptr);
+		auto it = m_appDataSourcesIP.find(sourceIP);
 
-		if (dataSource != nullptr)
+		if (it != m_appDataSourcesIP.end())
 		{
-			qint64 serverTime = QDateTime::currentMSecsSinceEpoch();
-			dataSource->pushRupFrame(sourceIP, serverTime, isSimFrame, simFrame.rupFrame, m_thisThread);
+			AppDataSource* dataSource = it->second;
+
+			dataSource->pushRupFrame(sourceIP, QDateTime::currentMSecsSinceEpoch(),
+									 isSimFrame, simFrame.rupFrame, m_thisThread);
 		}
 		else
 		{

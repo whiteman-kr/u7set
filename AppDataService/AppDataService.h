@@ -127,8 +127,8 @@ private:
 
 	AppSignals m_appSignals;
 
-	AppDataSources m_appDataSources;				// all data sources
-	AppDataSourcesIP m_appDataSourcesIP;
+	AppDataSources m_appDataSources;
+	AppDataSourcesIP m_appDataSourcesIP;			// own dynamic AppDataSource objects
 
 	SignalsToSources m_signalsToSources;
 
