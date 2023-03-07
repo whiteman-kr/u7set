@@ -24,6 +24,7 @@ private:
 
 private slots:
 	void slot_configurationArrived(ConfigSettings configuration);
+	void detailsClicked();
 
 private:
 	static inline DialogDataSources* s_dialogDataSources = nullptr;

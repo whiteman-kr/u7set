@@ -2,6 +2,7 @@
 
 #include "PosRectImpl.h"
 #include "FontParam.h"
+#include <QTextDocument>
 
 class QPen;
 class QBrush;
@@ -109,6 +110,10 @@ namespace VFrame30
 		Q_PROPERTY(E::LineStyle LineStyle READ lineStyle WRITE setLineStyle)
 
 		// Text Category Properties
+		//
+		/// \brief Sets text format (0 - PlainText (formatting with properties ), 1 - Markdown, 2 - HtmlSubset)
+		Q_PROPERTY(E::TextFormat textFormat READ textFormat WRITE setTextFormat)
+		Q_PROPERTY(E::TextFormat TextFormat READ textFormat WRITE setTextFormat)
 
 		/// \brief Text color name
 		Q_PROPERTY(QColor textColor READ textColor WRITE setTextColor)
@@ -150,7 +155,7 @@ namespace VFrame30
 	public:
 		SchemaItemRect(void);
 		explicit SchemaItemRect(SchemaUnit unit);
-		virtual ~SchemaItemRect(void);
+		virtual ~SchemaItemRect(void) = default;
 
 		// Serialization
 		//
@@ -162,9 +167,6 @@ namespace VFrame30
 		//
 	public:
 
-		// Рисование элемента, выполняется в 100% масштабе.
-		// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
-		//
 		virtual void draw(CDrawParam* drawParam) const override;
 
 	protected:
@@ -188,6 +190,9 @@ namespace VFrame30
 
 		E::LineStyle lineStyle() const;
 		void setLineStyle(E::LineStyle value);
+
+		E::TextFormat textFormat() const;
+		void setTextFormat(E::TextFormat value);
 
 		const QString& text() const;
 		void setText(QString value);
@@ -217,6 +222,7 @@ namespace VFrame30
 
 		E::LineStyle m_lineStyle = E::SolidLine;
 
+		E::TextFormat m_textFormat = E::TextFormat::PlainText;
 		QString m_text;
 		bool m_wordWrap = false;
 
@@ -225,12 +231,17 @@ namespace VFrame30
 
 		FontParam m_font;
 		bool m_fill = true;
-		bool m_drawRect = true;				// Rect is visible, thikness 0 is possible
-
+		bool m_drawRect = true;			// Rect is visible, thikness 0 is possible
 
 		// Drawing resources
 		//
 		mutable std::shared_ptr<QPen> m_rectPen;
 		mutable std::shared_ptr<QBrush> m_fillBrush;
+
+		mutable QImage m_cacheTextImage;
+		mutable QTextDocument m_cacheTextDocument;
+		mutable QString m_cacheDrewText;
+		mutable E::TextFormat m_cachetextFormat = E::TextFormat::PlainText;
+		mutable FontParam m_cachedFont{};
 	};
 }

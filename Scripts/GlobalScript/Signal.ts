@@ -91,7 +91,6 @@ module Signal {
 		signalExists(signalId: string): boolean;
 
 		isDiscrete(signalId: string): boolean;
-
 		isAnalog(signalId: string): boolean;
 
 		precision(signalId: string): number;

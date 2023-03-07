@@ -493,8 +493,8 @@ namespace Builder
 				lmReport << "Internal Configuration Code (HEX): 0x" + QString::number(jumpers, 16);
 				lmReport << "Internal Configuration Code (BIN): " + jumpersHex;
 
-				lmReport << tr("Lower Rotary Switch Value: '%1'").arg(QString::number(ssKey, 16));
 				lmReport << tr("Upper Rotary Switch Value: '%1'").arg(QString::number(lmNumber, 16));
+				lmReport << tr("Lower Rotary Switch Value: '%1'").arg(QString::number(ssKey, 16));
 			}
 			else
 			{

@@ -8,16 +8,16 @@
 // DialogAppDataSourceInfo
 //
 
-DialogAppDataSourceInfo::DialogAppDataSourceInfo(const AdsSourceStateConnection& adsSourceStateConnection, QWidget* parent,  Hash sourceHash) :
-	DialogSourceInfo(parent, sourceHash),
+DialogAppDataSourceInfo::DialogAppDataSourceInfo(const AdsSourceStateConnection& adsSourceStateConnection, QWidget* parent,  quint64 id) :
+	DialogSourceInfo(parent, id),
 	m_adsSourceStateConnection(adsSourceStateConnection)
 {
 	std::vector<AppDataSourceState> adsStates = m_adsSourceStateConnection.appDataSourceStates();
 
 	auto foundState = std::find_if(adsStates.begin(), adsStates.end(),
-		[&sourceHash](const AppDataSourceState& state)
+		[&id](const AppDataSourceState& state)
 		{
-			return state.id() == sourceHash;
+			return state.id() == id;
 		});
 
 	if (foundState == adsStates.end())
@@ -42,7 +42,7 @@ DialogAppDataSourceInfo::DialogAppDataSourceInfo(const AdsSourceStateConnection&
 
 	setLayout(l);
 
-	setMinimumSize(640, 600);
+	setMinimumSize(700, 600);
 
 	QStringList headerLabels;
 	headerLabels << tr("Parameter");
@@ -137,7 +137,7 @@ void DialogAppDataSourceInfo::updateData()
 	auto adsState = std::find_if(adsStates.begin(), adsStates.end(),
 		[this](const AppDataSourceState& state)
 		{
-			return state.id() == m_sourceHash;
+			return state.id() == m_dialogId;
 		});
 
 	// If state was not found in <closeInterval> seconds - close the dialog
@@ -273,8 +273,10 @@ AppDataSourcesWidget::AppDataSourcesWidget(const AdsSourceStateConnection& conne
 
 	m_treeWidget = new QTreeWidget();
 	mainLayout->addWidget(m_treeWidget);
+	connect(m_treeWidget, &QTreeWidget::itemDoubleClicked, this, &AppDataSourcesWidget::treeWidgetItemDoubleClicked);
 
-	connect(m_treeWidget, &QTreeWidget::itemDoubleClicked, this, &AppDataSourcesWidget::on_treeWidget_itemDoubleClicked);
+	m_treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(m_treeWidget, &QTreeWidget::customContextMenuRequested,this, &AppDataSourcesWidget::contextMenuRequested);
 
 	QHBoxLayout* bottomLayout = new QHBoxLayout();
 	mainLayout->addLayout(bottomLayout);
@@ -313,6 +315,11 @@ AppDataSourcesWidget::~AppDataSourcesWidget()
 {
 }
 
+bool AppDataSourcesWidget::treeIsFocused() const
+{
+	return m_treeWidget->hasFocus();
+}
+
 void AppDataSourcesWidget::detailsClicked()
 {
 	QTreeWidgetItem* item = m_treeWidget->currentItem();
@@ -322,17 +329,17 @@ void AppDataSourcesWidget::detailsClicked()
 		return;
 	}
 
-	Hash hash = item->data(columnIndex_Hash, Qt::UserRole).value<Hash>();
+	quint64 id = item->data(columnIndex_Id, Qt::UserRole).value<quint64>();
 
-	auto it = m_sourceInfoDialogsMap.find(hash);
+	auto it = m_sourceInfoDialogsMap.find(id);
 	if (it == m_sourceInfoDialogsMap.end())
 	{
-		DialogAppDataSourceInfo* dlg = new DialogAppDataSourceInfo(m_adsSourceStateConnection, this, hash);
+		DialogAppDataSourceInfo* dlg = new DialogAppDataSourceInfo(m_adsSourceStateConnection, this, id);
 		connect(dlg, &DialogAppDataSourceInfo::dialogClosed, this, &AppDataSourcesWidget::detailsDialogClosed);
 		dlg->show();
 		dlg->activateWindow();
 
-		m_sourceInfoDialogsMap[hash] = dlg;
+		m_sourceInfoDialogsMap[id] = dlg;
 	}
 	else
 	{
@@ -359,7 +366,7 @@ void AppDataSourcesWidget::timerEvent(QTimerEvent* event)
 	}
 }
 
-void AppDataSourcesWidget::slot_tuningSourcesArrived()
+void AppDataSourcesWidget::tuningSourcesArrived()
 {
 	update(false);
 }
@@ -383,7 +390,7 @@ void AppDataSourcesWidget::update(bool refreshOnly)
 		{
 			QStringList connectionStrings;
 
-			connectionStrings << adsState.info.moduleequipmentid().c_str();
+			connectionStrings << adsState.info.lancontrollerinfo()[0].equipmentid().c_str();
 			connectionStrings << adsState.info.lancontrollerinfo()[0].appdataip().c_str();
 			connectionStrings << QString::number(adsState.info.lancontrollerinfo()[0].appdataport());
 
@@ -394,7 +401,7 @@ void AppDataSourcesWidget::update(bool refreshOnly)
 
 			QTreeWidgetItem* item = new QTreeWidgetItem(connectionStrings);
 
-			item->setData(columnIndex_Hash, Qt::UserRole, adsState.id());
+			item->setData(columnIndex_Id, Qt::UserRole, adsState.id());
 
 			m_treeWidget->addTopLevelItem(item);
 		}
@@ -409,12 +416,12 @@ void AppDataSourcesWidget::update(bool refreshOnly)
 			continue;
 		}
 
-		Hash hash = item->data(columnIndex_Hash, Qt::UserRole).toULongLong();
+		quint64 id = item->data(columnIndex_Id, Qt::UserRole).toULongLong();
 
 		auto adsState = std::find_if(adsStates.begin(), adsStates.end(),
-			[&hash](const AppDataSourceState& state)
+			[&id](const AppDataSourceState& state)
 			{
-				return state.id() == hash;
+				return state.id() == id;
 			});
 
 		if (adsState == adsStates.end())
@@ -479,7 +486,7 @@ void AppDataSourcesWidget::update(bool refreshOnly)
 	}
 }
 
-void AppDataSourcesWidget::on_treeWidget_itemDoubleClicked(QTreeWidgetItem *item, int column)
+void AppDataSourcesWidget::treeWidgetItemDoubleClicked(QTreeWidgetItem *item, int column)
 {
 	Q_UNUSED(item);
 	Q_UNUSED(column);
@@ -487,15 +494,34 @@ void AppDataSourcesWidget::on_treeWidget_itemDoubleClicked(QTreeWidgetItem *item
 	QTimer::singleShot(10, this, &AppDataSourcesWidget::detailsClicked);
 }
 
-void AppDataSourcesWidget::detailsDialogClosed(Hash hash)
+void AppDataSourcesWidget::detailsDialogClosed(quint64 id)
 {
-	auto it = m_sourceInfoDialogsMap.find(hash);
+	auto it = m_sourceInfoDialogsMap.find(id);
 	if (it == m_sourceInfoDialogsMap.end())
 	{
-		//Q_ASSERT(false);
+		Q_ASSERT(false);
 		return;
 	}
 
 	m_sourceInfoDialogsMap.erase(it);
-
 }
+
+void AppDataSourcesWidget::contextMenuRequested()
+{
+	if (m_treeWidget->selectedItems().empty() == true)
+	{
+		return;
+	}
+
+	QAction action(tr("Details..."));
+	connect(&action, &QAction::triggered, this, [this](){
+		detailsClicked();
+	});
+
+	QMenu menu(this);
+	menu.addAction(&action);
+	menu.exec(this->cursor().pos());
+
+	return;
+}
+

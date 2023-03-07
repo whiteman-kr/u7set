@@ -13,13 +13,12 @@ else
     exit 1
 fi
 
-echo Trying to create database $1
-
 if psql -lqt | cut -d \| -f 1 | grep -qw $1; then
-    echo Database $1 Already exists!
-    # $? is 0
-else
-    psql -U postgres -c "CREATE DATABASE $1 OWNER u7;"
-    psql $1 < $1.sql
-    # $? is 1
+    echo Database $1 already exists, deleting it.
+    psql -U postgres -c "DROP DATABASE $1;"
 fi
+
+echo Importing database $1.
+
+psql -U postgres -c "CREATE DATABASE $1 OWNER u7;"
+psql $1 < $1.sql

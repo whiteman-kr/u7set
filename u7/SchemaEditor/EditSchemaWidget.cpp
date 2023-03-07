@@ -77,6 +77,29 @@ QString EditSchemaWidget::m_lastUsedLoopbackId = "";
 
 void addSchemaItem(const QByteArray& itemData);
 
+namespace
+{
+	class ResizedDialog : public QDialog
+	{
+	public:
+		ResizedDialog(int width, int height, QWidget* parent, Qt::WindowFlags f = Qt::WindowFlags()) :
+			QDialog{parent, f},
+			m_width{width},
+			m_height{height}
+		{
+		}
+
+	protected:
+		virtual QSize sizeHint() const override
+		{
+			return {m_width, m_height};
+		}
+
+		int m_width = 0;
+		int m_height = 0;
+	};
+}
+
 
 //
 // SchemaItemsClipboard
@@ -4875,26 +4898,72 @@ void EditSchemaWidget::f2KeyForRect(SchemaItemPtr item)
 
 	// Show input dialog
 	//
-	QInputDialog dialog{this};
-	dialog.setWindowFlags((dialog.windowFlags() &
+	int width = QSettings().value("f2KeyForRect\\width").toInt();
+	int height = QSettings().value("f2KeyForRect\\height").toInt();
+
+	ResizedDialog d(width, height, this);
+
+	d.setWindowTitle(tr("Set text"));
+	d.setWindowFlags((d.windowFlags() &
 					~Qt::WindowMinimizeButtonHint &
 					~Qt::WindowMaximizeButtonHint &
 					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
 
-	dialog.setWindowTitle(tr("Set text"));
-	dialog.setLabelText(tr("Text:"));
-	dialog.setInputMode(QInputDialog::TextInput);
-	dialog.setOption(QInputDialog::UsePlainTextEditForTextInput, true);
-	dialog.setTextValue(text);
+	// --
+	//
+	QString labelText;
+	switch (rectItem->textFormat())
+	{
+	case E::TextFormat::PlainText:
+		labelText = tr("PlainText - Manual formatting.");
+		break;
+	case E::TextFormat::Markdown:
+		labelText = tr("Markdown - Markdown formatting, supports GitHub-style Markdown.");
+		break;
+	case E::TextFormat::HtmlSubset:
+		labelText = tr("HtmlSubset - HTML-formatted text in the html string. Support of the limited HTML Subset.");
+		break;
+	}
 
-	int width = QSettings().value("f2KeyForRect\\width").toInt();
-	int height = QSettings().value("f2KeyForRect\\height").toInt();
-	dialog.resize(width, height);
+	QLabel* label = new QLabel{labelText, &d};
 
-	if (int result = dialog.exec();
+	QTextEdit* textEdit = new QTextEdit{&d};
+	textEdit->setPlainText(text);
+
+	QDialogButtonBox* buttonBox = new QDialogButtonBox{QDialogButtonBox::Apply | QDialogButtonBox::Ok | QDialogButtonBox::Cancel};
+
+	// --
+	//
+	QVBoxLayout* layout = new QVBoxLayout;
+
+	layout->addWidget(label);
+	layout->addWidget(textEdit);
+	layout->addWidget(buttonBox);
+
+	d.setLayout(layout);
+
+	connect(buttonBox, &QDialogButtonBox::clicked,
+			[item, this, buttonBox, textEdit, &text](QAbstractButton* button)
+			{
+				if (buttonBox->buttonRole(button) == QDialogButtonBox::ApplyRole)
+				{
+					QString newValue = textEdit->toPlainText();
+
+					if (newValue != text)
+					{
+						m_editEngine->runSetProperty(VFrame30::PropertyNames::text, QVariant(newValue), item);
+						editSchemaView()->update();
+					}
+				}
+			});
+
+	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
+	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
+
+	if (int result = d.exec();
 		result == QDialog::Accepted)
 	{
-		QString newValue = dialog.textValue();
+		QString newValue = textEdit->toPlainText();
 
 		if (newValue != text)
 		{
@@ -4903,8 +4972,8 @@ void EditSchemaWidget::f2KeyForRect(SchemaItemPtr item)
 		}
 	}
 
-	QSettings().setValue("f2KeyForRect\\width", dialog.width());
-	QSettings().setValue("f2KeyForRect\\height", dialog.height());
+	QSettings().setValue("f2KeyForRect\\width", d.width());
+	QSettings().setValue("f2KeyForRect\\height", d.height());
 
 	return;
 }
@@ -4951,7 +5020,10 @@ bool EditSchemaWidget::f2KeyForReceiver(SchemaItemPtr item, bool setViaEditEngin
 
 	// Show input dialog
 	//
-	QDialog d(this);
+	int width = QSettings().value("f2KeyForReceiver\\width").toInt();
+	int height = QSettings().value("f2KeyForReceiver\\height").toInt();
+
+	ResizedDialog d(width, height, this);
 
 	d.setWindowTitle(tr("Set Receiver Params"));
 	d.setWindowFlags((d.windowFlags() &
@@ -5014,10 +5086,6 @@ bool EditSchemaWidget::f2KeyForReceiver(SchemaItemPtr item, bool setViaEditEngin
 
 	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
 	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
-
-	int width = QSettings().value("f2KeyForReceiver\\width").toInt();
-	int height = QSettings().value("f2KeyForReceiver\\height").toInt();
-	d.resize(width, height);
 
 	// --
 	//
@@ -5101,7 +5169,10 @@ bool EditSchemaWidget::f2KeyForTransmitter(SchemaItemPtr item, bool setViaEditEn
 
 	// Show input dialog
 	//
-	QDialog d(this);
+	int width = QSettings().value("f2KeyForTransmitter\\width").toInt();
+	int height = QSettings().value("f2KeyForTransmitter\\height").toInt();
+
+	ResizedDialog d(width, height, this);
 
 	d.setWindowTitle(tr("Set Transmitter Params"));
 	d.setWindowFlags((d.windowFlags() &
@@ -5141,10 +5212,6 @@ bool EditSchemaWidget::f2KeyForTransmitter(SchemaItemPtr item, bool setViaEditEn
 
 	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
 	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
-
-	int width = QSettings().value("f2KeyForTransmitter\\width").toInt();
-	int height = QSettings().value("f2KeyForTransmitter\\height").toInt();
-	d.resize(width, height);
 
 	// --
 	//
@@ -5199,7 +5266,10 @@ void EditSchemaWidget::f2KeyForConst(SchemaItemPtr item)
 
 	// Show input dialog
 	//
-	QDialog d(this);
+	int width = QSettings().value("f2KeyForConst\\width").toInt();
+	int height = QSettings().value("f2KeyForConst\\height").toInt();
+
+	ResizedDialog d(width, height, this);
 
 	d.setWindowTitle(tr("Set Const Params"));
 	d.setWindowFlags((d.windowFlags() &
@@ -5373,10 +5443,6 @@ void EditSchemaWidget::f2KeyForConst(SchemaItemPtr item)
 		Q_ASSERT(false);
 	}
 
-	int width = QSettings().value("f2KeyForConst\\width").toInt();
-	int height = QSettings().value("f2KeyForConst\\height").toInt();
-	d.resize(width, height);
-
 	// --
 	//
 	int result = d.exec();
@@ -5519,7 +5585,10 @@ void EditSchemaWidget::f2KeyForSignal(SchemaItemPtr item)
 
 	// Show input dialog
 	//
-	QDialog d(this);
+	int width = QSettings().value("f2KeyForSignal/width").toInt();
+	int height = QSettings().value("f2KeyForSignal/height").toInt();
+
+	ResizedDialog d(width, height, this);
 
 	d.setWindowTitle(tr("SchemaItemSignal"));
 	d.setWindowFlags((d.windowFlags() & ~Qt::WindowMinimizeButtonHint & ~Qt::WindowContextHelpButtonHint)
@@ -5572,11 +5641,10 @@ void EditSchemaWidget::f2KeyForSignal(SchemaItemPtr item)
 	connect(tagsEditorButton, &QPushButton::clicked,
 	[this, &d, tagsEdit]()
 	{
-		QDialog tagsSelectorDialog{&d, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint};
-
 		int width = QSettings().value("f2KeyForSignal/tagsSelectorDialog/width").toInt();
 		int height = QSettings().value("f2KeyForSignal/tagsSelectorDialog/height").toInt();
-		tagsSelectorDialog.resize(width, height);
+
+		ResizedDialog tagsSelectorDialog{width, height, &d, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint};
 
 		DbTagsEditor te{this->db(), &d};
 		te.setText(tagsEdit->text());
@@ -5623,10 +5691,6 @@ void EditSchemaWidget::f2KeyForSignal(SchemaItemPtr item)
 
 	// --
 	//
-	int width = QSettings().value("f2KeyForSignal/width").toInt();
-	int height = QSettings().value("f2KeyForSignal/height").toInt();
-	d.resize(width, height);
-
 	int result = d.exec();
 
 	if (result == QDialog::Accepted)
@@ -5733,7 +5797,10 @@ void EditSchemaWidget::f2KeyForValue(SchemaItemPtr item)
 
 	// Show input dialog
 	//
-	QDialog d(this);
+	int width = QSettings().value("f2KeyForValue\\width").toInt();
+	int height = QSettings().value("f2KeyForValue\\height").toInt();
+
+	ResizedDialog d(width, height, this);
 
 	d.setWindowTitle(tr("SchemaItemValue"));
 	d.setWindowFlags((d.windowFlags() & ~Qt::WindowMinimizeButtonHint & ~Qt::WindowContextHelpButtonHint)
@@ -5826,10 +5893,6 @@ void EditSchemaWidget::f2KeyForValue(SchemaItemPtr item)
 
 	// --
 	//
-	int width = QSettings().value("f2KeyForValue\\width").toInt();
-	int height = QSettings().value("f2KeyForValue\\height").toInt();
-	d.resize(width, height);
-
 	int result = d.exec();
 
 	if (result == QDialog::Accepted)
@@ -5881,7 +5944,10 @@ void EditSchemaWidget::f2KeyForImageValue(SchemaItemPtr item)
 
 	// Show input dialog
 	//
-	QDialog d(this);
+	int width = QSettings().value("f2KeyForImageValue\\width").toInt();
+	int height = QSettings().value("f2KeyForImageValue\\height").toInt();
+
+	ResizedDialog d(width, height, this);
 
 	d.setWindowTitle(tr("SchemaItemImageValue"));
 	d.setWindowFlags((d.windowFlags() & ~Qt::WindowMinimizeButtonHint & ~Qt::WindowContextHelpButtonHint)
@@ -5971,10 +6037,6 @@ void EditSchemaWidget::f2KeyForImageValue(SchemaItemPtr item)
 
 	// --
 	//
-	int width = QSettings().value("f2KeyForImageValue\\width").toInt();
-	int height = QSettings().value("f2KeyForImageValue\\height").toInt();
-	d.resize(width, height);
-
 	int result = d.exec();
 
 	if (result == QDialog::Accepted)
@@ -6036,7 +6098,10 @@ void EditSchemaWidget::f2KeyForBus(SchemaItemPtr item)
 
 	// Show input dialog
 	//
-	QDialog d(this);
+	int width = QSettings().value("f2KeyForBus\\width").toInt();
+	int height = QSettings().value("f2KeyForBus\\height").toInt();
+
+	ResizedDialog d(width, height, this);
 
 	d.setWindowTitle(tr("Set BusType"));
 	d.setWindowFlags((d.windowFlags() &
@@ -6081,10 +6146,6 @@ void EditSchemaWidget::f2KeyForBus(SchemaItemPtr item)
 
 	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
 	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
-
-	int width = QSettings().value("f2KeyForBus\\width").toInt();
-	int height = QSettings().value("f2KeyForBus\\height").toInt();
-	d.resize(width, height);
 
 	// --
 	//
