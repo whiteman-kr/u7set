@@ -680,6 +680,8 @@ bool DataSourceOnline::processRupFrameTimeQueue(const QThread* thread)
 				{
 					if (m_rupFrameNumerator != numerator)
 					{
+						qDebug() << m_rupFrameNumerator << "  " << numerator;
+
 						if (m_rupFrameNumerator < numerator)
 						{
 							m_lostPacketCount += numerator - m_rupFrameNumerator;

@@ -1,13 +1,13 @@
 #include <QXmlStreamReader>
 #include <QMetaProperty>
 
-//#include "../lib/DeviceObject.h"
 #include "../OnlineLib/CfgServerLoader.h"
 
 #include "AppDataService.h"
 #include "TcpAppDataServer.h"
 #include "TcpArchiveClient.h"
 #include "RtTrendsServer.h"
+#include "AsyncAppDataReceiver.h"
 
 // -------------------------------------------------------------------------------
 //
@@ -125,27 +125,47 @@ void AppDataServiceWorker::loadSettings()
 
 void AppDataServiceWorker::runAppDataReceiverThread()
 {
-	if (m_appDataReceiverThread != nullptr)
+//	if (m_appDataReceiverThread != nullptr)
+//	{
+//		assert(false);
+//		return;
+//	}
+
+//	m_appDataReceiverThread = new AppDataReceiverThread(m_curSettingsProfile.appDataReceivingIP,
+//														m_appDataSourcesIP,
+//														sessionParams().softwareRunMode,
+//														logger());
+
+//	m_appDataReceiverThread->start();
+
+	if (m_asyncAppDataReceiver != nullptr)
 	{
-		assert(false);
+		Q_ASSERT(false);
 		return;
 	}
 
-	m_appDataReceiverThread = new AppDataReceiverThread(m_curSettingsProfile.appDataReceivingIP,
+	m_asyncAppDataReceiver = new AsyncAppDataReceiver(m_curSettingsProfile.appDataReceivingIP,
 														m_appDataSourcesIP,
 														sessionParams().softwareRunMode,
 														logger());
 
-	m_appDataReceiverThread->start();
+	m_asyncAppDataReceiver->start();
 }
 
 void AppDataServiceWorker::stopAppDataReceiverlThread()
 {
-	if (m_appDataReceiverThread != nullptr)
+//	if (m_appDataReceiverThread != nullptr)
+//	{
+//		m_appDataReceiverThread->quitAndWait();
+//		delete m_appDataReceiverThread;
+//		m_appDataReceiverThread = nullptr;
+//	}
+
+	if (m_asyncAppDataReceiver != nullptr)
 	{
-		m_appDataReceiverThread->quitAndWait();
-		delete m_appDataReceiverThread;
-		m_appDataReceiverThread = nullptr;
+		m_asyncAppDataReceiver->quitAndWait();
+		delete m_asyncAppDataReceiver;
+		m_asyncAppDataReceiver = nullptr;
 	}
 }
 
@@ -174,11 +194,16 @@ void AppDataServiceWorker::stopSignalStatesProcessingThread()
 
 void AppDataServiceWorker::runAppDataProcessingThreads()
 {
-	assert(m_appDataReceiverThread != nullptr);
+//	assert(m_appDataReceiverThread != nullptr);
+
+//	m_appDataProcessingThreadsPool.startProcessingThreads(m_appDataProcessingThreadCount,
+//														  m_appDataSourcesIP,
+//														  m_appDataReceiverThread,
+//														  logger());
+	assert(m_asyncAppDataReceiver != nullptr);
 
 	m_appDataProcessingThreadsPool.startProcessingThreads(m_appDataProcessingThreadCount,
 														  m_appDataSourcesIP,
-														  m_appDataReceiverThread,
 														  logger());
 }
 
@@ -193,7 +218,7 @@ void AppDataServiceWorker::runTcpAppDataServer()
 
 	TcpAppDataServer* tcpAppDataSever = new TcpAppDataServer(softwareInfo(),
 															 m_curSettingsProfile.securityLevel,
-															 m_appDataReceiverThread,
+															 m_asyncAppDataReceiver,
 															 m_signalStatesProcessingThread);
 
 	m_tcpAppDataServerThread = new TcpAppDataServerThread(	m_curSettingsProfile.clientRequestIP,

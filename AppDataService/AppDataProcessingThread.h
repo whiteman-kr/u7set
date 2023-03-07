@@ -8,7 +8,6 @@ class AppDataProcessingThread : public RunOverrideThread
 public:
 	AppDataProcessingThread(int number,
 							const AppDataSourcesIP& appDataSourcesIP,
-							const AppDataReceiverThread* appDataReceiver,
 							CircularLoggerShared log);
 
 	void run() override;
@@ -16,7 +15,6 @@ public:
 private:
 	int m_number = 0;
 	const AppDataSourcesIP& m_appDataSourcesIP;
-	const AppDataReceiverThread* m_appDataReceiver;
 	CircularLoggerShared m_log;
 
 	// parsing statistics
@@ -34,7 +32,6 @@ public:
 public:
 	void startProcessingThreads(int poolSize,
 								const AppDataSourcesIP& appDataSourcesIP,
-								const AppDataReceiverThread* appDataReceiver,
 								CircularLoggerShared log);
 
 	void stopProcessingThreads();

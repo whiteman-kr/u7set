@@ -1,8 +1,10 @@
 #pragma once
 
-#include <QUdpSocket>
+#include <asio.hpp>
 
-#include "../UtilsLib/SimpleThread.h"
+using namespace asio;
+using namespace asio::ip;
+
 #include "../OnlineLib/CircularLogger.h"
 #include "AppDataSource.h"
 
@@ -10,28 +12,37 @@
 // AppDataReceiver is receives RUP datagrams and push it in AppDataSource's queues
 //
 
-class AppDataReceiver : public RunOverrideThread
+class AsyncAppDataReceiver : public RunOverrideThread
 {
 public:
-	AppDataReceiver(const HostAddressPort& dataReceivingIP,
+	AsyncAppDataReceiver(const HostAddressPort& dataReceivingIP,
 					const AppDataSourcesIP& appDataSourcesIP,
 						  E::SoftwareRunMode swRunMode,
 					CircularLoggerShared log);
 
-	virtual ~AppDataReceiver() override;
+	virtual ~AsyncAppDataReceiver() override;
 
 	void fillAppDataReceiveState(Network::AppDataReceiveState* adrs);
 
 private:
 	virtual void run() override;
 
-	bool tryCreateAndBindSocket();
-	void closeSocket();
+	void startTimer1s();
+	void onTimer1s(const error_code& error);
 
-	void receivePackets();
+	void clearStatistics();
+	void updateStatistics();
+
+	bool createAndBindSocket();
+	bool isSocketWorkable() const;
+	void closeSocket();
+	void startReceive();
+
+	void receivePackets(const error_code& error, std::size_t bytesReceived);
+
+	QString appDataReceivingIPStr() const;
 
 private:
-	HostAddressPort m_dataReceivingIP;
 	const AppDataSourcesIP& m_appDataSourcesIP;
 	CircularLoggerShared m_log;
 	bool m_isSimulationMode = false;
@@ -40,14 +51,30 @@ private:
 
 	//
 
-	QUdpSocket* m_socket = nullptr;
+	udp::endpoint m_appDataReceivingIP;
 
-	HashedVector<quint32, quint32> m_unknownAppDataSourcesIP;
+	io_context* m_ioContext = nullptr;
+	steady_timer* m_timer = nullptr;
+	udp::socket* m_socket = nullptr;
+	bool m_socketBound = false;
+	int m_noReceiveCtr = 0;
+
+	static const int RECV_BUFFER_SIZE = sizeof(Rup::SimFrame) + 1;
+
+	//
+
+	int m_writeIndex = 0;
+	udp::endpoint m_receiveFromIP[2];
+	char m_receiveBuffer[2][RECV_BUFFER_SIZE];
+
+	//
+
+	std::set<quint32> m_unknownAppDataSourcesIP;
 
 	//
 
 	std::atomic<int> m_receivingRate = { 0 };				// bytes per second
-	std::atomic<int> m_udpReceivingRate = { 0 };				// UDP datagrams per second
+	std::atomic<int> m_udpReceivingRate = { 0 };			// UDP datagrams per second
 	std::atomic<int> m_rupFramesReceivingRate = { 0 };		// RUP frames per second
 	std::atomic<qint64> m_rupFramesCount = { 0 };
 	std::atomic<qint64> m_simFramesCount = { 0 };

@@ -15,6 +15,7 @@
 
 
 class TcpArchiveClient;
+class AsyncAppDataReceiver;
 
 namespace RtTrends
 {
@@ -135,7 +136,9 @@ private:
 
 	AppDataProcessingThreadsPool m_appDataProcessingThreadsPool;
 
-	AppDataReceiverThread* m_appDataReceiverThread = nullptr;
+	//AppDataReceiverThread* m_appDataRe ceiverThread = nullptr;
+
+	AsyncAppDataReceiver* m_asyncAppDataReceiver = nullptr;
 
 	SignalStatesProcessingThread* m_signalStatesProcessingThread = nullptr;
 

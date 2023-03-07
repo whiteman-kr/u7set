@@ -9,9 +9,10 @@
 #include "SignalStatesProcessingThread.h"
 
 
+
 class TcpAppDataServerThread;
 class AppDataServiceWorker;
-class AppDataReceiverThread;
+class AsyncAppDataReceiver;
 
 // -------------------------------------------------------------------------------
 //
@@ -24,7 +25,7 @@ class TcpAppDataServer : public Tcp::Server
 public:
 	TcpAppDataServer(const SoftwareInfo& softwareInfo,
 					 E::SecurityLevel securityLevel,
-					 AppDataReceiverThread* appDataReceiverThread,
+					 AsyncAppDataReceiver* appDataReceiverThread,
 					 SignalStatesProcessingThread* signalStatesProcessingThread);
 
 	virtual ~TcpAppDataServer() override;
@@ -73,7 +74,7 @@ private:
 private:
 	TcpAppDataServerThread* m_thread = nullptr;
 
-	AppDataReceiverThread* m_appDataReceiverThread = nullptr;
+	AsyncAppDataReceiver* m_appDataReceiverThread = nullptr;
 	SignalStatesProcessingThread* m_signalStatesProcessingThread = nullptr;
 
 	SimpleAppSignalStatesQueueShared m_signalStatesQueue;

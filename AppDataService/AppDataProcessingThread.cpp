@@ -10,14 +10,11 @@
 
 AppDataProcessingThread::AppDataProcessingThread(int number,
 												 const AppDataSourcesIP& appDataSourcesIP,
-												 const AppDataReceiverThread* appDataReceiver,
 												 CircularLoggerShared log) :
 	m_number(number),
 	m_appDataSourcesIP(appDataSourcesIP),
-	m_appDataReceiver(appDataReceiver),
 	m_log(log)
 {
-	assert(appDataReceiver != nullptr);
 }
 
 void AppDataProcessingThread::run()
@@ -85,7 +82,6 @@ void AppDataProcessingThread::run()
 
 void AppDataProcessingThreadsPool::startProcessingThreads(int poolSizeFromSettings,
 														  const AppDataSourcesIP& appDataSourcesIP,
-														  const AppDataReceiverThread* appDataReceiver,
 														  CircularLoggerShared log)
 {
 	assert(count() == 0);
@@ -101,7 +97,7 @@ void AppDataProcessingThreadsPool::startProcessingThreads(int poolSizeFromSettin
 
 	for(int i = 0; i < poolSize; i++)
 	{
-		AppDataProcessingThread* processingThread = new AppDataProcessingThread(i + 1, appDataSourcesIP, appDataReceiver, log);
+		AppDataProcessingThread* processingThread = new AppDataProcessingThread(i + 1, appDataSourcesIP, log);
 
 		append(processingThread);
 

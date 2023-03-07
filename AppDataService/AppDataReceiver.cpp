@@ -6,7 +6,7 @@
 //
 // -------------------------------------------------------------------------------
 
-AppDataReceiverThread::AppDataReceiverThread(const HostAddressPort& dataReceivingIP,
+AppDataReceiver::AppDataReceiver(const HostAddressPort& dataReceivingIP,
 								 const AppDataSourcesIP& appDataSourcesIP,
 								 E::SoftwareRunMode swRunMode,
 								 CircularLoggerShared log) :
@@ -17,11 +17,11 @@ AppDataReceiverThread::AppDataReceiverThread(const HostAddressPort& dataReceivin
 	m_isSimulationMode = (swRunMode == E::SoftwareRunMode::Simulation);
 }
 
-AppDataReceiverThread::~AppDataReceiverThread()
+AppDataReceiver::~AppDataReceiver()
 {
 }
 
-void AppDataReceiverThread::fillAppDataReceiveState(Network::AppDataReceiveState* adrs)
+void AppDataReceiver::fillAppDataReceiveState(Network::AppDataReceiveState* adrs)
 {
 	adrs->set_receivingrate(m_receivingRate);
 	adrs->set_udpreceivingrate(m_udpReceivingRate);
@@ -38,7 +38,7 @@ void AppDataReceiverThread::fillAppDataReceiveState(Network::AppDataReceiveState
 	adrs->set_errnotexpectedsimpacket(m_errNotExpectedSimPacket);
 }
 
-void AppDataReceiverThread::run()
+void AppDataReceiver::run()
 {
 	setPriority(QThread::Priority::HighPriority);
 
@@ -63,7 +63,7 @@ void AppDataReceiverThread::run()
 	DEBUG_LOG_MSG(m_log, QString("AppDataReceiver thread is finished (receiving IP %1)").arg(m_dataReceivingIP.addressPortStr()));
 }
 
-bool AppDataReceiverThread::tryCreateAndBindSocket()
+bool AppDataReceiver::tryCreateAndBindSocket()
 {
 	if (m_socket != nullptr)
 	{
@@ -132,7 +132,7 @@ bool AppDataReceiverThread::tryCreateAndBindSocket()
 	return m_socket != nullptr;
 }
 
-void AppDataReceiverThread::closeSocket()
+void AppDataReceiver::closeSocket()
 {
 	if (m_socket != nullptr)
 	{
@@ -144,7 +144,7 @@ void AppDataReceiverThread::closeSocket()
 	qDebug() << "AppDataReceiverThread listening socket closed";
 }
 
-void AppDataReceiverThread::receivePackets()
+void AppDataReceiver::receivePackets()
 {
 	if (m_socket == nullptr)
 	{

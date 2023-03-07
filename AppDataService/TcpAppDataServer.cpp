@@ -1,6 +1,6 @@
 #include "TcpAppDataServer.h"
 #include "AppDataService.h"
-
+#include "AsyncAppDataReceiver.h"
 
 // -------------------------------------------------------------------------------
 //
@@ -10,7 +10,7 @@
 
 TcpAppDataServer::TcpAppDataServer(const SoftwareInfo& softwareInfo,
 								   E::SecurityLevel securityLevel,
-								   AppDataReceiverThread* appDataReceiverThread,
+								   AsyncAppDataReceiver* appDataReceiverThread,
 								   SignalStatesProcessingThread* signalStatesProcessingThread) :
 	Tcp::Server(softwareInfo, securityLevel, "AppDataServer"),
 	m_appDataReceiverThread(appDataReceiverThread),
