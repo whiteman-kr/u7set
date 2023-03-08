@@ -4,8 +4,9 @@
 #include "../lib/Ui/AppDataSourcesWidget.h"
 #include "../lib/Tuning/TuningTcpClient.h"
 #include "../lib/Ui/TuningSourcesWidget.h"
+#include "../ClientLib/AdsSourceStateConnection.h"
 #include "MonitorConfigController.h"
-#include "AdsConnection.h"
+
 
 class DialogDataSources : public QDialog
 {
@@ -36,10 +37,14 @@ private:
 
 	QVBoxLayout* m_mainLayout = nullptr;
 
+	// --
+	//
 	const MonitorConfigController& m_configController;
 	ILogFile* m_logFile = nullptr;
 
-	AdsSourceStateConnection m_tcpSignalClientCtrl{m_configController, m_logFile};
+	// --
+	//
+	Client::AdsSourceStateConnection m_tcpSignalClientCtrl{m_logFile};
 };
 
 #endif // DIALOGDATASOURCES_H

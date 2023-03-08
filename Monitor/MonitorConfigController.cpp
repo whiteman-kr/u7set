@@ -211,7 +211,7 @@ void MonitorConfigController::dump(const ConfigSettings& config) const
 	m_logFile.writeMessage(tr("AppDatService(s): %1.").arg(config.appDataServices.size()));
 	qDebug() << "AppDatService(s):";
 
-	for (const MonitorSettings::AppDataService& service : config.appDataServices)
+	for (const auto& service : config.appDataServices)
 	{
 		qDebug() << "Service: id, address: " << service.equipmentId << ", " << service.address.addressPortStr();
 		m_logFile.writeMessage(tr("Service: id, address: %1, %2.").arg(service.equipmentId).arg(service.address.addressPortStr()));
@@ -222,7 +222,7 @@ void MonitorConfigController::dump(const ConfigSettings& config) const
 	m_logFile.writeMessage(tr("AppDataRealTimeService(s): %1.").arg(config.appDataRealTimeServices.size()));
 	qDebug() << "AppDataRealTimeService(s):";
 
-	for (const MonitorSettings::AppDataService& service : config.appDataRealTimeServices)
+	for (const auto& service : config.appDataRealTimeServices)
 	{
 		qDebug() << "Service: id, address: " << service.equipmentId << ", " << service.address.addressPortStr();
 		m_logFile.writeMessage(tr("Service: id, address: %1, %2.").arg(service.equipmentId).arg(service.address.addressPortStr()));
@@ -232,7 +232,7 @@ void MonitorConfigController::dump(const ConfigSettings& config) const
 	//
 	m_logFile.writeMessage(tr("ArchiveService(s): %1.").arg(config.archiveServices.size()));
 	qDebug() << "ArchiveService(s):";
-	for (const MonitorSettings::ArchiveService& service : config.archiveServices)
+	for (const auto& service : config.archiveServices)
 	{
 		qDebug() << "Service: id, address: " << service.equipmentId << ", " << service.address.addressPortStr();
 		m_logFile.writeMessage(tr("Service: id, address: %1, %2.").arg(service.equipmentId).arg(service.address.addressPortStr()));
@@ -243,7 +243,7 @@ void MonitorConfigController::dump(const ConfigSettings& config) const
 	m_logFile.writeMessage(QString("TuningEnabled = %.1").arg(config.tuningEnabled));
 	if (config.tuningEnabled == true)
 	{
-		for (const MonitorSettings::TuningService& ts : config.tuningServices)
+		for (const auto& ts : config.tuningServices)
 		{
 			m_logFile.writeMessage(tr("TuningService (id, ip, port): %1, %2, %3.").arg(ts.equipmentId).arg(ts.clientRequestIP).arg(ts.clientRequestPort));
 			m_logFile.writeMessage(tr("TuningSources: %1.").arg(ts.drivenSources.join(", ")));

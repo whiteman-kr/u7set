@@ -1196,7 +1196,7 @@ bool MonitorSettings::writeToXml(XmlWriteHelper& xml) const
 
 	// AppDataServices
 	//
-	for (const AppDataService& ads : appDataServices)
+	for (const SoftwareEndpoint::AppDataService& ads : appDataServices)
 	{
 		xml.writeStartElement(XmlElement::APP_DATA_SERVICE);
 
@@ -1213,7 +1213,7 @@ bool MonitorSettings::writeToXml(XmlWriteHelper& xml) const
 
 	// ArchiveServices
 	//
-	for (const ArchiveService& as : archiveServices)
+	for (const SoftwareEndpoint::ArchiveService& as : archiveServices)
 	{
 		xml.writeStartElement(XmlElement::ARCHIVE_SERVICE);
 
@@ -1277,7 +1277,7 @@ bool MonitorSettings::readFromXml(XmlReadHelper& xml)
 	{
 		if (xml.name() == XmlElement::CFG_SERVICE1)
 		{
-			ConfigService cs;
+			SoftwareEndpoint::ConfigService cs;
 			QString clientIp;
 			int clientPort = 0;
 
@@ -1294,7 +1294,7 @@ bool MonitorSettings::readFromXml(XmlReadHelper& xml)
 
 		if (xml.name() == XmlElement::CFG_SERVICE2)
 		{
-			ConfigService cs;
+			SoftwareEndpoint::ConfigService cs;
 			QString clientIp;
 			int clientPort = 0;
 
@@ -1323,7 +1323,7 @@ bool MonitorSettings::readFromXml(XmlReadHelper& xml)
 
 		if (xml.name() == XmlElement::APP_DATA_SERVICE)
 		{
-			AppDataService ads;
+			SoftwareEndpoint::AppDataService ads;
 			QString clientIp;
 			int clientPort = 0;
 			QString rtIp;
@@ -1346,7 +1346,7 @@ bool MonitorSettings::readFromXml(XmlReadHelper& xml)
 
 		if (xml.name() == XmlElement::ARCHIVE_SERVICE)
 		{
-			ArchiveService archiveService;
+			SoftwareEndpoint::ArchiveService archiveService;
 
 			QString clientRequestIp;
 			int clientRequestPort = 0;
@@ -1375,7 +1375,7 @@ bool MonitorSettings::readFromXml(XmlReadHelper& xml)
 
 			for(int i = 0; i < count; i++)
 			{
-				TuningService tsc;
+				SoftwareEndpoint::TuningService tsc;
 
 				result &= xml.findElement(XmlElement::TUNING_SERVICE);
 
@@ -1409,9 +1409,9 @@ bool MonitorSettings::readFromXml(XmlReadHelper& xml)
 		xml.skipCurrentElement();
 	}
 
-	MonitorSettings::setShortId<AppDataService>(&appDataServices);
-	MonitorSettings::setShortId<ArchiveService>(&archiveServices);
-	MonitorSettings::setShortId<TuningService>(&tuningServices);
+	MonitorSettings::setShortId<SoftwareEndpoint::AppDataService>(&appDataServices);
+	MonitorSettings::setShortId<SoftwareEndpoint::ArchiveService>(&archiveServices);
+	MonitorSettings::setShortId<SoftwareEndpoint::TuningService>(&tuningServices);
 
 	result &= (appDataServices.empty() == false);
 

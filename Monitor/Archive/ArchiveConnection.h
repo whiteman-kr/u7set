@@ -16,7 +16,7 @@ class ArchiveConnectionTask : public QObject
 public:
 	ArchiveConnectionTask(ArchiveSource request,
 						  const SoftwareInfo& softwareInfo,
-						  const MonitorSettings::ArchiveService& archiveService,
+						  const SoftwareEndpoint::ArchiveService& archiveService,
 						  ILogFile* logFile);
 
 	ArchiveConnectionTask() = delete;
@@ -38,7 +38,7 @@ signals:
 	void dataReady(std::shared_ptr<ArchiveRequestResult> result, QString error);
 
 private:
-	MonitorSettings::ArchiveService m_archiveService;
+	SoftwareEndpoint::ArchiveService m_archiveService;
 	ArchiveTcpClient2* m_tcpClient = nullptr;
 	SimpleThread* m_clientThread = nullptr;
 };

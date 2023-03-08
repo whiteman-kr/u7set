@@ -1,0 +1,56 @@
+#pragma once
+
+#include "../lib/SoftwareSettings.h"
+#include "../OnlineLib/Tcp.h"
+#include "../OnlineLib/TcpClientStatistics.h"
+#include "../Proto/network.pb.h"
+#include "IAppSignalUpdater.h"
+#include "IRecentAppSignals.h"
+
+
+//		ADS_GET_APP_SIGNAL_STATE <------+
+//				|						|			Repeat it
+//				+------------------------
+//
+
+namespace Client
+{
+
+	class TcpSignalRecents : public Tcp::Client, public TcpClientStatistics, public HasLogFile
+	{
+		Q_OBJECT
+
+	public:
+		TcpSignalRecents(const SoftwareInfo& softwareInfo,
+						 const SoftwareEndpoint::AppDataService& adsInfo,
+						 IRecentAppSignals& recentAppSignals,
+						 IAppSignalUpdater& signalUpdater,
+						 ILogFile* logFile);
+		virtual ~TcpSignalRecents();
+
+	public:
+		virtual void onClientThreadStarted() override;
+		virtual void onClientThreadFinished() override;
+		virtual void onConnection() override;
+		virtual void onDisconnection() override;
+		virtual void onReplyTimeout() override;
+
+		virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
+
+	protected:
+		void requestSignalState();
+		void processSignalState(const QByteArray& data);
+
+	private:
+		SoftwareEndpoint::AppDataService m_serverSettings;
+		IRecentAppSignals& m_recentAppSignals;
+		IAppSignalUpdater& m_signalUpdater;
+
+	private:
+		// Cache protobug messages
+		//
+		::Network::GetAppSignalStateRequest m_getSignalStateRequest;
+		::Network::GetAppSignalStateReply m_getSignalStateReply;
+	};
+
+}

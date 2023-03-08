@@ -25,7 +25,7 @@ class ArchiveTcpClient2 : public Tcp::Client, public TcpClientStatistics
 public:
 	ArchiveTcpClient2(const ArchiveSource& request,
 					  const SoftwareInfo& softwareInfo,
-					  const MonitorSettings::ArchiveService& archiveService,
+					  const SoftwareEndpoint::ArchiveService& archiveService,
 					  ILogFile* logFile);
 
 	virtual ~ArchiveTcpClient2();
@@ -75,7 +75,7 @@ private:
 	//
 private:
 	HasLogFile m_logFile;
-	MonitorSettings::ArchiveService m_serverSettings;
+	SoftwareEndpoint::ArchiveService m_serverSettings;
 
 	// State
 	//

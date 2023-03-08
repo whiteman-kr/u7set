@@ -147,7 +147,7 @@ namespace Builder
 
 		m_tuningSources.clear();
 
-		for(const MonitorSettings::TuningService& tsc : settings->tuningServices)
+		for(const auto& tsc : settings->tuningServices)
 		{
 			std::shared_ptr<Hardware::DeviceObject> tuningServiceObject = m_equipment->deviceObject(tsc.equipmentId);
 			if (tuningServiceObject == nullptr)

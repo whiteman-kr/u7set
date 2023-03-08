@@ -1533,7 +1533,7 @@ bool MonitorSettingsGetter::readAppDataServiceAndArchiveSettings(const Builder::
 			return false;
 		}
 
-		AppDataService ads;
+		SoftwareEndpoint::AppDataService ads;
 		ads.equipmentId = appDataServiceId;
 		ads.address = adsSettings.clientRequestIP;
 		ads.realtimeAddress = adsSettings.rtTrendsRequestIP;
@@ -1568,7 +1568,7 @@ bool MonitorSettingsGetter::readAppDataServiceAndArchiveSettings(const Builder::
 			continue;
 		}
 
-		ArchiveService as;
+		SoftwareEndpoint::ArchiveService as;
 		as.equipmentId = archiveServiceId;
 		as.appDataServiceId = appDataServiceId;
 		as.address = archClientRequestAddress;
@@ -1615,7 +1615,7 @@ bool MonitorSettingsGetter::readTuningServiceSettings(const Builder::Context* co
 									   log);
 		BREAK_IF_FALSE(result);
 
-		TuningService tsc;
+		SoftwareEndpoint::TuningService tsc;
 
 		tsc.equipmentId = tuningServiceID;
 		tsc.clientRequestIP = tuningServiceClientIP.addressStr();

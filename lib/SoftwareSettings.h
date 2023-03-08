@@ -21,6 +21,44 @@ struct SessionParams
 	void loadFrom(const Network::SessionParams& sp);
 };
 
+namespace SoftwareEndpoint
+{
+	struct ConfigService
+	{
+		QString equipmentId;
+		HostAddressPort address;
+	};
+
+	struct TuningService
+	{
+		QString equipmentId;
+		QString shortenId;			// Short version of tuningServiceID
+		QString clientRequestIP;
+		int clientRequestPort = 0;
+		QStringList drivenSources;
+	};
+
+	struct AppDataService
+	{
+		QString equipmentId;
+		QString shortenId;			// Short version of equipmentId
+		HostAddressPort address;
+		HostAddressPort realtimeAddress;
+
+		bool operator==(const AppDataService&) const = default;
+	};
+
+	struct ArchiveService
+	{
+		QString equipmentId;		// ArchiveService equipmentId
+		QString shortenId;			// Short version of equipmentId
+		QString appDataServiceId;	// ID of the source AppDataService for this ArchiveService
+		HostAddressPort address;	// ArchiveService ip address and port
+
+		bool operator==(const ArchiveService&) const = default;
+	};
+}
+
 
 class SoftwareSettings
 {
@@ -405,53 +443,17 @@ private:
 class MonitorSettings : virtual public SoftwareSettings
 {
 public:
-	struct ConfigService
-	{
-		QString equipmentId;
-		HostAddressPort address;
-	};
+	SoftwareEndpoint::ConfigService configService1;
+	SoftwareEndpoint::ConfigService configService2;
 
-	struct TuningService
-	{
-		QString equipmentId;
-		QString shortenId;			// Short version of tuningServiceID
-		QString clientRequestIP;
-		int clientRequestPort = 0;
-		QStringList drivenSources;
-	};
-
-	struct AppDataService
-	{
-		QString equipmentId;
-		QString shortenId;			// Short version of equipmentId
-		HostAddressPort address;
-		HostAddressPort realtimeAddress;
-
-		bool operator==(const AppDataService&) const = default;
-	};
-
-	struct ArchiveService
-	{
-		QString equipmentId;		// ArchiveService equipmentId
-		QString shortenId;			// Short version of equipmentId
-		QString appDataServiceId;	// ID of the source AppDataService for this ArchiveService
-		HostAddressPort address;	// ArchiveService ip address and port
-
-		bool operator==(const ArchiveService&) const = default;
-	};
-
-public:
-	ConfigService configService1;
-	ConfigService configService2;
-
-	std::vector<AppDataService> appDataServices;
-	std::vector<ArchiveService> archiveServices;
+	std::vector<SoftwareEndpoint::AppDataService> appDataServices;
+	std::vector<SoftwareEndpoint::ArchiveService> archiveServices;
 
 	QString startSchemaId;
 	QString schemaTags;
 
 	bool tuningEnabled = false;
-	std::vector<TuningService> tuningServices;
+	std::vector<SoftwareEndpoint::TuningService> tuningServices;
 
 	bool tuningLogin = false;
 	QString tuningUserAccounts;

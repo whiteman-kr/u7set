@@ -63,7 +63,6 @@ SOURCES += main.cpp \
     ../lib/Ui/SchemaListWidget.cpp \
     ../lib/Ui/TabWidgetEx.cpp \
     ../lib/Ui/TagSelectorWidget.cpp \
-    AdsConnection.cpp \
     Archive/ArchiveConnection.cpp \
     Archive/ArchiveTcpClient2.cpp \
     Archive/ArchiveWidget.cpp \
@@ -82,7 +81,6 @@ SOURCES += main.cpp \
     MonitorConfigController.cpp \
     SchemaDrawStatistics.cpp \
     ScriptMonitorApplication.cpp \
-    TcpSignalClient.cpp \
     ../lib/Ui/DialogSignalInfo.cpp \
     ../lib/Ui/DialogSignalSearch.cpp \
     DialogColumns.cpp \
@@ -91,7 +89,6 @@ SOURCES += main.cpp \
 	Archive/DialogChooseArchiveSignals.cpp \
 	Archive/ArchiveModelView.cpp \
 	Archive/ArchiveData.cpp \
-    TcpSignalRecents.cpp \
 	MonitorSchemaManager.cpp \
 	SelectSchemaWidget.cpp \
 	../lib/Tuning/TuningSignalManager.cpp \
@@ -106,7 +103,6 @@ SOURCES += main.cpp \
     ../lib/Ui/DialogAlert.cpp \
     ../lib/Ui/DialogAbout.cpp \
     ../lib/Ui/DialogSourceInfo.cpp \
-    TcpAppSourcesState.cpp \
     ../lib/Ui/TuningSourcesWidget.cpp \
     ../lib/Ui/AppDataSourcesWidget.cpp \
     DialogDataSources.cpp \
@@ -129,7 +125,6 @@ HEADERS  += \
     ../lib/Ui/SchemaListWidget.h \
     ../lib/Ui/TabWidgetEx.h \
     ../lib/Ui/TagSelectorWidget.h \
-    AdsConnection.h \
     Archive/ArchiveConnection.h \
     Archive/ArchiveTcpClient2.h \
     Archive/ArchiveWidget.h \
@@ -150,7 +145,6 @@ HEADERS  += \
     ../lib/BuildInfo.h \
     MonitorSchemaWidget.h \
     MonitorConfigController.h \
-    TcpSignalClient.h \
     ../CommonLib/PropertyObject.h \
     ../lib/Ui/DialogSignalInfo.h \
     ../lib/Ui/DialogSignalSearch.h \
@@ -160,7 +154,6 @@ HEADERS  += \
 	Archive/DialogChooseArchiveSignals.h \
 	Archive/ArchiveModelView.h \
 	Archive/ArchiveData.h \
-    TcpSignalRecents.h \
     SelectSchemaWidget.h \
     MonitorSchemaManager.h \
     ../lib/Tuning/TuningSignalManager.h \
@@ -176,7 +169,6 @@ HEADERS  += \
     ../lib/Ui/DialogAlert.h \
     ../lib/Ui/DialogAbout.h \
     ../lib/Ui/DialogSourceInfo.h \
-    TcpAppSourcesState.h \
     ../lib/Ui/TuningSourcesWidget.h \
     ../lib/Ui/AppDataSourcesWidget.h \
     DialogDataSources.h \

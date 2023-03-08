@@ -2,6 +2,7 @@
 
 #include "../ClientLib/ConfigController.h"
 #include "../lib/ClientBehavior.h"
+#include "../lib/ComparatorSet.h"
 #include "../VFrame30/Schema.h"
 
 
@@ -11,9 +12,9 @@ struct ConfigSettings
 
 	Client::ConfigurationInfo configInfo;
 
-	std::vector<MonitorSettings::AppDataService> appDataServices;
-	std::vector<MonitorSettings::AppDataService> appDataRealTimeServices;
-	std::vector<MonitorSettings::ArchiveService> archiveServices;
+	std::vector<SoftwareEndpoint::AppDataService> appDataServices;
+	std::vector<SoftwareEndpoint::AppDataService> appDataRealTimeServices;
+	std::vector<SoftwareEndpoint::ArchiveService> archiveServices;
 
 	QString startSchemaId;
 	QString globalScript;
@@ -24,7 +25,7 @@ struct ConfigSettings
 	// Tuning settings
 	//
 	bool tuningEnabled = false;
-	std::vector<MonitorSettings::TuningService> tuningServices;
+	std::vector<SoftwareEndpoint::TuningService> tuningServices;
 
 	bool tuningLogin = false;
 	QStringList tuningUserAccounts;

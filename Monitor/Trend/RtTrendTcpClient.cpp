@@ -4,10 +4,10 @@
 
 RtTrendTcpClient::RtTrendTcpClient(const SoftwareInfo& softwareInfo,
 								   const HostAddressPort& serverAddressPort,
-								   QString /*serviceEquipmentId*/,
+								   QString serviceEquipmentId,
 								   const ISignalDataServer& signalDataServer,
 								   ILogFile* logFile) :
-	Tcp::Client(softwareInfo, serverAddressPort, serverAddressPort, "RtTrendTcpClient"),
+	Tcp::Client(softwareInfo, serverAddressPort, serverAddressPort, "RtTrendTcpClient", serviceEquipmentId),
 	TcpClientStatistics(this),
 	m_signalDataServer(signalDataServer),
 	m_logFile(logFile, "RtTrendTcpClient")

@@ -46,11 +46,25 @@ CONFIG(release, debug|release) {
 }
 
 HEADERS += \
+    AdsConnection.h \
+	AdsSourceStateConnection.h \
+	AppSignalManager.h \
     ConfigController.h \
-    Stable.h
+    IAppSignalUpdater.h \
+    IRecentAppSignals.h \
+	Stable.h \
+	TcpAppSourcesState.h \
+	TcpSignalClient.h \
+	TcpSignalRecents.h
 
 SOURCES += \
-    ConfigController.cpp
+    AdsConnection.cpp \
+	AdsSourceStateConnection.cpp \
+	AppSignalManager.cpp \
+	ConfigController.cpp \
+	TcpAppSourcesState.cpp \
+	TcpSignalClient.cpp \
+	TcpSignalRecents.cpp
 
 DISTFILES += \
 

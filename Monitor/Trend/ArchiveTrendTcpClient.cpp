@@ -3,9 +3,9 @@
 
 
 ArchiveTrendTcpClient::ArchiveTrendTcpClient(const SoftwareInfo& softwareInfo,
-											 const MonitorSettings::ArchiveService& server,
+											 const SoftwareEndpoint::ArchiveService& server,
 											 ILogFile* logFile) :
-	Tcp::Client(softwareInfo, server.address, server.address, "ArchiveTrendTcpClient"),
+	Tcp::Client(softwareInfo, server.address, server.address, "ArchiveTrendTcpClient", server.equipmentId),
 	TcpClientStatistics(this),
 	m_server(server),
 	m_logFile(logFile, "ArchiveTrendTcpClient")

@@ -15,7 +15,7 @@ class ArchiveTrendTcpClient : public Tcp::Client, public TcpClientStatistics
 
 public:
 	ArchiveTrendTcpClient(const SoftwareInfo& softwareInfo,
-						  const MonitorSettings::ArchiveService& server,
+						  const SoftwareEndpoint::ArchiveService& server,
 						  ILogFile* logFile);
 	virtual ~ArchiveTrendTcpClient();
 
@@ -73,7 +73,7 @@ public:
 private:
 	int m_periodicTimerId = 0;
 
-	const MonitorSettings::ArchiveService m_server;
+	const SoftwareEndpoint::ArchiveService m_server;
 	HasLogFile m_logFile;
 
 	struct RequestQueue

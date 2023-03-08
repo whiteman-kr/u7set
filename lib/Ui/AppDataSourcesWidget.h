@@ -4,7 +4,7 @@
 #include <QDialog>
 
 #include "DialogSourceInfo.h"
-#include "AdsConnection.h"
+#include "../ClientLib/AdsSourceStateConnection.h"
 
 class TcpAppSourcesState;
 
@@ -17,16 +17,15 @@ class DialogAppDataSourceInfo : public DialogSourceInfo
 	Q_OBJECT
 
 public:
-	explicit DialogAppDataSourceInfo(const AdsSourceStateConnection& adsSourceStateConnection, QWidget* parent, quint64 id);
+	explicit DialogAppDataSourceInfo(const Client::AdsSourceStateConnection& adsSourceStateConnection, QWidget* parent, quint64 id);
 	virtual ~DialogAppDataSourceInfo();
 
 private:
 	void updateData() override;
 
 private:
-	const AdsSourceStateConnection& m_adsSourceStateConnection;
+	const Client::AdsSourceStateConnection& m_adsSourceStateConnection;
 	int m_noStateInfoTimeout = 0;
-
 };
 
 //
@@ -38,7 +37,7 @@ class AppDataSourcesWidget : public QWidget
 	Q_OBJECT
 
 public:
-	explicit AppDataSourcesWidget(const AdsSourceStateConnection& connection, QWidget* parent);
+	explicit AppDataSourcesWidget(const Client::AdsSourceStateConnection& connection, QWidget* parent);
 	virtual ~AppDataSourcesWidget();
 
 	bool treeIsFocused() const;
@@ -86,7 +85,7 @@ private:
 
 	const int m_updateIntervalMs = 250;
 
-	const AdsSourceStateConnection& m_adsSourceStateConnection;
+	const Client::AdsSourceStateConnection& m_adsSourceStateConnection;
 
 	QWidget* m_parent = nullptr;
 

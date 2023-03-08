@@ -98,6 +98,11 @@ DialogDataSources::DialogDataSources(const MonitorConfigController& configContro
 		setMinimumSize(1100, 300);
 	}
 
+	// --
+	//
+	m_tcpSignalClientCtrl.updateConnections(m_configController.softwareInfo(),
+											m_configController.configuration().appDataServices);
+
 	return;
 }
 
@@ -115,6 +120,9 @@ void DialogDataSources::setTuningTcpClients(std::vector<TuningTcpClient*> tcpTun
 
 void DialogDataSources::slot_configurationArrived(ConfigSettings configuration)
 {
+	m_tcpSignalClientCtrl.updateConnections(m_configController.softwareInfo(),
+											configuration.appDataServices);
+
 	m_tuningSourcesLabel->setVisible(configuration.tuningEnabled);
 	m_tuningSourcesWidget->setVisible(configuration.tuningEnabled);
 

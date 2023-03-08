@@ -22,7 +22,7 @@ bool TuningWriteCommand::load(const Network::TuningWriteCommand& message)
 // TuningTcpClient
 //
 TuningTcpClient::TuningTcpClient(const SoftwareInfo& softwareInfo, const QString& tuningServiceId, bool singleLmControlMode, TuningSignalManager& signalManager) :
-	Tcp::Client(softwareInfo, HostAddressPort("0.0.0.0", 0), "TuningTcpClient"),
+	Tcp::Client(softwareInfo, HostAddressPort("0.0.0.0", 0), "TuningTcpClient", tuningServiceId),
 	m_tuningServiceId(tuningServiceId),
 	m_singleLmControlMode(singleLmControlMode),
 	m_instanceId(softwareInfo.equipmentID()),

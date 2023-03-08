@@ -1569,6 +1569,11 @@ namespace Tcp
 		return localSoftwareInfo().equipmentID();
 	}
 
+	QString Client::connectToServerID() const
+	{
+		return m_serverEquipmentID;
+	}
+
 	HostAddressPort Client::currentServerAddressPort() const
 	{
 		return m_selectedServer;

@@ -224,7 +224,7 @@ void MonitorTrendsWidget::signalsButton()
 {
 	// Get archiev services
 	//
-	std::vector<MonitorSettings::ArchiveService> archiveServers = m_configController.configuration().archiveServices;
+	auto archiveServers = m_configController.configuration().archiveServices;
 	std::vector<TrendLib::ArchiveServer> trendArchiveServers;
 	trendArchiveServers.reserve(archiveServers.size());
 
@@ -393,20 +393,20 @@ void MonitorTrendsWidget::dropEvent(QDropEvent* event)
 			// Find the first suitable archive server
 			//
 			auto archServerIt = std::find_if(archiveServers.begin(), archiveServers.end(),
-						[&appSignalParam, this](const MonitorSettings::ArchiveService& as)
+						[&appSignalParam, this](const SoftwareEndpoint::ArchiveService& as)
 						{
 							return m_signalManager.dataServiceHasSignal(as.appDataServiceId, appSignalParam.appSignalId());
 						});
 
 			auto appDataServerIt = std::find_if(appDataServers.begin(), appDataServers.end(),
-						[&appSignalParam, this](const MonitorSettings::AppDataService& ads)
+						[&appSignalParam, this](const SoftwareEndpoint::AppDataService& ads)
 						{
 							return m_signalManager.dataServiceHasSignal(ads.equipmentId, appSignalParam.appSignalId());
 						});
 
 			if (archServerIt != archiveServers.end())
 			{
-				const MonitorSettings::ArchiveService& as = *archServerIt;
+				const SoftwareEndpoint::ArchiveService& as = *archServerIt;
 				TrendLib::ArchiveServer trendArchiveServer{as.equipmentId, as.shortenId, as.appDataServiceId};
 
 				TrendLib::TrendSignalParam tsp{appSignalParam, trendArchiveServer};
@@ -420,7 +420,7 @@ void MonitorTrendsWidget::dropEvent(QDropEvent* event)
 				// 
 				if (appDataServerIt != appDataServers.end())
 				{
-					const MonitorSettings::AppDataService& ads = *appDataServerIt;
+					const SoftwareEndpoint::AppDataService& ads = *appDataServerIt;
 
 					TrendLib::ArchiveServer trendArchiveServer{"", "", ads.equipmentId};
 					TrendLib::TrendSignalParam tsp{appSignalParam, trendArchiveServer};

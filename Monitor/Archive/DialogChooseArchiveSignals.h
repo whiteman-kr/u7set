@@ -16,7 +16,7 @@ class DialogChooseArchiveSignals : public QDialog
 
 public:
 	DialogChooseArchiveSignals(const MonitorSignalManager* signalManager,
-							   const std::vector<MonitorSettings::ArchiveService>& archiveServices,
+							   const std::vector<SoftwareEndpoint::ArchiveService>& archiveServices,
 							   const ArchiveSource& init,
 							   QWidget* parent);
 	virtual ~DialogChooseArchiveSignals();
@@ -69,7 +69,7 @@ private:
 	Ui::DialogChooseArchiveSignals* ui;
 	QCompleter* m_filterCompleter = nullptr;
 
-	std::vector<MonitorSettings::ArchiveService> m_archiveServices;
+	std::vector<SoftwareEndpoint::ArchiveService> m_archiveServices;
 
 	// --
 	//

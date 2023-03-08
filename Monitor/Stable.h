@@ -75,7 +75,6 @@
 #endif	// Visual Leak Detector
 
 
-#include "../AppSignalLib/AppSignalManager.h"
 #include "../lib/Tuning/TuningSignalManager.h"
 #include "ScriptMonitorApplication.h"
 

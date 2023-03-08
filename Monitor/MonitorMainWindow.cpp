@@ -14,13 +14,13 @@
 #include "../lib/Ui/SchemaListWidget.h"
 
 MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const SoftwareInfo& softwareInfo, QWidget* parent) :
-	QMainWindow(parent),
-	m_LogFile(qAppName(), QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + softwareInfo.equipmentID()),
-    m_tuningLogFile(qAppName() + "Tuning", QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + softwareInfo.equipmentID()),
-    m_instanceResolver(instanceResolver),
-	m_configController(softwareInfo, MonitorAppSettings::instance().configuratorAddress1(), MonitorAppSettings::instance().configuratorAddress2(), &m_LogFile),
-	m_signalManager{m_configController, &m_LogFile},
-	m_schemaManager(m_configController, m_signalManager),
+	QMainWindow{parent},
+	m_LogFile{qAppName(), QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + softwareInfo.equipmentID()},
+	m_tuningLogFile{qAppName() + "Tuning", QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + softwareInfo.equipmentID()},
+	m_instanceResolver{instanceResolver},
+	m_configController{softwareInfo, MonitorAppSettings::instance().configuratorAddress1(), MonitorAppSettings::instance().configuratorAddress2(), &m_LogFile},
+	m_signalManager{&m_LogFile},
+	m_schemaManager{m_configController, m_signalManager},
 	m_dialogAlert(this)
 {
 	setWindowTitle(MonitorAppSettings::instance().windowCaption());
@@ -718,7 +718,7 @@ void MonitorMainWindow::runTuningTcpClients()
 		return;
 	}
 
-	for (const MonitorSettings::TuningService& ts : m_configController.configuration().tuningServices)
+	for (const auto& ts : m_configController.configuration().tuningServices)
 	{
 		// TuningClientTcpClient
 		//
@@ -778,7 +778,7 @@ void MonitorMainWindow::updateStatusBar()
 	//
 	{
 		showSoftwareConnection("AppDataService",
-							   m_tcpSignalClientCtrl.tcpSignalConnStates(),
+							   m_adsConnection.tcpSignalConnStates(),
 							   m_statusBarAppDataConnection);
 	}
 
@@ -1555,6 +1555,11 @@ void MonitorMainWindow::slot_updateActions(bool schemaWidgetSelected)
 
 void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
 {
+	// Update AppSignalManager with specific data
+	//
+	m_adsConnection.updateConnections(m_configController.softwareInfo(), configuration.appDataServices);
+	m_signalManager.setSetpoints(m_configController.setpoints());
+
 	// Log out from tuning
 	//
 	if (m_tuningUserManager.isLoggedIn() == true)

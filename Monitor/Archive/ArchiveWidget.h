@@ -67,7 +67,7 @@ private:
 
 	// These three updated on slot_configurationArrived
 	//
-	std::vector<MonitorSettings::ArchiveService> m_archiveServices;
+	std::vector<SoftwareEndpoint::ArchiveService> m_archiveServices;
 	QString m_projectName;
 	QString m_softwareId;
 
