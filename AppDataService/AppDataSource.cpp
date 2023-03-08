@@ -72,7 +72,9 @@ AppDataSource::AppDataSource(const DataSource& dataSource) :
 	//
 	*static_cast<DataSource*>(this) = dataSource;
 
-	initQueue();
+	m_cachedDataUID = appDataUID();
+
+	initParsingBuffers(appDataFramesQuantity());
 }
 
 // Contructor for object NOT really used for packet receiving.

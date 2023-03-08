@@ -50,6 +50,8 @@ void AsyncAppDataReceiver::run()
 
 	m_thisThread = QThread::currentThread();
 
+	startAppDataProcessingThreads();
+
 	try
 	{
 		m_ioContext = new io_context;
@@ -409,6 +411,11 @@ void AsyncAppDataReceiver::receivePackets(const error_code& error, size_t bytesR
 			}
 		}
 	}
+}
+
+void AsyncAppDataReceiver::startAppDataProcessingThreads()
+{
+
 }
 
 QString AsyncAppDataReceiver::appDataReceivingIPStr() const

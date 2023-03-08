@@ -147,7 +147,7 @@ public:
 	DataSourceOnline();
 	~DataSourceOnline();
 
-	bool initQueue();
+	bool initParsingBuffers(int framesQuantity);
 
 	//
 
@@ -160,15 +160,6 @@ public:
 
 	quint64 receivedDataID() const { return m_receivedDataID; }
 	void setReceivedDataID(quint64 dataID) { m_receivedDataID = dataID; }
-
-	int rupFramesQueueSize() const { return m_rupFramesQueueSize; }
-	void setRupFramesQueueSize(int size) { m_rupFramesQueueSize = size; }
-
-	int rupFramesQueueCurSize() const { return m_rupFramesQueueCurSize; }
-	void setRupFramesQueueCurSize(int size) { m_rupFramesQueueCurSize = size; }
-
-	int rupFramesQueueCurMaxSize() const { return m_rupFramesQueueCurMaxSize; }
-	void setRupFramesQueueCurMaxSize(int size) { m_rupFramesQueueCurMaxSize = size; }
 
 	qint64 rupFramePlantTime() const { return m_rupFramePlantTime; }
 	QString rupFramePlantTimeStr() const;
@@ -244,15 +235,14 @@ public:
 	bool takeProcessingOwnership(const QThread* processingThread);
 	bool releaseProcessingOwnership(const QThread* processingThread);
 
-	bool processRupFrameTimeQueue(const QThread* thread);
-	bool getDataToParsing(Times* times,
+	bool parseNextBuffer(const QThread* thread);
+
+/*	bool getDataToParsing(Times* times,
 						  bool* isSimPacket,
 						  quint16* packetNo,
 						  const char** rupData,
 						  int* rupDataSize,
-						  bool* dataReceivingTimeout);
-
-	bool rupFramesQueueIsEmpty() const { return m_rupFrameTimeQueue.isEmpty(QThread::currentThread()); }
+						  bool* dataReceivingTimeout);*/
 
 	// Used by PacketViewer
 	//
@@ -262,29 +252,28 @@ public:
 	void setTimeErrLog(CircularLoggerShared timeErrLog) { m_timeErrLog = timeErrLog; }
 
 private:
-	bool collect(const RupFrameTime& rupFrameTime);
-	bool reallocate(quint32 framesQuantity);
+	bool moveToNextWriteBuffer(const QThread* thread);
+
+//	bool collect(const RupFrameTime& rupFrameTime);
 
 	void calcDataReceivingRate();
 
 	QString getTimeStr(qint64 timeMs) const;
 	QString getTimeStr(const Rup::TimeStamp& ts) const;
 
-private:
+protected:
 	// static information
 	//
 	QVector<int> m_relatedSignalIndexes;
 	CircularLoggerShared m_timeErrLog;
+
+	quint32 m_cachedDataUID = 0;
 
 	// dynamic state information
 	//
 	E::DataSourceState m_state = E::DataSourceState::NoData;
 	qint64 m_uptime = 0;										// in seconds!
 	quint64 m_receivedDataID = 0;
-
-	qint32 m_rupFramesQueueSize = 0;
-	qint32 m_rupFramesQueueCurSize = 0;
-	qint32 m_rupFramesQueueCurMaxSize = 0;
 
 	qint64 m_rupFramePlantTime = 0;
 	quint16 m_rupFrameNumerator = 0;
@@ -320,19 +309,37 @@ private:
 
 	//
 
-	FastThreadSafeQueue<RupFrameTime> m_rupFrameTimeQueue;				// filled by AppDataReceiver
-
-	//
-
 	std::atomic<const QThread*> m_processingOwner = { nullptr };
 
 	//
 
-	quint32 m_framesQuantityAllocated = 0;
-	Rup::Header* m_rupFramesHeaders = nullptr;
-	Rup::Data* m_rupFramesData = nullptr;
-	qint64 m_frame0ServerTime = 0;
-	bool m_isSimPacket = false;
+	struct ParsingBuffer
+	{
+		quint16 framesQuantity = 0;
+		Rup::Header* rupFramesHeaders = nullptr;	// array of REVERSED headers
+		Rup::Data* rupFramesData = nullptr;
+		qint64 frame0ServerTime = 0;
+		bool isSimPacket = false;
+
+		std::atomic<bool> readyToParsing{false};	// modified by both Receiver and ProcessingThread
+
+		ParsingBuffer();
+		~ParsingBuffer();
+
+		void clear();
+		void allocate(int frmsCount);
+		bool copyRupFrame(int frameNo, qint64 serverTime,
+						  bool simFrame, const Rup::Frame& rupFrame);
+	};
+
+	static const int PARSING_BUFFERS_COUNT = 5;
+
+	std::vector<ParsingBuffer*> m_parsingBuffers;
+
+	QueueIndex m_writeBufferIndex = 0;		// modified by packet Receiver only in pushRupFrame
+	QueueIndex m_readBufferIndex = 0;		// modified only by ProcessingThread
+
+	SimpleMutex m_parsingBuffersMutex;		// locks only while m_writeBufferIndex and m_readBufferIndex modyfied
 
 	// result variables
 

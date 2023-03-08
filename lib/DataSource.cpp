@@ -424,35 +424,27 @@ quint64 DataSource::generateID() const
 const QString DataSourceOnline::DATE_TIME_FORMAT_STR("%1:%2:%3.%4 %5/%6/%7");
 
 DataSourceOnline::DataSourceOnline() :
-	m_rupFrameTimeQueue(10)
+	m_writeBufferIndex(PARSING_BUFFERS_COUNT),
+	m_readBufferIndex(PARSING_BUFFERS_COUNT)
 {
 }
 
 DataSourceOnline::~DataSourceOnline()
 {
-	if (m_rupFramesHeaders != nullptr)
-	{
-		delete [] m_rupFramesHeaders;
-	}
-
-	if (m_rupFramesData != nullptr)
-	{
-		delete [] m_rupFramesData;
-	}
 }
 
-bool DataSourceOnline::initQueue()
+bool DataSourceOnline::initParsingBuffers(int framesQuantity)
 {
-	int queueSize = FastThreadSafeQueue<RupFrameTime>::MIN_QUEUE_SIZE;
+	m_parsingBuffers.clear();
+	m_parsingBuffers.reserve(PARSING_BUFFERS_COUNT);
 
-	if (appDataFramesQuantity() > 0)
+	for(int i = 0; i < PARSING_BUFFERS_COUNT; i++)
 	{
-		queueSize = appDataFramesQuantity() * 200 * 3;	// 3 seconds queue;
+		ParsingBuffer* pb = new ParsingBuffer;
+		pb->allocate(framesQuantity);
+
+		m_parsingBuffers.push_back(pb);
 	}
-
-	m_rupFrameTimeQueue.resize(queueSize);
-
-	setRupFramesQueueSize(queueSize);
 
 	return true;
 }
@@ -485,21 +477,61 @@ void DataSourceOnline::pushRupFrame(quint32 sourceIP,
 									const Rup::Frame& rupFrame,
 									const QThread* thread)
 {
-	RupFrameTime* rupFrameTime = m_rupFrameTimeQueue.beginPush(thread);
+	m_receivedFramesCount++;
 
-	if (rupFrameTime != nullptr)
+	if (m_parsingBuffers[m_writeBufferIndex]->readyToParsing == true)
 	{
-		rupFrameTime->sourceIP = sourceIP;
-		rupFrameTime->serverTime = serverTime;
-		rupFrameTime->isSimFrame = isSimFrame;
-		memcpy(&rupFrameTime->rupFrame, &rupFrame, sizeof(rupFrame));
-	}
-	else
-	{
-		// is not an error - queue is full
+		if (moveToNextWriteBuffer(thread) == false)
+		{
+			m_lostPacketCount++;
+			return;
+		}
 	}
 
-	m_rupFrameTimeQueue.completePush(thread, &m_rupFramesQueueCurSize, &m_rupFramesQueueCurMaxSize);
+	//
+
+	ParsingBuffer& writeBuffer = *m_parsingBuffers[m_writeBufferIndex];
+
+	quint16 framesQuantity = reverseUint16(rupFrame.header.framesQuantity);
+
+	if (framesQuantity != writeBuffer.framesQuantity)
+	{
+		Q_ASSERT(false);
+		m_errorFramesQuantity++;
+		return;
+	}
+
+	//
+
+	quint16 frameNo = reverseUint16(rupFrame.header.frameNumber);
+
+	if (frameNo >= writeBuffer.framesQuantity)
+	{
+		Q_ASSERT(false);
+		m_errorFrameNo++;
+		return;
+	}
+
+	//
+
+	quint16 protocolVersion = reverseUint16(rupFrame.header.protocolVersion);
+
+	if (protocolVersion != rupVersion())
+	{
+		m_errorProtocolVersion++;
+		return;
+	}
+
+	//
+
+	bool readyToParsing = writeBuffer.copyRupFrame(frameNo, serverTime, isSimFrame, rupFrame);
+
+	if (readyToParsing == true)
+	{
+		moveToNextWriteBuffer(thread);
+
+		// wake up waiting processing threads
+	}
 }
 
 bool DataSourceOnline::takeProcessingOwnership(const QThread* processingThread)
@@ -524,9 +556,9 @@ bool DataSourceOnline::releaseProcessingOwnership(const QThread* processingThrea
 	return result;
 }
 
-bool DataSourceOnline::processRupFrameTimeQueue(const QThread* thread)
+bool DataSourceOnline::parseNextBuffer(const QThread* thread)
 {
-	int count = 0;
+/*	int count = 0;
 
 	m_dataReadyToParsing = false;
 
@@ -615,14 +647,6 @@ bool DataSourceOnline::processRupFrameTimeQueue(const QThread* thread)
 
 			rupFrameHeader.reverseBytes();
 
-			// rupFrame's protocol version checking
-			//
-			if (rupFrameHeader.protocolVersion != 5)
-			{
-				m_errorProtocolVersion++;
-				break;
-			}
-
 			// rupFrame's data ID checking
 			//
 			m_receivedDataID = rupFrameHeader.dataId;
@@ -641,20 +665,6 @@ bool DataSourceOnline::processRupFrameTimeQueue(const QThread* thread)
 					qDebug() << C_STR(msg);
 				}
 
-				break;
-			}
-
-			// RupFrame's framesQuantity and frameNo checkng
-			//
-			if (rupFrameHeader.framesQuantity > Rup::MAX_FRAME_COUNT)
-			{
-				m_errorFramesQuantity++;
-				break;
-			}
-
-			if (rupFrameHeader.frameNumber >= rupFrameHeader.framesQuantity)
-			{
-				m_errorFrameNo++;
 				break;
 			}
 
@@ -708,8 +718,12 @@ bool DataSourceOnline::processRupFrameTimeQueue(const QThread* thread)
 	}
 	while(m_dataReadyToParsing == false && count < 100);
 
-	return m_dataReadyToParsing;
+	return m_dataReadyToParsing;*/
+
+	return true;
 }
+
+/*
 
 bool DataSourceOnline::getDataToParsing(Times* times,
 										bool* isSimPacket,
@@ -745,64 +759,17 @@ bool DataSourceOnline::getDataToParsing(Times* times,
 
 	return true;
 }
+*/
 
+/*
 bool DataSourceOnline::collect(const RupFrameTime& rupFrameTime)
 {
 	// rupFrameTime.rupFrame.header already reverseByted !
 	//
 	const Rup::Header& rupFrameHeader = rupFrameTime.rupFrame.header;
 
-	quint32 framesQuantity = rupFrameHeader.framesQuantity;
 
-	if (framesQuantity > m_framesQuantityAllocated)
-	{
-		if (reallocate(framesQuantity) == false)
-		{
-			return false;
-		}
-	}
 
-	quint32 frameNumber = rupFrameHeader.frameNumber;
-
-	if (frameNumber >= framesQuantity)
-	{
-		m_errorFrameNo++;
-		return false;
-	}
-
-	if (frameNumber >= m_framesQuantityAllocated)
-	{
-		assert(false);
-		return false;
-	}
-
-	if (frameNumber == 0)
-	{
-		qint64 rupFrameServerTime = rupFrameTime.serverTime;
-
-		if (rupFrameServerTime <= m_frame0ServerTime)
-		{
-			rupFrameServerTime = m_frame0ServerTime + 1;
-		}
-
-		m_frame0ServerTime = rupFrameServerTime;
-
-		m_isSimPacket = rupFrameTime.isSimFrame;
-	}
-	else
-	{
-		m_isSimPacket |= rupFrameTime.isSimFrame;
-	}
-
-	// copy RUP frame header
-	//
-	memcpy(m_rupFramesHeaders + frameNumber, &rupFrameHeader, sizeof(rupFrameHeader));
-
-	// copy RUP frame data
-	//
-	memcpy(m_rupFramesData + frameNumber, &rupFrameTime.rupFrame.data, sizeof(rupFrameTime.rupFrame.data));
-
-	m_receivedFramesCount++;
 
 	// check packet parts
 	//
@@ -896,37 +863,7 @@ bool DataSourceOnline::collect(const RupFrameTime& rupFrameTime)
 	return true;
 }
 
-bool DataSourceOnline::reallocate(quint32 framesQuantity)
-{
-	m_dataReadyToParsing = false;					// !!!  m_rupFramesData will be freed
-
-	if (m_rupFramesHeaders != nullptr)
-	{
-		delete [] m_rupFramesHeaders;
-		m_rupFramesHeaders = nullptr;
-	}
-
-	if (m_rupFramesData != nullptr)
-	{
-		delete [] m_rupFramesData;
-		m_rupFramesData = nullptr;
-	}
-
-	m_framesQuantityAllocated = 0;
-
-	if (framesQuantity < 1 || framesQuantity > Rup::MAX_FRAME_COUNT)
-	{
-		assert(false);
-		return false;
-	}
-
-	m_rupFramesHeaders = new Rup::Header[framesQuantity];
-	m_rupFramesData = new Rup::Data[framesQuantity];
-
-	m_framesQuantityAllocated = framesQuantity;
-
-	return true;
-}
+*/
 
 void DataSourceOnline::calcDataReceivingRate()
 {
@@ -997,6 +934,111 @@ QString DataSourceOnline::getTimeStr(const Rup::TimeStamp& ts) const
 				arg(ts.month, 2, 10, QLatin1Char('0')).
 				arg(ts.year, 4, 10, QLatin1Char('0'));
 }
+
+bool DataSourceOnline::moveToNextWriteBuffer(const QThread* thread)
+{
+	SimpleMutexLocker locker(&m_parsingBuffersMutex, thread);
+
+	m_parsingBuffers[m_writeBufferIndex]->readyToParsing = true;
+
+	m_writeBufferIndex++;
+
+	if (m_writeBufferIndex == m_readBufferIndex ||
+		m_parsingBuffers[m_writeBufferIndex]->readyToParsing == true)		// buffer is not parsed yet
+	{
+		m_writeBufferIndex--;				// return to prev writeIndexValue
+		return false;
+	}
+
+	return true;
+}
+
+DataSourceOnline::ParsingBuffer::ParsingBuffer()
+{
+}
+
+DataSourceOnline::ParsingBuffer::~ParsingBuffer()
+{
+	clear();
+}
+
+void DataSourceOnline::ParsingBuffer::clear()
+{
+	framesQuantity = 0;
+	DELETE_IF_NOT_NULL(rupFramesHeaders);
+	DELETE_ARRAY_IF_NOT_NULL(rupFramesData);
+	frame0ServerTime = 0;
+	isSimPacket = false;
+	readyToParsing = false;
+}
+
+void DataSourceOnline::ParsingBuffer::allocate(int frmsCount)
+{
+	Q_ASSERT(frmsCount > 0 && frmsCount <= Rup::MAX_FRAME_COUNT);
+
+	clear();
+
+	framesQuantity = static_cast<quint16>(frmsCount);
+
+	rupFramesHeaders = new Rup::Header[framesQuantity];
+	rupFramesData = new Rup::Data[framesQuantity];
+}
+
+bool DataSourceOnline::ParsingBuffer::copyRupFrame(int frameNo, qint64 serverTime,
+												   bool simFrame, const Rup::Frame& rupFrame)
+{
+	Q_ASSERT(readyToParsing == false);
+
+	// frameNo already checked!
+
+	Q_ASSERT(sizeof(rupFramesHeaders[0]) == sizeof(rupFrame.header));
+
+	memcpy(&rupFramesHeaders[frameNo], &rupFrame.header, sizeof(rupFrame.header));
+	rupFramesHeaders[frameNo].reverseBytes();
+
+	Q_ASSERT(sizeof(rupFramesData[0]) == sizeof(rupFrame.data));
+
+	memcpy(&rupFramesData[frameNo], &rupFrame.data, sizeof(rupFrame.data));
+
+	if (frameNo == 0)
+	{
+		if (serverTime <= frame0ServerTime)
+		{
+			serverTime = frame0ServerTime + 1;
+		}
+
+		frame0ServerTime = serverTime;
+
+		isSimPacket = simFrame;
+	}
+	else
+	{
+		isSimPacket |= simFrame;
+	}
+
+	bool dataReadyToParsing = true;
+
+	if (framesQuantity > 1)
+	{
+		quint16 numerator = rupFramesHeaders[frameNo].numerator;
+
+		for(int i = 0; i < framesQuantity; i++)
+		{
+			if (rupFramesHeaders[i].frameSize == 0 ||
+				rupFramesHeaders[i].numerator != numerator)
+			{
+				dataReadyToParsing = false;
+				break;
+			}
+		}
+	}
+
+	return dataReadyToParsing;
+}
+
+
+
+
 
 
 

@@ -39,8 +39,9 @@ private:
 	bool isSocketWorkable() const;
 	void closeSocket();
 	void startReceive();
-
 	void receivePackets(const error_code& error, std::size_t bytesReceived);
+
+	void startAppDataProcessingThreads();
 
 	QString appDataReceivingIPStr() const;
 

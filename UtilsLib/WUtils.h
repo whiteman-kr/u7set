@@ -82,6 +82,11 @@
 										ptr = nullptr; \
 									}
 
+#define DELETE_ARRAY_IF_NOT_NULL(ptr)		if (ptr != nullptr) \
+											{	\
+												delete [] ptr; \
+												ptr = nullptr; \
+											}
 
 #define DEBUG_STOP					{ int a = 0; a++; }
 
