@@ -1248,7 +1248,7 @@ bool MonitorSettings::writeToXml(XmlWriteHelper& xml) const
 
 	// --
 	//
-	xml.writeStartElement(XmlElement::SECURITY);
+	xml.writeStartElement(XmlElement::TUNING_SECURITY);
 
 	xml.writeBoolAttribute(EquipmentPropNames::TUNING_LOGIN, tuningLogin);
 	xml.writeStringAttribute(EquipmentPropNames::TUNING_USER_ACCOUNTS, tuningUserAccounts);
@@ -1312,14 +1312,12 @@ bool MonitorSettings::readFromXml(XmlReadHelper& xml)
 		if (xml.name() == EquipmentPropNames::START_SCHEMA_ID)
 		{
 			startSchemaId = xml.elementText();
-			xml.skipCurrentElement();
 			continue;
 		}
 
 		if (xml.name() == EquipmentPropNames::SCHEMA_TAGS)
 		{
 			schemaTags = xml.elementText();
-			xml.skipCurrentElement();
 			continue;
 		}
 
@@ -1387,13 +1385,15 @@ bool MonitorSettings::readFromXml(XmlReadHelper& xml)
 				result &= xml.readStringListAttribute(XmlAttribute::DRIVEN_SOURCES, &tsc.drivenSources);
 
 				tuningServices.push_back(tsc);
+
+				xml.skipCurrentElement();
 			}
 
 			xml.skipCurrentElement();
 			continue;
 		}
 
-		if (xml.name() == XmlElement::SECURITY)
+		if (xml.name() == XmlElement::TUNING_SECURITY)
 		{
 			result &= xml.readBoolAttribute(EquipmentPropNames::TUNING_LOGIN, &tuningLogin);
 			result &= xml.readStringAttribute(EquipmentPropNames::TUNING_USER_ACCOUNTS, &tuningUserAccounts);
