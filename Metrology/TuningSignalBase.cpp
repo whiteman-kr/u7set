@@ -1,5 +1,5 @@
 #include "TuningSignalBase.h"
-#include "../../AppSignalLib/TuningSignalState.h"
+#include "../AppSignalLib/TuningSignalState.h"
 #include "../Proto/network.pb.h"
 #include "SignalBase.h"
 

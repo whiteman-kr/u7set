@@ -1,9 +1,9 @@
 #include "MonitorCfgGenerator.h"
 #include "TuningClientCfgGenerator.h"
-#include "../lib/SoftwareSettings.h"
-#include "../lib/SoftwareSettingsGetter.h"
-#include "../VFrame30/Schema.h"
+#include "SoftwareSettingsGetter.h"
 #include "Context.h"
+#include "../OnlineLib/SoftwareSettings.h"
+#include "../VFrame30/Schema.h"
 #include "../lib/ClientBehavior.h"
 
 namespace Builder

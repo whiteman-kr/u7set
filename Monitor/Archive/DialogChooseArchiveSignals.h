@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ArchiveData.h"
-#include "../lib/SoftwareSettings.h"
+#include "../../OnlineLib/SoftwareSettings.h"
 
 class MonitorSignalManager;
 

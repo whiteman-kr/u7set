@@ -4,7 +4,7 @@
 #include <QReadWriteLock>
 
 #include "../Proto/network.pb.h"
-#include "../lib/SoftwareSettings.h"
+#include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"
 #include "../CommonLib/Hash.h"

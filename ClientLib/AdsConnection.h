@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../lib/SoftwareSettings.h"
+#include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/Tcp.h"
 #include "../UtilsLib/ILogFile.h"
 #include "../UtilsLib/SimpleThread.h"

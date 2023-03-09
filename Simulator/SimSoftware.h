@@ -1,5 +1,5 @@
 #pragma once
-#include "../lib/SoftwareXmlReader.h"
+#include "SoftwareXmlReader.h"
 #include "SimAppDataTransmitter.h"
 #include "SimTuningServiceCommunicator.h"
 

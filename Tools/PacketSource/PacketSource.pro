@@ -38,7 +38,6 @@ unix {
 }
 
 SOURCES += \
-    ../../lib/SoftwareSettings.cpp \
     ../../lib/Ui/DialogAbout.cpp \
 	../../lib/DataSource.cpp \
     ../../lib/BuildInfo.cpp \
@@ -64,7 +63,6 @@ SOURCES += \
 
 HEADERS += \
 	Stable.h \
-    ../../lib/SoftwareSettings.h \
     ../../lib/Ui/DialogAbout.h \
 	../../lib/DataSource.h \
     ../../lib/BuildInfo.h \

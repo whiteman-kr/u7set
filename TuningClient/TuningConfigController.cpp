@@ -1,6 +1,6 @@
 #include "TuningConfigController.h"
 #include "MainWindow.h"
-#include "../lib/SoftwareSettings.h"
+#include "../OnlineLib/SoftwareSettings.h"
 
 
 //

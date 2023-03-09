@@ -2,7 +2,7 @@
 #define SETTINGS_H
 
 #include "../CommonLib/HostAddressPort.h"
-#include "../lib/SoftwareSettings.h"
+#include "../OnlineLib/SoftwareSettings.h"
 
 extern QColor redColor;
 

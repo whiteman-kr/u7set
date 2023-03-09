@@ -55,6 +55,7 @@ HEADERS += \
 	UdpSocket.h \
 	CfgServerLoader.h \
 	CircularLogger.h \
+	SoftwareSettings.h \
 	DataProtocols.h \
 
 SOURCES += \
@@ -66,6 +67,7 @@ SOURCES += \
 	UdpSocket.cpp \
 	CfgServerLoader.cpp \
 	CircularLogger.cpp \
+	SoftwareSettings.cpp \
 	DataProtocols.cpp \
 
 DISTFILES += \

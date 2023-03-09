@@ -1,8 +1,8 @@
 #pragma once
-#include "../../lib/SoftwareSettings.h"
 #include "../../CommonLib/Times.h"
-#include "../OnlineLib/Tcp.h"
-#include "../OnlineLib/TcpClientStatistics.h"
+#include "../../OnlineLib/SoftwareSettings.h"
+#include "../../OnlineLib/Tcp.h"
+#include "../../OnlineLib/TcpClientStatistics.h"
 #include "ArchiveData.h"
 
 struct ArchiveRequest

@@ -27,7 +27,6 @@ unix {
 }
 
 SOURCES += \
-	../lib/SoftwareSettings.cpp \
     ../lib/DataSource.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
     ../lib/WidgetUtils.cpp \
@@ -51,7 +50,6 @@ SOURCES += \
 
 HEADERS  += \
 	Stable.h \
-    ../lib/SoftwareSettings.h \
     ../lib/DataSource.h \
 	../lib/Tuning/TuningSourceState.h \
     ../lib/WidgetUtils.h \

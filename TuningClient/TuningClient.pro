@@ -54,7 +54,6 @@ CONFIG(release, debug|release) {
 SOURCES +=\
     ../lib/ClientBehavior.cpp \
     ../lib/ComparatorSet.cpp \
-    ../lib/SoftwareSettings.cpp \
     ../lib/Tuning/TuningUserManager.cpp \
     ../lib/Ui/DialogTcpStatistics.cpp \
     LogonWorkspace.cpp \
@@ -100,7 +99,6 @@ HEADERS  += MainWindow.h \
     ../lib/ComparatorSet.h \
     ../lib/ConstStrings.h \
 	../UtilsLib/ILogFile.h \
-    ../lib/SoftwareSettings.h \
     ../lib/Tuning/TuningUserManager.h \
     ../lib/Ui/DialogTcpStatistics.h \
     LogonWorkspace.h \

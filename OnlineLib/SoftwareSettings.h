@@ -2,7 +2,7 @@
 
 #include "../CommonLib/Types.h"
 #include "../CommonLib/HostAddressPort.h"
-#include "ConstStrings.h"
+#include "../lib/ConstStrings.h"
 
 class XmlWriteHelper;
 class XmlReadHelper;

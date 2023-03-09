@@ -1,6 +1,6 @@
 #pragma once
 #include "../lib/Tuning/TuningSignalManager.h"
-#include "../lib/Tuning/TuningSignalState.h"
+#include "../../AppSignalLib/TuningSignalState.h"
 #include "../CommonLib/PropertyObject.h"
 #include "../CommonLib/Hash.h"
 #include "../VFrame30/Schema.h"

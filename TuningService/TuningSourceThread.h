@@ -6,7 +6,7 @@
 
 #include "../UtilsLib/SimpleThread.h"
 #include "../OnlineLib/CircularLogger.h"
-#include "../lib/SoftwareSettings.h"
+#include "../OnlineLib/SoftwareSettings.h"
 #include "../lib/TuningDataStorage.h"
 
 #include "TuningSource.h"

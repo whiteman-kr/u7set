@@ -47,9 +47,8 @@ SOURCES += \
     ../lib/LmDescription.cpp \
 	../lib/LanControllerInfo.cpp \
 	../lib/LogicModulesInfo.cpp \
-    ../lib/SoftwareSettings.cpp \
-    ../lib/SoftwareXmlReader.cpp \
 	../lib/Tuning/TuningSignalManager.cpp \
+	SoftwareXmlReader.cpp \
     SimAppDataLanInterface.cpp \
     SimAppDataTransmitter.cpp \
     SimCommandProcessor_LM5_LM6.cpp \
@@ -88,12 +87,11 @@ SOURCES += \
 HEADERS += \
     SimConsoleLogFile.h \
 	Stable.h \
+	SoftwareXmlReader.h \
     ../lib/ConnectionsInfo.h \
 	../UtilsLib/ILogFile.h \
 	../lib/LanControllerInfo.h \
 	../lib/LogicModulesInfo.h \
-    ../lib/SoftwareSettings.h \
-    ../lib/SoftwareXmlReader.h \
 	../Proto/serialization.pb.h \
 	../lib/LmDescription.h \
 	../lib/Tuning/ITuningSignalManager.h \

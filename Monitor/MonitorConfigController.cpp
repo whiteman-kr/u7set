@@ -1,4 +1,4 @@
-#include "../lib/SoftwareSettings.h"
+#include "../OnlineLib/SoftwareSettings.h"
 #include "MonitorConfigController.h"
 #include "MonitorAppSettings.h"
 #include "Globals.h"

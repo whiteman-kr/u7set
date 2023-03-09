@@ -3,7 +3,7 @@
 #include <vector>
 #include <list>
 
-#include "../lib/SoftwareSettings.h"
+#include "../OnlineLib/SoftwareSettings.h"
 #include "../Proto/network.pb.h"
 #include "../UtilsLib/ILogFile.h"
 #include "../OnlineLib/SoftwareInfo.h"

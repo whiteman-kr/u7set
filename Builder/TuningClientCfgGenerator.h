@@ -5,7 +5,7 @@
 
 #include "../lib/Tuning/TuningFilter.h"
 #include "../lib/Tuning/TuningSignalManager.h"
-#include "../lib/SoftwareSettings.h"
+#include "../OnlineLib/SoftwareSettings.h"
 
 namespace Builder
 {

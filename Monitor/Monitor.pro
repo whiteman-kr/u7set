@@ -52,7 +52,6 @@ PRECOMPILED_HEADER = Stable.h
 SOURCES += main.cpp \
     ../lib/ClientBehavior.cpp \
     ../lib/ComparatorSet.cpp \
-    ../lib/SoftwareSettings.cpp \
     ../lib/Tuning/TuningLog.cpp \
     ../lib/Tuning/TuningSourcesHelper.cpp \
     ../lib/Tuning/TuningUserManager.cpp \
@@ -113,7 +112,6 @@ HEADERS  += \
     ../lib/ConstStrings.h \
 	../UtilsLib/ILogFile.h \
     ../lib/ISignalDataServer.h \
-    ../lib/SoftwareSettings.h \
     ../lib/Tuning/TuningLog.h \
     ../lib/Tuning/TuningSourcesHelper.h \
     ../lib/Tuning/TuningUserManager.h \

@@ -4,8 +4,8 @@
 
 #include "../UtilsLib/XmlHelper.h"
 #include "../UtilsLib/WUtils.h"
-#include "../OnlineLib/SocketIO.h"
 #include "../Proto/network.pb.h"
+#include "SocketIO.h"
 
 #include "SoftwareSettings.h"
 

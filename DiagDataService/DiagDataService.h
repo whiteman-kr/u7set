@@ -4,7 +4,7 @@
 #include "../lib/DataSource.h"
 #include "../AppSignalLib/AppSignal.h"
 #include "../OnlineLib/CfgServerLoader.h"
-#include "../lib/SoftwareSettings.h"
+#include "../OnlineLib/SoftwareSettings.h"
 
 
 class DiagDataServiceWorker : public ServiceWorker

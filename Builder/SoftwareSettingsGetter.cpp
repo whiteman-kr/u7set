@@ -1,6 +1,6 @@
 #include "SoftwareSettingsGetter.h"
-#include "LanControllerInfo.h"
-#include "LanControllerInfoHelper.h"
+#include "../lib/LanControllerInfo.h"
+#include "../lib/LanControllerInfoHelper.h"
 
 // -------------------------------------------------------------------------------------
 //

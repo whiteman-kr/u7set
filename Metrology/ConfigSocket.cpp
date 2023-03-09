@@ -3,7 +3,7 @@
 #include <cassert>
 #include <QtConcurrent>
 
-#include "../lib/SoftwareSettings.h"
+#include "../OnlineLib/SoftwareSettings.h"
 
 #include "SignalBase.h"
 

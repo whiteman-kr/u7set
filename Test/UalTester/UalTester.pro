@@ -34,7 +34,6 @@ PRECOMPILED_HEADER = Stable.h
 
 SOURCES += \
 	../../lib/BuildInfo.cpp \
-	../../lib/SoftwareSettings.cpp \
 	main.cpp \
 	UalTester.cpp \
 	SignalBase.cpp \
@@ -48,7 +47,6 @@ HEADERS += \
 	Stable.h \
 	../../lib/ConstStrings.h \
     ../../lib/BuildInfo.h \
-	../../lib/SoftwareSettings.h \
     SignalBase.h \
     TestFile.h \
     TuningSocket.h \

@@ -29,7 +29,6 @@ unix {
 SOURCES += \
     ../lib/BuildInfo.cpp \
     ../lib/DataSource.cpp \
-	../lib/SoftwareSettings.cpp \
 	../lib/LanControllerInfo.cpp \
 	../lib/TuningDataStorage.cpp \
 	TuningService.cpp \
@@ -44,7 +43,6 @@ HEADERS += \
 	Stable.h \
     ../lib/BuildInfo.h \
     ../lib/DataSource.h \
-	../lib/SoftwareSettings.h \
 	../lib/LanControllerInfo.h \
 	../lib/TuningDataStorage.h \
 	TuningService.h \

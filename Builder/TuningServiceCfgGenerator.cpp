@@ -1,8 +1,8 @@
 #include "TuningServiceCfgGenerator.h"
 #include "Context.h"
 #include "Builder.h"
+#include "SoftwareSettingsGetter.h"
 #include "../TuningService/TuningSource.h"
-#include "../lib/SoftwareSettingsGetter.h"
 
 namespace Builder
 {

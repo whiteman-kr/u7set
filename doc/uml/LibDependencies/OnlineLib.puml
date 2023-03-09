@@ -5,13 +5,11 @@
 !include ./Protobuf.puml
 
 !include ./AppSignalLib.puml
-'[AppSignalLib]
 
 [OnlineLib]
 OnlineLib -up-> CommonLib
 OnlineLib -up-> UtilsLib
-'OnlineLib -up-> AppSignalLib : "???"
-'OnlineLib <-up- AppSignalLib : "???"
+OnlineLib -up-> AppSignalLib
 OnlineLib -up-> Protobuf
 
 @enduml  

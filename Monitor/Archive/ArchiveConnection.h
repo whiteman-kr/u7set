@@ -1,8 +1,8 @@
 #pragma once
 
 #include <QObject>
-#include "../UtilsLib/ILogFile.h"
-#include "../../lib/SoftwareSettings.h"
+#include "../../UtilsLib/ILogFile.h"
+#include "../../OnlineLib/SoftwareSettings.h"
 #include "ArchiveData.h"
 #include "ArchiveTcpClient2.h"
 
