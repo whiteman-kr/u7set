@@ -1,7 +1,7 @@
 #include "TuningSignalInfo.h"
 #include "ui_TuningSignalInfo.h"
 
-#include "../lib/Tuning/TuningSignalState.h"
+#include "../AppSignalLib/TuningSignalState.h"
 #include "../lib/Tuning/TuningSignalManager.h"
 #include "../lib/Tuning/TuningFilter.h"
 #include "Settings.h"

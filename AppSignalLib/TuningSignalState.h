@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../../AppSignalLib/AppSignalParam.h"
-#include "../../CommonLib/Hash.h"
-#include "../../Proto/network.pb.h"
+#include "AppSignalParam.h"
+#include "../CommonLib/Hash.h"
+#include "../Proto/network.pb.h"
 
 union TuningSignalStateFlags
 {

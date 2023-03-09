@@ -93,7 +93,6 @@ SOURCES += main.cpp \
 	SelectSchemaWidget.cpp \
 	../lib/Tuning/TuningSignalManager.cpp \
     ../lib/Tuning/TuningTcpClient.cpp \
-    ../lib/Tuning/TuningSignalState.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
     Trend/RtDataProvider.cpp \
     Trend/RtSchemaTrend.cpp \
@@ -164,7 +163,7 @@ HEADERS  += \
     Trend/RtTrendTcpClient.h \
     Trend/ArchiveTrendTcpClient.h \
     MonitorTuningTcpClient.h \
-    ../lib/Tuning/TuningSignalState.h \
+	../AppSignalLib/TuningSignalState.h \
     ../lib/Tuning/TuningSourceState.h \
     ../lib/Ui/DialogAlert.h \
     ../lib/Ui/DialogAbout.h \

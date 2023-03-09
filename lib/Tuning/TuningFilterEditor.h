@@ -3,7 +3,7 @@
 
 #include <QDialog>
 #include "TuningFilter.h"
-#include "TuningSignalState.h"
+#include "../../AppSignalLib/TuningSignalState.h"
 #include "TuningModel.h"
 #include "../lib/PropertyEditor.h"
 

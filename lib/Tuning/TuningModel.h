@@ -3,7 +3,7 @@
 
 #include <cmath>
 
-#include "TuningSignalState.h"
+#include "../../AppSignalLib/TuningSignalState.h"
 #include "TuningFilter.h"
 
 

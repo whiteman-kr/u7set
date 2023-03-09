@@ -81,7 +81,6 @@ SOURCES +=\
     TuningSchemaView.cpp \
     TuningSchemaWidget.cpp \
 	../lib/Tuning/TuningSignalManager.cpp \
-    ../lib/Tuning/TuningSignalState.cpp \
     DialogFilterEditor.cpp \
     ../lib/Tuning/TuningTcpClient.cpp \
     TuningClientTcpClient.cpp \
@@ -128,7 +127,6 @@ HEADERS  += MainWindow.h \
     TuningSchemaWidget.h \
     SchemasWorkspace.h \
     ../lib/Tuning/TuningSignalManager.h \
-    ../lib/Tuning/TuningSignalState.h \
     DialogFilterEditor.h \
     ../lib/Tuning/TuningTcpClient.h \
     TuningClientTcpClient.h \

@@ -60,7 +60,6 @@ SOURCES += \
     ../lib/LmDescription.cpp \
     ../lib/Tuning/TuningSignalManager.cpp \
     ../lib/ConnectionsInfo.cpp \
-	../lib/Tuning/TuningSignalState.cpp \
 	../lib/ComparatorSet.cpp \
 	../lib/TuningDataStorage.cpp \
 	../TuningService/TuningSource.cpp \
@@ -130,7 +129,6 @@ HEADERS += \
     ../lib/LmDescription.h \
     ../lib/Tuning/TuningSignalManager.h \
     ../lib/ConnectionsInfo.h \
-	../lib/Tuning/TuningSignalState.h \
 	../lib/TuningDataStorage.h \
 	../lib/ComparatorSet.h \
 	../CommonLib/PropertyObject.h \

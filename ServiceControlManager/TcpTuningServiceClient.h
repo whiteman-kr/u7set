@@ -5,7 +5,7 @@
 #include "../Proto/network.pb.h"
 #include "../lib/Tuning/TuningSourceState.h"
 #include "../AppSignalLib/AppSignal.h"
-#include "../lib/Tuning/TuningSignalState.h"
+#include "../AppSignalLib/TuningSignalState.h"
 
 
 class QTimer;
