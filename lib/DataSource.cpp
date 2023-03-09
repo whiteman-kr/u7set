@@ -431,11 +431,13 @@ DataSourceOnline::DataSourceOnline() :
 
 DataSourceOnline::~DataSourceOnline()
 {
+	clearParsingBuffers();
 }
 
 bool DataSourceOnline::initParsingBuffers(int framesQuantity)
 {
-	m_parsingBuffers.clear();
+	clearParsingBuffers();
+
 	m_parsingBuffers.reserve(PARSING_BUFFERS_COUNT);
 
 	for(int i = 0; i < PARSING_BUFFERS_COUNT; i++)
@@ -447,6 +449,16 @@ bool DataSourceOnline::initParsingBuffers(int framesQuantity)
 	}
 
 	return true;
+}
+
+void DataSourceOnline::clearParsingBuffers()
+{
+	for(ParsingBuffer* pb : m_parsingBuffers)
+	{
+		DELETE_IF_NOT_NULL(pb);
+	}
+
+	m_parsingBuffers.clear();
 }
 
 void DataSourceOnline::updateUptime()
@@ -529,35 +541,30 @@ void DataSourceOnline::pushRupFrame(quint32 sourceIP,
 	if (readyToParsing == true)
 	{
 		moveToNextWriteBuffer(thread);
-
-		// wake up waiting processing threads
 	}
-}
-
-bool DataSourceOnline::takeProcessingOwnership(const QThread* processingThread)
-{
-	const QThread* expected = nullptr;
-
-	bool result = m_processingOwner.compare_exchange_strong(expected,  processingThread);
-
-	// if ownership has been taken by processingWorker - function returns TRUE
-	//
-	// result == FALSE is Ok, means that another thread is already take ownership
-
-	return result;
-}
-
-bool DataSourceOnline::releaseProcessingOwnership(const QThread* processingThread)
-{
-	bool result = m_processingOwner.compare_exchange_strong(processingThread,  nullptr);
-
-	assert(result == true);	// releaseProcessingOwnership must be called by processingWorker == m_processingOwner only !!!
-
-	return result;
 }
 
 bool DataSourceOnline::parseNextBuffer(const QThread* thread)
 {
+	int ctr = 0;
+
+	do
+	{
+		if (moveToNextReadBuffer(thread) == false)
+		{
+			break;
+		}
+
+		parseBuffer(*m_parsingBuffers[m_readBufferIndex], thread);
+
+		if (moveToNextReadBuffer(thread) == false)
+		{
+			break;
+		}
+
+		ctr++;
+	}
+	while(ctr < 50);
 /*	int count = 0;
 
 	m_dataReadyToParsing = false;
@@ -722,6 +729,38 @@ bool DataSourceOnline::parseNextBuffer(const QThread* thread)
 
 	return true;
 }
+
+bool DataSourceOnline::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread)
+{
+	Q_UNUSED(thread);
+
+	readBuffer.prepareToWriting();
+
+	return true;
+}
+
+bool DataSourceOnline::takeProcessingOwnership(const QThread* processingThread)
+{
+	const QThread* expected = nullptr;
+
+	bool result = m_processingOwner.compare_exchange_strong(expected,  processingThread);
+
+	// if ownership has been taken by processingWorker - function returns TRUE
+	//
+	// result == FALSE is Ok, means that another thread is already take ownership
+
+	return result;
+}
+
+bool DataSourceOnline::releaseProcessingOwnership(const QThread* processingThread)
+{
+	bool result = m_processingOwner.compare_exchange_strong(processingThread,  nullptr);
+
+	assert(result == true);	// releaseProcessingOwnership must be called by processingWorker == m_processingOwner only !!!
+
+	return result;
+}
+
 
 /*
 
@@ -953,6 +992,28 @@ bool DataSourceOnline::moveToNextWriteBuffer(const QThread* thread)
 	return true;
 }
 
+bool DataSourceOnline::moveToNextReadBuffer(const QThread* thread)
+{
+	SimpleMutexLocker locker(&m_parsingBuffersMutex, thread);
+
+	if (m_parsingBuffers[m_readBufferIndex]->readyToParsing == true)
+	{
+		return true;
+	}
+
+	m_readBufferIndex++;
+
+	if (m_readBufferIndex == m_writeBufferIndex ||
+		m_parsingBuffers[m_readBufferIndex]->readyToParsing == false)	// buffer is not raddy to parsing yet
+	{
+		m_readBufferIndex--;				// return to prev readIndexValue
+		return false;
+	}
+
+	return true;
+}
+
+
 DataSourceOnline::ParsingBuffer::ParsingBuffer()
 {
 }
@@ -965,7 +1026,7 @@ DataSourceOnline::ParsingBuffer::~ParsingBuffer()
 void DataSourceOnline::ParsingBuffer::clear()
 {
 	framesQuantity = 0;
-	DELETE_IF_NOT_NULL(rupFramesHeaders);
+	DELETE_ARRAY_IF_NOT_NULL(rupFramesHeaders);
 	DELETE_ARRAY_IF_NOT_NULL(rupFramesData);
 	frame0ServerTime = 0;
 	isSimPacket = false;
@@ -982,6 +1043,8 @@ void DataSourceOnline::ParsingBuffer::allocate(int frmsCount)
 
 	rupFramesHeaders = new Rup::Header[framesQuantity];
 	rupFramesData = new Rup::Data[framesQuantity];
+
+	prepareToWriting();
 }
 
 bool DataSourceOnline::ParsingBuffer::copyRupFrame(int frameNo, qint64 serverTime,
@@ -1035,6 +1098,39 @@ bool DataSourceOnline::ParsingBuffer::copyRupFrame(int frameNo, qint64 serverTim
 
 	return dataReadyToParsing;
 }
+
+void DataSourceOnline::ParsingBuffer::prepareToWriting()
+{
+	for(int i = 0; i < framesQuantity; i++)
+	{
+		rupFramesHeaders[i].frameSize = 0;
+	}
+
+	readyToParsing = false;
+}
+
+const Rup::Header& DataSourceOnline::ParsingBuffer::frame0Header() const
+{
+	Q_ASSERT(rupFramesHeaders != nullptr);
+
+	return rupFramesHeaders[0];
+}
+
+const char* DataSourceOnline::ParsingBuffer::rupData() const
+{
+	Q_ASSERT(rupFramesData != nullptr);
+
+	return reinterpret_cast<const char*>(rupFramesData);
+}
+
+int DataSourceOnline::ParsingBuffer::rupDataSize() const
+{
+	Q_ASSERT(framesQuantity != 0);
+
+	return framesQuantity * sizeof(Rup::Data);
+}
+
+
 
 
 

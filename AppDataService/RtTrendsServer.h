@@ -55,7 +55,7 @@ namespace RtTrends
 		int m_id = 0;
 
 		DynamicAppSignalStates& m_signalStates;
-		const SignalsToSources& m_signalToSources;
+//		const SignalsToSources& m_signalToSources;
 
 		//
 
@@ -98,7 +98,6 @@ namespace RtTrends
 
 	private:
 		AppDataServiceWorker& m_appDataService;
-		const SignalsToSources& m_signalsToSources;
 		DynamicAppSignalStates& m_signalStates;
 		std::shared_ptr<CircularLogger> m_log;
 

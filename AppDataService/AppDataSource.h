@@ -24,13 +24,12 @@ class AppDataSource : public DataSourceOnline
 public:
 	AppDataSource(const DataSource& dataSource);
 	AppDataSource(const Network::DataSourceInfo& proto);
+	virtual ~AppDataSource();
 
 	void prepare(const AppSignals& appSignals,
 				 DynamicAppSignalStates* signalStates,
 				 int autoArchivingGroupsCount,
 				 CircularLoggerShared timeErrLog);
-
-	bool parsePacket();
 
 	bool getState(Network::AppDataSourceState* proto) const;
 	void setState(const Network::AppDataSourceState& proto);
@@ -44,6 +43,10 @@ public:
 	int signalStatesQueueCurMaxSize() const { return m_signalStatesQueueCurMaxSize; }
 
 private:
+	bool parsePacket();
+
+	virtual bool parseBuffer(ParsingBuffer& readBuffer, const QThread* thread) override;
+
 	int getAutoArchivingGroup(qint64 currentSysTime);
 
 	void setAcquiredSignalsCount(int count) { m_acquiredSignalsCount = count; }
@@ -76,10 +79,38 @@ private:
 	int m_lastAutoArchivingGroup = DynamicAppSignalState::NOT_INITIALIZED_AUTOARCHIVING_GROUP;
 };
 
-typedef std::shared_ptr<AppDataSource> AppDataSourceShared;
+class AppDataSources
+{
+public:
+	AppDataSources();
+	~AppDataSources();
 
-typedef std::map<QString, AppDataSource*> AppDataSources;		// app data source EquipmentID => AppDataSourceShared
+	bool init(const QString& profile,
+			  const QVector<DataSource>& dataSources,
+			  CircularLoggerShared logger);
+	void clear();
 
-typedef std::map<quint32, AppDataSource*> AppDataSourcesIP;		// app data source IP => AppDataSourceShared
+	AppDataSource* getSourceByIP(quint32 ip);
+	AppDataSource* getSignalSource(const QString& signalID);
+	AppDataSource* getSignalSource(Hash signalHash);
 
-typedef std::map<Hash, AppDataSource*> SignalsToSources;		// signal Hash => AppDataSourceShared
+	const std::map<QString, AppDataSource*>& sources() const;
+
+private:
+	// module EquipmentID => AppDataSource*
+	// dynamic AppDataSource objects owner!
+	//
+	std::map<QString, AppDataSource*> m_moduleToSource;
+
+	// lan controller EquipmentID => AppDataSource*
+	//
+	std::map<QString, AppDataSource*> m_lanControllerToSource;
+
+	// module ethernet adapter IP => AppDataSource*
+	//
+	std::map<quint32, AppDataSource*> m_ipToSource;
+
+	// signal Hash => AppDataSource*
+	//
+	std::map<Hash, AppDataSource*> m_signalToSource;
+};

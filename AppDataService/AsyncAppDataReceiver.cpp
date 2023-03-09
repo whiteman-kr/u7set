@@ -1,4 +1,37 @@
 #include "AsyncAppDataReceiver.h"
+#include "AppDataProcessingThread.h"
+
+StdThreadsGuard::StdThreadsGuard()
+{
+}
+
+StdThreadsGuard::~StdThreadsGuard()
+{
+	for(auto& p : m_threads)
+	{
+		p.second.join();
+	}
+}
+
+void StdThreadsGuard::append(std::thread& thread)
+{
+	Q_ASSERT(thread.joinable() == true);
+
+	auto thread_id = std::hash<std::thread::id>{}(thread.get_id());
+
+	if (m_threads.contains(thread_id))
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	auto p = m_threads.insert({thread_id, std::move(thread)});
+
+	Q_ASSERT(p.first->second.joinable() == true);
+
+	Q_ASSERT(thread.joinable() == false);
+}
+
 
 // -------------------------------------------------------------------------------
 //
@@ -7,10 +40,12 @@
 // -------------------------------------------------------------------------------
 
 AsyncAppDataReceiver::AsyncAppDataReceiver(const HostAddressPort& dataReceivingIP,
-								 const AppDataSourcesIP& appDataSourcesIP,
+								 AppDataSources& appDataSources,
+								 int processingThreadsCount,
 								 E::SoftwareRunMode swRunMode,
 								 CircularLoggerShared log) :
-	m_appDataSourcesIP(appDataSourcesIP),
+	m_appDataSources(appDataSources),
+	m_processingThreadsCountFromSettings(processingThreadsCount),
 	m_log(log)
 {
 	m_isSimulationMode = (swRunMode == E::SoftwareRunMode::Simulation);
@@ -50,7 +85,9 @@ void AsyncAppDataReceiver::run()
 
 	m_thisThread = QThread::currentThread();
 
-	startAppDataProcessingThreads();
+	StdThreadsGuard stg;
+
+	startProcessingThreads(stg);
 
 	try
 	{
@@ -65,6 +102,8 @@ void AsyncAppDataReceiver::run()
 	{
 		std::cout << e.what() << std::endl;
 	}
+
+	wakeupAllProcessingThreads();
 
 	DELETE_IF_NOT_NULL(m_timer);
 
@@ -92,17 +131,8 @@ void AsyncAppDataReceiver::startTimer1s()
 
 void AsyncAppDataReceiver::onTimer1s(const error_code& error)
 {
-	if (isQuitRequested() == true)
+	if (stopIfQuitRequested() == true)
 	{
-		if (m_ioContext != nullptr)
-		{
-			m_ioContext->stop();
-		}
-		else
-		{
-			Q_ASSERT(false);
-		}
-
 		return;
 	}
 
@@ -313,6 +343,11 @@ void AsyncAppDataReceiver::startReceive()
 
 void AsyncAppDataReceiver::receivePackets(const error_code& error, size_t bytesReceived)
 {
+	if (stopIfQuitRequested() == true)
+	{
+		return;
+	}
+
 	if (error)
 	{
 		closeSocket();
@@ -392,20 +427,25 @@ void AsyncAppDataReceiver::receivePackets(const error_code& error, size_t bytesR
 		m_rupFramesReceivedPerSecond++;
 		m_rupFramesCount++;
 
-		auto it = m_appDataSourcesIP.find(sourceIP);
+		AppDataSource* source = m_appDataSources.getSourceByIP(sourceIP);
 
-		if (it != m_appDataSourcesIP.end())
+		if (source != nullptr)
 		{
-			AppDataSource* dataSource = it->second;
+			source->pushRupFrame(sourceIP, QDateTime::currentMSecsSinceEpoch(),
+								 isSimFrame, simFrame.rupFrame, m_thisThread);
 
-			dataSource->pushRupFrame(sourceIP, QDateTime::currentMSecsSinceEpoch(),
-									 isSimFrame, simFrame.rupFrame, m_thisThread);
+			//
+
+			std::lock_guard lg(m_receivedConditionMutex);
+			m_requireProcessing.insert(source);
+			m_packetReceivedCondition.notify_one();
 		}
 		else
 		{
 			m_errUnknownAppDataSourceIP++;
 
-			if (m_unknownAppDataSourcesIP.contains(sourceIP) == false && m_unknownAppDataSourcesIP.size() < 500)
+			if (m_unknownAppDataSourcesIP.contains(sourceIP) == false &&
+				m_unknownAppDataSourcesIP.size() < 500)
 			{
 				m_unknownAppDataSourcesIP.insert(sourceIP);
 			}
@@ -413,9 +453,53 @@ void AsyncAppDataReceiver::receivePackets(const error_code& error, size_t bytesR
 	}
 }
 
-void AsyncAppDataReceiver::startAppDataProcessingThreads()
+void AsyncAppDataReceiver::startProcessingThreads(StdThreadsGuard& stg)
 {
+	int poolSize = m_processingThreadsCountFromSettings;
 
+	int idealThreadCount = QThread::idealThreadCount();
+
+	if (poolSize <= 0 || poolSize > idealThreadCount)
+	{
+		poolSize = idealThreadCount;
+	}
+
+	for(int i = 0; i < poolSize; i++)
+	{
+		std::thread t(&processPackets, std::ref(*this), i + 1);
+
+		stg.append(t);
+	}
+
+	DEBUG_LOG_MSG(m_log, QString("AppDataProcessingThreadsPool started. Running threads count %1%2").
+							arg(poolSize).arg(poolSize == idealThreadCount ? " (ideal)" : ""));
+}
+
+void AsyncAppDataReceiver::wakeupAllProcessingThreads()
+{
+	std::lock_guard lg(m_receivedConditionMutex);
+	m_packetReceivedCondition.notify_all();
+}
+
+bool AsyncAppDataReceiver::stopIfQuitRequested()
+{
+	if (isQuitRequested() == true)
+	{
+		if (m_ioContext != nullptr)
+		{
+			m_ioContext->stop();
+		}
+		else
+		{
+			Q_ASSERT(false);
+		}
+
+		wakeupAllProcessingThreads();
+
+		return true;
+	}
+
+	return false;
 }
 
 QString AsyncAppDataReceiver::appDataReceivingIPStr() const
@@ -424,3 +508,112 @@ QString AsyncAppDataReceiver::appDataReceivingIPStr() const
 				arg(QString::fromStdString(m_appDataReceivingIP.address().to_string())).
 				arg(m_appDataReceivingIP.port());
 }
+
+void processPackets(AsyncAppDataReceiver& receiver, int threadNumber)
+{
+	CircularLoggerShared log = receiver.log();
+
+	DEBUG_LOG_MSG(log, QString("AppDataProcessingThread #%1 is started").arg(threadNumber));
+
+	QThread* thisThread = QThread::currentThread();
+
+	std::mutex& receivedConditionMutex = receiver.m_receivedConditionMutex;
+	std::condition_variable& packetReceivedCondition = receiver.m_packetReceivedCondition;
+	std::set<AppDataSource*>& requireProcessing = receiver.m_requireProcessing;
+
+	AppDataSource* source = nullptr;
+
+	int ctr = 0;
+
+	while(1)
+	{
+		std::unique_lock ul(receivedConditionMutex);
+
+		packetReceivedCondition.wait(ul);
+
+		if (receiver.isQuitRequested() == true)
+		{
+			ul.unlock();
+			break;
+		}
+
+		if (requireProcessing.empty() == true)
+		{
+			ul.unlock();
+			continue;
+		}
+
+		source = *requireProcessing.begin();
+		requireProcessing.erase(requireProcessing.begin());
+
+		ul.unlock();
+
+		if (source->takeProcessingOwnership(thisThread) == false)
+		{
+			qDebug() << "Not take ownership";
+			continue;
+		}
+
+		// processing
+		ctr++;
+
+/*		if ((ctr % 100) == 0)
+		{
+			qDebug() << C_STR(QString("Thread #%1 processed %2").arg(threadNumber).arg(ctr));
+		}*/
+
+		source->parseNextBuffer(thisThread);
+
+		source->releaseProcessingOwnership(thisThread);
+
+/*		bool hasNoDataToProcessing = true;
+
+		for(auto& p : m_appDataSourcesIP)
+		{
+			AppDataSource* appDataSource = p.second;
+
+			if (appDataSource == nullptr)
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			bool result = appDataSource->takeProcessingOwnership(thisThread);
+
+			if (result == false)
+			{
+				m_failOwnership++;
+				continue;
+			}
+
+			m_successOwnership++;
+
+			do
+			{
+				result = appDataSource->processRupFrameTimeQueue(thisThread);
+
+				if (result == false)
+				{
+					break;
+				}
+
+				hasNoDataToProcessing = false;
+
+				appDataSource->parsePacket();
+
+				m_parsedRupPacketCount++;
+			}
+			while(isQuitRequested() == false);
+
+			appDataSource->releaseProcessingOwnership(thisThread);
+		}
+
+		if (hasNoDataToProcessing == true)
+		{
+			usleep(500);
+		}*/
+	}
+
+	DEBUG_LOG_MSG(log, QString("AppDataProcessingThread #%1 is finished").arg(threadNumber));
+}
+

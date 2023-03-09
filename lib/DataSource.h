@@ -143,11 +143,38 @@ private:
 
 	static const QString DATE_TIME_FORMAT_STR;
 
+protected:
+
+	struct ParsingBuffer
+	{
+		quint16 framesQuantity = 0;
+		Rup::Header* rupFramesHeaders = nullptr;	// array of REVERSED headers
+		Rup::Data* rupFramesData = nullptr;
+		qint64 frame0ServerTime = 0;
+		bool isSimPacket = false;
+
+		std::atomic<bool> readyToParsing{false};	// modified by both Receiver and ProcessingThread
+
+		ParsingBuffer();
+		~ParsingBuffer();
+
+		void clear();
+		void allocate(int frmsCount);
+		bool copyRupFrame(int frameNo, qint64 serverTime,
+						  bool simFrame, const Rup::Frame& rupFrame);
+		void prepareToWriting();
+
+		const Rup::Header& frame0Header() const;
+		const char* rupData() const;
+		int rupDataSize() const;
+	};
+
 public:
 	DataSourceOnline();
-	~DataSourceOnline();
+	virtual ~DataSourceOnline();
 
 	bool initParsingBuffers(int framesQuantity);
+	void clearParsingBuffers();
 
 	//
 
@@ -228,14 +255,15 @@ public:
 					  const Rup::Frame& rupFrame,
 					  const QThread* thread);
 
+	bool parseNextBuffer(const QThread* thread);
+	virtual bool parseBuffer(ParsingBuffer& readBuffer, const QThread* thread);
+
 	void incFrameSizeError() { m_errorFrameSize++; }
 
 	// Functions used by data processing thread
 	//
 	bool takeProcessingOwnership(const QThread* processingThread);
 	bool releaseProcessingOwnership(const QThread* processingThread);
-
-	bool parseNextBuffer(const QThread* thread);
 
 /*	bool getDataToParsing(Times* times,
 						  bool* isSimPacket,
@@ -253,6 +281,7 @@ public:
 
 private:
 	bool moveToNextWriteBuffer(const QThread* thread);
+	bool moveToNextReadBuffer(const QThread* thread);
 
 //	bool collect(const RupFrameTime& rupFrameTime);
 
@@ -312,25 +341,6 @@ protected:
 	std::atomic<const QThread*> m_processingOwner = { nullptr };
 
 	//
-
-	struct ParsingBuffer
-	{
-		quint16 framesQuantity = 0;
-		Rup::Header* rupFramesHeaders = nullptr;	// array of REVERSED headers
-		Rup::Data* rupFramesData = nullptr;
-		qint64 frame0ServerTime = 0;
-		bool isSimPacket = false;
-
-		std::atomic<bool> readyToParsing{false};	// modified by both Receiver and ProcessingThread
-
-		ParsingBuffer();
-		~ParsingBuffer();
-
-		void clear();
-		void allocate(int frmsCount);
-		bool copyRupFrame(int frameNo, qint64 serverTime,
-						  bool simFrame, const Rup::Frame& rupFrame);
-	};
 
 	static const int PARSING_BUFFERS_COUNT = 5;
 

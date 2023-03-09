@@ -14,8 +14,8 @@ class AppDataReceiver : public RunOverrideThread
 {
 public:
 	AppDataReceiver(const HostAddressPort& dataReceivingIP,
-					const AppDataSourcesIP& appDataSourcesIP,
-						  E::SoftwareRunMode swRunMode,
+					AppDataSources& appDataSources,
+					E::SoftwareRunMode swRunMode,
 					CircularLoggerShared log);
 
 	virtual ~AppDataReceiver() override;
@@ -32,7 +32,7 @@ private:
 
 private:
 	HostAddressPort m_dataReceivingIP;
-	const AppDataSourcesIP& m_appDataSourcesIP;
+	AppDataSources& m_appDataSources;
 	CircularLoggerShared m_log;
 	bool m_isSimulationMode = false;
 

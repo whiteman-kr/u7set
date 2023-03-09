@@ -3,7 +3,7 @@
 #include "SignalStatesProcessingThread.h"
 
 
-SignalStatesProcessingThread::SignalStatesProcessingThread(const AppDataSources& appDataSources, CircularLoggerShared log) :
+SignalStatesProcessingThread::SignalStatesProcessingThread(const AppDataSources &appDataSources, CircularLoggerShared log) :
     m_appDataSources(appDataSources),
     m_log(log)
 {
@@ -83,7 +83,7 @@ void SignalStatesProcessingThread::run()
 
 		int TO_DO_refactor_to_condition_variable_to_avoid_cycling_on_m_appDataSources;
 
-		for(auto& p : m_appDataSources)
+		for(const auto& p : m_appDataSources.sources())
 		{
 			AppDataSource* appDataSource = p.second;
 

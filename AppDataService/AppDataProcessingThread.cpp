@@ -9,25 +9,35 @@
 // -------------------------------------------------------------------------------
 
 AppDataProcessingThread::AppDataProcessingThread(AsyncAppDataReceiver& appDataReceiver,
-												 int number,
-												 CircularLoggerShared log) :
+												 int number) :
 	m_appDataReceiver(appDataReceiver),
-	m_appDataSourcesIP(appDataReceiver.appDataSourcesIP()),
-	m_number(number),
-	m_log(log)
+	m_appDataSources(appDataReceiver.appDataSources()),
+	m_number(number)
 {
-	setObjectName(QString("AppDataProcessingThread #%1").arg(number));
+	//setObjectName(QString("AppDataProcessingThread #%1").arg(number));
+	DEBUG_STOP;
+}
+
+AppDataProcessingThread::AppDataProcessingThread(const AppDataProcessingThread& pt) :
+	m_appDataReceiver(pt.m_appDataReceiver),
+	m_number(pt.m_number),
+	m_appDataSources(pt.m_appDataSources)
+{
+	DEBUG_STOP;
 }
 
 void AppDataProcessingThread::run()
 {
-	DEBUG_LOG_MSG(m_log, QString("AppDataProcessingThread #%1 is started").arg(m_number));
+	CircularLoggerShared log = m_appDataReceiver.log();
 
-	QThread* thisThread = currentThread();
+	DEBUG_LOG_MSG(log, QString("AppDataProcessingThread #%1 is started").arg(m_number));
 
-	while(isQuitRequested() == false)
+	QThread* thisThread = QThread::currentThread();
+
+	while(m_appDataReceiver.isQuitRequested() == false)
 	{
-		bool hasNoDataToProcessing = true;
+		QThread::msleep(1);
+/*		bool hasNoDataToProcessing = true;
 
 		for(auto& p : m_appDataSourcesIP)
 		{
@@ -72,10 +82,10 @@ void AppDataProcessingThread::run()
 		if (hasNoDataToProcessing == true)
 		{
 			usleep(500);
-		}
+		}*/
 	}
 
-	DEBUG_LOG_MSG(m_log, QString("AppDataProcessingThread #%1 is finished").arg(m_number));
+	DEBUG_LOG_MSG(log, QString("AppDataProcessingThread #%1 is finished").arg(m_number));
 }
 
 // -------------------------------------------------------------------------------
@@ -83,7 +93,7 @@ void AppDataProcessingThread::run()
 // AppDataProcessingThreadsPool class implementation
 //
 // -------------------------------------------------------------------------------
-
+/*
 void AppDataProcessingThreadsPool::startProcessingThreads(int poolSizeFromSettings,
 														  AsyncAppDataReceiver& appDataReciever,
 														  CircularLoggerShared log)
@@ -127,5 +137,5 @@ void AppDataProcessingThreadsPool::stopProcessingThreads()
 	}
 
 	clear();
-}
+}*/
 

@@ -11,6 +11,8 @@
 
 AppSignals::~AppSignals()
 {
+	int TO_DO_refactor_AppSignals;
+
 	clear();
 }
 
@@ -86,6 +88,10 @@ AppDataSource::AppDataSource(const Network::DataSourceInfo& proto) :
 	loadFromProto(proto);
 }
 
+AppDataSource::~AppDataSource()
+{
+}
+
 void AppDataSource::prepare(const AppSignals& appSignals,
 							DynamicAppSignalStates* signalStates,
 							int autoArchivingGroupsCount,
@@ -146,45 +152,6 @@ void AppDataSource::prepare(const AppSignals& appSignals,
 	m_signalStatesQueue.resize(queueSize);
 }
 
-bool AppDataSource::parsePacket()
-{
-	Times times;
-	const char* rupData = nullptr;
-	int rupDataSize = 0;
-	bool dataReceivingTimeout = false;
-	quint16 packetNo = 0;
-	bool isSimPacket = false;
-
-	bool result = getDataToParsing(&times, &isSimPacket, &packetNo, &rupData, &rupDataSize, &dataReceivingTimeout);
-
-	if (result == false)
-	{
-		assert(false);
-		return false;
-	}
-
-	int autoArchivingGroup = getAutoArchivingGroup(times.system.timeStamp);
-
-	const QThread* thread = QThread::currentThread();
-
-	for(DynamicAppSignalState* signalState : m_signalStates)
-	{
-		TEST_PTR_CONTINUE(signalState);
-
-		if (dataReceivingTimeout == true)
-		{
-			signalState->setUnavailable(times, m_signalStatesQueue, thread);
-		}
-		else
-		{
-			signalState->setState(times, isSimPacket, packetNo, rupData, rupDataSize, autoArchivingGroup, m_signalStatesQueue, thread);
-		}
-	}
-
-	m_signalStatesQueue.getSizes(&m_signalStatesQueueCurSize, &m_signalStatesQueueCurMaxSize, &m_signalStatesQueueSize, thread);
-
-	return true;
-}
 
 bool AppDataSource::getState(Network::AppDataSourceState* proto) const
 {
@@ -196,9 +163,17 @@ bool AppDataSource::getState(Network::AppDataSourceState* proto) const
 	proto->set_uptime(uptime());
 	proto->set_receiveddataid(receivedDataID());
 	proto->set_rupframeplanttime(rupFramePlantTime());
-	proto->set_rupframesqueuesize(rupFramesQueueSize());
-	proto->set_rupframesqueuecursize(rupFramesQueueCurSize());
-	proto->set_rupframesqueuecurmaxsize(rupFramesQueueCurMaxSize());
+
+	//
+
+	int TO_DO_remove_this_fields;
+
+//	proto->set_rupframesqueuesize(rupFramesQueueSize());
+//	proto->set_rupframesqueuecursize(rupFramesQueueCurSize());
+//	proto->set_rupframesqueuecurmaxsize(rupFramesQueueCurMaxSize());
+
+	//
+
 	proto->set_datareceivingrate(dataReceivingRate());
 	proto->set_receiveddatasize(receivedDataSize());
 	proto->set_receivedframescount(receivedFramesCount());
@@ -234,9 +209,17 @@ void AppDataSource::setState(const Network::AppDataSourceState& proto)
 	setUptime(proto.uptime());
 	setReceivedDataID(proto.receiveddataid());
 	setRupFramePlantTime(proto.rupframeplanttime());
-	setRupFramesQueueSize(proto.rupframesqueuesize());
-	setRupFramesQueueCurSize(proto.rupframesqueuecursize());
-	setRupFramesQueueCurMaxSize(proto.rupframesqueuecurmaxsize());
+
+	//
+
+	int TO_DO_remove_this_fields;
+
+//	setRupFramesQueueSize(proto.rupframesqueuesize());
+//	setRupFramesQueueCurSize(proto.rupframesqueuecursize());
+//	setRupFramesQueueCurMaxSize(proto.rupframesqueuecurmaxsize());
+
+	//
+
 	setDataReceivingRate(proto.datareceivingrate());
 	setReceivedDataSize(proto.receiveddatasize());
 	setReceivedFramesCount(proto.receivedframescount());
@@ -272,6 +255,131 @@ bool AppDataSource::getSignalState(SimpleAppSignalStateArchiveFlag* state, const
 	return result;
 }
 
+bool AppDataSource::parsePacket()
+{
+	Times times;
+	const char* rupData = nullptr;
+	int rupDataSize = 0;
+	bool dataReceivingTimeout = false;
+	quint16 packetNo = 0;
+	bool isSimPacket = false;
+
+/*	bool result = getDataToParsing(&times, &isSimPacket, &packetNo, &rupData, &rupDataSize, &dataReceivingTimeout);
+
+	if (result == false)
+	{
+		assert(false);
+		return false;
+	}*/
+
+	Q_ASSERT(false);
+	return false;
+
+	int autoArchivingGroup = getAutoArchivingGroup(times.system.timeStamp);
+
+	const QThread* thread = QThread::currentThread();
+
+	for(DynamicAppSignalState* signalState : m_signalStates)
+	{
+		TEST_PTR_CONTINUE(signalState);
+
+		if (dataReceivingTimeout == true)
+		{
+			signalState->setUnavailable(times, m_signalStatesQueue, thread);
+		}
+		else
+		{
+			signalState->setState(times, isSimPacket, packetNo, rupData, rupDataSize, autoArchivingGroup, m_signalStatesQueue, thread);
+		}
+	}
+
+	m_signalStatesQueue.getSizes(&m_signalStatesQueueCurSize, &m_signalStatesQueueCurMaxSize, &m_signalStatesQueueSize, thread);
+
+	return true;
+}
+
+bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread)
+{
+	if (readBuffer.readyToParsing == false)
+	{
+		Q_ASSERT(false);
+		return false;
+	}
+
+	Times times;
+	bool dataReceivingTimeout = false;
+	quint16 packetNo = 0;
+	bool isSimPacket = false;
+
+	const char* rupData = nullptr;
+	int rupDataSize = 0;
+
+/*	bool result = getDataToParsing(&times, &isSimPacket, &packetNo, &rupData, &rupDataSize, &dataReceivingTimeout);
+
+	if (result == false)
+	{
+		assert(false);
+		return false;
+	}*/
+
+	rupData = readBuffer.rupData();
+	rupDataSize = readBuffer.rupDataSize();
+
+	const Rup::Header& header = readBuffer.frame0Header();
+
+	//
+
+	QDateTime plantTime;
+
+	const Rup::TimeStamp& timeStamp = header.timeStamp;
+
+	// don't delete this to prevent plantTime conversion from Local to UTC time during call plantTime.toMSecsSinceEpoch()!!!
+	//
+	plantTime.setTimeSpec(Qt::UTC);
+
+	plantTime.setDate(QDate(timeStamp.year, timeStamp.month, timeStamp.day));
+	plantTime.setTime(QTime(timeStamp.hour, timeStamp.minute, timeStamp.second, timeStamp.millisecond));
+
+	times.plant.timeStamp = plantTime.toMSecsSinceEpoch();
+	times.system.timeStamp = readBuffer.frame0ServerTime;
+
+	QDateTime localTime = QDateTime::fromMSecsSinceEpoch(readBuffer.frame0ServerTime);
+
+	// don't delete this to prevent localTime conversion from Local to UTC time during call localTime.toMSecsSinceEpoch()!!!
+	//
+	localTime.setTimeSpec(Qt::UTC);
+
+	times.local.timeStamp = localTime.toMSecsSinceEpoch();
+
+	//
+
+	packetNo = header.numerator;
+	isSimPacket = readBuffer.isSimPacket;
+
+	int autoArchivingGroup = getAutoArchivingGroup(times.system.timeStamp);
+
+	for(DynamicAppSignalState* signalState : m_signalStates)
+	{
+		TEST_PTR_CONTINUE(signalState);
+
+		if (dataReceivingTimeout == true)
+		{
+			signalState->setUnavailable(times, m_signalStatesQueue, thread);
+		}
+		else
+		{
+			signalState->setState(times, isSimPacket, packetNo, rupData, rupDataSize, autoArchivingGroup, m_signalStatesQueue, thread);
+		}
+	}
+
+	m_signalStatesQueue.getSizes(&m_signalStatesQueueCurSize, &m_signalStatesQueueCurMaxSize, &m_signalStatesQueueSize, thread);
+
+	DataSourceOnline::parseBuffer(readBuffer, thread);
+
+	return true;
+}
+
+
 int AppDataSource::getAutoArchivingGroup(qint64 currentSysTime)
 {
 	if (m_autoArchivingGroupsCount <= 0)
@@ -305,4 +413,128 @@ int AppDataSource::getAutoArchivingGroup(qint64 currentSysTime)
 
 	return retGroup;
 }
+
+AppDataSources::AppDataSources()
+{
+}
+
+AppDataSources::~AppDataSources()
+{
+	clear();
+}
+
+bool AppDataSources::init(const QString& profile,
+						  const QVector<DataSource>& dataSources,
+						  CircularLoggerShared logger)
+{
+	clear();
+
+	bool result = true;
+
+	for(const DataSource& dataSource : dataSources)
+	{
+		if (dataSource.profile() != profile)
+		{
+			continue;
+		}
+
+		AppDataSource* appDataSource = nullptr;
+
+		for(const LanControllerInfo& lci : dataSource.lanControllersInfo()())
+		{
+			if (lci.isProvideAppData() == false ||
+				lci.appDataEnable == false ||
+				lci.appDataFramesQuantity == 0)
+			{
+				continue;
+			}
+
+			if (m_lanControllerToSource.contains(lci.equipmentID) == true)
+			{
+				DEBUG_LOG_ERR(logger, QString("Duplicate AppDataSource adapter EquipmentID %1").
+												arg(lci.equipmentID));
+				result = false;
+				continue;
+			}
+
+			if (m_ipToSource.contains(lci.appDataIP32()) == true)
+			{
+				DEBUG_LOG_ERR(logger, QString("Duplicate AppDataSource IP-address %1").
+											arg(lci.appDataIP));
+				continue;
+			}
+
+			if (appDataSource == nullptr)
+			{
+				appDataSource = new AppDataSource(dataSource);
+				m_moduleToSource.insert({appDataSource->moduleEquipmentID(), appDataSource});
+
+				const QStringList& sourceSignals = appDataSource->associatedSignals(E::LanControllerType::AppData);
+
+				for(const QString& signalID : sourceSignals)
+				{
+					Hash signalHash = calcHash(signalID);
+
+					Q_ASSERT(m_signalToSource.contains(signalHash) == false);
+
+					m_signalToSource.insert({signalHash, appDataSource});
+				}
+			}
+
+			m_lanControllerToSource.insert({lci.equipmentID, appDataSource});
+			m_ipToSource.insert({lci.appDataIP32(), appDataSource});
+		}
+	}
+
+	return result;
+}
+
+void AppDataSources::clear()
+{
+	m_lanControllerToSource.clear();
+	m_ipToSource.clear();
+	m_signalToSource.clear();
+
+	for(auto& p : m_moduleToSource)
+	{
+		delete p.second;
+	}
+
+	m_moduleToSource.clear();
+}
+
+AppDataSource* AppDataSources::getSourceByIP(quint32 ip)
+{
+	auto it = m_ipToSource.find(ip);
+
+	if (it == m_ipToSource.end())
+	{
+		return nullptr;
+	}
+
+	return it->second;
+}
+
+AppDataSource* AppDataSources::getSignalSource(const QString& signalID)
+{
+	return getSignalSource(calcHash(signalID));
+}
+
+AppDataSource* AppDataSources::getSignalSource(Hash signalHash)
+{
+	auto it = m_signalToSource.find(signalHash);
+
+	if (it == m_signalToSource.end())
+	{
+		return nullptr;
+	}
+
+	return it->second;
+}
+
+const std::map<QString, AppDataSource*>& AppDataSources::sources() const
+{
+	return m_moduleToSource;
+}
+
 

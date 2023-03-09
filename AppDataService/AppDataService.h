@@ -46,8 +46,7 @@ public:
 	bool isConnectedToArchiveService(quint32 &ip, quint16 &port) const;
 
 	const AppDataSources& appDataSources() const { return m_appDataSources; }
-	const AppDataSourcesIP& appDataSourcesIP() const { return m_appDataSourcesIP; }
-	const SignalsToSources& signalsToSources() const { return m_signalsToSources; }
+	AppDataSources& appDataSources() { return m_appDataSources; }
 
 	DynamicAppSignalStates& signalStates() { return m_signalStates; }
 
@@ -128,13 +127,10 @@ private:
 	AppSignals m_appSignals;
 
 	AppDataSources m_appDataSources;
-	AppDataSourcesIP m_appDataSourcesIP;			// own dynamic AppDataSource objects
-
-	SignalsToSources m_signalsToSources;
 
 	DynamicAppSignalStates m_signalStates;
 
-	AppDataProcessingThreadsPool m_appDataProcessingThreadsPool;
+//	AppDataProcessingThreadsPool m_appDataProcessingThreadsPool;
 
 	//AppDataReceiverThread* m_appDataRe ceiverThread = nullptr;
 

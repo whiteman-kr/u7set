@@ -7,11 +7,11 @@
 // -------------------------------------------------------------------------------
 
 AppDataReceiver::AppDataReceiver(const HostAddressPort& dataReceivingIP,
-								 const AppDataSourcesIP& appDataSourcesIP,
+								 AppDataSources& appDataSources,
 								 E::SoftwareRunMode swRunMode,
 								 CircularLoggerShared log) :
 	m_dataReceivingIP(dataReceivingIP),
-	m_appDataSourcesIP(appDataSourcesIP),
+	m_appDataSources(appDataSources),
 	m_log(log)
 {
 	m_isSimulationMode = (swRunMode == E::SoftwareRunMode::Simulation);
@@ -261,9 +261,9 @@ void AppDataReceiver::receivePackets()
 		m_rupFramesReceivedPerSecond++;
 		m_rupFramesCount++;
 
-		auto it = m_appDataSourcesIP.find(sourceIP);
+		AppDataSource* dataSource = m_appDataSources.getSourceByIP(sourceIP);
 
-		if (it == m_appDataSourcesIP.end())
+		if (dataSource == nullptr)
 		{
 			m_errUnknownAppDataSourceIP++;
 
@@ -274,10 +274,6 @@ void AppDataReceiver::receivePackets()
 
 			continue;
 		}
-
-		AppDataSource* dataSource = it->second;
-
-		TEST_PTR_CONTINUE(dataSource);
 
 		dataSource->pushRupFrame(sourceIP, serverTime, isSimFrame, simFrame.rupFrame, m_thisThread);
 	}

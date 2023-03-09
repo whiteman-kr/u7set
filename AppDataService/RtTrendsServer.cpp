@@ -33,8 +33,8 @@ namespace RtTrends
 
 	Session::Session(AppDataServiceWorker& service) :
 		m_id(m_globalID.fetch_add(1)),
-		m_signalStates(service.signalStates()),
-		m_signalToSources(service.signalsToSources())
+		m_signalStates(service.signalStates())
+//		m_signalToSources(service.signalsToSources())
 	{
 	}
 
@@ -112,7 +112,6 @@ namespace RtTrends
 	Server::Server(AppDataServiceWorker& appDataService, E::SecurityLevel securityLevel) :
 		Tcp::Server(appDataService.softwareInfo(), securityLevel, "RtTrendsServer"),
 		m_appDataService(appDataService),
-		m_signalsToSources(appDataService.signalsToSources()),
 		m_signalStates(appDataService.signalStates()),
 		m_log(appDataService.logger()),
 		m_session(std::make_shared<Session>(appDataService))
@@ -209,15 +208,7 @@ namespace RtTrends
 
 		for(Hash signalHash : trackedSignalHashes)
 		{
-			auto it = m_signalsToSources.find(signalHash);
-
-			if (it == m_signalsToSources.end())
-			{
-				Q_ASSERT(false);
-				continue;
-			}
-
-			AppDataSource* source = it->second;
+			AppDataSource* source = m_appDataService.appDataSources().getSignalSource(signalHash);
 
 			TEST_PTR_CONTINUE(source);
 
@@ -252,18 +243,10 @@ namespace RtTrends
 			return true;
 		}
 
-		auto it = m_signalsToSources.find(signalHash);
-
-		if (it == m_signalsToSources.end())
-		{
-			return false;
-		}
-
-		AppDataSource* source = it->second;
+		AppDataSource* source = m_appDataService.appDataSources().getSignalSource(signalHash);
 
 		if (source == nullptr)
 		{
-			//ASSERT_RETURN_FALSE;
 			return false;
 		}
 

@@ -416,9 +416,9 @@ void TcpAppDataServer::onGetAppDataSourcesInfoRequest()
 {
 	m_getDataSourcesInfoReply.Clear();
 
-	const AppDataSourcesIP& dataSources = appDataSources();
+	const AppDataSources& dataSources = appDataSources();
 
-	for(const auto& p : dataSources)
+	for(const auto& p : dataSources.sources())
 	{
 		AppDataSource* source = p.second;
 
@@ -437,9 +437,9 @@ void TcpAppDataServer::onGetAppDataSourcesStatesRequest()
 {
 	m_getAppDataSourcesStatesReply.Clear();
 
-	const AppDataSourcesIP& dataSources = appDataSources();
+	const AppDataSources& dataSources = appDataSources();
 
-	for(const auto& p : dataSources)
+	for(const auto& p : dataSources.sources())
 	{
 		const AppDataSource* source = p.second;
 
@@ -479,7 +479,7 @@ const AppSignals& TcpAppDataServer::appSignals() const
 	return m_thread->appSignals();
 }
 
-const AppDataSourcesIP& TcpAppDataServer::appDataSources() const
+const AppDataSources& TcpAppDataServer::appDataSources() const
 {
 	return m_thread->appDataSources();
 }
@@ -512,7 +512,7 @@ void TcpAppDataServer::getServerTimes(qint64* utc, qint64* local)
 
 TcpAppDataServerThread::TcpAppDataServerThread(const HostAddressPort& listenAddressPort,
 												TcpAppDataServer* server,
-												const AppDataSourcesIP& appDataSources,
+												const AppDataSources& appDataSources,
 												const AppSignals& appSignals,
 												const DynamicAppSignalStates& appSignalStates,
 												const AppDataServiceWorker &appDataServiceWorker,

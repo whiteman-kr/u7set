@@ -12,11 +12,24 @@ using namespace asio::ip;
 // AppDataReceiver is receives RUP datagrams and push it in AppDataSource's queues
 //
 
+class StdThreadsGuard
+{
+public:
+	StdThreadsGuard();
+	~StdThreadsGuard();
+
+	void append(std::thread& thread);
+
+private:
+	std::map<std::size_t, std::thread> m_threads;
+};
+
 class AsyncAppDataReceiver : public RunOverrideThread
 {
 public:
 	AsyncAppDataReceiver(const HostAddressPort& dataReceivingIP,
-					const AppDataSourcesIP& appDataSourcesIP,
+					AppDataSources& appDataSources,
+					int processingThreadsCount,
 					E::SoftwareRunMode swRunMode,
 					CircularLoggerShared log);
 
@@ -24,7 +37,9 @@ public:
 
 	void fillAppDataReceiveState(Network::AppDataReceiveState* adrs);
 
-	const AppDataSourcesIP& appDataSourcesIP() { return m_appDataSourcesIP; }
+	const AppDataSources& appDataSources() { return m_appDataSources; }
+
+	CircularLoggerShared log() { return m_log; }
 
 private:
 	virtual void run() override;
@@ -41,14 +56,18 @@ private:
 	void startReceive();
 	void receivePackets(const error_code& error, std::size_t bytesReceived);
 
-	void startAppDataProcessingThreads();
+	void startProcessingThreads(StdThreadsGuard& stg);
+	void wakeupAllProcessingThreads();
+
+	bool stopIfQuitRequested();
 
 	QString appDataReceivingIPStr() const;
 
 private:
-	const AppDataSourcesIP& m_appDataSourcesIP;
-	CircularLoggerShared m_log;
+	AppDataSources& m_appDataSources;
 	bool m_isSimulationMode = false;
+	int m_processingThreadsCountFromSettings = 0;
+	CircularLoggerShared m_log;
 
 	const QThread* m_thisThread = nullptr;
 
@@ -69,6 +88,14 @@ private:
 	int m_writeIndex = 0;
 	udp::endpoint m_receiveFromIP[2];
 	char m_receiveBuffer[2][RECV_BUFFER_SIZE];
+
+	//
+
+	std::mutex m_receivedConditionMutex;
+	std::condition_variable m_packetReceivedCondition;
+	std::set<AppDataSource*> m_requireProcessing;
+
+	friend void processPackets(AsyncAppDataReceiver& receiver, int threadNumber);
 
 	//
 
@@ -94,3 +121,5 @@ private:
 	std::atomic<int> m_udpReceivedPerSecond = 0;
 	std::atomic<int> m_rupFramesReceivedPerSecond = 0;
 };
+
+void processPackets(AsyncAppDataReceiver& receiver, int threadNumber);

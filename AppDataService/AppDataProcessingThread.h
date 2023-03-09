@@ -6,20 +6,20 @@
 
 class AsyncAppDataReceiver;
 
-class AppDataProcessingThread : public RunOverrideThread
+class AppDataProcessingThread //: public RunOverrideThread
 {
 public:
 	AppDataProcessingThread(AsyncAppDataReceiver& appDataReceiver,
-							int number,
-							CircularLoggerShared log);
+							int number);
 
-	void run() override;
+	AppDataProcessingThread(const AppDataProcessingThread& pt);
+
+	void run();
 
 private:
 	AsyncAppDataReceiver& m_appDataReceiver;
 	int m_number = 0;
-	const AppDataSourcesIP& m_appDataSourcesIP;
-	CircularLoggerShared m_log;
+	const AppDataSources& m_appDataSources;
 
 	// parsing statistics
 	//
@@ -28,6 +28,7 @@ private:
 	quint64 m_failOwnership = 0;
 };
 
+/*
 class AppDataProcessingThreadsPool : public QList<AppDataProcessingThread*>
 {
 public:
@@ -40,4 +41,4 @@ public:
 
 	void stopProcessingThreads();
 };
-
+*/
