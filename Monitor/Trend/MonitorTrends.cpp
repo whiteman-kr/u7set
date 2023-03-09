@@ -45,20 +45,48 @@ bool MonitorTrends::startTrendApp(const MonitorSignalManager& signalManager,
 	std::vector<TrendLib::TrendSignalParam> trendSignals;
 	trendSignals.reserve(appSignals.size());
 
-	auto archiveServers = configController.configuration().archiveServices;
+	auto configuration = configController.configuration();
+	auto archiveServers = configuration.archiveServices;
+	auto appDataServers = configuration.appDataRealTimeServices;
 
 	for (const AppSignalParam& appSignal : appSignals)
 	{
-		// Take the firss available srchive server for the signal
+		// Take the first available archive server for the signal.
 		//
-		for (const auto& server : archiveServers)
+		auto archServerIt = std::find_if(archiveServers.begin(), archiveServers.end(),
+					[&appSignal, &signalManager](const auto& as)
+					{
+						return signalManager.dataServiceHasSignal(as.appDataServiceId, appSignal.appSignalId());
+					});
+
+		auto appDataServerIt = std::find_if(appDataServers.begin(), appDataServers.end(),
+					[&appSignal, &signalManager](const auto& ads)
+					{
+						return signalManager.dataServiceHasSignal(ads.equipmentId, appSignal.appSignalId());
+					});
+
+		if (archServerIt != archiveServers.end())
 		{
-			if (signalManager.dataServiceHasSignal(server.appDataServiceId, appSignal.appSignalId()) == true)
-			{
-				TrendLib::ArchiveServer trendArchiveServer{server.equipmentId, server.shortenId, server.appDataServiceId};
-				trendSignals.emplace_back(appSignal, std::move(trendArchiveServer));
-				break;
-			}
+			const auto& as = *archServerIt;
+
+			TrendLib::ArchiveServer trendArchiveServer{as.equipmentId, as.shortenId, as.appDataServiceId};
+			TrendLib::TrendSignalParam tsp{appSignal, trendArchiveServer};
+
+			trendSignals.push_back(std::move(tsp));
+			continue;
+		};
+
+		// This situation is possible if archive service is not configured, but still realtime trends is possible, add it as is.
+		//
+		if (appDataServerIt != appDataServers.end())
+		{
+			const auto& ads = *appDataServerIt;
+
+			TrendLib::ArchiveServer trendArchiveServer{"", "", ads.equipmentId};
+			TrendLib::TrendSignalParam tsp{appSignal, trendArchiveServer};
+
+			trendSignals.push_back(std::move(tsp));
+			continue;
 		}
 	}
 
@@ -374,7 +402,7 @@ void MonitorTrendsWidget::dropEvent(QDropEvent* event)
 						[&appSignalParam, this](const MonitorSettings::AppDataService& ads)
 						{
 							return m_signalManager.dataServiceHasSignal(ads.equipmentId, appSignalParam.appSignalId());
-						});						
+						});
 
 			if (archServerIt != archiveServers.end())
 			{
