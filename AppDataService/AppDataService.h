@@ -2,8 +2,8 @@
 
 #include "../ServiceLib/Service.h"
 #include "../OnlineLib/CfgServerLoader.h"
+#include "../OnlineLib/SoftwareSettings.h"
 #include "../UtilsLib/Queue.h"
-#include "../lib/SoftwareSettings.h"
 #include "../lib/DataSource.h"
 
 #include "AppDataReceiver.h"

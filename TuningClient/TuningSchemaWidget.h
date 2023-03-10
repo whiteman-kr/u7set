@@ -5,6 +5,7 @@
 #include "../VFrame30/SchemaView.h"
 #include "TuningSchemaView.h"
 #include "TuningSchemaManager.h"
+#include "../ClientLib/TuningUserManager.h"
 
 
 class TuningClientTuningController : public VFrame30::TuningController
@@ -12,10 +13,13 @@ class TuningClientTuningController : public VFrame30::TuningController
 	Q_OBJECT
 
 public:
-	TuningClientTuningController(ITuningSignalManager* signalManager, std::vector<ITuningTcpClient*> tcpClients, QWidget* parent = nullptr);
+	TuningClientTuningController(ITuningSignalManager* signalManager, ClientLib::TuningUserManager& userManager, std::vector<ITuningTcpClient*> tcpClients, QWidget* parent = nullptr);
 
 protected:
 	[[nodiscard]] virtual bool checkTuningAccess() const override;
+
+private:
+	ClientLib::TuningUserManager& m_userManager;
 };
 
 
@@ -25,11 +29,12 @@ class TuningSchemaWidget : public VFrame30::ClientSchemaWidget
 
 public:
 	TuningSchemaWidget() = delete;
-	TuningSchemaWidget(TuningSignalManager* tuningSignalManager,
+	TuningSchemaWidget(TuningConfigController& configController,
+					   TuningSignalManager& tuningSignalManager,
 					   TuningClientTuningController* tuningController,
 					   VFrame30::LogController* logController,
 					   std::shared_ptr<VFrame30::Schema> schema,
-					   TuningSchemaManager* schemaManager,
+					   TuningSchemaManager& schemaManager,
 					   QWidget* parent);
 	virtual ~TuningSchemaWidget() = default;
 

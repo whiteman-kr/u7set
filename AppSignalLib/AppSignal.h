@@ -3,6 +3,7 @@
 #include <QString>
 #include <QMultiHash>
 #include <QFile>
+#include <QRegularExpression>
 #include <utility>
 #include <set>
 

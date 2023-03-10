@@ -30,6 +30,7 @@ private:
 	enum class Columns
 	{
 		Caption,
+		ServerID,
 		IsConnected,
 		AddressPort,
 		StartTime,

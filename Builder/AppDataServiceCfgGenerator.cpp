@@ -1,11 +1,11 @@
 #include "AppDataServiceCfgGenerator.h"
 #include "Builder.h"
+#include "SoftwareSettingsGetter.h"
 
 #include "../UtilsLib/XmlHelper.h"
 #include "../UtilsLib/WUtils.h"
 #include "../lib/DeviceHelper.h"
 #include "../lib/DataSource.h"
-#include "../lib/SoftwareSettingsGetter.h"
 
 class DataSource;
 

@@ -3,7 +3,7 @@
 
 #include <QDialog>
 #include "TuningFilter.h"
-#include "TuningSignalState.h"
+#include "../../AppSignalLib/TuningSignalState.h"
 #include "TuningModel.h"
 #include "../lib/PropertyEditor.h"
 
@@ -13,7 +13,7 @@ class ChooseTuningSignalsWidget : public QWidget
 
 public:
 
-	ChooseTuningSignalsWidget(TuningSignalManager* signalStorage, bool requestValuesEnabled, QWidget* parent);
+	ChooseTuningSignalsWidget(TuningSignalManager& signalManager, bool requestValuesEnabled, QWidget* parent);
 
 	enum class FilterType
 	{
@@ -61,7 +61,7 @@ private:
 
 private:
 
-	TuningSignalManager* m_signalManager = nullptr;
+	TuningSignalManager& m_signalManager;
 
 	std::shared_ptr<TuningFilter> m_filter;
 
@@ -137,7 +137,8 @@ class TuningFilterEditor : public QWidget
 
 public:
 
-	explicit TuningFilterEditor(TuningFilterStorage* filterStorage, TuningSignalManager* signalManager,
+	explicit TuningFilterEditor(TuningFilterStorage& filterStorage,
+								TuningSignalManager& signalManager,
 								bool readOnly,
 								bool requestValuesEnabled,
 								bool typeTreeEnabled,
@@ -243,9 +244,9 @@ private:
 
 	bool m_modified = false;
 
-	TuningFilterStorage* m_filterStorage = nullptr;
+	TuningFilterStorage& m_filterStorage;
 
-	TuningSignalManager* m_signalManager = nullptr;
+	TuningSignalManager& m_signalManager;
 
 private:
 

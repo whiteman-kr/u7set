@@ -3,9 +3,10 @@
 #include <QWaitCondition>
 
 #include "TcpFileTransfer.h"
+#include "SoftwareSettings.h"
 #include "../CommonLib/OrderedHash.h"
 #include "../lib/BuildInfo.h"
-#include "../lib/SoftwareSettings.h"
+
 
 typedef QVector<Builder::BuildFileInfo> BuildFileInfoArray;
 

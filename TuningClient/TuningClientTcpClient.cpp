@@ -4,11 +4,11 @@
 TuningClientTcpClient::TuningClientTcpClient(const SoftwareInfo& softwareInfo,
 											 const QString& tuningServiceId,
 											 int singleLmControlMode,
-											 TuningSignalManager* signalManager,
+											 TuningSignalManager& signalManager,
 											 Log::LogFile* log,
 											 TuningLog::TuningLog* tuningLog,
-											 TuningUserManager* userManager) :
-	TuningTcpClient(softwareInfo, tuningServiceId, singleLmControlMode, signalManager),
+											 ClientLib::TuningUserManager& userManager) :
+	ClientLib::TuningTcpClient(softwareInfo, tuningServiceId, singleLmControlMode, signalManager),
 	TcpClientStatistics(this),
 	m_log(log),
 	m_tuningLog(tuningLog),
@@ -18,8 +18,6 @@ TuningClientTcpClient::TuningClientTcpClient(const SoftwareInfo& softwareInfo,
 
 	assert(m_log);
 	assert(m_tuningLog);
-	assert(m_userManager);
-
 }
 
 void TuningClientTcpClient::writeLogAlert(const QString& message)
@@ -44,12 +42,12 @@ void TuningClientTcpClient::writeLogMessage(const QString& message)
 
 void TuningClientTcpClient::writeLogSignalChange(const AppSignalParam& param, const TuningValue& oldValue, const TuningValue& newValue)
 {
-	m_tuningLog->write(param, oldValue, newValue, m_userManager->loggedInUser());
+	m_tuningLog->write(param, oldValue, newValue, m_userManager.loggedInUser());
 }
 
 void TuningClientTcpClient::writeLogSignalChange(const QString& message)
 {
-	m_tuningLog->write(message, m_userManager->loggedInUser());
+	m_tuningLog->write(message, m_userManager.loggedInUser());
 }
 
 
@@ -61,7 +59,7 @@ int TuningClientTcpClient::sourceErrorCount() const
 
 	for (const auto& it : m_tuningSources)
 	{
-		const TuningSource& ts = it.second;
+		const ClientLib::TuningSource& ts = it.second;
 
 		for (int i = 0; i < ts.statesCount(); i++)
 		{
@@ -90,7 +88,7 @@ int TuningClientTcpClient::sourceErrorCount(Hash equipmentHash) const
 		return 0;
 	}
 
-	const TuningSource& ts = m_tuningSources.at(equipmentHash);
+	const ClientLib::TuningSource& ts = m_tuningSources.at(equipmentHash);
 
 	int result = 0;
 
@@ -127,7 +125,7 @@ int TuningClientTcpClient::sourceSorCount(bool* sorActive, bool* sorValid) const
 
 	for (const auto& it : m_tuningSources)
 	{
-		const TuningSource& ts = it.second;
+		const ClientLib::TuningSource& ts = it.second;
 
 		bool sorIsSet = false;
 
@@ -181,7 +179,7 @@ int TuningClientTcpClient::sourceSorCount(Hash equipmentHash, bool* sorActive, b
 		return result;
 	}
 
-	const TuningSource& ts = m_tuningSources.at(equipmentHash);
+	const ClientLib::TuningSource& ts = m_tuningSources.at(equipmentHash);
 
 	for (int i = 0; i < ts.statesCount(); i++)
 	{

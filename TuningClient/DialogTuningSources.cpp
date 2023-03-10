@@ -1,8 +1,12 @@
 #include "DialogTuningSources.h"
 #include "MainWindow.h"
 
-ClientTuningSourcesWidget::ClientTuningSourcesWidget(std::vector<TuningTcpClient*> tcpClients, bool hasActivationControls, QWidget* parent):
-	TuningSourcesWidget(tcpClients, hasActivationControls, parent)
+ClientTuningSourcesWidget::ClientTuningSourcesWidget(std::vector<ClientLib::TuningTcpClient*> tcpClients,
+													 ClientLib::TuningUserManager& userManager,
+													 bool hasActivationControls,
+													 QWidget* parent):
+	TuningSourcesWidget(tcpClients, hasActivationControls, parent),
+	m_userManager(userManager)
 {
 
 }
@@ -14,7 +18,7 @@ ClientTuningSourcesWidget::~ClientTuningSourcesWidget()
 
 bool ClientTuningSourcesWidget::login()
 {
-	if (theMainWindow->userManager()->login(this) == false)
+	if (m_userManager.login(this) == false)
 	{
 		return false;
 	}
@@ -26,14 +30,14 @@ bool ClientTuningSourcesWidget::login()
 // ---
 //
 
-DialogTuningSources::DialogTuningSources(std::vector<TuningTcpClient*> tcpClients, bool hasActivationControls, QWidget* parent):
+DialogTuningSources::DialogTuningSources(std::vector<ClientLib::TuningTcpClient*> tcpClients, ClientLib::TuningUserManager& userManager, bool hasActivationControls, QWidget* parent):
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
 {
 	setWindowTitle(tr("Tuning Data Sources"));
 
 	setAttribute(Qt::WA_DeleteOnClose);
 
-	m_tuningSourcesWidget = new ClientTuningSourcesWidget(tcpClients, hasActivationControls, this);
+	m_tuningSourcesWidget = new ClientTuningSourcesWidget(tcpClients, userManager, hasActivationControls, this);
 
 	QHBoxLayout* bottomLayout = new QHBoxLayout();
 
@@ -76,7 +80,7 @@ DialogTuningSources::DialogTuningSources(std::vector<TuningTcpClient*> tcpClient
 	setMinimumSize(1024, 300);
 }
 
-void DialogTuningSources::setTuningSources(std::vector<TuningTcpClient*> tcpClients)
+void DialogTuningSources::setTuningSources(std::vector<ClientLib::TuningTcpClient*> tcpClients)
 {
 	m_tuningSourcesWidget->setTuningTcpClients(tcpClients);
 }

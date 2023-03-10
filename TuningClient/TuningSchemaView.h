@@ -10,7 +10,7 @@ class TuningSchemaView : public VFrame30::ClientSchemaView
 	Q_OBJECT
 
 public:
-	TuningSchemaView(TuningSchemaManager* schemaManager, QWidget* parent = nullptr);
+	TuningSchemaView(TuningConfigController& configController, TuningSchemaManager& schemaManager, QWidget* parent = nullptr);
 	virtual ~TuningSchemaView() = default;
 
 public:
@@ -27,6 +27,7 @@ private slots:
 	//
 private:
 	int m_configurationId = -1;		// Last set configuration
+	TuningConfigController& m_configController;
 };
 
 #endif // TUNINGSCHEMAVIEW_H

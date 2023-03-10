@@ -204,7 +204,10 @@ void TuningClientFilterStorage::createSchemaCounterFilters()
 	return;
 }
 
-void TuningClientFilterStorage::updateCounters(const TuningSignalManager* objects, const std::vector<TuningClientTcpClient*> tcpClients, TuningFilter* filter)
+void TuningClientFilterStorage::updateCounters(const TuningSignalManager* objects,
+											   const std::vector<TuningClientTcpClient*> tcpClients,
+											   LmStatusFlagMode lmStatusFlagMode,
+											   TuningFilter* filter)
 {
 	if (filter == nullptr)
 	{
@@ -221,7 +224,7 @@ void TuningClientFilterStorage::updateCounters(const TuningSignalManager* object
 		{
 			filterCounters.errorCounter += client->sourceErrorCount();
 
-			if (theConfigSettings.lmStatusFlagMode() == LmStatusFlagMode::SOR)
+			if (lmStatusFlagMode == LmStatusFlagMode::SOR)
 			{
 				bool sorIsActive = false;
 				bool sorIsValid = false;
@@ -256,7 +259,7 @@ void TuningClientFilterStorage::updateCounters(const TuningSignalManager* object
 				{
 					filterCounters.errorCounter += client->sourceErrorCount(equipmentHash);
 
-					if (theConfigSettings.lmStatusFlagMode() == LmStatusFlagMode::SOR)
+					if (lmStatusFlagMode == LmStatusFlagMode::SOR)
 					{
 						bool sorIsActive = false;
 						bool sorIsValid = false;
@@ -305,7 +308,7 @@ void TuningClientFilterStorage::updateCounters(const TuningSignalManager* object
 	int count = filter->childFiltersCount();
 	for (int i = 0; i < count; i++)
 	{
-		updateCounters(objects, tcpClients, filter->childFilter(i).get());
+		updateCounters(objects, tcpClients, lmStatusFlagMode, filter->childFilter(i).get());
 
 		// Add child filters' counters for all empty filters
 		//
@@ -326,21 +329,6 @@ void TuningClientFilterStorage::updateCounters(const TuningSignalManager* object
 void TuningClientFilterStorage::removeFilters(TuningFilter::Source sourceType)
 {
 	m_root->removeChildren(sourceType);
-}
-
-void TuningClientFilterStorage::writeLogError(const QString& message)
-{
-	theLogFile->writeError(message);
-}
-
-void TuningClientFilterStorage::writeLogWarning(const QString& message)
-{
-	theLogFile->writeWarning(message);
-}
-
-void TuningClientFilterStorage::writeLogMessage(const QString& message)
-{
-	theLogFile->writeMessage(message);
 }
 
 int TuningClientFilterStorage::schemaCounterFiltersCount() const

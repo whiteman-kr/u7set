@@ -4,7 +4,7 @@
 #include <QtConcurrent>
 #include <QTimer>
 
-#include "../../lib/SoftwareSettings.h"
+#include "../../OnlineLib/SoftwareSettings.h"
 #include "../../lib/DataSource.h"
 
 // -------------------------------------------------------------------------------------------------------------------

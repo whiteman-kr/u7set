@@ -33,9 +33,9 @@ TcpClientStatistics::~TcpClientStatistics()
 	return;
 }
 
-std::vector<TcpClientStatistics::Statisctics> TcpClientStatistics::statistics()
+std::vector<TcpClientStatistics::Statistics> TcpClientStatistics::statistics()
 {
-	std::vector<Statisctics> result;
+	std::vector<Statistics> result;
 
 	QMutexLocker l(&s_mutex);
 	result.reserve(s_clients.size());
@@ -50,6 +50,7 @@ std::vector<TcpClientStatistics::Statisctics> TcpClientStatistics::statistics()
 
 		result.emplace_back(reinterpret_cast<uintptr_t>(tcpClient),
 							tcpClient->objectName(),
+							tcpClient->connectToServerID(),
 							tcpClient->getConnectionState());
 	}
 

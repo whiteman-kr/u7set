@@ -2,11 +2,11 @@
 
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"
+#include "../OnlineLib/SoftwareSettings.h"
 #include "../CommonLib/Hash.h"
 #include "../CommonLib/Times.h"
 #include "../Proto/network.pb.h"
 #include "../TrendView/TrendSignalSet.h"
-#include "../../lib/SoftwareSettings.h"
 
 
 class ArchiveTrendTcpClient : public Tcp::Client, public TcpClientStatistics
@@ -15,7 +15,7 @@ class ArchiveTrendTcpClient : public Tcp::Client, public TcpClientStatistics
 
 public:
 	ArchiveTrendTcpClient(const SoftwareInfo& softwareInfo,
-						  const MonitorSettings::ArchiveService& server,
+						  const SoftwareEndpoint::ArchiveService& server,
 						  ILogFile* logFile);
 	virtual ~ArchiveTrendTcpClient();
 
@@ -73,7 +73,7 @@ public:
 private:
 	int m_periodicTimerId = 0;
 
-	const MonitorSettings::ArchiveService m_server;
+	const SoftwareEndpoint::ArchiveService m_server;
 	HasLogFile m_logFile;
 
 	struct RequestQueue

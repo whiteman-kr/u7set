@@ -6,8 +6,11 @@
 #include "DialogSourceInfo.h"
 #include "../CommonLib/Hash.h"
 
-class TuningTcpClient;
-class TuningSource;
+namespace ClientLib
+{
+	class TuningTcpClient;
+	class TuningSource;
+}
 
 //
 // DialogTuningSourceInfo
@@ -18,10 +21,10 @@ class DialogTuningSourceInfo : public DialogSourceInfo
 	Q_OBJECT
 
 public:
-	explicit DialogTuningSourceInfo(std::vector<TuningTcpClient*> tcpClients, QWidget* parent, quint64 sourceId, Hash lanEquipmentHash);
+	explicit DialogTuningSourceInfo(std::vector<ClientLib::TuningTcpClient*> tcpClients, QWidget* parent, quint64 sourceId, Hash lanEquipmentHash);
 	virtual ~DialogTuningSourceInfo();
 
-	void setTuningTcpClients(std::vector<TuningTcpClient*> tcpClients);
+	void setTuningTcpClients(std::vector<ClientLib::TuningTcpClient*> tcpClients);
 
 private:
 	bool findActiveTuningTcpClient();
@@ -32,10 +35,10 @@ private:
 	void updateState();
 
 private:
-	std::vector<TuningTcpClient*> m_tcpClients;
+	std::vector<ClientLib::TuningTcpClient*> m_tcpClients;
 	int m_noStateInfoTimeout = 0;
 
-	TuningTcpClient* m_activeTcpClient = nullptr;
+	ClientLib::TuningTcpClient* m_activeTcpClient = nullptr;
 
 	Hash m_sourceHash;
 	Hash m_lanEquipmentHash;
@@ -46,12 +49,12 @@ class TuningSourcesWidget : public QWidget
 	Q_OBJECT
 public:
 
-	explicit TuningSourcesWidget(std::vector<TuningTcpClient*> tcpClients, bool hasActivationControls, QWidget* parent);
+	explicit TuningSourcesWidget(std::vector<ClientLib::TuningTcpClient*> tcpClients, bool hasActivationControls, QWidget* parent);
 	virtual ~TuningSourcesWidget();
 
 	bool treeIsFocused() const;
 
-	void setTuningTcpClients(std::vector<TuningTcpClient*> tcpClients);
+	void setTuningTcpClients(std::vector<ClientLib::TuningTcpClient*> tcpClients);
 
 public slots:
 	void detailsClicked();
@@ -107,7 +110,7 @@ private:
 	bool m_buttonDeactivateEnabled = false;
 
 
-	std::vector<TuningTcpClient*> m_tuningTcpClients;
+	std::vector<ClientLib::TuningTcpClient*> m_tuningTcpClients;
 
 	static const int columnIndex_SourceHash = 0;
 	static const int columnIndex_SourceEquipmentId = 1;

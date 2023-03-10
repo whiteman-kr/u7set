@@ -1,8 +1,6 @@
 #pragma once
 
 #include "../lib/Ui/DialogSignalSnapshot.h"
-
-#include "TcpSignalClient.h"
 #include "MonitorCentralWidget.h"
 
 class MonitorDialogSignalSnapshot : public DialogSignalSnapshot

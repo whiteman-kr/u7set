@@ -38,7 +38,6 @@ PRECOMPILED_HEADER = Stable.h
 
 HEADERS += \
 	Stable.h \
-	../lib/SoftwareSettings.h \
     ../lib/BuildInfo.h \
     FileArchReader.h \
     ArchFile.h \
@@ -55,7 +54,6 @@ HEADERS += \
 	TimeFilter.h \
 
 SOURCES += \
-	../lib/SoftwareSettings.cpp \
 	../lib/BuildInfo.cpp \
 	ArchivingService.cpp \
 	ArchServiceMain.cpp \

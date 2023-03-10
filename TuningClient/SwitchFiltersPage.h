@@ -1,10 +1,12 @@
 #ifndef SWITCHPRESETSPAGE_H
 #define SWITCHPRESETSPAGE_H
 
-#include "../lib/Tuning/TuningSignalState.h"
-#include "../lib/Tuning/TuningSignalManager.h"
+#include "../AppSignalLib/TuningSignalState.h"
+#include "../AppSignalLib/TuningSignalManager.h"
 #include "../lib/Tuning/TuningFilter.h"
 #include "TuningClientTcpClient.h"
+#include "TuningClientFilterStorage.h"
+#include "TuningConfigController.h"
 
 
 #include <QTableWidget>
@@ -114,10 +116,12 @@ class SwitchFiltersPage : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit SwitchFiltersPage(std::shared_ptr<TuningFilter> workspaceFilter,
-								TuningSignalManager* tuningSignalManager,
-								std::vector<TuningClientTcpClient*> tuningTcpClients,
-								TuningFilterStorage* tuningFilterStorage,
+	explicit SwitchFiltersPage(TuningConfigController& configController,
+							   TuningSignalManager& tuningSignalManager,
+							   TuningClientFilterStorage& tuningFilterStorage,
+							   ClientLib::TuningUserManager& userManager,
+							   std::vector<TuningClientTcpClient*> tuningTcpClients,
+							   std::shared_ptr<TuningFilter> workspaceFilter,
 								QWidget* parent = 0);
 	~SwitchFiltersPage();
 
@@ -163,11 +167,12 @@ private:
 	std::vector<std::shared_ptr<TuningFilter>> m_buttonFilters;
 	std::vector<std::shared_ptr<TuningFilter>> m_listFilters;
 
-	TuningSignalManager* m_tuningSignalManager = nullptr;
+	TuningConfigController& m_configController;
+	TuningSignalManager& m_tuningSignalManager;
+	TuningFilterStorage& m_tuningFilterStorage;
+	ClientLib::TuningUserManager& m_userManager;
 
 	std::vector<TuningClientTcpClient*> m_tuningTcpClients;
-
-	TuningFilterStorage* m_tuningFilterStorage = nullptr;
 
 	std::shared_ptr<TuningFilter> m_workspaceFilter;
 

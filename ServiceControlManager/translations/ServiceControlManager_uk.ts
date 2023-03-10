@@ -1939,7 +1939,7 @@
 <context>
     <name>MonitorSettingsGetter</name>
     <message>
-        <location filename="../../lib/SoftwareSettings.cpp" line="2300"/>
+	    <location filename="../../OnlineLib/SoftwareSettings.cpp" line="2300"/>
         <source>Monitor configuration error %1, property startSchemaId is invalid</source>
         <translation type="unfinished"></translation>
     </message>

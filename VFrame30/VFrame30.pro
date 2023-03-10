@@ -119,8 +119,6 @@ HEADERS += \
     SchemaManager.h \
     ClientSchemaView.h \
     SchemaItemLoopback.h \
-    ../lib/Tuning/TuningSignalState.h \
-    ../lib/Tuning/ITuningSignalManager.h \
     ../lib/Tuning/ITuningTcpClient.h \
 	TuningController.h \
     AppSignalController.h \

@@ -1,7 +1,7 @@
 #include "ArchivingServiceCfgGenerator.h"
+#include "SoftwareSettingsGetter.h"
 #include "../UtilsLib/WUtils.h"
-#include "../lib/SoftwareSettings.h"
-#include "../lib/SoftwareSettingsGetter.h"
+#include "../OnlineLib/SoftwareSettings.h"
 
 namespace Builder
 {

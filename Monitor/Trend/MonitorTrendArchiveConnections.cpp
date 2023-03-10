@@ -2,7 +2,7 @@
 
 
 MonitorTrendArchiveConnection::MonitorTrendArchiveConnection(const SoftwareInfo& softwareInfo,
-															 MonitorSettings::ArchiveService server,
+															 SoftwareEndpoint::ArchiveService server,
 															 ILogFile* logFile) :
 	QObject(),
 	m_logFile(logFile),
@@ -98,7 +98,7 @@ void MonitorTrendArchiveConnections::createConnections()
 
 	const SoftwareInfo& softwareInfo = m_configController.softwareInfo();
 
-	for (const MonitorSettings::ArchiveService& server : m_createdConnectionsServers)
+	for (const auto& server : m_createdConnectionsServers)
 	{
 		MonitorTrendArchiveConnection& conn = m_connections.emplace_back(softwareInfo, server, m_logFile);
 

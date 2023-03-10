@@ -15,17 +15,17 @@
 #include "../VFrame30/MacrosExpander.h"
 
 //
-//MonitorTuningController
+// MonitorTuningController
 //
-
-MonitorTuningController::MonitorTuningController(ITuningSignalManager* signalManager, ITuningTcpClient* tcpClient, TuningUserManager* tuningUserManager, QWidget* parent):
+MonitorTuningController::MonitorTuningController(ITuningSignalManager* signalManager,
+												 ITuningTcpClient* tcpClient,
+												 ClientLib::TuningUserManager* tuningUserManager,
+												 QWidget* parent):
 	VFrame30::TuningController(signalManager, tcpClient, parent),
 	m_tuningUserManager(tuningUserManager),
 	m_parentWidget(parent)
 {
-
 }
-
 
 bool MonitorTuningController::checkTuningAccess() const
 {
@@ -48,7 +48,6 @@ bool MonitorTuningController::checkTuningAccess() const
 //	MonitorSchemaWidget
 //
 //
-
 MonitorSchemaWidget::MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
 										 MonitorSchemaManager* schemaManager,
 										 VFrame30::AppSignalController* appSignalController,

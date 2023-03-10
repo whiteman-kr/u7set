@@ -1,5 +1,5 @@
 #pragma once
-
+#include <QDebug>
 
 class ILogFile
 {
@@ -22,6 +22,7 @@ public:
 	virtual bool writeMessage(const QString&)  override { return true; };
 	virtual bool writeText(const QString&)  override { return true; };
 };
+
 
 class HasLogFile
 {

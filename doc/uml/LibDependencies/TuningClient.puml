@@ -6,6 +6,7 @@
 !include ./Protobuf.puml
 !include ./AppSignalLib.puml
 !include ./VFrame30.puml
+!include ./ClientLib.puml
 
 
 [TuningClient]
@@ -14,6 +15,7 @@ TuningClient -up-> [UtilsLib]
 TuningClient -up-> [OnlineLib]
 TuningClient -up-> [Protobuf]
 TuningClient -up-> [AppSignalLib]
+TuningClient -up-> [ClientLib]
 TuningClient -up-> [VFrame30]
 
 @enduml

@@ -1,6 +1,6 @@
 #pragma once
-#include "../lib/Tuning/TuningSignalManager.h"
-#include "../lib/Tuning/TuningSignalState.h"
+#include "../../AppSignalLib/TuningSignalManager.h"
+#include "../../AppSignalLib/TuningSignalState.h"
 #include "../CommonLib/PropertyObject.h"
 #include "../CommonLib/Hash.h"
 #include "../VFrame30/Schema.h"
@@ -417,12 +417,6 @@ public:
 	void add(std::shared_ptr<TuningFilter> filter, bool moveToTop);
 
 	void checkFilterSignals(const std::vector<Hash>& signalHashes, std::vector<std::pair<QString, QString> >& notFoundSignalsAndFilters);
-
-protected:
-
-	virtual void writeLogError(const QString& message);
-	virtual void writeLogWarning(const QString& message);
-	virtual void writeLogMessage(const QString& message);
 
 protected:
 

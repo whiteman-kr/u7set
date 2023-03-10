@@ -246,7 +246,7 @@ void TcpTuningServiceClient::onGetTuningSourcesInfo(const char *replyData, quint
 
 		bool isAlreadyExists = false;
 
-		for (const TuningSource& ts : m_tuningSources)
+		for (const ClientLib::TuningSource& ts : m_tuningSources)
 		{
 			if (ts.id() == dsi.id() && ts.equipmentId() == QString::fromStdString(dsi.moduleequipmentid()))
 			{
@@ -260,7 +260,7 @@ void TcpTuningServiceClient::onGetTuningSourcesInfo(const char *replyData, quint
 			continue;
 		}
 
-		TuningSource ts(dsi);
+		ClientLib::TuningSource ts(dsi);
 		m_tuningSources.push_back(ts);
 	}
 

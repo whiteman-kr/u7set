@@ -52,15 +52,11 @@ SOURCES += \
     ../lib/LogicModulesInfo.cpp \
     ../lib/OutputLog.cpp \
     ../lib/LogicModuleSet.cpp \
-    ../lib/SoftwareSettings.cpp \
     ../lib/DataSource.cpp \
-	../lib/SoftwareSettingsGetter.cpp \
     ../lib/Tuning/TuningFilter.cpp \
     ../lib/BuildInfo.cpp \
     ../lib/LmDescription.cpp \
-    ../lib/Tuning/TuningSignalManager.cpp \
     ../lib/ConnectionsInfo.cpp \
-	../lib/Tuning/TuningSignalState.cpp \
 	../lib/ComparatorSet.cpp \
 	../lib/TuningDataStorage.cpp \
 	../TuningService/TuningSource.cpp \
@@ -68,6 +64,7 @@ SOURCES += \
 	../Metrology/MetrologyConnection.cpp \
 	../Metrology/UnitsConvertor.cpp \
 	../Metrology/UnitsConvertorTable.cpp \
+	SoftwareSettingsGetter.cpp \
     Builder.cpp \
 	AppSignalProperties.cpp \
 	CodeChecker.cpp \
@@ -122,15 +119,11 @@ HEADERS += \
     ../lib/LogicModulesInfo.h \
     ../lib/OutputLog.h \
     ../lib/LogicModuleSet.h \
-    ../lib/SoftwareSettings.h \
     ../lib/DataSource.h \
-	../lib/SoftwareSettingsGetter.h \
     ../lib/Tuning/TuningFilter.h \
     ../lib/BuildInfo.h \
     ../lib/LmDescription.h \
-    ../lib/Tuning/TuningSignalManager.h \
     ../lib/ConnectionsInfo.h \
-	../lib/Tuning/TuningSignalState.h \
 	../lib/TuningDataStorage.h \
 	../lib/ComparatorSet.h \
 	../CommonLib/PropertyObject.h \
@@ -139,6 +132,7 @@ HEADERS += \
 	../Metrology/MetrologyConnection.h \
 	../Metrology/UnitsConvertor.h \
 	../Metrology/UnitsConvertorTable.h \
+	SoftwareSettingsGetter.h \
 	Builder.h \
 	AppSignalProperties.h \
 	CodeChecker.h \

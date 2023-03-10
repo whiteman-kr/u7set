@@ -34,7 +34,6 @@ unix {
 
 SOURCES += \
     ../lib/BuildInfo.cpp \
-	../lib/SoftwareSettings.cpp \
 	ConfigurationService.cpp \
 	CfgServiceMain.cpp \
 	CfgChecker.cpp \
@@ -43,7 +42,6 @@ SOURCES += \
 HEADERS += \
 	Stable.h \
     ../lib/BuildInfo.h \
-	../lib/SoftwareSettings.h \
 	../CommonLib/Types.h \
 	ConfigurationService.h \
 	CfgChecker.h \

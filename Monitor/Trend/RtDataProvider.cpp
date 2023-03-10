@@ -1,7 +1,7 @@
 #include "RtDataProvider.h"
 
 RtConnection::RtConnection(const SoftwareInfo& softwareInfo,
-						   MonitorSettings::AppDataService server,
+						   SoftwareEndpoint::AppDataService server,
 						   const ISignalDataServer& signalDataServer,
 						   ILogFile* logFile) :
 	QObject(),
@@ -45,7 +45,7 @@ void RtConnection::setSamplePeriod(E::RtTrendsSamplePeriod samplePeriod)
 	m_rtTcpClient->setSamplePeriod(samplePeriod);
 }
 
-const MonitorSettings::AppDataService& RtConnection::server() const
+const SoftwareEndpoint::AppDataService& RtConnection::server() const
 {
 	return m_server;
 }
@@ -98,7 +98,7 @@ void RtDataProvider::createConnections()
 
 	const SoftwareInfo& softwareInfo = m_configController.softwareInfo();
 
-	for (const MonitorSettings::AppDataService& server : m_createdConnectionsServers)
+	for (const SoftwareEndpoint::AppDataService& server : m_createdConnectionsServers)
 	{
 		RtConnection& conn = m_connections.emplace_back(softwareInfo, server, m_signalDataServer, m_logFile);
 

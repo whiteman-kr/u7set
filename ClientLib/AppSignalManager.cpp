@@ -1,0 +1,817 @@
+#ifndef CLIENT_LIB_DOMAIN
+#error Don't include this file in the project! Link ClientLib instead.
+#endif
+
+#include "AppSignalManager.h"
+
+namespace ClientLib
+{
+	RecentUsed::RecentUsed(size_t maxSize /*= 750*/) :
+		m_maxSize(maxSize)
+	{
+		m_lastTimeDataFetched.start();
+	}
+
+	void RecentUsed::add(Hash hash)
+	{
+		if (m_lastTimeDataFetched.hasExpired(3000) == true)
+		{
+			// Nobody is fetching data from the recents, most likely there is no such thread.
+			//
+			m_signalToTime.clear();
+			m_timeToSignal.clear();
+			return;
+		}
+
+		qint64 now = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+
+		auto it = m_signalToTime.find(hash);
+		if (it == m_signalToTime.end())
+		{
+			if (m_signalToTime.size() >= m_maxSize)
+			{
+				auto lastTimeIt = m_timeToSignal.begin();
+
+				m_signalToTime.erase(lastTimeIt->second);
+				m_timeToSignal.erase(lastTimeIt);
+			}
+
+			m_signalToTime.insert({hash, now});
+			m_timeToSignal.insert({now, hash});
+		}
+		else
+		{
+			// Update add time.
+			//
+			qint64 itemTime = it->second;
+			bool updated = false;
+
+			auto range = m_timeToSignal.equal_range(itemTime);
+			for (auto th = range.first; th != range.second; ++th)
+			{
+				if (th->second == hash)
+				{
+					m_timeToSignal.erase(th);
+					m_timeToSignal.insert({now, hash});
+					updated = true;
+					break;
+				}
+			}
+			Q_ASSERT(updated == true);
+
+			it->second = now;
+		}
+
+		Q_ASSERT(m_signalToTime.size() == m_timeToSignal.size());
+		return;
+	}
+
+	void RecentUsed::add(const std::vector<Hash>& hashes)
+	{
+		if (m_lastTimeDataFetched.hasExpired(3000) == true)
+		{
+			// Nobody is fetching data from the recents, most likely there is no such thread.
+			//
+			m_signalToTime.clear();
+			m_timeToSignal.clear();
+			return;
+		}
+
+		for (Hash hash : hashes)
+		{
+			add(hash);
+		}
+
+		return;
+	}
+
+	bool RecentUsed::remove(Hash hash)
+	{
+		auto it = m_signalToTime.find(hash);
+		if (it == m_signalToTime.end())
+		{
+			return false;
+		}
+
+		qint64 itemTime = it->second;
+		bool removedFromTimeMap = false;
+
+		auto range = m_timeToSignal.equal_range(itemTime);
+		for (auto th = range.first; th != range.second; ++th)
+		{
+			if (th->second == hash)
+			{
+				m_timeToSignal.erase(th);
+				removedFromTimeMap = true;
+				break;
+			}
+		}
+		Q_ASSERT(removedFromTimeMap == true);
+
+		m_signalToTime.erase(it);
+
+		Q_ASSERT(m_signalToTime.size() == m_timeToSignal.size());
+		return true;
+	}
+
+	bool RecentUsed::remove(const std::vector<Hash>& hashes)
+	{
+		bool ok = true;
+		for (Hash hash : hashes)
+		{
+			ok &= remove(hash);
+		}
+
+		return ok;
+	}
+
+	bool RecentUsed::removeOutdated()
+	{
+		qint64 now = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+
+		std::vector<Hash> hashesToRemove;
+		hashesToRemove.reserve(m_signalToTime.size());
+
+		for (const auto&[hash, lastAccessTime] : m_signalToTime)
+		{
+			if (now - lastAccessTime > 3_sec)
+			{
+				hashesToRemove.push_back(hash);
+			}
+		}
+
+		return remove(hashesToRemove);
+	}
+
+	std::vector<Hash> RecentUsed::hashes() const
+	{
+		// Restart timer, it indicates that sometheng is fetching data, so this recent thing shoud work.
+		//
+		m_lastTimeDataFetched.restart();
+
+		std::vector<Hash> result;
+		result.reserve(m_signalToTime.size());
+
+		for (auto p : m_signalToTime)
+		{
+			result.push_back(p.first);
+		}
+
+		return result;
+	}
+
+
+	AppSignalManager::AppSignalManager(ILogFile* logFile, QObject* parent) :
+		QObject(parent),
+		m_logFile(logFile, "SignalManager")
+	{
+		{
+			QWriteLocker wl(&m_paramsLocker);
+			m_signalParams.reserve(128000);
+			m_signalParamByEquipmentId.reserve(128000);
+		}
+
+		{
+			QWriteLocker wl(&m_statesLocker);
+			m_states.reserve(64000);
+		}
+
+		return;
+	}
+
+	void AppSignalManager::reset()
+	{
+		{
+			QWriteLocker wl(&m_paramsLocker);
+			m_signalParams.clear();
+			m_signalParamByEquipmentId.clear();
+			m_tagToAppSignals.clear();
+			m_tags.clear();
+			m_appDataServiceToSignalHashList.clear();
+		}
+
+		{
+			QWriteLocker wl(&m_statesLocker);
+			m_states.clear();
+		}
+
+		m_setpoints.clear();	// m_setpoints is threadself itslef
+
+		// --
+		//
+		notifySignalParamsUpdated();
+
+		return;
+	}
+
+	void AppSignalManager::notifySignalParamsUpdated()
+	{
+		emit signalParamsUpdated();
+		return;
+	}
+
+	void AppSignalManager::addSignal(const AppSignalParam& appSignal, const QString& appDataServiceId)
+	{
+		QWriteLocker wl(&m_paramsLocker);
+
+		addSignalPrivate(appSignal, appDataServiceId);
+
+		return;
+	}
+
+	void AppSignalManager::addSignals(const std::vector<AppSignalParam>& appSignals, const QString& appDataServiceId)
+	{
+		QWriteLocker wl(&m_paramsLocker);
+
+		for (const AppSignalParam& s : appSignals)
+		{
+			addSignalPrivate(s, appDataServiceId);
+		}
+
+		return;
+	}
+
+	void AppSignalManager::addSignalPrivate(const AppSignalParam& appSignal, const QString& appDataServiceId)
+	{
+		m_signalParams[appSignal.hash()] = appSignal;
+
+		// Actually, EquipmentID does not starts from the symbol '@',
+		// but we need it particularly for Monitor to distinct AppSignalID from EquimpentID.
+		//
+		m_signalParamByEquipmentId[QStringLiteral("@") + appSignal.equipmentId()] = appSignal.appSignalId();
+
+		// --
+		//
+		m_appDataServiceToSignalHashList[appDataServiceId].insert(appSignal.hash());
+
+		// Add tags to m_signaIdsByTag
+		//
+		const QString& appSignalId = appSignal.appSignalId();
+		const std::set<QString>& tags = appSignal.tags();
+
+		for (const QString& tag : tags)
+		{
+			QStringList& l = m_tagToAppSignals[tag];
+
+			if (l.isEmpty() == true)
+			{
+				l.reserve(1024);
+			}
+
+			l.push_back(appSignalId);
+		}
+
+		// Add tags to commot tag set
+		//
+		m_tags.insert(tags.begin(), tags.end());
+
+		return;
+	}
+
+	void AppSignalManager::addRecentAppSignal(Hash hash)
+	{
+		QWriteLocker locker(&m_recentUsedLocker);
+		m_recentUsed.add(hash);
+	}
+
+	void AppSignalManager::addRecentAppSignals(const std::vector<Hash>& hashes)
+	{
+		QWriteLocker locker(&m_recentUsedLocker);
+		m_recentUsed.add(hashes);
+	}
+
+	std::vector<Hash> AppSignalManager::recentlyUsedAppSignals(const QString& appDataServivceId)
+	{
+		{
+			QWriteLocker locker(&m_recentUsedLocker);
+			m_recentUsed.removeOutdated();
+		}
+
+		QReadLocker locker(&m_recentUsedLocker);
+		std::vector<Hash> result{m_recentUsed.hashes()};
+		locker.unlock();
+
+		std::erase_if(result, [&appDataServivceId, this](Hash hash)
+			{
+				return !this->dataServiceHasSignal(appDataServivceId, hash);
+			});
+
+		return result;
+	}
+
+	std::vector<Hash> AppSignalManager::signalHashes() const
+	{
+		QReadLocker rl(&m_paramsLocker);
+
+		std::vector<Hash> result;
+		result.reserve(m_signalParams.size());
+
+		for (auto& s : m_signalParams)
+		{
+			result.push_back(s.first);
+		}
+
+		return result;
+	}
+
+	void AppSignalManager::invalidateSignalStates(Qt::HANDLE sourceThreadId)
+	{
+		QWriteLocker wl(&m_statesLocker);
+
+		for (auto&[signalHash, source] : m_states)
+		{
+			source.invalidateSource(sourceThreadId);
+		}
+
+		return;
+	}
+
+	void AppSignalManager::setState(const QString& appSignalId, const AppSignalState& state, Qt::HANDLE sourceThreadId)
+	{
+		Hash signalHash = ::calcHash(appSignalId);
+		return setState(signalHash, state, sourceThreadId);
+	}
+
+	void AppSignalManager::setState(Hash signalHash, const AppSignalState& arrivedState, Qt::HANDLE sourceThreadId)
+	{
+		if (signalHash == 0)
+		{
+			Q_ASSERT(signalHash != 0);
+			return;
+		}
+
+		QWriteLocker wl(&m_statesLocker);
+
+		Sources& currentState = m_states[signalHash];
+		currentState.set(arrivedState, sourceThreadId);
+
+		return;
+	}
+
+	void AppSignalManager::setState(const std::vector<AppSignalState>& states, Qt::HANDLE sourceThreadId)
+	{
+		QWriteLocker wl(&m_statesLocker);
+
+		for (const AppSignalState& newState : states)
+		{
+			Sources& currentStateAndSources = m_states[newState.hash()];
+			currentStateAndSources.set(newState, sourceThreadId);
+		}
+
+		return;
+	}
+
+	void AppSignalManager::setSetpoints(ComparatorSet&& setpoints)
+	{
+		m_setpoints = std::move(setpoints);
+		return;
+	}
+
+	void AppSignalManager::setSetpoints(const ComparatorSet& setpoints)
+	{
+		m_setpoints = setpoints;
+		return;
+	}
+
+	int AppSignalManager::signalsCount() const
+	{
+		QReadLocker rl(&m_paramsLocker);
+		return static_cast<int>(m_signalParams.size());
+	}
+
+	std::vector<AppSignalParam> AppSignalManager::signalList() const
+	{
+		QReadLocker rl(&m_paramsLocker);
+
+		std::vector<AppSignalParam> result;
+		result.reserve(m_signalParams.size());
+
+		for (auto& s : m_signalParams)
+		{
+			result.push_back(s.second);
+		}
+
+		return result;
+	}
+
+	bool AppSignalManager::signalExists(Hash hash) const
+	{
+		QReadLocker rl(&m_paramsLocker);
+
+		auto result = m_signalParams.find(hash);
+		return result != m_signalParams.end();
+	}
+
+	bool AppSignalManager::signalExists(const QString& appSignalId) const
+	{
+		Hash signalHash = ::calcHash(appSignalId);
+		return signalExists(signalHash);
+	}
+
+	AppSignalParam AppSignalManager::signalParam(Hash signalHash, bool* found) const
+	{
+		QReadLocker rl(&m_paramsLocker);
+
+		auto result = m_signalParams.find(signalHash);
+
+		if (result == m_signalParams.end())
+		{
+			if (found != nullptr)
+			{
+				*found = false;
+			}
+
+			return AppSignalParam();
+		}
+
+		if (found != nullptr)
+		{
+			*found = true;
+		}
+
+		return result->second;
+	}
+
+	AppSignalParam AppSignalManager::signalParam(const QString& appSignalId, bool* found) const
+	{
+		Hash signalHash = ::calcHash(appSignalId);
+		return signalParam(signalHash, found);
+	}
+
+	AppSignalState AppSignalManager::signalState(Hash signalHash, bool* found) const
+	{
+		if (signalHash == 0)
+		{
+			return AppSignalState();
+		}
+
+		const_cast<AppSignalManager*>(this)->addRecentAppSignal(signalHash);
+
+		QReadLocker rl(&m_statesLocker);
+
+		auto foundState = m_states.find(signalHash);
+
+		if (found != nullptr)
+		{
+			*found = !(foundState == m_states.end());
+		}
+
+		if (foundState != m_states.end())
+		{
+			return foundState->second.get();
+		}
+		else
+		{
+			AppSignalState result;
+			result.m_flags.valid = false;
+
+			return result;
+		}
+	}
+
+	AppSignalState AppSignalManager::signalState(const QString& appSignalId, bool* found) const
+	{
+		Hash h = ::calcHash(appSignalId);
+		return signalState(h, found);
+	}
+
+	void AppSignalManager::signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const
+	{
+		if (result == nullptr)
+		{
+			assert(result);
+			return;
+		}
+
+		result->clear();
+		result->reserve(appSignalHashes.size());
+
+		const_cast<AppSignalManager*>(this)->addRecentAppSignals(appSignalHashes);
+
+		int foundCount = 0;
+
+		{
+			QReadLocker rl(&m_statesLocker);
+
+			for (Hash signalHash : appSignalHashes)
+			{
+				auto foundState = m_states.find(signalHash);
+
+				if (foundState != m_states.end())
+				{
+					result->push_back(foundState->second.get());
+					foundCount ++;
+				}
+				else
+				{
+					AppSignalState state;				// Non valid state, hash will be 0 or something like UNDEFINED
+					state.m_flags.valid = false;
+
+					result->push_back(state);
+				}
+			}
+		}
+
+		if (found != nullptr)
+		{
+			*found = foundCount;
+		}
+
+		return;
+	}
+
+	void AppSignalManager::signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const
+	{
+		std::vector<Hash> appSignalHashes;
+		appSignalHashes.reserve(appSignalIds.size());
+
+		for (const QString& id : appSignalIds)
+		{
+			Hash h = ::calcHash(id);
+			appSignalHashes.push_back(h);
+		}
+
+		if (appSignalIds.size() != appSignalHashes.size())
+		{
+			assert(appSignalIds.size() == appSignalHashes.size());
+			return;
+		}
+
+		signalState(appSignalHashes, result, found);
+		return;
+	}
+
+	QStringList AppSignalManager::signalTags(Hash signalHash) const
+	{
+		QStringList result;
+
+		QReadLocker rl(&m_paramsLocker);
+
+		if (auto it = m_signalParams.find(signalHash);
+			it != m_signalParams.end())
+		{
+			result = it->second.tagStringList();
+		}
+
+		return result;
+	}
+
+	QStringList AppSignalManager::signalTags(const QString& appSignalId) const
+	{
+		return signalTags(::calcHash(appSignalId));
+	}
+
+	bool AppSignalManager::signalHasTag(Hash signalHash, const QString& tag) const
+	{
+		QReadLocker rl(&m_paramsLocker);
+
+		auto result = m_signalParams.find(signalHash);
+		return result == m_signalParams.end() ? false : result->second.hasTag(tag);
+	}
+
+	bool AppSignalManager::signalHasTag(const QString& appSignalId, const QString& tag) const
+	{
+		return signalHasTag(::calcHash(appSignalId), tag);
+	}
+
+	E::SignalType AppSignalManager::signalType(Hash signalHash, bool* found) const
+	{
+		QReadLocker rl(&m_paramsLocker);
+
+		auto result = m_signalParams.find(signalHash);
+
+		if (found != nullptr)
+		{
+			*found = (result != m_signalParams.end());
+		}
+
+		return result == m_signalParams.end() ?
+					E::SignalType::Discrete :
+					result->second.type();
+	}
+
+	QStringList AppSignalManager::signalIdsByTag(const QString& tag) const
+	{
+		QReadLocker rl(&m_paramsLocker);
+
+		auto it = m_tagToAppSignals.find(tag);
+		if (it == m_tagToAppSignals.end())
+		{
+			return {};
+		}
+		else
+		{
+			return it->second;
+		}
+	}
+
+	E::SignalType AppSignalManager::signalType(const QString& appSignalId, bool* found) const
+	{
+		return signalType(::calcHash(appSignalId), found);
+	}
+
+	QString AppSignalManager::equipmentToAppSiganlId(const QString& equipmentId) const
+	{
+		QString result;
+
+		{
+			QReadLocker rl(&m_paramsLocker);
+
+			auto it = m_signalParamByEquipmentId.find(equipmentId);
+			if (it != m_signalParamByEquipmentId.end())
+			{
+				result = it->second;
+			}
+		}
+
+		return result;
+	}
+
+
+	std::vector<std::shared_ptr<Comparator>> AppSignalManager::setpointsByInputSignalId(const QString& appSignalId) const
+	{
+		std::vector<std::shared_ptr<Comparator>> comparators = m_setpoints.getByInputSignalID(appSignalId);
+
+		std::vector<std::shared_ptr<Comparator>> result;
+		result.reserve(comparators.size());
+
+		for (const auto& c : comparators)
+		{
+			result.push_back(c);
+		}
+
+		return result;
+	}
+
+	/// Get AppDataService EquipmentIDs list by AppSignalID.
+	///
+	QStringList AppSignalManager::dataServiceIds(const QString& appSignalId) const
+	{
+		QReadLocker rl(&m_paramsLocker);
+
+		Hash hash = calcHash(appSignalId);
+
+		QStringList result;
+		for (const auto& [appDataServcieId, signalSet] : m_appDataServiceToSignalHashList)
+		{
+			if (signalSet.contains(hash) == true)
+			{
+				result.push_back(appDataServcieId);
+			}
+		}
+
+		return result;
+	}
+
+	/// Return true if AppDataService contains signal.
+	///
+	bool AppSignalManager::dataServiceHasSignal(const QString& serviceEquipmentId, const QString& appSignalId) const
+	{
+		Hash hash = calcHash(appSignalId);
+		return dataServiceHasSignal(serviceEquipmentId, hash);
+	}
+
+	bool AppSignalManager::dataServiceHasSignal(const QString& serviceEquipmentId, Hash signalHash) const
+	{
+		QReadLocker rl(&m_paramsLocker);
+
+		auto it = m_appDataServiceToSignalHashList.find(serviceEquipmentId);
+		if (it == m_appDataServiceToSignalHashList.end())
+		{
+			return false;
+		}
+
+		return it->second.contains(signalHash);
+	}
+
+	QStringList AppSignalManager::tags() const
+	{
+		QReadLocker rl(&m_paramsLocker);
+
+		QStringList result;
+		result.reserve(m_tags.size());
+
+		for (const QString& t : m_tags)
+		{
+			result.push_back(t);
+		}
+
+		return result;
+	}
+
+
+	AppSignalParam AppSignalManager::signalParamByEquipemntId(const QString& equipmentId, bool* found) const
+	{
+		Hash appSignalIdHash = UNDEFINED_HASH;
+
+		{
+			QReadLocker rl(&m_paramsLocker);
+
+			auto it = m_signalParamByEquipmentId.find(equipmentId);
+			if (it != m_signalParamByEquipmentId.end())
+			{
+				appSignalIdHash = ::calcHash(it->second);
+			}
+		}
+
+		return signalParam(appSignalIdHash, found);
+	}
+
+	void AppSignalManager::Sources::set(const AppSignalState& state, Qt::HANDLE sourceThreadId)
+	{
+		SourceState* emptyState = nullptr;
+		for (SourceState& sourceState : sources)
+		{
+			if (sourceState.sourceThreadId == sourceThreadId)
+			{
+				sourceState.state = state;
+				sourceState.lastUpdateTime = std::chrono::system_clock::now();
+				return;
+			}
+
+			if (sourceState.sourceThreadId == nullptr)
+			{
+				emptyState = &sourceState;
+			}
+		}
+
+		if (emptyState == nullptr)
+		{
+			// No emty space in sources
+			//
+			Q_ASSERT(emptyState);
+
+			// Try to mitigate it, and set value to the last item
+			//
+			emptyState = &sources.back();
+		}
+
+		*emptyState = SourceState{state, sourceThreadId, std::chrono::system_clock::now()};
+
+		return;
+	}
+
+	void AppSignalManager::Sources::invalidateSource(Qt::HANDLE sourceThreadId)
+	{
+		for (SourceState& sourceState : sources)
+		{
+			if (sourceState.sourceThreadId == sourceThreadId)
+			{
+				sourceState.state = AppSignalState{};
+				sourceState.lastUpdateTime = std::chrono::system_clock::now();
+				return;
+			}
+		}
+
+		return;
+	}
+
+	const AppSignalState& AppSignalManager::Sources::get() const
+	{
+		// Find the newest available state
+		//
+		const SourceState* stateAvailable = nullptr;
+		const SourceState* stateNewest = nullptr;
+
+		for (const SourceState& sourceState : sources)
+		{
+			if (sourceState.sourceThreadId == 0)
+			{
+				continue;
+			}
+
+			if (sourceState.state.isStateAvailable() == true)
+			{
+				if (stateAvailable == nullptr ||
+					stateAvailable->state.time().plant < sourceState.state.time().plant)
+				{
+					stateAvailable = &sourceState;	// the first state with state available flag
+				}
+			}
+			else
+			{
+				// sourceState.state.isStateAvailable() == false
+				//
+				if (stateNewest == nullptr ||
+					stateNewest->lastUpdateTime < sourceState.lastUpdateTime)
+				{
+					stateNewest = &sourceState;
+				}
+			}
+		}
+
+		if (stateAvailable != nullptr)
+		{
+			return stateAvailable->state;
+		}
+
+		if (stateNewest != nullptr)
+		{
+			return stateNewest->state;
+		}
+
+		static const AppSignalState NotValidState{};
+		return NotValidState;
+	}
+
+}

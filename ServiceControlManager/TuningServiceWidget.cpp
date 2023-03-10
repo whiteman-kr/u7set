@@ -237,11 +237,11 @@ void TuningServiceWidget::reloadTuningSourcesList()
 		return;
 	}
 
-	const QList<TuningSource>& tsList = m_tcpClientSocket->tuningSources();
+	const QList<ClientLib::TuningSource>& tsList = m_tcpClientSocket->tuningSources();
 
 	int sourcesLanCount = 0;
 
-	for (const TuningSource& ts : tsList)
+	for (const ClientLib::TuningSource& ts : tsList)
 	{
 		sourcesLanCount += ts.info().lancontrollerinfo_size();
 	}
@@ -249,7 +249,7 @@ void TuningServiceWidget::reloadTuningSourcesList()
 	m_tuningSourcesTabModel->setRowCount(sourcesLanCount);
 	int row = 0;
 
-	for (const TuningSource& ts : tsList)
+	for (const ClientLib::TuningSource& ts : tsList)
 	{
 		const ::Network::DataSourceInfo& info = ts.info();
 
@@ -295,7 +295,7 @@ void TuningServiceWidget::updateTuningSourcesState()
 
 	int row = 0;
 
-	for (const TuningSource& ts : m_tcpClientSocket->tuningSources())
+	for (const ClientLib::TuningSource& ts : m_tcpClientSocket->tuningSources())
 	{
 		for (int c = 0; c < ts.controllersCount(); c++)
 		{
@@ -405,7 +405,7 @@ void TuningServiceWidget::onTuningSourceDoubleClicked(const QModelIndex &index)
 
 	int row = index.row();
 
-	const TuningSource* tsClicked = nullptr;
+	const ClientLib::TuningSource* tsClicked = nullptr;
 	int lanIndexClicked = 0;
 	QString lanEquipmentIdClicked;
 
@@ -414,7 +414,7 @@ void TuningServiceWidget::onTuningSourceDoubleClicked(const QModelIndex &index)
 	{
 		int rowCounter = 0;
 
-		for (const TuningSource& ts : m_tcpClientSocket->tuningSources())
+		for (const ClientLib::TuningSource& ts : m_tcpClientSocket->tuningSources())
 		{
 			for (int c = 0; c < ts.controllersCount(); c++)
 			{

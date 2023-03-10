@@ -3,19 +3,20 @@
 
 #include "TuningSchemaManager.h"
 #include "../lib/Tuning/TuningModel.h"
-#include "../lib/Tuning/TuningSignalState.h"
-#include "../lib/Tuning/TuningSignalManager.h"
+#include "../AppSignalLib/TuningSignalState.h"
+#include "../AppSignalLib/TuningSignalManager.h"
+#include "../VFrame30/LogController.h"
 #include "TuningClientTcpClient.h"
 #include "TuningSchemaWidget.h"
-#include "../VFrame30/LogController.h"
 
 class SchemasWorkspace : public QWidget
 {
 	Q_OBJECT
 
 public:
-	SchemasWorkspace(ConfigController* configController,
-					 TuningSignalManager* tuningSignalManager,
+	SchemasWorkspace(TuningConfigController& configController,
+					 TuningSignalManager& tuningSignalManager,
+					 ClientLib::TuningUserManager& userManager,
 					 std::vector<ITuningTcpClient*> tuningTcpClients,
 					 const QString& caption,
 					 const QStringList& schemasTags,
@@ -47,9 +48,14 @@ private:
 private:
 	TuningClientTuningController m_tuningController;
 	VFrame30::LogController m_logController;
-	TuningSignalManager* m_tuningSignalManager = nullptr;
+
 	TuningSchemaManager m_schemaManager;
 
+	TuningSignalManager& m_tuningSignalManager;
+	TuningConfigController& m_configController;
+
+	// Interface members
+	//
 	QString m_caption;
 	QString m_startSchemaId;
 	QStringList m_schemasTags;

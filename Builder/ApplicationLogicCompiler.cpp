@@ -1,9 +1,9 @@
 #include "../lib/DeviceHelper.h"
 #include "../lib/LmDescription.h"
 #include "../lib/DataSource.h"
-#include "../lib/SoftwareSettings.h"
 #include "../lib/ConnectionsInfo.h"
 #include "../lib/LogicModulesInfo.h"
+#include "../OnlineLib/SoftwareSettings.h"
 
 #include "ApplicationLogicCompiler.h"
 #include "SoftwareCfgGenerator.h"

@@ -1,9 +1,9 @@
 #include "MonitorCfgGenerator.h"
 #include "TuningClientCfgGenerator.h"
-#include "../lib/SoftwareSettings.h"
-#include "../lib/SoftwareSettingsGetter.h"
-#include "../VFrame30/Schema.h"
+#include "SoftwareSettingsGetter.h"
 #include "Context.h"
+#include "../OnlineLib/SoftwareSettings.h"
+#include "../VFrame30/Schema.h"
 #include "../lib/ClientBehavior.h"
 
 namespace Builder
@@ -147,7 +147,7 @@ namespace Builder
 
 		m_tuningSources.clear();
 
-		for(const MonitorSettings::TuningService& tsc : settings->tuningServices)
+		for(const auto& tsc : settings->tuningServices)
 		{
 			std::shared_ptr<Hardware::DeviceObject> tuningServiceObject = m_equipment->deviceObject(tsc.equipmentId);
 			if (tuningServiceObject == nullptr)

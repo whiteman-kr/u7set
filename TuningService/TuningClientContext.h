@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../lib/SoftwareSettings.h"
+#include "../OnlineLib/SoftwareSettings.h"
 #include "TuningSourceThread.h"
 
 namespace Tuning

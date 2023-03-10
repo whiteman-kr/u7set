@@ -17,13 +17,9 @@ public:
 
 	void createSchemaCounterFilters();
 
-	void updateCounters(const TuningSignalManager* objects, const std::vector<TuningClientTcpClient*> tcpClients, TuningFilter* filter = nullptr);
+	void updateCounters(const TuningSignalManager* objects, const std::vector<TuningClientTcpClient*> tcpClients, LmStatusFlagMode lmStatusFlagMode, TuningFilter* filter = nullptr);
 
 	void removeFilters(TuningFilter::Source sourceType);
-
-	virtual void writeLogError(const QString& message);
-	virtual void writeLogWarning(const QString& message);
-	virtual void writeLogMessage(const QString& message);
 
 	int schemaCounterFiltersCount() const;
 	const QStringList& schemaCounterFiltersNames() const;
@@ -31,7 +27,6 @@ public:
 private:
 	int m_schemaCounterFiltersCount = 0;		// filled by createSchemaCounterFilters
 	QStringList m_schemaCounterFiltersNames;
-
 };
 
 class DialogCheckFilterSignals : public QDialog
