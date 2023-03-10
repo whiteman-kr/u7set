@@ -2,11 +2,11 @@
 
 #include <queue>
 #include <QReadWriteLock>
-#include "../lib/Tuning/TuningSignalManager.h"
-#include "../lib/Tuning/ITuningTcpClient.h"
-#include "../OnlineLib/Tcp.h"
-#include "../CommonLib/Hash.h"
 #include "../Proto/network.pb.h"
+#include "../CommonLib/Hash.h"
+#include "../AppSignalLib/TuningSignalManager.h"
+#include "../OnlineLib/Tcp.h"
+#include "../lib/Tuning/ITuningTcpClient.h"
 #include "TuningSourceState.h"
 
 
@@ -171,7 +171,6 @@ namespace ClientLib
 
 	public slots:
 		void slot_signalsUpdated();
-		//void slot_configurationArrived(HostAddressPort address, bool autoApply, LmStatusFlagMode lmStatusFlagMode);
 
 	signals:
 		void tuningSourcesInfoArrived();

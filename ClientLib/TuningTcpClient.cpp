@@ -1200,22 +1200,6 @@ namespace ClientLib
 		return;
 	}
 
-//	void TuningTcpClient::slot_configurationArrived(HostAddressPort address, bool autoApply, LmStatusFlagMode lmStatusFlagMode)
-//	{
-//		writeLogMessage(tr("slot_configurationArrived()"));
-
-//		if (serverAddressPort1() != address || serverAddressPort2() != address)
-//		{
-//			setServers(address, address, true);
-//		}
-
-//		setAutoApply(autoApply);
-
-//		m_lmStatusFlagMode = lmStatusFlagMode;
-
-//		return;
-//	}
-
 	void TuningTcpClient::slot_signalsUpdated()
 	{
 		writeLogMessage(tr("slot_signalsUpdated()"));

@@ -3,7 +3,7 @@
 #include "../OnlineLib/TcpClientStatistics.h"
 #include "../ClientLib/TuningUserManager.h"
 #include "../ClientLib/TuningTcpClient.h"
-#include "../lib/Tuning/TuningSignalManager.h"
+#include "../AppSignalLib/TuningSignalManager.h"
 #include "../lib/Tuning/TuningLog.h"
 
 

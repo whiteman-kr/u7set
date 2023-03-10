@@ -4,10 +4,10 @@
 #include "TuningSchemaManager.h"
 #include "../lib/Tuning/TuningModel.h"
 #include "../AppSignalLib/TuningSignalState.h"
-#include "../lib/Tuning/TuningSignalManager.h"
+#include "../AppSignalLib/TuningSignalManager.h"
+#include "../VFrame30/LogController.h"
 #include "TuningClientTcpClient.h"
 #include "TuningSchemaWidget.h"
-#include "../VFrame30/LogController.h"
 
 class SchemasWorkspace : public QWidget
 {

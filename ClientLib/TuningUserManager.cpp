@@ -16,11 +16,6 @@
 #include <lm.h>
 #endif
 
-#ifdef Q_OS_LINUX
-#include <security/pam_appl.h>
-#include <security/pam_misc.h>
-#endif
-
 namespace
 {
 	class DialogTuningPassword : public QDialog

@@ -2,7 +2,7 @@
 #define SWITCHPRESETSPAGE_H
 
 #include "../AppSignalLib/TuningSignalState.h"
-#include "../lib/Tuning/TuningSignalManager.h"
+#include "../AppSignalLib/TuningSignalManager.h"
 #include "../lib/Tuning/TuningFilter.h"
 #include "TuningClientTcpClient.h"
 #include "TuningClientFilterStorage.h"

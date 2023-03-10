@@ -4,7 +4,8 @@
 #include <unordered_map>
 #include <QMutex>
 
-#include "../lib/Tuning/ITuningSignalManager.h"
+#include "ITuningSignalManager.h"
+#include "TuningValue.h"
 
 struct TuningNewValue
 {

@@ -1,8 +1,8 @@
 #ifndef TUNINGPAGE_H
 #define TUNINGPAGE_H
 
+#include "../AppSignalLib/TuningSignalManager.h"
 #include "../lib/Tuning/TuningModel.h"
-#include "../lib/Tuning/TuningSignalManager.h"
 #include "../lib/Tuning/TuningFilter.h"
 #include "TuningClientTcpClient.h"
 #include "TuningConfigController.h"

@@ -1,8 +1,8 @@
 #include "TuningSourcesWidget.h"
 #include "../ClientLib/TuningTcpClient.h"
-#include "../lib/Tuning/TuningSignalManager.h"
-#include "../UtilsLib/Ui/UiTools.h"
 #include "../ClientLib/TuningSourcesHelper.h"
+#include "../AppSignalLib/TuningSignalManager.h"
+#include "../UtilsLib/Ui/UiTools.h"
 
 #include <QTreeWidget>
 

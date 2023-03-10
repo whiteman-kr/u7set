@@ -88,7 +88,6 @@ SOURCES += main.cpp \
 	Archive/ArchiveData.cpp \
 	MonitorSchemaManager.cpp \
 	SelectSchemaWidget.cpp \
-	../lib/Tuning/TuningSignalManager.cpp \
     Trend/RtDataProvider.cpp \
     Trend/RtSchemaTrend.cpp \
     Trend/RtTrendTcpClient.cpp \
@@ -147,7 +146,6 @@ HEADERS  += \
 	Archive/ArchiveData.h \
     SelectSchemaWidget.h \
     MonitorSchemaManager.h \
-    ../lib/Tuning/TuningSignalManager.h \
     Trend/RtDataProvider.h \
     Trend/RtSchemaTrend.h \
     Trend/RtTrendTcpClient.h \

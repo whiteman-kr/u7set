@@ -2,7 +2,7 @@
 #include "ui_TuningSignalInfo.h"
 
 #include "../AppSignalLib/TuningSignalState.h"
-#include "../lib/Tuning/TuningSignalManager.h"
+#include "../AppSignalLib/TuningSignalManager.h"
 #include "../lib/Tuning/TuningFilter.h"
 #include "Settings.h"
 

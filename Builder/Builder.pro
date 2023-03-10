@@ -56,7 +56,6 @@ SOURCES += \
     ../lib/Tuning/TuningFilter.cpp \
     ../lib/BuildInfo.cpp \
     ../lib/LmDescription.cpp \
-    ../lib/Tuning/TuningSignalManager.cpp \
     ../lib/ConnectionsInfo.cpp \
 	../lib/ComparatorSet.cpp \
 	../lib/TuningDataStorage.cpp \
@@ -124,7 +123,6 @@ HEADERS += \
     ../lib/Tuning/TuningFilter.h \
     ../lib/BuildInfo.h \
     ../lib/LmDescription.h \
-    ../lib/Tuning/TuningSignalManager.h \
     ../lib/ConnectionsInfo.h \
 	../lib/TuningDataStorage.h \
 	../lib/ComparatorSet.h \

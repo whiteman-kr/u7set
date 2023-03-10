@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../../AppSignalLib/TuningSignalState.h"
-#include "../../AppSignalLib/AppSignalParam.h"
+#include "TuningSignalState.h"
+#include "AppSignalParam.h"
 
 class ITuningSignalManager
 {

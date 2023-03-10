@@ -5,6 +5,11 @@
 #include <QLineEdit>
 #include <QDialog>
 
+#ifdef Q_OS_LINUX
+#include <security/pam_appl.h>
+#include <security/pam_misc.h>
+#endif
+
 namespace ClientLib
 {
 

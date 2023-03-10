@@ -1,7 +1,7 @@
 #ifndef TUNINGCLIENTFILTEREDITOR_H
 #define TUNINGCLIENTFILTEREDITOR_H
 
-#include "../lib/Tuning/TuningSignalManager.h"
+#include "../AppSignalLib/TuningSignalManager.h"
 #include "../lib/Tuning/TuningFilterEditor.h"
 #include "TuningClientTcpClient.h"
 

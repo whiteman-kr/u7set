@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../lib/Tuning/TuningSignalManager.h"
+#include "../AppSignalLib/TuningSignalManager.h"
 #include "ScriptMonitorApplication.h"
 
 

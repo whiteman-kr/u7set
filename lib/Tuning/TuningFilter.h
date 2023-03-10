@@ -1,5 +1,5 @@
 #pragma once
-#include "../lib/Tuning/TuningSignalManager.h"
+#include "../../AppSignalLib/TuningSignalManager.h"
 #include "../../AppSignalLib/TuningSignalState.h"
 #include "../CommonLib/PropertyObject.h"
 #include "../CommonLib/Hash.h"

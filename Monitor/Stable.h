@@ -75,7 +75,7 @@
 #endif	// Visual Leak Detector
 
 
-#include "../lib/Tuning/TuningSignalManager.h"
+#include "../AppSignalLib/TuningSignalManager.h"
 #include "ScriptMonitorApplication.h"
 
 // Defined in main.cpp

@@ -4,7 +4,7 @@
 #include "SoftwareCfgGenerator.h"
 
 #include "../lib/Tuning/TuningFilter.h"
-#include "../lib/Tuning/TuningSignalManager.h"
+#include "../AppSignalLib/TuningSignalManager.h"
 #include "../OnlineLib/SoftwareSettings.h"
 
 namespace Builder
