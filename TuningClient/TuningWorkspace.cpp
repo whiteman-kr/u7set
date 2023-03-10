@@ -140,7 +140,7 @@ int TuningWorkspace::m_instanceCounter = 0;
 TuningWorkspace::TuningWorkspace(TuningConfigController& configController,
 								 TuningSignalManager& tuningSignalManager,
 								 TuningClientFilterStorage& tuningFilterStorage,
-								 TuningUserManager& userManager,
+								 ClientLib::TuningUserManager& userManager,
 								 std::vector<TuningClientTcpClient*> tcpClients,
 								 std::shared_ptr<TuningFilter> treeFilter,
 								 std::shared_ptr<TuningFilter> workspaceFilter,

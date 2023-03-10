@@ -11,7 +11,7 @@
 #include "IAppSignalUpdater.h"
 
 
-namespace Client
+namespace ClientLib
 {
 	inline static const int RequestTimeInterval = 20;  // ms
 

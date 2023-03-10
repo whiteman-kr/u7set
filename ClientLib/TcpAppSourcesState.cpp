@@ -1,7 +1,11 @@
+#ifndef CLIENT_LIB_DOMAIN
+#error Don't include this file in the project! Link ClientLib instead.
+#endif
+
 #include "TcpAppSourcesState.h"
 
 
-namespace Client
+namespace ClientLib
 {
 	//
 	// TuningSource
@@ -120,7 +124,7 @@ namespace Client
 		qDebug() << "TcpSourcesStateClient::~TcpSourcesStateClient()";
 	}
 
-	std::vector<Client::AppDataSourceState> TcpAppSourcesState::appDataSourceStates() const
+	std::vector<ClientLib::AppDataSourceState> TcpAppSourcesState::appDataSourceStates() const
 	{
 		QReadLocker l(&m_appDataSourceStatesLock);
 

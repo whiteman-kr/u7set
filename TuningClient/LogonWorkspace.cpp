@@ -4,7 +4,7 @@
 // LogonWorkspace
 //
 
-LogonWorkspace::LogonWorkspace(TuningUserManager& userManager, QWidget* parent):
+LogonWorkspace::LogonWorkspace(ClientLib::TuningUserManager& userManager, QWidget* parent):
 	QWidget(parent),
 	m_userManager(userManager)
 {
@@ -50,8 +50,8 @@ LogonWorkspace::LogonWorkspace(TuningUserManager& userManager, QWidget* parent):
 	m.setBottom(0);
 	l->setContentsMargins(m);
 
-	connect(&m_userManager, &TuningUserManager::loggedIn, this, &LogonWorkspace::onUserManagerLogin);
-	connect(&m_userManager, &TuningUserManager::loggedOut, this, &LogonWorkspace::onUserManagerLogout);
+	connect(&m_userManager, &ClientLib::TuningUserManager::loggedIn, this, &LogonWorkspace::onUserManagerLogin);
+	connect(&m_userManager, &ClientLib::TuningUserManager::loggedOut, this, &LogonWorkspace::onUserManagerLogout);
 }
 
 void LogonWorkspace::onButtonLogin()

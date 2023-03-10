@@ -13,7 +13,7 @@ struct ConfigSettings
 {
 	int configurationId = -1;
 
-	Client::ConfigurationInfo configInfo;
+	ClientLib::ConfigurationInfo configInfo;
 
 	TuningClientSettings clientSettings;	//BuildInfo buildInfo;
 
@@ -27,7 +27,7 @@ struct ConfigSettings
 };
 
 
-class TuningConfigController : public Client::ConfigController
+class TuningConfigController : public ClientLib::ConfigController
 {
 	Q_OBJECT
 
@@ -48,7 +48,7 @@ public:
 	bool schemaHasTags(int schemaIndex, const QStringList& tags) const;
 
 protected:
-	virtual bool updateConfiguration(const Client::ConfigurationInfo& conf, const TuningClientSettings& settings, const BuildFileInfoArray& files) override;
+	virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const TuningClientSettings& settings, const BuildFileInfoArray& files) override;
 
 	void dump(const ConfigSettings& conf) const;
 
@@ -64,7 +64,7 @@ signals:
 	//
 public:
 	ConfigSettings configuration() const;
-	Client::ConfigurationInfo configInfo() const;
+	ClientLib::ConfigurationInfo configInfo() const;
 
 	QString startSchemaId() const;
 	bool showSignals() const;

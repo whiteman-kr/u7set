@@ -13,7 +13,7 @@
 //				+------------------------
 //
 
-namespace Client
+namespace ClientLib
 {
 
 	class TcpSignalRecents : public Tcp::Client, public TcpClientStatistics, public HasLogFile

@@ -8,7 +8,7 @@
 //
 
 TuningConfigController::TuningConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2, ILogFile* logFile) :
-	Client::ConfigController{softwareInfo, address1, address2, logFile}
+	ClientLib::ConfigController{softwareInfo, address1, address2, logFile}
 {
 	qRegisterMetaType<ConfigSettings>("ConfigSettings");
 
@@ -73,7 +73,7 @@ bool TuningConfigController::schemaHasTags(int schemaIndex, const QStringList& t
 	return false;
 }
 
-bool TuningConfigController::updateConfiguration(const Client::ConfigurationInfo& conf, const TuningClientSettings& settings, const BuildFileInfoArray& files)
+bool TuningConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& conf, const TuningClientSettings& settings, const BuildFileInfoArray& files)
 {
 	// Copy old settings to new settings, EXCEPT schemas information!
 	//
@@ -208,7 +208,7 @@ ConfigSettings TuningConfigController::configuration() const
 	return m_configuration;
 }
 
-Client::ConfigurationInfo TuningConfigController::configInfo() const
+ClientLib::ConfigurationInfo TuningConfigController::configInfo() const
 {
 	QReadLocker locker(&m_lock);
 	return m_configuration.configInfo;

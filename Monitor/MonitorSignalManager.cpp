@@ -2,6 +2,6 @@
 
 
 MonitorSignalManager::MonitorSignalManager(ILogFile* logFile, QObject* parent /*= nullptr*/) :
-	Client::AppSignalManager{logFile, parent}
+	ClientLib::AppSignalManager{logFile, parent}
 {
 }

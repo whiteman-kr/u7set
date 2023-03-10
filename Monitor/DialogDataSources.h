@@ -44,7 +44,7 @@ private:
 
 	// --
 	//
-	Client::AdsSourceStateConnection m_tcpSignalClientCtrl{m_logFile};
+	ClientLib::AdsSourceStateConnection m_tcpSignalClientCtrl{m_logFile};
 };
 
 #endif // DIALOGDATASOURCES_H

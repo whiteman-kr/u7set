@@ -17,14 +17,14 @@ class DialogAppDataSourceInfo : public DialogSourceInfo
 	Q_OBJECT
 
 public:
-	explicit DialogAppDataSourceInfo(const Client::AdsSourceStateConnection& adsSourceStateConnection, QWidget* parent, quint64 id);
+	explicit DialogAppDataSourceInfo(const ClientLib::AdsSourceStateConnection& adsSourceStateConnection, QWidget* parent, quint64 id);
 	virtual ~DialogAppDataSourceInfo();
 
 private:
 	void updateData() override;
 
 private:
-	const Client::AdsSourceStateConnection& m_adsSourceStateConnection;
+	const ClientLib::AdsSourceStateConnection& m_adsSourceStateConnection;
 	int m_noStateInfoTimeout = 0;
 };
 
@@ -37,7 +37,7 @@ class AppDataSourcesWidget : public QWidget
 	Q_OBJECT
 
 public:
-	explicit AppDataSourcesWidget(const Client::AdsSourceStateConnection& connection, QWidget* parent);
+	explicit AppDataSourcesWidget(const ClientLib::AdsSourceStateConnection& connection, QWidget* parent);
 	virtual ~AppDataSourcesWidget();
 
 	bool treeIsFocused() const;
@@ -85,7 +85,7 @@ private:
 
 	const int m_updateIntervalMs = 250;
 
-	const Client::AdsSourceStateConnection& m_adsSourceStateConnection;
+	const ClientLib::AdsSourceStateConnection& m_adsSourceStateConnection;
 
 	QWidget* m_parent = nullptr;
 

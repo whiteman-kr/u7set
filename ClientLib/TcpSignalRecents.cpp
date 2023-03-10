@@ -1,7 +1,11 @@
+#ifndef CLIENT_LIB_DOMAIN
+#error Don't include this file in the project! Link ClientLib instead.
+#endif
+
 #include "TcpSignalRecents.h"
 #include "../CommonLib/Hash.h"
 
-namespace Client
+namespace ClientLib
 {
 
 	//

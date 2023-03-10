@@ -2,7 +2,7 @@
 #include <vector>
 #include "../AppSignalLib/AppSignalParam.h"
 
-namespace Client
+namespace ClientLib
 {
 
 	class IAppSignalUpdater

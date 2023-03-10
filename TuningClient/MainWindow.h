@@ -7,8 +7,8 @@
 #include "SchemasWorkspace.h"
 #include "TuningConfigController.h"
 #include "LogonWorkspace.h"
-#include "../lib/Tuning/TuningUserManager.h"
 #include "DialogTuningSources.h"
+#include "../ClientLib/TuningUserManager.h"
 #include "../lib/Ui/DialogTcpStatistics.h"
 
 class TuningClientTcpClient;
@@ -90,7 +90,7 @@ private:
 	TuningConfigController m_configController;
 	TuningSignalManager m_tuningSignalManager;
 	TuningClientFilterStorage m_filterStorage;
-	TuningUserManager m_userManager;
+	ClientLib::TuningUserManager m_userManager;
 
 	// Connections
 	//

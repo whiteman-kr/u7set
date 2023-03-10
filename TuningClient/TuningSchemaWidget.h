@@ -5,7 +5,7 @@
 #include "../VFrame30/SchemaView.h"
 #include "TuningSchemaView.h"
 #include "TuningSchemaManager.h"
-#include "../lib/Tuning/TuningUserManager.h"
+#include "../ClientLib/TuningUserManager.h"
 
 
 class TuningClientTuningController : public VFrame30::TuningController
@@ -13,13 +13,13 @@ class TuningClientTuningController : public VFrame30::TuningController
 	Q_OBJECT
 
 public:
-	TuningClientTuningController(ITuningSignalManager* signalManager, TuningUserManager& userManager, std::vector<ITuningTcpClient*> tcpClients, QWidget* parent = nullptr);
+	TuningClientTuningController(ITuningSignalManager* signalManager, ClientLib::TuningUserManager& userManager, std::vector<ITuningTcpClient*> tcpClients, QWidget* parent = nullptr);
 
 protected:
 	[[nodiscard]] virtual bool checkTuningAccess() const override;
 
 private:
-	TuningUserManager& m_userManager;
+	ClientLib::TuningUserManager& m_userManager;
 };
 
 

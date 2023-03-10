@@ -54,7 +54,6 @@ SOURCES += main.cpp \
     ../lib/ComparatorSet.cpp \
     ../lib/Tuning/TuningLog.cpp \
     ../lib/Tuning/TuningSourcesHelper.cpp \
-    ../lib/Tuning/TuningUserManager.cpp \
     ../lib/Ui/DialogChooseTags.cpp \
     ../lib/Ui/DialogSignalSnapshot.cpp \
     ../lib/Ui/DialogTcpStatistics.cpp \
@@ -114,7 +113,6 @@ HEADERS  += \
     ../lib/ISignalDataServer.h \
     ../lib/Tuning/TuningLog.h \
     ../lib/Tuning/TuningSourcesHelper.h \
-    ../lib/Tuning/TuningUserManager.h \
     ../lib/Ui/DialogChooseTags.h \
     ../lib/Ui/DialogSignalSnapshot.h \
     ../lib/Ui/DialogTcpStatistics.h \

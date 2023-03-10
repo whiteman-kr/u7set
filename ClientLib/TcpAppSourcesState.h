@@ -11,7 +11,7 @@
 #include "../Proto/network.pb.h"
 
 
-namespace Client
+namespace ClientLib
 {
 	class AppDataSourceState
 	{
@@ -59,7 +59,7 @@ namespace Client
 		TcpAppSourcesState(const SoftwareInfo& softwareInfo, const SoftwareEndpoint::AppDataService& ads, ILogFile* logFile);
 		virtual ~TcpAppSourcesState();
 
-		std::vector<::Client::AppDataSourceState> appDataSourceStates() const;
+		std::vector<ClientLib::AppDataSourceState> appDataSourceStates() const;
 
 		int sourceErrorCount();
 	public:

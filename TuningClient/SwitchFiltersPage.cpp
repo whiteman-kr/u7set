@@ -42,7 +42,7 @@ QString SwitchFiltersPage::tag_FilterSwitch = "FilterSwitches";
 SwitchFiltersPage::SwitchFiltersPage(TuningConfigController& configController,
 									 TuningSignalManager& tuningSignalManager,
 									 TuningClientFilterStorage& tuningFilterStorage,
-									 TuningUserManager& userManager,
+									 ClientLib::TuningUserManager& userManager,
 									 std::vector<TuningClientTcpClient*> tuningTcpClients,
 									 std::shared_ptr<TuningFilter> workspaceFilter,
 									  QWidget* parent) :

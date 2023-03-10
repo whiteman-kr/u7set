@@ -1,6 +1,10 @@
+#ifndef CLIENT_LIB_DOMAIN
+#error Don't include this file in the project! Link ClientLib instead.
+#endif
+
 #include "AppSignalManager.h"
 
-namespace Client
+namespace ClientLib
 {
 	RecentUsed::RecentUsed(size_t maxSize /*= 750*/) :
 		m_maxSize(maxSize)

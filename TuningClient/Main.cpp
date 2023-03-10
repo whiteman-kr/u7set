@@ -1,10 +1,10 @@
 #include "Main.h"
+#include <QCommandLineParser>
 #include "MainWindow.h"
 #include <QApplication>
 #include "Settings.h"
 #include "ScriptTuningClientApplication.h"
-#include "../lib/Tuning/TuningUserManager.h"
-#include <QCommandLineParser>
+#include "../ClientLib/TuningUserManager.h"
 #include "../VFrame30/VFrame30Library.h"
 
 #if __has_include("../gitlabci_version.h")

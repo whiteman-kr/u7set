@@ -38,7 +38,7 @@ public:
 	explicit TuningWorkspace(TuningConfigController& configController,
 							 TuningSignalManager& tuningSignalManager,
 							 TuningClientFilterStorage& tuningFilterStorage,
-							 TuningUserManager& userManager,
+							 ClientLib::TuningUserManager& userManager,
 							 std::vector<TuningClientTcpClient*> tcpClients,
 							 std::shared_ptr<TuningFilter> treeFilter,
 							 std::shared_ptr<TuningFilter> workspaceFilter,
@@ -95,7 +95,7 @@ private:
 	TuningConfigController& m_configController;
 	TuningSignalManager& m_tuningSignalManager;
 	TuningClientFilterStorage& m_tuningFilterStorage;
-	TuningUserManager& m_userManager;
+	ClientLib::TuningUserManager& m_userManager;
 
 	std::vector<TuningClientTcpClient*> m_tuningTcpClients;
 

@@ -16,7 +16,7 @@
 #include "IRecentAppSignals.h"
 
 
-namespace Client
+namespace ClientLib
 {
 	class RecentUsed
 	{

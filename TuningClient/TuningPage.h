@@ -88,7 +88,7 @@ public:
 	explicit TuningPage(TuningConfigController& configController,
 						TuningSignalManager& tuningSignalManager,
 						TuningClientFilterStorage& tuningFilterStorage,
-						TuningUserManager& userManager,
+						ClientLib::TuningUserManager& userManager,
 						std::vector<TuningClientTcpClient*> tcpClients,
 						std::shared_ptr<TuningFilter> treeFilter,
 						std::shared_ptr<TuningFilter> pageFilter,
@@ -182,7 +182,7 @@ private:
 	TuningConfigController& m_configController;
 	TuningSignalManager& m_tuningSignalManager;
 	TuningFilterStorage& m_tuningFilterStorage;
-	TuningUserManager& m_userManager;
+	ClientLib::TuningUserManager& m_userManager;
 
 	std::vector<TuningClientTcpClient*> m_tuningTcpClients;
 

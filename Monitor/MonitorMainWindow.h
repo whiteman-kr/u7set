@@ -9,11 +9,11 @@
 #include "SchemaDrawStatistics.h"
 //#include "../VFrame30/ClientSchemaView.h"
 #include "../ClientLib/AdsConnection.h"
+#include "../ClientLib/TuningUserManager.h"
 #include "../VFrame30/AppSignalController.h"
 #include "../UtilsLib/LogFile.h"
 #include "../lib/Ui/DialogAlert.h"
 #include "../lib/Ui/DialogTcpStatistics.h"
-#include "../lib/Tuning/TuningUserManager.h"
 #include "../lib/Tuning/TuningLog.h"
 
 class MonitorCentralWidget;
@@ -139,8 +139,8 @@ public:
 	MonitorSignalManager& signalManager();
 	const MonitorSignalManager& signalManager() const;
 
-	TuningUserManager& userManager();
-	const TuningUserManager& userManager() const;
+	ClientLib::TuningUserManager& userManager();
+	const ClientLib::TuningUserManager& userManager() const;
 
 protected:
 
@@ -159,7 +159,7 @@ private:
 	std::unique_ptr<MonitorTuningController> m_tuningController;
 	std::unique_ptr<VFrame30::LogController> m_logController;
 
-	Client::AdsConnection m_adsConnection{m_signalManager, &m_signalManager, &m_LogFile};
+	ClientLib::AdsConnection m_adsConnection{m_signalManager, &m_signalManager, &m_LogFile};
 
 	std::vector<MonitorTuningTcpClient*> m_tuningTcpClients;
 	std::vector<SimpleThread*> m_tuningTcpClientThreads;
@@ -244,7 +244,7 @@ private:
 	//
 	DialogTcpStatistics* m_dialogStatistics = nullptr;
 
-	TuningUserManager m_tuningUserManager;
+	ClientLib::TuningUserManager m_tuningUserManager;
 };
 
 

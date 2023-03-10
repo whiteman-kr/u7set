@@ -56,8 +56,8 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	createToolBars();
 	createStatusBar();
 
-	connect(&m_tuningUserManager, &TuningUserManager::loggedIn, this, &MonitorMainWindow::slot_loggedIn);
-	connect(&m_tuningUserManager, &TuningUserManager::loggedOut, this, &MonitorMainWindow::slot_loggedOut);
+	connect(&m_tuningUserManager, &ClientLib::TuningUserManager::loggedIn, this, &MonitorMainWindow::slot_loggedIn);
+	connect(&m_tuningUserManager, &ClientLib::TuningUserManager::loggedOut, this, &MonitorMainWindow::slot_loggedOut);
 
 	// --
 	//
@@ -1795,12 +1795,12 @@ const MonitorSignalManager& MonitorMainWindow::signalManager() const
 	return m_signalManager;
 }
 
-TuningUserManager& MonitorMainWindow::userManager()
+ClientLib::TuningUserManager& MonitorMainWindow::userManager()
 {
 	return m_tuningUserManager;
 }
 
-const TuningUserManager& MonitorMainWindow::userManager() const
+const ClientLib::TuningUserManager& MonitorMainWindow::userManager() const
 {
 	return m_tuningUserManager;
 }

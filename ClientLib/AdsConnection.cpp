@@ -1,10 +1,14 @@
+#ifndef CLIENT_LIB_DOMAIN
+#error Don't include this file in the project! Link ClientLib instead.
+#endif
+
 #include "AdsConnection.h"
 #include "../UtilsLib/SimpleThread.h"
 #include "TcpSignalClient.h"
 #include "TcpSignalRecents.h"
 
 
-namespace Client
+namespace ClientLib
 {
 
 	AdsConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
@@ -13,13 +17,13 @@ namespace Client
 										  IRecentAppSignals* recentAppSignals,
 										  ILogFile* logFile)
 	{
-		tcpSignalClient = new Client::TcpSignalClient{softwareInfo, ads, signalUpdater, logFile};
+		tcpSignalClient = new ClientLib::TcpSignalClient{softwareInfo, ads, signalUpdater, logFile};
 		tcpClientThread = new ::SimpleThread{tcpSignalClient};
 		tcpClientThread->start();
 
 		if (recentAppSignals != nullptr)
 		{
-			tcpSignalRecents = new Client::TcpSignalRecents{softwareInfo, ads, *recentAppSignals, signalUpdater, logFile};
+			tcpSignalRecents = new ClientLib::TcpSignalRecents{softwareInfo, ads, *recentAppSignals, signalUpdater, logFile};
 			tcpClientRecentThread = new SimpleThread{tcpSignalRecents};
 			tcpClientRecentThread->start();
 		}

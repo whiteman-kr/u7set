@@ -10,7 +10,7 @@ struct ConfigSettings
 {
 	int configurationId = -1;		// Counter to detect that configuartion was updated
 
-	Client::ConfigurationInfo configInfo;
+	ClientLib::ConfigurationInfo configInfo;
 
 	std::vector<SoftwareEndpoint::AppDataService> appDataServices;
 	std::vector<SoftwareEndpoint::AppDataService> appDataRealTimeServices;
@@ -33,7 +33,7 @@ struct ConfigSettings
 };
 
 
-class MonitorConfigController : public Client::ConfigController
+class MonitorConfigController : public ClientLib::ConfigController
 {
 	Q_OBJECT
 
@@ -48,7 +48,7 @@ protected:
 	/// This function is called when the new configuarion arrives, it is overrided to get specific Monitor
 	/// configuration, after it signal `configurationArrived` is emitted
 	///
-	virtual bool updateConfiguration(const Client::ConfigurationInfo& conf, const MonitorSettings& settings, const BuildFileInfoArray& files) override;
+	virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const MonitorSettings& settings, const BuildFileInfoArray& files) override;
 
 	void dump(const ConfigSettings& conf) const;
 
@@ -73,7 +73,7 @@ public:
 	int configurationId() const;
 
 	ConfigSettings configuration() const;
-	Client::ConfigurationInfo configInfo() const;
+	ClientLib::ConfigurationInfo configInfo() const;
 
 	QString configurationStartSchemaId() const;
 

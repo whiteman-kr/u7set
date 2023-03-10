@@ -2,7 +2,7 @@
 #include <vector>
 #include "../CommonLib/Hash.h"
 
-namespace Client
+namespace ClientLib
 {
 	// Recently used AppSignals
 	//

@@ -1,6 +1,10 @@
+#ifndef CLIENT_LIB_DOMAIN
+#error Don't include this file in the project! Link ClientLib instead.
+#endif
+
 #include "TcpSignalClient.h"
 
-namespace Client
+namespace ClientLib
 {
 
 	TcpSignalClient::TcpSignalClient(const SoftwareInfo& softwareInfo,

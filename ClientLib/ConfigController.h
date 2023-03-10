@@ -10,7 +10,7 @@
 #include "../OnlineLib/CfgServerLoader.h"
 
 
-namespace Client
+namespace ClientLib
 {
 	struct ConfigurationInfo
 	{
@@ -53,9 +53,9 @@ namespace Client
 		/// This function is called when the new configuarion arrives, reimplement it for specific XML pasing.
 		/// Clinet must override an appropriate to settings class function.
 		///
-		virtual bool updateConfiguration(const Client::ConfigurationInfo& conf, const MonitorSettings& settings, const BuildFileInfoArray& files);
-		virtual bool updateConfiguration(const Client::ConfigurationInfo& conf, const TuningClientSettings& settings, const BuildFileInfoArray& files);
-		virtual bool updateConfiguration(const Client::ConfigurationInfo& conf, const TestClientSettings& settings, const BuildFileInfoArray& files);
+		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const MonitorSettings& settings, const BuildFileInfoArray& files);
+		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const TuningClientSettings& settings, const BuildFileInfoArray& files);
+		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const TestClientSettings& settings, const BuildFileInfoArray& files);
 
 	private:
 		int acquireAppInstanceNo(const QString& programName);

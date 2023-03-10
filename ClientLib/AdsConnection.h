@@ -9,7 +9,7 @@
 
 class SimpleThread;
 
-namespace Client
+namespace ClientLib
 {
 	class TcpSignalClient;
 	class TcpSignalRecents;
@@ -39,10 +39,10 @@ namespace Client
 
 			// --
 			//
-			Client::TcpSignalClient* tcpSignalClient = nullptr;
+			ClientLib::TcpSignalClient* tcpSignalClient = nullptr;
 			SimpleThread* tcpClientThread = nullptr;
 
-			Client::TcpSignalRecents* tcpSignalRecents = nullptr;
+			ClientLib::TcpSignalRecents* tcpSignalRecents = nullptr;
 			::SimpleThread* tcpClientRecentThread = nullptr;
 		};
 

@@ -1,14 +1,18 @@
+#ifndef CLIENT_LIB_DOMAIN
+#error Don't include this file in the project! Link ClientLib instead.
+#endif
+
 #include "AdsSourceStateConnection.h"
 #include "TcpAppSourcesState.h"
 #include "../UtilsLib/SimpleThread.h"
 
-namespace Client
+namespace ClientLib
 {
 	AdsSourceStateConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 													 const SoftwareEndpoint::AppDataService& ads,
 													 ILogFile* logFile)
 	{
-		tcpAppSourceStateClient = new Client::TcpAppSourcesState{softwareInfo, ads, logFile};
+		tcpAppSourceStateClient = new ClientLib::TcpAppSourcesState{softwareInfo, ads, logFile};
 		tcpAppSourceStateThread = new SimpleThread{tcpAppSourceStateClient};
 		tcpAppSourceStateThread->start();
 
@@ -78,9 +82,9 @@ namespace Client
 		return;
 	}
 
-	std::vector<::Client::AppDataSourceState> AdsSourceStateConnection::appDataSourceStates() const
+	std::vector<ClientLib::AppDataSourceState> AdsSourceStateConnection::appDataSourceStates() const
 	{
-		std::vector<Client::AppDataSourceState> result;
+		std::vector<ClientLib::AppDataSourceState> result;
 		result.reserve(m_conns.size());
 
 		for (const Connection& c : m_conns)

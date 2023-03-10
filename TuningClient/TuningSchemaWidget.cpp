@@ -1,13 +1,13 @@
 #include "MainWindow.h"
 #include "TuningSchemaWidget.h"
 #include "../VFrame30/MonitorSchema.h"
-#include "../lib/Tuning/TuningUserManager.h"
+#include "../ClientLib/TuningUserManager.h"
 
 
 //
 // TuningClientTuningController
 //
-TuningClientTuningController::TuningClientTuningController(ITuningSignalManager* signalManager, TuningUserManager& userManager, std::vector<ITuningTcpClient*> tcpClients, QWidget* parent):
+TuningClientTuningController::TuningClientTuningController(ITuningSignalManager* signalManager, ClientLib::TuningUserManager& userManager, std::vector<ITuningTcpClient*> tcpClients, QWidget* parent):
 	VFrame30::TuningController(signalManager, tcpClients, parent),
 	m_userManager(userManager)
 {

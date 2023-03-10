@@ -13,7 +13,7 @@
 class SimpleThread;
 
 
-namespace Client
+namespace ClientLib
 {
 	// Get application data sources states from AppDataServices(s)
 	//
@@ -53,7 +53,7 @@ namespace Client
 		///
 		void updateConnections(const SoftwareInfo& softwareInfo, const std::vector<SoftwareEndpoint::AppDataService>& appDataService);
 
-		std::vector<::Client::AppDataSourceState> appDataSourceStates() const;
+		std::vector<ClientLib::AppDataSourceState> appDataSourceStates() const;
 
 	private:
 		void createAndStart(const SoftwareInfo& softwareInfo, const std::vector<SoftwareEndpoint::AppDataService>& appDataService);

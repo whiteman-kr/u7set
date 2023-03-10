@@ -1,8 +1,12 @@
+#ifndef CLIENT_LIB_DOMAIN
+#error Don't include this file in the project! Link ClientLib instead.
+#endif
+
 #include "ConfigController.h"
 #include <QCoreApplication>
 #include <mutex>
 
-namespace Client
+namespace ClientLib
 {
 	ConfigController::ConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address, ILogFile* logFile) :
 		ConfigController{softwareInfo, address, address, logFile}
@@ -124,7 +128,7 @@ namespace Client
 		return m_logFile.logFile();
 	}
 
-	bool ConfigController::updateConfiguration(const Client::ConfigurationInfo& /*conf*/, const MonitorSettings& /*settings*/, const BuildFileInfoArray& /*files*/)
+	bool ConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& /*conf*/, const MonitorSettings& /*settings*/, const BuildFileInfoArray& /*files*/)
 	{
 		// Reimplement in the derviced class
 		//
@@ -132,7 +136,7 @@ namespace Client
 		return false;
 	}
 
-	bool ConfigController::updateConfiguration(const Client::ConfigurationInfo& /*conf*/, const TuningClientSettings& /*settings*/, const BuildFileInfoArray& /*files*/)
+	bool ConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& /*conf*/, const TuningClientSettings& /*settings*/, const BuildFileInfoArray& /*files*/)
 	{
 		// Reimplement in the derviced class
 		//
@@ -140,7 +144,7 @@ namespace Client
 		return false;
 	}
 
-	bool ConfigController::updateConfiguration(const Client::ConfigurationInfo& /*conf*/, const TestClientSettings& /*settings*/, const BuildFileInfoArray& /*files*/)
+	bool ConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& /*conf*/, const TestClientSettings& /*settings*/, const BuildFileInfoArray& /*files*/)
 	{
 		// Reimplement in the derviced class
 		//

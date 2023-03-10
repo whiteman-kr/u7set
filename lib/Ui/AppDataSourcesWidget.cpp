@@ -7,11 +7,11 @@
 // DialogAppDataSourceInfo
 //
 
-DialogAppDataSourceInfo::DialogAppDataSourceInfo(const Client::AdsSourceStateConnection& adsSourceStateConnection, QWidget* parent, quint64 id) :
+DialogAppDataSourceInfo::DialogAppDataSourceInfo(const ClientLib::AdsSourceStateConnection& adsSourceStateConnection, QWidget* parent, quint64 id) :
 	DialogSourceInfo(parent, id),
 	m_adsSourceStateConnection(adsSourceStateConnection)
 {
-	std::vector<Client::AppDataSourceState> adsStates = m_adsSourceStateConnection.appDataSourceStates();
+	std::vector<ClientLib::AppDataSourceState> adsStates = m_adsSourceStateConnection.appDataSourceStates();
 
 	auto foundState = std::find_if(adsStates.begin(), adsStates.end(),
 		[&id](const auto& state)
@@ -260,7 +260,7 @@ void DialogAppDataSourceInfo::updateData()
 // DialogAppDataSources
 //
 
-AppDataSourcesWidget::AppDataSourcesWidget(const Client::AdsSourceStateConnection& connection,  QWidget* parent) :
+AppDataSourcesWidget::AppDataSourcesWidget(const ClientLib::AdsSourceStateConnection& connection,  QWidget* parent) :
 	QWidget(parent),
 	m_adsSourceStateConnection(connection),
 	m_parent(parent)

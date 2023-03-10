@@ -2,7 +2,7 @@
 #include "MainWindow.h"
 
 ClientTuningSourcesWidget::ClientTuningSourcesWidget(std::vector<TuningTcpClient*> tcpClients,
-													 TuningUserManager& userManager,
+													 ClientLib::TuningUserManager& userManager,
 													 bool hasActivationControls,
 													 QWidget* parent):
 	TuningSourcesWidget(tcpClients, hasActivationControls, parent),
@@ -30,7 +30,7 @@ bool ClientTuningSourcesWidget::login()
 // ---
 //
 
-DialogTuningSources::DialogTuningSources(std::vector<TuningTcpClient*> tcpClients, TuningUserManager& userManager, bool hasActivationControls, QWidget* parent):
+DialogTuningSources::DialogTuningSources(std::vector<TuningTcpClient*> tcpClients, ClientLib::TuningUserManager& userManager, bool hasActivationControls, QWidget* parent):
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
 {
 	setWindowTitle(tr("Tuning Data Sources"));

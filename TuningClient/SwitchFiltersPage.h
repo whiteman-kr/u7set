@@ -119,7 +119,7 @@ public:
 	explicit SwitchFiltersPage(TuningConfigController& configController,
 							   TuningSignalManager& tuningSignalManager,
 							   TuningClientFilterStorage& tuningFilterStorage,
-							   TuningUserManager& userManager,
+							   ClientLib::TuningUserManager& userManager,
 							   std::vector<TuningClientTcpClient*> tuningTcpClients,
 							   std::shared_ptr<TuningFilter> workspaceFilter,
 								QWidget* parent = 0);
@@ -170,7 +170,7 @@ private:
 	TuningConfigController& m_configController;
 	TuningSignalManager& m_tuningSignalManager;
 	TuningFilterStorage& m_tuningFilterStorage;
-	TuningUserManager& m_userManager;
+	ClientLib::TuningUserManager& m_userManager;
 
 	std::vector<TuningClientTcpClient*> m_tuningTcpClients;
 

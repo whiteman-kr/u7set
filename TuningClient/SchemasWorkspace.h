@@ -16,7 +16,7 @@ class SchemasWorkspace : public QWidget
 public:
 	SchemasWorkspace(TuningConfigController& configController,
 					 TuningSignalManager& tuningSignalManager,
-					 TuningUserManager& userManager,
+					 ClientLib::TuningUserManager& userManager,
 					 std::vector<ITuningTcpClient*> tuningTcpClients,
 					 const QString& caption,
 					 const QStringList& schemasTags,

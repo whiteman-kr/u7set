@@ -2,7 +2,7 @@
 
 #include "../ClientLib/AppSignalManager.h"
 
-class MonitorSignalManager : public Client::AppSignalManager
+class MonitorSignalManager : public ClientLib::AppSignalManager
 {
 	Q_OBJECT
 

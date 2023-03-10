@@ -1,4 +1,4 @@
-QT += xml network
+QT += xml network widgets
 
 TARGET = ClientLib
 
@@ -55,7 +55,8 @@ HEADERS += \
 	Stable.h \
 	TcpAppSourcesState.h \
 	TcpSignalClient.h \
-	TcpSignalRecents.h
+	TcpSignalRecents.h \
+    TuningUserManager.h
 
 SOURCES += \
     AdsConnection.cpp \
@@ -64,7 +65,8 @@ SOURCES += \
 	ConfigController.cpp \
 	TcpAppSourcesState.cpp \
 	TcpSignalClient.cpp \
-	TcpSignalRecents.cpp
+	TcpSignalRecents.cpp \
+    TuningUserManager.cpp
 
 DISTFILES += \
 

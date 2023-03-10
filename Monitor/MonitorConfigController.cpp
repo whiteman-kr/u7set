@@ -5,14 +5,14 @@
 
 
 MonitorConfigController::MonitorConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2, ILogFile* logFile) :
-	Client::ConfigController{softwareInfo, address1, address2, logFile}
+	ClientLib::ConfigController{softwareInfo, address1, address2, logFile}
 {
 	qRegisterMetaType<ConfigSettings>("ConfigSettings");
 
 	return;
 }
 
-bool MonitorConfigController::updateConfiguration(const Client::ConfigurationInfo& conf, const MonitorSettings& settings, const BuildFileInfoArray& /*files*/)
+bool MonitorConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& conf, const MonitorSettings& settings, const BuildFileInfoArray& /*files*/)
 {
 	ConfigSettings config{};
 
@@ -304,7 +304,7 @@ ConfigSettings MonitorConfigController::configuration() const
 	return m_configuration;
 }
 
-Client::ConfigurationInfo MonitorConfigController::configInfo() const
+ClientLib::ConfigurationInfo MonitorConfigController::configInfo() const
 {
 	QReadLocker locker(&m_confugurationLock);
 	return m_configuration.configInfo;
