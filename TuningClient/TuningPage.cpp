@@ -4,9 +4,9 @@
 #include <QKeyEvent>
 #include <QPushButton>
 #include "../VFrame30/DrawParam.h"
+#include "../ClientLib/TuningSourcesHelper.h"
 #include "TuningSignalInfo.h"
 #include "DialogChooseFilter.h"
-#include "../lib/Tuning/TuningSourcesHelper.h"
 
 #include <QTableView>
 #include <QInputDialog>
@@ -1364,9 +1364,9 @@ bool TuningPage::write()
 	// Find TCP clients that contain modified signals
 	//
 	{
-		std::vector<TuningTcpClient*> clientsToCheckControl;
+		std::vector<ClientLib::TuningTcpClient*> clientsToCheckControl;
 
-		for (TuningTcpClient* client : m_tuningTcpClients)
+		for (ClientLib::TuningTcpClient* client : m_tuningTcpClients)
 		{
 			if (client->isConnected() == true &&
 				client->singleLmControlMode() == true &&
@@ -1378,7 +1378,7 @@ bool TuningPage::write()
 
 		// Check if same tuning sources are activated in clients
 		//
-		if (TuningSourcesHelper::clientsHaveSameActiveSource(clientsToCheckControl) == false)
+		if (ClientLib::TuningSourcesHelper::clientsHaveSameActiveSource(clientsToCheckControl) == false)
 		{
 			QMessageBox::critical(this, qAppName(), tr("To write changes, please activate the same Tuning Source in all Tuning Services."));
 			return false;
@@ -1386,7 +1386,7 @@ bool TuningPage::write()
 
 		// Take control on required clients
 		//
-		if (TuningSourcesHelper::takeServicesControl(clientsToCheckControl, this) == false)
+		if (ClientLib::TuningSourcesHelper::takeServicesControl(clientsToCheckControl, this) == false)
 		{
 			return false;
 		}
@@ -1439,7 +1439,7 @@ bool TuningPage::write()
 			continue;
 		}
 
-		std::vector<TuningWriteCommand> commands;
+		std::vector<ClientLib::TuningWriteCommand> commands;
 
 		std::vector<Hash> clientHashes = client->getProcessedHashes(modifiedHashes);
 
@@ -1459,7 +1459,7 @@ bool TuningPage::write()
 				continue;
 			}
 
-			TuningWriteCommand cmd(hash, m_tuningSignalManager.newValue(hash));
+			ClientLib::TuningWriteCommand cmd(hash, m_tuningSignalManager.newValue(hash));
 
 			commands.push_back(cmd);
 		}
@@ -1481,12 +1481,12 @@ void TuningPage::apply()
 		return;
 	}
 
-	std::vector<TuningTcpClient*> clientsToApply;
+	std::vector<ClientLib::TuningTcpClient*> clientsToApply;
 
 	// Find Active Tcp clients that contain modified signals
 	//
 	{
-		for (TuningTcpClient* client : m_tuningTcpClients)
+		for (ClientLib::TuningTcpClient* client : m_tuningTcpClients)
 		{
 			if (client->isConnected() == true &&
 				client->activeTuningSourceCount() != 0 &&
@@ -1505,7 +1505,7 @@ void TuningPage::apply()
 
 	// Take control on all clients
 	//
-	if (TuningSourcesHelper::takeServicesControl(clientsToApply, this) == false)
+	if (ClientLib::TuningSourcesHelper::takeServicesControl(clientsToApply, this) == false)
 	{
 		return;
 	}
@@ -1533,7 +1533,7 @@ void TuningPage::apply()
 		}
 	}
 
-	for (TuningTcpClient* client : clientsToApply)
+	for (ClientLib::TuningTcpClient* client : clientsToApply)
 	{
 		if (client->isConnected() == false)
 		{

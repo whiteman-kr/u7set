@@ -6,8 +6,13 @@
 #include "../lib/Tuning/TuningFilter.h"
 #include "Settings.h"
 
-TuningSignalInfo::TuningSignalInfo(Hash appSignalHash, E::AnalogFormat analogFormat, Hash instanceIdHash,
-								   TuningSignalManager& signalManager, std::vector<TuningTcpClient*> tuningTcpClients, LmStatusFlagMode lmStatusFlagMode, QWidget *parent) :
+TuningSignalInfo::TuningSignalInfo(Hash appSignalHash,
+								   E::AnalogFormat analogFormat,
+								   Hash instanceIdHash,
+								   TuningSignalManager& signalManager,
+								   std::vector<ClientLib::TuningTcpClient*> tuningTcpClients,
+								   LmStatusFlagMode lmStatusFlagMode,
+								   QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::TuningSignalInfo),
 	m_appSignalHash(appSignalHash),
@@ -48,13 +53,13 @@ TuningSignalInfo::~TuningSignalInfo()
 	delete ui;
 }
 
-void TuningSignalInfo::setTuningTcpClients(std::vector<TuningTcpClient*> tuningTcpClients)
+void TuningSignalInfo::setTuningTcpClients(std::vector<ClientLib::TuningTcpClient*> tuningTcpClients)
 {
 	m_signalTcpClients.clear();
 
 	// Get TCP clients that process this signal
 	//
-	for (TuningTcpClient* client : tuningTcpClients)
+	for (ClientLib::TuningTcpClient* client : tuningTcpClients)
 	{
 		if (client->hasTuningSignal(m_appSignalHash) == true)
 		{
@@ -98,7 +103,7 @@ void TuningSignalInfo::updateInfo()
 
 	// Fill the data received from TCP clients
 	//
-	for (TuningTcpClient* client : m_signalTcpClients)
+	for (ClientLib::TuningTcpClient* client : m_signalTcpClients)
 	{
 		TuningSignalState clientState = client->state(m_appSignalHash, &found);
 

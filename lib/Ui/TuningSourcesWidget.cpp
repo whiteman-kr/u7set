@@ -1,12 +1,12 @@
 #include "TuningSourcesWidget.h"
-#include "../lib/Tuning/TuningTcpClient.h"
+#include "../ClientLib/TuningTcpClient.h"
 #include "../lib/Tuning/TuningSignalManager.h"
 #include "../UtilsLib/Ui/UiTools.h"
-#include "../lib/Tuning/TuningSourcesHelper.h"
+#include "../ClientLib/TuningSourcesHelper.h"
 
 #include <QTreeWidget>
 
-DialogTuningSourceInfo::DialogTuningSourceInfo(std::vector<TuningTcpClient*> tcpClients, QWidget* parent, quint64 sourceId, Hash lanEquipmentHash) :
+DialogTuningSourceInfo::DialogTuningSourceInfo(std::vector<ClientLib::TuningTcpClient*> tcpClients, QWidget* parent, quint64 sourceId, Hash lanEquipmentHash) :
 	DialogSourceInfo(parent, lanEquipmentHash /*this is unique identifier, NOT sourceHash!*/),
 	m_tcpClients(tcpClients),
 	m_sourceHash(sourceId),
@@ -143,7 +143,7 @@ DialogTuningSourceInfo::~DialogTuningSourceInfo()
 
 }
 
-void DialogTuningSourceInfo::setTuningTcpClients(std::vector<TuningTcpClient*> tcpClients)
+void DialogTuningSourceInfo::setTuningTcpClients(std::vector<ClientLib::TuningTcpClient*> tcpClients)
 {
 	m_tcpClients = tcpClients;
 
@@ -154,11 +154,11 @@ void DialogTuningSourceInfo::setTuningTcpClients(std::vector<TuningTcpClient*> t
 
 bool DialogTuningSourceInfo::findActiveTuningTcpClient()
 {
-	for (TuningTcpClient* client : m_tcpClients)
+	for (ClientLib::TuningTcpClient* client : m_tcpClients)
 	{
-		const std::vector<TuningSource> tuningSourcesInfo = client->tuningSourcesInfo();
+		const std::vector<ClientLib::TuningSource> tuningSourcesInfo = client->tuningSourcesInfo();
 
-		for (const TuningSource& ts : tuningSourcesInfo)
+		for (const ClientLib::TuningSource& ts : tuningSourcesInfo)
 		{
 			for (int i = 0; i < ts.statesCount(); i++)
 			{
@@ -209,7 +209,7 @@ void DialogTuningSourceInfo::updateData()
 
 void DialogTuningSourceInfo::updateInfo()
 {
-	TuningSource ts;
+	ClientLib::TuningSource ts;
 
 	if (m_activeTcpClient->tuningSourceInfo(m_sourceHash, &ts) == false)
 	{
@@ -273,7 +273,7 @@ void DialogTuningSourceInfo::updateInfo()
 
 void DialogTuningSourceInfo::updateState()
 {
-	TuningSource ts;
+	ClientLib::TuningSource ts;
 
 	if (m_activeTcpClient->tuningSourceInfo(m_sourceHash, &ts) == false)
 	{
@@ -412,7 +412,7 @@ void DialogTuningSourceInfo::updateState()
 //
 
 
-TuningSourcesWidget::TuningSourcesWidget(std::vector<TuningTcpClient*> tcpClients, bool hasActivationControls, QWidget* parent) :
+TuningSourcesWidget::TuningSourcesWidget(std::vector<ClientLib::TuningTcpClient*> tcpClients, bool hasActivationControls, QWidget* parent) :
 	QWidget(parent),
 	m_hasActivationControls(hasActivationControls),
 	m_parent(parent)
@@ -474,7 +474,7 @@ bool TuningSourcesWidget::treeIsFocused() const
 	return m_treeWidget->hasFocus();
 }
 
-void TuningSourcesWidget::setTuningTcpClients(std::vector<TuningTcpClient*> tcpClients)
+void TuningSourcesWidget::setTuningTcpClients(std::vector<ClientLib::TuningTcpClient*> tcpClients)
 {
 	m_tuningTcpClients = tcpClients;
 
@@ -633,11 +633,11 @@ void TuningSourcesWidget::updateTuningSourcesStates()
 
 	int controllersCount = 0;
 
-	for (const TuningTcpClient* client : m_tuningTcpClients)
+	for (const ClientLib::TuningTcpClient* client : m_tuningTcpClients)
 	{
-		std::vector<TuningSource> sources = client->tuningSourcesInfo();
+		std::vector<ClientLib::TuningSource> sources = client->tuningSourcesInfo();
 
-		for (const TuningSource& ts: sources)
+		for (const ClientLib::TuningSource& ts: sources)
 		{
 			const ::Network::DataSourceInfo& info = ts.info();
 
@@ -801,7 +801,7 @@ void TuningSourcesWidget::enableActivationControls()
 	{
 		QString sourceEquipmentId = sel[0]->data(columnIndex_SourceEquipmentId, Qt::UserRole).toString();
 
-		TuningSourcesHelper::isActivationActionsAvailable(m_tuningTcpClients, sourceEquipmentId, &buttonActivateEnabled, &buttonDeactivateEnabled);
+		ClientLib::TuningSourcesHelper::isActivationActionsAvailable(m_tuningTcpClients, sourceEquipmentId, &buttonActivateEnabled, &buttonDeactivateEnabled);
 	}
 
 	if (buttonActivateEnabled != m_buttonActivateEnabled ||	buttonDeactivateEnabled != m_buttonDeactivateEnabled)
@@ -832,7 +832,7 @@ void TuningSourcesWidget::activateControl(bool enable)
 			return;
 		}
 
-		TuningSourcesHelper::activateTuningSourceControl(m_tuningTcpClients, sourceEquipmentId, enable, this);
+		ClientLib::TuningSourcesHelper::activateTuningSourceControl(m_tuningTcpClients, sourceEquipmentId, enable, this);
 	}
 
 	return;

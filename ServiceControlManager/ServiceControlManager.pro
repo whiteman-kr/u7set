@@ -28,7 +28,6 @@ unix {
 
 SOURCES += \
     ../lib/DataSource.cpp \
-    ../lib/Tuning/TuningSourceState.cpp \
     ../lib/WidgetUtils.cpp \
 	../lib/LanControllerInfo.cpp \
 	../AppDataService/DynamicAppSignalState.cpp \
@@ -51,7 +50,6 @@ SOURCES += \
 HEADERS  += \
 	Stable.h \
     ../lib/DataSource.h \
-	../lib/Tuning/TuningSourceState.h \
     ../lib/WidgetUtils.h \
 	../lib/LanControllerInfo.h \
 	../AppDataService/DynamicAppSignalState.h \
@@ -93,6 +91,12 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 #
 LIBS += -L$$DESTDIR
 LIBS += -L.
+
+# ClientLib
+#
+LIBS += -lClientLib
+win32:PRE_TARGETDEPS += $$DESTDIR/ClientLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libClientLib.a
 
 # OnlineLib
 #

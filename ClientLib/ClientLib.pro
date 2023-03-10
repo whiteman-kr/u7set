@@ -56,6 +56,9 @@ HEADERS += \
 	TcpAppSourcesState.h \
 	TcpSignalClient.h \
 	TcpSignalRecents.h \
+    TuningSourceState.h \
+    TuningSourcesHelper.h \
+    TuningTcpClient.h \
     TuningUserManager.h
 
 SOURCES += \
@@ -66,6 +69,9 @@ SOURCES += \
 	TcpAppSourcesState.cpp \
 	TcpSignalClient.cpp \
 	TcpSignalRecents.cpp \
+    TuningSourceState.cpp \
+    TuningSourcesHelper.cpp \
+    TuningTcpClient.cpp \
     TuningUserManager.cpp
 
 DISTFILES += \

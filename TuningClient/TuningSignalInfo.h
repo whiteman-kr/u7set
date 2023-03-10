@@ -18,14 +18,16 @@ class TuningSignalInfo : public QDialog
 	Q_OBJECT
 
 public:
-	explicit TuningSignalInfo(Hash appSignalHash, E::AnalogFormat analogFormat, Hash instanceIdHash,
+	explicit TuningSignalInfo(Hash appSignalHash,
+							  E::AnalogFormat analogFormat,
+							  Hash instanceIdHash,
 							  TuningSignalManager& signalManager,
-							  std::vector<TuningTcpClient*> tuningTcpClients,
+							  std::vector<ClientLib::TuningTcpClient*> tuningTcpClients,
 							  LmStatusFlagMode lmStatusFlagMode,
 							  QWidget* parent = 0);
 	~TuningSignalInfo();
 
-	void setTuningTcpClients(std::vector<TuningTcpClient*> tuningTcpClients);
+	void setTuningTcpClients(std::vector<ClientLib::TuningTcpClient*> tuningTcpClients);
 
 private:
 	virtual void timerEvent(QTimerEvent* event) override;
@@ -40,7 +42,7 @@ private:
 
 	TuningSignalManager& m_signalManager;
 
-	std::vector<TuningTcpClient*> m_signalTcpClients;
+	std::vector<ClientLib::TuningTcpClient*> m_signalTcpClients;
 	LmStatusFlagMode m_lmStatusFlagMode = LmStatusFlagMode::SOR;
 
 	Ui::TuningSignalInfo *ui;

@@ -1,14 +1,14 @@
 #pragma once
 
-#include "../lib/Tuning/TuningTcpClient.h"
 #include "../lib/Tuning/TuningFilter.h"
 #include "../lib/Tuning/TuningLog.h"
 #include "../UtilsLib/LogFile.h"
 #include "../OnlineLib/TcpClientStatistics.h"
+#include "../ClientLib/TuningTcpClient.h"
 #include "../ClientLib/TuningUserManager.h"
 
 
-class TuningClientTcpClient : public TuningTcpClient, public TcpClientStatistics
+class TuningClientTcpClient : public ClientLib::TuningTcpClient, public TcpClientStatistics
 {
 	Q_OBJECT
 public:

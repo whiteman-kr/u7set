@@ -1,7 +1,7 @@
 #include "TuningWorkspace.h"
 #include "Settings.h"
 #include "MainWindow.h"
-#include "../lib/Tuning/TuningSourcesHelper.h"
+#include "../ClientLib/TuningSourcesHelper.h"
 
 #include <QButtonGroup>
 #include <QTreeWidget>
@@ -1377,7 +1377,7 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 			continue;
 		}
 
-		TuningSource ts;
+		ClientLib::TuningSource ts;
 
 		QString sourceStatus;
 
@@ -1667,7 +1667,7 @@ void TuningWorkspace::activateControl(const QString& equipmentId, bool enable)
 		return;
 	}
 
-	TuningSourcesHelper::activateTuningSourceControl({m_tuningTcpClients.begin(), m_tuningTcpClients.end()}, equipmentId, enable, this);
+	ClientLib::TuningSourcesHelper::activateTuningSourceControl({m_tuningTcpClients.begin(), m_tuningTcpClients.end()}, equipmentId, enable, this);
 }
 
 QTreeWidgetItem* TuningWorkspace::findFilterWidget(const QString& id, QTreeWidgetItem* treeItem)
@@ -1796,7 +1796,7 @@ void TuningWorkspace::slot_treeContextMenuRequested(const QPoint& pos)
 	bool activateEnabled = false;
 	bool deactivateEnabled = false;
 
-	TuningSourcesHelper::isActivationActionsAvailable({m_tuningTcpClients.begin(), m_tuningTcpClients.end()}, equipmentId, &activateEnabled, &deactivateEnabled);
+	ClientLib::TuningSourcesHelper::isActivationActionsAvailable({m_tuningTcpClients.begin(), m_tuningTcpClients.end()}, equipmentId, &activateEnabled, &deactivateEnabled);
 
 	QMenu menu(this);
 

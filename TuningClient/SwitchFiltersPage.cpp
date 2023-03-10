@@ -165,7 +165,7 @@ void SwitchFiltersPage::createControls(std::shared_ptr<TuningFilter> root)
 
 	// Controls in this form only used in Multiple-LM control mode
 
-	for (const TuningTcpClient* client : m_tuningTcpClients)
+	for (const ClientLib::TuningTcpClient* client : m_tuningTcpClients)
 	{
 		if (client->singleLmControlMode() == true)
 		{

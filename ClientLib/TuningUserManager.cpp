@@ -335,8 +335,7 @@ namespace ClientLib
 
 #ifdef Q_OS_LINUX
 
-	int TuningUserManager::pamConverse(int n, const struct pam_message **msg,
-									   struct pam_response **resp, void *data)
+	int TuningUserManager::pamConverse(int n, const struct ::pam_message **msg, struct ::pam_response **resp, void *data)
 	{
 		TuningUserManager* ob = static_cast<TuningUserManager*>(data);
 
@@ -344,11 +343,11 @@ namespace ClientLib
 		QByteArray ba = strp.toLatin1();
 		char *pcodec = ba.data();
 
-		struct pam_response *aresp;
+		struct ::pam_response *aresp;
 		char buf[PAM_MAX_RESP_SIZE];
 		int i;
 
-		aresp = new pam_response;
+		aresp = new ::pam_response;
 
 		if (n <= 0 || n > PAM_MAX_NUM_MSG)
 			return (PAM_CONV_ERR);

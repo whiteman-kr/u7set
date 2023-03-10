@@ -2,12 +2,12 @@
 #include "../UtilsLib/ILogFile.h"
 #include "../OnlineLib/TcpClientStatistics.h"
 #include "../ClientLib/TuningUserManager.h"
-#include "../lib/Tuning/TuningTcpClient.h"
+#include "../ClientLib/TuningTcpClient.h"
 #include "../lib/Tuning/TuningSignalManager.h"
 #include "../lib/Tuning/TuningLog.h"
 
 
-class MonitorTuningTcpClient : public TuningTcpClient, public TcpClientStatistics
+class MonitorTuningTcpClient : public ClientLib::TuningTcpClient, public TcpClientStatistics
 {
 	Q_OBJECT
 

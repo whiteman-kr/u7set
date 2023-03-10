@@ -1,9 +1,8 @@
 #pragma once
 
 #include "../OnlineLib/Tcp.h"
-#include "../OnlineLib/SocketIO.h"
 #include "../Proto/network.pb.h"
-#include "../lib/Tuning/TuningSourceState.h"
+#include "../ClientLib/TuningSourceState.h"
 #include "../AppSignalLib/AppSignal.h"
 #include "../AppSignalLib/TuningSignalState.h"
 
@@ -46,7 +45,7 @@ public:
 	QString configIP1() {return m_configIP1; }
 	QString configIP2() { return m_configIP2; }
 
-	const QList<TuningSource>& tuningSources() { return m_tuningSources; }
+	const QList<ClientLib::TuningSource>& tuningSources() { return m_tuningSources; }
 	const QVector<AppSignal>& tuningSignalParams() { return m_signals; }
 	const QVector<TuningSignalState>& tuningSignalStates() { return m_tuningSignalState; }
 
@@ -89,7 +88,7 @@ private slots:
 	void updateStates();
 
 private:
-	QList<TuningSource> m_tuningSources;
+	QList<ClientLib::TuningSource> m_tuningSources;
 
 	QTimer* m_updateStatesTimer = nullptr;
 

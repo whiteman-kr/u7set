@@ -4,7 +4,7 @@
 #include <set>
 #include "../VFrame30/Schema.h"
 #include "../ClientLib/ConfigController.h"
-#include "../lib/Tuning/TuningTcpClient.h"
+#include "../ClientLib/TuningTcpClient.h"
 
 //
 // ConfigSettings

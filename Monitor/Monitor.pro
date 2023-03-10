@@ -53,7 +53,6 @@ SOURCES += main.cpp \
     ../lib/ClientBehavior.cpp \
     ../lib/ComparatorSet.cpp \
     ../lib/Tuning/TuningLog.cpp \
-    ../lib/Tuning/TuningSourcesHelper.cpp \
     ../lib/Ui/DialogChooseTags.cpp \
     ../lib/Ui/DialogSignalSnapshot.cpp \
     ../lib/Ui/DialogTcpStatistics.cpp \
@@ -90,8 +89,6 @@ SOURCES += main.cpp \
 	MonitorSchemaManager.cpp \
 	SelectSchemaWidget.cpp \
 	../lib/Tuning/TuningSignalManager.cpp \
-    ../lib/Tuning/TuningTcpClient.cpp \
-    ../lib/Tuning/TuningSourceState.cpp \
     Trend/RtDataProvider.cpp \
     Trend/RtSchemaTrend.cpp \
     Trend/RtTrendTcpClient.cpp \
@@ -112,7 +109,6 @@ HEADERS  += \
 	../UtilsLib/ILogFile.h \
     ../lib/ISignalDataServer.h \
     ../lib/Tuning/TuningLog.h \
-    ../lib/Tuning/TuningSourcesHelper.h \
     ../lib/Ui/DialogChooseTags.h \
     ../lib/Ui/DialogSignalSnapshot.h \
     ../lib/Ui/DialogTcpStatistics.h \
@@ -152,15 +148,12 @@ HEADERS  += \
     SelectSchemaWidget.h \
     MonitorSchemaManager.h \
     ../lib/Tuning/TuningSignalManager.h \
-    ../lib/Tuning/TuningTcpClient.h \
-    ../lib/Tuning/TuningSourceState.h \
     Trend/RtDataProvider.h \
     Trend/RtSchemaTrend.h \
     Trend/RtTrendTcpClient.h \
     Trend/ArchiveTrendTcpClient.h \
     MonitorTuningTcpClient.h \
 	../AppSignalLib/TuningSignalState.h \
-    ../lib/Tuning/TuningSourceState.h \
     ../lib/Ui/DialogAlert.h \
     ../lib/Ui/DialogAbout.h \
     ../lib/Ui/DialogSourceInfo.h \

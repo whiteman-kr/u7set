@@ -1230,10 +1230,10 @@ void MainWindow::showTuningSources()
 {
 	if (m_dialogTuningSources == nullptr)
 	{
-		std::vector<TuningTcpClient*> clients;
+		std::vector<ClientLib::TuningTcpClient*> clients;
 		for (const auto& c: m_tcpClients)
 		{
-			TuningTcpClient* tc = dynamic_cast<TuningTcpClient*>(c);
+			ClientLib::TuningTcpClient* tc = dynamic_cast<ClientLib::TuningTcpClient*>(c);
 			if (tc == nullptr)
 			{
 				Q_ASSERT(tc);

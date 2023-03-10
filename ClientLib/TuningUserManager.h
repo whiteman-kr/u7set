@@ -45,8 +45,7 @@ namespace ClientLib
 		bool requestPassword(QWidget* parent);
 
 #ifdef Q_OS_LINUX
-		static int pamConverse(int n, const struct pam_message **msg,
-							   struct pam_response **resp, void *data);
+		static int pamConverse(int n, const struct ::pam_message **msg, struct ::pam_response **resp, void *data);
 #endif
 
 	private:

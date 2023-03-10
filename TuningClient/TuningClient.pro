@@ -62,7 +62,6 @@ SOURCES +=\
     TuningPage.cpp \
     Settings.cpp \
     TuningSignalInfo.cpp \
-    ../lib/Tuning/TuningSourcesHelper.cpp \
     TuningWorkspace.cpp \
     ../lib/BuildInfo.cpp \
     DialogSettings.cpp \
@@ -80,10 +79,8 @@ SOURCES +=\
     TuningSchemaWidget.cpp \
 	../lib/Tuning/TuningSignalManager.cpp \
     DialogFilterEditor.cpp \
-    ../lib/Tuning/TuningTcpClient.cpp \
     TuningClientTcpClient.cpp \
     ../lib/Tuning/TuningLog.cpp \
-    ../lib/Tuning/TuningSourceState.cpp \
     TuningSchemaManager.cpp \
     ../lib/Ui/DialogAlert.cpp \
     ../lib/Ui/DialogAbout.cpp \
@@ -106,7 +103,6 @@ HEADERS  += MainWindow.h \
     TuningPage.h \
     Settings.h \
     TuningSignalInfo.h \
-    ../lib/Tuning/TuningSourcesHelper.h \
     TuningWorkspace.h \
     ../lib/BuildInfo.h \
     DialogSettings.h \
@@ -124,10 +120,8 @@ HEADERS  += MainWindow.h \
     SchemasWorkspace.h \
     ../lib/Tuning/TuningSignalManager.h \
     DialogFilterEditor.h \
-    ../lib/Tuning/TuningTcpClient.h \
     TuningClientTcpClient.h \
     ../lib/Tuning/TuningLog.h \
-    ../lib/Tuning/TuningSourceState.h \
     TuningSchemaManager.h \
     ../lib/Ui/DialogAlert.h \
     ../lib/Ui/DialogAbout.h \
