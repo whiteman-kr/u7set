@@ -1,9 +1,8 @@
 #pragma once
 
-#include "../lib/Tuning/TuningFilter.h"
-#include "../lib/Tuning/TuningLog.h"
 #include "../UtilsLib/LogFile.h"
 #include "../OnlineLib/TcpClientStatistics.h"
+#include "../ClientLib/TuningLog.h"
 #include "../ClientLib/TuningTcpClient.h"
 #include "../ClientLib/TuningUserManager.h"
 

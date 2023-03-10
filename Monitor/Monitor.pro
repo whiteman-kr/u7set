@@ -52,7 +52,6 @@ PRECOMPILED_HEADER = Stable.h
 SOURCES += main.cpp \
     ../lib/ClientBehavior.cpp \
     ../lib/ComparatorSet.cpp \
-    ../lib/Tuning/TuningLog.cpp \
     ../lib/Ui/DialogChooseTags.cpp \
     ../lib/Ui/DialogSignalSnapshot.cpp \
     ../lib/Ui/DialogTcpStatistics.cpp \
@@ -107,7 +106,6 @@ HEADERS  += \
     ../lib/ConstStrings.h \
 	../UtilsLib/ILogFile.h \
     ../lib/ISignalDataServer.h \
-    ../lib/Tuning/TuningLog.h \
     ../lib/Ui/DialogChooseTags.h \
     ../lib/Ui/DialogSignalSnapshot.h \
     ../lib/Ui/DialogTcpStatistics.h \
@@ -197,16 +195,16 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 LIBS += -L$$DESTDIR
 LIBS += -L.
 
-# Authorization
-#
-win32:LIBS += -lAdvapi32
-unix:LIBS += -lpam -lpam_misc
-
 # ClientLib
 #
 LIBS += -lClientLib
 win32:PRE_TARGETDEPS += $$DESTDIR/ClientLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libClientLib.a
+
+# Authorization
+#
+win32:LIBS += -lAdvapi32
+unix:LIBS += -lpam -lpam_misc
 
 # VFrame30 library
 #

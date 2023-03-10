@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../../UtilsLib/LogFile.h"
-#include "../../AppSignalLib/AppSignalParam.h"
+#include "../UtilsLib/LogFile.h"
+#include "../AppSignalLib/AppSignalParam.h"
 
 namespace TuningLog
 {

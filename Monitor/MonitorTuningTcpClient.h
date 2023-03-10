@@ -3,8 +3,8 @@
 #include "../OnlineLib/TcpClientStatistics.h"
 #include "../ClientLib/TuningUserManager.h"
 #include "../ClientLib/TuningTcpClient.h"
+#include "../ClientLib/TuningLog.h"
 #include "../AppSignalLib/TuningSignalManager.h"
-#include "../lib/Tuning/TuningLog.h"
 
 
 class MonitorTuningTcpClient : public ClientLib::TuningTcpClient, public TcpClientStatistics

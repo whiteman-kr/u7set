@@ -93,7 +93,6 @@ HEADERS += \
 	../lib/LogicModulesInfo.h \
 	../Proto/serialization.pb.h \
 	../lib/LmDescription.h \
-	../lib/Tuning/ITuningSignalManager.h \
     SimAppDataLanInterface.h \
     SimAppDataTransmitter.h \
     SimCommandProcessor_LM5_LM6.h \

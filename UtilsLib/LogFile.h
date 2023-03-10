@@ -1,9 +1,10 @@
 #pragma once
 
-#include "../UtilsLib/SimpleThread.h"
-#include "../UtilsLib/ILogFile.h"
+#include <string>
+#include <queue>
 
 #include <QTimer>
+#include <QFile>
 #include <QDateTime>
 #include <QMutex>
 #include <QDialog>
@@ -13,8 +14,12 @@
 #include <QPushButton>
 #include <QDateTimeEdit>
 #include <QStyledItemDelegate>
-#include <string>
-#include <queue>
+#include <QSharedMemory>
+#include <QSortFilterProxyModel>
+
+#include "../UtilsLib/SimpleThread.h"
+#include "../UtilsLib/ILogFile.h"
+
 
 namespace Log
 {

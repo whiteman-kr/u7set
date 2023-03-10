@@ -10,11 +10,11 @@
 //#include "../VFrame30/ClientSchemaView.h"
 #include "../ClientLib/AdsConnection.h"
 #include "../ClientLib/TuningUserManager.h"
+#include "../ClientLib/TuningLog.h"
 #include "../VFrame30/AppSignalController.h"
 #include "../UtilsLib/LogFile.h"
 #include "../lib/Ui/DialogAlert.h"
 #include "../lib/Ui/DialogTcpStatistics.h"
-#include "../lib/Tuning/TuningLog.h"
 
 class MonitorCentralWidget;
 class MonitorToolBar;

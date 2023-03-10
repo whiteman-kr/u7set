@@ -5,11 +5,11 @@
 
 #include <QApplication>
 
-#include "../lib/Tuning/TuningFilter.h"
 #include "../UtilsLib/LogFile.h"
-#include "../lib/Tuning/TuningLog.h"
-#include "../lib/Ui/DialogAlert.h"
 #include "../UtilsLib/Ui/UiTools.h"
+#include "../ClientLib/TuningLog.h"
+#include "../lib/Tuning/TuningFilter.h"
+#include "../lib/Ui/DialogAlert.h"
 #include "../lib/Ui/DialogAbout.h"
 
 #include "Settings.h"

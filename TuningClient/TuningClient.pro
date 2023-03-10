@@ -79,7 +79,6 @@ SOURCES +=\
     TuningSchemaWidget.cpp \
     DialogFilterEditor.cpp \
     TuningClientTcpClient.cpp \
-    ../lib/Tuning/TuningLog.cpp \
     TuningSchemaManager.cpp \
     ../lib/Ui/DialogAlert.cpp \
     ../lib/Ui/DialogAbout.cpp \
@@ -119,7 +118,6 @@ HEADERS  += MainWindow.h \
     SchemasWorkspace.h \
     DialogFilterEditor.h \
     TuningClientTcpClient.h \
-    ../lib/Tuning/TuningLog.h \
     TuningSchemaManager.h \
     ../lib/Ui/DialogAlert.h \
     ../lib/Ui/DialogAbout.h \
@@ -154,14 +152,17 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 LIBS += -L$$DESTDIR
 LIBS += -L.
 
-win32:LIBS += -lKernel32 -lAdvapi32
-unix:LIBS += -lpam -lpam_misc
-
 # ClientLib
 #
 LIBS += -lClientLib
 win32:PRE_TARGETDEPS += $$DESTDIR/ClientLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libClientLib.a
+
+# Authorization
+#
+win32:LIBS += -lAdvapi32
+unix:LIBS += -lpam -lpam_misc
+
 
 # VFrame30 library
 #
