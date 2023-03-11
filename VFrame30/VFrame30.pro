@@ -56,7 +56,6 @@ OTHER_FILES += \
 HEADERS += \
     ../Proto/serialization.pb.h \
     ../lib/ClientBehavior.h \
-    ../lib/ComparatorSet.h \
 	../UtilsLib/ILogFile.h \
     ../lib/ITimeStats.h \
     Context.h \

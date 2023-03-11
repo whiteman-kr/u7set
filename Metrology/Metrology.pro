@@ -55,7 +55,6 @@ SOURCES += \
 	../lib/BuildInfo.cpp \
 	../lib/PropertyEditor.cpp \
 	../lib/Ui/DialogAbout.cpp \
-	../lib/ComparatorSet.cpp \
 	ChartView.cpp \
 	DialogCalculator.cpp \
 	DialogComparatorList.cpp \
@@ -107,7 +106,6 @@ HEADERS  += \
 	../lib/BuildInfo.h \
     ../lib/PropertyEditor.h \
 	../lib/Ui/DialogAbout.h \
-	../lib/ComparatorSet.h \
     ChartView.h \
     ExcelHelper.h \
     MetrologyFormula.h \

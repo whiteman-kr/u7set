@@ -51,7 +51,6 @@ PRECOMPILED_HEADER = Stable.h
 
 SOURCES += main.cpp \
     ../lib/ClientBehavior.cpp \
-    ../lib/ComparatorSet.cpp \
     ../lib/Ui/DialogChooseTags.cpp \
     ../lib/Ui/DialogSignalSnapshot.cpp \
     ../lib/Ui/DialogTcpStatistics.cpp \
@@ -102,7 +101,6 @@ SOURCES += main.cpp \
 
 HEADERS  += \
     ../lib/ClientBehavior.h \
-    ../lib/ComparatorSet.h \
     ../lib/ConstStrings.h \
 	../UtilsLib/ILogFile.h \
     ../lib/ISignalDataServer.h \

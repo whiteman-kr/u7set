@@ -32,6 +32,7 @@ SUBDIRS += Protobuf \
 	PacketSource \
 	PacketViewer \
 	UalTester \
+	ClientTests \
 	SimulatorTests \
 	MetrologyTests \
 	u7databaseTests
@@ -40,6 +41,7 @@ qtkeychain.subdir = ./Tools/qtkeychain
 PacketSource.subdir = ./Tools/PacketSource
 PacketViewer.subdir = ./Tools/PacketViewer
 UalTester.subdir = ./Test/UalTester
+ClientTests.subdir = ./Test/ClientTests
 SimulatorTests.subdir = ./Test/SimulatorTests
 MetrologyTests.subdir = ./Test/MetrologyTests
 u7databaseTests.subdir = ./Test/u7databaseTests

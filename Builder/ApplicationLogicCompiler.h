@@ -1,9 +1,9 @@
 #pragma once
 
-#include "SubsystemStorage.h"
+#include "../AppSignalLib/ComparatorSet.h"
 #include "../VFrame30/Bus.h"
+#include "SubsystemStorage.h"
 #include "ModuleLogicCompiler.h"
-#include "../lib/ComparatorSet.h"
 
 
 namespace Builder

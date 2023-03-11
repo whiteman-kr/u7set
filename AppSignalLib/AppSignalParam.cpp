@@ -405,6 +405,9 @@ const QString& AppSignalParam::appSignalId() const
 void AppSignalParam::setAppSignalId(const QString& value)
 {
 	m_appSignalId = value;
+	setHash(::calcHash(m_appSignalId));
+
+	return;
 }
 
 const QString& AppSignalParam::customSignalId() const

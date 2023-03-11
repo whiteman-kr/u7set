@@ -57,7 +57,6 @@ SOURCES += \
     ../lib/BuildInfo.cpp \
     ../lib/LmDescription.cpp \
     ../lib/ConnectionsInfo.cpp \
-	../lib/ComparatorSet.cpp \
 	../lib/TuningDataStorage.cpp \
 	../TuningService/TuningSource.cpp \
 	../Metrology/MetrologySignal.cpp \
@@ -125,7 +124,6 @@ HEADERS += \
     ../lib/LmDescription.h \
     ../lib/ConnectionsInfo.h \
 	../lib/TuningDataStorage.h \
-	../lib/ComparatorSet.h \
 	../CommonLib/PropertyObject.h \
 	../TuningService/TuningSource.h \
 	../Metrology/MetrologySignal.h \

@@ -1,5 +1,5 @@
 #include "AppSignalController.h"
-#include "../lib/ComparatorSet.h"
+#include "../AppSignalLib/ComparatorSet.h"
 
 namespace VFrame30
 {

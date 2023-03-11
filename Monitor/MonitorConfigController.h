@@ -1,8 +1,8 @@
 #pragma once
 
+#include "../AppSignalLib/ComparatorSet.h"
 #include "../ClientLib/ConfigController.h"
 #include "../lib/ClientBehavior.h"
-#include "../lib/ComparatorSet.h"
 #include "../VFrame30/Schema.h"
 
 

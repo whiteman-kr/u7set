@@ -30,6 +30,7 @@ mkdir -p $OUTPUT_DIR
 
 # Run tests
 #
+./bin_unix/debug/ClientTests
 ./bin_unix/debug/SimulatorTests
 ./bin_unix/debug/MetrologyTests
 ./bin_unix/debug/u7databasetests -config=$CI_PROJECT_DIR/Test/u7databasetestsArgsCoverage.xml

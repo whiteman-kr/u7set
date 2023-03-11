@@ -4,9 +4,8 @@
 #include "../HardwareLib/ModuleFirmware.h"
 #include "../HardwareLib/Connection.h"
 #include "../CommonLib/OrderedHash.h"
-#include "../lib/ComparatorSet.h"
+#include "../AppSignalLib/ComparatorSet.h"
 #include "../lib/TuningDataStorage.h"
-#include "../lib/ComparatorSet.h"
 
 #include "BuildResultWriter.h"
 #include "ConnectionStorage.h"

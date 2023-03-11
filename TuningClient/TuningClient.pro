@@ -53,7 +53,6 @@ CONFIG(release, debug|release) {
 
 SOURCES +=\
     ../lib/ClientBehavior.cpp \
-    ../lib/ComparatorSet.cpp \
     ../lib/Ui/DialogTcpStatistics.cpp \
     LogonWorkspace.cpp \
 	MainWindow.cpp \
@@ -90,7 +89,6 @@ SOURCES +=\
 
 HEADERS  += MainWindow.h \
     ../lib/ClientBehavior.h \
-    ../lib/ComparatorSet.h \
     ../lib/ConstStrings.h \
 	../UtilsLib/ILogFile.h \
     ../lib/Ui/DialogTcpStatistics.h \

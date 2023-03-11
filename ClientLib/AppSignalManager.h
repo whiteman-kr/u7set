@@ -9,7 +9,7 @@
 #include <QReadWriteLock>
 
 #include "../lib/ISignalDataServer.h"
-#include "../lib/ComparatorSet.h"
+#include "../AppSignalLib/ComparatorSet.h"
 #include "../AppSignalLib/IAppSignalManager.h"
 #include "../UtilsLib/ILogFile.h"
 #include "IAppSignalUpdater.h"
