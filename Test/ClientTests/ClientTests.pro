@@ -14,9 +14,10 @@ CONFIG += thread
 
 include(../../compiler.pri)
 include(../../warnings.pri)
-include(../../sanitizer.pri)
 include(../../codecoverage.pri)
 
+CONFIG += precompile_header
+PRECOMPILED_HEADER = Stable.h
 
 # DESTDIR
 #
@@ -48,10 +49,13 @@ SOURCES += \
         AppSignalManagerTests.cpp \
         main.cpp
 
+HEADERS += \
+    Stable.h		
+
 
 # Add curent dir to a list of library directory paths
 #
-#unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
+unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 
 # --
 #
@@ -94,3 +98,4 @@ LIBS += -lprotobuf
 win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
 INCLUDEPATH += ./../../Protobuf
+

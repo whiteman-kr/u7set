@@ -97,7 +97,7 @@ constexpr TrendSignalParam::TrendSignalParam(
   , archive_service_short_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , data_service_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , unit_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , analog_format_(nullptr)
+  , analog_format_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , type_(0)
   , precision_(0)
   , line_weight_(0)
@@ -393,7 +393,7 @@ const char descriptor_table_protodef_trends_2eproto[] PROTOBUF_SECTION_VARIABLE(
   "d\030\002 \001(\t\022\031\n\021archive_server_id\030\003 \001(\t\022&\n\005ho"
   "urs\030\n \003(\0132\027.Proto.TrendArchiveHour\"E\n\016Tr"
   "endViewLimit\022\014\n\004type\030\001 \001(\005\022\022\n\nhigh_limit"
-  "\030\002 \001(\001\022\021\n\tlow_limit\030\003 \001(\001\"\304\003\n\020TrendSigna"
+  "\030\002 \001(\001\022\021\n\tlow_limit\030\003 \001(\001\"\271\003\n\020TrendSigna"
   "lParam\022\021\n\tsignal_id\030\002 \001(\t\022\025\n\rapp_signal_"
   "id\030\003 \001(\t\022\017\n\007caption\030\004 \001(\t\022\024\n\014equipment_i"
   "d\030\005 \001(\t\022\032\n\022archive_service_id\030\006 \001(\t\022 \n\030a"
@@ -404,30 +404,29 @@ const char descriptor_table_protodef_trends_2eproto[] PROTOBUF_SECTION_VARIABLE(
   "\021\n\tlow_limit\030\025 \001(\001\022\027\n\017view_high_limit\030\037 "
   "\001(\001\022\026\n\016view_low_limit\030  \001(\001\022*\n\013view_limi"
   "ts\030! \003(\0132\025.Proto.TrendViewLimit\022\r\n\005color"
-  "\030( \001(\r\022 \n\ranalog_format\030) \001(\t:\tg_9_or_9e"
-  "\"\324\001\n\016TrendSignalSet\022.\n\rsignal_params\030\002 \003"
-  "(\0132\027.Proto.TrendSignalParam\022/\n\022archive_l"
-  "ocal_time\030\n \003(\0132\023.Proto.TrendArchive\0220\n\023"
-  "archive_system_time\030\013 \003(\0132\023.Proto.TrendA"
-  "rchive\022/\n\022archive_plant_time\030\014 \003(\0132\023.Pro"
-  "to.TrendArchive\"V\n\nTrendRuler\022\022\n\ntime_st"
-  "amp\030\002 \001(\006\022\022\n\004show\030\003 \001(\010:\004true\022 \n\022show_si"
-  "gnal_values\030\004 \001(\010:\004true\"2\n\rTrendRulerSet"
-  "\022!\n\006rulers\030\002 \003(\0132\021.Proto.TrendRuler\"[\n\005T"
-  "rend\022)\n\nsignal_set\030\002 \001(\0132\025.Proto.TrendSi"
-  "gnalSet\022\'\n\truler_set\030\003 \001(\0132\024.Proto.Trend"
-  "RulerSet\"\274\001\n\nTrendParam\022\024\n\tview_mode\030\002 \001"
-  "(\005:\0010\022\024\n\ttime_type\030\003 \001(\005:\0012\022\025\n\nlane_coun"
-  "t\030\004 \001(\005:\0011\022\022\n\nstart_time\0302 \001(\006\022\020\n\010durati"
-  "on\0303 \001(\003\022\026\n\016back_color_1st\030F \001(\r\022\026\n\016back"
-  "_color_2nd\030G \001(\r\022\025\n\nscale_type\030\005 \001(\005:\0010\""
-  "R\n\013TrendWidget\022\033\n\005trend\030\002 \001(\0132\014.Proto.Tr"
-  "end\022&\n\013trend_param\030\003 \001(\0132\021.Proto.TrendPa"
-  "ram"
+  "\030( \001(\r\022\025\n\ranalog_format\030) \001(\t\"\324\001\n\016TrendS"
+  "ignalSet\022.\n\rsignal_params\030\002 \003(\0132\027.Proto."
+  "TrendSignalParam\022/\n\022archive_local_time\030\n"
+  " \003(\0132\023.Proto.TrendArchive\0220\n\023archive_sys"
+  "tem_time\030\013 \003(\0132\023.Proto.TrendArchive\022/\n\022a"
+  "rchive_plant_time\030\014 \003(\0132\023.Proto.TrendArc"
+  "hive\"V\n\nTrendRuler\022\022\n\ntime_stamp\030\002 \001(\006\022\022"
+  "\n\004show\030\003 \001(\010:\004true\022 \n\022show_signal_values"
+  "\030\004 \001(\010:\004true\"2\n\rTrendRulerSet\022!\n\006rulers\030"
+  "\002 \003(\0132\021.Proto.TrendRuler\"[\n\005Trend\022)\n\nsig"
+  "nal_set\030\002 \001(\0132\025.Proto.TrendSignalSet\022\'\n\t"
+  "ruler_set\030\003 \001(\0132\024.Proto.TrendRulerSet\"\274\001"
+  "\n\nTrendParam\022\024\n\tview_mode\030\002 \001(\005:\0010\022\024\n\tti"
+  "me_type\030\003 \001(\005:\0012\022\025\n\nlane_count\030\004 \001(\005:\0011\022"
+  "\022\n\nstart_time\0302 \001(\006\022\020\n\010duration\0303 \001(\003\022\026\n"
+  "\016back_color_1st\030F \001(\r\022\026\n\016back_color_2nd\030"
+  "G \001(\r\022\025\n\nscale_type\030\005 \001(\005:\0010\"R\n\013TrendWid"
+  "get\022\033\n\005trend\030\002 \001(\0132\014.Proto.Trend\022&\n\013tren"
+  "d_param\030\003 \001(\0132\021.Proto.TrendParam"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_trends_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_trends_2eproto = {
-  false, false, 1523, descriptor_table_protodef_trends_2eproto, "trends.proto", 
+  false, false, 1512, descriptor_table_protodef_trends_2eproto, "trends.proto", 
   &descriptor_table_trends_2eproto_once, nullptr, 0, 11,
   schemas, file_default_instances, TableStruct_trends_2eproto::offsets,
   file_level_metadata_trends_2eproto, file_level_enum_descriptors_trends_2eproto, file_level_service_descriptors_trends_2eproto,
@@ -1560,7 +1559,6 @@ class TrendSignalParam::_Internal {
   }
 };
 
-const ::PROTOBUF_NAMESPACE_ID::internal::LazyString TrendSignalParam::_i_give_permission_to_break_this_code_default_analog_format_{{{"g_9_or_9e", 9}}, {nullptr}};
 TrendSignalParam::TrendSignalParam(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena),
   tags_(arena),
@@ -1615,9 +1613,9 @@ TrendSignalParam::TrendSignalParam(const TrendSignalParam& from)
     unit_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_unit(), 
       GetArena());
   }
-  analog_format_.UnsafeSetDefault(nullptr);
+  analog_format_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (from._internal_has_analog_format()) {
-    analog_format_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::NonEmptyDefault{}, from._internal_analog_format(), 
+    analog_format_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_analog_format(), 
       GetArena());
   }
   ::memcpy(&type_, &from.type_,
@@ -1635,7 +1633,7 @@ archive_service_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmpt
 archive_service_short_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 data_service_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 unit_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-analog_format_.UnsafeSetDefault(nullptr);
+analog_format_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
     reinterpret_cast<char*>(&type_) - reinterpret_cast<char*>(this)),
     0, static_cast<size_t>(reinterpret_cast<char*>(&view_low_limit_) -
@@ -1658,7 +1656,7 @@ void TrendSignalParam::SharedDtor() {
   archive_service_short_id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   data_service_id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   unit_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  analog_format_.DestroyNoArena(nullptr);
+  analog_format_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
 void TrendSignalParam::ArenaDtor(void* object) {
@@ -1707,8 +1705,8 @@ void TrendSignalParam::Clear() {
     }
   }
   if (cached_has_bits & 0x00000100u) {
-    analog_format_.ClearToDefault(::Proto::TrendSignalParam::_i_give_permission_to_break_this_code_default_analog_format_, GetArena());
-     }
+    analog_format_.ClearNonDefaultToEmpty();
+  }
   if (cached_has_bits & 0x0000fe00u) {
     ::memset(&type_, 0, static_cast<size_t>(
         reinterpret_cast<char*>(&view_high_limit_) -
@@ -1907,7 +1905,7 @@ const char* TrendSignalParam::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPA
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional string analog_format = 41 [default = "g_9_or_9e"];
+      // optional string analog_format = 41;
       case 41:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 74)) {
           auto str = _internal_mutable_analog_format();
@@ -2094,7 +2092,7 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(40, this->_internal_color(), target);
   }
 
-  // optional string analog_format = 41 [default = "g_9_or_9e"];
+  // optional string analog_format = 41;
   if (cached_has_bits & 0x00000100u) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_analog_format().data(), static_cast<int>(this->_internal_analog_format().length()),
@@ -2195,7 +2193,7 @@ size_t TrendSignalParam::ByteSizeLong() const {
 
   }
   if (cached_has_bits & 0x0000ff00u) {
-    // optional string analog_format = 41 [default = "g_9_or_9e"];
+    // optional string analog_format = 41;
     if (cached_has_bits & 0x00000100u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
@@ -2373,7 +2371,7 @@ void TrendSignalParam::InternalSwap(TrendSignalParam* other) {
   archive_service_short_id_.Swap(&other->archive_service_short_id_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   data_service_id_.Swap(&other->data_service_id_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   unit_.Swap(&other->unit_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  analog_format_.Swap(&other->analog_format_, nullptr, GetArena());
+  analog_format_.Swap(&other->analog_format_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(TrendSignalParam, view_low_limit_)
       + sizeof(TrendSignalParam::view_low_limit_)

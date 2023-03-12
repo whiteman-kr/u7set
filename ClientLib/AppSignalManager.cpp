@@ -336,7 +336,7 @@ namespace ClientLib
 	{
 		if (signalHash == 0)
 		{
-			Q_ASSERT(signalHash != 0);
+			assert(signalHash != 0);
 			return;
 		}
 
@@ -463,6 +463,7 @@ namespace ClientLib
 		else
 		{
 			AppSignalState result;
+			result.m_hash = signalHash;
 			result.m_flags.valid = false;
 
 			return result;

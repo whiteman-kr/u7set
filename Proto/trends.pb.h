@@ -1179,7 +1179,7 @@ class TrendSignalParam PROTOBUF_FINAL :
   std::string* _internal_mutable_unit();
   public:
 
-  // optional string analog_format = 41 [default = "g_9_or_9e"];
+  // optional string analog_format = 41;
   bool has_analog_format() const;
   private:
   bool _internal_has_analog_format() const;
@@ -1322,7 +1322,6 @@ class TrendSignalParam PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr archive_service_short_id_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr data_service_id_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr unit_;
-  static const ::PROTOBUF_NAMESPACE_ID::internal::LazyString _i_give_permission_to_break_this_code_default_analog_format_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr analog_format_;
   ::PROTOBUF_NAMESPACE_ID::int32 type_;
   ::PROTOBUF_NAMESPACE_ID::int32 precision_;
@@ -3866,7 +3865,7 @@ inline void TrendSignalParam::set_color(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   // @@protoc_insertion_point(field_set:Proto.TrendSignalParam.color)
 }
 
-// optional string analog_format = 41 [default = "g_9_or_9e"];
+// optional string analog_format = 41;
 inline bool TrendSignalParam::_internal_has_analog_format() const {
   bool value = (_has_bits_[0] & 0x00000100u) != 0;
   return value;
@@ -3875,12 +3874,11 @@ inline bool TrendSignalParam::has_analog_format() const {
   return _internal_has_analog_format();
 }
 inline void TrendSignalParam::clear_analog_format() {
-  analog_format_.ClearToDefault(::Proto::TrendSignalParam::_i_give_permission_to_break_this_code_default_analog_format_, GetArena());
+  analog_format_.ClearToEmpty();
   _has_bits_[0] &= ~0x00000100u;
 }
 inline const std::string& TrendSignalParam::analog_format() const {
   // @@protoc_insertion_point(field_get:Proto.TrendSignalParam.analog_format)
-  if (analog_format_.IsDefault(nullptr)) return _i_give_permission_to_break_this_code_default_analog_format_.get();
   return _internal_analog_format();
 }
 inline void TrendSignalParam::set_analog_format(const std::string& value) {
@@ -3896,30 +3894,30 @@ inline const std::string& TrendSignalParam::_internal_analog_format() const {
 }
 inline void TrendSignalParam::_internal_set_analog_format(const std::string& value) {
   _has_bits_[0] |= 0x00000100u;
-  analog_format_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::NonEmptyDefault{}, value, GetArena());
+  analog_format_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void TrendSignalParam::set_analog_format(std::string&& value) {
   _has_bits_[0] |= 0x00000100u;
   analog_format_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::NonEmptyDefault{}, ::std::move(value), GetArena());
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:Proto.TrendSignalParam.analog_format)
 }
 inline void TrendSignalParam::set_analog_format(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   _has_bits_[0] |= 0x00000100u;
-  analog_format_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::NonEmptyDefault{}, ::std::string(value), GetArena());
+  analog_format_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:Proto.TrendSignalParam.analog_format)
 }
 inline void TrendSignalParam::set_analog_format(const char* value,
     size_t size) {
   _has_bits_[0] |= 0x00000100u;
-  analog_format_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::NonEmptyDefault{}, ::std::string(
+  analog_format_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:Proto.TrendSignalParam.analog_format)
 }
 inline std::string* TrendSignalParam::_internal_mutable_analog_format() {
   _has_bits_[0] |= 0x00000100u;
-  return analog_format_.Mutable(::Proto::TrendSignalParam::_i_give_permission_to_break_this_code_default_analog_format_, GetArena());
+  return analog_format_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* TrendSignalParam::release_analog_format() {
   // @@protoc_insertion_point(field_release:Proto.TrendSignalParam.analog_format)
@@ -3927,7 +3925,7 @@ inline std::string* TrendSignalParam::release_analog_format() {
     return nullptr;
   }
   _has_bits_[0] &= ~0x00000100u;
-  return analog_format_.ReleaseNonDefault(nullptr, GetArena());
+  return analog_format_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void TrendSignalParam::set_allocated_analog_format(std::string* analog_format) {
   if (analog_format != nullptr) {
@@ -3935,7 +3933,7 @@ inline void TrendSignalParam::set_allocated_analog_format(std::string* analog_fo
   } else {
     _has_bits_[0] &= ~0x00000100u;
   }
-  analog_format_.SetAllocated(nullptr, analog_format,
+  analog_format_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), analog_format,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:Proto.TrendSignalParam.analog_format)
 }

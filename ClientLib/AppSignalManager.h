@@ -61,6 +61,8 @@ namespace ClientLib
 	public:
 		virtual void reset() override;
 
+		/// This should be called manually when all signal params are added.
+		///
 		virtual void notifySignalParamsUpdated() override;
 
 		virtual void addSignal(const AppSignalParam& appSignal, const QString& appDataServiceId) override;
