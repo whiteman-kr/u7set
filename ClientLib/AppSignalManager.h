@@ -40,6 +40,8 @@ namespace ClientLib
 		std::multimap<qint64, Hash> m_timeToSignal;			// key - time of last update, value - signal hash.
 
 		mutable QElapsedTimer m_lastTimeDataFetched;		// If data not fetched regulary, then ignore any add(...).
+
+		static const int ExpiredTimeMs = 3000;				// If not fetch for this time, all cache is expired and cleared.
 	};
 
 

@@ -14,7 +14,7 @@ namespace ClientLib
 
 	void RecentUsed::add(Hash hash)
 	{
-		if (m_lastTimeDataFetched.hasExpired(3000) == true)
+		if (m_lastTimeDataFetched.hasExpired(ExpiredTimeMs) == true)
 		{
 			// Nobody is fetching data from the recents, most likely there is no such thread.
 			//
@@ -68,7 +68,7 @@ namespace ClientLib
 
 	void RecentUsed::add(const std::vector<Hash>& hashes)
 	{
-		if (m_lastTimeDataFetched.hasExpired(3000) == true)
+		if (m_lastTimeDataFetched.hasExpired(ExpiredTimeMs) == true)
 		{
 			// Nobody is fetching data from the recents, most likely there is no such thread.
 			//
@@ -410,26 +410,23 @@ namespace ClientLib
 
 	AppSignalParam AppSignalManager::signalParam(Hash signalHash, bool* found) const
 	{
+		AppSignalParam result;
+
 		QReadLocker rl(&m_paramsLocker);
 
-		auto result = m_signalParams.find(signalHash);
-
-		if (result == m_signalParams.end())
-		{
-			if (found != nullptr)
-			{
-				*found = false;
-			}
-
-			return AppSignalParam();
-		}
+		auto it = m_signalParams.find(signalHash);
 
 		if (found != nullptr)
 		{
-			*found = true;
+			*found = it != m_signalParams.end();
 		}
 
-		return result->second;
+		if (it != m_signalParams.end())
+		{
+			result = it->second;
+		}
+
+		return result;
 	}
 
 	AppSignalParam AppSignalManager::signalParam(const QString& appSignalId, bool* found) const
@@ -440,9 +437,16 @@ namespace ClientLib
 
 	AppSignalState AppSignalManager::signalState(Hash signalHash, bool* found) const
 	{
+		AppSignalState result;
+
 		if (signalHash == 0)
 		{
-			return AppSignalState();
+			if (found != nullptr)
+			{
+				*found = false;
+			}
+
+			return result;
 		}
 
 		const_cast<AppSignalManager*>(this)->addRecentAppSignal(signalHash);
@@ -458,16 +462,15 @@ namespace ClientLib
 
 		if (foundState != m_states.end())
 		{
-			return foundState->second.get();
+			result = foundState->second.get();
 		}
 		else
 		{
-			AppSignalState result;
 			result.m_hash = signalHash;
 			result.m_flags.valid = false;
-
-			return result;
 		}
+
+		return result;
 	}
 
 	AppSignalState AppSignalManager::signalState(const QString& appSignalId, bool* found) const
@@ -505,7 +508,8 @@ namespace ClientLib
 				}
 				else
 				{
-					AppSignalState state;				// Non valid state, hash will be 0 or something like UNDEFINED
+					AppSignalState state;
+					state.m_hash = signalHash;
 					state.m_flags.valid = false;
 
 					result->push_back(state);
@@ -532,14 +536,7 @@ namespace ClientLib
 			appSignalHashes.push_back(h);
 		}
 
-		if (appSignalIds.size() != appSignalHashes.size())
-		{
-			assert(appSignalIds.size() == appSignalHashes.size());
-			return;
-		}
-
-		signalState(appSignalHashes, result, found);
-		return;
+		return signalState(appSignalHashes, result, found);
 	}
 
 	QStringList AppSignalManager::signalTags(Hash signalHash) const
