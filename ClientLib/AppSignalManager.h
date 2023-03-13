@@ -102,37 +102,37 @@ namespace ClientLib
 
 		// IAppSignalManager implememntation - AppSignals
 		//
-		virtual int signalsCount() const final;
-		virtual std::vector<AppSignalParam> signalList() const final;
+		virtual int signalsCount() const override final;
+		virtual std::vector<AppSignalParam> signalList() const override final;
 
 		virtual bool signalExists(Hash hash) const override;
-		virtual bool signalExists(const QString& appSignalId) const final;
+		virtual bool signalExists(const QString& appSignalId) const override final;
 
-		virtual AppSignalParam signalParam(Hash signalHash, bool* found) const final;
-		virtual AppSignalParam signalParam(const QString& appSignalId, bool* found) const final;
+		virtual AppSignalParam signalParam(Hash signalHash, bool* found) const override final;
+		virtual AppSignalParam signalParam(const QString& appSignalId, bool* found) const override final;
 
-		virtual AppSignalState signalState(Hash signalHash, bool* found) const final;
-		virtual AppSignalState signalState(const QString& appSignalId, bool* found) const final;
+		virtual AppSignalState signalState(Hash signalHash, bool* found) const override final;
+		virtual AppSignalState signalState(const QString& appSignalId, bool* found) const override final;
 
-		virtual void signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const final;
-		virtual void signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const final;
+		virtual void signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const override final;
+		virtual void signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const override final;
 
-		virtual QStringList signalTags(Hash signalHash) const final;
-		virtual QStringList signalTags(const QString& appSignalId) const final;
+		virtual QStringList signalTags(Hash signalHash) const override final;
+		virtual QStringList signalTags(const QString& appSignalId) const override final;
 
-		virtual bool signalHasTag(Hash signalHash, const QString& tag) const final;
-		virtual bool signalHasTag(const QString& appSignalId, const QString& tag) const final;
+		virtual bool signalHasTag(Hash signalHash, const QString& tag) const override final;
+		virtual bool signalHasTag(const QString& appSignalId, const QString& tag) const override final;
 
-		virtual QStringList signalIdsByTag(const QString& tag) const final;
+		virtual QStringList signalIdsByTag(const QString& tag) const override final;
 
-		virtual E::SignalType signalType(Hash signalHash, bool* found) const final;
-		virtual E::SignalType signalType(const QString& appSignalId, bool* found) const final;
+		virtual E::SignalType signalType(Hash signalHash, bool* found) const override final;
+		virtual E::SignalType signalType(const QString& appSignalId, bool* found) const override final;
 
-		virtual QString equipmentToAppSiganlId(const QString& equipmentId) const final;
+		virtual QString equipmentToAppSiganlId(const QString& equipmentId) const override final;
 
 		// IAppSignalManager implememntation - Setpoints
 		//
-		virtual std::vector<std::shared_ptr<Comparator>> setpointsByInputSignalId(const QString& appSignalId) const final;
+		virtual std::vector<std::shared_ptr<Comparator>> setpointsByInputSignalId(const QString& appSignalId) const override final;
 
 		//
 		// ISignalDataServer implementation
@@ -149,7 +149,7 @@ namespace ClientLib
 
 		// Tags
 		//
-		virtual QStringList tags() const final;
+		virtual QStringList tags() const override final;
 
 		// Extension
 		//

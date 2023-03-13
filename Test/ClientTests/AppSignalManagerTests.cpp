@@ -1,3 +1,4 @@
+#include "../../AppSignalLib/ComparatorSet.h"
 #include "../../ClientLib/AppSignalManager.h"
 #include "gtest/gtest.h"
 
@@ -236,10 +237,10 @@ TEST(AppSignalManagerTests, setStateForZeroHash)
 	//
 #ifdef QT_DEBUG
 	ASSERT_DEATH({
-		ILogFileStub log;
-		ClientLib::AppSignalManager sm{&log};
-		sm.setState(Hash{0}, AppSignalState{}, std::bit_cast<Qt::HANDLE>(1ull));
-	}, "");
+					 ILogFileStub log;
+					 ClientLib::AppSignalManager sm{&log};
+					 sm.setState(Hash{0}, AppSignalState{}, std::bit_cast<Qt::HANDLE>(1ull));
+				 }, "");
 #endif
 }
 
@@ -302,12 +303,14 @@ TEST(AppSignalManagerTests, recentUsedRemoveOutdated)
 		[[maybe_unused]] auto s = recentUsed.hashes();	// This keep cache alive, as it has expiration time 3 secs (RecentUsed::ExpiredTimeMs).
 	}
 
+	QThread::currentThread()->msleep(50);
+
 	recentUsed.removeOutdated();
 
 	std::vector<Hash> keptSignals = recentUsed.hashes();
+	std::vector<Hash> expSignals{6, 7, 8, 9, 10};
 
-	bool eq = keptSignals == std::vector<Hash>{6, 7, 8, 9, 10};
-	EXPECT_TRUE(eq);
+	EXPECT_EQ(keptSignals, expSignals);
 
 	return;
 }
@@ -324,6 +327,8 @@ TEST(AppSignalManagerTests, recentUsedFetchOutdate)
 		recentUsed.add(h);
 		QThread::currentThread()->msleep(500);
 	}
+
+	QThread::currentThread()->msleep(50);
 
 	recentUsed.add({11, 12, 13});		// Now ftech timer already ellapsed, so no actual add should happen.
 
@@ -599,6 +604,332 @@ TEST(AppSignalManagerTests, signalState)
 
 	EXPECT_FALSE(recStates[2].isValid());
 	EXPECT_EQ(recStates[2].hash(), ::calcHash(QLatin1String("#FALSEID")));
+
+	return;
+}
+
+TEST(AppSignalManagerTests, signalTags)
+{
+	ILogFileStub log;
+	ClientLib::AppSignalManager sm{&log};
+
+	AppSignalParam sp1;
+	sp1.setAppSignalId("#SP1");
+	sp1.setTags({"sp1", "ads", "test"});
+
+	AppSignalParam sp2;
+	sp2.setAppSignalId("#SP2");
+	sp2.setTags({"sp2", "ads", "test", "tags"});
+
+	sm.addSignal(sp1, "ADS");
+	sm.addSignal(sp2, "ADS");
+
+	QStringList tags1 = sm.signalTags(sp1.appSignalId());
+	QStringList tags2 = sm.signalTags(sp2.appSignalId());
+
+	EXPECT_EQ(tags1.size(), 3);
+	EXPECT_EQ(tags2.size(), 4);
+
+	EXPECT_EQ(tags1, QStringList{} << "ads" << "sp1" << "test");
+	EXPECT_EQ(tags2, QStringList{} << "ads" << "sp2" << "tags" << "test");
+
+	return;
+}
+
+TEST(AppSignalManagerTests, signalHasTag)
+{
+	ILogFileStub log;
+	ClientLib::AppSignalManager sm{&log};
+
+	AppSignalParam sp1;
+	sp1.setAppSignalId("#SP1");
+	sp1.setTags({"sp1", "ads", "test"});
+
+	AppSignalParam sp2;
+	sp2.setAppSignalId("#SP2");
+	sp2.setTags({"sp2", "ads", "test", "tags"});
+
+	sm.addSignal(sp1, "ADS");
+	sm.addSignal(sp2, "ADS");
+
+	EXPECT_TRUE(sm.signalHasTag(sp1.appSignalId(), "sp1"));
+	EXPECT_TRUE(sm.signalHasTag(sp1.appSignalId(), "ads"));
+	EXPECT_TRUE(sm.signalHasTag(sp1.appSignalId(), "test"));
+	EXPECT_FALSE(sm.signalHasTag(sp1.appSignalId(), "fail"));
+	EXPECT_FALSE(sm.signalHasTag(sp1.appSignalId(), ""));
+
+	EXPECT_TRUE(sm.signalHasTag(sp2.appSignalId(), "sp2"));
+	EXPECT_TRUE(sm.signalHasTag(sp2.appSignalId(), "ads"));
+	EXPECT_TRUE(sm.signalHasTag(sp2.appSignalId(), "test"));
+	EXPECT_TRUE(sm.signalHasTag(sp2.appSignalId(), "tags"));
+	EXPECT_FALSE(sm.signalHasTag(sp2.appSignalId(), "fails"));
+
+	return;
+}
+
+TEST(AppSignalManagerTests, signalIdsByTag)
+{
+	ILogFileStub log;
+	ClientLib::AppSignalManager sm{&log};
+
+	AppSignalParam sp1;
+	sp1.setAppSignalId("#SP1");
+	sp1.setTags({"sp1", "ads", "test"});
+
+	AppSignalParam sp2;
+	sp2.setAppSignalId("#SP2");
+	sp2.setTags({"sp2", "ads", "test", "tags"});
+
+	sm.addSignal(sp1, "ADS1");
+	sm.addSignal(sp2, "ADS2");
+
+	QStringList signals_sp1 = sm.signalIdsByTag("sp1");
+	QStringList signals_ads = sm.signalIdsByTag("ads");
+	QStringList signals_tags = sm.signalIdsByTag("tags");
+	QStringList signals_empty = sm.signalIdsByTag("");
+
+	EXPECT_EQ(signals_sp1, QStringList{} << "#SP1");
+	EXPECT_EQ(signals_ads, QStringList{} << "#SP1" << "#SP2");
+	EXPECT_EQ(signals_tags, QStringList{} << "#SP2");
+	EXPECT_EQ(signals_empty, QStringList{});
+
+	return;
+}
+
+TEST(AppSignalManagerTests, signalType)
+{
+	ILogFileStub log;
+	ClientLib::AppSignalManager sm{&log};
+
+	AppSignalParam sp1;
+	sp1.setAppSignalId("#SP1");
+	sp1.setType(E::SignalType::Analog);
+
+	AppSignalParam sp2;
+	sp2.setAppSignalId("#SP2");
+	sp2.setType(E::SignalType::Discrete);
+
+	sm.addSignal(sp1, "ADS1");
+	sm.addSignal(sp2, "ADS2");
+
+	bool f1 = false;
+	bool f2 = false;
+	bool f3 = false;
+
+	auto t1 = sm.signalType(sp1.hash(), &f1);
+	auto t2 = sm.signalType(sp2.appSignalId(), &f2);
+	[[maybe_unused]] auto t3 = sm.signalType("#FAIL", &f3);
+
+	EXPECT_TRUE(f1);
+	EXPECT_TRUE(f2);
+	EXPECT_FALSE(f3);
+
+	EXPECT_EQ(t1, E::SignalType::Analog);
+	EXPECT_EQ(t2, E::SignalType::Discrete);
+
+	return;
+}
+
+TEST(AppSignalManagerTests, equipmentToAppSiganlId)
+{
+	ILogFileStub log;
+	ClientLib::AppSignalManager sm{&log};
+
+	AppSignalParam sp1;
+	sp1.setAppSignalId("#SP1");
+	sp1.setEquipmentId("USB_LM1_IN1");
+
+	AppSignalParam sp2;
+	sp2.setAppSignalId("#SP2");
+	sp2.setEquipmentId("USB_LM1_IN2");
+
+	AppSignalParam sp3;
+	sp3.setAppSignalId("#SP3");
+	sp3.setEquipmentId("USB_LM1_IN3");
+
+	sm.addSignal(sp1, "ADS");
+	sm.addSignal(sp2, "ADS");
+	sm.addSignal(sp3, "ADS");
+
+	EXPECT_EQ(sm.equipmentToAppSiganlId("@USB_LM1_IN1"), "#SP1");	// Symbol @ must be at the beginning
+	EXPECT_EQ(sm.equipmentToAppSiganlId("@USB_LM1_IN2"), "#SP2");
+	EXPECT_EQ(sm.equipmentToAppSiganlId("@USB_LM1_IN3"), "#SP3");
+	EXPECT_EQ(sm.equipmentToAppSiganlId("@FAIL"), "");
+
+	return;
+}
+
+TEST(AppSignalManagerTests, setpointsByInputSignalId)
+{
+	ILogFileStub log;
+	ClientLib::AppSignalManager sm{&log};
+
+	AppSignalParam sp1;
+	sp1.setAppSignalId("#SP1");
+	sp1.setEquipmentId("LM1");
+
+	AppSignalParam sp2;
+	sp2.setAppSignalId("#SP2");
+	sp2.setEquipmentId("LM2");
+
+	sm.addSignal(sp1, "ADS");
+	sm.addSignal(sp2, "ADS");
+
+	// Create ComparatorSet
+	//
+	auto cmp_sp1_1 = std::make_shared<Comparator>();
+	cmp_sp1_1->input().setSignalParams(sp1.appSignalId(), true, true, 1.0);
+	cmp_sp1_1->output().setSignalParams("#OUT_CMP1_1", true, false, 1.0);
+	cmp_sp1_1->setLabel("cmp_sp1_1");
+
+	auto cmp_sp1_2 = std::make_shared<Comparator>();
+	cmp_sp1_2->input().setSignalParams(sp1.appSignalId(), true, true, 2.0);
+	cmp_sp1_2->output().setSignalParams("#OUT_CMP1_2", true, false, 2.0);
+	cmp_sp1_2->setLabel("cmp_sp1_2");
+
+	auto cmp_sp2_1 = std::make_shared<Comparator>();
+	cmp_sp2_1->input().setSignalParams(sp2.appSignalId(), true, true, 3.0);
+	cmp_sp2_1->output().setSignalParams("#OUT_CMP2_1", true, false, 2.0);
+	cmp_sp2_1->setLabel("cmp_sp2_1");
+
+	ComparatorSet cs;
+	cs.insert("LM1", cmp_sp1_1);
+	cs.insert("LM1", cmp_sp1_2);
+	cs.insert("LM2", cmp_sp2_1);
+
+	sm.setSetpoints(cs);
+
+	auto sp1_comparators = sm.setpointsByInputSignalId(sp1.appSignalId());
+	auto sp2_comparators = sm.setpointsByInputSignalId(sp2.appSignalId());
+
+	ASSERT_EQ(sp1_comparators.size(), 2);
+	ASSERT_TRUE((sp1_comparators[0]->label() == "cmp_sp1_1" && sp1_comparators[1]->label() == "cmp_sp1_2") ||
+			(sp1_comparators[1]->label() == "cmp_sp1_1" && sp1_comparators[0]->label() == "cmp_sp1_2"));
+
+	ASSERT_EQ(sp2_comparators.size(), 1);
+	ASSERT_EQ(sp2_comparators[0]->label(), "cmp_sp2_1");
+
+	return;
+}
+
+TEST(AppSignalManagerTests, dataServiceIds)
+{
+	ILogFileStub log;
+	ClientLib::AppSignalManager sm{&log};
+
+	AppSignalParam sp1;
+	AppSignalParam sp2;
+	AppSignalParam sp3;
+
+	sp1.setAppSignalId("#SP1");
+	sp2.setAppSignalId("#SP2");
+
+	sm.addSignal(sp1, "ADS1");
+	sm.addSignal(sp1, "ADS2");
+	sm.addSignal(sp2, "ADS2");
+
+	auto s1adses = sm.dataServiceIds(sp1.appSignalId());
+	auto s2adses = sm.dataServiceIds(sp2.appSignalId());
+	auto s3adses = sm.dataServiceIds("#FALSEID");
+
+	ASSERT_EQ(s1adses.size(), 2);
+	EXPECT_TRUE((s1adses[0] == "ADS1" &&  s1adses[1] == "ADS2") ||
+			(s1adses[1] == "ADS1" &&  s1adses[0] == "ADS2"));
+
+	ASSERT_EQ(s2adses.size(), 1);
+	EXPECT_EQ(s2adses[0], "ADS2");
+
+	EXPECT_EQ(s3adses.size(), 0);
+
+	return;
+}
+
+TEST(AppSignalManagerTests, dataServiceHasSignal)
+{
+	ILogFileStub log;
+	ClientLib::AppSignalManager sm{&log};
+
+	AppSignalParam sp1;
+	AppSignalParam sp2;
+	AppSignalParam sp3;
+
+	sp1.setAppSignalId("#SP1");
+	sp2.setAppSignalId("#SP2");
+
+	sm.addSignal(sp1, "ADS1");
+	sm.addSignal(sp1, "ADS2");
+	sm.addSignal(sp2, "ADS2");
+
+	EXPECT_TRUE(sm.dataServiceHasSignal("ADS1", sp1.appSignalId()));
+	EXPECT_TRUE(sm.dataServiceHasSignal("ADS2", sp1.appSignalId()));
+
+	EXPECT_FALSE(sm.dataServiceHasSignal("ADS1", sp2.appSignalId()));
+	EXPECT_TRUE(sm.dataServiceHasSignal("ADS2", sp2.appSignalId()));
+
+	EXPECT_FALSE(sm.dataServiceHasSignal("ADS2", "#FALSEID"));
+	EXPECT_FALSE(sm.dataServiceHasSignal("FALSE_ADS", sp1.appSignalId()));
+
+	return;
+}
+
+TEST(AppSignalManagerTests, tags)
+{
+	ILogFileStub log;
+	ClientLib::AppSignalManager sm{&log};
+
+	AppSignalParam sp1;
+	sp1.setAppSignalId("#SP1");
+	sp1.setTags({"sp1", "ads", "test"});
+
+	AppSignalParam sp2;
+	sp2.setAppSignalId("#SP2");
+	sp2.setTags({"sp2", "ads", "test", "tags"});
+
+	sm.addSignal(sp1, "ADS");
+	sm.addSignal(sp2, "ADS");
+
+	QStringList tags = sm.tags();
+
+	EXPECT_EQ(tags.size(), 5);
+	EXPECT_TRUE(tags.contains("sp1"));
+	EXPECT_TRUE(tags.contains("ads"));
+	EXPECT_TRUE(tags.contains("test"));
+	EXPECT_TRUE(tags.contains("sp2"));
+	EXPECT_TRUE(tags.contains("tags"));
+
+	return;
+}
+
+TEST(AppSignalManagerTests, signalParamByEquipemntId)
+{
+	ILogFileStub log;
+	ClientLib::AppSignalManager sm{&log};
+
+	AppSignalParam sp1;
+	sp1.setAppSignalId("#SP1");
+	sp1.setEquipmentId("USB_LM1_IN1");
+
+	AppSignalParam sp2;
+	sp2.setAppSignalId("#SP2");
+	sp2.setEquipmentId("USB_LM1_IN2");
+
+	sm.addSignal(sp1, "ADS");
+	sm.addSignal(sp2, "ADS");
+
+	bool f1 = false;
+	bool f2 = false;
+	bool f3 = false;
+
+	auto signalParam1 = sm.signalParamByEquipemntId("@USB_LM1_IN1", &f1);
+	auto signalParam2 = sm.signalParamByEquipemntId("@USB_LM1_IN2", &f2);
+	auto signalParam3 = sm.signalParamByEquipemntId("@FLASE_EQ_ID", &f3);
+
+	ASSERT_TRUE(f1);
+	ASSERT_TRUE(f2);
+	ASSERT_FALSE(f3);
+
+	EXPECT_EQ(signalParam1.appSignalId(), sp1.appSignalId());
+	EXPECT_EQ(signalParam2.appSignalId(), sp2.appSignalId());
 
 	return;
 }

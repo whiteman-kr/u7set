@@ -167,8 +167,8 @@ namespace ClientLib
 	{
 		{
 			QWriteLocker wl(&m_paramsLocker);
-			m_signalParams.reserve(128000);
-			m_signalParamByEquipmentId.reserve(128000);
+			m_signalParams.reserve(64000);
+			m_signalParamByEquipmentId.reserve(64000);
 		}
 
 		{
@@ -255,7 +255,7 @@ namespace ClientLib
 
 			if (l.isEmpty() == true)
 			{
-				l.reserve(1024);
+				l.reserve(512);
 			}
 
 			l.push_back(appSignalId);
