@@ -210,10 +210,10 @@ windows_test_job:
     - "git log -1"
 #Run Create databases for compiler and simulator tests
     - echo Creating PostgreSQL databases...
-    - psql -U postgres -c "CREATE DATABASE u7_${COMPILER_TESTS_PROJECT_NAME} OWNER u7;"
-    - cmd '/c psql -U postgres u7_${COMPILER_TESTS_PROJECT_NAME} < c:\Data\u7_${COMPILER_TESTS_PROJECT_NAME}.sql'
-    - psql -U postgres -c "CREATE DATABASE u7_${SIMULATOR_PROJECT_NAME} OWNER u7;"
-    - cmd '/c psql -U postgres u7_${SIMULATOR_PROJECT_NAME} < c:\Data\u7_${SIMULATOR_PROJECT_NAME}.sql'
+    - psql -U postgres -c "CREATE DATABASE u7_%COMPILER_TESTS_PROJECT_NAME% OWNER u7;"
+    - cmd '/c psql -U postgres u7_%COMPILER_TESTS_PROJECT_NAME% < c:\Data\u7_%COMPILER_TESTS_PROJECT_NAME%.sql'
+    - psql -U postgres -c "CREATE DATABASE u7_%SIMULATOR_PROJECT_NAME% OWNER u7;"
+    - cmd '/c psql -U postgres u7_%SIMULATOR_PROJECT_NAME% < c:\Data\u7_%SIMULATOR_PROJECT_NAME%.sql'
 #Run XML validation
     - "# ----------------------------------------------"
     - "#               Run XML validation"
@@ -249,13 +249,13 @@ windows_test_job:
     - "# ----------------------------------------------"
     - "#               Run Simulator AFBs tests"
     - "# ----------------------------------------------"
-    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorConsole.exe -build=c:/temp/build/${SIMULATOR_PROJECT_NAME}/build -script=\"$Env:CI_PROJECT_DIR/Simulator/SimProjectTests.js\""
+    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorConsole.exe -build=c:/temp/build/%SIMULATOR_PROJECT_NAME%/build -script=\"$Env:CI_PROJECT_DIR/Simulator/SimProjectTests.js\""
 
 #Run ROVT to check configuration generation
     - "# ----------------------------------------------"
     - "#               Run ROVT tests"
     - "# ----------------------------------------------"
-    - "#&C:/ROVT/ROVT_C.exe /b:C:\\Temp\\build\\${SIMULATOR_PROJECT_NAME}\\build"
+    - "#&C:/ROVT/ROVT_C.exe /b:C:\\Temp\\build\\%SIMULATOR_PROJECT_NAME%\\build"
   artifacts:
     name: "u7set_test_windows_0.9.$CI_PIPELINE_ID $CI_BUILD_REF_SLUG $CI_COMMIT_SHA"
     paths:
@@ -388,10 +388,25 @@ linux_code_coverage_job:
     - "git status"
     - "git log -1"
     - "# ----------------------------------------------"
+    - "#               Import DB Projects              "
+    - "# ----------------------------------------------"
+    - "echo Creating PostgreSQL databases..."
+    - "cp $CI_PROJECT_DIR/Test/ImportDatabase.sh /tmp"
+    - "pushd /mnt/f/TestDatabase"
+    - "echo P2ssw0rd | su postgres /tmp/ImportDatabase.sh u7_${SIMULATOR_PROJECT_NAME}"
+    - "popd"
+    - "rm /tmp/ImportDatabase.sh"
+    - "echo Creating PostgreSQL databases complete      
+    - "# ----------------------------------------------"
     - "#               Build Test Project              "
     - "# ----------------------------------------------"
     - "/opt/Qt/${QT_VERSION}/gcc_64/bin/qmake u7set_tests.pro -spec linux-g++ CONFIG+=debug CONFIG-=qml_debug CONFIG-=qtquickcompiler CONFIG+=separate_debug_info CONFIG+=CODE_COVERAGE "
     - "make -j12"
+    - "# ----------------------------------------------"
+    - "#               Run BuilderConsole tests"
+    - "# ----------------------------------------------"
+    - "if [ -d \"/tmp/build/test_simulator\" ]; then rm -Rf /tmp/build/test_simulator; fi"
+    - "$CI_PROJECT_DIR/bin_unix/release/BuilderConsole $CI_PROJECT_DIR/Test/BuilderConsoleArgsCoverage.xml"    
     - "# ----------------------------------------------"
     - "#           Collect Test Coverage Data          "
     - "# ----------------------------------------------"
