@@ -249,13 +249,13 @@ windows_test_job:
     - "# ----------------------------------------------"
     - "#               Run Simulator AFBs tests"
     - "# ----------------------------------------------"
-    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorConsole.exe -build=c:/temp/build/%SIMULATOR_PROJECT_NAME%/build -script=\"$Env:CI_PROJECT_DIR/Simulator/SimProjectTests.js\""
+    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorConsole.exe -build=c:/temp/build/$Env:SIMULATOR_PROJECT_NAME/build -script=\"$Env:CI_PROJECT_DIR/Simulator/SimProjectTests.js\""
 
 #Run ROVT to check configuration generation
     - "# ----------------------------------------------"
     - "#               Run ROVT tests"
     - "# ----------------------------------------------"
-    - "#&C:/ROVT/ROVT_C.exe /b:C:\\Temp\\build\\%SIMULATOR_PROJECT_NAME%\\build"
+    - "#&C:/ROVT/ROVT_C.exe /b:C:\\Temp\\build\\$Env:SIMULATOR_PROJECT_NAME\\build"
   artifacts:
     name: "u7set_test_windows_0.9.$CI_PIPELINE_ID $CI_BUILD_REF_SLUG $CI_COMMIT_SHA"
     paths:
@@ -332,6 +332,7 @@ linux_test_job:
     - "# ----------------------------------------------"
     - "#               Run client tests"
     - "# ----------------------------------------------"
+    - "pkill CfgSrv"
     - "$CI_PROJECT_DIR/bin_unix/release/CfgSrv -e -id=SYSTEMID_CLIENTTEST_WS01_CFGS -profile=Default -b=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -ip=127.0.0.1:13312 < /dev/null > cfgsrv.out 2>&1 &"
     - "sleep 3"
     - "jobs"
