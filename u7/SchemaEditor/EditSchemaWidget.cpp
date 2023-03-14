@@ -4928,6 +4928,7 @@ void EditSchemaWidget::f2KeyForRect(SchemaItemPtr item)
 	QLabel* label = new QLabel{labelText, &d};
 
 	QTextEdit* textEdit = new QTextEdit{&d};
+	textEdit->setAcceptRichText(false);
 	textEdit->setPlainText(text);
 
 	QDialogButtonBox* buttonBox = new QDialogButtonBox{QDialogButtonBox::Apply | QDialogButtonBox::Ok | QDialogButtonBox::Cancel};
