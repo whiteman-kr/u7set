@@ -228,7 +228,7 @@ windows_test_job:
     - "#               Run unit tests"
     - "# ----------------------------------------------"
     - "&$Env:CI_PROJECT_DIR/bin/release/u7databasetests.exe -config=\"$Env:CI_PROJECT_DIR/Test/u7databasetestsArgs.xml\" -o u7databasetests.xml,junitxml -o -,txt"
-    - "&$Env:CI_PROJECT_DIR/bin/release/ClientTests.exe --gtest_output=xml:ClientTestsLinux.xml"
+    - "&$Env:CI_PROJECT_DIR/bin/release/ClientTests.exe --gtest_filter=-ConfigControllerTests.*  --gtest_output=xml:ClientTestsLinux.xml"
     - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorTests.exe -o SimulatorTests.xml,junitxml -o -,txt"
     - "&$Env:CI_PROJECT_DIR/bin/release/MetrologyTests.exe -o MetrologyTests.xml,junitxml -o -,txt"
 
@@ -337,6 +337,7 @@ linux_test_job:
     - "jobs"
     - "$CI_PROJECT_DIR/bin_unix/release/ClientTests --gtest_output=xml:ClientTestsLinux.xml"
     - "pkill CfgSrv"
+    - "sleep 1"
     - "jobs"
 
 #Run unit tests
@@ -406,11 +407,23 @@ linux_code_coverage_job:
     - "#               Run BuilderConsole tests"
     - "# ----------------------------------------------"
     - "if [ -d \"/tmp/build/test_simulator\" ]; then rm -Rf /tmp/build/test_simulator; fi"
-    - "$CI_PROJECT_DIR/bin_unix/release/BuilderConsole $CI_PROJECT_DIR/Test/BuilderConsoleArgsCoverage.xml"    
+    - "$CI_PROJECT_DIR/bin_unix/release/BuilderConsole $CI_PROJECT_DIR/Test/BuilderConsoleArgsCoverage.xml"
+    - "# ----------------------------------------------"
+    - "#       Run services for functional tests       "
+    - "# ----------------------------------------------"
+    - "$CI_PROJECT_DIR/bin_unix/release/CfgSrv -e -id=SYSTEMID_CLIENTTEST_WS01_CFGS -profile=Default -b=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -ip=127.0.0.1:13312 < /dev/null > cfgsrv.out 2>&1 &"
+    - "sleep 3"
+    - "jobs"
     - "# ----------------------------------------------"
     - "#           Collect Test Coverage Data          "
     - "# ----------------------------------------------"
     - "./Test/CodeCoverage.sh"
+    - "# ----------------------------------------------"
+    - "#       Stop services for functional tests      "
+    - "# ----------------------------------------------"
+    - "pkill CfgSrv"
+    - "sleep 1"
+    - "jobs"
 
   coverage: '/lines......: \d+\.\d+/'
   artifacts:
