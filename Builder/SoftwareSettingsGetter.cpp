@@ -1589,13 +1589,20 @@ bool MonitorSettingsGetter::readTuningServiceSettings(const Builder::Context* co
 
 	bool result = DeviceHelper::getBoolProperty(software, EquipmentPropNames::TUNING_ENABLE, &tuningEnabled, log);
 
-	RETURN_IF_FALSE(result);
-
 	result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::TUNING_SERVICE_ID, &tuningServicesIDs, log);
 
-	RETURN_IF_FALSE(result);
+	result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::TUNING_LOGIN, &tuningLogin, log);
+
+	result &= DeviceHelper::getStrListPropertyAsString(software, EquipmentPropNames::TUNING_USER_ACCOUNTS, &tuningUserAccounts, log);
+
+	result &= DeviceHelper::getIntProperty(software, EquipmentPropNames::TUNING_SESSION_TIMEOUT, &tuningSessionTimeout, log);
 
 	tuningServices.clear();
+
+	if (tuningEnabled == false)
+	{
+		return result;
+	}
 
 	for(const QString& tuningServiceID : tuningServicesIDs)
 	{

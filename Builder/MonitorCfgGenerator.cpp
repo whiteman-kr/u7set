@@ -320,12 +320,6 @@ namespace Builder
 
 	bool MonitorCfgGenerator::writeTuningSignals()
 	{
-		if (m_tuningSources.empty() == true)
-		{
-			//Q_ASSERT(m_tuningSources.empty() == false);
-			return false;
-		}
-
 		::Proto::AppSignalSet tuningSet;
 
 		bool ok = TuningClientCfgGenerator::createTuningSignals(m_tuningSources, m_signalSet, &tuningSet);
