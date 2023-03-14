@@ -16,7 +16,7 @@ SUBDIRS += Protobuf \
 	Simulator \
 	SimulatorConsole \
 	Builder \
-	Builder \
+	BuilderConsole \
 	ConfigurationService \
 	ArchivingService \
 	AppDataService \

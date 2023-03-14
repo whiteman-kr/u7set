@@ -6,6 +6,7 @@ CONFIG -= app_bundle
 include(../compiler.pri)
 include(../warnings.pri)
 include(../sanitizer.pri)
+include(../codecoverage.pri)
 
 # DESTDIR
 #
