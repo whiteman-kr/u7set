@@ -461,16 +461,9 @@ void DataSourceOnline::clearParsingBuffers()
 	m_parsingBuffers.clear();
 }
 
+
 void DataSourceOnline::updateUptime()
 {
-	if (m_firstPacketSystemTime == 0 || m_lastPacketSystemTime == 0)
-	{
-		m_uptime = 0;
-	}
-	else
-	{
-		m_uptime = (m_lastPacketSystemTime - m_firstPacketSystemTime) / 1000;
-	}
 }
 
 QString DataSourceOnline::rupFramePlantTimeStr() const
@@ -480,7 +473,7 @@ QString DataSourceOnline::rupFramePlantTimeStr() const
 
 QString DataSourceOnline::lastPacketSystemTimeStr() const
 {
-	return getTimeStr(m_lastPacketSystemTime);
+	return getTimeStr(m_lastPacketServerTime);
 }
 
 void DataSourceOnline::pushRupFrame(quint32 sourceIP,
@@ -490,6 +483,12 @@ void DataSourceOnline::pushRupFrame(quint32 sourceIP,
 									const QThread* thread)
 {
 	m_receivedFramesCount++;
+	m_receivedDataSize += (isSimFrame == true ? sizeof(Rup::SimFrame) : sizeof(Rup::Frame));
+
+	if (m_dataProcessingEnabled == false)
+	{
+		return;
+	}
 
 	if (m_parsingBuffers[m_writeBufferIndex]->readyToParsing == true)
 	{
@@ -544,6 +543,51 @@ void DataSourceOnline::pushRupFrame(quint32 sourceIP,
 	}
 }
 
+void DataSourceOnline::updateStatistics_1s()
+{
+	qint64 now = QDateTime::currentMSecsSinceEpoch();
+
+	if (now - m_lastPacketServerTime > APP_DATA_SOURCE_TIMEOUT)
+	{
+		m_rupTimes = m_lastRupTimes;
+		m_rupTimes += APP_DATA_SOURCE_TIMEOUT;
+
+		if (m_receivesData == true)
+		{
+			// invalidate source signals
+		}
+
+		m_receivesData = false;
+
+		m_receivedFramesCount = 0;
+
+
+		m_firstPacketServerTime = 0;
+		m_lastPacketServerTime = 0;
+
+		m_dataReceivingRate = 0;
+		m_receivedDataSize = 0;
+		m_prevReceivedDataSize = 0;
+	}
+	else
+	{
+		m_receivesData = true;
+
+		m_dataReceivingRate = static_cast<double>(m_receivedDataSize - m_prevReceivedDataSize);		// Bytes per second
+
+		m_prevReceivedDataSize = m_receivedDataSize;
+	}
+
+	if (m_firstPacketServerTime == 0 || m_lastPacketServerTime == 0)
+	{
+		m_uptime = 0;
+	}
+	else
+	{
+		m_uptime = (m_lastPacketServerTime - m_firstPacketServerTime) / 1000;
+	}
+}
+
 bool DataSourceOnline::parseNextBuffer(const QThread* thread)
 {
 	int ctr = 0;
@@ -556,11 +600,6 @@ bool DataSourceOnline::parseNextBuffer(const QThread* thread)
 		}
 
 		parseBuffer(*m_parsingBuffers[m_readBufferIndex], thread);
-
-		if (moveToNextReadBuffer(thread) == false)
-		{
-			break;
-		}
 
 		ctr++;
 	}
@@ -732,11 +771,59 @@ bool DataSourceOnline::parseNextBuffer(const QThread* thread)
 
 bool DataSourceOnline::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread)
 {
+	Q_UNUSED(readBuffer);
 	Q_UNUSED(thread);
 
-	readBuffer.prepareToWriting();
-
 	return true;
+}
+
+void DataSourceOnline::checkPlantTime(const Rup::TimeStamp& plantTimeStamp)
+{
+	if (plantTimeStamp.year < 2000 || plantTimeStamp.year > 2500 ||
+		plantTimeStamp.month < 1 || plantTimeStamp.month > 12 ||
+		plantTimeStamp.day < 1 || plantTimeStamp.day > 31 ||
+		plantTimeStamp.hour > 23 || plantTimeStamp.minute > 59 ||
+		plantTimeStamp.second > 59 || plantTimeStamp.millisecond > 999)
+	{
+		m_errorPlantTimeFormat++;
+
+		if (m_timeErrLog != nullptr)
+		{
+			DEBUG_LOG_ERR(m_timeErrLog, QString("Source %1 time format error %2").
+											arg(moduleEquipmentID()).
+											arg(getTimeStr(plantTimeStamp)));
+		}
+	}
+
+	if (m_lastRupTimes.plant.timeStamp == m_rupTimes.plant.timeStamp)
+	{
+		m_errorDuplicatePlantTime++;
+
+		if (m_timeErrLog != nullptr)
+		{
+			DEBUG_LOG_ERR(m_timeErrLog, QString("Source %1 duplicate time %2").
+											arg(moduleEquipmentID()).
+											arg(getTimeStr(plantTimeStamp)));
+		}
+	}
+
+	if (m_lastRupTimes.plant.timeStamp > m_rupTimes.plant.timeStamp)
+	{
+		m_errorNonmonotonicPlantTime++;
+
+		if (m_timeErrLog != nullptr)
+		{
+			DEBUG_LOG_ERR(m_timeErrLog, QString("Source %1 non monotonic time %2 (prev time %3)").
+											arg(moduleEquipmentID()).
+											arg(getTimeStr(plantTimeStamp)).
+											arg(getTimeStr(m_lastRupTimes.plant.timeStamp)));
+		}
+	}
+
+	m_lastRupTimes = m_rupTimes;
+
+
+
 }
 
 bool DataSourceOnline::takeProcessingOwnership(const QThread* processingThread)
@@ -761,53 +848,12 @@ bool DataSourceOnline::releaseProcessingOwnership(const QThread* processingThrea
 	return result;
 }
 
-
-/*
-
-bool DataSourceOnline::getDataToParsing(Times* times,
-										bool* isSimPacket,
-										quint16* packetNo,
-										const char** rupData,
-										int* rupDataSize,
-										bool* dataReceivingTimeout)
-{
-	if (m_dataReadyToParsing == false)
-	{
-		assert(false);
-		return false;
-	}
-
-#ifdef QT_DEBUG
-
-	if (times == nullptr || packetNo == nullptr || rupData == nullptr || rupDataSize == nullptr || dataReceivingTimeout == nullptr)
-	{
-		assert(false);
-		return false;
-	}
-
-#endif
-
-	*times = m_rupDataTimes;
-	*isSimPacket = m_isSimPacket;
-	*packetNo = m_packetNo;
-	*rupData = reinterpret_cast<const char*>(m_rupFramesData);
-	*rupDataSize = m_rupDataSize;
-	*dataReceivingTimeout = m_dataRecevingTimeout;
-
-	m_dataReadyToParsing = false;
-
-	return true;
-}
-*/
-
 /*
 bool DataSourceOnline::collect(const RupFrameTime& rupFrameTime)
 {
 	// rupFrameTime.rupFrame.header already reverseByted !
 	//
 	const Rup::Header& rupFrameHeader = rupFrameTime.rupFrame.header;
-
-
 
 
 	// check packet parts
@@ -829,24 +875,6 @@ bool DataSourceOnline::collect(const RupFrameTime& rupFrameTime)
 	m_packetNo = numerator0;
 
 	m_receivedPacketCount++;
-
-	const Rup::TimeStamp& timeStamp = m_rupFramesHeaders[0].timeStamp;
-
-	if (timeStamp.year < 2000 || timeStamp.year > 2500 ||
-		timeStamp.month < 1 || timeStamp.month > 12 ||
-		timeStamp.day < 1 || timeStamp.day > 31 ||
-		timeStamp.hour > 23 || timeStamp.minute > 59 ||
-		timeStamp.second > 59 || timeStamp.millisecond > 999)
-	{
-		m_errorPlantTimeFormat++;
-
-		if (m_timeErrLog != nullptr)
-		{
-			DEBUG_LOG_ERR(m_timeErrLog, QString("Source %1 time format error %2").
-											arg(moduleEquipmentID()).
-											arg(getTimeStr(timeStamp)));
-		}
-	}
 
 	QDateTime plantTime;
 
@@ -872,78 +900,11 @@ bool DataSourceOnline::collect(const RupFrameTime& rupFrameTime)
 
 	m_rupDataSize = framesQuantity * sizeof(Rup::Data);
 
-	if (m_lastRupDataTimes.plant.timeStamp == m_rupDataTimes.plant.timeStamp)
-	{
-		m_errorDuplicatePlantTime++;
-
-		if (m_timeErrLog != nullptr)
-		{
-			DEBUG_LOG_ERR(m_timeErrLog, QString("Source %1 duplicate time %2").
-											arg(moduleEquipmentID()).
-											arg(getTimeStr(timeStamp)));
-		}
-	}
-
-	if (m_lastRupDataTimes.plant.timeStamp > m_rupDataTimes.plant.timeStamp)
-	{
-		m_errorNonmonotonicPlantTime++;
-
-		if (m_timeErrLog != nullptr)
-		{
-			DEBUG_LOG_ERR(m_timeErrLog, QString("Source %1 non monotonic time %2 (prev time %3)").
-											arg(moduleEquipmentID()).
-											arg(getTimeStr(timeStamp)).
-											arg(getTimeStr(m_lastRupDataTimes.plant.timeStamp)));
-		}
-	}
-
-	m_lastRupDataTimes = m_rupDataTimes;
 
 	return true;
 }
 
 */
-
-void DataSourceOnline::calcDataReceivingRate()
-{
-	if (m_prevCalcTime == -1)
-	{
-		m_prevCalcTime = QDateTime::currentMSecsSinceEpoch();
-		m_prevReceivedSize = m_receivedDataSize;
-		m_firstCalc = true;
-		return;
-	}
-
-	m_calcFramesCtr++;
-
-	if (m_calcFramesCtr < 100)
-	{
-		return;
-	}
-
-	m_calcFramesCtr = 0;
-
-	qint64 now = QDateTime::currentMSecsSinceEpoch();
-
-	qint64 dT = now - m_prevCalcTime;
-
-	if (m_firstCalc == false)
-	{
-		if (dT < DATA_RECEIVING_RATE_CALC_PERIOD)
-		{
-			return;
-		}
-	}
-
-	m_firstCalc = false;
-
-	m_dataReceivingRate = static_cast<double>(m_receivedDataSize - m_prevReceivedSize) / (dT / 1000.0);		// Bytes per second
-
-	m_prevCalcTime = now;
-	m_prevReceivedSize = m_receivedDataSize;
-
-	return;
-}
 
 QString DataSourceOnline::getTimeStr(qint64 timeMs) const
 {

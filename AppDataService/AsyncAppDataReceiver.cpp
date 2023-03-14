@@ -1,5 +1,4 @@
 #include "AsyncAppDataReceiver.h"
-#include "AppDataProcessingThread.h"
 
 StdThreadsGuard::StdThreadsGuard()
 {
@@ -164,7 +163,8 @@ void AsyncAppDataReceiver::onTimer1s(const error_code& error)
 			}
 		}
 
-		updateStatistics();
+		updateReceiverStatistics();
+		updateDataSourcesStatistics();
 	}
 	else
 	{
@@ -186,7 +186,7 @@ void AsyncAppDataReceiver::clearStatistics()
 	m_rupFramesReceivedPerSecond = 0;
 }
 
-void AsyncAppDataReceiver::updateStatistics()
+void AsyncAppDataReceiver::updateReceiverStatistics()
 {
 	m_receivingRate.store(m_receivedPerSecond);
 	m_receivedPerSecond = 0;
@@ -198,6 +198,16 @@ void AsyncAppDataReceiver::updateStatistics()
 	m_rupFramesReceivedPerSecond = 0;
 
 	qDebug() << C_STR(QString("Receive RUP frames %1").arg(m_rupFramesReceivingRate));
+}
+
+void AsyncAppDataReceiver::updateDataSourcesStatistics()
+{
+	for(AppDataSource* source : m_appDataSources)
+	{
+		TEST_PTR_CONTINUE(source);
+
+		source->updateStatistics_1s();
+	}
 }
 
 bool AsyncAppDataReceiver::createAndBindSocket()
@@ -343,6 +353,8 @@ void AsyncAppDataReceiver::startReceive()
 
 void AsyncAppDataReceiver::receivePackets(const error_code& error, size_t bytesReceived)
 {
+	qint64 serverTime = QDateTime::currentMSecsSinceEpoch();
+
 	if (stopIfQuitRequested() == true)
 	{
 		return;
@@ -431,7 +443,7 @@ void AsyncAppDataReceiver::receivePackets(const error_code& error, size_t bytesR
 
 		if (source != nullptr)
 		{
-			source->pushRupFrame(sourceIP, QDateTime::currentMSecsSinceEpoch(),
+			source->pushRupFrame(sourceIP, serverTime,
 								 isSimFrame, simFrame.rupFrame, m_thisThread);
 
 			//
@@ -523,11 +535,11 @@ void processPackets(AsyncAppDataReceiver& receiver, int threadNumber)
 
 	AppDataSource* source = nullptr;
 
-	int ctr = 0;
+	std::unique_lock ul(receivedConditionMutex, std::defer_lock);
 
-	while(1)
+	while(true)
 	{
-		std::unique_lock ul(receivedConditionMutex);
+		ul.lock();
 
 		packetReceivedCondition.wait(ul);
 
@@ -537,81 +549,39 @@ void processPackets(AsyncAppDataReceiver& receiver, int threadNumber)
 			break;
 		}
 
-		if (requireProcessing.empty() == true)
+		// here ul is LOCKED!
+
+		int processingCtr = 0;
+
+		while(true)
 		{
+			if (requireProcessing.empty() == true ||
+				processingCtr >= 20)
+			{
+				ul.unlock();
+				break;
+			}
+
+			source = *requireProcessing.begin();
+			requireProcessing.erase(requireProcessing.begin());
+
 			ul.unlock();
-			continue;
-		}
 
-		source = *requireProcessing.begin();
-		requireProcessing.erase(requireProcessing.begin());
+			processingCtr++;
 
-		ul.unlock();
-
-		if (source->takeProcessingOwnership(thisThread) == false)
-		{
-			qDebug() << "Not take ownership";
-			continue;
-		}
-
-		// processing
-		ctr++;
-
-/*		if ((ctr % 100) == 0)
-		{
-			qDebug() << C_STR(QString("Thread #%1 processed %2").arg(threadNumber).arg(ctr));
-		}*/
-
-		source->parseNextBuffer(thisThread);
-
-		source->releaseProcessingOwnership(thisThread);
-
-/*		bool hasNoDataToProcessing = true;
-
-		for(auto& p : m_appDataSourcesIP)
-		{
-			AppDataSource* appDataSource = p.second;
-
-			if (appDataSource == nullptr)
+			if (source->takeProcessingOwnership(thisThread) == true)
 			{
-				Q_ASSERT(false);
-				continue;
+				source->parseNextBuffer(thisThread);
+
+				source->releaseProcessingOwnership(thisThread);
+			}
+			else
+			{
+				// another thread already processing this source
 			}
 
-			bool result = appDataSource->takeProcessingOwnership(thisThread);
-
-			if (result == false)
-			{
-				m_failOwnership++;
-				continue;
-			}
-
-			m_successOwnership++;
-
-			do
-			{
-				result = appDataSource->processRupFrameTimeQueue(thisThread);
-
-				if (result == false)
-				{
-					break;
-				}
-
-				hasNoDataToProcessing = false;
-
-				appDataSource->parsePacket();
-
-				m_parsedRupPacketCount++;
-			}
-			while(isQuitRequested() == false);
-
-			appDataSource->releaseProcessingOwnership(thisThread);
+			ul.lock();
 		}
-
-		if (hasNoDataToProcessing == true)
-		{
-			usleep(500);
-		}*/
 	}
 
 	DEBUG_LOG_MSG(log, QString("AppDataProcessingThread #%1 is finished").arg(threadNumber));

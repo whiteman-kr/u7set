@@ -83,10 +83,8 @@ void SignalStatesProcessingThread::run()
 
 		int TO_DO_refactor_to_condition_variable_to_avoid_cycling_on_m_appDataSources;
 
-		for(const auto& p : m_appDataSources.sources())
+		for(AppDataSource* appDataSource : m_appDataSources)
 		{
-			AppDataSource* appDataSource = p.second;
-
 			TEST_PTR_CONTINUE(appDataSource);
 
 			SimpleAppSignalStateArchiveFlag state;

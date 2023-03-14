@@ -98,7 +98,7 @@ public:
 private:
 	quint64 generateID() const;
 
-private:
+protected:
 	quint64 m_id = 0;						// generate by DataSource::generateID() after readFromXml
 
 	QString m_moduleEquipmentID;
@@ -176,10 +176,27 @@ public:
 	bool initParsingBuffers(int framesQuantity);
 	void clearParsingBuffers();
 
+	// Functions used by receiver thread
 	//
+	void pushRupFrame(quint32 sourceIP,
+					  qint64 serverTime,
+					  bool isSimFrame,
+					  const Rup::Frame& rupFrame,
+					  const QThread* thread);
 
-	E::DataSourceState state() const { return m_state; }
-	void setState(E::DataSourceState state) { m_state = state; }
+	void updateStatistics_1s();
+
+	// Functions used by data processing thread
+	//
+	bool parseNextBuffer(const QThread* thread);
+	virtual bool parseBuffer(ParsingBuffer& readBuffer, const QThread* thread);
+
+	void checkPlantTime(const Rup::TimeStamp& plantTimeStamp);
+
+	bool takeProcessingOwnership(const QThread* processingThread);
+	bool releaseProcessingOwnership(const QThread* processingThread);
+
+	//
 
 	qint64 uptime() const { return m_uptime; }
 	void setUptime(qint64 uptime) { m_uptime = uptime; }
@@ -195,8 +212,8 @@ public:
 	quint16 rupFrameNumerator() const { return m_rupFrameNumerator; }
 	void setRupFrameNumerator(quint16 num) { m_rupFrameNumerator = num; }
 
-	bool dataReceives() const { return m_dataReceives; }
-	void setDataReceives(bool receives) { m_dataReceives = receives; }
+	bool dataReceives() const { return m_receivesData; }
+	void setDataReceives(bool receives) { m_receivesData = receives; }
 
 	double dataReceivingRate() const { return m_dataReceivingRate; }
 	void setDataReceivingRate(double rate) { m_dataReceivingRate = rate; }
@@ -243,34 +260,10 @@ public:
 	bool dataProcessingEnabled() const { return m_dataProcessingEnabled; }
 	void setDataProcessingEnabled(bool enabled) { m_dataProcessingEnabled = enabled; }
 
-	qint64 lastPacketSystemTime() const { return m_lastPacketSystemTime; }
+	qint64 lastPacketSystemTime() const { return m_lastPacketServerTime; }
 	QString lastPacketSystemTimeStr() const;
-	void setLastPacketSystemTime(qint64 sysTime) { m_lastPacketSystemTime = sysTime; }
+	void setLastPacketSystemTime(qint64 sysTime) { m_lastPacketServerTime = sysTime; }
 
-	// Functions used by receiver thread
-	//
-	void pushRupFrame(quint32 sourceIP,
-					  qint64 serverTime,
-					  bool isSimFrame,
-					  const Rup::Frame& rupFrame,
-					  const QThread* thread);
-
-	bool parseNextBuffer(const QThread* thread);
-	virtual bool parseBuffer(ParsingBuffer& readBuffer, const QThread* thread);
-
-	void incFrameSizeError() { m_errorFrameSize++; }
-
-	// Functions used by data processing thread
-	//
-	bool takeProcessingOwnership(const QThread* processingThread);
-	bool releaseProcessingOwnership(const QThread* processingThread);
-
-/*	bool getDataToParsing(Times* times,
-						  bool* isSimPacket,
-						  quint16* packetNo,
-						  const char** rupData,
-						  int* rupDataSize,
-						  bool* dataReceivingTimeout);*/
 
 	// Used by PacketViewer
 	//
@@ -282,10 +275,6 @@ public:
 private:
 	bool moveToNextWriteBuffer(const QThread* thread);
 	bool moveToNextReadBuffer(const QThread* thread);
-
-//	bool collect(const RupFrameTime& rupFrameTime);
-
-	void calcDataReceivingRate();
 
 	QString getTimeStr(qint64 timeMs) const;
 	QString getTimeStr(const Rup::TimeStamp& ts) const;
@@ -300,22 +289,22 @@ protected:
 
 	// dynamic state information
 	//
-	E::DataSourceState m_state = E::DataSourceState::NoData;
+	bool m_dataProcessingEnabled = true;
+	bool m_receivesData = false;
+
 	qint64 m_uptime = 0;										// in seconds!
 	quint64 m_receivedDataID = 0;
 
 	qint64 m_rupFramePlantTime = 0;
 	quint16 m_rupFrameNumerator = 0;
-	bool m_dataReceives = false;
 
 	double m_dataReceivingRate = 0;
 	qint64 m_receivedDataSize = 0;
+	qint64 m_prevReceivedDataSize = 0;
 	qint64 m_receivedFramesCount = 0;
 	qint64 m_receivedPacketCount = 0;
 	qint64 m_lostPacketCount = 0;
 	qint64 m_processedPacketCount = 0;
-
-	bool m_dataRecevingTimeout = false;
 
 	//
 
@@ -328,13 +317,10 @@ protected:
 	qint64 m_errorNonmonotonicPlantTime = 0;
 	qint64 m_errorPlantTimeFormat = 0;
 
-	bool m_dataProcessingEnabled = true;
-
 	//
 
-	qint64 m_firstPacketSystemTime = 0;
-	qint64 m_lastPacketSystemTime = 0;
-	bool m_firstRupFrame = true;
+	qint64 m_firstPacketServerTime = 0;
+	qint64 m_lastPacketServerTime = 0;
 
 	//
 
@@ -353,19 +339,10 @@ protected:
 
 	// result variables
 
-	bool m_dataReadyToParsing = false;
-
-	Times m_rupDataTimes;
-	Times m_lastRupDataTimes;
+	Times m_rupTimes;
+	Times m_lastRupTimes;
 	quint16 m_packetNo = 0;
 	int m_rupDataSize = 0;
-
-	// variables to calc data receiving rate
-	//
-	bool m_firstCalc = true;
-	int m_calcFramesCtr = 0;
-	qint64 m_prevCalcTime = -1;
-	qint64 m_prevReceivedSize = -1;
 };
 
 

@@ -418,10 +418,8 @@ void TcpAppDataServer::onGetAppDataSourcesInfoRequest()
 
 	const AppDataSources& dataSources = appDataSources();
 
-	for(const auto& p : dataSources.sources())
+	for(AppDataSource* source : dataSources)
 	{
-		AppDataSource* source = p.second;
-
 		TEST_PTR_CONTINUE(source);
 
 		Network::DataSourceInfo* protoInfo = m_getDataSourcesInfoReply.add_datasourceinfo();
@@ -439,10 +437,8 @@ void TcpAppDataServer::onGetAppDataSourcesStatesRequest()
 
 	const AppDataSources& dataSources = appDataSources();
 
-	for(const auto& p : dataSources.sources())
+	for(const AppDataSource* source : dataSources)
 	{
-		const AppDataSource* source = p.second;
-
 		TEST_PTR_CONTINUE(source);
 
 		Network::AppDataSourceState* state = m_getAppDataSourcesStatesReply.add_appdatasourcesstates();

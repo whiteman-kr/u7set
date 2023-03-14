@@ -9,7 +9,6 @@
 #include "AppDataReceiver.h"
 #include "TcpAppDataServer.h"
 #include "TcpArchiveClient.h"
-#include "AppDataProcessingThread.h"
 #include "SignalStatesProcessingThread.h"
 #include "RtTrendsServer.h"
 
@@ -129,10 +128,6 @@ private:
 	AppDataSources m_appDataSources;
 
 	DynamicAppSignalStates m_signalStates;
-
-//	AppDataProcessingThreadsPool m_appDataProcessingThreadsPool;
-
-	//AppDataReceiverThread* m_appDataRe ceiverThread = nullptr;
 
 	AsyncAppDataReceiver* m_asyncAppDataReceiver = nullptr;
 

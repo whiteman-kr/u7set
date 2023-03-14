@@ -43,9 +43,9 @@ public:
 	int signalStatesQueueCurMaxSize() const { return m_signalStatesQueueCurMaxSize; }
 
 private:
-	bool parsePacket();
-
 	virtual bool parseBuffer(ParsingBuffer& readBuffer, const QThread* thread) override;
+
+	void invalidateSignals(const QThread* thread);
 
 	int getAutoArchivingGroup(qint64 currentSysTime);
 
@@ -94,11 +94,20 @@ public:
 	AppDataSource* getSignalSource(const QString& signalID);
 	AppDataSource* getSignalSource(Hash signalHash);
 
-	const std::map<QString, AppDataSource*>& sources() const;
+	std::vector<AppDataSource*>::iterator begin();
+	std::vector<AppDataSource*>::const_iterator begin() const;
+
+	std::vector<AppDataSource*>::iterator end();
+	std::vector<AppDataSource*>::const_iterator end() const;
+
+//	const std::map<QString, AppDataSource*>& sources() const;
 
 private:
-	// module EquipmentID => AppDataSource*
 	// dynamic AppDataSource objects owner!
+	//
+	std::vector<AppDataSource*> m_sources;
+
+	// module EquipmentID => AppDataSource*
 	//
 	std::map<QString, AppDataSource*> m_moduleToSource;
 

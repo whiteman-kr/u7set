@@ -431,16 +431,6 @@ public:
 	};
 	Q_ENUM(Channel)
 
-	// DataSourceState
-	//
-	enum class DataSourceState
-	{
-		NoData = 0,
-		ReceiveData = 1,
-		Stopped = 2
-	};
-	Q_ENUM(DataSourceState)
-
 	// ConfigCheckerState
 	//
 	enum class ConfigCheckerState

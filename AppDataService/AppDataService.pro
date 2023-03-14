@@ -34,7 +34,6 @@ SOURCES += \
 	../lib/SoftwareSettings.cpp \
 	../lib/LanControllerInfo.cpp \
 	AppDataService.cpp \
-	AppDataProcessingThread.cpp \
 	AppDataSource.cpp \
 	AppDataServiceMain.cpp \
 	AppDataReceiver.cpp \
@@ -54,7 +53,6 @@ HEADERS += \
 	../lib/SoftwareSettings.h \
 	../lib/LanControllerInfo.h \
 	AppDataService.h \
-	AppDataProcessingThread.h \
 	AppDataSource.h \
 	AppDataReceiver.h \
 	DynamicAppSignalState.h \

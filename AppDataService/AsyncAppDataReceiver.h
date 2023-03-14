@@ -48,7 +48,8 @@ private:
 	void onTimer1s(const error_code& error);
 
 	void clearStatistics();
-	void updateStatistics();
+	void updateReceiverStatistics();
+	void updateDataSourcesStatistics();
 
 	bool createAndBindSocket();
 	bool isSocketWorkable() const;
@@ -117,9 +118,9 @@ private:
 
 	//
 
-	std::atomic<int> m_receivedPerSecond = 0;
-	std::atomic<int> m_udpReceivedPerSecond = 0;
-	std::atomic<int> m_rupFramesReceivedPerSecond = 0;
+	int m_receivedPerSecond = 0;
+	int m_udpReceivedPerSecond = 0;
+	int m_rupFramesReceivedPerSecond = 0;
 };
 
 void processPackets(AsyncAppDataReceiver& receiver, int threadNumber);

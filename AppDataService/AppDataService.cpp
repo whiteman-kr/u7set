@@ -125,19 +125,6 @@ void AppDataServiceWorker::loadSettings()
 
 void AppDataServiceWorker::runAppDataReceiverThread()
 {
-//	if (m_appDataReceiverThread != nullptr)
-//	{
-//		assert(false);
-//		return;
-//	}
-
-//	m_appDataReceiverThread = new AppDataReceiverThread(m_curSettingsProfile.appDataReceivingIP,
-//														m_appDataSourcesIP,
-//														sessionParams().softwareRunMode,
-//														logger());
-
-//	m_appDataReceiverThread->start();
-
 	if (m_asyncAppDataReceiver != nullptr)
 	{
 		Q_ASSERT(false);
@@ -155,13 +142,6 @@ void AppDataServiceWorker::runAppDataReceiverThread()
 
 void AppDataServiceWorker::stopAppDataReceiverlThread()
 {
-//	if (m_appDataReceiverThread != nullptr)
-//	{
-//		m_appDataReceiverThread->quitAndWait();
-//		delete m_appDataReceiverThread;
-//		m_appDataReceiverThread = nullptr;
-//	}
-
 	if (m_asyncAppDataReceiver != nullptr)
 	{
 		m_asyncAppDataReceiver->quitAndWait();
@@ -581,10 +561,8 @@ void AppDataServiceWorker::createAndInitSignalStates()
 
 void AppDataServiceWorker::prepareAppDataSources()
 {
-	for(auto& p : m_appDataSources.sources())
+	for(AppDataSource* appDataSource : m_appDataSources)
 	{
-		AppDataSource* appDataSource = p.second;
-
 		TEST_PTR_CONTINUE(appDataSource);
 
 		appDataSource->prepare(m_appSignals, &m_signalStates, m_autoArchivingGroupsCount, m_timeErrLog);
