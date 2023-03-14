@@ -28,12 +28,30 @@ mkdir -p $OUTPUT_DIR
 #
 #lcov $LCOV_CLEAR_ARGUMENTS --output-file $OUTPUT_DIR/Simulator.info --directory ./Simulator/debug
 
+
+# Build project u7_test_simulator
+#
+if [ -d \"/tmp/build/test_simulator\" ]; then rm -Rf /tmp/build/test_simulator; fi
+$CI_PROJECT_DIR/bin_unix/debug/BuilderConsole $CI_PROJECT_DIR/Test/BuilderConsoleArgsCoverage.xml
+
+# Start services for functional tests
+#
+$CI_PROJECT_DIR/bin_unix/debug/CfgSrv -e -id=SYSTEMID_CLIENTTEST_WS01_CFGS -profile=Default -b=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -ip=127.0.0.1:13312 < /dev/null > cfgsrv.out 2>&1 &
+sleep 3
+jobs
+
 # Run tests
 #
 ./bin_unix/debug/ClientTests
 ./bin_unix/debug/SimulatorTests
 ./bin_unix/debug/MetrologyTests
 ./bin_unix/debug/u7databasetests -config=$CI_PROJECT_DIR/Test/u7databasetestsArgsCoverage.xml
+
+# Stop services for functional tests
+#
+pkill CfgSrv
+sleep 2
+jobs
 
 # Get code coverage data
 #

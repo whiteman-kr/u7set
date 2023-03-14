@@ -4,14 +4,14 @@
 #include "../../ClientLib/ConfigController.h"
 #include "../../lib/BuildInfo.h"
 
-std::atomic<bool> connectedFlag = false;
-
-std::mutex mutexConnected;
-QString connectionResult;
-std::list<std::tuple<QString, bool, QByteArray>> readFiles;
-
 namespace
 {
+	std::atomic<bool> connectedFlag = false;
+
+	std::mutex mutexConnected;
+	QString connectionResult;
+	std::list<std::tuple<QString, bool, QByteArray>> readFiles;
+
 
 	class MonitorConfigControllerStub : public ClientLib::ConfigController
 	{
