@@ -82,7 +82,7 @@ windows_build_job:
     - "echo $Env:CI_COMMIT_SHA"
     - "git status"
     - "git log -1"
-    - $Env:QT_BIN_DIR="C:\\Qt\\${QT_VERSION}\\msvc2019_64"
+    - $Env:QT_BIN_DIR="C:\\Qt\\${Env:QT_VERSION}\\msvc2019_64"
 #generation version file
     - "'#pragma once' > gitlabci_version.h"
     - "' ' >> gitlabci_version.h"
@@ -210,10 +210,10 @@ windows_test_job:
     - "git log -1"
 #Run Create databases for compiler and simulator tests
     - echo Creating PostgreSQL databases...
-    - psql -U postgres -c "CREATE DATABASE u7_%COMPILER_TESTS_PROJECT_NAME% OWNER u7;"
-    - cmd '/c psql -U postgres u7_%COMPILER_TESTS_PROJECT_NAME% < c:\Data\u7_%COMPILER_TESTS_PROJECT_NAME%.sql'
-    - psql -U postgres -c "CREATE DATABASE u7_%SIMULATOR_PROJECT_NAME% OWNER u7;"
-    - cmd '/c psql -U postgres u7_%SIMULATOR_PROJECT_NAME% < c:\Data\u7_%SIMULATOR_PROJECT_NAME%.sql'
+    - psql -U postgres -c "CREATE DATABASE u7_${Env:COMPILER_TESTS_PROJECT_NAME} OWNER u7;"
+    - cmd '/c psql -U postgres u7_${Env:COMPILER_TESTS_PROJECT_NAME} < c:\Data\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql'
+    - psql -U postgres -c "CREATE DATABASE u7_${Env:SIMULATOR_PROJECT_NAME} OWNER u7;"
+    - cmd '/c psql -U postgres u7_${Env:SIMULATOR_PROJECT_NAME} < c:\Data\u7_${Env:SIMULATOR_PROJECT_NAME}.sql'
 #Run XML validation
     - "# ----------------------------------------------"
     - "#               Run XML validation"
