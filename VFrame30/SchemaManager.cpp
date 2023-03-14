@@ -93,6 +93,7 @@ namespace VFrame30
 								  QDateTime /*from*/,
 								  QDateTime /*to*/,
 								  E::TimeType /*timeType*/,
+								  E::TrendMode /*mode*/,
 								  std::list<std::shared_ptr<TrendLib::OneHourData>>* /*outData*/) const
 	{
 		Q_ASSERT(false);

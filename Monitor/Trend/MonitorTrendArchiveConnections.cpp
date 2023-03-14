@@ -152,8 +152,8 @@ void MonitorTrendArchiveConnections::requestData(TrendLib::TrendSignalPlusServer
 
 	if (cit == m_connections.end())
 	{
-		m_logFile->writeError(QString("Trend RequestData, archive server %1 for signal %2 not found.")
-							  .arg(archievServerId, signalPlusServerId.appSignalId));
+		m_logFile->write>Warning(QString("Trend RequestData, archive server %1 for signal %2 not found.")
+								 .arg(archievServerId, signalPlusServerId.appSignalId));
 		return;
 	}
 

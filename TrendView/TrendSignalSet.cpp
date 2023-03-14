@@ -663,6 +663,7 @@ namespace TrendLib
 								   QDateTime from,
 								   QDateTime to,
 								   E::TimeType timeType,
+								   E::TrendMode mode,
 								   std::list<std::shared_ptr<OneHourData>>* outData) const
 	{
 		if (outData == nullptr ||
@@ -723,40 +724,55 @@ namespace TrendLib
 					return false;
 				}
 
-				std::shared_ptr<OneHourData>& hourData = archive.m_hours[archHour];		// Get hour data, insert if there is no such record
-																						// hourData is REFERENCE, it's important as shared_ptr can be changed
-
-				if (hourData == nullptr)
+				if (mode == E::TrendMode::Archive)
 				{
-					// hourData just was created in call "archive.m_hours[archHour]"
-					//
-					hourData = std::make_shared<OneHourData>();
+					std::shared_ptr<OneHourData>& hourData = archive.m_hours[archHour];		// Get hour data, insert if there is no such record
+																							// hourData is REFERENCE, it's important as shared_ptr can be changed
+
+					if (hourData == nullptr)
+					{
+						// hourData just was created in call "archive.m_hours[archHour]"
+						//
+						hourData = std::make_shared<OneHourData>();
+					}
+
+					switch (hourData->state)
+					{
+					case OneHourData::State::NoData:
+						// No data, request data from archive
+						//
+						emit requestData(trendSignalId, archHour, timeType);
+						hourData->state = OneHourData::State::Requested;
+						break;
+					case OneHourData::State::Requested:
+						// Data already requested, wait for it, just do nothing
+						//
+						break;
+					case OneHourData::State::Received:
+						{
+							// Data requested and received, pass it to the result
+							// MAKE A COPY of hourData
+							//
+							auto copiedHourData = std::make_shared<TrendLib::OneHourData>(hourData.operator*());
+							outData->push_back(copiedHourData);
+						}
+						break;
+					default:
+						Q_ASSERT(false);
+						return false;
+					}
 				}
 
-				switch (hourData->state)
+				if (mode == E::TrendMode::Realtime)
 				{
-				case OneHourData::State::NoData:
-					// No data, request data from archive
-					//
-					emit requestData(trendSignalId, archHour, timeType);
-					hourData->state = OneHourData::State::Requested;
-					break;
-				case OneHourData::State::Requested:
-					// Data already requested, wait for it, just do nothing
-					//
-					break;
-				case OneHourData::State::Received:
+					auto hit = archive.m_hours.find(archHour);
+					if (hit != archive.m_hours.end())
 					{
-						// Data requested and received, pass it to the result
 						// MAKE A COPY of hourData
 						//
-						auto copiedHourData = std::make_shared<TrendLib::OneHourData>(hourData.operator*());
+						auto copiedHourData = std::make_shared<TrendLib::OneHourData>(hit->second.operator*());
 						outData->push_back(copiedHourData);
 					}
-					break;
-				default:
-					Q_ASSERT(false);
-					return false;
 				}
 			}
 

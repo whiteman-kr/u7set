@@ -1,12 +1,11 @@
-
 # c++20 support
 #
 win32 {
-    CONFIG += c++20
+	CONFIG += c++20
 }
 unix {
 	CONFIG += c++20
-    #CONFIG -= c++17	
+	#CONFIG -= c++17
 	#QMAKE_CXXFLAGS += -std=c++20	# now using 'CONFIG += c++20' leads to -std=gnu++2a
 }
 
@@ -15,7 +14,7 @@ unix {
 win32 {
 	CONFIG(release, debug|release) {
 		CONFIG += optimize_speed
-		CONFIG += ltcg					# LTO
+		CONFIG += ltcg				# LTO
 	}
 }
 
@@ -23,6 +22,6 @@ win32 {
 unix {
 	CONFIG(release, debug|release) {
 		CONFIG += optimize_speed
-#		CONFIG += ltcg					# LTO is disabled for faster build by CI/CD
+		CONFIG += ltcg				# LTO can be disabled for faster build by CI/CD
 	}
 }
