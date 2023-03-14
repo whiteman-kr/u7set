@@ -42,10 +42,10 @@ public:
 	int signalStatesQueueCurSize() const { return m_signalStatesQueueCurSize; }
 	int signalStatesQueueCurMaxSize() const { return m_signalStatesQueueCurMaxSize; }
 
+	void invalidateSignals(const QThread* thread);
+
 private:
 	virtual bool parseBuffer(ParsingBuffer& readBuffer, const QThread* thread) override;
-
-	void invalidateSignals(const QThread* thread);
 
 	int getAutoArchivingGroup(qint64 currentSysTime);
 

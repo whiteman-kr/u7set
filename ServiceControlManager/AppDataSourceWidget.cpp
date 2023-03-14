@@ -39,7 +39,7 @@ static const QList<staticPropertyFieldDefinition> staticPropertiesFieldList {
 };
 
 static const QList<dynamicPropertyFieldDefinition> dynamicPropertiesFieldList {
-	{ QStringLiteral("State"), [](const DataSourceOnline& source) { return E::valueToString<E::DataSourceState>(TO_INT(source.state())); } },
+	{ QStringLiteral("State"), [](const DataSourceOnline& source) { return source.stateStr(); }},
 
 	{ QStringLiteral("Uptime"), [](const DataSourceOnline& source) {
 			auto time = source.uptime();

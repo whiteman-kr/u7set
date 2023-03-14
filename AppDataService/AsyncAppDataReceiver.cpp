@@ -206,7 +206,12 @@ void AsyncAppDataReceiver::updateDataSourcesStatistics()
 	{
 		TEST_PTR_CONTINUE(source);
 
-		source->updateStatistics_1s();
+		bool invalidateSignals = source->updateStatistics_1s();
+
+		if (invalidateSignals == true)
+		{
+			requireSignalsInvalidation(source);
+		}
 	}
 }
 
@@ -446,11 +451,7 @@ void AsyncAppDataReceiver::receivePackets(const error_code& error, size_t bytesR
 			source->pushRupFrame(sourceIP, serverTime,
 								 isSimFrame, simFrame.rupFrame, m_thisThread);
 
-			//
-
-			std::lock_guard lg(m_receivedConditionMutex);
-			m_requireProcessing.insert(source);
-			m_packetReceivedCondition.notify_one();
+			requireBufferProcessing(source);
 		}
 		else
 		{
@@ -463,6 +464,20 @@ void AsyncAppDataReceiver::receivePackets(const error_code& error, size_t bytesR
 			}
 		}
 	}
+}
+
+void AsyncAppDataReceiver::requireBufferProcessing(AppDataSource* source)
+{
+	std::lock_guard lg(m_waitConditionMutex);
+	m_requireProcessing.insert({source, true});
+	m_processingRequiredCondition.notify_one();
+}
+
+void AsyncAppDataReceiver::requireSignalsInvalidation(AppDataSource* source)
+{
+	std::lock_guard lg(m_waitConditionMutex);
+	m_requireProcessing.insert({source, false});
+	m_processingRequiredCondition.notify_one();
 }
 
 void AsyncAppDataReceiver::startProcessingThreads(StdThreadsGuard& stg)
@@ -489,8 +504,8 @@ void AsyncAppDataReceiver::startProcessingThreads(StdThreadsGuard& stg)
 
 void AsyncAppDataReceiver::wakeupAllProcessingThreads()
 {
-	std::lock_guard lg(m_receivedConditionMutex);
-	m_packetReceivedCondition.notify_all();
+	std::lock_guard lg(m_waitConditionMutex);
+	m_processingRequiredCondition.notify_all();
 }
 
 bool AsyncAppDataReceiver::stopIfQuitRequested()
@@ -529,19 +544,17 @@ void processPackets(AsyncAppDataReceiver& receiver, int threadNumber)
 
 	QThread* thisThread = QThread::currentThread();
 
-	std::mutex& receivedConditionMutex = receiver.m_receivedConditionMutex;
-	std::condition_variable& packetReceivedCondition = receiver.m_packetReceivedCondition;
-	std::set<AppDataSource*>& requireProcessing = receiver.m_requireProcessing;
+	auto& waitConditionMutex = receiver.m_waitConditionMutex;
+	auto& processingRequiredCondition = receiver.m_processingRequiredCondition;
+	auto& requireProcessing = receiver.m_requireProcessing;
 
-	AppDataSource* source = nullptr;
-
-	std::unique_lock ul(receivedConditionMutex, std::defer_lock);
+	std::unique_lock ul(waitConditionMutex, std::defer_lock);
 
 	while(true)
 	{
 		ul.lock();
 
-		packetReceivedCondition.wait(ul);
+		processingRequiredCondition.wait(ul);
 
 		if (receiver.isQuitRequested() == true)
 		{
@@ -555,15 +568,19 @@ void processPackets(AsyncAppDataReceiver& receiver, int threadNumber)
 
 		while(true)
 		{
-			if (requireProcessing.empty() == true ||
+			auto it = requireProcessing.begin();
+
+			if (it == requireProcessing.end() ||
 				processingCtr >= 20)
 			{
 				ul.unlock();
 				break;
 			}
 
-			source = *requireProcessing.begin();
-			requireProcessing.erase(requireProcessing.begin());
+			AppDataSource* source = it->first;;
+			bool requireBufferProcessing = it->second;
+
+			requireProcessing.erase(it);
 
 			ul.unlock();
 
@@ -571,7 +588,14 @@ void processPackets(AsyncAppDataReceiver& receiver, int threadNumber)
 
 			if (source->takeProcessingOwnership(thisThread) == true)
 			{
-				source->parseNextBuffer(thisThread);
+				if (requireBufferProcessing == true)
+				{
+					source->parseNextBuffer(thisThread);
+				}
+				else
+				{
+					source->invalidateSignals(thisThread);
+				}
 
 				source->releaseProcessingOwnership(thisThread);
 			}

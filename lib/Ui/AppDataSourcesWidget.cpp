@@ -184,7 +184,7 @@ void DialogAppDataSourceInfo::updateData()
 						arg(QString::number(adsState->info.lancontrollerinfo()[0].appdatauid())).
 						arg(QString::number(adsState->info.lancontrollerinfo()[0].appdatauid(), 16)));
 
-	setDataItemText("DataReceives", adsState->state.datareceives() ? "Yes" : "No");
+	setDataItemText("ReceivesData", adsState->state.receivesdata() ? "Yes" : "No");
 
 	{
 		QTreeWidgetItem* dataReceivesItem = dataItem("DataReceives");
@@ -194,7 +194,7 @@ void DialogAppDataSourceInfo::updateData()
 			return;
 		}
 
-		if (adsState->state.datareceives() == false)
+		if (adsState->state.receivesdata() == false)
 		{
 			dataReceivesItem->setForeground(1, QBrush(DialogSourceInfo::dataItemErrorColor));
 		}
@@ -211,8 +211,8 @@ void DialogAppDataSourceInfo::updateData()
 	setDataItemText("Uptime", QString("%1d %2:%3:%4").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0')));
 
 	setDataItemNumber("ReceivedDataID", adsState->state.receiveddataid());
-	setDataItemNumber("RupFramesQueueCurSize", adsState->state.rupframesqueuecursize());
-	setDataItemNumber("RupFramesQueueCurMaxSize", adsState->state.rupframesqueuecurmaxsize());
+//	setDataItemNumber("RupFramesQueueCurSize", adsState->state.rupframesqueuecursize());
+//	setDataItemNumber("RupFramesQueueCurMaxSize", adsState->state.rupframesqueuecurmaxsize());
 	double datareceivingrate = adsState->state.datareceivingrate();
 	setDataItemText("DataReceivingRate", QString::number(datareceivingrate / 1024.0, 'f', 1));
 	setDataItemNumber("ReceivedDataSize", adsState->state.receiveddatasize());
@@ -448,7 +448,7 @@ void AppDataSourcesWidget::update(bool refreshOnly)
 		}
 		else
 		{
-			if (adsState->state.datareceives() == false)
+			if (adsState->state.receivesdata() == false)
 			{
 				item->setForeground(static_cast<int>(Columns::State), QBrush(DialogSourceInfo::dataItemErrorColor));
 

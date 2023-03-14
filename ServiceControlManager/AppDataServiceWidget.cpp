@@ -328,7 +328,7 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 										arg(source.lanControllersInfo()[0].appDataUID,
 											sizeof(source.lanControllersInfo()[0].appDataUID) * 2, 16, QChar('0')).toUpper();
 				case DSC_UNIQUE_ID: return "0x" + QString("%1").arg(source.moduleUniqueID(), sizeof(source.moduleUniqueID()) * 2, 16, QChar('0')).toUpper();
-				case DSC_STATE: return E::valueToString<E::DataSourceState>(TO_INT(source.state()));
+				case DSC_STATE: return source.stateStr();
 
 				// DataSourceState
 				//
@@ -342,7 +342,7 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 				}
 				case DSC_RECEIVED: return source.receivedDataSize();
 				case DSC_SPEED: return source.dataReceivingRate();
-				case DSC_RECEIVES_DATA: return source.dataReceives();
+				case DSC_RECEIVES_DATA: return source.receivesData();
 				case DSC_RECEIVED_DATA_ID: return "0x" + QString("%1").arg(source.receivedDataID(), sizeof(source.receivedDataID()) * 2, 16, QChar('0')).toUpper();
 
 				//

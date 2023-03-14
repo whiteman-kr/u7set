@@ -147,7 +147,7 @@ int TcpAppSourcesState::sourceErrorCount()
 	{
 		const AppDataSourceState& ads = it.second;
 
-		if (ads.state.datareceives() == false)
+		if (ads.state.receivesdata() == false)
 		{
 			result++;
 			continue;

@@ -158,8 +158,8 @@ bool AppDataSource::getState(Network::AppDataSourceState* proto) const
 	TEST_PTR_RETURN_FALSE(proto);
 
 	proto->set_id(ID());
-	proto->set_state(TO_INT(state()));
-	proto->set_datareceives(dataReceives());
+//	proto->set_state(TO_INT(state()));
+	proto->set_receivesdata(receivesData());
 	proto->set_uptime(uptime());
 	proto->set_receiveddataid(receivedDataID());
 	proto->set_rupframeplanttime(rupFramePlantTime());
@@ -204,8 +204,7 @@ bool AppDataSource::getState(Network::AppDataSourceState* proto) const
 void AppDataSource::setState(const Network::AppDataSourceState& proto)
 {
 	setID(proto.id());
-	DataSourceOnline::setState(static_cast<E::DataSourceState>(proto.state()));
-	setDataReceives(proto.datareceives());
+	setReceivesData(proto.receivesdata());
 	setUptime(proto.uptime());
 	setReceivedDataID(proto.receiveddataid());
 	setRupFramePlantTime(proto.rupframeplanttime());
@@ -255,6 +254,18 @@ bool AppDataSource::getSignalState(SimpleAppSignalStateArchiveFlag* state, const
 	return result;
 }
 
+void AppDataSource::invalidateSignals(const QThread* thread)
+{
+	for(DynamicAppSignalState* signalState : m_signalStates)
+	{
+		TEST_PTR_CONTINUE(signalState);
+
+		signalState->setUnavailable(m_rupTimes, m_signalStatesQueue, thread);
+	}
+
+	qDebug() << "Invalidate";
+}
+
 bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread)
 {
 	if (readBuffer.readyToParsing == false)
@@ -273,6 +284,21 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 	}
 
 	const Rup::Header& header = readBuffer.frame0Header();
+
+	if (m_rupFrameNumerator != -1 &&
+		((m_rupFrameNumerator + 1) & 0xFFFF) != header.numerator)
+	{
+		if (header.numerator > m_rupFrameNumerator)
+		{
+			m_lostPacketCount += header.numerator - m_rupFrameNumerator - 1;
+		}
+		else
+		{
+			m_lostPacketCount += 0xFFFF - m_rupFrameNumerator + header.numerator - 1;
+		}
+	}
+
+	m_rupFrameNumerator = header.numerator;
 
 	//
 
@@ -310,21 +336,14 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 	const char* rupData = readBuffer.rupData();
 	int rupDataSize = readBuffer.rupDataSize();
 
-	int autoArchivingGroup = getAutoArchivingGroup(times.system.timeStamp);
+	int autoArchivingGroup = getAutoArchivingGroup(m_rupTimes.system.timeStamp);
 
 	for(DynamicAppSignalState* signalState : m_signalStates)
 	{
 		TEST_PTR_CONTINUE(signalState);
 
-		if (dataReceivingTimeout == true)
-		{
-			signalState->setUnavailable(times, m_signalStatesQueue, thread);
-		}
-		else
-		{
-			signalState->setState(m_rupTimes, isSimPacket, packetNo, rupData, rupDataSize,
-								  autoArchivingGroup, m_signalStatesQueue, thread);
-		}
+		signalState->setState(m_rupTimes, isSimPacket, packetNo, rupData, rupDataSize,
+							  autoArchivingGroup, m_signalStatesQueue, thread);
 	}
 
 	m_signalStatesQueue.getSizes(&m_signalStatesQueueCurSize, &m_signalStatesQueueCurMaxSize, &m_signalStatesQueueSize, thread);
@@ -332,16 +351,6 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 	readBuffer.prepareToWriting();
 
 	return true;
-}
-
-void AppDataSource::invalidateSignals(const QThread* thread)
-{
-	for(DynamicAppSignalState* signalState : m_signalStates)
-	{
-		TEST_PTR_CONTINUE(signalState);
-
-		signalState->setUnavailable(m_rupTimes, m_signalStatesQueue, thread);
-	}
 }
 
 int AppDataSource::getAutoArchivingGroup(qint64 currentSysTime)

@@ -57,6 +57,9 @@ private:
 	void startReceive();
 	void receivePackets(const error_code& error, std::size_t bytesReceived);
 
+	void requireBufferProcessing(AppDataSource* source);
+	void requireSignalsInvalidation(AppDataSource* source);
+
 	void startProcessingThreads(StdThreadsGuard& stg);
 	void wakeupAllProcessingThreads();
 
@@ -92,9 +95,10 @@ private:
 
 	//
 
-	std::mutex m_receivedConditionMutex;
-	std::condition_variable m_packetReceivedCondition;
-	std::set<AppDataSource*> m_requireProcessing;
+	std::mutex m_waitConditionMutex;
+	std::condition_variable m_processingRequiredCondition;
+	std::map<AppDataSource*, bool> m_requireProcessing;		//	source => true	 require buffer processing
+															//	source => false	 require signals invalidation
 
 	friend void processPackets(AsyncAppDataReceiver& receiver, int threadNumber);
 

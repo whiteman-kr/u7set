@@ -184,7 +184,7 @@ public:
 					  const Rup::Frame& rupFrame,
 					  const QThread* thread);
 
-	void updateStatistics_1s();
+	bool updateStatistics_1s();
 
 	// Functions used by data processing thread
 	//
@@ -212,8 +212,8 @@ public:
 	quint16 rupFrameNumerator() const { return m_rupFrameNumerator; }
 	void setRupFrameNumerator(quint16 num) { m_rupFrameNumerator = num; }
 
-	bool dataReceives() const { return m_receivesData; }
-	void setDataReceives(bool receives) { m_receivesData = receives; }
+	bool receivesData() const { return m_receivesData; }
+	void setReceivesData(bool receives) { m_receivesData = receives; }
 
 	double dataReceivingRate() const { return m_dataReceivingRate; }
 	void setDataReceivingRate(double rate) { m_dataReceivingRate = rate; }
@@ -264,6 +264,7 @@ public:
 	QString lastPacketSystemTimeStr() const;
 	void setLastPacketSystemTime(qint64 sysTime) { m_lastPacketServerTime = sysTime; }
 
+	QString stateStr() const;
 
 	// Used by PacketViewer
 	//
@@ -296,7 +297,7 @@ protected:
 	quint64 m_receivedDataID = 0;
 
 	qint64 m_rupFramePlantTime = 0;
-	quint16 m_rupFrameNumerator = 0;
+	qint64 m_rupFrameNumerator = -1;			// qint64 is Ok!
 
 	double m_dataReceivingRate = 0;
 	qint64 m_receivedDataSize = 0;

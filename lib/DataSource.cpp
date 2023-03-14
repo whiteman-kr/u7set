@@ -543,8 +543,10 @@ void DataSourceOnline::pushRupFrame(quint32 sourceIP,
 	}
 }
 
-void DataSourceOnline::updateStatistics_1s()
+bool DataSourceOnline::updateStatistics_1s()
 {
+	bool invalidateSignals = false;
+
 	qint64 now = QDateTime::currentMSecsSinceEpoch();
 
 	if (now - m_lastPacketServerTime > APP_DATA_SOURCE_TIMEOUT)
@@ -554,13 +556,12 @@ void DataSourceOnline::updateStatistics_1s()
 
 		if (m_receivesData == true)
 		{
-			// invalidate source signals
+			invalidateSignals = true;
 		}
 
 		m_receivesData = false;
 
 		m_receivedFramesCount = 0;
-
 
 		m_firstPacketServerTime = 0;
 		m_lastPacketServerTime = 0;
@@ -586,6 +587,8 @@ void DataSourceOnline::updateStatistics_1s()
 	{
 		m_uptime = (m_lastPacketServerTime - m_firstPacketServerTime) / 1000;
 	}
+
+	return invalidateSignals;
 }
 
 bool DataSourceOnline::parseNextBuffer(const QThread* thread)
@@ -933,6 +936,11 @@ QString DataSourceOnline::getTimeStr(const Rup::TimeStamp& ts) const
 				arg(ts.day, 2, 10, QLatin1Char('0')).
 				arg(ts.month, 2, 10, QLatin1Char('0')).
 				arg(ts.year, 4, 10, QLatin1Char('0'));
+}
+
+QString DataSourceOnline::stateStr() const
+{
+	return (m_receivesData ? "Receive" : "No data");
 }
 
 bool DataSourceOnline::moveToNextWriteBuffer(const QThread* thread)
