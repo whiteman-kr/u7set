@@ -46,10 +46,13 @@ CONFIG(release, debug|release) {
 
 
 SOURCES += \
+        ../../lib/BuildInfo.cpp \
         AppSignalManagerTests.cpp \
+        ConfigControllerTests.cpp \
         main.cpp
 
 HEADERS += \
+    ../../lib/BuildInfo.h \
     Stable.h		
 
 

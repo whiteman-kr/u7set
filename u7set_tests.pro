@@ -8,14 +8,20 @@ SUBDIRS += Protobuf \
 	UtilsLib \
 	OnlineLib \
 	ServiceLib \
-	ClientLib \
 	HardwareLib \
-	CommonLib \
+	CommonLib \	
+	ClientLib \
 	VFrame30 \
 	DbLib \
 	Simulator \
+	SimulatorConsole \
 	Builder \
+	Builder \
+	ConfigurationService \
+	ArchivingService \
+	AppDataService \
 	ClientTests \
+	TuningService \
 	SimulatorTests \
 	MetrologyTests \
 	u7databaseTests
