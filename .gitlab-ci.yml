@@ -211,9 +211,9 @@ windows_test_job:
 #Run Create databases for compiler and simulator tests
     - echo Creating PostgreSQL databases...
     - psql -U postgres -c "CREATE DATABASE u7_${Env:COMPILER_TESTS_PROJECT_NAME} OWNER u7;"
-    - cmd '/c psql -U postgres u7_${Env:COMPILER_TESTS_PROJECT_NAME} < c:\Data\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql'
+    - Get-Content c:\Data\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql | psql -U postgres u7_${Env:COMPILER_TESTS_PROJECT_NAME}
     - psql -U postgres -c "CREATE DATABASE u7_${Env:SIMULATOR_PROJECT_NAME} OWNER u7;"
-    - cmd '/c psql -U postgres u7_${Env:SIMULATOR_PROJECT_NAME} < c:\Data\u7_${Env:SIMULATOR_PROJECT_NAME}.sql'
+    - Get-Content c:\Data\u7_${Env:SIMULATOR_PROJECT_NAME}.sql | psql -U postgres u7_${Env:SIMULATOR_PROJECT_NAME}
 #Run XML validation
     - "# ----------------------------------------------"
     - "#               Run XML validation"
