@@ -2,9 +2,9 @@
 
 ArchiveTcpClient2::ArchiveTcpClient2(const ArchiveSource& request,
 									 const SoftwareInfo& softwareInfo,
-									 const MonitorSettings::ArchiveService& archiveService,
+									 const SoftwareEndpoint::ArchiveService& archiveService,
 									 ILogFile* logFile) :
-	Tcp::Client(softwareInfo, archiveService.address, "ArchiveTcpClient"),
+	Tcp::Client(softwareInfo, archiveService.address, "ArchiveTcpClient", archiveService.equipmentId),
 	TcpClientStatistics(this),
 	m_logFile(logFile, QString("ArchTcp(%1)").arg(archiveService.address.addressPortStr())),
 	m_serverSettings(archiveService)

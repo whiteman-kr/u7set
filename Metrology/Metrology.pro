@@ -54,10 +54,7 @@ unix {
 SOURCES += \
 	../lib/BuildInfo.cpp \
 	../lib/PropertyEditor.cpp \
-	../lib/SoftwareSettings.cpp \
-	../lib/Tuning/TuningSignalState.cpp \
 	../lib/Ui/DialogAbout.cpp \
-	../lib/ComparatorSet.cpp \
 	ChartView.cpp \
 	DialogCalculator.cpp \
 	DialogComparatorList.cpp \
@@ -108,10 +105,7 @@ SOURCES += \
 HEADERS  += \
 	../lib/BuildInfo.h \
     ../lib/PropertyEditor.h \
-	../lib/SoftwareSettings.h \
-	../lib/Tuning/TuningSignalState.h \
 	../lib/Ui/DialogAbout.h \
-	../lib/ComparatorSet.h \
     ChartView.h \
     ExcelHelper.h \
     MetrologyFormula.h \

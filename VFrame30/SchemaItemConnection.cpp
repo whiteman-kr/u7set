@@ -4,7 +4,7 @@
 #include "DrawParam.h"
 #include "Context.h"
 #include "AppSignalController.h"
-#include "../AppSignalLib/AppSignalManager.h"
+
 
 namespace VFrame30
 {

@@ -1,19 +1,23 @@
 #pragma once
-#include "../lib/Tuning/TuningTcpClient.h"
-#include "../lib/Tuning/TuningSignalManager.h"
-#include "../UtilsLib/LogFile.h"
+#include "../UtilsLib/ILogFile.h"
 #include "../OnlineLib/TcpClientStatistics.h"
-#include "MonitorConfigController.h"
-#include "../lib/Tuning/TuningLog.h"
-#include "../lib/Tuning/TuningUserManager.h"
+#include "../ClientLib/TuningUserManager.h"
+#include "../ClientLib/TuningTcpClient.h"
+#include "../ClientLib/TuningLog.h"
+#include "../AppSignalLib/TuningSignalManager.h"
 
-class MonitorTuningTcpClient : public TuningTcpClient, public TcpClientStatistics
+
+class MonitorTuningTcpClient : public ClientLib::TuningTcpClient, public TcpClientStatistics
 {
 	Q_OBJECT
 
 public:
-    MonitorTuningTcpClient(const SoftwareInfo& softwareInfo, const QString& tuningServiceId, TuningSignalManager* signalManager, ILogFile* logFile,
-                           TuningLog::TuningLog* tuningLog, TuningUserManager* tuningUserManager);
+	MonitorTuningTcpClient(const SoftwareInfo& softwareInfo,
+						   const QString& tuningServiceId,
+						   TuningSignalManager& signalManager,
+						   ILogFile* logFile,
+						   TuningLog::TuningLog* tuningLog,
+						   ClientLib::TuningUserManager& tuningUserManager);
 	virtual ~MonitorTuningTcpClient() = default;
 
 protected:
@@ -27,7 +31,6 @@ protected:
 private:
 	HasLogFile m_logFile;
     TuningLog::TuningLog* m_tuningLog = nullptr;
-    TuningUserManager* m_tuningUserManager = nullptr;
-
+	ClientLib::TuningUserManager& m_tuningUserManager;
 };
 

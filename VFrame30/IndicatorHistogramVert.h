@@ -3,7 +3,7 @@
 #include "FontParam.h"
 #include "Context.h"
 #include "../AppSignalLib/AppSignalParam.h"
-#include "../lib/Tuning/TuningSignalState.h"
+#include "../AppSignalLib/TuningSignalState.h"
 
 class Comparator;
 

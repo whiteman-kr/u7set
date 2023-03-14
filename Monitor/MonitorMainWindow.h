@@ -1,21 +1,20 @@
 #pragma once
 
+
 #include "MonitorConfigController.h"
-#include "MonitorSchemaManager.h"
 #include "MonitorSignalManager.h"
-#include "AdsConnection.h"
-#include "TcpAppSourcesState.h"
 #include "SelectSchemaWidget.h"
 #include "MonitorTuningTcpClient.h"
 #include "InstanceResolver.h"
 #include "SchemaDrawStatistics.h"
-#include "../VFrame30/ClientSchemaView.h"
+//#include "../VFrame30/ClientSchemaView.h"
+#include "../ClientLib/AdsConnection.h"
+#include "../ClientLib/TuningUserManager.h"
+#include "../ClientLib/TuningLog.h"
 #include "../VFrame30/AppSignalController.h"
 #include "../UtilsLib/LogFile.h"
 #include "../lib/Ui/DialogAlert.h"
 #include "../lib/Ui/DialogTcpStatistics.h"
-#include "../lib/Tuning/TuningUserManager.h"
-#include "../lib/Tuning/TuningLog.h"
 
 class MonitorCentralWidget;
 class MonitorToolBar;
@@ -112,8 +111,7 @@ public slots:
 	void slot_updateActions(bool schemaWidgetSelected);
 
 	void slot_configurationArrived(ConfigSettings configuration);
-	void slot_unknownClient(QString errMsg);
-	void slot_wrongClientHostname(QString errMsg);
+	void slot_configurationError(QString error);
 
 	//void checkMonitorSingleInstance();
 	void activateRequested();
@@ -141,8 +139,8 @@ public:
 	MonitorSignalManager& signalManager();
 	const MonitorSignalManager& signalManager() const;
 
-	TuningUserManager& userManager();
-	const TuningUserManager& userManager() const;
+	ClientLib::TuningUserManager& userManager();
+	const ClientLib::TuningUserManager& userManager() const;
 
 protected:
 
@@ -161,7 +159,7 @@ private:
 	std::unique_ptr<MonitorTuningController> m_tuningController;
 	std::unique_ptr<VFrame30::LogController> m_logController;
 
-	AdsConnection m_tcpSignalClientCtrl{m_configController, m_signalManager, &m_LogFile};
+	ClientLib::AdsConnection m_adsConnection{m_signalManager, &m_signalManager, &m_LogFile};
 
 	std::vector<MonitorTuningTcpClient*> m_tuningTcpClients;
 	std::vector<SimpleThread*> m_tuningTcpClientThreads;
@@ -222,11 +220,12 @@ private:
 	// Controls
 	//
 	MonitorToolBar* m_toolBar = nullptr;
-
 	QDockWidget* m_schemaListDock = nullptr;
 
 	SelectSchemaWidget* m_selectSchemaWidget = nullptr;
 
+	// Status bar
+	//
 	QLabel* m_statusBarInfo = nullptr;
 
 	QLabel* m_statusBarConfigConnection	= nullptr;
@@ -241,9 +240,11 @@ private:
 	int m_logErrorsCounter = -1;
 	int m_logWarningsCounter = -1;
 
+	// --
+	//
 	DialogTcpStatistics* m_dialogStatistics = nullptr;
 
-	TuningUserManager m_tuningUserManager;
+	ClientLib::TuningUserManager m_tuningUserManager;
 };
 
 

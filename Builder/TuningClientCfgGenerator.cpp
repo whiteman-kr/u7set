@@ -1,6 +1,6 @@
 #include "TuningClientCfgGenerator.h"
-#include "../lib/SoftwareSettings.h"
-#include "../lib/SoftwareSettingsGetter.h"
+#include "SoftwareSettingsGetter.h"
+#include "../OnlineLib/SoftwareSettings.h"
 #include "../VFrame30/Schema.h"
 #include "../lib/ClientBehavior.h"
 
@@ -116,13 +116,16 @@ namespace Builder
 	bool TuningClientCfgGenerator::createTuningSignals(const QStringList& equipmentList, const SignalSet* signalSet, Proto::AppSignalSet* tuningSet)
 	{
 		if (tuningSet == nullptr ||
-			signalSet == nullptr ||
-			equipmentList.empty() == true)
+			signalSet == nullptr)
 		{
 			assert(tuningSet);
 			assert(signalSet);
-			assert(equipmentList.empty() == false);
 			return false;
+		}
+
+		if (equipmentList.empty() == true)
+		{
+			return true;
 		}
 
 		// Create signals

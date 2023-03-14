@@ -621,7 +621,7 @@ bool XmlReadHelper::readHostAddress(const QString& nameIP, QHostAddress* hostAdd
 
 QString XmlReadHelper::elementText()
 {
-	return m_xmlReader->text().toString();
+	return m_xmlReader->readElementText();
 }
 
 bool XmlReadHelper::findElement(const QString& elementName)

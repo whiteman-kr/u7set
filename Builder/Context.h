@@ -4,10 +4,12 @@
 #include <QJSEngine>
 #include <unordered_set>
 
+#include "../AppSignalLib/ComparatorSet.h"
 #include "../DbLib/DbController.h"
 #include "../HardwareLib/Connection.h"
 #include "../VFrame30/Bus.h"
 #include "../VFrame30/LogicSchema.h"
+#include "../Simulator/SimProfiles.h"
 #include "../lib/TuningDataStorage.h"
 #include "SignalSet.h"
 #include "ConnectionStorage.h"
@@ -16,8 +18,6 @@
 #include "BuildResultWriter.h"
 #include "LmDescriptionSet.h"
 #include "OptoModule.h"
-#include "../lib/ComparatorSet.h"
-#include "../Simulator/SimProfiles.h"
 
 namespace Builder
 {

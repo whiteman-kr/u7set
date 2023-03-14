@@ -2761,6 +2761,42 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 		return false;
 	}
 
+	// Update from DbVersion 380 to 381.
+	//
+	// Problem: Preset of Monitor (v1 to v2) has compatibility breaking changes, here we try to mitigate it.
+	//			Before db project version 381 Monitor (preset version 1) had 2 properties AppDataServiceID1 and AppDataServiceID2
+	//		    then this property was removed starting from the preset version 2 and changed to a single property AppDataServiceIDs
+	//			which is combination of properties AppDataServiceID1 and AppDataServiceID2, but separated with semicolon (;)
+	// Solution: If preset version is 1, then find properties AppDataServiceID1 and AppDataServiceID2, then after update if
+	//			 property AppDataServiceIDs is present then set old values to it.
+	//
+	QString monitorMitigateComaptibilityAppDataService;
+
+	if (device->presetRoot() &&
+		device->presetName() == QStringLiteral("MONITOR") &&
+		device->presetVersion() == 1)
+	{
+		auto ads1 = device->propertyByCaption(QStringLiteral("AppDataServiceID1"));
+		auto ads2 = device->propertyByCaption(QStringLiteral("AppDataServiceID2"));
+
+		QStringList adsList;
+
+		if (ads1 != nullptr)
+		{
+			adsList << ads1->value().toString();
+		}
+
+		if (ads2 != nullptr)
+		{
+			adsList << ads2->value().toString();
+		}
+
+		monitorMitigateComaptibilityAppDataService = adsList.join(QChar(';'));
+	}
+
+	// End of Monitor fix
+	//
+
 //	qDebug();
 //	qDebug() << "EquipmentView::updateDeviceFromPreset"
 //			 << ", device: " << device->equipmentIdTemplate()
@@ -2982,6 +3018,17 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 								   deleteDeviceList,
 								   addDeviceList,
 								   deviceSignalsToUpdateAppSignals);
+		}
+	}
+
+	// Problem: Preset of Monitor has compatibility breaking changes, here we try to mitigate it.
+	//
+	if (monitorMitigateComaptibilityAppDataService.isEmpty() == false)
+	{
+		auto adsProp = device->propertyByCaption(QStringLiteral("AppDataServiceIDs"));
+		if (adsProp != nullptr)
+		{
+			adsProp->setValue(monitorMitigateComaptibilityAppDataService);
 		}
 	}
 

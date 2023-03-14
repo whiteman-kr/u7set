@@ -28,14 +28,12 @@ unix {
 
 SOURCES += \
     ../lib/BuildInfo.cpp \
-	../lib/SoftwareSettings.cpp \
 	DiagDataService.cpp \
 	DiagDataServiceMain.cpp \
 
 HEADERS += \
 	Stable.h \
     ../lib/BuildInfo.h \
-	../lib/SoftwareSettings.h \
 	DiagDataService.h \
 
 CONFIG += precompile_header

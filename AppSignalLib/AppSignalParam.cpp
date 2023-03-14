@@ -17,6 +17,14 @@ AppSignalState::AppSignalState(const Proto::AppSignalState& protoState)
 	}
 }
 
+AppSignalState::AppSignalState(Hash hash, Times times, double value, AppSignalStateFlags flags) :
+	m_hash{hash},
+	m_time{times},
+	m_value{value},
+	m_flags{flags}
+{
+}
+
 Hash AppSignalState::hash() const
 {
 	return m_hash;
@@ -405,6 +413,9 @@ const QString& AppSignalParam::appSignalId() const
 void AppSignalParam::setAppSignalId(const QString& value)
 {
 	m_appSignalId = value;
+	setHash(::calcHash(m_appSignalId));
+
+	return;
 }
 
 const QString& AppSignalParam::customSignalId() const

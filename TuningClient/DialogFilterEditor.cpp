@@ -1,14 +1,12 @@
 #include "DialogFilterEditor.h"
+#include "Settings.h"
 #include "MainWindow.h"
 
 
-DialogFilterEditor::DialogFilterEditor(TuningSignalManager* tuningSignalManager, TuningFilterStorage* filterStorage, QWidget* parent):
+DialogFilterEditor::DialogFilterEditor(TuningSignalManager& tuningSignalManager, TuningFilterStorage& filterStorage, QWidget* parent):
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	m_tuningSignalManager(tuningSignalManager)
 {
-	assert(tuningSignalManager);
-	assert(filterStorage);
-
 	setWindowTitle(tr("Filters"));
 
 	m_tuningFilterEditor = new TuningFilterEditor(filterStorage,
@@ -66,7 +64,7 @@ void DialogFilterEditor::onGetCurrentSignalValue(Hash appSignalHash, TuningValue
 {
     *ok = true;
 
-	TuningSignalState tss = m_tuningSignalManager->state(appSignalHash, ok);
+	TuningSignalState tss = m_tuningSignalManager.state(appSignalHash, ok);
 
 	if (*ok == false)
 	{

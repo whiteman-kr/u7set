@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../AppSignalLib/AppSignalParam.h"
-#include "../lib/ComparatorSet.h"
+#include "../AppSignalLib/ComparatorSet.h"
 #include "../HardwareLib/DeviceObject.h"
 #include "../UtilsLib/XmlHelper.h"
 #include "../Proto/ProtoSerialization.h"

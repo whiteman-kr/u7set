@@ -15,7 +15,7 @@ public:
 	MonitorTrendArchiveConnection& operator=(MonitorTrendArchiveConnection&&) = delete;
 
 	MonitorTrendArchiveConnection(const SoftwareInfo& softwareInfo,
-								  MonitorSettings::ArchiveService server,
+								  SoftwareEndpoint::ArchiveService server,
 								  ILogFile* logFile);
 
 	~MonitorTrendArchiveConnection();
@@ -87,6 +87,6 @@ private:
 
 	// Connections were created for these servers, keep this vector to detect when the servers really changed
 	//
-	std::vector<MonitorSettings::ArchiveService> m_createdConnectionsServers;
+	std::vector<SoftwareEndpoint::ArchiveService> m_createdConnectionsServers;
 };
 

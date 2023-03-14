@@ -4,15 +4,10 @@
 !include ./UtilsLib.puml
 !include ./Protobuf.puml
 
-'!include ./OnlineLib.puml
-[OnlineLib]
-
 [AppSignalLib]
 
 AppSignalLib -up-> UtilsLib
 AppSignalLib -up-> CommonLib
-AppSignalLib -right-> OnlineLib : "???"
-AppSignalLib <-left- OnlineLib : "???"
 AppSignalLib -up-> Protobuf
 
 

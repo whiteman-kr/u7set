@@ -11,55 +11,86 @@
 
 AppSignals::~AppSignals()
 {
-	int TO_DO_refactor_AppSignals;
-
 	clear();
 }
 
 void AppSignals::clear()
 {
-	m_hash2Signal.clear();
+	m_hashToSignal.clear();
 
-	for(AppSignal* signal : *this)
+	for(auto& p : m_idToSignal)
 	{
-		delete signal;
-	}
-
-	HashedVector<QString, AppSignal*>::clear();
-}
-
-void AppSignals::buildHash2Signal()
-{
-	m_hash2Signal.clear();
-
-	m_hash2Signal.reserve(static_cast<int>(count() * 1.3));
-
-	for(AppSignal* signal : *this)
-	{
-		Hash hash = calcHash(signal->appSignalID());
-
-		if (m_hash2Signal.contains(hash))
-		{
-			AppSignal* s = m_hash2Signal[hash];
-
-			qDebug() << "AppSignals::buildHash2Signal() hash collision" << QString::number(hash, 16) << signal->appSignalID() << "and" << s->appSignalID();
-
-			assert(false);
-			continue;
-		}
-
-		m_hash2Signal.insert(hash, signal);
+		delete p.second;
 	}
 }
 
-const AppSignal* AppSignals::getSignal(Hash hash) const
+void AppSignals::insert(const ::Proto::AppSignal& protoAppSignal)
 {
-	if (m_hash2Signal.contains(hash))
+	QString appSignalID = QString::fromStdString(protoAppSignal.appsignalid());
+
+	if (containsID(appSignalID) == true)
 	{
-		return m_hash2Signal[hash];
+		qDebug() << C_STR(QString("Duplicate AppSignalID %1").arg(appSignalID));
+		assert(false);
+		return;
 	}
 
-	return nullptr;
+	Hash hash = calcHash(appSignalID);
+
+	if (containsHash(hash) == true)
+	{
+		qDebug() << C_STR(QString("AppSignalID hash %1 collision").arg(hash, 16));
+		assert(false);
+		return;
+	}
+
+	AppSignal* s = new AppSignal;
+
+	s->loadFromProto(protoAppSignal);
+
+	m_idToSignal.insert({appSignalID, s});
+	m_hashToSignal.insert({hash, s});
+}
+
+bool AppSignals::containsID(const QString& appSignalID) const
+{
+	return m_idToSignal.contains(appSignalID);
+}
+
+bool AppSignals::containsHash(Hash hash) const
+{
+	return m_hashToSignal.contains(hash);
+}
+
+const AppSignal* AppSignals::getSignalByID(const QString& appSignalID) const
+{
+	auto it = m_idToSignal.find(appSignalID);
+
+	if (it == m_idToSignal.end())
+	{
+		return nullptr;
+	}
+
+	return it->second;
+}
+
+const AppSignal* AppSignals::getSignalByHash(Hash hash) const
+{
+	auto it = m_hashToSignal.find(hash);
+
+	if (it == m_hashToSignal.end())
+	{
+		return nullptr;
+	}
+
+	return it->second;
+}
+
+bool AppSignals::isEmpty() const
+{
+	Q_ASSERT(m_idToSignal.size() == m_hashToSignal.size());
+
+	return m_idToSignal.empty();
 }
 
 // -------------------------------------------------------------------------------
@@ -113,13 +144,13 @@ void AppDataSource::prepare(const AppSignals& appSignals,
 
 	for(const QString& signalID : sourceAssociatedSignals)
 	{
-		if (appSignals.contains(signalID) == false)
+		if (appSignals.containsID(signalID) == false)
 		{
 			assert(false);
 			continue;
 		}
 
-		AppSignal* signal = appSignals.value(signalID, nullptr);
+		const AppSignal* signal = appSignals.getSignalByID(signalID);
 
 		TEST_PTR_CONTINUE(signal);
 
@@ -158,19 +189,10 @@ bool AppDataSource::getState(Network::AppDataSourceState* proto) const
 	TEST_PTR_RETURN_FALSE(proto);
 
 	proto->set_id(ID());
-//	proto->set_state(TO_INT(state()));
 	proto->set_receivesdata(receivesData());
 	proto->set_uptime(uptime());
 	proto->set_receiveddataid(receivedDataID());
 	proto->set_rupframeplanttime(rupFramePlantTime());
-
-	//
-
-	int TO_DO_remove_this_fields;
-
-//	proto->set_rupframesqueuesize(rupFramesQueueSize());
-//	proto->set_rupframesqueuecursize(rupFramesQueueCurSize());
-//	proto->set_rupframesqueuecurmaxsize(rupFramesQueueCurMaxSize());
 
 	//
 
@@ -208,17 +230,6 @@ void AppDataSource::setState(const Network::AppDataSourceState& proto)
 	setUptime(proto.uptime());
 	setReceivedDataID(proto.receiveddataid());
 	setRupFramePlantTime(proto.rupframeplanttime());
-
-	//
-
-	int TO_DO_remove_this_fields;
-
-//	setRupFramesQueueSize(proto.rupframesqueuesize());
-//	setRupFramesQueueCurSize(proto.rupframesqueuecursize());
-//	setRupFramesQueueCurMaxSize(proto.rupframesqueuecurmaxsize());
-
-	//
-
 	setDataReceivingRate(proto.datareceivingrate());
 	setReceivedDataSize(proto.receiveddatasize());
 	setReceivedFramesCount(proto.receivedframescount());

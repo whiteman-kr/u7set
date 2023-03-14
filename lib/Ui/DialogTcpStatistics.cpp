@@ -35,6 +35,7 @@ DialogTcpStatistics::DialogTcpStatistics(QWidget* parent) :
 	//
 	QStringList headerLabels;
 	headerLabels << tr("Caption");
+	headerLabels << tr("ServerID");
 	headerLabels << tr("Connected");
 
 	headerLabels << tr("Address");
@@ -143,7 +144,7 @@ void DialogTcpStatistics::reconnectAll()
 		return;
 	}
 
-	std::vector<TcpClientStatistics::Statisctics> stats = TcpClientStatistics::statistics();
+	std::vector<TcpClientStatistics::Statistics> stats = TcpClientStatistics::statistics();
 
 	for (const auto& stat : stats)
 	{
@@ -155,7 +156,7 @@ void DialogTcpStatistics::reconnectAll()
 
 void DialogTcpStatistics::update()
 {
-	std::vector<TcpClientStatistics::Statisctics> stats = TcpClientStatistics::statistics();
+	std::vector<TcpClientStatistics::Statistics> stats = TcpClientStatistics::statistics();
 
 	int count = static_cast<int>(stats.size());
 
@@ -173,7 +174,7 @@ void DialogTcpStatistics::update()
 
 	for (int i = 0; i < count; i++)
 	{
-		TcpClientStatistics::Statisctics& stat = stats[i];
+		TcpClientStatistics::Statistics& stat = stats[i];
 
 		QTreeWidgetItem* item = nullptr;
 
@@ -200,6 +201,7 @@ void DialogTcpStatistics::update()
 		}
 
 		item->setText(static_cast<int>(Columns::Caption), stat.objectName);
+		item->setText(static_cast<int>(Columns::ServerID), stat.serverId);
 		item->setText(static_cast<int>(Columns::IsConnected), stat.state.isConnected ? tr("Yes") : tr("No"));
 
 		if (stat.state.isConnected == true)

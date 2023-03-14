@@ -123,22 +123,27 @@ ArchiveWidget::ArchiveWidget(MonitorSignalManager* signalManager,
 							 QWidget* parent) :
 	QMainWindow(parent, Qt::WindowSystemMenuHint | Qt::WindowMaximizeButtonHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	m_signalManager(signalManager),
-	m_archiveServices(configController->configuration().archiveServices),
-	m_projectName(configController->configuration().project),
-	m_softwareId(configController->configuration().softwareEquipmentId),
 	m_archiveConnection(*configController, configController->logFile(), this)
 {
 	Q_ASSERT(m_signalManager);
-
-	setAttribute(Qt::WA_DeleteOnClose);
 
 	static int no = 1;
 	QString name = QString("Monitor Archive %1").arg(no++);
 	MonitorArchive::registerWindow(name, this);
 
+	setAttribute(Qt::WA_DeleteOnClose);
 	setWindowTitle(name);
-
 	setMinimumSize(QSize(750, 400));
+
+	// --
+	//
+	{
+		const auto configuration = configController->configuration();
+
+		m_archiveServices = configuration.archiveServices;
+		m_projectName = configuration.configInfo.project;
+		m_softwareId = configuration.configInfo.softwareEquipmentId;
+	}
 
 	// --
 	//
@@ -333,7 +338,7 @@ bool ArchiveWidget::setSignals(const std::vector<AppSignalParam>& appSignals)
 	for (const AppSignalParam& signalParam : appSignals)
 	{
 		auto sit = std::find_if(m_archiveServices.begin(), m_archiveServices.end(),
-					[&signalParam, signalManager = m_signalManager](const MonitorSettings::ArchiveService& archiveService)
+					[&signalParam, signalManager = m_signalManager](const SoftwareEndpoint::ArchiveService& archiveService)
 					{
 						return signalManager->dataServiceHasSignal(archiveService.appDataServiceId, signalParam.appSignalId());
 					});
@@ -488,7 +493,7 @@ void ArchiveWidget::dropEvent(QDropEvent* event)
 		// Find an archive service for the signal and add it to the signal list
 		//
 		auto sit = std::find_if(m_archiveServices.begin(), m_archiveServices.end(),
-						[&signalParam, signalManager = m_signalManager](const MonitorSettings::ArchiveService& archiveService)
+						[&signalParam, signalManager = m_signalManager](const SoftwareEndpoint::ArchiveService& archiveService)
 						{
 							return signalManager->dataServiceHasSignal(archiveService.appDataServiceId, signalParam.appSignalId());
 						});
@@ -700,8 +705,8 @@ void ArchiveWidget::removeSignal(QString appSignalId, QString archiveServiceId)
 void ArchiveWidget::slot_configurationArrived(ConfigSettings configuration)
 {
 	m_archiveServices = std::move(configuration.archiveServices);
-	m_projectName = configuration.project;
-	m_softwareId = configuration.softwareEquipmentId;
+	m_projectName = configuration.configInfo.project;
+	m_softwareId = configuration.configInfo.softwareEquipmentId;
 
 	return;
 }

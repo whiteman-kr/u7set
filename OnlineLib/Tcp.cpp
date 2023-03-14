@@ -1277,7 +1277,7 @@ namespace Tcp
 			logError(QString("unknown client EquipmentID '%1' - check FAILED!").
 							arg(clientEquipmentID));
 
-			reply.set_errormsg((QString("Unknown client equipmentID '%1'").
+			reply.set_errormsg((QString("Unknown client EquipmentID '%1'").
 								arg(clientEquipmentID)).toStdString());
 			break;
 
@@ -1567,6 +1567,11 @@ namespace Tcp
 	QString Client::equipmentID() const
 	{
 		return localSoftwareInfo().equipmentID();
+	}
+
+	QString Client::connectToServerID() const
+	{
+		return m_serverEquipmentID;
 	}
 
 	HostAddressPort Client::currentServerAddressPort() const

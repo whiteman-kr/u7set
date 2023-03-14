@@ -36,6 +36,7 @@ namespace VFrame30
 							   QDateTime from,
 							   QDateTime to,
 							   E::TimeType timeType,
+							   E::TrendMode mode,
 							   std::list<std::shared_ptr<TrendLib::OneHourData>>* outData) const override;
 
 		virtual TimeStamp maxTimeStamp(QUuid trendUuid, E::TimeType timeType) const override;

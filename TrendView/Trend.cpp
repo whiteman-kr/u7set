@@ -912,6 +912,7 @@ namespace TrendLib
 																	 startTime,
 																	 finishTime,
 																	 drawParam.timeType(),
+																	 drawParam.trendMode(),
 																	 &signalData);
 
 			if (requestResult == false)

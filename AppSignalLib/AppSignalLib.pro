@@ -47,19 +47,24 @@ CONFIG(release, debug|release) {
 
 HEADERS += \
 	AppSignalStateFlags.h \
+    ComparatorSet.h \
     IAppSignalManager.h \
+    ITuningSignalManager.h \
 	Stable.h \
 	AppSignal.h \
 	AppSignalParam.h \
-	AppSignalManager.h \
+    TuningSignalManager.h \
 	TuningValue.h \
+	TuningSignalState.h \
 	SimpleAppSignalState.h \
 
 SOURCES += \
 	AppSignal.cpp \
 	AppSignalParam.cpp \
-	AppSignalManager.cpp \
 	AppSignalStateFlags.cpp \
+    ComparatorSet.cpp \
+    TuningSignalManager.cpp \
 	TuningValue.cpp \
+	TuningSignalState.cpp \
 	SimpleAppSignalState.cpp \
 

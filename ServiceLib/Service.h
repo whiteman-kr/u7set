@@ -11,13 +11,13 @@
 #include <iostream>
 
 #include "./qtservice/src/qtservice.h"
+#include "../UtilsLib/SimpleThread.h"
 #include "../OnlineLib/UdpSocket.h"
 #include "../OnlineLib/CircularLogger.h"
-#include "../UtilsLib/SimpleThread.h"
-#include "CommandLineParser.h"
 #include "../OnlineLib/SoftwareInfo.h"
-#include "../lib/SoftwareSettings.h"
+#include "../OnlineLib/SoftwareSettings.h"
 #include "../Proto/network.pb.h"
+#include "CommandLineParser.h"
 
 enum ServiceState
 {

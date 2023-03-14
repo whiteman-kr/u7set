@@ -19,8 +19,8 @@ Simulator -up-> [OnlineLib]
 Simulator -up-> [AppSignalLib]
 Simulator -up-> [HardwareLib]
 
-Simulator -up-> [Builder]
-Simulator <-up- [Builder] : SimTests
+'Simulator -up-> [Builder]	No, it doees not depend on Builder
+'Simulator <-up- [Builder] : SimTests
 
 Simulator -up-> [VFrame30]
 Simulator -up-> [TrendView]

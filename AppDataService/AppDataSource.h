@@ -5,18 +5,26 @@
 #include "../OnlineLib/CircularLogger.h"
 #include "DynamicAppSignalState.h"
 
-class AppSignals : public HashedVector<QString, AppSignal*>
+class AppSignals
 {
-private:
-	QHash<Hash, AppSignal*> m_hash2Signal;
-
 public:
 	~AppSignals();
 
 	void clear();
-	void buildHash2Signal();
 
-	const AppSignal* getSignal(Hash hash) const;
+	void insert(const ::Proto::AppSignal& protoAppSignal);
+
+	bool containsID(const QString& appSignalID) const;
+	bool containsHash(Hash hash) const;
+
+	const AppSignal* getSignalByID(const QString& appSignalID) const;
+	const AppSignal* getSignalByHash(Hash hash) const;
+
+	bool isEmpty() const;
+
+private:
+	std::map<QString, AppSignal*> m_idToSignal;		// appSignalID => appSignal, dynamic AppSignal object owner
+	std::map<Hash, AppSignal*> m_hashToSignal;		// Hash => appSignal
 };
 
 class AppDataSource : public DataSourceOnline

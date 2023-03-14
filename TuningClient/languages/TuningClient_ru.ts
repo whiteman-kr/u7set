@@ -842,27 +842,27 @@ Data will not be available at the time of reconnection.</source>
 <context>
     <name>DialogTuningPassword</name>
     <message>
-        <location filename="../../lib/Tuning/TuningUserManager.cpp" line="24"/>
+	    <location filename="../../ClientLib/TuningUserManager.cpp" line="24"/>
         <source>Tuning Login</source>
         <translation>Вход</translation>
     </message>
     <message>
-        <location filename="../../lib/Tuning/TuningUserManager.cpp" line="36"/>
+	    <location filename="../../ClientLib/TuningUserManager.cpp" line="36"/>
         <source>Login:</source>
         <translation>Имя:</translation>
     </message>
     <message>
-        <location filename="../../lib/Tuning/TuningUserManager.cpp" line="39"/>
+	    <location filename="../../ClientLib/TuningUserManager.cpp" line="39"/>
         <source>Password:</source>
         <translation>Пароль:</translation>
     </message>
     <message>
-        <location filename="../../lib/Tuning/TuningUserManager.cpp" line="46"/>
+	    <location filename="../../ClientLib/TuningUserManager.cpp" line="46"/>
         <source>OK</source>
         <translation>ОК</translation>
     </message>
     <message>
-        <location filename="../../lib/Tuning/TuningUserManager.cpp" line="50"/>
+	    <location filename="../../ClientLib/TuningUserManager.cpp" line="50"/>
         <source>Cancel</source>
         <translation>Отмена</translation>
     </message>
@@ -1752,7 +1752,7 @@ Colld not save crash dump file:
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Tuning/TuningUserManager.cpp" line="293"/>
+	    <location filename="../../ClientLib/TuningUserManager.cpp" line="293"/>
         <source>Wrong password!</source>
         <translation>Неверный пароль!</translation>
     </message>

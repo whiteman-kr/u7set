@@ -12,21 +12,23 @@ protected:
 	virtual ~TcpClientStatistics();
 
 public:
-	struct Statisctics
+	struct Statistics
 	{
-		Statisctics(uintptr_t _id, QString _objectName, Tcp::ConnectionState _state) :
-			id(_id),
-			objectName(_objectName),
-			state(_state)
+		Statistics(uintptr_t id, QString objectName, QString serverId, Tcp::ConnectionState state) :
+			id{id},
+			objectName{objectName},
+			serverId{serverId},
+			state{state}
 		{
 		}
 
 		uintptr_t id;		// is a pointer to TcpClientInstance
 		QString objectName;
+		QString serverId;
 		Tcp::ConnectionState state;
 	};
 
-	static std::vector<Statisctics> statistics();
+	static std::vector<Statistics> statistics();
 	static void reconnect(uintptr_t id);
 
 private:

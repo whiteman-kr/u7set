@@ -30,6 +30,7 @@ mkdir -p $OUTPUT_DIR
 
 # Run tests
 #
+./bin_unix/debug/ClientTests
 ./bin_unix/debug/SimulatorTests
 ./bin_unix/debug/MetrologyTests
 ./bin_unix/debug/u7databasetests -config=$CI_PROJECT_DIR/Test/u7databasetestsArgsCoverage.xml
@@ -82,41 +83,25 @@ TEST_DIR="./UtilsLib/debug"
 TEST_OUTPUT_FILE="UtilsLib.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
-
-
-
-# # Simulator.
-# #
-# TEST_FILE="./bin_unix/debug/SimulatorTests"
-# TEST_DIR="./Simulator/debug"
-# TEST_OUTPUT_FILE="Simulator.info"
-# lcov $LCOV_CLEAR_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
-# $TEST_FILE
-# lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
-
-# # u7databaseTests
-# #
-# TEST_FILE="./bin_unix/debug/u7databaseTests -config=$CI_PROJECT_DIR/Test/u7databasetestsArgs.xml"
-# TEST_DIR="./DbLib/debug"
-# TEST_OUTPUT_FILE="DbLib.info"
-# lcov $LCOV_CLEAR_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
-# $TEST_FILE
-# lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
-
-# # Metrology.
-# #
-# TEST_FILE="./bin_unix/debug/MetrologyTests"
-# TEST_DIR="./Test/MetrologyTests"
-# TEST_OUTPUT_FILE="MetrologyTests.info"
-# lcov $LCOV_CLEAR_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
-# $TEST_FILE
-# lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+# ClientLib
+TEST_DIR="./ClientLib/debug"
+TEST_OUTPUT_FILE="ClientLib.info"
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # Combine results to a single file, result stored to $OUTPUT_DIR/u7set-dirty.info
 #
-lcov --output-file $OUTPUT_DIR/u7set-dirty.info --add-tracefile $OUTPUT_DIR/AppSignalLib.info --add-tracefile $OUTPUT_DIR/CommonLib.info --add-tracefile $OUTPUT_DIR/DbLib.info --add-tracefile $OUTPUT_DIR/HardwareLib.info --add-tracefile $OUTPUT_DIR/MetrologyTests.info --add-tracefile $OUTPUT_DIR/Simulator.info --add-tracefile $OUTPUT_DIR/UtilsLib.info
+lcov --output-file $OUTPUT_DIR/u7set-dirty.info \
+    --add-tracefile $OUTPUT_DIR/AppSignalLib.info \
+    --add-tracefile $OUTPUT_DIR/CommonLib.info \
+    --add-tracefile $OUTPUT_DIR/DbLib.info \
+    --add-tracefile $OUTPUT_DIR/HardwareLib.info \
+    --add-tracefile $OUTPUT_DIR/MetrologyTests.info \
+    --add-tracefile $OUTPUT_DIR/Simulator.info \
+    --add-tracefile $OUTPUT_DIR/UtilsLib.info \
+    --add-tracefile $OUTPUT_DIR/ClientLib.info
 
 # There is no test data for these files yet.
+#
 #--add-tracefile $OUTPUT_DIR/Builder.info             
 #--add-tracefile $OUTPUT_DIR/TrendView.info
 

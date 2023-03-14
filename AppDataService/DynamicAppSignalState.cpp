@@ -43,7 +43,7 @@ void DynamicAppSignalState::setSignalParams(const AppSignal* signal, const AppSi
 				continue;
 			}
 
-			const AppSignal* flagSignal = appSignals.value(flagSignalID, nullptr);
+			const AppSignal* flagSignal = appSignals.getSignalByID(flagSignalID);
 
 			if (flagSignal == nullptr)
 			{

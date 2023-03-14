@@ -21,6 +21,7 @@ namespace TrendLib
 							   QDateTime from,
 							   QDateTime to,
 							   E::TimeType timeType,
+							   E::TrendMode mode,
 							   std::list<std::shared_ptr<TrendLib::OneHourData>>* outData) const = 0;
 
 		// Get maximum TimeStamp buy all signals

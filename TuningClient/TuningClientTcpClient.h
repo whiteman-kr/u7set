@@ -1,24 +1,23 @@
 #pragma once
 
-#include "../lib/Tuning/TuningTcpClient.h"
-#include "../lib/Tuning/TuningFilter.h"
-#include "../lib/Tuning/TuningLog.h"
 #include "../UtilsLib/LogFile.h"
 #include "../OnlineLib/TcpClientStatistics.h"
-#include "../lib/Tuning/TuningUserManager.h"
+#include "../ClientLib/TuningLog.h"
+#include "../ClientLib/TuningTcpClient.h"
+#include "../ClientLib/TuningUserManager.h"
 
 
-class TuningClientTcpClient : public TuningTcpClient, public TcpClientStatistics
+class TuningClientTcpClient : public ClientLib::TuningTcpClient, public TcpClientStatistics
 {
 	Q_OBJECT
 public:
 	TuningClientTcpClient(const SoftwareInfo& softwareInfo,
 						  const QString& tuningServiceId,
 						  int singleLmControlMode,
-						  TuningSignalManager* signalManager,
+						  TuningSignalManager& signalManager,
 						  Log::LogFile* log,
 						  TuningLog::TuningLog* tuningLog,
-						  TuningUserManager* userManager);
+						  ClientLib::TuningUserManager& userManager);
 
 	virtual void writeLogAlert(const QString& message) override;
 	virtual void writeLogError(const QString& message) override;
@@ -39,11 +38,9 @@ public:
 	std::vector<Hash> getProcessedHashes(const std::vector<Hash>& hashes);	// Returns hashes that are processed by this client among specified hashes
 
 private:
-
 	Log::LogFile* m_log = nullptr;
 
 	TuningLog::TuningLog* m_tuningLog = nullptr;
 
-	TuningUserManager* m_userManager = nullptr;
-
+	ClientLib::TuningUserManager& m_userManager;
 };

@@ -469,20 +469,8 @@ bool AppDataServiceWorker::readAppSignals(const QByteArray& fileData)
 	{
 		const ::Proto::AppSignal& appSignal = signalSet.appsignal(i);
 
-		if (m_appSignals.contains(QString::fromStdString(appSignal.appsignalid())) == true)
-		{
-			assert(false);
-			continue;
-		}
-
-		AppSignal* s = new AppSignal;
-
-		s->loadFromProto(appSignal);
-
-		m_appSignals.insert(s->appSignalID(), s);
+		m_appSignals.insert(appSignal);
 	}
-
-	m_appSignals.buildHash2Signal();
 
 	return true;
 }

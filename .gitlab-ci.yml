@@ -52,7 +52,7 @@ linux_build_job:
     - "#               Build Project"
     - "# ----------------------------------------------"    
     - "/opt/Qt/6.3.2/gcc_64/bin/qmake u7set.pro -spec linux-g++"
-    - "make -j9"
+    - "make -j12"
 
   artifacts:
     name: "u7set_linux_0.9.$CI_PIPELINE_ID $CI_BUILD_REF_SLUG $CI_COMMIT_SHA"
@@ -225,6 +225,7 @@ windows_test_job:
     - "#               Run unit tests"
     - "# ----------------------------------------------"
     - "&$Env:CI_PROJECT_DIR/bin/release/u7databasetests.exe -config=\"$Env:CI_PROJECT_DIR/Test/u7databasetestsArgs.xml\" -o u7databasetests.xml,junitxml -o -,txt"
+    - "&$Env:CI_PROJECT_DIR/bin/release/ClientTests.exe -o ClientTests.xml,junitxml -o -,txt"
     - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorTests.exe -o SimulatorTests.xml,junitxml -o -,txt"
     - "&$Env:CI_PROJECT_DIR/bin/release/MetrologyTests.exe -o MetrologyTests.xml,junitxml -o -,txt"
 
@@ -256,11 +257,13 @@ windows_test_job:
     name: "u7set_test_windows_0.9.$CI_PIPELINE_ID $CI_BUILD_REF_SLUG $CI_COMMIT_SHA"
     paths:
       - u7databasetests.xml
+      - ClientTests.xml
       - SimulatorTests.xml
       - MetrologyTests.xml
     reports:
       junit: 
         - u7databasetests.xml
+        - ClientTests.xml
         - SimulatorTests.xml
         - MetrologyTests.xml
 
@@ -308,6 +311,7 @@ linux_test_job:
     - "#               Run unit tests"
     - "# ----------------------------------------------"
     - "$CI_PROJECT_DIR/bin_unix/release/u7databasetests -config=$CI_PROJECT_DIR/Test/u7databasetestsArgsLinux.xml -o u7databasetestslinux.xml,junitxml -o -,txt"
+    - "$CI_PROJECT_DIR/bin_unix/release/ClientTests -o ClientTestsLinux.xml,junitxml -o -,txt"
     - "$CI_PROJECT_DIR/bin_unix/release/SimulatorTests -o SimulatorTestsLinux.xml,junitxml -o -,txt"
     - "$CI_PROJECT_DIR/bin_unix/release/MetrologyTests -o MetrologyTests.xml,junitxml -o -,txt"
 
@@ -340,11 +344,13 @@ linux_test_job:
     name: "u7set_test_linux_0.9.$CI_PIPELINE_ID $CI_BUILD_REF_SLUG $CI_COMMIT_SHA"
     paths:
       - u7databasetestslinux.xml
+      - ClientTestsLinux.xml
       - SimulatorTestsLinux.xml
       - MetrologyTests.xml
     reports:
       junit: 
         - u7databasetestslinux.xml
+        - ClientTestsLinux.xml
         - SimulatorTestsLinux.xml
         - MetrologyTests.xml
 
@@ -372,7 +378,7 @@ linux_code_coverage_job:
     - "#               Build Test Project              "
     - "# ----------------------------------------------"
     - "/opt/Qt/6.3.2/gcc_64/bin/qmake u7set_tests.pro -spec linux-g++ CONFIG+=debug CONFIG-=qml_debug CONFIG-=qtquickcompiler CONFIG+=separate_debug_info CONFIG+=CODE_COVERAGE "
-    - "make -j9"
+    - "make -j12"
     - "# ----------------------------------------------"
     - "#           Collect Test Coverage Data          "
     - "# ----------------------------------------------"

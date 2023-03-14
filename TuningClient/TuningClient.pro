@@ -53,19 +53,15 @@ CONFIG(release, debug|release) {
 
 SOURCES +=\
     ../lib/ClientBehavior.cpp \
-    ../lib/ComparatorSet.cpp \
-    ../lib/SoftwareSettings.cpp \
-    ../lib/Tuning/TuningUserManager.cpp \
     ../lib/Ui/DialogTcpStatistics.cpp \
     LogonWorkspace.cpp \
 	MainWindow.cpp \
     ScriptTuningClientApplication.cpp \
+    TuningConfigController.cpp \
     TuningPage.cpp \
     Settings.cpp \
     TuningSignalInfo.cpp \
-    ../lib/Tuning/TuningSourcesHelper.cpp \
     TuningWorkspace.cpp \
-    ConfigController.cpp \
     ../lib/BuildInfo.cpp \
     DialogSettings.cpp \
     ../lib/PropertyEditor.cpp \
@@ -80,13 +76,8 @@ SOURCES +=\
     SchemasWorkspace.cpp \
     TuningSchemaView.cpp \
     TuningSchemaWidget.cpp \
-	../lib/Tuning/TuningSignalManager.cpp \
-    ../lib/Tuning/TuningSignalState.cpp \
     DialogFilterEditor.cpp \
-    ../lib/Tuning/TuningTcpClient.cpp \
     TuningClientTcpClient.cpp \
-    ../lib/Tuning/TuningLog.cpp \
-    ../lib/Tuning/TuningSourceState.cpp \
     TuningSchemaManager.cpp \
     ../lib/Ui/DialogAlert.cpp \
     ../lib/Ui/DialogAbout.cpp \
@@ -98,21 +89,17 @@ SOURCES +=\
 
 HEADERS  += MainWindow.h \
     ../lib/ClientBehavior.h \
-    ../lib/ComparatorSet.h \
     ../lib/ConstStrings.h \
 	../UtilsLib/ILogFile.h \
-    ../lib/SoftwareSettings.h \
-    ../lib/Tuning/TuningUserManager.h \
     ../lib/Ui/DialogTcpStatistics.h \
     LogonWorkspace.h \
     ScriptTuningClientApplication.h \
     Stable.h \
+    TuningConfigController.h \
     TuningPage.h \
     Settings.h \
     TuningSignalInfo.h \
-    ../lib/Tuning/TuningSourcesHelper.h \
     TuningWorkspace.h \
-    ConfigController.h \
     ../lib/BuildInfo.h \
     DialogSettings.h \
     ../lib/PropertyEditor.h \
@@ -127,13 +114,8 @@ HEADERS  += MainWindow.h \
     TuningSchemaView.h \
     TuningSchemaWidget.h \
     SchemasWorkspace.h \
-    ../lib/Tuning/TuningSignalManager.h \
-    ../lib/Tuning/TuningSignalState.h \
     DialogFilterEditor.h \
-    ../lib/Tuning/TuningTcpClient.h \
     TuningClientTcpClient.h \
-    ../lib/Tuning/TuningLog.h \
-    ../lib/Tuning/TuningSourceState.h \
     TuningSchemaManager.h \
     ../lib/Ui/DialogAlert.h \
     ../lib/Ui/DialogAbout.h \
@@ -168,8 +150,17 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 LIBS += -L$$DESTDIR
 LIBS += -L.
 
-win32:LIBS += -lKernel32 -lAdvapi32
+# ClientLib
+#
+LIBS += -lClientLib
+win32:PRE_TARGETDEPS += $$DESTDIR/ClientLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libClientLib.a
+
+# Authorization
+#
+win32:LIBS += -lAdvapi32
 unix:LIBS += -lpam -lpam_misc
+
 
 # VFrame30 library
 #

@@ -1,7 +1,7 @@
 #include "TestClientCfgGenerator.h"
+#include "SoftwareSettingsGetter.h"
 
-#include "../lib/SoftwareSettings.h"
-#include "../lib/SoftwareSettingsGetter.h"
+#include "../OnlineLib/SoftwareSettings.h"
 
 namespace Builder
 {

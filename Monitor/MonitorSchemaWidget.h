@@ -2,10 +2,10 @@
 
 #include "MonitorSchemaManager.h"
 #include "MonitorSignalManager.h"
+#include "../ClientLib/TuningUserManager.h"
 #include "../VFrame30/ClientSchemaWidget.h"
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/TuningController.h"
-#include "../lib/Tuning/TuningUserManager.h"
 #include "../lib/ITimeStats.h"
 
 
@@ -17,14 +17,17 @@ class MonitorTuningController : public VFrame30::TuningController
 	Q_OBJECT
 
 public:
-	MonitorTuningController(ITuningSignalManager* signalManager, ITuningTcpClient* tcpClient, TuningUserManager* tuningUserManager, QWidget* parent = nullptr);
+	MonitorTuningController(ITuningSignalManager* signalManager,
+							ITuningTcpClient* tcpClient,
+							ClientLib::TuningUserManager* tuningUserManager,
+							QWidget* parent = nullptr);
 
 protected:
 	virtual bool checkTuningAccess() const override;
 
 private:
 	QWidget* m_parentWidget = nullptr;
-	TuningUserManager* m_tuningUserManager = nullptr;
+	ClientLib::TuningUserManager* m_tuningUserManager = nullptr;
 };
 
 //

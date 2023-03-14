@@ -17,7 +17,7 @@ public:
 	RtConnection& operator=(RtConnection&&) = delete;
 
 	RtConnection(const SoftwareInfo& softwareInfo,
-				 MonitorSettings::AppDataService server,
+				 SoftwareEndpoint::AppDataService server,
 				 const ISignalDataServer& signalDataServer,
 				 ILogFile* logFile);
 
@@ -27,7 +27,7 @@ public:
 	bool setData(E::RtTrendsSamplePeriod samplePeriod, const QStringList& trendSignals);
 	void setSamplePeriod(E::RtTrendsSamplePeriod samplePeriod);
 
-	const MonitorSettings::AppDataService& server() const;
+	const SoftwareEndpoint::AppDataService& server() const;
 	RtTrendTcpClient::Stat statistics() const;
 
 signals:
@@ -38,7 +38,7 @@ signals:
 private:
 	ILogFile* m_logFile = nullptr;
 
-	MonitorSettings::AppDataService m_server;
+	SoftwareEndpoint::AppDataService m_server;
 
 	RtTrendTcpClient* m_rtTcpClient = nullptr;			// This object deleted by m_rtTcpClientThread
 	std::unique_ptr<SimpleThread> m_rtTcpClientThread;
@@ -91,6 +91,6 @@ private:
 
 	// Connections were created for these servers, keep this vector to detect when the servers really changed
 	//
-	std::vector<MonitorSettings::AppDataService> m_createdConnectionsServers;
+	std::vector<SoftwareEndpoint::AppDataService> m_createdConnectionsServers;
 };
 

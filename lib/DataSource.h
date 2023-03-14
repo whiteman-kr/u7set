@@ -209,7 +209,7 @@ public:
 	QString rupFramePlantTimeStr() const;
 	void setRupFramePlantTime(qint64 time) { m_rupFramePlantTime = time; }
 
-	quint16 rupFrameNumerator() const { return m_rupFrameNumerator; }
+	quint16 rupFrameNumerator() const { return static_cast<quint16>(m_rupFrameNumerator); }
 	void setRupFrameNumerator(quint16 num) { m_rupFrameNumerator = num; }
 
 	bool receivesData() const { return m_receivesData; }

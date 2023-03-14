@@ -4,7 +4,7 @@
 
 ArchiveConnectionTask::ArchiveConnectionTask(ArchiveSource request,
 											 const SoftwareInfo& softwareInfo,
-											 const MonitorSettings::ArchiveService& archiveService,
+											 const SoftwareEndpoint::ArchiveService& archiveService,
 											 ILogFile* logFile)	:
 	m_archiveService(archiveService),
 	m_tcpClient(new ArchiveTcpClient2(request, softwareInfo, archiveService, logFile)),
@@ -180,7 +180,7 @@ void ArchiveConnection::slot_startRequest(ArchiveSource requestData)
 
 		// Find ArchiveService configuration
 		//
-		auto searchPred = [archsrv = archiveServiceId](const MonitorSettings::ArchiveService& as)
+		auto searchPred = [archsrv = archiveServiceId](const SoftwareEndpoint::ArchiveService& as)
 		{
 			return as.equipmentId == archsrv;
 		};

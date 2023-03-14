@@ -3,7 +3,7 @@
 #include "PropertyNames.h"
 #include "DrawParam.h"
 #include "../AppSignalLib/AppSignalParam.h"
-#include "../lib/ComparatorSet.h"
+#include "../AppSignalLib/ComparatorSet.h"
 #include "Schema.h"
 #include "TuningController.h"
 #include "AppSignalController.h"

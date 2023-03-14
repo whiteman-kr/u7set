@@ -1,7 +1,11 @@
 #include "MonitorTuningTcpClient.h"
 
-MonitorTuningTcpClient::MonitorTuningTcpClient(const SoftwareInfo& softwareInfo, const QString& tuningServiceId, TuningSignalManager* signalManager, ILogFile* logFile,
-                                               TuningLog::TuningLog* tuningLog, TuningUserManager* tuningUserManager) :
+MonitorTuningTcpClient::MonitorTuningTcpClient(const SoftwareInfo& softwareInfo,
+											   const QString& tuningServiceId,
+											   TuningSignalManager& signalManager,
+											   ILogFile* logFile,
+											   TuningLog::TuningLog* tuningLog,
+											   ClientLib::TuningUserManager& tuningUserManager) :
 	TuningTcpClient(softwareInfo, tuningServiceId, false/*singleLmControlMode*/, signalManager),
 	TcpClientStatistics(this),
     m_logFile(logFile, "TuningTcpClient"),
@@ -57,5 +61,5 @@ void MonitorTuningTcpClient::writeLogMessage(const QString& message)
 
 void MonitorTuningTcpClient::writeLogSignalChange(const AppSignalParam& param, const TuningValue& oldValue, const TuningValue& newValue)
 {
-    m_tuningLog->write(param, oldValue, newValue, m_tuningUserManager->loggedInUser());
+	m_tuningLog->write(param, oldValue, newValue, m_tuningUserManager.loggedInUser());
 }

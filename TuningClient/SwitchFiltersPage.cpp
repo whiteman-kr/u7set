@@ -39,14 +39,19 @@ void FilterPushButton::mousePressEvent(QMouseEvent *event)
 QString SwitchFiltersPage::tag_FilterButton = "FilterButtons";
 QString SwitchFiltersPage::tag_FilterSwitch = "FilterSwitches";
 
-SwitchFiltersPage::SwitchFiltersPage(std::shared_ptr<TuningFilter> workspaceFilter,
-									 TuningSignalManager* tuningSignalManager,
-									 std::vector<TuningClientTcpClient*> tuningTcpClients, TuningFilterStorage* tuningFilterStorage,
-									 QWidget* parent) :
+SwitchFiltersPage::SwitchFiltersPage(TuningConfigController& configController,
+									 TuningSignalManager& tuningSignalManager,
+									 TuningClientFilterStorage& tuningFilterStorage,
+									 ClientLib::TuningUserManager& userManager,
+									 std::vector<TuningClientTcpClient*> tuningTcpClients,
+									 std::shared_ptr<TuningFilter> workspaceFilter,
+									  QWidget* parent) :
 	QWidget(parent),
+	m_configController(configController),
     m_tuningSignalManager(tuningSignalManager),
-    m_tuningTcpClients(tuningTcpClients),
-    m_tuningFilterStorage(tuningFilterStorage),
+	m_tuningFilterStorage(tuningFilterStorage),
+	m_userManager(userManager),
+	m_tuningTcpClients(tuningTcpClients),
     m_workspaceFilter(workspaceFilter)
 {
 	m_mainLayout = new QVBoxLayout(this);
@@ -112,7 +117,7 @@ SwitchFiltersPage::SwitchFiltersPage(std::shared_ptr<TuningFilter> workspaceFilt
 		m_mainLayout->setContentsMargins(0, 0, 0, 0);
 	}
 
-	createControls(m_tuningFilterStorage->root());
+	createControls(m_tuningFilterStorage.root());
 
 	connect(theMainWindow, &MainWindow::timerTick500, this, &SwitchFiltersPage::onTimerTick500);
 
@@ -160,7 +165,7 @@ void SwitchFiltersPage::createControls(std::shared_ptr<TuningFilter> root)
 
 	// Controls in this form only used in Multiple-LM control mode
 
-	for (const TuningTcpClient* client : m_tuningTcpClients)
+	for (const ClientLib::TuningTcpClient* client : m_tuningTcpClients)
 	{
 		if (client->singleLmControlMode() == true)
 		{
@@ -179,7 +184,7 @@ void SwitchFiltersPage::createControls(std::shared_ptr<TuningFilter> root)
 
 	// Apply Button
 	//
-	if (theConfigSettings.clientSettings.autoApply == false &&
+	if (m_configController.configuration().clientSettings.autoApply == false &&
 		(m_buttonFilters.empty() == false || m_listFilters.empty() == false))
 	{
 		m_applyButton = new QPushButton(tr("Apply"), this);
@@ -513,7 +518,7 @@ void SwitchFiltersPage::createListItems()
 
 bool SwitchFiltersPage::changeFilterSignals(std::shared_ptr<TuningFilter> filter)
 {
-	if (theMainWindow->userManager()->login(this) == false)
+	if (m_userManager.login(this) == false)
 	{
 		return false;
 	}
@@ -607,7 +612,7 @@ bool SwitchFiltersPage::changeFilterSignals(std::shared_ptr<TuningFilter> filter
 	{
 		bool ok = false;
 
-		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+		AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
 		if (ok == false)
 		{
 			continue;
@@ -637,7 +642,7 @@ bool SwitchFiltersPage::changeFilterSignals(std::shared_ptr<TuningFilter> filter
 
 void SwitchFiltersPage::apply()
 {
-	if (theMainWindow->userManager()->login(this) == false)
+	if (m_userManager.login(this) == false)
 	{
 		return;
 	}
@@ -652,7 +657,7 @@ void SwitchFiltersPage::apply()
 
 	// Get SOR counters
 
-	TuningCounters rootCounters = m_tuningFilterStorage->root()->counters();
+	TuningCounters rootCounters = m_tuningFilterStorage.root()->counters();
 
 	if (rootCounters.sorCounter > 0)
 	{
@@ -689,7 +694,7 @@ int SwitchFiltersPage::countDiscretes(TuningFilter* filter)
 	{
 		bool ok = false;
 
-		AppSignalParam asp = m_tuningSignalManager->signalParam(tfs.appSignalHash(), &ok);
+		AppSignalParam asp = m_tuningSignalManager.signalParam(tfs.appSignalHash(), &ok);
 		if (ok == false)
 		{
 			continue;
@@ -720,7 +725,7 @@ int SwitchFiltersPage::countWritingEnabled(TuningFilter* filter)
 	{
 		bool ok = false;
 
-		AppSignalParam asp = m_tuningSignalManager->signalParam(tfs.appSignalHash(), &ok);
+		AppSignalParam asp = m_tuningSignalManager.signalParam(tfs.appSignalHash(), &ok);
 		if (ok == false)
 		{
 			continue;
@@ -731,7 +736,7 @@ int SwitchFiltersPage::countWritingEnabled(TuningFilter* filter)
 			continue;
 		}
 
-		const TuningSignalState state = m_tuningSignalManager->state(tfs.appSignalHash(), &ok);
+		const TuningSignalState state = m_tuningSignalManager.state(tfs.appSignalHash(), &ok);
 
 		if (ok == true)
 		{

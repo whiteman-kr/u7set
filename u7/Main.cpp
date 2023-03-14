@@ -17,8 +17,6 @@
 #include "../Protobuf/google/protobuf/message.h"
 #include "../UtilsLib/CrashExceptionHandler.h"
 
-#include "../lib/SoftwareXmlReader.h"
-
 #if __has_include("../gitlabci_version.h")
 #include "../gitlabci_version.h"
 #endif

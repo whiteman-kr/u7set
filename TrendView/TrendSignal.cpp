@@ -92,7 +92,9 @@ namespace TrendLib
 		m_unit = QString::fromStdString(message.unit());
 		m_precision = message.precision();
 
-		QString analogFormatString = QString::fromStdString(message.analog_format());
+		QString analogFormatString = message.has_analog_format() ?
+										 QString::fromStdString(message.analog_format()) :
+										 QStringLiteral("g_9_or_9e");
 		std::pair<E::AnalogFormat, bool> loadedAnalogFormat = E::stringToValue<E::AnalogFormat>(analogFormatString);
 		if (loadedAnalogFormat.second == true)
 		{

@@ -1,4 +1,5 @@
 #pragma once
+#include "../CommonLib/Hash.h"
 
 /// Interface for getting signal's data server, like AppDtataServiceID or DiagDataServiceID.
 ///
@@ -16,4 +17,5 @@ public:
 	/// Return true if AppDataService contains signal (AppSignalID for app signals DiagSignalEquipmentID for diag signals).
 	///
 	virtual bool dataServiceHasSignal(const QString& serviceEquipmentId, const QString& signalId) const = 0;
+	virtual bool dataServiceHasSignal(const QString& serviceEquipmentId, Hash signalHash) const = 0;
 };

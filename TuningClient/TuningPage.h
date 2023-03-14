@@ -1,17 +1,18 @@
 #ifndef TUNINGPAGE_H
 #define TUNINGPAGE_H
 
+#include "../AppSignalLib/TuningSignalManager.h"
 #include "../lib/Tuning/TuningModel.h"
-#include "../lib/Tuning/TuningSignalState.h"
-#include "../lib/Tuning/TuningSignalManager.h"
 #include "../lib/Tuning/TuningFilter.h"
 #include "TuningClientTcpClient.h"
+#include "TuningConfigController.h"
+#include "TuningClientFilterStorage.h"
 
 class TuningModelClient : public TuningModel
 {
 	Q_OBJECT
 public:
-	TuningModelClient(TuningSignalManager* tuningSignalManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent);
+	TuningModelClient(TuningSignalManager& tuningSignalManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent);
 
 	void blink();
 
@@ -83,11 +84,13 @@ class TuningPage : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit TuningPage(std::shared_ptr<TuningFilter> treeFilter,
+	explicit TuningPage(TuningConfigController& configController,
+						TuningSignalManager& tuningSignalManager,
+						TuningClientFilterStorage& tuningFilterStorage,
+						ClientLib::TuningUserManager& userManager,
+						std::vector<TuningClientTcpClient*> tcpClients,
+						std::shared_ptr<TuningFilter> treeFilter,
 						std::shared_ptr<TuningFilter> pageFilter,
-						TuningSignalManager* tuningSignalManager,
-						std::vector<TuningClientTcpClient*> tuningTcpClients,
-						TuningFilterStorage* tuningFilterStorage,
 						QWidget* parent = 0);
 	~TuningPage();
 
@@ -175,12 +178,13 @@ private slots:
 	void slot_Apply();
 
 private:
-
-	TuningSignalManager* m_tuningSignalManager = nullptr;
+	TuningConfigController& m_configController;
+	TuningSignalManager& m_tuningSignalManager;
+	TuningFilterStorage& m_tuningFilterStorage;
+	ClientLib::TuningUserManager& m_userManager;
 
 	std::vector<TuningClientTcpClient*> m_tuningTcpClients;
 
-	TuningFilterStorage* m_tuningFilterStorage = nullptr;
 
 	TuningTableView* m_objectList = nullptr;
 

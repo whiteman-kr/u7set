@@ -1,7 +1,7 @@
 #ifndef SIMTUNSIGNALMANGER_H
 #define SIMTUNSIGNALMANGER_H
 
-#include "../lib/Tuning/TuningSignalManager.h"
+#include "../AppSignalLib/TuningSignalManager.h"
 #include "SimScopedLog.h"
 
 namespace Sim

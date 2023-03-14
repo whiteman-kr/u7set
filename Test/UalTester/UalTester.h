@@ -21,7 +21,7 @@
 #include <QObject>
 
 #include "../../OnlineLib/CfgServerLoader.h"
-#include "../../lib/SoftwareSettings.h"
+#include "../../OnlineLib/SoftwareSettings.h"
 
 #include "CmdLineParam.h"
 #include "SignalBase.h"

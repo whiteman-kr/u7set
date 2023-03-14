@@ -1,8 +1,8 @@
 #pragma once
 #include "SimScopedLog.h"
-#include "../lib/SoftwareSettings.h"
 #include "../CommonLib/Times.h"
 #include "../UtilsLib/SimpleThread.h"
+#include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/DataProtocols.h"
 #include "../lib/LogicModulesInfo.h"
 #include "SimRam.h"

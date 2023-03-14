@@ -5163,7 +5163,7 @@ class LogicSchema PROTOBUF_FINAL :
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::wstring >&
       equipmentids() const;
 
-  // optional string lmDescriptionFile = 3 [default = "LogicModule0000.xml"];
+  // optional string lmDescriptionFile = 3;
   bool has_lmdescriptionfile() const;
   private:
   bool _internal_has_lmdescriptionfile() const;
@@ -5206,7 +5206,6 @@ class LogicSchema PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::wstring > equipmentids_;
-  static const ::PROTOBUF_NAMESPACE_ID::internal::LazyString _i_give_permission_to_break_this_code_default_lmdescriptionfile_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr lmdescriptionfile_;
   ::PROTOBUF_NAMESPACE_ID::int32 counter_;
   friend struct ::TableStruct_serialization_2eproto;
@@ -5358,7 +5357,7 @@ class UfbSchema PROTOBUF_FINAL :
   std::string* _internal_mutable_description();
   public:
 
-  // optional string lmDescriptionFile = 3 [default = "LogicModule0000.xml"];
+  // optional string lmDescriptionFile = 3;
   bool has_lmdescriptionfile() const;
   private:
   bool _internal_has_lmdescriptionfile() const;
@@ -5421,7 +5420,6 @@ class UfbSchema PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr description_;
-  static const ::PROTOBUF_NAMESPACE_ID::internal::LazyString _i_give_permission_to_break_this_code_default_lmdescriptionfile_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr lmdescriptionfile_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr specific_properties_struct_;
   ::PROTOBUF_NAMESPACE_ID::int32 version_;
@@ -8379,7 +8377,7 @@ class SchemaItemFrame PROTOBUF_FINAL :
     kAllowScaleFieldNumber = 2,
     kKeepAspectRatioFieldNumber = 3,
   };
-  // optional string schemaId = 1 [default = "SCHEMAID"];
+  // optional string schemaId = 1;
   bool has_schemaid() const;
   private:
   bool _internal_has_schemaid() const;
@@ -8434,7 +8432,6 @@ class SchemaItemFrame PROTOBUF_FINAL :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  static const ::PROTOBUF_NAMESPACE_ID::internal::LazyString _i_give_permission_to_break_this_code_default_schemaid_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr schemaid_;
   bool allowscale_;
   bool keepaspectratio_;
@@ -10195,7 +10192,7 @@ class FblConnectionPoint PROTOBUF_FINAL :
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::Uuid >&
       associatedios() const;
 
-  // optional string caption = 5 [default = ""];
+  // optional string caption = 5;
   bool has_caption() const;
   private:
   bool _internal_has_caption() const;
@@ -18152,7 +18149,7 @@ class ModuleConfiguration PROTOBUF_FINAL :
   std::string* _internal_mutable_struct_description();
   public:
 
-  // optional string name = 3 [default = ""];
+  // optional string name = 3;
   bool has_name() const;
   private:
   bool _internal_has_name() const;
@@ -22208,7 +22205,7 @@ class Connection PROTOBUF_FINAL :
     kPort2TxWordsQuantityFieldNumber = 18,
     kPort2RxWordsQuantityFieldNumber = 19,
   };
-  // optional string ConnectionID = 2 [default = ""];
+  // optional string ConnectionID = 2;
   bool has_connectionid() const;
   private:
   bool _internal_has_connectionid() const;
@@ -22228,7 +22225,7 @@ class Connection PROTOBUF_FINAL :
   std::string* _internal_mutable_connectionid();
   public:
 
-  // optional string Port1EquipmentID = 3 [default = ""];
+  // optional string Port1EquipmentID = 3;
   bool has_port1equipmentid() const;
   private:
   bool _internal_has_port1equipmentid() const;
@@ -22248,7 +22245,7 @@ class Connection PROTOBUF_FINAL :
   std::string* _internal_mutable_port1equipmentid();
   public:
 
-  // optional string Port2EquipmentID = 4 [default = ""];
+  // optional string Port2EquipmentID = 4;
   bool has_port2equipmentid() const;
   private:
   bool _internal_has_port2equipmentid() const;
@@ -22268,7 +22265,7 @@ class Connection PROTOBUF_FINAL :
   std::string* _internal_mutable_port2equipmentid();
   public:
 
-  // optional string Port1RawDataDescription = 5 [default = ""];
+  // optional string Port1RawDataDescription = 5;
   bool has_port1rawdatadescription() const;
   private:
   bool _internal_has_port1rawdatadescription() const;
@@ -22288,7 +22285,7 @@ class Connection PROTOBUF_FINAL :
   std::string* _internal_mutable_port1rawdatadescription();
   public:
 
-  // optional string Port2RawDataDescription = 6 [default = ""];
+  // optional string Port2RawDataDescription = 6;
   bool has_port2rawdatadescription() const;
   private:
   bool _internal_has_port2rawdatadescription() const;
@@ -32648,7 +32645,7 @@ inline void LogicSchema::set_counter(::PROTOBUF_NAMESPACE_ID::int32 value) {
   // @@protoc_insertion_point(field_set:Proto.LogicSchema.counter)
 }
 
-// optional string lmDescriptionFile = 3 [default = "LogicModule0000.xml"];
+// optional string lmDescriptionFile = 3;
 inline bool LogicSchema::_internal_has_lmdescriptionfile() const {
   bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
@@ -32657,12 +32654,11 @@ inline bool LogicSchema::has_lmdescriptionfile() const {
   return _internal_has_lmdescriptionfile();
 }
 inline void LogicSchema::clear_lmdescriptionfile() {
-  lmdescriptionfile_.ClearToDefault(::Proto::LogicSchema::_i_give_permission_to_break_this_code_default_lmdescriptionfile_, GetArena());
+  lmdescriptionfile_.ClearToEmpty();
   _has_bits_[0] &= ~0x00000001u;
 }
 inline const std::string& LogicSchema::lmdescriptionfile() const {
   // @@protoc_insertion_point(field_get:Proto.LogicSchema.lmDescriptionFile)
-  if (lmdescriptionfile_.IsDefault(nullptr)) return _i_give_permission_to_break_this_code_default_lmdescriptionfile_.get();
   return _internal_lmdescriptionfile();
 }
 inline void LogicSchema::set_lmdescriptionfile(const std::string& value) {
@@ -32678,30 +32674,30 @@ inline const std::string& LogicSchema::_internal_lmdescriptionfile() const {
 }
 inline void LogicSchema::_internal_set_lmdescriptionfile(const std::string& value) {
   _has_bits_[0] |= 0x00000001u;
-  lmdescriptionfile_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::NonEmptyDefault{}, value, GetArena());
+  lmdescriptionfile_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void LogicSchema::set_lmdescriptionfile(std::string&& value) {
   _has_bits_[0] |= 0x00000001u;
   lmdescriptionfile_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::NonEmptyDefault{}, ::std::move(value), GetArena());
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:Proto.LogicSchema.lmDescriptionFile)
 }
 inline void LogicSchema::set_lmdescriptionfile(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   _has_bits_[0] |= 0x00000001u;
-  lmdescriptionfile_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::NonEmptyDefault{}, ::std::string(value), GetArena());
+  lmdescriptionfile_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:Proto.LogicSchema.lmDescriptionFile)
 }
 inline void LogicSchema::set_lmdescriptionfile(const char* value,
     size_t size) {
   _has_bits_[0] |= 0x00000001u;
-  lmdescriptionfile_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::NonEmptyDefault{}, ::std::string(
+  lmdescriptionfile_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:Proto.LogicSchema.lmDescriptionFile)
 }
 inline std::string* LogicSchema::_internal_mutable_lmdescriptionfile() {
   _has_bits_[0] |= 0x00000001u;
-  return lmdescriptionfile_.Mutable(::Proto::LogicSchema::_i_give_permission_to_break_this_code_default_lmdescriptionfile_, GetArena());
+  return lmdescriptionfile_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* LogicSchema::release_lmdescriptionfile() {
   // @@protoc_insertion_point(field_release:Proto.LogicSchema.lmDescriptionFile)
@@ -32709,7 +32705,7 @@ inline std::string* LogicSchema::release_lmdescriptionfile() {
     return nullptr;
   }
   _has_bits_[0] &= ~0x00000001u;
-  return lmdescriptionfile_.ReleaseNonDefault(nullptr, GetArena());
+  return lmdescriptionfile_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void LogicSchema::set_allocated_lmdescriptionfile(std::string* lmdescriptionfile) {
   if (lmdescriptionfile != nullptr) {
@@ -32717,7 +32713,7 @@ inline void LogicSchema::set_allocated_lmdescriptionfile(std::string* lmdescript
   } else {
     _has_bits_[0] &= ~0x00000001u;
   }
-  lmdescriptionfile_.SetAllocated(nullptr, lmdescriptionfile,
+  lmdescriptionfile_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), lmdescriptionfile,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:Proto.LogicSchema.lmDescriptionFile)
 }
@@ -32827,7 +32823,7 @@ inline void UfbSchema::set_version(::PROTOBUF_NAMESPACE_ID::int32 value) {
   // @@protoc_insertion_point(field_set:Proto.UfbSchema.version)
 }
 
-// optional string lmDescriptionFile = 3 [default = "LogicModule0000.xml"];
+// optional string lmDescriptionFile = 3;
 inline bool UfbSchema::_internal_has_lmdescriptionfile() const {
   bool value = (_has_bits_[0] & 0x00000002u) != 0;
   return value;
@@ -32836,12 +32832,11 @@ inline bool UfbSchema::has_lmdescriptionfile() const {
   return _internal_has_lmdescriptionfile();
 }
 inline void UfbSchema::clear_lmdescriptionfile() {
-  lmdescriptionfile_.ClearToDefault(::Proto::UfbSchema::_i_give_permission_to_break_this_code_default_lmdescriptionfile_, GetArena());
+  lmdescriptionfile_.ClearToEmpty();
   _has_bits_[0] &= ~0x00000002u;
 }
 inline const std::string& UfbSchema::lmdescriptionfile() const {
   // @@protoc_insertion_point(field_get:Proto.UfbSchema.lmDescriptionFile)
-  if (lmdescriptionfile_.IsDefault(nullptr)) return _i_give_permission_to_break_this_code_default_lmdescriptionfile_.get();
   return _internal_lmdescriptionfile();
 }
 inline void UfbSchema::set_lmdescriptionfile(const std::string& value) {
@@ -32857,30 +32852,30 @@ inline const std::string& UfbSchema::_internal_lmdescriptionfile() const {
 }
 inline void UfbSchema::_internal_set_lmdescriptionfile(const std::string& value) {
   _has_bits_[0] |= 0x00000002u;
-  lmdescriptionfile_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::NonEmptyDefault{}, value, GetArena());
+  lmdescriptionfile_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void UfbSchema::set_lmdescriptionfile(std::string&& value) {
   _has_bits_[0] |= 0x00000002u;
   lmdescriptionfile_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::NonEmptyDefault{}, ::std::move(value), GetArena());
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:Proto.UfbSchema.lmDescriptionFile)
 }
 inline void UfbSchema::set_lmdescriptionfile(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   _has_bits_[0] |= 0x00000002u;
-  lmdescriptionfile_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::NonEmptyDefault{}, ::std::string(value), GetArena());
+  lmdescriptionfile_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:Proto.UfbSchema.lmDescriptionFile)
 }
 inline void UfbSchema::set_lmdescriptionfile(const char* value,
     size_t size) {
   _has_bits_[0] |= 0x00000002u;
-  lmdescriptionfile_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::NonEmptyDefault{}, ::std::string(
+  lmdescriptionfile_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:Proto.UfbSchema.lmDescriptionFile)
 }
 inline std::string* UfbSchema::_internal_mutable_lmdescriptionfile() {
   _has_bits_[0] |= 0x00000002u;
-  return lmdescriptionfile_.Mutable(::Proto::UfbSchema::_i_give_permission_to_break_this_code_default_lmdescriptionfile_, GetArena());
+  return lmdescriptionfile_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* UfbSchema::release_lmdescriptionfile() {
   // @@protoc_insertion_point(field_release:Proto.UfbSchema.lmDescriptionFile)
@@ -32888,7 +32883,7 @@ inline std::string* UfbSchema::release_lmdescriptionfile() {
     return nullptr;
   }
   _has_bits_[0] &= ~0x00000002u;
-  return lmdescriptionfile_.ReleaseNonDefault(nullptr, GetArena());
+  return lmdescriptionfile_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void UfbSchema::set_allocated_lmdescriptionfile(std::string* lmdescriptionfile) {
   if (lmdescriptionfile != nullptr) {
@@ -32896,7 +32891,7 @@ inline void UfbSchema::set_allocated_lmdescriptionfile(std::string* lmdescriptio
   } else {
     _has_bits_[0] &= ~0x00000002u;
   }
-  lmdescriptionfile_.SetAllocated(nullptr, lmdescriptionfile,
+  lmdescriptionfile_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), lmdescriptionfile,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:Proto.UfbSchema.lmDescriptionFile)
 }
@@ -38037,7 +38032,7 @@ inline void SchemaItemImage::set_allocated_image(::Proto::ImageItem* image) {
 
 // SchemaItemFrame
 
-// optional string schemaId = 1 [default = "SCHEMAID"];
+// optional string schemaId = 1;
 inline bool SchemaItemFrame::_internal_has_schemaid() const {
   bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
@@ -38046,12 +38041,11 @@ inline bool SchemaItemFrame::has_schemaid() const {
   return _internal_has_schemaid();
 }
 inline void SchemaItemFrame::clear_schemaid() {
-  schemaid_.ClearToDefault(::Proto::SchemaItemFrame::_i_give_permission_to_break_this_code_default_schemaid_, GetArena());
+  schemaid_.ClearToEmpty();
   _has_bits_[0] &= ~0x00000001u;
 }
 inline const std::string& SchemaItemFrame::schemaid() const {
   // @@protoc_insertion_point(field_get:Proto.SchemaItemFrame.schemaId)
-  if (schemaid_.IsDefault(nullptr)) return _i_give_permission_to_break_this_code_default_schemaid_.get();
   return _internal_schemaid();
 }
 inline void SchemaItemFrame::set_schemaid(const std::string& value) {
@@ -38067,30 +38061,30 @@ inline const std::string& SchemaItemFrame::_internal_schemaid() const {
 }
 inline void SchemaItemFrame::_internal_set_schemaid(const std::string& value) {
   _has_bits_[0] |= 0x00000001u;
-  schemaid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::NonEmptyDefault{}, value, GetArena());
+  schemaid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void SchemaItemFrame::set_schemaid(std::string&& value) {
   _has_bits_[0] |= 0x00000001u;
   schemaid_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::NonEmptyDefault{}, ::std::move(value), GetArena());
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:Proto.SchemaItemFrame.schemaId)
 }
 inline void SchemaItemFrame::set_schemaid(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   _has_bits_[0] |= 0x00000001u;
-  schemaid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::NonEmptyDefault{}, ::std::string(value), GetArena());
+  schemaid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:Proto.SchemaItemFrame.schemaId)
 }
 inline void SchemaItemFrame::set_schemaid(const char* value,
     size_t size) {
   _has_bits_[0] |= 0x00000001u;
-  schemaid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::NonEmptyDefault{}, ::std::string(
+  schemaid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:Proto.SchemaItemFrame.schemaId)
 }
 inline std::string* SchemaItemFrame::_internal_mutable_schemaid() {
   _has_bits_[0] |= 0x00000001u;
-  return schemaid_.Mutable(::Proto::SchemaItemFrame::_i_give_permission_to_break_this_code_default_schemaid_, GetArena());
+  return schemaid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* SchemaItemFrame::release_schemaid() {
   // @@protoc_insertion_point(field_release:Proto.SchemaItemFrame.schemaId)
@@ -38098,7 +38092,7 @@ inline std::string* SchemaItemFrame::release_schemaid() {
     return nullptr;
   }
   _has_bits_[0] &= ~0x00000001u;
-  return schemaid_.ReleaseNonDefault(nullptr, GetArena());
+  return schemaid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void SchemaItemFrame::set_allocated_schemaid(std::string* schemaid) {
   if (schemaid != nullptr) {
@@ -38106,7 +38100,7 @@ inline void SchemaItemFrame::set_allocated_schemaid(std::string* schemaid) {
   } else {
     _has_bits_[0] &= ~0x00000001u;
   }
-  schemaid_.SetAllocated(nullptr, schemaid,
+  schemaid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), schemaid,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItemFrame.schemaId)
 }
@@ -40169,7 +40163,7 @@ inline void FblConnectionPoint::set_operandindex(::PROTOBUF_NAMESPACE_ID::int32 
   // @@protoc_insertion_point(field_set:Proto.FblConnectionPoint.operandIndex)
 }
 
-// optional string caption = 5 [default = ""];
+// optional string caption = 5;
 inline bool FblConnectionPoint::_internal_has_caption() const {
   bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
@@ -47985,7 +47979,7 @@ ModuleConfiguration::values() const {
   return values_;
 }
 
-// optional string name = 3 [default = ""];
+// optional string name = 3;
 inline bool ModuleConfiguration::_internal_has_name() const {
   bool value = (_has_bits_[0] & 0x00000002u) != 0;
   return value;
@@ -52985,7 +52979,7 @@ inline void AppSignalState::set_packetno(::PROTOBUF_NAMESPACE_ID::uint32 value) 
 
 // Connection
 
-// optional string ConnectionID = 2 [default = ""];
+// optional string ConnectionID = 2;
 inline bool Connection::_internal_has_connectionid() const {
   bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
@@ -53058,7 +53052,7 @@ inline void Connection::set_allocated_connectionid(std::string* connectionid) {
   // @@protoc_insertion_point(field_set_allocated:Proto.Connection.ConnectionID)
 }
 
-// optional string Port1EquipmentID = 3 [default = ""];
+// optional string Port1EquipmentID = 3;
 inline bool Connection::_internal_has_port1equipmentid() const {
   bool value = (_has_bits_[0] & 0x00000002u) != 0;
   return value;
@@ -53131,7 +53125,7 @@ inline void Connection::set_allocated_port1equipmentid(std::string* port1equipme
   // @@protoc_insertion_point(field_set_allocated:Proto.Connection.Port1EquipmentID)
 }
 
-// optional string Port2EquipmentID = 4 [default = ""];
+// optional string Port2EquipmentID = 4;
 inline bool Connection::_internal_has_port2equipmentid() const {
   bool value = (_has_bits_[0] & 0x00000004u) != 0;
   return value;
@@ -53204,7 +53198,7 @@ inline void Connection::set_allocated_port2equipmentid(std::string* port2equipme
   // @@protoc_insertion_point(field_set_allocated:Proto.Connection.Port2EquipmentID)
 }
 
-// optional string Port1RawDataDescription = 5 [default = ""];
+// optional string Port1RawDataDescription = 5;
 inline bool Connection::_internal_has_port1rawdatadescription() const {
   bool value = (_has_bits_[0] & 0x00000008u) != 0;
   return value;
@@ -53277,7 +53271,7 @@ inline void Connection::set_allocated_port1rawdatadescription(std::string* port1
   // @@protoc_insertion_point(field_set_allocated:Proto.Connection.Port1RawDataDescription)
 }
 
-// optional string Port2RawDataDescription = 6 [default = ""];
+// optional string Port2RawDataDescription = 6;
 inline bool Connection::_internal_has_port2rawdatadescription() const {
   bool value = (_has_bits_[0] & 0x00000010u) != 0;
   return value;

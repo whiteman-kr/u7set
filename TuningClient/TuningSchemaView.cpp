@@ -2,8 +2,9 @@
 #include "Main.h"
 #include "../VFrame30/PropertyNames.h"
 
-TuningSchemaView::TuningSchemaView(TuningSchemaManager* schemaManager, QWidget* parent /*= nullptr*/)
-	:  VFrame30::ClientSchemaView(schemaManager, nullptr, nullptr, parent)
+TuningSchemaView::TuningSchemaView(TuningConfigController& configController, TuningSchemaManager& schemaManager, QWidget* parent /*= nullptr*/)
+	:  VFrame30::ClientSchemaView(&schemaManager, nullptr, nullptr, parent),
+	  m_configController(configController)
 {
 
 	QJSEngine* engine = jsEngine();
@@ -14,11 +15,11 @@ TuningSchemaView::TuningSchemaView(TuningSchemaManager* schemaManager, QWidget* 
 		return ;
 	}
 
-	connect(schemaManager->configController(), &ConfigController::configurationArrived, this, &TuningSchemaView::configurationArrived);
+	connect(&m_configController, &TuningConfigController::configurationArrived, this, &TuningSchemaView::configurationArrived);
 
 	// Updates scripts
 	//
-	configurationArrived(theConfigSettings);
+	configurationArrived(m_configController.configuration());
 
 	return;
 }
@@ -33,9 +34,9 @@ void TuningSchemaView::paintEvent(QPaintEvent* event)
 	// It is possible that arrived configuration was not yet applied, it can happen in the very beginning,
 	// when the schema was not created yet, but the configuration already received.
 	//
-	if (theConfigSettings.configurationId != m_configurationId)
+	if (m_configController.configuration().configurationId != m_configurationId)
 	{
-		configurationArrived(theConfigSettings);
+		configurationArrived(m_configController.configuration());
 	}
 
 	return ClientSchemaView::paintEvent(event);

@@ -56,7 +56,6 @@ OTHER_FILES += \
 HEADERS += \
     ../Proto/serialization.pb.h \
     ../lib/ClientBehavior.h \
-    ../lib/ComparatorSet.h \
 	../UtilsLib/ILogFile.h \
     ../lib/ITimeStats.h \
     Context.h \
@@ -119,8 +118,6 @@ HEADERS += \
     SchemaManager.h \
     ClientSchemaView.h \
     SchemaItemLoopback.h \
-    ../lib/Tuning/TuningSignalState.h \
-    ../lib/Tuning/ITuningSignalManager.h \
     ../lib/Tuning/ITuningTcpClient.h \
 	TuningController.h \
     AppSignalController.h \

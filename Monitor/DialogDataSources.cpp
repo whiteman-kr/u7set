@@ -2,7 +2,10 @@
 #include "../UtilsLib/Ui/UiTools.h"
 
 
-void DialogDataSources::create(const MonitorConfigController& configController, std::vector<TuningTcpClient*> tcpTuningClients, ILogFile* logFile, QWidget* parent)
+void DialogDataSources::create(const MonitorConfigController& configController,
+							   std::vector<ClientLib::TuningTcpClient*> tcpTuningClients,
+							   ILogFile* logFile,
+							   QWidget* parent)
 {
 	if (s_dialogDataSources == nullptr)
 	{
@@ -19,7 +22,7 @@ void DialogDataSources::create(const MonitorConfigController& configController, 
 	return;
 }
 
-void DialogDataSources::updateTuningTcpClients(std::vector<TuningTcpClient*> tcpTuningClients)
+void DialogDataSources::updateTuningTcpClients(std::vector<ClientLib::TuningTcpClient*> tcpTuningClients)
 {
 	if (s_dialogDataSources != nullptr)
 	{
@@ -29,7 +32,10 @@ void DialogDataSources::updateTuningTcpClients(std::vector<TuningTcpClient*> tcp
 	return;
 }
 
-DialogDataSources::DialogDataSources(const MonitorConfigController& configController, std::vector<TuningTcpClient*> tcpTuningClients, ILogFile* logFile, QWidget* parent) :
+DialogDataSources::DialogDataSources(const MonitorConfigController& configController,
+									 std::vector<ClientLib::TuningTcpClient*> tcpTuningClients,
+									 ILogFile* logFile,
+									 QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	  m_configController(configController),
 	  m_logFile(logFile)
@@ -98,6 +104,11 @@ DialogDataSources::DialogDataSources(const MonitorConfigController& configContro
 		setMinimumSize(1100, 300);
 	}
 
+	// --
+	//
+	m_tcpSignalClientCtrl.updateConnections(m_configController.softwareInfo(),
+											m_configController.configuration().appDataServices);
+
 	return;
 }
 
@@ -108,13 +119,16 @@ DialogDataSources::~DialogDataSources()
 
 }
 
-void DialogDataSources::setTuningTcpClients(std::vector<TuningTcpClient*> tcpTuningClients)
+void DialogDataSources::setTuningTcpClients(std::vector<ClientLib::TuningTcpClient*> tcpTuningClients)
 {
 	m_tuningSourcesWidget->setTuningTcpClients(std::move(tcpTuningClients));
 }
 
 void DialogDataSources::slot_configurationArrived(ConfigSettings configuration)
 {
+	m_tcpSignalClientCtrl.updateConnections(m_configController.softwareInfo(),
+											configuration.appDataServices);
+
 	m_tuningSourcesLabel->setVisible(configuration.tuningEnabled);
 	m_tuningSourcesWidget->setVisible(configuration.tuningEnabled);
 

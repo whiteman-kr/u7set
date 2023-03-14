@@ -2,7 +2,7 @@
 
 
 MonitorTrendArchiveConnection::MonitorTrendArchiveConnection(const SoftwareInfo& softwareInfo,
-															 MonitorSettings::ArchiveService server,
+															 SoftwareEndpoint::ArchiveService server,
 															 ILogFile* logFile) :
 	QObject(),
 	m_logFile(logFile),
@@ -98,7 +98,7 @@ void MonitorTrendArchiveConnections::createConnections()
 
 	const SoftwareInfo& softwareInfo = m_configController.softwareInfo();
 
-	for (const MonitorSettings::ArchiveService& server : m_createdConnectionsServers)
+	for (const auto& server : m_createdConnectionsServers)
 	{
 		MonitorTrendArchiveConnection& conn = m_connections.emplace_back(softwareInfo, server, m_logFile);
 
@@ -152,8 +152,8 @@ void MonitorTrendArchiveConnections::requestData(TrendLib::TrendSignalPlusServer
 
 	if (cit == m_connections.end())
 	{
-		m_logFile->writeError(QString("Trend RequestData, archive server %1 for signal %2 not found.")
-							  .arg(archievServerId, signalPlusServerId.appSignalId));
+		m_logFile->writeWarning(QString("Trend RequestData, archive server %1 for signal %2 not found.")
+								 .arg(archievServerId, signalPlusServerId.appSignalId));
 		return;
 	}
 

@@ -498,6 +498,7 @@ namespace Tcp
 		void setServers(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2, bool reconnect);
 
 		QString equipmentID() const;
+		QString connectToServerID() const;
 
 		HostAddressPort currentServerAddressPort() const;
 		HostAddressPort serverAddressPort(int serverIndex) const;

@@ -31,7 +31,6 @@ unix {
 SOURCES += \
 	../lib/DataSource.cpp \
     ../lib/BuildInfo.cpp \
-	../lib/SoftwareSettings.cpp \
 	../lib/LanControllerInfo.cpp \
 	AppDataService.cpp \
 	AppDataSource.cpp \
@@ -50,7 +49,6 @@ HEADERS += \
 	../lib/ConstStrings.h \
     ../lib/DataSource.h \
     ../lib/BuildInfo.h \
-	../lib/SoftwareSettings.h \
 	../lib/LanControllerInfo.h \
 	AppDataService.h \
 	AppDataSource.h \

@@ -1,46 +1,39 @@
 #pragma once
 
-#include "../OnlineLib/CfgServerLoader.h"
-#include "../UtilsLib/ILogFile.h"
+#include "../AppSignalLib/ComparatorSet.h"
+#include "../ClientLib/ConfigController.h"
 #include "../lib/ClientBehavior.h"
 #include "../VFrame30/Schema.h"
 
 
 struct ConfigSettings
 {
-	int configurationId = -1;
-	int buildNo = -1;
-	QString softwareEquipmentId;
-	QString project;
+	int configurationId = -1;		// Counter to detect that configuartion was updated
+
+	ClientLib::ConfigurationInfo configInfo;
+
+	std::vector<SoftwareEndpoint::AppDataService> appDataServices;
+	std::vector<SoftwareEndpoint::AppDataService> appDataRealTimeServices;
+	std::vector<SoftwareEndpoint::ArchiveService> archiveServices;
+
 	QString startSchemaId;
-
-	std::vector<MonitorSettings::AppDataService> appDataServices;
-	std::vector<MonitorSettings::AppDataService> appDataRealTimeServices;
-
-	std::vector<MonitorSettings::ArchiveService> archiveServices;
+	QString globalScript;
+	QString onConfigurationArrivedScript;
+	QImage logoImage;
+	MonitorBehavior monitorBeahvior;
 
 	// Tuning settings
 	//
 	bool tuningEnabled = false;
-	std::vector<MonitorSettings::TuningService> tuningServices;
+	std::vector<SoftwareEndpoint::TuningService> tuningServices;
 
 	bool tuningLogin = false;
 	QStringList tuningUserAccounts;
 	int tuningSessionTimeout = 0;
-
-	//
-	QString globalScript;
-	QString onConfigurationArrivedScript;
-
-	QImage logoImage;
-
-	MonitorBehavior monitorBeahvior;
-
-	QString errorMessage;				// Parsing error message, empty if no errors
 };
 
 
-class MonitorConfigController : public QObject, public HasLogFile
+class MonitorConfigController : public ClientLib::ConfigController
 {
 	Q_OBJECT
 
@@ -48,49 +41,24 @@ public:
 	MonitorConfigController() = delete;
 
 	MonitorConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2, ILogFile* logFile);
-	virtual ~MonitorConfigController();
+	virtual ~MonitorConfigController() = default;
 
-	// Methods
-	//
-public:
-	void setConnectionParams(QString equipmentId, HostAddressPort address1, HostAddressPort address2);
 
-	bool getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr);
-	bool getFile(const QString& pathFileName, QByteArray* fileData);
+protected:
+	/// This function is called when the new configuarion arrives, it is overrided to get specific Monitor
+	/// configuration, after it signal `configurationArrived` is emitted
+	///
+	virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const MonitorSettings& settings, const BuildFileInfoArray& files) override;
 
-	bool getFileBlockedById(const QString& id, QByteArray* fileData, QString* errorStr);
-	bool getFileById(const QString& id, QByteArray* fileData);
+	void dump(const ConfigSettings& conf) const;
 
-	bool hasFileId(QString fileId) const;
-
-	Tcp::ConnectionState getConnectionState() const;
-
-	const SoftwareInfo& softwareInfo() const;
-
-	// signals
+	// Signals
 	//
 signals:
-	void configurationUpdate();
+	/// These signals are emitted when the new configuration arrived and fully parsed.
+	///
+	void configurationUpdated();
 	void configurationArrived(ConfigSettings configuration);
-	void unknownClient(QString errMsg);										// Error if CfgService cannot find SoftwareID
-	void wrongClientHostname(QString errMsg);
-
-	// slots
-	//
-public slots:
-	void start();
-
-private slots:
-	void slot_configurationReady(const QByteArray configurationXmlData,
-								 const BuildFileInfoArray buildFileInfoArray,
-								 SessionParams sessionParams,
-								 std::shared_ptr<const SoftwareSettings> curSettingsProfile);
-
-private:
-	bool xmlReadBuildInfoNode(const QDomNode& buildInfoNode, ConfigSettings* outSetting);
-	bool xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigSettings* outSetting);
-
-	bool applyCurSettingsProfile(std::shared_ptr<const SoftwareSettings> curSettingsProfile, ConfigSettings* outSetting);
 
 	// Public properties
 	//
@@ -105,6 +73,8 @@ public:
 	int configurationId() const;
 
 	ConfigSettings configuration() const;
+	ClientLib::ConfigurationInfo configInfo() const;
+
 	QString configurationStartSchemaId() const;
 
 	int schemaCount() const;
@@ -119,12 +89,6 @@ public:
 	// Data section
 	//
 private:
-	QSharedMemory m_appInstanceSharedMemory;
-	SoftwareInfo m_softwareInfo;
-	int m_appInstanceNo = -1;
-
-	CfgLoaderThread* m_cfgLoaderThread = nullptr;
-
 	mutable QReadWriteLock m_schemaDetailsLock;
 	VFrame30::SchemaDetailsSet m_schemaDetailsSet;
 

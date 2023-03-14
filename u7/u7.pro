@@ -82,7 +82,6 @@ HEADERS  += \
 	Stable.h \
     ../lib/ExportPrint.h \
     ../lib/QDoublevalidatorEx.h \
-    ../lib/SoftwareXmlReader.h \
     ../lib/StandardColors.h \
     ../lib/Ui/DialogSignalInfo.h \
     ../lib/Ui/DialogSignalSearch.h \
@@ -201,7 +200,6 @@ HEADERS  += \
 SOURCES +=\
     ../UtilsLib/CrashExceptionHandler.cpp \
 	../lib/ExportPrint.cpp \
-	../lib/SoftwareXmlReader.cpp \
     ../lib/Ui/DialogChooseTags.cpp \
 	../lib/Ui/DialogSignalInfo.cpp \
 	../lib/Ui/DialogSignalSearch.cpp \

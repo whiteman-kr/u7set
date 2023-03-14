@@ -51,11 +51,6 @@ PRECOMPILED_HEADER = Stable.h
 
 SOURCES += main.cpp \
     ../lib/ClientBehavior.cpp \
-    ../lib/ComparatorSet.cpp \
-    ../lib/SoftwareSettings.cpp \
-    ../lib/Tuning/TuningLog.cpp \
-    ../lib/Tuning/TuningSourcesHelper.cpp \
-    ../lib/Tuning/TuningUserManager.cpp \
     ../lib/Ui/DialogChooseTags.cpp \
     ../lib/Ui/DialogSignalSnapshot.cpp \
     ../lib/Ui/DialogTcpStatistics.cpp \
@@ -63,7 +58,6 @@ SOURCES += main.cpp \
     ../lib/Ui/SchemaListWidget.cpp \
     ../lib/Ui/TabWidgetEx.cpp \
     ../lib/Ui/TagSelectorWidget.cpp \
-    AdsConnection.cpp \
     Archive/ArchiveConnection.cpp \
     Archive/ArchiveTcpClient2.cpp \
     Archive/ArchiveWidget.cpp \
@@ -82,7 +76,6 @@ SOURCES += main.cpp \
     MonitorConfigController.cpp \
     SchemaDrawStatistics.cpp \
     ScriptMonitorApplication.cpp \
-    TcpSignalClient.cpp \
     ../lib/Ui/DialogSignalInfo.cpp \
     ../lib/Ui/DialogSignalSearch.cpp \
     DialogColumns.cpp \
@@ -91,13 +84,8 @@ SOURCES += main.cpp \
 	Archive/DialogChooseArchiveSignals.cpp \
 	Archive/ArchiveModelView.cpp \
 	Archive/ArchiveData.cpp \
-    TcpSignalRecents.cpp \
 	MonitorSchemaManager.cpp \
 	SelectSchemaWidget.cpp \
-	../lib/Tuning/TuningSignalManager.cpp \
-    ../lib/Tuning/TuningTcpClient.cpp \
-    ../lib/Tuning/TuningSignalState.cpp \
-    ../lib/Tuning/TuningSourceState.cpp \
     Trend/RtDataProvider.cpp \
     Trend/RtSchemaTrend.cpp \
     Trend/RtTrendTcpClient.cpp \
@@ -106,7 +94,6 @@ SOURCES += main.cpp \
     ../lib/Ui/DialogAlert.cpp \
     ../lib/Ui/DialogAbout.cpp \
     ../lib/Ui/DialogSourceInfo.cpp \
-    TcpAppSourcesState.cpp \
     ../lib/Ui/TuningSourcesWidget.cpp \
     ../lib/Ui/AppDataSourcesWidget.cpp \
     DialogDataSources.cpp \
@@ -114,14 +101,9 @@ SOURCES += main.cpp \
 
 HEADERS  += \
     ../lib/ClientBehavior.h \
-    ../lib/ComparatorSet.h \
     ../lib/ConstStrings.h \
 	../UtilsLib/ILogFile.h \
     ../lib/ISignalDataServer.h \
-    ../lib/SoftwareSettings.h \
-    ../lib/Tuning/TuningLog.h \
-    ../lib/Tuning/TuningSourcesHelper.h \
-    ../lib/Tuning/TuningUserManager.h \
     ../lib/Ui/DialogChooseTags.h \
     ../lib/Ui/DialogSignalSnapshot.h \
     ../lib/Ui/DialogTcpStatistics.h \
@@ -129,7 +111,6 @@ HEADERS  += \
     ../lib/Ui/SchemaListWidget.h \
     ../lib/Ui/TabWidgetEx.h \
     ../lib/Ui/TagSelectorWidget.h \
-    AdsConnection.h \
     Archive/ArchiveConnection.h \
     Archive/ArchiveTcpClient2.h \
     Archive/ArchiveWidget.h \
@@ -150,7 +131,6 @@ HEADERS  += \
     ../lib/BuildInfo.h \
     MonitorSchemaWidget.h \
     MonitorConfigController.h \
-    TcpSignalClient.h \
     ../CommonLib/PropertyObject.h \
     ../lib/Ui/DialogSignalInfo.h \
     ../lib/Ui/DialogSignalSearch.h \
@@ -160,23 +140,17 @@ HEADERS  += \
 	Archive/DialogChooseArchiveSignals.h \
 	Archive/ArchiveModelView.h \
 	Archive/ArchiveData.h \
-    TcpSignalRecents.h \
     SelectSchemaWidget.h \
     MonitorSchemaManager.h \
-    ../lib/Tuning/TuningSignalManager.h \
-    ../lib/Tuning/TuningTcpClient.h \
-    ../lib/Tuning/TuningSourceState.h \
     Trend/RtDataProvider.h \
     Trend/RtSchemaTrend.h \
     Trend/RtTrendTcpClient.h \
     Trend/ArchiveTrendTcpClient.h \
     MonitorTuningTcpClient.h \
-    ../lib/Tuning/TuningSignalState.h \
-    ../lib/Tuning/TuningSourceState.h \
+	../AppSignalLib/TuningSignalState.h \
     ../lib/Ui/DialogAlert.h \
     ../lib/Ui/DialogAbout.h \
     ../lib/Ui/DialogSourceInfo.h \
-    TcpAppSourcesState.h \
     ../lib/Ui/TuningSourcesWidget.h \
     ../lib/Ui/AppDataSourcesWidget.h \
     DialogDataSources.h \
@@ -218,6 +192,12 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 #
 LIBS += -L$$DESTDIR
 LIBS += -L.
+
+# ClientLib
+#
+LIBS += -lClientLib
+win32:PRE_TARGETDEPS += $$DESTDIR/ClientLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libClientLib.a
 
 # Authorization
 #

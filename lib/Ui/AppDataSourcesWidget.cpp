@@ -1,5 +1,4 @@
 #include "AppDataSourcesWidget.h"
-#include "TcpAppSourcesState.h"
 #include "../UtilsLib/Ui/UiTools.h"
 
 #include <QTreeWidget>
@@ -8,14 +7,14 @@
 // DialogAppDataSourceInfo
 //
 
-DialogAppDataSourceInfo::DialogAppDataSourceInfo(const AdsSourceStateConnection& adsSourceStateConnection, QWidget* parent,  quint64 id) :
+DialogAppDataSourceInfo::DialogAppDataSourceInfo(const ClientLib::AdsSourceStateConnection& adsSourceStateConnection, QWidget* parent, quint64 id) :
 	DialogSourceInfo(parent, id),
 	m_adsSourceStateConnection(adsSourceStateConnection)
 {
-	std::vector<AppDataSourceState> adsStates = m_adsSourceStateConnection.appDataSourceStates();
+	std::vector<ClientLib::AppDataSourceState> adsStates = m_adsSourceStateConnection.appDataSourceStates();
 
 	auto foundState = std::find_if(adsStates.begin(), adsStates.end(),
-		[&id](const AppDataSourceState& state)
+		[&id](const auto& state)
 		{
 			return state.id() == id;
 		});
@@ -132,10 +131,10 @@ DialogAppDataSourceInfo::~DialogAppDataSourceInfo()
 
 void DialogAppDataSourceInfo::updateData()
 {
-	std::vector<AppDataSourceState> adsStates = m_adsSourceStateConnection.appDataSourceStates();
+	auto adsStates = m_adsSourceStateConnection.appDataSourceStates();
 
 	auto adsState = std::find_if(adsStates.begin(), adsStates.end(),
-		[this](const AppDataSourceState& state)
+		[this](const auto& state)
 		{
 			return state.id() == m_dialogId;
 		});
@@ -261,7 +260,7 @@ void DialogAppDataSourceInfo::updateData()
 // DialogAppDataSources
 //
 
-AppDataSourcesWidget::AppDataSourcesWidget(const AdsSourceStateConnection& connection,  QWidget* parent) :
+AppDataSourcesWidget::AppDataSourcesWidget(const ClientLib::AdsSourceStateConnection& connection,  QWidget* parent) :
 	QWidget(parent),
 	m_adsSourceStateConnection(connection),
 	m_parent(parent)
@@ -373,7 +372,7 @@ void AppDataSourcesWidget::tuningSourcesArrived()
 
 void AppDataSourcesWidget::update(bool refreshOnly)
 {
-	std::vector<AppDataSourceState> adsStates = m_adsSourceStateConnection.appDataSourceStates();
+	auto adsStates = m_adsSourceStateConnection.appDataSourceStates();
 
 	int count = static_cast<int>(adsStates.size());
 
@@ -386,7 +385,7 @@ void AppDataSourcesWidget::update(bool refreshOnly)
 	{
 		m_treeWidget->clear();
 
-		for (const AppDataSourceState& adsState : adsStates)
+		for (const auto& adsState : adsStates)
 		{
 			QStringList connectionStrings;
 
@@ -419,7 +418,7 @@ void AppDataSourcesWidget::update(bool refreshOnly)
 		quint64 id = item->data(columnIndex_Id, Qt::UserRole).toULongLong();
 
 		auto adsState = std::find_if(adsStates.begin(), adsStates.end(),
-			[&id](const AppDataSourceState& state)
+			[&id](const auto& state)
 			{
 				return state.id() == id;
 			});
