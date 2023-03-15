@@ -12,7 +12,7 @@
 
 class TcpAppDataServerThread;
 class AppDataServiceWorker;
-class AsyncAppDataReceiver;
+class AppDataReceiver;
 
 // -------------------------------------------------------------------------------
 //
@@ -25,7 +25,7 @@ class TcpAppDataServer : public Tcp::Server
 public:
 	TcpAppDataServer(const SoftwareInfo& softwareInfo,
 					 E::SecurityLevel securityLevel,
-					 AsyncAppDataReceiver* appDataReceiverThread,
+					 AppDataReceiver* appDataReceiverThread,
 					 SignalStatesProcessingThread* signalStatesProcessingThread);
 
 	virtual ~TcpAppDataServer() override;
@@ -74,7 +74,7 @@ private:
 private:
 	TcpAppDataServerThread* m_thread = nullptr;
 
-	AsyncAppDataReceiver* m_appDataReceiverThread = nullptr;
+	AppDataReceiver* m_appDataReceiverThread = nullptr;
 	SignalStatesProcessingThread* m_signalStatesProcessingThread = nullptr;
 
 	SimpleAppSignalStatesQueueShared m_signalStatesQueue;

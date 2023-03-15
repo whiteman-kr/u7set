@@ -1,5 +1,4 @@
-#ifndef DATAAQUISITIONSERVICEWIDGET_H
-#define DATAAQUISITIONSERVICEWIDGET_H
+#pragma once
 
 #include <QAbstractTableModel>
 #include "../CommonLib/OrderedHash.h"
@@ -117,5 +116,3 @@ private:
 
 	QList<AppDataSourceWidget*> m_appDataSourceWidgetList;
 };
-
-#endif // DATAAQUISITIONSERVICEWIDGET_H

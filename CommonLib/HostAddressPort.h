@@ -39,9 +39,11 @@ public:
 	bool setAddressPortStr(const QString& addressPortStr, quint16 defaultPort);
 
 	[[nodiscard]] quint32 address32() const;
+	[[nodiscard]] quint32 address32IfSet() const;
 	[[nodiscard]] QHostAddress address() const;
 
 	[[nodiscard]] quint16 port() const;
+	[[nodiscard]] quint16 portIfSet() const;
 
 	[[nodiscard]] QString toString() const;
 	[[nodiscard]] QString addressPortStr() const;
@@ -222,6 +224,18 @@ inline quint32 HostAddressPort::address32() const
 	return m_hostAddress.toIPv4Address();
 }
 
+inline quint32 HostAddressPort::address32IfSet() const
+{
+	if (isSet() == true)
+	{
+		bool ok = true;
+		quint32 ip32 = m_hostAddress.toIPv4Address(&ok);
+		return (ok == true ? ip32 : 0);
+	}
+
+	return 0;
+}
+
 inline QHostAddress HostAddressPort::address() const
 {
 	return m_hostAddress;
@@ -230,6 +244,16 @@ inline QHostAddress HostAddressPort::address() const
 inline quint16 HostAddressPort::port() const
 {
 	return m_port;
+}
+
+inline quint16 HostAddressPort::portIfSet() const
+{
+	if (isSet() == true)
+	{
+		return m_port;
+	}
+
+	return 0;
 }
 
 inline QString HostAddressPort::toString() const

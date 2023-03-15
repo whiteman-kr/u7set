@@ -32,11 +32,10 @@ SOURCES += \
 	../lib/DataSource.cpp \
     ../lib/BuildInfo.cpp \
 	../lib/LanControllerInfo.cpp \
+	AppDataReceiver.cpp \
 	AppDataService.cpp \
 	AppDataSource.cpp \
 	AppDataServiceMain.cpp \
-	AppDataReceiver.cpp \
-	AsyncAppDataReceiver.cpp \
 	DynamicAppSignalState.cpp	\
 	SignalStatesProcessingThread.cpp \
 	RtTrendsServer.cpp \
@@ -44,7 +43,7 @@ SOURCES += \
 	TcpArchiveClient.cpp \
 
 HEADERS += \
-	AsyncAppDataReceiver.h \
+	AppDataReceiver.h \
 	Stable.h \
 	../lib/ConstStrings.h \
     ../lib/DataSource.h \
@@ -52,7 +51,6 @@ HEADERS += \
 	../lib/LanControllerInfo.h \
 	AppDataService.h \
 	AppDataSource.h \
-	AppDataReceiver.h \
 	DynamicAppSignalState.h \
 	SignalStatesProcessingThread.h \
 	RtTrendsServer.h \

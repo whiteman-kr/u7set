@@ -482,6 +482,8 @@ void DataSourceOnline::pushRupFrame(quint32 sourceIP,
 									const Rup::Frame& rupFrame,
 									const QThread* thread)
 {
+	Q_UNUSED(sourceIP);
+
 	m_receivedFramesCount++;
 	m_receivedDataSize += (isSimFrame == true ? sizeof(Rup::SimFrame) : sizeof(Rup::Frame));
 

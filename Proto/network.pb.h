@@ -3886,8 +3886,8 @@ class AppDataReceiveState PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kReceivingRateFieldNumber = 1,
-    kUdpReceivingRateFieldNumber = 2,
+    kReceivingSpeedFieldNumber = 1,
+    kRupFramesReceivingSpeedFieldNumber = 3,
     kRupFramesCountFieldNumber = 4,
     kSimFramesCountFieldNumber = 5,
     kErrDatagramSizeFieldNumber = 6,
@@ -3895,32 +3895,31 @@ class AppDataReceiveState PROTOBUF_FINAL :
     kErrUnknownAppDataSourceIPFieldNumber = 8,
     kErrRupFrameCRCFieldNumber = 9,
     kErrNotExpectedSimPacketFieldNumber = 10,
-    kRupFramesReceivingRateFieldNumber = 3,
   };
-  // optional int32 receivingRate = 1 [default = 0];
-  bool has_receivingrate() const;
+  // optional int32 receivingSpeed = 1 [default = 0];
+  bool has_receivingspeed() const;
   private:
-  bool _internal_has_receivingrate() const;
+  bool _internal_has_receivingspeed() const;
   public:
-  void clear_receivingrate();
-  ::PROTOBUF_NAMESPACE_ID::int32 receivingrate() const;
-  void set_receivingrate(::PROTOBUF_NAMESPACE_ID::int32 value);
+  void clear_receivingspeed();
+  ::PROTOBUF_NAMESPACE_ID::int32 receivingspeed() const;
+  void set_receivingspeed(::PROTOBUF_NAMESPACE_ID::int32 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_receivingrate() const;
-  void _internal_set_receivingrate(::PROTOBUF_NAMESPACE_ID::int32 value);
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_receivingspeed() const;
+  void _internal_set_receivingspeed(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
-  // optional int32 udpReceivingRate = 2 [default = 0];
-  bool has_udpreceivingrate() const;
+  // optional int32 rupFramesReceivingSpeed = 3 [default = 0];
+  bool has_rupframesreceivingspeed() const;
   private:
-  bool _internal_has_udpreceivingrate() const;
+  bool _internal_has_rupframesreceivingspeed() const;
   public:
-  void clear_udpreceivingrate();
-  ::PROTOBUF_NAMESPACE_ID::int32 udpreceivingrate() const;
-  void set_udpreceivingrate(::PROTOBUF_NAMESPACE_ID::int32 value);
+  void clear_rupframesreceivingspeed();
+  ::PROTOBUF_NAMESPACE_ID::int32 rupframesreceivingspeed() const;
+  void set_rupframesreceivingspeed(::PROTOBUF_NAMESPACE_ID::int32 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_udpreceivingrate() const;
-  void _internal_set_udpreceivingrate(::PROTOBUF_NAMESPACE_ID::int32 value);
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_rupframesreceivingspeed() const;
+  void _internal_set_rupframesreceivingspeed(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
   // optional int64 rupFramesCount = 4 [default = 0];
@@ -4014,19 +4013,6 @@ class AppDataReceiveState PROTOBUF_FINAL :
   void _internal_set_errnotexpectedsimpacket(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
-  // optional int32 rupFramesReceivingRate = 3 [default = 0];
-  bool has_rupframesreceivingrate() const;
-  private:
-  bool _internal_has_rupframesreceivingrate() const;
-  public:
-  void clear_rupframesreceivingrate();
-  ::PROTOBUF_NAMESPACE_ID::int32 rupframesreceivingrate() const;
-  void set_rupframesreceivingrate(::PROTOBUF_NAMESPACE_ID::int32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_rupframesreceivingrate() const;
-  void _internal_set_rupframesreceivingrate(::PROTOBUF_NAMESPACE_ID::int32 value);
-  public:
-
   // @@protoc_insertion_point(class_scope:Network.AppDataReceiveState)
  private:
   class _Internal;
@@ -4036,8 +4022,8 @@ class AppDataReceiveState PROTOBUF_FINAL :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  ::PROTOBUF_NAMESPACE_ID::int32 receivingrate_;
-  ::PROTOBUF_NAMESPACE_ID::int32 udpreceivingrate_;
+  ::PROTOBUF_NAMESPACE_ID::int32 receivingspeed_;
+  ::PROTOBUF_NAMESPACE_ID::int32 rupframesreceivingspeed_;
   ::PROTOBUF_NAMESPACE_ID::int64 rupframescount_;
   ::PROTOBUF_NAMESPACE_ID::int64 simframescount_;
   ::PROTOBUF_NAMESPACE_ID::int64 errdatagramsize_;
@@ -4045,7 +4031,6 @@ class AppDataReceiveState PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::int64 errunknownappdatasourceip_;
   ::PROTOBUF_NAMESPACE_ID::int64 errrupframecrc_;
   ::PROTOBUF_NAMESPACE_ID::int64 errnotexpectedsimpacket_;
-  ::PROTOBUF_NAMESPACE_ID::int32 rupframesreceivingrate_;
   friend struct ::TableStruct_network_2eproto;
 };
 // -------------------------------------------------------------------
@@ -18084,88 +18069,60 @@ GetDataSourcesInfoReply::datasourceinfo() const {
 
 // AppDataReceiveState
 
-// optional int32 receivingRate = 1 [default = 0];
-inline bool AppDataReceiveState::_internal_has_receivingrate() const {
+// optional int32 receivingSpeed = 1 [default = 0];
+inline bool AppDataReceiveState::_internal_has_receivingspeed() const {
   bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
 }
-inline bool AppDataReceiveState::has_receivingrate() const {
-  return _internal_has_receivingrate();
+inline bool AppDataReceiveState::has_receivingspeed() const {
+  return _internal_has_receivingspeed();
 }
-inline void AppDataReceiveState::clear_receivingrate() {
-  receivingrate_ = 0;
+inline void AppDataReceiveState::clear_receivingspeed() {
+  receivingspeed_ = 0;
   _has_bits_[0] &= ~0x00000001u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 AppDataReceiveState::_internal_receivingrate() const {
-  return receivingrate_;
+inline ::PROTOBUF_NAMESPACE_ID::int32 AppDataReceiveState::_internal_receivingspeed() const {
+  return receivingspeed_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 AppDataReceiveState::receivingrate() const {
-  // @@protoc_insertion_point(field_get:Network.AppDataReceiveState.receivingRate)
-  return _internal_receivingrate();
+inline ::PROTOBUF_NAMESPACE_ID::int32 AppDataReceiveState::receivingspeed() const {
+  // @@protoc_insertion_point(field_get:Network.AppDataReceiveState.receivingSpeed)
+  return _internal_receivingspeed();
 }
-inline void AppDataReceiveState::_internal_set_receivingrate(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void AppDataReceiveState::_internal_set_receivingspeed(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000001u;
-  receivingrate_ = value;
+  receivingspeed_ = value;
 }
-inline void AppDataReceiveState::set_receivingrate(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _internal_set_receivingrate(value);
-  // @@protoc_insertion_point(field_set:Network.AppDataReceiveState.receivingRate)
+inline void AppDataReceiveState::set_receivingspeed(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_receivingspeed(value);
+  // @@protoc_insertion_point(field_set:Network.AppDataReceiveState.receivingSpeed)
 }
 
-// optional int32 udpReceivingRate = 2 [default = 0];
-inline bool AppDataReceiveState::_internal_has_udpreceivingrate() const {
+// optional int32 rupFramesReceivingSpeed = 3 [default = 0];
+inline bool AppDataReceiveState::_internal_has_rupframesreceivingspeed() const {
   bool value = (_has_bits_[0] & 0x00000002u) != 0;
   return value;
 }
-inline bool AppDataReceiveState::has_udpreceivingrate() const {
-  return _internal_has_udpreceivingrate();
+inline bool AppDataReceiveState::has_rupframesreceivingspeed() const {
+  return _internal_has_rupframesreceivingspeed();
 }
-inline void AppDataReceiveState::clear_udpreceivingrate() {
-  udpreceivingrate_ = 0;
+inline void AppDataReceiveState::clear_rupframesreceivingspeed() {
+  rupframesreceivingspeed_ = 0;
   _has_bits_[0] &= ~0x00000002u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 AppDataReceiveState::_internal_udpreceivingrate() const {
-  return udpreceivingrate_;
+inline ::PROTOBUF_NAMESPACE_ID::int32 AppDataReceiveState::_internal_rupframesreceivingspeed() const {
+  return rupframesreceivingspeed_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 AppDataReceiveState::udpreceivingrate() const {
-  // @@protoc_insertion_point(field_get:Network.AppDataReceiveState.udpReceivingRate)
-  return _internal_udpreceivingrate();
+inline ::PROTOBUF_NAMESPACE_ID::int32 AppDataReceiveState::rupframesreceivingspeed() const {
+  // @@protoc_insertion_point(field_get:Network.AppDataReceiveState.rupFramesReceivingSpeed)
+  return _internal_rupframesreceivingspeed();
 }
-inline void AppDataReceiveState::_internal_set_udpreceivingrate(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void AppDataReceiveState::_internal_set_rupframesreceivingspeed(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000002u;
-  udpreceivingrate_ = value;
+  rupframesreceivingspeed_ = value;
 }
-inline void AppDataReceiveState::set_udpreceivingrate(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _internal_set_udpreceivingrate(value);
-  // @@protoc_insertion_point(field_set:Network.AppDataReceiveState.udpReceivingRate)
-}
-
-// optional int32 rupFramesReceivingRate = 3 [default = 0];
-inline bool AppDataReceiveState::_internal_has_rupframesreceivingrate() const {
-  bool value = (_has_bits_[0] & 0x00000200u) != 0;
-  return value;
-}
-inline bool AppDataReceiveState::has_rupframesreceivingrate() const {
-  return _internal_has_rupframesreceivingrate();
-}
-inline void AppDataReceiveState::clear_rupframesreceivingrate() {
-  rupframesreceivingrate_ = 0;
-  _has_bits_[0] &= ~0x00000200u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 AppDataReceiveState::_internal_rupframesreceivingrate() const {
-  return rupframesreceivingrate_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 AppDataReceiveState::rupframesreceivingrate() const {
-  // @@protoc_insertion_point(field_get:Network.AppDataReceiveState.rupFramesReceivingRate)
-  return _internal_rupframesreceivingrate();
-}
-inline void AppDataReceiveState::_internal_set_rupframesreceivingrate(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000200u;
-  rupframesreceivingrate_ = value;
-}
-inline void AppDataReceiveState::set_rupframesreceivingrate(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _internal_set_rupframesreceivingrate(value);
-  // @@protoc_insertion_point(field_set:Network.AppDataReceiveState.rupFramesReceivingRate)
+inline void AppDataReceiveState::set_rupframesreceivingspeed(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_rupframesreceivingspeed(value);
+  // @@protoc_insertion_point(field_set:Network.AppDataReceiveState.rupFramesReceivingSpeed)
 }
 
 // optional int64 rupFramesCount = 4 [default = 0];

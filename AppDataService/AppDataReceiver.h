@@ -1,8 +1,10 @@
 #pragma once
 
-#include <QUdpSocket>
+#include <asio.hpp>
 
-#include "../UtilsLib/SimpleThread.h"
+using namespace asio;
+using namespace asio::ip;
+
 #include "../OnlineLib/CircularLogger.h"
 #include "AppDataSource.h"
 
@@ -10,11 +12,24 @@
 // AppDataReceiver is receives RUP datagrams and push it in AppDataSource's queues
 //
 
+class StdThreadsGuard
+{
+public:
+	StdThreadsGuard();
+	~StdThreadsGuard();
+
+	void append(std::thread& thread);
+
+private:
+	std::map<std::size_t, std::thread> m_threads;
+};
+
 class AppDataReceiver : public RunOverrideThread
 {
 public:
 	AppDataReceiver(const HostAddressPort& dataReceivingIP,
 					AppDataSources& appDataSources,
+					int processingThreadsCount,
 					E::SoftwareRunMode swRunMode,
 					CircularLoggerShared log);
 
@@ -22,33 +37,79 @@ public:
 
 	void fillAppDataReceiveState(Network::AppDataReceiveState* adrs);
 
+	const AppDataSources& appDataSources() { return m_appDataSources; }
+
+	CircularLoggerShared log() { return m_log; }
+
 private:
 	virtual void run() override;
 
-	bool tryCreateAndBindSocket();
-	void closeSocket();
+	void startTimer1s();
+	void onTimer1s(const error_code& error);
 
-	void receivePackets();
+	void clearReceiverStatistics();
+	void updateReceiverStatistics();
+	void updateDataSourcesStatistics();
+
+	bool createAndBindSocket();
+	bool isSocketWorkable() const;
+	void closeSocket();
+	void startReceive();
+	void receivePackets(const error_code& error, std::size_t bytesReceived);
+
+	void requireBufferProcessing(AppDataSource* source);
+	void requireSignalsInvalidation(AppDataSource* source);
+
+	void startProcessingThreads(StdThreadsGuard& stg);
+	void wakeupAllProcessingThreads();
+
+	bool stopIfQuitRequested();
+
+	QString appDataReceivingIPStr() const;
 
 private:
-	HostAddressPort m_dataReceivingIP;
 	AppDataSources& m_appDataSources;
-	CircularLoggerShared m_log;
 	bool m_isSimulationMode = false;
+	int m_processingThreadsCountFromSettings = 0;
+	CircularLoggerShared m_log;
 
 	const QThread* m_thisThread = nullptr;
 
 	//
 
-	QUdpSocket* m_socket = nullptr;
+	udp::endpoint m_appDataReceivingIP;
 
-	HashedVector<quint32, quint32> m_unknownAppDataSourcesIP;
+	io_context* m_ioContext = nullptr;
+	steady_timer* m_timer = nullptr;
+	udp::socket* m_socket = nullptr;
+	bool m_socketBound = false;
+	int m_noReceiveCtr = 0;
+
+	static const int RECV_BUFFER_SIZE = sizeof(Rup::SimFrame) + 1;
 
 	//
 
-	std::atomic<int> m_receivingRate = { 0 };				// bytes per second
-	std::atomic<int> m_udpReceivingRate = { 0 };				// UDP datagrams per second
-	std::atomic<int> m_rupFramesReceivingRate = { 0 };		// RUP frames per second
+	int m_writeIndex = 0;
+	udp::endpoint m_receiveFromIP[2];
+	char m_receiveBuffer[2][RECV_BUFFER_SIZE];
+
+	//
+
+	std::mutex m_waitConditionMutex;
+	std::condition_variable m_processingRequiredCondition;
+	std::map<AppDataSource*, bool> m_requireProcessing;		//	source => true	 require buffer processing
+															//	source => false	 require signals invalidation
+
+	friend void processPackets(AppDataReceiver& receiver, int threadNumber);
+
+	//
+
+	std::set<quint32> m_unknownAppDataSourcesIP;
+
+	//
+
+	std::atomic<int> m_receivingSpeed = { 0 };				// bytes per second
+	std::atomic<int> m_rupFramesReceivingSpeed = { 0 };		// RUP frames per second
 	std::atomic<qint64> m_rupFramesCount = { 0 };
 	std::atomic<qint64> m_simFramesCount = { 0 };
 
@@ -60,7 +121,8 @@ private:
 
 	//
 
-	std::atomic<int> m_receivedPerSecond = 0;
-	std::atomic<int> m_udpReceivedPerSecond = 0;
-	std::atomic<int> m_rupFramesReceivedPerSecond = 0;
+	int m_receivedPerSecond = 0;
+	int m_rupFramesReceivedPerSecond = 0;
 };
+
+void processPackets(AppDataReceiver& receiver, int threadNumber);

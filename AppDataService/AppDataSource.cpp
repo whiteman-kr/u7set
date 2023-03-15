@@ -17,11 +17,14 @@ AppSignals::~AppSignals()
 void AppSignals::clear()
 {
 	m_hashToSignal.clear();
+	m_idToSignal.clear();
 
-	for(auto& p : m_idToSignal)
+	for(AppSignal* s : m_signals)
 	{
-		delete p.second;
+		delete s;
 	}
+
+	m_signals.clear();
 }
 
 void AppSignals::insert(const ::Proto::AppSignal& protoAppSignal)
@@ -48,6 +51,7 @@ void AppSignals::insert(const ::Proto::AppSignal& protoAppSignal)
 
 	s->loadFromProto(protoAppSignal);
 
+	m_signals.push_back(s);
 	m_idToSignal.insert({appSignalID, s});
 	m_hashToSignal.insert({hash, s});
 }
@@ -88,10 +92,40 @@ const AppSignal* AppSignals::getSignalByHash(Hash hash) const
 
 bool AppSignals::isEmpty() const
 {
-	Q_ASSERT(m_idToSignal.size() == m_hashToSignal.size());
+	Q_ASSERT(m_signals.size() == m_idToSignal.size() &&
+			 m_signals.size() == m_hashToSignal.size());
 
-	return m_idToSignal.empty();
+	return m_signals.empty();
 }
+
+size_t AppSignals::count() const
+{
+	Q_ASSERT(m_signals.size() == m_idToSignal.size() &&
+			 m_signals.size() == m_hashToSignal.size());
+
+	return m_signals.size();
+}
+
+std::vector<AppSignal*>::iterator AppSignals::begin()
+{
+	return m_signals.begin();
+}
+
+std::vector<AppSignal*>::const_iterator AppSignals::begin() const
+{
+	return m_signals.begin();
+}
+
+std::vector<AppSignal*>::iterator AppSignals::end()
+{
+	return m_signals.end();
+}
+
+std::vector<AppSignal*>::const_iterator AppSignals::end() const
+{
+	return m_signals.end();
+}
+
 
 // -------------------------------------------------------------------------------
 //

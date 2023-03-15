@@ -167,19 +167,16 @@ message GetDataSourcesInfoRequest
 {
 }
 
-
 message GetDataSourcesInfoReply
 {
     optional int32 error = 1 [default = 0];
     repeated DataSourceInfo dataSourceInfo = 2;
 }
 
-
 message AppDataReceiveState
 {
-    optional int32 receivingRate = 1 [default = 0];
-	optional int32 udpReceivingRate = 2 [default = 0];
-	optional int32 rupFramesReceivingRate = 3 [default = 0];
+	optional int32 receivingSpeed = 1 [default = 0];
+	optional int32 rupFramesReceivingSpeed = 3 [default = 0];
 
     optional int64 rupFramesCount = 4 [default = 0];
 	optional int64 simFramesCount = 5 [default = 0];
@@ -243,7 +240,6 @@ message AppDataServiceState
 
     optional AppDataReceiveState appDataReceiveState = 7;
 }
-
 
 message SoftwareInfo
 {

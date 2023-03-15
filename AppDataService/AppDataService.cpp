@@ -7,7 +7,7 @@
 #include "TcpAppDataServer.h"
 #include "TcpArchiveClient.h"
 #include "RtTrendsServer.h"
-#include "AsyncAppDataReceiver.h"
+#include "AppDataReceiver.h"
 
 // -------------------------------------------------------------------------------
 //
@@ -131,7 +131,7 @@ void AppDataServiceWorker::runAppDataReceiverThread()
 		return;
 	}
 
-	m_asyncAppDataReceiver = new AsyncAppDataReceiver(m_curSettingsProfile.appDataReceivingIP,
+	m_asyncAppDataReceiver = new AppDataReceiver(m_curSettingsProfile.appDataReceivingIP,
 													  m_appDataSources,
 													  m_appDataProcessingThreadCount,
 													  sessionParams().softwareRunMode,

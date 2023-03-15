@@ -6,7 +6,6 @@
 #include "../UtilsLib/Queue.h"
 #include "../lib/DataSource.h"
 
-#include "AppDataReceiver.h"
 #include "TcpAppDataServer.h"
 #include "TcpArchiveClient.h"
 #include "SignalStatesProcessingThread.h"
@@ -14,7 +13,7 @@
 
 
 class TcpArchiveClient;
-class AsyncAppDataReceiver;
+class AppDataReceiver;
 
 namespace RtTrends
 {
@@ -129,7 +128,7 @@ private:
 
 	DynamicAppSignalStates m_signalStates;
 
-	AsyncAppDataReceiver* m_asyncAppDataReceiver = nullptr;
+	AppDataReceiver* m_asyncAppDataReceiver = nullptr;
 
 	SignalStatesProcessingThread* m_signalStatesProcessingThread = nullptr;
 

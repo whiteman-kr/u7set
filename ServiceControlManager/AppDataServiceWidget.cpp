@@ -547,9 +547,8 @@ void AppDataServiceWidget::updateServiceState()
 
 	auto state = m_tcpClientSocket->serviceState().appdatareceivestate();
 
-	stateTabModel()->setData(stateTabModel()->index(8, 1), static_cast<qint64>(state.receivingrate()));
-	stateTabModel()->setData(stateTabModel()->index(9, 1), static_cast<qint64>(state.udpreceivingrate()));
-	stateTabModel()->setData(stateTabModel()->index(10, 1), static_cast<qint64>(state.rupframesreceivingrate()));
+	stateTabModel()->setData(stateTabModel()->index(8, 1), static_cast<qint64>(state.receivingspeed()));
+	stateTabModel()->setData(stateTabModel()->index(10, 1), static_cast<qint64>(state.rupframesreceivingspeed()));
 
 	stateTabModel()->setData(stateTabModel()->index(11, 1), static_cast<qint64>(state.rupframescount()));
 	stateTabModel()->setData(stateTabModel()->index(12, 1), static_cast<qint64>(state.simframescount()));

@@ -1,6 +1,6 @@
 #include "TcpAppDataServer.h"
 #include "AppDataService.h"
-#include "AsyncAppDataReceiver.h"
+#include "AppDataReceiver.h"
 
 // -------------------------------------------------------------------------------
 //
@@ -10,7 +10,7 @@
 
 TcpAppDataServer::TcpAppDataServer(const SoftwareInfo& softwareInfo,
 								   E::SecurityLevel securityLevel,
-								   AsyncAppDataReceiver* appDataReceiverThread,
+								   AppDataReceiver* appDataReceiverThread,
 								   SignalStatesProcessingThread* signalStatesProcessingThread) :
 	Tcp::Server(softwareInfo, securityLevel, "AppDataServer"),
 	m_appDataReceiverThread(appDataReceiverThread),
@@ -226,7 +226,7 @@ void TcpAppDataServer::onGetAppSignalParamRequest(const char* requestData, quint
 	{
 		Hash hash = m_getAppSignalParamRequest.signalhashes(i);
 
-		const AppSignal* signal = appSignals().getSignal(hash);
+		const AppSignal* signal = appSignals().getSignalByHash(hash);
 
 		if (signal == nullptr)
 		{
@@ -267,7 +267,7 @@ void TcpAppDataServer::onGetAppSignalRequest(const char* requestData, quint32 re
 	{
 		Hash hash = m_getAppSignalRequest.signalhashes(i);
 
-		const AppSignal* signal = appSignals().getSignal(hash);
+		const AppSignal* signal = appSignals().getSignalByHash(hash);
 
 		if (signal == nullptr)
 		{
