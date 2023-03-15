@@ -51,15 +51,10 @@ namespace ClientLib
 			return *this;
 		}
 
-		tcpSignalClient = src.tcpSignalClient;
-		tcpClientThread = src.tcpClientThread;
-		tcpSignalRecents = src.tcpSignalRecents;
-		tcpClientRecentThread = src.tcpClientRecentThread;
-
-		src.tcpSignalClient = nullptr;
-		src.tcpClientThread = nullptr;
-		src.tcpSignalRecents = nullptr;
-		src.tcpClientRecentThread = nullptr;
+		tcpSignalClient = std::exchange(src.tcpSignalClient, nullptr);
+		tcpClientThread = std::exchange(src.tcpClientThread, nullptr);
+		tcpSignalRecents = std::exchange(src.tcpSignalRecents, nullptr);
+		tcpClientRecentThread = std::exchange(src.tcpClientRecentThread, nullptr);
 
 		return *this;
 	}
@@ -89,8 +84,7 @@ namespace ClientLib
 	HostAddressPort AdsConnection::Connection::address() const
 	{
 		Q_ASSERT(tcpSignalClient);
-		Q_ASSERT(tcpSignalRecents);
-		Q_ASSERT(tcpSignalClient->serverAddressPort1() == tcpSignalRecents->serverAddressPort1());
+		Q_ASSERT(tcpSignalRecents == nullptr || tcpSignalClient->serverAddressPort1() == tcpSignalRecents->serverAddressPort1());
 
 		return tcpSignalClient->serverAddressPort1();
 	}
@@ -103,6 +97,12 @@ namespace ClientLib
 		m_logFile{logFile, "AdsConnection"}
 	{
 		return;
+	}
+
+	AdsConnection::~AdsConnection()
+	{
+		qDebug() << "~AdsConnection()";
+		m_logFile.writeMessage("~AdsConnection()");
 	}
 
 	void AdsConnection::updateConnections(const SoftwareInfo& softwareInfo, const std::vector<SoftwareEndpoint::AppDataService>& appDataServices)
@@ -139,6 +139,7 @@ namespace ClientLib
 
 		for (const Connection& c : m_conns)
 		{
+			Q_ASSERT(c.tcpSignalClient);
 			states.emplace_back(c.tcpSignalClient->getConnectionState());
 		}
 
@@ -148,10 +149,17 @@ namespace ClientLib
 	std::vector<Tcp::ConnectionState> AdsConnection::recentSignalConnStates() const
 	{
 		std::vector<Tcp::ConnectionState> states;
+
+		if (m_recentAppSignals == nullptr)
+		{
+			return states;
+		}
+
 		states.reserve(m_conns.size());
 
 		for (const Connection& c : m_conns)
 		{
+			Q_ASSERT(c.tcpSignalRecents);
 			states.emplace_back(c.tcpSignalRecents->getConnectionState());
 		}
 

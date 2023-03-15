@@ -50,6 +50,7 @@ namespace ClientLib
 		explicit AdsConnection(IAppSignalUpdater& signalUpdater,
 							   IRecentAppSignals* recentAppSignals,		// Can be nullptr, then recent state comm thread will not be created.
 							   ILogFile* logFile);
+		virtual ~AdsConnection();
 
 	public:
 		/// Call this function when the new configuration arrived to recreate communication thread with the new configuration

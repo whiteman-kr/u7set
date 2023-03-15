@@ -103,7 +103,7 @@ TEST(ConfigControllerTests, monitorToConfigControllerConnection)
 
 	Tcp::ConnectionState state = configController.getConnectionState();
 	EXPECT_TRUE(state.isConnected);
-	EXPECT_EQ(state.peerAddr, host1);
+	EXPECT_EQ(state.peerAddr.toStdString(), host1.toStdString());
 
 	ASSERT_FALSE(result.isEmpty());		// Should be "Ok"
 
@@ -115,10 +115,10 @@ TEST(ConfigControllerTests, monitorToConfigControllerConnection)
 
 	// Test MonitorSettings
 	//
-	EXPECT_EQ(configController.receivedSettings.configService1.address, HostAddressPort("127.0.0.1", 13312));
+	EXPECT_EQ(configController.receivedSettings.configService1.address.toStdString(), HostAddressPort("127.0.0.1", 13312).toStdString());
 	EXPECT_EQ(configController.receivedSettings.configService1.equipmentId, "SYSTEMID_CLIENTTEST_WS01_CFGS");
 
-	EXPECT_EQ(configController.receivedSettings.configService2.address, HostAddressPort("127.0.0.1", 13313));
+	EXPECT_EQ(configController.receivedSettings.configService2.address.toStdString(), HostAddressPort("127.0.0.1", 13313).toStdString());
 	EXPECT_EQ(configController.receivedSettings.configService2.equipmentId, "SYSTEMID_CLIENTTEST_WS02_CFGS");
 
 	EXPECT_EQ(configController.receivedSettings.startSchemaId, "STARTSCHEMA");
@@ -266,8 +266,9 @@ TEST(ConfigControllerTests, setConnectionParams)
 	}
 
 	state = configController.getConnectionState();
+
 	EXPECT_TRUE(state.isConnected);
-	EXPECT_EQ(state.peerAddr, goodHost);
+	EXPECT_EQ(state.peerAddr.toStdString(), goodHost.toStdString());
 
 	EXPECT_TRUE(spy.isEmpty());
 
