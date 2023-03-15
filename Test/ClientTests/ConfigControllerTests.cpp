@@ -6,16 +6,14 @@
 
 namespace
 {
-	std::atomic<bool> connectedFlag = false;
-
-	std::mutex mutexConnected;
-	QString connectionResult;
-	std::list<std::tuple<QString, bool, QByteArray>> readFiles;
-
-
 	class MonitorConfigControllerStub : public ClientLib::ConfigController
 	{
 	public:
+		MonitorConfigControllerStub(const SoftwareInfo& softwareInfo, HostAddressPort address, ILogFile* logFile) :
+			ClientLib::ConfigController{softwareInfo, address, logFile}
+		{
+		}
+
 		MonitorConfigControllerStub(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2, ILogFile* logFile) :
 			ClientLib::ConfigController{softwareInfo, address1, address2, logFile}
 		{
@@ -58,6 +56,11 @@ namespace
 		ClientLib::ConfigurationInfo receivedConf;
 		MonitorSettings receivedSettings;
 		BuildFileInfoArray receivedFiles;
+
+		std::atomic<bool> connectedFlag = false;
+		std::mutex mutexConnected;
+		QString connectionResult;
+		std::list<std::tuple<QString, bool, QByteArray>> readFiles;
 	};
 
 }
@@ -81,10 +84,10 @@ TEST(ConfigControllerTests, monitorToConfigControllerConnection)
 	QElapsedTimer timer;
 	timer.start();
 
-	while (timer.hasExpired(3000) == false && connectedFlag == false)
+	while (timer.hasExpired(1000) == false && configController.connectedFlag == false)
 	{
 		QCoreApplication::instance()->processEvents();
-		QThread::usleep(10);
+		QThread::msleep(10);
 	}
 
 	// Get and check results
@@ -93,10 +96,14 @@ TEST(ConfigControllerTests, monitorToConfigControllerConnection)
 	std::list<std::tuple<QString, bool, QByteArray>> readFilesFromServer;
 
 	{
-		std::unique_lock lock{mutexConnected};
-		result = connectionResult;
-		readFilesFromServer = readFiles;
+		std::unique_lock lock{configController.mutexConnected};
+		result = configController.connectionResult;
+		readFilesFromServer = configController.readFiles;
 	}
+
+	Tcp::ConnectionState state = configController.getConnectionState();
+	EXPECT_TRUE(state.isConnected);
+	EXPECT_EQ(state.peerAddr, host1);
 
 	ASSERT_FALSE(result.isEmpty());		// Should be "Ok"
 
@@ -134,6 +141,8 @@ TEST(ConfigControllerTests, monitorToConfigControllerConnection)
 
 	// Test files
 	//
+	EXPECT_TRUE(configController.hasFileId(CfgFileId::LOGO));
+
 	bool ConfigurationXml = false;
 	bool GlobalScriptJs = false;
 	bool SchemaDetailsPbuf = false;
@@ -177,6 +186,108 @@ TEST(ConfigControllerTests, monitorToConfigControllerConnection)
 	{
 		EXPECT_TRUE(success) << file.toStdString();
 	}
+
+	return;
+}
+
+TEST(ConfigControllerTests, wrongCliendId)
+{
+	ILogFileStub log;
+	SoftwareInfo softwareInfo;
+	softwareInfo.init(E::SoftwareType::Monitor, "WRONG_SYSTEMID_CLIENTTEST_WS03_MONITOR", 0, 0);
+	HostAddressPort host{"127.0.0.1", 13312};
+
+	// Set bad client EquipmentID, error is expected
+	//
+	MonitorConfigControllerStub configController{softwareInfo, host, &log};
+	configController.start();
+
+	QSignalSpy spy{&configController, &ClientLib::ConfigController::error};
+
+	// Wait for connection for some time
+	//
+	QElapsedTimer timer;
+	timer.start();
+
+	while (timer.hasExpired(1000) == false && spy.empty() == true)
+	{
+		QCoreApplication::instance()->processEvents();
+		QThread::msleep(10);
+	}
+
+	Tcp::ConnectionState state = configController.getConnectionState();
+	EXPECT_FALSE(state.isConnected);
+
+	// Expected one error about wrong client id
+	//
+	EXPECT_EQ(spy.size(), 1);
+
+	return;
+}
+
+TEST(ConfigControllerTests, setConnectionParams)
+{
+	ILogFileStub log;
+	SoftwareInfo softwareInfo;
+	softwareInfo.init(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR", 0, 0);
+	HostAddressPort goodHost{"127.0.0.1", 13312};
+	HostAddressPort wrongHost{"192.168.99.103", 13313};
+
+	// Set wrong host, expect connection NOT established
+	//
+	MonitorConfigControllerStub configController{softwareInfo, wrongHost, &log};
+	configController.start();
+
+	QSignalSpy spy{&configController, &ClientLib::ConfigController::error};
+
+	// Wait for connection for some time
+	//
+	QElapsedTimer timer;
+	timer.start();
+
+	while (timer.hasExpired(1000) == false && spy.empty() == true)
+	{
+		QCoreApplication::instance()->processEvents();
+		QThread::msleep(10);
+	}
+
+	Tcp::ConnectionState state = configController.getConnectionState();
+	EXPECT_FALSE(state.isConnected);
+
+	// Set good host and expect connected
+	//
+	configController.setConnectionParams("SYSTEMID_CLIENTTEST_WS03_MONITOR", goodHost, goodHost);
+
+	timer.restart();
+	while (timer.hasExpired(1000) == false && configController.connectedFlag == false)
+	{
+		QCoreApplication::instance()->processEvents();
+		QThread::msleep(10);
+	}
+
+	state = configController.getConnectionState();
+	EXPECT_TRUE(state.isConnected);
+	EXPECT_EQ(state.peerAddr, goodHost);
+
+	EXPECT_TRUE(spy.isEmpty());
+
+	return;
+}
+
+TEST(ConfigControllerTests, twoClientsOnSameComputer)
+{
+	ILogFileStub log;
+	SoftwareInfo softwareInfo;
+	softwareInfo.init(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR", 0, 0);
+	HostAddressPort host{"127.0.0.1", 13312};
+
+	MonitorConfigControllerStub configController1{softwareInfo, host, &log};
+	MonitorConfigControllerStub configController2{softwareInfo, host, &log};
+	MonitorConfigControllerStub configController3{softwareInfo, host, &log};
+
+	EXPECT_NE(configController1.appInstanceNo(), configController2.appInstanceNo());
+	EXPECT_NE(configController1.appInstanceNo(), configController3.appInstanceNo());
+	EXPECT_NE(configController2.appInstanceNo(), configController3.appInstanceNo());
 
 	return;
 }

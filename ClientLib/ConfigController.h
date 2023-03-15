@@ -79,6 +79,9 @@ namespace ClientLib
 		///
 		void error(QString errorMessage);
 
+	public:
+		int appInstanceNo() const;
+
 	protected:
 		mutable HasLogFile m_logFile;
 		SoftwareInfo m_softwareInfo;

@@ -426,4 +426,9 @@ namespace ClientLib
 		return;
 	}
 
+	int ConfigController::appInstanceNo() const
+	{
+		return m_appInstanceNo;
+	}
+
 }
