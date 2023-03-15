@@ -35,10 +35,7 @@ $CI_PROJECT_DIR/bin_unix/debug/BuilderConsole $CI_PROJECT_DIR/Test/BuilderConsol
 
 # Start services for functional tests
 #
-set +e
-pkill CfgSrv
-set -e
-
+pkill CfgSrv || true
 $CI_PROJECT_DIR/bin_unix/debug/CfgSrv -e -id=SYSTEMID_CLIENTTEST_WS01_CFGS -profile=Default -b=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -ip=127.0.0.1:13312 < /dev/null > cfgsrv.out &
 sleep 3
 jobs
@@ -52,7 +49,7 @@ jobs
 
 # Stop services for functional tests
 #
-pkill CfgSrv
+pkill CfgSrv || true
 sleep 1
 jobs
 
@@ -89,6 +86,11 @@ TEST_DIR="./Test/MetrologyTests"
 TEST_OUTPUT_FILE="MetrologyTests.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
+# Builder
+TEST_DIR="./Builder/debug"
+TEST_OUTPUT_FILE="Builder.info"
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+
 # Simulator
 TEST_DIR="./Simulator/debug"
 TEST_OUTPUT_FILE="Simulator.info"
@@ -117,13 +119,13 @@ lcov --output-file $OUTPUT_DIR/u7set-dirty.info \
     --add-tracefile $OUTPUT_DIR/DbLib.info \
     --add-tracefile $OUTPUT_DIR/HardwareLib.info \
     --add-tracefile $OUTPUT_DIR/MetrologyTests.info \
+    --add-tracefile $OUTPUT_DIR/Builder.info \
     --add-tracefile $OUTPUT_DIR/Simulator.info \
     --add-tracefile $OUTPUT_DIR/UtilsLib.info \
     --add-tracefile $OUTPUT_DIR/ClientLib.info
 
 # There is no test data for these files yet.
 #
-#--add-tracefile $OUTPUT_DIR/Builder.info             
 #--add-tracefile $OUTPUT_DIR/TrendView.info
 
 # Filter combined file, result stored to $OUTPUT_DIR/u7set.info
