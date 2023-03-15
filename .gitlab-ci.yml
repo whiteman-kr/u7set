@@ -333,7 +333,7 @@ linux_test_job:
     - "#               Run client tests"
     - "# ----------------------------------------------"
     - "pkill CfgSrv"
-    - "$CI_PROJECT_DIR/bin_unix/release/CfgSrv -e -id=SYSTEMID_CLIENTTEST_WS01_CFGS -profile=Default -b=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -ip=127.0.0.1:13312 < /dev/null > cfgsrv.out 2>&1 &"
+    - "$CI_PROJECT_DIR/bin_unix/release/CfgSrv -e -id=SYSTEMID_CLIENTTEST_WS01_CFGS -profile=Default -b=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -ip=127.0.0.1:13312 < /dev/null > cfgsrv.out &"
     - "sleep 3"
     - "jobs"
     - "$CI_PROJECT_DIR/bin_unix/release/ClientTests --gtest_output=xml:ClientTestsLinux.xml"

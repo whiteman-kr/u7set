@@ -9,7 +9,6 @@
 #   sudo pip install python3
 #   sudo pip install lcov-cobertura
 #
-
 set -x  # Echo on
 set -e  # Terminate script if any command returns error
 
@@ -31,13 +30,13 @@ mkdir -p $OUTPUT_DIR
 
 # Build project u7_test_simulator
 #
-if [ -d \"/tmp/build/test_simulator\" ]; then rm -Rf /tmp/build/test_simulator; fi
+rm -Rf /tmp/build/test_simulator
 $CI_PROJECT_DIR/bin_unix/debug/BuilderConsole $CI_PROJECT_DIR/Test/BuilderConsoleArgsCoverage.xml
 
 # Start services for functional tests
 #
 pkill CfgSrv
-$CI_PROJECT_DIR/bin_unix/debug/CfgSrv -e -id=SYSTEMID_CLIENTTEST_WS01_CFGS -profile=Default -b=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -ip=127.0.0.1:13312 < /dev/null > cfgsrv.out 2>&1 &
+$CI_PROJECT_DIR/bin_unix/debug/CfgSrv -e -id=SYSTEMID_CLIENTTEST_WS01_CFGS -profile=Default -b=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -ip=127.0.0.1:13312 < /dev/null > cfgsrv.out &
 sleep 3
 jobs
 
