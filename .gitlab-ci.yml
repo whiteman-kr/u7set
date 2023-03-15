@@ -333,7 +333,7 @@ linux_test_job:
     - "#               Run client tests"
     - "# ----------------------------------------------"
     - "pkill CfgSrv || true"
-    - "$CI_PROJECT_DIR/bin_unix/release/CfgSrv -e -id=SYSTEMID_CLIENTTEST_WS01_CFGS -profile=Default -b=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -ip=127.0.0.1:13312 < /dev/null > cfgsrv.out &"
+    - "$CI_PROJECT_DIR/bin_unix/release/CfgSrv -e -id=SYSTEMID_CLIENTTEST_WS01_CFGS -profile=Default -b=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -ip=127.0.0.1:13312 < /dev/null > cfgsrv.out 2>&1 &"
     - "sleep 3"
     - "jobs"
     - "$CI_PROJECT_DIR/bin_unix/release/ClientTests --gtest_output=xml:ClientTestsLinux.xml"
@@ -408,16 +408,15 @@ linux_code_coverage_job:
     - "#           Collect Test Coverage Data          "
     - "# ----------------------------------------------"
     - "./Test/CodeCoverage.sh"
-    - "ps -A | grep Srv"
 
   coverage: '/lines......: \d+\.\d+/'
   artifacts:
     name: "coverage_report.$CI_PIPELINE_ID $CI_BUILD_REF_SLUG $CI_COMMIT_SHA"
     paths:
-      - CodeCoverage/coverage.xml
+#      - CodeCoverage/coverage.xml
       - CodeCoverage/Report/
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: CodeCoverage/coverage.xml
+#    reports:
+#      coverage_report:
+#        coverage_format: cobertura
+#        path: CodeCoverage/coverage.xml
 

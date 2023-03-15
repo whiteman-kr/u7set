@@ -36,7 +36,7 @@ $CI_PROJECT_DIR/bin_unix/debug/BuilderConsole $CI_PROJECT_DIR/Test/BuilderConsol
 # Start services for functional tests
 #
 pkill CfgSrv || true
-$CI_PROJECT_DIR/bin_unix/debug/CfgSrv -e -id=SYSTEMID_CLIENTTEST_WS01_CFGS -profile=Default -b=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -ip=127.0.0.1:13312 < /dev/null > cfgsrv.out &
+$CI_PROJECT_DIR/bin_unix/debug/CfgSrv -e -id=SYSTEMID_CLIENTTEST_WS01_CFGS -profile=Default -b=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -ip=127.0.0.1:13312 < /dev/null > cfgsrv.out 2>&1 &
 sleep 3
 jobs
 
