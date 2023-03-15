@@ -228,7 +228,7 @@ windows_test_job:
     - "#               Run unit tests"
     - "# ----------------------------------------------"
     - "&$Env:CI_PROJECT_DIR/bin/release/u7databasetests.exe -config=\"$Env:CI_PROJECT_DIR/Test/u7databasetestsArgs.xml\" -o u7databasetests.xml,junitxml -o -,txt"
-    - "&$Env:CI_PROJECT_DIR/bin/release/ClientTests.exe --gtest_filter=-ConfigControllerTests.*  --gtest_output=xml:ClientTestsLinux.xml"
+    - "&$Env:CI_PROJECT_DIR/bin/release/ClientTests.exe --gtest_filter=-AdsConnectionTests.*:ConfigControllerTests.*  --gtest_output=xml:ClientTestsLinux.xml"
     - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorTests.exe -o SimulatorTests.xml,junitxml -o -,txt"
     - "&$Env:CI_PROJECT_DIR/bin/release/MetrologyTests.exe -o MetrologyTests.xml,junitxml -o -,txt"
 

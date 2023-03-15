@@ -53,18 +53,49 @@ TEST(AdsConnectionTests, connectToAds)
 {
 	ILogFileStub log;
 	MockAppSignalUpdater signalUpdater;
+	MockRecentAppSignals recentlyUsedSignals;
 
 	SoftwareInfo softwareInfo;
 	softwareInfo.init(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR", 0, 0);
 
+	// MockAppSignalUpdater
+	//
+	EXPECT_CALL(signalUpdater, notifySignalParamsUpdated())
+			.Times(2);	// 2 times, once for each ADS whern all signals loaded (per ADS).
+
 	EXPECT_CALL(signalUpdater, reset())
-			.Times(1);	// 1 time in adsConnection.updateConnections
+			.Times(1);	// 1 time in adsConnection.updateConnections.
 
 	EXPECT_CALL(signalUpdater, invalidateSignalStates(_))
-			.Times(2);	// 2 times on disconnect two ADSs.
+			.Times(4);	// 4 times on disconnect two ADSs * two recent connections.
 
+	EXPECT_CALL(signalUpdater, addSignals(_, QString{"SYSTEMID_CLIENTTEST_WS01_ADS"}))
+			.Times(AtLeast(1));
+
+	EXPECT_CALL(signalUpdater, addSignals(_, QString{"SYSTEMID_CLIENTTEST_WS02_ADS"}))
+			.Times(AtLeast(1));
+
+	EXPECT_CALL(signalUpdater, setState(_, _))
+			.Times(AtLeast(2));
+
+	// MockRecentAppSignals
+	//
+	EXPECT_CALL(recentlyUsedSignals, addRecentAppSignal(_))
+			.Times(0);
+
+	EXPECT_CALL(recentlyUsedSignals, addRecentAppSignals(_))
+			.Times(0);
+
+	EXPECT_CALL(recentlyUsedSignals, recentlyUsedAppSignals(QString{"SYSTEMID_CLIENTTEST_WS01_ADS"}))
+			.Times(AtLeast(1));
+
+	EXPECT_CALL(recentlyUsedSignals, recentlyUsedAppSignals(QString{"SYSTEMID_CLIENTTEST_WS02_ADS"}))
+			.Times(AtLeast(1));
+
+	// Start
+	//
 	{
-		ClientLib::AdsConnection adsConnection{signalUpdater, nullptr, &log};
+		ClientLib::AdsConnection adsConnection{signalUpdater, &recentlyUsedSignals, &log};
 		adsConnection.updateConnections(softwareInfo, AppDataServices);
 
 		// Wait for connection established
@@ -77,26 +108,32 @@ TEST(AdsConnectionTests, connectToAds)
 			QCoreApplication::instance()->processEvents();
 			QThread::msleep(10);
 
+			// Wait for 20 replies, so all signals are loaded and some states are received.
+			//
 			std::vector<Tcp::ConnectionState> adsConnStates = adsConnection.tcpSignalConnStates();
-			if (std::all_of(adsConnStates.begin(), adsConnStates.end(), [](const auto& s) { return s.isConnected; }))
+			if (std::all_of(adsConnStates.begin(), adsConnStates.end(), [](const auto& s) { return s.replyCount > 20; }))
 			{
 				break;
 			}
 		}
 
-		// Check that two connections are established
+		// Check that two connections are established.
 		//
 		std::vector<Tcp::ConnectionState> adsConnStates = adsConnection.tcpSignalConnStates();
 		std::vector<Tcp::ConnectionState> adsRecntStates = adsConnection.recentSignalConnStates();
 
 		ASSERT_EQ(adsConnStates.size(), 2);
-		ASSERT_EQ(adsRecntStates.size(), 0);
+		ASSERT_EQ(adsRecntStates.size(), 2);
 
 		EXPECT_TRUE(adsConnStates[0].isConnected);
 		EXPECT_TRUE(adsConnStates[1].isConnected);
-
 		EXPECT_EQ(adsConnStates[0].peerAddr.toStdString(), AppDataServices[0].address.toStdString());
 		EXPECT_EQ(adsConnStates[1].peerAddr.toStdString(), AppDataServices[1].address.toStdString());
+
+		EXPECT_TRUE(adsRecntStates[0].isConnected);
+		EXPECT_TRUE(adsRecntStates[1].isConnected);
+		EXPECT_EQ(adsRecntStates[0].peerAddr.toStdString(), AppDataServices[0].address.toStdString());
+		EXPECT_EQ(adsRecntStates[1].peerAddr.toStdString(), AppDataServices[1].address.toStdString());
 	}
 
 	return;

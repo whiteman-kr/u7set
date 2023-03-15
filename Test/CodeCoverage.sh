@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Basic script to run unit ot functional tests with code coverage support
 # and build HTML and XML reports with lcov.
