@@ -30,12 +30,15 @@ mkdir -p $OUTPUT_DIR
 
 # Build project u7_test_simulator
 #
-rm -Rf /tmp/build/test_simulator
+rm -rvf /tmp/build/test_simulator
 $CI_PROJECT_DIR/bin_unix/debug/BuilderConsole $CI_PROJECT_DIR/Test/BuilderConsoleArgsCoverage.xml
 
 # Start services for functional tests
 #
+set +e
 pkill CfgSrv
+set -e
+
 $CI_PROJECT_DIR/bin_unix/debug/CfgSrv -e -id=SYSTEMID_CLIENTTEST_WS01_CFGS -profile=Default -b=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -ip=127.0.0.1:13312 < /dev/null > cfgsrv.out &
 sleep 3
 jobs
@@ -50,7 +53,7 @@ jobs
 # Stop services for functional tests
 #
 pkill CfgSrv
-sleep 2
+sleep 1
 jobs
 
 # Get code coverage data
