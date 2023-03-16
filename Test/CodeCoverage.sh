@@ -9,8 +9,26 @@
 #   sudo pip install python3
 #   sudo pip install lcov-cobertura
 #
-set -x  # Echo on
-set -e  # Terminate script if any command returns error
+set -x  # Echo on.
+set -e  # Terminate script if any command returns error.
+
+# Run StopServices when exit (any error or success).
+#
+trap StopServices EXIT  
+
+function StopServices() {
+    echo "StopServices()"
+
+    # Stop services for functional tests.
+    #
+    pkill CfgSrv || true
+    pkill AppDataSrv || true
+    sleep 1
+}
+
+# Stop if any service is running.
+#
+StopServices   
 
 # lcov exec arguments and output dir.
 # 
@@ -23,21 +41,18 @@ LCOV_COLLECT_ARGUMENTS="--rc lcov_branch_coverage=1 --capture"
 rm -rvf $OUTPUT_DIR
 mkdir -p $OUTPUT_DIR
 
-# Init is not required, as we have empty dir at start
+# Init is not required, as we have empty dir at start.
 #
 #lcov $LCOV_CLEAR_ARGUMENTS --output-file $OUTPUT_DIR/Simulator.info --directory ./Simulator/debug
 
-# Build project u7_test_simulator
+# Build project u7_test_simulator.
 #
 rm -rvf /tmp/build/test_simulator
 $CI_PROJECT_DIR/bin_unix/debug/BuilderConsole $CI_PROJECT_DIR/Test/BuilderConsoleArgsCoverage.xml
 
-# Start services for functional tests
+# Start services for functional tests.
 #
 pushd $CI_PROJECT_DIR/bin_unix/debug
-
-pkill CfgSrv || true
-pkill AppDataSrv || true
 
 cp /tmp/build/${SIMULATOR_PROJECT_NAME}/build/RunServiceScripts/Linux/*.sh .
 chmod +x *.sh
@@ -47,27 +62,23 @@ chmod +x *.sh
 ./Default_systemid_clienttest_ws01_ads.sh < /dev/null > clienttest_ws01_ads.out 2>&1 &
 ./Default_systemid_clienttest_ws02_ads.sh < /dev/null > clienttest_ws02_ads.out 2>&1 &
 
-sleep 3
-jobs
-
-# Run tests
+# Run ClientTests, they are functional.
 #
 ./ClientTests
+
+# Stop services after ClientTests (functional tests)
+#
+StopServices 
+
+# Run other tests, not services are required here.
+#
 ./SimulatorTests
 ./MetrologyTests
 ./u7databasetests -config=$CI_PROJECT_DIR/Test/u7databasetestsArgsCoverage.xml
 
-# Stop services for functional tests
-#
-pkill CfgSrv || true
-pkill AppDataSrv || true
-
-sleep 1
-jobs
-
 popd
 
-# Get code coverage data
+# Get code coverage data.
 #
 
 # AppSignalLib
@@ -142,7 +153,7 @@ lcov --output-file $OUTPUT_DIR/u7set-dirty.info \
 #
 #--add-tracefile $OUTPUT_DIR/TrendView.info
 
-# Filter combined file, result stored to $OUTPUT_DIR/u7set.info
+# Filter combined file, result stored to $OUTPUT_DIR/u7set.info.
 #
 lcov -r $OUTPUT_DIR/u7set-dirty.info "*Qt*.framework*" "/usr/*" "*/Qt/*" "*/Proto*/*" "*.pb.*" "*/Test*/*" "*.moc" "*moc_*.cpp" "*/test/*" --output-file $OUTPUT_DIR/u7set.info
 
@@ -150,7 +161,7 @@ lcov -r $OUTPUT_DIR/u7set-dirty.info "*Qt*.framework*" "/usr/*" "*/Qt/*" "*/Prot
 #
 genhtml --legend --rc lcov_branch_coverage=1 --output-directory $OUTPUT_DIR/Report $OUTPUT_DIR/u7set.info
 
-# Generate cobertura XML (for GitLab CI). 
+# Generate cobertura XML (for GitLab CI).
 # https://pypi.org/project/lcov-cobertura/
 # sudo pip install lcov-cobertura
 #
