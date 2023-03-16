@@ -62,7 +62,7 @@ chmod +x *.sh
 ./Default_systemid_clienttest_ws01_ads.sh < /dev/null > clienttest_ws01_ads.out 2>&1 &
 ./Default_systemid_clienttest_ws02_ads.sh < /dev/null > clienttest_ws02_ads.out 2>&1 &
 
-sleep(5);
+sleep 5
 
 # Run ClientTests, they are functional.
 #
