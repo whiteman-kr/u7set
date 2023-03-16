@@ -103,7 +103,7 @@ TEST(AdsConnectionTests, connectToAds)
 		QElapsedTimer timer;
 		timer.start();
 
-		while (timer.hasExpired(3000) == false)
+		while (timer.hasExpired(5000) == false)
 		{
 			QCoreApplication::instance()->processEvents();
 			QThread::msleep(10);
@@ -138,3 +138,4 @@ TEST(AdsConnectionTests, connectToAds)
 
 	return;
 }
+

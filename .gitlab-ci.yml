@@ -227,10 +227,10 @@ windows_test_job:
     - "# ----------------------------------------------"
     - "#               Run unit tests"
     - "# ----------------------------------------------"
-    - "&$Env:CI_PROJECT_DIR/bin/release/u7databasetests.exe -config=\"$Env:CI_PROJECT_DIR/Test/u7databasetestsArgs.xml\" -o u7databasetests.xml,junitxml -o -,txt"
-    - "&$Env:CI_PROJECT_DIR/bin/release/ClientTests.exe --gtest_filter=-AdsConnectionTests.*:ConfigControllerTests.*  --gtest_output=xml:ClientTestsLinux.xml"
-    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorTests.exe -o SimulatorTests.xml,junitxml -o -,txt"
-    - "&$Env:CI_PROJECT_DIR/bin/release/MetrologyTests.exe -o MetrologyTests.xml,junitxml -o -,txt"
+    - "&$Env:CI_PROJECT_DIR/bin/release/ClientTests.exe --gtest_filter=-AdsConnectionTests.*:ConfigControllerTests.*  --gtest_output=xml:ClientTestsLinux.xml"    
+    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorTests.exe"
+    - "&$Env:CI_PROJECT_DIR/bin/release/MetrologyTests.exe"
+    - "&$Env:CI_PROJECT_DIR/bin/release/u7databasetests.exe -config=\"$Env:CI_PROJECT_DIR/Test/u7databasetestsArgs.xml\""
 
 #Run Builder test
     - "# ----------------------------------------------"
@@ -256,19 +256,6 @@ windows_test_job:
     - "#               Run ROVT tests"
     - "# ----------------------------------------------"
     - "#&C:/ROVT/ROVT_C.exe /b:C:\\Temp\\build\\$Env:SIMULATOR_PROJECT_NAME\\build"
-  artifacts:
-    name: "u7set_test_windows_0.9.$CI_PIPELINE_ID $CI_BUILD_REF_SLUG $CI_COMMIT_SHA"
-    paths:
-      - u7databasetests.xml
-      - ClientTests.xml
-      - SimulatorTests.xml
-      - MetrologyTests.xml
-    reports:
-      junit: 
-        - u7databasetests.xml
-        - ClientTests.xml
-        - SimulatorTests.xml
-        - MetrologyTests.xml
 
 
 linux_test_job:
@@ -354,29 +341,15 @@ linux_test_job:
     - "# ----------------------------------------------"
     - "#               Run unit tests"
     - "# ----------------------------------------------"
-    - "$CI_PROJECT_DIR/bin_unix/release/SimulatorTests -o SimulatorTestsLinux.xml,junitxml -o -,txt"
-    - "$CI_PROJECT_DIR/bin_unix/release/MetrologyTests -o MetrologyTests.xml,junitxml -o -,txt"
-    - "$CI_PROJECT_DIR/bin_unix/release/u7databasetests -config=$CI_PROJECT_DIR/Test/u7databasetestsArgsLinux.xml -o u7databasetestslinux.xml,junitxml -o -,txt"
+    - "$CI_PROJECT_DIR/bin_unix/release/SimulatorTests"
+    - "$CI_PROJECT_DIR/bin_unix/release/MetrologyTests"
+    - "$CI_PROJECT_DIR/bin_unix/release/u7databasetests -config=$CI_PROJECT_DIR/Test/u7databasetestsArgsLinux.xml"
 
 #Run ROVT to check configuration generation
 #    - "# ----------------------------------------------"
 #    - "#               Run ROVT tests"
 #    - "# ----------------------------------------------"
 #    - "#&C:/ROVT/ROVT_C.exe /b:C:\\Temp\\build\\${SIMULATOR_PROJECT_NAME}\\build"
-
-  artifacts:
-    name: "u7set_test_linux_0.9.$CI_PIPELINE_ID $CI_BUILD_REF_SLUG $CI_COMMIT_SHA"
-    paths:
-      - u7databasetestslinux.xml
-      - ClientTestsLinux.xml
-      - SimulatorTestsLinux.xml
-      - MetrologyTests.xml
-    reports:
-      junit: 
-        - u7databasetestslinux.xml
-        - ClientTestsLinux.xml
-        - SimulatorTestsLinux.xml
-        - MetrologyTests.xml
 
 
 linux_code_coverage_job:

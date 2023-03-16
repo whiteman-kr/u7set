@@ -52,10 +52,10 @@ jobs
 
 # Run tests
 #
-ClientTests
-SimulatorTests
-MetrologyTests
-u7databasetests -config=$CI_PROJECT_DIR/Test/u7databasetestsArgsCoverage.xml
+./ClientTests
+./SimulatorTests
+./MetrologyTests
+./u7databasetests -config=$CI_PROJECT_DIR/Test/u7databasetestsArgsCoverage.xml
 
 # Stop services for functional tests
 #
