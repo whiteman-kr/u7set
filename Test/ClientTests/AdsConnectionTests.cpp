@@ -139,3 +139,64 @@ TEST(AdsConnectionTests, connectToAds)
 	return;
 }
 
+TEST(AdsConnectionTests, adsTimeout)
+{
+	ILogFileStub log;
+	MockAppSignalUpdater signalUpdater;
+
+	SoftwareInfo softwareInfo;
+	softwareInfo.init(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR", 0, 0);
+
+	// MockAppSignalUpdater
+	//
+	EXPECT_CALL(signalUpdater, notifySignalParamsUpdated())
+			.Times(0);
+
+	EXPECT_CALL(signalUpdater, reset())
+			.Times(1);	// 1 time in adsConnection.updateConnections.
+
+	EXPECT_CALL(signalUpdater, invalidateSignalStates(_))
+			.Times(0);
+
+	EXPECT_CALL(signalUpdater, addSignals(_, _))
+			.Times(0);
+
+	EXPECT_CALL(signalUpdater, setState(_, _))
+			.Times(0);
+
+	// Start
+	//
+	{
+		auto servers = AppDataServices;
+		servers[0].address = {"192.178.12.90", 13323};		// Some unreachable addresses.
+		servers[1].address = {"192.178.13.90", 13323};		//
+
+		ClientLib::AdsConnection adsConnection{signalUpdater, nullptr, &log};
+		adsConnection.updateConnections(softwareInfo, servers);
+
+		// Wait for connection established
+		//
+		QElapsedTimer timer;
+		timer.start();
+
+		while (timer.hasExpired(3000) == false)
+		{
+			QCoreApplication::instance()->processEvents();
+			QThread::msleep(10);
+		}
+
+		// Check that two connections are established.
+		//
+		std::vector<Tcp::ConnectionState> adsConnStates = adsConnection.tcpSignalConnStates();
+		std::vector<Tcp::ConnectionState> adsRecntStates = adsConnection.recentSignalConnStates();
+
+		ASSERT_EQ(adsConnStates.size(), 2);
+		ASSERT_EQ(adsRecntStates.size(), 0);
+
+		EXPECT_FALSE(adsConnStates[0].isConnected);
+		EXPECT_FALSE(adsConnStates[1].isConnected);
+	}
+
+	return;
+}
+
