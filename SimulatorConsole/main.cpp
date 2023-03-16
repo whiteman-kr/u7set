@@ -48,7 +48,7 @@ void messageOutputHandler(QtMsgType type, const QMessageLogContext& context, con
 void showProgrammUsageHint()
 {
 	std::cout << "Programm usage:\n";
-	std::cout << "  SimulatorConsole [-build=build_dir] [-script=script_file] [-profile=profile_name] [-unlock_timer] [-verbose]\n";
+	std::cout << "  SimulatorConsole [-build=build_dir] [-script=script_file] [-profile=profile_name] [-unlock_timer] [-verbose] [-enable_lan]\n";
 	std::cout << "\n";
 	std::cout << "Create template simualtion script:\n";
 	std::cout << "  SimulatorConsole [-create=file_name]\n";
@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
 	QCoreApplication app(argc, argv);
 
 	// Parse arguments
-	// SimulatorConsole.exe [-build=build_dir] [-script=script_file] [-profile=profile_name] [-unlock_timer] [-verbose]
+	// SimulatorConsole.exe [-build=build_dir] [-script=script_file] [-profile=profile_name] [-unlock_timer] [-verbose] [-enable_lan]
 	// SimulatorConsole.exe [-create=file_name]
 	//
 	QStringList args = QCoreApplication::arguments();
@@ -145,6 +145,7 @@ int main(int argc, char *argv[])
 	QString scriptFile;
 	QString profileName;
 	bool unlockTimer = false;
+	bool enableLan = false;
 
 	for (int argIndex = 1; argIndex < argc; argIndex++)
 	{
@@ -187,6 +188,12 @@ int main(int argc, char *argv[])
 			continue;
 		}
 
+		if (args[argIndex].compare("-enable_lan", Qt::CaseInsensitive) == 0)
+		{
+			enableLan = true;
+			continue;
+		}
+
 		// --
 		//
 		std::cout << "Unknown argument: " << args[argIndex].toStdString() << "\n\n";
@@ -209,6 +216,7 @@ int main(int argc, char *argv[])
 	simulator.setCurrentProfile(profileName);
 	simulator.control().setUnlockTimer(unlockTimer);
 	simulator.control().setRunList({});		// Add all modules to simulation
+	simulator.software().setEnabled(enableLan);
 
 	bool ok = true;
 

@@ -23,6 +23,7 @@ function StopServices() {
     #
     pkill CfgSrv || true
     pkill AppDataSrv || true
+    pkill SimulatorConsole || true
     sleep 1
 }
 
@@ -41,7 +42,7 @@ LCOV_COLLECT_ARGUMENTS="--rc lcov_branch_coverage=1 --capture"
 rm -rvf $OUTPUT_DIR
 mkdir -p $OUTPUT_DIR
 
-# Init is not required, as we have empty dir at start.
+# Init is not required, as we have an empty dir at start.
 #
 #lcov $LCOV_CLEAR_ARGUMENTS --output-file $OUTPUT_DIR/Simulator.info --directory ./Simulator/debug
 
@@ -57,10 +58,12 @@ pushd $CI_PROJECT_DIR/bin_unix/debug
 cp /tmp/build/${SIMULATOR_PROJECT_NAME}/build/RunServiceScripts/Linux/*.sh .
 chmod +x *.sh
 
-./Default_systemid_clienttest_ws01_cfgs.sh < /dev/null > clienttest_ws01_cfgs.out 2>&1 &
-./Default_systemid_clienttest_ws02_cfgs.sh < /dev/null > clienttest_ws02_cfgs.out 2>&1 &
+./Default_systemid_clienttest_ws01_cfgs.sh simulation < /dev/null > clienttest_ws01_cfgs.out 2>&1 &
+./Default_systemid_clienttest_ws02_cfgs.sh simulation < /dev/null > clienttest_ws02_cfgs.out 2>&1 &
 ./Default_systemid_clienttest_ws01_ads.sh < /dev/null > clienttest_ws01_ads.out 2>&1 &
 ./Default_systemid_clienttest_ws02_ads.sh < /dev/null > clienttest_ws02_ads.out 2>&1 &
+./Default_systemid_clienttest_ws02_ads.sh < /dev/null > clienttest_ws02_ads.out 2>&1 &
+./SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -enable_lan < /dev/null > SimulatorConsole.out 2>&1 &
 
 sleep 5
 
@@ -88,14 +91,14 @@ TEST_DIR="./AppSignalLib/debug"
 TEST_OUTPUT_FILE="AppSignalLib.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
-# Builder
-TEST_DIR="./Builder/debug"
-TEST_OUTPUT_FILE="Builder.info"
-lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
-
 # CommonLib
 TEST_DIR="./CommonLib/debug"
 TEST_OUTPUT_FILE="CommonLib.info"
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+
+# OnlineLib
+TEST_DIR="./OnlineLib/debug"
+TEST_OUTPUT_FILE="OnlineLib.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # DbLib
@@ -138,22 +141,32 @@ TEST_DIR="./ClientLib/debug"
 TEST_OUTPUT_FILE="ClientLib.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
+# AppDataSrv
+TEST_DIR="./AppDataService/debug"
+TEST_OUTPUT_FILE="AppDataSrv.info"
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+
+# CfgSrv
+TEST_DIR="./ConfigurationService/debug"
+TEST_OUTPUT_FILE="CfgSrv.info"
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+
+
 # Combine results to a single file, result stored to $OUTPUT_DIR/u7set-dirty.info
 #
 lcov --output-file $OUTPUT_DIR/u7set-dirty.info \
     --add-tracefile $OUTPUT_DIR/AppSignalLib.info \
     --add-tracefile $OUTPUT_DIR/CommonLib.info \
+    --add-tracefile $OUTPUT_DIR/OnlineLib.info \
     --add-tracefile $OUTPUT_DIR/DbLib.info \
     --add-tracefile $OUTPUT_DIR/HardwareLib.info \
     --add-tracefile $OUTPUT_DIR/MetrologyTests.info \
     --add-tracefile $OUTPUT_DIR/Builder.info \
     --add-tracefile $OUTPUT_DIR/Simulator.info \
     --add-tracefile $OUTPUT_DIR/UtilsLib.info \
-    --add-tracefile $OUTPUT_DIR/ClientLib.info
-
-# There is no test data for these files yet.
-#
-#--add-tracefile $OUTPUT_DIR/TrendView.info
+    --add-tracefile $OUTPUT_DIR/ClientLib.info \
+    --add-tracefile $OUTPUT_DIR/AppDataSrv.info \
+    --add-tracefile $OUTPUT_DIR/CfgSrv.info
 
 # Filter combined file, result stored to $OUTPUT_DIR/u7set.info.
 #

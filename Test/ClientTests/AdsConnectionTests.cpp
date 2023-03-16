@@ -1,7 +1,7 @@
 // Functional tests for class ClientLib::Config controller
 // ConfigurationService must be ranning on localhost and default port
 //
-#include "../../ClientLib/IAppSignalUpdater.h"
+#include "../../ClientLib/AppSignalManager.h"
 #include "../../ClientLib/IRecentAppSignals.h"
 #include "../../ClientLib/AdsConnection.h"
 
@@ -200,3 +200,63 @@ TEST(AdsConnectionTests, adsTimeout)
 	return;
 }
 
+TEST(AdsConnectionTests, receivesState)
+{
+	// Test: Connect to AppSignalManager and check that signal "#SYSTEMID_CLIENTTEST_CH10_MD00_PI_BLINK"
+	//	     is blinking (1 Hz)
+	//
+	ILogFileStub log;
+	ClientLib::AppSignalManager signalManager{&log};
+	SoftwareInfo softwareInfo;
+	softwareInfo.init(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR", 0, 0);
+
+	// Start
+	//
+	ClientLib::AdsConnection adsConnection{signalManager, &signalManager, &log};
+	adsConnection.updateConnections(softwareInfo, AppDataServices);
+
+	// Wait for connection established
+	//
+	QElapsedTimer timer;
+	timer.start();
+	bool connected = false;
+
+	while (timer.hasExpired(3000) == false)
+	{
+		QCoreApplication::instance()->processEvents();
+		QThread::msleep(10);
+
+		// Wait for 30 replies, so all signals are loaded and some states are received.
+		//
+		std::vector<Tcp::ConnectionState> adsConnStates = adsConnection.tcpSignalConnStates();
+		if (std::all_of(adsConnStates.begin(), adsConnStates.end(), [](const auto& s) { return s.replyCount > 30; }))
+		{
+			connected = true;
+			break;
+		}
+	}
+
+	ASSERT_TRUE(connected);
+
+	// Check that signal "#SYSTEMID_CLIENTTEST_CH10_MD00_PI_BLINK" is blinking with frequency 1 Hz1.
+	//
+	timer.restart();
+	double lastState = 0;
+	int stateChanges = 0;
+	while (timer.hasExpired(3000) == false)
+	{
+		QThread::msleep(10);
+
+		bool signalFound = false;
+		AppSignalState state = signalManager.signalState("#SYSTEMID_CLIENTTEST_CH10_MD00_PI_BLINK", &signalFound);
+
+		EXPECT_TRUE(signalFound);
+
+		stateChanges += (lastState == state.value()) ? 0 : 1;
+		lastState = state.value();
+	}
+
+	EXPECT_TRUE(stateChanges >= 4 && stateChanges < 10);
+
+	return;
+}
