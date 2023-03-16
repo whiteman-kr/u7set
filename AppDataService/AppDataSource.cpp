@@ -139,7 +139,7 @@ AppDataSource::AppDataSource(const DataSource& dataSource) :
 	//
 	*static_cast<DataSource*>(this) = dataSource;
 
-	m_cachedDataUID = appDataUID();
+	m_cachedAppDataUID = appDataUID();
 
 	initParsingBuffers(appDataFramesQuantity());
 }
@@ -230,13 +230,12 @@ bool AppDataSource::getState(Network::AppDataSourceState* proto) const
 
 	//
 
-	proto->set_datareceivingrate(dataReceivingRate());
+	proto->set_datareceivingrate(dataReceivingSpeed());
 	proto->set_receiveddatasize(receivedDataSize());
 	proto->set_receivedframescount(receivedFramesCount());
 	proto->set_receivedpacketcount(receivedPacketCount());
 	proto->set_lostpacketcount(lostPacketCount());
 	proto->set_dataprocessingenabled(dataProcessingEnabled());
-	proto->set_processedpacketcount(processedPacketCount());
 	proto->set_lastpacketsystemtime(lastPacketSystemTime());
 	proto->set_rupframeplanttime(rupFramePlantTime());
 	proto->set_rupframenumerator(rupFrameNumerator());
@@ -264,13 +263,12 @@ void AppDataSource::setState(const Network::AppDataSourceState& proto)
 	setUptime(proto.uptime());
 	setReceivedDataID(proto.receiveddataid());
 	setRupFramePlantTime(proto.rupframeplanttime());
-	setDataReceivingRate(proto.datareceivingrate());
+	setDataReceivingSpeed(proto.datareceivingrate());
 	setReceivedDataSize(proto.receiveddatasize());
 	setReceivedFramesCount(proto.receivedframescount());
 	setReceivedPacketCount(proto.receivedpacketcount());
 	setLostPacketCount(proto.lostpacketcount());
 	setDataProcessingEnabled(proto.dataprocessingenabled());
-	setProcessedPacketCount(proto.processedpacketcount());
 	setLastPacketSystemTime(proto.lastpacketsystemtime());
 	setRupFramePlantTime(proto.rupframeplanttime());
 	setRupFrameNumerator(static_cast<quint16>(proto.rupframenumerator()));
@@ -370,6 +368,8 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 	m_rupTimes.system.timeStamp = readBuffer.frame0ServerTime;
 	m_rupTimes.local.timeStamp = localTime.toMSecsSinceEpoch();
 
+	m_rupFramePlantTime = m_rupTimes.plant.timeStamp;
+
 	checkPlantTime(header.timeStamp);
 
 	m_lastRupTimes = m_rupTimes;
@@ -462,8 +462,7 @@ bool AppDataSources::init(const QString& profile,
 
 		for(const LanControllerInfo& lci : dataSource.lanControllersInfo()())
 		{
-			if (lci.isProvideAppData() == false ||
-				lci.appDataEnable == false ||
+			if (lci.isAppDataEnabled() == false ||
 				lci.appDataFramesQuantity == 0)
 			{
 				continue;

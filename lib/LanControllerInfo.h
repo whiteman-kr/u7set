@@ -83,6 +83,10 @@ struct LanControllerInfo
 	bool isProvideAppData() const;
 	bool isProvideDiagData() const;
 
+	bool isTuningEnabled() const;
+	bool isAppDataEnabled() const;
+	bool isDiagDataEnabled() const;
+
 	void writeToXml(XmlWriteHelper& xml)const;
 	bool readFromXml(XmlReadHelper& xml);
 	bool readFromXml(const QDomNode& lanControllerNode, QString* errMsg);

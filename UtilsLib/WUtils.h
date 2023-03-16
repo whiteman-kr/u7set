@@ -202,3 +202,24 @@ isDoubleEquals(T v1, T v2)
 
 using OptionalBool = std::optional<bool>;
 using OptionalQString = std::optional<QString>;
+
+inline QString formatUptime(qint64 uptime)
+{
+	int s = uptime % 60; uptime /= 60;
+	int m = uptime % 60; uptime /= 60;
+	int h = uptime % 24; uptime /= 24;
+
+	QString uptimeStr;
+
+	if (uptime != 0 /* days != 0 */)
+	{
+		uptimeStr = QString("%1d ").arg(uptime);
+	}
+
+	uptimeStr += QString("%1:%2:%3").
+						arg(h, 2, 10, QChar('0')).
+						arg(m, 2, 10, QChar('0')).
+						arg(s, 2, 10, QChar('0'));
+
+	return uptimeStr;
+}

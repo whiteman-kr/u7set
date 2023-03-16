@@ -71,7 +71,6 @@ void AppDataReceiver::fillAppDataReceiveState(Network::AppDataReceiveState* adrs
 	adrs->set_errsimversion(m_errSimVersion);
 	adrs->set_errunknownappdatasourceip(m_errUnknownAppDataSourceIP);
 	adrs->set_errrupframecrc(m_errRupFrameCRC);
-
 	adrs->set_errnotexpectedsimpacket(m_errNotExpectedSimPacket);
 }
 
@@ -448,7 +447,8 @@ void AppDataReceiver::receivePackets(const error_code& error, size_t bytesReceiv
 		if (source != nullptr)
 		{
 			source->pushRupFrame(sourceIP, serverTime,
-								 isSimFrame, simFrame.rupFrame, m_thisThread);
+								 isSimFrame, simFrame.rupFrame,
+								 source->cachedAppDataUID(), m_thisThread);
 
 			requireBufferProcessing(source);
 		}

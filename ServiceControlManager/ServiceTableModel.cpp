@@ -196,21 +196,14 @@ QVariant ServiceTableModel::data(const QModelIndex &index, int role) const
 			if (serviceState != ServiceState::Undefined &&
 				serviceState != ServiceState::Unavailable)
 			{
-				qint64 time = si.uptime();
-				qint64 s = time % 60; time /= 60;
-				qint64 m = time % 60; time /= 60;
-				qint64 h = time % 24; time /= 24;
-				str += tr("Uptime") + QString(" (%1d %2:%3:%4)\n").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0'));
+				str += QString("Uptime %1\n").arg(formatUptime(si.uptime()));
 			}
 			switch(serviceState)
 			{
 				case ServiceState::Work:
 				{
-					qint64 time = si.serviceuptime();
-					qint64 s = time % 60; time /= 60;
-					qint64 m = time % 60; time /= 60;
-					qint64 h = time % 24; time /= 24;
-					str += tr("Running in ") + E::valueToString(service.sessionParams.softwareRunMode) + QString(" mode (%1d %2:%3:%4)").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0'));
+					qint64 runtime = si.serviceruntime();
+					str += tr("Running in ") + E::valueToString(service.sessionParams.softwareRunMode) + " mode " + formatUptime(runtime);
 				} break;
 				case ServiceState::Stopped: str += tr("Stopped"); break;
 				case ServiceState::Unavailable: str += tr("Unavailable"); break;

@@ -98,7 +98,6 @@ message LanControllerInfo
 	optional string equipmentID = 1;
 	optional int32 controllerNo = 2 [default = -1];
 	optional int32 lanControllerType = 3 [default = 0];		// E::LanControllerType values
-	optional int32 channel = 4 [default = 0];
 
 	// tuning parameters
 
@@ -294,7 +293,7 @@ message ServiceInfo
 
     optional int64 uptime = 2 [default = 0];
     optional int32 serviceState = 3 [default = 0];		// ServiceState::Undefined;
-    optional int64 serviceUptime = 4 [default = 0];
+	optional int64 serviceRuntime = 4 [default = 0];
 
 	optional SessionParams sessionParams = 5;
 

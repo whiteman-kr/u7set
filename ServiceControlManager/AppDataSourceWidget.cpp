@@ -12,56 +12,323 @@
 struct staticPropertyFieldDefinition
 {
 	QString fieldName;
-	std::function<QVariant(const DataSource& source)> fieldValueGetter;
+	std::function<QVariant (const DataSource& source)> fieldValueGetter;
 };
 
 struct dynamicPropertyFieldDefinition
 {
 	QString fieldName;
-	std::function<QVariant(const DataSourceOnline& source)> fieldValueGetter;
+	std::function<QVariant (const DataSourceOnline& source)> fieldValueGetter;
 };
 
-static const QList<staticPropertyFieldDefinition> staticPropertiesFieldList {
-	{ QStringLiteral("Equipment ID"), [](const DataSource& source) { return source.moduleEquipmentID(); } },
-	{ QStringLiteral("Data ID"), [](const DataSource& source) { return "0x" + QString("%1").arg(source.lanControllersInfo()[0].appDataUID, sizeof(source.lanControllersInfo()[0].appDataUID) * 2, 16, QChar('0')).toUpper(); } },
-	{ QStringLiteral("IP"), [](const DataSource& source) { return source.lanControllersInfo()[0].appDataIP; } },
-	{ QStringLiteral("Enable Data"), [](const DataSource& source) { return source.lanControllersInfo()[0].appDataEnable ? "Yes" : "No"; } },
+static const QList<staticPropertyFieldDefinition> staticPropertiesFieldList
+{
+	{
+		QStringLiteral("Module EquipmentID"),
+		[](const DataSource& source)
+		{
+			return source.moduleEquipmentID();
+		}
+	},
 
-	{ QStringLiteral("Caption"), [](const DataSource& source) { return source.moduleCaption(); } },
-	{ QStringLiteral("Port"), [](const DataSource& source) { return source.lanControllersInfo()[0].appDataPort; } },
-	{ QStringLiteral("RUP frames quantity"), [](const DataSource& source) { return source.lanControllersInfo()[0].appDataFramesQuantity; } },
-	{ QStringLiteral("Data type"), [](const DataSource& source) { return QString("%1 (%2)").arg(E::valueToString(source.lanControllersInfo()[0].lanControllerType)).arg(TO_INT(source.lanControllersInfo()[0].lanControllerType)); } },
-	{ QStringLiteral("Module number"), [](const DataSource& source) { return source.lmNumber(); } },
-	{ QStringLiteral("Module type"), [](const DataSource& source) { return source.moduleType(); } },
-	{ QStringLiteral("Subsystem ID"), [](const DataSource& source) { return source.subsystemKey(); } },
-	{ QStringLiteral("Subsystem caption"), [](const DataSource& source) { return source.subsystemID(); } },
-	{ QStringLiteral("Adapter ID"), [](const DataSource& source) { return source.lanControllersInfo()[0].equipmentID; } },
+	{
+		QStringLiteral("Module caption"),
+		[](const DataSource& source)
+		{
+			return source.moduleCaption();
+		}
+	},
+
+	{
+		QStringLiteral("Module type"),
+		[](const DataSource& source)
+		{
+			return "0x" + QString("%1").arg(source.moduleType(), 4, 16, Latin1Char::ZERO).toUpper();
+		}
+	},
+
+	{
+		QStringLiteral("Module preset name"),
+		[](const DataSource& source)
+		{
+			return source.modulePresetName();
+		}
+	},
+
+	{
+		QStringLiteral("Module workcyle, ms"),
+		[](const DataSource& source)
+		{
+			return source.moduleWorkcycle_ms();
+		}
+	},
+
+	{
+		QStringLiteral("RUP protocol version"),
+		[](const DataSource& source)
+		{
+			return source.rupVersion();
+		}
+	},
+
+	{
+		QStringLiteral("Subsystem ID"),
+		[](const DataSource& source)
+		{
+			return source.subsystemID();
+		}
+	},
+
+	{
+		QStringLiteral("Subsystem key"),
+		[](const DataSource& source)
+		{
+			return source.subsystemKey();
+		}
+	},
+
+	{
+		QStringLiteral("LM number"),
+		[](const DataSource& source)
+		{
+			return source.lmNumber();
+		}
+	},
+
+	{
+		QStringLiteral("Subsystem channel"),
+		[](const DataSource& source)
+		{
+			return source.subsystemChannel();
+		}
+	},
+
+	{
+		QStringLiteral("Lan controller ID"),
+		[](const DataSource& source)
+		{
+			const auto& lanControllersInfo = source.lanControllersInfo()();
+			QString str;
+
+			for(const auto& lci : lanControllersInfo)
+			{
+				if (lci.isAppDataEnabled() == false)
+				{
+					continue;
+				}
+
+				if (str.isEmpty() == false)
+				{
+					str += ", ";
+				}
+
+				str += lci.equipmentID;
+			}
+
+			return str;
+		}
+	},
+
+	{
+		QStringLiteral("IP"),
+		[](const DataSource& source)
+		{
+			const auto& lanControllersInfo = source.lanControllersInfo()();
+			QString str;
+
+			for(const auto& lci : lanControllersInfo)
+			{
+				if (lci.isAppDataEnabled() == false)
+				{
+					continue;
+				}
+
+				if (str.isEmpty() == false)
+				{
+					str += ", ";
+				}
+
+				str += QString("%1:%2").arg(lci.appDataIP).arg(lci.appDataPort);
+			}
+
+			return str;
+		}
+	},
+
+	{
+		QStringLiteral("Expected AppDataUID"),
+		[](const DataSource& source)
+		{
+			quint32 dataID = source.appDataUID();
+			return "0x" + QString("%1").arg(dataID, sizeof(dataID) * 2,
+											16, QChar('0')).toUpper();
+		}
+	},
+
+	{
+		QStringLiteral("App data frames quantity"),
+		[](const DataSource& source)
+		{
+			return source.appDataFramesQuantity();
+		}
+	},
+
+	{
+		QStringLiteral("App data size, bytes"),
+		[](const DataSource& source)
+		{
+			return source.appDataSizeBytes();
+		}
+	},
 };
 
-static const QList<dynamicPropertyFieldDefinition> dynamicPropertiesFieldList {
-	{ QStringLiteral("State"), [](const DataSourceOnline& source) { return source.stateStr(); }},
+static const QList<dynamicPropertyFieldDefinition> dynamicPropertiesFieldList
+{
+	{
+		QStringLiteral("State"),
+		[](const DataSourceOnline& source)
+		{
+			return source.stateStr();
+		}
+	},
 
-	{ QStringLiteral("Uptime"), [](const DataSourceOnline& source) {
-			auto time = source.uptime();
-			int s = time % 60; time /= 60;
-			int m = time % 60; time /= 60;
-			int h = time % 24; time /= 24;
-			return QString("%1d %2:%3:%4").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0'));
-		} },
+	{
+		QStringLiteral("Uptime"),
+		[](const DataSourceOnline& source)
+		{
+			return formatUptime(source.uptime());
+		}
+	},
 
-	{ QStringLiteral("Received"), [](const DataSourceOnline& source) { return source.receivedDataSize(); } },
-	{ QStringLiteral("Speed, bytes/sec"), [](const DataSourceOnline& source) { return source.dataReceivingRate(); } },
+	{
+		QStringLiteral("Date receiving speed, bytes/sec"),
+		[](const DataSourceOnline& source)
+		{
+			return source.dataReceivingSpeed();
+		}
+	},
 
-	{ QStringLiteral("Error Protocol version"), [](const DataSourceOnline& source) { return source.errorProtocolVersion(); } },
-	{ QStringLiteral("Error Frames quantity"), [](const DataSourceOnline& source) { return source.errorFramesQuantity(); } },
-	{ QStringLiteral("Error Frame nomber"), [](const DataSourceOnline& source) { return source.errorFrameNo(); } },
-	{ QStringLiteral("Lost packet count"), [](const DataSourceOnline& source) { return source.lostPacketCount(); } },
-	{ QStringLiteral("Error Data ID"), [](const DataSourceOnline& source) { return source.errorDataID(); } },
-	{ QStringLiteral("Error Bad frame size"), [](const DataSourceOnline& source) { return source.errorFrameSize(); } },
+	{
+		QStringLiteral("Received data size, bytes"),
+		[](const DataSourceOnline& source)
+		{
+			return source.receivedDataSize();
+		}
+	},
 
-	{ QStringLiteral("Error plant time format"), [](const DataSourceOnline& source) { return source.errorPlantTimeFormat(); } },
-	{ QStringLiteral("Error Duplicate plant time"), [](const DataSourceOnline& source) { return source.errorDuplicatePlantTime(); } },
-	{ QStringLiteral("Error Non monotonic plant time"), [](const DataSourceOnline& source) { return source.errorNonmonotonicPlantTime(); } },
+	{
+		QStringLiteral("Received frames count"),
+		[](const DataSourceOnline& source)
+		{
+			return source.receivedFramesCount();
+		}
+	},
+
+	{
+		QStringLiteral("Received packets count"),
+		[](const DataSourceOnline& source)
+		{
+			return source.receivedPacketCount();
+		}
+	},
+
+	{
+		QStringLiteral("Received AppDataUID"),
+		[](const DataSourceOnline& source)
+		{
+			quint32 dataID = source.receivedDataID();
+			return "0x" + QString("%1").arg(dataID, sizeof(dataID) * 2,
+											16, QChar('0')).toUpper();
+		}
+	},
+
+	{
+		QStringLiteral("RUP frame numerator"),
+		[](const DataSourceOnline& source)
+		{
+			return source.rupFrameNumerator();
+		}
+	},
+
+	{
+		QStringLiteral("RUP frame plant time"),
+		[](const DataSourceOnline& source)
+		{
+			return DataSourceOnline::getTimeStr(source.rupFramePlantTime());
+		}
+	},
+
+	{
+		QStringLiteral("Lost packet count"),
+		[](const DataSourceOnline& source)
+		{
+			return source.lostPacketCount();
+		}
+	},
+
+	{
+		QStringLiteral("Error protocol version"),
+		[](const DataSourceOnline& source)
+		{
+			return source.errorProtocolVersion();
+		}
+	},
+
+	{
+		QStringLiteral("Error frames quantity"),
+		[](const DataSourceOnline& source)
+		{
+			return source.errorFramesQuantity();
+		}
+	},
+
+	{
+		QStringLiteral("Error frame nomber"),
+		[](const DataSourceOnline& source)
+		{
+			return source.errorFrameNo();
+		}
+	},
+
+	{
+		QStringLiteral("Error AppDataUID"),
+		[](const DataSourceOnline& source)
+		{
+			return source.errorDataID();
+		}
+	},
+
+	{
+		QStringLiteral("Error frame size"),
+		[](const DataSourceOnline& source)
+		{
+			return source.errorFrameSize();
+		}
+	},
+
+	{
+		QStringLiteral("Error plant time format"),
+		[](const DataSourceOnline& source)
+		{
+			return source.errorPlantTimeFormat();
+		}
+	},
+
+	{
+		QStringLiteral("Error duplicate plant time"),
+		[](const DataSourceOnline& source)
+		{
+			return source.errorDuplicatePlantTime();
+		}
+	},
+
+	{
+		QStringLiteral("Error non monotonic plant time"),
+		[](const DataSourceOnline& source)
+		{
+			return source.errorNonmonotonicPlantTime();
+		}
+	},
 };
 
 AppDataSourceWidget::AppDataSourceWidget(quint64 id, QString equipmentId, QWidget *parent) :

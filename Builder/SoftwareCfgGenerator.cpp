@@ -598,8 +598,7 @@ namespace Builder
 					continue;
 				}
 
-				if (lanControllerInfo.isProvideTuning() == true &&
-					lanControllerInfo.tuningEnable == true)
+				if (lanControllerInfo.isTuningEnabled() == true)
 				{
 					if (lanControllerInfo.tuningServiceID.isEmpty() == true)
 					{
@@ -638,8 +637,7 @@ namespace Builder
 					}
 				}
 
-				if (lanControllerInfo.isProvideAppData() == true &&
-					lanControllerInfo.appDataEnable == true)
+				if (lanControllerInfo.isAppDataEnabled() == true)
 				{
 					if (lanControllerInfo.appDataServiceID.isEmpty() == true)
 					{
@@ -679,8 +677,7 @@ namespace Builder
 					}
 				}
 
-				if (lanControllerInfo.isProvideDiagData() == true &&
-					lanControllerInfo.diagDataEnable == true)
+				if (lanControllerInfo.isDiagDataEnabled() == true)
 				{
 					if (lanControllerInfo.diagDataServiceID.isEmpty() == true)
 					{

@@ -23,12 +23,35 @@ public:
 	virtual ~DataSource();
 
 	// LM's properties
-	//
+
+	// Module properties
+
 	QString moduleEquipmentID() const { return m_moduleEquipmentID; }
 	void setModuleEquipmentID(const QString& equipmentID) { m_moduleEquipmentID = equipmentID; }
 
+	QString moduleCaption() const { return m_moduleCaption; }
+	void setModuleCaption(const QString& lmCaption) { m_moduleCaption = lmCaption; }
+
+	int moduleType() const { return m_moduleType; }
+	void setModuleType(int moduleType) { m_moduleType = moduleType; }
+
 	QString modulePresetName() const { return m_modulePresetName; }
 	void setModulePresetName(const QString& presetName) { m_modulePresetName = presetName; }
+
+	quint64 moduleUniqueID() const { return m_moduleUniqueID; }
+	void setModuleUniqueID(quint64 uid) { m_moduleUniqueID = uid; }
+
+	int moduleWorkcycle_ms() const { return m_moduleWorkcycle_mcs / 1000; }
+
+	int rupVersion() const { return m_lanControllersInfo.rupVersion(); }
+
+	// Subsystem properties
+
+	QString subsystemID() const { return m_subsystemID; }
+	void setSubsystemID(const QString& id) { m_subsystemID = id; }
+
+	int subsystemKey() const { return m_subsystemKey; }
+	void setSubsystemKey(int key) { m_subsystemKey = key; }
 
 	int lmNumber() const { return m_lmNumber; }
 	void setLmNumber(int number) { m_lmNumber = number; }
@@ -36,33 +59,26 @@ public:
 	QString subsystemChannel() const { return m_subsystemChannel; }
 	void setSubsystemChannel(const QString& channel) { m_subsystemChannel = channel; }
 
-	int subsystemKey() const { return m_subsystemKey; }
-	void setSubsystemKey(int key) { m_subsystemKey = key; }
-
-	int moduleType() const { return m_moduleType; }
-	void setModuleType(int moduleType) { m_moduleType = moduleType; }
-
-	quint64 moduleUniqueID() const { return m_moduleUniqueID; }
-	void setModuleUniqueID(quint64 uid) { m_moduleUniqueID = uid; }
-
-	QString subsystemID() const { return m_subsystemID; }
-	void setSubsystemID(const QString& id) { m_subsystemID = id; }
-
-	QString moduleCaption() const { return m_moduleCaption; }
-	void setModuleCaption(const QString& lmCaption) { m_moduleCaption = lmCaption; }
-
-	int appDataFramesQuantity() const;
-	int diagDataFramesQuantity() const;
-
-	int appDataSizeBytes() const;
-	int diagDataSizeBytes() const;
-
-	int overrideAppDataWordCount() const;
-	int overrideDiagDataWordCount() const;
+	// AppData properties
 
 	quint32 appDataUID() const;
+	int appDataFramesQuantity() const;
+	int appDataSizeBytes() const;
+	int overrideAppDataWordCount() const;
+
+	// DiagData properties
+
 	quint32 diagDataUID() const;
+	int diagDataSizeBytes() const;
+	int diagDataFramesQuantity() const;
+	int overrideDiagDataWordCount() const;
+
+	// Tuning properties
+
+	int fotipVersion() const { return m_lanControllersInfo.fotipVersion(); }
 	quint64 tuningDataUID() const;
+
+	//
 
 	quint64 ID() const { return m_id; }
 	void setID(quint64 id) { m_id = id; }
@@ -76,11 +92,6 @@ public:
 
 	QString profile() const { return m_profile; }
 	void setProfile(QString profile) { m_profile = profile; }
-
-	int moduleWorkcycle_ms() const { return m_moduleWorkcycle_mcs / 1000; }
-
-	int rupVersion() const { return m_lanControllersInfo.rupVersion(); }
-	int fotipVersion() const { return m_lanControllersInfo.fotipVersion(); }
 
 	//
 
@@ -129,19 +140,7 @@ protected:
 class DataSourceOnline : public DataSource
 {
 private:
-	struct RupFrameTime
-	{
-		quint32 sourceIP = 0;
-		qint64 serverTime = 0;
-		bool isSimFrame = false;
-
-		Rup::Frame rupFrame;
-	};
-
 	static const int APP_DATA_SOURCE_TIMEOUT = 1000;
-	static const int DATA_RECEIVING_RATE_CALC_PERIOD = 2000;
-
-	static const QString DATE_TIME_FORMAT_STR;
 
 protected:
 
@@ -182,6 +181,7 @@ public:
 					  qint64 serverTime,
 					  bool isSimFrame,
 					  const Rup::Frame& rupFrame,
+					  quint32 expectedDataUID,
 					  const QThread* thread);
 
 	bool updateStatistics_1s();
@@ -198,25 +198,17 @@ public:
 
 	//
 
+	bool receivesData() const { return m_receivesData; }
+	void setReceivesData(bool receives) { m_receivesData = receives; }
+
+	QString stateStr() const;
+
 	qint64 uptime() const { return m_uptime; }
 	void setUptime(qint64 uptime) { m_uptime = uptime; }
 	void updateUptime();
 
-	quint64 receivedDataID() const { return m_receivedDataID; }
-	void setReceivedDataID(quint64 dataID) { m_receivedDataID = dataID; }
-
-	qint64 rupFramePlantTime() const { return m_rupFramePlantTime; }
-	QString rupFramePlantTimeStr() const;
-	void setRupFramePlantTime(qint64 time) { m_rupFramePlantTime = time; }
-
-	quint16 rupFrameNumerator() const { return static_cast<quint16>(m_rupFrameNumerator); }
-	void setRupFrameNumerator(quint16 num) { m_rupFrameNumerator = num; }
-
-	bool receivesData() const { return m_receivesData; }
-	void setReceivesData(bool receives) { m_receivesData = receives; }
-
-	double dataReceivingRate() const { return m_dataReceivingRate; }
-	void setDataReceivingRate(double rate) { m_dataReceivingRate = rate; }
+	double dataReceivingSpeed() const { return m_dataReceivingSpeed; }
+	void setDataReceivingSpeed(double rate) { m_dataReceivingSpeed = rate; }
 
 	qint64 receivedDataSize() const { return m_receivedDataSize; }
 	void setReceivedDataSize(qint64 dataSize) { m_receivedDataSize = dataSize; }
@@ -227,11 +219,18 @@ public:
 	qint64 receivedPacketCount() const { return m_receivedPacketCount; }
 	void setReceivedPacketCount(qint64 packetCount) { m_receivedPacketCount = packetCount; }
 
+	quint32 receivedDataID() const { return m_receivedDataID; }
+	void setReceivedDataID(quint32 dataID) { m_receivedDataID = dataID; }
+
+	qint64 rupFramePlantTime() const { return m_rupFramePlantTime; }
+	QString rupFramePlantTimeStr() const;
+	void setRupFramePlantTime(qint64 time) { m_rupFramePlantTime = time; }
+
+	quint16 rupFrameNumerator() const { return static_cast<quint16>(m_rupFrameNumerator); }
+	void setRupFrameNumerator(quint16 num) { m_rupFrameNumerator = num; }
+
 	qint64 lostPacketCount() const { return m_lostPacketCount; }
 	void setLostPacketCount(qint64 packetCount) { m_lostPacketCount = packetCount; }
-
-	qint64 processedPacketCount() const { return m_processedPacketCount; }
-	void setProcessedPacketCount(qint64 packetCount) { m_processedPacketCount = packetCount; }
 
 	qint64 errorProtocolVersion() const { return m_errorProtocolVersion; }
 	void setErrorProtocolVersion(qint64 err) { m_errorProtocolVersion = err; }
@@ -264,7 +263,8 @@ public:
 	QString lastPacketSystemTimeStr() const;
 	void setLastPacketSystemTime(qint64 sysTime) { m_lastPacketServerTime = sysTime; }
 
-	QString stateStr() const;
+	static QString getTimeStr(qint64 timeMs);
+	static QString getTimeStr(const Rup::TimeStamp& ts);
 
 	// Used by PacketViewer
 	//
@@ -273,12 +273,10 @@ public:
 
 	void setTimeErrLog(CircularLoggerShared timeErrLog) { m_timeErrLog = timeErrLog; }
 
+
 private:
 	bool moveToNextWriteBuffer(const QThread* thread);
 	bool moveToNextReadBuffer(const QThread* thread);
-
-	QString getTimeStr(qint64 timeMs) const;
-	QString getTimeStr(const Rup::TimeStamp& ts) const;
 
 protected:
 	// static information
@@ -286,26 +284,23 @@ protected:
 	QVector<int> m_relatedSignalIndexes;
 	CircularLoggerShared m_timeErrLog;
 
-	quint32 m_cachedDataUID = 0;
-
 	// dynamic state information
 	//
 	bool m_dataProcessingEnabled = true;
 	bool m_receivesData = false;
 
 	qint64 m_uptime = 0;										// in seconds!
-	quint64 m_receivedDataID = 0;
+	quint32 m_receivedDataID = 0;
 
 	qint64 m_rupFramePlantTime = 0;
 	qint64 m_rupFrameNumerator = -1;			// qint64 is Ok!
 
-	double m_dataReceivingRate = 0;
+	double m_dataReceivingSpeed = 0;
 	qint64 m_receivedDataSize = 0;
 	qint64 m_prevReceivedDataSize = 0;
 	qint64 m_receivedFramesCount = 0;
 	qint64 m_receivedPacketCount = 0;
 	qint64 m_lostPacketCount = 0;
-	qint64 m_processedPacketCount = 0;
 
 	//
 

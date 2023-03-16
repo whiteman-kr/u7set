@@ -60,6 +60,8 @@ public:
 
 	void invalidateSignals(const QThread* thread);
 
+	quint32 cachedAppDataUID() const { return m_cachedAppDataUID; }
+
 private:
 	virtual bool parseBuffer(ParsingBuffer& readBuffer, const QThread* thread) override;
 
@@ -93,6 +95,8 @@ private:
 	int m_autoArchivingGroupsCount = 0;
 	qint64 m_lastAutoArchivingTime = 0;
 	int m_lastAutoArchivingGroup = DynamicAppSignalState::NOT_INITIALIZED_AUTOARCHIVING_GROUP;
+
+	quint32 m_cachedAppDataUID = 0;
 };
 
 class AppDataSources

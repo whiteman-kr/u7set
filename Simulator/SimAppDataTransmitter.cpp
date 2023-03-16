@@ -166,7 +166,7 @@ namespace Sim
 
 			for(const LanControllerInfo& lci : lmi.lanControllers())
 			{
-				if (lci.isProvideAppData() == true && lci.appDataEnable == true)
+				if (lci.isAppDataEnabled() == true)
 				{
 					AppDataSourcePortInfo adspi;
 

@@ -414,6 +414,7 @@ namespace Separator
 namespace FormatStr
 {
 	inline const QString POSTGRES_DATE_TIME("yyyy-MM-ddTHH:mm:ss");
+	inline const QString DATE_TIME_FORMAT_STR("%1:%2:%3.%4 %5.%6.%7");
 }
 
 namespace TemplateMacro

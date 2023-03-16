@@ -332,16 +332,9 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 
 				// DataSourceState
 				//
-				case DSC_UPTIME:
-				{
-					auto time = source.uptime();
-					int s = time % 60; time /= 60;
-					int m = time % 60; time /= 60;
-					int h = time % 24; time /= 24;
-					return QString("%1d %2:%3:%4").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0'));
-				}
+				case DSC_UPTIME: return formatUptime(source.uptime());
 				case DSC_RECEIVED: return source.receivedDataSize();
-				case DSC_SPEED: return source.dataReceivingRate();
+				case DSC_SPEED: return source.dataReceivingSpeed();
 				case DSC_RECEIVES_DATA: return source.receivesData();
 				case DSC_RECEIVED_DATA_ID: return "0x" + QString("%1").arg(source.receivedDataID(), sizeof(source.receivedDataID()) * 2, 16, QChar('0')).toUpper();
 
@@ -357,7 +350,7 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 				case DSC_RECEIVED_FRAMES_COUNT: return source.receivedFramesCount();
 				case DSC_RECEIVED_PACKET_COUNT: return source.receivedPacketCount();
 				case DSC_DATA_PROCESSING_ENABLED: return source.dataProcessingEnabled();
-				case DSC_PROCESSED_PACKET_COUNT: return source.processedPacketCount();
+				case DSC_PROCESSED_PACKET_COUNT: return 0;
 				case DSC_LAST_PACKET_SYSTEM_TIME: return source.lastPacketSystemTimeStr();
 				case DSC_RUP_FRAME_PLANT_TIME: return source.rupFramePlantTimeStr();
 				case DSC_RUP_FRAME_NUMERATOR: return source.rupFrameNumerator();
@@ -548,17 +541,17 @@ void AppDataServiceWidget::updateServiceState()
 	auto state = m_tcpClientSocket->serviceState().appdatareceivestate();
 
 	stateTabModel()->setData(stateTabModel()->index(8, 1), static_cast<qint64>(state.receivingspeed()));
-	stateTabModel()->setData(stateTabModel()->index(10, 1), static_cast<qint64>(state.rupframesreceivingspeed()));
+	stateTabModel()->setData(stateTabModel()->index(9, 1), static_cast<qint64>(state.rupframesreceivingspeed()));
 
-	stateTabModel()->setData(stateTabModel()->index(11, 1), static_cast<qint64>(state.rupframescount()));
-	stateTabModel()->setData(stateTabModel()->index(12, 1), static_cast<qint64>(state.simframescount()));
+	stateTabModel()->setData(stateTabModel()->index(10, 1), static_cast<qint64>(state.rupframescount()));
+	stateTabModel()->setData(stateTabModel()->index(11, 1), static_cast<qint64>(state.simframescount()));
 
-	stateTabModel()->setData(stateTabModel()->index(13, 1), static_cast<qint64>(state.errdatagramsize()));
-	stateTabModel()->setData(stateTabModel()->index(14, 1), static_cast<qint64>(state.errsimversion()));
-	stateTabModel()->setData(stateTabModel()->index(15, 1), static_cast<qint64>(state.errunknownappdatasourceip()));
-	stateTabModel()->setData(stateTabModel()->index(16, 1), static_cast<qint64>(state.errrupframecrc()));
+	stateTabModel()->setData(stateTabModel()->index(12, 1), static_cast<qint64>(state.errdatagramsize()));
+	stateTabModel()->setData(stateTabModel()->index(13, 1), static_cast<qint64>(state.errsimversion()));
+	stateTabModel()->setData(stateTabModel()->index(14, 1), static_cast<qint64>(state.errunknownappdatasourceip()));
+	stateTabModel()->setData(stateTabModel()->index(15, 1), static_cast<qint64>(state.errrupframecrc()));
 
-	stateTabModel()->setData(stateTabModel()->index(17, 1), static_cast<qint64>(state.errnotexpectedsimpacket()));
+	stateTabModel()->setData(stateTabModel()->index(16, 1), static_cast<qint64>(state.errnotexpectedsimpacket()));
 
 	auto appDataSettings = std::dynamic_pointer_cast<AppDataServiceSettings>(m_service.settings);
 
@@ -595,19 +588,18 @@ void AppDataServiceWidget::updateStateInfo()
 		stateTabModel()->setData(stateTabModel()->index(6, 0), "Connected to CfgService");
 		stateTabModel()->setData(stateTabModel()->index(7, 0), "Connected to ArchiveService");
 
-		stateTabModel()->setData(stateTabModel()->index(8, 0), "Receiving rate");
-		stateTabModel()->setData(stateTabModel()->index(9, 0), "UDP receiving rate");
-		stateTabModel()->setData(stateTabModel()->index(10, 0), "RUP frames receiving rate");
+		stateTabModel()->setData(stateTabModel()->index(8, 0), "App data receiving speed, bytes/s");
+		stateTabModel()->setData(stateTabModel()->index(9, 0), "RUP frames receiving speed, frames/s");
 
-		stateTabModel()->setData(stateTabModel()->index(11, 0), "RUP frames count");
-		stateTabModel()->setData(stateTabModel()->index(12, 0), "Simulated frames count");
+		stateTabModel()->setData(stateTabModel()->index(10, 0), "RUP frames count");
+		stateTabModel()->setData(stateTabModel()->index(11, 0), "Simulated frames count");
 
-		stateTabModel()->setData(stateTabModel()->index(13, 0), "Datagram size errors");
-		stateTabModel()->setData(stateTabModel()->index(14, 0), "Simulation version errors");
-		stateTabModel()->setData(stateTabModel()->index(15, 0), "Unknown AppDataSource IP errors");
-		stateTabModel()->setData(stateTabModel()->index(16, 0), "RUP frames CRC errors");
+		stateTabModel()->setData(stateTabModel()->index(12, 0), "Datagram size errors");
+		stateTabModel()->setData(stateTabModel()->index(13, 0), "Simulation version errors");
+		stateTabModel()->setData(stateTabModel()->index(14, 0), "Unknown AppDataSource IP errors");
+		stateTabModel()->setData(stateTabModel()->index(15, 0), "RUP frames CRC errors");
 
-		stateTabModel()->setData(stateTabModel()->index(17, 0), "Not expected Simulated packets");
+		stateTabModel()->setData(stateTabModel()->index(16, 0), "Not expected Simulated packets");
 
 		if (m_tcpClientSocket == nullptr || m_tcpClientSocket->stateIsReady() == false)
 		{
