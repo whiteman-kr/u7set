@@ -37,28 +37,6 @@ namespace ClientLib
 		return;
 	}
 
-	AdsConnection::Connection::Connection(Connection&& src) noexcept
-	{
-		operator=(std::move(src));
-		return;
-	}
-
-	AdsConnection::Connection& AdsConnection::Connection::operator=(Connection&& src) noexcept
-	{
-		if (this == &src)
-		{
-			Q_ASSERT(this != &src);
-			return *this;
-		}
-
-		tcpSignalClient = std::exchange(src.tcpSignalClient, nullptr);
-		tcpClientThread = std::exchange(src.tcpClientThread, nullptr);
-		tcpSignalRecents = std::exchange(src.tcpSignalRecents, nullptr);
-		tcpClientRecentThread = std::exchange(src.tcpClientRecentThread, nullptr);
-
-		return *this;
-	}
-
 	void AdsConnection::Connection::stopAndDestroy()
 	{
 		if (tcpClientThread != nullptr)

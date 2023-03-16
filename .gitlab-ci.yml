@@ -319,7 +319,7 @@ linux_test_job:
     - "# ----------------------------------------------"
     - "#               Run client tests"
     - "# ----------------------------------------------"
-    - "function StopServices () { pkill CfgSrv || true; pkill AppDataSrv; sllep(2); }"
+    - "function StopServices () { pkill CfgSrv || true; pkill AppDataSrv; sleep 2; }"
     - "trap StopServices EXIT"
     - "pushd $CI_PROJECT_DIR/bin_unix/release"
     - "StopServices"

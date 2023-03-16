@@ -27,12 +27,13 @@ namespace ClientLib
 					   IAppSignalUpdater& signalUpdater,
 					   IRecentAppSignals* recentAppSignals,
 					   ILogFile* logFile);
-			Connection(const Connection&) = delete;
-			Connection(Connection&& src) noexcept;
 			~Connection();
 
+			Connection() = delete;
+			Connection(const Connection&) = delete;
+			Connection(Connection&& src) = delete;
 			Connection& operator=(const Connection&) = delete;
-			Connection& operator=(Connection&& src) noexcept;
+			Connection& operator=(Connection&& src) = delete;
 
 			void stopAndDestroy();
 			HostAddressPort address() const;

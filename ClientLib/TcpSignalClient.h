@@ -52,9 +52,6 @@ namespace ClientLib
 
 		virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
 
-		bool hasSignal(const QString& appSignalId) const;
-		bool hasSignal(Hash signalHash) const;
-
 	protected:
 		void resetToGetSignalList();
 		void resetToGetState(bool resetStateIndex);
@@ -77,11 +74,6 @@ namespace ClientLib
 	private:
 		SoftwareEndpoint::AppDataService m_serverSettings;
 		IAppSignalUpdater& m_signalUpdater;
-
-		// Keep own signal list, so MonitorSignalManager can understand if this connstion has a signal
-		//
-		mutable QReadWriteLock m_hasSignalLock;
-		std::unordered_set<Hash> m_hasSignalList;			// Key is hash from signal internal id
 
 		// Cache protobug messages
 		//
