@@ -1744,6 +1744,28 @@ namespace Builder
 					arg(LMNumber).arg(module1).arg(module2));
 	}
 
+	/// IssueCode: CFG3104
+	///
+	/// IssueType: Error
+	///
+	/// Title: TuningSimIP %1 is not unique in objects %2 and %3 (profile %4)
+	///
+	/// Parameters:
+	///         %1 TuningSimIP:port
+	///			%2 Object1 ID
+	///			%3 Object2 ID
+	///			%4 Profile
+	///
+	/// Description:
+	///			Property TuningSimIP:port in TuningServicesmust be unique.
+	///
+	void IssueLogger::errCFG3104(QString tunSimIpStr, QString obj1, QString obj2, QString profile)
+	{
+		LOG_ERROR(IssueType::FscConfiguration, 3104,
+				  tr("TuningSimIP:Port %1 is not unique in objects %2 and %3 (profile %4).").
+					arg(tunSimIpStr).arg(obj1).arg(obj2).arg(profile));
+	}
+
 	//
 	// ALP			Application Logic Parsing				4000-4999
 	//

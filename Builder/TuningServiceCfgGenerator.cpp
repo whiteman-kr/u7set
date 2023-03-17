@@ -27,7 +27,37 @@ namespace Builder
 			return false;
 		}
 
-		bool result = m_settingsSet.addProfile<TuningServiceSettings>(profile, settingsGetter);
+		bool result = true;
+
+		const TuningServiceSettings& settings = settingsGetter;
+
+		for(int ch = CHANNEL_1; ch < settings.channelCount; ch++)
+		{
+			HostAddressPort tuningSimIP = settings.channelSettings[ch].tuningSimIP;
+
+			QString thisObjID = settings.channelSettings[ch].serviceControllerEquipmentID;
+
+			QString str = QString("%1_%2").arg(profile).arg(tuningSimIP.addressPortStr());
+
+			auto it = m_tuningSimIpPorts.find(str);
+
+			if (it == m_tuningSimIpPorts.end())
+			{
+				m_tuningSimIpPorts.insert({str, thisObjID});
+			}
+			else
+			{
+				// TuningSimIP %1 is not unique in objects %2 and %3 (profile %4)
+				//
+				m_log->errCFG3104(tuningSimIP.addressPortStr(), it->second, thisObjID, profile);
+
+				result = false;
+			}
+		}
+
+		RETURN_IF_FALSE(result);
+
+		result &= m_settingsSet.addProfile<TuningServiceSettings>(profile, settingsGetter);
 
 		result &= writeRunScriptFile(profile, settingsGetter, E::OS::Windows);
 		result &= writeRunScriptFile(profile, settingsGetter, E::OS::Linux);
