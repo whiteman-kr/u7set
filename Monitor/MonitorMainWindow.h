@@ -4,11 +4,11 @@
 #include "MonitorConfigController.h"
 #include "MonitorSignalManager.h"
 #include "SelectSchemaWidget.h"
-#include "MonitorTuningTcpClient.h"
 #include "InstanceResolver.h"
 #include "SchemaDrawStatistics.h"
 //#include "../VFrame30/ClientSchemaView.h"
 #include "../ClientLib/AdsConnection.h"
+#include "../ClientLib/TuningTcpClient.h"
 #include "../ClientLib/TuningUserManager.h"
 #include "../ClientLib/TuningLog.h"
 #include "../VFrame30/AppSignalController.h"
@@ -27,7 +27,7 @@ class MonitorMainWindow : public QMainWindow
 
 public:
 	MonitorMainWindow(InstanceResolver& instanceResolver,  const SoftwareInfo& softwareInfo, QWidget* parent = nullptr);
-	~MonitorMainWindow();
+	~MonitorMainWindow() = default;
 
 	// Events
 	//
@@ -66,9 +66,6 @@ public:
 	MonitorCentralWidget* monitorCentralWidget();
 
 private:
-	void runTuningTcpClients();
-	void stopTuningTcpClients();
-
 	void updateStatusBar();
 	void showSoftwareConnection(const QString& caption,
 								const std::vector<Tcp::ConnectionState>& connectionStates,
@@ -130,6 +127,9 @@ public slots:
 	void slot_loggedIn();
 	void slot_loggedOut();
 
+private slots:
+	void slot_tuningSignalsArrived(QByteArray data);
+
 	// Properties
 	//
 public:
@@ -153,6 +153,8 @@ private:
 
 	MonitorConfigController m_configController;
 	MonitorSignalManager m_signalManager;
+	TuningSignalManager m_tuningSignalManager;
+
 	MonitorSchemaManager m_schemaManager;
 
 	std::unique_ptr<VFrame30::AppSignalController> m_appSignalController;
@@ -160,9 +162,7 @@ private:
 	std::unique_ptr<VFrame30::LogController> m_logController;
 
 	ClientLib::AdsConnection m_adsConnection{m_signalManager, &m_signalManager, &m_LogFile};
-
-	std::vector<MonitorTuningTcpClient*> m_tuningTcpClients;
-	std::vector<SimpleThread*> m_tuningTcpClientThreads;
+	ClientLib::TuningConnection m_tuningConnection{m_tuningSignalManager, &m_LogFile, &m_tuningLogFile};
 
 	DialogAlert m_dialogAlert;
 

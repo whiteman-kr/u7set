@@ -1,11 +1,11 @@
-#ifndef SIMTUNINGTCPCLIENT_H
-#define SIMTUNINGTCPCLIENT_H
-#include "../../lib/Tuning/ITuningTcpClient.h"
+#ifndef SIMTUNINGCONNECTION_H
+#define SIMTUNINGCONNECTION_H
+#include "../../lib/Tuning/ITuningConnection.h"
 
-class SimTuningTcpClient : public ITuningTcpClient
+class SimTuningConnection : public ITuningConnection
 {
 public:
-	SimTuningTcpClient();
+	SimTuningConnection();
 
 public:
 	virtual bool hasTuningSignal(QString appSignalId) const override;
@@ -13,4 +13,4 @@ public:
 	virtual void applyTuningSignals() override;
 };
 
-#endif // SIMTUNINGTCPCLIENT_H
+#endif // SIMTUNINGCONNECTION_H

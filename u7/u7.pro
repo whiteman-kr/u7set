@@ -79,6 +79,7 @@ HEADERS  += \
     Reports/DialogReportFileTypeParams.h \
     Reports/SchemasReport.h \
     Simulator/ScriptSimApplication.h \
+    Simulator/SimTuningConnection.h \
 	Stable.h \
     ../lib/ExportPrint.h \
     ../lib/QDoublevalidatorEx.h \
@@ -181,7 +182,6 @@ HEADERS  += \
     Simulator/SimSchemaWidget.h \
     Simulator/SimSchemaManager.h \
     Simulator/SimSchemaView.h \
-    Simulator/SimTuningTcpClient.h \
     Simulator/SimCodePage.h \
     Simulator/SimWidget.h \
     Simulator/SimSelectBuildDialog.h \
@@ -261,6 +261,7 @@ SOURCES +=\
 	Simulator/SimSelectSchemaPage.cpp \
 	Simulator/SimSignalSnapshot.cpp \
 	Simulator/SimTrend/SimTrends.cpp \
+    Simulator/SimTuningConnection.cpp \
 	TestsTabPage.cpp \
 	UserManagementDialog.cpp \
 	EquipmentEditor/EquipmentTabPage.cpp \
@@ -310,7 +311,6 @@ SOURCES +=\
 	Simulator/SimSchemaWidget.cpp \
 	Simulator/SimSchemaManager.cpp \
 	Simulator/SimSchemaView.cpp \
-	Simulator/SimTuningTcpClient.cpp \
 	Simulator/SimCodePage.cpp \
 	Simulator/SimWidget.cpp \
 	Simulator/SimSelectBuildDialog.cpp \

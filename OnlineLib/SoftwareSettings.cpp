@@ -1547,11 +1547,12 @@ bool TuningClientSettings::writeToXml(XmlWriteHelper& xml) const
 	{
 		xml.writeStartElement(XmlElement::TUNING_SERVICE);
 
-		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, tsc.tuningServiceID);
+		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, tsc.equipmentId);
 		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, tsc.clientRequestIP);
 		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, tsc.clientRequestPort);
 		xml.writeStringListAttribute(XmlAttribute::DRIVEN_SOURCES, tsc.drivenSources);
 		xml.writeBoolAttribute(EquipmentPropNames::SINGLE_LM_CONTROL, tsc.singleLmControl);
+
 
 		xml.writeEndElement();		// </TuningService>
 	}
@@ -1565,7 +1566,7 @@ bool TuningClientSettings::writeToXml(XmlWriteHelper& xml) const
 	xml.writeBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS, showSchemas);
 	xml.writeBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS_LIST, showSchemasList);
 	xml.writeBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS_TABS, showSchemasTabs);
-	xml.writeIntAttribute(EquipmentPropNames::STATUS_FLAG_FUNCTION, statusFlagFunction);
+	xml.writeIntAttribute(EquipmentPropNames::STATUS_FLAG_FUNCTION, static_cast<int>(statusFlagFunction));
 
 	xml.writeBoolAttribute(EquipmentPropNames::TUNING_LOGIN, tuningLogin);
 	xml.writeStringAttribute(EquipmentPropNames::TUNING_USER_ACCOUNTS, tuningUserAccounts);
@@ -1614,15 +1615,16 @@ bool TuningClientSettings::readFromXml(XmlReadHelper& xml)
 
 	for(int i = 0; i < count; i++)
 	{
-		TuningService tsc;
+		SoftwareEndpoint::TuningService tsc;
 
 		result &= xml.findElement(XmlElement::TUNING_SERVICE);
 
-		result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &tsc.tuningServiceID);
+		result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &tsc.equipmentId);
 		result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &tsc.clientRequestIP);
 		result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &tsc.clientRequestPort);
 		result &= xml.readStringListAttribute(XmlAttribute::DRIVEN_SOURCES, &tsc.drivenSources);
 		result &= xml.readBoolAttribute(EquipmentPropNames::SINGLE_LM_CONTROL, &tsc.singleLmControl);
+
 
 		tuningServices.push_back(tsc);
 	}
@@ -1635,12 +1637,18 @@ bool TuningClientSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.readBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS_LIST, &showSchemasList);
 	result &= xml.readBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS_TABS, &showSchemasTabs);
 
-	bool resultStatusFlagFunction = xml.readIntAttribute(EquipmentPropNames::STATUS_FLAG_FUNCTION, &statusFlagFunction);
-	if (resultStatusFlagFunction == false)
+	int value = 0;
+	bool resultStatusFlagFunction = xml.readIntAttribute(EquipmentPropNames::STATUS_FLAG_FUNCTION, &value);
+
+	if (resultStatusFlagFunction == true)
+	{
+		statusFlagFunction = static_cast<LmStatusFlagMode>(value);
+	}
+	else
 	{
 		// Compatibility loading statusFlagFunction before 10.12.2020
 		//
-		statusFlagFunction = 0;
+		statusFlagFunction = LmStatusFlagMode::None;
 
 		bool showSOR = false;
 		bool useAccessFlag = false;
@@ -1652,13 +1660,13 @@ bool TuningClientSettings::readFromXml(XmlReadHelper& xml)
 		{
 			if (showSOR == true)
 			{
-				statusFlagFunction = 1;
+				statusFlagFunction = LmStatusFlagMode::SOR;
 			}
 			else
 			{
 				if (useAccessFlag == true)
 				{
-					statusFlagFunction = 2;
+					statusFlagFunction = LmStatusFlagMode::AccessKey;
 				}
 			}
 		}

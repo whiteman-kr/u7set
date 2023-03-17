@@ -1,9 +1,9 @@
 #ifndef TUNINGCLIENTFILTEREDITOR_H
 #define TUNINGCLIENTFILTEREDITOR_H
 
-#include "../AppSignalLib/TuningSignalManager.h"
 #include "../lib/Tuning/TuningFilterEditor.h"
-#include "TuningClientTcpClient.h"
+#include "../AppSignalLib/TuningSignalManager.h"
+#include "../ClientLib/TuningConnection.h"
 
 class DialogFilterEditor : public QDialog
 {

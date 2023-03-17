@@ -18,10 +18,10 @@
 // MonitorTuningController
 //
 MonitorTuningController::MonitorTuningController(ITuningSignalManager* signalManager,
-												 ITuningTcpClient* tcpClient,
+												 ClientLib::TuningConnection* tuningConnection,
 												 ClientLib::TuningUserManager* tuningUserManager,
 												 QWidget* parent):
-	VFrame30::TuningController(signalManager, tcpClient, parent),
+	VFrame30::TuningController(signalManager, tuningConnection, parent),
 	m_tuningUserManager(tuningUserManager),
 	m_parentWidget(parent)
 {

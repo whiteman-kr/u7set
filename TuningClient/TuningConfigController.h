@@ -20,9 +20,9 @@ struct ConfigSettings
 	QString scriptGlobal;
 	QString scriptConfigArrived;
 
-	LmStatusFlagMode lmStatusFlagMode() const
+	TuningClientSettings::LmStatusFlagMode lmStatusFlagMode() const
 	{
-		return static_cast<LmStatusFlagMode>(clientSettings.statusFlagFunction);
+		return static_cast<TuningClientSettings::LmStatusFlagMode>(clientSettings.statusFlagFunction);
 	}
 };
 
@@ -69,7 +69,9 @@ public:
 	QString startSchemaId() const;
 	bool showSignals() const;
 	bool showSchemas() const;
-	LmStatusFlagMode lmStatusFlagMode() const;
+
+	TuningClientSettings::LmStatusFlagMode lmStatusFlagMode() const;
+	bool singleLmControlMode() const;
 
 	// Data section
 	//

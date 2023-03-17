@@ -1715,9 +1715,9 @@ bool TuningClientSettingsGetter::readSettings(const Builder::Context* context,
 									   log);
 		BREAK_IF_FALSE(result);
 
-		TuningService tsc;
+		SoftwareEndpoint::TuningService tsc;
 
-		tsc.tuningServiceID = tuningServiceID;
+		tsc.equipmentId = tuningServiceID;
 		tsc.clientRequestIP = tuningServiceClientIP.addressStr();
 		tsc.clientRequestPort = tuningServiceClientIP.port();
 
@@ -1782,7 +1782,13 @@ bool TuningClientSettingsGetter::readSettings(const Builder::Context* context,
 	//
 	// statusFlagFunction
 	//
-	result &= DeviceHelper::getIntProperty(software, EquipmentPropNames::STATUS_FLAG_FUNCTION, &statusFlagFunction, log);
+
+	int value = 0;
+	result &= DeviceHelper::getIntProperty(software, EquipmentPropNames::STATUS_FLAG_FUNCTION, &value, log);
+	if (result == true)
+	{
+		statusFlagFunction = static_cast<LmStatusFlagMode>(value);
+	}
 
 	result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::TUNING_LOGIN, &tuningLogin, log);
 

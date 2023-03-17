@@ -29,7 +29,7 @@ SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 	// --
 	//
 	m_appSignalController = new VFrame30::AppSignalController{&m_simulator->appSignalManager(), this};
-	m_tuningController = new VFrame30::TuningController{&m_simulator->tuningSignalManager(), &m_tuningTcpClient, this};
+	m_tuningController = new VFrame30::TuningController{&m_simulator->tuningSignalManager(), &m_tuningConnection, this};
 
 	// --
 	//

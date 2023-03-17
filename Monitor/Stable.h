@@ -80,7 +80,6 @@
 
 // Defined in main.cpp
 //
-extern TuningSignalManager theTuningSignals;
 extern ScriptMonitorApplication theApp;
 
 

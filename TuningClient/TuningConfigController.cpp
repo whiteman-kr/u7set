@@ -184,8 +184,8 @@ bool TuningConfigController::updateConfiguration(const ClientLib::ConfigurationI
 
 	if (uiFilesUpdated == true || apperanceUpdated == true || serversUpdated == true)
 	{
-		emit filtersArrived(filterData);
 		emit signalsArrived(signalData);
+		emit filtersArrived(filterData);
 		emit configurationArrived(readConfig);
 	}
 
@@ -194,9 +194,9 @@ bool TuningConfigController::updateConfiguration(const ClientLib::ConfigurationI
 
 void TuningConfigController::dump(const ConfigSettings& conf) const
 {
-	for (const TuningClientSettings::TuningService& ts : conf.clientSettings.tuningServices)
+	for (const SoftwareEndpoint::TuningService& ts : conf.clientSettings.tuningServices)
 	{
-		m_logFile.writeMessage(tr("Tuning Service Connection: %1, %2, %3").arg(ts.tuningServiceID).arg(ts.clientRequestIP).arg(ts.clientRequestPort));
+		m_logFile.writeMessage(tr("Tuning Service Connection: %1, %2, %3").arg(ts.equipmentId).arg(ts.clientRequestIP).arg(ts.clientRequestPort));
 	}
 
 	return;
@@ -232,8 +232,21 @@ bool TuningConfigController::showSchemas() const
 	return m_configuration.clientSettings.showSchemas;
 }
 
-LmStatusFlagMode TuningConfigController::lmStatusFlagMode() const
+TuningClientSettings::LmStatusFlagMode TuningConfigController::lmStatusFlagMode() const
 {
 	QReadLocker locker(&m_lock);
 	return m_configuration.lmStatusFlagMode();
+}
+
+bool TuningConfigController::singleLmControlMode() const
+{
+	QReadLocker locker(&m_lock);
+	for (const SoftwareEndpoint::TuningService& tuns : m_configuration.clientSettings.tuningServices)
+	{
+		if (tuns.singleLmControl == true)
+		{
+			return true;
+		}
+	}
+	return false;
 }

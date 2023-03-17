@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../AppSignalLib/ITuningSignalManager.h"
-#include "../lib/Tuning/ITuningTcpClient.h"
+#include "../lib/Tuning/ITuningConnection.h"
 
 class AppSignalParam;
 class TuningSignalState;
@@ -88,13 +88,7 @@ namespace VFrame30
 
 	public:
 		TuningController() = delete;
-		TuningController(ITuningSignalManager* signalManager, ITuningTcpClient* tcpClient, QWidget* parent = nullptr);
-		TuningController(ITuningSignalManager* signalManager, std::vector<ITuningTcpClient*> tcpClients, QWidget* parent = nullptr);
-
-		void setTcpClient(ITuningTcpClient* tcpClient);
-		void setTcpClients(std::vector<ITuningTcpClient*> tcpClients);
-
-		void resetTcpClient();
+		TuningController(ITuningSignalManager* signalManager, ITuningConnection* tuningConnection, QWidget* parent = nullptr);
 
 	public:
 		AppSignalParam signalParam(const QString& appSignalId, bool* ok) const;
@@ -121,7 +115,7 @@ namespace VFrame30
 
 	private:
 		ITuningSignalManager* m_signalManager = nullptr;
-		std::vector<ITuningTcpClient*> m_tcpClients;
+		ITuningConnection* m_tuningConnection = nullptr;
 	};
 
 }

@@ -4,7 +4,7 @@
 #include "../../Simulator/SimConsoleLogFile.h"
 #include "SimIdeSimulator.h"
 #include "SimSchemaManager.h"
-#include "SimTuningTcpClient.h"
+#include "SimTuningConnection.h"
 #include "../../VFrame30/AppSignalController.h"
 #include "../../VFrame30/TuningController.h"
 
@@ -112,7 +112,7 @@ private:
 
 	VFrame30::AppSignalController* m_appSignalController = nullptr;
 
-	SimTuningTcpClient m_tuningTcpClient;
+	SimTuningConnection m_tuningConnection;
 	VFrame30::TuningController* m_tuningController = nullptr;
 
 	// Actions

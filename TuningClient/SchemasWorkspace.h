@@ -5,8 +5,8 @@
 #include "../lib/Tuning/TuningModel.h"
 #include "../AppSignalLib/TuningSignalState.h"
 #include "../AppSignalLib/TuningSignalManager.h"
+#include "../ClientLib/TuningConnection.h"
 #include "../VFrame30/LogController.h"
-#include "TuningClientTcpClient.h"
 #include "TuningSchemaWidget.h"
 
 class SchemasWorkspace : public QWidget
@@ -17,7 +17,7 @@ public:
 	SchemasWorkspace(TuningConfigController& configController,
 					 TuningSignalManager& tuningSignalManager,
 					 ClientLib::TuningUserManager& userManager,
-					 std::vector<ITuningTcpClient*> tuningTcpClients,
+					 ClientLib::TuningConnection& tuningConnection,
 					 const QString& caption,
 					 const QStringList& schemasTags,
 					 QString startSchemaId,

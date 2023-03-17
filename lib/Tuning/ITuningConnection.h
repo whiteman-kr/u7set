@@ -2,7 +2,7 @@
 
 #include "../../AppSignalLib/TuningValue.h"
 
-class ITuningTcpClient
+class ITuningConnection
 {
 public:
 	virtual bool hasTuningSignal(QString appSignalId) const = 0;

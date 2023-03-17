@@ -2,9 +2,9 @@
 #define TUNINGPAGE_H
 
 #include "../AppSignalLib/TuningSignalManager.h"
+#include "../ClientLib/TuningConnection.h"
 #include "../lib/Tuning/TuningModel.h"
 #include "../lib/Tuning/TuningFilter.h"
-#include "TuningClientTcpClient.h"
 #include "TuningConfigController.h"
 #include "TuningClientFilterStorage.h"
 
@@ -52,7 +52,6 @@ protected slots:
 private:
 
 	bool m_editorActive = false;
-	TuningClientTcpClient* m_tuningTcpClient = nullptr;
 
 };
 
@@ -88,7 +87,7 @@ public:
 						TuningSignalManager& tuningSignalManager,
 						TuningClientFilterStorage& tuningFilterStorage,
 						ClientLib::TuningUserManager& userManager,
-						std::vector<TuningClientTcpClient*> tcpClients,
+						ClientLib::TuningConnection& tuningConnection,
 						std::shared_ptr<TuningFilter> treeFilter,
 						std::shared_ptr<TuningFilter> pageFilter,
 						QWidget* parent = 0);
@@ -183,8 +182,7 @@ private:
 	TuningFilterStorage& m_tuningFilterStorage;
 	ClientLib::TuningUserManager& m_userManager;
 
-	std::vector<TuningClientTcpClient*> m_tuningTcpClients;
-
+	ClientLib::TuningConnection& m_tuningConnection;
 
 	TuningTableView* m_objectList = nullptr;
 

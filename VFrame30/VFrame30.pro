@@ -58,6 +58,7 @@ HEADERS += \
     ../lib/ClientBehavior.h \
 	../UtilsLib/ILogFile.h \
     ../lib/ITimeStats.h \
+    ../lib/Tuning/ITuningConnection.h \
     Context.h \
     ISchemaViewHistory.h \
     IViewVariables.h \
@@ -118,7 +119,6 @@ HEADERS += \
     SchemaManager.h \
     ClientSchemaView.h \
     SchemaItemLoopback.h \
-    ../lib/Tuning/ITuningTcpClient.h \
 	TuningController.h \
     AppSignalController.h \
     TuningSchema.h \

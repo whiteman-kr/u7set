@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "TuningSourcesHelper.h"
 #include "TuningClientFilterStorage.h"
 
 TuningClientFilterStorage::TuningClientFilterStorage()
@@ -6,17 +7,11 @@ TuningClientFilterStorage::TuningClientFilterStorage()
 
 }
 
-void TuningClientFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalManager* objects,
+void TuningClientFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalManager& objects,
 															   const std::vector<Hash>& allHashes,
 															   TuningFilter* filter,
 															   bool userFiltersOnly)
 {
-	if (objects == nullptr)
-	{
-		assert(objects);
-		return;
-	}
-
 	if (filter == nullptr)
 	{
 		assert(filter);
@@ -69,7 +64,7 @@ void TuningClientFilterStorage::createSignalsAndEqipmentHashes(const TuningSigna
 		{
 			bool ok = false;
 
-			AppSignalParam asp = objects->signalParam(allHashes[i], &ok);
+			AppSignalParam asp = objects.signalParam(allHashes[i], &ok);
 			if (ok == false)
 			{
 				assert(false);
@@ -192,7 +187,7 @@ void TuningClientFilterStorage::createSchemaCounterFilters()
 
 				Q_ASSERT(sf->isSourceSchema() == true || sf->isSourceEquipment() == true);
 
-				for (auto tf: templateFilters)
+				for (auto& tf: templateFilters)
 				{
 					std::shared_ptr<TuningFilter> cf = std::make_shared<TuningFilter>(*tf);
 					sf->addChild(cf);
@@ -204,9 +199,10 @@ void TuningClientFilterStorage::createSchemaCounterFilters()
 	return;
 }
 
-void TuningClientFilterStorage::updateCounters(const TuningSignalManager* objects,
-											   const std::vector<TuningClientTcpClient*> tcpClients,
-											   LmStatusFlagMode lmStatusFlagMode,
+void TuningClientFilterStorage::updateCounters(const TuningSignalManager& tunigSignals,
+											   const ClientLib::TuningConnection& tuningConnection,
+											   const std::vector<ClientLib::TuningSource>& sourceStates,
+											   TuningClientSettings::LmStatusFlagMode lmStatusFlagMode,
 											   TuningFilter* filter)
 {
 	if (filter == nullptr)
@@ -220,26 +216,14 @@ void TuningClientFilterStorage::updateCounters(const TuningSignalManager* object
 	{
 		// Root (total) Error and SOR counters
 		//
-		for (const TuningClientTcpClient* client : tcpClients)
+
+		filterCounters.errorCounter = ClientLib::TuningSourcesHelper::sourcesErrorsCount(sourceStates);
+
+		if (lmStatusFlagMode == TuningClientSettings::LmStatusFlagMode::SOR)
 		{
-			filterCounters.errorCounter += client->sourceErrorCount();
-
-			if (lmStatusFlagMode == LmStatusFlagMode::SOR)
-			{
-				bool sorIsActive = false;
-				bool sorIsValid = false;
-
-				filterCounters.sorCounter += client->sourceSorCount(&sorIsActive, &sorIsValid);
-
-				if (sorIsActive == true)
-				{
-					filterCounters.sorActive = true;
-				}
-				if (sorIsValid == true)
-				{
-					filterCounters.sorValid = true;
-				}
-			}
+			filterCounters.sorCounter = ClientLib::TuningSourcesHelper::sourcesSorCount(sourceStates,
+																						&filterCounters.sorActive,
+																						&filterCounters.sorValid);
 		}
 	}
 	else
@@ -254,26 +238,25 @@ void TuningClientFilterStorage::updateCounters(const TuningSignalManager* object
 			//
 			for (Hash& equipmentHash : equipmentHashes)
 			{
+				filterCounters.errorCounter += ClientLib::TuningSourcesHelper::sourceErrorsCount(sourceStates, equipmentHash);
 
-				for (const TuningClientTcpClient* client : tcpClients)
+				if (lmStatusFlagMode == TuningClientSettings::LmStatusFlagMode::SOR)
 				{
-					filterCounters.errorCounter += client->sourceErrorCount(equipmentHash);
+					bool sorIsActive = false;
+					bool sorIsValid = false;
 
-					if (lmStatusFlagMode == LmStatusFlagMode::SOR)
+					filterCounters.sorCounter += ClientLib::TuningSourcesHelper::sourceSorCount(sourceStates,
+																								 equipmentHash,
+																								 &sorIsActive,
+																								 &sorIsValid);
+
+					if (sorIsActive == true)
 					{
-						bool sorIsActive = false;
-						bool sorIsValid = false;
-
-						filterCounters.sorCounter += client->sourceSorCount(equipmentHash, &sorIsActive, &sorIsValid);
-
-						if (sorIsActive == true)
-						{
-							filterCounters.sorActive = true;
-						}
-						if (sorIsValid == true)
-						{
-							filterCounters.sorValid = true;
-						}
+						filterCounters.sorActive = true;
+					}
+					if (sorIsValid == true)
+					{
+						filterCounters.sorValid = true;
 					}
 				}
 			}
@@ -288,7 +271,7 @@ void TuningClientFilterStorage::updateCounters(const TuningSignalManager* object
 
 				for (const Hash& appSignalHash : appSignalsHashes)
 				{
-					TuningSignalState state = objects->state(appSignalHash, &found);
+					TuningSignalState state = tunigSignals.state(appSignalHash, &found);
 					if (found == false)
 					{
 						continue;
@@ -308,7 +291,7 @@ void TuningClientFilterStorage::updateCounters(const TuningSignalManager* object
 	int count = filter->childFiltersCount();
 	for (int i = 0; i < count; i++)
 	{
-		updateCounters(objects, tcpClients, lmStatusFlagMode, filter->childFilter(i).get());
+		updateCounters(tunigSignals, tuningConnection, sourceStates, lmStatusFlagMode, filter->childFilter(i).get());
 
 		// Add child filters' counters for all empty filters
 		//

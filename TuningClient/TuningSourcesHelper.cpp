@@ -1,0 +1,195 @@
+#include <QCoreApplication>
+#include <QMessageBox>
+#include "TuningSourcesHelper.h"
+#include "../ClientLib/TuningTcpClient.h"
+
+namespace ClientLib
+{
+
+	int TuningSourcesHelper::sourcesErrorsCount(const std::vector<ClientLib::TuningSource>& sourceStates)
+	{
+		int result = 0;
+
+		for (const auto& ts : sourceStates)
+		{
+			for (int i = 0; i < ts.statesCount(); i++)
+			{
+				if (ts.state(i).isreply() == false && ts.state(i).controlisactive() == true)
+				{
+					// Control but not valid
+					//
+					result++;
+				}
+				else
+				{
+					result += ts.getErrorsCount(i);
+				}
+			}
+		}
+
+		return result;
+	}
+
+	int TuningSourcesHelper::sourcesSorCount(const std::vector<ClientLib::TuningSource>& sourceStates, bool* sorActive, bool* sorValid)
+	{
+		if (sorValid == nullptr || sorActive == nullptr)
+		{
+			assert(sorValid);
+			assert(sorActive);
+			return 0;
+		}
+
+		int result = 0;
+
+		*sorActive = false;
+		*sorValid = false;
+
+		for (const auto& ts : sourceStates)
+		{
+			bool sorIsSet = false;
+
+			for (int i = 0; i < ts.statesCount(); i++)
+			{
+				auto state = ts.state(i);
+
+				if (state.controlisactive() == true)
+				{
+					*sorActive = true;
+
+					if (state.isreply() == true)
+					{
+						*sorValid = true;
+
+						if (state.setsor() == true)
+						{
+							sorIsSet = true;
+						}
+					}
+				}
+			}
+
+			if (sorIsSet == true)
+			{
+				result++;
+			}
+		}
+
+		return result;
+	}
+
+	int TuningSourcesHelper::sourceErrorsCount(const std::vector<ClientLib::TuningSource>& sourceStates, Hash sourceHash)
+	{
+		int result = 0;
+
+		for (const ClientLib::TuningSource& ts : sourceStates)
+		{
+			int check_source_hash = 1;
+			if (::calcHash(ts.equipmentId()) != sourceHash)
+			{
+				continue;
+			}
+
+			for (int i = 0; i < ts.statesCount(); i++)
+			{
+				if (ts.state(i).isreply() == false && ts.state(i).controlisactive() == true)
+				{
+					result++;
+				}
+				else
+				{
+					result += ts.getErrorsCount(i);
+				}
+			}
+		}
+
+		return result;
+	}
+
+	int TuningSourcesHelper::sourceSorCount(const std::vector<ClientLib::TuningSource>& sourceStates, Hash sourceHash, bool* sorActive, bool* sorValid)
+	{
+		if (sorValid == nullptr || sorActive == nullptr)
+		{
+			assert(sorValid);
+			assert(sorActive);
+			return 0;
+		}
+
+		*sorActive = false;
+		*sorValid = false;
+
+		int result = 0;
+
+		for (const ClientLib::TuningSource& ts : sourceStates)
+		{
+			int check_source_hash = 1;
+			if (::calcHash(ts.equipmentId()) != sourceHash)
+			{
+				continue;
+			}
+
+			for (int i = 0; i < ts.statesCount(); i++)
+			{
+				auto state = ts.state(i);
+
+				if (state.controlisactive() == true)
+				{
+					*sorActive = true;
+
+					if (state.isreply() == true)
+					{
+						*sorValid = true;
+
+						if (state.setsor() == true)
+						{
+							result++;
+						}
+					}
+				}
+			}
+		}
+
+		return result;
+	}
+
+	void TuningSourcesHelper::activateTuningSource(TuningConnection& tuningConnection, const QString& sourceEquipmentId, bool activate, QWidget* parent)
+	{
+		if (activate == true)
+		{
+			// Check if source can be activated on any Tuning Service
+			//
+			bool sourceIsActive = tuningConnection.tuningSourceIsActive(::calcHash(sourceEquipmentId));
+			if (sourceIsActive == true)
+			{
+				return;
+			}
+		}
+		else
+		{
+			// Check if source can be deactivated on any Tuning Service
+			//
+			bool sourceIsInactive = tuningConnection.tuningSourceIsInactive(::calcHash(sourceEquipmentId));
+			if (sourceIsInactive == true)
+			{
+				return;
+			}
+		}
+
+		QString action = activate ? QObject::tr("activate") : QObject::tr("deactivate");
+
+		if (QMessageBox::warning(parent, qAppName(),
+								 QObject:: tr("Are you sure you want to %1 the source %2?")
+								 .arg(action)
+								 .arg(sourceEquipmentId),
+								 QMessageBox::Yes | QMessageBox::No,
+								 QMessageBox::No) != QMessageBox::Yes)
+		{
+			return;
+		}
+
+		bool result = tuningConnection.activateTuningSource(::calcHash(sourceEquipmentId), activate);
+		if (result == false)
+		{
+			QMessageBox::critical(parent, qAppName(), QObject::tr("Source activation/deactivation failed!"));
+		}
+	}
+}

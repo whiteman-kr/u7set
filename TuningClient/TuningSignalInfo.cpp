@@ -8,17 +8,18 @@
 
 TuningSignalInfo::TuningSignalInfo(Hash appSignalHash,
 								   E::AnalogFormat analogFormat,
-								   Hash instanceIdHash,
-								   TuningSignalManager& signalManager,
-								   std::vector<ClientLib::TuningTcpClient*> tuningTcpClients,
-								   LmStatusFlagMode lmStatusFlagMode,
+								   const TuningSignalManager& signalManager,
+								   const ClientLib::TuningConnection& tuningConnection,
+								   Hash clientHash,
+								   const TuningClientSettings::LmStatusFlagMode lmStatusFlagMode,
 								   QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::TuningSignalInfo),
 	m_appSignalHash(appSignalHash),
 	m_analogFormat(analogFormat),
-	m_instanceIdHash(instanceIdHash),
 	m_signalManager(signalManager),
+	m_tuningConnection(tuningConnection),
+	m_clientHash(clientHash),
 	m_lmStatusFlagMode(lmStatusFlagMode)
 {
 	ui->setupUi(this);
@@ -26,8 +27,6 @@ TuningSignalInfo::TuningSignalInfo(Hash appSignalHash,
 	ui->m_textEdit->setReadOnly(true);
 
 	setAttribute(Qt::WA_DeleteOnClose);
-
-	setTuningTcpClients(tuningTcpClients);
 
 	bool found = false;
 	AppSignalParam asp = m_signalManager.signalParam(m_appSignalHash, &found);
@@ -51,21 +50,6 @@ TuningSignalInfo::TuningSignalInfo(Hash appSignalHash,
 TuningSignalInfo::~TuningSignalInfo()
 {
 	delete ui;
-}
-
-void TuningSignalInfo::setTuningTcpClients(std::vector<ClientLib::TuningTcpClient*> tuningTcpClients)
-{
-	m_signalTcpClients.clear();
-
-	// Get TCP clients that process this signal
-	//
-	for (ClientLib::TuningTcpClient* client : tuningTcpClients)
-	{
-		if (client->hasTuningSignal(m_appSignalHash) == true)
-		{
-			m_signalTcpClients.push_back(client);
-		}
-	}
 }
 
 void TuningSignalInfo::timerEvent(QTimerEvent* event)
@@ -103,11 +87,14 @@ void TuningSignalInfo::updateInfo()
 
 	// Fill the data received from TCP clients
 	//
-	for (ClientLib::TuningTcpClient* client : m_signalTcpClients)
-	{
-		TuningSignalState clientState = client->state(m_appSignalHash, &found);
 
-		stateServices.push_back(client->tuningServiceId());
+	std::vector<std::pair<QString, TuningSignalState>> clientStates = m_tuningConnection.states(m_appSignalHash);
+
+	for (const std::pair<QString, TuningSignalState>& statePair : clientStates)
+	{
+		stateServices.push_back(statePair.first);
+
+		const TuningSignalState& clientState = statePair.second;
 
 		validStrings.push_back(clientState.valid() == true ? tr("Yes") : tr("No"));
 		outOfRangeStrings.push_back(clientState.outOfRange() == true ? tr("Yes") : tr("No"));
@@ -115,13 +102,13 @@ void TuningSignalInfo::updateInfo()
 		controlIsEnabledStrings.push_back(clientState.controlIsEnabled() == true ? tr("Yes") : tr("No"));
 		isTuningDefaultStrings.push_back(clientState.isTuningDefault() == true ? tr("Yes") : tr("No"));
 
-		if (m_lmStatusFlagMode == LmStatusFlagMode::AccessKey)
+		if (m_lmStatusFlagMode == TuningClientSettings::LmStatusFlagMode::AccessKey)
 		{
 			writingIsEnabledStrings.push_back(clientState.writingIsEnabled() == true ? tr("Yes") : tr("No"));
 		}
 
 		QString hashString = QString("%1h").arg(QString::number(clientState.writeClient(), 16));
-		if (clientState.writeClient() == m_instanceIdHash)
+		if (clientState.writeClient() == m_clientHash)
 		{
 			hashString += tr(" (this client)");
 		}
@@ -149,13 +136,13 @@ void TuningSignalInfo::updateInfo()
 		controlIsEnabledStrings.push_back(managerState.controlIsEnabled() == true ? tr("Yes") : tr("No"));
 		isTuningDefaultStrings.push_back(managerState.isTuningDefault() == true ? tr("Yes") : tr("No"));
 
-		if (m_lmStatusFlagMode == LmStatusFlagMode::AccessKey)
+		if (m_lmStatusFlagMode == TuningClientSettings::LmStatusFlagMode::AccessKey)
 		{
 			writingIsEnabledStrings.push_back(managerState.writingIsEnabled() == true ? tr("Yes") : tr("No"));
 		}
 
 		QString hashString = QString("%1h").arg(QString::number(managerState.writeClient(), 16));
-		if (managerState.writeClient() == m_instanceIdHash)
+		if (managerState.writeClient() == m_clientHash)
 		{
 			hashString += tr(" (this client)");
 		}
@@ -243,13 +230,13 @@ void TuningSignalInfo::updateInfo()
 
 	text += "\n";
 
-	if (m_lmStatusFlagMode == LmStatusFlagMode::AccessKey)
+	if (m_lmStatusFlagMode == TuningClientSettings::LmStatusFlagMode::AccessKey)
 	{
 		text += tr("WritingIsEnabled:\t%1\n").arg(writingIsEnabledStrings.join(" / "));
 	}
 
 	text += tr("WriteClientHash:\t%1\n").arg(writeClientHashes.join(" / "));
-	text += tr("WriteErrorCode:\t\t%1\n").arg(writeErrorCodes.join(" / "));
+	text += tr("WriteErrorCode:\t%1\n").arg(writeErrorCodes.join(" / "));
 
 	text += "\n";
 

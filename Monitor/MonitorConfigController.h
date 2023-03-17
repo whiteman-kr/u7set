@@ -58,6 +58,7 @@ signals:
 	/// These signals are emitted when the new configuration arrived and fully parsed.
 	///
 	void configurationUpdated();
+	void tuningSignalsArrived(QByteArray data);
 	void configurationArrived(ConfigSettings configuration);
 
 	// Public properties

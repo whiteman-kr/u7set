@@ -90,7 +90,6 @@ SOURCES += main.cpp \
     Trend/RtSchemaTrend.cpp \
     Trend/RtTrendTcpClient.cpp \
     Trend/ArchiveTrendTcpClient.cpp \
-    MonitorTuningTcpClient.cpp \
     ../lib/Ui/DialogAlert.cpp \
     ../lib/Ui/DialogAbout.cpp \
     ../lib/Ui/DialogSourceInfo.cpp \
@@ -146,7 +145,6 @@ HEADERS  += \
     Trend/RtSchemaTrend.h \
     Trend/RtTrendTcpClient.h \
     Trend/ArchiveTrendTcpClient.h \
-    MonitorTuningTcpClient.h \
 	../AppSignalLib/TuningSignalState.h \
     ../lib/Ui/DialogAlert.h \
     ../lib/Ui/DialogAbout.h \

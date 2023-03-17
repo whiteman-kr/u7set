@@ -14,20 +14,16 @@ class DialogDataSources : public QDialog
 
 public:
 	static void create(const MonitorConfigController& configController,
-					   std::vector<ClientLib::TuningTcpClient*> tcpTuningClients,
+					   ClientLib::TuningConnection& tuningConnection,
 					   ILogFile* logFile,
 					   QWidget* parent);
-	static void updateTuningTcpClients(std::vector<ClientLib::TuningTcpClient*> tcpTuningClients);
 
 private:
 	explicit DialogDataSources(const MonitorConfigController& configController,
-							   std::vector<ClientLib::TuningTcpClient*> tcpTuningClients,
+							   ClientLib::TuningConnection& tuningConnection,
 							   ILogFile* logFile,
 							   QWidget* parent);
 	virtual ~DialogDataSources();
-
-private:
-	void setTuningTcpClients(std::vector<ClientLib::TuningTcpClient*> tcpTuningClients);
 
 private slots:
 	void slot_configurationArrived(ConfigSettings configuration);
@@ -51,6 +47,7 @@ private:
 	// --
 	//
 	ClientLib::AdsSourceStateConnection m_tcpSignalClientCtrl{m_logFile};
+	ClientLib::TuningConnection& m_tuningConnection;
 };
 
 #endif // DIALOGDATASOURCES_H

@@ -2,15 +2,15 @@
 #define DIALOGTUNINGSOURCES_H
 
 #include "../lib/Ui/TuningSourcesWidget.h"
-#include "../ClientLib/TuningTcpClient.h"
 #include "../ClientLib/TuningUserManager.h"
+#include "../ClientLib/TuningConnection.h"
 
 class ClientTuningSourcesWidget : public TuningSourcesWidget
 {
 	Q_OBJECT
 public:
 
-	explicit ClientTuningSourcesWidget(std::vector<ClientLib::TuningTcpClient*> tcpClients, ClientLib::TuningUserManager& userManager, bool hasActivationControls, QWidget* parent);
+	explicit ClientTuningSourcesWidget(ClientLib::TuningConnection& connection, ClientLib::TuningUserManager& userManager, bool hasActivationControls, QWidget* parent);
 	virtual ~ClientTuningSourcesWidget();
 
 protected:
@@ -31,10 +31,8 @@ class DialogTuningSources : public QDialog
 	Q_OBJECT
 
 public:
-	explicit DialogTuningSources(std::vector<ClientLib::TuningTcpClient*> tcpClients, ClientLib::TuningUserManager& userManager, bool hasActivationControls, QWidget* parent);
+	explicit DialogTuningSources(ClientLib::TuningConnection& tuningConnection, ClientLib::TuningUserManager& userManager, bool hasActivationControls, QWidget* parent);
 	virtual ~DialogTuningSources();
-
-	void setTuningSources(std::vector<ClientLib::TuningTcpClient*> tcpClients);
 
 protected:
 	virtual void reject() override;
@@ -46,6 +44,8 @@ private:
 	ClientTuningSourcesWidget* m_tuningSourcesWidget = nullptr;
 	QPushButton* m_btnEnableControl = nullptr;
 	QPushButton* m_btnDisableControl = nullptr;
+
+	ClientLib::TuningConnection& m_tuningConnection;
 
 
 
