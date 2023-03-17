@@ -29,7 +29,7 @@ function StopServices() {
 
 # Stop if any service is running.
 #
-StopServices   
+StopServices || true
 
 # lcov exec arguments and output dir.
 # 
@@ -72,7 +72,7 @@ sleep 5
 
 # Stop services after ClientTests (functional tests)
 #
-StopServices 
+StopServices || true
 
 # Run other tests, not services are required here.
 #
