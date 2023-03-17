@@ -62,7 +62,7 @@ chmod +x *.sh
 ./Default_systemid_clienttest_ws02_cfgs.sh simulation < /dev/null > clienttest_ws02_cfgs.out 2>&1 &
 ./Default_systemid_clienttest_ws01_ads.sh < /dev/null > clienttest_ws01_ads.out 2>&1 &
 ./Default_systemid_clienttest_ws02_ads.sh < /dev/null > clienttest_ws02_ads.out 2>&1 &
-./SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -enable_lan < /dev/null > SimulatorConsole.out 2>&1 &
+./SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -enable_lan -no_exit SimulatorConsole.out 2>&1 &
 
 sleep 5
 
