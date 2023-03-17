@@ -664,6 +664,8 @@ bool TuningServiceSettingsGetter::readSettings(const Builder::Context* context,
 
 	if (hasControllers == true)
 	{
+		isTwoChannelTuningService = true;
+
 		channelCount = TuningServiceSettings::CHANNELS_COUNT;
 
 		for(int channel = CHANNEL_1; channel < TuningServiceSettings::CHANNELS_COUNT; channel++)
@@ -697,6 +699,8 @@ bool TuningServiceSettingsGetter::readSettings(const Builder::Context* context,
 	{
 		// Reading of single-channel TuningService preset
 		//
+		isTwoChannelTuningService = false;
+
 		channelCount = 1;
 
 		ChannelSettings& ch1 = channelSettings[0];

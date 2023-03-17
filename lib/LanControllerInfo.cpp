@@ -617,6 +617,26 @@ void LanControllersInfo::filterLansByTuningServiceID(const QString& tuningServic
 	}
 }
 
+void LanControllersInfo::filterLansByTuningServiceLinkIDs(const std::set<QString>& tuningServiceLinkIDs)
+{
+	auto it = m_lans.begin();
+
+	while(it != m_lans.end())
+	{
+		Q_ASSERT(it->isProvideTuning() == true);
+
+		if (tuningServiceLinkIDs.contains(it->tuningServiceID) == false)
+		{
+			m_lans.erase(it);
+			it = m_lans.begin();
+		}
+		else
+		{
+			it++;
+		}
+	}
+}
+
 const std::vector<LanControllerInfo>& LanControllersInfo::operator ()() const
 {
 	return m_lans;

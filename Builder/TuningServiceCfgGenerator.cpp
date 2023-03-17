@@ -71,7 +71,12 @@ namespace Builder
 
 			TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
 
-			std::set<QString> alreadyAppendSources;
+			// TunableLmEquipmentID => set of LinkID(s) to TuningService
+			//
+			// Link to single-channel TuningService is TuningService.EquipmentID
+			// Links to two-channel TuningService are TuninService.ChannelController.EquipmentIDs
+			//
+			std::map<QString, std::set<QString>> lmToServiceLinksID;
 
 			for(int channel = CHANNEL_1; channel < TuningServiceSettings::CHANNELS_COUNT; channel++)
 			{
@@ -79,69 +84,94 @@ namespace Builder
 
 				for(const TuningServiceSettings::TuningSource& tunSrc : ch.sources)
 				{
-					if (alreadyAppendSources.contains(tunSrc.lmEquipmentID) == true)
+					auto srcIt = lmToServiceLinksID.find(tunSrc.lmEquipmentID);
+
+					if (srcIt == lmToServiceLinksID.end())
 					{
-						continue;
+						auto p = lmToServiceLinksID.insert({tunSrc.lmEquipmentID, std::set<QString>()});
+						srcIt = p.first;
 					}
 
-					alreadyAppendSources.insert(tunSrc.lmEquipmentID);
+					std::set<QString>& linksSet = srcIt->second;
 
-					std::shared_ptr<Hardware::DeviceObject> device = m_equipment->deviceObject(tunSrc.lmEquipmentID);
-
-					if (device == nullptr)
+					if (settings->isTwoChannelTuningService == false)
 					{
-						// Equipment object %1 is not found (Settings profile - %2).
+						// To single-channel TuningService LM must links via TuningService.EquipmentID
 						//
-						m_log->errCFG3044(tunSrc.lmEquipmentID, profile);
-						result = false;
-						continue;
-					}
+						Q_ASSERT(m_software->equipmentIdTemplate() == settings->equipmentID);
 
-					Hardware::DeviceModule* lm = dynamic_cast<Hardware::DeviceModule*>(device.get());
-
-					if (lm == nullptr)
-					{
-						LOG_INTERNAL_ERROR(m_log);
-						result = false;
-						continue;
-					}
-
-					Tuning::TuningSource ts;
-
-					ts.setProfile(profile);
-
-					result &= SoftwareSettingsGetter::getLmPropertiesFromDevice(lm,
-															E::LanControllerType::Tuning,
-															m_context, &ts);
-
-					if (result == false)
-					{
-						continue;
-					}
-
-					ts.lanControllersInfo().filterLansByTuningServiceID(m_software->equipmentIdTemplate());
-
-					if (ts.lanControllersInfo()().size() == 0)
-					{
-						continue;
-					}
-
-					Tuning::TuningDataShared tuningData = m_context->m_tuningDataStorage->getTuningData(lm->equipmentId());
-
-					if(tuningData != nullptr)
-					{
-						ts.setTuningData(tuningData);
+						linksSet.insert(settings->equipmentID);
 					}
 					else
 					{
-						// Tuning data is not found for module %1
+						// To two-channel TuningService LM must links via TuningService.ChannelController.EquipmentID
 						//
-						m_log->errALC5197(lm->equipmentIdTemplate());
-						result = false;
+						linksSet.insert(ch.serviceControllerEquipmentID);
 					}
-
-					tuningSources.push_back(ts);
 				}
+			}
+
+			for(const auto& p : lmToServiceLinksID)
+			{
+				const QString& tunableLmID = p.first;
+				const std::set<QString>& linksToTuningService = p.second;
+
+				std::shared_ptr<Hardware::DeviceObject> device = m_equipment->deviceObject(tunableLmID);
+
+				if (device == nullptr)
+				{
+					// Equipment object %1 is not found (Settings profile - %2).
+					//
+					m_log->errCFG3044(tunableLmID, profile);
+					result = false;
+					continue;
+				}
+
+				Hardware::DeviceModule* lm = dynamic_cast<Hardware::DeviceModule*>(device.get());
+
+				if (lm == nullptr)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					result = false;
+					continue;
+				}
+
+				Tuning::TuningSource ts;
+
+				ts.setProfile(profile);
+
+				result &= SoftwareSettingsGetter::getLmPropertiesFromDevice(lm,
+														E::LanControllerType::Tuning,
+														m_context, &ts);
+
+				if (result == false)
+				{
+					LOG_INTERNAL_ERROR_MSG(m_log, QString("Error getLmPropertiesFromDevice %1").arg(tunableLmID));
+					continue;
+				}
+
+				ts.lanControllersInfo().filterLansByTuningServiceLinkIDs(linksToTuningService);
+
+				if (ts.lanControllersInfo()().size() == 0)
+				{
+					continue;
+				}
+
+				Tuning::TuningDataShared tuningData = m_context->m_tuningDataStorage->getTuningData(lm->equipmentId());
+
+				if(tuningData != nullptr)
+				{
+					ts.setTuningData(tuningData);
+				}
+				else
+				{
+					// Tuning data is not found for module %1
+					//
+					m_log->errALC5197(lm->equipmentIdTemplate());
+					result = false;
+				}
+
+				tuningSources.push_back(ts);
 			}
 		}
 

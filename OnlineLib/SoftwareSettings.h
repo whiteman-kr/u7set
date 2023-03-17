@@ -304,6 +304,8 @@ public:
 
 	E::SecurityLevel securityLevel = E::SecurityLevel::Basic;
 
+	bool isTwoChannelTuningService = false;
+
 	int channelCount = 0;
 
 	QString cfgServiceID1;
