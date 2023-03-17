@@ -345,7 +345,7 @@ namespace Sim
 
 	bool Control::unlockTimer() const
 	{
-		return m_unlockTimer.load(std::memory_order_relaxed);
+		return m_unlockTimer.load();
 	}
 
 	void Control::setUnlockTimer(bool value)
