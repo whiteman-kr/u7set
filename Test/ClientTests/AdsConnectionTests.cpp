@@ -256,6 +256,7 @@ TEST(AdsConnectionTests, receivesState)
 		lastState = state.value();
 	}
 
+	qDebug() << "TEST(AdsConnectionTests, receivesState): stateChanges of #SYSTEMID_CLIENTTEST_CH10_MD00_PI_BLINK: " << stateChanges;
 	EXPECT_TRUE(stateChanges >= 4 && stateChanges < 10);
 
 	return;
