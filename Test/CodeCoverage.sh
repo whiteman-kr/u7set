@@ -141,12 +141,12 @@ TEST_OUTPUT_FILE="ClientLib.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # AppDataSrv
-TEST_DIR="./AppDataService/debug"
+TEST_DIR="./AppDataService"
 TEST_OUTPUT_FILE="AppDataSrv.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # CfgSrv
-TEST_DIR="./ConfigurationService/debug"
+TEST_DIR="./ConfigurationService"
 TEST_OUTPUT_FILE="CfgSrv.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
