@@ -50,10 +50,12 @@ SOURCES += \
         AdsConnectionTests.cpp \
         AppSignalManagerTests.cpp \
         ConfigControllerTests.cpp \
+        ConnectionPorts.cpp \
         main.cpp
 
 HEADERS += \
     ../../lib/BuildInfo.h \
+    ConnectionPorts.h \
     Stable.h		
 
 
@@ -65,6 +67,12 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 #
 LIBS += -L$$DESTDIR
 LIBS += -L.
+
+# Simulator Lib
+#
+LIBS += -lSimulator
+win32:PRE_TARGETDEPS += $$DESTDIR/Simulator.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libSimulator.a
 
 # ClientLib
 #

@@ -68,7 +68,7 @@ sleep 5
 
 # Run ClientTests, they are functional.
 #
-./ClientTests
+./ClientTests -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_code_coverage
 
 # Stop services after ClientTests (functional tests)
 #

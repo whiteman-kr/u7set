@@ -10,22 +10,6 @@ using ::testing::AtLeast;
 
 namespace
 {
-	static const std::vector<SoftwareEndpoint::AppDataService> AppDataServices =
-	{
-		{
-			.equipmentId = "SYSTEMID_CLIENTTEST_WS01_ADS",
-			.shortenId = "WS01_ADS",
-			.address = {"127.0.0.1", 13323},
-			.realtimeAddress = {"127.0.0.1", 13324}
-		},
-		{
-			.equipmentId = "SYSTEMID_CLIENTTEST_WS02_ADS",
-			.shortenId = "WS02_ADS",
-			.address = {"127.0.0.1", 13326},
-			.realtimeAddress = {"127.0.0.1", 13327}}
-	};
-
-
 	class MockAppSignalUpdater : public ClientLib::IAppSignalUpdater
 	{
 	public:
@@ -48,8 +32,40 @@ namespace
 	};
 }
 
+class AdsConnectionTests : public ::testing::Test
+{
+protected:
+	virtual void SetUp()
+	{
+		AppDataServices[0].address.setPort(g_connectionPorts.ads1.clientRequestPort);
+		AppDataServices[0].realtimeAddress.setPort(g_connectionPorts.ads1.rtTrendsRequestPort);
 
-TEST(AdsConnectionTests, connectToAds)
+		AppDataServices[1].address.setPort(g_connectionPorts.ads2.clientRequestPort);
+		AppDataServices[1].realtimeAddress.setPort(g_connectionPorts.ads2.rtTrendsRequestPort);
+	}
+
+	virtual void TearDown()
+	{
+	}
+
+	inline static std::vector<SoftwareEndpoint::AppDataService> AppDataServices =
+	{
+		{
+			.equipmentId = "SYSTEMID_CLIENTTEST_WS01_ADS",
+			.shortenId = "WS01_ADS",
+			.address = {"127.0.0.1", 13323},
+			.realtimeAddress = {"127.0.0.1", 13324}
+		},
+		{
+			.equipmentId = "SYSTEMID_CLIENTTEST_WS02_ADS",
+			.shortenId = "WS02_ADS",
+			.address = {"127.0.0.1", 13326},
+			.realtimeAddress = {"127.0.0.1", 13327}}
+	};
+};
+
+
+TEST_F(AdsConnectionTests, connectToAds)
 {
 	ILogFileStub log;
 	MockAppSignalUpdater signalUpdater;
@@ -139,7 +155,7 @@ TEST(AdsConnectionTests, connectToAds)
 	return;
 }
 
-TEST(AdsConnectionTests, adsTimeout)
+TEST_F(AdsConnectionTests, adsTimeout)
 {
 	ILogFileStub log;
 	MockAppSignalUpdater signalUpdater;
@@ -200,7 +216,7 @@ TEST(AdsConnectionTests, adsTimeout)
 	return;
 }
 
-TEST(AdsConnectionTests, receivesState)
+TEST_F(AdsConnectionTests, receivesState)
 {
 	// Test: Connect to AppSignalManager and check that signal "#SYSTEMID_CLIENTTEST_CH10_MD00_PI_BLINK"
 	//	     is blinking (1 Hz)

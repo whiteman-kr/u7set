@@ -18,4 +18,7 @@
 #include <QDebug>
 #include <QSignalSpy>
 
+#include "ConnectionPorts.h"
+
 using namespace std::chrono_literals;
+

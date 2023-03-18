@@ -65,13 +65,12 @@ namespace
 
 }
 
-
 TEST(ConfigControllerTests, monitorToConfigControllerConnection)
 {
 	SoftwareInfo softwareInfo;
 	softwareInfo.init(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR", 0, 0);
-	HostAddressPort host1{"127.0.0.1", 13312};		// valid address, where cfgservice is expected to run.
-	HostAddressPort host2{"192.168.99.103", 13313};	// some unreachable address
+	HostAddressPort host1{"127.0.0.1", g_connectionPorts.cfgService1.clientRequestPort};		// valid address, where cfgservice is expected to run.
+	HostAddressPort host2{"192.168.99.103", g_connectionPorts.cfgService2.clientRequestPort};	// some unreachable address
 	ILogFileStub log;
 
 	MonitorConfigControllerStub configController{softwareInfo, host1, host2, &log};
@@ -115,10 +114,12 @@ TEST(ConfigControllerTests, monitorToConfigControllerConnection)
 
 	// Test MonitorSettings
 	//
-	EXPECT_EQ(configController.receivedSettings.configService1.address.toStdString(), HostAddressPort("127.0.0.1", 13312).toStdString());
+	EXPECT_EQ(configController.receivedSettings.configService1.address.toStdString(),
+			  HostAddressPort("127.0.0.1", g_connectionPorts.cfgService1.clientRequestPort).toStdString());
 	EXPECT_EQ(configController.receivedSettings.configService1.equipmentId, "SYSTEMID_CLIENTTEST_WS01_CFGS");
 
-	EXPECT_EQ(configController.receivedSettings.configService2.address.toStdString(), HostAddressPort("127.0.0.1", 13313).toStdString());
+	EXPECT_EQ(configController.receivedSettings.configService2.address.toStdString(),
+			  HostAddressPort("127.0.0.1", g_connectionPorts.cfgService2.clientRequestPort).toStdString());
 	EXPECT_EQ(configController.receivedSettings.configService2.equipmentId, "SYSTEMID_CLIENTTEST_WS02_CFGS");
 
 	EXPECT_EQ(configController.receivedSettings.startSchemaId, "STARTSCHEMA");
@@ -195,7 +196,7 @@ TEST(ConfigControllerTests, wrongCliendId)
 	ILogFileStub log;
 	SoftwareInfo softwareInfo;
 	softwareInfo.init(E::SoftwareType::Monitor, "WRONG_SYSTEMID_CLIENTTEST_WS03_MONITOR", 0, 0);
-	HostAddressPort host{"127.0.0.1", 13312};
+	HostAddressPort host{"127.0.0.1", g_connectionPorts.cfgService1.clientRequestPort};
 
 	// Set bad client EquipmentID, error is expected
 	//
@@ -230,8 +231,8 @@ TEST(ConfigControllerTests, setConnectionParams)
 	ILogFileStub log;
 	SoftwareInfo softwareInfo;
 	softwareInfo.init(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR", 0, 0);
-	HostAddressPort goodHost{"127.0.0.1", 13312};
-	HostAddressPort wrongHost{"192.168.99.103", 13313};
+	HostAddressPort goodHost{"127.0.0.1", g_connectionPorts.cfgService1.clientRequestPort};
+	HostAddressPort wrongHost{"192.168.99.103", g_connectionPorts.cfgService2.clientRequestPort};
 
 	// Set wrong host, expect connection NOT established
 	//
@@ -280,7 +281,7 @@ TEST(ConfigControllerTests, twoClientsOnSameComputer)
 	ILogFileStub log;
 	SoftwareInfo softwareInfo;
 	softwareInfo.init(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR", 0, 0);
-	HostAddressPort host{"127.0.0.1", 13312};
+	HostAddressPort host{"127.0.0.1", g_connectionPorts.cfgService1.clientRequestPort};
 
 	MonitorConfigControllerStub configController1{softwareInfo, host, &log};
 	MonitorConfigControllerStub configController2{softwareInfo, host, &log};

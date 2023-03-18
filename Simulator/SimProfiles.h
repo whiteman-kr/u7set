@@ -31,6 +31,8 @@ namespace Sim
 
 		// --
 		//
+		[[nodiscard]] bool isEmpty() const;
+
 		[[nodiscard]] QStringList equipment() const;
 		bool applyToObject(QString equipmentId, std::shared_ptr<PropertyObject> object, QString* errorMessage);
 
@@ -50,6 +52,7 @@ namespace Sim
 	public:
 		void clear();
 
+		bool load(std::filesystem::path fileName, QString* errorMessage);
 		bool load(const QByteArray& data, QString* errorMessage);
 		bool parse(const QString& string, QString* errorMessage);
 

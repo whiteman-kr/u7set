@@ -227,7 +227,7 @@ windows_test_job:
     - "# ----------------------------------------------"
     - "#               Run unit tests"
     - "# ----------------------------------------------"
-    - "&$Env:CI_PROJECT_DIR/bin/release/ClientTests.exe --gtest_filter=-AdsConnectionTests.*:ConfigControllerTests.*  --gtest_output=xml:ClientTestsLinux.xml"    
+    - "&$Env:CI_PROJECT_DIR/bin/release/ClientTests.exe --gtest_filter=-AdsConnectionTests.*:ConfigControllerTests.*"
     - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorTests.exe"
     - "&$Env:CI_PROJECT_DIR/bin/release/MetrologyTests.exe"
     - "&$Env:CI_PROJECT_DIR/bin/release/u7databasetests.exe -config=\"$Env:CI_PROJECT_DIR/Test/u7databasetestsArgs.xml\""
@@ -332,7 +332,7 @@ linux_test_job:
     - "./SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_test_job -enable_lan -no_exit > SimulatorConsole.out 2>&1 &"
     - "sleep 5"
     - "jobs"
-    - "$CI_PROJECT_DIR/bin_unix/release/ClientTests --gtest_output=xml:ClientTestsLinux.xml"
+    - "$CI_PROJECT_DIR/bin_unix/release/ClientTests -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_test_job"
     - "StopServices || true"
     - "popd"
 
