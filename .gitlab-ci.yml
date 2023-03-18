@@ -332,7 +332,7 @@ linux_test_job:
     - "./SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_test_job -enable_lan -no_exit > SimulatorConsole.out 2>&1 &"
     - "sleep 5"
     - "jobs"
-    - "$CI_PROJECT_DIR/bin_unix/release/ClientTests -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_test_job"
+    - "./ClientTests -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_test_job"
     - "StopServices || true"
     - "popd"
 
