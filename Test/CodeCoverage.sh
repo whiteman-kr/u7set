@@ -23,7 +23,7 @@ function StopServices() {
     #
     pkill CfgSrv || true
     pkill AppDataSrv || true
-    pkill SimulatorConsole || true
+    pkill SimulatorConsol || true       # without last e, I assume there is a limitation to 15 symbols.
     sleep 1
 }
 
@@ -55,13 +55,13 @@ $CI_PROJECT_DIR/bin_unix/debug/BuilderConsole $CI_PROJECT_DIR/Test/BuilderConsol
 #
 pushd $CI_PROJECT_DIR/bin_unix/debug
 
-cp /tmp/build/${SIMULATOR_PROJECT_NAME}/build/RunServiceScripts/Linux/*.sh .
+cp /tmp/build/${SIMULATOR_PROJECT_NAME}/build/RunServiceScripts/Linux/linux_code_coverage_systemid_clienttest*.sh .
 chmod +x *.sh
 
-./Default_systemid_clienttest_ws01_cfgs.sh simulation < /dev/null > clienttest_ws01_cfgs.out 2>&1 &
-./Default_systemid_clienttest_ws02_cfgs.sh simulation < /dev/null > clienttest_ws02_cfgs.out 2>&1 &
-./Default_systemid_clienttest_ws01_ads.sh < /dev/null > clienttest_ws01_ads.out 2>&1 &
-./Default_systemid_clienttest_ws02_ads.sh < /dev/null > clienttest_ws02_ads.out 2>&1 &
+./linux_code_coverage_systemid_clienttest_ws01_cfgs.sh simulation < /dev/null > clienttest_ws01_cfgs.out 2>&1 &
+./linux_code_coverage_systemid_clienttest_ws02_cfgs.sh simulation < /dev/null > clienttest_ws02_cfgs.out 2>&1 &
+./linux_code_coverage_systemid_clienttest_ws01_ads.sh < /dev/null > clienttest_ws01_ads.out 2>&1 &
+./linux_code_coverage_systemid_clienttest_ws02_ads.sh < /dev/null > clienttest_ws02_ads.out 2>&1 &
 ./SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -enable_lan -no_exit > SimulatorConsole.out 2>&1 &
 
 sleep 5
@@ -140,15 +140,15 @@ TEST_DIR="./ClientLib/debug"
 TEST_OUTPUT_FILE="ClientLib.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
-# AppDataSrv
-TEST_DIR="./AppDataService"
-TEST_OUTPUT_FILE="AppDataSrv.info"
-lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+# AppDataSrv -- Cannot collect .gcda as process is killed and not finished normally
+#TEST_DIR="./AppDataService"
+#TEST_OUTPUT_FILE="AppDataSrv.info"
+#lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
-# CfgSrv
-TEST_DIR="./ConfigurationService"
-TEST_OUTPUT_FILE="CfgSrv.info"
-lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+# CfgSrv -- Cannot collect .gcda as process is killed and not finished normally
+#TEST_DIR="./ConfigurationService"
+#TEST_OUTPUT_FILE="CfgSrv.info"
+#lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 
 # Combine results to a single file, result stored to $OUTPUT_DIR/u7set-dirty.info
@@ -163,9 +163,10 @@ lcov --output-file $OUTPUT_DIR/u7set-dirty.info \
     --add-tracefile $OUTPUT_DIR/Builder.info \
     --add-tracefile $OUTPUT_DIR/Simulator.info \
     --add-tracefile $OUTPUT_DIR/UtilsLib.info \
-    --add-tracefile $OUTPUT_DIR/ClientLib.info \
-    --add-tracefile $OUTPUT_DIR/AppDataSrv.info \
-    --add-tracefile $OUTPUT_DIR/CfgSrv.info
+    --add-tracefile $OUTPUT_DIR/ClientLib.info
+
+#    --add-tracefile $OUTPUT_DIR/AppDataSrv.info \
+#    --add-tracefile $OUTPUT_DIR/CfgSrv.info
 
 # Filter combined file, result stored to $OUTPUT_DIR/u7set.info.
 #

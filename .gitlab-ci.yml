@@ -260,7 +260,7 @@ windows_test_job:
 
 linux_test_job:
   stage: test
-  needs: ["linux_build_job", "linux_code_coverage_job"]
+  needs: ["linux_build_job"]
   tags:
     - gcctest
   only:
@@ -319,16 +319,16 @@ linux_test_job:
     - "# ----------------------------------------------"
     - "#               Run client tests"
     - "# ----------------------------------------------"
-    - "function StopServices () { pkill CfgSrv || true; pkill AppDataSrv || true; pkill SimulatorConsole || true; sleep 2; }"
+    - "function StopServices () { pkill CfgSrv || true; pkill AppDataSrv || true; pkill SimulatorConsol || true; sleep 2; }"
     - "trap StopServices EXIT"
     - "pushd $CI_PROJECT_DIR/bin_unix/release"
     - "StopServices || true"
-    - "cp /tmp/build/${SIMULATOR_PROJECT_NAME}/build/RunServiceScripts/Linux/*.sh ."
+    - "cp /tmp/build/${SIMULATOR_PROJECT_NAME}/build/RunServiceScripts/Linux/linux_test_job_systemid_clienttest*.sh ."
     - "chmod +x *.sh"
-    - "./Default_systemid_clienttest_ws01_cfgs.sh simulation < /dev/null > clienttest_ws01_cfgs.out 2>&1 &"
-    - "./Default_systemid_clienttest_ws02_cfgs.sh simulation < /dev/null > clienttest_ws02_cfgs.out 2>&1 &"
-    - "./Default_systemid_clienttest_ws01_ads.sh < /dev/null > clienttest_ws01_ads.out 2>&1 &"
-    - "./Default_systemid_clienttest_ws02_ads.sh < /dev/null > clienttest_ws02_ads.out 2>&1 &"
+    - "./linux_test_job_systemid_clienttest_ws01_cfgs.sh simulation < /dev/null > clienttest_ws01_cfgs.out 2>&1 &"
+    - "./linux_test_job_systemid_clienttest_ws02_cfgs.sh simulation < /dev/null > clienttest_ws02_cfgs.out 2>&1 &"
+    - "./linux_test_job_systemid_clienttest_ws01_ads.sh < /dev/null > clienttest_ws01_ads.out 2>&1 &"
+    - "./linux_test_job_systemid_clienttest_ws02_ads.sh < /dev/null > clienttest_ws02_ads.out 2>&1 &"
     - "./SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -enable_lan -no_exit > SimulatorConsole.out 2>&1 &"
     - "sleep 5"
     - "jobs"
