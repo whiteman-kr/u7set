@@ -48,6 +48,7 @@ CONFIG(release, debug|release) {
 SOURCES += \
         ../../lib/BuildInfo.cpp \
         AdsConnectionTests.cpp \
+        AdsSourceStateConnectionTests.cpp \
         AppSignalManagerTests.cpp \
         ConfigControllerTests.cpp \
         ConnectionPorts.cpp \

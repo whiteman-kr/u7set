@@ -1,6 +1,3 @@
-// Functional tests for class ClientLib::Config controller
-// ConfigurationService must be ranning on localhost and default port
-//
 #include "../../ClientLib/AppSignalManager.h"
 #include "../../ClientLib/IRecentAppSignals.h"
 #include "../../ClientLib/AdsConnection.h"
@@ -155,7 +152,7 @@ TEST_F(AdsConnectionTests, connectToAds)
 	return;
 }
 
-TEST_F(AdsConnectionTests, adsTimeout)
+TEST_F(AdsConnectionTests, adsNoConnection)
 {
 	ILogFileStub log;
 	MockAppSignalUpdater signalUpdater;

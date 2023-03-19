@@ -25,29 +25,6 @@ namespace ClientLib
 		return;
 	}
 
-	AdsSourceStateConnection::Connection::Connection(Connection&& src) noexcept
-	{
-		operator=(std::move(src));
-		return;
-	}
-
-	AdsSourceStateConnection::Connection& AdsSourceStateConnection::Connection::operator=(Connection&& src) noexcept
-	{
-		if (this == &src)
-		{
-			Q_ASSERT(this != &src);
-			return *this;
-		}
-
-		tcpAppSourceStateClient = src.tcpAppSourceStateClient;
-		tcpAppSourceStateThread = src.tcpAppSourceStateThread;
-
-		src.tcpAppSourceStateClient = nullptr;
-		src.tcpAppSourceStateThread = nullptr;
-
-		return *this;
-	}
-
 	void AdsSourceStateConnection::Connection::stopAndDestroy()
 	{
 		if (tcpAppSourceStateThread != nullptr)
@@ -80,6 +57,20 @@ namespace ClientLib
 		m_logFile.writeMessage(QString("updateConnections(), %1 app data services").arg(appDataService.size()));
 		createAndStart(softwareInfo, appDataService);
 		return;
+	}
+
+	std::vector<Tcp::ConnectionState> AdsSourceStateConnection::adsConnectionStates() const
+	{
+		std::vector<Tcp::ConnectionState> states;
+		states.reserve(m_conns.size());
+
+		for (const Connection& c : m_conns)
+		{
+			Q_ASSERT(c.tcpAppSourceStateClient);
+			states.emplace_back(c.tcpAppSourceStateClient->getConnectionState());
+		}
+
+		return states;
 	}
 
 	std::vector<ClientLib::AppDataSourceState> AdsSourceStateConnection::appDataSourceStates() const

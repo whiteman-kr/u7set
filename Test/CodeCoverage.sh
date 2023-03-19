@@ -174,7 +174,7 @@ lcov -r $OUTPUT_DIR/u7set-dirty.info "*Qt*.framework*" "/usr/*" "*/Qt/*" "*/Prot
 
 # Generate HTML report.
 #
-genhtml --legend --rc lcov_branch_coverage=1 --output-directory $OUTPUT_DIR/Report $OUTPUT_DIR/u7set.info
+genhtml --legend --rc lcov_branch_coverage=1 --rc genhtml_med_limit=60 --rc genhtml_hi_limit=80 --output-directory $OUTPUT_DIR/Report $OUTPUT_DIR/u7set.info
 
 # Generate cobertura XML (for GitLab CI).
 # https://pypi.org/project/lcov-cobertura/
