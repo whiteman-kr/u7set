@@ -1,12 +1,11 @@
 #ifndef MONITORTRENDS_H
 #define MONITORTRENDS_H
 
+#include "../ClientLib/RtDataProvider.h"
 #include "TrendMainWindow.h"
 #include "MonitorConfigController.h"
 #include "MonitorSignalManager.h"
 #include "MonitorTrendArchiveConnections.h"
-#include "RtDataProvider.h"
-#include "RtTrendTcpClient.h"
 
 class MonitorTrendsWidget;
 class QLabel;
@@ -73,7 +72,7 @@ private:
 	const MonitorConfigController& m_configController;
 
 	MonitorTrendArchiveConnections m_archiveDataProvider;
-	RtDataProvider m_realtimeDataProvider;
+	ClientLib::RtDataProvider m_realtimeDataProvider;
 
 	enum  StatusBarColumns
 	{

@@ -52,6 +52,8 @@ HEADERS += \
     ConfigController.h \
     IAppSignalUpdater.h \
     IRecentAppSignals.h \
+	RtDataProvider.h \
+	RtTrendTcpClient.h \
 	Stable.h \
 	TcpAppSourcesState.h \
 	TcpSignalClient.h \
@@ -67,6 +69,8 @@ SOURCES += \
 	AdsSourceStateConnection.cpp \
 	AppSignalManager.cpp \
 	ConfigController.cpp \
+	RtDataProvider.cpp \
+	RtTrendTcpClient.cpp \
 	TcpAppSourcesState.cpp \
 	TcpSignalClient.cpp \
 	TcpSignalRecents.cpp \

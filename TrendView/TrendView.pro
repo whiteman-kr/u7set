@@ -34,6 +34,7 @@ SOURCES += \
     TrendArchiveServer.cpp \
     TrendScale.cpp \
     TrendSignalSet.cpp \
+    TrendSignalState.cpp \
     TrendWidget.cpp \
 	TrendSignal.cpp \
     TrendSlider.cpp \
@@ -55,6 +56,7 @@ HEADERS += \
     TrendArchiveServer.h \
     TrendScale.h \
     TrendSignalSet.h \
+    TrendSignalState.h \
     TrendWidget.h \
     TrendSignal.h \
     TrendSlider.h \

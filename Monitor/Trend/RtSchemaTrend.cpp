@@ -3,14 +3,12 @@
 //
 // RtConnection
 //
-RtSchemaTrendDataProvider::RtSchemaTrendDataProvider(const MonitorConfigController& configController,
-						const ISignalDataServer& signalDataServer,
-						ILogFile* logFile) :
-	m_dataProvider(configController, signalDataServer, logFile)
+RtSchemaTrendDataProvider::RtSchemaTrendDataProvider(const ISignalDataServer& signalDataServer, ILogFile* logFile) :
+	m_dataProvider{signalDataServer, logFile}
 {
 
-	connect(&m_dataProvider, &RtDataProvider::dataReady, this, &RtSchemaTrendDataProvider::slot_realtimeDataReceived, Qt::ConnectionType::QueuedConnection);
-	connect(&m_dataProvider, &RtDataProvider::connectionLost, this, &RtSchemaTrendDataProvider::slot_connectionLost, Qt::ConnectionType::QueuedConnection);
+	connect(&m_dataProvider, &ClientLib::RtDataProvider::dataReady, this, &RtSchemaTrendDataProvider::slot_realtimeDataReceived, Qt::ConnectionType::QueuedConnection);
+	connect(&m_dataProvider, &ClientLib::RtDataProvider::connectionLost, this, &RtSchemaTrendDataProvider::slot_connectionLost, Qt::ConnectionType::QueuedConnection);
 }
 
 RtSchemaTrendDataProvider::~RtSchemaTrendDataProvider()
@@ -22,12 +20,13 @@ RtSchemaTrendDataProvider::~RtSchemaTrendDataProvider()
 	return;
 }
 
-void RtSchemaTrendDataProvider::updateConnections()
+void RtSchemaTrendDataProvider::updateConnections(const SoftwareInfo& softwareInfo,
+												  const std::vector<SoftwareEndpoint::AppDataService>& appDataServices)
 {
 	Q_ASSERT(QThread::currentThreadId() == this->thread()->currentThreadId());
 	//QMutexLocker locker(&m_signalMutex);
 
-	m_dataProvider.updateConnections();
+	m_dataProvider.updateConnections(softwareInfo, appDataServices);
 	return;
 }
 
@@ -386,6 +385,9 @@ void RtSchemaTrend::updateRealtimeConnections()
 	// We could make this function slot and connecte it to MonitorConfigController::configurationArrived
 	// But we need to be sure that
 	//
+	auto softwareInfo = m_configController.softwareInfo();
+	auto appDataRealTimeServices = m_configController.configuration().appDataRealTimeServices;
+
 	auto schemaItems = m_configController.trendSchemaItems();
 
 	{
@@ -398,14 +400,13 @@ void RtSchemaTrend::updateRealtimeConnections()
 			if (m_dataProviders.contains(schemaItem.itemUuid) == false)
 			{
 				m_dataProviders.try_emplace(schemaItem.itemUuid,
-											m_configController,
 											m_signalDataServer,
 											m_configController.logFile());
 			}
 
 			auto& rtConnection = m_dataProviders.at(schemaItem.itemUuid);
 
-			rtConnection.updateConnections();
+			rtConnection.updateConnections(softwareInfo, appDataRealTimeServices);
 
 			rtConnection.setParams(schemaItem.samplePeriod, schemaItem.timeType, schemaItem.durationSeconds);
 			rtConnection.updateSignals(schemaItem.appSignalIds);
