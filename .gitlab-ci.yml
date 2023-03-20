@@ -289,11 +289,13 @@ linux_test_job:
 #Create databases for compiler and simulator tests
     - "echo Creating PostgreSQL databases..."
     - "cp $CI_PROJECT_DIR/Test/ImportDatabase.sh /tmp"
-    - "pushd /mnt/f/TestDatabase"
-    - "echo P2ssw0rd | su postgres /tmp/ImportDatabase.sh u7_${COMPILER_TESTS_PROJECT_NAME}"
-    - "echo P2ssw0rd | su postgres /tmp/ImportDatabase.sh u7_${SIMULATOR_PROJECT_NAME}"
-    - "popd"
+    - "cp /mnt/f/TestDatabase/u7_${COMPILER_TESTS_PROJECT_NAME}.sql /tmp"
+    - "cp /mnt/f/TestDatabase/u7_${SIMULATOR_PROJECT_NAME}.sql /tmp"
+    - "echo P2ssw0rd | su postgres /tmp/ImportDatabase.sh /tmp/u7_${COMPILER_TESTS_PROJECT_NAME}.sql u7_${COMPILER_TESTS_PROJECT_NAME}"
+    - "echo P2ssw0rd | su postgres /tmp/ImportDatabase.sh /tmp/u7_${SIMULATOR_PROJECT_NAME}.sql u7_${SIMULATOR_PROJECT_NAME}"
     - "rm /tmp/ImportDatabase.sh"
+    - "rm /tmp/u7_${COMPILER_TESTS_PROJECT_NAME}.sql"
+    - "rm /tmp/u7_${SIMULATOR_PROJECT_NAME}.sql"
     - "echo Creating PostgreSQL databases complete
 
 #Run Builder test
@@ -377,10 +379,10 @@ linux_code_coverage_job:
     - "# ----------------------------------------------"
     - "echo Creating PostgreSQL databases..."
     - "cp $CI_PROJECT_DIR/Test/ImportDatabase.sh /tmp"
-    - "pushd /mnt/f/TestDatabase"
-    - "echo P2ssw0rd | su postgres /tmp/ImportDatabase.sh u7_${SIMULATOR_PROJECT_NAME}"
-    - "popd"
+    - "cp /mnt/f/TestDatabase/u7_${SIMULATOR_PROJECT_NAME}.sql /tmp"
+    - "echo P2ssw0rd | su postgres /tmp/ImportDatabase.sh /tmp/u7_${SIMULATOR_PROJECT_NAME}.sql u7_${SIMULATOR_PROJECT_NAME}"
     - "rm /tmp/ImportDatabase.sh"
+    - "rm /tmp/u7_${SIMULATOR_PROJECT_NAME}.sql"
     - "echo Creating PostgreSQL databases complete      
     - "# ----------------------------------------------"
     - "#                    Build                      "
