@@ -163,8 +163,27 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 		return result;
 	}
 
-	bool TuningConnection::tuningSourceIsActive(Hash sourceHash) const
+	int TuningConnection::tuningSourceStatesCount(Hash sourceHash) const
 	{
+		int connectedCount = 0;
+
+		for (const Connection& c : m_conns)
+		{
+			if (c.tcpTuningClient->isConnected() == true &&
+				c.tcpTuningClient->singleLmControlMode() == true &&
+				c.tcpTuningClient->hasTuningSource(sourceHash) == true)
+			{
+				connectedCount++;
+			}
+		}
+
+		return connectedCount;
+	}
+
+	int TuningConnection::activatedTuningSourceStatesCount(Hash sourceHash) const
+	{
+		int activeCount = 0;
+
 		for (const Connection& c : m_conns)
 		{
 			if (c.tcpTuningClient->isConnected() == true &&
@@ -173,28 +192,12 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 			{
 				if (c.tcpTuningClient->activeTuningSource() == sourceHash)
 				{
-					return true;
+					activeCount++;
 				}
 			}
 		}
-		return false;
-	}
 
-	bool TuningConnection::tuningSourceIsInactive(Hash sourceHash) const
-	{
-		for (const Connection& c : m_conns)
-		{
-			if (c.tcpTuningClient->isConnected() == true &&
-				c.tcpTuningClient->singleLmControlMode() == true &&
-				c.tcpTuningClient->hasTuningSource(sourceHash) == true)
-			{
-				if (c.tcpTuningClient->activeTuningSource() != sourceHash)
-				{
-					return true;
-				}
-			}
-		}
-		return false;
+		return activeCount;
 	}
 
 	bool TuningConnection::activateTuningSource(Hash sourceHash, bool activate) const

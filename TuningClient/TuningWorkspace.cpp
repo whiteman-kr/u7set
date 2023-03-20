@@ -1438,7 +1438,7 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 
 	if (statesCount > 0 && validCount == statesCount)
 	{
-		if (hasUnappliedParamsCount == statesCount)
+		if (hasUnappliedParamsCount > 0)
 		{
 			// All are unappplied
 			//
@@ -1769,8 +1769,10 @@ void TuningWorkspace::slot_treeContextMenuRequested(const QPoint& pos)
 
 	Hash sourceHash = ::calcHash(filter->caption());
 
-	bool activateEnabled = m_tuningConnection.tuningSourceIsInactive(sourceHash);
-	bool deactivateEnabled = m_tuningConnection.tuningSourceIsActive(sourceHash);
+	int sourceStatesCount = m_tuningConnection.tuningSourceStatesCount(sourceHash);
+	int activeStatesCount = m_tuningConnection.activatedTuningSourceStatesCount(sourceHash);
+	bool activateEnabled = activeStatesCount < sourceStatesCount;
+	bool deactivateEnabled = activeStatesCount != 0 && activeStatesCount == sourceStatesCount;
 
 	QMenu menu(this);
 

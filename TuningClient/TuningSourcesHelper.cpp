@@ -153,24 +153,21 @@ namespace ClientLib
 
 	void TuningSourcesHelper::activateTuningSource(TuningConnection& tuningConnection, const QString& sourceEquipmentId, bool activate, QWidget* parent)
 	{
+		int sourceStatesCount = tuningConnection.tuningSourceStatesCount(::calcHash(sourceEquipmentId));
+		int activeStatesCount = tuningConnection.activatedTuningSourceStatesCount(::calcHash(sourceEquipmentId));
+
 		if (activate == true)
 		{
-			// Check if source can be activated on any Tuning Service
-			//
-			bool sourceIsActive = tuningConnection.tuningSourceIsActive(::calcHash(sourceEquipmentId));
-			if (sourceIsActive == true)
+			if (activeStatesCount != 0 && activeStatesCount == sourceStatesCount)
 			{
-				return;
+				return;	// All sources are already activated
 			}
 		}
 		else
 		{
-			// Check if source can be deactivated on any Tuning Service
-			//
-			bool sourceIsInactive = tuningConnection.tuningSourceIsInactive(::calcHash(sourceEquipmentId));
-			if (sourceIsInactive == true)
+			if (activeStatesCount == 0)
 			{
-				return;
+				return;	// No sources are activated
 			}
 		}
 

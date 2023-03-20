@@ -65,8 +65,8 @@ namespace ClientLib
 		[[nodiscard]] std::vector<TuningSource> tuningSourcesInfo() const;
 		[[nodiscard]] std::vector<TuningSource> tuningSourceInfo(Hash sourceHash) const;
 
-		[[nodiscard]] bool tuningSourceIsActive(Hash sourceHash) const;
-		[[nodiscard]] bool tuningSourceIsInactive(Hash sourceHash) const;
+		[[nodiscard]] int tuningSourceStatesCount(Hash sourceHash) const;
+		[[nodiscard]] int activatedTuningSourceStatesCount(Hash sourceHash) const;
 		[[nodiscard]] bool activateTuningSource(Hash sourceHash, bool activate) const;
 
 		/// Client Control functions

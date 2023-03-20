@@ -724,8 +724,10 @@ void TuningSourcesWidget::enableActivationControls()
 	{
 		Hash sourceHash =  sel[0]->data(columnIndex_SourceHash, Qt::UserRole).toULongLong();
 
-		buttonActivateEnabled = m_tuningConnection.tuningSourceIsInactive(sourceHash);
-		buttonDeactivateEnabled = m_tuningConnection.tuningSourceIsActive(sourceHash);
+		int sourceStatesCount = m_tuningConnection.tuningSourceStatesCount(sourceHash);
+		int activeStatesCount = m_tuningConnection.activatedTuningSourceStatesCount(sourceHash);
+		buttonActivateEnabled = activeStatesCount < sourceStatesCount;
+		buttonDeactivateEnabled = activeStatesCount != 0 && activeStatesCount == sourceStatesCount;
 	}
 
 	if (buttonActivateEnabled != m_buttonActivateEnabled ||	buttonDeactivateEnabled != m_buttonDeactivateEnabled)
