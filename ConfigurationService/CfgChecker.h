@@ -16,7 +16,8 @@ class CfgCheckerWorker : public SimpleThreadWorker
 	Q_OBJECT
 
 public:
-	CfgCheckerWorker(const QString& workFolder,
+	CfgCheckerWorker(const QString& serviceEquipmentID,
+					 const QString& workFolder,
 					 const QString& autoloadBuildFolder,
 					 int checkNewBuildInterval,
 					 std::shared_ptr<CircularLogger> logger);
@@ -40,6 +41,10 @@ protected:
 	void onThreadStarted();
 
 private:
+	QString getWorkStoragePath() const;
+
+private:
+	QString m_serviceEquipmentID;
 	QString m_workFolder;
 	QString m_autoloadBuildFolder;
 	QString m_lastBuildXmlHash;
