@@ -93,6 +93,8 @@ public:
 	QString profile() const { return m_profile; }
 	void setProfile(QString profile) { m_profile = profile; }
 
+	virtual quint32 getExpectedDataUID() const { return 0; }
+
 	//
 
 	void writeToXml(XmlWriteHelper& xml) const;
@@ -128,6 +130,7 @@ protected:
 	int m_moduleWorkcycle_mcs = 5000;		// module workcycle in MICROseconds
 
 	QString m_profile;
+	int m_acquiredSignalsCount = 0;
 
 	QStringList m_appSignals;
 	QStringList m_diagSignals;
@@ -198,70 +201,31 @@ public:
 
 	//
 
-	bool receivesData() const { return m_receivesData; }
-	void setReceivesData(bool receives) { m_receivesData = receives; }
-
 	QString stateStr() const;
 
-	qint64 uptime() const { return m_uptime; }
-	void setUptime(qint64 uptime) { m_uptime = uptime; }
 	void updateUptime();
 
+	bool dataProcessingEnabled() const { return m_dataProcessingEnabled; }
+	bool receivesData() const { return m_receivesData; }
+	qint64 uptime() const { return m_uptime; }
 	double dataReceivingSpeed() const { return m_dataReceivingSpeed; }
-	void setDataReceivingSpeed(double rate) { m_dataReceivingSpeed = rate; }
-
 	qint64 receivedDataSize() const { return m_receivedDataSize; }
-	void setReceivedDataSize(qint64 dataSize) { m_receivedDataSize = dataSize; }
-
 	qint64 receivedFramesCount() const { return m_receivedFramesCount; }
-	void setReceivedFramesCount(qint64 framesCount) { m_receivedFramesCount = framesCount; }
-
 	qint64 receivedPacketCount() const { return m_receivedPacketCount; }
-	void setReceivedPacketCount(qint64 packetCount) { m_receivedPacketCount = packetCount; }
-
 	quint32 receivedDataID() const { return m_receivedDataID; }
-	void setReceivedDataID(quint32 dataID) { m_receivedDataID = dataID; }
-
 	qint64 rupFramePlantTime() const { return m_rupFramePlantTime; }
 	QString rupFramePlantTimeStr() const;
-	void setRupFramePlantTime(qint64 time) { m_rupFramePlantTime = time; }
-
 	quint16 rupFrameNumerator() const { return static_cast<quint16>(m_rupFrameNumerator); }
-	void setRupFrameNumerator(quint16 num) { m_rupFrameNumerator = num; }
-
 	qint64 lostPacketCount() const { return m_lostPacketCount; }
-	void setLostPacketCount(qint64 packetCount) { m_lostPacketCount = packetCount; }
 
 	qint64 errorProtocolVersion() const { return m_errorProtocolVersion; }
-	void setErrorProtocolVersion(qint64 err) { m_errorProtocolVersion = err; }
-
 	qint64 errorFramesQuantity() const { return m_errorFramesQuantity; }
-	void setErrorFramesQuantity(qint64 err) { m_errorFramesQuantity = err; }
-
 	qint64 errorFrameNo() const { return m_errorFrameNo; }
-	void setErrorFrameNo(qint64 errFrameNo) { m_errorFrameNo = errFrameNo; }
-
 	qint64 errorDataID() const { return m_errorDataID; }
-	void setErrorDataID(qint64 err) { m_errorDataID = err; }
-
 	qint64 errorFrameSize() const { return m_errorFrameSize; }
-	void setErrorFrameSize(qint64 errFrameSize) { m_errorFrameSize = errFrameSize; }
-
 	qint64 errorDuplicatePlantTime() const { return m_errorDuplicatePlantTime; }
-	void setErrorDuplicatePlantTime(qint64 err) { m_errorDuplicatePlantTime = err; }
-
 	qint64 errorNonmonotonicPlantTime() const { return m_errorNonmonotonicPlantTime; }
-	void setErrorNonmonotonicPlantTime(qint64 err) { m_errorNonmonotonicPlantTime = err; }
-
 	qint64 errorPlantTimeFormat() const { return m_errorPlantTimeFormat; }
-	void setErrorPlantTimeFormat(qint64 err) { m_errorPlantTimeFormat = err; }
-
-	bool dataProcessingEnabled() const { return m_dataProcessingEnabled; }
-	void setDataProcessingEnabled(bool enabled) { m_dataProcessingEnabled = enabled; }
-
-	qint64 lastPacketSystemTime() const { return m_lastPacketServerTime; }
-	QString lastPacketSystemTimeStr() const;
-	void setLastPacketSystemTime(qint64 sysTime) { m_lastPacketServerTime = sysTime; }
 
 	static QString getTimeStr(qint64 timeMs);
 	static QString getTimeStr(const Rup::TimeStamp& ts);
@@ -272,7 +236,6 @@ public:
 	const QVector<int>& signalIndexes() const { return m_relatedSignalIndexes; }
 
 	void setTimeErrLog(CircularLoggerShared timeErrLog) { m_timeErrLog = timeErrLog; }
-
 
 private:
 	bool moveToNextWriteBuffer(const QThread* thread);

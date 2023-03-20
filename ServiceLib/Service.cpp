@@ -548,11 +548,11 @@ void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
 
 	if (m_state != ServiceState::Stopped)
 	{
-		serviceInfo.set_serviceuptime((QDateTime::currentMSecsSinceEpoch() - m_serviceWorkerStartTime) / 1000);
+		serviceInfo.set_serviceruntime((QDateTime::currentMSecsSinceEpoch() - m_serviceWorkerStartTime) / 1000);
 	}
 	else
 	{
-		serviceInfo.set_serviceuptime(0);
+		serviceInfo.set_serviceruntime(0);
 	}
 }
 

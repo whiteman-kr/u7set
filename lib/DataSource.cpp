@@ -302,7 +302,6 @@ bool DataSource::saveToProto(Network::DataSourceInfo* proto) const
 
 	proto->set_id(m_id);
 	proto->set_moduleequipmentid(m_moduleEquipmentID.toStdString());
-	proto->set_profile(m_profile.toStdString());
 	proto->set_modulepresetname(m_modulePresetName.toStdString());
 	proto->set_moduletype(m_moduleType);
 	proto->set_modulecaption(m_moduleCaption.toStdString());
@@ -319,6 +318,10 @@ bool DataSource::saveToProto(Network::DataSourceInfo* proto) const
 		Network::LanControllerInfo* protoLci = proto->add_lancontrollerinfo();
 		lci.saveToProto(protoLci);
 	}
+
+	proto->set_profile(m_profile.toStdString());
+	proto->set_acquiredsignalscount(m_acquiredSignalsCount);
+	proto->set_expecteddatauid(getExpectedDataUID());
 
 	return true;
 }
@@ -434,11 +437,6 @@ void DataSourceOnline::updateUptime()
 QString DataSourceOnline::rupFramePlantTimeStr() const
 {
 	return getTimeStr(m_rupFramePlantTime);
-}
-
-QString DataSourceOnline::lastPacketSystemTimeStr() const
-{
-	return getTimeStr(m_lastPacketServerTime);
 }
 
 QString DataSourceOnline::getTimeStr(qint64 timeMs)

@@ -3222,6 +3222,8 @@ class DataSourceInfo PROTOBUF_FINAL :
     kModuleTypeFieldNumber = 4,
     kSubsystemKeyFieldNumber = 8,
     kLmNumberFieldNumber = 9,
+    kAcquiredSignalsCountFieldNumber = 13,
+    kExpectedDataUIDFieldNumber = 14,
   };
   // repeated .Network.LanControllerInfo lanControllerInfo = 11;
   int lancontrollerinfo_size() const;
@@ -3426,6 +3428,32 @@ class DataSourceInfo PROTOBUF_FINAL :
   void _internal_set_lmnumber(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
+  // optional int32 acquiredSignalsCount = 13 [default = 0];
+  bool has_acquiredsignalscount() const;
+  private:
+  bool _internal_has_acquiredsignalscount() const;
+  public:
+  void clear_acquiredsignalscount();
+  ::PROTOBUF_NAMESPACE_ID::int32 acquiredsignalscount() const;
+  void set_acquiredsignalscount(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_acquiredsignalscount() const;
+  void _internal_set_acquiredsignalscount(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional uint32 expectedDataUID = 14 [default = 0];
+  bool has_expecteddatauid() const;
+  private:
+  bool _internal_has_expecteddatauid() const;
+  public:
+  void clear_expecteddatauid();
+  ::PROTOBUF_NAMESPACE_ID::uint32 expecteddatauid() const;
+  void set_expecteddatauid(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_expecteddatauid() const;
+  void _internal_set_expecteddatauid(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:Network.DataSourceInfo)
  private:
   class _Internal;
@@ -3447,6 +3475,8 @@ class DataSourceInfo PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::int32 moduletype_;
   ::PROTOBUF_NAMESPACE_ID::int32 subsystemkey_;
   ::PROTOBUF_NAMESPACE_ID::int32 lmnumber_;
+  ::PROTOBUF_NAMESPACE_ID::int32 acquiredsignalscount_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 expecteddatauid_;
   friend struct ::TableStruct_network_2eproto;
 };
 // -------------------------------------------------------------------
@@ -4140,35 +4170,31 @@ class AppDataSourceState PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kLmEquipmentIDFieldNumber = 27,
+    kLmEquipmentIDFieldNumber = 2,
     kIdFieldNumber = 1,
-    kUptimeFieldNumber = 3,
-    kReceivedDataIDFieldNumber = 4,
-    kDataReceivingRateFieldNumber = 7,
-    kReceivedDataSizeFieldNumber = 8,
-    kReceivedFramesCountFieldNumber = 9,
-    kReceivedPacketCountFieldNumber = 10,
-    kReceivesDataFieldNumber = 2,
-    kDataProcessingEnabledFieldNumber = 12,
-    kRupFrameNumeratorFieldNumber = 16,
-    kLostPacketCountFieldNumber = 11,
-    kProcessedPacketCountFieldNumber = 13,
-    kLastPacketSystemTimeFieldNumber = 14,
-    kRupFramePlantTimeFieldNumber = 15,
-    kSignalStatesQueueCurSizeFieldNumber = 17,
-    kSignalStatesQueueCurMaxSizeFieldNumber = 18,
-    kErrorProtocolVersionFieldNumber = 20,
-    kErrorFramesQuantityFieldNumber = 21,
-    kErrorFrameNoFieldNumber = 22,
-    kErrorDataIDFieldNumber = 23,
-    kErrorFrameSizeFieldNumber = 24,
-    kAcquiredSignalsCountFieldNumber = 19,
-    kSignalStatesQueueSizeFieldNumber = 29,
-    kErrorDuplicatePlantTimeFieldNumber = 25,
-    kErrorNonmonotonicPlantTimeFieldNumber = 26,
-    kErrorPlantTimeFormatFieldNumber = 31,
+    kDataProcessingEnabledFieldNumber = 3,
+    kReceivesDataFieldNumber = 4,
+    kReceivedDataIDFieldNumber = 6,
+    kUptimeFieldNumber = 5,
+    kRupFramePlantTimeFieldNumber = 7,
+    kDataReceivingSpeedFieldNumber = 9,
+    kReceivedDataSizeFieldNumber = 10,
+    kReceivedFramesCountFieldNumber = 11,
+    kRupFrameNumeratorFieldNumber = 8,
+    kSignalStatesQueueCurSizeFieldNumber = 14,
+    kReceivedPacketCountFieldNumber = 12,
+    kLostPacketCountFieldNumber = 13,
+    kErrorProtocolVersionFieldNumber = 16,
+    kErrorFramesQuantityFieldNumber = 17,
+    kErrorFrameNoFieldNumber = 18,
+    kErrorDataIDFieldNumber = 19,
+    kErrorFrameSizeFieldNumber = 20,
+    kErrorDuplicatePlantTimeFieldNumber = 21,
+    kErrorNonmonotonicPlantTimeFieldNumber = 22,
+    kErrorPlantTimeFormatFieldNumber = 23,
+    kSignalStatesQueueCurMaxSizeFieldNumber = 15,
   };
-  // optional string lmEquipmentID = 27;
+  // optional string lmEquipmentID = 2;
   bool has_lmequipmentid() const;
   private:
   bool _internal_has_lmequipmentid() const;
@@ -4201,98 +4227,7 @@ class AppDataSourceState PROTOBUF_FINAL :
   void _internal_set_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // optional int64 uptime = 3 [default = 0];
-  bool has_uptime() const;
-  private:
-  bool _internal_has_uptime() const;
-  public:
-  void clear_uptime();
-  ::PROTOBUF_NAMESPACE_ID::int64 uptime() const;
-  void set_uptime(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_uptime() const;
-  void _internal_set_uptime(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional uint64 receivedDataID = 4 [default = 0];
-  bool has_receiveddataid() const;
-  private:
-  bool _internal_has_receiveddataid() const;
-  public:
-  void clear_receiveddataid();
-  ::PROTOBUF_NAMESPACE_ID::uint64 receiveddataid() const;
-  void set_receiveddataid(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_receiveddataid() const;
-  void _internal_set_receiveddataid(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  public:
-
-  // optional double dataReceivingRate = 7 [default = 0];
-  bool has_datareceivingrate() const;
-  private:
-  bool _internal_has_datareceivingrate() const;
-  public:
-  void clear_datareceivingrate();
-  double datareceivingrate() const;
-  void set_datareceivingrate(double value);
-  private:
-  double _internal_datareceivingrate() const;
-  void _internal_set_datareceivingrate(double value);
-  public:
-
-  // optional int64 receivedDataSize = 8 [default = 0];
-  bool has_receiveddatasize() const;
-  private:
-  bool _internal_has_receiveddatasize() const;
-  public:
-  void clear_receiveddatasize();
-  ::PROTOBUF_NAMESPACE_ID::int64 receiveddatasize() const;
-  void set_receiveddatasize(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_receiveddatasize() const;
-  void _internal_set_receiveddatasize(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 receivedFramesCount = 9 [default = 0];
-  bool has_receivedframescount() const;
-  private:
-  bool _internal_has_receivedframescount() const;
-  public:
-  void clear_receivedframescount();
-  ::PROTOBUF_NAMESPACE_ID::int64 receivedframescount() const;
-  void set_receivedframescount(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_receivedframescount() const;
-  void _internal_set_receivedframescount(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 receivedPacketCount = 10 [default = 0];
-  bool has_receivedpacketcount() const;
-  private:
-  bool _internal_has_receivedpacketcount() const;
-  public:
-  void clear_receivedpacketcount();
-  ::PROTOBUF_NAMESPACE_ID::int64 receivedpacketcount() const;
-  void set_receivedpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_receivedpacketcount() const;
-  void _internal_set_receivedpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional bool receivesData = 2 [default = false];
-  bool has_receivesdata() const;
-  private:
-  bool _internal_has_receivesdata() const;
-  public:
-  void clear_receivesdata();
-  bool receivesdata() const;
-  void set_receivesdata(bool value);
-  private:
-  bool _internal_receivesdata() const;
-  void _internal_set_receivesdata(bool value);
-  public:
-
-  // optional bool dataProcessingEnabled = 12 [default = false];
+  // optional bool dataProcessingEnabled = 3 [default = false];
   bool has_dataprocessingenabled() const;
   private:
   bool _internal_has_dataprocessingenabled() const;
@@ -4305,59 +4240,46 @@ class AppDataSourceState PROTOBUF_FINAL :
   void _internal_set_dataprocessingenabled(bool value);
   public:
 
-  // optional uint32 rupFrameNumerator = 16 [default = 0];
-  bool has_rupframenumerator() const;
+  // optional bool receivesData = 4 [default = false];
+  bool has_receivesdata() const;
   private:
-  bool _internal_has_rupframenumerator() const;
+  bool _internal_has_receivesdata() const;
   public:
-  void clear_rupframenumerator();
-  ::PROTOBUF_NAMESPACE_ID::uint32 rupframenumerator() const;
-  void set_rupframenumerator(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  void clear_receivesdata();
+  bool receivesdata() const;
+  void set_receivesdata(bool value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_rupframenumerator() const;
-  void _internal_set_rupframenumerator(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  public:
-
-  // optional int64 lostPacketCount = 11 [default = 0];
-  bool has_lostpacketcount() const;
-  private:
-  bool _internal_has_lostpacketcount() const;
-  public:
-  void clear_lostpacketcount();
-  ::PROTOBUF_NAMESPACE_ID::int64 lostpacketcount() const;
-  void set_lostpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_lostpacketcount() const;
-  void _internal_set_lostpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value);
+  bool _internal_receivesdata() const;
+  void _internal_set_receivesdata(bool value);
   public:
 
-  // optional int64 processedPacketCount = 13 [default = 0];
-  bool has_processedpacketcount() const;
+  // optional uint32 receivedDataID = 6 [default = 0];
+  bool has_receiveddataid() const;
   private:
-  bool _internal_has_processedpacketcount() const;
+  bool _internal_has_receiveddataid() const;
   public:
-  void clear_processedpacketcount();
-  ::PROTOBUF_NAMESPACE_ID::int64 processedpacketcount() const;
-  void set_processedpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value);
+  void clear_receiveddataid();
+  ::PROTOBUF_NAMESPACE_ID::uint32 receiveddataid() const;
+  void set_receiveddataid(::PROTOBUF_NAMESPACE_ID::uint32 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_processedpacketcount() const;
-  void _internal_set_processedpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 lastPacketSystemTime = 14 [default = 0];
-  bool has_lastpacketsystemtime() const;
-  private:
-  bool _internal_has_lastpacketsystemtime() const;
-  public:
-  void clear_lastpacketsystemtime();
-  ::PROTOBUF_NAMESPACE_ID::int64 lastpacketsystemtime() const;
-  void set_lastpacketsystemtime(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_lastpacketsystemtime() const;
-  void _internal_set_lastpacketsystemtime(::PROTOBUF_NAMESPACE_ID::int64 value);
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_receiveddataid() const;
+  void _internal_set_receiveddataid(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
-  // optional int64 rupFramePlantTime = 15 [default = 0];
+  // optional int64 uptime = 5 [default = 0];
+  bool has_uptime() const;
+  private:
+  bool _internal_has_uptime() const;
+  public:
+  void clear_uptime();
+  ::PROTOBUF_NAMESPACE_ID::int64 uptime() const;
+  void set_uptime(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_uptime() const;
+  void _internal_set_uptime(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 rupFramePlantTime = 7 [default = 0];
   bool has_rupframeplanttime() const;
   private:
   bool _internal_has_rupframeplanttime() const;
@@ -4370,7 +4292,59 @@ class AppDataSourceState PROTOBUF_FINAL :
   void _internal_set_rupframeplanttime(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
-  // optional int32 signalStatesQueueCurSize = 17 [default = 0];
+  // optional double dataReceivingSpeed = 9 [default = 0];
+  bool has_datareceivingspeed() const;
+  private:
+  bool _internal_has_datareceivingspeed() const;
+  public:
+  void clear_datareceivingspeed();
+  double datareceivingspeed() const;
+  void set_datareceivingspeed(double value);
+  private:
+  double _internal_datareceivingspeed() const;
+  void _internal_set_datareceivingspeed(double value);
+  public:
+
+  // optional int64 receivedDataSize = 10 [default = 0];
+  bool has_receiveddatasize() const;
+  private:
+  bool _internal_has_receiveddatasize() const;
+  public:
+  void clear_receiveddatasize();
+  ::PROTOBUF_NAMESPACE_ID::int64 receiveddatasize() const;
+  void set_receiveddatasize(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_receiveddatasize() const;
+  void _internal_set_receiveddatasize(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 receivedFramesCount = 11 [default = 0];
+  bool has_receivedframescount() const;
+  private:
+  bool _internal_has_receivedframescount() const;
+  public:
+  void clear_receivedframescount();
+  ::PROTOBUF_NAMESPACE_ID::int64 receivedframescount() const;
+  void set_receivedframescount(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_receivedframescount() const;
+  void _internal_set_receivedframescount(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional uint32 rupFrameNumerator = 8 [default = 0];
+  bool has_rupframenumerator() const;
+  private:
+  bool _internal_has_rupframenumerator() const;
+  public:
+  void clear_rupframenumerator();
+  ::PROTOBUF_NAMESPACE_ID::uint32 rupframenumerator() const;
+  void set_rupframenumerator(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_rupframenumerator() const;
+  void _internal_set_rupframenumerator(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // optional int32 signalStatesQueueCurSize = 14 [default = 0];
   bool has_signalstatesqueuecursize() const;
   private:
   bool _internal_has_signalstatesqueuecursize() const;
@@ -4383,20 +4357,33 @@ class AppDataSourceState PROTOBUF_FINAL :
   void _internal_set_signalstatesqueuecursize(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
-  // optional int32 signalStatesQueueCurMaxSize = 18 [default = 0];
-  bool has_signalstatesqueuecurmaxsize() const;
+  // optional int64 receivedPacketCount = 12 [default = 0];
+  bool has_receivedpacketcount() const;
   private:
-  bool _internal_has_signalstatesqueuecurmaxsize() const;
+  bool _internal_has_receivedpacketcount() const;
   public:
-  void clear_signalstatesqueuecurmaxsize();
-  ::PROTOBUF_NAMESPACE_ID::int32 signalstatesqueuecurmaxsize() const;
-  void set_signalstatesqueuecurmaxsize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  void clear_receivedpacketcount();
+  ::PROTOBUF_NAMESPACE_ID::int64 receivedpacketcount() const;
+  void set_receivedpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_signalstatesqueuecurmaxsize() const;
-  void _internal_set_signalstatesqueuecurmaxsize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_receivedpacketcount() const;
+  void _internal_set_receivedpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
-  // optional int64 errorProtocolVersion = 20 [default = 0];
+  // optional int64 lostPacketCount = 13 [default = 0];
+  bool has_lostpacketcount() const;
+  private:
+  bool _internal_has_lostpacketcount() const;
+  public:
+  void clear_lostpacketcount();
+  ::PROTOBUF_NAMESPACE_ID::int64 lostpacketcount() const;
+  void set_lostpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_lostpacketcount() const;
+  void _internal_set_lostpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errorProtocolVersion = 16 [default = 0];
   bool has_errorprotocolversion() const;
   private:
   bool _internal_has_errorprotocolversion() const;
@@ -4409,7 +4396,7 @@ class AppDataSourceState PROTOBUF_FINAL :
   void _internal_set_errorprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
-  // optional int64 errorFramesQuantity = 21 [default = 0];
+  // optional int64 errorFramesQuantity = 17 [default = 0];
   bool has_errorframesquantity() const;
   private:
   bool _internal_has_errorframesquantity() const;
@@ -4422,7 +4409,7 @@ class AppDataSourceState PROTOBUF_FINAL :
   void _internal_set_errorframesquantity(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
-  // optional int64 errorFrameNo = 22 [default = 0];
+  // optional int64 errorFrameNo = 18 [default = 0];
   bool has_errorframeno() const;
   private:
   bool _internal_has_errorframeno() const;
@@ -4435,7 +4422,7 @@ class AppDataSourceState PROTOBUF_FINAL :
   void _internal_set_errorframeno(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
-  // optional int64 errorDataID = 23 [default = 0];
+  // optional int64 errorDataID = 19 [default = 0];
   bool has_errordataid() const;
   private:
   bool _internal_has_errordataid() const;
@@ -4448,7 +4435,7 @@ class AppDataSourceState PROTOBUF_FINAL :
   void _internal_set_errordataid(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
-  // optional int64 errorFrameSize = 24 [default = 0];
+  // optional int64 errorFrameSize = 20 [default = 0];
   bool has_errorframesize() const;
   private:
   bool _internal_has_errorframesize() const;
@@ -4461,33 +4448,7 @@ class AppDataSourceState PROTOBUF_FINAL :
   void _internal_set_errorframesize(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
-  // optional int32 acquiredSignalsCount = 19 [default = 0];
-  bool has_acquiredsignalscount() const;
-  private:
-  bool _internal_has_acquiredsignalscount() const;
-  public:
-  void clear_acquiredsignalscount();
-  ::PROTOBUF_NAMESPACE_ID::int32 acquiredsignalscount() const;
-  void set_acquiredsignalscount(::PROTOBUF_NAMESPACE_ID::int32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_acquiredsignalscount() const;
-  void _internal_set_acquiredsignalscount(::PROTOBUF_NAMESPACE_ID::int32 value);
-  public:
-
-  // optional int32 signalStatesQueueSize = 29 [default = 0];
-  bool has_signalstatesqueuesize() const;
-  private:
-  bool _internal_has_signalstatesqueuesize() const;
-  public:
-  void clear_signalstatesqueuesize();
-  ::PROTOBUF_NAMESPACE_ID::int32 signalstatesqueuesize() const;
-  void set_signalstatesqueuesize(::PROTOBUF_NAMESPACE_ID::int32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_signalstatesqueuesize() const;
-  void _internal_set_signalstatesqueuesize(::PROTOBUF_NAMESPACE_ID::int32 value);
-  public:
-
-  // optional int64 errorDuplicatePlantTime = 25 [default = 0];
+  // optional int64 errorDuplicatePlantTime = 21 [default = 0];
   bool has_errorduplicateplanttime() const;
   private:
   bool _internal_has_errorduplicateplanttime() const;
@@ -4500,7 +4461,7 @@ class AppDataSourceState PROTOBUF_FINAL :
   void _internal_set_errorduplicateplanttime(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
-  // optional int64 errorNonmonotonicPlantTime = 26 [default = 0];
+  // optional int64 errorNonmonotonicPlantTime = 22 [default = 0];
   bool has_errornonmonotonicplanttime() const;
   private:
   bool _internal_has_errornonmonotonicplanttime() const;
@@ -4513,7 +4474,7 @@ class AppDataSourceState PROTOBUF_FINAL :
   void _internal_set_errornonmonotonicplanttime(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
-  // optional int64 errorPlantTimeFormat = 31 [default = 0];
+  // optional int64 errorPlantTimeFormat = 23 [default = 0];
   bool has_errorplanttimeformat() const;
   private:
   bool _internal_has_errorplanttimeformat() const;
@@ -4524,6 +4485,19 @@ class AppDataSourceState PROTOBUF_FINAL :
   private:
   ::PROTOBUF_NAMESPACE_ID::int64 _internal_errorplanttimeformat() const;
   void _internal_set_errorplanttimeformat(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int32 signalStatesQueueCurMaxSize = 15 [default = 0];
+  bool has_signalstatesqueuecurmaxsize() const;
+  private:
+  bool _internal_has_signalstatesqueuecurmaxsize() const;
+  public:
+  void clear_signalstatesqueuecurmaxsize();
+  ::PROTOBUF_NAMESPACE_ID::int32 signalstatesqueuecurmaxsize() const;
+  void set_signalstatesqueuecurmaxsize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_signalstatesqueuecurmaxsize() const;
+  void _internal_set_signalstatesqueuecurmaxsize(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
   // @@protoc_insertion_point(class_scope:Network.AppDataSourceState)
@@ -4537,31 +4511,27 @@ class AppDataSourceState PROTOBUF_FINAL :
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr lmequipmentid_;
   ::PROTOBUF_NAMESPACE_ID::uint64 id_;
+  bool dataprocessingenabled_;
+  bool receivesdata_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 receiveddataid_;
   ::PROTOBUF_NAMESPACE_ID::int64 uptime_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 receiveddataid_;
-  double datareceivingrate_;
+  ::PROTOBUF_NAMESPACE_ID::int64 rupframeplanttime_;
+  double datareceivingspeed_;
   ::PROTOBUF_NAMESPACE_ID::int64 receiveddatasize_;
   ::PROTOBUF_NAMESPACE_ID::int64 receivedframescount_;
-  ::PROTOBUF_NAMESPACE_ID::int64 receivedpacketcount_;
-  bool receivesdata_;
-  bool dataprocessingenabled_;
   ::PROTOBUF_NAMESPACE_ID::uint32 rupframenumerator_;
-  ::PROTOBUF_NAMESPACE_ID::int64 lostpacketcount_;
-  ::PROTOBUF_NAMESPACE_ID::int64 processedpacketcount_;
-  ::PROTOBUF_NAMESPACE_ID::int64 lastpacketsystemtime_;
-  ::PROTOBUF_NAMESPACE_ID::int64 rupframeplanttime_;
   ::PROTOBUF_NAMESPACE_ID::int32 signalstatesqueuecursize_;
-  ::PROTOBUF_NAMESPACE_ID::int32 signalstatesqueuecurmaxsize_;
+  ::PROTOBUF_NAMESPACE_ID::int64 receivedpacketcount_;
+  ::PROTOBUF_NAMESPACE_ID::int64 lostpacketcount_;
   ::PROTOBUF_NAMESPACE_ID::int64 errorprotocolversion_;
   ::PROTOBUF_NAMESPACE_ID::int64 errorframesquantity_;
   ::PROTOBUF_NAMESPACE_ID::int64 errorframeno_;
   ::PROTOBUF_NAMESPACE_ID::int64 errordataid_;
   ::PROTOBUF_NAMESPACE_ID::int64 errorframesize_;
-  ::PROTOBUF_NAMESPACE_ID::int32 acquiredsignalscount_;
-  ::PROTOBUF_NAMESPACE_ID::int32 signalstatesqueuesize_;
   ::PROTOBUF_NAMESPACE_ID::int64 errorduplicateplanttime_;
   ::PROTOBUF_NAMESPACE_ID::int64 errornonmonotonicplanttime_;
   ::PROTOBUF_NAMESPACE_ID::int64 errorplanttimeformat_;
+  ::PROTOBUF_NAMESPACE_ID::int32 signalstatesqueuecurmaxsize_;
   friend struct ::TableStruct_network_2eproto;
 };
 // -------------------------------------------------------------------
@@ -17947,6 +17917,62 @@ inline void DataSourceInfo::set_allocated_profile(std::string* profile) {
   // @@protoc_insertion_point(field_set_allocated:Network.DataSourceInfo.profile)
 }
 
+// optional int32 acquiredSignalsCount = 13 [default = 0];
+inline bool DataSourceInfo::_internal_has_acquiredsignalscount() const {
+  bool value = (_has_bits_[0] & 0x00000800u) != 0;
+  return value;
+}
+inline bool DataSourceInfo::has_acquiredsignalscount() const {
+  return _internal_has_acquiredsignalscount();
+}
+inline void DataSourceInfo::clear_acquiredsignalscount() {
+  acquiredsignalscount_ = 0;
+  _has_bits_[0] &= ~0x00000800u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DataSourceInfo::_internal_acquiredsignalscount() const {
+  return acquiredsignalscount_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DataSourceInfo::acquiredsignalscount() const {
+  // @@protoc_insertion_point(field_get:Network.DataSourceInfo.acquiredSignalsCount)
+  return _internal_acquiredsignalscount();
+}
+inline void DataSourceInfo::_internal_set_acquiredsignalscount(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000800u;
+  acquiredsignalscount_ = value;
+}
+inline void DataSourceInfo::set_acquiredsignalscount(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_acquiredsignalscount(value);
+  // @@protoc_insertion_point(field_set:Network.DataSourceInfo.acquiredSignalsCount)
+}
+
+// optional uint32 expectedDataUID = 14 [default = 0];
+inline bool DataSourceInfo::_internal_has_expecteddatauid() const {
+  bool value = (_has_bits_[0] & 0x00001000u) != 0;
+  return value;
+}
+inline bool DataSourceInfo::has_expecteddatauid() const {
+  return _internal_has_expecteddatauid();
+}
+inline void DataSourceInfo::clear_expecteddatauid() {
+  expecteddatauid_ = 0u;
+  _has_bits_[0] &= ~0x00001000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 DataSourceInfo::_internal_expecteddatauid() const {
+  return expecteddatauid_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 DataSourceInfo::expecteddatauid() const {
+  // @@protoc_insertion_point(field_get:Network.DataSourceInfo.expectedDataUID)
+  return _internal_expecteddatauid();
+}
+inline void DataSourceInfo::_internal_set_expecteddatauid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _has_bits_[0] |= 0x00001000u;
+  expecteddatauid_ = value;
+}
+inline void DataSourceInfo::set_expecteddatauid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_expecteddatauid(value);
+  // @@protoc_insertion_point(field_set:Network.DataSourceInfo.expectedDataUID)
+}
+
 // -------------------------------------------------------------------
 
 // GetDataSourcesInfoRequest
@@ -18310,651 +18336,7 @@ inline void AppDataSourceState::set_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   // @@protoc_insertion_point(field_set:Network.AppDataSourceState.id)
 }
 
-// optional bool receivesData = 2 [default = false];
-inline bool AppDataSourceState::_internal_has_receivesdata() const {
-  bool value = (_has_bits_[0] & 0x00000100u) != 0;
-  return value;
-}
-inline bool AppDataSourceState::has_receivesdata() const {
-  return _internal_has_receivesdata();
-}
-inline void AppDataSourceState::clear_receivesdata() {
-  receivesdata_ = false;
-  _has_bits_[0] &= ~0x00000100u;
-}
-inline bool AppDataSourceState::_internal_receivesdata() const {
-  return receivesdata_;
-}
-inline bool AppDataSourceState::receivesdata() const {
-  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.receivesData)
-  return _internal_receivesdata();
-}
-inline void AppDataSourceState::_internal_set_receivesdata(bool value) {
-  _has_bits_[0] |= 0x00000100u;
-  receivesdata_ = value;
-}
-inline void AppDataSourceState::set_receivesdata(bool value) {
-  _internal_set_receivesdata(value);
-  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.receivesData)
-}
-
-// optional int64 uptime = 3 [default = 0];
-inline bool AppDataSourceState::_internal_has_uptime() const {
-  bool value = (_has_bits_[0] & 0x00000004u) != 0;
-  return value;
-}
-inline bool AppDataSourceState::has_uptime() const {
-  return _internal_has_uptime();
-}
-inline void AppDataSourceState::clear_uptime() {
-  uptime_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00000004u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_uptime() const {
-  return uptime_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::uptime() const {
-  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.uptime)
-  return _internal_uptime();
-}
-inline void AppDataSourceState::_internal_set_uptime(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00000004u;
-  uptime_ = value;
-}
-inline void AppDataSourceState::set_uptime(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_uptime(value);
-  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.uptime)
-}
-
-// optional uint64 receivedDataID = 4 [default = 0];
-inline bool AppDataSourceState::_internal_has_receiveddataid() const {
-  bool value = (_has_bits_[0] & 0x00000008u) != 0;
-  return value;
-}
-inline bool AppDataSourceState::has_receiveddataid() const {
-  return _internal_has_receiveddataid();
-}
-inline void AppDataSourceState::clear_receiveddataid() {
-  receiveddataid_ = PROTOBUF_ULONGLONG(0);
-  _has_bits_[0] &= ~0x00000008u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 AppDataSourceState::_internal_receiveddataid() const {
-  return receiveddataid_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 AppDataSourceState::receiveddataid() const {
-  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.receivedDataID)
-  return _internal_receiveddataid();
-}
-inline void AppDataSourceState::_internal_set_receiveddataid(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _has_bits_[0] |= 0x00000008u;
-  receiveddataid_ = value;
-}
-inline void AppDataSourceState::set_receiveddataid(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_receiveddataid(value);
-  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.receivedDataID)
-}
-
-// optional double dataReceivingRate = 7 [default = 0];
-inline bool AppDataSourceState::_internal_has_datareceivingrate() const {
-  bool value = (_has_bits_[0] & 0x00000010u) != 0;
-  return value;
-}
-inline bool AppDataSourceState::has_datareceivingrate() const {
-  return _internal_has_datareceivingrate();
-}
-inline void AppDataSourceState::clear_datareceivingrate() {
-  datareceivingrate_ = 0;
-  _has_bits_[0] &= ~0x00000010u;
-}
-inline double AppDataSourceState::_internal_datareceivingrate() const {
-  return datareceivingrate_;
-}
-inline double AppDataSourceState::datareceivingrate() const {
-  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.dataReceivingRate)
-  return _internal_datareceivingrate();
-}
-inline void AppDataSourceState::_internal_set_datareceivingrate(double value) {
-  _has_bits_[0] |= 0x00000010u;
-  datareceivingrate_ = value;
-}
-inline void AppDataSourceState::set_datareceivingrate(double value) {
-  _internal_set_datareceivingrate(value);
-  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.dataReceivingRate)
-}
-
-// optional int64 receivedDataSize = 8 [default = 0];
-inline bool AppDataSourceState::_internal_has_receiveddatasize() const {
-  bool value = (_has_bits_[0] & 0x00000020u) != 0;
-  return value;
-}
-inline bool AppDataSourceState::has_receiveddatasize() const {
-  return _internal_has_receiveddatasize();
-}
-inline void AppDataSourceState::clear_receiveddatasize() {
-  receiveddatasize_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00000020u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_receiveddatasize() const {
-  return receiveddatasize_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::receiveddatasize() const {
-  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.receivedDataSize)
-  return _internal_receiveddatasize();
-}
-inline void AppDataSourceState::_internal_set_receiveddatasize(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00000020u;
-  receiveddatasize_ = value;
-}
-inline void AppDataSourceState::set_receiveddatasize(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_receiveddatasize(value);
-  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.receivedDataSize)
-}
-
-// optional int64 receivedFramesCount = 9 [default = 0];
-inline bool AppDataSourceState::_internal_has_receivedframescount() const {
-  bool value = (_has_bits_[0] & 0x00000040u) != 0;
-  return value;
-}
-inline bool AppDataSourceState::has_receivedframescount() const {
-  return _internal_has_receivedframescount();
-}
-inline void AppDataSourceState::clear_receivedframescount() {
-  receivedframescount_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00000040u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_receivedframescount() const {
-  return receivedframescount_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::receivedframescount() const {
-  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.receivedFramesCount)
-  return _internal_receivedframescount();
-}
-inline void AppDataSourceState::_internal_set_receivedframescount(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00000040u;
-  receivedframescount_ = value;
-}
-inline void AppDataSourceState::set_receivedframescount(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_receivedframescount(value);
-  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.receivedFramesCount)
-}
-
-// optional int64 receivedPacketCount = 10 [default = 0];
-inline bool AppDataSourceState::_internal_has_receivedpacketcount() const {
-  bool value = (_has_bits_[0] & 0x00000080u) != 0;
-  return value;
-}
-inline bool AppDataSourceState::has_receivedpacketcount() const {
-  return _internal_has_receivedpacketcount();
-}
-inline void AppDataSourceState::clear_receivedpacketcount() {
-  receivedpacketcount_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00000080u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_receivedpacketcount() const {
-  return receivedpacketcount_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::receivedpacketcount() const {
-  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.receivedPacketCount)
-  return _internal_receivedpacketcount();
-}
-inline void AppDataSourceState::_internal_set_receivedpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00000080u;
-  receivedpacketcount_ = value;
-}
-inline void AppDataSourceState::set_receivedpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_receivedpacketcount(value);
-  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.receivedPacketCount)
-}
-
-// optional int64 lostPacketCount = 11 [default = 0];
-inline bool AppDataSourceState::_internal_has_lostpacketcount() const {
-  bool value = (_has_bits_[0] & 0x00000800u) != 0;
-  return value;
-}
-inline bool AppDataSourceState::has_lostpacketcount() const {
-  return _internal_has_lostpacketcount();
-}
-inline void AppDataSourceState::clear_lostpacketcount() {
-  lostpacketcount_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00000800u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_lostpacketcount() const {
-  return lostpacketcount_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::lostpacketcount() const {
-  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.lostPacketCount)
-  return _internal_lostpacketcount();
-}
-inline void AppDataSourceState::_internal_set_lostpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00000800u;
-  lostpacketcount_ = value;
-}
-inline void AppDataSourceState::set_lostpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_lostpacketcount(value);
-  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.lostPacketCount)
-}
-
-// optional bool dataProcessingEnabled = 12 [default = false];
-inline bool AppDataSourceState::_internal_has_dataprocessingenabled() const {
-  bool value = (_has_bits_[0] & 0x00000200u) != 0;
-  return value;
-}
-inline bool AppDataSourceState::has_dataprocessingenabled() const {
-  return _internal_has_dataprocessingenabled();
-}
-inline void AppDataSourceState::clear_dataprocessingenabled() {
-  dataprocessingenabled_ = false;
-  _has_bits_[0] &= ~0x00000200u;
-}
-inline bool AppDataSourceState::_internal_dataprocessingenabled() const {
-  return dataprocessingenabled_;
-}
-inline bool AppDataSourceState::dataprocessingenabled() const {
-  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.dataProcessingEnabled)
-  return _internal_dataprocessingenabled();
-}
-inline void AppDataSourceState::_internal_set_dataprocessingenabled(bool value) {
-  _has_bits_[0] |= 0x00000200u;
-  dataprocessingenabled_ = value;
-}
-inline void AppDataSourceState::set_dataprocessingenabled(bool value) {
-  _internal_set_dataprocessingenabled(value);
-  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.dataProcessingEnabled)
-}
-
-// optional int64 processedPacketCount = 13 [default = 0];
-inline bool AppDataSourceState::_internal_has_processedpacketcount() const {
-  bool value = (_has_bits_[0] & 0x00001000u) != 0;
-  return value;
-}
-inline bool AppDataSourceState::has_processedpacketcount() const {
-  return _internal_has_processedpacketcount();
-}
-inline void AppDataSourceState::clear_processedpacketcount() {
-  processedpacketcount_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00001000u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_processedpacketcount() const {
-  return processedpacketcount_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::processedpacketcount() const {
-  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.processedPacketCount)
-  return _internal_processedpacketcount();
-}
-inline void AppDataSourceState::_internal_set_processedpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00001000u;
-  processedpacketcount_ = value;
-}
-inline void AppDataSourceState::set_processedpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_processedpacketcount(value);
-  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.processedPacketCount)
-}
-
-// optional int64 lastPacketSystemTime = 14 [default = 0];
-inline bool AppDataSourceState::_internal_has_lastpacketsystemtime() const {
-  bool value = (_has_bits_[0] & 0x00002000u) != 0;
-  return value;
-}
-inline bool AppDataSourceState::has_lastpacketsystemtime() const {
-  return _internal_has_lastpacketsystemtime();
-}
-inline void AppDataSourceState::clear_lastpacketsystemtime() {
-  lastpacketsystemtime_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00002000u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_lastpacketsystemtime() const {
-  return lastpacketsystemtime_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::lastpacketsystemtime() const {
-  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.lastPacketSystemTime)
-  return _internal_lastpacketsystemtime();
-}
-inline void AppDataSourceState::_internal_set_lastpacketsystemtime(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00002000u;
-  lastpacketsystemtime_ = value;
-}
-inline void AppDataSourceState::set_lastpacketsystemtime(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_lastpacketsystemtime(value);
-  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.lastPacketSystemTime)
-}
-
-// optional int64 rupFramePlantTime = 15 [default = 0];
-inline bool AppDataSourceState::_internal_has_rupframeplanttime() const {
-  bool value = (_has_bits_[0] & 0x00004000u) != 0;
-  return value;
-}
-inline bool AppDataSourceState::has_rupframeplanttime() const {
-  return _internal_has_rupframeplanttime();
-}
-inline void AppDataSourceState::clear_rupframeplanttime() {
-  rupframeplanttime_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00004000u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_rupframeplanttime() const {
-  return rupframeplanttime_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::rupframeplanttime() const {
-  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.rupFramePlantTime)
-  return _internal_rupframeplanttime();
-}
-inline void AppDataSourceState::_internal_set_rupframeplanttime(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00004000u;
-  rupframeplanttime_ = value;
-}
-inline void AppDataSourceState::set_rupframeplanttime(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_rupframeplanttime(value);
-  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.rupFramePlantTime)
-}
-
-// optional uint32 rupFrameNumerator = 16 [default = 0];
-inline bool AppDataSourceState::_internal_has_rupframenumerator() const {
-  bool value = (_has_bits_[0] & 0x00000400u) != 0;
-  return value;
-}
-inline bool AppDataSourceState::has_rupframenumerator() const {
-  return _internal_has_rupframenumerator();
-}
-inline void AppDataSourceState::clear_rupframenumerator() {
-  rupframenumerator_ = 0u;
-  _has_bits_[0] &= ~0x00000400u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint32 AppDataSourceState::_internal_rupframenumerator() const {
-  return rupframenumerator_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint32 AppDataSourceState::rupframenumerator() const {
-  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.rupFrameNumerator)
-  return _internal_rupframenumerator();
-}
-inline void AppDataSourceState::_internal_set_rupframenumerator(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _has_bits_[0] |= 0x00000400u;
-  rupframenumerator_ = value;
-}
-inline void AppDataSourceState::set_rupframenumerator(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _internal_set_rupframenumerator(value);
-  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.rupFrameNumerator)
-}
-
-// optional int32 signalStatesQueueCurSize = 17 [default = 0];
-inline bool AppDataSourceState::_internal_has_signalstatesqueuecursize() const {
-  bool value = (_has_bits_[0] & 0x00008000u) != 0;
-  return value;
-}
-inline bool AppDataSourceState::has_signalstatesqueuecursize() const {
-  return _internal_has_signalstatesqueuecursize();
-}
-inline void AppDataSourceState::clear_signalstatesqueuecursize() {
-  signalstatesqueuecursize_ = 0;
-  _has_bits_[0] &= ~0x00008000u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 AppDataSourceState::_internal_signalstatesqueuecursize() const {
-  return signalstatesqueuecursize_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 AppDataSourceState::signalstatesqueuecursize() const {
-  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.signalStatesQueueCurSize)
-  return _internal_signalstatesqueuecursize();
-}
-inline void AppDataSourceState::_internal_set_signalstatesqueuecursize(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00008000u;
-  signalstatesqueuecursize_ = value;
-}
-inline void AppDataSourceState::set_signalstatesqueuecursize(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _internal_set_signalstatesqueuecursize(value);
-  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.signalStatesQueueCurSize)
-}
-
-// optional int32 signalStatesQueueCurMaxSize = 18 [default = 0];
-inline bool AppDataSourceState::_internal_has_signalstatesqueuecurmaxsize() const {
-  bool value = (_has_bits_[0] & 0x00010000u) != 0;
-  return value;
-}
-inline bool AppDataSourceState::has_signalstatesqueuecurmaxsize() const {
-  return _internal_has_signalstatesqueuecurmaxsize();
-}
-inline void AppDataSourceState::clear_signalstatesqueuecurmaxsize() {
-  signalstatesqueuecurmaxsize_ = 0;
-  _has_bits_[0] &= ~0x00010000u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 AppDataSourceState::_internal_signalstatesqueuecurmaxsize() const {
-  return signalstatesqueuecurmaxsize_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 AppDataSourceState::signalstatesqueuecurmaxsize() const {
-  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.signalStatesQueueCurMaxSize)
-  return _internal_signalstatesqueuecurmaxsize();
-}
-inline void AppDataSourceState::_internal_set_signalstatesqueuecurmaxsize(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00010000u;
-  signalstatesqueuecurmaxsize_ = value;
-}
-inline void AppDataSourceState::set_signalstatesqueuecurmaxsize(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _internal_set_signalstatesqueuecurmaxsize(value);
-  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.signalStatesQueueCurMaxSize)
-}
-
-// optional int32 acquiredSignalsCount = 19 [default = 0];
-inline bool AppDataSourceState::_internal_has_acquiredsignalscount() const {
-  bool value = (_has_bits_[0] & 0x00400000u) != 0;
-  return value;
-}
-inline bool AppDataSourceState::has_acquiredsignalscount() const {
-  return _internal_has_acquiredsignalscount();
-}
-inline void AppDataSourceState::clear_acquiredsignalscount() {
-  acquiredsignalscount_ = 0;
-  _has_bits_[0] &= ~0x00400000u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 AppDataSourceState::_internal_acquiredsignalscount() const {
-  return acquiredsignalscount_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 AppDataSourceState::acquiredsignalscount() const {
-  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.acquiredSignalsCount)
-  return _internal_acquiredsignalscount();
-}
-inline void AppDataSourceState::_internal_set_acquiredsignalscount(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00400000u;
-  acquiredsignalscount_ = value;
-}
-inline void AppDataSourceState::set_acquiredsignalscount(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _internal_set_acquiredsignalscount(value);
-  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.acquiredSignalsCount)
-}
-
-// optional int64 errorProtocolVersion = 20 [default = 0];
-inline bool AppDataSourceState::_internal_has_errorprotocolversion() const {
-  bool value = (_has_bits_[0] & 0x00020000u) != 0;
-  return value;
-}
-inline bool AppDataSourceState::has_errorprotocolversion() const {
-  return _internal_has_errorprotocolversion();
-}
-inline void AppDataSourceState::clear_errorprotocolversion() {
-  errorprotocolversion_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00020000u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_errorprotocolversion() const {
-  return errorprotocolversion_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::errorprotocolversion() const {
-  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.errorProtocolVersion)
-  return _internal_errorprotocolversion();
-}
-inline void AppDataSourceState::_internal_set_errorprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00020000u;
-  errorprotocolversion_ = value;
-}
-inline void AppDataSourceState::set_errorprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_errorprotocolversion(value);
-  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.errorProtocolVersion)
-}
-
-// optional int64 errorFramesQuantity = 21 [default = 0];
-inline bool AppDataSourceState::_internal_has_errorframesquantity() const {
-  bool value = (_has_bits_[0] & 0x00040000u) != 0;
-  return value;
-}
-inline bool AppDataSourceState::has_errorframesquantity() const {
-  return _internal_has_errorframesquantity();
-}
-inline void AppDataSourceState::clear_errorframesquantity() {
-  errorframesquantity_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00040000u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_errorframesquantity() const {
-  return errorframesquantity_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::errorframesquantity() const {
-  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.errorFramesQuantity)
-  return _internal_errorframesquantity();
-}
-inline void AppDataSourceState::_internal_set_errorframesquantity(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00040000u;
-  errorframesquantity_ = value;
-}
-inline void AppDataSourceState::set_errorframesquantity(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_errorframesquantity(value);
-  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.errorFramesQuantity)
-}
-
-// optional int64 errorFrameNo = 22 [default = 0];
-inline bool AppDataSourceState::_internal_has_errorframeno() const {
-  bool value = (_has_bits_[0] & 0x00080000u) != 0;
-  return value;
-}
-inline bool AppDataSourceState::has_errorframeno() const {
-  return _internal_has_errorframeno();
-}
-inline void AppDataSourceState::clear_errorframeno() {
-  errorframeno_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00080000u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_errorframeno() const {
-  return errorframeno_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::errorframeno() const {
-  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.errorFrameNo)
-  return _internal_errorframeno();
-}
-inline void AppDataSourceState::_internal_set_errorframeno(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00080000u;
-  errorframeno_ = value;
-}
-inline void AppDataSourceState::set_errorframeno(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_errorframeno(value);
-  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.errorFrameNo)
-}
-
-// optional int64 errorDataID = 23 [default = 0];
-inline bool AppDataSourceState::_internal_has_errordataid() const {
-  bool value = (_has_bits_[0] & 0x00100000u) != 0;
-  return value;
-}
-inline bool AppDataSourceState::has_errordataid() const {
-  return _internal_has_errordataid();
-}
-inline void AppDataSourceState::clear_errordataid() {
-  errordataid_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00100000u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_errordataid() const {
-  return errordataid_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::errordataid() const {
-  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.errorDataID)
-  return _internal_errordataid();
-}
-inline void AppDataSourceState::_internal_set_errordataid(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00100000u;
-  errordataid_ = value;
-}
-inline void AppDataSourceState::set_errordataid(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_errordataid(value);
-  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.errorDataID)
-}
-
-// optional int64 errorFrameSize = 24 [default = 0];
-inline bool AppDataSourceState::_internal_has_errorframesize() const {
-  bool value = (_has_bits_[0] & 0x00200000u) != 0;
-  return value;
-}
-inline bool AppDataSourceState::has_errorframesize() const {
-  return _internal_has_errorframesize();
-}
-inline void AppDataSourceState::clear_errorframesize() {
-  errorframesize_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00200000u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_errorframesize() const {
-  return errorframesize_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::errorframesize() const {
-  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.errorFrameSize)
-  return _internal_errorframesize();
-}
-inline void AppDataSourceState::_internal_set_errorframesize(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00200000u;
-  errorframesize_ = value;
-}
-inline void AppDataSourceState::set_errorframesize(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_errorframesize(value);
-  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.errorFrameSize)
-}
-
-// optional int64 errorDuplicatePlantTime = 25 [default = 0];
-inline bool AppDataSourceState::_internal_has_errorduplicateplanttime() const {
-  bool value = (_has_bits_[0] & 0x01000000u) != 0;
-  return value;
-}
-inline bool AppDataSourceState::has_errorduplicateplanttime() const {
-  return _internal_has_errorduplicateplanttime();
-}
-inline void AppDataSourceState::clear_errorduplicateplanttime() {
-  errorduplicateplanttime_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x01000000u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_errorduplicateplanttime() const {
-  return errorduplicateplanttime_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::errorduplicateplanttime() const {
-  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.errorDuplicatePlantTime)
-  return _internal_errorduplicateplanttime();
-}
-inline void AppDataSourceState::_internal_set_errorduplicateplanttime(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x01000000u;
-  errorduplicateplanttime_ = value;
-}
-inline void AppDataSourceState::set_errorduplicateplanttime(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_errorduplicateplanttime(value);
-  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.errorDuplicatePlantTime)
-}
-
-// optional int64 errorNonmonotonicPlantTime = 26 [default = 0];
-inline bool AppDataSourceState::_internal_has_errornonmonotonicplanttime() const {
-  bool value = (_has_bits_[0] & 0x02000000u) != 0;
-  return value;
-}
-inline bool AppDataSourceState::has_errornonmonotonicplanttime() const {
-  return _internal_has_errornonmonotonicplanttime();
-}
-inline void AppDataSourceState::clear_errornonmonotonicplanttime() {
-  errornonmonotonicplanttime_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x02000000u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_errornonmonotonicplanttime() const {
-  return errornonmonotonicplanttime_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::errornonmonotonicplanttime() const {
-  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.errorNonmonotonicPlantTime)
-  return _internal_errornonmonotonicplanttime();
-}
-inline void AppDataSourceState::_internal_set_errornonmonotonicplanttime(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x02000000u;
-  errornonmonotonicplanttime_ = value;
-}
-inline void AppDataSourceState::set_errornonmonotonicplanttime(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_errornonmonotonicplanttime(value);
-  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.errorNonmonotonicPlantTime)
-}
-
-// optional string lmEquipmentID = 27;
+// optional string lmEquipmentID = 2;
 inline bool AppDataSourceState::_internal_has_lmequipmentid() const {
   bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
@@ -19027,37 +18409,569 @@ inline void AppDataSourceState::set_allocated_lmequipmentid(std::string* lmequip
   // @@protoc_insertion_point(field_set_allocated:Network.AppDataSourceState.lmEquipmentID)
 }
 
-// optional int32 signalStatesQueueSize = 29 [default = 0];
-inline bool AppDataSourceState::_internal_has_signalstatesqueuesize() const {
-  bool value = (_has_bits_[0] & 0x00800000u) != 0;
+// optional bool dataProcessingEnabled = 3 [default = false];
+inline bool AppDataSourceState::_internal_has_dataprocessingenabled() const {
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
   return value;
 }
-inline bool AppDataSourceState::has_signalstatesqueuesize() const {
-  return _internal_has_signalstatesqueuesize();
+inline bool AppDataSourceState::has_dataprocessingenabled() const {
+  return _internal_has_dataprocessingenabled();
 }
-inline void AppDataSourceState::clear_signalstatesqueuesize() {
-  signalstatesqueuesize_ = 0;
-  _has_bits_[0] &= ~0x00800000u;
+inline void AppDataSourceState::clear_dataprocessingenabled() {
+  dataprocessingenabled_ = false;
+  _has_bits_[0] &= ~0x00000004u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 AppDataSourceState::_internal_signalstatesqueuesize() const {
-  return signalstatesqueuesize_;
+inline bool AppDataSourceState::_internal_dataprocessingenabled() const {
+  return dataprocessingenabled_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 AppDataSourceState::signalstatesqueuesize() const {
-  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.signalStatesQueueSize)
-  return _internal_signalstatesqueuesize();
+inline bool AppDataSourceState::dataprocessingenabled() const {
+  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.dataProcessingEnabled)
+  return _internal_dataprocessingenabled();
 }
-inline void AppDataSourceState::_internal_set_signalstatesqueuesize(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00800000u;
-  signalstatesqueuesize_ = value;
+inline void AppDataSourceState::_internal_set_dataprocessingenabled(bool value) {
+  _has_bits_[0] |= 0x00000004u;
+  dataprocessingenabled_ = value;
 }
-inline void AppDataSourceState::set_signalstatesqueuesize(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _internal_set_signalstatesqueuesize(value);
-  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.signalStatesQueueSize)
+inline void AppDataSourceState::set_dataprocessingenabled(bool value) {
+  _internal_set_dataprocessingenabled(value);
+  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.dataProcessingEnabled)
 }
 
-// optional int64 errorPlantTimeFormat = 31 [default = 0];
+// optional bool receivesData = 4 [default = false];
+inline bool AppDataSourceState::_internal_has_receivesdata() const {
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
+  return value;
+}
+inline bool AppDataSourceState::has_receivesdata() const {
+  return _internal_has_receivesdata();
+}
+inline void AppDataSourceState::clear_receivesdata() {
+  receivesdata_ = false;
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline bool AppDataSourceState::_internal_receivesdata() const {
+  return receivesdata_;
+}
+inline bool AppDataSourceState::receivesdata() const {
+  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.receivesData)
+  return _internal_receivesdata();
+}
+inline void AppDataSourceState::_internal_set_receivesdata(bool value) {
+  _has_bits_[0] |= 0x00000008u;
+  receivesdata_ = value;
+}
+inline void AppDataSourceState::set_receivesdata(bool value) {
+  _internal_set_receivesdata(value);
+  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.receivesData)
+}
+
+// optional int64 uptime = 5 [default = 0];
+inline bool AppDataSourceState::_internal_has_uptime() const {
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
+  return value;
+}
+inline bool AppDataSourceState::has_uptime() const {
+  return _internal_has_uptime();
+}
+inline void AppDataSourceState::clear_uptime() {
+  uptime_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_uptime() const {
+  return uptime_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::uptime() const {
+  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.uptime)
+  return _internal_uptime();
+}
+inline void AppDataSourceState::_internal_set_uptime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00000020u;
+  uptime_ = value;
+}
+inline void AppDataSourceState::set_uptime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_uptime(value);
+  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.uptime)
+}
+
+// optional uint32 receivedDataID = 6 [default = 0];
+inline bool AppDataSourceState::_internal_has_receiveddataid() const {
+  bool value = (_has_bits_[0] & 0x00000010u) != 0;
+  return value;
+}
+inline bool AppDataSourceState::has_receiveddataid() const {
+  return _internal_has_receiveddataid();
+}
+inline void AppDataSourceState::clear_receiveddataid() {
+  receiveddataid_ = 0u;
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 AppDataSourceState::_internal_receiveddataid() const {
+  return receiveddataid_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 AppDataSourceState::receiveddataid() const {
+  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.receivedDataID)
+  return _internal_receiveddataid();
+}
+inline void AppDataSourceState::_internal_set_receiveddataid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _has_bits_[0] |= 0x00000010u;
+  receiveddataid_ = value;
+}
+inline void AppDataSourceState::set_receiveddataid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_receiveddataid(value);
+  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.receivedDataID)
+}
+
+// optional int64 rupFramePlantTime = 7 [default = 0];
+inline bool AppDataSourceState::_internal_has_rupframeplanttime() const {
+  bool value = (_has_bits_[0] & 0x00000040u) != 0;
+  return value;
+}
+inline bool AppDataSourceState::has_rupframeplanttime() const {
+  return _internal_has_rupframeplanttime();
+}
+inline void AppDataSourceState::clear_rupframeplanttime() {
+  rupframeplanttime_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_rupframeplanttime() const {
+  return rupframeplanttime_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::rupframeplanttime() const {
+  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.rupFramePlantTime)
+  return _internal_rupframeplanttime();
+}
+inline void AppDataSourceState::_internal_set_rupframeplanttime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00000040u;
+  rupframeplanttime_ = value;
+}
+inline void AppDataSourceState::set_rupframeplanttime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_rupframeplanttime(value);
+  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.rupFramePlantTime)
+}
+
+// optional uint32 rupFrameNumerator = 8 [default = 0];
+inline bool AppDataSourceState::_internal_has_rupframenumerator() const {
+  bool value = (_has_bits_[0] & 0x00000400u) != 0;
+  return value;
+}
+inline bool AppDataSourceState::has_rupframenumerator() const {
+  return _internal_has_rupframenumerator();
+}
+inline void AppDataSourceState::clear_rupframenumerator() {
+  rupframenumerator_ = 0u;
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 AppDataSourceState::_internal_rupframenumerator() const {
+  return rupframenumerator_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 AppDataSourceState::rupframenumerator() const {
+  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.rupFrameNumerator)
+  return _internal_rupframenumerator();
+}
+inline void AppDataSourceState::_internal_set_rupframenumerator(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _has_bits_[0] |= 0x00000400u;
+  rupframenumerator_ = value;
+}
+inline void AppDataSourceState::set_rupframenumerator(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_rupframenumerator(value);
+  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.rupFrameNumerator)
+}
+
+// optional double dataReceivingSpeed = 9 [default = 0];
+inline bool AppDataSourceState::_internal_has_datareceivingspeed() const {
+  bool value = (_has_bits_[0] & 0x00000080u) != 0;
+  return value;
+}
+inline bool AppDataSourceState::has_datareceivingspeed() const {
+  return _internal_has_datareceivingspeed();
+}
+inline void AppDataSourceState::clear_datareceivingspeed() {
+  datareceivingspeed_ = 0;
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline double AppDataSourceState::_internal_datareceivingspeed() const {
+  return datareceivingspeed_;
+}
+inline double AppDataSourceState::datareceivingspeed() const {
+  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.dataReceivingSpeed)
+  return _internal_datareceivingspeed();
+}
+inline void AppDataSourceState::_internal_set_datareceivingspeed(double value) {
+  _has_bits_[0] |= 0x00000080u;
+  datareceivingspeed_ = value;
+}
+inline void AppDataSourceState::set_datareceivingspeed(double value) {
+  _internal_set_datareceivingspeed(value);
+  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.dataReceivingSpeed)
+}
+
+// optional int64 receivedDataSize = 10 [default = 0];
+inline bool AppDataSourceState::_internal_has_receiveddatasize() const {
+  bool value = (_has_bits_[0] & 0x00000100u) != 0;
+  return value;
+}
+inline bool AppDataSourceState::has_receiveddatasize() const {
+  return _internal_has_receiveddatasize();
+}
+inline void AppDataSourceState::clear_receiveddatasize() {
+  receiveddatasize_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_receiveddatasize() const {
+  return receiveddatasize_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::receiveddatasize() const {
+  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.receivedDataSize)
+  return _internal_receiveddatasize();
+}
+inline void AppDataSourceState::_internal_set_receiveddatasize(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00000100u;
+  receiveddatasize_ = value;
+}
+inline void AppDataSourceState::set_receiveddatasize(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_receiveddatasize(value);
+  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.receivedDataSize)
+}
+
+// optional int64 receivedFramesCount = 11 [default = 0];
+inline bool AppDataSourceState::_internal_has_receivedframescount() const {
+  bool value = (_has_bits_[0] & 0x00000200u) != 0;
+  return value;
+}
+inline bool AppDataSourceState::has_receivedframescount() const {
+  return _internal_has_receivedframescount();
+}
+inline void AppDataSourceState::clear_receivedframescount() {
+  receivedframescount_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_receivedframescount() const {
+  return receivedframescount_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::receivedframescount() const {
+  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.receivedFramesCount)
+  return _internal_receivedframescount();
+}
+inline void AppDataSourceState::_internal_set_receivedframescount(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00000200u;
+  receivedframescount_ = value;
+}
+inline void AppDataSourceState::set_receivedframescount(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_receivedframescount(value);
+  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.receivedFramesCount)
+}
+
+// optional int64 receivedPacketCount = 12 [default = 0];
+inline bool AppDataSourceState::_internal_has_receivedpacketcount() const {
+  bool value = (_has_bits_[0] & 0x00001000u) != 0;
+  return value;
+}
+inline bool AppDataSourceState::has_receivedpacketcount() const {
+  return _internal_has_receivedpacketcount();
+}
+inline void AppDataSourceState::clear_receivedpacketcount() {
+  receivedpacketcount_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00001000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_receivedpacketcount() const {
+  return receivedpacketcount_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::receivedpacketcount() const {
+  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.receivedPacketCount)
+  return _internal_receivedpacketcount();
+}
+inline void AppDataSourceState::_internal_set_receivedpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00001000u;
+  receivedpacketcount_ = value;
+}
+inline void AppDataSourceState::set_receivedpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_receivedpacketcount(value);
+  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.receivedPacketCount)
+}
+
+// optional int64 lostPacketCount = 13 [default = 0];
+inline bool AppDataSourceState::_internal_has_lostpacketcount() const {
+  bool value = (_has_bits_[0] & 0x00002000u) != 0;
+  return value;
+}
+inline bool AppDataSourceState::has_lostpacketcount() const {
+  return _internal_has_lostpacketcount();
+}
+inline void AppDataSourceState::clear_lostpacketcount() {
+  lostpacketcount_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00002000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_lostpacketcount() const {
+  return lostpacketcount_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::lostpacketcount() const {
+  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.lostPacketCount)
+  return _internal_lostpacketcount();
+}
+inline void AppDataSourceState::_internal_set_lostpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00002000u;
+  lostpacketcount_ = value;
+}
+inline void AppDataSourceState::set_lostpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_lostpacketcount(value);
+  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.lostPacketCount)
+}
+
+// optional int32 signalStatesQueueCurSize = 14 [default = 0];
+inline bool AppDataSourceState::_internal_has_signalstatesqueuecursize() const {
+  bool value = (_has_bits_[0] & 0x00000800u) != 0;
+  return value;
+}
+inline bool AppDataSourceState::has_signalstatesqueuecursize() const {
+  return _internal_has_signalstatesqueuecursize();
+}
+inline void AppDataSourceState::clear_signalstatesqueuecursize() {
+  signalstatesqueuecursize_ = 0;
+  _has_bits_[0] &= ~0x00000800u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 AppDataSourceState::_internal_signalstatesqueuecursize() const {
+  return signalstatesqueuecursize_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 AppDataSourceState::signalstatesqueuecursize() const {
+  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.signalStatesQueueCurSize)
+  return _internal_signalstatesqueuecursize();
+}
+inline void AppDataSourceState::_internal_set_signalstatesqueuecursize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000800u;
+  signalstatesqueuecursize_ = value;
+}
+inline void AppDataSourceState::set_signalstatesqueuecursize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_signalstatesqueuecursize(value);
+  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.signalStatesQueueCurSize)
+}
+
+// optional int32 signalStatesQueueCurMaxSize = 15 [default = 0];
+inline bool AppDataSourceState::_internal_has_signalstatesqueuecurmaxsize() const {
+  bool value = (_has_bits_[0] & 0x00400000u) != 0;
+  return value;
+}
+inline bool AppDataSourceState::has_signalstatesqueuecurmaxsize() const {
+  return _internal_has_signalstatesqueuecurmaxsize();
+}
+inline void AppDataSourceState::clear_signalstatesqueuecurmaxsize() {
+  signalstatesqueuecurmaxsize_ = 0;
+  _has_bits_[0] &= ~0x00400000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 AppDataSourceState::_internal_signalstatesqueuecurmaxsize() const {
+  return signalstatesqueuecurmaxsize_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 AppDataSourceState::signalstatesqueuecurmaxsize() const {
+  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.signalStatesQueueCurMaxSize)
+  return _internal_signalstatesqueuecurmaxsize();
+}
+inline void AppDataSourceState::_internal_set_signalstatesqueuecurmaxsize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00400000u;
+  signalstatesqueuecurmaxsize_ = value;
+}
+inline void AppDataSourceState::set_signalstatesqueuecurmaxsize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_signalstatesqueuecurmaxsize(value);
+  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.signalStatesQueueCurMaxSize)
+}
+
+// optional int64 errorProtocolVersion = 16 [default = 0];
+inline bool AppDataSourceState::_internal_has_errorprotocolversion() const {
+  bool value = (_has_bits_[0] & 0x00004000u) != 0;
+  return value;
+}
+inline bool AppDataSourceState::has_errorprotocolversion() const {
+  return _internal_has_errorprotocolversion();
+}
+inline void AppDataSourceState::clear_errorprotocolversion() {
+  errorprotocolversion_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00004000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_errorprotocolversion() const {
+  return errorprotocolversion_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::errorprotocolversion() const {
+  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.errorProtocolVersion)
+  return _internal_errorprotocolversion();
+}
+inline void AppDataSourceState::_internal_set_errorprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00004000u;
+  errorprotocolversion_ = value;
+}
+inline void AppDataSourceState::set_errorprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errorprotocolversion(value);
+  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.errorProtocolVersion)
+}
+
+// optional int64 errorFramesQuantity = 17 [default = 0];
+inline bool AppDataSourceState::_internal_has_errorframesquantity() const {
+  bool value = (_has_bits_[0] & 0x00008000u) != 0;
+  return value;
+}
+inline bool AppDataSourceState::has_errorframesquantity() const {
+  return _internal_has_errorframesquantity();
+}
+inline void AppDataSourceState::clear_errorframesquantity() {
+  errorframesquantity_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00008000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_errorframesquantity() const {
+  return errorframesquantity_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::errorframesquantity() const {
+  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.errorFramesQuantity)
+  return _internal_errorframesquantity();
+}
+inline void AppDataSourceState::_internal_set_errorframesquantity(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00008000u;
+  errorframesquantity_ = value;
+}
+inline void AppDataSourceState::set_errorframesquantity(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errorframesquantity(value);
+  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.errorFramesQuantity)
+}
+
+// optional int64 errorFrameNo = 18 [default = 0];
+inline bool AppDataSourceState::_internal_has_errorframeno() const {
+  bool value = (_has_bits_[0] & 0x00010000u) != 0;
+  return value;
+}
+inline bool AppDataSourceState::has_errorframeno() const {
+  return _internal_has_errorframeno();
+}
+inline void AppDataSourceState::clear_errorframeno() {
+  errorframeno_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00010000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_errorframeno() const {
+  return errorframeno_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::errorframeno() const {
+  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.errorFrameNo)
+  return _internal_errorframeno();
+}
+inline void AppDataSourceState::_internal_set_errorframeno(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00010000u;
+  errorframeno_ = value;
+}
+inline void AppDataSourceState::set_errorframeno(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errorframeno(value);
+  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.errorFrameNo)
+}
+
+// optional int64 errorDataID = 19 [default = 0];
+inline bool AppDataSourceState::_internal_has_errordataid() const {
+  bool value = (_has_bits_[0] & 0x00020000u) != 0;
+  return value;
+}
+inline bool AppDataSourceState::has_errordataid() const {
+  return _internal_has_errordataid();
+}
+inline void AppDataSourceState::clear_errordataid() {
+  errordataid_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00020000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_errordataid() const {
+  return errordataid_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::errordataid() const {
+  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.errorDataID)
+  return _internal_errordataid();
+}
+inline void AppDataSourceState::_internal_set_errordataid(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00020000u;
+  errordataid_ = value;
+}
+inline void AppDataSourceState::set_errordataid(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errordataid(value);
+  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.errorDataID)
+}
+
+// optional int64 errorFrameSize = 20 [default = 0];
+inline bool AppDataSourceState::_internal_has_errorframesize() const {
+  bool value = (_has_bits_[0] & 0x00040000u) != 0;
+  return value;
+}
+inline bool AppDataSourceState::has_errorframesize() const {
+  return _internal_has_errorframesize();
+}
+inline void AppDataSourceState::clear_errorframesize() {
+  errorframesize_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00040000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_errorframesize() const {
+  return errorframesize_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::errorframesize() const {
+  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.errorFrameSize)
+  return _internal_errorframesize();
+}
+inline void AppDataSourceState::_internal_set_errorframesize(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00040000u;
+  errorframesize_ = value;
+}
+inline void AppDataSourceState::set_errorframesize(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errorframesize(value);
+  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.errorFrameSize)
+}
+
+// optional int64 errorDuplicatePlantTime = 21 [default = 0];
+inline bool AppDataSourceState::_internal_has_errorduplicateplanttime() const {
+  bool value = (_has_bits_[0] & 0x00080000u) != 0;
+  return value;
+}
+inline bool AppDataSourceState::has_errorduplicateplanttime() const {
+  return _internal_has_errorduplicateplanttime();
+}
+inline void AppDataSourceState::clear_errorduplicateplanttime() {
+  errorduplicateplanttime_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00080000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_errorduplicateplanttime() const {
+  return errorduplicateplanttime_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::errorduplicateplanttime() const {
+  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.errorDuplicatePlantTime)
+  return _internal_errorduplicateplanttime();
+}
+inline void AppDataSourceState::_internal_set_errorduplicateplanttime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00080000u;
+  errorduplicateplanttime_ = value;
+}
+inline void AppDataSourceState::set_errorduplicateplanttime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errorduplicateplanttime(value);
+  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.errorDuplicatePlantTime)
+}
+
+// optional int64 errorNonmonotonicPlantTime = 22 [default = 0];
+inline bool AppDataSourceState::_internal_has_errornonmonotonicplanttime() const {
+  bool value = (_has_bits_[0] & 0x00100000u) != 0;
+  return value;
+}
+inline bool AppDataSourceState::has_errornonmonotonicplanttime() const {
+  return _internal_has_errornonmonotonicplanttime();
+}
+inline void AppDataSourceState::clear_errornonmonotonicplanttime() {
+  errornonmonotonicplanttime_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00100000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_errornonmonotonicplanttime() const {
+  return errornonmonotonicplanttime_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::errornonmonotonicplanttime() const {
+  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.errorNonmonotonicPlantTime)
+  return _internal_errornonmonotonicplanttime();
+}
+inline void AppDataSourceState::_internal_set_errornonmonotonicplanttime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00100000u;
+  errornonmonotonicplanttime_ = value;
+}
+inline void AppDataSourceState::set_errornonmonotonicplanttime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errornonmonotonicplanttime(value);
+  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.errorNonmonotonicPlantTime)
+}
+
+// optional int64 errorPlantTimeFormat = 23 [default = 0];
 inline bool AppDataSourceState::_internal_has_errorplanttimeformat() const {
-  bool value = (_has_bits_[0] & 0x04000000u) != 0;
+  bool value = (_has_bits_[0] & 0x00200000u) != 0;
   return value;
 }
 inline bool AppDataSourceState::has_errorplanttimeformat() const {
@@ -19065,7 +18979,7 @@ inline bool AppDataSourceState::has_errorplanttimeformat() const {
 }
 inline void AppDataSourceState::clear_errorplanttimeformat() {
   errorplanttimeformat_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x04000000u;
+  _has_bits_[0] &= ~0x00200000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_errorplanttimeformat() const {
   return errorplanttimeformat_;
@@ -19075,7 +18989,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::errorplanttimeformat()
   return _internal_errorplanttimeformat();
 }
 inline void AppDataSourceState::_internal_set_errorplanttimeformat(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x04000000u;
+  _has_bits_[0] |= 0x00200000u;
   errorplanttimeformat_ = value;
 }
 inline void AppDataSourceState::set_errorplanttimeformat(::PROTOBUF_NAMESPACE_ID::int64 value) {

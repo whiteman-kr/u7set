@@ -273,8 +273,6 @@ void TcpAppDataClient::onGetAppDataSourcesStatesReply(const char* replyData, qui
 		AppDataSource* source = m_appDataSources.value(id);
 
 		source->setState(m_getAppDataSourcesStatesReply.appdatasourcesstates(i));
-
-		assert(source->moduleEquipmentID().toStdString() == m_getAppDataSourcesStatesReply.appdatasourcesstates(i).lmequipmentid());
 	}
 
 	emit dataSoursesStateUpdated();

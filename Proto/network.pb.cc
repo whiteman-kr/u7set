@@ -244,7 +244,9 @@ constexpr DataSourceInfo::DataSourceInfo(
   , moduleuniqueid_(PROTOBUF_ULONGLONG(0))
   , moduletype_(0)
   , subsystemkey_(0)
-  , lmnumber_(0){}
+  , lmnumber_(0)
+  , acquiredsignalscount_(0)
+  , expecteddatauid_(0u){}
 struct DataSourceInfoDefaultTypeInternal {
   constexpr DataSourceInfoDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -302,31 +304,27 @@ constexpr AppDataSourceState::AppDataSourceState(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : lmequipmentid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , id_(PROTOBUF_ULONGLONG(0))
+  , dataprocessingenabled_(false)
+  , receivesdata_(false)
+  , receiveddataid_(0u)
   , uptime_(PROTOBUF_LONGLONG(0))
-  , receiveddataid_(PROTOBUF_ULONGLONG(0))
-  , datareceivingrate_(0)
+  , rupframeplanttime_(PROTOBUF_LONGLONG(0))
+  , datareceivingspeed_(0)
   , receiveddatasize_(PROTOBUF_LONGLONG(0))
   , receivedframescount_(PROTOBUF_LONGLONG(0))
-  , receivedpacketcount_(PROTOBUF_LONGLONG(0))
-  , receivesdata_(false)
-  , dataprocessingenabled_(false)
   , rupframenumerator_(0u)
-  , lostpacketcount_(PROTOBUF_LONGLONG(0))
-  , processedpacketcount_(PROTOBUF_LONGLONG(0))
-  , lastpacketsystemtime_(PROTOBUF_LONGLONG(0))
-  , rupframeplanttime_(PROTOBUF_LONGLONG(0))
   , signalstatesqueuecursize_(0)
-  , signalstatesqueuecurmaxsize_(0)
+  , receivedpacketcount_(PROTOBUF_LONGLONG(0))
+  , lostpacketcount_(PROTOBUF_LONGLONG(0))
   , errorprotocolversion_(PROTOBUF_LONGLONG(0))
   , errorframesquantity_(PROTOBUF_LONGLONG(0))
   , errorframeno_(PROTOBUF_LONGLONG(0))
   , errordataid_(PROTOBUF_LONGLONG(0))
   , errorframesize_(PROTOBUF_LONGLONG(0))
-  , acquiredsignalscount_(0)
-  , signalstatesqueuesize_(0)
   , errorduplicateplanttime_(PROTOBUF_LONGLONG(0))
   , errornonmonotonicplanttime_(PROTOBUF_LONGLONG(0))
-  , errorplanttimeformat_(PROTOBUF_LONGLONG(0)){}
+  , errorplanttimeformat_(PROTOBUF_LONGLONG(0))
+  , signalstatesqueuecurmaxsize_(0){}
 struct AppDataSourceStateDefaultTypeInternal {
   constexpr AppDataSourceStateDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -1304,6 +1302,8 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_network_2eproto::offsets[] PRO
   PROTOBUF_FIELD_OFFSET(::Network::DataSourceInfo, subsystemchannel_),
   PROTOBUF_FIELD_OFFSET(::Network::DataSourceInfo, lancontrollerinfo_),
   PROTOBUF_FIELD_OFFSET(::Network::DataSourceInfo, profile_),
+  PROTOBUF_FIELD_OFFSET(::Network::DataSourceInfo, acquiredsignalscount_),
+  PROTOBUF_FIELD_OFFSET(::Network::DataSourceInfo, expecteddatauid_),
   6,
   0,
   1,
@@ -1316,6 +1316,8 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_network_2eproto::offsets[] PRO
   4,
   ~0u,
   5,
+  11,
+  12,
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::Network::GetDataSourcesInfoRequest, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -1359,22 +1361,20 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_network_2eproto::offsets[] PRO
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, id_),
+  PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, lmequipmentid_),
+  PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, dataprocessingenabled_),
   PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, receivesdata_),
   PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, uptime_),
   PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, receiveddataid_),
-  PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, datareceivingrate_),
+  PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, rupframeplanttime_),
+  PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, rupframenumerator_),
+  PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, datareceivingspeed_),
   PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, receiveddatasize_),
   PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, receivedframescount_),
   PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, receivedpacketcount_),
   PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, lostpacketcount_),
-  PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, dataprocessingenabled_),
-  PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, processedpacketcount_),
-  PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, lastpacketsystemtime_),
-  PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, rupframeplanttime_),
-  PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, rupframenumerator_),
   PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, signalstatesqueuecursize_),
   PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, signalstatesqueuecurmaxsize_),
-  PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, acquiredsignalscount_),
   PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, errorprotocolversion_),
   PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, errorframesquantity_),
   PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, errorframeno_),
@@ -1382,36 +1382,30 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_network_2eproto::offsets[] PRO
   PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, errorframesize_),
   PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, errorduplicateplanttime_),
   PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, errornonmonotonicplanttime_),
-  PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, lmequipmentid_),
-  PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, signalstatesqueuesize_),
   PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, errorplanttimeformat_),
   1,
-  8,
+  0,
   2,
   3,
-  4,
   5,
+  4,
   6,
+  10,
   7,
-  11,
+  8,
   9,
   12,
   13,
+  11,
+  22,
   14,
-  10,
   15,
   16,
-  22,
   17,
   18,
   19,
   20,
   21,
-  24,
-  25,
-  0,
-  23,
-  26,
   PROTOBUF_FIELD_OFFSET(::Network::GetAppDataSourcesStatesReply, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::Network::GetAppDataSourcesStatesReply, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -2096,62 +2090,62 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 85, -1, sizeof(::Network::GetAppSignalStateChangesRequest)},
   { 90, 100, sizeof(::Network::GetAppSignalStateChangesReply)},
   { 105, 143, sizeof(::Network::LanControllerInfo)},
-  { 176, 193, sizeof(::Network::DataSourceInfo)},
-  { 205, -1, sizeof(::Network::GetDataSourcesInfoRequest)},
-  { 210, 217, sizeof(::Network::GetDataSourcesInfoReply)},
-  { 219, 233, sizeof(::Network::AppDataReceiveState)},
-  { 242, 274, sizeof(::Network::AppDataSourceState)},
-  { 301, 308, sizeof(::Network::GetAppDataSourcesStatesReply)},
-  { 310, 322, sizeof(::Network::AppDataServiceState)},
-  { 329, 346, sizeof(::Network::SoftwareInfo)},
-  { 358, 365, sizeof(::Network::SecurityLevelReply)},
-  { 367, 373, sizeof(::Network::IntroduceMyselfRequest)},
-  { 374, 382, sizeof(::Network::IntroduceMyselfReply)},
-  { 385, -1, sizeof(::Network::GetServiceInfoRequest)},
-  { 390, 397, sizeof(::Network::SessionParams)},
-  { 399, 410, sizeof(::Network::ServiceInfo)},
-  { 416, 423, sizeof(::Network::GetServiceInfoReply)},
-  { 425, 433, sizeof(::Network::ConfigurationServiceState)},
-  { 436, 446, sizeof(::Network::ServiceClientInfo)},
-  { 451, -1, sizeof(::Network::ServiceClients)},
-  { 457, 468, sizeof(::Network::BuildInfo)},
-  { 474, 482, sizeof(::Network::ConfigurationServiceSettings)},
-  { 485, 493, sizeof(::Network::ServiceSettings)},
-  { 496, -1, sizeof(::Network::GetTuningSourcesInfo)},
-  { 501, 511, sizeof(::Network::GetTuningSourcesInfoReply)},
-  { 516, -1, sizeof(::Network::GetTuningSourcesStates)},
-  { 521, 528, sizeof(::Network::SignalsAssociatedToTuningSource)},
-  { 530, 537, sizeof(::Network::TuningSourceFilling)},
-  { 539, 593, sizeof(::Network::TuningSourceState)},
-  { 642, 652, sizeof(::Network::GetTuningSourcesStatesReply)},
-  { 657, 665, sizeof(::Network::ChangeConrolledTuningSourceRequest)},
-  { 668, 676, sizeof(::Network::ChangeConrolledTuningSourceReply)},
-  { 679, -1, sizeof(::Network::TuningSignalsRead)},
-  { 685, 708, sizeof(::Network::TuningSignalState)},
-  { 726, 733, sizeof(::Network::TuningSignalsReadReply)},
-  { 735, 742, sizeof(::Network::TuningWriteCommand)},
-  { 744, 751, sizeof(::Network::TuningSignalsWrite)},
-  { 753, 760, sizeof(::Network::TuningSignalWriteResult)},
-  { 762, 769, sizeof(::Network::TuningSignalsWriteReply)},
-  { 771, -1, sizeof(::Network::TuningSignalsApply)},
-  { 776, 782, sizeof(::Network::TuningSignalsApplyReply)},
-  { 783, 790, sizeof(::Network::DataSourceWrite)},
-  { 792, 798, sizeof(::Network::DataSourceWriteReply)},
-  { 799, -1, sizeof(::Network::PacketSourceExit)},
-  { 804, 810, sizeof(::Network::PacketSourceExitReply)},
-  { 811, 818, sizeof(::Network::SaveAppSignalsStatesToArchiveRequest)},
-  { 820, 827, sizeof(::Network::SaveAppSignalsStatesToArchiveReply)},
-  { 829, 840, sizeof(::Network::GetAppSignalStatesFromArchiveStartRequest)},
-  { 846, 855, sizeof(::Network::GetAppSignalStatesFromArchiveStartReply)},
-  { 859, 865, sizeof(::Network::GetAppSignalStatesFromArchiveNextRequest)},
-  { 866, 881, sizeof(::Network::GetAppSignalStatesFromArchiveNextReply)},
-  { 891, 897, sizeof(::Network::GetAppSignalStatesFromArchiveCancelRequest)},
-  { 898, 906, sizeof(::Network::GetAppSignalStatesFromArchiveCancelReply)},
-  { 909, 918, sizeof(::Network::RtTrendsManagementRequest)},
-  { 922, 931, sizeof(::Network::RtTrendsManagementReply)},
-  { 935, -1, sizeof(::Network::RtTrendsGetStateChangesRequest)},
-  { 940, 948, sizeof(::Network::RtTrendsGetStateChangesReply)},
-  { 951, 963, sizeof(::Network::GetFileReply)},
+  { 176, 195, sizeof(::Network::DataSourceInfo)},
+  { 209, -1, sizeof(::Network::GetDataSourcesInfoRequest)},
+  { 214, 221, sizeof(::Network::GetDataSourcesInfoReply)},
+  { 223, 237, sizeof(::Network::AppDataReceiveState)},
+  { 246, 274, sizeof(::Network::AppDataSourceState)},
+  { 297, 304, sizeof(::Network::GetAppDataSourcesStatesReply)},
+  { 306, 318, sizeof(::Network::AppDataServiceState)},
+  { 325, 342, sizeof(::Network::SoftwareInfo)},
+  { 354, 361, sizeof(::Network::SecurityLevelReply)},
+  { 363, 369, sizeof(::Network::IntroduceMyselfRequest)},
+  { 370, 378, sizeof(::Network::IntroduceMyselfReply)},
+  { 381, -1, sizeof(::Network::GetServiceInfoRequest)},
+  { 386, 393, sizeof(::Network::SessionParams)},
+  { 395, 406, sizeof(::Network::ServiceInfo)},
+  { 412, 419, sizeof(::Network::GetServiceInfoReply)},
+  { 421, 429, sizeof(::Network::ConfigurationServiceState)},
+  { 432, 442, sizeof(::Network::ServiceClientInfo)},
+  { 447, -1, sizeof(::Network::ServiceClients)},
+  { 453, 464, sizeof(::Network::BuildInfo)},
+  { 470, 478, sizeof(::Network::ConfigurationServiceSettings)},
+  { 481, 489, sizeof(::Network::ServiceSettings)},
+  { 492, -1, sizeof(::Network::GetTuningSourcesInfo)},
+  { 497, 507, sizeof(::Network::GetTuningSourcesInfoReply)},
+  { 512, -1, sizeof(::Network::GetTuningSourcesStates)},
+  { 517, 524, sizeof(::Network::SignalsAssociatedToTuningSource)},
+  { 526, 533, sizeof(::Network::TuningSourceFilling)},
+  { 535, 589, sizeof(::Network::TuningSourceState)},
+  { 638, 648, sizeof(::Network::GetTuningSourcesStatesReply)},
+  { 653, 661, sizeof(::Network::ChangeConrolledTuningSourceRequest)},
+  { 664, 672, sizeof(::Network::ChangeConrolledTuningSourceReply)},
+  { 675, -1, sizeof(::Network::TuningSignalsRead)},
+  { 681, 704, sizeof(::Network::TuningSignalState)},
+  { 722, 729, sizeof(::Network::TuningSignalsReadReply)},
+  { 731, 738, sizeof(::Network::TuningWriteCommand)},
+  { 740, 747, sizeof(::Network::TuningSignalsWrite)},
+  { 749, 756, sizeof(::Network::TuningSignalWriteResult)},
+  { 758, 765, sizeof(::Network::TuningSignalsWriteReply)},
+  { 767, -1, sizeof(::Network::TuningSignalsApply)},
+  { 772, 778, sizeof(::Network::TuningSignalsApplyReply)},
+  { 779, 786, sizeof(::Network::DataSourceWrite)},
+  { 788, 794, sizeof(::Network::DataSourceWriteReply)},
+  { 795, -1, sizeof(::Network::PacketSourceExit)},
+  { 800, 806, sizeof(::Network::PacketSourceExitReply)},
+  { 807, 814, sizeof(::Network::SaveAppSignalsStatesToArchiveRequest)},
+  { 816, 823, sizeof(::Network::SaveAppSignalsStatesToArchiveReply)},
+  { 825, 836, sizeof(::Network::GetAppSignalStatesFromArchiveStartRequest)},
+  { 842, 851, sizeof(::Network::GetAppSignalStatesFromArchiveStartReply)},
+  { 855, 861, sizeof(::Network::GetAppSignalStatesFromArchiveNextRequest)},
+  { 862, 877, sizeof(::Network::GetAppSignalStatesFromArchiveNextReply)},
+  { 887, 893, sizeof(::Network::GetAppSignalStatesFromArchiveCancelRequest)},
+  { 894, 902, sizeof(::Network::GetAppSignalStatesFromArchiveCancelReply)},
+  { 905, 914, sizeof(::Network::RtTrendsManagementRequest)},
+  { 918, 927, sizeof(::Network::RtTrendsManagementReply)},
+  { 931, -1, sizeof(::Network::RtTrendsGetStateChangesRequest)},
+  { 936, 944, sizeof(::Network::RtTrendsGetStateChangesReply)},
+  { 947, 959, sizeof(::Network::GetFileReply)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -2274,7 +2268,7 @@ const char descriptor_table_protodef_network_2eproto[] PROTOBUF_SECTION_VARIABLE
   "etmask\030. \001(\t\022\026\n\013diagDataUID\030/ \001(\r:\0010\022\034\n\021"
   "diagDataSizeBytes\0300 \001(\005:\0010\022!\n\026diagDataFr"
   "amesQuantity\0301 \001(\005:\0010\022%\n\031overrideDiagDat"
-  "aWordCount\0302 \001(\005:\002-1\"\277\002\n\016DataSourceInfo\022"
+  "aWordCount\0302 \001(\005:\002-1\"\374\002\n\016DataSourceInfo\022"
   "\r\n\002id\030\001 \001(\004:\0010\022\031\n\021moduleEquipmentID\030\002 \001("
   "\t\022\030\n\020modulePresetName\030\003 \001(\t\022\025\n\nmoduleTyp"
   "e\030\004 \001(\005:\0010\022\025\n\rmoduleCaption\030\005 \001(\t\022\026\n\016mod"
@@ -2282,227 +2276,225 @@ const char descriptor_table_protodef_network_2eproto[] PROTOBUF_SECTION_VARIABLE
   "\n\014subsystemKey\030\010 \001(\005:\0010\022\023\n\010lmNumber\030\t \001("
   "\005:\0010\022\030\n\020subsystemChannel\030\n \001(\t\0225\n\021lanCon"
   "trollerInfo\030\013 \003(\0132\032.Network.LanControlle"
-  "rInfo\022\017\n\007profile\030\014 \001(\t\"\033\n\031GetDataSources"
-  "InfoRequest\"\\\n\027GetDataSourcesInfoReply\022\020"
-  "\n\005error\030\001 \001(\005:\0010\022/\n\016dataSourceInfo\030\002 \003(\013"
-  "2\027.Network.DataSourceInfo\"\245\002\n\023AppDataRec"
-  "eiveState\022\031\n\016receivingSpeed\030\001 \001(\005:\0010\022\"\n\027"
-  "rupFramesReceivingSpeed\030\003 \001(\005:\0010\022\031\n\016rupF"
-  "ramesCount\030\004 \001(\003:\0010\022\031\n\016simFramesCount\030\005 "
-  "\001(\003:\0010\022\032\n\017errDatagramSize\030\006 \001(\003:\0010\022\030\n\rer"
-  "rSimVersion\030\007 \001(\003:\0010\022$\n\031errUnknownAppDat"
-  "aSourceIP\030\010 \001(\003:\0010\022\031\n\016errRupFrameCRC\030\t \001"
-  "(\003:\0010\022\"\n\027errNotExpectedSimPacket\030\n \001(\003:\001"
-  "0\"\311\006\n\022AppDataSourceState\022\r\n\002id\030\001 \001(\004:\0010\022"
-  "\033\n\014receivesData\030\002 \001(\010:\005false\022\021\n\006uptime\030\003"
-  " \001(\003:\0010\022\031\n\016receivedDataID\030\004 \001(\004:\0010\022\034\n\021da"
-  "taReceivingRate\030\007 \001(\001:\0010\022\033\n\020receivedData"
-  "Size\030\010 \001(\003:\0010\022\036\n\023receivedFramesCount\030\t \001"
-  "(\003:\0010\022\036\n\023receivedPacketCount\030\n \001(\003:\0010\022\032\n"
-  "\017lostPacketCount\030\013 \001(\003:\0010\022$\n\025dataProcess"
-  "ingEnabled\030\014 \001(\010:\005false\022\037\n\024processedPack"
-  "etCount\030\r \001(\003:\0010\022\037\n\024lastPacketSystemTime"
-  "\030\016 \001(\003:\0010\022\034\n\021rupFramePlantTime\030\017 \001(\003:\0010\022"
-  "\034\n\021rupFrameNumerator\030\020 \001(\r:\0010\022#\n\030signalS"
-  "tatesQueueCurSize\030\021 \001(\005:\0010\022&\n\033signalStat"
-  "esQueueCurMaxSize\030\022 \001(\005:\0010\022\037\n\024acquiredSi"
-  "gnalsCount\030\023 \001(\005:\0010\022\037\n\024errorProtocolVers"
-  "ion\030\024 \001(\003:\0010\022\036\n\023errorFramesQuantity\030\025 \001("
-  "\003:\0010\022\027\n\014errorFrameNo\030\026 \001(\003:\0010\022\026\n\013errorDa"
-  "taID\030\027 \001(\003:\0010\022\031\n\016errorFrameSize\030\030 \001(\003:\0010"
-  "\022\"\n\027errorDuplicatePlantTime\030\031 \001(\003:\0010\022%\n\032"
-  "errorNonmonotonicPlantTime\030\032 \001(\003:\0010\022\025\n\rl"
-  "mEquipmentID\030\033 \001(\t\022 \n\025signalStatesQueueS"
-  "ize\030\035 \001(\005:\0010\022\037\n\024errorPlantTimeFormat\030\037 \001"
-  "(\003:\0010\"k\n\034GetAppDataSourcesStatesReply\022\020\n"
-  "\005error\030\001 \001(\005:\0010\0229\n\024appDataSourcesStates\030"
-  "\002 \003(\0132\033.Network.AppDataSourceState\"\220\002\n\023A"
-  "ppDataServiceState\022$\n\025CfgServiceIsConnec"
-  "ted\030\001 \002(\010:\005false\022\027\n\014CfgServiceIp\030\002 \001(\r:\001"
-  "0\022\031\n\016CfgServicePort\030\003 \001(\005:\0010\022(\n\031ArchiveS"
-  "erviceIsConnected\030\004 \002(\010:\005false\022\033\n\020Archiv"
-  "eServiceIp\030\005 \001(\r:\0010\022\035\n\022ArchiveServicePor"
-  "t\030\006 \001(\005:\0010\0229\n\023appDataReceiveState\030\007 \001(\0132"
-  "\034.Network.AppDataReceiveState\"\221\002\n\014Softwa"
-  "reInfo\022\032\n\014softwareType\030\001 \002(\005:\0048000\022\023\n\013eq"
-  "uipmentId\030\002 \002(\t\022\027\n\014majorVersion\030\003 \002(\005:\0010"
-  "\022\027\n\014minorVersion\030\004 \002(\005:\0010\022\023\n\010commitNo\030\005 "
-  "\002(\005:\0010\022\023\n\013buildBranch\030\006 \002(\t\022\021\n\tcommitSHA"
-  "\030\007 \002(\t\022\020\n\010userName\030\010 \002(\t\022\022\n\007buildNo\030\t \002("
-  "\005:\0010\022\016\n\003crc\030\n \002(\r:\0010\022\031\n\021clientDescriptio"
-  "n\030\013 \001(\t\022\020\n\010hostname\030\014 \001(\t\"D\n\022SecurityLev"
-  "elReply\022\024\n\014connectionNo\030\001 \002(\005\022\030\n\rsecurit"
-  "yLevel\030\002 \002(\005:\0010\"K\n\026IntroduceMyselfReques"
-  "t\0221\n\022clientSoftwareInfo\030\001 \002(\0132\025.Network."
-  "SoftwareInfo\"x\n\024IntroduceMyselfReply\0221\n\022"
-  "serverSoftwareInfo\030\001 \002(\0132\025.Network.Softw"
-  "areInfo\022\033\n\023setConnectionResult\030\002 \002(\005\022\020\n\010"
-  "errorMsg\030\003 \001(\t\"\027\n\025GetServiceInfoRequest\""
-  "K\n\rSessionParams\022\036\n\026currentSettingsProfi"
-  "le\030\001 \001(\t\022\032\n\017softwareRunMode\030\002 \001(\005:\0010\"\305\001\n"
-  "\013ServiceInfo\022+\n\014softwareInfo\030\001 \002(\0132\025.Net"
-  "work.SoftwareInfo\022\021\n\006uptime\030\002 \001(\003:\0010\022\027\n\014"
-  "serviceState\030\003 \001(\005:\0010\022\031\n\016serviceRuntime\030"
-  "\004 \001(\003:\0010\022-\n\rsessionParams\030\005 \001(\0132\026.Networ"
-  "k.SessionParams\022\023\n\013settingsXml\030\006 \001(\t\"R\n\023"
-  "GetServiceInfoReply\022\020\n\005error\030\001 \002(\005:\0010\022)\n"
-  "\013serviceInfo\030\002 \002(\0132\024.Network.ServiceInfo"
-  "\"x\n\031ConfigurationServiceState\022\035\n\025current"
-  "BuildDirectory\030\001 \002(\t\022!\n\031checkBuildAttemp"
-  "tQuantity\030\002 \002(\005\022\031\n\021buildCheckerState\030\003 \002"
-  "(\005\"\205\001\n\021ServiceClientInfo\022\n\n\002ip\030\003 \002(\005\022\016\n\006"
-  "uptime\030\005 \002(\003\022\020\n\010isActual\030\006 \002(\010\022\025\n\rreplyQ"
-  "uantity\030\007 \002(\003\022+\n\014softwareInfo\030\013 \002(\0132\025.Ne"
-  "twork.SoftwareInfo\"=\n\016ServiceClients\022+\n\007"
-  "clients\030\001 \003(\0132\032.Network.ServiceClientInf"
-  "o\"s\n\tBuildInfo\022\017\n\007project\030\001 \002(\t\022\016\n\002id\030\002 "
-  "\002(\005:\002-1\022\014\n\004date\030\004 \002(\003\022\024\n\tchangeset\030\005 \002(\005"
-  ":\0010\022\014\n\004user\030\006 \002(\t\022\023\n\013workstation\030\007 \002(\t\"e"
-  "\n\034ConfigurationServiceSettings\022\023\n\013equipm"
-  "entID\030\001 \002(\t\022\031\n\021autoloadBuildPath\030\002 \002(\t\022\025"
-  "\n\rworkDirectory\030\003 \002(\t\"L\n\017ServiceSettings"
-  "\022\023\n\013equipmentID\030\001 \002(\t\022\021\n\tconfigIP1\030\002 \002(\t"
-  "\022\021\n\tconfigIP2\030\003 \002(\t\"\026\n\024GetTuningSourcesI"
-  "nfo\"\263\001\n\031GetTuningSourcesInfoReply\022\020\n\005err"
-  "or\030\001 \001(\005:\0010\0221\n\020tuningSourceInfo\030\002 \003(\0132\027."
-  "Network.DataSourceInfo\022!\n\023singleLmContro"
-  "lMode\030\003 \001(\010:\004true\022\026\n\016activeClientID\030\004 \001("
-  "\t\022\026\n\016activeClientIP\030\005 \001(\t\"\030\n\026GetTuningSo"
-  "urcesStates\"G\n\037SignalsAssociatedToTuning"
-  "Source\022\020\n\010sourceID\030\001 \002(\004\022\022\n\nsignalHash\030\002"
-  " \003(\004\"n\n\023TuningSourceFilling\022\023\n\013signalCou"
-  "nt\030\001 \002(\004\022B\n\020signalsPerSource\030\002 \003(\0132(.Net"
-  "work.SignalsAssociatedToTuningSource\"\370\013\n"
-  "\021TuningSourceState\022\023\n\010sourceID\030\001 \001(\004:\0010\022"
-  "\026\n\016lanEquipmentID\030\002 \001(\t\022\026\n\007isReply\030\n \001(\010"
-  ":\005false\022\027\n\014requestCount\030\013 \001(\003:\0010\022\025\n\nrepl"
-  "yCount\030\014 \001(\003:\0010\022\033\n\020commandQueueSize\030\r \001("
-  "\005:\0010\022\036\n\017controlIsActive\030\016 \001(\010:\005false\022\025\n\006"
-  "setSOR\030\017 \001(\010:\005false\022\036\n\017writingDisabled\030\020"
-  " \001(\010:\005false\022!\n\022hasUnappliedParams\030\021 \001(\010:"
-  "\005false\022&\n\033fotipFlagBoundsCheckSuccess\030\036 "
-  "\001(\003:\0010\022 \n\025fotipFlagWriteSuccess\030\037 \001(\003:\0010"
-  "\022\037\n\024fotipFlagDataTypeErr\030  \001(\003:\0010\022\035\n\022fot"
-  "ipFlagOpCodeErr\030! \001(\003:\0010\022 \n\025fotipFlagSta"
-  "rtAddrErr\030\" \001(\003:\0010\022\036\n\023fotipFlagRomSizeEr"
-  "r\030# \001(\003:\0010\022#\n\030fotipFlagRomFrameSizeErr\030$"
-  " \001(\003:\0010\022 \n\025fotipFlagFrameSizeErr\030% \001(\003:\001"
-  "0\022&\n\033fotipFlagProtocolVersionErr\030& \001(\003:\001"
-  "0\022#\n\030fotipFlagSubsystemKeyErr\030\' \001(\003:\0010\022\036"
-  "\n\023fotipFlagUniueIDErr\030( \001(\003:\0010\022\035\n\022fotipF"
-  "lagOffsetErr\030) \001(\003:\0010\022 \n\025fotipFlagApplyS"
-  "uccess\030* \001(\003:\0010\022\032\n\017fotipFlagSetSOR\030+ \001(\003"
-  ":\0010\022#\n\030fotipFlagWritingDisabled\030, \001(\003:\0010"
-  "\022#\n\030fotipProcessingNumerator\030- \001(\004:\0010\022 \n"
-  "\025errRupProtocolVersion\0302 \001(\003:\0010\022\032\n\017errRu"
-  "pFrameSize\0303 \001(\003:\0010\022\036\n\023errRupNonTuningDa"
-  "ta\0304 \001(\003:\0010\022\033\n\020errRupModuleType\0305 \001(\003:\0010"
-  "\022\037\n\024errRupFramesQuantity\0306 \001(\003:\0010\022\034\n\021err"
-  "RupFrameNumber\0307 \001(\003:\0010\022\024\n\terrRupCRC\0308 \001"
-  "(\003:\0010\022\"\n\027errFotipProtocolVersion\030< \001(\003:\001"
-  "0\022\033\n\020errFotipUniqueID\030= \001(\003:\0010\022\033\n\020errFot"
-  "ipLmNumber\030> \001(\003:\0010\022 \n\025errFotipSubsystem"
-  "Code\030\? \001(\003:\0010\022 \n\025errFotipOperationCode\030@"
-  " \001(\003:\0010\022\034\n\021errFotipFrameSize\030A \001(\003:\0010\022\032\n"
-  "\017errFotipRomSize\030B \001(\003:\0010\022\037\n\024errFotipRom"
-  "FrameSize\030C \001(\003:\0010\022!\n\026errAnalogLowBoundC"
-  "heck\030D \001(\003:\0010\022\"\n\027errAnalogHighBoundCheck"
-  "\030E \001(\003:\0010\022\034\n\021errUntimelyReplay\030F \001(\003:\0010\022"
-  "\022\n\007errSent\030G \001(\003:\0010\022\031\n\016errPartialSent\030H "
-  "\001(\003:\0010\022\027\n\014errReplySize\030I \001(\003:\0010\022\025\n\nerrNo"
-  "Reply\030J \001(\003:\0010\022\037\n\024errTuningFrameUpdate\030K"
-  " \001(\003:\0010\"\272\001\n\033GetTuningSourcesStatesReply\022"
-  "\020\n\005error\030\001 \001(\005:\0010\0226\n\022tuningSourcesState\030"
-  "\002 \003(\0132\032.Network.TuningSourceState\022!\n\023sin"
-  "gleLmControlMode\030\003 \001(\010:\004true\022\026\n\016activeCl"
-  "ientID\030\004 \001(\t\022\026\n\016activeClientIP\030\005 \001(\t\"z\n\""
-  "ChangeConrolledTuningSourceRequest\022\023\n\013ta"
-  "keControl\030\001 \001(\010\022\037\n\027tuningSourceEquipment"
-  "ID\030\002 \001(\t\022\036\n\017activateControl\030\003 \001(\010:\005false"
-  "\"\177\n ChangeConrolledTuningSourceReply\022\020\n\005"
-  "error\030\001 \001(\005:\0010\022)\n!controlledTuningSource"
-  "EquipmentID\030\002 \001(\t\022\036\n\017controlIsActive\030\003 \001"
-  "(\010:\005false\"\'\n\021TuningSignalsRead\022\022\n\nsignal"
-  "Hash\030\002 \003(\004\"\250\004\n\021TuningSignalState\022\025\n\nsign"
-  "alHash\030\001 \001(\006:\0010\022\020\n\005error\030\002 \001(\005:\0010\022\024\n\005val"
-  "id\030\003 \001(\010:\005false\022!\n\005value\030\004 \001(\0132\022.Proto.T"
-  "uningValue\022(\n\014readLowBound\030\005 \001(\0132\022.Proto"
-  ".TuningValue\022)\n\rreadHighBound\030\006 \001(\0132\022.Pr"
-  "oto.TuningValue\022\036\n\017writeInProgress\030\007 \001(\010"
-  ":\005false\022\031\n\016writeErrorCode\030\010 \001(\005:\0010\022\026\n\013wr"
-  "iteClient\030\t \001(\006:\0010\022\035\n\022successfulReadTime"
-  "\030\n \001(\020:\0010\022\033\n\020writeRequestTime\030\013 \001(\020:\0010\022\036"
-  "\n\023successfulWriteTime\030\014 \001(\020:\0010\022 \n\025unsucc"
-  "essfulWriteTime\030\r \001(\020:\0010\022\025\n\006setSOR\030\016 \001(\010"
-  ":\005false\022\036\n\017writingDisabled\030\017 \001(\010:\005false\022"
-  "\034\n\rtuningDefault\030\020 \001(\010:\005false\022\021\n\006lmTime\030"
-  "\021 \001(\020:\0010\022#\n\030fotipProcessingNumerator\030\022 \001"
-  "(\006:\0010\"a\n\026TuningSignalsReadReply\022\020\n\005error"
-  "\030\001 \001(\005:\0010\0225\n\021tuningSignalState\030\002 \003(\0132\032.N"
-  "etwork.TuningSignalState\"N\n\022TuningWriteC"
-  "ommand\022\025\n\nsignalHash\030\001 \001(\004:\0010\022!\n\005value\030\002"
-  " \001(\0132\022.Proto.TuningValue\"]\n\022TuningSignal"
-  "sWrite\022\030\n\tautoApply\030\002 \001(\010:\005false\022-\n\010comm"
-  "ands\030\003 \003(\0132\033.Network.TuningWriteCommand\""
-  "B\n\027TuningSignalWriteResult\022\025\n\nsignalHash"
-  "\030\001 \001(\004:\0010\022\020\n\005error\030\002 \001(\005:\0010\"b\n\027TuningSig"
-  "nalsWriteReply\022\020\n\005error\030\001 \001(\005:\0010\0225\n\013writ"
-  "eResult\030\002 \003(\0132 .Network.TuningSignalWrit"
-  "eResult\"\024\n\022TuningSignalsApply\"+\n\027TuningS"
-  "ignalsApplyReply\022\020\n\005error\030\001 \001(\005:\0010\"B\n\017Da"
-  "taSourceWrite\022\031\n\021sourceEquipmentID\030\001 \001(\t"
-  "\022\024\n\005state\030\002 \001(\010:\005false\"(\n\024DataSourceWrit"
-  "eReply\022\020\n\005error\030\001 \001(\005:\0010\"\022\n\020PacketSource"
-  "Exit\")\n\025PacketSourceExitReply\022\020\n\005error\030\001"
-  " \001(\005:\0010\"q\n$SaveAppSignalsStatesToArchive"
-  "Request\022\031\n\021clientEquipmentID\030\001 \001(\t\022.\n\017ap"
-  "pSignalStates\030\002 \003(\0132\025.Proto.AppSignalSta"
-  "te\"N\n\"SaveAppSignalsStatesToArchiveReply"
-  "\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\0031"
-  "00\"\271\001\n)GetAppSignalStatesFromArchiveStar"
-  "tRequest\022\031\n\021clientEquipmentID\030\001 \001(\t\022\023\n\010t"
-  "imeType\030\002 \001(\005:\0011\022\024\n\tstartTime\030\003 \001(\020:\0010\022\022"
-  "\n\007endTime\030\004 \001(\020:\0010\022\024\n\014signalHashes\030\005 \003(\004"
-  "\022\034\n\016removePeriodic\030\006 \001(\010:\004true\"~\n\'GetApp"
-  "SignalStatesFromArchiveStartReply\022\020\n\005err"
-  "or\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022\023\n\013e"
-  "rrorString\030\004 \001(\t\022\024\n\trequestID\030\003 \001(\r:\0010\"@"
-  "\n(GetAppSignalStatesFromArchiveNextReque"
-  "st\022\024\n\trequestID\030\001 \001(\r:\0010\"\271\002\n&GetAppSigna"
-  "lStatesFromArchiveNextReply\022\020\n\005error\030\001 \001"
-  "(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022\024\n\trequest"
-  "ID\030\003 \001(\r:\0010\022\023\n\013errorString\030\n \001(\t\022\030\n\tdata"
-  "Ready\030\004 \001(\010:\005false\022\033\n\020totalStatesCount\030\005"
-  " \001(\005:\0010\022\032\n\017sentStatesCount\030\006 \001(\005:\0010\022\034\n\021s"
-  "tatesInPartCount\030\007 \001(\005:\0010\022\031\n\nisLastPart\030"
-  "\010 \001(\010:\005false\022.\n\017appSignalStates\030\t \003(\0132\025."
-  "Proto.AppSignalState\"B\n*GetAppSignalStat"
-  "esFromArchiveCancelRequest\022\024\n\trequestID\030"
-  "\001 \001(\r:\0010\"i\n(GetAppSignalStatesFromArchiv"
-  "eCancelReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchEr"
-  "ror\030\002 \001(\005:\003100\022\023\n\013errorString\030\003 \001(\t\"\204\001\n\031"
-  "RtTrendsManagementRequest\022\031\n\021clientEquip"
-  "mentID\030\001 \001(\t\022\024\n\014samplePeriod\030\002 \001(\005\022\032\n\022ap"
-  "pendSignalHashes\030\003 \003(\004\022\032\n\022deleteSignalHa"
-  "shes\030\004 \003(\004\"s\n\027RtTrendsManagementReply\022\020\n"
-  "\005error\030\001 \001(\005:\0010\022\023\n\013errorString\030\002 \001(\t\022\024\n\014"
-  "samplePeriod\030\003 \001(\005\022\033\n\023trackedSignalHashe"
-  "s\030\004 \003(\004\" \n\036RtTrendsGetStateChangesReques"
-  "t\"r\n\034RtTrendsGetStateChangesReply\022\020\n\005err"
-  "or\030\001 \001(\005:\0010\022\023\n\013errorString\030\002 \001(\t\022+\n\014sign"
-  "alStates\030\003 \003(\0132\025.Proto.AppSignalState\"\247\001"
-  "\n\014GetFileReply\022\024\n\terrorCode\030\001 \002(\005:\0010\022\023\n\010"
-  "fileSize\030\002 \001(\003:\0010\022\025\n\ntotalParts\030\003 \001(\005:\0010"
-  "\022\026\n\013currentPart\030\004 \001(\005:\0010\022\032\n\017currentPartS"
-  "ize\030\005 \001(\005:\0010\022\013\n\003md5\030\006 \001(\014\022\024\n\014filePartDat"
-  "a\030\n \001(\014"
+  "rInfo\022\017\n\007profile\030\014 \001(\t\022\037\n\024acquiredSignal"
+  "sCount\030\r \001(\005:\0010\022\032\n\017expectedDataUID\030\016 \001(\r"
+  ":\0010\"\033\n\031GetDataSourcesInfoRequest\"\\\n\027GetD"
+  "ataSourcesInfoReply\022\020\n\005error\030\001 \001(\005:\0010\022/\n"
+  "\016dataSourceInfo\030\002 \003(\0132\027.Network.DataSour"
+  "ceInfo\"\245\002\n\023AppDataReceiveState\022\031\n\016receiv"
+  "ingSpeed\030\001 \001(\005:\0010\022\"\n\027rupFramesReceivingS"
+  "peed\030\003 \001(\005:\0010\022\031\n\016rupFramesCount\030\004 \001(\003:\0010"
+  "\022\031\n\016simFramesCount\030\005 \001(\003:\0010\022\032\n\017errDatagr"
+  "amSize\030\006 \001(\003:\0010\022\030\n\rerrSimVersion\030\007 \001(\003:\001"
+  "0\022$\n\031errUnknownAppDataSourceIP\030\010 \001(\003:\0010\022"
+  "\031\n\016errRupFrameCRC\030\t \001(\003:\0010\022\"\n\027errNotExpe"
+  "ctedSimPacket\030\n \001(\003:\0010\"\305\005\n\022AppDataSource"
+  "State\022\r\n\002id\030\001 \001(\004:\0010\022\025\n\rlmEquipmentID\030\002 "
+  "\001(\t\022$\n\025dataProcessingEnabled\030\003 \001(\010:\005fals"
+  "e\022\033\n\014receivesData\030\004 \001(\010:\005false\022\021\n\006uptime"
+  "\030\005 \001(\003:\0010\022\031\n\016receivedDataID\030\006 \001(\r:\0010\022\034\n\021"
+  "rupFramePlantTime\030\007 \001(\003:\0010\022\034\n\021rupFrameNu"
+  "merator\030\010 \001(\r:\0010\022\035\n\022dataReceivingSpeed\030\t"
+  " \001(\001:\0010\022\033\n\020receivedDataSize\030\n \001(\003:\0010\022\036\n\023"
+  "receivedFramesCount\030\013 \001(\003:\0010\022\036\n\023received"
+  "PacketCount\030\014 \001(\003:\0010\022\032\n\017lostPacketCount\030"
+  "\r \001(\003:\0010\022#\n\030signalStatesQueueCurSize\030\016 \001"
+  "(\005:\0010\022&\n\033signalStatesQueueCurMaxSize\030\017 \001"
+  "(\005:\0010\022\037\n\024errorProtocolVersion\030\020 \001(\003:\0010\022\036"
+  "\n\023errorFramesQuantity\030\021 \001(\003:\0010\022\027\n\014errorF"
+  "rameNo\030\022 \001(\003:\0010\022\026\n\013errorDataID\030\023 \001(\003:\0010\022"
+  "\031\n\016errorFrameSize\030\024 \001(\003:\0010\022\"\n\027errorDupli"
+  "catePlantTime\030\025 \001(\003:\0010\022%\n\032errorNonmonoto"
+  "nicPlantTime\030\026 \001(\003:\0010\022\037\n\024errorPlantTimeF"
+  "ormat\030\027 \001(\003:\0010\"k\n\034GetAppDataSourcesState"
+  "sReply\022\020\n\005error\030\001 \001(\005:\0010\0229\n\024appDataSourc"
+  "esStates\030\002 \003(\0132\033.Network.AppDataSourceSt"
+  "ate\"\220\002\n\023AppDataServiceState\022$\n\025CfgServic"
+  "eIsConnected\030\001 \002(\010:\005false\022\027\n\014CfgServiceI"
+  "p\030\002 \001(\r:\0010\022\031\n\016CfgServicePort\030\003 \001(\005:\0010\022(\n"
+  "\031ArchiveServiceIsConnected\030\004 \002(\010:\005false\022"
+  "\033\n\020ArchiveServiceIp\030\005 \001(\r:\0010\022\035\n\022ArchiveS"
+  "ervicePort\030\006 \001(\005:\0010\0229\n\023appDataReceiveSta"
+  "te\030\007 \001(\0132\034.Network.AppDataReceiveState\"\221"
+  "\002\n\014SoftwareInfo\022\032\n\014softwareType\030\001 \002(\005:\0048"
+  "000\022\023\n\013equipmentId\030\002 \002(\t\022\027\n\014majorVersion"
+  "\030\003 \002(\005:\0010\022\027\n\014minorVersion\030\004 \002(\005:\0010\022\023\n\010co"
+  "mmitNo\030\005 \002(\005:\0010\022\023\n\013buildBranch\030\006 \002(\t\022\021\n\t"
+  "commitSHA\030\007 \002(\t\022\020\n\010userName\030\010 \002(\t\022\022\n\007bui"
+  "ldNo\030\t \002(\005:\0010\022\016\n\003crc\030\n \002(\r:\0010\022\031\n\021clientD"
+  "escription\030\013 \001(\t\022\020\n\010hostname\030\014 \001(\t\"D\n\022Se"
+  "curityLevelReply\022\024\n\014connectionNo\030\001 \002(\005\022\030"
+  "\n\rsecurityLevel\030\002 \002(\005:\0010\"K\n\026IntroduceMys"
+  "elfRequest\0221\n\022clientSoftwareInfo\030\001 \002(\0132\025"
+  ".Network.SoftwareInfo\"x\n\024IntroduceMyself"
+  "Reply\0221\n\022serverSoftwareInfo\030\001 \002(\0132\025.Netw"
+  "ork.SoftwareInfo\022\033\n\023setConnectionResult\030"
+  "\002 \002(\005\022\020\n\010errorMsg\030\003 \001(\t\"\027\n\025GetServiceInf"
+  "oRequest\"K\n\rSessionParams\022\036\n\026currentSett"
+  "ingsProfile\030\001 \001(\t\022\032\n\017softwareRunMode\030\002 \001"
+  "(\005:\0010\"\305\001\n\013ServiceInfo\022+\n\014softwareInfo\030\001 "
+  "\002(\0132\025.Network.SoftwareInfo\022\021\n\006uptime\030\002 \001"
+  "(\003:\0010\022\027\n\014serviceState\030\003 \001(\005:\0010\022\031\n\016servic"
+  "eRuntime\030\004 \001(\003:\0010\022-\n\rsessionParams\030\005 \001(\013"
+  "2\026.Network.SessionParams\022\023\n\013settingsXml\030"
+  "\006 \001(\t\"R\n\023GetServiceInfoReply\022\020\n\005error\030\001 "
+  "\002(\005:\0010\022)\n\013serviceInfo\030\002 \002(\0132\024.Network.Se"
+  "rviceInfo\"x\n\031ConfigurationServiceState\022\035"
+  "\n\025currentBuildDirectory\030\001 \002(\t\022!\n\031checkBu"
+  "ildAttemptQuantity\030\002 \002(\005\022\031\n\021buildChecker"
+  "State\030\003 \002(\005\"\205\001\n\021ServiceClientInfo\022\n\n\002ip\030"
+  "\003 \002(\005\022\016\n\006uptime\030\005 \002(\003\022\020\n\010isActual\030\006 \002(\010\022"
+  "\025\n\rreplyQuantity\030\007 \002(\003\022+\n\014softwareInfo\030\013"
+  " \002(\0132\025.Network.SoftwareInfo\"=\n\016ServiceCl"
+  "ients\022+\n\007clients\030\001 \003(\0132\032.Network.Service"
+  "ClientInfo\"s\n\tBuildInfo\022\017\n\007project\030\001 \002(\t"
+  "\022\016\n\002id\030\002 \002(\005:\002-1\022\014\n\004date\030\004 \002(\003\022\024\n\tchange"
+  "set\030\005 \002(\005:\0010\022\014\n\004user\030\006 \002(\t\022\023\n\013workstatio"
+  "n\030\007 \002(\t\"e\n\034ConfigurationServiceSettings\022"
+  "\023\n\013equipmentID\030\001 \002(\t\022\031\n\021autoloadBuildPat"
+  "h\030\002 \002(\t\022\025\n\rworkDirectory\030\003 \002(\t\"L\n\017Servic"
+  "eSettings\022\023\n\013equipmentID\030\001 \002(\t\022\021\n\tconfig"
+  "IP1\030\002 \002(\t\022\021\n\tconfigIP2\030\003 \002(\t\"\026\n\024GetTunin"
+  "gSourcesInfo\"\263\001\n\031GetTuningSourcesInfoRep"
+  "ly\022\020\n\005error\030\001 \001(\005:\0010\0221\n\020tuningSourceInfo"
+  "\030\002 \003(\0132\027.Network.DataSourceInfo\022!\n\023singl"
+  "eLmControlMode\030\003 \001(\010:\004true\022\026\n\016activeClie"
+  "ntID\030\004 \001(\t\022\026\n\016activeClientIP\030\005 \001(\t\"\030\n\026Ge"
+  "tTuningSourcesStates\"G\n\037SignalsAssociate"
+  "dToTuningSource\022\020\n\010sourceID\030\001 \002(\004\022\022\n\nsig"
+  "nalHash\030\002 \003(\004\"n\n\023TuningSourceFilling\022\023\n\013"
+  "signalCount\030\001 \002(\004\022B\n\020signalsPerSource\030\002 "
+  "\003(\0132(.Network.SignalsAssociatedToTuningS"
+  "ource\"\370\013\n\021TuningSourceState\022\023\n\010sourceID\030"
+  "\001 \001(\004:\0010\022\026\n\016lanEquipmentID\030\002 \001(\t\022\026\n\007isRe"
+  "ply\030\n \001(\010:\005false\022\027\n\014requestCount\030\013 \001(\003:\001"
+  "0\022\025\n\nreplyCount\030\014 \001(\003:\0010\022\033\n\020commandQueue"
+  "Size\030\r \001(\005:\0010\022\036\n\017controlIsActive\030\016 \001(\010:\005"
+  "false\022\025\n\006setSOR\030\017 \001(\010:\005false\022\036\n\017writingD"
+  "isabled\030\020 \001(\010:\005false\022!\n\022hasUnappliedPara"
+  "ms\030\021 \001(\010:\005false\022&\n\033fotipFlagBoundsCheckS"
+  "uccess\030\036 \001(\003:\0010\022 \n\025fotipFlagWriteSuccess"
+  "\030\037 \001(\003:\0010\022\037\n\024fotipFlagDataTypeErr\030  \001(\003:"
+  "\0010\022\035\n\022fotipFlagOpCodeErr\030! \001(\003:\0010\022 \n\025fot"
+  "ipFlagStartAddrErr\030\" \001(\003:\0010\022\036\n\023fotipFlag"
+  "RomSizeErr\030# \001(\003:\0010\022#\n\030fotipFlagRomFrame"
+  "SizeErr\030$ \001(\003:\0010\022 \n\025fotipFlagFrameSizeEr"
+  "r\030% \001(\003:\0010\022&\n\033fotipFlagProtocolVersionEr"
+  "r\030& \001(\003:\0010\022#\n\030fotipFlagSubsystemKeyErr\030\'"
+  " \001(\003:\0010\022\036\n\023fotipFlagUniueIDErr\030( \001(\003:\0010\022"
+  "\035\n\022fotipFlagOffsetErr\030) \001(\003:\0010\022 \n\025fotipF"
+  "lagApplySuccess\030* \001(\003:\0010\022\032\n\017fotipFlagSet"
+  "SOR\030+ \001(\003:\0010\022#\n\030fotipFlagWritingDisabled"
+  "\030, \001(\003:\0010\022#\n\030fotipProcessingNumerator\030- "
+  "\001(\004:\0010\022 \n\025errRupProtocolVersion\0302 \001(\003:\0010"
+  "\022\032\n\017errRupFrameSize\0303 \001(\003:\0010\022\036\n\023errRupNo"
+  "nTuningData\0304 \001(\003:\0010\022\033\n\020errRupModuleType"
+  "\0305 \001(\003:\0010\022\037\n\024errRupFramesQuantity\0306 \001(\003:"
+  "\0010\022\034\n\021errRupFrameNumber\0307 \001(\003:\0010\022\024\n\terrR"
+  "upCRC\0308 \001(\003:\0010\022\"\n\027errFotipProtocolVersio"
+  "n\030< \001(\003:\0010\022\033\n\020errFotipUniqueID\030= \001(\003:\0010\022"
+  "\033\n\020errFotipLmNumber\030> \001(\003:\0010\022 \n\025errFotip"
+  "SubsystemCode\030\? \001(\003:\0010\022 \n\025errFotipOperat"
+  "ionCode\030@ \001(\003:\0010\022\034\n\021errFotipFrameSize\030A "
+  "\001(\003:\0010\022\032\n\017errFotipRomSize\030B \001(\003:\0010\022\037\n\024er"
+  "rFotipRomFrameSize\030C \001(\003:\0010\022!\n\026errAnalog"
+  "LowBoundCheck\030D \001(\003:\0010\022\"\n\027errAnalogHighB"
+  "oundCheck\030E \001(\003:\0010\022\034\n\021errUntimelyReplay\030"
+  "F \001(\003:\0010\022\022\n\007errSent\030G \001(\003:\0010\022\031\n\016errParti"
+  "alSent\030H \001(\003:\0010\022\027\n\014errReplySize\030I \001(\003:\0010"
+  "\022\025\n\nerrNoReply\030J \001(\003:\0010\022\037\n\024errTuningFram"
+  "eUpdate\030K \001(\003:\0010\"\272\001\n\033GetTuningSourcesSta"
+  "tesReply\022\020\n\005error\030\001 \001(\005:\0010\0226\n\022tuningSour"
+  "cesState\030\002 \003(\0132\032.Network.TuningSourceSta"
+  "te\022!\n\023singleLmControlMode\030\003 \001(\010:\004true\022\026\n"
+  "\016activeClientID\030\004 \001(\t\022\026\n\016activeClientIP\030"
+  "\005 \001(\t\"z\n\"ChangeConrolledTuningSourceRequ"
+  "est\022\023\n\013takeControl\030\001 \001(\010\022\037\n\027tuningSource"
+  "EquipmentID\030\002 \001(\t\022\036\n\017activateControl\030\003 \001"
+  "(\010:\005false\"\177\n ChangeConrolledTuningSource"
+  "Reply\022\020\n\005error\030\001 \001(\005:\0010\022)\n!controlledTun"
+  "ingSourceEquipmentID\030\002 \001(\t\022\036\n\017controlIsA"
+  "ctive\030\003 \001(\010:\005false\"\'\n\021TuningSignalsRead\022"
+  "\022\n\nsignalHash\030\002 \003(\004\"\250\004\n\021TuningSignalStat"
+  "e\022\025\n\nsignalHash\030\001 \001(\006:\0010\022\020\n\005error\030\002 \001(\005:"
+  "\0010\022\024\n\005valid\030\003 \001(\010:\005false\022!\n\005value\030\004 \001(\0132"
+  "\022.Proto.TuningValue\022(\n\014readLowBound\030\005 \001("
+  "\0132\022.Proto.TuningValue\022)\n\rreadHighBound\030\006"
+  " \001(\0132\022.Proto.TuningValue\022\036\n\017writeInProgr"
+  "ess\030\007 \001(\010:\005false\022\031\n\016writeErrorCode\030\010 \001(\005"
+  ":\0010\022\026\n\013writeClient\030\t \001(\006:\0010\022\035\n\022successfu"
+  "lReadTime\030\n \001(\020:\0010\022\033\n\020writeRequestTime\030\013"
+  " \001(\020:\0010\022\036\n\023successfulWriteTime\030\014 \001(\020:\0010\022"
+  " \n\025unsuccessfulWriteTime\030\r \001(\020:\0010\022\025\n\006set"
+  "SOR\030\016 \001(\010:\005false\022\036\n\017writingDisabled\030\017 \001("
+  "\010:\005false\022\034\n\rtuningDefault\030\020 \001(\010:\005false\022\021"
+  "\n\006lmTime\030\021 \001(\020:\0010\022#\n\030fotipProcessingNume"
+  "rator\030\022 \001(\006:\0010\"a\n\026TuningSignalsReadReply"
+  "\022\020\n\005error\030\001 \001(\005:\0010\0225\n\021tuningSignalState\030"
+  "\002 \003(\0132\032.Network.TuningSignalState\"N\n\022Tun"
+  "ingWriteCommand\022\025\n\nsignalHash\030\001 \001(\004:\0010\022!"
+  "\n\005value\030\002 \001(\0132\022.Proto.TuningValue\"]\n\022Tun"
+  "ingSignalsWrite\022\030\n\tautoApply\030\002 \001(\010:\005fals"
+  "e\022-\n\010commands\030\003 \003(\0132\033.Network.TuningWrit"
+  "eCommand\"B\n\027TuningSignalWriteResult\022\025\n\ns"
+  "ignalHash\030\001 \001(\004:\0010\022\020\n\005error\030\002 \001(\005:\0010\"b\n\027"
+  "TuningSignalsWriteReply\022\020\n\005error\030\001 \001(\005:\001"
+  "0\0225\n\013writeResult\030\002 \003(\0132 .Network.TuningS"
+  "ignalWriteResult\"\024\n\022TuningSignalsApply\"+"
+  "\n\027TuningSignalsApplyReply\022\020\n\005error\030\001 \001(\005"
+  ":\0010\"B\n\017DataSourceWrite\022\031\n\021sourceEquipmen"
+  "tID\030\001 \001(\t\022\024\n\005state\030\002 \001(\010:\005false\"(\n\024DataS"
+  "ourceWriteReply\022\020\n\005error\030\001 \001(\005:\0010\"\022\n\020Pac"
+  "ketSourceExit\")\n\025PacketSourceExitReply\022\020"
+  "\n\005error\030\001 \001(\005:\0010\"q\n$SaveAppSignalsStates"
+  "ToArchiveRequest\022\031\n\021clientEquipmentID\030\001 "
+  "\001(\t\022.\n\017appSignalStates\030\002 \003(\0132\025.Proto.App"
+  "SignalState\"N\n\"SaveAppSignalsStatesToArc"
+  "hiveReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError"
+  "\030\002 \001(\005:\003100\"\271\001\n)GetAppSignalStatesFromAr"
+  "chiveStartRequest\022\031\n\021clientEquipmentID\030\001"
+  " \001(\t\022\023\n\010timeType\030\002 \001(\005:\0011\022\024\n\tstartTime\030\003"
+  " \001(\020:\0010\022\022\n\007endTime\030\004 \001(\020:\0010\022\024\n\014signalHas"
+  "hes\030\005 \003(\004\022\034\n\016removePeriodic\030\006 \001(\010:\004true\""
+  "~\n\'GetAppSignalStatesFromArchiveStartRep"
+  "ly\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:"
+  "\003100\022\023\n\013errorString\030\004 \001(\t\022\024\n\trequestID\030\003"
+  " \001(\r:\0010\"@\n(GetAppSignalStatesFromArchive"
+  "NextRequest\022\024\n\trequestID\030\001 \001(\r:\0010\"\271\002\n&Ge"
+  "tAppSignalStatesFromArchiveNextReply\022\020\n\005"
+  "error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022\024"
+  "\n\trequestID\030\003 \001(\r:\0010\022\023\n\013errorString\030\n \001("
+  "\t\022\030\n\tdataReady\030\004 \001(\010:\005false\022\033\n\020totalStat"
+  "esCount\030\005 \001(\005:\0010\022\032\n\017sentStatesCount\030\006 \001("
+  "\005:\0010\022\034\n\021statesInPartCount\030\007 \001(\005:\0010\022\031\n\nis"
+  "LastPart\030\010 \001(\010:\005false\022.\n\017appSignalStates"
+  "\030\t \003(\0132\025.Proto.AppSignalState\"B\n*GetAppS"
+  "ignalStatesFromArchiveCancelRequest\022\024\n\tr"
+  "equestID\030\001 \001(\r:\0010\"i\n(GetAppSignalStatesF"
+  "romArchiveCancelReply\022\020\n\005error\030\001 \001(\005:\0010\022"
+  "\026\n\tarchError\030\002 \001(\005:\003100\022\023\n\013errorString\030\003"
+  " \001(\t\"\204\001\n\031RtTrendsManagementRequest\022\031\n\021cl"
+  "ientEquipmentID\030\001 \001(\t\022\024\n\014samplePeriod\030\002 "
+  "\001(\005\022\032\n\022appendSignalHashes\030\003 \003(\004\022\032\n\022delet"
+  "eSignalHashes\030\004 \003(\004\"s\n\027RtTrendsManagemen"
+  "tReply\022\020\n\005error\030\001 \001(\005:\0010\022\023\n\013errorString\030"
+  "\002 \001(\t\022\024\n\014samplePeriod\030\003 \001(\005\022\033\n\023trackedSi"
+  "gnalHashes\030\004 \003(\004\" \n\036RtTrendsGetStateChan"
+  "gesRequest\"r\n\034RtTrendsGetStateChangesRep"
+  "ly\022\020\n\005error\030\001 \001(\005:\0010\022\023\n\013errorString\030\002 \001("
+  "\t\022+\n\014signalStates\030\003 \003(\0132\025.Proto.AppSigna"
+  "lState\"\247\001\n\014GetFileReply\022\024\n\terrorCode\030\001 \002"
+  "(\005:\0010\022\023\n\010fileSize\030\002 \001(\003:\0010\022\025\n\ntotalParts"
+  "\030\003 \001(\005:\0010\022\026\n\013currentPart\030\004 \001(\005:\0010\022\032\n\017cur"
+  "rentPartSize\030\005 \001(\005:\0010\022\013\n\003md5\030\006 \001(\014\022\024\n\014fi"
+  "lePartData\030\n \001(\014"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_network_2eproto_deps[1] = {
   &::descriptor_table_serialization_2eproto,
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_network_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_network_2eproto = {
-  false, false, 10727, descriptor_table_protodef_network_2eproto, "network.proto", 
+  false, false, 10656, descriptor_table_protodef_network_2eproto, "network.proto", 
   &descriptor_table_network_2eproto_once, descriptor_table_network_2eproto_deps, 1, 69,
   schemas, file_default_instances, TableStruct_network_2eproto::offsets,
   file_level_metadata_network_2eproto, file_level_enum_descriptors_network_2eproto, file_level_service_descriptors_network_2eproto,
@@ -6728,6 +6720,12 @@ class DataSourceInfo::_Internal {
   static void set_has_profile(HasBits* has_bits) {
     (*has_bits)[0] |= 32u;
   }
+  static void set_has_acquiredsignalscount(HasBits* has_bits) {
+    (*has_bits)[0] |= 2048u;
+  }
+  static void set_has_expecteddatauid(HasBits* has_bits) {
+    (*has_bits)[0] |= 4096u;
+  }
 };
 
 DataSourceInfo::DataSourceInfo(::PROTOBUF_NAMESPACE_ID::Arena* arena)
@@ -6773,8 +6771,8 @@ DataSourceInfo::DataSourceInfo(const DataSourceInfo& from)
       GetArena());
   }
   ::memcpy(&id_, &from.id_,
-    static_cast<size_t>(reinterpret_cast<char*>(&lmnumber_) -
-    reinterpret_cast<char*>(&id_)) + sizeof(lmnumber_));
+    static_cast<size_t>(reinterpret_cast<char*>(&expecteddatauid_) -
+    reinterpret_cast<char*>(&id_)) + sizeof(expecteddatauid_));
   // @@protoc_insertion_point(copy_constructor:Network.DataSourceInfo)
 }
 
@@ -6787,8 +6785,8 @@ subsystemchannel_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyS
 profile_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
     reinterpret_cast<char*>(&id_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&lmnumber_) -
-    reinterpret_cast<char*>(&id_)) + sizeof(lmnumber_));
+    0, static_cast<size_t>(reinterpret_cast<char*>(&expecteddatauid_) -
+    reinterpret_cast<char*>(&id_)) + sizeof(expecteddatauid_));
 }
 
 DataSourceInfo::~DataSourceInfo() {
@@ -6850,10 +6848,10 @@ void DataSourceInfo::Clear() {
         reinterpret_cast<char*>(&moduleuniqueid_) -
         reinterpret_cast<char*>(&id_)) + sizeof(moduleuniqueid_));
   }
-  if (cached_has_bits & 0x00000700u) {
+  if (cached_has_bits & 0x00001f00u) {
     ::memset(&moduletype_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&lmnumber_) -
-        reinterpret_cast<char*>(&moduletype_)) + sizeof(lmnumber_));
+        reinterpret_cast<char*>(&expecteddatauid_) -
+        reinterpret_cast<char*>(&moduletype_)) + sizeof(expecteddatauid_));
   }
   _has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -6985,6 +6983,22 @@ const char* DataSourceInfo::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
+      // optional int32 acquiredSignalsCount = 13 [default = 0];
+      case 13:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 104)) {
+          _Internal::set_has_acquiredsignalscount(&has_bits);
+          acquiredsignalscount_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional uint32 expectedDataUID = 14 [default = 0];
+      case 14:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 112)) {
+          _Internal::set_has_expecteddatauid(&has_bits);
+          expecteddatauid_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
       default: {
       handle_unusual:
         if ((tag & 7) == 4 || tag == 0) {
@@ -7113,6 +7127,18 @@ failure:
         12, this->_internal_profile(), target);
   }
 
+  // optional int32 acquiredSignalsCount = 13 [default = 0];
+  if (cached_has_bits & 0x00000800u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(13, this->_internal_acquiredsignalscount(), target);
+  }
+
+  // optional uint32 expectedDataUID = 14 [default = 0];
+  if (cached_has_bits & 0x00001000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(14, this->_internal_expecteddatauid(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -7195,7 +7221,7 @@ size_t DataSourceInfo::ByteSizeLong() const {
     }
 
   }
-  if (cached_has_bits & 0x00000700u) {
+  if (cached_has_bits & 0x00001f00u) {
     // optional int32 moduleType = 4 [default = 0];
     if (cached_has_bits & 0x00000100u) {
       total_size += 1 +
@@ -7215,6 +7241,20 @@ size_t DataSourceInfo::ByteSizeLong() const {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_lmnumber());
+    }
+
+    // optional int32 acquiredSignalsCount = 13 [default = 0];
+    if (cached_has_bits & 0x00000800u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_acquiredsignalscount());
+    }
+
+    // optional uint32 expectedDataUID = 14 [default = 0];
+    if (cached_has_bits & 0x00001000u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
+          this->_internal_expecteddatauid());
     }
 
   }
@@ -7278,7 +7318,7 @@ void DataSourceInfo::MergeFrom(const DataSourceInfo& from) {
     }
     _has_bits_[0] |= cached_has_bits;
   }
-  if (cached_has_bits & 0x00000700u) {
+  if (cached_has_bits & 0x00001f00u) {
     if (cached_has_bits & 0x00000100u) {
       moduletype_ = from.moduletype_;
     }
@@ -7287,6 +7327,12 @@ void DataSourceInfo::MergeFrom(const DataSourceInfo& from) {
     }
     if (cached_has_bits & 0x00000400u) {
       lmnumber_ = from.lmnumber_;
+    }
+    if (cached_has_bits & 0x00000800u) {
+      acquiredsignalscount_ = from.acquiredsignalscount_;
+    }
+    if (cached_has_bits & 0x00001000u) {
+      expecteddatauid_ = from.expecteddatauid_;
     }
     _has_bits_[0] |= cached_has_bits;
   }
@@ -7322,8 +7368,8 @@ void DataSourceInfo::InternalSwap(DataSourceInfo* other) {
   subsystemchannel_.Swap(&other->subsystemchannel_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   profile_.Swap(&other->profile_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(DataSourceInfo, lmnumber_)
-      + sizeof(DataSourceInfo::lmnumber_)
+      PROTOBUF_FIELD_OFFSET(DataSourceInfo, expecteddatauid_)
+      + sizeof(DataSourceInfo::expecteddatauid_)
       - PROTOBUF_FIELD_OFFSET(DataSourceInfo, id_)>(
           reinterpret_cast<char*>(&id_),
           reinterpret_cast<char*>(&other->id_));
@@ -8171,83 +8217,71 @@ class AppDataSourceState::_Internal {
   static void set_has_id(HasBits* has_bits) {
     (*has_bits)[0] |= 2u;
   }
-  static void set_has_receivesdata(HasBits* has_bits) {
-    (*has_bits)[0] |= 256u;
-  }
-  static void set_has_uptime(HasBits* has_bits) {
-    (*has_bits)[0] |= 4u;
-  }
-  static void set_has_receiveddataid(HasBits* has_bits) {
-    (*has_bits)[0] |= 8u;
-  }
-  static void set_has_datareceivingrate(HasBits* has_bits) {
-    (*has_bits)[0] |= 16u;
-  }
-  static void set_has_receiveddatasize(HasBits* has_bits) {
-    (*has_bits)[0] |= 32u;
-  }
-  static void set_has_receivedframescount(HasBits* has_bits) {
-    (*has_bits)[0] |= 64u;
-  }
-  static void set_has_receivedpacketcount(HasBits* has_bits) {
-    (*has_bits)[0] |= 128u;
-  }
-  static void set_has_lostpacketcount(HasBits* has_bits) {
-    (*has_bits)[0] |= 2048u;
+  static void set_has_lmequipmentid(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
   }
   static void set_has_dataprocessingenabled(HasBits* has_bits) {
-    (*has_bits)[0] |= 512u;
+    (*has_bits)[0] |= 4u;
   }
-  static void set_has_processedpacketcount(HasBits* has_bits) {
-    (*has_bits)[0] |= 4096u;
+  static void set_has_receivesdata(HasBits* has_bits) {
+    (*has_bits)[0] |= 8u;
   }
-  static void set_has_lastpacketsystemtime(HasBits* has_bits) {
-    (*has_bits)[0] |= 8192u;
+  static void set_has_uptime(HasBits* has_bits) {
+    (*has_bits)[0] |= 32u;
+  }
+  static void set_has_receiveddataid(HasBits* has_bits) {
+    (*has_bits)[0] |= 16u;
   }
   static void set_has_rupframeplanttime(HasBits* has_bits) {
-    (*has_bits)[0] |= 16384u;
+    (*has_bits)[0] |= 64u;
   }
   static void set_has_rupframenumerator(HasBits* has_bits) {
     (*has_bits)[0] |= 1024u;
   }
+  static void set_has_datareceivingspeed(HasBits* has_bits) {
+    (*has_bits)[0] |= 128u;
+  }
+  static void set_has_receiveddatasize(HasBits* has_bits) {
+    (*has_bits)[0] |= 256u;
+  }
+  static void set_has_receivedframescount(HasBits* has_bits) {
+    (*has_bits)[0] |= 512u;
+  }
+  static void set_has_receivedpacketcount(HasBits* has_bits) {
+    (*has_bits)[0] |= 4096u;
+  }
+  static void set_has_lostpacketcount(HasBits* has_bits) {
+    (*has_bits)[0] |= 8192u;
+  }
   static void set_has_signalstatesqueuecursize(HasBits* has_bits) {
-    (*has_bits)[0] |= 32768u;
+    (*has_bits)[0] |= 2048u;
   }
   static void set_has_signalstatesqueuecurmaxsize(HasBits* has_bits) {
-    (*has_bits)[0] |= 65536u;
-  }
-  static void set_has_acquiredsignalscount(HasBits* has_bits) {
     (*has_bits)[0] |= 4194304u;
   }
   static void set_has_errorprotocolversion(HasBits* has_bits) {
-    (*has_bits)[0] |= 131072u;
+    (*has_bits)[0] |= 16384u;
   }
   static void set_has_errorframesquantity(HasBits* has_bits) {
-    (*has_bits)[0] |= 262144u;
+    (*has_bits)[0] |= 32768u;
   }
   static void set_has_errorframeno(HasBits* has_bits) {
-    (*has_bits)[0] |= 524288u;
+    (*has_bits)[0] |= 65536u;
   }
   static void set_has_errordataid(HasBits* has_bits) {
-    (*has_bits)[0] |= 1048576u;
+    (*has_bits)[0] |= 131072u;
   }
   static void set_has_errorframesize(HasBits* has_bits) {
-    (*has_bits)[0] |= 2097152u;
+    (*has_bits)[0] |= 262144u;
   }
   static void set_has_errorduplicateplanttime(HasBits* has_bits) {
-    (*has_bits)[0] |= 16777216u;
+    (*has_bits)[0] |= 524288u;
   }
   static void set_has_errornonmonotonicplanttime(HasBits* has_bits) {
-    (*has_bits)[0] |= 33554432u;
-  }
-  static void set_has_lmequipmentid(HasBits* has_bits) {
-    (*has_bits)[0] |= 1u;
-  }
-  static void set_has_signalstatesqueuesize(HasBits* has_bits) {
-    (*has_bits)[0] |= 8388608u;
+    (*has_bits)[0] |= 1048576u;
   }
   static void set_has_errorplanttimeformat(HasBits* has_bits) {
-    (*has_bits)[0] |= 67108864u;
+    (*has_bits)[0] |= 2097152u;
   }
 };
 
@@ -8267,8 +8301,8 @@ AppDataSourceState::AppDataSourceState(const AppDataSourceState& from)
       GetArena());
   }
   ::memcpy(&id_, &from.id_,
-    static_cast<size_t>(reinterpret_cast<char*>(&errorplanttimeformat_) -
-    reinterpret_cast<char*>(&id_)) + sizeof(errorplanttimeformat_));
+    static_cast<size_t>(reinterpret_cast<char*>(&signalstatesqueuecurmaxsize_) -
+    reinterpret_cast<char*>(&id_)) + sizeof(signalstatesqueuecurmaxsize_));
   // @@protoc_insertion_point(copy_constructor:Network.AppDataSourceState)
 }
 
@@ -8276,8 +8310,8 @@ void AppDataSourceState::SharedCtor() {
 lmequipmentid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
     reinterpret_cast<char*>(&id_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&errorplanttimeformat_) -
-    reinterpret_cast<char*>(&id_)) + sizeof(errorplanttimeformat_));
+    0, static_cast<size_t>(reinterpret_cast<char*>(&signalstatesqueuecurmaxsize_) -
+    reinterpret_cast<char*>(&id_)) + sizeof(signalstatesqueuecurmaxsize_));
 }
 
 AppDataSourceState::~AppDataSourceState() {
@@ -8313,23 +8347,18 @@ void AppDataSourceState::Clear() {
   }
   if (cached_has_bits & 0x000000feu) {
     ::memset(&id_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&receivedpacketcount_) -
-        reinterpret_cast<char*>(&id_)) + sizeof(receivedpacketcount_));
+        reinterpret_cast<char*>(&datareceivingspeed_) -
+        reinterpret_cast<char*>(&id_)) + sizeof(datareceivingspeed_));
   }
   if (cached_has_bits & 0x0000ff00u) {
-    ::memset(&receivesdata_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&signalstatesqueuecursize_) -
-        reinterpret_cast<char*>(&receivesdata_)) + sizeof(signalstatesqueuecursize_));
+    ::memset(&receiveddatasize_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&errorframesquantity_) -
+        reinterpret_cast<char*>(&receiveddatasize_)) + sizeof(errorframesquantity_));
   }
-  if (cached_has_bits & 0x00ff0000u) {
-    ::memset(&signalstatesqueuecurmaxsize_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&signalstatesqueuesize_) -
-        reinterpret_cast<char*>(&signalstatesqueuecurmaxsize_)) + sizeof(signalstatesqueuesize_));
-  }
-  if (cached_has_bits & 0x07000000u) {
-    ::memset(&errorduplicateplanttime_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&errorplanttimeformat_) -
-        reinterpret_cast<char*>(&errorduplicateplanttime_)) + sizeof(errorplanttimeformat_));
+  if (cached_has_bits & 0x007f0000u) {
+    ::memset(&errorframeno_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&signalstatesqueuecurmaxsize_) -
+        reinterpret_cast<char*>(&errorframeno_)) + sizeof(signalstatesqueuecurmaxsize_));
   }
   _has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -8351,193 +8380,9 @@ const char* AppDataSourceState::_InternalParse(const char* ptr, ::PROTOBUF_NAMES
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional bool receivesData = 2 [default = false];
+      // optional string lmEquipmentID = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
-          _Internal::set_has_receivesdata(&has_bits);
-          receivesdata_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 uptime = 3 [default = 0];
-      case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
-          _Internal::set_has_uptime(&has_bits);
-          uptime_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional uint64 receivedDataID = 4 [default = 0];
-      case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
-          _Internal::set_has_receiveddataid(&has_bits);
-          receiveddataid_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional double dataReceivingRate = 7 [default = 0];
-      case 7:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 57)) {
-          _Internal::set_has_datareceivingrate(&has_bits);
-          datareceivingrate_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
-          ptr += sizeof(double);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 receivedDataSize = 8 [default = 0];
-      case 8:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 64)) {
-          _Internal::set_has_receiveddatasize(&has_bits);
-          receiveddatasize_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 receivedFramesCount = 9 [default = 0];
-      case 9:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 72)) {
-          _Internal::set_has_receivedframescount(&has_bits);
-          receivedframescount_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 receivedPacketCount = 10 [default = 0];
-      case 10:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 80)) {
-          _Internal::set_has_receivedpacketcount(&has_bits);
-          receivedpacketcount_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 lostPacketCount = 11 [default = 0];
-      case 11:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 88)) {
-          _Internal::set_has_lostpacketcount(&has_bits);
-          lostpacketcount_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional bool dataProcessingEnabled = 12 [default = false];
-      case 12:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 96)) {
-          _Internal::set_has_dataprocessingenabled(&has_bits);
-          dataprocessingenabled_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 processedPacketCount = 13 [default = 0];
-      case 13:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 104)) {
-          _Internal::set_has_processedpacketcount(&has_bits);
-          processedpacketcount_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 lastPacketSystemTime = 14 [default = 0];
-      case 14:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 112)) {
-          _Internal::set_has_lastpacketsystemtime(&has_bits);
-          lastpacketsystemtime_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 rupFramePlantTime = 15 [default = 0];
-      case 15:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 120)) {
-          _Internal::set_has_rupframeplanttime(&has_bits);
-          rupframeplanttime_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional uint32 rupFrameNumerator = 16 [default = 0];
-      case 16:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 128)) {
-          _Internal::set_has_rupframenumerator(&has_bits);
-          rupframenumerator_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int32 signalStatesQueueCurSize = 17 [default = 0];
-      case 17:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 136)) {
-          _Internal::set_has_signalstatesqueuecursize(&has_bits);
-          signalstatesqueuecursize_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int32 signalStatesQueueCurMaxSize = 18 [default = 0];
-      case 18:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 144)) {
-          _Internal::set_has_signalstatesqueuecurmaxsize(&has_bits);
-          signalstatesqueuecurmaxsize_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int32 acquiredSignalsCount = 19 [default = 0];
-      case 19:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 152)) {
-          _Internal::set_has_acquiredsignalscount(&has_bits);
-          acquiredsignalscount_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 errorProtocolVersion = 20 [default = 0];
-      case 20:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 160)) {
-          _Internal::set_has_errorprotocolversion(&has_bits);
-          errorprotocolversion_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 errorFramesQuantity = 21 [default = 0];
-      case 21:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 168)) {
-          _Internal::set_has_errorframesquantity(&has_bits);
-          errorframesquantity_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 errorFrameNo = 22 [default = 0];
-      case 22:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 176)) {
-          _Internal::set_has_errorframeno(&has_bits);
-          errorframeno_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 errorDataID = 23 [default = 0];
-      case 23:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 184)) {
-          _Internal::set_has_errordataid(&has_bits);
-          errordataid_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 errorFrameSize = 24 [default = 0];
-      case 24:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 192)) {
-          _Internal::set_has_errorframesize(&has_bits);
-          errorframesize_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 errorDuplicatePlantTime = 25 [default = 0];
-      case 25:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 200)) {
-          _Internal::set_has_errorduplicateplanttime(&has_bits);
-          errorduplicateplanttime_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int64 errorNonmonotonicPlantTime = 26 [default = 0];
-      case 26:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 208)) {
-          _Internal::set_has_errornonmonotonicplanttime(&has_bits);
-          errornonmonotonicplanttime_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional string lmEquipmentID = 27;
-      case 27:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 218)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
           auto str = _internal_mutable_lmequipmentid();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           #ifndef NDEBUG
@@ -8546,17 +8391,169 @@ const char* AppDataSourceState::_InternalParse(const char* ptr, ::PROTOBUF_NAMES
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional int32 signalStatesQueueSize = 29 [default = 0];
-      case 29:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 232)) {
-          _Internal::set_has_signalstatesqueuesize(&has_bits);
-          signalstatesqueuesize_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+      // optional bool dataProcessingEnabled = 3 [default = false];
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
+          _Internal::set_has_dataprocessingenabled(&has_bits);
+          dataprocessingenabled_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional int64 errorPlantTimeFormat = 31 [default = 0];
-      case 31:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 248)) {
+      // optional bool receivesData = 4 [default = false];
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
+          _Internal::set_has_receivesdata(&has_bits);
+          receivesdata_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 uptime = 5 [default = 0];
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 40)) {
+          _Internal::set_has_uptime(&has_bits);
+          uptime_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional uint32 receivedDataID = 6 [default = 0];
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 48)) {
+          _Internal::set_has_receiveddataid(&has_bits);
+          receiveddataid_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 rupFramePlantTime = 7 [default = 0];
+      case 7:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 56)) {
+          _Internal::set_has_rupframeplanttime(&has_bits);
+          rupframeplanttime_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional uint32 rupFrameNumerator = 8 [default = 0];
+      case 8:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 64)) {
+          _Internal::set_has_rupframenumerator(&has_bits);
+          rupframenumerator_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional double dataReceivingSpeed = 9 [default = 0];
+      case 9:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 73)) {
+          _Internal::set_has_datareceivingspeed(&has_bits);
+          datareceivingspeed_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
+          ptr += sizeof(double);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 receivedDataSize = 10 [default = 0];
+      case 10:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 80)) {
+          _Internal::set_has_receiveddatasize(&has_bits);
+          receiveddatasize_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 receivedFramesCount = 11 [default = 0];
+      case 11:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 88)) {
+          _Internal::set_has_receivedframescount(&has_bits);
+          receivedframescount_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 receivedPacketCount = 12 [default = 0];
+      case 12:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 96)) {
+          _Internal::set_has_receivedpacketcount(&has_bits);
+          receivedpacketcount_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 lostPacketCount = 13 [default = 0];
+      case 13:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 104)) {
+          _Internal::set_has_lostpacketcount(&has_bits);
+          lostpacketcount_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int32 signalStatesQueueCurSize = 14 [default = 0];
+      case 14:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 112)) {
+          _Internal::set_has_signalstatesqueuecursize(&has_bits);
+          signalstatesqueuecursize_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int32 signalStatesQueueCurMaxSize = 15 [default = 0];
+      case 15:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 120)) {
+          _Internal::set_has_signalstatesqueuecurmaxsize(&has_bits);
+          signalstatesqueuecurmaxsize_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 errorProtocolVersion = 16 [default = 0];
+      case 16:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 128)) {
+          _Internal::set_has_errorprotocolversion(&has_bits);
+          errorprotocolversion_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 errorFramesQuantity = 17 [default = 0];
+      case 17:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 136)) {
+          _Internal::set_has_errorframesquantity(&has_bits);
+          errorframesquantity_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 errorFrameNo = 18 [default = 0];
+      case 18:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 144)) {
+          _Internal::set_has_errorframeno(&has_bits);
+          errorframeno_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 errorDataID = 19 [default = 0];
+      case 19:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 152)) {
+          _Internal::set_has_errordataid(&has_bits);
+          errordataid_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 errorFrameSize = 20 [default = 0];
+      case 20:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 160)) {
+          _Internal::set_has_errorframesize(&has_bits);
+          errorframesize_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 errorDuplicatePlantTime = 21 [default = 0];
+      case 21:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 168)) {
+          _Internal::set_has_errorduplicateplanttime(&has_bits);
+          errorduplicateplanttime_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 errorNonmonotonicPlantTime = 22 [default = 0];
+      case 22:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 176)) {
+          _Internal::set_has_errornonmonotonicplanttime(&has_bits);
+          errornonmonotonicplanttime_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int64 errorPlantTimeFormat = 23 [default = 0];
+      case 23:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 184)) {
           _Internal::set_has_errorplanttimeformat(&has_bits);
           errorplanttimeformat_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
@@ -8598,164 +8595,140 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_id(), target);
   }
 
-  // optional bool receivesData = 2 [default = false];
-  if (cached_has_bits & 0x00000100u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(2, this->_internal_receivesdata(), target);
-  }
-
-  // optional int64 uptime = 3 [default = 0];
-  if (cached_has_bits & 0x00000004u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(3, this->_internal_uptime(), target);
-  }
-
-  // optional uint64 receivedDataID = 4 [default = 0];
-  if (cached_has_bits & 0x00000008u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(4, this->_internal_receiveddataid(), target);
-  }
-
-  // optional double dataReceivingRate = 7 [default = 0];
-  if (cached_has_bits & 0x00000010u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(7, this->_internal_datareceivingrate(), target);
-  }
-
-  // optional int64 receivedDataSize = 8 [default = 0];
-  if (cached_has_bits & 0x00000020u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(8, this->_internal_receiveddatasize(), target);
-  }
-
-  // optional int64 receivedFramesCount = 9 [default = 0];
-  if (cached_has_bits & 0x00000040u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(9, this->_internal_receivedframescount(), target);
-  }
-
-  // optional int64 receivedPacketCount = 10 [default = 0];
-  if (cached_has_bits & 0x00000080u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(10, this->_internal_receivedpacketcount(), target);
-  }
-
-  // optional int64 lostPacketCount = 11 [default = 0];
-  if (cached_has_bits & 0x00000800u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(11, this->_internal_lostpacketcount(), target);
-  }
-
-  // optional bool dataProcessingEnabled = 12 [default = false];
-  if (cached_has_bits & 0x00000200u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(12, this->_internal_dataprocessingenabled(), target);
-  }
-
-  // optional int64 processedPacketCount = 13 [default = 0];
-  if (cached_has_bits & 0x00001000u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(13, this->_internal_processedpacketcount(), target);
-  }
-
-  // optional int64 lastPacketSystemTime = 14 [default = 0];
-  if (cached_has_bits & 0x00002000u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(14, this->_internal_lastpacketsystemtime(), target);
-  }
-
-  // optional int64 rupFramePlantTime = 15 [default = 0];
-  if (cached_has_bits & 0x00004000u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(15, this->_internal_rupframeplanttime(), target);
-  }
-
-  // optional uint32 rupFrameNumerator = 16 [default = 0];
-  if (cached_has_bits & 0x00000400u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(16, this->_internal_rupframenumerator(), target);
-  }
-
-  // optional int32 signalStatesQueueCurSize = 17 [default = 0];
-  if (cached_has_bits & 0x00008000u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(17, this->_internal_signalstatesqueuecursize(), target);
-  }
-
-  // optional int32 signalStatesQueueCurMaxSize = 18 [default = 0];
-  if (cached_has_bits & 0x00010000u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(18, this->_internal_signalstatesqueuecurmaxsize(), target);
-  }
-
-  // optional int32 acquiredSignalsCount = 19 [default = 0];
-  if (cached_has_bits & 0x00400000u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(19, this->_internal_acquiredsignalscount(), target);
-  }
-
-  // optional int64 errorProtocolVersion = 20 [default = 0];
-  if (cached_has_bits & 0x00020000u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(20, this->_internal_errorprotocolversion(), target);
-  }
-
-  // optional int64 errorFramesQuantity = 21 [default = 0];
-  if (cached_has_bits & 0x00040000u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(21, this->_internal_errorframesquantity(), target);
-  }
-
-  // optional int64 errorFrameNo = 22 [default = 0];
-  if (cached_has_bits & 0x00080000u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(22, this->_internal_errorframeno(), target);
-  }
-
-  // optional int64 errorDataID = 23 [default = 0];
-  if (cached_has_bits & 0x00100000u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(23, this->_internal_errordataid(), target);
-  }
-
-  // optional int64 errorFrameSize = 24 [default = 0];
-  if (cached_has_bits & 0x00200000u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(24, this->_internal_errorframesize(), target);
-  }
-
-  // optional int64 errorDuplicatePlantTime = 25 [default = 0];
-  if (cached_has_bits & 0x01000000u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(25, this->_internal_errorduplicateplanttime(), target);
-  }
-
-  // optional int64 errorNonmonotonicPlantTime = 26 [default = 0];
-  if (cached_has_bits & 0x02000000u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(26, this->_internal_errornonmonotonicplanttime(), target);
-  }
-
-  // optional string lmEquipmentID = 27;
+  // optional string lmEquipmentID = 2;
   if (cached_has_bits & 0x00000001u) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_lmequipmentid().data(), static_cast<int>(this->_internal_lmequipmentid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
       "Network.AppDataSourceState.lmEquipmentID");
     target = stream->WriteStringMaybeAliased(
-        27, this->_internal_lmequipmentid(), target);
+        2, this->_internal_lmequipmentid(), target);
   }
 
-  // optional int32 signalStatesQueueSize = 29 [default = 0];
-  if (cached_has_bits & 0x00800000u) {
+  // optional bool dataProcessingEnabled = 3 [default = false];
+  if (cached_has_bits & 0x00000004u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(29, this->_internal_signalstatesqueuesize(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(3, this->_internal_dataprocessingenabled(), target);
   }
 
-  // optional int64 errorPlantTimeFormat = 31 [default = 0];
-  if (cached_has_bits & 0x04000000u) {
+  // optional bool receivesData = 4 [default = false];
+  if (cached_has_bits & 0x00000008u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(31, this->_internal_errorplanttimeformat(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(4, this->_internal_receivesdata(), target);
+  }
+
+  // optional int64 uptime = 5 [default = 0];
+  if (cached_has_bits & 0x00000020u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(5, this->_internal_uptime(), target);
+  }
+
+  // optional uint32 receivedDataID = 6 [default = 0];
+  if (cached_has_bits & 0x00000010u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(6, this->_internal_receiveddataid(), target);
+  }
+
+  // optional int64 rupFramePlantTime = 7 [default = 0];
+  if (cached_has_bits & 0x00000040u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(7, this->_internal_rupframeplanttime(), target);
+  }
+
+  // optional uint32 rupFrameNumerator = 8 [default = 0];
+  if (cached_has_bits & 0x00000400u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(8, this->_internal_rupframenumerator(), target);
+  }
+
+  // optional double dataReceivingSpeed = 9 [default = 0];
+  if (cached_has_bits & 0x00000080u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(9, this->_internal_datareceivingspeed(), target);
+  }
+
+  // optional int64 receivedDataSize = 10 [default = 0];
+  if (cached_has_bits & 0x00000100u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(10, this->_internal_receiveddatasize(), target);
+  }
+
+  // optional int64 receivedFramesCount = 11 [default = 0];
+  if (cached_has_bits & 0x00000200u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(11, this->_internal_receivedframescount(), target);
+  }
+
+  // optional int64 receivedPacketCount = 12 [default = 0];
+  if (cached_has_bits & 0x00001000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(12, this->_internal_receivedpacketcount(), target);
+  }
+
+  // optional int64 lostPacketCount = 13 [default = 0];
+  if (cached_has_bits & 0x00002000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(13, this->_internal_lostpacketcount(), target);
+  }
+
+  // optional int32 signalStatesQueueCurSize = 14 [default = 0];
+  if (cached_has_bits & 0x00000800u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(14, this->_internal_signalstatesqueuecursize(), target);
+  }
+
+  // optional int32 signalStatesQueueCurMaxSize = 15 [default = 0];
+  if (cached_has_bits & 0x00400000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(15, this->_internal_signalstatesqueuecurmaxsize(), target);
+  }
+
+  // optional int64 errorProtocolVersion = 16 [default = 0];
+  if (cached_has_bits & 0x00004000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(16, this->_internal_errorprotocolversion(), target);
+  }
+
+  // optional int64 errorFramesQuantity = 17 [default = 0];
+  if (cached_has_bits & 0x00008000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(17, this->_internal_errorframesquantity(), target);
+  }
+
+  // optional int64 errorFrameNo = 18 [default = 0];
+  if (cached_has_bits & 0x00010000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(18, this->_internal_errorframeno(), target);
+  }
+
+  // optional int64 errorDataID = 19 [default = 0];
+  if (cached_has_bits & 0x00020000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(19, this->_internal_errordataid(), target);
+  }
+
+  // optional int64 errorFrameSize = 20 [default = 0];
+  if (cached_has_bits & 0x00040000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(20, this->_internal_errorframesize(), target);
+  }
+
+  // optional int64 errorDuplicatePlantTime = 21 [default = 0];
+  if (cached_has_bits & 0x00080000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(21, this->_internal_errorduplicateplanttime(), target);
+  }
+
+  // optional int64 errorNonmonotonicPlantTime = 22 [default = 0];
+  if (cached_has_bits & 0x00100000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(22, this->_internal_errornonmonotonicplanttime(), target);
+  }
+
+  // optional int64 errorPlantTimeFormat = 23 [default = 0];
+  if (cached_has_bits & 0x00200000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(23, this->_internal_errorplanttimeformat(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -8776,9 +8749,9 @@ size_t AppDataSourceState::ByteSizeLong() const {
 
   cached_has_bits = _has_bits_[0];
   if (cached_has_bits & 0x000000ffu) {
-    // optional string lmEquipmentID = 27;
+    // optional string lmEquipmentID = 2;
     if (cached_has_bits & 0x00000001u) {
-      total_size += 2 +
+      total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
           this->_internal_lmequipmentid());
     }
@@ -8790,179 +8763,149 @@ size_t AppDataSourceState::ByteSizeLong() const {
           this->_internal_id());
     }
 
-    // optional int64 uptime = 3 [default = 0];
+    // optional bool dataProcessingEnabled = 3 [default = false];
     if (cached_has_bits & 0x00000004u) {
+      total_size += 1 + 1;
+    }
+
+    // optional bool receivesData = 4 [default = false];
+    if (cached_has_bits & 0x00000008u) {
+      total_size += 1 + 1;
+    }
+
+    // optional uint32 receivedDataID = 6 [default = 0];
+    if (cached_has_bits & 0x00000010u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
+          this->_internal_receiveddataid());
+    }
+
+    // optional int64 uptime = 5 [default = 0];
+    if (cached_has_bits & 0x00000020u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
           this->_internal_uptime());
     }
 
-    // optional uint64 receivedDataID = 4 [default = 0];
-    if (cached_has_bits & 0x00000008u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-          this->_internal_receiveddataid());
-    }
-
-    // optional double dataReceivingRate = 7 [default = 0];
-    if (cached_has_bits & 0x00000010u) {
-      total_size += 1 + 8;
-    }
-
-    // optional int64 receivedDataSize = 8 [default = 0];
-    if (cached_has_bits & 0x00000020u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_receiveddatasize());
-    }
-
-    // optional int64 receivedFramesCount = 9 [default = 0];
+    // optional int64 rupFramePlantTime = 7 [default = 0];
     if (cached_has_bits & 0x00000040u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_receivedframescount());
-    }
-
-    // optional int64 receivedPacketCount = 10 [default = 0];
-    if (cached_has_bits & 0x00000080u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_receivedpacketcount());
-    }
-
-  }
-  if (cached_has_bits & 0x0000ff00u) {
-    // optional bool receivesData = 2 [default = false];
-    if (cached_has_bits & 0x00000100u) {
-      total_size += 1 + 1;
-    }
-
-    // optional bool dataProcessingEnabled = 12 [default = false];
-    if (cached_has_bits & 0x00000200u) {
-      total_size += 1 + 1;
-    }
-
-    // optional uint32 rupFrameNumerator = 16 [default = 0];
-    if (cached_has_bits & 0x00000400u) {
-      total_size += 2 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
-          this->_internal_rupframenumerator());
-    }
-
-    // optional int64 lostPacketCount = 11 [default = 0];
-    if (cached_has_bits & 0x00000800u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_lostpacketcount());
-    }
-
-    // optional int64 processedPacketCount = 13 [default = 0];
-    if (cached_has_bits & 0x00001000u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_processedpacketcount());
-    }
-
-    // optional int64 lastPacketSystemTime = 14 [default = 0];
-    if (cached_has_bits & 0x00002000u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_lastpacketsystemtime());
-    }
-
-    // optional int64 rupFramePlantTime = 15 [default = 0];
-    if (cached_has_bits & 0x00004000u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
           this->_internal_rupframeplanttime());
     }
 
-    // optional int32 signalStatesQueueCurSize = 17 [default = 0];
-    if (cached_has_bits & 0x00008000u) {
-      total_size += 2 +
+    // optional double dataReceivingSpeed = 9 [default = 0];
+    if (cached_has_bits & 0x00000080u) {
+      total_size += 1 + 8;
+    }
+
+  }
+  if (cached_has_bits & 0x0000ff00u) {
+    // optional int64 receivedDataSize = 10 [default = 0];
+    if (cached_has_bits & 0x00000100u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
+          this->_internal_receiveddatasize());
+    }
+
+    // optional int64 receivedFramesCount = 11 [default = 0];
+    if (cached_has_bits & 0x00000200u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
+          this->_internal_receivedframescount());
+    }
+
+    // optional uint32 rupFrameNumerator = 8 [default = 0];
+    if (cached_has_bits & 0x00000400u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
+          this->_internal_rupframenumerator());
+    }
+
+    // optional int32 signalStatesQueueCurSize = 14 [default = 0];
+    if (cached_has_bits & 0x00000800u) {
+      total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_signalstatesqueuecursize());
     }
 
-  }
-  if (cached_has_bits & 0x00ff0000u) {
-    // optional int32 signalStatesQueueCurMaxSize = 18 [default = 0];
-    if (cached_has_bits & 0x00010000u) {
-      total_size += 2 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-          this->_internal_signalstatesqueuecurmaxsize());
+    // optional int64 receivedPacketCount = 12 [default = 0];
+    if (cached_has_bits & 0x00001000u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
+          this->_internal_receivedpacketcount());
     }
 
-    // optional int64 errorProtocolVersion = 20 [default = 0];
-    if (cached_has_bits & 0x00020000u) {
+    // optional int64 lostPacketCount = 13 [default = 0];
+    if (cached_has_bits & 0x00002000u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
+          this->_internal_lostpacketcount());
+    }
+
+    // optional int64 errorProtocolVersion = 16 [default = 0];
+    if (cached_has_bits & 0x00004000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
           this->_internal_errorprotocolversion());
     }
 
-    // optional int64 errorFramesQuantity = 21 [default = 0];
-    if (cached_has_bits & 0x00040000u) {
+    // optional int64 errorFramesQuantity = 17 [default = 0];
+    if (cached_has_bits & 0x00008000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
           this->_internal_errorframesquantity());
     }
 
-    // optional int64 errorFrameNo = 22 [default = 0];
-    if (cached_has_bits & 0x00080000u) {
+  }
+  if (cached_has_bits & 0x007f0000u) {
+    // optional int64 errorFrameNo = 18 [default = 0];
+    if (cached_has_bits & 0x00010000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
           this->_internal_errorframeno());
     }
 
-    // optional int64 errorDataID = 23 [default = 0];
-    if (cached_has_bits & 0x00100000u) {
+    // optional int64 errorDataID = 19 [default = 0];
+    if (cached_has_bits & 0x00020000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
           this->_internal_errordataid());
     }
 
-    // optional int64 errorFrameSize = 24 [default = 0];
-    if (cached_has_bits & 0x00200000u) {
+    // optional int64 errorFrameSize = 20 [default = 0];
+    if (cached_has_bits & 0x00040000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
           this->_internal_errorframesize());
     }
 
-    // optional int32 acquiredSignalsCount = 19 [default = 0];
-    if (cached_has_bits & 0x00400000u) {
-      total_size += 2 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-          this->_internal_acquiredsignalscount());
-    }
-
-    // optional int32 signalStatesQueueSize = 29 [default = 0];
-    if (cached_has_bits & 0x00800000u) {
-      total_size += 2 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-          this->_internal_signalstatesqueuesize());
-    }
-
-  }
-  if (cached_has_bits & 0x07000000u) {
-    // optional int64 errorDuplicatePlantTime = 25 [default = 0];
-    if (cached_has_bits & 0x01000000u) {
+    // optional int64 errorDuplicatePlantTime = 21 [default = 0];
+    if (cached_has_bits & 0x00080000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
           this->_internal_errorduplicateplanttime());
     }
 
-    // optional int64 errorNonmonotonicPlantTime = 26 [default = 0];
-    if (cached_has_bits & 0x02000000u) {
+    // optional int64 errorNonmonotonicPlantTime = 22 [default = 0];
+    if (cached_has_bits & 0x00100000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
           this->_internal_errornonmonotonicplanttime());
     }
 
-    // optional int64 errorPlantTimeFormat = 31 [default = 0];
-    if (cached_has_bits & 0x04000000u) {
+    // optional int64 errorPlantTimeFormat = 23 [default = 0];
+    if (cached_has_bits & 0x00200000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
           this->_internal_errorplanttimeformat());
+    }
+
+    // optional int32 signalStatesQueueCurMaxSize = 15 [default = 0];
+    if (cached_has_bits & 0x00400000u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_signalstatesqueuecurmaxsize());
     }
 
   }
@@ -9006,88 +8949,73 @@ void AppDataSourceState::MergeFrom(const AppDataSourceState& from) {
       id_ = from.id_;
     }
     if (cached_has_bits & 0x00000004u) {
-      uptime_ = from.uptime_;
+      dataprocessingenabled_ = from.dataprocessingenabled_;
     }
     if (cached_has_bits & 0x00000008u) {
-      receiveddataid_ = from.receiveddataid_;
+      receivesdata_ = from.receivesdata_;
     }
     if (cached_has_bits & 0x00000010u) {
-      datareceivingrate_ = from.datareceivingrate_;
+      receiveddataid_ = from.receiveddataid_;
     }
     if (cached_has_bits & 0x00000020u) {
-      receiveddatasize_ = from.receiveddatasize_;
+      uptime_ = from.uptime_;
     }
     if (cached_has_bits & 0x00000040u) {
-      receivedframescount_ = from.receivedframescount_;
+      rupframeplanttime_ = from.rupframeplanttime_;
     }
     if (cached_has_bits & 0x00000080u) {
-      receivedpacketcount_ = from.receivedpacketcount_;
+      datareceivingspeed_ = from.datareceivingspeed_;
     }
     _has_bits_[0] |= cached_has_bits;
   }
   if (cached_has_bits & 0x0000ff00u) {
     if (cached_has_bits & 0x00000100u) {
-      receivesdata_ = from.receivesdata_;
+      receiveddatasize_ = from.receiveddatasize_;
     }
     if (cached_has_bits & 0x00000200u) {
-      dataprocessingenabled_ = from.dataprocessingenabled_;
+      receivedframescount_ = from.receivedframescount_;
     }
     if (cached_has_bits & 0x00000400u) {
       rupframenumerator_ = from.rupframenumerator_;
     }
     if (cached_has_bits & 0x00000800u) {
-      lostpacketcount_ = from.lostpacketcount_;
-    }
-    if (cached_has_bits & 0x00001000u) {
-      processedpacketcount_ = from.processedpacketcount_;
-    }
-    if (cached_has_bits & 0x00002000u) {
-      lastpacketsystemtime_ = from.lastpacketsystemtime_;
-    }
-    if (cached_has_bits & 0x00004000u) {
-      rupframeplanttime_ = from.rupframeplanttime_;
-    }
-    if (cached_has_bits & 0x00008000u) {
       signalstatesqueuecursize_ = from.signalstatesqueuecursize_;
     }
-    _has_bits_[0] |= cached_has_bits;
-  }
-  if (cached_has_bits & 0x00ff0000u) {
-    if (cached_has_bits & 0x00010000u) {
-      signalstatesqueuecurmaxsize_ = from.signalstatesqueuecurmaxsize_;
+    if (cached_has_bits & 0x00001000u) {
+      receivedpacketcount_ = from.receivedpacketcount_;
     }
-    if (cached_has_bits & 0x00020000u) {
+    if (cached_has_bits & 0x00002000u) {
+      lostpacketcount_ = from.lostpacketcount_;
+    }
+    if (cached_has_bits & 0x00004000u) {
       errorprotocolversion_ = from.errorprotocolversion_;
     }
-    if (cached_has_bits & 0x00040000u) {
+    if (cached_has_bits & 0x00008000u) {
       errorframesquantity_ = from.errorframesquantity_;
-    }
-    if (cached_has_bits & 0x00080000u) {
-      errorframeno_ = from.errorframeno_;
-    }
-    if (cached_has_bits & 0x00100000u) {
-      errordataid_ = from.errordataid_;
-    }
-    if (cached_has_bits & 0x00200000u) {
-      errorframesize_ = from.errorframesize_;
-    }
-    if (cached_has_bits & 0x00400000u) {
-      acquiredsignalscount_ = from.acquiredsignalscount_;
-    }
-    if (cached_has_bits & 0x00800000u) {
-      signalstatesqueuesize_ = from.signalstatesqueuesize_;
     }
     _has_bits_[0] |= cached_has_bits;
   }
-  if (cached_has_bits & 0x07000000u) {
-    if (cached_has_bits & 0x01000000u) {
+  if (cached_has_bits & 0x007f0000u) {
+    if (cached_has_bits & 0x00010000u) {
+      errorframeno_ = from.errorframeno_;
+    }
+    if (cached_has_bits & 0x00020000u) {
+      errordataid_ = from.errordataid_;
+    }
+    if (cached_has_bits & 0x00040000u) {
+      errorframesize_ = from.errorframesize_;
+    }
+    if (cached_has_bits & 0x00080000u) {
       errorduplicateplanttime_ = from.errorduplicateplanttime_;
     }
-    if (cached_has_bits & 0x02000000u) {
+    if (cached_has_bits & 0x00100000u) {
       errornonmonotonicplanttime_ = from.errornonmonotonicplanttime_;
     }
-    if (cached_has_bits & 0x04000000u) {
+    if (cached_has_bits & 0x00200000u) {
       errorplanttimeformat_ = from.errorplanttimeformat_;
+    }
+    if (cached_has_bits & 0x00400000u) {
+      signalstatesqueuecurmaxsize_ = from.signalstatesqueuecurmaxsize_;
     }
     _has_bits_[0] |= cached_has_bits;
   }
@@ -9117,8 +9045,8 @@ void AppDataSourceState::InternalSwap(AppDataSourceState* other) {
   swap(_has_bits_[0], other->_has_bits_[0]);
   lmequipmentid_.Swap(&other->lmequipmentid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(AppDataSourceState, errorplanttimeformat_)
-      + sizeof(AppDataSourceState::errorplanttimeformat_)
+      PROTOBUF_FIELD_OFFSET(AppDataSourceState, signalstatesqueuecurmaxsize_)
+      + sizeof(AppDataSourceState::signalstatesqueuecurmaxsize_)
       - PROTOBUF_FIELD_OFFSET(AppDataSourceState, id_)>(
           reinterpret_cast<char*>(&id_),
           reinterpret_cast<char*>(&other->id_));

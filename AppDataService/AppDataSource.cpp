@@ -142,6 +142,8 @@ AppDataSource::AppDataSource(const DataSource& dataSource) :
 	m_cachedAppDataUID = appDataUID();
 
 	initParsingBuffers(appDataFramesQuantity());
+
+	m_acquiredSignalsCount = static_cast<int>(m_appSignals.size());
 }
 
 // Contructor for object NOT really used for packet receiving.
@@ -222,68 +224,63 @@ bool AppDataSource::getState(Network::AppDataSourceState* proto) const
 {
 	TEST_PTR_RETURN_FALSE(proto);
 
-	proto->set_id(ID());
-	proto->set_receivesdata(receivesData());
-	proto->set_uptime(uptime());
-	proto->set_receiveddataid(receivedDataID());
-	proto->set_rupframeplanttime(rupFramePlantTime());
+	proto->set_id(m_id);
+	proto->set_lmequipmentid(m_moduleEquipmentID.toStdString());
+	proto->set_dataprocessingenabled(m_dataProcessingEnabled);
+	proto->set_receivesdata(m_receivesData);
+	proto->set_uptime(m_uptime);
+	proto->set_receiveddataid(m_receivedDataID);
+	proto->set_rupframeplanttime(m_rupFramePlantTime);
+	proto->set_rupframenumerator(static_cast<quint32>(m_rupFrameNumerator));
 
 	//
 
-	proto->set_datareceivingrate(dataReceivingSpeed());
-	proto->set_receiveddatasize(receivedDataSize());
-	proto->set_receivedframescount(receivedFramesCount());
-	proto->set_receivedpacketcount(receivedPacketCount());
-	proto->set_lostpacketcount(lostPacketCount());
-	proto->set_dataprocessingenabled(dataProcessingEnabled());
-	proto->set_lastpacketsystemtime(lastPacketSystemTime());
-	proto->set_rupframeplanttime(rupFramePlantTime());
-	proto->set_rupframenumerator(rupFrameNumerator());
-	proto->set_signalstatesqueuesize(signalStatesQueueSize());
-	proto->set_signalstatesqueuecursize(signalStatesQueueCurSize());
-	proto->set_signalstatesqueuecurmaxsize(signalStatesQueueCurMaxSize());
-	proto->set_acquiredsignalscount(acquiredSignalsCount());
-	proto->set_errorprotocolversion(errorProtocolVersion());
-	proto->set_errorframesquantity(errorFramesQuantity());
-	proto->set_errorframeno(errorFrameNo());
-	proto->set_errordataid(errorDataID());
-	proto->set_errorframesize(errorFrameSize());
-	proto->set_errorduplicateplanttime(errorDuplicatePlantTime());
-	proto->set_errornonmonotonicplanttime(errorNonmonotonicPlantTime());
-	proto->set_errorplanttimeformat(errorPlantTimeFormat());
-	proto->set_lmequipmentid(moduleEquipmentID().toStdString());
+	proto->set_datareceivingspeed(m_dataReceivingSpeed);
+	proto->set_receiveddatasize(m_receivedDataSize);
+	proto->set_receivedframescount(m_receivedFramesCount);
+	proto->set_receivedpacketcount(m_receivedPacketCount);
+	proto->set_lostpacketcount(m_lostPacketCount);
+	proto->set_signalstatesqueuecursize(m_signalStatesQueueCurSize);
+	proto->set_signalstatesqueuecurmaxsize(m_signalStatesQueueCurMaxSize);
+
+	proto->set_errorprotocolversion(m_errorProtocolVersion);
+	proto->set_errorframesquantity(m_errorFramesQuantity);
+	proto->set_errorframeno(m_errorFrameNo);
+	proto->set_errordataid(m_errorDataID);
+	proto->set_errorframesize(m_errorFrameSize);
+	proto->set_errorduplicateplanttime(m_errorDuplicatePlantTime);
+	proto->set_errornonmonotonicplanttime(m_errorNonmonotonicPlantTime);
+	proto->set_errorplanttimeformat(m_errorPlantTimeFormat);
 
 	return true;
 }
 
 void AppDataSource::setState(const Network::AppDataSourceState& proto)
 {
-	setID(proto.id());
-	setReceivesData(proto.receivesdata());
-	setUptime(proto.uptime());
-	setReceivedDataID(proto.receiveddataid());
-	setRupFramePlantTime(proto.rupframeplanttime());
-	setDataReceivingSpeed(proto.datareceivingrate());
-	setReceivedDataSize(proto.receiveddatasize());
-	setReceivedFramesCount(proto.receivedframescount());
-	setReceivedPacketCount(proto.receivedpacketcount());
-	setLostPacketCount(proto.lostpacketcount());
-	setDataProcessingEnabled(proto.dataprocessingenabled());
-	setLastPacketSystemTime(proto.lastpacketsystemtime());
-	setRupFramePlantTime(proto.rupframeplanttime());
-	setRupFrameNumerator(static_cast<quint16>(proto.rupframenumerator()));
-	setSignalStatesQueueSize(proto.signalstatesqueuesize());
-	setSignalStatesQueueCurSize(proto.signalstatesqueuecursize());
-	setSignalStatesQueueCurMaxSize(proto.signalstatesqueuecurmaxsize());
-	setAcquiredSignalsCount(proto.acquiredsignalscount());
-	setErrorProtocolVersion(proto.errorprotocolversion());
-	setErrorFramesQuantity(proto.errorframesquantity());
-	setErrorFrameNo(proto.errorframeno());
-	setErrorDataID(proto.errordataid());
-	setErrorFrameSize(proto.errorframesize());
-	setErrorDuplicatePlantTime(proto.errorduplicateplanttime());
-	setErrorNonmonotonicPlantTime(proto.errornonmonotonicplanttime());
-	setErrorPlantTimeFormat(proto.errorplanttimeformat());
+	m_id = proto.id();
+	m_dataProcessingEnabled = proto.dataprocessingenabled();
+	m_receivesData = proto.receivesdata();
+	m_uptime = proto.uptime();
+	m_receivedDataID = proto.receiveddataid();
+	m_rupFramePlantTime = proto.rupframeplanttime();
+	m_rupFrameNumerator = proto.rupframenumerator();
+
+	m_dataReceivingSpeed = proto.datareceivingspeed();
+	m_receivedDataSize = proto.receiveddatasize();
+	m_receivedFramesCount = proto.receivedframescount();
+	m_receivedPacketCount = proto.receivedpacketcount();
+	m_lostPacketCount = proto.lostpacketcount();
+	m_signalStatesQueueCurSize = proto.signalstatesqueuecursize();
+	m_signalStatesQueueCurMaxSize = proto.signalstatesqueuecurmaxsize();
+
+	m_errorProtocolVersion = proto.errorprotocolversion();
+	m_errorFramesQuantity = proto.errorframesquantity();
+	m_errorFrameNo = proto.errorframeno();
+	m_errorDataID = proto.errordataid();
+	m_errorFrameSize = proto.errorframesize();
+	m_errorDuplicatePlantTime = proto.errorduplicateplanttime();
+	m_errorNonmonotonicPlantTime = proto.errornonmonotonicplanttime();
+	m_errorPlantTimeFormat = proto.errorplanttimeformat();
 }
 
 bool AppDataSource::getSignalState(SimpleAppSignalStateArchiveFlag* state, const QThread* thread)

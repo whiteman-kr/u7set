@@ -54,7 +54,6 @@ public:
 
 	int acquiredSignalsCount() const { return m_acquiredSignalsCount; }
 
-	int signalStatesQueueSize() const { return m_signalStatesQueueSize; }
 	int signalStatesQueueCurSize() const { return m_signalStatesQueueCurSize; }
 	int signalStatesQueueCurMaxSize() const { return m_signalStatesQueueCurMaxSize; }
 
@@ -72,6 +71,8 @@ private:
 	void setSignalStatesQueueSize(int size) { m_signalStatesQueueSize = size; }
 	void setSignalStatesQueueCurSize(int size) { m_signalStatesQueueCurSize = size; }
 	void setSignalStatesQueueCurMaxSize(int size) { m_signalStatesQueueCurMaxSize = size; }
+
+	virtual quint32 getExpectedDataUID() const override { return m_cachedAppDataUID; }
 
 private:
 	QVector<DynamicAppSignalState*> m_signalStates;

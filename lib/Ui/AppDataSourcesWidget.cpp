@@ -182,6 +182,7 @@ void DialogAppDataSourceInfo::updateData()
 	setDataItemText("LmDataID", tr("%1 (%2h)").
 						arg(QString::number(adsState->info.lancontrollerinfo()[0].appdatauid())).
 						arg(QString::number(adsState->info.lancontrollerinfo()[0].appdatauid(), 16)));
+	setDataItemNumber("AcquiredSignalsCount", adsState->info.acquiredsignalscount());
 
 	setDataItemText("ReceivesData", adsState->state.receivesdata() ? "Yes" : "No");
 
@@ -210,23 +211,17 @@ void DialogAppDataSourceInfo::updateData()
 	setDataItemText("Uptime", QString("%1d %2:%3:%4").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0')));
 
 	setDataItemNumber("ReceivedDataID", adsState->state.receiveddataid());
-//	setDataItemNumber("RupFramesQueueCurSize", adsState->state.rupframesqueuecursize());
-//	setDataItemNumber("RupFramesQueueCurMaxSize", adsState->state.rupframesqueuecurmaxsize());
-	double datareceivingrate = adsState->state.datareceivingrate();
+	double datareceivingrate = adsState->state.datareceivingspeed();
 	setDataItemText("DataReceivingRate", QString::number(datareceivingrate / 1024.0, 'f', 1));
 	setDataItemNumber("ReceivedDataSize", adsState->state.receiveddatasize());
 	setDataItemNumber("ReceivedFramesCount", adsState->state.receivedframescount());
 	setDataItemNumber("ReceivedPacketCount", adsState->state.receivedpacketcount());
 	setDataItemNumber("LostPacketCount", adsState->state.lostpacketcount());
 	setDataItemText("DataProcessingEnabled", adsState->state.dataprocessingenabled() ? "Yes" : "No");
-	setDataItemNumber("ProcessedPacketCount", adsState->state.processedpacketcount());
 
 	QDateTime tm;
 
 	tm.setTimeSpec(Qt::UTC);
-
-	tm.setMSecsSinceEpoch(adsState->state.lastpacketsystemtime());
-	setDataItemText("LastPacketSystemTime", tm.toString("dd/MM/yyyy HH:mm:ss.zzz"));
 
 	tm.setMSecsSinceEpoch(adsState->state.rupframeplanttime());
 	setDataItemText("RupFramePlantTime", tm.toString("dd/MM/yyyy HH:mm:ss.zzz"));
@@ -234,7 +229,6 @@ void DialogAppDataSourceInfo::updateData()
 	setDataItemNumber("RupFrameNumerator", adsState->state.rupframenumerator());
 	setDataItemNumber("SignalStatesQueueCurSize", adsState->state.signalstatesqueuecursize());
 	setDataItemNumber("SignalStatesQueueCurMaxSize", adsState->state.signalstatesqueuecurmaxsize());
-	setDataItemNumber("AcquiredSignalsCount", adsState->state.acquiredsignalscount());
 
 	// errors
 
@@ -436,7 +430,7 @@ void AppDataSourcesWidget::update(bool refreshOnly)
 
 		item->setText(static_cast<int>(Columns::Uptime), QString("%1d %2:%3:%4").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0')));
 		item->setText(static_cast<int>(Columns::ReceivedPacketCount), QString::number(adsState->state.receivedpacketcount()));
-		double datareceivingrate = adsState->state.datareceivingrate();
+		double datareceivingrate = adsState->state.datareceivingspeed();
 		item->setText(static_cast<int>(Columns::DataReceivingRate), QString::number(datareceivingrate, 'f', 1));
 
 		if (adsState->valid() == false)
