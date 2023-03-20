@@ -20,5 +20,9 @@ fi
 
 echo Importing database $1.
 
+date
+
 psql -U postgres -c "CREATE DATABASE $1 OWNER u7;"
 psql $1 < $1.sql
+
+date
