@@ -139,6 +139,7 @@ class TuningSignalState
 public:
 	TuningSignalState() = default;
 	TuningSignalState(const ::Network::TuningSignalState& message);
+	TuningSignalState(Hash hash, TuningSignalStateFlags flags, TuningValue value);
 
 	Hash hash() const;
 

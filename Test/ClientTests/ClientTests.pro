@@ -52,6 +52,7 @@ SOURCES += \
         AppSignalManagerTests.cpp \
         ConfigControllerTests.cpp \
         ConnectionPorts.cpp \
+        TuningSignalManagerTests.cpp \
         main.cpp
 
 HEADERS += \

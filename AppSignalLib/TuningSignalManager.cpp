@@ -306,7 +306,10 @@ void TuningSignalManager::setState(Hash signalHash, const TuningSignalState& sta
 
 	QWriteLocker l(&m_statesLock);
 
-	m_states[signalHash] = state;
+	auto [it, inserted] = m_states.insert_or_assign(signalHash, state);
+	Q_UNUSED(inserted);
+
+	it->second.m_hash = signalHash;
 
 	return;
 }
