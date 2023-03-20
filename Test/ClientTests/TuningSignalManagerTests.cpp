@@ -129,7 +129,7 @@ TEST_F(TuningSignalManagerTests, signalHashesByLms)
 	Hash h1 = as1.hash();
 	Hash h2 = as2.hash();
 
-	EXPECT_TRUE((appSignals[0] == h1 && appSignals[1] == h2) || (appSignals[1] == h1 && appSignals[2] == h2));
+	EXPECT_TRUE((appSignals[0] == h1 && appSignals[1] == h2) || (appSignals[1] == h1 && appSignals[0] == h2));
 
 	return;
 }
