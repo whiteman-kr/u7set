@@ -59,7 +59,9 @@ cp /tmp/build/${SIMULATOR_PROJECT_NAME}/build/RunServiceScripts/Linux/linux_code
 chmod +x *.sh
 
 ./linux_code_coverage_systemid_clienttest_ws01_cfgs.sh simulation < /dev/null > clienttest_ws01_cfgs.out 2>&1 &
+sleep 5
 ./linux_code_coverage_systemid_clienttest_ws02_cfgs.sh simulation < /dev/null > clienttest_ws02_cfgs.out 2>&1 &
+sleep 5
 ./linux_code_coverage_systemid_clienttest_ws01_ads.sh < /dev/null > clienttest_ws01_ads.out 2>&1 &
 ./linux_code_coverage_systemid_clienttest_ws02_ads.sh < /dev/null > clienttest_ws02_ads.out 2>&1 &
 ./SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_code_coverage -enable_lan -no_exit > SimulatorConsole.out 2>&1 &
