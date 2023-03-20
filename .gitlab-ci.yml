@@ -1,8 +1,8 @@
 variables:
   GIT_DEPTH: "1"
   QT_VERSION: "6.3.2"
-  COMPILER_TESTS_PROJECT_NAME: "compiler_tests_v381"
-  SIMULATOR_PROJECT_NAME: "test_simulator_v381"
+  COMPILER_TESTS_PROJECT_NAME: "compiler_tests_v382"
+  SIMULATOR_PROJECT_NAME: "test_simulator_v382"
   
 stages:
   - build
