@@ -242,7 +242,6 @@ bool LmDescription::load(QDomDocument doc, QString* errorMessage)
 	// Attribute DescriptionNumber
 	//
 	QString s = logicModuleElement.attribute(QLatin1String("DescriptionNumber"));
-
 	if (s.isEmpty() == true)
 	{
 		errorMessage->append(tr("Cant't find attribute DescriptionNumber"));
@@ -251,7 +250,6 @@ bool LmDescription::load(QDomDocument doc, QString* errorMessage)
 
 	bool ok = false;
 	m_descriptionNumber = s.toInt(&ok);
-
 	if (ok == false)
 	{
 		errorMessage->append(tr("Attribute DescriptionNumber has wrong format (integer is expected)"));
@@ -261,7 +259,6 @@ bool LmDescription::load(QDomDocument doc, QString* errorMessage)
     // Attribute ConfigurationScriptFile
     //
 	m_configurationScriptFile = logicModuleElement.attribute(QLatin1String("ConfigurationScriptFile"));
-
     if (m_configurationScriptFile.isEmpty() == true)
     {
         errorMessage->append(tr("Cant't find attribute ConfigurationScriptFile"));
@@ -271,7 +268,6 @@ bool LmDescription::load(QDomDocument doc, QString* errorMessage)
     // Attribute Version
     //
 	m_version = logicModuleElement.attribute(QLatin1String("Version"));
-
     if (m_version.isEmpty() == true)
     {
         errorMessage->append(tr("Cant't find attribute Version"));
@@ -281,7 +277,6 @@ bool LmDescription::load(QDomDocument doc, QString* errorMessage)
     // <FlashMemory> -> m_flashMemory
 	//
 	ok = m_flashMemory.load(doc, errorMessage);
-
 	if (ok == false)
 	{
 		return false;
@@ -290,7 +285,6 @@ bool LmDescription::load(QDomDocument doc, QString* errorMessage)
 	// <Memory> -> m_memory
 	//
 	ok = m_memory.load(doc, errorMessage);
-
 	if (ok == false)
 	{
 		return false;
@@ -299,7 +293,6 @@ bool LmDescription::load(QDomDocument doc, QString* errorMessage)
 	// <LogicUnit> -> m_logicUnit
 	//
 	ok = m_logicUnit.load(doc, errorMessage);
-
 	if (ok == false)
 	{
 		return false;
@@ -308,7 +301,6 @@ bool LmDescription::load(QDomDocument doc, QString* errorMessage)
 	// <OptoInterface> -> m_optoInterface
 	//
 	ok = m_optoInterface.load(doc, errorMessage);
-
 	if (ok == false)
 	{
 		return false;
@@ -317,7 +309,14 @@ bool LmDescription::load(QDomDocument doc, QString* errorMessage)
 	// <LanInterfaces> -> m_lanInterface
 	//
 	ok = m_lan.load(doc, errorMessage);
+	if (ok == false)
+	{
+		return false;
+	}
 
+	// <Other> -> m_other
+	//
+	ok = m_other.load(doc, errorMessage);
 	if (ok == false)
 	{
 		return false;
@@ -1210,6 +1209,71 @@ bool LmDescription::Lan::load(const QDomDocument& document, QString* errorMessag
 
 		m_lanControllers.push_back(li);
 	}
+
+	return errorMessage->isEmpty();
+}
+
+bool LmDescription::Other::load(const QDomDocument& document, QString* errorMessage)
+{
+	if (errorMessage == nullptr)
+	{
+		assert(errorMessage);
+		return false;
+	}
+
+	if (document.isNull() == true)
+	{
+		assert(document.isNull() == false);
+		*errorMessage = "XML documnet is null";
+		return false;
+	}
+
+	// <LogicModule>
+	//
+	QDomElement logicModuleElement = document.documentElement();
+
+	if (logicModuleElement.isNull() == true ||
+		logicModuleElement.tagName() != QLatin1String("LogicModule"))
+	{
+		errorMessage->append(tr("Cant't find root element LogicModule."));
+		return false;
+	}
+
+	// <Other>
+	//
+	QDomNodeList elements = logicModuleElement.elementsByTagName(QLatin1String("Other"));
+
+	if (elements.size() != 1)
+	{
+		*errorMessage = "Expected one section Other";
+		return false;
+	}
+
+	QDomElement element = elements.at(0).toElement();
+
+	*this = Other{};
+
+	// Func for gettiong data from some xml section
+	//
+	auto getSectionUintValue =
+		[&element](QLatin1String section, QString* errorMessage) -> quint32
+		{
+			QDomNodeList nl = element.elementsByTagName(section);
+
+			if (nl.size() != 1)
+			{
+				*errorMessage = QString("Expected one %1 section.").arg(section);
+				return 0xFFFFFFFF;
+			}
+
+			QString nodeText = nl.at(0).toElement().text();
+			return nodeText.toUInt();
+		};
+
+	// Getting data
+	//
+	ocmTxDataSizeLimit = getSectionUintValue(QLatin1String("OcmTxDataSizeLimit"), errorMessage);
+	ocmRxDataSizeLimit = getSectionUintValue(QLatin1String("OcmRxDataSizeLimit"), errorMessage);
 
 	return errorMessage->isEmpty();
 }

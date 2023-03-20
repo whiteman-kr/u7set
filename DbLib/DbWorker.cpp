@@ -401,6 +401,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0379.sql", "Upgrade to version 379, Add SSL to property SecurityLevel to all software services"},
 	{":/DatabaseUpgrade/Upgrade0380.sql", "Upgrade to version 380, Add HardwareTests folder to Tests tree"},
 	{":/DatabaseUpgrade/Upgrade0381.sql", "Upgrade to version 381, Added single property AppDataServiceIDs instead of two AppDataServiceID1(2)"},
+	{":/DatabaseUpgrade/Upgrade0382.sql", "Upgrade to version 382, Added OCM data limits to LM description"},
 };
 
 int DbWorker::counter = 0;

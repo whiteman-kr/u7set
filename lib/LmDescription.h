@@ -190,6 +190,14 @@ public:
 		bool load(const QDomDocument& document, QString* errorMessage);
 	};
 
+	struct Other
+	{
+		int ocmTxDataSizeLimit = 0;
+		int ocmRxDataSizeLimit = 0;
+
+		bool load(const QDomDocument& document, QString* errorMessage);
+	};
+
 	// Properties
 	//
 public:
@@ -207,6 +215,7 @@ public:
 	const LogicUnit& logicUnit() const;
 	const OptoInterface& optoInterface() const;
 	const Lan& lan() const;
+	const Other& other() const;
 
 	Q_INVOKABLE int jsLanControllerType(int index);
 	Q_INVOKABLE int jsLanControllerPlace(int index);
@@ -242,6 +251,7 @@ private:
 	LogicUnit m_logicUnit;
 	OptoInterface m_optoInterface;
 	Lan m_lan;
+	Other m_other;
 
 	// Possible commands
 	//
