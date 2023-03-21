@@ -3,7 +3,7 @@ TEMPLATE = subdirs
 CONFIG += ordered
 
 SUBDIRS += Protobuf \
-    TrendView \
+	TrendView \
 	AppSignalLib \
 	UtilsLib \
 	OnlineLib \
@@ -35,7 +35,11 @@ SUBDIRS += Protobuf \
 	ClientTests \
 	SimulatorTests \
 	MetrologyTests \
-	u7databaseTests
+	u7databaseTests \
+	TestSuiteLib \
+	TestSuite \
+	TestSuiteConsole \
+	TestSuiteTests
 
 qtkeychain.subdir = ./Tools/qtkeychain
 PacketSource.subdir = ./Tools/PacketSource
@@ -45,6 +49,7 @@ ClientTests.subdir = ./Test/ClientTests
 SimulatorTests.subdir = ./Test/SimulatorTests
 MetrologyTests.subdir = ./Test/MetrologyTests
 u7databaseTests.subdir = ./Test/u7databaseTests
+TestSuiteTests.subdir = ./Test/TestSuiteTests
 
 #AppDataService.depends = Protobuf OnlineLib ServiceLib UtilsLib CommonLib
 #DiagDataService.depends = Protobuf OnlineLib ServiceLib UtilsLib HardwareLib CommonLib

@@ -152,6 +152,14 @@ namespace ClientLib
 		return false;
 	}
 
+	bool ConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& /*conf*/, const TestSuiteSettings& /*settings*/, const BuildFileInfoArray& /*files*/)
+	{
+		// Reimplement in the derviced class
+		//
+		Q_ASSERT(false);
+		return false;
+	}
+
 	int ConfigController::acquireAppInstanceNo(const QString& programName)
 	{
 		// Communication instance no
@@ -402,6 +410,10 @@ namespace ClientLib
 
 		case E::SoftwareType::TestClient:
 			callUpdateFunc(dynamic_cast<const TestClientSettings*>(curSettingsProfile.get()));
+			return;
+
+		case E::SoftwareType::TestSuite:
+			callUpdateFunc(dynamic_cast<const TestSuiteSettings*>(curSettingsProfile.get()));
 			return;
 
 		case E::SoftwareType::Unknown:

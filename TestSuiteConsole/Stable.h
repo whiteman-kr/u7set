@@ -1,9 +1,5 @@
 #pragma once
 
-// c++ includes
-//
-#include <atomic>
-
 // Qt includes
 //
 #ifdef _MSC_VER
@@ -18,9 +14,10 @@
 #endif
 
 #include <QVector>
-#include <QFloat16>
 #include <QtCore>
-
+#include <QJSValue>
+#include <QJSEngine>
+#include <QDomNode>
 
 #ifdef _MSC_VER
 	#pragma warning(pop)

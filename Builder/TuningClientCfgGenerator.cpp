@@ -564,11 +564,6 @@ namespace Builder
 		return ok;
 	}
 
-	void TuningClientCfgGenerator::writeErrorSection(QXmlStreamWriter& xmlWriter, QString error)
-	{
-		xmlWriter.writeTextElement("Error", error);
-	}
-
 	bool TuningClientCfgGenerator::createAutomaticFilters(const QStringList& equipmentList,
 														  const TuningSignalManager& tuningSignalManager)
 	{
