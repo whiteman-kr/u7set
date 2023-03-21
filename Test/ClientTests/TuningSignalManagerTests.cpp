@@ -13,6 +13,7 @@ protected:
 			as1.setHash(::calcHash(as1.appSignalID()));
 			as1.setEnableTuning(true);
 			as1.setLmEquipmentID("LM1");
+			as1.setTagsStr("tag1");
 
 			::Proto::AppSignal* protoAppSignal = protoSignalSet.add_appsignal();
 			as1.saveToProto(protoAppSignal);
@@ -23,6 +24,7 @@ protected:
 			as2.setHash(::calcHash(as2.appSignalID()));
 			as2.setEnableTuning(true);
 			as2.setLmEquipmentID("LM1");
+			as2.setTagsStr("tag2");
 
 			::Proto::AppSignal* protoAppSignal = protoSignalSet.add_appsignal();
 			as2.saveToProto(protoAppSignal);
@@ -86,6 +88,8 @@ TEST_F(TuningSignalManagerTests, loadFromProto)
 	EXPECT_EQ(tsm.signalsCount(), protoSignalSet.appsignal_size());
 
 	EXPECT_EQ(loadSpy.size(), 1);
+
+	EXPECT_TRUE(tsm.signalExists(as1.appSignalID()));
 
 	return;
 }
@@ -211,6 +215,59 @@ TEST_F(TuningSignalManagerTests, invalidateStates)
 
 	EXPECT_FALSE(gotState1.valid());
 	EXPECT_FALSE(gotState2.valid());
+
+	return;
+}
+
+TEST_F(TuningSignalManagerTests, setNewValue)
+{
+	TuningSignalManager tsm{};
+
+	bool ok = tsm.load(protoSignalSet);
+
+	EXPECT_TRUE(ok);
+	EXPECT_EQ(tsm.signalsCount(), protoSignalSet.appsignal_size());
+
+	TuningSignalState state1{as1.hash(), TuningSignalStateFlags{.valid = 1}, TuningValue{TuningValueType::Float, 101.0}};
+
+	tsm.setState(as1.appSignalID(), state1);
+
+	tsm.setNewValue(as1.hash(), TuningValue(TuningValueType::Float, 256.0));
+
+	EXPECT_TRUE(tsm.newValueIsUnapplied(as1.hash()));
+
+	TuningValue nv = tsm.newValue(as1.hash());
+	EXPECT_TRUE(fabs(nv.floatValue() - 256.0) < std::numeric_limits<float>::epsilon());
+
+	tsm.setNewValueAsApplied(as1.hash());
+
+	EXPECT_FALSE(tsm.newValueIsUnapplied(as1.hash()));
+
+	return;
+}
+
+TEST_F(TuningSignalManagerTests, signalIdsByTag)
+{
+	TuningSignalManager tsm{};
+
+	bool ok = tsm.load(protoSignalSet);
+
+	EXPECT_TRUE(ok);
+	EXPECT_EQ(tsm.signalsCount(), protoSignalSet.appsignal_size());
+
+	QStringList sids =  tsm.signalIdsByTag("tag1");
+	EXPECT_EQ(sids.size(), 1);
+	if (sids.isEmpty() == false)
+	{
+		EXPECT_EQ(sids[0], as1.appSignalID());
+	}
+
+	sids =  tsm.signalIdsByTag("tag2");
+	EXPECT_EQ(sids.size(), 1);
+	if (sids.isEmpty() == false)
+	{
+		EXPECT_EQ(sids[0], as2.appSignalID());
+	}
 
 	return;
 }
