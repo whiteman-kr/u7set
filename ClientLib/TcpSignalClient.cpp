@@ -22,6 +22,12 @@ namespace ClientLib
 		Q_ASSERT(this->logFile());
 		qDebug() << "TcpSignalClient::TcpSignalClient() " << adsInfo.equipmentId << ", " << serverAddressPort1().addressPortStr();
 
+		connect(this, &Tcp::Client::signal_wrongServerID,
+			[this](const QString& errorMessage)
+			{
+				writeError(errorMessage);
+			});
+
 		return;
 	}
 

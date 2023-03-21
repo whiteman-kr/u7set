@@ -43,6 +43,12 @@ namespace ClientLib
 
 		qRegisterMetaType<TuningClientSettings::LmStatusFlagMode>("LmStatusFlagMode");
 
+		connect(this, &Tcp::Client::signal_wrongServerID,
+			[this](const QString& errorMessage)
+			{
+				m_logFile.writeError(errorMessage);
+			});
+
 		return;
 	}
 

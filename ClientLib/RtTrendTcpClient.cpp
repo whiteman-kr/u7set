@@ -20,6 +20,12 @@ namespace ClientLib
 		m_logFile.writeMessage("RtTrendTcpClient::RtTrendTcpClient(), address " + serverAddressPort.toString());
 		qDebug() << "RtTrendTcpClient::RtTrendTcpClient(...), address " << serverAddressPort.toString();
 
+		connect(this, &Tcp::Client::signal_wrongServerID,
+			[this](const QString& errorMessage)
+			{
+				m_logFile.writeError(errorMessage);
+			});
+
 		return;
 	}
 

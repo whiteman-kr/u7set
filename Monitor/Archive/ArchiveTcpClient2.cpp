@@ -27,6 +27,12 @@ ArchiveTcpClient2::ArchiveTcpClient2(const ArchiveSource& request,
 	setRequestData(request);
 	updateStatistics("Construction");
 
+	connect(this, &Tcp::Client::signal_wrongServerID,
+		[this](const QString& errorMessage)
+		{
+			m_logFile.writeError(errorMessage);
+		});
+
 	return;
 }
 
