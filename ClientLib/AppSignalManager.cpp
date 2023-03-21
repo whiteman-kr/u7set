@@ -270,26 +270,26 @@ namespace ClientLib
 
 	void AppSignalManager::addRecentAppSignal(Hash hash)
 	{
-		QWriteLocker locker(&m_recentUsedLocker);
+		QMutexLocker locker(&m_recentUsedMutex);
 		m_recentUsed.add(hash);
 	}
 
 	void AppSignalManager::addRecentAppSignals(const std::vector<Hash>& hashes)
 	{
-		QWriteLocker locker(&m_recentUsedLocker);
+		QMutexLocker locker(&m_recentUsedMutex);
 		m_recentUsed.add(hashes);
 	}
 
 	std::vector<Hash> AppSignalManager::recentlyUsedAppSignals(const QString& appDataServivceId)
 	{
-		{
-			QWriteLocker locker(&m_recentUsedLocker);
-			m_recentUsed.removeOutdated();
-		}
+		std::vector<Hash> result;
 
-		QReadLocker locker(&m_recentUsedLocker);
-		std::vector<Hash> result{m_recentUsed.hashes()};
-		locker.unlock();
+		{
+			QMutexLocker locker(&m_recentUsedMutex);
+			m_recentUsed.removeOutdated();
+
+			result = m_recentUsed.hashes();
+		}
 
 		std::erase_if(result, [&appDataServivceId, this](Hash hash)
 			{
@@ -757,7 +757,7 @@ namespace ClientLib
 			{
 				sourceState.state = AppSignalState{};
 				sourceState.lastUpdateTime = std::chrono::system_clock::now();
-				return;
+				break;
 			}
 		}
 

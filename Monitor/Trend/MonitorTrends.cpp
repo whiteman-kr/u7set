@@ -159,9 +159,11 @@ static int no = 1;
 	// Realtime Trends connections
 	//
 	connect(&m_realtimeDataProvider, &ClientLib::RtDataProvider::dataReady, &signalSet(), &TrendLib::TrendSignalSet::slot_realtimeDataReceived);
+	connect(&m_realtimeDataProvider, &ClientLib::RtDataProvider::dataReady, this, &MonitorTrendsWidget::slot_realtimeDataReceived);
+
 	connect(&m_realtimeDataProvider, &ClientLib::RtDataProvider::requestError, &signalSet(), &TrendLib::TrendSignalSet::slot_realtimeRequestError);
 	connect(&m_realtimeDataProvider, &ClientLib::RtDataProvider::connectionLost, &signalSet(), &TrendLib::TrendSignalSet::slot_realtimeConnectionLost);
-	connect(&m_realtimeDataProvider, &ClientLib::RtDataProvider::dataReady, this, &MonitorTrendsWidget::slot_realtimeDataReceived);
+
 
 	// --
 	//

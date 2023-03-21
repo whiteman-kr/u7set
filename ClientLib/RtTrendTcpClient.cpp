@@ -104,7 +104,7 @@ namespace ClientLib
 
 	void RtTrendTcpClient::onDisconnection()
 	{
-		emit connectionLost(connectedSoftwareInfo().equipmentID());
+		emit connectionLost(connectToServerID());
 
 		qDebug() << "TrendTcpClient::onDisconnection " << serverAddressPort1().toString();
 		m_logFile.writeMessage("onDisconnection() " + serverAddressPort1().toString());
