@@ -336,8 +336,6 @@ DialogSignalSearch::DialogSignalSearch(QWidget *parent, IAppSignalManager* appSi
 
 	setLayout(mainLayout);
 
-	connect(this, &DialogSignalSearch::finished, this, &DialogSignalSearch::finished);
-
 	setMinimumSize(400, 450);
 
 	// set model
@@ -381,6 +379,8 @@ DialogSignalSearch::DialogSignalSearch(QWidget *parent, IAppSignalManager* appSi
 		m_tableView->setColumnWidth(i, width);
 	}
 
+	m_tableView->horizontalHeader()->setStretchLastSection(true);
+
 	//
 
 	m_editSignalID->setText(m_signalId);
@@ -418,6 +418,25 @@ DialogSignalSearch::DialogSignalSearch(QWidget *parent, IAppSignalManager* appSi
 
 DialogSignalSearch::~DialogSignalSearch()
 {
+	// Save columns width
+	//
+	DialogSignalSearchSettings settings;
+
+	QDataStream stream(&settings.columnWidth, QIODevice::WriteOnly);
+
+	settings.columnCount = m_model.columnCount();
+
+	for (int i = 0; i < settings.columnCount; i++)
+	{
+		stream << (int)m_tableView->columnWidth(i);
+	}
+
+	// Save window position
+	//
+	settings.pos = pos();
+	settings.geometry = saveGeometry();
+
+	settings.store();
 }
 
 void DialogSignalSearch::signalsUpdated()
@@ -465,31 +484,6 @@ void DialogSignalSearch::search()
 	m_labelFound->setText(QString("Signals found: %1").arg(foundSignals.size()));
 
 	m_model.setSignals(&foundSignals);
-}
-
-void DialogSignalSearch::finished(int result)
-{
-	Q_UNUSED(result);
-
-	// Save columns width
-	//
-	DialogSignalSearchSettings settings;
-
-	QDataStream stream(&settings.columnWidth, QIODevice::WriteOnly);
-
-	settings.columnCount = m_model.columnCount();
-
-	for (int i = 0; i < settings.columnCount; i++)
-	{
-		stream << (int)m_tableView->columnWidth(i);
-	}
-
-	// Save window position
-	//
-	settings.pos = pos();
-	settings.geometry = saveGeometry();
-
-	settings.store();
 }
 
 void DialogSignalSearch::openClicked()
