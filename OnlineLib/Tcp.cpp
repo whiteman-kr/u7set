@@ -1979,6 +1979,10 @@ namespace Tcp
 				{
 					onConnection();
 				}
+				else
+				{
+					closeConnection();
+				}
 				break;
 
 			default:
@@ -2083,11 +2087,6 @@ namespace Tcp
 		}
 
 		m_connectedSoftwareInfo.serializeFrom(imr.serversoftwareinfo());
-
-		if (m_serverEquipmentID.isEmpty() == false)
-		{
-			DEBUG_STOP;
-		}
 
 		if (m_serverEquipmentID.isEmpty() == false &&
 			m_serverEquipmentID != m_connectedSoftwareInfo.equipmentID())

@@ -357,7 +357,7 @@ namespace Tuning
 
 		const TuningSourceState& state() const { return m_state; }
 
-		void stopCommandProcessing(const TuningCommand& cmd, int srcChannel);
+		void stopCommandProcessing(const TuningCommand& cmd, int srcChannel, bool hasUnappliedParams);
 
 	private:
 
@@ -521,7 +521,7 @@ namespace Tuning
 
 		TuningServiceWorker& service() { return m_service; }
 
-		void stopCommandProcessing(const TuningCommand& cmd, int srcChannel);
+		void stopCommandProcessing(const TuningCommand& cmd, int srcChannel, bool hasUnappliedParams);
 
 	private:
 		void initTuningSignals();
