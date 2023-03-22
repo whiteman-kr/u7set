@@ -1328,6 +1328,11 @@ const LmDescription::Lan& LmDescription::lan() const
 	return m_lan;
 }
 
+const LmDescription::Other& LmDescription::other() const
+{
+	return m_other;
+}
+
 int LmDescription::jsLanControllerType(int index)
 {
 	return static_cast<int>(m_lan.lanControllerType(index));

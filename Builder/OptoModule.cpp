@@ -2004,8 +2004,12 @@ namespace Hardware
 			result &= DeviceHelper::getIntProperty(module, "RxAppDataOffset", &m_txDataOffset, log);
 			result &= DeviceHelper::getIntProperty(module, "RxAppDataSize", &m_txDataSizeW, log);
 
+			m_txDataSizeW = std::min(m_txDataSizeW, m_lmDescription->other().ocmTxDataSizeLimit);
+
 			result &= DeviceHelper::getIntProperty(module, "TxAppDataOffset", &m_rxDataOffset, log);
 			result &= DeviceHelper::getIntProperty(module, "TxAppDataSize", &m_rxDataSizeW, log);
+
+			m_rxDataSizeW = std::min(m_rxDataSizeW, m_lmDescription->other().ocmRxDataSizeLimit);
 
 			result &= DeviceHelper::getIntProperty(module, "OptoPortCount", &m_optoPortCount, log);
 
