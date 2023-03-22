@@ -18,7 +18,7 @@ namespace ClientLib
 		Q_OBJECT
 
 	public:
-		TuningUserManager();
+		TuningUserManager() = default;
 
 		// Operations
 		//
@@ -32,8 +32,8 @@ namespace ClientLib
 		//
 		bool tuningLogin() const;
 		const QStringList& tuningUserAccounts() const;
-		int tuningSessionTimeout() const;
 		bool loginPerOperation() const;
+		int tuningSessionTimeout() const;
 
 		// State
 		//
@@ -45,6 +45,10 @@ namespace ClientLib
 	signals:
 		void loggedIn();
 		void loggedOut();
+
+	protected:
+		virtual bool askForPassword(QString* userName, QString* password, QWidget* parent);
+		virtual bool checkPassword(const QString& userName, const QString& password);
 
 	private:
 		bool requestPassword(QWidget* parent);

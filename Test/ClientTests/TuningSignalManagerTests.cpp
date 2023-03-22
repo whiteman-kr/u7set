@@ -73,6 +73,11 @@ TEST_F(TuningSignalManagerTests, loadFromBinary)
 
 	EXPECT_EQ(loadSpy.size(), 1);
 
+	TuningSignalManager tsm2{};
+	ba.fill(0x55, 1024);
+	ok = tsm2.load(ba);
+	EXPECT_FALSE(ok);
+
 	return;
 }
 
@@ -94,7 +99,7 @@ TEST_F(TuningSignalManagerTests, loadFromProto)
 	return;
 }
 
-TEST_F(TuningSignalManagerTests, signalHashes)
+TEST_F(TuningSignalManagerTests, signalHashesAndList)
 {
 	TuningSignalManager tsm{};
 
@@ -103,12 +108,24 @@ TEST_F(TuningSignalManagerTests, signalHashes)
 	EXPECT_TRUE(ok);
 	EXPECT_EQ(tsm.signalsCount(), protoSignalSet.appsignal_size());
 
+	// signalHashes
+
 	std::vector<Hash> appSignals = tsm.signalHashes();
 
 	for (const auto& ps : protoSignalSet.appsignal())
 	{
 		Hash hash = calcHash(QString::fromStdString(ps.appsignalid()));
 		EXPECT_TRUE(std::find(appSignals.begin(), appSignals.end(), hash) != appSignals.end());
+	}
+
+	// signalList
+
+	std::vector<AppSignalParam> aspList = tsm.signalList();
+	EXPECT_EQ(aspList.size(), protoSignalSet.appsignal_size());
+
+	for (int i = 0; i < aspList.size(); i++)
+	{
+		EXPECT_EQ(aspList[i].appSignalId(), QString::fromStdString(protoSignalSet.appsignal(i).appsignalid()));
 	}
 
 	return;
@@ -134,6 +151,27 @@ TEST_F(TuningSignalManagerTests, signalHashesByLms)
 	Hash h2 = as2.hash();
 
 	EXPECT_TRUE((appSignals[0] == h1 && appSignals[1] == h2) || (appSignals[1] == h1 && appSignals[0] == h2));
+
+	return;
+}
+
+TEST_F(TuningSignalManagerTests, appSignalParam)
+{
+	TuningSignalManager tsm{};
+
+	bool ok = tsm.load(protoSignalSet);
+
+	EXPECT_TRUE(ok);
+
+	bool found = false;
+
+	AppSignalParam asp = tsm.signalParam(as1.appSignalID(), &found);
+	EXPECT_EQ(found, true);
+	EXPECT_EQ(asp.appSignalId(), as1.appSignalID());
+
+	found = tsm.signalParam(calcHash(as2.appSignalID()), &asp);
+	EXPECT_EQ(found, true);
+	EXPECT_EQ(asp.appSignalId(), as2.appSignalID());
 
 	return;
 }
@@ -228,6 +266,8 @@ TEST_F(TuningSignalManagerTests, setNewValue)
 	EXPECT_TRUE(ok);
 	EXPECT_EQ(tsm.signalsCount(), protoSignalSet.appsignal_size());
 
+	// set and apply state
+
 	TuningSignalState state1{as1.hash(), TuningSignalStateFlags{.valid = 1}, TuningValue{TuningValueType::Float, 101.0}};
 
 	tsm.setState(as1.appSignalID(), state1);
@@ -237,11 +277,26 @@ TEST_F(TuningSignalManagerTests, setNewValue)
 	EXPECT_TRUE(tsm.newValueIsUnapplied(as1.hash()));
 
 	TuningValue nv = tsm.newValue(as1.hash());
+
 	EXPECT_TRUE(fabs(nv.floatValue() - 256.0) < std::numeric_limits<float>::epsilon());
 
 	tsm.setNewValueAsApplied(as1.hash());
 
 	EXPECT_FALSE(tsm.newValueIsUnapplied(as1.hash()));
+
+	// set and unset state by old value
+
+	TuningSignalState state2{as2.hash(), TuningSignalStateFlags{.valid = 1}, TuningValue{TuningValueType::Float, 501.0}};
+
+	tsm.setState(as2.appSignalID(), state2);
+
+	tsm.setNewValue(as2.hash(), TuningValue(TuningValueType::Float, 502.0));
+
+	EXPECT_TRUE(tsm.newValueIsUnapplied(as2.hash()));
+
+	tsm.setNewValue(as2.hash(), TuningValue(TuningValueType::Float, 501.0));
+
+	EXPECT_FALSE(tsm.newValueIsUnapplied(as2.hash()));
 
 	return;
 }
