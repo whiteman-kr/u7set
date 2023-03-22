@@ -229,31 +229,36 @@ namespace VFrame30
 			m_cachedFont = m_font;
 		}
 
-		QFont font(m_font.name());
-		font.setBold(m_font.bold());
-		font.setItalic(m_font.italic());
-
-		int flags = static_cast<int>(horzAlign()) |
-					static_cast<int>(vertAlign()) |
-					static_cast<int>((wordWrap() ? Qt::TextWordWrap : 0));
-
 		if (drawParam->pdfMode() == true)
 		{
 			// For pdf draw text without caching to image, it makes pdf much smaller and will allows
-			// to select and copy text to the clipboard
+			// to select and copy text to the clipboard.
 			//
-			painter->setPen(m_textColor);
+			if (textFormat() == E::TextFormat::PlainText)
+			{
+				drawPlainText(*painter, boundingRect, text);
+			}
+			else
+			{
+				// Problems in drawing directly to Pdf painter device, it is possible to draw normaly only to pos 0, 0
+				// in other cases text is cut. Translate device to avoid the problem.
+				//
+				painter->save();
+				painter->translate(boundingRect.left(), boundingRect.top());
 
-			DrawHelper::drawText(painter,
-								 m_font,
-								 itemUnit(),
-								 text,
-								 boundingRect,
-								 flags);
+				QRectF drawRect = boundingRect;
+				drawRect.moveTo(0, 0);
+
+				drawMarkdown(*painter, drawRect, text, true);
+
+				painter->restore();
+			}
 
 			return;
 		}
 
+		// Check if image already cached, if not, then create one
+		//
 		if (itemUnit() == SchemaUnit::Display)
 		{
 			// Pixels
@@ -262,66 +267,42 @@ namespace VFrame30
 			const double imageWidth = widthDocPt() * zoom;
 			const double imageHeight = heightDocPt()  * zoom;
 
-			QRectF clipRect{0, 0, imageWidth, imageHeight};
 			QRect clipRectInt{0, 0, static_cast<int>(imageWidth), static_cast<int>(imageHeight)};
 
 			if (textChanged == true ||
 				m_cacheTextImage.isNull() == true ||
 				m_cacheTextImage.size() != clipRectInt.size())
 			{
-				if (m_cacheTextImage.size() != clipRectInt.size())
-				{
-					m_cacheTextImage = QImage{clipRectInt.size(), QImage::Format_ARGB32_Premultiplied};
-				}
+				double deviceDpr = drawParam->devicePixelRatio();
+
+				m_cacheTextImage = QImage{clipRectInt.size(), QImage::Format_ARGB32_Premultiplied};
+				m_cacheTextImage.setDevicePixelRatio(deviceDpr);
 
 				m_cacheTextImage.fill(qRgba(0, 0, 0, 0));	// Transparent
 
 				QPainter p{&m_cacheTextImage};
 
-				const int pixelSize = static_cast<int>(m_font.drawSize() * zoom);
-				font.setPixelSize(pixelSize > 0 ? pixelSize : 1);
+				SchemaView::Ajust(&p,
+								  painter->device()->physicalDpiX(),
+								  painter->device()->physicalDpiY(),
+								  painter->device()->devicePixelRatioF(),
+								  itemUnit(),
+								  0,
+								  0,
+								  m_drawParam->schemaView()->zoom());
+
+				QRectF textRect = boundingRect;
+				textRect.moveTo(0, 0);
 
 				if (textFormat() == E::TextFormat::PlainText)
 				{
-					p.setPen(m_textColor);
-					p.setFont(font);
-
-					p.drawText(clipRectInt, flags, text);
+					drawPlainText(p, textRect, text);
 				}
 				else
 				{
-					m_cacheTextDocument.documentLayout()->setPaintDevice(p.device());
-					m_cacheTextDocument.setDefaultFont(font);
-
-					auto dto = m_cacheTextDocument.defaultTextOption();
-					dto.setWrapMode(m_wordWrap ? QTextOption::WrapMode::WrapAtWordBoundaryOrAnywhere : QTextOption::WrapMode::NoWrap);
-					m_cacheTextDocument.setTextWidth(clipRect.width() / m_cacheTextImage.devicePixelRatioF());
-					m_cacheTextDocument.setDefaultTextOption(dto);
-
-					// Set new text to m_cacheTextDocument only after setting paint device and font
-					// or it will calculate wrong line indents.
-					//
-					if (textChanged == true)
-					{
-						switch (m_textFormat)
-						{
-						case E::TextFormat::PlainText:
-							break;
-						case E::TextFormat::Markdown:
-							m_cacheTextDocument.setMarkdown(text);
-							break;
-						case E::TextFormat::HtmlSubset:
-							m_cacheTextDocument.setHtml(text);
-							break;
-						}
-					}
-
-					m_cacheTextDocument.drawContents(&p, clipRect);
+					drawMarkdown(p, textRect, text, textChanged);
 				}
 			}
-
-			QRectF sourceRect = m_cacheTextImage.rect();
-			painter->drawImage(boundingRect, m_cacheTextImage, sourceRect);
 		}
 		else
 		{
@@ -334,68 +315,49 @@ namespace VFrame30
 			const double imageWidth = widthDocPt() * dpiX * zoom;
 			const double imageHeight = heightDocPt() * dpiY * zoom;
 
-			QRectF clipRect{0, 0, imageWidth, imageHeight};
 			QRect clipRectInt{0, 0, static_cast<int>(imageWidth), static_cast<int>(imageHeight)};
 
 			if (textChanged == true ||
 				m_cacheTextImage.isNull() == true ||
 				m_cacheTextImage.size() != clipRectInt.size())
 			{
+				double deviceDpr = drawParam->devicePixelRatio();
+
 				m_cacheTextImage = QImage{clipRectInt.size(), QImage::Format_ARGB32_Premultiplied};
-				m_cacheTextImage.setDevicePixelRatio(painter->device()->devicePixelRatioF());
+				m_cacheTextImage.setDotsPerMeterX(static_cast<int>(painter->device()->physicalDpiX() / 25.4 * 1000.0));
+				m_cacheTextImage.setDotsPerMeterY(static_cast<int>(painter->device()->physicalDpiY() / 25.4 * 1000.0));
+				m_cacheTextImage.setDevicePixelRatio(deviceDpr);
+
 				m_cacheTextImage.fill(qRgba(0, 0, 0, 0));	// Transparent
 
 				QPainter p{&m_cacheTextImage};
+				SchemaView::Ajust(&p,
+								  painter->device()->physicalDpiX(),
+								  painter->device()->physicalDpiY(),
+								  deviceDpr,
+								  itemUnit(),
+								  0,
+								  0,
+								  m_drawParam->schemaView()->zoom());
 
-				const int pixelSize = static_cast<int>(m_font.drawSize() * dpiY * zoom / m_cacheTextImage.devicePixelRatioF());
-				font.setPixelSize(pixelSize > 0 ? pixelSize : 1);
+				QRectF textRect = boundingRect;
+				textRect.moveTo(0, 0);
 
 				if (textFormat() == E::TextFormat::PlainText)
 				{
-					p.setPen(m_textColor);
-					p.setFont(font);
-
-					QRect drawClipRect{0, 0,
-									   static_cast<int>(clipRect.width() / m_cacheTextImage.devicePixelRatioF()),
-									   static_cast<int>(clipRectInt.height() / m_cacheTextImage.devicePixelRatioF())};
-
-					p.drawText(drawClipRect, flags, text);
+					drawPlainText(p, textRect, text);
 				}
 				else
 				{
-					m_cacheTextDocument.documentLayout()->setPaintDevice(p.device());
-					m_cacheTextDocument.setDefaultFont(font);
-
-					auto dto = m_cacheTextDocument.defaultTextOption();
-					dto.setWrapMode(m_wordWrap ? QTextOption::WrapMode::WrapAtWordBoundaryOrAnywhere : QTextOption::WrapMode::NoWrap);
-					m_cacheTextDocument.setTextWidth(clipRect.width() / m_cacheTextImage.devicePixelRatioF());
-					m_cacheTextDocument.setDefaultTextOption(dto);
-
-					// Set new text to m_cacheTextDocument only after setting paint device and font
-					// or it will calculate wrong line indents.
-					//
-					if (textChanged == true)
-					{
-						switch (m_textFormat)
-						{
-						case E::TextFormat::PlainText:
-							break;
-						case E::TextFormat::Markdown:
-							m_cacheTextDocument.setMarkdown(text);
-							break;
-						case E::TextFormat::HtmlSubset:
-							m_cacheTextDocument.setHtml(text);
-							break;
-						}
-					}
-
-					m_cacheTextDocument.drawContents(&p, clipRect);
+					drawMarkdown(p, textRect, text, textChanged || drawParam->pdfMode());
 				}
 			}
-
-			QRectF sourceRect = m_cacheTextImage.rect();
-			painter->drawImage(boundingRect, m_cacheTextImage, sourceRect);
 		}
+
+		// Draw cached image
+		//
+		QRectF sourceRect = m_cacheTextImage.rect();
+		painter->drawImage(boundingRect, m_cacheTextImage, sourceRect);
 
 		return;
 	}
@@ -408,6 +370,90 @@ namespace VFrame30
 	double SchemaItemRect::minimumPossibleWidthDocPt(double gridSize, int /*pinGridStep*/) const
 	{
 		return gridSize;
+	}
+
+	void SchemaItemRect::drawPlainText(QPainter& painter, QRectF rect, QString text) const
+	{
+		int flags = static_cast<int>(horzAlign()) |
+					static_cast<int>(vertAlign()) |
+					static_cast<int>((wordWrap() ? Qt::TextWordWrap : 0));
+
+		painter.setPen(m_textColor);
+
+		DrawHelper::drawText(&painter,
+							 m_font,
+							 itemUnit(),
+							 text,
+							 rect,
+							 flags);
+
+		return;
+	}
+
+	void SchemaItemRect::drawMarkdown(QPainter& painter, QRectF rect, QString text, bool textChanged) const
+	{
+		const double dpiX = CDrawParam::realDpiX(&painter);
+		const double dpiY = CDrawParam::realDpiY(&painter);
+
+		QFont font(m_font.name());
+		font.setBold(m_font.bold());
+		font.setItalic(m_font.italic());
+
+		if (itemUnit() == SchemaUnit::Display)
+		{
+			const int pixelSize = static_cast<int>(m_font.drawSize());
+			font.setPixelSize(pixelSize > 0 ? pixelSize : 1);
+		}
+		else
+		{
+			painter.save();
+			painter.scale(1.0 / dpiX, 1.0 / dpiY);
+
+			const int pixelSize = static_cast<int>(m_font.drawSize() * dpiY);
+			font.setPixelSize(pixelSize > 0 ? pixelSize : 1);
+
+			rect = QRectF{rect.left() * dpiX, rect.top() * dpiY, rect.width() * dpiX, rect.height() * dpiY};
+		}
+
+		painter.setFont(font);
+
+		m_cacheTextDocument.documentLayout()->setPaintDevice(painter.device());
+		m_cacheTextDocument.setDefaultFont(font);
+
+		auto dto = m_cacheTextDocument.defaultTextOption();
+		dto.setWrapMode(m_wordWrap ? QTextOption::WrapMode::WrapAtWordBoundaryOrAnywhere : QTextOption::WrapMode::NoWrap);
+		m_cacheTextDocument.setTextWidth(rect.width());
+		m_cacheTextDocument.setDefaultTextOption(dto);
+
+		// Set new text to m_cacheTextDocument only after setting paint device and font
+		// or it will calculate wrong line indents.
+		//
+		if (textChanged == true)
+		{
+			switch (m_textFormat)
+			{
+			case E::TextFormat::PlainText:
+				break;
+			case E::TextFormat::Markdown:
+				m_cacheTextDocument.setMarkdown(text);
+				break;
+			case E::TextFormat::HtmlSubset:
+				m_cacheTextDocument.setHtml(text);
+				break;
+			}
+		}
+
+		m_cacheTextDocument.drawContents(&painter, rect);
+
+		if (itemUnit() == SchemaUnit::Display)
+		{
+		}
+		else
+		{
+			painter.restore();
+		}
+
+		return;
 	}
 
 	// Properties and Data

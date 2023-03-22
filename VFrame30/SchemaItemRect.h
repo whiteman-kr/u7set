@@ -166,12 +166,15 @@ namespace VFrame30
 		// Draw Functions
 		//
 	public:
-
 		virtual void draw(CDrawParam* drawParam) const override;
 
 	protected:
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
+
+	private:
+		void drawPlainText(QPainter& painter, QRectF rect, QString text) const;
+		void drawMarkdown(QPainter& painter, QRectF rect, QString text, bool textChanged) const;
 
 		// Properties and Data
 		//

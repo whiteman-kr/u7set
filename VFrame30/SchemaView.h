@@ -16,14 +16,12 @@ namespace VFrame30
 		SchemaView();
 		explicit SchemaView(std::shared_ptr<Schema> schema);
 
-		// Painting
-		//
-	protected:
-		void Ajust(QPainter* painter, double startX, double startY, double zoom) const;
-
 		// Methods
 		//
 	public:
+		static void Ajust(QPainter* painter, SchemaUnit units, double startX, double startY, double zoom);
+		static void Ajust(QPainter* painter, int dpiX, int dpiY, double devicePixelRatioF, SchemaUnit units, double startX, double startY, double zoom);
+
 		virtual DrawMode drawMode() const = 0;
 
 		[[nodiscard]] double realDpiX(const QPaintDevice* device) const;
