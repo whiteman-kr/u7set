@@ -132,7 +132,6 @@ signals:
 
 private slots:
 	void textEdited(const QString &arg1);
-	void finished(int result);
 	void openClicked();
 	void tableDoubleClicked(const QModelIndex &index);
 	void prepareContextMenu(const QPoint& pos);

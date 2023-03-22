@@ -115,8 +115,15 @@ namespace ClientLib
 		Q_ASSERT(logFile);
 
 		setObjectName("TcpSourcesStateClient");
-
 		qDebug() << "TcpSourcesStateClient::TcpSourcesStateClient(...)";
+
+		connect(this, &Tcp::Client::signal_wrongServerID,
+			[this](const QString& errorMessage)
+			{
+				m_logFile.writeError(errorMessage);
+			});
+
+		return;
 	}
 
 	TcpAppSourcesState::~TcpAppSourcesState()
