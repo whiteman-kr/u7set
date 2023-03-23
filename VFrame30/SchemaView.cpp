@@ -15,22 +15,30 @@ SchemaView::SchemaView(std::shared_ptr<Schema> schema):
 {
 }
 
-void SchemaView::Ajust(QPainter* painter, double startX, double startY, double zoom) const
+void SchemaView::Ajust(QPainter* painter, SchemaUnit units, double startX, double startY, double zoom)
 {
+	int dpix = painter->device()->physicalDpiX();
+	int dpiy = painter->device()->physicalDpiY();
+	double dpr = painter->device()->devicePixelRatioF();
+
+	return SchemaView::Ajust(painter, dpix, dpiy, dpr, units, startX, startY, zoom);
+}
+
+void SchemaView::Ajust(QPainter* painter, int dpiX, int dpiY, double devicePixelRatioF, SchemaUnit units, double startX, double startY, double zoom)
+{
+	double dpix = static_cast<double>(dpiX);
+	double dpiy = static_cast<double>(dpiY);
+
 	// Set transform matrix
 	//
 	painter->resetTransform();
 
 	zoom /= 100.0;
 
-	double dpr = painter->device()->devicePixelRatioF();
-	double dpix = painter->device()->physicalDpiX();
-	double dpiy = painter->device()->physicalDpiY();
-
-	if (m_schema->unit() == SchemaUnit::Inch)
+	if (units == SchemaUnit::Inch)
 	{
-		startX = startX + 0.5 / dpr;
-		startY = startY + 0.5 / dpr;
+		startX = startX + 0.5 / devicePixelRatioF;
+		startY = startY + 0.5 / devicePixelRatioF;
 
 		double scalex = dpix * zoom;
 		double scaley = dpiy * zoom;
@@ -40,17 +48,16 @@ void SchemaView::Ajust(QPainter* painter, double startX, double startY, double z
 	}
 	else
 	{
-		startX = VFrame30::Round(startX) + 0.5 / dpr;
-		startY = VFrame30::Round(startY) + 0.5 / dpr;
+		startX = VFrame30::Round(startX) + 0.5 / devicePixelRatioF;
+		startY = VFrame30::Round(startY) + 0.5 / devicePixelRatioF;
 
-		double scalex = 1.0 / dpr * zoom;
-		double scaley = 1.0 / dpr * zoom;
+		double scalex = 1.0 / devicePixelRatioF * zoom;
+		double scaley = 1.0 / devicePixelRatioF * zoom;
 
 		painter->translate(startX, startY);
 		painter->scale(scalex, scaley);
 	}
 
-	return;
 }
 
 double SchemaView::realDpiX(const QPaintDevice* device) const
@@ -348,7 +355,7 @@ void SchemaViewWidget::draw(CDrawParam& drawParam, const QRectF& clipRect)
 
 	// Ajust QPainter
 	//
-	Ajust(p, 0, 0, zoom());
+	Ajust(p, schema()->unit(), 0, 0, zoom());
 
 	// Draw Schema
 	//
