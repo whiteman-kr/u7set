@@ -268,8 +268,6 @@ namespace Tuning
 	{
 		Q_ASSERT(writeCommandID != 0);
 
-//		qDebug() << "write Command" << writeCommandID;
-
 		m_writeStateMutex.lock();
 
 		m_writeCommandID = writeCommandID;
@@ -281,8 +279,6 @@ namespace Tuning
 	void TuningSignal::finalizeWriting(quint64 writeCommandID, NetworkError errCode)
 	{
 		m_writeStateMutex.lock();
-
-//		qDebug() << "command" << writeCommandID << " error" << TO_INT(errCode);
 
 		if (writeCommandID == m_writeCommandID)
 		{
@@ -579,7 +575,9 @@ namespace Tuning
 
 		if (m_alreadyProcessedCommands.size() == 1000)
 		{
-			m_alreadyProcessedCommands.erase(m_alreadyProcessedCommands.begin());	// remove first element
+			auto next200 = std::next(m_alreadyProcessedCommands.begin(), 200);
+			m_alreadyProcessedCommands.erase(m_alreadyProcessedCommands.begin(),
+											 next200);	 // remove first 200 elements
 		}
 
 		auto it = m_alreadyProcessedCommands.find(commandID);
@@ -591,13 +589,6 @@ namespace Tuning
 
 		//
 
-		if (m_lastProcessedCommand.commandID() != commandID)
-		{
-			return;
-		}
-
-		m_lastProcessedCommand.resetCommandID();
-		m_waitReply = false;
 		m_state.hasUnappliedParams = hasUnappliedParams;
 	}
 
@@ -640,7 +631,16 @@ namespace Tuning
 
 			//
 
-			processReply(m_reply);
+			auto it = m_alreadyProcessedCommands.find(m_lastProcessedCommand.commandID());
+
+			if (it == m_alreadyProcessedCommands.end())
+			{
+				processReply(m_reply);
+			}
+			else
+			{
+				m_alreadyProcessedCommands.erase(it);
+			}
 
 			m_waitReply = false;
 			m_lastRequestTime = 0;
@@ -1406,9 +1406,7 @@ namespace Tuning
 		if (rupHeader.timeStamp.isValid(false) == false)
 		{
 			m_state.errTimeStamp++;
-			//result &= false;
-
-			qDebug() << C_STR(QString("Error time stamp: %1").arg(rupHeader.timeStamp.rawToString(false)));
+			DEBUG_LOG_WRN(m_logger, QString("Error time stamp: %1").arg(rupHeader.timeStamp.rawToString(false)));
 		}
 
 		if (rupHeader.flags.tuningData != 1 ||
@@ -1425,7 +1423,8 @@ namespace Tuning
 			m_state.errRupModuleType++;
 			result &= false;
 
-			qDebug() << "Invalid moduleType of" << m_portEquipmentID << "( waiting" << m_lmModuleType << ", receiving" << rupHeader.moduleType << ")";
+			DEBUG_LOG_ERR(m_logger, QString("Invalid moduleType of %1 (waiting %2, receiving %3)").
+								arg(m_portEquipmentID).arg(m_lmModuleType).arg(rupHeader.moduleType));
 		}
 
 		if (rupHeader.framesQuantity != 1)

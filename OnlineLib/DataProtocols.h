@@ -192,7 +192,7 @@ namespace Fotip
 		quint16 dataType;							// enum Fotip::DataType values
 		quint32 offsetInFrameW;
 		quint64 requestNumerator;					// from v3
-		quint64 fotipProcessingNumerator;							// from v3
+		quint64 fotipProcessingNumerator;			// from v3
 
 		quint8 reserv[HEADER_RESERVE_SIZE];
 
