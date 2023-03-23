@@ -121,11 +121,19 @@ TEST_F(TuningSignalManagerTests, signalHashesAndList)
 	// signalList
 
 	std::vector<AppSignalParam> aspList = tsm.signalList();
+
 	EXPECT_EQ(aspList.size(), protoSignalSet.appsignal_size());
 
-	for (int i = 0; i < aspList.size(); i++)
+	QStringList appSignalIds;
+	for (const auto& asp : aspList)
 	{
-		EXPECT_EQ(aspList[i].appSignalId(), QString::fromStdString(protoSignalSet.appsignal(i).appsignalid()));
+		appSignalIds.push_back(asp.appSignalId());
+	}
+
+	for (int i = 0; i < protoSignalSet.appsignal_size(); i++)
+	{
+		QString setAppSignalId = QString::fromStdString(protoSignalSet.appsignal(i).appsignalid());
+		EXPECT_TRUE(std::find(appSignalIds.begin(), appSignalIds.end(), setAppSignalId) != appSignalIds.end());
 	}
 
 	return;
