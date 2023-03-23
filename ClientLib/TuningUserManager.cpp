@@ -271,14 +271,14 @@ namespace ClientLib
 
 #ifdef Q_OS_LINUX
 			QByteArray userNameData = userName.toLocal8Bit();
-			char* userName = userNameData.data();
+            char* userNameBuffer = userNameData.data();
 
 			conversePassword = password;
 
 			pam_handle_t *pamh = nullptr;
 			struct pam_conv pamc = {pamConverse, this};
 
-			int res = pam_start("su", userName, &pamc, &pamh);
+            int res = pam_start("su", userNameBuffer, &pamc, &pamh);
 
 			if (res == PAM_SUCCESS)
 			{
@@ -344,7 +344,10 @@ namespace ClientLib
 
 			if (result == false)
 			{
-				QMessageBox::critical(parent, qAppName(), QObject::tr("Wrong password!"));
+                if (parent != nullptr)
+                {
+                    QMessageBox::critical(parent, qAppName(), QObject::tr("Wrong password!"));
+                }
 			}
 			else
 			{
