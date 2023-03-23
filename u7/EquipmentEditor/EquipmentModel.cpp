@@ -1006,7 +1006,55 @@ void EquipmentModel::refreshDeviceObject(QModelIndexList& rowList)
 
 			emit dataChanged(index, index);
 		}
+		else
+		{
+			// Refresh single object without children
+			//
+			const DbFileInfo* fi = d->data();
+			if (fi == nullptr)
+			{
+				Q_ASSERT(fi);
+				return;
+			}
+
+			// Get latest version of file info
+			//
+			std::shared_ptr<DbFileInfo> newFi = std::make_shared<DbFileInfo>();
+
+			bool ok = dbController()->getFileInfo(fi->fileId(), newFi.get(), nullptr);
+			if (ok == false)
+			{
+				Q_ASSERT(ok);
+				return;
+			}
+
+			d->setData(newFi);
+
+			std::shared_ptr<DbFile> freshFile;
+			ok = dbController()->getLatestVersion(*newFi, &freshFile, nullptr);
+			if (ok == false)
+			{
+				Q_ASSERT(ok);
+				return;
+			}
+
+			// Update object
+			//
+			ok = d->Load(freshFile->data());	// Refresh data in the object
+			if (ok == false)
+			{
+				Q_ASSERT(ok);
+				return;
+			}
+
+			// Update fileInfo and model
+			//
+			QModelIndex bottomRightIndex = this->index(index.row(), ColumnCount, index.parent());
+			emit dataChanged(index, bottomRightIndex);		// Notify view about data update
+		}
 	}
+
+	emit objectVcsStateChanged();
 
 	return;
 }
