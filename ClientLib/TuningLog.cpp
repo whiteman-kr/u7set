@@ -14,8 +14,9 @@ namespace TuningLog
 	// TuningLog
 	//
 
-	TuningLog::TuningLog(const QString& logName, const QString& path, int maxFileSize, int maxFilesCount)
-		: Log::LogFile(logName, path, maxFileSize, maxFilesCount, false/*addAppInfoOnStart*/)
+	TuningLog::TuningLog(ClientLib::TuningUserManager& userManager, const QString& logName, const QString& path, int maxFileSize, int maxFilesCount)
+		: Log::LogFile(logName, path, maxFileSize, maxFilesCount, false/*addAppInfoOnStart*/),
+		  m_userManager(userManager)
 	{
 	}
 
@@ -23,9 +24,11 @@ namespace TuningLog
 	{
 	}
 
-	bool TuningLog::write(const AppSignalParam& asp, const TuningValue& oldValue, const TuningValue& newValue, const QString& userName)
+	bool TuningLog::write(const AppSignalParam& asp, const TuningValue& oldValue, const TuningValue& newValue)
 	{
 		QStringList l;
+
+		QString userName = m_userManager.loggedInUser();
 
 		if (userName.isEmpty() == true)
 		{
@@ -44,9 +47,11 @@ namespace TuningLog
 		return LogFile::writeArray(l);
 	}
 
-	bool TuningLog::write(const QString& message, const QString& userName)
+	bool TuningLog::write(const QString& message)
 	{
 		QStringList l;
+
+		QString userName = m_userManager.loggedInUser();
 
 		if (userName.isEmpty() == true)
 		{

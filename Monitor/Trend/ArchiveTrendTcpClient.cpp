@@ -21,6 +21,12 @@ ArchiveTrendTcpClient::ArchiveTrendTcpClient(const SoftwareInfo& softwareInfo,
 	qRegisterMetaType<std::shared_ptr<TrendLib::OneHourData>>("shared_ptr<TrendLib::OneHourData>>");
 	qRegisterMetaType<std::shared_ptr<TrendLib::RealtimeData>>("shared_ptr<TrendLib::RealtimeData>>");
 
+	connect(this, &Tcp::Client::signal_wrongServerID,
+		[this](const QString& errorMessage)
+		{
+			m_logFile.writeError(errorMessage);
+		});
+
 	return;
 }
 

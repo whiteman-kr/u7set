@@ -3,19 +3,14 @@
 #include <queue>
 #include <QReadWriteLock>
 #include "../Proto/network.pb.h"
-#include "../CommonLib/Hash.h"
 #include "../AppSignalLib/TuningSignalManager.h"
+#include "../CommonLib/Hash.h"
 #include "../OnlineLib/Tcp.h"
-#include "../lib/Tuning/ITuningTcpClient.h"
+#include "../OnlineLib/TcpClientStatistics.h"
+#include "../OnlineLib/SoftwareSettings.h"
+#include "../UtilsLib/LogFile.h"
 #include "TuningSourceState.h"
-
-
-enum class LmStatusFlagMode
-{
-	None,
-	SOR,
-	AccessKey
-};
+#include "TuningLog.h"
 
 namespace ClientLib
 {
@@ -30,8 +25,8 @@ namespace ClientLib
 
 		// Data
 
-		Hash m_hash = 0;
-		QString m_equipmentId;		// Used only for activation/deactivation LM
+		Hash m_appSignalHash = 0;
+		Hash m_equipmentHash;		// Used only for activation/deactivation LM
 		TuningValue m_value;
 
 		TuningWriteCommandType m_type = TuningWriteCommandType::WriteValue;
@@ -50,7 +45,7 @@ namespace ClientLib
 		{
 			m_type = TuningWriteCommandType::WriteValue;
 
-			m_hash = hash;
+			m_appSignalHash = hash;
 			m_value = value;
 		}
 
@@ -64,11 +59,11 @@ namespace ClientLib
 
 		// Activate LM constructor
 		//
-		TuningWriteCommand(const QString& equipmentId, bool enableControl, bool forceTakeControl)
+		TuningWriteCommand(Hash equipmentHash, bool enableControl, bool forceTakeControl)
 		{
 			m_type = TuningWriteCommandType::ActivateLm;
 
-			m_equipmentId = equipmentId;
+			m_equipmentHash = equipmentHash;
 			m_enableControl = enableControl;
 			m_forceTakeControl = forceTakeControl;
 		}
@@ -80,7 +75,7 @@ namespace ClientLib
 	};
 
 
-	class TuningTcpClient : public Tcp::Client, public ITuningTcpClient
+	class TuningTcpClient : public Tcp::Client, public TcpClientStatistics
 	{
 		Q_OBJECT
 
@@ -88,40 +83,41 @@ namespace ClientLib
 
 	public:
 		TuningTcpClient(const SoftwareInfo& softwareInfo,
-						const QString& tuningServiceId,
-						bool singleLmControlMode,
-						TuningSignalManager& signalManager);
+						const SoftwareEndpoint::TuningService& tunsInfo,
+						TuningSignalManager& signalManager,
+						ILogFile* log,
+						TuningLog::TuningLog* tuningLog);
 
 		virtual ~TuningTcpClient();
 
 	public:
 		// Tuning sources
 		//
-		std::vector<Hash> tuningSourcesEquipmentHashes() const;
+		std::vector<Hash> tuningSourcesHashes() const;
 		std::vector<TuningSource> tuningSourcesInfo() const;
 		bool tuningSourceInfo(Hash equipmentHash, TuningSource* result) const;
 		bool hasTuningSource(Hash equipmentHash) const;
 
-		bool activateTuningSourceControl(const QString& equipmentId, bool enableControl, bool forceTakeControl);
+		bool activateTuningSourceControl(Hash equipmentHash, bool enableControl, bool forceTakeControl);
 
 		// Searching signals
 		//
 		bool hasTuningSignals(const std::vector<Hash> appSignalHashes) const;	// Returns true if client processes at least one of specified signals
 		bool hasTuningSignal(Hash appSignalHash) const;
-		bool hasTuningSignal(QString appSignalId) const override;
+		bool hasTuningSignal(QString appSignalId) const;
 
 		// Writing states
 		//
-		void writeTuningSignal(const TuningWriteCommand& data);
 		void writeTuningSignal(const std::vector<TuningWriteCommand>& data);
+		void writeTuningSignal(const TuningWriteCommand& data);
 
 		// ITuningTcpClient implementation
 		//
 	public:
-		virtual bool writeTuningSignal(QString appSignalId, TuningValue value) override;
+		virtual bool writeTuningSignal(QString appSignalId, TuningValue value);
 		// Apply states
 		//
-		void applyTuningSignals() override;
+		void applyTuningSignals();
 
 		// Reading state
 		//
@@ -149,7 +145,7 @@ namespace ClientLib
 		void requestTuningSourcesState();
 		void processTuningSourcesState(const QByteArray& data);
 
-		void requestActivateTuningSource(const QString& equipmentId, bool enableControl, bool forceTakeControl);
+		void requestActivateTuningSource(Hash equipmentHash, bool enableControl, bool forceTakeControl);
 		void processActivateTuningSource(const QByteArray& data);
 
 		void requestReadTuningSignals();
@@ -161,13 +157,13 @@ namespace ClientLib
 		void requestApplyTuningSignals();
 		void processApplyTuningSignals(const QByteArray& data);
 
-		virtual void writeLogAlert(const QString& message);
-		virtual void writeLogError(const QString& message);
-		virtual void writeLogWarning(const QString& message);
-		virtual void writeLogMessage(const QString& message);
+		void writeLogAlert(const QString& message);
+		void writeLogError(const QString& message);
+		void writeLogWarning(const QString& message);
+		void writeLogMessage(const QString& message);
 
-		virtual void writeLogSignalChange(const AppSignalParam& param, const TuningValue& oldValue, const TuningValue& newValue);
-		virtual void writeLogSignalChange(const QString& message);
+		void writeTuningLogSignalChange(const AppSignalParam& param, const TuningValue& oldValue, const TuningValue& newValue);
+		void writeTuningLogMessage(const QString& message);
 
 	public slots:
 		void slot_signalsUpdated();
@@ -199,28 +195,30 @@ namespace ClientLib
 
 		bool singleLmControlMode() const;
 
-		bool clientIsActive() const;
-
+		bool clientIsActive() const;	// Returns if this client is selected as active in connected TuningService
 		QString activeClientId() const;
 		QString activeClientIp() const;
 
-		int activeTuningSourceCount() const;
+		Hash activeTuningSource() const;
 
-		QString activeTuningSource() const;
+		// SOR/Key mode flag
 
-		LmStatusFlagMode lmStatusFlagMode() const;
-		void setLmStatusFlagMode(const LmStatusFlagMode& mode);
+		TuningClientSettings::LmStatusFlagMode lmStatusFlagMode() const;
+		void setLmStatusFlagMode(const TuningClientSettings::LmStatusFlagMode& mode);
 
 		// Data
 		//
 	private:
+		HasLogFile m_logFile;
+		TuningLog::TuningLog* m_tuningLog = nullptr;
+
 		QString m_instanceId;
 		Hash m_instanceIdHash;
 		int m_requestInterval = 100;
 		bool m_autoApply = true;
 		QString m_tuningServiceId;
 
-		LmStatusFlagMode m_lmStatusFlagMode = LmStatusFlagMode::SOR;
+		TuningClientSettings::LmStatusFlagMode m_lmStatusFlagMode = TuningClientSettings::LmStatusFlagMode::SOR;
 
 		TuningSignalManager& m_signals;
 
@@ -246,13 +244,12 @@ namespace ClientLib
 		int m_readTuningSignalIndex = 0;
 		int m_readTuningSignalCount = 0;
 
-		bool m_singleLmControlMode = false;
-
-		mutable QMutex m_activeClientMutex;				// For access to m_activeClientId, m_activeClientIp
+		mutable QReadWriteLock m_activeClientMutex;				// For access to m_activeClientId, m_activeClientIp, m_singleLmControlMode, m_currentClientIsActive
 		QString m_activeClientId;
 		QString m_activeClientIp;
-
 		bool m_currentClientIsActive = false;
+
+		bool m_singleLmControlMode = false;
 
 	private:
 		// Cached protobuf messages

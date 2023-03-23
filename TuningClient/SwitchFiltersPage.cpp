@@ -43,7 +43,7 @@ SwitchFiltersPage::SwitchFiltersPage(TuningConfigController& configController,
 									 TuningSignalManager& tuningSignalManager,
 									 TuningClientFilterStorage& tuningFilterStorage,
 									 ClientLib::TuningUserManager& userManager,
-									 std::vector<TuningClientTcpClient*> tuningTcpClients,
+									 ClientLib::TuningConnection& tuningConnection,
 									 std::shared_ptr<TuningFilter> workspaceFilter,
 									  QWidget* parent) :
 	QWidget(parent),
@@ -51,7 +51,7 @@ SwitchFiltersPage::SwitchFiltersPage(TuningConfigController& configController,
     m_tuningSignalManager(tuningSignalManager),
 	m_tuningFilterStorage(tuningFilterStorage),
 	m_userManager(userManager),
-	m_tuningTcpClients(tuningTcpClients),
+	m_tuningConnection(tuningConnection),
     m_workspaceFilter(workspaceFilter)
 {
 	m_mainLayout = new QVBoxLayout(this);
@@ -164,16 +164,14 @@ void SwitchFiltersPage::createControls(std::shared_ptr<TuningFilter> root)
 	}
 
 	// Controls in this form only used in Multiple-LM control mode
-
-	for (const ClientLib::TuningTcpClient* client : m_tuningTcpClients)
+	//
+	for (const SoftwareEndpoint::TuningService& tsc : m_configController.configuration().clientSettings.tuningServices)
 	{
-		if (client->singleLmControlMode() == true)
+		if (tsc.singleLmControl == true)
 		{
 			m_promptLabel = new QLabel(tr("This tab should be used only with Multiple LM Control Mode of TuningServices. Disable \"SingleLMControl\" mode for all services."));
 			m_promptLabel->setAlignment(Qt::AlignHCenter | Qt::AlignCenter);
-
 			m_mainLayout->addWidget(m_promptLabel);
-
 			return;
 		}
 	}
@@ -608,6 +606,8 @@ bool SwitchFiltersPage::changeFilterSignals(std::shared_ptr<TuningFilter> filter
 
 	// Write new values
 	//
+	std::vector<ClientLib::TuningWriteCommand> commands;
+
 	for (Hash hash : signalsHashes)
 	{
 		bool ok = false;
@@ -627,14 +627,12 @@ bool SwitchFiltersPage::changeFilterSignals(std::shared_ptr<TuningFilter> filter
 		tv.setType(TuningValueType::Discrete);
 		tv.setDiscreteValue(newValue);
 
-		for (TuningClientTcpClient* client : m_tuningTcpClients)
-		{
-			if (client->hasTuningSignal(hash) == true)
-			{
-				client->writeTuningSignal(asp.appSignalId(), tv);
-				client->writeLogSignalChange(tr("'%1' filter is toggled.").arg(filter->caption()));
-			}
-		}
+		ClientLib::TuningWriteCommand c(hash, tv);
+	}
+
+	if (commands.empty() == false)
+	{
+		m_tuningConnection.writeTuningSignals(commands);
 	}
 
 	return true;
@@ -670,10 +668,7 @@ void SwitchFiltersPage::apply()
 		}
 	}
 
-	for (TuningClientTcpClient* client : m_tuningTcpClients)
-	{
-		client->applyTuningSignals();
-	}
+	m_tuningConnection.applyTuningSignals();
 
 	return;
 }

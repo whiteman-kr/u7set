@@ -28,11 +28,11 @@ namespace ClientLib
 					   const SoftwareEndpoint::AppDataService& ads,
 					   ILogFile* logFile);
 			Connection(const Connection&) = delete;
-			Connection(Connection&& src) noexcept;
+			Connection(Connection&& src) = delete;
 			~Connection();
 
 			Connection& operator=(const Connection&) = delete;
-			Connection& operator=(Connection&& src) noexcept;
+			Connection& operator=(Connection&& src) = delete;
 
 			void stopAndDestroy();
 
@@ -53,6 +53,7 @@ namespace ClientLib
 		///
 		void updateConnections(const SoftwareInfo& softwareInfo, const std::vector<SoftwareEndpoint::AppDataService>& appDataService);
 
+		std::vector<Tcp::ConnectionState> adsConnectionStates() const;
 		std::vector<ClientLib::AppDataSourceState> appDataSourceStates() const;
 
 	private:

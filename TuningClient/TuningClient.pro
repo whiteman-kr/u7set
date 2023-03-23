@@ -73,11 +73,11 @@ SOURCES +=\
     ../lib/Tuning/TuningFilterEditor.cpp \
     ../lib/Tuning/TuningModel.cpp \
     TuningClientFilterStorage.cpp \
+    TuningSourcesHelper.cpp \
     SchemasWorkspace.cpp \
     TuningSchemaView.cpp \
     TuningSchemaWidget.cpp \
     DialogFilterEditor.cpp \
-    TuningClientTcpClient.cpp \
     TuningSchemaManager.cpp \
     ../lib/Ui/DialogAlert.cpp \
     ../lib/Ui/DialogAbout.cpp \
@@ -111,11 +111,11 @@ HEADERS  += MainWindow.h \
     ../lib/Tuning/TuningFilterEditor.h \
     ../lib/Tuning/TuningModel.h \
     TuningClientFilterStorage.h \
+    TuningSourcesHelper.h \
     TuningSchemaView.h \
     TuningSchemaWidget.h \
     SchemasWorkspace.h \
     DialogFilterEditor.h \
-    TuningClientTcpClient.h \
     TuningSchemaManager.h \
     ../lib/Ui/DialogAlert.h \
     ../lib/Ui/DialogAbout.h \

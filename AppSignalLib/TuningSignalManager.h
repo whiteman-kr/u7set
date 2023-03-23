@@ -2,7 +2,7 @@
 #define TUNINGSIGNALMANAGER_H
 
 #include <unordered_map>
-#include <QMutex>
+#include <QReadWriteLock>
 
 #include "ITuningSignalManager.h"
 #include "TuningValue.h"

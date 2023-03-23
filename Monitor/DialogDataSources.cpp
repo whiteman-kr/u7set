@@ -3,13 +3,13 @@
 
 
 void DialogDataSources::create(const MonitorConfigController& configController,
-							   std::vector<ClientLib::TuningTcpClient*> tcpTuningClients,
+							   ClientLib::TuningConnection& tuningConnection,
 							   ILogFile* logFile,
 							   QWidget* parent)
 {
 	if (s_dialogDataSources == nullptr)
 	{
-		s_dialogDataSources = new DialogDataSources(configController, std::move(tcpTuningClients), logFile, parent);
+		s_dialogDataSources = new DialogDataSources(configController, tuningConnection, logFile, parent);
 		s_dialogDataSources->show();
 	}
 	else
@@ -22,22 +22,13 @@ void DialogDataSources::create(const MonitorConfigController& configController,
 	return;
 }
 
-void DialogDataSources::updateTuningTcpClients(std::vector<ClientLib::TuningTcpClient*> tcpTuningClients)
-{
-	if (s_dialogDataSources != nullptr)
-	{
-		s_dialogDataSources->setTuningTcpClients(std::move(tcpTuningClients));
-	}
-
-	return;
-}
-
 DialogDataSources::DialogDataSources(const MonitorConfigController& configController,
-									 std::vector<ClientLib::TuningTcpClient*> tcpTuningClients,
+									 ClientLib::TuningConnection& tuningConnection,
 									 ILogFile* logFile,
 									 QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	  m_configController(configController),
+	  m_tuningConnection(tuningConnection),
 	  m_logFile(logFile)
 {
 	if (m_logFile == nullptr)
@@ -65,7 +56,7 @@ DialogDataSources::DialogDataSources(const MonitorConfigController& configContro
 	m_tuningSourcesLabel = new QLabel(tr("Tuning Data Sources"));
 	m_mainLayout->addWidget(m_tuningSourcesLabel);
 
-	m_tuningSourcesWidget = new TuningSourcesWidget(std::move(tcpTuningClients), false/*hasActivationControls*/, this);
+	m_tuningSourcesWidget = new TuningSourcesWidget(m_tuningConnection, false/*hasActivationControls*/, this);
 	m_mainLayout->addWidget(m_tuningSourcesWidget);
 
 	if (m_configController.configuration().tuningEnabled == false)
@@ -117,11 +108,6 @@ DialogDataSources::~DialogDataSources()
 	Q_ASSERT(s_dialogDataSources);
 	s_dialogDataSources = nullptr;
 
-}
-
-void DialogDataSources::setTuningTcpClients(std::vector<ClientLib::TuningTcpClient*> tcpTuningClients)
-{
-	m_tuningSourcesWidget->setTuningTcpClients(std::move(tcpTuningClients));
 }
 
 void DialogDataSources::slot_configurationArrived(ConfigSettings configuration)

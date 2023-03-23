@@ -1,7 +1,8 @@
 #pragma once
 #include <map>
 #include "../MonitorConfigController.h"
-#include "RtDataProvider.h"
+#include "../ClientLib/RtDataProvider.h"
+#include "../../TrendView/TrendSignalSet.h"
 
 //
 // RtSignal: Data for RealTimeTrends on schemas, SchemaItemIndicator, type = Trend
@@ -43,13 +44,12 @@ class RtSchemaTrendDataProvider : public QObject
 	Q_OBJECT
 
 public:
-	RtSchemaTrendDataProvider(const MonitorConfigController& configController,
-							const ISignalDataServer& signalDataServer,
-							ILogFile* logFile);
+	RtSchemaTrendDataProvider(const ISignalDataServer& signalDataServer, ILogFile* logFile);
 	~RtSchemaTrendDataProvider();
 
 public:
-	void updateConnections();
+	void updateConnections(const SoftwareInfo& softwareInfo,
+						   const std::vector<SoftwareEndpoint::AppDataService>& appDataServices);
 
 	bool trendData(const QString& appSignalId, std::list<std::shared_ptr<TrendLib::OneHourData>>* outData) const;
 	TimeStamp maxTimeStamp() const;
@@ -71,7 +71,7 @@ private:
 	void trimArchive_unsafe(int durationSeconds, TrendLib::TrendArchive* archive);
 
 private:
-	RtDataProvider m_dataProvider;
+	ClientLib::RtDataProvider m_dataProvider;
 
 	mutable QMutex m_signalMutex;
 

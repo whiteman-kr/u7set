@@ -58,8 +58,12 @@
 			<Place>1</Place>
 		</LanController>
 	</Lan>
+	<Other>
+	    <OcmTxDataSizeLimit>2397</OcmTxDataSizeLimit>
+		<OcmRxDataSizeLimit>2397</OcmRxDataSizeLimit>
+	</Other>
 
-        <LogicUnitCommnads/>
+    <LogicUnitCommnads/>
 	
 	<AFBImplementation/>
 	<AFBL/>

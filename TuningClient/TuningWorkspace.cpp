@@ -1,7 +1,7 @@
 #include "TuningWorkspace.h"
 #include "Settings.h"
 #include "MainWindow.h"
-#include "../ClientLib/TuningSourcesHelper.h"
+#include "TuningSourcesHelper.h"
 
 #include <QButtonGroup>
 #include <QTreeWidget>
@@ -141,7 +141,7 @@ TuningWorkspace::TuningWorkspace(TuningConfigController& configController,
 								 TuningSignalManager& tuningSignalManager,
 								 TuningClientFilterStorage& tuningFilterStorage,
 								 ClientLib::TuningUserManager& userManager,
-								 std::vector<TuningClientTcpClient*> tcpClients,
+								 ClientLib::TuningConnection& tuningConnection,
 								 std::shared_ptr<TuningFilter> treeFilter,
 								 std::shared_ptr<TuningFilter> workspaceFilter,
 								 QWidget* parent) :
@@ -149,7 +149,7 @@ TuningWorkspace::TuningWorkspace(TuningConfigController& configController,
 	m_tuningSignalManager(tuningSignalManager),
 	m_tuningFilterStorage(tuningFilterStorage),
 	m_userManager(userManager),
-	m_tuningTcpClients(tcpClients),
+	m_tuningConnection(tuningConnection),
 	m_treeFilter(treeFilter),
 	m_workspaceFilter(workspaceFilter),
 	QWidget(parent)
@@ -336,7 +336,7 @@ void TuningWorkspace::onTimer()
 {
 	updateTabsButtonsCounters();
 
-	updateTreeItemsStatus();
+	updateTreeItemStatus();
 
 	for (auto it : m_tuningWorkspacesMap)
 	{
@@ -435,7 +435,7 @@ void TuningWorkspace::updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter
 
 		// Access (?)
 
-		if (m_configController.configuration().lmStatusFlagMode() == LmStatusFlagMode::AccessKey)
+		if (m_configController.configuration().lmStatusFlagMode() == TuningClientSettings::LmStatusFlagMode::AccessKey)
 		{
 			headerLabels << tr("Access");
 			m_columnAccessIndex = columnIndex;
@@ -444,7 +444,7 @@ void TuningWorkspace::updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter
 
 		// SOR (?)
 
-		if (m_configController.configuration().lmStatusFlagMode() == LmStatusFlagMode::SOR)
+		if (m_configController.configuration().lmStatusFlagMode() == TuningClientSettings::LmStatusFlagMode::SOR)
 		{
 			headerLabels << tr("SOR");
 			m_columnSorIndex = columnIndex;
@@ -943,7 +943,7 @@ QWidget* TuningWorkspace::createTuningPageOrWorkspace(std::shared_ptr<TuningFilt
 													  m_tuningSignalManager,
 													  m_tuningFilterStorage,
 													  m_userManager,
-													  m_tuningTcpClients,
+													  m_tuningConnection,
 													  m_treeFilter,
 													  childWorkspaceFilter,
 													  this/*parent*/);
@@ -965,7 +965,7 @@ QWidget* TuningWorkspace::createTuningPageOrWorkspace(std::shared_ptr<TuningFilt
 		{
 			// We have to create Presets Switch page
 			//
-			SwitchFiltersPage* swp = new SwitchFiltersPage(m_configController, m_tuningSignalManager, m_tuningFilterStorage, m_userManager, m_tuningTcpClients, childWorkspaceFilter, this);
+			SwitchFiltersPage* swp = new SwitchFiltersPage(m_configController, m_tuningSignalManager, m_tuningFilterStorage, m_userManager, m_tuningConnection, childWorkspaceFilter, this);
 			m_switchPresetPages.push_back(swp);
 			return swp;
 		}
@@ -976,7 +976,7 @@ QWidget* TuningWorkspace::createTuningPageOrWorkspace(std::shared_ptr<TuningFilt
 			auto it = m_tuningPagesMap.find(childWorkspaceFilterId);
 			if (it == m_tuningPagesMap.end())
 			{
-				TuningPage* tp = new TuningPage(m_configController, m_tuningSignalManager, m_tuningFilterStorage, m_userManager, m_tuningTcpClients, m_treeFilter, childWorkspaceFilter, this);
+				TuningPage* tp = new TuningPage(m_configController, m_tuningSignalManager, m_tuningFilterStorage, m_userManager, m_tuningConnection, m_treeFilter, childWorkspaceFilter, this);
 
 				m_tuningPagesMap[childWorkspaceFilterId] = tp;
 
@@ -1168,7 +1168,7 @@ void TuningWorkspace::updateTabsButtonsCounters()
 	}
 }
 
-void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
+void TuningWorkspace::updateTreeItemStatus(QTreeWidgetItem* treeItem)
 {
 	if (m_filterTree == nullptr)
 	{
@@ -1177,7 +1177,6 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 
 	if (treeItem == nullptr)
 	{
-
 		if (m_filterTree->topLevelItemCount() == 0)
 		{
 			return;
@@ -1245,7 +1244,7 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 
 		// SOR Column
 
-		if (m_columnSorIndex != -1 && m_configController.configuration().lmStatusFlagMode() == LmStatusFlagMode::SOR)
+		if (m_columnSorIndex != -1 && m_configController.configuration().lmStatusFlagMode() == TuningClientSettings::LmStatusFlagMode::SOR)
 		{
 			QColor backColor;
 			QColor textColor;
@@ -1309,7 +1308,7 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 	int count = treeItem->childCount();
 	for (int i = 0; i < count; i++)
 	{
-		updateTreeItemsStatus(treeItem->child(i));
+		updateTreeItemStatus(treeItem->child(i));
 	}
 }
 
@@ -1347,42 +1346,19 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 	int statesCount = 0;
 	int accessCount = 0;
 
-	for (const TuningClientTcpClient* client : m_tuningTcpClients)
+	std::vector<ClientLib::TuningSource> sourceInfo = m_tuningConnection.tuningSourceInfo(hash);
+
+	if (sourceInfo.empty() == true)
 	{
-		bool sourceDrivenByThisClient = false;
+		statesCount++;
+		statusStrings.push_back(tr("Unknown"));
+	}
 
-		for (const TuningClientSettings::TuningService& tcs : m_configController.configuration().clientSettings.tuningServices)
-		{
-			if (client->tuningServiceId() != tcs.tuningServiceID)
-			{
-				continue;
-			}
-
-			for (const QString& drivenSource : tcs.drivenSources)
-			{
-				if (::calcHash(drivenSource) == hash)
-				{
-					sourceDrivenByThisClient = true;
-					break;
-				}
-			}
-			if (sourceDrivenByThisClient == true)
-			{
-				break;
-			}
-		}
-
-		if (sourceDrivenByThisClient == false)
-		{
-			continue;
-		}
-
-		ClientLib::TuningSource ts;
-
+	for (const ClientLib::TuningSource& ts : sourceInfo)
+	{
 		QString sourceStatus;
 
-		if (client->tuningSourceInfo(hash, &ts) == false ||
-			ts.valid() == false)
+		if (ts.valid() == false)
 		{
 			statesCount++;
 			sourceStatus = tr("Non-Valid");
@@ -1442,7 +1418,7 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 				if (state.isreply() == true) isReplyCount++;
 				if (state.hasunappliedparams() == true) hasUnappliedParamsCount++;
 
-				if (m_configController.configuration().lmStatusFlagMode() == LmStatusFlagMode::AccessKey &&
+				if (m_configController.configuration().lmStatusFlagMode() == TuningClientSettings::LmStatusFlagMode::AccessKey &&
 					ts.valid() == true &&
 					state.controlisactive() == true &&
 					state.isreply() == true)
@@ -1451,7 +1427,7 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 				}
 			}
 		}
-	}	// Loop through clients
+	}	// Loop through states
 
 	QString statusText = statusStrings.join(" / ");
 
@@ -1462,7 +1438,7 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 
 	if (statesCount > 0 && validCount == statesCount)
 	{
-		if (hasUnappliedParamsCount == statesCount)
+		if (hasUnappliedParamsCount > 0)
 		{
 			// All are unappplied
 			//
@@ -1667,7 +1643,7 @@ void TuningWorkspace::activateControl(const QString& equipmentId, bool enable)
 		return;
 	}
 
-	ClientLib::TuningSourcesHelper::activateTuningSourceControl({m_tuningTcpClients.begin(), m_tuningTcpClients.end()}, equipmentId, enable, this);
+	ClientLib::TuningSourcesHelper::activateTuningSource(m_tuningConnection, equipmentId, enable, this);
 }
 
 QTreeWidgetItem* TuningWorkspace::findFilterWidget(const QString& id, QTreeWidgetItem* treeItem)
@@ -1791,12 +1767,12 @@ void TuningWorkspace::slot_treeContextMenuRequested(const QPoint& pos)
 		return;
 	}
 
-	const QString equipmentId = filter->caption();
+	Hash sourceHash = ::calcHash(filter->caption());
 
-	bool activateEnabled = false;
-	bool deactivateEnabled = false;
-
-	ClientLib::TuningSourcesHelper::isActivationActionsAvailable({m_tuningTcpClients.begin(), m_tuningTcpClients.end()}, equipmentId, &activateEnabled, &deactivateEnabled);
+	int sourceStatesCount = m_tuningConnection.tuningSourceStatesCount(sourceHash);
+	int activeStatesCount = m_tuningConnection.activatedTuningSourceStatesCount(sourceHash);
+	bool activateEnabled = activeStatesCount < sourceStatesCount;
+	bool deactivateEnabled = activeStatesCount != 0 && activeStatesCount == sourceStatesCount;
 
 	QMenu menu(this);
 

@@ -84,6 +84,11 @@ namespace Sim
 	//
 	// Profile
 	//
+	bool Profile::isEmpty() const
+	{
+		return profileName.isEmpty();
+	}
+
 	QStringList Profile::equipment() const
 	{
 		QStringList result;
@@ -163,6 +168,23 @@ namespace Sim
 	void Profiles::clear()
 	{
 		*this = {};
+	}
+
+	bool Profiles::load(std::filesystem::path fileName, QString* errorMessage)
+	{
+		QFile file{fileName};
+
+		if (file.open(QIODevice::ReadOnly | QIODevice::Text) == false)
+		{
+			if (errorMessage != nullptr)
+			{
+				*errorMessage = file.errorString();
+			}
+
+			return false;
+		}
+
+		return load(file.readAll(), errorMessage);
 	}
 
 	bool Profiles::load(const QByteArray& data, QString* errorMsg)

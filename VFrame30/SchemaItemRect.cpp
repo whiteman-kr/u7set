@@ -237,6 +237,23 @@ namespace VFrame30
 					static_cast<int>(vertAlign()) |
 					static_cast<int>((wordWrap() ? Qt::TextWordWrap : 0));
 
+		if (drawParam->pdfMode() == true)
+		{
+			// For pdf draw text without caching to image, it makes pdf much smaller and will allows
+			// to select and copy text to the clipboard
+			//
+			painter->setPen(m_textColor);
+
+			DrawHelper::drawText(painter,
+								 m_font,
+								 itemUnit(),
+								 text,
+								 boundingRect,
+								 flags);
+
+			return;
+		}
+
 		if (itemUnit() == SchemaUnit::Display)
 		{
 			// Pixels

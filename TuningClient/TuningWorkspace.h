@@ -1,11 +1,11 @@
 #ifndef TUNINGWORKSPACE_H
 #define TUNINGWORKSPACE_H
 
-#include "TuningPage.h"
-#include "SwitchFiltersPage.h"
-#include "TuningClientTcpClient.h"
+#include "../ClientLib/TuningConnection.h"
 #include "TuningClientFilterStorage.h"
 #include "TuningConfigController.h"
+#include "TuningPage.h"
+#include "SwitchFiltersPage.h"
 
 class FilterButton : public QPushButton
 {
@@ -39,7 +39,7 @@ public:
 							 TuningSignalManager& tuningSignalManager,
 							 TuningClientFilterStorage& tuningFilterStorage,
 							 ClientLib::TuningUserManager& userManager,
-							 std::vector<TuningClientTcpClient*> tcpClients,
+							 ClientLib::TuningConnection& tuningConnection,
 							 std::shared_ptr<TuningFilter> treeFilter,
 							 std::shared_ptr<TuningFilter> workspaceFilter,
 							 QWidget* parent);
@@ -74,7 +74,7 @@ private:
 
 	void updateTabsButtonsCounters();
 
-	void updateTreeItemsStatus(QTreeWidgetItem* treeItem = nullptr);
+	void updateTreeItemStatus(QTreeWidgetItem* treeItem = nullptr);
 
 	void updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, TuningFilter* filter);
 
@@ -97,7 +97,7 @@ private:
 	TuningClientFilterStorage& m_tuningFilterStorage;
 	ClientLib::TuningUserManager& m_userManager;
 
-	std::vector<TuningClientTcpClient*> m_tuningTcpClients;
+	ClientLib::TuningConnection& m_tuningConnection;
 
 	std::shared_ptr<TuningFilter> m_workspaceFilter;
 

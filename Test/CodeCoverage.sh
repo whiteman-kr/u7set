@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Basic script to run unit ot functional tests with code coverage support
 # and build HTML and XML reports with lcov.
@@ -9,9 +9,27 @@
 #   sudo pip install python3
 #   sudo pip install lcov-cobertura
 #
+set -x  # Echo on.
+set -e  # Terminate script if any command returns error.
 
-set -x  # Echo on
-set -e  # Terminate script if any command returns error
+# Run StopServices when exit (any error or success).
+#
+trap StopServices EXIT  
+
+function StopServices() {
+    echo "StopServices()"
+
+    # Stop services for functional tests.
+    #
+    pkill CfgSrv || true
+    pkill AppDataSrv || true
+    pkill SimulatorConsol || true       # without last e, I assume there is a limitation to 15 symbols.
+    sleep 1
+}
+
+# Stop if any service is running.
+#
+StopServices || true
 
 # lcov exec arguments and output dir.
 # 
@@ -24,18 +42,49 @@ LCOV_COLLECT_ARGUMENTS="--rc lcov_branch_coverage=1 --capture"
 rm -rvf $OUTPUT_DIR
 mkdir -p $OUTPUT_DIR
 
-# Init is not required, as we have empty dir at start
+# Init is not required, as we have an empty dir at start.
 #
 #lcov $LCOV_CLEAR_ARGUMENTS --output-file $OUTPUT_DIR/Simulator.info --directory ./Simulator/debug
 
-# Run tests
+# Build project u7_test_simulator.
 #
-./bin_unix/debug/ClientTests
-./bin_unix/debug/SimulatorTests
-./bin_unix/debug/MetrologyTests
-./bin_unix/debug/u7databasetests -config=$CI_PROJECT_DIR/Test/u7databasetestsArgsCoverage.xml
+rm -rvf /tmp/build/test_simulator
+$CI_PROJECT_DIR/bin_unix/debug/BuilderConsole $CI_PROJECT_DIR/Test/BuilderConsoleArgsCoverage.xml
 
-# Get code coverage data
+# Start services for functional tests.
+#
+pushd $CI_PROJECT_DIR/bin_unix/debug
+
+cp /tmp/build/${SIMULATOR_PROJECT_NAME}/build/RunServiceScripts/Linux/linux_code_coverage_systemid_clienttest*.sh .
+chmod +x *.sh
+
+./linux_code_coverage_systemid_clienttest_ws01_cfgs.sh simulation < /dev/null > clienttest_ws01_cfgs.out 2>&1 &
+sleep 5
+./linux_code_coverage_systemid_clienttest_ws02_cfgs.sh simulation < /dev/null > clienttest_ws02_cfgs.out 2>&1 &
+sleep 5
+./linux_code_coverage_systemid_clienttest_ws01_ads.sh < /dev/null > clienttest_ws01_ads.out 2>&1 &
+./linux_code_coverage_systemid_clienttest_ws02_ads.sh < /dev/null > clienttest_ws02_ads.out 2>&1 &
+./SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_code_coverage -enable_lan -no_exit > SimulatorConsole.out 2>&1 &
+
+sleep 5
+
+# Run ClientTests, they are functional.
+#
+./ClientTests -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_code_coverage
+
+# Stop services after ClientTests (functional tests)
+#
+StopServices || true
+
+# Run other tests, not services are required here.
+#
+./SimulatorTests
+./MetrologyTests
+./u7databasetests -config=$CI_PROJECT_DIR/Test/u7databasetestsArgsCoverage.xml
+
+popd
+
+# Get code coverage data.
 #
 
 # AppSignalLib
@@ -43,14 +92,14 @@ TEST_DIR="./AppSignalLib/debug"
 TEST_OUTPUT_FILE="AppSignalLib.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
-# Builder
-TEST_DIR="./Builder/debug"
-TEST_OUTPUT_FILE="Builder.info"
-lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
-
 # CommonLib
 TEST_DIR="./CommonLib/debug"
 TEST_OUTPUT_FILE="CommonLib.info"
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+
+# OnlineLib
+TEST_DIR="./OnlineLib/debug"
+TEST_OUTPUT_FILE="OnlineLib.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # DbLib
@@ -66,6 +115,11 @@ lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTP
 # Metrology
 TEST_DIR="./Test/MetrologyTests"
 TEST_OUTPUT_FILE="MetrologyTests.info"
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+
+# Builder
+TEST_DIR="./Builder/debug"
+TEST_OUTPUT_FILE="Builder.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # Simulator
@@ -88,32 +142,43 @@ TEST_DIR="./ClientLib/debug"
 TEST_OUTPUT_FILE="ClientLib.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
+# AppDataSrv -- Cannot collect .gcda as process is killed and not finished normally
+#TEST_DIR="./AppDataService"
+#TEST_OUTPUT_FILE="AppDataSrv.info"
+#lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+
+# CfgSrv -- Cannot collect .gcda as process is killed and not finished normally
+#TEST_DIR="./ConfigurationService"
+#TEST_OUTPUT_FILE="CfgSrv.info"
+#lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+
+
 # Combine results to a single file, result stored to $OUTPUT_DIR/u7set-dirty.info
 #
 lcov --output-file $OUTPUT_DIR/u7set-dirty.info \
     --add-tracefile $OUTPUT_DIR/AppSignalLib.info \
     --add-tracefile $OUTPUT_DIR/CommonLib.info \
+    --add-tracefile $OUTPUT_DIR/OnlineLib.info \
     --add-tracefile $OUTPUT_DIR/DbLib.info \
     --add-tracefile $OUTPUT_DIR/HardwareLib.info \
     --add-tracefile $OUTPUT_DIR/MetrologyTests.info \
+    --add-tracefile $OUTPUT_DIR/Builder.info \
     --add-tracefile $OUTPUT_DIR/Simulator.info \
     --add-tracefile $OUTPUT_DIR/UtilsLib.info \
     --add-tracefile $OUTPUT_DIR/ClientLib.info
 
-# There is no test data for these files yet.
-#
-#--add-tracefile $OUTPUT_DIR/Builder.info             
-#--add-tracefile $OUTPUT_DIR/TrendView.info
+#    --add-tracefile $OUTPUT_DIR/AppDataSrv.info \
+#    --add-tracefile $OUTPUT_DIR/CfgSrv.info
 
-# Filter combined file, result stored to $OUTPUT_DIR/u7set.info
+# Filter combined file, result stored to $OUTPUT_DIR/u7set.info.
 #
 lcov -r $OUTPUT_DIR/u7set-dirty.info "*Qt*.framework*" "/usr/*" "*/Qt/*" "*/Proto*/*" "*.pb.*" "*/Test*/*" "*.moc" "*moc_*.cpp" "*/test/*" --output-file $OUTPUT_DIR/u7set.info
 
 # Generate HTML report.
 #
-genhtml --legend --rc lcov_branch_coverage=1 --output-directory $OUTPUT_DIR/Report $OUTPUT_DIR/u7set.info
+genhtml --legend --rc lcov_branch_coverage=1 --rc genhtml_med_limit=60 --rc genhtml_hi_limit=80 --output-directory $OUTPUT_DIR/Report $OUTPUT_DIR/u7set.info
 
-# Generate cobertura XML (for GitLab CI). 
+# Generate cobertura XML (for GitLab CI).
 # https://pypi.org/project/lcov-cobertura/
 # sudo pip install lcov-cobertura
 #

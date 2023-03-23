@@ -1,49 +1,16 @@
 #include "TuningController.h"
 #include "../AppSignalLib/AppSignalParam.h"
 #include "../AppSignalLib/ITuningSignalManager.h"
-#include "../lib/Tuning/ITuningTcpClient.h"
 
 namespace VFrame30
 {
-	TuningController::TuningController(ITuningSignalManager* signalManager, ITuningTcpClient* tcpClient, QWidget* parent) :
-		QObject(parent),
-		m_signalManager(signalManager)
-	{
-		if (tcpClient != nullptr)
-		{
-			m_tcpClients.push_back(tcpClient);
-		}
-
-		assert(m_signalManager);
-		return;
-	}
-
-	TuningController::TuningController(ITuningSignalManager* signalManager, std::vector<ITuningTcpClient*> tcpClients, QWidget* parent) :
+	TuningController::TuningController(ITuningSignalManager* signalManager, ITuningConnection* tuningConnection, QWidget* parent) :
 		QObject(parent),
 		m_signalManager(signalManager),
-		m_tcpClients(tcpClients)
+		m_tuningConnection(tuningConnection)
 	{
 		assert(m_signalManager);
 		return;
-	}
-
-	void TuningController::setTcpClient(ITuningTcpClient* tcpClient)
-	{
-		std::vector<ITuningTcpClient*> tcpClients;
-		tcpClients.push_back(tcpClient);
-		setTcpClients(tcpClients);
-		return;
-	}
-
-	void TuningController::setTcpClients(std::vector<ITuningTcpClient*> tcpClients)
-	{
-		m_tcpClients = tcpClients;
-		return;
-	}
-
-	void TuningController::resetTcpClient()
-	{
-		m_tcpClients.clear();
 	}
 
 	AppSignalParam TuningController::signalParam(const QString& appSignalId, bool* ok) const
@@ -107,12 +74,6 @@ namespace VFrame30
 
 	bool TuningController::writeValue(QString appSignalId, QVariant value)
 	{
-		if (m_tcpClients.empty() == true)
-		{
-			qDebug() << "Warning: Attempt to write tuning value while m_tcpClients are not set.";
-			return false;
-		}
-
 		if (checkTuningAccess() == false)
 		{
 			return true;	// Access is denied, this is not an error
@@ -233,34 +194,19 @@ namespace VFrame30
 			}
 		}
 
-		for (ITuningTcpClient* client : m_tcpClients)
-		{
-			if (client->hasTuningSignal(appSignalId) == true)
-			{
-				ok &= client->writeTuningSignal(appSignalId, tuningValue);
-			}
-		}
+		ok &= m_tuningConnection->writeTuningSignal(appSignalId, tuningValue);
 
 		return ok;
 	}
 
 	void TuningController::apply()
 	{
-		if (m_tcpClients.empty() == true)
-		{
-			qDebug() << "Warning: Attempt to write tuning value while m_tcpClients are not set.";
-			return;
-		}
-
 		if (checkTuningAccess() == false)
 		{
 			return;	// Access is denied, this is not an error
 		}
 
-		for (ITuningTcpClient* client : m_tcpClients)
-		{
-			client->applyTuningSignals();
-		}
+		m_tuningConnection->applyTuningSignals();
 
 		return;
 	}

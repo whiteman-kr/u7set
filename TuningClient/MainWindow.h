@@ -8,10 +8,10 @@
 #include "TuningConfigController.h"
 #include "LogonWorkspace.h"
 #include "DialogTuningSources.h"
+#include "../ClientLib/TuningConnection.h"
 #include "../ClientLib/TuningUserManager.h"
 #include "../lib/Ui/DialogTcpStatistics.h"
 
-class TuningClientTcpClient;
 class DialogAlert;
 
 namespace Ui {
@@ -60,9 +60,6 @@ private:
 
 	void createAndCheckFiltersHashes(bool userFiltersOnly);
 
-	void runTcpClients();
-	void stopTcpClients();
-
 	void createWorkspace();
 	void deleteWorkspace();
 
@@ -71,6 +68,10 @@ private:
 	bool eventFilter(QObject *object, QEvent *event) override;
 
 	void updateStatusBar();
+	void showSoftwareConnection(const QString& caption,
+								const std::vector<Tcp::ConnectionState>& connectionStates,
+								QLabel* label);
+
 
 signals:
 	void timerTick500();
@@ -94,8 +95,7 @@ private:
 
 	// Connections
 	//
-	std::vector<TuningClientTcpClient*> m_tcpClients;
-	std::vector<SimpleThread*> m_tcpClientThreads;
+	ClientLib::TuningConnection m_tuningConnection;
 
 	// Workspace items
 	//
@@ -141,9 +141,6 @@ private:
 	int m_logErrorsCounter = -1;
 	int m_logWarningsCounter = -1;
 
-	QString m_singleLmControlModeText;
-	QString m_multipleLmControlModeText;
-	QString m_mixedLmControlModeText;
 	QString m_sorTooltipText;
 };
 

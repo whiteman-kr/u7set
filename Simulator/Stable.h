@@ -11,6 +11,7 @@
 #include <queue>
 #include <algorithm>
 #include <cstring>
+#include <filesystem>
 
 // Qt includes
 //

@@ -66,6 +66,10 @@
 			<Place>3</Place>
 		</LanController>
 	</Lan>
+	<Other>
+		<OcmTxDataSizeLimit>2397</OcmTxDataSizeLimit>
+		<OcmRxDataSizeLimit>2397</OcmRxDataSizeLimit>
+	</Other>
 
     <LogicUnitCommnads>
 	    <Command Caption="nop"			Code="0040"	CodeMask="07c0"	SimulationFunc="command_nop"		ParseFunc="parse_nop"		Description="No operation"/>

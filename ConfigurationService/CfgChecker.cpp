@@ -14,10 +14,12 @@
 
 QStringList redundantFileExtensions = QStringList() << ".alb" << ".asm" << ".mcb" << ".mct" << ".mem" << ".mif" << ".tub" << ".tun" << ".txt" << ".bts";
 
-CfgCheckerWorker::CfgCheckerWorker(const QString& workFolder,
+CfgCheckerWorker::CfgCheckerWorker(const QString& serviceEquipmentID,
+								   const QString& workFolder,
 								   const QString& autoloadBuildFolder,
 								   int checkNewBuildInterval,
 								   std::shared_ptr<CircularLogger> logger) :
+	m_serviceEquipmentID(serviceEquipmentID),
 	m_workFolder(workFolder),
 	m_autoloadBuildFolder(autoloadBuildFolder),
 	m_checkNewBuildInterval(checkNewBuildInterval),
@@ -265,7 +267,7 @@ bool CfgCheckerWorker::updateBuildXml()
 
 	// Copying into workDirectory/check-date
 	//
-	QString workStorage = m_workFolder + "/CfgSrvStorage";
+	QString workStorage = getWorkStoragePath();
 	QDir workDirectory(workStorage);
 	QString newCheckDirectoryName = "check-" + QDateTime::currentDateTime().toString("yyyy-MM-dd-HH-mm-ss");
 	QString newCheckDirectoryPath = workStorage + "/" + newCheckDirectoryName;
@@ -337,7 +339,7 @@ bool CfgCheckerWorker::updateBuildXml()
 void CfgCheckerWorker::renameWorkToBackup(QString workDirectoryPathToLeave)
 {
 	QString workDirectoryNameToLeave = workDirectoryPathToLeave.right(24);	// 24 symbols in directory name work-YYYY-DD-MM-hh-mm-ss
-	QString workStorage = m_workFolder + "/CfgSrvStorage";
+	QString workStorage = getWorkStoragePath();
 	QDir workDirectory(workStorage);
 
 	QStringList&& workBuildDirectoryList = workDirectory.entryList(QStringList() << "work-?\?\?\?-?\?-?\?-?\?-?\?-?\?", QDir::Dirs | QDir::NoSymLinks, QDir::Name);
@@ -368,7 +370,7 @@ void CfgCheckerWorker::renameWorkToBackup(QString workDirectoryPathToLeave)
 bool CfgCheckerWorker::renameWorkToBackupCorrupted(QString corruptedWorkDirectoryPath)
 {
 	QString corruptedWorkDirectoryName = corruptedWorkDirectoryPath.right(24);	// 24 symbols in directory name work-YYYY-DD-MM-hh-mm-ss
-	QString workStorage = m_workFolder + "/CfgSrvStorage";
+	QString workStorage = getWorkStoragePath();
 
 	QString fullPath = workStorage + "/" + corruptedWorkDirectoryName;
 	QString date = corruptedWorkDirectoryName.right(19);
@@ -391,17 +393,31 @@ bool CfgCheckerWorker::renameWorkToBackupCorrupted(QString corruptedWorkDirector
 
 void CfgCheckerWorker::onThreadStarted()
 {
+	QDir d;
+
 	if (m_workFolder.isEmpty() == true)
 	{
 		m_workFolder = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
 	}
+	else
+	{
+		if (d.mkpath(m_workFolder) == false)
+		{
+			DEBUG_LOG_ERR(m_logger, "Error creating work directory: " + m_workFolder);
 
-	QDir workDirectory(m_workFolder);
-	QString workStorage = m_workFolder + "/CfgSrvStorage";
+			m_workFolder = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
 
-	if (workDirectory.exists("CfgSrvStorage") == false && !workDirectory.mkpath(workStorage) == false)
+			DEBUG_LOG_WRN(m_logger, "Standart app data location will be used: " + m_workFolder);
+		}
+	}
+
+	QString workStorage = getWorkStoragePath();
+
+	if (d.mkpath(workStorage) == false)
 	{
 		m_workFolder.clear();
+		DEBUG_LOG_ERR(m_logger, "Error creating work storage directory: " + workStorage);
+		return;
 	}
 
 	if (m_workFolder.isEmpty() || m_autoloadBuildFolder.isEmpty())
@@ -411,7 +427,7 @@ void CfgCheckerWorker::onThreadStarted()
 	}
 	else
 	{
-		DEBUG_LOG_MSG(m_logger, "Autoupdate is working to " + workStorage);
+		DEBUG_LOG_MSG(m_logger, "Working storage path: " + workStorage);
 	}
 
 	QDir storageDirectory(workStorage);
@@ -466,3 +482,12 @@ void CfgCheckerWorker::onThreadStarted()
 		checkBuildXmlTimer->start(m_checkNewBuildInterval);
 	}
 }
+
+QString CfgCheckerWorker::getWorkStoragePath() const
+{
+	Q_ASSERT(m_workFolder.isEmpty() == false);
+	Q_ASSERT(m_serviceEquipmentID.isEmpty() == false);
+
+	return QString("%1/CfgSrvStorage/%2").arg(m_workFolder).arg(m_serviceEquipmentID);
+}
+

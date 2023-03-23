@@ -27,12 +27,13 @@ namespace ClientLib
 					   IAppSignalUpdater& signalUpdater,
 					   IRecentAppSignals* recentAppSignals,
 					   ILogFile* logFile);
-			Connection(const Connection&) = delete;
-			Connection(Connection&& src) noexcept;
 			~Connection();
 
+			Connection() = delete;
+			Connection(const Connection&) = delete;
+			Connection(Connection&& src) = delete;
 			Connection& operator=(const Connection&) = delete;
-			Connection& operator=(Connection&& src) noexcept;
+			Connection& operator=(Connection&& src) = delete;
 
 			void stopAndDestroy();
 			HostAddressPort address() const;
@@ -50,6 +51,7 @@ namespace ClientLib
 		explicit AdsConnection(IAppSignalUpdater& signalUpdater,
 							   IRecentAppSignals* recentAppSignals,		// Can be nullptr, then recent state comm thread will not be created.
 							   ILogFile* logFile);
+		virtual ~AdsConnection();
 
 	public:
 		/// Call this function when the new configuration arrived to recreate communication thread with the new configuration

@@ -16,7 +16,7 @@
 MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow{parent},
 	m_LogFile{qAppName(), QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + softwareInfo.equipmentID()},
-	m_tuningLogFile{qAppName() + "Tuning", QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + softwareInfo.equipmentID()},
+	m_tuningLogFile{m_tuningUserManager, qAppName() + "Tuning", QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + softwareInfo.equipmentID()},
 	m_instanceResolver{instanceResolver},
 	m_configController{softwareInfo, MonitorAppSettings::instance().configuratorAddress1(), MonitorAppSettings::instance().configuratorAddress2(), &m_LogFile},
 	m_signalManager{&m_LogFile},
@@ -26,6 +26,7 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	setWindowTitle(MonitorAppSettings::instance().windowCaption());
 
 	connect(&m_configController, &MonitorConfigController::configurationArrived, this, &MonitorMainWindow::slot_configurationArrived);
+	connect(&m_configController, &MonitorConfigController::tuningSignalsArrived, this, &MonitorMainWindow::slot_tuningSignalsArrived);
 	connect(&m_configController, &MonitorConfigController::error, this, &MonitorMainWindow::slot_configurationError);
 
 	// DialogAlert
@@ -36,7 +37,7 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	// Creating signals controllers for VFrame30
 	//
 	m_appSignalController = std::make_unique<VFrame30::AppSignalController>(&m_signalManager);
-	m_tuningController = std::make_unique<MonitorTuningController>(&theTuningSignals, nullptr, &m_tuningUserManager);
+	m_tuningController = std::make_unique<MonitorTuningController>(&m_tuningSignalManager, &m_tuningConnection, &m_tuningUserManager);
 	m_logController = std::make_unique<VFrame30::LogController>(&m_LogFile);
 
 	// --
@@ -116,15 +117,6 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 			{
 				schemaListWidget->setDetails(m_configController.schemasDetailsSet());
 			});
-
-	return;
-}
-
-MonitorMainWindow::~MonitorMainWindow()
-{
-	DialogDataSources::updateTuningTcpClients({});
-
-	stopTuningTcpClients();
 
 	return;
 }
@@ -709,53 +701,6 @@ MonitorCentralWidget* MonitorMainWindow::monitorCentralWidget()
 	return centralWidget;
 }
 
-void MonitorMainWindow::runTuningTcpClients()
-{
-	if (m_tuningTcpClients.empty() == false || m_tuningTcpClientThreads.empty() == false)
-	{
-		Q_ASSERT(m_tuningTcpClients.empty() == true);
-		Q_ASSERT(m_tuningTcpClientThreads.empty() == true);
-		return;
-	}
-
-	for (const auto& ts : m_configController.configuration().tuningServices)
-	{
-		// TuningClientTcpClient
-		//
-		MonitorTuningTcpClient* client = new MonitorTuningTcpClient(m_configController.softwareInfo(),
-																	ts.equipmentId,
-																	theTuningSignals,
-																	&m_LogFile,
-																	&m_tuningLogFile,
-																	m_tuningUserManager);
-
-		const HostAddressPort addrPort = HostAddressPort(ts.clientRequestIP, ts.clientRequestPort);
-		client->setServers(addrPort, addrPort, false);
-
-		SimpleThread* thread = new SimpleThread(client);
-		thread->start();
-
-		m_tuningTcpClients.push_back(client);
-		m_tuningTcpClientThreads.push_back(thread);
-	}
-
-	return;
-}
-
-void MonitorMainWindow::stopTuningTcpClients()
-{
-	for (SimpleThread* t : m_tuningTcpClientThreads)
-	{
-		t->quitAndWait(10000);
-		delete t;
-	}
-
-	m_tuningTcpClients.clear();
-	m_tuningTcpClientThreads.clear();
-
-	return;
-}
-
 void MonitorMainWindow::updateStatusBar()
 {
 	// Update status bar
@@ -784,58 +729,11 @@ void MonitorMainWindow::updateStatusBar()
 
 	// TuningService connection
 	//
-	if  (m_configController.configuration().tuningEnabled == true && m_tuningTcpClients.empty() == false)
 	{
-		QString statusText;
-		QString tooltipText;
-
-		statusText = tr(" %1:").arg(tr("Tuning Service"));
-
-		for (const MonitorTuningTcpClient* client : m_tuningTcpClients)
-		{
-			Tcp::ConnectionState tuningClientState = client->getConnectionState();
-
-			const auto& portPrimary = client->serverAddressPort1();
-			const auto& portSecondary = client->serverAddressPort2();
-
-			tooltipText.append(tr("%1\r\n\r\n").arg(client->tuningServiceId()));
-			tooltipText.append(tr("Address (primary): %1\r\n").arg(portPrimary.addressPortStr()));
-			tooltipText.append(tr("Address (secondary): %1\r\n\r\n").arg(portSecondary.addressPortStr()));
-			tooltipText.append(tr("Address (current): %1\r\n").arg(tuningClientState.peerAddr.addressPortStr()));
-
-			if (tuningClientState.isConnected == true)
-			{
-				statusText += tr(" %1 /").arg(tuningClientState.replyCount);
-				tooltipText.append(tr("Connection: established\n\n"));
-			}
-			else
-			{
-				if (m_tuningTcpClients.size() > 1)
-				{
-					statusText += tr(" No /");
-				}
-				else
-				{
-					statusText += tr(" No connection");
-				}
-				tooltipText.append(tr("Connection: no connection\n\n"));
-			}
-		}
-
-		statusText.remove(statusText.length() - 1, 1);
-
-		tooltipText = tooltipText.trimmed();
-
-		if (m_statusBarTuningConnection->text() != statusText)
-		{
-			m_statusBarTuningConnection->setText(statusText);
-		}
-		if (m_statusBarTuningConnection->toolTip() != tooltipText)
-		{
-			m_statusBarTuningConnection->setToolTip(tooltipText);
-		}
+		showSoftwareConnection("TuningService",
+							   m_tuningConnection.tcpTuningConnStates(),
+							   m_statusBarTuningConnection);
 	}
-
 
 	// BuildNo
 	//
@@ -975,7 +873,7 @@ void MonitorMainWindow::showTuningLog()
 void MonitorMainWindow::showDataSources()
 {
 	DialogDataSources::create(m_configController,
-							  {m_tuningTcpClients.begin(), m_tuningTcpClients.end()},
+							  m_tuningConnection,
 							  &m_LogFile,
 							  this);
 }
@@ -1558,6 +1456,12 @@ void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
 	// Update AppSignalManager with specific data
 	//
 	m_adsConnection.updateConnections(m_configController.softwareInfo(), configuration.appDataServices);
+
+	m_tuningConnection.updateConnections(m_configController.softwareInfo(),
+										 configuration.tuningServices,
+										 true/*autoApply*/,
+										 TuningClientSettings::LmStatusFlagMode::None);
+
 	m_signalManager.setSetpoints(m_configController.setpoints());
 
 	// Log out from tuning
@@ -1577,20 +1481,6 @@ void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
 	showTuningLoginControls();
 
     m_pTuningLogAction->setVisible(configuration.tuningEnabled == true);
-
-	// Close TuningTcpClients
-	//
-	stopTuningTcpClients();
-
-	// Create TuningTcpClients if tuning is enabled
-	//
-	if (configuration.tuningEnabled == true)
-	{
-		runTuningTcpClients();
-	}
-
-	m_tuningController->setTcpClients({m_tuningTcpClients.begin(),m_tuningTcpClients.end()});
-	DialogDataSources::updateTuningTcpClients({m_tuningTcpClients.begin(),m_tuningTcpClients.end()});
 
 	m_statusBarTuningConnection->setVisible(configuration.tuningEnabled == true);
 
@@ -1773,6 +1663,15 @@ void MonitorMainWindow::slot_loggedOut()
 	}
 
 	m_loginUserTimeoutAction->setEnabled(false);
+}
+
+void MonitorMainWindow::slot_tuningSignalsArrived(QByteArray data)
+{
+	if (m_tuningSignalManager.load(data) == false)
+	{
+		QString completeErrorMessage = QObject::tr("Tuning signals file loading error.");
+		m_LogFile.writeError(completeErrorMessage);
+	}
 }
 
 MonitorConfigController& MonitorMainWindow::configController()

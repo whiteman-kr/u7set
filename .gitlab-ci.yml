@@ -1,5 +1,8 @@
 variables:
   GIT_DEPTH: "1"
+  QT_VERSION: "6.3.2"
+  COMPILER_TESTS_PROJECT_NAME: "compiler_tests_v382"
+  SIMULATOR_PROJECT_NAME: "test_simulator_v382"
   
 stages:
   - build
@@ -51,7 +54,7 @@ linux_build_job:
     - "# ----------------------------------------------"
     - "#               Build Project"
     - "# ----------------------------------------------"    
-    - "/opt/Qt/6.3.2/gcc_64/bin/qmake u7set.pro -spec linux-g++"
+    - "/opt/Qt/${QT_VERSION}/gcc_64/bin/qmake u7set.pro -spec linux-g++"
     - "make -j12"
 
   artifacts:
@@ -79,7 +82,7 @@ windows_build_job:
     - "echo $Env:CI_COMMIT_SHA"
     - "git status"
     - "git log -1"
-    - $Env:QT_BIN_DIR="C:\\Qt\\6.3.2\\msvc2019_64"
+    - $Env:QT_BIN_DIR="C:\\Qt\\${Env:QT_VERSION}\\msvc2019_64"
 #generation version file
     - "'#pragma once' > gitlabci_version.h"
     - "' ' >> gitlabci_version.h"
@@ -207,10 +210,10 @@ windows_test_job:
     - "git log -1"
 #Run Create databases for compiler and simulator tests
     - echo Creating PostgreSQL databases...
-    - psql -U postgres -c "CREATE DATABASE u7_compiler_tests_v381 OWNER u7;"
-    - cmd '/c psql -U postgres u7_compiler_tests_v381 < c:\Data\u7_compiler_tests_v381.sql'
-    - psql -U postgres -c "CREATE DATABASE u7_test_simulator_v381 OWNER u7;"
-    - cmd '/c psql -U postgres u7_test_simulator_v381 < c:\Data\u7_test_simulator_v381.sql'
+    - psql -U postgres -c "CREATE DATABASE u7_${Env:COMPILER_TESTS_PROJECT_NAME} OWNER u7;"
+    - Get-Content c:\Data\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql | psql -U postgres u7_${Env:COMPILER_TESTS_PROJECT_NAME}
+    - psql -U postgres -c "CREATE DATABASE u7_${Env:SIMULATOR_PROJECT_NAME} OWNER u7;"
+    - Get-Content c:\Data\u7_${Env:SIMULATOR_PROJECT_NAME}.sql | psql -U postgres u7_${Env:SIMULATOR_PROJECT_NAME}
 #Run XML validation
     - "# ----------------------------------------------"
     - "#               Run XML validation"
@@ -224,10 +227,10 @@ windows_test_job:
     - "# ----------------------------------------------"
     - "#               Run unit tests"
     - "# ----------------------------------------------"
-    - "&$Env:CI_PROJECT_DIR/bin/release/u7databasetests.exe -config=\"$Env:CI_PROJECT_DIR/Test/u7databasetestsArgs.xml\" -o u7databasetests.xml,junitxml -o -,txt"
-    - "&$Env:CI_PROJECT_DIR/bin/release/ClientTests.exe -o ClientTests.xml,junitxml -o -,txt"
-    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorTests.exe -o SimulatorTests.xml,junitxml -o -,txt"
-    - "&$Env:CI_PROJECT_DIR/bin/release/MetrologyTests.exe -o MetrologyTests.xml,junitxml -o -,txt"
+    - "&$Env:CI_PROJECT_DIR/bin/release/ClientTests.exe --gtest_filter=-AdsConnectionTests.*:ConfigControllerTests.*:AdsSourceStateConnectionTests.*"
+    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorTests.exe"
+    - "&$Env:CI_PROJECT_DIR/bin/release/MetrologyTests.exe"
+    - "&$Env:CI_PROJECT_DIR/bin/release/u7databasetests.exe -config=\"$Env:CI_PROJECT_DIR/Test/u7databasetestsArgs.xml\""
 
 #Run Builder test
     - "# ----------------------------------------------"
@@ -246,26 +249,13 @@ windows_test_job:
     - "# ----------------------------------------------"
     - "#               Run Simulator AFBs tests"
     - "# ----------------------------------------------"
-    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorConsole.exe -build=c:/temp/build/test_simulator_v381/build -script=\"$Env:CI_PROJECT_DIR/Simulator/SimProjectTests.js\""
+    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorConsole.exe -build=c:/temp/build/$Env:SIMULATOR_PROJECT_NAME/build -script=\"$Env:CI_PROJECT_DIR/Simulator/SimProjectTests.js\""
 
 #Run ROVT to check configuration generation
     - "# ----------------------------------------------"
     - "#               Run ROVT tests"
     - "# ----------------------------------------------"
-    - "#&C:/ROVT/ROVT_C.exe /b:C:\\Temp\\build\\test_simulator_v381\\build"
-  artifacts:
-    name: "u7set_test_windows_0.9.$CI_PIPELINE_ID $CI_BUILD_REF_SLUG $CI_COMMIT_SHA"
-    paths:
-      - u7databasetests.xml
-      - ClientTests.xml
-      - SimulatorTests.xml
-      - MetrologyTests.xml
-    reports:
-      junit: 
-        - u7databasetests.xml
-        - ClientTests.xml
-        - SimulatorTests.xml
-        - MetrologyTests.xml
+    - "#&C:/ROVT/ROVT_C.exe /b:C:\\Temp\\build\\$Env:SIMULATOR_PROJECT_NAME\\build"
 
 
 linux_test_job:
@@ -298,22 +288,17 @@ linux_test_job:
 
 #Create databases for compiler and simulator tests
     - "echo Creating PostgreSQL databases..."
+    - "pushd /tmp"
     - "cp $CI_PROJECT_DIR/Test/ImportDatabase.sh /tmp"
-    - "pushd /mnt/f/TestDatabase"
-    - "echo P2ssw0rd | su postgres /tmp/ImportDatabase.sh u7_compiler_tests_v381"
-    - "echo P2ssw0rd | su postgres /tmp/ImportDatabase.sh u7_test_simulator_v381"
-    - "popd"
+    - "cp /mnt/f/TestDatabase/u7_${COMPILER_TESTS_PROJECT_NAME}.sql /tmp"
+    - "cp /mnt/f/TestDatabase/u7_${SIMULATOR_PROJECT_NAME}.sql /tmp"
+    - "echo P2ssw0rd | su postgres /tmp/ImportDatabase.sh /tmp/u7_${COMPILER_TESTS_PROJECT_NAME}.sql u7_${COMPILER_TESTS_PROJECT_NAME}"
+    - "echo P2ssw0rd | su postgres /tmp/ImportDatabase.sh /tmp/u7_${SIMULATOR_PROJECT_NAME}.sql u7_${SIMULATOR_PROJECT_NAME}"
     - "rm /tmp/ImportDatabase.sh"
+    - "rm /tmp/u7_${COMPILER_TESTS_PROJECT_NAME}.sql"
+    - "rm /tmp/u7_${SIMULATOR_PROJECT_NAME}.sql"
+    - "popd"
     - "echo Creating PostgreSQL databases complete
-
-#Run unit tests
-    - "# ----------------------------------------------"
-    - "#               Run unit tests"
-    - "# ----------------------------------------------"
-    - "$CI_PROJECT_DIR/bin_unix/release/u7databasetests -config=$CI_PROJECT_DIR/Test/u7databasetestsArgsLinux.xml -o u7databasetestslinux.xml,junitxml -o -,txt"
-    - "$CI_PROJECT_DIR/bin_unix/release/ClientTests -o ClientTestsLinux.xml,junitxml -o -,txt"
-    - "$CI_PROJECT_DIR/bin_unix/release/SimulatorTests -o SimulatorTestsLinux.xml,junitxml -o -,txt"
-    - "$CI_PROJECT_DIR/bin_unix/release/MetrologyTests -o MetrologyTests.xml,junitxml -o -,txt"
 
 #Run Builder test
     - "# ----------------------------------------------"
@@ -332,27 +317,44 @@ linux_test_job:
     - "# ----------------------------------------------"
     - "#               Run Simulator AFBs tests"
     - "# ----------------------------------------------"
-    - "$CI_PROJECT_DIR/bin_unix/release/SimulatorConsole -build=/tmp/build/test_simulator_v381/build -script=\"$CI_PROJECT_DIR/Simulator/SimProjectTests.js\""
+    - "$CI_PROJECT_DIR/bin_unix/release/SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -script=\"$CI_PROJECT_DIR/Simulator/SimProjectTests.js\""
+
+#Run unit tests
+    - "# ----------------------------------------------"
+    - "#               Run client tests"
+    - "# ----------------------------------------------"
+    - "function StopServices () { pkill CfgSrv || true; pkill AppDataSrv || true; pkill SimulatorConsol || true; sleep 2; }"
+    - "trap StopServices EXIT"
+    - "pushd $CI_PROJECT_DIR/bin_unix/release"
+    - "StopServices || true"
+    - "cp /tmp/build/${SIMULATOR_PROJECT_NAME}/build/RunServiceScripts/Linux/linux_test_job_systemid_clienttest*.sh ."
+    - "chmod +x *.sh"
+    - "./linux_test_job_systemid_clienttest_ws01_cfgs.sh simulation < /dev/null > clienttest_ws01_cfgs.out 2>&1 &"
+    - "sleep 5"
+    - "./linux_test_job_systemid_clienttest_ws02_cfgs.sh simulation < /dev/null > clienttest_ws02_cfgs.out 2>&1 &"
+    - "sleep 5"
+    - "./linux_test_job_systemid_clienttest_ws01_ads.sh < /dev/null > clienttest_ws01_ads.out 2>&1 &"
+    - "./linux_test_job_systemid_clienttest_ws02_ads.sh < /dev/null > clienttest_ws02_ads.out 2>&1 &"
+    - "./SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_test_job -enable_lan -no_exit > SimulatorConsole.out 2>&1 &"
+    - "sleep 5"
+    - "jobs"
+    - "./ClientTests -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_test_job"
+    - "StopServices || true"
+    - "popd"
+
+#Run unit tests
+    - "# ----------------------------------------------"
+    - "#               Run unit tests"
+    - "# ----------------------------------------------"
+    - "$CI_PROJECT_DIR/bin_unix/release/SimulatorTests"
+    - "$CI_PROJECT_DIR/bin_unix/release/MetrologyTests"
+    - "$CI_PROJECT_DIR/bin_unix/release/u7databasetests -config=$CI_PROJECT_DIR/Test/u7databasetestsArgsLinux.xml"
 
 #Run ROVT to check configuration generation
 #    - "# ----------------------------------------------"
 #    - "#               Run ROVT tests"
 #    - "# ----------------------------------------------"
-#    - "#&C:/ROVT/ROVT_C.exe /b:C:\\Temp\\build\\test_simulator_v381\\build"
-
-  artifacts:
-    name: "u7set_test_linux_0.9.$CI_PIPELINE_ID $CI_BUILD_REF_SLUG $CI_COMMIT_SHA"
-    paths:
-      - u7databasetestslinux.xml
-      - ClientTestsLinux.xml
-      - SimulatorTestsLinux.xml
-      - MetrologyTests.xml
-    reports:
-      junit: 
-        - u7databasetestslinux.xml
-        - ClientTestsLinux.xml
-        - SimulatorTestsLinux.xml
-        - MetrologyTests.xml
+#    - "#&C:/ROVT/ROVT_C.exe /b:C:\\Temp\\build\\${SIMULATOR_PROJECT_NAME}\\build"
 
 
 linux_code_coverage_job:
@@ -375,9 +377,21 @@ linux_code_coverage_job:
     - "git status"
     - "git log -1"
     - "# ----------------------------------------------"
-    - "#               Build Test Project              "
+    - "#               Import DB Projects              "
     - "# ----------------------------------------------"
-    - "/opt/Qt/6.3.2/gcc_64/bin/qmake u7set_tests.pro -spec linux-g++ CONFIG+=debug CONFIG-=qml_debug CONFIG-=qtquickcompiler CONFIG+=separate_debug_info CONFIG+=CODE_COVERAGE "
+    - "echo Creating PostgreSQL databases..."
+    - "pushd /tmp"
+    - "cp $CI_PROJECT_DIR/Test/ImportDatabase.sh /tmp"
+    - "cp /mnt/f/TestDatabase/u7_${SIMULATOR_PROJECT_NAME}.sql /tmp"
+    - "echo P2ssw0rd | su postgres /tmp/ImportDatabase.sh /tmp/u7_${SIMULATOR_PROJECT_NAME}.sql u7_${SIMULATOR_PROJECT_NAME}"
+    - "rm /tmp/ImportDatabase.sh"
+    - "rm /tmp/u7_${SIMULATOR_PROJECT_NAME}.sql"
+    - "popd"
+    - "echo Creating PostgreSQL databases complete      
+    - "# ----------------------------------------------"
+    - "#                    Build                      "
+    - "# ----------------------------------------------"
+    - "/opt/Qt/${QT_VERSION}/gcc_64/bin/qmake u7set_tests.pro -spec linux-g++ CONFIG+=debug CONFIG-=qml_debug CONFIG-=qtquickcompiler CONFIG+=separate_debug_info CONFIG+=CODE_COVERAGE "
     - "make -j12"
     - "# ----------------------------------------------"
     - "#           Collect Test Coverage Data          "
@@ -388,10 +402,10 @@ linux_code_coverage_job:
   artifacts:
     name: "coverage_report.$CI_PIPELINE_ID $CI_BUILD_REF_SLUG $CI_COMMIT_SHA"
     paths:
-      - CodeCoverage/coverage.xml
+#      - CodeCoverage/coverage.xml
       - CodeCoverage/Report/
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: CodeCoverage/coverage.xml
+#    reports:
+#      coverage_report:
+#        coverage_format: cobertura
+#        path: CodeCoverage/coverage.xml
 

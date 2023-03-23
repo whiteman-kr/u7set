@@ -571,7 +571,7 @@ namespace Tuning
 		m_state.saveToProto(tuningSourceState);
 	}
 
-	void TuningChannelHandler::stopCommandProcessing(const TuningCommand& cmd, int srcChannel)
+	void TuningChannelHandler::stopCommandProcessing(const TuningCommand& cmd, int srcChannel, bool hasUnappliedParams)
 	{
 		quint64 commandID = cmd.commandID();
 
@@ -598,6 +598,7 @@ namespace Tuning
 
 		m_lastProcessedCommand.resetCommandID();
 		m_waitReply = false;
+		m_state.hasUnappliedParams = hasUnappliedParams;
 	}
 
 	bool TuningChannelHandler::processWaitReply()
@@ -714,7 +715,8 @@ namespace Tuning
 				if (replyReceived == true)
 				{
 					m_state.errUntimelyReplay++;
-					LOG_MSG(m_tuningLog, QString("???? UNTIMELY reply from"));
+					LOG_MSG(m_tuningLog, QString("???? UNTIMELY reply from %1").
+							arg(m_portEquipmentID));
 					m_lastReplyTime = QDateTime::currentMSecsSinceEpoch();
 				}
 			}
@@ -1191,7 +1193,7 @@ namespace Tuning
 			// Write or Apply command is successfully processed
 			// Stop processing of this command in other handlers
 			//
-			m_sourceThread.stopCommandProcessing(m_lastProcessedCommand, m_channel);
+			m_sourceThread.stopCommandProcessing(m_lastProcessedCommand, m_channel, m_state.hasUnappliedParams);
 		}
 	}
 
@@ -2170,7 +2172,7 @@ namespace Tuning
 		return true;
 	}
 
-	void TuningSourceThreadWorker::stopCommandProcessing(const TuningCommand& cmd, int srcChannel)
+	void TuningSourceThreadWorker::stopCommandProcessing(const TuningCommand& cmd, int srcChannel, bool hasUnappliedParams)
 	{
 		for(TuningChannelHandler* handler : m_handlers)
 		{
@@ -2178,7 +2180,7 @@ namespace Tuning
 
 			if (handler->channel() != srcChannel)
 			{
-				handler->stopCommandProcessing(cmd, srcChannel);
+				handler->stopCommandProcessing(cmd, srcChannel, hasUnappliedParams);
 			}
 		}
 	}

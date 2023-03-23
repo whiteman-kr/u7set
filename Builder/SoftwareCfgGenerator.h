@@ -91,8 +91,6 @@ namespace Builder
 
 		QString softwareCfgSubdir() const { return m_software->equipmentIdTemplate(); }
 
-	private:
-
 	protected:
 		Context* m_context = nullptr;
 		Hardware::Software* m_software = nullptr;
@@ -108,5 +106,9 @@ namespace Builder
 		SoftwareSettingsSet m_settingsSet;
 
 		static std::multimap<QString, std::shared_ptr<SchemaFile>> m_schemaTagToFile;
+
+		// Profile_STR(TuningService.TuningSimIP:Port) => TuningService.EquipmentID
+		//
+		static std::map<QString, QString> m_tuningSimIpPorts;
 	};
 }

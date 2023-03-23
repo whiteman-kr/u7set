@@ -28,6 +28,12 @@ namespace ClientLib
 		Q_ASSERT(this->logFile());
 		qDebug() << "TcpSignalRecents::TcpSignalRecents(...)";
 
+		connect(this, &Tcp::Client::signal_wrongServerID,
+			[this](const QString& errorMessage)
+			{
+				writeError(errorMessage);
+			});
+
 		return;
 	}
 

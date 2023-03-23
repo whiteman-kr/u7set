@@ -2,7 +2,7 @@
 #define CLIENTFILTERSTORAGE_H
 
 #include "../lib/Tuning/TuningFilter.h"
-#include "TuningClientTcpClient.h"
+#include "../ClientLib/TuningConnection.h"
 
 class TuningClientFilterStorage : public TuningFilterStorage
 {
@@ -11,13 +11,23 @@ public:
 
 	// Operations
 
-	void createSignalsAndEqipmentHashes(const TuningSignalManager* objects, const std::vector<Hash>& allHashes, TuningFilter* filter, bool userFiltersOnly);
+	void createSignalsAndEqipmentHashes(const TuningSignalManager &objects,
+										const std::vector<Hash> &allHashes,
+										TuningFilter *filter,
+										bool userFiltersOnly);
 
-	void checkAndRemoveFilterSignals(const std::vector<Hash>& signalHashes, bool& removedNotFound, std::vector<std::pair<QString, QString>>& notFoundSignalsAndFilters, QWidget* parentWidget);
+	void checkAndRemoveFilterSignals(const std::vector<Hash> &signalHashes,
+									 bool &removedNotFound,
+									 std::vector<std::pair<QString, QString>> &notFoundSignalsAndFilters,
+									 QWidget* parentWidget);
 
 	void createSchemaCounterFilters();
 
-	void updateCounters(const TuningSignalManager* objects, const std::vector<TuningClientTcpClient*> tcpClients, LmStatusFlagMode lmStatusFlagMode, TuningFilter* filter = nullptr);
+	void updateCounters(const TuningSignalManager& tunigSignals,
+						const ClientLib::TuningConnection& tuningConnection,
+						const std::vector<ClientLib::TuningSource>& sourceStates,
+						TuningClientSettings::LmStatusFlagMode lmStatusFlagMode,
+						TuningFilter* filter = nullptr);
 
 	void removeFilters(TuningFilter::Source sourceType);
 

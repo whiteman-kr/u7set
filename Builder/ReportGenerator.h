@@ -5,10 +5,10 @@
 #include "../VFrame30/SchemaView.h"
 #include "../VFrame30/AppSignalController.h"
 #include "ReportAppSignalProvider.h"
+#include <QPrinter>
 
 namespace Builder
 {
-
 	//
 	// ReportFileTypeParams
 	//
@@ -354,9 +354,9 @@ namespace Builder
 		QString currentSchemaId() const;
 
 	private:
-		struct SchemaFilesInfo
+		struct SchemaFilesGroup
 		{
-			SchemaFilesInfo(int fileId, const QString& caption)
+			SchemaFilesGroup(int fileId, const QString& caption)
 			{
 				this->fileId = fileId;
 				this->caption = caption;
@@ -375,7 +375,11 @@ namespace Builder
 
 		void openProject();
 		void closeProject();
-		void loadSchemas(const std::vector<DbFileInfo>& files, std::map<QString, std::shared_ptr<VFrame30::Schema>>* schemas);
+
+		void loadSchemas(const std::vector<DbFileInfo>& files, std::map<QString, std::shared_ptr<VFrame30::Schema>>& schemas);
+		void renderSchemas(const SchemaFilesGroup& sfg);
+		void clearSchemas(SchemaFilesGroup& sfg);
+
 
 	private:
 		DbController m_db;

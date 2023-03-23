@@ -22,6 +22,12 @@ namespace ClientLib
 		Q_ASSERT(this->logFile());
 		qDebug() << "TcpSignalClient::TcpSignalClient() " << adsInfo.equipmentId << ", " << serverAddressPort1().addressPortStr();
 
+		connect(this, &Tcp::Client::signal_wrongServerID,
+			[this](const QString& errorMessage)
+			{
+				writeError(errorMessage);
+			});
+
 		return;
 	}
 
@@ -118,17 +124,6 @@ namespace ClientLib
 		return;
 	}
 
-	bool TcpSignalClient::hasSignal(const QString& appSignalId) const
-	{
-		return hasSignal(::calcHash(appSignalId));
-	}
-
-	bool TcpSignalClient::hasSignal(Hash signalHash) const
-	{
-		QWriteLocker wl(&m_hasSignalLock);
-		return m_hasSignalList.contains(signalHash);
-	}
-
 	void TcpSignalClient::resetToGetSignalList()
 	{
 		QThread::msleep(RequestTimeInterval);
@@ -136,11 +131,6 @@ namespace ClientLib
 		m_signalList.clear();
 		m_lastSignalParamStartIndex = 0;
 		m_lastSignalStateStartIndex = 0;
-
-		{
-			QWriteLocker wl(&m_hasSignalLock);
-			m_hasSignalList.clear();
-		}
 
 		requestSignalListStart();
 		return;
@@ -225,11 +215,6 @@ namespace ClientLib
 
 			m_signalList.clear();
 
-			{
-				QWriteLocker wl(&m_hasSignalLock);
-				m_hasSignalList.clear();
-			}
-
 			// request params
 			//
 			requestSignalParam(0);
@@ -238,11 +223,6 @@ namespace ClientLib
 
 		m_signalList.clear();
 		m_signalList.reserve(m_getSignalListStartReply.totalitemcount());
-
-		{
-			QWriteLocker wl(&m_hasSignalLock);
-			m_hasSignalList.clear();
-		}
 
 		requestSignalListNext(0);
 
@@ -258,11 +238,6 @@ namespace ClientLib
 		if (part >= m_getSignalListStartReply.partcount())
 		{
 			Q_ASSERT(std::ssize(m_signalList) == m_getSignalListStartReply.totalitemcount());
-
-			{
-				QWriteLocker wl(&m_hasSignalLock);
-				Q_ASSERT(std::ssize(m_hasSignalList) == m_getSignalListStartReply.totalitemcount());
-			}
 
 			// Request params
 			//
@@ -325,12 +300,10 @@ namespace ClientLib
 		writeMessage(QString("-- part: %1").arg(m_getSignalListNextReply.part()));
 
 		{
-			QWriteLocker wl(&m_hasSignalLock);
 			for (int i = 0; i < m_getSignalListNextReply.appsignalids_size(); i++)
 			{
 				Hash hash = ::calcHash(QString::fromStdString(m_getSignalListNextReply.appsignalids(i)));
 				m_signalList.push_back(hash);
-				m_hasSignalList.insert(hash);
 			}
 		}
 

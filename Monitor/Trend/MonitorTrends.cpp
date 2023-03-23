@@ -1,5 +1,6 @@
 #include "MonitorTrends.h"
 #include "../lib/ISignalHasTag.h"
+#include "../ClientLib/RtTrendTcpClient.h"
 #include "../TrendView/TrendWidget.h"
 #include "../TrendView/DialogChooseTrendSignals.h"
 
@@ -117,7 +118,7 @@ MonitorTrendsWidget::MonitorTrendsWidget(const MonitorSignalManager& signalManag
 	m_signalManager(signalManager),
 	m_configController(configController),
 	m_archiveDataProvider(m_configController, m_configController.logFile()),
-	m_realtimeDataProvider(m_configController, m_signalManager, m_configController.logFile())
+	m_realtimeDataProvider(m_signalManager, m_configController.logFile())
 {
 static int no = 1;
 	QString trendName = QString("Monitor Trends %1").arg(no++);
@@ -157,10 +158,12 @@ static int no = 1;
 
 	// Realtime Trends connections
 	//
-	connect(&m_realtimeDataProvider, &RtDataProvider::dataReady, &signalSet(), &TrendLib::TrendSignalSet::slot_realtimeDataReceived);
-	connect(&m_realtimeDataProvider, &RtDataProvider::requestError, &signalSet(), &TrendLib::TrendSignalSet::slot_realtimeRequestError);
-	connect(&m_realtimeDataProvider, &RtDataProvider::connectionLost, &signalSet(), &TrendLib::TrendSignalSet::slot_realtimeConnectionLost);
-	connect(&m_realtimeDataProvider, &RtDataProvider::dataReady, this, &MonitorTrendsWidget::slot_realtimeDataReceived);
+	connect(&m_realtimeDataProvider, &ClientLib::RtDataProvider::dataReady, &signalSet(), &TrendLib::TrendSignalSet::slot_realtimeDataReceived);
+	connect(&m_realtimeDataProvider, &ClientLib::RtDataProvider::dataReady, this, &MonitorTrendsWidget::slot_realtimeDataReceived);
+
+	connect(&m_realtimeDataProvider, &ClientLib::RtDataProvider::requestError, &signalSet(), &TrendLib::TrendSignalSet::slot_realtimeRequestError);
+	connect(&m_realtimeDataProvider, &ClientLib::RtDataProvider::connectionLost, &signalSet(), &TrendLib::TrendSignalSet::slot_realtimeConnectionLost);
+
 
 	// --
 	//
@@ -206,7 +209,7 @@ void MonitorTrendsWidget::timerEvent(QTimerEvent*)
 
 		// --
 		//
-		RtTrendTcpClient::Stat stat = m_realtimeDataProvider.statistics();
+		ClientLib::RtTrendTcpClient::Stat stat = m_realtimeDataProvider.statistics();
 
 		m_statusBarTextLabel->setText(stat.text);
 		m_statusBarQueueSizeLabel->setText("             ");
@@ -444,7 +447,8 @@ void MonitorTrendsWidget::createArchiveConnection()
 
 void MonitorTrendsWidget::createRealtimeConnection()
 {
-	m_realtimeDataProvider.createConnections();
+	m_realtimeDataProvider.createConnections(m_configController.softwareInfo(),
+											 m_configController.configuration().appDataRealTimeServices);
 	setRealtimeParams();
 
 	return;
@@ -621,7 +625,8 @@ void MonitorTrendsWidget::slot_configurationArrived(ConfigSettings /*configurati
 	}
 	else
 	{
-		m_realtimeDataProvider.updateConnections();
+		m_realtimeDataProvider.updateConnections(m_configController.softwareInfo(),
+												 m_configController.configuration().appDataRealTimeServices);
 	}
 
 }

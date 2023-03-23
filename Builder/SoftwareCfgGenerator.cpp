@@ -15,6 +15,7 @@ namespace Builder
 	// ---------------------------------------------------------------------------------
 
 	std::multimap<QString, std::shared_ptr<SoftwareCfgGenerator::SchemaFile>> SoftwareCfgGenerator::m_schemaTagToFile;
+	std::map<QString, QString> SoftwareCfgGenerator::m_tuningSimIpPorts;
 
 	SoftwareCfgGenerator::SoftwareCfgGenerator(Context* context, Hardware::Software* software) :
 		m_context(context),
@@ -516,6 +517,7 @@ namespace Builder
 	void SoftwareCfgGenerator::clearStaticData()
 	{
 		m_schemaTagToFile.clear();
+		m_tuningSimIpPorts.clear();
 
 		return;
 	}

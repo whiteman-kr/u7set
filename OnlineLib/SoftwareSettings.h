@@ -36,6 +36,9 @@ namespace SoftwareEndpoint
 		QString clientRequestIP;
 		int clientRequestPort = 0;
 		QStringList drivenSources;
+		bool singleLmControl = false;
+
+		bool operator==(const TuningService&) const = default;
 	};
 
 	struct AppDataService
@@ -304,6 +307,8 @@ public:
 
 	E::SecurityLevel securityLevel = E::SecurityLevel::Basic;
 
+	bool isTwoChannelTuningService = false;
+
 	int channelCount = 0;
 
 	QString cfgServiceID1;
@@ -481,25 +486,13 @@ public:
 class TuningClientSettings : virtual public SoftwareSettings
 {
 public:
-	struct TuningService
-	{
-		QString tuningServiceID;
-		QString clientRequestIP;
-		int clientRequestPort = 0;
-		QStringList drivenSources;
-		bool singleLmControl = false;
-
-		bool operator == (const TuningService&) const = default;
-	};
-
-public:
 	QString cfgServiceID1;
 	HostAddressPort cfgServiceIP1;
 
 	QString cfgServiceID2;
 	HostAddressPort cfgServiceIP2;
 
-	std::vector<TuningService> tuningServices;
+	std::vector<SoftwareEndpoint::TuningService> tuningServices;
 
 	bool autoApply = true;
 
@@ -508,7 +501,14 @@ public:
 	bool showSchemasList = true;
 	bool showSchemasTabs = true;
 
-	int statusFlagFunction = 0;	// LmStatusFlagMode::None
+	enum class LmStatusFlagMode
+	{
+		None,
+		SOR,
+		AccessKey
+	};
+
+	LmStatusFlagMode statusFlagFunction = LmStatusFlagMode::None;
 
 	bool loginPerOperation = false;
 	bool tuningLogin = false;

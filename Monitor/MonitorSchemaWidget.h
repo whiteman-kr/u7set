@@ -2,6 +2,7 @@
 
 #include "MonitorSchemaManager.h"
 #include "MonitorSignalManager.h"
+#include "../ClientLib/TuningConnection.h"
 #include "../ClientLib/TuningUserManager.h"
 #include "../VFrame30/ClientSchemaWidget.h"
 #include "../VFrame30/AppSignalController.h"
@@ -18,7 +19,7 @@ class MonitorTuningController : public VFrame30::TuningController
 
 public:
 	MonitorTuningController(ITuningSignalManager* signalManager,
-							ITuningTcpClient* tcpClient,
+							ClientLib::TuningConnection* tuningConnection,
 							ClientLib::TuningUserManager* tuningUserManager,
 							QWidget* parent = nullptr);
 

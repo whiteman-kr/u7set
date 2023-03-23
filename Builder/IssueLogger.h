@@ -194,6 +194,8 @@ namespace Builder
 
 		void errCFG3103(int LMNumber, QString module1, QString module2);	// Property System\\LMNumber (%1) is not uinique in logic modules %2 and %3.
 
+		void errCFG3104(QString tunSimIpStr, QString obj1, QString obj2, QString profile);	// TuningSimIP %1 is not unique in objects %2 and %3 (profile %4)
+
 		// ALP			Application Logic Parsing				4000-4999
 		//
 		void errALP4000(QString schema, const std::vector<QUuid>& itemsUuids);

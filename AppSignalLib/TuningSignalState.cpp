@@ -10,6 +10,13 @@ TuningSignalState::TuningSignalState(const ::Network::TuningSignalState& message
 	setState(message);
 }
 
+TuningSignalState::TuningSignalState(Hash hash, TuningSignalStateFlags flags, TuningValue value) :
+	m_hash(hash),
+	m_flags(flags),
+	m_value(value)
+{
+}
+
 Hash TuningSignalState::hash() const
 {
 	return m_hash;

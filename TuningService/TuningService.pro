@@ -13,6 +13,7 @@ TEMPLATE = app
 
 include(../compiler.pri)
 include(../sanitizer.pri)
+include(../codecoverage.pri)
 
 
 # DESTDIR

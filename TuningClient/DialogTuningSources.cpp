@@ -1,11 +1,13 @@
 #include "DialogTuningSources.h"
 #include "MainWindow.h"
 
-ClientTuningSourcesWidget::ClientTuningSourcesWidget(std::vector<ClientLib::TuningTcpClient*> tcpClients,
+#include "TuningSourcesHelper.h"
+
+ClientTuningSourcesWidget::ClientTuningSourcesWidget(ClientLib::TuningConnection& connection,
 													 ClientLib::TuningUserManager& userManager,
 													 bool hasActivationControls,
 													 QWidget* parent):
-	TuningSourcesWidget(tcpClients, hasActivationControls, parent),
+	TuningSourcesWidget(connection, hasActivationControls, parent),
 	m_userManager(userManager)
 {
 
@@ -30,14 +32,15 @@ bool ClientTuningSourcesWidget::login()
 // ---
 //
 
-DialogTuningSources::DialogTuningSources(std::vector<ClientLib::TuningTcpClient*> tcpClients, ClientLib::TuningUserManager& userManager, bool hasActivationControls, QWidget* parent):
-	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
+DialogTuningSources::DialogTuningSources(ClientLib::TuningConnection& tuningConnection, ClientLib::TuningUserManager& userManager, bool hasActivationControls, QWidget* parent):
+	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
+	m_tuningConnection(tuningConnection)
 {
 	setWindowTitle(tr("Tuning Data Sources"));
 
 	setAttribute(Qt::WA_DeleteOnClose);
 
-	m_tuningSourcesWidget = new ClientTuningSourcesWidget(tcpClients, userManager, hasActivationControls, this);
+	m_tuningSourcesWidget = new ClientTuningSourcesWidget(tuningConnection, userManager, hasActivationControls, this);
 
 	QHBoxLayout* bottomLayout = new QHBoxLayout();
 
@@ -58,6 +61,12 @@ DialogTuningSources::DialogTuningSources(std::vector<ClientLib::TuningTcpClient*
 			m_btnEnableControl->setEnabled(activateEnabled);
 			m_btnDisableControl->setEnabled(deactivateEnabled);
 		});
+
+		connect(m_tuningSourcesWidget, &ClientTuningSourcesWidget::activateSourceControl,
+				this, [this](const QString& sourceEquipmentId, bool activate){
+			ClientLib::TuningSourcesHelper::activateTuningSource(m_tuningConnection, sourceEquipmentId, activate, this);
+		});
+
 	}
 
 	QPushButton* detailsButton = new QPushButton(tr("Details..."));
@@ -78,11 +87,6 @@ DialogTuningSources::DialogTuningSources(std::vector<ClientLib::TuningTcpClient*
 	setLayout(l);
 
 	setMinimumSize(1024, 300);
-}
-
-void DialogTuningSources::setTuningSources(std::vector<ClientLib::TuningTcpClient*> tcpClients)
-{
-	m_tuningSourcesWidget->setTuningTcpClients(tcpClients);
 }
 
 DialogTuningSources::~DialogTuningSources()

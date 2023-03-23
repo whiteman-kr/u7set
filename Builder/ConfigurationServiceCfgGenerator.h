@@ -20,7 +20,8 @@ namespace Builder
 
 		QString getCommandLine(const QString& profile,
 								const HostAddressPort& clientRequestIP,
-								E::OS os) const;
+								E::OS os,
+								bool simulation) const;
 	};
 
 }

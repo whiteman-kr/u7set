@@ -72,10 +72,6 @@ namespace Tcp
 		emit closeConnectionSignal();
 	}
 
-	void SocketWorker::onDisconnection()
-	{
-	}
-
 	void SocketWorker::enableWatchdogTimer(bool enable)
 	{
 		AUTO_LOCK(m_mutex);
@@ -384,7 +380,6 @@ namespace Tcp
 	{
 		AUTO_LOCK(m_stateMutex);
 		m_state.clear();
-
 		m_state.localSoftwareInfo = m_localSoftwareInfo;
 		m_connectedSoftwareInfo.clear();
 	}
@@ -587,12 +582,17 @@ namespace Tcp
 	{
 		initReadStatusVariables();
 
+		m_setConnResult = SetConnectionResult::Undefined;
+
 		setSocketStateConnected(HostAddressPort(m_socket->peerAddress(), m_socket->peerPort()));
 	}
 
 	void SocketWorker::disconnected()
 	{
-		onDisconnection();
+		if (m_setConnResult == SetConnectionResult::Ok)
+		{
+			onDisconnection();
+		}
 
 		m_mutex.lock();
 
@@ -1975,9 +1975,13 @@ namespace Tcp
 				break;
 
 			case RQID_INTRODUCE_MYSELF:
-				if (processIntroduceMyselfReply(m_receiveDataBuffer, m_header.dataSize) == true)
+				if (processIntroduceMyselfReply(m_receiveDataBuffer, m_header.dataSize) == SetConnectionResult::Ok)
 				{
 					onConnection();
+				}
+				else
+				{
+					closeConnection();
 				}
 				break;
 
@@ -2072,14 +2076,14 @@ namespace Tcp
 		return false;
 	}
 
-	bool Client::processIntroduceMyselfReply(const char* dataBuffer, int dataSize)
+	SetConnectionResult Client::processIntroduceMyselfReply(const char* dataBuffer, int dataSize)
 	{
 		Network::IntroduceMyselfReply imr;
 
 		if (imr.ParseFromArray(dataBuffer, dataSize) == false)
 		{
 			Q_ASSERT(false);
-			return false;
+			return SetConnectionResult::Undefined;
 		}
 
 		m_connectedSoftwareInfo.serializeFrom(imr.serversoftwareinfo());
@@ -2149,7 +2153,7 @@ namespace Tcp
 
 		m_stateMutex.unlock();
 
-		return (m_setConnResult == SetConnectionResult::Ok);
+		return m_setConnResult;
 	}
 
 	void Client::sendIntroduceMyselfRequest()

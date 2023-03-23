@@ -5,6 +5,7 @@
 
 #include "DialogSourceInfo.h"
 #include "../CommonLib/Hash.h"
+#include "../ClientLib/TuningConnection.h"
 
 namespace ClientLib
 {
@@ -21,24 +22,18 @@ class DialogTuningSourceInfo : public DialogSourceInfo
 	Q_OBJECT
 
 public:
-	explicit DialogTuningSourceInfo(std::vector<ClientLib::TuningTcpClient*> tcpClients, QWidget* parent, quint64 sourceId, Hash lanEquipmentHash);
+	explicit DialogTuningSourceInfo(ClientLib::TuningConnection& connection, QWidget* parent, quint64 sourceId, Hash lanEquipmentHash);
 	virtual ~DialogTuningSourceInfo();
 
-	void setTuningTcpClients(std::vector<ClientLib::TuningTcpClient*> tcpClients);
-
 private:
-	bool findActiveTuningTcpClient();
-
 	void updateData() override;
 
-	void updateInfo();
-	void updateState();
+	void updateInfo(const ClientLib::TuningSource& ts);
+	void updateState(const ClientLib::TuningSource& ts);
 
 private:
-	std::vector<ClientLib::TuningTcpClient*> m_tcpClients;
+	ClientLib::TuningConnection& m_tuningConnection;
 	int m_noStateInfoTimeout = 0;
-
-	ClientLib::TuningTcpClient* m_activeTcpClient = nullptr;
 
 	Hash m_sourceHash;
 	Hash m_lanEquipmentHash;
@@ -49,12 +44,10 @@ class TuningSourcesWidget : public QWidget
 	Q_OBJECT
 public:
 
-	explicit TuningSourcesWidget(std::vector<ClientLib::TuningTcpClient*> tcpClients, bool hasActivationControls, QWidget* parent);
+	explicit TuningSourcesWidget(ClientLib::TuningConnection& tuningConnection, bool hasActivationControls, QWidget* parent);
 	virtual ~TuningSourcesWidget();
 
 	bool treeIsFocused() const;
-
-	void setTuningTcpClients(std::vector<ClientLib::TuningTcpClient*> tcpClients);
 
 public slots:
 	void detailsClicked();
@@ -76,11 +69,11 @@ private:
 	void updateData();
 	void updateTuningSourcesStates();
 	void enableActivationControls();
-
 	void activateControl(bool enable);
 
 signals:
 	void activationControlsAccessChanged(bool activateEnabled, bool deactivateEnabled);
+	void activateSourceControl(const QString& sourceEquipmentId, bool activate);
 
 private:
 	enum class Columns
@@ -110,7 +103,7 @@ private:
 	bool m_buttonDeactivateEnabled = false;
 
 
-	std::vector<ClientLib::TuningTcpClient*> m_tuningTcpClients;
+	ClientLib::TuningConnection& m_tuningConnection;
 
 	static const int columnIndex_SourceHash = 0;
 	static const int columnIndex_SourceEquipmentId = 1;

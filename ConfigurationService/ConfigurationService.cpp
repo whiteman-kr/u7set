@@ -228,7 +228,7 @@ void ConfigurationServiceWorker::stopCfgServerThread()
 
 void ConfigurationServiceWorker::startCfgCheckerThread()
 {
-	m_cfgCheckerWorker = new CfgCheckerWorker(m_workDirectory, m_autoloadBuildPath, 3 * 1000, m_logger);
+	m_cfgCheckerWorker = new CfgCheckerWorker(equipmentID(), m_workDirectory, m_autoloadBuildPath, 3 * 1000, m_logger);
 
 	m_cfgCheckerThread = new SimpleThread(m_cfgCheckerWorker);
 

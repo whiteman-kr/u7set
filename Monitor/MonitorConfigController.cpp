@@ -86,8 +86,6 @@ bool MonitorConfigController::updateConfiguration(const ClientLib::Configuration
 
 	// Get tuning signal files
 	//
-	theTuningSignals.reset();
-
 	if (config.tuningEnabled == true)
 	{
 		QByteArray data;
@@ -95,7 +93,7 @@ bool MonitorConfigController::updateConfiguration(const ClientLib::Configuration
 		bool result = getFileBlockedById(CfgFileId::TUNING_SIGNALS, &data, nullptr);
 		if (result == true)
 		{
-			theTuningSignals.load(data);
+			emit tuningSignalsArrived(data);
 		}
 	}
 

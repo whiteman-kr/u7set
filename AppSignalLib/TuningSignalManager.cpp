@@ -128,7 +128,7 @@ std::vector<Hash> TuningSignalManager::signalHashes() const
 
 	QReadLocker rl(&m_signalsLock);
 
-	for (auto p : m_signals)
+	for (const auto& p : m_signals)
 	{
 		result.push_back(p.first);
 	}
@@ -143,7 +143,7 @@ std::vector<Hash> TuningSignalManager::signalHashes(const std::vector<Hash> lmEq
 
 	QReadLocker rl(&m_signalsLock);
 
-	for (auto p : m_signals)
+	for (const auto& p : m_signals)
 	{
 		const AppSignalParam& param = p.second;
 		Hash signalEquipmentHash = ::calcHash(param.lmEquipmentId());
@@ -306,7 +306,10 @@ void TuningSignalManager::setState(Hash signalHash, const TuningSignalState& sta
 
 	QWriteLocker l(&m_statesLock);
 
-	m_states[signalHash] = state;
+	auto [it, inserted] = m_states.insert_or_assign(signalHash, state);
+	Q_UNUSED(inserted);
+
+	it->second.m_hash = signalHash;
 
 	return;
 }

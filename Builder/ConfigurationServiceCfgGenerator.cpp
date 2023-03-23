@@ -43,11 +43,36 @@ namespace Builder
 	{
 		TEST_PTR_RETURN_FALSE(m_software);
 
-		QString content = getBuildInfoComments(os);
+		QString content;
 
-		content += getCommentStart(os) + " To run simulation append param -mode=simulation to command line\n\n";
+		if (os == E::OS::Linux)
+		{
+			content = "#!/bin/bash\n#\n";
+			content += getBuildInfoComments(os);
 
-		content += getCommandLine(profile, settings.clientRequestIP, os);
+			content += getCommentStart(os) + " To run simulation append param -mode=simulation to command line or run this script with the argument simulation\n\n";
+
+			content += "if [[ $1 = \"simulation\" ]]\nthen\n";
+			content += QString("\t") + getCommandLine(profile, settings.clientRequestIP, os, true);
+			content += "else\n";
+			content += QString("\t") + getCommandLine(profile, settings.clientRequestIP, os, false);
+			content += "fi\n";
+		}
+		else
+		{
+			Q_ASSERT(os == E::OS::Windows);
+
+			content += "@echo off\n";
+			content += getBuildInfoComments(os);
+
+			content += getCommentStart(os) + " To run simulation append param -mode=simulation to command line or run this script with the argument simulation\n\n";
+
+			content += "if \"%~1\" == \"simulation\" (\n";
+			content += QString("\t") + getCommandLine(profile, settings.clientRequestIP, os, true);
+			content += ") else (\n";
+			content += QString("\t") + getCommandLine(profile, settings.clientRequestIP, os, false);
+			content += ")\n";
+		}
 
 		BuildFile* buildFile = m_buildResultWriter->addFile(getRunScriptDirectory(os),
 															getRunScriptName(profile, os),
@@ -59,7 +84,8 @@ namespace Builder
 
 	QString ConfigurationServiceCfgGenerator::getCommandLine(const QString& profile,
 															 const HostAddressPort& clientRequestIP,
-															 E::OS os) const
+															 E::OS os,
+															 bool simulation) const
 	{
 		QString cmdLine;
 
@@ -96,7 +122,14 @@ namespace Builder
 
 		cmdLine += " -b=" + appDataPath + "/" + buildDir;
 
-		cmdLine += " -ip=" + clientRequestIP.addressPortStr() + "\n";
+		cmdLine += " -ip=" + clientRequestIP.addressPortStr();
+
+		if (simulation == true)
+		{
+			cmdLine += " -mode=simulation";
+		}
+
+		cmdLine += "\n";
 
 		return cmdLine;
 	}

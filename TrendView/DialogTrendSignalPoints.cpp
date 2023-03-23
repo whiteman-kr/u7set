@@ -100,7 +100,7 @@ TrendLib::TrendStateItem TrendPointsModel::stateItemByIndex(int index, int* oneH
 		{
 			if (currentIndex <= index && index < currentIndex + stateRecord.states.size())
 			{
-				(*stateIndex) += static_cast<int>(stateRecord.states.size());
+				(*stateIndex) = index - currentIndex;
 
 				*ok = true;
 

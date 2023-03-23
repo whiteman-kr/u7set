@@ -4,7 +4,7 @@
 #include "../AppSignalLib/TuningSignalState.h"
 #include "../AppSignalLib/TuningSignalManager.h"
 #include "../lib/Tuning/TuningFilter.h"
-#include "TuningClientTcpClient.h"
+#include "../ClientLib/TuningConnection.h"
 #include "TuningClientFilterStorage.h"
 #include "TuningConfigController.h"
 
@@ -120,9 +120,9 @@ public:
 							   TuningSignalManager& tuningSignalManager,
 							   TuningClientFilterStorage& tuningFilterStorage,
 							   ClientLib::TuningUserManager& userManager,
-							   std::vector<TuningClientTcpClient*> tuningTcpClients,
+							   ClientLib::TuningConnection& tuningConnection,
 							   std::shared_ptr<TuningFilter> workspaceFilter,
-								QWidget* parent = 0);
+							   QWidget* parent = 0);
 	~SwitchFiltersPage();
 
 	void createControls(std::shared_ptr<TuningFilter> root);
@@ -151,9 +151,6 @@ private slots:
 	void onFilterButtonClicked(std::shared_ptr<TuningFilter> filter);
 	void onFilterTablePressed();
 
-
-
-
 private:
 
 	enum class Columns
@@ -172,7 +169,7 @@ private:
 	TuningFilterStorage& m_tuningFilterStorage;
 	ClientLib::TuningUserManager& m_userManager;
 
-	std::vector<TuningClientTcpClient*> m_tuningTcpClients;
+	ClientLib::TuningConnection& m_tuningConnection;
 
 	std::shared_ptr<TuningFilter> m_workspaceFilter;
 

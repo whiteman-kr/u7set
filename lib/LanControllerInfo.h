@@ -115,6 +115,7 @@ public:
 	void filterLansByAppDataServiceID(const QString& appDataServiceID);
 	void filterLansByDiagDataServiceID(const QString& diagDataServiceID);
 	void filterLansByTuningServiceID(const QString& tuningServiceID);
+	void filterLansByTuningServiceLinkIDs(const std::set<QString>& tuningServiceLinkIDs);
 
 	const std::vector<LanControllerInfo>& operator()() const;
 

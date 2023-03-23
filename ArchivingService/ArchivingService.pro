@@ -21,6 +21,7 @@ TEMPLATE = app
 include(../compiler.pri)
 include(../warnings.pri)
 include(../sanitizer.pri)
+include(../codecoverage.pri)
 
 # DESTDIR
 #

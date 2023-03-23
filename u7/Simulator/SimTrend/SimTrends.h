@@ -1,13 +1,12 @@
 #pragma once
 #include "TrendMainWindow.h"
 #include "SimAppSignalManager.h"
-//#include "SimConfigController.h"
-//#include "ArchiveTrendTcpClient.h"
-//#include "RtTrendTcpClient.h"
+
 
 class SimIdeSimulator;
 class SimTrendsWidget;
 class QLabel;
+
 
 class SimTrends
 {

@@ -2,16 +2,16 @@
 #define TUNINGSIGNALINFO_H
 
 #include <QDialog>
+#include "../ClientLib/TuningConnection.h"
 #include "../CommonLib/Hash.h"
 #include "../CommonLib/Types.h"
-#include "TuningClientTcpClient.h"
+#include "../OnlineLib/SoftwareSettings.h"
 
 namespace Ui {
 	class TuningSignalInfo;
 }
 
 class TuningSignalManager;
-class TuningTcpClient;
 
 class TuningSignalInfo : public QDialog
 {
@@ -20,14 +20,12 @@ class TuningSignalInfo : public QDialog
 public:
 	explicit TuningSignalInfo(Hash appSignalHash,
 							  E::AnalogFormat analogFormat,
-							  Hash instanceIdHash,
-							  TuningSignalManager& signalManager,
-							  std::vector<ClientLib::TuningTcpClient*> tuningTcpClients,
-							  LmStatusFlagMode lmStatusFlagMode,
+							  const TuningSignalManager& signalManager,
+							  const ClientLib::TuningConnection& tuningConnection,
+							  Hash clientHash,
+							  const TuningClientSettings::LmStatusFlagMode lmStatusFlagMode,
 							  QWidget* parent = 0);
 	~TuningSignalInfo();
-
-	void setTuningTcpClients(std::vector<ClientLib::TuningTcpClient*> tuningTcpClients);
 
 private:
 	virtual void timerEvent(QTimerEvent* event) override;
@@ -38,12 +36,12 @@ private:
 
 	Hash m_appSignalHash = UNDEFINED_HASH;
 	E::AnalogFormat m_analogFormat = E::AnalogFormat::f_9;
-	Hash m_instanceIdHash = UNDEFINED_HASH;
 
-	TuningSignalManager& m_signalManager;
+	const TuningSignalManager& m_signalManager;
+	const ClientLib::TuningConnection& m_tuningConnection;
 
-	std::vector<ClientLib::TuningTcpClient*> m_signalTcpClients;
-	LmStatusFlagMode m_lmStatusFlagMode = LmStatusFlagMode::SOR;
+	Hash m_clientHash;
+	TuningClientSettings::LmStatusFlagMode m_lmStatusFlagMode = TuningClientSettings::LmStatusFlagMode::SOR;
 
 	Ui::TuningSignalInfo *ui;
 	int m_timerId = -1;

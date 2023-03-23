@@ -4,7 +4,7 @@
 #include <QKeyEvent>
 #include <QPushButton>
 #include "../VFrame30/DrawParam.h"
-#include "../ClientLib/TuningSourcesHelper.h"
+#include "TuningSourcesHelper.h"
 #include "TuningSignalInfo.h"
 #include "DialogChooseFilter.h"
 
@@ -683,7 +683,7 @@ TuningPage::TuningPage(TuningConfigController& configController,
 					   TuningSignalManager& tuningSignalManager,
 					   TuningClientFilterStorage& tuningFilterStorage,
 					   ClientLib::TuningUserManager& userManager,
-					   std::vector<TuningClientTcpClient*> tcpClients,
+					   ClientLib::TuningConnection& tuningConnection,
 					   std::shared_ptr<TuningFilter> treeFilter,
 					   std::shared_ptr<TuningFilter> pageFilter,
 					   QWidget* parent) :
@@ -692,7 +692,7 @@ TuningPage::TuningPage(TuningConfigController& configController,
 	m_tuningSignalManager(tuningSignalManager),
 	m_tuningFilterStorage(tuningFilterStorage),
 	m_userManager(userManager),
-	m_tuningTcpClients(tcpClients),
+	m_tuningConnection(tuningConnection),
 	m_treeFilter(treeFilter),
 	m_pageFilter(pageFilter)
 {
@@ -1337,7 +1337,7 @@ bool TuningPage::write()
 	std::vector<Hash> modifiedHashes;
 	modifiedHashes.reserve(allHashes.size());
 
-	bool ok = false;
+	std::set<Hash> sourceHashes;
 
 	for (Hash hash : allHashes)
 	{
@@ -1346,14 +1346,29 @@ bool TuningPage::write()
 			continue;
 		}
 
+		bool ok = false;
+
 		TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
 
-		if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
+		if (ok == false || state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
 		{
 			continue;
 		}
 
 		modifiedHashes.push_back(hash);
+
+		// Create list of sources to take control
+		//
+		if (m_configController.singleLmControlMode() == true)
+		{
+			AppSignalParam param = m_tuningSignalManager.signalParam(hash, &ok);
+			if (ok == false)
+			{
+				continue;
+			}
+
+			sourceHashes.insert(::calcHash(param.lmEquipmentId()));
+		}
 	}
 
 	if (modifiedHashes.empty() == true)
@@ -1361,33 +1376,13 @@ bool TuningPage::write()
 		return false;
 	}
 
-	// Find TCP clients that contain modified signals
+	// Take control on required sources
 	//
+	if (sourceHashes.empty() == false)
 	{
-		std::vector<ClientLib::TuningTcpClient*> clientsToCheckControl;
-
-		for (ClientLib::TuningTcpClient* client : m_tuningTcpClients)
+		if (m_tuningConnection.takeClientControl(sourceHashes) == false)
 		{
-			if (client->isConnected() == true &&
-				client->singleLmControlMode() == true &&
-				client->hasTuningSignals(modifiedHashes) == true)
-			{
-				clientsToCheckControl.push_back(client);
-			}
-		}
-
-		// Check if same tuning sources are activated in clients
-		//
-		if (ClientLib::TuningSourcesHelper::clientsHaveSameActiveSource(clientsToCheckControl) == false)
-		{
-			QMessageBox::critical(this, qAppName(), tr("To write changes, please activate the same Tuning Source in all Tuning Services."));
-			return false;
-		}
-
-		// Take control on required clients
-		//
-		if (ClientLib::TuningSourcesHelper::takeServicesControl(clientsToCheckControl, this) == false)
-		{
+			QMessageBox::critical(this, qAppName(), QObject::tr("Taking control of tuning sources failed!"));
 			return false;
 		}
 	}
@@ -1398,6 +1393,8 @@ bool TuningPage::write()
 
 	for (Hash hash : modifiedHashes)
 	{
+		bool ok = false;
+
 		AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
 
 		if (listCount >= 10)
@@ -1430,46 +1427,17 @@ bool TuningPage::write()
 		return false;
 	}
 
+
 	// Write values on all clients
 	//
-	for (TuningClientTcpClient* client : m_tuningTcpClients)
+	std::vector<ClientLib::TuningWriteCommand> commands;
+
+	for (Hash hash : modifiedHashes)
 	{
-		if (client->isConnected() == false)
-		{
-			continue;
-		}
-
-		std::vector<ClientLib::TuningWriteCommand> commands;
-
-		std::vector<Hash> clientHashes = client->getProcessedHashes(modifiedHashes);
-
-		for (Hash hash : clientHashes)
-		{
-			if (m_tuningSignalManager.newValueIsUnapplied(hash) == false)
-			{
-				continue;
-			}
-
-			// Take state from client, NOT (!) from tuningSignalManager, to skip writing non-valid signals in multi-channel case
-			//
-			TuningSignalState state = client->state(hash, &ok);
-
-			if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
-			{
-				continue;
-			}
-
-			ClientLib::TuningWriteCommand cmd(hash, m_tuningSignalManager.newValue(hash));
-
-			commands.push_back(cmd);
-		}
-
-		if (commands.empty() == false)
-		{
-			client->writeLogSignalChange(tr("'Write' button is pressed."));
-			client->writeTuningSignal(commands);
-		}
+		commands.push_back({hash, m_tuningSignalManager.newValue(hash)});
 	}
+
+	m_tuningConnection.writeTuningSignals(commands);
 
 	return true;
 }
@@ -1477,43 +1445,6 @@ bool TuningPage::write()
 void TuningPage::apply()
 {
 	if (m_userManager.login(this) == false)
-	{
-		return;
-	}
-
-	std::vector<ClientLib::TuningTcpClient*> clientsToApply;
-
-	// Find Active Tcp clients that contain modified signals
-	//
-	{
-		for (ClientLib::TuningTcpClient* client : m_tuningTcpClients)
-		{
-			if (client->isConnected() == true &&
-				client->activeTuningSourceCount() != 0 &&
-				client->hasTuningSignals(m_model->allHashes()) == true)
-			{
-				clientsToApply.push_back(client);
-			}
-		}
-	}
-
-	if (clientsToApply.empty() == true)
-	{
-		QMessageBox::warning(this, qAppName(), tr("No tuning sources to apply!"));
-		return;
-	}
-
-	// Take control on all clients
-	//
-	if (ClientLib::TuningSourcesHelper::takeServicesControl(clientsToApply, this) == false)
-	{
-		return;
-	}
-
-	if (QMessageBox::warning(this, qAppName(),
-							 tr("Are you sure you want apply the changes?"),
-							 QMessageBox::Yes | QMessageBox::No,
-							 QMessageBox::No) != QMessageBox::Yes)
 	{
 		return;
 	}
@@ -1533,15 +1464,62 @@ void TuningPage::apply()
 		}
 	}
 
-	for (ClientLib::TuningTcpClient* client : clientsToApply)
+	std::vector<Hash> allHashes = m_model->allHashes();
+
+	std::vector<Hash> hashesToApply;
+
+	std::set<Hash> sourceHashes;
+
+	for (Hash hash : allHashes)
 	{
-		if (client->isConnected() == false)
+		bool ok = false;
+
+		TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
+
+		if (ok == false || state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
 		{
 			continue;
 		}
 
-		client->applyTuningSignals();
+		hashesToApply.push_back(hash);
+
+		// Create list of sources to take control
+		//
+		if (m_configController.singleLmControlMode() == true)
+		{
+			AppSignalParam param = m_tuningSignalManager.signalParam(hash, &ok);
+			if (ok == false)
+			{
+				Q_ASSERT(ok);
+				continue;
+			}
+
+			sourceHashes.insert(::calcHash(param.lmEquipmentId()));
+		}
 	}
+
+	// Take control on required sources
+	//
+	if (sourceHashes.empty() == false)
+	{
+		// Take control on required sources
+		//
+		if (m_tuningConnection.takeClientControl(sourceHashes) == false)
+		{
+			QMessageBox::critical(this, qAppName(), QObject::tr("Taking control of tuning sources failed!"));
+			return;
+		}
+	}
+
+	if (QMessageBox::warning(this, qAppName(),
+							 tr("Are you sure you want apply the changes?"),
+							 QMessageBox::Yes | QMessageBox::No,
+							 QMessageBox::No) != QMessageBox::Yes)
+	{
+		return;
+	}
+
+	m_tuningConnection.applyTuningSignals(hashesToApply);
 
 	return;
 }
@@ -1766,22 +1744,13 @@ void TuningPage::slot_listContextMenuRequested(const QPoint& pos)
 
 			QAction* a = new QAction(tr("%1 - %2").arg(asp.customSignalId()).arg(asp.caption()), &menu);
 
-			Hash instanceIdHash = 0;
-
-			for (const TuningClientTcpClient* client : m_tuningTcpClients)
+			auto f = [this, hash]() -> void
 			{
-				if (client->hasTuningSignal(asp.hash()) == true)
-				{
-					instanceIdHash = client->instanceIdHash();
-					break;
-				}
-			}
-
-			auto f = [this, hash, instanceIdHash]() -> void
-			{
-				TuningSignalInfo* d = new TuningSignalInfo(hash, m_model->analogFormat(), instanceIdHash,
+				TuningSignalInfo* d = new TuningSignalInfo(hash,
+														   m_model->analogFormat(),
 														   m_tuningSignalManager,
-														   {m_tuningTcpClients.begin(), m_tuningTcpClients.end()},
+														   m_tuningConnection,
+														   ::calcHash(m_configController.softwareInfo().equipmentID()),
 														   m_configController.lmStatusFlagMode(),
 														   this);
 				d->show();

@@ -46,6 +46,7 @@ public:
 	[[nodiscard]] quint16 portIfSet() const;
 
 	[[nodiscard]] QString toString() const;
+	[[nodiscard]] std::string toStdString() const;
 	[[nodiscard]] QString addressPortStr() const;
 	[[nodiscard]] QString addressPortStrIfSet() const;
 
@@ -259,6 +260,11 @@ inline quint16 HostAddressPort::portIfSet() const
 inline QString HostAddressPort::toString() const
 {
 	return addressPortStr();
+}
+
+inline std::string HostAddressPort::toStdString() const
+{
+	return addressPortStr().toStdString();
 }
 
 inline QString HostAddressPort::addressPortStr() const

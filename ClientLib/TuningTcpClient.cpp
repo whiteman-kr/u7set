@@ -11,14 +11,14 @@ namespace ClientLib
 	//
 	bool TuningWriteCommand::save(Network::TuningWriteCommand* message) const
 	{
-		message->set_signalhash(m_hash);
+		message->set_signalhash(m_appSignalHash);
 		m_value.save(message->mutable_value());
 		return true;
 	}
 
 	bool TuningWriteCommand::load(const Network::TuningWriteCommand& message)
 	{
-		m_hash = message.signalhash();
+		m_appSignalHash = message.signalhash();
 		m_value.load(message.value());
 		return true;
 	}
@@ -26,15 +26,28 @@ namespace ClientLib
 	//
 	// TuningTcpClient
 	//
-	TuningTcpClient::TuningTcpClient(const SoftwareInfo& softwareInfo, const QString& tuningServiceId, bool singleLmControlMode, TuningSignalManager& signalManager) :
-		Tcp::Client(softwareInfo, HostAddressPort("0.0.0.0", 0), "TuningTcpClient", tuningServiceId),
+	TuningTcpClient::TuningTcpClient(const SoftwareInfo& softwareInfo, const SoftwareEndpoint::TuningService& tunsInfo, TuningSignalManager& signalManager, ILogFile* log, TuningLog::TuningLog* tuningLog) :
+		Tcp::Client(softwareInfo,
+					HostAddressPort(tunsInfo.clientRequestIP, tunsInfo.clientRequestPort),
+					"TuningTcpClient",
+					tunsInfo.equipmentId),
+		TcpClientStatistics(this),
 		m_instanceId(softwareInfo.equipmentID()),
 		m_instanceIdHash(::calcHash(softwareInfo.equipmentID())),
-		m_tuningServiceId(tuningServiceId),
+		m_tuningServiceId(tunsInfo.equipmentId),
 		m_signals(signalManager),
-		m_singleLmControlMode(singleLmControlMode)
+		m_logFile(log, "TuningTcpClient"),
+		m_tuningLog(tuningLog)
 	{
-		qRegisterMetaType<LmStatusFlagMode>("LmStatusFlagMode");
+		setObjectName("TuningTcpClient " + tunsInfo.shortenId);
+
+		qRegisterMetaType<TuningClientSettings::LmStatusFlagMode>("LmStatusFlagMode");
+
+		connect(this, &Tcp::Client::signal_wrongServerID,
+			[this](const QString& errorMessage)
+			{
+				m_logFile.writeError(errorMessage);
+			});
 
 		return;
 	}
@@ -43,7 +56,7 @@ namespace ClientLib
 	{
 	}
 
-	std::vector<Hash> TuningTcpClient::tuningSourcesEquipmentHashes() const
+	std::vector<Hash> TuningTcpClient::tuningSourcesHashes() const
 	{
 		QReadLocker l(&m_tuningSourcesLock);
 
@@ -101,32 +114,35 @@ namespace ClientLib
 		return m_tuningSources.contains(equipmentHash);
 	}
 
-	bool TuningTcpClient::activateTuningSourceControl(const QString& equipmentId, bool enableControl, bool forceTakeControl)
+	bool TuningTcpClient::activateTuningSourceControl(Hash equipmentHash, bool enableControl, bool forceTakeControl)
 	{
+		QString equipmentId;
+
 		{
 			QReadLocker l(&m_tuningSourcesLock);
 
-			if (m_tuningSources.find(::calcHash(equipmentId)) == m_tuningSources.end())
+			auto it = m_tuningSources.find(equipmentHash);
+			if (it == m_tuningSources.end())
 			{
 				assert(false);
 				return false;
 			}
+
+			equipmentId = it->second.equipmentId();
 		}
 
 		if (forceTakeControl == true && clientIsActive() == true)
 		{
-			qDebug() << "Do not allow forceTakeControl command if current client is already active";
-			writeLogError(QString("activateTuningSourceControl(%1, enableControl=%2, forceTakeControl=%3), Do not allow forceTakeControl command if current client is already active").arg(equipmentId).arg(enableControl).arg(forceTakeControl));
+			writeLogError(QString("activateTuningSourceControl([%1], enableControl=%2, forceTakeControl=%3), Do not allow forceTakeControl command if current client is already active").arg(equipmentId).arg(enableControl).arg(forceTakeControl));
 
 			assert(false);
 			return false;
 		}
 
-		writeLogMessage(tr("Tuning Source %1 is %2.").arg(equipmentId).arg(enableControl ? tr("activated") : tr("deactivated")));
+		writeLogMessage(tr("Tuning Source [%1] is %2.").arg(equipmentId).arg(enableControl ? tr("activated") : tr("deactivated")));
 
 		QMutexLocker l(&m_writeQueueMutex);
-
-		m_writeQueue.emplace(TuningWriteCommand(equipmentId, enableControl, forceTakeControl));
+		m_writeQueue.emplace(TuningWriteCommand(equipmentHash, enableControl, forceTakeControl));
 
 		return true;
 	}
@@ -158,16 +174,13 @@ namespace ClientLib
 		return hasTuningSignal(::calcHash(appSignalId));
 	}
 
-	void TuningTcpClient::writeTuningSignal(const TuningWriteCommand& data)
-	{
-		std::vector<TuningWriteCommand> toVector;
-		toVector.push_back(data);
-
-		return writeTuningSignal(toVector);
-	}
-
 	void TuningTcpClient::writeTuningSignal(const std::vector<TuningWriteCommand>& data)
 	{
+		if (isConnected() == false)
+		{
+			return;
+		}
+
 		QMutexLocker l(&m_writeQueueMutex);
 
 		bool found = false;
@@ -176,14 +189,14 @@ namespace ClientLib
 		{
 			// Write command to log
 			//
-			AppSignalParam param = m_signals.signalParam(command.m_hash, &found);
+			AppSignalParam param = m_signals.signalParam(command.m_appSignalHash, &found);
 			if (found == false)
 			{
 				assert(false);
 				return;
 			}
 
-			TuningSignalState state = m_signals.state(command.m_hash, &found);
+			TuningSignalState state = m_signals.state(command.m_appSignalHash, &found);
 			if (found == false)
 			{
 				assert(false);
@@ -196,7 +209,7 @@ namespace ClientLib
 				continue;
 			}
 
-			writeLogSignalChange(param, state.value(), command.m_value);
+			writeTuningLogSignalChange(param, state.value(), command.m_value);
 
 			// Push command to the queue
 			//
@@ -206,13 +219,16 @@ namespace ClientLib
 		return;
 	}
 
+	void TuningTcpClient::writeTuningSignal(const TuningWriteCommand& data)
+	{
+		std::vector<TuningWriteCommand> toVector;
+		toVector.push_back(data);
+
+		return writeTuningSignal(toVector);
+	}
+
 	bool TuningTcpClient::writeTuningSignal(QString appSignalId, TuningValue value)
 	{
-		if (isConnected() == false)
-		{
-			return false;
-		}
-
 		TuningWriteCommand command(appSignalId, value);
 		writeTuningSignal(command);
 
@@ -223,11 +239,16 @@ namespace ClientLib
 	//
 	void TuningTcpClient::applyTuningSignals()
 	{
+		if (isConnected() == false)
+		{
+			return;
+		}
+
 		QMutexLocker l(&m_writeQueueMutex);
 
 		m_writeQueue.emplace(TuningWriteCommand(true));
 
-		writeLogSignalChange(tr("applyTuningSignals(), 'Apply' command is sent."));
+		writeTuningLogMessage(tr("'Apply' command is sent."));
 
 		return;
 	}
@@ -423,7 +444,7 @@ namespace ClientLib
 					//
 					locker.unlock();
 
-					requestActivateTuningSource(cmd.m_equipmentId, cmd.m_enableControl, cmd.m_forceTakeControl);
+					requestActivateTuningSource(cmd.m_equipmentHash, cmd.m_enableControl, cmd.m_forceTakeControl);
 
 					return;
 				}
@@ -529,7 +550,7 @@ namespace ClientLib
 		// Initialize list of signal hashes processed by this client
 		//
 		{
-			std::vector<Hash> equipmentHashes = tuningSourcesEquipmentHashes();
+			std::vector<Hash> equipmentHashes = tuningSourcesHashes();
 
 			QWriteLocker l(&m_signalHashesLock);
 
@@ -645,7 +666,7 @@ namespace ClientLib
 						{
 							const ::Network::TuningSourceState& state = ts.state(s);
 
-							if (state.isreply() == true && m_lmStatusFlagMode != LmStatusFlagMode::None)
+							if (state.isreply() == true && m_lmStatusFlagMode != TuningClientSettings::LmStatusFlagMode::None)
 							{
 								TuningValue oldSor;
 								oldSor.setType(TuningValueType::Discrete);
@@ -662,12 +683,12 @@ namespace ClientLib
 
 									switch (m_lmStatusFlagMode)
 									{
-									case LmStatusFlagMode::AccessKey:
+									case TuningClientSettings::LmStatusFlagMode::AccessKey:
 										{
 											param.setCustomSignalId(tr("Access Key"));
 											break;
 										}
-									case LmStatusFlagMode::SOR:
+									case TuningClientSettings::LmStatusFlagMode::SOR:
 										{
 											param.setCustomSignalId(tr("SOR is set"));
 											break;
@@ -680,7 +701,7 @@ namespace ClientLib
 
 									param.setPrecision(0);
 
-									writeLogSignalChange(param, oldSor, newSor);
+									writeTuningLogSignalChange(param, oldSor, newSor);
 								}
 							}
 						} // Write SOR
@@ -724,12 +745,13 @@ namespace ClientLib
 		}
 
 		{
-			QMutexLocker l(&m_activeClientMutex);
+			QWriteLocker l(&m_activeClientMutex);
 			m_activeClientId = m_tuningSourcesStatesReply.activeclientid().c_str();
 			m_activeClientIp = m_tuningSourcesStatesReply.activeclientip().c_str();
+			m_singleLmControlMode = m_tuningSourcesStatesReply.singlelmcontrolmode();
 
 			QString localAddress = localAddressPort().addressStr();
-			m_currentClientIsActive = (singleLmControlMode() == false) || (m_activeClientId == m_instanceId && m_activeClientIp == localAddress);
+			m_currentClientIsActive = (m_singleLmControlMode == false) || (m_activeClientId == m_instanceId && m_activeClientIp == localAddress);
 		}
 
 		//
@@ -740,7 +762,7 @@ namespace ClientLib
 	}
 
 
-	void TuningTcpClient::requestActivateTuningSource(const QString& equipmentId, bool enableControl, bool forceTakeControl)
+	void TuningTcpClient::requestActivateTuningSource(Hash equipmentHash, bool enableControl, bool forceTakeControl)
 	{
 		if (isConnected() == false)
 		{
@@ -757,6 +779,20 @@ namespace ClientLib
 
 		// Create the request
 		//
+		QString equipmentId;
+
+		{
+			QReadLocker l(&m_tuningSourcesLock);
+
+			auto it = m_tuningSources.find(equipmentHash);
+			if (it == m_tuningSources.end())
+			{
+				assert(false);
+				return;
+			}
+
+			equipmentId = it->second.equipmentId();
+		}
 
 		m_activateTuningSource.set_tuningsourceequipmentid(equipmentId.toUtf8());
 		m_activateTuningSource.set_activatecontrol(enableControl);
@@ -903,7 +939,7 @@ namespace ClientLib
 			//
 			arrivedState.m_flags.controlIsEnabled = (error == NetworkError::LmControlIsNotActive) ? false : true;
 
-			if (lmStatusFlagMode() != LmStatusFlagMode::AccessKey)
+			if (lmStatusFlagMode() != TuningClientSettings::LmStatusFlagMode::AccessKey)
 			{
 				// Set Access key flag to Validity flag & Control flag if Access Key function is inactive
 				//
@@ -1240,34 +1276,32 @@ namespace ClientLib
 
 	void TuningTcpClient::writeLogAlert(const QString& message)
 	{
-		qDebug() << "TuningTcpClient: " << message;
+		m_logFile.writeAlert(message);
 	}
 
 	void TuningTcpClient::writeLogError(const QString& message)
 	{
-		qDebug() << "TuningTcpClient: " << message;
+		m_logFile.writeError(message);
 	}
 
 	void TuningTcpClient::writeLogWarning(const QString& message)
 	{
-		qDebug() << "TuningTcpClient: " << message;
+		m_logFile.writeWarning(message);
 	}
 
 	void TuningTcpClient::writeLogMessage(const QString& message)
 	{
-		qDebug() << "TuningTcpClient: " << message;
+		m_logFile.writeMessage(message);
 	}
 
-	void TuningTcpClient::writeLogSignalChange(const AppSignalParam& param, const TuningValue& oldValue, const TuningValue& newValue)
+	void TuningTcpClient::writeTuningLogSignalChange(const AppSignalParam& param, const TuningValue& oldValue, const TuningValue& newValue)
 	{
-		Q_UNUSED(param);
-		Q_UNUSED(oldValue);
-		Q_UNUSED(newValue);
+		m_tuningLog->write(param, oldValue, newValue);
 	}
 
-	void TuningTcpClient::writeLogSignalChange(const QString& message)
+	void TuningTcpClient::writeTuningLogMessage(const QString& message)
 	{
-		qDebug() << message;
+		m_tuningLog->write(message);
 	}
 
 	QString TuningTcpClient::instanceId() const
@@ -1318,61 +1352,38 @@ namespace ClientLib
 
 	bool TuningTcpClient::singleLmControlMode() const
 	{
+		QReadLocker l(&m_activeClientMutex);
 		return m_singleLmControlMode;
 	}
 
 	bool TuningTcpClient::clientIsActive() const
 	{
-		if (singleLmControlMode() == false)
+		QReadLocker l(&m_activeClientMutex);
+		if (m_singleLmControlMode == false)
 		{
 			return true;
 		}
-
 		return m_currentClientIsActive;
 	}
 
 	QString TuningTcpClient::activeClientId() const
 	{
-		QMutexLocker l(&m_activeClientMutex);
+		QReadLocker l(&m_activeClientMutex);
 		return m_activeClientId;
 	}
 
 	QString TuningTcpClient::activeClientIp() const
 	{
-		QMutexLocker l(&m_activeClientMutex);
+		QReadLocker l(&m_activeClientMutex);
 		return m_activeClientIp;
 	}
 
-	int TuningTcpClient::activeTuningSourceCount() const
-	{
-		int result = 0;
-
-		QReadLocker l(&m_tuningSourcesLock);
-
-		for (const auto& it : m_tuningSources)
-		{
-			const TuningSource& ts = it.second;
-
-			for (int i = 0; i < ts.statesCount(); i++)
-			{
-				if (ts.state(i).controlisactive() == true)
-				{
-					result++;
-					break;	// Break if found control in the source, do not count twice
-				}
-			}
-		}
-
-		return result;
-	}
-
-
-	QString TuningTcpClient::activeTuningSource() const
+	Hash TuningTcpClient::activeTuningSource() const
 	{
 		if (singleLmControlMode() == false)
 		{
 			assert(false);
-			return QString();
+			return UNDEFINED_HASH;
 		}
 
 		QReadLocker l(&m_tuningSourcesLock);
@@ -1385,20 +1396,20 @@ namespace ClientLib
 			{
 				if (ts.state(i).controlisactive() == true)
 				{
-					return ts.equipmentId();
+					return ::calcHash(ts.equipmentId());
 				}
 			}
 		}
 
-		return QString();
+		return UNDEFINED_HASH;
 	}
 
-	LmStatusFlagMode TuningTcpClient::lmStatusFlagMode() const
+	TuningClientSettings::LmStatusFlagMode TuningTcpClient::lmStatusFlagMode() const
 	{
 		return m_lmStatusFlagMode;
 	}
 
-	void TuningTcpClient::setLmStatusFlagMode(const LmStatusFlagMode& mode)
+	void TuningTcpClient::setLmStatusFlagMode(const TuningClientSettings::LmStatusFlagMode& mode)
 	{
 		m_lmStatusFlagMode = mode;
 	}
