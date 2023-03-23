@@ -92,7 +92,7 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	m_pSplitter->addWidget(m_tabWidget);
 	m_pSplitter->addWidget(m_pLog);
 	m_pSplitter->setChildrenCollapsible(false);
-		
+
 	// Right Layout (buttons)
 	//
 	QVBoxLayout* pRightLayout = new QVBoxLayout();
@@ -110,7 +110,7 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 
 	pRightLayout->addWidget(m_pSettingsButton);
 	pRightLayout->addWidget(m_pClearLogButton);
-		
+
 	pRightLayout->addWidget(m_pAboutQtButton);
 	pRightLayout->addWidget(m_pAboutButton);
 
@@ -220,7 +220,7 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 
 	// --
 	//
-    theLog.writeMessage(tr("Programm is started"));
+	theLog.writeMessage(tr("Programm is started"));
 	theLog.writeMessage(tr("Version %1").arg(qApp->applicationVersion()));
 
 #ifdef GITLAB_CI_BUILD
@@ -230,6 +230,8 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	theLog.writeMessage(tr("Build Host: %1").arg(COMPUTERNAME));
 #else
 #endif
+
+	setAcceptDrops(true);
 
 	return;
 }
@@ -259,14 +261,14 @@ void ModuleConfigurator::timerEvent(QTimerEvent* pTimerEvent)
 		return;
 	}
 
-	if (pTimerEvent->timerId() == m_logTimerId && 
-        theLog.isEmpty() == false &&
-		m_pLog != nullptr)
+	if (pTimerEvent->timerId() == m_logTimerId &&
+			theLog.isEmpty() == false &&
+			m_pLog != nullptr)
 	{
 		std::list<OutputLogItem> messages;
 		for (int i = 0; i < 30 && theLog.isEmpty() == false; i++)
 		{
-            messages.push_back(theLog.popMessages());
+			messages.push_back(theLog.popMessages());
 		}
 
 		for (auto m = messages.begin(); m != messages.end(); ++m)
@@ -276,6 +278,65 @@ void ModuleConfigurator::timerEvent(QTimerEvent* pTimerEvent)
 	}
 
 	return;
+}
+
+void ModuleConfigurator::dragEnterEvent(QDragEnterEvent* event)
+{
+	const QMimeData* mimeData = event->mimeData();
+
+	if (mimeData->hasUrls())
+	{
+		QList<QUrl> urlList = mimeData->urls();
+
+		if (urlList.size() == 1)
+		{
+			QString fileName = urlList.at(0).toLocalFile();
+			if (fileName.endsWith(".bts") == true)
+			{
+				event->acceptProposedAction();
+			}
+		}
+	}
+}
+
+void ModuleConfigurator::dragMoveEvent(QDragMoveEvent* event)
+{
+	event->acceptProposedAction();
+}
+
+void ModuleConfigurator::dragLeaveEvent(QDragLeaveEvent* event)
+{
+	event->accept();
+}
+
+void ModuleConfigurator::dropEvent(QDropEvent* event)
+{
+	const QMimeData* mimeData = event->mimeData();
+
+	// check for our needed mime type, here a file or a list of files
+	if (mimeData->hasUrls())
+	{
+		QList<QUrl> urlList = mimeData->urls();
+
+		if (urlList.size() != 1)
+		{
+			return;
+		}
+
+		QString fileName = urlList.at(0).toLocalFile();
+		if (fileName.endsWith(".bts") == false)
+		{
+			return;
+		}
+
+		m_tabWidget->setCurrentIndex(0);
+
+		if (dynamic_cast<ApplicationTabPage*>(m_tabWidget->widget(0)) != nullptr)
+		{
+			ApplicationTabPage* page = dynamic_cast<ApplicationTabPage*>(m_tabWidget->currentWidget());
+			page->openBitstreamFile(fileName);
+		}
+	}
 }
 
 void ModuleConfigurator::writeLog(const OutputLogItem& logItem)
@@ -309,7 +370,7 @@ void ModuleConfigurator::configureClicked()
 				return;
 			}
 
-            if (page->isFirmwareCrcValid() == false)
+			if (page->isFirmwareCrcValid() == false)
 			{
 				QMessageBox::critical(this, qApp->applicationName(), tr("Invalid Firmware CRC."));
 				return;
@@ -318,7 +379,7 @@ void ModuleConfigurator::configureClicked()
 
 			uint32_t factoryNo = page->factoryNo();
 			QDate manufactureDate = page->manufactureDate();
-            uint32_t firmwareCrc = page->firmwareCrc();
+			uint32_t firmwareCrc = page->firmwareCrc();
 
 			if (factoryNo == 0)
 			{
@@ -328,14 +389,14 @@ void ModuleConfigurator::configureClicked()
 
 			// --
 			//
-            theLog.writeMessage("");
+			theLog.writeMessage("");
 			theLog.writeMessage(tr("Writing service information..."));
 
 			// send write in commuinication thread...
 			//
 			disableControls();
 
-            emit writeDiagData(factoryNo, manufactureDate, firmwareCrc);
+			emit writeDiagData(factoryNo, manufactureDate, firmwareCrc);
 		}
 
 		// Write diag info, like factory no, crc, etc
@@ -376,7 +437,7 @@ void ModuleConfigurator::configureClicked()
 	}
 	catch(QString message)
 	{
-        theLog.writeError(message);
+		theLog.writeError(message);
 		return;
 	}
 
@@ -393,7 +454,7 @@ void ModuleConfigurator::readClicked()
 		{
 			//DiagTabPage* page = dynamic_cast<DiagTabPage*>(m_tabWidget->currentWidget());
 
-            theLog.writeMessage("");
+			theLog.writeMessage("");
 			theLog.writeMessage(tr("Reading service information..."));
 
 			// Read
@@ -435,7 +496,7 @@ void ModuleConfigurator::readClicked()
 	}
 	catch(QString message)
 	{
-        theLog.writeError(message);
+		theLog.writeError(message);
 		return;
 	}
 
@@ -465,8 +526,8 @@ void ModuleConfigurator::eraseClicked()
 	{
 		// --
 		//
-        theLog.writeMessage("");
-        theLog.writeMessage(tr("Erasing flash memory..."));
+		theLog.writeMessage("");
+		theLog.writeMessage(tr("Erasing flash memory..."));
 		
 		// Read
 		//
@@ -495,7 +556,7 @@ void ModuleConfigurator::eraseClicked()
 	}
 	catch(QString message)
 	{
-        theLog.writeError(message);
+		theLog.writeError(message);
 		return;
 	}
 	
@@ -613,7 +674,7 @@ void ModuleConfigurator::communicationReadFinished(int protocolVersion, std::vec
 				page->setFactoryNo(serviceDataVersion.factoryNo());
 				page->setManufactureDate(QDate(serviceDataVersion.manufactureYear(), serviceDataVersion.manufactureMonth(), serviceDataVersion.manufactureDay()));
 
-                page->setFirmwareCrc(serviceDataVersion.firmwareCrc());
+				page->setFirmwareCrc(serviceDataVersion.firmwareCrc());
 			}
 			break;
 		default:

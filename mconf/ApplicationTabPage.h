@@ -24,6 +24,8 @@ public:
 
 	std::optional<std::vector<int>> selectedUarts() const;
 
+	void openBitstreamFile(const QString& fileName);
+
 signals:
 	void loadBinaryFile(const QString& fileName, ModuleFirmwareStorage* storage);
 	void detectSubsystem();
