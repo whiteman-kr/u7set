@@ -101,7 +101,7 @@ void DialogTcpStatistics::prepareContextMenu(const QPoint& pos)
 				return;
 			}
 
-			 size_t id = item->data(static_cast<int>(ColumnUserData::StatId), Qt::UserRole).value<size_t>();
+			 size_t id = item->data(static_cast<int>(ColumnUserData::StatId), Qt::UserRole).value<uintptr_t>();
 			 Q_ASSERT(id);
 
 			TcpClientStatistics::reconnect(id);
@@ -200,7 +200,7 @@ void DialogTcpStatistics::update()
 			continue;
 		}
 
-		item->setData(static_cast<int>(ColumnUserData::StatId), Qt::UserRole, static_cast<size_t>(stat.id));
+		item->setData(static_cast<int>(ColumnUserData::StatId), Qt::UserRole, QVariant::fromValue<uintptr_t>(stat.id));
 		item->setText(static_cast<int>(Columns::Caption), stat.objectName);
 		item->setText(static_cast<int>(Columns::ServerID), stat.serverId);
 		item->setText(static_cast<int>(Columns::IsConnected), stat.state.isConnected ? tr("Yes") : tr("No"));
