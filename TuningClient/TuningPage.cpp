@@ -46,7 +46,7 @@ void SelectionControlDelegate::initStyleOption(QStyleOptionViewItem* option, con
 		QBrush br = m_model->backColor(index);
 		QBrush fr = m_model->foregroundColor(index);
 
-		if (br.style() != Qt::NoBrush && fr.style() != Qt::NoBrush)
+		if (br.style() != Qt::NoBrush)
 		{
 			if (br.color() != QPalette().color(QPalette::Base))
 			{
@@ -2347,47 +2347,181 @@ void TuningPage::restoreSignalsFromFilter(TuningFilter* filter)
 	}
 }
 
+void TuningPage::setActionButtonsState()
+{
+	bool writeEnabled = false;
+	bool setValueEnabled = false;
+	bool setAllEnabled = false;
+
+	bool autoApply = m_configController.configuration().clientSettings.autoApply;
+	bool applyEnabled = false;
+
+	std::vector<Hash> hashes = m_model->allHashes();
+
+	std::set<Hash> sourceHashes;
+
+	bool ok = false;
+
+	for (Hash hash : hashes)
+	{
+		if (autoApply == false)
+		{
+			AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
+			sourceHashes.insert(::calcHash(asp.lmEquipmentId()));
+		}
+
+		TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
+
+		if (ok == false ||
+				state.valid() == false ||
+				state.controlIsEnabled() == false ||
+				state.writingIsEnabled() == false)
+		{
+			continue;
+		}
+
+		setAllEnabled = true;
+
+		if(m_tuningSignalManager.newValueIsUnapplied(hash))
+		{
+			writeEnabled = true;
+		}
+
+		if (setAllEnabled == true && writeEnabled == true)
+		{
+			break;
+		}
+	}
+
+	if (setAllEnabled == true)
+	{
+		// Verify if Setting value is possible (selection is writable)
+
+		QModelIndexList selection = m_objectList->selectionModel()->selectedRows();
+		for (const QModelIndex& index : selection)
+		{
+			const TuningModelHashSet& hashSet = m_model->hashSetByIndex(index.row());
+			for (int c = 0; c < m_model->valueColumnsCount(); c++)
+			{
+				Hash hash = hashSet.hash[c];
+				if (hash == UNDEFINED_HASH)
+				{
+					continue;
+				}
+
+				TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
+				if (ok == true &&
+						state.valid() == true &&
+						state.controlIsEnabled() == true &&
+						state.writingIsEnabled() == true)
+				{
+					setValueEnabled = true;
+					break;
+				}
+			}
+			if (setValueEnabled == true)
+			{
+				break;
+			}
+		}
+	}
+
+	if (m_setValueButton->isEnabled() != setValueEnabled)
+	{
+		m_setValueButton->setEnabled(setValueEnabled);
+	}
+
+	if (m_setAllButton->isEnabled() != setAllEnabled)
+	{
+		m_setAllButton->setEnabled(setAllEnabled);
+	}
+
+	if (m_writeButton->isEnabled() != writeEnabled)
+	{
+		m_writeButton->setEnabled(writeEnabled);
+	}
+
+	if (m_undoButton->isEnabled() != writeEnabled)
+	{
+		m_undoButton->setEnabled(writeEnabled);
+	}
+
+	// Enable or disable "Apply" button
+	//
+	if (autoApply == false)
+	{
+		for (Hash sourceHash : sourceHashes)
+		{
+			std::vector<ClientLib::TuningSource> tss = m_tuningConnection.tuningSourceInfo(sourceHash);
+			for (const ClientLib::TuningSource& ts : tss)
+			{
+				for (int i = 0; i < ts.statesCount(); i++)
+				{
+					if (ts.state(i).hasunappliedparams() == true)
+					{
+						applyEnabled = true;
+						break;
+					}
+				}
+				if (applyEnabled == true)
+				{
+					break;
+				}
+			}
+			if (applyEnabled == true)
+			{
+				break;
+			}
+		}
+
+		if (m_applyButton->isEnabled() != applyEnabled)
+		{
+			m_applyButton->setEnabled(applyEnabled);
+		}
+	}
+}
+
+void TuningPage::updateVisibleItems()
+{
+	m_model->blink();
+
+	// Update only visible dynamic items
+	//
+	int from = m_objectList->rowAt(0);
+	int to = m_objectList->rowAt(m_objectList->height() - m_objectList->horizontalHeader()->height());
+
+	if (from == -1)
+	{
+		from = 0;
+	}
+
+	if (to == -1)
+	{
+		to = m_model->rowCount() - 1;
+	}
+
+	// Redraw visible table items
+	//
+	for (int row = from; row <= to; row++)
+	{
+		for (int col = 0; col < m_model->columnCount(); col++)
+		{
+			int columnType = static_cast<int>(m_model->columnType(col));
+
+			if (columnType >= static_cast<int>(TuningModelColumns::ValueFirst))
+			{
+				m_objectList->update(m_model->index(row, col));
+			}
+		}
+	}
+}
+
 void TuningPage::slot_timerTick500()
 {
 	if  (isVisible() == true && m_model->rowCount() > 0)
 	{
-
-		//qDebug() << m_instanceNo;
-
-		m_model->blink();
-
-		// Update only visible dynamic items
-		//
-		int from = m_objectList->rowAt(0);
-		int to = m_objectList->rowAt(m_objectList->height() - m_objectList->horizontalHeader()->height());
-
-		if (from == -1)
-		{
-			from = 0;
-		}
-
-		if (to == -1)
-		{
-			to = m_model->rowCount() - 1;
-		}
-
-		// Redraw visible table items
-		//
-		for (int row = from; row <= to; row++)
-		{
-			for (int col = 0; col < m_model->columnCount(); col++)
-			{
-				int columnType = static_cast<int>(m_model->columnType(col));
-
-				if (columnType >= static_cast<int>(TuningModelColumns::ValueFirst))
-				{
-					//QString str = QString("%1:%2").arg(row).arg(col);
-					//qDebug() << str;
-
-					m_objectList->update(m_model->index(row, col));
-				}
-			}
-		}
+		setActionButtonsState();
+		updateVisibleItems();
 	}
 }
 
