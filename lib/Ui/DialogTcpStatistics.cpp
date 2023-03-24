@@ -101,7 +101,7 @@ void DialogTcpStatistics::prepareContextMenu(const QPoint& pos)
 				return;
 			}
 
-			 size_t id = item->data(0, Qt::UserRole).value<size_t>();
+			 size_t id = item->data(static_cast<int>(ColumnUserData::StatId), Qt::UserRole).value<size_t>();
 			 Q_ASSERT(id);
 
 			TcpClientStatistics::reconnect(id);
@@ -167,7 +167,7 @@ void DialogTcpStatistics::update()
 		for (int i = 0; i < count; i++)
 		{
 			QTreeWidgetItem* item = new QTreeWidgetItem();
-			item->setData(0, Qt::UserRole, i);
+			item->setData(static_cast<int>(ColumnUserData::Index), Qt::UserRole, i);
 			m_treeWidget->addTopLevelItem(item);
 		}
 	}
@@ -187,7 +187,7 @@ void DialogTcpStatistics::update()
 				continue;
 			}
 
-			if (topItem->data(0, Qt::UserRole).toInt() == i)
+			if (topItem->data(static_cast<int>(ColumnUserData::Index), Qt::UserRole).toInt() == i)
 			{
 				item = topItem;
 				break;
@@ -200,6 +200,7 @@ void DialogTcpStatistics::update()
 			continue;
 		}
 
+		item->setData(static_cast<int>(ColumnUserData::StatId), Qt::UserRole, stat.id);
 		item->setText(static_cast<int>(Columns::Caption), stat.objectName);
 		item->setText(static_cast<int>(Columns::ServerID), stat.serverId);
 		item->setText(static_cast<int>(Columns::IsConnected), stat.state.isConnected ? tr("Yes") : tr("No"));

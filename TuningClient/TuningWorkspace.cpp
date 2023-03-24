@@ -1684,10 +1684,30 @@ QTreeWidgetItem* TuningWorkspace::findFilterWidget(const QString& id, QTreeWidge
 
 bool TuningWorkspace::eventFilter(QObject *object, QEvent *event)
 {
+	bool navigationKey = false;
+
+	if (event->type() == QEvent::KeyPress)
+	{
+		QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+		if (keyEvent->key() == Qt::Key_Up ||
+				keyEvent->key() == Qt::Key_Down ||
+				keyEvent->key() == Qt::Key_Left ||
+				keyEvent->key() == Qt::Key_Right ||
+				keyEvent->key() == Qt::Key_PageUp ||
+				keyEvent->key() == Qt::Key_PageDown ||
+				keyEvent->key() == Qt::Key_Home ||
+				keyEvent->key() == Qt::Key_End ||
+				keyEvent->key() == Qt::Key_Space ||
+				keyEvent->key() == Qt::Key_Enter ||
+				keyEvent->key() == Qt::Key_Return)
+			navigationKey = true;
+	}
+
 	if (m_tab != nullptr && object == m_tab->tabBar() &&
 		(event->type() == QEvent::MouseButtonPress ||
 		 event->type() == QEvent::MouseButtonRelease ||
-		 event->type() == QEvent::KeyPress))
+		 event->type() == QEvent::MouseButtonDblClick ||
+		 navigationKey == true))
 	{
 		if (askForSavePendingChanges() == false)
 		{
@@ -1698,7 +1718,8 @@ bool TuningWorkspace::eventFilter(QObject *object, QEvent *event)
 	if (m_filterTree != nullptr && (object == m_filterTree || object == m_filterTree->viewport()) &&
 		(event->type() == QEvent::MouseButtonPress ||
 		 event->type() == QEvent::MouseButtonRelease ||
-		 event->type() == QEvent::KeyPress))
+		 event->type() == QEvent::MouseButtonDblClick ||
+		 navigationKey == true))
 	{
 		if (askForSavePendingChanges() == false)
 		{
@@ -1711,7 +1732,8 @@ bool TuningWorkspace::eventFilter(QObject *object, QEvent *event)
 		if (object == b &&
 			(event->type() == QEvent::MouseButtonPress ||
 			 event->type() == QEvent::MouseButtonRelease ||
-			 event->type() == QEvent::KeyPress))
+			 event->type() == QEvent::MouseButtonDblClick ||
+			 navigationKey == true))
 		{
 			if (askForSavePendingChanges() == false)
 			{

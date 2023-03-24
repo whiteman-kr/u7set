@@ -14,6 +14,50 @@
 
 int todo_crash_if_modal_dialog_in_reload_config;
 
+class SelectionControlDelegate : public QStyledItemDelegate
+{
+public:
+	SelectionControlDelegate(QObject* parent, TuningModelClient* model);
+	void initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const override;
+
+private:
+	TuningModelClient* m_model = nullptr;
+};
+
+//
+// SelectionControlDelegate
+//
+SelectionControlDelegate::SelectionControlDelegate(QObject* parent, TuningModelClient* model) :
+	QStyledItemDelegate(parent),
+	m_model(model)
+{
+}
+
+void SelectionControlDelegate::initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const
+{
+	QStyledItemDelegate::initStyleOption(option, index);
+
+	bool selected = option->state & QStyle::State_Selected;
+
+	// Set background color for selected item (by default it is displayed by white)
+	//
+	if (selected == true)
+	{
+		QBrush br = m_model->backColor(index);
+		QBrush fr = m_model->foregroundColor(index);
+
+		if (br.style() != Qt::NoBrush && fr.style() != Qt::NoBrush)
+		{
+			if (br.color() != QPalette().color(QPalette::Base))
+			{
+
+				option->palette.setColor(QPalette::Highlight, br.color());
+				option->palette.setColor(QPalette::HighlightedText, fr.color());
+			}
+		}
+	}
+}
+
 //
 // TuningItemModelMain
 //
@@ -220,10 +264,10 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 		}
 
 		if (state.writingIsEnabled() == false)
-        {
+		{
 			QColor color = theSettings.m_columnDisabledTextColor;
-            return QBrush(color);
-        }
+			return QBrush(color);
+		}
 
 		if (m_blink == true && m_tuningSignalManager.newValueIsUnapplied(hash) == true)
 		{
@@ -713,8 +757,7 @@ TuningPage::TuningPage(TuningConfigController& configController,
 	// Object List
 	//
 	m_objectList = new TuningTableView();
-    m_objectList->setWordWrap(false);
-
+	m_objectList->setWordWrap(false);
 
 	// Models and data
 	//
@@ -742,6 +785,7 @@ TuningPage::TuningPage(TuningConfigController& configController,
 	std::vector<QString> valueColumnsAppSignalIdSuffixes = tabFilter->valueColumnsAppSignalIdSuffixes();
 
 	m_model = new TuningModelClient(m_tuningSignalManager, valueColumnsAppSignalIdSuffixes, this);
+	m_objectList->setItemDelegate(new SelectionControlDelegate(this, m_model));
 
 	QFont f = m_objectList->font();
 
@@ -994,8 +1038,8 @@ void TuningPage::fillObjectsList()
 
 	//if (m_pageFilter != nullptr)
 	//{
-//		qDebug() << "Button " << m_pageFilter->caption();
-//	}
+	//		qDebug() << "Button " << m_pageFilter->caption();
+	//	}
 
 	if (m_pageFilter == nullptr)
 	{
@@ -1298,10 +1342,13 @@ bool TuningPage::askForSavePendingChanges()
 	}
 
 	QMessageBox msgBox{this};
+	msgBox.setIcon(QMessageBox::Warning);
 	msgBox.setText(tr("Some values were modified but not written. Please select the following:"));
 	QPushButton* saveButton = msgBox.addButton(QMessageBox::Save);
 	QPushButton* undoButton = msgBox.addButton(tr("Undo"), QMessageBox::ActionRole);
 	/*QPushButton* cancelButton = */msgBox.addButton(QMessageBox::Cancel);
+
+	msgBox.exec();
 
 	if (msgBox.clickedButton() == saveButton)
 	{
@@ -1314,10 +1361,10 @@ bool TuningPage::askForSavePendingChanges()
 		return true;
 	}
 
-//	if (msgBox.clickedButton() == cancelButton)
-//	{
-//		return false;
-//	}
+	//	if (msgBox.clickedButton() == cancelButton)
+	//	{
+	//		return false;
+	//	}
 
 	return false;
 }
@@ -1859,8 +1906,8 @@ void TuningPage::slot_saveSignalsToNewFilter()
 
 	bool ok;
 	QString filterName = QInputDialog::getText(this, tr("Add Signals To Filter"),
-											tr("Enter the filter name:"), QLineEdit::Normal,
-											tr("Name"), &ok);
+											   tr("Enter the filter name:"), QLineEdit::Normal,
+											   tr("Name"), &ok);
 
 	if (ok == false)
 	{
@@ -1947,8 +1994,8 @@ void TuningPage::slot_exportContentsToCSV()
 	int rowCount = m_model->rowCount();
 
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Export to CSV"),
-							   QString(),
-							   tr("CSV (*.csv)"));
+													QString(),
+													tr("CSV (*.csv)"));
 
 	if (fileName.isEmpty() == true)
 	{
@@ -2467,9 +2514,9 @@ void TuningPage::slot_setAll()
 				if(tvDefault < asp.tuningLowBound() || tvDefault > asp.tuningHighBound())
 				{
 					QString message = tr("Invalid default value '%1' in signal %2 [%3]")
-									  .arg(tvDefault.toString(m_model->analogFormat(), asp.precision()))
-									  .arg(asp.appSignalId())
-									  .arg(asp.caption());
+							.arg(tvDefault.toString(m_model->analogFormat(), asp.precision()))
+							.arg(asp.appSignalId())
+							.arg(asp.caption());
 					QMessageBox::critical(this, qAppName(), message);
 				}
 				else

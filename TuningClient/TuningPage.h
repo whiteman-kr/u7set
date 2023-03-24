@@ -18,10 +18,10 @@ public:
 
 	bool hasPendingChanges();
 
-protected:
 	virtual QBrush backColor(const QModelIndex& index) const override;
 	virtual QBrush foregroundColor(const QModelIndex& index) const override;
 
+protected:
 	virtual Qt::ItemFlags flags(const QModelIndex& index) const override;
 
 	virtual	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
