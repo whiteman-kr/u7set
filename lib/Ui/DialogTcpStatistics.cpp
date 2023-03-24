@@ -200,7 +200,7 @@ void DialogTcpStatistics::update()
 			continue;
 		}
 
-		item->setData(static_cast<int>(ColumnUserData::StatId), Qt::UserRole, stat.id);
+		item->setData(static_cast<int>(ColumnUserData::StatId), Qt::UserRole, static_cast<size_t>(stat.id));
 		item->setText(static_cast<int>(Columns::Caption), stat.objectName);
 		item->setText(static_cast<int>(Columns::ServerID), stat.serverId);
 		item->setText(static_cast<int>(Columns::IsConnected), stat.state.isConnected ? tr("Yes") : tr("No"));
