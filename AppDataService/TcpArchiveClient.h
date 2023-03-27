@@ -2,16 +2,16 @@
 
 #include "../OnlineLib/Tcp.h"
 #include "../Proto/network.pb.h"
+#include "../AppSignalLib/SimpleAppSignalState.h"
 
-#include "SignalStatesProcessingThread.h"
+class AppDataServiceWorker;
 
 class TcpArchiveClient : public Tcp::Client
 {
 public:
 	TcpArchiveClient(const SoftwareInfo& softwareInfo,
-					 const HostAddressPort& serverAddressPort,
-					 SignalStatesProcessingThread* signalStatesProcessingThread,
-					 CircularLoggerShared logger);
+					 const HostAddressPort& archiveSrviceAddressPort,
+					 AppDataServiceWorker& appDataService);
 
 	virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
 
@@ -27,7 +27,7 @@ private slots:
 	void onSignalStatesQueueIsNotEmpty();
 
 private:
-	SignalStatesProcessingThread* m_signalStatesProcessingThread = nullptr;
+	AppDataServiceWorker& m_appDataService;
 	CircularLoggerShared m_logger;
 
 	SimpleAppSignalStatesQueueShared m_signalStatesQueue;
@@ -37,11 +37,12 @@ private:
 	qint64 m_saveAppSignalsStateErrorReplyCount = 0;
 };
 
-
 class TcpArchiveClientThread : public SimpleThread
 {
 public:
-	TcpArchiveClientThread(TcpArchiveClient* tcpArchiveClient);
+	TcpArchiveClientThread(const SoftwareInfo& softwareInfo,
+						   const HostAddressPort& serverAddressPort,
+						   AppDataServiceWorker& appDataService);
 
 	Tcp::ConnectionState getConnectionState();
 
@@ -51,5 +52,5 @@ private:
 
 private:
 	TcpArchiveClient* m_tcpArchiveClient = nullptr;
-	Tcp::ConnectionState m_dummyState;
+	static Tcp::ConnectionState m_emptyState;
 };

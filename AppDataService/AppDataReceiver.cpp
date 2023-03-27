@@ -44,15 +44,23 @@ AppDataReceiver::AppDataReceiver(const HostAddressPort& dataReceivingIP,
 								 CircularLoggerShared log) :
 	m_appDataSources(appDataSources),
 	m_processingThreadsCountFromSettings(processingThreadsCount),
-	m_log(log)
+	m_log(log),
+	m_statesProcessingThread(log)
 {
+	setObjectName("AppDataReceiver");
+
 	m_isSimulationMode = (swRunMode == E::SoftwareRunMode::Simulation);
 
 	m_appDataReceivingIP = udp::endpoint(
 								ip::address::from_string(dataReceivingIP.addressStr().toStdString()),
 								dataReceivingIP.port());
 
-	setObjectName("AppDataReceiver");
+	for(AppDataSource* appDataSource : appDataSources)
+	{
+		appDataSource->setStatesProcessingThreadWakupParams(&m_statesProcessigRequiredMutex,
+															&m_statesProcessingRequiredCondition,
+															&m_statesProcessingRequired);
+	}
 }
 
 AppDataReceiver::~AppDataReceiver()
@@ -61,6 +69,8 @@ AppDataReceiver::~AppDataReceiver()
 
 void AppDataReceiver::fillAppDataReceiveState(Network::AppDataReceiveState* adrs)
 {
+	TEST_PTR_RETURN(adrs);
+
 	adrs->set_receivingspeed(m_receivingSpeed);
 	adrs->set_rupframesreceivingspeed(m_rupFramesReceivingSpeed);
 
@@ -72,6 +82,18 @@ void AppDataReceiver::fillAppDataReceiveState(Network::AppDataReceiveState* adrs
 	adrs->set_errunknownappdatasourceip(m_errUnknownAppDataSourceIP);
 	adrs->set_errrupframecrc(m_errRupFrameCRC);
 	adrs->set_errnotexpectedsimpacket(m_errNotExpectedSimPacket);
+}
+
+void AppDataReceiver::registerDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue,
+													bool isArchivingQueue,
+													const QString& description)
+{
+	m_statesProcessingThread.registerDestSignalStatesQueue(destQueue, isArchivingQueue, description);
+}
+
+void AppDataReceiver::unregisterDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue)
+{
+	m_statesProcessingThread.unregisterDestSignalStatesQueue(destQueue);
 }
 
 void AppDataReceiver::run()
@@ -107,7 +129,7 @@ void AppDataReceiver::run()
 
 	DELETE_IF_NOT_NULL(m_ioContext);
 
-	DEBUG_LOG_MSG(m_log, QString("AppDataReceiver thread is finished (receiving IP %1)").
+	DEBUG_LOG_MSG(m_log, QString("AppDataReceiver thread finished (receiving IP %1)").
 							arg(appDataReceivingIPStr()));
 }
 
@@ -255,67 +277,6 @@ bool AppDataReceiver::createAndBindSocket()
 	}
 
 	return isSocketWorkable();
-
-/*	qint64 prevServerTime = -1;
-
-	while(isQuitRequested() == false)
-	{
-		qint64 serverTime = QDateTime::currentMSecsSinceEpoch();
-
-		if (prevServerTime != -1 && serverTime - prevServerTime < 1000)
-		{
-			msleep(200);
-			continue;
-		}
-
-		prevServerTime = serverTime;
-
-		qDebug() << C_STR(QString("Try create AsyncAppDataReceiver listening socket on %1").arg(m_dataReceivingIP.addressPortStr()));
-
-		m_socket = new QUdpSocket();
-
-		bool result = m_socket->bind(m_dataReceivingIP.address(), m_dataReceivingIP.port());
-
-		if (result == false)
-		{
-			qDebug() << C_STR(QString("AsyncAppDataReceiver listening socket binding error to %1").arg(m_dataReceivingIP.addressPortStr()));
-
-			closeSocket();
-
-			msleep(200);
-
-			continue;
-		}
-
-		// bind Ok
-
-		DEBUG_LOG_MSG(m_log, QString("AppDataReceiver listening socket is created and bound to %1").arg(m_dataReceivingIP.addressPortStr()));
-
-		QVariant osRecvBufSize = m_socket->socketOption(QAbstractSocket::ReceiveBufferSizeSocketOption);
-
-		DEBUG_LOG_MSG(m_log, QString("AppDataReceiver: OS defined receive buffer size - %1 bytes").arg(osRecvBufSize.toInt()));
-
-		QVariant newRecvBufSize(static_cast<int>(2 * 1024 * 1024));
-
-		m_socket->setSocketOption(QAbstractSocket::ReceiveBufferSizeSocketOption, newRecvBufSize);
-
-		QVariant currentBufSize = m_socket->socketOption(QAbstractSocket::ReceiveBufferSizeSocketOption);
-
-		DEBUG_LOG_MSG(m_log, (QString("AppDataReceiver: new receive buffer size is set - %1 bytes").arg(currentBufSize.toInt())));
-
-		if (newRecvBufSize.toInt() != currentBufSize.toInt())
-		{
-			qDebug() << "";
-			DEBUG_LOG_WRN(m_log, QString("WARNING!!! Receive buffer size is not changed to required size."));
-			DEBUG_LOG_MSG(m_log, QString("Try change value of registry key (create if key is not exist)"));
-			DEBUG_LOG_MSG(m_log, QString("HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\AFD\\Parameters\\DefaultReceiveWindow"));
-			qDebug() << "";
-		}
-
-		break;
-	}
-
-	return m_socket != nullptr; */
 }
 
 bool AppDataReceiver::isSocketWorkable() const
@@ -467,16 +428,16 @@ void AppDataReceiver::receivePackets(const error_code& error, size_t bytesReceiv
 
 void AppDataReceiver::requireBufferProcessing(AppDataSource* source)
 {
-	std::lock_guard lg(m_waitConditionMutex);
-	m_requireProcessing.insert({source, true});
-	m_processingRequiredCondition.notify_one();
+	std::lock_guard lg(m_packetProcessigRequiredMutex);
+	m_packetProcessingRequired.insert({source, true});
+	m_packetProcessingRequiredCondition.notify_one();
 }
 
 void AppDataReceiver::requireSignalsInvalidation(AppDataSource* source)
 {
-	std::lock_guard lg(m_waitConditionMutex);
-	m_requireProcessing.insert({source, false});
-	m_processingRequiredCondition.notify_one();
+	std::lock_guard lg(m_packetProcessigRequiredMutex);
+	m_packetProcessingRequired.insert({source, false});
+	m_packetProcessingRequiredCondition.notify_one();
 }
 
 void AppDataReceiver::startProcessingThreads(StdThreadsGuard& stg)
@@ -499,12 +460,18 @@ void AppDataReceiver::startProcessingThreads(StdThreadsGuard& stg)
 
 	DEBUG_LOG_MSG(m_log, QString("AppDataProcessingThreadsPool started. Running threads count %1%2").
 							arg(poolSize).arg(poolSize == idealThreadCount ? " (ideal)" : ""));
+
+	std::thread t(&SignalStatesProcessingThread::processStates,
+				  &m_statesProcessingThread, std::ref(*this));
+
+	stg.append(t);
 }
 
 void AppDataReceiver::wakeupAllProcessingThreads()
 {
-	std::lock_guard lg(m_waitConditionMutex);
-	m_processingRequiredCondition.notify_all();
+	std::lock_guard lg(m_packetProcessigRequiredMutex);
+	m_packetProcessingRequiredCondition.notify_all();
+	m_statesProcessingRequiredCondition.notify_all();
 }
 
 bool AppDataReceiver::stopIfQuitRequested()
@@ -543,9 +510,9 @@ void processPackets(AppDataReceiver& receiver, int threadNumber)
 
 	QThread* thisThread = QThread::currentThread();
 
-	auto& waitConditionMutex = receiver.m_waitConditionMutex;
-	auto& processingRequiredCondition = receiver.m_processingRequiredCondition;
-	auto& requireProcessing = receiver.m_requireProcessing;
+	auto& waitConditionMutex = receiver.m_packetProcessigRequiredMutex;
+	auto& waitCondition = receiver.m_packetProcessingRequiredCondition;
+	auto& requireProcessing = receiver.m_packetProcessingRequired;
 
 	std::unique_lock ul(waitConditionMutex, std::defer_lock);
 
@@ -553,7 +520,7 @@ void processPackets(AppDataReceiver& receiver, int threadNumber)
 	{
 		ul.lock();
 
-		processingRequiredCondition.wait(ul);
+		waitCondition.wait(ul);
 
 		if (receiver.isQuitRequested() == true)
 		{
@@ -607,6 +574,6 @@ void processPackets(AppDataReceiver& receiver, int threadNumber)
 		}
 	}
 
-	DEBUG_LOG_MSG(log, QString("AppDataProcessingThread #%1 is finished").arg(threadNumber));
+	DEBUG_LOG_MSG(log, QString("AppDataProcessingThread #%1 finished").arg(threadNumber));
 }
 

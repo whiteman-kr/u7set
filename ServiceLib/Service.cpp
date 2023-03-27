@@ -343,51 +343,8 @@ QString Service::getServiceInstanceName(const QString& serviceName, const QStrin
 
 QString Service::getServiceInstanceName(const QString& serviceName, int argc, char* argv[])
 {
-	return getServiceInstanceName(serviceName, Service::getInstanceID(argc, argv));
+	return getServiceInstanceName(serviceName, getServiceInstanceID(argc, argv));
 }
-
-QString Service::getInstanceID(const QStringList& serviceArgs)
-{
-	for(QString arg : serviceArgs)
-	{
-		if (arg.trimmed().toLower().startsWith(QtService::ARG_INSTANCE_ID) == false)
-		{
-			continue;
-		}
-
-		// parse: -inst=InstanceID
-
-		QStringList vl = arg.split("=");
-
-		if (vl.count() != 2)
-		{
-			continue;
-		}
-
-		return vl[1].trimmed();
-	}
-
-	return QString();
-}
-
-QString Service::getInstanceID(int argc, char* argv[])
-{
-	QStringList args;
-
-	for(int i = 0; i < argc; i++)
-	{
-		if (argv[i] == nullptr)
-		{
-			assert(false);
-			continue;
-		}
-
-		args.append(QString(argv[i]));
-	}
-
-	return getInstanceID(args);
-}
-
 
 void Service::onServiceWork()
 {

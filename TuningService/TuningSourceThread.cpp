@@ -2565,7 +2565,7 @@ namespace Tuning
 
 		closeSocket();
 
-		DEBUG_LOG_MSG(m_logger, QString(tr("Tuning channel %1 (IP %2) listening thread is finished")).
+		DEBUG_LOG_MSG(m_logger, QString(tr("Tuning channel %1 (IP %2) listening thread finished")).
 					  arg(m_channel + 1).arg(m_listenIP.addressPortStr()));
 	}
 

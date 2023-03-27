@@ -3,26 +3,29 @@
 #include "../UtilsLib/SimpleThread.h"
 #include "../OnlineLib/CircularLogger.h"
 #include "../UtilsLib/SimpleMutex.h"
+#include "../AppSignalLib/SimpleAppSignalState.h"
 
-#include "AppDataSource.h"
+class AppDataReceiver;
 
-class SignalStatesProcessingThread : public RunOverrideThread
+class SignalStatesProcessingThread
 {
 public:
-	SignalStatesProcessingThread(const AppDataSources& appDataSources, CircularLoggerShared log);
+	SignalStatesProcessingThread(CircularLoggerShared log);
 
-	void registerDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue, bool isArchivingQueue, const QString& description);
-	void unregisterDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue, const QString& description);
+	void registerDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue,
+									   bool isArchivingQueue,
+									   const QString& description);
 
-	void run() override;
+	void unregisterDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue);
+
+	void processStates(AppDataReceiver& receiver);
 
 private:
-	const AppDataSources& m_appDataSources;
 	CircularLoggerShared m_log;
-
-	//
 
 	SimpleMutex m_queuesMutex;
 
-	QVector<QPair<SimpleAppSignalStatesQueueShared, bool>> m_queues;
+	// queuePtr => pair<isArchiveQueue, queueDescription>
+	//
+	std::map<SimpleAppSignalStatesQueueShared, std::pair<bool, QString>> m_queues;
 };

@@ -48,6 +48,8 @@
 #include <QHash>
 #include <QHostAddress>
 
+#include <QList>
+
 #include <QMap>
 #include <QMetaClassInfo>
 #include <QMetaEnum>

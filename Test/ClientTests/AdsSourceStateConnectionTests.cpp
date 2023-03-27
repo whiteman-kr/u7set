@@ -170,7 +170,7 @@ TEST_F(AdsSourceStateConnectionTests, receiveSourceStates)
 	for (const ClientLib::AppDataSourceState& source : sources)
 	{
 		EXPECT_TRUE(source.valid());
-		EXPECT_EQ(source.state.state(), static_cast<int>(E::DataSourceState::ReceiveData));
+		EXPECT_EQ(source.state.receivesdata(), true);
 		EXPECT_GT(source.state.receivedframescount(), 0);
 	}
 

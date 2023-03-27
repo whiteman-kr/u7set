@@ -105,14 +105,14 @@ void ArchMaintenanceThread::maintenance()
 
 	if (retryHashes.count() > 0)
 	{
-		DEBUG_LOG_WRN(m_log, QString("Maintenance: %1 files is not processed due to permanent errors").arg(retryHashes.count()));
+		DEBUG_LOG_WRN(m_log, QString("Maintenance: %1 files not processed due to permanent errors").arg(retryHashes.count()));
 	}
 	else
 	{
-		DEBUG_LOG_MSG(m_log, QString("Maintenance: %1 files is processed").arg(m_signalsHashes.count()));
+		DEBUG_LOG_MSG(m_log, QString("Maintenance: %1 files processed").arg(m_signalsHashes.count()));
 	}
 
-	DEBUG_LOG_MSG(m_log, QString("Archive maintenance is finished. Deleted %1. Packed %2. Errors %3. Time elapsed %4 s").
+	DEBUG_LOG_MSG(m_log, QString("Archive maintenance finished. Deleted %1. Packed %2. Errors %3. Time elapsed %4 s").
 					arg(deletedCount).
 					arg(packedCount).
 					arg(errorCount).

@@ -1,5 +1,7 @@
 #pragma once
 
+#include<queue>
+
 #include "../AppSignalLib/AppSignal.h"
 #include "../lib/DataSource.h"
 #include "../OnlineLib/CircularLogger.h"
@@ -35,6 +37,8 @@ private:
 	std::map<Hash, AppSignal*> m_hashToSignal;		// Hash => appSignal
 };
 
+class AppDataReceiver;
+
 class AppDataSource : public DataSourceOnline
 {
 public:
@@ -46,6 +50,10 @@ public:
 				 DynamicAppSignalStates* signalStates,
 				 int autoArchivingGroupsCount,
 				 CircularLoggerShared timeErrLog);
+
+	void setStatesProcessingThreadWakupParams(std::mutex* statesProcessigRequiredMutex,
+											  std::condition_variable* statesProcessingRequiredCondition,
+											  std::queue<AppDataSource*>* statesProcessingRequired);
 
 	bool getState(Network::AppDataSourceState* proto) const;
 	void setState(const Network::AppDataSourceState& proto);
@@ -61,8 +69,12 @@ public:
 
 	quint32 cachedAppDataUID() const { return m_cachedAppDataUID; }
 
+	bool statesQueueIsEmpty(QThread* thread) const;
+
 private:
 	virtual bool parseBuffer(ParsingBuffer& readBuffer, const QThread* thread) override;
+
+	void wakeupStatesProcessingThread();
 
 	int getAutoArchivingGroup(qint64 currentSysTime);
 
@@ -75,6 +87,12 @@ private:
 	virtual quint32 getExpectedDataUID() const override { return m_cachedAppDataUID; }
 
 private:
+	std::mutex* m_statesProcessigRequiredMutex = nullptr;
+	std::condition_variable* m_statesProcessingRequiredCondition = nullptr;
+	std::queue<AppDataSource*>* m_statesProcessingRequired = nullptr;
+
+	//
+
 	QVector<DynamicAppSignalState*> m_signalStates;
 
 	int m_acquiredSignalsCount = 0;

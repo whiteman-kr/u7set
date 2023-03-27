@@ -54,7 +54,7 @@ namespace RtTrends
 
 		int m_id = 0;
 
-		DynamicAppSignalStates& m_signalStates;
+		const DynamicAppSignalStates& m_signalStates;
 //		const SignalsToSources& m_signalToSources;
 
 		//

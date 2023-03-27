@@ -24,7 +24,7 @@ public:
 
 	void setSignalParams(const AppSignal* signal, const AppSignals& appSignals);
 
-	bool setState(const Times& time,
+	int setState(const Times& time,
 				  bool isSimPacket,
 				  quint16 packetNo,
 				  const char* rupData,
@@ -33,7 +33,7 @@ public:
 				  SimpleAppSignalStatesArchiveFlagQueue& statesQueue,
 				  const QThread* thread);
 
-	void setUnavailable(const Times& time,
+	int setUnavailable(const Times& time,
 				  SimpleAppSignalStatesArchiveFlagQueue& statesQueue,
 				  const QThread* thread);
 
@@ -167,7 +167,6 @@ private:
 	QHash<int, RtSession> m_rtSessions;
 };
 
-
 class DynamicAppSignalStates
 {
 public:
@@ -181,8 +180,11 @@ public:
 
 	DynamicAppSignalState* operator [] (int index);
 
+	const DynamicAppSignalState* getStateByHash(Hash signalHash) const;
 	DynamicAppSignalState* getStateByHash(Hash signalHash);
-	DynamicAppSignalState* getStateByID(const QString& signalID) { return getStateByHash(calcHash(signalID)); }
+
+	const DynamicAppSignalState* getStateByID(const QString& signalID) const;
+	DynamicAppSignalState* getStateByID(const QString& signalID);
 
 	void buidlHash2State();
 

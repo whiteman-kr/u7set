@@ -95,6 +95,11 @@
 										return false; \
 									}
 
+#define RETURN_VALUE_IF_FALSE(result, value)		if (result == false) \
+													{ \
+														return value; \
+													}
+
 #define CONTINUE_IF_FALSE(result)	if (result == false) \
 									{ \
 										continue; \

@@ -62,7 +62,6 @@ CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
 INCLUDEPATH +=  ./../Protobuf \
-				./../asio/include \
 
 DEFINES += ASIO_STANDALONE=1
 

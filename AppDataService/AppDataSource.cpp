@@ -219,6 +219,14 @@ void AppDataSource::prepare(const AppSignals& appSignals,
 	m_signalStatesQueue.resize(queueSize);
 }
 
+void AppDataSource::setStatesProcessingThreadWakupParams(std::mutex* statesProcessigRequiredMutex,
+										  std::condition_variable* statesProcessingRequiredCondition,
+										  std::queue<AppDataSource*>* statesProcessingRequired)
+{
+	m_statesProcessigRequiredMutex = statesProcessigRequiredMutex;
+	m_statesProcessingRequiredCondition = statesProcessingRequiredCondition;
+	m_statesProcessingRequired = statesProcessingRequired;
+}
 
 bool AppDataSource::getState(Network::AppDataSourceState* proto) const
 {
@@ -296,14 +304,29 @@ bool AppDataSource::getSignalState(SimpleAppSignalStateArchiveFlag* state, const
 
 void AppDataSource::invalidateSignals(const QThread* thread)
 {
+	int pushedStatesCount = 0;
+
 	for(DynamicAppSignalState* signalState : m_signalStates)
 	{
 		TEST_PTR_CONTINUE(signalState);
 
-		signalState->setUnavailable(m_rupTimes, m_signalStatesQueue, thread);
+		pushedStatesCount += signalState->setUnavailable(m_rupTimes, m_signalStatesQueue, thread);
+
+		if (pushedStatesCount >= 20)
+		{
+			pushedStatesCount -= 20;
+			wakeupStatesProcessingThread();
+		}
 	}
 
+	wakeupStatesProcessingThread();
+
 	qDebug() << "Invalidate";
+}
+
+bool AppDataSource::statesQueueIsEmpty(QThread* thread) const
+{
+	return m_signalStatesQueue.isEmpty(thread);
 }
 
 bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread)
@@ -380,19 +403,42 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 
 	int autoArchivingGroup = getAutoArchivingGroup(m_rupTimes.system.timeStamp);
 
+	int pushedStatesCtr = 0;
+
 	for(DynamicAppSignalState* signalState : m_signalStates)
 	{
 		TEST_PTR_CONTINUE(signalState);
 
-		signalState->setState(m_rupTimes, isSimPacket, packetNo, rupData, rupDataSize,
-							  autoArchivingGroup, m_signalStatesQueue, thread);
+		pushedStatesCtr += signalState->setState(m_rupTimes, isSimPacket, packetNo, rupData, rupDataSize,
+										  autoArchivingGroup, m_signalStatesQueue, thread);
+
+		if (pushedStatesCtr > 20)
+		{
+			pushedStatesCtr -= 20;
+			wakeupStatesProcessingThread();
+		}
 	}
+
+	wakeupStatesProcessingThread();
 
 	m_signalStatesQueue.getSizes(&m_signalStatesQueueCurSize, &m_signalStatesQueueCurMaxSize, &m_signalStatesQueueSize, thread);
 
 	readBuffer.prepareToWriting();
 
 	return true;
+}
+
+void AppDataSource::wakeupStatesProcessingThread()
+{
+	Q_ASSERT(m_statesProcessigRequiredMutex != nullptr);
+	Q_ASSERT(m_statesProcessingRequired != nullptr);
+	Q_ASSERT(m_statesProcessingRequiredCondition != nullptr);
+
+	std::lock_guard lg(*m_statesProcessigRequiredMutex);
+	m_statesProcessingRequired->push(this);
+	m_statesProcessingRequiredCondition->notify_one();
+
+	Q_UNUSED(lg);
 }
 
 int AppDataSource::getAutoArchivingGroup(qint64 currentSysTime)

@@ -94,6 +94,44 @@ E::SecurityLevel AppDataServiceWorker::securityLevel() const
 	return m_curSettingsProfile.securityLevel;
 }
 
+void AppDataServiceWorker::registerDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue,
+														 bool isArchivingQueue,
+														 const QString& description)
+{
+	if (m_appDataReceiver != nullptr)
+	{
+		m_appDataReceiver->registerDestSignalStatesQueue(destQueue, isArchivingQueue, description);
+	}
+	else
+	{
+		Q_ASSERT(false);
+	}
+}
+
+void AppDataServiceWorker::unregisterDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue)
+{
+	if (m_appDataReceiver != nullptr)
+	{
+		m_appDataReceiver->unregisterDestSignalStatesQueue(destQueue);
+	}
+	else
+	{
+		Q_ASSERT(false);
+	}
+}
+
+void AppDataServiceWorker::fillAppDataReceiveState(Network::AppDataReceiveState* adrs)
+{
+	if (m_appDataReceiver != nullptr)
+	{
+		m_appDataReceiver->fillAppDataReceiveState(adrs);
+	}
+	else
+	{
+		Q_ASSERT(false);
+	}
+}
+
 void AppDataServiceWorker::initCmdLineParser()
 {
 	CommandLineParser& cp = cmdLineParser();
@@ -125,95 +163,39 @@ void AppDataServiceWorker::loadSettings()
 
 void AppDataServiceWorker::runAppDataReceiverThread()
 {
-	if (m_asyncAppDataReceiver != nullptr)
+	if (m_appDataReceiver != nullptr)
 	{
 		Q_ASSERT(false);
 		return;
 	}
 
-	m_asyncAppDataReceiver = new AppDataReceiver(m_curSettingsProfile.appDataReceivingIP,
+	m_appDataReceiver = new AppDataReceiver(m_curSettingsProfile.appDataReceivingIP,
 													  m_appDataSources,
 													  m_appDataProcessingThreadCount,
 													  sessionParams().softwareRunMode,
 													  logger());
 
-	m_asyncAppDataReceiver->start();
+	m_appDataReceiver->start();
 }
 
 void AppDataServiceWorker::stopAppDataReceiverlThread()
 {
-	if (m_asyncAppDataReceiver != nullptr)
+	if (m_appDataReceiver != nullptr)
 	{
-		m_asyncAppDataReceiver->quitAndWait();
-		delete m_asyncAppDataReceiver;
-		m_asyncAppDataReceiver = nullptr;
+		m_appDataReceiver->quitAndWait();
+		delete m_appDataReceiver;
+		m_appDataReceiver = nullptr;
 	}
-}
-
-void AppDataServiceWorker::runSignalStatesProcessingThread()
-{
-	if (m_signalStatesProcessingThread != nullptr)
-	{
-		assert(false);
-		return;
-	}
-
-	m_signalStatesProcessingThread = new SignalStatesProcessingThread(m_appDataSources, logger());
-
-	m_signalStatesProcessingThread->start();
-}
-
-void AppDataServiceWorker::stopSignalStatesProcessingThread()
-{
-	if (m_signalStatesProcessingThread != nullptr)
-	{
-		m_signalStatesProcessingThread->quitAndWait();
-		delete m_signalStatesProcessingThread;
-		m_signalStatesProcessingThread = nullptr;
-	}
-}
-
-void AppDataServiceWorker::runAppDataProcessingThreads()
-{
-//	assert(m_appDataReceiverThread != nullptr);
-
-//	m_appDataProcessingThreadsPool.startProcessingThreads(m_appDataProcessingThreadCount,
-//														  m_appDataSourcesIP,
-//														  m_appDataReceiverThread,
-//														  logger());
-/*	if (m_asyncAppDataReceiver != nullptr)
-	{
-		m_appDataProcessingThreadsPool.startProcessingThreads(m_appDataProcessingThreadCount,
-															  *m_asyncAppDataReceiver,
-															  logger());
-	}
-	else
-	{
-		Q_ASSERT(false);
-	}*/
-}
-
-void AppDataServiceWorker::stopAppDataProcessingThreads()
-{
-//	m_appDataProcessingThreadsPool.stopProcessingThreads();
 }
 
 void AppDataServiceWorker::runTcpAppDataServer()
 {
 	assert(m_tcpAppDataServerThread == nullptr);
 
-	TcpAppDataServer* tcpAppDataSever = new TcpAppDataServer(softwareInfo(),
-															 m_curSettingsProfile.securityLevel,
-															 m_asyncAppDataReceiver,
-															 m_signalStatesProcessingThread);
-
-	m_tcpAppDataServerThread = new TcpAppDataServerThread(	m_curSettingsProfile.clientRequestIP,
-															tcpAppDataSever,
-															m_appDataSources,
-															m_appSignals,
-															m_signalStates,
-															*this,
-															logger());
+	m_tcpAppDataServerThread = new TcpAppDataServerThread(	softwareInfo(),
+															m_curSettingsProfile.clientRequestIP,
+															m_curSettingsProfile.securityLevel,
+															*this);
 	m_tcpAppDataServerThread->start();
 }
 
@@ -238,13 +220,9 @@ void AppDataServiceWorker::runTcpArchiveClientThread()
 		return;
 	}
 
-	TcpArchiveClient* tcpArchiveClient = new TcpArchiveClient(softwareInfo(),
-												m_curSettingsProfile.archServiceIP,
-												m_signalStatesProcessingThread,
-												logger());
-
-	m_tcpArchiveClientThread = new TcpArchiveClientThread(tcpArchiveClient);
-
+	m_tcpArchiveClientThread = new TcpArchiveClientThread(softwareInfo(),
+														  m_curSettingsProfile.archServiceIP,
+														  *this);
 	m_tcpArchiveClientThread->start();
 }
 
@@ -314,7 +292,7 @@ void AppDataServiceWorker::shutdown()
 	stopTcpAppDataServer();
 	stopCfgLoaderThread();
 
-	DEBUG_LOG_MSG(logger(), "AppDataServiceWorker is finished");
+	DEBUG_LOG_MSG(logger(), "AppDataServiceWorker finished");
 }
 
 void AppDataServiceWorker::runCfgLoaderThread()
@@ -501,7 +479,7 @@ void AppDataServiceWorker::shutdownTimeErrLog()
 
 void AppDataServiceWorker::createAndInitSignalStates()
 {
-	m_signalStates.clear();
+	m_appSignalStates.clear();
 
 	if (m_appSignals.isEmpty())
 	{
@@ -522,7 +500,7 @@ void AppDataServiceWorker::createAndInitSignalStates()
 		signalCount++;
 	}
 
-	m_signalStates.setSize(signalCount);
+	m_appSignalStates.setSize(signalCount);
 
 	int index = 0;
 
@@ -535,16 +513,32 @@ void AppDataServiceWorker::createAndInitSignalStates()
 			continue;
 		}
 
-		DynamicAppSignalState* signalState = m_signalStates[index];
+		DynamicAppSignalState* signalState = m_appSignalStates[index];
 
 		signalState->setSignalParams(signal, m_appSignals);
 
 		index++;
 	}
 
-	m_signalStates.buidlHash2State();
+	m_appSignalStates.buidlHash2State();
 
-	m_signalStates.setAutoArchivingGroups(m_autoArchivingGroupsCount);
+	m_appSignalStates.setAutoArchivingGroups(m_autoArchivingGroupsCount);
+}
+
+void AppDataServiceWorker::buildAcuiredAppSignalIDs()
+{
+	m_acquiredAppSignalIDs.clear();
+	m_acquiredAppSignalIDs.reserve(m_appSignals.count());
+
+	for(const AppSignal* signal : m_appSignals)
+	{
+		TEST_PTR_CONTINUE(signal);
+
+		if (signal->isAcquired() == true)
+		{
+			m_acquiredAppSignalIDs.push_back(signal->appSignalID());
+		}
+	}
 }
 
 void AppDataServiceWorker::prepareAppDataSources()
@@ -553,7 +547,7 @@ void AppDataServiceWorker::prepareAppDataSources()
 	{
 		TEST_PTR_CONTINUE(appDataSource);
 
-		appDataSource->prepare(m_appSignals, &m_signalStates, m_autoArchivingGroupsCount, m_timeErrLog);
+		appDataSource->prepare(m_appSignals, &m_appSignalStates, m_autoArchivingGroupsCount, m_timeErrLog);
 	}
 }
 
@@ -563,13 +557,12 @@ void AppDataServiceWorker::applyNewConfiguration()
 
 	createTimeErrLog();
 	createAndInitSignalStates();
+	buildAcuiredAppSignalIDs();
 	prepareAppDataSources();
 
-	runSignalStatesProcessingThread();
-	runTcpArchiveClientThread();
 	runAppDataReceiverThread();
+	runTcpArchiveClientThread();
 	runTcpAppDataServer();
-	runAppDataProcessingThreads();
 	runRtTrendsServerThread();
 }
 
@@ -578,15 +571,15 @@ void AppDataServiceWorker::clearConfiguration()
 	// free all resources allocated in onConfigurationReady
 	//
 	stopRtTrendsServerThread();
-	stopAppDataProcessingThreads();
+	stopTcpArchiveClientThread();
 	stopTcpAppDataServer();
 	stopAppDataReceiverlThread();
-	stopTcpArchiveClientThread();
-	stopSignalStatesProcessingThread();
+
 	shutdownTimeErrLog();
 
 	m_appSignals.clear();
 	m_appDataSources.clear();
-	m_signalStates.clear();
+	m_appSignalStates.clear();
+	m_acquiredAppSignalIDs.clear();
 }
 

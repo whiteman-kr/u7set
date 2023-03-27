@@ -371,7 +371,7 @@ namespace Sim
 
 		closeSocket();
 
-		m_log.writeDebug(QString("TuningRequestsProcessingThread is finished (EquipmentID %1)").
+		m_log.writeDebug(QString("TuningRequestsProcessingThread finished (EquipmentID %1)").
 							arg(m_tsCommunicator.tuningServiceEquipmentID()));
 	}
 

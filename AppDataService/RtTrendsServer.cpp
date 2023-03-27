@@ -33,7 +33,7 @@ namespace RtTrends
 
 	Session::Session(AppDataServiceWorker& service) :
 		m_id(m_globalID.fetch_add(1)),
-		m_signalStates(service.signalStates())
+		m_signalStates(service.appSignalStates())
 //		m_signalToSources(service.signalsToSources())
 	{
 	}
@@ -108,11 +108,10 @@ namespace RtTrends
 	//
 	// -----------------------------------------------------------------------------------------------
 
-
 	Server::Server(AppDataServiceWorker& appDataService, E::SecurityLevel securityLevel) :
 		Tcp::Server(appDataService.softwareInfo(), securityLevel, "RtTrendsServer"),
 		m_appDataService(appDataService),
-		m_signalStates(appDataService.signalStates()),
+		m_signalStates(appDataService.appSignalStates()),
 		m_log(appDataService.logger()),
 		m_session(std::make_shared<Session>(appDataService))
 	{

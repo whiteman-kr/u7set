@@ -1,12 +1,16 @@
 #pragma once
 
-#include <asio.hpp>
+#include <queue>
+
+#include "../OnlineLib/SocketIO.h"
+#include "../OnlineLib/CircularLogger.h"
+#include "AppDataSource.h"
+#include "SignalStatesProcessingThread.h"
+
+#include "../asio/include/asio.hpp"
 
 using namespace asio;
 using namespace asio::ip;
-
-#include "../OnlineLib/CircularLogger.h"
-#include "AppDataSource.h"
 
 //
 // AppDataReceiver is receives RUP datagrams and push it in AppDataSource's queues
@@ -40,6 +44,12 @@ public:
 	const AppDataSources& appDataSources() { return m_appDataSources; }
 
 	CircularLoggerShared log() { return m_log; }
+
+	void registerDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue,
+									   bool isArchivingQueue,
+									   const QString& description);
+
+	void unregisterDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue);
 
 private:
 	virtual void run() override;
@@ -95,12 +105,19 @@ private:
 
 	//
 
-	std::mutex m_waitConditionMutex;
-	std::condition_variable m_processingRequiredCondition;
-	std::map<AppDataSource*, bool> m_requireProcessing;		//	source => true	 require buffer processing
-															//	source => false	 require signals invalidation
-
+	std::mutex m_packetProcessigRequiredMutex;
+	std::condition_variable m_packetProcessingRequiredCondition;
+	std::map<AppDataSource*, bool> m_packetProcessingRequired;		//	source => true	 require buffer processing
+																	//	source => false	 require signals invalidation
 	friend void processPackets(AppDataReceiver& receiver, int threadNumber);
+
+	//
+
+	SignalStatesProcessingThread m_statesProcessingThread;
+
+	std::mutex m_statesProcessigRequiredMutex;
+	std::condition_variable m_statesProcessingRequiredCondition;
+	std::queue<AppDataSource*> m_statesProcessingRequired;		//	source requires states queue processing
 
 	//
 
@@ -123,6 +140,10 @@ private:
 
 	int m_receivedPerSecond = 0;
 	int m_rupFramesReceivedPerSecond = 0;
+
+	//
+
+	friend class SignalStatesProcessingThread;
 };
 
 void processPackets(AppDataReceiver& receiver, int threadNumber);
