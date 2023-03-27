@@ -53,10 +53,6 @@ namespace ClientLib
 	private:
 		bool requestPassword(QWidget* parent);
 
-#ifdef Q_OS_LINUX
-		static int pamConverse(int n, const struct ::pam_message **msg, struct ::pam_response **resp, void *data);
-#endif
-
 	private:
 		bool m_tuningLogin = false;
 		QStringList m_tuningUserAccounts;
