@@ -28,7 +28,7 @@ namespace ClientLib
 	//
 	TuningTcpClient::TuningTcpClient(const SoftwareInfo& softwareInfo, const SoftwareEndpoint::TuningService& tunsInfo, TuningSignalManager& signalManager, ILogFile* log, TuningLog::TuningLog* tuningLog) :
 		Tcp::Client(softwareInfo,
-					HostAddressPort(tunsInfo.clientRequestIP, tunsInfo.clientRequestPort),
+					tunsInfo.clientRequestAddress,
 					"TuningTcpClient",
 					tunsInfo.equipmentId),
 		TcpClientStatistics(this),

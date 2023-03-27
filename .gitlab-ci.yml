@@ -1,8 +1,8 @@
 variables:
   GIT_DEPTH: "1"
   QT_VERSION: "6.3.2"
-  COMPILER_TESTS_PROJECT_NAME: "compiler_tests_v382"
-  SIMULATOR_PROJECT_NAME: "test_simulator_v382"
+  COMPILER_TESTS_PROJECT_NAME: "compiler_tests_v383"
+  SIMULATOR_PROJECT_NAME: "test_simulator_v383"
   
 stages:
   - build
@@ -227,7 +227,7 @@ windows_test_job:
     - "# ----------------------------------------------"
     - "#               Run unit tests"
     - "# ----------------------------------------------"
-    - "&$Env:CI_PROJECT_DIR/bin/release/ClientTests.exe --gtest_filter=-AdsConnectionTests.*:ConfigControllerTests.*:AdsSourceStateConnectionTests.*"
+    - "&$Env:CI_PROJECT_DIR/bin/release/ClientTests.exe --gtest_filter=-AdsConnectionTests.*:ConfigControllerTests.*:AdsSourceStateConnectionTests.*:TuningConnectionTests.*"
     - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorTests.exe"
     - "&$Env:CI_PROJECT_DIR/bin/release/MetrologyTests.exe"
     - "&$Env:CI_PROJECT_DIR/bin/release/u7databasetests.exe -config=\"$Env:CI_PROJECT_DIR/Test/u7databasetestsArgs.xml\""
@@ -323,7 +323,7 @@ linux_test_job:
     - "# ----------------------------------------------"
     - "#               Run client tests"
     - "# ----------------------------------------------"
-    - "function StopServices () { pkill CfgSrv || true; pkill AppDataSrv || true; pkill SimulatorConsol || true; sleep 2; }"
+    - "function StopServices () { pkill CfgSrv || true; pkill AppDataSrv || true; pkill TuningSrv || true; pkill SimulatorConsol || true; sleep 2; }"
     - "trap StopServices EXIT"
     - "pushd $CI_PROJECT_DIR/bin_unix/release"
     - "StopServices || true"
@@ -335,6 +335,8 @@ linux_test_job:
     - "sleep 5"
     - "./linux_test_job_systemid_clienttest_ws01_ads.sh < /dev/null > clienttest_ws01_ads.out 2>&1 &"
     - "./linux_test_job_systemid_clienttest_ws02_ads.sh < /dev/null > clienttest_ws02_ads.out 2>&1 &"
+    - "./linux_test_job_systemid_clienttest_ws01_tuns.sh < /dev/null > clienttest_ws01_tuns.out 2>&1 &"
+    - "./linux_test_job_systemid_clienttest_ws02_tuns.sh < /dev/null > clienttest_ws02_tuns.out 2>&1 &"
     - "./SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_test_job -enable_lan -no_exit > SimulatorConsole.out 2>&1 &"
     - "sleep 5"
     - "jobs"

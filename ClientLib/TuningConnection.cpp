@@ -19,8 +19,7 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 	{
 		tcpTuningClient = new TuningTcpClient{softwareInfo, tuns, tuningSignalManager, logFile, tuningLog};
 		tcpTuningClient->setInstanceId(softwareInfo.equipmentID());
-		const HostAddressPort addrPort = HostAddressPort(tuns.clientRequestIP, tuns.clientRequestPort);
-		tcpTuningClient->setServers(addrPort, addrPort, true);
+		tcpTuningClient->setServers(tuns.clientRequestAddress, tuns.clientRequestAddress, true);
 		tcpTuningClient->setAutoApply(autoApply);
 		tcpTuningClient->setLmStatusFlagMode(lmStatusFlagMode);
 
@@ -33,29 +32,6 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 	{
 		stopAndDestroy();
 		return;
-	}
-
-	TuningConnection::Connection::Connection(Connection&& src) noexcept
-	{
-		operator=(std::move(src));
-		return;
-	}
-
-	TuningConnection::Connection& TuningConnection::Connection::operator=(Connection&& src) noexcept
-	{
-		if (this == &src)
-		{
-			Q_ASSERT(this != &src);
-			return *this;
-		}
-
-		tcpTuningClient = src.tcpTuningClient;
-		tcpClientThread = src.tcpClientThread;
-
-		src.tcpTuningClient = nullptr;
-		src.tcpClientThread = nullptr;
-
-		return *this;
 	}
 
 	void TuningConnection::Connection::stopAndDestroy()
@@ -102,7 +78,7 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 		{
 			auto it = std::find_if(m_conns.begin(), m_conns.end(), [&tuns](const Connection& c)
 			{
-				return c.address() == HostAddressPort(tuns.clientRequestIP, tuns.clientRequestPort);
+				return c.address() == tuns.clientRequestAddress;
 			});
 
 			if (it != m_conns.end())
@@ -332,18 +308,6 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 				c.tcpTuningClient->writeTuningSignal(commands);
 			}
 		}
-	}
-
-	bool TuningConnection::hasTuningSignal(QString appSignalId) const
-	{
-		for (const Connection& c : m_conns)
-		{
-			if (c.tcpTuningClient->hasTuningSignal(appSignalId) == true)
-			{
-				return true;
-			}
-		}
-		return false;
 	}
 
 	bool TuningConnection::writeTuningSignal(QString appSignalId, TuningValue tuningValue)

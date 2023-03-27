@@ -29,18 +29,17 @@ namespace ClientLib
 					   ILogFile* logFile,
 					   TuningLog::TuningLog* tuningLog);
 			Connection(const Connection&) = delete;
-			Connection(Connection&& src) noexcept;
+			Connection(Connection&& src) = delete;
 			~Connection();
 
 			Connection& operator=(const Connection&) = delete;
-			Connection& operator=(Connection&& src) noexcept;
+			Connection& operator=(Connection&& src) = delete;
 
 			void stopAndDestroy();
 			HostAddressPort address() const;
 
 			// --
 			//
-
 			ClientLib::TuningTcpClient* tcpTuningClient = nullptr;
 			SimpleThread* tcpClientThread = nullptr;
 		};
@@ -65,14 +64,30 @@ namespace ClientLib
 		[[nodiscard]] std::vector<TuningSource> tuningSourcesInfo() const;
 		[[nodiscard]] std::vector<TuningSource> tuningSourceInfo(Hash sourceHash) const;
 
+		/// Returns number of communication channels for tuning source (LogicModule). Now 1 or 2.
+		/// (Used only Single LM Control is turned on)
+		///
 		[[nodiscard]] int tuningSourceStatesCount(Hash sourceHash) const;
+
+		/// Returns number of activated communication channels for tuning source (LogicModule). Now 0, 1 or 2.
+		///	Activation is Tusning Service feature, LM does not know about it.
+		/// (Used only Single LM Control is turned on)
+		///
 		[[nodiscard]] int activatedTuningSourceStatesCount(Hash sourceHash) const;
+
+		/// Command to TuningServices to (de)activate communication channel to source (LogicModule).
+		/// (Used only Single LM Control is turned on)
+		///
 		[[nodiscard]] bool activateTuningSource(Hash sourceHash, bool activate) const;
 
-		/// Client Control functions
+		/// Get information about current state of client control. Used for printing info in status bars, etc.
+		/// (Used only Single LM Control is turned on)
 		///
 		QString clientControlInfo() const;
 
+		/// Make this client active for TuningServices that control the specified sources.
+		/// (Used only Single LM Control is turned on)
+		///
 		[[nodiscard]] bool takeClientControl(const std::set<Hash>& sourceHashes) const;
 
 		/// Reading channel-specific signal states from all connections
@@ -83,7 +98,6 @@ namespace ClientLib
 		///
 		void writeTuningSignals(const std::vector<TuningWriteCommand>& writeCommands);
 
-		virtual bool hasTuningSignal(QString appSignalId) const override;
 		virtual bool writeTuningSignal(QString appSignalId, TuningValue tuningValue) override;
 
 		/// Apply functions

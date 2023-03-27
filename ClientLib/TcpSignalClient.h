@@ -82,6 +82,7 @@ namespace ClientLib
 
 		::Network::GetSignalListNextRequest m_getSignalListNextRequest;
 		::Network::GetSignalListNextReply m_getSignalListNextReply;
+
 		std::vector<Hash> m_signalList;
 
 		::Network::GetAppSignalParamRequest m_getSignalParamRequest;
