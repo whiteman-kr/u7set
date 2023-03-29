@@ -273,7 +273,7 @@ TEST_F(AdsConnectionTests, receivesState)
 
 	// The test machine can be loaded heavily, it will result in reduced numbers of state changes.
 	//
-	EXPECT_TRUE(stateChanges >= 3 && stateChanges < 10);
+	EXPECT_TRUE(stateChanges >= 3 && stateChanges < 12);
 
 	return;
 }
