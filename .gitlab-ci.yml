@@ -40,8 +40,14 @@ project_backup_job:
     - "if (Test-Path \"f:\\u7_${Env:SIMULATOR_PROJECT_NAME}.sql.1\") {  Remove-Item -Verbose -Force \"f:\\TestDatabase\\u7_${Env:SIMULATOR_PROJECT_NAME}.sql.1\" }"
     - "pg_dump -h 192.168.75.10 -U u7 -f f:\\TestDatabase\\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql.1 u7_${Env:COMPILER_TESTS_PROJECT_NAME}"
     - "pg_dump -h 192.168.75.10 -U u7 -f f:\\TestDatabase\\u7_${Env:SIMULATOR_PROJECT_NAME}.sql.1 u7_${Env:SIMULATOR_PROJECT_NAME}"
-    - "&$Env:CI_PROJECT_DIR/CI/RenameIfDifferent.ps1 f:\\TestDatabase\\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql.1 f:\\TestDatabase\\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql"
-    - "&$Env:CI_PROJECT_DIR/CI/RenameIfDifferent.ps1 f:\\TestDatabase\\u7_${Env:SIMULATOR_PROJECT_NAME}.sql.1 f:\\TestDatabase\\u7_${Env:SIMULATOR_PROJECT_NAME}.sql"
+    - "$fileSource = \"f:\\TestDatabaseu7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql.1\""
+    - "$fileTarget = \"f:\\TestDatabaseu7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql\""
+    - "echo n | comp.exe $fileSource $fileTarget | Out-Null"
+    - "if ($LASTEXITCODE -eq 1){  Remove-Item -Force $fileTarget;   Rename-Item -Path $fileSource -NewName $fileTarget;}"
+    - "$fileSource = \"f:\\TestDatabaseu7_${Env:SIMULATOR_PROJECT_NAME}.sql.1\""
+    - "$fileTarget = \"f:\\TestDatabaseu7_${Env:SIMULATOR_PROJECT_NAME}.sql\""
+    - "echo n | comp.exe $fileSource $fileTarget | Out-Null"
+    - "if ($LASTEXITCODE -eq 1){  Remove-Item -Force $fileTarget;   Rename-Item -Path $fileSource -NewName $fileTarget;}"
 
 linux_build_job:
   stage: build
