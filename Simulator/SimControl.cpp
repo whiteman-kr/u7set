@@ -207,6 +207,8 @@ namespace Sim
 		case SimControlState::Stop:
 			m_controlData.m_state = SimControlState::Run;
 
+			m_simulator->software().startSimulation(m_simulator->currentProfileName());
+
 			m_controlData.m_startTime = duration_cast<microseconds>(system_clock::now().time_since_epoch());
 
 			// It will make start time on the edge of 5ms, it will make nice timestamp
@@ -238,8 +240,6 @@ namespace Sim
 
 				m_simulator->appSignalManager().setData(cs.equipmentId(), {}, plantTime, localTime, systemTime);
 			}
-
-			m_simulator->software().startSimulation(m_simulator->currentProfileName());
 			break;
 
 		case SimControlState::Run:
