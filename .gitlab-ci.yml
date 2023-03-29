@@ -3,6 +3,7 @@ variables:
   QT_VERSION: "6.3.2"
   COMPILER_TESTS_PROJECT_NAME: "compiler_tests_v383"
   SIMULATOR_PROJECT_NAME: "test_simulator_v383"
+  PGPASSWORD: "P2ssw0rd"
   
 stages:
   - prepare
@@ -37,9 +38,8 @@ project_backup_job:
     - "# ----------------------------------------------"
     - "if (Test-Path \"f:\\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql\") {  Remove-Item -Verbose -Force \"f:\\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql\" }"
     - "if (Test-Path \"f:\\u7_${Env:SIMULATOR_PROJECT_NAME}.sql\") {  Remove-Item -Verbose -Force \"f:\\u7_${Env:SIMULATOR_PROJECT_NAME}.sql\" }"
-    - "pg_dump --encoding=utf8 \"host=192.168.75.10 port=5432 dbname=u7_${Env:COMPILER_TESTS_PROJECT_NAME} user=u7 password=P2ssw0rd\" > f:\\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql"
-    - "pg_dump --encoding=utf8 \"host=192.168.75.10 port=5432 dbname=u7_${Env:SIMULATOR_PROJECT_NAME} user=u7 password=P2ssw0rd\" > f:\\u7_${Env:SIMULATOR_PROJECT_NAME}.sql"
-
+    - "pg_dump -h 192.168.75.10 -U u7 -f f:\\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql u7_${Env:COMPILER_TESTS_PROJECT_NAME}"
+    - "pg_dump -h 192.168.75.10 -U u7 -f f:\\u7_${Env:SIMULATOR_PROJECT_NAME}.sql u7_${Env:SIMULATOR_PROJECT_NAME}"
 
 linux_build_job:
   stage: build
