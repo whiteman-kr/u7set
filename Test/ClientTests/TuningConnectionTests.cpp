@@ -36,10 +36,12 @@ protected:
 
 TEST_F(TuningConnectionTests, connect)
 {
-	TuningSignalManager signalManager;
+	ILogFileStub logFile;
+
+	TuningSignalManager signalManager{s_softwareInfo, &logFile};
+
 	ClientLib::TuningUserManager userManager;
 
-	ILogFileStub logFile;
 	TuningLog::TuningLogStub tuningLog{userManager, {}};
 
 	{

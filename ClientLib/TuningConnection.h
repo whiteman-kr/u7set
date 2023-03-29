@@ -88,16 +88,11 @@ namespace ClientLib
 		/// Make this client active for TuningServices that control the specified sources.
 		/// (Used only Single LM Control is turned on)
 		///
-		[[nodiscard]] bool takeClientControl(const std::set<Hash>& sourceHashes) const;
-
-		/// Reading channel-specific signal states from all connections
-		///
-		std::vector<std::pair<QString, TuningSignalState>> states(Hash appSignalHash) const;	// First is Tuning Service ID, Second is State
+		[[nodiscard]] bool takeClientControl(Hash sourceHash) const;
 
 		/// Tuning signals functions
 		///
-		void writeTuningSignals(const std::vector<TuningWriteCommand>& writeCommands);
-
+		bool writeTuningSignals(const std::vector<TuningWriteCommand>& writeCommands);
 		virtual bool writeTuningSignal(QString appSignalId, TuningValue tuningValue) override;
 
 		/// Apply functions

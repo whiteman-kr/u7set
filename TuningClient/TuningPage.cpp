@@ -77,7 +77,7 @@ bool TuningModelClient::hasPendingChanges()
 	{
 		Hash hash = m_allHashes[i];
 
-		if (m_tuningSignalManager.newValueIsUnapplied(hash) == true)
+		if (m_tuningSignalManager.isUnapplied(hash) == true)
 		{
 			return true;
 		}
@@ -136,7 +136,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 			return QBrush(color);
 		}
 
-		if (m_blink == true && m_tuningSignalManager.newValueIsUnapplied(hash) == true)
+		if (m_blink == true && m_tuningSignalManager.isUnapplied(hash) == true)
 		{
 			QColor color = theSettings.m_columnUnappliedBackColor;
 			return QBrush(color);
@@ -269,7 +269,7 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 			return QBrush(color);
 		}
 
-		if (m_blink == true && m_tuningSignalManager.newValueIsUnapplied(hash) == true)
+		if (m_blink == true && m_tuningSignalManager.isUnapplied(hash) == true)
 		{
 			QColor color = theSettings.m_columnUnappliedTextColor;
 			return QBrush(color);
@@ -363,7 +363,7 @@ Qt::ItemFlags TuningModelClient::flags(const QModelIndex& index) const
 			return f;
 		}
 
-		if (m_tuningSignalManager.newValueIsUnapplied(hash) == true)
+		if (m_tuningSignalManager.isUnapplied(hash) == true)
 		{
 			f &= ~Qt::ItemIsSelectable;
 		}
@@ -442,9 +442,9 @@ QVariant TuningModelClient::data(const QModelIndex& index, int role) const
 		{
 			quint32 discreteValue = 0;
 
-			if (m_tuningSignalManager.newValueIsUnapplied(hash) == true)
+			if (m_tuningSignalManager.isUnapplied(hash) == true)
 			{
-				discreteValue = m_tuningSignalManager.newValue(hash).discreteValue();
+				discreteValue = m_tuningSignalManager.unappliedValue(hash).discreteValue();
 			}
 			else
 			{
@@ -510,7 +510,7 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 				return false;
 			}
 
-			m_tuningSignalManager.setNewValue(asp.hash(), TuningValue(asp.tuningType(), v));
+			m_tuningSignalManager.setUnappliedValue(asp.hash(), TuningValue(asp.tuningType(), v));
 			return true;
 		}
 
@@ -521,12 +521,12 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 		{
 			if ((Qt::CheckState)value.toInt() == Qt::Checked)
 			{
-				m_tuningSignalManager.setNewValue(asp.hash(), TuningValue(asp.tuningType(), 1));
+				m_tuningSignalManager.setUnappliedValue(asp.hash(), TuningValue(asp.tuningType(), 1));
 				return true;
 			}
 			else
 			{
-				m_tuningSignalManager.setNewValue(asp.hash(), TuningValue(asp.tuningType(), 0));
+				m_tuningSignalManager.setUnappliedValue(asp.hash(), TuningValue(asp.tuningType(), 0));
 				return true;
 			}
 		}
@@ -740,7 +740,6 @@ TuningPage::TuningPage(TuningConfigController& configController,
 	m_treeFilter(treeFilter),
 	m_pageFilter(pageFilter)
 {
-
 	//qDebug() << "TuningPage::TuningPage m_instanceCounter = " << m_instanceCounter;
 
 	m_instanceNo = m_instanceCounter;
@@ -1384,11 +1383,11 @@ bool TuningPage::write()
 	std::vector<Hash> modifiedHashes;
 	modifiedHashes.reserve(allHashes.size());
 
-	std::set<Hash> sourceHashes;
+	std::map<Hash, QString> modifiedSourcesMap;	// Key is source hash, value is LM eqipment Id
 
 	for (Hash hash : allHashes)
 	{
-		if (m_tuningSignalManager.newValueIsUnapplied(hash) == false)
+		if (m_tuningSignalManager.isUnapplied(hash) == false)
 		{
 			continue;
 		}
@@ -1414,7 +1413,7 @@ bool TuningPage::write()
 				continue;
 			}
 
-			sourceHashes.insert(::calcHash(param.lmEquipmentId()));
+			modifiedSourcesMap[::calcHash(param.lmEquipmentId())] = param.lmEquipmentId();
 		}
 	}
 
@@ -1423,13 +1422,45 @@ bool TuningPage::write()
 		return false;
 	}
 
-	// Take control on required sources
+	// Check if all sources connections are active
 	//
-	if (sourceHashes.empty() == false)
+	QStringList partiallyActivatedSources;
+
+	for (const auto& it : modifiedSourcesMap)
 	{
-		if (m_tuningConnection.takeClientControl(sourceHashes) == false)
+		int sourceStatesCount = m_tuningConnection.tuningSourceStatesCount(it.first);
+		int activeStatesCount = m_tuningConnection.activatedTuningSourceStatesCount(it.first);
+
+		if (activeStatesCount < sourceStatesCount)
 		{
-			QMessageBox::critical(this, qAppName(), QObject::tr("Taking control of tuning sources failed!"));
+			partiallyActivatedSources.push_back(it.second);
+		}
+	}
+
+	if (partiallyActivatedSources.empty() == false)
+	{
+		if (QMessageBox::warning(this, qAppName(), tr("To write changes, all connections to following tuning sources will be activated:\n\n%1\n\nContinue?")
+								 .arg(partiallyActivatedSources.join('\n')),
+								 QMessageBox::Yes | QMessageBox::No,
+								 QMessageBox::No) != QMessageBox::Yes)
+		{
+			return false;
+		}
+	}
+
+	// Take control on required services
+	//
+	for (const auto& it : modifiedSourcesMap)
+	{
+		if (m_tuningConnection.activateTuningSource(it.first, true) == false)
+		{
+			QMessageBox::critical(this, qAppName(), QObject::tr("Activating control of tuning source '%1' failed!").arg(it.second));
+			return false;
+		}
+
+		if (m_tuningConnection.takeClientControl(it.first) == false)
+		{
+			QMessageBox::critical(this, qAppName(), QObject::tr("Taking control of tuning source '%1' failed!").arg(it.second));
 			return false;
 		}
 	}
@@ -1452,11 +1483,11 @@ bool TuningPage::write()
 
 		if (asp.isAnalog() == true)
 		{
-			strValue = m_tuningSignalManager.newValue(hash).toString(m_model->analogFormat(), asp.precision());
+			strValue = m_tuningSignalManager.unappliedValue(hash).toString(m_model->analogFormat(), asp.precision());
 		}
 		else
 		{
-			strValue = m_tuningSignalManager.newValue(hash).toString();
+			strValue = m_tuningSignalManager.unappliedValue(hash).toString();
 		}
 
 		str += tr("%1 (%2) = %3\n").arg(asp.appSignalId()).arg(asp.caption()).arg(strValue);
@@ -1481,7 +1512,7 @@ bool TuningPage::write()
 
 	for (Hash hash : modifiedHashes)
 	{
-		commands.push_back({hash, m_tuningSignalManager.newValue(hash)});
+		commands.push_back({hash, m_tuningSignalManager.unappliedValue(hash)});
 	}
 
 	m_tuningConnection.writeTuningSignals(commands);
@@ -1515,7 +1546,7 @@ void TuningPage::apply()
 
 	std::vector<Hash> hashesToApply;
 
-	std::set<Hash> sourceHashes;
+	std::map<Hash, QString> modifiedSourcesMap;
 
 	for (Hash hash : allHashes)
 	{
@@ -1541,20 +1572,23 @@ void TuningPage::apply()
 				continue;
 			}
 
-			sourceHashes.insert(::calcHash(param.lmEquipmentId()));
+			modifiedSourcesMap[::calcHash(param.lmEquipmentId())] = param.lmEquipmentId();
 		}
 	}
 
 	// Take control on required sources
 	//
-	if (sourceHashes.empty() == false)
+	if (modifiedSourcesMap.empty() == false)
 	{
-		// Take control on required sources
-		//
-		if (m_tuningConnection.takeClientControl(sourceHashes) == false)
+		for (const auto& it: modifiedSourcesMap)
 		{
-			QMessageBox::critical(this, qAppName(), QObject::tr("Taking control of tuning sources failed!"));
-			return;
+			// Take control on required sources
+			//
+			if (m_tuningConnection.takeClientControl(it.first) == false)
+			{
+				QMessageBox::critical(this, qAppName(), QObject::tr("Taking control of tuning source '%1' failed!").arg(it.second));
+				return;
+			}
 		}
 	}
 
@@ -1713,7 +1747,7 @@ void TuningPage::slot_setValue()
 
 	for (Hash hash : selectedHashes)
 	{
-		m_tuningSignalManager.setNewValue(hash, newValue);
+		m_tuningSignalManager.setUnappliedValue(hash, newValue);
 	}
 }
 
@@ -1793,7 +1827,8 @@ void TuningPage::slot_listContextMenuRequested(const QPoint& pos)
 
 			auto f = [this, hash]() -> void
 			{
-				TuningSignalInfo* d = new TuningSignalInfo(hash,
+				TuningSignalInfo* d = new TuningSignalInfo(m_configController,
+														   hash,
 														   m_model->analogFormat(),
 														   m_tuningSignalManager,
 														   m_tuningConnection,
@@ -2189,12 +2224,12 @@ void TuningPage::invertValue()
 
 				tv.setDiscreteValue(0);
 
-				if (m_tuningSignalManager.newValue(hash).discreteValue() == 0)
+				if (m_tuningSignalManager.unappliedValue(hash).discreteValue() == 0)
 				{
 					tv.setDiscreteValue(1);
 				}
 
-				m_tuningSignalManager.setNewValue(hash, tv);
+				m_tuningSignalManager.setUnappliedValue(hash, tv);
 			}
 		}
 	}
@@ -2330,7 +2365,7 @@ void TuningPage::restoreSignalsFromFilter(TuningFilter* filter)
 
 				if (state.value() != tv.value())
 				{
-					m_tuningSignalManager.setNewValue(hash, tv.value());
+					m_tuningSignalManager.setUnappliedValue(hash, tv.value());
 					restoredCount++;
 				}
 			}
@@ -2382,7 +2417,7 @@ void TuningPage::setActionButtonsState()
 
 		setAllEnabled = true;
 
-		if(m_tuningSignalManager.newValueIsUnapplied(hash))
+		if(m_tuningSignalManager.isUnapplied(hash))
 		{
 			writeEnabled = true;
 		}
@@ -2583,7 +2618,7 @@ void TuningPage::slot_setAll()
 				TuningValue tv;
 				tv.setType(TuningValueType::Discrete);
 				tv.setDiscreteValue(1);
-				m_tuningSignalManager.setNewValue(hash, tv);
+				m_tuningSignalManager.setUnappliedValue(hash, tv);
 			}
 		}
 	};
@@ -2614,7 +2649,7 @@ void TuningPage::slot_setAll()
 				TuningValue tv;
 				tv.setType(TuningValueType::Discrete);
 				tv.setDiscreteValue(0);
-				m_tuningSignalManager.setNewValue(hash, tv);
+				m_tuningSignalManager.setUnappliedValue(hash, tv);
 			}
 		}
 	};
@@ -2655,7 +2690,7 @@ void TuningPage::slot_setAll()
 				}
 				else
 				{
-					m_tuningSignalManager.setNewValue(hash, tvDefault);
+					m_tuningSignalManager.setUnappliedValue(hash, tvDefault);
 				}
 			}
 		}
@@ -2683,7 +2718,7 @@ void TuningPage::slot_undo()
 	for (Hash hash : hashes)
 	{
 		TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
-		m_tuningSignalManager.setNewValue(hash, state.value());
+		m_tuningSignalManager.setUnappliedValue(hash, state.value());
 	}
 }
 

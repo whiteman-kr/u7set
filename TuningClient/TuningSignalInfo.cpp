@@ -6,7 +6,8 @@
 #include "../lib/Tuning/TuningFilter.h"
 #include "Settings.h"
 
-TuningSignalInfo::TuningSignalInfo(Hash appSignalHash,
+TuningSignalInfo::TuningSignalInfo(TuningConfigController& configController,
+								   Hash appSignalHash,
 								   E::AnalogFormat analogFormat,
 								   const TuningSignalManager& signalManager,
 								   const ClientLib::TuningConnection& tuningConnection,
@@ -15,6 +16,7 @@ TuningSignalInfo::TuningSignalInfo(Hash appSignalHash,
 								   QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::TuningSignalInfo),
+	m_configController(configController),
 	m_appSignalHash(appSignalHash),
 	m_analogFormat(analogFormat),
 	m_signalManager(signalManager),
@@ -67,8 +69,6 @@ void TuningSignalInfo::timerEvent(QTimerEvent* event)
 
 void TuningSignalInfo::updateInfo()
 {
-	bool found = false;
-
 	QStringList validStrings;
 	QStringList outOfRangeStrings;
 	QStringList writeInProgressStrings;
@@ -85,16 +85,20 @@ void TuningSignalInfo::updateInfo()
 	QStringList successfulWriteTimes;
 	QStringList unsuccessfulWriteTimes;
 
+	bool found = false;
+
 	// Fill the data received from TCP clients
 	//
 
-	std::vector<std::pair<QString, TuningSignalState>> clientStates = m_tuningConnection.states(m_appSignalHash);
-
-	for (const std::pair<QString, TuningSignalState>& statePair : clientStates)
+	for (const SoftwareEndpoint::TuningService& tuns : m_configController.configuration().clientSettings.tuningServices)
 	{
-		stateServices.push_back(statePair.first);
+		const TuningSignalState clientState = m_signalManager.state(m_appSignalHash, ::calcHash(tuns.equipmentId), &found);
+		if (found == false)
+		{
+			continue;
+		}
 
-		const TuningSignalState& clientState = statePair.second;
+		stateServices.push_back(tuns.equipmentId);
 
 		validStrings.push_back(clientState.valid() == true ? tr("Yes") : tr("No"));
 		outOfRangeStrings.push_back(clientState.outOfRange() == true ? tr("Yes") : tr("No"));
@@ -121,14 +125,15 @@ void TuningSignalInfo::updateInfo()
 		writeRequestTimes.push_back(clientState.writeRequestTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
 		successfulWriteTimes.push_back(clientState.successfulWriteTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
 		unsuccessfulWriteTimes.push_back(clientState.unsuccessfulWriteTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
+
 	}
+
 
 	// Fill the data that is received from TuningSignalManager
 
 	TuningSignalState managerState = m_signalManager.state(m_appSignalHash, &found);
-
 	{
-		stateServices.push_back(tr("TuningSignalManager"));
+		stateServices.push_back(tr("Common"));
 
 		validStrings.push_back(managerState.valid() == true ? tr("Yes") : tr("No"));
 		outOfRangeStrings.push_back(managerState.outOfRange() == true ? tr("Yes") : tr("No"));
@@ -156,6 +161,7 @@ void TuningSignalInfo::updateInfo()
 		successfulWriteTimes.push_back(managerState.successfulWriteTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
 		unsuccessfulWriteTimes.push_back(managerState.unsuccessfulWriteTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
 	}
+
 
 	// Print data to the dialog
 	//
@@ -199,7 +205,7 @@ void TuningSignalInfo::updateInfo()
 	}
 	else
 	{
-		if (m_signalManager.newValueIsUnapplied(m_appSignalHash) == true)
+		if (m_signalManager.isUnapplied(m_appSignalHash) == true)
 		{
 			int precision = 0;
 
@@ -208,7 +214,7 @@ void TuningSignalInfo::updateInfo()
 				precision = asp.precision();
 			}
 
-			text += tr("NewValue:\t\t%1\n").arg(m_signalManager.newValue(m_appSignalHash).toString(m_analogFormat, precision));
+			text += tr("NewValue:\t\t%1\n").arg(m_signalManager.unappliedValue(m_appSignalHash).toString(m_analogFormat, precision));
 		}
 		else
 		{

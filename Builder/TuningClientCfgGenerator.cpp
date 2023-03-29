@@ -247,7 +247,8 @@ namespace Builder
 	{
 		bool ok = true;
 
-		TuningSignalManager tuningSignalManager;
+		ILogFileStub logFileStub;
+		TuningSignalManager tuningSignalManager({}, &logFileStub);
 		tuningSignalManager.load(m_tuningSet);
 
 		//
