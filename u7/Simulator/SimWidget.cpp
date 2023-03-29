@@ -222,6 +222,25 @@ void SimWidget::createToolBar()
 	connect(m_addWindowAction, &QAction::triggered, this, &SimWidget::addNewWindow);
 	m_toolBar->addAction(m_addWindowAction);
 
+	// --
+	//
+	m_simulationTimeEdit = new QLineEdit{this};
+	m_simulationTimeEdit->setPlaceholderText("Infinite");
+	m_simulationTimeEdit->setClearButtonEnabled(true);
+	m_simulationTimeEdit->setToolTip("Simualtion time in seconds.\n\"0\" - at least one workcyle.\nClear the field for an infinite simulation (till Stop or Pause).\nExamples: \"0.500\" - 500ms, \"60\" - 1min, \"3600\" - 1hour.");
+	m_simulationTimeEdit->setSizePolicy(QSizePolicy::Policy::Minimum, m_simulationTimeEdit->sizePolicy().verticalPolicy());
+	m_simulationTimeEdit->setMaxLength(16);
+
+	m_simulationTimeLocale.setNumberOptions(m_simulationTimeLocale.numberOptions() & ~(QLocale::OmitGroupSeparator));
+	m_simulationTimeEditValidator.setLocale(m_simulationTimeLocale);
+	m_simulationTimeEditValidator.setNotation(QDoubleValidator::Notation::StandardNotation);
+	m_simulationTimeEditValidator.setBottom(0.001);
+	m_simulationTimeEditValidator.setDecimals(3);
+
+	m_simulationTimeEdit->setValidator(&m_simulationTimeEditValidator);
+
+	// --
+	//
 	m_runAction = new QAction{QIcon(":/Images/Images/SimRun.svg"), tr("Run simulation for complete project"), this};
 	QList<QKeySequence> runsKeys;
 	runsKeys << QKeySequence{Qt::CTRL | Qt::Key_R};
@@ -283,6 +302,7 @@ void SimWidget::createToolBar()
 	m_toolBar->addAction(m_addWindowAction);
 
 	m_toolBar->addSeparator();
+	m_toolBar->addWidget(m_simulationTimeEdit);
 	m_toolBar->addAction(m_runAction);
 	m_toolBar->addAction(m_pauseAction);
 	m_toolBar->addAction(m_stopAction);
@@ -551,6 +571,8 @@ void SimWidget::updateActions()
 	// Run, Pause, Stop
 	//
 	{
+		m_simulationTimeEdit->setEnabled((m_simulator->isStopped() == true || m_simulator->isPaused()) && projectIsLoaded == true);
+
 		m_runAction->setEnabled((m_simulator->isStopped() == true || m_simulator->isPaused()) && projectIsLoaded == true);
 		m_pauseAction->setEnabled(m_simulator->isRunning() == true && projectIsLoaded == true);
 		m_stopAction->setEnabled(m_simulator->isStopped() == false  && projectIsLoaded == true);
@@ -698,8 +720,6 @@ void SimWidget::refreshBuild()
 
 void SimWidget::runSimulation()
 {
-	qDebug() << "SimWidget::runSimulation()";
-
 	if (m_simulator->isLoaded() == false)
 	{
 		qDebug() << "SimWidget::runSimulation(): Project is not loaded";
@@ -713,7 +733,67 @@ void SimWidget::runSimulation()
 		return;
 	}
 
-	// Set profile tosimulator
+	// Get simulation time
+	//
+	std::chrono::microseconds duration{-1};
+
+	if (QString simTimeText = m_simulationTimeEdit->text();
+		simTimeText.isEmpty() == false)
+	{
+		QStringList splitted = simTimeText.split(m_simulationTimeLocale.decimalPoint());
+		QString secondsText;
+		QString millisecondsText;
+
+		if (splitted.size() >= 1)
+		{
+			secondsText = splitted[0];
+		}
+
+		if (splitted.size() == 2)
+		{
+			millisecondsText = splitted[1];
+		}
+
+		if (secondsText.isEmpty() == false)
+		{
+			bool ok;
+			auto s = secondsText.toULongLong(&ok, 10);
+
+			if (ok == true)
+			{
+				duration = std::chrono::seconds{s};
+			}
+		}
+
+		if (millisecondsText.isEmpty() == false)
+		{
+			uint64_t order = 100;
+			uint64_t ms = 0;
+
+			for (qsizetype i = 0; i < millisecondsText.size(); i++)
+			{
+				QChar ch = millisecondsText[i];
+				Q_ASSERT(ch.isDigit());
+
+				ms += ch.digitValue() * order;
+				order /= 10;
+			}
+
+			if (duration.count() < 0)
+			{
+				duration = std::chrono::microseconds{0};
+			}
+
+			duration += std::chrono::milliseconds{ms};
+		}
+	}
+
+	if (duration.count() == 0)
+	{
+		duration = std::chrono::microseconds{1};	// It will run one work cycle
+	}
+
+	// Set profile to simulator
 	//
 	Q_ASSERT(m_profilesComboBox);
 
@@ -732,9 +812,7 @@ void SimWidget::runSimulation()
 
 	if (m_simulator->isPaused() == true)
 	{
-		// Continue running what was simualted before
-		//
-		mutableControl.startSimulation(mutableControl.duration());
+		mutableControl.startSimulation(duration);
 	}
 	else
 	{
@@ -765,7 +843,7 @@ void SimWidget::runSimulation()
 		// Start simulation
 		//
 		mutableControl.setRunList(equipmentIds);
-		mutableControl.startSimulation();
+		mutableControl.startSimulation(duration);
 	}
 
 	return;

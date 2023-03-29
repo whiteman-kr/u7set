@@ -183,7 +183,7 @@ namespace Sim
 	{
 		using namespace std::chrono;
 
-		m_log.writeDebug(tr("Start"));
+		m_log.writeDebug(tr("Start, duration microseconds: %1").arg(duration.count()));
 
 		std::unique_lock locker(m_controlDataMutex);
 

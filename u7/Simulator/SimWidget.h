@@ -124,6 +124,10 @@ private:
 
 	QAction* m_addWindowAction = nullptr;
 
+	QLocale m_simulationTimeLocale{QLocale::C};
+	QDoubleValidator m_simulationTimeEditValidator;
+	QLineEdit* m_simulationTimeEdit = nullptr;
+
 	QAction* m_runAction = nullptr;
 	QAction* m_pauseAction = nullptr;
 	QAction* m_stopAction = nullptr;
