@@ -1,10 +1,13 @@
 #pragma once
 
+#include <chrono>
 #include <set>
 #include <atomic>
 #include <memory>
 #include <vector>
 #include <optional>
+#include <mutex>
+#include <condition_variable>
 #include <QThread>
 #include <QtConcurrent>
 #include <QMutex>
@@ -50,6 +53,11 @@ namespace Sim
 		}
 
 		LogicModule* operator->()
+		{
+			return m_lm.get();
+		}
+
+		const LogicModule* operator->() const
 		{
 			return m_lm.get();
 		}
@@ -169,7 +177,9 @@ namespace Sim
 
 		// Start of access only with mutex
 		// \/ \/ \/ \/ \/
-		mutable QReadWriteLock m_controlDataLock{QReadWriteLock::Recursive};
+		mutable std::recursive_mutex m_controlDataMutex;
+		mutable std::condition_variable_any m_controlDataConditionVariable;		// nofify_one every time m_controlData is changed
+
 		ControlData m_controlData;
 		// /\ /\ /\ /\ /\
 		// End of Access only with mutex

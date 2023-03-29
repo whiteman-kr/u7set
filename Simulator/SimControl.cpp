@@ -1,6 +1,7 @@
 #include "SimControl.h"
 #include "Simulator.h"
 
+
 namespace Sim
 {
 
@@ -42,9 +43,11 @@ namespace Sim
 		m_log.writeDebug(tr("Reset"));
 
 		{
-			QWriteLocker wl(&m_controlDataLock);
+			std::lock_guard locker(m_controlDataMutex);
 			m_controlData = ControlData{};
 		}
+
+		m_controlDataConditionVariable.notify_one();
 
 		m_simulator->software().stopSimulation();
 
@@ -100,7 +103,7 @@ namespace Sim
 		// set list
 		//
 		{
-			QWriteLocker wl(&m_controlDataLock);
+			std::lock_guard locker(m_controlDataMutex);
 
 			// Add new LMs, keep old
 			//
@@ -139,6 +142,8 @@ namespace Sim
 				m_controlData.m_lms.end());
 		}
 
+		m_controlDataConditionVariable.notify_one();
+
 		return addedModuleCount;
 	}
 
@@ -154,7 +159,7 @@ namespace Sim
 	{
 		m_log.writeDebug(tr("Remove from RunList %1 module(s).").arg(equipmentIds.join(", ")));
 
-		QWriteLocker wl(&m_controlDataLock);
+		std::lock_guard locker(m_controlDataMutex);
 
 		for (QString id : equipmentIds)
 		{
@@ -165,6 +170,8 @@ namespace Sim
 						m_controlData.m_lms.end());
 		}
 
+		m_controlDataConditionVariable.notify_one();
+
 		return;
 	}
 
@@ -174,7 +181,7 @@ namespace Sim
 
 		m_log.writeDebug(tr("Start"));
 
-		QWriteLocker wl(&m_controlDataLock);
+		std::unique_lock locker(m_controlDataMutex);
 
 		if (m_controlData.m_lms.empty() == true)
 		{
@@ -186,7 +193,8 @@ namespace Sim
 
 			ControlStatus cs{m_controlData};
 
-			wl.unlock();		// Unlock before emitting signal
+			locker.unlock();		// Unlock before emitting signal
+			m_controlDataConditionVariable.notify_one();
 
 			emit stateChanged(cs.m_state);
 			emit statusUpdate(cs);
@@ -200,8 +208,16 @@ namespace Sim
 			m_controlData.m_state = SimControlState::Run;
 
 			m_controlData.m_startTime = duration_cast<microseconds>(system_clock::now().time_since_epoch());
-			//m_controlData.m_startTime = (m_controlData.m_startTime / 100'000) * 100'000;	// It will make start time on the edge of 100ms, it will make nice timestamp
-			m_controlData.m_startTime = (m_controlData.m_startTime / 5'000) * 5'000;	// It will make start time on the edge of 5ms, it will make nice timestamp
+
+			// It will make start time on the edge of 5ms, it will make nice timestamp
+			//
+			m_controlData.m_startTime = (m_controlData.m_startTime / 5000) * 5000;
+
+			// +5 ms to compensate slight difference between simulated time and real PC time, it allows to have
+			// almost the same time for device simulation and sending data to AppDataService.
+			//
+			//m_controlData.m_startTime += std::chrono::microseconds{5000};
+
 			m_controlData.m_sliceStartTime = m_controlData.m_startTime;
 
 			m_controlData.m_currentTime = m_controlData.m_sliceStartTime;
@@ -242,7 +258,9 @@ namespace Sim
 
 		ControlStatus cs{m_controlData};
 
-		wl.unlock();		// Unlock before emitting signal
+		locker.unlock();		// Unlock before emitting signal
+
+		m_controlDataConditionVariable.notify_one();
 
 		emit stateChanged(cs.m_state);
 		emit statusUpdate(m_controlData);
@@ -256,12 +274,14 @@ namespace Sim
 		ControlStatus cs;
 
 		{
-			QWriteLocker wl(&m_controlDataLock);
+			std::lock_guard locker(m_controlDataMutex);
 			m_controlData.m_state = SimControlState::Pause;
 
 			leftTime = (m_controlData.m_sliceStartTime + m_controlData.m_duration) - m_controlData.m_currentTime;
 			cs = ControlStatus{m_controlData};
 		}
+
+		m_controlDataConditionVariable.notify_one();
 
 		emit stateChanged(cs.m_state);
 		emit statusUpdate(cs);
@@ -276,12 +296,14 @@ namespace Sim
 
 		ControlStatus cs;
 		{
-			QWriteLocker wl(&m_controlDataLock);
+			std::lock_guard locker(m_controlDataMutex);
 			m_controlData.m_state = SimControlState::Stop;
 
 			leftTime = (m_controlData.m_sliceStartTime + m_controlData.m_duration) - m_controlData.m_currentTime;
 			cs = ControlStatus{m_controlData};
 		}
+
+		m_controlDataConditionVariable.notify_one();
 
 		m_simulator->software().stopSimulation();
 
@@ -294,13 +316,13 @@ namespace Sim
 
 	ControlData Control::controlData() const
 	{
-		QReadLocker rl(&m_controlDataLock);
+		std::lock_guard locker(m_controlDataMutex);
 		return m_controlData;
 	}
 
 	void Control::updateControlData(const ControlData& cd)
 	{
-		QWriteLocker wl(&m_controlDataLock);
+		std::lock_guard locker(m_controlDataMutex);
 
 		m_controlData.m_currentTime = cd.m_currentTime;
 
@@ -316,30 +338,32 @@ namespace Sim
 			}
 		}
 
+		m_controlDataConditionVariable.notify_one();
+
 		return;
 	}
 
 	SimControlState Control::state() const
 	{
-		QReadLocker rl(&m_controlDataLock);
+		std::lock_guard locker(m_controlDataMutex);
 		return m_controlData.m_state;
 	}
 
 	bool Control::isRunning() const
 	{
-		QReadLocker rl(&m_controlDataLock);
+		std::lock_guard locker(m_controlDataMutex);
 		return m_controlData.m_state == SimControlState::Run;
 	}
 
 	std::chrono::microseconds Control::duration() const
 	{
-		QReadLocker rl(&m_controlDataLock);
+		std::lock_guard locker(m_controlDataMutex);
 		return m_controlData.m_duration;
 	}
 
 	std::chrono::microseconds Control::leftTime() const
 	{
-		QReadLocker rl(&m_controlDataLock);
+		std::lock_guard locker(m_controlDataMutex);
 		return (m_controlData.m_sliceStartTime + m_controlData.m_duration) - m_controlData.m_currentTime;
 	}
 
@@ -363,15 +387,22 @@ namespace Sim
 
 		while (isInterruptionRequested() == false)
 		{
-			switch (state())
+			SimControlState currentState = state();
+
+			if (currentState == SimControlState::Stop || currentState == SimControlState::Pause)
 			{
-			case SimControlState::Stop:
 				// Have some rest
 				//
-				msleep(50);
-				break;
+				std::unique_lock locker(m_controlDataMutex);
+				m_controlDataConditionVariable.wait_for(locker,
+														std::chrono::milliseconds{100},
+														[currentState, this](){ return m_controlData.m_state != currentState; });
 
-			case SimControlState::Run:
+				currentState = m_controlData.m_state;
+			}
+
+			if (currentState == SimControlState::Run)
+			{
 				// !!! processRun() blocks until state() is changed or time expired
 				//
 				if (bool ok = processRun();	// Blocks here
@@ -381,19 +412,7 @@ namespace Sim
 					//
 					reset();
 				}
-				break;
-
-			case SimControlState::Pause:
-				// Have some rest
-				//
-				msleep(1);		// yieldCurrentThread(); - gives high CPU load
-				break;
-
-			default:
-				Q_ASSERT(false);
-				return;
 			}
-
 		} // while
 
 		return;
@@ -405,7 +424,7 @@ namespace Sim
 		using namespace std::chrono;
 
 		bool result = true;
-		ControlData cd = controlData();                     // Initialize local data with actual simulation ControlData
+		ControlData cd = controlData();						// Initialize local data with actual simulation ControlData
 
 		// Get simulation LogicModules
 		//
@@ -475,6 +494,8 @@ namespace Sim
 					allLmsArePoweredOff = false;
 				}
 
+				// Run receiveConnectionsData(...) only for running LMs.
+				//
 				if (lm.m_task.has_value() == false)
 				{
 					lm->receiveConnectionsData(cd.m_currentTime);
