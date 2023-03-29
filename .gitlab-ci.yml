@@ -36,10 +36,12 @@ project_backup_job:
     - "# ----------------------------------------------"
     - "#               Create backup of database files "
     - "# ----------------------------------------------"
-    - "if (Test-Path \"f:\\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql\") {  Remove-Item -Verbose -Force \"f:\\TestDatabase\\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql\" }"
-    - "if (Test-Path \"f:\\u7_${Env:SIMULATOR_PROJECT_NAME}.sql\") {  Remove-Item -Verbose -Force \"f:\\TestDatabase\\u7_${Env:SIMULATOR_PROJECT_NAME}.sql\" }"
-    - "pg_dump -h 192.168.75.10 -U u7 -f f:\\TestDatabase\\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql u7_${Env:COMPILER_TESTS_PROJECT_NAME}"
-    - "pg_dump -h 192.168.75.10 -U u7 -f f:\\TestDatabase\\u7_${Env:SIMULATOR_PROJECT_NAME}.sql u7_${Env:SIMULATOR_PROJECT_NAME}"
+    - "if (Test-Path \"f:\\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql.1\") {  Remove-Item -Verbose -Force \"f:\\TestDatabase\\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql.1\" }"
+    - "if (Test-Path \"f:\\u7_${Env:SIMULATOR_PROJECT_NAME}.sql.1\") {  Remove-Item -Verbose -Force \"f:\\TestDatabase\\u7_${Env:SIMULATOR_PROJECT_NAME}.sql.1\" }"
+    - "pg_dump -h 192.168.75.10 -U u7 -f f:\\TestDatabase\\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql.1 u7_${Env:COMPILER_TESTS_PROJECT_NAME}"
+    - "pg_dump -h 192.168.75.10 -U u7 -f f:\\TestDatabase\\u7_${Env:SIMULATOR_PROJECT_NAME}.sql.1 u7_${Env:SIMULATOR_PROJECT_NAME}"
+    - "$Env:CI_PROJECT_DIR/CI/RenameIfDifferent.ps1 f:\\TestDatabase\\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql.1 f:\\TestDatabase\\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql"
+    - "$Env:CI_PROJECT_DIR/CI/RenameIfDifferent.ps1 f:\\TestDatabase\\u7_${Env:SIMULATOR_PROJECT_NAME}.sql.1 f:\\TestDatabase\\u7_${Env:SIMULATOR_PROJECT_NAME}.sql"
 
 linux_build_job:
   stage: build
