@@ -5,6 +5,7 @@ variables:
   SIMULATOR_PROJECT_NAME: "test_simulator_v383"
   
 stages:
+  - prepare
   - build
   - test
 #  - deploy
@@ -17,7 +18,9 @@ before_script:
 #after_script:
 #  - echo after_script
 project_backup_job:
-  stage: build
+  stage: prepare
+  variables:
+    GIT_STRATEGY: none
   only:
     - master
     - /^release.*$/
@@ -38,7 +41,6 @@ project_backup_job:
 
 linux_build_job:
   stage: build
-  needs: ["project_backup_job"]
   only:
     - master
     - /^release.*$/
@@ -86,7 +88,6 @@ linux_build_job:
 
 windows_build_job:
   stage: build
-  needs: ["project_backup_job"]
   only:
     - master
     - /^release.*$/
@@ -381,7 +382,6 @@ linux_test_job:
 
 linux_code_coverage_job:
   stage: test
-  needs: ["project_backup_job"]
   tags:
     - testlinux
   only:
