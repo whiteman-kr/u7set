@@ -35,8 +35,8 @@ project_backup_job:
     - "# ----------------------------------------------"
     - "#               Create backup of database files "
     - "# ----------------------------------------------"
-    - "IF EXIST f:\\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql del -Force f:\\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql"
-    - "IF EXIST f:\\u7_${Env:SIMULATOR_PROJECT_NAME}.sql del -Force f:\\u7_${Env:SIMULATOR_PROJECT_NAME}.sql"
+    - "if (Test-Path \"f:\\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql\") {  Remove-Item -Verbose -Force \"f:\\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql\" }"
+    - "if (Test-Path \"f:\\u7_${Env:SIMULATOR_PROJECT_NAME}.sql\") {  Remove-Item -Verbose -Force \"f:\\u7_${Env:SIMULATOR_PROJECT_NAME}.sql\" }"
     - "pg_dump --encoding=utf8 \"host=192.168.75.10 port=5432 dbname=u7_${Env:COMPILER_TESTS_PROJECT_NAME} user=u7 password=P2ssw0rd\" > f:\\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql"
     - "pg_dump --encoding=utf8 \"host=192.168.75.10 port=5432 dbname=u7_${Env:SIMULATOR_PROJECT_NAME} user=u7 password=P2ssw0rd\" > f:\\u7_${Env:SIMULATOR_PROJECT_NAME}.sql"
 
