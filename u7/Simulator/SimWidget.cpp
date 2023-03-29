@@ -15,16 +15,18 @@
 #include "SimSignalInfo.h"
 
 
-SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
+SimWidget::SimWidget(std::shared_ptr<Sim::ConsoleLogFile> ideLogFile,
+					 std::shared_ptr<SimIdeSimulator> simulator,
 					 DbController* db,
 					 QWidget* parent /*= nullptr*/,
 					 Qt::WindowType windowType /*= Qt::Window*/,
-					 bool slaveWindow /*= false*/)
-	: QMainWindow(parent),
-	  HasDbController(db),
-	  m_slaveWindow(slaveWindow),
-	  m_simulator(simulator ? simulator : std::make_shared<SimIdeSimulator>(&m_ideLogFile, true, nullptr)),
-	  m_schemaManager(m_simulator.get())
+					 bool slaveWindow /*= false*/) :
+	QMainWindow(parent),
+	HasDbController(db),
+	m_slaveWindow(slaveWindow),
+	m_ideLogFile(ideLogFile ? ideLogFile : std::make_shared<Sim::ConsoleLogFile>()),
+	m_simulator(simulator ? simulator : std::make_shared<SimIdeSimulator>(m_ideLogFile.get(), true, nullptr)),
+	m_schemaManager(m_simulator.get())
 {
 	// --
 	//
@@ -960,7 +962,7 @@ void SimWidget::addNewWindow()
 {
 	qDebug() << "SimulatorWidget::addNewWindow()";
 
-	SimWidget* widget = new SimWidget{m_simulator, db(), this->parentWidget(), Qt::Window, true};
+	SimWidget* widget = new SimWidget{m_ideLogFile, m_simulator, db(), this->parentWidget(), Qt::Window, true};
 	widget->setWindowTitle(tr("u7 Simulator"));
 
 	widget->show();

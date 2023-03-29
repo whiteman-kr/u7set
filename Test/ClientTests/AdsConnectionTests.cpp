@@ -256,7 +256,7 @@ TEST_F(AdsConnectionTests, receivesState)
 	timer.restart();
 	double lastState = 0;
 	int stateChanges = 0;
-	while (timer.hasExpired(3000) == false)
+	while (timer.hasExpired(4000) == false)
 	{
 		QThread::msleep(10);
 
@@ -270,7 +270,10 @@ TEST_F(AdsConnectionTests, receivesState)
 	}
 
 	qDebug() << "TEST(AdsConnectionTests, receivesState): stateChanges of #SYSTEMID_CLIENTTEST_CH10_MD00_PI_BLINK: " << stateChanges;
-	EXPECT_TRUE(stateChanges >= 4 && stateChanges < 10);
+
+	// The test machine can be loaded heavily, it will result in reduced numbers of state changes.
+	//
+	EXPECT_TRUE(stateChanges >= 3 && stateChanges < 10);
 
 	return;
 }

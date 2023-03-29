@@ -21,7 +21,8 @@ class SimWidget : public QMainWindow, HasDbController
 	Q_OBJECT
 
 public:
-	SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
+	SimWidget(std::shared_ptr<Sim::ConsoleLogFile> ideLogFile,
+			  std::shared_ptr<SimIdeSimulator> simulator,
 			  DbController* db,
 			  QWidget* parent = nullptr,
 			  Qt::WindowType windowType = Qt::Window,
@@ -100,7 +101,7 @@ private:
 	SimProjectWidget* m_projectWidget = nullptr;
 	std::vector<SimMemoryWidget*> m_memoryWidgets;
 
-	Sim::ConsoleLogFile m_ideLogFile;
+	std::shared_ptr<Sim::ConsoleLogFile> m_ideLogFile;
 	std::shared_ptr<SimIdeSimulator> m_simulator;
 
 	QDockWidget* m_overridePaneDock = nullptr;

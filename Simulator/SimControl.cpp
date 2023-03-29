@@ -49,6 +49,10 @@ namespace Sim
 
 		m_controlDataConditionVariable.notify_one();
 
+		// Wait when simulation thread exit form simulation loop (Sim::Control::processRun).
+		//
+		m_insideProcessRun.wait(true);
+
 		m_simulator->software().stopSimulation();
 
 		return;
@@ -215,13 +219,7 @@ namespace Sim
 			//
 			m_controlData.m_startTime = (m_controlData.m_startTime / 5000) * 5000;
 
-			// +5 ms to compensate slight difference between simulated time and real PC time, it allows to have
-			// almost the same time for device simulation and sending data to AppDataService.
-			//
-			//m_controlData.m_startTime += std::chrono::microseconds{5000};
-
 			m_controlData.m_sliceStartTime = m_controlData.m_startTime;
-
 			m_controlData.m_currentTime = m_controlData.m_sliceStartTime;
 			m_controlData.m_duration = duration;
 
@@ -304,6 +302,10 @@ namespace Sim
 		}
 
 		m_controlDataConditionVariable.notify_one();
+
+		// Wait when simulation thread exit form simulation loop (Sim::Control::processRun).
+		//
+		m_insideProcessRun.wait(true);
 
 		m_simulator->software().stopSimulation();
 
@@ -395,7 +397,7 @@ namespace Sim
 				//
 				std::unique_lock locker(m_controlDataMutex);
 				m_controlDataConditionVariable.wait_for(locker,
-														std::chrono::milliseconds{100},
+														std::chrono::milliseconds{1000},
 														[currentState, this](){ return m_controlData.m_state != currentState; });
 
 				currentState = m_controlData.m_state;
@@ -403,15 +405,21 @@ namespace Sim
 
 			if (currentState == SimControlState::Run)
 			{
+				m_insideProcessRun.store(true);
+
 				// !!! processRun() blocks until state() is changed or time expired
 				//
-				if (bool ok = processRun();	// Blocks here
-					ok == false)
+				bool ok = processRun();	// Blocks here
+
+				if (ok == false)
 				{
 					// Some error in simulation, stop the simulation
 					//
 					reset();
 				}
+
+				m_insideProcessRun.store(false);
+				m_insideProcessRun.notify_one();
 			}
 		} // while
 

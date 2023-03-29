@@ -15,7 +15,7 @@ SimulatorTabPage::SimulatorTabPage(DbController* dbc, QWidget* parent) :
 
 	// Controls
 	//
-	m_simultorWidget = new SimWidget(nullptr, dbc, this, Qt::Widget);
+	m_simultorWidget = new SimWidget(nullptr, nullptr, dbc, this, Qt::Widget);
 
 	QVBoxLayout* layout = new QVBoxLayout;
 	setLayout(layout);

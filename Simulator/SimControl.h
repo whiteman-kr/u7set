@@ -165,7 +165,7 @@ namespace Sim
 		void stateChanged(SimControlState state);
 		void statusUpdate(ControlStatus state);
 
-	protected:
+	private:
 		virtual void run() override;
 		bool processRun();
 
@@ -174,6 +174,11 @@ namespace Sim
 		ScopedLog m_log;
 
 		std::atomic<bool> m_unlockTimer{false};
+
+		// m_insideProcessRun indicates that simulation thread now in the function processRun(),
+		// while we are in this function we cannot do some operations, like m_simulator->software().stopSimulation().
+		//
+		std::atomic<bool> m_insideProcessRun{false};
 
 		// Start of access only with mutex
 		// \/ \/ \/ \/ \/
