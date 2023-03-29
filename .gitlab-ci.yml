@@ -16,10 +16,29 @@ before_script:
   
 #after_script:
 #  - echo after_script
+project_backup_job:
+  stage: build
+  only:
+    - master
+    - /^release.*$/
+    - develop
+    - /experimental/
+    - /^.*exp.*$/
+    - /^.*rpct-.*$/
+    - /^.*RPCT-.*$/
+  tags:
+    - projectbackup
+  script:
+    - "# ----------------------------------------------"
+    - "#               Create backup of database files "
+    - "# ----------------------------------------------"
+    - "pg_dump \"host=192.168.75.10 port=5432 dbname=u7_${Env:COMPILER_TESTS_PROJECT_NAME} user=u7 password=P2ssw0rd\" > f:\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql"
+    - "pg_dump \"host=192.168.75.10 port=5432 dbname=u7_${Env:SIMULATOR_PROJECT_NAME} user=u7 password=P2ssw0rd\" > f:\u7_${Env:SIMULATOR_PROJECT_NAME}.sql"
 
 
 linux_build_job:
   stage: build
+  needs: ["project_backup_job"]
   only:
     - master
     - /^release.*$/
@@ -67,6 +86,7 @@ linux_build_job:
 
 windows_build_job:
   stage: build
+  needs: ["project_backup_job"]
   only:
     - master
     - /^release.*$/
@@ -361,7 +381,7 @@ linux_test_job:
 
 linux_code_coverage_job:
   stage: test
-  needs: []
+  needs: ["project_backup_job"]
   tags:
     - testlinux
   only:
