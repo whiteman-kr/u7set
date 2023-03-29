@@ -42,11 +42,11 @@ project_backup_job:
     - "pg_dump -h 192.168.75.10 -U u7 -f f:\\TestDatabase\\u7_${Env:SIMULATOR_PROJECT_NAME}.sql.1 u7_${Env:SIMULATOR_PROJECT_NAME}"
     - "$fileSource = \"f:\\TestDatabase\\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql.1\""
     - "$fileTarget = \"f:\\TestDatabase\\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql\""
-    - "echo n | comp.exe $fileSource $fileTarget; $compareResult = $LASTEXITCODE; | true"
+    - "echo n | comp.exe $fileSource $fileTarget; $compareResult = $LASTEXITCODE; $LASTEXITCODE = 0"
     - "if ($compareResult -eq 1){  Remove-Item -Force $fileTarget;   Rename-Item -Path $fileSource -NewName $fileTarget;}"
     - "$fileSource = \"f:\\TestDatabase\\u7_${Env:SIMULATOR_PROJECT_NAME}.sql.1\""
     - "$fileTarget = \"f:\\TestDatabase\\u7_${Env:SIMULATOR_PROJECT_NAME}.sql\""
-    - "echo n | comp.exe $fileSource $fileTarget; $compareResult = $LASTEXITCODE; | true"
+    - "echo n | comp.exe $fileSource $fileTarget; $compareResult = $LASTEXITCODE; $LASTEXITCODE = 0"
     - "if ($compareResult -eq 1){  Remove-Item -Force $fileTarget;   Rename-Item -Path $fileSource -NewName $fileTarget;}"
 
 linux_build_job:
