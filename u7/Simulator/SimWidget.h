@@ -128,6 +128,8 @@ private:
 	QDoubleValidator m_simulationTimeEditValidator;
 	QLineEdit* m_simulationTimeEdit = nullptr;
 
+	QComboBox* m_speedComboBox = nullptr;
+
 	QAction* m_runAction = nullptr;
 	QAction* m_pauseAction = nullptr;
 	QAction* m_stopAction = nullptr;

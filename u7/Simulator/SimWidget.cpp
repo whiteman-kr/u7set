@@ -226,10 +226,10 @@ void SimWidget::createToolBar()
 	//
 	m_simulationTimeEdit = new QLineEdit{this};
 	m_simulationTimeEdit->setPlaceholderText("Infinite");
-	m_simulationTimeEdit->setClearButtonEnabled(true);
+	m_simulationTimeEdit->setClearButtonEnabled(false);
 	m_simulationTimeEdit->setToolTip("Simualtion time in seconds.\n\"0\" - at least one workcyle.\nClear the field for an infinite simulation (till Stop or Pause).\nExamples: \"0.500\" - 500ms, \"60\" - 1min, \"3600\" - 1hour.");
 	m_simulationTimeEdit->setSizePolicy(QSizePolicy::Policy::Minimum, m_simulationTimeEdit->sizePolicy().verticalPolicy());
-	m_simulationTimeEdit->setMaxLength(16);
+	m_simulationTimeEdit->setMaxLength(18);
 
 	m_simulationTimeLocale.setNumberOptions(m_simulationTimeLocale.numberOptions() & ~(QLocale::OmitGroupSeparator));
 	m_simulationTimeEditValidator.setLocale(m_simulationTimeLocale);
@@ -238,6 +238,30 @@ void SimWidget::createToolBar()
 	m_simulationTimeEditValidator.setDecimals(3);
 
 	m_simulationTimeEdit->setValidator(&m_simulationTimeEditValidator);
+
+	// --
+	//
+	m_speedComboBox = new QComboBox{this};
+	m_speedComboBox->setToolTip("Simulation speed factor.\nFF - Fast Forward.\nNote: Simulation speed depends on hardware and project complexity.");
+	m_speedComboBox->addItem("x0.1", QVariant{0.1});
+	m_speedComboBox->addItem("x0.25", QVariant{0.25});
+	m_speedComboBox->addItem("x0.5", QVariant{0.5});
+	m_speedComboBox->addItem("x1", QVariant{1.0});
+	m_speedComboBox->addItem("x2", QVariant{2.0});
+	m_speedComboBox->addItem("x4", QVariant{4.0});
+	m_speedComboBox->addItem("FF", QVariant{256.0});
+	m_speedComboBox->setCurrentIndex(3);	// x1
+
+	auto speedChangedFunc = [this](int)
+		{
+			bool ok;
+			double d = m_speedComboBox->currentData().toDouble(&ok);
+			m_simulator->control().setSpeedFactor(ok ? d : 1.0);
+		};
+
+	connect(m_speedComboBox, &QComboBox::currentIndexChanged, speedChangedFunc);
+
+	speedChangedFunc(3);	// Call first time to init m_simualtor
 
 	// --
 	//
@@ -303,6 +327,7 @@ void SimWidget::createToolBar()
 
 	m_toolBar->addSeparator();
 	m_toolBar->addWidget(m_simulationTimeEdit);
+	m_toolBar->addWidget(m_speedComboBox);
 	m_toolBar->addAction(m_runAction);
 	m_toolBar->addAction(m_pauseAction);
 	m_toolBar->addAction(m_stopAction);
@@ -572,6 +597,7 @@ void SimWidget::updateActions()
 	//
 	{
 		m_simulationTimeEdit->setEnabled((m_simulator->isStopped() == true || m_simulator->isPaused()) && projectIsLoaded == true);
+		m_speedComboBox->setEnabled(projectIsLoaded);
 
 		m_runAction->setEnabled((m_simulator->isStopped() == true || m_simulator->isPaused()) && projectIsLoaded == true);
 		m_pauseAction->setEnabled(m_simulator->isRunning() == true && projectIsLoaded == true);
@@ -733,6 +759,25 @@ void SimWidget::runSimulation()
 		return;
 	}
 
+	// Trim all trends
+	//
+	{
+		TimeStamp currentTime{QDateTime::currentDateTime()};
+		auto trimFunc = [currentTime](SimTrendsWidget* simTrendsWidget)
+		{
+// Choose what to do, trim or clear.
+//
+#if 1
+			simTrendsWidget->trimTrendData(currentTime);
+			simTrendsWidget->addNonValidPoints();
+#else
+			simTrendsWidget->clear();
+#endif
+		};
+
+		SimTrends::applyForAll(trimFunc);
+	}
+
 	// Get simulation time
 	//
 	std::chrono::microseconds duration{-1};
@@ -746,7 +791,7 @@ void SimWidget::runSimulation()
 
 		if (splitted.size() >= 1)
 		{
-			secondsText = splitted[0];
+			secondsText = splitted[0].remove(m_simulationTimeLocale.groupSeparator());
 		}
 
 		if (splitted.size() == 2)

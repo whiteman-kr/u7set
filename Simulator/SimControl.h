@@ -158,8 +158,8 @@ namespace Sim
 		std::chrono::microseconds duration() const;
 		std::chrono::microseconds leftTime() const;
 
-		bool unlockTimer() const;
-		void setUnlockTimer(bool value);
+		double speedFactor() const;
+		void setSpeedFactor(double value);
 
 	signals:
 		void stateChanged(SimControlState state);
@@ -173,7 +173,7 @@ namespace Sim
 		Simulator* m_simulator = nullptr;
 		ScopedLog m_log;
 
-		std::atomic<bool> m_unlockTimer{false};
+		std::atomic<double> m_speedFactor;
 
 		// m_insideProcessRun indicates that simulation thread now in the function processRun(),
 		// while we are in this function we cannot do some operations, like m_simulator->software().stopSimulation().

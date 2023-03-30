@@ -70,8 +70,11 @@ namespace Sim
 		/// \brief Script execution timeout in milliseconds, if -1 then timeout is not applied.
 		Q_PROPERTY(qint64 executionTimeout READ executionTimeout WRITE setExecutionTimeout)
 
-		/// \brief Unlocks simulation timer binding to PC's time. This param can significantly increase simulation speed but it depends on underlying hardware and project size.
+		/// \brief Unlocks simulation timer binding to PC's time. This param can significantly increase simulation speed but it depends on underlying hardware and project size. Also see speedFactor.
 		Q_PROPERTY(bool unlockTimer READ unlockTimer WRITE setUnlockTimer)
+
+		/// \brief This param can increase or decrease simulation speed but it depends on underlying hardware and project size. Accepts values [0.1 - 256.0].
+		Q_PROPERTY(double speedFactor READ speedFactor WRITE setSpeedFactor)
 
 		/// \brief Allows or disables LogicModules' LAN communications like Application Data transmittion to AppDataSrv, TuningService communications (note: Tuning Key and Arming Key must be set to 1). This is global flag for all simulated communications.
 		Q_PROPERTY(bool enabledLanComm READ enabledLanComm WRITE setEnabledLanComm)
@@ -171,6 +174,9 @@ namespace Sim
 	private:
 		[[nodiscard]] bool unlockTimer() const;
 		void setUnlockTimer(bool value);
+
+		[[nodiscard]] double speedFactor() const;
+		void setSpeedFactor(double value);
 
 		[[nodiscard]] bool enabledLanComm() const;
 		void setEnabledLanComm(bool value);

@@ -369,14 +369,15 @@ namespace Sim
 		return (m_controlData.m_sliceStartTime + m_controlData.m_duration) - m_controlData.m_currentTime;
 	}
 
-	bool Control::unlockTimer() const
+	double Control::speedFactor() const
 	{
-		return m_unlockTimer.load();
+		return m_speedFactor.load();
 	}
 
-	void Control::setUnlockTimer(bool value)
+	void Control::setSpeedFactor(double value)
 	{
-		m_unlockTimer = value;
+		value = std::clamp(value, 0.1, 256.0);
+		m_speedFactor.store(value);
 	}
 
 	void Control::run()
@@ -477,6 +478,8 @@ namespace Sim
 		QDateTime currentDateTime = QDateTime::fromMSecsSinceEpoch(std::chrono::duration_cast<std::chrono::milliseconds>(cd.m_currentTime).count());
 
 		auto finishTime = cd.m_sliceStartTime + cd.m_duration;
+
+		double currentSpeedFactor = speedFactor();
 
 		do
 		{
@@ -580,16 +583,28 @@ namespace Sim
 			//
 			if (minPossibleTime > cd.m_currentTime)
 			{
-				if (m_unlockTimer == false)
+				if (currentSpeedFactor != speedFactor())
+				{
+					currentSpeedFactor = speedFactor();
+					perfmanceTimer.restart();
+					perfmonaceStartedAt = cd.m_currentTime;
+				}
+
+				if (currentSpeedFactor < 128.0)
 				{
 					// If current simulation is ahead of physical time, pause it a little bit
 					//
-					microseconds timeEllapsed{perfmanceTimer.elapsed() * 1000ul};
+					microseconds timeEllapsed{perfmanceTimer.elapsed() * static_cast<unsigned long long>(1000.0 * currentSpeedFactor)};
 					microseconds simulatedTime = cd.m_currentTime - perfmonaceStartedAt;
 					microseconds ahead = simulatedTime - timeEllapsed;
 
-					if (ahead > 0us)
+					if (ahead > 5us)
 					{
+						if (ahead > 100ms)		// sleep no more then 100ms.
+						{
+							ahead = 100ms;
+						}
+
 						unsigned long usTimeToSleep = static_cast<unsigned long>(ahead.count());
 						QThread::usleep(usTimeToSleep);
 					}

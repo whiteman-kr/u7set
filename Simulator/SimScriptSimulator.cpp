@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <QJSValueIterator>
 #include "SimScriptSimulator.h"
 #include "Simulator.h"
@@ -666,12 +667,22 @@ namespace Sim
 
 	bool ScriptSimulator::unlockTimer() const
 	{
-		return m_simulator->control().unlockTimer();
+		return m_simulator->control().speedFactor() >= 128.0;
 	}
 
 	void ScriptSimulator::setUnlockTimer(bool value)
 	{
-		m_simulator->control().setUnlockTimer(value);
+		m_simulator->control().setSpeedFactor(value ? 256.0 : 1.0);
+	}
+
+	double ScriptSimulator::speedFactor() const
+	{
+		return m_simulator->control().speedFactor();
+	}
+
+	void ScriptSimulator::setSpeedFactor(double value)
+	{
+		m_simulator->control().setSpeedFactor(value);
 	}
 
 	bool ScriptSimulator::enabledLanComm() const
