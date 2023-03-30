@@ -1826,7 +1826,10 @@ void TuningWorkspace::slot_treeContextMenuRequested(const QPoint& pos)
 
 	// Run the menu
 
-	menu.exec(QCursor::pos());
+	if (actionEnable->isEnabled() == true || actionDisable->isEnabled() == true)
+	{
+		menu.exec(QCursor::pos());
+	}
 }
 
 void TuningWorkspace::slot_maskReturnPressed()

@@ -394,12 +394,6 @@ QString TuningValue::toString(E::AnalogFormat analogFormat, int precision) const
 
 void TuningValue::fromString(QString value, bool* ok)
 {
-	if (ok == nullptr)
-	{
-		assert(false);
-		return;
-	}
-
 	switch (m_type)
 	{
 	case TuningValueType::Discrete:

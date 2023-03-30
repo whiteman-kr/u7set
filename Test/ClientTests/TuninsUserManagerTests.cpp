@@ -1,11 +1,22 @@
 #include "../ClientLib/TuningUserManager.h"
 
+// ----------------
+//
+//	Warning! To complete these tests successfully, add user account with "user" username and "P2ssw0rd" password!
+//
+// ---------------
+
 class TuningUserManagerTests : public ::testing::Test
 {
 protected:
-	virtual void SetUp()
+	static void SetUpTestSuite()
 	{
 
+		std::cout << "Warning: To complete TuningUserManagerTests successfully, add an account with \"user\" username and \"P2ssw0rd\" password.\n";
+	}
+
+	virtual void SetUp()
+	{
 		return;
 	}
 

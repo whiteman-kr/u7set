@@ -270,7 +270,7 @@ namespace ClientLib
 #endif
 
 #ifdef Q_OS_LINUX
-			QString command = QString("echo %1 | su - %2 >/dev/null 2>/dev/null").arg(password).arg(userName);
+			QString command = QString("echo %1 | /bin/su - %2 >/dev/null 2>/dev/null").arg(password).arg(userName);
 			result = system(command.toLocal8Bit()) == 0;
 #endif
 

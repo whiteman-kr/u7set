@@ -6,6 +6,7 @@
 #include "../CommonLib/Hash.h"
 #include "../CommonLib/Types.h"
 #include "../OnlineLib/SoftwareSettings.h"
+#include "TuningConfigController.h"
 
 namespace Ui {
 	class TuningSignalInfo;
@@ -18,7 +19,8 @@ class TuningSignalInfo : public QDialog
 	Q_OBJECT
 
 public:
-	explicit TuningSignalInfo(Hash appSignalHash,
+	explicit TuningSignalInfo(TuningConfigController& configController,
+							  Hash appSignalHash,
 							  E::AnalogFormat analogFormat,
 							  const TuningSignalManager& signalManager,
 							  const ClientLib::TuningConnection& tuningConnection,
@@ -33,6 +35,8 @@ private:
 	void updateInfo();
 
 private:
+
+	TuningConfigController& m_configController;
 
 	Hash m_appSignalHash = UNDEFINED_HASH;
 	E::AnalogFormat m_analogFormat = E::AnalogFormat::f_9;

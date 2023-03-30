@@ -165,7 +165,7 @@ namespace Tuning
 		void invalidate();
 
 		void initWriting(quint64 writeCommandID);
-		void finalizeWriting(quint64 writeCommandID, NetworkError errCode);
+		void finalizeWriting(quint64 writeCommandID, E::NetworkError errCode);
 
 		bool writeInProgress() const;
 
@@ -183,7 +183,7 @@ namespace Tuning
 
 		Hash writeClient() const { return m_writeClient; }
 
-		NetworkError writeErrorCode() const { return m_writeErrorCode; }
+		E::NetworkError writeErrorCode() const { return m_writeErrorCode; }
 
 		Fotip::DataType fotipDataType() const;
 
@@ -226,7 +226,7 @@ namespace Tuning
 
 		quint64 m_writeCommandID = 0;							// if != 0 - writing in progress
 																// if == 0 - no writing in progress (or writing is already finished)
-		NetworkError m_writeErrorCode = NetworkError::Success;	// last write error code, NetworkError:  Success, TuningValueOutOfRange, TuningNoReply
+		E::NetworkError m_writeErrorCode = E::NetworkError::Success;	// last write error code, NetworkError:  Success, TuningValueOutOfRange, TuningNoReply
 
 		//
 
@@ -379,7 +379,7 @@ namespace Tuning
 		bool processWriteReply(RupFotip& reply);
 		bool processApplyReply(RupFotip& reply);
 
-		void finalizeWriting(NetworkError errCode);
+		void finalizeWriting(E::NetworkError errCode);
 
 		bool checkRupHeader(const Rup::Header& rupHeader);
 		bool checkFotipHeader(const Fotip::Header& fotipHeader);
@@ -496,12 +496,12 @@ namespace Tuning
 
 		void readSignalState(Network::TuningSignalState* tss) const;
 
-		NetworkError writeSignalState(const QString& clientEquipmentID,
+		E::NetworkError writeSignalState(const QString& clientEquipmentID,
 										const QString& user,
 										Hash signalHash,
 										const TuningValue& newValue);
 
-		NetworkError applySignalStates(	const QString& clientEquipmentID,
+		E::NetworkError applySignalStates(	const QString& clientEquipmentID,
 										const QString& user);
 
 		QString sourceEquipmentID() const;
@@ -605,12 +605,12 @@ namespace Tuning
 		void getSourceState(Network::GetTuningSourcesStatesReply* reply);
 		void readSignalState(Network::TuningSignalState* tss) const;
 
-		NetworkError writeSignalState(const QString& clientEquipmentID,
+		E::NetworkError writeSignalState(const QString& clientEquipmentID,
 										const QString& user,
 										Hash signalHash,
 										const TuningValue& newValue);
 
-		NetworkError applySignalStates(	const QString& clientEquipmentID,
+		E::NetworkError applySignalStates(	const QString& clientEquipmentID,
 										const QString& user);
 
 		QString sourceEquipmentID() const;

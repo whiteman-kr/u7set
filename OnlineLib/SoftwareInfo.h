@@ -10,6 +10,17 @@ public:
 
 	SoftwareInfo() = default;
 
+	SoftwareInfo(E::SoftwareType softwareType,
+				 const QString& equipmentID,
+				 int majorVersion,
+				 int minorVersion,
+				 int buildNo);
+
+	SoftwareInfo(const SoftwareInfo&) = default;
+	SoftwareInfo(SoftwareInfo&&) = default;
+	SoftwareInfo& operator=(const SoftwareInfo&) = default;
+	SoftwareInfo& operator=(SoftwareInfo&&) = default;
+
 	void clear();
 
 	void init(E::SoftwareType softwareType,
