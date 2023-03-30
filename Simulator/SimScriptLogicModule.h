@@ -5,16 +5,28 @@
 namespace Sim
 {
 
+	/*! \class ScriptLogicModule
+		\ingroup simulator
+		\brief Represents class that represents a logic module. It allows to control it's power and tuning state.
+	*/
 	class ScriptLogicModule : public QObject
 	{
 		Q_OBJECT
 
+		/// \brief Module EquipmentID.
 		Q_PROPERTY(QString equipmentID READ equipmentId)
+
+		/// \brief Switches module power on and off.
+		Q_PROPERTY(bool powerOff READ isPowerOff WRITE setPowerOff)
+
+		/// \brief Switches module Arming Key on and off.
+		Q_PROPERTY(bool armingKey READ isArmingKey WRITE setArmingKey)
+
+		/// \brief Switches module Tuning Key on and off.
+		Q_PROPERTY(bool tuningKey READ isTuningKey WRITE setTuningKey)
 
 		Q_PROPERTY(quint32 regBufferStartAddress READ regBufferStartAddress)
 		Q_PROPERTY(quint32 regBufferSize READ regBufferSize)
-
-		Q_PROPERTY(bool powerOff READ isPowerOff WRITE setPowerOff)
 
 	public:
 		ScriptLogicModule() = default;
@@ -28,11 +40,17 @@ namespace Sim
 
 		QString equipmentId() const;
 
-		quint32 regBufferStartAddress() const;
-		quint32 regBufferSize() const;
-
 		bool isPowerOff() const;
 		void setPowerOff(bool value);
+
+		bool isArmingKey() const;
+		void setArmingKey(bool value);
+
+		bool isTuningKey() const;
+		void setTuningKey(bool value);
+
+		quint32 regBufferStartAddress() const;
+		quint32 regBufferSize() const;
 
 		// Ram Access
 		//

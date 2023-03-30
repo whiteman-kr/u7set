@@ -35,28 +35,6 @@ namespace Sim
 		return m_logicModule->equipmentId();
 	}
 
-	quint32 ScriptLogicModule::regBufferStartAddress() const
-	{
-		if (isNull() == true)
-		{
-			ScriptSimulator::throwScriptException(this, tr("ScriptLogicModule is null"));
-			return {};
-		}
-
-		return m_logicModule->lmDescription().memory().m_appLogicWordDataOffset;
-	}
-
-	quint32 ScriptLogicModule::regBufferSize() const
-	{
-		if (isNull() == true)
-		{
-			ScriptSimulator::throwScriptException(this, tr("ScriptLogicModule is null"));
-			return {};
-		}
-
-		return m_logicModule->logicModuleExtraInfo().appDataSizeBytes / 2;
-	}
-
 	bool ScriptLogicModule::isPowerOff() const
 	{
 		if (isNull() == true)
@@ -77,6 +55,72 @@ namespace Sim
 		}
 
 		return m_logicModule->setPowerOff(value);
+	}
+
+	bool ScriptLogicModule::isArmingKey() const
+	{
+		if (isNull() == true)
+		{
+			ScriptSimulator::throwScriptException(this, tr("ScriptLogicModule is null"));
+			return {};
+		}
+
+		return m_logicModule->armingKey();
+	}
+
+	void ScriptLogicModule::setArmingKey(bool value)
+	{
+		if (isNull() == true)
+		{
+			ScriptSimulator::throwScriptException(this, tr("ScriptLogicModule is null"));
+			return;
+		}
+
+		return m_logicModule->setArmingKey(value);
+	}
+
+	bool ScriptLogicModule::isTuningKey() const
+	{
+		if (isNull() == true)
+		{
+			ScriptSimulator::throwScriptException(this, tr("ScriptLogicModule is null"));
+			return {};
+		}
+
+		return m_logicModule->tuningKey();
+	}
+
+	void ScriptLogicModule::setTuningKey(bool value)
+	{
+		if (isNull() == true)
+		{
+			ScriptSimulator::throwScriptException(this, tr("ScriptLogicModule is null"));
+			return;
+		}
+
+		return m_logicModule->setTuningKey(value);
+	}
+
+	quint32 ScriptLogicModule::regBufferStartAddress() const
+	{
+		if (isNull() == true)
+		{
+			ScriptSimulator::throwScriptException(this, tr("ScriptLogicModule is null"));
+			return {};
+		}
+
+		return m_logicModule->lmDescription().memory().m_appLogicWordDataOffset;
+	}
+
+	quint32 ScriptLogicModule::regBufferSize() const
+	{
+		if (isNull() == true)
+		{
+			ScriptSimulator::throwScriptException(this, tr("ScriptLogicModule is null"));
+			return {};
+		}
+
+		return m_logicModule->logicModuleExtraInfo().appDataSizeBytes / 2;
 	}
 
 	quint16 ScriptLogicModule::readRamBit(RamAddress address, E::LogicModuleRamAccess access)
