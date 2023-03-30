@@ -156,30 +156,24 @@ void AppDataReceiver::onTimer1s(const error_code& error)
 
 	if (!error)
 	{
-		if (isSocketWorkable() == false)
+		if (m_receivedPerSecond == 0)
 		{
-			createAndBindSocket();
-			clearReceiverStatistics();
-		}
-		else
-		{
-			// socket is workable
-			//
-			if (m_rupFramesReceivingSpeed == 0)
+			m_noReceiveCtr++;
+
+			if (m_noReceiveCtr >= NO_RUP_FRAMES_TIMEOUT)
 			{
-				m_noReceiveCtr++;
-
-				if (m_noReceiveCtr == 3)
-				{
-					m_noReceiveCtr = 0;
-
-					qDebug() << "No RUP frames received in 3 seconds";
-
-					closeSocket();
-					clearReceiverStatistics();
-					createAndBindSocket();
-				}
+				qDebug() << C_STR(QString("No RUP frames received in %1 seconds").
+									arg(NO_RUP_FRAMES_TIMEOUT));
 			}
+		}
+
+		if (isSocketWorkable() == false ||
+			m_noReceiveCtr >= NO_RUP_FRAMES_TIMEOUT ||
+			m_socketErrorCtr >= MAX_SOCKET_ERROR_COUNT)
+		{
+			closeSocket();
+			clearReceiverStatistics();
+			createAndBindSocket();
 		}
 
 		updateReceiverStatistics();
@@ -195,6 +189,9 @@ void AppDataReceiver::onTimer1s(const error_code& error)
 
 void AppDataReceiver::clearReceiverStatistics()
 {
+	m_noReceiveCtr = 0;
+	m_socketErrorCtr = 0;
+
 	m_receivingSpeed = 0;
 	m_rupFramesReceivingSpeed = 0;
 	m_rupFramesCount = 0;
@@ -263,14 +260,21 @@ bool AppDataReceiver::createAndBindSocket()
 		{
 			m_socketBound = true;
 
-			DEBUG_LOG_MSG(m_log, QString("AsyncAppDataReceiver socket created and bound to %1").
+			DEBUG_LOG_MSG(m_log, QString("AppDataReceiver socket created and bound to %1").
 							arg(appDataReceivingIPStr()));
 			startReceive();
+		}
+		else
+		{
+			DEBUG_LOG_MSG(m_log, QString("AppDataReceiver listening socket binding error: %1").
+							arg(QString::fromStdString(error.message())));
+
+			closeSocket();
 		}
 	}
 	else
 	{
-		DEBUG_LOG_MSG(m_log, QString("AsyncAppDataReceiver listening socket opening error: %1").
+		DEBUG_LOG_MSG(m_log, QString("AppDataReceiver listening socket opening error: %1").
 						arg(QString::fromStdString(error.message())));
 
 		closeSocket();
@@ -294,8 +298,6 @@ void AppDataReceiver::closeSocket()
 		delete m_socket;
 		m_socket = nullptr;
 		m_socketBound = false;
-
-		qDebug() << "AsyncAppDataReceiver socket closed";
 	}
 }
 
@@ -327,9 +329,11 @@ void AppDataReceiver::receivePackets(const error_code& error, size_t bytesReceiv
 
 	if (error)
 	{
-		closeSocket();
+		m_socketErrorCtr++;
 		return;
 	}
+
+	m_noReceiveCtr = 0;
 
 	udp::endpoint receiveFromIP = m_receiveFromIP[m_writeIndex];
 	Rup::SimFrame& simFrame = *reinterpret_cast<Rup::SimFrame*>(m_receiveBuffer[m_writeIndex]);
@@ -516,28 +520,20 @@ void processPackets(AppDataReceiver& receiver, int threadNumber)
 
 	std::unique_lock ul(waitConditionMutex, std::defer_lock);
 
-	while(true)
+	while(receiver.isQuitRequested() == false)
 	{
 		ul.lock();
 
-		waitCondition.wait(ul);
-
-		if (receiver.isQuitRequested() == true)
-		{
-			ul.unlock();
-			break;
-		}
+		waitCondition.wait_for(ul, std::chrono::milliseconds(20));
 
 		// here ul is LOCKED!
-
-		int processingCtr = 0;
 
 		while(true)
 		{
 			auto it = requireProcessing.begin();
 
 			if (it == requireProcessing.end() ||
-				processingCtr >= 20)
+				receiver.isQuitRequested() == true)
 			{
 				ul.unlock();
 				break;
@@ -549,8 +545,6 @@ void processPackets(AppDataReceiver& receiver, int threadNumber)
 			requireProcessing.erase(it);
 
 			ul.unlock();
-
-			processingCtr++;
 
 			if (source->takeProcessingOwnership(thisThread) == true)
 			{

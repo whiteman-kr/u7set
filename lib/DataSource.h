@@ -22,8 +22,6 @@ public:
 	DataSource();
 	virtual ~DataSource();
 
-	// LM's properties
-
 	// Module properties
 
 	QString moduleEquipmentID() const { return m_moduleEquipmentID; }
@@ -42,6 +40,8 @@ public:
 	void setModuleUniqueID(quint64 uid) { m_moduleUniqueID = uid; }
 
 	int moduleWorkcycle_ms() const { return m_moduleWorkcycle_mcs / 1000; }
+	int moduleWorkcycle_mcs() const { return m_moduleWorkcycle_mcs; }
+	void setModuleWorkcycle_mcs(int mcs) { m_moduleWorkcycle_mcs = mcs; }
 
 	int rupVersion() const { return m_lanControllersInfo.rupVersion(); }
 
@@ -125,9 +125,9 @@ protected:
 	int m_lmNumber = 0;
 	QString m_subsystemChannel;				// A, B, C...
 
-	LanControllersInfo m_lanControllersInfo;		// array of LanControllerInfo!
+	LanControllersInfo m_lanControllersInfo;	// array of LanControllerInfo!
 
-	int m_moduleWorkcycle_mcs = 5000;		// module workcycle in MICROseconds
+	int m_moduleWorkcycle_mcs = 0;				// module workcycle in MICROseconds
 
 	QString m_profile;
 	int m_acquiredSignalsCount = 0;
@@ -202,8 +202,6 @@ public:
 	//
 
 	QString stateStr() const;
-
-	void updateUptime();
 
 	bool dataProcessingEnabled() const { return m_dataProcessingEnabled; }
 	bool receivesData() const { return m_receivesData; }

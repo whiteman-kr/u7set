@@ -208,6 +208,7 @@ void DataSource::writeToXml(XmlWriteHelper& xml) const
 	xml.writeStringAttribute(XmlAttribute::SUBSYSTEM_CHANNEL, m_subsystemChannel);
 	xml.writeStringAttribute(XmlAttribute::CAPTION, m_moduleCaption);
 	xml.writeUInt64Attribute(XmlAttribute::MODULE_UNIQUE_ID, m_moduleUniqueID, true);
+	xml.writeIntAttribute(XmlAttribute::MODULE_WORKCYCLE_MCS, m_moduleWorkcycle_mcs);
 
 	xml.writeIntAttribute(EquipmentPropNames::APP_DATA_SIZE_BYTES, appDataSizeBytes());
 	xml.writeUInt32Attribute(EquipmentPropNames::APP_DATA_UID, appDataUID(), false);
@@ -253,6 +254,7 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 	result &= xml.readStringAttribute(XmlAttribute::SUBSYSTEM_CHANNEL,&m_subsystemChannel);
 	result &= xml.readStringAttribute(XmlAttribute::CAPTION, &m_moduleCaption);
 	result &= xml.readUInt64Attribute(XmlAttribute::MODULE_UNIQUE_ID, &m_moduleUniqueID);
+	result &= xml.readIntAttribute(XmlAttribute::MODULE_WORKCYCLE_MCS, &m_moduleWorkcycle_mcs);
 
 	if (xml.findElement(XmlElement::LAN_CONTROLLERS) == false)
 	{
@@ -429,11 +431,6 @@ void DataSourceOnline::clearParsingBuffers()
 	m_parsingBuffers.clear();
 }
 
-
-void DataSourceOnline::updateUptime()
-{
-}
-
 QString DataSourceOnline::rupFramePlantTimeStr() const
 {
 	return getTimeStr(m_rupFramePlantTime);
@@ -562,10 +559,11 @@ bool DataSourceOnline::updateStatistics_1s()
 
 	qint64 now = QDateTime::currentMSecsSinceEpoch();
 
-	if (now - m_lastPacketServerTime > APP_DATA_SOURCE_TIMEOUT)
+	if (m_lastPacketServerTime != 0 &&
+		(now - m_lastPacketServerTime > APP_DATA_SOURCE_TIMEOUT))
 	{
 		m_rupTimes = m_lastRupTimes;
-		m_rupTimes += APP_DATA_SOURCE_TIMEOUT;
+		m_rupTimes += moduleWorkcycle_ms();
 
 		if (m_receivesData == true)
 		{
@@ -586,8 +584,6 @@ bool DataSourceOnline::updateStatistics_1s()
 	}
 	else
 	{
-		m_receivesData = true;
-
 		m_dataReceivingSpeed = static_cast<double>(m_receivedDataSize - m_prevReceivedDataSize);		// Bytes per second
 
 		m_prevReceivedDataSize = m_receivedDataSize;

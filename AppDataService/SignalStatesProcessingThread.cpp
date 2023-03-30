@@ -77,21 +77,16 @@ void SignalStatesProcessingThread::processStates(AppDataReceiver& receiver)
 
 	std::unique_lock ul(waitConditionMutex, std::defer_lock);
 
-	while(true)
+	while(receiver.isQuitRequested() == false)
 	{
 		ul.lock();
 
-		waitCondition.wait(ul);
-
-		if (receiver.isQuitRequested() == true)
-		{
-			ul.unlock();
-			break;
-		}
+		waitCondition.wait_for(ul, std::chrono::milliseconds(10));
 
 		while(true)
 		{
-			if (requireProcessing.empty() == true)
+			if (requireProcessing.empty() == true ||
+				receiver.isQuitRequested() == true)
 			{
 				ul.unlock();
 				break;
@@ -103,9 +98,7 @@ void SignalStatesProcessingThread::processStates(AppDataReceiver& receiver)
 
 			ul.unlock();
 
-			bool stateExists = source->getSignalState(&state, thisThread);
-
-			while(stateExists == true)
+			while(source->getSignalState(&state, thisThread) == true)
 			{
 				m_queuesMutex.lock(thisThread);
 
@@ -130,8 +123,6 @@ void SignalStatesProcessingThread::processStates(AppDataReceiver& receiver)
 				}
 
 				m_queuesMutex.unlock(thisThread);
-
-				stateExists = source->getSignalState(&state, thisThread);
 			}
 
 			ul.lock();

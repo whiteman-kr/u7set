@@ -337,6 +337,15 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 		return false;
 	}
 
+	if (m_receivesData == false)
+	{
+		qDebug() << C_STR(QString("first packet: plant = %1, server = %2").
+						  arg(getTimeStr(readBuffer.frame0Header().timeStamp)).
+						  arg(getTimeStr(readBuffer.frame0ServerTime)));
+	}
+
+	m_receivesData = true;
+
 	m_receivedPacketCount++;
 
 	m_lastPacketServerTime = readBuffer.frame0ServerTime;

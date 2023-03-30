@@ -282,6 +282,7 @@ namespace XmlAttribute
 	inline const QString SUBSYSTEM_ID("SubsystemID");
 	inline const QString MODULE_TYPE("ModuleType");
 	inline const QString MODULE_UNIQUE_ID("ModuleUniqueID");
+	inline const QString MODULE_WORKCYCLE_MCS("ModuleWorkcycleMcs");
 
 	inline const QString RUP_VERSION("RupVersion");
 	inline const QString FOTIP_VERSION("FotipVersion");

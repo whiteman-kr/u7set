@@ -82,24 +82,36 @@ namespace Sim
 
 		void runTransmitterThread();
 		void stopTransmitterThread();
+		void wakeupTransmitterThread();
 
 		void processAppDataQueue();
 		void sendAppDataPackets(QUdpSocket& socket, const ExtAppData& extAppData);
+		void clearAppDataQueue();
+
+		void logTime(const QString& msg);
 
 	private:
 		Simulator* m_simulator = nullptr;
 		QString m_curProfileName;
 		mutable ScopedLog m_log;
 
+		//
+
+		std::unordered_map<QString, AppDataSourcePortInfo> m_appDataSourcePorts;
+
+		//
+
 		mutable std::mutex m_appDataQueueMutex;
 		std::condition_variable m_appDataQueueNotEmpty;
 		std::queue<ExtAppData> m_appDataQueue;
 
-		std::atomic<bool> m_runSimulation = {false};
-		std::thread* m_transmitterThread = nullptr;
-		std::atomic<bool> m_transmitterThreadWork = {false};
+		//
 
-		std::unordered_map<QString, AppDataSourcePortInfo> m_appDataSourcePorts;
+		qint64 m_simStartTime = 0;
+
+		std::atomic<bool> m_runSimulation = {false};
+		std::atomic<bool> m_exitTransmitterThread = {false};
+		std::thread* m_transmitterThread = nullptr;
 	};
 }
 

@@ -30,6 +30,9 @@ private:
 
 class AppDataReceiver : public RunOverrideThread
 {
+	static const int NO_RUP_FRAMES_TIMEOUT = 5;		// in seconds
+	static const int MAX_SOCKET_ERROR_COUNT = 3;
+
 public:
 	AppDataReceiver(const HostAddressPort& dataReceivingIP,
 					AppDataSources& appDataSources,
@@ -94,6 +97,7 @@ private:
 	udp::socket* m_socket = nullptr;
 	bool m_socketBound = false;
 	int m_noReceiveCtr = 0;
+	int m_socketErrorCtr = 0;
 
 	static const int RECV_BUFFER_SIZE = sizeof(Rup::SimFrame) + 1;
 

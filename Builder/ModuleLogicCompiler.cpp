@@ -1,7 +1,6 @@
 #include "../Builder/ModuleLogicCompiler.h"
 #include "../Builder/ApplicationLogicCompiler.h"
 #include "../lib/DeviceHelper.h"
-#include "../lib/DataSource.h"
 #include "../UtilsLib/Crc.h"
 #include "../HardwareLib/Connection.h"
 #include "../lib/LanControllerInfoHelper.h"

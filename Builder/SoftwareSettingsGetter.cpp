@@ -290,10 +290,20 @@ bool SoftwareSettingsGetter::getLmPropertiesFromDevice(	const Hardware::DeviceMo
 		ds->setModuleUniqueID(0);
 	}
 
+	std::shared_ptr<LmDescription> ld = context->m_lmDescriptions->get(lm);
+
+	if (ld == nullptr)
+	{
+		LOG_INTERNAL_ERROR_MSG(log, QString("LmDescription is not found for module %1").
+											arg(lm->equipmentIdTemplate()));
+		return false;
+	}
+
+	ds->setModuleWorkcycle_mcs(ld->logicUnit().m_cycleDuration);
+
 	result &= LanControllerInfoHelper::getInfo(*lm, lanControllerType,
 											   *context, false,
 											   &ds->lanControllersInfo(), log);
-
 	return result;
 }
 

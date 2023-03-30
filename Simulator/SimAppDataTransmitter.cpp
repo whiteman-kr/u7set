@@ -23,10 +23,16 @@ namespace Sim
 	{
 		// m_log.writeText(QString("Sending app data simulation is started for profile %1").arg(profileName));
 
+		Q_ASSERT(m_runSimulation == false);
+
 		TEST_PTR_RETURN_FALSE(m_simulator);
 		m_curProfileName = profileName;
 
+		m_simStartTime = QDateTime::currentMSecsSinceEpoch();
+
 		initAppDataSources();
+		clearAppDataQueue();
+		m_runSimulation = true;
 		runTransmitterThread();
 
 		return true;
@@ -34,8 +40,11 @@ namespace Sim
 
 	bool AppDataTransmitter::stopSimulation()
 	{
-		stopTransmitterThread();
-		m_appDataSourcePorts.clear();
+//		Q_ASSERT(m_runSimulation == true);
+
+		m_runSimulation = false;
+		clearAppDataQueue();
+		wakeupTransmitterThread();
 
 		return true;
 	}
@@ -45,6 +54,8 @@ namespace Sim
 									  const QByteArray& data,
 									  TimeStamp timeStamp)
 	{
+		logTime("sendData()");
+
 		m_appDataQueueMutex.lock();
 
 		m_appDataQueue.emplace(lmEquipmentId,
@@ -130,30 +141,25 @@ namespace Sim
 
 	void AppDataTransmitter::runTransmitterThread()
 	{
-		Q_ASSERT(m_transmitterThread == nullptr);
+		m_exitTransmitterThread = false;
 
-		m_runSimulation = true;
-		m_transmitterThreadWork = false;
-
-		m_transmitterThread = new std::thread(&AppDataTransmitter::processAppDataQueue, this);
+		if (m_transmitterThread == nullptr)
+		{
+			m_transmitterThread = new std::thread(&AppDataTransmitter::processAppDataQueue, this);
+		}
+		else
+		{
+			wakeupTransmitterThread();
+		}
 	}
 
 	void AppDataTransmitter::stopTransmitterThread()
 	{
 		if (m_transmitterThread != nullptr)
 		{
-			//
+			m_exitTransmitterThread = true;
 
-			m_runSimulation = false;
-
-			while(m_transmitterThreadWork == true)
-			{
-				m_appDataQueueMutex.lock();
-				m_appDataQueueNotEmpty.notify_one();
-				m_appDataQueueMutex.unlock();
-			}
-
-			//
+			wakeupTransmitterThread();
 
 			m_transmitterThread->join();
 
@@ -162,10 +168,14 @@ namespace Sim
 		}
 	}
 
+	void AppDataTransmitter::wakeupTransmitterThread()
+	{
+		std::lock_guard lg(m_appDataQueueMutex);
+		m_appDataQueueNotEmpty.notify_one();
+	}
+
 	void AppDataTransmitter::processAppDataQueue()
 	{
-		m_transmitterThreadWork = true;
-
 		qDebug() << "processAppDataQueue started";
 
 		QUdpSocket socket;
@@ -175,18 +185,19 @@ namespace Sim
 
 		int maxQueueSize = 0;
 
-		while(m_runSimulation == true)
+		while(m_exitTransmitterThread == false)
 		{
 			ul.lock();
 
-			m_appDataQueueNotEmpty.wait(ul);
+			m_appDataQueueNotEmpty.wait_for(ul, std::chrono::milliseconds(m_runSimulation ? 10 : 500));
 
 			// ul locked here
 
 			while(true)
 			{
 				if (m_appDataQueue.empty() == true ||
-					m_runSimulation == false)
+					m_runSimulation == false ||
+					m_exitTransmitterThread == true)
 				{
 					ul.unlock();
 					break;
@@ -212,8 +223,6 @@ namespace Sim
 		}
 
 		qDebug() << "processAppDataQueue finished maxSize =" << maxQueueSize;
-
-		m_transmitterThreadWork = false;
 	}
 
 	void AppDataTransmitter::sendAppDataPackets(QUdpSocket& socket, const ExtAppData& extAppData)
@@ -284,4 +293,16 @@ namespace Sim
 
 		adspi.rupFramesNumerator++;
 	}
+
+	void AppDataTransmitter::clearAppDataQueue()
+	{
+		std::lock_guard lg(m_appDataQueueMutex);
+		std::queue<ExtAppData>().swap(m_appDataQueue);
+	}
+
+	void AppDataTransmitter::logTime(const QString& msg)
+	{
+		qDebug() << C_STR(QString("%1 +%2").arg(msg).arg(QDateTime::currentMSecsSinceEpoch() - m_simStartTime));
+	}
+
 }
