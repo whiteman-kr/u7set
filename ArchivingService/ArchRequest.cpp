@@ -413,7 +413,7 @@ void ArchRequest::prepareGetNextReply()
 
 	m_getNextReply->set_requestid(m_param.requestID());
 
-	m_getNextReply->set_error(static_cast<int>(NetworkError::Success));
+	m_getNextReply->set_error(static_cast<int>(E::NetworkError::Success));
 	m_getNextReply->set_archerror(static_cast<int>(ArchiveError::Success));
 	m_getNextReply->clear_errorstring();
 
@@ -615,7 +615,7 @@ void ArchRequest::reportError()
 
 	m_getNextReply->set_requestid(m_param.requestID());
 
-	m_getNextReply->set_error(static_cast<int>(NetworkError::ArchiveError));
+	m_getNextReply->set_error(static_cast<int>(E::NetworkError::ArchiveError));
 	m_getNextReply->set_archerror(static_cast<int>(ArchiveError::SearchError));
 	m_getNextReply->set_errorstring(m_errMsg.toStdString());
 
@@ -638,7 +638,7 @@ void ArchRequest::reportNoData()
 
 	m_getNextReply->set_requestid(m_param.requestID());
 
-	m_getNextReply->set_error(static_cast<int>(NetworkError::Success));
+	m_getNextReply->set_error(static_cast<int>(E::NetworkError::Success));
 	m_getNextReply->set_archerror(static_cast<int>(ArchiveError::Success));
 	m_getNextReply->clear_errorstring();
 
@@ -661,7 +661,7 @@ void ArchRequest::reportNoMoreData()
 
 	m_getNextReply->set_requestid(m_param.requestID());
 
-	m_getNextReply->set_error(static_cast<int>(NetworkError::Success));
+	m_getNextReply->set_error(static_cast<int>(E::NetworkError::Success));
 	m_getNextReply->set_archerror(static_cast<int>(ArchiveError::Success));
 	m_getNextReply->clear_errorstring();
 

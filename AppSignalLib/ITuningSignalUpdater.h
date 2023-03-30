@@ -1,6 +1,5 @@
 #pragma once
 #include <vector>
-#include "AppSignalParam.h"
 #include "TuningSignalState.h"
 
 class ITuningSignalUpdater
@@ -26,6 +25,7 @@ public:
 	virtual void setState(const TuningSignalState& state, Hash tuningServiceHash) = 0;
 	virtual void setStates(const std::vector<TuningSignalState>& states, Hash tuningServiceHash) = 0;
 
+protected:
 	// This function must notify (emit signal?) that signal params where updated.
 	// This signal is out of scope of this interface, it is up to implemenation which signal to emit and how to use it.
 	//

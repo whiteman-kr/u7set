@@ -118,7 +118,7 @@ void TuningSignalInfo::updateInfo()
 		}
 		writeClientHashes.push_back(hashString);
 
-		writeErrorCodes.push_back(getNetworkErrorStr(static_cast<NetworkError>(clientState.writeErrorCode())));
+		writeErrorCodes.push_back(E::valueToString(static_cast<E::NetworkError>(clientState.writeErrorCode())));
 
 		lmTimes.push_back(clientState.lmTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
 		successfulReadTimes.push_back(clientState.successfulReadTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
@@ -153,7 +153,7 @@ void TuningSignalInfo::updateInfo()
 		}
 		writeClientHashes.push_back(hashString);
 
-		writeErrorCodes.push_back(getNetworkErrorStr(static_cast<NetworkError>(managerState.writeErrorCode())));
+		writeErrorCodes.push_back(E::valueToString(static_cast<E::NetworkError>(managerState.writeErrorCode())));
 
 		lmTimes.push_back(managerState.lmTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
 		successfulReadTimes.push_back(managerState.successfulReadTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));

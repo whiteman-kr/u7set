@@ -87,7 +87,7 @@ namespace Tuning
 		if (m_sourceThread == nullptr)
 		{
 			tss->set_valid(false);
-			tss->set_error(TO_INT(NetworkError::LmControlIsNotActive));
+			tss->set_error(TO_INT(E::NetworkError::LmControlIsNotActive));
 			return;
 		}
 
@@ -101,7 +101,7 @@ namespace Tuning
 	{
 		if (m_sourceThread == nullptr)
 		{
-			return NetworkError::LmControlIsNotActive;
+			return E::NetworkError::LmControlIsNotActive;
 		}
 
 		return m_sourceThread->writeSignalState(clientEquipmentID, user, signalHash, newValue);
@@ -112,7 +112,7 @@ namespace Tuning
 	{
 		if (m_sourceThread == nullptr)
 		{
-			return NetworkError::LmControlIsNotActive;
+			return E::NetworkError::LmControlIsNotActive;
 		}
 
 		return m_sourceThread->applySignalStates(clientEquipmentID, user);
@@ -207,7 +207,7 @@ namespace Tuning
 			readSignalState(tss);
 		}
 
-		reply->set_error(TO_INT(NetworkError::Success));
+		reply->set_error(TO_INT(E::NetworkError::Success));
 	}
 
 	void TuningClientContext::writeSignalStates(const QString& clientEquipmentID,
@@ -243,7 +243,7 @@ namespace Tuning
 
 			if (result.first == false)
 			{
-				writeResult->set_error(TO_INT(NetworkError::UnknownSignalHash));
+				writeResult->set_error(TO_INT(E::NetworkError::UnknownSignalHash));
 				continue;
 			}
 
@@ -251,13 +251,13 @@ namespace Tuning
 
 			if (sourceThread == nullptr)
 			{
-				writeResult->set_error(TO_INT(NetworkError::LmControlIsNotActive));
+				writeResult->set_error(TO_INT(E::NetworkError::LmControlIsNotActive));
 				continue;
 			}
 
-			NetworkError err = sourceThread->writeSignalState(clientEquipmentID, user, signalHash, TuningValue(writeCmd.value()));
+			E::NetworkError err = sourceThread->writeSignalState(clientEquipmentID, user, signalHash, TuningValue(writeCmd.value()));
 
-			if (err != NetworkError::Success)
+			if (err != E::NetworkError::Success)
 			{
 				hasErrors = true;
 			}
@@ -276,16 +276,16 @@ namespace Tuning
 			{
 				TEST_PTR_CONTINUE(srcThread);
 
-				NetworkError err = srcThread->applySignalStates(clientEquipmentID, user);
+				E::NetworkError err = srcThread->applySignalStates(clientEquipmentID, user);
 
-				if (err != NetworkError::Success)
+				if (err != E::NetworkError::Success)
 				{
 					hasErrors = true;
 				}
 			}
 		}
 
-		NetworkError result = hasErrors == true ? NetworkError::InternalError : NetworkError::Success;
+		E::NetworkError result = hasErrors == true ? E::NetworkError::InternalError : E::NetworkError::Success;
 
 		reply->set_error(TO_INT(result));
 	}
@@ -384,7 +384,7 @@ namespace Tuning
 		if (result.first == false)
 		{
 			tss->set_valid(false);
-			tss->set_error(TO_INT(NetworkError::UnknownSignalHash));
+			tss->set_error(TO_INT(E::NetworkError::UnknownSignalHash));
 			return;
 		}
 
@@ -393,7 +393,7 @@ namespace Tuning
 		if (sourceThread == nullptr)
 		{
 			tss->set_valid(false);
-			tss->set_error(TO_INT(NetworkError::LmControlIsNotActive));
+			tss->set_error(TO_INT(E::NetworkError::LmControlIsNotActive));
 			return;
 		}
 

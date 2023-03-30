@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../AppSignalLib/ITuningSignalManager.h"
+#include "../AppSignalLib/ITuningSignalUpdater.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/Tcp.h"
 #include "../UtilsLib/ILogFile.h"
@@ -25,7 +27,7 @@ namespace ClientLib
 					   const SoftwareEndpoint::TuningService& tuns,
 					   bool autoApply,
 					   TuningClientSettings::LmStatusFlagMode lmStatusFlagMode,
-					   TuningSignalManager& tuningSignalManager,
+					   ITuningSignalUpdater& signalUpdater,
 					   ILogFile* logFile,
 					   TuningLog::TuningLog* tuningLog);
 			Connection(const Connection&) = delete;
@@ -45,7 +47,10 @@ namespace ClientLib
 		};
 
 	public:
-		explicit TuningConnection(TuningSignalManager& tuningSignalManager, ILogFile* logFile, TuningLog::TuningLog* tuningLog);
+		explicit TuningConnection(ITuningSignalManager& tuningSignalManager,
+								  ITuningSignalUpdater& tuningSignalUpdater,
+								  ILogFile* logFile,
+								  TuningLog::TuningLog* tuningLog);
 
 	public:
 		/// Call this function when the new configuration arrived to recreate communication thread with the new configuration
@@ -106,7 +111,8 @@ namespace ClientLib
 		std::list<Connection> m_conns;
 
 	private:
-		TuningSignalManager& m_tuningSignalManager;
+		ITuningSignalManager& m_tuningSignalManager;
+		ITuningSignalUpdater& m_tuningSignalUpdater;
 
 		HasLogFile m_logFile;
 		TuningLog::TuningLog* m_tuningLog = nullptr;

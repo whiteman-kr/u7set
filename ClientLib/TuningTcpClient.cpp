@@ -26,17 +26,21 @@ namespace ClientLib
 	//
 	// TuningTcpClient
 	//
-	TuningTcpClient::TuningTcpClient(const SoftwareInfo& softwareInfo, const SoftwareEndpoint::TuningService& tunsInfo, TuningSignalManager& signalManager, ILogFile* log, TuningLog::TuningLog* tuningLog) :
+	TuningTcpClient::TuningTcpClient(const SoftwareInfo& softwareInfo,
+									 const SoftwareEndpoint::TuningService& tunsInfo,
+									 ITuningSignalUpdater& signalUpdater,
+									 ILogFile* log,
+									 TuningLog::TuningLog* tuningLog) :
 		Tcp::Client(softwareInfo,
 					tunsInfo.clientRequestAddress,
 					"TuningTcpClient",
 					tunsInfo.equipmentId),
 		TcpClientStatistics(this),
+		m_logFile(log, "TuningTcpClient"),
+		m_tuningLog(tuningLog),
 		m_tuningClientHash(::calcHash(softwareInfo.equipmentID())),
 		m_tuningServiceHash(::calcHash(tunsInfo.equipmentId)),
-		m_signals(signalManager),
-		m_logFile(log, "TuningTcpClient"),
-		m_tuningLog(tuningLog)
+		m_signalUpdater(signalUpdater)
 	{
 		setObjectName("TuningTcpClient " + tunsInfo.shortenId);
 
@@ -273,7 +277,7 @@ namespace ClientLib
 	{
 		m_logFile.writeMessage(tr("onDisconnection(), connection closed."));
 
-		m_signals.invalidateSignalStates(m_tuningServiceHash);
+		m_signalUpdater.invalidateSignalStates(m_tuningServiceHash);
 
 		{
 			QWriteLocker l(&m_tuningSourcesLock);
@@ -469,10 +473,10 @@ namespace ClientLib
 			return;
 		}
 
-		if (m_tuningSourcesInfoReply.error() != static_cast<int>(NetworkError::Success))
+		if (m_tuningSourcesInfoReply.error() != static_cast<int>(E::NetworkError::Success))
 		{
 			m_logFile.writeError(tr("m_tuningDataSourcesInfoReply(), error received: %1")
-						  .arg(getNetworkErrorStr(static_cast<NetworkError>(m_tuningSourcesInfoReply.error()))));
+						  .arg(E::valueToString(static_cast<E::NetworkError>(m_tuningSourcesInfoReply.error()))));
 
 			resetToProcessTuningSignals();
 			return;
@@ -506,7 +510,7 @@ namespace ClientLib
 
 			QWriteLocker l(&m_signalHashesLock);
 
-			m_signalHashes = m_signals.signalHashes(equipmentHashes);
+			m_signalHashes = m_signalUpdater.signalHashes(equipmentHashes);
 
 			m_signalHashesSet.reserve(m_signalHashes.size());
 			for (const Hash& hash : m_signalHashes)
@@ -554,10 +558,10 @@ namespace ClientLib
 			return;
 		}
 
-		if (m_tuningSourcesStatesReply.error() != static_cast<int>(NetworkError::Success))
+		if (m_tuningSourcesStatesReply.error() != static_cast<int>(E::NetworkError::Success))
 		{
 			m_logFile.writeError(tr("processTuningSourcesState(), error received: %1")
-						  .arg(getNetworkErrorStr(static_cast<NetworkError>(m_tuningSourcesStatesReply.error()))));
+						  .arg(E::valueToString(static_cast<E::NetworkError>(m_tuningSourcesStatesReply.error()))));
 
 			resetToProcessTuningSignals();
 			return;
@@ -710,10 +714,10 @@ namespace ClientLib
 			return;
 		}
 
-		if (m_activateTuningSourceReply.error() != static_cast<int>(NetworkError::Success))
+		if (m_activateTuningSourceReply.error() != static_cast<int>(E::NetworkError::Success))
 		{
 			m_logFile.writeError(tr("processActivateTuningSource(), error received: %1")
-						  .arg(getNetworkErrorStr(static_cast<NetworkError>(m_activateTuningSourceReply.error()))));
+						  .arg(E::valueToString(static_cast<E::NetworkError>(m_activateTuningSourceReply.error()))));
 
 			return;
 		}
@@ -800,10 +804,10 @@ namespace ClientLib
 			return;
 		}
 
-		if (m_readTuningSignalsReply.error() != static_cast<int>(NetworkError::Success))
+		if (m_readTuningSignalsReply.error() != static_cast<int>(E::NetworkError::Success))
 		{
 			m_logFile.writeError(tr("processReadTuningSignals(), error received: %1")
-						  .arg(getNetworkErrorStr(static_cast<NetworkError>(m_readTuningSignalsReply.error()))));
+						  .arg(E::valueToString(static_cast<E::NetworkError>(m_readTuningSignalsReply.error()))));
 
 			resetToGetTuningSourcesState();
 			return;
@@ -819,12 +823,12 @@ namespace ClientLib
 
 			const ::Network::TuningSignalState& stateMessage = m_readTuningSignalsReply.tuningsignalstate(i);
 
-			NetworkError error = static_cast<NetworkError>(stateMessage.error());
+			E::NetworkError error = static_cast<E::NetworkError>(stateMessage.error());
 
-			if (error != NetworkError::Success && error != NetworkError::LmControlIsNotActive)
+			if (error != E::NetworkError::Success && error != E::NetworkError::LmControlIsNotActive)
 			{
 				m_logFile.writeError(tr("processReadTuningSignals(), TuningSignalState error received: %1")
-							  .arg(getNetworkErrorStr(error)));
+							  .arg(E::valueToString(error)));
 
 				continue;
 			}
@@ -833,7 +837,7 @@ namespace ClientLib
 
 			// When updating states, we have to set some properties locally
 			//
-			arrivedState.m_flags.controlIsEnabled = (error == NetworkError::LmControlIsNotActive) ? false : true;
+			arrivedState.m_flags.controlIsEnabled = (error == E::NetworkError::LmControlIsNotActive) ? false : true;
 
 			if (lmStatusFlagMode() != TuningClientSettings::LmStatusFlagMode::AccessKey)
 			{
@@ -849,7 +853,7 @@ namespace ClientLib
 			arrivedStates.push_back(arrivedState);
 		}
 
-		m_signals.setStates(arrivedStates, m_tuningServiceHash);
+		m_signalUpdater.setStates(arrivedStates, m_tuningServiceHash);
 
 		// Increase the requested signal index, wrap the request index if needed
 		//
@@ -947,10 +951,10 @@ namespace ClientLib
 			return;
 		}
 
-		if (m_writeTuningSignalsReply.error() != static_cast<int>(NetworkError::Success))
+		if (m_writeTuningSignalsReply.error() != static_cast<int>(E::NetworkError::Success))
 		{
 			m_logFile.writeError(tr("processWriteTuningSignals(), error received: %1")
-						  .arg(getNetworkErrorStr(static_cast<NetworkError>(m_writeTuningSignalsReply.error()))));
+						  .arg(E::valueToString(static_cast<E::NetworkError>(m_writeTuningSignalsReply.error()))));
 
 			resetToGetTuningSourcesState();
 			return;
@@ -962,10 +966,10 @@ namespace ClientLib
 		{
 			const ::Network::TuningSignalWriteResult& twr = m_writeTuningSignalsReply.writeresult(i);
 
-			if (twr.error() != static_cast<int>(NetworkError::Success))
+			if (twr.error() != static_cast<int>(E::NetworkError::Success))
 			{
 				m_logFile.writeError(tr("processWriteTuningSignals(), TuningSignalWriteResult error received: %1, hash = %2")
-							  .arg(getNetworkErrorStr(static_cast<NetworkError>(twr.error())))
+							  .arg(E::valueToString(static_cast<E::NetworkError>(twr.error())))
 							  .arg(twr.signalhash()));
 
 				continue;
@@ -1008,10 +1012,10 @@ namespace ClientLib
 			return;
 		}
 
-		if (m_applyTuningSignalsReply.error() != static_cast<int>(NetworkError::Success))
+		if (m_applyTuningSignalsReply.error() != static_cast<int>(E::NetworkError::Success))
 		{
 			m_logFile.writeError(tr("processApplyTuningSignals(), error received: %1")
-						  .arg(getNetworkErrorStr(static_cast<NetworkError>(m_applyTuningSignalsReply.error()))));
+						  .arg(E::valueToString(static_cast<E::NetworkError>(m_applyTuningSignalsReply.error()))));
 
 			resetToGetTuningSourcesState();
 			return;

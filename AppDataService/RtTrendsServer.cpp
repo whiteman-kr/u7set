@@ -164,7 +164,7 @@ namespace RtTrends
 
 		if (result == false)
 		{
-			m_rtTrendsManagementReply.set_error(TO_INT(NetworkError::ParseRequestError));
+			m_rtTrendsManagementReply.set_error(TO_INT(E::NetworkError::ParseRequestError));
 			m_rtTrendsManagementReply.set_errorstring("Network::RtTrendsManagementRequest parsing error");
 			sendReply(m_rtTrendsManagementReply);
 			return;
@@ -321,7 +321,7 @@ namespace RtTrends
 
 		if (result == false)
 		{
-			m_rtTrendsGetStateChangesReply.set_error(TO_INT(NetworkError::ParseRequestError));
+			m_rtTrendsGetStateChangesReply.set_error(TO_INT(E::NetworkError::ParseRequestError));
 			m_rtTrendsGetStateChangesReply.set_errorstring("Network::RtTrendsGetStateChangesRequest parsing error");
 			sendReply(m_rtTrendsGetStateChangesReply);
 			return;

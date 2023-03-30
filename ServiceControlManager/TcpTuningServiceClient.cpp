@@ -453,7 +453,7 @@ void TcpTuningServiceClient::onGetTuningSignalState(const char *replyData, quint
 		return;
 	}
 
-	assert(m_getTuningSignalStateReply.has_error() == false || m_getTuningSignalStateReply.error() == TO_INT(NetworkError::Success));
+	assert(m_getTuningSignalStateReply.has_error() == false || m_getTuningSignalStateReply.error() == TO_INT(E::NetworkError::Success));
 
 	int receivedSignalQuantity = m_getTuningSignalStateReply.tuningsignalstate_size();
 

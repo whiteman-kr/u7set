@@ -3,39 +3,21 @@
 #endif
 
 #include "TuningSignalManager.h"
-#include "../OnlineLib/SocketIO.h"
 
 #define ANY_HASH UNDEFINED_HASH
 
 //
 //TuningSignalManager
 //
-TuningSignalManager::TuningSignalManager(const SoftwareInfo& softwareInfo, ILogFile* logFile, QObject* parent) :
-	m_softwareInfo(softwareInfo),
-	m_tuningClientHash(::calcHash(softwareInfo.equipmentID())),
-	m_logFile(logFile, "TuningSignalManager"),
-	QObject(parent)
+TuningSignalManager::TuningSignalManager(const QString& clientEquipmentId, ILogFile* logFile, QObject* parent) :
+	QObject(parent),
+	m_tuningClientHash(::calcHash(clientEquipmentId)),
+	m_logFile(logFile, "TuningSignalManager")
 {
 }
 
 TuningSignalManager::~TuningSignalManager()
 {
-}
-
-void TuningSignalManager::reset()
-{
-	{
-		QWriteLocker l(&m_signalsLock);
-		m_signals.clear();
-		m_tagToAppSignals.clear();
-	}
-
-	{
-		QWriteLocker l(&m_statesLocker);
-		m_states.clear();
-	}
-
-	return;
 }
 
 bool TuningSignalManager::load(const QByteArray& data)
@@ -122,42 +104,6 @@ std::vector<AppSignalParam> TuningSignalManager::signalList() const
 	for (auto p : m_signals)
 	{
 		result.emplace_back(p.second);
-	}
-
-	return result;
-}
-
-std::vector<Hash> TuningSignalManager::signalHashes() const
-{
-	std::vector<Hash> result;
-	result.reserve(m_signals.size());
-
-	QReadLocker rl(&m_signalsLock);
-
-	for (const auto& p : m_signals)
-	{
-		result.push_back(p.first);
-	}
-
-	return result;
-}
-
-std::vector<Hash> TuningSignalManager::signalHashes(const std::vector<Hash> lmEquipmentIdHashes) const
-{
-	std::vector<Hash> result;
-	result.reserve(m_signals.size());
-
-	QReadLocker rl(&m_signalsLock);
-
-	for (const auto& p : m_signals)
-	{
-		const AppSignalParam& param = p.second;
-		Hash signalEquipmentHash = ::calcHash(param.lmEquipmentId());
-
-		if (std::find(lmEquipmentIdHashes.begin(), lmEquipmentIdHashes.end(), signalEquipmentHash) != lmEquipmentIdHashes.end())
-		{
-			result.push_back(p.first);
-		}
 	}
 
 	return result;
@@ -320,6 +266,58 @@ QStringList TuningSignalManager::signalIdsByTag(const QString& tag) const
 	}
 }
 
+void TuningSignalManager::reset()
+{
+	{
+		QWriteLocker l(&m_signalsLock);
+		m_signals.clear();
+		m_tagToAppSignals.clear();
+	}
+
+	{
+		QWriteLocker l(&m_statesLocker);
+		m_states.clear();
+	}
+
+	return;
+}
+
+std::vector<Hash> TuningSignalManager::signalHashes() const
+{
+	std::vector<Hash> result;
+	result.reserve(m_signals.size());
+
+	QReadLocker rl(&m_signalsLock);
+
+	for (const auto& p : m_signals)
+	{
+		result.push_back(p.first);
+	}
+
+	return result;
+}
+
+std::vector<Hash> TuningSignalManager::signalHashes(const std::vector<Hash> lmEquipmentIdHashes) const
+{
+	std::vector<Hash> result;
+	result.reserve(m_signals.size());
+
+	QReadLocker rl(&m_signalsLock);
+
+	for (const auto& p : m_signals)
+	{
+		const AppSignalParam& param = p.second;
+		Hash signalEquipmentHash = ::calcHash(param.lmEquipmentId());
+
+		if (std::find(lmEquipmentIdHashes.begin(), lmEquipmentIdHashes.end(), signalEquipmentHash) != lmEquipmentIdHashes.end())
+		{
+			result.push_back(p.first);
+		}
+	}
+
+	return result;
+}
+
 void TuningSignalManager::invalidateSignalStates(Hash tuningServiceHash)
 {
 	QWriteLocker l(&m_statesLocker);
@@ -376,7 +374,7 @@ void TuningSignalManager::setStates(const std::vector<TuningSignalState>& states
 					continue;
 				}
 
-				if (static_cast<NetworkError>(arrivedState.writeErrorCode()) == NetworkError::Success)
+				if (static_cast<E::NetworkError>(arrivedState.writeErrorCode()) == E::NetworkError::Success)
 				{
 					if (arrivedState.successfulWriteTime() > currentState.successfulWriteTime())
 					{
@@ -420,12 +418,17 @@ void TuningSignalManager::setStates(const std::vector<TuningSignalState>& states
 							 .arg(param.customSignalId())
 							 .arg(param.caption())
 							 .arg(param.lmEquipmentId())
-							 .arg(getNetworkErrorStr(static_cast<NetworkError>(u.writeErrorCode)))
+							 .arg(E::valueToString(static_cast<E::NetworkError>(u.writeErrorCode)))
 							 );
 	}
 
 
 	return;
+}
+
+void TuningSignalManager::notifySignalParamsUpdated()
+{
+	emit signalsLoaded();
 }
 
 void TuningSignalManager::setUnappliedValue(Hash hash, const TuningValue& value)
@@ -471,11 +474,6 @@ bool TuningSignalManager::isUnapplied(Hash hash) const
 	}
 
 	return false;
-}
-
-void TuningSignalManager::notifySignalParamsUpdated()
-{
-	emit signalsLoaded();
 }
 
 void TuningSignalManager::Sources::set(const TuningSignalState& state, Hash tuningServiceHash)

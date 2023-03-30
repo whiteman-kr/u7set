@@ -92,12 +92,10 @@ namespace ClientLib
 	{
 		Q_OBJECT
 
-		Q_ENUM(NetworkError)
-
 	public:
 		TuningTcpClient(const SoftwareInfo& softwareInfo,
 						const SoftwareEndpoint::TuningService& tunsInfo,
-						TuningSignalManager& signalManager,
+						ITuningSignalUpdater& signalUpdater,
 						ILogFile* log,
 						TuningLog::TuningLog* tuningLog);
 
@@ -225,7 +223,7 @@ namespace ClientLib
 		bool m_singleLmControlMode = false;
 		TuningClientSettings::LmStatusFlagMode m_lmStatusFlagMode = TuningClientSettings::LmStatusFlagMode::SOR;
 
-		ITuningSignalUpdater& m_signals;
+		ITuningSignalUpdater& m_signalUpdater;
 
 		// Write processing
 		//

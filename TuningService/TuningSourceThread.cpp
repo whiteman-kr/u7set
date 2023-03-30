@@ -271,20 +271,20 @@ namespace Tuning
 		m_writeStateMutex.lock();
 
 		m_writeCommandID = writeCommandID;
-		m_writeErrorCode = NetworkError::Success;
+		m_writeErrorCode = E::NetworkError::Success;
 
 		m_writeStateMutex.unlock();
 	}
 
-	void TuningSignal::finalizeWriting(quint64 writeCommandID, NetworkError errCode)
+	void TuningSignal::finalizeWriting(quint64 writeCommandID, E::NetworkError errCode)
 	{
 		m_writeStateMutex.lock();
 
 		if (writeCommandID == m_writeCommandID)
 		{
-			if (errCode == NetworkError::Success)
+			if (errCode == E::NetworkError::Success)
 			{
-				m_writeErrorCode = NetworkError::Success;
+				m_writeErrorCode = E::NetworkError::Success;
 				m_writeCommandID = 0;
 			}
 			else
@@ -836,7 +836,7 @@ namespace Tuning
 
 	void TuningChannelHandler::onNoReply()
 	{
-		finalizeWriting(NetworkError::TuningNoReply);
+		finalizeWriting(E::NetworkError::TuningNoReply);
 	}
 
 	bool TuningChannelHandler::prepareFotipRequest(const TuningCommand& tuningCmd, RupFotip &request)
@@ -1142,7 +1142,7 @@ namespace Tuning
 
 		if (result == false)
 		{
-			finalizeWriting(NetworkError::TuningNoReply);
+			finalizeWriting(E::NetworkError::TuningNoReply);
 			m_state.errRupCRC++;
 			return;
 		}
@@ -1154,7 +1154,7 @@ namespace Tuning
 
 		if (result == false)
 		{
-			finalizeWriting(NetworkError::TuningNoReply);
+			finalizeWriting(E::NetworkError::TuningNoReply);
 			return;
 		}
 
@@ -1164,7 +1164,7 @@ namespace Tuning
 
 		if (result == false)
 		{
-			finalizeWriting(NetworkError::TuningNoReply);
+			finalizeWriting(E::NetworkError::TuningNoReply);
 			return;
 		}
 
@@ -1235,7 +1235,7 @@ namespace Tuning
 
 		bool hasErrors = false;
 
-		NetworkError errCode = NetworkError::Success;
+		E::NetworkError errCode = E::NetworkError::Success;
 
 		switch(static_cast<Fotip::DataType>(reply.fotipFrame.header.dataType))
 		{
@@ -1249,7 +1249,7 @@ namespace Tuning
 					m_state.errAnalogHighBoundCheck++;
 
 					boundCheckStr = QString("HighBoundCheckError == 1 ");
-					errCode = NetworkError::TuningValueOutOfRange;
+					errCode = E::NetworkError::TuningValueOutOfRange;
 					hasErrors = true;
 				}
 
@@ -1258,7 +1258,7 @@ namespace Tuning
 					m_state.errAnalogLowBoundCheck++;
 
 					boundCheckStr = QString("LowBoundCheckError == 1 ");
-					errCode = NetworkError::TuningValueOutOfRange;
+					errCode = E::NetworkError::TuningValueOutOfRange;
 					hasErrors = true;
 				}
 
@@ -1305,7 +1305,7 @@ namespace Tuning
 
 			if (newTuningValue != currentValue)
 			{
-				errCode = NetworkError::TuningValueCorrupted;
+				errCode = E::NetworkError::TuningValueCorrupted;
 
 				msg +=  QString("Tuning value corrupted");
 
@@ -1360,7 +1360,7 @@ namespace Tuning
 		return res;
 	}
 
-	void TuningChannelHandler::finalizeWriting(NetworkError errCode)
+	void TuningChannelHandler::finalizeWriting(E::NetworkError errCode)
 	{
 		if (m_lastProcessedCommand.opCode != Fotip::OpCode::Write)
 		{
@@ -1373,7 +1373,7 @@ namespace Tuning
 
 		qint64 time = QDateTime::currentMSecsSinceEpoch();
 
-		if (errCode == NetworkError::Success)
+		if (errCode == E::NetworkError::Success)
 		{
 			ts->setSuccessfulWriteTime(time);
 			ts->setUnsuccessfulWriteTime(0);
@@ -1894,7 +1894,7 @@ namespace Tuning
 		{
 			Q_ASSERT(false);			// how all previous checks we pass ???
 			tss->set_valid(false);
-			tss->set_error(TO_INT(NetworkError::UnknownSignalHash));
+			tss->set_error(TO_INT(E::NetworkError::UnknownSignalHash));
 			return;
 		}
 
@@ -1911,7 +1911,7 @@ namespace Tuning
 		if (result == false)
 		{
 			tss->set_valid(false);
-			tss->set_error(TO_INT(NetworkError::InternalError));
+			tss->set_error(TO_INT(E::NetworkError::InternalError));
 			return;
 		}
 
@@ -1930,10 +1930,10 @@ namespace Tuning
 		tss->set_setsor(m_setSOR);
 		tss->set_writingdisabled(m_writingDisabled);
 
-		tss->set_error(TO_INT(NetworkError::Success));
+		tss->set_error(TO_INT(E::NetworkError::Success));
 	}
 
-	NetworkError TuningSourceThreadWorker::writeSignalState(const QString& clientEquipmentID,
+	E::NetworkError TuningSourceThreadWorker::writeSignalState(const QString& clientEquipmentID,
 														const QString& user,
 														Hash signalHash,
 														const TuningValue& newValue)
@@ -1943,7 +1943,7 @@ namespace Tuning
 		if (ts == nullptr)
 		{
 			Q_ASSERT(false);
-			return NetworkError::UnknownSignalHash;
+			return E::NetworkError::UnknownSignalHash;
 		}
 
 		if (ts->tuningValueType() != newValue.type())
@@ -1953,7 +1953,7 @@ namespace Tuning
 											arg(ts->appSignalID()).
 											arg(ts->tuningValueTypeStr()));
 
-			return NetworkError::WrongTuningValueType;
+			return E::NetworkError::WrongTuningValueType;
 		}
 
 		if (newValue < ts->lowBound() || newValue > ts->highBound())
@@ -1964,7 +1964,7 @@ namespace Tuning
 											arg(ts->lowBound().toString()).
 											arg(ts->highBound().toString()));
 
-			return NetworkError::TuningValueOutOfRange;
+			return E::NetworkError::TuningValueOutOfRange;
 		}
 
 		TuningCommand cmd;
@@ -1980,10 +1980,10 @@ namespace Tuning
 
 		pushCommandToHandlers(cmd, ts->appSignalID());
 
-		return NetworkError::Success;
+		return E::NetworkError::Success;
 	}
 
-	NetworkError TuningSourceThreadWorker::applySignalStates(const QString& clientEquipmentID,
+	E::NetworkError TuningSourceThreadWorker::applySignalStates(const QString& clientEquipmentID,
 														const QString& user)
 	{
 		TuningCommand cmd;
@@ -1996,7 +1996,7 @@ namespace Tuning
 
 		pushCommandToHandlers(cmd, QString());
 
-		return NetworkError::Success;
+		return E::NetworkError::Success;
 	}
 
 	QString TuningSourceThreadWorker::sourceEquipmentID() const
@@ -2476,27 +2476,27 @@ namespace Tuning
 		m_worker->readSignalState(tss);
 	}
 
-	NetworkError TuningSourceThread::writeSignalState(const QString& clientEquipmentID,
-									const QString& user,
-									Hash signalHash,
-									const TuningValue& newValue)
+	E::NetworkError TuningSourceThread::writeSignalState(const QString& clientEquipmentID,
+														 const QString& user,
+														 Hash signalHash,
+														 const TuningValue& newValue)
 	{
 		if (m_worker == nullptr)
 		{
 			Q_ASSERT(false);
-			return NetworkError::InternalError;
+			return E::NetworkError::InternalError;
 		}
 
 		return m_worker->writeSignalState(clientEquipmentID, user, signalHash, newValue);
 	}
 
-	NetworkError TuningSourceThread::applySignalStates(	const QString& clientEquipmentID,
+	E::NetworkError TuningSourceThread::applySignalStates(	const QString& clientEquipmentID,
 														const QString& user)
 	{
 		if (m_worker == nullptr)
 		{
 			Q_ASSERT(false);
-			return NetworkError::InternalError;
+			return E::NetworkError::InternalError;
 		}
 
 		return m_worker->applySignalStates(clientEquipmentID, user);

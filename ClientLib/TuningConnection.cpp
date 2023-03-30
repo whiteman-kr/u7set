@@ -13,16 +13,14 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 										 const SoftwareEndpoint::TuningService& tuns,
 										 bool autoApply,
 										 TuningClientSettings::LmStatusFlagMode lmStatusFlagMode,
-										 TuningSignalManager& tuningSignalManager,
+										 ITuningSignalUpdater& signalUpdater,
 										 ILogFile* logFile,
 										 TuningLog::TuningLog* tuningLog)
 	{
-		tcpTuningClient = new TuningTcpClient{softwareInfo, tuns, tuningSignalManager, logFile, tuningLog};
+		tcpTuningClient = new TuningTcpClient{softwareInfo, tuns, signalUpdater, logFile, tuningLog};
 		tcpTuningClient->setServers(tuns.clientRequestAddress, tuns.clientRequestAddress, true);
 		tcpTuningClient->setAutoApply(autoApply);
 		tcpTuningClient->setLmStatusFlagMode(lmStatusFlagMode);
-
-		connect(&tuningSignalManager, &TuningSignalManager::signalsLoaded, tcpTuningClient, &TuningTcpClient::reset, Qt::QueuedConnection);
 
 		tcpClientThread = new ::SimpleThread{tcpTuningClient};
 		tcpClientThread->start();
@@ -55,14 +53,15 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 		return tcpTuningClient->serverAddressPort1();
 	}
 
-	TuningConnection::TuningConnection(TuningSignalManager& tuningSignalManager,
+	TuningConnection::TuningConnection(ITuningSignalManager& tuningSignalManager,
+									   ITuningSignalUpdater& tuningSignalUpdater,
 									   ILogFile* logFile,
 									   TuningLog::TuningLog* tuningLog) :
 		m_tuningSignalManager{tuningSignalManager},
+		m_tuningSignalUpdater{tuningSignalUpdater},
 		m_logFile{logFile, "TuningConnection"},
 		m_tuningLog(tuningLog)
 	{
-
 		return;
 	}
 
@@ -89,7 +88,7 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 				continue;
 			}
 
-			m_conns.emplace_back(softwareInfo, tuns, autoApply, lmStatusFlagMode, m_tuningSignalManager, m_logFile.logFile(), m_tuningLog);
+			m_conns.emplace_back(softwareInfo, tuns, autoApply, lmStatusFlagMode, m_tuningSignalUpdater, m_logFile.logFile(), m_tuningLog);
 		}
 
 		return;

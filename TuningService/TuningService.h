@@ -41,10 +41,10 @@ namespace Tuning
 
 		// called from TcpTuningServer thread!!!
 		//
-		NetworkError changeControlledTuningSource(const QString& tuningSourceEquipmentID,
-													bool activateControl,
-													QString* controlledTuningSource,
-													bool* controlIsActive);
+		E::NetworkError changeControlledTuningSource(const QString& tuningSourceEquipmentID,
+													 bool activateControl,
+													 QString* controlledTuningSource,
+													 bool* controlIsActive);
 
 		bool clientIsConnected(const SoftwareInfo& softwareInfo, const QString& clientIP);
 		bool clientIsDisconnected(const SoftwareInfo& softwareInfo, const QString& clientIP);

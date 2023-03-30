@@ -5,7 +5,6 @@
 #include <QReadWriteLock>
 
 #include "../AppSignalLib/ITuningSignalUpdater.h"
-#include "../OnlineLib/SoftwareInfo.h"
 #include "../UtilsLib/ILogFile.h"
 #include "ITuningSignalManager.h"
 #include "TuningValue.h"
@@ -18,12 +17,10 @@ class TuningSignalManager :
 	Q_OBJECT
 
 public:
-	explicit TuningSignalManager(const SoftwareInfo& softwareInfo, ILogFile* logFile, QObject* parent = nullptr);
+	explicit TuningSignalManager(const QString& clientEquipmentId, ILogFile* logFile, QObject* parent = nullptr);
 	virtual ~TuningSignalManager();
 
 public:
-	void reset() override;
-
 	bool load(const QByteArray& data);
 	bool load(const ::Proto::AppSignalSet& message);
 
@@ -31,9 +28,6 @@ public:
 	//
 	int signalsCount() const;
 	std::vector<AppSignalParam> signalList() const;
-
-	std::vector<Hash> signalHashes() const override;
-	std::vector<Hash> signalHashes(const std::vector<Hash> lmEquipmentIdHashes) const override;
 
 	// Implementation ITuningSignalManager
 	//
@@ -50,28 +44,36 @@ public:
 	virtual TuningSignalState state(Hash hash, bool* found) const override;
 	virtual TuningSignalState state(const QString& appSignalId, bool* found) const override;
 
-	virtual TuningSignalState state(Hash hash, Hash tuningServiceHash, bool* found) const;
-	virtual TuningSignalState state(const QString& appSignalId, Hash tuningServiceHash, bool* found) const;
+	virtual TuningSignalState state(Hash hash, Hash tuningServiceHash, bool* found) const override;
+	virtual TuningSignalState state(const QString& appSignalId, Hash tuningServiceHash, bool* found) const override;
 
 	virtual QStringList signalIdsByTag(const QString& tag) const override;
 
-	// State manipulation
+	// Implementation ITuningSignalUpdater - State manipulation
 	//
 public:
+	void reset() override;
+
+	std::vector<Hash> signalHashes() const override;
+	std::vector<Hash> signalHashes(const std::vector<Hash> lmEquipmentIdHashes) const override;
+
 	void invalidateSignalStates(Hash tuningServiceHash) override;
 
 	void setState(const TuningSignalState& state, Hash tuningServiceHash) override;
 	void setStates(const std::vector<TuningSignalState>& states, Hash tuningServiceHash) override;
 
+private:
+	void notifySignalParamsUpdated() override;
+
+	// End of ITuningSignalUpdater
+
+public:
 	// Unapplied values manipulation
 	//
 	void setUnappliedValue(Hash hash, const TuningValue& value);
 	[[nodiscard]] TuningValue unappliedValue(Hash hash) const;
 
 	[[nodiscard]] bool isUnapplied(Hash hash) const;
-
-private:
-	void notifySignalParamsUpdated() override;
 
 
 	// Signals
@@ -82,8 +84,6 @@ signals:
 	// Data
 	//
 private:
-
-	const SoftwareInfo& m_softwareInfo;
 	const Hash m_tuningClientHash = UNDEFINED_HASH;	// cached client hash value
 	HasLogFile m_logFile;
 
@@ -122,7 +122,7 @@ private:
 
 	// Objects storage
 	//
-	mutable QReadWriteLock m_signalsLock;									// For access to m_signals
+	mutable QReadWriteLock m_signalsLock;							// For access to m_signals
 	std::unordered_map<Hash, AppSignalParam> m_signals;
 	std::unordered_map<QString, QStringList> m_tagToAppSignals;		// Key is tag - value is list of AppSignalIDs with this tag
 

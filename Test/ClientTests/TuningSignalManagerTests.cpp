@@ -1,6 +1,6 @@
 #include "../AppSignalLib/TuningSignalManager.h"
 #include "../Proto/serialization.pb.h"
-#include "../../OnlineLib/SocketIO.h"
+#include "../../OnlineLib/SoftwareInfo.h"
 
 class TuningSignalManagerTests : public ::testing::Test
 {
@@ -65,7 +65,7 @@ protected:
 TEST_F(TuningSignalManagerTests, loadFromBinary)
 {
 	ILogFileStub logFile;
-	TuningSignalManager tsm{s_softwareInfo, &logFile};
+	TuningSignalManager tsm{s_softwareInfo.equipmentID(), &logFile};
 
 	QSignalSpy loadSpy{&tsm, &TuningSignalManager::signalsLoaded};
 
@@ -80,7 +80,7 @@ TEST_F(TuningSignalManagerTests, loadFromBinary)
 
 	EXPECT_EQ(loadSpy.size(), 1);
 
-	TuningSignalManager tsm2{s_softwareInfo, &logFile};
+	TuningSignalManager tsm2{s_softwareInfo.equipmentID(), &logFile};
 	ba.fill(0x55, 1024);
 	ok = tsm2.load(ba);
 	EXPECT_FALSE(ok);
@@ -91,7 +91,7 @@ TEST_F(TuningSignalManagerTests, loadFromBinary)
 TEST_F(TuningSignalManagerTests, loadFromProto)
 {
 	ILogFileStub logFile;
-	TuningSignalManager tsm{s_softwareInfo, &logFile};
+	TuningSignalManager tsm{s_softwareInfo.equipmentID(), &logFile};
 
 	QSignalSpy loadSpy{&tsm, &TuningSignalManager::signalsLoaded};
 
@@ -110,7 +110,7 @@ TEST_F(TuningSignalManagerTests, loadFromProto)
 TEST_F(TuningSignalManagerTests, signalHashesAndList)
 {
 	ILogFileStub logFile;
-	TuningSignalManager tsm{s_softwareInfo, &logFile};
+	TuningSignalManager tsm{s_softwareInfo.equipmentID(), &logFile};
 
 	bool ok = tsm.load(protoSignalSet);
 
@@ -151,7 +151,7 @@ TEST_F(TuningSignalManagerTests, signalHashesAndList)
 TEST_F(TuningSignalManagerTests, signalHashesByLms)
 {
 	ILogFileStub logFile;
-	TuningSignalManager tsm{s_softwareInfo, &logFile};
+	TuningSignalManager tsm{s_softwareInfo.equipmentID(), &logFile};
 
 	bool ok = tsm.load(protoSignalSet);
 
@@ -176,7 +176,7 @@ TEST_F(TuningSignalManagerTests, signalHashesByLms)
 TEST_F(TuningSignalManagerTests, appSignalParam)
 {
 	ILogFileStub logFile;
-	TuningSignalManager tsm{s_softwareInfo, &logFile};
+	TuningSignalManager tsm{s_softwareInfo.equipmentID(), &logFile};
 
 	bool ok = tsm.load(protoSignalSet);
 
@@ -198,7 +198,7 @@ TEST_F(TuningSignalManagerTests, appSignalParam)
 TEST_F(TuningSignalManagerTests, setState)
 {
 	ILogFileStub logFile;
-	TuningSignalManager tsm{s_softwareInfo, &logFile};
+	TuningSignalManager tsm{s_softwareInfo.equipmentID(), &logFile};
 
 	bool ok = tsm.load(protoSignalSet);
 
@@ -252,7 +252,7 @@ TEST_F(TuningSignalManagerTests, setState)
 TEST_F(TuningSignalManagerTests, invalidateStates)
 {
 	ILogFileStub logFile;
-	TuningSignalManager tsm{s_softwareInfo, &logFile};
+	TuningSignalManager tsm{s_softwareInfo.equipmentID(), &logFile};
 
 	bool ok = tsm.load(protoSignalSet);
 
@@ -281,7 +281,7 @@ TEST_F(TuningSignalManagerTests, invalidateStates)
 TEST_F(TuningSignalManagerTests, setUnappliedValue)
 {
 	ILogFileStub logFile;
-	TuningSignalManager tsm{s_softwareInfo, &logFile};
+	TuningSignalManager tsm{s_softwareInfo.equipmentID(), &logFile};
 
 	double oldValue_twoChannels = 101.0;
 	double newValue_twoChannels = 256.0;
@@ -346,7 +346,7 @@ TEST_F(TuningSignalManagerTests, setUnappliedValue)
 TEST_F(TuningSignalManagerTests, setStateFromNetworkMessage)
 {
 	ILogFileStub logFile;
-	TuningSignalManager tsm{s_softwareInfo, &logFile};
+	TuningSignalManager tsm{s_softwareInfo.equipmentID(), &logFile};
 
 	double oldValue = 101.0;
 	double newValue = 256.0;
@@ -377,7 +377,7 @@ TEST_F(TuningSignalManagerTests, setStateFromNetworkMessage)
 	networkMessage.mutable_readlowbound()->set_type(static_cast<int>(TuningValueType::Float));
 	networkMessage.mutable_readhighbound()->set_doublevalue(500.0);
 	networkMessage.mutable_readhighbound()->set_type(static_cast<int>(TuningValueType::Float));
-	networkMessage.set_writeerrorcode(static_cast<int>(NetworkError::Success));
+	networkMessage.set_writeerrorcode(static_cast<int>(E::NetworkError::Success));
 	networkMessage.set_writeclient(::calcHash(s_softwareInfo.equipmentID()));
 	QDateTime tm = QDateTime::currentDateTime();
 	networkMessage.set_successfulreadtime(tm.toMSecsSinceEpoch());
@@ -410,7 +410,7 @@ TEST_F(TuningSignalManagerTests, setStateFromNetworkMessage)
 TEST_F(TuningSignalManagerTests, signalIdsByTag)
 {
 	ILogFileStub logFile;
-	TuningSignalManager tsm{s_softwareInfo, &logFile};
+	TuningSignalManager tsm{s_softwareInfo.equipmentID(), &logFile};
 
 	bool ok = tsm.load(protoSignalSet);
 

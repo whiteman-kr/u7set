@@ -108,7 +108,7 @@ void UalTesterServer::onGetTuningSourcesInfoRequest(const char *requestData, qui
 
 	if (result == false)
 	{
-		m_getTuningSourcesInfoReply.set_error(TO_INT(NetworkError::ParseRequestError));
+		m_getTuningSourcesInfoReply.set_error(TO_INT(E::NetworkError::ParseRequestError));
 		sendReply(m_getTuningSourcesInfoReply);
 		return;
 	}
@@ -132,7 +132,7 @@ void UalTesterServer::onGetTuningSourcesInfoRequest(const char *requestData, qui
 		}
 	}
 
-	m_getTuningSourcesInfoReply.set_error(TO_INT(NetworkError::Success));
+	m_getTuningSourcesInfoReply.set_error(TO_INT(E::NetworkError::Success));
 
 	sendReply(m_getTuningSourcesInfoReply);
 }
@@ -145,12 +145,12 @@ void UalTesterServer::onGetTuningSourcesStateRequest(const char *requestData, qu
 
 	if (result == false)
 	{
-		m_getTuningSourcesStatesReply.set_error(TO_INT(NetworkError::ParseRequestError));
+		m_getTuningSourcesStatesReply.set_error(TO_INT(E::NetworkError::ParseRequestError));
 		sendReply(m_getTuningSourcesStatesReply);
 		return;
 	}
 
-	m_getTuningSourcesStatesReply.set_error(TO_INT(NetworkError::Success));
+	m_getTuningSourcesStatesReply.set_error(TO_INT(E::NetworkError::Success));
 
 	sendReply(m_getTuningSourcesStatesReply);
 }
@@ -162,7 +162,7 @@ void UalTesterServer::onTuningSignalsWriteRequest(const char *requestData, quint
 	bool result = m_tuningSignalsWriteRequest.ParseFromArray(requestData, static_cast<int>(requestDataSize));
 	if (result == false)
 	{
-		m_tuningSignalsWriteReply.set_error(TO_INT(NetworkError::ParseRequestError));
+		m_tuningSignalsWriteReply.set_error(TO_INT(E::NetworkError::ParseRequestError));
 		sendReply(m_tuningSignalsWriteReply);
 		return;
 	}
@@ -198,7 +198,7 @@ void UalTesterServer::onTuningSignalsWriteRequest(const char *requestData, quint
 		}
 	}
 
-	m_tuningSignalsWriteReply.set_error(TO_INT(NetworkError::Success));
+	m_tuningSignalsWriteReply.set_error(TO_INT(E::NetworkError::Success));
 
 	sendReply(m_tuningSignalsWriteReply);
 }
@@ -210,7 +210,7 @@ void UalTesterServer::onDataSourceWriteRequest(const char *requestData, quint32 
 	bool result = m_dataSourceWriteRequest.ParseFromArray(requestData, static_cast<int>(requestDataSize));
 	if (result == false)
 	{
-		m_dataSourceWriteReply.set_error(TO_INT(NetworkError::ParseRequestError));
+		m_dataSourceWriteReply.set_error(TO_INT(E::NetworkError::ParseRequestError));
 		sendReply(m_dataSourceWriteReply);
 		return;
 	}
@@ -246,7 +246,7 @@ void UalTesterServer::onDataSourceWriteRequest(const char *requestData, quint32 
 		}
 	}
 
-	m_dataSourceWriteReply.set_error(TO_INT(NetworkError::Success));
+	m_dataSourceWriteReply.set_error(TO_INT(E::NetworkError::Success));
 
 	sendReply(m_dataSourceWriteReply);
 }
@@ -258,14 +258,14 @@ void UalTesterServer::onPacketSourceExitRequest(const char *requestData, quint32
 	bool result = m_packetSourceExitRequest.ParseFromArray(requestData, static_cast<int>(requestDataSize));
 	if (result == false)
 	{
-		m_packetSourceExitReply.set_error(TO_INT(NetworkError::ParseRequestError));
+		m_packetSourceExitReply.set_error(TO_INT(E::NetworkError::ParseRequestError));
 		sendReply(m_packetSourceExitReply);
 		return;
 	}
 
 	emit exitApplication();
 
-	m_packetSourceExitReply.set_error(TO_INT(NetworkError::Success));
+	m_packetSourceExitReply.set_error(TO_INT(E::NetworkError::Success));
 
 	sendReply(m_packetSourceExitReply);
 }
