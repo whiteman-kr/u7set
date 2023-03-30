@@ -62,6 +62,73 @@ protected:
 };
 
 
+TEST_F(TuningSignalManagerTests, tuningValue)
+{
+	// Test base values and types
+	//
+	TuningValue v1(TuningValueType::Float);
+	EXPECT_EQ(v1.type(), TuningValueType::Float);
+	v1.setFloatValue(700);
+	EXPECT_FLOAT_EQ(v1.floatValue(), 700);
+	EXPECT_DOUBLE_EQ(v1.rawDouble(), 700);
+
+	TuningValue v2(TuningValueType::Float, 256.0);
+	EXPECT_EQ(v2.type(), TuningValueType::Float);
+
+	TuningValue v3(QVariant(50));
+	EXPECT_EQ(v3.type(), TuningValueType::SignedInt32);
+	v3.setInt32Value(700);
+	EXPECT_EQ(v3.int32Value(), 700);
+
+	TuningValue v4(QVariant(true));
+	EXPECT_EQ(v4.type(), TuningValueType::Discrete);
+	EXPECT_TRUE(v4.typeStr().contains("Discrete"));
+	v4.setDiscreteValue(false);
+	EXPECT_EQ(v4.discreteValue(), false);
+
+	EXPECT_EQ(v4.toVariant().typeId(), QMetaType::Int);
+
+	// Test creating from string and creating from double functions
+	//
+	TuningValue v5;
+	v5.setType(TuningValueType::SignedInt32);
+	v5.fromString("7");
+	EXPECT_TRUE(v5.tuningValueTypeString().contains("SignedInt32"));
+
+	TuningValue v6 = TuningValue::createFromDouble(E::SignalType::Analog, E::AnalogAppSignalFormat::SignedInt32, 7);
+	EXPECT_EQ(v6.type(), TuningValueType::SignedInt32);
+
+	// Test comparators
+	//
+	EXPECT_TRUE(v5 == v6);
+
+	v6.setInt32Value(10);
+	EXPECT_TRUE(v5 <= v6);
+	EXPECT_TRUE(v5 < v6);
+
+	v6.setInt32Value(2);
+	EXPECT_TRUE(v5 >= v6);
+	EXPECT_TRUE(v5 > v6);
+
+	EXPECT_TRUE(v5 != v6);
+
+	EXPECT_EQ(v5.rawInt64(), 7);
+
+	// Test proto functions
+	//
+	Proto::TuningValue message;
+
+	TuningValue v7(TuningValueType::Discrete, true);
+	v7.save(&message);
+
+	TuningValue v8;
+	bool ok = v8.load(message);
+	EXPECT_TRUE(ok);
+
+	EXPECT_EQ(v7, v8);
+	return;
+}
+
 TEST_F(TuningSignalManagerTests, loadFromBinary)
 {
 	ILogFileStub logFile;
@@ -188,7 +255,7 @@ TEST_F(TuningSignalManagerTests, appSignalParam)
 	EXPECT_EQ(found, true);
 	EXPECT_EQ(asp.appSignalId(), as1.appSignalID());
 
-	found = tsm.signalParam(calcHash(as2.appSignalID()), &asp);
+	found = tsm.signalParam(as2.appSignalID(), &asp);
 	EXPECT_EQ(found, true);
 	EXPECT_EQ(asp.appSignalId(), as2.appSignalID());
 
@@ -304,6 +371,19 @@ TEST_F(TuningSignalManagerTests, setUnappliedValue)
 	tsm.setState(state_service1, ::calcHash(s_tuningServiceId1));
 	tsm.setState(state_service2, ::calcHash(s_tuningServiceId2));
 
+	// Check states are set correctly
+	//
+
+	TuningSignalState gotStateService1 = tsm.state(as1.appSignalID(), ::calcHash(s_tuningServiceId1), &ok);
+	EXPECT_TRUE(ok);
+	EXPECT_EQ(gotStateService1.hash(), as1.hash());
+	EXPECT_TRUE(gotStateService1.valid());
+
+	TuningSignalState gotStateService2 = tsm.state(as1.appSignalID(), ::calcHash(s_tuningServiceId2), &ok);
+	EXPECT_TRUE(ok);
+	EXPECT_EQ(gotStateService2.hash(), as1.hash());
+	EXPECT_FALSE(gotStateService2.valid());
+
 	// Set unapplied value to the signal and check that unapplied flag has been set
 	//
 	tsm.setUnappliedValue(as1.hash(), TuningValue(TuningValueType::Float, newValue_twoChannels));
@@ -312,7 +392,7 @@ TEST_F(TuningSignalManagerTests, setUnappliedValue)
 
 	TuningValue nv = tsm.unappliedValue(as1.hash());
 
-	EXPECT_TRUE(fabs(nv.floatValue() - newValue_twoChannels) < std::numeric_limits<float>::epsilon());
+	EXPECT_FLOAT_EQ(nv.floatValue(), newValue_twoChannels);
 
 	// Reset unapplied value to old value and and check that unapplied flag has been reset
 	//
@@ -402,7 +482,7 @@ TEST_F(TuningSignalManagerTests, setStateFromNetworkMessage)
 	EXPECT_TRUE(found);
 
 	EXPECT_EQ(gotState.valid(), true);
-	EXPECT_TRUE(fabs(gotState.value().floatValue() - newValue) < std::numeric_limits<float>::epsilon());
+	EXPECT_FLOAT_EQ(gotState.value().floatValue(), newValue);
 
 	return;
 }
