@@ -2316,6 +2316,7 @@ bool AppSignal::setSpecPropValue(const QString& name, const QVariant& qv, bool i
 QStringList AppSignal::tags() const
 {
 	QStringList list;
+	list.reserve(m_tags.size());
 
 	for(const QString& tag : m_tags)
 	{
@@ -2553,13 +2554,14 @@ QVector<int> AppSignalSet::getChannelSignalsID(const AppSignal& signal) const
 
 QVector<int> AppSignalSet::getChannelSignalsID(int signalGroupID) const
 {
-	QVector<int> channelSignalsID;
-
 	QList<int> signalsID = m_groupSignals.values(signalGroupID);
 
 	qsizetype signalCount = signalsID.count();
 
-	for(qsizetype i = 0; i< signalCount; i++)
+	QVector<int> channelSignalsID;
+	channelSignalsID.reserve(signalCount);
+
+	for(qsizetype i = 0; i < signalCount; i++)
 	{
 		channelSignalsID.append(signalsID.at(i));
 	}

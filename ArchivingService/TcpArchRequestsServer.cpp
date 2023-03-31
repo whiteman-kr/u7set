@@ -112,6 +112,8 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveStart(const char* reques
 	// check signal hashes
 	//
 	QVector<Hash> signalHashes;
+	signalHashes.reserve(requestSignalsCount);
+
 	QHash<Hash, bool> signalHashesMap;
 
 	for(int i = 0; i < requestSignalsCount; i++)

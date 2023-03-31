@@ -14,7 +14,7 @@ protected:
 public:
 	struct Statistics
 	{
-		Statistics(uintptr_t id, QString objectName, QString serverId, Tcp::ConnectionState state) :
+		Statistics(uintptr_t id, QString objectName, QString serverId, const Tcp::ConnectionState& state) :
 			id{id},
 			objectName{objectName},
 			serverId{serverId},

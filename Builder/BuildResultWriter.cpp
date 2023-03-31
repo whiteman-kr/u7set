@@ -927,6 +927,7 @@ namespace Builder
 	QStringList BuildResultWriter::fullOutputPathes() const
 	{
 		QStringList result;
+		result.reserve(std::size(m_buildResults));
 
 		for (const BuildResult& br : m_buildResults)
 		{

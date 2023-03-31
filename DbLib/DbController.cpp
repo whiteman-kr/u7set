@@ -1821,6 +1821,7 @@ bool DbController::deleteDeviceObjects(std::vector<Hardware::DeviceObject*>& dev
 	}
 
 	std::vector<DbFileInfo> files;
+	files.reserve(devices.size());
 
 	for (auto& d : devices)
 	{

@@ -24,6 +24,8 @@ namespace Sim
 	Connection::Connection(::ConnectionInfo buildConnection) :
 		m_buildConnection(buildConnection)
 	{
+		m_ports.reserve(m_buildConnection.ports.size());
+
 		for (const ::ConnectionPortInfo& bp : m_buildConnection.ports)
 		{
 			ConnectionPortPtr cp = std::make_shared<ConnectionPort>(bp);
