@@ -183,7 +183,7 @@ public:
 	void pushRupFrame(quint32 sourceIP,
 					  qint64 serverTime,
 					  bool isSimFrame,
-					  const Rup::Frame& rupFrame,
+					  Rup::Frame& rupFrame,
 					  quint32 expectedDataUID,
 					  const QThread* thread);
 

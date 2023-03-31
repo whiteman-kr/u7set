@@ -29,6 +29,7 @@ namespace Sim
 		m_curProfileName = profileName;
 
 		m_simStartTime = QDateTime::currentMSecsSinceEpoch();
+		m_prevPacketTime = 0;
 
 		initAppDataSources();
 		clearAppDataQueue();
@@ -46,6 +47,8 @@ namespace Sim
 		clearAppDataQueue();
 		wakeupTransmitterThread();
 
+		m_prevPacketTime = 0;
+
 		return true;
 	}
 
@@ -54,14 +57,14 @@ namespace Sim
 									  const QByteArray& data,
 									  TimeStamp timeStamp)
 	{
-		logTime("sendData()");
+		trace_dt(portEquipmentId);
 
 		m_appDataQueueMutex.lock();
 
 		m_appDataQueue.emplace(lmEquipmentId,
-							  portEquipmentId,
-							  data,
-							  timeStamp);
+								portEquipmentId,
+								data,
+								timeStamp);
 
 		m_appDataQueueNotEmpty.notify_one();
 
@@ -216,6 +219,8 @@ namespace Sim
 
 				ul.unlock();
 
+				//trace_dt(extAppData.portEquipmentID);
+
 				sendAppDataPackets(socket, extAppData);
 
 				ul.lock();
@@ -305,4 +310,23 @@ namespace Sim
 		qDebug() << C_STR(QString("%1 +%2").arg(msg).arg(QDateTime::currentMSecsSinceEpoch() - m_simStartTime));
 	}
 
+	void AppDataTransmitter::trace_dt(const QString& portID)
+	{
+		if (portID == "SYSTEMID_RACK01_FSCC01_MD00_ETHERNET02")
+		{
+			qint64 curTime = QDateTime::currentMSecsSinceEpoch();
+
+			if (m_prevPacketTime != 0 )
+			{
+				qint64 dt = curTime - m_prevPacketTime;
+
+				if (dt < 4 || dt > 6)
+				{
+					qDebug() << "dt =" << dt;
+				}
+			}
+
+			m_prevPacketTime = curTime;
+		}
+	}
 }

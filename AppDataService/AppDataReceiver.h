@@ -80,6 +80,8 @@ private:
 
 	QString appDataReceivingIPStr() const;
 
+	void trace_dt(const QString& portID);
+
 private:
 	AppDataSources& m_appDataSources;
 	bool m_isSimulationMode = false;
@@ -144,6 +146,7 @@ private:
 
 	int m_receivedPerSecond = 0;
 	int m_rupFramesReceivedPerSecond = 0;
+	qint64 m_prevPacketTime = 0;
 
 	//
 

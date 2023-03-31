@@ -331,6 +331,12 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 
 	DEBUG_LOG_MSG(logger(), "Configuration is ready");
 
+	DEBUG_LOG_MSG(logger(), "");
+
+	DEBUG_LOG_MSG(logger(), "Settings profile: " + currentSettingsProfile->profile);
+
+	DEBUG_LOG_MSG(logger(), "");
+
 	// stop all threads and free all allocated resources
 	//
 	clearConfiguration();

@@ -20,17 +20,6 @@ namespace Sim
 	private:
 		struct ExtAppData
 		{
-/*			ExtAppData(const QString& lmID,
-					   const QString& portID,
-					   const QByteArray& data,
-					   const TimeStamp& time) :
-				lmEquipmentID(lmID),
-				portEquipmentID(portID),
-				appData(data),
-				timeStamp(time)
-			{
-			}*/
-
 			QString lmEquipmentID;
 			QString portEquipmentID;
 			QByteArray appData;
@@ -89,6 +78,7 @@ namespace Sim
 		void clearAppDataQueue();
 
 		void logTime(const QString& msg);
+		void trace_dt(const QString& portID);
 
 	private:
 		Simulator* m_simulator = nullptr;
@@ -108,6 +98,7 @@ namespace Sim
 		//
 
 		qint64 m_simStartTime = 0;
+		qint64 m_prevPacketTime = 0;
 
 		std::atomic<bool> m_runSimulation = {false};
 		std::atomic<bool> m_exitTransmitterThread = {false};

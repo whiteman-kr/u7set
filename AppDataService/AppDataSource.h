@@ -93,6 +93,7 @@ private:
 
 	//
 
+	qint64 m_workcycle_ms = 0;
 	QVector<DynamicAppSignalState*> m_signalStates;
 
 	int m_acquiredSignalsCount = 0;

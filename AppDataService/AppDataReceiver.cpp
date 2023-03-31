@@ -333,6 +333,8 @@ void AppDataReceiver::receivePackets(const error_code& error, size_t bytesReceiv
 		return;
 	}
 
+//	trace_dt("");
+
 	m_noReceiveCtr = 0;
 
 	udp::endpoint receiveFromIP = m_receiveFromIP[m_writeIndex];
@@ -505,6 +507,27 @@ QString AppDataReceiver::appDataReceivingIPStr() const
 				arg(QString::fromStdString(m_appDataReceivingIP.address().to_string())).
 				arg(m_appDataReceivingIP.port());
 }
+
+void AppDataReceiver::trace_dt(const QString& portID)
+{
+	if (portID.isEmpty() || portID == "SYSTEMID_RACK01_FSCC01_MD00_ETHERNET02")
+	{
+		qint64 curTime = QDateTime::currentMSecsSinceEpoch();
+
+		if (m_prevPacketTime != 0 )
+		{
+			qint64 dt = curTime - m_prevPacketTime;
+
+			if (dt < 4 || dt > 6)
+			{
+				qDebug() << "dt =" << dt;
+			}
+		}
+
+		m_prevPacketTime = curTime;
+	}
+}
+
 
 void processPackets(AppDataReceiver& receiver, int threadNumber)
 {

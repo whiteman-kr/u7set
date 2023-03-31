@@ -468,7 +468,7 @@ QString DataSourceOnline::getTimeStr(const Rup::TimeStamp& ts)
 void DataSourceOnline::pushRupFrame(quint32 sourceIP,
 									qint64 serverTime,
 									bool isSimFrame,
-									const Rup::Frame& rupFrame,
+									Rup::Frame& rupFrame,
 									quint32 expectedDataUID,
 									const QThread* thread)
 {
@@ -493,9 +493,9 @@ void DataSourceOnline::pushRupFrame(quint32 sourceIP,
 
 	//
 
-	quint16 protocolVersion = reverseUint16(rupFrame.header.protocolVersion);
+	rupFrame.header.reverseBytes();
 
-	if (protocolVersion != rupVersion())
+	if (rupFrame.header.protocolVersion != rupVersion())
 	{
 		m_errorProtocolVersion++;
 		return;
@@ -505,9 +505,7 @@ void DataSourceOnline::pushRupFrame(quint32 sourceIP,
 
 	ParsingBuffer& writeBuffer = *m_parsingBuffers[m_writeBufferIndex];
 
-	quint16 framesQuantity = reverseUint16(rupFrame.header.framesQuantity);
-
-	if (framesQuantity != writeBuffer.framesQuantity)
+	if (rupFrame.header.framesQuantity != writeBuffer.framesQuantity)
 	{
 		Q_ASSERT(false);
 		m_errorFramesQuantity++;
@@ -516,7 +514,7 @@ void DataSourceOnline::pushRupFrame(quint32 sourceIP,
 
 	//
 
-	quint16 frameNo = reverseUint16(rupFrame.header.frameNumber);
+	int frameNo = rupFrame.header.frameNumber;
 
 	if (frameNo >= writeBuffer.framesQuantity)
 	{
@@ -527,7 +525,7 @@ void DataSourceOnline::pushRupFrame(quint32 sourceIP,
 
 	//
 
-	m_receivedDataID = reverseUint32(rupFrame.header.dataId);
+	m_receivedDataID = rupFrame.header.dataId;
 
 	if (m_receivedDataID != expectedDataUID)
 	{
@@ -787,8 +785,9 @@ bool DataSourceOnline::ParsingBuffer::copyRupFrame(int frameNo, qint64 serverTim
 
 	Q_ASSERT(sizeof(rupFramesHeaders[0]) == sizeof(rupFrame.header));
 
+	// rupFrame.header already reversed!
+	//
 	memcpy(&rupFramesHeaders[frameNo], &rupFrame.header, sizeof(rupFrame.header));
-	rupFramesHeaders[frameNo].reverseBytes();
 
 	Q_ASSERT(sizeof(rupFramesData[0]) == sizeof(rupFrame.data));
 

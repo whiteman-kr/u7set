@@ -144,6 +144,8 @@ AppDataSource::AppDataSource(const DataSource& dataSource) :
 	initParsingBuffers(appDataFramesQuantity());
 
 	m_acquiredSignalsCount = static_cast<int>(m_appSignals.size());
+
+	m_workcycle_ms = moduleWorkcycle_ms();
 }
 
 // Contructor for object NOT really used for packet receiving.
@@ -337,25 +339,20 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 		return false;
 	}
 
-	if (m_receivesData == false)
+/*	if (m_receivesData == false)
 	{
 		qDebug() << C_STR(QString("first packet: plant = %1, server = %2").
 						  arg(getTimeStr(readBuffer.frame0Header().timeStamp)).
 						  arg(getTimeStr(readBuffer.frame0ServerTime)));
-	}
+	}*/
 
 	m_receivesData = true;
 
 	m_receivedPacketCount++;
 
-	m_lastPacketServerTime = readBuffer.frame0ServerTime;
-
-	if (m_firstPacketServerTime == 0)
-	{
-		m_firstPacketServerTime = m_lastPacketServerTime;
-	}
-
 	const Rup::Header& header = readBuffer.frame0Header();
+
+	bool disableTimeCorrection = false;
 
 	if (m_rupFrameNumerator != -1 &&
 		((m_rupFrameNumerator + 1) & 0xFFFF) != header.numerator)
@@ -368,9 +365,61 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 		{
 			m_lostPacketCount += 0xFFFF - m_rupFrameNumerator + header.numerator - 1;
 		}
+
+		disableTimeCorrection = true;		// no sequential packets, disable time correction
 	}
 
 	m_rupFrameNumerator = header.numerator;
+
+	qint64 now = readBuffer.frame0ServerTime;
+	qint64 dt = now - m_lastPacketServerTime;
+
+	qint64 prevTime = m_lastPacketServerTime;
+
+//	Q_ASSERT(dt >= 0);
+
+	if (disableTimeCorrection == true ||
+		dt < 0 ||
+		dt > 25)
+	{
+		// NO time correction
+		//
+		m_lastPacketServerTime = now;
+	}
+	else
+	{
+		// time correction
+		//
+
+		if (dt == 0)
+		{
+			m_lastPacketServerTime += 1;
+
+			qDebug() << "dt" << dt << " corr +1" << (now % 10000) << " to" << (m_lastPacketServerTime % 10000);
+		}
+		else
+		{
+			if (dt > m_workcycle_ms + 1)
+			{
+				qDebug() << "dt" << dt << " corr +5" << (m_lastPacketServerTime % 10000) << " to" << ((m_lastPacketServerTime + m_workcycle_ms + 1)% 10000);
+				m_lastPacketServerTime += m_workcycle_ms + 1;
+			}
+			else
+			{
+				m_lastPacketServerTime = now;
+			}
+		}
+	}
+
+	if (m_lastPacketServerTime == prevTime)
+	{
+		DEBUG_STOP;
+	}
+
+	if (m_firstPacketServerTime == 0)
+	{
+		m_firstPacketServerTime = m_lastPacketServerTime;
+	}
 
 	//
 
