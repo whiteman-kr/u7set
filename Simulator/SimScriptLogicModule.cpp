@@ -57,7 +57,7 @@ namespace Sim
 		return m_logicModule->setPowerOff(value);
 	}
 
-	bool ScriptLogicModule::isArmingKey() const
+	bool ScriptLogicModule::armingKey() const
 	{
 		if (isNull() == true)
 		{
@@ -79,7 +79,7 @@ namespace Sim
 		return m_logicModule->setArmingKey(value);
 	}
 
-	bool ScriptLogicModule::isTuningKey() const
+	bool ScriptLogicModule::tuningKey() const
 	{
 		if (isNull() == true)
 		{

@@ -20,10 +20,10 @@ namespace Sim
 		Q_PROPERTY(bool powerOff READ isPowerOff WRITE setPowerOff)
 
 		/// \brief Switches module Arming Key on and off.
-		Q_PROPERTY(bool armingKey READ isArmingKey WRITE setArmingKey)
+		Q_PROPERTY(bool armingKey READ armingKey WRITE setArmingKey)
 
 		/// \brief Switches module Tuning Key on and off.
-		Q_PROPERTY(bool tuningKey READ isTuningKey WRITE setTuningKey)
+		Q_PROPERTY(bool tuningKey READ tuningKey WRITE setTuningKey)
 
 		Q_PROPERTY(quint32 regBufferStartAddress READ regBufferStartAddress)
 		Q_PROPERTY(quint32 regBufferSize READ regBufferSize)
@@ -43,10 +43,10 @@ namespace Sim
 		bool isPowerOff() const;
 		void setPowerOff(bool value);
 
-		bool isArmingKey() const;
+		bool armingKey() const;
 		void setArmingKey(bool value);
 
-		bool isTuningKey() const;
+		bool tuningKey() const;
 		void setTuningKey(bool value);
 
 		quint32 regBufferStartAddress() const;
