@@ -231,6 +231,10 @@ void SimWidget::createToolBar()
 	m_simulationTimeEdit->setSizePolicy(QSizePolicy::Policy::Minimum, m_simulationTimeEdit->sizePolicy().verticalPolicy());
 	m_simulationTimeEdit->setMaxLength(18);
 
+	QFontMetrics fm(m_simulationTimeEdit->font());
+	int pixelWidth = fm.horizontalAdvance("0000000000.000");
+	m_simulationTimeEdit->setMaximumWidth(pixelWidth);
+
 	m_simulationTimeLocale.setNumberOptions(m_simulationTimeLocale.numberOptions() & ~(QLocale::OmitGroupSeparator));
 	m_simulationTimeEditValidator.setLocale(m_simulationTimeLocale);
 	m_simulationTimeEditValidator.setNotation(QDoubleValidator::Notation::StandardNotation);

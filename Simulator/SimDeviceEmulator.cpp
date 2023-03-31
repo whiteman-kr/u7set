@@ -272,6 +272,8 @@ namespace Sim
 		//
 		auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime);
 
+		// qDebug() << "DeviceEmulator::runWorkcycle " << ms.count() << ", Diff: " << QDateTime::currentDateTime().toMSecsSinceEpoch() - ms.count();
+
 		TimeStamp plantTime{ms.count() + QDateTime::currentDateTime().offsetFromUtc() * 1000};
 		TimeStamp localTime{plantTime};
 		TimeStamp systemTime{ms.count()};
