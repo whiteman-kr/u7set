@@ -10,6 +10,8 @@ protected:
 	{
 		s_tuningServices[0].clientRequestAddress.setPort(g_connectionPorts.tuningService1.clientRequestPort);
 		s_tuningServices[1].clientRequestAddress.setPort(g_connectionPorts.tuningService2.clientRequestPort);
+
+		s_safeTuningServices[0].clientRequestAddress.setPort(g_connectionPorts.tuningService3.clientRequestPort);
 	}
 
 	virtual void TearDown()

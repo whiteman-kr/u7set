@@ -28,6 +28,7 @@ struct ConnectionPorts
 
 	TuningServicePorts tuningService1 = {.clientRequestPort = 13333};
 	TuningServicePorts tuningService2 = {.clientRequestPort = 13334};
+	TuningServicePorts tuningService3 = {.clientRequestPort = 13335};
 
 	std::pair<bool, QString> init(Sim::Profile profile);	// Returns result bool and error message if necessary.
 };

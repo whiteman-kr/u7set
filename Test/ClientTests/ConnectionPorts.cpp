@@ -74,6 +74,11 @@ std::pair<bool, QString> ConnectionPorts::init(Sim::Profile profile)
 			Sim::ProfileProperties props = profile.properties("SYSTEMID_CLIENTTEST_WS02_TUNS");
 			tuningService2.clientRequestPort = getProperty(props, "ClientRequestPort");
 		}
+
+		{
+			Sim::ProfileProperties props = profile.properties("SYSTEMID_CLIENTTEST_WS04_TUNS");
+			tuningService3.clientRequestPort = getProperty(props, "ClientRequestPort");
+		}
 	}
 	catch (std::exception& e)
 	{
