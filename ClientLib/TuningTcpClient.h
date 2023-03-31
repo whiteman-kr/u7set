@@ -116,7 +116,7 @@ namespace ClientLib
 
 		// Searching signals
 		//
-		bool hasTuningSignals(const std::vector<Hash> appSignalHashes) const;	// Returns true if client processes at least one of specified signals
+		bool hasTuningSignals(const std::vector<Hash>& appSignalHashes) const;	// Returns true if client processes at least one of specified signals
 		bool hasTuningSignal(Hash appSignalHash) const;
 		bool hasTuningSignal(QString appSignalId) const;
 

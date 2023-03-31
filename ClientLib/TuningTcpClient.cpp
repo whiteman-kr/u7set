@@ -74,6 +74,7 @@ namespace ClientLib
 		QReadLocker l(&m_tuningSourcesLock);
 
 		std::vector<Hash> result;
+		result.reserve(m_tuningSources.size());
 
 		for (const auto& p : m_tuningSources)
 		{
@@ -160,7 +161,7 @@ namespace ClientLib
 		return true;
 	}
 
-	bool TuningTcpClient::hasTuningSignals(const std::vector<Hash> appSignalHashes) const
+	bool TuningTcpClient::hasTuningSignals(const std::vector<Hash>& appSignalHashes) const
 	{
 		QReadLocker l(&m_signalHashesLock);
 
