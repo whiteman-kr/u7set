@@ -56,10 +56,10 @@ static const QList<staticPropertyFieldDefinition> staticPropertiesFieldList
 	},
 
 	{
-		QStringLiteral("Module workcyle, ms"),
+		QStringLiteral("Module workcycle, mcs"),
 		[](const DataSource& source)
 		{
-			return source.moduleWorkcycle_ms();
+			return source.moduleWorkcycle_mcs();
 		}
 	},
 
@@ -283,10 +283,18 @@ static const QList<dynamicPropertyFieldDefinition> dynamicPropertiesFieldList
 	},
 
 	{
-		QStringLiteral("Error frame nomber"),
+		QStringLiteral("Error frame number"),
 		[](const DataSourceOnline& source)
 		{
 			return source.errorFrameNo();
+		}
+	},
+
+	{
+		QStringLiteral("Error frame CRC"),
+		[](const DataSourceOnline& source)
+		{
+			return source.errorFrameCRC();
 		}
 	},
 
@@ -295,14 +303,6 @@ static const QList<dynamicPropertyFieldDefinition> dynamicPropertiesFieldList
 		[](const DataSourceOnline& source)
 		{
 			return source.errorDataID();
-		}
-	},
-
-	{
-		QStringLiteral("Error frame size"),
-		[](const DataSourceOnline& source)
-		{
-			return source.errorFrameSize();
 		}
 	},
 

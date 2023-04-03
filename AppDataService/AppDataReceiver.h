@@ -57,8 +57,8 @@ public:
 private:
 	virtual void run() override;
 
-	void startTimer1s();
-	void onTimer1s(const error_code& error);
+	void startTimer500ms();
+	void onTimer500ms(const error_code& error);
 
 	void clearReceiverStatistics();
 	void updateReceiverStatistics();
@@ -92,10 +92,13 @@ private:
 
 	//
 
+	HostAddressPort m_dataReceivingIP;
 	udp::endpoint m_appDataReceivingIP;
 
 	io_context* m_ioContext = nullptr;
 	steady_timer* m_timer = nullptr;
+	int m_1second = 0;
+
 	udp::socket* m_socket = nullptr;
 	bool m_socketBound = false;
 	int m_noReceiveCtr = 0;

@@ -143,7 +143,7 @@ protected:
 class DataSourceOnline : public DataSource
 {
 private:
-	static const int APP_DATA_SOURCE_TIMEOUT = 1000;
+	static const int APP_DATA_SOURCE_TIMEOUT = 500;
 
 protected:
 
@@ -187,7 +187,7 @@ public:
 					  quint32 expectedDataUID,
 					  const QThread* thread);
 
-	bool updateStatistics_1s();
+	bool updateStatistics_500ms(int oneSecond);
 
 	// Functions used by data processing thread
 	//
@@ -219,8 +219,11 @@ public:
 	qint64 errorProtocolVersion() const { return m_errorProtocolVersion; }
 	qint64 errorFramesQuantity() const { return m_errorFramesQuantity; }
 	qint64 errorFrameNo() const { return m_errorFrameNo; }
+
+	qint64 errorFrameCRC() const { return m_errorFrameCRC; }
+	void incErrorFrameCRC() { m_errorFrameCRC++; }
+
 	qint64 errorDataID() const { return m_errorDataID; }
-	qint64 errorFrameSize() const { return m_errorFrameSize; }
 	qint64 errorDuplicatePlantTime() const { return m_errorDuplicatePlantTime; }
 	qint64 errorNonmonotonicPlantTime() const { return m_errorNonmonotonicPlantTime; }
 	qint64 errorPlantTimeFormat() const { return m_errorPlantTimeFormat; }
@@ -236,6 +239,8 @@ public:
 	void setTimeErrLog(CircularLoggerShared timeErrLog) { m_timeErrLog = timeErrLog; }
 
 private:
+	void clearStatistics();
+
 	bool moveToNextWriteBuffer(const QThread* thread);
 	bool moveToNextReadBuffer(const QThread* thread);
 
@@ -256,20 +261,25 @@ protected:
 	qint64 m_rupFramePlantTime = 0;
 	qint64 m_rupFrameNumerator = -1;			// qint64 is Ok!
 
-	double m_dataReceivingSpeed = 0;
-	qint64 m_receivedDataSize = 0;
-	qint64 m_prevReceivedDataSize = 0;
-	qint64 m_receivedFramesCount = 0;
-	qint64 m_receivedPacketCount = 0;
-	qint64 m_lostPacketCount = 0;
+	std::atomic<double> m_dataReceivingSpeed = { 0 };
+	std::atomic<qint64> m_receivedDataSize = { 0 };
+	std::atomic<qint64> m_prevReceivedDataSize = { 0 };
+	std::atomic<qint64> m_receivedFramesCount = { 0 };
+	std::atomic<qint64> m_receivedPacketCount = { 0 };
+	std::atomic<qint64> m_lostPacketCount = { 0 };
 
 	//
 
-	qint64 m_errorProtocolVersion = 0;
-	qint64 m_errorFramesQuantity = 0;
-	qint64 m_errorFrameNo = 0;
-	qint64 m_errorDataID = 0;
-	qint64 m_errorFrameSize = 0;
+	// this values can be changed from AppDataReceiver thread!
+	//
+	std::atomic<qint64> m_errorProtocolVersion = { 0 };
+	std::atomic<qint64> m_errorFramesQuantity = { 0 };
+	std::atomic<qint64> m_errorFrameNo = { 0 };
+	std::atomic<qint64> m_errorFrameCRC = { 0 };
+	std::atomic<qint64> m_errorDataID = { 0 };
+
+	//
+
 	qint64 m_errorDuplicatePlantTime = 0;
 	qint64 m_errorNonmonotonicPlantTime = 0;
 	qint64 m_errorPlantTimeFormat = 0;

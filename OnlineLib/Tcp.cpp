@@ -1055,6 +1055,11 @@ namespace Tcp
 
 		for(const Tcp::ConnectionState& state : m_connectionStates)
 		{
+			if (state.isConnected == false)
+			{
+				continue;
+			}
+
 			const SoftwareInfo& si = state.connectedSoftwareInfo;
 
 			if (E::contains<E::SoftwareType>(TO_INT(si.softwareType())) == false)

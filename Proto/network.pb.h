@@ -3224,6 +3224,7 @@ class DataSourceInfo PROTOBUF_FINAL :
     kLmNumberFieldNumber = 9,
     kAcquiredSignalsCountFieldNumber = 13,
     kExpectedDataUIDFieldNumber = 14,
+    kWorkcycleMcsFieldNumber = 15,
   };
   // repeated .Network.LanControllerInfo lanControllerInfo = 11;
   int lancontrollerinfo_size() const;
@@ -3454,6 +3455,19 @@ class DataSourceInfo PROTOBUF_FINAL :
   void _internal_set_expecteddatauid(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
+  // optional int32 workcycle_mcs = 15 [default = 0];
+  bool has_workcycle_mcs() const;
+  private:
+  bool _internal_has_workcycle_mcs() const;
+  public:
+  void clear_workcycle_mcs();
+  ::PROTOBUF_NAMESPACE_ID::int32 workcycle_mcs() const;
+  void set_workcycle_mcs(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_workcycle_mcs() const;
+  void _internal_set_workcycle_mcs(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:Network.DataSourceInfo)
  private:
   class _Internal;
@@ -3477,6 +3491,7 @@ class DataSourceInfo PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::int32 lmnumber_;
   ::PROTOBUF_NAMESPACE_ID::int32 acquiredsignalscount_;
   ::PROTOBUF_NAMESPACE_ID::uint32 expecteddatauid_;
+  ::PROTOBUF_NAMESPACE_ID::int32 workcycle_mcs_;
   friend struct ::TableStruct_network_2eproto;
 };
 // -------------------------------------------------------------------
@@ -4187,8 +4202,8 @@ class AppDataSourceState PROTOBUF_FINAL :
     kErrorProtocolVersionFieldNumber = 16,
     kErrorFramesQuantityFieldNumber = 17,
     kErrorFrameNoFieldNumber = 18,
-    kErrorDataIDFieldNumber = 19,
-    kErrorFrameSizeFieldNumber = 20,
+    kErrorFrameCRCFieldNumber = 19,
+    kErrorDataIDFieldNumber = 20,
     kErrorDuplicatePlantTimeFieldNumber = 21,
     kErrorNonmonotonicPlantTimeFieldNumber = 22,
     kErrorPlantTimeFormatFieldNumber = 23,
@@ -4422,7 +4437,20 @@ class AppDataSourceState PROTOBUF_FINAL :
   void _internal_set_errorframeno(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
-  // optional int64 errorDataID = 19 [default = 0];
+  // optional int64 errorFrameCRC = 19 [default = 0];
+  bool has_errorframecrc() const;
+  private:
+  bool _internal_has_errorframecrc() const;
+  public:
+  void clear_errorframecrc();
+  ::PROTOBUF_NAMESPACE_ID::int64 errorframecrc() const;
+  void set_errorframecrc(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errorframecrc() const;
+  void _internal_set_errorframecrc(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errorDataID = 20 [default = 0];
   bool has_errordataid() const;
   private:
   bool _internal_has_errordataid() const;
@@ -4433,19 +4461,6 @@ class AppDataSourceState PROTOBUF_FINAL :
   private:
   ::PROTOBUF_NAMESPACE_ID::int64 _internal_errordataid() const;
   void _internal_set_errordataid(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 errorFrameSize = 20 [default = 0];
-  bool has_errorframesize() const;
-  private:
-  bool _internal_has_errorframesize() const;
-  public:
-  void clear_errorframesize();
-  ::PROTOBUF_NAMESPACE_ID::int64 errorframesize() const;
-  void set_errorframesize(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errorframesize() const;
-  void _internal_set_errorframesize(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
   // optional int64 errorDuplicatePlantTime = 21 [default = 0];
@@ -4526,8 +4541,8 @@ class AppDataSourceState PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::int64 errorprotocolversion_;
   ::PROTOBUF_NAMESPACE_ID::int64 errorframesquantity_;
   ::PROTOBUF_NAMESPACE_ID::int64 errorframeno_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errorframecrc_;
   ::PROTOBUF_NAMESPACE_ID::int64 errordataid_;
-  ::PROTOBUF_NAMESPACE_ID::int64 errorframesize_;
   ::PROTOBUF_NAMESPACE_ID::int64 errorduplicateplanttime_;
   ::PROTOBUF_NAMESPACE_ID::int64 errornonmonotonicplanttime_;
   ::PROTOBUF_NAMESPACE_ID::int64 errorplanttimeformat_;
@@ -17973,6 +17988,34 @@ inline void DataSourceInfo::set_expecteddatauid(::PROTOBUF_NAMESPACE_ID::uint32 
   // @@protoc_insertion_point(field_set:Network.DataSourceInfo.expectedDataUID)
 }
 
+// optional int32 workcycle_mcs = 15 [default = 0];
+inline bool DataSourceInfo::_internal_has_workcycle_mcs() const {
+  bool value = (_has_bits_[0] & 0x00002000u) != 0;
+  return value;
+}
+inline bool DataSourceInfo::has_workcycle_mcs() const {
+  return _internal_has_workcycle_mcs();
+}
+inline void DataSourceInfo::clear_workcycle_mcs() {
+  workcycle_mcs_ = 0;
+  _has_bits_[0] &= ~0x00002000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DataSourceInfo::_internal_workcycle_mcs() const {
+  return workcycle_mcs_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DataSourceInfo::workcycle_mcs() const {
+  // @@protoc_insertion_point(field_get:Network.DataSourceInfo.workcycle_mcs)
+  return _internal_workcycle_mcs();
+}
+inline void DataSourceInfo::_internal_set_workcycle_mcs(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00002000u;
+  workcycle_mcs_ = value;
+}
+inline void DataSourceInfo::set_workcycle_mcs(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_workcycle_mcs(value);
+  // @@protoc_insertion_point(field_set:Network.DataSourceInfo.workcycle_mcs)
+}
+
 // -------------------------------------------------------------------
 
 // GetDataSourcesInfoRequest
@@ -18857,9 +18900,37 @@ inline void AppDataSourceState::set_errorframeno(::PROTOBUF_NAMESPACE_ID::int64 
   // @@protoc_insertion_point(field_set:Network.AppDataSourceState.errorFrameNo)
 }
 
-// optional int64 errorDataID = 19 [default = 0];
-inline bool AppDataSourceState::_internal_has_errordataid() const {
+// optional int64 errorFrameCRC = 19 [default = 0];
+inline bool AppDataSourceState::_internal_has_errorframecrc() const {
   bool value = (_has_bits_[0] & 0x00020000u) != 0;
+  return value;
+}
+inline bool AppDataSourceState::has_errorframecrc() const {
+  return _internal_has_errorframecrc();
+}
+inline void AppDataSourceState::clear_errorframecrc() {
+  errorframecrc_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00020000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_errorframecrc() const {
+  return errorframecrc_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::errorframecrc() const {
+  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.errorFrameCRC)
+  return _internal_errorframecrc();
+}
+inline void AppDataSourceState::_internal_set_errorframecrc(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00020000u;
+  errorframecrc_ = value;
+}
+inline void AppDataSourceState::set_errorframecrc(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errorframecrc(value);
+  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.errorFrameCRC)
+}
+
+// optional int64 errorDataID = 20 [default = 0];
+inline bool AppDataSourceState::_internal_has_errordataid() const {
+  bool value = (_has_bits_[0] & 0x00040000u) != 0;
   return value;
 }
 inline bool AppDataSourceState::has_errordataid() const {
@@ -18867,7 +18938,7 @@ inline bool AppDataSourceState::has_errordataid() const {
 }
 inline void AppDataSourceState::clear_errordataid() {
   errordataid_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00020000u;
+  _has_bits_[0] &= ~0x00040000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_errordataid() const {
   return errordataid_;
@@ -18877,40 +18948,12 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::errordataid() const {
   return _internal_errordataid();
 }
 inline void AppDataSourceState::_internal_set_errordataid(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00020000u;
+  _has_bits_[0] |= 0x00040000u;
   errordataid_ = value;
 }
 inline void AppDataSourceState::set_errordataid(::PROTOBUF_NAMESPACE_ID::int64 value) {
   _internal_set_errordataid(value);
   // @@protoc_insertion_point(field_set:Network.AppDataSourceState.errorDataID)
-}
-
-// optional int64 errorFrameSize = 20 [default = 0];
-inline bool AppDataSourceState::_internal_has_errorframesize() const {
-  bool value = (_has_bits_[0] & 0x00040000u) != 0;
-  return value;
-}
-inline bool AppDataSourceState::has_errorframesize() const {
-  return _internal_has_errorframesize();
-}
-inline void AppDataSourceState::clear_errorframesize() {
-  errorframesize_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00040000u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_errorframesize() const {
-  return errorframesize_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::errorframesize() const {
-  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.errorFrameSize)
-  return _internal_errorframesize();
-}
-inline void AppDataSourceState::_internal_set_errorframesize(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00040000u;
-  errorframesize_ = value;
-}
-inline void AppDataSourceState::set_errorframesize(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_errorframesize(value);
-  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.errorFrameSize)
 }
 
 // optional int64 errorDuplicatePlantTime = 21 [default = 0];

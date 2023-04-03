@@ -42,6 +42,7 @@ AppDataReceiver::AppDataReceiver(const HostAddressPort& dataReceivingIP,
 								 int processingThreadsCount,
 								 E::SoftwareRunMode swRunMode,
 								 CircularLoggerShared log) :
+	m_dataReceivingIP(dataReceivingIP),
 	m_appDataSources(appDataSources),
 	m_processingThreadsCountFromSettings(processingThreadsCount),
 	m_log(log),
@@ -110,7 +111,7 @@ void AppDataReceiver::run()
 	try
 	{
 		m_ioContext = new io_context;
-		startTimer1s();
+		startTimer500ms();
 		createAndBindSocket();
 
 		m_ioContext->run();
@@ -133,7 +134,7 @@ void AppDataReceiver::run()
 							arg(appDataReceivingIPStr()));
 }
 
-void AppDataReceiver::startTimer1s()
+void AppDataReceiver::startTimer500ms()
 {
 	TEST_PTR_RETURN(m_ioContext);
 
@@ -142,12 +143,12 @@ void AppDataReceiver::startTimer1s()
 		m_timer = new steady_timer(*m_ioContext);
 	}
 
-	m_timer->expires_after(asio::chrono::seconds(1));
-	m_timer->async_wait(bind(&AppDataReceiver::onTimer1s, this,
+	m_timer->expires_after(asio::chrono::milliseconds(500));
+	m_timer->async_wait(bind(&AppDataReceiver::onTimer500ms, this,
 						   std::placeholders::_1));
 }
 
-void AppDataReceiver::onTimer1s(const error_code& error)
+void AppDataReceiver::onTimer500ms(const error_code& error)
 {
 	if (stopIfQuitRequested() == true)
 	{
@@ -156,7 +157,7 @@ void AppDataReceiver::onTimer1s(const error_code& error)
 
 	if (!error)
 	{
-		if (m_receivedPerSecond == 0)
+		if (m_receivedPerSecond == 0 && m_1second)
 		{
 			m_noReceiveCtr++;
 
@@ -184,7 +185,9 @@ void AppDataReceiver::onTimer1s(const error_code& error)
 		DELETE_IF_NOT_NULL(m_timer);
 	}
 
-	startTimer1s();
+	m_1second ^= 1;
+
+	startTimer500ms();
 }
 
 void AppDataReceiver::clearReceiverStatistics()
@@ -209,13 +212,16 @@ void AppDataReceiver::clearReceiverStatistics()
 
 void AppDataReceiver::updateReceiverStatistics()
 {
-	m_receivingSpeed = m_receivedPerSecond;
-	m_receivedPerSecond = 0;
+	if (m_1second)
+	{
+		m_receivingSpeed = m_receivedPerSecond;
+		m_receivedPerSecond = 0;
 
-	m_rupFramesReceivingSpeed = m_rupFramesReceivedPerSecond;
-	m_rupFramesReceivedPerSecond = 0;
+		m_rupFramesReceivingSpeed = m_rupFramesReceivedPerSecond;
+		m_rupFramesReceivedPerSecond = 0;
 
-	qDebug() << C_STR(QString("Receive RUP frames %1/s").arg(m_rupFramesReceivingSpeed));
+		qDebug() << C_STR(QString("Receive RUP frames %1/s").arg(m_rupFramesReceivingSpeed));
+	}
 }
 
 void AppDataReceiver::updateDataSourcesStatistics()
@@ -224,7 +230,7 @@ void AppDataReceiver::updateDataSourcesStatistics()
 	{
 		TEST_PTR_CONTINUE(source);
 
-		bool invalidateSignals = source->updateStatistics_1s();
+		bool invalidateSignals = source->updateStatistics_500ms(m_1second);
 
 		if (invalidateSignals == true)
 		{
@@ -262,11 +268,27 @@ bool AppDataReceiver::createAndBindSocket()
 
 			DEBUG_LOG_MSG(m_log, QString("AppDataReceiver socket created and bound to %1").
 							arg(appDataReceivingIPStr()));
+
+			asio::socket_base::receive_buffer_size rxBufferSize(10 * 1024 * 1024);
+
+			m_socket->set_option(rxBufferSize, error);
+
+			if (error)
+			{
+				DEBUG_LOG_ERR(m_log, "AppDataReceiver error changing udp socket receive buffer size");
+			}
+
+			m_socket->get_option(rxBufferSize);
+
+			DEBUG_LOG_MSG(m_log, QString("AppDataReceiver udp socket receive buffer size %1 bytes").
+										arg(rxBufferSize.value()));
+
 			startReceive();
 		}
 		else
 		{
-			DEBUG_LOG_MSG(m_log, QString("AppDataReceiver listening socket binding error: %1").
+			DEBUG_LOG_MSG(m_log, QString("AppDataReceiver error binding listening socket to %1: %2").
+							arg(m_dataReceivingIP.addressPortStr()).
 							arg(QString::fromStdString(error.message())));
 
 			closeSocket();
@@ -333,8 +355,6 @@ void AppDataReceiver::receivePackets(const error_code& error, size_t bytesReceiv
 		return;
 	}
 
-//	trace_dt("");
-
 	m_noReceiveCtr = 0;
 
 	udp::endpoint receiveFromIP = m_receiveFromIP[m_writeIndex];
@@ -346,6 +366,7 @@ void AppDataReceiver::receivePackets(const error_code& error, size_t bytesReceiv
 
 	bool isSimFrame = false;
 	bool isValidFrame = false;
+	bool crcOk = false;
 	quint32 sourceIP = 0;
 
 	do
@@ -354,74 +375,84 @@ void AppDataReceiver::receivePackets(const error_code& error, size_t bytesReceiv
 		{
 			sourceIP = receiveFromIP.address().to_v4().to_ulong();
 			isValidFrame = true;
-		}
-		else
-		{
-			if (bytesReceived == sizeof(Rup::SimFrame))
-			{
-				if (m_isSimulationMode == false)
-				{
-					m_errNotExpectedSimPacket++;
-
-					if ((m_errNotExpectedSimPacket % 1000) == 0)
-					{
-						qDebug() << C_STR(QString("Software is not in SIMULATION mode, %1 sim packets has been ignored.").
-										  arg(m_errNotExpectedSimPacket));
-					}
-
-					break;
-				}
-
-				quint16 simVersion = reverseUint16(simFrame.simVersion);
-
-				if (simVersion != 1)
-				{
-					m_errSimVersion++;
-					break;
-				}
-
-				sourceIP = reverseUint32(simFrame.sourceIP);
-
-				m_simFramesCount++;
-
-				isSimFrame = true;
-				isValidFrame = true;
-			}
-			else
-			{
-				// received datagram  has unknown size, skip this datagram
-				//
-				m_errDatagramSize++;
-				break;
-			}
-		}
-
-		if (isValidFrame == true && simFrame.rupFrame.checkCRC64() == false)
-		{
-			m_errRupFrameCRC++;
-			isValidFrame = false;
 			break;
 		}
-	} while(false);		// Its Ok!
+
+		//
+
+		if (bytesReceived == sizeof(Rup::SimFrame))
+		{
+			if (m_isSimulationMode == false)
+			{
+				m_errNotExpectedSimPacket++;
+
+				if ((m_errNotExpectedSimPacket % 1000) == 0)
+				{
+					qDebug() << C_STR(QString("Software is not in SIMULATION mode, %1 sim packets has been ignored.").
+									  arg(m_errNotExpectedSimPacket));
+				}
+
+				break;
+			}
+
+			quint16 simVersion = reverseUint16(simFrame.simVersion);
+
+			if (simVersion != 1)
+			{
+				m_errSimVersion++;
+				break;
+			}
+
+			sourceIP = reverseUint32(simFrame.sourceIP);
+
+			m_simFramesCount++;
+
+			isSimFrame = true;
+			isValidFrame = true;
+			break;
+		}
+
+		// received datagram  has unknown size, skip this datagram
+		//
+		m_errDatagramSize++;
+		break;
+	}
+	while(true);		// Its OK!
 
 	if (isValidFrame == true)
 	{
 		m_rupFramesReceivedPerSecond++;
 		m_rupFramesCount++;
 
+		crcOk = simFrame.rupFrame.checkCRC64();
+
+		if (crcOk == false)
+		{
+			m_errRupFrameCRC++;
+		}
+
 		AppDataSource* source = m_appDataSources.getSourceByIP(sourceIP);
 
 		if (source != nullptr)
 		{
-			source->pushRupFrame(sourceIP, serverTime,
-								 isSimFrame, simFrame.rupFrame,
-								 source->cachedAppDataUID(), m_thisThread);
+			if (crcOk == true)
+			{
+				source->pushRupFrame(sourceIP, serverTime,
+									 isSimFrame, simFrame.rupFrame,
+									 source->cachedAppDataUID(), m_thisThread);
 
-			requireBufferProcessing(source);
+				requireBufferProcessing(source);
+			}
+			else
+			{
+				source->incErrorFrameCRC();
+			}
 		}
 		else
 		{
 			m_errUnknownAppDataSourceIP++;
+
+//			qDebug() << "Unknown IP" << C_STR(HostAddressPort(sourceIP, 0).addressStr());
 
 			if (m_unknownAppDataSourcesIP.contains(sourceIP) == false &&
 				m_unknownAppDataSourcesIP.size() < 500)

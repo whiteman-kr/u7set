@@ -162,6 +162,7 @@ message DataSourceInfo
 	optional string profile = 12;
 	optional int32 acquiredSignalsCount = 13 [default = 0];
 	optional uint32 expectedDataUID = 14 [default = 0];
+	optional int32 workcycle_mcs = 15 [default = 0];
 }
 
 message GetDataSourcesInfoRequest
@@ -215,8 +216,8 @@ message AppDataSourceState
 	optional int64 errorProtocolVersion = 16 [default = 0];
 	optional int64 errorFramesQuantity = 17 [default = 0];
 	optional int64 errorFrameNo = 18 [default = 0];
-	optional int64 errorDataID = 19 [default = 0];
-	optional int64 errorFrameSize = 20 [default = 0];
+	optional int64 errorFrameCRC = 19 [default = 0];
+	optional int64 errorDataID = 20 [default = 0];
 	optional int64 errorDuplicatePlantTime = 21 [default = 0];
 	optional int64 errorNonmonotonicPlantTime = 22 [default = 0];
 	optional int64 errorPlantTimeFormat = 23 [default = 0];

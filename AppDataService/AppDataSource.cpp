@@ -204,6 +204,11 @@ void AppDataSource::prepare(const AppSignals& appSignals,
 
 		DynamicAppSignalState* dynState = signalStates->getStateByID(signal->appSignalID());
 
+/*		if (dynState->appSignalID() == "#LM1_MEANDR_10MS_2")
+		{
+			dynState->m_debug_replace_time = true;
+		}*/
+
 		TEST_PTR_CONTINUE(dynState);
 
 		m_signalStates.append(dynState);
@@ -256,8 +261,8 @@ bool AppDataSource::getState(Network::AppDataSourceState* proto) const
 	proto->set_errorprotocolversion(m_errorProtocolVersion);
 	proto->set_errorframesquantity(m_errorFramesQuantity);
 	proto->set_errorframeno(m_errorFrameNo);
+	proto->set_errorframecrc(m_errorFrameCRC);
 	proto->set_errordataid(m_errorDataID);
-	proto->set_errorframesize(m_errorFrameSize);
 	proto->set_errorduplicateplanttime(m_errorDuplicatePlantTime);
 	proto->set_errornonmonotonicplanttime(m_errorNonmonotonicPlantTime);
 	proto->set_errorplanttimeformat(m_errorPlantTimeFormat);
@@ -286,8 +291,8 @@ void AppDataSource::setState(const Network::AppDataSourceState& proto)
 	m_errorProtocolVersion = proto.errorprotocolversion();
 	m_errorFramesQuantity = proto.errorframesquantity();
 	m_errorFrameNo = proto.errorframeno();
+	m_errorFrameCRC = proto.errorframecrc();
 	m_errorDataID = proto.errordataid();
-	m_errorFrameSize = proto.errorframesize();
 	m_errorDuplicatePlantTime = proto.errorduplicateplanttime();
 	m_errorNonmonotonicPlantTime = proto.errornonmonotonicplanttime();
 	m_errorPlantTimeFormat = proto.errorplanttimeformat();
@@ -371,20 +376,15 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 
 	m_rupFrameNumerator = header.numerator;
 
-	qint64 now = readBuffer.frame0ServerTime;
-	qint64 dt = now - m_lastPacketServerTime;
-
-	qint64 prevTime = m_lastPacketServerTime;
-
-//	Q_ASSERT(dt >= 0);
+	qint64 timeWithoutCorrection = readBuffer.frame0ServerTime;
+	qint64 dt = timeWithoutCorrection - m_lastPacketServerTime;
 
 	if (disableTimeCorrection == true ||
-		dt < 0 ||
-		dt > 25)
+		(dt < 0 || dt > 50))
 	{
 		// NO time correction
 		//
-		m_lastPacketServerTime = now;
+		m_lastPacketServerTime = timeWithoutCorrection;
 	}
 	else
 	{
@@ -394,26 +394,18 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 		if (dt == 0)
 		{
 			m_lastPacketServerTime += 1;
-
-			qDebug() << "dt" << dt << " corr +1" << (now % 10000) << " to" << (m_lastPacketServerTime % 10000);
 		}
 		else
 		{
 			if (dt > m_workcycle_ms + 1)
 			{
-				qDebug() << "dt" << dt << " corr +5" << (m_lastPacketServerTime % 10000) << " to" << ((m_lastPacketServerTime + m_workcycle_ms + 1)% 10000);
-				m_lastPacketServerTime += m_workcycle_ms + 1;
+				m_lastPacketServerTime += m_workcycle_ms;
 			}
 			else
 			{
-				m_lastPacketServerTime = now;
+				m_lastPacketServerTime = timeWithoutCorrection;
 			}
 		}
-	}
-
-	if (m_lastPacketServerTime == prevTime)
-	{
-		DEBUG_STOP;
 	}
 
 	if (m_firstPacketServerTime == 0)
@@ -434,7 +426,7 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 	plantTime.setDate(QDate(timeStamp.year, timeStamp.month, timeStamp.day));
 	plantTime.setTime(QTime(timeStamp.hour, timeStamp.minute, timeStamp.second, timeStamp.millisecond));
 
-	QDateTime localTime = QDateTime::fromMSecsSinceEpoch(readBuffer.frame0ServerTime);
+	QDateTime localTime = QDateTime::fromMSecsSinceEpoch(m_lastPacketServerTime);
 
 	// don't delete this to prevent localTime conversion from Local to UTC time during call localTime.toMSecsSinceEpoch()!!!
 	//
@@ -443,7 +435,7 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 	//
 
 	m_rupTimes.plant.timeStamp = plantTime.toMSecsSinceEpoch();
-	m_rupTimes.system.timeStamp = readBuffer.frame0ServerTime;
+	m_rupTimes.system.timeStamp = m_lastPacketServerTime;
 	m_rupTimes.local.timeStamp = localTime.toMSecsSinceEpoch();
 
 	m_rupFramePlantTime = m_rupTimes.plant.timeStamp;
@@ -467,8 +459,18 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 	{
 		TEST_PTR_CONTINUE(signalState);
 
+/*		if (signalState->m_debug_replace_time == true)
+		{
+			m_rupTimes.system = timeWithoutCorrection;
+		}*/
+
 		pushedStatesCtr += signalState->setState(m_rupTimes, isSimPacket, packetNo, rupData, rupDataSize,
 										  autoArchivingGroup, m_signalStatesQueue, thread);
+
+/*		if (signalState->m_debug_replace_time == true)
+		{
+			m_rupTimes.system = m_lastPacketServerTime;
+		}*/
 
 		if (pushedStatesCtr > 20)
 		{

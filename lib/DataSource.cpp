@@ -312,6 +312,7 @@ bool DataSource::saveToProto(Network::DataSourceInfo* proto) const
 	proto->set_subsystemkey(m_subsystemKey);
 	proto->set_lmnumber(m_lmNumber);
 	proto->set_subsystemchannel(m_subsystemChannel.toStdString());
+	proto->set_workcycle_mcs(m_moduleWorkcycle_mcs);
 
 	proto->clear_lancontrollerinfo();
 
@@ -341,6 +342,7 @@ bool DataSource::loadFromProto(const Network::DataSourceInfo& proto)
 	m_subsystemKey = proto.subsystemkey();
 	m_lmNumber = proto.lmnumber();
 	m_subsystemChannel = QString::fromStdString(proto.subsystemchannel());
+	m_moduleWorkcycle_mcs = proto.workcycle_mcs();
 
 	m_lanControllersInfo.clear();
 
@@ -431,40 +433,6 @@ void DataSourceOnline::clearParsingBuffers()
 	m_parsingBuffers.clear();
 }
 
-QString DataSourceOnline::rupFramePlantTimeStr() const
-{
-	return getTimeStr(m_rupFramePlantTime);
-}
-
-QString DataSourceOnline::getTimeStr(qint64 timeMs)
-{
-	QDateTime dt = QDateTime::fromMSecsSinceEpoch(timeMs, Qt::UTC, 0);
-
-	QDate date = dt.date();
-	QTime time = dt.time();
-
-	return 	QString(FormatStr::DATE_TIME_FORMAT_STR).
-				arg(time.hour(), 2, 10, QLatin1Char('0')).
-				arg(time.minute(), 2, 10, QLatin1Char('0')).
-				arg(time.second(), 2, 10, QLatin1Char('0')).
-				arg(time.msec(), 3, 10, QLatin1Char('0')).
-				arg(date.day(), 2, 10, QLatin1Char('0')).
-				arg(date.month(), 2, 10, QLatin1Char('0')).
-				arg(date.year(), 4, 10, QLatin1Char('0'));
-}
-
-QString DataSourceOnline::getTimeStr(const Rup::TimeStamp& ts)
-{
-	return 	QString(FormatStr::DATE_TIME_FORMAT_STR).
-				arg(ts.hour, 2, 10, QLatin1Char('0')).
-				arg(ts.minute, 2, 10, QLatin1Char('0')).
-				arg(ts.second, 2, 10, QLatin1Char('0')).
-				arg(ts.millisecond, 3, 10, QLatin1Char('0')).
-				arg(ts.day, 2, 10, QLatin1Char('0')).
-				arg(ts.month, 2, 10, QLatin1Char('0')).
-				arg(ts.year, 4, 10, QLatin1Char('0'));
-}
-
 void DataSourceOnline::pushRupFrame(quint32 sourceIP,
 									qint64 serverTime,
 									bool isSimFrame,
@@ -551,7 +519,7 @@ void DataSourceOnline::pushRupFrame(quint32 sourceIP,
 	}
 }
 
-bool DataSourceOnline::updateStatistics_1s()
+bool DataSourceOnline::updateStatistics_500ms(int oneSecond)
 {
 	bool invalidateSignals = false;
 
@@ -570,21 +538,17 @@ bool DataSourceOnline::updateStatistics_1s()
 
 		m_receivesData = false;
 
-		m_receivedFramesCount = 0;
-
-		m_firstPacketServerTime = 0;
-		m_lastPacketServerTime = 0;
-
-		m_dataReceivingSpeed = 0;
-		m_receivedDataSize = 0;
-		m_prevReceivedDataSize = 0;
-		m_rupFrameNumerator = -1;
+		clearStatistics();
 	}
 	else
 	{
-		m_dataReceivingSpeed = static_cast<double>(m_receivedDataSize - m_prevReceivedDataSize);		// Bytes per second
-
-		m_prevReceivedDataSize = m_receivedDataSize;
+		if (oneSecond)
+		{
+			// Bytes per second
+			//
+			m_dataReceivingSpeed = static_cast<double>(m_receivedDataSize - m_prevReceivedDataSize);
+			m_prevReceivedDataSize.store(m_receivedDataSize);
+		}
 	}
 
 	if (m_firstPacketServerTime == 0 || m_lastPacketServerTime == 0)
@@ -671,9 +635,6 @@ void DataSourceOnline::checkPlantTime(const Rup::TimeStamp& plantTimeStamp)
 	}
 
 	m_lastRupTimes = m_rupTimes;
-
-
-
 }
 
 bool DataSourceOnline::takeProcessingOwnership(const QThread* processingThread)
@@ -701,6 +662,73 @@ bool DataSourceOnline::releaseProcessingOwnership(const QThread* processingThrea
 QString DataSourceOnline::stateStr() const
 {
 	return (m_receivesData ? "Receive data" : "No data");
+}
+
+QString DataSourceOnline::rupFramePlantTimeStr() const
+{
+	return getTimeStr(m_rupFramePlantTime);
+}
+
+QString DataSourceOnline::getTimeStr(qint64 timeMs)
+{
+	QDateTime dt = QDateTime::fromMSecsSinceEpoch(timeMs, Qt::UTC, 0);
+
+	QDate date = dt.date();
+	QTime time = dt.time();
+
+	return 	QString(FormatStr::DATE_TIME_FORMAT_STR).
+				arg(time.hour(), 2, 10, QLatin1Char('0')).
+				arg(time.minute(), 2, 10, QLatin1Char('0')).
+				arg(time.second(), 2, 10, QLatin1Char('0')).
+				arg(time.msec(), 3, 10, QLatin1Char('0')).
+				arg(date.day(), 2, 10, QLatin1Char('0')).
+				arg(date.month(), 2, 10, QLatin1Char('0')).
+				arg(date.year(), 4, 10, QLatin1Char('0'));
+}
+
+QString DataSourceOnline::getTimeStr(const Rup::TimeStamp& ts)
+{
+	return 	QString(FormatStr::DATE_TIME_FORMAT_STR).
+				arg(ts.hour, 2, 10, QLatin1Char('0')).
+				arg(ts.minute, 2, 10, QLatin1Char('0')).
+				arg(ts.second, 2, 10, QLatin1Char('0')).
+				arg(ts.millisecond, 3, 10, QLatin1Char('0')).
+				arg(ts.day, 2, 10, QLatin1Char('0')).
+				arg(ts.month, 2, 10, QLatin1Char('0')).
+				arg(ts.year, 4, 10, QLatin1Char('0'));
+}
+
+void DataSourceOnline::clearStatistics()
+{
+	m_dataReceivingSpeed = 0;
+	m_receivedDataSize = 0;
+	m_prevReceivedDataSize = 0;
+
+	m_uptime = 0;										// in seconds!
+	m_receivedDataID = 0;
+
+	m_rupFramePlantTime = 0;
+	m_rupFrameNumerator = -1;			// qint64 is Ok!
+
+	m_dataReceivingSpeed = 0;
+	m_receivedDataSize = 0;
+	m_prevReceivedDataSize = 0;
+	m_receivedFramesCount = 0;
+	m_receivedPacketCount = 0;
+	m_lostPacketCount = 0;
+
+	m_errorProtocolVersion = 0;
+	m_errorFramesQuantity = 0;
+	m_errorFrameNo = 0;
+	m_errorFrameCRC = 0;
+	m_errorDataID = 0;
+
+	m_errorDuplicatePlantTime = 0;
+	m_errorNonmonotonicPlantTime = 0;
+	m_errorPlantTimeFormat = 0;
+
+	m_firstPacketServerTime = 0;
+	m_lastPacketServerTime = 0;
 }
 
 bool DataSourceOnline::moveToNextWriteBuffer(const QThread* thread)

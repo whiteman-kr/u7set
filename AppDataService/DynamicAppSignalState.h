@@ -70,6 +70,10 @@ public:
 
 	const AppSignal* signal() const { return m_signal; }
 
+public:
+
+	// bool m_debug_replace_time = false;
+
 private:
 	bool getValue(const char* rupData, int rupDataSize, double& value);
 	bool getBit(const char* rupData, int rupDataSize, const Address16& addr, quint32& bit);
@@ -143,11 +147,6 @@ private:
 
 	double m_coarseStoredValue;
 	double m_fineStoredValue;
-
-	//
-
-	//quint32 m_prevValidity = false;
-	//double m_prevValue = 0;
 
 	//
 
