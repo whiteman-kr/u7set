@@ -354,6 +354,18 @@ TuningSignalState EditSchemaTuningSignalProvider::state(const QString& appSignal
 	return result;
 }
 
+TuningSignalState EditSchemaTuningSignalProvider::state(Hash /*hash*/, Hash /*tuningServiceHash*/, bool* /*found*/) const
+{
+	Q_ASSERT(false);
+	return {};
+}
+
+TuningSignalState EditSchemaTuningSignalProvider::state(const QString& /*appSignalId*/, Hash /*tuningServiceHash*/, bool* /*found*/) const
+{
+	Q_ASSERT(false);
+	return {};
+}
+
 QStringList EditSchemaTuningSignalProvider::signalIdsByTag(const QString& /*tag*/) const
 {
 	Q_ASSERT(false);

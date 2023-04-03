@@ -1620,7 +1620,7 @@ bool MonitorSettingsGetter::readTuningServiceSettings(const Builder::Context* co
 
 	for(const QString& tuningServiceID : tuningServicesIDs)
 	{
-		HostAddressPort tuningServiceClientIP;
+		HostAddressPort tuningServiceClientAddress;
 
 		result &= getSoftwareConnectionBySoftwareID(equipment,
 									   software,
@@ -1628,7 +1628,7 @@ bool MonitorSettingsGetter::readTuningServiceSettings(const Builder::Context* co
 									   EquipmentPropNames::TUNING_SERVICE_ID,
 									   EquipmentPropNames::CLIENT_REQUEST_IP,
 									   EquipmentPropNames::CLIENT_REQUEST_PORT,
-									   &tuningServiceClientIP,
+									   &tuningServiceClientAddress,
 									   false,
 									   Socket::IP_NULL,
 									   PORT_TUNING_SERVICE_CLIENT_REQUEST,
@@ -1639,8 +1639,7 @@ bool MonitorSettingsGetter::readTuningServiceSettings(const Builder::Context* co
 		SoftwareEndpoint::TuningService tsc;
 
 		tsc.equipmentId = tuningServiceID;
-		tsc.clientRequestIP = tuningServiceClientIP.addressStr();
-		tsc.clientRequestPort = tuningServiceClientIP.port();
+		tsc.clientRequestAddress = tuningServiceClientAddress;
 
 		TuningServiceSettingsGetter tsg;
 
@@ -1709,7 +1708,7 @@ bool TuningClientSettingsGetter::readSettings(const Builder::Context* context,
 
 	for(const QString& tuningServiceID : tuninfServicesIDs)
 	{
-		HostAddressPort tuningServiceClientIP;
+		HostAddressPort tuningServiceClientAddress;
 
 		result &= getSoftwareConnectionBySoftwareID(equipment,
 									   software,
@@ -1717,7 +1716,7 @@ bool TuningClientSettingsGetter::readSettings(const Builder::Context* context,
 									   EquipmentPropNames::TUNING_SERVICE_ID,
 									   EquipmentPropNames::CLIENT_REQUEST_IP,
 									   EquipmentPropNames::CLIENT_REQUEST_PORT,
-									   &tuningServiceClientIP,
+									   &tuningServiceClientAddress,
 									   false,
 									   Socket::IP_NULL,
 									   PORT_TUNING_SERVICE_CLIENT_REQUEST,
@@ -1728,8 +1727,7 @@ bool TuningClientSettingsGetter::readSettings(const Builder::Context* context,
 		SoftwareEndpoint::TuningService tsc;
 
 		tsc.equipmentId = tuningServiceID;
-		tsc.clientRequestIP = tuningServiceClientIP.addressStr();
-		tsc.clientRequestPort = tuningServiceClientIP.port();
+		tsc.clientRequestAddress = tuningServiceClientAddress;
 
 		TuningServiceSettingsGetter tsg;
 

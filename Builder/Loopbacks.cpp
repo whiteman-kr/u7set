@@ -65,6 +65,7 @@ namespace Builder
 	QStringList Loopback::linkedSignalsIDs() const
 	{
 		QStringList list;
+		list.reserve(m_linkedSignals.size());
 
 		for(const QString& signalID : m_linkedSignals)
 		{

@@ -18,10 +18,10 @@ public:
 
 	bool hasPendingChanges();
 
-protected:
 	virtual QBrush backColor(const QModelIndex& index) const override;
 	virtual QBrush foregroundColor(const QModelIndex& index) const override;
 
+protected:
 	virtual Qt::ItemFlags flags(const QModelIndex& index) const override;
 
 	virtual	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
@@ -163,10 +163,11 @@ private:
 	// Signals processing
 
 	void invertValue();
-
 	void addSelectedSignalsToFilter(TuningFilter* filter);
-
 	void restoreSignalsFromFilter(TuningFilter* filter);
+
+	void setActionButtonsState();
+	void updateVisibleItems();
 
 private slots:
 
@@ -187,25 +188,17 @@ private:
 	TuningTableView* m_objectList = nullptr;
 
 	QVBoxLayout* m_mainLayout = nullptr;
-
 	QHBoxLayout* m_bottomLayout = nullptr;
 
 	QPushButton* m_setValueButton = nullptr;
-
 	QPushButton* m_setAllButton = nullptr;
-
 	QPushButton* m_writeButton = nullptr;
-
 	QPushButton* m_undoButton = nullptr;
-
 	QPushButton* m_applyButton = nullptr;
 
 	QPushButton* m_filterButton = nullptr;
-
 	QComboBox* m_filterTextCombo = nullptr;
-
 	QComboBox* m_filterTypeCombo = nullptr;
-
 	QComboBox* m_filterValueCombo = nullptr;
 
 	TuningModelClient* m_model = nullptr;

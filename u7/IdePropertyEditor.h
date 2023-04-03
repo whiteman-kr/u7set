@@ -206,6 +206,7 @@ private:
 private:
     TuningFilterEditor* m_tuningFilterEditor = nullptr;
 
+	ILogFileStub logFileStub;
 	TuningSignalManager m_signals;
 	TuningFilterStorage m_filters;
 

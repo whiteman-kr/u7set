@@ -43,6 +43,15 @@ private:
 		ColumnCount
 	};
 
+	enum class ColumnUserData
+	{
+		Index,
+		StatId
+	};
+
+
+
+
 	QTreeWidget* m_treeWidget = nullptr;
 	int m_updateStateTimerId = -1;
 };

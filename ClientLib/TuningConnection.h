@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../AppSignalLib/ITuningSignalManager.h"
+#include "../AppSignalLib/ITuningSignalUpdater.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/Tcp.h"
 #include "../UtilsLib/ILogFile.h"
@@ -25,28 +27,30 @@ namespace ClientLib
 					   const SoftwareEndpoint::TuningService& tuns,
 					   bool autoApply,
 					   TuningClientSettings::LmStatusFlagMode lmStatusFlagMode,
-					   TuningSignalManager& tuningSignalManager,
+					   ITuningSignalUpdater& signalUpdater,
 					   ILogFile* logFile,
 					   TuningLog::TuningLog* tuningLog);
 			Connection(const Connection&) = delete;
-			Connection(Connection&& src) noexcept;
+			Connection(Connection&& src) = delete;
 			~Connection();
 
 			Connection& operator=(const Connection&) = delete;
-			Connection& operator=(Connection&& src) noexcept;
+			Connection& operator=(Connection&& src) = delete;
 
 			void stopAndDestroy();
 			HostAddressPort address() const;
 
 			// --
 			//
-
 			ClientLib::TuningTcpClient* tcpTuningClient = nullptr;
 			SimpleThread* tcpClientThread = nullptr;
 		};
 
 	public:
-		explicit TuningConnection(TuningSignalManager& tuningSignalManager, ILogFile* logFile, TuningLog::TuningLog* tuningLog);
+		explicit TuningConnection(ITuningSignalManager& tuningSignalManager,
+								  ITuningSignalUpdater& tuningSignalUpdater,
+								  ILogFile* logFile,
+								  TuningLog::TuningLog* tuningLog);
 
 	public:
 		/// Call this function when the new configuration arrived to recreate communication thread with the new configuration
@@ -65,25 +69,35 @@ namespace ClientLib
 		[[nodiscard]] std::vector<TuningSource> tuningSourcesInfo() const;
 		[[nodiscard]] std::vector<TuningSource> tuningSourceInfo(Hash sourceHash) const;
 
+		/// Returns number of communication channels for tuning source (LogicModule). Now 1 or 2.
+		/// (Used only Single LM Control is turned on)
+		///
 		[[nodiscard]] int tuningSourceStatesCount(Hash sourceHash) const;
+
+		/// Returns number of activated communication channels for tuning source (LogicModule). Now 0, 1 or 2.
+		///	Activation is Tusning Service feature, LM does not know about it.
+		/// (Used only Single LM Control is turned on)
+		///
 		[[nodiscard]] int activatedTuningSourceStatesCount(Hash sourceHash) const;
+
+		/// Command to TuningServices to (de)activate communication channel to source (LogicModule).
+		/// (Used only Single LM Control is turned on)
+		///
 		[[nodiscard]] bool activateTuningSource(Hash sourceHash, bool activate) const;
 
-		/// Client Control functions
+		/// Get information about current state of client control. Used for printing info in status bars, etc.
+		/// (Used only Single LM Control is turned on)
 		///
 		QString clientControlInfo() const;
 
-		[[nodiscard]] bool takeClientControl(const std::set<Hash>& sourceHashes) const;
-
-		/// Reading channel-specific signal states from all connections
+		/// Make this client active for TuningServices that control the specified sources.
+		/// (Used only Single LM Control is turned on)
 		///
-		std::vector<std::pair<QString, TuningSignalState>> states(Hash appSignalHash) const;	// First is Tuning Service ID, Second is State
+		[[nodiscard]] bool takeClientControl(Hash sourceHash) const;
 
 		/// Tuning signals functions
 		///
-		void writeTuningSignals(const std::vector<TuningWriteCommand>& writeCommands);
-
-		virtual bool hasTuningSignal(QString appSignalId) const override;
+		bool writeTuningSignals(const std::vector<TuningWriteCommand>& writeCommands);
 		virtual bool writeTuningSignal(QString appSignalId, TuningValue tuningValue) override;
 
 		/// Apply functions
@@ -97,7 +111,8 @@ namespace ClientLib
 		std::list<Connection> m_conns;
 
 	private:
-		TuningSignalManager& m_tuningSignalManager;
+		ITuningSignalManager& m_tuningSignalManager;
+		ITuningSignalUpdater& m_tuningSignalUpdater;
 
 		HasLogFile m_logFile;
 		TuningLog::TuningLog* m_tuningLog = nullptr;

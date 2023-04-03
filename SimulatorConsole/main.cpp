@@ -48,7 +48,7 @@ void messageOutputHandler(QtMsgType type, const QMessageLogContext& context, con
 void showProgrammUsageHint()
 {
 	std::cout << "Programm usage:\n";
-	std::cout << "  SimulatorConsole [-build=build_dir] [-script=script_file] [-profile=profile_name] [-unlock_timer] [-verbose] [-enable_lan]\n";
+	std::cout << "  SimulatorConsole [-build=build_dir] [-script=script_file] [-profile=profile_name] [-speed_factor=x0.1|x0.25|x0.5|x1|x2|x4|FF] [-verbose] [-enable_lan]\n";
 	std::cout << "\n";
 	std::cout << "Create template simualtion script:\n";
 	std::cout << "  SimulatorConsole [-create=file_name]\n";
@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
 	QCoreApplication app(argc, argv);
 
 	// Parse arguments
-	// SimulatorConsole.exe [-build=build_dir] [-script=script_file] [-profile=profile_name] [-unlock_timer] [-verbose] [-enable_lan] [-no_exit]
+	// SimulatorConsole.exe [-build=build_dir] [-script=script_file] [-profile=profile_name] [-speed_factor=x0.1|x0.25|x0.5|x1|x2|x4|FF] [-verbose] [-enable_lan] [-no_exit]
 	// SimulatorConsole.exe [-create=file_name]
 	//
 	QStringList args = QCoreApplication::arguments();
@@ -144,6 +144,7 @@ int main(int argc, char *argv[])
 	QString buildPath;
 	QString scriptFile;
 	QString profileName;
+	QString speedFactorStr;
 	bool unlockTimer = false;
 	bool enableLan = false;
 	bool noExit = false;
@@ -183,6 +184,13 @@ int main(int argc, char *argv[])
 			continue;
 		}
 
+		if (args[argIndex].startsWith("-speed_factor=", Qt::CaseInsensitive) == true)
+		{
+			speedFactorStr = args[argIndex];
+			speedFactorStr.replace("-speed_factor=", "", Qt::CaseInsensitive);
+			continue;
+		}
+
 		if (args[argIndex].compare("-verbose", Qt::CaseInsensitive) == 0)
 		{
 			g_verbose.store(true);
@@ -209,6 +217,55 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
+	double speedFactor = 1.0;
+	if (unlockTimer == true)
+	{
+		// -unlock_timer - is obsolete.
+		//
+		speedFactor = 256.0;
+	}
+
+	if (speedFactorStr.isEmpty() == false)
+	{
+		std::map<QString, double> speedFactorStrToValue{
+			{".1", 0.1},
+			{".25", 0.25},
+			{".5", 0.5},
+			{".75", 0.75},
+			{"1", 1.0},
+			{"2", 2.0},
+			{"4", 4.0},
+			{"8", 8.0},
+			{"10", 10.0},
+			{"16", 16.0},
+			{"FF", 256.0}
+		};
+
+		speedFactorStr.remove("x", Qt::CaseInsensitive);
+		if (speedFactorStr.startsWith("0.", Qt::CaseInsensitive) == true)
+		{
+			speedFactorStr.replace("0.", ".");
+		}
+
+		if (speedFactorStrToValue.contains(speedFactorStr) == true)
+		{
+			speedFactor = speedFactorStrToValue[speedFactorStr];
+		}
+		else
+		{
+			std::cout << "Wrong SpeedFactor: " << speedFactorStr.toLocal8Bit().data() << ", fallback to SpeedFactor 1.0\n";
+		}
+	}
+
+	if (speedFactor >= 256.0)
+	{
+		std::cout << "SpeedFactor: FF\n";
+	}
+	else
+	{
+		std::cout << "SpeedFactor: " << speedFactor << "\n";
+	}
+
 	// --
 	//
 	Sim::ConsoleLogFile consoleLog;
@@ -221,7 +278,7 @@ int main(int argc, char *argv[])
 	}
 
 	simulator.setCurrentProfile(profileName);
-	simulator.control().setUnlockTimer(unlockTimer);
+	simulator.control().setSpeedFactor(speedFactor);
 	simulator.control().setRunList({});		// Add all modules to simulation
 	simulator.software().setEnabled(enableLan);
 
@@ -248,7 +305,7 @@ int main(int argc, char *argv[])
 		{
 			// Wait for Enter
 			//
-			std::cout << "Press Enter to exit...\n";
+			std::cout << "Press Enter to stop simulation and exit...\n";
 			std::string str;
 			std::getline(std::cin, str);
 		}

@@ -196,7 +196,7 @@ void TuningConfigController::dump(const ConfigSettings& conf) const
 {
 	for (const SoftwareEndpoint::TuningService& ts : conf.clientSettings.tuningServices)
 	{
-		m_logFile.writeMessage(tr("Tuning Service Connection: %1, %2, %3").arg(ts.equipmentId).arg(ts.clientRequestIP).arg(ts.clientRequestPort));
+		m_logFile.writeMessage(tr("Tuning Service Connection: %1, %2").arg(ts.shortenId).arg(ts.clientRequestAddress.toString()));
 	}
 
 	return;

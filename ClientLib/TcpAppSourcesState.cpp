@@ -303,13 +303,13 @@ namespace ClientLib
 			return;
 		}
 
-		if (m_getDataSourcesInfoReply.error() != static_cast<int>(NetworkError::Success))
+		if (m_getDataSourcesInfoReply.error() != static_cast<int>(E::NetworkError::Success))
 		{
 			qDebug() << tr("TcpAppDataSourcesStateClient::m_getDataSourcesInfoReply, error received: %1")
-						.arg(getNetworkErrorStr(static_cast<NetworkError>(m_getDataSourcesInfoReply.error())));
+						.arg(E::valueToString(static_cast<E::NetworkError>(m_getDataSourcesInfoReply.error())));
 
 			m_logFile.writeError(QString("m_getDataSourcesInfoReply, error received: %1")
-								 .arg(getNetworkErrorStr(static_cast<NetworkError>(m_getDataSourcesInfoReply.error()))));
+								 .arg(E::valueToString(static_cast<E::NetworkError>(m_getDataSourcesInfoReply.error()))));
 
 			resetToGetAppDataSourcesInfo();
 			return;
@@ -354,12 +354,12 @@ namespace ClientLib
 			return;
 		}
 
-		if (m_getAppDataSourcesStateReply.error() != static_cast<int>(NetworkError::Success))
+		if (m_getAppDataSourcesStateReply.error() != static_cast<int>(E::NetworkError::Success))
 		{
 			qDebug() << "TcpSourcesStateClient::processAppDataSourcesState, error received: " << m_getAppDataSourcesStateReply.error();
 			m_logFile.writeError(QString("processAppDataSourcesState, error received: %1").arg(m_getAppDataSourcesStateReply.error()));
 
-			assert(m_getAppDataSourcesStateReply.error() != static_cast<int>(NetworkError::Success));
+			assert(m_getAppDataSourcesStateReply.error() != static_cast<int>(E::NetworkError::Success));
 
 			resetToGetAppDataSourcesState();
 			return;

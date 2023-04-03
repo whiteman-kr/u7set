@@ -4,32 +4,20 @@
 
 #include "TuningSignalManager.h"
 
+#define ANY_HASH UNDEFINED_HASH
+
 //
 //TuningSignalManager
 //
-TuningSignalManager::TuningSignalManager(QObject* parent) :
-	QObject(parent)
+TuningSignalManager::TuningSignalManager(const QString& clientEquipmentId, ILogFile* logFile, QObject* parent) :
+	QObject(parent),
+	m_tuningClientHash(::calcHash(clientEquipmentId)),
+	m_logFile(logFile, "TuningSignalManager")
 {
 }
 
 TuningSignalManager::~TuningSignalManager()
 {
-}
-
-void TuningSignalManager::reset()
-{
-	{
-		QWriteLocker l(&m_signalsLock);
-		m_signals.clear();
-		m_tagToAppSignals.clear();
-	}
-
-	{
-		QWriteLocker l(&m_statesLock);
-		m_states.clear();
-	}
-
-	return;
 }
 
 bool TuningSignalManager::load(const QByteArray& data)
@@ -95,7 +83,7 @@ bool TuningSignalManager::load(const ::Proto::AppSignalSet& message)
 		std::swap(tagToAppSignals, m_tagToAppSignals);
 	}
 
-	emit signalsLoaded();
+	notifySignalParamsUpdated();
 
 	return ok;
 }
@@ -116,42 +104,6 @@ std::vector<AppSignalParam> TuningSignalManager::signalList() const
 	for (auto p : m_signals)
 	{
 		result.emplace_back(p.second);
-	}
-
-	return result;
-}
-
-std::vector<Hash> TuningSignalManager::signalHashes() const
-{
-	std::vector<Hash> result;
-	result.reserve(m_signals.size());
-
-	QReadLocker rl(&m_signalsLock);
-
-	for (const auto& p : m_signals)
-	{
-		result.push_back(p.first);
-	}
-
-	return result;
-}
-
-std::vector<Hash> TuningSignalManager::signalHashes(const std::vector<Hash> lmEquipmentIdHashes) const
-{
-	std::vector<Hash> result;
-	result.reserve(m_signals.size());
-
-	QReadLocker rl(&m_signalsLock);
-
-	for (const auto& p : m_signals)
-	{
-		const AppSignalParam& param = p.second;
-		Hash signalEquipmentHash = ::calcHash(param.lmEquipmentId());
-
-		if (std::find(lmEquipmentIdHashes.begin(), lmEquipmentIdHashes.end(), signalEquipmentHash) != lmEquipmentIdHashes.end())
-		{
-			result.push_back(p.first);
-		}
 	}
 
 	return result;
@@ -229,13 +181,13 @@ bool TuningSignalManager::signalParam(const QString& appSignalId, AppSignalParam
 
 TuningSignalState TuningSignalManager::state(Hash hash, bool* found) const
 {
-	if (hash == 0)
+	if (hash == UNDEFINED_HASH)
 	{
-		assert(hash != 0);
+		assert(hash != UNDEFINED_HASH);
 		return TuningSignalState();
 	}
 
-	QReadLocker l(&m_statesLock);
+	QReadLocker l(&m_statesLocker);
 
 	auto foundState = m_states.find(hash);
 
@@ -246,7 +198,7 @@ TuningSignalState TuningSignalManager::state(Hash hash, bool* found) const
 
 	if (foundState != m_states.end())
 	{
-		return foundState->second;
+		return foundState->second.get();
 	}
 	else
 	{
@@ -261,6 +213,42 @@ TuningSignalState TuningSignalManager::state(const QString& appSignalId, bool* f
 {
 	Hash signalHash = ::calcHash(appSignalId);
 	return state(signalHash, found);
+}
+
+TuningSignalState TuningSignalManager::state(Hash hash, Hash tuningServiceHash, bool* found) const
+{
+	if (hash == UNDEFINED_HASH)
+	{
+		assert(hash != UNDEFINED_HASH);
+		return TuningSignalState();
+	}
+
+	QReadLocker l(&m_statesLocker);
+
+	auto foundState = m_states.find(hash);
+
+	if (foundState != m_states.end())
+	{
+		return foundState->second.get(tuningServiceHash, found);
+	}
+	else
+	{
+		if (found != nullptr)
+		{
+			*found = false;
+		}
+
+		TuningSignalState result;
+		result.m_flags.valid = false;
+
+		return result;
+	}
+}
+
+TuningSignalState TuningSignalManager::state(const QString& appSignalId, Hash tuningServiceHash, bool* found) const
+{
+	Hash signalHash = ::calcHash(appSignalId);
+	return state(signalHash, tuningServiceHash, found);
 }
 
 QStringList TuningSignalManager::signalIdsByTag(const QString& tag) const
@@ -278,130 +266,408 @@ QStringList TuningSignalManager::signalIdsByTag(const QString& tag) const
 	}
 }
 
-void TuningSignalManager::invalidateStates()
+void TuningSignalManager::reset()
 {
-	QWriteLocker l(&m_statesLock);
+	{
+		QWriteLocker l(&m_signalsLock);
+		m_signals.clear();
+		m_tagToAppSignals.clear();
+	}
+
+	{
+		QWriteLocker l(&m_statesLocker);
+		m_states.clear();
+	}
+
+	return;
+}
+
+std::vector<Hash> TuningSignalManager::signalHashes() const
+{
+	std::vector<Hash> result;
+	result.reserve(m_signals.size());
+
+	QReadLocker rl(&m_signalsLock);
+
+	for (const auto& p : m_signals)
+	{
+		result.push_back(p.first);
+	}
+
+	return result;
+}
+
+std::vector<Hash> TuningSignalManager::signalHashes(const std::vector<Hash> lmEquipmentIdHashes) const
+{
+	std::vector<Hash> result;
+	result.reserve(m_signals.size());
+
+	QReadLocker rl(&m_signalsLock);
+
+	for (const auto& p : m_signals)
+	{
+		const AppSignalParam& param = p.second;
+		Hash signalEquipmentHash = ::calcHash(param.lmEquipmentId());
+
+		if (std::find(lmEquipmentIdHashes.begin(), lmEquipmentIdHashes.end(), signalEquipmentHash) != lmEquipmentIdHashes.end())
+		{
+			result.push_back(p.first);
+		}
+	}
+
+	return result;
+}
+
+void TuningSignalManager::invalidateSignalStates(Hash tuningServiceHash)
+{
+	QWriteLocker l(&m_statesLocker);
 
 	for (auto& p : m_states)
 	{
-		p.second.invalidate();
+		p.second.invalidateSource(tuningServiceHash);
 	}
 
 	return;
 }
 
-void TuningSignalManager::setState(const QString& appSignalId, const TuningSignalState& state)
+void TuningSignalManager::setState(const TuningSignalState& state, Hash tuningServiceHash)
 {
-	Hash signalHash = ::calcHash(appSignalId);
-	return setState(signalHash, state);
+	return setStates({state}, tuningServiceHash);
 }
 
-void TuningSignalManager::setState(Hash signalHash, const TuningSignalState& state)
+void TuningSignalManager::setStates(const std::vector<TuningSignalState>& states, Hash tuningServiceHash)
 {
-	if (signalHash == 0)
+	struct UnsuccessfulWrite
 	{
-		assert(signalHash != 0);
-		return;
-	}
+		TuningValue value;
+		Hash appSignalHash = UNDEFINED_HASH;
+		int writeErrorCode = 0;
+	};
 
-	QWriteLocker l(&m_statesLock);
+	std::vector<UnsuccessfulWrite> unsuccessfulWrites;
 
-	auto [it, inserted] = m_states.insert_or_assign(signalHash, state);
-	Q_UNUSED(inserted);
-
-	it->second.m_hash = signalHash;
-
-	return;
-}
-
-void TuningSignalManager::setState(const std::vector<TuningSignalState>& states)
-{
-	QWriteLocker l(&m_statesLock);
-
-	for (const TuningSignalState& state : states)
 	{
-		m_states[state.hash()] = state;
-	}
+		QWriteLocker l(&m_statesLocker);
 
-	return;
-}
-
-TuningValue TuningSignalManager::newValue(Hash signalHash) const
-{
-	QReadLocker l(&m_newValuesLock);
-
-	auto it = m_newValues.find(signalHash);
-	if (it == m_newValues.end())
-	{
-		return TuningValue();
-	}
-
-	return it->second.value;
-}
-
-void TuningSignalManager::setNewValue(Hash signalHash, const TuningValue& value)
-{
-	if (signalHash == 0)
-	{
-		assert(signalHash != 0);
-		return;
-	}
-
-	// Get the old value
-
-	QReadLocker ls(&m_statesLock);
-
-	auto foundState = m_states.find(signalHash);
-
-	if (foundState == m_states.end())
-	{
-		assert(false);
-		return;
-	}
-
-	const TuningSignalState state = foundState->second;
-
-	ls.unlock();
-
-	// Compare new value to old value and set unapplied flag
-
-	QWriteLocker l(&m_newValuesLock);
-
-	TuningNewValue tnv;
-	tnv.value = value;
-
-	if (state.valid() == true)
-	{
-		if (state.value() == value)
+		// If writing has been finished - set new values as applied or display a writing error
+		//
+		for (const TuningSignalState& arrivedState : states)
 		{
-			tnv.isUnapplied = false;
+			if (m_tuningClientHash != arrivedState.writeClient())
+			{
+				continue;
+			}
+
+			auto sourcesIt = m_states.find(arrivedState.hash());
+			if (sourcesIt == m_states.end())
+			{
+				continue;
+			}
+			Sources& currentSources = sourcesIt->second;
+
+			if (currentSources.isValueUnapplied(tuningServiceHash) == true)
+			{
+				bool found = false;
+				TuningSignalState currentState = currentSources.get(tuningServiceHash, &found);
+				if (found == false)
+				{
+					continue;
+				}
+
+				if (static_cast<E::NetworkError>(arrivedState.writeErrorCode()) == E::NetworkError::Success)
+				{
+					if (arrivedState.successfulWriteTime() > currentState.successfulWriteTime())
+					{
+						currentSources.setAsApplied(tuningServiceHash);
+					}
+				}
+				else
+				{
+					if (arrivedState.unsuccessfulWriteTime() > currentState.unsuccessfulWriteTime())
+					{
+						currentSources.setAsApplied(tuningServiceHash);
+
+						unsuccessfulWrites.push_back({currentSources.getUnappliedValue(), arrivedState.hash(), arrivedState.writeErrorCode()});
+					}
+				}
+			}
+		}
+
+		// Write new states to states array
+		//
+		for (const TuningSignalState& arrivedState : states)
+		{
+			m_states[arrivedState.hash()].set(arrivedState, tuningServiceHash);
+		}
+	}
+
+	// Log unsuccessful writes
+	//
+	for (const UnsuccessfulWrite&  u: unsuccessfulWrites)
+	{
+		bool paramFound = false;
+		AppSignalParam param = signalParam(u.appSignalHash, &paramFound);
+		if (paramFound == false)
+		{
+			assert(false);
+			continue;
+		}
+
+		m_logFile.writeAlert(tr("TuningSignalManager::setStates(), Error writing value '%1' to signal '%2' (%3), logic module '%4': %5")
+							 .arg(u.value.toString())
+							 .arg(param.customSignalId())
+							 .arg(param.caption())
+							 .arg(param.lmEquipmentId())
+							 .arg(E::valueToString(static_cast<E::NetworkError>(u.writeErrorCode)))
+							 );
+	}
+
+
+	return;
+}
+
+void TuningSignalManager::notifySignalParamsUpdated()
+{
+	emit signalsLoaded();
+}
+
+void TuningSignalManager::setUnappliedValue(Hash hash, const TuningValue& value)
+{
+	QWriteLocker l(&m_statesLocker);
+
+	auto foundState = m_states.find(hash);
+	if (foundState != m_states.end())
+	{
+		Sources& sources = foundState->second;
+		sources.setUnappliedValue(value);
+	}
+}
+
+TuningValue TuningSignalManager::unappliedValue(Hash hash) const
+{
+	QWriteLocker l(&m_statesLocker);
+
+	auto foundState = m_states.find(hash);
+
+	if (foundState != m_states.end())
+	{
+		const Sources& sources = foundState->second;
+		return sources.getUnappliedValue();
+	}
+
+	static TuningValue empty;
+	return empty;
+}
+
+bool TuningSignalManager::isUnapplied(Hash hash) const
+{
+	QWriteLocker l(&m_statesLocker);
+
+	auto foundState = m_states.find(hash);
+	if (foundState != m_states.end())
+	{
+		const Sources& sources = foundState->second;
+		if (sources.isValueUnapplied() == true)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void TuningSignalManager::Sources::set(const TuningSignalState& state, Hash tuningServiceHash)
+{
+	SourceState* emptyState = nullptr;
+	for (SourceState& sourceState : sources)
+	{
+		if (sourceState.tuningServiceHash == tuningServiceHash)
+		{
+			sourceState.state = state;
+			sourceState.lastUpdateTime = std::chrono::system_clock::now();
+			return;
+		}
+
+		if (sourceState.tuningServiceHash == UNDEFINED_HASH)
+		{
+			emptyState = &sourceState;
+		}
+	}
+
+	if (emptyState == nullptr)
+	{
+		// No emty space in sources
+		//
+		Q_ASSERT(emptyState);
+
+		// Try to mitigate it, and set value to the last item
+		//
+		emptyState = &sources.back();
+	}
+
+	*emptyState = SourceState{state, tuningServiceHash, std::chrono::system_clock::now(), false/*isUnapplied*/};
+
+	return;
+}
+
+void TuningSignalManager::Sources::invalidateSource(Hash tuningServiceHash)
+{
+	for (SourceState& sourceState : sources)
+	{
+		if (sourceState.tuningServiceHash == tuningServiceHash)
+		{
+			sourceState.state = TuningSignalState{};
+			sourceState.lastUpdateTime = std::chrono::system_clock::now();
+			break;
+		}
+	}
+
+	return;
+}
+
+const TuningSignalState& TuningSignalManager::Sources::get() const
+{
+	return get(ANY_HASH, nullptr);
+}
+
+const TuningSignalState& TuningSignalManager::Sources::get(Hash tuningServiceHash, bool* found) const
+{
+	if (found != nullptr)
+	{
+		*found = false;
+	}
+
+	// Find the newest available state
+	//
+	const SourceState* stateAvailable = nullptr;
+	const SourceState* stateNewest = nullptr;
+
+	for (const SourceState& sourceState : sources)
+	{
+		if (sourceState.tuningServiceHash == UNDEFINED_HASH)
+		{
+			continue;
+		}
+
+		if (tuningServiceHash != ANY_HASH && tuningServiceHash != sourceState.tuningServiceHash)
+		{
+			continue;
+		}
+
+		if (found != nullptr)
+		{
+			*found = true;
+		}
+
+		if (sourceState.state.valid() == true)
+		{
+			if (stateAvailable == nullptr ||
+				stateAvailable->state.m_successfulReadTime < sourceState.state.m_successfulReadTime)
+			{
+				stateAvailable = &sourceState;	// the first state with state available flag
+			}
 		}
 		else
 		{
-			tnv.isUnapplied = true;
+			// sourceState.state.valid() == false
+			//
+			if (stateNewest == nullptr ||
+				stateNewest->lastUpdateTime < sourceState.lastUpdateTime)
+			{
+				stateNewest = &sourceState;
+			}
 		}
 	}
 
-	m_newValues[signalHash] = tnv;
-
-	return;
-}
-
-bool TuningSignalManager::newValueIsUnapplied(Hash signalHash) const
-{
-	QReadLocker l(&m_newValuesLock);
-
-	auto it = m_newValues.find(signalHash);
-	if (it == m_newValues.end())
+	if (stateAvailable != nullptr)
 	{
-		return false;
+		return stateAvailable->state;
 	}
 
-	return it->second.isUnapplied;
+	if (stateNewest != nullptr)
+	{
+		return stateNewest->state;
+	}
+
+	static const TuningSignalState NotValidState{};
+	return NotValidState;
 }
 
-void TuningSignalManager::setNewValueAsApplied(Hash signalHash)
+void TuningSignalManager::Sources::setUnappliedValue(const TuningValue& value)
 {
-	QWriteLocker l(&m_newValuesLock);
-	m_newValues[signalHash].isUnapplied = false;
+	// Unapplied value is set to all sources
+	//
+	unappliedValue = value;
+
+	for (SourceState& sourceState : sources)
+	{
+		if (sourceState.tuningServiceHash == UNDEFINED_HASH)
+		{
+			continue;
+		}
+
+		if (sourceState.state.valid() == true)
+		{
+			if (sourceState.state.value() == value)
+			{
+				sourceState.isUnapplied = false;
+			}
+			else
+			{
+				sourceState.isUnapplied = true;
+			}
+		}
+		else
+		{
+			sourceState.isUnapplied = false;
+		}
+	}
+}
+
+const TuningValue& TuningSignalManager::Sources::getUnappliedValue() const
+{
+	return unappliedValue;
+}
+
+bool TuningSignalManager::Sources::isValueUnapplied() const
+{
+	for (const SourceState& sourceState : sources)
+	{
+		if (sourceState.tuningServiceHash == UNDEFINED_HASH)
+		{
+			continue;
+		}
+
+		if (sourceState.state.valid() == true)
+		{
+			if (sourceState.isUnapplied == true)
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+bool TuningSignalManager::Sources::isValueUnapplied(Hash tuningServiceHash) const
+{
+	for (const SourceState& sourceState : sources)
+	{
+		if (sourceState.tuningServiceHash == tuningServiceHash)
+		{
+			return sourceState.isUnapplied;
+		}
+	}
+	return false;
+}
+
+void TuningSignalManager::Sources::setAsApplied(Hash tuningServiceHash)
+{
+	for (SourceState& sourceState : sources)
+	{
+		if (sourceState.tuningServiceHash == tuningServiceHash)
+		{
+			sourceState.isUnapplied = false;
+		}
+	}
 }

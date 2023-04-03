@@ -655,6 +655,32 @@ public:
 	};
 	Q_ENUM(SecurityLevel)
 
+	// NetworkError
+	//
+	enum class NetworkError
+	{
+		Success,
+		WrongPartNo,
+		RequestParamExceed,
+		RequestStateExceed,
+		ParseRequestError,
+		RequestDataSourcesStatesExceed,
+		UnitsExceed,
+		UnknownTuningClientID,
+		UnknownSignalHash,
+		InternalError,
+		ArchiveError,								// for detail information check archError field
+		WrongTuningValueType,
+		TuningValueOutOfRange,
+		SingleLmControlDisabled,
+		LmControlIsNotActive,
+		ClientIsNotActive,
+		TuningNoReply,
+		TuningValueCorrupted,
+	};
+	Q_ENUM(NetworkError)
+
+
 public:
 	template <typename ENUM_TYPE>
 	static QMetaEnum metaEnum()

@@ -10,6 +10,15 @@
 
 const int SoftwareInfo::UNDEFINED_BUILD_NO = -1;
 
+SoftwareInfo::SoftwareInfo(E::SoftwareType softwareType,
+						   const QString& equipmentID,
+						   int majorVersion,
+						   int minorVersion,
+						   int buildNo)
+{
+	init(softwareType, equipmentID, majorVersion, minorVersion, buildNo);
+}
+
 void SoftwareInfo::init(E::SoftwareType softwareType,
 							 const QString& equipmentID,
 							 int majorVersion,

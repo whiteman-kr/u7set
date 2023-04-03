@@ -1357,6 +1357,56 @@ namespace TrendLib
 		return;
 	}
 
+	void TrendSignalSet::slot_trimData(E::TimeType timeType, TimeStamp trimFrom)
+	{
+		QMutexLocker locker(&m_archiveMutex);
+
+		std::map<TrendSignalPlusServerId, TrendArchive>* m_archive = nullptr;
+
+		switch (timeType)
+		{
+		case E::TimeType::Local:	m_archive = &m_archiveLocalTime;	break;
+		case E::TimeType::System:	m_archive = &m_archiveSystemTime;	break;
+		case E::TimeType::Plant:	m_archive = &m_archivePlantTime;	break;
+		default:
+			Q_ASSERT(false);
+			return;
+		}
+
+		for (auto&[trendSignalPlusServerId, archive] : *m_archive)
+		{
+			std::erase_if(archive.m_hours, [trimFrom](const auto& item) {
+				auto const& [timeStamp, hourData] = item;
+				return timeStamp >= trimFrom;
+			});
+
+			// Remove TrendStateRecord from the last hour
+			//
+			if (archive.m_hours.empty() == false)
+			{
+				std::shared_ptr<OneHourData> lastHour = archive.m_hours.rbegin()->second;
+				Q_ASSERT(lastHour);
+
+				std::erase_if(lastHour->data, [timeType, trimFrom](const TrendStateRecord& record) {
+					return record.states.empty() || record.states.front().getTime(timeType) >= trimFrom;
+				});
+
+				// Remove states from the last record
+				//
+				if (lastHour->data.empty() == false)
+				{
+					TrendStateRecord& lastRecord = lastHour->data.back();
+
+					std::erase_if(lastRecord.states, [timeType, trimFrom](const TrendStateItem& state) {
+						return state.getTime(timeType) >= trimFrom;
+					});
+				}
+			}
+		}
+
+		return;
+	}
+
 	void TrendSignalSet::appendRealtimeDataToArchive(QString sourceEquipmentId,
 													 E::TimeType timeType,
 													 Hash signalhash,

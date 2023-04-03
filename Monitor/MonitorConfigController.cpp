@@ -243,7 +243,7 @@ void MonitorConfigController::dump(const ConfigSettings& config) const
 	{
 		for (const auto& ts : config.tuningServices)
 		{
-			m_logFile.writeMessage(tr("TuningService (id, ip, port): %1, %2, %3.").arg(ts.equipmentId).arg(ts.clientRequestIP).arg(ts.clientRequestPort));
+			m_logFile.writeMessage(tr("TuningService (id, address): %1, %2.").arg(ts.shortenId).arg(ts.clientRequestAddress.toString()));
 			m_logFile.writeMessage(tr("TuningSources: %1.").arg(ts.drivenSources.join(", ")));
 		}
 		m_logFile.writeMessage(tr("TuningUserAccounts: %1.").arg(config.tuningUserAccounts.join(", ")));

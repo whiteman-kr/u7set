@@ -18,6 +18,10 @@
 
 namespace
 {
+	//
+	// DialogTuningPassword
+	//
+
 	class DialogTuningPassword : public QDialog
 	{
 	public:
@@ -34,16 +38,11 @@ namespace
 		const ClientLib::TuningUserManager& m_tuningUserManager;
 
 		QString m_password;
-		static QString m_lastUser;
+		static inline QString m_lastUser;
 
 		QComboBox* m_userCombo = nullptr;
 		QLineEdit* m_passwordEdit = nullptr;
 	};
-
-	//
-	// DialogPassword
-	//
-	QString DialogTuningPassword::m_lastUser = "";
 
 	DialogTuningPassword::DialogTuningPassword(const ClientLib::TuningUserManager& userManager, QWidget* parent) :
 		QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
@@ -147,12 +146,8 @@ namespace ClientLib
 {
 
 	//
-	// UserManager
+	// TuningUserManager
 	//
-
-	TuningUserManager::TuningUserManager()
-	{
-	}
 
 	void TuningUserManager::setConfiguration(bool tuningLogin, const QStringList& tuningUserAccounts, bool loginPerOperation, int tuningSessionTimeout)
 	{
@@ -226,14 +221,14 @@ namespace ClientLib
 		return m_tuningUserAccounts;
 	}
 
-	int TuningUserManager::tuningSessionTimeout() const
-	{
-		return m_tuningSessionTimeout;
-	}
-
 	bool TuningUserManager::loginPerOperation() const
 	{
 		return m_loginPerOperation;
+	}
+
+	int TuningUserManager::tuningSessionTimeout() const
+	{
+		return m_tuningSessionTimeout;
 	}
 
 	bool TuningUserManager::isLoggedIn() const
@@ -251,30 +246,16 @@ namespace ClientLib
 		return static_cast<int>(m_logoutSecsSinceEpoch - QDateTime::currentSecsSinceEpoch());
 	}
 
-	bool TuningUserManager::requestPassword(QWidget* parent)
+	bool TuningUserManager::checkPassword(const QString& userName, const QString& password)
 	{
-		if (m_tuningUserAccounts.empty() == true)
-		{
-			return true;
-		}
-
 		bool result = false;
-
-		do
-		{
-			DialogTuningPassword d(*this, parent);
-
-			if (d.exec() != QDialog::Accepted)
-			{
-				return false;
-			}
 
 #ifdef Q_OS_WIN
 			HANDLE phToken=NULL;
 
-			if (LogonUser(reinterpret_cast<LPCWSTR>(d.userName().data()),
+			if (LogonUser(reinterpret_cast<LPCWSTR>(userName.data()),
 						  0,
-						  reinterpret_cast<LPCWSTR>(d.password().data()),
+						  reinterpret_cast<LPCWSTR>(password.data()),
 						  LOGON32_LOGON_INTERACTIVE,
 						  LOGON32_PROVIDER_DEFAULT,
 						  &phToken) == TRUE)
@@ -289,110 +270,71 @@ namespace ClientLib
 #endif
 
 #ifdef Q_OS_LINUX
-			QByteArray userNameData = d.userName().toLocal8Bit();
-			char* userName = userNameData.data();
-
-			conversePassword = d.password();
-
-			pam_handle_t *pamh = nullptr;
-			struct pam_conv pamc = {pamConverse, this};
-
-			int res = pam_start("su", userName, &pamc, &pamh);
-
-			if (res == PAM_SUCCESS)
-			{
-				res = pam_authenticate(pamh, 0);
-			}
-
-			if (res == PAM_SUCCESS)
-			{
-				res = pam_acct_mgmt(pamh, 0);
-			}
-
-			pam_end(pamh, res);
-
-			result = res == PAM_SUCCESS ? true : false;
+			QString command = QString("echo %1 | /bin/su - %2 >/dev/null 2>/dev/null").arg(password).arg(userName);
+			result = system(command.toLocal8Bit()) == 0;
 #endif
-
-			if (result == false)
-			{
-				QMessageBox::critical(parent, qAppName(), QObject::tr("Wrong password!"));
-			}
-			else
-			{
-				m_loggedInUser = d.userName();
-			}
-
-		}while (result == false);
 
 		return result;
 	}
 
-#ifdef Q_OS_LINUX
-
-	int TuningUserManager::pamConverse(int n, const struct ::pam_message **msg, struct ::pam_response **resp, void *data)
+	bool TuningUserManager::askForPassword(QString* userName, QString* password, QWidget* parent)
 	{
-		TuningUserManager* ob = static_cast<TuningUserManager*>(data);
-
-		QString strp = ob->conversePassword;
-		QByteArray ba = strp.toLatin1();
-		char *pcodec = ba.data();
-
-		struct ::pam_response *aresp;
-		char buf[PAM_MAX_RESP_SIZE];
-		int i;
-
-		aresp = new ::pam_response;
-
-		if (n <= 0 || n > PAM_MAX_NUM_MSG)
-			return (PAM_CONV_ERR);
-		for (i = 0; i < n; ++i) {
-			aresp[i].resp_retcode = 0;
-			aresp[i].resp = NULL;
-			switch (msg[i]->msg_style) {
-			case PAM_PROMPT_ECHO_OFF:
-				aresp[i].resp = strdup(pcodec);
-				if (aresp[i].resp == NULL)
-					goto fail;
-				break;
-			case PAM_PROMPT_ECHO_ON:
-				fputs(msg[i]->msg, stderr);
-				if (fgets(buf, sizeof buf, stdin) == NULL)
-					goto fail;
-				aresp[i].resp = strdup(buf);
-				if (aresp[i].resp == NULL)
-					goto fail;
-				break;
-			case PAM_ERROR_MSG:
-				fputs(msg[i]->msg, stderr);
-				if (strlen(msg[i]->msg) > 0 &&
-					msg[i]->msg[strlen(msg[i]->msg) - 1] != '\n')
-					fputc('\n', stderr);
-				break;
-			case PAM_TEXT_INFO:
-				fputs(msg[i]->msg, stdout);
-				if (strlen(msg[i]->msg) > 0 &&
-					msg[i]->msg[strlen(msg[i]->msg) - 1] != '\n')
-					fputc('\n', stdout);
-				break;
-			default:
-				goto fail;
-			}
+		if (userName == nullptr || password == nullptr)
+		{
+			Q_ASSERT(userName);
+			Q_ASSERT(password);
+			return false;
 		}
-		*resp = aresp;
-		return (PAM_SUCCESS);
-fail:
-		for (i = 0; i < n; ++i) {
-			if (aresp[i].resp != NULL) {
-				memset(aresp[i].resp, 0, strlen(aresp[i].resp));
-				free(aresp[i].resp);
-			}
+
+		DialogTuningPassword d(*this, parent);
+		if (d.exec() != QDialog::Accepted)
+		{
+			return false;
 		}
-		memset(aresp, 0, n * sizeof *aresp);
-		*resp = NULL;
-		return (PAM_CONV_ERR);
+
+		*userName = d.userName();
+		*password = d.password();
+
+		return true;
 	}
 
-#endif
+	bool TuningUserManager::requestPassword(QWidget* parent)
+	{
+		if (m_tuningUserAccounts.empty() == true)
+		{
+			return true;
+		}
 
+		bool result = false;
+
+		for (int i = 0; i < 3; i++)
+		{
+			QString userName;
+			QString password;
+
+			result = askForPassword(&userName, &password, parent);
+
+			if (result == false)
+			{
+				break;
+			}
+
+			result = checkPassword(userName, password);
+
+			if (result == false)
+			{
+                if (parent != nullptr)
+                {
+                    QMessageBox::critical(parent, qAppName(), QObject::tr("Wrong password!"));
+                }
+			}
+			else
+			{
+				m_loggedInUser = userName;
+				break;
+			}
+		}
+
+		return result;
+	}
 }

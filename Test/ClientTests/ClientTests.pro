@@ -3,8 +3,7 @@ GOOGLETEST_DIR = ../googletest
 
 include(gtest_dependency.pri)
 
-QT += testlib xml qml core concurrent network
-QT -= gui
+QT += testlib xml qml core concurrent network gui widgets
 
 TEMPLATE = app
 CONFIG += console
@@ -52,13 +51,15 @@ SOURCES += \
         AppSignalManagerTests.cpp \
         ConfigControllerTests.cpp \
         ConnectionPorts.cpp \
+        TuningConnectionTests.cpp \
         TuningSignalManagerTests.cpp \
+        TuninsUserManagerTests.cpp \
         main.cpp
 
 HEADERS += \
     ../../lib/BuildInfo.h \
     ConnectionPorts.h \
-    Stable.h		
+    Stable.h
 
 
 # Add curent dir to a list of library directory paths
@@ -81,6 +82,11 @@ unix:PRE_TARGETDEPS += $$DESTDIR/libSimulator.a
 LIBS += -lClientLib
 win32:PRE_TARGETDEPS += $$DESTDIR/ClientLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libClientLib.a
+
+# Authorization
+#
+win32:LIBS += -lAdvapi32
+unix:LIBS += -lpam -lpam_misc
 
 # OnlineLib
 #

@@ -23,6 +23,7 @@ function StopServices() {
     #
     pkill CfgSrv || true
     pkill AppDataSrv || true
+    pkill TuningSrv || true
     pkill SimulatorConsol || true       # without last e, I assume there is a limitation to 15 symbols.
     sleep 1
 }
@@ -64,7 +65,10 @@ sleep 5
 sleep 5
 ./linux_code_coverage_systemid_clienttest_ws01_ads.sh < /dev/null > clienttest_ws01_ads.out 2>&1 &
 ./linux_code_coverage_systemid_clienttest_ws02_ads.sh < /dev/null > clienttest_ws02_ads.out 2>&1 &
-./SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_code_coverage -enable_lan -no_exit > SimulatorConsole.out 2>&1 &
+./linux_code_coverage_systemid_clienttest_ws01_tuns.sh < /dev/null > clienttest_ws01_tuns.out 2>&1 &
+./linux_code_coverage_systemid_clienttest_ws02_tuns.sh < /dev/null > clienttest_ws02_tuns.out 2>&1 &
+./linux_code_coverage_systemid_clienttest_ws04_tuns.sh < /dev/null > clienttest_ws04_tuns.out 2>&1 &
+./SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_code_coverage -enable_lan -script=$CI_PROJECT_DIR/Test/ClientTests/Scripts/TuningTests.js > SimulatorConsole.out 2>&1 &
 
 sleep 5
 

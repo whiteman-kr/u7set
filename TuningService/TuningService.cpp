@@ -127,21 +127,21 @@ namespace Tuning
 
 	// called from TcpTuningServer thread!!!
 	//
-	NetworkError TuningServiceWorker::changeControlledTuningSource(const QString& tuningSourceEquipmentID,
+	E::NetworkError TuningServiceWorker::changeControlledTuningSource(const QString& tuningSourceEquipmentID,
 												bool activateControl,
 												QString* controlledTuningSource,
 												bool* controlIsActive)
 	{
 		if (controlledTuningSource == nullptr || controlIsActive == nullptr)
 		{
-			return NetworkError::InternalError;
+			return E::NetworkError::InternalError;
 		}
 
 		if (m_settings.singleLmControl == false)
 		{
 			controlledTuningSource->clear();
 			*controlIsActive = false;
-			return NetworkError::SingleLmControlDisabled;
+			return E::NetworkError::SingleLmControlDisabled;
 		}
 
 		AUTO_LOCK(m_mainMutex);							// !!!!
@@ -154,7 +154,7 @@ namespace Tuning
 		{
 			*controlledTuningSource = tuningSourceEquipmentID;
 			*controlIsActive = false;
-			return NetworkError::Success;
+			return E::NetworkError::Success;
 		}
 
 		bool result = runTuningSourceThread(true, tuningSourceEquipmentID);
@@ -163,7 +163,7 @@ namespace Tuning
 		{
 			*controlledTuningSource = tuningSourceEquipmentID;
 			*controlIsActive = false;
-			return NetworkError::InternalError;
+			return E::NetworkError::InternalError;
 		}
 
 		runSourcesListenerThreads();
@@ -171,7 +171,7 @@ namespace Tuning
 		*controlledTuningSource = tuningSourceEquipmentID;
 		*controlIsActive = true;
 
-		return NetworkError::Success;
+		return E::NetworkError::Success;
 	}
 
 	bool TuningServiceWorker::clientIsConnected(const SoftwareInfo& softwareInfo, const QString& clientIP)

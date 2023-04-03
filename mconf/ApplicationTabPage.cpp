@@ -243,6 +243,29 @@ std::optional<std::vector<int>> ApplicationTabPage::selectedUarts() const
 	return selectedUarts;
 }
 
+void ApplicationTabPage::openBitstreamFile(const QString& fileName)
+{
+	if (fileName.endsWith(".bts") == false)
+	{
+		QMessageBox::critical(this, qApp->applicationName(), tr("File %1 has wrong extension (.bts expected)!").arg(fileName));
+		return;
+	}
+
+	if (QFile::exists(fileName) == false)
+	{
+		QMessageBox::critical(this, qApp->applicationName(), tr("File %1 doesn't exists.").arg(fileName));
+		return;
+	}
+
+	m_fileNameEdit->setText(fileName);
+
+	clearSubsystemsUartData();
+
+	emit loadBinaryFile(fileName, &m_firmware);
+
+	return;
+}
+
 void ApplicationTabPage::subsystemChanged(QTreeWidgetItem* item1, QTreeWidgetItem* item2)
 {
 	Q_UNUSED(item1);
@@ -314,17 +337,7 @@ void ApplicationTabPage::openFileClicked()
 
 	QString fileName = fileList[0];
 
-	if (QFile::exists(fileName) == false)
-	{
-		QMessageBox::critical(this, qApp->applicationName(), tr("File %1 doesn't exists.").arg(fileName));
-		return;
-	}
-
-	m_fileNameEdit->setText(fileName);
-
-	clearSubsystemsUartData();
-
-	emit loadBinaryFile(fileName, &m_firmware);
+	openBitstreamFile(fileName);
 
 	return;
 }

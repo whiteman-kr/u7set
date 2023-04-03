@@ -692,7 +692,8 @@ bool IdeCodePropertyEditor::isModified() const
 
 IdeTuningFiltersEditor::IdeTuningFiltersEditor(DbController* dbController, QWidget* parent):
   PropertyTextEditor(parent),
-  m_dbController(dbController)
+  m_dbController(dbController),
+  m_signals({}, &logFileStub)
 {
 	AppSignalSet tuningSignalSet;
 	::Proto::AppSignalSet appSignalSet;

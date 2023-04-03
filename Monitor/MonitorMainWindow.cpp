@@ -20,6 +20,7 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	m_instanceResolver{instanceResolver},
 	m_configController{softwareInfo, MonitorAppSettings::instance().configuratorAddress1(), MonitorAppSettings::instance().configuratorAddress2(), &m_LogFile},
 	m_signalManager{&m_LogFile},
+	m_tuningSignalManager{softwareInfo.equipmentID(), &m_LogFile},
 	m_schemaManager{m_configController, m_signalManager},
 	m_dialogAlert(this)
 {

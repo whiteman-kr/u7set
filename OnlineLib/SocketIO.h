@@ -242,32 +242,6 @@ const int RT_TRENDS_MANAGEMENT = 0x1801;
 const int RT_TRENDS_GET_STATE_CHANGES = 1802;
 
 
-enum class NetworkError
-{
-	Success,
-	WrongPartNo,
-	RequestParamExceed,
-	RequestStateExceed,
-	ParseRequestError,
-	RequestDataSourcesStatesExceed,
-	UnitsExceed,
-	UnknownTuningClientID,
-	UnknownSignalHash,
-	InternalError,
-	ArchiveError,								// for detail information check archError field
-	WrongTuningValueType,
-	TuningValueOutOfRange,
-	SingleLmControlDisabled,
-	LmControlIsNotActive,
-	ClientIsNotActive,
-	TuningNoReply,
-	TuningValueCorrupted,
-
-	// update getNetworkErrorStr function after adding new error types!
-};
-
-
-
 enum class ArchiveError
 {
 	Success = 100,
@@ -283,5 +257,3 @@ enum class ArchiveError
 	SearchError
 };
 
-
-extern QString getNetworkErrorStr(NetworkError err);

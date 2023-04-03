@@ -4,26 +4,23 @@
 #include <unordered_map>
 #include <QReadWriteLock>
 
+#include "../AppSignalLib/ITuningSignalUpdater.h"
+#include "../UtilsLib/ILogFile.h"
 #include "ITuningSignalManager.h"
 #include "TuningValue.h"
 
-struct TuningNewValue
-{
-	TuningValue value;
-	bool isUnapplied = false;
-};
-
-class TuningSignalManager : public QObject, public ITuningSignalManager
+class TuningSignalManager :
+		public QObject,
+		public ITuningSignalManager,
+		public ITuningSignalUpdater
 {
 	Q_OBJECT
 
 public:
-	explicit TuningSignalManager(QObject* parent = nullptr);
+	explicit TuningSignalManager(const QString& clientEquipmentId, ILogFile* logFile, QObject* parent = nullptr);
 	virtual ~TuningSignalManager();
 
 public:
-	void reset();
-
 	bool load(const QByteArray& data);
 	bool load(const ::Proto::AppSignalSet& message);
 
@@ -31,9 +28,6 @@ public:
 	//
 	int signalsCount() const;
 	std::vector<AppSignalParam> signalList() const;
-
-	std::vector<Hash> signalHashes() const;
-	std::vector<Hash> signalHashes(const std::vector<Hash> lmEquipmentIdHashes) const;
 
 	// Implementation ITuningSignalManager
 	//
@@ -50,24 +44,37 @@ public:
 	virtual TuningSignalState state(Hash hash, bool* found) const override;
 	virtual TuningSignalState state(const QString& appSignalId, bool* found) const override;
 
+	virtual TuningSignalState state(Hash hash, Hash tuningServiceHash, bool* found) const override;
+	virtual TuningSignalState state(const QString& appSignalId, Hash tuningServiceHash, bool* found) const override;
+
 	virtual QStringList signalIdsByTag(const QString& tag) const override;
 
-	// State manipulation
+	// Implementation ITuningSignalUpdater - State manipulation
 	//
 public:
-	void invalidateStates();
+	void reset() override;
 
-	void setState(const QString& appSignalId, const TuningSignalState& state);
-	void setState(Hash signalHash, const TuningSignalState& state);
-	void setState(const std::vector<TuningSignalState>& states);
+	std::vector<Hash> signalHashes() const override;
+	std::vector<Hash> signalHashes(const std::vector<Hash> lmEquipmentIdHashes) const override;
 
-	// Working with new values
+	void invalidateSignalStates(Hash tuningServiceHash) override;
 
-	TuningValue newValue(Hash signalHash) const;
-	void setNewValue(Hash signalHash, const TuningValue& value);
+	void setState(const TuningSignalState& state, Hash tuningServiceHash) override;
+	void setStates(const std::vector<TuningSignalState>& states, Hash tuningServiceHash) override;
 
-	bool newValueIsUnapplied(Hash signalHash) const;
-	void setNewValueAsApplied(Hash signalHash);
+private:
+	void notifySignalParamsUpdated() override;
+
+	// End of ITuningSignalUpdater
+
+public:
+	// Unapplied values manipulation
+	//
+	void setUnappliedValue(Hash hash, const TuningValue& value);
+	[[nodiscard]] TuningValue unappliedValue(Hash hash) const;
+
+	[[nodiscard]] bool isUnapplied(Hash hash) const;
+
 
 	// Signals
 	//
@@ -77,22 +84,52 @@ signals:
 	// Data
 	//
 private:
+	const Hash m_tuningClientHash = UNDEFINED_HASH;	// cached client hash value
+	HasLogFile m_logFile;
+
+	struct SourceState
+	{
+		TuningSignalState state{};
+		Hash tuningServiceHash{UNDEFINED_HASH};
+		std::chrono::time_point<std::chrono::system_clock> lastUpdateTime{};	// State last time received or updated
+
+		bool isUnapplied = false;
+	};
+
+	struct Sources
+	{
+		size_t size = 0;
+		std::array<SourceState, 2> sources{};	// 2 maximum possible channels of getting signal
+
+		TuningValue unappliedValue{};
+
+		void set(const TuningSignalState& state, Hash tuningServiceHash);
+		void invalidateSource(Hash tuningServiceHash);
+
+		[[nodiscard]] const TuningSignalState& get() const;
+		[[nodiscard]] const TuningSignalState& get(Hash tuningServiceHash, bool* found) const;
+
+		// Working with unapplied values
+		//
+		void setUnappliedValue(const TuningValue& value);
+		[[nodiscard]] const TuningValue& getUnappliedValue() const;
+
+		[[nodiscard]] bool isValueUnapplied() const;						// Any source is unapplied
+		[[nodiscard]] bool isValueUnapplied(Hash tuningServiceHash) const;	// Specified source is unapplied
+
+		void setAsApplied(Hash tuningServiceHash);							// Set value as applied at specified source
+	};
 
 	// Objects storage
 	//
-	mutable QReadWriteLock m_signalsLock;									// For access to m_signals
+	mutable QReadWriteLock m_signalsLock;							// For access to m_signals
 	std::unordered_map<Hash, AppSignalParam> m_signals;
 	std::unordered_map<QString, QStringList> m_tagToAppSignals;		// Key is tag - value is list of AppSignalIDs with this tag
 
 	// States storage
 	//
-	mutable QReadWriteLock m_statesLock;						// For access to m_states
-	std::unordered_map<Hash, TuningSignalState> m_states;
-
-	// New values storage
-	//
-	mutable QReadWriteLock m_newValuesLock;						// For access to m_newValues
-	std::unordered_map<Hash, TuningNewValue> m_newValues;
+	mutable QReadWriteLock m_statesLocker;
+	std::unordered_map<Hash, Sources, VoidHasher<Hash>> m_states;
 };
 
 

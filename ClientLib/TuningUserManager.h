@@ -18,7 +18,7 @@ namespace ClientLib
 		Q_OBJECT
 
 	public:
-		TuningUserManager();
+		TuningUserManager() = default;
 
 		// Operations
 		//
@@ -32,8 +32,8 @@ namespace ClientLib
 		//
 		bool tuningLogin() const;
 		const QStringList& tuningUserAccounts() const;
-		int tuningSessionTimeout() const;
 		bool loginPerOperation() const;
+		int tuningSessionTimeout() const;
 
 		// State
 		//
@@ -46,12 +46,12 @@ namespace ClientLib
 		void loggedIn();
 		void loggedOut();
 
+	protected:
+		virtual bool askForPassword(QString* userName, QString* password, QWidget* parent);
+		virtual bool checkPassword(const QString& userName, const QString& password);
+
 	private:
 		bool requestPassword(QWidget* parent);
-
-#ifdef Q_OS_LINUX
-		static int pamConverse(int n, const struct ::pam_message **msg, struct ::pam_response **resp, void *data);
-#endif
 
 	private:
 		bool m_tuningLogin = false;

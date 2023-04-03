@@ -139,7 +139,7 @@ void TcpAppDataServer::onGetAppSignalListStartRequest()
 
 	m_getSignalListStartReply.set_itemsperpart(ADS_GET_APP_SIGNAL_LIST_ITEMS_PER_PART);
 
-	m_getSignalListStartReply.set_error(TO_INT(NetworkError::Success));
+	m_getSignalListStartReply.set_error(TO_INT(E::NetworkError::Success));
 
 	sendReply(m_getSignalListStartReply);
 }
@@ -152,7 +152,7 @@ void TcpAppDataServer::onGetAppSignalListNextRequest(const char* requestData, qu
 
 	if (result == false)
 	{
-		m_getSignalListNextReply.set_error(TO_INT(NetworkError::ParseRequestError));
+		m_getSignalListNextReply.set_error(TO_INT(E::NetworkError::ParseRequestError));
 		sendReply(m_getSignalListNextReply);
 		return;
 	}
@@ -161,7 +161,7 @@ void TcpAppDataServer::onGetAppSignalListNextRequest(const char* requestData, qu
 
 	if (requestPartNo < 0 ||  requestPartNo >= m_acquiredSignalListPartCount)
 	{
-		m_getSignalListNextReply.set_error(TO_INT(NetworkError::WrongPartNo));
+		m_getSignalListNextReply.set_error(TO_INT(E::NetworkError::WrongPartNo));
 		sendReply(m_getSignalListNextReply);
 		return;
 	}
@@ -184,7 +184,7 @@ void TcpAppDataServer::onGetAppSignalListNextRequest(const char* requestData, qu
 		m_getSignalListNextReply.add_appsignalids(IDs[i].toStdString());
 	}
 
-	m_getSignalListNextReply.set_error(TO_INT(NetworkError::Success));
+	m_getSignalListNextReply.set_error(TO_INT(E::NetworkError::Success));
 
 	sendReply(m_getSignalListNextReply);
 }
@@ -197,7 +197,7 @@ void TcpAppDataServer::onGetAppSignalParamRequest(const char* requestData, quint
 
 	if (result == false)
 	{
-		m_getAppSignalParamReply.set_error(TO_INT(NetworkError::ParseRequestError));
+		m_getAppSignalParamReply.set_error(TO_INT(E::NetworkError::ParseRequestError));
 		sendReply(m_getAppSignalParamReply);
 		return;
 	}
@@ -206,7 +206,7 @@ void TcpAppDataServer::onGetAppSignalParamRequest(const char* requestData, quint
 
 	if (hashesCount > ADS_GET_APP_SIGNAL_PARAM_MAX)
 	{
-		m_getAppSignalParamReply.set_error(TO_INT(NetworkError::RequestParamExceed));
+		m_getAppSignalParamReply.set_error(TO_INT(E::NetworkError::RequestParamExceed));
 		sendReply(m_getAppSignalParamReply);
 		return;
 	}
@@ -238,7 +238,7 @@ void TcpAppDataServer::onGetAppSignalRequest(const char* requestData, quint32 re
 
 	if (result == false)
 	{
-		m_getAppSignalReply.set_error(TO_INT(NetworkError::ParseRequestError));
+		m_getAppSignalReply.set_error(TO_INT(E::NetworkError::ParseRequestError));
 		sendReply(m_getAppSignalReply);
 		return;
 	}
@@ -247,7 +247,7 @@ void TcpAppDataServer::onGetAppSignalRequest(const char* requestData, quint32 re
 
 	if (hashesCount > ADS_GET_APP_SIGNAL_PARAM_MAX)
 	{
-		m_getAppSignalReply.set_error(TO_INT(NetworkError::RequestParamExceed));
+		m_getAppSignalReply.set_error(TO_INT(E::NetworkError::RequestParamExceed));
 		sendReply(m_getAppSignalReply);
 		return;
 	}
@@ -279,7 +279,7 @@ void TcpAppDataServer::onGetAppSignalStateRequest(const char* requestData, quint
 
 	if (result == false)
 	{
-		m_getAppSignalStateReply.set_error(TO_INT(NetworkError::ParseRequestError));
+		m_getAppSignalStateReply.set_error(TO_INT(E::NetworkError::ParseRequestError));
 		sendReply(m_getAppSignalStateReply);
 		return;
 	}
@@ -288,7 +288,7 @@ void TcpAppDataServer::onGetAppSignalStateRequest(const char* requestData, quint
 
 	if (hashesCount > ADS_GET_APP_SIGNAL_STATE_MAX)
 	{
-		m_getAppSignalStateReply.set_error(TO_INT(NetworkError::RequestParamExceed));
+		m_getAppSignalStateReply.set_error(TO_INT(E::NetworkError::RequestParamExceed));
 		sendReply(m_getAppSignalStateReply);
 		return;
 	}
@@ -351,7 +351,7 @@ void TcpAppDataServer::onGetAppSignalStateChangesRequest(const char* requestData
 
 	if (result == false)
 	{
-		m_getAppSignalStateChangesReply.set_error(TO_INT(NetworkError::ParseRequestError));
+		m_getAppSignalStateChangesReply.set_error(TO_INT(E::NetworkError::ParseRequestError));
 		sendReply(m_getAppSignalStateChangesReply);
 		return;
 	}
@@ -420,7 +420,7 @@ void TcpAppDataServer::onGetAppDataSourcesInfoRequest()
 		source->saveToProto(protoInfo);
 	}
 
-	m_getDataSourcesInfoReply.set_error(TO_INT(NetworkError::Success));
+	m_getDataSourcesInfoReply.set_error(TO_INT(E::NetworkError::Success));
 
 	sendReply(m_getDataSourcesInfoReply);
 }
@@ -439,7 +439,7 @@ void TcpAppDataServer::onGetAppDataSourcesStatesRequest()
 		source->getState(state);
 	}
 
-	m_getAppDataSourcesStatesReply.set_error(TO_INT(NetworkError::Success));
+	m_getAppDataSourcesStatesReply.set_error(TO_INT(E::NetworkError::Success));
 
 	sendReply(m_getAppDataSourcesStatesReply);
 }
