@@ -53,9 +53,15 @@ function cleanup(sim)
 //
 function testStartTuning(sim)
 {
+	let lm = sim.logicModule("SYSTEMID_CLIENTTEST_CH11_MD00");
+	assert(lm != undefined);
+
+	lm.armingKey = true;
+	lm.tuningKey = true;
+
 	// Get ScriptLogicModule object for LM
 	//
-	let lm = sim.logicModule("SYSTEMID_CLIENTTEST_CH12_MD00");
+	lm = sim.logicModule("SYSTEMID_CLIENTTEST_CH12_MD00");
 	assert(lm != undefined);
 
 	lm.armingKey = true;
