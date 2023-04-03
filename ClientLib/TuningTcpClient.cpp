@@ -9,17 +9,10 @@ namespace ClientLib
 	//
 	// TuningWriteCommand
 	//
-	bool TuningWriteCommand::save(Network::TuningWriteCommand* message) const
+	bool TuningWriteCommand::toProtoWriteCommand(Network::TuningWriteCommand* message) const
 	{
 		message->set_signalhash(appSignalHash);
 		value.save(message->mutable_value());
-		return true;
-	}
-
-	bool TuningWriteCommand::load(const Network::TuningWriteCommand& message)
-	{
-		appSignalHash = message.signalhash();
-		value.load(message.value());
 		return true;
 	}
 
@@ -38,7 +31,6 @@ namespace ClientLib
 		TcpClientStatistics(this),
 		m_logFile(log, "TuningTcpClient"),
 		m_tuningLog(tuningLog),
-		m_tuningClientHash(::calcHash(softwareInfo.equipmentID())),
 		m_tuningServiceHash(::calcHash(tunsInfo.equipmentId)),
 		m_signalUpdater(signalUpdater)
 	{
@@ -57,11 +49,6 @@ namespace ClientLib
 
 	TuningTcpClient::~TuningTcpClient()
 	{
-	}
-
-	Hash TuningTcpClient::tuningClientHash() const
-	{
-		return m_tuningClientHash;
 	}
 
 	Hash TuningTcpClient::tuningServiceHash() const
@@ -182,11 +169,6 @@ namespace ClientLib
 		return m_signalHashesSet.find(appSignalHash) != m_signalHashesSet.end();
 	}
 
-	bool TuningTcpClient::hasTuningSignal(QString appSignalId) const
-	{
-		return hasTuningSignal(::calcHash(appSignalId));
-	}
-
 	void TuningTcpClient::writeTuningSignal(const std::vector<TuningWriteCommand>& data)
 	{
 		if (isConnected() == false)
@@ -204,22 +186,6 @@ namespace ClientLib
 		}
 
 		return;
-	}
-
-	void TuningTcpClient::writeTuningSignal(const TuningWriteCommand& data)
-	{
-		std::vector<TuningWriteCommand> toVector;
-		toVector.push_back(data);
-
-		return writeTuningSignal(toVector);
-	}
-
-	bool TuningTcpClient::writeTuningSignal(QString appSignalId, TuningValue value)
-	{
-		TuningWriteCommand command(appSignalId, value);
-		writeTuningSignal(command);
-
-		return true;
 	}
 
 	// Apply states
@@ -930,7 +896,7 @@ namespace ClientLib
 				const TuningWriteCommand& cmd = m_writeQueue.front();
 
 				::Network::TuningWriteCommand* protoCommand = m_writeTuningSignals.mutable_commands()->Add();
-				cmd.save(protoCommand);
+				cmd.toProtoWriteCommand(protoCommand);
 
 				m_writeQueue.pop();
 			}
@@ -1029,7 +995,7 @@ namespace ClientLib
 
 	void TuningTcpClient::reset()
 	{
-		m_logFile.writeMessage(tr("slot_signalsUpdated()"));
+		m_logFile.writeMessage(tr("reset()"));
 
 		m_readTuningSignalIndex = 0;
 		m_readTuningSignalCount = 0;

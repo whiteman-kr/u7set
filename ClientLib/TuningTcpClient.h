@@ -82,9 +82,8 @@ namespace ClientLib
 		}
 
 		// Serializing
-
-		bool save(Network::TuningWriteCommand* message) const;
-		bool load(const Network::TuningWriteCommand& message);
+		//
+		bool toProtoWriteCommand(Network::TuningWriteCommand* message) const;
 	};
 
 
@@ -102,7 +101,6 @@ namespace ClientLib
 		virtual ~TuningTcpClient();
 
 	public:
-		Hash tuningClientHash() const;
 		Hash tuningServiceHash() const;
 
 		// Tuning sources
@@ -118,17 +116,11 @@ namespace ClientLib
 		//
 		bool hasTuningSignals(const std::vector<Hash>& appSignalHashes) const;	// Returns true if client processes at least one of specified signals
 		bool hasTuningSignal(Hash appSignalHash) const;
-		bool hasTuningSignal(QString appSignalId) const;
 
 		// Writing states
 		//
 		void writeTuningSignal(const std::vector<TuningWriteCommand>& data);
-		void writeTuningSignal(const TuningWriteCommand& data);
 
-		// ITuningTcpClient implementation
-		//
-	public:
-		virtual bool writeTuningSignal(QString appSignalId, TuningValue value);
 		// Apply states
 		//
 		void applyTuningSignals();
@@ -215,7 +207,6 @@ namespace ClientLib
 		HasLogFile m_logFile;
 		TuningLog::TuningLog* m_tuningLog = nullptr;
 
-		const Hash m_tuningClientHash = UNDEFINED_HASH;
 		const Hash m_tuningServiceHash = UNDEFINED_HASH;
 
 		int m_requestInterval = 100;

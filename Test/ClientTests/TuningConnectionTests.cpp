@@ -257,7 +257,7 @@ TEST_F(TuningConnectionTests, tuningSourceInfo)
 	EXPECT_EQ(connStates[0].peerAddr, s_safeTuningServices[0].clientRequestAddress);
 
 	// Check that tuning source info is arrived
-
+	//
 	std::vector<ClientLib::TuningSource> allSourcesInfo = tc.tuningSourcesInfo();
 	EXPECT_EQ(allSourcesInfo.size(), 1);
 
@@ -322,6 +322,17 @@ TEST_F(TuningConnectionTests, tuningSourceInfo)
 	{
 		const ::Network::TuningSourceState& st = si.state(::calcHash(si.controllerEquipmentId(0)));
 		EXPECT_TRUE(st.isreply());
+
+		const ::Network::TuningSourceState& stp = si.previousState(::calcHash(si.controllerEquipmentId(0)));
+		EXPECT_FALSE(stp.isreply());
+
+		//Check that tuning sources have no errors
+
+		for (int i = 0; i < si.controllersCount(); i++)
+		{
+			EXPECT_EQ(si.getErrorsCount(i), 0);
+		}
+
 	}
 
 	EXPECT_TRUE(tc.activateTuningSource(lmHash, false));
@@ -492,7 +503,7 @@ TEST_F(TuningConnectionTests, activeClientInfo)
 }
 
 
-TEST_F(TuningConnectionTests, writeTuningSignals)
+TEST_F(TuningConnectionTests, writeAnalogSignals)
 {
 	ILogFileStub logFile;
 
@@ -629,43 +640,9 @@ TEST_F(TuningConnectionTests, writeTuningSignals)
 			EXPECT_TRUE(state.valid());
 		}
 	}
-
-	// Write set of int values to #CLIENTTEST_TUNING_D1
-	//
-	std::vector<int> discreteValues{1, 0};
-
-	for (int i = 0; i < discreteValues.size(); i++)
-	{
-		TuningValue tv({TuningValueType::Discrete}, discreteValues[i]);
-		EXPECT_TRUE(tc.writeTuningSignal(asDiscrete.appSignalID(), tv));
-
-		// Wait for signal is written
-		//
-		{
-			QElapsedTimer timer;
-			timer.start();
-
-			TuningSignalState state;
-
-			while (timer.hasExpired(5000) == false)
-			{
-				QCoreApplication::instance()->processEvents();
-				QThread::msleep(10);
-
-				state = signalManager.state(asDiscrete.appSignalID(), nullptr);
-				if (state.valid() == true && fabs(state.value().discreteValue() == discreteValues[i]))
-				{
-					break;
-				}
-			}
-
-			EXPECT_EQ(state.value().discreteValue(), discreteValues[i]);
-			EXPECT_TRUE(state.valid());
-		}
-	}
 }
 
-TEST_F(TuningConnectionTests, applyTuningSignals)
+TEST_F(TuningConnectionTests, applyAnalogSignals)
 {
 	ILogFileStub logFile;
 
@@ -721,6 +698,210 @@ TEST_F(TuningConnectionTests, applyTuningSignals)
 								::calcHash(asInt.appSignalID()),
 								::calcHash(asDiscrete.appSignalID())};
 	tc.applyTuningSignals(hashes);
+
+	// Wait for changes are applied
+	//
+	{
+		QElapsedTimer timer;
+		timer.start();
+
+		while (timer.hasExpired(5000) == false)
+		{
+			QCoreApplication::instance()->processEvents();
+			QThread::msleep(10);
+
+			tss = tc.tuningSourcesInfo();
+			EXPECT_EQ(tss.size(), 2);
+
+			bool unapplied = false;
+
+			for (const ClientLib::TuningSource& ts : tss)
+			{
+				for (int i = 0; i < ts.statesCount(); i++)
+				{
+					if (ts.state(i).hasunappliedparams() == true)
+					{
+						unapplied = true;
+					}
+				}
+			}
+			if (unapplied == false)
+			{
+				break;
+			}
+		}
+	}
+
+	// Check that values are applied
+	//
+	tss = tc.tuningSourcesInfo();
+	EXPECT_EQ(tss.size(), 2);
+	for (const ClientLib::TuningSource& ts : tss)
+	{
+		for (int i = 0; i < ts.statesCount(); i++)
+		{
+			EXPECT_FALSE(ts.state(i).hasunappliedparams());
+		}
+	}
+}
+
+TEST_F(TuningConnectionTests, writeDiscreteSignals)
+{
+	ILogFileStub logFile;
+
+	TuningSignalManager signalManager{s_softwareInfo.equipmentID(), &logFile};
+
+	bool ok = signalManager.load(protoSignalSet);
+
+	EXPECT_TRUE(ok);
+
+	ClientLib::TuningUserManager userManager;
+	TuningLog::TuningLogStub tuningLog{userManager, {}};
+
+	// Create tuning connection to the service
+	//
+	ClientLib::TuningConnection tc{signalManager, signalManager, &logFile, &tuningLog};
+	tc.updateConnections(s_softwareInfo, s_tuningServices, false/*autoApply*/, TuningClientSettings::LmStatusFlagMode::AccessKey);
+
+	// Wait for connection established
+	//
+	{
+		QElapsedTimer timer;
+		timer.start();
+
+		while (timer.hasExpired(5000) == false)
+		{
+			QCoreApplication::instance()->processEvents();
+			QThread::msleep(10);
+
+			// Wait for several replies
+			//
+			std::vector<Tcp::ConnectionState> connStates = tc.tcpTuningConnStates();
+			if (std::all_of(connStates.begin(), connStates.end(), [](const auto& s) { return s.isConnected && s.replyCount > 4; }))
+			{
+				break;
+			}
+		}
+	}
+
+	// Wait for all signals to become valid
+	//
+	{
+		QElapsedTimer timer;
+		timer.start();
+
+		while (timer.hasExpired(5000) == false)
+		{
+			QCoreApplication::instance()->processEvents();
+			QThread::msleep(10);
+
+			bool allValid = true;
+			for (int i = 0; i < protoSignalSet.appsignal_size(); i++)
+			{
+				QString appSignalID = QString::fromStdString(protoSignalSet.appsignal(i).appsignalid());
+
+				TuningSignalState state = signalManager.state(appSignalID, nullptr);
+				if (state.valid() == false)
+				{
+					allValid = false;
+					break;
+				}
+			}
+			if (allValid == true)
+			{
+				break;
+			}
+		}
+	}
+
+	// Write set of int values to #CLIENTTEST_TUNING_D1
+	//
+	std::vector<int> discreteValues{1, 0};
+
+	for (int i = 0; i < discreteValues.size(); i++)
+	{
+		TuningValue tv({TuningValueType::Discrete}, discreteValues[i]);
+		EXPECT_TRUE(tc.writeTuningSignal(asDiscrete.appSignalID(), tv));
+
+		// Wait for signal is written
+		//
+		{
+			QElapsedTimer timer;
+			timer.start();
+
+			TuningSignalState state;
+
+			while (timer.hasExpired(5000) == false)
+			{
+				QCoreApplication::instance()->processEvents();
+				QThread::msleep(10);
+
+				state = signalManager.state(asDiscrete.appSignalID(), nullptr);
+				if (state.valid() == true && fabs(state.value().discreteValue() == discreteValues[i]))
+				{
+					break;
+				}
+			}
+
+			EXPECT_EQ(state.value().discreteValue(), discreteValues[i]);
+			EXPECT_TRUE(state.valid());
+		}
+	}
+}
+
+TEST_F(TuningConnectionTests, applyDiscreteSignals)
+{
+	ILogFileStub logFile;
+
+	TuningSignalManager signalManager{s_softwareInfo.equipmentID(), &logFile};
+
+	bool ok = signalManager.load(protoSignalSet);
+
+	EXPECT_TRUE(ok);
+
+	ClientLib::TuningUserManager userManager;
+	TuningLog::TuningLogStub tuningLog{userManager, {}};
+
+	// Create tuning connection to the service
+	//
+	ClientLib::TuningConnection tc{signalManager, signalManager, &logFile, &tuningLog};
+	tc.updateConnections(s_softwareInfo, s_tuningServices, false/*autoApply*/, TuningClientSettings::LmStatusFlagMode::SOR);
+
+	// Wait for connection established
+	//
+	{
+		QElapsedTimer timer;
+		timer.start();
+
+		while (timer.hasExpired(5000) == false)
+		{
+			QCoreApplication::instance()->processEvents();
+			QThread::msleep(10);
+
+			// Wait for several replies
+			//
+			std::vector<Tcp::ConnectionState> connStates = tc.tcpTuningConnStates();
+			if (std::all_of(connStates.begin(), connStates.end(), [](const auto& s) { return s.isConnected && s.replyCount > 4; }))
+			{
+				break;
+			}
+		}
+	}
+	// Check that values are unapplied
+	//
+	std::vector<ClientLib::TuningSource> tss = tc.tuningSourcesInfo();
+	EXPECT_EQ(tss.size(), 2);
+	for (const ClientLib::TuningSource& ts : tss)
+	{
+		for (int i = 0; i < ts.statesCount(); i++)
+		{
+			EXPECT_TRUE(ts.state(i).hasunappliedparams());
+		}
+	}
+
+	// Apply changes
+	//
+	tc.applyTuningSignals();
 
 	// Wait for changes are applied
 	//
