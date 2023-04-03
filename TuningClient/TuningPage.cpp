@@ -2483,7 +2483,7 @@ void TuningPage::setActionButtonsState()
 
 	// Enable or disable "Apply" button
 	//
-	if (autoApply == false)
+	if (autoApply == false && m_applyButton != nullptr)
 	{
 		for (Hash sourceHash : sourceHashes)
 		{
