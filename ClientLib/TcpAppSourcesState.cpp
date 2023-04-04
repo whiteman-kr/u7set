@@ -66,7 +66,7 @@ namespace ClientLib
 			result++;
 		}
 
-		if (state.errorframesize() > m_previousState.errorframesize())
+		if (state.errorframecrc() > m_previousState.errorframecrc())
 		{
 			result++;
 		}
