@@ -10,8 +10,7 @@ include(../warnings.pri)
 include(../codecoverage.pri)
 
 INCLUDEPATH += $$PWD
-INCLUDEPATH +=	./../Protobuf \
-				./../asio/include \
+INCLUDEPATH +=	./../Protobuf
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
