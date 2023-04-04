@@ -44,6 +44,12 @@ public:
 										QString* cfgServiceID2, HostAddressPort* cfgServiceAddrPort2,
 										Builder::IssueLogger* log);
 
+	static bool getCfgServiceConnection(const Hardware::EquipmentSet* equipment,
+										const Hardware::Software* software,
+										SoftwareEndpoint::ConfigService* cfgService1,
+										SoftwareEndpoint::ConfigService* cfgService2,
+										Builder::IssueLogger* log);
+
 	static bool getLmPropertiesFromDevice(const Hardware::DeviceModule* lm,
 											E::LanControllerType lanControllerType,
 											const Builder::Context* context,
@@ -160,6 +166,16 @@ private:
 	bool readSettings(const Builder::Context* context,
 						const Hardware::Software* software) override;
 };
+
+// -------------------------------------------------------------------------------------------
+
+class GatewayServiceSettingsGetter : public GatewayServiceSettings, public SoftwareSettingsGetter
+{
+private:
+	bool readSettings(const Builder::Context* context,
+					const Hardware::Software* software) override;
+};
+
 
 #pragma warning(pop)
 

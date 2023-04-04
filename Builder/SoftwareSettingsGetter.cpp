@@ -234,6 +234,22 @@ bool SoftwareSettingsGetter::getCfgServiceConnection(	const Hardware::EquipmentS
 	return result;
 }
 
+bool SoftwareSettingsGetter::getCfgServiceConnection(const Hardware::EquipmentSet* equipment,
+													const Hardware::Software* software,
+													SoftwareEndpoint::ConfigService* cfgService1,
+													SoftwareEndpoint::ConfigService* cfgService2,
+													Builder::IssueLogger* log)
+{
+	TEST_PTR_LOG_RETURN_FALSE(cfgService1, log);
+	TEST_PTR_LOG_RETURN_FALSE(cfgService2, log);
+
+	return getCfgServiceConnection(equipment,
+								   software,
+								   &cfgService1->equipmentId, &cfgService1->address,
+								   &cfgService2->equipmentId, &cfgService2->address,
+								   Builder::IssueLogger* log);
+}
+
 bool SoftwareSettingsGetter::getLmPropertiesFromDevice(	const Hardware::DeviceModule* lm,
 														E::LanControllerType lanControllerType,
 														const Builder::Context* context,
@@ -1672,7 +1688,6 @@ bool MonitorSettingsGetter::readTuningServiceSettings(const Builder::Context* co
 //
 // -------------------------------------------------------------------------------------
 
-
 bool TuningClientSettingsGetter::readSettings(const Builder::Context* context,
 												const Hardware::Software* software)
 {
@@ -1817,6 +1832,140 @@ bool TuningClientSettingsGetter::readSettings(const Builder::Context* context,
 
 	schemaTags = schemaTagList.join(Separator::SEMICOLON);
 
+	return result;
+}
+
+// -------------------------------------------------------------------------------------
+//
+// GatewayServiceSettingsGetter class implementation
+//
+// -------------------------------------------------------------------------------------
+
+bool GatewayServiceSettingsGetter::readSettings(const Builder::Context* context,
+												const Hardware::Software* software)
+{
+	TEST_PTR_RETURN_FALSE(context);
+
+	Builder::IssueLogger* log = context->m_log;
+
+	TEST_PTR_RETURN_FALSE(log);
+	TEST_PTR_LOG_RETURN_FALSE(software, log);
+
+	const Hardware::EquipmentSet* equipment = context->m_equipmentSet.get();
+
+	bool result = true;
+
+	// ConfigurationService connections checking
+	//
+/*	result = getCfgServiceConnection(equipment, software, &cfgService1, &cfgService2, log);
+
+	RETURN_IF_FALSE(result);
+
+	//
+
+	QStringList tuninfServicesIDs;
+
+	result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::TUNING_SERVICE_ID, &tuninfServicesIDs, log);
+
+	RETURN_IF_FALSE(result);
+
+	tuningServices.clear();
+
+	for(const QString& tuningServiceID : tuninfServicesIDs)
+	{
+		HostAddressPort tuningServiceClientAddress;
+
+		result &= getSoftwareConnectionBySoftwareID(equipment,
+									   software,
+									   tuningServiceID,
+									   EquipmentPropNames::TUNING_SERVICE_ID,
+									   EquipmentPropNames::CLIENT_REQUEST_IP,
+									   EquipmentPropNames::CLIENT_REQUEST_PORT,
+									   &tuningServiceClientAddress,
+									   false,
+									   Socket::IP_NULL,
+									   PORT_TUNING_SERVICE_CLIENT_REQUEST,
+									   E::SoftwareType::TuningService,
+									   log);
+		BREAK_IF_FALSE(result);
+
+		SoftwareEndpoint::TuningService tsc;
+
+		tsc.equipmentId = tuningServiceID;
+		tsc.clientRequestAddress = tuningServiceClientAddress;
+
+		TuningServiceSettingsGetter tsg;
+
+		result &= tsg.readFromDeviceByEquipmentID(context, tuningServiceID, E::SoftwareType::TuningService);
+
+		BREAK_IF_FALSE(result);
+
+		TuningServiceSettings::TuningClient tc = tsg.getTuningClient(software->equipmentIdTemplate());
+
+		if (tc.isValid() == false)
+		{
+			LOG_INTERNAL_ERROR_MSG(log, QString("Tuning Client %1 is not found in clients list of Tuning Service %2").
+										arg(software->equipmentIdTemplate()).
+										arg(tuningServiceID));
+			result = false;
+			break;
+		}
+
+		tsc.drivenSources = tc.uniqueSourcesIDs();
+
+		tsc.singleLmControl = tsg.singleLmControl;
+
+		tuningServices.push_back(tsc);
+	}
+
+	RETURN_IF_FALSE(result);
+
+	result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::AUTO_APPLAY, &autoApply, log);
+	result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::SHOW_SIGNALS, &showSignals, log);
+	result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::SHOW_SCHEMAS, &showSchemas, log);
+
+	RETURN_IF_FALSE(result);
+
+	//
+	// schemasNavigation
+	//
+	showSchemasList = false;
+	showSchemasTabs = false;
+
+	int schemasNavigation = 0;
+
+	result &= DeviceHelper::getIntProperty(software, EquipmentPropNames::SCHEMAS_NAVIGATION, &schemasNavigation, log);
+
+	RETURN_IF_FALSE(result);
+
+	switch (schemasNavigation)
+	{
+	case 0:
+		break;
+	case 1:
+		showSchemasList = true;
+		break;
+	case 2:
+		showSchemasTabs = true;
+		break;
+	default:
+		Q_ASSERT(false);
+	}
+
+	//
+	// statusFlagFunction
+	//
+
+	int value = 0;
+	result &= DeviceHelper::getIntProperty(software, EquipmentPropNames::STATUS_FLAG_FUNCTION, &value, log);
+	if (result == true)
+	{
+		statusFlagFunction = static_cast<LmStatusFlagMode>(value);
+	}
+
+	result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::START_SCHEMA_ID, &startSchemaID, log);
+
+*/
 	return result;
 }
 

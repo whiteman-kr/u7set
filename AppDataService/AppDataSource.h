@@ -7,36 +7,6 @@
 #include "../OnlineLib/CircularLogger.h"
 #include "DynamicAppSignalState.h"
 
-class AppSignals
-{
-public:
-	~AppSignals();
-
-	void clear();
-
-	void insert(const ::Proto::AppSignal& protoAppSignal);
-
-	bool containsID(const QString& appSignalID) const;
-	bool containsHash(Hash hash) const;
-
-	const AppSignal* getSignalByID(const QString& appSignalID) const;
-	const AppSignal* getSignalByHash(Hash hash) const;
-
-	bool isEmpty() const;
-	size_t count() const;
-
-	std::vector<AppSignal*>::iterator begin();
-	std::vector<AppSignal*>::const_iterator begin() const;
-
-	std::vector<AppSignal*>::iterator end();
-	std::vector<AppSignal*>::const_iterator end() const;
-
-private:
-	std::vector<AppSignal*> m_signals;				// dynamic AppSignal object owner
-	std::map<QString, AppSignal*> m_idToSignal;		// appSignalID => appSignal
-	std::map<Hash, AppSignal*> m_hashToSignal;		// Hash => appSignal
-};
-
 class AppDataReceiver;
 
 class AppDataSource : public DataSourceOnline

@@ -482,7 +482,6 @@ public:
 	void clear();
 };
 
-
 class TuningClientSettings : virtual public SoftwareSettings
 {
 public:
@@ -537,4 +536,23 @@ public:
 
 	bool appearanceChanged(const TuningClientSettings& src) const;
 	bool connectionChanged(const TuningClientSettings& src) const;
+};
+
+class GatewayServiceSettings : virtual public SoftwareSettings
+{
+	SoftwareEndpoint::ConfigService cfgService1;
+	SoftwareEndpoint::ConfigService cfgService2;
+
+	SoftwareEndpoint::AppDataService appDataService1;
+	SoftwareEndpoint::AppDataService appDataService2;
+
+	QString gatewayDescription;
+
+private:
+	// this methods should be call by SoftwareSettingsSet only
+	//
+	bool writeToXml(XmlWriteHelper& xml) const override;
+	bool readFromXml(XmlReadHelper& xml) override;
+
+	friend class SoftwareSettingsSet;
 };

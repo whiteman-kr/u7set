@@ -1,0 +1,19 @@
+[Gateway]
+
+Type = IVS_KompleksAES
+SystemID = 2
+
+GatewayIP1 = 192.168.23.23:Port
+GatewayIP2 = 192.168.33.23:Port
+
+[SignalList]
+
+ID = 1
+Events = On/Off
+IncludeInternalID = On/Off (Yes/No) default Off
+DataType = A | D | B
+
+#SIGNAL1  AppSignalID or CustomAppSignalID
+#SIGNAL2
+....
+#SIGNALN

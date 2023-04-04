@@ -1,0 +1,481 @@
+#include <QXmlStreamReader>
+#include <QMetaProperty>
+
+#include "../OnlineLib/CfgServerLoader.h"
+
+#include "GatewayService.h"
+
+// -------------------------------------------------------------------------------
+//
+// GatewayServiceWorker class implementation
+//
+// -------------------------------------------------------------------------------
+
+GatewayServiceWorker::GatewayServiceWorker(const SoftwareInfo& softwareInfo,
+										   const QString& serviceName,
+										   int& argc,
+										   char** argv,
+										   CircularLoggerShared logger,
+										   E::ServiceRunMode runMode) :
+	ServiceWorker(softwareInfo, serviceName, argc, argv, logger, runMode),
+	m_timer(this)
+{
+}
+
+GatewayServiceWorker::~GatewayServiceWorker()
+{
+}
+
+ServiceWorker* GatewayServiceWorker::createInstance() const
+{
+	GatewayServiceWorker* newInstance = new GatewayServiceWorker(softwareInfo(),
+																 serviceName(),
+																 argc(), argv(),
+																 logger(),
+																 serviceRunMode());
+	newInstance->init();
+
+	return newInstance;
+}
+
+void GatewayServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
+{
+	QString xmlString = SoftwareSettingsSet::writeSettingsToXmlString(E::SoftwareType::AppDataService, m_curSettingsProfile);
+
+	serviceInfo.set_settingsxml(xmlString.toStdString());
+}
+
+bool GatewayServiceWorker::isConnectedToConfigurationService(quint32& ip, quint16& port) const
+{
+	if (m_cfgLoaderThread == nullptr)
+	{
+		return false;
+	}
+
+	Tcp::ConnectionState&& state = m_cfgLoaderThread->getConnectionState();
+
+	if (state.isConnected)
+	{
+		ip = state.peerAddr.address32();
+		port = state.peerAddr.port();
+
+		return true;
+	}
+
+	return false;
+}
+
+E::SecurityLevel GatewayServiceWorker::securityLevel() const
+{
+	return m_curSettingsProfile.securityLevel;
+}
+
+void GatewayServiceWorker::initCmdLineParser()
+{
+	CommandLineParser& cp = cmdLineParser();
+
+	cp.addSingleValueOption(CmdLineOption::ID, SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
+	cp.addSingleValueOption(CmdLineOption::CFG_IP1, SoftwareSetting::CFG_SERVICE_IP1, "IP address of first Configuration Service.", "IPv4:Port");
+	cp.addSingleValueOption(CmdLineOption::CFG_IP2, SoftwareSetting::CFG_SERVICE_IP2, "IP address of second Configuration Service.", "IPv4:Port");
+	cp.addSingleValueOption("ptc", SoftwareSetting::PROCESSING_THREADS_COUNT, "App data processing threads count", "N");
+	cp.addSingleValueOption("recvip", SoftwareSetting::OVERRIDE_APP_DATA_RECEIVING_IP, "Override AppDataReceivingIP", "IPv4:Port");
+	cp.addSimpleOption(CmdLineOption::LOG_RUP_TIME_ERR, "Log RUP frames time errors");
+}
+
+void GatewayServiceWorker::loadSettings()
+{
+/*	m_appDataProcessingThreadCount = QString(getStrSetting(SoftwareSetting::PROCESSING_THREADS_COUNT)).toInt();
+
+	m_strCmdLineAppDataReceivingIP = getStrSetting(SoftwareSetting::OVERRIDE_APP_DATA_RECEIVING_IP);
+	m_cmdLineAppDataReceivingIP.setAddressPortStr(m_strCmdLineAppDataReceivingIP, PORT_APP_DATA_SERVICE_DATA);
+
+	m_logRupTimeErrors = cmdLineParser().optionIsSet(CmdLineOption::LOG_RUP_TIME_ERR);*/
+
+	DEBUG_LOG_MSG(logger(), QString(tr("Settings from command line or registry:")));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::EQUIPMENT_ID).arg(equipmentID()));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStrIfSet()));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStrIfSet()));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::PROCESSING_THREADS_COUNT).arg(m_appDataProcessingThreadCount));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::OVERRIDE_APP_DATA_RECEIVING_IP).arg(m_cmdLineAppDataReceivingIP.addressPortStrIfSet()));
+}
+
+
+void GatewayServiceWorker::runTcpArchiveClientThread()
+{
+	assert(m_tcpArchiveClientThread == nullptr);
+
+	if (m_curSettingsProfile.archServiceID.isEmpty() == true)
+	{
+		DEBUG_LOG_WRN(logger(), "ArchiveService is not assigned");
+		return;
+	}
+
+	m_tcpArchiveClientThread = new TcpArchiveClientThread(softwareInfo(),
+														  m_curSettingsProfile.archServiceIP,
+														  *this);
+	m_tcpArchiveClientThread->start();
+}
+
+void GatewayServiceWorker::stopTcpArchiveClientThread()
+{
+	if (m_tcpArchiveClientThread == nullptr)
+	{
+		return;
+	}
+
+	m_tcpArchiveClientThread->quitAndWait();
+
+	delete m_tcpArchiveClientThread;
+
+	m_tcpArchiveClientThread = nullptr;
+}
+
+void GatewayServiceWorker::runRtTrendsServerThread()
+{
+	assert(m_rtTrendsServerThread == nullptr);
+
+	m_rtTrendsServerThread = new RtTrends::ServerThread(m_curSettingsProfile.rtTrendsRequestIP,
+														*this,
+														m_curSettingsProfile.securityLevel);
+
+	m_rtTrendsServerThread->start();
+}
+
+void GatewayServiceWorker::stopRtTrendsServerThread()
+{
+	if (m_rtTrendsServerThread != nullptr)
+	{
+		m_rtTrendsServerThread->quitAndWait(10000);
+		delete m_rtTrendsServerThread;
+
+		m_rtTrendsServerThread = nullptr;
+	}
+}
+
+void GatewayServiceWorker::runTimer()
+{
+	connect(&m_timer, &QTimer::timeout, this, &GatewayServiceWorker::onTimer);
+
+	m_timer.setInterval(1000);
+	m_timer.start();
+}
+
+void GatewayServiceWorker::stopTimer()
+{
+	m_timer.stop();
+}
+
+void GatewayServiceWorker::initialize()
+{
+	DEBUG_LOG_MSG(logger(), "GatewayServiceWorker is started");
+
+	runCfgLoaderThread();
+	runTimer();
+}
+
+void GatewayServiceWorker::shutdown()
+{
+	clearConfiguration();
+
+	stopTimer();
+
+	stopTcpAppDataServer();
+	stopCfgLoaderThread();
+
+	DEBUG_LOG_MSG(logger(), "GatewayServiceWorker finished");
+}
+
+void GatewayServiceWorker::runCfgLoaderThread()
+{
+	assert(m_cfgLoaderThread == nullptr);			// once should be runned
+
+	m_cfgLoaderThread = new CfgLoaderThread(softwareInfo(), 1, cfgServiceIP1(), cfgServiceIP2(), false, logger());
+
+	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &GatewayServiceWorker::onConfigurationReady);
+
+	m_cfgLoaderThread->start();
+
+	m_cfgLoaderThread->enableDownloadConfiguration();
+}
+
+void GatewayServiceWorker::stopCfgLoaderThread()
+{
+	if (m_cfgLoaderThread == nullptr)
+	{
+		return;
+	}
+
+	m_cfgLoaderThread->quitAndWait();
+
+	delete m_cfgLoaderThread;
+
+	m_cfgLoaderThread = nullptr;
+}
+
+void GatewayServiceWorker::onConfigurationReady(const QByteArray configurationXmlData,
+												const BuildFileInfoArray buildFileInfoArray,
+												SessionParams sessionParams,
+												std::shared_ptr<const SoftwareSettings> currentSettingsProfile)
+{
+	setSessionParams(sessionParams);
+
+	DEBUG_LOG_MSG(logger(), "Configuration is ready");
+
+	DEBUG_LOG_MSG(logger(), "");
+
+	DEBUG_LOG_MSG(logger(), "Settings profile: " + currentSettingsProfile->profile);
+
+	DEBUG_LOG_MSG(logger(), "");
+
+	// stop all threads and free all allocated resources
+	//
+	clearConfiguration();
+
+	const AppDataServiceSettings* typedSettingsPtr = dynamic_cast<const AppDataServiceSettings*>(currentSettingsProfile.get());
+
+	if (typedSettingsPtr == nullptr)
+	{
+		DEBUG_LOG_MSG(logger(), "Settings casting error!");
+		return;
+	}
+
+	// making modificable local copy of settings
+	//
+	m_curSettingsProfile = *typedSettingsPtr;
+
+	// replace some cfg settings by command line arguments
+	//
+	if (m_strCmdLineAppDataReceivingIP.isEmpty() == false)
+	{
+		m_curSettingsProfile.appDataReceivingIP = m_cmdLineAppDataReceivingIP;
+	}
+
+	bool result = true;
+
+	for(const Builder::BuildFileInfo& bfi : buildFileInfoArray)
+	{
+		QByteArray fileData;
+		QString errStr;
+
+		m_cfgLoaderThread->getFileBlocked(bfi.pathFileName, &fileData, &errStr);
+
+		if (errStr.isEmpty() == false)
+		{
+			qDebug() << errStr;
+			result = false;
+			continue;
+		}
+
+		result = true;
+
+		if (bfi.ID == CfgFileId::APP_DATA_SOURCES)
+		{
+			result &= readAppDataSources(fileData, sessionParams.currentSettingsProfile);			// fill m_appDataSources
+		}
+
+		if (bfi.ID == CfgFileId::APP_SIGNAL_SET)
+		{
+			result &= readAppSignals(fileData);				// fill m_unitInfo and m_appSignals
+		}
+
+		if (result == true)
+		{
+			qDebug() << "Read file " << bfi.pathFileName << " OK";
+		}
+		else
+		{
+			qDebug() << "Read file " << bfi.pathFileName << " ERROR";
+			break;
+		}
+	}
+
+	if (result == true)
+	{
+		applyNewConfiguration();
+	}
+}
+
+void GatewayServiceWorker::onTimer()
+{
+}
+
+bool GatewayServiceWorker::readAppDataSources(const QByteArray& fileData, const QString& profile)
+{
+	QVector<DataSource> dataSources;
+
+	bool result = DataSourcesXML<DataSource>::readFromXml(fileData, &dataSources);
+
+	if (result == false)
+	{
+		DEBUG_LOG_ERR(logger(), QString("Error reading AppDataSources from XML-file"));
+		return false;
+	}
+
+	result = m_appDataSources.init(profile, dataSources, logger());
+
+	if (result == true)
+	{
+		DEBUG_LOG_MSG(logger(), QString("AppDataSources successfully loaded"));
+	}
+	else
+	{
+		DEBUG_LOG_ERR(logger(), QString("AppDataSources loading error!"));
+	}
+
+	return result;
+}
+
+
+bool GatewayServiceWorker::readAppSignals(const QByteArray& fileData)
+{
+	::Proto::AppSignalSet signalSet;
+
+	bool result = signalSet.ParseFromArray(fileData.constData(), static_cast<int>(fileData.size()));
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	int signalCount = signalSet.appsignal_size();
+
+	for(int i = 0; i < signalCount; i++)
+	{
+		const ::Proto::AppSignal& appSignal = signalSet.appsignal(i);
+
+		m_appSignals.insert(appSignal);
+	}
+
+	return true;
+}
+
+
+void GatewayServiceWorker::createTimeErrLog()
+{
+	Q_ASSERT(m_timeErrLog == nullptr);
+
+	if (m_logRupTimeErrors == true)
+	{
+		m_timeErrLog = std::make_shared<CircularLogger>();
+
+		LOGGER_INIT(m_timeErrLog, QString("RupTimeErr"), QString());
+
+		m_timeErrLog->setLogCodeInfo(false);
+	}
+}
+
+void GatewayServiceWorker::shutdownTimeErrLog()
+{
+	if (m_timeErrLog != nullptr)
+	{
+		LOGGER_SHUTDOWN(m_timeErrLog);
+		m_timeErrLog = nullptr;
+	}
+}
+
+void GatewayServiceWorker::createAndInitSignalStates()
+{
+	m_appSignalStates.clear();
+
+	if (m_appSignals.isEmpty())
+	{
+		return;
+	}
+
+	int signalCount = 0;
+
+	for(AppSignal* signal : m_appSignals)
+	{
+		TEST_PTR_CONTINUE(signal);
+
+		if (signal->isBus() == true)
+		{
+			continue;
+		}
+
+		signalCount++;
+	}
+
+	m_appSignalStates.setSize(signalCount);
+
+	int index = 0;
+
+	for(AppSignal* signal : m_appSignals)
+	{
+		TEST_PTR_CONTINUE(signal);
+
+		if (signal->isBus() == true)
+		{
+			continue;
+		}
+
+		DynamicAppSignalState* signalState = m_appSignalStates[index];
+
+		signalState->setSignalParams(signal, m_appSignals);
+
+		index++;
+	}
+
+	m_appSignalStates.buidlHash2State();
+
+	m_appSignalStates.setAutoArchivingGroups(m_autoArchivingGroupsCount);
+}
+
+void GatewayServiceWorker::buildAcuiredAppSignalIDs()
+{
+	m_acquiredAppSignalIDs.clear();
+	m_acquiredAppSignalIDs.reserve(m_appSignals.count());
+
+	for(const AppSignal* signal : m_appSignals)
+	{
+		TEST_PTR_CONTINUE(signal);
+
+		if (signal->isAcquired() == true)
+		{
+			m_acquiredAppSignalIDs.push_back(signal->appSignalID());
+		}
+	}
+}
+
+void GatewayServiceWorker::prepareAppDataSources()
+{
+	for(AppDataSource* appDataSource : m_appDataSources)
+	{
+		TEST_PTR_CONTINUE(appDataSource);
+
+		appDataSource->prepare(m_appSignals, &m_appSignalStates, m_autoArchivingGroupsCount, m_timeErrLog);
+	}
+}
+
+void GatewayServiceWorker::applyNewConfiguration()
+{
+	m_autoArchivingGroupsCount = m_curSettingsProfile.autoArchiveInterval * 60;
+
+	createTimeErrLog();
+	createAndInitSignalStates();
+	buildAcuiredAppSignalIDs();
+	prepareAppDataSources();
+
+	runAppDataReceiverThread();
+	runTcpArchiveClientThread();
+	runTcpAppDataServer();
+	runRtTrendsServerThread();
+}
+
+void GatewayServiceWorker::clearConfiguration()
+{
+	// free all resources allocated in onConfigurationReady
+	//
+	stopRtTrendsServerThread();
+	stopTcpArchiveClientThread();
+	stopTcpAppDataServer();
+	stopAppDataReceiverlThread();
+
+	shutdownTimeErrLog();
+
+	m_appSignals.clear();
+	m_appDataSources.clear();
+	m_appSignalStates.clear();
+	m_acquiredAppSignalIDs.clear();
+}
+
