@@ -308,6 +308,7 @@ TEST_F(TuningConnectionTests, tuningSourceInfo)
 
 			if (tc.activatedTuningSourceStatesCount(lmHash) == 1)
 			{
+				QThread::msleep(2000);
 				break;
 			}
 		}
