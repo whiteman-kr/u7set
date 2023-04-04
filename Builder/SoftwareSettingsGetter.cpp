@@ -247,7 +247,7 @@ bool SoftwareSettingsGetter::getCfgServiceConnection(const Hardware::EquipmentSe
 								   software,
 								   &cfgService1->equipmentId, &cfgService1->address,
 								   &cfgService2->equipmentId, &cfgService2->address,
-								   Builder::IssueLogger* log);
+								   log);
 }
 
 bool SoftwareSettingsGetter::getLmPropertiesFromDevice(	const Hardware::DeviceModule* lm,

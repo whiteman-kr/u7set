@@ -1783,3 +1783,21 @@ bool TuningClientSettings::connectionChanged(const TuningClientSettings& src) co
 
 	return false;
 }
+
+// -------------------------------------------------------------------------------------
+//
+// GatewayServiceSettings class implementation
+//
+// -------------------------------------------------------------------------------------
+
+bool GatewayServiceSettings::writeToXml(XmlWriteHelper& xml) const
+{
+	return true;
+}
+
+bool GatewayServiceSettings::readFromXml(XmlReadHelper& xml)
+{
+	bool result = true;
+	return result;
+}
+

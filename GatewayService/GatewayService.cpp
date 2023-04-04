@@ -65,11 +65,6 @@ bool GatewayServiceWorker::isConnectedToConfigurationService(quint32& ip, quint1
 	return false;
 }
 
-E::SecurityLevel GatewayServiceWorker::securityLevel() const
-{
-	return m_curSettingsProfile.securityLevel;
-}
-
 void GatewayServiceWorker::initCmdLineParser()
 {
 	CommandLineParser& cp = cmdLineParser();
@@ -95,61 +90,6 @@ void GatewayServiceWorker::loadSettings()
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::EQUIPMENT_ID).arg(equipmentID()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStrIfSet()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStrIfSet()));
-	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::PROCESSING_THREADS_COUNT).arg(m_appDataProcessingThreadCount));
-	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::OVERRIDE_APP_DATA_RECEIVING_IP).arg(m_cmdLineAppDataReceivingIP.addressPortStrIfSet()));
-}
-
-
-void GatewayServiceWorker::runTcpArchiveClientThread()
-{
-	assert(m_tcpArchiveClientThread == nullptr);
-
-	if (m_curSettingsProfile.archServiceID.isEmpty() == true)
-	{
-		DEBUG_LOG_WRN(logger(), "ArchiveService is not assigned");
-		return;
-	}
-
-	m_tcpArchiveClientThread = new TcpArchiveClientThread(softwareInfo(),
-														  m_curSettingsProfile.archServiceIP,
-														  *this);
-	m_tcpArchiveClientThread->start();
-}
-
-void GatewayServiceWorker::stopTcpArchiveClientThread()
-{
-	if (m_tcpArchiveClientThread == nullptr)
-	{
-		return;
-	}
-
-	m_tcpArchiveClientThread->quitAndWait();
-
-	delete m_tcpArchiveClientThread;
-
-	m_tcpArchiveClientThread = nullptr;
-}
-
-void GatewayServiceWorker::runRtTrendsServerThread()
-{
-	assert(m_rtTrendsServerThread == nullptr);
-
-	m_rtTrendsServerThread = new RtTrends::ServerThread(m_curSettingsProfile.rtTrendsRequestIP,
-														*this,
-														m_curSettingsProfile.securityLevel);
-
-	m_rtTrendsServerThread->start();
-}
-
-void GatewayServiceWorker::stopRtTrendsServerThread()
-{
-	if (m_rtTrendsServerThread != nullptr)
-	{
-		m_rtTrendsServerThread->quitAndWait(10000);
-		delete m_rtTrendsServerThread;
-
-		m_rtTrendsServerThread = nullptr;
-	}
 }
 
 void GatewayServiceWorker::runTimer()
@@ -179,7 +119,6 @@ void GatewayServiceWorker::shutdown()
 
 	stopTimer();
 
-	stopTcpAppDataServer();
 	stopCfgLoaderThread();
 
 	DEBUG_LOG_MSG(logger(), "GatewayServiceWorker finished");
@@ -231,7 +170,7 @@ void GatewayServiceWorker::onConfigurationReady(const QByteArray configurationXm
 	//
 	clearConfiguration();
 
-	const AppDataServiceSettings* typedSettingsPtr = dynamic_cast<const AppDataServiceSettings*>(currentSettingsProfile.get());
+	const GatewayServiceSettings* typedSettingsPtr = dynamic_cast<const GatewayServiceSettings*>(currentSettingsProfile.get());
 
 	if (typedSettingsPtr == nullptr)
 	{
@@ -242,13 +181,6 @@ void GatewayServiceWorker::onConfigurationReady(const QByteArray configurationXm
 	// making modificable local copy of settings
 	//
 	m_curSettingsProfile = *typedSettingsPtr;
-
-	// replace some cfg settings by command line arguments
-	//
-	if (m_strCmdLineAppDataReceivingIP.isEmpty() == false)
-	{
-		m_curSettingsProfile.appDataReceivingIP = m_cmdLineAppDataReceivingIP;
-	}
 
 	bool result = true;
 
@@ -267,11 +199,6 @@ void GatewayServiceWorker::onConfigurationReady(const QByteArray configurationXm
 		}
 
 		result = true;
-
-		if (bfi.ID == CfgFileId::APP_DATA_SOURCES)
-		{
-			result &= readAppDataSources(fileData, sessionParams.currentSettingsProfile);			// fill m_appDataSources
-		}
 
 		if (bfi.ID == CfgFileId::APP_SIGNAL_SET)
 		{
@@ -299,32 +226,6 @@ void GatewayServiceWorker::onTimer()
 {
 }
 
-bool GatewayServiceWorker::readAppDataSources(const QByteArray& fileData, const QString& profile)
-{
-	QVector<DataSource> dataSources;
-
-	bool result = DataSourcesXML<DataSource>::readFromXml(fileData, &dataSources);
-
-	if (result == false)
-	{
-		DEBUG_LOG_ERR(logger(), QString("Error reading AppDataSources from XML-file"));
-		return false;
-	}
-
-	result = m_appDataSources.init(profile, dataSources, logger());
-
-	if (result == true)
-	{
-		DEBUG_LOG_MSG(logger(), QString("AppDataSources successfully loaded"));
-	}
-	else
-	{
-		DEBUG_LOG_ERR(logger(), QString("AppDataSources loading error!"));
-	}
-
-	return result;
-}
-
 
 bool GatewayServiceWorker::readAppSignals(const QByteArray& fileData)
 {
@@ -349,33 +250,9 @@ bool GatewayServiceWorker::readAppSignals(const QByteArray& fileData)
 	return true;
 }
 
-
-void GatewayServiceWorker::createTimeErrLog()
-{
-	Q_ASSERT(m_timeErrLog == nullptr);
-
-	if (m_logRupTimeErrors == true)
-	{
-		m_timeErrLog = std::make_shared<CircularLogger>();
-
-		LOGGER_INIT(m_timeErrLog, QString("RupTimeErr"), QString());
-
-		m_timeErrLog->setLogCodeInfo(false);
-	}
-}
-
-void GatewayServiceWorker::shutdownTimeErrLog()
-{
-	if (m_timeErrLog != nullptr)
-	{
-		LOGGER_SHUTDOWN(m_timeErrLog);
-		m_timeErrLog = nullptr;
-	}
-}
-
 void GatewayServiceWorker::createAndInitSignalStates()
-{
-	m_appSignalStates.clear();
+{/*
+//	m_appSignalStates.clear();
 
 	if (m_appSignals.isEmpty())
 	{
@@ -396,7 +273,7 @@ void GatewayServiceWorker::createAndInitSignalStates()
 		signalCount++;
 	}
 
-	m_appSignalStates.setSize(signalCount);
+	//m_appSignalStates.setSize(signalCount);
 
 	int index = 0;
 
@@ -418,7 +295,7 @@ void GatewayServiceWorker::createAndInitSignalStates()
 
 	m_appSignalStates.buidlHash2State();
 
-	m_appSignalStates.setAutoArchivingGroups(m_autoArchivingGroupsCount);
+	m_appSignalStates.setAutoArchivingGroups(m_autoArchivingGroupsCount);*/
 }
 
 void GatewayServiceWorker::buildAcuiredAppSignalIDs()
@@ -437,45 +314,20 @@ void GatewayServiceWorker::buildAcuiredAppSignalIDs()
 	}
 }
 
-void GatewayServiceWorker::prepareAppDataSources()
-{
-	for(AppDataSource* appDataSource : m_appDataSources)
-	{
-		TEST_PTR_CONTINUE(appDataSource);
-
-		appDataSource->prepare(m_appSignals, &m_appSignalStates, m_autoArchivingGroupsCount, m_timeErrLog);
-	}
-}
-
 void GatewayServiceWorker::applyNewConfiguration()
 {
-	m_autoArchivingGroupsCount = m_curSettingsProfile.autoArchiveInterval * 60;
-
-	createTimeErrLog();
 	createAndInitSignalStates();
 	buildAcuiredAppSignalIDs();
-	prepareAppDataSources();
 
-	runAppDataReceiverThread();
-	runTcpArchiveClientThread();
-	runTcpAppDataServer();
-	runRtTrendsServerThread();
+//	runAppDataReceiverThread();
 }
 
 void GatewayServiceWorker::clearConfiguration()
 {
 	// free all resources allocated in onConfigurationReady
 	//
-	stopRtTrendsServerThread();
-	stopTcpArchiveClientThread();
-	stopTcpAppDataServer();
-	stopAppDataReceiverlThread();
-
-	shutdownTimeErrLog();
-
 	m_appSignals.clear();
-	m_appDataSources.clear();
-	m_appSignalStates.clear();
+//	m_appSignalStates.clear();
 	m_acquiredAppSignalIDs.clear();
 }
 

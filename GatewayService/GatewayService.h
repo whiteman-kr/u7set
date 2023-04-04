@@ -34,8 +34,6 @@ public:
 /*	const DynamicAppSignalStates& appSignalStates() const { return m_appSignalStates; }
 	DynamicAppSignalStates& appSignalStates() { return m_appSignalStates; }*/
 
-	E::SecurityLevel securityLevel() const;
-
 	const std::vector<QString>& acquiredAppSignalIDs() const { return m_acquiredAppSignalIDs; }
 	int acquiredAppSignalIDsCount() const { return static_cast<int>(m_acquiredAppSignalIDs.size()); }
 

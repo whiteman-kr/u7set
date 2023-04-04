@@ -30,11 +30,13 @@ unix {
 
 
 SOURCES += \
+	../lib/BuildInfo.cpp \
 	AppSignalStates.cpp \
 	GatewayService.cpp \
 	GatewayServiceMain.cpp \
 
 HEADERS += \
+	../lib/BuildInfo.h \
 	../lib/ConstStrings.h \
 	AppSignalStates.h \
 	GatewayService.h \
