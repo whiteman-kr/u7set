@@ -1,0 +1,5 @@
+GWS
+	04.04.2023	Version: 1	Gateway Service_v1.u7devp	RPCT-3484: Create GatewayService preset
+
+
+
