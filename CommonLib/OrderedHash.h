@@ -347,6 +347,7 @@ public:
 	const VALUE& operator[](qsizetype index) const;
 
 	QList<VALUE*> toList() const;
+	const QVector<VALUE*>& toVector() const;
 
 	void reserve(qsizetype n);
 };
@@ -556,6 +557,12 @@ template <typename KEY, typename VALUE>
 QList<VALUE*> PtrOrderedHash<KEY, VALUE>::toList() const
 {
 	return m_valueVector.toList();
+}
+
+template <typename KEY, typename VALUE>
+const QVector<VALUE*>& PtrOrderedHash<KEY, VALUE>::toVector() const
+{
+	return m_valueVector;
 }
 
 

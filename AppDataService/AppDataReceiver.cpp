@@ -212,15 +212,28 @@ void AppDataReceiver::clearReceiverStatistics()
 
 void AppDataReceiver::updateReceiverStatistics()
 {
-	if (m_1second)
+	qint64 now = QDateTime::currentMSecsSinceEpoch();
+
+	if (m_lastUpdateTime == 0)
 	{
-		m_receivingSpeed = m_receivedPerSecond;
-		m_receivedPerSecond = 0;
+		m_lastUpdateTime = now;
+	}
+	else
+	{
+		qint64 dt = now - m_lastUpdateTime;
 
-		m_rupFramesReceivingSpeed = m_rupFramesReceivedPerSecond;
-		m_rupFramesReceivedPerSecond = 0;
+		if (dt > 900)
+		{
+			m_receivingSpeed = static_cast<int>((m_receivedPerSecond * 1000.0) / dt);
+			m_receivedPerSecond = 0;
 
-		qDebug() << C_STR(QString("Receive RUP frames %1/s").arg(m_rupFramesReceivingSpeed));
+			m_rupFramesReceivingSpeed = static_cast<int>((m_rupFramesReceivedPerSecond * 1000.0) / dt);
+			m_rupFramesReceivedPerSecond = 0;
+
+			qDebug() << C_STR(QString("Receive RUP frames %1/s").arg(m_rupFramesReceivingSpeed));
+
+			m_lastUpdateTime = now;
+		}
 	}
 }
 

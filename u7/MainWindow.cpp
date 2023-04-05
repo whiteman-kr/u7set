@@ -38,8 +38,11 @@
 #endif
 
 MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
-	QMainWindow(parent),
-	m_dbController(dbcontroller)
+	QMainWindow{parent},
+	m_connectionLocatorProvider{dbcontroller},
+	m_schemaLocatorProvider{dbcontroller},
+	m_locatorListWidget{dbcontroller, this},
+	m_dbController{dbcontroller}
 {
 	assert(m_dbController);
 
@@ -103,6 +106,16 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	//
 	connect(m_buildTabPage, &BuildTabPage::buildStarted, this, &MainWindow::buildStarted);
 	connect(m_buildTabPage, &BuildTabPage::buildFinished, this, &MainWindow::buildFinished);
+
+	// Init locators
+	//
+	m_equipmentLocatorProvider.setEquipmentTabPage(m_equipmentTab);
+	m_appSignalLocatorProvider.setSignalProvider(m_signalSetProvider);
+
+	m_locator.addProvider(m_equipmentLocatorProvider);
+	m_locator.addProvider(m_connectionLocatorProvider);
+	m_locator.addProvider(m_schemaLocatorProvider);
+	m_locator.addProvider(m_appSignalLocatorProvider);
 
 	// --
 	//
@@ -460,6 +473,39 @@ void MainWindow::createActions()
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, [this](){m_pendingChangesAction->setEnabled(true);});
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, [this](){m_pendingChangesAction->setEnabled(false);});
 
+	// Locator
+	//
+	m_locatorAction = new QAction(tr("Locator..."), this);
+	m_locatorAction->setEnabled(false);
+	m_locatorAction->setEnabled(true);
+	m_locatorAction->setShortcut(QKeySequence{Qt::CTRL | Qt::Key_K});
+	m_locatorAction->setShortcutContext(Qt::ApplicationShortcut);
+
+	connect(m_locatorAction, &QAction::triggered,
+			[this](){
+				m_locatorEditControl->setFocus();
+			});
+
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened,
+			[this]()
+			{
+				m_locatorAction->setEnabled(true);
+				m_locatorEditControl->setEnabled(true);
+			});
+
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed,
+			[this]()
+			{
+				m_locatorAction->setEnabled(false);
+				m_locatorEditControl->setEnabled(false);
+				m_locatorEditControl->clear();
+			});
+
+	addAction(m_locatorAction);
+
+	// --
+	//
+
 	return;
 }
 
@@ -556,6 +602,9 @@ void MainWindow::createToolBars()
 
 void MainWindow::createStatusBar()
 {
+	m_locatorEditControl = new Locator::LocatorEditControl{m_locator, m_locatorListWidget, this};
+	m_locatorEditControl->setEnabled(false);
+
 	m_statusBarInfo = new QLabel();
 	m_statusBarInfo->setAlignment(Qt::AlignLeft);
 	m_statusBarInfo->setIndent(3);
@@ -570,7 +619,8 @@ void MainWindow::createStatusBar()
 
 	// --
 	//
-	statusBar()->addWidget(m_statusBarInfo, 1);
+	statusBar()->addWidget(m_locatorEditControl, 2);
+	statusBar()->addWidget(m_statusBarInfo, 7);
 	statusBar()->addPermanentWidget(m_statusBarConnectionStatistics, 0);
 	statusBar()->addPermanentWidget(m_statusBarConnectionState, 0);
 
@@ -1305,7 +1355,7 @@ void MainWindow::projectOpened(DbProject project)
 	//
 	assert(m_statusBarConnectionState != nullptr);
 
-	m_statusBarConnectionState->setText(tr("Opened: ") + theSettings.serverHost());
+	m_statusBarConnectionState->setText(tr("Opened: %1:%2").arg(theSettings.serverHost()).arg(theSettings.serverPort()));
 
 	// Show and hide FilesTabPage
 	//

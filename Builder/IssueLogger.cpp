@@ -3858,7 +3858,6 @@ namespace Builder
 						  arg(txDataSize).arg(optoPortID).arg(moduleID).arg(optoPortAppDataSize));
 	}
 
-
 	/// IssueCode: ALC5033
 	///
 	/// IssueType: Error
@@ -3903,7 +3902,6 @@ namespace Builder
 				  tr("Non-signal element is connected to transmitter."));
 	}
 
-
 	/// IssueCode: ALC5035
 	///
 	/// IssueType: Error
@@ -3923,7 +3921,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5035,
-				  QString(tr("RxData size (%1 words) of opto port %2 exceed value of OptoPortAppDataSize property of module %3 (%4 words).")).
+				  QString(tr("RxData size (%1 words) of opto port %2 exceed value of OcmRxDataSizeLimit of module %3 (%4 words).")).
 						  arg(rxDataSize).arg(optoPortID).arg(moduleID).arg(optoPortAppDataSize));
 	}
 
@@ -3952,7 +3950,6 @@ namespace Builder
 				  QString(tr("Analog signal %1 is connected to discrete signal %2.")).
 						  arg(srcSignalID).arg(destSignalID));
 	}
-
 
 	/// IssueCode: ALC5037
 	///
@@ -4051,6 +4048,31 @@ namespace Builder
 		LOG_ERROR(IssueType::AlCompiler,
 				  5040,
 				  QString(tr("Connection with ID %1 is not found.")).arg(connectionID));
+	}
+
+	/// IssueCode: ALC5041
+	///
+	/// IssueType: Error
+	///
+	/// Title: Manual settings TxStartAddr + TxWorsQuantity (%1 + %2 = X words) of opto port %3 exceed value of OcmTxDataSizeLimit of module %4 (%5 words).
+	///
+	/// Parameters:
+	///		%1 opto port txData start address
+	///		%2 opto port txData size, words
+	///		%3 opto port equipmentID
+	///		%4 opto module equipmentID
+	///		%5 value of OcmTxDataSizeLimit
+	///
+	/// Description:
+	///		Check port manual settings TxStartAddr and TxWordsQuantity.
+	///
+	void IssueLogger::errALC5041(int bufAddr, int txDataSize, QString optoPortID, QString moduleID, int optoPortAppDataSize)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5041,
+				  QString(tr("Manual settings TxStartAddr + TxWorsQuantity (%1 + %2 = %3 words) of opto port %4 exceed value of OcmTxDataSizeLimit of module %5 (%6 words).")).
+							  arg(bufAddr).arg(txDataSize).arg(bufAddr + txDataSize).
+								arg(optoPortID).arg(moduleID).arg(optoPortAppDataSize));
 	}
 
 	/// IssueCode: ALC5042

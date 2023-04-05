@@ -1,5 +1,11 @@
 #pragma once
 #include "../DbLib/DbStruct.h"
+#include "./Locator/EquipmentLocatorProvider.h"
+#include "./Locator/ConnectionLocatorProvider.h"
+#include "./Locator/SchemaLocatorProvider.h"
+#include "./Locator/AppSignalLocatorProvider.h"
+#include "./Locator/LocatorListWidget.h"
+#include "./Locator/LocatorEditControl.h"
 
 class CentralWidget;
 class DbController;
@@ -150,6 +156,17 @@ private:
 	QAction* m_projectDifferenceAction = nullptr;
 	QAction* m_schemasAlbumAction = nullptr;
 	QAction* m_pendingChangesAction = nullptr;
+
+	QAction* m_locatorAction = nullptr;
+
+	Locator::EquipmentLocatorProvider m_equipmentLocatorProvider;
+	Locator::ConnectionLocatorProvider m_connectionLocatorProvider;
+	Locator::SchemaLocatorProvider m_schemaLocatorProvider;
+	Locator::AppSignalLocatorProvider m_appSignalLocatorProvider;
+	Locator::LocatorListWidget m_locatorListWidget;
+	Locator::Locator m_locator{m_locatorListWidget};
+	Locator::LocatorEditControl* m_locatorEditControl = nullptr;
+
 	QLabel* m_statusBarInfo = nullptr;
 	QLabel* m_statusBarConnectionStatistics = nullptr;
 	QLabel* m_statusBarSchemaZoom = nullptr;

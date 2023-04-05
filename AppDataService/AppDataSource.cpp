@@ -255,32 +255,27 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 	qint64 timeWithoutCorrection = readBuffer.frame0ServerTime;
 	qint64 dt = timeWithoutCorrection - m_lastPacketServerTime;
 
-	if (disableTimeCorrection == true ||
-		(dt < 0 || dt > 50))
+	if (dt == 0)
 	{
-		// NO time correction
+		// always do correction
 		//
-		m_lastPacketServerTime = timeWithoutCorrection;
+		m_lastPacketServerTime += 1;
 	}
 	else
 	{
-		// time correction
-		//
-
-		if (dt == 0)
+		if (disableTimeCorrection == true ||
+			dt > 50 ||
+			dt <= (m_workcycle_ms + 1))
 		{
-			m_lastPacketServerTime += 1;
+			// NO time correction
+			//
+			m_lastPacketServerTime = timeWithoutCorrection;
 		}
 		else
 		{
-			if (dt > m_workcycle_ms + 1)
-			{
-				m_lastPacketServerTime += m_workcycle_ms;
-			}
-			else
-			{
-				m_lastPacketServerTime = timeWithoutCorrection;
-			}
+			// time correction
+			//
+			m_lastPacketServerTime += m_workcycle_ms;
 		}
 	}
 

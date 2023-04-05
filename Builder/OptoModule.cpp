@@ -2294,9 +2294,9 @@ namespace Hardware
 
 					if (manualTxStartAddr + port->manualTxSizeW() > m_txDataSizeW)
 					{
-						// TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
+						// Manual settings TxStartAddr + TxWorsQuantity (%1 + %2 = X words) of opto port %3 exceed value of OcmTxDataSizeLimit of module %4 (%5 words).
 						//
-						m_log->errALC5032(port->txDataSizeW(), port->equipmentID(), equipmentID(), m_txDataSizeW);
+						m_log->errALC5041(manualTxStartAddr, port->txDataSizeW(), port->equipmentID(), equipmentID(), m_txDataSizeW);
 						result = false;
 						break;
 					}
@@ -2356,9 +2356,10 @@ namespace Hardware
 
 					if (port->manualTxStartAddressW() + port->manualTxSizeW() > m_txDataSizeW)
 					{
-						// TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
+						// Manual settings TxStartAddr + TxWorsQuantity (%1 + %2 = X words) of opto port %3 exceed value of OcmTxDataSizeLimit of module %4 (%5 words).
 						//
-						m_log->errALC5032(port->txDataSizeW(), port->equipmentID(), equipmentID(), m_txDataSizeW);
+						m_log->errALC5041(port->manualTxStartAddressW(), port->txDataSizeW(), port->equipmentID(), equipmentID(), m_txDataSizeW);
+
 						return false;
 					}
 

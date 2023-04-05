@@ -42,8 +42,11 @@ public:
 	bool insertDeviceObject(std::shared_ptr<Hardware::DeviceObject> object, QModelIndex parentIndex);
 	void deleteDeviceObject(const QModelIndexList& rowList);
 
+	void updateFirstLevelObjects();
+
 private:
 	void updateRowFuncOnCheckIn(QModelIndex modelIndex, const std::map<int, DbFileInfo>& updateFiles, std::set<void*>& updatedModelIndexes);
+
 public:
 	void checkInDeviceObject(QModelIndexList& rowList);
 
@@ -61,6 +64,7 @@ public:
 	void reset();
 
 	QModelIndex findObject(const QModelIndex& findStartIndex, int level, const QStringList& equipmentIdFragments);
+	QModelIndexList findObjects(const QModelIndex& findStartIndex, int level, const QStringList& equipmentIdFragments);
 
 private:
 	void sortChildrenByCaption(std::shared_ptr<Hardware::DeviceObject> deviceObject, Qt::SortOrder order);

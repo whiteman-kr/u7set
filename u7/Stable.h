@@ -36,6 +36,7 @@
 #include <limits>
 #include <iterator>
 #include <optional>
+#include <utility>
 
 
 // Qt includes

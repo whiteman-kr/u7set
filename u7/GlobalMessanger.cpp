@@ -37,6 +37,11 @@ void GlobalMessanger::fireShowDeviceApplicationSignals(QStringList deviceStrIds,
 	emit showDeviceApplicationSignals(deviceStrIds, refreshSignalList);
 }
 
+void GlobalMessanger::fireFindDeviceObject(QString equipmentId)
+{
+	emit findDeviceObject(equipmentId);
+}
+
 void GlobalMessanger::fireAddLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile)
 {
 	qDebug() << "Add Logic Schema to LogicModule(s) " << deviceStrIds;
@@ -46,6 +51,16 @@ void GlobalMessanger::fireAddLogicSchema(QStringList deviceStrIds, QString lmDes
 void GlobalMessanger::fireSearchSchemaForLm(QString equipmentId)
 {
 	emit searchSchemaForLm(equipmentId);
+}
+
+void GlobalMessanger::fireOpenSchema(const DbFileInfo& file)
+{
+	emit openSchema(file);
+}
+
+void GlobalMessanger::fireViewSchema(const DbFileInfo& file)
+{
+	emit viewSchema(file);
 }
 
 void GlobalMessanger::fireBuildStarted()

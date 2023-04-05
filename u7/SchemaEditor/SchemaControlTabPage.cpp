@@ -2192,6 +2192,8 @@ SchemaControlTabPage::SchemaControlTabPage(DbController* db, AppSignalSetProvide
 
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::addLogicSchema, this, &SchemaControlTabPage::addLogicSchema);
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::searchSchemaForLm, this, &SchemaControlTabPage::searchSchemaForLm);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::openSchema, this, &SchemaControlTabPage::openFile);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::viewSchema, [this](const DbFileInfo& file) { viewFile(file); });
 
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::compareObject, this, &SchemaControlTabPage::compareObject);
 
@@ -2452,6 +2454,8 @@ void SchemaControlTabPage::openFile(const DbFileInfo& file)
 		return;
 	}
 
+	GlobalMessanger::instance().fireChangeCurrentTab(this->parentWidget()->parentWidget()->parentWidget());
+
 	// Check if file already open, and activate it if it's so
 	//
 	if (auto editTabPage = findOpenedFile(file, false);
@@ -2566,6 +2570,8 @@ void SchemaControlTabPage::viewFile(const DbFileInfo& file)
 
 void SchemaControlTabPage::viewFile(const DbFileInfo& file, int changesetId)
 {
+	GlobalMessanger::instance().fireChangeCurrentTab(this->parentWidget()->parentWidget()->parentWidget());
+
 	if (changesetId == -1)
 	{
 		Q_ASSERT(changesetId != -1);
