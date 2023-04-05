@@ -1238,9 +1238,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3022,
-				  tr("Property %1.%2 is empty.")
-				  .arg(objectID)
-				  .arg(propertyName));
+				  QString(tr("Property %1.%2 is empty.")).arg(objectID).arg(propertyName));
 	}
 
 	/// IssueCode: CFG3023
@@ -1642,7 +1640,31 @@ namespace Builder
 								arg(cfgServiceID).arg(workstationID)));
 	}
 
-	/// IssueCode: CFG3100
+	/// IssueCode: CFG3050
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property %1.%2 contains more than %3 software identifier(s).
+	///
+	/// Parameters:
+	///         %1 Object ID
+	///         %2 Property name
+	///			%3 max count of identifiers
+	///
+	/// Description:
+	///			Delete extra identifiers from property.
+	///
+	void IssueLogger::errCFG3050(QString objectID, QString propertyName, int maxIDs)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3050,
+				  QString(tr("Property %1.%2 contains more than %3 software identifier(s).")).
+						arg(objectID).
+						arg(propertyName).
+						arg(maxIDs));
+	}
+
+	/// IssueCode: CFG3060
 	///
 	/// IssueType: Error
 	///

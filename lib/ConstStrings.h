@@ -125,6 +125,10 @@ namespace EquipmentPropNames
 	inline const QString ARCHIVE_LONG_TERM_PERIOD("LongTermArchivePeriod");
 	inline const QString ARCHIVE_LOCATION("ArchiveLocation");
 
+	// GatewayService propertiews
+	//
+	inline const QString GATEWAY_DESCRIPTION("GatewayDescription");
+
 	// Properties used in several Services
 	//
 	inline const QString CLIENT_REQUEST_IP("ClientRequestIP");
@@ -140,6 +144,8 @@ namespace EquipmentPropNames
 	inline const QString CFG_SERVICE_ID2("ConfigurationServiceID2");
 	inline const QString CFG_SERVICE_IP2("ConfigurationServiceIP2");
 	inline const QString CFG_SERVICE_PORT2("ConfigurationServicePort2");
+
+	inline const QString CFG_SERVICE_IDS("ConfigurationServiceIDs");
 
 	inline const QString SOFTWARE_TYPE("SoftwareType");
 	inline const QString HOSTNAME("Hostname");

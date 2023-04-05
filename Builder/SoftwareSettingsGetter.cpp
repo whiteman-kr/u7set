@@ -1855,117 +1855,36 @@ bool GatewayServiceSettingsGetter::readSettings(const Builder::Context* context,
 
 	bool result = true;
 
-	// ConfigurationService connections checking
+	// Get ConfigurationService connections
 	//
-/*	result = getCfgServiceConnection(equipment, software, &cfgService1, &cfgService2, log);
+	QVector<SoftwareEndpoint::ConfigService> cfgSrvConns;
 
-	RETURN_IF_FALSE(result);
+	result &= getSoftwareConnectionsBySoftwareIDs<SoftwareEndpoint::ConfigService>(
+										equipment, software,
+										EquipmentPropNames::CFG_SERVICE_IDS, 2, false,
+										E::SoftwareType::ConfigurationService,
+										EquipmentPropNames::CLIENT_REQUEST_IP,
+										EquipmentPropNames::CLIENT_REQUEST_PORT,
+										&cfgSrvConns, log);
+	cfgService1 = cfgSrvConns[0];
+	cfgService2 = cfgSrvConns[1];
 
+	// Get AppDataService connections
 	//
+	QVector<SoftwareEndpoint::AppDataService> appDataSrvConns;
 
-	QStringList tuninfServicesIDs;
+	result &= getSoftwareConnectionsBySoftwareIDs<SoftwareEndpoint::AppDataService>(
+										equipment, software,
+										EquipmentPropNames::APP_DATA_SERVICE_IDS, 2, false,
+										E::SoftwareType::AppDataService,
+										EquipmentPropNames::CLIENT_REQUEST_IP,
+										EquipmentPropNames::CLIENT_REQUEST_PORT,
+										&appDataSrvConns, log);
+	appDataService1 = appDataSrvConns[0];
+	appDataService2 = appDataSrvConns[1];
 
-	result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::TUNING_SERVICE_ID, &tuninfServicesIDs, log);
-
-	RETURN_IF_FALSE(result);
-
-	tuningServices.clear();
-
-	for(const QString& tuningServiceID : tuninfServicesIDs)
-	{
-		HostAddressPort tuningServiceClientAddress;
-
-		result &= getSoftwareConnectionBySoftwareID(equipment,
-									   software,
-									   tuningServiceID,
-									   EquipmentPropNames::TUNING_SERVICE_ID,
-									   EquipmentPropNames::CLIENT_REQUEST_IP,
-									   EquipmentPropNames::CLIENT_REQUEST_PORT,
-									   &tuningServiceClientAddress,
-									   false,
-									   Socket::IP_NULL,
-									   PORT_TUNING_SERVICE_CLIENT_REQUEST,
-									   E::SoftwareType::TuningService,
-									   log);
-		BREAK_IF_FALSE(result);
-
-		SoftwareEndpoint::TuningService tsc;
-
-		tsc.equipmentId = tuningServiceID;
-		tsc.clientRequestAddress = tuningServiceClientAddress;
-
-		TuningServiceSettingsGetter tsg;
-
-		result &= tsg.readFromDeviceByEquipmentID(context, tuningServiceID, E::SoftwareType::TuningService);
-
-		BREAK_IF_FALSE(result);
-
-		TuningServiceSettings::TuningClient tc = tsg.getTuningClient(software->equipmentIdTemplate());
-
-		if (tc.isValid() == false)
-		{
-			LOG_INTERNAL_ERROR_MSG(log, QString("Tuning Client %1 is not found in clients list of Tuning Service %2").
-										arg(software->equipmentIdTemplate()).
-										arg(tuningServiceID));
-			result = false;
-			break;
-		}
-
-		tsc.drivenSources = tc.uniqueSourcesIDs();
-
-		tsc.singleLmControl = tsg.singleLmControl;
-
-		tuningServices.push_back(tsc);
-	}
-
-	RETURN_IF_FALSE(result);
-
-	result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::AUTO_APPLAY, &autoApply, log);
-	result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::SHOW_SIGNALS, &showSignals, log);
-	result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::SHOW_SCHEMAS, &showSchemas, log);
-
-	RETURN_IF_FALSE(result);
-
-	//
-	// schemasNavigation
-	//
-	showSchemasList = false;
-	showSchemasTabs = false;
-
-	int schemasNavigation = 0;
-
-	result &= DeviceHelper::getIntProperty(software, EquipmentPropNames::SCHEMAS_NAVIGATION, &schemasNavigation, log);
-
-	RETURN_IF_FALSE(result);
-
-	switch (schemasNavigation)
-	{
-	case 0:
-		break;
-	case 1:
-		showSchemasList = true;
-		break;
-	case 2:
-		showSchemasTabs = true;
-		break;
-	default:
-		Q_ASSERT(false);
-	}
-
-	//
-	// statusFlagFunction
-	//
-
-	int value = 0;
-	result &= DeviceHelper::getIntProperty(software, EquipmentPropNames::STATUS_FLAG_FUNCTION, &value, log);
-	if (result == true)
-	{
-		statusFlagFunction = static_cast<LmStatusFlagMode>(value);
-	}
-
-	result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::START_SCHEMA_ID, &startSchemaID, log);
-
-*/
+	result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::GATEWAY_DESCRIPTION,
+										   &gatewayDescription, log);
 	return result;
 }
 

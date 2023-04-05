@@ -1792,6 +1792,19 @@ bool TuningClientSettings::connectionChanged(const TuningClientSettings& src) co
 
 bool GatewayServiceSettings::writeToXml(XmlWriteHelper& xml) const
 {
+	xml.writeStringElement(EquipmentPropNames::CFG_SERVICE_ID1,
+						   cfgService1.equipmentId);
+	xml.writeHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
+							 EquipmentPropNames::CFG_SERVICE_PORT1,
+							 cfgService1.address);
+
+	xml.writeStringElement(EquipmentPropNames::CFG_SERVICE_ID2,
+						   cfgService2.equipmentId);
+	xml.writeHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP2,
+							 EquipmentPropNames::CFG_SERVICE_PORT2,
+							 cfgService2.address);
+
+	xml.writeStringElement("GatewayDescription", gatewayDescription);
 	return true;
 }
 
