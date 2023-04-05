@@ -10,6 +10,11 @@ class DbController;
 class EquipmentModel;
 class EquipmentView;
 
+namespace Hardware
+{
+	class DeviceObject;
+}
+
 //
 //
 // EquipmentTabPage
@@ -24,6 +29,9 @@ public:
 	virtual ~EquipmentTabPage();
 
 	void saveSession() const;
+
+	std::shared_ptr<Hardware::DeviceObject> deviceObject(QString equipmentId) const;
+	std::vector<std::shared_ptr<Hardware::DeviceObject>> deviceObjects(QString equipmentId) const;
 
 protected:
 	void CreateActions();
@@ -65,6 +73,8 @@ protected slots:
 	void importPreset();
 
 	void onEquipmentViewContextMenuRequested(const QPoint& pos);
+
+	void findDeviceObject(QString equipmentId);
 
 	// Data
 	//

@@ -83,6 +83,9 @@ public slots:
 	void findObject();
 	bool findObject(QString equiepmentId);
 
+	std::shared_ptr<Hardware::DeviceObject> deviceObject(QString equiepmentId) const;
+	std::vector<std::shared_ptr<Hardware::DeviceObject>> deviceObjects(QString equipmentId) const;
+
 	void deleteSelectedDevices();
 	void checkInSelectedDevices();
 	void checkOutSelectedDevices();

@@ -51,11 +51,15 @@ public:
 	// Equipment Editor
 	//
 	void fireShowDeviceApplicationSignals(QStringList deviceStrIds, bool refreshSignalList);
+	void fireFindDeviceObject(QString equipmentId);
 
 	// Schema Editor
 	//
 	void fireAddLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile);
 	void fireSearchSchemaForLm(QString equipmentId);
+
+	void fireOpenSchema(const DbFileInfo& file);
+	void fireViewSchema(const DbFileInfo& file);
 
 	// Build
 	//
@@ -91,10 +95,18 @@ signals:
 	void buildFinished(int errorCount);
 
 	void showDeviceApplicationSignals(QStringList deviceStrIds, bool refreshSignalList);
+	void findDeviceObject(QString equipmentId);
 
+	// Schemas
+	//
 	void addLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile);
 	void searchSchemaForLm(QString equipmentId);
 
+	void openSchema(const DbFileInfo& file);
+	void viewSchema(const DbFileInfo& file);
+
+	//--
+	//
 	void changeCurrentTab(QWidget* tab);
 
 	void compareObject(DbChangesetObject object, CompareData compareData);

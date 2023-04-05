@@ -71,6 +71,14 @@ HEADERS  += \
     CodeEditor.h \
     DbTagsEditor.h \
     EquipmentEditor/DialogImportPreset.h \
+    Locator/AppSignalLocatorProvider.h \
+    Locator/ConnectionLocatorProvider.h \
+    Locator/EquipmentLocatorProvider.h \
+    Locator/Locator.h \
+    Locator/LocatorEditControl.h \
+    Locator/LocatorListWidget.h \
+    Locator/LocatorProvider.h \
+    Locator/SchemaLocatorProvider.h \
     Reports/ProjectDiffReport.h \
     SchemaEditor/EditSchemaSignalProvider.h \
     SchemaEditor/EditSchemaTabPage.h \
@@ -236,6 +244,14 @@ SOURCES +=\
 	EquipmentEditor/EquipmentView.cpp \
 	FilesTabPage.cpp \
 	Forms/DialogProjectDiff.cpp \
+    Locator/AppSignalLocatorProvider.cpp \
+    Locator/ConnectionLocatorProvider.cpp \
+    Locator/EquipmentLocatorProvider.cpp \
+    Locator/Locator.cpp \
+    Locator/LocatorEditControl.cpp \
+    Locator/LocatorListWidget.cpp \
+    Locator/LocatorProvider.cpp \
+    Locator/SchemaLocatorProvider.cpp \
 	LoginDialog.cpp \
 	Main.cpp \
 	MainTabPage.cpp \

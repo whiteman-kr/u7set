@@ -578,6 +578,15 @@ void EquipmentModel::deleteDeviceObject(const QModelIndexList& rowList)
 	return;
 }
 
+void EquipmentModel::updateFirstLevelObjects()
+{
+	if (m_root->childrenCount() == 0)
+	{
+		fetchMore({});
+	}
+
+	return;
+}
 
 void EquipmentModel::updateRowFuncOnCheckIn(QModelIndex modelIndex, const std::map<int, DbFileInfo>& updateFiles, std::set<void*>& updatedModelIndexes)
 {
@@ -1190,7 +1199,7 @@ QModelIndex EquipmentModel::findObject(const QModelIndex& findStartIndex, int le
 	if (level < 1 || level > equipmentIdFragments.size())
 	{
 		Q_ASSERT(false);
-		return QModelIndex();
+		return {};
 	}
 
 	// Construct equipmentId according to level
@@ -1231,7 +1240,6 @@ QModelIndex EquipmentModel::findObject(const QModelIndex& findStartIndex, int le
 		}
 
 		QModelIndex childIndex = index(0, foundIndex);
-
 		if (childIndex.isValid() == false)
 		{
 			Q_ASSERT(false);
@@ -1239,14 +1247,84 @@ QModelIndex EquipmentModel::findObject(const QModelIndex& findStartIndex, int le
 		}
 
 		QModelIndex result = findObject(childIndex, level + 1, equipmentIdFragments);
-
 		if (result.isValid() == true)
 		{
 			return result;
 		}
 	}
 
-	return QModelIndex();
+	return {};
+}
+
+QModelIndexList EquipmentModel::findObjects(const QModelIndex& findStartIndex, int level, const QStringList& equipmentIdFragments)
+{
+	if (level < 1 || level > equipmentIdFragments.size())
+	{
+		Q_ASSERT(false);
+		return {};
+	}
+
+	// Construct equipmentId according to level
+	//
+	QString equipmentId;
+	for (int i = 0; i < level; i++)
+	{
+		equipmentId += equipmentIdFragments[i];
+		if (i < level - 1)
+		{
+			equipmentId += "_";
+		}
+	}
+
+	// Find an object starting from findStartIndex
+	//
+	auto matchType = (level == equipmentIdFragments.size()) ? Qt::MatchStartsWith : Qt::MatchExactly;
+
+	QModelIndexList foundIndexes = match(findStartIndex, EquipmentModel::EquipmentIdRole, equipmentId, -1, matchType);
+
+	// If we are at the highest level and result is not empty - return it, search finished
+	//
+	if (level == equipmentIdFragments.size())
+	{
+		for (auto mi : foundIndexes)
+		{
+			if (canFetchMore(mi) == true)
+			{
+				fetchMore(mi);
+			}
+		}
+
+		return foundIndexes;
+	}
+
+	// Otherwise fetch and search recursively child objects
+	//
+	QModelIndexList allFoundIndexes;
+
+	for (QModelIndex& foundIndex : foundIndexes)
+	{
+		if (canFetchMore(foundIndex) == true)
+		{
+			fetchMore(foundIndex);
+		}
+
+		if (rowCount(foundIndex) == 0)
+		{
+			continue;
+		}
+
+		QModelIndex childIndex = index(0, foundIndex);
+		if (childIndex.isValid() == false)
+		{
+			Q_ASSERT(false);
+			continue;
+		}
+
+		QModelIndexList resultIndexes = findObjects(childIndex, level + 1, equipmentIdFragments);
+		allFoundIndexes.append(resultIndexes);
+	}
+
+	return allFoundIndexes;
 }
 
 void EquipmentModel::sortChildrenByCaption(std::shared_ptr<Hardware::DeviceObject> deviceObject, Qt::SortOrder order)

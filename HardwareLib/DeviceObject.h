@@ -186,6 +186,7 @@ namespace Hardware
 		[[nodiscard]] const std::shared_ptr<DeviceObject> parent() const noexcept;
 
 		[[nodiscard]] DeviceType deviceType() const noexcept;
+		[[nodiscard]] QString deviceTypeName() const noexcept;
 
 		[[nodiscard]] bool isRoot() const noexcept;
 		[[nodiscard]] bool isSystem() const noexcept;

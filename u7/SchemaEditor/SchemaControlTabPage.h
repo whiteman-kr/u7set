@@ -292,6 +292,7 @@ public slots:
 	void viewFile(const DbFileInfo& file);
 	void viewFile(const DbFileInfo& file, int changesetId);
 
+
 protected slots:
 	void projectOpened();
 	void projectClosed();
