@@ -147,6 +147,8 @@ private:
 
 	//
 
+	qint64 m_lastUpdateTime = 0;
+
 	int m_receivedPerSecond = 0;
 	int m_rupFramesReceivedPerSecond = 0;
 	qint64 m_prevPacketTime = 0;
