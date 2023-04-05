@@ -257,11 +257,29 @@ TEST_F(TuningConnectionTests, tuningSourceInfo)
 
 	EXPECT_EQ(connStates[0].peerAddr, s_safeTuningServices[0].clientRequestAddress);
 
-	// Check that tuning source info is arrived
+	// Wait for sources info arrives
 	//
 	std::vector<ClientLib::TuningSource> allSourcesInfo = tc.tuningSourcesInfo();
+	{
+		QElapsedTimer timer;
+		timer.start();
+
+		while (timer.hasExpired(5000) == false)
+		{
+			if (allSourcesInfo.size() > 0)
+			{
+				break;
+			}
+			QCoreApplication::instance()->processEvents();
+			QThread::msleep(10);
+
+			allSourcesInfo = tc.tuningSourcesInfo();
+		}
+	}
 	EXPECT_EQ(allSourcesInfo.size(), 1);
 
+	// Check that tuning source info for LM is arrived
+	//
 	std::vector<ClientLib::TuningSource> sourceInfo = tc.tuningSourceInfo(lmHash);
 	EXPECT_EQ(sourceInfo.size(), 1);
 
@@ -271,6 +289,12 @@ TEST_F(TuningConnectionTests, tuningSourceInfo)
 
 		EXPECT_TRUE(si.id() != 0);
 		EXPECT_EQ(si.valid(), true);
+
+		if (si.statesCount() == 0)
+		{
+			EXPECT_TRUE(si.statesCount() != 0);
+			break;
+		}
 
 		EXPECT_EQ(lmHash, ::calcHash(si.equipmentId()));
 
