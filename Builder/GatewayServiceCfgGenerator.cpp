@@ -19,7 +19,14 @@ namespace Builder
 			return false;
 		}
 
-		return m_settingsSet.addProfile<GatewayServiceSettings>(profile, settingsGetter);
+		bool result = true;
+
+		result &= m_settingsSet.addProfile<GatewayServiceSettings>(profile, settingsGetter);
+
+		result &= writeRunScriptFile(profile, settingsGetter, E::OS::Windows);
+		result &= writeRunScriptFile(profile, settingsGetter, E::OS::Linux);
+
+		return result;
 	}
 
 	bool GatewayServiceCfgGenerator::generateConfigurationStep1()
@@ -53,5 +60,29 @@ namespace Builder
 		return result;
 	}
 
+	bool GatewayServiceCfgGenerator::writeRunScriptFile(const QString& profile,
+														const GatewayServiceSettings& settings,
+														E::OS os)
+	{
+		TEST_PTR_RETURN_FALSE(m_software);
 
+		QString content = getBuildInfoComments(os);
+
+		QString cmdLine = getCommonCmdLine(settings.cfgService1.address,
+										   settings.cfgService2.address, os, true);
+
+		if (cmdLine.isEmpty() == true)
+		{
+			return false;
+		}
+
+		content += cmdLine;
+
+		BuildFile* buildFile = m_buildResultWriter->addFile(getRunScriptDirectory(os),
+															getRunScriptName(profile, os),
+															content);
+		TEST_PTR_RETURN_FALSE(buildFile);
+
+		return true;
+	}
 }

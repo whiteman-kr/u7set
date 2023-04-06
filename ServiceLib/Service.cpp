@@ -6,36 +6,6 @@
 #include "../UtilsLib/WUtils.h"
 #include "../lib/ConstStrings.h"
 
-ServiceInfo::ServiceInfo()
-{
-}
-
-ServiceInfo::ServiceInfo(E::SoftwareType _softwareType, quint16 _port, QString _name, QString _shortName) :
-	softwareType(_softwareType),
-	port(_port),
-	name(_name),
-	shortName(_shortName)
-{
-}
-
-ServicesInfo::ServicesInfo()
-{
-	const ServiceInfo serviceInfo[] =
-	{
-		ServiceInfo(E::SoftwareType::BaseService, PORT_BASE_SERVICE, "Base Service", "BaseSrv"),
-		ServiceInfo(E::SoftwareType::ConfigurationService, PORT_CONFIGURATION_SERVICE, "Configuration Service", "CfgSrv"),
-		ServiceInfo(E::SoftwareType::AppDataService, PORT_APP_DATA_SERVICE, "Application Data Service", "AppDataSrv"),
-		ServiceInfo(E::SoftwareType::TuningService, PORT_TUNING_SERVICE, "Tuning Service", "TuningSrv"),
-		ServiceInfo(E::SoftwareType::ArchiveService, PORT_ARCHIVING_SERVICE, "Data Archiving Service", "DataArchSrv"),
-		ServiceInfo(E::SoftwareType::DiagDataService, PORT_DIAG_DATA_SERVICE, "Diagnostics Data Service", "DiagDataSrv"),
-	};
-
-	for(const ServiceInfo& sInfo : serviceInfo)
-	{
-		insert(sInfo.softwareType, sInfo);
-	}
-}
-
 // -------------------------------------------------------------------------------------
 //
 // ServiceWorker class implementation
@@ -454,7 +424,11 @@ void Service::stopServiceWorkerThread()
 
 void Service::startBaseRequestSocketThread()
 {
-	ServiceInfo sInfo = servicesInfo.value(m_serviceWorkerFactory.softwareType());
+	auto it = servicesInfo.find(m_serviceWorkerFactory.softwareType());
+
+	Q_ASSERT(it != servicesInfo.end());
+
+	const ServiceInfo& sInfo = it->second;
 
 	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::AnyIPv4, sInfo.port, m_logger);
 

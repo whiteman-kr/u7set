@@ -15,6 +15,9 @@ namespace Builder
 		virtual bool generateConfigurationStep1() override;
 
 	private:
+		bool writeRunScriptFile(const QString& profile,
+								const GatewayServiceSettings& settings,
+								E::OS os);
 	};
 
 }

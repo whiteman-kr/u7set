@@ -81,7 +81,7 @@ bool getSoftwareConnectionsBySoftwareIDs(const Hardware::EquipmentSet* equipment
 									E::SoftwareType requiredSoftwareType,
 									const QString& propIP,						// in connected software
 									const QString& propPort,					// in connected software
-									QList<SW_ENDPOINT>* connections,			// on return connections->size() always == maxIDsCount
+									std::vector<SW_ENDPOINT>* connections,			// on return connections->size() always == maxIDsCount
 									Builder::IssueLogger* log)
 {
 	TEST_PTR_RETURN_FALSE(log);
@@ -121,12 +121,10 @@ bool getSoftwareConnectionsBySoftwareIDs(const Hardware::EquipmentSet* equipment
 		return false;
 	}
 
-	QVector<SW_ENDPOINT> endpoints(maxIDsCount);
-
 	for(int i = 0; i < softwareIDs.size(); i++)
 	{
 		const QString& softwareID = softwareIDs[i];
-		SW_ENDPOINT& endpoint = endpoints[i];
+		SW_ENDPOINT& endpoint = connections->at(i);
 
 		endpoint.equipmentId = softwareID;
 
@@ -141,7 +139,6 @@ bool getSoftwareConnectionsBySoftwareIDs(const Hardware::EquipmentSet* equipment
 
 	return result;
 }
-
 
 #pragma warning(push)
 #pragma warning(disable: 4250)

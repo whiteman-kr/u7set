@@ -1003,6 +1003,7 @@ namespace Builder
 			{ E::SoftwareType::TuningClient, QString("TuningClient") },
 			{ E::SoftwareType::Monitor, QString("Monitor") },
 			{ E::SoftwareType::Metrology, QString("Metrology") },
+			{ E::SoftwareType::GatewayService, QString("GatewaySrv") },
 		};
 
 		auto it = servicesBins.find(m_software->softwareType());

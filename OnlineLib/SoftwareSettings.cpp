@@ -349,6 +349,9 @@ std::shared_ptr<SoftwareSettings> SoftwareSettingsSet::createAppropriateSettings
 	case E::SoftwareType::TestClient:
 		return std::make_shared<TestClientSettings>();
 
+	case E::SoftwareType::GatewayService:
+		return std::make_shared<GatewayServiceSettings>();
+
 	case E::SoftwareType::ServiceControlManager:
 	case E::SoftwareType::Unknown:
 	case E::SoftwareType::BaseService:
@@ -1792,6 +1795,8 @@ bool TuningClientSettings::connectionChanged(const TuningClientSettings& src) co
 
 bool GatewayServiceSettings::writeToXml(XmlWriteHelper& xml) const
 {
+	writeStartSettings(xml);
+
 	xml.writeStringElement(EquipmentPropNames::CFG_SERVICE_ID1,
 						   cfgService1.equipmentId);
 	xml.writeHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
@@ -1803,14 +1808,28 @@ bool GatewayServiceSettings::writeToXml(XmlWriteHelper& xml) const
 	xml.writeHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP2,
 							 EquipmentPropNames::CFG_SERVICE_PORT2,
 							 cfgService2.address);
+	writeEndSettings(xml);
 
-	xml.writeStringElement("GatewayDescription", gatewayDescription);
 	return true;
 }
 
 bool GatewayServiceSettings::readFromXml(XmlReadHelper& xml)
 {
 	bool result = true;
+
+	result = startSettingsReading(xml);
+
+	RETURN_IF_FALSE(result);
+
+	result &= xml.readStringElement(EquipmentPropNames::CFG_SERVICE_ID1, &cfgService1.equipmentId, true);
+	result &= xml.readHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
+									  EquipmentPropNames::CFG_SERVICE_PORT1,
+									  &cfgService1.address);
+
+	result &= xml.readStringElement(EquipmentPropNames::CFG_SERVICE_ID2, &cfgService2.equipmentId, true);
+	result &= xml.readHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP2,
+									  EquipmentPropNames::CFG_SERVICE_PORT2,
+									  &cfgService2.address);
 	return result;
 }
 

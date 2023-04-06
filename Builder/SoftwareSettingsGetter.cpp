@@ -434,6 +434,7 @@ bool CfgServiceSettingsGetter::buildClientsList(const Builder::Context* context,
 {
 	const QString PROP_CFG_SERVICE_ID1(EquipmentPropNames::CFG_SERVICE_ID1);
 	const QString PROP_CFG_SERVICE_ID2(EquipmentPropNames::CFG_SERVICE_ID2);
+	const QString PROP_CFG_SERVICE_IDS(EquipmentPropNames::CFG_SERVICE_IDS);
 
 	Builder::IssueLogger* log = context->m_log;
 
@@ -459,18 +460,40 @@ bool CfgServiceSettingsGetter::buildClientsList(const Builder::Context* context,
 		}
 
 		QString ID1;
+		QString ID2;
+
+		if (DeviceHelper::isPropertyExists(software, PROP_CFG_SERVICE_IDS) == true)
+		{
+			QStringList ids;
+			result &= DeviceHelper::getStrListProperty(software, PROP_CFG_SERVICE_IDS, &ids, log);
+
+			if (ids.size() == 1)
+			{
+				ID1 = ids[0];
+			}
+			else
+			{
+				if (ids.size() >= 2)
+				{
+					ID1 = ids[0];
+					ID2 = ids[1];
+				}
+			}
+		}
+
+		//
 
 		if (DeviceHelper::isPropertyExists(software, PROP_CFG_SERVICE_ID1) == true)
 		{
 			result &= DeviceHelper::getStrProperty(software, PROP_CFG_SERVICE_ID1, &ID1, log);
 		}
 
-		QString ID2;
-
 		if (DeviceHelper::isPropertyExists(software, PROP_CFG_SERVICE_ID2) == true)
 		{
 			result &= DeviceHelper::getStrProperty(software, PROP_CFG_SERVICE_ID2, &ID2, log);
 		}
+
+		//
 
 		if (ID1 == cfgService->equipmentIdTemplate() || ID2 == cfgService->equipmentIdTemplate())
 		{
@@ -1857,7 +1880,7 @@ bool GatewayServiceSettingsGetter::readSettings(const Builder::Context* context,
 
 	// Get ConfigurationService connections
 	//
-	QVector<SoftwareEndpoint::ConfigService> cfgSrvConns;
+	std::vector<SoftwareEndpoint::ConfigService> cfgSrvConns;
 
 	result &= getSoftwareConnectionsBySoftwareIDs<SoftwareEndpoint::ConfigService>(
 										equipment, software,
@@ -1871,7 +1894,7 @@ bool GatewayServiceSettingsGetter::readSettings(const Builder::Context* context,
 
 	// Get AppDataService connections
 	//
-	QVector<SoftwareEndpoint::AppDataService> appDataSrvConns;
+	std::vector<SoftwareEndpoint::AppDataService> appDataSrvConns;
 
 	result &= getSoftwareConnectionsBySoftwareIDs<SoftwareEndpoint::AppDataService>(
 										equipment, software,

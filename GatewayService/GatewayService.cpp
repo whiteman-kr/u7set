@@ -226,7 +226,6 @@ void GatewayServiceWorker::onTimer()
 {
 }
 
-
 bool GatewayServiceWorker::readAppSignals(const QByteArray& fileData)
 {
 	::Proto::AppSignalSet signalSet;
