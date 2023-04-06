@@ -257,9 +257,7 @@ namespace Locator
 
 		if (providerName == "Connection" && item->what.isEmpty() == false)
 		{
-			// LocatedItem::what is ConnectionID
-			//
-			QString equpmnetId = item->what;
+			QString connectionId = item->data.toString();
 
 			if (theDialogConnections == nullptr)
 			{
@@ -271,7 +269,7 @@ namespace Locator
 				theDialogConnections->activateWindow();
 			}
 
-			theDialogConnections->setFilter(equpmnetId);
+			theDialogConnections->setFilter(connectionId);
 
 			emit clearFocusFromInput();
 			return;
