@@ -8,10 +8,9 @@
 #include "AppDataSource.h"
 #include "SignalStatesProcessingThread.h"
 
-
 class TcpAppDataServerThread;
 class AppDataServiceWorker;
-class AppDataReceiverThread;
+class AppDataReceiver;
 
 // -------------------------------------------------------------------------------
 //
@@ -24,8 +23,7 @@ class TcpAppDataServer : public Tcp::Server
 public:
 	TcpAppDataServer(const SoftwareInfo& softwareInfo,
 					 E::SecurityLevel securityLevel,
-					 AppDataReceiverThread* appDataReceiverThread,
-					 SignalStatesProcessingThread* signalStatesProcessingThread);
+					 AppDataServiceWorker& appDataService);
 
 	virtual ~TcpAppDataServer() override;
 
@@ -33,8 +31,6 @@ public:
 	virtual void onServerThreadFinished() override;
 
 	virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) override;
-
-	void setThread(TcpAppDataServerThread* thread) { m_thread = thread; }
 
 private:
 	virtual Server* getNewInstance() override;
@@ -61,20 +57,13 @@ private:
 	//
 	int getSignalListPartCount(int signalCount);
 
-	const QVector<QString>& acquiredAppSignalIDs() const;
-	const AppSignals& appSignals() const;
-	const AppDataSourcesIP& appDataSources() const;
-
-	bool getAppSignalStateState(Hash hash, AppSignalState& state);
-	bool getDataSourceState(Hash hash, AppSignalState& state);
+//	bool getAppSignalStateState(Hash hash, AppSignalState& state);
+//	bool getDataSourceState(Hash hash, AppSignalState& state);
 
 	void getServerTimes(qint64* utc, qint64* local);
 
 private:
-	TcpAppDataServerThread* m_thread = nullptr;
-
-	AppDataReceiverThread* m_appDataReceiverThread = nullptr;
-	SignalStatesProcessingThread* m_signalStatesProcessingThread = nullptr;
+	AppDataServiceWorker& m_appDataService;
 
 	SimpleAppSignalStatesQueueShared m_signalStatesQueue;
 
@@ -122,38 +111,9 @@ private:
 class TcpAppDataServerThread : public Tcp::ServerThread
 {
 public:
-	TcpAppDataServerThread(const HostAddressPort& listenAddressPort,
-							TcpAppDataServer* server,
-							const AppDataSourcesIP& appDataSources,
-							const AppSignals& appSignals,
-							const DynamicAppSignalStates& appSignalStates,
-							const AppDataServiceWorker& appDataServiceWorker,
-							std::shared_ptr<CircularLogger> logger);
-
-	const QVector<QString>& acquiredAppSignalIDs() const { return m_acquiredAppSignalIDs; }
-	int acquiredAppSignalIDsCount() const { return static_cast<int>(m_acquiredAppSignalIDs.count()); }
-
-	const AppSignals& appSignals() const { return m_appSignals; }
-	const AppDataSourcesIP& appDataSources() const { return  m_appDataSources; }
-
-	bool getAppSignalState(Hash hash, AppSignalState& state);
-
-	bool isConnectedToConfigurationService(quint32 &ip, quint16 &port);
-	bool isConnectedToArchiveService(quint32& ip, quint16& port);
-
-	QString equipmentID() const;
-	QString cfgServiceIP1Str() const;
-	QString cfgServiceIP2Str() const;
-
-private:
-	void buildAppSignalIDs();
-
-private:
-	QVector<QString> m_acquiredAppSignalIDs;
-
-	const AppDataSourcesIP& m_appDataSources;
-	const AppSignals& m_appSignals;
-	const DynamicAppSignalStates& m_appSignalStates;
-	const AppDataServiceWorker& m_appDataServiceWorker;
+	TcpAppDataServerThread(const SoftwareInfo& softwareInfo,
+							const HostAddressPort& listenAddressPort,
+							E::SecurityLevel securityLevel,
+							AppDataServiceWorker &appDataServiceWorker);
 };
 

@@ -3,6 +3,7 @@
 #include "EquipmentView.h"
 #include "EquipmentVcsDialog.h"
 #include "IdePropertyEditor.h"
+#include "../../HardwareLib/DeviceObject.h"
 #include "../Settings.h"
 #include "../DialogConnections.h"
 #include "../Forms/ComparePropertyObjectDialog.h"
@@ -171,6 +172,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 
 	connect(m_equipmentModel, &EquipmentModel::objectVcsStateChanged, this, &EquipmentTabPage::objectVcsStateChanged);
 
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::findDeviceObject, this, &EquipmentTabPage::findDeviceObject);
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::compareObject, this, &EquipmentTabPage::compareObject);
 
 	// Evidently, project is not opened yet
@@ -196,6 +198,17 @@ void EquipmentTabPage::saveSession() const
 	m_equipmentView->saveSession();
 	return;
 }
+
+std::shared_ptr<Hardware::DeviceObject> EquipmentTabPage::deviceObject(QString equipmentId) const
+{
+	return std::as_const(m_equipmentView)->deviceObject(equipmentId);
+}
+
+std::vector<std::shared_ptr<Hardware::DeviceObject>> EquipmentTabPage::deviceObjects(QString equipmentId) const
+{
+	return std::as_const(m_equipmentView)->deviceObjects(equipmentId);
+}
+
 
 void EquipmentTabPage::CreateActions()
 {
@@ -1728,5 +1741,12 @@ void EquipmentTabPage::onEquipmentViewContextMenuRequested(const QPoint& /*pos*/
 
 	contextMenu.exec(QCursor::pos());
 
+	return;
+}
+
+void EquipmentTabPage::findDeviceObject(QString equipmentId)
+{
+	GlobalMessanger::instance().changeCurrentTab(this);
+	m_equipmentView->findObject(equipmentId);
 	return;
 }

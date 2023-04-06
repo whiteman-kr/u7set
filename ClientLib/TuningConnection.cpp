@@ -13,14 +13,12 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 										 const SoftwareEndpoint::TuningService& tuns,
 										 bool autoApply,
 										 TuningClientSettings::LmStatusFlagMode lmStatusFlagMode,
-										 TuningSignalManager& tuningSignalManager,
+										 ITuningSignalUpdater& signalUpdater,
 										 ILogFile* logFile,
 										 TuningLog::TuningLog* tuningLog)
 	{
-		tcpTuningClient = new TuningTcpClient{softwareInfo, tuns, tuningSignalManager, logFile, tuningLog};
-		tcpTuningClient->setInstanceId(softwareInfo.equipmentID());
-		const HostAddressPort addrPort = HostAddressPort(tuns.clientRequestIP, tuns.clientRequestPort);
-		tcpTuningClient->setServers(addrPort, addrPort, true);
+		tcpTuningClient = new TuningTcpClient{softwareInfo, tuns, signalUpdater, logFile, tuningLog};
+		tcpTuningClient->setServers(tuns.clientRequestAddress, tuns.clientRequestAddress, true);
 		tcpTuningClient->setAutoApply(autoApply);
 		tcpTuningClient->setLmStatusFlagMode(lmStatusFlagMode);
 
@@ -33,29 +31,6 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 	{
 		stopAndDestroy();
 		return;
-	}
-
-	TuningConnection::Connection::Connection(Connection&& src) noexcept
-	{
-		operator=(std::move(src));
-		return;
-	}
-
-	TuningConnection::Connection& TuningConnection::Connection::operator=(Connection&& src) noexcept
-	{
-		if (this == &src)
-		{
-			Q_ASSERT(this != &src);
-			return *this;
-		}
-
-		tcpTuningClient = src.tcpTuningClient;
-		tcpClientThread = src.tcpClientThread;
-
-		src.tcpTuningClient = nullptr;
-		src.tcpClientThread = nullptr;
-
-		return *this;
 	}
 
 	void TuningConnection::Connection::stopAndDestroy()
@@ -78,14 +53,15 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 		return tcpTuningClient->serverAddressPort1();
 	}
 
-	TuningConnection::TuningConnection(TuningSignalManager& tuningSignalManager,
+	TuningConnection::TuningConnection(ITuningSignalManager& tuningSignalManager,
+									   ITuningSignalUpdater& tuningSignalUpdater,
 									   ILogFile* logFile,
 									   TuningLog::TuningLog* tuningLog) :
 		m_tuningSignalManager{tuningSignalManager},
+		m_tuningSignalUpdater{tuningSignalUpdater},
 		m_logFile{logFile, "TuningConnection"},
 		m_tuningLog(tuningLog)
 	{
-
 		return;
 	}
 
@@ -102,7 +78,7 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 		{
 			auto it = std::find_if(m_conns.begin(), m_conns.end(), [&tuns](const Connection& c)
 			{
-				return c.address() == HostAddressPort(tuns.clientRequestIP, tuns.clientRequestPort);
+				return c.address() == tuns.clientRequestAddress;
 			});
 
 			if (it != m_conns.end())
@@ -112,7 +88,7 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 				continue;
 			}
 
-			m_conns.emplace_back(softwareInfo, tuns, autoApply, lmStatusFlagMode, m_tuningSignalManager, m_logFile.logFile(), m_tuningLog);
+			m_conns.emplace_back(softwareInfo, tuns, autoApply, lmStatusFlagMode, m_tuningSignalUpdater, m_logFile.logFile(), m_tuningLog);
 		}
 
 		return;
@@ -229,7 +205,7 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 
 		for (const Connection& c : m_conns)
 		{
-			str += tr("%1: ").arg(c.tcpTuningClient->tuningServiceId());
+			str += tr("%1: ").arg(c.tcpTuningClient->connectedSoftwareInfo().equipmentID());
 
 			QString activeClientId = c.tcpTuningClient->activeClientId();
 			QString activeClientIp = c.tcpTuningClient->activeClientIp();
@@ -256,7 +232,7 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 		return str;
 	}
 
-	bool TuningConnection::takeClientControl(const std::set<Hash>& sourceHashes) const
+	bool TuningConnection::takeClientControl(Hash sourceHash) const
 	{
 		bool result = true;
 
@@ -266,12 +242,9 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 					c.tcpTuningClient->singleLmControlMode() == true &&
 					c.tcpTuningClient->clientIsActive() == false)
 			{
-				for (Hash sourceHash : sourceHashes)
+				if (c.tcpTuningClient->hasTuningSource(sourceHash) == true)
 				{
-					if (c.tcpTuningClient->hasTuningSource(sourceHash) == true)
-					{
-						result &= c.tcpTuningClient->activateTuningSourceControl(sourceHash, true, true);
-					}
+					result &= c.tcpTuningClient->activateTuningSourceControl(sourceHash, true, true);
 				}
 			}
 		}
@@ -279,26 +252,7 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 		return result;
 	}
 
-	std::vector<std::pair<QString, TuningSignalState>> TuningConnection::states(Hash appSignalHash) const
-	{
-		std::vector<std::pair<QString, TuningSignalState>> result;
-		result.reserve(m_conns.size());
-
-		bool found = false;
-
-		for (const Connection& c : m_conns)
-		{
-			TuningSignalState state = c.tcpTuningClient->state(appSignalHash, &found);
-			if (found == true)
-			{
-				result.push_back(std::make_pair(c.tcpTuningClient->tuningServiceId(), state));
-			}
-		}
-
-		return result;
-	}
-
-	void TuningConnection::writeTuningSignals(const std::vector<TuningWriteCommand>& writeCommands)
+	bool TuningConnection::writeTuningSignals(const std::vector<TuningWriteCommand>& writeCommands)
 	{
 		// Write values on all clients
 		//
@@ -310,21 +264,47 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 			}
 
 			std::vector<TuningWriteCommand> commands;
+			commands.reserve(writeCommands.size());
 
 			for (const TuningWriteCommand& command : writeCommands)
 			{
-				// Take state from client, NOT (!) from tuningSignalManager, to skip writing non-valid signals in multi-channel case.
-				//
-				bool found = false;
-
-				TuningSignalState state = c.tcpTuningClient->state(command.m_appSignalHash, &found);
-
-				if (found == false || state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
+				if (c.tcpTuningClient->hasTuningSignal(command.appSignalHash) == false)
 				{
 					continue;
 				}
 
-				commands.push_back({command.m_appSignalHash, m_tuningSignalManager.newValue(command.m_appSignalHash)});
+				// Take state from client, NOT (!) from tuningSignalManager, to skip writing non-valid signals in multi-channel case.
+				//
+				bool found = false;
+				AppSignalParam param = m_tuningSignalManager.signalParam(command.appSignalHash, &found);
+				if (found == false)
+				{
+					Q_ASSERT(false);
+					return false;
+				}
+
+				TuningSignalState state = m_tuningSignalManager.state(command.appSignalHash, c.tcpTuningClient->tuningServiceHash(), &found);
+				if (found == false)
+				{
+					Q_ASSERT(false);
+					return false;
+				}
+
+				if (state.limitsUnbalance(param) == true)
+				{
+					m_logFile.writeAlert(tr("writeTuningSignal(), There is limits mismatch in signal '%1'. Operation is disabled.").arg(param.customSignalId()));
+					continue;
+				}
+
+				if (found == true &&
+						state.valid() == true &&
+						state.controlIsEnabled() == true &&
+						state.writingIsEnabled() == true)
+				{
+					m_tuningLog->write(param, state.value(), command.value);
+
+					commands.push_back({command.appSignalHash, command.value});
+				}
 			}
 
 			if (commands.empty() == false)
@@ -332,33 +312,15 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 				c.tcpTuningClient->writeTuningSignal(commands);
 			}
 		}
-	}
 
-	bool TuningConnection::hasTuningSignal(QString appSignalId) const
-	{
-		for (const Connection& c : m_conns)
-		{
-			if (c.tcpTuningClient->hasTuningSignal(appSignalId) == true)
-			{
-				return true;
-			}
-		}
-		return false;
+		return true;
 	}
 
 	bool TuningConnection::writeTuningSignal(QString appSignalId, TuningValue tuningValue)
 	{
-		bool result = true;
-
-		for (const Connection& c : m_conns)
-		{
-			if (c.tcpTuningClient->hasTuningSignal(appSignalId) == true)
-			{
-				result &= c.tcpTuningClient->writeTuningSignal(appSignalId, tuningValue);
-			}
-		}
-
-		return result;
+		std::vector<TuningWriteCommand> commands;
+		commands.push_back({appSignalId, tuningValue});
+		return writeTuningSignals(commands);
 	}
 
 	void TuningConnection::applyTuningSignals(const std::vector<Hash>& signalHashes)

@@ -93,7 +93,7 @@ void TestSuiteConfigController::dump(const ConfigSettings& config) const
 	// --
 	//
 	m_logFile.writeMessage(tr("AppDatService(s): %1.").arg(config.appDataServices.size()));
-	qDebug() << "AppDatService(s):";
+	qDebug() << "AppDatService(s): " << config.appDataServices.size();
 
 	for (const auto& service : config.appDataServices)
 	{
@@ -103,13 +103,19 @@ void TestSuiteConfigController::dump(const ConfigSettings& config) const
 
 	// --
 	//
-	m_logFile.writeMessage(QString("TuningEnabled = %.1").arg(config.tuningEnabled));
+	m_logFile.writeMessage(QString("TuningEnabled = %1").arg(config.tuningEnabled));
 	if (config.tuningEnabled == true)
 	{
+		m_logFile.writeMessage(tr("TuningService(s): %1.").arg(config.tuningServices.size()));
+		qDebug() << "TuningService(s): " << config.tuningServices.size();
+
 		for (const auto& ts : config.tuningServices)
 		{
-			m_logFile.writeMessage(tr("TuningService (id, ip, port): %1, %2, %3.").arg(ts.equipmentId).arg(ts.clientRequestIP).arg(ts.clientRequestPort));
+			m_logFile.writeMessage(tr("TuningService: id, address: %1, %2.").arg(ts.equipmentId).arg(ts.clientRequestAddress.addressPortStr()));
+			qDebug() << "TuningService: id, address: " << ts.equipmentId << ", " << ts.clientRequestAddress.addressPortStr();
+
 			m_logFile.writeMessage(tr("TuningSources: %1.").arg(ts.drivenSources.join(", ")));
+			qDebug() << "TuningSources: " << ts.drivenSources.join(", ");
 		}
 	}
 

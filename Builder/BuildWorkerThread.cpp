@@ -1297,7 +1297,7 @@ namespace Builder
 		QObject::connect(thread, &QThread::started, &worker, &SchemasReportGenerator::exportAllSchemasToAlbums);
 		QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);	// Schedule thread deleting
 
-		bool threadComplete = false;
+		std::atomic<bool> threadComplete = false;
 
 		QObject::connect(&worker, &SchemasReportGenerator::finished, &worker, [thread, &threadComplete, this](const QString& errorMessage)
 		{

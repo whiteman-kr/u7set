@@ -1,10 +1,13 @@
 #pragma once
 
+#include <chrono>
 #include <set>
 #include <atomic>
 #include <memory>
 #include <vector>
 #include <optional>
+#include <mutex>
+#include <condition_variable>
 #include <QThread>
 #include <QtConcurrent>
 #include <QMutex>
@@ -50,6 +53,11 @@ namespace Sim
 		}
 
 		LogicModule* operator->()
+		{
+			return m_lm.get();
+		}
+
+		const LogicModule* operator->() const
 		{
 			return m_lm.get();
 		}
@@ -150,14 +158,14 @@ namespace Sim
 		std::chrono::microseconds duration() const;
 		std::chrono::microseconds leftTime() const;
 
-		bool unlockTimer() const;
-		void setUnlockTimer(bool value);
+		double speedFactor() const;
+		void setSpeedFactor(double value);
 
 	signals:
 		void stateChanged(SimControlState state);
 		void statusUpdate(ControlStatus state);
 
-	protected:
+	private:
 		virtual void run() override;
 		bool processRun();
 
@@ -165,11 +173,18 @@ namespace Sim
 		Simulator* m_simulator = nullptr;
 		ScopedLog m_log;
 
-		std::atomic<bool> m_unlockTimer{false};
+		std::atomic<double> m_speedFactor;
+
+		// m_insideProcessRun indicates that simulation thread now in the function processRun(),
+		// while we are in this function we cannot do some operations, like m_simulator->software().stopSimulation().
+		//
+		std::atomic<bool> m_insideProcessRun{false};
 
 		// Start of access only with mutex
 		// \/ \/ \/ \/ \/
-		mutable QReadWriteLock m_controlDataLock{QReadWriteLock::Recursive};
+		mutable std::recursive_mutex m_controlDataMutex;
+		mutable std::condition_variable_any m_controlDataConditionVariable;		// nofify_one every time m_controlData is changed
+
 		ControlData m_controlData;
 		// /\ /\ /\ /\ /\
 		// End of Access only with mutex

@@ -282,6 +282,7 @@ namespace XmlAttribute
 	inline const QString SUBSYSTEM_ID("SubsystemID");
 	inline const QString MODULE_TYPE("ModuleType");
 	inline const QString MODULE_UNIQUE_ID("ModuleUniqueID");
+	inline const QString MODULE_WORKCYCLE_MCS("ModuleWorkcycleMcs");
 
 	inline const QString RUP_VERSION("RupVersion");
 	inline const QString FOTIP_VERSION("FotipVersion");
@@ -416,6 +417,7 @@ namespace Separator
 namespace FormatStr
 {
 	inline const QString POSTGRES_DATE_TIME("yyyy-MM-ddTHH:mm:ss");
+	inline const QString DATE_TIME_FORMAT_STR("%1:%2:%3.%4 %5.%6.%7");
 }
 
 namespace TemplateMacro

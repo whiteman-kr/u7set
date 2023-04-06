@@ -98,7 +98,6 @@ message LanControllerInfo
 	optional string equipmentID = 1;
 	optional int32 controllerNo = 2 [default = -1];
 	optional int32 lanControllerType = 3 [default = 0];		// E::LanControllerType values
-	optional int32 channel = 4 [default = 0];
 
 	// tuning parameters
 
@@ -161,12 +160,14 @@ message DataSourceInfo
 	repeated LanControllerInfo lanControllerInfo = 11;
 
 	optional string profile = 12;
+	optional int32 acquiredSignalsCount = 13 [default = 0];
+	optional uint32 expectedDataUID = 14 [default = 0];
+	optional int32 workcycle_mcs = 15 [default = 0];
 }
 
 message GetDataSourcesInfoRequest
 {
 }
-
 
 message GetDataSourcesInfoReply
 {
@@ -174,12 +175,10 @@ message GetDataSourcesInfoReply
     repeated DataSourceInfo dataSourceInfo = 2;
 }
 
-
 message AppDataReceiveState
 {
-    optional int32 receivingRate = 1 [default = 0];
-	optional int32 udpReceivingRate = 2 [default = 0];
-	optional int32 rupFramesReceivingRate = 3 [default = 0];
+	optional int32 receivingSpeed = 1 [default = 0];
+	optional int32 rupFramesReceivingSpeed = 3 [default = 0];
 
     optional int64 rupFramesCount = 4 [default = 0];
 	optional int64 simFramesCount = 5 [default = 0];
@@ -196,48 +195,39 @@ message AppDataReceiveState
 //
 message AppDataSourceState
 {
-    optional uint64 id = 1 [default = 0];			    // unique id
-    optional bool dataReceives = 2 [default = false];
-    optional int64 uptime = 3 [default = 0];			    // time from start of data receiving
-    optional uint64 receivedDataID = 4 [default = 0];
-	optional int32 rupFramesQueueCurSize = 5 [default = 0];
-	optional int32 rupFramesQueueCurMaxSize = 6 [default = 0];
-    optional double dataReceivingRate = 7 [default = 0];	    // bytes/sec
-    optional int64 receivedDataSize = 8 [default = 0];	    //
-    optional int64 receivedFramesCount = 9 [default = 0];
-    optional int64 receivedPacketCount = 10 [default = 0];
-	optional int64 lostPacketCount = 11 [default = 0];
-    optional bool dataProcessingEnabled = 12 [default = false];
-    optional int64 processedPacketCount = 13 [default = 0];
-    optional int64 lastPacketSystemTime = 14 [default = 0];
-    optional int64 rupFramePlantTime = 15 [default = 0];
-	optional uint32 rupFrameNumerator = 16 [default = 0];
-	optional int32 signalStatesQueueCurSize = 17 [default = 0];
-	optional int32 signalStatesQueueCurMaxSize = 18 [default = 0];
-    optional int32 acquiredSignalsCount = 19 [default = 0];
-    optional int64 errorProtocolVersion = 20 [default = 0];
-    optional int64 errorFramesQuantity = 21 [default = 0];
-    optional int64 errorFrameNo = 22 [default = 0];
-    optional int64 errorDataID = 23 [default = 0];
-    optional int64 errorFrameSize = 24 [default = 0];
-    optional int64 errorDuplicatePlantTime = 25 [default = 0];
-    optional int64 errorNonmonotonicPlantTime = 26 [default = 0];
-    optional string lmEquipmentID = 27;
+	optional uint64 id = 1 [default = 0];				// unique id
+	optional string lmEquipmentID = 2;
 
-	optional int32 rupFramesQueueSize = 28 [default = 0];
-	optional int32 signalStatesQueueSize = 29 [default = 0];
+	optional bool dataProcessingEnabled = 3 [default = false];
+	optional bool receivesData = 4 [default = false];
+	optional int64 uptime = 5 [default = 0];					// time from start of data receiving
+	optional uint32 receivedDataID = 6 [default = 0];
+	optional int64 rupFramePlantTime = 7 [default = 0];
+	optional uint32 rupFrameNumerator = 8 [default = 0];
 
-    optional int32 state = 30 [default = 0];		// == E::DataSourceState::NoData
-	optional int64 errorPlantTimeFormat = 31 [default = 0];
+	optional double dataReceivingSpeed = 9 [default = 0];	    // bytes/sec
+	optional int64 receivedDataSize = 10 [default = 0];
+	optional int64 receivedFramesCount = 11 [default = 0];
+	optional int64 receivedPacketCount = 12 [default = 0];
+	optional int64 lostPacketCount = 13 [default = 0];
+	optional int32 signalStatesQueueCurSize = 14 [default = 0];
+	optional int32 signalStatesQueueCurMaxSize = 15 [default = 0];
+
+	optional int64 errorProtocolVersion = 16 [default = 0];
+	optional int64 errorFramesQuantity = 17 [default = 0];
+	optional int64 errorFrameNo = 18 [default = 0];
+	optional int64 errorFrameCRC = 19 [default = 0];
+	optional int64 errorDataID = 20 [default = 0];
+	optional int64 errorDuplicatePlantTime = 21 [default = 0];
+	optional int64 errorNonmonotonicPlantTime = 22 [default = 0];
+	optional int64 errorPlantTimeFormat = 23 [default = 0];
 }
-
 
 message GetAppDataSourcesStatesReply
 {
     optional int32 error = 1 [default = 0];
     repeated AppDataSourceState appDataSourcesStates = 2;
 }
-
 
 message AppDataServiceState
 {
@@ -251,7 +241,6 @@ message AppDataServiceState
 
     optional AppDataReceiveState appDataReceiveState = 7;
 }
-
 
 message SoftwareInfo
 {
@@ -306,7 +295,7 @@ message ServiceInfo
 
     optional int64 uptime = 2 [default = 0];
     optional int32 serviceState = 3 [default = 0];		// ServiceState::Undefined;
-    optional int64 serviceUptime = 4 [default = 0];
+	optional int64 serviceRuntime = 4 [default = 0];
 
 	optional SessionParams sessionParams = 5;
 

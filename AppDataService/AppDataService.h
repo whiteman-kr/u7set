@@ -6,15 +6,14 @@
 #include "../UtilsLib/Queue.h"
 #include "../lib/DataSource.h"
 
-#include "AppDataReceiver.h"
 #include "TcpAppDataServer.h"
 #include "TcpArchiveClient.h"
-#include "AppDataProcessingThread.h"
 #include "SignalStatesProcessingThread.h"
 #include "RtTrendsServer.h"
 
 
 class TcpArchiveClient;
+class AppDataReceiver;
 
 namespace RtTrends
 {
@@ -45,12 +44,22 @@ public:
 	bool isConnectedToArchiveService(quint32 &ip, quint16 &port) const;
 
 	const AppDataSources& appDataSources() const { return m_appDataSources; }
-	const AppDataSourcesIP& appDataSourcesIP() const { return m_appDataSourcesIP; }
-	const SignalsToSources& signalsToSources() const { return m_signalsToSources; }
+	AppDataSources& appDataSources() { return m_appDataSources; }
 
-	DynamicAppSignalStates& signalStates() { return m_signalStates; }
+	const AppSignals& appSignals() const { return m_appSignals; }
+
+	const DynamicAppSignalStates& appSignalStates() const { return m_appSignalStates; }
+	DynamicAppSignalStates& appSignalStates() { return m_appSignalStates; }
 
 	E::SecurityLevel securityLevel() const;
+
+	void registerDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue, bool isArchivingQueue, const QString& description);
+	void unregisterDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue);
+
+	void fillAppDataReceiveState(Network::AppDataReceiveState* adrs);
+
+	const std::vector<QString>& acquiredAppSignalIDs() const { return m_acquiredAppSignalIDs; }
+	int acquiredAppSignalIDsCount() const { return static_cast<int>(m_acquiredAppSignalIDs.size()); }
 
 private:
 	virtual void initCmdLineParser() override;
@@ -72,12 +81,11 @@ private:
 	bool readAppDataSources(const QByteArray& fileData, const QString& profile);
 	bool readAppSignals(const QByteArray& fileData);
 
-	void buildAppSignalID2IndexMap(bool signalsLoadResult);
-
 	void createTimeErrLog();
 	void shutdownTimeErrLog();
 
 	void createAndInitSignalStates();
+	void buildAcuiredAppSignalIDs();
 	void prepareAppDataSources();
 
 	void applyNewConfiguration();
@@ -85,12 +93,6 @@ private:
 
 	void runAppDataReceiverThread();
 	void stopAppDataReceiverlThread();
-
-	void runSignalStatesProcessingThread();
-	void stopSignalStatesProcessingThread();
-
-	void runAppDataProcessingThreads();
-	void stopAppDataProcessingThreads();
 
 	void runTcpAppDataServer();
 	void stopTcpAppDataServer();
@@ -126,18 +128,15 @@ private:
 
 	AppSignals m_appSignals;
 
-	AppDataSources m_appDataSources;				// all data sources
-	AppDataSourcesIP m_appDataSourcesIP;
+	AppDataSources m_appDataSources;
 
-	SignalsToSources m_signalsToSources;
+	DynamicAppSignalStates m_appSignalStates;
 
-	DynamicAppSignalStates m_signalStates;
+	std::vector<QString> m_acquiredAppSignalIDs;
 
-	AppDataProcessingThreadsPool m_appDataProcessingThreadsPool;
+	//
 
-	AppDataReceiverThread* m_appDataReceiverThread = nullptr;
-
-	SignalStatesProcessingThread* m_signalStatesProcessingThread = nullptr;
+	AppDataReceiver* m_appDataReceiver = nullptr;
 
 	TcpAppDataServerThread* m_tcpAppDataServerThread = nullptr;
 

@@ -91,6 +91,7 @@
         <file>Images/ZoomIn.svg</file>
         <file>Images/ZoomOut.svg</file>
         <file>Images/SchemaList.svg</file>
+        <file>Images/LocatorFind.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>ScriptHelp/scripthelp.html</file>

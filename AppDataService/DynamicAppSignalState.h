@@ -24,7 +24,7 @@ public:
 
 	void setSignalParams(const AppSignal* signal, const AppSignals& appSignals);
 
-	bool setState(const Times& time,
+	int setState(const Times& time,
 				  bool isSimPacket,
 				  quint16 packetNo,
 				  const char* rupData,
@@ -33,7 +33,7 @@ public:
 				  SimpleAppSignalStatesArchiveFlagQueue& statesQueue,
 				  const QThread* thread);
 
-	void setUnavailable(const Times& time,
+	int setUnavailable(const Times& time,
 				  SimpleAppSignalStatesArchiveFlagQueue& statesQueue,
 				  const QThread* thread);
 
@@ -69,6 +69,10 @@ public:
 	void rtSessionsProcessing(const SimpleAppSignalState& state, bool pushAnyway, const QThread* thread);
 
 	const AppSignal* signal() const { return m_signal; }
+
+public:
+
+	// bool m_debug_replace_time = false;
 
 private:
 	bool getValue(const char* rupData, int rupDataSize, double& value);
@@ -146,11 +150,6 @@ private:
 
 	//
 
-	//quint32 m_prevValidity = false;
-	//double m_prevValue = 0;
-
-	//
-
 	SimpleAppSignalState m_current[2];
 	std::atomic<int> m_curStateIndex = {0};
 
@@ -167,7 +166,6 @@ private:
 	QHash<int, RtSession> m_rtSessions;
 };
 
-
 class DynamicAppSignalStates
 {
 public:
@@ -181,8 +179,11 @@ public:
 
 	DynamicAppSignalState* operator [] (int index);
 
+	const DynamicAppSignalState* getStateByHash(Hash signalHash) const;
 	DynamicAppSignalState* getStateByHash(Hash signalHash);
-	DynamicAppSignalState* getStateByID(const QString& signalID) { return getStateByHash(calcHash(signalID)); }
+
+	const DynamicAppSignalState* getStateByID(const QString& signalID) const;
+	DynamicAppSignalState* getStateByID(const QString& signalID);
 
 	void buidlHash2State();
 

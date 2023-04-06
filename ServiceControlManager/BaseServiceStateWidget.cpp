@@ -128,13 +128,9 @@ void BaseServiceStateWidget::updateServiceState()
 
 				m_connectionStateStatus->setText("Connected to service" + QString(" - %1").arg(m_udpAckQuantity));
 
-				qint64 time = m_service.information.uptime();
+				qint64 uptime = m_service.information.uptime();
 
-				qint64 s = time % 60; time /= 60;
-				qint64 m = time % 60; time /= 60;
-				qint64 h = time % 24; time /= 24;
-
-				QString&& uptimeStr = QString("%1d %2:%3:%4").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0'));
+				QString&& uptimeStr = formatUptime(uptime);
 
 				m_stateTabModel->setData(m_stateTabModel->index(1, 1), uptimeStr);
 
@@ -172,15 +168,9 @@ void BaseServiceStateWidget::updateServiceState()
 
 				m_stateTabModel->setData(m_stateTabModel->index(3, 0), "Runing time");
 
-				qint64 time = m_service.information.serviceuptime();
+				qint64 runtime = m_service.information.serviceruntime();
 
-				qint64 s = time % 60; time /= 60;
-				qint64 m = time % 60; time /= 60;
-				qint64 h = time % 24; time /= 24;
-
-				QString&& srvUptimeStr = QString("%1d %2:%3:%4").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0'));
-
-				m_stateTabModel->setData(m_stateTabModel->index(3, 1), srvUptimeStr);
+				m_stateTabModel->setData(m_stateTabModel->index(3, 1), formatUptime(runtime));
 
 				quint32 ip = m_service.clientRequestIp;
 				qint32 port = m_service.clientRequestPort;
@@ -365,7 +355,8 @@ void BaseServiceStateWidget::serviceAckReceived(const UdpRequest udpRequest)
 				}
 
 				if (newState == ServiceState::Work &&
-						(oldState != ServiceState::Work || newServiceState.serviceuptime() < m_service.information.serviceuptime()))
+					(oldState != ServiceState::Work ||
+						newServiceState.serviceruntime() < m_service.information.serviceruntime()))
 				{
 					emit needToReloadData();
 				}

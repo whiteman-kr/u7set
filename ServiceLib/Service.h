@@ -196,9 +196,6 @@ public:
 	static QString getServiceInstanceName(const QString& serviceName, const QString& instanceID);
 	static QString getServiceInstanceName(const QString& serviceName, int argc, char* argv[]);
 
-	static QString getInstanceID(const QStringList& serviceArgs);
-	static QString getInstanceID(int argc, char* argv[]);
-
 signals:
 	void ackBaseRequest(UdpRequest request);
 

@@ -4,9 +4,11 @@ int main(int argc, char *argv[])
 {
 	QCoreApplication app(argc, argv);
 
+	QThread::currentThread()->setObjectName("MainThread");
+
 	std::shared_ptr<CircularLogger> logger = std::make_shared<CircularLogger>();
 
-	LOGGER_INIT(logger, QString(), Service::getInstanceID(argc, argv));
+	LOGGER_INIT(logger, QString(), getServiceInstanceID(argc, argv));
 
 	logger->setLogCodeInfo(false);
 

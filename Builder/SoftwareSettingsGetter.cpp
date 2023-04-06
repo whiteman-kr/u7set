@@ -290,10 +290,20 @@ bool SoftwareSettingsGetter::getLmPropertiesFromDevice(	const Hardware::DeviceMo
 		ds->setModuleUniqueID(0);
 	}
 
+	std::shared_ptr<LmDescription> ld = context->m_lmDescriptions->get(lm);
+
+	if (ld == nullptr)
+	{
+		LOG_INTERNAL_ERROR_MSG(log, QString("LmDescription is not found for module %1").
+											arg(lm->equipmentIdTemplate()));
+		return false;
+	}
+
+	ds->setModuleWorkcycle_mcs(ld->logicUnit().m_cycleDuration);
+
 	result &= LanControllerInfoHelper::getInfo(*lm, lanControllerType,
 											   *context, false,
 											   &ds->lanControllersInfo(), log);
-
 	return result;
 }
 
@@ -1611,27 +1621,26 @@ bool MonitorSettingsGetter::readTuningServiceSettings(const Builder::Context* co
 
 	for(const QString& tuningServiceID : tuningServicesIDs)
 	{
-		HostAddressPort tuningServiceClientIP;
+		HostAddressPort tuningServiceClientAddress;
 
 		result &= getSoftwareConnectionBySoftwareID(equipment,
-													software,
-													tuningServiceID,
-													EquipmentPropNames::TUNING_SERVICE_ID,
-													EquipmentPropNames::CLIENT_REQUEST_IP,
-													EquipmentPropNames::CLIENT_REQUEST_PORT,
-													&tuningServiceClientIP,
-													false,
-													Socket::IP_NULL,
-													PORT_TUNING_SERVICE_CLIENT_REQUEST,
-													E::SoftwareType::TuningService,
-													log);
+									   software,
+									   tuningServiceID,
+									   EquipmentPropNames::TUNING_SERVICE_ID,
+									   EquipmentPropNames::CLIENT_REQUEST_IP,
+									   EquipmentPropNames::CLIENT_REQUEST_PORT,
+									   &tuningServiceClientAddress,
+									   false,
+									   Socket::IP_NULL,
+									   PORT_TUNING_SERVICE_CLIENT_REQUEST,
+									   E::SoftwareType::TuningService,
+									   log);
 		BREAK_IF_FALSE(result);
 
 		SoftwareEndpoint::TuningService tsc;
 
 		tsc.equipmentId = tuningServiceID;
-		tsc.clientRequestIP = tuningServiceClientIP.addressStr();
-		tsc.clientRequestPort = tuningServiceClientIP.port();
+		tsc.clientRequestAddress = tuningServiceClientAddress;
 
 		TuningServiceSettingsGetter tsg;
 
@@ -1700,27 +1709,26 @@ bool TuningClientSettingsGetter::readSettings(const Builder::Context* context,
 
 	for(const QString& tuningServiceID : tuninfServicesIDs)
 	{
-		HostAddressPort tuningServiceClientIP;
+		HostAddressPort tuningServiceClientAddress;
 
 		result &= getSoftwareConnectionBySoftwareID(equipment,
-													software,
-													tuningServiceID,
-													EquipmentPropNames::TUNING_SERVICE_ID,
-													EquipmentPropNames::CLIENT_REQUEST_IP,
-													EquipmentPropNames::CLIENT_REQUEST_PORT,
-													&tuningServiceClientIP,
-													false,
-													Socket::IP_NULL,
-													PORT_TUNING_SERVICE_CLIENT_REQUEST,
-													E::SoftwareType::TuningService,
-													log);
+									   software,
+									   tuningServiceID,
+									   EquipmentPropNames::TUNING_SERVICE_ID,
+									   EquipmentPropNames::CLIENT_REQUEST_IP,
+									   EquipmentPropNames::CLIENT_REQUEST_PORT,
+									   &tuningServiceClientAddress,
+									   false,
+									   Socket::IP_NULL,
+									   PORT_TUNING_SERVICE_CLIENT_REQUEST,
+									   E::SoftwareType::TuningService,
+									   log);
 		BREAK_IF_FALSE(result);
 
 		SoftwareEndpoint::TuningService tsc;
 
 		tsc.equipmentId = tuningServiceID;
-		tsc.clientRequestIP = tuningServiceClientIP.addressStr();
-		tsc.clientRequestPort = tuningServiceClientIP.port();
+		tsc.clientRequestAddress = tuningServiceClientAddress;
 
 		TuningServiceSettingsGetter tsg;
 
@@ -1968,7 +1976,7 @@ bool TestSuiteSettingsGetter::readTuningServiceSettings(const Builder::Context* 
 
 	for(const QString& tuningServiceID : tuningServicesIDs)
 	{
-		HostAddressPort tuningServiceClientIP;
+		HostAddressPort clientRequestAddress;
 
 		result &= getSoftwareConnectionBySoftwareID(equipment,
 													software,
@@ -1976,7 +1984,7 @@ bool TestSuiteSettingsGetter::readTuningServiceSettings(const Builder::Context* 
 													EquipmentPropNames::TUNING_SERVICE_ID,
 													EquipmentPropNames::CLIENT_REQUEST_IP,
 													EquipmentPropNames::CLIENT_REQUEST_PORT,
-													&tuningServiceClientIP,
+													&clientRequestAddress,
 													false,
 													Socket::IP_NULL,
 													PORT_TUNING_SERVICE_CLIENT_REQUEST,
@@ -1987,8 +1995,7 @@ bool TestSuiteSettingsGetter::readTuningServiceSettings(const Builder::Context* 
 		SoftwareEndpoint::TuningService tsc;
 
 		tsc.equipmentId = tuningServiceID;
-		tsc.clientRequestIP = tuningServiceClientIP.addressStr();
-		tsc.clientRequestPort = tuningServiceClientIP.port();
+		tsc.clientRequestAddress = clientRequestAddress;
 
 		TuningServiceSettingsGetter tsg;
 

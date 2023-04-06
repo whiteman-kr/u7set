@@ -2176,7 +2176,16 @@ void EquipmentView::findObject()
 
 bool EquipmentView::findObject(QString equipmentId)
 {
-	QStringList equipmentIdFragments = equipmentId.split('_');
+	// If the tab page was not shown yet, this update helps to initiate loading of objectes, then search will work.
+	//
+	equipmentModel()->updateFirstLevelObjects();
+
+	QStringList equipmentIdFragments = equipmentId.split('_', Qt::SkipEmptyParts);
+	if (equipmentIdFragments.isEmpty() == true)
+	{
+		return false;
+	}
+
 	QModelIndex findIndex = equipmentModel()->findObject(equipmentModel()->index(0, 0, QModelIndex()), 1/*level*/, equipmentIdFragments);
 
 	if (findIndex.isValid() == true)
@@ -2186,6 +2195,55 @@ bool EquipmentView::findObject(QString equipmentId)
 	}
 
 	return findIndex.isValid();
+}
+
+std::shared_ptr<Hardware::DeviceObject> EquipmentView::deviceObject(QString equipmentId) const
+{
+	std::shared_ptr<Hardware::DeviceObject> result;
+
+	// If the tab page was not shown yet, this update helps to initiate loading of objectes, then search will work.
+	//
+	equipmentModel()->updateFirstLevelObjects();
+
+	QStringList equipmentIdFragments = equipmentId.split('_', Qt::SkipEmptyParts);
+	if (equipmentIdFragments.isEmpty() == true)
+	{
+		return result;
+	}
+
+	QModelIndex findIndex = equipmentModel()->findObject(equipmentModel()->index(0, 0, QModelIndex()), 1/*level*/, equipmentIdFragments);
+
+	if (findIndex.isValid() == true)
+	{
+		result = equipmentModel()->deviceObject(findIndex);
+	}
+
+	return result;
+}
+
+std::vector<std::shared_ptr<Hardware::DeviceObject>> EquipmentView::deviceObjects(QString equipmentId) const
+{
+	std::vector<std::shared_ptr<Hardware::DeviceObject>> result;
+
+	// If the tab page was not shown yet, this update helps to initiate loading of objectes, then search will work.
+	//
+	equipmentModel()->updateFirstLevelObjects();
+
+	QStringList equipmentIdFragments = equipmentId.split('_', Qt::SkipEmptyParts);
+	if (equipmentIdFragments.isEmpty() == true)
+	{
+		return result;
+	}
+
+	QModelIndexList findIndexes = equipmentModel()->findObjects(equipmentModel()->index(0, 0, QModelIndex()), 1/*level*/, equipmentIdFragments);
+	result.reserve(findIndexes.size());
+
+	for (auto index : findIndexes)
+	{
+		result.push_back(equipmentModel()->deviceObject(index));
+	}
+
+	return result;
 }
 
 void EquipmentView::deleteSelectedDevices()

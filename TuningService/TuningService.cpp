@@ -127,21 +127,21 @@ namespace Tuning
 
 	// called from TcpTuningServer thread!!!
 	//
-	NetworkError TuningServiceWorker::changeControlledTuningSource(const QString& tuningSourceEquipmentID,
+	E::NetworkError TuningServiceWorker::changeControlledTuningSource(const QString& tuningSourceEquipmentID,
 												bool activateControl,
 												QString* controlledTuningSource,
 												bool* controlIsActive)
 	{
 		if (controlledTuningSource == nullptr || controlIsActive == nullptr)
 		{
-			return NetworkError::InternalError;
+			return E::NetworkError::InternalError;
 		}
 
 		if (m_settings.singleLmControl == false)
 		{
 			controlledTuningSource->clear();
 			*controlIsActive = false;
-			return NetworkError::SingleLmControlDisabled;
+			return E::NetworkError::SingleLmControlDisabled;
 		}
 
 		AUTO_LOCK(m_mainMutex);							// !!!!
@@ -154,7 +154,7 @@ namespace Tuning
 		{
 			*controlledTuningSource = tuningSourceEquipmentID;
 			*controlIsActive = false;
-			return NetworkError::Success;
+			return E::NetworkError::Success;
 		}
 
 		bool result = runTuningSourceThread(true, tuningSourceEquipmentID);
@@ -163,7 +163,7 @@ namespace Tuning
 		{
 			*controlledTuningSource = tuningSourceEquipmentID;
 			*controlIsActive = false;
-			return NetworkError::InternalError;
+			return E::NetworkError::InternalError;
 		}
 
 		runSourcesListenerThreads();
@@ -171,7 +171,7 @@ namespace Tuning
 		*controlledTuningSource = tuningSourceEquipmentID;
 		*controlIsActive = true;
 
-		return NetworkError::Success;
+		return E::NetworkError::Success;
 	}
 
 	bool TuningServiceWorker::clientIsConnected(const SoftwareInfo& softwareInfo, const QString& clientIP)
@@ -446,10 +446,6 @@ namespace Tuning
 
 	bool TuningServiceWorker::readConfiguration(const QByteArray& cfgXmlData)
 	{
-		QString str;
-
-		XmlReadHelper xml(cfgXmlData);
-
 		bool result = true;
 
 		result = softwareSettingsSet().readFromXml(cfgXmlData);
@@ -469,34 +465,18 @@ namespace Tuning
 			}
 		}
 
-		if  (result == true)
-		{
-			str = QString("Configuration is loaded successful");
-		}
-		else
-		{
-			str = QString("Loading configuration error");
-		}
-
-		qDebug() << C_STR(str);
-
 		return result;
 	}
 
 	bool TuningServiceWorker::loadConfigurationFromFile(const QString& fileName)
 	{
-		QString str;
-
 		QByteArray cfgXmlData;
 
 		QFile file(fileName);
 
 		if (file.open(QIODevice::ReadOnly) == false)
 		{
-			str = QString("Error open configuration file: %1").arg(fileName);
-
-			qDebug() << C_STR(str);
-
+			DEBUG_LOG_ERR(m_logger, QString("Error open configuration file: %1").arg(fileName));
 			return false;
 		}
 
@@ -508,14 +488,12 @@ namespace Tuning
 
 		if  (result == true)
 		{
-			str = QString("Configuration is loaded from file: %1").arg(fileName);
+			DEBUG_LOG_MSG(m_logger, QString("Configuration is loaded from file: %1").arg(fileName));
 		}
 		else
 		{
-			str = QString("Loading configuration error from file: %1").arg(fileName);
+			DEBUG_LOG_ERR(m_logger, QString("Loading configuration error from file: %1").arg(fileName));
 		}
-
-		qDebug() << C_STR(str);
 
 		return result;
 	}
@@ -811,8 +789,6 @@ namespace Tuning
 
 		m_settings = *typedSettingsPtr;
 
-		DEBUG_LOG_MSG(m_logger, QString("Configuration reading success"));
-
 		bool result = true;
 
 		TuningSources newSources;
@@ -826,7 +802,7 @@ namespace Tuning
 
 			if (errStr.isEmpty() == false)
 			{
-				qDebug() << errStr;
+				DEBUG_LOG_ERR(m_logger, errStr);
 				result = false;
 				continue;
 			}
@@ -840,17 +816,19 @@ namespace Tuning
 
 			if (result == true)
 			{
-				qDebug() << "Read file " << bfi.pathFileName << " OK";
+				DEBUG_LOG_MSG(m_logger, QString("Read file %1 OK").arg(bfi.pathFileName));
 			}
 			else
 			{
-				qDebug() << "Read file " << bfi.pathFileName << " ERROR";
+				DEBUG_LOG_ERR(m_logger, QString("Read file %1 ERROR").arg(bfi.pathFileName));
 				break;
 			}
 		}
 
 		if (result == true)
 		{
+			DEBUG_LOG_MSG(m_logger, QString("Configuration reading success"));
+
 			clearConfiguration();
 			applyNewConfiguration(newSources);
 		}

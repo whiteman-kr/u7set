@@ -21,7 +21,8 @@ class SimWidget : public QMainWindow, HasDbController
 	Q_OBJECT
 
 public:
-	SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
+	SimWidget(std::shared_ptr<Sim::ConsoleLogFile> ideLogFile,
+			  std::shared_ptr<SimIdeSimulator> simulator,
 			  DbController* db,
 			  QWidget* parent = nullptr,
 			  Qt::WindowType windowType = Qt::Window,
@@ -100,7 +101,7 @@ private:
 	SimProjectWidget* m_projectWidget = nullptr;
 	std::vector<SimMemoryWidget*> m_memoryWidgets;
 
-	Sim::ConsoleLogFile m_ideLogFile;
+	std::shared_ptr<Sim::ConsoleLogFile> m_ideLogFile;
 	std::shared_ptr<SimIdeSimulator> m_simulator;
 
 	QDockWidget* m_overridePaneDock = nullptr;
@@ -122,6 +123,12 @@ private:
 	QAction* m_refreshProjectAction = nullptr;
 
 	QAction* m_addWindowAction = nullptr;
+
+	QLocale m_simulationTimeLocale{QLocale::C};
+	QDoubleValidator m_simulationTimeEditValidator;
+	QLineEdit* m_simulationTimeEdit = nullptr;
+
+	QComboBox* m_speedComboBox = nullptr;
 
 	QAction* m_runAction = nullptr;
 	QAction* m_pauseAction = nullptr;

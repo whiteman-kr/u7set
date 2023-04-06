@@ -210,6 +210,9 @@ private:
 	QCoreApplication* m_app = nullptr;
 };
 
+QString getServiceInstanceID(const QStringList& serviceArgs);
+QString getServiceInstanceID(int argc, char* argv[]);
+
 /*template <typename Application>
 class QtService : public QtServiceBase
 {

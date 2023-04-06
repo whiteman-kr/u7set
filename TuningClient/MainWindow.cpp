@@ -22,7 +22,8 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	m_logFile("TuningClient", QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + softwareInfo.equipmentID()),
 	m_tuningLog(m_userManager, "TuningClientSignals", QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + softwareInfo.equipmentID()),
 	m_configController(softwareInfo, theSettings.configuratorAddress1(), theSettings.configuratorAddress2(), &m_logFile),
-	m_tuningConnection{m_tuningSignalManager, &m_logFile, &m_tuningLog}
+	m_tuningSignalManager(softwareInfo.equipmentID(), &m_logFile),
+	m_tuningConnection{m_tuningSignalManager, m_tuningSignalManager, &m_logFile, &m_tuningLog}
 
 {
 	m_sorTooltipText = QObject::tr("SOR counter (click for details)");

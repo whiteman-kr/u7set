@@ -1,12 +1,18 @@
 #include "TcpArchiveClient.h"
+#include "AppDataService.h"
+
+// ------------------------------------------------------------------------------
+//
+// TcpArchiveClient class implementation
+//
+// ------------------------------------------------------------------------------
 
 TcpArchiveClient::TcpArchiveClient(const SoftwareInfo& softwareInfo,
-								   const HostAddressPort& serverAddressPort,
-								   SignalStatesProcessingThread* signalStatesProcessingThread,
-								   CircularLoggerShared logger) :
-	Tcp::Client(softwareInfo, serverAddressPort, "TcpArchiveClient"),
-	m_signalStatesProcessingThread(signalStatesProcessingThread),
-	m_logger(logger),
+								   const HostAddressPort& archiveSrviceAddressPort,
+								   AppDataServiceWorker& appDataService) :
+	Tcp::Client(softwareInfo, archiveSrviceAddressPort, "TcpArchiveClient"),
+	m_appDataService(appDataService),
+	m_logger(appDataService.logger()),
 	m_timer(this)
 {
 	setObjectName("TcpArchiveClient");
@@ -34,14 +40,7 @@ void TcpArchiveClient::onClientThreadStarted()
 
 	connect(m_signalStatesQueue.get(), &SimpleAppSignalStatesQueue::queueNotEmpty, this, &TcpArchiveClient::onSignalStatesQueueIsNotEmpty);
 
-	if (m_signalStatesProcessingThread != nullptr)
-	{
-		m_signalStatesProcessingThread->registerDestSignalStatesQueue(m_signalStatesQueue, true, "TcpArchiveClient");
-	}
-	else
-	{
-		assert(false);
-	}
+	m_appDataService.registerDestSignalStatesQueue(m_signalStatesQueue, true, "TcpArchiveClient");
 
 	connect(&m_timer, &QTimer::timeout, this, &TcpArchiveClient::onTimer);
 
@@ -51,10 +50,7 @@ void TcpArchiveClient::onClientThreadStarted()
 
 void TcpArchiveClient::onClientThreadFinished()
 {
-	if (m_signalStatesProcessingThread != nullptr)
-	{
-		m_signalStatesProcessingThread->unregisterDestSignalStatesQueue(m_signalStatesQueue, "TcpArchiveClient");
-	}
+	m_appDataService.unregisterDestSignalStatesQueue(m_signalStatesQueue);
 
 	DEBUG_LOG_MSG(m_logger, QString("TcpArchiveClient thread finished, archive server %1").
 								arg(serverAddressPort(0).addressPortStr()));
@@ -125,9 +121,9 @@ void TcpArchiveClient::onSaveAppSignalsStatesReply(const char* replyData, quint3
 
 	msg.ParseFromArray(replyData, replyDataSize);
 
-	NetworkError errorCode = static_cast<NetworkError>(msg.error());
+	E::NetworkError errorCode = static_cast<E::NetworkError>(msg.error());
 
-	if (errorCode == NetworkError::Success)
+	if (errorCode == E::NetworkError::Success)
 	{
 		sendSignalStatesToArchiveRequest(false);
 	}
@@ -152,10 +148,24 @@ void TcpArchiveClient::onSignalStatesQueueIsNotEmpty()
 	sendSignalStatesToArchiveRequest(false);
 }
 
-TcpArchiveClientThread::TcpArchiveClientThread(TcpArchiveClient* tcpArchiveClient) :
-	SimpleThread(tcpArchiveClient),
-	m_tcpArchiveClient(tcpArchiveClient)
+// ------------------------------------------------------------------------------
+//
+// TcpArchiveClient class implementation
+//
+// ------------------------------------------------------------------------------
+
+Tcp::ConnectionState TcpArchiveClientThread::m_emptyState;
+
+TcpArchiveClientThread::TcpArchiveClientThread(const SoftwareInfo& softwareInfo,
+											   const HostAddressPort& archiveServiceAddressPort,
+											   AppDataServiceWorker& appDataService)
 {
+	m_tcpArchiveClient = new TcpArchiveClient(softwareInfo,
+											   archiveServiceAddressPort,
+											   appDataService);
+	addWorker(m_tcpArchiveClient);
+
+	setObjectName("TcpArchiveClientThread");
 }
 
 Tcp::ConnectionState TcpArchiveClientThread::getConnectionState()
@@ -165,7 +175,7 @@ Tcp::ConnectionState TcpArchiveClientThread::getConnectionState()
 		return m_tcpArchiveClient->getConnectionState();
 	}
 
-	return m_dummyState;
+	return m_emptyState;
 }
 
 void TcpArchiveClientThread::beforeQuit()

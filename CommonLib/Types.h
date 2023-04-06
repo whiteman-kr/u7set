@@ -432,16 +432,6 @@ public:
 	};
 	Q_ENUM(Channel)
 
-	// DataSourceState
-	//
-	enum class DataSourceState
-	{
-		NoData = 0,
-		ReceiveData = 1,
-		Stopped = 2
-	};
-	Q_ENUM(DataSourceState)
-
 	// ConfigCheckerState
 	//
 	enum class ConfigCheckerState
@@ -665,6 +655,32 @@ public:
 		SSL = 2
 	};
 	Q_ENUM(SecurityLevel)
+
+	// NetworkError
+	//
+	enum class NetworkError
+	{
+		Success,
+		WrongPartNo,
+		RequestParamExceed,
+		RequestStateExceed,
+		ParseRequestError,
+		RequestDataSourcesStatesExceed,
+		UnitsExceed,
+		UnknownTuningClientID,
+		UnknownSignalHash,
+		InternalError,
+		ArchiveError,								// for detail information check archError field
+		WrongTuningValueType,
+		TuningValueOutOfRange,
+		SingleLmControlDisabled,
+		LmControlIsNotActive,
+		ClientIsNotActive,
+		TuningNoReply,
+		TuningValueCorrupted,
+	};
+	Q_ENUM(NetworkError)
+
 
 public:
 	template <typename ENUM_TYPE>

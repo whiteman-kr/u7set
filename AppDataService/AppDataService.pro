@@ -33,11 +33,10 @@ SOURCES += \
 	../lib/DataSource.cpp \
     ../lib/BuildInfo.cpp \
 	../lib/LanControllerInfo.cpp \
+	AppDataReceiver.cpp \
 	AppDataService.cpp \
-	AppDataProcessingThread.cpp \
 	AppDataSource.cpp \
 	AppDataServiceMain.cpp \
-	AppDataReceiver.cpp \
 	DynamicAppSignalState.cpp	\
 	SignalStatesProcessingThread.cpp \
 	RtTrendsServer.cpp \
@@ -45,15 +44,14 @@ SOURCES += \
 	TcpArchiveClient.cpp \
 
 HEADERS += \
+	AppDataReceiver.h \
 	Stable.h \
 	../lib/ConstStrings.h \
     ../lib/DataSource.h \
     ../lib/BuildInfo.h \
 	../lib/LanControllerInfo.h \
 	AppDataService.h \
-	AppDataProcessingThread.h \
 	AppDataSource.h \
-	AppDataReceiver.h \
 	DynamicAppSignalState.h \
 	SignalStatesProcessingThread.h \
 	RtTrendsServer.h \
@@ -63,7 +61,10 @@ HEADERS += \
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
-INCLUDEPATH += ./../Protobuf
+INCLUDEPATH +=  ./../Protobuf \
+				./../asio/include \
+
+DEFINES += ASIO_STANDALONE=1
 
 # Add curent dir to a list of library directory paths
 #

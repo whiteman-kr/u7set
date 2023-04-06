@@ -2,13 +2,17 @@ TEMPLATE = subdirs
 
 CONFIG += ordered
 
-win32:	SUBDIRS +=  Protobuf \
-		    qtservice \
-                    BaseService \
-                    ConfigurationService \
-                    AppDataService \
-                    TuningService \
-                    ArchivingService
-
-
+SUBDIRS += Protobuf \
+	AppSignalLib \
+	UtilsLib \
+	OnlineLib \
+	ServiceLib \
+	HardwareLib \
+	CommonLib \
+	ServiceControlManager \
+	ConfigurationService \
+	ArchivingService \
+	TuningService \
+	AppDataService \
+	DiagDataService \
 

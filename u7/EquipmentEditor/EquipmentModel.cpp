@@ -578,6 +578,15 @@ void EquipmentModel::deleteDeviceObject(const QModelIndexList& rowList)
 	return;
 }
 
+void EquipmentModel::updateFirstLevelObjects()
+{
+	if (m_root->childrenCount() == 0)
+	{
+		fetchMore({});
+	}
+
+	return;
+}
 
 void EquipmentModel::updateRowFuncOnCheckIn(QModelIndex modelIndex, const std::map<int, DbFileInfo>& updateFiles, std::set<void*>& updatedModelIndexes)
 {
@@ -1006,7 +1015,55 @@ void EquipmentModel::refreshDeviceObject(QModelIndexList& rowList)
 
 			emit dataChanged(index, index);
 		}
+		else
+		{
+			// Refresh single object without children
+			//
+			const DbFileInfo* fi = d->data();
+			if (fi == nullptr)
+			{
+				Q_ASSERT(fi);
+				return;
+			}
+
+			// Get latest version of file info
+			//
+			std::shared_ptr<DbFileInfo> newFi = std::make_shared<DbFileInfo>();
+
+			bool ok = dbController()->getFileInfo(fi->fileId(), newFi.get(), nullptr);
+			if (ok == false)
+			{
+				Q_ASSERT(ok);
+				return;
+			}
+
+			d->setData(newFi);
+
+			std::shared_ptr<DbFile> freshFile;
+			ok = dbController()->getLatestVersion(*newFi, &freshFile, nullptr);
+			if (ok == false)
+			{
+				Q_ASSERT(ok);
+				return;
+			}
+
+			// Update object
+			//
+			ok = d->Load(freshFile->data());	// Refresh data in the object
+			if (ok == false)
+			{
+				Q_ASSERT(ok);
+				return;
+			}
+
+			// Update fileInfo and model
+			//
+			QModelIndex bottomRightIndex = this->index(index.row(), ColumnCount, index.parent());
+			emit dataChanged(index, bottomRightIndex);		// Notify view about data update
+		}
 	}
+
+	emit objectVcsStateChanged();
 
 	return;
 }
@@ -1142,7 +1199,7 @@ QModelIndex EquipmentModel::findObject(const QModelIndex& findStartIndex, int le
 	if (level < 1 || level > equipmentIdFragments.size())
 	{
 		Q_ASSERT(false);
-		return QModelIndex();
+		return {};
 	}
 
 	// Construct equipmentId according to level
@@ -1183,7 +1240,6 @@ QModelIndex EquipmentModel::findObject(const QModelIndex& findStartIndex, int le
 		}
 
 		QModelIndex childIndex = index(0, foundIndex);
-
 		if (childIndex.isValid() == false)
 		{
 			Q_ASSERT(false);
@@ -1191,14 +1247,84 @@ QModelIndex EquipmentModel::findObject(const QModelIndex& findStartIndex, int le
 		}
 
 		QModelIndex result = findObject(childIndex, level + 1, equipmentIdFragments);
-
 		if (result.isValid() == true)
 		{
 			return result;
 		}
 	}
 
-	return QModelIndex();
+	return {};
+}
+
+QModelIndexList EquipmentModel::findObjects(const QModelIndex& findStartIndex, int level, const QStringList& equipmentIdFragments)
+{
+	if (level < 1 || level > equipmentIdFragments.size())
+	{
+		Q_ASSERT(false);
+		return {};
+	}
+
+	// Construct equipmentId according to level
+	//
+	QString equipmentId;
+	for (int i = 0; i < level; i++)
+	{
+		equipmentId += equipmentIdFragments[i];
+		if (i < level - 1)
+		{
+			equipmentId += "_";
+		}
+	}
+
+	// Find an object starting from findStartIndex
+	//
+	auto matchType = (level == equipmentIdFragments.size()) ? Qt::MatchStartsWith : Qt::MatchExactly;
+
+	QModelIndexList foundIndexes = match(findStartIndex, EquipmentModel::EquipmentIdRole, equipmentId, -1, matchType);
+
+	// If we are at the highest level and result is not empty - return it, search finished
+	//
+	if (level == equipmentIdFragments.size())
+	{
+		for (auto mi : foundIndexes)
+		{
+			if (canFetchMore(mi) == true)
+			{
+				fetchMore(mi);
+			}
+		}
+
+		return foundIndexes;
+	}
+
+	// Otherwise fetch and search recursively child objects
+	//
+	QModelIndexList allFoundIndexes;
+
+	for (QModelIndex& foundIndex : foundIndexes)
+	{
+		if (canFetchMore(foundIndex) == true)
+		{
+			fetchMore(foundIndex);
+		}
+
+		if (rowCount(foundIndex) == 0)
+		{
+			continue;
+		}
+
+		QModelIndex childIndex = index(0, foundIndex);
+		if (childIndex.isValid() == false)
+		{
+			Q_ASSERT(false);
+			continue;
+		}
+
+		QModelIndexList resultIndexes = findObjects(childIndex, level + 1, equipmentIdFragments);
+		allFoundIndexes.append(resultIndexes);
+	}
+
+	return allFoundIndexes;
 }
 
 void EquipmentModel::sortChildrenByCaption(std::shared_ptr<Hardware::DeviceObject> deviceObject, Qt::SortOrder order)

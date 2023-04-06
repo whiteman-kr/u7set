@@ -307,7 +307,11 @@ namespace Builder
 		void errALC5038(QString srcSignalID, QUuid srcUuid, QString destSignalID, QUuid destUuid);		// Signals %1 and %2 have different data format.
 		void errALC5039(QString srcSignalID, QUuid srcUuid, QString destSignalID, QUuid destUuid);		// Signals %1 and %2 have different data size.
 		void errALC5040(QString connectionID, QUuid item);									// Connection with ID %1 is not found.
-		// 5041
+
+		// Manual settings TxStartAddr + TxWorsQuantity (%1 + %2 = X words) of opto port %3 exceed value of OcmTxDataSizeLimit of module %4 (%5 words).
+		//
+		void errALC5041(int bufAddr, int txDataSize, QString optoPortID, QString moduleID, int optoPortAppDataSize);
+
 		void errALC5042(QString appSignalID, QString connectionID, QUuid receiverUuid, QString schemaID);		// Signal %1 is not exists in connection %2.
 		void errALC5043(QString fbCaption, QString paramCaption, QUuid itemUuid);			// Value of parameter %1.%2 must be greater or equal to 0.
 		void errALC5044(QString fbCaption, int opcode, QUuid itemUuid);						// Parameter's calculation for AFB %1 (opcode %2) is not implemented.

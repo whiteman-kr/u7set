@@ -126,7 +126,7 @@ namespace Sim
 	{
 		int dataIndex = frameSize() * frameIndex + byteOffset;
 		assert(dataIndex < m_data.size());
-		return m_data[dataIndex];
+		return std::as_const(m_data)[dataIndex];
 	}
 
 	quint16 Eeprom::getWord(int frameIndex, int wordOffset)

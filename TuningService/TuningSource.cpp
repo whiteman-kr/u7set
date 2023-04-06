@@ -82,8 +82,7 @@ namespace Tuning
 
 			for(const LanControllerInfo& lci : lanControllersInfo()())
 			{
-				if (lci.isProvideTuning() == true &&
-					lci.tuningEnable == true)
+				if (lci.isTuningEnabled() == true)
 				{
 					lans.append(lci.equipmentID);
 				}

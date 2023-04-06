@@ -43,7 +43,7 @@ void DynamicAppSignalState::setSignalParams(const AppSignal* signal, const AppSi
 				continue;
 			}
 
-			const AppSignal* flagSignal = appSignals.value(flagSignalID, nullptr);
+			const AppSignal* flagSignal = appSignals.getSignalByID(flagSignalID);
 
 			if (flagSignal == nullptr)
 			{
@@ -98,7 +98,9 @@ void DynamicAppSignalState::setSignalParams(const AppSignal* signal, const AppSi
 	m_current[0].hash = m_current[1].hash = m_signalHash;
 }
 
-bool DynamicAppSignalState::setState(const Times& time,
+// returns count of states pushed in statesQueue
+//
+int DynamicAppSignalState::setState(const Times& time,
 								bool isSimPacket,
 								quint16 packetNo,
 								const char* rupData,
@@ -127,11 +129,13 @@ bool DynamicAppSignalState::setState(const Times& time,
 
 	quint32 validity = AppSignalState::VALID;
 
+	int pushedStatesCtr = 0;
+
 	if (m_validityAddr.isValid() == true)
 	{
 		result = getBit(rupData, rupDataSize, m_validityAddr, validity);
 
-		RETURN_IF_FALSE(result);
+		RETURN_VALUE_IF_FALSE(result, pushedStatesCtr);
 	}
 
 	curState.flags.valid = validity;
@@ -142,7 +146,7 @@ bool DynamicAppSignalState::setState(const Times& time,
 
 	result = getValue(rupData, rupDataSize, value);
 
-	RETURN_IF_FALSE(result);
+	RETURN_VALUE_IF_FALSE(result, pushedStatesCtr);
 
 	curState.value = value;
 
@@ -159,6 +163,7 @@ bool DynamicAppSignalState::setState(const Times& time,
 				if (m_archive == true)
 				{
 					statesQueue.pushAutoPoint(prevState, m_archive, thread);
+					pushedStatesCtr++;
 				}
 
 				if (m_hasRtSessions == true)
@@ -190,6 +195,7 @@ bool DynamicAppSignalState::setState(const Times& time,
 			if (m_archive == true)
 			{
 				statesQueue.pushAutoPoint(tmpState, m_archive, thread);
+				pushedStatesCtr++;
 			}
 
 			if (m_hasRtSessions == true)
@@ -344,6 +350,7 @@ bool DynamicAppSignalState::setState(const Times& time,
 	if (hasArchivingReason == true)
 	{
 		statesQueue.push(curState, m_archive, thread);
+		pushedStatesCtr++;
 
 		// update stored states
 		//
@@ -372,18 +379,20 @@ bool DynamicAppSignalState::setState(const Times& time,
 		rtSessionsProcessing(curState, hasArchivingReason, thread);
 	}
 
-	return hasArchivingReason;
+	return pushedStatesCtr;
 }
 
-void DynamicAppSignalState::setUnavailable(const Times& time,
+int DynamicAppSignalState::setUnavailable(const Times& time,
 			  SimpleAppSignalStatesArchiveFlagQueue& statesQueue,
 			  const QThread* thread)
 {
+	int pushedStatesCount = 0;
+
 	SimpleAppSignalState prevState = current();			// prevState is a COPY of current()!
 
 	if (prevState.flags.stateAvailable == 0)
 	{
-		return;
+		return pushedStatesCount;
 	}
 
 	// prevState.flags.stateAvailable == 1
@@ -394,6 +403,7 @@ void DynamicAppSignalState::setUnavailable(const Times& time,
 		//
 
 		statesQueue.pushAutoPoint(prevState, m_archive, thread);
+		pushedStatesCount++;
 
 		if (m_hasRtSessions == true)
 		{
@@ -413,6 +423,7 @@ void DynamicAppSignalState::setUnavailable(const Times& time,
 	curState.flags.updateArchivingReasonFlags(prevState.flags);
 
 	statesQueue.push(curState, m_archive, thread);
+	pushedStatesCount++;
 
 	m_prevStateIsStored = true;
 
@@ -422,6 +433,8 @@ void DynamicAppSignalState::setUnavailable(const Times& time,
 	{
 		rtSessionsProcessing(curState, true, thread);
 	}
+
+	return pushedStatesCount;
 }
 
 Hash DynamicAppSignalState::hash() const
@@ -762,9 +775,24 @@ DynamicAppSignalState* DynamicAppSignalStates::operator [] (int index)
 	return m_appSignalState + index;
 }
 
+const DynamicAppSignalState* DynamicAppSignalStates::getStateByHash(Hash signalHash) const
+{
+	return m_hash2State.value(signalHash, nullptr);
+}
+
 DynamicAppSignalState* DynamicAppSignalStates::getStateByHash(Hash signalHash)
 {
 	return m_hash2State.value(signalHash, nullptr);
+}
+
+const DynamicAppSignalState* DynamicAppSignalStates::getStateByID(const QString& signalID) const
+{
+	return getStateByHash(calcHash(signalID));
+}
+
+DynamicAppSignalState* DynamicAppSignalStates::getStateByID(const QString& signalID)
+{
+	return getStateByHash(calcHash(signalID));
 }
 
 void DynamicAppSignalStates::buidlHash2State()

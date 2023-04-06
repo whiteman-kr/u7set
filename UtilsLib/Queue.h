@@ -39,7 +39,22 @@ public:
 		return m_index;
 	}
 
+	int operator -- (int)
+	{
+		m_index--;
+
+		if (m_index < 0)
+		{
+			m_index = m_maxValue - 1;
+		}
+
+		return m_index;
+	}
+
 	int operator () () const { return m_index; }
+
+	operator int () const { return m_index; }
+	operator size_t () const { return static_cast<size_t>(m_index); }
 
 	void reset() { m_index = 0; }
 	void setMaxValue(int maxValue) { m_maxValue = maxValue; }
@@ -48,7 +63,16 @@ public:
 private:
 	int m_index = 0;
 	int m_maxValue = 0;
+
+	friend bool operator == (const QueueIndex& i1, const QueueIndex& i2);
 };
+
+inline bool operator == (const QueueIndex& i1, const QueueIndex& i2)
+{
+	Q_ASSERT(i1.m_maxValue == i2.m_maxValue);
+
+	return i1.m_index == i2.m_index;
+}
 
 class QueueBase : public QObject
 {

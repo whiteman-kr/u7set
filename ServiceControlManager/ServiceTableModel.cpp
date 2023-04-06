@@ -196,21 +196,14 @@ QVariant ServiceTableModel::data(const QModelIndex &index, int role) const
 			if (serviceState != ServiceState::Undefined &&
 				serviceState != ServiceState::Unavailable)
 			{
-				qint64 time = si.uptime();
-				qint64 s = time % 60; time /= 60;
-				qint64 m = time % 60; time /= 60;
-				qint64 h = time % 24; time /= 24;
-				str += tr("Uptime") + QString(" (%1d %2:%3:%4)\n").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0'));
+				str += QString("Uptime %1\n").arg(formatUptime(si.uptime()));
 			}
 			switch(serviceState)
 			{
 				case ServiceState::Work:
 				{
-					qint64 time = si.serviceuptime();
-					qint64 s = time % 60; time /= 60;
-					qint64 m = time % 60; time /= 60;
-					qint64 h = time % 24; time /= 24;
-					str += tr("Running in ") + E::valueToString(service.sessionParams.softwareRunMode) + QString(" mode (%1d %2:%3:%4)").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0'));
+					qint64 runtime = si.serviceruntime();
+					str += tr("Running in ") + E::valueToString(service.sessionParams.softwareRunMode) + " mode " + formatUptime(runtime);
 				} break;
 				case ServiceState::Stopped: str += tr("Stopped"); break;
 				case ServiceState::Unavailable: str += tr("Unavailable"); break;
@@ -359,24 +352,24 @@ void ServiceData::parseServiceInfo()
 	{
 		CfgServiceSettings* cfgServiceSettings = dynamic_cast<CfgServiceSettings*>(pSettings);
 		Q_ASSERT(cfgServiceSettings);
-		clientRequestIp = cfgServiceSettings->clientRequestIP.address32();
-		clientRequestPort = cfgServiceSettings->clientRequestIP.port();
+		clientRequestIp = cfgServiceSettings->clientRequestIP.address32IfSet();
+		clientRequestPort = cfgServiceSettings->clientRequestIP.portIfSet();
 	}
 		break;
 	case E::SoftwareType::AppDataService:
 	{
 		AppDataServiceSettings* appDataServiceSettings = dynamic_cast<AppDataServiceSettings*>(pSettings);
 		Q_ASSERT(appDataServiceSettings);
-		clientRequestIp = appDataServiceSettings->clientRequestIP.address32();
-		clientRequestPort = appDataServiceSettings->clientRequestIP.port();
+		clientRequestIp = appDataServiceSettings->clientRequestIP.address32IfSet();
+		clientRequestPort = appDataServiceSettings->clientRequestIP.portIfSet();
 	}
 		break;
 	case E::SoftwareType::DiagDataService:
 	{
 		DiagDataServiceSettings* diagDataServiceSettings = dynamic_cast<DiagDataServiceSettings*>(pSettings);
 		Q_ASSERT(diagDataServiceSettings);
-		clientRequestIp = diagDataServiceSettings->clientRequestIP.address32();
-		clientRequestPort = diagDataServiceSettings->clientRequestIP.port();
+		clientRequestIp = diagDataServiceSettings->clientRequestIP.address32IfSet();
+		clientRequestPort = diagDataServiceSettings->clientRequestIP.portIfSet();
 	}
 		break;
 	case E::SoftwareType::TuningService:
@@ -386,16 +379,16 @@ void ServiceData::parseServiceInfo()
 
 		// TO DO 2ch tuning!
 		//
-		clientRequestIp = tuningDataServiceSettings->clientRequestIP.address32();
-		clientRequestPort = tuningDataServiceSettings->clientRequestIP.port();
+		clientRequestIp = tuningDataServiceSettings->clientRequestIP.address32IfSet();
+		clientRequestPort = tuningDataServiceSettings->clientRequestIP.portIfSet();
 	}
 		break;
 	case E::SoftwareType::ArchiveService:
 	{
         ArchivingServiceSettings* archivingServiceSettings = dynamic_cast<ArchivingServiceSettings*>(pSettings);
         Q_ASSERT(archivingServiceSettings);
-        clientRequestIp = archivingServiceSettings->clientRequestIP.address32();
-        clientRequestPort = archivingServiceSettings->clientRequestIP.port();
+		clientRequestIp = archivingServiceSettings->clientRequestIP.address32IfSet();
+		clientRequestPort = archivingServiceSettings->clientRequestIP.portIfSet();
 	}
 		break;
 	default:

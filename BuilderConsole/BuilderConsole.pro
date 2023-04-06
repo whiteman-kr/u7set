@@ -96,6 +96,12 @@ win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
 INCLUDEPATH += ./../Protobuf
 
+# AppSignalLib
+#
+LIBS += -lAppSignalLib
+win32:PRE_TARGETDEPS += $$DESTDIR/AppSignalLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libAppSignalLib.a
+
 # OnlineLib
 #
 LIBS += -lOnlineLib
@@ -119,9 +125,3 @@ unix:PRE_TARGETDEPS += $$DESTDIR/libDbLib.a
 LIBS += -lCommonLib
 win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libCommonLib.a
-
-# AppSignalLib
-#
-LIBS += -lAppSignalLib
-win32:PRE_TARGETDEPS += $$DESTDIR/AppSignalLib.lib
-unix:PRE_TARGETDEPS += $$DESTDIR/libAppSignalLib.a

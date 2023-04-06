@@ -71,6 +71,21 @@ bool LanControllerInfo::isProvideDiagData() const
 	return isProvideDiagData(lanControllerType);
 }
 
+bool LanControllerInfo::isTuningEnabled() const
+{
+	return isProvideTuning() && tuningEnable;
+}
+
+bool LanControllerInfo::isAppDataEnabled() const
+{
+	return isProvideAppData() && appDataEnable;
+}
+
+bool LanControllerInfo::isDiagDataEnabled() const
+{
+	return isProvideDiagData() && diagDataEnable;
+}
+
 void LanControllerInfo::writeToXml(XmlWriteHelper& xml) const
 {
 	xml.writeStartElement(XmlElement::LAN_CONTROLLER);
@@ -358,16 +373,6 @@ void LanControllerInfo::saveToProto(Network::LanControllerInfo* proto) const
 
 	//
 
-	proto->set_appdataenable(appDataEnable);
-	proto->set_appdataip(appDataIP.toStdString());
-	proto->set_appdataport(appDataPort);
-	proto->set_appdataserviceid(appDataServiceID.toStdString());
-	proto->set_appdataserviceip(appDataServiceIP.toStdString());
-	proto->set_appdataserviceport(appDataServicePort);
-	proto->set_appdataservicenetmask(appDataServiceNetmask.toStdString());
-
-	//
-
 	proto->set_tuningenable(tuningEnable);
 	proto->set_tuningip(tuningIP.toStdString());
 	proto->set_tuningport(tuningPort);
@@ -375,6 +380,21 @@ void LanControllerInfo::saveToProto(Network::LanControllerInfo* proto) const
 	proto->set_tuningserviceip(tuningServiceIP.toStdString());
 	proto->set_tuningserviceport(tuningServicePort);
 	proto->set_tuningservicenetmask(tuningServiceNetmask.toStdString());
+	proto->set_tuningdatauid(tuningDataUID);
+
+	//
+
+	proto->set_appdataenable(appDataEnable);
+	proto->set_appdataip(appDataIP.toStdString());
+	proto->set_appdataport(appDataPort);
+	proto->set_appdataserviceid(appDataServiceID.toStdString());
+	proto->set_appdataserviceip(appDataServiceIP.toStdString());
+	proto->set_appdataserviceport(appDataServicePort);
+	proto->set_appdataservicenetmask(appDataServiceNetmask.toStdString());
+	proto->set_appdatauid(appDataUID);
+	proto->set_appdatasizebytes(appDataSizeBytes);
+	proto->set_appdataframesquantity(appDataFramesQuantity);
+	proto->set_overrideappdatawordcount(overrideAppDataWordCount);
 
 	//
 
@@ -385,6 +405,11 @@ void LanControllerInfo::saveToProto(Network::LanControllerInfo* proto) const
 	proto->set_diagdataserviceip(diagDataServiceIP.toStdString());
 	proto->set_diagdataserviceport(diagDataServicePort);
 	proto->set_diagdataservicenetmask(diagDataServiceNetmask.toStdString());
+
+	proto->set_diagdatauid(diagDataUID);
+	proto->set_diagdatasizebytes(diagDataSizeBytes);
+	proto->set_diagdataframesquantity(diagDataFramesQuantity);
+	proto->set_overridediagdatawordcount(overrideDiagDataWordCount);
 }
 
 void LanControllerInfo::loadFromProto(const Network::LanControllerInfo& proto)
@@ -395,16 +420,6 @@ void LanControllerInfo::loadFromProto(const Network::LanControllerInfo& proto)
 
 	//
 
-	appDataEnable = proto.appdataenable();
-	appDataIP = QString::fromStdString(proto.appdataip());
-	appDataPort = proto.appdataport();
-	appDataServiceID = QString::fromStdString(proto.appdataserviceid());
-	appDataServiceIP = QString::fromStdString(proto.appdataserviceip());
-	appDataServicePort = proto.appdataserviceport();
-	appDataServiceNetmask = QString::fromStdString(proto.appdataservicenetmask());
-
-	//
-
 	tuningEnable = proto.tuningenable();
 	tuningIP = QString::fromStdString(proto.tuningip());
 	tuningPort = proto.tuningport();
@@ -412,6 +427,21 @@ void LanControllerInfo::loadFromProto(const Network::LanControllerInfo& proto)
 	tuningServiceIP = QString::fromStdString(proto.tuningserviceip());
 	tuningServicePort = proto.tuningserviceport();
 	tuningServiceNetmask = QString::fromStdString(proto.tuningservicenetmask());
+	tuningDataUID = proto.tuningdatauid();
+
+	//
+
+	appDataEnable = proto.appdataenable();
+	appDataIP = QString::fromStdString(proto.appdataip());
+	appDataPort = proto.appdataport();
+	appDataServiceID = QString::fromStdString(proto.appdataserviceid());
+	appDataServiceIP = QString::fromStdString(proto.appdataserviceip());
+	appDataServicePort = proto.appdataserviceport();
+	appDataServiceNetmask = QString::fromStdString(proto.appdataservicenetmask());
+	appDataUID = proto.appdatauid();
+	appDataSizeBytes = proto.appdatasizebytes();
+	appDataFramesQuantity = proto.appdataframesquantity();
+	overrideAppDataWordCount = proto.overrideappdatawordcount();
 
 	//
 
@@ -422,6 +452,10 @@ void LanControllerInfo::loadFromProto(const Network::LanControllerInfo& proto)
 	diagDataServiceIP = QString::fromStdString(proto.diagdataserviceip());
 	diagDataServicePort = proto.diagdataserviceport();
 	diagDataServiceNetmask = QString::fromStdString(proto.diagdataservicenetmask());
+	diagDataUID = proto.diagdatauid();
+	diagDataSizeBytes = proto.diagdatasizebytes();
+	diagDataFramesQuantity = proto.diagdataframesquantity();
+	overrideDiagDataWordCount = proto.overridediagdatawordcount();
 }
 
 bool LanControllerInfo::operator == (int controllerNo) const

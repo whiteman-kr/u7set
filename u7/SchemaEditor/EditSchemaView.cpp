@@ -138,7 +138,7 @@ void EditSchemaView::paintEvent(QPaintEvent* paintEvent)
 
 	// Ajust QPainter
 	//
-	Ajust(&p, 0, 0, zoom());
+	Ajust(&p, schema()->unit(), 0, 0, zoom());
 
 	// Draw schema
 	//
@@ -1688,7 +1688,7 @@ void EditSchemaView::exportToPdf(const QString& fileName, bool infoMode)
 
 	// Ajust QPainter
 	//
-	Ajust(&p, 0, 0, 100.0);			// Export 100% zoom
+	Ajust(&p, schema()->unit(), 0, 0, 100.0);			// Export 100% zoom
 
 	// Draw Schema
 	//

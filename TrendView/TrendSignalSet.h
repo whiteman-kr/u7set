@@ -139,6 +139,8 @@ namespace TrendLib
 		void slot_realtimeRequestError(QString errorText);
 		void slot_realtimeConnectionLost(QString sourceEquipmentId);
 
+		void slot_trimData(E::TimeType timeType, TimeStamp trimFrom);	// Trim data from time trimFrom to the end (right).
+
 	private:
 		void appendRealtimeDataToArchive(QString sourceEquipmentId,
 										 E::TimeType timeType,

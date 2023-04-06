@@ -68,6 +68,93 @@ bool SoftwareSettings::startSettingsReading(XmlReadHelper& xml)
 	return result;
 }
 
+
+template<typename SERVICETYPE>		// SERVICETYPE is one of TuningService, AppDataService, ArchiveService
+void SoftwareSettings::setShortId(std::vector<SERVICETYPE>* services)
+{
+	if (services == nullptr)
+	{
+		Q_ASSERT(services);
+		return;
+	}
+
+	if (services->empty() == true)
+	{
+		return;
+	}
+
+	struct ServiceRecord
+	{
+		QString serviceId;		// Full ArchiveServiceID
+		QString shortId;		// Shorted ArchiveServiceID
+		QString currentId;		// Current work version (used for creating shortId)
+	};
+
+	std::vector<ServiceRecord> ss;
+	ss.reserve(services->size());
+
+	for (const SERVICETYPE& as : *services)
+	{
+		ss.push_back({as.equipmentId, as.equipmentId, as.equipmentId});
+	}
+
+	if (ss.size() == 1)
+	{
+		// If there is just one service then make it a bit shorter (remove system)
+		//
+		QString shortId = ss[0].shortId;
+
+		if (qsizetype underscoreIndex = shortId.indexOf('_');
+			underscoreIndex != -1)
+		{
+			ss[0].shortId = shortId.right(shortId.size() - (underscoreIndex + 1));
+		}
+		else
+		{
+			// ss[0].shortId = shortId;
+		}
+	}
+	else
+	{
+		for (qsizetype i = 0; i < ss[0].serviceId.size(); i++)
+		{
+			QChar firstLetter = ss[0].currentId[0];
+
+			if (firstLetter == QChar('_'))
+			{
+				std::ranges::for_each(ss, [](ServiceRecord& sr){	sr.shortId = sr.currentId; sr.shortId.remove(0, 1);});
+			}
+
+			bool firstLetterIsSame = std::all_of(ss.begin(), ss.end(),
+												 [firstLetter](const ServiceRecord& sr)
+												 {
+													return sr.currentId[0] == firstLetter;
+												 });
+
+			if (firstLetterIsSame == true)
+			{
+				std::ranges::for_each(ss, [](ServiceRecord& sr){	sr.currentId.remove(0, 1);});
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+
+	// Set result
+	//
+	Q_ASSERT(services->size() == ss.size());
+
+	for (size_t i = 0; i < services->size(); i++)
+	{
+		services->at(i).shortenId = ss.at(i).shortId;
+	}
+
+	return;
+}
+
+
 // -------------------------------------------------------------------------------------
 //
 // SoftwareSettingsSet class implementation
@@ -1240,8 +1327,8 @@ bool MonitorSettings::writeToXml(XmlWriteHelper& xml) const
 		xml.writeStartElement(XmlElement::TUNING_SERVICE);
 
 		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, tsc.equipmentId);
-		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, tsc.clientRequestIP);
-		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, tsc.clientRequestPort);
+		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, tsc.clientRequestAddress.addressStr());
+		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, tsc.clientRequestAddress.port());
 		xml.writeStringListAttribute(XmlAttribute::DRIVEN_SOURCES, tsc.drivenSources);
 
 		xml.writeEndElement();		// </TuningService>
@@ -1382,10 +1469,15 @@ bool MonitorSettings::readFromXml(XmlReadHelper& xml)
 
 				result &= xml.findElement(XmlElement::TUNING_SERVICE);
 
+				QString clientRequestAddress;
+				int clientRequestPort = 0;
+
 				result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &tsc.equipmentId);
-				result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &tsc.clientRequestIP);
-				result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &tsc.clientRequestPort);
+				result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &clientRequestAddress);
+				result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestPort);
 				result &= xml.readStringListAttribute(XmlAttribute::DRIVEN_SOURCES, &tsc.drivenSources);
+
+				tsc.clientRequestAddress = {clientRequestAddress, clientRequestPort};
 
 				tuningServices.push_back(tsc);
 
@@ -1412,9 +1504,9 @@ bool MonitorSettings::readFromXml(XmlReadHelper& xml)
 		xml.skipCurrentElement();
 	}
 
-	MonitorSettings::setShortId<SoftwareEndpoint::AppDataService>(&appDataServices);
-	MonitorSettings::setShortId<SoftwareEndpoint::ArchiveService>(&archiveServices);
-	MonitorSettings::setShortId<SoftwareEndpoint::TuningService>(&tuningServices);
+	SoftwareSettings::setShortId<SoftwareEndpoint::AppDataService>(&appDataServices);
+	SoftwareSettings::setShortId<SoftwareEndpoint::ArchiveService>(&archiveServices);
+	SoftwareSettings::setShortId<SoftwareEndpoint::TuningService>(&tuningServices);
 
 	result &= (appDataServices.empty() == false);
 
@@ -1434,91 +1526,6 @@ QStringList MonitorSettings::getUsersAccounts() const
 void MonitorSettings::clear()
 {
 	*this = MonitorSettings{};
-}
-
-template<typename SERVICETYPE>		// SERVICETYPE is one of TuningService, AppDataService, ArchiveService
-void MonitorSettings::setShortId(std::vector<SERVICETYPE>* services)
-{
-	if (services == nullptr)
-	{
-		Q_ASSERT(services);
-		return;
-	}
-
-	if (services->empty() == true)
-	{
-		return;
-	}
-
-	struct ServiceRecord
-	{
-		QString serviceId;		// Full ArchiveServiceID
-		QString shortId;		// Shorted ArchiveServiceID
-		QString currentId;		// Current work version (used for creating shortId)
-	};
-
-	std::vector<ServiceRecord> ss;
-	ss.reserve(services->size());
-
-	for (const SERVICETYPE& as : *services)
-	{
-		ss.push_back({as.equipmentId, as.equipmentId, as.equipmentId});
-	}
-
-	if (ss.size() == 1)
-	{
-		// If there is just one service then make it a bit shorter (remove system)
-		//
-		QString shortId = ss[0].shortId;
-
-		if (qsizetype underscoreIndex = shortId.indexOf('_');
-			underscoreIndex != -1)
-		{
-			ss[0].shortId = shortId.right(shortId.size() - (underscoreIndex + 1));
-		}
-		else
-		{
-			// ss[0].shortId = shortId;
-		}
-	}
-	else
-	{
-		for (qsizetype i = 0; i < ss[0].serviceId.size(); i++)
-		{
-			QChar firstLetter = ss[0].currentId[0];
-
-			if (firstLetter == QChar('_'))
-			{
-				std::ranges::for_each(ss, [](ServiceRecord& sr){	sr.shortId = sr.currentId; sr.shortId.remove(0, 1);});
-			}
-
-			bool firstLetterIsSame = std::all_of(ss.begin(), ss.end(),
-												 [firstLetter](const ServiceRecord& sr)
-												 {
-													return sr.currentId[0] == firstLetter;
-												 });
-
-			if (firstLetterIsSame == true)
-			{
-				std::ranges::for_each(ss, [](ServiceRecord& sr){	sr.currentId.remove(0, 1);});
-			}
-			else
-			{
-				break;
-			}
-		}
-	}
-
-	// Set result
-	//
-	Q_ASSERT(services->size() == ss.size());
-
-	for (size_t i = 0; i < services->size(); i++)
-	{
-		services->at(i).shortenId = ss.at(i).shortId;
-	}
-
-	return;
 }
 
 // -------------------------------------------------------------------------------------
@@ -1551,8 +1558,8 @@ bool TuningClientSettings::writeToXml(XmlWriteHelper& xml) const
 		xml.writeStartElement(XmlElement::TUNING_SERVICE);
 
 		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, tsc.equipmentId);
-		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, tsc.clientRequestIP);
-		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, tsc.clientRequestPort);
+		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, tsc.clientRequestAddress.addressStr());
+		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, tsc.clientRequestAddress.port());
 		xml.writeStringListAttribute(XmlAttribute::DRIVEN_SOURCES, tsc.drivenSources);
 		xml.writeBoolAttribute(EquipmentPropNames::SINGLE_LM_CONTROL, tsc.singleLmControl);
 
@@ -1622,12 +1629,16 @@ bool TuningClientSettings::readFromXml(XmlReadHelper& xml)
 
 		result &= xml.findElement(XmlElement::TUNING_SERVICE);
 
+		QString clientRequestAddress;
+		int clientRequestPort = 0;
+
 		result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &tsc.equipmentId);
-		result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &tsc.clientRequestIP);
-		result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &tsc.clientRequestPort);
+		result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &clientRequestAddress);
+		result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestPort);
 		result &= xml.readStringListAttribute(XmlAttribute::DRIVEN_SOURCES, &tsc.drivenSources);
 		result &= xml.readBoolAttribute(EquipmentPropNames::SINGLE_LM_CONTROL, &tsc.singleLmControl);
 
+		tsc.clientRequestAddress = {clientRequestAddress, clientRequestPort};
 
 		tuningServices.push_back(tsc);
 	}
@@ -1690,6 +1701,8 @@ bool TuningClientSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.findElement(EquipmentPropNames::SCHEMA_TAGS);
 
 	result &= xml.readStringElement(EquipmentPropNames::SCHEMA_TAGS, &schemaTags);
+
+	SoftwareSettings::setShortId<SoftwareEndpoint::TuningService>(&tuningServices);
 
 	return result;
 }
@@ -1823,8 +1836,8 @@ bool TestSuiteSettings::writeToXml(XmlWriteHelper& xml) const
 		xml.writeStartElement(XmlElement::TUNING_SERVICE);
 
 		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, tsc.equipmentId);
-		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, tsc.clientRequestIP);
-		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, tsc.clientRequestPort);
+		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, tsc.clientRequestAddress.addressStr());
+		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, tsc.clientRequestAddress.port());
 		xml.writeStringListAttribute(XmlAttribute::DRIVEN_SOURCES, tsc.drivenSources);
 
 		xml.writeEndElement();		// </TuningService>
@@ -1906,10 +1919,15 @@ bool TestSuiteSettings::readFromXml(XmlReadHelper& xml)
 
 		result &= xml.findElement(XmlElement::TUNING_SERVICE);
 
+		QString clientRequestAddress;
+		int clientRequestPort = 0;
+
 		result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &tsc.equipmentId);
-		result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &tsc.clientRequestIP);
-		result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &tsc.clientRequestPort);
+		result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &clientRequestAddress);
+		result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestPort);
 		result &= xml.readStringListAttribute(XmlAttribute::DRIVEN_SOURCES, &tsc.drivenSources);
+
+		tsc.clientRequestAddress = {clientRequestAddress, clientRequestPort};
 
 		tuningServices.push_back(tsc);
 	}

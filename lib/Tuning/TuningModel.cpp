@@ -914,13 +914,13 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 			{
 				if (tss.valid() == true)
 				{
-					TuningValue newValue = m_tuningSignalManager.newValue(tssHash);
+					TuningValue newValue = m_tuningSignalManager.unappliedValue(tssHash);
 
 					if (asp.isAnalog() == false)
 					{
 						QString valueString = tss.value().toString();
 
-						if (m_tuningSignalManager.newValueIsUnapplied(tssHash) == true)
+						if (m_tuningSignalManager.isUnapplied(tssHash) == true)
 						{
 							QString editValueString = newValue.toString();
 							return tr("%1 => %2").arg(valueString).arg(editValueString);
@@ -937,7 +937,7 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 					{
 						QString valueString = tss.value().toString(m_analogFormat, asp.precision());
 
-						if (m_tuningSignalManager.newValueIsUnapplied(tssHash) == true)
+						if (m_tuningSignalManager.isUnapplied(tssHash) == true)
 						{
 							QString editValueString = newValue.toString(m_analogFormat, asp.precision());
 							return QString("%1 => %2").arg(valueString).arg(editValueString);

@@ -216,7 +216,7 @@ void TcpAppDataClient::onGetAppDataSourcesInfoReply(const char* replyData, quint
 		return;
 	}
 
-	if (m_getDataSourcesInfoReply.error() != TO_INT(NetworkError::Success))
+	if (m_getDataSourcesInfoReply.error() != TO_INT(E::NetworkError::Success))
 	{
 		assert(false);
 		return;
@@ -253,7 +253,7 @@ void TcpAppDataClient::onGetAppDataSourcesStatesReply(const char* replyData, qui
 		return;
 	}
 
-	if (m_getAppDataSourcesStatesReply.error() != TO_INT(NetworkError::Success))
+	if (m_getAppDataSourcesStatesReply.error() != TO_INT(E::NetworkError::Success))
 	{
 		assert(false);
 		return;
@@ -273,8 +273,6 @@ void TcpAppDataClient::onGetAppDataSourcesStatesReply(const char* replyData, qui
 		AppDataSource* source = m_appDataSources.value(id);
 
 		source->setState(m_getAppDataSourcesStatesReply.appdatasourcesstates(i));
-
-		assert(source->moduleEquipmentID().toStdString() == m_getAppDataSourcesStatesReply.appdatasourcesstates(i).lmequipmentid());
 	}
 
 	emit dataSoursesStateUpdated();

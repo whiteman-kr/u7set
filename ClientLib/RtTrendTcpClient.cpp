@@ -20,6 +20,12 @@ namespace ClientLib
 		m_logFile.writeMessage("RtTrendTcpClient::RtTrendTcpClient(), address " + serverAddressPort.toString());
 		qDebug() << "RtTrendTcpClient::RtTrendTcpClient(...), address " << serverAddressPort.toString();
 
+		connect(this, &Tcp::Client::signal_wrongServerID,
+			[this](const QString& errorMessage)
+			{
+				m_logFile.writeError(errorMessage);
+			});
+
 		return;
 	}
 
@@ -104,7 +110,7 @@ namespace ClientLib
 
 	void RtTrendTcpClient::onDisconnection()
 	{
-		emit connectionLost(connectedSoftwareInfo().equipmentID());
+		emit connectionLost(connectToServerID());
 
 		qDebug() << "TrendTcpClient::onDisconnection " << serverAddressPort1().toString();
 		m_logFile.writeMessage("onDisconnection() " + serverAddressPort1().toString());

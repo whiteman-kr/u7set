@@ -137,8 +137,22 @@ static int no = 1;
 SimTrendsWidget::~SimTrendsWidget()
 {
 	SimTrends::unregisterTrendWindow(this->windowTitle());
-
 	return;
+}
+
+void SimTrendsWidget::trimTrendData(TimeStamp trimFrom)
+{
+	signalSet().slot_trimData(E::TimeType::Plant, trimFrom);
+}
+
+void SimTrendsWidget::addNonValidPoints()
+{
+	signalSet().addNonValidPoint();
+}
+
+void SimTrendsWidget::clear()
+{
+	signalSet().clear(E::TimeType::Plant);
 }
 
 void SimTrendsWidget::timerEvent(QTimerEvent*)

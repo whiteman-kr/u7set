@@ -33,8 +33,7 @@ namespace SoftwareEndpoint
 	{
 		QString equipmentId;
 		QString shortenId;			// Short version of tuningServiceID
-		QString clientRequestIP;
-		int clientRequestPort = 0;
+		HostAddressPort clientRequestAddress;
 		QStringList drivenSources;
 		bool singleLmControl = false;
 
@@ -84,6 +83,10 @@ private:
 	virtual bool readFromXml(XmlReadHelper& xml) = 0;
 
 	friend class SoftwareSettingsSet;
+
+protected:
+	template<typename SERVICETYPE>
+	static void setShortId(std::vector<SERVICETYPE>* services);
 
 public:
 	QString profile;
@@ -477,9 +480,6 @@ public:
 	QStringList getUsersAccounts() const;
 
 	void clear();
-
-	template<typename SERVICETYPE>
-	static void setShortId(std::vector<SERVICETYPE>* services);
 };
 
 

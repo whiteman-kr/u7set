@@ -53,8 +53,6 @@
 #include <QWaitCondition>
 #include <QAbstractEventDispatcher>
 
-#include "../../Service.h"
-
 #ifdef _MSC_VER
 	#pragma warning(push)
 	#pragma warning(disable : 6011)
@@ -1018,10 +1016,9 @@ QString QtServiceBasePrivate::filePath() const
 	return QString::fromUtf16(reinterpret_cast<char16_t*>(path));
 }
 
-
 QString QtServiceBasePrivate::filePathWithInstanceArg() const
 {
-	QString serviceInstanceID = Service::getInstanceID(q_ptr->args());
+	QString serviceInstanceID = getServiceInstanceID(q_ptr->args());
 
 	if (serviceInstanceID.isEmpty() == true)
 	{

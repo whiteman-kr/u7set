@@ -18,6 +18,16 @@ public:
 	static void registerTrendWindow(QString name, SimTrendsWidget* window);
 	static void unregisterTrendWindow(QString name);
 
+	template <typename Func>
+	static void applyForAll(Func func)
+	{
+		for (auto& [key, trendWidget] : m_trendsList)
+		{
+			Q_UNUSED(key);
+			func(trendWidget);
+		}
+	}
+
 private:
 	static std::map<QString, SimTrendsWidget*> m_trendsList;
 };
@@ -28,6 +38,10 @@ class SimTrendsWidget : public TrendLib::TrendMainWindow
 public:
 	SimTrendsWidget(std::shared_ptr<SimIdeSimulator> simulator, QWidget* parent);
 	virtual ~SimTrendsWidget();
+
+	void trimTrendData(TimeStamp trimFrom);	// Trim data from time trimFrom to the end (right).
+	void addNonValidPoints();
+	void clear();
 
 protected:
 	virtual void timerEvent(QTimerEvent* event) override;

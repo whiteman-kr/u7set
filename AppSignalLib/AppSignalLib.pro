@@ -50,6 +50,7 @@ HEADERS += \
     ComparatorSet.h \
     IAppSignalManager.h \
     ITuningSignalManager.h \
+    ITuningSignalUpdater.h \
 	Stable.h \
 	AppSignal.h \
 	AppSignalParam.h \

@@ -1505,5 +1505,48 @@ int QtService::executeApplication()
 	return m_app->exec();
 }
 
+QString getServiceInstanceID(const QStringList& serviceArgs)
+{
+	for(QString arg : serviceArgs)
+	{
+		if (arg.trimmed().toLower().startsWith(QtService::ARG_INSTANCE_ID) == false)
+		{
+			continue;
+		}
+
+		// parse: -inst=InstanceID
+
+		QStringList vl = arg.split("=");
+
+		if (vl.count() != 2)
+		{
+			continue;
+		}
+
+		return vl[1].trimmed();
+	}
+
+	return QString();
+}
+
+QString getServiceInstanceID(int argc, char* argv[])
+{
+	QStringList args;
+
+	for(int i = 0; i < argc; i++)
+	{
+		if (argv[i] == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+
+		args.append(QString(argv[i]));
+	}
+
+	return getServiceInstanceID(args);
+}
+
+
 
 

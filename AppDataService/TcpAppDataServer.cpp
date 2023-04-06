@@ -1,6 +1,6 @@
 #include "TcpAppDataServer.h"
 #include "AppDataService.h"
-
+#include "AppDataReceiver.h"
 
 // -------------------------------------------------------------------------------
 //
@@ -10,12 +10,11 @@
 
 TcpAppDataServer::TcpAppDataServer(const SoftwareInfo& softwareInfo,
 								   E::SecurityLevel securityLevel,
-								   AppDataReceiverThread* appDataReceiverThread,
-								   SignalStatesProcessingThread* signalStatesProcessingThread) :
+								   AppDataServiceWorker& appDataService) :
 	Tcp::Server(softwareInfo, securityLevel, "AppDataServer"),
-	m_appDataReceiverThread(appDataReceiverThread),
-	m_signalStatesProcessingThread(signalStatesProcessingThread)
+	m_appDataService(appDataService)
 {
+	setObjectName("TcpAppDataServer");
 }
 
 TcpAppDataServer::~TcpAppDataServer()
@@ -24,7 +23,7 @@ TcpAppDataServer::~TcpAppDataServer()
 
 void TcpAppDataServer::onServerThreadStarted()
 {
-	m_acquiredSignalCount = m_thread->acquiredAppSignalIDsCount();
+	m_acquiredSignalCount = m_appDataService.acquiredAppSignalIDsCount();
 	m_acquiredSignalListPartCount = getSignalListPartCount(m_acquiredSignalCount);
 
 	qDebug() << "TcpAppDataServer::onServerThreadStarted()";
@@ -34,7 +33,7 @@ void TcpAppDataServer::onServerThreadFinished()
 {
 	if (m_signalStatesQueue != nullptr)
 	{
-		m_signalStatesProcessingThread->unregisterDestSignalStatesQueue(m_signalStatesQueue, "TcpAppDataServer");
+		m_appDataService.unregisterDestSignalStatesQueue(m_signalStatesQueue);
 	}
 
 	qDebug() << "TcpAppDataServer::onServerThreadFinished()";
@@ -97,24 +96,15 @@ Tcp::Server* TcpAppDataServer::getNewInstance()
 {
 	TcpAppDataServer* newServer =  new TcpAppDataServer(localSoftwareInfo(),
 														securityLevel(),
-														m_appDataReceiverThread,
-														m_signalStatesProcessingThread);
-	newServer->setThread(m_thread);
-
+														m_appDataService);
 	return newServer;
 }
 
 void TcpAppDataServer::onGetState()
 {
-	if (m_thread == nullptr)
-	{
-		assert(false);
-		return;
-	}
-
 	quint32 ip = 0;
 	quint16 port = 0;
-	bool connected = m_thread->isConnectedToConfigurationService(ip, port);
+	bool connected = m_appDataService.isConnectedToConfigurationService(ip, port);
 
 	m_getAppDataServiceState.set_cfgserviceisconnected(connected);
 	if (connected)
@@ -123,7 +113,7 @@ void TcpAppDataServer::onGetState()
 		m_getAppDataServiceState.set_cfgserviceport(port);
 	}
 
-	connected = m_thread->isConnectedToArchiveService(ip, port);
+	connected = m_appDataService.isConnectedToArchiveService(ip, port);
 
 	m_getAppDataServiceState.set_archiveserviceisconnected(connected);
 	if (connected)
@@ -134,7 +124,7 @@ void TcpAppDataServer::onGetState()
 
 	Network::AppDataReceiveState* adrs = new Network::AppDataReceiveState();
 
-	m_appDataReceiverThread->fillAppDataReceiveState(adrs);
+	m_appDataService.fillAppDataReceiveState(adrs);
 
 	m_getAppDataServiceState.set_allocated_appdatareceivestate(adrs);
 
@@ -149,7 +139,7 @@ void TcpAppDataServer::onGetAppSignalListStartRequest()
 
 	m_getSignalListStartReply.set_itemsperpart(ADS_GET_APP_SIGNAL_LIST_ITEMS_PER_PART);
 
-	m_getSignalListStartReply.set_error(TO_INT(NetworkError::Success));
+	m_getSignalListStartReply.set_error(TO_INT(E::NetworkError::Success));
 
 	sendReply(m_getSignalListStartReply);
 }
@@ -162,7 +152,7 @@ void TcpAppDataServer::onGetAppSignalListNextRequest(const char* requestData, qu
 
 	if (result == false)
 	{
-		m_getSignalListNextReply.set_error(TO_INT(NetworkError::ParseRequestError));
+		m_getSignalListNextReply.set_error(TO_INT(E::NetworkError::ParseRequestError));
 		sendReply(m_getSignalListNextReply);
 		return;
 	}
@@ -171,7 +161,7 @@ void TcpAppDataServer::onGetAppSignalListNextRequest(const char* requestData, qu
 
 	if (requestPartNo < 0 ||  requestPartNo >= m_acquiredSignalListPartCount)
 	{
-		m_getSignalListNextReply.set_error(TO_INT(NetworkError::WrongPartNo));
+		m_getSignalListNextReply.set_error(TO_INT(E::NetworkError::WrongPartNo));
 		sendReply(m_getSignalListNextReply);
 		return;
 	}
@@ -185,7 +175,7 @@ void TcpAppDataServer::onGetAppSignalListNextRequest(const char* requestData, qu
 
 	m_getSignalListNextReply.set_part(requestPartNo);
 
-	const QVector<QString>& IDs = acquiredAppSignalIDs();
+	const std::vector<QString>& IDs = m_appDataService.acquiredAppSignalIDs();
 
 	int endIndex = requestPartNo * ADS_GET_APP_SIGNAL_LIST_ITEMS_PER_PART + itemsInPart;
 
@@ -194,7 +184,7 @@ void TcpAppDataServer::onGetAppSignalListNextRequest(const char* requestData, qu
 		m_getSignalListNextReply.add_appsignalids(IDs[i].toStdString());
 	}
 
-	m_getSignalListNextReply.set_error(TO_INT(NetworkError::Success));
+	m_getSignalListNextReply.set_error(TO_INT(E::NetworkError::Success));
 
 	sendReply(m_getSignalListNextReply);
 }
@@ -207,7 +197,7 @@ void TcpAppDataServer::onGetAppSignalParamRequest(const char* requestData, quint
 
 	if (result == false)
 	{
-		m_getAppSignalParamReply.set_error(TO_INT(NetworkError::ParseRequestError));
+		m_getAppSignalParamReply.set_error(TO_INT(E::NetworkError::ParseRequestError));
 		sendReply(m_getAppSignalParamReply);
 		return;
 	}
@@ -216,7 +206,7 @@ void TcpAppDataServer::onGetAppSignalParamRequest(const char* requestData, quint
 
 	if (hashesCount > ADS_GET_APP_SIGNAL_PARAM_MAX)
 	{
-		m_getAppSignalParamReply.set_error(TO_INT(NetworkError::RequestParamExceed));
+		m_getAppSignalParamReply.set_error(TO_INT(E::NetworkError::RequestParamExceed));
 		sendReply(m_getAppSignalParamReply);
 		return;
 	}
@@ -225,7 +215,7 @@ void TcpAppDataServer::onGetAppSignalParamRequest(const char* requestData, quint
 	{
 		Hash hash = m_getAppSignalParamRequest.signalhashes(i);
 
-		const AppSignal* signal = appSignals().getSignal(hash);
+		const AppSignal* signal = m_appDataService.appSignals().getSignalByHash(hash);
 
 		if (signal == nullptr)
 		{
@@ -248,7 +238,7 @@ void TcpAppDataServer::onGetAppSignalRequest(const char* requestData, quint32 re
 
 	if (result == false)
 	{
-		m_getAppSignalReply.set_error(TO_INT(NetworkError::ParseRequestError));
+		m_getAppSignalReply.set_error(TO_INT(E::NetworkError::ParseRequestError));
 		sendReply(m_getAppSignalReply);
 		return;
 	}
@@ -257,7 +247,7 @@ void TcpAppDataServer::onGetAppSignalRequest(const char* requestData, quint32 re
 
 	if (hashesCount > ADS_GET_APP_SIGNAL_PARAM_MAX)
 	{
-		m_getAppSignalReply.set_error(TO_INT(NetworkError::RequestParamExceed));
+		m_getAppSignalReply.set_error(TO_INT(E::NetworkError::RequestParamExceed));
 		sendReply(m_getAppSignalReply);
 		return;
 	}
@@ -266,7 +256,7 @@ void TcpAppDataServer::onGetAppSignalRequest(const char* requestData, quint32 re
 	{
 		Hash hash = m_getAppSignalRequest.signalhashes(i);
 
-		const AppSignal* signal = appSignals().getSignal(hash);
+		const AppSignal* signal = m_appDataService.appSignals().getSignalByHash(hash);
 
 		if (signal == nullptr)
 		{
@@ -289,7 +279,7 @@ void TcpAppDataServer::onGetAppSignalStateRequest(const char* requestData, quint
 
 	if (result == false)
 	{
-		m_getAppSignalStateReply.set_error(TO_INT(NetworkError::ParseRequestError));
+		m_getAppSignalStateReply.set_error(TO_INT(E::NetworkError::ParseRequestError));
 		sendReply(m_getAppSignalStateReply);
 		return;
 	}
@@ -298,10 +288,12 @@ void TcpAppDataServer::onGetAppSignalStateRequest(const char* requestData, quint
 
 	if (hashesCount > ADS_GET_APP_SIGNAL_STATE_MAX)
 	{
-		m_getAppSignalStateReply.set_error(TO_INT(NetworkError::RequestParamExceed));
+		m_getAppSignalStateReply.set_error(TO_INT(E::NetworkError::RequestParamExceed));
 		sendReply(m_getAppSignalStateReply);
 		return;
 	}
+
+	const DynamicAppSignalStates& appSignalStates = m_appDataService.appSignalStates();
 
 	for(int i = 0; i < hashesCount; i++)
 	{
@@ -309,7 +301,7 @@ void TcpAppDataServer::onGetAppSignalStateRequest(const char* requestData, quint
 
 		AppSignalState appSignalState;
 
-		result = getAppSignalStateState(hash, appSignalState);
+		result = appSignalStates.getCurrentState(hash, appSignalState);
 
 		if (result == false)
 		{
@@ -347,7 +339,10 @@ void TcpAppDataServer::onGetAppSignalStateChangesRequest(const char* requestData
 	if (m_signalStatesQueue == nullptr)
 	{
 		m_signalStatesQueue = std::make_shared<SimpleAppSignalStatesQueue>(10000);
-		m_signalStatesProcessingThread->registerDestSignalStatesQueue(m_signalStatesQueue, false, "TcpAppDataServer");
+		m_appDataService.registerDestSignalStatesQueue(m_signalStatesQueue, false,
+			QString("TcpAppDataServer for %1 (%2)").
+					arg(connectedSoftwareInfo().equipmentID()).
+					arg(peerAddr().addressStr()));
 	}
 
 	bool result = m_getAppSignalStateChangesRequest.ParseFromArray(requestData, requestDataSize);
@@ -356,7 +351,7 @@ void TcpAppDataServer::onGetAppSignalStateChangesRequest(const char* requestData
 
 	if (result == false)
 	{
-		m_getAppSignalStateChangesReply.set_error(TO_INT(NetworkError::ParseRequestError));
+		m_getAppSignalStateChangesReply.set_error(TO_INT(E::NetworkError::ParseRequestError));
 		sendReply(m_getAppSignalStateChangesReply);
 		return;
 	}
@@ -415,15 +410,17 @@ void TcpAppDataServer::onGetAppDataSourcesInfoRequest()
 {
 	m_getDataSourcesInfoReply.Clear();
 
-	const AppDataSourcesIP& dataSources = appDataSources();
+	const AppDataSources& dataSources = m_appDataService.appDataSources();
 
-	for(const AppDataSourceShared source : dataSources)
+	for(AppDataSource* source : dataSources)
 	{
+		TEST_PTR_CONTINUE(source);
+
 		Network::DataSourceInfo* protoInfo = m_getDataSourcesInfoReply.add_datasourceinfo();
 		source->saveToProto(protoInfo);
 	}
 
-	m_getDataSourcesInfoReply.set_error(TO_INT(NetworkError::Success));
+	m_getDataSourcesInfoReply.set_error(TO_INT(E::NetworkError::Success));
 
 	sendReply(m_getDataSourcesInfoReply);
 }
@@ -432,24 +429,26 @@ void TcpAppDataServer::onGetAppDataSourcesStatesRequest()
 {
 	m_getAppDataSourcesStatesReply.Clear();
 
-	const AppDataSourcesIP& dataSources = appDataSources();
+	const AppDataSources& dataSources = m_appDataService.appDataSources();
 
-	for (const AppDataSourceShared& source : dataSources)
+	for(const AppDataSource* source : dataSources)
 	{
+		TEST_PTR_CONTINUE(source);
+
 		Network::AppDataSourceState* state = m_getAppDataSourcesStatesReply.add_appdatasourcesstates();
 		source->getState(state);
 	}
 
-	m_getAppDataSourcesStatesReply.set_error(TO_INT(NetworkError::Success));
+	m_getAppDataSourcesStatesReply.set_error(TO_INT(E::NetworkError::Success));
 
 	sendReply(m_getAppDataSourcesStatesReply);
 }
 
 void TcpAppDataServer::onGetSettings()
 {
-	m_getServiceSettings.set_equipmentid(m_thread->equipmentID().toStdString());
-	m_getServiceSettings.set_configip1(m_thread->cfgServiceIP1Str().toStdString());
-	m_getServiceSettings.set_configip2(m_thread->cfgServiceIP2Str().toStdString());
+	m_getServiceSettings.set_equipmentid(m_appDataService.equipmentID().toStdString());
+	m_getServiceSettings.set_configip1(m_appDataService.cfgServiceIP1().addressPortStr().toStdString());
+	m_getServiceSettings.set_configip2(m_appDataService.cfgServiceIP1().addressPortStr().toStdString());
 
 	sendReply(m_getServiceSettings);
 }
@@ -458,26 +457,6 @@ int TcpAppDataServer::getSignalListPartCount(int signalCount)
 {
 	return signalCount / ADS_GET_APP_SIGNAL_LIST_ITEMS_PER_PART +
 			((signalCount % ADS_GET_APP_SIGNAL_LIST_ITEMS_PER_PART) == 0 ? 0 : 1);
-}
-
-const QVector<QString>& TcpAppDataServer::acquiredAppSignalIDs() const
-{
-	return m_thread->acquiredAppSignalIDs();
-}
-
-const AppSignals& TcpAppDataServer::appSignals() const
-{
-	return m_thread->appSignals();
-}
-
-const AppDataSourcesIP& TcpAppDataServer::appDataSources() const
-{
-	return m_thread->appDataSources();
-}
-
-bool TcpAppDataServer::getAppSignalStateState(Hash hash, AppSignalState& state)
-{
-	return m_thread->getAppSignalState(hash, state);
 }
 
 void TcpAppDataServer::getServerTimes(qint64* utc, qint64* local)
@@ -494,76 +473,19 @@ void TcpAppDataServer::getServerTimes(qint64* utc, qint64* local)
 	*local = currentTimeLocal.toMSecsSinceEpoch();
 }
 
-
 // -------------------------------------------------------------------------------
 //
 // TcpAppDataServerThread class implementation
 //
 // -------------------------------------------------------------------------------
 
-TcpAppDataServerThread::TcpAppDataServerThread(const HostAddressPort& listenAddressPort,
-												TcpAppDataServer* server,
-												const AppDataSourcesIP& appDataSources,
-												const AppSignals& appSignals,
-												const DynamicAppSignalStates& appSignalStates,
-												const AppDataServiceWorker &appDataServiceWorker,
-												std::shared_ptr<CircularLogger> logger) :
-	Tcp::ServerThread(listenAddressPort, server, logger),
-	m_appDataSources(appDataSources),
-	m_appSignals(appSignals),
-	m_appSignalStates(appSignalStates),
-	m_appDataServiceWorker(appDataServiceWorker)
+TcpAppDataServerThread::TcpAppDataServerThread(const SoftwareInfo& softwareInfo,
+											   const HostAddressPort& listenAddressPort,
+											   E::SecurityLevel securityLevel,
+											   AppDataServiceWorker& appDataServiceWorker) :
+	Tcp::ServerThread(listenAddressPort,
+					  new TcpAppDataServer(softwareInfo, securityLevel, appDataServiceWorker),
+					  appDataServiceWorker.logger())
 {
-	server->setThread(this);
-	buildAppSignalIDs();
 }
-
-
-bool TcpAppDataServerThread::getAppSignalState(Hash hash, AppSignalState& state)
-{
-	return m_appSignalStates.getCurrentState(hash, state);
-}
-
-bool TcpAppDataServerThread::isConnectedToConfigurationService(quint32& ip, quint16& port)
-{
-	return m_appDataServiceWorker.isConnectedToConfigurationService(ip, port);
-}
-
-bool TcpAppDataServerThread::isConnectedToArchiveService(quint32& ip, quint16& port)
-{
-	return m_appDataServiceWorker.isConnectedToArchiveService(ip, port);
-}
-
-QString TcpAppDataServerThread::equipmentID() const
-{
-	return m_appDataServiceWorker.equipmentID();
-}
-
-QString TcpAppDataServerThread::cfgServiceIP1Str() const
-{
-	return m_appDataServiceWorker.cfgServiceIP1().addressPortStr();
-}
-
-QString TcpAppDataServerThread::cfgServiceIP2Str() const
-{
-	return m_appDataServiceWorker.cfgServiceIP2().addressPortStr();
-}
-
-void TcpAppDataServerThread::buildAppSignalIDs()
-{
-	m_acquiredAppSignalIDs.clear();
-	m_acquiredAppSignalIDs.reserve(m_appSignals.count());
-
-	for(AppSignal* signal : m_appSignals)
-	{
-		TEST_PTR_CONTINUE(signal);
-
-		if (signal->isAcquired() == true)
-		{
-			m_acquiredAppSignalIDs.append(signal->appSignalID());
-		}
-	}
-}
-
-
 

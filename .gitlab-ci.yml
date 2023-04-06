@@ -1,10 +1,12 @@
 variables:
   GIT_DEPTH: "1"
-  QT_VERSION: "6.3.2"
-  COMPILER_TESTS_PROJECT_NAME: "compiler_tests_v382"
-  SIMULATOR_PROJECT_NAME: "test_simulator_v382"
+  QT_VERSION: "6.4.3"
+  COMPILER_TESTS_PROJECT_NAME: "compiler_tests_v383"
+  SIMULATOR_PROJECT_NAME: "test_simulator_v383"
+  PGPASSWORD: "P2ssw0rd"
   
 stages:
+  - prepare
   - build
   - test
 #  - deploy
@@ -16,10 +18,34 @@ before_script:
   
 #after_script:
 #  - echo after_script
-
+project_backup_job:
+  stage: prepare
+  variables:
+    GIT_STRATEGY: none
+  only:
+    - master
+    - /^release.*$/
+    - develop
+    - /experimental/
+    - /^.*exp.*$/
+    - /^.*rpct-.*$/
+    - /^.*RPCT-.*$/
+  tags:
+    - projectbackup
+  script:
+    - "# ----------------------------------------------"
+    - "#               Create backup of database files "
+    - "# ----------------------------------------------"
+    - "if (Test-Path \"f:\\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql.1\") {  Remove-Item -Verbose -Force \"f:\\TestDatabase\\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql.1\" }"
+    - "if (Test-Path \"f:\\u7_${Env:SIMULATOR_PROJECT_NAME}.sql.1\") {  Remove-Item -Verbose -Force \"f:\\TestDatabase\\u7_${Env:SIMULATOR_PROJECT_NAME}.sql.1\" }"
+    - "pg_dump -h 192.168.75.10 -U u7 -f f:\\TestDatabase\\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql.1 u7_${Env:COMPILER_TESTS_PROJECT_NAME}"
+    - "pg_dump -h 192.168.75.10 -U u7 -f f:\\TestDatabase\\u7_${Env:SIMULATOR_PROJECT_NAME}.sql.1 u7_${Env:SIMULATOR_PROJECT_NAME}"
+    - "f:\\TestDatabase\\UpdateFileIfDifferent.ps1 f:\\TestDatabase\\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql.1 f:\\TestDatabase\\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql"
+    - "f:\\TestDatabase\\UpdateFileIfDifferent.ps1 f:\\TestDatabase\\u7_${Env:SIMULATOR_PROJECT_NAME}.sql.1 f:\\TestDatabase\\u7_${Env:SIMULATOR_PROJECT_NAME}.sql"
 
 linux_build_job:
   stage: build
+  needs: ["project_backup_job"]
   only:
     - master
     - /^release.*$/
@@ -67,6 +93,7 @@ linux_build_job:
 
 windows_build_job:
   stage: build
+  needs: ["project_backup_job"]
   only:
     - master
     - /^release.*$/
@@ -227,7 +254,7 @@ windows_test_job:
     - "# ----------------------------------------------"
     - "#               Run unit tests"
     - "# ----------------------------------------------"
-    - "&$Env:CI_PROJECT_DIR/bin/release/ClientTests.exe --gtest_filter=-AdsConnectionTests.*:ConfigControllerTests.*:AdsSourceStateConnectionTests.*"
+    - "&$Env:CI_PROJECT_DIR/bin/release/ClientTests.exe --gtest_filter=-AdsConnectionTests.*:ConfigControllerTests.*:AdsSourceStateConnectionTests.*:TuningConnectionTests.*"
     - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorTests.exe"
     - "&$Env:CI_PROJECT_DIR/bin/release/MetrologyTests.exe"
     - "&$Env:CI_PROJECT_DIR/bin/release/u7databasetests.exe -config=\"$Env:CI_PROJECT_DIR/Test/u7databasetestsArgs.xml\""
@@ -298,7 +325,7 @@ linux_test_job:
     - "rm /tmp/u7_${COMPILER_TESTS_PROJECT_NAME}.sql"
     - "rm /tmp/u7_${SIMULATOR_PROJECT_NAME}.sql"
     - "popd"
-    - "echo Creating PostgreSQL databases complete
+    - "echo Creating PostgreSQL databases complete"
 
 #Run Builder test
     - "# ----------------------------------------------"
@@ -323,7 +350,7 @@ linux_test_job:
     - "# ----------------------------------------------"
     - "#               Run client tests"
     - "# ----------------------------------------------"
-    - "function StopServices () { pkill CfgSrv || true; pkill AppDataSrv || true; pkill SimulatorConsol || true; sleep 2; }"
+    - "function StopServices () { pkill CfgSrv || true; pkill AppDataSrv || true; pkill TuningSrv || true; pkill SimulatorConsol || true; sleep 2; }"
     - "trap StopServices EXIT"
     - "pushd $CI_PROJECT_DIR/bin_unix/release"
     - "StopServices || true"
@@ -335,7 +362,10 @@ linux_test_job:
     - "sleep 5"
     - "./linux_test_job_systemid_clienttest_ws01_ads.sh < /dev/null > clienttest_ws01_ads.out 2>&1 &"
     - "./linux_test_job_systemid_clienttest_ws02_ads.sh < /dev/null > clienttest_ws02_ads.out 2>&1 &"
-    - "./SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_test_job -enable_lan -no_exit > SimulatorConsole.out 2>&1 &"
+    - "./linux_test_job_systemid_clienttest_ws01_tuns.sh < /dev/null > clienttest_ws01_tuns.out 2>&1 &"
+    - "./linux_test_job_systemid_clienttest_ws02_tuns.sh < /dev/null > clienttest_ws02_tuns.out 2>&1 &"
+    - "./linux_test_job_systemid_clienttest_ws04_tuns.sh < /dev/null > clienttest_ws04_tuns.out 2>&1 &"
+    - "./SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_test_job -enable_lan -script=\"$CI_PROJECT_DIR/Test/ClientTests/Scripts/TuningTests.js\" > SimulatorConsole.out 2>&1 &"
     - "sleep 5"
     - "jobs"
     - "./ClientTests -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_test_job"
@@ -359,7 +389,7 @@ linux_test_job:
 
 linux_code_coverage_job:
   stage: test
-  needs: []
+  needs: ["project_backup_job"]
   tags:
     - testlinux
   only:
@@ -387,7 +417,7 @@ linux_code_coverage_job:
     - "rm /tmp/ImportDatabase.sh"
     - "rm /tmp/u7_${SIMULATOR_PROJECT_NAME}.sql"
     - "popd"
-    - "echo Creating PostgreSQL databases complete      
+    - "echo Creating PostgreSQL databases complete"
     - "# ----------------------------------------------"
     - "#                    Build                      "
     - "# ----------------------------------------------"

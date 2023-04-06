@@ -15,16 +15,18 @@
 #include "SimSignalInfo.h"
 
 
-SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
+SimWidget::SimWidget(std::shared_ptr<Sim::ConsoleLogFile> ideLogFile,
+					 std::shared_ptr<SimIdeSimulator> simulator,
 					 DbController* db,
 					 QWidget* parent /*= nullptr*/,
 					 Qt::WindowType windowType /*= Qt::Window*/,
-					 bool slaveWindow /*= false*/)
-	: QMainWindow(parent),
-	  HasDbController(db),
-	  m_slaveWindow(slaveWindow),
-	  m_simulator(simulator ? simulator : std::make_shared<SimIdeSimulator>(&m_ideLogFile, true, nullptr)),
-	  m_schemaManager(m_simulator.get())
+					 bool slaveWindow /*= false*/) :
+	QMainWindow(parent),
+	HasDbController(db),
+	m_slaveWindow(slaveWindow),
+	m_ideLogFile(ideLogFile ? ideLogFile : std::make_shared<Sim::ConsoleLogFile>()),
+	m_simulator(simulator ? simulator : std::make_shared<SimIdeSimulator>(m_ideLogFile.get(), true, nullptr)),
+	m_schemaManager(m_simulator.get())
 {
 	// --
 	//
@@ -220,6 +222,53 @@ void SimWidget::createToolBar()
 	connect(m_addWindowAction, &QAction::triggered, this, &SimWidget::addNewWindow);
 	m_toolBar->addAction(m_addWindowAction);
 
+	// --
+	//
+	m_simulationTimeEdit = new QLineEdit{this};
+	m_simulationTimeEdit->setPlaceholderText("Infinite");
+	m_simulationTimeEdit->setClearButtonEnabled(false);
+	m_simulationTimeEdit->setToolTip("Simualtion time in seconds.\n\"0\" - at least one workcyle.\nClear the field for an infinite simulation (till Stop or Pause).\nExamples: \"0.500\" - 500ms, \"60\" - 1min, \"3600\" - 1hour.");
+	m_simulationTimeEdit->setSizePolicy(QSizePolicy::Policy::Minimum, m_simulationTimeEdit->sizePolicy().verticalPolicy());
+	m_simulationTimeEdit->setMaxLength(18);
+
+	QFontMetrics fm(m_simulationTimeEdit->font());
+	int pixelWidth = fm.horizontalAdvance("0000000000.000");
+	m_simulationTimeEdit->setMaximumWidth(pixelWidth);
+
+	m_simulationTimeLocale.setNumberOptions(m_simulationTimeLocale.numberOptions() & ~(QLocale::OmitGroupSeparator));
+	m_simulationTimeEditValidator.setLocale(m_simulationTimeLocale);
+	m_simulationTimeEditValidator.setNotation(QDoubleValidator::Notation::StandardNotation);
+	m_simulationTimeEditValidator.setBottom(0.001);
+	m_simulationTimeEditValidator.setDecimals(3);
+
+	m_simulationTimeEdit->setValidator(&m_simulationTimeEditValidator);
+
+	// --
+	//
+	m_speedComboBox = new QComboBox{this};
+	m_speedComboBox->setToolTip("Simulation speed factor.\nFF - Fast Forward.\nNote: Simulation speed depends on hardware and project complexity.");
+	m_speedComboBox->addItem("x0.1", QVariant{0.1});
+	m_speedComboBox->addItem("x0.25", QVariant{0.25});
+	m_speedComboBox->addItem("x0.5", QVariant{0.5});
+	m_speedComboBox->addItem("x1", QVariant{1.0});
+	m_speedComboBox->addItem("x2", QVariant{2.0});
+	m_speedComboBox->addItem("x4", QVariant{4.0});
+	m_speedComboBox->addItem("FF", QVariant{256.0});
+	m_speedComboBox->setCurrentIndex(3);	// x1
+
+	auto speedChangedFunc = [this](int)
+		{
+			bool ok;
+			double d = m_speedComboBox->currentData().toDouble(&ok);
+			m_simulator->control().setSpeedFactor(ok ? d : 1.0);
+		};
+
+	connect(m_speedComboBox, &QComboBox::currentIndexChanged, speedChangedFunc);
+
+	speedChangedFunc(3);	// Call first time to init m_simualtor
+
+	// --
+	//
 	m_runAction = new QAction{QIcon(":/Images/Images/SimRun.svg"), tr("Run simulation for complete project"), this};
 	QList<QKeySequence> runsKeys;
 	runsKeys << QKeySequence{Qt::CTRL | Qt::Key_R};
@@ -281,6 +330,8 @@ void SimWidget::createToolBar()
 	m_toolBar->addAction(m_addWindowAction);
 
 	m_toolBar->addSeparator();
+	m_toolBar->addWidget(m_simulationTimeEdit);
+	m_toolBar->addWidget(m_speedComboBox);
 	m_toolBar->addAction(m_runAction);
 	m_toolBar->addAction(m_pauseAction);
 	m_toolBar->addAction(m_stopAction);
@@ -549,6 +600,9 @@ void SimWidget::updateActions()
 	// Run, Pause, Stop
 	//
 	{
+		m_simulationTimeEdit->setEnabled((m_simulator->isStopped() == true || m_simulator->isPaused()) && projectIsLoaded == true);
+		m_speedComboBox->setEnabled(projectIsLoaded);
+
 		m_runAction->setEnabled((m_simulator->isStopped() == true || m_simulator->isPaused()) && projectIsLoaded == true);
 		m_pauseAction->setEnabled(m_simulator->isRunning() == true && projectIsLoaded == true);
 		m_stopAction->setEnabled(m_simulator->isStopped() == false  && projectIsLoaded == true);
@@ -696,8 +750,6 @@ void SimWidget::refreshBuild()
 
 void SimWidget::runSimulation()
 {
-	qDebug() << "SimWidget::runSimulation()";
-
 	if (m_simulator->isLoaded() == false)
 	{
 		qDebug() << "SimWidget::runSimulation(): Project is not loaded";
@@ -711,7 +763,86 @@ void SimWidget::runSimulation()
 		return;
 	}
 
-	// Set profile tosimulator
+	// Trim all trends
+	//
+	{
+		TimeStamp currentTime{QDateTime::currentDateTime()};
+		auto trimFunc = [currentTime](SimTrendsWidget* simTrendsWidget)
+		{
+// Choose what to do, trim or clear.
+//
+#if 1
+			simTrendsWidget->trimTrendData(currentTime);
+			simTrendsWidget->addNonValidPoints();
+#else
+			simTrendsWidget->clear();
+#endif
+		};
+
+		SimTrends::applyForAll(trimFunc);
+	}
+
+	// Get simulation time
+	//
+	std::chrono::microseconds duration{-1};
+
+	if (QString simTimeText = m_simulationTimeEdit->text();
+		simTimeText.isEmpty() == false)
+	{
+		QStringList splitted = simTimeText.split(m_simulationTimeLocale.decimalPoint());
+		QString secondsText;
+		QString millisecondsText;
+
+		if (splitted.size() >= 1)
+		{
+			secondsText = splitted[0].remove(m_simulationTimeLocale.groupSeparator());
+		}
+
+		if (splitted.size() == 2)
+		{
+			millisecondsText = splitted[1];
+		}
+
+		if (secondsText.isEmpty() == false)
+		{
+			bool ok;
+			auto s = secondsText.toULongLong(&ok, 10);
+
+			if (ok == true)
+			{
+				duration = std::chrono::seconds{s};
+			}
+		}
+
+		if (millisecondsText.isEmpty() == false)
+		{
+			uint64_t order = 100;
+			uint64_t ms = 0;
+
+			for (qsizetype i = 0; i < millisecondsText.size(); i++)
+			{
+				QChar ch = millisecondsText[i];
+				Q_ASSERT(ch.isDigit());
+
+				ms += ch.digitValue() * order;
+				order /= 10;
+			}
+
+			if (duration.count() < 0)
+			{
+				duration = std::chrono::microseconds{0};
+			}
+
+			duration += std::chrono::milliseconds{ms};
+		}
+	}
+
+	if (duration.count() == 0)
+	{
+		duration = std::chrono::microseconds{1};	// It will run one work cycle
+	}
+
+	// Set profile to simulator
 	//
 	Q_ASSERT(m_profilesComboBox);
 
@@ -730,9 +861,7 @@ void SimWidget::runSimulation()
 
 	if (m_simulator->isPaused() == true)
 	{
-		// Continue running what was simualted before
-		//
-		mutableControl.startSimulation(mutableControl.duration());
+		mutableControl.startSimulation(duration);
 	}
 	else
 	{
@@ -763,7 +892,7 @@ void SimWidget::runSimulation()
 		// Start simulation
 		//
 		mutableControl.setRunList(equipmentIds);
-		mutableControl.startSimulation();
+		mutableControl.startSimulation(duration);
 	}
 
 	return;
@@ -960,7 +1089,7 @@ void SimWidget::addNewWindow()
 {
 	qDebug() << "SimulatorWidget::addNewWindow()";
 
-	SimWidget* widget = new SimWidget{m_simulator, db(), this->parentWidget(), Qt::Window, true};
+	SimWidget* widget = new SimWidget{m_ideLogFile, m_simulator, db(), this->parentWidget(), Qt::Window, true};
 	widget->setWindowTitle(tr("u7 Simulator"));
 
 	widget->show();

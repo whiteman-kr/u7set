@@ -33,8 +33,8 @@ namespace RtTrends
 
 	Session::Session(AppDataServiceWorker& service) :
 		m_id(m_globalID.fetch_add(1)),
-		m_signalStates(service.signalStates()),
-		m_signalToSources(service.signalsToSources())
+		m_signalStates(service.appSignalStates())
+//		m_signalToSources(service.signalsToSources())
 	{
 	}
 
@@ -108,12 +108,10 @@ namespace RtTrends
 	//
 	// -----------------------------------------------------------------------------------------------
 
-
 	Server::Server(AppDataServiceWorker& appDataService, E::SecurityLevel securityLevel) :
 		Tcp::Server(appDataService.softwareInfo(), securityLevel, "RtTrendsServer"),
 		m_appDataService(appDataService),
-		m_signalsToSources(appDataService.signalsToSources()),
-		m_signalStates(appDataService.signalStates()),
+		m_signalStates(appDataService.appSignalStates()),
 		m_log(appDataService.logger()),
 		m_session(std::make_shared<Session>(appDataService))
 	{
@@ -164,7 +162,7 @@ namespace RtTrends
 
 		if (result == false)
 		{
-			m_rtTrendsManagementReply.set_error(TO_INT(NetworkError::ParseRequestError));
+			m_rtTrendsManagementReply.set_error(TO_INT(E::NetworkError::ParseRequestError));
 			m_rtTrendsManagementReply.set_errorstring("Network::RtTrendsManagementRequest parsing error");
 			sendReply(m_rtTrendsManagementReply);
 			return;
@@ -209,7 +207,7 @@ namespace RtTrends
 
 		for(Hash signalHash : trackedSignalHashes)
 		{
-			AppDataSourceShared source = m_signalsToSources.value(signalHash, nullptr);
+			AppDataSource* source = m_appDataService.appDataSources().getSignalSource(signalHash);
 
 			TEST_PTR_CONTINUE(source);
 
@@ -244,11 +242,10 @@ namespace RtTrends
 			return true;
 		}
 
-		AppDataSourceShared source = m_signalsToSources.value(signalHash, nullptr);
+		AppDataSource* source = m_appDataService.appDataSources().getSignalSource(signalHash);
 
 		if (source == nullptr)
 		{
-			//ASSERT_RETURN_FALSE;
 			return false;
 		}
 
@@ -321,7 +318,7 @@ namespace RtTrends
 
 		if (result == false)
 		{
-			m_rtTrendsGetStateChangesReply.set_error(TO_INT(NetworkError::ParseRequestError));
+			m_rtTrendsGetStateChangesReply.set_error(TO_INT(E::NetworkError::ParseRequestError));
 			m_rtTrendsGetStateChangesReply.set_errorstring("Network::RtTrendsGetStateChangesRequest parsing error");
 			sendReply(m_rtTrendsGetStateChangesReply);
 			return;
@@ -447,5 +444,6 @@ namespace RtTrends
 						  new Server(appDataService, securityLevel),
 						  appDataService.logger())
 	{
+		setObjectName("RtTrends::ServerThread");
 	}
 }

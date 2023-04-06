@@ -83,7 +83,6 @@ namespace ClientLib
 
 		for (const ClientLib::TuningSource& ts : sourceStates)
 		{
-			int check_source_hash = 1;
 			if (::calcHash(ts.equipmentId()) != sourceHash)
 			{
 				continue;
@@ -121,7 +120,6 @@ namespace ClientLib
 
 		for (const ClientLib::TuningSource& ts : sourceStates)
 		{
-			int check_source_hash = 1;
 			if (::calcHash(ts.equipmentId()) != sourceHash)
 			{
 				continue;

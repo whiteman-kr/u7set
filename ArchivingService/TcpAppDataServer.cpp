@@ -40,7 +40,7 @@ void TcpAppDataServer::onSaveAppSignalsStatesToArchive(const char* requestData, 
 
 	if (result == false)
 	{
-		m_saveStatesReply.set_error(TO_INT(NetworkError::ParseRequestError));
+		m_saveStatesReply.set_error(TO_INT(E::NetworkError::ParseRequestError));
 		sendReply(m_saveStatesReply);
 		return;
 	}
@@ -60,7 +60,7 @@ void TcpAppDataServer::onSaveAppSignalsStatesToArchive(const char* requestData, 
 		m_archive->saveState(state);
 	}
 
-	m_saveStatesReply.set_error(TO_INT(NetworkError::Success));
+	m_saveStatesReply.set_error(TO_INT(E::NetworkError::Success));
 
 	sendReply(m_saveStatesReply);
 }

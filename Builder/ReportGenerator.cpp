@@ -29,7 +29,7 @@ namespace  Builder
 
 	void ReportSchemaView::adjust(QPainter* painter, double startX, double startY, double zoom) const
 	{
-		Ajust(painter, startX, startY, zoom);
+		Ajust(painter, schema()->unit(), startX, startY, zoom);
 	}
 
 	void ReportSchemaView::drawCompareOutlines(VFrame30::CDrawParam* drawParam, const QRectF& clipRect, const std::map<QUuid, ReportSchemaCompareAction>& compareActions)

@@ -1,13 +1,11 @@
 #include "../UtilsLib/WUtils.h"
 
 #include "SignalStatesProcessingThread.h"
+#include "AppDataReceiver.h"
 
-
-SignalStatesProcessingThread::SignalStatesProcessingThread(const AppDataSources& appDataSources, CircularLoggerShared log) :
-    m_appDataSources(appDataSources),
+SignalStatesProcessingThread::SignalStatesProcessingThread(CircularLoggerShared log) :
     m_log(log)
 {
-
 }
 
 void SignalStatesProcessingThread::registerDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue,
@@ -16,133 +14,120 @@ void SignalStatesProcessingThread::registerDestSignalStatesQueue(SimpleAppSignal
 {
     TEST_PTR_RETURN(destQueue);
 
-	bool found = false;
-
 	m_queuesMutex.lock();
 
-	for(const QPair<SimpleAppSignalStatesQueueShared, bool>& queue : m_queues)
-	{
-		if (queue.first == destQueue)
-		{
-			found = true;
-			assert(false);
-			break;
-		}
-	}
+	auto it = m_queues.find(destQueue);
 
-	if (found == false)
+	if (it == m_queues.end())
 	{
-		m_queues.append(QPair<SimpleAppSignalStatesQueueShared, bool>(destQueue, isArchivingQueue));
+		m_queues.insert({ destQueue, { isArchivingQueue, description }});
 	}
-
+	else
+	{
+		Q_ASSERT(false);
+	}
 	m_queuesMutex.unlock();
 
     DEBUG_LOG_MSG(m_log, QString("SignalStatesProcessingThread: register queue '%1'").arg(description));
 }
 
-void SignalStatesProcessingThread::unregisterDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue, const QString& description)
+void SignalStatesProcessingThread::unregisterDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue)
 {
     TEST_PTR_RETURN(destQueue);
 
-	Q_UNUSED(description);
-
-	int curIndex = 0;
 	bool removeOk = false;
+	QString description;
 
 	m_queuesMutex.lock();
 
-	for(const QPair<SimpleAppSignalStatesQueueShared, bool>& queue : m_queues)
-	{
-		if (queue.first == destQueue)
-		{
-			m_queues.removeAt(curIndex);
-			removeOk = true;
-			break;
-		}
+	auto it = m_queues.find(destQueue);
 
-		curIndex++;
+	if (it != m_queues.end())
+	{
+		description = it->second.second;
+
+		m_queues.erase(it);
+
+		removeOk = true;
+	}
+	else
+	{
+		Q_ASSERT(false);
 	}
 
 	m_queuesMutex.unlock();
 
-	if (removeOk == false)
+	if (removeOk == true)
 	{
-		assert(false);			// destQueue is not found in m_queues
+		DEBUG_LOG_MSG(m_log, QString("SignalStatesProcessingThread: unregister queue '%1'").arg(description));
 	}
-
-	DEBUG_LOG_MSG(m_log, QString("SignalStatesProcessingThread: unregister queue '%1'").arg(description));
 }
 
-void SignalStatesProcessingThread::run()
+void SignalStatesProcessingThread::processStates(AppDataReceiver& receiver)
 {
-    DEBUG_LOG_MSG(m_log, QString("SignalStatesProcessingThread is started"));
+	DEBUG_LOG_MSG(m_log, QString("SignalStatesProcessingThread is started"));
 
-    do
-    {
-		bool hasNoStatesToProcessing = true;
+	auto& waitConditionMutex = receiver.m_statesProcessigRequiredMutex;
+	auto& waitCondition = receiver.m_statesProcessingRequiredCondition;
+	auto& requireProcessing = receiver.m_statesProcessingRequired;
 
-		for(AppDataSourceShared appDataSource : m_appDataSources)
+	QThread* thisThread = QThread::currentThread();
+
+	SimpleAppSignalStateArchiveFlag state;
+
+	std::unique_lock ul(waitConditionMutex, std::defer_lock);
+
+	while(receiver.isQuitRequested() == false)
+	{
+		ul.lock();
+
+		waitCondition.wait_for(ul, std::chrono::milliseconds(10));
+
+		while(true)
 		{
-			TEST_PTR_CONTINUE(appDataSource);
-
-			SimpleAppSignalStateArchiveFlag state;
-
-			int processedStatesCount = 0;
-
-			m_queuesMutex.lock();
-
-			do
+			if (requireProcessing.empty() == true ||
+				receiver.isQuitRequested() == true)
 			{
-				bool result = appDataSource->getSignalState(&state, this);
+				ul.unlock();
+				break;
+			}
 
-				if (result == false)
+			AppDataSource* source = requireProcessing.front();
+
+			requireProcessing.pop();
+
+			ul.unlock();
+
+			while(source->getSignalState(&state, thisThread) == true)
+			{
+				m_queuesMutex.lock(thisThread);
+
+				for(const auto& p : m_queues)
 				{
-					break;		    // appDataSource has no states to processing, go to next source
-				}
+					SimpleAppSignalStatesQueueShared queue = p.first;
+					bool isAchiveQueue = p.second.first;
 
-				hasNoStatesToProcessing = false;
-
-				for(const QPair<SimpleAppSignalStatesQueueShared, bool>& queue : m_queues)
-				{
-					if (queue.second == true)
+					if (isAchiveQueue == true)
 					{
 						// is archiving queue
 						//
 						if (state.sendStateToArchive == true)
 						{
-							queue.first->push(state.state, this);
+							queue->push(state.state, thisThread);
 						}
 					}
 					else
 					{
-						queue.first->push(state.state, this);
+						queue->push(state.state, thisThread);
 					}
 				}
 
-				processedStatesCount++;
+				m_queuesMutex.unlock(thisThread);
 			}
-			while(processedStatesCount < 100);
 
-			m_queuesMutex.unlock();
-
-			if (isQuitRequested() == true)
-			{
-				break;
-			}
+			ul.lock();
 		}
+	}
 
-		if (isQuitRequested() == true)
-		{
-			break;
-		}
-
-		if (hasNoStatesToProcessing == true)
-		{
-			usleep(500);
-		}
-    }
-    while(isQuitRequested() == false);
-
-    DEBUG_LOG_MSG(m_log, QString("SignalStatesProcessingThread is finished"));
+	DEBUG_LOG_MSG(m_log, QString("SignalStatesProcessingThread finished"));
 }
-

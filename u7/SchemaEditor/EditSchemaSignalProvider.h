@@ -85,6 +85,9 @@ public:
 	virtual TuningSignalState state(Hash hash, bool* found) const override;
 	virtual TuningSignalState state(const QString& appSignalId, bool* found) const override;
 
+	virtual TuningSignalState state(Hash hash, Hash tuningServiceHash, bool* found) const override;
+	virtual TuningSignalState state(const QString& appSignalId, Hash tuningServiceHash, bool* found) const override;
+
 	virtual QStringList signalIdsByTag(const QString& tag) const override;
 
 private:

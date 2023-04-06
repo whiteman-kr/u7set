@@ -563,7 +563,7 @@ namespace Tcp
 		virtual void onHeaderAndDataReady() override final;
 
 		bool processSecurityLevelReply(const char* dataBuffer, int dataSize);
-		bool processIntroduceMyselfReply(const char* dataBuffer, int dataSize);
+		SetConnectionResult processIntroduceMyselfReply(const char* dataBuffer, int dataSize);
 
 		void sendIntroduceMyselfRequest();
 

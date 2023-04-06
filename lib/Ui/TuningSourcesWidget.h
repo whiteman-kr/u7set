@@ -1,5 +1,4 @@
-#ifndef TUNINGSOURCESWIDGET_H
-#define TUNINGSOURCESWIDGET_H
+#pragma once
 
 #include <QDialog>
 
@@ -111,7 +110,3 @@ private:
 
 	std::map<Hash, DialogTuningSourceInfo*> m_sourceInfoDialogsMap;	// Used for managing details dialogs. Key is LAN controller hash
 };
-
-
-
-#endif // DIALOGTUNINGSOURCES_H

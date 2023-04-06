@@ -342,7 +342,7 @@ bool LogicModulesInfo::load(::LogicModuleInfo* lmi, const QDomNode& lmNode, QStr
 			result &= LanControllerInfoHelper::getInfo(	*lmModule, lc.m_type, lc.m_place,
 														m_context, false, &lci, log());
 
-			if (lci.isProvideAppData() == true && lci.appDataEnable == true)
+			if (lci.isAppDataEnabled() == true)
 			{
 				lmInfo->appDataEnable = true;
 
@@ -361,7 +361,7 @@ bool LogicModulesInfo::load(::LogicModuleInfo* lmi, const QDomNode& lmNode, QStr
 				lmInfo->appDataUID = lci.appDataUID;
 			}
 
-			if (lci.isProvideDiagData() == true && lci.diagDataEnable == true)
+			if (lci.isDiagDataEnabled() == true)
 			{
 				lmInfo->diagDataEnable = true;
 

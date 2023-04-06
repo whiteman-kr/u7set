@@ -26,6 +26,7 @@
 	#pragma warning(disable : 6011)
 	#pragma warning(disable : 4251)
 	#pragma warning(disable : 4127)
+	#pragma warning(disable : 4459)		// qlist.h:450: warning: C4459: declaration of 'detached' hides global declaration
 	#pragma warning(disable : 6326)
 	#pragma warning(disable : 28182)	// qvector.h(761) : warning C28182: Dereferencing NULL pointer. 'd' contains the same NULL value as 'x' did. See line 713 for an earlier location where this can occur: Lines: 702, 703, 705, 709, 710, 713, 715, 716, 718, 719, 720, 722, 724, 729, 746, 748, 749, 758, 760, 761
 	#pragma warning(disable : 6386)		// Static analyzer warning: qvariant.h:444: warning: C6386: Buffer overrun while writing to 'data':  the writable size is 'size' bytes, but '8' bytes might be written.: Lines: 431, 432, 433, 435, 436, 443, 444
@@ -49,6 +50,8 @@
 
 #include <QHash>
 #include <QHostAddress>
+
+#include <QList>
 
 #include <QMap>
 #include <QMetaClassInfo>
@@ -108,6 +111,5 @@
 		#endif
 	#endif
 #endif	// Visual Leak Detector
-
 
 

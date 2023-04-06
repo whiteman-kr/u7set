@@ -84,7 +84,7 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveStart(const char* reques
 
 	if (result == false)
 	{
-		reply.set_error(static_cast<int>(NetworkError::ParseRequestError));
+		reply.set_error(static_cast<int>(E::NetworkError::ParseRequestError));
 		sendReply(reply);
 		return;
 	}
@@ -93,7 +93,7 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveStart(const char* reques
 
 	if (m_archRequest != nullptr)
 	{
-		reply.set_error(static_cast<int>(NetworkError::ArchiveError));
+		reply.set_error(static_cast<int>(E::NetworkError::ArchiveError));
 		reply.set_archerror(static_cast<int>(ArchiveError::PreviousArchRequestIsNotFinished));
 		sendReply(reply);
 		return;
@@ -103,7 +103,7 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveStart(const char* reques
 
 	if (requestSignalsCount > ARCH_REQUEST_MAX_SIGNALS)
 	{
-		reply.set_error(static_cast<int>(NetworkError::ArchiveError));
+		reply.set_error(static_cast<int>(E::NetworkError::ArchiveError));
 		reply.set_archerror(static_cast<int>(ArchiveError::ArchRequestSignalsExceed));
 		sendReply(reply);
 		return;
@@ -112,6 +112,8 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveStart(const char* reques
 	// check signal hashes
 	//
 	QVector<Hash> signalHashes;
+	signalHashes.reserve(requestSignalsCount);
+
 	QHash<Hash, bool> signalHashesMap;
 
 	for(int i = 0; i < requestSignalsCount; i++)
@@ -128,7 +130,7 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveStart(const char* reques
 
 	if (signalHashes.count() == 0)
 	{
-		reply.set_error(static_cast<int>(NetworkError::ArchiveError));
+		reply.set_error(static_cast<int>(E::NetworkError::ArchiveError));
 		reply.set_archerror(static_cast<int>(ArchiveError::NoSignals));
 		sendReply(reply);
 		return;
@@ -143,13 +145,13 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveStart(const char* reques
 											   m_getNextReply);
 	if (m_archRequest == nullptr)
 	{
-		reply.set_error(static_cast<int>(NetworkError::ArchiveError));
+		reply.set_error(static_cast<int>(E::NetworkError::ArchiveError));
 		reply.set_archerror(static_cast<int>(ArchiveError::RequestStartError));
 		sendReply(reply);
 		return;
 	}
 
-	reply.set_error(static_cast<int>(NetworkError::Success));
+	reply.set_error(static_cast<int>(E::NetworkError::Success));
 	reply.set_requestid(m_archRequest->requestID());
 
 	sendReply(reply);
@@ -165,7 +167,7 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveNext(const char* request
 
 	if (result == false)
 	{
-		reply.set_error(static_cast<int>(NetworkError::ParseRequestError));
+		reply.set_error(static_cast<int>(E::NetworkError::ParseRequestError));
 		sendReply(reply);
 		return;
 	}
@@ -174,7 +176,7 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveNext(const char* request
 
 	if (m_archRequest == nullptr || requestID != request.requestid())
 	{
-		reply.set_error(static_cast<int>(NetworkError::ArchiveError));
+		reply.set_error(static_cast<int>(E::NetworkError::ArchiveError));
 		reply.set_archerror(static_cast<int>(ArchiveError::UnknownArchRequestID));
 		reply.set_requestid(requestID);
 		sendReply(reply);
@@ -183,7 +185,7 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveNext(const char* request
 
 	if (m_archRequest->isDataReady() == false)
 	{
-		reply.set_error(static_cast<int>(NetworkError::Success));
+		reply.set_error(static_cast<int>(E::NetworkError::Success));
 		reply.set_archerror(static_cast<int>(ArchiveError::Success));
 		reply.set_requestid(requestID);
 		reply.set_dataready(false);
@@ -216,20 +218,20 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveCancel(const char* reque
 
 	if (result == false)
 	{
-		reply.set_error(static_cast<int>(NetworkError::ParseRequestError));
+		reply.set_error(static_cast<int>(E::NetworkError::ParseRequestError));
 		sendReply(reply);
 		return;
 	}
 
 	if (m_archRequest == nullptr || m_archRequest->requestID() != request.requestid())
 	{
-		reply.set_error(static_cast<int>(NetworkError::ArchiveError));
+		reply.set_error(static_cast<int>(E::NetworkError::ArchiveError));
 		reply.set_archerror(static_cast<int>(ArchiveError::UnknownArchRequestID));
 		sendReply(reply);
 		return;
 	}
 
-	reply.set_error(static_cast<int>(NetworkError::Success));
+	reply.set_error(static_cast<int>(E::NetworkError::Success));
 	sendReply(reply);
 
 	finalizeArchRequest();

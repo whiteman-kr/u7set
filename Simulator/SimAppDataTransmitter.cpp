@@ -16,38 +16,61 @@ namespace Sim
 
 	AppDataTransmitter::~AppDataTransmitter()
 	{
-		shutdownTransmitterThread();
+		stopTransmitterThread();
 	}
 
 	bool AppDataTransmitter::startSimulation(QString profileName)
 	{
 		// m_log.writeText(QString("Sending app data simulation is started for profile %1").arg(profileName));
 
-		TEST_PTR_RETURN_FALSE(m_simulator);
+		Q_ASSERT(m_runSimulation == false);
 
-		m_transmitterThread = new AppDataTransmitterThread(*m_simulator, profileName, m_log);
-		m_transmitterThread->start();
+		TEST_PTR_RETURN_FALSE(m_simulator);
+		m_curProfileName = profileName;
+
+		m_simStartTime = QDateTime::currentMSecsSinceEpoch();
+		m_prevPacketTime = 0;
+
+		initAppDataSources();
+		clearAppDataQueue();
+		m_runSimulation = true;
+		runTransmitterThread();
 
 		return true;
 	}
 
 	bool AppDataTransmitter::stopSimulation()
 	{
-		shutdownTransmitterThread();
+//		Q_ASSERT(m_runSimulation == true);
+
+		m_runSimulation = false;
+		clearAppDataQueue();
+		wakeupTransmitterThread();
+
+		m_prevPacketTime = 0;
 
 		return true;
 	}
 
-	bool AppDataTransmitter::sendData(const QString& lmEquipmentId, const QString& portEquipmentId, const QByteArray& data, TimeStamp timeStamp)
+	bool AppDataTransmitter::sendData(const QString& lmEquipmentId,
+									  const QString& portEquipmentId,
+									  const QByteArray& data,
+									  TimeStamp timeStamp)
 	{
-		if (softwareEnabled() == false)
-		{
-			return true;
-		}
+		trace_dt(portEquipmentId);
 
-		TEST_PTR_RETURN_FALSE(m_transmitterThread);
+		m_appDataQueueMutex.lock();
 
-		return m_transmitterThread->sendAppData(lmEquipmentId, portEquipmentId, data, timeStamp);
+		m_appDataQueue.emplace(lmEquipmentId,
+								portEquipmentId,
+								data,
+								timeStamp);
+
+		m_appDataQueueNotEmpty.notify_one();
+
+		m_appDataQueueMutex.unlock();
+
+		return true;
 	}
 
 	void AppDataTransmitter::projectUpdated()
@@ -62,96 +85,13 @@ namespace Sim
 		return m_simulator->software().enabled();
 	}
 
-	void AppDataTransmitter::shutdownTransmitterThread()
+	void AppDataTransmitter::initAppDataSources()
 	{
-		if (m_transmitterThread != nullptr)
-		{
-			m_transmitterThread->quitAndWait();
-			delete m_transmitterThread;
-			m_transmitterThread = nullptr;
-		}
-	}
+		TEST_PTR_RETURN(m_simulator);
 
-	// --------------------------------------------------------------------------------------------------
-	//
-	// class AppDataTransmitterThread
-	//
-	// --------------------------------------------------------------------------------------------------
+		std::vector<std::shared_ptr<LogicModule>> logicModules = m_simulator->logicModules();
 
-	AppDataTransmitterThread::AppDataTransmitterThread(const Simulator& simulator,
-													   const QString& curProfileName,
-													   ScopedLog& log) :
-		m_simulator(simulator),
-		m_curProfileName(curProfileName),
-		m_log(log)
-	{
-	}
-
-	AppDataTransmitterThread::~AppDataTransmitterThread()
-	{
-	}
-
-	bool AppDataTransmitterThread::sendAppData(const QString& lmEquipmentId, const QString& portEquipmentId, const QByteArray& data, TimeStamp timeStamp)
-	{
-		QThread* curThread = QThread::currentThread();
-
-		m_appDataQueueMutex.lock(curThread);
-
-		ExtAppData& extAppData = m_appDataQueue.emplace();
-
-		extAppData.lmEquipmentID = lmEquipmentId;
-		extAppData.appData = data;
-		extAppData.portEquipmentID = portEquipmentId;
-		extAppData.timeStamp = timeStamp;
-
-		m_appDataQueueMutex.unlock(curThread);
-
-		return true;
-	}
-
-	void AppDataTransmitterThread::run()
-	{
-		initAppDataSources();
-
-		m_socket = new QUdpSocket();
-
-		QThread* curThread = QThread::currentThread();
-
-		ExtAppData extAppData;
-
-		while(isQuitRequested() == false)
-		{
-			m_appDataQueueMutex.lock(curThread);
-
-			if (m_appDataQueue.empty() == false)
-			{
-				ExtAppData& queueAppData = m_appDataQueue.front();
-
-				extAppData.lmEquipmentID = queueAppData.lmEquipmentID;
-				extAppData.portEquipmentID = queueAppData.portEquipmentID;
-				extAppData.timeStamp = queueAppData.timeStamp;
-				extAppData.appData.swap(queueAppData.appData);
-
-				m_appDataQueue.pop();
-
-				m_appDataQueueMutex.unlock(curThread);
-
-				privateSendAppData(extAppData);
-			}
-			else
-			{
-				m_appDataQueueMutex.unlock(curThread);
-				msleep(1);
-			}
-		}
-
-		delete m_socket;
-		m_socket = nullptr;
-	}
-
-	void AppDataTransmitterThread::initAppDataSources()
-	{
-		std::vector<std::shared_ptr<LogicModule>> logicModules = m_simulator.logicModules();
+		m_appDataSourcePorts.clear();
 
 		for(std::shared_ptr<LogicModule> logicModule : logicModules)
 		{
@@ -166,7 +106,7 @@ namespace Sim
 
 			for(const LanControllerInfo& lci : lmi.lanControllers())
 			{
-				if (lci.isProvideAppData() == true && lci.appDataEnable == true)
+				if (lci.isAppDataEnabled() == true)
 				{
 					AppDataSourcePortInfo adspi;
 
@@ -184,7 +124,7 @@ namespace Sim
 					adspi.lanSourcePort = lci.appDataPort;
 
 					std::shared_ptr<const AppDataServiceSettings> settings =
-							m_simulator.software().getSettingsProfile<AppDataServiceSettings>(lci.appDataServiceID, m_curProfileName);
+							m_simulator->software().getSettingsProfile<AppDataServiceSettings>(lci.appDataServiceID, m_curProfileName);
 
 					if (settings == nullptr)
 					{
@@ -202,7 +142,95 @@ namespace Sim
 		}
 	}
 
-	void AppDataTransmitterThread::privateSendAppData(const ExtAppData& extAppData)
+	void AppDataTransmitter::runTransmitterThread()
+	{
+		m_exitTransmitterThread = false;
+
+		if (m_transmitterThread == nullptr)
+		{
+			m_transmitterThread = new std::thread(&AppDataTransmitter::processAppDataQueue, this);
+		}
+		else
+		{
+			wakeupTransmitterThread();
+		}
+	}
+
+	void AppDataTransmitter::stopTransmitterThread()
+	{
+		if (m_transmitterThread != nullptr)
+		{
+			m_exitTransmitterThread = true;
+
+			wakeupTransmitterThread();
+
+			m_transmitterThread->join();
+
+			delete m_transmitterThread;
+			m_transmitterThread = nullptr;
+		}
+	}
+
+	void AppDataTransmitter::wakeupTransmitterThread()
+	{
+		std::lock_guard lg(m_appDataQueueMutex);
+		m_appDataQueueNotEmpty.notify_one();
+	}
+
+	void AppDataTransmitter::processAppDataQueue()
+	{
+		qDebug() << "processAppDataQueue started";
+
+		QUdpSocket socket;
+		ExtAppData extAppData;
+
+		std::unique_lock ul(m_appDataQueueMutex, std::defer_lock);
+
+		int maxQueueSize = 0;
+
+		while(m_exitTransmitterThread == false)
+		{
+			ul.lock();
+
+			m_appDataQueueNotEmpty.wait_for(ul, std::chrono::milliseconds(m_runSimulation ? 10 : 500));
+
+			// ul locked here
+
+			while(true)
+			{
+				if (m_appDataQueue.empty() == true ||
+					m_runSimulation == false ||
+					m_exitTransmitterThread == true)
+				{
+					ul.unlock();
+					break;
+				}
+
+				maxQueueSize = std::max(static_cast<int>(m_appDataQueue.size()), maxQueueSize);
+
+				ExtAppData& queueAppData = m_appDataQueue.front();
+
+				extAppData.lmEquipmentID = queueAppData.lmEquipmentID;
+				extAppData.portEquipmentID = queueAppData.portEquipmentID;
+				extAppData.timeStamp = queueAppData.timeStamp;
+				extAppData.appData.swap(queueAppData.appData);
+
+				m_appDataQueue.pop();
+
+				ul.unlock();
+
+				//trace_dt(extAppData.portEquipmentID);
+
+				sendAppDataPackets(socket, extAppData);
+
+				ul.lock();
+			}
+		}
+
+		qDebug() << "processAppDataQueue finished maxSize =" << maxQueueSize;
+	}
+
+	void AppDataTransmitter::sendAppDataPackets(QUdpSocket& socket, const ExtAppData& extAppData)
 	{
 		auto item = m_appDataSourcePorts.find(extAppData.portEquipmentID);
 
@@ -262,12 +290,43 @@ namespace Sim
 
 			simFrame.sourceIP = reverseUint32(adspi.lanSourceIP.toIPv4Address());
 
-			m_socket->writeDatagram(reinterpret_cast<const char*>(&simFrame),
+			socket.writeDatagram(reinterpret_cast<const char*>(&simFrame),
 									sizeof(simFrame),
 									adspi.lanDestinationIP,
 									static_cast<quint16>(adspi.lanDestinationPort));
 		}
 
 		adspi.rupFramesNumerator++;
+	}
+
+	void AppDataTransmitter::clearAppDataQueue()
+	{
+		std::lock_guard lg(m_appDataQueueMutex);
+		std::queue<ExtAppData>().swap(m_appDataQueue);
+	}
+
+	void AppDataTransmitter::logTime(const QString& msg)
+	{
+		qDebug() << C_STR(QString("%1 +%2").arg(msg).arg(QDateTime::currentMSecsSinceEpoch() - m_simStartTime));
+	}
+
+	void AppDataTransmitter::trace_dt(const QString& portID)
+	{
+		if (portID == "SYSTEMID_RACK01_FSCC01_MD00_ETHERNET02")
+		{
+			qint64 curTime = QDateTime::currentMSecsSinceEpoch();
+
+			if (m_prevPacketTime != 0 )
+			{
+				qint64 dt = curTime - m_prevPacketTime;
+
+				if (dt < 4 || dt > 6)
+				{
+					qDebug() << "dt =" << dt;
+				}
+			}
+
+			m_prevPacketTime = curTime;
+		}
 	}
 }

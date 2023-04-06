@@ -128,7 +128,6 @@ public:
 	AppSignalState(Hash hash, Times times, double value, AppSignalStateFlags flags);
 
 	AppSignalState& operator= (const AppSignalState& state) = default;
-//	AppSignalState& operator= (const SimpleAppSignalState& smState);
 
 	[[nodiscard]] Hash hash() const;
 	[[nodiscard]] const Times& time() const;
