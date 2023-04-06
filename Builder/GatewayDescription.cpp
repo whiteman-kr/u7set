@@ -1,6 +1,10 @@
 #include "GatewayDescription.h"
 
-GatewayDescription::GatewayDescription()
+GatewayDescriptionParser::GatewayDescriptionParser()
 {
+}
 
+void GatewayDescriptionParser::setDescription(const QString& desc)
+{
+	m_desc = desc;
 }

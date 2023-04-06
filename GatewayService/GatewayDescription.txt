@@ -1,19 +1,63 @@
+// This is a Comment
+// 
+// [Gateway], [SignalList], etc - sections
+//
+// Type = V, ID = N, etc - settings
+//
+// Sections names, settings names are case insensitive
+//
+// Settings values are case sensetive
+//
+// * - required settings
+
 [Gateway]
 
-Type = IVS_KompleksAES
-SystemID = 2
 
-GatewayIP1 = 192.168.23.23:Port
-GatewayIP2 = 192.168.33.23:Port
+Type = IVS_Impulse                      // * gateway type
+ID = HAES_1B_AZ1			// * gateway identifier
+Description = description		//   free style gateway description	
+
+[Settings]
+
+// IVS Impulse specifis settings
+
+SystemID = 2				// * global system identifier
+
+GatewayIP1 = 224.0.0.221:9090		// * IP and port of IVS gateway channel 1
+GatewayIP2 = 224.0.1.222:9090	        //   IP and port of IVS gateway channel 2
+
+ListsVersion = 1			// * version of exchange lists
+
+Period = 1000				// * periodic send state period, milliseconds
 
 [SignalList]
 
-ID = 1
-Events = On/Off
-IncludeInternalID = On/Off (Yes/No) default Off
-DataType = A | D | B
+ID = 1					// * signal list identifier
 
-#SIGNAL1  AppSignalID or CustomAppSignalID
-#SIGNAL2
+Events = On/Off                         // * send events for signals from list
+IncludeAppSignalID = On/Off (Yes/No) 	//   write AppSignalID in exchange list, default Off (HAES requirements)
+DataType = A | B			// * data type
+
+#SIGNAL1  				//   AppSignalID 
+SIGNAL2					//   or CustomAppSignalID
 ....
 #SIGNALN
+
+[SignalList]
+
+ID = 2
+
+...
+
+[SignalList]
+
+ID = N
+
+...
+
+
+[Gateway]
+
+ID = N
+
+...

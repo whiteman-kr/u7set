@@ -1,11 +1,32 @@
-#ifndef GATEWAYDESCRIPTION_H
-#define GATEWAYDESCRIPTION_H
+#pragma once
 
+#include "IssueLogger.h"
 
-class GatewayDescription
+namespace Gateway
 {
-public:
-	GatewayDescription();
-};
+	enum class GatewayType
+	{
+		IVS_Impulse,
+	};
 
-#endif // GATEWAYDESCRIPTION_H
+	struct Gateway
+	{
+		GatewayType type;
+		QString gatewayID;
+		QString description;
+	};
+
+	class GatewayDescriptionParser
+	{
+	public:
+		GatewayDescription();
+
+		void setDescription(const QString& desc);
+		bool parse(Builder::IssueLogger* log);
+
+	private:
+		QString m_description;
+		Builder::IssueLogger* m_log = nullptr;
+	};
+}
+
