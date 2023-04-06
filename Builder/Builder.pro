@@ -63,6 +63,7 @@ SOURCES += \
 	../Metrology/MetrologyConnection.cpp \
 	../Metrology/UnitsConvertor.cpp \
 	../Metrology/UnitsConvertorTable.cpp \
+	GatewayDescription.cpp \
 	GatewayServiceCfgGenerator.cpp \
 	SoftwareSettingsGetter.cpp \
     Builder.cpp \
@@ -131,6 +132,7 @@ HEADERS += \
 	../Metrology/MetrologyConnection.h \
 	../Metrology/UnitsConvertor.h \
 	../Metrology/UnitsConvertorTable.h \
+	GatewayDescription.h \
 	GatewayServiceCfgGenerator.h \
 	SoftwareSettingsGetter.h \
 	Builder.h \

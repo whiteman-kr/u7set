@@ -349,6 +349,8 @@ namespace SoftwareSetting
 
 	inline const QString PROCESSING_THREADS_COUNT("ProcessingThreadsCount");
 	inline const QString OVERRIDE_APP_DATA_RECEIVING_IP("OverrideAppDataReceivingIP");
+
+	inline const QString GATEWAY_DESCRIPTION_FILE("GatewayDescriptionFile");
 }
 
 namespace CmdLineOption
@@ -356,6 +358,8 @@ namespace CmdLineOption
 	inline const QString ID("id");
 	inline const QString CFG_IP1("cfgip1");
 	inline const QString CFG_IP2("cfgip2");
+	inline const QString CFG_FILE("f");
+	inline const QString CFG_PARSE("parse");
 	inline const QString LOG_RUP_TIME_ERR("logRupTimeErr");
 }
 

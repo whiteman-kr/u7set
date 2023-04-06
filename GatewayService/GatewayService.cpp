@@ -72,9 +72,11 @@ void GatewayServiceWorker::initCmdLineParser()
 	cp.addSingleValueOption(CmdLineOption::ID, SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
 	cp.addSingleValueOption(CmdLineOption::CFG_IP1, SoftwareSetting::CFG_SERVICE_IP1, "IP address of first Configuration Service.", "IPv4:Port");
 	cp.addSingleValueOption(CmdLineOption::CFG_IP2, SoftwareSetting::CFG_SERVICE_IP2, "IP address of second Configuration Service.", "IPv4:Port");
-	cp.addSingleValueOption("ptc", SoftwareSetting::PROCESSING_THREADS_COUNT, "App data processing threads count", "N");
-	cp.addSingleValueOption("recvip", SoftwareSetting::OVERRIDE_APP_DATA_RECEIVING_IP, "Override AppDataReceivingIP", "IPv4:Port");
-	cp.addSimpleOption(CmdLineOption::LOG_RUP_TIME_ERR, "Log RUP frames time errors");
+
+	cp.addSimpleOption(CmdLineOption::CFG_PARSE, "Parse gateway description file.");
+
+	cp.addSingleValueOption(CmdLineOption::CFG_FILE,
+							SoftwareSetting::GATEWAY_DESCRIPTION_FILE, "Gateway description file name.", "file");
 }
 
 void GatewayServiceWorker::loadSettings()
