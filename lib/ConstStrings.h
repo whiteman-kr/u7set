@@ -420,6 +420,7 @@ namespace Separator
 	inline const QString DIR("/");
 	inline const QString BACK_DIR("\\");
 	inline const QString EMPTY_STR("");
+	inline const QString NEW_LINE("\n");
 }
 
 namespace FormatStr

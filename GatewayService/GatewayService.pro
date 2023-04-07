@@ -31,6 +31,7 @@ unix {
 
 SOURCES += \
 	../lib/BuildInfo.cpp \
+	../lib/GatewayDescription.cpp \
 	AppSignalStates.cpp \
 	GatewayService.cpp \
 	GatewayServiceMain.cpp \
@@ -38,6 +39,7 @@ SOURCES += \
 HEADERS += \
 	../lib/BuildInfo.h \
 	../lib/ConstStrings.h \
+	../lib/GatewayDescription.h \
 	AppSignalStates.h \
 	GatewayService.h \
 

@@ -41,6 +41,8 @@ private:
 	virtual void initCmdLineParser() override;
 	virtual void loadSettings() override;
 
+	bool processCustomCmdLineSettings() override;
+
 	virtual void initialize() override;
 	virtual void shutdown() override;
 
@@ -65,11 +67,9 @@ private:
 	void runTimer();
 	void stopTimer();
 
-	void onGetDataSourcesIDs(UdpRequest& request);
-	void onGetDataSourcesInfo(UdpRequest& request);
-	void onGetDataSourcesState(UdpRequest& request);
-
 	void onTimer();
+
+	void parseGatewayDescription(const QString& filePathName, const QString& gwDesc);
 
 private:
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;

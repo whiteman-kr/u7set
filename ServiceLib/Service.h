@@ -82,7 +82,7 @@ public:
 	const SoftwareInfo& softwareInfo() const;
 	E::SoftwareType softwareType() const;
 
-	void initAndProcessCmdLineSettings();
+	bool initAndProcessCmdLineSettings();
 
 	void setService(Service* service);
 	Service* service();
@@ -131,7 +131,9 @@ signals:
 protected:
 	void init();
 
-	void processCmdLineSettings();					// override to process service-specific cmd line settings
+	virtual bool processCustomCmdLineSettings();			// override to process service-specific cmd line settings
+													// return true - to continue service running
+													// return false - to exit service
 
 	virtual void initCmdLineParser() = 0;			// override to add service-specific options to m_cmdLineParser
 	virtual void loadSettings() = 0;				// override to load service-specific settings

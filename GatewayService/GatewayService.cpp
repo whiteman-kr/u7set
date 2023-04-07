@@ -2,6 +2,7 @@
 #include <QMetaProperty>
 
 #include "../OnlineLib/CfgServerLoader.h"
+#include "../lib/GatewayDescription.h"
 
 #include "GatewayService.h"
 
@@ -94,17 +95,34 @@ void GatewayServiceWorker::loadSettings()
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStrIfSet()));
 }
 
-void GatewayServiceWorker::runTimer()
+bool GatewayServiceWorker::processCustomCmdLineSettings()
 {
-	connect(&m_timer, &QTimer::timeout, this, &GatewayServiceWorker::onTimer);
+	const CommandLineParser& clp = cmdLineParser();
 
-	m_timer.setInterval(1000);
-	m_timer.start();
-}
+	if (clp.optionIsSet(CmdLineOption::CFG_PARSE) == false)
+	{
+		return true;
+	}
 
-void GatewayServiceWorker::stopTimer()
-{
-	m_timer.stop();
+	if (clp.optionIsSet(CmdLineOption::CFG_FILE) == false)
+	{
+		DEBUG_LOG_ERR(logger(), "To parse gateway description file cmd line option -f=fileName should be set!");
+		return false;
+	}
+
+	QString fileName = clp.optionValue(CmdLineOption::CFG_FILE);
+
+	QFile file(fileName);
+
+	if (file.open(QIODeviceBase::ReadOnly | QIODeviceBase::Text) == false)
+	{
+		DEBUG_LOG_ERR(logger(), QString("Can't open file %1!").arg(fileName));
+		return false;
+	}
+
+	parseGatewayDescription(fileName, file.readAll());
+
+	return false;
 }
 
 void GatewayServiceWorker::initialize()
@@ -224,10 +242,6 @@ void GatewayServiceWorker::onConfigurationReady(const QByteArray configurationXm
 	}
 }
 
-void GatewayServiceWorker::onTimer()
-{
-}
-
 bool GatewayServiceWorker::readAppSignals(const QByteArray& fileData)
 {
 	::Proto::AppSignalSet signalSet;
@@ -331,4 +345,70 @@ void GatewayServiceWorker::clearConfiguration()
 //	m_appSignalStates.clear();
 	m_acquiredAppSignalIDs.clear();
 }
+
+void GatewayServiceWorker::runTimer()
+{
+	connect(&m_timer, &QTimer::timeout, this, &GatewayServiceWorker::onTimer);
+
+	m_timer.setInterval(1000);
+	m_timer.start();
+}
+
+void GatewayServiceWorker::stopTimer()
+{
+	m_timer.stop();
+}
+
+void GatewayServiceWorker::onTimer()
+{
+}
+
+void GatewayServiceWorker::parseGatewayDescription(const QString& filePathName, const QString& gwDesc)
+{
+	DEBUG_LOG_MSG(logger(), "");
+	DEBUG_LOG_MSG(logger(), QString("Parsing gateway description file: %1").arg(filePathName));
+	DEBUG_LOG_MSG(logger(), "");
+
+	GatewayDescriptionParser gdp;
+
+	std::vector<std::tuple<int, GatewayDescriptionParser::MsgType, QString>> parserLog;
+
+	bool result = gdp.parse(gwDesc, &parserLog);
+
+	int errCount = 0;
+	int wrnCount = 0;
+
+	for(const auto& t : parserLog)
+	{
+		auto [ lineNo, msgType, msg ] = t;
+
+		switch(msgType)
+		{
+		case GatewayDescriptionParser::MsgType::Message:
+			msg = msg.mid(0, 1).toUpper() + msg.mid(1);
+			DEBUG_LOG_MSG(logger(), msg);
+			break;
+
+		case GatewayDescriptionParser::MsgType::Warning:
+			DEBUG_LOG_WRN(logger(), QString("Warning (%1): %2").arg(lineNo).arg(msg));
+			wrnCount++;
+			break;
+
+		case GatewayDescriptionParser::MsgType::Error:
+			DEBUG_LOG_ERR(logger(), QString("Error (%1): %2").arg(lineNo).arg(msg));
+			errCount++;
+			break;
+
+		default:
+			Q_ASSERT(false);
+		}
+	}
+
+	DEBUG_LOG_MSG(logger(), "");
+	DEBUG_LOG_MSG(logger(), QString("Parsing finished with %1 errors, %2 warnings")
+										.arg(errCount).arg(wrnCount));
+	DEBUG_LOG_MSG(logger(), "");
+}
+
+
 

@@ -13,11 +13,9 @@
 [Gateway]
 
 
-Type = IVS_Impulse                      // * gateway type
-ID = HAES_1B_AZ1			// * gateway identifier
+GatewayType = IVS_Impulse               // * gateway type
+GatewayID = HAES_1B_AZ1			// * gateway identifier
 Description = description		//   free style gateway description	
-
-[Settings]
 
 // IVS Impulse specifis settings
 
@@ -32,9 +30,9 @@ Period = 1000				// * periodic send state period, milliseconds
 
 [SignalList]
 
-ID = 1					// * signal list identifier
+ListNo = 1				// * signal list identifier
 
-Events = On/Off                         // * send events for signals from list
+SendEvents = On/Off                      // * send events for signals from list
 IncludeAppSignalID = On/Off (Yes/No) 	//   write AppSignalID in exchange list, default Off (HAES requirements)
 DataType = A | B			// * data type
 

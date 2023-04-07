@@ -1,5 +1,6 @@
 #include "GatewayServiceCfgGenerator.h"
 #include "SoftwareSettingsGetter.h"
+#include "../lib/GatewayDescription.h"
 #include "../OnlineLib/SoftwareSettings.h"
 
 namespace Builder
@@ -38,7 +39,7 @@ namespace Builder
 			m_buildResultWriter == nullptr)
 		{
 			assert(m_software);
-			assert(m_software->softwareType() == E::SoftwareType::Monitor);
+			assert(m_software->softwareType() == E::SoftwareType::GatewayService);
 			assert(m_equipment);
 			assert(m_cfgXml);
 			assert(m_buildResultWriter);
@@ -53,9 +54,15 @@ namespace Builder
 			return false;
 		}
 
+		bool result = true;
+
 		std::shared_ptr<const GatewayServiceSettings> settings = m_settingsSet.getSettingsDefaultProfile<GatewayServiceSettings>();
 
-		bool result = true;
+		GatewayDescriptionParser gdp;
+
+		std::vector<std::tuple<int, GatewayDescriptionParser::MsgType, QString>> parserLog;
+
+		result = gdp.parse(settings->gatewayDescription, &parserLog);
 
 		return result;
 	}

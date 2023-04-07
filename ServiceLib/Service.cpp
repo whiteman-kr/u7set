@@ -101,17 +101,19 @@ E::SoftwareType ServiceWorker::softwareType() const
 	return m_softwareInfo.softwareType();
 }
 
-void ServiceWorker::initAndProcessCmdLineSettings()
+bool ServiceWorker::initAndProcessCmdLineSettings()
 {
 	if (m_instanceNo > 1)
 	{
 		assert(false);			// call initAndProcessCmdLineSettings() for first ServiceWorker instance only!
-		return;
+		return true;
 	}
 
 	init();
 
-	processCmdLineSettings();
+	m_cmdLineParser.processSettings(m_settings, m_logger);
+
+	return processCustomCmdLineSettings();
 }
 
 void ServiceWorker::setService(Service* service)
@@ -231,9 +233,10 @@ void ServiceWorker::init()
 	m_cmdLineParser.parse();
 }
 
-void ServiceWorker::processCmdLineSettings()
+bool ServiceWorker::processCustomCmdLineSettings()
 {
-	m_cmdLineParser.processSettings(m_settings, m_logger);
+	return true;		// continue service running
+						// return false to exit service
 }
 
 void ServiceWorker::onThreadStarted()
@@ -424,11 +427,18 @@ void Service::stopServiceWorkerThread()
 
 void Service::startBaseRequestSocketThread()
 {
-	auto it = servicesInfo.find(m_serviceWorkerFactory.softwareType());
+	E::SoftwareType swType = m_serviceWorkerFactory.softwareType();
+
+	auto it = std::find_if(	servicesInfo.begin(),
+							servicesInfo.end(),
+							[swType](const ServiceInfo& si)
+							{
+								return si.softwareType == swType;
+							});
 
 	Q_ASSERT(it != servicesInfo.end());
 
-	const ServiceInfo& sInfo = it->second;
+	const ServiceInfo& sInfo = *it;
 
 	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::AnyIPv4, sInfo.port, m_logger);
 
@@ -585,10 +595,19 @@ int ServiceStarter::privateRun()
 	DEBUG_LOG_MSG(m_logger, Separator::LINE);
 	DEBUG_LOG_MSG(m_logger, QString());
 
-	m_serviceWorker.initAndProcessCmdLineSettings();			// 1. init CommanLineParser
-																// 2. process cmd line args
-																// 3. update and store service settings
+	// 1. init CommanLineParser
+	// 2. process cmd line args
+	// 3. update and store service settings
+	//
+	bool continueRun = m_serviceWorker.initAndProcessCmdLineSettings();
+
+	if (continueRun == false)
+	{
+		return 0;
+	}
+
 	bool pauseAndExit = false;
+
 	bool startAsRegularApp = false;
 
 	processCmdLineArguments(pauseAndExit, startAsRegularApp);
