@@ -60,7 +60,7 @@ namespace Builder
 
 		GatewayDescriptionParser gdp;
 
-		std::vector<std::tuple<int, GatewayDescriptionParser::MsgType, QString>> parserLog;
+		GwParserLog parserLog;
 
 		result = gdp.parse(settings->gatewayDescription, &parserLog);
 

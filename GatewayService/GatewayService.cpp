@@ -371,7 +371,7 @@ void GatewayServiceWorker::parseGatewayDescription(const QString& filePathName, 
 
 	GatewayDescriptionParser gdp;
 
-	std::vector<std::tuple<int, GatewayDescriptionParser::MsgType, QString>> parserLog;
+	GwParserLog parserLog;
 
 	bool result = gdp.parse(gwDesc, &parserLog);
 
