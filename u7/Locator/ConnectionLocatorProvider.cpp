@@ -86,16 +86,43 @@ namespace Locator
 			return;
 		}
 
-		QStringList connectionIds = connections.connectionIds();
-
 		std::vector<LocatedItem> result;
 		result.reserve(8);
-
-		for (const QString& connectionId : connectionIds)
+		for (const std::shared_ptr<Hardware::Connection>& c : connections)
 		{
-			if (connectionId.contains(text, Qt::CaseInsensitive) == true)
+			if (c->connectionID().contains(text, Qt::CaseInsensitive) == true)
 			{
-				result.emplace_back(connectionId, "Connection");
+				result.emplace_back(c->connectionID(),
+									QString{"%1 connection"}.arg(c->typeStr()),
+									QVariant{c->connectionID()});
+
+				if (c->port1EquipmentID().isEmpty() == false)
+				{
+					result.emplace_back(c->port1EquipmentID(),
+										QString{"Port1 in connection %1"}.arg(c->connectionID()),
+										QVariant{c->connectionID()});
+				}
+
+				if (c->port2EquipmentID().isEmpty() == false)
+				{
+					result.emplace_back(c->port2EquipmentID(),
+										QString{"Port2 in connection %1"}.arg(c->connectionID()),
+										QVariant{c->connectionID()});
+				}
+			}
+
+			if (c->port1EquipmentID().compare(text, Qt::CaseInsensitive) == 0)
+			{
+				result.emplace_back(c->port1EquipmentID(),
+									QString{"Port1 in connection %1"}.arg(c->connectionID()),
+									QVariant{c->connectionID()});
+			}
+
+			if (c->port2EquipmentID().compare(text, Qt::CaseInsensitive) == 0)
+			{
+				result.emplace_back(c->port2EquipmentID(),
+									QString{"Port2 in connection %1"}.arg(c->connectionID()),
+									QVariant{c->connectionID()});
 			}
 		}
 
