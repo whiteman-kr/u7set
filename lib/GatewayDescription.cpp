@@ -50,6 +50,18 @@ namespace Gateway
 		return m_settingsValues.end();
 	}
 
+	SettingValue SettingsValues::getSettingVaue(E::Setting st) const
+	{
+		auto it = m_settingsValues.find(st);
+
+		if (it == m_settingsValues.end())
+		{
+			return SettingValue();
+		}
+
+		return it->second;
+	}
+
 	// ---------------------------------------------------------------------------------
 	//
 	// Struct Gateway::Parser::ParseLineResult implementation
@@ -87,13 +99,13 @@ namespace Gateway
 
 	void Parser::Log::logResult(const Parser::ParseLineResult& plr)
 	{
-		log(plr.lineNo, plr.msgType, plr.msg);
+		log(plr.lineNo, plr.msgType, message(plr.lineNo, plr.msg));
 	}
 
 	void Parser::Log::logError(int lineNo,
 								const QString& errMsg)
 	{
-		log(lineNo, Parser::MsgType::Error, errMsg);
+		log(lineNo, Parser::MsgType::Error, message(lineNo, errMsg));
 	}
 
 	void Parser::Log::logError(const QString& errMsg)
@@ -104,7 +116,7 @@ namespace Gateway
 	void Parser::Log::logWarning(int lineNo,
 								  const QString& wrnMsg)
 	{
-		log(lineNo, Parser::MsgType::Warning, wrnMsg);
+		log(lineNo, Parser::MsgType::Warning, message(lineNo, wrnMsg));
 	}
 
 	void Parser::Log::logWarning(const QString& wrnMsg)
@@ -116,6 +128,16 @@ namespace Gateway
 	{
 		logError(lineNo, QString("required setting '%1' is not set").
 						arg(::E::valueToString<E::Setting>(st)));
+	}
+
+	QString Parser::Log::message(int lineNo, const QString& msg)
+	{
+		if (lineNo == 0)
+		{
+			return msg;
+		}
+
+		return QString("line %1, %2").arg(lineNo).arg(msg);
 	}
 
 	void Parser::Log::log(int lineNo, Parser::MsgType msgType, const QString& msg)
@@ -149,8 +171,8 @@ namespace Gateway
 
 		// Common gateways settings
 		//
-		{ E::Setting::GatewayType,			E::SettingType::String	},
-		{ E::Setting::GatewayID,			E::SettingType::String	},
+		{ E::Setting::GatewayType,			E::SettingType::AlphaNumericUnderlineString	},
+		{ E::Setting::GatewayID,			E::SettingType::AlphaNumericUnderlineString	},
 		{ E::Setting::GatewayDescription,	E::SettingType::String	},
 
 		// IVS Impulse gateway specific settings
@@ -169,8 +191,8 @@ namespace Gateway
 		{ E::Setting::IncludeAppSignalID,	E::SettingType::Bool	},
 	};
 
-	const QRegularExpression Parser::m_appSignalIdTemplate("^#[a-zA-Z0-9_]");
-	const QRegularExpression Parser::m_anyWhitespaceTemplate("\\s");
+	const QRegularExpression Parser::m_anyWhitespaceSymbol("\\s");
+	const QRegularExpression Parser::m_notAlphaNumericUnderlineSymbols("[^a-zA-Z0-9_]");
 
 	Parser::Parser()
 	{
@@ -191,6 +213,7 @@ namespace Gateway
 
 		QStringList strs = desc.split(Separator::NEW_LINE, Qt::KeepEmptyParts, Qt::CaseInsensitive);
 
+		int errCount = 0;
 		int lineNo = 0;
 
 		// parsing states
@@ -214,9 +237,14 @@ namespace Gateway
 				m_log.logResult(plr);
 			}
 
-			if (plr.msgType == MsgType::Error ||
-				plr.lineType == LineType::Comment)
+			if (plr.lineType == LineType::Comment)
 			{
+				continue;
+			}
+
+			if (plr.msgType == MsgType::Error)
+			{
+				errCount++;
 				continue;
 			}
 
@@ -244,15 +272,40 @@ namespace Gateway
 
 			if (pr == ParseResult::Error)
 			{
+				errCount++;
 				result = false;
 				continue;
 			}
 
 			if (pr == ParseResult::CriticalError)
 			{
+				errCount++;
 				result = false;
 				break;
 			}
+		}
+
+		// finalize parsing
+		switch(parsingSection)
+		{
+		case E::Section::Unknown:
+			break;
+
+		case E::Section::Gateway:
+			m_gateways.back()->checkAndApplySettings(0, m_log);
+			break;
+
+		case E::Section::SignalList:
+			m_gateways.back()->m_signalLists.back()->checkAndApplySettings(0, m_log);
+			break;
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		if (errCount == 0)
+		{
+			result &= generateGatewaysRequiredFiles();
 		}
 
 		return result;
@@ -261,6 +314,20 @@ namespace Gateway
 	const Parser::Log& Parser::log() const
 	{
 		return m_log;
+	}
+
+	bool Parser::generateGatewaysRequiredFiles()
+	{
+		m_log.clear();
+
+		bool result = true;
+
+		for(Gateway* gw : m_gateways)
+		{
+			result &= gw->generateRequiredFiles(m_log);
+		}
+
+		return result;
 	}
 
 	Parser::ParseResult Parser::parseUnknownSection(E::Section& parsingSection,
@@ -398,8 +465,7 @@ namespace Gateway
 
 			return ParseResult::Ok;
 
-		case LineType::AppSignalID:
-		case LineType::CustomAppSignalID:
+		case LineType::SignalID:
 			sl->m_signalIDs.push_back(plr.value.toString());
 			return ParseResult::Ok;
 
@@ -504,6 +570,8 @@ namespace Gateway
 				return false;
 			}
 
+			plr->lineType = LineType::Section;
+
 			QString sectionID = toParse.replace(START_SECTION, "").
 										replace(END_SECTION, "").
 										trimmed().toLower();
@@ -512,8 +580,6 @@ namespace Gateway
 			{
 				if (sectionID == knownSection.toLower())
 				{
-					plr->lineType = LineType::Section;
-
 					bool ok = true;
 					plr->section = ::E::stringToValue<E::Section>(knownSection, &ok);
 					Q_ASSERT(ok == true);
@@ -523,7 +589,7 @@ namespace Gateway
 			}
 
 			plr->msgType = MsgType::Error;
-			plr->msg = QString("unknown section %1").arg(toParse.trimmed());
+			plr->msg = QString("unknown section - %1").arg(toParse.trimmed());
 			return false;
 		}
 
@@ -533,6 +599,8 @@ namespace Gateway
 
 		if (equalSignIndex != -1)
 		{
+			plr->lineType = LineType::Setting;
+
 			QString settingID = toParse.mid(0, equalSignIndex).trimmed();
 			QString settingValueStr = toParse.mid(equalSignIndex + 1).trimmed();
 
@@ -564,7 +632,6 @@ namespace Gateway
 				return false;
 			}
 
-			plr->lineType = LineType::Setting;
 			plr->setting = st;
 
 			return parseSettingValue(st, settingValueStr, plr);;
@@ -572,23 +639,16 @@ namespace Gateway
 
 		// check signalID token
 
-		if (toParse.contains(m_appSignalIdTemplate) == true)
+		if (toParse.contains(m_anyWhitespaceSymbol) == true)
 		{
-			plr->lineType = LineType::AppSignalID;
-			plr->value = QVariant(toParse);
-			return true;
+			plr->setError("signal identifier should not contain any whitespace symbols");
+			return false;
 		}
 
-		if (toParse.contains(m_anyWhitespaceTemplate) != true)
-		{
-			plr->lineType = LineType::CustomAppSignalID;
-			plr->value = QVariant(toParse);
-			return true;
-		}
+		plr->lineType = LineType::SignalID;
+		plr->value = QVariant(toParse);
 
-		plr->setError(ERR_SYNTAX);
-
-		return false;
+		return true;
 	}
 
 	bool Parser::parseSettingValue(E::Setting setting,
@@ -620,6 +680,10 @@ namespace Gateway
 			plr->value = QVariant(valueStr.trimmed());
 			break;
 
+		case E::SettingType::AlphaNumericUnderlineString:
+			result &= parseAlphsNumericUnderlineStr(valueStr, plr);
+			break;
+
 		case E::SettingType::Bool:
 			result &= parseBoolValueStr(valueStr, plr);
 			break;
@@ -639,7 +703,7 @@ namespace Gateway
 	}
 
 	bool Parser::parseIntValueStr(const QString& valueStr,
-													ParseLineResult* plr)
+									ParseLineResult* plr)
 	{
 		TEST_PTR_RETURN_FALSE(plr);
 
@@ -661,8 +725,21 @@ namespace Gateway
 		return result;
 	}
 
+	bool Parser::parseAlphsNumericUnderlineStr(const QString& valueStr, ParseLineResult* plr)
+	{
+		if (valueStr.contains(m_notAlphaNumericUnderlineSymbols) == true)
+		{
+			plr->setError("setting value should contains only english letters, numbers and underline sign");
+			return false;
+		}
+
+		plr->value = QVariant(valueStr);
+
+		return true;
+	}
+
 	bool Parser::parseBoolValueStr(const QString& valueStr,
-													 ParseLineResult* plr)
+									ParseLineResult* plr)
 	{
 		TEST_PTR_RETURN_FALSE(plr);
 
@@ -698,7 +775,7 @@ namespace Gateway
 			}
 			else
 			{
-				plr->setError("setting value is not boolean (1/0, on/off, yes/no, true/false)");
+				plr->setError("setting value is not boolean (use 1/0, on/off, yes/no, true/false)");
 				result = false;
 			}
 		}
@@ -792,6 +869,11 @@ namespace Gateway
 		Q_UNUSED(lineNo);
 		Q_UNUSED(log);
 		return true;
+	}
+
+	SettingValue SignalList::getSettingValue(E::Setting st) const
+	{
+		return m_settingsValues.getSettingVaue(st);
 	}
 
 	// ---------------------------------------------------------------------------------
@@ -899,6 +981,12 @@ namespace Gateway
 		return result;
 	}
 
+	bool Gateway::generateRequiredFiles(Parser::Log& log)
+	{
+		Q_UNUSED(log);
+		return true;
+	}
+
 	// ---------------------------------------------------------------------------------
 	//
 	// Class Gateway::IVS_Impulse_SignalList implementation
@@ -960,7 +1048,7 @@ namespace Gateway
 						}
 						else
 						{
-							log.logError(sv.lineNo, QString("unknown signal list data type '%1'").
+							log.logError(sv.lineNo, QString("unknown signal list data type '%1' use 'A' or 'B' instead").
 														arg(dataTypeStr));
 							result = false;
 						}
@@ -982,6 +1070,11 @@ namespace Gateway
 		}
 
 		return result;
+	}
+
+	int IVS_Impulse_SignalList::listNo() const
+	{
+		return m_listNo;
 	}
 
 	// ---------------------------------------------------------------------------------
@@ -1009,11 +1102,6 @@ namespace Gateway
 	{
 		return Gateway::isKnownSetting(st) ||
 				m_requiredSettings.contains(st);
-	}
-
-	void IVS_Impulse_Gateway::appendSignalList()
-	{
-		m_signalLists.push_back(new IVS_Impulse_SignalList);
 	}
 
 	bool IVS_Impulse_Gateway::checkAndApplySettings(int lineNo, Parser::Log& log)
@@ -1064,4 +1152,54 @@ namespace Gateway
 
 		return result;
 	}
+
+	void IVS_Impulse_Gateway::appendSignalList()
+	{
+		m_signalLists.push_back(new IVS_Impulse_SignalList);
+	}
+
+	bool IVS_Impulse_Gateway::generateRequiredFiles(Parser::Log& log)
+	{
+		bool result = true;
+
+		result = checkSignalListsSettings(log);
+
+		RETURN_IF_FALSE(result);
+
+		return result;
+	}
+
+	bool IVS_Impulse_Gateway::checkSignalListsSettings(Parser::Log& log)
+	{
+		bool result = true;
+
+		std::map<int, IVS_Impulse_SignalList*> listsIDs;
+
+		for(SignalList* l : m_signalLists)
+		{
+			IVS_Impulse_SignalList* sl = dynamic_cast<IVS_Impulse_SignalList*>(l);
+
+			TEST_PTR_CONTINUE(sl);
+
+			auto it = listsIDs.find(sl->listNo());
+
+			if (it == listsIDs.end())
+			{
+				listsIDs.insert({ sl->listNo(), sl });
+				continue;
+			}
+
+			SettingValue sv1 = it->second->getSettingValue(E::Setting::ListNo);
+			SettingValue sv2 = sl->getSettingValue(E::Setting::ListNo);
+
+			log.logError(QString("duplicate signal lists ListNo = %1 (lines %2, %3)").
+						 arg(sl->listNo()).arg(sv1.lineNo).arg(sv2.lineNo));
+
+			result = false;
+		}
+
+		return result;
+	}
+
+
 }

@@ -389,12 +389,12 @@ void GatewayServiceWorker::parseGatewayDescription(const QString& filePathName, 
 			break;
 
 		case Gateway::Parser::MsgType::Warning:
-			DEBUG_LOG_WRN(logger(), QString("Warning (%1): %2").arg(lineNo).arg(msg));
+			DEBUG_LOG_WRN(logger(), "Warning: " + msg);
 			wrnCount++;
 			break;
 
 		case Gateway::Parser::MsgType::Error:
-			DEBUG_LOG_ERR(logger(), QString("Error (%1): %2").arg(lineNo).arg(msg));
+			DEBUG_LOG_ERR(logger(), "Error: " + msg);
 			errCount++;
 			break;
 

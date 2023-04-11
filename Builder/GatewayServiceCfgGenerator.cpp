@@ -58,7 +58,7 @@ namespace Builder
 
 		std::shared_ptr<const GatewayServiceSettings> settings = m_settingsSet.getSettingsDefaultProfile<GatewayServiceSettings>();
 
-		LOG_MSG(log, QString("Parsing gateway description of %1 service").arg(equipmentID()));
+		LOG_MESSAGE(log, QString("Parsing of %1 gateway description started...").arg(equipmentID()));
 
 		Gateway::Parser gdp;
 
@@ -77,21 +77,43 @@ namespace Builder
 			{
 			case Gateway::Parser::MsgType::Message:
 				msg = msg.mid(0, 1).toUpper() + msg.mid(1);
-				LOG_MSG(log, msg);
+				LOG_MESSAGE(log, msg);
 				break;
 
 			case Gateway::Parser::MsgType::Warning:
-				DEBUG_LOG_WRN(logger(), QString("Warning (%1): %2").arg(lineNo).arg(msg));
+				// Gateway description parsing warning: line %1,  %2
+				//
+				log->wrnCFG3052(msg);
 				wrnCount++;
 				break;
 
 			case Gateway::Parser::MsgType::Error:
-				DEBUG_LOG_ERR(logger(), QString("Error (%1): %2").arg(lineNo).arg(msg));
+				// Gateway description parsing error: line %1,  %2
+				//
+				log->errCFG3051(msg);
 				errCount++;
 				break;
 
 			default:
 				Q_ASSERT(false);
+			}
+		}
+
+		QString resultStr = QString("Parsing of %1 gateway description finished with %2 errors, %3 warnings").
+								arg(equipmentID()).arg(errCount).arg(wrnCount);
+		if (errCount > 0)
+		{
+			log->writeError(resultStr);
+		}
+		else
+		{
+			if (wrnCount > 0)
+			{
+				log->writeWarning0(resultStr);
+			}
+			else
+			{
+				log->writeMessage(resultStr);
 			}
 		}
 

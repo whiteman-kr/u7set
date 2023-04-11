@@ -55,6 +55,7 @@ namespace Gateway
 			Unknown,
 			Int,
 			String,
+			AlphaNumericUnderlineString,
 			Bool,
 			IpPort
 		};
@@ -82,6 +83,8 @@ namespace Gateway
 
 		std::map<E::Setting, SettingValue>::const_iterator end() const;
 		std::map<E::Setting, SettingValue>::iterator end();
+
+		SettingValue getSettingVaue(E::Setting st) const;
 
 	private:
 		std::map<E::Setting, SettingValue> m_settingsValues;
@@ -132,8 +135,7 @@ namespace Gateway
 			Section,
 			Setting,
 			Comment,
-			AppSignalID,
-			CustomAppSignalID,
+			SignalID,
 		};
 
 		struct ParseLineResult
@@ -173,6 +175,7 @@ namespace Gateway
 			void logRequirtedSettingIsNotSet(int lineNo, E::Setting st);
 
 		private:
+			QString message(int lineNo, const QString& msg);
 			void log(int lineNo, Parser::MsgType msgType, const QString& msg);
 		};
 
@@ -184,6 +187,8 @@ namespace Gateway
 
 		const Log& log() const;
 
+		bool generateGatewaysRequiredFiles();
+
 	private:
 		ParseResult parseUnknownSection(E::Section& parsingSection, const ParseLineResult& plr);
 		ParseResult parseGatewaySection(E::Section& parsingSection, const ParseLineResult& plr);
@@ -193,6 +198,7 @@ namespace Gateway
 		bool parseSettingValue(E::Setting setting, const QString& valueStr, ParseLineResult* plr);
 
 		bool parseIntValueStr(const QString& valueStr, ParseLineResult* plr);
+		bool parseAlphsNumericUnderlineStr(const QString& valueStr, ParseLineResult* plr);
 		bool parseBoolValueStr(const QString& valueStr, ParseLineResult* plr);
 		bool parseIpPortValueStr(const QString& valueStr, ParseLineResult* plr);
 
@@ -211,8 +217,8 @@ namespace Gateway
 		QStringList m_knownSections;
 		QStringList m_knownSettings;
 
-		static const QRegularExpression m_appSignalIdTemplate;
-		static const QRegularExpression m_anyWhitespaceTemplate;
+		static const QRegularExpression m_anyWhitespaceSymbol;
+		static const QRegularExpression m_notAlphaNumericUnderlineSymbols;
 	};
 
 	class SignalList
@@ -223,6 +229,8 @@ namespace Gateway
 
 		virtual bool isKnownSetting(E::Setting st) const;
 		virtual bool checkAndApplySettings(int lineNo, Parser::Log& log);
+
+		SettingValue getSettingValue(E::Setting st) const;
 
 	protected:
 		SettingsValues m_settingsValues;
@@ -254,6 +262,9 @@ namespace Gateway
 		static bool checkRequiredSettings(const std::set<E::Setting> reqSettings,
 										  const SettingsValues& settingsValues,
 										  int lineNo, Parser::Log& log);
+
+		virtual bool generateRequiredFiles(Parser::Log& log);
+
 	protected:
 		E::GatewayType m_gatewayType = E::GatewayType::Unknown;
 		QString m_gatewayID;
@@ -288,6 +299,8 @@ namespace Gateway
 		virtual bool isKnownSetting(E::Setting st) const override;
 		virtual bool checkAndApplySettings(int lineNo, Parser::Log& log) override;
 
+		int listNo() const;
+
 	private:
 		int m_listNo;
 		DataType m_dataType;
@@ -307,6 +320,11 @@ namespace Gateway
 		virtual bool checkAndApplySettings(int lineNo, Parser::Log& log) override;
 
 		virtual void appendSignalList() override;
+
+		virtual bool generateRequiredFiles(Parser::Log& log) override;
+
+	private:
+		bool checkSignalListsSettings(Parser::Log& log);
 
 	private:
 		int m_systemID = 0;

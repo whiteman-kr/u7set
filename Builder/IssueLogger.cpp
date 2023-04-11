@@ -1664,6 +1664,46 @@ namespace Builder
 						arg(maxIDs));
 	}
 
+	/// IssueCode: CFG3051
+	///
+	/// IssueType: Error
+	///
+	/// Title: Gateway description parsing error: line %1,  %2
+	///
+	/// Parameters:
+	///         %1 error message
+	///
+	/// Description:
+	///			Check gateway description
+	///
+	void IssueLogger::errCFG3051(QString gwParserError)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3051,
+				  QString(tr("Gateway description parsing error: %1")).
+						arg(gwParserError));
+	}
+
+	/// IssueCode: CFG3052
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Gateway description parsing warning: %1
+	///
+	/// Parameters:
+	///         %1 warning message
+	///
+	/// Description:
+	///			Check gateway description
+	///
+	void IssueLogger::wrnCFG3052(QString gwParserWarning)
+	{
+		LOG_WARNING0(IssueType::FscConfiguration,
+					3052,
+					QString(tr("Gateway description parsing warning: %1")).
+								arg(gwParserWarning));
+	}
+
 	/// IssueCode: CFG3060
 	///
 	/// IssueType: Error
