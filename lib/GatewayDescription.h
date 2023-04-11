@@ -3,156 +3,273 @@
 #include <QRegularExpression>
 #include "../CommonLib/HostAddressPort.h"
 
-class GwParserLog;
-
-class GatewayDescriptionParser : public QObject
+namespace Gateway
 {
-	Q_OBJECT
-
-public:
-	enum class MsgType
+	class E : public QObject
 	{
-		Nothing,
-		Message,
-		Warning,
-		Error
+		Q_OBJECT
+	public:
+
+		enum class GatewayType
+		{
+			Unknown,
+			IVS_Impulse,
+		};
+		Q_ENUM(GatewayType)
+
+		enum class Section
+		{
+			Unknown,
+			Gateway,
+			SignalList
+		};
+		Q_ENUM(Section)
+
+		enum class Setting
+		{
+			Unknown,
+
+			// Common gateway settings
+
+			GatewayType,
+			GatewayID,
+			GatewayDescription,
+
+			// IVS Impulse specific settings
+
+			SystemID,
+			GatewayIP1,
+			GatewayIP2,
+			ListsVersion,
+			Period,
+
+			ListNo,
+			DataType,
+			SendEvents,
+			IncludeAppSignalID
+		};
+		Q_ENUM(Setting)
+
+		enum class SettingType
+		{
+			Unknown,
+			Int,
+			String,
+			Bool,
+			IpPort
+		};
+		Q_ENUM(SettingType)
 	};
 
-	enum class GatewayType
-	{
-		Unknown,
-		IVS_Impulse,
-	};
-	Q_ENUM(GatewayType)
+	class Gateway;
+	class SignalList;
 
-	enum class Section
-	{
-		Unknown,
-		Gateway,
-		SignalList
-	};
-	Q_ENUM(Section)
-
-	enum class Setting
-	{
-		Unknown,
-
-		// Common gateway settings
-
-		GatewayType,
-		GatewayID,
-		GatewayDescription,
-
-		// IVS Impulse specific settings
-
-		SystemID,
-		GatewayIP1,
-		GatewayIP2,
-		ListsVersion,
-		Period,
-
-		ListNo,
-		DataType,
-		SendEvents,
-		IncludeAppSignalID
-	};
-	Q_ENUM(Setting)
-
-	enum class SettingType
-	{
-		Unknown,
-		Int,
-		String,
-		Bool,
-		IpPort
-	};
-	Q_ENUM(SettingType)
-
-	enum class LineType
-	{
-		Unknown,
-		Section,
-		Setting,
-		Comment,
-		AppSignalID,
-		CustomAppSignalID,
-	};
-
-	struct ParseLineResult
+	struct SettingValue
 	{
 		int lineNo = 0;
-		LineType lineType = LineType::Unknown;
-
-		Section section = Section::Unknown;
-		Setting setting = Setting::Unknown;
-
+		E::Setting setting = E::Setting::Unknown;
 		QVariant value;
+	};
+
+	class SettingsValues
+	{
+	public:
+		bool contains(E::Setting st) const;
+		bool insert(int lineNo, E::Setting st, const QVariant& value);
+
+		std::map<E::Setting, SettingValue>::const_iterator begin() const;
+		std::map<E::Setting, SettingValue>::iterator begin();
+
+		std::map<E::Setting, SettingValue>::const_iterator end() const;
+		std::map<E::Setting, SettingValue>::iterator end();
+
+	private:
+		std::map<E::Setting, SettingValue> m_settingsValues;
+	};
+
+	class Parser
+	{
+		//
+
+		static const QString SECTION_GATEWAY;
+		static const QString SECTION_SIGNAL_LIST;
+
+		static const QString START_LINE_COMMENT;
+		static const QString START_MULTILINE_COMMENT;
+		static const QString END_MULTILINE_COMMENT;
+
+		static const QString START_SECTION;
+		static const QString END_SECTION;
+
+		static const QString EQUAL_SIGN;
+		static const QString APP_SIGNAL_ID_START_SIGN;
+
+		static const QString ERR_SYNTAX;
+
+		static const std::map<E::Setting, E::SettingType> m_settingType;
 
 		//
 
-		MsgType msgType = MsgType::Nothing;
-		QString msg;
+	public:
+		enum class ParseResult
+		{
+			Ok,
+			Error,
+			CriticalError
+		};
 
-		void setError(const QString& err);
-		void setWarning(const QString& wrn);
-		void setMessage(const QString& msg);
+		enum class MsgType
+		{
+			Nothing,
+			Message,
+			Warning,
+			Error
+		};
+
+		enum class LineType
+		{
+			Unknown,
+			Section,
+			Setting,
+			Comment,
+			AppSignalID,
+			CustomAppSignalID,
+		};
+
+		struct ParseLineResult
+		{
+			int lineNo = 0;
+			LineType lineType = LineType::Unknown;
+
+			E::Section section = E::Section::Unknown;
+			E::Setting setting = E::Setting::Unknown;
+
+			QVariant value;
+
+			//
+
+			MsgType msgType = MsgType::Nothing;
+			QString msg;
+
+			//
+
+			void setError(const QString& err);
+			void setWarning(const QString& wrn);
+			void setMessage(const QString& msg);
+			void clear();
+		};
+
+		class Log : public std::vector<std::tuple<int, Parser::MsgType, QString>>
+		{
+		public:
+			void logResult(const Parser::ParseLineResult& plr);
+
+			void logError(int lineNo, const QString& errMsg);
+			void logError(const QString& errMsg);
+
+			void logWarning(int lineNo, const QString& wrnMsg);
+			void logWarning(const QString& wrnMsg);
+
+			void logRequirtedSettingIsNotSet(int lineNo, E::Setting st);
+
+		private:
+			void log(int lineNo, Parser::MsgType msgType, const QString& msg);
+		};
+
+	public:
+		Parser();
+		~Parser();
+
+		bool parse(const QString& desc);
+
+		const Log& log() const;
+
+	private:
+		ParseResult parseUnknownSection(E::Section& parsingSection, const ParseLineResult& plr);
+		ParseResult parseGatewaySection(E::Section& parsingSection, const ParseLineResult& plr);
+		ParseResult parseSignalListSection(E::Section& parsingSection, const ParseLineResult& plr);
+
+		bool parseLine(const QString& str, ParseLineResult* plr);
+		bool parseSettingValue(E::Setting setting, const QString& valueStr, ParseLineResult* plr);
+
+		bool parseIntValueStr(const QString& valueStr, ParseLineResult* plr);
+		bool parseBoolValueStr(const QString& valueStr, ParseLineResult* plr);
+		bool parseIpPortValueStr(const QString& valueStr, ParseLineResult* plr);
+
+		Gateway* createApropriateGateway(E::GatewayType gwType);
+
 		void clear();
-	};
 
-	//
+	private:
+		Log m_log;
+		std::vector<Gateway*> m_gateways;
+
+		//
+
+		bool m_multilineCommentStarted = false;
+
+		QStringList m_knownSections;
+		QStringList m_knownSettings;
+
+		static const QRegularExpression m_appSignalIdTemplate;
+		static const QRegularExpression m_anyWhitespaceTemplate;
+	};
 
 	class SignalList
 	{
 	public:
-		std::map<Setting, QVariant> settingValue;
-		std::vector<QString> signalIDs;
+		bool setSettingValue(int lineNo, E::Setting st, const QVariant& value);
+		bool settingIsSet(E::Setting st) const;
 
-		void setSettingValue(const ParseLineResult& plr);
-		bool settingIsSet(Setting st) const;
+		virtual bool isKnownSetting(E::Setting st) const;
+		virtual bool checkAndApplySettings(int lineNo, Parser::Log& log);
 
-		virtual bool prepare(int lineNo, GwParserLog* log);
+	protected:
+		SettingsValues m_settingsValues;
+		std::vector<QString> m_signalIDs;
+
+		friend class Parser;
 	};
 
 	class Gateway
 	{
+	private:
+		static const std::set<E::Setting> m_gatewayRequiredSettings;
+
 	public:
 		Gateway();
-		Gateway(GatewayType gwType);
+		Gateway(E::GatewayType gwType);
 		~Gateway();
 
-		static Gateway* createGateway(GatewayType gwType);
+		static Gateway* createGateway(E::GatewayType gwType);
 
-		bool setSettingValue(const ParseLineResult& plr);
-		bool settingIsSet(Setting st) const;
+		bool setSettingValue(int lineNo, E::Setting st, const QVariant& value);
+		bool settingIsSet(E::Setting st) const;
 
-		virtual bool isKnownGatewaySetting(Setting st) const;
-		virtual bool isKnownSignalListSetting(Setting st) const;
+		virtual bool isKnownSetting(E::Setting st) const;
+		virtual bool checkAndApplySettings(int lineNo, Parser::Log& log);
 
 		virtual void appendSignalList();
 
-		virtual bool prepare(int lineNo, GwParserLog* log);
+		static bool checkRequiredSettings(const std::set<E::Setting> reqSettings,
+										  const SettingsValues& settingsValues,
+										  int lineNo, Parser::Log& log);
+	protected:
+		E::GatewayType m_gatewayType = E::GatewayType::Unknown;
+		QString m_gatewayID;
+		QString m_gatewayDescription;
 
-	public:
-		GatewayType gatewayType = GatewayType::Unknown;
-		QString gatewayID;
-		QString gatewayDescription;
+		SettingsValues m_settingsValues;
 
-		std::map<Setting, QVariant> settingValue;
+		std::vector<SignalList*> m_signalLists;
 
-		std::vector<SignalList*> signalLists;
+		friend class Parser;
 	};
 
 	// IVS_Impulse gateway structs
 
 	class IVS_Impulse_SignalList : public SignalList
 	{
-	public:
-		static const std::set<Setting> requiredSettings;
-
-	public:
-		IVS_Impulse_SignalList();
-		virtual bool prepare(int lineNo, GwParserLog* log) override;
-
 	public:
 		enum class DataType
 		{
@@ -162,106 +279,40 @@ public:
 			Discrete_B			// Discrete packed parameters, format 'B'
 		};
 
-		int listNo;
-		DataType dataType;
-		bool sendEvents;
-		bool includeAppSignalID;
+	private:
+		static const std::set<E::Setting> m_requiredSettings;
+
+	public:
+		IVS_Impulse_SignalList();
+
+		virtual bool isKnownSetting(E::Setting st) const override;
+		virtual bool checkAndApplySettings(int lineNo, Parser::Log& log) override;
+
+	private:
+		int m_listNo;
+		DataType m_dataType;
+		bool m_sendEvents;
+		bool m_includeAppSignalID;
 	};
 
 	class IVS_Impulse_Gateway : public Gateway
 	{
 	public:
-		static const std::set<Setting> requiredSettings;
+		static const std::set<E::Setting> m_requiredSettings;
 
 	public:
 		IVS_Impulse_Gateway();
 
-		virtual bool isKnownGatewaySetting(Setting st) const override;
-		virtual bool isKnownSignalListSetting(Setting st) const override;
+		virtual bool isKnownSetting(E::Setting st) const override;
+		virtual bool checkAndApplySettings(int lineNo, Parser::Log& log) override;
 
 		virtual void appendSignalList() override;
 
-		virtual bool prepare(int lineNo, GwParserLog* log) override;
-
-	public:
-		int systemID = 0;
-		HostAddressPort gatewayIP1;
-		HostAddressPort gatewayIP2;
-		int listsVersion = 0;
-		int period = 1000;
+	private:
+		int m_systemID = 0;
+		HostAddressPort m_gatewayIP1;
+		HostAddressPort m_gatewayIP2;
+		int m_listsVersion = 0;
+		int m_period = 1000;
 	};
-
-
-	//
-
-	static const QString SECTION_GATEWAY;
-	static const QString SECTION_SIGNAL_LIST;
-
-	static const QString START_LINE_COMMENT;
-	static const QString START_MULTILINE_COMMENT;
-	static const QString END_MULTILINE_COMMENT;
-
-	static const QString START_SECTION;
-	static const QString END_SECTION;
-
-	static const QString EQUAL_SIGN;
-	static const QString APP_SIGNAL_ID_START_SIGN;
-
-	static const QString ERR_SYNTAX;
-
-	static const std::map<Setting, SettingType> m_settingType;
-
-	enum class ParseResult
-	{
-		Ok,
-		Error,
-		CriticalError
-	};
-
-public:
-	GatewayDescriptionParser();
-	~GatewayDescriptionParser();
-
-	bool parse(const QString& desc, GwParserLog* log);
-
-private:
-	ParseResult parseUnknownSection(Section& parsingSection, const ParseLineResult& plr, GwParserLog* log);
-	ParseResult parseGatewaySection(Section& parsingSection, const ParseLineResult& plr, GwParserLog* log);
-	ParseResult parseSignalListSection(Section& parsingSection, const ParseLineResult& plr, GwParserLog* log);
-
-	bool parseLine(const QString& str, ParseLineResult* plr);
-	bool parseSettingValue(Setting setting, const QString& valueStr, ParseLineResult* plr);
-
-	bool parseIntValueStr(const QString& valueStr, ParseLineResult* plr);
-	bool parseBoolValueStr(const QString& valueStr, ParseLineResult* plr);
-	bool parseIpPortValueStr(const QString& valueStr, ParseLineResult* plr);
-
-	Gateway* createApropriateGateway(GatewayType gwType);
-
-private:
-	bool m_multilineCommentStarted = false;
-
-	QStringList m_knownSections;
-	QStringList m_knownSettings;
-
-	static const QRegularExpression m_appSignalIdTemplate;
-	static const QRegularExpression m_anyWhitespaceTemplate;
-
-	std::vector<Gateway*> m_gateways;
-};
-
-class GwParserLog : public std::vector<std::tuple<int, GatewayDescriptionParser::MsgType, QString>>
-{
-public:
-	void logResult(const GatewayDescriptionParser::ParseLineResult& plr);
-
-	void logError(int lineNo, const QString& errMsg);
-	void logError(const QString& errMsg);
-
-	void logWarning(int lineNo, const QString& wrnMsg);
-	void logWarning(const QString& wrnMsg);
-
-private:
-	void log(int lineNo, GatewayDescriptionParser::MsgType msgType, const QString& msg);
-};
-
+}

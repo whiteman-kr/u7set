@@ -367,16 +367,15 @@ void GatewayServiceWorker::parseGatewayDescription(const QString& filePathName, 
 {
 	DEBUG_LOG_MSG(logger(), "");
 	DEBUG_LOG_MSG(logger(), QString("Parsing gateway description file: %1").arg(filePathName));
-	DEBUG_LOG_MSG(logger(), "");
 
-	GatewayDescriptionParser gdp;
+	Gateway::Parser gdp;
 
-	GwParserLog parserLog;
-
-	bool result = gdp.parse(gwDesc, &parserLog);
+	gdp.parse(gwDesc);
 
 	int errCount = 0;
 	int wrnCount = 0;
+
+	const Gateway::Parser::Log& parserLog = gdp.log();
 
 	for(const auto& t : parserLog)
 	{
@@ -384,17 +383,17 @@ void GatewayServiceWorker::parseGatewayDescription(const QString& filePathName, 
 
 		switch(msgType)
 		{
-		case GatewayDescriptionParser::MsgType::Message:
+		case Gateway::Parser::MsgType::Message:
 			msg = msg.mid(0, 1).toUpper() + msg.mid(1);
 			DEBUG_LOG_MSG(logger(), msg);
 			break;
 
-		case GatewayDescriptionParser::MsgType::Warning:
+		case Gateway::Parser::MsgType::Warning:
 			DEBUG_LOG_WRN(logger(), QString("Warning (%1): %2").arg(lineNo).arg(msg));
 			wrnCount++;
 			break;
 
-		case GatewayDescriptionParser::MsgType::Error:
+		case Gateway::Parser::MsgType::Error:
 			DEBUG_LOG_ERR(logger(), QString("Error (%1): %2").arg(lineNo).arg(msg));
 			errCount++;
 			break;
@@ -404,7 +403,6 @@ void GatewayServiceWorker::parseGatewayDescription(const QString& filePathName, 
 		}
 	}
 
-	DEBUG_LOG_MSG(logger(), "");
 	DEBUG_LOG_MSG(logger(), QString("Parsing finished with %1 errors, %2 warnings")
 										.arg(errCount).arg(wrnCount));
 	DEBUG_LOG_MSG(logger(), "");

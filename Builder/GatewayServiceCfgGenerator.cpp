@@ -58,11 +58,42 @@ namespace Builder
 
 		std::shared_ptr<const GatewayServiceSettings> settings = m_settingsSet.getSettingsDefaultProfile<GatewayServiceSettings>();
 
-		GatewayDescriptionParser gdp;
+		LOG_MSG(log, QString("Parsing gateway description of %1 service").arg(equipmentID()));
 
-		GwParserLog parserLog;
+		Gateway::Parser gdp;
 
-		result = gdp.parse(settings->gatewayDescription, &parserLog);
+		result = gdp.parse(settings->gatewayDescription);
+
+		const Gateway::Parser::Log& parserLog = gdp.log();
+
+		int errCount = 0;
+		int wrnCount = 0;
+
+		for(const auto& t : parserLog)
+		{
+			auto [ lineNo, msgType, msg ] = t;
+
+			switch(msgType)
+			{
+			case Gateway::Parser::MsgType::Message:
+				msg = msg.mid(0, 1).toUpper() + msg.mid(1);
+				LOG_MSG(log, msg);
+				break;
+
+			case Gateway::Parser::MsgType::Warning:
+				DEBUG_LOG_WRN(logger(), QString("Warning (%1): %2").arg(lineNo).arg(msg));
+				wrnCount++;
+				break;
+
+			case Gateway::Parser::MsgType::Error:
+				DEBUG_LOG_ERR(logger(), QString("Error (%1): %2").arg(lineNo).arg(msg));
+				errCount++;
+				break;
+
+			default:
+				Q_ASSERT(false);
+			}
+		}
 
 		return result;
 	}
