@@ -1,4 +1,4 @@
-QT       += core gui widgets sql network qml xml
+QT += core gui widgets sql network qml xml testlib
 
 
 TARGET = TestSuite

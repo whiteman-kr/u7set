@@ -11,7 +11,7 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 	: QMainWindow(parent),
 	ui(new Ui::TestSuiteMainWindow),
 	m_logFile(qAppName(), QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + theSettings.librarySettings().instanceStrId()),
-	m_testLibrary(softwareInfo, theSettings.librarySettings(), &m_logFile, &m_outputLog)
+	m_testSuite(softwareInfo, theSettings.librarySettings(), &m_logFile, &m_outputLog)
 {
 	ui->setupUi(this);
 
@@ -22,8 +22,8 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 	ui->testsTree->setHeaderLabels(headerLabels);
 	ui->testsTree->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
-	connect(&m_testLibrary.configController(), &TestSuiteConfigController::configurationArrived, this, &TestSuiteMainWindow::onConfigurationArrived);
-	connect(&m_testLibrary, &TestLibrary::testingFinished, this, &TestSuiteMainWindow::onTestingFinished);
+	//connect(&m_testSuite.configController(), &TestSuite::TestSuiteConfigController::configurationArrived, this, &TestSuiteMainWindow::onConfigurationArrived);
+	connect(&m_testSuite, &TestSuite::TestSuite::finished, this, &TestSuiteMainWindow::onTestingFinished);
 
 	connect(&m_logFile, &TestSuiteLogFile::errorArrived, this, &TestSuiteMainWindow::onLogError, Qt::QueuedConnection);
 	connect(&m_logFile, &TestSuiteLogFile::warningArrived, this, &TestSuiteMainWindow::onLogWarning, Qt::QueuedConnection);
@@ -38,10 +38,10 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 	createMenu();
 	createStatusBar();
 
-	if (theSettings.librarySettings().loadScriptsFromPath() == true)
-	{
-		fillTestsTree();
-	}
+//	if (theSettings.librarySettings().loadScriptsFromPath() == true)
+//	{
+//		fillTestsTree();
+//	}
 
 	if (theSettings.m_mainWindowPos.x() != -1 && theSettings.m_mainWindowPos.y() != -1)
 	{
@@ -205,16 +205,16 @@ void TestSuiteMainWindow::createStatusBar()
 
 void TestSuiteMainWindow::fillTestsTree()
 {
-	ui->testsTree->clear();
+//	ui->testsTree->clear();
 
-	QStringList l = m_testLibrary.testScriptsStorage().scriptList();
+//	QStringList l = m_testLibrary.testScriptsStorage().scriptList();
 
-	for (const QString& s : l)
-	{
-		QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << QDir::toNativeSeparators(s));
-		item->setCheckState(0, Qt::Checked);
-		ui->testsTree->addTopLevelItem(item);
-	}
+//	for (const QString& s : l)
+//	{
+//		QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << QDir::toNativeSeparators(s));
+//		item->setCheckState(0, Qt::Checked);
+//		ui->testsTree->addTopLevelItem(item);
+//	}
 }
 
 void TestSuiteMainWindow::exit()
@@ -224,20 +224,20 @@ void TestSuiteMainWindow::exit()
 
 void TestSuiteMainWindow::on_m_run_clicked()
 {
-	m_testLibrary.execute();
+//	m_testLibrary.execute();
 }
 
 void TestSuiteMainWindow::on_m_stop_clicked()
 {
-	m_testLibrary.stop();
+//	m_testLibrary.stop();
 }
 
-void TestSuiteMainWindow::newLogItem(const TestLogItem& item)
+void TestSuiteMainWindow::newLogItem(const TestSuite::TestLogItem& item)
 {
-	ui->resultsLog->moveCursor (QTextCursor::End);
-	ui->resultsLog->insertPlainText(item.toText());
-	ui->resultsLog->insertPlainText("\n");
-	ui->resultsLog->moveCursor (QTextCursor::End);
+//	ui->resultsLog->moveCursor (QTextCursor::End);
+//	ui->resultsLog->insertPlainText(item.toText());
+//	ui->resultsLog->insertPlainText("\n");
+//	ui->resultsLog->moveCursor (QTextCursor::End);
 }
 
 void TestSuiteMainWindow::onTestingFinished(int result)
@@ -330,10 +330,8 @@ void TestSuiteMainWindow::showSettings()
 		auto currentSettings = theSettings;
 
 		if (currentSettings.librarySettings().instanceStrId() != d.settings().librarySettings().instanceStrId() ||
-			currentSettings.librarySettings().configuratorAddress1().address() != d.settings().librarySettings().configuratorAddress1().address() ||
-			currentSettings.librarySettings().configuratorAddress1().port() != d.settings().librarySettings().configuratorAddress1().port() ||
-			currentSettings.librarySettings().configuratorAddress2().address() != d.settings().librarySettings().configuratorAddress2().address() ||
-			currentSettings.librarySettings().configuratorAddress2().port() != d.settings().librarySettings().configuratorAddress2().port())
+			currentSettings.librarySettings().configuratorAddress1() != d.settings().librarySettings().configuratorAddress1() ||
+			currentSettings.librarySettings().configuratorAddress2() != d.settings().librarySettings().configuratorAddress2())
 		{
 			needReconnect = true;
 		}
@@ -348,9 +346,9 @@ void TestSuiteMainWindow::showSettings()
 		//
 		if (needReconnect == true)
 		{
-			m_testLibrary.configController().setConnectionParams(theSettings.librarySettings().instanceStrId(),
-												   theSettings.librarySettings().configuratorAddress1(),
-												   theSettings.librarySettings().configuratorAddress2());
+//			m_testSuite.configController().setConnectionParams(theSettings.librarySettings().instanceStrId(),
+//															   theSettings.librarySettings().configuratorAddress1(),
+//															   theSettings.librarySettings().configuratorAddress2());
 		}
 
 		//setWindowTitle(MonitorAppSettings::instance().windowCaption());
@@ -362,5 +360,3 @@ void TestSuiteMainWindow::showSettings()
 }
 
 TestSuiteMainWindow* theMainWindow = nullptr;
-
-

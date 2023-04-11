@@ -67,6 +67,12 @@ namespace ClientLib
 		return tcpSignalClient->serverAddressPort1();
 	}
 
+	bool AdsConnection::Connection::signalParamsLoaded() const
+	{
+		Q_ASSERT(tcpSignalClient);
+		return tcpSignalClient->signalParamsLoaded();
+	}
+
 	AdsConnection::AdsConnection(IAppSignalUpdater& signalUpdater,
 								 IRecentAppSignals* recentAppSignals,
 								 ILogFile* logFile) :
@@ -142,6 +148,11 @@ namespace ClientLib
 		}
 
 		return states;
+	}
+
+	bool AdsConnection::signalParamsLoaded() const
+	{
+		return std::all_of(m_conns.begin(), m_conns.end(), [](const Connection& c) { return c.signalParamsLoaded(); });
 	}
 
 }	// namespace

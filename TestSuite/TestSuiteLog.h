@@ -22,7 +22,7 @@ signals:
 	void textArrived(const QString& text);
 };
 
-class TestSuiteOutputLog : public QObject, public IOutputLog
+class TestSuiteOutputLog : public QObject, public TestSuite::ITestLog
 {
 	Q_OBJECT
 public:

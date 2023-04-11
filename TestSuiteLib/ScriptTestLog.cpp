@@ -1,39 +1,24 @@
 #include "ScriptTestLog.h"
 
-ScriptTestLog::ScriptTestLog(TestLog* testLog):
-	m_testLog(testLog)
+namespace TestSuite
 {
-	Q_ASSERT(m_testLog);
-
-}
-
-void ScriptTestLog::writeError(const QString& message)
-{
-	if (m_testLog == nullptr)
+	ScriptTestLog::ScriptTestLog(ITestLog& testLog):
+		m_testLog(testLog)
 	{
-		Q_ASSERT(m_testLog);
-		return;
 	}
-	m_testLog->writeError(message);
-}
 
-void ScriptTestLog::writeWarning(const QString& message)
-{
-	if (m_testLog == nullptr)
+	void ScriptTestLog::writeError(const QString& message)
 	{
-		Q_ASSERT(m_testLog);
-		return;
+		m_testLog.writeError(message);
 	}
-	m_testLog->writeError(message);
-}
 
-void ScriptTestLog::writeMessage(const QString& message)
-{
-	if (m_testLog == nullptr)
+	void ScriptTestLog::writeWarning(const QString& message)
 	{
-		Q_ASSERT(m_testLog);
-		return;
+		m_testLog.writeWarning(message);
 	}
-	m_testLog->writeMessage(message);
-}
 
+	void ScriptTestLog::writeMessage(const QString& message)
+	{
+		m_testLog.writeMessage(message);
+	}
+}

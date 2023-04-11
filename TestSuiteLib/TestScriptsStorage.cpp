@@ -1,112 +1,105 @@
 #include "TestScriptsStorage.h"
 
-TestScriptsStorage::TestScriptsStorage()
+namespace TestSuite
 {
+//	std::vector<TestScript>& TestScriptsStorage::scripts()
+//	{
+//		QReadLocker l(&m_lock);
+//		return m_scripts;
+//	}
 
-}
-
-std::vector<TestScript>& TestScriptsStorage::scripts()
-{
-	QReadLocker l(&m_lock);
-	return m_scripts;
-}
-
-const std::vector<TestScript>& TestScriptsStorage::scripts() const
-{
-	QReadLocker l(&m_lock);
-	return m_scripts;
-}
-
-const TestScript& TestScriptsStorage::script(int index) const
-{
-	QReadLocker l(&m_lock);
-	if (index >= m_scripts.size())
+	const std::vector<TestScript>& TestScriptsStorage::scripts() const
 	{
-		static TestScript err;
-		return err;
+		QReadLocker l(&m_lock);
+		return m_scripts;
 	}
 
-	return m_scripts[index];
-}
+//	const TestScript& TestScriptsStorage::script(int index) const
+//	{
+//		QReadLocker l(&m_lock);
+//		if (index >= m_scripts.size())
+//		{
+//			static TestScript err;
+//			return err;
+//		}
 
-qsizetype TestScriptsStorage::count() const
-{
-	QReadLocker l(&m_lock);
-	return m_scripts.size();
-}
+//		return m_scripts[index];
+//	}
 
-QStringList TestScriptsStorage::scriptList() const
-{
-	QReadLocker l(&m_lock);
-
-	QStringList result;
-	for (const TestScript& ts : m_scripts)
+	qsizetype TestScriptsStorage::count() const
 	{
-		result.push_back(ts.fileName);
-	}
-	return result;
-}
-
-void TestScriptsStorage::clear()
-{
-	QWriteLocker l(&m_lock);
-	m_scripts.clear();
-
-	m_loadedFromFiles = false;
-}
-
-void TestScriptsStorage::add(const TestScript& script)
-{
-	QWriteLocker l(&m_lock);
-	m_scripts.push_back(script);
-}
-
-void TestScriptsStorage::move(std::vector<TestScript>& scripts)
-{
-	QWriteLocker l(&m_lock);
-	m_scripts = std::move(scripts);
-}
-
-
-bool TestScriptsStorage::loadFromPath(const QString& path, QString* errorMsg)
-{
-	if (errorMsg == nullptr)
-	{
-		Q_ASSERT(errorMsg);
-		return false;
+		QReadLocker l(&m_lock);
+		return m_scripts.size();
 	}
 
-	QDir dir(path);
-	if (dir.exists() == false)
+	QStringList TestScriptsStorage::scriptList() const
 	{
-		*errorMsg = QObject::tr("Error: Scripts path \"%1\" does not exist!").arg(path);
-		return false;
-	}
+		QReadLocker l(&m_lock);
 
-	QStringList files = dir.entryList(QStringList() << "*.js", QDir::Files, QDir::Name);
-	for (const QString& file : files)
-	{
-		TestScript ts;
-		ts.fileName = QDir::fromNativeSeparators(path + "\\" + file);
+		QStringList result;
+		result.reserve(m_scripts.size());
 
-		QFile f(ts.fileName);
-		if (f.open(QFile::ReadOnly) == false)
+		for (const TestScript& ts : m_scripts)
 		{
-			*errorMsg = QObject::tr("Error: Can't open file \"%1\" for reading!").arg(ts.fileName);
+			result.push_back(ts.fileName);
+		}
+
+		return result;
+	}
+
+	void TestScriptsStorage::clear()
+	{
+		QWriteLocker l(&m_lock);
+		m_scripts.clear();
+		return;
+	}
+
+	void TestScriptsStorage::add(const TestScript& script)
+	{
+		QWriteLocker l(&m_lock);
+		m_scripts.push_back(script);
+		return;
+	}
+
+	void TestScriptsStorage::setScript(std::vector<TestScript>&& scripts)
+	{
+		QWriteLocker l(&m_lock);
+		m_scripts = std::move(scripts);
+	}
+
+	bool TestScriptsStorage::loadFromPath(const QString& path, QString* errorMsg)
+	{
+		if (errorMsg == nullptr)
+		{
+			Q_ASSERT(errorMsg);
 			return false;
 		}
-		ts.script = f.readAll();
 
-		add(ts);
+		QDir dir(path);
+		if (dir.exists() == false)
+		{
+			*errorMsg = QObject::tr("Error: Scripts path \"%1\" does not exist!").arg(path);
+			return false;
+		}
+
+		QStringList files = dir.entryList(QStringList() << "*.js", QDir::Files, QDir::Name);
+		for (const QString& file : files)
+		{
+			TestScript ts;
+			ts.fileName = QDir::fromNativeSeparators(path + QDir::separator() + file);
+
+			QFile f(ts.fileName);
+			if (f.open(QFile::ReadOnly) == false)
+			{
+				*errorMsg = QObject::tr("Error: Can't open file \"%1\" for reading!").arg(ts.fileName);
+				return false;
+			}
+			ts.script = f.readAll();
+
+			add(ts);
+		}
+
+		return true;
+
 	}
-
-	m_loadedFromFiles = true;
-
-	return true;
-
-}
-
-bool TestScriptsStorage::isLoadedFromFiles() const
-{
-	return m_loadedFromFiles;
 }

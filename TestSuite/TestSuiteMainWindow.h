@@ -2,7 +2,7 @@
 #define TESTSUITEMAINWINDOW_H
 
 #include <QMainWindow>
-#include "../TestSuiteLib/TestLibrary.h"
+#include "../TestSuiteLib/TestSuite.h"
 #include "../TestSuiteLib/TestSuiteConfigController.h"
 
 #include "TestSuiteLog.h"
@@ -29,7 +29,7 @@ private:
 private slots:
 	void exit();
 	void on_m_run_clicked();
-	void newLogItem(const TestLogItem& item);
+	void newLogItem(const TestSuite::TestLogItem& item);
 	void onTestingFinished(int result);
 
 	void showSettings();
@@ -59,8 +59,7 @@ private:
 
 	TestSuiteOutputLog m_outputLog;
 
-	TestLibrary m_testLibrary;
-
+	TestSuite::TestSuite m_testSuite;
 };
 
 extern TestSuiteMainWindow* theMainWindow;

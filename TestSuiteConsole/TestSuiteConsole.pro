@@ -1,5 +1,5 @@
 QT -= gui
-QT       += qml sql xml widgets svg
+QT += qml sql xml widgets svg testlib
 
 
 CONFIG += console

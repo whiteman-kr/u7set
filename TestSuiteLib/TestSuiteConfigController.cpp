@@ -3,139 +3,162 @@
 
 // ------------------------- TestSuiteConfigController -----------------------------------
 
-TestSuiteConfigController::TestSuiteConfigController(const SoftwareInfo& softwareInfo,
-													 HostAddressPort address1,
-													 HostAddressPort address2,
-													 ILogFile* appLogFile) :
-	ConfigController(softwareInfo, address1, address2, appLogFile)
+namespace TestSuite
 {
-	qRegisterMetaType<ConfigSettings>("ConfigSettings");
 
-	return;
-}
-
-bool TestSuiteConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& conf, const TestSuiteSettings& settings, const BuildFileInfoArray& files)
-{
-	ConfigSettings config{};
-
-	config.configInfo = conf;
-
-	config.appDataServices = settings.appDataServices;
-	//  --
-	//
-	config.tuningEnabled = settings.tuningEnabled;
-
-	if (config.tuningEnabled == true)
+	TestSuiteConfigController::TestSuiteConfigController(const SoftwareInfo& softwareInfo,
+														 HostAddressPort address1,
+														 HostAddressPort address2,
+														 ILogFile* appLogFile) :
+		ConfigController(softwareInfo, address1, address2, appLogFile)
 	{
-		config.tuningServices = settings.tuningServices;
+		qRegisterMetaType<ConfigSettings>("ConfigSettings");
+
+		return;
 	}
-	else
+
+	bool TestSuiteConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& conf,
+														const ::TestSuiteSettings& settings,
+														const BuildFileInfoArray& files)
 	{
-		// tuning disabled
+		ConfigSettings config{};
+
+		config.configInfo = conf;
+		config.appDataServices = settings.appDataServices;
+		//  --
 		//
-		config.tuningServices.clear();
-	}
-
-	//--
-	//
-	auto getScriptFunc = [this](const QString& scriptFileName) -> QString
+		config.tuningEnabled = settings.tuningEnabled;
+		if (config.tuningEnabled == true)
 		{
-			QString parsingError;
-			QByteArray ba;
-
-			if (bool ok = getFileBlocked(scriptFileName, &ba, &parsingError);
-				ok == true)
-			{
-				return QString{ba};
-			}
-			else
-			{
-				return {};
-			}
-		};
-
-	// Get test files list
-
-	for (const Builder::BuildFileInfo& buildFileInfo: files)
-	{
-		if (buildFileInfo.pathFileName.endsWith(".js") == false)
+			config.tuningServices = settings.tuningServices;
+		}
+		else
 		{
-			continue;
+			config.tuningServices.clear();
 		}
 
-		config.scriptFiles.push_back(buildFileInfo.pathFileName);
-	}
-
-	// Trace received params
-	//
-	qDebug() << "New configuration arrived.";
-	m_logFile.writeMessage(tr("New configuration arrived:"));
-
-	dump(config);
-
-	// --
-	//
-	{
-		QWriteLocker locker(&m_confugurationLock);
-		config.configurationId = s_configurationIdCounter++;
-		m_configuration = config;		// Cannot move config here as it is used later for `emit configurationArrived(config)`
-	}
-
-	// Emit signal to inform everybody about new configuration
-	//
-	emit configurationArrived(config);
-
-	return true;
-}
-
-void TestSuiteConfigController::dump(const ConfigSettings& config) const
-{
-	// --
-	//
-	m_logFile.writeMessage(tr("AppDatService(s): %1.").arg(config.appDataServices.size()));
-	qDebug() << "AppDatService(s): " << config.appDataServices.size();
-
-	for (const auto& service : config.appDataServices)
-	{
-		qDebug() << "Service: id, address: " << service.equipmentId << ", " << service.address.addressPortStr();
-		m_logFile.writeMessage(tr("Service: id, address: %1, %2.").arg(service.equipmentId).arg(service.address.addressPortStr()));
-	}
-
-	// --
-	//
-	m_logFile.writeMessage(QString("TuningEnabled = %1").arg(config.tuningEnabled));
-	if (config.tuningEnabled == true)
-	{
-		m_logFile.writeMessage(tr("TuningService(s): %1.").arg(config.tuningServices.size()));
-		qDebug() << "TuningService(s): " << config.tuningServices.size();
-
-		for (const auto& ts : config.tuningServices)
+		// Get test files list
+		//
+		for (const Builder::BuildFileInfo& buildFileInfo : files)
 		{
-			m_logFile.writeMessage(tr("TuningService: id, address: %1, %2.").arg(ts.equipmentId).arg(ts.clientRequestAddress.addressPortStr()));
-			qDebug() << "TuningService: id, address: " << ts.equipmentId << ", " << ts.clientRequestAddress.addressPortStr();
+			if (buildFileInfo.pathFileName.endsWith(".js") == false)
+			{
+				continue;
+			}
 
-			m_logFile.writeMessage(tr("TuningSources: %1.").arg(ts.drivenSources.join(", ")));
-			qDebug() << "TuningSources: " << ts.drivenSources.join(", ");
+			config.scriptFiles.push_back(buildFileInfo.pathFileName);
 		}
+
+		std::sort(config.scriptFiles.begin(), config.scriptFiles.end());
+
+		// Get script files form CfgService
+		//
+		std::vector<TestScript> scripts;
+		scripts.reserve(config.scriptFiles.size());
+
+		for (const QString& fileName : config.scriptFiles)
+		{
+			QByteArray data;
+			QString errorMsg;
+
+			bool loadResult = getFileBlocked(fileName, &data, &errorMsg);
+
+			if (loadResult == false)
+			{
+				QString completeErrorMessage = tr("updateConfiguration: Get %1 file error:\n%2").arg(fileName).arg(errorMsg);
+				m_logFile.writeError(completeErrorMessage);
+
+				{
+					QWriteLocker locker(&m_confugurationLock);
+					m_configuration = {};
+					m_scripts.clear();
+				}
+
+				emit configrationError();
+				return false;
+			}
+
+			m_logFile.writeMessage("Loaded file: " + fileName);
+
+			scripts.emplace_back(fileName, data);
+		}
+
+		// Trace received params
+		//
+		qDebug() << "New configuration arrived.";
+		m_logFile.writeMessage(tr("New configuration arrived:"));
+
+		dump(config);
+
+		// --
+		//
+		{
+			QWriteLocker locker(&m_confugurationLock);
+			config.configurationId = s_configurationIdCounter++;
+			m_configuration = config;		// Cannot move config here as it is used later for `emit configurationArrived(config)`
+			m_scripts = std::move(scripts);
+		}
+
+		// Emit signal to inform everybody about new configuration
+		//
+		emit configurationArrived(config);
+
+		return true;
 	}
 
-	for (const QString& s : config.scriptFiles)
+	void TestSuiteConfigController::dump(const ConfigSettings& config) const
 	{
-		m_logFile.writeMessage(tr("Script File: %1").arg(s));
+		m_logFile.writeMessage(tr("AppDatService(s): %1.").arg(config.appDataServices.size()));
+		qDebug() << "AppDatService(s): " << config.appDataServices.size();
+
+		for (const auto& service : config.appDataServices)
+		{
+			qDebug() << "Service: id, address: " << service.equipmentId << ", " << service.address.addressPortStr();
+			m_logFile.writeMessage(tr("Service: id, address: %1, %2.").arg(service.equipmentId).arg(service.address.addressPortStr()));
+		}
+
+		// --
+		//
+		m_logFile.writeMessage(QString("TuningEnabled = %1").arg(config.tuningEnabled));
+		if (config.tuningEnabled == true)
+		{
+			m_logFile.writeMessage(tr("TuningService(s): %1.").arg(config.tuningServices.size()));
+			qDebug() << "TuningService(s): " << config.tuningServices.size();
+
+			for (const auto& ts : config.tuningServices)
+			{
+				m_logFile.writeMessage(tr("TuningService: id, address: %1, %2.").arg(ts.equipmentId).arg(ts.clientRequestAddress.addressPortStr()));
+				qDebug() << "TuningService: id, address: " << ts.equipmentId << ", " << ts.clientRequestAddress.addressPortStr();
+
+				m_logFile.writeMessage(tr("TuningSources: %1.").arg(ts.drivenSources.join(", ")));
+				qDebug() << "TuningSources: " << ts.drivenSources.join(", ");
+			}
+		}
+
+		for (const QString& s : config.scriptFiles)
+		{
+			m_logFile.writeMessage(tr("Script File: %1").arg(s));
+		}
+
+		return;
 	}
 
-	return;
-}
 
+	ConfigSettings TestSuiteConfigController::configuration() const
+	{
+		QReadLocker locker(&m_confugurationLock);
+		return m_configuration;
+	}
 
-ConfigSettings TestSuiteConfigController::configuration() const
-{
-	QReadLocker locker(&m_confugurationLock);
-	return m_configuration;
-}
+	ClientLib::ConfigurationInfo TestSuiteConfigController::configInfo() const
+	{
+		QReadLocker locker(&m_confugurationLock);
+		return m_configuration.configInfo;
+	}
 
-ClientLib::ConfigurationInfo TestSuiteConfigController::configInfo() const
-{
-	QReadLocker locker(&m_confugurationLock);
-	return m_configuration.configInfo;
+	std::vector<TestSuite::TestScript> TestSuiteConfigController::scripts() const
+	{
+		QReadLocker locker(&m_confugurationLock);
+		return m_scripts;
+	}
 }

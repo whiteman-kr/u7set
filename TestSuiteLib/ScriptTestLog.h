@@ -2,17 +2,23 @@
 
 #include "TestLog.h"
 
-class ScriptTestLog : public QObject
+namespace TestSuite
 {
-	Q_OBJECT
-public:
-	ScriptTestLog(TestLog* testLog);
+	// Wrapper for TestLog for JavaScript.
+	//
+	class ScriptTestLog : public QObject
+	{
+		Q_OBJECT
 
-public slots:
-	void writeError(const QString& message);
-	void writeWarning(const QString& message);
-	void writeMessage(const QString& message);
+	public:
+		ScriptTestLog(ITestLog& testLog);
 
-private:
-	TestLog* m_testLog = nullptr;
-};
+	public slots:
+		void writeError(const QString& message);
+		void writeWarning(const QString& message);
+		void writeMessage(const QString& message);
+
+	private:
+		ITestLog& m_testLog;
+	};
+}

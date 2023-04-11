@@ -26,9 +26,9 @@ void TestSuiteDialogSettings::setSettings(const AppConfigSettings& settings)
 	ui->m_IP2->setText(m_settings.librarySettings().configuratorAddress2().addressStr());
 	ui->m_port2->setText(QString::number(m_settings.librarySettings().configuratorAddress2().port()));
 
-	ui->loadSciptsPathCheck->setChecked(m_settings.librarySettings().loadScriptsFromPath());
-	ui->loadSciptsPath->setEnabled(m_settings.librarySettings().loadScriptsFromPath());
-	ui->loadSciptsPath->setText(m_settings.librarySettings().scriptsPath());
+//	ui->loadSciptsPathCheck->setChecked(m_settings.librarySettings().loadScriptsFromPath());
+//	ui->loadSciptsPath->setEnabled(m_settings.librarySettings().loadScriptsFromPath());
+//	ui->loadSciptsPath->setText(m_settings.librarySettings().scriptsPath());
 }
 
 const AppConfigSettings& TestSuiteDialogSettings::settings() const
@@ -62,23 +62,19 @@ void TestSuiteDialogSettings::on_TestSuiteDialogSettings_accepted()
 
 	m_settings.librarySettings().setInstanceStrId(instanceStrId);
 
-	m_settings.librarySettings().setLoadScriptsFromPath(ui->loadSciptsPathCheck->isChecked() == true);
-	m_settings.librarySettings().setScriptsPath(ui->loadSciptsPath->text());
+//	m_settings.librarySettings().setLoadScriptsFromPath(ui->loadSciptsPathCheck->isChecked() == true);
+//	m_settings.librarySettings().setScriptsPath(ui->loadSciptsPath->text());
 
 	// IP Configuration
+	HostAddressPort address1{ui->m_IP1->text(), ui->m_port1->text().toInt()};
+	HostAddressPort address2{ui->m_IP2->text(), ui->m_port2->text().toInt()};
 
-	QString configIP1 = ui->m_IP1->text();
-	int configPort1 = ui->m_port1->text().toInt();
-
-	QString configIP2 = ui->m_IP2->text();
-	int configPort2 = ui->m_port2->text().toInt();
-
-	if (configIP1 != m_settings.librarySettings().configuratorAddress1().addressStr() || configIP2 != m_settings.librarySettings().configuratorAddress2().addressStr()
-			|| configPort1 != m_settings.librarySettings().configuratorAddress1().port() || configPort2 != m_settings.librarySettings().configuratorAddress2().port())
+	if (address1 != m_settings.librarySettings().configuratorAddress1() ||
+		address2 != m_settings.librarySettings().configuratorAddress2())
 	{
 
-		m_settings.librarySettings().setConfiguratorAddress1(configIP1, configPort1);
-		m_settings.librarySettings().setConfiguratorAddress2(configIP2, configPort2);
+		m_settings.librarySettings().setConfiguratorAddress1(address1);
+		m_settings.librarySettings().setConfiguratorAddress2(address2);
 
 		QMessageBox::warning(this, qAppName(), tr("Configurator address has been changed, please restart the application."));
 	}

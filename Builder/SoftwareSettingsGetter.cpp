@@ -1874,11 +1874,13 @@ bool TestSuiteSettingsGetter::readAppDataServiceAndArchiveSettings(const Builder
 	QStringList appDataServiceIds;
 	result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::APP_DATA_SERVICE_IDS, &appDataServiceIds, log);
 
-	if (appDataServiceIds.isEmpty() == true)
-	{
-		log->errCFG3022(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS);
-		return false;
-	}
+	// Maybe we will have tests without AppDataService
+	//
+//	if (appDataServiceIds.isEmpty() == true)
+//	{
+//		log->errCFG3022(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS);
+//		return false;
+//	}
 
 	// Get all AppDataServices
 	//
@@ -1925,7 +1927,7 @@ bool TestSuiteSettingsGetter::readAppDataServiceAndArchiveSettings(const Builder
 		}
 	}
 
-	if (result == false || appDataServices.empty() == true)
+	if (result == false)
 	{
 		return false;
 	}

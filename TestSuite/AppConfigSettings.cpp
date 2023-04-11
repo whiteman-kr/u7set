@@ -80,12 +80,12 @@ void AppConfigSettings::RestoreUser()
 	m_language = s.value("MainWindow/language", m_language).toString();
 }
 
-TestLibrarySettings& AppConfigSettings::librarySettings()
+TestSuite::TestSuiteSettings& AppConfigSettings::librarySettings()
 {
 	return m_librarySettings;
 }
 
-const TestLibrarySettings& AppConfigSettings::librarySettings() const
+const TestSuite::TestSuiteSettings& AppConfigSettings::librarySettings() const
 {
 	return m_librarySettings;
 }

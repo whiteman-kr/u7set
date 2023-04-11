@@ -38,6 +38,8 @@ namespace ClientLib
 			void stopAndDestroy();
 			HostAddressPort address() const;
 
+			bool signalParamsLoaded() const;
+
 			// --
 			//
 			ClientLib::TcpSignalClient* tcpSignalClient = nullptr;
@@ -60,6 +62,8 @@ namespace ClientLib
 
 		std::vector<Tcp::ConnectionState> tcpSignalConnStates() const;
 		std::vector<Tcp::ConnectionState> recentSignalConnStates() const;
+
+		bool signalParamsLoaded() const;
 
 		// --
 		//

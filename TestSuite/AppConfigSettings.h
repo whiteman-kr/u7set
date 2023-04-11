@@ -2,8 +2,8 @@
 
 #include "../CommonLib/HostAddressPort.h"
 #include "../ClientLib//TuningUserManager.h"
-#include "../TestSuiteLib/TestLibrarySettings.h"
-#include "../TestSuiteLib/TestLibrary.h"
+#include "../TestSuiteLib/TestSuiteSettings.h"
+#include "../TestSuiteLib/TestSuite.h"
 
 //
 // AppConfigSettings
@@ -21,8 +21,8 @@ public:
 	void StoreSystem();
 	void RestoreSystem();
 
-	TestLibrarySettings& librarySettings();
-	const TestLibrarySettings& librarySettings() const;
+	TestSuite::TestSuiteSettings& librarySettings();
+	const TestSuite::TestSuiteSettings& librarySettings() const;
 
 	QStringList instanceHistory() const;
 	void setInstanceHistory(const QStringList& value);
@@ -45,7 +45,7 @@ private:
 
 	// System settings set by operator
 
-	TestLibrarySettings m_librarySettings;
+	TestSuite::TestSuiteSettings m_librarySettings;
 
 	QString m_language = "en";
 

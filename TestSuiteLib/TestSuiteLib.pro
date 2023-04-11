@@ -1,6 +1,6 @@
 QT -= gui
 
-QT += qml xml
+QT += qml xml testlib
 
 TARGET = TestSuiteLib
 
@@ -47,29 +47,33 @@ CONFIG(release, debug|release) {
 }
 
 SOURCES += \
-    InputController.cpp \
-    OutputController.cpp \
+    AdsInputController.cpp \
+    Control.cpp \
+    ScriptRunner.cpp \
     ScriptTestLog.cpp \
-    TestLibrary.cpp \
-    TestLibrarySettings.cpp \
+    TestController.cpp \
     TestLog.cpp \
     TestScriptsStorage.cpp \
+    TestSuite.cpp \
     TestSuiteConfigController.cpp \
     TestSuiteLib.cpp \
-    TestWorker.cpp
+    TestSuiteSettings.cpp
 
 HEADERS += \
-    InputController.h \
-    OutputController.h \
+    AdsInputController.h \
+    Control.h \
+    IInputController.h \
+    IOutputController.h \
+    ScriptRunner.h \
     ScriptTestLog.h \
     Stable.h \
-    TestLibrary.h \
-    TestLibrarySettings.h \
+    TestController.h \
     TestLog.h \
     TestScriptsStorage.h \
+    TestSuite.h \
     TestSuiteConfigController.h \
     TestSuiteLib.h \
-    TestWorker.h
+    TestSuiteSettings.h
 
 # protobuf
 #
