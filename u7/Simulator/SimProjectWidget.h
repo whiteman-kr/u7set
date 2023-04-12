@@ -40,6 +40,7 @@ private:
 	SimIdeSimulator* m_simulator = nullptr;
 
 	QLabel* m_buildLabel = nullptr;
+	QLabel* m_buildNoLabel = nullptr;
 	QTreeWidget* m_treeWidget = nullptr;
 };
 

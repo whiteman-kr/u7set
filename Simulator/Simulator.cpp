@@ -541,6 +541,11 @@ namespace Sim
 		return m_buildPath;
 	}
 
+	int Simulator::buildNo() const
+	{
+		return m_firmwares.buildNumber();
+	}
+
 	QString Simulator::projectName() const
 	{
 		return m_firmwares.projectName();
