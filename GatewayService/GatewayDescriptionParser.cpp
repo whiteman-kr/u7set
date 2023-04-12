@@ -1,65 +1,38 @@
-#include "GatewayDescription.h"
-#include "../lib/ConstStrings.h"
-#include "../CommonLib/Types.h"
-#include "../UtilsLib/WUtils.h"
+#include "GatewayDescriptionParser.h"
 
 namespace Gateway
 {
 	// ---------------------------------------------------------------------------------
 	//
-	// Class Gateway::SettingsValues implementation
+	// Class Gateway::SignalSetAdapter implementation
 	//
 	// ---------------------------------------------------------------------------------
 
-	bool SettingsValues::contains(E::Setting st) const
+	SignalSetAdapter::SignalSetAdapter(const AppSignalSet* appSignalSet) :
+		m_appSignalSet(appSignalSet)
 	{
-		return m_settingsValues.contains(st);
 	}
 
-	bool SettingsValues::insert(int lineNo, E::Setting st, const QVariant& value)
+	SignalSetAdapter::SignalSetAdapter(const AppSignals& appSignals) :
+		m_appSignals(&appSignals)
 	{
-		SettingValue sv =
+	}
+
+	const AppSignal* SignalSetAdapter::getAppSignal(const QString& appSignalID) const
+	{
+		if (m_appSignalSet != nullptr)
 		{
-			.lineNo = lineNo,
-			.setting = st,
-			.value = value
-		};
-
-		auto p = m_settingsValues.insert({ st, sv });
-
-		return !p.second;		// if true - setting value already exists
-	}
-
-	std::map<E::Setting, SettingValue>::const_iterator SettingsValues::begin() const
-	{
-		return m_settingsValues.begin();
-	}
-
-	std::map<E::Setting, SettingValue>::iterator SettingsValues::begin()
-	{
-		return m_settingsValues.begin();
-	}
-
-	std::map<E::Setting, SettingValue>::const_iterator SettingsValues::end() const
-	{
-		return m_settingsValues.end();
-	}
-
-	std::map<E::Setting, SettingValue>::iterator SettingsValues::end()
-	{
-		return m_settingsValues.end();
-	}
-
-	SettingValue SettingsValues::getSettingVaue(E::Setting st) const
-	{
-		auto it = m_settingsValues.find(st);
-
-		if (it == m_settingsValues.end())
-		{
-			return SettingValue();
+			return m_appSignalSet->getSignal(appSignalID);
 		}
 
-		return it->second;
+		if (m_appSignals != nullptr)
+		{
+			return m_appSignals->getSignalByID(appSignalID);
+		}
+
+		Q_ASSERT(false);
+
+		return nullptr;
 	}
 
 	// ---------------------------------------------------------------------------------
@@ -70,19 +43,19 @@ namespace Gateway
 
 	void Parser::ParseLineResult::setError(const QString& err)
 	{
-		msgType = MsgType::Error;
+		msgType = LogMsgType::Error;
 		msg = err;
 	}
 
 	void Parser::ParseLineResult::setWarning(const QString& wrn)
 	{
-		msgType = MsgType::Warning;
+		msgType = LogMsgType::Warning;
 		msg = wrn;
 	}
 
 	void Parser::ParseLineResult::setMessage(const QString& msg)
 	{
-		msgType = MsgType::Message;
+		msgType = LogMsgType::Message;
 		this->msg = msg;
 	}
 
@@ -93,44 +66,53 @@ namespace Gateway
 
 	// ---------------------------------------------------------------------------------
 	//
-	// Class Gateway::Parser::Log implementation
+	// Class Gateway::ParserLog implementation
 	//
 	// ---------------------------------------------------------------------------------
 
-	void Parser::Log::logResult(const Parser::ParseLineResult& plr)
+	void ParserLog::logResult(int lineNo, LogMsgType msgType, const QString& msg)
 	{
-		log(plr.lineNo, plr.msgType, message(plr.lineNo, plr.msg));
+		log(lineNo, msgType, message(lineNo, msg));
 	}
 
-	void Parser::Log::logError(int lineNo,
-								const QString& errMsg)
+	void ParserLog::logError(int lineNo, const QString& errMsg)
 	{
-		log(lineNo, Parser::MsgType::Error, message(lineNo, errMsg));
+		log(lineNo, LogMsgType::Error, message(lineNo, errMsg));
 	}
 
-	void Parser::Log::logError(const QString& errMsg)
+	void ParserLog::logError(const QString& errMsg)
 	{
-		log(0, Parser::MsgType::Error, errMsg);
+		log(0, LogMsgType::Error, errMsg);
 	}
 
-	void Parser::Log::logWarning(int lineNo,
+	void ParserLog::logWarning(int lineNo,
 								  const QString& wrnMsg)
 	{
-		log(lineNo, Parser::MsgType::Warning, message(lineNo, wrnMsg));
+		log(lineNo, LogMsgType::Warning, message(lineNo, wrnMsg));
 	}
 
-	void Parser::Log::logWarning(const QString& wrnMsg)
+	void ParserLog::logWarning(const QString& wrnMsg)
 	{
-		log(0, Parser::MsgType::Warning, wrnMsg);
+		log(0, LogMsgType::Warning, wrnMsg);
 	}
 
-	void Parser::Log::logRequirtedSettingIsNotSet(int lineNo, E::Setting st)
+	void ParserLog::logRequirtedSettingIsNotSet(int lineNo, E::Setting st)
 	{
 		logError(lineNo, QString("required setting '%1' is not set").
 						arg(::E::valueToString<E::Setting>(st)));
 	}
 
-	QString Parser::Log::message(int lineNo, const QString& msg)
+	int ParserLog::errorCount() const
+	{
+		return m_errCount;
+	}
+
+	int ParserLog::warningCount() const
+	{
+		return m_wrnCount;
+	}
+
+	QString ParserLog::message(int lineNo, const QString& msg)
 	{
 		if (lineNo == 0)
 		{
@@ -140,9 +122,27 @@ namespace Gateway
 		return QString("line %1, %2").arg(lineNo).arg(msg);
 	}
 
-	void Parser::Log::log(int lineNo, Parser::MsgType msgType, const QString& msg)
+	void ParserLog::log(int lineNo, LogMsgType msgType, const QString& msg)
 	{
 		push_back({lineNo, msgType, msg});
+
+		switch(msgType)
+		{
+		case LogMsgType::Error:
+			m_errCount++;
+			break;
+
+		case LogMsgType::Warning:
+			m_wrnCount++;
+			break;
+
+		case LogMsgType::Message:
+			break;
+
+		case LogMsgType::Nothing:
+		default:
+			Q_ASSERT(false);
+		}
 	}
 
 	// ---------------------------------------------------------------------------------
@@ -205,7 +205,7 @@ namespace Gateway
 		clear();
 	}
 
-	bool Parser::parse(const QString& desc)
+	bool Parser::parse(const QString& desc, const SignalSetAdapter& signalSetAdapter)
 	{
 		clear();
 
@@ -232,9 +232,9 @@ namespace Gateway
 
 			result &= res;
 
-			if (plr.msgType != MsgType::Nothing)
+			if (plr.msgType != LogMsgType::Nothing)
 			{
-				m_log.logResult(plr);
+				m_log.logResult(plr.lineNo, plr.msgType, plr.msg);
 			}
 
 			if (plr.lineType == LineType::Comment)
@@ -242,7 +242,7 @@ namespace Gateway
 				continue;
 			}
 
-			if (plr.msgType == MsgType::Error)
+			if (plr.msgType == LogMsgType::Error)
 			{
 				errCount++;
 				continue;
@@ -305,26 +305,36 @@ namespace Gateway
 
 		if (errCount == 0)
 		{
-			result &= generateGatewaysRequiredFiles();
+			result &= generateGatewaysRequiredFiles(signalSetAdapter);
 		}
 
 		return result;
 	}
 
-	const Parser::Log& Parser::log() const
+	const ParserLog& Parser::log() const
 	{
 		return m_log;
 	}
 
-	bool Parser::generateGatewaysRequiredFiles()
+	std::vector<const Gateway*> Parser::gateways() const
 	{
-		m_log.clear();
+		std::vector<const Gateway*> gateways;
 
+		for(auto gw : m_gateways)
+		{
+			gateways.push_back(gw);
+		}
+
+		return gateways;
+	}
+
+	bool Parser::generateGatewaysRequiredFiles(SignalSetAdapter signalSetAdapter)
+	{
 		bool result = true;
 
 		for(Gateway* gw : m_gateways)
 		{
-			result &= gw->generateRequiredFiles(m_log);
+			result &= gw->generateRequiredFiles(signalSetAdapter, m_log);
 		}
 
 		return result;
@@ -498,7 +508,7 @@ namespace Gateway
 		TEST_PTR_RETURN_FALSE(plr);
 
 		plr->lineType = LineType::Unknown;
-		plr->msgType = MsgType::Nothing;
+		plr->msgType = LogMsgType::Nothing;
 		plr->msg.clear();
 
 		QString toParse;
@@ -588,7 +598,7 @@ namespace Gateway
 				}
 			}
 
-			plr->msgType = MsgType::Error;
+			plr->msgType = LogMsgType::Error;
 			plr->msg = QString("unknown section - %1").arg(toParse.trimmed());
 			return false;
 		}
@@ -841,365 +851,4 @@ namespace Gateway
 
 		m_gateways.clear();
 	}
-
-	// ---------------------------------------------------------------------------------
-	//
-	// Class Gateway::SignalList implementation
-	//
-	// ---------------------------------------------------------------------------------
-
-	bool SignalList::setSettingValue(int lineNo, E::Setting st, const QVariant& value)
-	{
-		return m_settingsValues.insert(lineNo, st, value);
-	}
-
-	bool SignalList::settingIsSet(E::Setting st) const
-	{
-		return m_settingsValues.contains(st);
-	}
-
-	bool SignalList::isKnownSetting(E::Setting st) const
-	{
-		Q_UNUSED(st);
-		return false;
-	}
-
-	bool SignalList::checkAndApplySettings(int lineNo, Parser::Log& log)
-	{
-		Q_UNUSED(lineNo);
-		Q_UNUSED(log);
-		return true;
-	}
-
-	SettingValue SignalList::getSettingValue(E::Setting st) const
-	{
-		return m_settingsValues.getSettingVaue(st);
-	}
-
-	// ---------------------------------------------------------------------------------
-	//
-	// Class Gateway::Gateway implementation
-	//
-	// ---------------------------------------------------------------------------------
-
-	const std::set<E::Setting> Gateway::m_gatewayRequiredSettings =
-	{
-		E::Setting::GatewayType,
-		E::Setting::GatewayID,
-		E::Setting::GatewayDescription,
-	};
-
-	Gateway::Gateway() :
-		m_gatewayType(E::GatewayType::Unknown)
-	{
-	}
-
-	Gateway::Gateway(E::GatewayType gwType) :
-		m_gatewayType(gwType)
-	{
-
-	}
-
-	Gateway::~Gateway()
-	{
-		for(SignalList* list : m_signalLists)
-		{
-			delete list;
-		}
-	}
-
-	bool Gateway::setSettingValue(int lineNo, E::Setting st, const QVariant& value)
-	{
-		return m_settingsValues.insert(lineNo, st, value);
-	}
-
-	bool Gateway::settingIsSet(E::Setting st) const
-	{
-		return m_settingsValues.contains(st);
-	}
-
-	bool Gateway::isKnownSetting(E::Setting st) const
-	{
-		return m_gatewayRequiredSettings.contains(st);
-	}
-
-	bool Gateway::checkAndApplySettings(int lineNo, Parser::Log& log)
-	{
-		bool result = true;
-
-		result &= checkRequiredSettings(m_gatewayRequiredSettings, m_settingsValues, lineNo, log);
-
-		RETURN_IF_FALSE(result);
-
-		for(const auto& p : m_settingsValues)
-		{
-			E::Setting st = p.first;
-			const SettingValue& sv = p.second;
-
-			switch(st)
-			{
-			case E::Setting::GatewayType:
-				// setting GatewayType was checked and applied early
-				break;
-
-			case E::Setting::GatewayID:
-				m_gatewayID = sv.value.toString();
-				break;
-
-			case E::Setting::GatewayDescription:
-				m_gatewayDescription = sv.value.toString();
-				break;
-
-			default:
-				;		// ok
-			}
-		}
-
-		return result;
-	}
-
-	void Gateway::appendSignalList()
-	{
-		Q_ASSERT(false);		// this function should be called in derived classes only!
-	}
-
-	bool Gateway::checkRequiredSettings(const std::set<E::Setting> reqSettings,
-									  const SettingsValues& settingsValues,
-									  int lineNo, Parser::Log& log)
-	{
-		bool result = true;
-
-		for(E::Setting st : reqSettings)
-		{
-			if (settingsValues.contains(st) == false)
-			{
-				log.logRequirtedSettingIsNotSet(lineNo, st);
-				result = false;
-			}
-		}
-
-		return result;
-	}
-
-	bool Gateway::generateRequiredFiles(Parser::Log& log)
-	{
-		Q_UNUSED(log);
-		return true;
-	}
-
-	// ---------------------------------------------------------------------------------
-	//
-	// Class Gateway::IVS_Impulse_SignalList implementation
-	//
-	// ---------------------------------------------------------------------------------
-
-	const std::set<E::Setting> IVS_Impulse_SignalList::m_requiredSettings =
-	{
-		E::Setting::ListNo,
-		E::Setting::DataType,
-		E::Setting::SendEvents,
-		E::Setting::IncludeAppSignalID
-	};
-
-	IVS_Impulse_SignalList::IVS_Impulse_SignalList()
-	{
-	}
-
-	bool IVS_Impulse_SignalList::isKnownSetting(E::Setting st) const
-	{
-		return m_requiredSettings.contains(st);
-	}
-
-	bool IVS_Impulse_SignalList::checkAndApplySettings(int lineNo, Parser::Log& log)
-	{
-		bool result = true;
-
-		result &= SignalList::checkAndApplySettings(lineNo, log);
-
-		result &= Gateway::checkRequiredSettings(m_requiredSettings,
-												 m_settingsValues,
-												 lineNo, log);
-		RETURN_IF_FALSE(result);
-
-		for(const auto& p : m_settingsValues)
-		{
-			E::Setting st = p.first;
-			const SettingValue& sv = p.second;
-
-			switch(st)
-			{
-			case E::Setting::ListNo:
-				m_listNo = sv.value.toInt();
-				break;
-
-			case E::Setting::DataType:
-				{
-					QString dataTypeStr = sv.value.toString();
-
-					if (dataTypeStr == "A")
-					{
-						m_dataType = DataType::Analog_A;
-					}
-					else
-					{
-						if (dataTypeStr == "B")
-						{
-							m_dataType = DataType::Discrete_B;
-						}
-						else
-						{
-							log.logError(sv.lineNo, QString("unknown signal list data type '%1' use 'A' or 'B' instead").
-														arg(dataTypeStr));
-							result = false;
-						}
-					}
-				}
-				break;
-
-			case E::Setting::SendEvents:
-				m_sendEvents = sv.value.toBool();
-				break;
-
-			case E::Setting::IncludeAppSignalID:
-				m_includeAppSignalID = sv.value.toBool();
-				break;
-
-			default:
-				Q_ASSERT(false);
-			}
-		}
-
-		return result;
-	}
-
-	int IVS_Impulse_SignalList::listNo() const
-	{
-		return m_listNo;
-	}
-
-	// ---------------------------------------------------------------------------------
-	//
-	// Class Gateway::IVS_Impulse_Gateway implementation
-	//
-	// ---------------------------------------------------------------------------------
-
-	const std::set<E::Setting>	IVS_Impulse_Gateway::m_requiredSettings =
-	{
-		E::Setting::GatewayIP1,
-		E::Setting::GatewayIP2,
-		E::Setting::SystemID,
-		E::Setting::ListsVersion,
-		E::Setting::Period
-	};
-
-
-	IVS_Impulse_Gateway::IVS_Impulse_Gateway() :
-		Gateway(E::GatewayType::IVS_Impulse)
-	{
-	}
-
-	bool IVS_Impulse_Gateway::isKnownSetting(E::Setting st) const
-	{
-		return Gateway::isKnownSetting(st) ||
-				m_requiredSettings.contains(st);
-	}
-
-	bool IVS_Impulse_Gateway::checkAndApplySettings(int lineNo, Parser::Log& log)
-	{
-		bool result = true;
-
-		result &= Gateway::checkAndApplySettings(lineNo, log);
-		result &= Gateway::checkRequiredSettings(m_requiredSettings,
-												 m_settingsValues,
-												 lineNo, log);
-		RETURN_IF_FALSE(result);
-
-		HostAddressPort addrPort;
-
-		for(const auto& p: m_settingsValues)
-		{
-			E::Setting st = p.first;
-			const SettingValue& sv = p.second;
-
-			switch(st)
-			{
-			case E::Setting::GatewayIP1:
-				addrPort.setAddressPortStr(sv.value.toString(),  0);
-				m_gatewayIP1 = addrPort;
-				break;
-
-			case E::Setting::GatewayIP2:
-				addrPort.setAddressPortStr(sv.value.toString(),  0);
-				m_gatewayIP2 = addrPort;
-				break;
-
-			case E::Setting::SystemID:
-				m_systemID = sv.value.toInt();
-				break;
-
-			case E::Setting::ListsVersion:
-				m_listsVersion = sv.value.toInt();
-				break;
-
-			case E::Setting::Period:
-				m_period = sv.value.toInt();
-				break;
-
-			default:
-				;	// ok
-			}
-		}
-
-		return result;
-	}
-
-	void IVS_Impulse_Gateway::appendSignalList()
-	{
-		m_signalLists.push_back(new IVS_Impulse_SignalList);
-	}
-
-	bool IVS_Impulse_Gateway::generateRequiredFiles(Parser::Log& log)
-	{
-		bool result = true;
-
-		result = checkSignalListsSettings(log);
-
-		RETURN_IF_FALSE(result);
-
-		return result;
-	}
-
-	bool IVS_Impulse_Gateway::checkSignalListsSettings(Parser::Log& log)
-	{
-		bool result = true;
-
-		std::map<int, IVS_Impulse_SignalList*> listsIDs;
-
-		for(SignalList* l : m_signalLists)
-		{
-			IVS_Impulse_SignalList* sl = dynamic_cast<IVS_Impulse_SignalList*>(l);
-
-			TEST_PTR_CONTINUE(sl);
-
-			auto it = listsIDs.find(sl->listNo());
-
-			if (it == listsIDs.end())
-			{
-				listsIDs.insert({ sl->listNo(), sl });
-				continue;
-			}
-
-			SettingValue sv1 = it->second->getSettingValue(E::Setting::ListNo);
-			SettingValue sv2 = sl->getSettingValue(E::Setting::ListNo);
-
-			log.logError(QString("duplicate signal lists ListNo = %1 (lines %2, %3)").
-						 arg(sl->listNo()).arg(sv1.lineNo).arg(sv2.lineNo));
-
-			result = false;
-		}
-
-		return result;
-	}
-
-
 }
