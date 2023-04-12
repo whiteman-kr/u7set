@@ -1,4 +1,5 @@
 #include "../../ClientLib/TuningConnection.h"
+#include "../../ClientLib/ITuningLog.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -169,8 +170,7 @@ TEST_F(TuningConnectionTests, connect)
 	EXPECT_CALL(signalUpdater, signalHashes(lmHashes))
 			.Times(2);
 
-	ClientLib::TuningUserManager userManager;
-	TuningLog::TuningLogStub tuningLog{userManager, {}};
+	ClientLib::TuningLogStub tuningLog;
 
 	{
 		ClientLib::TuningConnection tc{signalManager, signalUpdater, &logFile, &tuningLog};
@@ -217,8 +217,7 @@ TEST_F(TuningConnectionTests, tuningSourceInfo)
 
 	TuningSignalManager signalManager{s_safeSoftwareInfoA.equipmentID(), &logFile};
 
-	ClientLib::TuningUserManager userManager;
-	TuningLog::TuningLogStub tuningLog{userManager, {}};
+	ClientLib::TuningLogStub tuningLog;
 
 	Hash lmHash = {::calcHash(QStringLiteral("SYSTEMID_CLIENTTEST_CH12_MD00"))};
 
@@ -403,8 +402,7 @@ TEST_F(TuningConnectionTests, activeClientInfo)
 	TuningSignalManager signalManagerA{s_safeSoftwareInfoA.equipmentID(), &logFile};
 	TuningSignalManager signalManagerB{s_safeSoftwareInfoB.equipmentID(), &logFile};
 
-	ClientLib::TuningUserManager userManager;
-	TuningLog::TuningLogStub tuningLog{userManager, {}};
+	ClientLib::TuningLogStub tuningLog;
 
 	Hash lmHash = {::calcHash(QStringLiteral("SYSTEMID_CLIENTTEST_CH12_MD00"))};
 
@@ -539,8 +537,7 @@ TEST_F(TuningConnectionTests, writeAnalogSignals)
 
 	EXPECT_TRUE(ok);
 
-	ClientLib::TuningUserManager userManager;
-	TuningLog::TuningLogStub tuningLog{userManager, {}};
+	ClientLib::TuningLogStub tuningLog;
 
 	// Create tuning connection to the service
 	//
@@ -678,8 +675,7 @@ TEST_F(TuningConnectionTests, applyAnalogSignals)
 
 	EXPECT_TRUE(ok);
 
-	ClientLib::TuningUserManager userManager;
-	TuningLog::TuningLogStub tuningLog{userManager, {}};
+	ClientLib::TuningLogStub tuningLog;
 
 	// Create tuning connection to the service
 	//
@@ -781,8 +777,7 @@ TEST_F(TuningConnectionTests, writeDiscreteSignals)
 
 	EXPECT_TRUE(ok);
 
-	ClientLib::TuningUserManager userManager;
-	TuningLog::TuningLogStub tuningLog{userManager, {}};
+	ClientLib::TuningLogStub tuningLog;
 
 	// Create tuning connection to the service
 	//
@@ -885,8 +880,7 @@ TEST_F(TuningConnectionTests, applyDiscreteSignals)
 
 	EXPECT_TRUE(ok);
 
-	ClientLib::TuningUserManager userManager;
-	TuningLog::TuningLogStub tuningLog{userManager, {}};
+	ClientLib::TuningLogStub tuningLog;
 
 	// Create tuning connection to the service
 	//

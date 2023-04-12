@@ -1,6 +1,7 @@
 #include <QSignalSpy>
 #include "Control.h"
 #include "AdsInputController.h"
+#include "TunsOutputController.h"
 #include "ScriptRunner.h"
 
 namespace
@@ -184,6 +185,24 @@ namespace TestSuite
 
 	void ControlThread::taskInitOutputController()
 	{
+		if (m_configuration.tuningEnabled == false)
+		{
+			m_outputController.reset();
+			return;
+		}
+
+		auto controller = std::make_unique<TunsOutputController>(m_softwareInfo,
+																 m_configuration.tuningServices,
+																 TuningClientSettings::LmStatusFlagMode::None,	// Access key?
+																 m_appLog.logFile());
+		bool ok = controller->waitForConnection(ServiceConnectTimeoutMs);
+		if (ok == false)
+		{
+			throw 1;
+		}
+
+		m_outputController = std::move(controller);
+		return;
 	}
 
 	void ControlThread::taskRunTests()

@@ -15,7 +15,7 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 										 TuningClientSettings::LmStatusFlagMode lmStatusFlagMode,
 										 ITuningSignalUpdater& signalUpdater,
 										 ILogFile* logFile,
-										 TuningLog::TuningLog* tuningLog)
+										 ITuningLog* tuningLog)
 	{
 		tcpTuningClient = new TuningTcpClient{softwareInfo, tuns, signalUpdater, logFile, tuningLog};
 		tcpTuningClient->setServers(tuns.clientRequestAddress, tuns.clientRequestAddress, true);
@@ -56,7 +56,7 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 	TuningConnection::TuningConnection(ITuningSignalManager& tuningSignalManager,
 									   ITuningSignalUpdater& tuningSignalUpdater,
 									   ILogFile* logFile,
-									   TuningLog::TuningLog* tuningLog) :
+									   ITuningLog* tuningLog) :
 		m_tuningSignalManager{tuningSignalManager},
 		m_tuningSignalUpdater{tuningSignalUpdater},
 		m_logFile{logFile, "TuningConnection"},

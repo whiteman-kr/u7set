@@ -6,6 +6,7 @@
 #include "TestSuiteConfigController.h"
 #include "TestScriptsStorage.h"
 #include "IInputController.h"
+#include "IOutputController.h"
 #include "../ClientLib/AppSignalManager.h"
 
 namespace TestSuite
@@ -57,6 +58,7 @@ namespace TestSuite
 
 		ClientLib::AppSignalManager m_signals;
 		std::unique_ptr<IInputController> m_inputController;
+		std::unique_ptr<IOutputController> m_outputController;
 	};
 
 

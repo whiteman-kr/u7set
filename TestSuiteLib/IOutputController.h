@@ -5,7 +5,9 @@ namespace TestSuite
 	class IOutputController
 	{
 	public:
-		~IOutputController() = default;
+		virtual ~IOutputController() = default;
+
+		virtual bool waitForConnection(qint64 timeoutMs) const = 0;
 	};
 }
 

@@ -31,11 +31,11 @@ void showHelp()
 
 #ifdef Q_OS_WINDOWS
 	std::cout << "Example 1 - run tests contained in the project:" << std::endl;
-	std::cout << "\tTestSuiteConsole.exe -settings=Settings.xml" << std::endl;
+	std::cout << "\tTestSuiteConsole.exe -settings=TestSuiteSettings.xml" << std::endl;
 	std::cout << "Example 2 - run tests from specified folder:" << std::endl;
-	std::cout << "\tTestSuiteConsole.exe -settings=Settings.xml -scripts_path=D:\\ProjectTests" << std::endl;
+	std::cout << "\tTestSuiteConsole.exe -settings=TestSuiteSettings.xml -scripts_path=D:\\ProjectTests" << std::endl;
 	std::cout << "Example 3 - create settings file template:" << std::endl;
-	std::cout << "\tTestSuiteConsole.exe -create=Settings.xml" << std::endl;
+	std::cout << "\tTestSuiteConsole.exe -create=TestSuiteSettings.xml" << std::endl;
 #else
 	std::cout << "Example 1 - run tests contained in the project:" << std::endl;
 	std::cout << "\t./TestSuiteConsole -settings=Settings.xml" << std::endl;

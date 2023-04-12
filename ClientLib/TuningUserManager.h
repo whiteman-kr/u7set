@@ -1,9 +1,6 @@
 #pragma once
 
-#include <QDateTime>
-#include <QComboBox>
-#include <QLineEdit>
-#include <QDialog>
+#include <QObject>
 
 #ifdef Q_OS_LINUX
 #include <security/pam_appl.h>

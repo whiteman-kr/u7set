@@ -57,7 +57,8 @@ SOURCES += \
     TestSuite.cpp \
     TestSuiteConfigController.cpp \
     TestSuiteLib.cpp \
-    TestSuiteSettings.cpp
+    TestSuiteSettings.cpp \
+    TunsOutputController.cpp
 
 HEADERS += \
     AdsInputController.h \
@@ -73,7 +74,8 @@ HEADERS += \
     TestSuite.h \
     TestSuiteConfigController.h \
     TestSuiteLib.h \
-    TestSuiteSettings.h
+    TestSuiteSettings.h \
+    TunsOutputController.h
 
 # protobuf
 #

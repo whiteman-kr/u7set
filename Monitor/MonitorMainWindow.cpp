@@ -868,7 +868,7 @@ void MonitorMainWindow::showLog()
 
 void MonitorMainWindow::showTuningLog()
 {
-    m_tuningLogFile.viewSignalsLog(this);
+	m_tuningLogFile.viewTuningLog(this);
 }
 
 void MonitorMainWindow::showDataSources()

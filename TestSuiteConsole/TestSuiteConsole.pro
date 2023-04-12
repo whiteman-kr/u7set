@@ -60,6 +60,11 @@ LIBS += -lClientLib
 win32:PRE_TARGETDEPS += $$DESTDIR/ClientLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libClientLib.a
 
+# Authorization
+#
+win32:LIBS += -lAdvapi32
+unix:LIBS += -lpam -lpam_misc
+
 # TestSuiteLib
 #
 LIBS += -lTestSuiteLib
