@@ -56,7 +56,6 @@ SOURCES += \
     TestScriptsStorage.cpp \
     TestSuite.cpp \
     TestSuiteConfigController.cpp \
-    TestSuiteLib.cpp \
     TestSuiteSettings.cpp \
     TunsOutputController.cpp
 
@@ -73,7 +72,6 @@ HEADERS += \
     TestScriptsStorage.h \
     TestSuite.h \
     TestSuiteConfigController.h \
-    TestSuiteLib.h \
     TestSuiteSettings.h \
     TunsOutputController.h
 

@@ -6,6 +6,7 @@ TestSuiteDialogSettings::TestSuiteDialogSettings(QWidget *parent) :
 	ui(new Ui::TestSuiteDialogSettings)
 {
 	ui->setupUi(this);
+	createLanguagesList();
 }
 
 TestSuiteDialogSettings::~TestSuiteDialogSettings()
@@ -26,14 +27,37 @@ void TestSuiteDialogSettings::setSettings(const AppConfigSettings& settings)
 	ui->m_IP2->setText(m_settings.librarySettings().configuratorAddress2().addressStr());
 	ui->m_port2->setText(QString::number(m_settings.librarySettings().configuratorAddress2().port()));
 
-//	ui->loadSciptsPathCheck->setChecked(m_settings.librarySettings().loadScriptsFromPath());
-//	ui->loadSciptsPath->setEnabled(m_settings.librarySettings().loadScriptsFromPath());
-//	ui->loadSciptsPath->setText(m_settings.librarySettings().scriptsPath());
+	ui->loadSciptsPathCheck->setChecked(m_settings.useLocalScriptsPath());
+	ui->loadSciptsPath->setEnabled(m_settings.useLocalScriptsPath());
+	ui->loadSciptsPath->setText(m_settings.localScriptsPath());
 }
 
 const AppConfigSettings& TestSuiteDialogSettings::settings() const
 {
 	return m_settings;
+}
+
+void TestSuiteDialogSettings::createLanguagesList()
+{
+	ui->m_languageCombo->addItem("English", "en");
+	ui->m_languageCombo->setCurrentIndex(0);
+
+	QDirIterator it(":/languages", QDirIterator::Subdirectories);
+	while (it.hasNext())
+	{
+		QString locale = it.next();
+		locale.truncate(locale.lastIndexOf('.')); // "TestSuite_"
+		locale.remove(0, locale.indexOf('_') + 1); // "de"
+
+		QString lang = QLocale::languageToString(QLocale(locale).language());
+
+		ui->m_languageCombo->addItem(lang, locale);
+
+		if (theSettings.language() == locale)
+		{
+			ui->m_languageCombo->setCurrentIndex(ui->m_languageCombo->count() - 1);
+		}
+	}
 }
 
 void TestSuiteDialogSettings::on_TestSuiteDialogSettings_accepted()
@@ -62,8 +86,8 @@ void TestSuiteDialogSettings::on_TestSuiteDialogSettings_accepted()
 
 	m_settings.librarySettings().setInstanceStrId(instanceStrId);
 
-//	m_settings.librarySettings().setLoadScriptsFromPath(ui->loadSciptsPathCheck->isChecked() == true);
-//	m_settings.librarySettings().setScriptsPath(ui->loadSciptsPath->text());
+	m_settings.setUseLocalScriptsPath(ui->loadSciptsPathCheck->isChecked() == true);
+	m_settings.setLocalScriptsPath(ui->loadSciptsPath->text());
 
 	// IP Configuration
 	HostAddressPort address1{ui->m_IP1->text(), ui->m_port1->text().toInt()};
@@ -80,7 +104,7 @@ void TestSuiteDialogSettings::on_TestSuiteDialogSettings_accepted()
 	}
 
 	// Language
-	/*
+
 
 	QVariant data = ui->m_languageCombo->currentData();
 
@@ -92,10 +116,9 @@ void TestSuiteDialogSettings::on_TestSuiteDialogSettings_accepted()
 
 		QMessageBox::warning(this, qAppName(), tr("Language has been changed, please restart the application."));
 	}
-*/
+
 	//
 }
-
 
 void TestSuiteDialogSettings::on_loadSciptsPathBrowse_clicked()
 {

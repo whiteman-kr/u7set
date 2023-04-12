@@ -25,12 +25,6 @@ namespace TestSuite
 		void setConfiguratorAddress2(const HostAddressPort& address);
 		HostAddressPort configuratorAddress2() const;
 
-//		bool loadScriptsFromPath() const;
-//		void setLoadScriptsFromPath(bool value);
-
-//		QString scriptsPath() const;
-//		void setScriptsPath(const QString& path);
-
 	private:
 		bool getArgumentFromXml(QDomElement& docElem, QString name, QString* result);
 		bool getArgumentFromXml(QDomElement& docElem, QString name, int* result);
@@ -40,8 +34,5 @@ namespace TestSuite
 
 		HostAddressPort m_cfgServiceAddress1;
 		HostAddressPort m_cfgServiceAddress2;
-
-//		bool m_loadScriptsFromPath = false;
-//		QString m_scriptsPath;
 	};
 }

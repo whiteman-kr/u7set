@@ -39,8 +39,14 @@ CONFIG(release, debug|release) {
 	UI_DIR = release/ui
 }
 
+RESOURCES += \
+    Resources.qrc
+
 SOURCES += \
     ../lib/BuildInfo.cpp \
+    ../lib/Ui/DialogAbout.cpp \
+    ../lib/Ui/DialogAlert.cpp \
+    ../lib/Ui/DialogTcpStatistics.cpp \
     AppConfigSettings.cpp \
     TestSuiteDialogSettings.cpp \
     TestSuiteLog.cpp \
@@ -49,6 +55,9 @@ SOURCES += \
 
 HEADERS += \
     ../lib/BuildInfo.h \
+    ../lib/Ui/DialogAbout.h \
+    ../lib/Ui/DialogAlert.h \
+    ../lib/Ui/DialogTcpStatistics.h \
     AppConfigSettings.h \
     TestSuiteDialogSettings.h \
     TestSuiteLog.h \
@@ -122,3 +131,6 @@ LIBS += -lprotobuf
 win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
 INCLUDEPATH += ./../Protobuf
+
+DISTFILES += \
+    Images/logo.png

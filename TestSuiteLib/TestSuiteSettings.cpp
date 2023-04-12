@@ -26,9 +26,6 @@ namespace TestSuite
 		int configuratorPort2 = s.value("m_configuratorPort2", PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST).toInt();
 		m_cfgServiceAddress2 = {configuratorIpAddress2, configuratorPort2};
 
-//		m_loadScriptsFromPath = s.value("m_loadScriptsFromPath", false).toBool();
-//		m_scriptsPath = s.value("m_scriptsPath", QString()).toString();
-
 		return;
 	}
 
@@ -142,16 +139,6 @@ namespace TestSuite
 
 		m_cfgServiceAddress2 = {configuratorIpAddress2, configuratorPort2};
 
-//		// ScriptsPath
-//		//
-//		ok = getArgumentFromXml(docElem, "ScriptsPath", &m_scriptsPath);
-//		if (ok == false)
-//		{
-//			*errorMsg = "Failed to read ScriptsPath argument from file!";
-//			return false;
-//		}
-//		m_loadScriptsFromPath = m_scriptsPath.isEmpty() == false;
-
 		return true;
 	}
 
@@ -166,9 +153,6 @@ namespace TestSuite
 
 		s.setValue("m_configuratorIpAddress2", m_cfgServiceAddress2.addressStr());
 		s.setValue("m_configuratorPort2", m_cfgServiceAddress2.port());
-
-		//s.setValue("m_loadScriptsFromPath", m_loadScriptsFromPath);
-		//s.setValue("m_scriptsPath", m_scriptsPath);
 
 		return;
 	}
@@ -237,9 +221,6 @@ namespace TestSuite
 		writer.writeComment("Configurator Port 2");
 		writer.writeTextElement("ConfiguratorPort2", QString::number(PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST));
 
-		//writer.writeComment("ScriptsPath (optional)");
-		//writer.writeTextElement("ScriptsPath", "");
-
 		writer.writeEndElement();	// TestSuiteConsoleArguments
 		writer.writeEndDocument();
 
@@ -283,24 +264,4 @@ namespace TestSuite
 	{
 		return m_cfgServiceAddress2;
 	}
-
-//	bool TestSuiteSettings::loadScriptsFromPath() const
-//	{
-//		return m_loadScriptsFromPath;
-//	}
-
-//	void TestSuiteSettings::setLoadScriptsFromPath(bool value)
-//	{
-//		m_loadScriptsFromPath = value;
-//	}
-
-//	QString TestSuiteSettings::scriptsPath() const
-//	{
-//		return m_scriptsPath;
-//	}
-
-//	void TestSuiteSettings::setScriptsPath(const QString& path)
-//	{
-//		m_scriptsPath = path;
-//	}
 }

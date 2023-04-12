@@ -61,7 +61,7 @@ namespace TestSuite
 		return;
 	}
 
-	void TestScriptsStorage::setScript(std::vector<TestScript>&& scripts)
+	void TestScriptsStorage::setScripts(std::vector<TestScript>&& scripts)
 	{
 		QWriteLocker l(&m_lock);
 		m_scripts = std::move(scripts);
@@ -82,11 +82,13 @@ namespace TestSuite
 			return false;
 		}
 
+		clear();
+
 		QStringList files = dir.entryList(QStringList() << "*.js", QDir::Files, QDir::Name);
 		for (const QString& file : files)
 		{
 			TestScript ts;
-			ts.fileName = QDir::fromNativeSeparators(path + QDir::separator() + file);
+			ts.fileName = path + QDir::separator() + file;
 
 			QFile f(ts.fileName);
 			if (f.open(QFile::ReadOnly) == false)

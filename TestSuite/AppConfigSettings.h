@@ -30,10 +30,19 @@ public:
 	QString language() const;
 	void setLanguage(const QString& value);
 
+	bool useLocalScriptsPath() const;
+	void setUseLocalScriptsPath(bool value);
+
+	QString localScriptsPath() const;
+	void setLocalScriptsPath(const QString& path);
+
 	QString localAppDataPath();
 
 public:
 	int m_requestInterval = 100;
+
+	bool m_useLocalScriptsPath = false;
+	QString m_localScriptsPath;
 
 	// MainWindow options
 
@@ -61,6 +70,8 @@ public:
 	{
 		m_librarySettings = That.m_librarySettings;
 
+		m_useLocalScriptsPath = That.m_useLocalScriptsPath;
+		m_localScriptsPath = That.m_localScriptsPath;
 		m_language = That.m_language;
 
 		return *this;

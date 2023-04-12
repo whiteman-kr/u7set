@@ -65,6 +65,8 @@ void AppConfigSettings::StoreUser()
 
 	s.setValue("MainWindow/language", m_language);
 
+	s.setValue("Global/useLocalScriptsPath", m_useLocalScriptsPath);
+	s.setValue("Global/localScriptsPath", m_localScriptsPath);
 }
 
 void AppConfigSettings::RestoreUser()
@@ -78,6 +80,9 @@ void AppConfigSettings::RestoreUser()
 	m_mainWindowState = s.value("MainWindow/state").toByteArray();
 
 	m_language = s.value("MainWindow/language", m_language).toString();
+
+	m_useLocalScriptsPath = s.value("Global/useLocalScriptsPath", m_useLocalScriptsPath).toBool();
+	m_localScriptsPath = s.value("Global/localScriptsPath", m_localScriptsPath).toString();
 }
 
 TestSuite::TestSuiteSettings& AppConfigSettings::librarySettings()
@@ -111,6 +116,26 @@ QString AppConfigSettings::language() const
 void AppConfigSettings::setLanguage(const QString& value)
 {
 	m_language = value;
+}
+
+bool AppConfigSettings::useLocalScriptsPath() const
+{
+	return m_useLocalScriptsPath;
+}
+
+void AppConfigSettings::setUseLocalScriptsPath(bool value)
+{
+	m_useLocalScriptsPath = value;
+}
+
+QString AppConfigSettings::localScriptsPath() const
+{
+	return m_localScriptsPath;
+}
+
+void AppConfigSettings::setLocalScriptsPath(const QString& path)
+{
+	m_localScriptsPath = path;
 }
 
 QString AppConfigSettings::localAppDataPath()

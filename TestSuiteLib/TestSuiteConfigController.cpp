@@ -78,9 +78,14 @@ namespace TestSuite
 				return false;
 			}
 
-			m_logFile.writeMessage("Loaded file: " + fileName);
-
-			scripts.emplace_back(fileName, data);
+			QString shortenFileName = fileName;
+			shortenFileName.remove(m_softwareInfo.equipmentID());
+			while (shortenFileName.startsWith("/"))
+			{
+				shortenFileName.remove(0, 1);
+			}
+			m_logFile.writeMessage("Loaded script file: " + shortenFileName);
+			scripts.emplace_back(shortenFileName, data);
 		}
 
 		// Trace received params

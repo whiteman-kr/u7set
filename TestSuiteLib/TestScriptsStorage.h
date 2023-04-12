@@ -26,7 +26,7 @@ namespace TestSuite
 		//
 		void clear();
 		void add(const TestScript& script);
-		void setScript(std::vector<TestScript>&& scripts);	// Sets scripts by moving them from source
+		void setScripts(std::vector<TestScript>&& scripts);	// Sets scripts by moving them from source
 
 		bool loadFromPath(const QString& path, QString* errorMsg);
 

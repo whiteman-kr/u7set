@@ -44,9 +44,6 @@ namespace TestSuite
 
 		bool isRunning() const;
 
-//		TestLibraryState state() const;
-//		void setState(TestLibraryState state);
-
 	signals:
 		void finished(int result);
 

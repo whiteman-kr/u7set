@@ -31,7 +31,7 @@
      </widget>
     </item>
     <item row="0" column="2" rowspan="3">
-     <widget class="QTextEdit" name="resultsLog"/>
+     <widget class="QTextEdit" name="testLog"/>
     </item>
     <item row="0" column="1">
      <widget class="QPushButton" name="m_run">
@@ -54,7 +54,7 @@
      </spacer>
     </item>
     <item row="3" column="0" colspan="3">
-     <widget class="QTextEdit" name="outputLog"/>
+     <widget class="QTextEdit" name="appLog"/>
     </item>
     <item row="1" column="1">
      <widget class="QPushButton" name="m_stop">

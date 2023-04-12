@@ -36,17 +36,17 @@ bool TestSuiteLogFile::writeText(const QString& text)
 	return Log::LogFile::writeText(text);
 }
 
-void TestSuiteOutputLog::writeError(const QString& text)
+void TestSuiteTestLog::writeError(const QString& text)
 {
 	emit errorArrived(text);
 }
 
-void TestSuiteOutputLog::writeWarning(const QString& text)
+void TestSuiteTestLog::writeWarning(const QString& text)
 {
 	emit warningArrived(text);
 }
 
-void TestSuiteOutputLog::writeMessage(const QString& text)
+void TestSuiteTestLog::writeMessage(const QString& text)
 {
 	emit messageArrived(text);
 }

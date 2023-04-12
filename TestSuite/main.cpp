@@ -16,6 +16,28 @@ struct TestSuiteSharedData
 };
 #pragma pack()
 
+QTranslator m_translator; // contains the translations for this application
+
+void switchTranslator(QTranslator& translator, const QString& filename)
+{
+	// remove the old translator
+	qApp->removeTranslator(&translator);
+
+	// load the new translator
+	if(translator.load(filename))
+	{
+		qApp->installTranslator(&translator);
+	}
+}
+
+void loadLanguage(const QString& rLanguage)
+{
+	QLocale locale = QLocale(rLanguage);
+	QLocale::setDefault(locale);
+
+	switchTranslator(m_translator, QString(":/languages/TestSuite_%1.qm").arg(rLanguage));
+}
+
 int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
@@ -34,7 +56,7 @@ int main(int argc, char *argv[])
 	theSettings.RestoreUser();
 	theSettings.RestoreSystem();
 
-	//loadLanguage(theSettings.language());
+	loadLanguage(theSettings.language());
 
 	// Parse the command line
 	//

@@ -81,6 +81,7 @@ namespace TestSuite
 		m_scripts.clear();
 		m_signals.reset();
 		m_inputController.reset();
+		m_outputController.reset();
 		return;
 	}
 
@@ -213,6 +214,12 @@ namespace TestSuite
 
 		for (const auto& script : m_scripts)
 		{
+			if (m_executionTests.empty() == false &&
+					std::find(m_executionTests.begin(), m_executionTests.end(), script.fileName) == m_executionTests.end())
+			{
+				continue;
+			}
+
 			checkAndInterruptTestExecution();
 
 			QString logMessage = tr("Run test script: %1").arg(script.fileName);
