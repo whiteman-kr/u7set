@@ -1,4 +1,5 @@
 #pragma once
+#include "../lib/Ui/ClickableLabel.h"
 #include "../DbLib/DbStruct.h"
 #include "./Locator/EquipmentLocatorProvider.h"
 #include "./Locator/ConnectionLocatorProvider.h"
@@ -67,9 +68,12 @@ private:
 public slots:
     void onMiniDumpCreated(QString dumpFilePath, bool result);
 
+
+protected slots:
+	void currentTabChanged(int tabIndex);
+
 	// Commands
 	//
-protected slots:
 	void exit();
 
 	void userManagement();
@@ -117,7 +121,6 @@ private slots:
 protected:
 	DbController* dbController();
 	DbController* db();
-
     
 	// Data
 	//
@@ -168,8 +171,8 @@ private:
 	Locator::LocatorEditControl* m_locatorEditControl = nullptr;
 
 	QLabel* m_statusBarInfo = nullptr;
-	QLabel* m_statusBarConnectionStatistics = nullptr;
-	QLabel* m_statusBarSchemaZoom = nullptr;
+	ClickableLabel* m_statusBarSchemaLayerLabel = nullptr;		// Specific information for schemas tab
+	ClickableLabel* m_statusBarSchemaZoomLabel = nullptr;		// Specific information for schemas tab
 	QLabel* m_statusBarConnectionState = nullptr;
 
 	ProjectsTabPage* m_projectsTab = nullptr;
