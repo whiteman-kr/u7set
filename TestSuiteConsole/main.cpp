@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
 #ifdef GITLAB_CI_BUILD
 	const int buildNo = CI_PIPELINE_ID;
 
-	a.setApplicationVersion(QString("%1.%2.%3 (%4)")
+	app.setApplicationVersion(QString("%1.%2.%3 (%4)")
 							.arg(MajorVersion)
 							.arg(MinorVersion)
 							.arg(buildNo)
