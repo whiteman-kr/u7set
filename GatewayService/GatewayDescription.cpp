@@ -1,0 +1,622 @@
+#include "../lib/ConstStrings.h"
+#include "../CommonLib/Types.h"
+#include "../UtilsLib/WUtils.h"
+
+#include "GatewayDescription.h"
+#include "GatewayDescriptionParser.h"
+
+namespace Gateway
+{
+	// ---------------------------------------------------------------------------------
+	//
+	// Class Gateway::SettingsValues implementation
+	//
+	// ---------------------------------------------------------------------------------
+
+	bool SettingsValues::contains(E::Setting st) const
+	{
+		return m_settingsValues.contains(st);
+	}
+
+	bool SettingsValues::insert(int lineNo, E::Setting st, const QVariant& value)
+	{
+		SettingValue sv =
+		{
+			.lineNo = lineNo,
+			.setting = st,
+			.value = value
+		};
+
+		auto p = m_settingsValues.insert({ st, sv });
+
+		return !p.second;		// if true - setting value already exists
+	}
+
+	std::map<E::Setting, SettingValue>::const_iterator SettingsValues::begin() const
+	{
+		return m_settingsValues.begin();
+	}
+
+	std::map<E::Setting, SettingValue>::iterator SettingsValues::begin()
+	{
+		return m_settingsValues.begin();
+	}
+
+	std::map<E::Setting, SettingValue>::const_iterator SettingsValues::end() const
+	{
+		return m_settingsValues.end();
+	}
+
+	std::map<E::Setting, SettingValue>::iterator SettingsValues::end()
+	{
+		return m_settingsValues.end();
+	}
+
+	SettingValue SettingsValues::getSettingVaue(E::Setting st) const
+	{
+		auto it = m_settingsValues.find(st);
+
+		if (it == m_settingsValues.end())
+		{
+			return SettingValue();
+		}
+
+		return it->second;
+	}
+
+	// ---------------------------------------------------------------------------------
+	//
+	// Class Gateway::File implementation
+	//
+	// ---------------------------------------------------------------------------------
+
+	File::File(E::GatewayType gatewayType, const QString& gatewayID, const QString& fileName) :
+		m_gatewayType(gatewayType),
+		m_gatewayID(gatewayID),
+		m_fileName(fileName)
+	{
+	}
+
+	const QByteArray& File::fileData() const
+	{
+		return m_fileData;
+	}
+
+	QByteArray& File::mutableFileData()
+	{
+		return m_fileData;
+	}
+
+	QString File::gatewayID() const
+	{
+		return m_gatewayID;
+	}
+
+	QString File::fileName() const
+	{
+		return m_fileName;
+	}
+
+	// ---------------------------------------------------------------------------------
+	//
+	// Class Gateway::SignalList implementation
+	//
+	// ---------------------------------------------------------------------------------
+
+	bool SignalList::setSettingValue(int lineNo, E::Setting st, const QVariant& value)
+	{
+		return m_settingsValues.insert(lineNo, st, value);
+	}
+
+	bool SignalList::settingIsSet(E::Setting st) const
+	{
+		return m_settingsValues.contains(st);
+	}
+
+	bool SignalList::isKnownSetting(E::Setting st) const
+	{
+		Q_UNUSED(st);
+		return false;
+	}
+
+	bool SignalList::checkAndApplySettings(int lineNo, ParserLog &log)
+	{
+		Q_UNUSED(lineNo);
+		Q_UNUSED(log);
+		return true;
+	}
+
+	SettingValue SignalList::getSettingValue(E::Setting st) const
+	{
+		return m_settingsValues.getSettingVaue(st);
+	}
+
+	const std::vector<QString>& SignalList::signalIDs() const
+	{
+		return m_signalIDs;
+	}
+
+	// ---------------------------------------------------------------------------------
+	//
+	// Class Gateway::Gateway implementation
+	//
+	// ---------------------------------------------------------------------------------
+
+	const std::set<E::Setting> Gateway::m_gatewayRequiredSettings =
+	{
+		E::Setting::GatewayType,
+		E::Setting::GatewayID,
+		E::Setting::GatewayDescription,
+	};
+
+	Gateway::Gateway() :
+		m_gatewayType(E::GatewayType::Unknown)
+	{
+	}
+
+	Gateway::Gateway(E::GatewayType gwType) :
+		m_gatewayType(gwType)
+	{
+
+	}
+
+	Gateway::~Gateway()
+	{
+		for(SignalList* list : m_signalLists)
+		{
+			delete list;
+		}
+	}
+
+	bool Gateway::setSettingValue(int lineNo, E::Setting st, const QVariant& value)
+	{
+		return m_settingsValues.insert(lineNo, st, value);
+	}
+
+	bool Gateway::settingIsSet(E::Setting st) const
+	{
+		return m_settingsValues.contains(st);
+	}
+
+	bool Gateway::isKnownSetting(E::Setting st) const
+	{
+		return m_gatewayRequiredSettings.contains(st);
+	}
+
+	bool Gateway::checkAndApplySettings(int lineNo, ParserLog& log)
+	{
+		bool result = true;
+
+		result &= checkRequiredSettings(m_gatewayRequiredSettings, m_settingsValues, lineNo, log);
+
+		RETURN_IF_FALSE(result);
+
+		for(const auto& p : m_settingsValues)
+		{
+			E::Setting st = p.first;
+			const SettingValue& sv = p.second;
+
+			switch(st)
+			{
+			case E::Setting::GatewayType:
+				// setting GatewayType was checked and applied early
+				break;
+
+			case E::Setting::GatewayID:
+				m_gatewayID = sv.value.toString();
+				break;
+
+			case E::Setting::GatewayDescription:
+				m_gatewayDescription = sv.value.toString();
+				break;
+
+			default:
+				;		// ok
+			}
+		}
+
+		return result;
+	}
+
+	void Gateway::appendSignalList()
+	{
+		Q_ASSERT(false);		// this function should be called in derived classes only!
+	}
+
+	const std::vector<File>& Gateway::files() const
+	{
+		return m_files;
+	}
+
+	bool Gateway::checkRequiredSettings(const std::set<E::Setting> reqSettings,
+									  const SettingsValues& settingsValues,
+									  int lineNo, ParserLog& log)
+	{
+		bool result = true;
+
+		for(E::Setting st : reqSettings)
+		{
+			if (settingsValues.contains(st) == false)
+			{
+				log.logRequirtedSettingIsNotSet(lineNo, st);
+				result = false;
+			}
+		}
+
+		return result;
+	}
+
+	bool Gateway::generateRequiredFiles(const SignalSetAdapter& signalSetAdapter, ParserLog& log)
+	{
+		Q_UNUSED(signalSetAdapter);
+		Q_UNUSED(log);
+		return true;
+	}
+
+	// ---------------------------------------------------------------------------------
+	//
+	// Class Gateway::IVS_Impulse_SignalList implementation
+	//
+	// ---------------------------------------------------------------------------------
+
+	const std::set<E::Setting> IVS_Impulse_SignalList::m_requiredSettings =
+	{
+		E::Setting::ListNo,
+		E::Setting::DataType,
+		E::Setting::SendEvents,
+		E::Setting::IncludeAppSignalID
+	};
+
+	IVS_Impulse_SignalList::IVS_Impulse_SignalList()
+	{
+	}
+
+	bool IVS_Impulse_SignalList::isKnownSetting(E::Setting st) const
+	{
+		return m_requiredSettings.contains(st);
+	}
+
+	bool IVS_Impulse_SignalList::checkAndApplySettings(int lineNo, ParserLog& log)
+	{
+		bool result = true;
+
+		result &= SignalList::checkAndApplySettings(lineNo, log);
+
+		result &= Gateway::checkRequiredSettings(m_requiredSettings,
+												 m_settingsValues,
+												 lineNo, log);
+		RETURN_IF_FALSE(result);
+
+		for(const auto& p : m_settingsValues)
+		{
+			E::Setting st = p.first;
+			const SettingValue& sv = p.second;
+
+			switch(st)
+			{
+			case E::Setting::ListNo:
+				m_listNo = sv.value.toInt();
+				break;
+
+			case E::Setting::DataType:
+				{
+					QString dataTypeStr = sv.value.toString();
+
+					if (dataTypeStr == "A")
+					{
+						m_dataType = DataType::Analog_A;
+					}
+					else
+					{
+						if (dataTypeStr == "B")
+						{
+							m_dataType = DataType::Discrete_B;
+						}
+						else
+						{
+							log.logError(sv.lineNo, QString("unknown signal list data type '%1' use 'A' or 'B' instead").
+														arg(dataTypeStr));
+							result = false;
+						}
+					}
+				}
+				break;
+
+			case E::Setting::SendEvents:
+				m_sendEvents = sv.value.toBool();
+				break;
+
+			case E::Setting::IncludeAppSignalID:
+				m_includeAppSignalID = sv.value.toBool();
+				break;
+
+			default:
+				Q_ASSERT(false);
+			}
+		}
+
+		return result;
+	}
+
+	int IVS_Impulse_SignalList::listNo() const
+	{
+		return m_listNo;
+	}
+
+	IVS_Impulse_SignalList::DataType IVS_Impulse_SignalList::dataType() const
+	{
+		return m_dataType;
+	}
+
+	char IVS_Impulse_SignalList::dataTypeLetter() const
+	{
+		switch(m_dataType)
+		{
+		case DataType::Analog_A:
+			return 'A';
+
+		case DataType::Discrete_B:
+			return 'B';
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		return '_';
+	}
+
+	bool IVS_Impulse_SignalList::sendEvents() const
+	{
+		return m_sendEvents;
+	}
+
+	bool IVS_Impulse_SignalList::includeAppSignalID() const
+	{
+		return m_includeAppSignalID;
+	}
+
+	// ---------------------------------------------------------------------------------
+	//
+	// Class Gateway::IVS_Impulse_Gateway implementation
+	//
+	// ---------------------------------------------------------------------------------
+
+	const std::set<E::Setting>	IVS_Impulse_Gateway::m_requiredSettings =
+	{
+		E::Setting::GatewayIP1,
+		E::Setting::GatewayIP2,
+		E::Setting::SystemID,
+		E::Setting::ListsVersion,
+		E::Setting::Period
+	};
+
+	IVS_Impulse_Gateway::IVS_Impulse_Gateway() :
+		Gateway(E::GatewayType::IVS_Impulse)
+	{
+	}
+
+	bool IVS_Impulse_Gateway::isKnownSetting(E::Setting st) const
+	{
+		return Gateway::isKnownSetting(st) ||
+				m_requiredSettings.contains(st);
+	}
+
+	bool IVS_Impulse_Gateway::checkAndApplySettings(int lineNo, ParserLog& log)
+	{
+		bool result = true;
+
+		result &= Gateway::checkAndApplySettings(lineNo, log);
+		result &= Gateway::checkRequiredSettings(m_requiredSettings,
+												 m_settingsValues,
+												 lineNo, log);
+		RETURN_IF_FALSE(result);
+
+		HostAddressPort addrPort;
+
+		for(const auto& p: m_settingsValues)
+		{
+			E::Setting st = p.first;
+			const SettingValue& sv = p.second;
+
+			switch(st)
+			{
+			case E::Setting::GatewayIP1:
+				addrPort.setAddressPortStr(sv.value.toString(),  0);
+				m_gatewayIP1 = addrPort;
+				break;
+
+			case E::Setting::GatewayIP2:
+				addrPort.setAddressPortStr(sv.value.toString(),  0);
+				m_gatewayIP2 = addrPort;
+				break;
+
+			case E::Setting::SystemID:
+				m_systemID = sv.value.toInt();
+				break;
+
+			case E::Setting::ListsVersion:
+				m_listsVersion = sv.value.toInt();
+				break;
+
+			case E::Setting::Period:
+				m_period = sv.value.toInt();
+				break;
+
+			default:
+				;	// ok
+			}
+		}
+
+		return result;
+	}
+
+	void IVS_Impulse_Gateway::appendSignalList()
+	{
+		m_signalLists.push_back(new IVS_Impulse_SignalList);
+	}
+
+	bool IVS_Impulse_Gateway::generateRequiredFiles(const SignalSetAdapter& signalSetAdapter,
+													ParserLog& log)
+	{
+		RETURN_IF_FALSE(checkSignalListsSettings(log));
+		RETURN_IF_FALSE(generateSignalListsFiles(signalSetAdapter, log));
+
+		return true;
+	}
+
+	bool IVS_Impulse_Gateway::checkSignalListsSettings(ParserLog& log)
+	{
+		bool result = true;
+
+		std::map<int, IVS_Impulse_SignalList*> listsIDs;
+
+		for(SignalList* l : m_signalLists)
+		{
+			IVS_Impulse_SignalList* sl = dynamic_cast<IVS_Impulse_SignalList*>(l);
+			TEST_PTR_CONTINUE(sl);
+
+			auto it = listsIDs.find(sl->listNo());
+
+			if (it == listsIDs.end())
+			{
+				listsIDs.insert({ sl->listNo(), sl });
+				continue;
+			}
+
+			SettingValue sv1 = it->second->getSettingValue(E::Setting::ListNo);
+			SettingValue sv2 = sl->getSettingValue(E::Setting::ListNo);
+
+			log.logError(QString("duplicate signal lists ListNo = %1 (lines %2, %3)").
+						 arg(sl->listNo()).arg(sv1.lineNo).arg(sv2.lineNo));
+
+			result = false;
+		}
+
+		return result;
+	}
+
+	bool IVS_Impulse_Gateway::generateSignalListsFiles(const SignalSetAdapter& signalSetAdapter, ParserLog& log)
+	{
+		m_files.clear();
+		bool result = true;
+
+		for(SignalList* l : m_signalLists)
+		{
+			IVS_Impulse_SignalList* sl = dynamic_cast<IVS_Impulse_SignalList*>(l);
+			TEST_PTR_CONTINUE(sl);
+
+			//
+
+			QString fileName = QString("R%1%2%3.%4").
+									arg(m_systemID, 3, 10, Latin1Char::ZERO).
+									arg(sl->dataTypeLetter()).
+									arg(sl->listNo(), 3, 10, Latin1Char::ZERO).
+									arg(m_listsVersion, 3, 10, Latin1Char::ZERO);
+
+			File& file = m_files.emplace_back(m_gatewayType, m_gatewayID, fileName);
+
+			result &= generateSignalListFile(*sl, file, signalSetAdapter, log);
+		}
+
+		return result;
+	}
+
+	bool IVS_Impulse_Gateway::generateSignalListFile(const IVS_Impulse_SignalList& signalList,
+													 File& file,
+													 const SignalSetAdapter& signalSetAdapter,
+													 ParserLog& log)
+	{
+		QTextStream ts(&file.mutableFileData());
+
+		bool result = true;
+
+		int paramIndex = 1;
+
+		QString str;
+
+		for(const QString& signalID : signalList.signalIDs())
+		{
+			const AppSignal* s = signalSetAdapter.getAppSignal(signalID);
+
+			if (s == nullptr)
+			{
+				log.logError(QString("signal '%1' not found (GatewayID = %2, ListNo = %3)").
+								arg(signalID).arg(m_gatewayID).arg(signalList.listNo()));
+				result = false;
+				continue;
+			}
+
+			bool res = true;
+
+			switch(signalList.dataType())
+			{
+			case IVS_Impulse_SignalList::DataType::Analog_A:
+				if (s->isAnalog() == false)
+				{
+					log.logError(QString("signal '%1' is not Analog (GatewayID = %2, ListNo = %3)").
+									arg(signalID).arg(m_gatewayID).arg(signalList.listNo()));
+					res = false;
+				}
+				else
+				{
+					str = QString("|%1|%2|%3|%4|%5|%6").
+							arg(paramIndex, 3, 10, Latin1Char::ZERO).
+							arg(s->customAppSignalID().trimmed()).
+							arg(s->caption()).
+							arg(s->unit()).
+							arg(s->lowEngineeringUnits()).
+							arg(s->highEngineeringUnits());
+
+					if (signalList.includeAppSignalID() == true)
+					{
+						str += QString("|%1").arg(s->appSignalID());
+					}
+
+					str += Separator::NEW_LINE;
+
+					ts << str;
+
+					paramIndex++;
+				}
+				break;
+
+			case IVS_Impulse_SignalList::DataType::Discrete_B:
+				if (s->isDiscrete() == false)
+				{
+					log.logError(QString("signal '%1' is not Discrete (GatewayID = %2, ListNo = %3)").
+									arg(signalID).arg(m_gatewayID).arg(signalList.listNo()));
+					res = false;
+				}
+				else
+				{
+					str = QString("|%1|%2|%3").
+							arg(paramIndex, 3, 10, Latin1Char::ZERO).
+							arg(s->customAppSignalID().trimmed()).
+							arg(s->caption());
+
+					if (signalList.includeAppSignalID() == true)
+					{
+						str += QString("|%1").arg(s->appSignalID());
+					}
+
+					str += Separator::NEW_LINE;
+
+					ts << str;
+
+					paramIndex++;
+				}
+				break;
+
+			default:
+				Q_ASSERT(false);
+				res = false;
+			}
+
+			result &= res;
+
+			CONTINUE_IF_FALSE(res);
+		}
+
+		return result;
+	}
+}

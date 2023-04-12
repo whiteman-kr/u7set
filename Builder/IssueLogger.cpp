@@ -1668,7 +1668,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Gateway description parsing error: line %1,  %2
+	/// Title: Gateway description parsing error: %1
 	///
 	/// Parameters:
 	///         %1 error message

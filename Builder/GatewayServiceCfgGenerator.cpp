@@ -1,6 +1,6 @@
 #include "GatewayServiceCfgGenerator.h"
 #include "SoftwareSettingsGetter.h"
-#include "../lib/GatewayDescription.h"
+#include "../GatewayService/GatewayDescriptionParser.h"
 #include "../OnlineLib/SoftwareSettings.h"
 
 namespace Builder
@@ -60,43 +60,76 @@ namespace Builder
 
 		LOG_MESSAGE(log, QString("Parsing of %1 gateway description started...").arg(equipmentID()));
 
-		Gateway::Parser gdp;
+		Gateway::SignalSetAdapter adapter(m_context->m_signalSet->castToAppSignalSet());
+		Gateway::Parser parser;
 
-		result = gdp.parse(settings->gatewayDescription);
+		result = parser.parse(settings->gatewayDescription, adapter);
 
-		const Gateway::Parser::Log& parserLog = gdp.log();
+		const Gateway::ParserLog& parserLog = parser.log();
 
-		int errCount = 0;
-		int wrnCount = 0;
-
-		for(const auto& t : parserLog)
+		for(const auto& r : parserLog)
 		{
-			auto [ lineNo, msgType, msg ] = t;
-
-			switch(msgType)
+			switch(r.msgType)
 			{
-			case Gateway::Parser::MsgType::Message:
-				msg = msg.mid(0, 1).toUpper() + msg.mid(1);
-				LOG_MESSAGE(log, msg);
+			case Gateway::LogMsgType::Message:
+				{
+					QString msg = r.msg;
+					msg = msg.mid(0, 1).toUpper() + msg.mid(1);
+					LOG_MESSAGE(log, msg);
+				}
 				break;
 
-			case Gateway::Parser::MsgType::Warning:
-				// Gateway description parsing warning: line %1,  %2
+			case Gateway::LogMsgType::Warning:
+				// Gateway description parsing warning: %1
 				//
-				log->wrnCFG3052(msg);
-				wrnCount++;
+				log->wrnCFG3052(r.msg);
 				break;
 
-			case Gateway::Parser::MsgType::Error:
-				// Gateway description parsing error: line %1,  %2
+			case Gateway::LogMsgType::Error:
+				// Gateway description parsing error: %1
 				//
-				log->errCFG3051(msg);
-				errCount++;
+				log->errCFG3051(r.msg);
 				break;
 
 			default:
 				Q_ASSERT(false);
 			}
+		}
+
+		int errCount = parserLog.errorCount();
+		int wrnCount = parserLog.warningCount();
+
+		if (errCount == 0)
+		{
+			auto&& gateways = parser.gateways();
+
+			for(const Gateway::Gateway* gw : gateways)
+			{
+				TEST_PTR_CONTINUE(gw);
+
+				const auto& files = gw->files();
+
+				for(const Gateway::File& file : files)
+				{
+					BuildFile* buildFile = m_buildResultWriter->addFile(
+												softwareCfgSubdir() + Separator::DIR + file.gatewayID(),
+												file.fileName(), file.fileData());
+					if (buildFile == nullptr)
+					{
+						errCount++;
+						result = false;
+					}
+				}
+			}
+		}
+
+		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(),
+															File::GATEWAY_DESCRIPTION_TXT,
+															settings->gatewayDescription);
+		if (buildFile == nullptr)
+		{
+			errCount++;
+			result = false;
 		}
 
 		QString resultStr = QString("Parsing of %1 gateway description finished with %2 errors, %3 warnings").

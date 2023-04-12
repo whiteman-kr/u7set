@@ -19,6 +19,11 @@ namespace Builder
 	{
 	}
 
+	const ::AppSignalSet* SignalSet::castToAppSignalSet() const
+	{
+		return static_cast<const ::AppSignalSet*>(this);
+	}
+
 	bool SignalSet::prepareBusses()
 	{
 		bool result =  m_busses.prepare();

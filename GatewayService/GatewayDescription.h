@@ -2,6 +2,7 @@
 
 #include <QRegularExpression>
 #include "../CommonLib/HostAddressPort.h"
+#include "../AppSignalLib/AppSignal.h"
 
 namespace Gateway
 {
@@ -62,8 +63,7 @@ namespace Gateway
 		Q_ENUM(SettingType)
 	};
 
-	class Gateway;
-	class SignalList;
+	class ParserLog;
 
 	struct SettingValue
 	{
@@ -90,135 +90,38 @@ namespace Gateway
 		std::map<E::Setting, SettingValue> m_settingsValues;
 	};
 
-	class Parser
+	class File
 	{
-		//
-
-		static const QString SECTION_GATEWAY;
-		static const QString SECTION_SIGNAL_LIST;
-
-		static const QString START_LINE_COMMENT;
-		static const QString START_MULTILINE_COMMENT;
-		static const QString END_MULTILINE_COMMENT;
-
-		static const QString START_SECTION;
-		static const QString END_SECTION;
-
-		static const QString EQUAL_SIGN;
-		static const QString APP_SIGNAL_ID_START_SIGN;
-
-		static const QString ERR_SYNTAX;
-
-		static const std::map<E::Setting, E::SettingType> m_settingType;
-
-		//
-
 	public:
-		enum class ParseResult
-		{
-			Ok,
-			Error,
-			CriticalError
-		};
+		File(E::GatewayType gatewayType, const QString& gatewayID, const QString& fileName);
 
-		enum class MsgType
-		{
-			Nothing,
-			Message,
-			Warning,
-			Error
-		};
+		const QByteArray& fileData() const;
+		QByteArray& mutableFileData();
 
-		enum class LineType
-		{
-			Unknown,
-			Section,
-			Setting,
-			Comment,
-			SignalID,
-		};
-
-		struct ParseLineResult
-		{
-			int lineNo = 0;
-			LineType lineType = LineType::Unknown;
-
-			E::Section section = E::Section::Unknown;
-			E::Setting setting = E::Setting::Unknown;
-
-			QVariant value;
-
-			//
-
-			MsgType msgType = MsgType::Nothing;
-			QString msg;
-
-			//
-
-			void setError(const QString& err);
-			void setWarning(const QString& wrn);
-			void setMessage(const QString& msg);
-			void clear();
-		};
-
-		class Log : public std::vector<std::tuple<int, Parser::MsgType, QString>>
-		{
-		public:
-			void logResult(const Parser::ParseLineResult& plr);
-
-			void logError(int lineNo, const QString& errMsg);
-			void logError(const QString& errMsg);
-
-			void logWarning(int lineNo, const QString& wrnMsg);
-			void logWarning(const QString& wrnMsg);
-
-			void logRequirtedSettingIsNotSet(int lineNo, E::Setting st);
-
-		private:
-			QString message(int lineNo, const QString& msg);
-			void log(int lineNo, Parser::MsgType msgType, const QString& msg);
-		};
-
-	public:
-		Parser();
-		~Parser();
-
-		bool parse(const QString& desc);
-
-		const Log& log() const;
-
-		bool generateGatewaysRequiredFiles();
+		QString gatewayID() const;
+		QString fileName() const;
 
 	private:
-		ParseResult parseUnknownSection(E::Section& parsingSection, const ParseLineResult& plr);
-		ParseResult parseGatewaySection(E::Section& parsingSection, const ParseLineResult& plr);
-		ParseResult parseSignalListSection(E::Section& parsingSection, const ParseLineResult& plr);
+		E::GatewayType m_gatewayType = E::GatewayType::Unknown;
+		QString m_gatewayID;
+		QString m_fileName;
 
-		bool parseLine(const QString& str, ParseLineResult* plr);
-		bool parseSettingValue(E::Setting setting, const QString& valueStr, ParseLineResult* plr);
+		QByteArray m_fileData;
+	};
 
-		bool parseIntValueStr(const QString& valueStr, ParseLineResult* plr);
-		bool parseAlphsNumericUnderlineStr(const QString& valueStr, ParseLineResult* plr);
-		bool parseBoolValueStr(const QString& valueStr, ParseLineResult* plr);
-		bool parseIpPortValueStr(const QString& valueStr, ParseLineResult* plr);
+	class SignalSetAdapter
+	{
+	public:
+		SignalSetAdapter() = delete;
 
-		Gateway* createApropriateGateway(E::GatewayType gwType);
+		SignalSetAdapter(const AppSignalSet* appSignalSet);
+		SignalSetAdapter(const AppSignals& appSignals);
 
-		void clear();
+		const AppSignal* getAppSignal(const QString& appSignalID) const;
 
 	private:
-		Log m_log;
-		std::vector<Gateway*> m_gateways;
-
-		//
-
-		bool m_multilineCommentStarted = false;
-
-		QStringList m_knownSections;
-		QStringList m_knownSettings;
-
-		static const QRegularExpression m_anyWhitespaceSymbol;
-		static const QRegularExpression m_notAlphaNumericUnderlineSymbols;
+		const AppSignalSet* m_appSignalSet = nullptr;
+		const AppSignals* m_appSignals = nullptr;
 	};
 
 	class SignalList
@@ -228,9 +131,11 @@ namespace Gateway
 		bool settingIsSet(E::Setting st) const;
 
 		virtual bool isKnownSetting(E::Setting st) const;
-		virtual bool checkAndApplySettings(int lineNo, Parser::Log& log);
+		virtual bool checkAndApplySettings(int lineNo, ParserLog& log);
 
 		SettingValue getSettingValue(E::Setting st) const;
+
+		const std::vector<QString>& signalIDs() const;
 
 	protected:
 		SettingsValues m_settingsValues;
@@ -255,15 +160,18 @@ namespace Gateway
 		bool settingIsSet(E::Setting st) const;
 
 		virtual bool isKnownSetting(E::Setting st) const;
-		virtual bool checkAndApplySettings(int lineNo, Parser::Log& log);
+		virtual bool checkAndApplySettings(int lineNo, ParserLog& log);
 
 		virtual void appendSignalList();
 
+		const std::vector<File>& files() const;
+
 		static bool checkRequiredSettings(const std::set<E::Setting> reqSettings,
 										  const SettingsValues& settingsValues,
-										  int lineNo, Parser::Log& log);
+										  int lineNo, ParserLog& log);
 
-		virtual bool generateRequiredFiles(Parser::Log& log);
+	protected:
+		virtual bool generateRequiredFiles(const SignalSetAdapter& signalSetAdapter, ParserLog& log);
 
 	protected:
 		E::GatewayType m_gatewayType = E::GatewayType::Unknown;
@@ -273,6 +181,7 @@ namespace Gateway
 		SettingsValues m_settingsValues;
 
 		std::vector<SignalList*> m_signalLists;
+		std::vector<File> m_files;
 
 		friend class Parser;
 	};
@@ -297,9 +206,13 @@ namespace Gateway
 		IVS_Impulse_SignalList();
 
 		virtual bool isKnownSetting(E::Setting st) const override;
-		virtual bool checkAndApplySettings(int lineNo, Parser::Log& log) override;
+		virtual bool checkAndApplySettings(int lineNo, ParserLog& log) override;
 
 		int listNo() const;
+		DataType dataType() const;
+		char dataTypeLetter() const;
+		bool sendEvents() const;
+		bool includeAppSignalID() const;
 
 	private:
 		int m_listNo;
@@ -317,14 +230,20 @@ namespace Gateway
 		IVS_Impulse_Gateway();
 
 		virtual bool isKnownSetting(E::Setting st) const override;
-		virtual bool checkAndApplySettings(int lineNo, Parser::Log& log) override;
+		virtual bool checkAndApplySettings(int lineNo, ParserLog& log) override;
 
 		virtual void appendSignalList() override;
 
-		virtual bool generateRequiredFiles(Parser::Log& log) override;
-
 	private:
-		bool checkSignalListsSettings(Parser::Log& log);
+		virtual bool generateRequiredFiles(const SignalSetAdapter& signalSetAdapter, ParserLog& log) override;
+
+		bool checkSignalListsSettings(ParserLog& log);
+		bool generateSignalListsFiles(const SignalSetAdapter& signalSetAdapter, ParserLog& log);
+
+		bool generateSignalListFile(const IVS_Impulse_SignalList& signalList,
+									File& file,
+									const SignalSetAdapter& signalSetAdapter,
+									ParserLog& log);
 
 	private:
 		int m_systemID = 0;

@@ -58,12 +58,13 @@ SOURCES += \
     ../lib/LmDescription.cpp \
     ../lib/ConnectionsInfo.cpp \
 	../lib/TuningDataStorage.cpp \
-	../lib/GatewayDescription.cpp \
 	../TuningService/TuningSource.cpp \
 	../Metrology/MetrologySignal.cpp \
 	../Metrology/MetrologyConnection.cpp \
 	../Metrology/UnitsConvertor.cpp \
 	../Metrology/UnitsConvertorTable.cpp \
+	../GatewayService/GatewayDescription.cpp \
+	../GatewayService/GatewayDescriptionParser.cpp \
 	GatewayServiceCfgGenerator.cpp \
 	SoftwareSettingsGetter.cpp \
     Builder.cpp \
@@ -126,13 +127,14 @@ HEADERS += \
     ../lib/LmDescription.h \
     ../lib/ConnectionsInfo.h \
 	../lib/TuningDataStorage.h \
-	../lib/GatewayDescription.h \
 	../CommonLib/PropertyObject.h \
 	../TuningService/TuningSource.h \
 	../Metrology/MetrologySignal.h \
 	../Metrology/MetrologyConnection.h \
 	../Metrology/UnitsConvertor.h \
 	../Metrology/UnitsConvertorTable.h \
+	../GatewayService/GatewayDescription.h \
+	../GatewayService/GatewayDescriptionParser.h \
 	GatewayServiceCfgGenerator.h \
 	SoftwareSettingsGetter.h \
 	Builder.h \

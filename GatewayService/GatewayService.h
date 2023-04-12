@@ -71,6 +71,8 @@ private:
 
 	void parseGatewayDescription(const QString& filePathName, const QString& gwDesc);
 
+	const AppSignal* getSignalFunc(const QString& signalID);
+
 private:
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 

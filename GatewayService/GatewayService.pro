@@ -31,15 +31,17 @@ unix {
 
 SOURCES += \
 	../lib/BuildInfo.cpp \
-	../lib/GatewayDescription.cpp \
+	GatewayDescription.cpp \
+	GatewayDescriptionParser.cpp \
 	AppSignalStates.cpp \
 	GatewayService.cpp \
 	GatewayServiceMain.cpp \
 
 HEADERS += \
-	../lib/BuildInfo.h \
 	../lib/ConstStrings.h \
-	../lib/GatewayDescription.h \
+	../lib/BuildInfo.h \
+	GatewayDescription.h \
+	GatewayDescriptionParser.h \
 	AppSignalStates.h \
 	GatewayService.h \
 

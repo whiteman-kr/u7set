@@ -2,7 +2,7 @@
 #include <QMetaProperty>
 
 #include "../OnlineLib/CfgServerLoader.h"
-#include "../lib/GatewayDescription.h"
+#include "GatewayDescriptionParser.h"
 
 #include "GatewayService.h"
 
@@ -368,33 +368,38 @@ void GatewayServiceWorker::parseGatewayDescription(const QString& filePathName, 
 	DEBUG_LOG_MSG(logger(), "");
 	DEBUG_LOG_MSG(logger(), QString("Parsing gateway description file: %1").arg(filePathName));
 
+	AppSignals appSignals;
+
+	Gateway::SignalSetAdapter adapter(appSignals);
+
 	Gateway::Parser gdp;
 
-	gdp.parse(gwDesc);
+	gdp.parse(gwDesc, adapter);
 
 	int errCount = 0;
 	int wrnCount = 0;
 
-	const Gateway::Parser::Log& parserLog = gdp.log();
+	const Gateway::ParserLog& parserLog = gdp.log();
 
-	for(const auto& t : parserLog)
+	for(const auto& r : parserLog)
 	{
-		auto [ lineNo, msgType, msg ] = t;
-
-		switch(msgType)
+		switch(r.msgType)
 		{
-		case Gateway::Parser::MsgType::Message:
-			msg = msg.mid(0, 1).toUpper() + msg.mid(1);
-			DEBUG_LOG_MSG(logger(), msg);
+		case Gateway::LogMsgType::Message:
+			{
+				QString msg = r.msg;
+				msg = msg.mid(0, 1).toUpper() + msg.mid(1);
+				DEBUG_LOG_MSG(logger(), msg);
+			}
 			break;
 
-		case Gateway::Parser::MsgType::Warning:
-			DEBUG_LOG_WRN(logger(), "Warning: " + msg);
+		case Gateway::LogMsgType::Warning:
+			DEBUG_LOG_WRN(logger(), "Warning: " + r.msg);
 			wrnCount++;
 			break;
 
-		case Gateway::Parser::MsgType::Error:
-			DEBUG_LOG_ERR(logger(), "Error: " + msg);
+		case Gateway::LogMsgType::Error:
+			DEBUG_LOG_ERR(logger(), "Error: " + r.msg);
 			errCount++;
 			break;
 
