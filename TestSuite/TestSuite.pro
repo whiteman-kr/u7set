@@ -76,6 +76,14 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 LIBS += -L$$DESTDIR
 LIBS += -L.
 
+# TestSuiteLib
+#
+LIBS += -lTestSuiteLib
+win32:PRE_TARGETDEPS += $$DESTDIR/TestSuiteLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libTestSuiteLib.a
+INCLUDEPATH += $$PWD/../TestSuiteLib
+DEPENDPATH += $$PWD/../TestSuiteLib
+
 # ClientLib
 #
 LIBS += -lClientLib
@@ -86,14 +94,6 @@ unix:PRE_TARGETDEPS += $$DESTDIR/libClientLib.a
 #
 win32:LIBS += -lAdvapi32
 unix:LIBS += -lpam -lpam_misc
-
-# TestSuiteLib
-#
-LIBS += -lTestSuiteLib
-win32:PRE_TARGETDEPS += $$DESTDIR/TestSuiteLib.lib
-unix:PRE_TARGETDEPS += $$DESTDIR/libTestSuiteLib.a
-INCLUDEPATH += $$PWD/../TestSuiteLib
-DEPENDPATH += $$PWD/../TestSuiteLib
 
 # OnlineLib
 #
