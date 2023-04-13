@@ -370,11 +370,9 @@ void GatewayServiceWorker::parseGatewayDescription(const QString& filePathName, 
 
 	AppSignals appSignals;
 
-	Gateway::SignalSetAdapter adapter(appSignals);
+	Gateway::Parser gdp(appSignals);
 
-	Gateway::Parser gdp;
-
-	gdp.parse(gwDesc, adapter);
+	gdp.parse(gwDesc);
 
 	int errCount = 0;
 	int wrnCount = 0;

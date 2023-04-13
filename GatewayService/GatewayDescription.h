@@ -109,21 +109,6 @@ namespace Gateway
 		QByteArray m_fileData;
 	};
 
-	class SignalSetAdapter
-	{
-	public:
-		SignalSetAdapter() = delete;
-
-		SignalSetAdapter(const AppSignalSet* appSignalSet);
-		SignalSetAdapter(const AppSignals& appSignals);
-
-		const AppSignal* getAppSignal(const QString& appSignalID) const;
-
-	private:
-		const AppSignalSet* m_appSignalSet = nullptr;
-		const AppSignals* m_appSignals = nullptr;
-	};
-
 	class SignalList
 	{
 	public:
@@ -144,6 +129,11 @@ namespace Gateway
 		friend class Parser;
 	};
 
+	using SignalListShared = std::shared_ptr<SignalList>;
+	using SignalLists = std::vector<SignalListShared>;
+
+	class SignalSetAdapter;
+
 	class Gateway
 	{
 	private:
@@ -154,7 +144,10 @@ namespace Gateway
 		Gateway(E::GatewayType gwType);
 		~Gateway();
 
-		static Gateway* createGateway(E::GatewayType gwType);
+		E::GatewayType gatewayType() const;
+		QString gatewayID() const;
+		QString gatewayDescription() const;
+		int signalListsCount() const;
 
 		bool setSettingValue(int lineNo, E::Setting st, const QVariant& value);
 		bool settingIsSet(E::Setting st) const;
@@ -170,6 +163,9 @@ namespace Gateway
 										  const SettingsValues& settingsValues,
 										  int lineNo, ParserLog& log);
 
+		virtual void writeToXml(XmlWriteHelper& xml) const;
+		virtual bool readFromXml(XmlReadHelper& xml) const;
+
 	protected:
 		virtual bool generateRequiredFiles(const SignalSetAdapter& signalSetAdapter, ParserLog& log);
 
@@ -180,11 +176,33 @@ namespace Gateway
 
 		SettingsValues m_settingsValues;
 
-		std::vector<SignalList*> m_signalLists;
+		SignalLists m_signalLists;
 		std::vector<File> m_files;
 
 		friend class Parser;
 	};
+
+	using GatewayShared = std::shared_ptr<Gateway>;
+
+	class Gateways
+	{
+	public:
+		void append(GatewayShared gw);
+
+		void setLast(GatewayShared gw);
+		GatewayShared last();
+
+		std::vector<GatewayShared>::iterator begin();
+		std::vector<GatewayShared>::iterator end();
+
+		void writeToXml(XmlWriteHelper& xml) const;
+		bool readFromXml(XmlReadHelper& xml) const;
+
+	private:
+		std::vector<GatewayShared> m_gateways;
+	};
+
+	using GatewaysShared = std::shared_ptr<Gateways>;
 
 	// IVS_Impulse gateway structs
 
@@ -221,6 +239,8 @@ namespace Gateway
 		bool m_includeAppSignalID;
 	};
 
+	using IVS_Impulse_SignalList_Shared = std::shared_ptr<IVS_Impulse_SignalList>;
+
 	class IVS_Impulse_Gateway : public Gateway
 	{
 	public:
@@ -233,6 +253,9 @@ namespace Gateway
 		virtual bool checkAndApplySettings(int lineNo, ParserLog& log) override;
 
 		virtual void appendSignalList() override;
+
+		virtual void writeToXml(XmlWriteHelper& xml) const override;
+		virtual bool readFromXml(XmlReadHelper& xml) const override;
 
 	private:
 		virtual bool generateRequiredFiles(const SignalSetAdapter& signalSetAdapter, ParserLog& log) override;

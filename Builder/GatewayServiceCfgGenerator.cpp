@@ -60,10 +60,11 @@ namespace Builder
 
 		LOG_MESSAGE(log, QString("Parsing of %1 gateway description started...").arg(equipmentID()));
 
-		Gateway::SignalSetAdapter adapter(m_context->m_signalSet->castToAppSignalSet());
-		Gateway::Parser parser;
+		Gateway::GatewaysShared gateways = std::make_shared<Gateway::Gateways>();
 
-		result = parser.parse(settings->gatewayDescription, adapter);
+		Gateway::Parser parser(m_context->m_signalSet->appSignalSet(), gateways);
+
+		result = parser.parse(settings->gatewayDescription);
 
 		const Gateway::ParserLog& parserLog = parser.log();
 
@@ -99,11 +100,11 @@ namespace Builder
 		int errCount = parserLog.errorCount();
 		int wrnCount = parserLog.warningCount();
 
+		BuildFile* buildFile = nullptr;
+
 		if (errCount == 0)
 		{
-			auto&& gateways = parser.gateways();
-
-			for(const Gateway::Gateway* gw : gateways)
+			for(const Gateway::GatewayShared gw : *gateways)
 			{
 				TEST_PTR_CONTINUE(gw);
 
@@ -111,9 +112,10 @@ namespace Builder
 
 				for(const Gateway::File& file : files)
 				{
-					BuildFile* buildFile = m_buildResultWriter->addFile(
-												softwareCfgSubdir() + Separator::DIR + file.gatewayID(),
-												file.fileName(), file.fileData());
+					buildFile = m_buildResultWriter->addFile(
+											softwareCfgSubdir() + Separator::DIR + file.gatewayID(),
+											file.fileName(), file.fileData());
+
 					if (buildFile == nullptr)
 					{
 						errCount++;
@@ -121,11 +123,26 @@ namespace Builder
 					}
 				}
 			}
+
+			QString xmlStr;
+			XmlWriteHelper xml(&xmlStr);
+
+			gateways->writeToXml(xml);
+
+			buildFile = m_buildResultWriter->addFile(
+									softwareCfgSubdir(),
+									File::GATEWAY_DESCRIPTION_XML, xmlStr);
+
+			if (buildFile == nullptr)
+			{
+				errCount++;
+				result = false;
+			}
 		}
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(),
-															File::GATEWAY_DESCRIPTION_TXT,
-															settings->gatewayDescription);
+		buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(),
+												File::GATEWAY_DESCRIPTION_TXT,
+												settings->gatewayDescription);
 		if (buildFile == nullptr)
 		{
 			errCount++;

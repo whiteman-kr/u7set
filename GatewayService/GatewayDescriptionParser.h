@@ -4,6 +4,21 @@
 
 namespace Gateway
 {
+	class SignalSetAdapter
+	{
+	public:
+		SignalSetAdapter() = delete;
+
+		SignalSetAdapter(const AppSignalSet* appSignalSet);
+		SignalSetAdapter(const AppSignals& appSignals);
+
+		const AppSignal* getAppSignal(const QString& appSignalID) const;
+
+	private:
+		const AppSignalSet* m_appSignalSet = nullptr;
+		const AppSignals* m_appSignals = nullptr;
+	};
+
 	enum class LogMsgType
 	{
 		Nothing,
@@ -105,16 +120,23 @@ namespace Gateway
 		};
 
 	public:
-		Parser();
+		Parser() = delete;
+		Parser(const Parser&) = delete;
+
+		Parser(const AppSignalSet* appSignalSet, GatewaysShared gateways = nullptr);
+		Parser(const AppSignals& appSignals, GatewaysShared gateways = nullptr);
 		~Parser();
 
-		bool parse(const QString& desc, const SignalSetAdapter& signalSetAdapter);
+		bool parse(const QString& desc);
 
 		const ParserLog& log() const;
 
-		std::vector<const Gateway*> gateways() const;
+		GatewaysShared gateways();
 
 	private:
+		void commonInitialization();
+		void clear();
+
 		bool generateGatewaysRequiredFiles(SignalSetAdapter signalSetAdapter);
 
 		ParseResult parseUnknownSection(E::Section& parsingSection, const ParseLineResult& plr);
@@ -129,13 +151,14 @@ namespace Gateway
 		bool parseBoolValueStr(const QString& valueStr, ParseLineResult* plr);
 		bool parseIpPortValueStr(const QString& valueStr, ParseLineResult* plr);
 
-		Gateway* createApropriateGateway(E::GatewayType gwType);
-
-		void clear();
+		GatewayShared createTypedGateway(E::GatewayType gwType);
 
 	private:
+		const SignalSetAdapter m_signalSetAdapter;
+		GatewaysShared m_gateways;
+
 		ParserLog m_log;
-		std::vector<Gateway*> m_gateways;
+
 
 		//
 

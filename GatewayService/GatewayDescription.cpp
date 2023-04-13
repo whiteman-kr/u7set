@@ -1,6 +1,7 @@
 #include "../lib/ConstStrings.h"
 #include "../CommonLib/Types.h"
 #include "../UtilsLib/WUtils.h"
+#include "../UtilsLib/XmlHelper.h"
 
 #include "GatewayDescription.h"
 #include "GatewayDescriptionParser.h"
@@ -157,15 +158,30 @@ namespace Gateway
 	Gateway::Gateway(E::GatewayType gwType) :
 		m_gatewayType(gwType)
 	{
-
 	}
 
 	Gateway::~Gateway()
 	{
-		for(SignalList* list : m_signalLists)
-		{
-			delete list;
-		}
+	}
+
+	E::GatewayType Gateway::gatewayType() const
+	{
+		return m_gatewayType;
+	}
+
+	QString Gateway::gatewayID() const
+	{
+		return m_gatewayID;
+	}
+
+	QString Gateway::gatewayDescription() const
+	{
+		return m_gatewayDescription;
+	}
+
+	int Gateway::signalListsCount() const
+	{
+		return TO_INT(m_signalLists.size());
 	}
 
 	bool Gateway::setSettingValue(int lineNo, E::Setting st, const QVariant& value)
@@ -246,10 +262,84 @@ namespace Gateway
 		return result;
 	}
 
+	void Gateway::writeToXml(XmlWriteHelper& xml) const
+	{
+	}
+
+	bool Gateway::readFromXml(XmlReadHelper& xml) const
+	{
+		return true;
+	}
+
 	bool Gateway::generateRequiredFiles(const SignalSetAdapter& signalSetAdapter, ParserLog& log)
 	{
 		Q_UNUSED(signalSetAdapter);
 		Q_UNUSED(log);
+		return true;
+	}
+
+	// ---------------------------------------------------------------------------------
+	//
+	// Class Gateway::Gateways implementation
+	//
+	// ---------------------------------------------------------------------------------
+
+	void Gateways::append(GatewayShared gw)
+	{
+		m_gateways.push_back(gw);
+	}
+
+	void Gateways::setLast(GatewayShared gw)
+	{
+		m_gateways.back() = gw;
+	}
+
+	GatewayShared Gateways::last()
+	{
+		return m_gateways.back();
+	}
+
+	std::vector<GatewayShared>::iterator Gateways::begin()
+	{
+		return m_gateways.begin();
+	}
+
+	std::vector<GatewayShared>::iterator Gateways::end()
+	{
+		return m_gateways.end();
+	}
+
+	void Gateways::writeToXml(XmlWriteHelper& xml) const
+	{
+		xml.setAutoFormatting(true);
+		xml.writeStartDocument();
+
+		xml.writeStartElement(XmlElement::GATEWAYS);
+		xml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(m_gateways.size()));
+
+		for(GatewayShared gw : m_gateways)
+		{
+			TEST_PTR_CONTINUE(gw);
+
+			xml.writeStartElement(XmlElement::GATEWAY);
+
+			xml.writeEnumKeyAttribute<E::GatewayType>(XmlAttribute::GATEWAY_TYPE, gw->gatewayType());
+			xml.writeStringAttribute(XmlAttribute::GATEWAY_ID, gw->gatewayID());
+			xml.writeStringAttribute(XmlAttribute::GATEWAY_DESCRIPTION, gw->gatewayDescription());
+			xml.writeIntAttribute(XmlAttribute::SIGNAL_LISTS_COUNT, gw->signalListsCount());
+
+			gw->writeToXml(xml);
+
+			xml.writeEndElement();			// </Gateway>
+		}
+
+		xml.writeEndElement();		// </Gateways>
+
+		xml.writeEndDocument();
+	}
+
+	bool Gateways::readFromXml(XmlReadHelper& xml) const
+	{
 		return true;
 	}
 
@@ -452,7 +542,25 @@ namespace Gateway
 
 	void IVS_Impulse_Gateway::appendSignalList()
 	{
-		m_signalLists.push_back(new IVS_Impulse_SignalList);
+		m_signalLists.push_back(std::make_shared<IVS_Impulse_SignalList>());
+	}
+
+	void IVS_Impulse_Gateway::writeToXml(XmlWriteHelper& xml) const
+	{
+		xml.writeStartElement(XmlElement::SETTINGS);
+
+		xml.writeIntAttribute(XmlAttribute::SYSTEM_ID, m_systemID);
+		xml.writeHostAddressPortAttribute(XmlAttribute::GATEWAY_IP1, m_gatewayIP1);
+		xml.writeHostAddressPortAttribute(XmlAttribute::GATEWAY_IP2, m_gatewayIP2);
+		xml.writeIntAttribute(XmlAttribute::LISTS_VERSION, m_listsVersion);
+		xml.writeIntAttribute(XmlAttribute::PERIOD, m_period);
+
+		xml.writeEndElement();	//	</Settings>
+	}
+
+	bool IVS_Impulse_Gateway::readFromXml(XmlReadHelper& xml) const
+	{
+		return true;
 	}
 
 	bool IVS_Impulse_Gateway::generateRequiredFiles(const SignalSetAdapter& signalSetAdapter,
@@ -468,11 +576,13 @@ namespace Gateway
 	{
 		bool result = true;
 
-		std::map<int, IVS_Impulse_SignalList*> listsIDs;
+		std::map<int, IVS_Impulse_SignalList_Shared> listsIDs;
 
-		for(SignalList* l : m_signalLists)
+		for(SignalListShared l : m_signalLists)
 		{
-			IVS_Impulse_SignalList* sl = dynamic_cast<IVS_Impulse_SignalList*>(l);
+			IVS_Impulse_SignalList_Shared sl =
+					std::dynamic_pointer_cast<IVS_Impulse_SignalList>(l);
+
 			TEST_PTR_CONTINUE(sl);
 
 			auto it = listsIDs.find(sl->listNo());
@@ -500,9 +610,11 @@ namespace Gateway
 		m_files.clear();
 		bool result = true;
 
-		for(SignalList* l : m_signalLists)
+		for(SignalListShared l : m_signalLists)
 		{
-			IVS_Impulse_SignalList* sl = dynamic_cast<IVS_Impulse_SignalList*>(l);
+			IVS_Impulse_SignalList_Shared sl =
+					std::dynamic_pointer_cast<IVS_Impulse_SignalList>(l);
+
 			TEST_PTR_CONTINUE(sl);
 
 			//

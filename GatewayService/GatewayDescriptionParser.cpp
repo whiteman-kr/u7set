@@ -194,10 +194,18 @@ namespace Gateway
 	const QRegularExpression Parser::m_anyWhitespaceSymbol("\\s");
 	const QRegularExpression Parser::m_notAlphaNumericUnderlineSymbols("[^a-zA-Z0-9_]");
 
-	Parser::Parser()
+	Parser::Parser(const AppSignalSet* appSignalSet, GatewaysShared gateways) :
+		m_signalSetAdapter(appSignalSet),
+		m_gateways(gateways)
 	{
-		m_knownSections = ::E::enumKeyStrings<E::Section>();
-		m_knownSettings = ::E::enumKeyStrings<E::Setting>();
+		commonInitialization();
+	}
+
+	Parser::Parser(const AppSignals& appSignals, GatewaysShared gateways) :
+		m_signalSetAdapter(appSignals),
+		m_gateways(gateways)
+	{
+		commonInitialization();
 	}
 
 	Parser::~Parser()
@@ -205,10 +213,25 @@ namespace Gateway
 		clear();
 	}
 
-	bool Parser::parse(const QString& desc, const SignalSetAdapter& signalSetAdapter)
+	void Parser::commonInitialization()
 	{
-		clear();
+		if (m_gateways == nullptr)
+		{
+			m_gateways = std::make_shared<Gateways>();
+		}
 
+		m_knownSections = ::E::enumKeyStrings<E::Section>();
+		m_knownSettings = ::E::enumKeyStrings<E::Setting>();
+	}
+
+	void Parser::clear()
+	{
+		m_log.clear();
+		m_gateways = nullptr;
+	}
+
+	bool Parser::parse(const QString& desc)
+	{
 		bool result = true;
 
 		QStringList strs = desc.split(Separator::NEW_LINE, Qt::KeepEmptyParts, Qt::CaseInsensitive);
@@ -292,11 +315,11 @@ namespace Gateway
 			break;
 
 		case E::Section::Gateway:
-			m_gateways.back()->checkAndApplySettings(0, m_log);
+			m_gateways->last()->checkAndApplySettings(0, m_log);
 			break;
 
 		case E::Section::SignalList:
-			m_gateways.back()->m_signalLists.back()->checkAndApplySettings(0, m_log);
+			m_gateways->last()->m_signalLists.back()->checkAndApplySettings(0, m_log);
 			break;
 
 		default:
@@ -305,7 +328,7 @@ namespace Gateway
 
 		if (errCount == 0)
 		{
-			result &= generateGatewaysRequiredFiles(signalSetAdapter);
+			result &= generateGatewaysRequiredFiles(m_signalSetAdapter);
 		}
 
 		return result;
@@ -316,23 +339,17 @@ namespace Gateway
 		return m_log;
 	}
 
-	std::vector<const Gateway*> Parser::gateways() const
+	GatewaysShared Parser::gateways()
 	{
-		std::vector<const Gateway*> gateways;
-
-		for(auto gw : m_gateways)
-		{
-			gateways.push_back(gw);
-		}
-
-		return gateways;
+		Q_ASSERT(m_gateways != nullptr);
+		return m_gateways;
 	}
 
 	bool Parser::generateGatewaysRequiredFiles(SignalSetAdapter signalSetAdapter)
 	{
 		bool result = true;
 
-		for(Gateway* gw : m_gateways)
+		for(GatewayShared gw : *m_gateways)
 		{
 			result &= gw->generateRequiredFiles(signalSetAdapter, m_log);
 		}
@@ -346,7 +363,7 @@ namespace Gateway
 		if (plr.lineType == LineType::Section &&
 			plr.section == E::Section::Gateway)
 		{
-			m_gateways.push_back(new Gateway);
+			m_gateways->append(std::make_shared<Gateway>());
 			parsingSection = E::Section::Gateway;
 			return ParseResult::Ok;
 		}
@@ -358,7 +375,7 @@ namespace Gateway
 	Parser::ParseResult Parser::parseGatewaySection(E::Section& parsingSection,
 													   const ParseLineResult& plr)
 	{
-		Gateway* gw = m_gateways.back();
+		GatewayShared gw = m_gateways->last();
 
 		bool res = true;
 
@@ -384,13 +401,11 @@ namespace Gateway
 						return ParseResult::CriticalError;
 					}
 
-					delete m_gateways.back();		// delete base Gateway
+					m_gateways->setLast(createTypedGateway(gatewayType));
 
-					m_gateways.back() = createApropriateGateway(gatewayType);
+					Q_ASSERT(m_gateways->last() != nullptr);
 
-					Q_ASSERT(m_gateways.back() != nullptr);
-
-					bool alreadyExists = m_gateways.back()->setSettingValue(plr.lineNo, plr.setting, plr.value);
+					bool alreadyExists = m_gateways->last()->setSettingValue(plr.lineNo, plr.setting, plr.value);
 
 					Q_ASSERT(alreadyExists == false);
 
@@ -425,13 +440,13 @@ namespace Gateway
 			{
 			case E::Section::Gateway:
 				gw->checkAndApplySettings(plr.lineNo, m_log);
-				m_gateways.push_back(new Gateway);
+				m_gateways->append(std::make_shared<Gateway>());
 				parsingSection = E::Section::Gateway;
 				return ParseResult::Ok;
 
 			case E::Section::SignalList:
 				gw->checkAndApplySettings(plr.lineNo, m_log);
-				m_gateways.back()->appendSignalList();
+				m_gateways->last()->appendSignalList();
 				parsingSection = E::Section::SignalList;
 				return ParseResult::Ok;
 
@@ -452,8 +467,8 @@ namespace Gateway
 	Parser::ParseResult Parser::parseSignalListSection(E::Section& parsingSection,
 													   const ParseLineResult& plr)
 	{
-		Gateway* gw = m_gateways.back();
-		SignalList* sl = gw->m_signalLists.back();
+		GatewayShared gw = m_gateways->last();
+		SignalListShared sl = gw->m_signalLists.back();
 
 		switch(plr.lineType)
 		{
@@ -484,13 +499,13 @@ namespace Gateway
 			{
 			case E::Section::Gateway:
 				sl->checkAndApplySettings(plr.lineNo, m_log);
-				m_gateways.push_back(new Gateway);
+				m_gateways->append(std::make_shared<Gateway>());
 				parsingSection = E::Section::Gateway;
 				return ParseResult::Ok;
 
 			case E::Section::SignalList:
 				sl->checkAndApplySettings(plr.lineNo, m_log);
-				m_gateways.back()->appendSignalList();
+				m_gateways->last()->appendSignalList();
 				parsingSection = E::Section::SignalList;
 				return ParseResult::Ok;
 
@@ -826,29 +841,17 @@ namespace Gateway
 		return result;
 	}
 
-	Gateway* Parser::createApropriateGateway(E::GatewayType gwType)
+	GatewayShared Parser::createTypedGateway(E::GatewayType gwType)
 	{
 		switch(gwType)
 		{
 		case E::GatewayType::IVS_Impulse:
-			return new IVS_Impulse_Gateway;
+			return std::make_shared<IVS_Impulse_Gateway>();
 
 		default:
 			Q_ASSERT(false);
 		}
 
 		return nullptr;
-	}
-
-	void Parser::clear()
-	{
-		m_log.clear();
-
-		for(Gateway* gw : m_gateways)
-		{
-			delete gw;
-		}
-
-		m_gateways.clear();
 	}
 }

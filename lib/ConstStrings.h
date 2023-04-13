@@ -232,6 +232,10 @@ namespace XmlElement
 
 	inline const QString SIGNALS("Signals");
 	inline const QString SIGNAL_ELEM("Signal");
+
+	inline const QString GATEWAYS("Gateways");
+	inline const QString GATEWAY("Gateway");
+	inline const QString SIGNAL_LIST("SignalList");
 }
 
 namespace XmlAttribute
@@ -292,6 +296,17 @@ namespace XmlAttribute
 
 	inline const QString RUP_VERSION("RupVersion");
 	inline const QString FOTIP_VERSION("FotipVersion");
+
+	inline const QString GATEWAY_TYPE("GatewayType");
+	inline const QString GATEWAY_ID("GatewayID");
+	inline const QString GATEWAY_DESCRIPTION("GatewayDescription");
+	inline const QString SIGNAL_LISTS_COUNT("SignalListsCount");
+
+	inline const QString SYSTEM_ID("SystemID");
+	inline const QString GATEWAY_IP1("GatewayIP1");
+	inline const QString GATEWAY_IP2("GatewayIP2");
+	inline const QString LISTS_VERSION("ListsVersion");
+	inline const QString PERIOD("Period");
 }
 
 namespace Latin1Char
@@ -401,6 +416,7 @@ namespace File
 	inline const QString RESOURCES_TXT = "Resources.txt";
 
 	inline const QString GATEWAY_DESCRIPTION_TXT = "GatewayDescription.txt";
+	inline const QString GATEWAY_DESCRIPTION_XML = "GatewayDescription.xml";
 
 	inline const QString CRYPTO_SS_SERVER_CERTIFICATE = "/Crypto/ss_server.crt";
 	inline const QString CRYPTO_SS_SERVER_PRIVATE_KEY = "/Crypto/ss_server_private.key";

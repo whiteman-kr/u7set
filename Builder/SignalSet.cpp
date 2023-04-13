@@ -19,7 +19,7 @@ namespace Builder
 	{
 	}
 
-	const ::AppSignalSet* SignalSet::castToAppSignalSet() const
+	const ::AppSignalSet* SignalSet::appSignalSet() const
 	{
 		return static_cast<const ::AppSignalSet*>(this);
 	}
