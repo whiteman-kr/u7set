@@ -61,6 +61,17 @@ namespace Gateway
 			IpPort
 		};
 		Q_ENUM(SettingType)
+
+		enum class SignalListDataType
+		{
+			Unknown,
+
+			// IVS_Impulse data types
+			//
+			Analog_A,			// Analog parameters, format 'A'
+			Discrete_B			// Discrete packed parameters, format 'B'
+		};
+		Q_ENUM(SignalListDataType)
 	};
 
 	class ParserLog;
@@ -122,6 +133,16 @@ namespace Gateway
 
 		const std::vector<QString>& signalIDs() const;
 
+		void writeToXml(XmlWriteHelper& xml) const;
+		bool readFromXml(XmlReadHelper& xml);
+
+	protected:
+		virtual void writeSettingsToXml(XmlWriteHelper& xml) const;
+		virtual bool readSettingsFromXml(XmlReadHelper& xml);
+
+		virtual void writeSignalsToXml(XmlWriteHelper& xml) const;
+		virtual bool readSignalsFromXml(XmlReadHelper& xml);
+
 	protected:
 		SettingsValues m_settingsValues;
 		std::vector<QString> m_signalIDs;
@@ -163,10 +184,16 @@ namespace Gateway
 										  const SettingsValues& settingsValues,
 										  int lineNo, ParserLog& log);
 
-		virtual void writeToXml(XmlWriteHelper& xml) const;
-		virtual bool readFromXml(XmlReadHelper& xml) const;
+		void writeToXml(XmlWriteHelper& xml) const;
+		bool readFromXml(XmlReadHelper& xml);
 
 	protected:
+		virtual void writeSettingsToXml(XmlWriteHelper& xml) const;
+		virtual bool readSettingsFromXml(XmlReadHelper& xml);
+
+		void writeSignalListsToXml(XmlWriteHelper& xml) const;
+		bool readSignalListsFromXml(XmlReadHelper& xml);
+
 		virtual bool generateRequiredFiles(const SignalSetAdapter& signalSetAdapter, ParserLog& log);
 
 	protected:
@@ -195,8 +222,8 @@ namespace Gateway
 		std::vector<GatewayShared>::iterator begin();
 		std::vector<GatewayShared>::iterator end();
 
-		void writeToXml(XmlWriteHelper& xml) const;
-		bool readFromXml(XmlReadHelper& xml) const;
+		virtual void writeToXml(XmlWriteHelper& xml) const;
+		virtual bool readFromXml(XmlReadHelper& xml);
 
 	private:
 		std::vector<GatewayShared> m_gateways;
@@ -208,15 +235,6 @@ namespace Gateway
 
 	class IVS_Impulse_SignalList : public SignalList
 	{
-	public:
-		enum class DataType
-		{
-			Unknown,
-
-			Analog_A,			// Analog parameters, format 'A'
-			Discrete_B			// Discrete packed parameters, format 'B'
-		};
-
 	private:
 		static const std::set<E::Setting> m_requiredSettings;
 
@@ -227,14 +245,18 @@ namespace Gateway
 		virtual bool checkAndApplySettings(int lineNo, ParserLog& log) override;
 
 		int listNo() const;
-		DataType dataType() const;
+		E::SignalListDataType dataType() const;
 		char dataTypeLetter() const;
 		bool sendEvents() const;
 		bool includeAppSignalID() const;
 
 	private:
+		virtual void writeSettingsToXml(XmlWriteHelper& xml) const override;
+		virtual bool readSettingsFromXml(XmlReadHelper& xml) override;
+
+	private:
 		int m_listNo;
-		DataType m_dataType;
+		E::SignalListDataType m_dataType;
 		bool m_sendEvents;
 		bool m_includeAppSignalID;
 	};
@@ -254,8 +276,9 @@ namespace Gateway
 
 		virtual void appendSignalList() override;
 
-		virtual void writeToXml(XmlWriteHelper& xml) const override;
-		virtual bool readFromXml(XmlReadHelper& xml) const override;
+	private:
+		virtual void writeSettingsToXml(XmlWriteHelper& xml) const override;
+		virtual bool readSettingsFromXml(XmlReadHelper& xml) override;
 
 	private:
 		virtual bool generateRequiredFiles(const SignalSetAdapter& signalSetAdapter, ParserLog& log) override;

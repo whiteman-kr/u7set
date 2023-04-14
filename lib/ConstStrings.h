@@ -235,7 +235,9 @@ namespace XmlElement
 
 	inline const QString GATEWAYS("Gateways");
 	inline const QString GATEWAY("Gateway");
+	inline const QString SIGNAL_LISTS("SignalLists");
 	inline const QString SIGNAL_LIST("SignalList");
+	inline const QString ID("ID");
 }
 
 namespace XmlAttribute
@@ -307,6 +309,11 @@ namespace XmlAttribute
 	inline const QString GATEWAY_IP2("GatewayIP2");
 	inline const QString LISTS_VERSION("ListsVersion");
 	inline const QString PERIOD("Period");
+
+	inline const QString LIST_NO("ListNo");
+	inline const QString DATA_TYPE("DataType");
+	inline const QString SEND_EVENTS("SendEvents");
+	inline const QString INCLUDE_APP_SIGNAL_ID("IncludeAppSignalID");
 }
 
 namespace Latin1Char

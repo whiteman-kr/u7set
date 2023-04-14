@@ -137,6 +137,48 @@ namespace Gateway
 		return m_signalIDs;
 	}
 
+	void SignalList::writeToXml(XmlWriteHelper& xml) const
+	{
+		writeSettingsToXml(xml);
+		writeSignalsToXml(xml);
+	}
+
+	bool SignalList::readFromXml(XmlReadHelper& xml)
+	{
+		bool result = true;
+
+		result &= readSettingsFromXml(xml);
+		result &= readSignalsFromXml(xml);
+
+		return result;
+	}
+
+	void SignalList::writeSettingsToXml(XmlWriteHelper& xml) const
+	{
+		Q_UNUSED(xml);
+		Q_ASSERT(false);		// this function should be overrided in derived class
+	}
+
+	bool SignalList::readSettingsFromXml(XmlReadHelper& xml)
+	{
+		Q_UNUSED(xml);
+		Q_ASSERT(false);		// this function should be overrided in derived class
+		return false;
+	}
+
+	void SignalList::writeSignalsToXml(XmlWriteHelper& xml) const
+	{
+		for(const QString& id : m_signalIDs)
+		{
+			xml.writeStringElement(XmlElement::ID, id);
+		}
+	}
+
+	bool SignalList::readSignalsFromXml(XmlReadHelper& xml)
+	{
+		return false;
+	}
+
 	// ---------------------------------------------------------------------------------
 	//
 	// Class Gateway::Gateway implementation
@@ -264,11 +306,49 @@ namespace Gateway
 
 	void Gateway::writeToXml(XmlWriteHelper& xml) const
 	{
+		writeSettingsToXml(xml);
+		writeSignalListsToXml(xml);
 	}
 
-	bool Gateway::readFromXml(XmlReadHelper& xml) const
+	bool Gateway::readFromXml(XmlReadHelper& xml)
 	{
-		return true;
+		bool result = true;
+
+		result &= readSettingsFromXml(xml);
+		result &= readSignalListsFromXml(xml);
+
+		return result;
+	}
+
+	void Gateway::writeSettingsToXml(XmlWriteHelper& xml) const
+	{
+		Q_UNUSED(xml);
+		Q_ASSERT(false);		// this function should be overrided in derived class
+	}
+
+	bool Gateway::readSettingsFromXml(XmlReadHelper& xml)
+	{
+		Q_UNUSED(xml);
+		Q_ASSERT(false);		// this function should be overrided in derived class
+		return false;
+	}
+
+	void Gateway::writeSignalListsToXml(XmlWriteHelper& xml) const
+	{
+		xml.writeStartElement(XmlElement::SIGNAL_LISTS);
+		xml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(m_signalLists.size()));
+
+		for(SignalListShared sl : m_signalLists)
+		{
+			sl->writeToXml(xml);
+		}
+
+		xml.writeEndElement();		//	</SignalLists>
+	}
+
+	bool Gateway::readSignalListsFromXml(XmlReadHelper& xml)
+	{
+		return false;
 	}
 
 	bool Gateway::generateRequiredFiles(const SignalSetAdapter& signalSetAdapter, ParserLog& log)
@@ -338,7 +418,7 @@ namespace Gateway
 		xml.writeEndDocument();
 	}
 
-	bool Gateways::readFromXml(XmlReadHelper& xml) const
+	bool Gateways::readFromXml(XmlReadHelper& xml)
 	{
 		return true;
 	}
@@ -394,13 +474,13 @@ namespace Gateway
 
 					if (dataTypeStr == "A")
 					{
-						m_dataType = DataType::Analog_A;
+						m_dataType = E::SignalListDataType::Analog_A;
 					}
 					else
 					{
 						if (dataTypeStr == "B")
 						{
-							m_dataType = DataType::Discrete_B;
+							m_dataType = E::SignalListDataType::Discrete_B;
 						}
 						else
 						{
@@ -433,7 +513,7 @@ namespace Gateway
 		return m_listNo;
 	}
 
-	IVS_Impulse_SignalList::DataType IVS_Impulse_SignalList::dataType() const
+	E::SignalListDataType IVS_Impulse_SignalList::dataType() const
 	{
 		return m_dataType;
 	}
@@ -442,10 +522,10 @@ namespace Gateway
 	{
 		switch(m_dataType)
 		{
-		case DataType::Analog_A:
+		case E::SignalListDataType::Analog_A:
 			return 'A';
 
-		case DataType::Discrete_B:
+		case E::SignalListDataType::Discrete_B:
 			return 'B';
 
 		default:
@@ -463,6 +543,23 @@ namespace Gateway
 	bool IVS_Impulse_SignalList::includeAppSignalID() const
 	{
 		return m_includeAppSignalID;
+	}
+
+	void IVS_Impulse_SignalList::writeSettingsToXml(XmlWriteHelper& xml) const
+	{
+		xml.writeStartElement(XmlElement::SIGNAL_LIST);
+
+		xml.writeIntAttribute(XmlAttribute::LIST_NO, m_listNo);
+		xml.writeEnumKeyAttribute<E::SignalListDataType>(XmlAttribute::DATA_TYPE, m_dataType);
+		xml.writeBoolAttribute(XmlAttribute::SEND_EVENTS, m_sendEvents);
+		xml.writeBoolAttribute(XmlAttribute::INCLUDE_APP_SIGNAL_ID, m_includeAppSignalID);
+
+		xml.writeEndElement();		//	</SignalList>
+	}
+
+	bool IVS_Impulse_SignalList::readSettingsFromXml(XmlReadHelper& xml)
+	{
+		return true;
 	}
 
 	// ---------------------------------------------------------------------------------
@@ -545,7 +642,7 @@ namespace Gateway
 		m_signalLists.push_back(std::make_shared<IVS_Impulse_SignalList>());
 	}
 
-	void IVS_Impulse_Gateway::writeToXml(XmlWriteHelper& xml) const
+	void IVS_Impulse_Gateway::writeSettingsToXml(XmlWriteHelper& xml) const
 	{
 		xml.writeStartElement(XmlElement::SETTINGS);
 
@@ -554,11 +651,10 @@ namespace Gateway
 		xml.writeHostAddressPortAttribute(XmlAttribute::GATEWAY_IP2, m_gatewayIP2);
 		xml.writeIntAttribute(XmlAttribute::LISTS_VERSION, m_listsVersion);
 		xml.writeIntAttribute(XmlAttribute::PERIOD, m_period);
-
-		xml.writeEndElement();	//	</Settings>
+		xml.writeEndElement();		//	</Settings>
 	}
 
-	bool IVS_Impulse_Gateway::readFromXml(XmlReadHelper& xml) const
+	bool IVS_Impulse_Gateway::readSettingsFromXml(XmlReadHelper& xml)
 	{
 		return true;
 	}
@@ -662,7 +758,7 @@ namespace Gateway
 
 			switch(signalList.dataType())
 			{
-			case IVS_Impulse_SignalList::DataType::Analog_A:
+			case E::SignalListDataType::Analog_A:
 				if (s->isAnalog() == false)
 				{
 					log.logError(QString("signal '%1' is not Analog (GatewayID = %2, ListNo = %3)").
@@ -692,7 +788,7 @@ namespace Gateway
 				}
 				break;
 
-			case IVS_Impulse_SignalList::DataType::Discrete_B:
+			case E::SignalListDataType::Discrete_B:
 				if (s->isDiscrete() == false)
 				{
 					log.logError(QString("signal '%1' is not Discrete (GatewayID = %2, ListNo = %3)").
