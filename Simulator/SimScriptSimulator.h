@@ -67,6 +67,9 @@ namespace Sim
 		/// \brief Loaded project build directory, if empty then project is not loaded.
 		Q_PROPERTY(QString buildPath READ buildPath)
 
+		/// \brief Loaded project build number, if 0 then project is not loaded.
+		Q_PROPERTY(int buildNo READ buildNo)
+
 		/// \brief Script execution timeout in milliseconds, if -1 then timeout is not applied.
 		Q_PROPERTY(qint64 executionTimeout READ executionTimeout WRITE setExecutionTimeout)
 
@@ -161,6 +164,7 @@ namespace Sim
 		[[nodiscard]] ScopedLog& log();
 
 		QString buildPath() const;
+		int buildNo() const;
 
 		qint64 executionTimeout() const;
 		void setExecutionTimeout(qint64 value);

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../../lib/Ui/ClickableLabel.h"
 #include "../AppSignalSetProvider.h"
 #include "../DbLib/DbController.h"
 #include "MainTabPage.h"
@@ -16,7 +17,11 @@ class SchemasTabPage : public MainTabPage
 	Q_OBJECT
 
 public:
-	explicit SchemasTabPage(DbController* dbc, AppSignalSetProvider* signalSetProvider, QWidget* parent);
+	explicit SchemasTabPage(DbController* dbc,
+							AppSignalSetProvider* signalSetProvider,
+							ClickableLabel* statusBarLayerLabel,
+							ClickableLabel* statusBarZoomLabel,
+							QWidget* parent);
 	virtual ~SchemasTabPage();
 
 public:
@@ -31,6 +36,7 @@ public:
 
 protected:
 	void showEvent(QShowEvent* event) override;
+	void timerEvent(QTimerEvent* event) override;
 
 public slots:
 	void projectOpened();
@@ -40,9 +46,15 @@ protected slots:
 	void tabCloseRequested(int index);
 	void currentTabChanged(int index);
 
+	void statusBarLayerClicked();
+	void statusBarZoomClicked();
+
 	// Data
 	//
 protected:
+	ClickableLabel* m_statusBarLayerLabel = nullptr;
+	ClickableLabel* m_statusBarZoomLabel = nullptr;
+
 	QTabWidget* m_tabWidget = nullptr;
 	SchemaControlTabPage* m_controlTabPage = nullptr;
 

@@ -311,6 +311,31 @@ void EditSchemaTabPage::setZoom(double zoom, bool repaint)
 	return;
 }
 
+QString EditSchemaTabPage::activeLayer() const
+{
+	Q_ASSERT(m_schemaWidget);
+
+	auto layer = m_schemaWidget->activeLayer();
+	Q_ASSERT(layer);
+
+	QString layerName = (layer != nullptr) ? layer->name() : QString{};
+	return layerName;
+}
+
+void EditSchemaTabPage::setActiveLayer(QString name)
+{
+	Q_ASSERT(m_schemaWidget);
+	m_schemaWidget->setActiveLayer(name);
+	return;
+}
+
+void EditSchemaTabPage::layersDialog()
+{
+	Q_ASSERT(m_schemaWidget);
+	m_schemaWidget->layers();
+	return;
+}
+
 void EditSchemaTabPage::updateAfbSchemaItems()
 {
 	if (m_schemaWidget == nullptr)

@@ -72,6 +72,7 @@ namespace Sim
 
 		[[nodiscard]] bool isLoaded() const;
 		[[nodiscard]] QString buildPath() const;
+		[[nodiscard]] int buildNo() const;
 
 		[[nodiscard]] QString projectName() const;
 
