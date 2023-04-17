@@ -635,6 +635,11 @@ namespace Sim
 		return m_simulator->buildPath();
 	}
 
+	int ScriptSimulator::buildNo() const
+	{
+		return m_simulator->buildNo();
+	}
+
 	qint64 ScriptSimulator::executionTimeout() const
 	{
 		return m_executionTimeout;

@@ -167,6 +167,10 @@ signals:
 
 	// Slots
 	//
+public slots:
+	void layers();
+	void setActiveLayer(QString name);
+
 protected slots:
 	void contextMenu(const QPoint& pos);
 
@@ -210,7 +214,6 @@ protected slots:
 
 	void schemaProperties();
 	void properties();
-	void layers();
 	void compareSchemaItem();
 	void selectionChanged();
 

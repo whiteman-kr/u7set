@@ -48,7 +48,10 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 
 	// --
 	//
-	setCentralWidget(new CentralWidget());
+	CentralWidget* central = new CentralWidget();
+	setCentralWidget(central);
+
+	connect(central, &QTabWidget::currentChanged, this, &MainWindow::currentTabChanged);
 
 	// Create Menus, ToolBars, StatusBar
 	//
@@ -87,7 +90,7 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	m_filesTabPageIndex = getCentralWidget()->addTabPage(m_filesTabPage, m_filesTabPage->windowTitle());
 	getCentralWidget()->removeTab(m_filesTabPageIndex);	// It will be added in projectOpened slot if required
 
-	m_schemaTabPage = new SchemasTabPage{db(), m_signalSetProvider, this};
+	m_schemaTabPage = new SchemasTabPage{db(), m_signalSetProvider, m_statusBarSchemaLayerLabel, m_statusBarSchemaZoomLabel, this};
 	getCentralWidget()->addTabPage(m_schemaTabPage, tr("Schemas"));
 
 	m_buildTabPage = new BuildTabPage(dbController(), nullptr);
@@ -609,9 +612,17 @@ void MainWindow::createStatusBar()
 	m_statusBarInfo->setAlignment(Qt::AlignLeft);
 	m_statusBarInfo->setIndent(3);
 
-	m_statusBarConnectionStatistics = new QLabel();
-	m_statusBarConnectionStatistics->setAlignment(Qt::AlignHCenter);
-	m_statusBarConnectionStatistics->setMinimumWidth(100);
+	m_statusBarSchemaLayerLabel = new ClickableLabel("Layer: ");
+	m_statusBarSchemaLayerLabel->setAlignment(Qt::AlignHCenter);
+	m_statusBarSchemaLayerLabel->setMinimumWidth(100);
+	m_statusBarSchemaLayerLabel->setVisible(false);
+	m_statusBarSchemaLayerLabel->setCursor(Qt::PointingHandCursor);
+
+	m_statusBarSchemaZoomLabel = new ClickableLabel("Zoom: ");
+	m_statusBarSchemaZoomLabel->setAlignment(Qt::AlignHCenter);
+	m_statusBarSchemaZoomLabel->setMinimumWidth(80);
+	m_statusBarSchemaZoomLabel->setVisible(false);
+	m_statusBarSchemaZoomLabel->setCursor(Qt::PointingHandCursor);
 
 	m_statusBarConnectionState = new QLabel();
 	m_statusBarConnectionState->setAlignment(Qt::AlignHCenter);
@@ -621,7 +632,8 @@ void MainWindow::createStatusBar()
 	//
 	statusBar()->addWidget(m_locatorEditControl, 2);
 	statusBar()->addWidget(m_statusBarInfo, 7);
-	statusBar()->addPermanentWidget(m_statusBarConnectionStatistics, 0);
+	statusBar()->addPermanentWidget(m_statusBarSchemaLayerLabel, 0);
+	statusBar()->addPermanentWidget(m_statusBarSchemaZoomLabel, 0);
 	statusBar()->addPermanentWidget(m_statusBarConnectionState, 0);
 
 	return;
@@ -648,6 +660,16 @@ void MainWindow::onMiniDumpCreated(QString dumpFilePath, bool result)
     }
 
     QMessageBox::critical(this, qAppName(), s);
+}
+
+void MainWindow::currentTabChanged(int /*tabIndex*/)
+{
+	QWidget* currentTabWidget = getCentralWidget()->currentWidget();
+
+	m_statusBarSchemaLayerLabel->setVisible(currentTabWidget == m_schemaTabPage);
+	m_statusBarSchemaZoomLabel->setVisible(currentTabWidget == m_schemaTabPage);
+
+	return;
 }
 
 void MainWindow::exit()

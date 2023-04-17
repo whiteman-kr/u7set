@@ -4152,6 +4152,33 @@ void EditSchemaWidget::clearSelection()
 	editSchemaView()->clearSelection();
 }
 
+void EditSchemaWidget::layers()
+{
+	SchemaLayersDialog schemaLayersDialog(editSchemaView(), this);
+
+	if (schemaLayersDialog.exec() == QDialog::Accepted)
+	{
+	}
+
+	update();
+	return;
+}
+
+void EditSchemaWidget::setActiveLayer(QString name)
+{
+	for (auto layers = schema()->layers();
+		 auto layer : layers)
+	{
+		if (layer->name() == name)
+		{
+			editSchemaView()->setActiveLayer(layer);
+			break;
+		}
+	}
+
+	return;
+}
+
 void EditSchemaWidget::contextMenu(const QPoint& pos)
 {
 	if (mouseState() == MouseState::AddSchemaPosConnectionNextPoint ||
@@ -6848,17 +6875,6 @@ void EditSchemaWidget::properties()
 	m_itemsPropertiesDialog->raise();
 	m_itemsPropertiesDialog->activateWindow();
 
-	return;
-}
-
-void EditSchemaWidget::layers()
-{
-	SchemaLayersDialog schemaLayersDialog(editSchemaView(), this);
-	if (schemaLayersDialog.exec() == QDialog::Accepted)
-	{
-
-	}
-	update();
 	return;
 }
 

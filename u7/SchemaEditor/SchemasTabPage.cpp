@@ -10,9 +10,20 @@
 // SchemasTabPage
 //
 //
-SchemasTabPage::SchemasTabPage(DbController* dbc, AppSignalSetProvider* signalSetProvider, QWidget* parent) :
-	MainTabPage(dbc, parent)
+SchemasTabPage::SchemasTabPage(DbController* dbc,
+							   AppSignalSetProvider* signalSetProvider,
+							   ClickableLabel* statusBarLayerLabel,
+							   ClickableLabel* statusBarZoomLabel,
+							   QWidget* parent) :
+	MainTabPage{dbc, parent},
+	m_statusBarLayerLabel{statusBarLayerLabel},
+	m_statusBarZoomLabel{statusBarZoomLabel}
 {
+	Q_ASSERT(dbc);
+	Q_ASSERT(signalSetProvider);
+	Q_ASSERT(m_statusBarLayerLabel);
+	Q_ASSERT(m_statusBarZoomLabel);
+
 	m_tabWidget = new TabWidgetEx{this};
 
 	// --
@@ -82,6 +93,13 @@ SchemasTabPage::SchemasTabPage(DbController* dbc, AppSignalSetProvider* signalSe
 
 	connect(m_tabWidget->tabBar(), &QTabBar::tabCloseRequested, this, &SchemasTabPage::tabCloseRequested);
 	connect(m_tabWidget->tabBar(), &QTabBar::currentChanged, this, &SchemasTabPage::currentTabChanged);
+
+	// Start timer for updating StatusBar
+	//
+	startTimer(150);
+
+	connect(m_statusBarLayerLabel, &ClickableLabel::clicked, this, &SchemasTabPage::statusBarLayerClicked);
+	connect(m_statusBarZoomLabel, &ClickableLabel::clicked, this, &SchemasTabPage::statusBarZoomClicked);
 
 	return;
 }
@@ -314,6 +332,24 @@ void SchemasTabPage::showEvent(QShowEvent* event)
 	return;
 }
 
+void SchemasTabPage::timerEvent(QTimerEvent* /*event*/)
+{
+	EditSchemaTabPage* w = dynamic_cast<EditSchemaTabPage*>(m_tabWidget->currentWidget());
+
+	if (w != nullptr)
+	{
+		m_statusBarLayerLabel->setText(tr("Layer: %1").arg(w->activeLayer()));
+		m_statusBarZoomLabel->setText(tr("Zoom: %1%").arg(static_cast<int>(w->zoom())));
+	}
+	else
+	{
+		m_statusBarLayerLabel->setText({});
+		m_statusBarZoomLabel->setText({});
+	}
+
+	return;
+}
+
 void SchemasTabPage::projectOpened()
 {
 	this->setEnabled(true);
@@ -378,4 +414,118 @@ void SchemasTabPage::currentTabChanged(int index)
 	return;
 }
 
+void SchemasTabPage::statusBarLayerClicked()
+{
+	EditSchemaTabPage* w = dynamic_cast<EditSchemaTabPage*>(m_tabWidget->currentWidget());
+	if (w != nullptr && w->schema())
+	{
+		auto schema = w->schema();
 
+		QMenu menu;
+		QList<QAction*> actions;
+
+		auto layers = schema->layers();
+		for (auto layer : layers)
+		{
+			QAction* layerAction = new QAction{layer->name(), &menu};
+			layerAction->setData(layer->name());
+			layerAction->setCheckable(true);
+			layerAction->setChecked(layer->name() == w->activeLayer());
+
+			actions.push_back(layerAction);
+		}
+
+		QAction* actSeparator = new QAction{"--", &menu};
+		actSeparator->setSeparator(true);
+		QAction* actLayers = new QAction{tr("Layers..."), &menu};
+
+		actions.push_back(actSeparator);
+		actions.push_back(actLayers);
+
+		// Show menu.
+		//
+		QAction* hitAchtion = menu.exec(actions, QCursor::pos());
+
+		if (hitAchtion != nullptr)
+		{
+			if (hitAchtion == actLayers)
+			{
+				w->layersDialog();
+				return;
+			}
+
+			if (hitAchtion->data().isValid() == true)
+			{
+				w->setActiveLayer(hitAchtion->data().toString());
+				return;
+			}
+		}
+	}
+
+	return;
+}
+
+void SchemasTabPage::statusBarZoomClicked()
+{
+	EditSchemaTabPage* w = dynamic_cast<EditSchemaTabPage*>(m_tabWidget->currentWidget());
+	if (w != nullptr)
+	{
+		int currentZoom = static_cast<int>(w->zoom());
+
+		QMenu menu;
+		QList<QAction*> actions;
+
+		actions.push_back(new QAction{"100%", &menu});
+		actions.back()->setShortcut(Qt::CTRL | Qt::Key_Asterisk);
+		actions.back()->setData(100);
+		actions.back()->setCheckable(true);
+		actions.back()->setChecked(actions.back()->data().toInt() == currentZoom);
+
+		actions.push_back(new QAction{"Zoom to Fit", &menu});
+		actions.back()->setData(0);
+
+		actions.push_back(new QAction{"--", &menu});
+		actions.back()->setSeparator(true);
+
+		actions.push_back(new QAction{"50%", &menu});
+		actions.back()->setData(50);
+		actions.back()->setCheckable(true);
+		actions.back()->setChecked(actions.back()->data().toInt() == currentZoom);
+
+		actions.push_back(new QAction{"75%", &menu});
+		actions.back()->setData(75);
+		actions.back()->setCheckable(true);
+		actions.back()->setChecked(actions.back()->data().toInt() == currentZoom);
+
+		actions.push_back(new QAction{"100%", &menu});
+		actions.back()->setData(100);
+		actions.back()->setCheckable(true);
+		actions.back()->setChecked(actions.back()->data().toInt() == currentZoom);
+
+		actions.push_back(new QAction{"125%", &menu});
+		actions.back()->setData(125);
+		actions.back()->setCheckable(true);
+		actions.back()->setChecked(actions.back()->data().toInt() == currentZoom);
+
+		actions.push_back(new QAction{"150%", &menu});
+		actions.back()->setData(150);
+		actions.back()->setCheckable(true);
+		actions.back()->setChecked(actions.back()->data().toInt() == currentZoom);
+
+		actions.push_back(new QAction{"200%", &menu});
+		actions.back()->setData(200);
+		actions.back()->setCheckable(true);
+		actions.back()->setChecked(actions.back()->data().toInt() == currentZoom);
+
+		// Show menu.
+		//
+		QAction* hitAction = menu.exec(actions, QCursor::pos());
+
+		if (hitAction != nullptr && hitAction->data().isValid() == true)
+		{
+			w->setZoom(hitAction->data().toInt(), true);
+		}
+	}
+
+	return;
+}

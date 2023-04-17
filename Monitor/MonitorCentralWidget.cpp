@@ -83,7 +83,7 @@ void MonitorCentralWidget::timerEvent(QTimerEvent* event)
 int MonitorCentralWidget::addSchemaTabPage(const QString& schemaId, const QVariantHash& variables)
 {
 	// Create a dummy context, later it will be changed to the normal one inside MonitorSchemaWidget
-	// constructor, as MonitorSchemaView is cretaed inside MonitorSchemaView().
+	// constructor, as MonitorSchemaView is created inside MonitorSchemaView().
 	//
 	auto dummyContext = VFrame30::Context::create(nullptr, nullptr, nullptr, nullptr);
 

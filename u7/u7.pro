@@ -67,6 +67,7 @@ CONFIG(release, debug|release) {
 
 HEADERS  += \
     ../UtilsLib/CrashExceptionHandler.h \
+    ../lib/Ui/ClickableLabel.h \
     ../lib/Ui/DialogChooseTags.h \
     CodeEditor.h \
     DbTagsEditor.h \
