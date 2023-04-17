@@ -27,6 +27,7 @@ namespace Builder
 
 			void setSizeW(quint32 sizeW);
 			quint32 sizeW() const;
+			void addSizeW(quint32 sizeW);
 
 			bool addressInArea(quint32 addr, quint32 sizeW) const;
 
@@ -49,6 +50,8 @@ namespace Builder
 
 		bool initReadableAreas();
 		bool initWritableAreas();
+		void joiningSequentialAreas(std::map<quint32, MemArea>* areas);
+
 		bool initPartialWrittenAddresses();
 		bool initLoopbackDiscretes();
 

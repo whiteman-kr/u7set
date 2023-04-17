@@ -47,6 +47,12 @@ namespace Builder
 		return m_sizeW;
 	}
 
+	void CodeChecker::MemArea::addSizeW(quint32 sizeW)
+	{
+		Q_ASSERT(m_sizeW != NOT_INIT);
+		m_sizeW += sizeW;
+	}
+
 	bool CodeChecker::MemArea::addressInArea(quint32 addr, quint32 sizeW) const
 	{
 		return addr >= m_startAddr &&
@@ -260,6 +266,8 @@ namespace Builder
 
 		m_readAreas.insert({wordMem.startAddr(), wordMem});
 
+		joiningSequentialAreas(&m_readAreas);
+
 		return true;
 	}
 
@@ -336,7 +344,48 @@ namespace Builder
 
 		m_writeAreas.insert({wordMem.startAddr(), wordMem});
 
+		joiningSequentialAreas(&m_writeAreas);
+
 		return true;
+	}
+
+	void CodeChecker::joiningSequentialAreas(std::map<quint32, MemArea>* areas)
+	{
+		TEST_PTR_RETURN(areas);
+
+		if (areas->empty() == true)
+		{
+			return;
+		}
+
+		std::map<quint32, MemArea> joinedWriteAreas;
+
+		auto it = areas->begin();
+
+		MemArea prevMemArea = it->second;
+
+		it++;
+
+		while(it != areas->end())
+		{
+			const MemArea& memArea = it->second;
+
+			if (prevMemArea.startAddr() + prevMemArea.sizeW() == memArea.startAddr())
+			{
+				prevMemArea.addSizeW(memArea.sizeW());
+			}
+			else
+			{
+				joinedWriteAreas.insert({ prevMemArea.startAddr(), prevMemArea});
+				prevMemArea = memArea;
+			}
+
+			it++;
+		}
+
+		joinedWriteAreas.insert({ prevMemArea.startAddr(), prevMemArea });
+
+		areas->swap(joinedWriteAreas);
 	}
 
 	bool CodeChecker::initPartialWrittenAddresses()
