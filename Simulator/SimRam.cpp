@@ -247,11 +247,13 @@ namespace Sim
 		data &= 0x01;
 		int byteOffset = (offsetW - areaOffset) * 2;
 
+//#ifdef QT_DEBUG
 		if (byteOffset >= m_data.size())
 		{
 			Q_ASSERT(byteOffset < m_data.size());
 			return false;
 		}
+//#endif
 
 		quint16 word;
 		std::memcpy(&word, m_data.constData() + byteOffset, sizeof(word));
@@ -452,6 +454,7 @@ namespace Sim
 		m_memoryAreas.clear();
 		m_readAreas.clear();
 		m_writeAreas.clear();
+		m_pool.release();
 
 		m_memoryAreas.reserve(that.m_memoryAreas.size());
 
@@ -483,6 +486,7 @@ namespace Sim
 		m_memoryAreas.clear();
 		m_readAreas.clear();
 		m_writeAreas.clear();
+		m_pool.release();
 		m_overrideSignalsLastCounter = -1;
 		return;
 	}
@@ -900,7 +904,7 @@ namespace Sim
 
 	RamArea* Ram::memoryArea(E::LogicModuleRamAccess access, quint32 offsetW) noexcept
 	{
-		const std::map<quint32, size_t>* areasMap = nullptr;
+		const std::pmr::map<quint32, size_t>* areasMap = nullptr;
 
 		if (static_cast<int>(access) & static_cast<int>(E::LogicModuleRamAccess::Write))
 		{
@@ -942,7 +946,7 @@ namespace Sim
 
 	const RamArea* Ram::memoryArea(E::LogicModuleRamAccess access, quint32 offsetW) const noexcept
 	{
-		const std::map<quint32, size_t>* areasMap = nullptr;
+		const std::pmr::map<quint32, size_t>* areasMap = nullptr;
 
 		if (static_cast<int>(access) & static_cast<int>(E::LogicModuleRamAccess::Write))
 		{

@@ -209,34 +209,38 @@ namespace Sim
 		switch (m_controlData.m_state)
 		{
 		case SimControlState::Stop:
-			m_controlData.m_state = SimControlState::Run;
-
-			m_simulator->software().startSimulation(m_simulator->currentProfileName());
-
-			m_controlData.m_startTime = duration_cast<microseconds>(system_clock::now().time_since_epoch());
-
-			// It will make start time on the edge of 5ms, it will make nice timestamp
-			//
-			m_controlData.m_startTime = (m_controlData.m_startTime / 5000) * 5000;
-
-			m_controlData.m_sliceStartTime = m_controlData.m_startTime;
-			m_controlData.m_currentTime = m_controlData.m_sliceStartTime;
-			m_controlData.m_duration = duration;
-
-			for (SimControlRunStruct& cs : m_controlData.m_lms)
 			{
-				cs.m_lastStartTime = 0us;	// it will make LM to reset() before running cycle
-				m_simulator->overrideSignals().requestToResetOverrideScripts(cs.equipmentId());	// It will reset all scripts, clear global variables, etc
+				m_controlData.m_state = SimControlState::Run;
 
-				// It sets nonvalid point to realtime trends
+				m_simulator->software().startSimulation(m_simulator->currentProfileName());
+
+				m_controlData.m_startTime = duration_cast<microseconds>(system_clock::now().time_since_epoch());
+
+				// It will make start time on the edge of 5ms, it will make nice timestamp
 				//
-				auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(m_controlData.m_currentTime);
+				m_controlData.m_startTime = (m_controlData.m_startTime / 5000) * 5000;
 
-				TimeStamp plantTime{ms.count() + QDateTime::currentDateTime().offsetFromUtc() * 1000};
-				TimeStamp localTime{plantTime};
-				TimeStamp systemTime{ms.count()};
+				m_controlData.m_sliceStartTime = m_controlData.m_startTime;
+				m_controlData.m_currentTime = m_controlData.m_sliceStartTime;
+				m_controlData.m_duration = duration;
 
-				m_simulator->appSignalManager().setData(cs.equipmentId(), {}, plantTime, localTime, systemTime);
+				int offsetFromUtcMs = QDateTime::currentDateTime().offsetFromUtc() * 1000;
+
+				for (SimControlRunStruct& cs : m_controlData.m_lms)
+				{
+					cs.m_lastStartTime = 0us;	// it will make LM to reset() before running cycle
+					m_simulator->overrideSignals().requestToResetOverrideScripts(cs.equipmentId());	// It will reset all scripts, clear global variables, etc
+
+					// It sets nonvalid point to realtime trends
+					//
+					auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(m_controlData.m_currentTime);
+
+					TimeStamp plantTime{ms.count() + offsetFromUtcMs};
+					TimeStamp localTime{plantTime};
+					TimeStamp systemTime{ms.count()};
+
+					m_simulator->appSignalManager().setData(cs.equipmentId(), {}, plantTime, localTime, systemTime);
+				}
 			}
 			break;
 
@@ -371,13 +375,13 @@ namespace Sim
 
 	double Control::speedFactor() const
 	{
-		return m_speedFactor.load();
+		return m_speedFactor.load(std::memory_order_relaxed);
 	}
 
 	void Control::setSpeedFactor(double value)
 	{
 		value = std::clamp(value, 0.1, 256.0);
-		m_speedFactor.store(value);
+		m_speedFactor.store(value, std::memory_order_relaxed);
 	}
 
 	void Control::run()
@@ -446,7 +450,7 @@ namespace Sim
 			return false;
 		}
 
-		quint32 minimulLmWorkcycleUs = 5000;
+		std::chrono::microseconds minimulLmWorkcycle{5000};
 
 		for (const SimControlRunStruct& lm : lms)
 		{
@@ -460,7 +464,8 @@ namespace Sim
 				continue;
 			}
 
-			minimulLmWorkcycleUs = std::min(minimulLmWorkcycleUs, simLm->lmDescription().logicUnit().m_cycleDuration);
+			minimulLmWorkcycle = std::min(minimulLmWorkcycle,
+										  std::chrono::microseconds{simLm->lmDescription().logicUnit().m_cycleDuration});
 		}
 
 		if (result == false)
@@ -480,6 +485,9 @@ namespace Sim
 		auto finishTime = cd.m_sliceStartTime + cd.m_duration;
 
 		double currentSpeedFactor = speedFactor();
+
+		std::mutex fakeMutex;
+		std::condition_variable someLmFinishedSimulation;
 
 		do
 		{
@@ -545,7 +553,7 @@ namespace Sim
 
 						// Task can be STARTED again
 						//
-						lm.m_task = lm.start(cd.m_currentTime, currentDateTime);
+						lm.m_task = lm.start(cd.m_currentTime, currentDateTime, someLmFinishedSimulation);
 					}
 				}
 			}	// for (SimControlRunStruct& lm : lms)
@@ -648,11 +656,27 @@ namespace Sim
 			// Give some time for tasks
 			//
 			bool hadWait = false;
+
 			for (SimControlRunStruct& lm : lms)
 			{
 				if (lm.m_task.has_value() == true && lm->isPowerOff() == false)
 				{
-					lm.m_task->waitForFinished();
+					// There is at least one lm which is running simulation right now.
+					// WAIT for at least shortest workcyle time.
+					//
+					std::unique_lock fakeLock{fakeMutex};
+
+//					someLmFinishedSimulation.wait_for(fakeLock, minimulLmWorkcycle, [&lms](){
+//						return std::any_of(lms.begin(), lms.end(), [](SimControlRunStruct& lm)
+//						{
+//							return  lm.m_task.has_value() == true &&
+//									lm.m_task.value().isFinished() == true &&
+//									lm->isPowerOff() == false;
+//						});
+//					});
+
+					someLmFinishedSimulation.wait_for(fakeLock, minimulLmWorkcycle, [](){ return true; });
+
 					hadWait = true;
 					break;      // At least one LM has finished the work
 				}
@@ -678,7 +702,7 @@ namespace Sim
 
 			if (allLmsArePoweredOff == true)
 			{
-				QThread::usleep(minimulLmWorkcycleUs);
+				QThread::usleep(static_cast<unsigned long>(minimulLmWorkcycle.count()));
 			}
 		}
 		while (true);	// Run always till state is triggered to STOP or PAUSE

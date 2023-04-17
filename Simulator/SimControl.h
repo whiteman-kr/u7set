@@ -37,14 +37,14 @@ namespace Sim
 		{
 		}
 
-		QFuture<bool> start(std::chrono::microseconds time, const QDateTime& currentDateTime)
+		QFuture<bool> start(std::chrono::microseconds time, const QDateTime& currentDateTime, std::condition_variable& cvFinished)
 		{
 			bool reset = m_lastStartTime == 0us;
 
 			m_lastStartTime = time;
 			m_possibleToAdvanceTo = time;
 			m_cyclesCounter ++;
-			return m_lm->asyncRunCycle(time, currentDateTime, m_cyclesCounter, reset);
+			return m_lm->asyncRunCycle(time, currentDateTime, m_cyclesCounter, reset, cvFinished);
 		}
 
 		const QString& equipmentId() const
@@ -108,7 +108,7 @@ namespace Sim
 
 			for (const SimControlRunStruct& lm : cd.m_lms)
 			{
-				m_lmDeviceModes.emplace_back(Sim::ControlStatus::LmMode{lm.equipmentId(), lm.m_lm->deviceState()});
+				m_lmDeviceModes.push_back(Sim::ControlStatus::LmMode{lm.equipmentId(), lm.m_lm->deviceState()});
 			}
 		}
 
