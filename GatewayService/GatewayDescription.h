@@ -163,6 +163,7 @@ namespace Gateway
 	public:
 		Gateway();
 		Gateway(E::GatewayType gwType);
+		Gateway(E::GatewayType gwType, const QString& gwID, const QString& gwDesc);
 		~Gateway();
 
 		E::GatewayType gatewayType() const;

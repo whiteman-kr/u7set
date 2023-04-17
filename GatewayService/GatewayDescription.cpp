@@ -168,15 +168,41 @@ namespace Gateway
 
 	void SignalList::writeSignalsToXml(XmlWriteHelper& xml) const
 	{
+		xml.writeStartElement(XmlElement::SIGNALS);
+		xml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(m_signalIDs.size()));
+
 		for(const QString& id : m_signalIDs)
 		{
 			xml.writeStringElement(XmlElement::ID, id);
 		}
+
+		xml.writeEndElement();		// </Signals>
 	}
 
 	bool SignalList::readSignalsFromXml(XmlReadHelper& xml)
 	{
-		return false;
+		bool result = true;
+
+		result &= xml.findElement(XmlElement::SIGNALS);
+
+		int signalsCount = 0;
+
+		result &= xml.readIntAttribute(XmlAttribute::COUNT, &signalsCount);
+
+		RETURN_IF_FALSE(result);
+
+		for(int i = 0; i < signalsCount; i++)
+		{
+			QString signalID;
+
+			result &= xml.readStringElement(XmlElement::ID, &signalID, true);
+
+			BREAK_IF_FALSE(result);
+
+			m_signalIDs.push_back(signalID);
+		}
+
+		return result;
 	}
 
 	// ---------------------------------------------------------------------------------
@@ -199,6 +225,13 @@ namespace Gateway
 
 	Gateway::Gateway(E::GatewayType gwType) :
 		m_gatewayType(gwType)
+	{
+	}
+
+	Gateway::Gateway(E::GatewayType gwType, const QString& gwID, const QString& gwDesc) :
+		m_gatewayType(gwType),
+		m_gatewayID(gwID),
+		m_gatewayDescription(gwDesc)
 	{
 	}
 
@@ -348,7 +381,32 @@ namespace Gateway
 
 	bool Gateway::readSignalListsFromXml(XmlReadHelper& xml)
 	{
-		return false;
+		bool result = true;
+
+		result &= xml.findElement(XmlElement::SIGNAL_LISTS);
+
+		int signalListsCount = 0;
+
+		result &= xml.readIntAttribute(XmlAttribute::COUNT, &signalListsCount);
+
+		RETURN_IF_FALSE(signalListsCount);
+
+		for(int i = 0; i < signalListsCount; i++)
+		{
+			appendSignalList();
+
+			SignalListShared sl = m_signalLists.back();
+
+			result &= sl->readFromXml(xml);
+
+			if (result == false)
+			{
+				m_signalLists.pop_back();
+				break;
+			}
+		}
+
+		return result;
 	}
 
 	bool Gateway::generateRequiredFiles(const SignalSetAdapter& signalSetAdapter, ParserLog& log)
@@ -406,7 +464,6 @@ namespace Gateway
 			xml.writeEnumKeyAttribute<E::GatewayType>(XmlAttribute::GATEWAY_TYPE, gw->gatewayType());
 			xml.writeStringAttribute(XmlAttribute::GATEWAY_ID, gw->gatewayID());
 			xml.writeStringAttribute(XmlAttribute::GATEWAY_DESCRIPTION, gw->gatewayDescription());
-			xml.writeIntAttribute(XmlAttribute::SIGNAL_LISTS_COUNT, gw->signalListsCount());
 
 			gw->writeToXml(xml);
 
@@ -420,7 +477,43 @@ namespace Gateway
 
 	bool Gateways::readFromXml(XmlReadHelper& xml)
 	{
-		return true;
+		m_gateways.clear();
+
+		bool result = true;
+
+		result &= xml.findElement(XmlElement::GATEWAYS);
+
+		int gatewaysCount = 0;
+
+		result &= xml.readIntAttribute(XmlAttribute::COUNT, &gatewaysCount);
+
+		RETURN_IF_FALSE(result);
+
+		for(int i = 0; i < gatewaysCount; i++)
+		{
+			result &= xml.findElement(XmlElement::GATEWAY);
+
+			BREAK_IF_FALSE(result);
+
+			E::GatewayType gatewayType;
+			QString gatewayID;
+			QString datewayDescription;
+
+			xml.readEnumKeyAttribute<E::GatewayType>(XmlAttribute::GATEWAY_TYPE, &gatewayType);
+			xml.readStringAttribute(XmlAttribute::GATEWAY_ID, &gatewayID);
+			xml.readStringAttribute(XmlAttribute::GATEWAY_DESCRIPTION, &datewayDescription);
+
+			GatewayShared gw = std::make_shared<Gateway>(gatewayType,
+														 gatewayID,
+														 datewayDescription);
+			result &= gw->readFromXml(xml);
+
+			BREAK_IF_FALSE(result);
+
+			m_gateways.push_back(gw);
+		}
+
+		return result;
 	}
 
 	// ---------------------------------------------------------------------------------
@@ -559,7 +652,16 @@ namespace Gateway
 
 	bool IVS_Impulse_SignalList::readSettingsFromXml(XmlReadHelper& xml)
 	{
-		return true;
+		bool result = true;
+
+		result &= xml.findElement(XmlElement::SIGNAL_LIST);
+
+		result &= xml.readIntAttribute(XmlAttribute::LIST_NO, &m_listNo);
+		result &= xml.readEnumKeyAttribute<E::SignalListDataType>(XmlAttribute::DATA_TYPE, &m_dataType);
+		result &= xml.readBoolAttribute(XmlAttribute::SEND_EVENTS, &m_sendEvents);
+		result &= xml.readBoolAttribute(XmlAttribute::INCLUDE_APP_SIGNAL_ID, &m_includeAppSignalID);
+
+		return result;
 	}
 
 	// ---------------------------------------------------------------------------------
@@ -656,7 +758,17 @@ namespace Gateway
 
 	bool IVS_Impulse_Gateway::readSettingsFromXml(XmlReadHelper& xml)
 	{
-		return true;
+		bool result = true;
+
+		result &= xml.findElement(XmlElement::SETTINGS);
+
+		result &= xml.readIntAttribute(XmlAttribute::SYSTEM_ID, &m_systemID);
+		result &= xml.readHostAddressPortAttribute(XmlAttribute::GATEWAY_IP1, &m_gatewayIP1);
+		result &= xml.readHostAddressPortAttribute(XmlAttribute::GATEWAY_IP2, &m_gatewayIP2);
+		result &= xml.readIntAttribute(XmlAttribute::LISTS_VERSION, &m_listsVersion);
+		result &= xml.readIntAttribute(XmlAttribute::PERIOD, &m_period);
+
+		return result;
 	}
 
 	bool IVS_Impulse_Gateway::generateRequiredFiles(const SignalSetAdapter& signalSetAdapter,

@@ -343,6 +343,8 @@ namespace CfgFileId
 
 	inline const QString METROLOGY_ITEMS("METROLOGY_ITEMS");
 	inline const QString METROLOGY_SIGNAL_SET("METROLOGY_SIGNAL_SET");
+
+	inline const QString GATEWAY_DESCRIPTION("GATEWAY_DESCRIPTION");
 }
 
 namespace  SettingsProfile

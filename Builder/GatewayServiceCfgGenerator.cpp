@@ -142,11 +142,29 @@ namespace Builder
 
 		buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(),
 												File::GATEWAY_DESCRIPTION_TXT,
+												CfgFileId::GATEWAY_DESCRIPTION,
+												QString(),
 												settings->gatewayDescription);
 		if (buildFile == nullptr)
 		{
 			errCount++;
 			result = false;
+		}
+		else
+		{
+			m_cfgXml->addLinkToFile(buildFile);
+		}
+
+		buildFile = m_buildResultWriter->getBuildFileByID(Directory::COMMON, CfgFileId::APP_SIGNAL_SET);
+
+		if (buildFile == nullptr)
+		{
+			errCount++;
+			result = false;
+		}
+		else
+		{
+			m_cfgXml->addLinkToFile(buildFile);
 		}
 
 		QString resultStr = QString("Parsing of %1 gateway description finished with %2 errors, %3 warnings").

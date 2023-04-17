@@ -56,7 +56,8 @@ private:
 							  SessionParams sessionParams,
 							  std::shared_ptr<const SoftwareSettings> currentSettingsProfile);
 
-	bool readAppSignals(const QByteArray& fileData);
+	bool readAppSignals(const QString& fileName, const QByteArray& fileData);
+	bool readGatewayDescription(const QString& fileName, const QByteArray& fileData);
 
 	void createAndInitSignalStates();
 	void buildAcuiredAppSignalIDs();
@@ -85,7 +86,7 @@ private:
 
 	//DynamicAppSignalStates m_appSignalStates;
 
-	std::vector<QString> m_acquiredAppSignalIDs;
+	std::set<Hash> m_acquiredAppSignalIDs;
 
 	//
 

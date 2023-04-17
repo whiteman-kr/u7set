@@ -204,6 +204,12 @@ void GatewayServiceWorker::onConfigurationReady(const QByteArray configurationXm
 
 	bool result = true;
 
+	QString appSignalSetFileName;
+	QByteArray appSignalSetFileData;
+
+	QString gatewayDescriptionFileName;
+	QByteArray gatewayDescriptionFileData;
+
 	for(const Builder::BuildFileInfo& bfi : buildFileInfoArray)
 	{
 		QByteArray fileData;
@@ -222,19 +228,21 @@ void GatewayServiceWorker::onConfigurationReady(const QByteArray configurationXm
 
 		if (bfi.ID == CfgFileId::APP_SIGNAL_SET)
 		{
-			result &= readAppSignals(fileData);				// fill m_unitInfo and m_appSignals
+			appSignalSetFileName = bfi.pathFileName;
+			appSignalSetFileData.swap(fileData);
+			continue;
 		}
 
-		if (result == true)
+		if (bfi.ID == CfgFileId::GATEWAY_DESCRIPTION)
 		{
-			qDebug() << "Read file " << bfi.pathFileName << " OK";
-		}
-		else
-		{
-			qDebug() << "Read file " << bfi.pathFileName << " ERROR";
-			break;
+			gatewayDescriptionFileName = bfi.pathFileName;
+			gatewayDescriptionFileData.swap(fileData);
+			continue;
 		}
 	}
+
+	result &= readGatewayDescription(gatewayDescriptionFileName, gatewayDescriptionFileData);
+	result &= readAppSignals(appSignalSetFileName, appSignalSetFileData);	// fills m_appSignals
 
 	if (result == true)
 	{
@@ -242,7 +250,7 @@ void GatewayServiceWorker::onConfigurationReady(const QByteArray configurationXm
 	}
 }
 
-bool GatewayServiceWorker::readAppSignals(const QByteArray& fileData)
+bool GatewayServiceWorker::readAppSignals(const QString& fileName, const QByteArray& fileData)
 {
 	::Proto::AppSignalSet signalSet;
 
@@ -250,8 +258,11 @@ bool GatewayServiceWorker::readAppSignals(const QByteArray& fileData)
 
 	if (result == false)
 	{
+		qDebug() << C_STR(QString("Read file %1 ERROR").arg(fileName));
 		return false;
 	}
+
+	qDebug() << C_STR(QString("Read file %1 OK").arg(fileName));
 
 	int signalCount = signalSet.appsignal_size();
 
@@ -263,6 +274,13 @@ bool GatewayServiceWorker::readAppSignals(const QByteArray& fileData)
 	}
 
 	return true;
+}
+
+bool GatewayServiceWorker::readGatewayDescription(const QString& fileName, const QByteArray& fileData)
+{
+	bool result = true;
+
+	return result;
 }
 
 void GatewayServiceWorker::createAndInitSignalStates()
@@ -339,10 +357,11 @@ void GatewayServiceWorker::applyNewConfiguration()
 
 void GatewayServiceWorker::clearConfiguration()
 {
+	stopAllThreads();
+
 	// free all resources allocated in onConfigurationReady
 	//
 	m_appSignals.clear();
-//	m_appSignalStates.clear();
 	m_acquiredAppSignalIDs.clear();
 }
 
