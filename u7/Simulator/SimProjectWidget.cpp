@@ -1,5 +1,6 @@
 #include "SimProjectWidget.h"
 #include "../Settings.h"
+#include "../../Simulator/SimConnections.h"
 
 using namespace SimProjectTreeItems;
 
@@ -393,12 +394,12 @@ namespace SimProjectTreeItems
 	{
 		setData(0, Qt::UserRole, QVariant(m_connectionId));
 
-		const std::vector<Sim::ConnectionPortPtr>& ports = connection->ports();
+		std::vector<Sim::ConnectionPort> ports = connection->ports();
 
 		setToolTip(0, QObject::tr("ConnectionID: %1\n\tPort1: %2\n\tPort2: %3")
 						.arg(m_connectionId)
-						.arg(ports.size() >= 1 ? ports[0]->portInfo().equipmentID : "")
-						.arg(ports.size() >= 2 ? ports[1]->portInfo().equipmentID : ""));
+						.arg(ports.size() >= 1 ? ports[0].portInfo().equipmentID : "")
+						.arg(ports.size() >= 2 ? ports[1].portInfo().equipmentID : ""));
 
 		return;
 	}

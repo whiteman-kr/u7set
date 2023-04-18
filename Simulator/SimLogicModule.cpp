@@ -86,16 +86,22 @@ namespace Sim
 		return;
 	}
 
-	QFuture<bool> LogicModule::asyncRunCycle(std::chrono::microseconds currentTime, const QDateTime& currentDateTime, qint64 workcycle, bool reset)
+	QFuture<bool> LogicModule::asyncRunCycle(std::chrono::microseconds currentTime,
+											 const QDateTime& currentDateTime,
+											 qint64 workcycle,
+											 bool reset,
+											 std::condition_variable& cvFinished)
 	{
 		if (reset == true)
 		{
 			m_device.reset();
 		}
 
-		auto f = [this](std::chrono::microseconds currentTime, QDateTime currentDateTime, qint64 workcycle) -> bool
+		auto f = [this, &cvFinished](std::chrono::microseconds currentTime, QDateTime currentDateTime, qint64 workcycle) -> bool
 		{
-			return this->m_device.runWorkcycle(currentTime, currentDateTime, workcycle);
+			bool result = this->m_device.runWorkcycle(currentTime, currentDateTime, workcycle);
+			cvFinished.notify_one();
+			return result;
 		};
 
 		return QtConcurrent::run(f, currentTime, currentDateTime, workcycle);

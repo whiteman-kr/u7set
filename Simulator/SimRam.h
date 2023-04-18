@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <memory_resource>
 #include <vector>
 #include <memory>
 #include <QByteArray>
@@ -143,17 +144,17 @@ namespace Sim
 		}
 
 		int countBytes = countW * 2;
-
 		int byteOffset = (offsetW - offset()) * 2;
-		if (byteOffset < 0 ||
-			m_data.size() - byteOffset < countBytes)
+
+//#ifdef QT_DEBUG
+		if (byteOffset < 0 || m_data.size() - byteOffset < countBytes)
 		{
 			// Buffer must be completely inside area
 			//
-			Q_ASSERT(byteOffset >= 0 &&
-					 m_data.size() - byteOffset >= countBytes);
+			Q_ASSERT(byteOffset >= 0 && m_data.size() - byteOffset >= countBytes);
 			return false;
 		}
+//#endif
 
 		if (static_cast<int>(data->size()) != countBytes)
 		{
@@ -171,12 +172,13 @@ namespace Sim
 		{
 			int zeroBasedOffsetW = offsetW - offset();
 
-			if (zeroBasedOffsetW < 0 ||
-				zeroBasedOffsetW >= static_cast<int>(m_overrideData.size()))
+//#ifdef QT_DEBUG
+			if (zeroBasedOffsetW < 0 || zeroBasedOffsetW >= static_cast<int>(m_overrideData.size()))
 			{
 				Q_ASSERT(zeroBasedOffsetW >= 0 && zeroBasedOffsetW < static_cast<int>(m_overrideData.size()));
 				return false;
 			}
+//#endif
 
 			quint16* dataPtr = reinterpret_cast<quint16*>(data->data());
 			for (quint32 i = 0; i < countW; i++)
@@ -192,11 +194,14 @@ namespace Sim
 	bool RamArea::writeData(quint32 offsetW, TYPE data, E::ByteOrder byteOrder) noexcept
 	{
 		size_t byteOffset = (offsetW - offset()) * 2;
+
+//#ifdef QT_DEBUG
 		if (byteOffset > m_data.size() - sizeof(TYPE))
 		{
 			Q_ASSERT(false);
 			return false;
 		}
+//#endif
 
 		TYPE valueToWrite;
 
@@ -247,11 +252,13 @@ namespace Sim
 		constexpr int wordCount = sizeof(TYPE) / sizeof(quint16);
 		size_t byteOffset = (offsetW - offset()) * 2;
 
+//#ifdef QT_DEBUG
 		if (byteOffset > m_data.size() - sizeof(TYPE))
 		{
 			Q_ASSERT(false);
 			return false;
 		}
+//#endif
 
 		TYPE rawValue;
 		std::memcpy(&rawValue, m_data.constData() + byteOffset, sizeof(TYPE));
@@ -369,9 +376,16 @@ namespace Sim
 		std::vector<RamArea> m_memoryAreas;
 		int m_overrideSignalsLastCounter = -1;
 
-		std::map<quint32, size_t> m_readAreas;	// key is area offset, value is index
-		std::map<quint32, size_t> m_writeAreas;	// key is area offset, value is index
+		// --
+		//
+		std::array<char, 4096> pool_buffer;
+		std::pmr::monotonic_buffer_resource m_pool{pool_buffer.data(), pool_buffer.size()};
 
+		std::pmr::map<quint32, size_t> m_readAreas{&m_pool};	// key is area offset, value is index
+		std::pmr::map<quint32, size_t> m_writeAreas{&m_pool};	// key is area offset, value is index
+
+		// --
+		//
 		friend SimRamTests;
 	};
 }

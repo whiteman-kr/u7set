@@ -197,7 +197,7 @@ void SimConnectionPage::updateData()
 	}
 	else
 	{
-		m_connectionType->setText(tr("\tType:\t\t\t%1\n"
+		m_connectionType->setText(tr("\tType:\t\t%1\n"
 									 "\tLinkID:\t\t0x%2(%3)\n"
 									 "\tManual:\t\t%4\n"
 									 "\tControlDataID:\t%5\n")

@@ -21,48 +21,53 @@ namespace Sim
 	//
 	// Sim::Connection
 	//
-	Connection::Connection(::ConnectionInfo buildConnection) :
+	Connection::Connection(const ConnectionInfo& buildConnection) :
 		m_buildConnection(buildConnection)
 	{
-		m_ports.reserve(m_buildConnection.ports.size());
-
-		for (const ::ConnectionPortInfo& bp : m_buildConnection.ports)
+		auto portPrepare = [this](ConnectionPort& cp)
 		{
-			ConnectionPortPtr cp = std::make_shared<ConnectionPort>(bp);
-			m_ports.push_back(cp);
-
 			// Preallocate buffers for sending and receiving
 			//
 			{
-				std::vector<char>* portReceiveBuffer = getPortReceiveBuffer(cp->portInfo().portNo);
+				std::vector<char>* portReceiveBuffer = getPortReceiveBuffer(cp.portInfo().portNo);
 				if (portReceiveBuffer == nullptr)
 				{
 					assert(portReceiveBuffer);
 				}
 				else
 				{
-					portReceiveBuffer->resize(cp->portInfo().rxDataSizeW * 2);
+					portReceiveBuffer->resize(cp.portInfo().rxDataSizeW * 2);
 				}
 			}
 
 			{
-				std::vector<char>* portSendBuffer = getPortSendBuffer(cp->portInfo().portNo);
+				std::vector<char>* portSendBuffer = getPortSendBuffer(cp.portInfo().portNo);
 				if (portSendBuffer == nullptr)
 				{
 					assert(portSendBuffer);
 				}
 				else
 				{
-					portSendBuffer->resize(cp->portInfo().txDataSizeW * 2);
+					portSendBuffer->resize(cp.portInfo().txDataSizeW * 2);
 				}
 			}
+		};
+
+		Q_ASSERT(m_buildConnection.ports.size() <= 2);
+
+		if (m_buildConnection.ports.size() > 0)
+		{
+			m_port1 = ConnectionPort{m_buildConnection.ports[0]};
+			portPrepare(m_port1.value());
+		}
+
+		if (m_buildConnection.ports.size() > 1)
+		{
+			m_port2 = ConnectionPort{m_buildConnection.ports[1]};
+			portPrepare(m_port2.value());
 		}
 
 		return;
-	}
-
-	Connection::~Connection()
-	{
 	}
 
 	const QString& Connection::connectionId() const
@@ -70,17 +75,43 @@ namespace Sim
 		return m_buildConnection.ID;
 	}
 
-	Sim::ConnectionPortPtr Connection::portForLm(const QString& lmEquipmnetId)
+	const Sim::ConnectionPort* Connection::portForLmRawPtr(const QString& lmEquipmnetId) const
 	{
-		for (Sim::ConnectionPortPtr& p : m_ports)
+		return portForLmRawPtr(calcHash(lmEquipmnetId));
+	}
+
+	const Sim::ConnectionPort* Connection::portForLmRawPtr(Hash logicModuleIdHash) const
+	{
+		const Sim::ConnectionPort* result = nullptr;
+
+		if (m_port1.has_value() == true && m_port1->lmIdHash() == logicModuleIdHash)
 		{
-			if (p->portInfo().lmID == lmEquipmnetId)
-			{
-				return p;
-			}
+			result = &m_port1.value();
 		}
 
-		return {};
+		if (m_port2.has_value() == true && m_port2->lmIdHash() == logicModuleIdHash)
+		{
+			result = &m_port2.value();
+		}
+
+		return result;
+	}
+
+	Sim::ConnectionPort* Connection::portForLmRawPtr(Hash logicModuleIdHash)
+	{
+		Sim::ConnectionPort* result = nullptr;
+
+		if (m_port1.has_value() == true && m_port1->lmIdHash() == logicModuleIdHash)
+		{
+			result = &m_port1.value();
+		}
+
+		if (m_port2.has_value() == true && m_port2->lmIdHash() == logicModuleIdHash)
+		{
+			result = &m_port2.value();
+		}
+
+		return result;
 	}
 
 	bool Connection::sendData(int portNo,
@@ -140,7 +171,7 @@ namespace Sim
 		if (m_buildConnection.type == Hardware::Connection::Type::SinglePort)
 		{
 			*timeoutHappend = true;
-			m_timeout = true;
+			m_timeout.store(true, std::memory_order::relaxed);
 			return true;
 		}
 
@@ -161,7 +192,7 @@ namespace Sim
 					data->clear();
 					*timeoutHappend = true;
 
-					m_timeout = true;
+					m_timeout.store(true, std::memory_order::relaxed);
 				}
 				else
 				{
@@ -174,7 +205,7 @@ namespace Sim
 						m_port2sentData.m_data.clear();
 						m_port2sentData.m_sentTime = currentTime;		// timeout will be counted from this moment
 
-						m_timeout = false;
+						m_timeout.store(false, std::memory_order::relaxed);
 					}
 					else
 					{
@@ -198,7 +229,7 @@ namespace Sim
 					data->clear();
 					*timeoutHappend = true;
 
-					m_timeout = true;
+					m_timeout.store(true, std::memory_order::relaxed);
 				}
 				else
 				{
@@ -211,7 +242,7 @@ namespace Sim
 						m_port1sentData.m_data.clear();
 						m_port1sentData.m_sentTime = currentTime;		// timeout will be counted from this moment
 
-						m_timeout = false;
+						m_timeout.store(false, std::memory_order::relaxed);
 					}
 					else
 					{
@@ -222,10 +253,10 @@ namespace Sim
 				}
 			}
 			return true;
-		default:
-			assert(portNo == 1 || portNo == 2);
-			return false;
 		}
+
+		assert(portNo == 1 || portNo == 2);
+		return false;
 	}
 
 	QString Connection::typeStr() const
@@ -243,24 +274,37 @@ namespace Sim
 		return m_buildConnection;
 	}
 
-	const std::vector<Sim::ConnectionPortPtr>& Connection::ports() const
+	std::vector<Sim::ConnectionPort> Connection::ports() const
 	{
-		return m_ports;
+		std::vector<Sim::ConnectionPort> result;
+		result.reserve(2);
+
+		if (m_port1.has_value() == true)
+		{
+			result.push_back(m_port1.value());
+		}
+
+		if (m_port2.has_value() == true)
+		{
+			result.push_back(m_port2.value());
+		}
+
+		return result;
 	}
 
 	bool Connection::enabled() const
 	{
-		return m_enable;
+		return m_enable.load(std::memory_order::relaxed);
 	}
 
 	void Connection::setEnabled(bool value)
 	{
-		m_enable = value;
+		m_enable.store(value, std::memory_order::relaxed);
 	}
 
 	bool Connection::timeout() const
 	{
-		return m_timeout;
+		return m_timeout.load(std::memory_order::relaxed);
 	}
 
 	std::vector<char>* Connection::getPortReceiveBuffer(int portNo)
@@ -306,7 +350,6 @@ namespace Sim
 		m_connectionMap.clear();
 		m_lmToConnection.clear();
 		m_portToConnection.clear();
-		m_portMap.clear();
 
 		m_connections.clear();
 
@@ -335,11 +378,10 @@ namespace Sim
 
 			// m_lmToConnection
 			//
-			for (auto p : c->ports())
+			for (const auto& p : c->ports())
 			{
-				m_lmToConnection.insert({::calcHash(p->portInfo().lmID), c});
-				m_portToConnection[::calcHash(p->portInfo().equipmentID)] = c;
-				m_portMap[::calcHash(p->portInfo().equipmentID)] = p;
+				m_lmToConnection.insert({::calcHash(p.portInfo().lmID), c});
+				m_portToConnection[::calcHash(p.portInfo().equipmentID)] = c;
 			}
 		}
 

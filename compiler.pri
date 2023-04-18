@@ -25,3 +25,12 @@ unix {
 		CONFIG += ltcg				# LTO can be disabled for faster build by CI/CD
 	}
 }
+
+# Generate pdb files for release
+#
+GENERATE_PDB {
+    CONFIG(release, debug|release) {
+	    win32:QMAKE_CXXFLAGS_RELEASE += /Zi
+		win32:QMAKE_LFLAGS_RELEASE += /DEBUG
+	}
+}

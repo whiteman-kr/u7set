@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule DescriptionNumber="0" ConfigurationScriptFile="MSO3Conf0000.js" SimulationScriptFile="LM1_SR01_SIM.js" Version="1.0002">
+<LogicModule DescriptionNumber="0" ConfigurationScriptFile="MSO3Conf0000.js" SimulationScriptFile="LM1_SR01_SIM.js" Version="1.0003">
 	<FlashMemory>
 		<AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFramePayload>1016</AppLogicFramePayload>
@@ -36,7 +36,7 @@
 		<TuningDataFramePayload>508</TuningDataFramePayload>
 		<TuningDataFrameSize>512</TuningDataFrameSize>
 		<TxDiagDataOffset>57526</TxDiagDataOffset>
-		<TxDiagDataSize>84</TxDiagDataSize>
+		<TxDiagDataSize>155</TxDiagDataSize>
 	</Memory>
 	<LogicUnit>
 		<ALPPhaseTime>2500</ALPPhaseTime>

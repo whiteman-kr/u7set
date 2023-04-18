@@ -241,7 +241,7 @@ namespace Sim
 	{
 		bool ok = false;
 
-		if (m_deviceState == DeviceState::Start)
+		if (deviceState() == DeviceState::Start)
 		{
 			bool processStartOk = processStartMode();
 			if (processStartOk == false)
@@ -250,19 +250,20 @@ namespace Sim
 			}
 		}
 
-		if (m_deviceState == DeviceState::Fault)
+		if (auto currentDeviceState = deviceState();
+			currentDeviceState == DeviceState::Fault)
 		{
 			ok = processFaultMode();
 		}
 		else
 		{
-			if (m_deviceState == DeviceState::Off)
+			if (currentDeviceState == DeviceState::Off)
 			{
 				ok = processOffMode();
 			}
 			else
 			{
-				Q_ASSERT(m_deviceState == DeviceState::Operate);
+				Q_ASSERT(currentDeviceState == DeviceState::Operate);
 
 				ok = processOperate(currentTime, currentDateTime, workcycle);
 			}
@@ -274,7 +275,7 @@ namespace Sim
 
 		// qDebug() << "DeviceEmulator::runWorkcycle " << ms.count() << ", Diff: " << QDateTime::currentDateTime().toMSecsSinceEpoch() - ms.count();
 
-		TimeStamp plantTime{ms.count() + QDateTime::currentDateTime().offsetFromUtc() * 1000};
+		TimeStamp plantTime{ms.count() + currentDateTime.offsetFromUtc() * 1000};
 		TimeStamp localTime{plantTime};
 		TimeStamp systemTime{ms.count()};
 
@@ -284,7 +285,7 @@ namespace Sim
 
 		// Send reg data to AppDataSrv
 		//
-		if (m_deviceState == DeviceState::Operate && m_lans.isAppDataEnabled() == true)
+		if (deviceState() == DeviceState::Operate && m_lans.isAppDataEnabled() == true)
 		{
 			QByteArray regData;
 
@@ -320,7 +321,7 @@ namespace Sim
 
 		// Update tuning data
 		//
-		if (m_deviceState == DeviceState::Operate &&
+		if (deviceState() == DeviceState::Operate &&
 			runtimeMode() == RuntimeMode::TuningMode &&
 			m_lans.isTuningEnabled() == true)
 		{
@@ -1322,7 +1323,7 @@ namespace Sim
 				}
 
 				auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime);
-				TimeStamp plantTime{ms.count() + QDateTime::currentDateTime().offsetFromUtc() * 1000};
+				TimeStamp plantTime{ms.count() + currentDateTime.offsetFromUtc() * 1000};
 
 				// Send confirmations to tuning subsystem
 				//
@@ -1375,14 +1376,14 @@ namespace Sim
 			Q_ASSERT(m_logicUnit.programCounter == command.m_offset);
 
 			if (bool ok = runCommand(command);
-				ok == false && m_deviceState != DeviceState::Fault)
+				ok == false && deviceState() != DeviceState::Fault)
 			{
 				SIM_FAULT(QString("Run command %1 unknown error.").arg(command.m_string));
 				result = false;
 				break;
 			}
 
-			if (m_deviceState == DeviceState::Fault)
+			if (deviceState() == DeviceState::Fault)
 			{
 				result = true;
 				break;
@@ -1437,13 +1438,13 @@ namespace Sim
 
 	bool DeviceEmulator::processOffMode()
 	{
-		Q_ASSERT(m_deviceState == DeviceState::Off);
+		Q_ASSERT(deviceState() == DeviceState::Off);
 		return true;
 	}
 
 	bool DeviceEmulator::processStartMode()
 	{
-		Q_ASSERT(m_deviceState == DeviceState::Start);
+		Q_ASSERT(deviceState() == DeviceState::Start);
 		m_log.writeDebug(tr("Start mode"));
 
 		bool ok = initMemory();
@@ -1504,25 +1505,25 @@ namespace Sim
 
 	bool DeviceEmulator::receiveConnectionsData(std::chrono::microseconds currentTime)
 	{
-		if (m_deviceState == DeviceState::Off ||
-			m_deviceState == DeviceState::Fault)
+		if (auto ds = deviceState();
+			ds == DeviceState::Off || ds == DeviceState::Fault)
 		{
 			return true;
 		}
 
 		for (ConnectionPtr& c : m_connections)
 		{
-			if (c->enabled() == false)
-			{
+			//if (c->enabled() == false)
+			//{
 				// Even though the connection is disabled we should procced it to zero
 				// memory and to set validity flag. If connection is disabled nothing will be send and
 				// then nothing can be received, it will cause timeout
 				//
-			}
+			//}
 
 			// Get port for this connection for this LM
 			//
-			ConnectionPortPtr port = c->portForLm(equipmentId());
+			ConnectionPort* port = c->portForLmRawPtr(equipmentIdHash());
 			if (port == nullptr)
 			{
 				Q_ASSERT(port);
@@ -1642,11 +1643,17 @@ namespace Sim
 
 			// Set port receive validity flag to 0 or 1
 			//
-			ok = m_ram.writeBit(portInfo.rxValiditySignalAbsAddr.offset(),
-								static_cast<quint16>(portInfo.rxValiditySignalAbsAddr.bit()),
-								timeout ? 0x0000 : 0x0001,
-								E::ByteOrder::BigEndian,
-								E::LogicModuleRamAccess::Read);
+
+			// Commented: For perfomamce reason it was moved to port, where memory area can be cached.
+			//
+//			ok = m_ram.writeBit(portInfo.rxValiditySignalAbsAddr.offset(),
+//								static_cast<quint16>(portInfo.rxValiditySignalAbsAddr.bit()),
+//								timeout ? 0x0000 : 0x0001,
+//								E::ByteOrder::BigEndian,
+//								E::LogicModuleRamAccess::Read);
+
+			ok = port->writeValidityBit(m_ram, timeout ? 0x0000 : 0x0001);
+
 			if (ok == false)
 			{
 				SIM_FAULT(QString("Write receive validity signal error, signal %1 (%2), connection %3, port %4 (%5).")
@@ -1665,8 +1672,8 @@ namespace Sim
 
 	bool DeviceEmulator::sendConnectionsData(std::chrono::microseconds currentTime)
 	{
-		if (m_deviceState == DeviceState::Off ||
-			m_deviceState == DeviceState::Fault)
+		if (auto ds = deviceState();
+			ds == DeviceState::Off || ds == DeviceState::Fault)
 		{
 			return true;
 		}
@@ -1682,7 +1689,7 @@ namespace Sim
 
 			// Get port for this connection for this LM
 			//
-			ConnectionPortPtr port = c->portForLm(equipmentId());
+			const ConnectionPort* port = c->portForLmRawPtr(equipmentIdHash());
 			if (port == nullptr)
 			{
 				Q_ASSERT(port);
@@ -1857,6 +1864,11 @@ namespace Sim
 		return m_logicModuleInfo.equipmentId;
 	}
 
+	Hash DeviceEmulator::equipmentIdHash() const
+	{
+		return m_logicModuleIdHash;
+	}
+
 	int DeviceEmulator::buildNo() const
 	{
 		// On loading eeprom buildNo was checked, so it is guarantee to be the same across all the eeproms
@@ -1876,6 +1888,7 @@ namespace Sim
 	void DeviceEmulator::setLogicModuleInfo(const Hardware::LogicModuleInfo& lmInfo)
 	{
 		m_logicModuleInfo = lmInfo;
+		m_logicModuleIdHash = calcHash(m_logicModuleInfo.equipmentId);
 
 		m_cacheMutex.lock();
 		m_cachedLogicModuleInfo = lmInfo;
@@ -1930,12 +1943,12 @@ namespace Sim
 
 	RuntimeMode DeviceEmulator::runtimeMode() const
 	{
-		return m_runtimeMode;
+		return m_runtimeMode.load(std::memory_order::acquire);
 	}
 
 	void DeviceEmulator::setRuntimeMode(RuntimeMode value)
 	{
-		RuntimeMode currentRuntimeMode = m_runtimeMode.exchange(value);
+		RuntimeMode currentRuntimeMode = m_runtimeMode.exchange(value, std::memory_order::release);
 
 		if (currentRuntimeMode == RuntimeMode::TuningMode && value != RuntimeMode::TuningMode)
 		{
@@ -1949,12 +1962,12 @@ namespace Sim
 
 	DeviceState DeviceEmulator::deviceState() const
 	{
-		return m_deviceState;
+		return m_deviceState2.load(std::memory_order::acquire);
 	}
 
 	void DeviceEmulator::setDeviceState(DeviceState value)
 	{
-		m_deviceState = value;
+		m_deviceState2.store(value, std::memory_order::release);
 
 		switch (value)
 		{

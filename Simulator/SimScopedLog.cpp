@@ -134,12 +134,12 @@ namespace Sim
 
 	bool ScopedLog::debugMessagesEnabled() const
 	{
-		return m_debugMessagesEnabled;
+		return m_debugMessagesEnabled.load(std::memory_order::relaxed);
 	}
 
 	void ScopedLog::setDebugMessagesEnabled(bool value)
 	{
-		m_debugMessagesEnabled = value;
+		m_debugMessagesEnabled.store(value, std::memory_order::relaxed);
 	}
 
 	ILogFile* ScopedLog::logInterface()
