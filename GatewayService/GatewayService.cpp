@@ -334,12 +334,11 @@ void GatewayServiceWorker::createAndInitSignalStates()
 void GatewayServiceWorker::buildAcuiredAppSignalIDs()
 {
 	m_acquiredAppSignalIDs.clear();
-	m_acquiredAppSignalIDs.reserve(m_appSignals.count());
 
 	for(const AppSignal* signal : m_appSignals)
 	{
 		TEST_PTR_CONTINUE(signal);
-
+wdqwdqwd
 		if (signal->isAcquired() == true)
 		{
 			m_acquiredAppSignalIDs.push_back(signal->appSignalID());

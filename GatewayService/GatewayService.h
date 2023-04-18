@@ -34,7 +34,7 @@ public:
 /*	const DynamicAppSignalStates& appSignalStates() const { return m_appSignalStates; }
 	DynamicAppSignalStates& appSignalStates() { return m_appSignalStates; }*/
 
-	const std::vector<QString>& acquiredAppSignalIDs() const { return m_acquiredAppSignalIDs; }
+	const std::set<Hash>& acquiredAppSignalIDs() const { return m_acquiredAppSignalIDs; }
 	int acquiredAppSignalIDsCount() const { return static_cast<int>(m_acquiredAppSignalIDs.size()); }
 
 private:
