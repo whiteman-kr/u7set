@@ -86,6 +86,8 @@ namespace Sim
 
 	AfbComponentParam::AfbComponentParam()
 	{
+		static_assert(std::is_trivially_copyable_v<AfbComponentParam>);
+
 		setDataToType<qint64>(std::numeric_limits<quint64>::max());
 	}
 
@@ -719,7 +721,8 @@ namespace Sim
 
 	AfbComponentInstance::AfbComponentInstance(const std::shared_ptr<const Afb::AfbComponent>& afbComp, quint16 instanceNo) :
 		m_afbComp(afbComp),
-		m_instanceNo(instanceNo)
+		m_instanceNo(instanceNo),
+		m_versionOpIndex(m_afbComp->versionOpIndex())
 	{
 		Q_ASSERT(m_afbComp);
 	}
@@ -748,7 +751,7 @@ namespace Sim
 
 	const AfbComponentParam* AfbComponentInstance::param(quint16 opIndex)
 	{
-		if (opIndex == m_afbComp->versionOpIndex())
+		if (opIndex == m_versionOpIndex)
 		{
 			// This is o_version output, which is constant always
 			// if it is not present, then create it in m_params_v with version value from m_afbComp

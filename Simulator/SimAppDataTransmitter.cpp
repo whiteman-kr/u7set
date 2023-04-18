@@ -66,9 +66,9 @@ namespace Sim
 								data,
 								timeStamp);
 
-		m_appDataQueueNotEmpty.notify_one();
-
 		m_appDataQueueMutex.unlock();
+
+		m_appDataQueueNotEmpty.notify_one();
 
 		return true;
 	}
@@ -173,7 +173,6 @@ namespace Sim
 
 	void AppDataTransmitter::wakeupTransmitterThread()
 	{
-		std::lock_guard lg(m_appDataQueueMutex);
 		m_appDataQueueNotEmpty.notify_one();
 	}
 
@@ -188,19 +187,21 @@ namespace Sim
 
 		int maxQueueSize = 0;
 
-		while(m_exitTransmitterThread == false)
+		while(m_exitTransmitterThread.load(std::memory_order::relaxed) == false)
 		{
 			ul.lock();
 
-			m_appDataQueueNotEmpty.wait_for(ul, std::chrono::milliseconds(m_runSimulation ? 10 : 500));
+			m_appDataQueueNotEmpty.wait_for(ul, std::chrono::milliseconds{100}, [this]() {
+				return m_appDataQueue.empty() == false || m_exitTransmitterThread.load(std::memory_order::relaxed) == true;
+			});
 
 			// ul locked here
 
 			while(true)
 			{
 				if (m_appDataQueue.empty() == true ||
-					m_runSimulation == false ||
-					m_exitTransmitterThread == true)
+					m_runSimulation.load(std::memory_order::seq_cst) == false ||
+					m_exitTransmitterThread.load(std::memory_order::relaxed) == true)
 				{
 					ul.unlock();
 					break;

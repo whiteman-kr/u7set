@@ -292,6 +292,7 @@ namespace Sim
 		ScopedLog& log();
 
 		const QString& equipmentId() const;
+		Hash equipmentIdHash() const;
 
 		int buildNo() const;
 
@@ -348,6 +349,8 @@ namespace Sim
 		mutable ScopedLog m_log;
 
 		Hardware::LogicModuleInfo m_logicModuleInfo;
+		Hash m_logicModuleIdHash = UNDEFINED_HASH;		// hash from m_logicModuleInfo.equipmentId.
+
 		LmDescription m_lmDescription;
 		::LogicModuleInfo m_logicModuleExtraInfo;
 
@@ -363,9 +366,9 @@ namespace Sim
 		// Current state
 		//
 		std::atomic<RuntimeMode> m_runtimeMode = RuntimeMode::PoweredOffMode;
-		std::atomic<DeviceState> m_deviceState = DeviceState::Off;	// The only place where it can be accessed in concurrent mode is powerOff/reset
-																			// powerOff can be called while simulation is running
-																			// reset can be called to restart module after powerOff
+		std::atomic<DeviceState> m_deviceState2 = DeviceState::Off;	// The only place where it can be accessed in concurrent mode is powerOff/reset
+																	// powerOff can be called while simulation is running
+																	// reset can be called to restart module after powerOff
 
 
 		Ram m_ram;

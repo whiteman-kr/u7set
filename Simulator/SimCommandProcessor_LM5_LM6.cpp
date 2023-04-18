@@ -104,19 +104,40 @@ namespace Sim
 
 		// Set Arming Key State
 		//
-		const quint32 inputControllerOffset = 57782 + 0;
-		const quint16 armingKeyValidityBit = 0;
-		const quint16 armingKeyHighABit = 3;
-		const quint16 armingKeyLowABit = 6;
-		const quint16 armingKeyHighBBit = 9;
-		const quint16 armingKeyLowBBit = 12;
+		constexpr quint32 inputControllerOffset = 57782 + 0;
+		constexpr quint16 armingKeyValidityBit = 0;
+		constexpr quint16 armingKeyHighABit = 3;
+		constexpr quint16 armingKeyLowABit = 6;
+		constexpr quint16 armingKeyHighBBit = 9;
+		constexpr quint16 armingKeyLowBBit = 12;
+
+		constexpr quint16 armingKeyMask = (0x0001 << armingKeyValidityBit) ||
+										  (0x0001 << armingKeyHighABit) ||
+										  (0x0001 << armingKeyLowABit) ||
+										  (0x0001 << armingKeyHighBBit) ||
+										  (0x0001 << armingKeyLowBBit);
+
 		const quint16 armingKey = m_device->armingKey();
 
-		m_device->writeRamBit(inputControllerOffset, armingKeyValidityBit, 1, E::LogicModuleRamAccess::Read);
-		m_device->writeRamBit(inputControllerOffset, armingKeyHighABit, armingKey, E::LogicModuleRamAccess::Read);
-		m_device->writeRamBit(inputControllerOffset, armingKeyLowABit, armingKey, E::LogicModuleRamAccess::Read);
-		m_device->writeRamBit(inputControllerOffset, armingKeyHighBBit, armingKey, E::LogicModuleRamAccess::Read);
-		m_device->writeRamBit(inputControllerOffset, armingKeyLowBBit, armingKey, E::LogicModuleRamAccess::Read);
+		//m_device->writeRamBit(inputControllerOffset, armingKeyValidityBit, 1, E::LogicModuleRamAccess::Read);
+		//m_device->writeRamBit(inputControllerOffset, armingKeyHighABit, armingKey, E::LogicModuleRamAccess::Read);
+		//m_device->writeRamBit(inputControllerOffset, armingKeyLowABit, armingKey, E::LogicModuleRamAccess::Read);
+		//m_device->writeRamBit(inputControllerOffset, armingKeyHighBBit, armingKey, E::LogicModuleRamAccess::Read);
+		//m_device->writeRamBit(inputControllerOffset, armingKeyLowBBit, armingKey, E::LogicModuleRamAccess::Read);
+
+		quint16 inputControllerData = m_device->readRamWord(inputControllerOffset, E::LogicModuleRamAccess::Read);
+
+		if (armingKey != 0)
+		{
+			inputControllerData |= armingKeyMask;
+		}
+		else
+		{
+			inputControllerData &= ~armingKeyMask;
+			inputControllerData |= (0x0001 << armingKeyValidityBit) | 1;
+		}
+
+		m_device->writeRamWord(inputControllerOffset, inputControllerData, E::LogicModuleRamAccess::Read);
 
 		// Set Tuning Key State
 		//
