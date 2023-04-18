@@ -176,6 +176,8 @@ void GatewayServiceWorker::onConfigurationReady(const QByteArray configurationXm
 												SessionParams sessionParams,
 												std::shared_ptr<const SoftwareSettings> currentSettingsProfile)
 {
+	Q_UNUSED(configurationXmlData);
+
 	setSessionParams(sessionParams);
 
 	DEBUG_LOG_MSG(logger(), "Configuration is ready");
@@ -203,46 +205,31 @@ void GatewayServiceWorker::onConfigurationReady(const QByteArray configurationXm
 	m_curSettingsProfile = *typedSettingsPtr;
 
 	bool result = true;
+	QString errStr;
 
-	QString appSignalSetFileName;
-	QByteArray appSignalSetFileData;
+	//
 
-	QString gatewayDescriptionFileName;
 	QByteArray gatewayDescriptionFileData;
 
-	for(const Builder::BuildFileInfo& bfi : buildFileInfoArray)
-	{
-		QByteArray fileData;
-		QString errStr;
+	m_cfgLoaderThread->getFileBlockedByID(CfgFileId::GATEWAY_DESCRIPTION,
+										  &gatewayDescriptionFileData,
+										  &errStr);
+	result &= errStr.isEmpty();
 
-		m_cfgLoaderThread->getFileBlocked(bfi.pathFileName, &fileData, &errStr);
+	result &= readGatewayDescription(gatewayDescriptionFileData);
 
-		if (errStr.isEmpty() == false)
-		{
-			qDebug() << errStr;
-			result = false;
-			continue;
-		}
+	//
 
-		result = true;
+	QByteArray appSignalSetFileData;
 
-		if (bfi.ID == CfgFileId::APP_SIGNAL_SET)
-		{
-			appSignalSetFileName = bfi.pathFileName;
-			appSignalSetFileData.swap(fileData);
-			continue;
-		}
+	m_cfgLoaderThread->getFileBlockedByID(CfgFileId::APP_SIGNAL_SET,
+										  &appSignalSetFileData,
+										  &errStr);
+	result &= errStr.isEmpty();
 
-		if (bfi.ID == CfgFileId::GATEWAY_DESCRIPTION)
-		{
-			gatewayDescriptionFileName = bfi.pathFileName;
-			gatewayDescriptionFileData.swap(fileData);
-			continue;
-		}
-	}
+	result &= readAppSignals(appSignalSetFileData);
 
-	result &= readGatewayDescription(gatewayDescriptionFileName, gatewayDescriptionFileData);
-	result &= readAppSignals(appSignalSetFileName, appSignalSetFileData);	// fills m_appSignals
+	//
 
 	if (result == true)
 	{
@@ -250,7 +237,7 @@ void GatewayServiceWorker::onConfigurationReady(const QByteArray configurationXm
 	}
 }
 
-bool GatewayServiceWorker::readAppSignals(const QString& fileName, const QByteArray& fileData)
+bool GatewayServiceWorker::readAppSignals(const QByteArray& fileData)
 {
 	::Proto::AppSignalSet signalSet;
 
@@ -258,11 +245,11 @@ bool GatewayServiceWorker::readAppSignals(const QString& fileName, const QByteAr
 
 	if (result == false)
 	{
-		qDebug() << C_STR(QString("Read file %1 ERROR").arg(fileName));
+		DEBUG_LOG_ERR(logger(), "AppSignalSet file reading - ERROR");
 		return false;
 	}
 
-	qDebug() << C_STR(QString("Read file %1 OK").arg(fileName));
+	DEBUG_LOG_MSG(logger(), "AppSignalSet file reading - OK");
 
 	int signalCount = signalSet.appsignal_size();
 
@@ -276,9 +263,11 @@ bool GatewayServiceWorker::readAppSignals(const QString& fileName, const QByteAr
 	return true;
 }
 
-bool GatewayServiceWorker::readGatewayDescription(const QString& fileName, const QByteArray& fileData)
+bool GatewayServiceWorker::readGatewayDescription(const QByteArray& fileData)
 {
-	bool result = true;
+	XmlReadHelper xml(fileData);
+
+	bool result = m_gateways.readFromXml(xml);
 
 	return result;
 }
@@ -333,17 +322,16 @@ void GatewayServiceWorker::createAndInitSignalStates()
 
 void GatewayServiceWorker::buildAcuiredAppSignalIDs()
 {
-	m_acquiredAppSignalIDs.clear();
+/*	m_acquiredAppSignalIDs.clear();
 
 	for(const AppSignal* signal : m_appSignals)
 	{
 		TEST_PTR_CONTINUE(signal);
-wdqwdqwd
 		if (signal->isAcquired() == true)
 		{
 			m_acquiredAppSignalIDs.push_back(signal->appSignalID());
 		}
-	}
+	}*/
 }
 
 void GatewayServiceWorker::applyNewConfiguration()
@@ -351,7 +339,7 @@ void GatewayServiceWorker::applyNewConfiguration()
 	createAndInitSignalStates();
 	buildAcuiredAppSignalIDs();
 
-//	runAppDataReceiverThread();
+	runAllThreads();
 }
 
 void GatewayServiceWorker::clearConfiguration()
@@ -362,6 +350,17 @@ void GatewayServiceWorker::clearConfiguration()
 	//
 	m_appSignals.clear();
 	m_acquiredAppSignalIDs.clear();
+}
+
+void GatewayServiceWorker::runAllThreads()
+{
+	// app data reciver thread
+	// gateway data send thread
+}
+
+void GatewayServiceWorker::stopAllThreads()
+{
+
 }
 
 void GatewayServiceWorker::runTimer()

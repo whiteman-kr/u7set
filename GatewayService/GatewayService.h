@@ -6,6 +6,7 @@
 #include "../UtilsLib/Queue.h"
 #include "../lib/DataSource.h"
 #include "../AppSignalLib/AppSignal.h"
+#include "GatewayDescription.h"
 
 class GatewayServiceWorker : public ServiceWorker
 {
@@ -56,14 +57,17 @@ private:
 							  SessionParams sessionParams,
 							  std::shared_ptr<const SoftwareSettings> currentSettingsProfile);
 
-	bool readAppSignals(const QString& fileName, const QByteArray& fileData);
-	bool readGatewayDescription(const QString& fileName, const QByteArray& fileData);
+	bool readAppSignals(const QByteArray& fileData);
+	bool readGatewayDescription(const QByteArray& fileData);
 
 	void createAndInitSignalStates();
 	void buildAcuiredAppSignalIDs();
 
 	void applyNewConfiguration();
 	void clearConfiguration();
+
+	void runAllThreads();
+	void stopAllThreads();
 
 	void runTimer();
 	void stopTimer();
@@ -83,6 +87,8 @@ private:
 	int m_autoArchivingGroupsCount = 0;
 
 	AppSignals m_appSignals;
+
+	Gateway::Gateways m_gateways;
 
 	//DynamicAppSignalStates m_appSignalStates;
 

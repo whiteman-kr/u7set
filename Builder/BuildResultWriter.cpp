@@ -853,7 +853,11 @@ namespace Builder
 
 			cfgFile->finalize();
 
-			BuildFile* buildFile = addFile(cfgFile->subDir(), File::CONFIGURATION_XML, cfgFile->getFileData());
+			BuildFile* buildFile = addFile(cfgFile->subDir(),
+										   File::CONFIGURATION_XML,
+										   CfgFileId::CONFIGURATION_XML,
+										   QString(),
+										   cfgFile->getFileData());
 
 			if (buildFile == nullptr)
 			{

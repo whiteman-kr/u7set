@@ -10,7 +10,6 @@
 
 namespace Builder
 {
-
 	struct BuildInfo
 	{
 		QString project;
@@ -26,7 +25,6 @@ namespace Builder
 		void readFromXml(QXmlStreamReader& xmlReader);
 	};
 
-
 	struct BuildFileInfo
 	{
 		QString pathFileName;					// path and file name from build root directory, like "/subdir/filename.xml"
@@ -41,6 +39,7 @@ namespace Builder
 		void readFromXml(QXmlStreamReader& xmlReader);
 
 		QString getMetadata(const QString& key) const;
-	};
 
+		bool isConfigurationXml() const;
+	};
 }

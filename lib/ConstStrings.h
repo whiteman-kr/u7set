@@ -324,6 +324,8 @@ namespace Latin1Char
 
 namespace CfgFileId
 {
+	inline const QString CONFIGURATION_XML("CONFIGURATION_XML");
+
 	inline const QString APP_DATA_SOURCES("APP_DATA_SOURCES");
 	inline const QString APP_SIGNALS("APP_SIGNALS");
 	inline const QString APP_SIGNALS_EXT("APP_SIGNALS_EXT");

@@ -389,7 +389,7 @@ namespace Gateway
 
 		result &= xml.readIntAttribute(XmlAttribute::COUNT, &signalListsCount);
 
-		RETURN_IF_FALSE(signalListsCount);
+		RETURN_IF_FALSE(result);
 
 		for(int i = 0; i < signalListsCount; i++)
 		{
@@ -445,6 +445,25 @@ namespace Gateway
 	std::vector<GatewayShared>::iterator Gateways::end()
 	{
 		return m_gateways.end();
+	}
+
+	GatewayShared Gateways::createTypedGateway(E::GatewayType gwType, const QString& gwID, const QString& gwDesc)
+	{
+		GatewayShared gw;
+
+		switch(gwType)
+		{
+		case E::GatewayType::IVS_Impulse:
+			gw = std::make_shared<IVS_Impulse_Gateway>(gwID, gwDesc);
+			break;
+
+		case E::GatewayType::Unknown:
+		default:
+			Q_ASSERT(false);
+			gw = std::make_shared<Gateway>(gwType, gwID, gwDesc);
+		};
+
+		return gw;
 	}
 
 	void Gateways::writeToXml(XmlWriteHelper& xml) const
@@ -503,9 +522,9 @@ namespace Gateway
 			xml.readStringAttribute(XmlAttribute::GATEWAY_ID, &gatewayID);
 			xml.readStringAttribute(XmlAttribute::GATEWAY_DESCRIPTION, &datewayDescription);
 
-			GatewayShared gw = std::make_shared<Gateway>(gatewayType,
-														 gatewayID,
-														 datewayDescription);
+			GatewayShared gw = createTypedGateway(gatewayType,
+												  gatewayID,
+												  datewayDescription);
 			result &= gw->readFromXml(xml);
 
 			BREAK_IF_FALSE(result);
@@ -681,6 +700,11 @@ namespace Gateway
 
 	IVS_Impulse_Gateway::IVS_Impulse_Gateway() :
 		Gateway(E::GatewayType::IVS_Impulse)
+	{
+	}
+
+	IVS_Impulse_Gateway::IVS_Impulse_Gateway(const QString& gwID, const QString& gwDesc) :
+		Gateway(E::GatewayType::IVS_Impulse, gwID, gwDesc)
 	{
 	}
 

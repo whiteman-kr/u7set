@@ -216,12 +216,15 @@ namespace Gateway
 	{
 	public:
 		void append(GatewayShared gw);
-
 		void setLast(GatewayShared gw);
 		GatewayShared last();
 
 		std::vector<GatewayShared>::iterator begin();
 		std::vector<GatewayShared>::iterator end();
+
+		GatewayShared createTypedGateway(E::GatewayType gwType,
+										 const QString& gwID,
+										 const QString& gwDesc);
 
 		virtual void writeToXml(XmlWriteHelper& xml) const;
 		virtual bool readFromXml(XmlReadHelper& xml);
@@ -271,6 +274,7 @@ namespace Gateway
 
 	public:
 		IVS_Impulse_Gateway();
+		IVS_Impulse_Gateway(const QString& gwID, const QString& gwDesc);
 
 		virtual bool isKnownSetting(E::Setting st) const override;
 		virtual bool checkAndApplySettings(int lineNo, ParserLog& log) override;

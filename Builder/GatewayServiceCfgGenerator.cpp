@@ -131,19 +131,24 @@ namespace Builder
 
 			buildFile = m_buildResultWriter->addFile(
 									softwareCfgSubdir(),
-									File::GATEWAY_DESCRIPTION_XML, xmlStr);
+									File::GATEWAY_DESCRIPTION_XML,
+									CfgFileId::GATEWAY_DESCRIPTION,
+									QString(),
+									xmlStr);
 
 			if (buildFile == nullptr)
 			{
 				errCount++;
 				result = false;
 			}
+			else
+			{
+				m_cfgXml->addLinkToFile(buildFile);
+			}
 		}
 
 		buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(),
 												File::GATEWAY_DESCRIPTION_TXT,
-												CfgFileId::GATEWAY_DESCRIPTION,
-												QString(),
 												settings->gatewayDescription);
 		if (buildFile == nullptr)
 		{

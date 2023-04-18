@@ -1,9 +1,8 @@
 #include "../lib/BuildInfo.h"
-
+#include "../lib/ConstStrings.h"
 
 namespace Builder
 {
-
 	// --------------------------------------------------------------------------------------
 	//
 	//	BuildInfo structure implementation
@@ -23,7 +22,6 @@ namespace Builder
 
 		xmlWriter.writeEndElement();			// build
 	}
-
 
 	void BuildInfo::readFromXml(QXmlStreamReader& xmlReader)
 	{
@@ -45,7 +43,6 @@ namespace Builder
 
 		workstation = xmlReader.attributes().value("Workstation").toString();
 	}
-
 
 	// --------------------------------------------------------------------------------------
 	//
@@ -71,7 +68,6 @@ namespace Builder
 
 		xmlWriter.writeEndElement();		// file
 	}
-
 
 	void BuildFileInfo::readFromXml(QXmlStreamReader& xmlReader)
 	{
@@ -113,7 +109,6 @@ namespace Builder
 		}
 	}
 
-
 	QString BuildFileInfo::getMetadata(const QString& key) const
 	{
 		if (metadata.contains(key))
@@ -122,5 +117,10 @@ namespace Builder
 		}
 
 		return QString();
+	}
+
+	bool BuildFileInfo::isConfigurationXml() const
+	{
+		return ID == CfgFileId::CONFIGURATION_XML;
 	}
 }
