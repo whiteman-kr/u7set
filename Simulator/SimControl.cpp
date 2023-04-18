@@ -479,7 +479,7 @@ namespace Sim
 		perfmanceTimer.start();
 
 		microseconds perfmonaceStartedAt = cd.m_currentTime;
-		quint64 timeStatusUpdateCounter = 0;
+		qint64 timeStatusUpdateCounter = 0;
 		QDateTime currentDateTime = QDateTime::fromMSecsSinceEpoch(std::chrono::duration_cast<std::chrono::milliseconds>(cd.m_currentTime).count());
 
 		auto finishTime = cd.m_sliceStartTime + cd.m_duration;
@@ -623,19 +623,21 @@ namespace Sim
 				cd.m_currentTime = minPossibleTime;
 				currentDateTime = QDateTime::fromMSecsSinceEpoch(std::chrono::duration_cast<std::chrono::milliseconds>(cd.m_currentTime).count());
 
-				if ((++timeStatusUpdateCounter) % 20 == 0)	// Update every ~100 ms
-				{
-					// Emit this information signal every 100 ms, we don't need to send it every cycle
+				if (std::abs(perfmanceTimer.elapsed() - timeStatusUpdateCounter) >= 125)	// Update every ~125 ms, perfmanceTimer can be restarted,
+				{																			// so std::abs() was added.
+					// Emit this information signal every 125 ms, we don't need to send it every cycle
 					//
+					timeStatusUpdateCounter = perfmanceTimer.elapsed();
 					emit statusUpdate(ControlStatus{cd});
 				}
 			}
 			else
 			{
-				if (allLmsArePoweredOff == true && (++timeStatusUpdateCounter) % 20 == 0)	// Update every ~100 ms
+				if (allLmsArePoweredOff == true && std::abs(perfmanceTimer.elapsed() - timeStatusUpdateCounter) >= 125)	// Update every ~125 ms
 				{
 					// Emit this information signal every 100 ms, we don't need to send it every cycle
 					//
+					timeStatusUpdateCounter = perfmanceTimer.elapsed();
 					emit statusUpdate(ControlStatus{cd});
 				}
 			}
