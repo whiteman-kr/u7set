@@ -471,6 +471,12 @@ namespace Builder
 
 		for (std::shared_ptr<DbFile>& file : presetLatesFiles)
 		{
+			if (file->deleted() == true ||
+				(file->state() == E::VcsState::CheckedOut && file->action() == E::VcsItemAction::Deleted))
+			{
+				continue;
+			}
+
 			std::shared_ptr<Hardware::DeviceObject> d = Hardware::DeviceObject::Create(file->data());
 			Q_ASSERT(d);
 
