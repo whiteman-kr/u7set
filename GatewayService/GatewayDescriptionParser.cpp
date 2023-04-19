@@ -846,7 +846,7 @@ namespace Gateway
 		switch(gwType)
 		{
 		case E::GatewayType::IVS_Impulse:
-			return std::make_shared<IVS_Impulse_Gateway>();
+			return std::make_shared<IvsImpulseGateway>();
 
 		default:
 			Q_ASSERT(false);

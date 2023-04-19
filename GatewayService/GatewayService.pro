@@ -34,8 +34,10 @@ SOURCES += \
 	GatewayDescription.cpp \
 	GatewayDescriptionParser.cpp \
 	AppSignalStates.cpp \
+	GatewayHandler.cpp \
 	GatewayService.cpp \
 	GatewayServiceMain.cpp \
+	IvsImpulseGatewayHandler.cpp
 
 HEADERS += \
 	../lib/ConstStrings.h \
@@ -43,7 +45,9 @@ HEADERS += \
 	GatewayDescription.h \
 	GatewayDescriptionParser.h \
 	AppSignalStates.h \
+	GatewayHandler.h \
 	GatewayService.h \
+	IvsImpulseGatewayHandler.h
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h

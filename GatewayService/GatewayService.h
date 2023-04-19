@@ -7,6 +7,7 @@
 #include "../lib/DataSource.h"
 #include "../AppSignalLib/AppSignal.h"
 #include "GatewayDescription.h"
+#include "GatewayHandler.h"
 
 class GatewayServiceWorker : public ServiceWorker
 {
@@ -35,8 +36,6 @@ public:
 /*	const DynamicAppSignalStates& appSignalStates() const { return m_appSignalStates; }
 	DynamicAppSignalStates& appSignalStates() { return m_appSignalStates; }*/
 
-	const std::set<Hash>& acquiredAppSignalIDs() const { return m_acquiredAppSignalIDs; }
-	int acquiredAppSignalIDsCount() const { return static_cast<int>(m_acquiredAppSignalIDs.size()); }
 
 private:
 	virtual void initCmdLineParser() override;
@@ -61,13 +60,9 @@ private:
 	bool readGatewayDescription(const QByteArray& fileData);
 
 	void createAndInitSignalStates();
-	void buildAcuiredAppSignalIDs();
 
 	void applyNewConfiguration();
 	void clearConfiguration();
-
-	void runAllThreads();
-	void stopAllThreads();
 
 	void runTimer();
 	void stopTimer();
@@ -82,17 +77,14 @@ private:
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
 	GatewayServiceSettings m_curSettingsProfile;
-	CircularLoggerShared m_timeErrLog;
 
-	int m_autoArchivingGroupsCount = 0;
-
+	std::set<Hash> m_acquiredSignals;		// set of Hash(appSignalID) of acquired signals
 	AppSignals m_appSignals;
 
 	Gateway::Gateways m_gateways;
+	Gateway::Handlers m_handlers;
 
 	//DynamicAppSignalStates m_appSignalStates;
-
-	std::set<Hash> m_acquiredAppSignalIDs;
 
 	//
 

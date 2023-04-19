@@ -133,6 +133,8 @@ namespace Gateway
 
 		const std::vector<QString>& signalIDs() const;
 
+		void fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals) const;
+
 		void writeToXml(XmlWriteHelper& xml) const;
 		bool readFromXml(XmlReadHelper& xml);
 
@@ -185,6 +187,8 @@ namespace Gateway
 										  const SettingsValues& settingsValues,
 										  int lineNo, ParserLog& log);
 
+		void fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals) const;
+
 		void writeToXml(XmlWriteHelper& xml) const;
 		bool readFromXml(XmlReadHelper& xml);
 
@@ -222,9 +226,16 @@ namespace Gateway
 		std::vector<GatewayShared>::iterator begin();
 		std::vector<GatewayShared>::iterator end();
 
+		std::vector<GatewayShared>::const_iterator begin() const;
+		std::vector<GatewayShared>::const_iterator end() const;
+
+		void clear();
+
 		GatewayShared createTypedGateway(E::GatewayType gwType,
 										 const QString& gwID,
 										 const QString& gwDesc);
+
+		void fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals) const;
 
 		virtual void writeToXml(XmlWriteHelper& xml) const;
 		virtual bool readFromXml(XmlReadHelper& xml);
@@ -237,13 +248,13 @@ namespace Gateway
 
 	// IVS_Impulse gateway structs
 
-	class IVS_Impulse_SignalList : public SignalList
+	class IvsImpulseSignalList : public SignalList
 	{
 	private:
 		static const std::set<E::Setting> m_requiredSettings;
 
 	public:
-		IVS_Impulse_SignalList();
+		IvsImpulseSignalList();
 
 		virtual bool isKnownSetting(E::Setting st) const override;
 		virtual bool checkAndApplySettings(int lineNo, ParserLog& log) override;
@@ -265,16 +276,16 @@ namespace Gateway
 		bool m_includeAppSignalID;
 	};
 
-	using IVS_Impulse_SignalList_Shared = std::shared_ptr<IVS_Impulse_SignalList>;
+	using IvsImpulseSignalListShared = std::shared_ptr<IvsImpulseSignalList>;
 
-	class IVS_Impulse_Gateway : public Gateway
+	class IvsImpulseGateway : public Gateway
 	{
 	public:
 		static const std::set<E::Setting> m_requiredSettings;
 
 	public:
-		IVS_Impulse_Gateway();
-		IVS_Impulse_Gateway(const QString& gwID, const QString& gwDesc);
+		IvsImpulseGateway();
+		IvsImpulseGateway(const QString& gwID, const QString& gwDesc);
 
 		virtual bool isKnownSetting(E::Setting st) const override;
 		virtual bool checkAndApplySettings(int lineNo, ParserLog& log) override;
@@ -291,7 +302,7 @@ namespace Gateway
 		bool checkSignalListsSettings(ParserLog& log);
 		bool generateSignalListsFiles(const SignalSetAdapter& signalSetAdapter, ParserLog& log);
 
-		bool generateSignalListFile(const IVS_Impulse_SignalList& signalList,
+		bool generateSignalListFile(const IvsImpulseSignalList& signalList,
 									File& file,
 									const SignalSetAdapter& signalSetAdapter,
 									ParserLog& log);
@@ -303,4 +314,6 @@ namespace Gateway
 		int m_listsVersion = 0;
 		int m_period = 1000;
 	};
+
+	using IvsImpulseGatewayShared = std::shared_ptr<IvsImpulseGateway>;
 }

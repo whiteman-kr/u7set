@@ -216,7 +216,15 @@ void GatewayServiceWorker::onConfigurationReady(const QByteArray configurationXm
 										  &errStr);
 	result &= errStr.isEmpty();
 
+	// reads gateway description and fills m_acquiredSignals
+	//
 	result &= readGatewayDescription(gatewayDescriptionFileData);
+
+	if (result != false)
+	{
+		m_acquiredSignals.clear();
+		m_gateways.fillAcquiredSignalsSet(&m_acquiredSignals);
+	}
 
 	//
 
@@ -226,7 +234,6 @@ void GatewayServiceWorker::onConfigurationReady(const QByteArray configurationXm
 										  &appSignalSetFileData,
 										  &errStr);
 	result &= errStr.isEmpty();
-
 	result &= readAppSignals(appSignalSetFileData);
 
 	//
@@ -252,13 +259,24 @@ bool GatewayServiceWorker::readAppSignals(const QByteArray& fileData)
 	DEBUG_LOG_MSG(logger(), "AppSignalSet file reading - OK");
 
 	int signalCount = signalSet.appsignal_size();
+	int aquiredSignalsCount = 0;
+
+	m_appSignals.clear();
 
 	for(int i = 0; i < signalCount; i++)
 	{
 		const ::Proto::AppSignal& appSignal = signalSet.appsignal(i);
 
-		m_appSignals.insert(appSignal);
+		const QString&& appSignalID = QString::fromStdString(appSignal.appsignalid());
+
+		if (m_acquiredSignals.contains(calcHash(appSignalID)) == true)
+		{
+			m_appSignals.insert(appSignal);
+			aquiredSignalsCount++;
+		}
 	}
+
+	DEBUG_LOG_MSG(logger(), QString("All gatreways acquire %1 signal(s)").arg(aquiredSignalsCount));
 
 	return true;
 }
@@ -320,47 +338,33 @@ void GatewayServiceWorker::createAndInitSignalStates()
 	m_appSignalStates.setAutoArchivingGroups(m_autoArchivingGroupsCount);*/
 }
 
-void GatewayServiceWorker::buildAcuiredAppSignalIDs()
-{
-/*	m_acquiredAppSignalIDs.clear();
-
-	for(const AppSignal* signal : m_appSignals)
-	{
-		TEST_PTR_CONTINUE(signal);
-		if (signal->isAcquired() == true)
-		{
-			m_acquiredAppSignalIDs.push_back(signal->appSignalID());
-		}
-	}*/
-}
-
 void GatewayServiceWorker::applyNewConfiguration()
 {
-	createAndInitSignalStates();
-	buildAcuiredAppSignalIDs();
+	// already filled:
+	//
+	//		m_appSignals
+	//		m_gateways
 
-	runAllThreads();
+	bool result = true;
+
+	result &= m_handlers.init(m_gateways, m_appSignals);
+
+	if (result == false)
+	{
+		clearConfiguration();
+		return;
+	}
+
+	m_handlers.run();
+
 }
 
 void GatewayServiceWorker::clearConfiguration()
 {
-	stopAllThreads();
-
-	// free all resources allocated in onConfigurationReady
-	//
+	m_handlers.shutdown();
+	m_handlers.clear();
 	m_appSignals.clear();
-	m_acquiredAppSignalIDs.clear();
-}
-
-void GatewayServiceWorker::runAllThreads()
-{
-	// app data reciver thread
-	// gateway data send thread
-}
-
-void GatewayServiceWorker::stopAllThreads()
-{
-
+	m_gateways.clear();
 }
 
 void GatewayServiceWorker::runTimer()

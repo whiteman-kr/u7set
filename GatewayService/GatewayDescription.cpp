@@ -137,6 +137,16 @@ namespace Gateway
 		return m_signalIDs;
 	}
 
+	void SignalList::fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals) const
+	{
+		TEST_PTR_RETURN(acquiredSignals);
+
+		for(const QString& id : m_signalIDs)
+		{
+			acquiredSignals->insert(calcHash(id));
+		}
+	}
+
 	void SignalList::writeToXml(XmlWriteHelper& xml) const
 	{
 		writeSettingsToXml(xml);
@@ -337,6 +347,16 @@ namespace Gateway
 		return result;
 	}
 
+	void Gateway::fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals) const
+	{
+		TEST_PTR_RETURN(acquiredSignals);
+
+		for(auto& sl : m_signalLists)
+		{
+			sl->fillAcquiredSignalsSet(acquiredSignals);
+		}
+	}
+
 	void Gateway::writeToXml(XmlWriteHelper& xml) const
 	{
 		writeSettingsToXml(xml);
@@ -447,6 +467,21 @@ namespace Gateway
 		return m_gateways.end();
 	}
 
+	std::vector<GatewayShared>::const_iterator Gateways::begin() const
+	{
+		return m_gateways.begin();
+	}
+
+	std::vector<GatewayShared>::const_iterator Gateways::end() const
+	{
+		return m_gateways.end();
+	}
+
+	void Gateways::clear()
+	{
+		m_gateways.clear();
+	}
+
 	GatewayShared Gateways::createTypedGateway(E::GatewayType gwType, const QString& gwID, const QString& gwDesc)
 	{
 		GatewayShared gw;
@@ -454,7 +489,7 @@ namespace Gateway
 		switch(gwType)
 		{
 		case E::GatewayType::IVS_Impulse:
-			gw = std::make_shared<IVS_Impulse_Gateway>(gwID, gwDesc);
+			gw = std::make_shared<IvsImpulseGateway>(gwID, gwDesc);
 			break;
 
 		case E::GatewayType::Unknown:
@@ -492,6 +527,18 @@ namespace Gateway
 		xml.writeEndElement();		// </Gateways>
 
 		xml.writeEndDocument();
+	}
+
+	void Gateways::fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals) const
+	{
+		TEST_PTR_RETURN(acquiredSignals);
+
+		acquiredSignals->clear();
+
+		for(auto& gw : m_gateways)
+		{
+			gw->fillAcquiredSignalsSet(acquiredSignals);
+		}
 	}
 
 	bool Gateways::readFromXml(XmlReadHelper& xml)
@@ -541,7 +588,7 @@ namespace Gateway
 	//
 	// ---------------------------------------------------------------------------------
 
-	const std::set<E::Setting> IVS_Impulse_SignalList::m_requiredSettings =
+	const std::set<E::Setting> IvsImpulseSignalList::m_requiredSettings =
 	{
 		E::Setting::ListNo,
 		E::Setting::DataType,
@@ -549,16 +596,16 @@ namespace Gateway
 		E::Setting::IncludeAppSignalID
 	};
 
-	IVS_Impulse_SignalList::IVS_Impulse_SignalList()
+	IvsImpulseSignalList::IvsImpulseSignalList()
 	{
 	}
 
-	bool IVS_Impulse_SignalList::isKnownSetting(E::Setting st) const
+	bool IvsImpulseSignalList::isKnownSetting(E::Setting st) const
 	{
 		return m_requiredSettings.contains(st);
 	}
 
-	bool IVS_Impulse_SignalList::checkAndApplySettings(int lineNo, ParserLog& log)
+	bool IvsImpulseSignalList::checkAndApplySettings(int lineNo, ParserLog& log)
 	{
 		bool result = true;
 
@@ -620,17 +667,17 @@ namespace Gateway
 		return result;
 	}
 
-	int IVS_Impulse_SignalList::listNo() const
+	int IvsImpulseSignalList::listNo() const
 	{
 		return m_listNo;
 	}
 
-	E::SignalListDataType IVS_Impulse_SignalList::dataType() const
+	E::SignalListDataType IvsImpulseSignalList::dataType() const
 	{
 		return m_dataType;
 	}
 
-	char IVS_Impulse_SignalList::dataTypeLetter() const
+	char IvsImpulseSignalList::dataTypeLetter() const
 	{
 		switch(m_dataType)
 		{
@@ -647,17 +694,17 @@ namespace Gateway
 		return '_';
 	}
 
-	bool IVS_Impulse_SignalList::sendEvents() const
+	bool IvsImpulseSignalList::sendEvents() const
 	{
 		return m_sendEvents;
 	}
 
-	bool IVS_Impulse_SignalList::includeAppSignalID() const
+	bool IvsImpulseSignalList::includeAppSignalID() const
 	{
 		return m_includeAppSignalID;
 	}
 
-	void IVS_Impulse_SignalList::writeSettingsToXml(XmlWriteHelper& xml) const
+	void IvsImpulseSignalList::writeSettingsToXml(XmlWriteHelper& xml) const
 	{
 		xml.writeStartElement(XmlElement::SIGNAL_LIST);
 
@@ -669,7 +716,7 @@ namespace Gateway
 		xml.writeEndElement();		//	</SignalList>
 	}
 
-	bool IVS_Impulse_SignalList::readSettingsFromXml(XmlReadHelper& xml)
+	bool IvsImpulseSignalList::readSettingsFromXml(XmlReadHelper& xml)
 	{
 		bool result = true;
 
@@ -689,7 +736,7 @@ namespace Gateway
 	//
 	// ---------------------------------------------------------------------------------
 
-	const std::set<E::Setting>	IVS_Impulse_Gateway::m_requiredSettings =
+	const std::set<E::Setting>	IvsImpulseGateway::m_requiredSettings =
 	{
 		E::Setting::GatewayIP1,
 		E::Setting::GatewayIP2,
@@ -698,23 +745,23 @@ namespace Gateway
 		E::Setting::Period
 	};
 
-	IVS_Impulse_Gateway::IVS_Impulse_Gateway() :
+	IvsImpulseGateway::IvsImpulseGateway() :
 		Gateway(E::GatewayType::IVS_Impulse)
 	{
 	}
 
-	IVS_Impulse_Gateway::IVS_Impulse_Gateway(const QString& gwID, const QString& gwDesc) :
+	IvsImpulseGateway::IvsImpulseGateway(const QString& gwID, const QString& gwDesc) :
 		Gateway(E::GatewayType::IVS_Impulse, gwID, gwDesc)
 	{
 	}
 
-	bool IVS_Impulse_Gateway::isKnownSetting(E::Setting st) const
+	bool IvsImpulseGateway::isKnownSetting(E::Setting st) const
 	{
 		return Gateway::isKnownSetting(st) ||
 				m_requiredSettings.contains(st);
 	}
 
-	bool IVS_Impulse_Gateway::checkAndApplySettings(int lineNo, ParserLog& log)
+	bool IvsImpulseGateway::checkAndApplySettings(int lineNo, ParserLog& log)
 	{
 		bool result = true;
 
@@ -763,12 +810,12 @@ namespace Gateway
 		return result;
 	}
 
-	void IVS_Impulse_Gateway::appendSignalList()
+	void IvsImpulseGateway::appendSignalList()
 	{
-		m_signalLists.push_back(std::make_shared<IVS_Impulse_SignalList>());
+		m_signalLists.push_back(std::make_shared<IvsImpulseSignalList>());
 	}
 
-	void IVS_Impulse_Gateway::writeSettingsToXml(XmlWriteHelper& xml) const
+	void IvsImpulseGateway::writeSettingsToXml(XmlWriteHelper& xml) const
 	{
 		xml.writeStartElement(XmlElement::SETTINGS);
 
@@ -780,7 +827,7 @@ namespace Gateway
 		xml.writeEndElement();		//	</Settings>
 	}
 
-	bool IVS_Impulse_Gateway::readSettingsFromXml(XmlReadHelper& xml)
+	bool IvsImpulseGateway::readSettingsFromXml(XmlReadHelper& xml)
 	{
 		bool result = true;
 
@@ -795,7 +842,7 @@ namespace Gateway
 		return result;
 	}
 
-	bool IVS_Impulse_Gateway::generateRequiredFiles(const SignalSetAdapter& signalSetAdapter,
+	bool IvsImpulseGateway::generateRequiredFiles(const SignalSetAdapter& signalSetAdapter,
 													ParserLog& log)
 	{
 		RETURN_IF_FALSE(checkSignalListsSettings(log));
@@ -804,16 +851,16 @@ namespace Gateway
 		return true;
 	}
 
-	bool IVS_Impulse_Gateway::checkSignalListsSettings(ParserLog& log)
+	bool IvsImpulseGateway::checkSignalListsSettings(ParserLog& log)
 	{
 		bool result = true;
 
-		std::map<int, IVS_Impulse_SignalList_Shared> listsIDs;
+		std::map<int, IvsImpulseSignalListShared> listsIDs;
 
 		for(SignalListShared l : m_signalLists)
 		{
-			IVS_Impulse_SignalList_Shared sl =
-					std::dynamic_pointer_cast<IVS_Impulse_SignalList>(l);
+			IvsImpulseSignalListShared sl =
+					std::dynamic_pointer_cast<IvsImpulseSignalList>(l);
 
 			TEST_PTR_CONTINUE(sl);
 
@@ -837,15 +884,15 @@ namespace Gateway
 		return result;
 	}
 
-	bool IVS_Impulse_Gateway::generateSignalListsFiles(const SignalSetAdapter& signalSetAdapter, ParserLog& log)
+	bool IvsImpulseGateway::generateSignalListsFiles(const SignalSetAdapter& signalSetAdapter, ParserLog& log)
 	{
 		m_files.clear();
 		bool result = true;
 
 		for(SignalListShared l : m_signalLists)
 		{
-			IVS_Impulse_SignalList_Shared sl =
-					std::dynamic_pointer_cast<IVS_Impulse_SignalList>(l);
+			IvsImpulseSignalListShared sl =
+					std::dynamic_pointer_cast<IvsImpulseSignalList>(l);
 
 			TEST_PTR_CONTINUE(sl);
 
@@ -865,7 +912,7 @@ namespace Gateway
 		return result;
 	}
 
-	bool IVS_Impulse_Gateway::generateSignalListFile(const IVS_Impulse_SignalList& signalList,
+	bool IvsImpulseGateway::generateSignalListFile(const IvsImpulseSignalList& signalList,
 													 File& file,
 													 const SignalSetAdapter& signalSetAdapter,
 													 ParserLog& log)
