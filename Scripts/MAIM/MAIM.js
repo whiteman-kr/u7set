@@ -16,6 +16,7 @@ function generate_maim(confFirmware, module, LMNumber, frame, log, signalSet, op
 	var defaultLowBoundR = 0;
 	var defaultK1 = 1.0;
 	var defaultK2 = 0.0;
+	var defaultWordOfFlags = 0;
 	
 	var signalBlockSize = 28 * 2; // in bytes
 	
@@ -100,7 +101,8 @@ function generate_maim(confFirmware, module, LMNumber, frame, log, signalSet, op
 										"; [" + frame + ":" + (ptr + 2) + "] K1 = " + defaultK1 +
 										"; [" + frame + ":" + (ptr + 6) + "] K2 = " + defaultK2 +
 										"; [" + frame + ":" + (ptr + 10) + "] HighValidRange = " + defaultHighBound +
-										"; [" + frame + ":" + (ptr + 14) + "] LowValidRange = " + defaultLowBound + "\r\n");
+										"; [" + frame + ":" + (ptr + 14) + "] LowValidRange = " + defaultLowBound +
+										"; [" + frame + ":" + (ptr + 54) + "] WordOfFlags = " + defaultWordOfFlags + "\r\n");
 				}
 				else
 				{
@@ -155,6 +157,18 @@ function generate_maim(confFirmware, module, LMNumber, frame, log, signalSet, op
 				}
 				ptr += 4;
 				
+				if (s == 0) 
+				{	
+					let flagsPtr = ptr + 36;
+
+					// Word of flags
+					//
+					if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, flagsPtr, "WordOfFlags", defaultWordOfFlags) == false)          // Word of flags
+					{
+						return false;
+					}
+				}
+
 			}
 			else
 			{
@@ -203,7 +217,8 @@ function generate_maim(confFirmware, module, LMNumber, frame, log, signalSet, op
 				
 				var highValidRange = signal.highValidRange();
 				var lowValidRange = signal.lowValidRange();
-				
+
+				var wordOfFlags = 0;
 				
 				// Check properties of signal A
 				
@@ -341,6 +356,21 @@ function generate_maim(confFirmware, module, LMNumber, frame, log, signalSet, op
 				
 				lowValidRangeMinEngineering = parseFloat(lowValidRangeMinEngineering.toFixed(decimalPlaces));
 				highValidRangeMaxEngineering = parseFloat(highValidRangeMaxEngineering.toFixed(decimalPlaces));
+
+				if (s == 0)
+				{
+					var unitEnable = signal.propertyValue("UnitEnable");
+					if (unitEnable == undefined) 
+					{
+						log.errCFG3000("UnitEnable", signalStrId);
+						return false;
+					}
+					
+					if (unitEnable == true)
+					{
+						wordOfFlags |= 1;
+					}
+				}
 				
 				//
 				
@@ -365,7 +395,8 @@ function generate_maim(confFirmware, module, LMNumber, frame, log, signalSet, op
 											"; [" + frame + ":" + (ptr + 2) + "] K1 = " + k1 +
 											"; [" + frame + ":" + (ptr + 6) + "] K2 = " + k2 +
 											"; [" + frame + ":" + (ptr + 10) + "] HighValidRange = " + highValidRange +
-											"; [" + frame + ":" + (ptr + 14) + "] LowValidRange = " + lowValidRange + "\r\n");
+											"; [" + frame + ":" + (ptr + 14) + "] LowValidRange = " + lowValidRange +
+											"; [" + frame + ":" + (ptr + 54) + "] WordOfFlags = " + wordOfFlags + "\r\n");
 				}
 				else
 				{
@@ -426,7 +457,18 @@ function generate_maim(confFirmware, module, LMNumber, frame, log, signalSet, op
 					return false;
 				}
 				ptr += 4;
-				
+
+				if (s == 0) 
+				{	
+					let flagsPtr = ptr + 36;
+
+					// Word of flags
+					//
+					if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, flagsPtr, "WordOfFlags", wordOfFlags) == false)          // Word of flags
+					{
+						return false;
+					}
+				}
 			}
 		}
 	}
