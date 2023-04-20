@@ -52,6 +52,7 @@ private:
 	TuningSchemaManager m_schemaManager;
 
 	TuningSignalManager& m_tuningSignalManager;
+	ClientLib::TuningConnection& m_tuningConnection;
 	TuningConfigController& m_configController;
 
 	// Interface members
