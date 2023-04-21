@@ -612,7 +612,6 @@ void TestSuiteMainWindow::onAppLogError(const QString& errMsg)
 	ui->appLog->insertPlainText("\n");
 	ui->appLog->moveCursor (QTextCursor::End);
 
-	QMessageBox::critical(this, qAppName(), errMsg);
 	return;
 }
 
@@ -647,7 +646,6 @@ void TestSuiteMainWindow::onTestLogError(const QString& errMsg)
 	ui->testLog->insertPlainText("\n");
 	ui->testLog->moveCursor (QTextCursor::End);
 
-	QMessageBox::critical(this, qAppName(), errMsg);
 	return;
 }
 

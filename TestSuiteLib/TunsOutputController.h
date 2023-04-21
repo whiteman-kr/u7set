@@ -21,6 +21,13 @@ namespace TestSuite
 		virtual bool waitForConnection(qint64 timeoutMs) const override;
 		virtual bool writeSignalValue(const QString& appSignalId, const QVariant& value) override;
 
+		virtual bool waitForSignalWritten(const QString& appSignalId, qint64 timeoutMs) const override;
+		virtual bool waitForAllSignalsWritten(qint64 timeoutMs) const override;
+
+
+	private:
+		virtual bool waitForSignalsWritten(const std::vector<Hash>& hashes, qint64 timeoutMs) const;
+
 	private:
 		TuningSignalManager m_signalManager;
 		mutable HasLogFile m_appLog;

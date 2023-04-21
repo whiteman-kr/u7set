@@ -18,5 +18,7 @@ namespace TestSuite
 //		virtual int precision(const QString& signalId) const = 0;
 
 		virtual AppSignalState signalState(const QString& appSignalId, bool* found) const = 0;
+
+		virtual bool expectSignalValue(QString appSignalId, double value, qint64 timeoutMs) const = 0;
 	};
 }

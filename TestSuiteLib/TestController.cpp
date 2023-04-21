@@ -49,13 +49,15 @@ namespace TestSuite
 			return false;
 		}
 
+		qint64 nsecs = static_cast<quint64>(msecs) * 1'000'000;
+
 		QElapsedTimer timer;
 		timer.start();
 
 		QThread* currentThread = QThread::currentThread();
 		while (currentThread->isInterruptionRequested() == false)
 		{
-			qint64 timeLeftUs = std::min<qint64>((msecs * 1'000'000 - timer.nsecsElapsed()) / 1'000, 100'000);
+			qint64 timeLeftUs = std::min<qint64>((nsecs - timer.nsecsElapsed()) / 1'000, 100'000);
 			if (timeLeftUs <= 0)
 			{
 				break;
@@ -109,10 +111,25 @@ namespace TestSuite
 		if (ok == false)
 		{
 			throwScriptException(this, tr("overrideSignalValue(%1, ...), signal write error.").arg(appSignalId));
-			return -1;
+			return false;
 		}
 
 		return ok;
+	}
+
+	bool TestController::waitForSignalWritten(QString appSignalId, qint64 timeoutMs)
+	{
+		return m_outputController.waitForSignalWritten(appSignalId, timeoutMs);
+	}
+
+	bool TestController::waitForAllSignalsWritten(qint64 timeoutMs)
+	{
+		return m_outputController.waitForAllSignalsWritten(timeoutMs);
+	}
+
+	bool TestController::expectSignalValue(QString appSignalId, double value, qint64 timeoutMs)
+	{
+		return m_inputController.expectSignalValue(appSignalId, value, timeoutMs);
 	}
 
 	bool TestController::signalExists(QString appSignalId) const

@@ -97,5 +97,37 @@ namespace TestSuite
 	{
 		return m_signalManager.signalState(appSignalId, found);
 	}
+
+	bool AdsInputController::expectSignalValue(QString appSignalId, double value, qint64 timeoutMs) const
+	{
+		QElapsedTimer timer;
+		timer.start();
+
+		AppSignalState state;
+
+		while (timer.hasExpired(timeoutMs) == false)
+		{
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				return false;
+			}
+
+			bool found = false;
+			state = m_signalManager.signalState(appSignalId, &found);
+			if (found == false || state.isValid() == false || state.isStateAvailable() == false)
+			{
+				return false;
+			}
+
+			if (fabs(state.value() - value) < std::numeric_limits<double>::epsilon())
+			{
+				return true;
+			}
+
+			QThread::msleep(10);
+		}
+
+		return false;
+	}
 }
 

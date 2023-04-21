@@ -36,8 +36,7 @@ namespace TestSuite
 	public slots:
 		void debugOutput(QString str);					// Debug output to qDebug
 
-		/// \brief Run the simulation for \a msec milliseconds, if \a msec is -1 then simulation will last till the programm interrupted.
-		/// <b>Note:</b> Simulation process can last longer than \a msec milliseconds, it depends on project size and simulation hardware.
+		/// \brief Wait for specified numbers of milliseconds
 		bool startForMs(int msecs);
 		bool waitForMs(int msecs);
 
@@ -49,9 +48,16 @@ namespace TestSuite
 		double signalValue(QString appSignalId);
 
 		/// \brief Override signal value. Returns true if signal value is overriden.
-		/// <b>Note:</b> At least one work cycle must be run [startForMs(5)] to apply override to signal.
-		/// <b>Note:</b> Not all signals can be overriden. For example, some signals can be optimized to constant value, as they don not have location in RAM they connot be overriden.
 		bool overrideSignalValue(QString appSignalId, QVariant value);
+
+		/// \brief Waits while specified overrided signal value is written to LM. Returns true if signal value is overriden, false on timeout.
+		bool waitForSignalWritten(QString appSignalId, qint64 timeoutMs);
+
+		/// \brief Waits while all overrided signal value is written to LM. Returns true if signal value is overriden, false on timeout.
+		bool waitForAllSignalsWritten(qint64 timeoutMs);
+
+		/// \brief Waits while signal value is set to specified value. Returns true if value is correct, false on timeout.
+		bool expectSignalValue(QString appSignalId, double value, qint64 timeoutMs);
 
 		/// \brief Remove all overriden signals.
 		/// <b>Note:</b> At least one work cycle must be run [startForMs(5)] to apply this function.

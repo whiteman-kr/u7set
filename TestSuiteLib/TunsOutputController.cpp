@@ -93,6 +93,59 @@ namespace TestSuite
 
 	bool TunsOutputController::writeSignalValue(const QString& appSignalId, const QVariant& value)
 	{
+		bool found = false;
+		AppSignalParam asp = m_signalManager.signalParam(appSignalId, &found);
+		if (found == false)
+		{
+			return false;
+		}
+
+		m_signalManager.setUnappliedValue(::calcHash(appSignalId), TuningValue{asp.tuningType(), value.toDouble()});
+
 		return m_connection.writeTuningSignal(appSignalId, value);
+	}
+
+	bool TunsOutputController::waitForSignalWritten(const QString& appSignalId, qint64 timeoutMs) const
+	{
+		std::vector<Hash> hashes{::calcHash(appSignalId)};
+		return waitForSignalsWritten(hashes, timeoutMs);
+	}
+
+	bool TunsOutputController::waitForAllSignalsWritten(qint64 timeoutMs) const
+	{
+		return waitForSignalsWritten(m_signalManager.signalHashes(), timeoutMs);
+	}
+
+	bool TunsOutputController::waitForSignalsWritten(const std::vector<Hash>& hashes, qint64 timeoutMs) const
+	{
+		QElapsedTimer timer;
+		timer.start();
+
+		while (timer.hasExpired(timeoutMs) == false)
+		{
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				return false;
+			}
+
+			bool allApplied = true;
+
+			if (std::any_of(hashes.cbegin(), hashes.cend(), [this](Hash hash)
+			{
+					return m_signalManager.isUnapplied(hash);
+			}))
+			{
+				allApplied = false;
+			}
+
+			if (allApplied == true)
+			{
+				return true;
+			}
+
+			QThread::msleep(10);
+		}
+
+		return false;
 	}
 }
