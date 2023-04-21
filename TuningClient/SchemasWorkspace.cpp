@@ -18,6 +18,7 @@ SchemasWorkspace::SchemasWorkspace(TuningConfigController& configController,
 	m_tuningController(&tuningSignalManager, &tuningConnection, userManager),
 	m_logController(logFile),
 	m_tuningSignalManager(tuningSignalManager),
+	m_tuningConnection(tuningConnection),
 	m_schemaManager(configController),
 	m_caption(caption),
 	m_startSchemaId(startSchemaId),
@@ -314,7 +315,7 @@ void SchemasWorkspace::createSchemasList()
 			return;
 		}
 
-		m_schemaWidget = new TuningSchemaWidget(m_configController, m_tuningSignalManager, &m_tuningController, &m_logController, schema, m_schemaManager, this);
+		m_schemaWidget = new TuningSchemaWidget(m_configController, m_tuningSignalManager, m_tuningConnection, &m_tuningController, &m_logController, schema, m_schemaManager, this);
 
 		// Make sure the new context was set
 		//
@@ -355,7 +356,7 @@ void SchemasWorkspace::createSchemasTabs()
 
 		std::shared_ptr<VFrame30::Schema> schema = m_schemaManager.schema(schemaId, dummyContext);
 
-		TuningSchemaWidget* schemaWidget = new TuningSchemaWidget(m_configController, m_tuningSignalManager, &m_tuningController, &m_logController,schema, m_schemaManager, this);
+		TuningSchemaWidget* schemaWidget = new TuningSchemaWidget(m_configController, m_tuningSignalManager, m_tuningConnection, &m_tuningController, &m_logController,schema, m_schemaManager, this);
 
 		// Make sure the new context was set
 		//
@@ -449,7 +450,7 @@ void SchemasWorkspace::createSchemasView()
 	auto dummyContext = VFrame30::Context::create(nullptr, nullptr, nullptr, nullptr);
 	std::shared_ptr<VFrame30::Schema> schema = m_schemaManager.schema(startSchemaID, dummyContext);
 
-	m_schemaWidget = new TuningSchemaWidget(m_configController, m_tuningSignalManager, &m_tuningController, &m_logController, schema, m_schemaManager, this);
+	m_schemaWidget = new TuningSchemaWidget(m_configController, m_tuningSignalManager, m_tuningConnection, &m_tuningController, &m_logController, schema, m_schemaManager, this);
 
 	// Make sure the new context was set
 	//

@@ -1828,12 +1828,10 @@ void TuningPage::slot_listContextMenuRequested(const QPoint& pos)
 			auto f = [this, hash]() -> void
 			{
 				TuningSignalInfo* d = new TuningSignalInfo(m_configController,
-														   hash,
-														   m_model->analogFormat(),
 														   m_tuningSignalManager,
 														   m_tuningConnection,
-														   ::calcHash(m_configController.softwareInfo().equipmentID()),
-														   m_configController.lmStatusFlagMode(),
+														   hash,
+														   m_model->analogFormat(),
 														   this);
 				d->show();
 			};

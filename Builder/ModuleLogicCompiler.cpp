@@ -2999,7 +2999,7 @@ namespace Builder
 		bool result = true;
 
 		result &= processAcquiredIOSignalsValidity();
-//		result &= processAcquiredOptoSignalsValidity();
+		result &= processAcquiredOptoSignalsValidity();
 		result &= processSimlockItems();
 		result &= processMismatchItems();
 		result &= processSetFlagsItems();

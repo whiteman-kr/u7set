@@ -101,6 +101,18 @@ namespace VFrame30
 		/// \brief Returns TuningSignalState structure or undefined if signal does not exist.
 		QVariant signalState(const QString& appSignalId) const;	// If no signal with specified appSignalID found, QVariant is undefined
 
+		/// \brief Returns <b>true</b> if signal specified by <b>signalId</b> is exist.
+		bool signalExists(QString signalId) const;
+
+		/// \brief Returns <b>true</b> for discrete signals.
+		bool isDiscrete(QString signalId) const;
+
+		/// \brief Returns <b>true</b> for analog signals.
+		bool isAnalog(QString signalId) const;
+
+		/// \brief Returns precision for analog signals. If signal is discrete or not found, returns 0.
+		int precision(QString signalId) const;
+
 		/// \brief Returns list of AppSignalIDs with specified <b>tag</b>.
 		QStringList signalIdsByTag(QString tag) const;
 

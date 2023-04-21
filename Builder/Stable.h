@@ -3,11 +3,16 @@
 #include <cassert>
 #include <typeindex>
 #include <functional>
+#include <algorithm>
 #include <set>
 #include <unordered_set>
+#include <map>
+#include <unordered_map>
 #include <vector>
+#include <list>
 #include <optional>
 #include <memory>
+#include <ranges>
 
 // Qt includes
 //

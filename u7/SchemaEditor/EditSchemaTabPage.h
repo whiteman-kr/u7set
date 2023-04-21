@@ -39,6 +39,10 @@ public:
 	double zoom() const;
 	void setZoom(double zoom, bool repaint);
 
+	QString activeLayer() const;
+	void setActiveLayer(QString layer);
+	void layersDialog();
+
 	void updateAfbSchemaItems();
 	void updateUfbSchemaItems();
 	void updateBussesSchemaItems();

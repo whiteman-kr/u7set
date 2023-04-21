@@ -31,12 +31,12 @@ namespace Sim
 
 	bool LanInterface::enabled() const
 	{
-		return m_enabled.load(std::memory_order::relaxed);
+		return m_enabled.load(std::memory_order::acquire);
 	}
 
 	void LanInterface::setEnabled(bool value)
 	{
-		m_enabled = value;
+		m_enabled.store(value, std::memory_order::release);
 	}
 
 	bool LanInterface::isTuning() const

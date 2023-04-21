@@ -344,6 +344,16 @@ public:
 		m_fileInfo[uuid] = fileInfo;
 	}
 
+	auto begin() const
+	{
+		return m_objectsVector.begin();
+	}
+
+	auto end() const
+	{
+		return m_objectsVector.end();
+	}
+
 protected:
 	virtual bool load(QString* errorMessage) = 0;
 	virtual bool save(const QUuid& uuid, QString* errorMessage) = 0;

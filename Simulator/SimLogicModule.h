@@ -35,9 +35,13 @@ namespace Sim
 
 		void clear();
 
-		// Running LM
+		// Running LM, start running one cycle.
 		//
-		QFuture<bool> asyncRunCycle(std::chrono::microseconds currentTime, const QDateTime& currentDateTime, qint64 workcycle,  bool reset);				// Start running one cycle
+		QFuture<bool> asyncRunCycle(std::chrono::microseconds currentTime,
+									const QDateTime& currentDateTime,
+									qint64 workcycle,
+									bool reset,
+									std::condition_variable& cvFinished);
 
 		bool receiveConnectionsData(std::chrono::microseconds currentTime);
 

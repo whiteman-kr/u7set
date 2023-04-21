@@ -30,7 +30,7 @@ namespace EditEngine
 	{
 		for (const auto& item : m_items)
 		{
-			bool ok = m_layer->removeItem(item);
+			[[maybe_unused]] bool ok = m_layer->removeItem(item);
 			assert(ok);
 		}
 

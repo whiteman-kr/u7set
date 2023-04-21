@@ -1,5 +1,6 @@
 #include "SimProjectWidget.h"
 #include "../Settings.h"
+#include "../../Simulator/SimConnections.h"
 
 using namespace SimProjectTreeItems;
 
@@ -12,13 +13,15 @@ SimProjectWidget::SimProjectWidget(SimIdeSimulator* simulator, QWidget* parent) 
 	setBackgroundRole(QPalette::Window);
 	setAutoFillBackground(true);
 
-	QVBoxLayout* layout = new QVBoxLayout;
+	QGridLayout* layout = new QGridLayout;
 
 	m_buildLabel = new QLabel("Build: Not loaded");
 	m_buildLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Minimum);
 	m_buildLabel->setTextFormat(Qt::RichText);
 	m_buildLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
 	m_buildLabel->setOpenExternalLinks(true);
+
+	m_buildNoLabel = new QLabel();
 
 	m_treeWidget = new QTreeWidget;
 	m_treeWidget->setUniformRowHeights(true);
@@ -33,8 +36,12 @@ SimProjectWidget::SimProjectWidget(SimIdeSimulator* simulator, QWidget* parent) 
 	QByteArray headerState = QSettings().value("SimulatorProjectWidget/headerState").toByteArray();
 	m_treeWidget->header()->restoreState(headerState);
 
-	layout->addWidget(m_buildLabel);
-	layout->addWidget(m_treeWidget);
+	layout->addWidget(m_buildLabel, 0, 0, Qt::AlignmentFlag::AlignLeft | Qt::AlignmentFlag::AlignLeft | Qt::AlignmentFlag::AlignVCenter);
+	layout->addWidget(m_buildNoLabel, 0, 1, Qt::AlignmentFlag::AlignRight | Qt::AlignmentFlag::AlignLeft | Qt::AlignmentFlag::AlignVCenter);
+	layout->addWidget(m_treeWidget, 1, 0, 1, 2);
+
+	layout->setColumnStretch(0, 6);	// Stretch 6 for column 0, where m_buildLabel
+	layout->setColumnStretch(1, 1);	// Stretch 1 for column 1, where m_buildNoLabel
 
 	setLayout(layout);
 
@@ -76,11 +83,15 @@ void SimProjectWidget::projectUpdated()
 	if (m_simulator->isLoaded() == false)
 	{
 		m_buildLabel->setText(tr("Build: Not loaded"));
+		m_buildNoLabel->setText("");
 	}
 	else
 	{
 		QString buildPath = m_simulator->buildPath();
+		int buildNo = m_simulator->buildNo();
+
 		m_buildLabel->setText(tr("Build: <a href=\"%1\">%1</a>").arg(buildPath));
+		m_buildNoLabel->setText(tr("#%1").arg(buildNo));
 	}
 
 	fillEquipmentTree();
@@ -383,12 +394,12 @@ namespace SimProjectTreeItems
 	{
 		setData(0, Qt::UserRole, QVariant(m_connectionId));
 
-		const std::vector<Sim::ConnectionPortPtr>& ports = connection->ports();
+		std::vector<Sim::ConnectionPort> ports = connection->ports();
 
 		setToolTip(0, QObject::tr("ConnectionID: %1\n\tPort1: %2\n\tPort2: %3")
 						.arg(m_connectionId)
-						.arg(ports.size() >= 1 ? ports[0]->portInfo().equipmentID : "")
-						.arg(ports.size() >= 2 ? ports[1]->portInfo().equipmentID : ""));
+						.arg(ports.size() >= 1 ? ports[0].portInfo().equipmentID : "")
+						.arg(ports.size() >= 2 ? ports[1].portInfo().equipmentID : ""));
 
 		return;
 	}

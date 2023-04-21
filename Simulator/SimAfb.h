@@ -52,6 +52,9 @@ namespace Sim
 		explicit AfbComponentParam(quint16 paramOpIndex);
 		explicit AfbComponentParam(quint16 paramOpIndex, quint16 word);
 
+		AfbComponentParam& operator=(const AfbComponentParam&) noexcept = default;
+		AfbComponentParam& operator=(AfbComponentParam&&) noexcept = default;
+
 	public:
 		[[nodiscard]] int opIndex() const noexcept;
 		void setOpIndex(int index) noexcept;
@@ -246,6 +249,7 @@ namespace Sim
 		quint16 m_instanceNo = 0;
 
 		std::array<AfbComponentParam, 64> m_params_a;		// Index is AfbComponentParam.opIndex()
+		quint16 m_versionOpIndex = 0xFFFF;					// Optimisation: cache versionOpIndex so no acces in param(...) for it.
 	};
 
 

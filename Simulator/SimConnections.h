@@ -4,6 +4,7 @@
 #include "../HardwareLib/Connection.h"
 #include "../CommonLib/Hash.h"
 #include "../lib/ConnectionsInfo.h"
+#include "SimRam.h"
 
 namespace Sim
 {
@@ -36,6 +37,7 @@ namespace Sim
 		ConnectionPort(const ::ConnectionPortInfo& portInfo) :
 			m_portInfo(portInfo)
 		{
+			m_lmIdHash = calcHash(m_portInfo.lmID);
 		}
 
 	public:
@@ -44,8 +46,46 @@ namespace Sim
 			return m_portInfo;
 		}
 
+		Hash lmIdHash() const
+		{
+			return m_lmIdHash;
+		}
+
+		// writeValidityBit was moved here as optimisation, this is very convenient place 
+		// to store memory area for this bit.
+		//
+		bool writeValidityBit(Ram& ram, quint16 value)
+		{
+			if (m_receiveValidityBitMemoryArea == Ram::InvalidHandle)
+			{
+				m_receiveValidityBitMemoryArea = ram.memoryAreaHandle(E::LogicModuleRamAccess::Read,
+																	  m_portInfo.rxValiditySignalAbsAddr.offset());
+
+				if (m_receiveValidityBitMemoryArea == Ram::InvalidHandle)
+				{
+					Q_ASSERT(false);
+					return false;
+				}
+			}
+
+			auto memoryArea = ram.memoryArea(m_receiveValidityBitMemoryArea);
+			if (memoryArea == nullptr)
+			{
+				Q_ASSERT(false);
+				return false;
+			}
+
+			return memoryArea->writeBit(m_portInfo.rxValiditySignalAbsAddr.offset(),
+										static_cast<quint16>(m_portInfo.rxValiditySignalAbsAddr.bit()),
+										value,
+										E::ByteOrder::BigEndian);
+		}
+
 	private:
 		::ConnectionPortInfo m_portInfo;
+		Hash m_lmIdHash = UNDEFINED_HASH;
+
+		Ram::Handle m_receiveValidityBitMemoryArea = Ram::InvalidHandle;
 	};
 
 
@@ -55,13 +95,14 @@ namespace Sim
 	class Connection
 	{
 	public:
-		Connection(::ConnectionInfo buildConnection);
-		~Connection();
+		Connection(const ::ConnectionInfo& buildConnection);
 
 	public:
 		const QString& connectionId() const;
 
-		Sim::ConnectionPortPtr portForLm(const QString& lmEquipmnetId);
+		const Sim::ConnectionPort* portForLmRawPtr(const QString& lmEquipmnetId) const;
+		const Sim::ConnectionPort* portForLmRawPtr(Hash logicModuleIdHash) const;
+		Sim::ConnectionPort* portForLmRawPtr(Hash logicModuleIdHash);
 
 		bool sendData(int portNo,
 					  std::vector<char>* data,
@@ -77,7 +118,7 @@ namespace Sim
 		Hardware::Connection::Type type() const;
 		const ::ConnectionInfo& connectionInfo() const;
 
-		const std::vector<Sim::ConnectionPortPtr>& ports() const;
+		std::vector<Sim::ConnectionPort> ports() const;
 
 		bool enabled() const;
 		void setEnabled(bool value);
@@ -89,7 +130,9 @@ namespace Sim
 
 	private:
 		::ConnectionInfo m_buildConnection;
-		std::vector<Sim::ConnectionPortPtr> m_ports;
+
+		std::optional<Sim::ConnectionPort> m_port1;
+		std::optional<Sim::ConnectionPort> m_port2;
 
 		std::atomic<bool> m_enable = true;
 		std::atomic<bool> m_timeout = false;
@@ -144,7 +187,6 @@ namespace Sim
 		std::map<Hash, ConnectionPtr> m_connectionMap;				// ConnectionID to connection
 		std::multimap<Hash, ConnectionPtr> m_lmToConnection;		// LM to connections
 		std::map<Hash, ConnectionPtr> m_portToConnection;			// PortID to connection
-		std::map<Hash, ConnectionPortPtr> m_portMap;				// PortID to connection port
 	};
 
 }
