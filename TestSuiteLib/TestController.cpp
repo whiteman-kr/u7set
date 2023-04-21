@@ -2,7 +2,10 @@
 
 namespace TestSuite
 {
-	TestController::TestController(QObject* parent)
+	TestController::TestController(IInputController& inputController, IOutputController& outputController, QObject* parent) :
+		QObject{parent},
+		m_inputController{inputController},
+		m_outputController{outputController}
 	{
 	}
 
@@ -34,79 +37,100 @@ namespace TestSuite
 		qDebug() << str;
 	}
 
+	bool TestController::startForMs(int msecs)
+	{
+		return waitForMs(msecs);
+	}
+
+	bool TestController::waitForMs(int msecs)
+	{
+		if (msecs < 0)
+		{
+			return false;
+		}
+
+		QElapsedTimer timer;
+		timer.start();
+
+		QThread* currentThread = QThread::currentThread();
+		while (currentThread->isInterruptionRequested() == false)
+		{
+			qint64 timeLeftUs = std::min<qint64>((msecs * 1'000'000 - timer.nsecsElapsed()) / 1'000, 100'000);
+			if (timeLeftUs <= 0)
+			{
+				break;
+			}
+
+			QThread::usleep(static_cast<unsigned long>(timeLeftUs));
+		}
+
+		return true;
+	}
+
 
 	QJSValue TestController::signalState(QString appSignalId)
 	{
-		/*
-	bool ok = false;
-	AppSignalState state = m_simulator->appSignalManager().signalState(appSignalId, &ok, true);
+		bool ok = false;
+		AppSignalState state = m_inputController.signalState(appSignalId, &ok);
 
-	if (ok == false)
-	{
-		throwScriptException(this, tr("signalState(%1), signal not found.").arg(appSignalId));
-		return -1;
-	}
+		if (ok == false)
+		{
+			throwScriptException(this, tr("signalState(%1), signal not found.").arg(appSignalId));
+			return -1;
+		}
 
-	QJSEngine* jsEngine = qjsEngine(this);
-	if (jsEngine == nullptr)
-	{
-		assert(jsEngine);
-		return {};
-	}
+		QJSEngine* jsEngine = qjsEngine(this);
+		if (jsEngine == nullptr)
+		{
+			Q_ASSERT(jsEngine);
+			return {};
+		}
 
-	return jsEngine->toScriptValue(state);
-	*/
-		return {};
+		return jsEngine->toScriptValue(state);
 	}
 
 	double TestController::signalValue(QString appSignalId)
 	{
-		/*
-	bool ok = false;
-	AppSignalState state = m_simulator->appSignalManager().signalState(appSignalId, &ok, true);
+		bool ok = false;
+		AppSignalState state = m_inputController.signalState(appSignalId, &ok);
 
-	if (ok == false)
-	{
-		throwScriptException(this, tr("signalValue(%1), signal not found.").arg(appSignalId));
-		return -1;
-	}
-
-	return state.value();*/
-		return 0;
-	}
-
-	bool TestController::overrideSignalValue(QString appSignalId, double value)
-	{
-		/*if (m_simulator->overrideSignals().isSignalInOverrideList(appSignalId) == false)
-	{
-		int count = m_simulator->overrideSignals().addSignals(QStringList{} << appSignalId);
-		if (count != 1)
+		if (ok == false)
 		{
-			return false;
+			throwScriptException(this, tr("signalValue(%1), signal not found.").arg(appSignalId));
+			return -1;
 		}
+
+		return state.value();
 	}
 
-	m_simulator->overrideSignals().setValue(appSignalId, OverrideSignalMethod::Value, value);*/
-		return true;
+	bool TestController::overrideSignalValue(QString appSignalId, QVariant value)
+	{
+		bool ok = m_outputController.writeSignalValue(appSignalId, value);
+		if (ok == false)
+		{
+			throwScriptException(this, tr("overrideSignalValue(%1, ...), signal write error.").arg(appSignalId));
+			return -1;
+		}
+
+		return ok;
 	}
 
 	bool TestController::signalExists(QString appSignalId) const
 	{
-		return true;//m_simulator->appSignalManager().signalExists(appSignalId);
+		return m_inputController.signalExists(appSignalId);
 	}
 
 	AppSignalParam TestController::signalParam(QString appSignalId)
 	{
-		/*bool ok = false;
+		bool ok = false;
 
-	AppSignalParam result = m_simulator->appSignalManager().signalParam(appSignalId, &ok);
-	if (ok == false)
-	{
-		throwScriptException(this, tr("signalParam(%1), signal not found.").arg(appSignalId));
-	}
+		AppSignalParam result = m_inputController.signalParam(appSignalId, &ok);
+		if (ok == false)
+		{
+			throwScriptException(this, tr("signalParam(%1), signal not found.").arg(appSignalId));
+		}
 
-	return result;*/
-		return {};
+		return result;
 	}
 
 }

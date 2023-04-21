@@ -88,6 +88,16 @@ namespace TestSuite
 			scripts.emplace_back(shortenFileName, data);
 		}
 
+		// Get file CfgFileId::TUNING_SIGNALS
+		//
+		if (bool result = getFileBlockedById(CfgFileId::TUNING_SIGNALS, &config.tuningSignalsFile, nullptr);
+			result == false)
+		{
+			m_logFile.writeError("Failed to load tuning signal list file: TuningSignals.dat");
+			emit configrationError();
+			return false;
+		}
+
 		// Trace received params
 		//
 		qDebug() << "New configuration arrived.";

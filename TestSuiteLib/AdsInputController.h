@@ -15,7 +15,18 @@ namespace TestSuite
 						   const std::vector<SoftwareEndpoint::AppDataService>& appDataServices,
 						   ILogFile* logFile);
 
+		// IInputController implementation
+		//
+	public:
 		virtual bool waitForConnection(qint64 timeoutMs) const override;
+
+		virtual bool signalExists(const QString& signalId) const override;
+		virtual AppSignalParam signalParam(const QString& appSignalId, bool* found) const override;
+
+		virtual AppSignalState signalState(const QString& appSignalId, bool* found) const override;
+
+		// End of IInputController
+		//
 
 	private:
 		ClientLib::AppSignalManager& m_signalManager;

@@ -194,6 +194,7 @@ namespace TestSuite
 
 		auto controller = std::make_unique<TunsOutputController>(m_softwareInfo,
 																 m_configuration.tuningServices,
+																 m_configuration.tuningSignalsFile,
 																 TuningClientSettings::LmStatusFlagMode::None,	// Access key?
 																 m_appLog.logFile());
 		bool ok = controller->waitForConnection(ServiceConnectTimeoutMs);
@@ -208,14 +209,17 @@ namespace TestSuite
 
 	void ControlThread::taskRunTests()
 	{
-		TestController testController;
+		Q_ASSERT(m_inputController);
+		Q_ASSERT(m_outputController);
+
+		TestController testController{*m_inputController, *m_outputController};
 
 		bool fileTestResult = true;
 
 		for (const auto& script : m_scripts)
 		{
 			if (m_executionTests.empty() == false &&
-					std::find(m_executionTests.begin(), m_executionTests.end(), script.fileName) == m_executionTests.end())
+				std::find(m_executionTests.begin(), m_executionTests.end(), script.fileName) == m_executionTests.end())
 			{
 				continue;
 			}

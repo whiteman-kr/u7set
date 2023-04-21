@@ -27,6 +27,7 @@ namespace TestSuite
 		//
 		bool tuningEnabled = false;
 		std::vector<SoftwareEndpoint::TuningService> tuningServices;
+		QByteArray tuningSignalsFile;
 
 		// Scripts list
 		//

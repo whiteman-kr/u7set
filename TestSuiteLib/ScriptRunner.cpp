@@ -6,6 +6,8 @@ namespace TestSuite
 		m_testController(testController),
 		m_scriptTestLog(scriptTestLog)
 	{
+		m_jsEngine.installExtensions(QJSEngine::ConsoleExtension);
+
 		// Controllers
 		//
 		m_jsTestController = m_jsEngine.newQObject(&m_testController);

@@ -316,11 +316,161 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 		return true;
 	}
 
-	bool TuningConnection::writeTuningSignal(QString appSignalId, TuningValue tuningValue)
+	bool TuningConnection::writeTuningSignal(const QString& appSignalId, const TuningValue& tuningValue)
 	{
 		std::vector<TuningWriteCommand> commands;
 		commands.push_back({appSignalId, tuningValue});
 		return writeTuningSignals(commands);
+	}
+
+	bool TuningConnection::writeTuningSignal(const QString& appSignalId, QVariant value)
+	{
+		AppSignalParam appSignal;
+
+		bool ok = m_tuningSignalManager.signalParam(appSignalId, &appSignal);
+		if (ok == false)
+		{
+			return false;
+		}
+
+		// Adjust value type to match signal type
+		//
+		auto valueType = value.metaType().id();
+
+		if (valueType != QMetaType::Bool &&
+			valueType != QMetaType::Int &&
+			valueType != QMetaType::Double)
+		{
+			m_logFile.writeError(tr("writeTuningSignal(%1, %2) - Unsupported value type (%3), type must be bool, integer or double.")
+								 .arg(appSignalId)
+								 .arg(value.toString())
+								 .arg(value.metaType().name()));
+			return false;
+		}
+
+		TuningValueType tuningType = appSignal.tuningType();
+
+		switch (tuningType)
+		{
+		case TuningValueType::Discrete:
+			{
+				if (valueType == QMetaType::Bool)
+				{
+					break;
+				}
+				if (valueType == QMetaType::Int)
+				{
+					value = value.toInt() == 0 ? false : true;
+					break;
+				}
+				if (valueType == QMetaType::Double)
+				{
+					value = value.toDouble() == 0 ? false : true;
+					break;
+				}
+				Q_ASSERT(false);
+			}
+			break;
+		case TuningValueType::SignedInt32:
+			{
+				if (valueType == QMetaType::Bool)
+				{
+					m_logFile.writeWarning(tr("writeTuningSignal(%1, %2) - type bool is implicitly converted to SignedInt32.")
+										 .arg(appSignalId)
+										 .arg(value.toString()));
+
+					value = value.toBool() == false ? static_cast<int>(0) : static_cast<int>(1);
+					break;
+				}
+
+				if (valueType == QMetaType::Int)
+				{
+					break;
+				}
+
+				if (valueType == QMetaType::Double)
+				{
+					m_logFile.writeWarning(tr("writeTuningSignal(%1, %2) - casting double to SignedInt32 can result in loss of precision.")
+										 .arg(appSignalId)
+										 .arg(value.toString()));
+
+					if (double valueDouble = value.toDouble();
+						valueDouble < std::numeric_limits<qint32>::min() || valueDouble > std::numeric_limits<qint32>::max())
+					{
+						m_logFile.writeError(tr("writeTuningSignal(%1, %2) - value is out of range of type SignedInt32.")
+											 .arg(appSignalId)
+											 .arg(value.toString()));
+						return false;
+					}
+
+					value = value.toInt();
+					break;
+				}
+			}
+			break;
+		case TuningValueType::Float:
+			{
+				if (valueType == QMetaType::Bool)
+				{
+					m_logFile.writeWarning(tr("writeTuningSignal(%1, %2) - type bool is implicitly converted to Float32.")
+										 .arg(appSignalId)
+										 .arg(value.toString()));
+
+					value = value.toBool() == false ? static_cast<float>(0) : static_cast<float>(1);
+					break;
+				}
+
+				if (valueType == QMetaType::Int)
+				{
+					value = value.toFloat();
+					break;
+				}
+
+				if (valueType == QMetaType::Double)
+				{
+					if (double valueDouble = value.toDouble();
+						valueDouble < static_cast<double>(std::numeric_limits<float>::lowest()) ||
+						valueDouble > static_cast<double>(std::numeric_limits<float>::max()))
+					{
+						m_logFile.writeError(tr("writeTuningSignal(%1, %2) - value is out of range of type Float32.")
+											 .arg(appSignalId)
+											 .arg(value.toString()));
+						return false;
+					}
+
+					value = value.toFloat();
+					break;
+				}
+			}
+			break;
+		case TuningValueType::SignedInt64:
+			{
+				return false;
+			}
+		case TuningValueType::Double:
+			{
+				return false;
+			}
+		}
+
+		TuningValue tuningValue{value};
+
+		// Check range for analog signal
+		//
+		if (appSignal.tuningType() != TuningValueType::Discrete)
+		{
+			if (tuningValue < appSignal.tuningLowBound() || tuningValue > appSignal.tuningHighBound())
+			{
+				m_logFile.writeError(tr("writeTuningSignal(%1, %2) - value is out tuning of range [%3, %4].")
+									 .arg(appSignalId)
+									 .arg(value.toString())
+									 .arg(appSignal.tuningLowBound().toString())
+									 .arg(appSignal.tuningHighBound().toString()));
+				return false;
+			}
+		}
+
+		return writeTuningSignal(appSignalId, tuningValue);
 	}
 
 	void TuningConnection::applyTuningSignals(const std::vector<Hash>& signalHashes)

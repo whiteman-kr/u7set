@@ -4,19 +4,21 @@ namespace TestSuite
 {
 	TunsOutputController::TunsOutputController(const SoftwareInfo& softwareInfo,
 											   const std::vector<SoftwareEndpoint::TuningService>& tuningServices,
+											   const QByteArray& signalsFile,
 											   TuningClientSettings::LmStatusFlagMode lmStatusFlagMode,
 											   ILogFile* logFile):
 		m_signalManager{softwareInfo.equipmentID(), logFile},
 		m_appLog{logFile, "TunsOutputController"},
 		m_connection{m_signalManager, m_signalManager, logFile, &m_tuningLogStub}
 	{
+		m_signalManager.load(signalsFile);
 
 		m_connection.updateConnections(softwareInfo,
 							   tuningServices,
 							   true/*autoApply*/,
 							   lmStatusFlagMode);
 
-
+		return;
 	}
 
 
@@ -87,5 +89,10 @@ namespace TestSuite
 
 		m_appLog.writeMessage("TuningSources info arrived");
 		return true;
+	}
+
+	bool TunsOutputController::writeSignalValue(const QString& appSignalId, const QVariant& value)
+	{
+		return m_connection.writeTuningSignal(appSignalId, value);
 	}
 }

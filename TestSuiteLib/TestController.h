@@ -26,7 +26,7 @@ namespace TestSuite
 		//Q_PROPERTY(bool debugMessagesEnabled READ (m_log.debugMessagesEnabled) WRITE (m_log.setDebugMessagesEnabled))
 
 	public:
-		explicit TestController(QObject* parent = nullptr);
+		explicit TestController(IInputController& inputController, IOutputController& outputController, QObject* parent = nullptr);
 		virtual ~TestController();
 
 		static void throwScriptException(const QObject* object, QString text);
@@ -38,11 +38,8 @@ namespace TestSuite
 
 		/// \brief Run the simulation for \a msec milliseconds, if \a msec is -1 then simulation will last till the programm interrupted.
 		/// <b>Note:</b> Simulation process can last longer than \a msec milliseconds, it depends on project size and simulation hardware.
-		//bool startForMs(int msecs);
-
-		/// \brief Reset all simulations to initial state.
-		/// <b>Note:</b> Function sets reset flag and actual reset will be performed on the next \c startForMs call.
-		//bool reset();
+		bool startForMs(int msecs);
+		bool waitForMs(int msecs);
 
 		/// \brief Get signal state, if signal is not found then exception is thrown.
 		QJSValue signalState(QString appSignalId);
@@ -54,7 +51,7 @@ namespace TestSuite
 		/// \brief Override signal value. Returns true if signal value is overriden.
 		/// <b>Note:</b> At least one work cycle must be run [startForMs(5)] to apply override to signal.
 		/// <b>Note:</b> Not all signals can be overriden. For example, some signals can be optimized to constant value, as they don not have location in RAM they connot be overriden.
-		bool overrideSignalValue(QString appSignalId, double value);
+		bool overrideSignalValue(QString appSignalId, QVariant value);
 
 		/// \brief Remove all overriden signals.
 		/// <b>Note:</b> At least one work cycle must be run [startForMs(5)] to apply this function.
@@ -106,23 +103,12 @@ namespace TestSuite
 		//[[nodiscard]] Simulator* simulator();
 		//[[nodiscard]] const Simulator* simulator() const;
 
-	private:
-		//[[nodiscard]] bool unlockTimer() const;
-		//void setUnlockTimer(bool value);
-
-		//[[nodiscard]] bool enabledLanComm() const;
-		//void setEnabledLanComm(bool value);
-
 		// Data
 		//
 	private:
-		//Simulator* m_simulator = nullptr;
-		//mutable ScopedLog m_log;
-		//OutputController* m_outputController = nullptr;
-		//InputController* m_inputController = nullptr;
-		//ScriptTestLog* m_scriptTestLog = nullptr;
+		IInputController& m_inputController;
+		IOutputController& m_outputController;
 
 		//std::atomic<qint64> m_executionTimeout = -1;		// Script execution timeout in milliseconds, negative means no timeout
-		//std::atomic<bool> m_checkSkipOnBuildConst = false;	// If true then check script global variable SkipOnBuild, and both re true the SKIP this file
 	};
 }

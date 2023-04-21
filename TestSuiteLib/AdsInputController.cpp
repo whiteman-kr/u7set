@@ -82,5 +82,20 @@ namespace TestSuite
 		m_appLog.writeMessage("All AppSignalParams are loaded");
 		return true;
 	}
+
+	bool AdsInputController::signalExists(const QString& signalId) const
+	{
+		return m_signalManager.signalExists(signalId);
+	}
+
+	AppSignalParam AdsInputController::signalParam(const QString& appSignalId, bool* found) const
+	{
+		return m_signalManager.signalParam(appSignalId, found);
+	}
+
+	AppSignalState AdsInputController::signalState(const QString& appSignalId, bool* found) const
+	{
+		return m_signalManager.signalState(appSignalId, found);
+	}
 }
 

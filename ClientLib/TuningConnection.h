@@ -98,7 +98,8 @@ namespace ClientLib
 		/// Tuning signals functions
 		///
 		bool writeTuningSignals(const std::vector<TuningWriteCommand>& writeCommands);
-		virtual bool writeTuningSignal(QString appSignalId, TuningValue tuningValue) override;
+		virtual bool writeTuningSignal(const QString& appSignalId, const TuningValue& tuningValue) override;
+		virtual bool writeTuningSignal(const QString& appSignalId, QVariant value) override;
 
 		/// Apply functions
 		///
