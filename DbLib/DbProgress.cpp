@@ -101,7 +101,7 @@ bool DbProgress::run(QWidget* parentWidget, const QString& description)
 
 bool DbProgress::completed() const
 {
-	return m_completed.load(std::memory_order::relaxed);
+	return m_completed.load();
 }
 
 void DbProgress::setCompleted(bool value)
@@ -111,7 +111,7 @@ void DbProgress::setCompleted(bool value)
 
 bool DbProgress::wasCanceled() const
 {
-	return m_cancel.load(std::memory_order::relaxed);
+	return m_cancel.load();
 }
 
 void DbProgress::setCancel(bool value)
@@ -133,7 +133,7 @@ void DbProgress::setCurrentOperation(const QString& value)
 
 int DbProgress::value() const
 {
-	return m_value.load(std::memory_order::relaxed);
+	return m_value.load();
 }
 
 void DbProgress::setValue(int value)
@@ -189,6 +189,6 @@ void DbProgress::disableProgress()
 
 bool DbProgress::isProgressEnabled() const
 {
-	return m_progressEnabled.load(std::memory_order::relaxed);
+	return m_progressEnabled.load();
 }
 
