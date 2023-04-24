@@ -50,9 +50,6 @@ namespace TestSuite
 		/// \brief Override signal value. Returns true if signal value is overriden.
 		bool overrideSignalValue(QString appSignalId, QVariant value);
 
-		/// \brief Waits while specified overrided signal value is written to LM. Returns true if signal value is overriden, false on timeout.
-		bool waitForSignalWritten(QString appSignalId, qint64 timeoutMs);
-
 		/// \brief Waits while all overrided signal value is written to LM. Returns true if signal value is overriden, false on timeout.
 		bool waitForAllSignalsWritten(qint64 timeoutMs);
 

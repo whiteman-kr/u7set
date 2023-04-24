@@ -49,7 +49,7 @@ namespace TestSuite
 			return false;
 		}
 
-		qint64 nsecs = static_cast<quint64>(msecs) * 1'000'000;
+		qint64 nsecs = static_cast<qint64>(msecs) * 1'000'000;
 
 		QElapsedTimer timer;
 		timer.start();
@@ -115,11 +115,6 @@ namespace TestSuite
 		}
 
 		return ok;
-	}
-
-	bool TestController::waitForSignalWritten(QString appSignalId, qint64 timeoutMs)
-	{
-		return m_outputController.waitForSignalWritten(appSignalId, timeoutMs);
 	}
 
 	bool TestController::waitForAllSignalsWritten(qint64 timeoutMs)

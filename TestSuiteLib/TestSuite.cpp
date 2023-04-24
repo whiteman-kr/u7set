@@ -3,12 +3,12 @@
 namespace TestSuite
 {
 
-	TestSuite::TestSuite(const SoftwareInfo& softwareInfo, const TestSuiteSettings& settings, ILogFile* appLog, ITestLog* testLog):
+	TestSuite::TestSuite(const SoftwareInfo& softwareInfo, const TestSuiteSettings& settings, ILogFile* appLog, ITestLogOutput* testOutput):
 		m_appLog{appLog, "TestLibrary"},
-		m_testLog{testLog},
+		m_testLog{testOutput},
 		m_softwareInfo{softwareInfo},
 		m_settings{settings},
-		m_control{appLog, testLog}
+		m_control{appLog, &m_testLog}
 		//m_configController(softwareInfo, settings.configuratorAddress1(), settings.configuratorAddress2(), appLog)
 		//m_scriptTestLog(&m_testLog)
 	{
@@ -53,6 +53,8 @@ namespace TestSuite
 	bool TestSuite::execute(const QStringList& executionTests,		// List of tests for execution, if empty then exec all.
 							const QString& scriptsPath)				// Load scripts from disk, path to dir for *.js files.);
 	{
+		m_testLog.clear();
+
 		return m_control.execute(m_softwareInfo, m_settings, executionTests, scriptsPath);
 	}
 

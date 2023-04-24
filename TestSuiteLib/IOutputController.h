@@ -9,7 +9,6 @@ namespace TestSuite
 
 		virtual bool waitForConnection(qint64 timeoutMs) const = 0;
 		virtual bool writeSignalValue(const QString& appSignalId, const QVariant& value) = 0;
-		virtual bool waitForSignalWritten(const QString& appSignalId, qint64 timeoutMs) const = 0;
 		virtual bool waitForAllSignalsWritten(qint64 timeoutMs) const = 0;
 	};
 }

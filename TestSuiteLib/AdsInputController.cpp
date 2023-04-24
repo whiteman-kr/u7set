@@ -105,13 +105,10 @@ namespace TestSuite
 
 		AppSignalState state;
 
-		while (timer.hasExpired(timeoutMs) == false)
-		{
-			if (QThread::currentThread()->isInterruptionRequested() == true)
-			{
-				return false;
-			}
+		qint64 nsecs = static_cast<qint64>(timeoutMs) * 1'000'000;
 
+		do
+		{
 			bool found = false;
 			state = m_signalManager.signalState(appSignalId, &found);
 			if (found == false || state.isValid() == false || state.isStateAvailable() == false)
@@ -124,8 +121,15 @@ namespace TestSuite
 				return true;
 			}
 
-			QThread::msleep(10);
-		}
+			qint64 timeLeftUs = std::min<qint64>((nsecs - timer.nsecsElapsed()) / 1'000, 10'000);
+			if (timeLeftUs <= 0)
+			{
+				break;
+			}
+
+			QThread::usleep(static_cast<unsigned long>(timeLeftUs));
+
+		}while(QThread::currentThread()->isInterruptionRequested() == false);
 
 		return false;
 	}

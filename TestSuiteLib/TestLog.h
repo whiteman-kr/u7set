@@ -7,52 +7,68 @@ namespace TestSuite
 	{
 	public:
 		virtual ~ITestLog() = default;
-		virtual void writeMessage(const QString& text) = 0;
-		virtual void writeWarning(const QString& text) = 0;
 		virtual void writeError(const QString& text) = 0;
+		virtual void writeWarning(const QString& text) = 0;
+		virtual void writeMessage(const QString& text) = 0;
 	};
 
 	enum class TestLogItemType
 	{
-		Message,
+		Error,
 		Warning,
-		Error
+		Message
 	};
 
 	class TestLogItem
 	{
 	public:
-		explicit TestLogItem(const QString& text, TestLogItemType type);
+		explicit TestLogItem(int no, const QString& text, TestLogItemType type);
 
 		QString toText() const;
+		QString toHtml() const;
+
+		TestLogItemType type() const;
+		bool isError() const;
+		bool isWarning() const;
+		bool isMessage() const;
 
 	private:
+		int m_no = 0;
 		QString m_message;
 		TestLogItemType m_type = TestLogItemType::Message;
 		QDateTime m_dateTime;
+
+//		QString m_file;
+//		int m_fileLine = 0;
+//		QString m_func;
+		QString m_htmlFont;
+
 	};
 
-	class TestLog
+	class ITestLogOutput
 	{
 	public:
-		explicit TestLog(ITestLog* outputLog);
+		virtual ~ITestLogOutput() = default;
+		virtual void logItemArrived(const TestLogItem& item) = 0;
+	};
 
-		void writeError(const QString& text);
-		void writeWarning(const QString& text);
-		void writeMessage(const QString& text);
+	class TestLog : public ITestLog
+	{
+	public:
+		explicit TestLog(ITestLogOutput* logOutput);
+
+		void clear();
+
+		void writeError(const QString& text) override;
+		void writeWarning(const QString& text) override;
+		void writeMessage(const QString& text) override;
 
 	private:
-		QMutex m_itemsMutex;	// For access to m_itemsMutex
+		int no = 0;
+
+		QReadWriteLock m_itemsLock;	// For access to m_items and m_items
 		std::vector<TestLogItem> m_items;
 
-		ITestLog* m_outputLog = nullptr;
-	};
-
-	class ConsoleTestLog : public TestSuite::ITestLog
-	{
-	public:
-		void writeMessage(const QString& text) override	{	qInfo() << text;		}
-		void writeWarning(const QString& text) override	{	qWarning() << text;		}
-		void writeError(const QString& text) override	{	qCritical() << text;	}
+		ITestLogOutput* m_logOutput = nullptr;
 	};
 }

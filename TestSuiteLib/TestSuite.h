@@ -23,7 +23,7 @@ namespace TestSuite
 		Q_OBJECT
 
 	public:
-		TestSuite(const SoftwareInfo& softwareInfo, const TestSuiteSettings& settings, ILogFile* appLog, ITestLog* testLog);
+		TestSuite(const SoftwareInfo& softwareInfo, const TestSuiteSettings& settings, ILogFile* appLog, ITestLogOutput* testOutput);
 		~TestSuite() = default;
 
 	public:
