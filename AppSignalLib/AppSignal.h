@@ -611,6 +611,21 @@ typedef PtrOrderedHash<int, AppSignal> SignalPtrOrderedHash;
 
 class AppSignalSet : public SignalPtrOrderedHash
 {
+private:
+	class SignalsGroups
+	{
+	public:
+		void clear();
+		void insert(const AppSignal* appSignal);
+		void remove(const AppSignal& appSignal);
+		void remove(int groupID, int signalID);
+		void getGroupSignalsIDs(int groupID, QList<int>& signalsIDs) const;
+
+	private:
+		std::map<int, std::set<int>> m_groups;		// signalGroupID => set of signalIDs
+													// signalGroupID == 0 is NOT placed in this map!
+	};
+
 public:
 	AppSignalSet();
 	virtual ~AppSignalSet();
@@ -649,7 +664,7 @@ public:
 	void replaceOrAppendIfNotExists(int signalID, const AppSignal& s);
 
 private:
-	QMultiHash<int, int> m_groupSignals;
+	SignalsGroups m_groups;
 	QHash<QString, int> m_strID2IndexMap;
 
 	int m_maxID = -1;
