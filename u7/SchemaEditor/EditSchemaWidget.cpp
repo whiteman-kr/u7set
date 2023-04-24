@@ -4295,8 +4295,9 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 	menu.addMenu(m_alignSubMenu);
 	menu.addMenu(m_orderSubMenu);
 
+	// --
+	//
 	QList<QAction*> actions;
-
 	if (selectedOneConnectionLine == true)
 	{
 		Q_ASSERT(selectedItems().size() == 1);
@@ -4316,6 +4317,77 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 	if (allSelectedAreSignals == true)
 	{
 		menu.addMenu(m_transformSubMenu);
+	}
+
+	// "Selection" -> Select by item type or Afb
+	//
+	QMenu selectionSubMenu{tr("Selection")};
+	if (selectedItems().empty() == false)
+	{
+		menu.addMenu(&selectionSubMenu);
+
+		std::set<std::pair<QString, QString>> itemTypes;	// First class name, second text for menu
+		std::set<QString> afbTypes;							// AfbElement caption
+
+		for (const auto& si : selectedItems())
+		{
+			QString typeText = QString{si->metaObject()->className()}.replace("VFrame30::SchemaItem", "");
+			itemTypes.insert({si->metaObject()->className(), typeText});
+
+			if (si->isSchemaItemAfb() == true)
+			{
+				afbTypes.insert({si->toSchemaItemAfb()->afbElement().caption()});
+			}
+		}
+
+		QList<QAction*> typeActions;
+
+		for (const auto&[typeStr, text]: itemTypes)
+		{
+			QAction* typeAction = new QAction{text, &selectionSubMenu};
+			typeActions << typeAction;
+
+			connect(typeAction, &QAction::triggered, this, [typeStr, this]() {
+				std::list<SchemaItemPtr> selection;
+				for (const auto& si : selectedItems())
+				{
+					if (si->metaObject()->className() == typeStr)
+					{
+						selection.push_back(si);
+					}
+				}
+
+				editSchemaView()->setSelectedItems(selection);
+				editSchemaView()->update();
+			});
+		}
+
+		QAction* sepator = new QAction{"", &selectionSubMenu};
+		sepator->setSeparator(true);
+		typeActions << sepator;
+
+		for (const auto& afbCaption : afbTypes)
+		{
+			QAction* typeAction = new QAction{afbCaption, &selectionSubMenu};
+			typeActions << typeAction;
+
+			connect(typeAction, &QAction::triggered, this, [afbCaption, this](){
+				std::list<SchemaItemPtr> selection;
+				for (const auto& si : selectedItems())
+				{
+					if (si->isSchemaItemAfb() == true &&
+						si->toSchemaItemAfb()->afbElement().caption() == afbCaption)
+					{
+						selection.push_back(si);
+					}
+				}
+
+				editSchemaView()->setSelectedItems(selection);
+				editSchemaView()->update();
+			});
+		}
+
+		selectionSubMenu.addActions(typeActions);
 	}
 
 	// Signal properties

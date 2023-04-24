@@ -762,8 +762,9 @@ void SimWidget::runSimulation()
 		return;
 	}
 
-	// Trim all trends
+	// Trim all trends only if it is the start of the new simualtion.
 	//
+	if (m_simulator->isStopped() == true)
 	{
 		TimeStamp currentTime{QDateTime::currentDateTime()};
 		auto trimFunc = [currentTime](SimTrendsWidget* simTrendsWidget)

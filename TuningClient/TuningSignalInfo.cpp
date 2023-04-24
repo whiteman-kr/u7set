@@ -7,12 +7,10 @@
 #include "Settings.h"
 
 TuningSignalInfo::TuningSignalInfo(TuningConfigController& configController,
-								   Hash appSignalHash,
-								   E::AnalogFormat analogFormat,
 								   const TuningSignalManager& signalManager,
 								   const ClientLib::TuningConnection& tuningConnection,
-								   Hash clientHash,
-								   const TuningClientSettings::LmStatusFlagMode lmStatusFlagMode,
+								   Hash appSignalHash,
+								   E::AnalogFormat analogFormat,
 								   QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::TuningSignalInfo),
@@ -21,8 +19,8 @@ TuningSignalInfo::TuningSignalInfo(TuningConfigController& configController,
 	m_analogFormat(analogFormat),
 	m_signalManager(signalManager),
 	m_tuningConnection(tuningConnection),
-	m_clientHash(clientHash),
-	m_lmStatusFlagMode(lmStatusFlagMode)
+	m_clientHash(::calcHash(configController.softwareInfo().equipmentID())),
+	m_lmStatusFlagMode(m_configController.lmStatusFlagMode())
 {
 	ui->setupUi(this);
 

@@ -20,12 +20,10 @@ class TuningSignalInfo : public QDialog
 
 public:
 	explicit TuningSignalInfo(TuningConfigController& configController,
-							  Hash appSignalHash,
-							  E::AnalogFormat analogFormat,
 							  const TuningSignalManager& signalManager,
 							  const ClientLib::TuningConnection& tuningConnection,
-							  Hash clientHash,
-							  const TuningClientSettings::LmStatusFlagMode lmStatusFlagMode,
+							  Hash appSignalHash,
+							  E::AnalogFormat analogFormat,
 							  QWidget* parent = 0);
 	~TuningSignalInfo();
 
