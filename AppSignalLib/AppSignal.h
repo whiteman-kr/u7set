@@ -384,9 +384,14 @@ public:
 	int changesetID() const { return m_changesetID; }
 	bool checkedOut() const { return m_checkedOut; }
 	int userID() const { return m_userID; }
-	QDateTime created() const { return m_created; }
 	bool deleted() const { return m_deleted; }
-	QDateTime instanceCreated() const { return m_instanceCreated; }
+
+	QDateTime created() const;
+	QDateTime instanceCreated() const;
+
+	qint64 createdMcs() const { return m_createdMcs; }
+	qint64 instanceCreatedMcs() const { return m_instanceCreatedMcs; }
+
 	E::VcsItemAction instanceAction() const { return m_instanceAction; }
 
 	// Signal properties calculated in compile-time
@@ -484,11 +489,14 @@ private:
 	void setCheckedOut(bool checkedOut) { m_checkedOut = checkedOut; }
 	void setUserID(int userID) { m_userID = userID; }
 	void setChannel(E::Channel channel) { m_channel = channel; }
-	void setCreated(const QDateTime& created) { m_created = created; }
-	void setCreated(const QString& createdStr) { m_created = QDateTime::fromString(createdStr, FormatStr::POSTGRES_DATE_TIME); }
+
+	void setCreated(qint64 timestampMcs) { m_createdMcs = timestampMcs; }
+	void setCreated(const QDateTime& dt) { m_createdMcs = dt.toMSecsSinceEpoch() * 1000; }
+
+	void setInstanceCreated(qint64 timestampMcs) { m_instanceCreatedMcs = timestampMcs; }
+	void setInstanceCreated(const QDateTime& dt) { m_instanceCreatedMcs = dt.toMSecsSinceEpoch() * 1000; }
+
 	void setDeleted(bool deleted) { m_deleted = deleted; }
-	void setInstanceCreated(const QDateTime& instanceCreated) { m_instanceCreated = instanceCreated; }
-	void setInstanceCreated(const QString& instanceCreatedStr) { m_instanceCreated = QDateTime::fromString(instanceCreatedStr, FormatStr::POSTGRES_DATE_TIME); }
 	void setInstanceAction(E::VcsItemAction action) { m_instanceAction = action; }
 	void initCreatedDates();
 
@@ -564,9 +572,11 @@ private:
 	int m_changesetID = 0;
 	bool m_checkedOut = false;
 	int m_userID = 0;
-	QDateTime m_created;
 	bool m_deleted = false;
-	QDateTime m_instanceCreated;
+
+	qint64 m_createdMcs;					// in microseconds, as in database
+	qint64 m_instanceCreatedMcs;			// in microseconds, as in database
+
 	E::VcsItemAction m_instanceAction = E::VcsItemAction::Added;
 
 	// Signal properties calculated in compile-time
@@ -611,6 +621,21 @@ typedef PtrOrderedHash<int, AppSignal> SignalPtrOrderedHash;
 
 class AppSignalSet : public SignalPtrOrderedHash
 {
+private:
+	class SignalsGroups
+	{
+	public:
+		void clear();
+		void insert(const AppSignal* appSignal);
+		void remove(const AppSignal& appSignal);
+		void remove(int groupID, int signalID);
+		void getGroupSignalsIDs(int groupID, QList<int>& signalsIDs) const;
+
+	private:
+		std::map<int, std::set<int>> m_groups;		// signalGroupID => set of signalIDs
+													// signalGroupID == 0 is NOT placed in this map!
+	};
+
 public:
 	AppSignalSet();
 	virtual ~AppSignalSet();
@@ -649,7 +674,7 @@ public:
 	void replaceOrAppendIfNotExists(int signalID, const AppSignal& s);
 
 private:
-	QMultiHash<int, int> m_groupSignals;
+	SignalsGroups m_groups;
 	QHash<QString, int> m_strID2IndexMap;
 
 	int m_maxID = -1;
