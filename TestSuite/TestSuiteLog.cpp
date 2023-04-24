@@ -1,5 +1,7 @@
 #include "TestSuiteLog.h"
 
+Q_LOGGING_CATEGORY(testsuite_applog, "testsuite.applog")
+
 TestSuiteLogFile::TestSuiteLogFile(const QString& fileName, const QString& path, int maxFileSize, int maxFilesCount, bool addAppInfoOnStart)
 	:Log::LogFile(fileName, path, maxFileSize, maxFilesCount, addAppInfoOnStart)
 {
@@ -8,45 +10,82 @@ TestSuiteLogFile::TestSuiteLogFile(const QString& fileName, const QString& path,
 
 bool TestSuiteLogFile::writeAlert(const QString& text)
 {
-	emit errorArrived(text);
+	qCCritical(testsuite_applog).noquote() << text;
 	return Log::LogFile::writeAlert(text);
 }
 
 bool TestSuiteLogFile::writeError(const QString& text)
 {
-	emit errorArrived(text);
+	qCCritical(testsuite_applog).noquote() << text;
 	return Log::LogFile::writeError(text);
 }
 
 bool TestSuiteLogFile::writeWarning(const QString& text)
 {
-	emit warningArrived(text);
+	qCWarning(testsuite_applog).noquote() << text;
 	return Log::LogFile::writeWarning(text);
 }
 
 bool TestSuiteLogFile::writeMessage(const QString& text)
 {
-	emit messageArrived(text);
+	qCInfo(testsuite_applog).noquote() << text;
 	return Log::LogFile::writeMessage(text);
 }
 
 bool TestSuiteLogFile::writeText(const QString& text)
 {
-	emit textArrived(text);
+	qCInfo(testsuite_applog).noquote() << text;
 	return Log::LogFile::writeText(text);
 }
 
-void TestSuiteTestLog::writeError(const QString& text)
+TestSuiteTestLogOutput::TestSuiteTestLogOutput()
 {
-	emit errorArrived(text);
+	setHtmlFont("Verdana");
 }
 
-void TestSuiteTestLog::writeWarning(const QString& text)
+QString TestSuiteTestLogOutput::htmlFont() const
 {
-	emit warningArrived(text);
+	return m_htmlFont;
 }
 
-void TestSuiteTestLog::writeMessage(const QString& text)
+void TestSuiteTestLogOutput::setHtmlFont(QString fontName)
 {
-	emit messageArrived(text);
+	m_htmlFont = fontName;
 }
+
+bool TestSuiteTestLogOutput::queueIsEmpty() const
+{
+	QReadLocker l(&m_lock);
+	Q_UNUSED(l);
+	return m_itemsQueue.empty() == true;
+}
+
+void TestSuiteTestLogOutput::popQueue(std::vector<TestSuite::TestLogItem>* out, int maxCount)
+{
+	if (out == nullptr)
+	{
+		assert(out);
+		return;
+	}
+
+	QReadLocker l(&m_lock);
+	Q_UNUSED(l);
+
+	while (maxCount > 0 && m_itemsQueue.empty() == false)
+	{
+		out->push_back(m_itemsQueue.front());
+		m_itemsQueue.pop();
+
+		maxCount --;
+	}
+
+	return;
+}
+
+void TestSuiteTestLogOutput::logItemArrived(const TestSuite::TestLogItem& item)
+{
+	QWriteLocker l(&m_lock);
+	Q_UNUSED(l);
+	m_itemsQueue.push(item);
+}
+

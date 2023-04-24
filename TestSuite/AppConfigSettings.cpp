@@ -67,6 +67,8 @@ void AppConfigSettings::StoreUser()
 
 	s.setValue("Global/useLocalScriptsPath", m_useLocalScriptsPath);
 	s.setValue("Global/localScriptsPath", m_localScriptsPath);
+
+	s.setValue("TestLogTabPage/m_buildSerachCompleter", m_outputSerachCompleter);
 }
 
 void AppConfigSettings::RestoreUser()
@@ -83,6 +85,8 @@ void AppConfigSettings::RestoreUser()
 
 	m_useLocalScriptsPath = s.value("Global/useLocalScriptsPath", m_useLocalScriptsPath).toBool();
 	m_localScriptsPath = s.value("Global/localScriptsPath", m_localScriptsPath).toString();
+	m_outputSerachCompleter = s.value("TestLogTabPage/m_buildSerachCompleter").toStringList();
+
 }
 
 TestSuite::TestSuiteSettings& AppConfigSettings::librarySettings()
@@ -142,6 +146,17 @@ QString AppConfigSettings::localAppDataPath()
 {
 	return m_localAppDataPath;
 }
+
+const QStringList& AppConfigSettings::outputSearchCompleter() const
+{
+	return m_outputSerachCompleter;
+}
+
+QStringList& AppConfigSettings::outputSearchCompleter()
+{
+	return m_outputSerachCompleter;
+}
+
 
 AppConfigSettings theSettings;
 

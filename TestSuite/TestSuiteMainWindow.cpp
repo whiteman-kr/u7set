@@ -3,8 +3,10 @@
 #include "AppConfigSettings.h"
 #include "TestSuiteDialogSettings.h"
 #include "../UtilsLib/Ui/UiTools.h"
+#include "../lib/Ui/TabWidgetEx.h"
 #include "../lib/Ui/DialogAbout.h"
 #include "../OnlineLib/TcpClientStatistics.h"
+#include "TestLogTabPage.h"
 
 #if __has_include("../gitlabci_version.h")
 #	include "../gitlabci_version.h"
@@ -12,41 +14,50 @@
 
 TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidget *parent)
 	: QMainWindow(parent),
-	ui(new Ui::TestSuiteMainWindow),
 	m_appLog(qAppName(), QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + theSettings.librarySettings().instanceStrId()),
 	m_configController(softwareInfo, theSettings.librarySettings().configuratorAddress1(), theSettings.librarySettings().configuratorAddress2(), &m_appLog),
-	m_testSuite(softwareInfo, theSettings.librarySettings(), &m_appLog, &m_testLog),
+	m_testSuite(softwareInfo, theSettings.librarySettings(), &m_appLog, &m_testLogOutput),
 	m_dialogAlert(this)
 
 {
-	ui->setupUi(this);
+	setWindowFlags(Qt::Widget);
+	setDockOptions(AnimatedDocks | AllowTabbedDocks | GroupedDragging);
 
-	ui->testsTree->setRootIsDecorated(false);
-	QStringList headerLabels;
-	headerLabels << tr("Test");
-	ui->testsTree->setColumnCount(static_cast<int>(headerLabels.size()));
-	ui->testsTree->setHeaderLabels(headerLabels);
-	ui->testsTree->setSelectionMode(QAbstractItemView::ExtendedSelection);
+	m_tabWidget = new TabWidgetEx{this};
+	m_tabWidget->setDocumentMode(false);
+	m_tabWidget->tabBar()->setContextMenuPolicy(Qt::CustomContextMenu);
+
+	setCentralWidget(m_tabWidget);
+	centralWidget()->setAutoFillBackground(true);
+
+	QHBoxLayout* layout = new QHBoxLayout;
+	centralWidget()->setLayout(layout);
+
+	auto margins = layout->contentsMargins();
+	margins.setTop(0);
+	layout->setContentsMargins(margins);
+
+	m_testLogTabPage = new TestLogTabPage(m_testLogOutput, this);
+	m_tabWidget->addTab(m_testLogTabPage, "Test Log");
+
+	m_testLogOutput.setHtmlFont("Verdana");
+
+	// Create UI elements
+	//
+
+	createDocks();
+	createToolbar();
+	createActions();
+	createMenu();
+	createStatusBar();
 
 	connect(&m_configController, &TestSuite::TestSuiteConfigController::configurationArrived, this, &TestSuiteMainWindow::onConfigurationArrived);
 	connect(&m_testSuite, &TestSuite::TestSuite::finished, this, &TestSuiteMainWindow::onTestingFinished);
 
 	// Logs
 	//
-	connect(&m_appLog, &TestSuiteLogFile::errorArrived, this, &TestSuiteMainWindow::onAppLogError, Qt::QueuedConnection);
-	connect(&m_appLog, &TestSuiteLogFile::warningArrived, this, &TestSuiteMainWindow::onAppLogWarning, Qt::QueuedConnection);
-	connect(&m_appLog, &TestSuiteLogFile::messageArrived, this, &TestSuiteMainWindow::onAppLogMessage, Qt::QueuedConnection);
-	connect(&m_appLog, &TestSuiteLogFile::textArrived, this, &TestSuiteMainWindow::onAppLogText, Qt::QueuedConnection);
 	connect(&m_appLog, &Log::LogFile::alertArrived, &m_dialogAlert, &DialogAlert::onAlertArrived);
 	connect(&m_appLog, &Log::LogFile::writeFailure, &m_dialogAlert, &DialogAlert::onAlertArrived);
-
-	connect(&m_testLog, &TestSuiteTestLog::errorArrived, this, &TestSuiteMainWindow::onTestLogError, Qt::QueuedConnection);
-	connect(&m_testLog, &TestSuiteTestLog::warningArrived, this, &TestSuiteMainWindow::onTestLogWarning, Qt::QueuedConnection);
-	connect(&m_testLog, &TestSuiteTestLog::messageArrived, this, &TestSuiteMainWindow::onTestLogMessage, Qt::QueuedConnection);
-
-	createActions();
-	createMenu();
-	createStatusBar();
 
 	if (theSettings.useLocalScriptsPath() == true)
 	{
@@ -67,6 +78,8 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 	m_mainWindowTimerId_250ms = startTimer(250);
 
 	m_configController.start();
+
+	updateActionsState();
 }
 
 TestSuiteMainWindow::~TestSuiteMainWindow()
@@ -75,7 +88,111 @@ TestSuiteMainWindow::~TestSuiteMainWindow()
 	theSettings.m_mainWindowGeometry = saveGeometry();
 	theSettings.m_mainWindowState = saveState();
 
-	delete ui;
+}
+
+void TestSuiteMainWindow::createDocks()
+{
+	setCorner(Qt::Corner::BottomLeftCorner, Qt::DockWidgetArea::LeftDockWidgetArea);
+	setCorner(Qt::Corner::BottomRightCorner, Qt::DockWidgetArea::BottomDockWidgetArea);
+	setCorner(Qt::Corner::TopRightCorner, Qt::DockWidgetArea::RightDockWidgetArea);
+
+	// Tests List dock
+	//
+	QDockWidget* testsListDock = new QDockWidget{"TestListWidget", this};
+	testsListDock->setObjectName("TestListWidget");
+	testsListDock->setFeatures(QDockWidget::NoDockWidgetFeatures);
+	testsListDock->setTitleBarWidget(new QWidget{});		// Hides title bar
+
+	m_testListWidget = new TestListWidget{this};
+	testsListDock->setWidget(m_testListWidget);
+
+	addDockWidget(Qt::LeftDockWidgetArea, testsListDock);
+
+	// Overriden Signals dock
+	//
+//	m_overridePaneDock = new QDockWidget{"Overrides", this};
+//	m_overridePaneDock->setObjectName("SimOverridenSignals");
+//	m_overridePaneDock->setWidget(new SimOverridePane{m_simulator.get(), dbc(), m_overridePaneDock});
+//	m_overridePaneDock->setAllowedAreas(Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
+
+//	addDockWidget(Qt::BottomDockWidgetArea, m_overridePaneDock);
+
+	// OutputLog dock
+	//
+//	if (m_slaveWindow == false)
+	{
+		m_appLogPaneDock = new QDockWidget{"Output", this};
+		m_appLogPaneDock->setObjectName("AppLogOutputWidget");
+
+		m_appLogoutputWidget = new AppLogOutputWidget{m_appLogPaneDock};
+
+		m_appLogPaneDock->setWidget(m_appLogoutputWidget);
+		m_appLogPaneDock->setAllowedAreas(Qt::BottomDockWidgetArea);
+
+		addDockWidget(Qt::BottomDockWidgetArea, m_appLogPaneDock);
+	}
+}
+
+void TestSuiteMainWindow::createToolbar()
+{
+	m_toolBar = new QToolBar{"ToolBar"};
+	addToolBar(m_toolBar);
+
+	//m_openTestsAction = new QAction{QIcon(":/Images/Images/SimOpen.svg"), tr("Open Build"), this};
+	//m_openTestsAction->setShortcut(QKeySequence::Open);
+	//connect(m_openTestsAction, &QAction::triggered, this, &SimWidget::openBuild);
+
+	//m_closeTestsAction = new QAction{QIcon(":/Images/Images/SimClose.svg"), tr("Close"), this};
+	//m_closeTestsAction->setShortcut(QKeySequence::Close);
+	//connect(m_closeTestsAction, &QAction::triggered, this, &SimWidget::closeBuild);
+
+	m_refreshTestsAction = new QAction{QIcon(":/Images/Images/TestsRefresh.svg"), tr("Refresh"), this};
+	m_refreshTestsAction->setShortcut(QKeySequence::Refresh);
+	connect(m_refreshTestsAction, &QAction::triggered, this, &TestSuiteMainWindow::onTestsRefresh);
+
+	// --
+	//
+	m_runAction = new QAction{QIcon(":/Images/Images/TestsRun.svg"), tr("Run tests"), this};
+	QList<QKeySequence> runsKeys;
+	runsKeys << QKeySequence{Qt::CTRL | Qt::Key_R};
+	runsKeys << QKeySequence{Qt::CTRL | Qt::Key_F5};
+	m_runAction->setShortcuts(runsKeys);
+	connect(m_runAction, &QAction::triggered, this, &TestSuiteMainWindow::on_m_run_clicked);
+
+//	m_pauseAction = new QAction{QIcon(":/Images/Images/TestsPause.svg"), tr("Pause tests"), this};
+//	connect(m_pauseAction, &QAction::triggered, this, &SimWidget::pauseSimulation);
+
+	m_stopAction = new QAction{QIcon(":/Images/Images/TestsStop.svg"), tr("Stop tests"), this};
+	m_stopAction->setShortcut(Qt::SHIFT | Qt::Key_F5);
+	connect(m_stopAction, &QAction::triggered, this, &TestSuiteMainWindow::on_m_stop_clicked);
+
+	// --
+	//
+	m_timeIndicator = new QLabel;
+
+#if defined(Q_OS_WIN)
+		QFont f = QFont("Consolas");
+#else
+		QFont f = QFont("Courier");
+#endif
+	m_timeIndicator->setFont(f);
+	updateTimeIndicator(TestSuite::ControlStatus{});
+
+	// --
+	//
+//	m_toolBar->addAction(m_openProjectAction);
+//	m_toolBar->addAction(m_closeProjectAction);
+	m_toolBar->addAction(m_refreshTestsAction);
+
+	m_toolBar->addSeparator();
+	m_toolBar->addAction(m_runAction);
+	//m_toolBar->addAction(m_pauseAction);
+	m_toolBar->addAction(m_stopAction);
+
+	m_toolBar->addSeparator();
+	m_toolBar->addWidget(m_timeIndicator);
+
+	return;
 }
 
 void TestSuiteMainWindow::createActions()
@@ -390,22 +507,86 @@ void TestSuiteMainWindow::loadScriptsFromLocalPath()
 
 void TestSuiteMainWindow::clearTestsTree()
 {
-	ui->testsTree->clear();
+	m_testListWidget->clearTestsList();
 }
 
 void TestSuiteMainWindow::fillTestsTree()
 {
-	clearTestsTree();
+	m_testListWidget->updateTestsList(m_testScriptsStorage.scriptList());
+}
 
-	QStringList l = m_testScriptsStorage.scriptList();
+void TestSuiteMainWindow::updateActionsState()
+{
+	m_runAction->setEnabled(!m_testSuite.isRunning());
+	m_stopAction->setEnabled(m_testSuite.isRunning());
+}
 
-	for (const QString& fileName : l)
+void TestSuiteMainWindow::updateTimeIndicator(const TestSuite::ControlStatus& state)
+{
+using namespace std::chrono;
+
+	Q_ASSERT(m_timeIndicator);
+
+	milliseconds durration = duration_cast<milliseconds>(state.m_duration);
+
+	qint64 days = durration.count() / 1_day;
+	qint64 hours = (durration.count() % 1_day)  / 1_hour;
+	qint64 minutes = (durration.count() % 1_hour)  / 1_min;
+	qint64 seconds = (durration.count() % 1_min)  / 1_sec;
+	qint64 millisecond = durration.count() % 1_sec;
+
+	auto ms = duration_cast<milliseconds>(state.m_currentTime);
+	QDateTime utcOffset = QDateTime::currentDateTime();
+	TimeStamp plantTime{ms.count() + utcOffset.offsetFromUtc() * 1000};
+
+	QDateTime currentTime = plantTime.toDateTime();
+
+	if (currentTime.date().year() == 1970)
 	{
-		QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << fileName);
-		item->setCheckState(0, Qt::Checked);
-		ui->testsTree->addTopLevelItem(item);
-		item->setData(0, Qt::UserRole, fileName);
+		currentTime = QDateTime::currentDateTime();
 	}
+
+	QLocale locale;
+
+#if 1
+	// IF UNCOMMENTING THIS CODE
+	// and if you want to show milliseconds,
+	// THEN do not forget to send message more frequently
+	// in Sim::Control::processRun emit statusUpdate(ControlStatus{cd});
+	//
+	//        0d 00:20:03.580
+	//05/17/2020 15:18:59.335
+
+	QString dateText = QString("%6 %7")
+					   .arg(locale.toString(currentTime.date(),  QLocale::FormatType::ShortFormat))
+					   .arg(currentTime.toString(QStringLiteral("hh:mm:ss.zzz")));
+
+	QString text = tr("%1d %2:%3:%4.%5\n%6")
+					.arg(days, static_cast<int>(dateText.size()) - 14, 10, QChar(' '))
+					.arg(hours, 2, 10, QChar('0'))
+					.arg(minutes, 2, 10, QChar('0'))
+					.arg(seconds, 2, 10, QChar('0'))
+					.arg(millisecond, 3, 10, QChar('0'))
+					.arg(dateText);
+#else
+	//        0d 00:20:03
+	//05/17/2020 15:18:59
+
+	QString dateText = QString("%6 %7")
+					   .arg(locale.toString(currentTime.date(),  QLocale::FormatType::ShortFormat))
+					   .arg(currentTime.toString(QStringLiteral("hh:mm:ss")));
+
+	QString text = tr("%1d %2:%3:%4\n%6")
+					.arg(days, static_cast<int>(dateText.size()) - 10, 10, QChar(' '))
+					.arg(hours, 2, 10, QChar('0'))
+					.arg(minutes, 2, 10, QChar('0'))
+					.arg(seconds, 2, 10, QChar('0'))
+					.arg(dateText);
+#endif
+
+	m_timeIndicator->setText(text);
+
+	return;
 }
 
 bool TestSuiteMainWindow::eventFilter(QObject *object, QEvent *event)
@@ -455,23 +636,15 @@ void TestSuiteMainWindow::on_m_run_clicked()
 
 	// Create a list of tests user has selected to run
 	//
-	QStringList scriptsToExecute;
-
-	for (int i = 0; i < ui->testsTree->topLevelItemCount(); i++)
-	{
-		QTreeWidgetItem* item = ui->testsTree->topLevelItem(i);
-		if (item->checkState(0) == Qt::Checked)
-		{
-			QString fileName = item->data(0, Qt::UserRole).toString();
-			scriptsToExecute.push_back(fileName);
-		}
-	}
+	QStringList scriptsToExecute = m_testListWidget->selectedTests();
 
 	if (scriptsToExecute.isEmpty() == true)
 	{
 		QMessageBox::warning(this, qAppName(), tr("Please choose at least one test to run."));
 		return;
 	}
+
+	m_testLogTabPage->clearOutputLog();
 
 	// Run tests
 	//
@@ -480,6 +653,8 @@ void TestSuiteMainWindow::on_m_run_clicked()
 	{
 		return;
 	}
+
+	updateActionsState();
 }
 
 void TestSuiteMainWindow::on_m_stop_clicked()
@@ -590,6 +765,20 @@ void TestSuiteMainWindow::showAbout()
 	DialogAbout::show(this, text, ":/Images/Images/logo.png");
 }
 
+void TestSuiteMainWindow::onTestsRefresh()
+{
+	// Reload scripts that displayed by the user interface. Actual executed scripts are loaded at testing start.
+	//
+	if (theSettings.useLocalScriptsPath() == true)
+	{
+		loadScriptsFromLocalPath();
+	}
+	else
+	{
+		loadScriptsFromConfiguration();
+	}
+}
+
 void TestSuiteMainWindow::onConfigurationArrived()
 {
 	if (theSettings.useLocalScriptsPath() == false)
@@ -602,69 +791,7 @@ void TestSuiteMainWindow::onConfigurationArrived()
 
 void TestSuiteMainWindow::onTestingFinished(int result)
 {
-
+	updateActionsState();
 }
-
-void TestSuiteMainWindow::onAppLogError(const QString& errMsg)
-{
-	ui->appLog->moveCursor (QTextCursor::End);
-	ui->appLog->insertPlainText(errMsg);
-	ui->appLog->insertPlainText("\n");
-	ui->appLog->moveCursor (QTextCursor::End);
-
-	return;
-}
-
-void TestSuiteMainWindow::onAppLogWarning(const QString& msg)
-{
-	ui->appLog->moveCursor (QTextCursor::End);
-	ui->appLog->insertPlainText(msg);
-	ui->appLog->insertPlainText("\n");
-	ui->appLog->moveCursor (QTextCursor::End);
-}
-
-void TestSuiteMainWindow::onAppLogMessage(const QString& msg)
-{
-	ui->appLog->moveCursor (QTextCursor::End);
-	ui->appLog->insertPlainText(msg);
-	ui->appLog->insertPlainText("\n");
-	ui->appLog->moveCursor (QTextCursor::End);
-}
-
-void TestSuiteMainWindow::onAppLogText(const QString& msg)
-{
-	ui->appLog->moveCursor (QTextCursor::End);
-	ui->appLog->insertPlainText(msg);
-	ui->appLog->insertPlainText("\n");
-	ui->appLog->moveCursor (QTextCursor::End);
-}
-
-void TestSuiteMainWindow::onTestLogError(const QString& errMsg)
-{
-	ui->testLog->moveCursor (QTextCursor::End);
-	ui->testLog->insertPlainText(errMsg);
-	ui->testLog->insertPlainText("\n");
-	ui->testLog->moveCursor (QTextCursor::End);
-
-	return;
-}
-
-void TestSuiteMainWindow::onTestLogWarning(const QString& msg)
-{
-	ui->testLog->moveCursor (QTextCursor::End);
-	ui->testLog->insertPlainText(msg);
-	ui->testLog->insertPlainText("\n");
-	ui->testLog->moveCursor (QTextCursor::End);
-}
-
-void TestSuiteMainWindow::onTestLogMessage(const QString& msg)
-{
-	ui->testLog->moveCursor (QTextCursor::End);
-	ui->testLog->insertPlainText(msg);
-	ui->testLog->insertPlainText("\n");
-	ui->testLog->moveCursor (QTextCursor::End);
-}
-
-
 
 TestSuiteMainWindow* theMainWindow = nullptr;

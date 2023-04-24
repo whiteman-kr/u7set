@@ -1,5 +1,9 @@
 <RCC>
     <qresource prefix="/Images">
         <file>Images/logo.png</file>
+        <file>Images/TestsPause.svg</file>
+        <file>Images/TestsRefresh.svg</file>
+        <file>Images/TestsRun.svg</file>
+        <file>Images/TestsStop.svg</file>
     </qresource>
 </RCC>

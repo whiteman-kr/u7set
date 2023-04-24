@@ -38,6 +38,10 @@ public:
 
 	QString localAppDataPath();
 
+	//
+	const QStringList& outputSearchCompleter() const;
+	QStringList& outputSearchCompleter();
+
 public:
 	int m_requestInterval = 100;
 
@@ -49,6 +53,9 @@ public:
 	QPoint m_mainWindowPos;
 	QByteArray m_mainWindowGeometry;
 	QByteArray m_mainWindowState;		// Toolbars/dock's
+
+private:
+	QStringList m_outputSerachCompleter;
 
 private:
 

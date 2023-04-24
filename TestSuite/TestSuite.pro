@@ -47,7 +47,11 @@ SOURCES += \
     ../lib/Ui/DialogAbout.cpp \
     ../lib/Ui/DialogAlert.cpp \
     ../lib/Ui/DialogTcpStatistics.cpp \
+    ../lib/Ui/TabWidgetEx.cpp \
     AppConfigSettings.cpp \
+    AppLogOutputWidget.cpp \
+    TestListWidget.cpp \
+    TestLogTabPage.cpp \
     TestSuiteDialogSettings.cpp \
     TestSuiteLog.cpp \
     main.cpp \
@@ -58,14 +62,17 @@ HEADERS += \
     ../lib/Ui/DialogAbout.h \
     ../lib/Ui/DialogAlert.h \
     ../lib/Ui/DialogTcpStatistics.h \
+    ../lib/Ui/TabWidgetEx.h \
     AppConfigSettings.h \
+    AppLogOutputWidget.h \
+    TestListWidget.h \
+    TestLogTabPage.h \
     TestSuiteDialogSettings.h \
     TestSuiteLog.h \
     TestSuiteMainWindow.h
 
 FORMS += \
-    TestSuiteDialogSettings.ui \
-    TestSuiteMainWindow.ui
+    TestSuiteDialogSettings.ui
 
 # Add curent dir to a list of library directory paths
 #

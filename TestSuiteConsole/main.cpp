@@ -72,6 +72,20 @@ public:
 	bool writeText(const QString& text) override	{	qInfo() << text;		return Log::LogFile::writeText(text);	}
 };
 
+class ConsoleTestLog : public TestSuite::ITestLogOutput
+{
+public:
+	virtual void logItemArrived(const TestSuite::TestLogItem& item) override
+	{
+		switch(item.type())
+		{
+		case TestSuite::TestLogItemType::Error:	qCritical() << item.toText();	break;
+		case TestSuite::TestLogItemType::Warning:	qWarning() << item.toText();	break;
+		case TestSuite::TestLogItemType::Message:	qInfo() << item.toText();		break;
+		}
+	}
+};
+
 struct CommandLineArgs
 {
 	QString settingsFileName;
@@ -183,7 +197,7 @@ int main(int argc, char* argv[])
 	// --
 	//
 	ConsoleLogFile appLog{qAppName(), QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + settings.instanceStrId()};
-	TestSuite::ConsoleTestLog testLog;
+	ConsoleTestLog testLog;
 
 	SoftwareInfo softwareInfo{E::SoftwareType::TestSuite, settings.instanceStrId(), MajorVersion, MinorVersion, buildNo};
 

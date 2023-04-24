@@ -35,6 +35,7 @@
 #include <QAbstractItemModel>
 #include <QAbstractTableModel>
 #include <QSortFilterProxyModel>
+#include <QToolBar>
 #include <QHeaderView>
 #include <QSettings>
 #include <QXmlStreamReader>
@@ -67,6 +68,9 @@
 #include <QMouseEvent>
 #include <QtQml>
 #include <QFileDialog>
+#include <QDockWidget>
+#include <QTextBrowser>
+#include <QCompleter>
 
 #ifdef _MSC_VER
 	#pragma warning(pop)

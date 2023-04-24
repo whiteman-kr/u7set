@@ -2,6 +2,7 @@
 
 #include "../UtilsLib/LogFile.h"
 #include "../TestSuiteLib/TestLog.h"
+#include <queue>
 
 class TestSuiteLogFile : public Log::LogFile
 {
@@ -14,25 +15,26 @@ public:
 	bool writeWarning(const QString& text) override;
 	bool writeMessage(const QString& text) override;
 	bool writeText(const QString& text) override;
-
-signals:
-	void errorArrived(const QString& text);
-	void warningArrived(const QString& text);
-	void messageArrived(const QString& text);
-	void textArrived(const QString& text);
 };
 
-class TestSuiteTestLog : public QObject, public TestSuite::ITestLog
+class TestSuiteTestLogOutput : public TestSuite::ITestLogOutput
 {
-	Q_OBJECT
 public:
-	void writeError(const QString& text) override;
-	void writeWarning(const QString& text) override;
-	void writeMessage(const QString& text) override;
+	TestSuiteTestLogOutput();
 
-signals:
-	void errorArrived(const QString& text);
-	void warningArrived(const QString& text);
-	void messageArrived(const QString& text);
+public:
+	QString htmlFont() const;
+	void setHtmlFont(QString fontName);
+
+	bool queueIsEmpty() const;
+	void popQueue(std::vector<TestSuite::TestLogItem> *out, int maxCount);
+
+private:
+	void logItemArrived(const TestSuite::TestLogItem& item) override;
+
+private:
+	mutable QReadWriteLock m_lock;
+	std::queue<TestSuite::TestLogItem> m_itemsQueue;
+	QString m_htmlFont;
 };
 
