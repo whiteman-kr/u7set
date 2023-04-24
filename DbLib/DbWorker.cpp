@@ -5124,8 +5124,6 @@ void DbWorker::slot_getCheckedOutSignalsIDs(QVector<int>* signalsIDs)
 	return;
 }
 
-
-
 void DbWorker::getSignalData(QSqlQuery& q, AppSignal& s)
 {
 	// indexes of SignalData's fields
@@ -5173,9 +5171,11 @@ void DbWorker::getSignalData(QSqlQuery& q, AppSignal& s)
 	s.setChangesetID(q.value(SD_CHANGESET_ID).toInt());
 	s.setCheckedOut(q.value(SD_CHECKEDOUT).toBool());
 	s.setUserID(q.value(SD_USER_ID).toInt());
+
 	s.setCreated(q.value(SD_CREATED).toDateTime());
 	s.setDeleted(q.value(SD_DELETED).toBool());
 	s.setInstanceCreated(q.value(SD_INSTANCE_CREATED).toDateTime());
+
 	s.setInstanceAction(static_cast<E::VcsItemAction>(q.value(SD_INSTANCE_ACTION).toInt()));
 
 	s.setIsLoaded(true);
@@ -5285,8 +5285,9 @@ bool DbWorker::addSignal(E::SignalType signalType, QVector<AppSignal>* newSignal
 		AppSignal& signal = (*newSignal)[i];
 
 		signal.setID(signalID);
+
 		signal.setCreated(QDateTime::currentDateTime());
-		signal.setInstanceCreated(QDateTime::currentDateTime());
+		signal.setInstanceCreated(signal.createdMcs());
 
 		ObjectState objectState;
 		QString errMsg;

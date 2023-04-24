@@ -126,12 +126,12 @@ std::vector<AppSignal*>::const_iterator AppSignals::end() const
 	return m_signals.end();
 }
 
-
 // -------------------------------------------------------------------------------
 //
 // AppDataSource class implementation
 //
 // -------------------------------------------------------------------------------
+
 AppDataSource::AppDataSource(const DataSource& dataSource) :
 	m_signalStatesQueue(3)
 {

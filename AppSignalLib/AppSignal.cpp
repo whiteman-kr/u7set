@@ -1223,6 +1223,16 @@ void AppSignal::loadProtoData(const Proto::ProtoAppSignalData& protoData)
 	setTagsStr(QString::fromStdString(protoData.tags()));
 }
 
+QDateTime AppSignal::created() const
+{
+	return QDateTime::fromMSecsSinceEpoch(m_createdMcs / 1000);;
+}
+
+QDateTime AppSignal::instanceCreated() const
+{
+	return QDateTime::fromMSecsSinceEpoch(m_instanceCreatedMcs / 1000);;
+}
+
 Address16 AppSignal::ioBufAddr() const
 {
 	return m_ioBufAddr;
@@ -1691,9 +1701,9 @@ void AppSignal::saveToProto(Proto::AppSignal* s) const
 		dbField->set_changesetid(m_changesetID);
 		dbField->set_checkedout(m_checkedOut);
 		dbField->set_userid(m_userID);
-		dbField->set_created(m_created.toMSecsSinceEpoch());
+		dbField->set_created(m_createdMcs);
 		dbField->set_deleted(m_deleted);
-		dbField->set_instancecreated(m_instanceCreated.toMSecsSinceEpoch());
+		dbField->set_instancecreated(m_instanceCreatedMcs);
 		dbField->set_instanceaction(static_cast<int>(m_instanceAction));
 	}
 	else
@@ -1909,9 +1919,9 @@ void AppSignal::loadFromProto(const Proto::AppSignal& s)
 	m_changesetID = dbField.changesetid();
 	m_checkedOut = dbField.checkedout();
 	m_userID = dbField.userid();
-	m_created.setMSecsSinceEpoch(dbField.created());
+	m_createdMcs = dbField.created();
 	m_deleted = dbField.deleted();
-	m_instanceCreated.setMSecsSinceEpoch(dbField.instancecreated());
+	m_instanceCreatedMcs = dbField.instancecreated();
 	m_instanceAction = static_cast<E::VcsItemAction>(dbField.instanceaction());
 
 	// Signal properties calculated in compile-time
@@ -2051,8 +2061,8 @@ QString AppSignal::removeNumberSign(const QString& appSignalID)
 
 void AppSignal::initCreatedDates()
 {
-	m_created = QDateTime::currentDateTime();
-	m_instanceCreated = QDateTime::currentDateTime();
+	m_createdMcs = QDateTime::currentDateTime().toMSecsSinceEpoch() * 1000;
+	m_instanceCreatedMcs = QDateTime::currentDateTime().toMSecsSinceEpoch() * 1000;
 }
 
 bool AppSignal::isCompatibleFormatPrivate(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder, const QString& busTypeID) const
