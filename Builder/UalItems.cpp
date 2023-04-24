@@ -1690,9 +1690,10 @@ namespace Builder
 		return isCompatible(destSignal->signal(), log);
 	}
 
-	void UalSignal::setReceivedOptoAppSignalID(const QString& recvAppSignalID)
+	void UalSignal::setReceivedOptoAppSignalID(const QString& recvAppSignalID, const UalReceiver* ualReceiver)
 	{
 		m_receivedOptoAppSignalID = recvAppSignalID;
+		m_ualReceiver = ualReceiver;
 		m_isOptoSignal = true;
 	}
 

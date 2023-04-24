@@ -507,8 +507,9 @@ namespace Builder
 		bool isTunable() const { return m_isTunable; }
 
 		bool isOptoSignal() const { return m_isOptoSignal; }
-		void setReceivedOptoAppSignalID(const QString& recvAppSignalID);
+		void setReceivedOptoAppSignalID(const QString& recvAppSignalID, const UalReceiver* ualReceiver);
 		QString receivedOptoAppSignalID() const { return m_receivedOptoAppSignalID; }
+		const UalReceiver* ualReceiver() const { return m_ualReceiver; }
 
 		bool isSource() const { return m_isInput || m_isTunable || m_isOptoSignal || m_isConst; }
 
@@ -622,6 +623,7 @@ namespace Builder
 		bool m_isTunable = false;
 		bool m_isOptoSignal = false;
 		QString m_receivedOptoAppSignalID;
+		const UalReceiver* m_ualReceiver = nullptr;
 
 		bool m_isOutput = false;
 		bool m_isAcquired = false;

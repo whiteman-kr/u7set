@@ -1763,7 +1763,7 @@ namespace Builder
 			return false;
 		}
 
-		ualSignal->setReceivedOptoAppSignalID(receivedAppSignalID);
+		ualSignal->setReceivedOptoAppSignalID(receivedAppSignalID, ualItem->ualReceiver());
 
 		result &= linkConnectedItems(ualItem, outPin, ualSignal);
 
@@ -3150,7 +3150,15 @@ namespace Builder
 				continue;
 			}
 
-			QStringList refSignalIDs = optoSignal->refSignalIDs();
+			//QStringList refSignalIDs = optoSignal->refSignalIDs();
+
+			const UalReceiver* receiver = optoSignal->ualReceiver();
+
+			TEST_PTR_CONTINUE(receiver);
+
+			receiver->sdfsdfsdfsdfsdf
+
+			QStringList nearestSignalsIDs = getNearestOutSignalIDs(, &nearestSignalsIDs);
 
 			for(const QString& refSignalID : refSignalIDs)
 			{
