@@ -62,6 +62,8 @@ public:
 	void setState(const TuningSignalState& state, Hash tuningServiceHash) override;
 	void setStates(const std::vector<TuningSignalState>& states, Hash tuningServiceHash) override;
 
+	bool hasUnappliedSignals() const;
+
 private:
 	void notifySignalParamsUpdated() override;
 
@@ -128,8 +130,9 @@ private:
 
 	// States storage
 	//
-	mutable QReadWriteLock m_statesLocker;
+	mutable QReadWriteLock m_statesLocker;	// For access to m_states and m_unappliedStates
 	std::unordered_map<Hash, Sources, VoidHasher<Hash>> m_states;
+	std::set<Hash> m_unappliedStates;
 };
 
 

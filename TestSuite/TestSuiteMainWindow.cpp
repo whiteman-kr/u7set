@@ -1,5 +1,4 @@
 #include "TestSuiteMainWindow.h"
-#include "ui_TestSuiteMainWindow.h"
 #include "AppConfigSettings.h"
 #include "TestSuiteDialogSettings.h"
 #include "../UtilsLib/Ui/UiTools.h"

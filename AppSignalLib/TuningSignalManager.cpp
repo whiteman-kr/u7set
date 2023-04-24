@@ -277,6 +277,7 @@ void TuningSignalManager::reset()
 	{
 		QWriteLocker l(&m_statesLocker);
 		m_states.clear();
+		m_unappliedStates.clear();
 	}
 
 	return;
@@ -326,6 +327,8 @@ void TuningSignalManager::invalidateSignalStates(Hash tuningServiceHash)
 	{
 		p.second.invalidateSource(tuningServiceHash);
 	}
+
+	m_unappliedStates.clear();
 
 	return;
 }
@@ -390,6 +393,14 @@ void TuningSignalManager::setStates(const std::vector<TuningSignalState>& states
 						unsuccessfulWrites.push_back({currentSources.getUnappliedValue(), arrivedState.hash(), arrivedState.writeErrorCode()});
 					}
 				}
+
+				// If value was unapplied and became fully applied - clear its hash from unapplied states set
+				//
+				if (currentSources.isValueUnapplied() == false)
+				{
+					//qDebug() << "-Unapplied: " << arrivedState.hash();
+					m_unappliedStates.erase(arrivedState.hash());
+				}
 			}
 		}
 
@@ -426,6 +437,12 @@ void TuningSignalManager::setStates(const std::vector<TuningSignalState>& states
 	return;
 }
 
+bool TuningSignalManager::hasUnappliedSignals() const
+{
+	QWriteLocker l(&m_statesLocker);
+	return m_unappliedStates.empty() == false;
+}
+
 void TuningSignalManager::notifySignalParamsUpdated()
 {
 	emit signalsLoaded();
@@ -440,7 +457,14 @@ void TuningSignalManager::setUnappliedValue(Hash hash, const TuningValue& value)
 	{
 		Sources& sources = foundState->second;
 		sources.setUnappliedValue(value);
+
+		if (sources.isValueUnapplied() == true)
+		{
+			//qDebug() << "+Unapplied: " << hash;
+			m_unappliedStates.insert(hash);
+		}
 	}
+
 }
 
 TuningValue TuningSignalManager::unappliedValue(Hash hash) const

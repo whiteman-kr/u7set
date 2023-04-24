@@ -107,10 +107,6 @@ namespace TestSuite
 
 	bool TunsOutputController::waitForAllSignalsWritten(qint64 timeoutMs) const
 	{
-		int create_a_writing_queue_in_connnection = 1;
-
-		std::vector<Hash> hashes{m_signalManager.signalHashes()};
-
 		qint64 nsecs = static_cast<qint64>(timeoutMs) * 1'000'000;
 
 		QElapsedTimer timer;
@@ -118,12 +114,7 @@ namespace TestSuite
 
 		while (QThread::currentThread()->isInterruptionRequested() == false)
 		{
-			bool allApplied = std::all_of(hashes.cbegin(), hashes.cend(), [this](Hash hash)
-			{
-					return m_signalManager.isUnapplied(hash) == false;
-			});
-
-			if (allApplied == true)
+			if (m_signalManager.hasUnappliedSignals() == false)
 			{
 				return true;
 			}
