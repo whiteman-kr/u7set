@@ -2,7 +2,7 @@
 #define SVGEDITOR_H
 
 #include "../lib/PropertyEditor.h"
-#include "CodeEditor.h"
+#include "../lib/CodeEditor.h"
 
 class SvgWidget : public QWidget
 {

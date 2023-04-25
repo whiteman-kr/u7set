@@ -30,6 +30,7 @@ enum class DbDir
 	EtcDir,						// $root$/ETC
 	TestsDir,					// $root$/Tests
 	SimTestsDir,				// $root$/Tests/SimTests
+	HardwareTestsDir,			// $root$/Tests/HadrwareTestsDir
 	DiagSignalTypesDir			// $root$/DiagSignalTypes
 };
 
@@ -76,6 +77,7 @@ namespace Db
 				{DbDir::EtcDir, QStringLiteral("$root$/ETC")},									// ETC
 				{DbDir::TestsDir, QStringLiteral("$root$/Tests")},								// Tests
 				{DbDir::SimTestsDir, QStringLiteral("$root$/Tests/SimTests")},					// Simulator based tests
+				{DbDir::HardwareTestsDir, QStringLiteral("$root$/Tests/HardwareTests")},		// Hardware tests
 				{DbDir::DiagSignalTypesDir, QStringLiteral("$root$/DiagSignalTypes")},			// Signal types for diagnostcics signals
 			};
 

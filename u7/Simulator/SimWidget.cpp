@@ -553,7 +553,7 @@ using namespace std::chrono;
 					   .arg(currentTime.toString(QStringLiteral("hh:mm:ss.zzz")));
 
 	QString text = tr("%1d %2:%3:%4.%5\n%6")
-					.arg(days, dateText.size() - 14, 10, QChar(' '))
+					.arg(days, static_cast<int>(dateText.size() - 14), 10, QChar(' '))
 					.arg(hours, 2, 10, QChar('0'))
 					.arg(minutes, 2, 10, QChar('0'))
 					.arg(seconds, 2, 10, QChar('0'))

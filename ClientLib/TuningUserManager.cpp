@@ -4,17 +4,20 @@
 
 #include "TuningUserManager.h"
 
-#include <QCoreApplication>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QPushButton>
-#include <QMessageBox>
-
 #ifdef Q_OS_WIN
 #include <windows.h>
 #include <lm.h>
 #endif
+
+#include <QCoreApplication>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QComboBox>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QMessageBox>
+#include <QDateTime>
 
 namespace
 {

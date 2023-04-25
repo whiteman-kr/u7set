@@ -341,7 +341,7 @@ void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
 
 void CodeEditor::keyPressEvent(QKeyEvent* e)
 {
-    if (m_autoIndent == true &&
+	if (m_autoIndent == true && qApp->keyboardModifiers() == Qt::NoModifier &&
             (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return || e->text() == "}"))
     {
         QString documentContents = document()->toPlainText();

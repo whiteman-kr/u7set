@@ -1629,6 +1629,13 @@ namespace Tcp
 		Q_UNUSED(replyDataSize);
 	}
 
+	ConnectionState Client::getConnectionState() const
+	{
+		ConnectionState state = SocketWorker::getConnectionState();
+		state.serverEquipmentID = connectToServerID();
+		return state;
+	}
+
 	bool Client::isClearToSendRequest() const
 	{
 		AUTO_LOCK(m_mutex);

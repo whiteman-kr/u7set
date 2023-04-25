@@ -71,13 +71,18 @@ namespace ClientLib
 		void requestSignalState(int startIndex);
 		void processSignalState(const QByteArray& data);
 
+	public:
+		bool signalParamsLoaded() const;
+
 	private:
 		SoftwareEndpoint::AppDataService m_serverSettings;
 		IAppSignalUpdater& m_signalUpdater;
 
-		// Cache protobug messages
+		// Cache protobuf messages
 		//
 	private:
+		std::atomic<bool> m_signalParamsLoaded{false};
+
 		::Network::GetSignalListStartReply m_getSignalListStartReply;
 
 		::Network::GetSignalListNextRequest m_getSignalListNextRequest;

@@ -16,11 +16,11 @@ public:
 class ILogFileStub : public ILogFile
 {
 public:
-	virtual bool writeAlert(const QString&) override { return true; };
-	virtual bool writeError(const QString&)  override { return true; };
-	virtual bool writeWarning(const QString&) override { return true; };
-	virtual bool writeMessage(const QString&) override { return true; };
-	virtual bool writeText(const QString&)  override { return true; };
+	virtual bool writeAlert(const QString&) override { return true; }
+	virtual bool writeError(const QString&)  override { return true; }
+	virtual bool writeWarning(const QString&) override { return true; }
+	virtual bool writeMessage(const QString&) override { return true; }
+	virtual bool writeText(const QString&)  override { return true; }
 };
 
 

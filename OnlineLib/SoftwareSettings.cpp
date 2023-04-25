@@ -349,6 +349,9 @@ std::shared_ptr<SoftwareSettings> SoftwareSettingsSet::createAppropriateSettings
 	case E::SoftwareType::TestClient:
 		return std::make_shared<TestClientSettings>();
 
+	case E::SoftwareType::TestSuite:
+		return std::make_shared<TestSuiteSettings>();
+
 	case E::SoftwareType::ServiceControlManager:
 	case E::SoftwareType::Unknown:
 	case E::SoftwareType::BaseService:
@@ -1782,4 +1785,157 @@ bool TuningClientSettings::connectionChanged(const TuningClientSettings& src) co
 	}
 
 	return false;
+}
+
+// -------------------------------------------------------------------------------------
+//
+// MonitorSettings class implementation
+//
+// -------------------------------------------------------------------------------------
+
+bool TestSuiteSettings::writeToXml(XmlWriteHelper& xml) const
+{
+	writeStartSettings(xml);
+
+	//
+
+	xml.writeStringElement(EquipmentPropNames::CFG_SERVICE_ID1, cfgServiceID1);
+	xml.writeHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
+							 EquipmentPropNames::CFG_SERVICE_PORT1, cfgServiceIP1);
+
+	xml.writeStringElement(EquipmentPropNames::CFG_SERVICE_ID2, cfgServiceID2);
+	xml.writeHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP2,
+							 EquipmentPropNames::CFG_SERVICE_PORT2, cfgServiceIP2);
+
+	//
+
+	xml.writeStartElement(XmlElement::APP_DATA_SERVICES);
+	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(appDataServices.size()));
+
+	for(const SoftwareEndpoint::AppDataService& ads : appDataServices)
+	{
+		xml.writeStartElement(XmlElement::APP_DATA_SERVICE);
+
+		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, ads.equipmentId);
+		xml.writeHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP, EquipmentPropNames::CLIENT_REQUEST_PORT, ads.address);
+		xml.writeHostAddressPort(EquipmentPropNames::RT_TRENDS_REQUEST_IP, EquipmentPropNames::RT_TRENDS_REQUEST_PORT, ads.realtimeAddress);
+
+		xml.writeEndElement();		// </AppDataService>
+	}
+
+	xml.writeEndElement();		// </AppDataServices>
+
+	//
+
+	xml.writeStartElement(XmlElement::TUNING_SERVICES);
+	xml.writeBoolAttribute(EquipmentPropNames::TUNING_ENABLE, tuningEnabled);
+	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(tuningServices.size()));
+
+	for(const auto& tsc : tuningServices)
+	{
+		xml.writeStartElement(XmlElement::TUNING_SERVICE);
+
+		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, tsc.equipmentId);
+		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, tsc.clientRequestAddress.addressStr());
+		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, tsc.clientRequestAddress.port());
+		xml.writeStringListAttribute(XmlAttribute::DRIVEN_SOURCES, tsc.drivenSources);
+
+		xml.writeEndElement();		// </TuningService>
+	}
+
+	xml.writeEndElement();		// </TuningServices>
+
+	//
+
+	writeEndSettings(xml);;			// </Settings>
+
+	return true;
+}
+
+bool TestSuiteSettings::readFromXml(XmlReadHelper& xml)
+{
+	clear();
+
+	bool result = true;
+
+	result = startSettingsReading(xml);
+
+	RETURN_IF_FALSE(result);
+
+	//
+
+	result &= xml.readStringElement(EquipmentPropNames::CFG_SERVICE_ID1, &cfgServiceID1, true);
+	result &= xml.readHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
+									  EquipmentPropNames::CFG_SERVICE_PORT1, &cfgServiceIP1);
+
+	result &= xml.readStringElement(EquipmentPropNames::CFG_SERVICE_ID2, &cfgServiceID2, true);
+	result &= xml.readHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP2,
+									  EquipmentPropNames::CFG_SERVICE_PORT2, &cfgServiceIP2);
+	//
+
+	result &= xml.findElement(XmlElement::APP_DATA_SERVICES);
+
+	RETURN_IF_FALSE(result);
+
+	int count = 0;
+
+	result &= xml.readIntAttribute(XmlAttribute::COUNT, &count);
+
+	appDataServices.clear();
+
+	for(int i = 0; i < count; i++)
+	{
+		SoftwareEndpoint::AppDataService ads;
+
+		result &= xml.findElement(XmlElement::APP_DATA_SERVICE);
+
+		result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &ads.equipmentId);
+		result &= xml.readHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
+										  EquipmentPropNames::CLIENT_REQUEST_PORT, &ads.address);
+		result &= xml.readHostAddressPort(EquipmentPropNames::RT_TRENDS_REQUEST_IP,
+										  EquipmentPropNames::RT_TRENDS_REQUEST_PORT, &ads.realtimeAddress);
+
+
+		appDataServices.push_back(ads);
+	}
+
+	//
+
+	result &= xml.findElement(XmlElement::TUNING_SERVICES);
+
+	RETURN_IF_FALSE(result);
+
+	result &= xml.readBoolAttribute(EquipmentPropNames::TUNING_ENABLE, &tuningEnabled);
+
+	count = 0;
+
+	result &= xml.readIntAttribute(XmlAttribute::COUNT, &count);
+
+	tuningServices.clear();
+
+	for(int i = 0; i < count; i++)
+	{
+		SoftwareEndpoint::TuningService tsc;
+
+		result &= xml.findElement(XmlElement::TUNING_SERVICE);
+
+		QString clientRequestAddress;
+		int clientRequestPort = 0;
+
+		result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &tsc.equipmentId);
+		result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &clientRequestAddress);
+		result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestPort);
+		result &= xml.readStringListAttribute(XmlAttribute::DRIVEN_SOURCES, &tsc.drivenSources);
+
+		tsc.clientRequestAddress = {clientRequestAddress, clientRequestPort};
+
+		tuningServices.push_back(tsc);
+	}
+
+	return result;
+}
+
+void TestSuiteSettings::clear()
+{
+	*this = TestSuiteSettings{};
 }

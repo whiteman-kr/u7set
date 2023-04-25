@@ -129,6 +129,8 @@ namespace ClientLib
 		QThread::msleep(RequestTimeInterval);
 
 		m_signalList.clear();
+		m_signalParamsLoaded.store(false);
+
 		m_lastSignalParamStartIndex = 0;
 		m_lastSignalStateStartIndex = 0;
 
@@ -214,6 +216,7 @@ namespace ClientLib
 			Q_ASSERT(m_getSignalListStartReply.partcount() == 0);
 
 			m_signalList.clear();
+			m_signalParamsLoaded.store(false);
 
 			// request params
 			//
@@ -223,6 +226,7 @@ namespace ClientLib
 
 		m_signalList.clear();
 		m_signalList.reserve(m_getSignalListStartReply.totalitemcount());
+		m_signalParamsLoaded.store(false);
 
 		requestSignalListNext(0);
 
@@ -332,6 +336,10 @@ namespace ClientLib
 		if (startIndex >= std::ssize(m_signalList))
 		{
 			m_signalUpdater.notifySignalParamsUpdated();
+
+			// Set flag that all signal params were loaded
+			//
+			m_signalParamsLoaded.store(true);
 
 			resetToGetState(true);	// END OF RECEIVING SIGNALS PARAMS,
 			// Here the new loop starts!!!
@@ -527,6 +535,11 @@ namespace ClientLib
 
 		resetToGetState(false);
 		return;
+	}
+
+	bool TcpSignalClient::signalParamsLoaded() const
+	{
+		return m_signalParamsLoaded.load();
 	}
 
 }

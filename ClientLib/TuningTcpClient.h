@@ -8,9 +8,8 @@
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"
 #include "../OnlineLib/SoftwareSettings.h"
-#include "../UtilsLib/LogFile.h"
 #include "TuningSourceState.h"
-#include "TuningLog.h"
+#include "ITuningLog.h"
 
 //
 //		TDS_GET_TUNING_SOURCES_INFO
@@ -96,7 +95,7 @@ namespace ClientLib
 						const SoftwareEndpoint::TuningService& tunsInfo,
 						ITuningSignalUpdater& signalUpdater,
 						ILogFile* log,
-						TuningLog::TuningLog* tuningLog);
+						ITuningLog* tuningLog);
 
 		virtual ~TuningTcpClient();
 
@@ -205,7 +204,7 @@ namespace ClientLib
 		// Data
 		//
 		HasLogFile m_logFile;
-		TuningLog::TuningLog* m_tuningLog = nullptr;
+		ITuningLog* m_tuningLog = nullptr;
 
 		const Hash m_tuningServiceHash = UNDEFINED_HASH;
 

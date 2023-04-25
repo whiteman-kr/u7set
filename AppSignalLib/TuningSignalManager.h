@@ -2,6 +2,7 @@
 #define TUNINGSIGNALMANAGER_H
 
 #include <unordered_map>
+#include <condition_variable>
 #include <QReadWriteLock>
 
 #include "../AppSignalLib/ITuningSignalUpdater.h"
@@ -61,6 +62,8 @@ public:
 
 	void setState(const TuningSignalState& state, Hash tuningServiceHash) override;
 	void setStates(const std::vector<TuningSignalState>& states, Hash tuningServiceHash) override;
+
+	bool waitForAllApplied(std::chrono::milliseconds timeout) const;
 
 private:
 	void notifySignalParamsUpdated() override;
@@ -128,8 +131,11 @@ private:
 
 	// States storage
 	//
-	mutable QReadWriteLock m_statesLocker;
+	mutable std::mutex m_statesMutex;								// For access to m_states and m_unappliedStates
+	mutable std::condition_variable m_allStatesApplied;
+
 	std::unordered_map<Hash, Sources, VoidHasher<Hash>> m_states;
+	std::set<Hash> m_unappliedStates;
 };
 
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CodeEditor.h"
+#include "../lib/CodeEditor.h"
 #include "../lib/PropertyEditor.h"
 #include "../lib/PropertyTable.h"
 #include "../lib/Tuning/TuningFilterEditor.h"

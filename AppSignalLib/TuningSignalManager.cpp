@@ -187,7 +187,7 @@ TuningSignalState TuningSignalManager::state(Hash hash, bool* found) const
 		return TuningSignalState();
 	}
 
-	QReadLocker l(&m_statesLocker);
+	std::scoped_lock l(m_statesMutex);
 
 	auto foundState = m_states.find(hash);
 
@@ -223,7 +223,7 @@ TuningSignalState TuningSignalManager::state(Hash hash, Hash tuningServiceHash, 
 		return TuningSignalState();
 	}
 
-	QReadLocker l(&m_statesLocker);
+	std::scoped_lock l(m_statesMutex);
 
 	auto foundState = m_states.find(hash);
 
@@ -275,8 +275,11 @@ void TuningSignalManager::reset()
 	}
 
 	{
-		QWriteLocker l(&m_statesLocker);
+		std::scoped_lock l(m_statesMutex);
 		m_states.clear();
+
+		m_unappliedStates.clear();
+		m_allStatesApplied.notify_all();
 	}
 
 	return;
@@ -320,12 +323,15 @@ std::vector<Hash> TuningSignalManager::signalHashes(const std::vector<Hash> lmEq
 
 void TuningSignalManager::invalidateSignalStates(Hash tuningServiceHash)
 {
-	QWriteLocker l(&m_statesLocker);
+	std::scoped_lock l(m_statesMutex);
 
 	for (auto& p : m_states)
 	{
 		p.second.invalidateSource(tuningServiceHash);
 	}
+
+	m_unappliedStates.clear();
+	m_allStatesApplied.notify_all();
 
 	return;
 }
@@ -347,7 +353,7 @@ void TuningSignalManager::setStates(const std::vector<TuningSignalState>& states
 	std::vector<UnsuccessfulWrite> unsuccessfulWrites;
 
 	{
-		QWriteLocker l(&m_statesLocker);
+		std::scoped_lock l(m_statesMutex);
 
 		// If writing has been finished - set new values as applied or display a writing error
 		//
@@ -390,6 +396,19 @@ void TuningSignalManager::setStates(const std::vector<TuningSignalState>& states
 						unsuccessfulWrites.push_back({currentSources.getUnappliedValue(), arrivedState.hash(), arrivedState.writeErrorCode()});
 					}
 				}
+
+				// If value was unapplied and became fully applied - clear its hash from unapplied states set
+				//
+				if (currentSources.isValueUnapplied() == false)
+				{
+					//qDebug() << "-Unapplied: " << arrivedState.hash();
+					m_unappliedStates.erase(arrivedState.hash());
+
+					if (m_unappliedStates.empty() == true)
+					{
+						m_allStatesApplied.notify_all();
+					}
+				}
 			}
 		}
 
@@ -426,6 +445,12 @@ void TuningSignalManager::setStates(const std::vector<TuningSignalState>& states
 	return;
 }
 
+bool TuningSignalManager::waitForAllApplied(std::chrono::milliseconds timeout) const
+{
+	std::unique_lock l(m_statesMutex);
+	return m_allStatesApplied.wait_for(l, timeout, [this]() { return m_unappliedStates.empty() == true; });
+}
+
 void TuningSignalManager::notifySignalParamsUpdated()
 {
 	emit signalsLoaded();
@@ -433,19 +458,26 @@ void TuningSignalManager::notifySignalParamsUpdated()
 
 void TuningSignalManager::setUnappliedValue(Hash hash, const TuningValue& value)
 {
-	QWriteLocker l(&m_statesLocker);
+	std::scoped_lock l(m_statesMutex);
 
 	auto foundState = m_states.find(hash);
 	if (foundState != m_states.end())
 	{
 		Sources& sources = foundState->second;
 		sources.setUnappliedValue(value);
+
+		if (sources.isValueUnapplied() == true)
+		{
+			//qDebug() << "+Unapplied: " << hash;
+			m_unappliedStates.insert(hash);
+		}
 	}
+
 }
 
 TuningValue TuningSignalManager::unappliedValue(Hash hash) const
 {
-	QWriteLocker l(&m_statesLocker);
+	std::scoped_lock l(m_statesMutex);
 
 	auto foundState = m_states.find(hash);
 
@@ -461,7 +493,7 @@ TuningValue TuningSignalManager::unappliedValue(Hash hash) const
 
 bool TuningSignalManager::isUnapplied(Hash hash) const
 {
-	QWriteLocker l(&m_statesLocker);
+	std::scoped_lock l(m_statesMutex);
 
 	auto foundState = m_states.find(hash);
 	if (foundState != m_states.end())

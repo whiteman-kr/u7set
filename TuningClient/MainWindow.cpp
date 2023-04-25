@@ -1198,7 +1198,7 @@ void MainWindow::showAppLog()
 
 void MainWindow::showSignalsLog()
 {
-	m_tuningLog.viewSignalsLog(this);
+	m_tuningLog.viewTuningLog(this);
 }
 
 void MainWindow::showAboutQt()

@@ -56,6 +56,7 @@ namespace ClientLib
 		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const MonitorSettings& settings, const BuildFileInfoArray& files);
 		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const TuningClientSettings& settings, const BuildFileInfoArray& files);
 		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const TestClientSettings& settings, const BuildFileInfoArray& files);
+		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const TestSuiteSettings& settings, const BuildFileInfoArray& files);
 
 	private:
 		int acquireAppInstanceNo(const QString& programName);

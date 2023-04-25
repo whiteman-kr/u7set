@@ -1,0 +1,134 @@
+#include "TunsOutputController.h"
+
+namespace TestSuite
+{
+	TunsOutputController::TunsOutputController(const SoftwareInfo& softwareInfo,
+											   const std::vector<SoftwareEndpoint::TuningService>& tuningServices,
+											   const QByteArray& signalsFile,
+											   TuningClientSettings::LmStatusFlagMode lmStatusFlagMode,
+											   ILogFile* logFile):
+		m_signalManager{softwareInfo.equipmentID(), logFile},
+		m_appLog{logFile, "TunsOutputController"},
+		m_connection{m_signalManager, m_signalManager, logFile, &m_tuningLogStub}
+	{
+		m_signalManager.load(signalsFile);
+
+		m_connection.updateConnections(softwareInfo,
+							   tuningServices,
+							   true/*autoApply*/,
+							   lmStatusFlagMode);
+
+		return;
+	}
+
+
+	bool TunsOutputController::waitForConnection(qint64 timeoutMs) const
+	{
+		// Wait for connection established
+		//
+		QElapsedTimer timer;
+		timer.start();
+
+		while (timer.hasExpired(timeoutMs) == false)
+		{
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				return false;
+			}
+
+			//QCoreApplication::instance()->processEvents();
+			QThread::msleep(200);
+
+			// Wait for 30 replies, so all signals are loaded and some states are received.
+			//
+			std::vector<Tcp::ConnectionState> tunsConnStates = m_connection.tcpTuningConnStates();
+			if (std::all_of(tunsConnStates.begin(), tunsConnStates.end(), [](const auto& s) { return s.isConnected; }))
+			{
+				break;
+			}
+		}
+
+		bool connected = true;
+		std::vector<Tcp::ConnectionState> tunsConnStates = m_connection.tcpTuningConnStates();
+
+		for (const Tcp::ConnectionState& state : tunsConnStates)
+		{
+			if (state.isConnected == false)
+			{
+				connected = false;
+				m_appLog.writeError(QString{"Cannot establish connection to TuningService %1"}
+									.arg(state.serverEquipmentID));
+			}
+		}
+
+		if (connected == false)
+		{
+			return false;
+		}
+
+		// Wait that TuningConnection loads all signal params.
+		//
+		timer.restart();
+
+
+		while (timer.hasExpired(30'000) == false && m_connection.tuningSourcesInfo().empty() == true)
+		{
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				return false;
+			}
+
+			QThread::msleep(200);
+		}
+
+		if (m_connection.tuningSourcesInfo().empty() == true)
+		{
+			m_appLog.writeError("Receiving TuningSources info timeout");
+			return false;
+		}
+
+		m_appLog.writeMessage("TuningSources info arrived");
+		return true;
+	}
+
+	bool TunsOutputController::writeSignalValue(const QString& appSignalId, const QVariant& value)
+	{
+		bool found = false;
+		AppSignalParam asp = m_signalManager.signalParam(appSignalId, &found);
+		if (found == false)
+		{
+			return false;
+		}
+
+		m_signalManager.setUnappliedValue(::calcHash(appSignalId), TuningValue{asp.tuningType(), value.toDouble()});
+
+		return m_connection.writeTuningSignal(appSignalId, value);
+	}
+
+	bool TunsOutputController::waitForAllSignalsWritten(qint64 timeoutMs) const
+	{
+		using namespace std::chrono_literals;
+		using namespace std::chrono;
+
+		qint64 nsecs = static_cast<qint64>(timeoutMs) * 1'000'000;
+
+		QElapsedTimer timer;
+		timer.start();
+
+		while (QThread::currentThread()->isInterruptionRequested() == false)
+		{
+			microseconds timeLeftUs{std::min<qint64>((nsecs - timer.nsecsElapsed()) / 1'000, 100'000)};
+			if (timeLeftUs <= 0us)
+			{
+				break;
+			}
+
+			if (m_signalManager.waitForAllApplied(duration_cast<milliseconds>(timeLeftUs)) == true)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+}
