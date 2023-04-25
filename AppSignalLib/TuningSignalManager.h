@@ -2,6 +2,7 @@
 #define TUNINGSIGNALMANAGER_H
 
 #include <unordered_map>
+#include <condition_variable>
 #include <QReadWriteLock>
 
 #include "../AppSignalLib/ITuningSignalUpdater.h"
@@ -130,7 +131,7 @@ private:
 
 	// States storage
 	//
-	mutable std::mutex m_statesMutext;								// For access to m_states and m_unappliedStates
+	mutable std::mutex m_statesMutex;								// For access to m_states and m_unappliedStates
 	mutable std::condition_variable m_allStatesApplied;
 
 	std::unordered_map<Hash, Sources, VoidHasher<Hash>> m_states;

@@ -123,7 +123,7 @@ namespace TestSuite
 				break;
 			}
 
-			if (m_signalManager.waitForAllApplied(duration_cast<milliseconds>(timeLeftUs)) == false)
+			if (m_signalManager.waitForAllApplied(duration_cast<milliseconds>(timeLeftUs)) == true)
 			{
 				return true;
 			}

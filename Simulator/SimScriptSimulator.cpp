@@ -71,8 +71,8 @@ namespace Sim
 				QQmlEngine::setObjectOwnership(&m_log, QQmlEngine::CppOwnership);
 
 				m_jsEngine->globalObject().setProperty("log", m_jsLog);
-				m_jsEngine.globalObject().setProperty("isSimulator", QJSValue{true});
-				m_jsEngine.globalObject().setProperty("isTestSuite", QJSValue{false});
+				m_jsEngine->globalObject().setProperty("isSimulator", QJSValue{true});
+				m_jsEngine->globalObject().setProperty("isTestSuite", QJSValue{false});
 
 				// Evaluate script
 				//

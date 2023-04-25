@@ -6,6 +6,7 @@
 #include "../lib/Ui/DialogAbout.h"
 #include "../OnlineLib/TcpClientStatistics.h"
 #include "TestLogTabPage.h"
+#include "TestViewTabPage.h"
 
 #if __has_include("../gitlabci_version.h")
 #	include "../gitlabci_version.h"
@@ -25,6 +26,7 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 	m_tabWidget = new TabWidgetEx{this};
 	m_tabWidget->setDocumentMode(false);
 	m_tabWidget->tabBar()->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(m_tabWidget, &TabWidgetEx::tabCloseRequested, this, &TestSuiteMainWindow::onTabCloseRequested);
 
 	setCentralWidget(m_tabWidget);
 	centralWidget()->setAutoFillBackground(true);
@@ -38,6 +40,7 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 
 	m_testLogTabPage = new TestLogTabPage(m_testLogOutput, this);
 	m_tabWidget->addTab(m_testLogTabPage, "Test Log");
+	m_tabWidget->tabBar()->setTabButton(0, QTabBar::RightSide, 0);	// This tab is not closable
 
 	m_testLogOutput.setHtmlFont("Verdana");
 
@@ -103,6 +106,7 @@ void TestSuiteMainWindow::createDocks()
 	testsListDock->setTitleBarWidget(new QWidget{});		// Hides title bar
 
 	m_testListWidget = new TestListWidget{this};
+	connect(m_testListWidget, &TestListWidget::testItemClicked, this, &TestSuiteMainWindow::onShowTestContents);
 	testsListDock->setWidget(m_testListWidget);
 
 	addDockWidget(Qt::LeftDockWidgetArea, testsListDock);
@@ -645,6 +649,8 @@ void TestSuiteMainWindow::on_m_run_clicked()
 
 	m_testLogTabPage->clearOutputLog();
 
+	m_tabWidget->setCurrentIndex(0);
+
 	// Run tests
 	//
 	bool ok = m_testSuite.execute(scriptsToExecute, theSettings.useLocalScriptsPath() ? theSettings.localScriptsPath() : QString());
@@ -776,6 +782,57 @@ void TestSuiteMainWindow::onTestsRefresh()
 	{
 		loadScriptsFromConfiguration();
 	}
+}
+
+void TestSuiteMainWindow::onShowTestContents(const QString& testName)
+{
+	const TestSuite::TestScript& script = m_testScriptsStorage.script(::calcHash(testName));
+
+	for (int i = 0; i < m_tabWidget->count(); i++)
+	{
+		// Check if tab page with this script already exists, open it if so
+		//
+		QWidget* w = m_tabWidget->widget(i);
+		if (w == nullptr)
+		{
+			Q_ASSERT(w);
+			continue;
+		}
+		TestViewTabPage* p = dynamic_cast<TestViewTabPage*>(w);
+		if (p == nullptr)
+		{
+			continue;
+		}
+		if (p->script().hash() == script.hash())
+		{
+			m_tabWidget->setCurrentIndex(i);;
+			return;
+		}
+	}
+
+	TestViewTabPage* p = new TestViewTabPage(script, this);
+	m_tabWidget->addTab(p, script.fileName());
+	m_tabWidget->setCurrentIndex(m_tabWidget->count() - 1);
+
+	return;
+}
+
+void TestSuiteMainWindow::onTabCloseRequested(int index)
+{
+	QWidget* w = m_tabWidget->widget(index);
+	if (w == nullptr)
+	{
+		Q_ASSERT(w);
+		return;
+	}
+
+	if (dynamic_cast<TestViewTabPage*>(w) == nullptr)
+	{
+		return;
+	}
+
+	delete w;
+	m_tabWidget->removeTab(index);
 }
 
 void TestSuiteMainWindow::onConfigurationArrived()

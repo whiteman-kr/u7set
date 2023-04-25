@@ -32,13 +32,13 @@ namespace TestSuite
 
 	bool ScriptRunner::runScript(const TestScript& script)
 	{
-		qDebug() << "ScriptRunner::runScript(), script file: " << script.fileName;
+		qDebug() << "ScriptRunner::runScript(), script file: " << script.fileName();
 
-		m_scriptTestLog.writeMessage(tr("********** Start testing of %1 **********").arg(script.fileName));
+		m_scriptTestLog.writeMessage(tr("********** Start testing of %1 **********").arg(script.fileName()));
 
 		// Evaluate script.
 		//
-		QJSValue scriptValue = m_jsEngine.evaluate(script.script);
+		QJSValue scriptValue = m_jsEngine.evaluate(script.script());
 
 		if (scriptValue.isError() == true)
 		{
@@ -46,7 +46,7 @@ namespace TestSuite
 										  "\tClass: %3\n"
 										  "\tStack: %4\n"
 										  "\tMessage: %5")
-									   .arg(script.fileName)
+									   .arg(script.fileName())
 									   .arg(scriptValue.property("lineNumber").toInt())
 									   .arg(metaObject()->className())
 									   .arg(scriptValue.property("stack").toString())
@@ -67,7 +67,7 @@ namespace TestSuite
 		if (bool initTestCaseResult = runScriptFunction("initTestCase");
 			initTestCaseResult == false)
 		{
-			m_scriptTestLog.writeError(script.fileName + ": initTestCase() failed, test terminated.");
+			m_scriptTestLog.writeError(script.fileName() + ": initTestCase() failed, test terminated.");
 			return false;
 		}
 
@@ -127,7 +127,7 @@ namespace TestSuite
 		if (bool cleanupTestCaseResult = runScriptFunction("cleanupTestCase");
 			cleanupTestCaseResult == false)
 		{
-			m_scriptTestLog.writeError(script.fileName + ": cleanupTestCase() failed, test terminated.");
+			m_scriptTestLog.writeError(script.fileName() + ": cleanupTestCase() failed, test terminated.");
 		}
 
 		qint64 elapsedMsTotal = timer.elapsed();
@@ -141,7 +141,7 @@ namespace TestSuite
 			m_scriptTestLog.writeError(tr("Totals: %1 tests, %2 failed, %3ms").arg(testList.size()).arg(failed).arg(elapsedMsTotal));
 		}
 
-		m_scriptTestLog.writeMessage(tr("********** Finished testing of %1 **********").arg(script.fileName));
+		m_scriptTestLog.writeMessage(tr("********** Finished testing of %1 **********").arg(script.fileName()));
 
 		return failed == 0;
 	}

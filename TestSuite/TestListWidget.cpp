@@ -23,6 +23,8 @@ TestListWidget::TestListWidget(QWidget* parent):
 	QByteArray headerState = QSettings().value("TestsListWidget/headerState").toByteArray();
 	m_treeWidget->header()->restoreState(headerState);
 
+	connect(m_treeWidget, &QTreeWidget::itemDoubleClicked, this, &TestListWidget::testItemDoubleClicked);
+
 	layout->addWidget(m_testsPathLabel);
 	layout->addWidget(m_treeWidget);
 
@@ -64,4 +66,13 @@ QStringList TestListWidget::selectedTests() const
 	}
 
 	return result;
+}
+
+void TestListWidget::testItemDoubleClicked(QTreeWidgetItem *item, int column)
+{
+	if (item == nullptr)
+	{
+		return;
+	}
+	emit testItemClicked(item->text(0));
 }

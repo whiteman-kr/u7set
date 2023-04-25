@@ -1,11 +1,43 @@
 #pragma once
 
+#include "../CommonLib/Hash.h"
+
 namespace TestSuite
 {
-	struct TestScript
+	class TestScript
 	{
-		QString fileName;
-		QString script;
+	public:
+		TestScript() = default;
+		TestScript(const QString& name, const QString& contents):
+			m_fileName(name), m_script(contents), m_hash(::calcHash(name))
+		{
+		}
+		Hash hash() const
+		{
+			return m_hash;
+		}
+		const QString fileName() const
+		{
+			return m_fileName;
+		}
+		void setFileName(const QString& name)
+		{
+			m_fileName = name;
+			m_hash = ::calcHash(name);
+		}
+		const QString& script() const
+		{
+			return m_script;
+		}
+		void setScript(const QString& contents)
+		{
+			m_script = contents;
+		}
+
+	private:
+		Hash m_hash = UNDEFINED_HASH;
+		QString m_fileName;
+		QString m_script;
 	};
 
 	class TestScriptsStorage
@@ -17,7 +49,7 @@ namespace TestSuite
 		//
 		//std::vector<TestScript>& scripts();
 		const std::vector<TestScript>& scripts() const;
-		//const TestScript& script(int index) const;
+		const TestScript& script(Hash hash) const;
 
 		qsizetype count() const;
 		QStringList scriptList() const;
@@ -31,7 +63,6 @@ namespace TestSuite
 		bool loadFromPath(const QString& path, QString* errorMsg);
 
 	private:
-		mutable QReadWriteLock m_lock;
 		std::vector<TestScript> m_scripts;
 	};
 

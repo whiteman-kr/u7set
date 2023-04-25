@@ -10,8 +10,22 @@ namespace TestSuite
 
 	const std::vector<TestScript>& TestScriptsStorage::scripts() const
 	{
-		QReadLocker l(&m_lock);
 		return m_scripts;
+	}
+
+	const TestScript& TestScriptsStorage::script(Hash hash) const
+	{
+
+		for (const auto& ts : m_scripts)
+		{
+			if(ts.hash() == hash)
+			{
+				return ts;
+			}
+		}
+
+		static TestScript err;
+		return err;
 	}
 
 //	const TestScript& TestScriptsStorage::script(int index) const
@@ -28,20 +42,17 @@ namespace TestSuite
 
 	qsizetype TestScriptsStorage::count() const
 	{
-		QReadLocker l(&m_lock);
 		return m_scripts.size();
 	}
 
 	QStringList TestScriptsStorage::scriptList() const
 	{
-		QReadLocker l(&m_lock);
-
 		QStringList result;
 		result.reserve(m_scripts.size());
 
 		for (const TestScript& ts : m_scripts)
 		{
-			result.push_back(ts.fileName);
+			result.push_back(ts.fileName());
 		}
 
 		return result;
@@ -49,21 +60,18 @@ namespace TestSuite
 
 	void TestScriptsStorage::clear()
 	{
-		QWriteLocker l(&m_lock);
 		m_scripts.clear();
 		return;
 	}
 
 	void TestScriptsStorage::add(const TestScript& script)
 	{
-		QWriteLocker l(&m_lock);
 		m_scripts.push_back(script);
 		return;
 	}
 
 	void TestScriptsStorage::setScripts(std::vector<TestScript>&& scripts)
 	{
-		QWriteLocker l(&m_lock);
 		m_scripts = std::move(scripts);
 	}
 
@@ -88,15 +96,15 @@ namespace TestSuite
 		for (const QString& file : files)
 		{
 			TestScript ts;
-			ts.fileName = path + QDir::separator() + file;
+			ts.setFileName(path + QDir::separator() + file);
 
-			QFile f(ts.fileName);
+			QFile f(ts.fileName());
 			if (f.open(QFile::ReadOnly) == false)
 			{
-				*errorMsg = QObject::tr("Error: Can't open file \"%1\" for reading!").arg(ts.fileName);
+				*errorMsg = QObject::tr("Error: Can't open file \"%1\" for reading!").arg(ts.fileName());
 				return false;
 			}
-			ts.script = f.readAll();
+			ts.setScript(f.readAll());
 
 			add(ts);
 		}

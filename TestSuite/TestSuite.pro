@@ -44,6 +44,7 @@ RESOURCES += \
 
 SOURCES += \
     ../lib/BuildInfo.cpp \
+    ../lib/CodeEditor.cpp \
     ../lib/Ui/DialogAbout.cpp \
     ../lib/Ui/DialogAlert.cpp \
     ../lib/Ui/DialogTcpStatistics.cpp \
@@ -54,11 +55,13 @@ SOURCES += \
     TestLogTabPage.cpp \
     TestSuiteDialogSettings.cpp \
     TestSuiteLog.cpp \
+    TestViewTabPage.cpp \
     main.cpp \
     TestSuiteMainWindow.cpp
 
 HEADERS += \
     ../lib/BuildInfo.h \
+    ../lib/CodeEditor.h \
     ../lib/Ui/DialogAbout.h \
     ../lib/Ui/DialogAlert.h \
     ../lib/Ui/DialogTcpStatistics.h \
@@ -69,7 +72,8 @@ HEADERS += \
     TestLogTabPage.h \
     TestSuiteDialogSettings.h \
     TestSuiteLog.h \
-    TestSuiteMainWindow.h
+    TestSuiteMainWindow.h \
+    TestViewTabPage.h
 
 FORMS += \
     TestSuiteDialogSettings.ui

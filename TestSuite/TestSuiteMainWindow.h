@@ -62,6 +62,8 @@ private slots:
 	void showAboutQt();
 	void showAbout();
 	void onTestsRefresh();
+	void onShowTestContents(const QString& testName);
+	void onTabCloseRequested(int index);
 
 	// Processing slots
 	//

@@ -5,5 +5,7 @@
         <file>Images/TestsRefresh.svg</file>
         <file>Images/TestsRun.svg</file>
         <file>Images/TestsStop.svg</file>
+        <file>Images/CloseButtonBlack.svg</file>
+        <file>Images/CloseButtonGray.svg</file>
     </qresource>
 </RCC>

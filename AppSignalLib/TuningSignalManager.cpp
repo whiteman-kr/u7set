@@ -187,7 +187,7 @@ TuningSignalState TuningSignalManager::state(Hash hash, bool* found) const
 		return TuningSignalState();
 	}
 
-	std::scoped_lock l(m_statesMutext);
+	std::scoped_lock l(m_statesMutex);
 
 	auto foundState = m_states.find(hash);
 
@@ -223,7 +223,7 @@ TuningSignalState TuningSignalManager::state(Hash hash, Hash tuningServiceHash, 
 		return TuningSignalState();
 	}
 
-	std::scoped_lock l(m_statesMutext);
+	std::scoped_lock l(m_statesMutex);
 
 	auto foundState = m_states.find(hash);
 
@@ -275,7 +275,7 @@ void TuningSignalManager::reset()
 	}
 
 	{
-		std::scoped_lock l(m_statesMutext);
+		std::scoped_lock l(m_statesMutex);
 		m_states.clear();
 
 		m_unappliedStates.clear();
@@ -323,7 +323,7 @@ std::vector<Hash> TuningSignalManager::signalHashes(const std::vector<Hash> lmEq
 
 void TuningSignalManager::invalidateSignalStates(Hash tuningServiceHash)
 {
-	std::scoped_lock l(m_statesMutext);
+	std::scoped_lock l(m_statesMutex);
 
 	for (auto& p : m_states)
 	{
@@ -353,7 +353,7 @@ void TuningSignalManager::setStates(const std::vector<TuningSignalState>& states
 	std::vector<UnsuccessfulWrite> unsuccessfulWrites;
 
 	{
-		std::scoped_lock l(m_statesMutext);
+		std::scoped_lock l(m_statesMutex);
 
 		// If writing has been finished - set new values as applied or display a writing error
 		//
@@ -447,7 +447,7 @@ void TuningSignalManager::setStates(const std::vector<TuningSignalState>& states
 
 bool TuningSignalManager::waitForAllApplied(std::chrono::milliseconds timeout) const
 {
-	std::unique_lock l(m_statesMutext);
+	std::unique_lock l(m_statesMutex);
 	return m_allStatesApplied.wait_for(l, timeout, [this]() { return m_unappliedStates.empty() == true; });
 }
 
@@ -458,7 +458,7 @@ void TuningSignalManager::notifySignalParamsUpdated()
 
 void TuningSignalManager::setUnappliedValue(Hash hash, const TuningValue& value)
 {
-	std::scoped_lock l(m_statesMutext);
+	std::scoped_lock l(m_statesMutex);
 
 	auto foundState = m_states.find(hash);
 	if (foundState != m_states.end())
@@ -477,7 +477,7 @@ void TuningSignalManager::setUnappliedValue(Hash hash, const TuningValue& value)
 
 TuningValue TuningSignalManager::unappliedValue(Hash hash) const
 {
-	std::scoped_lock l(m_statesMutext);
+	std::scoped_lock l(m_statesMutex);
 
 	auto foundState = m_states.find(hash);
 
@@ -493,7 +493,7 @@ TuningValue TuningSignalManager::unappliedValue(Hash hash) const
 
 bool TuningSignalManager::isUnapplied(Hash hash) const
 {
-	std::scoped_lock l(m_statesMutext);
+	std::scoped_lock l(m_statesMutex);
 
 	auto foundState = m_states.find(hash);
 	if (foundState != m_states.end())

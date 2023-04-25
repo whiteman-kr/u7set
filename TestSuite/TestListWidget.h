@@ -5,6 +5,7 @@
 
 class TestListWidget : public QWidget
 {
+	Q_OBJECT
 public:
 	TestListWidget(QWidget* parent);
 
@@ -13,6 +14,13 @@ public:
 	void clearTestsList();
 
 	QStringList selectedTests() const;
+
+signals:
+	void testItemClicked(const QString& testName);
+
+
+private slots:
+	void testItemDoubleClicked(QTreeWidgetItem *item, int column);
 
 private:
 	QLabel* m_testsPathLabel = nullptr;
