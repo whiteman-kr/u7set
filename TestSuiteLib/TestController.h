@@ -40,6 +40,10 @@ namespace TestSuite
 		bool startForMs(int msecs);
 		bool waitForMs(int msecs);
 
+//		/// \brief Reset all simulations to initial state.
+//		/// <b>Note:</b> Function sets reset flag and actual reset will be performed on the next \c startForMs call.
+//		bool reset();
+
 		/// \brief Get signal state, if signal is not found then exception is thrown.
 		QJSValue signalState(QString appSignalId);
 
@@ -51,7 +55,7 @@ namespace TestSuite
 		bool overrideSignalValue(QString appSignalId, QVariant value);
 
 		/// \brief Waits while all overrided signal value is written to LM. Returns true if signal value is overriden, false on timeout.
-		bool waitForAllSignalsWritten(qint64 timeoutMs);
+		bool waitForSignalOverrides(qint64 timeoutMs);
 
 		/// \brief Waits while signal value is set to specified value. Returns true if value is correct, false on timeout.
 		bool expectSignalValue(QString appSignalId, double value, qint64 timeoutMs);

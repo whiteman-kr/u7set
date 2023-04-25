@@ -111,7 +111,7 @@ namespace TestSuite
 		{
 			bool found = false;
 			state = m_signalManager.signalState(appSignalId, &found);
-			if (found == false || state.isValid() == false || state.isStateAvailable() == false)
+			if (found == false || state.isStateAvailable() == false || state.isValid() == false)
 			{
 				return false;
 			}
@@ -129,7 +129,7 @@ namespace TestSuite
 
 			QThread::usleep(static_cast<unsigned long>(timeLeftUs));
 
-		}while(QThread::currentThread()->isInterruptionRequested() == false);
+		} while(QThread::currentThread()->isInterruptionRequested() == false);
 
 		return false;
 	}

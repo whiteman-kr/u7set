@@ -19,6 +19,8 @@ namespace TestSuite
 		QQmlEngine::setObjectOwnership(&m_scriptTestLog, QQmlEngine::CppOwnership);
 
 		m_jsEngine.globalObject().setProperty("log", m_jsLog);
+		m_jsEngine.globalObject().setProperty("isSimulator", QJSValue{false});
+		m_jsEngine.globalObject().setProperty("isTestSuite", QJSValue{true});
 
 		return;
 	}

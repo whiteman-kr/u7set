@@ -107,6 +107,9 @@ namespace TestSuite
 
 	bool TunsOutputController::waitForAllSignalsWritten(qint64 timeoutMs) const
 	{
+		using namespace std::chrono_literals;
+		using namespace std::chrono;
+
 		qint64 nsecs = static_cast<qint64>(timeoutMs) * 1'000'000;
 
 		QElapsedTimer timer;
@@ -114,18 +117,16 @@ namespace TestSuite
 
 		while (QThread::currentThread()->isInterruptionRequested() == false)
 		{
-			if (m_signalManager.hasUnappliedSignals() == false)
-			{
-				return true;
-			}
-
-			qint64 timeLeftUs = std::min<qint64>((nsecs - timer.nsecsElapsed()) / 1'000, 10'000);
-			if (timeLeftUs <= 0)
+			microseconds timeLeftUs{std::min<qint64>((nsecs - timer.nsecsElapsed()) / 1'000, 100'000)};
+			if (timeLeftUs <= 0us)
 			{
 				break;
 			}
 
-			QThread::usleep(static_cast<unsigned long>(timeLeftUs));
+			if (m_signalManager.waitForAllApplied(duration_cast<milliseconds>(timeLeftUs)) == false)
+			{
+				return true;
+			}
 		}
 
 		return false;

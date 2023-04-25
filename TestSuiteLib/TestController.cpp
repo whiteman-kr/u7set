@@ -117,7 +117,7 @@ namespace TestSuite
 		return ok;
 	}
 
-	bool TestController::waitForAllSignalsWritten(qint64 timeoutMs)
+	bool TestController::waitForSignalOverrides(qint64 timeoutMs)
 	{
 		return m_outputController.waitForAllSignalsWritten(timeoutMs);
 	}
