@@ -171,7 +171,7 @@ namespace Sim
 		if (m_buildConnection.type == Hardware::Connection::Type::SinglePort)
 		{
 			*timeoutHappend = true;
-			m_timeout.store(true, std::memory_order::relaxed);
+			m_timeout.store(true);
 			return true;
 		}
 
@@ -192,7 +192,7 @@ namespace Sim
 					data->clear();
 					*timeoutHappend = true;
 
-					m_timeout.store(true, std::memory_order::relaxed);
+					m_timeout.store(true);
 				}
 				else
 				{
@@ -205,7 +205,7 @@ namespace Sim
 						m_port2sentData.m_data.clear();
 						m_port2sentData.m_sentTime = currentTime;		// timeout will be counted from this moment
 
-						m_timeout.store(false, std::memory_order::relaxed);
+						m_timeout.store(false);
 					}
 					else
 					{
@@ -229,7 +229,7 @@ namespace Sim
 					data->clear();
 					*timeoutHappend = true;
 
-					m_timeout.store(true, std::memory_order::relaxed);
+					m_timeout.store(true);
 				}
 				else
 				{
@@ -242,7 +242,7 @@ namespace Sim
 						m_port1sentData.m_data.clear();
 						m_port1sentData.m_sentTime = currentTime;		// timeout will be counted from this moment
 
-						m_timeout.store(false, std::memory_order::relaxed);
+						m_timeout.store(false);
 					}
 					else
 					{
@@ -294,17 +294,17 @@ namespace Sim
 
 	bool Connection::enabled() const
 	{
-		return m_enable.load(std::memory_order::relaxed);
+		return m_enable.load();
 	}
 
 	void Connection::setEnabled(bool value)
 	{
-		m_enable.store(value, std::memory_order::relaxed);
+		m_enable.store(value);
 	}
 
 	bool Connection::timeout() const
 	{
-		return m_timeout.load(std::memory_order::relaxed);
+		return m_timeout.load();
 	}
 
 	std::vector<char>* Connection::getPortReceiveBuffer(int portNo)

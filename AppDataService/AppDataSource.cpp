@@ -8,6 +8,7 @@
 // AppDataSource class implementation
 //
 // -------------------------------------------------------------------------------
+
 AppDataSource::AppDataSource(const DataSource& dataSource) :
 	m_signalStatesQueue(3)
 {

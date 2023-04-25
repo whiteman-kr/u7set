@@ -192,7 +192,7 @@ namespace  Sim
 
 	bool Software::enabled() const
 	{
-		return m_enabled.load(std::memory_order::relaxed);
+		return m_enabled.load();
 	}
 
 	void Software::setEnabled(bool value)

@@ -1182,11 +1182,17 @@ namespace Hardware
 				break;
 
 			case RawDataDescriptionItem::Type::TxSignal:
-				m_rawTxSignals.insert(item.appSignalID, item);
+				if (m_rawTxSignals.contains(item.appSignalID) == false)
+				{
+					m_rawTxSignals.insert(item.appSignalID, item);
+				}
 				break;
 
 			case RawDataDescriptionItem::Type::RxSignal:
-				m_rawRxSignals.insert(item.appSignalID, item);
+				if (m_rawRxSignals.contains(item.appSignalID) == false)
+				{
+					m_rawRxSignals.insert(item.appSignalID, item);
+				}
 				break;
 
 			case RawDataDescriptionItem::Type::TxAllModulesRawData:

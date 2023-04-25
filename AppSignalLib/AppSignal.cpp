@@ -1223,6 +1223,16 @@ void AppSignal::loadProtoData(const Proto::ProtoAppSignalData& protoData)
 	setTagsStr(QString::fromStdString(protoData.tags()));
 }
 
+QDateTime AppSignal::created() const
+{
+	return QDateTime::fromMSecsSinceEpoch(m_createdMcs / 1000);;
+}
+
+QDateTime AppSignal::instanceCreated() const
+{
+	return QDateTime::fromMSecsSinceEpoch(m_instanceCreatedMcs / 1000);;
+}
+
 Address16 AppSignal::ioBufAddr() const
 {
 	return m_ioBufAddr;
@@ -1691,9 +1701,9 @@ void AppSignal::saveToProto(Proto::AppSignal* s) const
 		dbField->set_changesetid(m_changesetID);
 		dbField->set_checkedout(m_checkedOut);
 		dbField->set_userid(m_userID);
-		dbField->set_created(m_created.toMSecsSinceEpoch());
+		dbField->set_created(m_createdMcs);
 		dbField->set_deleted(m_deleted);
-		dbField->set_instancecreated(m_instanceCreated.toMSecsSinceEpoch());
+		dbField->set_instancecreated(m_instanceCreatedMcs);
 		dbField->set_instanceaction(static_cast<int>(m_instanceAction));
 	}
 	else
@@ -1901,18 +1911,18 @@ void AppSignal::loadFromProto(const Proto::AppSignal& s)
 
 	// Signal fields from database
 
-	const Proto::AppSignalDbField& dbFiled = s.dbfield();
+	const Proto::AppSignalDbField& dbField = s.dbfield();
 
-	m_ID = dbFiled.id();
-	m_signalGroupID = dbFiled.signalgroupid();
-	m_signalInstanceID = dbFiled.signalinstanceid();
-	m_changesetID = dbFiled.changesetid();
-	m_checkedOut = dbFiled.checkedout();
-	m_userID = dbFiled.userid();
-	m_created.setMSecsSinceEpoch(dbFiled.created());
-	m_deleted = dbFiled.deleted();
-	m_instanceCreated.setMSecsSinceEpoch(dbFiled.instancecreated());
-	m_instanceAction = static_cast<E::VcsItemAction>(dbFiled.instanceaction());
+	m_ID = dbField.id();
+	m_signalGroupID = dbField.signalgroupid();
+	m_signalInstanceID = dbField.signalinstanceid();
+	m_changesetID = dbField.changesetid();
+	m_checkedOut = dbField.checkedout();
+	m_userID = dbField.userid();
+	m_createdMcs = dbField.created();
+	m_deleted = dbField.deleted();
+	m_instanceCreatedMcs = dbField.instancecreated();
+	m_instanceAction = static_cast<E::VcsItemAction>(dbField.instanceaction());
 
 	// Signal properties calculated in compile-time
 
@@ -2051,8 +2061,8 @@ QString AppSignal::removeNumberSign(const QString& appSignalID)
 
 void AppSignal::initCreatedDates()
 {
-	m_created = QDateTime::currentDateTime();
-	m_instanceCreated = QDateTime::currentDateTime();
+	m_createdMcs = QDateTime::currentDateTime().toMSecsSinceEpoch() * 1000;
+	m_instanceCreatedMcs = QDateTime::currentDateTime().toMSecsSinceEpoch() * 1000;
 }
 
 bool AppSignal::isCompatibleFormatPrivate(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder, const QString& busTypeID) const
@@ -2381,6 +2391,88 @@ void AppSignal::clearTags()
 
 // --------------------------------------------------------------------------------------------------------
 //
+// AppSignalSet::SignalsGroups class implementation
+//
+// --------------------------------------------------------------------------------------------------------
+
+void AppSignalSet::SignalsGroups::clear()
+{
+	m_groups.clear();
+}
+
+void AppSignalSet::SignalsGroups::insert(const AppSignal* appSignal)
+{
+	TEST_PTR_RETURN(appSignal);
+
+	int groupID = appSignal->signalGroupID();
+
+	if (groupID == 0)
+	{
+		return;
+	}
+
+	int signalID = appSignal->ID();
+
+	auto it = m_groups.find(groupID);
+
+	if (it == m_groups.end())
+	{
+		m_groups.emplace(groupID, std::set<int>({ signalID }));
+	}
+	else
+	{
+		it->second.insert(signalID);
+	}
+}
+
+void AppSignalSet::SignalsGroups::remove(const AppSignal& appSignal)
+{
+	remove(appSignal.signalGroupID(), appSignal.ID());
+}
+
+void AppSignalSet::SignalsGroups::remove(int groupID, int signalID)
+{
+	if (groupID == 0)
+	{
+		return;
+	}
+
+	auto it = m_groups.find(groupID);
+
+	if (it == m_groups.end())
+	{
+		return;
+	}
+
+	it->second.erase(signalID);
+}
+
+void AppSignalSet::SignalsGroups::getGroupSignalsIDs(int groupID, QList<int>& signalsIDs) const
+{
+	signalsIDs.clear();
+
+	if (groupID == 0)
+	{
+		return;
+	}
+
+	auto it = m_groups.find(groupID);
+
+	if (it == m_groups.end())
+	{
+		return;
+	}
+
+	const std::set<int>& ids = it->second;
+
+	for(int id : ids)
+	{
+		signalsIDs.append(id);
+	}
+}
+
+// --------------------------------------------------------------------------------------------------------
+//
 // AppSignalSet class implementation
 //
 // --------------------------------------------------------------------------------------------------------
@@ -2398,14 +2490,13 @@ void AppSignalSet::clear()
 {
 	SignalPtrOrderedHash::clear();
 
-	m_groupSignals.clear();
+	m_groups.clear();
 	m_strID2IndexMap.clear();
 }
 
 void AppSignalSet::reserve(int n)
 {
 	SignalPtrOrderedHash::reserve(n);
-	m_groupSignals.reserve(n);
 }
 
 void AppSignalSet::buildID2IndexMap()
@@ -2513,9 +2604,9 @@ void AppSignalSet::append(const int& signalID, AppSignal* signal)
 
 	int groupID = signal->signalGroupID();
 
-	if (m_groupSignals.contains(groupID, signalID) == false)
+	if (groupID != 0)
 	{
-		m_groupSignals.insert(groupID, signalID);
+		m_groups.insert(signal);
 	}
 }
 
@@ -2532,7 +2623,7 @@ void AppSignalSet::remove(const int& signalID)
 
 	SignalPtrOrderedHash::remove(signalID);
 
-	m_groupSignals.remove(signal.signalGroupID(), signalID);
+	m_groups.remove(signal);
 }
 
 void AppSignalSet::removeAt(const qsizetype index)
@@ -2544,7 +2635,7 @@ void AppSignalSet::removeAt(const qsizetype index)
 
 	SignalPtrOrderedHash::removeAt(index);
 
-	m_groupSignals.remove(signalGroupID, signalID);
+	m_groups.remove(signalGroupID, signalID);
 }
 
 QVector<int> AppSignalSet::getChannelSignalsID(const AppSignal& signal) const
@@ -2554,19 +2645,17 @@ QVector<int> AppSignalSet::getChannelSignalsID(const AppSignal& signal) const
 
 QVector<int> AppSignalSet::getChannelSignalsID(int signalGroupID) const
 {
-	QList<int> signalsID = m_groupSignals.values(signalGroupID);
-
-	qsizetype signalCount = signalsID.count();
-
-	QVector<int> channelSignalsID;
-	channelSignalsID.reserve(signalCount);
-
-	for(qsizetype i = 0; i < signalCount; i++)
+	if (signalGroupID == 0)
 	{
-		channelSignalsID.append(signalsID.at(i));
+		Q_ASSERT(false);
+		return QList<int>();
 	}
 
-	return channelSignalsID;
+	QList<int> signalsIDs;
+
+	m_groups.getGroupSignalsIDs(signalGroupID, signalsIDs);
+
+	return signalsIDs;
 }
 
 void AppSignalSet::resetAddresses()

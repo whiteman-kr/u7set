@@ -1943,12 +1943,12 @@ namespace Sim
 
 	RuntimeMode DeviceEmulator::runtimeMode() const
 	{
-		return m_runtimeMode.load(std::memory_order::acquire);
+		return m_runtimeMode.load();
 	}
 
 	void DeviceEmulator::setRuntimeMode(RuntimeMode value)
 	{
-		RuntimeMode currentRuntimeMode = m_runtimeMode.exchange(value, std::memory_order::release);
+		RuntimeMode currentRuntimeMode = m_runtimeMode.exchange(value);
 
 		if (currentRuntimeMode == RuntimeMode::TuningMode && value != RuntimeMode::TuningMode)
 		{
@@ -1962,12 +1962,12 @@ namespace Sim
 
 	DeviceState DeviceEmulator::deviceState() const
 	{
-		return m_deviceState2.load(std::memory_order::acquire);
+		return m_deviceState2.load();
 	}
 
 	void DeviceEmulator::setDeviceState(DeviceState value)
 	{
-		m_deviceState2.store(value, std::memory_order::release);
+		m_deviceState2.store(value);
 
 		switch (value)
 		{
@@ -1989,7 +1989,7 @@ namespace Sim
 
 	bool DeviceEmulator::armingKey() const
 	{
-		return m_armingKey.load(std::memory_order::relaxed);
+		return m_armingKey.load();
 	}
 
 	void DeviceEmulator::setArmingKey(bool value)
@@ -1999,7 +1999,7 @@ namespace Sim
 
 	bool DeviceEmulator::tuningKey() const
 	{
-		return m_tuningKey.load(std::memory_order::relaxed);
+		return m_tuningKey.load();
 	}
 
 	void DeviceEmulator::setTuningKey(bool value)
@@ -2009,7 +2009,7 @@ namespace Sim
 
 	bool DeviceEmulator::sorIsSet() const
 	{
-		return m_sorIsSet.load(std::memory_order::relaxed);
+		return m_sorIsSet.load();
 	}
 
 	void DeviceEmulator::setSorIsSet(bool value)
@@ -2019,7 +2019,7 @@ namespace Sim
 
 	bool DeviceEmulator::sorSetSwitch1() const
 	{
-		return m_sorSetSwitch1.load(std::memory_order::relaxed);
+		return m_sorSetSwitch1.load();
 	}
 
 	void DeviceEmulator::setSorSetSwitch1(bool value)
@@ -2029,7 +2029,7 @@ namespace Sim
 
 	bool DeviceEmulator::sorSetSwitch2() const
 	{
-		return m_sorSetSwitch2.load(std::memory_order::relaxed);
+		return m_sorSetSwitch2.load();
 	}
 
 	void DeviceEmulator::setSorSetSwitch2(bool value)
@@ -2039,7 +2039,7 @@ namespace Sim
 
 	bool DeviceEmulator::sorSetSwitch3() const
 	{
-		return m_sorSetSwitch3.load(std::memory_order::relaxed);
+		return m_sorSetSwitch3.load();
 	}
 
 	void DeviceEmulator::setSorSetSwitch3(bool value)
@@ -2049,7 +2049,7 @@ namespace Sim
 
 	bool DeviceEmulator::testSorResetSwitch(bool newValue)
 	{
-		return m_sorResetSwitch.exchange(newValue, std::memory_order::relaxed);
+		return m_sorResetSwitch.exchange(newValue);
 	}
 
 }

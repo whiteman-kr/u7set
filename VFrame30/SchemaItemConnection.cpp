@@ -728,6 +728,13 @@ namespace VFrame30
 		return result;
 	}
 
+	const VFrame30::AfbPin& SchemaItemReceiver::outputPin() const
+	{
+		// pin 0 is always output
+		//
+		return outputs()[0];
+	}
+
 	E::ColumnData SchemaItemReceiver::data() const
 	{
 		return m_dataType;

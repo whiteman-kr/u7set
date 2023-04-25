@@ -403,6 +403,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0381.sql", "Upgrade to version 381, Added single property AppDataServiceIDs instead of two AppDataServiceID1(2)"},
 	{":/DatabaseUpgrade/Upgrade0382.sql", "Upgrade to version 382, Added OCM data limits to LM description"},
 	{":/DatabaseUpgrade/Upgrade0383.sql", "Upgrade to version 383, Change OCM RxAppDataSize (->2397) and RxAppDataOffset (->0) values"},
+	{":/DatabaseUpgrade/Upgrade0384.sql", "Upgrade to version 384, Set ConfigService.CheckHostname to false by default"},
 };
 
 int DbWorker::counter = 0;
@@ -5124,8 +5125,6 @@ void DbWorker::slot_getCheckedOutSignalsIDs(QVector<int>* signalsIDs)
 	return;
 }
 
-
-
 void DbWorker::getSignalData(QSqlQuery& q, AppSignal& s)
 {
 	// indexes of SignalData's fields
@@ -5173,9 +5172,11 @@ void DbWorker::getSignalData(QSqlQuery& q, AppSignal& s)
 	s.setChangesetID(q.value(SD_CHANGESET_ID).toInt());
 	s.setCheckedOut(q.value(SD_CHECKEDOUT).toBool());
 	s.setUserID(q.value(SD_USER_ID).toInt());
+
 	s.setCreated(q.value(SD_CREATED).toDateTime());
 	s.setDeleted(q.value(SD_DELETED).toBool());
 	s.setInstanceCreated(q.value(SD_INSTANCE_CREATED).toDateTime());
+
 	s.setInstanceAction(static_cast<E::VcsItemAction>(q.value(SD_INSTANCE_ACTION).toInt()));
 
 	s.setIsLoaded(true);
@@ -5285,8 +5286,9 @@ bool DbWorker::addSignal(E::SignalType signalType, QVector<AppSignal>* newSignal
 		AppSignal& signal = (*newSignal)[i];
 
 		signal.setID(signalID);
+
 		signal.setCreated(QDateTime::currentDateTime());
-		signal.setInstanceCreated(QDateTime::currentDateTime());
+		signal.setInstanceCreated(signal.createdMcs());
 
 		ObjectState objectState;
 		QString errMsg;
