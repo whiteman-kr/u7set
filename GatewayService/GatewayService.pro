@@ -31,6 +31,8 @@ unix {
 
 SOURCES += \
 	../lib/BuildInfo.cpp \
+	AppDataServiceClient.cpp \
+	AppSignalState.cpp \
 	GatewayDescription.cpp \
 	GatewayDescriptionParser.cpp \
 	AppSignalStates.cpp \
@@ -42,6 +44,8 @@ SOURCES += \
 HEADERS += \
 	../lib/ConstStrings.h \
 	../lib/BuildInfo.h \
+	AppDataServiceClient.h \
+	AppSignalState.h \
 	GatewayDescription.h \
 	GatewayDescriptionParser.h \
 	AppSignalStates.h \

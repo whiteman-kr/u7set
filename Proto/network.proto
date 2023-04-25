@@ -75,7 +75,7 @@ message GetAppSignalStateReply
 	repeated Proto.AppSignalState appSignalStates = 4;		// Limited to ADS_GET_APP_SIGNAL_STATE_MAX (2000)
 }
 
-// Geetting application signal states changes
+// Getting application signal states changes
 //
 message GetAppSignalStateChangesRequest
 {

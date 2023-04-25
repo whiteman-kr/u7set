@@ -2,16 +2,23 @@
 
 #include "GatewayDescription.h"
 #include "../AppSignalLib/AppSignal.h"
+#include "../OnlineLib/SoftwareSettings.h"
+#include "../OnlineLib/SoftwareInfo.h"
 
 namespace Gateway
 {
 	class Handler
 	{
 	public:
-		Handler();
+		Handler(const SoftwareInfo& swInfo,
+				const GatewayServiceSettings& settings);
 
 		virtual void run() = 0;
 		virtual void shutdown() = 0;
+
+	protected:
+		const SoftwareInfo& m_swInfo;
+		const GatewayServiceSettings& m_settings;
 	};
 
 	using HandlerShared = std::shared_ptr<Handler>;
@@ -21,7 +28,10 @@ namespace Gateway
 	public:
 		Handlers();
 
-		bool init(const Gateways& gateways, const AppSignals& appSignals);
+		bool init(const Gateways& gateways,
+				  const SoftwareInfo& swInfo,
+				  const GatewayServiceSettings& settings,
+				  const AppSignals& appSignals);
 		void run();
 		void shutdown();
 

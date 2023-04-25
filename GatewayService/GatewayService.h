@@ -86,8 +86,6 @@ private:
 
 	//DynamicAppSignalStates m_appSignalStates;
 
-	//
-
 	QTimer m_timer;
 };
 

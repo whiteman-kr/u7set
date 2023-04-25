@@ -5,17 +5,20 @@ namespace Gateway
 {
 	// ---------------------------------------------------------------------------------
 	//
-	// Class Gateway::Handler implementation
+	// Gateway::Handler class implementation
 	//
 	// ---------------------------------------------------------------------------------
 
-	Handler::Handler()
+	Handler::Handler(const SoftwareInfo& swInfo,
+					 const GatewayServiceSettings& settings) :
+		m_swInfo(swInfo),
+		m_settings(settings)
 	{
 	}
 
 	// ---------------------------------------------------------------------------------
 	//
-	// Class GatewayHandlers implementation
+	// Gateway::Handlers class implementation
 	//
 	// ---------------------------------------------------------------------------------
 
@@ -23,7 +26,10 @@ namespace Gateway
 	{
 	}
 
-	bool Handlers::init(const Gateways& gateways, const AppSignals& appSignals)
+	bool Handlers::init(const Gateways& gateways,
+						const SoftwareInfo& swInfo,
+						const GatewayServiceSettings& settings,
+						const AppSignals& appSignals)
 	{
 		Q_ASSERT(m_handlers.empty());
 
@@ -43,11 +49,8 @@ namespace Gateway
 						break;
 					}
 
-					IvsImpulseHandlerShared ivsHandler = std::make_shared<IvsImpulseHandler>();
-
-					result &= ivsHandler->init(ivsGateway, appSignals);
-
-					BREAK_IF_FALSE(result);
+					IvsImpulseHandlerShared ivsHandler =
+							std::make_shared<IvsImpulseHandler>(swInfo, settings, ivsGateway, appSignals);
 
 					m_handlers.push_back(ivsHandler);
 				}

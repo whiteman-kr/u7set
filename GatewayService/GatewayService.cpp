@@ -347,7 +347,7 @@ void GatewayServiceWorker::applyNewConfiguration()
 
 	bool result = true;
 
-	result &= m_handlers.init(m_gateways, m_appSignals);
+	result &= m_handlers.init(m_gateways, m_curSettingsProfile, m_appSignals);
 
 	if (result == false)
 	{

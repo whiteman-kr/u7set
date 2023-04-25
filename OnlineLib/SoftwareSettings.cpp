@@ -1797,6 +1797,8 @@ bool GatewayServiceSettings::writeToXml(XmlWriteHelper& xml) const
 {
 	writeStartSettings(xml);
 
+	//
+
 	xml.writeStringElement(EquipmentPropNames::CFG_SERVICE_ID1,
 						   cfgService1.equipmentId);
 	xml.writeHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
@@ -1808,6 +1810,21 @@ bool GatewayServiceSettings::writeToXml(XmlWriteHelper& xml) const
 	xml.writeHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP2,
 							 EquipmentPropNames::CFG_SERVICE_PORT2,
 							 cfgService2.address);
+	//
+
+	xml.writeStringElement(EquipmentPropNames::APP_DATA_SERVICE_ID1,
+						   appDataService1.equipmentId);
+	xml.writeHostAddressPort(EquipmentPropNames::APP_DATA_SERVICE_IP1,
+							 EquipmentPropNames::APP_DATA_SERVICE_PORT1,
+							 appDataService1.address);
+
+	xml.writeStringElement(EquipmentPropNames::APP_DATA_SERVICE_ID2,
+						   appDataService2.equipmentId);
+	xml.writeHostAddressPort(EquipmentPropNames::APP_DATA_SERVICE_IP2,
+							 EquipmentPropNames::APP_DATA_SERVICE_PORT2,
+							 appDataService2.address);
+	//
+
 	writeEndSettings(xml);
 
 	return true;
@@ -1830,6 +1847,17 @@ bool GatewayServiceSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.readHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP2,
 									  EquipmentPropNames::CFG_SERVICE_PORT2,
 									  &cfgService2.address);
+	//
+
+	result &= xml.readStringElement(EquipmentPropNames::APP_DATA_SERVICE_ID1, &appDataService1.equipmentId, true);
+	result &= xml.readHostAddressPort(EquipmentPropNames::APP_DATA_SERVICE_IP1,
+									  EquipmentPropNames::APP_DFATA_SERVICE_PORT1,
+									  &appDataService1.address);
+
+	result &= xml.readStringElement(EquipmentPropNames::APP_DATA_SERVICE_ID2, &appDataService2.equipmentId, true);
+	result &= xml.readHostAddressPort(EquipmentPropNames::APP_DATA_SERVICE_IP2,
+									  EquipmentPropNames::APP_DFATA_SERVICE_PORT2,
+									  &appDataService2.address);
 	return result;
 }
 
