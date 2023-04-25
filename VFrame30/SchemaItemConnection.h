@@ -152,6 +152,8 @@ namespace VFrame30
 		bool isValidityPin(const QUuid& pin) const;
 		bool isOutputPin(const QUuid& pinGuid) const;
 
+		const VFrame30::AfbPin& outputPin() const;
+
 		E::ColumnData data() const;
 		void setData(E::ColumnData value);
 

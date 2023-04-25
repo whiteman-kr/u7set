@@ -1763,7 +1763,7 @@ namespace Builder
 			return false;
 		}
 
-		ualSignal->setReceivedOptoAppSignalID(receivedAppSignalID);
+		ualSignal->setReceivedOptoAppSignalID(receivedAppSignalID, ualItem->ualReceiver());
 
 		result &= linkConnectedItems(ualItem, outPin, ualSignal);
 
@@ -3102,8 +3102,6 @@ namespace Builder
 	{
 		bool result = true;
 
-		std::vector<std::pair<AppSignal*, QString>> acquiredOptoSignalToLinkedValiditySignalID;	// Acquired input signal => linked validity signal EquipmentID
-
 		for(const UalSignal* optoSignal : m_ualSignals)
 		{
 			TEST_PTR_CONTINUE(optoSignal);
@@ -3150,11 +3148,17 @@ namespace Builder
 				continue;
 			}
 
-			QStringList refSignalIDs = optoSignal->refSignalIDs();
+			const UalReceiver* receiver = optoSignal->ualReceiver();
 
-			for(const QString& refSignalID : refSignalIDs)
+			TEST_PTR_CONTINUE(receiver);
+
+			QStringList nearestSignalsIDs;
+
+			getNearestOutSignalIDs(receiver->outputPin(), &nearestSignalsIDs);
+
+			for(const QString& signalID : nearestSignalsIDs)
 			{
-				bool res = appendFlagToSignal(refSignalID,
+				bool res = appendFlagToSignal(signalID,
 											E::AppSignalStateFlagType::Validity,
 											validitySignal->appSignalID(),
 											nullptr);
