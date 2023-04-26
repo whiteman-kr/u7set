@@ -1946,12 +1946,13 @@ class GetAppSignalStateReply PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kAppSignalStatesFieldNumber = 4,
+    kAppSignalStatesFieldNumber = 5,
     kServerTimeUtcFieldNumber = 2,
-    kServerTimeLocalFieldNumber = 3,
     kErrorFieldNumber = 1,
+    kStateChangesQueueSizeFieldNumber = 4,
+    kServerTimeLocalFieldNumber = 3,
   };
-  // repeated .Proto.AppSignalState appSignalStates = 4;
+  // repeated .Proto.AppSignalState appSignalStates = 5;
   int appsignalstates_size() const;
   private:
   int _internal_appsignalstates_size() const;
@@ -1969,7 +1970,7 @@ class GetAppSignalStateReply PROTOBUF_FINAL :
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::AppSignalState >&
       appsignalstates() const;
 
-  // optional int64 serverTimeUtc = 2;
+  // optional int64 serverTimeUtc = 2 [default = 0];
   bool has_servertimeutc() const;
   private:
   bool _internal_has_servertimeutc() const;
@@ -1980,19 +1981,6 @@ class GetAppSignalStateReply PROTOBUF_FINAL :
   private:
   ::PROTOBUF_NAMESPACE_ID::int64 _internal_servertimeutc() const;
   void _internal_set_servertimeutc(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 serverTimeLocal = 3;
-  bool has_servertimelocal() const;
-  private:
-  bool _internal_has_servertimelocal() const;
-  public:
-  void clear_servertimelocal();
-  ::PROTOBUF_NAMESPACE_ID::int64 servertimelocal() const;
-  void set_servertimelocal(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_servertimelocal() const;
-  void _internal_set_servertimelocal(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
   // optional int32 error = 1 [default = 0];
@@ -2008,6 +1996,32 @@ class GetAppSignalStateReply PROTOBUF_FINAL :
   void _internal_set_error(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
+  // optional int32 stateChangesQueueSize = 4 [default = 0];
+  bool has_statechangesqueuesize() const;
+  private:
+  bool _internal_has_statechangesqueuesize() const;
+  public:
+  void clear_statechangesqueuesize();
+  ::PROTOBUF_NAMESPACE_ID::int32 statechangesqueuesize() const;
+  void set_statechangesqueuesize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_statechangesqueuesize() const;
+  void _internal_set_statechangesqueuesize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int64 serverTimeLocal = 3 [default = 0];
+  bool has_servertimelocal() const;
+  private:
+  bool _internal_has_servertimelocal() const;
+  public:
+  void clear_servertimelocal();
+  ::PROTOBUF_NAMESPACE_ID::int64 servertimelocal() const;
+  void set_servertimelocal(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_servertimelocal() const;
+  void _internal_set_servertimelocal(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:Network.GetAppSignalStateReply)
  private:
   class _Internal;
@@ -2019,8 +2033,9 @@ class GetAppSignalStateReply PROTOBUF_FINAL :
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::AppSignalState > appsignalstates_;
   ::PROTOBUF_NAMESPACE_ID::int64 servertimeutc_;
-  ::PROTOBUF_NAMESPACE_ID::int64 servertimelocal_;
   ::PROTOBUF_NAMESPACE_ID::int32 error_;
+  ::PROTOBUF_NAMESPACE_ID::int32 statechangesqueuesize_;
+  ::PROTOBUF_NAMESPACE_ID::int64 servertimelocal_;
   friend struct ::TableStruct_network_2eproto;
 };
 // -------------------------------------------------------------------
@@ -2144,6 +2159,45 @@ class GetAppSignalStateChangesRequest PROTOBUF_FINAL :
 
   // accessors -------------------------------------------------------
 
+  enum : int {
+    kSelectedHashesFieldNumber = 2,
+    kReceiveModeFieldNumber = 1,
+  };
+  // repeated uint64 selectedHashes = 2;
+  int selectedhashes_size() const;
+  private:
+  int _internal_selectedhashes_size() const;
+  public:
+  void clear_selectedhashes();
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_selectedhashes(int index) const;
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >&
+      _internal_selectedhashes() const;
+  void _internal_add_selectedhashes(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >*
+      _internal_mutable_selectedhashes();
+  public:
+  ::PROTOBUF_NAMESPACE_ID::uint64 selectedhashes(int index) const;
+  void set_selectedhashes(int index, ::PROTOBUF_NAMESPACE_ID::uint64 value);
+  void add_selectedhashes(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >&
+      selectedhashes() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >*
+      mutable_selectedhashes();
+
+  // optional int32 receiveMode = 1 [default = 0];
+  bool has_receivemode() const;
+  private:
+  bool _internal_has_receivemode() const;
+  public:
+  void clear_receivemode();
+  ::PROTOBUF_NAMESPACE_ID::int32 receivemode() const;
+  void set_receivemode(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_receivemode() const;
+  void _internal_set_receivemode(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:Network.GetAppSignalStateChangesRequest)
  private:
   class _Internal;
@@ -2151,7 +2205,10 @@ class GetAppSignalStateChangesRequest PROTOBUF_FINAL :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 > selectedhashes_;
+  ::PROTOBUF_NAMESPACE_ID::int32 receivemode_;
   friend struct ::TableStruct_network_2eproto;
 };
 // -------------------------------------------------------------------
@@ -15524,7 +15581,7 @@ GetAppSignalStateRequest::mutable_signalhashes() {
 
 // optional int32 error = 1 [default = 0];
 inline bool GetAppSignalStateReply::_internal_has_error() const {
-  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
   return value;
 }
 inline bool GetAppSignalStateReply::has_error() const {
@@ -15532,7 +15589,7 @@ inline bool GetAppSignalStateReply::has_error() const {
 }
 inline void GetAppSignalStateReply::clear_error() {
   error_ = 0;
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 GetAppSignalStateReply::_internal_error() const {
   return error_;
@@ -15542,7 +15599,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 GetAppSignalStateReply::error() const {
   return _internal_error();
 }
 inline void GetAppSignalStateReply::_internal_set_error(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000002u;
   error_ = value;
 }
 inline void GetAppSignalStateReply::set_error(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -15550,7 +15607,7 @@ inline void GetAppSignalStateReply::set_error(::PROTOBUF_NAMESPACE_ID::int32 val
   // @@protoc_insertion_point(field_set:Network.GetAppSignalStateReply.error)
 }
 
-// optional int64 serverTimeUtc = 2;
+// optional int64 serverTimeUtc = 2 [default = 0];
 inline bool GetAppSignalStateReply::_internal_has_servertimeutc() const {
   bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
@@ -15578,9 +15635,9 @@ inline void GetAppSignalStateReply::set_servertimeutc(::PROTOBUF_NAMESPACE_ID::i
   // @@protoc_insertion_point(field_set:Network.GetAppSignalStateReply.serverTimeUtc)
 }
 
-// optional int64 serverTimeLocal = 3;
+// optional int64 serverTimeLocal = 3 [default = 0];
 inline bool GetAppSignalStateReply::_internal_has_servertimelocal() const {
-  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
   return value;
 }
 inline bool GetAppSignalStateReply::has_servertimelocal() const {
@@ -15588,7 +15645,7 @@ inline bool GetAppSignalStateReply::has_servertimelocal() const {
 }
 inline void GetAppSignalStateReply::clear_servertimelocal() {
   servertimelocal_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 GetAppSignalStateReply::_internal_servertimelocal() const {
   return servertimelocal_;
@@ -15598,7 +15655,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 GetAppSignalStateReply::servertimelocal() 
   return _internal_servertimelocal();
 }
 inline void GetAppSignalStateReply::_internal_set_servertimelocal(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000008u;
   servertimelocal_ = value;
 }
 inline void GetAppSignalStateReply::set_servertimelocal(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -15606,7 +15663,35 @@ inline void GetAppSignalStateReply::set_servertimelocal(::PROTOBUF_NAMESPACE_ID:
   // @@protoc_insertion_point(field_set:Network.GetAppSignalStateReply.serverTimeLocal)
 }
 
-// repeated .Proto.AppSignalState appSignalStates = 4;
+// optional int32 stateChangesQueueSize = 4 [default = 0];
+inline bool GetAppSignalStateReply::_internal_has_statechangesqueuesize() const {
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  return value;
+}
+inline bool GetAppSignalStateReply::has_statechangesqueuesize() const {
+  return _internal_has_statechangesqueuesize();
+}
+inline void GetAppSignalStateReply::clear_statechangesqueuesize() {
+  statechangesqueuesize_ = 0;
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 GetAppSignalStateReply::_internal_statechangesqueuesize() const {
+  return statechangesqueuesize_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 GetAppSignalStateReply::statechangesqueuesize() const {
+  // @@protoc_insertion_point(field_get:Network.GetAppSignalStateReply.stateChangesQueueSize)
+  return _internal_statechangesqueuesize();
+}
+inline void GetAppSignalStateReply::_internal_set_statechangesqueuesize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000004u;
+  statechangesqueuesize_ = value;
+}
+inline void GetAppSignalStateReply::set_statechangesqueuesize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_statechangesqueuesize(value);
+  // @@protoc_insertion_point(field_set:Network.GetAppSignalStateReply.stateChangesQueueSize)
+}
+
+// repeated .Proto.AppSignalState appSignalStates = 5;
 inline int GetAppSignalStateReply::_internal_appsignalstates_size() const {
   return appsignalstates_.size();
 }
@@ -15645,6 +15730,81 @@ GetAppSignalStateReply::appsignalstates() const {
 // -------------------------------------------------------------------
 
 // GetAppSignalStateChangesRequest
+
+// optional int32 receiveMode = 1 [default = 0];
+inline bool GetAppSignalStateChangesRequest::_internal_has_receivemode() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool GetAppSignalStateChangesRequest::has_receivemode() const {
+  return _internal_has_receivemode();
+}
+inline void GetAppSignalStateChangesRequest::clear_receivemode() {
+  receivemode_ = 0;
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 GetAppSignalStateChangesRequest::_internal_receivemode() const {
+  return receivemode_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 GetAppSignalStateChangesRequest::receivemode() const {
+  // @@protoc_insertion_point(field_get:Network.GetAppSignalStateChangesRequest.receiveMode)
+  return _internal_receivemode();
+}
+inline void GetAppSignalStateChangesRequest::_internal_set_receivemode(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000001u;
+  receivemode_ = value;
+}
+inline void GetAppSignalStateChangesRequest::set_receivemode(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_receivemode(value);
+  // @@protoc_insertion_point(field_set:Network.GetAppSignalStateChangesRequest.receiveMode)
+}
+
+// repeated uint64 selectedHashes = 2;
+inline int GetAppSignalStateChangesRequest::_internal_selectedhashes_size() const {
+  return selectedhashes_.size();
+}
+inline int GetAppSignalStateChangesRequest::selectedhashes_size() const {
+  return _internal_selectedhashes_size();
+}
+inline void GetAppSignalStateChangesRequest::clear_selectedhashes() {
+  selectedhashes_.Clear();
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetAppSignalStateChangesRequest::_internal_selectedhashes(int index) const {
+  return selectedhashes_.Get(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetAppSignalStateChangesRequest::selectedhashes(int index) const {
+  // @@protoc_insertion_point(field_get:Network.GetAppSignalStateChangesRequest.selectedHashes)
+  return _internal_selectedhashes(index);
+}
+inline void GetAppSignalStateChangesRequest::set_selectedhashes(int index, ::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  selectedhashes_.Set(index, value);
+  // @@protoc_insertion_point(field_set:Network.GetAppSignalStateChangesRequest.selectedHashes)
+}
+inline void GetAppSignalStateChangesRequest::_internal_add_selectedhashes(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  selectedhashes_.Add(value);
+}
+inline void GetAppSignalStateChangesRequest::add_selectedhashes(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_add_selectedhashes(value);
+  // @@protoc_insertion_point(field_add:Network.GetAppSignalStateChangesRequest.selectedHashes)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >&
+GetAppSignalStateChangesRequest::_internal_selectedhashes() const {
+  return selectedhashes_;
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >&
+GetAppSignalStateChangesRequest::selectedhashes() const {
+  // @@protoc_insertion_point(field_list:Network.GetAppSignalStateChangesRequest.selectedHashes)
+  return _internal_selectedhashes();
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >*
+GetAppSignalStateChangesRequest::_internal_mutable_selectedhashes() {
+  return &selectedhashes_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >*
+GetAppSignalStateChangesRequest::mutable_selectedhashes() {
+  // @@protoc_insertion_point(field_mutable_list:Network.GetAppSignalStateChangesRequest.selectedHashes)
+  return _internal_mutable_selectedhashes();
+}
 
 // -------------------------------------------------------------------
 

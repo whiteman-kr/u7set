@@ -21,18 +21,39 @@ namespace Gateway
 		virtual void onConnection() override;
 		virtual void onDisconnection() override;
 
+		void onTimer();
+
 		virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
 
-		void onTimer();
+		void onGetAppSignalStateReply(const char* replyData, quint32 replyDataSize);
+		void onGetAppSignalStateChangesReply(const char* replyData, quint32 replyDataSize);
 
 	private:
 		QTimer m_timer;
-		int m_timerCtr = 0;
 
-		std::vector<AppSignalStatesIterator> m_stateIterator;
+		AppSignalStates& m_states;
 
 		Network::GetAppSignalStateRequest m_getStatesRequest;
+		Network::GetAppSignalStateReply m_getStatesReply;
+
 		Network::GetAppSignalStateChangesRequest m_getStateChangesRequest;
+		Network::GetAppSignalStateChangesReply m_getStateChangesReply;
 	};
 
+	class AppDataServiceClientThread : public SimpleThread
+	{
+	public:
+		AppDataServiceClientThread(const SoftwareInfo& softwareInfo,
+								   const HostAddressPort& serverAddressPort1,
+								   const HostAddressPort& serverAddressPort2,
+								   const QString& clientDescription,
+								   AppSignalStates& states)
+		{
+			addWorker(new AppDataServiceClient(softwareInfo,
+											   serverAddressPort1,
+											   serverAddressPort2,
+											   clientDescription,
+											   states));
+		}
+	};
 }

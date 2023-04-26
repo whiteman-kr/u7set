@@ -28,7 +28,6 @@ unix {
 	CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
 }
 
-
 SOURCES += \
 	../lib/DataSource.cpp \
     ../lib/BuildInfo.cpp \
@@ -44,12 +43,12 @@ SOURCES += \
 	TcpArchiveClient.cpp \
 
 HEADERS += \
-	AppDataReceiver.h \
 	Stable.h \
 	../lib/ConstStrings.h \
     ../lib/DataSource.h \
     ../lib/BuildInfo.h \
 	../lib/LanControllerInfo.h \
+	AppDataReceiver.h \
 	AppDataService.h \
 	AppDataSource.h \
 	DynamicAppSignalState.h \

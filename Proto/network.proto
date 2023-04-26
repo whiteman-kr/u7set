@@ -69,16 +69,28 @@ message GetAppSignalStateReply
 {
 	optional int32 error = 1 [default = 0];
 
-	optional int64 serverTimeUtc = 2;
-	optional int64 serverTimeLocal = 3;
+	optional int64 serverTimeUtc = 2 [default = 0];
+	optional int64 serverTimeLocal = 3 [default = 0];
 
-	repeated Proto.AppSignalState appSignalStates = 4;		// Limited to ADS_GET_APP_SIGNAL_STATE_MAX (2000)
+	optional int32 stateChangesQueueSize = 4  [default = 0];
+
+	repeated Proto.AppSignalState appSignalStates = 5;		// Limited to ADS_GET_APP_SIGNAL_STATE_MAX (2000)
 }
 
 // Getting application signal states changes
 //
 message GetAppSignalStateChangesRequest
 {
+	optional int32 receiveMode = 1 [default = 0];	// values of SimpleAppSignalStatesQueue::ReceiveMode
+													//
+													// 0 == continue in previously set mode (1 or 2)
+													// 1 == receive all signals, default mode
+													// 2 == receive only selected (update selected set from selectedHashed)
+
+													// to avoid StatesQueue performanse decreasing
+													// don't set modes 1 and 2 in messages permanently!
+													// instead use mode 0
+	repeated uint64 selectedHashes = 2;
 }
 
 message GetAppSignalStateChangesReply

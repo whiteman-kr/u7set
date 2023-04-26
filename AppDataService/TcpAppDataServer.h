@@ -45,7 +45,7 @@ private:
 	void onGetAppSignalParamRequest(const char* requestData, quint32 requestDataSize);		// returns class AppSignalParam
 	void onGetAppSignalRequest(const char* requestData, quint32 requestDataSize);			// returns class Signal
 
-	void onGetAppSignalStateRequest(const char* requestData, quint32 requestDataSize);
+	void onGetAppSignalStateRequest(const char* requestData, quint32 requestDataSize, bool constSize);
 	void onGetAppSignalStateChangesRequest(const char* requestData, quint32 requestDataSize);
 
 	void onGetAppDataSourcesInfoRequest();
@@ -56,9 +56,6 @@ private:
 	// helper functions
 	//
 	int getSignalListPartCount(int signalCount);
-
-//	bool getAppSignalStateState(Hash hash, AppSignalState& state);
-//	bool getDataSourceState(Hash hash, AppSignalState& state);
 
 	void getServerTimes(qint64* utc, qint64* local);
 

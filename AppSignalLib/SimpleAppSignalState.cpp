@@ -78,6 +78,48 @@ SimpleAppSignalStatesQueue::~SimpleAppSignalStatesQueue()
 {
 }
 
+void SimpleAppSignalStatesQueue::push(const SimpleAppSignalState& item, const QThread* thread, int* curSize, int* curMaxSize)
+{
+	if (m_receiveMode != ReceiveMode::AllSignals)
+	{
+		SimpleMutexLocker(&m_receiveModeMutex, thread);
+
+		if (m_receiveMode == ReceiveMode::SelectedSignals &&
+			m_selectedHashes.contains(item.hash) == false)
+		{
+			return;
+		}
+	}
+
+	FastThreadSafeQueue<SimpleAppSignalState>::push(item, thread, curSize, curMaxSize);
+}
+
+void SimpleAppSignalStatesQueue::setReceiveMode(ReceiveMode mode, std::set<Hash>& selectedHashes)
+{
+	if (mode == ReceiveMode::Continue)
+	{
+		return;
+	}
+
+	SimpleMutexLocker sl(&m_receiveModeMutex);
+
+	switch(mode)
+	{
+	case ReceiveMode::AllSignals:
+		m_receiveMode = ReceiveMode::AllSignals;
+		m_selectedHashes.clear();
+		return;
+
+	case ReceiveMode::SelectedSignals:
+		m_receiveMode = ReceiveMode::SelectedSignals;
+		m_selectedHashes.swap(selectedHashes);
+		return;
+
+	default:
+		Q_ASSERT(false);
+	}
+}
+
 void SimpleAppSignalStatesQueue::afterPush()
 {
 	m_afterPushCtr++;

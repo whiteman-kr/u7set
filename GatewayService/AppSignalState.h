@@ -7,12 +7,17 @@ namespace Gateway
 	class AppSignalState
 	{
 	public:
+		AppSignalState();
 		AppSignalState(Hash appSignalIdHash);
+		AppSignalState(const AppSignalState& appState);
 
-		void updateState(const SimpleAppSignalState& state);
+		void updateState(const Proto::AppSignalState& protoState);
 		const SimpleAppSignalState& getState() const;
 
-		void switchStates();
+		Hash hash() const;
+		void setHash(Hash h);
+
+		bool isWorkable() const;
 
 	private:
 		Hash m_hash = 0;
@@ -20,6 +25,6 @@ namespace Gateway
 		SimpleAppSignalState m_state[2];
 	};
 
-	using AppSignalStates = std::map<Hash, AppSignalState>;
+	using AppSignalStates = std::vector<AppSignalState>;
 	using AppSignalStatesIterator = std::map<Hash, AppSignalState>::iterator;
 }

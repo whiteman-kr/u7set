@@ -8,9 +8,29 @@ namespace Gateway
 	//
 	// ---------------------------------------------------------------------------------
 
-	void AppSignalState::updateState(const SimpleAppSignalState& state)
+	AppSignalState::AppSignalState()
 	{
-		m_state[m_writeStateIndex] = state;
+	}
+
+	AppSignalState::AppSignalState(Hash appSignalIdHash) :
+		m_hash(appSignalIdHash)
+	{
+	}
+
+	AppSignalState::AppSignalState(const AppSignalState& appState)
+	{
+		m_hash = appState.hash();
+	}
+
+	void AppSignalState::updateState(const Proto::AppSignalState& protoState)
+	{
+		if (m_hash != protoState.hash())
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		m_state[m_writeStateIndex].load(protoState);
 		m_writeStateIndex.fetch_xor(1);
 	}
 
@@ -19,4 +39,18 @@ namespace Gateway
 		return m_state[m_writeStateIndex ^ 1];
 	}
 
+	Hash AppSignalState::hash() const
+	{
+		return m_hash;
+	}
+
+	void AppSignalState::setHash(Hash h)
+	{
+		m_hash = h;
+	}
+
+	bool AppSignalState::isWorkable() const
+	{
+		return m_hash != 0;
+	}
 }

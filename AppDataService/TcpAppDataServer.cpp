@@ -68,7 +68,11 @@ void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData
 		break;
 
 	case ADS_GET_APP_SIGNAL_STATE:
-		onGetAppSignalStateRequest(requestData, requestDataSize);
+		onGetAppSignalStateRequest(requestData, requestDataSize, false);
+		break;
+
+	case ADS_GET_APP_SIGNAL_STATE_CONST_SIZE:
+		onGetAppSignalStateRequest(requestData, requestDataSize, true);
 		break;
 
 	case ADS_GET_APP_SIGNAL_STATE_CHANGES:
@@ -271,7 +275,7 @@ void TcpAppDataServer::onGetAppSignalRequest(const char* requestData, quint32 re
 	sendReply(m_getAppSignalReply);
 }
 
-void TcpAppDataServer::onGetAppSignalStateRequest(const char* requestData, quint32 requestDataSize)
+void TcpAppDataServer::onGetAppSignalStateRequest(const char* requestData, quint32 requestDataSize, bool constSize)
 {
 	bool result = m_getAppSignalStateRequest.ParseFromArray(requestData, requestDataSize);
 
@@ -293,6 +297,11 @@ void TcpAppDataServer::onGetAppSignalStateRequest(const char* requestData, quint
 		return;
 	}
 
+	if (hashesCount > 0)
+	{
+		m_getAppSignalStateReply.mutable_appsignalstates()->Reserve(hashesCount);
+	}
+
 	const DynamicAppSignalStates& appSignalStates = m_appDataService.appSignalStates();
 
 	for(int i = 0; i < hashesCount; i++)
@@ -303,15 +312,17 @@ void TcpAppDataServer::onGetAppSignalStateRequest(const char* requestData, quint
 
 		result = appSignalStates.getCurrentState(hash, appSignalState);
 
-		if (result == false)
+		if (constSize == false && result == false)
 		{
-			//assert(false);			// unknown hash
-			continue;
+			continue;	// unknown hash
 		}
 
 		Proto::AppSignalState* protoAppSignalState = m_getAppSignalStateReply.add_appsignalstates();
 
-		appSignalState.save(protoAppSignalState);
+		if (result == true)
+		{
+			appSignalState.save(protoAppSignalState);
+		}
 	}
 
 	qint64 utc = 0;
@@ -322,6 +333,8 @@ void TcpAppDataServer::onGetAppSignalStateRequest(const char* requestData, quint
 	m_getAppSignalStateReply.set_servertimeutc(utc);
 	m_getAppSignalStateReply.set_servertimelocal(local);
 
+	m_getAppSignalStateReply.set_statechangesqueuesize(m_signalStatesQueue != nullptr ?
+											m_signalStatesQueue->size(QThread::currentThread()) : 0);
 	sendReply(m_getAppSignalStateReply);
 
 	static int ctr = 0;
@@ -345,7 +358,9 @@ void TcpAppDataServer::onGetAppSignalStateChangesRequest(const char* requestData
 					arg(peerAddr().addressStr()));
 	}
 
-	bool result = m_getAppSignalStateChangesRequest.ParseFromArray(requestData, requestDataSize);
+	Network::GetAppSignalStateChangesRequest& request =  m_getAppSignalStateChangesRequest;
+
+	bool result = request.ParseFromArray(requestData, requestDataSize);
 
 	m_getAppSignalStateChangesReply.Clear();
 
@@ -354,6 +369,26 @@ void TcpAppDataServer::onGetAppSignalStateChangesRequest(const char* requestData
 		m_getAppSignalStateChangesReply.set_error(TO_INT(E::NetworkError::ParseRequestError));
 		sendReply(m_getAppSignalStateChangesReply);
 		return;
+	}
+
+	SimpleAppSignalStatesQueue::ReceiveMode receiveMode =
+			static_cast<SimpleAppSignalStatesQueue::ReceiveMode>(request.receivemode());
+
+	if (receiveMode != SimpleAppSignalStatesQueue::ReceiveMode::Continue)
+	{
+		std::set<Hash> selectedHashes;
+
+		if (receiveMode == SimpleAppSignalStatesQueue::ReceiveMode::SelectedSignals)
+		{
+			int count = request.selectedhashes_size();
+
+			for(int i = 0; i < count; i++)
+			{
+				selectedHashes.insert(request.selectedhashes(i));
+			}
+		}
+
+		m_signalStatesQueue->setReceiveMode(receiveMode, selectedHashes);
 	}
 
 	QThread* thisThread = QThread::currentThread();

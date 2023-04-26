@@ -151,7 +151,12 @@ namespace EquipmentPropNames
 	inline const QString HOSTNAME("Hostname");
 
 	inline const QString APP_DATA_SERVICE_ID1("AppDataServiceID1");
+	inline const QString APP_DATA_SERVICE_IP1("AppDataServiceIP1");
+	inline const QString APP_DATA_SERVICE_PORT1("AppDataServicePort1");
+
 	inline const QString APP_DATA_SERVICE_ID2("AppDataServiceID2");
+	inline const QString APP_DATA_SERVICE_IP2("AppDataServiceIP2");
+	inline const QString APP_DATA_SERVICE_PORT2("AppDataServicePort2");
 
 	inline const QString START_SCHEMA_ID("StartSchemaID");
 	inline const QString SCHEMA_TAGS("SchemaTags");

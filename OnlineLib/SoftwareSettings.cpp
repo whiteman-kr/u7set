@@ -1851,12 +1851,12 @@ bool GatewayServiceSettings::readFromXml(XmlReadHelper& xml)
 
 	result &= xml.readStringElement(EquipmentPropNames::APP_DATA_SERVICE_ID1, &appDataService1.equipmentId, true);
 	result &= xml.readHostAddressPort(EquipmentPropNames::APP_DATA_SERVICE_IP1,
-									  EquipmentPropNames::APP_DFATA_SERVICE_PORT1,
+									  EquipmentPropNames::APP_DATA_SERVICE_PORT1,
 									  &appDataService1.address);
 
 	result &= xml.readStringElement(EquipmentPropNames::APP_DATA_SERVICE_ID2, &appDataService2.equipmentId, true);
 	result &= xml.readHostAddressPort(EquipmentPropNames::APP_DATA_SERVICE_IP2,
-									  EquipmentPropNames::APP_DFATA_SERVICE_PORT2,
+									  EquipmentPropNames::APP_DATA_SERVICE_PORT2,
 									  &appDataService2.address);
 	return result;
 }

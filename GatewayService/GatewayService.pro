@@ -28,17 +28,16 @@ unix {
 	CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
 }
 
-
 SOURCES += \
 	../lib/BuildInfo.cpp \
 	AppDataServiceClient.cpp \
 	AppSignalState.cpp \
 	GatewayDescription.cpp \
 	GatewayDescriptionParser.cpp \
-	AppSignalStates.cpp \
 	GatewayHandler.cpp \
 	GatewayService.cpp \
 	GatewayServiceMain.cpp \
+	IvsImpulseCommThread.cpp \
 	IvsImpulseGatewayHandler.cpp
 
 HEADERS += \
@@ -48,9 +47,10 @@ HEADERS += \
 	AppSignalState.h \
 	GatewayDescription.h \
 	GatewayDescriptionParser.h \
-	AppSignalStates.h \
 	GatewayHandler.h \
 	GatewayService.h \
+	InfoServer/IvsSocketThread.h \
+	IvsImpulseCommThread.h \
 	IvsImpulseGatewayHandler.h
 
 CONFIG += precompile_header

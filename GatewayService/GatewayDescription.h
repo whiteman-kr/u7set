@@ -132,6 +132,7 @@ namespace Gateway
 		SettingValue getSettingValue(E::Setting st) const;
 
 		const std::vector<QString>& signalIDs() const;
+		int signalsCount() const;
 
 		void fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals) const;
 
@@ -180,6 +181,10 @@ namespace Gateway
 		virtual bool checkAndApplySettings(int lineNo, ParserLog& log);
 
 		virtual void appendSignalList();
+
+		const SignalLists& signalLists() const;
+
+		int signalsCount() const;
 
 		const std::vector<File>& files() const;
 
@@ -291,6 +296,14 @@ namespace Gateway
 		virtual bool checkAndApplySettings(int lineNo, ParserLog& log) override;
 
 		virtual void appendSignalList() override;
+
+		//
+
+		int systemID() const;
+		HostAddressPort gatewayIP1() const;
+		HostAddressPort gatewayIP2() const;
+		int listsVersion() const;
+		int period() const;
 
 	private:
 		virtual void writeSettingsToXml(XmlWriteHelper& xml) const override;

@@ -137,6 +137,11 @@ namespace Gateway
 		return m_signalIDs;
 	}
 
+	int SignalList::signalsCount() const
+	{
+		return TO_INT(m_signalIDs.size());
+	}
+
 	void SignalList::fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals) const
 	{
 		TEST_PTR_RETURN(acquiredSignals);
@@ -322,6 +327,25 @@ namespace Gateway
 	void Gateway::appendSignalList()
 	{
 		Q_ASSERT(false);		// this function should be called in derived classes only!
+	}
+
+	const SignalLists& Gateway::signalLists() const
+	{
+		return m_signalLists;
+	}
+
+	int Gateway::signalsCount() const
+	{
+		int signalsCount = 0;
+
+		for(const auto& sl : m_signalLists)
+		{
+			TEST_PTR_CONTINUE(sl);
+
+			signalsCount += sl->signalsCount();
+		}
+
+		return signalsCount;
 	}
 
 	const std::vector<File>& Gateway::files() const
@@ -813,6 +837,31 @@ namespace Gateway
 	void IvsImpulseGateway::appendSignalList()
 	{
 		m_signalLists.push_back(std::make_shared<IvsImpulseSignalList>());
+	}
+
+	int IvsImpulseGateway::systemID() const
+	{
+		return m_systemID;
+	}
+
+	HostAddressPort IvsImpulseGateway::gatewayIP1() const
+	{
+		return m_gatewayIP1;
+	}
+
+	HostAddressPort IvsImpulseGateway::gatewayIP2() const
+	{
+		return m_gatewayIP2;
+	}
+
+	int IvsImpulseGateway::listsVersion() const
+	{
+
+	}
+
+	int IvsImpulseGateway::period() const
+	{
+		return m_period;
 	}
 
 	void IvsImpulseGateway::writeSettingsToXml(XmlWriteHelper& xml) const

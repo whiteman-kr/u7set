@@ -189,8 +189,13 @@ const quint32 ADS_GET_APP_SIGNAL_LIST_NEXT = 0x1201;
 
 const quint32 ADS_GET_APP_SIGNAL_PARAM = 0x1301;
 const quint32 ADS_GET_APP_SIGNAL = 0x1302;
-const quint32 ADS_GET_APP_SIGNAL_STATE = 0x1303;
+
+const quint32 ADS_GET_APP_SIGNAL_STATE = 0x1303;				// states for unknown hashes NOT placed in reply
+																// so, reply array size CAN BE LESS than request array size
 const quint32 ADS_GET_APP_SIGNAL_STATE_CHANGES = 0x1304;
+
+const quint32 ADS_GET_APP_SIGNAL_STATE_CONST_SIZE = 0x1305;		// states for unknown hashes PLACED in reply
+																// reply array size always EQUAL to request array size
 
 // Limiters and other constants
 //

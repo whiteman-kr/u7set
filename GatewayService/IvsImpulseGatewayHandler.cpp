@@ -13,28 +13,102 @@ namespace Gateway
 										 IvsImpulseGatewayShared gateway,
 										 const AppSignals& appSignals) :
 		Handler(swInfo, settings),
+		m_softwareInfo(swInfo),
+		m_appDataService1(settings.appDataService1.address),
+		m_appDataService2(settings.appDataService2.address),
 		m_gateway(gateway),
 		m_appSignals(appSignals)
 	{
-		m_appDataServiceClient =
-				new AppDataServiceClient(swInfo,
-										 settings.appDataService1.address,
-										 settings.appDataService2.address,
-										 QString("GatewayService %1").arg(swInfo.equipmentID()));
 	}
 
-	bool IvsImpulseHandler::init()
+	IvsImpulseHandler::~IvsImpulseHandler()
 	{
-		return true;
+		shutdown();
 	}
 
 	void IvsImpulseHandler::run()
 	{
+		init();
 
+		m_appDataServiceClientThread =
+				new AppDataServiceClientThread( m_softwareInfo,
+												m_appDataService1,
+												m_appDataService2,
+												QString("GatewayService %1").arg(m_softwareInfo.equipmentID()),
+												m_states);
+		m_appDataServiceClientThread->start();
+
+		//
+
+		m_ivsImpulseCommThread = new IvsImpulseCommThread(*this);
+		m_ivsImpulseCommThread->start();
 	}
 
 	void IvsImpulseHandler::shutdown()
 	{
+		if (m_ivsImpulseCommThread != nullptr)
+		{
+			m_ivsImpulseCommThread->quitAndWait();
+			delete m_ivsImpulseCommThread;
+			m_ivsImpulseCommThread = nullptr;
+		}
 
+		if (m_appDataServiceClientThread != nullptr)
+		{
+			m_appDataServiceClientThread->quitAndWait();
+			delete m_appDataServiceClientThread;
+			m_appDataServiceClientThread = nullptr;
+		}
+	}
+
+	bool IvsImpulseHandler::init()
+	{
+		m_lists.clear();
+		m_states.clear();
+
+		int signalsCount = m_gateway->signalsCount();
+
+		m_states.reserve(signalsCount);
+
+		const SignalLists& lists = m_gateway->signalLists();
+
+		int signalStateIndex = 0;
+
+		for(SignalListShared sl : lists)
+		{
+			TEST_PTR_CONTINUE(sl);
+
+			IvsImpulseSignalListShared ivsList = std::dynamic_pointer_cast<IvsImpulseSignalList>(sl);
+
+			TEST_PTR_CONTINUE(ivsList);
+
+			IvsImpulseListInfo li;
+
+			li.info = ivsList;
+			li.startIndex = signalStateIndex;
+
+			const auto& ids = ivsList->signalIDs();
+
+			for(const QString& id : ids)
+			{
+				const AppSignal* s = m_appSignals.getSignalByID(id);
+
+				if (s != nullptr)
+				{
+					m_states.emplace_back(calcHash(id));
+				}
+				else
+				{
+					m_states.emplace_back(0);		// init as NOT workable
+				}
+
+				signalStateIndex++;
+			}
+
+			li.size = signalStateIndex - li.startIndex;
+
+			m_lists.push_back(li);
+		}
+		return true;
 	}
 }
