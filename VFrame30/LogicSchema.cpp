@@ -137,6 +137,15 @@ namespace VFrame30
 			addLayer(l);
 		}
 
+		// Layers were reordered need to set active layer again.
+		//
+		if (auto compileLayerIt = std::find_if(layersCopy.begin(), layersCopy.end(), [](const auto& l) { return l->compile(); });
+			compileLayerIt != layersCopy.end())
+		{
+			Q_ASSERT(*compileLayerIt);
+			setActiveLayer(*compileLayerIt);
+		}
+
 		// --
 		//
 		if (message.schema().has_logic_schema() == false)

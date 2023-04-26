@@ -12,7 +12,12 @@ namespace VFrame30
 
 	public:
 		TuningSchema(void);
-		virtual ~TuningSchema(void);
+
+		// Serialization
+		//
+	protected:
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	public:
 		virtual QStringList getSignalList() const override;
