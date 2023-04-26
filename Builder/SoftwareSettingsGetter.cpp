@@ -1430,15 +1430,6 @@ bool MonitorSettingsGetter::readSettings(const Builder::Context* context,
 
 	startSchemaId = startSchemaId.trimmed();
 
-	if (startSchemaId.isEmpty() == true)
-	{
-		QString errorStr = QString("Monitor configuration error %1, property startSchemaId is invalid").
-				arg(software->equipmentIdTemplate());
-
-		log->writeError(errorStr);
-		return false;
-	}
-
 	// SchemaTags
 	//
 	result = DeviceHelper::getStrProperty(software, EquipmentPropNames::SCHEMA_TAGS, &schemaTags, log);

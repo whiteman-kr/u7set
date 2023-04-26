@@ -15,6 +15,7 @@ namespace Builder
 
 		virtual bool createSettingsProfile(const QString& profile) override;
 		virtual bool generateConfigurationStep1() override;
+		virtual bool generateConfigurationStep2() override;
 
 	protected:
 		bool initSchemaTags();
@@ -33,6 +34,7 @@ namespace Builder
 	private:
 		QStringList m_tuningSources;
 
+		VFrame30::SchemaDetailsSet m_detailsSet;
 		QStringList m_schemaTagList;		// Generated in writeMonitorSettings
 	};
 }

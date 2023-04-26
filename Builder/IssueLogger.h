@@ -546,7 +546,8 @@ namespace Builder
 		void errEQP6205(QString tuningClientMonitorId);				// No tuning sources found for %1.
 		void errEQP6206(QString tuningClientID);					// Property %1.TuningServiceID can't be empty if tuning enabled.
 
-		void errEQP6210(QString behaviorId, QString softwareObjectStrId);	// Client behavior (%1) specified in %2.BehaviorID does not exist.
+		void errEQP6210(QString behaviorId, QString softwareObjectStrId);			// Client behavior (%1) specified in %2.BehaviorID does not exist.
+		void errEQP6211(QString monitorId, QString startSchemaId, QString profile);	// The specified schema %1 in property %2.StartSchemaID (profile %3) does not exist.
 
 	public:
 		void addItemsIssues(OutputMessageLevel level, int issueCode, const std::vector<QUuid>& itemsUuids);

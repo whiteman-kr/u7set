@@ -105,6 +105,38 @@ namespace Builder
 		return result;
 	}
 
+	bool MonitorCfgGenerator::generateConfigurationStep2()
+	{
+		if (bool ok = SoftwareCfgGenerator::generateConfigurationStep2();
+			ok == false)
+		{
+			return false;
+		}
+
+		// Check that schema from property startSchemaId is exist. Check for all exisiting profiles.
+		// m_detailsSet must be filled in.
+		//
+		bool result = true;
+		for (QStringList profiles = m_settingsSet.getSettingsProfiles();
+			 const QString& profile : profiles)
+		{
+			std::shared_ptr<const MonitorSettings> profileSettings = m_settingsSet.getSettingsProfile<MonitorSettings>(profile);
+			TEST_PTR_LOG_RETURN_FALSE(profileSettings, m_log);
+
+			QString startSchemaId = profileSettings->startSchemaId;
+			if (startSchemaId.isEmpty() == false)
+			{
+				if (m_detailsSet.schemaDetails(startSchemaId) == nullptr)
+				{
+					m_log->errEQP6211(m_software->equipmentId(), startSchemaId, profile);
+					result = false;
+				}
+			}
+		}
+
+		return result;
+	}
+
 	bool MonitorCfgGenerator::initSchemaTags()
 	{
 		std::shared_ptr<const MonitorSettings> settings = m_settingsSet.getSettingsDefaultProfile<MonitorSettings>();
@@ -277,12 +309,12 @@ namespace Builder
 
 		// --
 		//
-		VFrame30::SchemaDetailsSet detailsSet;
+		m_detailsSet.clear();
 
 		for (const auto& schemaFile : monitorSchemas)
 		{
 			result &= m_cfgXml->addLinkToFile(schemaFile->subDir, schemaFile->fileName);
-			detailsSet.add(schemaFile->details);
+			m_detailsSet.add(schemaFile->details);
 		}
 
 		// Save details
@@ -290,7 +322,7 @@ namespace Builder
 		{
 			QByteArray fileData;
 
-			if (bool ok = detailsSet.saveToByteArray(&fileData);
+			if (bool ok = m_detailsSet.saveToByteArray(&fileData);
 				ok == true)
 			{
 				BuildFile* schemaDetailsBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "SchemaDetails.pbuf", fileData);
