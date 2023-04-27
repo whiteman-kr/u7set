@@ -149,7 +149,7 @@ namespace VFrame30
 		return true;
 	}
 
-	QWidget* SchemaItemPushButton::createWidget(QWidget* parent, bool editMode, double zoom)
+	QWidget* SchemaItemPushButton::createWidgetImpl(QWidget* parent, bool editMode, double zoom)
 	{
 		if (parent == nullptr)
 		{
@@ -191,10 +191,6 @@ namespace VFrame30
 			{
 				connect(control, &QPushButton::toggled, this, &SchemaItemPushButton::toggled);
 			}
-
-			// Run script after create
-			//
-			afterCreate(control);
 		}
 
 		updateWdgetPosAndSize(control, zoom);
@@ -247,11 +243,13 @@ namespace VFrame30
 	}
 
 
-	void SchemaItemPushButton::afterCreate(QPushButton* control)
+	void SchemaItemPushButton::afterCreateImpl(QWidget* control)
 	{
-		if (control == nullptr)
+		QPushButton* pushButtonWidget = dynamic_cast<QPushButton*>(control);
+
+		if (pushButtonWidget == nullptr)
 		{
-			assert(control);
+			assert(pushButtonWidget);
 			return;
 		}
 
@@ -265,7 +263,7 @@ namespace VFrame30
 		//
 		if (m_jsAfterCreate.isUndefined() == true)
 		{
-			m_jsAfterCreate = evaluateScript(control, m_scriptAfterCreate);
+			m_jsAfterCreate = evaluateScript(pushButtonWidget, m_scriptAfterCreate);
 
 			if (m_jsAfterCreate.isError() == true ||
 				m_jsAfterCreate.isNull() == true)
@@ -276,7 +274,7 @@ namespace VFrame30
 
 		// Run script
 		//
-		runEventScript(m_jsAfterCreate, control, false);
+		runEventScript(m_jsAfterCreate, pushButtonWidget, false);
 
 		return;
 	}

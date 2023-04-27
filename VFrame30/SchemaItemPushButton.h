@@ -181,12 +181,15 @@ namespace VFrame30
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
 		// Methods
+		//
 	public:
-		virtual QWidget* createWidget(QWidget* parent, bool editMode, double zoom) override;
+		virtual QWidget* createWidgetImpl(QWidget* parent, bool editMode, double zoom) override;
 		virtual void updateWidgetProperties(QWidget* widget) const override;
 
+	protected:
+		virtual void afterCreateImpl(QWidget* control) override;
+
 	protected slots:
-		void afterCreate(QPushButton* control);
 		void clicked(bool checked);
 		void pressed();
 		void released();
