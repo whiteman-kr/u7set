@@ -65,9 +65,7 @@ namespace Gateway
 		static const QString SECTION_GATEWAY;
 		static const QString SECTION_SIGNAL_LIST;
 
-		static const QString START_LINE_COMMENT;
-		static const QString START_MULTILINE_COMMENT;
-		static const QString END_MULTILINE_COMMENT;
+		static const QString START_COMMENT;
 
 		static const QString START_SECTION;
 		static const QString END_SECTION;
@@ -159,10 +157,7 @@ namespace Gateway
 
 		ParserLog m_log;
 
-
 		//
-
-		bool m_multilineCommentStarted = false;
 
 		QStringList m_knownSections;
 		QStringList m_knownSettings;

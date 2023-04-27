@@ -17,10 +17,14 @@ namespace Gateway
 		Hash hash() const;
 		void setHash(Hash h);
 
+		int listIndex() const;
+		void setListIndex(int index);
+
 		bool isWorkable() const;
 
 	private:
 		Hash m_hash = 0;
+		int m_listIndex = 0;
 		std::atomic<int> m_writeStateIndex = { 0 };
 		SimpleAppSignalState m_state[2];
 	};

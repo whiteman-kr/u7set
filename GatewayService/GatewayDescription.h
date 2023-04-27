@@ -43,6 +43,7 @@ namespace Gateway
 			GatewayIP2,
 			ListsVersion,
 			Period,
+			TimeType,
 
 			ListNo,
 			DataType,
@@ -69,9 +70,19 @@ namespace Gateway
 			// IVS_Impulse data types
 			//
 			Analog_A,			// Analog parameters, format 'A'
-			Discrete_B			// Discrete packed parameters, format 'B'
+			Discrete_B,			// Discrete packed parameters, format 'B'
+			Discrete_D			// Discrete parameters, format 'D'
 		};
 		Q_ENUM(SignalListDataType)
+
+		enum class TimeType
+		{
+			PlantTime,
+			ServerLocalTime,
+			ServerTimeUTC0
+		};
+		Q_ENUM(TimeType)
+
 	};
 
 	class ParserLog;
@@ -325,6 +336,7 @@ namespace Gateway
 		HostAddressPort m_gatewayIP1;
 		HostAddressPort m_gatewayIP2;
 		int m_listsVersion = 0;
+		E::TimeType m_timeType = E::TimeType::PlantTime;
 		int m_period = 1000;
 	};
 

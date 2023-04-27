@@ -313,6 +313,7 @@ namespace XmlAttribute
 	inline const QString GATEWAY_IP1("GatewayIP1");
 	inline const QString GATEWAY_IP2("GatewayIP2");
 	inline const QString LISTS_VERSION("ListsVersion");
+	inline const QString TIME_TYPE("TimeType");
 	inline const QString PERIOD("Period");
 
 	inline const QString LIST_NO("ListNo");

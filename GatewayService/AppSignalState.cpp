@@ -49,6 +49,17 @@ namespace Gateway
 		m_hash = h;
 	}
 
+	int AppSignalState::listIndex() const
+	{
+		return m_listIndex;
+	}
+
+	void AppSignalState::setListIndex(int index)
+	{
+		m_listIndex = index;
+	}
+
+
 	bool AppSignalState::isWorkable() const
 	{
 		return m_hash != 0;

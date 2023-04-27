@@ -51,6 +51,7 @@ HEADERS += \
 	GatewayService.h \
 	InfoServer/IvsSocketThread.h \
 	IvsImpulseCommThread.h \
+	IvsImpulseDataProtocol.h \
 	IvsImpulseGatewayHandler.h
 
 CONFIG += precompile_header

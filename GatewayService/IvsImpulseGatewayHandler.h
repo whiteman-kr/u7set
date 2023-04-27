@@ -10,8 +10,11 @@ namespace Gateway
 	struct IvsImpulseListInfo
 	{
 		IvsImpulseSignalListShared info;
+
 		int startIndex = -1;
 		int size = -1;
+
+		quint16 iventsPacketNo = 0;
 	};
 
 	class IvsImpulseHandler : public Handler

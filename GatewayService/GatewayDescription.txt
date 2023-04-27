@@ -1,61 +1,92 @@
-// This is a Comment
-// 
-// [Gateway], [SignalList], etc - sections
+//  this is a comment
+
 //
-// Type = V, ID = N, etc - settings
+//	[Gateway], [SignalList], etc - sections
 //
-// Sections names, settings names are case insensitive
+//	Type = V, ID = N, etc - settings
 //
-// Settings values are case sensetive
+//	Sections names and settings names are case insensitive
 //
-// * - required settings
+//	Settings values are case sensitive
+//
+//	Signal IDs are case sensitive
+//
 
-[Gateway]
+[Gateway]   						// --- gateway description
 
+GatewayType = IVS_Impulse           // gateway type
+GatewayID = HAES_1B_AZ1				// gateway identifier
+GatewayDescription = description		// free style gateway description
 
-GatewayType = IVS_Impulse               // * gateway type
-GatewayID = HAES_1B_AZ1			// * gateway identifier
-Description = description		//   free style gateway description	
+// IVS Impulse gateway specifis settings
 
-// IVS Impulse specifis settings
+SystemID = 2						// global system identifier
 
-SystemID = 2				// * global system identifier
+GatewayIP1 = 224.0.0.221:9090		// IP and port of IVS gateway channel 1
+GatewayIP2 = 224.0.1.222:9090	    // IP and port of IVS gateway channel 2
 
-GatewayIP1 = 224.0.0.221:9090		// * IP and port of IVS gateway channel 1
-GatewayIP2 = 224.0.1.222:9090	        //   IP and port of IVS gateway channel 2
+ListsVersion = 1					// version of exchange lists
 
-ListsVersion = 1			// * version of exchange lists
+TimeType = PlantTime					// possible values: PlantTime, ServerLocalTime, ServerTimeUTC0
+Period = 1000						// periodic send state period, milliseconds
 
-Period = 1000				// * periodic send state period, milliseconds
+[SignalList]						// --- signal list description
+
+ListNo = 1							// signal list identifier
+SendEvents = On                 		// yes/no send events for signals from list
+IncludeAppSignalID = no		 	 	// yes/no  write AppSignalID in exchange list, default Off
+DataType = A 					 	// data type: A, B, D
+
+// AppSignalIDs
+
+#LM2_LM1_TEMP2
+#LM1_RES04
+#LM2_LM1_TEMP3
+#LM2_LM1_TEMP4
 
 [SignalList]
 
-ListNo = 1				// * signal list identifier
+ListNo = 2
+SendEvents = false
+IncludeAppSignalID = 0
+DataType = B
 
-SendEvents = On/Off                      // * send events for signals from list
-IncludeAppSignalID = On/Off (Yes/No) 	//   write AppSignalID in exchange list, default Off (HAES requirements)
-DataType = A | B			// * data type
-
-#SIGNAL1  				//   AppSignalID 
-SIGNAL2					//   or CustomAppSignalID
-....
-#SIGNALN
+#SYSTEMID_RACK01_FSCC01_MD00_CTRLIN_ARMINGKEYLA
+#LM2_LM1_BLINK4
+#SYSTEMID_RACK01_FSCC01_MD00_CTRLIN_INL02B
+#SYSTEMID_RACK01_FSCC01_MD00_CTRLOUT_OUT02
+#SYSTEMID_RACK01_FSCC01_MD00_PI_BLINK
+#SYSTEMID_RACK01_FSCC01_MD00_PI_MODERUN
+#SYSTEMID_RACK01_FSCC01_MD00_PI_MODESTARTUP
+#LM2_LM1_BLINK3
+#OUT_BUS32_B00
+#OUT_BUS32_B11
+#OUT_BUS32_B03
 
 [SignalList]
 
-ID = 2
+ListNo = 3
+SendEvents = false
+IncludeAppSignalID = 0
+DataType = D
 
-...
+#OUT_BUS32_B00
+#OUT_BUS32_B11
+#OUT_BUS32_B03
+#SYSTEMID_RACK01_FSCC01_MD00_CTRLIN_INL02B
+#SYSTEMID_RACK01_FSCC01_MD00_CTRLOUT_OUT02
+#SYSTEMID_RACK01_FSCC01_MD00_PI_BLINK
+#SYSTEMID_RACK01_FSCC01_MD00_CTRLIN_ARMINGKEYLA
+#LM2_LM1_BLINK4
+#SYSTEMID_RACK01_FSCC01_MD00_PI_MODERUN
+#SYSTEMID_RACK01_FSCC01_MD00_PI_MODESTARTUP
+#LM2_LM1_BLINK3
 
-[SignalList]
-
-ID = N
-
-...
-
-
-[Gateway]
-
-ID = N
-
-...
+// [Gateway]
+// 		...
+// [SignalList]
+// 		...
+// [SignalList]
+// 		...
+//
+// etc

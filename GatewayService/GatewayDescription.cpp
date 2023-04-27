@@ -667,9 +667,16 @@ namespace Gateway
 						}
 						else
 						{
-							log.logError(sv.lineNo, QString("unknown signal list data type '%1' use 'A' or 'B' instead").
-														arg(dataTypeStr));
-							result = false;
+							if (dataTypeStr == "D")
+							{
+								m_dataType = E::SignalListDataType::Discrete_D;
+							}
+							else
+							{
+								log.logError(sv.lineNo, QString("unknown signal list data type '%1' use 'A', 'B' or 'D'").
+															arg(dataTypeStr));
+								result = false;
+							}
 						}
 					}
 				}
@@ -710,6 +717,9 @@ namespace Gateway
 
 		case E::SignalListDataType::Discrete_B:
 			return 'B';
+
+		case E::SignalListDataType::Discrete_D:
+			return 'D';
 
 		default:
 			Q_ASSERT(false);
@@ -766,7 +776,8 @@ namespace Gateway
 		E::Setting::GatewayIP2,
 		E::Setting::SystemID,
 		E::Setting::ListsVersion,
-		E::Setting::Period
+		E::Setting::Period,
+		E::Setting::TimeType
 	};
 
 	IvsImpulseGateway::IvsImpulseGateway() :
@@ -826,6 +837,23 @@ namespace Gateway
 				m_period = sv.value.toInt();
 				break;
 
+			case E::Setting::TimeType:
+				{
+					QString timeTypeStr = sv.value.toString();
+
+					bool ok = true;
+
+					m_timeType = ::E::stringToValue<E::TimeType>(timeTypeStr, &ok);
+
+					if (ok == false)
+					{
+						log.logError(sv.lineNo, QString("unknown gateway time type '%1' use 'PlantTime', 'ServerLocalTime' or 'ServerTimeUTC0'").
+													arg(timeTypeStr));
+						result = false;
+					}
+				}
+				break;
+
 			default:
 				;	// ok
 			}
@@ -856,7 +884,7 @@ namespace Gateway
 
 	int IvsImpulseGateway::listsVersion() const
 	{
-
+		return m_listsVersion;
 	}
 
 	int IvsImpulseGateway::period() const
@@ -872,6 +900,7 @@ namespace Gateway
 		xml.writeHostAddressPortAttribute(XmlAttribute::GATEWAY_IP1, m_gatewayIP1);
 		xml.writeHostAddressPortAttribute(XmlAttribute::GATEWAY_IP2, m_gatewayIP2);
 		xml.writeIntAttribute(XmlAttribute::LISTS_VERSION, m_listsVersion);
+		xml.writeEnumKeyAttribute<E::TimeType>(XmlAttribute::TIME_TYPE, m_timeType);
 		xml.writeIntAttribute(XmlAttribute::PERIOD, m_period);
 		xml.writeEndElement();		//	</Settings>
 	}
@@ -886,6 +915,7 @@ namespace Gateway
 		result &= xml.readHostAddressPortAttribute(XmlAttribute::GATEWAY_IP1, &m_gatewayIP1);
 		result &= xml.readHostAddressPortAttribute(XmlAttribute::GATEWAY_IP2, &m_gatewayIP2);
 		result &= xml.readIntAttribute(XmlAttribute::LISTS_VERSION, &m_listsVersion);
+		result &= xml.readEnumKeyAttribute<E::TimeType>(XmlAttribute::TIME_TYPE, &m_timeType);
 		result &= xml.readIntAttribute(XmlAttribute::PERIOD, &m_period);
 
 		return result;
@@ -991,6 +1021,7 @@ namespace Gateway
 			switch(signalList.dataType())
 			{
 			case E::SignalListDataType::Analog_A:
+
 				if (s->isAnalog() == false)
 				{
 					log.logError(QString("signal '%1' is not Analog (GatewayID = %2, ListNo = %3)").
@@ -1021,6 +1052,8 @@ namespace Gateway
 				break;
 
 			case E::SignalListDataType::Discrete_B:
+			case E::SignalListDataType::Discrete_D:
+
 				if (s->isDiscrete() == false)
 				{
 					log.logError(QString("signal '%1' is not Discrete (GatewayID = %2, ListNo = %3)").

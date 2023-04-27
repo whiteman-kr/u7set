@@ -151,9 +151,7 @@ namespace Gateway
 	//
 	// ---------------------------------------------------------------------------------
 
-	const QString Parser::START_LINE_COMMENT("//");
-	const QString Parser::START_MULTILINE_COMMENT("/*");
-	const QString Parser::END_MULTILINE_COMMENT("*/");
+	const QString Parser::START_COMMENT("//");
 
 	const QString Parser::START_SECTION("[");
 	const QString Parser::END_SECTION("]");
@@ -182,6 +180,7 @@ namespace Gateway
 		{ E::Setting::GatewayIP2,			E::SettingType::IpPort	},
 		{ E::Setting::ListsVersion,			E::SettingType::Int		},
 		{ E::Setting::Period,				E::SettingType::Int		},
+		{ E::Setting::TimeType,				E::SettingType::String	},
 
 		// IVS Impulse signal lists specific settings
 		//
@@ -526,59 +525,24 @@ namespace Gateway
 		plr->msgType = LogMsgType::Nothing;
 		plr->msg.clear();
 
-		QString toParse;
-		QString line = str.trimmed();
+		QString toParse = str.trimmed();
 
 		// exclude comments first
 
-		if (line.isEmpty() == true ||
-			line.startsWith(START_LINE_COMMENT) == true)
+		int startCommentIndex = toParse.indexOf(START_COMMENT);
+
+		if (startCommentIndex != -1)
+		{
+			toParse = toParse.mid(0, startCommentIndex).trimmed();
+		}
+
+		if (toParse.isEmpty() == true)
 		{
 			plr->lineType = LineType::Comment;
 			return true;
 		}
 
-		if (m_multilineCommentStarted == true)
-		{
-			qsizetype index = line.indexOf(END_MULTILINE_COMMENT);
-
-			if (index == -1)
-			{
-				plr->lineType = LineType::Comment;
-				return true;
-			}
-
-			m_multilineCommentStarted = false;
-
-			toParse = line.mid(index + 2);
-		}
-		else
-		{
-			qsizetype index = line.indexOf(START_MULTILINE_COMMENT);
-
-			if (index == -1)
-			{
-				index = line.indexOf(START_LINE_COMMENT);
-
-				if (index == -1)
-				{
-					toParse = line;
-				}
-				else
-				{
-					toParse = line.mid(0, index);
-				}
-			}
-			else
-			{
-				toParse = line.mid(0, index);
-				m_multilineCommentStarted = true;
-			}
-		}
-
-		// toParse contains string without comment
-
-		toParse = toParse.trimmed();
+		// here toParse contains trimmed string without comment
 
 		// check secton token
 
