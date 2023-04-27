@@ -185,8 +185,11 @@ namespace VFrame30
 
 		DrawHelper::drawText(painter, m_font, itemUnit(), loopbackId(), textRect, Qt::AlignHCenter | Qt::AlignVCenter);
 
-		// Draw highlights
-		//
+		return;
+	}
+
+	void SchemaItemLoopbackSource::drawHighlight(CDrawParam* drawParam) const
+	{
 		if (drawParam->hightlightIds().contains(loopbackId()) == true)
 		{
 			QRectF highlightRect = boundingRectInDocPt(drawParam);
@@ -316,6 +319,11 @@ namespace VFrame30
 
 		DrawHelper::drawText(painter, m_font, itemUnit(), loopbackId(), textRect, Qt::AlignHCenter | Qt::AlignVCenter);
 
+		return;
+	}
+
+	void SchemaItemLoopbackTarget::drawHighlight(CDrawParam* drawParam) const
+	{
 		// Draw highlights
 		//
 		if (drawParam->hightlightIds().contains(loopbackId()) == true)

@@ -257,11 +257,24 @@ namespace VFrame30
 			}
 		}
 
+		return;
+	}
+
+	void SchemaItemSignal::drawHighlight(CDrawParam* drawParam) const
+	{
 		// Draw highlights for m_appSignalIds, m_impactAppSignalIds
 		//
-		QStringList allIds = m_appSignalIds + m_impactAppSignalIds;
+		for (const QString& appSignalId : m_appSignalIds)
+		{
+			if (drawParam->hightlightIds().contains(appSignalId) == true)
+			{
+				QRectF highlightRect = itemRectPinIndent(drawParam);
+				drawHighlightRect(drawParam, highlightRect);
+				break;
+			}
+		}
 
-		for (const QString& appSignalId : allIds)
+		for (const QString& appSignalId : m_impactAppSignalIds)
 		{
 			if (drawParam->hightlightIds().contains(appSignalId) == true)
 			{

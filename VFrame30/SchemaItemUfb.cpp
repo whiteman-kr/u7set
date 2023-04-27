@@ -211,30 +211,33 @@ namespace VFrame30
 		p->setPen(textColor());
 		DrawHelper::drawText(p, smallFont, itemUnit(), text, r, Qt::AlignLeft | Qt::AlignBottom);
 
-		// Draw highlights for m_appSignalIds
-		//
+		return;
+	}
+
+	void SchemaItemUfb::drawHighlight(CDrawParam* drawParam) const
+	{
+		auto props = PropertyObject::specificProperties();
+
+		for (const auto& prop : props)
 		{
-			for (const auto& prop : props)
+			bool breakLoop = false;
+			QString v = prop->value().toString();
+			QStringList valueAsList = v.split(QChar::LineFeed, Qt::SkipEmptyParts);
+
+			for (const QString& s : valueAsList)
 			{
-				bool breakLoop = false;
-				QString v = prop->value().toString();
-				QStringList valueAsList = v.split(QChar::LineFeed, Qt::SkipEmptyParts);
-
-				for (const QString& s : valueAsList)
+				if (s.startsWith(QChar('#')) == true && drawParam->hightlightIds().contains(s))
 				{
-					if (s.startsWith(QChar('#')) == true && drawParam->hightlightIds().contains(s))
-					{
-						QRectF highlightRect = boundingRectInDocPt(drawParam);
-						drawHighlightRect(drawParam, highlightRect);
-						breakLoop = true;
-						break;
-					}
-				}
-
-				if (breakLoop == true)
-				{
+					QRectF highlightRect = boundingRectInDocPt(drawParam);
+					drawHighlightRect(drawParam, highlightRect);
+					breakLoop = true;
 					break;
 				}
+			}
+
+			if (breakLoop == true)
+			{
+				break;
 			}
 		}
 

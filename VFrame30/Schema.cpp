@@ -606,7 +606,9 @@ namespace VFrame30
 					//
 					auto startTimeDraw = std::chrono::system_clock::now();
 
-					item->draw(drawParam);	// Drawing item is here
+					// Drawing item is here.
+					//
+					item->draw(drawParam);
 
 					if (item->isCommented() == true)
 					{
@@ -625,7 +627,6 @@ namespace VFrame30
 						item->drawScriptError(drawParam);
 					}
 
-
 					// Collect stats
 					//
 					if (drawParam->timeStats() != nullptr)
@@ -635,6 +636,23 @@ namespace VFrame30
 						auto ellapsed = duration_cast<microseconds>(now - startTimeDraw);
 						drawParam->timeStats()->addRecord(schemaId(), item->label(), "draw", ellapsed);
 					}
+				}
+			}
+
+			// Draw highlighted items after drawing the layer.
+			//
+			for (const auto& item : layer->items())
+			{
+				Q_ASSERT(item);
+
+				if (item->isType<PosRectImpl>() == false || (isClientMode == true && item->visible() == false))
+				{
+					continue;
+				}
+
+				if (item->isIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
+				{
+					item->toType<PosRectImpl>()->drawHighlight(drawParam);
 				}
 			}
 		}

@@ -195,6 +195,11 @@ namespace VFrame30
 			p->drawRect(rect);
 		}
 
+		return;
+	}
+
+	void SchemaItemImageValue::drawHighlight(CDrawParam* drawParam) const
+	{
 		// Draw highlights by signals
 		//
 		for (const QString& appSignalId : m_signalIds)
