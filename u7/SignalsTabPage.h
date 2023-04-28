@@ -284,7 +284,7 @@ signals:
 	void signalSelected(int signalId);
 
 protected:
-	void closeEvent(QCloseEvent* event);
+	virtual void reject() override;
 
 private:
 	void addSignalIfNeeded(const AppSignal& signal);
