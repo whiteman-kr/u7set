@@ -204,7 +204,7 @@ static QIcon staticFolderIcon(":/Images/Images/SchemaFolder.svg");
 		//
 		if (m_tagFilter.isEmpty() == false)
 		{
-			if (schema->hasTag(m_tagFilter) == false)
+			if (schema->hasSchemaTag(m_tagFilter) == false)
 			{
 				// Schema filtered
 				//
@@ -216,7 +216,7 @@ static QIcon staticFolderIcon(":/Images/Images/SchemaFolder.svg");
 		// --
 		//
 		QString tags;
-		for (const QString& t : schema->m_tags)
+		for (const QString& t : schema->m_schemaTags)
 		{
 			if (tags.isEmpty() == true)
 			{
@@ -592,7 +592,7 @@ void SchemaListWidget::setDetails(VFrame30::SchemaDetailsSet details)
 		std::shared_ptr<VFrame30::SchemaDetails> schema = details.schemaDetails(i);
 		assert(schema);
 
-		const std::set<QString>& schemaTags = schema->tags();
+		const std::set<QString>& schemaTags = schema->schemaTags();
 
 		for (const QString& t : schemaTags)
 		{

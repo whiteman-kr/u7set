@@ -1402,8 +1402,9 @@ message SchemaDetails
 	repeated string labels = 21;
 	repeated string connections = 22;
 	repeated Uuid guids = 23;
-	repeated string tags = 24;
+	repeated string schematags = 24;
 	repeated string loopbacks = 25;
+	repeated string itemtags = 26;
 
     message TrendIndicatorSchemaItems
 	{

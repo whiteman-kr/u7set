@@ -1047,6 +1047,25 @@ namespace VFrame30
 		return result;
 	}
 
+	QStringList Schema::itemTags() const
+	{
+		QSet<QString> tags;
+
+		for (const std::shared_ptr<SchemaLayer>& layer : layers())
+		{
+			for (const auto& item : layer->items())
+			{
+				for (QStringList itemTags = item->tagsAsList();
+					 const auto& tag : itemTags)
+				{
+					tags.insert(tag);
+				}
+			}
+		}
+
+		return tags.values();
+	}
+
 	QString Schema::details(const QString& path) const
 	{
 		return SchemaDetails::getDetailsString(this, path);
@@ -1941,11 +1960,18 @@ namespace VFrame30
 			}
 		}
 
-		// Get tags, kept in lowercase
+		// Get schema tags, kept in lowercase
 		//
-		QStringList tags = schema->tagsAsList();
+		QStringList schemaTags = schema->tagsAsList();
+		for (QString& tag : schemaTags)
+		{
+			tag = tag.toLower();
+		}
 
-		for (QString& tag : tags)
+		// Get item tags, kept in lowercase
+		//
+		QStringList itemTags = schema->itemTags().toList();
+		for (QString& tag : itemTags)
 		{
 			tag = tag.toLower();
 		}
@@ -1968,7 +1994,8 @@ namespace VFrame30
 		QVariant labelsVariant(labels);
 		QVariant connectionsVariant(connections.values());
 		QVariant loopbacksVariant(loopbacks.values());
-		QVariant tagsVariant(tags);
+		QVariant tagsVariant(schemaTags);
+		QVariant itemTagsVariant(itemTags);
 		QVariant guidsVariant(guidsStringList);
 
 		jsonObject.insert("Version", QJsonValue(1));
@@ -2002,6 +2029,7 @@ namespace VFrame30
 		jsonObject.insert("Connections", QJsonValue::fromVariant(connectionsVariant));
 		jsonObject.insert("Loopbacks", QJsonValue::fromVariant(loopbacksVariant));
 		jsonObject.insert("Tags", QJsonValue::fromVariant(tagsVariant));
+		jsonObject.insert("ItemTags", QJsonValue::fromVariant(itemTagsVariant));
 		jsonObject.insert("ItemGuids", QJsonValue::fromVariant(guidsVariant));
 
 		QJsonArray jsontrendsIndicators;
@@ -2153,14 +2181,28 @@ namespace VFrame30
 					m_loopbacks.insert(str);
 				}
 
-				// Tags
+				// Schema Tags
 				//
-				m_tags.clear();
-				QStringList tagsList = jsonObject.value(QLatin1String("Tags")).toVariant().toStringList();
-
-				for (const QString& str : tagsList)
 				{
-					m_tags.insert(str);
+					m_schemaTags.clear();
+					QStringList tagsList = jsonObject.value(QLatin1String("Tags")).toVariant().toStringList();
+
+					for (const QString& str : tagsList)
+					{
+						m_schemaTags.insert(str);
+					}
+				}
+
+				// SchemaItems Tags
+				//
+				{
+					m_itemTags.clear();
+					QStringList itemTagsList = jsonObject.value(QLatin1String("ItemTags")).toVariant().toStringList();
+
+					for (const QString& str : itemTagsList)
+					{
+						m_itemTags.insert(str.toLower());
+					}
 				}
 
 				// ItemGuids
@@ -2229,9 +2271,14 @@ namespace VFrame30
 			message->add_loopbacks(l.toStdString());
 		}
 
-		for (const QString& t : m_tags)
+		for (const QString& t : m_schemaTags)
 		{
-			message->add_tags(t.toStdString());
+			message->add_schematags(t.toStdString());
+		}
+
+		for (const QString& t : m_itemTags)
+		{
+			message->add_itemtags(t.toStdString());
 		}
 
 		for (const QUuid& u : m_guids)
@@ -2293,12 +2340,18 @@ namespace VFrame30
 			m_loopbacks.insert(lb);
 		}
 
-		m_tags.clear();
-		int tagCount = message.tags_size();
-		for (int i = 0; i < tagCount; i++)
+		m_schemaTags.clear();
+		for (int i = 0, tagCount = message.schematags_size(); i < tagCount; i++)
 		{
-			QString tag = QString::fromStdString(message.tags(i));
-			m_tags.insert(tag);
+			QString tag = QString::fromStdString(message.schematags(i));
+			m_schemaTags.insert(tag);
+		}
+
+		m_itemTags.clear();
+		for (int i = 0, tagCount = message.itemtags_size(); i < tagCount; i++)
+		{
+			QString tag = QString::fromStdString(message.itemtags(i)).toLower();
+			m_itemTags.insert(tag);
 		}
 
 		m_guids.clear();
@@ -2361,6 +2414,11 @@ namespace VFrame30
 			return true;
 		}
 
+		if (m_itemTags.contains(searchText.toLower()) == true)
+		{
+			return true;
+		}
+
 		QUuid textAsUuid(searchText);
 
 		if (textAsUuid.isNull() == false &&
@@ -2372,16 +2430,16 @@ namespace VFrame30
 		return false;
 	}
 
-	bool SchemaDetails::hasTag(const QString& tag) const
+	bool SchemaDetails::hasSchemaTag(const QString& tag) const
 	{
-		return m_tags.find(tag.trimmed().toLower()) != m_tags.end();
+		return m_schemaTags.find(tag.trimmed().toLower()) != m_schemaTags.end();
 	}
 
-	bool SchemaDetails::hasTag(const QStringList& tags) const
+	bool SchemaDetails::hasSchemaTag(const QStringList& tags) const
 	{
 		for (const QString& tag : tags)
 		{
-			if (m_tags.find(tag.trimmed().toLower()) != m_tags.end())
+			if (m_schemaTags.find(tag.trimmed().toLower()) != m_schemaTags.end())
 			{
 				return true;
 			}
@@ -2390,9 +2448,9 @@ namespace VFrame30
 		return false;
 	}
 
-	const std::set<QString>& SchemaDetails::tags() const
+	const std::set<QString>& SchemaDetails::schemaTags() const
 	{
-		return m_tags;
+		return m_schemaTags;
 	}
 
 	bool SchemaDetails::hasEquipmentId(const QString& equipmentId) const

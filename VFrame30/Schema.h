@@ -147,6 +147,10 @@ namespace VFrame30
 		virtual QStringList getLabels() const;
 		virtual std::vector<QUuid> getGuids() const;
 
+		/// Get all schema items tags
+		///
+		QStringList itemTags() const;
+
 		virtual QString details(const QString& path) const;				// form details JSON object (signal list)
 		static SchemaDetails parseDetails(const QString& detailsString);// parse details section (from DB), result is signal list
 
@@ -349,9 +353,9 @@ namespace VFrame30
 
 		[[nodiscard]] bool searchForString(const QString& searchText) const;
 
-		[[nodiscard]] bool hasTag(const QString& tag) const;
-		[[nodiscard]] bool hasTag(const QStringList& tags) const;
-		[[nodiscard]] const std::set<QString>& tags() const;
+		[[nodiscard]] bool hasSchemaTag(const QString& tag) const;
+		[[nodiscard]] bool hasSchemaTag(const QStringList& tags) const;
+		[[nodiscard]] const std::set<QString>& schemaTags() const;
 
 		[[nodiscard]] bool hasEquipmentId(const QString& equipmentId) const;
 		[[nodiscard]] bool hasSignal(const QString& signalId) const;
@@ -369,7 +373,8 @@ namespace VFrame30
 		std::set<QString> m_labels;
 		std::set<QString> m_connections;
 		std::set<QString> m_loopbacks;
-		std::set<QString> m_tags;		// All tags are kept in lowercase
+		std::set<QString> m_schemaTags;		// All tags are kept in lowercase
+		std::set<QString> m_itemTags;		// All tags are kept in lowercase
 		std::set<QUuid> m_guids;
 
 		// SchemaItemIndicator, type trend
