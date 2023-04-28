@@ -53,7 +53,7 @@ public slots:
 	<br>
 
 	\code
-	//Show archive for last day
+	// Show archive for last day
 	//
 	const TIME_PLANT =  0;
 	const TIME_SYSTEM = 1;

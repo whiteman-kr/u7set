@@ -717,7 +717,13 @@ void SimWidget::closeBuild()
 	emit needUpdateActions();
 
 	SimBasePage::deleteAllPages();
-	m_outputWidget->clear();
+
+	if (m_outputWidget != nullptr)
+	{
+		// m_outputWidget exist only for the main simualtor tab page.
+		//
+		m_outputWidget->clear();
+	}
 
 	return;
 }
