@@ -97,6 +97,18 @@ void AppDataReceiver::unregisterDestSignalStatesQueue(SimpleAppSignalStatesQueue
 	m_statesProcessingThread.unregisterDestSignalStatesQueue(destQueue);
 }
 
+void AppDataReceiver::registerGatewaySignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue,
+														const Network::GetAppSignalStateChangesForGatewayRequest& request,
+														const QString& description)
+{
+	m_statesProcessingThread.registerGatewaySignalStatesQueue(destQueue, request, description);
+}
+
+void AppDataReceiver::unregisterGatewaySignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue)
+{
+	m_statesProcessingThread.unregisterGatewaySignalStatesQueue(destQueue);
+}
+
 void AppDataReceiver::run()
 {
 	DEBUG_LOG_MSG(m_log, QString("AppDataReceiver thread is started (receiving IP %1)").

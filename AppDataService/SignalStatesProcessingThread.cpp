@@ -63,6 +63,18 @@ void SignalStatesProcessingThread::unregisterDestSignalStatesQueue(SimpleAppSign
 	}
 }
 
+void SignalStatesProcessingThread::registerGatewaySignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue,
+								   const Network::GetAppSignalStateChangesForGatewayRequest& request,
+								   const QString& description)
+{
+	Q_ASSERT(false);
+}
+
+void SignalStatesProcessingThread::unregisterGatewaySignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue)
+{
+	Q_ASSERT(false);
+}
+
 void SignalStatesProcessingThread::processStates(AppDataReceiver& receiver)
 {
 	DEBUG_LOG_MSG(m_log, QString("SignalStatesProcessingThread is started"));

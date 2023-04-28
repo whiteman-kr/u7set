@@ -24,16 +24,20 @@ namespace Gateway
 		void periodicSendStates();
 		int writeStatesToPacket(IvsImpulseStatesPacket* packet,
 								E::SignalListDataType dataType,
-								int startIndex, int size, int& paramCount);
+								int startIndex, int size,
+								int& paramCount, qint64& time);
 
 		int writeStatesToPacket_A(AnalogState_A* states,
-								int startIndex, int size, int& paramCount);
+								  int startIndex, int size,
+								  int& paramCount, qint64& time);
 
 		int writeStatesToPacket_B(DiscreteState_B* states,
-								int startIndex, int size, int& paramCount);
+								  int startIndex, int size,
+								  int& paramCount, qint64& time);
 
 		int writeStatesToPacket_D(DiscreteState_D* states,
-								int startIndex, int size, int& paramCount);
+								  int startIndex, int size,
+								  int& paramCount, qint64& time);
 
 		AnalogStateCode_A getAnalogStateCodeA(::AppSignalStateFlags flags) const;
 

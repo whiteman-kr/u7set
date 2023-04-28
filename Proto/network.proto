@@ -81,16 +81,6 @@ message GetAppSignalStateReply
 //
 message GetAppSignalStateChangesRequest
 {
-	optional int32 receiveMode = 1 [default = 0];	// values of SimpleAppSignalStatesQueue::ReceiveMode
-													//
-													// 0 == continue in previously set mode (1 or 2)
-													// 1 == receive all signals, default mode
-													// 2 == receive only selected (update selected set from selectedHashed)
-
-													// to avoid StatesQueue performanse decreasing
-													// don't set modes 1 and 2 in messages permanently!
-													// instead use mode 0
-	repeated uint64 selectedHashes = 2;
 }
 
 message GetAppSignalStateChangesReply
@@ -104,6 +94,28 @@ message GetAppSignalStateChangesReply
 
 	repeated Proto.AppSignalState appSignalStates = 5;		// Limited to ADS_GET_APP_SIGNAL_STATE_MAX (2000)
 }
+
+// Getting application signal states changes for GatewayService
+//
+message GetAppSignalStateChangesForGatewayRequest
+{
+	repeated uint64 signalsHashes = 1;
+}
+
+message GetAppSignalStateChangesForGatewayReply
+{
+	optional int32 error = 1 [default = 0];
+
+	optional int64 minPlantTime = 2;
+	optional int64 minServerTimeUtc = 3;
+	optional int64 minServerTimeLocal = 4;
+
+	optional int32 pendingStatesCount = 5 [default = 0];
+
+	repeated Proto.AppSignalState appSignalStates = 6;		// Limited to ADS_GET_APP_SIGNAL_STATE_MAX (2000)
+}
+
+//
 
 message LanControllerInfo
 {

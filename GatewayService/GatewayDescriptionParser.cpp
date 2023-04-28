@@ -529,7 +529,7 @@ namespace Gateway
 
 		// exclude comments first
 
-		int startCommentIndex = toParse.indexOf(START_COMMENT);
+		qsizetype startCommentIndex = toParse.indexOf(START_COMMENT);
 
 		if (startCommentIndex != -1)
 		{

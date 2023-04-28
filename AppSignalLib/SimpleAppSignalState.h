@@ -39,21 +39,10 @@ class SimpleAppSignalStatesQueue : public QObject, public FastThreadSafeQueue<Si
 	Q_OBJECT
 
 public:
-	enum class ReceiveMode
-	{
-		Continue = 0,					// no change mode, continue in previously set mode
-
-		AllSignals = 1,					// receive all signals, default mode
-		SelectedSignals = 2,			// receive only selected signals
-	};
-
-public:
 	SimpleAppSignalStatesQueue(int queueSize);
 	virtual ~SimpleAppSignalStatesQueue();
 
 	virtual void push(const SimpleAppSignalState& item, const QThread* thread, int* curSize = nullptr, int* curMaxSize = nullptr) override;
-
-	void setReceiveMode(ReceiveMode mode, std::set<Hash>& selectedHashes);
 
 signals:
 	void queueNotEmpty();
@@ -63,10 +52,6 @@ private:
 
 private:
 	int m_afterPushCtr = 0;
-
-	SimpleMutex m_receiveModeMutex;
-	ReceiveMode m_receiveMode = ReceiveMode::AllSignals;
-	std::set<Hash> m_selectedHashes;
 };
 
 typedef std::shared_ptr<SimpleAppSignalStatesQueue> SimpleAppSignalStatesQueueShared;

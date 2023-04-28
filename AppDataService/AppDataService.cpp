@@ -98,26 +98,32 @@ void AppDataServiceWorker::registerDestSignalStatesQueue(SimpleAppSignalStatesQu
 														 bool isArchivingQueue,
 														 const QString& description)
 {
-	if (m_appDataReceiver != nullptr)
-	{
-		m_appDataReceiver->registerDestSignalStatesQueue(destQueue, isArchivingQueue, description);
-	}
-	else
-	{
-		Q_ASSERT(false);
-	}
+	TEST_PTR_RETURN(m_appDataReceiver);
+
+	m_appDataReceiver->registerDestSignalStatesQueue(destQueue, isArchivingQueue, description);
 }
 
 void AppDataServiceWorker::unregisterDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue)
 {
-	if (m_appDataReceiver != nullptr)
-	{
-		m_appDataReceiver->unregisterDestSignalStatesQueue(destQueue);
-	}
-	else
-	{
-		Q_ASSERT(false);
-	}
+	TEST_PTR_RETURN(m_appDataReceiver);
+
+	m_appDataReceiver->unregisterDestSignalStatesQueue(destQueue);
+}
+
+void AppDataServiceWorker::registerGatewaySignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue,
+															const Network::GetAppSignalStateChangesForGatewayRequest& request,
+															const QString& description)
+{
+	TEST_PTR_RETURN(m_appDataReceiver);
+
+	m_appDataReceiver->registerGatewaySignalStatesQueue(destQueue, request, description);
+}
+
+void AppDataServiceWorker::unregisterGatewaySignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue)
+{
+	TEST_PTR_RETURN(m_appDataReceiver);
+
+	m_appDataReceiver->unregisterGatewaySignalStatesQueue(destQueue);
 }
 
 void AppDataServiceWorker::fillAppDataReceiveState(Network::AppDataReceiveState* adrs)

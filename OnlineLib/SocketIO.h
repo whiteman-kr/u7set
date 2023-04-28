@@ -197,6 +197,8 @@ const quint32 ADS_GET_APP_SIGNAL_STATE_CHANGES = 0x1304;
 const quint32 ADS_GET_APP_SIGNAL_STATE_CONST_SIZE = 0x1305;		// states for unknown hashes PLACED in reply
 																// reply array size always EQUAL to request array size
 
+const quint32 ADS_GET_APP_SIGNAL_STATE_CHANGES_FOR_GATEWAY = 0x1306;
+
 // Limiters and other constants
 //
 const int ADS_GET_APP_SIGNAL_LIST_ITEMS_PER_PART = 1000;

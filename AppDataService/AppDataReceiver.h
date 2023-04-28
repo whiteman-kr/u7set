@@ -54,6 +54,12 @@ public:
 
 	void unregisterDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue);
 
+	void registerGatewaySignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue,
+										  const Network::GetAppSignalStateChangesForGatewayRequest& request,
+										  const QString& description);
+
+	void unregisterGatewaySignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue);
+
 private:
 	virtual void run() override;
 

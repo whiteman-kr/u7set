@@ -79,6 +79,10 @@ void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData
 		onGetAppSignalStateChangesRequest(requestData, requestDataSize);
 		break;
 
+	case ADS_GET_APP_SIGNAL_STATE_CHANGES_FOR_GATEWAY:
+		onGetAppSignalStateChangesForGatewayRequest(requestData, requestDataSize);
+		break;
+
 	case ADS_GET_APP_DATA_SOURCES_INFO:
 		onGetAppDataSourcesInfoRequest();
 		break;
@@ -371,26 +375,6 @@ void TcpAppDataServer::onGetAppSignalStateChangesRequest(const char* requestData
 		return;
 	}
 
-	SimpleAppSignalStatesQueue::ReceiveMode receiveMode =
-			static_cast<SimpleAppSignalStatesQueue::ReceiveMode>(request.receivemode());
-
-	if (receiveMode != SimpleAppSignalStatesQueue::ReceiveMode::Continue)
-	{
-		std::set<Hash> selectedHashes;
-
-		if (receiveMode == SimpleAppSignalStatesQueue::ReceiveMode::SelectedSignals)
-		{
-			int count = request.selectedhashes_size();
-
-			for(int i = 0; i < count; i++)
-			{
-				selectedHashes.insert(request.selectedhashes(i));
-			}
-		}
-
-		m_signalStatesQueue->setReceiveMode(receiveMode, selectedHashes);
-	}
-
 	QThread* thisThread = QThread::currentThread();
 
 	SimpleAppSignalState state;
@@ -399,7 +383,6 @@ void TcpAppDataServer::onGetAppSignalStateChangesRequest(const char* requestData
 
 	for(int i = 0; i < ADS_GET_APP_SIGNAL_STATE_MAX; i++)
 	{
-
 		result = m_signalStatesQueue->pop(&state, thisThread);
 
 		if (result == false)
@@ -439,6 +422,99 @@ void TcpAppDataServer::onGetAppSignalStateChangesRequest(const char* requestData
 	{
 		qDebug() << "Send states changes" << ctr;
 	}
+}
+
+void TcpAppDataServer::onGetAppSignalStateChangesForGatewayRequest(const char* requestData, quint32 requestDataSize)
+{
+	Network::GetAppSignalStateChangesForGatewayRequest& request =
+										m_getAppSignalStateChangesForGatewayRequest;
+
+	bool result = request.ParseFromArray(requestData, requestDataSize);
+
+	m_getAppSignalStateChangesForGatewayReply.Clear();
+
+	if (result == false)
+	{
+		m_getAppSignalStateChangesForGatewayReply.set_error(TO_INT(E::NetworkError::ParseRequestError));
+		sendReply(m_getAppSignalStateChangesForGatewayReply);
+		return;
+	}
+
+	if (request.signalshashes_size() != 0)
+	{
+		if (m_gatewaySignalStatesQueue != nullptr)
+		{
+			m_appDataService.unregisterGatewaySignalStatesQueue(m_gatewaySignalStatesQueue);
+			m_gatewaySignalStatesQueue.reset();
+		}
+	}
+
+	if (m_gatewaySignalStatesQueue == nullptr &&
+		request.signalshashes_size() != 0)
+	{
+		m_gatewaySignalStatesQueue = std::make_shared<SimpleAppSignalStatesQueue>(10000);
+		m_appDataService.registerGatewaySignalStatesQueue(m_gatewaySignalStatesQueue, request,
+			QString("TcpAppDataServer for %1 (%2)").
+					arg(connectedSoftwareInfo().equipmentID()).
+					arg(peerAddr().addressStr()));
+	}
+
+	if (m_gatewaySignalStatesQueue == nullptr)
+	{
+		sendReply(m_getAppSignalStateChangesForGatewayReply);
+		return;
+	}
+
+	QThread* thisThread = QThread::currentThread();
+
+	SimpleAppSignalState state;
+
+	int pendingStatesCount = 0;
+
+	for(int i = 0; i < ADS_GET_APP_SIGNAL_STATE_MAX; i++)
+	{
+		Q_ASSERT(false);
+/*
+		result = m_gatewaySignalStatesQueue->pop(&state, thisThread);
+
+		if (result == false)
+		{
+			break;		// queue is empty - pendingStatesCount == 0
+		}
+
+		::Proto::AppSignalState* protoState = m_getAppSignalStateChangesReply.add_appsignalstates();
+
+		state.save(protoState);
+
+		if (i + 1 == ADS_GET_APP_SIGNAL_STATE_MAX)
+		{
+			// on last iteration set pendingStatesCount to actual value
+			//
+			pendingStatesCount = m_signalStatesQueue->size(thisThread);
+		}*/
+	}
+
+	m_getAppSignalStateChangesReply.set_pendingstatescount(pendingStatesCount);
+
+	qint64 utc = 0;
+	qint64 local = 0;
+
+	getServerTimes(&utc, &local);
+
+	m_getAppSignalStateChangesReply.set_servertimeutc(utc);
+	m_getAppSignalStateChangesReply.set_servertimelocal(local);
+
+	sendReply(m_getAppSignalStateChangesReply);
+
+	static int ctr = 0;
+
+	ctr++;
+
+	if ((ctr % 100) == 0)
+	{
+		qDebug() << "Send states changes" << ctr;
+	}
+
 }
 
 void TcpAppDataServer::onGetAppDataSourcesInfoRequest()

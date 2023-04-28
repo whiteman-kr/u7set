@@ -887,6 +887,11 @@ namespace Gateway
 		return m_listsVersion;
 	}
 
+	E::TimeType IvsImpulseGateway::timeType() const
+	{
+		return m_timeType;
+	}
+
 	int IvsImpulseGateway::period() const
 	{
 		return m_period;

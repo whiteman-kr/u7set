@@ -67,18 +67,23 @@ namespace Gateway
 			header.listVersion = static_cast<quint8>(m_gateway->listsVersion());
 			header.firstParamIndex = 1;
 
-			header.time = 0; // ??????
-
 			qint64 packetSize = sizeof(IvsImpulsePacketHeader);
 
 			int writtenParamCount = 0;
+			qint64 time = 0;
 
 			packetSize += writeStatesToPacket(packet, li.info->dataType(),
-											  li.startIndex, li.size, writtenParamCount);
+											  li.startIndex, li.size,
+											  writtenParamCount, time);
 
 			Q_ASSERT(writtenParamCount == li.size);
 
 			header.paramCount = static_cast<quint16>(writtenParamCount);
+
+			// time in milliseconds
+			// header.time in seconds
+			//
+			header.time = static_cast<qint32>(time / 1000);
 
 			for(auto& ci : m_channelsInfo)
 			{
@@ -99,20 +104,21 @@ namespace Gateway
 
 	int IvsImpulseCommThreadWorker::writeStatesToPacket(IvsImpulseStatesPacket* packet,
 														E::SignalListDataType dataType,
-														int startIndex, int size, int& paramCount)
+														int startIndex, int size,
+														int& paramCount, qint64& time)
 	{
 		TEST_PTR_RETURN_VALUE(packet, 0);
 
 		switch(dataType)
 		{
 		case E::SignalListDataType::Analog_A:
-			return writeStatesToPacket_A(&packet->states_A, startIndex, size, paramCount);
+			return writeStatesToPacket_A(&packet->states_A, startIndex, size, paramCount, time);
 
 		case E::SignalListDataType::Discrete_B:
-			return writeStatesToPacket_B(&packet->states_B, startIndex, size, paramCount);
+			return writeStatesToPacket_B(&packet->states_B, startIndex, size, paramCount, time);
 
 		case E::SignalListDataType::Discrete_D:
-			return writeStatesToPacket_D(&packet->states_D, startIndex, size, paramCount);
+			return writeStatesToPacket_D(&packet->states_D, startIndex, size, paramCount, time);
 
 		default:
 			Q_ASSERT(false);
@@ -122,11 +128,14 @@ namespace Gateway
 	}
 
 	int IvsImpulseCommThreadWorker::writeStatesToPacket_A(AnalogState_A* states,
-														  int startIndex, int size, int& paramCount)
+														  int startIndex, int size,
+														  int& paramCount, qint64& time)
 	{
 		TEST_PTR_RETURN_VALUE(states, 0);
 
+		E::TimeType timeType = m_gateway->timeType();
 		paramCount = 0;
+		time = 0;
 		int dataSize = 0;
 
 		AnalogState_A* stateA = states;
@@ -137,6 +146,13 @@ namespace Gateway
 
 			stateA->value = static_cast<float>(st.value);
 			stateA->stateCode = getAnalogStateCodeA(st.flags);
+
+			switch(timeType)
+			{
+			case E::TimeType::PlantTime:		time = std::max(time, st.time.plant.timeStamp); break;
+			case E::TimeType::ServerTimeUTC0:	time = std::max(time, st.time.system.timeStamp); break;
+			case E::TimeType::ServerLocalTime:	time = std::max(time, st.time.local.timeStamp); break;
+			}
 
 			stateA++;
 
@@ -154,10 +170,12 @@ namespace Gateway
 	}
 
 	int IvsImpulseCommThreadWorker::writeStatesToPacket_B(DiscreteState_B* states,
-														  int startIndex, int size, int& paramCount)
+														  int startIndex, int size,
+														  int& paramCount, qint64& time)
 	{
 		TEST_PTR_RETURN_VALUE(states, 0);
 
+		E::TimeType timeType = m_gateway->timeType();
 		paramCount = 0;
 		int dataSize = 0;
 
@@ -181,6 +199,13 @@ namespace Gateway
 			*statesB |= (st.value == 0 ? 0 : 1) << bitNo;
 			*validityB |= (st.isValid() == true ? 0 : 1) << bitNo;
 
+			switch(timeType)
+			{
+			case E::TimeType::PlantTime:		time = std::max(time, st.time.plant.timeStamp); break;
+			case E::TimeType::ServerTimeUTC0:	time = std::max(time, st.time.system.timeStamp); break;
+			case E::TimeType::ServerLocalTime:	time = std::max(time, st.time.local.timeStamp); break;
+			}
+
 			paramCount++;
 
 			bitNo++;
@@ -197,10 +222,12 @@ namespace Gateway
 	}
 
 	int IvsImpulseCommThreadWorker::writeStatesToPacket_D(DiscreteState_D* states,
-														  int startIndex, int size, int& paramCount)
+														  int startIndex, int size,
+														  int& paramCount, qint64& time)
 	{
 		TEST_PTR_RETURN_VALUE(states, 0);
 
+		E::TimeType timeType = m_gateway->timeType();
 		paramCount = 0;
 		int dataSize = 0;
 
@@ -212,6 +239,13 @@ namespace Gateway
 
 			stateD->value = st.value == 0 ? 0 : 1;
 			stateD->notValid = st.isValid() == true ? 0 : 1;
+
+			switch(timeType)
+			{
+			case E::TimeType::PlantTime:		time = std::max(time, st.time.plant.timeStamp); break;
+			case E::TimeType::ServerTimeUTC0:	time = std::max(time, st.time.system.timeStamp); break;
+			case E::TimeType::ServerLocalTime:	time = std::max(time, st.time.local.timeStamp); break;
+			}
 
 			stateD++;
 

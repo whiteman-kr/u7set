@@ -79,9 +79,12 @@ namespace Gateway
 		quint16	firstParamIndex = 0;	// in periodic state packets must be > 0
 										// in events packets must be == 0
 
-		quint16	paramCount = 0;			// params count in DataSection
+		quint16	paramCount = 0;			// params count or events count in DataSection
 
 		quint32	time = 0;				// packet time UTC+0, in seconds since 1 Jan 1970
+										//
+										// for event packet this is a base time of events
+										// that is event time is equal to header.time + event.timeOffset
 	};
 
 	const int IVS_IMPULSE_DATA_SECTION_MAX_SIZE = 16380;

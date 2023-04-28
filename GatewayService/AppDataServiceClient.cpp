@@ -42,16 +42,15 @@ namespace Gateway
 
 		//
 
-		Network::GetAppSignalStateChangesRequest initialRequest;
+		Network::GetAppSignalStateChangesForGatewayRequest initialRequest;
 
-		initialRequest.set_receivemode(TO_INT(SimpleAppSignalStatesQueue::ReceiveMode::SelectedSignals));
-		initialRequest.mutable_selectedhashes()->Reserve(TO_INT(m_states.size()));
+		initialRequest.mutable_signalshashes()->Reserve(TO_INT(m_states.size()));
 
 		for(const auto& st : m_states)
 		{
 			if (st.isWorkable() == true)
 			{
-				initialRequest.add_selectedhashes(st.hash());
+				initialRequest.add_signalshashes(st.hash());
 			}
 		}
 

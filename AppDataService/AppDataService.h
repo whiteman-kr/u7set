@@ -56,6 +56,11 @@ public:
 	void registerDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue, bool isArchivingQueue, const QString& description);
 	void unregisterDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue);
 
+	void registerGatewaySignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue,
+										const Network::GetAppSignalStateChangesForGatewayRequest& request,
+										const QString& description);
+	void unregisterGatewaySignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue);
+
 	void fillAppDataReceiveState(Network::AppDataReceiveState* adrs);
 
 	const std::vector<QString>& acquiredAppSignalIDs() const { return m_acquiredAppSignalIDs; }

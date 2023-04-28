@@ -47,6 +47,7 @@ private:
 
 	void onGetAppSignalStateRequest(const char* requestData, quint32 requestDataSize, bool constSize);
 	void onGetAppSignalStateChangesRequest(const char* requestData, quint32 requestDataSize);
+	void onGetAppSignalStateChangesForGatewayRequest(const char* requestData, quint32 requestDataSize);
 
 	void onGetAppDataSourcesInfoRequest();
 	void onGetAppDataSourcesStatesRequest();
@@ -63,6 +64,7 @@ private:
 	AppDataServiceWorker& m_appDataService;
 
 	SimpleAppSignalStatesQueueShared m_signalStatesQueue;
+	GatewaytAppSignalStatesQueueShared m_gatewaySignalStatesQueue;
 
 	// precalculated variables
 	//
@@ -89,6 +91,9 @@ private:
 
 	Network::GetAppSignalStateChangesRequest m_getAppSignalStateChangesRequest;
 	Network::GetAppSignalStateChangesReply m_getAppSignalStateChangesReply;
+
+	Network::GetAppSignalStateChangesForGatewayRequest m_getAppSignalStateChangesForGatewayRequest;
+	Network::GetAppSignalStateChangesForGatewayReply m_getAppSignalStateChangesForGatewayReply;
 
 	//
 

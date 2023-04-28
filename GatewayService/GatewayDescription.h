@@ -78,8 +78,8 @@ namespace Gateway
 		enum class TimeType
 		{
 			PlantTime,
-			ServerLocalTime,
-			ServerTimeUTC0
+			ServerTimeUTC0,
+			ServerLocalTime
 		};
 		Q_ENUM(TimeType)
 
@@ -314,6 +314,7 @@ namespace Gateway
 		HostAddressPort gatewayIP1() const;
 		HostAddressPort gatewayIP2() const;
 		int listsVersion() const;
+		E::TimeType timeType() const;
 		int period() const;
 
 	private:
