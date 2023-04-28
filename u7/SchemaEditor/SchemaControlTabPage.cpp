@@ -995,7 +995,7 @@ void SchemaListModel::applyTagFilter(DbFileTree* filesTree, const std::map<int, 
 		{
 			const VFrame30::SchemaDetails& details = dit->second;
 
-			if (bool searchResult = details.hasTag(m_tagFilter);
+			if (bool searchResult = details.hasSchemaTag(m_tagFilter);
 				searchResult == true)
 			{
 				filteredFiles[fileId] = file;
@@ -1072,7 +1072,7 @@ void SchemaListModel::updateTagsFromDetails()
 
 	for (auto&[fileId, details] : m_details)
 	{
-		for (const QString& tag : details.tags())
+		for (const QString& tag : details.schemaTags())
 		{
 			m_tags.insert(tag);
 		}
@@ -1222,7 +1222,7 @@ QString SchemaListModel::tagsColumnText(int fileId) const
 	result.reserve(256);
 
 	const VFrame30::SchemaDetails& d = it->second;
-	for (QString tag : d.m_tags)
+	for (QString tag : d.m_schemaTags)
 	{
 		if (result.isEmpty() == true)
 		{

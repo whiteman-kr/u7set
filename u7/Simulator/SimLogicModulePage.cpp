@@ -588,7 +588,7 @@ void SimLogicModulePage::updateFilterCompleter()
 			completerList.push_back(l);
 		}
 
-		for (const auto& t : sd.m_tags)
+		for (const auto& t : sd.m_schemaTags)
 		{
 			completerList.push_back(t);
 		}
