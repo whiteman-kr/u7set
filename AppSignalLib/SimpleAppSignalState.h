@@ -42,8 +42,6 @@ public:
 	SimpleAppSignalStatesQueue(int queueSize);
 	virtual ~SimpleAppSignalStatesQueue();
 
-	virtual void push(const SimpleAppSignalState& item, const QThread* thread, int* curSize = nullptr, int* curMaxSize = nullptr) override;
-
 signals:
 	void queueNotEmpty();
 
