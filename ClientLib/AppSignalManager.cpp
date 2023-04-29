@@ -511,6 +511,7 @@ namespace ClientLib
 					AppSignalState state;
 					state.m_hash = signalHash;
 					state.m_flags.valid = false;
+					state.m_flags.stateAvailable = false;
 
 					result->push_back(state);
 				}
