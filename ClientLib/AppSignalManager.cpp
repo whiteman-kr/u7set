@@ -397,15 +397,20 @@ namespace ClientLib
 	bool AppSignalManager::signalExists(Hash hash) const
 	{
 		QReadLocker rl(&m_paramsLocker);
-
-		auto result = m_signalParams.find(hash);
-		return result != m_signalParams.end();
+		return m_signalParams.contains(hash);
 	}
 
 	bool AppSignalManager::signalExists(const QString& appSignalId) const
 	{
-		Hash signalHash = ::calcHash(appSignalId);
-		return signalExists(signalHash);
+		return signalExists(::calcHash(appSignalId));
+	}
+
+	bool AppSignalManager::signalsExist(const QStringList& signalIds) const
+	{
+		QReadLocker rl(&m_paramsLocker);
+		return std::all_of(signalIds.begin(), signalIds.end(), [this](const QString& appSignalId) {
+			return m_signalParams.contains(::calcHash(appSignalId));
+		});
 	}
 
 	AppSignalParam AppSignalManager::signalParam(Hash signalHash, bool* found) const

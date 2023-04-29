@@ -107,6 +107,7 @@ namespace ClientLib
 
 		virtual bool signalExists(Hash hash) const override;
 		virtual bool signalExists(const QString& appSignalId) const override final;
+		virtual bool signalsExist(const QStringList& signalIds) const override final;
 
 		virtual AppSignalParam signalParam(Hash signalHash, bool* found) const override final;
 		virtual AppSignalParam signalParam(const QString& appSignalId, bool* found) const override final;

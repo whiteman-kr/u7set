@@ -42,9 +42,14 @@ bool ReportAppSignalProvider::signalExists(Hash hash) const
 
 bool ReportAppSignalProvider::signalExists(const QString& appSignalId) const
 {
-	const AppSignal* s = m_signalSet->getSignal(appSignalId);
+	return m_signalSet->contains(appSignalId);
+}
 
-	return s != nullptr;
+bool ReportAppSignalProvider::signalsExist(const QStringList& signalIds) const
+{
+	return std::all_of(signalIds.begin(), signalIds.end(), [this](const QString& appSignalId) {
+		return m_signalSet->contains(appSignalId);
+	});
 }
 
 AppSignalParam ReportAppSignalProvider::signalParam(Hash signalHash, bool* found) const
