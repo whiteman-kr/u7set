@@ -1,4 +1,5 @@
 #include "SchemaItemAfb.h"
+#include "SchemaView.h"
 #include "Schema.h"
 #include "PropertyNames.h"
 #include "DrawParam.h"
@@ -93,7 +94,19 @@ namespace VFrame30
 		QString text = m_afbElement.caption();
 
 		p->setPen(textColor());
+
+#ifdef VFRAME30_CACHE_DRAW_TEXT
+		if (drawParam->pdfMode() == true)
+		{
+			DrawHelper::drawText(p, m_font, itemUnit(), text, r, Qt::AlignHCenter | Qt::AlignTop);
+		}
+		else
+		{
+			DrawHelper::drawTextCahed(p, m_font, itemUnit(), text, r, Qt::AlignHCenter | Qt::AlignTop, drawParam->schemaView()->zoom());
+		}
+#else
 		DrawHelper::drawText(p, m_font, itemUnit(), text, r, Qt::AlignHCenter | Qt::AlignTop);
+#endif
 
 		// Draw params
 		//
@@ -129,8 +142,19 @@ namespace VFrame30
 		}
 
 		p->setPen(textColor());
-		DrawHelper::drawText(p, smallFont, itemUnit(), text, r, Qt::AlignLeft | Qt::AlignBottom);
 
+#ifdef VFRAME30_CACHE_DRAW_TEXT
+		if (drawParam->pdfMode() == true)
+		{
+			DrawHelper::drawText(p, smallFont, itemUnit(), text, r, Qt::AlignLeft | Qt::AlignBottom);
+		}
+		else
+		{
+			DrawHelper::drawTextCahed(p, smallFont, itemUnit(), text, r, Qt::AlignLeft | Qt::AlignBottom, drawParam->schemaView()->zoom());
+		}
+#else
+		DrawHelper::drawText(p, smallFont, itemUnit(), text, r, Qt::AlignLeft | Qt::AlignBottom);
+#endif
 		return;
 	}
 

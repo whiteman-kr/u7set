@@ -674,7 +674,18 @@ namespace VFrame30
 			drawParam->timeStats()->addRecord("Schema", schemaId(), "Draw", ellapsed);
 		}
 
-		//qDebug() << "Schema::Draw " << timer.elapsed();
+#if 0
+		thread_local std::list<qint64> elapsedAverage;
+
+		elapsedAverage.push_back(timer.elapsed());
+		while (elapsedAverage.size() > 20)
+		{
+			elapsedAverage.pop_front();
+		}
+
+		qDebug() << "Schema::Draw " << elapsedAverage.back() <<
+					", average " << std::accumulate(elapsedAverage.begin(), elapsedAverage.end(), 0) / elapsedAverage.size();
+#endif
 
 		return;
 	}

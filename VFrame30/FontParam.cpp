@@ -53,6 +53,26 @@ namespace VFrame30
 		return true;
 	}
 
+	QFont FontParam::qfont(SchemaUnit unit, double dpiY) const
+	{
+		QFont f{m_name};
+
+		f.setBold(m_bold);
+		f.setItalic(m_italic);
+
+		if (unit == SchemaUnit::Display)
+		{
+			f.setPixelSize(static_cast<int>(drawSize()));
+		}
+		else
+		{
+			int pixelSize = static_cast<int>(drawSize() * dpiY);
+			f.setPixelSize(pixelSize > 0 ? pixelSize : 1);
+		}
+
+		return f;
+	}
+
 	const QString& FontParam::name() const
 	{
 		return m_name;
