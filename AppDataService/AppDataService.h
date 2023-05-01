@@ -56,10 +56,10 @@ public:
 	void registerDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue, bool isArchivingQueue, const QString& description);
 	void unregisterDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue);
 
-	void registerGatewaySignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue,
-										const Network::GetAppSignalStateChangesForGatewayRequest& request,
+	void registerGatewaySignalStatesQueue(GatewayAppSignalStatesQueueShared destQueue,
+										const std::set<Hash>& hashes,
 										const QString& description);
-	void unregisterGatewaySignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue);
+	void unregisterGatewaySignalStatesQueue(GatewayAppSignalStatesQueueShared destQueue);
 
 	void fillAppDataReceiveState(Network::AppDataReceiveState* adrs);
 
@@ -97,7 +97,7 @@ private:
 	void clearConfiguration();
 
 	void runAppDataReceiverThread();
-	void stopAppDataReceiverlThread();
+	void stopAppDataReceiverThread();
 
 	void runTcpAppDataServer();
 	void stopTcpAppDataServer();

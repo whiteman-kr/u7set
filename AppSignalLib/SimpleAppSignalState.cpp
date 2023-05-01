@@ -16,7 +16,7 @@ SimpleAppSignalState::operator AppSignalState() const
 
 	copyTo(state);
 
-//	return state;
+	return state;
 }
 
 void SimpleAppSignalState::save(Proto::AppSignalState* protoState)
@@ -134,8 +134,10 @@ GatewayAppSignalStatesQueue::GatewayAppSignalStatesQueue(int queueSize) :
 {
 }
 
-void GatewayAppSignalStatesQueue::push(const SimpleAppSignalState& prevState, const SimpleAppSignalState& curState)
+void GatewayAppSignalStatesQueue::push(const SimpleAppSignalState& prevState,
+									   const SimpleAppSignalState& curState,
+									   const QThread* thread)
 {
-
+	FastThreadSafeQueue<GatewayAppSignalState>::push({ .prevState = prevState, .curState = curState }, thread);
 }
 

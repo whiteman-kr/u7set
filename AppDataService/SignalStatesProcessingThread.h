@@ -4,13 +4,15 @@
 #include "../OnlineLib/CircularLogger.h"
 #include "../UtilsLib/SimpleMutex.h"
 #include "../AppSignalLib/SimpleAppSignalState.h"
+#include "DynamicAppSignalState.h"
 
 class AppDataReceiver;
 
 class SignalStatesProcessingThread
 {
 public:
-	SignalStatesProcessingThread(CircularLoggerShared log);
+	SignalStatesProcessingThread(DynamicAppSignalStates& signalStates,
+								 CircularLoggerShared log);
 
 	void registerDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue,
 									   bool isArchivingQueue,
@@ -18,15 +20,16 @@ public:
 
 	void unregisterDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue);
 
-	void registerGatewaySignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue,
-									   const Network::GetAppSignalStateChangesForGatewayRequest& request,
+	void registerGatewaySignalStatesQueue(GatewayAppSignalStatesQueueShared destQueue,
+									   const std::set<Hash>& hashes,
 									   const QString& description);
 
-	void unregisterGatewaySignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue);
+	void unregisterGatewaySignalStatesQueue(GatewayAppSignalStatesQueueShared destQueue);
 
 	void processStates(AppDataReceiver& receiver);
 
 private:
+	DynamicAppSignalStates& m_signalStates;
 	CircularLoggerShared m_log;
 
 	SimpleMutex m_queuesMutex;
@@ -34,4 +37,19 @@ private:
 	// queuePtr => pair<isArchiveQueue, queueDescription>
 	//
 	std::map<SimpleAppSignalStatesQueueShared, std::pair<bool, QString>> m_queues;
+
+	//
+
+	const int GATEWAY_QUEUES_COUNT = sizeof(quint32);
+
+	SimpleMutex m_gatewayQueuesMutex;
+
+	struct GatewayQueueHashes
+	{
+		GatewayAppSignalStatesQueueShared queue;
+		std::set<Hash> hashes;
+	};
+
+	std::vector<GatewayQueueHashes> m_gatewayQueues;
+
 };

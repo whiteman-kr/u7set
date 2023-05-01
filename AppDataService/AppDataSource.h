@@ -21,7 +21,7 @@ public:
 				 int autoArchivingGroupsCount,
 				 CircularLoggerShared timeErrLog);
 
-	void setStatesProcessingThreadWakupParams(std::mutex* statesProcessigRequiredMutex,
+	void setStatesProcessingThreadWakeupParams(std::mutex* statesProcessigRequiredMutex,
 											  std::condition_variable* statesProcessingRequiredCondition,
 											  std::queue<AppDataSource*>* statesProcessingRequired);
 
@@ -69,6 +69,7 @@ private:
 	int m_acquiredSignalsCount = 0;
 
 	SimpleAppSignalStatesArchiveFlagQueue m_signalStatesQueue;
+	GatewayAppSignalStatesQueue m_gatewaySignalStatesQueue;
 
 	int m_signalStatesQueueSize = 0;
 	int m_signalStatesQueueCurSize = 0;

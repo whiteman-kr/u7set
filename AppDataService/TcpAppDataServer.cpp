@@ -452,8 +452,18 @@ void TcpAppDataServer::onGetAppSignalStateChangesForGatewayRequest(const char* r
 	if (m_gatewaySignalStatesQueue == nullptr &&
 		request.signalshashes_size() != 0)
 	{
-		m_gatewaySignalStatesQueue = std::make_shared<SimpleAppSignalStatesQueue>(10000);
-		m_appDataService.registerGatewaySignalStatesQueue(m_gatewaySignalStatesQueue, request,
+		m_gatewaySignalStatesQueue = std::make_shared<GatewayAppSignalStatesQueue>(10000);
+
+		std::set<Hash> hashes;
+
+		int hashesCount = request.signalshashes_size();
+
+		for(int i = 0; i < hashesCount; i++)
+		{
+			hashes.insert(request.signalshashes(i));
+		}
+
+		m_appDataService.registerGatewaySignalStatesQueue(m_gatewaySignalStatesQueue, hashes,
 			QString("TcpAppDataServer for %1 (%2)").
 					arg(connectedSoftwareInfo().equipmentID()).
 					arg(peerAddr().addressStr()));

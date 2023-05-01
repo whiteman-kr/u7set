@@ -98,6 +98,19 @@ void DynamicAppSignalState::setSignalParams(const AppSignal* signal, const AppSi
 	m_current[0].hash = m_current[1].hash = m_signalHash;
 }
 
+void DynamicAppSignalState::setQueues(SimpleAppSignalStatesArchiveFlagQueue* signalStatesQueue,
+			   GatewayAppSignalStatesQueue* gatewaySignalStatesQueue)
+{
+	Q_ASSERT(signalStatesQueue != nullptr);
+	Q_ASSERT(gatewaySignalStatesQueue != nullptr);
+
+	Q_ASSERT(m_statesQueue == nullptr);
+	Q_ASSERT(m_gwStatesQueue == nullptr);
+
+	m_statesQueue = signalStatesQueue;
+	m_gwStatesQueue = gatewaySignalStatesQueue;
+}
+
 // returns count of states pushed in statesQueue
 //
 int DynamicAppSignalState::setState(const Times& time,
@@ -106,7 +119,6 @@ int DynamicAppSignalState::setState(const Times& time,
 								const char* rupData,
 								int rupDataSize,
 								int autoArchivingGroup,
-								SimpleAppSignalStatesArchiveFlagQueue& statesQueue,
 								const QThread* thread)
 {
 	SimpleAppSignalState prevState = current();			// prevState is a COPY of current()!
@@ -162,7 +174,7 @@ int DynamicAppSignalState::setState(const Times& time,
 			{
 				if (m_archive == true)
 				{
-					statesQueue.pushAutoPoint(prevState, m_archive, thread);
+					m_statesQueue->pushAutoPoint(prevState, m_archive, thread);
 					pushedStatesCtr++;
 				}
 
@@ -194,7 +206,7 @@ int DynamicAppSignalState::setState(const Times& time,
 
 			if (m_archive == true)
 			{
-				statesQueue.pushAutoPoint(tmpState, m_archive, thread);
+				m_statesQueue->pushAutoPoint(tmpState, m_archive, thread);
 				pushedStatesCtr++;
 			}
 
@@ -349,7 +361,7 @@ int DynamicAppSignalState::setState(const Times& time,
 
 	if (hasArchivingReason == true)
 	{
-		statesQueue.push(curState, m_archive, thread);
+		m_statesQueue->push(curState, m_archive, thread);
 		pushedStatesCtr++;
 
 		// update stored states
@@ -368,6 +380,11 @@ int DynamicAppSignalState::setState(const Times& time,
 	else
 	{
 		m_prevStateIsStored = false;
+	}
+
+	if (hasGatewaySendReasone(curState.flags) == true)
+	{
+		m_gwStatesQueue->push(prevState, curState, m_gatewayQueueMask);
 	}
 
 	// curState should be update always
@@ -461,6 +478,16 @@ QString DynamicAppSignalState::appSignalID() const
 void DynamicAppSignalState::setAutoArchivingGroup(int archivingGroup)
 {
 	m_autoArchivingGroup = archivingGroup;
+}
+
+void DynamicAppSignalState::setGatewayQueueMask(quint32 mask)
+{
+	m_gatewayQueueMask |= mask;
+}
+
+void DynamicAppSignalState::resetGatewayQueueMask(quint32 mask)
+{
+	m_gatewayQueueMask &= !mask;
 }
 
 void DynamicAppSignalState::appendRtSession(Hash signalHash,
@@ -727,6 +754,23 @@ void DynamicAppSignalState::setNewCurState(const SimpleAppSignalState& newCurSta
 	m_curStateIndex.store(writeStateIndex);					// change now-reading struct to updated
 }
 
+bool DynamicAppSignalState::hasGatewaySendReasone(AppSignalStateFlags flags) const
+{
+	if (m_signalType == E::SignalType::Discrete)
+	{
+		return ((flags & AppSignalStateFlags::MASK_VALIDITY_AND_AVAILABLE_FLAGS) ||
+			   (flags & AppSignalStateFlags::MASK_COARSE_APERTURE)) != 0;		// discrete state change
+	}
+
+	if (m_signalType == E::SignalType::Analog)
+	{
+		return ((flags & AppSignalStateFlags::MASK_VALIDITY_AND_AVAILABLE_FLAGS) ||
+			   (flags & AppSignalStateFlags::MASK_LIMITS_FLAGS)) != 0;
+	}
+
+	return false;
+}
+
 DynamicAppSignalStates::~DynamicAppSignalStates()
 {
 	clear();
@@ -852,4 +896,31 @@ void DynamicAppSignalStates::setAutoArchivingGroups(int autoArchivingGroupsCount
 		}
 	}
 }
+
+void DynamicAppSignalStates::setGatewayQueueMask(const std::set<Hash>& hashes, quint32 mask)
+{
+	for(Hash h : hashes)
+	{
+		DynamicAppSignalState* st = getStateByHash(h);
+
+		if (st != nullptr)
+		{
+			st->setGatewayQueueMask(mask);
+		}
+	}
+}
+
+void DynamicAppSignalStates::resetGatewayQueueMask(const std::set<Hash>& hashes, quint32 mask)
+{
+	for(Hash h : hashes)
+	{
+		DynamicAppSignalState* st = getStateByHash(h);
+
+		if (st != nullptr)
+		{
+			st->resetGatewayQueueMask(mask);
+		}
+	}
+}
+
 

@@ -110,16 +110,16 @@ void AppDataServiceWorker::unregisterDestSignalStatesQueue(SimpleAppSignalStates
 	m_appDataReceiver->unregisterDestSignalStatesQueue(destQueue);
 }
 
-void AppDataServiceWorker::registerGatewaySignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue,
-															const Network::GetAppSignalStateChangesForGatewayRequest& request,
+void AppDataServiceWorker::registerGatewaySignalStatesQueue(GatewayAppSignalStatesQueueShared destQueue,
+															const std::set<Hash>& hashes,
 															const QString& description)
 {
 	TEST_PTR_RETURN(m_appDataReceiver);
 
-	m_appDataReceiver->registerGatewaySignalStatesQueue(destQueue, request, description);
+	m_appDataReceiver->registerGatewaySignalStatesQueue(destQueue, hashes, description);
 }
 
-void AppDataServiceWorker::unregisterGatewaySignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue)
+void AppDataServiceWorker::unregisterGatewaySignalStatesQueue(GatewayAppSignalStatesQueueShared destQueue)
 {
 	TEST_PTR_RETURN(m_appDataReceiver);
 
@@ -176,15 +176,16 @@ void AppDataServiceWorker::runAppDataReceiverThread()
 	}
 
 	m_appDataReceiver = new AppDataReceiver(m_curSettingsProfile.appDataReceivingIP,
-													  m_appDataSources,
-													  m_appDataProcessingThreadCount,
-													  sessionParams().softwareRunMode,
-													  logger());
+											m_appDataSources,
+											m_appSignalStates,
+											m_appDataProcessingThreadCount,
+											sessionParams().softwareRunMode,
+											logger());
 
 	m_appDataReceiver->start();
 }
 
-void AppDataServiceWorker::stopAppDataReceiverlThread()
+void AppDataServiceWorker::stopAppDataReceiverThread()
 {
 	if (m_appDataReceiver != nullptr)
 	{
@@ -585,7 +586,7 @@ void AppDataServiceWorker::clearConfiguration()
 	stopRtTrendsServerThread();
 	stopTcpArchiveClientThread();
 	stopTcpAppDataServer();
-	stopAppDataReceiverlThread();
+	stopAppDataReceiverThread();
 
 	shutdownTimeErrLog();
 

@@ -36,6 +36,7 @@ class AppDataReceiver : public RunOverrideThread
 public:
 	AppDataReceiver(const HostAddressPort& dataReceivingIP,
 					AppDataSources& appDataSources,
+					DynamicAppSignalStates& signalStates,
 					int processingThreadsCount,
 					E::SoftwareRunMode swRunMode,
 					CircularLoggerShared log);
@@ -54,11 +55,11 @@ public:
 
 	void unregisterDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue);
 
-	void registerGatewaySignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue,
-										  const Network::GetAppSignalStateChangesForGatewayRequest& request,
+	void registerGatewaySignalStatesQueue(GatewayAppSignalStatesQueueShared destQueue,
+										  const std::set<Hash>& hashes,
 										  const QString& description);
 
-	void unregisterGatewaySignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue);
+	void unregisterGatewaySignalStatesQueue(GatewayAppSignalStatesQueueShared destQueue);
 
 private:
 	virtual void run() override;

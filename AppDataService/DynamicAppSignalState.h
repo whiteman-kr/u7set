@@ -24,13 +24,15 @@ public:
 
 	void setSignalParams(const AppSignal* signal, const AppSignals& appSignals);
 
+	void setQueues(SimpleAppSignalStatesArchiveFlagQueue* signalStatesQueue,
+				   GatewayAppSignalStatesQueue* gatewaySignalStatesQueue);
+
 	int setState(const Times& time,
 				  bool isSimPacket,
 				  quint16 packetNo,
 				  const char* rupData,
 				  int rupDataSize,
 				  int autoArchivingGroup,
-				  SimpleAppSignalStatesArchiveFlagQueue& statesQueue,
 				  const QThread* thread);
 
 	int setUnavailable(const Times& time,
@@ -49,6 +51,9 @@ public:
 
 	int autoArchivingGroup() const { return m_autoArchivingGroup; }
 	void setAutoArchivingGroup(int archivingGroup);
+
+	void setGatewayQueueMask(quint32 mask);
+	void resetGatewayQueueMask(quint32 mask);
 
 	// Real time trends support
 	//
@@ -70,10 +75,6 @@ public:
 
 	const AppSignal* signal() const { return m_signal; }
 
-public:
-
-	// bool m_debug_replace_time = false;
-
 private:
 	bool getValue(const char* rupData, int rupDataSize, double& value);
 	bool getBit(const char* rupData, int rupDataSize, const Address16& addr, quint32& bit);
@@ -81,12 +82,17 @@ private:
 	void setNewCurState(const SimpleAppSignalState& newCurState);
 	void logState(const SimpleAppSignalState& state);
 
+	inline bool hasGatewaySendReasone(AppSignalStateFlags flags) const;
+
 	// Real time trends support
 	//
 	void takeRtProcessingOwnership(const QThread* newProcessingOwner);
 	void releaseRtProcessingOwnership(const QThread* currentProcessingOwner);
 
 private:
+	SimpleAppSignalStatesArchiveFlagQueue* m_statesQueue = nullptr;
+	GatewayAppSignalStatesQueue* m_gwStatesQueue = nullptr;
+
 	struct FlagSignalParceInfo
 	{
 #ifdef QT_DEBUG
@@ -164,6 +170,8 @@ private:
 	std::atomic<const QThread*> m_rtProcessingOwner = { nullptr };
 
 	QHash<int, RtSession> m_rtSessions;
+
+	quint32 m_gatewayQueueMask = 0;
 };
 
 class DynamicAppSignalStates
@@ -191,6 +199,9 @@ public:
 //	bool getStoredState(Hash hash, AppSignalState& state) const;
 
 	void setAutoArchivingGroups(int autoArchivingGroupsCount);
+
+	void setGatewayQueueMask(const std::set<Hash>& hashes, quint32 mask);
+	void resetGatewayQueueMask(const std::set<Hash>& hashes, quint32 mask);
 
 private:
 	QMutex m_allMutex;

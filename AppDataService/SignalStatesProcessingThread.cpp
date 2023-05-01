@@ -3,9 +3,12 @@
 #include "SignalStatesProcessingThread.h"
 #include "AppDataReceiver.h"
 
-SignalStatesProcessingThread::SignalStatesProcessingThread(CircularLoggerShared log) :
-    m_log(log)
+SignalStatesProcessingThread::SignalStatesProcessingThread(DynamicAppSignalStates& signalStates,
+														   CircularLoggerShared log) :
+	m_signalStates(signalStates),
+	m_log(log)
 {
+	m_gatewayQueues.resize(GATEWAY_QUEUES_COUNT);
 }
 
 void SignalStatesProcessingThread::registerDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue,
@@ -63,16 +66,66 @@ void SignalStatesProcessingThread::unregisterDestSignalStatesQueue(SimpleAppSign
 	}
 }
 
-void SignalStatesProcessingThread::registerGatewaySignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue,
-								   const Network::GetAppSignalStateChangesForGatewayRequest& request,
+void SignalStatesProcessingThread::registerGatewaySignalStatesQueue(GatewayAppSignalStatesQueueShared destQueue,
+								   const std::set<Hash>& hashes,
 								   const QString& description)
 {
-	Q_ASSERT(false);
+	quint32 queueMask = 0;
+
+	m_gatewayQueuesMutex.lock();
+
+	for(int i = 0; i < GATEWAY_QUEUES_COUNT; i++)
+	{
+		GatewayQueueHashes& gqh = m_gatewayQueues[i];
+
+		if (gqh.queue == nullptr)
+		{
+			gqh.queue = destQueue;
+			gqh.hashes = hashes;
+
+			queueMask = 1 << i;
+
+			break;
+		}
+	}
+
+	m_gatewayQueuesMutex.unlock();
+
+	if (queueMask != 0)
+	{
+		m_signalStates.setGatewayQueueMask(hashes, queueMask);
+	}
 }
 
-void SignalStatesProcessingThread::unregisterGatewaySignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue)
+void SignalStatesProcessingThread::unregisterGatewaySignalStatesQueue(GatewayAppSignalStatesQueueShared destQueue)
 {
-	Q_ASSERT(false);
+	quint32 queueMask = 0;
+	std::set<Hash> hashes;
+
+	m_gatewayQueuesMutex.lock();
+
+	for(int i = 0; i < GATEWAY_QUEUES_COUNT; i++)
+	{
+		GatewayQueueHashes& gqh = m_gatewayQueues[i];
+
+		if (gqh.queue == destQueue)
+		{
+			gqh.queue = nullptr;
+			hashes.swap(gqh.hashes);
+
+			queueMask = 1 << i;
+
+			break;
+		}
+	}
+
+	m_gatewayQueuesMutex.unlock();
+
+	if (queueMask != 0)
+	{
+		m_signalStates.resetGatewayQueueMask(hashes, queueMask);
+	}
+
 }
 
 void SignalStatesProcessingThread::processStates(AppDataReceiver& receiver)

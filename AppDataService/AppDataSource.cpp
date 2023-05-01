@@ -81,6 +81,8 @@ void AppDataSource::prepare(const AppSignals& appSignals,
 
 		DynamicAppSignalState* dynState = signalStates->getStateByID(signal->appSignalID());
 
+		dynState->setQueues(&m_signalStatesQueue, &m_gatewaySignalStatesQueue);
+
 /*		if (dynState->appSignalID() == "#LM1_MEANDR_10MS_2")
 		{
 			dynState->m_debug_replace_time = true;
@@ -93,17 +95,16 @@ void AppDataSource::prepare(const AppSignals& appSignals,
 
 	m_acquiredSignalsCount = static_cast<int>(m_signalStates.count());
 
-	int queueSize = m_acquiredSignalsCount * 3;
-
-	if (queueSize < 200)
-	{
-		queueSize = 200;
-	}
+	int queueSize = std::max(m_acquiredSignalsCount * 3, 200);
 
 	m_signalStatesQueue.resize(queueSize);
+
+	queueSize = std::max(m_acquiredSignalsCount / 2, 1000);
+
+	m_gatewaySignalStatesQueue.resize(queueSize);
 }
 
-void AppDataSource::setStatesProcessingThreadWakupParams(std::mutex* statesProcessigRequiredMutex,
+void AppDataSource::setStatesProcessingThreadWakeupParams(std::mutex* statesProcessigRequiredMutex,
 										  std::condition_variable* statesProcessingRequiredCondition,
 										  std::queue<AppDataSource*>* statesProcessingRequired)
 {
