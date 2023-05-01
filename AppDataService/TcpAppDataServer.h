@@ -64,7 +64,7 @@ private:
 	AppDataServiceWorker& m_appDataService;
 
 	SimpleAppSignalStatesQueueShared m_signalStatesQueue;
-	GatewaytAppSignalStatesQueueShared m_gatewaySignalStatesQueue;
+	GatewayAppSignalStatesQueueShared m_gatewaySignalStatesQueue;
 
 	// precalculated variables
 	//

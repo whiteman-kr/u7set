@@ -16,7 +16,7 @@ SimpleAppSignalState::operator AppSignalState() const
 
 	copyTo(state);
 
-	return state;
+//	return state;
 }
 
 void SimpleAppSignalState::save(Proto::AppSignalState* protoState)
@@ -121,5 +121,21 @@ void SimpleAppSignalStatesArchiveFlagQueue::pushAutoPoint(const SimpleAppSignalS
 	st.sendStateToArchive = sendStateToArchive;
 
 	FastThreadSafeQueue<SimpleAppSignalStateArchiveFlag>::push(st, thread);
+}
+
+// ---------------------------------------------------------------------------------------------------------
+//
+// GatewayAppSignalStatesQueue class implementation
+//
+// ---------------------------------------------------------------------------------------------------------
+
+GatewayAppSignalStatesQueue::GatewayAppSignalStatesQueue(int queueSize) :
+	FastThreadSafeQueue<GatewayAppSignalState>(queueSize)
+{
+}
+
+void GatewayAppSignalStatesQueue::push(const SimpleAppSignalState& prevState, const SimpleAppSignalState& curState)
+{
+
 }
 

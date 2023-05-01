@@ -52,7 +52,7 @@ private:
 	int m_afterPushCtr = 0;
 };
 
-typedef std::shared_ptr<SimpleAppSignalStatesQueue> SimpleAppSignalStatesQueueShared;
+using SimpleAppSignalStatesQueueShared = std::shared_ptr<SimpleAppSignalStatesQueue>;
 
 struct SimpleAppSignalStateArchiveFlag
 {
@@ -70,8 +70,18 @@ public:
 };
 
 
+struct GatewayAppSignalState
+{
+	SimpleAppSignalState prevState;
+	SimpleAppSignalState curState;
+};
 
+class GatewayAppSignalStatesQueue : private FastThreadSafeQueue<GatewayAppSignalState>
+{
+public:
+	GatewayAppSignalStatesQueue(int queueSize);
 
-
+	void push(const SimpleAppSignalState& prevState, const SimpleAppSignalState& curState);
+}
 
 
