@@ -77,16 +77,7 @@ struct GatewayAppSignalState
 	SimpleAppSignalState curState;
 };
 
-class GatewayAppSignalStatesQueue : private FastThreadSafeQueue<GatewayAppSignalState>
-{
-public:
-	GatewayAppSignalStatesQueue(int queueSize);
-
-	void push(const SimpleAppSignalState& prevState,
-			  const SimpleAppSignalState& curState,
-			  const QThread* thread);
-};
-
+using GatewayAppSignalStatesQueue = FastThreadSafeQueue<GatewayAppSignalState>;
 using GatewayAppSignalStatesQueueShared = std::shared_ptr<GatewayAppSignalStatesQueue>;
 
 

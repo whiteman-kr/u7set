@@ -10,7 +10,8 @@
 // -------------------------------------------------------------------------------
 
 AppDataSource::AppDataSource(const DataSource& dataSource) :
-	m_signalStatesQueue(3)
+	m_signalStatesQueue(3),
+	m_gatewaySignalStatesQueue(3)
 {
 	// copy DataSource properties to THIS object
 	//
@@ -29,7 +30,8 @@ AppDataSource::AppDataSource(const DataSource& dataSource) :
 // This object used in SCM for AppDataSource state data displaying only.
 //
 AppDataSource::AppDataSource(const Network::DataSourceInfo& proto) :
-	m_signalStatesQueue(3)
+	m_signalStatesQueue(3),
+	m_gatewaySignalStatesQueue(3)
 {
 	loadFromProto(proto);
 }
@@ -106,11 +108,13 @@ void AppDataSource::prepare(const AppSignals& appSignals,
 
 void AppDataSource::setStatesProcessingThreadWakeupParams(std::mutex* statesProcessigRequiredMutex,
 										  std::condition_variable* statesProcessingRequiredCondition,
-										  std::queue<AppDataSource*>* statesProcessingRequired)
+										  std::queue<AppDataSource*>* statesProcessingRequired,
+										  std::queue<AppDataSource *>* gwStatesProcessingRequired)
 {
 	m_statesProcessigRequiredMutex = statesProcessigRequiredMutex;
 	m_statesProcessingRequiredCondition = statesProcessingRequiredCondition;
 	m_statesProcessingRequired = statesProcessingRequired;
+	m_gwStatesProcessingRequired = gwStatesProcessingRequired;
 }
 
 bool AppDataSource::getState(Network::AppDataSourceState* proto) const
@@ -183,6 +187,17 @@ bool AppDataSource::getSignalState(SimpleAppSignalStateArchiveFlag* state, const
 	bool result = m_signalStatesQueue.pop(state, thread);
 
 	m_signalStatesQueueCurSize = m_signalStatesQueue.size(thread);
+
+	return result;
+}
+
+bool AppDataSource::getGatewaySignalState(GatewayAppSignalState* gwState, const QThread* thread)
+{
+	TEST_PTR_RETURN_FALSE(gwState);
+
+	bool result = m_gatewaySignalStatesQueue.pop(gwState, thread);
+
+	m_gatewaySignalStatesQueueCurSize = m_gatewaySignalStatesQueue.size(thread);
 
 	return result;
 }
@@ -327,27 +342,20 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 	int autoArchivingGroup = getAutoArchivingGroup(m_rupTimes.system.timeStamp);
 
 	int pushedStatesCtr = 0;
+	int pushedGwStatesCtr = 0;
 
 	for(DynamicAppSignalState* signalState : m_signalStates)
 	{
 		TEST_PTR_CONTINUE(signalState);
 
-/*		if (signalState->m_debug_replace_time == true)
-		{
-			m_rupTimes.system = timeWithoutCorrection;
-		}*/
+		signalState->setState(m_rupTimes, isSimPacket, packetNo, rupData, rupDataSize,
+							  autoArchivingGroup, thread,
+							  pushedStatesCtr, pushedGwStatesCtr);
 
-		pushedStatesCtr += signalState->setState(m_rupTimes, isSimPacket, packetNo, rupData, rupDataSize,
-										  autoArchivingGroup, m_signalStatesQueue, thread);
-
-/*		if (signalState->m_debug_replace_time == true)
-		{
-			m_rupTimes.system = m_lastPacketServerTime;
-		}*/
-
-		if (pushedStatesCtr > 20)
+		if (pushedStatesCtr > 20 || pushedGwStatesCtr > 10)
 		{
 			pushedStatesCtr -= 20;
+			pushedGwStatesCtr -=10;
 			wakeupStatesProcessingThread();
 		}
 	}

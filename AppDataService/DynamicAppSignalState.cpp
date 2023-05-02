@@ -119,7 +119,9 @@ int DynamicAppSignalState::setState(const Times& time,
 								const char* rupData,
 								int rupDataSize,
 								int autoArchivingGroup,
-								const QThread* thread)
+								const QThread* thread,
+								int& pushedStatesCtr,
+								int& pushedGwStatesCtr)
 {
 	SimpleAppSignalState prevState = current();			// prevState is a COPY of current()!
 	SimpleAppSignalState curState;
@@ -140,8 +142,6 @@ int DynamicAppSignalState::setState(const Times& time,
 	bool result = false;
 
 	quint32 validity = AppSignalState::VALID;
-
-	int pushedStatesCtr = 0;
 
 	if (m_validityAddr.isValid() == true)
 	{
@@ -382,9 +382,17 @@ int DynamicAppSignalState::setState(const Times& time,
 		m_prevStateIsStored = false;
 	}
 
-	if (hasGatewaySendReasone(curState.flags) == true)
+	if (m_gatewayQueueMask != 0 && hasGatewaySendReasone(curState.flags) == true)
 	{
-		m_gwStatesQueue->push(prevState, curState, m_gatewayQueueMask);
+		GatewayAppSignalState gwState;
+
+		gwState.gatewayQueueMask = m_gatewayQueueMask;
+		gwState.prevState = prevState;
+		gwState.curState = curState;
+
+		m_gwStatesQueue->push(gwState, thread);
+
+		pushedGwStatesCtr++;
 	}
 
 	// curState should be update always
@@ -758,14 +766,14 @@ bool DynamicAppSignalState::hasGatewaySendReasone(AppSignalStateFlags flags) con
 {
 	if (m_signalType == E::SignalType::Discrete)
 	{
-		return ((flags & AppSignalStateFlags::MASK_VALIDITY_AND_AVAILABLE_FLAGS) ||
-			   (flags & AppSignalStateFlags::MASK_COARSE_APERTURE)) != 0;		// discrete state change
+		return ((flags.all & AppSignalStateFlags::MASK_VALIDITY_AND_AVAILABLE_FLAGS) ||
+			   (flags.all & AppSignalStateFlags::MASK_COARSE_APERTURE)) != 0;		// discrete state change
 	}
 
 	if (m_signalType == E::SignalType::Analog)
 	{
-		return ((flags & AppSignalStateFlags::MASK_VALIDITY_AND_AVAILABLE_FLAGS) ||
-			   (flags & AppSignalStateFlags::MASK_LIMITS_FLAGS)) != 0;
+		return ((flags.all & AppSignalStateFlags::MASK_VALIDITY_AND_AVAILABLE_FLAGS) ||
+			   (flags.all & AppSignalStateFlags::MASK_LIMITS_FLAGS)) != 0;
 	}
 
 	return false;

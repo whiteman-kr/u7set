@@ -23,12 +23,14 @@ public:
 
 	void setStatesProcessingThreadWakeupParams(std::mutex* statesProcessigRequiredMutex,
 											  std::condition_variable* statesProcessingRequiredCondition,
-											  std::queue<AppDataSource*>* statesProcessingRequired);
+											  std::queue<AppDataSource*>* statesProcessingRequired,
+											  std::queue<AppDataSource*>* gwStatesProcessingRequired);
 
 	bool getState(Network::AppDataSourceState* proto) const;
 	void setState(const Network::AppDataSourceState& proto);
 
 	bool getSignalState(SimpleAppSignalStateArchiveFlag* state, const QThread* thread);
+	bool getGatewaySignalState(GatewayAppSignalState* gwState, const QThread* thread);
 
 	int acquiredSignalsCount() const { return m_acquiredSignalsCount; }
 
@@ -60,6 +62,7 @@ private:
 	std::mutex* m_statesProcessigRequiredMutex = nullptr;
 	std::condition_variable* m_statesProcessingRequiredCondition = nullptr;
 	std::queue<AppDataSource*>* m_statesProcessingRequired = nullptr;
+	std::queue<AppDataSource*>* m_gwStatesProcessingRequired = nullptr;
 
 	//
 
@@ -74,6 +77,8 @@ private:
 	int m_signalStatesQueueSize = 0;
 	int m_signalStatesQueueCurSize = 0;
 	int m_signalStatesQueueCurMaxSize = 0;
+
+	int m_gatewaySignalStatesQueueCurSize = 0;
 
 	// app data parsing
 	//

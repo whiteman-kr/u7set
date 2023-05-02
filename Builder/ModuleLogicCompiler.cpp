@@ -15431,7 +15431,6 @@ namespace Builder
 											m_log);
 	}
 
-
 /*
  * Generation of binary representation of tuning frames data
  *

@@ -122,22 +122,3 @@ void SimpleAppSignalStatesArchiveFlagQueue::pushAutoPoint(const SimpleAppSignalS
 
 	FastThreadSafeQueue<SimpleAppSignalStateArchiveFlag>::push(st, thread);
 }
-
-// ---------------------------------------------------------------------------------------------------------
-//
-// GatewayAppSignalStatesQueue class implementation
-//
-// ---------------------------------------------------------------------------------------------------------
-
-GatewayAppSignalStatesQueue::GatewayAppSignalStatesQueue(int queueSize) :
-	FastThreadSafeQueue<GatewayAppSignalState>(queueSize)
-{
-}
-
-void GatewayAppSignalStatesQueue::push(const SimpleAppSignalState& prevState,
-									   const SimpleAppSignalState& curState,
-									   const QThread* thread)
-{
-	FastThreadSafeQueue<GatewayAppSignalState>::push({ .prevState = prevState, .curState = curState }, thread);
-}
-

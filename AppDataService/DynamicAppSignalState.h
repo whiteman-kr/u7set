@@ -33,7 +33,9 @@ public:
 				  const char* rupData,
 				  int rupDataSize,
 				  int autoArchivingGroup,
-				  const QThread* thread);
+				  const QThread* thread,
+				  int& pushedStatesCtr,
+				  int& pushedGwStatesCtr);
 
 	int setUnavailable(const Times& time,
 				  SimpleAppSignalStatesArchiveFlagQueue& statesQueue,

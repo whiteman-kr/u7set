@@ -135,37 +135,77 @@ void SignalStatesProcessingThread::processStates(AppDataReceiver& receiver)
 	auto& waitConditionMutex = receiver.m_statesProcessigRequiredMutex;
 	auto& waitCondition = receiver.m_statesProcessingRequiredCondition;
 	auto& requireProcessing = receiver.m_statesProcessingRequired;
+	auto& gwRequireProcessing = receiver.m_gwStatesProcessingRequired;
 
 	QThread* thisThread = QThread::currentThread();
 
 	SimpleAppSignalStateArchiveFlag state;
+	GatewayAppSignalState gwState;
+	bool haveStateToProcessing = false;
 
 	std::unique_lock ul(waitConditionMutex, std::defer_lock);
 
-	while(receiver.isQuitRequested() == false)
+	AppDataSource* sourceToStatesProcessing = nullptr;
+	AppDataSource* sourceToGwStatesProcessing = nullptr;
+
+	while(true)
 	{
 		ul.lock();
 
-		waitCondition.wait_for(ul, std::chrono::milliseconds(10));
-
-		while(true)
+		if (sourceToStatesProcessing != nullptr)
 		{
-			if (requireProcessing.empty() == true ||
-				receiver.isQuitRequested() == true)
-			{
-				ul.unlock();
-				break;
-			}
+			requireProcessing.push(sourceToStatesProcessing);
+		}
 
-			AppDataSource* source = requireProcessing.front();
+		if (sourceToGwStatesProcessing != nullptr)
+		{
+			gwRequireProcessing.push(sourceToGwStatesProcessing);
+		}
 
-			requireProcessing.pop();
+		waitCondition.wait(ul, [&requireProcessing, &gwRequireProcessing, &receiver]() -> bool
+								{
+									return	!requireProcessing.empty() ||
+											!gwRequireProcessing.empty() ||
+											receiver.isQuitRequested();
+								});
 
+		if (receiver.isQuitRequested() == true)
+		{
 			ul.unlock();
+			break;
+		}
 
-			while(source->getSignalState(&state, thisThread) == true)
+		sourceToStatesProcessing = nullptr;
+
+		if (requireProcessing.empty() == false)
+		{
+			sourceToStatesProcessing = requireProcessing.front();
+			requireProcessing.pop();
+		}
+
+		sourceToGwStatesProcessing = nullptr;
+
+		if (gwRequireProcessing.empty() == false)
+		{
+			sourceToGwStatesProcessing = gwRequireProcessing.front();
+			gwRequireProcessing.pop();
+		}
+
+		ul.unlock();
+
+		if (sourceToStatesProcessing != nullptr)
+		{
+			m_queuesMutex.lock(thisThread);
+
+			for(int i = 0; i < 500; i++)
 			{
-				m_queuesMutex.lock(thisThread);
+				haveStateToProcessing = sourceToStatesProcessing->getSignalState(&state, thisThread);
+
+				if (haveStateToProcessing == false)
+				{
+					sourceToStatesProcessing = nullptr;
+					break;
+				}
 
 				for(const auto& p : m_queues)
 				{
@@ -186,12 +226,46 @@ void SignalStatesProcessingThread::processStates(AppDataReceiver& receiver)
 						queue->push(state.state, thisThread);
 					}
 				}
-
-				m_queuesMutex.unlock(thisThread);
 			}
 
-			ul.lock();
+			m_queuesMutex.unlock(thisThread);
 		}
+
+		//
+
+		if (sourceToGwStatesProcessing != nullptr)
+		{
+			m_gatewayQueuesMutex.lock(thisThread);
+
+			for(int i = 0; i < 500; i++)
+			{
+				haveStateToProcessing = sourceToGwStatesProcessing->getGatewaySignalState(&gwState, thisThread);
+
+				if (haveStateToProcessing == false)
+				{
+					sourceToGwStatesProcessing = nullptr;
+					break;
+				}
+
+				quint32 queueMask = gwState.gatewayQueueMask;
+
+				for(int bit = 0; queueMask != 0 && bit < sizeof(quint32) * 8;  queueMask >>= 1, bit++)
+				{
+					if ((queueMask & 1) != 0)
+					{
+						GatewayAppSignalStatesQueueShared queue = m_gatewayQueues[bit].queue;
+
+						if (queue != nullptr)
+						{
+							queue->push(gwState, thisThread);
+						}
+					}
+				}
+			}
+
+			m_gatewayQueuesMutex.unlock(thisThread);
+		}
+
 	}
 
 	DEBUG_LOG_MSG(m_log, QString("SignalStatesProcessingThread finished"));

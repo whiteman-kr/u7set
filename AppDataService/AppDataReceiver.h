@@ -134,6 +134,7 @@ private:
 	std::mutex m_statesProcessigRequiredMutex;
 	std::condition_variable m_statesProcessingRequiredCondition;
 	std::queue<AppDataSource*> m_statesProcessingRequired;		//	source requires states queue processing
+	std::queue<AppDataSource*> m_gwStatesProcessingRequired;	//	source requires gateway states queue processing
 
 	//
 

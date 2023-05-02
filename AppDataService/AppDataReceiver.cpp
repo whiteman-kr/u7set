@@ -60,8 +60,9 @@ AppDataReceiver::AppDataReceiver(const HostAddressPort& dataReceivingIP,
 	for(AppDataSource* appDataSource : appDataSources)
 	{
 		appDataSource->setStatesProcessingThreadWakeupParams(&m_statesProcessigRequiredMutex,
-															&m_statesProcessingRequiredCondition,
-															&m_statesProcessingRequired);
+															 &m_statesProcessingRequiredCondition,
+															 &m_statesProcessingRequired,
+															 &m_gwStatesProcessingRequired);
 	}
 }
 
