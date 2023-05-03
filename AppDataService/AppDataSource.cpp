@@ -108,13 +108,11 @@ void AppDataSource::prepare(const AppSignals& appSignals,
 
 void AppDataSource::setStatesProcessingThreadWakeupParams(std::mutex* statesProcessigRequiredMutex,
 										  std::condition_variable* statesProcessingRequiredCondition,
-										  std::queue<AppDataSource*>* statesProcessingRequired,
-										  std::queue<AppDataSource *>* gwStatesProcessingRequired)
+										  std::queue<AppDataSource*>* statesProcessingRequired)
 {
 	m_statesProcessigRequiredMutex = statesProcessigRequiredMutex;
 	m_statesProcessingRequiredCondition = statesProcessingRequiredCondition;
 	m_statesProcessingRequired = statesProcessingRequired;
-	m_gwStatesProcessingRequired = gwStatesProcessingRequired;
 }
 
 bool AppDataSource::getState(Network::AppDataSourceState* proto) const
@@ -342,25 +340,25 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 	int autoArchivingGroup = getAutoArchivingGroup(m_rupTimes.system.timeStamp);
 
 	int pushedStatesCtr = 0;
-	int pushedGwStatesCtr = 0;
 
 	for(DynamicAppSignalState* signalState : m_signalStates)
 	{
 		TEST_PTR_CONTINUE(signalState);
 
-		signalState->setState(m_rupTimes, isSimPacket, packetNo, rupData, rupDataSize,
-							  autoArchivingGroup, thread,
-							  pushedStatesCtr, pushedGwStatesCtr);
+		pushedStatesCtr += signalState->setState(m_rupTimes, isSimPacket, packetNo, rupData, rupDataSize,
+												autoArchivingGroup, thread);
 
-		if (pushedStatesCtr > 20 || pushedGwStatesCtr > 10)
+		if (pushedStatesCtr > 20)
 		{
-			pushedStatesCtr -= 20;
-			pushedGwStatesCtr -=10;
+			pushedStatesCtr = 0;
 			wakeupStatesProcessingThread();
 		}
 	}
 
-	wakeupStatesProcessingThread();
+	if (pushedStatesCtr != 0)
+	{
+		wakeupStatesProcessingThread();
+	}
 
 	m_signalStatesQueue.getSizes(&m_signalStatesQueueCurSize, &m_signalStatesQueueCurMaxSize, &m_signalStatesQueueSize, thread);
 
@@ -377,7 +375,7 @@ void AppDataSource::wakeupStatesProcessingThread()
 
 	std::lock_guard lg(*m_statesProcessigRequiredMutex);
 	m_statesProcessingRequired->push(this);
-	m_statesProcessingRequiredCondition->notify_one();
+	m_statesProcessingRequiredCondition->notify_all();
 
 	Q_UNUSED(lg);
 }

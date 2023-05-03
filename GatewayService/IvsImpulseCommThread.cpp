@@ -13,6 +13,7 @@ namespace Gateway
 		m_gateway(handler.m_gateway),
 		m_appSignals(handler.m_appSignals),
 		m_states(handler.m_states),
+		m_signalStatesUpdated(handler.m_signalStatesUpdated),
 		m_lists(handler.m_lists),
 		m_timer(this),
 		m_socket(this)
@@ -55,6 +56,11 @@ namespace Gateway
 
 	void IvsImpulseCommThreadWorker::periodicSendStates()
 	{
+		if (m_signalStatesUpdated == false)
+		{
+			return;
+		}
+
 		IvsImpulseStatesPacket* packet = reinterpret_cast<IvsImpulseStatesPacket*>(m_sendBuffer);
 
 		for(IvsImpulseListInfo& li : m_lists)
@@ -100,6 +106,8 @@ namespace Gateway
 				}
 			}
 		}
+
+		m_signalStatesUpdated = false;
 	}
 
 	int IvsImpulseCommThreadWorker::writeStatesToPacket(IvsImpulseStatesPacket* packet,
@@ -133,7 +141,7 @@ namespace Gateway
 	{
 		TEST_PTR_RETURN_VALUE(states, 0);
 
-		E::TimeType timeType = m_gateway->timeType();
+		::E::TimeType timeType = m_gateway->timeType();
 		paramCount = 0;
 		time = 0;
 		int dataSize = 0;
@@ -149,9 +157,9 @@ namespace Gateway
 
 			switch(timeType)
 			{
-			case E::TimeType::PlantTime:		time = std::max(time, st.time.plant.timeStamp); break;
-			case E::TimeType::ServerTimeUTC0:	time = std::max(time, st.time.system.timeStamp); break;
-			case E::TimeType::ServerLocalTime:	time = std::max(time, st.time.local.timeStamp); break;
+			case ::E::TimeType::Plant:	time = std::max(time, st.time.plant.timeStamp); break;
+			case ::E::TimeType::System:	time = std::max(time, st.time.system.timeStamp); break;
+			case ::E::TimeType::Local:	time = std::max(time, st.time.local.timeStamp); break;
 			}
 
 			stateA++;
@@ -175,7 +183,7 @@ namespace Gateway
 	{
 		TEST_PTR_RETURN_VALUE(states, 0);
 
-		E::TimeType timeType = m_gateway->timeType();
+		::E::TimeType timeType = m_gateway->timeType();
 		paramCount = 0;
 		int dataSize = 0;
 
@@ -201,9 +209,9 @@ namespace Gateway
 
 			switch(timeType)
 			{
-			case E::TimeType::PlantTime:		time = std::max(time, st.time.plant.timeStamp); break;
-			case E::TimeType::ServerTimeUTC0:	time = std::max(time, st.time.system.timeStamp); break;
-			case E::TimeType::ServerLocalTime:	time = std::max(time, st.time.local.timeStamp); break;
+			case ::E::TimeType::Plant:	time = std::max(time, st.time.plant.timeStamp); break;
+			case ::E::TimeType::System:	time = std::max(time, st.time.system.timeStamp); break;
+			case ::E::TimeType::Local:	time = std::max(time, st.time.local.timeStamp); break;
 			}
 
 			paramCount++;
@@ -227,7 +235,7 @@ namespace Gateway
 	{
 		TEST_PTR_RETURN_VALUE(states, 0);
 
-		E::TimeType timeType = m_gateway->timeType();
+		::E::TimeType timeType = m_gateway->timeType();
 		paramCount = 0;
 		int dataSize = 0;
 
@@ -242,9 +250,9 @@ namespace Gateway
 
 			switch(timeType)
 			{
-			case E::TimeType::PlantTime:		time = std::max(time, st.time.plant.timeStamp); break;
-			case E::TimeType::ServerTimeUTC0:	time = std::max(time, st.time.system.timeStamp); break;
-			case E::TimeType::ServerLocalTime:	time = std::max(time, st.time.local.timeStamp); break;
+			case ::E::TimeType::Plant:	time = std::max(time, st.time.plant.timeStamp); break;
+			case ::E::TimeType::System:	time = std::max(time, st.time.system.timeStamp); break;
+			case ::E::TimeType::Local:	time = std::max(time, st.time.local.timeStamp); break;
 			}
 
 			stateD++;

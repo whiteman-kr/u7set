@@ -61,6 +61,8 @@ namespace Gateway
 		const AppSignals& m_appSignals;
 
 		const AppSignalStates& m_states;
+		std::atomic_bool& m_signalStatesUpdated;
+
 		std::vector<IvsImpulseListInfo>& m_lists;
 
 		std::vector<GatewayChannelInfo> m_channelsInfo;

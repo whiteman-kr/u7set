@@ -119,9 +119,7 @@ int DynamicAppSignalState::setState(const Times& time,
 								const char* rupData,
 								int rupDataSize,
 								int autoArchivingGroup,
-								const QThread* thread,
-								int& pushedStatesCtr,
-								int& pushedGwStatesCtr)
+								const QThread* thread)
 {
 	SimpleAppSignalState prevState = current();			// prevState is a COPY of current()!
 	SimpleAppSignalState curState;
@@ -140,6 +138,7 @@ int DynamicAppSignalState::setState(const Times& time,
 	// update validity flag
 
 	bool result = false;
+	int pushedStatesCtr = 0;
 
 	quint32 validity = AppSignalState::VALID;
 
@@ -392,7 +391,7 @@ int DynamicAppSignalState::setState(const Times& time,
 
 		m_gwStatesQueue->push(gwState, thread);
 
-		pushedGwStatesCtr++;
+		pushedStatesCtr++;
 	}
 
 	// curState should be update always

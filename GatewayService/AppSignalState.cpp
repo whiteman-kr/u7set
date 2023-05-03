@@ -12,8 +12,9 @@ namespace Gateway
 	{
 	}
 
-	AppSignalState::AppSignalState(Hash appSignalIdHash) :
-		m_hash(appSignalIdHash)
+	AppSignalState::AppSignalState(Hash appSignalIdHash, bool requestEvents) :
+		m_hash(appSignalIdHash),
+		m_requestEvents(requestEvents)
 	{
 	}
 
@@ -63,5 +64,10 @@ namespace Gateway
 	bool AppSignalState::isWorkable() const
 	{
 		return m_hash != 0;
+	}
+
+	bool AppSignalState::requestEvents() const
+	{
+		return m_requestEvents;
 	}
 }

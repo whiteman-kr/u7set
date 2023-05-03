@@ -61,7 +61,7 @@ struct TableStruct_network_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[71]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[72]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -103,6 +103,15 @@ extern DataSourceWriteDefaultTypeInternal _DataSourceWrite_default_instance_;
 class DataSourceWriteReply;
 struct DataSourceWriteReplyDefaultTypeInternal;
 extern DataSourceWriteReplyDefaultTypeInternal _DataSourceWriteReply_default_instance_;
+class GatewayAppSignalState;
+struct GatewayAppSignalStateDefaultTypeInternal;
+extern GatewayAppSignalStateDefaultTypeInternal _GatewayAppSignalState_default_instance_;
+class GatewayGetAppSignalStateChangesReply;
+struct GatewayGetAppSignalStateChangesReplyDefaultTypeInternal;
+extern GatewayGetAppSignalStateChangesReplyDefaultTypeInternal _GatewayGetAppSignalStateChangesReply_default_instance_;
+class GatewayGetAppSignalStateChangesRequest;
+struct GatewayGetAppSignalStateChangesRequestDefaultTypeInternal;
+extern GatewayGetAppSignalStateChangesRequestDefaultTypeInternal _GatewayGetAppSignalStateChangesRequest_default_instance_;
 class GetAppDataSourcesStatesReply;
 struct GetAppDataSourcesStatesReplyDefaultTypeInternal;
 extern GetAppDataSourcesStatesReplyDefaultTypeInternal _GetAppDataSourcesStatesReply_default_instance_;
@@ -118,12 +127,6 @@ extern GetAppSignalReplyDefaultTypeInternal _GetAppSignalReply_default_instance_
 class GetAppSignalRequest;
 struct GetAppSignalRequestDefaultTypeInternal;
 extern GetAppSignalRequestDefaultTypeInternal _GetAppSignalRequest_default_instance_;
-class GetAppSignalStateChangesForGatewayReply;
-struct GetAppSignalStateChangesForGatewayReplyDefaultTypeInternal;
-extern GetAppSignalStateChangesForGatewayReplyDefaultTypeInternal _GetAppSignalStateChangesForGatewayReply_default_instance_;
-class GetAppSignalStateChangesForGatewayRequest;
-struct GetAppSignalStateChangesForGatewayRequestDefaultTypeInternal;
-extern GetAppSignalStateChangesForGatewayRequestDefaultTypeInternal _GetAppSignalStateChangesForGatewayRequest_default_instance_;
 class GetAppSignalStateChangesReply;
 struct GetAppSignalStateChangesReplyDefaultTypeInternal;
 extern GetAppSignalStateChangesReplyDefaultTypeInternal _GetAppSignalStateChangesReply_default_instance_;
@@ -296,13 +299,14 @@ template<> ::Network::ConfigurationServiceState* Arena::CreateMaybeMessage<::Net
 template<> ::Network::DataSourceInfo* Arena::CreateMaybeMessage<::Network::DataSourceInfo>(Arena*);
 template<> ::Network::DataSourceWrite* Arena::CreateMaybeMessage<::Network::DataSourceWrite>(Arena*);
 template<> ::Network::DataSourceWriteReply* Arena::CreateMaybeMessage<::Network::DataSourceWriteReply>(Arena*);
+template<> ::Network::GatewayAppSignalState* Arena::CreateMaybeMessage<::Network::GatewayAppSignalState>(Arena*);
+template<> ::Network::GatewayGetAppSignalStateChangesReply* Arena::CreateMaybeMessage<::Network::GatewayGetAppSignalStateChangesReply>(Arena*);
+template<> ::Network::GatewayGetAppSignalStateChangesRequest* Arena::CreateMaybeMessage<::Network::GatewayGetAppSignalStateChangesRequest>(Arena*);
 template<> ::Network::GetAppDataSourcesStatesReply* Arena::CreateMaybeMessage<::Network::GetAppDataSourcesStatesReply>(Arena*);
 template<> ::Network::GetAppSignalParamReply* Arena::CreateMaybeMessage<::Network::GetAppSignalParamReply>(Arena*);
 template<> ::Network::GetAppSignalParamRequest* Arena::CreateMaybeMessage<::Network::GetAppSignalParamRequest>(Arena*);
 template<> ::Network::GetAppSignalReply* Arena::CreateMaybeMessage<::Network::GetAppSignalReply>(Arena*);
 template<> ::Network::GetAppSignalRequest* Arena::CreateMaybeMessage<::Network::GetAppSignalRequest>(Arena*);
-template<> ::Network::GetAppSignalStateChangesForGatewayReply* Arena::CreateMaybeMessage<::Network::GetAppSignalStateChangesForGatewayReply>(Arena*);
-template<> ::Network::GetAppSignalStateChangesForGatewayRequest* Arena::CreateMaybeMessage<::Network::GetAppSignalStateChangesForGatewayRequest>(Arena*);
 template<> ::Network::GetAppSignalStateChangesReply* Arena::CreateMaybeMessage<::Network::GetAppSignalStateChangesReply>(Arena*);
 template<> ::Network::GetAppSignalStateChangesRequest* Arena::CreateMaybeMessage<::Network::GetAppSignalStateChangesRequest>(Arena*);
 template<> ::Network::GetAppSignalStateReply* Arena::CreateMaybeMessage<::Network::GetAppSignalStateReply>(Arena*);
@@ -1954,13 +1958,14 @@ class GetAppSignalStateReply PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kAppSignalStatesFieldNumber = 5,
+    kAppSignalStatesFieldNumber = 6,
     kServerTimeUtcFieldNumber = 2,
     kErrorFieldNumber = 1,
     kStateChangesQueueSizeFieldNumber = 4,
     kServerTimeLocalFieldNumber = 3,
+    kGatewayStateChangesQueueSizeFieldNumber = 5,
   };
-  // repeated .Proto.AppSignalState appSignalStates = 5;
+  // repeated .Proto.AppSignalState appSignalStates = 6;
   int appsignalstates_size() const;
   private:
   int _internal_appsignalstates_size() const;
@@ -2030,6 +2035,19 @@ class GetAppSignalStateReply PROTOBUF_FINAL :
   void _internal_set_servertimelocal(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
+  // optional int32 gatewayStateChangesQueueSize = 5 [default = 0];
+  bool has_gatewaystatechangesqueuesize() const;
+  private:
+  bool _internal_has_gatewaystatechangesqueuesize() const;
+  public:
+  void clear_gatewaystatechangesqueuesize();
+  ::PROTOBUF_NAMESPACE_ID::int32 gatewaystatechangesqueuesize() const;
+  void set_gatewaystatechangesqueuesize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_gatewaystatechangesqueuesize() const;
+  void _internal_set_gatewaystatechangesqueuesize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:Network.GetAppSignalStateReply)
  private:
   class _Internal;
@@ -2044,6 +2062,7 @@ class GetAppSignalStateReply PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::int32 error_;
   ::PROTOBUF_NAMESPACE_ID::int32 statechangesqueuesize_;
   ::PROTOBUF_NAMESPACE_ID::int64 servertimelocal_;
+  ::PROTOBUF_NAMESPACE_ID::int32 gatewaystatechangesqueuesize_;
   friend struct ::TableStruct_network_2eproto;
 };
 // -------------------------------------------------------------------
@@ -2393,24 +2412,24 @@ class GetAppSignalStateChangesReply PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
-class GetAppSignalStateChangesForGatewayRequest PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Network.GetAppSignalStateChangesForGatewayRequest) */ {
+class GatewayGetAppSignalStateChangesRequest PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Network.GatewayGetAppSignalStateChangesRequest) */ {
  public:
-  inline GetAppSignalStateChangesForGatewayRequest() : GetAppSignalStateChangesForGatewayRequest(nullptr) {}
-  virtual ~GetAppSignalStateChangesForGatewayRequest();
-  explicit constexpr GetAppSignalStateChangesForGatewayRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+  inline GatewayGetAppSignalStateChangesRequest() : GatewayGetAppSignalStateChangesRequest(nullptr) {}
+  virtual ~GatewayGetAppSignalStateChangesRequest();
+  explicit constexpr GatewayGetAppSignalStateChangesRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
 
-  GetAppSignalStateChangesForGatewayRequest(const GetAppSignalStateChangesForGatewayRequest& from);
-  GetAppSignalStateChangesForGatewayRequest(GetAppSignalStateChangesForGatewayRequest&& from) noexcept
-    : GetAppSignalStateChangesForGatewayRequest() {
+  GatewayGetAppSignalStateChangesRequest(const GatewayGetAppSignalStateChangesRequest& from);
+  GatewayGetAppSignalStateChangesRequest(GatewayGetAppSignalStateChangesRequest&& from) noexcept
+    : GatewayGetAppSignalStateChangesRequest() {
     *this = ::std::move(from);
   }
 
-  inline GetAppSignalStateChangesForGatewayRequest& operator=(const GetAppSignalStateChangesForGatewayRequest& from) {
+  inline GatewayGetAppSignalStateChangesRequest& operator=(const GatewayGetAppSignalStateChangesRequest& from) {
     CopyFrom(from);
     return *this;
   }
-  inline GetAppSignalStateChangesForGatewayRequest& operator=(GetAppSignalStateChangesForGatewayRequest&& from) noexcept {
+  inline GatewayGetAppSignalStateChangesRequest& operator=(GatewayGetAppSignalStateChangesRequest&& from) noexcept {
     if (GetArena() == from.GetArena()) {
       if (this != &from) InternalSwap(&from);
     } else {
@@ -2435,20 +2454,20 @@ class GetAppSignalStateChangesForGatewayRequest PROTOBUF_FINAL :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return GetMetadataStatic().reflection;
   }
-  static const GetAppSignalStateChangesForGatewayRequest& default_instance() {
+  static const GatewayGetAppSignalStateChangesRequest& default_instance() {
     return *internal_default_instance();
   }
-  static inline const GetAppSignalStateChangesForGatewayRequest* internal_default_instance() {
-    return reinterpret_cast<const GetAppSignalStateChangesForGatewayRequest*>(
-               &_GetAppSignalStateChangesForGatewayRequest_default_instance_);
+  static inline const GatewayGetAppSignalStateChangesRequest* internal_default_instance() {
+    return reinterpret_cast<const GatewayGetAppSignalStateChangesRequest*>(
+               &_GatewayGetAppSignalStateChangesRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     12;
 
-  friend void swap(GetAppSignalStateChangesForGatewayRequest& a, GetAppSignalStateChangesForGatewayRequest& b) {
+  friend void swap(GatewayGetAppSignalStateChangesRequest& a, GatewayGetAppSignalStateChangesRequest& b) {
     a.Swap(&b);
   }
-  inline void Swap(GetAppSignalStateChangesForGatewayRequest* other) {
+  inline void Swap(GatewayGetAppSignalStateChangesRequest* other) {
     if (other == this) return;
     if (GetArena() == other->GetArena()) {
       InternalSwap(other);
@@ -2456,7 +2475,7 @@ class GetAppSignalStateChangesForGatewayRequest PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(GetAppSignalStateChangesForGatewayRequest* other) {
+  void UnsafeArenaSwap(GatewayGetAppSignalStateChangesRequest* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetArena() == other->GetArena());
     InternalSwap(other);
@@ -2464,17 +2483,17 @@ class GetAppSignalStateChangesForGatewayRequest PROTOBUF_FINAL :
 
   // implements Message ----------------------------------------------
 
-  inline GetAppSignalStateChangesForGatewayRequest* New() const final {
-    return CreateMaybeMessage<GetAppSignalStateChangesForGatewayRequest>(nullptr);
+  inline GatewayGetAppSignalStateChangesRequest* New() const final {
+    return CreateMaybeMessage<GatewayGetAppSignalStateChangesRequest>(nullptr);
   }
 
-  GetAppSignalStateChangesForGatewayRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<GetAppSignalStateChangesForGatewayRequest>(arena);
+  GatewayGetAppSignalStateChangesRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<GatewayGetAppSignalStateChangesRequest>(arena);
   }
   void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const GetAppSignalStateChangesForGatewayRequest& from);
-  void MergeFrom(const GetAppSignalStateChangesForGatewayRequest& from);
+  void CopyFrom(const GatewayGetAppSignalStateChangesRequest& from);
+  void MergeFrom(const GatewayGetAppSignalStateChangesRequest& from);
   PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
   bool IsInitialized() const final;
 
@@ -2488,13 +2507,13 @@ class GetAppSignalStateChangesForGatewayRequest PROTOBUF_FINAL :
   inline void SharedCtor();
   inline void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(GetAppSignalStateChangesForGatewayRequest* other);
+  void InternalSwap(GatewayGetAppSignalStateChangesRequest* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "Network.GetAppSignalStateChangesForGatewayRequest";
+    return "Network.GatewayGetAppSignalStateChangesRequest";
   }
   protected:
-  explicit GetAppSignalStateChangesForGatewayRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  explicit GatewayGetAppSignalStateChangesRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
   private:
   static void ArenaDtor(void* object);
   inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
@@ -2537,7 +2556,7 @@ class GetAppSignalStateChangesForGatewayRequest PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >*
       mutable_signalshashes();
 
-  // @@protoc_insertion_point(class_scope:Network.GetAppSignalStateChangesForGatewayRequest)
+  // @@protoc_insertion_point(class_scope:Network.GatewayGetAppSignalStateChangesRequest)
  private:
   class _Internal;
 
@@ -2550,24 +2569,24 @@ class GetAppSignalStateChangesForGatewayRequest PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
-class GetAppSignalStateChangesForGatewayReply PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Network.GetAppSignalStateChangesForGatewayReply) */ {
+class GatewayAppSignalState PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Network.GatewayAppSignalState) */ {
  public:
-  inline GetAppSignalStateChangesForGatewayReply() : GetAppSignalStateChangesForGatewayReply(nullptr) {}
-  virtual ~GetAppSignalStateChangesForGatewayReply();
-  explicit constexpr GetAppSignalStateChangesForGatewayReply(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+  inline GatewayAppSignalState() : GatewayAppSignalState(nullptr) {}
+  virtual ~GatewayAppSignalState();
+  explicit constexpr GatewayAppSignalState(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
 
-  GetAppSignalStateChangesForGatewayReply(const GetAppSignalStateChangesForGatewayReply& from);
-  GetAppSignalStateChangesForGatewayReply(GetAppSignalStateChangesForGatewayReply&& from) noexcept
-    : GetAppSignalStateChangesForGatewayReply() {
+  GatewayAppSignalState(const GatewayAppSignalState& from);
+  GatewayAppSignalState(GatewayAppSignalState&& from) noexcept
+    : GatewayAppSignalState() {
     *this = ::std::move(from);
   }
 
-  inline GetAppSignalStateChangesForGatewayReply& operator=(const GetAppSignalStateChangesForGatewayReply& from) {
+  inline GatewayAppSignalState& operator=(const GatewayAppSignalState& from) {
     CopyFrom(from);
     return *this;
   }
-  inline GetAppSignalStateChangesForGatewayReply& operator=(GetAppSignalStateChangesForGatewayReply&& from) noexcept {
+  inline GatewayAppSignalState& operator=(GatewayAppSignalState&& from) noexcept {
     if (GetArena() == from.GetArena()) {
       if (this != &from) InternalSwap(&from);
     } else {
@@ -2592,20 +2611,20 @@ class GetAppSignalStateChangesForGatewayReply PROTOBUF_FINAL :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return GetMetadataStatic().reflection;
   }
-  static const GetAppSignalStateChangesForGatewayReply& default_instance() {
+  static const GatewayAppSignalState& default_instance() {
     return *internal_default_instance();
   }
-  static inline const GetAppSignalStateChangesForGatewayReply* internal_default_instance() {
-    return reinterpret_cast<const GetAppSignalStateChangesForGatewayReply*>(
-               &_GetAppSignalStateChangesForGatewayReply_default_instance_);
+  static inline const GatewayAppSignalState* internal_default_instance() {
+    return reinterpret_cast<const GatewayAppSignalState*>(
+               &_GatewayAppSignalState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     13;
 
-  friend void swap(GetAppSignalStateChangesForGatewayReply& a, GetAppSignalStateChangesForGatewayReply& b) {
+  friend void swap(GatewayAppSignalState& a, GatewayAppSignalState& b) {
     a.Swap(&b);
   }
-  inline void Swap(GetAppSignalStateChangesForGatewayReply* other) {
+  inline void Swap(GatewayAppSignalState* other) {
     if (other == this) return;
     if (GetArena() == other->GetArena()) {
       InternalSwap(other);
@@ -2613,7 +2632,7 @@ class GetAppSignalStateChangesForGatewayReply PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(GetAppSignalStateChangesForGatewayReply* other) {
+  void UnsafeArenaSwap(GatewayAppSignalState* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetArena() == other->GetArena());
     InternalSwap(other);
@@ -2621,17 +2640,17 @@ class GetAppSignalStateChangesForGatewayReply PROTOBUF_FINAL :
 
   // implements Message ----------------------------------------------
 
-  inline GetAppSignalStateChangesForGatewayReply* New() const final {
-    return CreateMaybeMessage<GetAppSignalStateChangesForGatewayReply>(nullptr);
+  inline GatewayAppSignalState* New() const final {
+    return CreateMaybeMessage<GatewayAppSignalState>(nullptr);
   }
 
-  GetAppSignalStateChangesForGatewayReply* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<GetAppSignalStateChangesForGatewayReply>(arena);
+  GatewayAppSignalState* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<GatewayAppSignalState>(arena);
   }
   void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const GetAppSignalStateChangesForGatewayReply& from);
-  void MergeFrom(const GetAppSignalStateChangesForGatewayReply& from);
+  void CopyFrom(const GatewayAppSignalState& from);
+  void MergeFrom(const GatewayAppSignalState& from);
   PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
   bool IsInitialized() const final;
 
@@ -2645,13 +2664,190 @@ class GetAppSignalStateChangesForGatewayReply PROTOBUF_FINAL :
   inline void SharedCtor();
   inline void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(GetAppSignalStateChangesForGatewayReply* other);
+  void InternalSwap(GatewayAppSignalState* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "Network.GetAppSignalStateChangesForGatewayReply";
+    return "Network.GatewayAppSignalState";
   }
   protected:
-  explicit GetAppSignalStateChangesForGatewayReply(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  explicit GatewayAppSignalState(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_network_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kPrevStateFieldNumber = 1,
+    kCurStateFieldNumber = 2,
+  };
+  // required .Proto.AppSignalState prevState = 1;
+  bool has_prevstate() const;
+  private:
+  bool _internal_has_prevstate() const;
+  public:
+  void clear_prevstate();
+  const ::Proto::AppSignalState& prevstate() const;
+  ::Proto::AppSignalState* release_prevstate();
+  ::Proto::AppSignalState* mutable_prevstate();
+  void set_allocated_prevstate(::Proto::AppSignalState* prevstate);
+  private:
+  const ::Proto::AppSignalState& _internal_prevstate() const;
+  ::Proto::AppSignalState* _internal_mutable_prevstate();
+  public:
+  void unsafe_arena_set_allocated_prevstate(
+      ::Proto::AppSignalState* prevstate);
+  ::Proto::AppSignalState* unsafe_arena_release_prevstate();
+
+  // required .Proto.AppSignalState curState = 2;
+  bool has_curstate() const;
+  private:
+  bool _internal_has_curstate() const;
+  public:
+  void clear_curstate();
+  const ::Proto::AppSignalState& curstate() const;
+  ::Proto::AppSignalState* release_curstate();
+  ::Proto::AppSignalState* mutable_curstate();
+  void set_allocated_curstate(::Proto::AppSignalState* curstate);
+  private:
+  const ::Proto::AppSignalState& _internal_curstate() const;
+  ::Proto::AppSignalState* _internal_mutable_curstate();
+  public:
+  void unsafe_arena_set_allocated_curstate(
+      ::Proto::AppSignalState* curstate);
+  ::Proto::AppSignalState* unsafe_arena_release_curstate();
+
+  // @@protoc_insertion_point(class_scope:Network.GatewayAppSignalState)
+ private:
+  class _Internal;
+
+  // helper for ByteSizeLong()
+  size_t RequiredFieldsByteSizeFallback() const;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::Proto::AppSignalState* prevstate_;
+  ::Proto::AppSignalState* curstate_;
+  friend struct ::TableStruct_network_2eproto;
+};
+// -------------------------------------------------------------------
+
+class GatewayGetAppSignalStateChangesReply PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Network.GatewayGetAppSignalStateChangesReply) */ {
+ public:
+  inline GatewayGetAppSignalStateChangesReply() : GatewayGetAppSignalStateChangesReply(nullptr) {}
+  virtual ~GatewayGetAppSignalStateChangesReply();
+  explicit constexpr GatewayGetAppSignalStateChangesReply(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  GatewayGetAppSignalStateChangesReply(const GatewayGetAppSignalStateChangesReply& from);
+  GatewayGetAppSignalStateChangesReply(GatewayGetAppSignalStateChangesReply&& from) noexcept
+    : GatewayGetAppSignalStateChangesReply() {
+    *this = ::std::move(from);
+  }
+
+  inline GatewayGetAppSignalStateChangesReply& operator=(const GatewayGetAppSignalStateChangesReply& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline GatewayGetAppSignalStateChangesReply& operator=(GatewayGetAppSignalStateChangesReply&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
+    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
+  }
+  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
+    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const GatewayGetAppSignalStateChangesReply& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const GatewayGetAppSignalStateChangesReply* internal_default_instance() {
+    return reinterpret_cast<const GatewayGetAppSignalStateChangesReply*>(
+               &_GatewayGetAppSignalStateChangesReply_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    14;
+
+  friend void swap(GatewayGetAppSignalStateChangesReply& a, GatewayGetAppSignalStateChangesReply& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(GatewayGetAppSignalStateChangesReply* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(GatewayGetAppSignalStateChangesReply* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline GatewayGetAppSignalStateChangesReply* New() const final {
+    return CreateMaybeMessage<GatewayGetAppSignalStateChangesReply>(nullptr);
+  }
+
+  GatewayGetAppSignalStateChangesReply* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<GatewayGetAppSignalStateChangesReply>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const GatewayGetAppSignalStateChangesReply& from);
+  void MergeFrom(const GatewayGetAppSignalStateChangesReply& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(GatewayGetAppSignalStateChangesReply* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Network.GatewayGetAppSignalStateChangesReply";
+  }
+  protected:
+  explicit GatewayGetAppSignalStateChangesReply(::PROTOBUF_NAMESPACE_ID::Arena* arena);
   private:
   static void ArenaDtor(void* object);
   inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
@@ -2672,30 +2868,30 @@ class GetAppSignalStateChangesForGatewayReply PROTOBUF_FINAL :
   enum : int {
     kAppSignalStatesFieldNumber = 6,
     kMinPlantTimeFieldNumber = 2,
-    kMinServerTimeUtcFieldNumber = 3,
+    kMinSystemTimeFieldNumber = 3,
     kErrorFieldNumber = 1,
     kPendingStatesCountFieldNumber = 5,
-    kMinServerTimeLocalFieldNumber = 4,
+    kMinLocalTimeFieldNumber = 4,
   };
-  // repeated .Proto.AppSignalState appSignalStates = 6;
+  // repeated .Network.GatewayAppSignalState appSignalStates = 6;
   int appsignalstates_size() const;
   private:
   int _internal_appsignalstates_size() const;
   public:
   void clear_appsignalstates();
-  ::Proto::AppSignalState* mutable_appsignalstates(int index);
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::AppSignalState >*
+  ::Network::GatewayAppSignalState* mutable_appsignalstates(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Network::GatewayAppSignalState >*
       mutable_appsignalstates();
   private:
-  const ::Proto::AppSignalState& _internal_appsignalstates(int index) const;
-  ::Proto::AppSignalState* _internal_add_appsignalstates();
+  const ::Network::GatewayAppSignalState& _internal_appsignalstates(int index) const;
+  ::Network::GatewayAppSignalState* _internal_add_appsignalstates();
   public:
-  const ::Proto::AppSignalState& appsignalstates(int index) const;
-  ::Proto::AppSignalState* add_appsignalstates();
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::AppSignalState >&
+  const ::Network::GatewayAppSignalState& appsignalstates(int index) const;
+  ::Network::GatewayAppSignalState* add_appsignalstates();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Network::GatewayAppSignalState >&
       appsignalstates() const;
 
-  // optional int64 minPlantTime = 2;
+  // optional int64 minPlantTime = 2 [default = 0];
   bool has_minplanttime() const;
   private:
   bool _internal_has_minplanttime() const;
@@ -2708,17 +2904,17 @@ class GetAppSignalStateChangesForGatewayReply PROTOBUF_FINAL :
   void _internal_set_minplanttime(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
-  // optional int64 minServerTimeUtc = 3;
-  bool has_minservertimeutc() const;
+  // optional int64 minSystemTime = 3 [default = 0];
+  bool has_minsystemtime() const;
   private:
-  bool _internal_has_minservertimeutc() const;
+  bool _internal_has_minsystemtime() const;
   public:
-  void clear_minservertimeutc();
-  ::PROTOBUF_NAMESPACE_ID::int64 minservertimeutc() const;
-  void set_minservertimeutc(::PROTOBUF_NAMESPACE_ID::int64 value);
+  void clear_minsystemtime();
+  ::PROTOBUF_NAMESPACE_ID::int64 minsystemtime() const;
+  void set_minsystemtime(::PROTOBUF_NAMESPACE_ID::int64 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_minservertimeutc() const;
-  void _internal_set_minservertimeutc(::PROTOBUF_NAMESPACE_ID::int64 value);
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_minsystemtime() const;
+  void _internal_set_minsystemtime(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
   // optional int32 error = 1 [default = 0];
@@ -2747,20 +2943,20 @@ class GetAppSignalStateChangesForGatewayReply PROTOBUF_FINAL :
   void _internal_set_pendingstatescount(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
-  // optional int64 minServerTimeLocal = 4;
-  bool has_minservertimelocal() const;
+  // optional int64 minLocalTime = 4 [default = 0];
+  bool has_minlocaltime() const;
   private:
-  bool _internal_has_minservertimelocal() const;
+  bool _internal_has_minlocaltime() const;
   public:
-  void clear_minservertimelocal();
-  ::PROTOBUF_NAMESPACE_ID::int64 minservertimelocal() const;
-  void set_minservertimelocal(::PROTOBUF_NAMESPACE_ID::int64 value);
+  void clear_minlocaltime();
+  ::PROTOBUF_NAMESPACE_ID::int64 minlocaltime() const;
+  void set_minlocaltime(::PROTOBUF_NAMESPACE_ID::int64 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_minservertimelocal() const;
-  void _internal_set_minservertimelocal(::PROTOBUF_NAMESPACE_ID::int64 value);
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_minlocaltime() const;
+  void _internal_set_minlocaltime(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
-  // @@protoc_insertion_point(class_scope:Network.GetAppSignalStateChangesForGatewayReply)
+  // @@protoc_insertion_point(class_scope:Network.GatewayGetAppSignalStateChangesReply)
  private:
   class _Internal;
 
@@ -2769,12 +2965,12 @@ class GetAppSignalStateChangesForGatewayReply PROTOBUF_FINAL :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::AppSignalState > appsignalstates_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Network::GatewayAppSignalState > appsignalstates_;
   ::PROTOBUF_NAMESPACE_ID::int64 minplanttime_;
-  ::PROTOBUF_NAMESPACE_ID::int64 minservertimeutc_;
+  ::PROTOBUF_NAMESPACE_ID::int64 minsystemtime_;
   ::PROTOBUF_NAMESPACE_ID::int32 error_;
   ::PROTOBUF_NAMESPACE_ID::int32 pendingstatescount_;
-  ::PROTOBUF_NAMESPACE_ID::int64 minservertimelocal_;
+  ::PROTOBUF_NAMESPACE_ID::int64 minlocaltime_;
   friend struct ::TableStruct_network_2eproto;
 };
 // -------------------------------------------------------------------
@@ -2829,7 +3025,7 @@ class LanControllerInfo PROTOBUF_FINAL :
                &_LanControllerInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    14;
+    15;
 
   friend void swap(LanControllerInfo& a, LanControllerInfo& b) {
     a.Swap(&b);
@@ -3549,7 +3745,7 @@ class DataSourceInfo PROTOBUF_FINAL :
                &_DataSourceInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    15;
+    16;
 
   friend void swap(DataSourceInfo& a, DataSourceInfo& b) {
     a.Swap(&b);
@@ -3955,7 +4151,7 @@ class GetDataSourcesInfoRequest PROTOBUF_FINAL :
                &_GetDataSourcesInfoRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    16;
+    17;
 
   friend void swap(GetDataSourcesInfoRequest& a, GetDataSourcesInfoRequest& b) {
     a.Swap(&b);
@@ -4086,7 +4282,7 @@ class GetDataSourcesInfoReply PROTOBUF_FINAL :
                &_GetDataSourcesInfoReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    17;
+    18;
 
   friend void swap(GetDataSourcesInfoReply& a, GetDataSourcesInfoReply& b) {
     a.Swap(&b);
@@ -4255,7 +4451,7 @@ class AppDataReceiveState PROTOBUF_FINAL :
                &_AppDataReceiveState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    18;
+    19;
 
   friend void swap(AppDataReceiveState& a, AppDataReceiveState& b) {
     a.Swap(&b);
@@ -4524,7 +4720,7 @@ class AppDataSourceState PROTOBUF_FINAL :
                &_AppDataSourceState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    19;
+    20;
 
   friend void swap(AppDataSourceState& a, AppDataSourceState& b) {
     a.Swap(&b);
@@ -5010,7 +5206,7 @@ class GetAppDataSourcesStatesReply PROTOBUF_FINAL :
                &_GetAppDataSourcesStatesReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    20;
+    21;
 
   friend void swap(GetAppDataSourcesStatesReply& a, GetAppDataSourcesStatesReply& b) {
     a.Swap(&b);
@@ -5179,7 +5375,7 @@ class AppDataServiceState PROTOBUF_FINAL :
                &_AppDataServiceState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    21;
+    22;
 
   friend void swap(AppDataServiceState& a, AppDataServiceState& b) {
     a.Swap(&b);
@@ -5426,7 +5622,7 @@ class SoftwareInfo PROTOBUF_FINAL :
                &_SoftwareInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    22;
+    23;
 
   friend void swap(SoftwareInfo& a, SoftwareInfo& b) {
     a.Swap(&b);
@@ -5785,7 +5981,7 @@ class SecurityLevelReply PROTOBUF_FINAL :
                &_SecurityLevelReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    23;
+    24;
 
   friend void swap(SecurityLevelReply& a, SecurityLevelReply& b) {
     a.Swap(&b);
@@ -5952,7 +6148,7 @@ class IntroduceMyselfRequest PROTOBUF_FINAL :
                &_IntroduceMyselfRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    24;
+    25;
 
   friend void swap(IntroduceMyselfRequest& a, IntroduceMyselfRequest& b) {
     a.Swap(&b);
@@ -6106,7 +6302,7 @@ class IntroduceMyselfReply PROTOBUF_FINAL :
                &_IntroduceMyselfReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    25;
+    26;
 
   friend void swap(IntroduceMyselfReply& a, IntroduceMyselfReply& b) {
     a.Swap(&b);
@@ -6300,7 +6496,7 @@ class GetServiceInfoRequest PROTOBUF_FINAL :
                &_GetServiceInfoRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    26;
+    27;
 
   friend void swap(GetServiceInfoRequest& a, GetServiceInfoRequest& b) {
     a.Swap(&b);
@@ -6431,7 +6627,7 @@ class SessionParams PROTOBUF_FINAL :
                &_SessionParams_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    27;
+    28;
 
   friend void swap(SessionParams& a, SessionParams& b) {
     a.Swap(&b);
@@ -6602,7 +6798,7 @@ class ServiceInfo PROTOBUF_FINAL :
                &_ServiceInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    28;
+    29;
 
   friend void swap(ServiceInfo& a, ServiceInfo& b) {
     a.Swap(&b);
@@ -6843,7 +7039,7 @@ class GetServiceInfoReply PROTOBUF_FINAL :
                &_GetServiceInfoReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    29;
+    30;
 
   friend void swap(GetServiceInfoReply& a, GetServiceInfoReply& b) {
     a.Swap(&b);
@@ -7015,7 +7211,7 @@ class ConfigurationServiceState PROTOBUF_FINAL :
                &_ConfigurationServiceState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    30;
+    31;
 
   friend void swap(ConfigurationServiceState& a, ConfigurationServiceState& b) {
     a.Swap(&b);
@@ -7204,7 +7400,7 @@ class ServiceClientInfo PROTOBUF_FINAL :
                &_ServiceClientInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    31;
+    32;
 
   friend void swap(ServiceClientInfo& a, ServiceClientInfo& b) {
     a.Swap(&b);
@@ -7421,7 +7617,7 @@ class ServiceClients PROTOBUF_FINAL :
                &_ServiceClients_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    32;
+    33;
 
   friend void swap(ServiceClients& a, ServiceClients& b) {
     a.Swap(&b);
@@ -7574,7 +7770,7 @@ class BuildInfo PROTOBUF_FINAL :
                &_BuildInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    33;
+    34;
 
   friend void swap(BuildInfo& a, BuildInfo& b) {
     a.Swap(&b);
@@ -7822,7 +8018,7 @@ class ConfigurationServiceSettings PROTOBUF_FINAL :
                &_ConfigurationServiceSettings_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    34;
+    35;
 
   friend void swap(ConfigurationServiceSettings& a, ConfigurationServiceSettings& b) {
     a.Swap(&b);
@@ -8025,7 +8221,7 @@ class ServiceSettings PROTOBUF_FINAL :
                &_ServiceSettings_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    35;
+    36;
 
   friend void swap(ServiceSettings& a, ServiceSettings& b) {
     a.Swap(&b);
@@ -8228,7 +8424,7 @@ class GetTuningSourcesInfo PROTOBUF_FINAL :
                &_GetTuningSourcesInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    36;
+    37;
 
   friend void swap(GetTuningSourcesInfo& a, GetTuningSourcesInfo& b) {
     a.Swap(&b);
@@ -8359,7 +8555,7 @@ class GetTuningSourcesInfoReply PROTOBUF_FINAL :
                &_GetTuningSourcesInfoReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    37;
+    38;
 
   friend void swap(GetTuningSourcesInfoReply& a, GetTuningSourcesInfoReply& b) {
     a.Swap(&b);
@@ -8587,7 +8783,7 @@ class GetTuningSourcesStates PROTOBUF_FINAL :
                &_GetTuningSourcesStates_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    38;
+    39;
 
   friend void swap(GetTuningSourcesStates& a, GetTuningSourcesStates& b) {
     a.Swap(&b);
@@ -8718,7 +8914,7 @@ class SignalsAssociatedToTuningSource PROTOBUF_FINAL :
                &_SignalsAssociatedToTuningSource_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    39;
+    40;
 
   friend void swap(SignalsAssociatedToTuningSource& a, SignalsAssociatedToTuningSource& b) {
     a.Swap(&b);
@@ -8891,7 +9087,7 @@ class TuningSourceFilling PROTOBUF_FINAL :
                &_TuningSourceFilling_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    40;
+    41;
 
   friend void swap(TuningSourceFilling& a, TuningSourceFilling& b) {
     a.Swap(&b);
@@ -9060,7 +9256,7 @@ class TuningSourceState PROTOBUF_FINAL :
                &_TuningSourceState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    41;
+    42;
 
   friend void swap(TuningSourceState& a, TuningSourceState& b) {
     a.Swap(&b);
@@ -9936,7 +10132,7 @@ class GetTuningSourcesStatesReply PROTOBUF_FINAL :
                &_GetTuningSourcesStatesReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    42;
+    43;
 
   friend void swap(GetTuningSourcesStatesReply& a, GetTuningSourcesStatesReply& b) {
     a.Swap(&b);
@@ -10164,7 +10360,7 @@ class ChangeConrolledTuningSourceRequest PROTOBUF_FINAL :
                &_ChangeConrolledTuningSourceRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    43;
+    44;
 
   friend void swap(ChangeConrolledTuningSourceRequest& a, ChangeConrolledTuningSourceRequest& b) {
     a.Swap(&b);
@@ -10350,7 +10546,7 @@ class ChangeConrolledTuningSourceReply PROTOBUF_FINAL :
                &_ChangeConrolledTuningSourceReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    44;
+    45;
 
   friend void swap(ChangeConrolledTuningSourceReply& a, ChangeConrolledTuningSourceReply& b) {
     a.Swap(&b);
@@ -10536,7 +10732,7 @@ class TuningSignalsRead PROTOBUF_FINAL :
                &_TuningSignalsRead_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    45;
+    46;
 
   friend void swap(TuningSignalsRead& a, TuningSignalsRead& b) {
     a.Swap(&b);
@@ -10693,7 +10889,7 @@ class TuningSignalState PROTOBUF_FINAL :
                &_TuningSignalState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    46;
+    47;
 
   friend void swap(TuningSignalState& a, TuningSignalState& b) {
     a.Swap(&b);
@@ -11112,7 +11308,7 @@ class TuningSignalsReadReply PROTOBUF_FINAL :
                &_TuningSignalsReadReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    47;
+    48;
 
   friend void swap(TuningSignalsReadReply& a, TuningSignalsReadReply& b) {
     a.Swap(&b);
@@ -11281,7 +11477,7 @@ class TuningWriteCommand PROTOBUF_FINAL :
                &_TuningWriteCommand_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    48;
+    49;
 
   friend void swap(TuningWriteCommand& a, TuningWriteCommand& b) {
     a.Swap(&b);
@@ -11450,7 +11646,7 @@ class TuningSignalsWrite PROTOBUF_FINAL :
                &_TuningSignalsWrite_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    49;
+    50;
 
   friend void swap(TuningSignalsWrite& a, TuningSignalsWrite& b) {
     a.Swap(&b);
@@ -11619,7 +11815,7 @@ class TuningSignalWriteResult PROTOBUF_FINAL :
                &_TuningSignalWriteResult_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    50;
+    51;
 
   friend void swap(TuningSignalWriteResult& a, TuningSignalWriteResult& b) {
     a.Swap(&b);
@@ -11783,7 +11979,7 @@ class TuningSignalsWriteReply PROTOBUF_FINAL :
                &_TuningSignalsWriteReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    51;
+    52;
 
   friend void swap(TuningSignalsWriteReply& a, TuningSignalsWriteReply& b) {
     a.Swap(&b);
@@ -11952,7 +12148,7 @@ class TuningSignalsApply PROTOBUF_FINAL :
                &_TuningSignalsApply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    52;
+    53;
 
   friend void swap(TuningSignalsApply& a, TuningSignalsApply& b) {
     a.Swap(&b);
@@ -12083,7 +12279,7 @@ class TuningSignalsApplyReply PROTOBUF_FINAL :
                &_TuningSignalsApplyReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    53;
+    54;
 
   friend void swap(TuningSignalsApplyReply& a, TuningSignalsApplyReply& b) {
     a.Swap(&b);
@@ -12232,7 +12428,7 @@ class DataSourceWrite PROTOBUF_FINAL :
                &_DataSourceWrite_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    54;
+    55;
 
   friend void swap(DataSourceWrite& a, DataSourceWrite& b) {
     a.Swap(&b);
@@ -12403,7 +12599,7 @@ class DataSourceWriteReply PROTOBUF_FINAL :
                &_DataSourceWriteReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    55;
+    56;
 
   friend void swap(DataSourceWriteReply& a, DataSourceWriteReply& b) {
     a.Swap(&b);
@@ -12552,7 +12748,7 @@ class PacketSourceExit PROTOBUF_FINAL :
                &_PacketSourceExit_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    56;
+    57;
 
   friend void swap(PacketSourceExit& a, PacketSourceExit& b) {
     a.Swap(&b);
@@ -12683,7 +12879,7 @@ class PacketSourceExitReply PROTOBUF_FINAL :
                &_PacketSourceExitReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    57;
+    58;
 
   friend void swap(PacketSourceExitReply& a, PacketSourceExitReply& b) {
     a.Swap(&b);
@@ -12832,7 +13028,7 @@ class SaveAppSignalsStatesToArchiveRequest PROTOBUF_FINAL :
                &_SaveAppSignalsStatesToArchiveRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    58;
+    59;
 
   friend void swap(SaveAppSignalsStatesToArchiveRequest& a, SaveAppSignalsStatesToArchiveRequest& b) {
     a.Swap(&b);
@@ -13008,7 +13204,7 @@ class SaveAppSignalsStatesToArchiveReply PROTOBUF_FINAL :
                &_SaveAppSignalsStatesToArchiveReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    59;
+    60;
 
   friend void swap(SaveAppSignalsStatesToArchiveReply& a, SaveAppSignalsStatesToArchiveReply& b) {
     a.Swap(&b);
@@ -13172,7 +13368,7 @@ class GetAppSignalStatesFromArchiveStartRequest PROTOBUF_FINAL :
                &_GetAppSignalStatesFromArchiveStartRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    60;
+    61;
 
   friend void swap(GetAppSignalStatesFromArchiveStartRequest& a, GetAppSignalStatesFromArchiveStartRequest& b) {
     a.Swap(&b);
@@ -13412,7 +13608,7 @@ class GetAppSignalStatesFromArchiveStartReply PROTOBUF_FINAL :
                &_GetAppSignalStatesFromArchiveStartReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    61;
+    62;
 
   friend void swap(GetAppSignalStatesFromArchiveStartReply& a, GetAppSignalStatesFromArchiveStartReply& b) {
     a.Swap(&b);
@@ -13613,7 +13809,7 @@ class GetAppSignalStatesFromArchiveNextRequest PROTOBUF_FINAL :
                &_GetAppSignalStatesFromArchiveNextRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    62;
+    63;
 
   friend void swap(GetAppSignalStatesFromArchiveNextRequest& a, GetAppSignalStatesFromArchiveNextRequest& b) {
     a.Swap(&b);
@@ -13762,7 +13958,7 @@ class GetAppSignalStatesFromArchiveNextReply PROTOBUF_FINAL :
                &_GetAppSignalStatesFromArchiveNextReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    63;
+    64;
 
   friend void swap(GetAppSignalStatesFromArchiveNextReply& a, GetAppSignalStatesFromArchiveNextReply& b) {
     a.Swap(&b);
@@ -14058,7 +14254,7 @@ class GetAppSignalStatesFromArchiveCancelRequest PROTOBUF_FINAL :
                &_GetAppSignalStatesFromArchiveCancelRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    64;
+    65;
 
   friend void swap(GetAppSignalStatesFromArchiveCancelRequest& a, GetAppSignalStatesFromArchiveCancelRequest& b) {
     a.Swap(&b);
@@ -14207,7 +14403,7 @@ class GetAppSignalStatesFromArchiveCancelReply PROTOBUF_FINAL :
                &_GetAppSignalStatesFromArchiveCancelReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    65;
+    66;
 
   friend void swap(GetAppSignalStatesFromArchiveCancelReply& a, GetAppSignalStatesFromArchiveCancelReply& b) {
     a.Swap(&b);
@@ -14393,7 +14589,7 @@ class RtTrendsManagementRequest PROTOBUF_FINAL :
                &_RtTrendsManagementRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    66;
+    67;
 
   friend void swap(RtTrendsManagementRequest& a, RtTrendsManagementRequest& b) {
     a.Swap(&b);
@@ -14612,7 +14808,7 @@ class RtTrendsManagementReply PROTOBUF_FINAL :
                &_RtTrendsManagementReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    67;
+    68;
 
   friend void swap(RtTrendsManagementReply& a, RtTrendsManagementReply& b) {
     a.Swap(&b);
@@ -14822,7 +15018,7 @@ class RtTrendsGetStateChangesRequest PROTOBUF_FINAL :
                &_RtTrendsGetStateChangesRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    68;
+    69;
 
   friend void swap(RtTrendsGetStateChangesRequest& a, RtTrendsGetStateChangesRequest& b) {
     a.Swap(&b);
@@ -14953,7 +15149,7 @@ class RtTrendsGetStateChangesReply PROTOBUF_FINAL :
                &_RtTrendsGetStateChangesReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    69;
+    70;
 
   friend void swap(RtTrendsGetStateChangesReply& a, RtTrendsGetStateChangesReply& b) {
     a.Swap(&b);
@@ -15144,7 +15340,7 @@ class GetFileReply PROTOBUF_FINAL :
                &_GetFileReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    70;
+    71;
 
   friend void swap(GetFileReply& a, GetFileReply& b) {
     a.Swap(&b);
@@ -16043,7 +16239,35 @@ inline void GetAppSignalStateReply::set_statechangesqueuesize(::PROTOBUF_NAMESPA
   // @@protoc_insertion_point(field_set:Network.GetAppSignalStateReply.stateChangesQueueSize)
 }
 
-// repeated .Proto.AppSignalState appSignalStates = 5;
+// optional int32 gatewayStateChangesQueueSize = 5 [default = 0];
+inline bool GetAppSignalStateReply::_internal_has_gatewaystatechangesqueuesize() const {
+  bool value = (_has_bits_[0] & 0x00000010u) != 0;
+  return value;
+}
+inline bool GetAppSignalStateReply::has_gatewaystatechangesqueuesize() const {
+  return _internal_has_gatewaystatechangesqueuesize();
+}
+inline void GetAppSignalStateReply::clear_gatewaystatechangesqueuesize() {
+  gatewaystatechangesqueuesize_ = 0;
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 GetAppSignalStateReply::_internal_gatewaystatechangesqueuesize() const {
+  return gatewaystatechangesqueuesize_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 GetAppSignalStateReply::gatewaystatechangesqueuesize() const {
+  // @@protoc_insertion_point(field_get:Network.GetAppSignalStateReply.gatewayStateChangesQueueSize)
+  return _internal_gatewaystatechangesqueuesize();
+}
+inline void GetAppSignalStateReply::_internal_set_gatewaystatechangesqueuesize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000010u;
+  gatewaystatechangesqueuesize_ = value;
+}
+inline void GetAppSignalStateReply::set_gatewaystatechangesqueuesize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_gatewaystatechangesqueuesize(value);
+  // @@protoc_insertion_point(field_set:Network.GetAppSignalStateReply.gatewayStateChangesQueueSize)
+}
+
+// repeated .Proto.AppSignalState appSignalStates = 6;
 inline int GetAppSignalStateReply::_internal_appsignalstates_size() const {
   return appsignalstates_.size();
 }
@@ -16237,232 +16461,397 @@ GetAppSignalStateChangesReply::appsignalstates() const {
 
 // -------------------------------------------------------------------
 
-// GetAppSignalStateChangesForGatewayRequest
+// GatewayGetAppSignalStateChangesRequest
 
 // repeated uint64 signalsHashes = 1;
-inline int GetAppSignalStateChangesForGatewayRequest::_internal_signalshashes_size() const {
+inline int GatewayGetAppSignalStateChangesRequest::_internal_signalshashes_size() const {
   return signalshashes_.size();
 }
-inline int GetAppSignalStateChangesForGatewayRequest::signalshashes_size() const {
+inline int GatewayGetAppSignalStateChangesRequest::signalshashes_size() const {
   return _internal_signalshashes_size();
 }
-inline void GetAppSignalStateChangesForGatewayRequest::clear_signalshashes() {
+inline void GatewayGetAppSignalStateChangesRequest::clear_signalshashes() {
   signalshashes_.Clear();
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint64 GetAppSignalStateChangesForGatewayRequest::_internal_signalshashes(int index) const {
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GatewayGetAppSignalStateChangesRequest::_internal_signalshashes(int index) const {
   return signalshashes_.Get(index);
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint64 GetAppSignalStateChangesForGatewayRequest::signalshashes(int index) const {
-  // @@protoc_insertion_point(field_get:Network.GetAppSignalStateChangesForGatewayRequest.signalsHashes)
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GatewayGetAppSignalStateChangesRequest::signalshashes(int index) const {
+  // @@protoc_insertion_point(field_get:Network.GatewayGetAppSignalStateChangesRequest.signalsHashes)
   return _internal_signalshashes(index);
 }
-inline void GetAppSignalStateChangesForGatewayRequest::set_signalshashes(int index, ::PROTOBUF_NAMESPACE_ID::uint64 value) {
+inline void GatewayGetAppSignalStateChangesRequest::set_signalshashes(int index, ::PROTOBUF_NAMESPACE_ID::uint64 value) {
   signalshashes_.Set(index, value);
-  // @@protoc_insertion_point(field_set:Network.GetAppSignalStateChangesForGatewayRequest.signalsHashes)
+  // @@protoc_insertion_point(field_set:Network.GatewayGetAppSignalStateChangesRequest.signalsHashes)
 }
-inline void GetAppSignalStateChangesForGatewayRequest::_internal_add_signalshashes(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+inline void GatewayGetAppSignalStateChangesRequest::_internal_add_signalshashes(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   signalshashes_.Add(value);
 }
-inline void GetAppSignalStateChangesForGatewayRequest::add_signalshashes(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+inline void GatewayGetAppSignalStateChangesRequest::add_signalshashes(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   _internal_add_signalshashes(value);
-  // @@protoc_insertion_point(field_add:Network.GetAppSignalStateChangesForGatewayRequest.signalsHashes)
+  // @@protoc_insertion_point(field_add:Network.GatewayGetAppSignalStateChangesRequest.signalsHashes)
 }
 inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >&
-GetAppSignalStateChangesForGatewayRequest::_internal_signalshashes() const {
+GatewayGetAppSignalStateChangesRequest::_internal_signalshashes() const {
   return signalshashes_;
 }
 inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >&
-GetAppSignalStateChangesForGatewayRequest::signalshashes() const {
-  // @@protoc_insertion_point(field_list:Network.GetAppSignalStateChangesForGatewayRequest.signalsHashes)
+GatewayGetAppSignalStateChangesRequest::signalshashes() const {
+  // @@protoc_insertion_point(field_list:Network.GatewayGetAppSignalStateChangesRequest.signalsHashes)
   return _internal_signalshashes();
 }
 inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >*
-GetAppSignalStateChangesForGatewayRequest::_internal_mutable_signalshashes() {
+GatewayGetAppSignalStateChangesRequest::_internal_mutable_signalshashes() {
   return &signalshashes_;
 }
 inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >*
-GetAppSignalStateChangesForGatewayRequest::mutable_signalshashes() {
-  // @@protoc_insertion_point(field_mutable_list:Network.GetAppSignalStateChangesForGatewayRequest.signalsHashes)
+GatewayGetAppSignalStateChangesRequest::mutable_signalshashes() {
+  // @@protoc_insertion_point(field_mutable_list:Network.GatewayGetAppSignalStateChangesRequest.signalsHashes)
   return _internal_mutable_signalshashes();
 }
 
 // -------------------------------------------------------------------
 
-// GetAppSignalStateChangesForGatewayReply
+// GatewayAppSignalState
+
+// required .Proto.AppSignalState prevState = 1;
+inline bool GatewayAppSignalState::_internal_has_prevstate() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  PROTOBUF_ASSUME(!value || prevstate_ != nullptr);
+  return value;
+}
+inline bool GatewayAppSignalState::has_prevstate() const {
+  return _internal_has_prevstate();
+}
+inline const ::Proto::AppSignalState& GatewayAppSignalState::_internal_prevstate() const {
+  const ::Proto::AppSignalState* p = prevstate_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Proto::AppSignalState&>(
+      ::Proto::_AppSignalState_default_instance_);
+}
+inline const ::Proto::AppSignalState& GatewayAppSignalState::prevstate() const {
+  // @@protoc_insertion_point(field_get:Network.GatewayAppSignalState.prevState)
+  return _internal_prevstate();
+}
+inline void GatewayAppSignalState::unsafe_arena_set_allocated_prevstate(
+    ::Proto::AppSignalState* prevstate) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(prevstate_);
+  }
+  prevstate_ = prevstate;
+  if (prevstate) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Network.GatewayAppSignalState.prevState)
+}
+inline ::Proto::AppSignalState* GatewayAppSignalState::release_prevstate() {
+  _has_bits_[0] &= ~0x00000001u;
+  ::Proto::AppSignalState* temp = prevstate_;
+  prevstate_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::Proto::AppSignalState* GatewayAppSignalState::unsafe_arena_release_prevstate() {
+  // @@protoc_insertion_point(field_release:Network.GatewayAppSignalState.prevState)
+  _has_bits_[0] &= ~0x00000001u;
+  ::Proto::AppSignalState* temp = prevstate_;
+  prevstate_ = nullptr;
+  return temp;
+}
+inline ::Proto::AppSignalState* GatewayAppSignalState::_internal_mutable_prevstate() {
+  _has_bits_[0] |= 0x00000001u;
+  if (prevstate_ == nullptr) {
+    auto* p = CreateMaybeMessage<::Proto::AppSignalState>(GetArena());
+    prevstate_ = p;
+  }
+  return prevstate_;
+}
+inline ::Proto::AppSignalState* GatewayAppSignalState::mutable_prevstate() {
+  // @@protoc_insertion_point(field_mutable:Network.GatewayAppSignalState.prevState)
+  return _internal_mutable_prevstate();
+}
+inline void GatewayAppSignalState::set_allocated_prevstate(::Proto::AppSignalState* prevstate) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete reinterpret_cast< ::PROTOBUF_NAMESPACE_ID::MessageLite*>(prevstate_);
+  }
+  if (prevstate) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(prevstate)->GetArena();
+    if (message_arena != submessage_arena) {
+      prevstate = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, prevstate, submessage_arena);
+    }
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  prevstate_ = prevstate;
+  // @@protoc_insertion_point(field_set_allocated:Network.GatewayAppSignalState.prevState)
+}
+
+// required .Proto.AppSignalState curState = 2;
+inline bool GatewayAppSignalState::_internal_has_curstate() const {
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  PROTOBUF_ASSUME(!value || curstate_ != nullptr);
+  return value;
+}
+inline bool GatewayAppSignalState::has_curstate() const {
+  return _internal_has_curstate();
+}
+inline const ::Proto::AppSignalState& GatewayAppSignalState::_internal_curstate() const {
+  const ::Proto::AppSignalState* p = curstate_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Proto::AppSignalState&>(
+      ::Proto::_AppSignalState_default_instance_);
+}
+inline const ::Proto::AppSignalState& GatewayAppSignalState::curstate() const {
+  // @@protoc_insertion_point(field_get:Network.GatewayAppSignalState.curState)
+  return _internal_curstate();
+}
+inline void GatewayAppSignalState::unsafe_arena_set_allocated_curstate(
+    ::Proto::AppSignalState* curstate) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(curstate_);
+  }
+  curstate_ = curstate;
+  if (curstate) {
+    _has_bits_[0] |= 0x00000002u;
+  } else {
+    _has_bits_[0] &= ~0x00000002u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Network.GatewayAppSignalState.curState)
+}
+inline ::Proto::AppSignalState* GatewayAppSignalState::release_curstate() {
+  _has_bits_[0] &= ~0x00000002u;
+  ::Proto::AppSignalState* temp = curstate_;
+  curstate_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::Proto::AppSignalState* GatewayAppSignalState::unsafe_arena_release_curstate() {
+  // @@protoc_insertion_point(field_release:Network.GatewayAppSignalState.curState)
+  _has_bits_[0] &= ~0x00000002u;
+  ::Proto::AppSignalState* temp = curstate_;
+  curstate_ = nullptr;
+  return temp;
+}
+inline ::Proto::AppSignalState* GatewayAppSignalState::_internal_mutable_curstate() {
+  _has_bits_[0] |= 0x00000002u;
+  if (curstate_ == nullptr) {
+    auto* p = CreateMaybeMessage<::Proto::AppSignalState>(GetArena());
+    curstate_ = p;
+  }
+  return curstate_;
+}
+inline ::Proto::AppSignalState* GatewayAppSignalState::mutable_curstate() {
+  // @@protoc_insertion_point(field_mutable:Network.GatewayAppSignalState.curState)
+  return _internal_mutable_curstate();
+}
+inline void GatewayAppSignalState::set_allocated_curstate(::Proto::AppSignalState* curstate) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete reinterpret_cast< ::PROTOBUF_NAMESPACE_ID::MessageLite*>(curstate_);
+  }
+  if (curstate) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(curstate)->GetArena();
+    if (message_arena != submessage_arena) {
+      curstate = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, curstate, submessage_arena);
+    }
+    _has_bits_[0] |= 0x00000002u;
+  } else {
+    _has_bits_[0] &= ~0x00000002u;
+  }
+  curstate_ = curstate;
+  // @@protoc_insertion_point(field_set_allocated:Network.GatewayAppSignalState.curState)
+}
+
+// -------------------------------------------------------------------
+
+// GatewayGetAppSignalStateChangesReply
 
 // optional int32 error = 1 [default = 0];
-inline bool GetAppSignalStateChangesForGatewayReply::_internal_has_error() const {
+inline bool GatewayGetAppSignalStateChangesReply::_internal_has_error() const {
   bool value = (_has_bits_[0] & 0x00000004u) != 0;
   return value;
 }
-inline bool GetAppSignalStateChangesForGatewayReply::has_error() const {
+inline bool GatewayGetAppSignalStateChangesReply::has_error() const {
   return _internal_has_error();
 }
-inline void GetAppSignalStateChangesForGatewayReply::clear_error() {
+inline void GatewayGetAppSignalStateChangesReply::clear_error() {
   error_ = 0;
   _has_bits_[0] &= ~0x00000004u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 GetAppSignalStateChangesForGatewayReply::_internal_error() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 GatewayGetAppSignalStateChangesReply::_internal_error() const {
   return error_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 GetAppSignalStateChangesForGatewayReply::error() const {
-  // @@protoc_insertion_point(field_get:Network.GetAppSignalStateChangesForGatewayReply.error)
+inline ::PROTOBUF_NAMESPACE_ID::int32 GatewayGetAppSignalStateChangesReply::error() const {
+  // @@protoc_insertion_point(field_get:Network.GatewayGetAppSignalStateChangesReply.error)
   return _internal_error();
 }
-inline void GetAppSignalStateChangesForGatewayReply::_internal_set_error(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void GatewayGetAppSignalStateChangesReply::_internal_set_error(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000004u;
   error_ = value;
 }
-inline void GetAppSignalStateChangesForGatewayReply::set_error(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void GatewayGetAppSignalStateChangesReply::set_error(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_error(value);
-  // @@protoc_insertion_point(field_set:Network.GetAppSignalStateChangesForGatewayReply.error)
+  // @@protoc_insertion_point(field_set:Network.GatewayGetAppSignalStateChangesReply.error)
 }
 
-// optional int64 minPlantTime = 2;
-inline bool GetAppSignalStateChangesForGatewayReply::_internal_has_minplanttime() const {
+// optional int64 minPlantTime = 2 [default = 0];
+inline bool GatewayGetAppSignalStateChangesReply::_internal_has_minplanttime() const {
   bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
 }
-inline bool GetAppSignalStateChangesForGatewayReply::has_minplanttime() const {
+inline bool GatewayGetAppSignalStateChangesReply::has_minplanttime() const {
   return _internal_has_minplanttime();
 }
-inline void GetAppSignalStateChangesForGatewayReply::clear_minplanttime() {
+inline void GatewayGetAppSignalStateChangesReply::clear_minplanttime() {
   minplanttime_ = PROTOBUF_LONGLONG(0);
   _has_bits_[0] &= ~0x00000001u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 GetAppSignalStateChangesForGatewayReply::_internal_minplanttime() const {
+inline ::PROTOBUF_NAMESPACE_ID::int64 GatewayGetAppSignalStateChangesReply::_internal_minplanttime() const {
   return minplanttime_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 GetAppSignalStateChangesForGatewayReply::minplanttime() const {
-  // @@protoc_insertion_point(field_get:Network.GetAppSignalStateChangesForGatewayReply.minPlantTime)
+inline ::PROTOBUF_NAMESPACE_ID::int64 GatewayGetAppSignalStateChangesReply::minplanttime() const {
+  // @@protoc_insertion_point(field_get:Network.GatewayGetAppSignalStateChangesReply.minPlantTime)
   return _internal_minplanttime();
 }
-inline void GetAppSignalStateChangesForGatewayReply::_internal_set_minplanttime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+inline void GatewayGetAppSignalStateChangesReply::_internal_set_minplanttime(::PROTOBUF_NAMESPACE_ID::int64 value) {
   _has_bits_[0] |= 0x00000001u;
   minplanttime_ = value;
 }
-inline void GetAppSignalStateChangesForGatewayReply::set_minplanttime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+inline void GatewayGetAppSignalStateChangesReply::set_minplanttime(::PROTOBUF_NAMESPACE_ID::int64 value) {
   _internal_set_minplanttime(value);
-  // @@protoc_insertion_point(field_set:Network.GetAppSignalStateChangesForGatewayReply.minPlantTime)
+  // @@protoc_insertion_point(field_set:Network.GatewayGetAppSignalStateChangesReply.minPlantTime)
 }
 
-// optional int64 minServerTimeUtc = 3;
-inline bool GetAppSignalStateChangesForGatewayReply::_internal_has_minservertimeutc() const {
+// optional int64 minSystemTime = 3 [default = 0];
+inline bool GatewayGetAppSignalStateChangesReply::_internal_has_minsystemtime() const {
   bool value = (_has_bits_[0] & 0x00000002u) != 0;
   return value;
 }
-inline bool GetAppSignalStateChangesForGatewayReply::has_minservertimeutc() const {
-  return _internal_has_minservertimeutc();
+inline bool GatewayGetAppSignalStateChangesReply::has_minsystemtime() const {
+  return _internal_has_minsystemtime();
 }
-inline void GetAppSignalStateChangesForGatewayReply::clear_minservertimeutc() {
-  minservertimeutc_ = PROTOBUF_LONGLONG(0);
+inline void GatewayGetAppSignalStateChangesReply::clear_minsystemtime() {
+  minsystemtime_ = PROTOBUF_LONGLONG(0);
   _has_bits_[0] &= ~0x00000002u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 GetAppSignalStateChangesForGatewayReply::_internal_minservertimeutc() const {
-  return minservertimeutc_;
+inline ::PROTOBUF_NAMESPACE_ID::int64 GatewayGetAppSignalStateChangesReply::_internal_minsystemtime() const {
+  return minsystemtime_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 GetAppSignalStateChangesForGatewayReply::minservertimeutc() const {
-  // @@protoc_insertion_point(field_get:Network.GetAppSignalStateChangesForGatewayReply.minServerTimeUtc)
-  return _internal_minservertimeutc();
+inline ::PROTOBUF_NAMESPACE_ID::int64 GatewayGetAppSignalStateChangesReply::minsystemtime() const {
+  // @@protoc_insertion_point(field_get:Network.GatewayGetAppSignalStateChangesReply.minSystemTime)
+  return _internal_minsystemtime();
 }
-inline void GetAppSignalStateChangesForGatewayReply::_internal_set_minservertimeutc(::PROTOBUF_NAMESPACE_ID::int64 value) {
+inline void GatewayGetAppSignalStateChangesReply::_internal_set_minsystemtime(::PROTOBUF_NAMESPACE_ID::int64 value) {
   _has_bits_[0] |= 0x00000002u;
-  minservertimeutc_ = value;
+  minsystemtime_ = value;
 }
-inline void GetAppSignalStateChangesForGatewayReply::set_minservertimeutc(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_minservertimeutc(value);
-  // @@protoc_insertion_point(field_set:Network.GetAppSignalStateChangesForGatewayReply.minServerTimeUtc)
+inline void GatewayGetAppSignalStateChangesReply::set_minsystemtime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_minsystemtime(value);
+  // @@protoc_insertion_point(field_set:Network.GatewayGetAppSignalStateChangesReply.minSystemTime)
 }
 
-// optional int64 minServerTimeLocal = 4;
-inline bool GetAppSignalStateChangesForGatewayReply::_internal_has_minservertimelocal() const {
+// optional int64 minLocalTime = 4 [default = 0];
+inline bool GatewayGetAppSignalStateChangesReply::_internal_has_minlocaltime() const {
   bool value = (_has_bits_[0] & 0x00000010u) != 0;
   return value;
 }
-inline bool GetAppSignalStateChangesForGatewayReply::has_minservertimelocal() const {
-  return _internal_has_minservertimelocal();
+inline bool GatewayGetAppSignalStateChangesReply::has_minlocaltime() const {
+  return _internal_has_minlocaltime();
 }
-inline void GetAppSignalStateChangesForGatewayReply::clear_minservertimelocal() {
-  minservertimelocal_ = PROTOBUF_LONGLONG(0);
+inline void GatewayGetAppSignalStateChangesReply::clear_minlocaltime() {
+  minlocaltime_ = PROTOBUF_LONGLONG(0);
   _has_bits_[0] &= ~0x00000010u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 GetAppSignalStateChangesForGatewayReply::_internal_minservertimelocal() const {
-  return minservertimelocal_;
+inline ::PROTOBUF_NAMESPACE_ID::int64 GatewayGetAppSignalStateChangesReply::_internal_minlocaltime() const {
+  return minlocaltime_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 GetAppSignalStateChangesForGatewayReply::minservertimelocal() const {
-  // @@protoc_insertion_point(field_get:Network.GetAppSignalStateChangesForGatewayReply.minServerTimeLocal)
-  return _internal_minservertimelocal();
+inline ::PROTOBUF_NAMESPACE_ID::int64 GatewayGetAppSignalStateChangesReply::minlocaltime() const {
+  // @@protoc_insertion_point(field_get:Network.GatewayGetAppSignalStateChangesReply.minLocalTime)
+  return _internal_minlocaltime();
 }
-inline void GetAppSignalStateChangesForGatewayReply::_internal_set_minservertimelocal(::PROTOBUF_NAMESPACE_ID::int64 value) {
+inline void GatewayGetAppSignalStateChangesReply::_internal_set_minlocaltime(::PROTOBUF_NAMESPACE_ID::int64 value) {
   _has_bits_[0] |= 0x00000010u;
-  minservertimelocal_ = value;
+  minlocaltime_ = value;
 }
-inline void GetAppSignalStateChangesForGatewayReply::set_minservertimelocal(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_minservertimelocal(value);
-  // @@protoc_insertion_point(field_set:Network.GetAppSignalStateChangesForGatewayReply.minServerTimeLocal)
+inline void GatewayGetAppSignalStateChangesReply::set_minlocaltime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_minlocaltime(value);
+  // @@protoc_insertion_point(field_set:Network.GatewayGetAppSignalStateChangesReply.minLocalTime)
 }
 
 // optional int32 pendingStatesCount = 5 [default = 0];
-inline bool GetAppSignalStateChangesForGatewayReply::_internal_has_pendingstatescount() const {
+inline bool GatewayGetAppSignalStateChangesReply::_internal_has_pendingstatescount() const {
   bool value = (_has_bits_[0] & 0x00000008u) != 0;
   return value;
 }
-inline bool GetAppSignalStateChangesForGatewayReply::has_pendingstatescount() const {
+inline bool GatewayGetAppSignalStateChangesReply::has_pendingstatescount() const {
   return _internal_has_pendingstatescount();
 }
-inline void GetAppSignalStateChangesForGatewayReply::clear_pendingstatescount() {
+inline void GatewayGetAppSignalStateChangesReply::clear_pendingstatescount() {
   pendingstatescount_ = 0;
   _has_bits_[0] &= ~0x00000008u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 GetAppSignalStateChangesForGatewayReply::_internal_pendingstatescount() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 GatewayGetAppSignalStateChangesReply::_internal_pendingstatescount() const {
   return pendingstatescount_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 GetAppSignalStateChangesForGatewayReply::pendingstatescount() const {
-  // @@protoc_insertion_point(field_get:Network.GetAppSignalStateChangesForGatewayReply.pendingStatesCount)
+inline ::PROTOBUF_NAMESPACE_ID::int32 GatewayGetAppSignalStateChangesReply::pendingstatescount() const {
+  // @@protoc_insertion_point(field_get:Network.GatewayGetAppSignalStateChangesReply.pendingStatesCount)
   return _internal_pendingstatescount();
 }
-inline void GetAppSignalStateChangesForGatewayReply::_internal_set_pendingstatescount(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void GatewayGetAppSignalStateChangesReply::_internal_set_pendingstatescount(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000008u;
   pendingstatescount_ = value;
 }
-inline void GetAppSignalStateChangesForGatewayReply::set_pendingstatescount(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void GatewayGetAppSignalStateChangesReply::set_pendingstatescount(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_pendingstatescount(value);
-  // @@protoc_insertion_point(field_set:Network.GetAppSignalStateChangesForGatewayReply.pendingStatesCount)
+  // @@protoc_insertion_point(field_set:Network.GatewayGetAppSignalStateChangesReply.pendingStatesCount)
 }
 
-// repeated .Proto.AppSignalState appSignalStates = 6;
-inline int GetAppSignalStateChangesForGatewayReply::_internal_appsignalstates_size() const {
+// repeated .Network.GatewayAppSignalState appSignalStates = 6;
+inline int GatewayGetAppSignalStateChangesReply::_internal_appsignalstates_size() const {
   return appsignalstates_.size();
 }
-inline int GetAppSignalStateChangesForGatewayReply::appsignalstates_size() const {
+inline int GatewayGetAppSignalStateChangesReply::appsignalstates_size() const {
   return _internal_appsignalstates_size();
 }
-inline ::Proto::AppSignalState* GetAppSignalStateChangesForGatewayReply::mutable_appsignalstates(int index) {
-  // @@protoc_insertion_point(field_mutable:Network.GetAppSignalStateChangesForGatewayReply.appSignalStates)
+inline void GatewayGetAppSignalStateChangesReply::clear_appsignalstates() {
+  appsignalstates_.Clear();
+}
+inline ::Network::GatewayAppSignalState* GatewayGetAppSignalStateChangesReply::mutable_appsignalstates(int index) {
+  // @@protoc_insertion_point(field_mutable:Network.GatewayGetAppSignalStateChangesReply.appSignalStates)
   return appsignalstates_.Mutable(index);
 }
-inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::AppSignalState >*
-GetAppSignalStateChangesForGatewayReply::mutable_appsignalstates() {
-  // @@protoc_insertion_point(field_mutable_list:Network.GetAppSignalStateChangesForGatewayReply.appSignalStates)
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Network::GatewayAppSignalState >*
+GatewayGetAppSignalStateChangesReply::mutable_appsignalstates() {
+  // @@protoc_insertion_point(field_mutable_list:Network.GatewayGetAppSignalStateChangesReply.appSignalStates)
   return &appsignalstates_;
 }
-inline const ::Proto::AppSignalState& GetAppSignalStateChangesForGatewayReply::_internal_appsignalstates(int index) const {
+inline const ::Network::GatewayAppSignalState& GatewayGetAppSignalStateChangesReply::_internal_appsignalstates(int index) const {
   return appsignalstates_.Get(index);
 }
-inline const ::Proto::AppSignalState& GetAppSignalStateChangesForGatewayReply::appsignalstates(int index) const {
-  // @@protoc_insertion_point(field_get:Network.GetAppSignalStateChangesForGatewayReply.appSignalStates)
+inline const ::Network::GatewayAppSignalState& GatewayGetAppSignalStateChangesReply::appsignalstates(int index) const {
+  // @@protoc_insertion_point(field_get:Network.GatewayGetAppSignalStateChangesReply.appSignalStates)
   return _internal_appsignalstates(index);
 }
-inline ::Proto::AppSignalState* GetAppSignalStateChangesForGatewayReply::_internal_add_appsignalstates() {
+inline ::Network::GatewayAppSignalState* GatewayGetAppSignalStateChangesReply::_internal_add_appsignalstates() {
   return appsignalstates_.Add();
 }
-inline ::Proto::AppSignalState* GetAppSignalStateChangesForGatewayReply::add_appsignalstates() {
-  // @@protoc_insertion_point(field_add:Network.GetAppSignalStateChangesForGatewayReply.appSignalStates)
+inline ::Network::GatewayAppSignalState* GatewayGetAppSignalStateChangesReply::add_appsignalstates() {
+  // @@protoc_insertion_point(field_add:Network.GatewayGetAppSignalStateChangesReply.appSignalStates)
   return _internal_add_appsignalstates();
 }
-inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::AppSignalState >&
-GetAppSignalStateChangesForGatewayReply::appsignalstates() const {
-  // @@protoc_insertion_point(field_list:Network.GetAppSignalStateChangesForGatewayReply.appSignalStates)
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Network::GatewayAppSignalState >&
+GatewayGetAppSignalStateChangesReply::appsignalstates() const {
+  // @@protoc_insertion_point(field_list:Network.GatewayGetAppSignalStateChangesReply.appSignalStates)
   return appsignalstates_;
 }
 
@@ -28219,6 +28608,8 @@ inline void GetFileReply::set_allocated_filepartdata(std::string* filepartdata) 
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

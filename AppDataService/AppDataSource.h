@@ -23,8 +23,7 @@ public:
 
 	void setStatesProcessingThreadWakeupParams(std::mutex* statesProcessigRequiredMutex,
 											  std::condition_variable* statesProcessingRequiredCondition,
-											  std::queue<AppDataSource*>* statesProcessingRequired,
-											  std::queue<AppDataSource*>* gwStatesProcessingRequired);
+											  std::queue<AppDataSource*>* statesProcessingRequired);
 
 	bool getState(Network::AppDataSourceState* proto) const;
 	void setState(const Network::AppDataSourceState& proto);
@@ -62,7 +61,6 @@ private:
 	std::mutex* m_statesProcessigRequiredMutex = nullptr;
 	std::condition_variable* m_statesProcessingRequiredCondition = nullptr;
 	std::queue<AppDataSource*>* m_statesProcessingRequired = nullptr;
-	std::queue<AppDataSource*>* m_gwStatesProcessingRequired = nullptr;
 
 	//
 

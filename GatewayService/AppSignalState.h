@@ -8,7 +8,7 @@ namespace Gateway
 	{
 	public:
 		AppSignalState();
-		AppSignalState(Hash appSignalIdHash);
+		AppSignalState(Hash appSignalIdHash, bool requestEvents);
 		AppSignalState(const AppSignalState& appState);
 
 		void updateState(const Proto::AppSignalState& protoState);
@@ -22,9 +22,12 @@ namespace Gateway
 
 		bool isWorkable() const;
 
+		bool requestEvents() const;
+
 	private:
 		Hash m_hash = 0;
 		int m_listIndex = 0;
+		bool m_requestEvents = false;
 		std::atomic<int> m_writeStateIndex = { 0 };
 		SimpleAppSignalState m_state[2];
 	};

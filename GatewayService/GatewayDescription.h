@@ -74,15 +74,6 @@ namespace Gateway
 			Discrete_D			// Discrete parameters, format 'D'
 		};
 		Q_ENUM(SignalListDataType)
-
-		enum class TimeType
-		{
-			PlantTime,
-			ServerTimeUTC0,
-			ServerLocalTime
-		};
-		Q_ENUM(TimeType)
-
 	};
 
 	class ParserLog;
@@ -314,7 +305,7 @@ namespace Gateway
 		HostAddressPort gatewayIP1() const;
 		HostAddressPort gatewayIP2() const;
 		int listsVersion() const;
-		E::TimeType timeType() const;
+		::E::TimeType timeType() const;
 		int period() const;
 
 	private:
@@ -337,7 +328,7 @@ namespace Gateway
 		HostAddressPort m_gatewayIP1;
 		HostAddressPort m_gatewayIP2;
 		int m_listsVersion = 0;
-		E::TimeType m_timeType = E::TimeType::PlantTime;
+		::E::TimeType m_timeType = ::E::TimeType::Plant;
 		int m_period = 1000;
 	};
 

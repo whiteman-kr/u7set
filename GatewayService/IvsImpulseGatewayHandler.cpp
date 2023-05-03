@@ -35,7 +35,8 @@ namespace Gateway
 												m_appDataService1,
 												m_appDataService2,
 												QString("GatewayService %1").arg(m_softwareInfo.equipmentID()),
-												m_states);
+												m_states,
+												m_signalStatesUpdated);
 		m_appDataServiceClientThread->start();
 
 		//
@@ -82,10 +83,10 @@ namespace Gateway
 
 			TEST_PTR_CONTINUE(ivsList);
 
-			IvsImpulseListInfo li;
+			IvsImpulseListInfoShared li = std::make_shared<IvsImpulseListInfo>();
 
-			li.info = ivsList;
-			li.startIndex = signalStateIndex;
+			li->info = ivsList;
+			li->startIndex = signalStateIndex;
 
 			const auto& ids = ivsList->signalIDs();
 
@@ -95,20 +96,44 @@ namespace Gateway
 
 				if (s != nullptr)
 				{
-					m_states.emplace_back(calcHash(id));
+					m_states.emplace_back(calcHash(id), ivsList->sendEvents());
 				}
 				else
 				{
-					m_states.emplace_back(0);		// init as NOT workable
+					m_states.emplace_back(0, false);		// init as NOT workable
 				}
 
 				signalStateIndex++;
 			}
 
-			li.size = signalStateIndex - li.startIndex;
+			li->size = signalStateIndex - li->startIndex;
 
 			m_lists.push_back(li);
 		}
+
+		//
+
+		for(auto& list : m_lists)
+		{
+			const auto& ids = list->info->signalIDs();
+
+			for(const QString& id : ids)
+			{
+				Hash h = calcHash(id);
+
+				auto it = m_hashToLists.find(h);
+
+				if (it == m_hashToLists.end())
+				{
+					auto p = m_hashToLists.emplace(h, std::vector<IvsImpulseListInfoShared>());
+
+					it = p.first;
+				}
+
+				it->second.push_back(list);
+			}
+		}
+
 		return true;
 	}
 }

@@ -451,8 +451,8 @@ public:
 	enum class TimeType
 	{
 		Plant,
-		System,
-		Local,
+		System,				// server time UTC+0
+		Local,				// server local time
 		ArchiveId
 	};
 	Q_ENUM(TimeType)

@@ -32,6 +32,10 @@ struct SimpleAppSignalState
 	Hash load(const Proto::AppSignalState& protoState);
 
 	void print() const;
+
+	qint64 plantTime() const { return time.plant.timeStamp; }
+	qint64 systemTime() const { return time.system.timeStamp; }
+	qint64 locaTime() const { return time.local.timeStamp; }
 };
 
 class SimpleAppSignalStatesQueue : public QObject, public FastThreadSafeQueue<SimpleAppSignalState>

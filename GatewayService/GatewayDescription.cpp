@@ -843,11 +843,11 @@ namespace Gateway
 
 					bool ok = true;
 
-					m_timeType = ::E::stringToValue<E::TimeType>(timeTypeStr, &ok);
+					m_timeType = ::E::stringToValue<::E::TimeType>(timeTypeStr, &ok);
 
 					if (ok == false)
 					{
-						log.logError(sv.lineNo, QString("unknown gateway time type '%1' use 'PlantTime', 'ServerLocalTime' or 'ServerTimeUTC0'").
+						log.logError(sv.lineNo, QString("unknown gateway time type '%1' use 'Plant', 'System' or 'Local'").
 													arg(timeTypeStr));
 						result = false;
 					}
@@ -887,7 +887,7 @@ namespace Gateway
 		return m_listsVersion;
 	}
 
-	E::TimeType IvsImpulseGateway::timeType() const
+	::E::TimeType IvsImpulseGateway::timeType() const
 	{
 		return m_timeType;
 	}
@@ -905,7 +905,7 @@ namespace Gateway
 		xml.writeHostAddressPortAttribute(XmlAttribute::GATEWAY_IP1, m_gatewayIP1);
 		xml.writeHostAddressPortAttribute(XmlAttribute::GATEWAY_IP2, m_gatewayIP2);
 		xml.writeIntAttribute(XmlAttribute::LISTS_VERSION, m_listsVersion);
-		xml.writeEnumKeyAttribute<E::TimeType>(XmlAttribute::TIME_TYPE, m_timeType);
+		xml.writeEnumKeyAttribute<::E::TimeType>(XmlAttribute::TIME_TYPE, m_timeType);
 		xml.writeIntAttribute(XmlAttribute::PERIOD, m_period);
 		xml.writeEndElement();		//	</Settings>
 	}
@@ -920,7 +920,7 @@ namespace Gateway
 		result &= xml.readHostAddressPortAttribute(XmlAttribute::GATEWAY_IP1, &m_gatewayIP1);
 		result &= xml.readHostAddressPortAttribute(XmlAttribute::GATEWAY_IP2, &m_gatewayIP2);
 		result &= xml.readIntAttribute(XmlAttribute::LISTS_VERSION, &m_listsVersion);
-		result &= xml.readEnumKeyAttribute<E::TimeType>(XmlAttribute::TIME_TYPE, &m_timeType);
+		result &= xml.readEnumKeyAttribute<::E::TimeType>(XmlAttribute::TIME_TYPE, &m_timeType);
 		result &= xml.readIntAttribute(XmlAttribute::PERIOD, &m_period);
 
 		return result;

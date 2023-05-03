@@ -1,4 +1,5 @@
 #include "AppDataServiceClient.h"
+#include "IvsImpulseGatewayHandler.h"
 
 namespace Gateway
 {
@@ -6,9 +7,11 @@ namespace Gateway
 											   const HostAddressPort& serverAddressPort1,
 											   const HostAddressPort& serverAddressPort2,
 											   const QString& clientDescription,
-											   AppSignalStates& states) :
+											   AppSignalStates& states,
+											   std::atomic_bool& signalStatesUpdated) :
 		Tcp::Client(softwareInfo, serverAddressPort1, serverAddressPort2, clientDescription),
 		m_states(states),
+		m_signalStatesUpdated(signalStatesUpdated),
 		m_timer(this)
 	{
 	}
@@ -42,19 +45,19 @@ namespace Gateway
 
 		//
 
-		Network::GetAppSignalStateChangesForGatewayRequest initialRequest;
+		Network::GatewayGetAppSignalStateChangesRequest initialRequest;
 
 		initialRequest.mutable_signalshashes()->Reserve(TO_INT(m_states.size()));
 
 		for(const auto& st : m_states)
 		{
-			if (st.isWorkable() == true)
+			if (st.isWorkable() == true && st.requestEvents() == true)
 			{
 				initialRequest.add_signalshashes(st.hash());
 			}
 		}
 
-		sendRequest(ADS_GET_APP_SIGNAL_STATE_CHANGES, initialRequest);
+		sendRequest(ADS_GATEWAY_GET_APP_SIGNAL_STATE_CHANGES, initialRequest);
 	}
 
 	void AppDataServiceClient::onDisconnection()
@@ -82,8 +85,8 @@ namespace Gateway
 			onGetAppSignalStateReply(replyData, replyDataSize);
 			break;
 
-		case ADS_GET_APP_SIGNAL_STATE_CHANGES:
-			onGetAppSignalStateChangesReply(replyData, replyDataSize);
+		case ADS_GATEWAY_GET_APP_SIGNAL_STATE_CHANGES:
+			onGatewayGetAppSignalStateChangesReply(replyData, replyDataSize);
 			break;
 
 		default:
@@ -114,20 +117,33 @@ namespace Gateway
 			m_states[i].updateState(m_getStatesReply.appsignalstates(i));
 		}
 
-		if (m_getStatesReply.statechangesqueuesize() != 0)
+		m_signalStatesUpdated = true;
+
+		if (m_getStatesReply.gatewaystatechangesqueuesize() != 0)
 		{
-			sendRequest(ADS_GET_APP_SIGNAL_STATE_CHANGES, m_getStateChangesRequest);
+			sendRequest(ADS_GATEWAY_GET_APP_SIGNAL_STATE_CHANGES, m_gwGetStateChangesRequest);
 		}
 	}
 
-	void AppDataServiceClient::onGetAppSignalStateChangesReply(const char* replyData, quint32 replyDataSize)
+	void AppDataServiceClient::onGatewayGetAppSignalStateChangesReply(const char* replyData, quint32 replyDataSize)
 	{
-		bool result = m_getStateChangesReply.ParseFromArray(replyData, replyDataSize);
+		auto& reply = m_gwGetStateChangesReply;
+
+		bool result = reply.ParseFromArray(replyData, replyDataSize);
 
 		if (result == false)
 		{
 			Q_ASSERT(false);
 			return;
+		}
+
+		int statesCount = reply.appsignalstates_size();
+
+		std::map<IvsImpulseListInfoShared, std::vector<GatewayAppSignalState>> listStateChanges;
+
+		for(int i = 0; i < statesCount; i++)
+		{
+			v;lrmvb;km;dfbmd;fbmd;fbmd;flbmd;f
 		}
 	}
 }

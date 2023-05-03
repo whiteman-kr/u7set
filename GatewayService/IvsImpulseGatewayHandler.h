@@ -15,7 +15,11 @@ namespace Gateway
 		int size = -1;
 
 		quint16 iventsPacketNo = 0;
+
+		std::vector<GatewayAppSignalState> stateChanges;
 	};
+
+	using IvsImpulseListInfoShared = std::shared_ptr<IvsImpulseListInfo>;
 
 	class IvsImpulseHandler : public Handler
 	{
@@ -42,7 +46,13 @@ namespace Gateway
 		const AppSignals& m_appSignals;
 
 		AppSignalStates m_states;
-		std::vector<IvsImpulseListInfo> m_lists;
+		std::atomic_bool m_signalStatesUpdated = { false };
+
+		std::vector<IvsImpulseListInfoShared> m_lists;
+
+		// signal hash => lists where this signal live
+		//
+		std::map<Hash, std::vector<IvsImpulseListInfoShared>> m_hashToLists;
 
 		AppDataServiceClientThread* m_appDataServiceClientThread = nullptr;
 		IvsImpulseCommThread* m_ivsImpulseCommThread = nullptr;

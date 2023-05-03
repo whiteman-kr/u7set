@@ -47,7 +47,7 @@ private:
 
 	void onGetAppSignalStateRequest(const char* requestData, quint32 requestDataSize, bool constSize);
 	void onGetAppSignalStateChangesRequest(const char* requestData, quint32 requestDataSize);
-	void onGetAppSignalStateChangesForGatewayRequest(const char* requestData, quint32 requestDataSize);
+	void onGatewayGetAppSignalStateChangesRequest(const char* requestData, quint32 requestDataSize);
 
 	void onGetAppDataSourcesInfoRequest();
 	void onGetAppDataSourcesStatesRequest();
@@ -88,12 +88,15 @@ private:
 
 	Network::GetAppSignalStateRequest m_getAppSignalStateRequest;
 	Network::GetAppSignalStateReply m_getAppSignalStateReply;
+	int m_sentGetAppSignalStateReplyCount = 0;
 
 	Network::GetAppSignalStateChangesRequest m_getAppSignalStateChangesRequest;
 	Network::GetAppSignalStateChangesReply m_getAppSignalStateChangesReply;
+	int m_sentGetAppSignalStateChangesReplyCount = 0;
 
-	Network::GetAppSignalStateChangesForGatewayRequest m_getAppSignalStateChangesForGatewayRequest;
-	Network::GetAppSignalStateChangesForGatewayReply m_getAppSignalStateChangesForGatewayReply;
+	Network::GatewayGetAppSignalStateChangesRequest m_gwGetAppSignalStateChangesRequest;
+	Network::GatewayGetAppSignalStateChangesReply m_gwGetAppSignalStateChangesReply;
+	int m_sentGatewayGetAppSignalStateChangesReplyCount = 0;
 
 	//
 

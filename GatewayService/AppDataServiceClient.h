@@ -13,7 +13,8 @@ namespace Gateway
 							 const HostAddressPort& serverAddressPort1,
 							 const HostAddressPort& serverAddressPort2,
 							 const QString& clientDescription,
-							 AppSignalStates& states);
+							 AppSignalStates& states,
+							 std::atomic_bool& signalStatesUpdated);
 	private:
 		virtual void onClientThreadStarted() override;
 		virtual void onClientThreadFinished() override;
@@ -26,18 +27,19 @@ namespace Gateway
 		virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
 
 		void onGetAppSignalStateReply(const char* replyData, quint32 replyDataSize);
-		void onGetAppSignalStateChangesReply(const char* replyData, quint32 replyDataSize);
+		void onGatewayGetAppSignalStateChangesReply(const char* replyData, quint32 replyDataSize);
 
 	private:
 		QTimer m_timer;
 
 		AppSignalStates& m_states;
+		std::atomic_bool& m_signalStatesUpdated;
 
 		Network::GetAppSignalStateRequest m_getStatesRequest;
 		Network::GetAppSignalStateReply m_getStatesReply;
 
-		Network::GetAppSignalStateChangesRequest m_getStateChangesRequest;
-		Network::GetAppSignalStateChangesReply m_getStateChangesReply;
+		Network::GatewayGetAppSignalStateChangesRequest m_gwGetStateChangesRequest;
+		Network::GatewayGetAppSignalStateChangesReply m_gwGetStateChangesReply;
 	};
 
 	class AppDataServiceClientThread : public SimpleThread
@@ -47,13 +49,15 @@ namespace Gateway
 								   const HostAddressPort& serverAddressPort1,
 								   const HostAddressPort& serverAddressPort2,
 								   const QString& clientDescription,
-								   AppSignalStates& states)
+								   AppSignalStates& states,
+								   std::atomic_bool& signalStatesUpdated)
 		{
 			addWorker(new AppDataServiceClient(softwareInfo,
 											   serverAddressPort1,
 											   serverAddressPort2,
 											   clientDescription,
-											   states));
+											   states,
+											   signalStatesUpdated));
 		}
 	};
 }
