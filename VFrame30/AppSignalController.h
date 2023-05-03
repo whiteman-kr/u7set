@@ -140,8 +140,14 @@ namespace VFrame30
 		QJSValue signalState(QString signalId) const;		// Returns AppSignalState
 		QJSValue signalState(Hash signalHash) const;		// Returns AppSignalState
 
+		/// \brief Returns an array of AppSignalState structures of signals specified by <b>signalIds</b>. If signal is not found, then the <b>stateAvailable</b> is false.
+		QJSValueList signalStates(QStringList signalIds) const;	// Returns AppSignalState
+
 		/// \brief Returns <b>true</b> if signal specified by <b>signalId</b> is exist.
 		bool signalExists(QString signalId) const;
+
+		/// \brief The function takes a list of signal IDs and returns true or false depending on whether all signals exist or not.
+		bool signalsExist(QStringList signalIds);
 
 		/// \brief Returns <b>true</b> for discrete signals.
 		bool isDiscrete(QString signalId) const;

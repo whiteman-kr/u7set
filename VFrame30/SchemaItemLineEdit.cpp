@@ -144,7 +144,7 @@ namespace VFrame30
 		return true;
 	}
 
-	QWidget* SchemaItemLineEdit::createWidget(QWidget* parent, bool editMode, double zoom)
+	QWidget* SchemaItemLineEdit::createWidgetImpl(QWidget* parent, bool editMode, double zoom)
 	{
 		if (parent == nullptr)
 		{
@@ -180,10 +180,6 @@ namespace VFrame30
 			{
 				connect(control, &QLineEdit::textChanged, this, &SchemaItemLineEdit::textChanged);
 			}
-
-			// Run script after create
-			//
-			afterCreate(control);
 		}
 
 		updateWdgetPosAndSize(control, zoom);
@@ -235,11 +231,13 @@ namespace VFrame30
 		return;
 	}
 
-	void SchemaItemLineEdit::afterCreate(QLineEdit* control)
+	void SchemaItemLineEdit::afterCreateImpl(QWidget* control)
 	{
-		if (control == nullptr)
+		QLineEdit* lineEditWidget = dynamic_cast<QLineEdit*>(control);
+
+		if (lineEditWidget == nullptr)
 		{
-			assert(control);
+			assert(lineEditWidget);
 			return;
 		}
 
@@ -253,7 +251,7 @@ namespace VFrame30
 		//
 		if (m_jsAfterCreate.isUndefined() == true)
 		{
-			m_jsAfterCreate = evaluateScript(control, m_scriptAfterCreate);
+			m_jsAfterCreate = evaluateScript(lineEditWidget, m_scriptAfterCreate);
 
 			if (m_jsAfterCreate.isError() == true ||
 				m_jsAfterCreate.isNull() == true)
@@ -264,7 +262,7 @@ namespace VFrame30
 
 		// Run script
 		//
-		runEventScript(m_jsAfterCreate, control, false);
+		runEventScript(m_jsAfterCreate, lineEditWidget, false);
 
 		return;
 	}

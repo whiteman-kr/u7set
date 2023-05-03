@@ -404,6 +404,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0382.sql", "Upgrade to version 382, Added OCM data limits to LM description"},
 	{":/DatabaseUpgrade/Upgrade0383.sql", "Upgrade to version 383, Change OCM RxAppDataSize (->2397) and RxAppDataOffset (->0) values"},
 	{":/DatabaseUpgrade/Upgrade0384.sql", "Upgrade to version 384, Set ConfigService.CheckHostname to false by default"},
+	{":/DatabaseUpgrade/Upgrade0385.sql", "Upgrade to version 385, Set default value Monitor.StartSchemaID to empty"},
 };
 
 int DbWorker::counter = 0;

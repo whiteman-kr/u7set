@@ -557,6 +557,11 @@ namespace VFrame30
 			textRow ++;
 		}
 
+		return;
+	}
+
+	void SchemaItemReceiver::drawHighlight(CDrawParam* drawParam) const
+	{
 		// Draw highlights for m_appSignalIds
 		//
 		for (const QString& appSignalId : m_appSignalIds)

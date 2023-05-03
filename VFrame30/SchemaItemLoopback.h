@@ -71,6 +71,8 @@ namespace VFrame30
 	public:
 		virtual void draw(CDrawParam* drawParam) const override;
 
+		virtual void drawHighlight(CDrawParam* drawParam) const override;
+
 		// Public Methods
 		//
 	public:
@@ -113,6 +115,8 @@ namespace VFrame30
 		//
 	public:
 		virtual void draw(CDrawParam* drawParam) const override;
+
+		virtual void drawHighlight(CDrawParam* drawParam) const override;
 
 		// Public Methods
 		//

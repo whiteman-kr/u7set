@@ -136,6 +136,8 @@ namespace VFrame30
 	public:
 		virtual void draw(CDrawParam* drawParam) const override;
 
+		virtual void drawHighlight(CDrawParam* drawParam) const override;
+
 		static QString getCoulumnText(const Context* context,
 									  DrawMode drawMode,
 									  const SchemaItem* schemaItem,

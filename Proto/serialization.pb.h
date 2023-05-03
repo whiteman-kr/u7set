@@ -23112,8 +23112,9 @@ class SchemaDetails PROTOBUF_FINAL :
     kLabelsFieldNumber = 21,
     kConnectionsFieldNumber = 22,
     kGuidsFieldNumber = 23,
-    kTagsFieldNumber = 24,
+    kSchematagsFieldNumber = 24,
     kLoopbacksFieldNumber = 25,
+    kItemtagsFieldNumber = 26,
     kTrendIndicatorsFieldNumber = 30,
     kSchemaIdFieldNumber = 4,
     kCaptionFieldNumber = 5,
@@ -23213,28 +23214,28 @@ class SchemaDetails PROTOBUF_FINAL :
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::Uuid >&
       guids() const;
 
-  // repeated string tags = 24;
-  int tags_size() const;
+  // repeated string schematags = 24;
+  int schematags_size() const;
   private:
-  int _internal_tags_size() const;
+  int _internal_schematags_size() const;
   public:
-  void clear_tags();
-  const std::string& tags(int index) const;
-  std::string* mutable_tags(int index);
-  void set_tags(int index, const std::string& value);
-  void set_tags(int index, std::string&& value);
-  void set_tags(int index, const char* value);
-  void set_tags(int index, const char* value, size_t size);
-  std::string* add_tags();
-  void add_tags(const std::string& value);
-  void add_tags(std::string&& value);
-  void add_tags(const char* value);
-  void add_tags(const char* value, size_t size);
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& tags() const;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_tags();
+  void clear_schematags();
+  const std::string& schematags(int index) const;
+  std::string* mutable_schematags(int index);
+  void set_schematags(int index, const std::string& value);
+  void set_schematags(int index, std::string&& value);
+  void set_schematags(int index, const char* value);
+  void set_schematags(int index, const char* value, size_t size);
+  std::string* add_schematags();
+  void add_schematags(const std::string& value);
+  void add_schematags(std::string&& value);
+  void add_schematags(const char* value);
+  void add_schematags(const char* value, size_t size);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& schematags() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_schematags();
   private:
-  const std::string& _internal_tags(int index) const;
-  std::string* _internal_add_tags();
+  const std::string& _internal_schematags(int index) const;
+  std::string* _internal_add_schematags();
   public:
 
   // repeated string loopbacks = 25;
@@ -23259,6 +23260,30 @@ class SchemaDetails PROTOBUF_FINAL :
   private:
   const std::string& _internal_loopbacks(int index) const;
   std::string* _internal_add_loopbacks();
+  public:
+
+  // repeated string itemtags = 26;
+  int itemtags_size() const;
+  private:
+  int _internal_itemtags_size() const;
+  public:
+  void clear_itemtags();
+  const std::string& itemtags(int index) const;
+  std::string* mutable_itemtags(int index);
+  void set_itemtags(int index, const std::string& value);
+  void set_itemtags(int index, std::string&& value);
+  void set_itemtags(int index, const char* value);
+  void set_itemtags(int index, const char* value, size_t size);
+  std::string* add_itemtags();
+  void add_itemtags(const std::string& value);
+  void add_itemtags(std::string&& value);
+  void add_itemtags(const char* value);
+  void add_itemtags(const char* value, size_t size);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& itemtags() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_itemtags();
+  private:
+  const std::string& _internal_itemtags(int index) const;
+  std::string* _internal_add_itemtags();
   public:
 
   // repeated .Proto.SchemaDetails.TrendIndicatorSchemaItems trendIndicators = 30;
@@ -23418,8 +23443,9 @@ class SchemaDetails PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> labels_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> connections_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::Uuid > guids_;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> tags_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> schematags_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> loopbacks_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> itemtags_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::SchemaDetails_TrendIndicatorSchemaItems > trendindicators_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr schemaid_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr caption_;
@@ -54933,78 +54959,78 @@ SchemaDetails::guids() const {
   return guids_;
 }
 
-// repeated string tags = 24;
-inline int SchemaDetails::_internal_tags_size() const {
-  return tags_.size();
+// repeated string schematags = 24;
+inline int SchemaDetails::_internal_schematags_size() const {
+  return schematags_.size();
 }
-inline int SchemaDetails::tags_size() const {
-  return _internal_tags_size();
+inline int SchemaDetails::schematags_size() const {
+  return _internal_schematags_size();
 }
-inline void SchemaDetails::clear_tags() {
-  tags_.Clear();
+inline void SchemaDetails::clear_schematags() {
+  schematags_.Clear();
 }
-inline std::string* SchemaDetails::add_tags() {
-  // @@protoc_insertion_point(field_add_mutable:Proto.SchemaDetails.tags)
-  return _internal_add_tags();
+inline std::string* SchemaDetails::add_schematags() {
+  // @@protoc_insertion_point(field_add_mutable:Proto.SchemaDetails.schematags)
+  return _internal_add_schematags();
 }
-inline const std::string& SchemaDetails::_internal_tags(int index) const {
-  return tags_.Get(index);
+inline const std::string& SchemaDetails::_internal_schematags(int index) const {
+  return schematags_.Get(index);
 }
-inline const std::string& SchemaDetails::tags(int index) const {
-  // @@protoc_insertion_point(field_get:Proto.SchemaDetails.tags)
-  return _internal_tags(index);
+inline const std::string& SchemaDetails::schematags(int index) const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaDetails.schematags)
+  return _internal_schematags(index);
 }
-inline std::string* SchemaDetails::mutable_tags(int index) {
-  // @@protoc_insertion_point(field_mutable:Proto.SchemaDetails.tags)
-  return tags_.Mutable(index);
+inline std::string* SchemaDetails::mutable_schematags(int index) {
+  // @@protoc_insertion_point(field_mutable:Proto.SchemaDetails.schematags)
+  return schematags_.Mutable(index);
 }
-inline void SchemaDetails::set_tags(int index, const std::string& value) {
-  // @@protoc_insertion_point(field_set:Proto.SchemaDetails.tags)
-  tags_.Mutable(index)->assign(value);
+inline void SchemaDetails::set_schematags(int index, const std::string& value) {
+  // @@protoc_insertion_point(field_set:Proto.SchemaDetails.schematags)
+  schematags_.Mutable(index)->assign(value);
 }
-inline void SchemaDetails::set_tags(int index, std::string&& value) {
-  // @@protoc_insertion_point(field_set:Proto.SchemaDetails.tags)
-  tags_.Mutable(index)->assign(std::move(value));
+inline void SchemaDetails::set_schematags(int index, std::string&& value) {
+  // @@protoc_insertion_point(field_set:Proto.SchemaDetails.schematags)
+  schematags_.Mutable(index)->assign(std::move(value));
 }
-inline void SchemaDetails::set_tags(int index, const char* value) {
+inline void SchemaDetails::set_schematags(int index, const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  tags_.Mutable(index)->assign(value);
-  // @@protoc_insertion_point(field_set_char:Proto.SchemaDetails.tags)
+  schematags_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:Proto.SchemaDetails.schematags)
 }
-inline void SchemaDetails::set_tags(int index, const char* value, size_t size) {
-  tags_.Mutable(index)->assign(
+inline void SchemaDetails::set_schematags(int index, const char* value, size_t size) {
+  schematags_.Mutable(index)->assign(
     reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:Proto.SchemaDetails.tags)
+  // @@protoc_insertion_point(field_set_pointer:Proto.SchemaDetails.schematags)
 }
-inline std::string* SchemaDetails::_internal_add_tags() {
-  return tags_.Add();
+inline std::string* SchemaDetails::_internal_add_schematags() {
+  return schematags_.Add();
 }
-inline void SchemaDetails::add_tags(const std::string& value) {
-  tags_.Add()->assign(value);
-  // @@protoc_insertion_point(field_add:Proto.SchemaDetails.tags)
+inline void SchemaDetails::add_schematags(const std::string& value) {
+  schematags_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add:Proto.SchemaDetails.schematags)
 }
-inline void SchemaDetails::add_tags(std::string&& value) {
-  tags_.Add(std::move(value));
-  // @@protoc_insertion_point(field_add:Proto.SchemaDetails.tags)
+inline void SchemaDetails::add_schematags(std::string&& value) {
+  schematags_.Add(std::move(value));
+  // @@protoc_insertion_point(field_add:Proto.SchemaDetails.schematags)
 }
-inline void SchemaDetails::add_tags(const char* value) {
+inline void SchemaDetails::add_schematags(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  tags_.Add()->assign(value);
-  // @@protoc_insertion_point(field_add_char:Proto.SchemaDetails.tags)
+  schematags_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:Proto.SchemaDetails.schematags)
 }
-inline void SchemaDetails::add_tags(const char* value, size_t size) {
-  tags_.Add()->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_add_pointer:Proto.SchemaDetails.tags)
+inline void SchemaDetails::add_schematags(const char* value, size_t size) {
+  schematags_.Add()->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:Proto.SchemaDetails.schematags)
 }
 inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>&
-SchemaDetails::tags() const {
-  // @@protoc_insertion_point(field_list:Proto.SchemaDetails.tags)
-  return tags_;
+SchemaDetails::schematags() const {
+  // @@protoc_insertion_point(field_list:Proto.SchemaDetails.schematags)
+  return schematags_;
 }
 inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
-SchemaDetails::mutable_tags() {
-  // @@protoc_insertion_point(field_mutable_list:Proto.SchemaDetails.tags)
-  return &tags_;
+SchemaDetails::mutable_schematags() {
+  // @@protoc_insertion_point(field_mutable_list:Proto.SchemaDetails.schematags)
+  return &schematags_;
 }
 
 // repeated string loopbacks = 25;
@@ -55079,6 +55105,80 @@ inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
 SchemaDetails::mutable_loopbacks() {
   // @@protoc_insertion_point(field_mutable_list:Proto.SchemaDetails.loopbacks)
   return &loopbacks_;
+}
+
+// repeated string itemtags = 26;
+inline int SchemaDetails::_internal_itemtags_size() const {
+  return itemtags_.size();
+}
+inline int SchemaDetails::itemtags_size() const {
+  return _internal_itemtags_size();
+}
+inline void SchemaDetails::clear_itemtags() {
+  itemtags_.Clear();
+}
+inline std::string* SchemaDetails::add_itemtags() {
+  // @@protoc_insertion_point(field_add_mutable:Proto.SchemaDetails.itemtags)
+  return _internal_add_itemtags();
+}
+inline const std::string& SchemaDetails::_internal_itemtags(int index) const {
+  return itemtags_.Get(index);
+}
+inline const std::string& SchemaDetails::itemtags(int index) const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaDetails.itemtags)
+  return _internal_itemtags(index);
+}
+inline std::string* SchemaDetails::mutable_itemtags(int index) {
+  // @@protoc_insertion_point(field_mutable:Proto.SchemaDetails.itemtags)
+  return itemtags_.Mutable(index);
+}
+inline void SchemaDetails::set_itemtags(int index, const std::string& value) {
+  // @@protoc_insertion_point(field_set:Proto.SchemaDetails.itemtags)
+  itemtags_.Mutable(index)->assign(value);
+}
+inline void SchemaDetails::set_itemtags(int index, std::string&& value) {
+  // @@protoc_insertion_point(field_set:Proto.SchemaDetails.itemtags)
+  itemtags_.Mutable(index)->assign(std::move(value));
+}
+inline void SchemaDetails::set_itemtags(int index, const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  itemtags_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:Proto.SchemaDetails.itemtags)
+}
+inline void SchemaDetails::set_itemtags(int index, const char* value, size_t size) {
+  itemtags_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:Proto.SchemaDetails.itemtags)
+}
+inline std::string* SchemaDetails::_internal_add_itemtags() {
+  return itemtags_.Add();
+}
+inline void SchemaDetails::add_itemtags(const std::string& value) {
+  itemtags_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add:Proto.SchemaDetails.itemtags)
+}
+inline void SchemaDetails::add_itemtags(std::string&& value) {
+  itemtags_.Add(std::move(value));
+  // @@protoc_insertion_point(field_add:Proto.SchemaDetails.itemtags)
+}
+inline void SchemaDetails::add_itemtags(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  itemtags_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:Proto.SchemaDetails.itemtags)
+}
+inline void SchemaDetails::add_itemtags(const char* value, size_t size) {
+  itemtags_.Add()->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:Proto.SchemaDetails.itemtags)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>&
+SchemaDetails::itemtags() const {
+  // @@protoc_insertion_point(field_list:Proto.SchemaDetails.itemtags)
+  return itemtags_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
+SchemaDetails::mutable_itemtags() {
+  // @@protoc_insertion_point(field_mutable_list:Proto.SchemaDetails.itemtags)
+  return &itemtags_;
 }
 
 // repeated .Proto.SchemaDetails.TrendIndicatorSchemaItems trendIndicators = 30;

@@ -95,12 +95,24 @@ namespace VFrame30
 		return gridSize;
 	}
 
-	QWidget* SchemaItemControl::createWidget(QWidget* /*parent*/, bool /*editMode*/, double /*zoom*/)
+	QWidget* SchemaItemControl::createWidget(QWidget* parent, bool editMode, double zoom)
 	{
-		// Implement in derived class
+		QWidget* widget = createWidgetImpl(parent, editMode, zoom);
+		associateWidget(widget);
+
+		// Run script after create
 		//
-		assert(false);
-		return nullptr;
+		if (editMode == false)
+		{
+			afterCreate(widget);
+		}
+
+		return widget;
+	}
+
+	void SchemaItemControl::afterCreate(QWidget* control)
+	{
+		return afterCreateImpl(control);
 	}
 
 	void SchemaItemControl::updateWidgetProperties(QWidget* widget) const
@@ -129,6 +141,48 @@ namespace VFrame30
 			widget->setToolTip(toolTip());
 
 			widget->setUpdatesEnabled(true);
+		}
+
+		return;
+	}
+
+	QWidget* SchemaItemControl::createWidgetImpl(QWidget* /*parent*/, bool /*editMode*/, double /*zoom*/)
+	{
+		// Must be implemented in the derived class.
+		//
+		Q_ASSERT(false);
+		return nullptr;
+	}
+
+	void SchemaItemControl::afterCreateImpl(QWidget* /*control*/)
+	{
+		// Must be implemented in the derived class.
+		//
+		Q_ASSERT(false);
+		return;
+	}
+
+	void SchemaItemControl::associateWidget(QWidget* widget)
+	{
+		// Disconnect currently associated widget
+		//
+		if (m_widget != nullptr)
+		{
+			disconnect(m_widget, nullptr, this, nullptr);
+		}
+
+		// Connect the new one if possible
+		//
+		m_widget = widget;
+
+		if (m_widget != nullptr)
+		{
+			connect(m_widget, &QObject::destroyed, this, [this](QObject* object) {
+				if (m_widget == object)
+				{
+					associateWidget(nullptr);
+				}
+			});
 		}
 
 		return;

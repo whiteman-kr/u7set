@@ -297,7 +297,8 @@ public:
 		Metrology = 9007,
 		ServiceControlManager = 9008,
 		TestClient = 9009,
-		GatewayService = 9010
+		TestSuite = 9010,
+		GatewayService = 9011
 	};
 	Q_ENUM(SoftwareType)
 

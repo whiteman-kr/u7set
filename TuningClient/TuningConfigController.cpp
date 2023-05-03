@@ -48,7 +48,7 @@ std::set<QString> TuningConfigController::schemaTagsByIndex(int schemaIndex) con
 		Q_ASSERT(details);
 		return {};
 	}
-	return details->tags();
+	return details->schemaTags();
 }
 
 
@@ -62,7 +62,7 @@ bool TuningConfigController::schemaHasTags(int schemaIndex, const QStringList& t
 		return false;
 	}
 
-	const std::set<QString>& detailsTags = details->tags();
+	const std::set<QString>& detailsTags = details->schemaTags();
 	for (const QString& tag : tags)
 	{
 		if (detailsTags.find(tag.trimmed().toLower()) != detailsTags.end())

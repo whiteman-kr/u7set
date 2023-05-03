@@ -544,6 +544,32 @@ public:
 	bool connectionChanged(const TuningClientSettings& src) const;
 };
 
+class TestSuiteSettings : virtual public SoftwareSettings
+{
+public:
+	QString cfgServiceID1;
+	HostAddressPort cfgServiceIP1;
+
+	QString cfgServiceID2;
+	HostAddressPort cfgServiceIP2;
+
+	std::vector<SoftwareEndpoint::AppDataService> appDataServices;
+	bool tuningEnabled = false;
+
+	std::vector<SoftwareEndpoint::TuningService> tuningServices;
+
+private:
+	// this methods should be call by SoftwareSettingsSet only
+	//
+	bool writeToXml(XmlWriteHelper& xml) const override;
+	bool readFromXml(XmlReadHelper& xml) override;
+
+	friend class SoftwareSettingsSet;
+
+public:
+	void clear();
+};
+
 class GatewayServiceSettings : virtual public SoftwareSettings
 {
 public:

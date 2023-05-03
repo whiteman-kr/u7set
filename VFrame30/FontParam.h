@@ -59,6 +59,8 @@ namespace VFrame30
 		bool SaveData(Proto::FontParam* message) const;
 		bool LoadData(const Proto::FontParam& message);
 
+		QFont qfont(SchemaUnit unit, double dpiY) const;
+
 		// Properties
 		//
 	public:

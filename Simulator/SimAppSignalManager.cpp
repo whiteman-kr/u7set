@@ -836,12 +836,21 @@ namespace Sim
 	bool AppSignalManager::signalExists(Hash hash) const
 	{
 		QReadLocker rl(&m_signalParamLock);
-		return m_signalParams.find(hash) != m_signalParams.end();
+		return m_signalParams.contains(hash);
 	}
 
 	bool AppSignalManager::signalExists(const QString& appSignalId) const
 	{
 		return signalExists(::calcHash(appSignalId));
+	}
+
+	bool AppSignalManager::signalsExist(const QStringList& signalIds) const
+	{
+		QReadLocker rl(&m_signalParamLock);
+
+		return std::all_of(signalIds.begin(), signalIds.end(), [this](const QString& appSignalId) {
+			return m_signalParams.contains(::calcHash(appSignalId));
+		});
 	}
 
 	AppSignalParam AppSignalManager::signalParam(Hash signalHash, bool* found) const

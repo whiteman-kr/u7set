@@ -8,6 +8,7 @@
 #include "MonitorCfgGenerator.h"
 #include "TuningServiceCfgGenerator.h"
 #include "TuningClientCfgGenerator.h"
+#include "TestSuiteCfgGenerator.h"
 #include "ConfigurationServiceCfgGenerator.h"
 #include "ArchivingServiceCfgGenerator.h"
 #include "MetrologyCfgGenerator.h"
@@ -1063,6 +1064,38 @@ namespace Builder
 					return false;
 				}
 
+				QString folderPath = Db::File::systemDirToName(DbDir::RootDir) + "/";
+
+				{
+					QStringList pathList;
+					std::shared_ptr<DbFileInfo> f = fileTree.file(fileId);
+
+					while (f != nullptr)
+					{
+						f = fileTree.file(f->parentId());
+
+						if (f != nullptr)
+						{
+							pathList.push_front(f->fileName());
+						}
+					}
+
+					folderPath += pathList.join(QChar('/'));
+				}
+
+				if (folderPath.startsWith(Db::File::systemDirToName(DbDir::SimTestsDir)) == false)
+				{
+					continue;
+				}
+
+				QString runScriptWindowsTemplate = "SimulatorConsole.exe -build=%1 -script=%2 -profile=Default\n"
+										   "@if %ERRORLEVEL% NEQ 0 goto ERROR";
+				QString runScriptLinuxTemplate = "./SimulatorConsole -build=%1 -script=%2 -profile=Default\n"
+										 "if [ $? -ne 0 ]; then\n"
+										 "echo \"Script execution failed!\"\n"
+										 "exit 1\n"
+										 "fi\n";
+
 				// Create run script
 				//
 				QString scriptFileName = file->fileName();
@@ -1084,8 +1117,7 @@ namespace Builder
 
 				// Windows script
 				//
-				QString runScriptWindows = tr("SimulatorConsole.exe -build=%1 -script=%2 -profile=Default\n"
-                                              "@if %ERRORLEVEL% NEQ 0 goto ERROR")
+				QString runScriptWindows = tr(runScriptWindowsTemplate.toLocal8Bit())
 						.arg(QDir::toNativeSeparators(buildDir))
 						.arg(QDir::toNativeSeparators(scriptDir + "/" + file->fileName()));
 
@@ -1093,11 +1125,7 @@ namespace Builder
 
 				// Linux script
 				//
-                QString runScriptLinux = tr("./SimulatorConsole -build=%1 -script=%2 -profile=Default\n"
-                                            "if [ $? -ne 0 ]; then\n"
-                                            "echo \"Script execution failed!\"\n"
-                                            "exit 1\n"
-                                            "fi\n")
+				QString runScriptLinux = tr(runScriptLinuxTemplate.toLocal8Bit())
 						.arg(buildDir)
 						.arg(scriptDir + "/" + file->fileName());
 
@@ -1109,7 +1137,6 @@ namespace Builder
 				return false;
 			}
 		}
-
 
 		// Add script files
 		//
@@ -1937,6 +1964,10 @@ namespace Builder
 
 			case E::SoftwareType::TestClient:
 				swCfgGen = std::make_shared<TestClientCfgGenerator>(context, software);
+				break;
+
+			case E::SoftwareType::TestSuite:
+				swCfgGen = std::make_shared<TestSuiteCfgGenerator>(context, software);
 				break;
 
 			case E::SoftwareType::GatewayService:

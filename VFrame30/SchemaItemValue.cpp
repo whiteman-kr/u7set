@@ -4,6 +4,7 @@
 #include "DrawParam.h"
 #include "TuningController.h"
 #include "AppSignalController.h"
+#include "SchemaView.h"
 #include "../AppSignalLib/AppSignalParam.h"
 #include "../AppSignalLib/TuningSignalState.h"
 
@@ -24,13 +25,14 @@ namespace VFrame30
 		switch (unit)
 		{
 		case SchemaUnit::Display:
-			m_font.setSize(12.0, unit);
+			m_font.setSize(14.0, unit);
 			break;
 		case SchemaUnit::Inch:
-			m_font.setSize(1.0 / 8.0, unit);		// 1/8"
+			m_font.setSize(mm2in(4), unit);
+			//m_font.setSize(1.0 / 8.0, unit);		// 1/8"
 			break;
 		case SchemaUnit::Millimeter:
-			m_font.setSize(mm2in(3), unit);
+			m_font.setSize(mm2in(4), unit);
 			break;
 		default:
 			assert(false);
@@ -213,6 +215,11 @@ namespace VFrame30
 			painter->drawRect(r);
 		}
 
+		return;
+	}
+
+	void SchemaItemValue::drawHighlight(CDrawParam* drawParam) const
+	{
 		// Draw highlights for m_appSignalIds
 		//
 		for (const QString& appSignalId : m_signalIds)
@@ -298,9 +305,16 @@ namespace VFrame30
 			}
 		}
 
-		if (text.isEmpty() == false)
+		if (text.isEmpty() == true)
 		{
-			painter->setPen(textColor());
+			return;
+		}
+
+		painter->setPen(textColor());
+
+#ifdef VFRAME30_CACHE_DRAW_TEXT
+		if (drawParam->pdfMode() == true)
+		{
 			DrawHelper::drawText(painter,
 								 m_font,
 								 itemUnit(),
@@ -308,6 +322,24 @@ namespace VFrame30
 								 rect,
 								 static_cast<int>(horzAlign()) | static_cast<int>(vertAlign()));
 		}
+		else
+		{
+			DrawHelper::drawTextCahed(painter,
+									  m_font,
+									  itemUnit(),
+									  text,
+									  rect,
+									  static_cast<int>(horzAlign()) | static_cast<int>(vertAlign()),
+									  drawParam->schemaView()->zoom());
+		}
+#else
+		DrawHelper::drawText(painter,
+							 m_font,
+							 itemUnit(),
+							 text,
+							 rect,
+							 static_cast<int>(horzAlign()) | static_cast<int>(vertAlign()));
+#endif
 
 		return;
 	}

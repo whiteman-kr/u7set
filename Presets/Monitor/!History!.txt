@@ -1,3 +1,4 @@
 Monitor
-	22.02.2023	Version: 2	Monitor_v2.u7devp		RPCT-3444: Added single property AppDataServiceIDs instead of two AppDataServiceID1(2)
+	22.02.2023	Version: 2	Monitor_v2.u7devp		RPCT-3444: Added single property AppDataServiceIDs instead of two AppDataServiceID1(2).
+	26.04.2023	Version: 3	Monitor_v3.u7devp		RPCT-3461: Set default value of property StartSchemaID to empty.
 

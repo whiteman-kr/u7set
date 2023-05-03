@@ -8,7 +8,8 @@ public:
 	SimTuningConnection() = default;
 
 public:
-	virtual bool writeTuningSignal(QString appSignalId, TuningValue value) override;
+	virtual bool writeTuningSignal(const QString& appSignalId, const TuningValue& value) override;
+	virtual bool writeTuningSignal(const QString& appSignalId, QVariant value) override;
 	virtual void applyTuningSignals() override;
 };
 

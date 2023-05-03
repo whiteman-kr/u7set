@@ -268,6 +268,41 @@ namespace VFrame30
 		return engine->toScriptValue(s);
 	}
 
+	QJSValueList ScriptAppSignalController::signalStates(QStringList signalIds) const
+	{
+		QJSValueList result;
+
+		if (m_appSignalManager == nullptr)
+		{
+			assert(m_appSignalManager);
+			return result;
+		}
+
+		// --
+		//
+		std::vector<QString> appSignalIds{signalIds.begin(), signalIds.end()};
+		std::vector<AppSignalState> states;
+
+		m_appSignalManager->signalState(appSignalIds, &states, nullptr);
+
+		// --
+		//
+		QJSEngine* engine = qjsEngine(this);
+		if (engine == nullptr)
+		{
+			Q_ASSERT(engine);
+			return result;
+		}
+
+		result.reserve(signalIds.size());
+		for (const auto& state : states)
+		{
+			result.push_back(engine->toScriptValue(state));
+		}
+
+		return result;
+	}
+
 	bool ScriptAppSignalController::signalExists(QString signalId) const
 	{
 		if (m_appSignalManager == nullptr)
@@ -277,6 +312,17 @@ namespace VFrame30
 		}
 
 		return m_appSignalManager->signalExists(::calcHash(signalId));
+	}
+
+	bool ScriptAppSignalController::signalsExist(QStringList signalIds)
+	{
+		if (m_appSignalManager == nullptr)
+		{
+			assert(m_appSignalManager);
+			return {};
+		}
+
+		return m_appSignalManager->signalsExist(signalIds);
 	}
 
 	bool ScriptAppSignalController::isDiscrete(QString signalId) const

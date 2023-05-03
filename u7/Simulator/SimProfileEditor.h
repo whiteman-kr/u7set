@@ -2,7 +2,7 @@
 
 #include "../../Simulator/SimProfiles.h"
 #include "../DbLib/DbController.h"
-#include "CodeEditor.h"
+#include "../lib/CodeEditor.h"
 
 class SimProfileEditor : public QDialog
 {

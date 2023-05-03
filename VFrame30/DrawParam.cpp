@@ -1,6 +1,58 @@
 #include "DrawParam.h"
 #include "ClientSchemaView.h"
 
+namespace
+{
+	struct DrawTextCacheItem
+	{
+		DrawTextCacheItem(const QFont& font, SchemaUnit unit, const QString& text, QSize size, int flags, QRgb textColor, double dpiX, double dpiY, double zoom) :
+			font{font},
+			unit{unit},
+			text{text},
+			size{size},
+			flags{flags},
+			textColor{textColor},
+			dpiX{dpiX},
+			dpiY{dpiY},
+			zoom{zoom}
+		{
+		}
+
+		const QFont font{};
+		const SchemaUnit unit{};
+		const QString text;
+		const QSize size;
+		int flags{};
+		QRgb textColor{};
+		double dpiX{};
+		double dpiY{};
+		double zoom{};
+
+		QImage image{};
+
+		Hash hash()
+		{
+			return getHash(font, unit, text, size, flags, textColor, dpiX, dpiY, zoom);
+		}
+
+		static Hash getHash(const QFont& font, SchemaUnit unit, const QString& text, QSize size,
+							int flags, QRgb textColor, double dpiX, double dpiY, double zoom)
+		{
+			Hash result = ::calcHash(font.key(), 0);
+			result = ::calcHash(&unit, sizeof(unit), result);
+			result = ::calcHash(text, result);
+			result = ::calcHash(size, result);
+			result = ::calcHash(&flags, sizeof(flags), result);
+			result = ::calcHash(&textColor, sizeof(textColor), result);
+			result = ::calcHash(&dpiX, sizeof(dpiX), result);
+			result = ::calcHash(&dpiY, sizeof(dpiY), result);
+			result = ::calcHash(&zoom, sizeof(zoom), result);
+
+			return result;
+		}
+	};
+}
+
 
 namespace VFrame30
 {
@@ -30,7 +82,7 @@ namespace VFrame30
 
 		return;
 	}
-	
+
 	QPainter* CDrawParam::painter()
 	{
 		return m_painter;
@@ -366,17 +418,13 @@ namespace VFrame30
 			return;
 		}
 
-		QFont f(font.name());
+		const double dpiX = CDrawParam::realDpiX(painter);
+		const double dpiY = CDrawParam::realDpiY(painter);
 
-		f.setBold(font.bold());
-		f.setItalic(font.italic());
-		//f.setStyleStrategy(QFont::StyleStrategy::NoAntialias);
-		//f.setStyleStrategy(QFont::PreferDevice);
+		QFont f = font.qfont(unit, dpiY);
 
 		if (unit == SchemaUnit::Display)
 		{
-			f.setPixelSize(static_cast<int>(font.drawSize()));
-
 			painter->setFont(f);
 			painter->drawText(rect, flags, str, boundingRect);
 		}
@@ -384,16 +432,10 @@ namespace VFrame30
 		{
 			Q_ASSERT(unit == SchemaUnit::Inch);
 
-			QRectF rc;
-			const double dpiX = CDrawParam::realDpiX(painter);
-			const double dpiY = CDrawParam::realDpiY(painter);
-
 			painter->save();
 			painter->scale(1.0 / dpiX, 1.0 / dpiY);
 
-			int pixelSize = static_cast<int>(font.drawSize() * dpiY);
-			f.setPixelSize(pixelSize > 0 ? pixelSize : 1);
-
+			QRectF rc;
 			rc.setLeft(rect.left() * dpiX);
 			rc.setTop(rect.top() * dpiY);
 			rc.setRight(rect.right() * dpiX);
@@ -407,6 +449,118 @@ namespace VFrame30
 
 		return;
 	}
+
+	void DrawHelper::drawTextCahed(QPainter* painter,
+								   const FontParam& font,
+								   SchemaUnit unit,
+								   const QString& str,
+								   const QRectF& rect,
+								   int flags,
+								   double zoom)
+	{
+		if (painter == nullptr || str.isEmpty())
+		{
+			Q_ASSERT(painter);
+			return;
+		}
+
+		QRgb textColor = painter->pen().color().rgb();		// Text color is taken from the current pen.
+
+		const double dpiX = CDrawParam::realDpiX(painter);
+		const double dpiY = CDrawParam::realDpiY(painter);
+		QFont f = font.qfont(unit, dpiY);
+
+		// Draw in pixels, for now we do not cache text out for SchemaUnit::Display, as this unit mode is discouraged.
+		//
+		if (unit == SchemaUnit::Display)
+		{
+			painter->setFont(f);
+			painter->drawText(rect, flags, str);
+			return;
+		}
+
+		// Draw in inches.
+		//
+
+		// Get cached image, if there is no one, create it.
+		//
+		const double reduceZoom = (dpiY > 120) ? 300 : 600;					// Kind of HiDpi Screen?
+		const double sizeReduceFactor = (zoom > reduceZoom) ? 0.5 : 1.0;	// It makes images smaller depending on zoom.
+
+		const double imageWidth = rect.width() * dpiX * (zoom / 100.0) * sizeReduceFactor;
+		const double imageHeight = rect.height() * dpiY * (zoom / 100.0) * sizeReduceFactor;
+
+		QSize imageSize{static_cast<int>(imageWidth), static_cast<int>(imageHeight)};
+		QRect clipRectInt{0, 0, imageSize.width(), imageSize.height()};
+
+		Hash cacheItemHash = DrawTextCacheItem::getHash(f, unit, str, imageSize, flags, textColor, dpiX, dpiY, zoom);
+		bool newCacheItem = false;
+
+thread_local QCache<Hash, DrawTextCacheItem> cache{50'000'000};			// 50Mb of images.
+
+		DrawTextCacheItem* cacheItem = cache.object(cacheItemHash);
+		if (cacheItem == nullptr)
+		{
+			cacheItem = new DrawTextCacheItem{f, unit, str, imageSize, flags, textColor, dpiX, dpiY, zoom};
+			newCacheItem = true;
+		}
+
+		// Draw in inches
+		//
+		if (unit == SchemaUnit::Inch)
+		{
+			Q_ASSERT(unit == SchemaUnit::Inch);
+
+			if (cacheItem->image.size() != clipRectInt.size())		// if image size is different, then it was just created.
+			{
+				// Create image and draw text to it.
+				//
+				double deviceDpr = painter->device()->devicePixelRatioF();
+
+				cacheItem->image = QImage{clipRectInt.size(), QImage::Format_ARGB32_Premultiplied};
+				cacheItem->image.setDotsPerMeterX(static_cast<int>(painter->device()->physicalDpiX() / 25.4 * 1000.0));
+				cacheItem->image.setDotsPerMeterY(static_cast<int>(painter->device()->physicalDpiY() / 25.4 * 1000.0));
+				cacheItem->image.setDevicePixelRatio(deviceDpr);
+
+				cacheItem->image.fill(qRgba(0, 0, 0, 0));	// Transparent
+
+				QPainter cacheImagePainter{&cacheItem->image};
+
+				SchemaView::Ajust(&cacheImagePainter,
+								  painter->device()->physicalDpiX(),
+								  painter->device()->physicalDpiY(),
+								  deviceDpr,
+								  unit,
+								  0,
+								  0,
+								  zoom * sizeReduceFactor);
+
+				QRectF textRect = rect;
+				textRect.moveTo(0, 0);
+
+				cacheImagePainter.setPen(textColor);
+				cacheImagePainter.setFont(f);
+
+				DrawHelper::drawText(&cacheImagePainter, font, unit, str, textRect, flags);
+			}
+		}
+
+		// Draw cached image
+		//
+		Q_ASSERT(cacheItem != nullptr && cacheItem->image.isNull() == false);
+
+		painter->drawImage(rect, cacheItem->image, cacheItem->image.rect());
+
+		// Add to cache new item, cache only images not greater then specified size.
+		//
+		if (newCacheItem == true && cacheItem->image.sizeInBytes() < 2'000'000)
+		{
+			cache.insert(cacheItemHash, cacheItem, cacheItem->image.sizeInBytes());
+		}
+
+		return;
+	}
+
 
 	void DrawHelper::drawText(QPainter* painter, SchemaUnit unit, const QString& str, const QRectF& rect, int flags, QRectF* boundingRect/* = nullptr*/)
 	{

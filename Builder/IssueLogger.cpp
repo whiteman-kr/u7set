@@ -8715,7 +8715,31 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6210,
-				  tr("Client behavior %1 specified in %2.BehaviorID does not exist. ").arg(behaviorId).arg(softwareObjectStrId));
+				  tr("Client behavior %1 specified in %2.BehaviorID does not exist.").arg(behaviorId).arg(softwareObjectStrId));
+	}
+
+	/// IssueCode: EQP6211
+	///
+	/// IssueType: Error
+	///
+	/// Title: The specified schema %1 in property %2.StartSchemaID (profile %3) does not exist.
+	///
+	/// Parameters:
+	///		%1 Value of the property StartSchemaID
+	///		%2 Monitor EquipmentID
+	///		%3 Profile
+	///
+	/// Description:
+	///		The specified schema in Monitor, property StartSchemaID does not exist.
+	///
+	void IssueLogger::errEQP6211(QString monitorId, QString startSchemaId, QString profile)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6211,
+				  tr("The specified schema %1 in property %2.StartSchemaID (profile %3) does not exist.")
+					.arg(startSchemaId)
+					.arg(monitorId)
+					.arg(profile));
 	}
 
 	// --

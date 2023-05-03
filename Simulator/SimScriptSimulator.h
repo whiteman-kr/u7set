@@ -107,6 +107,7 @@ namespace Sim
         /// \brief Run the simulation for \a msec milliseconds, if \a msec is -1 then simulation will last till the programm interrupted.
 		/// <b>Note:</b> Simulation process can last longer than \a msec milliseconds, it depends on project size and simulation hardware.
 		bool startForMs(int msecs);
+		//bool waitForMs(int msecs);
 
 		/// \brief Reset all simulations to initial state.
 		/// <b>Note:</b> Function sets reset flag and actual reset will be performed on the next \c startForMs call.
@@ -123,6 +124,12 @@ namespace Sim
 		/// <b>Note:</b> At least one work cycle must be run [startForMs(5)] to apply override to signal.
 		/// <b>Note:</b> Not all signals can be overriden. For example, some signals can be optimized to constant value, as they don not have location in RAM they connot be overriden.
 		bool overrideSignalValue(QString appSignalId, double value);
+
+//		/// \brief Waits while all overrided signal value is written to LM. Returns true if signal value is overriden, false on timeout.
+//		bool waitForSignalOverrides(qint64 timeoutMs);
+
+//		/// \brief Waits while signal value is set to specified value. Returns true if value is correct, false on timeout.
+//		bool expectSignalValue(QString appSignalId, double value, qint64 timeoutMs);
 
 		/// \brief Remove all overriden signals.
 		/// <b>Note:</b> At least one work cycle must be run [startForMs(5)] to apply this function.

@@ -186,6 +186,8 @@ namespace VFrame30
 	public:
 		virtual void draw(CDrawParam* drawParam) const override;
 
+		virtual void drawHighlight(CDrawParam* drawParam) const override;
+
 	protected:
 		void initDrawingResources() const;
 		void drawText(CDrawParam* drawParam, const Context* context, const QRectF& rect) const;

@@ -3,6 +3,7 @@
 
 #include "../AppSignalLib/TuningSignalManager.h"
 #include "../ClientLib/TuningConnection.h"
+#include "../ClientLib/TuningUserManager.h"
 #include "../lib/Tuning/TuningModel.h"
 #include "../lib/Tuning/TuningFilter.h"
 #include "TuningConfigController.h"

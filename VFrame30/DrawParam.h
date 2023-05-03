@@ -7,6 +7,9 @@
 #include "FontParam.h"
 
 
+#define VFRAME30_CACHE_DRAW_TEXT	// Use cached draw text, DrawHelper::drawTextCahed(...)
+
+
 #define CONTROL_BAR_PX		10
 #define CONTROL_BAR_MM		(VFrame30::mm2in(2.4))
 #define CONTROL_BAR(_unit, _devicePixelRatio, _zoom)	((_unit == SchemaUnit::Display) ? CONTROL_BAR_PX * _devicePixelRatio * (100.0 / _zoom) : CONTROL_BAR_MM * (100.0 / _zoom))
@@ -137,6 +140,14 @@ namespace VFrame30
 							 const QRectF& rect,
 							 int flags,
 							 QRectF* boundingRect = nullptr);
+
+		static void drawTextCahed(QPainter* p,
+								  const FontParam& font,
+								  SchemaUnit unit,
+								  const QString& str,
+								  const QRectF& rect,
+								  int flags,
+								  double zoom);
 
 		// Draw using already stelectd font
 		//

@@ -29,7 +29,7 @@ namespace ClientLib
 					   TuningClientSettings::LmStatusFlagMode lmStatusFlagMode,
 					   ITuningSignalUpdater& signalUpdater,
 					   ILogFile* logFile,
-					   TuningLog::TuningLog* tuningLog);
+					   ITuningLog* tuningLog);
 			Connection(const Connection&) = delete;
 			Connection(Connection&& src) = delete;
 			~Connection();
@@ -50,7 +50,7 @@ namespace ClientLib
 		explicit TuningConnection(ITuningSignalManager& tuningSignalManager,
 								  ITuningSignalUpdater& tuningSignalUpdater,
 								  ILogFile* logFile,
-								  TuningLog::TuningLog* tuningLog);
+								  ITuningLog* tuningLog);
 
 	public:
 		/// Call this function when the new configuration arrived to recreate communication thread with the new configuration
@@ -98,7 +98,8 @@ namespace ClientLib
 		/// Tuning signals functions
 		///
 		bool writeTuningSignals(const std::vector<TuningWriteCommand>& writeCommands);
-		virtual bool writeTuningSignal(QString appSignalId, TuningValue tuningValue) override;
+		virtual bool writeTuningSignal(const QString& appSignalId, const TuningValue& tuningValue) override;
+		virtual bool writeTuningSignal(const QString& appSignalId, QVariant value) override;
 
 		/// Apply functions
 		///
@@ -115,7 +116,7 @@ namespace ClientLib
 		ITuningSignalUpdater& m_tuningSignalUpdater;
 
 		HasLogFile m_logFile;
-		TuningLog::TuningLog* m_tuningLog = nullptr;
+		ITuningLog* m_tuningLog = nullptr;
 	};
 }
 

@@ -13,17 +13,17 @@ SoftwareSettingsGetter::~SoftwareSettingsGetter()
 }
 
 bool SoftwareSettingsGetter::getSoftwareConnection(const Hardware::EquipmentSet* equipment,
-											const Hardware::Software* thisSoftware,
-											const QString& propConnectedSoftwareID,
-											const QString& propConnectedSoftwareIP,
-											const QString& propConnectedSoftwarePort,
-											QString* connectedSoftwareID,
-											HostAddressPort* connectedSoftwareIP,
-											bool emptyAllowed,
-											const QString& defaultIP,
-											int defaultPort,
-											E::SoftwareType requiredSoftwareType,
-											Builder::IssueLogger* log)
+												   const Hardware::Software* thisSoftware,
+												   const QString& propConnectedSoftwareID,
+												   const QString& propConnectedSoftwareIP,
+												   const QString& propConnectedSoftwarePort,
+												   QString* connectedSoftwareID,
+												   HostAddressPort* connectedSoftwareIP,
+												   bool emptyAllowed,
+												   const QString& defaultIP,
+												   int defaultPort,
+												   E::SoftwareType requiredSoftwareType,
+												   Builder::IssueLogger* log)
 {
 	TEST_PTR_RETURN_FALSE(log);
 
@@ -61,7 +61,7 @@ bool SoftwareSettingsGetter::getSoftwareConnection(const Hardware::EquipmentSet*
 	*connectedSoftwareID = connectedSoftwareID->trimmed();
 
 	if (connectedSoftwareID->isEmpty() == true &&
-		emptyAllowed == false)
+			emptyAllowed == false)
 	{
 		//  Property '%1.%2' is empty.
 		//
@@ -86,17 +86,17 @@ bool SoftwareSettingsGetter::getSoftwareConnection(const Hardware::EquipmentSet*
 
 
 bool SoftwareSettingsGetter::getSoftwareConnectionBySoftwareID(const Hardware::EquipmentSet* equipment,
-											const Hardware::Software* thisSoftware,
-											const QString& connectedSoftwareID,
-											const QString& propConnectedSoftwareID,
-											const QString& propConnectedSoftwareIP,
-											const QString& propConnectedSoftwarePort,
-											HostAddressPort* connectedSoftwareIP,
-											bool emptyAllowed,
-											const QString& defaultIP,
-											int defaultPort,
-											E::SoftwareType requiredSoftwareType,
-											Builder::IssueLogger* log)
+															   const Hardware::Software* thisSoftware,
+															   const QString& connectedSoftwareID,
+															   const QString& propConnectedSoftwareID,
+															   const QString& propConnectedSoftwareIP,
+															   const QString& propConnectedSoftwarePort,
+															   HostAddressPort* connectedSoftwareIP,
+															   bool emptyAllowed,
+															   const QString& defaultIP,
+															   int defaultPort,
+															   E::SoftwareType requiredSoftwareType,
+															   Builder::IssueLogger* log)
 {
 	bool result = true;
 
@@ -324,7 +324,7 @@ bool SoftwareSettingsGetter::getLmPropertiesFromDevice(	const Hardware::DeviceMo
 }
 
 bool SoftwareSettingsGetter::readSoftwareSettings(const Builder::Context* context,
-						  const Hardware::Software* software)
+												  const Hardware::Software* software)
 {
 	TEST_PTR_RETURN_FALSE(context);
 	TEST_PTR_RETURN_FALSE(software);
@@ -335,7 +335,7 @@ bool SoftwareSettingsGetter::readSoftwareSettings(const Builder::Context* contex
 	{
 		Q_ASSERT(false);
 		LOG_INTERNAL_ERROR_MSG(context->m_log, QString("Software %1 hasn't parent Workstation").
-							arg(software->equipmentIdTemplate()));
+							   arg(software->equipmentIdTemplate()));
 		return false;
 	}
 
@@ -345,8 +345,8 @@ bool SoftwareSettingsGetter::readSoftwareSettings(const Builder::Context* contex
 }
 
 bool SoftwareSettingsGetter::readFromDeviceByEquipmentID(const Builder::Context* context,
-														const QString& softwareID,
-														E::SoftwareType requiredSoftwareType)
+														 const QString& softwareID,
+														 E::SoftwareType requiredSoftwareType)
 {
 	TEST_PTR_RETURN_FALSE(context);
 
@@ -388,7 +388,7 @@ bool SoftwareSettingsGetter::readFromDeviceByEquipmentID(const Builder::Context*
 		if (software->softwareType() != requiredSoftwareType)
 		{
 			LOG_INTERNAL_ERROR_MSG(log, QString("Unappropriate software type of %1, required %2").
-											arg(softwareID).arg(E::valueToString<E::SoftwareType>(requiredSoftwareType)));
+								   arg(softwareID).arg(E::valueToString<E::SoftwareType>(requiredSoftwareType)));
 			return false;
 		}
 	}
@@ -538,7 +538,7 @@ bool CfgServiceSettingsGetter::buildClientsList(const Builder::Context* context,
 // -------------------------------------------------------------------------------------
 
 bool AppDataServiceSettingsGetter::readSettings(const Builder::Context* context,
-												  const Hardware::Software* software)
+												const Hardware::Software* software)
 {
 	TEST_PTR_RETURN_FALSE(context);
 
@@ -604,7 +604,7 @@ bool AppDataServiceSettingsGetter::readSettings(const Builder::Context* context,
 // -------------------------------------------------------------------------------------
 
 bool DiagDataServiceSettingsGetter::readSettings(const Builder::Context* context,
-												   const Hardware::Software* software)
+												 const Hardware::Software* software)
 {
 	TEST_PTR_RETURN_FALSE(context);
 
@@ -660,7 +660,7 @@ bool DiagDataServiceSettingsGetter::readSettings(const Builder::Context* context
 // -------------------------------------------------------------------------------------
 
 bool TuningServiceSettingsGetter::readSettings(const Builder::Context* context,
-												 const Hardware::Software* software)
+											   const Hardware::Software* software)
 {
 	TEST_PTR_RETURN_FALSE(context);
 
@@ -878,7 +878,7 @@ bool TuningServiceSettingsGetter::fillTuningSourcesInfo(const Builder::Context* 
 		Tuning::TuningSource ts;
 
 		bool res = getLmPropertiesFromDevice(lm, E::LanControllerType::Tuning,
-											context, &ts);
+											 context, &ts);
 		if (res == false)
 		{
 			result = false;
@@ -897,9 +897,9 @@ bool TuningServiceSettingsGetter::fillTuningSourcesInfo(const Builder::Context* 
 				// Different subnet address in data source IP %1 (%2) and data receiving IP %3 (%4).
 				//
 				log->errCFG3043(lan.tuningIP,
-								  lan.equipmentID,
-								  tuningDataIP.addressStr(),
-								  srvControllerEquipmentID);
+								lan.equipmentID,
+								tuningDataIP.addressStr(),
+								srvControllerEquipmentID);
 				result = false;
 				continue;
 			}
@@ -938,9 +938,10 @@ bool TuningServiceSettingsGetter::fillTuningClientsInfo(const Builder::Context* 
 		TEST_PTR_CONTINUE(tuningClient);
 
 		if (tuningClient->softwareType() != E::SoftwareType::TuningClient &&
-			tuningClient->softwareType() != E::SoftwareType::Metrology &&
-			tuningClient->softwareType() != E::SoftwareType::Monitor &&
-			tuningClient->softwareType() != E::SoftwareType::TestClient)
+				tuningClient->softwareType() != E::SoftwareType::Metrology &&
+				tuningClient->softwareType() != E::SoftwareType::Monitor &&
+				tuningClient->softwareType() != E::SoftwareType::TestClient &&
+				tuningClient->softwareType() != E::SoftwareType::TestSuite)
 		{
 			continue;
 		}
@@ -1059,7 +1060,7 @@ bool TuningServiceSettingsGetter::fillTuningClientsInfo(const Builder::Context* 
 // -------------------------------------------------------------------------------------
 
 bool ArchivingServiceSettingsGetter::readSettings(const Builder::Context* context,
-													const Hardware::Software* software)
+												  const Hardware::Software* software)
 {
 	TEST_PTR_RETURN_FALSE(context);
 
@@ -1146,7 +1147,7 @@ bool ArchivingServiceSettingsGetter::checkSettings(const Hardware::Software *sof
 // -------------------------------------------------------------------------------------
 
 bool TestClientSettingsGetter::readSettings(const Builder::Context* context,
-											  const Hardware::Software* software)
+											const Hardware::Software* software)
 {
 	TEST_PTR_RETURN_FALSE(context);
 
@@ -1320,7 +1321,7 @@ bool TestClientSettingsGetter::readSettings(const Builder::Context* context,
 
 
 bool MetrologySettingsGetter::readSettings(const Builder::Context* context,
-											 const Hardware::Software* software)
+										   const Hardware::Software* software)
 {
 	TEST_PTR_RETURN_FALSE(context);
 
@@ -1345,7 +1346,7 @@ bool MetrologySettingsGetter::readSettings(const Builder::Context* context,
 	RETURN_IF_FALSE(result);
 
 	if (appDataServiceID1.isEmpty() == true &&
-		appDataServiceID2.isEmpty() == true)
+			appDataServiceID2.isEmpty() == true)
 	{
 		// Property '%1.%2' is empty.
 		//
@@ -1360,17 +1361,17 @@ bool MetrologySettingsGetter::readSettings(const Builder::Context* context,
 		HostAddressPort appDataServiceClientRequestIP1;
 
 		result = getSoftwareConnection(equipment,
-										software,
-										EquipmentPropNames::APP_DATA_SERVICE_ID1,
-										EquipmentPropNames::CLIENT_REQUEST_IP,
-										EquipmentPropNames::CLIENT_REQUEST_PORT,
-										&appDataServiceID1,
-										&appDataServiceClientRequestIP1,
-										true,
-										Socket::IP_NULL,
-										PORT_APP_DATA_SERVICE_CLIENT_REQUEST,
-										E::SoftwareType::AppDataService,
-										log);
+									   software,
+									   EquipmentPropNames::APP_DATA_SERVICE_ID1,
+									   EquipmentPropNames::CLIENT_REQUEST_IP,
+									   EquipmentPropNames::CLIENT_REQUEST_PORT,
+									   &appDataServiceID1,
+									   &appDataServiceClientRequestIP1,
+									   true,
+									   Socket::IP_NULL,
+									   PORT_APP_DATA_SERVICE_CLIENT_REQUEST,
+									   E::SoftwareType::AppDataService,
+									   log);
 		RETURN_IF_FALSE(result);
 
 		appDataServiceIP1 = appDataServiceClientRequestIP1.addressStr();
@@ -1384,17 +1385,17 @@ bool MetrologySettingsGetter::readSettings(const Builder::Context* context,
 		HostAddressPort appDataServiceClientRequestIP2;
 
 		result = getSoftwareConnection(equipment,
-										software,
-										EquipmentPropNames::APP_DATA_SERVICE_ID2,
-										EquipmentPropNames::CLIENT_REQUEST_IP,
-										EquipmentPropNames::CLIENT_REQUEST_PORT,
-										&appDataServiceID2,
-										&appDataServiceClientRequestIP2,
-										true,
-										Socket::IP_NULL,
-										PORT_APP_DATA_SERVICE_CLIENT_REQUEST,
-										E::SoftwareType::AppDataService,
-										log);
+									   software,
+									   EquipmentPropNames::APP_DATA_SERVICE_ID2,
+									   EquipmentPropNames::CLIENT_REQUEST_IP,
+									   EquipmentPropNames::CLIENT_REQUEST_PORT,
+									   &appDataServiceID2,
+									   &appDataServiceClientRequestIP2,
+									   true,
+									   Socket::IP_NULL,
+									   PORT_APP_DATA_SERVICE_CLIENT_REQUEST,
+									   E::SoftwareType::AppDataService,
+									   log);
 		RETURN_IF_FALSE(result);
 
 		appDataServiceIP2 = appDataServiceClientRequestIP2.addressStr();
@@ -1408,17 +1409,17 @@ bool MetrologySettingsGetter::readSettings(const Builder::Context* context,
 	HostAddressPort tuningServiceClientRequestIP;
 
 	result = getSoftwareConnection(equipment,
-									software,
-									EquipmentPropNames::TUNING_SERVICE_ID,
-									EquipmentPropNames::CLIENT_REQUEST_IP,
-									EquipmentPropNames::CLIENT_REQUEST_PORT,
-									&tuningServiceID,
-									&tuningServiceClientRequestIP,
-									false,
-									Socket::IP_NULL,
-									PORT_TUNING_SERVICE_CLIENT_REQUEST,
-									E::SoftwareType::TuningService,
-									log);
+								   software,
+								   EquipmentPropNames::TUNING_SERVICE_ID,
+								   EquipmentPropNames::CLIENT_REQUEST_IP,
+								   EquipmentPropNames::CLIENT_REQUEST_PORT,
+								   &tuningServiceID,
+								   &tuningServiceClientRequestIP,
+								   false,
+								   Socket::IP_NULL,
+								   PORT_TUNING_SERVICE_CLIENT_REQUEST,
+								   E::SoftwareType::TuningService,
+								   log);
 	RETURN_IF_FALSE(result);
 
 	softwareMetrologyID = software->equipmentIdTemplate();
@@ -1438,7 +1439,7 @@ bool MetrologySettingsGetter::readSettings(const Builder::Context* context,
 // -------------------------------------------------------------------------------------
 
 bool MonitorSettingsGetter::readSettings(const Builder::Context* context,
-										   const Hardware::Software* software)
+										 const Hardware::Software* software)
 {
 	clear();
 
@@ -1467,15 +1468,6 @@ bool MonitorSettingsGetter::readSettings(const Builder::Context* context,
 	RETURN_IF_FALSE(result);
 
 	startSchemaId = startSchemaId.trimmed();
-
-	if (startSchemaId.isEmpty() == true)
-	{
-		QString errorStr = QString("Monitor configuration error %1, property startSchemaId is invalid").
-								arg(software->equipmentIdTemplate());
-
-		log->writeError(errorStr);
-		return false;
-	}
 
 	// SchemaTags
 	//
@@ -1633,7 +1625,7 @@ bool MonitorSettingsGetter::readAppDataServiceAndArchiveSettings(const Builder::
 }
 
 bool MonitorSettingsGetter::readTuningServiceSettings(const Builder::Context* context,
-										  const Hardware::Software* software)
+													  const Hardware::Software* software)
 {
 	Builder::IssueLogger* log = context->m_log;
 	const Hardware::EquipmentSet* equipment = context->m_equipmentSet.get();
@@ -1691,8 +1683,8 @@ bool MonitorSettingsGetter::readTuningServiceSettings(const Builder::Context* co
 		if (tc.isValid() == false)
 		{
 			LOG_INTERNAL_ERROR_MSG(log, QString("Tuning Client %1 is not found in clients list of Tuning Service %2").
-										arg(software->equipmentIdTemplate()).
-										arg(tuningServiceID));
+								   arg(software->equipmentIdTemplate()).
+								   arg(tuningServiceID));
 			result = false;
 			break;
 		}
@@ -1712,7 +1704,7 @@ bool MonitorSettingsGetter::readTuningServiceSettings(const Builder::Context* co
 // -------------------------------------------------------------------------------------
 
 bool TuningClientSettingsGetter::readSettings(const Builder::Context* context,
-												const Hardware::Software* software)
+											  const Hardware::Software* software)
 {
 	TEST_PTR_RETURN_FALSE(context);
 
@@ -1778,8 +1770,8 @@ bool TuningClientSettingsGetter::readSettings(const Builder::Context* context,
 		if (tc.isValid() == false)
 		{
 			LOG_INTERNAL_ERROR_MSG(log, QString("Tuning Client %1 is not found in clients list of Tuning Service %2").
-										arg(software->equipmentIdTemplate()).
-										arg(tuningServiceID));
+								   arg(software->equipmentIdTemplate()).
+								   arg(tuningServiceID));
 			result = false;
 			break;
 		}
@@ -1860,6 +1852,208 @@ bool TuningClientSettingsGetter::readSettings(const Builder::Context* context,
 
 // -------------------------------------------------------------------------------------
 //
+// TestSuiteSettingsGetter class implementation
+//
+// -------------------------------------------------------------------------------------
+
+bool TestSuiteSettingsGetter::readSettings(const Builder::Context* context,
+										   const Hardware::Software* software)
+{
+	clear();
+
+	TEST_PTR_RETURN_FALSE(context);
+
+	Builder::IssueLogger* log = context->m_log;
+
+	TEST_PTR_RETURN_FALSE(log);
+	TEST_PTR_LOG_RETURN_FALSE(software, log);
+
+	const Hardware::EquipmentSet* equipment = context->m_equipmentSet.get();
+
+	TEST_PTR_LOG_RETURN_FALSE(equipment, log);
+
+	bool result = true;
+
+	result &= getCfgServiceConnection(equipment, software, &cfgServiceID1, &cfgServiceIP1,
+									  &cfgServiceID2, &cfgServiceIP2, log);
+
+
+	result = readAppDataServiceAndArchiveSettings(context, software);
+
+	RETURN_IF_FALSE(result);
+
+	result = readTuningServiceSettings(context, software);
+
+	RETURN_IF_FALSE(result);
+
+	return result;
+}
+
+bool TestSuiteSettingsGetter::readAppDataServiceAndArchiveSettings(const Builder::Context* context,
+																   const Hardware::Software* software)
+{
+	Builder::IssueLogger* log = context->m_log;
+	const Hardware::EquipmentSet* equipment = context->m_equipmentSet.get();
+
+	bool result = true;
+
+	// AppDataService settings reading
+	//
+	QStringList appDataServiceIds;
+	result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::APP_DATA_SERVICE_IDS, &appDataServiceIds, log);
+
+	// Maybe we will have tests without AppDataService
+	//
+//	if (appDataServiceIds.isEmpty() == true)
+//	{
+//		log->errCFG3022(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS);
+//		return false;
+//	}
+
+	// Get all AppDataServices
+	//
+	std::map<QString, const Hardware::Software*> appDataServices;
+
+	for (const QString& appDataServiceId : appDataServiceIds)
+	{
+		// ADS->ClientRequestIP, ClientRequestPort
+		//
+		const Hardware::Software* appDataService = nullptr;
+
+		if (auto appDataServiceDevice = equipment->deviceObject(appDataServiceId);
+			appDataServiceDevice == nullptr)
+		{
+			// Property %1.%2 is linked to undefined software ID %3.
+			//
+			log->errCFG3021(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS, appDataServiceId);
+			result = false;
+		}
+		else
+		{
+			if (appDataService = appDataServiceDevice->toSoftware().get();
+				appDataService == nullptr)
+			{
+				// Property %1.%2 is linked to undefined software ID %3.
+				//
+				log->errCFG3021(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS, appDataServiceId);
+				result = false;
+			}
+			else
+			{
+				if (appDataService->softwareType() != E::SoftwareType::AppDataService)
+				{
+					// Property %1.%2 is linked to not compatible software %3.
+					//
+					log->errCFG3017(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS, appDataServiceId);
+					result = false;
+				}
+				else
+				{
+					appDataServices[appDataServiceId] = appDataService;
+				}
+			}
+		}
+	}
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	// Reading AppDataService Settings
+	//
+	for (const auto&[appDataServiceId, appDataService] : appDataServices)
+	{
+		// Get AppDataService connection settings
+		//
+		AppDataServiceSettingsGetter adsSettings;
+		result &= adsSettings.readSoftwareSettings(context, appDataService);
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		SoftwareEndpoint::AppDataService ads;
+		ads.equipmentId = appDataServiceId;
+		ads.address = adsSettings.clientRequestIP;
+		ads.realtimeAddress = adsSettings.rtTrendsRequestIP;
+
+		this->appDataServices.push_back(ads);
+	}
+
+	return result;
+}
+
+bool TestSuiteSettingsGetter::readTuningServiceSettings(const Builder::Context* context,
+														const Hardware::Software* software)
+{
+	Builder::IssueLogger* log = context->m_log;
+	const Hardware::EquipmentSet* equipment = context->m_equipmentSet.get();
+
+	QStringList tuningServicesIDs;
+
+	bool result = DeviceHelper::getBoolProperty(software, EquipmentPropNames::TUNING_ENABLE, &tuningEnabled, log);
+
+	result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::TUNING_SERVICE_ID, &tuningServicesIDs, log);
+
+	tuningServices.clear();
+
+	if (tuningEnabled == false)
+	{
+		return result;
+	}
+
+	for(const QString& tuningServiceID : tuningServicesIDs)
+	{
+		HostAddressPort clientRequestAddress;
+
+		result &= getSoftwareConnectionBySoftwareID(equipment,
+													software,
+													tuningServiceID,
+													EquipmentPropNames::TUNING_SERVICE_ID,
+													EquipmentPropNames::CLIENT_REQUEST_IP,
+													EquipmentPropNames::CLIENT_REQUEST_PORT,
+													&clientRequestAddress,
+													false,
+													Socket::IP_NULL,
+													PORT_TUNING_SERVICE_CLIENT_REQUEST,
+													E::SoftwareType::TuningService,
+													log);
+		BREAK_IF_FALSE(result);
+
+		SoftwareEndpoint::TuningService tsc;
+
+		tsc.equipmentId = tuningServiceID;
+		tsc.clientRequestAddress = clientRequestAddress;
+
+		TuningServiceSettingsGetter tsg;
+
+		result &= tsg.readFromDeviceByEquipmentID(context, tuningServiceID, E::SoftwareType::TuningService);
+
+		BREAK_IF_FALSE(result);
+
+		TuningServiceSettings::TuningClient tc = tsg.getTuningClient(software->equipmentIdTemplate());
+
+		if (tc.isValid() == false)
+		{
+			LOG_INTERNAL_ERROR_MSG(log, QString("Tuning Client %1 is not found in clients list of Tuning Service %2").
+								   arg(software->equipmentIdTemplate()).
+								   arg(tuningServiceID));
+			result = false;
+			break;
+		}
+
+		tsc.drivenSources = tc.uniqueSourcesIDs();
+
+		tuningServices.push_back(tsc);
+	}
+
+	return result;
+}
+
+// -------------------------------------------------------------------------------------
+//
 // GatewayServiceSettingsGetter class implementation
 //
 // -------------------------------------------------------------------------------------
@@ -1910,4 +2104,3 @@ bool GatewayServiceSettingsGetter::readSettings(const Builder::Context* context,
 										   &gatewayDescription, log);
 	return result;
 }
-

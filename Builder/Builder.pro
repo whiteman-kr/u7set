@@ -87,6 +87,7 @@ SOURCES += \
 	RawDataDescription.cpp \
     SignalsHeap.cpp \
     SubsystemStorage.cpp \
+    TestSuiteCfgGenerator.cpp \
     UalItems.cpp \
     ApplicationLogicCode.cpp \
     LmMemoryMap.cpp \
@@ -158,6 +159,7 @@ HEADERS += \
     OptoModule.h \
     RawDataDescription.h \
     SubsystemStorage.h \
+    TestSuiteCfgGenerator.h \
     UalItems.h \
     ApplicationLogicCode.h \
     LmMemoryMap.h \

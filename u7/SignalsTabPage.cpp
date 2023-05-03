@@ -2725,12 +2725,12 @@ FindSignalDialog::FindSignalDialog(int currentUserId, bool currentUserIsAdmin, Q
 	QTimer::singleShot(0, [this](){ m_findString->setFocus(); });
 }
 
-void FindSignalDialog::closeEvent(QCloseEvent* event)
+void FindSignalDialog::reject()
 {
 	saveDialogGeometry();
 	m_shouldReopen = false;
 
-	QDialog::closeEvent(event);
+	QDialog::reject();
 }
 
 void FindSignalDialog::generateListIfNeeded()

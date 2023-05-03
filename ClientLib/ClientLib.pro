@@ -1,4 +1,4 @@
-QT += xml network widgets
+QT += gui xml network widgets
 
 TARGET = ClientLib
 
@@ -52,6 +52,7 @@ HEADERS += \
     ConfigController.h \
     IAppSignalUpdater.h \
     IRecentAppSignals.h \
+    ITuningLog.h \
 	RtDataProvider.h \
 	RtTrendTcpClient.h \
 	Stable.h \

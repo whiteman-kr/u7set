@@ -1,8 +1,11 @@
 #pragma once
 #include <cassert>
 #include <type_traits>
+#include <array>
 #include <QString>
 #include <QUuid>
+#include <QRectF>
+#include <QSize>
 #include <QtGlobal>
 
 using Hash = quint64;
@@ -12,9 +15,9 @@ using Hash = quint64;
 
 
 
-inline Hash calcHash(const QString& str)
+inline Hash calcHash(const QString& str, Hash init = 0)
 {
-	Hash hash = 0;
+	Hash hash = init;
 	const QChar* prt = str.constData();
 
 	while (prt->unicode())
@@ -56,9 +59,9 @@ inline Hash calcHash(const QByteArray& data)
 	return hash;
 }
 
-inline Hash calcHash(const void* data, size_t byteSize)
+inline Hash calcHash(const void* data, size_t byteSize, Hash init = 0)
 {
-	Hash hash = 0;
+	Hash hash = init;
 	const char* prt = (const char*)data;
 
 	while (byteSize--)
@@ -68,6 +71,18 @@ inline Hash calcHash(const void* data, size_t byteSize)
 	}
 
 	return hash;
+}
+
+inline Hash calcHash(const QRectF& rect, Hash init = 0)
+{
+	std::array<double, 4> data{rect.left(), rect.top(), rect.width(), rect.height()};
+	return calcHash(data.data(), sizeof(data), init);
+}
+
+inline Hash calcHash(QSize size, Hash init = 0)
+{
+	std::array<int, 2> data{size.width(), size.height()};
+	return calcHash(data.data(), sizeof(data), init);
 }
 
 inline quint16 calcHash16(const void* src, qsizetype l)

@@ -58,6 +58,8 @@ namespace Tcp
 		SetConnectionResult setConnectionResult = SetConnectionResult::Undefined;
 		int connectionNo = 0;
 
+		QString serverEquipmentID;						// Valid only for Tcp::Client, indicates service the client tries connect to.
+
 		// nex data is valid if isConnected == true
 		//
 		HostAddressPort peerAddr;
@@ -129,7 +131,7 @@ namespace Tcp
 
 		HostAddressPort localAddressPort() const;
 
-		ConnectionState getConnectionState() const;
+		virtual ConnectionState getConnectionState() const;
 
 		const SoftwareInfo& localSoftwareInfo() const;
 		const SoftwareInfo& connectedSoftwareInfo() const;
@@ -519,6 +521,8 @@ namespace Tcp
 		virtual void onTryConnectToServer(const HostAddressPort& serverAddr);
 
 		virtual void onAck(quint32 requestID, const char* replyData, quint32 replyDataSize);
+
+		virtual ConnectionState getConnectionState() const override;
 
 		bool isClearToSendRequest() const;
 

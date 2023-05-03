@@ -1,4 +1,5 @@
 #include "SchemaItemSignal.h"
+#include "SchemaView.h"
 #include "LogicSchema.h"
 #include "PropertyNames.h"
 #include "DrawParam.h"
@@ -257,11 +258,24 @@ namespace VFrame30
 			}
 		}
 
+		return;
+	}
+
+	void SchemaItemSignal::drawHighlight(CDrawParam* drawParam) const
+	{
 		// Draw highlights for m_appSignalIds, m_impactAppSignalIds
 		//
-		QStringList allIds = m_appSignalIds + m_impactAppSignalIds;
+		for (const QString& appSignalId : m_appSignalIds)
+		{
+			if (drawParam->hightlightIds().contains(appSignalId) == true)
+			{
+				QRectF highlightRect = itemRectPinIndent(drawParam);
+				drawHighlightRect(drawParam, highlightRect);
+				break;
+			}
+		}
 
-		for (const QString& appSignalId : allIds)
+		for (const QString& appSignalId : m_impactAppSignalIds)
 		{
 			if (drawParam->hightlightIds().contains(appSignalId) == true)
 			{
@@ -501,7 +515,18 @@ namespace VFrame30
 			}
 		}
 
+#ifdef VFRAME30_CACHE_DRAW_TEXT
+		if (drawParam->pdfMode() == true)
+		{
+			DrawHelper::drawText(painter, m_font, itemUnit(), text, rect, Qt::AlignLeft | Qt::AlignTop);
+		}
+		else
+		{
+			DrawHelper::drawTextCahed(painter, m_font, itemUnit(), text, rect, Qt::AlignLeft | Qt::AlignTop, drawParam->schemaView()->zoom());
+		}
+#else
 		DrawHelper::drawText(painter, m_font, itemUnit(), text, rect, Qt::AlignLeft | Qt::AlignTop);
+#endif
 	}
 
 	void SchemaItemSignal::drawMultichannelValues(const Context* context, CDrawParam* drawParam, QPen& linePen) const
@@ -871,7 +896,19 @@ namespace VFrame30
 				painter->setPen(cell.textColor.isValid() ? cell.textColor : textColor());
 
 				QRectF boundingRect = rect.intersected(textRect);
+
+#ifdef VFRAME30_CACHE_DRAW_TEXT
+				if (drawParam->pdfMode() == true)
+				{
+					DrawHelper::drawText(painter, m_font, itemUnit(), cell.text, boundingRect, cell.textDrawFlags);
+				}
+				else
+				{
+					DrawHelper::drawTextCahed(painter, m_font, itemUnit(), cell.text, boundingRect, cell.textDrawFlags, drawParam->schemaView()->zoom());
+				}
+#else
 				DrawHelper::drawText(painter, m_font, itemUnit(), cell.text, boundingRect, cell.textDrawFlags);
+#endif
 			}
 		}
 
@@ -897,7 +934,7 @@ namespace VFrame30
 			}
 		}
 
-		//  Draw vertical deviders
+		//  Draw vertical dividers
 		//
 		std::vector<double> xpos;
 		xpos.reserve(32);
@@ -954,8 +991,8 @@ namespace VFrame30
 
 		for (double x : xpos)
 		{
-			QPointF pt1 = drawParam->gridToDpi(x, rect.top());
-			QPointF pt2 = drawParam->gridToDpi(x, rect.bottom());
+			QPointF pt1{drawParam->gridToDpiX(x), rect.top()};
+			QPointF pt2{drawParam->gridToDpiX(x), rect.bottom()};
 
 			if (pt1.x() >= rect.right())
 			{
@@ -1137,7 +1174,18 @@ namespace VFrame30
 				QColor tc = cellTextColor(row, static_cast<int>(columnIndex));
 				painter->setPen(tc.isValid() ? tc : textColor());
 
+#ifdef VFRAME30_CACHE_DRAW_TEXT
+				if (drawParam->pdfMode() == true)
+				{
+					DrawHelper::drawText(painter, m_font, itemUnit(), text, textRect, c.horzAlign | Qt::AlignTop);
+				}
+				else
+				{
+					DrawHelper::drawTextCahed(painter, m_font, itemUnit(), text, textRect, c.horzAlign | Qt::AlignTop, drawParam->schemaView()->zoom());
+				}
+#else
 				DrawHelper::drawText(painter, m_font, itemUnit(), text, textRect, c.horzAlign | Qt::AlignTop);
+#endif
 			}
 		}
 
@@ -1150,8 +1198,10 @@ namespace VFrame30
 
 			if (columnIndex < m_columns.size() - 1)	// For all columns exceprt last
 			{
-				painter->drawLine(drawParam->gridToDpi(cellRect.topRight()),
-								  drawParam->gridToDpi(cellRect.bottomRight()));
+				QPointF verLinePt1{drawParam->gridToDpiX(cellRect.right()), cellRect.top()};
+				QPointF verLinePt2{drawParam->gridToDpiX(cellRect.right()), cellRect.bottom()};
+
+				painter->drawLine(verLinePt1, verLinePt2);
 			}
 		}
 

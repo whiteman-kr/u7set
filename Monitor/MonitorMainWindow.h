@@ -148,7 +148,7 @@ protected:
 	//
 private:
 	Log::LogFile m_LogFile;						// Must be initialized first
-    TuningLog::TuningLog m_tuningLogFile;
+	ClientLib::TuningLog m_tuningLogFile;
 	InstanceResolver& m_instanceResolver;
 
 	MonitorConfigController m_configController;

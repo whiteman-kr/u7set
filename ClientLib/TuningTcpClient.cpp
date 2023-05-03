@@ -23,7 +23,7 @@ namespace ClientLib
 									 const SoftwareEndpoint::TuningService& tunsInfo,
 									 ITuningSignalUpdater& signalUpdater,
 									 ILogFile* log,
-									 TuningLog::TuningLog* tuningLog) :
+									 ITuningLog* tuningLog) :
 		Tcp::Client(softwareInfo,
 					tunsInfo.clientRequestAddress,
 					"TuningTcpClient",
@@ -201,7 +201,7 @@ namespace ClientLib
 
 		m_writeQueue.emplace(TuningWriteCommand(true));
 
-		m_tuningLog->writeMessage(tr("'Apply' command is sent."));
+		m_tuningLog->write(tr("'Apply' command is sent."));
 
 		return;
 	}

@@ -3,7 +3,7 @@
 #include "../../Simulator/SimOverrideSignals.h"
 #include "../../DbLib/DbController.h"
 #include "../../lib/QDoublevalidatorEx.h"
-#include "CodeEditor.h"
+#include "../lib/CodeEditor.h"
 
 
 namespace SimOverrideUI

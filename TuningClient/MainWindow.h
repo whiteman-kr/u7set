@@ -10,7 +10,9 @@
 #include "DialogTuningSources.h"
 #include "../ClientLib/TuningConnection.h"
 #include "../ClientLib/TuningUserManager.h"
+#include "../ClientLib/TuningLog.h"
 #include "../lib/Ui/DialogTcpStatistics.h"
+#include "../UtilsLib/LogFile.h"
 
 class DialogAlert;
 
@@ -84,7 +86,7 @@ private:
 	// Logs, must be initialized first
 	//
 	Log::LogFile m_logFile;
-	TuningLog::TuningLog m_tuningLog;
+	ClientLib::TuningLog m_tuningLog;
 
 	// Base objects
 	//

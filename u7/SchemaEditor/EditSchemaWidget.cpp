@@ -37,7 +37,7 @@
 #include "../lib/Ui/TextEditCompleter.h"
 #include "../lib/QDoublevalidatorEx.h"
 #include <cfloat>
-#include "CodeEditor.h"
+#include "../lib/CodeEditor.h"
 
 const EditSchemaWidget::MouseStateCursor EditSchemaWidget::m_mouseStateCursor[] =
 	{

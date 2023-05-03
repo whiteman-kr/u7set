@@ -69,7 +69,7 @@ HEADERS  += \
     ../UtilsLib/CrashExceptionHandler.h \
     ../lib/Ui/ClickableLabel.h \
     ../lib/Ui/DialogChooseTags.h \
-    CodeEditor.h \
+    ../lib/CodeEditor.h \
     DbTagsEditor.h \
     EquipmentEditor/DialogImportPreset.h \
     Locator/AppSignalLocatorProvider.h \
@@ -230,7 +230,7 @@ SOURCES +=\
 	../lib/PropertyTable.cpp \
 	../Metrology/MetrologyConnection.cpp \
 	AppSignalSetProvider.cpp \
-    CodeEditor.cpp \
+    ../lib/CodeEditor.cpp \
     DbTagsEditor.cpp \
 	DlgMetrologyConnection.cpp \
 	CentralWidget.cpp \
