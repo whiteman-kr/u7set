@@ -13,8 +13,6 @@ using Hash = quint64;
 #define UNDEFINED_HASH 0x0000000000000000ULL
 
 
-
-
 inline Hash calcHash(const QString& str, Hash init = 0)
 {
 	Hash hash = init;

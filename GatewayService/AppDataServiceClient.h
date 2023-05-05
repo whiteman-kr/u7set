@@ -6,15 +6,19 @@
 
 namespace Gateway
 {
+	class IvsImpulseListInfo;
+	class IvsImpulseHandler;
+
 	class AppDataServiceClient : public Tcp::Client
 	{
+		Q_OBJECT
+
 	public:
 		AppDataServiceClient(const SoftwareInfo& softwareInfo,
 							 const HostAddressPort& serverAddressPort1,
 							 const HostAddressPort& serverAddressPort2,
 							 const QString& clientDescription,
-							 AppSignalStates& states,
-							 std::atomic_bool& signalStatesUpdated);
+							 IvsImpulseHandler& handler);
 	private:
 		virtual void onClientThreadStarted() override;
 		virtual void onClientThreadFinished() override;
@@ -29,11 +33,20 @@ namespace Gateway
 		void onGetAppSignalStateReply(const char* replyData, quint32 replyDataSize);
 		void onGatewayGetAppSignalStateChangesReply(const char* replyData, quint32 replyDataSize);
 
+	signals:
+		void sendStateChanges();
+
 	private:
 		QTimer m_timer;
 
+		// refs to IvsImpulseHandler data structs
+
+		std::vector<std::shared_ptr<IvsImpulseListInfo>>& m_lists;
 		AppSignalStates& m_states;
+		std::map<Hash, std::vector<std::shared_ptr<IvsImpulseListInfo>>>& m_hashToLists;
 		std::atomic_bool& m_signalStatesUpdated;
+
+		//
 
 		Network::GetAppSignalStateRequest m_getStatesRequest;
 		Network::GetAppSignalStateReply m_getStatesReply;
@@ -49,15 +62,15 @@ namespace Gateway
 								   const HostAddressPort& serverAddressPort1,
 								   const HostAddressPort& serverAddressPort2,
 								   const QString& clientDescription,
-								   AppSignalStates& states,
-								   std::atomic_bool& signalStatesUpdated)
+								   IvsImpulseHandler& handler)
 		{
 			addWorker(new AppDataServiceClient(softwareInfo,
 											   serverAddressPort1,
 											   serverAddressPort2,
 											   clientDescription,
-											   states,
-											   signalStatesUpdated));
+											   handler));
 		}
+
+		AppDataServiceClient* client() { return dynamic_cast<AppDataServiceClient*>(m_workerList[0]); }
 	};
 }

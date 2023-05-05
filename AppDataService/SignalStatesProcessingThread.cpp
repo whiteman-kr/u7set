@@ -67,8 +67,7 @@ void SignalStatesProcessingThread::unregisterDestSignalStatesQueue(SimpleAppSign
 }
 
 void SignalStatesProcessingThread::registerGatewaySignalStatesQueue(GatewayAppSignalStatesQueueShared destQueue,
-								   const std::set<Hash>& hashes,
-								   const QString& description)
+								   const std::set<Hash>& hashes)
 {
 	quint32 queueMask = 0;
 
@@ -125,7 +124,6 @@ void SignalStatesProcessingThread::unregisterGatewaySignalStatesQueue(GatewayApp
 	{
 		m_signalStates.resetGatewayQueueMask(hashes, queueMask);
 	}
-
 }
 
 void SignalStatesProcessingThread::processStates(AppDataReceiver& receiver)
@@ -139,13 +137,12 @@ void SignalStatesProcessingThread::processStates(AppDataReceiver& receiver)
 	QThread* thisThread = QThread::currentThread();
 
 	SimpleAppSignalStateArchiveFlag state;
-	GatewayAppSignalState gwState;
+	GatewayAppSignalStateQueueMask gwState;
 	bool haveStateToProcessing = false;
 
 	std::unique_lock ul(waitConditionMutex, std::defer_lock);
 
 	AppDataSource* sourceToStatesProcessing = nullptr;
-	AppDataSource* sourceToGwStatesProcessing = nullptr;
 
 	while(true)
 	{

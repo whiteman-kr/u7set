@@ -148,4 +148,6 @@ struct Times
 	[[nodiscard]] QDateTime plantToDateTime() const;
 
 	Times& operator += (qint64 timeSpan);
+
+	void clear();
 };

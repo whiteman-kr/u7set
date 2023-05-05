@@ -473,10 +473,7 @@ void TcpAppDataServer::onGatewayGetAppSignalStateChangesRequest(const char* requ
 			hashes.insert(request.signalshashes(i));
 		}
 
-		m_appDataService.registerGatewaySignalStatesQueue(m_gatewaySignalStatesQueue, hashes,
-			QString("TcpAppDataServer for gateway %1 (%2)").
-					arg(connectedSoftwareInfo().equipmentID()).
-					arg(peerAddr().addressStr()));
+		m_appDataService.registerGatewaySignalStatesQueue(m_gatewaySignalStatesQueue, hashes);
 	}
 
 	if (m_gatewaySignalStatesQueue == nullptr)
@@ -487,7 +484,7 @@ void TcpAppDataServer::onGatewayGetAppSignalStateChangesRequest(const char* requ
 
 	QThread* thisThread = QThread::currentThread();
 
-	GatewayAppSignalState gwState;
+	GatewayAppSignalStateQueueMask state;
 
 	qint64 minPlantTime = std::numeric_limits<qint64>::max();
 	qint64 minSystemTime = std::numeric_limits<qint64>::max();
@@ -515,7 +512,7 @@ void TcpAppDataServer::onGatewayGetAppSignalStateChangesRequest(const char* requ
 
 	for(int i = 0; i < ADS_GET_APP_SIGNAL_STATE_MAX; i++)
 	{
-		result = m_gatewaySignalStatesQueue->pop(&gwState, thisThread);
+		result = m_gatewaySignalStatesQueue->pop(&state, thisThread);
 
 		if (result == false)
 		{
@@ -524,11 +521,10 @@ void TcpAppDataServer::onGatewayGetAppSignalStateChangesRequest(const char* requ
 
 		::Network::GatewayAppSignalState* protoState = reply.add_appsignalstates();
 
-		gwState.prevState.save(protoState->mutable_prevstate());
-		getMinTimes(gwState.prevState);
+		state.gwState.saveToProto(protoState);
 
-		gwState.curState.save(protoState->mutable_curstate());
-		getMinTimes(gwState.curState);
+		getMinTimes(state.gwState.prevState);
+		getMinTimes(state.gwState.curState);
 
 		if (i + 1 == ADS_GET_APP_SIGNAL_STATE_MAX)
 		{

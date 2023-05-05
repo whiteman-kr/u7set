@@ -99,10 +99,9 @@ void AppDataReceiver::unregisterDestSignalStatesQueue(SimpleAppSignalStatesQueue
 }
 
 void AppDataReceiver::registerGatewaySignalStatesQueue(GatewayAppSignalStatesQueueShared destQueue,
-														const std::set<Hash>& hashes,
-														const QString& description)
+														const std::set<Hash>& hashes)
 {
-	m_statesProcessingThread.registerGatewaySignalStatesQueue(destQueue, hashes, description);
+	m_statesProcessingThread.registerGatewaySignalStatesQueue(destQueue, hashes);
 }
 
 void AppDataReceiver::unregisterGatewaySignalStatesQueue(GatewayAppSignalStatesQueueShared destQueue)

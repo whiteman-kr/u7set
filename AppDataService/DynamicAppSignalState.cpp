@@ -383,13 +383,13 @@ int DynamicAppSignalState::setState(const Times& time,
 
 	if (m_gatewayQueueMask != 0 && hasGatewaySendReasone(curState.flags) == true)
 	{
-		GatewayAppSignalState gwState;
+		GatewayAppSignalStateQueueMask state;
 
-		gwState.gatewayQueueMask = m_gatewayQueueMask;
-		gwState.prevState = prevState;
-		gwState.curState = curState;
+		state.gatewayQueueMask = m_gatewayQueueMask;
+		state.gwState.prevState = prevState;
+		state.gwState.curState = curState;
 
-		m_gwStatesQueue->push(gwState, thread);
+		m_gwStatesQueue->push(state, thread);
 
 		pushedStatesCtr++;
 	}

@@ -33,6 +33,11 @@ namespace Gateway
 		}
 	}
 
+	void IvsImpulseCommThreadWorker::onSendStateChanges()
+	{
+		sendStateChanges();
+	}
+
 	void IvsImpulseCommThreadWorker::onThreadStarted()
 	{
 		m_timer.setTimerType(Qt::PreciseTimer);
@@ -51,6 +56,7 @@ namespace Gateway
 
 	void IvsImpulseCommThreadWorker::onTimer()
 	{
+		sendStateChanges();			// at first flush all existing state changes
 		periodicSendStates();
 	}
 
@@ -63,13 +69,13 @@ namespace Gateway
 
 		IvsImpulseStatesPacket* packet = reinterpret_cast<IvsImpulseStatesPacket*>(m_sendBuffer);
 
-		for(IvsImpulseListInfo& li : m_lists)
+		for(IvsImpulseListInfoShared& li : m_lists)
 		{
 			IvsImpulsePacketHeader& header = packet->header;
 
 			header.systemID = static_cast<quint8>(m_gateway->systemID());
-			header.dataType = static_cast<quint8>(li.info->dataTypeLetter());
-			header.listID = static_cast<quint8>(li.info->listNo());
+			header.dataType = static_cast<quint8>(li->info->dataTypeLetter());
+			header.listID = static_cast<quint8>(li->info->listNo());
 			header.listVersion = static_cast<quint8>(m_gateway->listsVersion());
 			header.firstParamIndex = 1;
 
@@ -78,11 +84,11 @@ namespace Gateway
 			int writtenParamCount = 0;
 			qint64 time = 0;
 
-			packetSize += writeStatesToPacket(packet, li.info->dataType(),
-											  li.startIndex, li.size,
+			packetSize += writeStatesToPacket(packet, li->info->dataType(),
+											  li->startIndex, li->size,
 											  writtenParamCount, time);
 
-			Q_ASSERT(writtenParamCount == li.size);
+			Q_ASSERT(writtenParamCount == li->size);
 
 			header.paramCount = static_cast<quint16>(writtenParamCount);
 
@@ -108,6 +114,69 @@ namespace Gateway
 		}
 
 		m_signalStatesUpdated = false;
+	}
+
+	void IvsImpulseCommThreadWorker::sendStateChanges()
+	{
+		QThread* thread = QThread::currentThread();
+
+		IvsImpulseEventsPacket* packet = reinterpret_cast<IvsImpulseEventsPacket*>(m_sendBuffer);
+
+		for(IvsImpulseListInfoShared& li : m_lists)
+		{
+			IvsImpulsePacketHeader& header = packet->header;
+
+			header.systemID = static_cast<quint8>(m_gateway->systemID());
+			header.dataType = static_cast<quint8>(li->info->dataTypeLetter());
+			header.listID = static_cast<quint8>(li->info->listNo());
+			header.listVersion = static_cast<quint8>(m_gateway->listsVersion());
+			header.firstParamIndex = 0;				// sign of events packet
+
+			qint64 packetSize = sizeof(IvsImpulsePacketHeader);
+
+			//
+
+			li->stateChangesMutex.lock(thread);
+
+			int writtenParamCount = 0;
+			qint64 baseTime_ms = 0;
+
+			packetSize += writeStateChangesToPacket(li,
+													&packet->signalEvents,
+													li->info->dataType(),
+													baseTime_ms,
+													li->stateChangesToRead,
+													writtenParamCount);
+
+			Q_ASSERT(writtenParamCount == static_cast<int>(li->stateChangesToRead.size()));
+
+			li->stateChangesToRead.clear();
+			li->minTime.clear();
+
+			li->stateChangesMutex.unlock(thread);
+
+			//
+
+			header.paramCount = static_cast<quint16>(writtenParamCount);
+
+			header.time = static_cast<qint32>(baseTime_ms / 1000);	// milliseconds -> seconds
+
+			for(auto& ci : m_channelsInfo)
+			{
+				m_socket.writeDatagram(m_sendBuffer, packetSize,
+									   ci.gatewayIP.address(), ci.gatewayIP.port());
+
+				ci.statesPacketsSentCount++;
+
+				if ((ci.statesPacketsSentCount % 10) == 0)
+				{
+					qDebug() << C_STR(QString("State packets send to %1: %3").
+									  arg(ci.gatewayIP.addressPortStr()).
+									  arg(ci.statesPacketsSentCount));
+				}
+			}
+		}
+
 	}
 
 	int IvsImpulseCommThreadWorker::writeStatesToPacket(IvsImpulseStatesPacket* packet,
@@ -150,16 +219,17 @@ namespace Gateway
 
 		for(int i = startIndex; i < startIndex + size; i++)
 		{
-			SimpleAppSignalState st = m_states[i].getState();
+			const SimpleAppSignalState& st = m_states[i].getState();
 
 			stateA->value = static_cast<float>(st.value);
-			stateA->stateCode = getAnalogStateCodeA(st.flags);
+			stateA->stateCode = getAnalogStateCodeA(st);
 
 			switch(timeType)
 			{
 			case ::E::TimeType::Plant:	time = std::max(time, st.time.plant.timeStamp); break;
 			case ::E::TimeType::System:	time = std::max(time, st.time.system.timeStamp); break;
 			case ::E::TimeType::Local:	time = std::max(time, st.time.local.timeStamp); break;
+			default: Q_ASSERT(false);
 			}
 
 			stateA++;
@@ -202,7 +272,7 @@ namespace Gateway
 
 		for(int i = startIndex; i < startIndex + size; i++)
 		{
-			SimpleAppSignalState st = m_states[i].getState();
+			const SimpleAppSignalState& st = m_states[i].getState();
 
 			*statesB |= (st.value == 0 ? 0 : 1) << bitNo;
 			*validityB |= (st.isValid() == true ? 0 : 1) << bitNo;
@@ -212,6 +282,7 @@ namespace Gateway
 			case ::E::TimeType::Plant:	time = std::max(time, st.time.plant.timeStamp); break;
 			case ::E::TimeType::System:	time = std::max(time, st.time.system.timeStamp); break;
 			case ::E::TimeType::Local:	time = std::max(time, st.time.local.timeStamp); break;
+			default: Q_ASSERT(false);
 			}
 
 			paramCount++;
@@ -243,16 +314,16 @@ namespace Gateway
 
 		for(int i = startIndex; i < startIndex + size; i++)
 		{
-			SimpleAppSignalState st = m_states[i].getState();
+			const SimpleAppSignalState& st = m_states[i].getState();
 
-			stateD->value = st.value == 0 ? 0 : 1;
-			stateD->notValid = st.isValid() == true ? 0 : 1;
+			*stateD = getDiscreteStateD(st);
 
 			switch(timeType)
 			{
 			case ::E::TimeType::Plant:	time = std::max(time, st.time.plant.timeStamp); break;
 			case ::E::TimeType::System:	time = std::max(time, st.time.system.timeStamp); break;
 			case ::E::TimeType::Local:	time = std::max(time, st.time.local.timeStamp); break;
+			default: Q_ASSERT(false);
 			}
 
 			stateD++;
@@ -270,23 +341,129 @@ namespace Gateway
 		return dataSize;
 	}
 
-	AnalogStateCode_A IvsImpulseCommThreadWorker::getAnalogStateCodeA(::AppSignalStateFlags flags) const
+	int IvsImpulseCommThreadWorker::writeStateChangesToPacket(std::shared_ptr<IvsImpulseListInfo>& li,
+															IvsImpulseSignalEvent* event,
+															E::SignalListDataType dataType,
+															qint64 baseTime_ms,
+															const std::vector<GatewayAppSignalState>& stateChanges,
+															int& paramCount)
 	{
-		AnalogStateCode_A code;
+		TEST_PTR_RETURN_VALUE(event, 0);
 
-		code.flag.notValid = !flags.valid;
+		::E::TimeType timeType = m_gateway->timeType();
+		paramCount = 0;
+		int dataSize = 0;
+
+		qint64 time = 0;
+
+		for(const GatewayAppSignalState& st : stateChanges)
+		{
+			auto it = li->hashToListIndex.find(st.curState.hash);
+
+			if (it == li->hashToListIndex.end())
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			event->indexInList = static_cast<quint16>(it->second);
+
+			switch(timeType)
+			{
+			case ::E::TimeType::Plant:	time = st.curState.plantTime(); break;
+			case ::E::TimeType::System:	time = st.curState.systemTime(); break;
+			case ::E::TimeType::Local:	time = st.curState.localTime(); break;
+			default: Q_ASSERT(false);
+			}
+
+			qint64 timeOffset = time - baseTime_ms;
+
+			if (timeOffset < 0)
+			{
+				Q_ASSERT(false);
+				timeOffset = 0;
+			}
+
+			event->timeOffset = static_cast<quint16>(timeOffset);
+
+			switch(dataType)
+			{
+			case E::SignalListDataType::Analog_A:
+				event->prevCode_A = getAnalogStateCodeA(st.prevState);
+				event->newCode_A = getAnalogStateCodeA(st.curState);
+				break;
+
+			case E::SignalListDataType::Discrete_D:
+			case E::SignalListDataType::Discrete_B:
+				event->prevState_D = getDiscreteStateD(st.prevState);
+				event->newState_D = getDiscreteStateD(st.curState);
+				break;
+
+			default: Q_ASSERT(false);
+			}
+
+			event++;
+
+			paramCount++;
+			dataSize += sizeof(IvsImpulseSignalEvent);
+		}
+
+		return dataSize;
+	}
+
+	AnalogStateCode_A IvsImpulseCommThreadWorker::getAnalogStateCodeA(const SimpleAppSignalState& state) const
+	{
+		const ::AppSignalStateFlags& flags = state.flags;
+
+		AnalogStateCode_A codeA;
+
+		codeA.flag.notValid = !flags.valid;
 
 		if (flags.aboveHighLimit)
 		{
-			code.flag.deviationCode = DEV_CODE_A_VRG;
+			codeA.flag.deviationCode = DEV_CODE_A_VRG;
 		}
 
 		if (flags.belowLowLimit)
 		{
-			code.flag.deviationCode = DEV_CODE_A_NRG;
+			codeA.flag.deviationCode = DEV_CODE_A_NRG;
 		}
 
-		return code;
+		return codeA;
+	}
+
+	DiscreteState_D IvsImpulseCommThreadWorker::getDiscreteStateD(const SimpleAppSignalState& state) const
+	{
+		DiscreteState_D stateD;
+
+		stateD.value = state.value == 0 ? 0 : 1;
+		stateD.notValid = state.isValid() == true ? 0 : 1;
+
+		return stateD;
+	}
+
+	// --------------------------------------------------------------------------------------
+	//
+	//  IvsImpulseCommThread class implementation
+	//
+	// --------------------------------------------------------------------------------------
+
+	IvsImpulseCommThread::IvsImpulseCommThread(IvsImpulseHandler& handler)
+	{
+		addWorker(new IvsImpulseCommThreadWorker(handler));
+	}
+
+	void IvsImpulseCommThread::connect(AppDataServiceClient* client)
+	{
+		TEST_PTR_RETURN(client);
+
+		for(auto worker : m_workerList)
+		{
+			SimpleThread::connect(client,
+								  &AppDataServiceClient::sendStateChanges,
+								  dynamic_cast<IvsImpulseCommThreadWorker*>(worker),
+								  &IvsImpulseCommThreadWorker::onSendStateChanges);
+		}
 	}
 }
 

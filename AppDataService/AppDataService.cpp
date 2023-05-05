@@ -111,12 +111,11 @@ void AppDataServiceWorker::unregisterDestSignalStatesQueue(SimpleAppSignalStates
 }
 
 void AppDataServiceWorker::registerGatewaySignalStatesQueue(GatewayAppSignalStatesQueueShared destQueue,
-															const std::set<Hash>& hashes,
-															const QString& description)
+															const std::set<Hash>& hashes)
 {
 	TEST_PTR_RETURN(m_appDataReceiver);
 
-	m_appDataReceiver->registerGatewaySignalStatesQueue(destQueue, hashes, description);
+	m_appDataReceiver->registerGatewaySignalStatesQueue(destQueue, hashes);
 }
 
 void AppDataServiceWorker::unregisterGatewaySignalStatesQueue(GatewayAppSignalStatesQueueShared destQueue)

@@ -7,8 +7,9 @@
 
 namespace Gateway
 {
-	struct IvsImpulseListInfo
+	class IvsImpulseListInfo
 	{
+	public:
 		IvsImpulseSignalListShared info;
 
 		int startIndex = -1;
@@ -16,7 +17,14 @@ namespace Gateway
 
 		quint16 iventsPacketNo = 0;
 
-		std::vector<GatewayAppSignalState> stateChanges;
+		std::map<Hash, int> hashToListIndex;		// Hash(appSignalID) => index in signal list
+
+		SimpleMutex stateChangesMutex;
+
+		Times minTime;
+		std::vector<GatewayAppSignalState> stateChangesToRead;
+
+		std::vector<GatewayAppSignalState> stateChangesToWrite;
 	};
 
 	using IvsImpulseListInfoShared = std::shared_ptr<IvsImpulseListInfo>;
@@ -58,6 +66,7 @@ namespace Gateway
 		IvsImpulseCommThread* m_ivsImpulseCommThread = nullptr;
 
 		friend class IvsImpulseCommThreadWorker;
+		friend class AppDataServiceClient;
 	};
 
 	using IvsImpulseHandlerShared = std::shared_ptr<IvsImpulseHandler>;

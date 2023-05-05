@@ -35,13 +35,13 @@ namespace Gateway
 												m_appDataService1,
 												m_appDataService2,
 												QString("GatewayService %1").arg(m_softwareInfo.equipmentID()),
-												m_states,
-												m_signalStatesUpdated);
+												*this);
 		m_appDataServiceClientThread->start();
 
-		//
-
 		m_ivsImpulseCommThread = new IvsImpulseCommThread(*this);
+
+		m_ivsImpulseCommThread->connect(m_appDataServiceClientThread->client());
+
 		m_ivsImpulseCommThread->start();
 	}
 
@@ -90,18 +90,29 @@ namespace Gateway
 
 			const auto& ids = ivsList->signalIDs();
 
+			// signal index in list, numbered from 1
+			//
+			int listIndex = 1;
+
 			for(const QString& id : ids)
 			{
 				const AppSignal* s = m_appSignals.getSignalByID(id);
 
 				if (s != nullptr)
 				{
-					m_states.emplace_back(calcHash(id), ivsList->sendEvents());
+					Hash h = calcHash(id);
+
+					AppSignalState& newState = m_states.emplace_back(h, ivsList->sendEvents());
+					newState.setListIndex(listIndex);
+
+					li->hashToListIndex.insert({h, listIndex});
 				}
 				else
 				{
 					m_states.emplace_back(0, false);		// init as NOT workable
 				}
+
+				listIndex++;
 
 				signalStateIndex++;
 			}

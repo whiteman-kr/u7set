@@ -189,7 +189,7 @@ bool AppDataSource::getSignalState(SimpleAppSignalStateArchiveFlag* state, const
 	return result;
 }
 
-bool AppDataSource::getGatewaySignalState(GatewayAppSignalState* gwState, const QThread* thread)
+bool AppDataSource::getGatewaySignalState(GatewayAppSignalStateQueueMask* gwState, const QThread* thread)
 {
 	TEST_PTR_RETURN_FALSE(gwState);
 

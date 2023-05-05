@@ -57,8 +57,7 @@ public:
 	void unregisterDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue);
 
 	void registerGatewaySignalStatesQueue(GatewayAppSignalStatesQueueShared destQueue,
-										const std::set<Hash>& hashes,
-										const QString& description);
+										const std::set<Hash>& hashes);
 	void unregisterGatewaySignalStatesQueue(GatewayAppSignalStatesQueueShared destQueue);
 
 	void fillAppDataReceiveState(Network::AppDataReceiveState* adrs);

@@ -44,13 +44,21 @@ namespace Gateway
 	//
 	struct DiscreteState_D
 	{
-		quint8 value		: 1;	// value of discrete signal, 0 or 1
+		union
+		{
+			struct
+			{
+				quint8 value		: 1;	// value of discrete signal, 0 or 1
 
-		quint8 reserv1		: 2;
+				quint8 reserv1		: 2;
 
-		quint8 notValid		: 1;	// validity flag: valid - 0, NOT valid - 1,
+				quint8 notValid		: 1;	// validity flag: valid - 0, NOT valid - 1,
 
-		quint8 reserv2		: 4;
+				quint8 reserv2		: 4;
+			};
+
+			quint8 allFlags = 0;
+		};
 	};
 
 	// discrete signals packed states, 'B' format

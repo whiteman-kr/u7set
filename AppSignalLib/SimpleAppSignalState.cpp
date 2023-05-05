@@ -19,15 +19,15 @@ SimpleAppSignalState::operator AppSignalState() const
 	return state;
 }
 
-void SimpleAppSignalState::save(Proto::AppSignalState* protoState)
+void SimpleAppSignalState::save(Proto::AppSignalState* protoState) const
 {
-	if (protoState == nullptr)
+	TEST_PTR_RETURN(protoState);
+
+	if (hash == 0)
 	{
-		assert(false);
+		protoState->Clear();
 		return;
 	}
-
-	assert(hash != 0);
 
 	protoState->set_hash(hash);
 	protoState->set_value(value);
@@ -41,8 +41,6 @@ void SimpleAppSignalState::save(Proto::AppSignalState* protoState)
 Hash SimpleAppSignalState::load(const Proto::AppSignalState& protoState)
 {
 	hash = protoState.hash();
-
-	assert(hash != 0);
 
 	value = protoState.value();
 	flags.all = protoState.flags();
@@ -92,7 +90,7 @@ void SimpleAppSignalStatesQueue::afterPush()
 
 // ---------------------------------------------------------------------------------------------------------
 //
-// SimpleAppSignalStatesArchiveQueue class implementation
+// SimpleAppSignalStatesArchiveFlagQueue class implementation
 //
 // ---------------------------------------------------------------------------------------------------------
 
@@ -121,4 +119,24 @@ void SimpleAppSignalStatesArchiveFlagQueue::pushAutoPoint(const SimpleAppSignalS
 	st.sendStateToArchive = sendStateToArchive;
 
 	FastThreadSafeQueue<SimpleAppSignalStateArchiveFlag>::push(st, thread);
+}
+
+// ---------------------------------------------------------------------------------------------------------
+//
+// GatewayAppSignalState class implementation
+//
+// ---------------------------------------------------------------------------------------------------------
+
+void GatewayAppSignalState::saveToProto(::Network::GatewayAppSignalState* proto) const
+{
+	TEST_PTR_RETURN(proto);
+
+	prevState.save(proto->mutable_prevstate());
+	curState.save(proto->mutable_curstate());
+}
+
+void GatewayAppSignalState::loadFromProto(const ::Network::GatewayAppSignalState& proto)
+{
+	prevState.load(proto.prevstate());
+	curState.load(proto.curstate());
 }

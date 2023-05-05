@@ -7,11 +7,12 @@ namespace Gateway
 											   const HostAddressPort& serverAddressPort1,
 											   const HostAddressPort& serverAddressPort2,
 											   const QString& clientDescription,
-											   AppSignalStates& states,
-											   std::atomic_bool& signalStatesUpdated) :
+											   IvsImpulseHandler& handler) :
 		Tcp::Client(softwareInfo, serverAddressPort1, serverAddressPort2, clientDescription),
-		m_states(states),
-		m_signalStatesUpdated(signalStatesUpdated),
+		m_lists(handler.m_lists),
+		m_states(handler.m_states),
+		m_hashToLists(handler.m_hashToLists),
+		m_signalStatesUpdated(handler.m_signalStatesUpdated),
 		m_timer(this)
 	{
 	}
@@ -137,13 +138,54 @@ namespace Gateway
 			return;
 		}
 
+		for(auto& list : m_lists)
+		{
+			list->stateChangesToWrite.clear();
+		}
+
 		int statesCount = reply.appsignalstates_size();
 
-		std::map<IvsImpulseListInfoShared, std::vector<GatewayAppSignalState>> listStateChanges;
+		GatewayAppSignalState state;
 
 		for(int i = 0; i < statesCount; i++)
 		{
-			v;lrmvb;km;dfbmd;fbmd;fbmd;flbmd;f
+			const ::Network::GatewayAppSignalState& protoState = reply.appsignalstates(i);
+
+			state.loadFromProto(protoState);
+
+			Q_ASSERT(state.prevState.hash == state.curState.hash);
+
+			auto it = m_hashToLists.find(state.prevState.hash);
+
+			if (it == m_hashToLists.end())
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			std::vector<IvsImpulseListInfoShared>& lists = it->second;
+
+			for(IvsImpulseListInfoShared& list : lists)
+			{
+				list->stateChangesToWrite.push_back(state);
+			}
 		}
+
+		QThread* thread = QThread::currentThread();
+
+		for(IvsImpulseListInfoShared& list : m_lists)
+		{
+			list->stateChangesMutex.lock(thread);
+
+			list->minTime.plant.timeStamp = reply.minplanttime();
+			list->minTime.system.timeStamp = reply.minsystemtime();
+			list->minTime.local.timeStamp = reply.minlocaltime();
+
+			list->stateChangesToWrite.swap(list->stateChangesToRead);
+
+			list->stateChangesMutex.unlock(thread);
+		}
+
+		emit sendStateChanges();
 	}
 }

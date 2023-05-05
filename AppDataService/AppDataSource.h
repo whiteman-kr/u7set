@@ -29,7 +29,7 @@ public:
 	void setState(const Network::AppDataSourceState& proto);
 
 	bool getSignalState(SimpleAppSignalStateArchiveFlag* state, const QThread* thread);
-	bool getGatewaySignalState(GatewayAppSignalState* gwState, const QThread* thread);
+	bool getGatewaySignalState(GatewayAppSignalStateQueueMask* gwState, const QThread* thread);
 
 	int acquiredSignalsCount() const { return m_acquiredSignalsCount; }
 
