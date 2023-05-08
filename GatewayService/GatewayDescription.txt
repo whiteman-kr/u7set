@@ -27,7 +27,7 @@ GatewayIP2 = 224.0.1.222:9090	    // IP and port of IVS gateway channel 2
 
 ListsVersion = 1					// version of exchange lists
 
-TimeType = PlantTime					// possible values: PlantTime, ServerLocalTime, ServerTimeUTC0
+TimeType = Plant					// possible values: Plant, Server, Local
 Period = 1000						// periodic send state period, milliseconds
 
 [SignalList]						// --- signal list description
