@@ -466,6 +466,7 @@ namespace AppSignalPropNames
 	inline const QString R0_OHM("R0_Ohm");
 	inline const QString OUTPUT_MODE("OutputMode");
 	inline const QString OUTPUT_MODE_STR("OutputModeStr");
+    inline const QString INPUT_RANGE("InputRange");
 	inline const QString ACQUIRE("Acquire");
 	inline const QString ARCHIVE("Archive");
 	inline const QString DECIMAL_PLACES("DecimalPlaces");
