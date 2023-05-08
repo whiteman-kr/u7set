@@ -1457,6 +1457,11 @@ void AppSignal::writeToXml(XmlWriteHelper& xml)
 				continue;
 			}
 
+            if (name == AppSignalPropNames::INPUT_RANGE)
+            {
+                continue;
+            }
+
 			Q_ASSERT(false);		// unknown E::* enum type!
 		}
 	}
