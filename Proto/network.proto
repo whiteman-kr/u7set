@@ -69,13 +69,16 @@ message GetAppSignalStateReply
 {
 	optional int32 error = 1 [default = 0];
 
-	optional int64 serverTimeUtc = 2;
-	optional int64 serverTimeLocal = 3;
+	optional int64 serverTimeUtc = 2 [default = 0];
+	optional int64 serverTimeLocal = 3 [default = 0];
 
-	repeated Proto.AppSignalState appSignalStates = 4;		// Limited to ADS_GET_APP_SIGNAL_STATE_MAX (2000)
+	optional int32 stateChangesQueueSize = 4  [default = 0];
+	optional int32 gatewayStateChangesQueueSize = 5  [default = 0];
+
+	repeated Proto.AppSignalState appSignalStates = 6;		// Limited to ADS_GET_APP_SIGNAL_STATE_MAX (2000)
 }
 
-// Geetting application signal states changes
+// Getting application signal states changes
 //
 message GetAppSignalStateChangesRequest
 {
@@ -92,6 +95,34 @@ message GetAppSignalStateChangesReply
 
 	repeated Proto.AppSignalState appSignalStates = 5;		// Limited to ADS_GET_APP_SIGNAL_STATE_MAX (2000)
 }
+
+// Getting application signal states changes for GatewayService
+//
+message GatewayGetAppSignalStateChangesRequest
+{
+	repeated uint64 signalsHashes = 1;
+}
+
+message GatewayAppSignalState
+{
+	required Proto.AppSignalState prevState = 1;
+	required Proto.AppSignalState curState = 2;
+}
+
+message GatewayGetAppSignalStateChangesReply
+{
+	optional int32 error = 1 [default = 0];
+
+	optional int64 minPlantTime = 2 [default = 0];
+	optional int64 minSystemTime = 3 [default = 0];
+	optional int64 minLocalTime = 4 [default = 0];
+
+	optional int32 pendingStatesCount = 5 [default = 0];
+
+	repeated GatewayAppSignalState appSignalStates = 6;		// Limited to ADS_GET_APP_SIGNAL_STATE_MAX (2000)
+}
+
+//
 
 message LanControllerInfo
 {

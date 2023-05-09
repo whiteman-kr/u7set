@@ -3,9 +3,12 @@
 #include "SignalStatesProcessingThread.h"
 #include "AppDataReceiver.h"
 
-SignalStatesProcessingThread::SignalStatesProcessingThread(CircularLoggerShared log) :
-    m_log(log)
+SignalStatesProcessingThread::SignalStatesProcessingThread(DynamicAppSignalStates& signalStates,
+														   CircularLoggerShared log) :
+	m_signalStates(signalStates),
+	m_log(log)
 {
+	m_gatewayQueues.resize(GATEWAY_QUEUES_COUNT);
 }
 
 void SignalStatesProcessingThread::registerDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue,
@@ -63,6 +66,66 @@ void SignalStatesProcessingThread::unregisterDestSignalStatesQueue(SimpleAppSign
 	}
 }
 
+void SignalStatesProcessingThread::registerGatewaySignalStatesQueue(GatewayAppSignalStatesQueueShared destQueue,
+								   const std::set<Hash>& hashes)
+{
+	quint32 queueMask = 0;
+
+	m_gatewayQueuesMutex.lock();
+
+	for(int i = 0; i < GATEWAY_QUEUES_COUNT; i++)
+	{
+		GatewayQueueHashes& gqh = m_gatewayQueues[i];
+
+		if (gqh.queue == nullptr)
+		{
+			gqh.queue = destQueue;
+			gqh.hashes = hashes;
+
+			queueMask = 1 << i;
+
+			break;
+		}
+	}
+
+	m_gatewayQueuesMutex.unlock();
+
+	if (queueMask != 0)
+	{
+		m_signalStates.setGatewayQueueMask(hashes, queueMask);
+	}
+}
+
+void SignalStatesProcessingThread::unregisterGatewaySignalStatesQueue(GatewayAppSignalStatesQueueShared destQueue)
+{
+	quint32 queueMask = 0;
+	std::set<Hash> hashes;
+
+	m_gatewayQueuesMutex.lock();
+
+	for(int i = 0; i < GATEWAY_QUEUES_COUNT; i++)
+	{
+		GatewayQueueHashes& gqh = m_gatewayQueues[i];
+
+		if (gqh.queue == destQueue)
+		{
+			gqh.queue = nullptr;
+			hashes.swap(gqh.hashes);
+
+			queueMask = 1 << i;
+
+			break;
+		}
+	}
+
+	m_gatewayQueuesMutex.unlock();
+
+	if (queueMask != 0)
+	{
+		m_signalStates.resetGatewayQueueMask(hashes, queueMask);
+	}
+}
+
 void SignalStatesProcessingThread::processStates(AppDataReceiver& receiver)
 {
 	DEBUG_LOG_MSG(m_log, QString("SignalStatesProcessingThread is started"));
@@ -74,33 +137,58 @@ void SignalStatesProcessingThread::processStates(AppDataReceiver& receiver)
 	QThread* thisThread = QThread::currentThread();
 
 	SimpleAppSignalStateArchiveFlag state;
+	GatewayAppSignalStateQueueMask gwState;
+	bool haveStateToProcessing = false;
 
 	std::unique_lock ul(waitConditionMutex, std::defer_lock);
 
-	while(receiver.isQuitRequested() == false)
+	AppDataSource* sourceToStatesProcessing = nullptr;
+
+	while(true)
 	{
 		ul.lock();
 
-		waitCondition.wait_for(ul, std::chrono::milliseconds(10));
-
-		while(true)
+		if (sourceToStatesProcessing != nullptr)
 		{
-			if (requireProcessing.empty() == true ||
-				receiver.isQuitRequested() == true)
-			{
-				ul.unlock();
-				break;
-			}
+			requireProcessing.push(sourceToStatesProcessing);
+		}
 
-			AppDataSource* source = requireProcessing.front();
+		waitCondition.wait(ul, [&requireProcessing, &receiver]() -> bool
+								{
+									return	!requireProcessing.empty() ||
+											receiver.isQuitRequested();
+								});
 
-			requireProcessing.pop();
-
+		if (receiver.isQuitRequested() == true)
+		{
 			ul.unlock();
+			break;
+		}
 
-			while(source->getSignalState(&state, thisThread) == true)
+		sourceToStatesProcessing = nullptr;
+
+		if (requireProcessing.empty() == false)
+		{
+			sourceToStatesProcessing = requireProcessing.front();
+			requireProcessing.pop();
+		}
+
+		ul.unlock();
+
+		int ctr = 500;
+
+		if (sourceToStatesProcessing != nullptr)
+		{
+			m_queuesMutex.lock(thisThread);
+
+			while(ctr > 0)
 			{
-				m_queuesMutex.lock(thisThread);
+				haveStateToProcessing = sourceToStatesProcessing->getSignalState(&state, thisThread);
+
+				if (haveStateToProcessing == false)
+				{
+					break;
+				}
 
 				for(const auto& p : m_queues)
 				{
@@ -114,18 +202,51 @@ void SignalStatesProcessingThread::processStates(AppDataReceiver& receiver)
 						if (state.sendStateToArchive == true)
 						{
 							queue->push(state.state, thisThread);
+							ctr--;
 						}
 					}
 					else
 					{
 						queue->push(state.state, thisThread);
+						ctr--;
 					}
 				}
-
-				m_queuesMutex.unlock(thisThread);
 			}
 
-			ul.lock();
+			m_queuesMutex.unlock(thisThread);
+
+			//
+
+			m_gatewayQueuesMutex.lock(thisThread);
+
+			while(ctr > 0)
+			{
+				haveStateToProcessing = sourceToStatesProcessing->getGatewaySignalState(&gwState, thisThread);
+
+				if (haveStateToProcessing == false)
+				{
+					sourceToStatesProcessing = nullptr;
+					break;
+				}
+
+				quint32 queueMask = gwState.gatewayQueueMask;
+
+				for(int bit = 0; queueMask != 0 && bit < sizeof(quint32) * 8;  queueMask >>= 1, bit++)
+				{
+					if ((queueMask & 1) != 0)
+					{
+						GatewayAppSignalStatesQueueShared queue = m_gatewayQueues[bit].queue;
+
+						if (queue != nullptr)
+						{
+							queue->push(gwState, thisThread);
+							ctr--;
+						}
+					}
+				}
+			}
+
+			m_gatewayQueuesMutex.unlock(thisThread);
 		}
 	}
 

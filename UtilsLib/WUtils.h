@@ -90,22 +90,22 @@
 
 #define DEBUG_STOP					{ int a = 0; a++; }
 
-#define RETURN_IF_FALSE(result)		if (result == false) \
+#define RETURN_IF_FALSE(result)		if ((result) == false) \
 									{ \
 										return false; \
 									}
 
-#define RETURN_VALUE_IF_FALSE(result, value)		if (result == false) \
+#define RETURN_VALUE_IF_FALSE(result, value)		if ((result) == false) \
 													{ \
 														return value; \
 													}
 
-#define CONTINUE_IF_FALSE(result)	if (result == false) \
+#define CONTINUE_IF_FALSE(result)	if ((result) == false) \
 									{ \
 										continue; \
 									}
 
-#define BREAK_IF_FALSE(result)		if (result == false) \
+#define BREAK_IF_FALSE(result)		if ((result) == false) \
 									{ \
 										break; \
 									}

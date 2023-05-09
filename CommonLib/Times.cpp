@@ -27,3 +27,10 @@ Times& Times::operator += (qint64 timeSpan)
 
 	return *this;
 }
+
+void Times::clear()
+{
+	system.timeStamp = 0;
+	local.timeStamp = 0;
+	plant.timeStamp = 0;
+}

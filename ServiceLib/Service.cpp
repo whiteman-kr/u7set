@@ -6,36 +6,6 @@
 #include "../UtilsLib/WUtils.h"
 #include "../lib/ConstStrings.h"
 
-ServiceInfo::ServiceInfo()
-{
-}
-
-ServiceInfo::ServiceInfo(E::SoftwareType _softwareType, quint16 _port, QString _name, QString _shortName) :
-	softwareType(_softwareType),
-	port(_port),
-	name(_name),
-	shortName(_shortName)
-{
-}
-
-ServicesInfo::ServicesInfo()
-{
-	const ServiceInfo serviceInfo[] =
-	{
-		ServiceInfo(E::SoftwareType::BaseService, PORT_BASE_SERVICE, "Base Service", "BaseSrv"),
-		ServiceInfo(E::SoftwareType::ConfigurationService, PORT_CONFIGURATION_SERVICE, "Configuration Service", "CfgSrv"),
-		ServiceInfo(E::SoftwareType::AppDataService, PORT_APP_DATA_SERVICE, "Application Data Service", "AppDataSrv"),
-		ServiceInfo(E::SoftwareType::TuningService, PORT_TUNING_SERVICE, "Tuning Service", "TuningSrv"),
-		ServiceInfo(E::SoftwareType::ArchiveService, PORT_ARCHIVING_SERVICE, "Data Archiving Service", "DataArchSrv"),
-		ServiceInfo(E::SoftwareType::DiagDataService, PORT_DIAG_DATA_SERVICE, "Diagnostics Data Service", "DiagDataSrv"),
-	};
-
-	for(const ServiceInfo& sInfo : serviceInfo)
-	{
-		insert(sInfo.softwareType, sInfo);
-	}
-}
-
 // -------------------------------------------------------------------------------------
 //
 // ServiceWorker class implementation
@@ -131,17 +101,19 @@ E::SoftwareType ServiceWorker::softwareType() const
 	return m_softwareInfo.softwareType();
 }
 
-void ServiceWorker::initAndProcessCmdLineSettings()
+bool ServiceWorker::initAndProcessCmdLineSettings()
 {
 	if (m_instanceNo > 1)
 	{
 		assert(false);			// call initAndProcessCmdLineSettings() for first ServiceWorker instance only!
-		return;
+		return true;
 	}
 
 	init();
 
-	processCmdLineSettings();
+	m_cmdLineParser.processSettings(m_settings, m_logger);
+
+	return processCustomCmdLineSettings();
 }
 
 void ServiceWorker::setService(Service* service)
@@ -261,9 +233,10 @@ void ServiceWorker::init()
 	m_cmdLineParser.parse();
 }
 
-void ServiceWorker::processCmdLineSettings()
+bool ServiceWorker::processCustomCmdLineSettings()
 {
-	m_cmdLineParser.processSettings(m_settings, m_logger);
+	return true;		// continue service running
+						// return false to exit service
 }
 
 void ServiceWorker::onThreadStarted()
@@ -454,7 +427,18 @@ void Service::stopServiceWorkerThread()
 
 void Service::startBaseRequestSocketThread()
 {
-	ServiceInfo sInfo = servicesInfo.value(m_serviceWorkerFactory.softwareType());
+	E::SoftwareType swType = m_serviceWorkerFactory.softwareType();
+
+	auto it = std::find_if(	servicesInfo.begin(),
+							servicesInfo.end(),
+							[swType](const ServiceInfo& si)
+							{
+								return si.softwareType == swType;
+							});
+
+	Q_ASSERT(it != servicesInfo.end());
+
+	const ServiceInfo& sInfo = *it;
 
 	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::AnyIPv4, sInfo.port, m_logger);
 
@@ -611,10 +595,19 @@ int ServiceStarter::privateRun()
 	DEBUG_LOG_MSG(m_logger, Separator::LINE);
 	DEBUG_LOG_MSG(m_logger, QString());
 
-	m_serviceWorker.initAndProcessCmdLineSettings();			// 1. init CommanLineParser
-																// 2. process cmd line args
-																// 3. update and store service settings
+	// 1. init CommanLineParser
+	// 2. process cmd line args
+	// 3. update and store service settings
+	//
+	bool continueRun = m_serviceWorker.initAndProcessCmdLineSettings();
+
+	if (continueRun == false)
+	{
+		return 0;
+	}
+
 	bool pauseAndExit = false;
+
 	bool startAsRegularApp = false;
 
 	processCmdLineArguments(pauseAndExit, startAsRegularApp);

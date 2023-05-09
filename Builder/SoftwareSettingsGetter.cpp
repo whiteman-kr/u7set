@@ -234,6 +234,22 @@ bool SoftwareSettingsGetter::getCfgServiceConnection(	const Hardware::EquipmentS
 	return result;
 }
 
+bool SoftwareSettingsGetter::getCfgServiceConnection(const Hardware::EquipmentSet* equipment,
+													const Hardware::Software* software,
+													SoftwareEndpoint::ConfigService* cfgService1,
+													SoftwareEndpoint::ConfigService* cfgService2,
+													Builder::IssueLogger* log)
+{
+	TEST_PTR_LOG_RETURN_FALSE(cfgService1, log);
+	TEST_PTR_LOG_RETURN_FALSE(cfgService2, log);
+
+	return getCfgServiceConnection(equipment,
+								   software,
+								   &cfgService1->equipmentId, &cfgService1->address,
+								   &cfgService2->equipmentId, &cfgService2->address,
+								   log);
+}
+
 bool SoftwareSettingsGetter::getLmPropertiesFromDevice(	const Hardware::DeviceModule* lm,
 														E::LanControllerType lanControllerType,
 														const Builder::Context* context,
@@ -418,6 +434,7 @@ bool CfgServiceSettingsGetter::buildClientsList(const Builder::Context* context,
 {
 	const QString PROP_CFG_SERVICE_ID1(EquipmentPropNames::CFG_SERVICE_ID1);
 	const QString PROP_CFG_SERVICE_ID2(EquipmentPropNames::CFG_SERVICE_ID2);
+	const QString PROP_CFG_SERVICE_IDS(EquipmentPropNames::CFG_SERVICE_IDS);
 
 	Builder::IssueLogger* log = context->m_log;
 
@@ -443,18 +460,40 @@ bool CfgServiceSettingsGetter::buildClientsList(const Builder::Context* context,
 		}
 
 		QString ID1;
+		QString ID2;
+
+		if (DeviceHelper::isPropertyExists(software, PROP_CFG_SERVICE_IDS) == true)
+		{
+			QStringList ids;
+			result &= DeviceHelper::getStrListProperty(software, PROP_CFG_SERVICE_IDS, &ids, log);
+
+			if (ids.size() == 1)
+			{
+				ID1 = ids[0];
+			}
+			else
+			{
+				if (ids.size() >= 2)
+				{
+					ID1 = ids[0];
+					ID2 = ids[1];
+				}
+			}
+		}
+
+		//
 
 		if (DeviceHelper::isPropertyExists(software, PROP_CFG_SERVICE_ID1) == true)
 		{
 			result &= DeviceHelper::getStrProperty(software, PROP_CFG_SERVICE_ID1, &ID1, log);
 		}
 
-		QString ID2;
-
 		if (DeviceHelper::isPropertyExists(software, PROP_CFG_SERVICE_ID2) == true)
 		{
 			result &= DeviceHelper::getStrProperty(software, PROP_CFG_SERVICE_ID2, &ID2, log);
 		}
+
+		//
 
 		if (ID1 == cfgService->equipmentIdTemplate() || ID2 == cfgService->equipmentIdTemplate())
 		{
@@ -1664,7 +1703,6 @@ bool MonitorSettingsGetter::readTuningServiceSettings(const Builder::Context* co
 //
 // -------------------------------------------------------------------------------------
 
-
 bool TuningClientSettingsGetter::readSettings(const Builder::Context* context,
 											  const Hardware::Software* software)
 {
@@ -1811,7 +1849,6 @@ bool TuningClientSettingsGetter::readSettings(const Builder::Context* context,
 
 	return result;
 }
-
 
 // -------------------------------------------------------------------------------------
 //
@@ -2012,5 +2049,58 @@ bool TestSuiteSettingsGetter::readTuningServiceSettings(const Builder::Context* 
 		tuningServices.push_back(tsc);
 	}
 
+	return result;
+}
+
+// -------------------------------------------------------------------------------------
+//
+// GatewayServiceSettingsGetter class implementation
+//
+// -------------------------------------------------------------------------------------
+
+bool GatewayServiceSettingsGetter::readSettings(const Builder::Context* context,
+												const Hardware::Software* software)
+{
+	TEST_PTR_RETURN_FALSE(context);
+
+	Builder::IssueLogger* log = context->m_log;
+
+	TEST_PTR_RETURN_FALSE(log);
+	TEST_PTR_LOG_RETURN_FALSE(software, log);
+
+	const Hardware::EquipmentSet* equipment = context->m_equipmentSet.get();
+
+	bool result = true;
+
+	// Get ConfigurationService connections
+	//
+	std::vector<SoftwareEndpoint::ConfigService> cfgSrvConns;
+
+	result &= getSoftwareConnectionsBySoftwareIDs<SoftwareEndpoint::ConfigService>(
+										equipment, software,
+										EquipmentPropNames::CFG_SERVICE_IDS, 2, false,
+										E::SoftwareType::ConfigurationService,
+										EquipmentPropNames::CLIENT_REQUEST_IP,
+										EquipmentPropNames::CLIENT_REQUEST_PORT,
+										&cfgSrvConns, log);
+	cfgService1 = cfgSrvConns[0];
+	cfgService2 = cfgSrvConns[1];
+
+	// Get AppDataService connections
+	//
+	std::vector<SoftwareEndpoint::AppDataService> appDataSrvConns;
+
+	result &= getSoftwareConnectionsBySoftwareIDs<SoftwareEndpoint::AppDataService>(
+										equipment, software,
+										EquipmentPropNames::APP_DATA_SERVICE_IDS, 2, false,
+										E::SoftwareType::AppDataService,
+										EquipmentPropNames::CLIENT_REQUEST_IP,
+										EquipmentPropNames::CLIENT_REQUEST_PORT,
+										&appDataSrvConns, log);
+	appDataService1 = appDataSrvConns[0];
+	appDataService2 = appDataSrvConns[1];
+
+	result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::GATEWAY_DESCRIPTION,
+										   &gatewayDescription, log);
 	return result;
 }

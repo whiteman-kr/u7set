@@ -27,6 +27,12 @@ namespace SoftwareEndpoint
 	{
 		QString equipmentId;
 		HostAddressPort address;
+
+		void clear()
+		{
+			equipmentId.clear();
+			address.clear();
+		}
 	};
 
 	struct TuningService
@@ -482,7 +488,6 @@ public:
 	void clear();
 };
 
-
 class TuningClientSettings : virtual public SoftwareSettings
 {
 public:
@@ -563,4 +568,24 @@ private:
 
 public:
 	void clear();
+};
+
+class GatewayServiceSettings : virtual public SoftwareSettings
+{
+public:
+	SoftwareEndpoint::ConfigService cfgService1;
+	SoftwareEndpoint::ConfigService cfgService2;
+
+	SoftwareEndpoint::AppDataService appDataService1;
+	SoftwareEndpoint::AppDataService appDataService2;
+
+	QString gatewayDescription;
+
+private:
+	// this methods should be call by SoftwareSettingsSet only
+	//
+	bool writeToXml(XmlWriteHelper& xml) const override;
+	bool readFromXml(XmlReadHelper& xml) override;
+
+	friend class SoftwareSettingsSet;
 };

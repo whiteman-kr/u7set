@@ -5,135 +5,13 @@
 
 // -------------------------------------------------------------------------------
 //
-// AppSignals class implementation
-//
-// -------------------------------------------------------------------------------
-
-AppSignals::~AppSignals()
-{
-	clear();
-}
-
-void AppSignals::clear()
-{
-	m_hashToSignal.clear();
-	m_idToSignal.clear();
-
-	for(AppSignal* s : m_signals)
-	{
-		delete s;
-	}
-
-	m_signals.clear();
-}
-
-void AppSignals::insert(const ::Proto::AppSignal& protoAppSignal)
-{
-	QString appSignalID = QString::fromStdString(protoAppSignal.appsignalid());
-
-	if (containsID(appSignalID) == true)
-	{
-		qDebug() << C_STR(QString("Duplicate AppSignalID %1").arg(appSignalID));
-		assert(false);
-		return;
-	}
-
-	Hash hash = calcHash(appSignalID);
-
-	if (containsHash(hash) == true)
-	{
-		qDebug() << C_STR(QString("AppSignalID hash %1 collision").arg(hash, 16));
-		assert(false);
-		return;
-	}
-
-	AppSignal* s = new AppSignal;
-
-	s->loadFromProto(protoAppSignal);
-
-	m_signals.push_back(s);
-	m_idToSignal.insert({appSignalID, s});
-	m_hashToSignal.insert({hash, s});
-}
-
-bool AppSignals::containsID(const QString& appSignalID) const
-{
-	return m_idToSignal.contains(appSignalID);
-}
-
-bool AppSignals::containsHash(Hash hash) const
-{
-	return m_hashToSignal.contains(hash);
-}
-
-const AppSignal* AppSignals::getSignalByID(const QString& appSignalID) const
-{
-	auto it = m_idToSignal.find(appSignalID);
-
-	if (it == m_idToSignal.end())
-	{
-		return nullptr;
-	}
-
-	return it->second;
-}
-
-const AppSignal* AppSignals::getSignalByHash(Hash hash) const
-{
-	auto it = m_hashToSignal.find(hash);
-
-	if (it == m_hashToSignal.end())
-	{
-		return nullptr;
-	}
-
-	return it->second;
-}
-
-bool AppSignals::isEmpty() const
-{
-	Q_ASSERT(m_signals.size() == m_idToSignal.size() &&
-			 m_signals.size() == m_hashToSignal.size());
-
-	return m_signals.empty();
-}
-
-size_t AppSignals::count() const
-{
-	Q_ASSERT(m_signals.size() == m_idToSignal.size() &&
-			 m_signals.size() == m_hashToSignal.size());
-
-	return m_signals.size();
-}
-
-std::vector<AppSignal*>::iterator AppSignals::begin()
-{
-	return m_signals.begin();
-}
-
-std::vector<AppSignal*>::const_iterator AppSignals::begin() const
-{
-	return m_signals.begin();
-}
-
-std::vector<AppSignal*>::iterator AppSignals::end()
-{
-	return m_signals.end();
-}
-
-std::vector<AppSignal*>::const_iterator AppSignals::end() const
-{
-	return m_signals.end();
-}
-
-// -------------------------------------------------------------------------------
-//
 // AppDataSource class implementation
 //
 // -------------------------------------------------------------------------------
 
 AppDataSource::AppDataSource(const DataSource& dataSource) :
-	m_signalStatesQueue(3)
+	m_signalStatesQueue(3),
+	m_gatewaySignalStatesQueue(3)
 {
 	// copy DataSource properties to THIS object
 	//
@@ -152,7 +30,8 @@ AppDataSource::AppDataSource(const DataSource& dataSource) :
 // This object used in SCM for AppDataSource state data displaying only.
 //
 AppDataSource::AppDataSource(const Network::DataSourceInfo& proto) :
-	m_signalStatesQueue(3)
+	m_signalStatesQueue(3),
+	m_gatewaySignalStatesQueue(3)
 {
 	loadFromProto(proto);
 }
@@ -204,6 +83,8 @@ void AppDataSource::prepare(const AppSignals& appSignals,
 
 		DynamicAppSignalState* dynState = signalStates->getStateByID(signal->appSignalID());
 
+		dynState->setQueues(&m_signalStatesQueue, &m_gatewaySignalStatesQueue);
+
 /*		if (dynState->appSignalID() == "#LM1_MEANDR_10MS_2")
 		{
 			dynState->m_debug_replace_time = true;
@@ -216,17 +97,16 @@ void AppDataSource::prepare(const AppSignals& appSignals,
 
 	m_acquiredSignalsCount = static_cast<int>(m_signalStates.count());
 
-	int queueSize = m_acquiredSignalsCount * 3;
-
-	if (queueSize < 200)
-	{
-		queueSize = 200;
-	}
+	int queueSize = std::max(m_acquiredSignalsCount * 3, 200);
 
 	m_signalStatesQueue.resize(queueSize);
+
+	queueSize = std::max(m_acquiredSignalsCount / 2, 1000);
+
+	m_gatewaySignalStatesQueue.resize(queueSize);
 }
 
-void AppDataSource::setStatesProcessingThreadWakupParams(std::mutex* statesProcessigRequiredMutex,
+void AppDataSource::setStatesProcessingThreadWakeupParams(std::mutex* statesProcessigRequiredMutex,
 										  std::condition_variable* statesProcessingRequiredCondition,
 										  std::queue<AppDataSource*>* statesProcessingRequired)
 {
@@ -305,6 +185,17 @@ bool AppDataSource::getSignalState(SimpleAppSignalStateArchiveFlag* state, const
 	bool result = m_signalStatesQueue.pop(state, thread);
 
 	m_signalStatesQueueCurSize = m_signalStatesQueue.size(thread);
+
+	return result;
+}
+
+bool AppDataSource::getGatewaySignalState(GatewayAppSignalStateQueueMask* gwState, const QThread* thread)
+{
+	TEST_PTR_RETURN_FALSE(gwState);
+
+	bool result = m_gatewaySignalStatesQueue.pop(gwState, thread);
+
+	m_gatewaySignalStatesQueueCurSize = m_gatewaySignalStatesQueue.size(thread);
 
 	return result;
 }
@@ -454,27 +345,20 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 	{
 		TEST_PTR_CONTINUE(signalState);
 
-/*		if (signalState->m_debug_replace_time == true)
-		{
-			m_rupTimes.system = timeWithoutCorrection;
-		}*/
-
 		pushedStatesCtr += signalState->setState(m_rupTimes, isSimPacket, packetNo, rupData, rupDataSize,
-										  autoArchivingGroup, m_signalStatesQueue, thread);
-
-/*		if (signalState->m_debug_replace_time == true)
-		{
-			m_rupTimes.system = m_lastPacketServerTime;
-		}*/
+												autoArchivingGroup, thread);
 
 		if (pushedStatesCtr > 20)
 		{
-			pushedStatesCtr -= 20;
+			pushedStatesCtr = 0;
 			wakeupStatesProcessingThread();
 		}
 	}
 
-	wakeupStatesProcessingThread();
+	if (pushedStatesCtr != 0)
+	{
+		wakeupStatesProcessingThread();
+	}
 
 	m_signalStatesQueue.getSizes(&m_signalStatesQueueCurSize, &m_signalStatesQueueCurMaxSize, &m_signalStatesQueueSize, thread);
 
@@ -491,7 +375,7 @@ void AppDataSource::wakeupStatesProcessingThread()
 
 	std::lock_guard lg(*m_statesProcessigRequiredMutex);
 	m_statesProcessingRequired->push(this);
-	m_statesProcessingRequiredCondition->notify_one();
+	m_statesProcessingRequiredCondition->notify_all();
 
 	Q_UNUSED(lg);
 }

@@ -17,6 +17,10 @@ if (MSVC)
 endif (MSVC)
 
 add_library(Builder STATIC
+	../GatewayService/GatewayDescription.cpp
+	../GatewayService/GatewayDescription.h
+	../GatewayService/GatewayDescriptionParser.cpp
+	../GatewayService/GatewayDescriptionParser.h
 	../lib/ClientBehavior.cpp
 	../lib/ClientBehavior.h
 	../lib/ConstStrings.h
@@ -79,6 +83,8 @@ add_library(Builder STATIC
 	DiagDataServiceCfgGenerator.cpp
 	DiagDataServiceCfgGenerator.h
 	FbParamCalculation.cpp
+	GatewayServiceCfgGenerator.cpp
+	GatewayServiceCfgGenerator.h
 	IssueLogger.cpp
 	IssueLogger.h
 	LanControllerInfoHelper.cpp

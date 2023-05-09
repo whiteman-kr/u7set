@@ -32,25 +32,24 @@ enum ServiceState
 
 struct ServiceInfo
 {
-	ServiceInfo();
-	ServiceInfo(E::SoftwareType _softwareType, quint16 _port, QString _name, QString _shortName);
-
 	E::SoftwareType softwareType = E::SoftwareType::Unknown;
 	quint16 port = 0;
 	QString name;
 	QString shortName;
 };
 
-class ServicesInfo : public HashedVector<E::SoftwareType, ServiceInfo>
+inline const std::vector<ServiceInfo> servicesInfo =
 {
-public:
-	ServicesInfo();
+	{ E::SoftwareType::BaseService, PORT_BASE_SERVICE, "Base Service", "BaseSrv" },
+	{ E::SoftwareType::ConfigurationService, PORT_CONFIGURATION_SERVICE, "Configuration Service", "CfgSrv" },
+	{ E::SoftwareType::AppDataService, PORT_APP_DATA_SERVICE, "Application Data Service", "AppDataSrv" },
+	{ E::SoftwareType::TuningService, PORT_TUNING_SERVICE, "Tuning Service", "TuningSrv" },
+	{ E::SoftwareType::ArchiveService, PORT_ARCHIVING_SERVICE, "Data Archiving Service", "DataArchSrv" },
+	{ E::SoftwareType::DiagDataService, PORT_DIAG_DATA_SERVICE, "Diagnostics Data Service", "DiagDataSrv" },
+	{ E::SoftwareType::GatewayService, PORT_GATEWAY_SERVICE, "Gateway Service", "GatewaySrv" },
 };
 
-static ServicesInfo servicesInfo;
-
 class Service;
-
 
 // -------------------------------------------------------------------------------------
 //
@@ -83,7 +82,7 @@ public:
 	const SoftwareInfo& softwareInfo() const;
 	E::SoftwareType softwareType() const;
 
-	void initAndProcessCmdLineSettings();
+	bool initAndProcessCmdLineSettings();
 
 	void setService(Service* service);
 	Service* service();
@@ -132,7 +131,9 @@ signals:
 protected:
 	void init();
 
-	void processCmdLineSettings();					// override to process service-specific cmd line settings
+	virtual bool processCustomCmdLineSettings();			// override to process service-specific cmd line settings
+													// return true - to continue service running
+													// return false - to exit service
 
 	virtual void initCmdLineParser() = 0;			// override to add service-specific options to m_cmdLineParser
 	virtual void loadSettings() = 0;				// override to load service-specific settings

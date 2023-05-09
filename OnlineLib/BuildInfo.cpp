@@ -1,4 +1,5 @@
 #include "BuildInfo.h"
+#include "../lib/ConstStrings.h"
 
 
 namespace OnlineLib
@@ -122,5 +123,10 @@ namespace OnlineLib
 		}
 
 		return QString();
+	}
+
+	bool BuildFileInfo::isConfigurationXml() const
+	{
+		return ID == CfgFileId::CONFIGURATION_XML;
 	}
 }

@@ -14,12 +14,16 @@
 
 HostInfo::HostInfo() : ip(0)
 {
-	servicesData.resize(servicesInfo.count());
+	servicesData.reserve(servicesInfo.size());
 
-	for (int i = 0; i < servicesInfo.count(); i++)
+	for (const ServiceInfo& si : servicesInfo)
 	{
-		servicesData[i].information.mutable_softwareinfo()->set_softwaretype(servicesInfo[i].softwareType);
-		servicesData[i].type = servicesInfo[i].softwareType;
+		ServiceData sd;
+
+		sd.information.mutable_softwareinfo()->set_softwaretype(si.softwareType);
+		sd.type = si.softwareType;
+
+		servicesData.push_back(sd);
 	}
 }
 
@@ -68,7 +72,7 @@ ServiceTableModel::~ServiceTableModel()
 		settings.setArrayIndex(i);
 		settings.setValue("IP", m_hostsInfo[i].ip);
 
-		for (int j = 0; j < servicesInfo.count(); j++)
+		for (int j = 0; j < servicesInfo.size(); j++)
 		{
 			if (m_hostsInfo[i].servicesData[j].statusWidget != nullptr)
 			{
@@ -93,7 +97,7 @@ void ServiceTableModel::startUdpSocketThread()
 
 	for (int i = 0; i < m_hostsInfo.count(); i++)
 	{
-		for (int j = 0; j < servicesInfo.count(); j++)
+		for (int j = 0; j < servicesInfo.size(); j++)
 		{
 			UdpClientSocket*& clientSocket = m_hostsInfo[i].servicesData[j].clientSocket;
 
@@ -104,14 +108,7 @@ void ServiceTableModel::startUdpSocketThread()
 			connect(clientSocket, &UdpClientSocket::ackTimeout, this, &ServiceTableModel::serviceNotFound);
 			connect(clientSocket, &UdpClientSocket::ackReceived, this, &ServiceTableModel::serviceAckReceived);
 
-//			m_hostsInfo[i].servicesData[j].clientSocket = clientSocket;
-
 			m_socketThread->addWorker(clientSocket);
-
-/*			if (!clientSocket->isWaitingForAck())
-			{
-				clientSocket->sendRequest(RQID_SERVICE_GET_INFO);
-			}*/
 		}
 	}
 
@@ -134,7 +131,7 @@ void ServiceTableModel::finishtUdpSocketThread()
 
 	for (int i = 0; i < m_hostsInfo.count(); i++)
 	{
-		for (int j = 0; j < servicesInfo.count(); j++)
+		for (int j = 0; j < servicesInfo.size(); j++)
 		{
 			m_hostsInfo[i].servicesData[j].clientSocket = nullptr;
 		}
@@ -156,7 +153,7 @@ int ServiceTableModel::rowCount(const QModelIndex&) const
 
 int ServiceTableModel::columnCount(const QModelIndex&) const
 {
-	return static_cast<int>(servicesInfo.count());
+	return static_cast<int>(servicesInfo.size());
 }
 
 QVariant ServiceTableModel::data(const QModelIndex &index, int role) const
@@ -176,7 +173,7 @@ QVariant ServiceTableModel::data(const QModelIndex &index, int role) const
 			QString str;
 			bool serviceFound = false;
 
-			for (int i = 0; i < servicesInfo.count(); i++)
+			for (int i = 0; i < servicesInfo.size(); i++)
 			{
 				if (servicesInfo[i].softwareType == static_cast<E::SoftwareType>(si.softwareinfo().softwaretype()))
 				{
@@ -259,7 +256,7 @@ void ServiceTableModel::setServiceState(quint32 ip, quint16 port, ServiceState s
 {
 	int portIndex = -1;
 
-	for (int i = 0; i < servicesInfo.count(); i++)
+	for (int i = 0; i < servicesInfo.size(); i++)
 	{
 		if (servicesInfo[i].port == port)
 		{
@@ -308,7 +305,7 @@ void ServiceTableModel::getServiceState(quint32 ip, quint16 port, int& hostIndex
 	serviceIndex = -1;
 	hostIndex = -1;
 
-	for (int i = 0; i < servicesInfo.count(); i++)
+	for (int i = 0; i < servicesInfo.size(); i++)
 	{
 		if (servicesInfo[i].port == port)
 		{
@@ -535,7 +532,7 @@ void ServiceTableModel::checkServiceStates()
 
 	for (int i = 0; i < m_hostsInfo.count(); i++)
 	{
-		for (int j = 0; j < servicesInfo.count(); j++)
+		for (int j = 0; j < servicesInfo.size(); j++)
 		{
 			UdpClientSocket* clientSocket = m_hostsInfo[i].servicesData[j].clientSocket;
 
@@ -556,7 +553,7 @@ void ServiceTableModel::removeHost(int row)
 {
 	beginRemoveRows(QModelIndex(), row, row);
 
-	for (int j = 0; j < servicesInfo.count(); j++)
+	for (int j = 0; j < servicesInfo.size(); j++)
 	{
 		if (m_hostsInfo[row].servicesData[j].statusWidget != nullptr)
 		{
@@ -608,7 +605,7 @@ void ServiceTableModel::setServiceInformation(quint32 ip, quint16 port, Network:
 	int serviceIndex = -1;
 	getServiceState(ip, port, hostIndex, serviceIndex);
 
-	if (hostIndex >= m_hostsInfo.count() || serviceIndex == -1 || serviceIndex >= servicesInfo.count())
+	if (hostIndex >= m_hostsInfo.count() || serviceIndex == -1 || serviceIndex >= servicesInfo.size())
 	{
 		return;
 	}

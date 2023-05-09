@@ -23,6 +23,7 @@ SUBDIRS += Protobuf \
 	ServiceControlManager \
 	ConfigurationService \
 	ArchivingService \
+	GatewayService \
 	Monitor \
 	TuningService \
 	AppDataService \

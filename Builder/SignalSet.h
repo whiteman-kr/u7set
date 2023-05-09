@@ -19,6 +19,8 @@ namespace Builder
 		SignalSet(VFrame30::BusSet* busSet, std::shared_ptr<BuildResultWriter> resultWriter, IssueLogger* log);
 		virtual ~SignalSet();
 
+		const ::AppSignalSet* appSignalSet() const;
+
 		bool prepareBusses();
 		bool checkSignals();
 		bool bindSignalsToLMs(Hardware::EquipmentSet* equipment);

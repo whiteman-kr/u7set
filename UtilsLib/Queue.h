@@ -376,7 +376,7 @@ public:
 
 	void resize(int newSize);
 
-	void push(const T& item, const QThread* thread, int* curSize = nullptr, int* curMaxSize = nullptr);
+	virtual void push(const T& item, const QThread* thread, int* curSize = nullptr, int* curMaxSize = nullptr);
 	bool pop(T* item, const QThread* thread);
 	bool peekAt(int index, T* item, const QThread* thread);
 

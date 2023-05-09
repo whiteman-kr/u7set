@@ -13,6 +13,7 @@
 #include "ArchivingServiceCfgGenerator.h"
 #include "MetrologyCfgGenerator.h"
 #include "TestClientCfgGenerator.h"
+#include "GatewayServiceCfgGenerator.h"
 #include "../Simulator/Simulator.h"
 #include "../HardwareLib/Subsystem.h"
 #include "ReportGenerator.h"
@@ -1968,6 +1969,10 @@ namespace Builder
 
 			case E::SoftwareType::TestSuite:
 				swCfgGen = std::make_shared<TestSuiteCfgGenerator>(context, software);
+				break;
+
+			case E::SoftwareType::GatewayService:
+				swCfgGen = std::make_shared<GatewayServiceCfgGenerator>(context, software);
 				break;
 
 			default:

@@ -45,8 +45,9 @@ private:
 	void onGetAppSignalParamRequest(const char* requestData, quint32 requestDataSize);		// returns class AppSignalParam
 	void onGetAppSignalRequest(const char* requestData, quint32 requestDataSize);			// returns class Signal
 
-	void onGetAppSignalStateRequest(const char* requestData, quint32 requestDataSize);
+	void onGetAppSignalStateRequest(const char* requestData, quint32 requestDataSize, bool constSize);
 	void onGetAppSignalStateChangesRequest(const char* requestData, quint32 requestDataSize);
+	void onGatewayGetAppSignalStateChangesRequest(const char* requestData, quint32 requestDataSize);
 
 	void onGetAppDataSourcesInfoRequest();
 	void onGetAppDataSourcesStatesRequest();
@@ -57,15 +58,13 @@ private:
 	//
 	int getSignalListPartCount(int signalCount);
 
-//	bool getAppSignalStateState(Hash hash, AppSignalState& state);
-//	bool getDataSourceState(Hash hash, AppSignalState& state);
-
 	void getServerTimes(qint64* utc, qint64* local);
 
 private:
 	AppDataServiceWorker& m_appDataService;
 
 	SimpleAppSignalStatesQueueShared m_signalStatesQueue;
+	GatewayAppSignalStatesQueueShared m_gatewaySignalStatesQueue;
 
 	// precalculated variables
 	//
@@ -89,9 +88,15 @@ private:
 
 	Network::GetAppSignalStateRequest m_getAppSignalStateRequest;
 	Network::GetAppSignalStateReply m_getAppSignalStateReply;
+	int m_sentGetAppSignalStateReplyCount = 0;
 
 	Network::GetAppSignalStateChangesRequest m_getAppSignalStateChangesRequest;
 	Network::GetAppSignalStateChangesReply m_getAppSignalStateChangesReply;
+	int m_sentGetAppSignalStateChangesReplyCount = 0;
+
+	Network::GatewayGetAppSignalStateChangesRequest m_gwGetAppSignalStateChangesRequest;
+	Network::GatewayGetAppSignalStateChangesReply m_gwGetAppSignalStateChangesReply;
+	int m_sentGatewayGetAppSignalStateChangesReplyCount = 0;
 
 	//
 

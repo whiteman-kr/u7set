@@ -184,10 +184,23 @@ namespace Builder
 						QString obj1, QString obj2);				// Value of properties pair %1:%2 of objects %3 and %4 are equal.
 
 		void errCFG3047(QString objectID, QString propertyName, QString controillersList);	// Property %1.%2 should refer to one of software controllers: %3
-		void errCFG3048(QString objectID, QString propertyName);	// Property %1.%2 should refer to Software or Software child controller object.
-		void errCFG3049(QString cfgServiceID, QString workstationID);		// %1.CheckHostname is set True but hostname of workstation %2 isn't set.
+		void errCFG3048(QString objectID, QString propertyName);				// Property %1.%2 should refer to Software or Software child controller object.
+		void errCFG3049(QString cfgServiceID, QString workstationID);			// %1.CheckHostname is set True but hostname of workstation %2 isn't set.
+
+		// Property %1.%2 contains more than %3 software identifier(s).
+		//
+		void errCFG3050(QString objectID, QString propertyName, int maxIDs);
+
+		// Gateway description parsing error: %1
+		//
+		void errCFG3051(QString gwParserError);
+
+		// Gateway description parsing warning: %1
+		//
+		void wrnCFG3052(QString gwParserWarning);
 
 		void errCFG3060(QString subSysID, int value, int max, int min);	// Subsystem %1 key has wrong value (%2), valid range is %3..%4.
+
 
 		void errCFG3100(QString equipmentId, int devicePresetVersion, QString presetName, int presetVersion);		// Device %1 has preset version mismatch (%1.PresetVersion = %2, %3.PresetVersion = %4). For updating presets select 'Update from Preset' in Equipmemt Editor.
 		void wrnCFG3101(QString equipmentId, int devicePresetVersion, QString presetName, int presetVersion);		// Device %1 has preset version mismatch (%1.PresetVersion = %2, %3.PresetVersion = %4). For updating presets select 'Update from Preset' in Equipmemt Editor.

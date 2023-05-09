@@ -297,7 +297,8 @@ public:
 		Metrology = 9007,
 		ServiceControlManager = 9008,
 		TestClient = 9009,
-		TestSuite = 9010
+		TestSuite = 9010,
+		GatewayService = 9011
 	};
 	Q_ENUM(SoftwareType)
 
@@ -450,8 +451,8 @@ public:
 	enum class TimeType
 	{
 		Plant,
-		System,
-		Local,
+		System,				// server time UTC+0
+		Local,				// server local time
 		ArchiveId
 	};
 	Q_ENUM(TimeType)

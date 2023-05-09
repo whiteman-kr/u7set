@@ -7,36 +7,6 @@
 #include "../OnlineLib/CircularLogger.h"
 #include "DynamicAppSignalState.h"
 
-class AppSignals
-{
-public:
-	~AppSignals();
-
-	void clear();
-
-	void insert(const ::Proto::AppSignal& protoAppSignal);
-
-	bool containsID(const QString& appSignalID) const;
-	bool containsHash(Hash hash) const;
-
-	const AppSignal* getSignalByID(const QString& appSignalID) const;
-	const AppSignal* getSignalByHash(Hash hash) const;
-
-	bool isEmpty() const;
-	size_t count() const;
-
-	std::vector<AppSignal*>::iterator begin();
-	std::vector<AppSignal*>::const_iterator begin() const;
-
-	std::vector<AppSignal*>::iterator end();
-	std::vector<AppSignal*>::const_iterator end() const;
-
-private:
-	std::vector<AppSignal*> m_signals;				// dynamic AppSignal object owner
-	std::map<QString, AppSignal*> m_idToSignal;		// appSignalID => appSignal
-	std::map<Hash, AppSignal*> m_hashToSignal;		// Hash => appSignal
-};
-
 class AppDataReceiver;
 
 class AppDataSource : public DataSourceOnline
@@ -51,7 +21,7 @@ public:
 				 int autoArchivingGroupsCount,
 				 CircularLoggerShared timeErrLog);
 
-	void setStatesProcessingThreadWakupParams(std::mutex* statesProcessigRequiredMutex,
+	void setStatesProcessingThreadWakeupParams(std::mutex* statesProcessigRequiredMutex,
 											  std::condition_variable* statesProcessingRequiredCondition,
 											  std::queue<AppDataSource*>* statesProcessingRequired);
 
@@ -59,6 +29,7 @@ public:
 	void setState(const Network::AppDataSourceState& proto);
 
 	bool getSignalState(SimpleAppSignalStateArchiveFlag* state, const QThread* thread);
+	bool getGatewaySignalState(GatewayAppSignalStateQueueMask* gwState, const QThread* thread);
 
 	int acquiredSignalsCount() const { return m_acquiredSignalsCount; }
 
@@ -99,10 +70,13 @@ private:
 	int m_acquiredSignalsCount = 0;
 
 	SimpleAppSignalStatesArchiveFlagQueue m_signalStatesQueue;
+	GatewayAppSignalStatesQueue m_gatewaySignalStatesQueue;
 
 	int m_signalStatesQueueSize = 0;
 	int m_signalStatesQueueCurSize = 0;
 	int m_signalStatesQueueCurMaxSize = 0;
+
+	int m_gatewaySignalStatesQueueCurSize = 0;
 
 	// app data parsing
 	//

@@ -57,6 +57,9 @@ SOURCES += \
 	../Metrology/MetrologyConnection.cpp \
 	../Metrology/UnitsConvertor.cpp \
 	../Metrology/UnitsConvertorTable.cpp \
+	../GatewayService/GatewayDescription.cpp \
+	../GatewayService/GatewayDescriptionParser.cpp \
+	GatewayServiceCfgGenerator.cpp \
 	LogicModulesInfoWriter.cpp \
 	ConnectionsInfoWriter.cpp \
 	SoftwareSettingsGetter.cpp \
@@ -120,6 +123,9 @@ HEADERS += \
 	../Metrology/MetrologyConnection.h \
 	../Metrology/UnitsConvertor.h \
 	../Metrology/UnitsConvertorTable.h \
+	../GatewayService/GatewayDescription.h \
+	../GatewayService/GatewayDescriptionParser.h \
+	GatewayServiceCfgGenerator.h \
 	LogicModulesInfoWriter.h \
 	SoftwareSettingsGetter.h \
 	ConnectionsInfoWriter.h \

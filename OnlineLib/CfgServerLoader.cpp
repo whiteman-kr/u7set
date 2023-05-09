@@ -256,6 +256,7 @@ bool CfgLoader::getFileBlocked(QString pathFileName, QByteArray* fileData, QStri
 	TEST_PTR_RETURN_FALSE(errorStr);
 
 	fileData->clear();
+	errorStr->clear();
 
 	bool result = false;
 
@@ -595,6 +596,8 @@ void CfgLoader::resetStatuses()
 
 void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResult errorCode, const QString md5)
 {
+	m_currentDownloadRequest.setErrorCode(errorCode);
+
 	//
 
 	emit signal_onEndFileDownload(fileName, errorCode);
@@ -963,16 +966,9 @@ void CfgLoader::emitFileReady()
 
 QString CfgLoader::getFilePathNameByID(QString fileID) const
 {
-	QString pathFileName;
-
 	AUTO_LOCK(m_mutex);
 
-	if (m_fileIDPathMap.contains(fileID))
-	{
-		pathFileName = m_fileIDPathMap[fileID];
-	}
-
-	return pathFileName;
+	return m_fileIDPathMap.value(fileID, QString());
 }
 
 // -------------------------------------------------------------------------------------
@@ -1058,6 +1054,8 @@ bool CfgLoaderThread::getFileBlocked(const QString& pathFileName, QByteArray* fi
 	TEST_PTR_RETURN_FALSE(fileData);
 	TEST_PTR_RETURN_FALSE(errorStr);
 
+	errorStr->clear();
+
 	return m_cfgLoader->getFileBlocked(pathFileName, fileData, errorStr);
 }
 
@@ -1074,6 +1072,8 @@ bool CfgLoaderThread::getFileBlockedByID(const QString& fileID, QByteArray* file
 {
 	TEST_PTR_RETURN_FALSE(fileData);
 	TEST_PTR_RETURN_FALSE(errorStr);
+
+	errorStr->clear();
 
 	return m_cfgLoader->getFileBlockedByID(fileID, fileData, errorStr);
 }

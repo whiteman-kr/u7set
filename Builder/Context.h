@@ -23,7 +23,6 @@ namespace Builder
 {
 	class AppLogicData;
 
-
 	class Context
 	{
 	public:

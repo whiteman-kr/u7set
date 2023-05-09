@@ -81,7 +81,9 @@ union AppSignalStateFlags
 	static const quint32 MASK_SIM_BLOCK_UNBL_FLAGS = 0x0000001C;
 	static const quint32 MASK_LIMITS_FLAGS = 0x00000060;
 	static const quint32 MASK_ALL_ARCHIVING_REASONS = 0x003F0000;
-	static const quint32 MASK_SHORT_TERM_ARCHIVING_REASONE = 0x00100000;		// for now this is fineAperture flag only
+	static const quint32 MASK_FINE_APERTURE = 0x00100000;
+	static const quint32 MASK_COARSE_APERTURE = 0x00200000;
+	static const quint32 MASK_SHORT_TERM_ARCHIVING_REASONE = MASK_FINE_APERTURE;	// for now this is fineAperture flag only
 	static const quint32 MASK_AUTO_POINT_REASONE = 0x00080000;
 };
 

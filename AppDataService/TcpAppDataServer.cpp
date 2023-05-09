@@ -36,6 +36,11 @@ void TcpAppDataServer::onServerThreadFinished()
 		m_appDataService.unregisterDestSignalStatesQueue(m_signalStatesQueue);
 	}
 
+	if (m_gatewaySignalStatesQueue != nullptr)
+	{
+		m_appDataService.unregisterGatewaySignalStatesQueue(m_gatewaySignalStatesQueue);
+	}
+
 	qDebug() << "TcpAppDataServer::onServerThreadFinished()";
 }
 
@@ -68,11 +73,19 @@ void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData
 		break;
 
 	case ADS_GET_APP_SIGNAL_STATE:
-		onGetAppSignalStateRequest(requestData, requestDataSize);
+		onGetAppSignalStateRequest(requestData, requestDataSize, false);
+		break;
+
+	case ADS_GET_APP_SIGNAL_STATE_CONST_SIZE:
+		onGetAppSignalStateRequest(requestData, requestDataSize, true);
 		break;
 
 	case ADS_GET_APP_SIGNAL_STATE_CHANGES:
 		onGetAppSignalStateChangesRequest(requestData, requestDataSize);
+		break;
+
+	case ADS_GATEWAY_GET_APP_SIGNAL_STATE_CHANGES:
+		onGatewayGetAppSignalStateChangesRequest(requestData, requestDataSize);
 		break;
 
 	case ADS_GET_APP_DATA_SOURCES_INFO:
@@ -271,7 +284,7 @@ void TcpAppDataServer::onGetAppSignalRequest(const char* requestData, quint32 re
 	sendReply(m_getAppSignalReply);
 }
 
-void TcpAppDataServer::onGetAppSignalStateRequest(const char* requestData, quint32 requestDataSize)
+void TcpAppDataServer::onGetAppSignalStateRequest(const char* requestData, quint32 requestDataSize, bool constSize)
 {
 	bool result = m_getAppSignalStateRequest.ParseFromArray(requestData, requestDataSize);
 
@@ -293,6 +306,11 @@ void TcpAppDataServer::onGetAppSignalStateRequest(const char* requestData, quint
 		return;
 	}
 
+	if (hashesCount > 0)
+	{
+		m_getAppSignalStateReply.mutable_appsignalstates()->Reserve(hashesCount);
+	}
+
 	const DynamicAppSignalStates& appSignalStates = m_appDataService.appSignalStates();
 
 	for(int i = 0; i < hashesCount; i++)
@@ -303,15 +321,17 @@ void TcpAppDataServer::onGetAppSignalStateRequest(const char* requestData, quint
 
 		result = appSignalStates.getCurrentState(hash, appSignalState);
 
-		if (result == false)
+		if (constSize == false && result == false)
 		{
-			//assert(false);			// unknown hash
-			continue;
+			continue;	// unknown hash
 		}
 
 		Proto::AppSignalState* protoAppSignalState = m_getAppSignalStateReply.add_appsignalstates();
 
-		appSignalState.save(protoAppSignalState);
+		if (result == true)
+		{
+			appSignalState.save(protoAppSignalState);
+		}
 	}
 
 	qint64 utc = 0;
@@ -322,15 +342,21 @@ void TcpAppDataServer::onGetAppSignalStateRequest(const char* requestData, quint
 	m_getAppSignalStateReply.set_servertimeutc(utc);
 	m_getAppSignalStateReply.set_servertimelocal(local);
 
+	m_getAppSignalStateReply.set_statechangesqueuesize(m_signalStatesQueue != nullptr ?
+											m_signalStatesQueue->size(QThread::currentThread()) : 0);
+
+	m_getAppSignalStateReply.set_gatewaystatechangesqueuesize(m_gatewaySignalStatesQueue != nullptr ?
+											m_gatewaySignalStatesQueue->size(QThread::currentThread()) : 0);
+
 	sendReply(m_getAppSignalStateReply);
 
-	static int ctr = 0;
+	m_sentGetAppSignalStateReplyCount++;
 
-	ctr++;
-
-	if ((ctr % 1000) == 0)
+	if ((m_sentGetAppSignalStateReplyCount % 100) == 0)
 	{
-		qDebug() << "Send states" << ctr;
+		qDebug() << C_STR(QString("Send %1 get states replies to %2").
+						  arg(m_sentGetAppSignalStateReplyCount).
+						  arg(connectedSoftwareInfo().equipmentID()));
 	}
 }
 
@@ -345,7 +371,9 @@ void TcpAppDataServer::onGetAppSignalStateChangesRequest(const char* requestData
 					arg(peerAddr().addressStr()));
 	}
 
-	bool result = m_getAppSignalStateChangesRequest.ParseFromArray(requestData, requestDataSize);
+	Network::GetAppSignalStateChangesRequest& request =  m_getAppSignalStateChangesRequest;
+
+	bool result = request.ParseFromArray(requestData, requestDataSize);
 
 	m_getAppSignalStateChangesReply.Clear();
 
@@ -364,7 +392,6 @@ void TcpAppDataServer::onGetAppSignalStateChangesRequest(const char* requestData
 
 	for(int i = 0; i < ADS_GET_APP_SIGNAL_STATE_MAX; i++)
 	{
-
 		result = m_signalStatesQueue->pop(&state, thisThread);
 
 		if (result == false)
@@ -396,13 +423,131 @@ void TcpAppDataServer::onGetAppSignalStateChangesRequest(const char* requestData
 
 	sendReply(m_getAppSignalStateChangesReply);
 
-	static int ctr = 0;
+	m_sentGetAppSignalStateChangesReplyCount++;
 
-	ctr++;
-
-	if ((ctr % 100) == 0)
+	if ((m_sentGetAppSignalStateChangesReplyCount % 100) == 0)
 	{
-		qDebug() << "Send states changes" << ctr;
+		qDebug() << C_STR(QString("Send %1 states changes replies to %2").
+						  arg(m_sentGetAppSignalStateChangesReplyCount).
+						  arg(connectedSoftwareInfo().equipmentID()));
+	}
+}
+
+void TcpAppDataServer::onGatewayGetAppSignalStateChangesRequest(const char* requestData, quint32 requestDataSize)
+{
+	auto& request = m_gwGetAppSignalStateChangesRequest;
+
+	auto& reply = m_gwGetAppSignalStateChangesReply;
+
+	bool result = request.ParseFromArray(requestData, requestDataSize);
+
+	reply.Clear();
+
+	if (result == false)
+	{
+		reply.set_error(TO_INT(E::NetworkError::ParseRequestError));
+		sendReply(reply);
+		return;
+	}
+
+	if (request.signalshashes_size() != 0)
+	{
+		if (m_gatewaySignalStatesQueue != nullptr)
+		{
+			m_appDataService.unregisterGatewaySignalStatesQueue(m_gatewaySignalStatesQueue);
+			m_gatewaySignalStatesQueue.reset();
+		}
+	}
+
+	if (m_gatewaySignalStatesQueue == nullptr &&
+		request.signalshashes_size() != 0)
+	{
+		m_gatewaySignalStatesQueue = std::make_shared<GatewayAppSignalStatesQueue>(10000);
+
+		std::set<Hash> hashes;
+
+		int hashesCount = request.signalshashes_size();
+
+		for(int i = 0; i < hashesCount; i++)
+		{
+			hashes.insert(request.signalshashes(i));
+		}
+
+		m_appDataService.registerGatewaySignalStatesQueue(m_gatewaySignalStatesQueue, hashes);
+	}
+
+	if (m_gatewaySignalStatesQueue == nullptr)
+	{
+		sendReply(reply);
+		return;
+	}
+
+	QThread* thisThread = QThread::currentThread();
+
+	GatewayAppSignalStateQueueMask state;
+
+	qint64 minPlantTime = std::numeric_limits<qint64>::max();
+	qint64 minSystemTime = std::numeric_limits<qint64>::max();
+	qint64 minLocalTime = std::numeric_limits<qint64>::max();
+
+	int pendingStatesCount = 0;
+
+	auto getMinTimes = [&minPlantTime, &minSystemTime, &minLocalTime](const SimpleAppSignalState& st)
+					   {
+							if (st.time.plant.timeStamp != 0)
+							{
+								minPlantTime = std::min(minPlantTime, st.time.plant.timeStamp);
+							}
+
+							if (st.time.system.timeStamp != 0)
+							{
+								minSystemTime = std::min(minSystemTime, st.time.system.timeStamp);
+							}
+
+							if (st.time.local.timeStamp != 0)
+							{
+								minLocalTime = std::min(minLocalTime, st.time.local.timeStamp);
+							}
+					   };
+
+	for(int i = 0; i < ADS_GET_APP_SIGNAL_STATE_MAX; i++)
+	{
+		result = m_gatewaySignalStatesQueue->pop(&state, thisThread);
+
+		if (result == false)
+		{
+			break;		// queue is empty - pendingStatesCount == 0
+		}
+
+		::Network::GatewayAppSignalState* protoState = reply.add_appsignalstates();
+
+		state.gwState.saveToProto(protoState);
+
+		getMinTimes(state.gwState.prevState);
+		getMinTimes(state.gwState.curState);
+
+		if (i + 1 == ADS_GET_APP_SIGNAL_STATE_MAX)
+		{
+			// on last iteration set pendingStatesCount to actual value
+			//
+			pendingStatesCount = m_gatewaySignalStatesQueue->size(thisThread);
+		}
+	}
+
+	reply.set_pendingstatescount(pendingStatesCount);
+	reply.set_minplanttime(minPlantTime);
+	reply.set_minsystemtime(minSystemTime);
+	reply.set_minlocaltime(minLocalTime);
+
+	sendReply(reply);
+
+	m_sentGatewayGetAppSignalStateChangesReplyCount++;
+
+	if ((m_sentGatewayGetAppSignalStateChangesReplyCount % 100) == 0)
+	{
+		qDebug() << C_STR(QString("Send %1 gateway states changes replies to %2").
+						  arg(m_sentGatewayGetAppSignalStateChangesReplyCount).
+						  arg(connectedSoftwareInfo().equipmentID()));
 	}
 }
 

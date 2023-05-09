@@ -125,6 +125,10 @@ namespace EquipmentPropNames
 	inline const QString ARCHIVE_LONG_TERM_PERIOD("LongTermArchivePeriod");
 	inline const QString ARCHIVE_LOCATION("ArchiveLocation");
 
+	// GatewayService propertiews
+	//
+	inline const QString GATEWAY_DESCRIPTION("GatewayDescription");
+
 	// Properties used in several Services
 	//
 	inline const QString CLIENT_REQUEST_IP("ClientRequestIP");
@@ -141,11 +145,18 @@ namespace EquipmentPropNames
 	inline const QString CFG_SERVICE_IP2("ConfigurationServiceIP2");
 	inline const QString CFG_SERVICE_PORT2("ConfigurationServicePort2");
 
+	inline const QString CFG_SERVICE_IDS("ConfigurationServiceIDs");
+
 	inline const QString SOFTWARE_TYPE("SoftwareType");
 	inline const QString HOSTNAME("Hostname");
 
 	inline const QString APP_DATA_SERVICE_ID1("AppDataServiceID1");
+	inline const QString APP_DATA_SERVICE_IP1("AppDataServiceIP1");
+	inline const QString APP_DATA_SERVICE_PORT1("AppDataServicePort1");
+
 	inline const QString APP_DATA_SERVICE_ID2("AppDataServiceID2");
+	inline const QString APP_DATA_SERVICE_IP2("AppDataServiceIP2");
+	inline const QString APP_DATA_SERVICE_PORT2("AppDataServicePort2");
 
 	inline const QString START_SCHEMA_ID("StartSchemaID");
 	inline const QString SCHEMA_TAGS("SchemaTags");
@@ -226,6 +237,12 @@ namespace XmlElement
 
 	inline const QString SIGNALS("Signals");
 	inline const QString SIGNAL_ELEM("Signal");
+
+	inline const QString GATEWAYS("Gateways");
+	inline const QString GATEWAY("Gateway");
+	inline const QString SIGNAL_LISTS("SignalLists");
+	inline const QString SIGNAL_LIST("SignalList");
+	inline const QString ID("ID");
 }
 
 namespace XmlAttribute
@@ -286,6 +303,23 @@ namespace XmlAttribute
 
 	inline const QString RUP_VERSION("RupVersion");
 	inline const QString FOTIP_VERSION("FotipVersion");
+
+	inline const QString GATEWAY_TYPE("GatewayType");
+	inline const QString GATEWAY_ID("GatewayID");
+	inline const QString GATEWAY_DESCRIPTION("GatewayDescription");
+	inline const QString SIGNAL_LISTS_COUNT("SignalListsCount");
+
+	inline const QString SYSTEM_ID("SystemID");
+	inline const QString GATEWAY_IP1("GatewayIP1");
+	inline const QString GATEWAY_IP2("GatewayIP2");
+	inline const QString LISTS_VERSION("ListsVersion");
+	inline const QString TIME_TYPE("TimeType");
+	inline const QString PERIOD("Period");
+
+	inline const QString LIST_NO("ListNo");
+	inline const QString DATA_TYPE("DataType");
+	inline const QString SEND_EVENTS("SendEvents");
+	inline const QString INCLUDE_APP_SIGNAL_ID("IncludeAppSignalID");
 }
 
 namespace Latin1Char
@@ -296,6 +330,8 @@ namespace Latin1Char
 
 namespace CfgFileId
 {
+	inline const QString CONFIGURATION_XML("CONFIGURATION_XML");
+
 	inline const QString APP_DATA_SOURCES("APP_DATA_SOURCES");
 	inline const QString APP_SIGNALS("APP_SIGNALS");
 	inline const QString APP_SIGNALS_EXT("APP_SIGNALS_EXT");
@@ -317,6 +353,8 @@ namespace CfgFileId
 	inline const QString METROLOGY_SIGNAL_SET("METROLOGY_SIGNAL_SET");
 
 	inline const QString TESTSUITE_TESTSCRIPT("TESTSUITE_TESTSCRIPT");
+
+	inline const QString GATEWAY_DESCRIPTION("GATEWAY_DESCRIPTION");
 }
 
 namespace  SettingsProfile
@@ -345,6 +383,8 @@ namespace SoftwareSetting
 
 	inline const QString PROCESSING_THREADS_COUNT("ProcessingThreadsCount");
 	inline const QString OVERRIDE_APP_DATA_RECEIVING_IP("OverrideAppDataReceivingIP");
+
+	inline const QString GATEWAY_DESCRIPTION_FILE("GatewayDescriptionFile");
 }
 
 namespace CmdLineOption
@@ -352,6 +392,8 @@ namespace CmdLineOption
 	inline const QString ID("id");
 	inline const QString CFG_IP1("cfgip1");
 	inline const QString CFG_IP2("cfgip2");
+	inline const QString CFG_FILE("f");
+	inline const QString CFG_PARSE("parse");
 	inline const QString LOG_RUP_TIME_ERR("logRupTimeErr");
 }
 
@@ -392,6 +434,9 @@ namespace File
 	inline const QString SIM_PROFILES = "SimProfiles.txt";
 	inline const QString RESOURCES_TXT = "Resources.txt";
 
+	inline const QString GATEWAY_DESCRIPTION_TXT = "GatewayDescription.txt";
+	inline const QString GATEWAY_DESCRIPTION_XML = "GatewayDescription.xml";
+
 	inline const QString CRYPTO_SS_SERVER_CERTIFICATE = "/Crypto/ss_server.crt";
 	inline const QString CRYPTO_SS_SERVER_PRIVATE_KEY = "/Crypto/ss_server_private.key";
 
@@ -412,6 +457,7 @@ namespace Separator
 	inline const QString DIR("/");
 	inline const QString BACK_DIR("\\");
 	inline const QString EMPTY_STR("");
+	inline const QString NEW_LINE("\n");
 }
 
 namespace FormatStr
@@ -466,6 +512,7 @@ namespace AppSignalPropNames
 	inline const QString R0_OHM("R0_Ohm");
 	inline const QString OUTPUT_MODE("OutputMode");
 	inline const QString OUTPUT_MODE_STR("OutputModeStr");
+    inline const QString INPUT_RANGE("InputRange");
 	inline const QString ACQUIRE("Acquire");
 	inline const QString ARCHIVE("Archive");
 	inline const QString DECIMAL_PLACES("DecimalPlaces");

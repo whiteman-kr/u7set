@@ -41,9 +41,6 @@ public:
 	void writeHostAddressPortAttribute(const QString& name, const HostAddressPort& addr);
 	void writeQHostAddressAttribute(const QString& name, const QHostAddress& addr);
 
-	template<typename ENUM_TYPE>
-	void writeEnumAttribute(const QString& name, ENUM_TYPE value);
-
 	void writeString(const QString& str);
 
 	void writeStringElement(const QString& name, const QString& value);

@@ -39,6 +39,7 @@ void StdThreadsGuard::append(std::thread& thread)
 
 AppDataReceiver::AppDataReceiver(const HostAddressPort& dataReceivingIP,
 								 AppDataSources& appDataSources,
+								 DynamicAppSignalStates& signalStates,
 								 int processingThreadsCount,
 								 E::SoftwareRunMode swRunMode,
 								 CircularLoggerShared log) :
@@ -46,7 +47,7 @@ AppDataReceiver::AppDataReceiver(const HostAddressPort& dataReceivingIP,
 	m_appDataSources(appDataSources),
 	m_processingThreadsCountFromSettings(processingThreadsCount),
 	m_log(log),
-	m_statesProcessingThread(log)
+	m_statesProcessingThread(signalStates, log)
 {
 	setObjectName("AppDataReceiver");
 
@@ -58,9 +59,9 @@ AppDataReceiver::AppDataReceiver(const HostAddressPort& dataReceivingIP,
 
 	for(AppDataSource* appDataSource : appDataSources)
 	{
-		appDataSource->setStatesProcessingThreadWakupParams(&m_statesProcessigRequiredMutex,
-															&m_statesProcessingRequiredCondition,
-															&m_statesProcessingRequired);
+		appDataSource->setStatesProcessingThreadWakeupParams(&m_statesProcessigRequiredMutex,
+															 &m_statesProcessingRequiredCondition,
+															 &m_statesProcessingRequired);
 	}
 }
 
@@ -95,6 +96,17 @@ void AppDataReceiver::registerDestSignalStatesQueue(SimpleAppSignalStatesQueueSh
 void AppDataReceiver::unregisterDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue)
 {
 	m_statesProcessingThread.unregisterDestSignalStatesQueue(destQueue);
+}
+
+void AppDataReceiver::registerGatewaySignalStatesQueue(GatewayAppSignalStatesQueueShared destQueue,
+														const std::set<Hash>& hashes)
+{
+	m_statesProcessingThread.registerGatewaySignalStatesQueue(destQueue, hashes);
+}
+
+void AppDataReceiver::unregisterGatewaySignalStatesQueue(GatewayAppSignalStatesQueueShared destQueue)
+{
+	m_statesProcessingThread.unregisterGatewaySignalStatesQueue(destQueue);
 }
 
 void AppDataReceiver::run()

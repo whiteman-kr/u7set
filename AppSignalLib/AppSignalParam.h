@@ -152,7 +152,7 @@ public:
 	[[nodiscard]] static QString toString(double value, E::ValueViewType viewType, E::AnalogFormat analogFormat, E::AnalogAppSignalFormat analogAppSignalFormat, int precision);
 
 public:
-	Hash m_hash{};
+	Hash m_hash = {0};
 	Times m_time{};
 	double m_value{};
 	AppSignalStateFlags m_flags{};

@@ -50,7 +50,10 @@ const quint16   PORT_BASE_SERVICE = 13300,
 				PORT_DIAG_DATA_SERVICE = 13350,
 				PORT_DIAG_DATA_SERVICE_INFO = 13351,
 				PORT_DIAG_DATA_SERVICE_DATA = 13352,				// port receiving diagnostics data from LM's
-				PORT_DIAG_DATA_SERVICE_CLIENT_REQUEST = 13353;
+				PORT_DIAG_DATA_SERVICE_CLIENT_REQUEST = 13353,
+
+				PORT_GATEWAY_SERVICE = 13360,
+				PORT_GATEWAY_SERVICE_INFO = 13361;
 
 const quint16	PORT_LM_TUNING = 50000;								// default port of LM tuning
 
@@ -186,8 +189,15 @@ const quint32 ADS_GET_APP_SIGNAL_LIST_NEXT = 0x1201;
 
 const quint32 ADS_GET_APP_SIGNAL_PARAM = 0x1301;
 const quint32 ADS_GET_APP_SIGNAL = 0x1302;
-const quint32 ADS_GET_APP_SIGNAL_STATE = 0x1303;
+
+const quint32 ADS_GET_APP_SIGNAL_STATE = 0x1303;				// states for unknown hashes NOT placed in reply
+																// so, reply array size CAN BE LESS than request array size
 const quint32 ADS_GET_APP_SIGNAL_STATE_CHANGES = 0x1304;
+
+const quint32 ADS_GET_APP_SIGNAL_STATE_CONST_SIZE = 0x1305;		// states for unknown hashes PLACED in reply
+																// reply array size always EQUAL to request array size
+
+const quint32 ADS_GATEWAY_GET_APP_SIGNAL_STATE_CHANGES = 0x1306;
 
 // Limiters and other constants
 //

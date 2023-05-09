@@ -4,6 +4,7 @@
 #include "../CommonLib/Times.h"
 #include "../UtilsLib/Queue.h"
 #include "../Proto/serialization.pb.h"
+#include "../Proto/network.pb.h"
 #include "AppSignalParam.h"
 
 struct SimpleAppSignalState
@@ -28,10 +29,14 @@ struct SimpleAppSignalState
 
 	bool isValid() const { return flags.valid == 1; }
 
-	void save(Proto::AppSignalState* protoState);
+	void save(Proto::AppSignalState* protoState) const;
 	Hash load(const Proto::AppSignalState& protoState);
 
 	void print() const;
+
+	qint64 plantTime() const { return time.plant.timeStamp; }
+	qint64 systemTime() const { return time.system.timeStamp; }
+	qint64 localTime() const { return time.local.timeStamp; }
 };
 
 class SimpleAppSignalStatesQueue : public QObject, public FastThreadSafeQueue<SimpleAppSignalState>
@@ -52,7 +57,7 @@ private:
 	int m_afterPushCtr = 0;
 };
 
-typedef std::shared_ptr<SimpleAppSignalStatesQueue> SimpleAppSignalStatesQueueShared;
+using SimpleAppSignalStatesQueueShared = std::shared_ptr<SimpleAppSignalStatesQueue>;
 
 struct SimpleAppSignalStateArchiveFlag
 {
@@ -69,9 +74,22 @@ public:
 	void pushAutoPoint(const SimpleAppSignalState& state, bool sendStateToArchive, const QThread* thread);
 };
 
+struct GatewayAppSignalState
+{
+	SimpleAppSignalState prevState;
+	SimpleAppSignalState curState;
 
+	void saveToProto(::Network::GatewayAppSignalState* proto) const;
+	void loadFromProto(const ::Network::GatewayAppSignalState& proto);
+};
 
+struct GatewayAppSignalStateQueueMask
+{
+	quint32 gatewayQueueMask = 0;
+	GatewayAppSignalState gwState;
+};
 
-
+using GatewayAppSignalStatesQueue = FastThreadSafeQueue<GatewayAppSignalStateQueueMask>;
+using GatewayAppSignalStatesQueueShared = std::shared_ptr<GatewayAppSignalStatesQueue>;
 
 
