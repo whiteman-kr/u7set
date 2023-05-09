@@ -300,7 +300,7 @@ namespace Builder
 
 		m_xmlWriter.writeStartElement("Configuration");
 
-		BuildInfo bi = buildResultWriter.buildInfo();
+		OnlineLib::BuildInfo bi = buildResultWriter.buildInfo();
 
 		bi.writeToXml(m_xmlWriter);
 	}
@@ -409,7 +409,7 @@ namespace Builder
 	{
 	}
 
-	bool BuildResult::create(const QString& buildDir, const QString& fullPath, const BuildInfo& buildInfo, IssueLogger* log)
+	bool BuildResult::create(const QString& buildDir, const QString& fullPath, const OnlineLib::BuildInfo& buildInfo, IssueLogger* log)
 	{
 		m_directory = buildDir;
 		m_fullPath = fullPath;
@@ -489,7 +489,7 @@ namespace Builder
 		}
 	}
 
-	bool BuildResult::createBuildXml(const BuildInfo& buildInfo)
+	bool BuildResult::createBuildXml(const OnlineLib::BuildInfo& buildInfo)
 	{
 		m_buildXmlFile.setFileName(m_fullPath + "/build.xml");
 

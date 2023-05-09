@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../Builder/Context.h"
-#include "../Builder/IssueLogger.h"
 #include "../TuningService/TuningSource.h"
 #include "../OnlineLib/SoftwareSettings.h"
-#include "../lib/DeviceHelper.h"
+#include "Context.h"
+#include "IssueLogger.h"
+#include "DeviceHelper.h"
 
 // -------------------------------------------------------------------------------------------
 

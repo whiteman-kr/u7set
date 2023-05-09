@@ -1,0 +1,101 @@
+cmake_minimum_required(VERSION 3.16)
+
+project(TuningSrv LANGUAGES CXX)
+
+include(../vld.cmake)
+
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+find_package(Qt6 REQUIRED COMPONENTS Core Network Widgets Qml Xml)
+qt_standard_project_setup()
+
+add_executable(TuningSrv
+	../lib/DataSource.cpp
+	../lib/DataSource.h
+	../lib/TuningDataStorage.cpp
+	../lib/TuningDataStorage.h
+	TcpTuningServer.cpp
+	TcpTuningServer.h
+	TuningClientContext.cpp
+	TuningClientContext.h
+	TuningMemory.cpp
+	TuningMemory.h
+	TuningService.cpp
+	TuningService.h
+	TuningServiceMain.cpp
+	TuningSource.cpp
+	TuningSource.h
+	TuningSourceThread.cpp
+	TuningSourceThread.h
+)
+
+target_precompile_headers(TuningSrv PRIVATE
+	# C includes, must be before c++ includes
+	#
+	<cassert>
+	<cstdint>
+
+	# C++ includes
+	#
+	<algorithm>
+	<atomic>
+	<functional>
+	<iostream>
+	<limits>
+	<list>
+	<map>
+	<memory>
+	<vector>
+	<set>
+	<type_traits>
+
+	# Qt includes
+	#
+	<QAbstractSocket>
+	<QApplication>
+	<QCommandLineParser>
+	<QCoreApplication>
+	<QDebug>
+	<QDateTime>
+	<QElapsedTimer>
+	<QEventLoop>
+	<QFile>
+	<QFileInfo>
+	<QHash>
+	<QHostAddress>
+	<QMap>
+	<QMetaClassInfo>
+	<QMetaEnum>
+	<QMetaObject>
+	<QMutex>
+	<QMutexLocker>
+	<QObject>
+	<QQueue>
+	<QSettings>
+	<QString>
+	<QStringList>
+	<QTextStream>
+	<QThread>
+	<QTimer>
+	<QtCore>
+	<QtGlobal>
+	<QtNetwork/QHostAddress>
+	<QUdpSocket>
+	<QUuid>
+	<QVariant>
+	<QVector>
+	<QXmlStreamReader>
+	<QXmlStreamWriter>
+)
+
+target_link_libraries(TuningSrv PRIVATE Qt6::Core Qt6::Network Qt6::Widgets Qt6::Qml Qt6::Xml)
+target_link_libraries(TuningSrv PUBLIC CommonLib Protobuf UtilsLib AppSignalLib OnlineLib HardwareLib ServiceLib)
+
+# Link Visaul Leak Detector
+#
+if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
+	target_link_libraries(TuningSrv PRIVATE vld.lib)
+endif()

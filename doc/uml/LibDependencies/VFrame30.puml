@@ -5,6 +5,7 @@
 !include ./Protobuf.puml
 !include ./TrendView.puml
 !include ./AppSignalLib.puml
+!include ./HardwareLib.puml
 
 [VFrame30]
 VFrame30 -up-> CommonLib
@@ -12,5 +13,6 @@ VFrame30 -up-> UtilsLib
 VFrame30 -up-> Protobuf
 VFrame30 -up-> TrendView  
 VFrame30 -up-> AppSignalLib
+VFrame30 -up-> HardwareLib
 
 @enduml

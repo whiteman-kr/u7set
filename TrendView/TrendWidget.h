@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QThread>
 #include "Trend.h"
 #include "TrendRuler.h"
 #include "ITrendDataProvider.h"

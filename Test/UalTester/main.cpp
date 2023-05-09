@@ -1,5 +1,5 @@
 #include <QCoreApplication>
-#include <UalTester.h>
+#include "UalTester.h"
 
 int main(int argc, char *argv[])
 {

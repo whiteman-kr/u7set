@@ -12,6 +12,8 @@
 #include <QDateTime>
 #include <QDesktopServices>
 #include <QScreen>
+#include <QFile>
+#include <QUrl>
 
 //
 // UiTools

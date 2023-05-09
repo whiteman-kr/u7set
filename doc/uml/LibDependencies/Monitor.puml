@@ -8,6 +8,7 @@
 !include ./TrendView.puml
 !include ./VFrame30.puml
 !include ./ClientLib.puml
+!include ./HardwareLib.puml
 
 [Monitor]
 Monitor -up-> [CommonLib]
@@ -18,5 +19,6 @@ Monitor -up-> [AppSignalLib]
 Monitor -up-> [ClientLib]
 Monitor -up-> [TrendView]
 Monitor -up-> [VFrame30]
+Monitor -up-> [HardwareLib]
 
 @enduml

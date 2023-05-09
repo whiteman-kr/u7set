@@ -1,4 +1,5 @@
 #include <QCoreApplication>
+#include <QTest>
 
 #include "UnitsConvertorTests.h"
 #include "MetrologyFormulaTests.h"

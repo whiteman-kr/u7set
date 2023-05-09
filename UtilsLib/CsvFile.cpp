@@ -4,6 +4,7 @@
 
 #include "CsvFile.h"
 #include <QVariant>
+#include <QRegularExpression>
 
 QString CsvFile::stringsToCSV(const QStringList& strings, bool replaceSeparatorsAndQuotes)
 {

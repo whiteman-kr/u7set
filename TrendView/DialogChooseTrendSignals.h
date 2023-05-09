@@ -1,5 +1,8 @@
 #pragma once
 
+#include <QDialog>
+#include <QItemSelection>
+#include <QCompleter>
 #include "../lib/ISignalHasTag.h"
 #include "../TrendView/TrendSignal.h"
 

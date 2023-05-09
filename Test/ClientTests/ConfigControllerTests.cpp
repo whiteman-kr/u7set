@@ -2,7 +2,8 @@
 // ConfigurationService must be ranning on localhost and default port
 //
 #include "../../ClientLib/ConfigController.h"
-#include "../../lib/BuildInfo.h"
+#include "../../OnlineLib/BuildInfo.h"
+#include "ConnectionPorts.h"
 
 namespace
 {
@@ -149,7 +150,7 @@ TEST(ConfigControllerTests, monitorToConfigControllerConnection)
 	bool SchemaDetailsPbuf = false;
 	bool TuningSignalsDat = false;
 
-	for (const Builder::BuildFileInfo& file : configController.receivedFiles)
+	for (const OnlineLib::BuildFileInfo& file : configController.receivedFiles)
 	{
 		if (file.pathFileName == "/SYSTEMID_CLIENTTEST_WS03_MONITOR/Configuration.xml")
 		{

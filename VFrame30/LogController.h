@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QObject>
 #include "../UtilsLib/ILogFile.h"
 
 namespace VFrame30
@@ -97,6 +98,5 @@ namespace VFrame30
 
 	private:
 		ILogFile* m_logFile = nullptr;
-
 	};
 }

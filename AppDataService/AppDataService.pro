@@ -31,8 +31,6 @@ unix {
 
 SOURCES += \
 	../lib/DataSource.cpp \
-    ../lib/BuildInfo.cpp \
-	../lib/LanControllerInfo.cpp \
 	AppDataReceiver.cpp \
 	AppDataService.cpp \
 	AppDataSource.cpp \
@@ -48,8 +46,6 @@ HEADERS += \
 	Stable.h \
 	../lib/ConstStrings.h \
     ../lib/DataSource.h \
-    ../lib/BuildInfo.h \
-	../lib/LanControllerInfo.h \
 	AppDataService.h \
 	AppDataSource.h \
 	DynamicAppSignalState.h \
@@ -81,11 +77,6 @@ DISTFILES += \
 
 CONFIG(release, debug|release): unix:QMAKE_CXXFLAGS += -DNDEBUG
 
-# Protobuf
-#
-LIBS += -lprotobuf
-win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
-unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
 
 # ServiceLib
 #
@@ -93,11 +84,23 @@ LIBS += -lServiceLib
 win32:PRE_TARGETDEPS += $$DESTDIR/ServiceLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libServiceLib.a
 
+# HardwareLib
+#
+LIBS += -lHardwareLib
+win32:PRE_TARGETDEPS += $$DESTDIR/HardwareLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libHardwareLib.a
+
 # OnlineLib
 #
 LIBS += -lOnlineLib
 win32:PRE_TARGETDEPS += $$DESTDIR/OnlineLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libOnlineLib.a
+
+# AppSignalLib
+#
+LIBS += -lAppSignalLib
+win32:PRE_TARGETDEPS += $$DESTDIR/AppSignalLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libAppSignalLib.a
 
 # UtilsLib
 #
@@ -105,11 +108,11 @@ LIBS += -lUtilsLib
 win32:PRE_TARGETDEPS += $$DESTDIR/UtilsLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libUtilsLib.a
 
-# AppSignalLib
+# Protobuf
 #
-LIBS += -lAppSignalLib
-win32:PRE_TARGETDEPS += $$DESTDIR/AppSignalLib.lib
-unix:PRE_TARGETDEPS += $$DESTDIR/libAppSignalLib.a
+LIBS += -lprotobuf
+win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
 
 # CommonLib
 #

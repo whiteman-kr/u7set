@@ -7,8 +7,8 @@
 #include <optional>
 #include <concepts>
 #include <QObject>
-#include "../lib/LmDescription.h"
-#include "../VFrame30/Afb.h"
+#include "../HardwareLib/LmDescription.h"
+
 
 class SimAfbParamTests;
 

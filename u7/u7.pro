@@ -66,7 +66,6 @@ CONFIG(release, debug|release) {
 
 
 HEADERS  += \
-    ../UtilsLib/CrashExceptionHandler.h \
     ../lib/Ui/ClickableLabel.h \
     ../lib/Ui/DialogChooseTags.h \
     ../lib/CodeEditor.h \
@@ -207,7 +206,6 @@ HEADERS  += \
 	SvgEditor.h \
 
 SOURCES +=\
-    ../UtilsLib/CrashExceptionHandler.cpp \
 	../lib/ExportPrint.cpp \
     ../lib/Ui/DialogChooseTags.cpp \
 	../lib/Ui/DialogSignalInfo.cpp \

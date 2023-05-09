@@ -38,11 +38,9 @@ CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
 SOURCES += \
-        ../lib/BuildInfo.cpp \
         main.cpp
 
 HEADERS += \
-    ../lib/BuildInfo.h \
     Stable.h
 
 # Add curent dir to a list of library directory paths

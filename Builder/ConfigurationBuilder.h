@@ -131,7 +131,7 @@ namespace Builder
 
 
 	private:
-		Builder::BuildResultWriter* m_buildResultWriter = nullptr;
+		BuildResultWriter* m_buildResultWriter = nullptr;
 
 		BuildWorkerThread* m_buildWorkerThread = nullptr;
 		DbController* m_db = nullptr;

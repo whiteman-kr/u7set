@@ -1,0 +1,245 @@
+cmake_minimum_required(VERSION 3.16)
+
+project(Metrology LANGUAGES CXX)
+
+include(../vld.cmake)
+
+
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/lib/Ui)
+
+if (MSVC)
+	# MSVC warning suppressions
+	add_compile_options(
+		/wd4828 # The file contains a character starting at offset 0x10d2 that is illegal in the current source character set (codepage 65001).
+	)
+endif (MSVC)
+
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Concurrent SerialPort Network Sql Qml Xml Charts AxContainer)
+
+if (MSVC)
+	find_package(Qt6 REQUIRED COMPONENTS AxContainer)
+endif (MSVC)
+
+qt_standard_project_setup()
+
+set (METROLOGY_SOURCES
+	../lib/PropertyEditor.cpp
+	../lib/PropertyEditor.h
+	../lib/Ui/DialogAbout.cpp
+	../lib/Ui/DialogAbout.h
+	Calibrator.cpp
+	Calibrator.h
+	CalibratorBase.cpp
+	CalibratorBase.h
+	CalibratorManager.cpp
+	CalibratorManager.h
+	ChartView.cpp
+	ChartView.h
+	ConfigSocket.cpp
+	ConfigSocket.h
+	Database.cpp
+	Database.h
+	Delegate.cpp
+	Delegate.h
+	DialogCalculator.cpp
+	DialogCalculator.h
+	DialogComparatorList.cpp
+	DialogComparatorList.h
+	DialogList.cpp
+	DialogList.h
+	DialogMeasurePoint.cpp
+	DialogMeasurePoint.h
+	DialogMetrologyConnection.cpp
+	DialogMetrologyConnection.h
+	DialogObjectProperties.cpp
+	DialogObjectProperties.h
+	DialogOptions.cpp
+	DialogOptions.h
+	DialogOptionsMvh.cpp
+	DialogOptionsMvh.h
+	DialogRackList.cpp
+	DialogRackList.h
+	DialogSignalList.cpp
+	DialogSignalList.h
+	DialogTuningSignalList.cpp
+	DialogTuningSignalList.h
+	DialogTuningSourceList.cpp
+	DialogTuningSourceList.h
+	ExcelHelper.cpp
+	ExcelHelper.h
+	MeasureBase.cpp
+	MeasureBase.h
+	MeasurePointBase.cpp
+	MeasurePointBase.h
+	MeasureThread.cpp
+	MeasureThread.h
+	MeasureView.cpp
+	MeasureView.h
+	MeasureViewHeader.cpp
+	MeasureViewHeader.h
+	MetrologyConnection.cpp
+	MetrologyConnection.h
+	MetrologyFormula.cpp
+	MetrologyFormula.h
+	MetrologyMain.cpp
+	MetrologyMainWindow.cpp
+	MetrologyMainWindow.h
+	MetrologySignal.cpp
+	MetrologySignal.h
+	Options.cpp
+	Options.h
+	PanelComparatorInfo.cpp
+	PanelComparatorInfo.h
+	PanelFindMeasure.cpp
+	PanelFindMeasure.h
+	PanelSignalInfo.cpp
+	PanelSignalInfo.h
+	PanelStatistics.cpp
+	PanelStatistics.h
+	ProcessData.cpp
+	ProcessData.h
+	RackBase.cpp
+	RackBase.h
+	SelectSignalWidget.cpp
+	SelectSignalWidget.h
+	SignalBase.cpp
+	SignalBase.h
+	SignalSocket.cpp
+	SignalSocket.h
+	StatisticsBase.cpp
+	StatisticsBase.h
+	TuningSignalBase.cpp
+	TuningSignalBase.h
+	TuningSocket.cpp
+	TuningSocket.h
+	UnitsConvertor.cpp
+	UnitsConvertor.h
+	UnitsConvertorTable.cpp
+	UnitsConvertorTable.h
+	Visa/visa.h
+
+)
+
+set (METROLOGY_RESOURCES
+	Resources.qrc
+)
+
+set (METROLOGY_FORMS
+)
+
+add_executable(Metrology
+	${METROLOGY_FORMS}
+	${METROLOGY_SOURCES}
+	${METROLOGY_RESOURCES}
+	languages/Metrology_ru.ts
+)
+
+target_precompile_headers(Metrology PRIVATE
+	<algorithm>
+	<atomic>
+	<functional>
+	<iostream>
+	<limits>
+	<list>
+	<map>
+	<memory>
+	<vector>
+	<set>
+	<type_traits>
+
+	<QAbstractSocket>
+	<QApplication>
+	<QCommandLineParser>
+	<QCoreApplication>
+	<QDebug>
+	<QDateTime>
+	<QElapsedTimer>
+	<QEventLoop>
+	<QFile>
+	<QFileInfo>
+	<QHash>
+	<QHostAddress>
+	<QMap>
+	<QMetaClassInfo>
+	<QMetaEnum>
+	<QMetaObject>
+	<QMutex>
+	<QMutexLocker>
+	<QObject>
+	<QQueue>
+	<QSettings>
+	<QString>
+	<QStringList>
+	<QTextStream>
+	<QThread>
+	<QTimer>
+	<QTranslator>
+	<QtCore>
+	<QtGlobal>
+	<QtNetwork/QHostAddress>
+	<QUdpSocket>
+	<QUuid>
+	<QVariant>
+	<QVector>
+	<QXmlStreamReader>
+	<QXmlStreamWriter>
+	<QRegularExpression>
+	<QRegularExpressionValidator>
+	<QAbstractItemModel>
+	<QAbstractTableModel>
+	<QAction>
+	<QComboBox>
+	<QCheckBox>
+	<QCloseEvent>
+	<QErrorMessage>
+	<QFileDialog>
+	<QHBoxLayout>
+	<QHeaderView>
+	<QInputDialog>
+	<QLabel>
+	<QListView>
+	<QListWidget>
+	<QMainWindow>
+	<QMenu>
+	<QMenuBar>
+	<QMessageBox>
+	<QVBoxLayout>
+	<QPainter>
+	<QProgressDialog>
+	<QPushButton>
+	<QScrollArea>
+	<QScrollBar>
+	<QSplitter>
+	<QStatusBar>
+	<QTableWidget>
+	<QTabWidget>
+	<QTextEdit>
+	<QTreeWidget>
+	<QScreen>
+	<QCompleter>
+	<QProgressBar>
+)
+
+target_link_libraries(Metrology PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Concurrent Qt6::SerialPort Qt6::Network
+	Qt6::Sql Qt6::Qml Qt6::Xml Qt6::Charts)
+
+target_link_libraries(Metrology PRIVATE CommonLib Protobuf AppSignalLib HardwareLib UtilsLib OnlineLib)
+
+# Interface for calibrator Rigol DG1062Z
+#
+if (MSVC)
+	target_link_libraries(Metrology PRIVATE Qt6::AxContainer ${CMAKE_SOURCE_DIR}/Metrology/Visa/visa64.lib)
+endif()
+
+
+# Link Visaul Leak Detector
+#
+if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
+	target_link_libraries(Metrology PRIVATE vld.lib)
+endif()
+
+

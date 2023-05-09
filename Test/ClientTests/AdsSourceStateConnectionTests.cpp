@@ -1,4 +1,5 @@
 #include "../../ClientLib/AdsSourceStateConnection.h"
+#include "ConnectionPorts.h"
 
 
 class AdsSourceStateConnectionTests : public ::testing::Test

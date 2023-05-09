@@ -71,7 +71,6 @@ SOURCES += main.cpp \
     MonitorSignalManager.cpp \
     MonitorSignalSnapshot.cpp \
     DialogSettings.cpp \
-    ../lib/BuildInfo.cpp \
     MonitorSchemaWidget.cpp \
     MonitorConfigController.cpp \
     SchemaDrawStatistics.cpp \
@@ -125,7 +124,6 @@ HEADERS  += \
     ScriptMonitorApplication.h \
 	Stable.h \
     DialogSettings.h \
-    ../lib/BuildInfo.h \
     MonitorSchemaWidget.h \
     MonitorConfigController.h \
     ../CommonLib/PropertyObject.h \
@@ -214,12 +212,11 @@ unix:PRE_TARGETDEPS += $$DESTDIR/libTrendView.a
 INCLUDEPATH += $$PWD/../TrendView
 DEPENDPATH += $$PWD/../TrendView
 
-# Protobuf
+# HardwareLib
 #
-LIBS += -lprotobuf
-win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
-unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
-INCLUDEPATH += ./../Protobuf
+LIBS += -lHardwareLib
+win32:PRE_TARGETDEPS += $$DESTDIR/HardwareLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libHardwareLib.a
 
 # OnlineLib
 #
@@ -227,11 +224,24 @@ LIBS += -lOnlineLib
 win32:PRE_TARGETDEPS += $$DESTDIR/OnlineLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libOnlineLib.a
 
+# AppSignalLib
+#
+LIBS += -lAppSignalLib
+win32:PRE_TARGETDEPS += $$DESTDIR/AppSignalLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libAppSignalLib.a
+
 # UtilsLib
 #
 LIBS += -lUtilsLib
 win32:PRE_TARGETDEPS += $$DESTDIR/UtilsLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libUtilsLib.a
+
+# Protobuf
+#
+LIBS += -lprotobuf
+win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
+INCLUDEPATH += ./../Protobuf
 
 # CommonLib
 #
@@ -239,9 +249,4 @@ LIBS += -lCommonLib
 win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libCommonLib.a
 
-# AppSignalLib
-#
-LIBS += -lAppSignalLib
-win32:PRE_TARGETDEPS += $$DESTDIR/AppSignalLib.lib
-unix:PRE_TARGETDEPS += $$DESTDIR/libAppSignalLib.a
 

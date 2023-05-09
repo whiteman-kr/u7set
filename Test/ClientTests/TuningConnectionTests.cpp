@@ -1,5 +1,6 @@
 #include "../../ClientLib/TuningConnection.h"
 #include "../../ClientLib/ITuningLog.h"
+#include "ConnectionPorts.h"
 
 using ::testing::_;
 using ::testing::AtLeast;

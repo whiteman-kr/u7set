@@ -43,10 +43,6 @@ unix {
 }
 
 SOURCES += \
-    ../lib/ConnectionsInfo.cpp \
-    ../lib/LmDescription.cpp \
-	../lib/LanControllerInfo.cpp \
-	../lib/LogicModulesInfo.cpp \
 	SoftwareXmlReader.cpp \
     SimAppDataLanInterface.cpp \
     SimAppDataTransmitter.cpp \
@@ -87,12 +83,7 @@ HEADERS += \
     SimConsoleLogFile.h \
 	Stable.h \
 	SoftwareXmlReader.h \
-    ../lib/ConnectionsInfo.h \
 	../UtilsLib/ILogFile.h \
-	../lib/LanControllerInfo.h \
-	../lib/LogicModulesInfo.h \
-	../Proto/serialization.pb.h \
-	../lib/LmDescription.h \
     SimAppDataLanInterface.h \
     SimAppDataTransmitter.h \
     SimCommandProcessor_LM5_LM6.h \

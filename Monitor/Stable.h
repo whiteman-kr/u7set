@@ -75,11 +75,11 @@
 #endif	// Visual Leak Detector
 
 
-#include "../AppSignalLib/TuningSignalManager.h"
-#include "ScriptMonitorApplication.h"
+//#include "../AppSignalLib/TuningSignalManager.h"
+//#include "ScriptMonitorApplication.h"
 
 // Defined in main.cpp
 //
-extern ScriptMonitorApplication theApp;
+//extern ScriptMonitorApplication theApp;
 
 

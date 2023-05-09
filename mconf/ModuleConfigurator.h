@@ -4,7 +4,7 @@
 #include <QtWidgets/QMainWindow>
 #include "ui_moduleconfigurator.h"
 #include "../HardwareLib/ModuleFirmware.h"
-#include "../lib/OutputLog.h"
+#include "../UtilsLib/OutputLog.h"
 #include "Settings.h"
 
 #include <optional>

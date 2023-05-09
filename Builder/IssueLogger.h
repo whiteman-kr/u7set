@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../lib/OutputLog.h"
+#include "../UtilsLib/OutputLog.h"
 #include <QUuid>
 
 #define LOG_ERROR(type, code, message)		writeError(issuePTypeToString(type), code, message, __FILE__, __LINE__, SHORT_FUNC_INFO)

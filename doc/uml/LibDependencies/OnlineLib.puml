@@ -3,7 +3,6 @@
 !include ./CommonLib.puml
 !include ./UtilsLib.puml
 !include ./Protobuf.puml
-
 !include ./AppSignalLib.puml
 
 [OnlineLib]
@@ -12,4 +11,4 @@ OnlineLib -up-> UtilsLib
 OnlineLib -up-> AppSignalLib
 OnlineLib -up-> Protobuf
 
-@enduml  
+@enduml

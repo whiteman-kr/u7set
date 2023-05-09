@@ -6,6 +6,9 @@
 #include "../lib/ConstStrings.h"
 #include "../Proto/network.pb.h"
 #include <cstdlib>
+#include <QCoreApplication>
+#include <QDir>
+#include <QSslPreSharedKeyAuthenticator>
 
 namespace Tcp
 {

@@ -30,7 +30,7 @@
 #include "../VFrame30/SchemaItemLoopback.h"
 #include "../VFrame30/Session.h"
 #include "../VFrame30/Bus.h"
-#include "../lib/LmDescription.h"
+#include "../HardwareLib/LmDescription.h"
 #include "../AppSignalSetProvider.h"
 #include "Forms/ComparePropertyObjectDialog.h"
 #include "Settings.h"

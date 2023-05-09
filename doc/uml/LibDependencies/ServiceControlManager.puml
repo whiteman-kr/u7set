@@ -8,6 +8,7 @@
 !include ./AppSignalLib.puml
 !include ./AppDataService.puml
 !include ./ClientLib.puml
+!include ./HardwareLib.puml
 
 [ServiceControlManager]
 ServiceControlManager -up-> [CommonLib]
@@ -18,5 +19,6 @@ ServiceControlManager -up-> [ServiceLib]
 ServiceControlManager -up-> [AppSignalLib]
 ServiceControlManager -up-> [AppDataService]
 ServiceControlManager -up-> [ClientLib]
+ServiceControlManager -up-> [HardwareLib]
 
 @enduml

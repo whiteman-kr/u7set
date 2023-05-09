@@ -1,7 +1,7 @@
 #include "ApplicationLogicCode.h"
 #include "ModuleLogicCompiler.h"
 
-#include "../VFrame30/Afb.h"
+#include "../HardwareLib/Afb.h"
 #include "../lib/ConstStrings.h"
 
 

@@ -1,4 +1,7 @@
 #pragma once
+#include <filesystem>
+#include <map>
+#include <memory>
 #include "../CommonLib/PropertyObject.h"
 
 namespace Sim

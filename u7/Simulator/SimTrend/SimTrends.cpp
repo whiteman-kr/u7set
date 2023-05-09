@@ -1,7 +1,7 @@
 #include "SimTrends.h"
 #include "../SimIdeSimulator.h"
-#include "../../TrendView/DialogChooseTrendSignals.h"
-#include "../../TrendView/TrendWidget.h"
+#include "../../../TrendView/DialogChooseTrendSignals.h"
+#include "../../../TrendView/TrendWidget.h"
 
 
 std::map<QString, SimTrendsWidget*> SimTrends::m_trendsList;

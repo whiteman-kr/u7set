@@ -2,7 +2,7 @@
 #include "../OnlineLib/SocketIO.h"
 #include <algorithm>
 #include <QSettings>
-#include "../OnlineLib/DataProtocols.h"
+#include "../HardwareLib/DataProtocols.h"
 
 const int C_DECIMAL = 0,
 C_HEXADECIMAL = 1,

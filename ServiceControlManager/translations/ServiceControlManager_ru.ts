@@ -1952,7 +1952,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/OutputLog.h" line="28"/>
+        <location filename="../../UtilsLib/OutputLog.h" line="28"/>
         <source>Ok</source>
         <translation type="unfinished"></translation>
     </message>

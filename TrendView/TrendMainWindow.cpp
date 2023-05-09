@@ -1,3 +1,17 @@
+#include <QGridLayout>
+#include <QComboBox>
+#include <QPushButton>
+#include <QScreen>
+#include <QToolBar>
+#include <QCloseEvent>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QDialogButtonBox>
+#include <QPrinter>
+#include <QPrintDialog>
+#include <QDateEdit>
+#include <QTimeEdit>
+#include <QActionGroup>
 #include "TrendMainWindow.h"
 #include "ui_TrendsMainWindow.h"
 #include "TrendSettings.h"

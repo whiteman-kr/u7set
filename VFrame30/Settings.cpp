@@ -1,4 +1,5 @@
 #include "Settings.h"
+#include "VFrameTools.h"
 
 namespace VFrame30
 {

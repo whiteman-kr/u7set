@@ -5,10 +5,10 @@
 #include "TcpFileTransfer.h"
 #include "SoftwareSettings.h"
 #include "../CommonLib/OrderedHash.h"
-#include "../lib/BuildInfo.h"
+#include "../OnlineLib/BuildInfo.h"
 
 
-typedef QVector<Builder::BuildFileInfo> BuildFileInfoArray;
+typedef QVector<OnlineLib::BuildFileInfo> BuildFileInfoArray;
 
 // -------------------------------------------------------------------------------------
 //
@@ -58,7 +58,7 @@ public:
 	virtual void onServerThreadStarted() override;
 	virtual void onServerThreadFinished() override;
 
-	const Builder::BuildInfo& buildInfo() { return m_buildInfo; }
+	const OnlineLib::BuildInfo& buildInfo() { return m_buildInfo; }
 
 private:
 	void readBuildXml();
@@ -72,8 +72,8 @@ private:
 
 	QString m_buildXmlPathFileName;
 
-	Builder::BuildInfo m_buildInfo;
-	HashedVector<QString, Builder::BuildFileInfo> m_buildFileInfo;		// fileName => buildFileInfo
+	OnlineLib::BuildInfo m_buildInfo;
+	HashedVector<QString, OnlineLib::BuildFileInfo> m_buildFileInfo;		// fileName => buildFileInfo
 
 	ErrorCode m_errorCode = ErrorCode::Ok;
 };
@@ -111,7 +111,7 @@ public:
 	Tcp::FileTransferResult getLastError() const { return m_lastError; }
 	QString getLastErrorStr() const { return getErrorStr(getLastError()); }
 
-	Builder::BuildInfo buildInfo();
+	OnlineLib::BuildInfo buildInfo();
 	SoftwareInfo softwareInfo() const { return localSoftwareInfo(); }
 	int appInstance() const { return m_appInstance; }
 	bool enableDownloadCfg() const { return m_enableDownloadConfiguration; }
@@ -182,7 +182,7 @@ private:
 	QString getFilePathNameByID(QString fileID) const;
 
 private:
-	struct CfgFileInfo : public Builder::BuildFileInfo
+	struct CfgFileInfo : public OnlineLib::BuildFileInfo
 	{
 		QByteArray fileData;
 		bool md5IsValid = false;
@@ -236,7 +236,7 @@ private:
 	bool m_allFilesLoaded = false;
 	int m_autoDownloadIndex = 0;
 
-	Builder::BuildInfo m_buildInfo;
+	OnlineLib::BuildInfo m_buildInfo;
 	CfgFilesInfo m_cfgFilesInfo;
 
 	bool m_hasValidSavedConfiguration = false;
@@ -305,7 +305,7 @@ public:
 
 	bool hasFileID(QString fileID) const;
 
-	Builder::BuildInfo buildInfo();
+	OnlineLib::BuildInfo buildInfo();
 
 	QString getLastErrorStr();
 

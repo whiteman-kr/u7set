@@ -3,8 +3,8 @@
 #include "../CommonLib/Times.h"
 #include "../UtilsLib/SimpleThread.h"
 #include "../OnlineLib/SoftwareSettings.h"
-#include "../OnlineLib/DataProtocols.h"
-#include "../lib/LogicModulesInfo.h"
+#include "../HardwareLib/DataProtocols.h"
+#include "../HardwareLib/LogicModulesInfo.h"
 #include "SimRam.h"
 #include "SimTuningRecord.h"
 

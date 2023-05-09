@@ -62,7 +62,6 @@ SOURCES +=\
     Settings.cpp \
     TuningSignalInfo.cpp \
     TuningWorkspace.cpp \
-    ../lib/BuildInfo.cpp \
     DialogSettings.cpp \
     ../lib/PropertyEditor.cpp \
     ../lib/PropertyEditorDialog.cpp \
@@ -100,7 +99,6 @@ HEADERS  += MainWindow.h \
     Settings.h \
     TuningSignalInfo.h \
     TuningWorkspace.h \
-    ../lib/BuildInfo.h \
     DialogSettings.h \
     ../lib/PropertyEditor.h \
     ../lib/PropertyEditorDialog.h \
@@ -161,7 +159,6 @@ unix:PRE_TARGETDEPS += $$DESTDIR/libClientLib.a
 win32:LIBS += -lAdvapi32
 unix:LIBS += -lpam -lpam_misc
 
-
 # VFrame30 library
 #
 LIBS += -lVFrame30
@@ -188,23 +185,17 @@ LIBS += -lOnlineLib
 win32:PRE_TARGETDEPS += $$DESTDIR/OnlineLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libOnlineLib.a
 
-# UtilsLib
-#
-LIBS += -lUtilsLib
-win32:PRE_TARGETDEPS += $$DESTDIR/UtilsLib.lib
-unix:PRE_TARGETDEPS += $$DESTDIR/libUtilsLib.a
-
-# CommonLib
-#
-LIBS += -lCommonLib
-win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
-unix:PRE_TARGETDEPS += $$DESTDIR/libCommonLib.a
-
 # AppSignalLib
 #
 LIBS += -lAppSignalLib
 win32:PRE_TARGETDEPS += $$DESTDIR/AppSignalLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libAppSignalLib.a
+
+# UtilsLib
+#
+LIBS += -lUtilsLib
+win32:PRE_TARGETDEPS += $$DESTDIR/UtilsLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libUtilsLib.a
 
 # Protobuf
 #
@@ -213,3 +204,8 @@ win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
 INCLUDEPATH += ./../Protobuf
 
+# CommonLib
+#
+LIBS += -lCommonLib
+win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libCommonLib.a

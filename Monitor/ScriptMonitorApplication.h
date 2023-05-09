@@ -180,3 +180,4 @@ private:
 	MonitorMainWindow* m_mainWindow = nullptr;
 };
 
+
