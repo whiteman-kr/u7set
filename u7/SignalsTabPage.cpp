@@ -679,7 +679,7 @@ SignalsTabPage::SignalsTabPage(AppSignalSetProvider* signalSetProvider, DbContro
 	m_completer = new QCompleter(m_filterHistory, this);
 	m_completer->setCaseSensitivity(Qt::CaseInsensitive);
 	m_filterEdit->setCompleter(m_completer);
-	connect(m_filterEdit, &QLineEdit::textEdited, [=](){m_completer->complete();});
+    connect(m_filterEdit, &QLineEdit::textEdited, [this](){m_completer->complete();});
 	connect(m_completer, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), m_filterEdit, &QLineEdit::setText);
 
 	QPushButton* applyButton = new QPushButton("Apply", this);
@@ -2669,14 +2669,14 @@ FindSignalDialog::FindSignalDialog(int currentUserId, bool currentUserIsAdmin, Q
 	m_findCompleter = new QCompleter(completerStringList, this);
 	m_findCompleter->setCaseSensitivity(Qt::CaseInsensitive);
 	m_findString->setCompleter(m_findCompleter);
-	connect(m_findString, &QLineEdit::textEdited, this, [=](){m_findCompleter->complete();});
+    connect(m_findString, &QLineEdit::textEdited, this, [this](){m_findCompleter->complete();});
 	connect(m_findCompleter, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), m_findString, &QLineEdit::setText);
 
 	completerStringList = QSettings{}.value("FindSignalDialog/ReplaceCompleter").toStringList();
 	m_replaceCompleter = new QCompleter(completerStringList, this);
 	m_replaceCompleter->setCaseSensitivity(Qt::CaseInsensitive);
 	m_replaceString->setCompleter(m_replaceCompleter);
-	connect(m_replaceString, &QLineEdit::textEdited, this, [=](){m_replaceCompleter->complete();});
+    connect(m_replaceString, &QLineEdit::textEdited, this, [this](){m_replaceCompleter->complete();});
 	connect(m_replaceCompleter, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), m_replaceString, &QLineEdit::setText);
 	//
 

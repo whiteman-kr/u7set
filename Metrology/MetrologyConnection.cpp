@@ -703,7 +703,7 @@ namespace Metrology
 		}
 
 		qint64 writtenBytes = file.write(data);
-		if (writtenBytes != data.count())
+        if (writtenBytes != data.size())
 		{
 			return false;
 		}

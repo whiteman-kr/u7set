@@ -10104,7 +10104,7 @@ SchemaFindDialog::SchemaFindDialog(bool replaceEnabled, QWidget* parent) :
 	m_findCompleter = new QCompleter(completerStringList, this);
 	m_findCompleter->setCaseSensitivity(Qt::CaseInsensitive);
 	m_findTextEdit->setCompleter(m_findCompleter);
-	connect(m_findTextEdit, &QLineEdit::textEdited, this, [=](){m_findCompleter->complete();});
+    connect(m_findTextEdit, &QLineEdit::textEdited, this, [this](){m_findCompleter->complete();});
 	connect(m_findCompleter, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), m_findTextEdit, &QLineEdit::setText);
 
 	if (replaceEnabled == true)
@@ -10115,7 +10115,7 @@ SchemaFindDialog::SchemaFindDialog(bool replaceEnabled, QWidget* parent) :
 		m_replaceCompleter = new QCompleter(completerStringList, this);
 		m_replaceCompleter->setCaseSensitivity(Qt::CaseInsensitive);
 		m_replaceTextEdit->setCompleter(m_replaceCompleter);
-		connect(m_replaceTextEdit, &QLineEdit::textEdited, this, [=](){m_replaceCompleter->complete();});
+        connect(m_replaceTextEdit, &QLineEdit::textEdited, this, [this](){m_replaceCompleter->complete();});
 		connect(m_replaceCompleter, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), m_replaceTextEdit, &QLineEdit::setText);
 	}
 
