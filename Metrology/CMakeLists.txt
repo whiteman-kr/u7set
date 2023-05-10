@@ -18,7 +18,7 @@ if (MSVC)
 	)
 endif (MSVC)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Concurrent SerialPort Network Sql Qml Xml Charts AxContainer)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Concurrent SerialPort Network Sql Qml Xml Charts)
 
 if (MSVC)
 	find_package(Qt6 REQUIRED COMPONENTS AxContainer)

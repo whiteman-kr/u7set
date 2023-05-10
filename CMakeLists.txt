@@ -9,6 +9,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
 	set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
+
 add_subdirectory(Protobuf)
 add_subdirectory(CommonLib)
 add_subdirectory(UtilsLib)

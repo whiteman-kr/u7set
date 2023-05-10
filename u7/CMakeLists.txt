@@ -18,7 +18,7 @@ if (MSVC)
   )
 endif (MSVC)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Sql Network Qml Svg Serialport Xml PrintSupport Test Concurrent DBus)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Sql Network Qml Svg SerialPort Xml PrintSupport Test Concurrent DBus)
 qt_standard_project_setup()
 
 set (U7_SOURCES

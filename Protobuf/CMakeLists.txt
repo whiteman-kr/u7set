@@ -7,6 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+find_package(Threads REQUIRED)
+
 find_package(Qt6 REQUIRED COMPONENTS Core)
 
 if (MSVC)
@@ -165,5 +167,11 @@ add_library(Protobuf STATIC
 	google/protobuf/io/zero_copy_stream_impl_lite.h
 )
 
-target_link_libraries(Protobuf PRIVATE Qt6::Core)
+if(Threads_FOUND)
+	target_compile_definitions(Protobuf PRIVATE HAVE_PTHREAD)
+endif()
+
+target_link_libraries(Protobuf PUBLIC Threads::Threads Qt6::Core)
+target_link_libraries(Protobuf PUBLIC CommonLib)
+
 target_include_directories(Protobuf INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
