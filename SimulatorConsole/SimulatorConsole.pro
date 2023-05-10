@@ -61,18 +61,11 @@ unix:PRE_TARGETDEPS += $$DESTDIR/libVFrame30.a
 INCLUDEPATH += ../VFrame30
 DEPENDPATH += ../VFrame30
 
-# Protobuf
+# HardwareLib
 #
-LIBS += -lprotobuf
-win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
-unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
-INCLUDEPATH += ./../Protobuf
-
-# AppSignalLib
-#
-LIBS += -lAppSignalLib
-win32:PRE_TARGETDEPS += $$DESTDIR/AppSignalLib.lib
-unix:PRE_TARGETDEPS += $$DESTDIR/libAppSignalLib.a
+LIBS += -lHardwareLib
+win32:PRE_TARGETDEPS += $$DESTDIR/HardwareLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libHardwareLib.a
 
 # OnlineLib
 #
@@ -80,17 +73,24 @@ LIBS += -lOnlineLib
 win32:PRE_TARGETDEPS += $$DESTDIR/OnlineLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libOnlineLib.a
 
+# AppSignalLib
+#
+LIBS += -lAppSignalLib
+win32:PRE_TARGETDEPS += $$DESTDIR/AppSignalLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libAppSignalLib.a
+
 # UtilsLib
 #
 LIBS += -lUtilsLib
 win32:PRE_TARGETDEPS += $$DESTDIR/UtilsLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libUtilsLib.a
 
-# HardwareLib
+# Protobuf
 #
-LIBS += -lHardwareLib
-win32:PRE_TARGETDEPS += $$DESTDIR/HardwareLib.lib
-unix:PRE_TARGETDEPS += $$DESTDIR/libHardwareLib.a
+LIBS += -lprotobuf
+win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
+INCLUDEPATH += ./../Protobuf
 
 # CommonLib
 #
