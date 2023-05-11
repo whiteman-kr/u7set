@@ -11,11 +11,6 @@ public:
 
 	// Operations
 
-	void createSignalsAndEqipmentHashes(const TuningSignalManager &objects,
-										const std::vector<Hash> &allHashes,
-										TuningFilter *filter,
-										bool userFiltersOnly);
-
 	void checkAndRemoveFilterSignals(const std::vector<Hash> &signalHashes,
 									 bool &removedNotFound,
 									 std::vector<std::pair<QString, QString>> &notFoundSignalsAndFilters,

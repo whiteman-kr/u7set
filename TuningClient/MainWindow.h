@@ -60,7 +60,7 @@ private:
 	virtual void closeEvent(QCloseEvent *event) override;
 	virtual void timerEvent(QTimerEvent* event) override;
 
-	void createAndCheckFiltersHashes(bool userFiltersOnly);
+    void checkAndRemoveFilterSignals();
 
 	void createWorkspace();
 	void deleteWorkspace();

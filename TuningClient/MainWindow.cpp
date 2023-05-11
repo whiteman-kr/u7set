@@ -353,23 +353,24 @@ void MainWindow::timerEvent(QTimerEvent* event)
 	return;
 }
 
-void MainWindow::createAndCheckFiltersHashes(bool userFiltersOnly)
+void MainWindow::checkAndRemoveFilterSignals()
 {
-	m_filterStorage.createSignalsAndEqipmentHashes(m_tuningSignalManager, m_tuningSignalManager.signalHashes(), m_filterStorage.root().get(), userFiltersOnly);
-
 	// Find and possibly remove non-existing signals from the list
 
 	bool removedNotFound = false;
 
 	std::vector<std::pair<QString, QString>> notFoundSignalsAndFilters;
 
-	m_filterStorage.checkAndRemoveFilterSignals(m_tuningSignalManager.signalHashes(), removedNotFound, notFoundSignalsAndFilters, this);
+    m_filterStorage.checkAndRemoveFilterSignals(m_tuningSignalManager.signalHashes(),
+                                                removedNotFound,
+                                                notFoundSignalsAndFilters,
+                                                this);
 
 	if (removedNotFound == true)
 	{
 		QString errorMsg;
 
-		if (m_filterStorage.save(theSettings.userFiltersFile(), &errorMsg, TuningFilter::Source::User) == false)
+        if (m_filterStorage.saveUserFilters(theSettings.userFiltersFile(), &errorMsg) == false)
 		{
 			m_logFile.writeError(errorMsg);
 			QMessageBox::critical(this, tr("Error"), errorMsg);
@@ -405,7 +406,14 @@ void MainWindow::createWorkspace()
 		setCentralWidget(w);
 	}
 
-	createAndCheckFiltersHashes(false/*userFiltersOnly*/);
+    // Count user filters signals hashes
+
+    m_filterStorage.createSignalsAndEqipmentHashes(m_tuningSignalManager,
+                                                         m_tuningSignalManager.signalHashes(),
+                                                         m_filterStorage.root().get(),
+                                                         TuningFilter::Source::User);
+
+    checkAndRemoveFilterSignals();
 
 	// Create new workspaces
 
@@ -1116,17 +1124,22 @@ void MainWindow::runPresetEditor()
 				return;
 			}
 
-			if (child->source() != TuningFilter::Source::User)
+            if (child->source() == TuningFilter::Source::User)
 			{
-				continue;
+                m_filterStorage.add(child, false);
 			}
-
-			m_filterStorage.add(child, false);
 		}
 
-		QString errorMsg;
+        // Count user filters signals hashes
 
-		if (m_filterStorage.save(theSettings.userFiltersFile(), &errorMsg, TuningFilter::Source::User) == false)
+        m_filterStorage.createSignalsAndEqipmentHashes(m_tuningSignalManager,
+                                                       m_tuningSignalManager.signalHashes(),
+                                                       m_filterStorage.root().get(),
+                                                       TuningFilter::Source::User);
+
+        QString errorMsg;
+
+        if (m_filterStorage.saveUserFilters(theSettings.userFiltersFile(), &errorMsg) == false)
 		{
 			m_logFile.writeError(errorMsg);
 			QMessageBox::critical(this, tr("Error"), errorMsg);
@@ -1220,9 +1233,7 @@ void MainWindow::showTuningUserManual()
 
 void MainWindow::slot_userFiltersChanged()
 {
-	// Update user filters
-
-	createAndCheckFiltersHashes(true/*userFiltersOnly*/);
+    checkAndRemoveFilterSignals();
 
 	if (m_tuningWorkspace != nullptr)
 	{

@@ -65,7 +65,9 @@ void Settings::RestoreSystem()
 		dir.mkpath(m_localAppDataPath);
 	}
 
-	m_filtersDefaultFile = QDir::toNativeSeparators(m_localAppDataPath + "/UserFilters.xml");
+    m_filtersDefaultFile = QDir::toNativeSeparators(QObject::tr("%1/%2/UserFilters.xml")
+                                                        .arg(m_localAppDataPath)
+                                                        .arg(m_instanceStrId));
 
 	m_filtersCustomFile = s.value("m_filtersCustomFile", m_filtersDefaultFile).toString();
 	m_useFiltersCustomFile = s.value("m_useFiltersCustomFile", m_useFiltersCustomFile).toBool();
