@@ -1031,7 +1031,23 @@ void TuningWorkspace::addChildTreeObjects(const std::shared_ptr<TuningFilter> fi
 
 		if (mask.isEmpty() == false)
 		{
-			if (f->childFiltersCount() == 0 && caption.contains(mask, Qt::CaseInsensitive) == false)
+            // Check if filter has child filters EXCEPT counters
+            //
+            bool hasChildFilters = false;
+
+            int childFiltersCount = f->childFiltersCount();
+            for (int i = 0; i < childFiltersCount; i++)
+            {
+                TuningFilter* const cf = f->childFilter(i).get();
+                if (cf->isCounter() == false)
+                {
+                    hasChildFilters = true;
+                    break;
+                }
+            }
+
+            if (hasChildFilters == false &&
+                caption.contains(mask, Qt::CaseInsensitive) == false)
 			{
 				continue;
 			}

@@ -24,10 +24,10 @@ namespace Builder
 		SubsystemStorage* m_subsystems = nullptr;
 
 		bool createEquipmentList(QStringList* equipmentList);
-		bool createObjectFilters(const QStringList& equipmentList);
+		bool createObjectFilters(const TuningSignalManager& tuningSignalManager, const QStringList& equipmentList);
 
 		bool writeTuningSignals();
-		bool writeObjectFilters();
+		bool writeObjectFilters(const TuningSignalManager& tuningSignalManager);
 		bool writeTuningSchemas();
 		bool writeGlobalScript();
 		bool writeTuningClientBehavior();

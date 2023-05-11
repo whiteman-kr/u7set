@@ -2303,9 +2303,18 @@ void TuningPage::addSelectedSignalsToFilter(TuningFilter* filter)
 		return;
 	}
 
-	QString errorMsg;
+    // Count user filters signals hashes
 
-	if (m_tuningFilterStorage.save(theSettings.userFiltersFile(), &errorMsg, TuningFilter::Source::User) == false)
+    m_tuningFilterStorage.createSignalsAndEqipmentHashes(m_tuningSignalManager,
+                                                   m_tuningSignalManager.signalHashes(),
+                                                   m_tuningFilterStorage.root().get(),
+                                                   TuningFilter::Source::User);
+
+    // SaveFilters to file
+
+    QString errorMsg;
+
+    if (m_tuningFilterStorage.saveUserFilters(theSettings.userFiltersFile(), &errorMsg) == false)
 	{
 		QMessageBox::critical(this, tr("Error"), errorMsg);
 	}

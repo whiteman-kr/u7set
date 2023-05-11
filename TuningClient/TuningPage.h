@@ -181,7 +181,7 @@ private slots:
 private:
 	TuningConfigController& m_configController;
 	TuningSignalManager& m_tuningSignalManager;
-	TuningFilterStorage& m_tuningFilterStorage;
+    TuningClientFilterStorage& m_tuningFilterStorage;
 	ClientLib::TuningUserManager& m_userManager;
 
 	ClientLib::TuningConnection& m_tuningConnection;

@@ -255,6 +255,13 @@ bool EditSchemaTuningSignalProvider::signalExists(const QString& appSignalId) co
 	return s != nullptr;
 }
 
+bool EditSchemaTuningSignalProvider::signalsExist(const QStringList& signalIds) const
+{
+	return std::all_of(signalIds.begin(), signalIds.end(), [this](const QString& appSignalId) {
+		return m_signalSetProvider->getSignalByStrID(appSignalId) != nullptr;
+	});
+}
+
 AppSignalParam EditSchemaTuningSignalProvider::signalParam(Hash hash, bool* found) const
 {
 	// Unlikely this function required for schema editing
@@ -371,6 +378,19 @@ TuningSignalState EditSchemaTuningSignalProvider::state(const QString& /*appSign
 	Q_ASSERT(false);
 	return {};
 }
+
+void EditSchemaTuningSignalProvider::state(const std::vector<Hash>& /*appSignalHashes*/, std::vector<TuningSignalState>* /*result*/, int* /*found*/) const
+{
+	Q_ASSERT(false);
+	return;
+}
+
+void EditSchemaTuningSignalProvider::state(const std::vector<QString>& /*appSignalIds*/, std::vector<TuningSignalState>* /*result*/, int* /*found*/) const
+{
+	Q_ASSERT(false);
+	return;
+}
+
 
 QStringList EditSchemaTuningSignalProvider::signalIdsByTag(const QString& /*tag*/) const
 {

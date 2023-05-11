@@ -69,7 +69,8 @@ public:
 		Project,
 		Schema,
 		Equipment,
-		User
+		User,
+		All // used to specify any filter in save operation
 	};
 	Q_ENUM(Source)
 
@@ -104,7 +105,7 @@ public:
 	TuningFilter& operator= (const TuningFilter& That);
 
 	bool load(QXmlStreamReader& reader);
-	bool save(QXmlStreamWriter& writer, bool filterByInterfaceType, TuningFilter::Source saveSourceType) const;
+	bool save(QXmlStreamWriter& writer, TuningFilter::Source saveSourceType) const;
 
 	bool match(const AppSignalParam& object) const;
 
@@ -405,9 +406,8 @@ public:
 	bool load(const QByteArray& data, QString* errorCode);
 	bool load(const QString& fileName, QString* errorCode);
 
-	bool save(QByteArray& data);
-	bool save(QByteArray& data, TuningFilter::Source saveSourceType) const;
-	bool save(const QString& fileName, QString* errorMsg, TuningFilter::Source saveSourceType);
+	bool save(QByteArray& data) const;
+	bool saveUserFilters(const QString& fileName, QString* errorMsg) const;
 
 	bool copyToClipboard(std::vector<std::shared_ptr<TuningFilter>> filters);
 	std::shared_ptr<TuningFilter> pasteFromClipboard();
@@ -418,6 +418,10 @@ public:
 
 	void checkFilterSignals(const std::vector<Hash>& signalHashes, std::vector<std::pair<QString, QString> >& notFoundSignalsAndFilters);
 
+	void createSignalsAndEqipmentHashes(const TuningSignalManager &objects,
+										const std::vector<Hash> &allHashes,
+										TuningFilter *filter,
+										TuningFilter::Source source);
 protected:
 
 	std::shared_ptr<TuningFilter> m_root = nullptr;

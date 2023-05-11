@@ -61,6 +61,42 @@ namespace VFrame30
 		return result;
 	}
 
+
+	QJSValueList TuningController::signalStates(QStringList appSignalIds) const
+	{
+		QJSValueList result;
+
+		if (m_signalManager == nullptr)
+		{
+			assert(m_signalManager);
+			return result;
+		}
+
+		// --
+		//
+		std::vector<QString> signalIds{appSignalIds.begin(), appSignalIds.end()};
+		std::vector<TuningSignalState> states;
+
+		m_signalManager->state(signalIds, &states, nullptr);
+
+		// --
+		//
+		QJSEngine* engine = qjsEngine(this);
+		if (engine == nullptr)
+		{
+			Q_ASSERT(engine);
+			return result;
+		}
+
+		result.reserve(signalIds.size());
+		for (const auto& state : states)
+		{
+			result.push_back(engine->toScriptValue(state));
+		}
+
+		return result;
+	}
+
 	bool TuningController::signalExists(QString signalId) const
 	{
 		if (m_signalManager == nullptr)
@@ -70,6 +106,17 @@ namespace VFrame30
 		}
 
 		return m_signalManager->signalExists(::calcHash(signalId));
+	}
+
+	bool TuningController::signalsExist(QStringList signalIds)
+	{
+		if (m_signalManager == nullptr)
+		{
+			assert(m_signalManager);
+			return {};
+		}
+
+		return m_signalManager->signalsExist(signalIds);
 	}
 
 	bool TuningController::isDiscrete(QString signalId) const
