@@ -1,9 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(OnlineLib LANGUAGES CXX)
-
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -35,9 +33,8 @@ add_library(OnlineLib STATIC
 )
 
 target_link_libraries(OnlineLib PRIVATE Qt6::Network)
-target_link_libraries(OnlineLib PUBLIC UtilsLib AppSignalLib HardwareLib)
+target_link_libraries(OnlineLib PUBLIC CommonLib Protobuf UtilsLib)
 
-target_compile_definitions(OnlineLib PRIVATE ONLINE_LIBRARY)
+target_compile_definitions(OnlineLib PRIVATE ONLINE_LIB_DOMAIN)
 #target_include_directories(OnlineLib INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
-add_compile_definitions(ONLINE_LIB_DOMAIN)		# TODO: ONLINE_LIB_DOMAIN -> ONLINE_LIBRARY?

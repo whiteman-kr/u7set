@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(CfgSrv LANGUAGES CXX)
+message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 include(../vld.cmake)
 
@@ -83,7 +84,7 @@ target_precompile_headers(CfgSrv PRIVATE
 )
 
 target_link_libraries(CfgSrv PRIVATE Qt6::Core Qt6::Gui Qt6::Network Qt6::Qml Qt6::Xml Qt6::Widgets)
-target_link_libraries(CfgSrv PUBLIC CommonLib Protobuf UtilsLib AppSignalLib HardwareLib ServiceLib OnlineLib ClientLib)
+target_link_libraries(CfgSrv PRIVATE CommonLib Protobuf UtilsLib ServiceLib OnlineLib)
 
 # Link Visaul Leak Detector
 #

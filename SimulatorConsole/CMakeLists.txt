@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(SimulatorConsole LANGUAGES CXX)
+message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 include(../vld.cmake)
 
@@ -18,7 +19,7 @@ add_executable(SimulatorConsole
 )
 
 target_link_libraries(SimulatorConsole PRIVATE Qt6::Xml Qt6::Qml Qt6::Core Qt6::Concurrent Qt6::Network)
-target_link_libraries(SimulatorConsole PUBLIC Simulator)
+target_link_libraries(SimulatorConsole PRIVATE Protobuf Simulator)
 
 # Link Visaul Leak Detector
 #

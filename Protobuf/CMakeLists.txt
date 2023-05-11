@@ -1,14 +1,11 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(Protobuf LANGUAGES CXX)
-
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 find_package(Threads REQUIRED)
-
 find_package(Qt6 REQUIRED COMPONENTS Core)
 
 if (MSVC)

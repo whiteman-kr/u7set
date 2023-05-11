@@ -1,9 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(ServiceLib LANGUAGES CXX)
-
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -35,10 +33,9 @@ if(UNIX)
 endif(UNIX)
 
 
-target_link_libraries(ServiceLib PRIVATE Qt6::Core Qt6::Network)
+target_link_libraries(ServiceLib PUBLIC Qt6::Core Qt6::Network)
 target_link_libraries(ServiceLib PUBLIC Protobuf OnlineLib CommonLib)
 
-target_compile_definitions(ServiceLib PRIVATE SERVICE_LIBRARY)
+target_compile_definitions(ServiceLib PRIVATE SERVICE_LIB_DOMAIN)
 #target_include_directories(ServiceLib INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
-add_compile_definitions(SERVICE_LIB_DOMAIN)		# TODO: SERVICE_LIB_DOMAIN -> SERVICE_LIBRARY?

@@ -1,9 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(DbLib LANGUAGES CXX)
-
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -27,10 +25,9 @@ add_library(DbLib STATIC
 	DbWorker.h
 )
 
-target_link_libraries(DbLib PRIVATE Qt6::Gui Qt6::Widgets Qt6::Sql Qt6::Concurrent Qt6::Network)
-target_link_libraries(DbLib PUBLIC HardwareLib AppSignalLib)
+target_link_libraries(DbLib PUBLIC Qt6::Gui Qt6::Widgets Qt6::Sql Qt6::Concurrent Qt6::Network)
+target_link_libraries(DbLib PUBLIC CommonLib HardwareLib AppSignalLib)
 
-target_compile_definitions(DbLib PRIVATE DB_LIBRARY)
+target_compile_definitions(DbLib PRIVATE DB_LIB_DOMAIN)
 #target_include_directories(DbLib INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
-add_compile_definitions(DB_LIB_DOMAIN)		# TODO: DB_LIB_DOMAIN -> DB_LIBRARY?

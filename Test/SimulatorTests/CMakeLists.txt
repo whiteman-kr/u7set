@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(SimulatorTests LANGUAGES CXX)
+message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 enable_testing()
 
@@ -27,5 +28,6 @@ add_executable(SimulatorTests
 )
 
 target_link_libraries(SimulatorTests PRIVATE Qt6::Test Qt6::Core Qt6::Network Qt6::Qml Qt6::Xml Qt6::Concurrent)
-target_link_libraries(SimulatorTests PUBLIC CommonLib Protobuf UtilsLib AppSignalLib OnlineLib HardwareLib VFrame30 Simulator)
+target_link_libraries(SimulatorTests PRIVATE Protobuf HardwareLib Simulator)
+
 

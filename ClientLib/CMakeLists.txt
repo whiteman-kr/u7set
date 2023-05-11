@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(ClientLib LANGUAGES CXX)
+message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -43,7 +44,7 @@ add_library(ClientLib STATIC
 )
 
 target_link_libraries(ClientLib PUBLIC Qt6::Gui Qt6::Xml Qt6::Network Qt6::Widgets)
-target_link_libraries(ClientLib PUBLIC CommonLib Protobuf UtilsLib OnlineLib AppSignalLib)
+target_link_libraries(ClientLib PUBLIC CommonLib Protobuf UtilsLib OnlineLib AppSignalLib TrendView)
 
 if (MSVC)
 	target_link_libraries(ClientLib PUBLIC Advapi32)
@@ -52,6 +53,6 @@ if (UNIX)
 	target_link_libraries(ClientLib PUBLIC pam pam_misc)
 endif (UNIX)
 
-target_compile_definitions(ClientLib PRIVATE CLIENT_LIBRARY)
+target_compile_definitions(ClientLib PRIVATE CLIENT_LIB_DOMAIN)
 #target_include_directories(ClientLib INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
-add_compile_definitions(CLIENT_LIB_DOMAIN)		# TODO: CLIENT_LIB_DOMAIN-> CLIENT_LIBRARY?
+

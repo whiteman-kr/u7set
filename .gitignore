@@ -4,7 +4,8 @@ version.h
 gitlab_version.h
 Makefile*
 *.o
-build*/**
+build-*/**
+build/**
 out/**
 *embed.manifest
 GetGitProjectVersion.exe

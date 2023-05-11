@@ -6,7 +6,7 @@
 #include "../UtilsLib/WUtils.h"
 #include "../Proto/network.pb.h"
 #include "../CommonLib/HostAddressPort.h"
-#include "../HardwareLib/DataProtocols.h"
+#include "DataProtocols.h"
 
 struct LanControllerInfo
 {

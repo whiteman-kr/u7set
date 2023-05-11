@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(Builder LANGUAGES CXX)
+message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -169,10 +170,9 @@ target_precompile_headers(Builder PRIVATE
 	<QFile>
 )
 
-target_link_libraries(Builder PRIVATE Qt6::Widgets Qt6::Qml Qt6::Xml Qt6::Sql Qt6::Concurrent Qt6::Gui Qt6::PrintSupport)
-target_link_libraries(Builder PUBLIC Protobuf HardwareLib DbLib AppSignalLib OnlineLib UtilsLib CommonLib VFrame30 Simulator)
+target_link_libraries(Builder PUBLIC Qt6::Widgets Qt6::Qml Qt6::Xml Qt6::Sql Qt6::Concurrent Qt6::Gui Qt6::PrintSupport)
+target_link_libraries(Builder PUBLIC CommonLib Protobuf UtilsLib HardwareLib DbLib AppSignalLib OnlineLib VFrame30 Simulator)
 
-target_compile_definitions(Builder PRIVATE BUILDER_LIBRARY)
 target_compile_definitions(Builder PRIVATE IS_BUILDER)
 #target_include_directories(Builder INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 

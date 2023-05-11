@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(u7databasetests LANGUAGES CXX)
+message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 enable_testing()
 

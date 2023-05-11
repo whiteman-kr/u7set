@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(ClientTests LANGUAGES CXX)
+message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 enable_testing()
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
-
 set(GOOGLETEST_DIR $ENV{GOOGLETEST_DIR})
 
 find_package(Threads REQUIRED)

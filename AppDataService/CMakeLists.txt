@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(AppDataSrv LANGUAGES CXX)
+message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 include(../vld.cmake)
 
@@ -99,7 +100,7 @@ target_include_directories(AppDataSrv PRIVATE ./../asio/include)
 target_compile_definitions(AppDataSrv PRIVATE ASIO_STANDALONE=1)
 
 target_link_libraries(AppDataSrv PRIVATE Qt6::Core Qt6::Network Qt6::Widgets Qt6::Qml Qt6::Sql Qt6::Xml)
-target_link_libraries(AppDataSrv PUBLIC CommonLib Protobuf UtilsLib AppSignalLib HardwareLib OnlineLib ServiceLib)
+target_link_libraries(AppDataSrv PRIVATE CommonLib Protobuf UtilsLib AppSignalLib HardwareLib OnlineLib ServiceLib)
 
 # Link Visaul Leak Detector
 #

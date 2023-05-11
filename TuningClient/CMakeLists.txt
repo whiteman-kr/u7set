@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(TuningClient LANGUAGES CXX)
+message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 include(../vld.cmake)
-
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -164,7 +164,7 @@ target_precompile_headers(TuningClient PRIVATE
 )
 
 target_link_libraries(TuningClient PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Sql Qt6::Network Qt6::Qml Qt6::Xml Qt6::Svg Qt6::PrintSupport)
-target_link_libraries(TuningClient PRIVATE CommonLib Protobuf UtilsLib AppSignalLib OnlineLib HardwareLib TrendView VFrame30 ClientLib)
+target_link_libraries(TuningClient PRIVATE CommonLib UtilsLib AppSignalLib OnlineLib VFrame30 ClientLib)
 
 # Link Visaul Leak Detector
 #

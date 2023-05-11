@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(DiagDataSrv LANGUAGES CXX)
+message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 include(../vld.cmake)
 
@@ -78,7 +79,7 @@ target_precompile_headers(DiagDataSrv PRIVATE
 )
 
 target_link_libraries(DiagDataSrv PRIVATE Qt6::Core Qt6::Network Qt6::Widgets Qt6::Qml Qt6::Xml)
-target_link_libraries(DiagDataSrv PUBLIC CommonLib Protobuf UtilsLib OnlineLib ServiceLib)
+target_link_libraries(DiagDataSrv PRIVATE HardwareLib AppSignalLib OnlineLib ServiceLib)
 
 # Link Visaul Leak Detector
 #

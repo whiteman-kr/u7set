@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(scm LANGUAGES CXX)
+message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 include(../vld.cmake)
 
@@ -114,7 +115,7 @@ target_precompile_headers(scm PRIVATE
 )
 
 target_link_libraries(scm PRIVATE Qt6::Core Qt6::Gui Qt6::Network Qt6::Qml Qt6::Xml Qt6::Widgets)
-target_link_libraries(scm PUBLIC CommonLib Protobuf UtilsLib AppSignalLib HardwareLib ServiceLib OnlineLib ClientLib)
+target_link_libraries(scm PRIVATE CommonLib Protobuf UtilsLib AppSignalLib HardwareLib ServiceLib OnlineLib ClientLib)
 
 # Link Visaul Leak Detector
 #

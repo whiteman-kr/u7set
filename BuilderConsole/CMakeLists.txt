@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(BuilderConsole LANGUAGES CXX)
+message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 include(../vld.cmake)
 
@@ -19,7 +20,7 @@ add_executable(BuilderConsole
 )
 
 target_link_libraries(BuilderConsole PRIVATE Qt6::Qml Qt6::Sql Qt6::Xml Qt6::Widgets Qt6::Svg)
-target_link_libraries(BuilderConsole PUBLIC HardwareLib VFrame30 Builder Simulator Protobuf)
+target_link_libraries(BuilderConsole PRIVATE HardwareLib VFrame30 Builder Simulator Protobuf)
 
 # Link Visaul Leak Detector
 #

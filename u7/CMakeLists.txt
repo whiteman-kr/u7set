@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(u7 LANGUAGES CXX)
+message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 include(../vld.cmake)
-
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -373,7 +373,7 @@ target_precompile_headers(u7 PRIVATE
 target_link_libraries(u7 PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Sql Qt6::Network Qt6::Qml	Qt6::Svg
 	Qt6::SerialPort Qt6::Xml Qt6::PrintSupport Qt6::Test Qt6::Concurrent Qt6::DBus)
 
-target_link_libraries(u7 PRIVATE CommonLib Protobuf HardwareLib DbLib UtilsLib OnlineLib AppSignalLib
+target_link_libraries(u7 PRIVATE CommonLib Protobuf UtilsLib AppSignalLib HardwareLib DbLib OnlineLib 
 	TrendView Simulator qt6keychain Builder VFrame30)
 
 # Link Visaul Leak Detector

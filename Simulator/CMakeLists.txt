@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(Simulator LANGUAGES CXX)
+message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -111,8 +112,8 @@ target_precompile_headers(Simulator PRIVATE
 	<QVector>
 )
 
-target_link_libraries(Simulator PRIVATE Qt6::Xml Qt6::Qml Qt6::Core Qt6::Concurrent Qt6::Network)
-target_link_libraries(Simulator PUBLIC TrendView VFrame30 Protobuf HardwareLib AppSignalLib OnlineLib UtilsLib CommonLib)
+target_link_libraries(Simulator PUBLIC Qt6::Xml Qt6::Qml Qt6::Core Qt6::Concurrent Qt6::Network)
+target_link_libraries(Simulator PUBLIC CommonLib Protobuf UtilsLib AppSignalLib HardwareLib OnlineLib TrendView)
 
 target_compile_definitions(Simulator PRIVATE SIMULATOR_LIBRARY)
 target_include_directories(Simulator INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

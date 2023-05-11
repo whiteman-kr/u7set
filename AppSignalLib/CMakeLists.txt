@@ -1,9 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(AppSignalLib LANGUAGES CXX)
-
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -33,10 +31,9 @@ add_library(AppSignalLib STATIC
 	SimpleAppSignalState.cpp
 )
 
-target_link_libraries(AppSignalLib PRIVATE Qt6::Network)
-target_link_libraries(AppSignalLib PUBLIC Protobuf)
+target_link_libraries(AppSignalLib PUBLIC Qt6::Network)
+target_link_libraries(AppSignalLib PUBLIC CommonLib Protobuf UtilsLib)
 
-target_compile_definitions(AppSignalLib PRIVATE APPSIGNAL_LIBRARY)
+target_compile_definitions(AppSignalLib PRIVATE APP_SIGNAL_LIB_DOMAIN)
 #target_include_directories(AppSignalLib INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
-add_compile_definitions(APP_SIGNAL_LIB_DOMAIN)		# TODO: APP_SIGNAL_LIB_DOMAIN -> APPSIGNAL_LIBRARY?

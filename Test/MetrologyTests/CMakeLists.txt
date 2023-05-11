@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(MetrologyTests LANGUAGES CXX)
+message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 enable_testing()
 
@@ -34,5 +35,5 @@ target_precompile_headers(Builder PRIVATE
 )
 
 target_link_libraries(MetrologyTests PRIVATE Qt6::Test Qt6::Core Qt6::Network)
-target_link_libraries(MetrologyTests PUBLIC CommonLib Protobuf UtilsLib AppSignalLib OnlineLib HardwareLib)
+target_link_libraries(MetrologyTests PRIVATE CommonLib Protobuf UtilsLib AppSignalLib OnlineLib HardwareLib)
 

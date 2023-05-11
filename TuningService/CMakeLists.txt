@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(TuningSrv LANGUAGES CXX)
+message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 include(../vld.cmake)
 
@@ -92,7 +93,7 @@ target_precompile_headers(TuningSrv PRIVATE
 )
 
 target_link_libraries(TuningSrv PRIVATE Qt6::Core Qt6::Network Qt6::Widgets Qt6::Qml Qt6::Xml)
-target_link_libraries(TuningSrv PUBLIC CommonLib Protobuf UtilsLib AppSignalLib OnlineLib HardwareLib ServiceLib)
+target_link_libraries(TuningSrv PRIVATE CommonLib Protobuf UtilsLib AppSignalLib OnlineLib HardwareLib ServiceLib)
 
 # Link Visaul Leak Detector
 #

@@ -1,9 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(HardwareLib LANGUAGES CXX)
-
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -36,12 +34,11 @@ add_library(HardwareLib STATIC
 	Subsystem.h
 )
 
-target_link_libraries(HardwareLib PRIVATE Qt6::Core Qt6::Network Qt6::Xml Qt6::Concurrent Qt6::Qml)
-target_link_libraries(HardwareLib PUBLIC Protobuf)
+target_link_libraries(HardwareLib PUBLIC Qt6::Core Qt6::Network Qt6::Xml Qt6::Concurrent Qt6::Qml)
+target_link_libraries(HardwareLib PUBLIC CommonLib Protobuf UtilsLib)
 
-target_compile_definitions(HardwareLib PRIVATE HARDWARE_LIBRARY)
+target_compile_definitions(HardwareLib PRIVATE HARDWARE_LIB_DOMAIN)
 target_include_directories(HardwareLib INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
-add_compile_definitions(HARDWARE_LIB_DOMAIN)		# TODO: HARDWARE_LIB_DOMAIN -> HARDWARE_LIBRARY?
 
 

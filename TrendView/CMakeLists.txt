@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(TrendView LANGUAGES CXX)
+message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -55,9 +56,8 @@ add_library(TrendView STATIC
 	TrendView.qrc
 )
 
-
-target_link_libraries(TrendView PRIVATE Qt6::Gui Qt6::Svg Qt6::Widgets Qt6::PrintSupport)
-target_link_libraries(TrendView PUBLIC Protobuf UtilsLib AppSignalLib CommonLib)
+target_link_libraries(TrendView PUBLIC Qt6::Gui Qt6::Svg Qt6::Widgets Qt6::PrintSupport)
+target_link_libraries(TrendView PUBLIC CommonLib Protobuf UtilsLib AppSignalLib )
 
 target_compile_definitions(TrendView PRIVATE TREND_VIEW_LIBRARY)
 #target_include_directories(TrendView INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

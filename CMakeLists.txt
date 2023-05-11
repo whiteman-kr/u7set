@@ -1,6 +1,23 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(u7)
+# Version, example: 23.6.1.2570
+# Year (two last digits) / Month (1-12) / PatchNo (0-...) / PipelineID (2000-...)
+#
+
+# Version, example: 385.1.2570
+# Project DB Version / PatchNo (0-...) / PipelineID (2000-...)
+# 
+
+# Git based 
+# CI_PIPELINE_ID (2570) CI_COMMIT_SHA
+#
+project(
+	PRCT 
+	VERSION 00.00.00.0000
+	DESCRIPTION "Radiy Platform Configuration Tool" 
+	HOMEPAGE_URL "radiy.com")
+
+message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -8,7 +25,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
 	set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
-
 
 add_subdirectory(Protobuf)
 add_subdirectory(CommonLib)

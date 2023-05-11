@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(TestSuiteConsole LANGUAGES CXX)
+message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 include(../vld.cmake)
 
@@ -16,7 +17,7 @@ add_executable(TestSuiteConsole
 )
 
 target_link_libraries(TestSuiteConsole PRIVATE Qt6::Xml Qt6::Sql Qt6::Qml Qt6::Svg Qt6::Test)
-target_link_libraries(TestSuiteConsole PUBLIC CommonLib Protobuf UtilsLib AppSignalLib OnlineLib ClientLib TestSuiteLib)
+target_link_libraries(TestSuiteConsole PRIVATE CommonLib Protobuf UtilsLib AppSignalLib OnlineLib ClientLib TestSuiteLib)
 
 
 # Link Visaul Leak Detector

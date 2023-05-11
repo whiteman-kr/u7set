@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(PacketSource LANGUAGES CXX)
+message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 include(../../vld.cmake)
-
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)

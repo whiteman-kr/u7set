@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(VFrame30 LANGUAGES CXX)
+message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -204,8 +205,8 @@ target_precompile_headers(VFrame30 PRIVATE
 		"../Proto/ProtoSerialization.h"
 )
 
-target_link_libraries(VFrame30 PRIVATE Qt6::Widgets Qt6::Qml Qt6::Xml Qt6::Svg)
-target_link_libraries(VFrame30 PUBLIC Protobuf TrendView AppSignalLib UtilsLib CommonLib)
+target_link_libraries(VFrame30 PUBLIC Qt6::Widgets Qt6::Qml Qt6::Xml Qt6::Svg)
+target_link_libraries(VFrame30 PUBLIC CommonLib Protobuf UtilsLib AppSignalLib HardwareLib TrendView)
 
 target_compile_definitions(VFrame30 PRIVATE VFRAME30_LIBRARY)
 #target_include_directories(VFrame30 INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

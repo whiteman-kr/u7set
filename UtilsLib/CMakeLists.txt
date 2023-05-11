@@ -1,9 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(UtilsLib LANGUAGES CXX)
-
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -39,11 +37,11 @@ add_library(UtilsLib STATIC
 	CrashExceptionHandler.cpp
 )
 
-target_link_libraries(UtilsLib PRIVATE Qt6::Core Qt6::Network Qt6::Xml Qt6::Widgets)
+target_link_libraries(UtilsLib PUBLIC Qt6::Core Qt6::Network Qt6::Xml Qt6::Widgets)
+target_link_libraries(UtilsLib PUBLIC CommonLib)
 
-target_compile_definitions(UtilsLib PRIVATE UTILS_LIBRARY)
+target_compile_definitions(UtilsLib PRIVATE UTILS_LIB_DOMAIN)
 target_include_directories(UtilsLib INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
-add_compile_definitions(UTILS_LIB_DOMAIN)		# TODO: UTILS_LIB_DOMAIN -> UTILS_LIBRARY?
 
 

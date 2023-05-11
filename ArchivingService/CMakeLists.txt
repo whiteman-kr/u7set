@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(ArchSrv LANGUAGES CXX)
+message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 include(../vld.cmake)
 
@@ -101,7 +102,7 @@ target_precompile_headers(ArchSrv PRIVATE
 )
 
 target_link_libraries(ArchSrv PRIVATE Qt6::Core Qt6::Network Qt6::Widgets Qt6::Qml Qt6::Sql Qt6::Xml)
-target_link_libraries(ArchSrv PUBLIC CommonLib Protobuf UtilsLib AppSignalLib OnlineLib ServiceLib)
+target_link_libraries(ArchSrv PRIVATE CommonLib Protobuf UtilsLib AppSignalLib OnlineLib ServiceLib)
 
 # Link Visaul Leak Detector
 #
