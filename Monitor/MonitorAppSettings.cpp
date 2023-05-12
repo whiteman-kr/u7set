@@ -42,6 +42,7 @@ void MonitorAppSettings::save(QSettings& settings) const
 
 	settings.setValue("MonitorAppSettings/equipmentId", data.equipmentId);
 	settings.setValue("MonitorAppSettings/windowCaption", data.windowCaption);
+	settings.setValue("MonitorAppSettings/language", data.language);
 
 	settings.setValue("MonitorAppSettings/configuratorIpAddress1", data.cfgSrvIpAddress1);
 	settings.setValue("MonitorAppSettings/configuratorPort1", data.cfgSrvPort1);
@@ -63,6 +64,7 @@ void MonitorAppSettings::load(const QSettings& settings)
 
 	data.equipmentId = settings.value("MonitorAppSettings/equipmentId", "SYSTEM_RACKID_WS00_MONITOR").toString();
 	data.windowCaption = settings.value("MonitorAppSettings/windowCaption", "Monitor").toString();
+	data.language = settings.value("MonitorAppSettings/language", "en").toString();
 
 	data.cfgSrvIpAddress1 = settings.value("MonitorAppSettings/configuratorIpAddress1", "127.0.0.1").toString();
 	data.cfgSrvPort1 = settings.value("MonitorAppSettings/configuratorPort1", PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST).toInt();
@@ -101,6 +103,12 @@ QString MonitorAppSettings::windowCaption() const
 {
 	QMutexLocker l(&m_mutex);
 	return m_data.windowCaption;
+}
+
+QString MonitorAppSettings::language() const
+{
+	QMutexLocker l(&m_mutex);
+	return m_data.language;
 }
 
 HostAddressPort MonitorAppSettings::configuratorAddress1() const

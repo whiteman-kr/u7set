@@ -7,6 +7,7 @@
 #include "InstanceResolver.h"
 #include "SchemaDrawStatistics.h"
 //#include "../VFrame30/ClientSchemaView.h"
+#include "../ClientLib/ClientTranslator.h"
 #include "../ClientLib/AdsConnection.h"
 #include "../ClientLib/TuningTcpClient.h"
 #include "../ClientLib/TuningUserManager.h"
@@ -239,6 +240,10 @@ private:
 
 	int m_logErrorsCounter = -1;
 	int m_logWarningsCounter = -1;
+
+	// Translator
+	//
+	ClientLib::ClientTranslator m_translator;
 
 	// --
 	//

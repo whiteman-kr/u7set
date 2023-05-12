@@ -69,8 +69,8 @@ namespace
 
 		cursor.setBlockFormat(regularFormat);
 		cursor.setCharFormat(regularCharFormat);
-		cursor.insertText(tr("Generated: %1\n").arg(QDateTime::currentDateTime().toString("dd/MM/yyyy  HH:mm:ss")));
-		cursor.insertText(tr("Monitor: %1\n").arg(m_softwareId));
+		cursor.insertText(QObject::tr("Generated: %1\n").arg(QDateTime::currentDateTime().toString("dd/MM/yyyy  HH:mm:ss")));
+		cursor.insertText(QObject::tr("Monitor: %1\n").arg(m_softwareId));
 		cursor.insertText("\n");
 
 		QDateTime from = m_source->requestStartTime.toDateTime();
@@ -78,11 +78,11 @@ namespace
 
 		if (from.date() == to.date())
 		{
-			cursor.insertText(tr("Requested interval: %1 - %2\n").arg(from.toString("dd/MM/yyyy  HH:mm:ss")).arg(to.toString("HH:mm:ss")));
+			cursor.insertText(QObject::tr("Requested interval: %1 - %2\n").arg(from.toString("dd/MM/yyyy  HH:mm:ss")).arg(to.toString("HH:mm:ss")));
 		}
 		else
 		{
-			cursor.insertText(tr("Requested interval:: %1 - %2\n").arg(from.toString("dd/MM/yyyy  HH:mm:ss")).arg(to.toString("dd/MM/yyyy  HH:mm:ss")));
+			cursor.insertText(QObject::tr("Requested interval:: %1 - %2\n").arg(from.toString("dd/MM/yyyy  HH:mm:ss")).arg(to.toString("dd/MM/yyyy  HH:mm:ss")));
 		}
 
 		std::map<QString, std::vector<QString>> serviceToSignals;

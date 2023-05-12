@@ -21,6 +21,8 @@ include(../sanitizer.pri)
 #Application icon
 win32:RC_ICONS += Images/Monitor.ico
 
+TRANSLATIONS = languages/Monitor_ua.ts
+
 # DESTDIR
 #
 win32 {

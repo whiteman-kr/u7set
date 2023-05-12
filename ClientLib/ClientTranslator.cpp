@@ -6,9 +6,6 @@ namespace ClientLib
 {
 	ClientTranslator::ClientTranslator()
 	{
-		addLanguage("en", "English");
-		addLanguage("ru", "Russian/Русский");
-		addLanguage("ua", "Ukrainian/Українська");
 	}
 
 	ClientTranslator::~ClientTranslator()
@@ -100,6 +97,7 @@ namespace ClientLib
 			}
 			else
 			{
+				Q_ASSERT(false);
 				ok = false;
 			}
 		}

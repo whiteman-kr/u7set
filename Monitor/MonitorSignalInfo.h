@@ -9,6 +9,7 @@ class MonitorConfigController;
 
 class MonitorSignalInfo : public DialogSignalInfo
 {
+	Q_OBJECT
 public:
 	static bool showDialog(QString appSignalId,
 						   MonitorSignalManager* signalManager,

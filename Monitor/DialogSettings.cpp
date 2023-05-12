@@ -2,7 +2,7 @@
 #include "ui_DialogSettings.h"
 #include <QFileDialog>
 
-DialogSettings::DialogSettings(QWidget *parent) :
+DialogSettings::DialogSettings(const ClientLib::ClientTranslator& translator, QWidget *parent) :
 	QDialog(parent),
 	ui(new Ui::DialogSettings)
 {
@@ -16,6 +16,8 @@ DialogSettings::DialogSettings(QWidget *parent) :
 	connect (ui->buttonBox, &QDialogButtonBox::accepted, this, &DialogSettings::ok_clicked);
 	connect (ui->buttonBox, &QDialogButtonBox::rejected, this, &DialogSettings::cancel_clicked);
 	connect (ui->saveAsButton, &QPushButton::clicked, this, &DialogSettings::saveAs_clicked);
+
+	fillLanguagesList(translator);
 
 	return;
 }
@@ -48,6 +50,15 @@ void DialogSettings::setSettings(const MonitorAppSettings::Data& value)
 	ui->checkSingleInstance->setChecked(m_settings.singleInstance);
 	ui->windowCaptionEdit->setText(m_settings.windowCaption);
 
+	for (int i = 0; i < ui->m_languageCombo->count(); i++)
+	{
+		if (m_settings.language == ui->m_languageCombo->itemData(i).toString())
+		{
+			ui->m_languageCombo->setCurrentIndex(i);
+			break;
+		}
+	}
+
 	return;
 }
 
@@ -61,6 +72,24 @@ void DialogSettings::showEvent(QShowEvent*)
 	move(screen.center() - rect().center());
 
 	return;
+}
+
+void DialogSettings::fillLanguagesList(const ClientLib::ClientTranslator& translator)
+{
+	QStringList languages = translator.languagesList();
+	if (languages.isEmpty() == true)
+	{
+		ui->m_languageCombo->addItem("English", "en");
+		ui->m_languageCombo->setCurrentIndex(0);
+		ui->m_languageCombo->setEnabled(false);
+		return;
+	}
+
+	for (const QString& code : languages)
+	{
+		QString name = translator.languageName(code);
+		ui->m_languageCombo->addItem(name, code);
+	}
 }
 
 std::optional<MonitorAppSettings::Data> DialogSettings::parseData()
@@ -143,6 +172,10 @@ std::optional<MonitorAppSettings::Data> DialogSettings::parseData()
 		return {};
 	}
 
+	// Language
+
+	QString language = ui->m_languageCombo->currentData().toString();
+
 	// --
 	//
 	MonitorAppSettings::Data data;
@@ -161,6 +194,8 @@ std::optional<MonitorAppSettings::Data> DialogSettings::parseData()
 	data.windowCaption = ui->windowCaptionEdit->text();
 
 	data.singleInstance = ui->checkSingleInstance->isChecked();
+
+	data.language = language;
 
 	return {data};
 }

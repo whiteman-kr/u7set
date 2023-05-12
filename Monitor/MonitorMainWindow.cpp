@@ -24,6 +24,20 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	m_schemaManager{m_configController, m_signalManager},
 	m_dialogAlert(this)
 {
+	// Init translator
+	//
+	m_translator.addLanguage("en", "English");
+	m_translator.addLanguage("ua", "Ukrainian/Українська");
+
+	m_translator.addTranslationFile("ua", ":/languages/Monitor_ua.qm");
+	m_translator.addTranslationFile("ua", ":/ClientLib/languages/ClientLib_ua.qm");
+	m_translator.addTranslationFile("ua", ":/TrendView/languages/TrendView_ua.qm");
+	m_translator.addTranslationFile("ua", ":/UtilsLib/languages/UtilsLib_ua.qm");
+
+	m_translator.setLanguage(MonitorAppSettings::instance().language());
+
+	// -
+	//
 	setWindowTitle(MonitorAppSettings::instance().windowCaption());
 
 	connect(&m_configController, &MonitorConfigController::configurationArrived, this, &MonitorMainWindow::slot_configurationArrived);
@@ -882,7 +896,7 @@ void MonitorMainWindow::showDataSources()
 
 void MonitorMainWindow::showSettings()
 {
-	DialogSettings d(this);
+	DialogSettings d(m_translator, this);
 	d.setSettings(MonitorAppSettings::instance().get());
 
 	int result = d.exec();
