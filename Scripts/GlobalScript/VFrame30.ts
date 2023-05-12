@@ -280,10 +280,16 @@ module VFrame30 {
 		imageItem(imageId: string): ScriptImageItem;
 	}
 
-	export interface SchemaItemPushButton extends SchemaItem {
+	export interface SchemaItemControl extends SchemaItem {
+		// Properties
+		//
+		widget: QWidget;
 	}
 
-	export interface SchemaItemLineEdit extends SchemaItem {
+	export interface SchemaItemPushButton extends SchemaItemControl {
+	}
+
+	export interface SchemaItemLineEdit extends SchemaItemControl {
 	}
 
 	export interface PushButtonWidget extends QWidget {
