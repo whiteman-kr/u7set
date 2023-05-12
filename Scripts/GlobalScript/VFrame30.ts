@@ -281,15 +281,14 @@ module VFrame30 {
 	}
 
 	export interface SchemaItemControl extends SchemaItem {
-		// Properties
-		//
-		widget: QWidget;
 	}
 
 	export interface SchemaItemPushButton extends SchemaItemControl {
+		widget: PushButtonWidget;
 	}
 
 	export interface SchemaItemLineEdit extends SchemaItemControl {
+		widget: LineEditWidget;
 	}
 
 	export interface PushButtonWidget extends QWidget {
