@@ -179,23 +179,23 @@ namespace VFrame30
 
 		// Message Box functions
 		//
-		/// \brief Displays a warning message box with specified text. Optional detail parameter specifies details text.
+		/// \brief Displays a warning message box with specified text. Optional details parameter specifies details text.
 		///
 		/// Displays a question message box with specified text.
 		///
 		/// \warning Do not call this function from <b>PreDrawScript</b> and <b>AfterCreateScript</b> event handlers. This can cause user interface hang.
 		void warningMessageBox(QString text, QString details = QString());
 
-		/// \brief Displays an error message box with specified text. Optional detail parameter specifies details text.
+		/// \brief Displays an error message box with specified text. Optional details parameter specifies details text.
 		///
-		/// Displays a question message box with specified text. Optional detail parameter specifies details text.
+		/// Displays a question message box with specified text. Optional details parameter specifies details text.
 		///
 		/// \warning Do not call this function from <b>PreDrawScript</b> and <b>AfterCreateScript</b> event handlers. This can cause user interface hang.
 		void errorMessageBox(QString text, QString details = QString());
 
-		/// \brief Displays an information message box with specified text. Optional detail parameter specifies details text.
+		/// \brief Displays an information message box with specified text. Optional details parameter specifies details text.
 		///
-		/// Displays a question message box with specified text. Optional detail parameter specifies details text.
+		/// Displays a question message box with specified text. Optional details parameter specifies details text.
 		///
 		/// \warning Do not call this function from <b>PreDrawScript</b> and <b>AfterCreateScript</b> event handlers. This can cause user interface hang.
 		void infoMessageBox(QString text, QString details = QString());

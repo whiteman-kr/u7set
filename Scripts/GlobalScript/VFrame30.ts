@@ -45,7 +45,7 @@ module VFrame30 {
 
 		// Message Box functons
 		//
-		warningMessageBox(text: string, details?: string): void;
+		warningMessageBox(text: string, details? : string): void;
 		errorMessageBox(text: string, details? : string): void;
 		infoMessageBox(text: string, details? : string): void;
 		questionMessageBox(text: string, details? : string): boolean;
