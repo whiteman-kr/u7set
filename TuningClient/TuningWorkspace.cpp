@@ -1036,9 +1036,9 @@ void TuningWorkspace::addChildTreeObjects(const std::shared_ptr<TuningFilter> fi
             bool hasChildFilters = false;
 
             int childFiltersCount = f->childFiltersCount();
-            for (int i = 0; i < childFiltersCount; i++)
+			for (int j = 0; j < childFiltersCount; j++)
             {
-                TuningFilter* const cf = f->childFilter(i).get();
+				TuningFilter* const cf = f->childFilter(j).get();
                 if (cf->isCounter() == false)
                 {
                     hasChildFilters = true;

@@ -1,4 +1,4 @@
-set RPCT_VERSION="0.8.%CI_PIPELINE_ID%"
+set RPCT_VERSION="0.9.%CI_PIPELINE_ID%"
 echo Software Version is %RPCT_VERSION%
 
 powershell -Command "(gc config\config.in) -replace '<Version>1.0.0</Version>', '<Version>%RPCT_VERSION%</Version>' | Out-File -encoding ASCII config\config.xml"
@@ -22,6 +22,7 @@ md packages\u7set.mats.tuningclient\data
 md packages\u7set.mats.tuningclient.docs\data\docs
 md packages\u7set.tools.metrology\data
 md packages\u7set.tools.mconf\data
+md packages\u7set.tools.testsuite\data
 
 echo --------------- Copying Source Files ------------------
 
@@ -52,6 +53,8 @@ copy ..\bin\release\docs\D11.9_FSC_Tuning_User_Manual.pdf packages\u7set.mats.tu
 
 copy ..\bin\release\Metrology.exe packages\u7set.tools.metrology\data
 copy ..\bin\release\mconf.exe packages\u7set.tools.mconf\data
+copy ..\bin\release\TestSuite.exe packages\u7set.tools.testsuite\data
+copy ..\bin\release\TestSuiteConsole.exe packages\u7set.tools.testsuite\data
 
 echo --------------- Building the installer ------------------
 

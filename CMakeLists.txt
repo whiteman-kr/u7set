@@ -12,9 +12,9 @@ cmake_minimum_required(VERSION 3.16)
 # CI_PIPELINE_ID (2570) CI_COMMIT_SHA
 #
 project(
-	PRCT 
+	u7set
 	VERSION 00.00.00.0000
-	DESCRIPTION "Radiy Platform Configuration Tool" 
+	DESCRIPTION "Radiy Platform Configuration Tools"
 	HOMEPAGE_URL "radiy.com")
 
 message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
