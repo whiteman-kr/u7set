@@ -26,6 +26,16 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	m_tuningConnection{m_tuningSignalManager, m_tuningSignalManager, &m_logFile, &m_tuningLog}
 
 {
+	m_translator.addTranslationFile("ru", ":/languages/TuningClient_ru.qm");
+	m_translator.addTranslationFile("ru", ":/ClientLib/languages/ClientLib_ru.qm");
+	m_translator.addTranslationFile("ru", ":/UtilsLib/languages/UtilsLib_ru.qm");
+
+	m_translator.addTranslationFile("ua", ":/languages/TuningClient_ua.qm");
+	m_translator.addTranslationFile("ua", ":/ClientLib/languages/ClientLib_ua.qm");
+	m_translator.addTranslationFile("ua", ":/UtilsLib/languages/UtilsLib_ua.qm");
+
+	m_translator.setLanguage(theSettings.language());
+
 	m_sorTooltipText = QObject::tr("SOR counter (click for details)");
 
 	if (theSettings.m_mainWindowPos.x() != -1 && theSettings.m_mainWindowPos.y() != -1)
@@ -1151,11 +1161,8 @@ void MainWindow::runPresetEditor()
 
 void MainWindow::showSettings()
 {
-	DialogSettings* d = new DialogSettings(this);
-
-	d->exec();
-
-	delete d;
+	DialogSettings d(m_translator);
+	d.exec();
 }
 
 

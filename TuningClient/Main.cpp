@@ -138,37 +138,8 @@ bool EnableDumping(DWORD dumpCount)
 ////
 //// ---------------- Minidump generating functions -------------------
 
-// ---------------- Translator functions -------------------
-//
-
-QTranslator m_translator; // contains the translations for this application
-
 QSharedMemory* theSharedMemorySingleApp = nullptr;
 ScriptTuningClientApplication theApp;
-
-void switchTranslator(QTranslator& translator, const QString& filename)
-{
-	// remove the old translator
-	qApp->removeTranslator(&translator);
-
-	// load the new translator
-	if(translator.load(filename))
-	{
-		qApp->installTranslator(&translator);
-	}
-}
-
-void loadLanguage(const QString& rLanguage)
-{
-	QLocale locale = QLocale(rLanguage);
-	QLocale::setDefault(locale);
-
-	switchTranslator(m_translator, QString(":/languages/TuningClient_%1.qm").arg(rLanguage));
-}
-
-//
-// ---------------- Translator functions -------------------
-
 
 int main(int argc, char* argv[])
 {
@@ -199,8 +170,6 @@ int main(int argc, char* argv[])
 
 	theSettings.RestoreUser();
 	theSettings.RestoreSystem();
-
-	loadLanguage(theSettings.language());
 
 	// Parse the command line
 	//
