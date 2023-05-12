@@ -179,33 +179,33 @@ namespace VFrame30
 
 		// Message Box functions
 		//
-		/// \brief Displays a warning message box with specified text.
+		/// \brief Displays a warning message box with specified text. Optional detail parameter specifies details text.
 		///
-		/// Displays a question message box with specified text. If user clicked "Yes", returns true, otherwise returns false.
+		/// Displays a question message box with specified text.
 		///
 		/// \warning Do not call this function from <b>PreDrawScript</b> and <b>AfterCreateScript</b> event handlers. This can cause user interface hang.
-		void warningMessageBox(QString text);
+		void warningMessageBox(QString text, QString details = QString());
 
-		/// \brief Displays an error message box with specified text.
+		/// \brief Displays an error message box with specified text. Optional detail parameter specifies details text.
 		///
-		/// Displays a question message box with specified text. If user clicked "Yes", returns true, otherwise returns false.
+		/// Displays a question message box with specified text. Optional detail parameter specifies details text.
 		///
 		/// \warning Do not call this function from <b>PreDrawScript</b> and <b>AfterCreateScript</b> event handlers. This can cause user interface hang.
-		void errorMessageBox(QString text);
+		void errorMessageBox(QString text, QString details = QString());
 
-		/// \brief Displays an information message box with specified text.
+		/// \brief Displays an information message box with specified text. Optional detail parameter specifies details text.
 		///
-		/// Displays a question message box with specified text. If user clicked "Yes", returns true, otherwise returns false.
+		/// Displays a question message box with specified text. Optional detail parameter specifies details text.
 		///
 		/// \warning Do not call this function from <b>PreDrawScript</b> and <b>AfterCreateScript</b> event handlers. This can cause user interface hang.
-		void infoMessageBox(QString text);
+		void infoMessageBox(QString text, QString details = QString());
 
 		/// \brief Displays a question message box with specified text. If user clicked "Yes", returns true, otherwise returns false.
 		///
 		/// Displays a question message box with specified text. If user clicked "Yes", returns true, otherwise returns false.
 		///
 		/// \warning Do not call this function from <b>PreDrawScript</b> and <b>AfterCreateScript</b> event handlers. This can cause user interface hang.
-		bool questionMessageBox(QString text);
+		bool questionMessageBox(QString text, QString details = QString());
 
 		// Variables functions
 		//
