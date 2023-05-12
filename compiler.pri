@@ -27,6 +27,7 @@ unix {
 }
 
 # Generate pdb files for release
+# Add to qmake "CONFIG+=GENERATE_PDB"
 #
 GENERATE_PDB {
     CONFIG(release, debug|release) {
