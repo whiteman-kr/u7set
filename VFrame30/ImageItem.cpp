@@ -1,6 +1,7 @@
 #include "ImageItem.h"
 #include "PropertyNames.h"
 #include "Schema.h"
+#include "SchemaView.h"
 
 namespace VFrame30
 {
@@ -249,7 +250,7 @@ namespace VFrame30
 			return;
 		}
 
-		// Keepn in midnd, autoscale == false does not work for SVG
+		// Keepn in mind, autoscale == false does not work for SVG
 		//
 		QRectF imageRect = rect;
 
@@ -263,7 +264,18 @@ namespace VFrame30
 								std::fabs(rect.height() - imageRect.height()) / 2);
 		}
 
+#if 1
+		if (drawParam->pdfMode() == true)
+		{
+			m_svgRenderer->render(drawParam->painter(), imageRect);
+		}
+		else
+		{
+			DrawHelper::drawSvgCached(*drawParam->painter(), drawParam->schemaUnit(), imageRect, m_svgData, drawParam->schemaView()->zoom());
+		}
+#else
 		m_svgRenderer->render(drawParam->painter(), imageRect);
+#endif
 
 		return;
 	}
