@@ -14,7 +14,7 @@ CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
 #Application icon
-#win32:RC_ICONS += Images/TuningClient.ico
+win32:RC_ICONS += Images/TestSuite.ico
 
 win32 {
         CONFIG(debug, debug|release): DESTDIR = ../bin/debug
