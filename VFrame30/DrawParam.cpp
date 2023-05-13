@@ -639,20 +639,24 @@ thread_local QCache<Hash, DrawTextCacheItem> cache{50'000'000};			// 50Mb of ima
 
 	bool DrawHelper::drawSvgCached(QPainter& painter, SchemaUnit unit, const QRectF& rect, const QString& svg, double zoom)
 	{
-		// Get cached image, if there is no one, create it.
+		// Add some extra space for drawing, to avoid artifacts in the adges of the image.
 		//
+		const int extraSizePx = 20;
+
+		const double zoomFactor = zoom / 100.0;
+		const double devicePixelRatioF = painter.device()->devicePixelRatioF();
 		const double dpiX = CDrawParam::realDpiX(&painter);
 		const double dpiY = CDrawParam::realDpiY(&painter);
 
 		const double imageWidth = (unit == SchemaUnit::Inch) ?
-										rect.width() * dpiX * (zoom / 100.0) :
-										rect.width() * (zoom / 100.0);
+										rect.width() * dpiX * zoomFactor :
+										rect.width() * zoomFactor;
 
 		const double imageHeight = (unit == SchemaUnit::Inch) ?
-										rect.height() * dpiY * (zoom / 100.0) :
-										rect.height() * (zoom / 100.0);
+										rect.height() * dpiY * zoomFactor :
+										rect.height() * zoomFactor;
 
-		QSize imageSize{static_cast<int>(imageWidth), static_cast<int>(imageHeight)};
+		QSize imageSize{std::lround(imageWidth) + extraSizePx, std::lround(imageHeight) + extraSizePx};
 
 		Hash cacheItemHash = DrawSvgCacheItem::getHash(unit, svg, imageSize, dpiX, dpiY, zoom);
 		bool newCacheItem = false;
@@ -672,7 +676,6 @@ thread_local QCache<Hash, DrawSvgCacheItem> cache{20'000'000};			// 20Mb of imag
 		{
 			// Create image and draw text to it.
 			//
-			double devicePixelRatioF = painter.device()->devicePixelRatioF();
 			cacheItem->image = QImage{imageSize, QImage::Format_ARGB32_Premultiplied};
 
 			if (unit == SchemaUnit::Inch)
@@ -690,18 +693,25 @@ thread_local QCache<Hash, DrawSvgCacheItem> cache{20'000'000};			// 20Mb of imag
 
 			QPainter cacheImagePainter{&cacheItem->image};
 
+			// Ajust painter for the image, note that extraSizePx is taken and
+			// (-0.5) / devicePixelRatioF used to neglect half pixel align.
+			//
 			SchemaView::Ajust(&cacheImagePainter,
 							  painter.device()->physicalDpiX(),
 							  painter.device()->physicalDpiY(),
 							  devicePixelRatioF,
 							  unit,
-							  -0.5 / devicePixelRatioF,
-							  -0.5 / devicePixelRatioF,
+							  extraSizePx / 2.0 + (-0.5) / devicePixelRatioF,
+							  extraSizePx / 2.0 + (-0.5) / devicePixelRatioF,
 							  zoom);
 
+			// The painter already adjusted to pint in pixels or inches.
+			//
 			QRectF imageRect = rect;
 			imageRect.moveTo(0, 0);
 
+			// Render svg.
+			//
 			QSvgRenderer svgRenderer;
 
 			bool loadSvgResult = svgRenderer.load(svg.toUtf8());
@@ -717,7 +727,36 @@ thread_local QCache<Hash, DrawSvgCacheItem> cache{20'000'000};			// 20Mb of imag
 		//
 		Q_ASSERT(cacheItem != nullptr && cacheItem->image.isNull() == false);
 
-		painter.drawImage(rect, cacheItem->image);
+		// Make a rect which takes into account extra size of the cached image.
+		//
+		QRectF extendedDstRect{rect};
+
+		if (unit == SchemaUnit::Inch)
+		{
+			const double extendedInX = extraSizePx / dpiX / zoomFactor;
+			const double extendedInY = extraSizePx / dpiY / zoomFactor;
+
+			extendedDstRect.translate(-extendedInX / 2.0 * devicePixelRatioF,
+									  -extendedInY / 2.0 * devicePixelRatioF);
+
+			extendedDstRect.setWidth(rect.width() + extendedInX);
+			extendedDstRect.setHeight(rect.height() + extendedInY);
+		}
+		else
+		{
+			const double extendedPxX = extraSizePx / zoomFactor;
+			const double extendedPxY = extraSizePx / zoomFactor;
+
+			extendedDstRect.translate(-extendedPxX / 2.0 * devicePixelRatioF,
+									  -extendedPxY / 2.0 * devicePixelRatioF);
+
+			extendedDstRect.setWidth(rect.width() + extendedPxX);
+			extendedDstRect.setHeight(rect.height() + extendedPxY);
+		}
+
+		// Draw cached image into a painter.
+		//
+		painter.drawImage(extendedDstRect, cacheItem->image);
 
 		// Add to cache new item, cache only images not greater then specified size.
 		//
