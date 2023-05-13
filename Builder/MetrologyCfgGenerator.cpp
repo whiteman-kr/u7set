@@ -322,7 +322,7 @@ namespace Builder
 
 						default:
 							Q_ASSERT(false);
-					}
+                    }
 				}
 			}
 
@@ -556,13 +556,13 @@ namespace Builder
 		{
 			return true;
 		}
-		else
-		{
-			if (signal.sensorType() != E::SensorType::V_0_5 && signal.sensorType() != E::SensorType::V_m10_p10)
-			{
-				return false;
-			}
-		}
+
+        if (signal.sensorType() != E::SensorType::V_0_5 &&
+            signal.sensorType() != E::SensorType::V_m10_p10 &&
+            signal.sensorType() != E::SensorType::NoSensor)
+        {
+            return false;
+        }
 
 		if (signal.isSpecPropExists(AppSignalPropNames::RLOAD_OHM) == false)
 		{
