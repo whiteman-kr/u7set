@@ -71,8 +71,6 @@ int main(int argc, char *argv[])
 	QCommandLineOption idOption("id", "Set the TestSuite ID.", "TestSuite ID");
 	parser.addOption(idOption);
 
-	// A boolean option with simulation (-simulate)
-
 	parser.process(*qApp);
 
 	QString clientID = parser.value(idOption);

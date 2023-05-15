@@ -38,8 +38,9 @@ namespace TestSuite
 		//void setAppSignalTcpClients(std::vector<TcpSignalClient*> tcpClients);
 		//void setTuningTcpClients(std::vector<TuningTcpClient*> tcpClients);
 
-		bool execute(const QStringList& executionTests,		// List of tests for execution, if empty then exec all.
-					 const QString& scriptsPath);			// Load scripts from disk, path to dir for *.js files.);
+		bool execute(const QStringList& scriptsFiles,		// List of script files for execution, if empty then exec all.
+					 const QString& scriptsPath,			// Load scripts from disk, path to dir for *.js files.
+					 const QString& testsFilter);			// Tests filter
 		void stop();
 
 		bool isRunning() const;

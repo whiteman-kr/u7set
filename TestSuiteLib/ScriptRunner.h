@@ -18,7 +18,7 @@ namespace TestSuite
 		virtual ~ScriptRunner();
 
 	public:
-		bool runScript(const TestScript& script);
+		bool runScript(const TestScript& script, const QString& functionsFilter);
 
 	private:
 		bool runScriptFunction(const QString& functionName);

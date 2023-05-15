@@ -30,7 +30,7 @@ namespace TestSuite
 		qDebug() << "ScriptRunner::~ScriptRunner()";
 	}
 
-	bool ScriptRunner::runScript(const TestScript& script)
+	bool ScriptRunner::runScript(const TestScript& script, const QString& functionsFilter)
 	{
 		qDebug() << "ScriptRunner::runScript(), script file: " << script.fileName();
 
@@ -71,9 +71,11 @@ namespace TestSuite
 			return false;
 		}
 
-		// Call all functions which starts from 'test', like 'testTgnAboveTNom()'
+		// Find all functions which starts from 'test', like 'testTgnAboveTNom(), using filter'
 		//
 		QStringList testList;
+
+		QStringList testFunctionFilters = functionsFilter.split(';', Qt::SkipEmptyParts);
 
 		QJSValueIterator it(m_jsEngine.globalObject());
 		while (it.hasNext() == true)
@@ -82,7 +84,30 @@ namespace TestSuite
 
 			if (it.name().startsWith("test"))
 			{
-				testList.push_back(it.name());
+				bool filterMatch = true;
+
+				// Process test function filter
+				//
+				for (const QString& filter : testFunctionFilters)
+				{
+					bool matchValue = filter.startsWith('-') == false;	// Should match if no '-', otherwise should NOT match
+
+					QRegularExpression rx(QRegularExpression::wildcardToRegularExpression(
+											  matchValue ? filter : filter.right(filter.length() - 1)));
+
+					if(rx.match(it.name()).hasMatch() != matchValue)
+					{
+						filterMatch = false;
+						break;
+					}
+				}
+
+				// Add function for execution
+				//
+				if (filterMatch == true)
+				{
+					testList.push_back(it.name());
+				}
 			}
 		}
 

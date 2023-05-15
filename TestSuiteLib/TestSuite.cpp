@@ -50,12 +50,13 @@ namespace TestSuite
 	//	return m_testLog;
 	//}
 
-	bool TestSuite::execute(const QStringList& executionTests,		// List of tests for execution, if empty then exec all.
-							const QString& scriptsPath)				// Load scripts from disk, path to dir for *.js files.);
+	bool TestSuite::execute(const QStringList& scriptsFiles,		// List of script files for execution, if empty then exec all.
+							const QString& scriptsPath,				// Load scripts from disk, path to dir for *.js files.
+							const QString& testsFilter)				// Tests filter
 	{
 		m_testLog.clear();
 
-		return m_control.execute(m_softwareInfo, m_settings, executionTests, scriptsPath);
+		return m_control.execute(m_softwareInfo, m_settings, scriptsFiles, scriptsPath, testsFilter);
 	}
 
 	void TestSuite::stop()

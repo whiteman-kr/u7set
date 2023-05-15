@@ -22,16 +22,18 @@ namespace TestSuite
 
 	void ControlThread::setTestParams(const SoftwareInfo& softwareInfo,
 									  const TestSuiteSettings& settings,
-									  const QStringList& executionTests,	// List of tests for execution, if empty then exec all.
-									  const QString& scriptsPath)			// Load scripts from disk, path to dir for *.js files.)
+									  const QStringList& scriptsFiles,		// List of script files for execution, if empty then exec all.
+									  const QString& scriptsPath,			// Load scripts from disk, path to dir for *.js files.)
+									  const QString& testsFilter)			// Tests filter
 	{
 		Q_ASSERT(isRunning() == false);
 
 		m_softwareInfo = softwareInfo;
 		m_settings = settings;
 
-		m_executionTests = executionTests;
+		m_scriptsFiles = scriptsFiles;
 		m_scriptsPath = scriptsPath;
+		m_testsFilter = testsFilter;
 
 		return;
 	}
@@ -218,10 +220,14 @@ namespace TestSuite
 
 		for (const auto& script : m_scripts)
 		{
-			if (m_executionTests.empty() == false &&
-				std::find(m_executionTests.begin(), m_executionTests.end(), script.fileName()) == m_executionTests.end())
+			// Process script files list, if it is not empty
+			//
+			if (m_scriptsFiles.empty() == false)
 			{
-				continue;
+				if (std::find(m_scriptsFiles.begin(), m_scriptsFiles.end(), script.fileName()) == m_scriptsFiles.end())
+				{
+					continue;
+				}
 			}
 
 			checkAndInterruptTestExecution();
@@ -230,7 +236,7 @@ namespace TestSuite
 			m_appLog.writeMessage(logMessage);
 
 			ScriptRunner scriptRunner{testController, *m_testLog};
-			fileTestResult &= scriptRunner.runScript(script);
+			fileTestResult &= scriptRunner.runScript(script, m_testsFilter);
 		}
 
 		if (fileTestResult == false)
@@ -260,8 +266,9 @@ namespace TestSuite
 
 	bool Control::execute(const SoftwareInfo& softwareInfo,
 						  const TestSuiteSettings& settings,
-						  const QStringList& executionTests,	// List of tests for execution, if empty then exec all.
-						  const QString& scriptsPath)			// Load scripts from disk, path to dir for *.js files.
+						  const QStringList& scriptsFiles,		// List of script files for execution, if empty then exec all.
+						  const QString& scriptsPath,			// Load scripts from disk, path to dir for *.js files.
+						  const QString& testsFilter)			// Tests filter
 	{
 		if (isRunning() == true)
 		{
@@ -270,7 +277,7 @@ namespace TestSuite
 
 		m_controlThread.moveToThread(&m_controlThread);
 
-		m_controlThread.setTestParams(softwareInfo, settings, executionTests, scriptsPath);
+		m_controlThread.setTestParams(softwareInfo, settings, scriptsFiles, scriptsPath, testsFilter);
 		m_controlThread.start();
 
 		// Wait that ControlThread actually started.

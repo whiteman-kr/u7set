@@ -87,8 +87,9 @@ namespace TestSuite
 	public:
 		void setTestParams(const SoftwareInfo& softwareInfo,
 						   const TestSuiteSettings& settings,
-						   const QStringList& executionTests,	// List of tests for execution, if empty then exec all.
-						   const QString& scriptsPath);			// Load scripts from disk, path to dir for *.js files.
+						   const QStringList& scriptsFiles,		// List of script files for execution, if empty then exec all.
+						   const QString& scriptsPath,			// Load scripts from disk, path to dir for *.js files.
+						   const QString& testsFilter);			// Tests filter
 
 		int result() const;
 
@@ -112,8 +113,9 @@ namespace TestSuite
 		SoftwareInfo m_softwareInfo;
 		TestSuiteSettings m_settings;
 
-		QStringList m_executionTests;	// List of tests for execution, if empty then exec all.
+		QStringList m_scriptsFiles;		// List of script files for execution, if empty then exec all.
 		QString m_scriptsPath;			// Load scripts from disk, path to dir for *.js files.
+		QString m_testsFilter;			// Tests filter
 
 		// --
 		//
@@ -138,8 +140,9 @@ namespace TestSuite
 	public:
 		bool execute(const SoftwareInfo& softwareInfo,
 					 const TestSuiteSettings& settings,
-					 const QStringList& executionTests,
-					 const QString& scriptsPath);
+					 const QStringList& scriptsFiles,
+					 const QString& scriptsPath,
+					 const QString& testsFilter);
 		bool stop();
 		bool isRunning() const;
 

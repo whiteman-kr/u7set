@@ -639,9 +639,9 @@ void TestSuiteMainWindow::on_m_run_clicked()
 
 	// Create a list of tests user has selected to run
 	//
-	QStringList scriptsToExecute = m_testListWidget->selectedTests();
+	QStringList scriptsFiles = m_testListWidget->selectedTests();
 
-	if (scriptsToExecute.isEmpty() == true)
+	if (scriptsFiles.isEmpty() == true)
 	{
 		QMessageBox::warning(this, qAppName(), tr("Please choose at least one test to run."));
 		return;
@@ -653,7 +653,7 @@ void TestSuiteMainWindow::on_m_run_clicked()
 
 	// Run tests
 	//
-	bool ok = m_testSuite.execute(scriptsToExecute, theSettings.useLocalScriptsPath() ? theSettings.localScriptsPath() : QString());
+	bool ok = m_testSuite.execute(scriptsFiles, theSettings.useLocalScriptsPath() ? theSettings.localScriptsPath() : QString(), {}/*testsFilter*/);
 	if (ok == false)
 	{
 		return;
