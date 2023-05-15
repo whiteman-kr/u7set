@@ -129,7 +129,7 @@ FORMS    += \
     SwitchFiltersPageOptions.ui \
     TuningSignalInfo.ui
 
-TRANSLATIONS = languages/TuningClient_ru.ts
+TRANSLATIONS = languages/TuningClient_ru.ts languages/TuningClient_ua.ts
 
 DISTFILES += \
     Images/logo.png \

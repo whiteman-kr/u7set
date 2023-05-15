@@ -45,7 +45,7 @@ module VFrame30 {
 
 		// Message Box functons
 		//
-		warningMessageBox(text: string, details?: string): void;
+		warningMessageBox(text: string, details? : string): void;
 		errorMessageBox(text: string, details? : string): void;
 		infoMessageBox(text: string, details? : string): void;
 		questionMessageBox(text: string, details? : string): boolean;
@@ -280,10 +280,15 @@ module VFrame30 {
 		imageItem(imageId: string): ScriptImageItem;
 	}
 
-	export interface SchemaItemPushButton extends SchemaItem {
+	export interface SchemaItemControl extends SchemaItem {
 	}
 
-	export interface SchemaItemLineEdit extends SchemaItem {
+	export interface SchemaItemPushButton extends SchemaItemControl {
+		widget: PushButtonWidget;
+	}
+
+	export interface SchemaItemLineEdit extends SchemaItemControl {
+		widget: LineEditWidget;
 	}
 
 	export interface PushButtonWidget extends QWidget {

@@ -15,6 +15,8 @@ INCLUDEPATH += ./../Protobuf
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
+TRANSLATIONS = languages/UtilsLib_ru.ts languages/UtilsLib_ua.ts
+
 unix {
     target.path = /usr/lib
 	INSTALLS += target

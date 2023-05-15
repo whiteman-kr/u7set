@@ -149,6 +149,7 @@ namespace VFrame30
 		if (m_clientSchemaView->scriptMessageBoxAllowed() == true)
 		{
 			QMessageBox msgBox;
+			msgBox.setParent(m_clientSchemaView);
 			msgBox.setText(text);
 			if (details.isEmpty() == false)
 			{
@@ -172,6 +173,7 @@ namespace VFrame30
 		if (m_clientSchemaView->scriptMessageBoxAllowed() == true)
 		{
 			QMessageBox msgBox;
+			msgBox.setParent(m_clientSchemaView);
 			msgBox.setText(text);
 			if (details.isEmpty() == false)
 			{
@@ -195,6 +197,7 @@ namespace VFrame30
 		if (m_clientSchemaView->scriptMessageBoxAllowed() == true)
 		{
 			QMessageBox msgBox;
+			msgBox.setParent(m_clientSchemaView);
 			msgBox.setText(text);
 			if (details.isEmpty() == false)
 			{
@@ -218,6 +221,7 @@ namespace VFrame30
 		if (m_clientSchemaView->scriptMessageBoxAllowed() == true)
 		{
 			QMessageBox msgBox;
+			msgBox.setParent(m_clientSchemaView);
 			msgBox.setText(text);
 			if (details.isEmpty() == false)
 			{

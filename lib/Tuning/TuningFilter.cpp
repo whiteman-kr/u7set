@@ -2311,7 +2311,7 @@ void TuningFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalManag
         return;
     }
 
-    int allCount = static_cast<int>(allHashes.size());
+	size_t allCount = allHashes.size();
 
     std::vector<Hash> signalsHashes;
     signalsHashes.reserve(allCount);
@@ -2354,11 +2354,11 @@ void TuningFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalManag
 
         std::map<Hash, int> equipmentHashesMap;
 
-        for (int i = 0; i < allCount; i++)
+		for (size_t i = 0; i < allCount; i++)
         {
             bool ok = false;
 
-            AppSignalParam asp = objects.signalParam(allHashes[i], &ok);
+			AppSignalParam asp = objects.signalParam(allHashes[i], &ok);
             if (ok == false)
             {
                 assert(false);

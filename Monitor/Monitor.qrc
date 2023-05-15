@@ -1,5 +1,10 @@
 <RCC>
-    <qresource prefix="/"/>
+    <qresource prefix="/">
+        <file>../ClientLib/languages/ClientLib_ua.qm</file>
+        <file>../TrendView/languages/TrendView_ua.qm</file>
+        <file>../UtilsLib/languages/UtilsLib_ua.qm</file>
+        <file>languages/Monitor_ua.qm</file>
+    </qresource>
     <qresource prefix="/Images">
         <file>Images/NewSchema.svg</file>
         <file>Images/Backward.svg</file>

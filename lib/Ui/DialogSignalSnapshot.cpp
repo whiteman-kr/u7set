@@ -35,8 +35,8 @@ void SnapshotExportPrint::generateHeader(QTextCursor& cursor)
 
 	cursor.setBlockFormat(regularFormat);
 	cursor.setCharFormat(regularCharFormat);
-	cursor.insertText(tr("Generated: %1\n").arg(QDateTime::currentDateTime().toString("dd/MM/yyyy  HH:mm:ss")));
-	cursor.insertText(tr("%1: %2\n").arg(qAppName()).arg(m_softwareEquipmentId));
+	cursor.insertText(QObject::tr("Generated: %1\n").arg(QDateTime::currentDateTime().toString("dd/MM/yyyy  HH:mm:ss")));
+	cursor.insertText(QObject::tr("%1: %2\n").arg(qAppName()).arg(m_softwareEquipmentId));
 	cursor.insertText("\n");
 
 	cursor.insertText("\n");

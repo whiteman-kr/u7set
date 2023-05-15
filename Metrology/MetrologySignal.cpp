@@ -375,7 +375,10 @@ namespace Metrology
 
 				if (signal.isSpecPropExists(AppSignalPropNames::SENSOR_TYPE) == true)
 				{
-					m_electricSensorType = signal.sensorType();
+                    if (signal.sensorType() != E::SensorType::NoSensor)
+                    {
+                        m_electricSensorType = signal.sensorType();
+                    }
 				}
 
 				switch (signal.inOutType())

@@ -182,6 +182,7 @@ namespace VFrame30
 		double lineWeight = drawParam->controlBarSize() / 3.0f;
 		pen.setWidthF(lineWeight);
 
+		p->setBrush(Qt::NoBrush);
 		p->setPen(pen);
 
 		// --
