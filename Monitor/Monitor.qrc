@@ -4,6 +4,7 @@
         <file>../TrendView/languages/TrendView_ua.qm</file>
         <file>../UtilsLib/languages/UtilsLib_ua.qm</file>
         <file>languages/Monitor_ua.qm</file>
+        <file>languages/qtbase_uk.qm</file>
     </qresource>
     <qresource prefix="/Images">
         <file>Images/NewSchema.svg</file>
