@@ -22,6 +22,12 @@ public:
 public:
 	QString equipmentId() const;
 
+public slots:
+	/// \brief Starts the program 'program' with the arguments 'arguments' in 'workingDir' directory in a new process.
+	/// Multiple arguments are divided by a semicolon.
+	bool start(QString program, QString arguments = QString(), QString workDir = QString());
+
+
 private:
 };
 
