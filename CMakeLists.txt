@@ -26,6 +26,12 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
 	set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
+# Where to put binaries.
+#
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+# Add projects.
+#
 add_subdirectory(Protobuf)
 add_subdirectory(CommonLib)
 add_subdirectory(UtilsLib)

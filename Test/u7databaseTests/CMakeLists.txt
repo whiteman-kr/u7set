@@ -12,7 +12,9 @@ set(CMAKE_AUTORCC ON)
 find_package(Qt6 REQUIRED COMPONENTS Test Core Sql Network Widgets Xml Qml)
 qt_standard_project_setup()
 
-add_executable(u7databasetests
+set(TARGET_NAME u7databasetests)
+
+add_executable(${TARGET_NAME}
 	main.cpp
 	DbControllerFileManagementTests.cpp
 	DbControllerFileManagementTests.h
@@ -49,6 +51,8 @@ add_executable(u7databasetests
 	FutureDatabaseUpgrade.qrc
 )
 
-target_link_libraries(u7databasetests PRIVATE Qt6::Test Qt6::Core Qt6::Sql Qt6::Network Qt6::Widgets Qt6::Xml Qt6::Qml)
-target_link_libraries(u7databasetests PRIVATE CommonLib Protobuf UtilsLib AppSignalLib OnlineLib HardwareLib DbLib)
+set_target_properties(${TARGET_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
+target_link_libraries(${TARGET_NAME} PRIVATE Qt6::Test Qt6::Core Qt6::Sql Qt6::Network Qt6::Widgets Qt6::Xml Qt6::Qml)
+target_link_libraries(${TARGET_NAME} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib OnlineLib HardwareLib DbLib)
 

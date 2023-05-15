@@ -16,6 +16,8 @@ add_library(ClientLib STATIC
 	AdsSourceStateConnection.h
 	AppSignalManager.cpp
 	AppSignalManager.h
+	ClientTranslator.cpp
+	ClientTranslator.h
 	ConfigController.cpp
 	ConfigController.h
 	IAppSignalUpdater.h

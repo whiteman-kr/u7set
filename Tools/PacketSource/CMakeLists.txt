@@ -12,7 +12,9 @@ set(CMAKE_AUTORCC ON)
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Network Sql Qml Xml Concurrent)
 qt_standard_project_setup()
 
-add_executable(PacketSource
+set(TARGET_NAME PacketSource)
+
+add_executable(${TARGET_NAME}
 	../../lib/DataSource.cpp
 	../../lib/DataSource.h
 	../../lib/Ui/DialogAbout.cpp
@@ -57,7 +59,9 @@ add_executable(PacketSource
 	resources.qrc
 )
 
-target_precompile_headers(PacketSource PRIVATE
+set_target_properties(${TARGET_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
+target_precompile_headers(${TARGET_NAME} PRIVATE
 	# C/C++ includes
 	#
 	<cassert>
@@ -152,12 +156,12 @@ target_precompile_headers(PacketSource PRIVATE
 	<QVBoxLayout>
 )
 
-target_link_libraries(PacketSource PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network Qt6::Sql Qt6::Qml Qt6::Xml Qt6::Concurrent)
-target_link_libraries(PacketSource PRIVATE CommonLib Protobuf UtilsLib AppSignalLib OnlineLib HardwareLib )
+target_link_libraries(${TARGET_NAME} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network Qt6::Sql Qt6::Qml Qt6::Xml Qt6::Concurrent)
+target_link_libraries(${TARGET_NAME} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib OnlineLib HardwareLib )
 
 # Link Visaul Leak Detector
 #
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
-	 target_link_libraries(PacketSource PRIVATE vld.lib)
+	 target_link_libraries(${TARGET_NAME} PRIVATE vld.lib)
 endif()
 

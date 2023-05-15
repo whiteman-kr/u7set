@@ -328,13 +328,17 @@ set (U7_FORMS
 	DialogTuningClients.ui
 )
 
-add_executable(u7
+set(TARGET_NAME u7)
+
+add_executable(${TARGET_NAME}
 	${U7_FORMS}
 	${U7_SOURCES}
 	${U7_RESOURCES}
 )
 
-target_precompile_headers(u7 PRIVATE
+set_target_properties(${TARGET_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
+target_precompile_headers(${TARGET_NAME} PRIVATE
 	<cassert>
 	<cfloat>
 	<cstdint>
@@ -370,16 +374,16 @@ target_precompile_headers(u7 PRIVATE
 	"../Proto/ProtoSerialization.h"
 )
 
-target_link_libraries(u7 PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Sql Qt6::Network Qt6::Qml	Qt6::Svg
+target_link_libraries(${TARGET_NAME} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Sql Qt6::Network Qt6::Qml	Qt6::Svg
 	Qt6::SerialPort Qt6::Xml Qt6::PrintSupport Qt6::Test Qt6::Concurrent Qt6::DBus)
 
-target_link_libraries(u7 PRIVATE CommonLib Protobuf UtilsLib AppSignalLib HardwareLib DbLib OnlineLib 
+target_link_libraries(${TARGET_NAME} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib HardwareLib DbLib OnlineLib
 	TrendView Simulator qt6keychain Builder VFrame30)
 
 # Link Visaul Leak Detector
 #
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
-	 target_link_libraries(u7 PRIVATE vld.lib)
+	 target_link_libraries(${TARGET_NAME} PRIVATE vld.lib)
 endif()
 
-target_compile_definitions(u7 PRIVATE QTKEYCHAIN_NO_EXPORT)
+target_compile_definitions(${TARGET_NAME} PRIVATE QTKEYCHAIN_NO_EXPORT)
