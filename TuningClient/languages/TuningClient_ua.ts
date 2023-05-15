@@ -915,276 +915,293 @@ Data will not be available at the time of reconnection.</source>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../MainWindow.cpp" line="61"/>
+        <location filename="../MainWindow.cpp" line="70"/>
         <source>Waiting for configuration...</source>
         <translation>Очікування конфігурації...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="82"/>
+        <location filename="../MainWindow.cpp" line="91"/>
         <source>Failed to load user filters: %1</source>
         <translation>Помилка читання фільтрів користувача: %1</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="85"/>
-        <location filename="../MainWindow.cpp" line="386"/>
-        <location filename="../MainWindow.cpp" line="1155"/>
+        <location filename="../MainWindow.cpp" line="94"/>
+        <location filename="../MainWindow.cpp" line="395"/>
+        <location filename="../MainWindow.cpp" line="1164"/>
         <source>Error</source>
         <translation>Помилка</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="108"/>
+        <location filename="../MainWindow.cpp" line="117"/>
         <source>Exit</source>
         <translation>Вихід</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="109"/>
+        <location filename="../MainWindow.cpp" line="118"/>
         <source>Quit the application</source>
         <translation>Вихід</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="117"/>
+        <location filename="../MainWindow.cpp" line="126"/>
         <source>Filter Editor...</source>
         <translation>Редактор фільтрів...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="118"/>
+        <location filename="../MainWindow.cpp" line="127"/>
         <source>Edit user filters</source>
         <translation>Редагувати фільтри</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="123"/>
+        <location filename="../MainWindow.cpp" line="132"/>
         <source>Settings...</source>
         <translation>Налаштування...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="124"/>
+        <location filename="../MainWindow.cpp" line="133"/>
         <source>Change application settings</source>
         <translation>Зміна налаштувань</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="129"/>
+        <location filename="../MainWindow.cpp" line="138"/>
         <source>Tuning sources...</source>
         <translation>Джерела тюнінгу...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="130"/>
+        <location filename="../MainWindow.cpp" line="139"/>
         <source>View tuning sources</source>
         <translation>Перегляд джерел тюнінгу</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="135"/>
+        <location filename="../MainWindow.cpp" line="144"/>
         <source>Connection Statistics...</source>
         <translation>Статистика з&apos;єднань...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="136"/>
+        <location filename="../MainWindow.cpp" line="145"/>
         <source>View Connection Statistics</source>
         <translation>Перегляд статистики</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="140"/>
+        <location filename="../MainWindow.cpp" line="149"/>
         <source>Application Log...</source>
         <translation>Журнал програми...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="141"/>
+        <location filename="../MainWindow.cpp" line="150"/>
         <source>Show application log</source>
         <translation>Перегляд журналу програми</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="144"/>
+        <location filename="../MainWindow.cpp" line="153"/>
         <source>Signals Log...</source>
         <translation>Журнал зміни сигналів...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="145"/>
+        <location filename="../MainWindow.cpp" line="154"/>
         <source>Show signals log</source>
         <translation>Перегляд журналу зміни сигналів</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="148"/>
+        <location filename="../MainWindow.cpp" line="157"/>
         <source>About Qt...</source>
         <translation>Про Qt...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="149"/>
+        <location filename="../MainWindow.cpp" line="158"/>
         <source>Show Qt information</source>
         <translation>Інформація про Qt</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="153"/>
+        <location filename="../MainWindow.cpp" line="162"/>
         <source>About TuningClient...</source>
         <translation>Про TuningClient...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="154"/>
+        <location filename="../MainWindow.cpp" line="163"/>
         <source>Show application information</source>
         <translation>Інформація про TuningClient</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="159"/>
+        <location filename="../MainWindow.cpp" line="168"/>
         <source>Tuning User Manual</source>
         <translation>Посібник користувача</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="160"/>
+        <location filename="../MainWindow.cpp" line="169"/>
         <source>Show Tuning User Manual</source>
         <translation>Перегляд посібника користувача</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="169"/>
+        <location filename="../MainWindow.cpp" line="178"/>
         <source>&amp;File</source>
         <translation>&amp;Файл</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="175"/>
+        <location filename="../MainWindow.cpp" line="184"/>
         <source>&amp;Service</source>
         <translation>&amp;Сервіс</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="183"/>
+        <location filename="../MainWindow.cpp" line="192"/>
         <source>&amp;?</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="218"/>
+        <location filename="../MainWindow.cpp" line="227"/>
         <source>LM Errors (click for details)</source>
         <translation>Помилки LM (клкініть для деталей)</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="240"/>
+        <location filename="../MainWindow.cpp" line="249"/>
         <source>Error and warning counters in the log (click to view log)</source>
         <translation>Лічильники помилок та попереджень (клікніть для перегляду журналу)</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="294"/>
+        <location filename="../MainWindow.cpp" line="303"/>
         <source>Warning! Some values were modified but not written. Are you sure you want to exit?</source>
         <translation>Увага! Деякі значення були модифіковані, але не записані. Ви впевнені, що хочете вийти?</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="468"/>
+        <location filename="../MainWindow.cpp" line="477"/>
         <source>Schemas</source>
         <translation>Схеми</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="504"/>
+        <location filename="../MainWindow.cpp" line="513"/>
         <source>No workspaces exist, configuration error.</source>
         <translation>Відсутні робочі простори, помилка конфігурації.</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="536"/>
+        <location filename="../MainWindow.cpp" line="545"/>
         <source>Signals</source>
         <translation>Сигнали</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="625"/>
+        <location filename="../MainWindow.cpp" line="634"/>
         <source>Project %1, build %2</source>
         <translation>Проект %1, збірка %2</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="648"/>
+        <location filename="../MainWindow.cpp" line="657"/>
         <source> ConfigService: </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="652"/>
+        <location filename="../MainWindow.cpp" line="661"/>
         <source> no connection</source>
         <translation> нема з&apos;єднання</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="656"/>
+        <location filename="../MainWindow.cpp" line="665"/>
         <source>%1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="666"/>
+        <location filename="../MainWindow.cpp" line="675"/>
         <source>Address: %1</source>
         <translation>Адреса: %1</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="718"/>
+        <location filename="../MainWindow.cpp" line="727"/>
         <source>Counter %1</source>
         <translation>Лічильник: %1</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="757"/>
+        <location filename="../MainWindow.cpp" line="766"/>
         <source> %1 %2 </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="792"/>
+        <location filename="../MainWindow.cpp" line="801"/>
         <source> LM Errors: %1 </source>
         <translation> Помилок LM %1 </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="824"/>
+        <location filename="../MainWindow.cpp" line="833"/>
         <source> SOR: -</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="830"/>
+        <location filename="../MainWindow.cpp" line="839"/>
         <source> SOR: ? </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="836"/>
+        <location filename="../MainWindow.cpp" line="845"/>
         <source> SOR: No </source>
         <translation> SOR: Ні </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="842"/>
+        <location filename="../MainWindow.cpp" line="851"/>
         <source> SOR: Yes </source>
         <translation> SOR: Так </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="846"/>
+        <location filename="../MainWindow.cpp" line="855"/>
         <source> SOR: Yes [%1] </source>
         <translation> SOR: Так [%1] </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="916"/>
+        <location filename="../MainWindow.cpp" line="895"/>
+        <source> Log E: %1 W: %2 </source>
+        <translation> Журнал E: %1 W: %2 </translation>
+    </message>
+    <message>
+        <location filename="../MainWindow.cpp" line="925"/>
         <source>%1:
 </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="920"/>
+        <location filename="../MainWindow.cpp" line="929"/>
         <source>Not configured</source>
         <translation>Не налаштовано</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="948"/>
+        <location filename="../MainWindow.cpp" line="946"/>
+        <location filename="../MainWindow.cpp" line="959"/>
+        <source>ok</source>
+        <translation>ок</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow.cpp" line="946"/>
+        <location filename="../MainWindow.cpp" line="959"/>
+        <source>down</source>
+        <translation>не з&apos;єднано</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow.cpp" line="957"/>
         <source>%1: %2 (Replies: %3)</source>
         <translation>%1: %2 (Відповідей: %3)</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="955"/>
+        <location filename="../MainWindow.cpp" line="964"/>
         <source>%1: %2/%3 (Replies: %4)</source>
         <translation>%1: %2/%3 (Відповідей: %4)</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="992"/>
-        <location filename="../MainWindow.cpp" line="1011"/>
+        <location filename="../MainWindow.cpp" line="1001"/>
+        <location filename="../MainWindow.cpp" line="1020"/>
         <source>Warning</source>
         <translation>Попередження</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="992"/>
+        <location filename="../MainWindow.cpp" line="1001"/>
         <source>Program configuraton has been changed. Press OK to restart the program.</source>
         <translation>Конфігурація програми змінилася. Натисніть ОК для перезапуску програми.</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1011"/>
+        <location filename="../MainWindow.cpp" line="1020"/>
         <source>Program configuration has been changed and will be updated.</source>
         <translation>Конфігурація програми змінилася та буде оновлена.</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1097"/>
+        <location filename="../MainWindow.cpp" line="1106"/>
         <source>Configuration error: %1</source>
         <translation>Помилка конфігурації: %1</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1232"/>
+        <location filename="../MainWindow.cpp" line="1241"/>
         <source> allows user to modify tuning values.</source>
         <translation> дозволяє користувачеві змінювати значення сигналів тюнінгу.</translation>
     </message>
@@ -1232,32 +1249,32 @@ Colld not save crash dump file:
         <translation>Програма вже запущена!</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="39"/>
+        <location filename="../MainWindow.cpp" line="48"/>
         <source>SOR counter (click for details)</source>
         <translation>Лічильник SOR (клікніть для деталей)</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1028"/>
+        <location filename="../MainWindow.cpp" line="1037"/>
         <source>Single LM Control Mode</source>
         <translation>Режим керування одним LM</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1029"/>
+        <location filename="../MainWindow.cpp" line="1038"/>
         <source>Multiple LM Control Mode</source>
         <translation>Режим керування всіма LM</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1030"/>
+        <location filename="../MainWindow.cpp" line="1039"/>
         <source>Mixed LM Control Mode</source>
         <translation>Змішаний режим керування LM</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1075"/>
+        <location filename="../MainWindow.cpp" line="1084"/>
         <source>Object Filters file loading error: %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1088"/>
+        <location filename="../MainWindow.cpp" line="1097"/>
         <source>Tuning signals file loading error.</source>
         <translation></translation>
     </message>

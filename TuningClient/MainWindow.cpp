@@ -33,10 +33,12 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	m_translator.addLanguage("ua", "Ukrainian/Українська");
 
 	m_translator.addTranslationFile("ru", ":/languages/TuningClient_ru.qm");
+	m_translator.addTranslationFile("ru", ":/languages/qtbase_ru.qm");
 	m_translator.addTranslationFile("ru", ":/ClientLib/languages/ClientLib_ru.qm");
 	m_translator.addTranslationFile("ru", ":/UtilsLib/languages/UtilsLib_ru.qm");
 
 	m_translator.addTranslationFile("ua", ":/languages/TuningClient_ua.qm");
+	m_translator.addTranslationFile("ua", ":/languages/qtbase_uk.qm");
 	m_translator.addTranslationFile("ua", ":/ClientLib/languages/ClientLib_ua.qm");
 	m_translator.addTranslationFile("ua", ":/UtilsLib/languages/UtilsLib_ua.qm");
 
@@ -890,7 +892,7 @@ void MainWindow::updateStatusBar()
 
 		assert(m_statusBarLogAlerts);
 
-		m_statusBarLogAlerts->setText(QString(" Log E: %1 W: %2 ").arg(m_logErrorsCounter).arg(m_logWarningsCounter));
+		m_statusBarLogAlerts->setText(tr(" Log E: %1 W: %2 ").arg(m_logErrorsCounter).arg(m_logWarningsCounter));
 
 		if (m_logErrorsCounter == 0 && m_logWarningsCounter == 0)
 		{
@@ -941,7 +943,7 @@ void MainWindow::showSoftwareConnection(const QString& caption,
 		toolTipText += QString("%1 %2 (%3)\n")
 							.arg(state.connectedSoftwareInfo.equipmentID())
 							.arg(state.peerAddr.addressPortStr())
-							.arg(state.isConnected ? "ok" : "down");
+							.arg(state.isConnected ? tr("ok") : tr("down"));
 	}
 	toolTipText = toolTipText.trimmed();
 
@@ -954,7 +956,7 @@ void MainWindow::showSoftwareConnection(const QString& caption,
 	{
 		statusText = tr("%1: %2 (Replies: %3)")
 					 .arg(caption)
-					 .arg(statusOk ? "ok" : "down")
+					 .arg(statusOk ? tr("ok") : tr("down"))
 					 .arg(replyCount);
 	}
 	else

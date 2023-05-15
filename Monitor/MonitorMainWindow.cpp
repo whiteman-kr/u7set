@@ -30,6 +30,7 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	m_translator.addLanguage("ua", "Ukrainian/Українська");
 
 	m_translator.addTranslationFile("ua", ":/languages/Monitor_ua.qm");
+	m_translator.addTranslationFile("ua", ":/languages/qtbase_uk.qm");
 	m_translator.addTranslationFile("ua", ":/ClientLib/languages/ClientLib_ua.qm");
 	m_translator.addTranslationFile("ua", ":/TrendView/languages/TrendView_ua.qm");
 	m_translator.addTranslationFile("ua", ":/UtilsLib/languages/UtilsLib_ua.qm");
@@ -755,7 +756,7 @@ void MonitorMainWindow::updateStatusBar()
 	{
 		auto configInfo = m_configController.configInfo();
 
-		QString text = QString(" Project: %1   Build: %2  ")
+		QString text = tr(" Project: %1   Build: %2  ")
 					   .arg(configInfo.project)
 					   .arg(configInfo.buildNo);
 
@@ -770,7 +771,7 @@ void MonitorMainWindow::updateStatusBar()
 
 		assert(m_statusBarLogAlerts);
 
-		m_statusBarLogAlerts->setText(QString(" Log E: %1 W: %2 ")
+		m_statusBarLogAlerts->setText(tr(" Log E: %1 W: %2 ")
 										.arg(m_logErrorsCounter)
 										.arg(m_logWarningsCounter));
 
@@ -825,7 +826,7 @@ void MonitorMainWindow::showSoftwareConnection(const QString& caption,
 		toolTipText += QString("%1 %2 (%3)\n")
 							.arg(state.connectedSoftwareInfo.equipmentID())
 							.arg(state.peerAddr.addressPortStr())
-							.arg(state.isConnected ? "ok" : "down");
+							.arg(state.isConnected ? tr("ok") : tr("down"));
 	}
 	toolTipText = toolTipText.trimmed();
 
@@ -838,7 +839,7 @@ void MonitorMainWindow::showSoftwareConnection(const QString& caption,
 	{
 		statusText = tr("%1: %2 (Replies: %3)")
 					 .arg(caption)
-					 .arg(statusOk ? "ok" : "down")
+					 .arg(statusOk ? tr("ok") : tr("down"))
 					 .arg(replyCount);
 	}
 	else

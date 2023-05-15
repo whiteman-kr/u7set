@@ -61,6 +61,11 @@ void ScriptMonitorApplication::setFullScreen(bool fullScreen)
 	emit signal_setFullScreen(fullScreen);
 }
 
+bool ScriptMonitorApplication::start(QString program, QString arguments, QString workDir)
+{
+	return QProcess::startDetached(program, arguments.split(';', Qt::SkipEmptyParts), workDir);
+}
+
 QString ScriptMonitorApplication::equipmentId() const
 {
 	if (m_mainWindow == nullptr)
