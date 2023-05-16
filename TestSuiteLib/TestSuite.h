@@ -45,6 +45,8 @@ namespace TestSuite
 
 		bool isRunning() const;
 
+		TestLog& testLog();
+
 	signals:
 		void finished(int result);
 

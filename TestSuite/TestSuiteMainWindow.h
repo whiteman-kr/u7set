@@ -56,6 +56,11 @@ private slots:
 	void onExit();
 	void on_m_run_clicked();
 	void on_m_stop_clicked();
+
+	void onSaveTestLog();
+	void onLoadTestLog();
+	void onClearTestLog();
+
 	void onSettings();
 	void showStatistics();
 	void showAppLog();
@@ -86,6 +91,10 @@ private:
 	QAction* m_runAction = nullptr;
 	//QAction* m_pauseAction = nullptr;
 	QAction* m_stopAction = nullptr;
+
+	QAction* m_saveTestLogAction = nullptr;
+	QAction* m_loadTestLogAction = nullptr;
+	QAction* m_clearTestLogAction = nullptr;
 
 	TabWidgetEx* m_tabWidget = nullptr;
 

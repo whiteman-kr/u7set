@@ -27,6 +27,7 @@ public:
 	void setHtmlFont(QString fontName);
 
 	bool queueIsEmpty() const;
+	void pushQueue(const std::vector<TestSuite::TestLogItem>& in);
 	void popQueue(std::vector<TestSuite::TestLogItem> *out, int maxCount);
 
 private:

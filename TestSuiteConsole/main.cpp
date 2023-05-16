@@ -28,14 +28,15 @@ void showHelp()
 	std::cout << "TestSuiteConsole is a command-line tool that performs hardware testing of RPCT projects." << std::endl;
 	std::cout << std::endl << "Command line parameters:" << std::endl;
 #ifdef Q_OS_WINDOWS
-	std::cout << "\tTestSuiteConsole -settings=<FileName.xml> [-scripts_path=<ScriptsPath>] [-tests_filter=<TestsFilter>] - run build task with settings taken from <FileName.xml> file." << std::endl;
+	std::cout << "\tTestSuiteConsole -settings=<FileName.xml> [-scripts_path=<ScriptsPath>] [-tests_filter=<TestsFilter>] [-testlog=<filename>|default] [-cp=NNNN]- run build task with settings taken from <FileName.xml> file." << std::endl;
 #else
-	std::cout << "\tTestSuiteConsole -settings=<FileName.xml> [-scripts_path=<ScriptsPath>] [-tests_filter=<TestsFilter>] [-cp=NNNN]- run build task with settings taken from <FileName.xml> file." << std::endl;
+	std::cout << "\tTestSuiteConsole -settings=<FileName.xml> [-scripts_path=<ScriptsPath>] [-tests_filter=<TestsFilter>] [-testlog=<filename>|default] - run build task with settings taken from <FileName.xml> file." << std::endl;
 #endif
 	std::cout << "\t\t\tOptional -scripts_path parameter specifies a directory where test scripts are stored." << std::endl;
 	std::cout << "\t\t\tOptional -tests_filter parameter specifies a filter for running tests. Filter contains test function name" << std::endl;
 	std::cout << "\t\t\twith wildcards (\'*\' and \'?\' symbols). If filters starts from '-' symbol, specified tests are excluded." << std::endl;
 	std::cout << "\t\t\tSeveral filters can be separated by a semicolon." << std::endl;
+	std::cout << "\t\t\tOptional -testlog parameter specifies the file name to store test log(for example, TestLog.tsl)." << std::endl;
 #ifdef Q_OS_WINDOWS
 	std::cout << "\t\t\tOptional -cp parameter specifies the codepage (for example, 1251)." << std::endl;
 #endif
@@ -145,6 +146,7 @@ public:
 				break;
 			}
 		case TestSuite::TestLogItemType::Message:
+		case TestSuite::TestLogItemType::Text:
 			{
 				qInfo() << item.toText().toStdString().data();
 				break;
@@ -155,11 +157,12 @@ public:
 
 struct CommandLineArgs
 {
+	QString createSettingsTemplateFileName;
 	QString settingsFileName;
 	QString scriptsPath;
 	QString testsFilter;
-	QString createSettingsTemplateFileName;
 	QString codepage;
+	QString testLogFileName;
 };
 
 CommandLineArgs parseCommandLine(const QStringList args)
@@ -168,6 +171,13 @@ CommandLineArgs parseCommandLine(const QStringList args)
 
 	for (const QString& arg : args)
 	{
+		if (arg.startsWith("-create=", Qt::CaseInsensitive) == true)
+		{
+			result.createSettingsTemplateFileName = arg;
+			result.createSettingsTemplateFileName.replace("-create=", "", Qt::CaseInsensitive);
+			continue;
+		}
+
 		if (arg.startsWith("-settings=", Qt::CaseInsensitive) == true)
 		{
 			result.settingsFileName = arg;
@@ -189,17 +199,17 @@ CommandLineArgs parseCommandLine(const QStringList args)
 			continue;
 		}
 
-		if (arg.startsWith("-create=", Qt::CaseInsensitive) == true)
-		{
-			result.createSettingsTemplateFileName = arg;
-			result.createSettingsTemplateFileName.replace("-create=", "", Qt::CaseInsensitive);
-			continue;
-		}
-
 		if (arg.startsWith("-cp=", Qt::CaseInsensitive) == true)
 		{
 			result.codepage = arg;
 			result.codepage.replace("-cp=", "", Qt::CaseInsensitive);
+			continue;
+		}
+
+		if (arg.startsWith("-testlog=", Qt::CaseInsensitive) == true)
+		{
+			result.testLogFileName = arg;
+			result.testLogFileName.replace("-testlog=", "", Qt::CaseInsensitive);
 			continue;
 		}
 	}
@@ -318,6 +328,33 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 
-	QObject::connect(&testSuite, &TestSuite::TestSuite::finished, &app, &QCoreApplication::exit);
+	QObject::connect(&testSuite, &TestSuite::TestSuite::finished, [&args, &appLog, &testSuite](int)
+	{
+		// Save test log to the file
+		//
+		if (args.testLogFileName.isEmpty() == false)
+		{
+			QString fileName = args.testLogFileName;
+			if (fileName == "default")
+			{
+				fileName = QString("TestLog_%1.tsl").arg(QDateTime::currentDateTime().toString("ddMMyyyy_HHmmss"));
+			}
+			QString errorMsg;
+			bool ok = testSuite.testLog().saveToCSV(fileName, &errorMsg);
+			if (ok == false)
+			{
+				appLog.writeError(errorMsg);
+			}
+			else
+			{
+				appLog.writeMessage(QObject::tr("Test log is saved to the file: '%1'.").arg(fileName));
+			}
+		}
+
+		// Exit the application
+		//
+		QCoreApplication::exit();
+	});
+
 	return app.exec();
 }

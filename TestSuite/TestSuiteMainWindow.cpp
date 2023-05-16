@@ -38,7 +38,7 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 	margins.setTop(0);
 	layout->setContentsMargins(margins);
 
-	m_testLogTabPage = new TestLogTabPage(m_testLogOutput, this);
+	m_testLogTabPage = new TestLogTabPage(m_testSuite.testLog(), m_testLogOutput, this);
 	m_tabWidget->addTab(m_testLogTabPage, "Test Log");
 	m_tabWidget->tabBar()->setTabButton(0, QTabBar::RightSide, 0);	// This tab is not closable
 
@@ -48,8 +48,8 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 	//
 
 	createDocks();
-	createToolbar();
 	createActions();
+	createToolbar();
 	createMenu();
 	createStatusBar();
 
@@ -141,34 +141,6 @@ void TestSuiteMainWindow::createToolbar()
 	m_toolBar = new QToolBar{"ToolBar"};
 	addToolBar(m_toolBar);
 
-	//m_openTestsAction = new QAction{QIcon(":/Images/Images/SimOpen.svg"), tr("Open Build"), this};
-	//m_openTestsAction->setShortcut(QKeySequence::Open);
-	//connect(m_openTestsAction, &QAction::triggered, this, &SimWidget::openBuild);
-
-	//m_closeTestsAction = new QAction{QIcon(":/Images/Images/SimClose.svg"), tr("Close"), this};
-	//m_closeTestsAction->setShortcut(QKeySequence::Close);
-	//connect(m_closeTestsAction, &QAction::triggered, this, &SimWidget::closeBuild);
-
-	m_refreshTestsAction = new QAction{QIcon(":/Images/Images/TestsRefresh.svg"), tr("Refresh"), this};
-	m_refreshTestsAction->setShortcut(QKeySequence::Refresh);
-	connect(m_refreshTestsAction, &QAction::triggered, this, &TestSuiteMainWindow::onTestsRefresh);
-
-	// --
-	//
-	m_runAction = new QAction{QIcon(":/Images/Images/TestsRun.svg"), tr("Run tests"), this};
-	QList<QKeySequence> runsKeys;
-	runsKeys << QKeySequence{Qt::CTRL | Qt::Key_R};
-	runsKeys << QKeySequence{Qt::CTRL | Qt::Key_F5};
-	m_runAction->setShortcuts(runsKeys);
-	connect(m_runAction, &QAction::triggered, this, &TestSuiteMainWindow::on_m_run_clicked);
-
-//	m_pauseAction = new QAction{QIcon(":/Images/Images/TestsPause.svg"), tr("Pause tests"), this};
-//	connect(m_pauseAction, &QAction::triggered, this, &SimWidget::pauseSimulation);
-
-	m_stopAction = new QAction{QIcon(":/Images/Images/TestsStop.svg"), tr("Stop tests"), this};
-	m_stopAction->setShortcut(Qt::SHIFT | Qt::Key_F5);
-	connect(m_stopAction, &QAction::triggered, this, &TestSuiteMainWindow::on_m_stop_clicked);
-
 	// --
 	//
 	m_timeIndicator = new QLabel;
@@ -200,6 +172,24 @@ void TestSuiteMainWindow::createToolbar()
 
 void TestSuiteMainWindow::createActions()
 {
+	m_saveTestLogAction = new QAction(tr("Save Test Log..."), this);
+	m_saveTestLogAction->setStatusTip(tr("Save Test Log to file"));
+	//m_pExitAction->setIcon(QIcon(":/Images/Images/Close.svg"));
+	m_saveTestLogAction->setEnabled(true);
+	connect(m_saveTestLogAction, &QAction::triggered, this, &TestSuiteMainWindow::onSaveTestLog);
+
+	m_loadTestLogAction = new QAction(tr("Load Test Log..."), this);
+	m_loadTestLogAction->setStatusTip(tr("Load Test Log from file"));
+	//m_pExitAction->setIcon(QIcon(":/Images/Images/Close.svg"));
+	m_loadTestLogAction->setEnabled(true);
+	connect(m_loadTestLogAction, &QAction::triggered, this, &TestSuiteMainWindow::onLoadTestLog);
+
+	m_clearTestLogAction = new QAction(tr("Clear Test Log"), this);
+	m_clearTestLogAction->setStatusTip(tr("Clear Test Log"));
+	//m_pExitAction->setIcon(QIcon(":/Images/Images/Close.svg"));
+	m_clearTestLogAction->setEnabled(true);
+	connect(m_clearTestLogAction, &QAction::triggered, this, &TestSuiteMainWindow::onClearTestLog);
+
 	m_pExitAction = new QAction(tr("Exit"), this);
 	m_pExitAction->setStatusTip(tr("Quit the application"));
 	//m_pExitAction->setIcon(QIcon(":/Images/Images/Close.svg"));
@@ -207,6 +197,26 @@ void TestSuiteMainWindow::createActions()
 	m_pExitAction->setShortcutContext(Qt::ApplicationShortcut);
 	m_pExitAction->setEnabled(true);
 	connect(m_pExitAction, &QAction::triggered, this, &TestSuiteMainWindow::onExit);
+
+	m_refreshTestsAction = new QAction{QIcon(":/Images/Images/TestsRefresh.svg"), tr("Refresh"), this};
+	m_refreshTestsAction->setShortcut(QKeySequence::Refresh);
+	connect(m_refreshTestsAction, &QAction::triggered, this, &TestSuiteMainWindow::onTestsRefresh);
+
+	// --
+	//
+	m_runAction = new QAction{QIcon(":/Images/Images/TestsRun.svg"), tr("Run tests"), this};
+	QList<QKeySequence> runsKeys;
+	runsKeys << QKeySequence{Qt::CTRL | Qt::Key_R};
+	runsKeys << QKeySequence{Qt::CTRL | Qt::Key_F5};
+	m_runAction->setShortcuts(runsKeys);
+	connect(m_runAction, &QAction::triggered, this, &TestSuiteMainWindow::on_m_run_clicked);
+
+//	m_pauseAction = new QAction{QIcon(":/Images/Images/TestsPause.svg"), tr("Pause tests"), this};
+//	connect(m_pauseAction, &QAction::triggered, this, &SimWidget::pauseSimulation);
+
+	m_stopAction = new QAction{QIcon(":/Images/Images/TestsStop.svg"), tr("Stop tests"), this};
+	m_stopAction->setShortcut(Qt::SHIFT | Qt::Key_F5);
+	connect(m_stopAction, &QAction::triggered, this, &TestSuiteMainWindow::on_m_stop_clicked);
 
 	m_pSettingsAction = new QAction(tr("Settings..."), this);
 	m_pSettingsAction->setStatusTip(tr("Change application settings"));
@@ -229,13 +239,8 @@ void TestSuiteMainWindow::createActions()
 	m_pAppLogAction->setStatusTip(tr("Show application log"));
 	connect(m_pAppLogAction, &QAction::triggered, this, &TestSuiteMainWindow::showAppLog);
 
-	/*m_pSignalLogAction = new QAction(tr("Signals Log..."), this);
-	m_pSignalLogAction->setStatusTip(tr("Show signals log"));
-	connect(m_pSignalLogAction, &QAction::triggered, this, &MainWindow::showSignalsLog);*/
-
 	m_aboutQtAction = new QAction(tr("About Qt..."), this);
 	m_aboutQtAction->setStatusTip(tr("Show Qt information"));
-	//m_pAboutAction->setEnabled(true);
 	connect(m_aboutQtAction, &QAction::triggered, this, &TestSuiteMainWindow::showAboutQt);
 
 	m_pAboutAction = new QAction(tr("About TestSuite..."), this);
@@ -257,7 +262,21 @@ void TestSuiteMainWindow::createMenu()
 	QMenu* pFileMenu = menuBar()->addMenu(tr("&File"));
 	pFileMenu->addAction(m_pExitAction);
 
-	// Tools
+	// Tests
+	//
+	QMenu* pTestsMenu = menuBar()->addMenu(tr("&Tests"));
+	pTestsMenu->addAction(m_runAction);
+	pTestsMenu->addAction(m_stopAction);
+
+	// Reports
+	//
+	QMenu* pReportsMenu = menuBar()->addMenu(tr("&Reports"));
+	pReportsMenu->addAction(m_saveTestLogAction);
+	pReportsMenu->addAction(m_loadTestLogAction);
+	pReportsMenu->addSeparator();
+	pReportsMenu->addAction(m_clearTestLogAction);
+
+	// Service
 	//
 	QMenu* pServiceMenu = menuBar()->addMenu(tr("&Service"));
 	pServiceMenu->addAction(m_pSettingsAction);
@@ -647,7 +666,8 @@ void TestSuiteMainWindow::on_m_run_clicked()
 		return;
 	}
 
-	m_testLogTabPage->clearOutputLog();
+	m_testSuite.testLog().clear();
+	m_testLogTabPage->clearOutputWidget();
 
 	m_tabWidget->setCurrentIndex(0);
 
@@ -668,6 +688,60 @@ void TestSuiteMainWindow::on_m_stop_clicked()
 	{
 		m_testSuite.stop();
 	}
+}
+
+void TestSuiteMainWindow::onSaveTestLog()
+{
+	QString defaultFileName = QString("TestLog_%1.tsl").arg(QDateTime::currentDateTime().toString("ddMMyyyy_HHmmss"));
+
+	QString fileName = QFileDialog::getSaveFileName(this,
+													tr("Save Test Log"),
+													defaultFileName,
+													tr("TestSuite Log File (*.tsl);;CSV Files, semicolon separated (*.csv)"));
+
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
+
+	QString errorMsg;
+	bool ok = m_testSuite.testLog().saveToCSV(fileName, &errorMsg);
+	if (ok == false)
+	{
+		QMessageBox::critical(this, qAppName(), errorMsg);
+	}
+	return;
+}
+
+void TestSuiteMainWindow::onLoadTestLog()
+{
+	QString fileName = QFileDialog::getOpenFileName(this,
+													tr("Load Test Log"),
+													QString(),
+													tr("TestSuite Log File (*.tsl);;CSV Files, semicolon separated (*.csv)"));
+
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
+
+	QString errorMsg;
+	bool ok = m_testSuite.testLog().loadFromCSV(fileName, &errorMsg);
+	if (ok == false)
+	{
+		QMessageBox::critical(this, qAppName(), errorMsg);
+		return;
+	}
+
+	m_testLogOutput.pushQueue(m_testSuite.testLog().items());
+
+	return;
+}
+
+void TestSuiteMainWindow::onClearTestLog()
+{
+	m_testSuite.testLog().clear();
+	m_testLogTabPage->clearOutputWidget();
 }
 
 void TestSuiteMainWindow::onSettings()

@@ -60,6 +60,17 @@ bool TestSuiteTestLogOutput::queueIsEmpty() const
 	return m_itemsQueue.empty() == true;
 }
 
+void TestSuiteTestLogOutput::pushQueue(const std::vector<TestSuite::TestLogItem>& in)
+{
+	QWriteLocker l(&m_lock);
+	Q_UNUSED(l);
+
+	for (const auto& item: in)
+	{
+		m_itemsQueue.push(item);
+	}
+}
+
 void TestSuiteTestLogOutput::popQueue(std::vector<TestSuite::TestLogItem>* out, int maxCount)
 {
 	if (out == nullptr)

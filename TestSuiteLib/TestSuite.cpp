@@ -70,6 +70,11 @@ namespace TestSuite
 		return m_control.isRunning();
 	}
 
+	TestLog& TestSuite::testLog()
+	{
+		return m_testLog;
+	}
+
 	//void TestLibrary::runTests()
 	//{
 	//	if (state() == TestLibraryState::Running)
