@@ -28,8 +28,9 @@ if (MSVC)
   )
 endif (MSVC)
 
+set(TARGET Protobuf)
 
-add_library(Protobuf STATIC
+add_library(${TARGET} STATIC
 	../Proto/network.pb.cc
 	../Proto/serialization.pb.cc
 	../Proto/trends.pb.cc
@@ -165,10 +166,10 @@ add_library(Protobuf STATIC
 )
 
 if(Threads_FOUND)
-	target_compile_definitions(Protobuf PRIVATE HAVE_PTHREAD)
+	target_compile_definitions(${TARGET} PRIVATE HAVE_PTHREAD)
 endif()
 
-target_link_libraries(Protobuf PUBLIC Threads::Threads Qt6::Core)
-target_link_libraries(Protobuf PUBLIC CommonLib)
+target_link_libraries(${TARGET} PUBLIC Threads::Threads Qt6::Core)
+target_link_libraries(${TARGET} PUBLIC CommonLib)
 
-target_include_directories(Protobuf INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

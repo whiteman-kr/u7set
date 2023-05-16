@@ -13,9 +13,9 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 find_package(Qt6 REQUIRED COMPONENTS Core Network Widgets Qml Sql Xml)
 qt_standard_project_setup()
 
-set(TARGET_NAME AppDataSrv)
+set(TARGET AppDataSrv)
 
-add_executable(${TARGET_NAME}
+add_executable(${TARGET}
 	../lib/ConstStrings.h
 	../lib/DataSource.cpp
 	../lib/DataSource.h
@@ -38,9 +38,9 @@ add_executable(${TARGET_NAME}
 	TcpArchiveClient.h
 )
 
-set_target_properties(${TARGET_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+set_target_properties(${TARGET} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-target_precompile_headers(${TARGET_NAME} PRIVATE
+target_precompile_headers(${TARGET} PRIVATE
 	# C includes, must be before c++ includes
 	#
 	<cassert>
@@ -100,14 +100,14 @@ target_precompile_headers(${TARGET_NAME} PRIVATE
 	<QXmlStreamWriter>
 )
 
-target_include_directories(${TARGET_NAME} PRIVATE ./../asio/include)
-target_compile_definitions(${TARGET_NAME} PRIVATE ASIO_STANDALONE=1)
+target_include_directories(${TARGET} PRIVATE ./../asio/include)
+target_compile_definitions(${TARGET} PRIVATE ASIO_STANDALONE=1)
 
-target_link_libraries(${TARGET_NAME} PRIVATE Qt6::Core Qt6::Network Qt6::Widgets Qt6::Qml Qt6::Sql Qt6::Xml)
-target_link_libraries(${TARGET_NAME} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib HardwareLib OnlineLib ServiceLib)
+target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Network Qt6::Widgets Qt6::Qml Qt6::Sql Qt6::Xml)
+target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib HardwareLib OnlineLib ServiceLib)
 
 # Link Visaul Leak Detector
 #
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
-	target_link_libraries(${TARGET_NAME} PRIVATE vld.lib)
+	target_link_libraries(${TARGET} PRIVATE vld.lib)
 endif()

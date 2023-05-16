@@ -9,7 +9,9 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Network)
 
-add_library(ServiceLib STATIC
+set(TARGET ServiceLib)
+
+add_library(${TARGET} STATIC
 	CommandLineParser.h
 	CommandLineParser.cpp
 	Service.h
@@ -17,14 +19,14 @@ add_library(ServiceLib STATIC
 )
 
 if(WIN32)
-	target_sources(ServiceLib PRIVATE
+	target_sources(${TARGET} PRIVATE
 		qtservice/src/qtservice.cpp
 		qtservice/src/qtservice_win.cpp
 	)
 endif(WIN32)
 
 if(UNIX)
-	target_sources(ServiceLib PRIVATE
+	target_sources(${TARGET} PRIVATE
 		qtservice/src/qtservice.cpp
 		qtservice/src/qtservice_unix.cpp
 		qtservice/src/qtunixsocket.cpp
@@ -33,9 +35,9 @@ if(UNIX)
 endif(UNIX)
 
 
-target_link_libraries(ServiceLib PUBLIC Qt6::Core Qt6::Network)
-target_link_libraries(ServiceLib PUBLIC Protobuf OnlineLib CommonLib)
+target_link_libraries(${TARGET} PUBLIC Qt6::Core Qt6::Network)
+target_link_libraries(${TARGET} PUBLIC Protobuf OnlineLib CommonLib)
 
-target_compile_definitions(ServiceLib PRIVATE SERVICE_LIB_DOMAIN)
-#target_include_directories(ServiceLib INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_definitions(${TARGET} PRIVATE SERVICE_LIB_DOMAIN)
+#target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 

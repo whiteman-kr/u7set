@@ -9,7 +9,9 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Gui Widgets Sql Concurrent Network)
 
-add_library(DbLib STATIC
+set(TARGET DbLib)
+
+add_library(${TARGET} STATIC
 	DbController.cpp
 	DbController.h
 	DbControllerTools.cpp
@@ -25,9 +27,9 @@ add_library(DbLib STATIC
 	DbWorker.h
 )
 
-target_link_libraries(DbLib PUBLIC Qt6::Gui Qt6::Widgets Qt6::Sql Qt6::Concurrent Qt6::Network)
-target_link_libraries(DbLib PUBLIC CommonLib HardwareLib AppSignalLib)
+target_link_libraries(${TARGET} PUBLIC Qt6::Gui Qt6::Widgets Qt6::Sql Qt6::Concurrent Qt6::Network)
+target_link_libraries(${TARGET} PUBLIC CommonLib HardwareLib AppSignalLib)
 
-target_compile_definitions(DbLib PRIVATE DB_LIB_DOMAIN)
-#target_include_directories(DbLib INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_definitions(${TARGET} PRIVATE DB_LIB_DOMAIN)
+#target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 

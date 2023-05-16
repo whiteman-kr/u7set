@@ -9,7 +9,9 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Network Xml Concurrent Qml)
 
-add_library(HardwareLib STATIC
+set(TARGET HardwareLib)
+
+add_library(${TARGET} STATIC
 	Afb.cpp
 	Afb.h
 	Connection.cpp
@@ -34,11 +36,11 @@ add_library(HardwareLib STATIC
 	Subsystem.h
 )
 
-target_link_libraries(HardwareLib PUBLIC Qt6::Core Qt6::Network Qt6::Xml Qt6::Concurrent Qt6::Qml)
-target_link_libraries(HardwareLib PUBLIC CommonLib Protobuf UtilsLib)
+target_link_libraries(${TARGET} PUBLIC Qt6::Core Qt6::Network Qt6::Xml Qt6::Concurrent Qt6::Qml)
+target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib)
 
-target_compile_definitions(HardwareLib PRIVATE HARDWARE_LIB_DOMAIN)
-target_include_directories(HardwareLib INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_definitions(${TARGET} PRIVATE HARDWARE_LIB_DOMAIN)
+target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
 
 

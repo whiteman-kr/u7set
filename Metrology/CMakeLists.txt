@@ -131,18 +131,18 @@ set (METROLOGY_RESOURCES
 set (METROLOGY_FORMS
 )
 
-set(TARGET_NAME Metrology)
+set(TARGET Metrology)
 
-add_executable(${TARGET_NAME}
+add_executable(${TARGET}
 	${METROLOGY_FORMS}
 	${METROLOGY_SOURCES}
 	${METROLOGY_RESOURCES}
 	languages/Metrology_ru.ts
 )
 
-set_target_properties(${TARGET_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+set_target_properties(${TARGET} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-target_precompile_headers(${TARGET_NAME} PRIVATE
+target_precompile_headers(${TARGET} PRIVATE
 	<algorithm>
 	<atomic>
 	<functional>
@@ -228,22 +228,22 @@ target_precompile_headers(${TARGET_NAME} PRIVATE
 	<QProgressBar>
 )
 
-target_link_libraries(${TARGET_NAME} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Concurrent Qt6::SerialPort Qt6::Network
+target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Concurrent Qt6::SerialPort Qt6::Network
 	Qt6::Sql Qt6::Qml Qt6::Xml Qt6::Charts)
 
-target_link_libraries(${TARGET_NAME} PRIVATE CommonLib Protobuf AppSignalLib HardwareLib UtilsLib OnlineLib)
+target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf AppSignalLib HardwareLib UtilsLib OnlineLib)
 
 # Interface for calibrator Rigol DG1062Z
 #
 if (MSVC)
-	target_link_libraries(${TARGET_NAME} PRIVATE Qt6::AxContainer ${CMAKE_SOURCE_DIR}/Metrology/Visa/visa64.lib)
+	target_link_libraries(${TARGET} PRIVATE Qt6::AxContainer ${CMAKE_SOURCE_DIR}/Metrology/Visa/visa64.lib)
 endif()
 
 
 # Link Visaul Leak Detector
 #
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
-	target_link_libraries(${TARGET_NAME} PRIVATE vld.lib)
+	target_link_libraries(${TARGET} PRIVATE vld.lib)
 endif()
 
 

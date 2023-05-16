@@ -13,9 +13,9 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 find_package(Qt6 REQUIRED COMPONENTS Test Core Network Qml Xml Concurrent)
 qt_standard_project_setup()
 
-set(TARGET_NAME SimulatorTests)
+set(TARGET SimulatorTests)
 
-add_executable(${TARGET_NAME}
+add_executable(${TARGET}
 	main.cpp
 	SimAfbParamTests.cpp
 	SimAfbParamTests.h
@@ -29,9 +29,9 @@ add_executable(${TARGET_NAME}
 	Resources.qrc
 )
 
-set_target_properties(${TARGET_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+set_target_properties(${TARGET} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-target_link_libraries(${TARGET_NAME} PRIVATE Qt6::Test Qt6::Core Qt6::Network Qt6::Qml Qt6::Xml Qt6::Concurrent)
-target_link_libraries(${TARGET_NAME} PRIVATE Protobuf HardwareLib Simulator)
+target_link_libraries(${TARGET} PRIVATE Qt6::Test Qt6::Core Qt6::Network Qt6::Qml Qt6::Xml Qt6::Concurrent)
+target_link_libraries(${TARGET} PRIVATE Protobuf HardwareLib Simulator)
 
 

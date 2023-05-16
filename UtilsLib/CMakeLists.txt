@@ -9,7 +9,9 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Network Xml Widgets)
 
-add_library(UtilsLib STATIC
+set(TARGET UtilsLib)
+
+add_library(${TARGET} STATIC
 	CUtils.h
 	CsvFile.h
 	CsvFile.cpp
@@ -37,11 +39,11 @@ add_library(UtilsLib STATIC
 	CrashExceptionHandler.cpp
 )
 
-target_link_libraries(UtilsLib PUBLIC Qt6::Core Qt6::Network Qt6::Xml Qt6::Widgets)
-target_link_libraries(UtilsLib PUBLIC CommonLib)
+target_link_libraries(${TARGET} PUBLIC Qt6::Core Qt6::Network Qt6::Xml Qt6::Widgets)
+target_link_libraries(${TARGET} PUBLIC CommonLib)
 
-target_compile_definitions(UtilsLib PRIVATE UTILS_LIB_DOMAIN)
-target_include_directories(UtilsLib INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_definitions(${TARGET} PRIVATE UTILS_LIB_DOMAIN)
+target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
 
 

@@ -33,11 +33,11 @@ add_executable(UalTester
 	Resources.qrc
 )
 
-set(TARGET_NAME UalTester)
+set(TARGET UalTester)
 
-set_target_properties(${TARGET_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+set_target_properties(${TARGET} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-target_precompile_headers(${TARGET_NAME} PRIVATE
+target_precompile_headers(${TARGET} PRIVATE
 	# C/C++ includes
 	#
 	<cassert>
@@ -61,12 +61,12 @@ target_precompile_headers(${TARGET_NAME} PRIVATE
 	<QtQml>
 )
 
-target_link_libraries(${TARGET_NAME} PRIVATE Qt6::Core Qt6::Network Qt6::Qml)
-target_link_libraries(${TARGET_NAME} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib ServiceLib OnlineLib  HardwareLib)
+target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Network Qt6::Qml)
+target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib ServiceLib OnlineLib  HardwareLib)
 
 # Link Visaul Leak Detector
 #
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
-	 target_link_libraries(${TARGET_NAME} PRIVATE vld.lib)
+	 target_link_libraries(${TARGET} PRIVATE vld.lib)
 endif()
 

@@ -17,7 +17,9 @@ if (MSVC)
   )
 endif (MSVC)
 
-add_library(VFrame30 STATIC
+set(TARGET VFrame30)
+
+add_library(${TARGET} STATIC
 	../lib/ClientBehavior.cpp
 	../lib/ClientBehavior.h
 	../lib/ITimeStats.h
@@ -148,7 +150,7 @@ add_library(VFrame30 STATIC
 	WiringSchema.h
 )
 
-target_precompile_headers(VFrame30 PRIVATE
+target_precompile_headers(${TARGET} PUBLIC
 	    <array>
 		<iostream>
 		<fstream>
@@ -205,10 +207,10 @@ target_precompile_headers(VFrame30 PRIVATE
 		"../Proto/ProtoSerialization.h"
 )
 
-target_link_libraries(VFrame30 PUBLIC Qt6::Widgets Qt6::Qml Qt6::Xml Qt6::Svg)
-target_link_libraries(VFrame30 PUBLIC CommonLib Protobuf UtilsLib AppSignalLib HardwareLib TrendView)
+target_link_libraries(${TARGET} PUBLIC Qt6::Widgets Qt6::Qml Qt6::Xml Qt6::Svg)
+target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib AppSignalLib HardwareLib TrendView)
 
-target_compile_definitions(VFrame30 PRIVATE VFRAME30_LIBRARY)
-#target_include_directories(VFrame30 INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_definitions(${TARGET} PRIVATE VFRAME30_LIBRARY)
+#target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
 

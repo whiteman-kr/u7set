@@ -8,7 +8,9 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 find_package(Qt6 REQUIRED COMPONENTS Core)
 
-add_library(CommonLib STATIC
+set(TARGET CommonLib)
+
+add_library(${TARGET} STATIC
   AfbParamValue.h
   AfbParamValue.cpp
   DebugInstCounter.h
@@ -24,8 +26,8 @@ add_library(CommonLib STATIC
   Types.h
 )
 
-target_link_libraries(CommonLib PUBLIC Qt6::Core)
-target_compile_definitions(CommonLib PRIVATE COMMON_LIB_DOMAIN)
-target_include_directories(CommonLib INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(${TARGET} PUBLIC Qt6::Core)
+target_compile_definitions(${TARGET} PRIVATE COMMON_LIB_DOMAIN)
+target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
 

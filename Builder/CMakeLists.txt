@@ -17,7 +17,9 @@ if (MSVC)
   )
 endif (MSVC)
 
-add_library(Builder STATIC
+set(TARGET Builder)
+
+add_library(${TARGET} STATIC
 	../GatewayService/GatewayDescription.cpp
 	../GatewayService/GatewayDescription.h
 	../GatewayService/GatewayDescriptionParser.cpp
@@ -146,7 +148,7 @@ add_library(Builder STATIC
 	UalItems.h
 )
 
-target_precompile_headers(Builder PRIVATE
+target_precompile_headers(${TARGET} PUBLIC
 	<cassert>
 	<algorithm>
 	<functional>
@@ -170,10 +172,10 @@ target_precompile_headers(Builder PRIVATE
 	<QFile>
 )
 
-target_link_libraries(Builder PUBLIC Qt6::Widgets Qt6::Qml Qt6::Xml Qt6::Sql Qt6::Concurrent Qt6::Gui Qt6::PrintSupport)
-target_link_libraries(Builder PUBLIC CommonLib Protobuf UtilsLib HardwareLib DbLib AppSignalLib OnlineLib VFrame30 Simulator)
+target_link_libraries(${TARGET} PUBLIC Qt6::Widgets Qt6::Qml Qt6::Xml Qt6::Sql Qt6::Concurrent Qt6::Gui Qt6::PrintSupport)
+target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib HardwareLib DbLib AppSignalLib OnlineLib VFrame30 Simulator)
 
-target_compile_definitions(Builder PRIVATE IS_BUILDER)
-#target_include_directories(Builder INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_definitions(${TARGET} PRIVATE IS_BUILDER)
+#target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
 

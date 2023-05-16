@@ -9,7 +9,9 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Gui Xml Network Widgets)
 
-add_library(ClientLib STATIC
+set(TARGET ClientLib)
+
+add_library(${TARGET} STATIC
 	AdsConnection.cpp
 	AdsConnection.h
 	AdsSourceStateConnection.cpp
@@ -45,16 +47,16 @@ add_library(ClientLib STATIC
 	TuningUserManager.h
 )
 
-target_link_libraries(ClientLib PUBLIC Qt6::Gui Qt6::Xml Qt6::Network Qt6::Widgets)
-target_link_libraries(ClientLib PUBLIC CommonLib Protobuf UtilsLib OnlineLib AppSignalLib TrendView)
+target_link_libraries(${TARGET} PUBLIC Qt6::Gui Qt6::Xml Qt6::Network Qt6::Widgets)
+target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib OnlineLib AppSignalLib TrendView)
 
 if (MSVC)
-	target_link_libraries(ClientLib PUBLIC Advapi32)
+	target_link_libraries(${TARGET} PUBLIC Advapi32)
 endif (MSVC)
 if (UNIX)
-	target_link_libraries(ClientLib PUBLIC pam pam_misc)
+	target_link_libraries(${TARGET} PUBLIC pam pam_misc)
 endif (UNIX)
 
-target_compile_definitions(ClientLib PRIVATE CLIENT_LIB_DOMAIN)
-#target_include_directories(ClientLib INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_definitions(${TARGET} PRIVATE CLIENT_LIB_DOMAIN)
+#target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 

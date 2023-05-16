@@ -17,7 +17,9 @@ if (MSVC)
   )
 endif (MSVC)
 
-add_library(Simulator STATIC
+set(TARGET Simulator)
+
+add_library(${TARGET} STATIC
 	SimAfb.cpp
 	SimAfb.h
 	SimAppDataLanInterface.cpp
@@ -90,7 +92,7 @@ add_library(Simulator STATIC
 	SoftwareXmlReader.h
 )
 
-target_precompile_headers(Simulator PRIVATE
+target_precompile_headers(${TARGET} PUBLIC
 	<bit>
 	<memory>
 	<map>
@@ -112,10 +114,10 @@ target_precompile_headers(Simulator PRIVATE
 	<QVector>
 )
 
-target_link_libraries(Simulator PUBLIC Qt6::Xml Qt6::Qml Qt6::Core Qt6::Concurrent Qt6::Network)
-target_link_libraries(Simulator PUBLIC CommonLib Protobuf UtilsLib AppSignalLib HardwareLib OnlineLib TrendView)
+target_link_libraries(${TARGET} PUBLIC Qt6::Xml Qt6::Qml Qt6::Core Qt6::Concurrent Qt6::Network)
+target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib AppSignalLib HardwareLib OnlineLib TrendView)
 
-target_compile_definitions(Simulator PRIVATE SIMULATOR_LIBRARY)
-target_include_directories(Simulator INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_definitions(${TARGET} PRIVATE SIMULATOR_LIBRARY)
+target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
 

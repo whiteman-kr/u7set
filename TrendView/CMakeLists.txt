@@ -10,7 +10,9 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Gui Svg Widgets PrintSupport)
 
-add_library(TrendView STATIC
+set(TARGET TrendView)
+
+add_library(${TARGET} STATIC
 	../lib/ISignalDataServer.h
 	../lib/ISignalHasTag.h
 	DialogChooseTrendSignals.cpp
@@ -56,9 +58,9 @@ add_library(TrendView STATIC
 	TrendView.qrc
 )
 
-target_link_libraries(TrendView PUBLIC Qt6::Gui Qt6::Svg Qt6::Widgets Qt6::PrintSupport)
-target_link_libraries(TrendView PUBLIC CommonLib Protobuf UtilsLib AppSignalLib )
+target_link_libraries(${TARGET} PUBLIC Qt6::Gui Qt6::Svg Qt6::Widgets Qt6::PrintSupport)
+target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib AppSignalLib )
 
-target_compile_definitions(TrendView PRIVATE TREND_VIEW_LIBRARY)
-#target_include_directories(TrendView INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_definitions(${TARGET} PRIVATE TREND_VIEW_LIBRARY)
+#target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 

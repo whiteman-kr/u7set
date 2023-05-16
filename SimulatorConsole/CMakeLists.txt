@@ -13,20 +13,20 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 find_package(Qt6 REQUIRED COMPONENTS Xml Qml Core Concurrent Network)
 qt_standard_project_setup()
 
-set(TARGET_NAME SimulatorConsole)
+set(TARGET SimulatorConsole)
 
-add_executable(${TARGET_NAME}
+add_executable(${TARGET}
 	main.cpp
 	SimulatorConsole.qrc
 )
 
-set_target_properties(${TARGET_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+set_target_properties(${TARGET} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-target_link_libraries(${TARGET_NAME} PRIVATE Qt6::Xml Qt6::Qml Qt6::Core Qt6::Concurrent Qt6::Network)
-target_link_libraries(${TARGET_NAME} PRIVATE Protobuf Simulator)
+target_link_libraries(${TARGET} PRIVATE Qt6::Xml Qt6::Qml Qt6::Core Qt6::Concurrent Qt6::Network)
+target_link_libraries(${TARGET} PRIVATE Protobuf Simulator)
 
 # Link Visaul Leak Detector
 #
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
-	 target_link_libraries(${TARGET_NAME} PRIVATE vld.lib)
+	 target_link_libraries(${TARGET} PRIVATE vld.lib)
 endif()

@@ -9,7 +9,9 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Qml Xml Test)
 
-add_library(TestSuiteLib STATIC
+set(TARGET TestSuiteLib)
+
+add_library(${TARGET} STATIC
 	AdsInputController.cpp
 	AdsInputController.h
 	Control.cpp
@@ -36,15 +38,15 @@ add_library(TestSuiteLib STATIC
 	TunsOutputController.h
 )
 
-target_precompile_headers(TestSuiteLib PRIVATE
+target_precompile_headers(${TARGET} PUBLIC
 	<QtQml>
 	<QtXml>
 	<QtTest>
 )
 
 
-target_link_libraries(TestSuiteLib PUBLIC Qt6::Qml Qt6::Xml Qt6::Test)
-target_link_libraries(TestSuiteLib PUBLIC CommonLib Protobuf UtilsLib AppSignalLib OnlineLib ClientLib)
+target_link_libraries(${TARGET} PUBLIC Qt6::Qml Qt6::Xml Qt6::Test)
+target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib AppSignalLib OnlineLib ClientLib)
 
-target_compile_definitions(TestSuiteLib PRIVATE TEST_SUITE_LIBRARY)
-target_include_directories(TestSuiteLib INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_definitions(${TARGET} PRIVATE TEST_SUITE_LIBRARY)
+target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

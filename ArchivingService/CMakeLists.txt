@@ -13,8 +13,8 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 find_package(Qt6 REQUIRED COMPONENTS Core Network Widgets Qml Sql Xml)
 qt_standard_project_setup()
 
-set(TARGET_NAME ArchSrv)
-add_executable(${TARGET_NAME}
+set(TARGET ArchSrv)
+add_executable(${TARGET}
 	ArchFile.cpp
 	ArchFile.h
 	ArchFileBuffer.cpp
@@ -43,9 +43,9 @@ add_executable(${TARGET_NAME}
 	TimeFilter.h
 )
 
-set_target_properties(${TARGET_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+set_target_properties(${TARGET} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-target_precompile_headers(${TARGET_NAME} PRIVATE
+target_precompile_headers(${TARGET} PRIVATE
 	# C includes, must be before c++ includes
 	#
 	<cassert>
@@ -104,11 +104,11 @@ target_precompile_headers(${TARGET_NAME} PRIVATE
 	<QXmlStreamWriter>
 )
 
-target_link_libraries(${TARGET_NAME} PRIVATE Qt6::Core Qt6::Network Qt6::Widgets Qt6::Qml Qt6::Sql Qt6::Xml)
-target_link_libraries(${TARGET_NAME} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib OnlineLib ServiceLib)
+target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Network Qt6::Widgets Qt6::Qml Qt6::Sql Qt6::Xml)
+target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib OnlineLib ServiceLib)
 
 # Link Visaul Leak Detector
 #
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
-	target_link_libraries(${TARGET_NAME} PRIVATE vld.lib)
+	target_link_libraries(${TARGET} PRIVATE vld.lib)
 endif()

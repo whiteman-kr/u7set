@@ -11,9 +11,9 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Test Core Network)
 
-set(TARGET_NAME MetrologyTests)
+set(TARGET MetrologyTests)
 
-add_executable(${TARGET_NAME}
+add_executable(${TARGET}
 	main.cpp
 
 	../../Metrology/MetrologyFormula.cpp
@@ -29,14 +29,14 @@ add_executable(${TARGET_NAME}
 	UnitsConvertorTests.h
 )
 
-set_target_properties(${TARGET_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+set_target_properties(${TARGET} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-target_precompile_headers(${TARGET_NAME} PRIVATE
+target_precompile_headers(${TARGET} PRIVATE
 	<QVector>
 	<QtCore>
 	<QHostAddress>
 )
 
-target_link_libraries(${TARGET_NAME} PRIVATE Qt6::Test Qt6::Core Qt6::Network)
-target_link_libraries(${TARGET_NAME} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib OnlineLib HardwareLib)
+target_link_libraries(${TARGET} PRIVATE Qt6::Test Qt6::Core Qt6::Network)
+target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib OnlineLib HardwareLib)
 

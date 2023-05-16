@@ -13,9 +13,9 @@ set(GOOGLETEST_DIR $ENV{GOOGLETEST_DIR})
 find_package(Threads REQUIRED)
 find_package(Qt6 REQUIRED COMPONENTS Test Core Network Qml Xml Concurrent Gui Widgets)
 
-set(TARGET_NAME ClientTests)
+set(TARGET ClientTests)
 
-add_executable(${TARGET_NAME}
+add_executable(${TARGET}
 	AdsConnectionTests.cpp
 	AdsSourceStateConnectionTests.cpp
 	AppSignalManagerTests.cpp
@@ -28,9 +28,9 @@ add_executable(${TARGET_NAME}
 	TuninsUserManagerTests.cpp
 )
 
-set_target_properties(${TARGET_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+set_target_properties(${TARGET} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-target_precompile_headers(${TARGET_NAME} PRIVATE
+target_precompile_headers(${TARGET} PRIVATE
 	<algorithm>
 	<chrono>
 	<bit>
@@ -50,6 +50,6 @@ target_precompile_headers(${TARGET_NAME} PRIVATE
 	<QSignalSpy>
 )
 
-target_link_libraries(${TARGET_NAME} PRIVATE Qt6::Test Threads::Threads GTest::gtest_main GTest::gmock)
-target_link_libraries(${TARGET_NAME} PRIVATE ClientLib Simulator)
+target_link_libraries(${TARGET} PRIVATE Qt6::Test Threads::Threads GTest::gtest_main GTest::gmock)
+target_link_libraries(${TARGET} PRIVATE ClientLib Simulator)
 

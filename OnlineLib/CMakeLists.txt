@@ -9,7 +9,9 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Network)
 
-add_library(OnlineLib STATIC
+set(TARGET OnlineLib)
+
+add_library(${TARGET} STATIC
 	BuildInfo.cpp
 	BuildInfo.h
 	CfgServerLoader.cpp
@@ -32,9 +34,9 @@ add_library(OnlineLib STATIC
 	UdpSocket.h
 )
 
-target_link_libraries(OnlineLib PRIVATE Qt6::Network)
-target_link_libraries(OnlineLib PUBLIC CommonLib Protobuf UtilsLib)
+target_link_libraries(${TARGET} PRIVATE Qt6::Network)
+target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib)
 
-target_compile_definitions(OnlineLib PRIVATE ONLINE_LIB_DOMAIN)
-#target_include_directories(OnlineLib INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_definitions(${TARGET} PRIVATE ONLINE_LIB_DOMAIN)
+#target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 

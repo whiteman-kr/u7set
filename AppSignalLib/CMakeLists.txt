@@ -9,7 +9,9 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Network)
 
-add_library(AppSignalLib STATIC
+set(TARGET AppSignalLib)
+
+add_library(${TARGET} STATIC
 	AppSignalStateFlags.h
 	AppSignalStateFlags.cpp
 	ComparatorSet.h
@@ -31,9 +33,9 @@ add_library(AppSignalLib STATIC
 	SimpleAppSignalState.cpp
 )
 
-target_link_libraries(AppSignalLib PUBLIC Qt6::Network)
-target_link_libraries(AppSignalLib PUBLIC CommonLib Protobuf UtilsLib)
+target_link_libraries(${TARGET} PUBLIC Qt6::Network)
+target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib)
 
-target_compile_definitions(AppSignalLib PRIVATE APP_SIGNAL_LIB_DOMAIN)
-#target_include_directories(AppSignalLib INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_definitions(${TARGET} PRIVATE APP_SIGNAL_LIB_DOMAIN)
+#target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
