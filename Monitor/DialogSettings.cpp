@@ -234,6 +234,11 @@ void DialogSettings::saveAs_clicked()
 													QString{},
 													tr("ini File (*.ini);;All Files (*.*)"));
 
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
+
 	MonitorAppSettings ms;
 	ms.set(d.value());
 

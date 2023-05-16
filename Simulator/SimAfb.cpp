@@ -722,7 +722,7 @@ namespace Sim
 	AfbComponentInstance::AfbComponentInstance(const std::shared_ptr<const Afb::AfbComponent>& afbComp, quint16 instanceNo) :
 		m_afbComp(afbComp),
 		m_instanceNo(instanceNo),
-		m_versionOpIndex(m_afbComp->versionOpIndex())
+		m_versionOpIndex(static_cast<quint16>(m_afbComp->versionOpIndex()))
 	{
 		Q_ASSERT(m_afbComp);
 	}

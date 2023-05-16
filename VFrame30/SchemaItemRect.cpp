@@ -218,6 +218,11 @@ namespace VFrame30
 
 		QString text = MacrosExpander::parse(m_text, context.get(), &drawParam->session(), this);
 
+		if (text.trimmed().isEmpty() == true)
+		{
+			return;
+		}
+
 		bool textChanged = (text != m_cacheDrewText) ||
 						   (m_cachetextFormat != m_textFormat) ||
 						   (m_cachedFont != m_font);
