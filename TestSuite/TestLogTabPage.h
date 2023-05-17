@@ -21,6 +21,7 @@ private slots:
 
 	void search();
 	void slot_typeChanged(int index);
+	void slot_levelChanged(int index);
 
 private:
 	void createActions();
@@ -31,6 +32,7 @@ private:
 	QTextBrowser* m_outputWidget = nullptr;
 
 	QComboBox* m_typeCombo = nullptr;
+	QComboBox* m_levelCombo = nullptr;
 
 	QPushButton* m_prevIssueButton = nullptr;
 	QPushButton* m_nextIssueButton = nullptr;

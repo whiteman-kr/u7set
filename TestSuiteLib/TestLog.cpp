@@ -3,7 +3,7 @@
 
 namespace TestSuite
 {
-	TestLogItem::TestLogItem(int no, TestLogItemType type, const QString& text, int level, int tag)	:
+	TestLogItem::TestLogItem(int no, TestLogItemType type, const QString& text, TestLogItemLevel level, int tag)	:
 		m_no(no),
 		m_dateTime(QDateTime::currentDateTime()),
 		m_type(type),
@@ -121,7 +121,7 @@ namespace TestSuite
 		}
 
 		result << m_message;
-		result << QString::number(m_level);
+		result << QString::number(static_cast<int>(m_level));
 		result << QString::number(m_tag);
 
 		return result;
@@ -164,7 +164,7 @@ namespace TestSuite
 					result.m_type = TestLogItemType::Error;
 
 		result.m_message = strings[4];
-		result.m_level = strings[5].toInt();
+		result.m_level = static_cast<TestLogItemLevel>(strings[5].toInt());
 		result.m_tag = strings[6].toInt();
 
 		*ok = true;
@@ -189,6 +189,11 @@ namespace TestSuite
 		return m_type == TestLogItemType::Message;
 	}
 
+	TestLogItemLevel TestLogItem::level() const
+	{
+		return m_level;
+	}
+
 	TestLog::TestLog(ITestLogOutput* logOutput):
 		m_logOutput(logOutput)
 	{
@@ -203,7 +208,7 @@ namespace TestSuite
 		m_items.clear();
 	}
 
-	void TestLog::writeError(const QString& text, int level, int tag)
+	void TestLog::writeError(const QString& text, TestLogItemLevel level, int tag)
 	{
 		if (m_logOutput == nullptr)
 		{
@@ -218,7 +223,7 @@ namespace TestSuite
 		m_items.push_back(ti);
 	}
 
-	void TestLog::writeWarning(const QString& text, int level, int tag)
+	void TestLog::writeWarning(const QString& text, TestLogItemLevel level, int tag)
 	{
 		if (m_logOutput == nullptr)
 		{
@@ -233,7 +238,7 @@ namespace TestSuite
 		m_items.push_back(ti);
 	}
 
-	void TestLog::writeMessage(const QString& text, int level, int tag)
+	void TestLog::writeMessage(const QString& text, TestLogItemLevel level, int tag)
 	{
 		if (m_logOutput == nullptr)
 		{
@@ -248,7 +253,7 @@ namespace TestSuite
 		m_items.push_back(ti);
 	}
 
-	void TestLog::writeText(const QString& text, int level, int tag)
+	void TestLog::writeText(const QString& text, TestLogItemLevel level, int tag)
 	{
 		if (m_logOutput == nullptr)
 		{

@@ -29,16 +29,26 @@ TestLogTabPage::TestLogTabPage(TestSuite::TestLog& testLog, TestSuiteTestLogOutp
 	m_outputWidget->setStyleSheet(selectionColor);
 
 	m_typeCombo = new QComboBox();
-	m_typeCombo->addItem("All Messages", static_cast<int>(TestSuite::TestLogItemType::All));
-	m_typeCombo->addItem("Errors", static_cast<int>(TestSuite::TestLogItemType::Error));
-	m_typeCombo->addItem("Warnings", static_cast<int>(TestSuite::TestLogItemType::Warning));
+	m_typeCombo->addItem("All Messages",	static_cast<int>(TestSuite::TestLogItemType::All));
+	m_typeCombo->addItem("Errors&Warnings",	static_cast<int>(TestSuite::TestLogItemType::Error) | static_cast<int>(TestSuite::TestLogItemType::Warning));
+	m_typeCombo->addItem("Errors",			static_cast<int>(TestSuite::TestLogItemType::Error));
+	m_typeCombo->addItem("Warnings",		static_cast<int>(TestSuite::TestLogItemType::Warning));
 	connect(m_typeCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TestLogTabPage::slot_typeChanged);
 
+	m_levelCombo = new QComboBox();
+	m_levelCombo->addItem("All levels",	static_cast<int>(TestSuite::TestLogItemLevel::All));
+	m_levelCombo->addItem("Level 0&1",	static_cast<int>(TestSuite::TestLogItemLevel::Level0) | static_cast<int>(TestSuite::TestLogItemLevel::Level1));
+	m_levelCombo->addItem("Level 1&2",	static_cast<int>(TestSuite::TestLogItemLevel::Level1) | static_cast<int>(TestSuite::TestLogItemLevel::Level2));
+	m_levelCombo->addItem("Level 0",	static_cast<int>(TestSuite::TestLogItemLevel::Level0));
+	m_levelCombo->addItem("Level 1",	static_cast<int>(TestSuite::TestLogItemLevel::Level1));
+	m_levelCombo->addItem("Level 2",	static_cast<int>(TestSuite::TestLogItemLevel::Level2));
+	connect(m_levelCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TestLogTabPage::slot_levelChanged);
+
 	m_prevIssueButton = new QPushButton(tr("Prev Issue <Shift+F6>"));
-	//m_prevIssueButton->setShortcut(Qt::SHIFT + Qt::Key_F6);	// Too slow, use usual QAction
+	m_prevIssueButton->setShortcut(Qt::SHIFT | Qt::Key_F6);
 
 	m_nextIssueButton = new QPushButton(tr("Next Issue <F6>"));
-	//m_nextIssueButton->setShortcut(Qt::Key_F6);				// Too slow, use usual QAction
+	m_nextIssueButton->setShortcut(Qt::Key_F6);
 
 	m_findTextEdit = new QLineEdit();
 	m_findTextEdit->setPlaceholderText("Find Text");
@@ -49,20 +59,21 @@ TestLogTabPage::TestLogTabPage(TestSuite::TestLog& testLog, TestSuiteTestLogOutp
 	m_findTextEdit->setCompleter(searchCompleter);
 
 	m_findTextButton = new QPushButton(tr("Search <F3>"));
-	//m_findTextButton->setShortcut(Qt::Key_F3);				// Too slow, use usual QAction
+	m_findTextButton->setShortcut(Qt::Key_F3);
 
 	QGridLayout* rightWidgetLayout = new QGridLayout();
 
 	rightWidgetLayout->addWidget(m_outputWidget, 0, 0, 1, 8);
 
 	rightWidgetLayout->addWidget(m_typeCombo, 1, 0);
-	rightWidgetLayout->addWidget(m_prevIssueButton, 1, 1);
-	rightWidgetLayout->addWidget(m_nextIssueButton, 1, 2);
+	rightWidgetLayout->addWidget(m_levelCombo, 1, 1);
+	rightWidgetLayout->addWidget(m_prevIssueButton, 1, 2);
+	rightWidgetLayout->addWidget(m_nextIssueButton, 1, 3);
 
-	rightWidgetLayout->addWidget(m_findTextEdit, 1, 3, 1, 2);
-	rightWidgetLayout->addWidget(m_findTextButton, 1, 5);
+	rightWidgetLayout->addWidget(m_findTextEdit, 1, 4, 1, 2);
+	rightWidgetLayout->addWidget(m_findTextButton, 1, 6);
 
-	rightWidgetLayout->setColumnStretch(6, 100);
+	rightWidgetLayout->setColumnStretch(7, 100);
 
 	//rightWidgetLayout->setColumnStretch(0, 1);
 
@@ -99,20 +110,182 @@ void TestLogTabPage::testingWasFinished(int errorCount)
 
 void TestLogTabPage::prevIssue()
 {
+	assert(m_outputWidget);
 
+	QString regExpVal("\\b(ERR|WRN)\\b");
+
+	//  --
+	//
+	if ((m_lastNavIsNextIssue == true || m_lastNavIsPrevIssue == true) &&
+		m_outputWidget->textCursor() == m_lastNavCursor)
+	{
+		m_lastNavCursor.movePosition(QTextCursor::StartOfLine);
+		m_outputWidget->setTextCursor(m_lastNavCursor);
+	}
+
+	// Find issue
+	//
+	QRegularExpression rx(regExpVal);
+	bool found = m_outputWidget->find(rx, QTextDocument::FindBackward);
+
+	if (found == false)
+	{
+		// Try to find one more time from the end
+		//
+		QTextCursor textCursor = m_outputWidget->textCursor();
+		textCursor.movePosition(QTextCursor::End);
+		m_outputWidget->setTextCursor(textCursor);
+
+		found = m_outputWidget->find(rx, QTextDocument::FindBackward);
+	}
+
+	if (found == true)
+	{
+		// Set cursor int middle of the word, as now it is after selected word and backward find will give the same result
+		//
+		QTextCursor textCursor = m_outputWidget->textCursor();
+		textCursor.movePosition(QTextCursor::PreviousCharacter);
+		m_outputWidget->setTextCursor(textCursor);
+
+		// Hightlight the line
+		//
+		QTextEdit::ExtraSelection highlight;
+		highlight.cursor = m_outputWidget->textCursor();
+		highlight.format.setProperty(QTextFormat::FullWidthSelection, true);
+		highlight.format.setBackground(Qt::yellow);
+
+		QList<QTextEdit::ExtraSelection> extras;
+		extras << highlight;
+
+		m_outputWidget->setExtraSelections(extras);
+
+		// Save this search data
+		//
+		m_lastNavIsPrevIssue = true;
+		m_lastNavIsNextIssue = false;
+		m_lastNavCursor = m_outputWidget->textCursor();
+	}
+
+	return;
 }
 
 void TestLogTabPage::nextIssue()
 {
+	assert(m_outputWidget);
 
+	QString regExpVal("\\b(ERR|WRN)\\b");
+
+	//  --
+	//
+	if (m_lastNavIsPrevIssue == true &&
+		m_outputWidget->textCursor() == m_lastNavCursor)
+	{
+		m_lastNavCursor.movePosition(QTextCursor::EndOfLine);
+		m_outputWidget->setTextCursor(m_lastNavCursor);
+	}
+
+	// Find Issue
+	//
+	QRegularExpression rx(regExpVal);
+	bool found = m_outputWidget->find(rx);
+
+	if (found == false)
+	{
+		// Try to find one more time from the beginning
+		//
+		QTextCursor textCursor = m_outputWidget->textCursor();
+		textCursor.movePosition(QTextCursor::Start);
+		m_outputWidget->setTextCursor(textCursor);
+
+		found = m_outputWidget->find(rx);
+	}
+
+	if (found == true)
+	{
+		// Set cursor int middle of the word, as now it is after selected word and backward find will give the same result
+		//
+		QTextCursor textCursor = m_outputWidget->textCursor();
+		textCursor.clearSelection();
+		m_outputWidget->setTextCursor(textCursor);
+
+		// Hightlight the line
+		//
+		QTextEdit::ExtraSelection highlight;
+		highlight.cursor = m_outputWidget->textCursor();
+		highlight.format.setProperty(QTextFormat::FullWidthSelection, true);
+		highlight.format.setBackground(Qt::yellow);
+
+		QList<QTextEdit::ExtraSelection> extras;
+		extras << highlight;
+
+		m_outputWidget->setExtraSelections(extras);
+
+		// Save this search data
+		//
+		m_lastNavIsPrevIssue = false;
+		m_lastNavIsNextIssue = true;
+		m_lastNavCursor = m_outputWidget->textCursor();
+	}
+
+	return;
 }
 
 void TestLogTabPage::search()
 {
+	assert(m_findTextEdit);
+	assert(m_outputWidget);
 
+	// Get search text
+	//
+	QString searchText = m_findTextEdit->text();
+
+	if (searchText.isEmpty() == true)
+	{
+		m_findTextEdit->setFocus();
+		return;
+	}
+
+	// Update completer
+	//
+	/*
+	if (theSettings.buildSearchCompleter().contains(searchText, Qt::CaseInsensitive) == false)
+	{
+		theSettings.buildSearchCompleter() << searchText;
+
+		QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_findTextEdit->completer()->model());
+		assert(completerModel);
+
+		if (completerModel != nullptr)
+		{
+			completerModel->setStringList(theSettings.buildSearchCompleter());
+		}
+	}
+	*/
+
+	// Find
+	//
+	bool found = m_outputWidget->find(searchText);
+
+	if (found == false)
+	{
+		// Try to find one more time from the documnet start
+		//
+		QTextCursor textCursor = m_outputWidget->textCursor();
+		textCursor.movePosition(QTextCursor::Start);
+		m_outputWidget->setTextCursor(textCursor);
+
+		found = m_outputWidget->find(searchText);
+	}
+
+//	if (found == true)
+//	{
+//		m_outputWidget->setFocus();
+//	}
+
+	return;
 }
 
-void TestLogTabPage::slot_typeChanged(int index)
+void TestLogTabPage::slot_typeChanged(int /*index*/)
 {
 	TestSuite::TestLogItemType type{TestSuite::TestLogItemType::All};
 
@@ -129,6 +302,29 @@ void TestLogTabPage::slot_typeChanged(int index)
 	else
 	{
 		m_typeCombo->setStyleSheet(QString());
+	}
+
+	m_outputWidget->clear();
+	appendLogMessages(m_testLog.items());
+}
+
+void TestLogTabPage::slot_levelChanged(int /*index*/)
+{
+	int level = 0x07;
+
+	QVariant data = m_levelCombo->currentData();
+	if (data.isValid() == true)
+	{
+		level = data.toInt();
+	}
+
+	if (level != 0x07)
+	{
+		m_levelCombo->setStyleSheet("QComboBox { color: red }");
+	}
+	else
+	{
+		m_levelCombo->setStyleSheet(QString());
 	}
 
 	m_outputWidget->clear();
@@ -180,28 +376,37 @@ void TestLogTabPage::appendLogMessages(const std::vector<TestSuite::TestLogItem>
 	QString outputMessagesBuffer;
 	outputMessagesBuffer.reserve(128000);
 
-	TestSuite::TestLogItemType warningLevel{TestSuite::TestLogItemType::All};
+	TestSuite::TestLogItemType showType{TestSuite::TestLogItemType::All};
+	TestSuite::TestLogItemLevel showLevel{TestSuite::TestLogItemLevel::All};
 
 	QVariant data = m_typeCombo->currentData();
 	if (data.isValid() == true)
 	{
-		warningLevel = static_cast<TestSuite::TestLogItemType>(data.toInt());
+		showType = static_cast<TestSuite::TestLogItemType>(data.toInt());
+	}
+
+	data = m_levelCombo->currentData();
+	if (data.isValid() == true)
+	{
+		showLevel = static_cast<TestSuite::TestLogItemLevel>(data.toInt());
 	}
 
 	for (size_t i = 0; i < messages.size(); i++)
 	{
 		const TestSuite::TestLogItem& m = messages[i];
 
-		if (warningLevel != TestSuite::TestLogItemType::All)
+		// Filter by type
+		//
+		if ((static_cast<int>(showType) & static_cast<int>(m.type())) == 0)
 		{
-			if (warningLevel == TestSuite::TestLogItemType::Error && m.isError() == false )
-			{
-				continue;
-			}
-			if (warningLevel == TestSuite::TestLogItemType::Warning && m.isWarning() == false )
-			{
-				continue;
-			}
+			continue;
+		}
+
+		// Filter by level
+		//
+		if ((static_cast<int>(showLevel) & static_cast<int>(m.level())) == 0)
+		{
+			continue;
 		}
 
 		outputMessagesBuffer.append(m.toHtml());
