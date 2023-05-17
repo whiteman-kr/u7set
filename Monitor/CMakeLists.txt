@@ -9,7 +9,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/lib/Ui)
+set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../lib/Ui)
 
 if (MSVC)
   # MSVC warning suppressions
@@ -121,8 +121,14 @@ set (MONITOR_RESOURCES
 	Monitor.qrc
 )
 
+# Add icon
+#
+if (MSVC)
+	list (APPEND MONITOR_RESOURCES ./WinResources/WinResources.rc)
+endif (MSVC)
+
 set (MONITOR_FORMS
-	${CMAKE_SOURCE_DIR}/lib/Ui/DialogSignalInfo.ui
+	${CMAKE_CURRENT_SOURCE_DIR}/../lib/Ui/DialogSignalInfo.ui
 	./Archive/DialogChooseArchiveSignals.ui
 	DialogSettings.ui
 	DialogColumns.ui
@@ -130,7 +136,7 @@ set (MONITOR_FORMS
 
 set(TARGET Monitor)
 
-add_executable(${TARGET}
+add_executable(${TARGET} WIN32
 	${MONITOR_FORMS}
 	${MONITOR_SOURCES}
 	${MONITOR_RESOURCES}

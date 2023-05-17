@@ -12,7 +12,15 @@ set(CMAKE_AUTORCC ON)
 find_package(Qt6 REQUIRED COMPONENTS Core Network Qml)
 qt_standard_project_setup()
 
-add_executable(UalTester
+# Add icon
+#
+if (MSVC)
+	set (WINDOWS_RESOURCES ./WinResources/WinResources.rc)
+endif (MSVC)
+
+set(TARGET UalTester)
+
+add_executable(${TARGET}
 	../../lib/ConstStrings.h
 	CmdLineParam.cpp
 	CmdLineParam.h
@@ -31,9 +39,8 @@ add_executable(UalTester
 	UalTester.h
 
 	Resources.qrc
+	${WINDOWS_RESOURCES}
 )
-
-set(TARGET UalTester)
 
 set_target_properties(${TARGET} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 

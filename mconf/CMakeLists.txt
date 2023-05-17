@@ -14,6 +14,12 @@ qt_standard_project_setup()
 
 set(TARGET mconf)
 
+# Add icon
+#
+if (MSVC)
+	set (WINDOWS_RESOURCES ./WinResources/WinResources.rc)
+endif (MSVC)
+
 add_executable(${TARGET}
 	../lib/Configurator.cpp
 	../lib/Configurator.h
@@ -33,6 +39,7 @@ add_executable(${TARGET}
 	SettingsForm.h
 
 	diagtabpage.ui
+	${WINDOWS_RESOURCES}
 )
 
 set_target_properties(${TARGET} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
@@ -69,8 +76,8 @@ target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib HardwareLib)
 if(MSVC)
 	add_library(ftdi STATIC IMPORTED)
 	set_target_properties(ftdi PROPERTIES
-	  IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/mconf/ftdi64/ftd2xx.lib"
-	  INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/mconf/ftdi"
+	  IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/ftdi64/ftd2xx.lib"
+	  INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/ftdi"
     )
 
     target_link_libraries(${TARGET} PRIVATE ftdi)

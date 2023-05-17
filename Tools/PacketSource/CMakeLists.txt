@@ -14,6 +14,12 @@ qt_standard_project_setup()
 
 set(TARGET PacketSource)
 
+# Add icon
+#
+if (MSVC)
+	set (WINDOWS_RESOURCES ./WinResources/WinResources.rc)
+endif (MSVC)
+
 add_executable(${TARGET}
 	../../lib/DataSource.cpp
 	../../lib/DataSource.h
@@ -57,6 +63,7 @@ add_executable(${TARGET}
 	UalTesterServer.h
 
 	resources.qrc
+	${WINDOWS_RESOURCES}
 )
 
 set_target_properties(${TARGET} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})

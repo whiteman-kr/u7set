@@ -9,7 +9,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/lib/Ui)
+set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../lib/Ui)
 
 if (MSVC)
   # MSVC warning suppressions
@@ -299,7 +299,7 @@ set (U7_RESOURCES
 )
 
 set (U7_FORMS
-	${CMAKE_SOURCE_DIR}/lib/Ui/DialogSignalInfo.ui
+	${CMAKE_CURRENT_SOURCE_DIR}/../lib/Ui/DialogSignalInfo.ui
 	CreateProjectDialog.ui
 	CreateUserDialogDialog.ui
 	DialogSettings.ui
@@ -328,12 +328,19 @@ set (U7_FORMS
 	DialogTuningClients.ui
 )
 
+# Add icon
+#
+if (MSVC)
+	set (WINDOWS_RESOURCES ./WinResources/WinResources.rc)
+endif (MSVC)
+
 set(TARGET u7)
 
 add_executable(${TARGET}
 	${U7_FORMS}
 	${U7_SOURCES}
 	${U7_RESOURCES}
+	${WINDOWS_RESOURCES}
 )
 
 set_target_properties(${TARGET} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})

@@ -100,12 +100,19 @@ set (TC_FORMS
 	TuningSignalInfo.ui
 )
 
+# Add icon
+#
+if (MSVC)
+	set (WINDOWS_RESOURCES ./WinResources/WinResources.rc)
+endif (MSVC)
+
 set(TARGET TuningClient)
 
 add_executable(${TARGET}
 	${TC_FORMS}
 	${TC_SOURCES}
 	${TC_RESOURCES}
+	${WINDOWS_RESOURCES}
 )
 
 set_target_properties(${TARGET} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})

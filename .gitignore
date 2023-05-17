@@ -16,6 +16,7 @@ GetGitProjectVersion
 .vs
 Scripts/out
 Test/build-*/**
+*.aps
 Test/bin/**
 Metrology/Metrology.db
 Tools/build-*/**

@@ -14,6 +14,12 @@ qt_standard_project_setup()
 
 set(TARGET TestSuite)
 
+# Add icon
+#
+if (MSVC)
+	set (WINDOWS_RESOURCES ./WinResources/WinResources.rc)
+endif (MSVC)
+
 add_executable(${TARGET}
 	../lib/CodeEditor.cpp
 	../lib/CodeEditor.h
@@ -41,6 +47,7 @@ add_executable(${TARGET}
 	TestViewTabPage.cpp
 
 	Resources.qrc
+	${WINDOWS_RESOURCES}
 )
 
 set_target_properties(${TARGET} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
