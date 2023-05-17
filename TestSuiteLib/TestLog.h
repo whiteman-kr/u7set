@@ -3,22 +3,14 @@
 
 namespace TestSuite
 {
-	enum class TestLogItemLevel
-	{
-		Level0 = 0x01,
-		Level1 = 0x02,
-		Level2 = 0x04,
-		All = 0x07
-	};
-
 	class ITestLog
 	{
 	public:
 		virtual ~ITestLog() = default;
-		virtual void writeError(const QString& text, TestLogItemLevel level, int tag) = 0;
-		virtual void writeWarning(const QString& text, TestLogItemLevel level, int tag) = 0;
-		virtual void writeMessage(const QString& text, TestLogItemLevel level, int tag) = 0;
-		virtual void writeText(const QString& text, TestLogItemLevel level, int tag) = 0;
+		virtual void writeError(const QString& text, const QString& tag) = 0;
+		virtual void writeWarning(const QString& text, const QString& tag) = 0;
+		virtual void writeMessage(const QString& text, const QString& tag) = 0;
+		virtual void writeText(const QString& text, const QString& tag) = 0;
 	};
 
 	enum class TestLogItemType
@@ -34,7 +26,7 @@ namespace TestSuite
 	{
 	public:
 		TestLogItem() = default;
-		TestLogItem(int no, TestLogItemType type, const QString& text, TestLogItemLevel level, int tag);
+		TestLogItem(int no, TestLogItemType type, const QString& text, const QString& tag);
 
 		QString toText() const;
 		QString toHtml() const;
@@ -47,15 +39,12 @@ namespace TestSuite
 		bool isWarning() const;
 		bool isMessage() const;
 
-		TestLogItemLevel level() const;
-
 	private:
 		int m_no{0};
 		QDateTime m_dateTime;
 		TestLogItemType m_type{TestLogItemType::Message};
 		QString m_message;
-		TestLogItemLevel m_level{TestLogItemLevel::Level0};
-		int m_tag{0};
+		QString m_tag;
 
 //		QString m_file;
 //		int m_fileLine = 0;
@@ -79,10 +68,10 @@ namespace TestSuite
 
 		void clear();
 
-		void writeError(const QString& text, TestLogItemLevel level, int tag) override;
-		void writeWarning(const QString& text, TestLogItemLevel level, int tag) override;
-		void writeMessage(const QString& text, TestLogItemLevel level, int tag) override;
-		void writeText(const QString& text, TestLogItemLevel level, int tag) override;
+		void writeError(const QString& text, const QString& tag) override;
+		void writeWarning(const QString& text, const QString& tag) override;
+		void writeMessage(const QString& text, const QString& tag) override;
+		void writeText(const QString& text, const QString& tag) override;
 
 		std::vector<TestLogItem> items() const;
 

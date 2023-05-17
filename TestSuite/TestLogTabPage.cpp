@@ -35,15 +35,6 @@ TestLogTabPage::TestLogTabPage(TestSuite::TestLog& testLog, TestSuiteTestLogOutp
 	m_typeCombo->addItem("Warnings",		static_cast<int>(TestSuite::TestLogItemType::Warning));
 	connect(m_typeCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TestLogTabPage::slot_typeChanged);
 
-	m_levelCombo = new QComboBox();
-	m_levelCombo->addItem("All levels",	static_cast<int>(TestSuite::TestLogItemLevel::All));
-	m_levelCombo->addItem("Level 0&1",	static_cast<int>(TestSuite::TestLogItemLevel::Level0) | static_cast<int>(TestSuite::TestLogItemLevel::Level1));
-	m_levelCombo->addItem("Level 1&2",	static_cast<int>(TestSuite::TestLogItemLevel::Level1) | static_cast<int>(TestSuite::TestLogItemLevel::Level2));
-	m_levelCombo->addItem("Level 0",	static_cast<int>(TestSuite::TestLogItemLevel::Level0));
-	m_levelCombo->addItem("Level 1",	static_cast<int>(TestSuite::TestLogItemLevel::Level1));
-	m_levelCombo->addItem("Level 2",	static_cast<int>(TestSuite::TestLogItemLevel::Level2));
-	connect(m_levelCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TestLogTabPage::slot_levelChanged);
-
 	m_prevIssueButton = new QPushButton(tr("Prev Issue <Shift+F6>"));
 	m_prevIssueButton->setShortcut(Qt::SHIFT | Qt::Key_F6);
 
@@ -66,14 +57,13 @@ TestLogTabPage::TestLogTabPage(TestSuite::TestLog& testLog, TestSuiteTestLogOutp
 	rightWidgetLayout->addWidget(m_outputWidget, 0, 0, 1, 8);
 
 	rightWidgetLayout->addWidget(m_typeCombo, 1, 0);
-	rightWidgetLayout->addWidget(m_levelCombo, 1, 1);
-	rightWidgetLayout->addWidget(m_prevIssueButton, 1, 2);
-	rightWidgetLayout->addWidget(m_nextIssueButton, 1, 3);
+	rightWidgetLayout->addWidget(m_prevIssueButton, 1, 1);
+	rightWidgetLayout->addWidget(m_nextIssueButton, 1, 2);
 
-	rightWidgetLayout->addWidget(m_findTextEdit, 1, 4, 1, 2);
-	rightWidgetLayout->addWidget(m_findTextButton, 1, 6);
+	rightWidgetLayout->addWidget(m_findTextEdit, 1, 3, 1, 2);
+	rightWidgetLayout->addWidget(m_findTextButton, 1, 4);
 
-	rightWidgetLayout->setColumnStretch(7, 100);
+	rightWidgetLayout->setColumnStretch(6, 100);
 
 	//rightWidgetLayout->setColumnStretch(0, 1);
 
@@ -308,29 +298,6 @@ void TestLogTabPage::slot_typeChanged(int /*index*/)
 	appendLogMessages(m_testLog.items());
 }
 
-void TestLogTabPage::slot_levelChanged(int /*index*/)
-{
-	int level = 0x07;
-
-	QVariant data = m_levelCombo->currentData();
-	if (data.isValid() == true)
-	{
-		level = data.toInt();
-	}
-
-	if (level != 0x07)
-	{
-		m_levelCombo->setStyleSheet("QComboBox { color: red }");
-	}
-	else
-	{
-		m_levelCombo->setStyleSheet(QString());
-	}
-
-	m_outputWidget->clear();
-	appendLogMessages(m_testLog.items());
-}
-
 void TestLogTabPage::createActions()
 {
 	m_findNextAction = new QAction(tr("Find Text"), this);
@@ -377,18 +344,11 @@ void TestLogTabPage::appendLogMessages(const std::vector<TestSuite::TestLogItem>
 	outputMessagesBuffer.reserve(128000);
 
 	TestSuite::TestLogItemType showType{TestSuite::TestLogItemType::All};
-	TestSuite::TestLogItemLevel showLevel{TestSuite::TestLogItemLevel::All};
 
 	QVariant data = m_typeCombo->currentData();
 	if (data.isValid() == true)
 	{
 		showType = static_cast<TestSuite::TestLogItemType>(data.toInt());
-	}
-
-	data = m_levelCombo->currentData();
-	if (data.isValid() == true)
-	{
-		showLevel = static_cast<TestSuite::TestLogItemLevel>(data.toInt());
 	}
 
 	for (size_t i = 0; i < messages.size(); i++)
@@ -398,13 +358,6 @@ void TestLogTabPage::appendLogMessages(const std::vector<TestSuite::TestLogItem>
 		// Filter by type
 		//
 		if ((static_cast<int>(showType) & static_cast<int>(m.type())) == 0)
-		{
-			continue;
-		}
-
-		// Filter by level
-		//
-		if ((static_cast<int>(showLevel) & static_cast<int>(m.level())) == 0)
 		{
 			continue;
 		}

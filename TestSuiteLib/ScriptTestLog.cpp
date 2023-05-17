@@ -7,81 +7,23 @@ namespace TestSuite
 	{
 	}
 
-	void ScriptTestLog::writeError(const QString& message, int level, int tag)
+	void ScriptTestLog::writeError(QString message, QString tag)
 	{
-		TestLogItemLevel l{TestLogItemLevel::Level0};
-		switch (level)
-		{
-		case 0: l = TestLogItemLevel::Level0; break;
-		case 1: l = TestLogItemLevel::Level1; break;
-		case 2: l = TestLogItemLevel::Level2; break;
-		}
-		m_testLog.writeError(message, l, tag);
+		m_testLog.writeError(message, tag);
 	}
 
-	void ScriptTestLog::writeWarning(const QString& message, int level, int tag)
+	void ScriptTestLog::writeWarning(QString message, QString tag)
 	{
-		TestLogItemLevel l{TestLogItemLevel::Level0};
-		switch (level)
-		{
-		case 0: l = TestLogItemLevel::Level0; break;
-		case 1: l = TestLogItemLevel::Level1; break;
-		case 2: l = TestLogItemLevel::Level2; break;
-		}
-		m_testLog.writeWarning(message, l, tag);
+		m_testLog.writeWarning(message, tag);
 	}
 
-	void ScriptTestLog::writeWarningLevel0(const QString& message, int tag)
+	void ScriptTestLog::writeMessage(QString message, QString tag)
 	{
-		m_testLog.writeWarning(message, TestLogItemLevel::Level0, tag);
+		m_testLog.writeMessage(message, tag);
 	}
 
-	void ScriptTestLog::writeWarningLevel1(const QString& message, int tag)
+	void ScriptTestLog::writeText(QString message, QString tag)
 	{
-		m_testLog.writeWarning(message, TestLogItemLevel::Level1, tag);
-	}
-
-	void ScriptTestLog::writeWarningLevel2(const QString& message, int tag)
-	{
-		m_testLog.writeWarning(message, TestLogItemLevel::Level2, tag);
-	}
-
-	void ScriptTestLog::writeMessage(const QString& message, int level, int tag)
-	{
-		TestLogItemLevel l{TestLogItemLevel::Level0};
-		switch (level)
-		{
-		case 0: l = TestLogItemLevel::Level0; break;
-		case 1: l = TestLogItemLevel::Level1; break;
-		case 2: l = TestLogItemLevel::Level2; break;
-		}
-		m_testLog.writeMessage(message, l, tag);
-	}
-
-	void ScriptTestLog::writeMessageLevel0(const QString& message, int tag)
-	{
-		m_testLog.writeMessage(message, TestLogItemLevel::Level0, tag);
-	}
-
-	void ScriptTestLog::writeMessageLevel1(const QString& message, int tag)
-	{
-		m_testLog.writeMessage(message, TestLogItemLevel::Level1, tag);
-	}
-
-	void ScriptTestLog::writeMessageLevel2(const QString& message, int tag)
-	{
-		m_testLog.writeMessage(message, TestLogItemLevel::Level2, tag);
-	}
-
-	void ScriptTestLog::writeText(const QString& message, int level, int tag)
-	{
-		TestLogItemLevel l{TestLogItemLevel::Level0};
-		switch (level)
-		{
-		case 0: l = TestLogItemLevel::Level0; break;
-		case 1: l = TestLogItemLevel::Level1; break;
-		case 2: l = TestLogItemLevel::Level2; break;
-		}
-		m_testLog.writeText(message, l, tag);
+		m_testLog.writeText(message, tag);
 	}
 }

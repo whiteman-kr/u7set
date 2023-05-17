@@ -3,12 +3,11 @@
 
 namespace TestSuite
 {
-	TestLogItem::TestLogItem(int no, TestLogItemType type, const QString& text, TestLogItemLevel level, int tag)	:
+	TestLogItem::TestLogItem(int no, TestLogItemType type, const QString& text, const QString& tag):
 		m_no(no),
 		m_dateTime(QDateTime::currentDateTime()),
 		m_type(type),
 		m_message(text),
-		m_level(level),
 		m_tag(tag)
 	{
 	}
@@ -121,8 +120,7 @@ namespace TestSuite
 		}
 
 		result << m_message;
-		result << QString::number(static_cast<int>(m_level));
-		result << QString::number(m_tag);
+		result << m_tag;
 
 		return result;
 	}
@@ -143,7 +141,7 @@ namespace TestSuite
 		}
 
 		int version = strings[0].toInt();
-		if (version != 1 || strings.size() != 7)
+		if (version != 1 || strings.size() != 6)
 		{
 			// Unsupported version
 			*ok = false;
@@ -164,8 +162,7 @@ namespace TestSuite
 					result.m_type = TestLogItemType::Error;
 
 		result.m_message = strings[4];
-		result.m_level = static_cast<TestLogItemLevel>(strings[5].toInt());
-		result.m_tag = strings[6].toInt();
+		result.m_tag = strings[5];
 
 		*ok = true;
 		return result;
@@ -189,11 +186,6 @@ namespace TestSuite
 		return m_type == TestLogItemType::Message;
 	}
 
-	TestLogItemLevel TestLogItem::level() const
-	{
-		return m_level;
-	}
-
 	TestLog::TestLog(ITestLogOutput* logOutput):
 		m_logOutput(logOutput)
 	{
@@ -208,7 +200,7 @@ namespace TestSuite
 		m_items.clear();
 	}
 
-	void TestLog::writeError(const QString& text, TestLogItemLevel level, int tag)
+	void TestLog::writeError(const QString& text, const QString& tag)
 	{
 		if (m_logOutput == nullptr)
 		{
@@ -216,14 +208,14 @@ namespace TestSuite
 			return;
 		}
 
-		TestLogItem ti(no++, TestLogItemType::Error, text, level, tag);
+		TestLogItem ti(no++, TestLogItemType::Error, text, tag);
 		m_logOutput->logItemArrived(ti);
 
 		QWriteLocker l(&m_itemsLock);
 		m_items.push_back(ti);
 	}
 
-	void TestLog::writeWarning(const QString& text, TestLogItemLevel level, int tag)
+	void TestLog::writeWarning(const QString& text, const QString& tag)
 	{
 		if (m_logOutput == nullptr)
 		{
@@ -231,14 +223,14 @@ namespace TestSuite
 			return;
 		}
 
-		TestLogItem ti(no++, TestLogItemType::Warning, text, level, tag);
+		TestLogItem ti(no++, TestLogItemType::Warning, text, tag);
 		m_logOutput->logItemArrived(ti);
 
 		QWriteLocker l(&m_itemsLock);
 		m_items.push_back(ti);
 	}
 
-	void TestLog::writeMessage(const QString& text, TestLogItemLevel level, int tag)
+	void TestLog::writeMessage(const QString& text, const QString& tag)
 	{
 		if (m_logOutput == nullptr)
 		{
@@ -246,14 +238,14 @@ namespace TestSuite
 			return;
 		}
 
-		TestLogItem ti(no++, TestLogItemType::Message, text, level, tag);
+		TestLogItem ti(no++, TestLogItemType::Message, text, tag);
 		m_logOutput->logItemArrived(ti);
 
 		QWriteLocker l(&m_itemsLock);
 		m_items.push_back(ti);
 	}
 
-	void TestLog::writeText(const QString& text, TestLogItemLevel level, int tag)
+	void TestLog::writeText(const QString& text, const QString& tag)
 	{
 		if (m_logOutput == nullptr)
 		{
@@ -261,7 +253,7 @@ namespace TestSuite
 			return;
 		}
 
-		TestLogItem ti(-1, TestLogItemType::Text, text, level, tag);
+		TestLogItem ti(-1, TestLogItemType::Text, text, tag);
 		m_logOutput->logItemArrived(ti);
 
 		QWriteLocker l(&m_itemsLock);
