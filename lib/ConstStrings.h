@@ -310,8 +310,10 @@ namespace XmlAttribute
 	inline const QString SIGNAL_LISTS_COUNT("SignalListsCount");
 
 	inline const QString SYSTEM_ID("SystemID");
-	inline const QString GATEWAY_IP1("GatewayIP1");
-	inline const QString GATEWAY_IP2("GatewayIP2");
+	inline const QString LOCAL_GATEWAY_IP1("LocalGatewayIP1");
+	inline const QString REMOTE_GATEWAY_IP1("RemoteGatewayIP1");
+	inline const QString LOCAL_GATEWAY_IP2("LocalGatewayIP2");
+	inline const QString REMOTE_GATEWAY_IP2("RemoteGatewayIP2");
 	inline const QString LISTS_VERSION("ListsVersion");
 	inline const QString TIME_TYPE("TimeType");
 	inline const QString PERIOD("Period");

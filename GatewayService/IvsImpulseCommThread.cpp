@@ -10,32 +10,37 @@ namespace Gateway
 	// --------------------------------------------------------------------------------------
 
 	IvsImpulseCommThreadWorker::IvsImpulseCommThreadWorker(IvsImpulseHandler& handler) :
+		m_log(handler.m_log),
 		m_gateway(handler.m_gateway),
 		m_appSignals(handler.m_appSignals),
 		m_states(handler.m_states),
 		m_signalStatesUpdated(handler.m_signalStatesUpdated),
 		m_lists(handler.m_lists),
-		m_timer(this),
-		m_socket(this)
+		m_timer(this)
 	{
-		HostAddressPort ip = handler.m_gateway->gatewayIP1();
+		HostAddressPort localIP = handler.m_gateway->localGatewayIP1();
+		HostAddressPort remoteIP = handler.m_gateway->remoteGatewayIP1();
 
-		if (ip.isSet() == true)
+		if (localIP.isSet() == true && remoteIP.isSet() == true)
 		{
-			m_channelsInfo.emplace_back(ip);
+			m_channelsInfo.emplace_back(localIP, remoteIP);
 		}
 
-		ip = handler.m_gateway->gatewayIP2();
+		localIP = handler.m_gateway->localGatewayIP2();
+		remoteIP = handler.m_gateway->remoteGatewayIP2();
 
-		if (ip.isSet() == true)
+		if (localIP.isSet() == true && remoteIP.isSet() == true)
 		{
-			m_channelsInfo.emplace_back(ip);
+			m_channelsInfo.emplace_back(localIP, remoteIP);
 		}
 	}
 
 	void IvsImpulseCommThreadWorker::onSendStateChanges()
 	{
-		sendStateChanges();
+		if (isWorkableSocketExists() == true)
+		{
+			sendStateChanges();
+		}
 	}
 
 	void IvsImpulseCommThreadWorker::onThreadStarted()
@@ -56,8 +61,44 @@ namespace Gateway
 
 	void IvsImpulseCommThreadWorker::onTimer()
 	{
-		sendStateChanges();			// at first flush all existing state changes
-		periodicSendStates();
+		bool workableSocketExists = tryCreateSockets();
+
+		if (workableSocketExists == true)
+		{
+			sendStateChanges();			// at first flush all existing state changes
+			periodicSendStates();
+		}
+	}
+
+	bool IvsImpulseCommThreadWorker::tryCreateSockets()
+	{
+		bool workableSocketExists = false;
+
+		for(GatewayChannelInfo& ci : m_channelsInfo)
+		{
+			if (ci.socket != nullptr)
+			{
+				workableSocketExists = true;
+				continue;
+			}
+
+			workableSocketExists |= ci.tryCreateSocket(m_log);
+		}
+
+		return workableSocketExists;
+	}
+
+	bool IvsImpulseCommThreadWorker::isWorkableSocketExists() const
+	{
+		for(auto& ci : m_channelsInfo)
+		{
+			if (ci.socket != nullptr)
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	void IvsImpulseCommThreadWorker::periodicSendStates()
@@ -99,15 +140,32 @@ namespace Gateway
 
 			for(auto& ci : m_channelsInfo)
 			{
-				m_socket.writeDatagram(m_sendBuffer, packetSize,
-									   ci.gatewayIP.address(), ci.gatewayIP.port());
+				if (ci.socket == nullptr)
+				{
+					continue;
+				}
+
+				qint64 res = ci.socket->writeDatagram(m_sendBuffer, packetSize,
+									   ci.remoteGatewayIP.address(), ci.remoteGatewayIP.port());
+
+				if (res == -1)
+				{
+					DEBUG_LOG_ERR(m_log, QString("Error send packet to %1 via %2 (%3). Socket closed.").
+											arg(ci.remoteGatewayIP.addressPortStr()).
+											arg(ci.localGatewayIP.addressPortStr()).
+											arg(ci.socket->errorString()));
+					ci.clearSocket();
+
+					continue;
+				}
 
 				ci.statesPacketsSentCount++;
 
-				if ((ci.statesPacketsSentCount % 10) == 0)
+				if ((ci.statesPacketsSentCount % 20) == 0)
 				{
-					qDebug() << C_STR(QString("State packets send to %1: %3").
-									  arg(ci.gatewayIP.addressPortStr()).
+					qDebug() << C_STR(QString("State packets send to %1 via %2: %3").
+									  arg(ci.remoteGatewayIP.addressPortStr()).
+									  arg(ci.localGatewayIP.addressPortStr()).
 									  arg(ci.statesPacketsSentCount));
 				}
 			}
@@ -124,6 +182,11 @@ namespace Gateway
 
 		for(IvsImpulseListInfoShared& li : m_lists)
 		{
+			if (li->hasStateChanges() == false)
+			{
+				continue;
+			}
+
 			IvsImpulsePacketHeader& header = packet->header;
 
 			header.systemID = static_cast<quint8>(m_gateway->systemID());
@@ -163,20 +226,33 @@ namespace Gateway
 
 			for(auto& ci : m_channelsInfo)
 			{
-				m_socket.writeDatagram(m_sendBuffer, packetSize,
-									   ci.gatewayIP.address(), ci.gatewayIP.port());
+				TEST_PTR_CONTINUE(ci.socket);
+
+				quint64 res = ci.socket->writeDatagram(m_sendBuffer, packetSize,
+									   ci.remoteGatewayIP.address(), ci.remoteGatewayIP.port());
+
+				if (res == -1)
+				{
+					DEBUG_LOG_ERR(m_log, QString("Error send packet to %1 via %2 (%3). Socket closed.").
+											arg(ci.remoteGatewayIP.addressPortStr()).
+											arg(ci.localGatewayIP.addressPortStr()).
+											arg(ci.socket->errorString()));
+					ci.clearSocket();
+
+					continue;
+				}
 
 				ci.statesPacketsSentCount++;
 
-				if ((ci.statesPacketsSentCount % 10) == 0)
+				if ((ci.statesPacketsSentCount % 20) == 0)
 				{
-					qDebug() << C_STR(QString("State packets send to %1: %3").
-									  arg(ci.gatewayIP.addressPortStr()).
+					qDebug() << C_STR(QString("State changes packets send to %1 via %2: %3").
+									  arg(ci.remoteGatewayIP.addressPortStr()).
+									  arg(ci.localGatewayIP.addressPortStr()).
 									  arg(ci.statesPacketsSentCount));
 				}
 			}
 		}
-
 	}
 
 	int IvsImpulseCommThreadWorker::writeStatesToPacket(IvsImpulseStatesPacket* packet,
@@ -440,6 +516,58 @@ namespace Gateway
 		stateD.notValid = state.isValid() == true ? 0 : 1;
 
 		return stateD;
+	}
+
+	// --------------------------------------------------------------------------------------
+	//
+	//  IvsImpulseCommThreadWorker::GatewayChannelInfo struct implementation
+	//
+	// --------------------------------------------------------------------------------------
+
+	bool IvsImpulseCommThreadWorker::GatewayChannelInfo::tryCreateSocket(CircularLoggerShared log)
+	{
+		if (socket != nullptr)
+		{
+			Q_ASSERT(false);
+			return true;			// Ok!
+		}
+
+		if (localGatewayIP.isSet() == false ||
+			remoteGatewayIP.isSet() == false)
+		{
+			return false;
+		}
+
+		qint64 now = QDateTime::currentMSecsSinceEpoch();
+
+		if (now - prevTryCreateSocketTime < TRY_CREATE_SOCKET_INTERVAL_MS)
+		{
+			return false;
+		}
+
+		prevTryCreateSocketTime = now;
+
+		bool result = false;
+
+		socket = new QUdpSocket;
+
+		result = socket->bind(localGatewayIP.address(), localGatewayIP.port(), QAbstractSocket::ShareAddress);
+
+		if (result == true)
+		{
+			DEBUG_LOG_MSG(log, QString("Socket created and bound to %1 (remote gateway IP is %2)").
+										arg(localGatewayIP.addressPortStr()).
+										arg(remoteGatewayIP.addressPortStr()));
+		}
+		else
+		{
+			DEBUG_LOG_ERR(log, QString("Socket can't bind to %1").arg(localGatewayIP.addressPortStr()));
+
+			delete socket;
+			socket = nullptr;
+		}
+
+		return result;
 	}
 
 	// --------------------------------------------------------------------------------------

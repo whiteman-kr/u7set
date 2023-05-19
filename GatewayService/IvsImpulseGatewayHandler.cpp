@@ -11,8 +11,9 @@ namespace Gateway
 	IvsImpulseHandler::IvsImpulseHandler(const SoftwareInfo& swInfo,
 										 const GatewayServiceSettings& settings,
 										 IvsImpulseGatewayShared gateway,
-										 const AppSignals& appSignals) :
-		Handler(swInfo, settings),
+										 const AppSignals& appSignals,
+										 CircularLoggerShared log) :
+		Handler(swInfo, settings, log),
 		m_softwareInfo(swInfo),
 		m_appDataService1(settings.appDataService1.address),
 		m_appDataService2(settings.appDataService2.address),
