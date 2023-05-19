@@ -14,7 +14,9 @@ namespace TuningTags
 	static const QString tag_Counter = "Counter";
 	static const QString tag_SchemasTab = "SchemasTab";
 	static const QString tag_Value = "Value";
-	static const QString tag_Values = "Values";
+    static const QString tag_Values = "Values";
+    static const QString tag_SignalHashes = "SignalHashes";
+    static const QString tag_SourceHashes = "SourceHashes";
 
 	static const QString tag_All = "All";
 	static const QString tag_Analog = "Analog";
@@ -691,7 +693,43 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 				continue;
 			}
 
-			if (tagName == TuningTags::tag_Tree || tagName == TuningTags::tag_Tab || tagName == TuningTags::tag_Button || tagName == TuningTags::tag_Counter || tagName == TuningTags::tag_SchemasTab)
+            if (source() != Source::User &&
+                tagName == TuningTags::tag_SignalHashes)
+            {
+                QByteArray data = QByteArray::fromBase64(reader.readElementText().toUtf8());
+
+                QDataStream stream(data);
+                m_signalsHashes.clear();
+
+                Hash hash;
+                while(stream.atEnd() == false)
+                {
+                    stream >> hash;
+                    m_signalsHashes.push_back(hash);
+                }
+
+                continue;
+            }
+
+            if (source() != Source::User &&
+                tagName == TuningTags::tag_SourceHashes)
+            {
+                QByteArray data = QByteArray::fromBase64(reader.readElementText().toUtf8());
+
+                QDataStream stream(data);
+                m_equipmentHashes.clear();
+
+                Hash hash;
+                while(stream.atEnd() == false)
+                {
+                    stream >> hash;
+                    m_equipmentHashes.push_back(hash);
+                }
+
+                continue;
+            }
+
+            if (tagName == TuningTags::tag_Tree || tagName == TuningTags::tag_Tab || tagName == TuningTags::tag_Button || tagName == TuningTags::tag_Counter || tagName == TuningTags::tag_SchemasTab)
 			{
 				TuningFilter::InterfaceType filterType = TuningFilter::InterfaceType::Tree;
 
@@ -737,21 +775,19 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 	return true;
 }
 
-bool TuningFilter::save(QXmlStreamWriter& writer, bool filterBySourceType, Source saveSourceType) const
+bool TuningFilter::save(QXmlStreamWriter& writer, Source saveSourceType) const
 {
 	if (isRoot() == true)
 	{
 		writer.writeStartElement("Root");
 	}
 	else
-	{
-		if (filterBySourceType == true)
-		{
-			if (saveSourceType != source())
-			{
-				return true;
-			}
-		}
+    {
+        if (saveSourceType != Source::All &&
+            saveSourceType != source())
+        {
+            return true;
+        }
 
 		if (isTree() == true)
 		{
@@ -853,18 +889,63 @@ bool TuningFilter::save(QXmlStreamWriter& writer, bool filterBySourceType, Sourc
 	writer.writeAttribute(TuningTags::prop_ColumnValid, columnValid() ? TuningTags::tag_True : TuningTags::tag_False);
 	writer.writeAttribute(TuningTags::prop_ColumnOutOfRange, columnOutOfRange() ? TuningTags::tag_True : TuningTags::tag_False);
 
-	writer.writeStartElement(TuningTags::tag_Values);
+    // Write values
+    //
+    writer.writeStartElement(TuningTags::tag_Values);
 
 	std::vector <TuningFilterSignal> valuesList = getFilterSignals();
 	for (const TuningFilterSignal& v : valuesList)
 	{
 		v.save(writer);
 	}
+
 	writer.writeEndElement();
 
-	for (auto f : m_childFilters)
+    // Write Sinals hashes
+    //
+    if (source() != Source::User)
+    {
+        writer.writeStartElement(TuningTags::tag_SignalHashes);
+
+        QByteArray data;
+        data.reserve(static_cast<int>(m_signalsHashes.size()) * sizeof(Hash));
+
+        QDataStream stream(&data, QIODeviceBase::WriteOnly);
+        for (Hash hash : m_signalsHashes)
+        {
+            stream << hash;
+        }
+
+        writer.writeCharacters(data.toBase64());
+
+        writer.writeEndElement();
+    }
+
+    // Write equipment hashes
+    //
+    if (source() != Source::User)
+    {
+        writer.writeStartElement(TuningTags::tag_SourceHashes);
+
+        QByteArray data;
+        data.reserve(static_cast<int>(m_equipmentHashes.size()) * sizeof(Hash));
+
+        QDataStream stream(&data, QIODeviceBase::WriteOnly);
+        for (Hash hash : m_equipmentHashes)
+        {
+            stream << hash;
+        }
+
+        writer.writeCharacters(data.toBase64());
+
+        writer.writeEndElement();
+    }
+
+    // Call write for all children
+    //
+    for (const auto& f : m_childFilters)
 	{
-		f->save(writer, filterBySourceType, saveSourceType);
+        f->save(writer, saveSourceType);
 	}
 
 	writer.writeEndElement();
@@ -1230,7 +1311,7 @@ void TuningFilter::setHasDiscreteCounter(bool value)
 QString TuningFilter::customAppSignalIDMask() const
 {
 	QString result;
-	for (auto s : m_customAppSignalIDMasks)
+    for (const auto& s : m_customAppSignalIDMasks)
 	{
 		result += s + ';';
 	}
@@ -1255,7 +1336,7 @@ void TuningFilter::setCustomAppSignalIDMask(const QString& value)
 QString TuningFilter::equipmentIDMask() const
 {
 	QString result;
-	for (auto s : m_equipmentIDMasks)
+    for (const auto& s : m_equipmentIDMasks)
 	{
 		result += s + ';';
 	}
@@ -1279,7 +1360,7 @@ void TuningFilter::setEquipmentIDMask(const QString& value)
 QString TuningFilter::appSignalIDMask() const
 {
 	QString result;
-	for (auto s : m_appSignalIDMasks)
+    for (const auto& s : m_appSignalIDMasks)
 	{
 		result += s + ';';
 	}
@@ -1303,7 +1384,7 @@ void TuningFilter::setAppSignalIDMask(const QString& value)
 QString TuningFilter::appSignalTags() const
 {
 	QString result;
-	for (auto s : m_appSignalTags)
+    for (const auto& s : m_appSignalTags)
 	{
 		result += s + ';';
 	}
@@ -1406,7 +1487,7 @@ void TuningFilter::setCounterType(CounterType type)
 QString TuningFilter::tags() const
 {
 	QString result;
-	for (auto s : m_tags)
+    for (const auto& s : m_tags)
 	{
 		result += s + ';';
 	}
@@ -1434,7 +1515,7 @@ const QStringList& TuningFilter::tagsList() const
 
 bool TuningFilter::hasAnyTag(const QStringList& tags) const
 {
-	for (auto tag : tags)
+    for (const auto& tag : tags)
 	{
 		if (m_tags.contains(tag) == true)
 		{
@@ -1882,7 +1963,7 @@ void TuningFilter::copy(const TuningFilter& That)
 	m_signalsHashes = That.m_signalsHashes;
 
 
-	for (auto f : That.m_childFilters)
+    for (const auto& f : That.m_childFilters)
 	{
 		TuningFilter* fi = f.get();
 
@@ -2082,7 +2163,7 @@ bool TuningFilterStorage::load(const QByteArray &data, QString* errorCode)
     return !reader.hasError();
 }
 
-bool TuningFilterStorage::save(QByteArray& data)
+bool TuningFilterStorage::save(QByteArray& data) const
 {
 	QXmlStreamWriter writer(&data);
 
@@ -2092,7 +2173,7 @@ bool TuningFilterStorage::save(QByteArray& data)
 
 	writer.writeStartElement("ObjectFilterStorage");
 
-	m_root->save(writer, false, TuningFilter::Source::Project/*Not used!*/);
+    m_root->save(writer, TuningFilter::Source::All);
 
 	writer.writeEndElement();
 
@@ -2103,17 +2184,22 @@ bool TuningFilterStorage::save(QByteArray& data)
 	return true;
 }
 
-bool TuningFilterStorage::save(QByteArray& data, TuningFilter::Source saveSourceType) const
+bool TuningFilterStorage::saveUserFilters(const QString& fileName, QString* errorMsg) const
 {
+	// save data to XML
+	//
+
+    QByteArray data;
+
     QXmlStreamWriter writer(&data);
 
     writer.setAutoFormatting(true);
 
-	writer.writeStartDocument();
+    writer.writeStartDocument();
 
     writer.writeStartElement("ObjectFilterStorage");
 
-	m_root->save(writer, true, saveSourceType);
+    m_root->save(writer, TuningFilter::Source::User);
 
     writer.writeEndElement();
 
@@ -2121,25 +2207,7 @@ bool TuningFilterStorage::save(QByteArray& data, TuningFilter::Source saveSource
 
     writer.writeEndDocument();
 
-    return true;
-}
-
-bool TuningFilterStorage::save(const QString& fileName, QString* errorMsg, TuningFilter::Source saveSourceType)
-{
-	// save data to XML
-	//
-
-    QByteArray data;
-
-	bool ok = save(data, saveSourceType);
-
-    if (ok == false)
-    {
-        *errorMsg = QObject::tr("TuningFilterStorage::save: failed to save presets QByteArray.");
-        return false;
-    }
-
-	QFile f(fileName);
+    QFile f(fileName);
 
 	if (f.open(QFile::WriteOnly) == false)
 	{
@@ -2167,7 +2235,7 @@ bool TuningFilterStorage::copyToClipboard(std::vector<std::shared_ptr<TuningFilt
 
 	TuningFilter root(TuningFilter::InterfaceType::Root);
 
-	for (auto filter : filters)
+    for (const auto& filter : filters)
 	{
 		std::shared_ptr<TuningFilter> filterCopy = std::make_shared<TuningFilter>();
 
@@ -2176,7 +2244,7 @@ bool TuningFilterStorage::copyToClipboard(std::vector<std::shared_ptr<TuningFilt
 		root.addChild(filterCopy);
 	}
 
-	root.save(writer, false, TuningFilter::Source::Project/*Not used!*/);
+    root.save(writer, TuningFilter::Source::All);
 
 	writer.writeEndElement();
 
@@ -2230,5 +2298,115 @@ void TuningFilterStorage::add(std::shared_ptr<TuningFilter> filter, bool moveToT
 void TuningFilterStorage::checkFilterSignals(const std::vector<Hash>& signalHashes, std::vector<std::pair<QString, QString>>& notFoundSignalsAndFilters)
 {
 	m_root->checkSignals(signalHashes, notFoundSignalsAndFilters);
+}
+
+void TuningFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalManager& objects,
+                                                         const std::vector<Hash>& allHashes,
+                                                         TuningFilter* filter,
+                                                         TuningFilter::Source source)
+{
+    if (filter == nullptr)
+    {
+        assert(filter);
+        return;
+    }
+
+	size_t allCount = allHashes.size();
+
+    std::vector<Hash> signalsHashes;
+    signalsHashes.reserve(allCount);
+
+    while (true)
+    {
+        if (source != TuningFilter::Source::All &&
+            source != filter->source())
+        {
+            // Filter of non-processed type, skip it
+
+            signalsHashes = allHashes;
+
+            break;
+        }
+
+        if (filter->isRoot() == true)
+        {
+            // Root filter
+
+            // All signals ahashes are stored in root filter for discrete counter to work
+
+            signalsHashes = allHashes;
+
+            filter->setSignalsHashes(signalsHashes);
+
+            break;
+        }
+
+        if (filter->isEmpty() == true)
+        {
+            // Filter is empty
+
+            signalsHashes = allHashes;
+
+            break;
+        }
+
+        // Filter is not empty
+
+        std::map<Hash, int> equipmentHashesMap;
+
+		for (size_t i = 0; i < allCount; i++)
+        {
+            bool ok = false;
+
+			AppSignalParam asp = objects.signalParam(allHashes[i], &ok);
+            if (ok == false)
+            {
+                assert(false);
+                return;
+            }
+
+            if (filter->match(asp) == false)
+            {
+                continue;
+            }
+
+            signalsHashes.push_back(asp.hash());
+
+            if (filter->isSourceEquipment() == false)	// Skip equipment filters
+            {
+                Hash aspEquipmentHash = ::calcHash(asp.lmEquipmentId());
+                equipmentHashesMap[aspEquipmentHash] = 1;
+            }
+        }
+
+        filter->setSignalsHashes(signalsHashes);
+
+        if (filter->isSourceEquipment() == false)
+        {
+            // Set equipment hashes
+
+            std::vector<Hash> equipmentHashes;
+            for (auto it : equipmentHashesMap)
+            {
+                equipmentHashes.push_back(it.first);
+            }
+            filter->setEquipmentHashes(equipmentHashes);
+        }
+        else
+        {
+            // Equipment filters can be processed easier
+
+            std::vector<Hash> equipmentHashes;
+            equipmentHashes.push_back(::calcHash(filter->caption()));
+            filter->setEquipmentHashes(equipmentHashes);
+        }
+
+        break;
+    }
+
+    for (int i = 0; i < filter->childFiltersCount(); i++)
+    {
+        createSignalsAndEqipmentHashes(objects, signalsHashes, filter->childFilter(i).get(), source);
+    }
 }
 

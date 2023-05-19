@@ -18,6 +18,8 @@ include(../compiler.pri)
 include(../warnings.pri)
 include(../codecoverage.pri)
 
+TRANSLATIONS = languages/TrendView_ua.ts
+
 # DESTDIR
 #
 win32 {

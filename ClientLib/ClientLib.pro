@@ -20,6 +20,8 @@ unix {
 	INSTALLS += target
 }
 
+TRANSLATIONS = languages/ClientLib_ru.ts languages/ClientLib_ua.ts
+
 # DESTDIR
 #
 win32 {
@@ -49,6 +51,7 @@ HEADERS += \
     AdsConnection.h \
 	AdsSourceStateConnection.h \
 	AppSignalManager.h \
+    ClientTranslator.h \
     ConfigController.h \
     IAppSignalUpdater.h \
     IRecentAppSignals.h \
@@ -69,6 +72,7 @@ SOURCES += \
     AdsConnection.cpp \
 	AdsSourceStateConnection.cpp \
 	AppSignalManager.cpp \
+    ClientTranslator.cpp \
 	ConfigController.cpp \
 	RtDataProvider.cpp \
 	RtTrendTcpClient.cpp \

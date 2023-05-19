@@ -348,12 +348,12 @@ namespace TrendLib
 
 		// Signals
 		//
-		m_refreshButton = new QPushButton("Refresh");
+		m_refreshButton = new QPushButton(tr("Refresh"));
 		m_refreshActionForButton = m_toolBar->addWidget(m_refreshButton);
 
 		// Signals
 		//
-		m_signalsButton = new QPushButton("Signals...");
+		m_signalsButton = new QPushButton(tr("Signals..."));
 		m_toolBar->addWidget(m_signalsButton);
 
 		// --

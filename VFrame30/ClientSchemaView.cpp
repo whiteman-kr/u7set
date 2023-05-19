@@ -144,11 +144,21 @@ namespace VFrame30
 		return;
 	}
 
-	void ScriptSchemaView::warningMessageBox(QString text)
+	void ScriptSchemaView::warningMessageBox(QString text, QString details)
 	{
 		if (m_clientSchemaView->scriptMessageBoxAllowed() == true)
 		{
-			QMessageBox::warning(m_clientSchemaView, qAppName(), text);
+			QMessageBox msgBox;
+			msgBox.setParent(m_clientSchemaView);
+			msgBox.setText(text);
+			if (details.isEmpty() == false)
+			{
+				msgBox.setDetailedText(details);
+			}
+			msgBox.setStandardButtons(QMessageBox::Ok);
+			msgBox.setDefaultButton(QMessageBox::Ok);
+			msgBox.setIcon(QMessageBox::Warning);
+			msgBox.exec();
 		}
 		else
 		{
@@ -158,11 +168,21 @@ namespace VFrame30
 		return;
 	}
 
-	void ScriptSchemaView::errorMessageBox(QString text)
+	void ScriptSchemaView::errorMessageBox(QString text, QString details)
 	{
 		if (m_clientSchemaView->scriptMessageBoxAllowed() == true)
 		{
-			QMessageBox::critical(m_clientSchemaView, qAppName(), text);
+			QMessageBox msgBox;
+			msgBox.setParent(m_clientSchemaView);
+			msgBox.setText(text);
+			if (details.isEmpty() == false)
+			{
+				msgBox.setDetailedText(details);
+			}
+			msgBox.setStandardButtons(QMessageBox::Ok);
+			msgBox.setDefaultButton(QMessageBox::Ok);
+			msgBox.setIcon(QMessageBox::Critical);
+			msgBox.exec();
 		}
 		else
 		{
@@ -172,11 +192,21 @@ namespace VFrame30
 		return;
 	}
 
-	void ScriptSchemaView::infoMessageBox(QString text)
+	void ScriptSchemaView::infoMessageBox(QString text, QString details)
 	{
 		if (m_clientSchemaView->scriptMessageBoxAllowed() == true)
 		{
-			QMessageBox::information(m_clientSchemaView, qAppName(), text);
+			QMessageBox msgBox;
+			msgBox.setParent(m_clientSchemaView);
+			msgBox.setText(text);
+			if (details.isEmpty() == false)
+			{
+				msgBox.setDetailedText(details);
+			}
+			msgBox.setStandardButtons(QMessageBox::Ok);
+			msgBox.setDefaultButton(QMessageBox::Ok);
+			msgBox.setIcon(QMessageBox::Information);
+			msgBox.exec();
 		}
 		else
 		{
@@ -186,12 +216,21 @@ namespace VFrame30
 		return;
 	}
 
-	bool ScriptSchemaView::questionMessageBox(QString text)
+	bool ScriptSchemaView::questionMessageBox(QString text, QString details)
 	{
 		if (m_clientSchemaView->scriptMessageBoxAllowed() == true)
 		{
-			int result = QMessageBox::question(m_clientSchemaView, qAppName(), text,  QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
-			return result == QMessageBox::Yes;
+			QMessageBox msgBox;
+			msgBox.setParent(m_clientSchemaView);
+			msgBox.setText(text);
+			if (details.isEmpty() == false)
+			{
+				msgBox.setDetailedText(details);
+			}
+			msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+			msgBox.setDefaultButton(QMessageBox::No);
+			msgBox.setIcon(QMessageBox::Question);
+			return msgBox.exec() == QMessageBox::Yes;
 		}
 		else
 		{

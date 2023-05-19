@@ -157,6 +157,10 @@ namespace VFrame30
 							 const QRectF& rect,
 							 int flags,
 							 QRectF* boundingRect = nullptr);
+
+		// Svg
+		//
+		static bool drawSvgCached(QPainter& painter, SchemaUnit unit, const QRectF& rect, const QString& svg, double zoom);
 	};
 }
 

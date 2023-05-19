@@ -29,11 +29,11 @@ namespace Builder
 	bool TuningClientCfgGenerator::generateConfigurationStep1()
 	{
 		if (m_software == nullptr ||
-			m_software->softwareType() != E::SoftwareType::TuningClient ||
-			m_equipment == nullptr ||
-			m_cfgXml == nullptr ||
-			m_buildResultWriter == nullptr ||
-			m_subsystems == nullptr)
+				m_software->softwareType() != E::SoftwareType::TuningClient ||
+				m_equipment == nullptr ||
+				m_cfgXml == nullptr ||
+				m_buildResultWriter == nullptr ||
+				m_subsystems == nullptr)
 		{
 			assert(m_software);
 			assert(m_software->softwareType() == E::SoftwareType::Monitor);
@@ -58,7 +58,7 @@ namespace Builder
 		// Check tuning users list
 		//
 		if (settings->tuningLogin == true &&
-			settings->tuningUserAccounts.split(Separator::SEMICOLON, Qt::SkipEmptyParts).isEmpty() == true)
+				settings->tuningUserAccounts.split(Separator::SEMICOLON, Qt::SkipEmptyParts).isEmpty() == true)
 		{
 			m_log->errEQP6202(m_software->equipmentIdTemplate());
 			return false;
@@ -86,13 +86,6 @@ namespace Builder
 			return result;
 		}
 
-		// --
-		//
-		result &= createObjectFilters(equipmentList);
-		if (result == false)
-		{
-			return result;
-		}
 
 		result &= writeTuningSignals();
 		if (result == false)
@@ -100,10 +93,24 @@ namespace Builder
 			return result;
 		}
 
-		result &= writeObjectFilters();
-		if (result == false)
 		{
-			return result;
+			ILogFileStub logFileStub;
+			TuningSignalManager tuningSignalManager({}, &logFileStub);
+			tuningSignalManager.load(m_tuningSet);
+
+			// --
+			//
+			result &= createObjectFilters(tuningSignalManager, equipmentList);
+			if (result == false)
+			{
+				return result;
+			}
+
+			result &= writeObjectFilters(tuningSignalManager);
+			if (result == false)
+			{
+				return result;
+			}
 		}
 
 		result &= writeGlobalScript();
@@ -116,7 +123,7 @@ namespace Builder
 	bool TuningClientCfgGenerator::createTuningSignals(const QStringList& equipmentList, const SignalSet* signalSet, Proto::AppSignalSet* tuningSet)
 	{
 		if (tuningSet == nullptr ||
-			signalSet == nullptr)
+				signalSet == nullptr)
 		{
 			assert(tuningSet);
 			assert(signalSet);
@@ -235,7 +242,7 @@ namespace Builder
 			else
 			{
 				LOG_INTERNAL_ERROR_MSG(m_log, QString("TuningClient %1 isn't found in clients list of TuningService %2").
-											arg(equipmentID()).arg(tsc.equipmentId));
+									   arg(equipmentID()).arg(tsc.equipmentId));
 				result = false;
 			}
 		}
@@ -243,13 +250,10 @@ namespace Builder
 		return result;
 	}
 
-	bool TuningClientCfgGenerator::createObjectFilters(const QStringList& equipmentList)
+	bool TuningClientCfgGenerator::createObjectFilters(const TuningSignalManager& tuningSignalManager,
+													   const QStringList& equipmentList)
 	{
 		bool ok = true;
-
-		ILogFileStub logFileStub;
-		TuningSignalManager tuningSignalManager({}, &logFileStub);
-		tuningSignalManager.load(m_tuningSet);
 
 		//
 		// Filters
@@ -330,8 +334,15 @@ namespace Builder
 		return true;
 	}
 
-	bool TuningClientCfgGenerator::writeObjectFilters()
+	bool TuningClientCfgGenerator::writeObjectFilters(const TuningSignalManager &tuningSignalManager)
 	{
+		// Count all hashes contained in filters and save them
+
+		m_tuningFilterStorage.createSignalsAndEqipmentHashes(tuningSignalManager,
+															 tuningSignalManager.signalHashes(),
+															 m_tuningFilterStorage.root().get(),
+															 TuningFilter::Source::All);
+
 		// Save filters to file
 
 		QByteArray data;
@@ -354,7 +365,6 @@ namespace Builder
 		m_cfgXml->addLinkToFile(buildFile);
 
 		return true;
-
 	}
 
 	bool TuningClientCfgGenerator::writeTuningSchemas()
@@ -395,7 +405,7 @@ namespace Builder
 					std::shared_ptr<SchemaFile> schemaFile = it->second;
 
 					if (mapTag != tag ||
-						schemaFile == nullptr)
+							schemaFile == nullptr)
 					{
 						assert(mapTag == tag);
 						assert(schemaFile);
@@ -423,7 +433,7 @@ namespace Builder
 			QByteArray fileData;
 
 			if (bool ok = detailsSet.saveToByteArray(&fileData);
-				ok == true)
+					ok == true)
 			{
 				BuildFile* schemaDetailsBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "SchemaDetails.pbuf", fileData);
 

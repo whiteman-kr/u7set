@@ -771,7 +771,7 @@ QString IdeTuningFiltersEditor::text() const
 {
     QByteArray data;
 
-	bool ok = m_filters.save(data, TuningFilter::Source::Project);
+    bool ok = m_filters.save(data);
 
     if (ok == true)
     {

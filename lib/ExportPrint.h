@@ -5,6 +5,7 @@
 
 class ExportPrint : public QObject
 {
+	Q_OBJECT
 public:
 	ExportPrint(QWidget* parent);
 	virtual ~ExportPrint() = default;

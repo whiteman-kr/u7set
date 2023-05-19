@@ -26,6 +26,25 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	m_tuningConnection{m_tuningSignalManager, m_tuningSignalManager, &m_logFile, &m_tuningLog}
 
 {
+	// Init translator
+	//
+	m_translator.addLanguage("en", "English");
+	m_translator.addLanguage("ru", "Russian/Русский");
+	m_translator.addLanguage("ua", "Ukrainian/Українська");
+
+	m_translator.addTranslationFile("ru", ":/languages/TuningClient_ru.qm");
+	m_translator.addTranslationFile("ru", ":/languages/qtbase_ru.qm");
+	m_translator.addTranslationFile("ru", ":/ClientLib/languages/ClientLib_ru.qm");
+	m_translator.addTranslationFile("ru", ":/UtilsLib/languages/UtilsLib_ru.qm");
+
+	m_translator.addTranslationFile("ua", ":/languages/TuningClient_ua.qm");
+	m_translator.addTranslationFile("ua", ":/languages/qtbase_uk.qm");
+	m_translator.addTranslationFile("ua", ":/ClientLib/languages/ClientLib_ua.qm");
+	m_translator.addTranslationFile("ua", ":/UtilsLib/languages/UtilsLib_ua.qm");
+
+	m_translator.setLanguage(theSettings.language());
+
+	// -
 	m_sorTooltipText = QObject::tr("SOR counter (click for details)");
 
 	if (theSettings.m_mainWindowPos.x() != -1 && theSettings.m_mainWindowPos.y() != -1)
@@ -353,23 +372,24 @@ void MainWindow::timerEvent(QTimerEvent* event)
 	return;
 }
 
-void MainWindow::createAndCheckFiltersHashes(bool userFiltersOnly)
+void MainWindow::checkAndRemoveFilterSignals()
 {
-	m_filterStorage.createSignalsAndEqipmentHashes(m_tuningSignalManager, m_tuningSignalManager.signalHashes(), m_filterStorage.root().get(), userFiltersOnly);
-
 	// Find and possibly remove non-existing signals from the list
 
 	bool removedNotFound = false;
 
 	std::vector<std::pair<QString, QString>> notFoundSignalsAndFilters;
 
-	m_filterStorage.checkAndRemoveFilterSignals(m_tuningSignalManager.signalHashes(), removedNotFound, notFoundSignalsAndFilters, this);
+    m_filterStorage.checkAndRemoveFilterSignals(m_tuningSignalManager.signalHashes(),
+                                                removedNotFound,
+                                                notFoundSignalsAndFilters,
+                                                this);
 
 	if (removedNotFound == true)
 	{
 		QString errorMsg;
 
-		if (m_filterStorage.save(theSettings.userFiltersFile(), &errorMsg, TuningFilter::Source::User) == false)
+        if (m_filterStorage.saveUserFilters(theSettings.userFiltersFile(), &errorMsg) == false)
 		{
 			m_logFile.writeError(errorMsg);
 			QMessageBox::critical(this, tr("Error"), errorMsg);
@@ -405,7 +425,14 @@ void MainWindow::createWorkspace()
 		setCentralWidget(w);
 	}
 
-	createAndCheckFiltersHashes(false/*userFiltersOnly*/);
+    // Count user filters signals hashes
+
+    m_filterStorage.createSignalsAndEqipmentHashes(m_tuningSignalManager,
+                                                         m_tuningSignalManager.signalHashes(),
+                                                         m_filterStorage.root().get(),
+                                                         TuningFilter::Source::User);
+
+    checkAndRemoveFilterSignals();
 
 	// Create new workspaces
 
@@ -865,7 +892,7 @@ void MainWindow::updateStatusBar()
 
 		assert(m_statusBarLogAlerts);
 
-		m_statusBarLogAlerts->setText(QString(" Log E: %1 W: %2 ").arg(m_logErrorsCounter).arg(m_logWarningsCounter));
+		m_statusBarLogAlerts->setText(tr(" Log E: %1 W: %2 ").arg(m_logErrorsCounter).arg(m_logWarningsCounter));
 
 		if (m_logErrorsCounter == 0 && m_logWarningsCounter == 0)
 		{
@@ -916,7 +943,7 @@ void MainWindow::showSoftwareConnection(const QString& caption,
 		toolTipText += QString("%1 %2 (%3)\n")
 							.arg(state.connectedSoftwareInfo.equipmentID())
 							.arg(state.peerAddr.addressPortStr())
-							.arg(state.isConnected ? "ok" : "down");
+							.arg(state.isConnected ? tr("ok") : tr("down"));
 	}
 	toolTipText = toolTipText.trimmed();
 
@@ -929,7 +956,7 @@ void MainWindow::showSoftwareConnection(const QString& caption,
 	{
 		statusText = tr("%1: %2 (Replies: %3)")
 					 .arg(caption)
-					 .arg(statusOk ? "ok" : "down")
+					 .arg(statusOk ? tr("ok") : tr("down"))
 					 .arg(replyCount);
 	}
 	else
@@ -1116,17 +1143,22 @@ void MainWindow::runPresetEditor()
 				return;
 			}
 
-			if (child->source() != TuningFilter::Source::User)
+            if (child->source() == TuningFilter::Source::User)
 			{
-				continue;
+                m_filterStorage.add(child, false);
 			}
-
-			m_filterStorage.add(child, false);
 		}
 
-		QString errorMsg;
+        // Count user filters signals hashes
 
-		if (m_filterStorage.save(theSettings.userFiltersFile(), &errorMsg, TuningFilter::Source::User) == false)
+        m_filterStorage.createSignalsAndEqipmentHashes(m_tuningSignalManager,
+                                                       m_tuningSignalManager.signalHashes(),
+                                                       m_filterStorage.root().get(),
+                                                       TuningFilter::Source::User);
+
+        QString errorMsg;
+
+        if (m_filterStorage.saveUserFilters(theSettings.userFiltersFile(), &errorMsg) == false)
 		{
 			m_logFile.writeError(errorMsg);
 			QMessageBox::critical(this, tr("Error"), errorMsg);
@@ -1138,11 +1170,8 @@ void MainWindow::runPresetEditor()
 
 void MainWindow::showSettings()
 {
-	DialogSettings* d = new DialogSettings(this);
-
-	d->exec();
-
-	delete d;
+	DialogSettings d(m_translator);
+	d.exec();
 }
 
 
@@ -1220,9 +1249,7 @@ void MainWindow::showTuningUserManual()
 
 void MainWindow::slot_userFiltersChanged()
 {
-	// Update user filters
-
-	createAndCheckFiltersHashes(true/*userFiltersOnly*/);
+    checkAndRemoveFilterSignals();
 
 	if (m_tuningWorkspace != nullptr)
 	{

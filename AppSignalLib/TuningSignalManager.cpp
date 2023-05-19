@@ -121,6 +121,14 @@ bool TuningSignalManager::signalExists(const QString& appSignalId) const
 	return TuningSignalManager::signalExists(hash);
 }
 
+bool TuningSignalManager::signalsExist(const QStringList& signalIds) const
+{
+	QReadLocker rl(&m_signalsLock);
+	return std::all_of(signalIds.begin(), signalIds.end(), [this](const QString& appSignalId) {
+		return m_signals.contains(::calcHash(appSignalId));
+	});
+}
+
 AppSignalParam TuningSignalManager::signalParam(Hash hash, bool* found) const
 {
 	QReadLocker rl(&m_signalsLock);
@@ -250,6 +258,65 @@ TuningSignalState TuningSignalManager::state(const QString& appSignalId, Hash tu
 	Hash signalHash = ::calcHash(appSignalId);
 	return state(signalHash, tuningServiceHash, found);
 }
+
+void TuningSignalManager::state(const std::vector<Hash>& appSignalHashes, std::vector<TuningSignalState>* result, int* found) const
+{
+	if (result == nullptr)
+	{
+		assert(result);
+		return;
+	}
+
+	result->clear();
+	result->reserve(appSignalHashes.size());
+
+	int foundCount = 0;
+
+	{
+		std::scoped_lock l(m_statesMutex);
+
+		for (Hash signalHash : appSignalHashes)
+		{
+			auto foundState = m_states.find(signalHash);
+
+			if (foundState != m_states.end())
+			{
+				result->push_back(foundState->second.get());
+				foundCount ++;
+			}
+			else
+			{
+				TuningSignalState state;
+				state.m_hash = signalHash;
+				state.m_flags.valid = false;
+
+				result->push_back(state);
+			}
+		}
+	}
+
+	if (found != nullptr)
+	{
+		*found = foundCount;
+	}
+
+	return;
+}
+
+void TuningSignalManager::state(const std::vector<QString>& appSignalIds, std::vector<TuningSignalState>* result, int* found) const
+{
+	std::vector<Hash> appSignalHashes;
+	appSignalHashes.reserve(appSignalIds.size());
+
+	for (const QString& id : appSignalIds)
+	{
+		Hash h = ::calcHash(id);
+		appSignalHashes.push_back(h);
+	}
+
+	return state(appSignalHashes, result, found);
+}
+
 
 QStringList TuningSignalManager::signalIdsByTag(const QString& tag) const
 {

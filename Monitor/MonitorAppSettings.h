@@ -15,6 +15,7 @@ public:
 	{
 		QString equipmentId = "SYSTEM_RACKID_WS00_MONITOR";
 		QString windowCaption = "Monitor";
+		QString language = "en";
 
 		QString cfgSrvIpAddress1 = "127.0.0.1";
 		int cfgSrvPort1 = PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST;
@@ -55,6 +56,8 @@ public:
 	//
 	QString equipmentId() const;
 	QString windowCaption() const;
+
+	QString language() const;
 
 	HostAddressPort configuratorAddress1() const;
 	HostAddressPort configuratorAddress2() const;

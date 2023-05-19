@@ -8,6 +8,7 @@
 #include "TuningConfigController.h"
 #include "LogonWorkspace.h"
 #include "DialogTuningSources.h"
+#include "../ClientLib/ClientTranslator.h"
 #include "../ClientLib/TuningConnection.h"
 #include "../ClientLib/TuningUserManager.h"
 #include "../ClientLib/TuningLog.h"
@@ -60,7 +61,7 @@ private:
 	virtual void closeEvent(QCloseEvent *event) override;
 	virtual void timerEvent(QTimerEvent* event) override;
 
-	void createAndCheckFiltersHashes(bool userFiltersOnly);
+    void checkAndRemoveFilterSignals();
 
 	void createWorkspace();
 	void deleteWorkspace();
@@ -111,6 +112,8 @@ private:
 
 	// User interface
 	//
+	ClientLib::ClientTranslator m_translator;
+
 	QLabel* m_noWorkspaceLabel = nullptr;
 
 	QVBoxLayout* m_mainLayout = nullptr;

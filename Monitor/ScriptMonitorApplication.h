@@ -154,6 +154,10 @@ public slots:
 	/// \brief Set or rest fuill screen mode.
 	void setFullScreen(bool fullScreen);
 
+	/// \brief Starts the program 'program' with the arguments 'arguments' in 'workingDir' directory in a new process.
+	/// Multiple arguments are divided by a semicolon.
+	bool start(QString program, QString arguments = QString(), QString workDir = QString());
+
 signals:
 	void signal_showArchive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType);
 

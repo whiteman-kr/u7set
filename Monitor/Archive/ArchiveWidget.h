@@ -8,6 +8,7 @@ class MonitorSignalManager;
 
 class ArchiveWidget : public QMainWindow
 {
+	Q_OBJECT
 public:
 	explicit ArchiveWidget(MonitorSignalManager* signalManager,
 						   MonitorConfigController* configController,

@@ -7,5 +7,6 @@
         <file>Images/TestsStop.svg</file>
         <file>Images/CloseButtonBlack.svg</file>
         <file>Images/CloseButtonGray.svg</file>
+        <file>Images/TestSuite.ico</file>
     </qresource>
 </RCC>

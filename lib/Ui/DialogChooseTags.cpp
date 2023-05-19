@@ -159,7 +159,7 @@ void ChooseTagsWidget::setupUi(bool hasDescriptions)
     //
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->addWidget(m_textEdit);
-    mainLayout->addWidget(new QLabel("Predefined tags:"));
+	mainLayout->addWidget(new QLabel(tr("Predefined tags:")));
     mainLayout->addWidget(m_tagsList);
     mainLayout->addLayout(buttonsLayout);
     mainLayout->setContentsMargins(0, 0, 0, 0);
