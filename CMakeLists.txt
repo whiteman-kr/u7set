@@ -30,15 +30,21 @@ if (DEFINED BIN_OUT_DIR)
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN_OUT_DIR})
 	unset(BIN_OUT_DIR)
 else()
-	string(TOLOWER ${CMAKE_BUILD_TYPE} LOWERCASE_BUILD_TYPE)
+	# ${CMAKE_BUILD_TYPE} can be empty, for example in VS Code, which makes configuration for multiple types?
+	#
+	string(TOLOWER "${CMAKE_BUILD_TYPE}" LOWERCASE_BUILD_TYPE)
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/${LOWERCASE_BUILD_TYPE})
 endif()
+
+option(CODE_COVERAGE "Code coverage (Linux only)" OFF)
+include(./cmake/codecoverage.cmake)
 
 message("-----------------------------------------")
 message(${PROJECT_NAME})
 message("Version: " ${CMAKE_PROJECT_VERSION})
 message("Build type: " ${CMAKE_BUILD_TYPE})
 message("Build output dir set to: " ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+message("Code coverage: " ${CODE_COVERAGE})
 message("-----------------------------------------")
 
 # Add projects.

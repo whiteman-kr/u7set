@@ -50,11 +50,11 @@ mkdir -p $OUTPUT_DIR
 # Build project u7_test_simulator.
 #
 rm -rvf /tmp/build/test_simulator
-$CI_PROJECT_DIR/bin_unix/debug/BuilderConsole $CI_PROJECT_DIR/Test/BuilderConsoleArgsCoverage.xml
+$CI_PROJECT_DIR/bin/debug/BuilderConsole $CI_PROJECT_DIR/Test/BuilderConsoleArgsCoverage.xml
 
 # Start services for functional tests.
 #
-pushd $CI_PROJECT_DIR/bin_unix/debug
+pushd $CI_PROJECT_DIR/bin/debug
 
 cp /tmp/build/${SIMULATOR_PROJECT_NAME}/build/RunServiceScripts/Linux/linux_code_coverage_systemid_clienttest*.sh .
 chmod +x *.sh

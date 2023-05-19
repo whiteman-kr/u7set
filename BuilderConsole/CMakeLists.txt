@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 project(BuilderConsole LANGUAGES CXX)
 message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
-include(../vld.cmake)
+include(../cmake/vld.cmake)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -31,3 +31,5 @@ target_link_libraries(${TARGET} PRIVATE HardwareLib VFrame30 Builder Simulator P
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
 	 target_link_libraries(${TARGET} PRIVATE vld.lib)
 endif()
+
+add_code_coverage_options(${TARGET} CODE_COVERAGE)

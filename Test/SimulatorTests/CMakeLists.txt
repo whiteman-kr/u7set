@@ -34,4 +34,4 @@ set_target_properties(${TARGET} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNT
 target_link_libraries(${TARGET} PRIVATE Qt6::Test Qt6::Core Qt6::Network Qt6::Qml Qt6::Xml Qt6::Concurrent)
 target_link_libraries(${TARGET} PRIVATE Protobuf HardwareLib Simulator)
 
-
+add_code_coverage_options(${TARGET} CODE_COVERAGE)

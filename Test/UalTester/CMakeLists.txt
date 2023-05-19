@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 project(UalTester LANGUAGES CXX)
 message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
-include(../../vld.cmake)
+include(../../cmake/vld.cmake)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)

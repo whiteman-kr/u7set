@@ -40,3 +40,4 @@ target_precompile_headers(${TARGET} PRIVATE
 target_link_libraries(${TARGET} PRIVATE Qt6::Test Qt6::Core Qt6::Network)
 target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib OnlineLib HardwareLib)
 
+add_code_coverage_options(${TARGET} CODE_COVERAGE)

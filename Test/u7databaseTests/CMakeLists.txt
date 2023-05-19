@@ -56,3 +56,4 @@ set_target_properties(${TARGET} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNT
 target_link_libraries(${TARGET} PRIVATE Qt6::Test Qt6::Core Qt6::Sql Qt6::Network Qt6::Widgets Qt6::Xml Qt6::Qml)
 target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib OnlineLib HardwareLib DbLib)
 
+add_code_coverage_options(${TARGET} CODE_COVERAGE)

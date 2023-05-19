@@ -45,5 +45,4 @@ target_link_libraries(${TARGET} PUBLIC CommonLib)
 target_compile_definitions(${TARGET} PRIVATE UTILS_LIB_DOMAIN)
 target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
-
-
+add_code_coverage_options(${TARGET} CODE_COVERAGE)
