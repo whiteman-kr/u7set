@@ -30,15 +30,21 @@ if (DEFINED BIN_OUT_DIR)
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN_OUT_DIR})
 	unset(BIN_OUT_DIR)
 else()
-	string(TOLOWER ${CMAKE_BUILD_TYPE} LOWERCASE_BUILD_TYPE)
+	# ${CMAKE_BUILD_TYPE} can be empty, for example in VS Code, which makes configuration for multiple types?
+	#
+	string(TOLOWER "${CMAKE_BUILD_TYPE}" LOWERCASE_BUILD_TYPE)
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/${LOWERCASE_BUILD_TYPE})
 endif()
+
+option(CODE_COVERAGE "Code coverage (Linux only)" OFF)
+include(./cmake/codecoverage.cmake)
 
 message("-----------------------------------------")
 message(${PROJECT_NAME})
 message("Version: " ${CMAKE_PROJECT_VERSION})
 message("Build type: " ${CMAKE_BUILD_TYPE})
 message("Build output dir set to: " ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+message("Code coverage: " ${CODE_COVERAGE})
 message("-----------------------------------------")
 
 # Add projects.
@@ -62,9 +68,6 @@ add_subdirectory(SimulatorConsole)
 add_subdirectory(Builder)
 add_subdirectory(BuilderConsole)
 
-add_subdirectory(./Tools/qtkeychain)
-add_subdirectory(u7)
-
 add_subdirectory(ServiceControlManager)
 add_subdirectory(ConfigurationService)
 add_subdirectory(AppDataService)
@@ -72,18 +75,25 @@ add_subdirectory(ArchivingService)
 add_subdirectory(TuningService)
 add_subdirectory(DiagDataService)
 
-add_subdirectory(Monitor)
-add_subdirectory(TuningClient)
+# Do not compile these projects if code coverage is on.
+#
+if(NOT CODE_COVERAGE)
+    add_subdirectory(./Tools/qtkeychain)
+    add_subdirectory(u7)
 
-add_subdirectory(Metrology)
-add_subdirectory(mconf)
+	add_subdirectory(Monitor)
+	add_subdirectory(TuningClient)
+
+	add_subdirectory(Metrology)
+	add_subdirectory(mconf)	
+
+	add_subdirectory(./Tools/PacketSource)
+	add_subdirectory(./Tools/PacketViewer)	
+endif(CODE_COVERAGE)
 
 add_subdirectory(TestSuiteLib)
 add_subdirectory(TestSuite)
 add_subdirectory(TestSuiteConsole)
-
-add_subdirectory(./Tools/PacketSource)
-add_subdirectory(./Tools/PacketViewer)
 
 add_subdirectory(./Test/googletest)
 add_subdirectory(./Test/UalTester)

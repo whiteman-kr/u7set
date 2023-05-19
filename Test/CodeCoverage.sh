@@ -50,11 +50,11 @@ mkdir -p $OUTPUT_DIR
 # Build project u7_test_simulator.
 #
 rm -rvf /tmp/build/test_simulator
-$CI_PROJECT_DIR/bin_unix/debug/BuilderConsole $CI_PROJECT_DIR/Test/BuilderConsoleArgsCoverage.xml
+$CI_PROJECT_DIR/bin/debug/BuilderConsole $CI_PROJECT_DIR/Test/BuilderConsoleArgsCoverage.xml
 
 # Start services for functional tests.
 #
-pushd $CI_PROJECT_DIR/bin_unix/debug
+pushd $CI_PROJECT_DIR/bin/debug
 
 cp /tmp/build/${SIMULATOR_PROJECT_NAME}/build/RunServiceScripts/Linux/linux_code_coverage_systemid_clienttest*.sh .
 chmod +x *.sh
@@ -92,57 +92,57 @@ popd
 #
 
 # AppSignalLib
-TEST_DIR="./AppSignalLib/debug"
+TEST_DIR="./build/AppSignalLib/CMakeFiles/AppSignalLib.dir"
 TEST_OUTPUT_FILE="AppSignalLib.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # CommonLib
-TEST_DIR="./CommonLib/debug"
+TEST_DIR="./build/CommonLib/CMakeFiles/CommonLib.dir"
 TEST_OUTPUT_FILE="CommonLib.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # OnlineLib
-TEST_DIR="./OnlineLib/debug"
+TEST_DIR="./build/OnlineLib/CMakeFiles/OnlineLib.dir"
 TEST_OUTPUT_FILE="OnlineLib.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # DbLib
-TEST_DIR="./DbLib/debug"
+TEST_DIR="./build/DbLib/CMakeFiles/DbLib.dir"
 TEST_OUTPUT_FILE="DbLib.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # HardwareLib
-TEST_DIR="./HardwareLib/debug"
+TEST_DIR="./build/HardwareLib/CMakeFiles/HardwareLib.dir"
 TEST_OUTPUT_FILE="HardwareLib.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # Metrology
-TEST_DIR="./Test/MetrologyTests"
+TEST_DIR="./build/Test/MetrologyTests/CMakeFiles/MetrologyTests.dir"
 TEST_OUTPUT_FILE="MetrologyTests.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # Builder
-TEST_DIR="./Builder/debug"
+TEST_DIR="./build/Builder/CMakeFiles/Builder.dir"
 TEST_OUTPUT_FILE="Builder.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # Simulator
-TEST_DIR="./Simulator/debug"
+TEST_DIR="./build/Simulator/CMakeFiles/Simulator.dir"
 TEST_OUTPUT_FILE="Simulator.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # TrendView
-TEST_DIR="./TrendView"
+TEST_DIR="./build/TrendView/CMakeFiles/TrendView.dir"
 TEST_OUTPUT_FILE="TrendView.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # UtilsLib
-TEST_DIR="./UtilsLib/debug"
+TEST_DIR="./build/UtilsLib/CMakeFiles/UtilsLib.dir"
 TEST_OUTPUT_FILE="UtilsLib.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # ClientLib
-TEST_DIR="./ClientLib/debug"
+TEST_DIR="./build/ClientLib/CMakeFiles/ClientLib.dir"
 TEST_OUTPUT_FILE="ClientLib.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
