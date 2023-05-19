@@ -17,8 +17,6 @@ project(
 	DESCRIPTION "Radiy Platform Configuration Tools"
 	HOMEPAGE_URL "radiy.com")
 
-message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
-
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -28,8 +26,20 @@ endif()
 
 # Where to put binaries.
 #
-string(TOLOWER ${CMAKE_BUILD_TYPE} LOWERCASE_BUILD_TYPE)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/${LOWERCASE_BUILD_TYPE})
+if (DEFINED BIN_OUT_DIR)
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN_OUT_DIR})
+	unset(BIN_OUT_DIR)
+else()
+	string(TOLOWER ${CMAKE_BUILD_TYPE} LOWERCASE_BUILD_TYPE)
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/${LOWERCASE_BUILD_TYPE})
+endif()
+
+message("-----------------------------------------")
+message(${PROJECT_NAME})
+message("Version: " ${CMAKE_PROJECT_VERSION})
+message("Build type: " ${CMAKE_BUILD_TYPE})
+message("Build output dir set to: " ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+message("-----------------------------------------")
 
 # Add projects.
 #
