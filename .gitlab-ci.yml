@@ -86,9 +86,9 @@ linux_build_job:
   artifacts:
     name: "u7set_linux_0.9.$CI_PIPELINE_ID $CI_BUILD_REF_SLUG $CI_COMMIT_SHA"
     paths:
-      - bin/*
+      - build/bin/*
     exclude:
-      - bin/**/*.a
+      - build/bin/**/*.a
 #
 
 windows_build_job:
