@@ -80,15 +80,15 @@ linux_build_job:
     - "# ----------------------------------------------"
     - "#               Build Project"
     - "# ----------------------------------------------"    
-    - "/opt/Qt/${QT_VERSION}/gcc_64/bin/qmake u7set.pro -spec linux-g++"
-    - "make -j12"
+    - "cmake -S . -B ./build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/opt/Qt/${QT_VERSION}/gcc_64"
+    - "cmake --build ./build"
 
   artifacts:
     name: "u7set_linux_0.9.$CI_PIPELINE_ID $CI_BUILD_REF_SLUG $CI_COMMIT_SHA"
     paths:
-      - bin_unix/*
+      - bin/*
     exclude:
-      - bin_unix/**/*.a
+      - bin/**/*.a
 #
 
 windows_build_job:
@@ -110,6 +110,7 @@ windows_build_job:
     - "git status"
     - "git log -1"
     - $Env:QT_BIN_DIR="C:\\Qt\\${Env:QT_VERSION}\\msvc2019_64"
+    - $Env:BIN_OUT_DIR="$Env:CI_PROJECT_DIR/build/bin/release"
 #generation version file
     - "'#pragma once' > gitlabci_version.h"
     - "' ' >> gitlabci_version.h"
@@ -132,41 +133,37 @@ windows_build_job:
     - "# ----------------------------------------------"
     - "& './CI/windeploy.bat'"
 #Copy PostgreSQL DLL to bin/release
-    - "copy C:\\libpq_my_build\\libpq.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
-# Copy Metrology plugins
-    - "copy $Env:CI_PROJECT_DIR\\bin_Win64\\visa64.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
-    - "copy $Env:CI_PROJECT_DIR\\bin_Win64\\visaConfMgr.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
-    - "copy $Env:CI_PROJECT_DIR\\bin_Win64\\visaUtilities.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
+    - "copy C:\\libpq_my_build\\libpq.dll \"$Env:BIN_OUT_DIR/\""
 # Copy documents
-    - "mkdir \"$Env:CI_PROJECT_DIR/bin/release/docs\""
-    - "copy $Env:CI_PROJECT_DIR\\Metrology\\docs\\Metrology_User_Manual.pdf \"$Env:CI_PROJECT_DIR/bin/release/docs/\""
+    - "mkdir \"$Env:BIN_OUT_DIR/docs\""
+    - "copy $Env:CI_PROJECT_DIR\\Metrology\\docs\\Metrology_User_Manual.pdf \"$Env:BIN_OUT_DIR/docs/\""
 # Copy GlobalScript library
-    - "mkdir \"$Env:CI_PROJECT_DIR/bin/release/scripting\""
-    - "copy $Env:CI_PROJECT_DIR\\Scripts\\GlobalScript\\*.* \"$Env:CI_PROJECT_DIR/bin/release/scripting/\""
+    - "mkdir \"$Env:BIN_OUT_DIR/scripting\""
+    - "copy $Env:CI_PROJECT_DIR\\Scripts\\GlobalScript\\*.* \"$Env:BIN_OUT_DIR/scripting/\""
 
 #Remove some files not requiered for releases
     - "# ----------------------------------------------"
     - "#               Remove some files not requiered for releases"
     - "# ----------------------------------------------"
-    - "del -Force $Env:CI_PROJECT_DIR/bin/release/DiagDataSrv.exe"
+    - "del -Force $Env:BIN_OUT_DIR/DiagDataSrv.exe"
     
 #Signing Files
     - "# ----------------------------------------------"
     - "#               Sign Files"
     - "# ----------------------------------------------"
 #    - "$SIGNTOOL='C:/Program Files (x86)/Windows Kits/10/App Certification Kit/signtool.exe'"
-#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD bin\\release\\AppDataSrv.exe"
-#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD bin\\release\\ArchSrv.exe"
-#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD bin\\release\\CfgSrv.exe"
-#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD bin\\release\\mconf.exe"
-#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD bin\\release\\PacketSource.exe"
-#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD bin\\release\\PacketViewer.exe"
-#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD bin\\release\\Metrology.exe"
-#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD bin\\release\\Monitor.exe"
-#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD bin\\release\\scm.exe"
-#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD bin\\release\\TuningClient.exe"
-#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD bin\\release\\TuningSrv.exe"
-#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD bin\\release\\u7.exe"    
+#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD build\\bin\\release\\AppDataSrv.exe"
+#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD build\\bin\\release\\ArchSrv.exe"
+#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD build\\bin\\release\\CfgSrv.exe"
+#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD build\\bin\\release\\mconf.exe"
+#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD build\\bin\\release\\PacketSource.exe"
+#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD build\\bin\\release\\PacketViewer.exe"
+#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD build\\bin\\release\\Metrology.exe"
+#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD build\\bin\\release\\Monitor.exe"
+#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD build\\bin\\release\\scm.exe"
+#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD build\\bin\\release\\TuningClient.exe"
+#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD build\\bin\\release\\TuningSrv.exe"
+#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD build\\bin\\release\\u7.exe"    
 
 #Generate ScriptHelp
     - "# ----------------------------------------------"
@@ -194,27 +191,27 @@ windows_build_job:
     - "cd $Env:CI_PROJECT_DIR/u7setinstall"
     - "&./createinstall.bat"
     - "popd"	
-#    - "&$SIGNTOOL sign /v /a  /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD bin\\*.exe"
+#    - "&$SIGNTOOL sign /v /a  /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD build\\bin\\*.exe"
 
   artifacts:
     name: "u7set_0.9.$CI_PIPELINE_ID $CI_BUILD_REF_SLUG $CI_COMMIT_SHA"
     paths:
-      - bin/*.exe
-      - bin/release/*.exe
-      - bin/release/*.dll
-      - bin/release/iconengines/*.dll
-      - bin/release/imageformats/*.dll
-      - bin/release/networkinformation/*.dll
-      - bin/release/platforms/*.dll
-      - bin/release/sqldrivers/*.dll
-      - bin/release/styles/*.dll
-      - bin/release/tls/*.dll
-      - bin/release/translations/*.qm
-      - bin/release/scripting/*.*
-      - bin/release/scripthelp/*.*
-      - bin/release/scripthelp/search/*.*
-      - bin/release/docs/*.pdf
-      - bin/release/docs/Appendixes/*.pdf
+      - build/bin/*.exe
+      - build/bin/release/*.exe
+      - build/bin/release/*.dll
+      - build/bin/release/iconengines/*.dll
+      - build/bin/release/imageformats/*.dll
+      - build/bin/release/networkinformation/*.dll
+      - build/bin/release/platforms/*.dll
+      - build/bin/release/sqldrivers/*.dll
+      - build/bin/release/styles/*.dll
+      - build/bin/release/tls/*.dll
+      - build/bin/release/translations/*.qm
+      - build/bin/release/scripting/*.*
+      - build/bin/release/scripthelp/*.*
+      - build/bin/release/scripthelp/search/*.*
+      - build/bin/release/docs/*.pdf
+      - build/bin/release/docs/Appendixes/*.pdf
 
 
 windows_test_job:
