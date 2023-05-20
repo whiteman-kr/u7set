@@ -68,9 +68,6 @@ add_subdirectory(SimulatorConsole)
 add_subdirectory(Builder)
 add_subdirectory(BuilderConsole)
 
-add_subdirectory(./Tools/qtkeychain)
-add_subdirectory(u7)
-
 add_subdirectory(ServiceControlManager)
 add_subdirectory(ConfigurationService)
 add_subdirectory(AppDataService)
@@ -78,18 +75,25 @@ add_subdirectory(ArchivingService)
 add_subdirectory(TuningService)
 add_subdirectory(DiagDataService)
 
-add_subdirectory(Monitor)
-add_subdirectory(TuningClient)
+# Do not compile these projects if code coverage is on.
+#
+if(NOT CODE_COVERAGE)
+    add_subdirectory(./Tools/qtkeychain)
+    add_subdirectory(u7)
 
-add_subdirectory(Metrology)
-add_subdirectory(mconf)
+	add_subdirectory(Monitor)
+	add_subdirectory(TuningClient)
+
+	add_subdirectory(Metrology)
+	add_subdirectory(mconf)	
+
+	add_subdirectory(./Tools/PacketSource)
+	add_subdirectory(./Tools/PacketViewer)	
+endif(CODE_COVERAGE)
 
 add_subdirectory(TestSuiteLib)
 add_subdirectory(TestSuite)
 add_subdirectory(TestSuiteConsole)
-
-add_subdirectory(./Tools/PacketSource)
-add_subdirectory(./Tools/PacketViewer)
 
 add_subdirectory(./Test/googletest)
 add_subdirectory(./Test/UalTester)
