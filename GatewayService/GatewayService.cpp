@@ -340,6 +340,8 @@ void GatewayServiceWorker::createAndInitSignalStates()
 
 void GatewayServiceWorker::applyNewConfiguration()
 {
+	DEBUG_LOG_MSG(logger(), QString("Applying new configuration..."));
+
 	// already filled:
 	//
 	//		m_appSignals
@@ -347,16 +349,20 @@ void GatewayServiceWorker::applyNewConfiguration()
 
 	bool result = true;
 
-	result &= m_handlers.init(m_gateways, softwareInfo(), m_curSettingsProfile, m_appSignals);
+	result &= m_handlers.init(m_gateways, softwareInfo(), m_curSettingsProfile, m_appSignals, logger());
 
 	if (result == false)
 	{
+		DEBUG_LOG_ERR(logger(), QString("Handlers initialization ERROR!"));
 		clearConfiguration();
 		return;
 	}
 
+	DEBUG_LOG_ERR(logger(), QString("Handlers initialization OK"));
+
 	m_handlers.run();
 
+	DEBUG_LOG_ERR(logger(), QString("All handlers runned."));
 }
 
 void GatewayServiceWorker::clearConfiguration()
@@ -365,6 +371,8 @@ void GatewayServiceWorker::clearConfiguration()
 	m_handlers.clear();
 	m_appSignals.clear();
 	m_gateways.clear();
+
+	DEBUG_LOG_MSG(logger(), QString("All handlears stoped. Configuration cleared."));
 }
 
 void GatewayServiceWorker::runTimer()

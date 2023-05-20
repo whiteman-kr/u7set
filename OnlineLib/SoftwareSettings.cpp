@@ -1994,26 +1994,42 @@ bool GatewayServiceSettings::readFromXml(XmlReadHelper& xml)
 
 	RETURN_IF_FALSE(result);
 
-	result &= xml.readStringElement(EquipmentPropNames::CFG_SERVICE_ID1, &cfgService1.equipmentId, true);
-	result &= xml.readHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
+	//
+
+	bool okCfg1 = true;
+
+	okCfg1 &= xml.readStringElement(EquipmentPropNames::CFG_SERVICE_ID1, &cfgService1.equipmentId, true);
+	okCfg1 &= xml.readHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
 									  EquipmentPropNames::CFG_SERVICE_PORT1,
 									  &cfgService1.address);
 
-	result &= xml.readStringElement(EquipmentPropNames::CFG_SERVICE_ID2, &cfgService2.equipmentId, true);
-	result &= xml.readHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP2,
+	bool okCfg2 = true;
+
+	okCfg2 &= xml.readStringElement(EquipmentPropNames::CFG_SERVICE_ID2, &cfgService2.equipmentId, true);
+	okCfg2 &= xml.readHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP2,
 									  EquipmentPropNames::CFG_SERVICE_PORT2,
 									  &cfgService2.address);
+
+	result &= okCfg1 || okCfg2;
+
 	//
 
-	result &= xml.readStringElement(EquipmentPropNames::APP_DATA_SERVICE_ID1, &appDataService1.equipmentId, true);
-	result &= xml.readHostAddressPort(EquipmentPropNames::APP_DATA_SERVICE_IP1,
+	bool okApp1 = true;
+
+	okApp1 &= xml.readStringElement(EquipmentPropNames::APP_DATA_SERVICE_ID1, &appDataService1.equipmentId, true);
+	okApp1 &= xml.readHostAddressPort(EquipmentPropNames::APP_DATA_SERVICE_IP1,
 									  EquipmentPropNames::APP_DATA_SERVICE_PORT1,
 									  &appDataService1.address);
 
-	result &= xml.readStringElement(EquipmentPropNames::APP_DATA_SERVICE_ID2, &appDataService2.equipmentId, true);
-	result &= xml.readHostAddressPort(EquipmentPropNames::APP_DATA_SERVICE_IP2,
+	bool okApp2 = true;
+
+	okApp2 &= xml.readStringElement(EquipmentPropNames::APP_DATA_SERVICE_ID2, &appDataService2.equipmentId, true);
+	okApp2 &= xml.readHostAddressPort(EquipmentPropNames::APP_DATA_SERVICE_IP2,
 									  EquipmentPropNames::APP_DATA_SERVICE_PORT2,
 									  &appDataService2.address);
+
+	result &= okApp1 || okApp2;
+
 	return result;
 }
 

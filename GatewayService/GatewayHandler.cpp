@@ -10,9 +10,11 @@ namespace Gateway
 	// ---------------------------------------------------------------------------------
 
 	Handler::Handler(const SoftwareInfo& swInfo,
-					 const GatewayServiceSettings& settings) :
+					 const GatewayServiceSettings& settings,
+					 CircularLoggerShared log) :
 		m_swInfo(swInfo),
-		m_settings(settings)
+		m_settings(settings),
+		m_log(log)
 	{
 	}
 
@@ -29,7 +31,8 @@ namespace Gateway
 	bool Handlers::init(const Gateways& gateways,
 						const SoftwareInfo& swInfo,
 						const GatewayServiceSettings& settings,
-						const AppSignals& appSignals)
+						const AppSignals& appSignals,
+						CircularLoggerShared log)
 	{
 		Q_ASSERT(m_handlers.empty());
 
@@ -50,7 +53,7 @@ namespace Gateway
 					}
 
 					IvsImpulseHandlerShared ivsHandler =
-							std::make_shared<IvsImpulseHandler>(swInfo, settings, ivsGateway, appSignals);
+							std::make_shared<IvsImpulseHandler>(swInfo, settings, ivsGateway, appSignals, log);
 
 					m_handlers.push_back(ivsHandler);
 				}

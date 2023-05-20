@@ -23,8 +23,13 @@ namespace Gateway
 
 		Times minTime;
 		std::vector<GatewayAppSignalState> stateChangesToRead;
-
 		std::vector<GatewayAppSignalState> stateChangesToWrite;
+
+		bool hasStateChanges()
+		{
+			SimpleMutexLocker ml(&stateChangesMutex);
+			return !stateChangesToRead.empty();
+		}
 	};
 
 	using IvsImpulseListInfoShared = std::shared_ptr<IvsImpulseListInfo>;
@@ -35,7 +40,8 @@ namespace Gateway
 		IvsImpulseHandler(const SoftwareInfo& swInfo,
 						  const GatewayServiceSettings& settings,
 						  IvsImpulseGatewayShared gateway,
-						  const AppSignals& appSignals);
+						  const AppSignals& appSignals,
+						  CircularLoggerShared log);
 
 		~IvsImpulseHandler();
 

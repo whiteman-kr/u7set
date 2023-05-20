@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../UtilsLib/SimpleThread.h"
+#include "../OnlineLib/CircularLogger.h"
 #include "GatewayDescription.h"
 #include "AppSignalState.h"
 #include "IvsImpulseDataProtocol.h"
@@ -27,6 +28,8 @@ namespace Gateway
 
 		void onTimer();
 
+		bool tryCreateSockets();
+		bool isWorkableSocketExists() const;
 		void periodicSendStates();
 		void sendStateChanges();
 
@@ -58,14 +61,38 @@ namespace Gateway
 		DiscreteState_D getDiscreteStateD(const SimpleAppSignalState& state) const;
 
 	private:
+
+		static const int TRY_CREATE_SOCKET_INTERVAL_MS = 3000;
+
 		struct GatewayChannelInfo
 		{
-			GatewayChannelInfo(const HostAddressPort& ip)
+			GatewayChannelInfo(const HostAddressPort& localIP, const HostAddressPort& remoteIP)
 			{
-				 gatewayIP = ip;
+				 localGatewayIP = localIP;
+				 remoteGatewayIP = remoteIP;
 			}
 
-			HostAddressPort gatewayIP;
+			~GatewayChannelInfo()
+			{
+				clearSocket();
+			}
+
+			void clearSocket()
+			{
+				DELETE_IF_NOT_NULL(socket);
+
+				prevTryCreateSocketTime = QDateTime::currentMSecsSinceEpoch();
+			}
+
+			HostAddressPort localGatewayIP;
+			HostAddressPort remoteGatewayIP;
+
+			//
+
+			bool tryCreateSocket(CircularLoggerShared log);
+
+			qint64 prevTryCreateSocketTime = 0;
+			QUdpSocket* socket = nullptr;
 
 			int statesPacketsSentCount = 0;
 			int eventPacketsSentCount = 0;
@@ -73,6 +100,7 @@ namespace Gateway
 
 
 	private:
+		CircularLoggerShared m_log;
 		IvsImpulseGatewayShared m_gateway;
 		const AppSignals& m_appSignals;
 
@@ -88,7 +116,6 @@ namespace Gateway
 		//
 
 		QTimer m_timer;
-		QUdpSocket m_socket;
 	};
 
 	class IvsImpulseCommThread : public SimpleThread

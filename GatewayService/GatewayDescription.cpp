@@ -770,14 +770,20 @@ namespace Gateway
 	//
 	// ---------------------------------------------------------------------------------
 
-	const std::set<E::Setting>	IvsImpulseGateway::m_requiredSettings =
+	const std::set<E::Setting> IvsImpulseGateway::m_requiredSettings =
 	{
-		E::Setting::GatewayIP1,
-		E::Setting::GatewayIP2,
+		E::Setting::LocalGatewayIP1,
+		E::Setting::RemoteGatewayIP1,
 		E::Setting::SystemID,
 		E::Setting::ListsVersion,
 		E::Setting::Period,
 		E::Setting::TimeType
+	};
+
+	const std::set<E::Setting> IvsImpulseGateway::m_optionalSettings =
+	{
+		E::Setting::LocalGatewayIP2,
+		E::Setting::RemoteGatewayIP2
 	};
 
 	IvsImpulseGateway::IvsImpulseGateway() :
@@ -793,7 +799,8 @@ namespace Gateway
 	bool IvsImpulseGateway::isKnownSetting(E::Setting st) const
 	{
 		return Gateway::isKnownSetting(st) ||
-				m_requiredSettings.contains(st);
+				m_requiredSettings.contains(st) ||
+				m_optionalSettings.contains(st);
 	}
 
 	bool IvsImpulseGateway::checkAndApplySettings(int lineNo, ParserLog& log)
@@ -815,14 +822,24 @@ namespace Gateway
 
 			switch(st)
 			{
-			case E::Setting::GatewayIP1:
+			case E::Setting::LocalGatewayIP1:
 				addrPort.setAddressPortStr(sv.value.toString(),  0);
-				m_gatewayIP1 = addrPort;
+				m_localGatewayIP1 = addrPort;
 				break;
 
-			case E::Setting::GatewayIP2:
+			case E::Setting::RemoteGatewayIP1:
 				addrPort.setAddressPortStr(sv.value.toString(),  0);
-				m_gatewayIP2 = addrPort;
+				m_remoteGatewayIP1 = addrPort;
+				break;
+
+			case E::Setting::LocalGatewayIP2:
+				addrPort.setAddressPortStr(sv.value.toString(),  0);
+				m_localGatewayIP2 = addrPort;
+				break;
+
+			case E::Setting::RemoteGatewayIP2:
+				addrPort.setAddressPortStr(sv.value.toString(),  0);
+				m_remoteGatewayIP2 = addrPort;
 				break;
 
 			case E::Setting::SystemID:
@@ -872,14 +889,24 @@ namespace Gateway
 		return m_systemID;
 	}
 
-	HostAddressPort IvsImpulseGateway::gatewayIP1() const
+	HostAddressPort IvsImpulseGateway::localGatewayIP1() const
 	{
-		return m_gatewayIP1;
+		return m_localGatewayIP1;
 	}
 
-	HostAddressPort IvsImpulseGateway::gatewayIP2() const
+	HostAddressPort IvsImpulseGateway::remoteGatewayIP1() const
 	{
-		return m_gatewayIP2;
+		return m_remoteGatewayIP1;
+	}
+
+	HostAddressPort IvsImpulseGateway::localGatewayIP2() const
+	{
+		return m_localGatewayIP2;
+	}
+
+	HostAddressPort IvsImpulseGateway::remoteGatewayIP2() const
+	{
+		return m_remoteGatewayIP2;
 	}
 
 	int IvsImpulseGateway::listsVersion() const
@@ -902,8 +929,10 @@ namespace Gateway
 		xml.writeStartElement(XmlElement::SETTINGS);
 
 		xml.writeIntAttribute(XmlAttribute::SYSTEM_ID, m_systemID);
-		xml.writeHostAddressPortAttribute(XmlAttribute::GATEWAY_IP1, m_gatewayIP1);
-		xml.writeHostAddressPortAttribute(XmlAttribute::GATEWAY_IP2, m_gatewayIP2);
+		xml.writeHostAddressPortAttribute(XmlAttribute::LOCAL_GATEWAY_IP1, m_localGatewayIP1);
+		xml.writeHostAddressPortAttribute(XmlAttribute::REMOTE_GATEWAY_IP1, m_remoteGatewayIP1);
+		xml.writeHostAddressPortAttribute(XmlAttribute::LOCAL_GATEWAY_IP2, m_localGatewayIP2);
+		xml.writeHostAddressPortAttribute(XmlAttribute::REMOTE_GATEWAY_IP2, m_remoteGatewayIP2);
 		xml.writeIntAttribute(XmlAttribute::LISTS_VERSION, m_listsVersion);
 		xml.writeEnumKeyAttribute<::E::TimeType>(XmlAttribute::TIME_TYPE, m_timeType);
 		xml.writeIntAttribute(XmlAttribute::PERIOD, m_period);
@@ -917,8 +946,31 @@ namespace Gateway
 		result &= xml.findElement(XmlElement::SETTINGS);
 
 		result &= xml.readIntAttribute(XmlAttribute::SYSTEM_ID, &m_systemID);
-		result &= xml.readHostAddressPortAttribute(XmlAttribute::GATEWAY_IP1, &m_gatewayIP1);
-		result &= xml.readHostAddressPortAttribute(XmlAttribute::GATEWAY_IP2, &m_gatewayIP2);
+
+		//
+
+		bool okIp1 = true;
+
+		m_localGatewayIP1.clear();
+		m_remoteGatewayIP1.clear();
+
+		okIp1 &= xml.readHostAddressPortAttribute(XmlAttribute::LOCAL_GATEWAY_IP1, &m_localGatewayIP1);
+		okIp1 &= xml.readHostAddressPortAttribute(XmlAttribute::REMOTE_GATEWAY_IP1, &m_remoteGatewayIP1);
+
+		//
+
+		bool okIp2 = true;
+
+		m_localGatewayIP2.clear();
+		m_remoteGatewayIP2.clear();
+
+		okIp2 &= xml.readHostAddressPortAttribute(XmlAttribute::LOCAL_GATEWAY_IP2, &m_localGatewayIP2);
+		okIp2 &= xml.readHostAddressPortAttribute(XmlAttribute::REMOTE_GATEWAY_IP2, &m_remoteGatewayIP2);
+
+		result &= okIp1 || okIp2;
+
+		//
+
 		result &= xml.readIntAttribute(XmlAttribute::LISTS_VERSION, &m_listsVersion);
 		result &= xml.readEnumKeyAttribute<::E::TimeType>(XmlAttribute::TIME_TYPE, &m_timeType);
 		result &= xml.readIntAttribute(XmlAttribute::PERIOD, &m_period);
@@ -941,7 +993,7 @@ namespace Gateway
 
 		std::map<int, IvsImpulseSignalListShared> listsIDs;
 
-		for(SignalListShared l : m_signalLists)
+		for(SignalListShared& l : m_signalLists)
 		{
 			IvsImpulseSignalListShared sl =
 					std::dynamic_pointer_cast<IvsImpulseSignalList>(l);

@@ -626,7 +626,7 @@ int ServiceStarter::privateRun()
 		if (m_serviceWorker.getStrSetting(SoftwareSetting::EQUIPMENT_ID).isEmpty() == true)
 		{
 			DEBUG_LOG_MSG(m_logger, "");
-			DEBUG_LOG_ERR(m_logger, QString(tr("EquipmentID of service has NOT SET !!!")));
+			DEBUG_LOG_ERR(m_logger, QString(tr("EquipmentID of service is NOT SET !!!")));
 			return 7;
 		}
 

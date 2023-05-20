@@ -1,33 +1,35 @@
-//  this is a comment
+// - this is a comment
 
 //
 //	[Gateway], [SignalList], etc - sections
 //
 //	Type = V, ID = N, etc - settings
-//
+//	
 //	Sections names and settings names are case insensitive
 //
 //	Settings values are case sensitive
 //
-//	Signal IDs are case sensitive
+//	Signal IDs are case sensitive	
 //
 
 [Gateway]   						// --- gateway description
 
 GatewayType = IVS_Impulse           // gateway type
 GatewayID = HAES_1B_AZ1				// gateway identifier
-GatewayDescription = description		// free style gateway description
+GatewayDescription = description		// free style gateway description	
 
 // IVS Impulse gateway specifis settings
 
 SystemID = 2						// global system identifier
 
-GatewayIP1 = 224.0.0.221:9090		// IP and port of IVS gateway channel 1
-GatewayIP2 = 224.0.1.222:9090	    // IP and port of IVS gateway channel 2
+LocalGatewayIP1 = 224.0.0.253		// Local IP and port of IVS gateway channel 1	
+RemoteGatewayIP1 = 224.0.0.221:9090	// Remote IP and port of IVS gateway channel 1
+
+//GatewayIP2 = 224.0.1.222:9090	    // IP and port of IVS gateway channel 2
 
 ListsVersion = 1					// version of exchange lists
 
-TimeType = Plant					// possible values: Plant, Server, Local
+TimeType = Plant					// possible values: Plant, Local, System (UTC+0)
 Period = 1000						// periodic send state period, milliseconds
 
 [SignalList]						// --- signal list description
@@ -46,10 +48,10 @@ DataType = A 					 	// data type: A, B, D
 
 [SignalList]
 
-ListNo = 2
-SendEvents = false
-IncludeAppSignalID = 0
-DataType = B
+ListNo = 2	
+SendEvents = true   
+IncludeAppSignalID = 0	
+DataType = B 		
 
 #SYSTEMID_RACK01_FSCC01_MD00_CTRLIN_ARMINGKEYLA
 #LM2_LM1_BLINK4
@@ -65,10 +67,10 @@ DataType = B
 
 [SignalList]
 
-ListNo = 3
-SendEvents = false
-IncludeAppSignalID = 0
-DataType = D
+ListNo = 3	
+SendEvents = true   
+IncludeAppSignalID = 0	
+DataType = D 		
 
 #OUT_BUS32_B00
 #OUT_BUS32_B11
@@ -82,7 +84,7 @@ DataType = D
 #SYSTEMID_RACK01_FSCC01_MD00_PI_MODESTARTUP
 #LM2_LM1_BLINK3
 
-// [Gateway]
+// [Gateway]   
 // 		...
 // [SignalList]
 // 		...

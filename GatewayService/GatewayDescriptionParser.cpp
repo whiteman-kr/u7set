@@ -176,8 +176,10 @@ namespace Gateway
 		// IVS Impulse gateway specific settings
 		//
 		{ E::Setting::SystemID,				E::SettingType::Int		},
-		{ E::Setting::GatewayIP1,			E::SettingType::IpPort	},
-		{ E::Setting::GatewayIP2,			E::SettingType::IpPort	},
+		{ E::Setting::LocalGatewayIP1,		E::SettingType::IpPort	},
+		{ E::Setting::RemoteGatewayIP1,		E::SettingType::IpPort	},
+		{ E::Setting::LocalGatewayIP2,		E::SettingType::IpPort	},
+		{ E::Setting::RemoteGatewayIP2,		E::SettingType::IpPort	},
 		{ E::Setting::ListsVersion,			E::SettingType::Int		},
 		{ E::Setting::Period,				E::SettingType::Int		},
 		{ E::Setting::TimeType,				E::SettingType::String	},
@@ -772,37 +774,38 @@ namespace Gateway
 		return result;
 	}
 
-	bool Parser::parseIpPortValueStr(const QString& valueStr,
-													   ParseLineResult* plr)
+	bool Parser::parseIpPortValueStr(const QString& valueStr, ParseLineResult* plr)
 	{
 		TEST_PTR_RETURN_FALSE(plr);
 
 		QStringList sl = valueStr.trimmed().split(":", Qt::SkipEmptyParts);
 
-		static const QString errMsg("setting value is no valid IP:Port (for example 127.0.0.0:3500)");
+		bool ipValid = false;
 
-		bool result = true;
+		if (sl.count() >= 1)
+		{
+			// check IP
+			ipValid = HostAddressPort::isValidIPv4(sl[0]);
+		}
+
+		bool portValid = true;		// ok!
 
 		if (sl.count() == 2)
 		{
-			if (HostAddressPort::isValidIPv4(sl[0]) == false ||
-				HostAddressPort::isValidPort(sl[1]) == false)
-			{
-				plr->setError(errMsg);
-				result = false;
-			}
-			else
-			{
-				plr->value = QVariant(valueStr.trimmed());	// IpPort value store as string
-			}
+			// check port
+			portValid = HostAddressPort::isValidPort(sl[1]);
+		}
+
+		if (ipValid && portValid)
+		{
+			plr->value = QVariant(valueStr.trimmed());	// IpPort value store as string
 		}
 		else
 		{
-			plr->setError(errMsg);
-			result = false;
+			plr->setError("setting value is no valid IP:Port (for example 127.0.0.0 or 127.0.0.0:3500)");
 		}
 
-		return result;
+		return ipValid && portValid;
 	}
 
 	GatewayShared Parser::createTypedGateway(E::GatewayType gwType)

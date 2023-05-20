@@ -47,7 +47,6 @@ HEADERS += \
 	GatewayDescriptionParser.h \
 	GatewayHandler.h \
 	GatewayService.h \
-	InfoServer/IvsSocketThread.h \
 	IvsImpulseCommThread.h \
 	IvsImpulseDataProtocol.h \
 	IvsImpulseGatewayHandler.h
