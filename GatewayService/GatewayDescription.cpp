@@ -991,7 +991,7 @@ namespace Gateway
 	{
 		bool result = true;
 
-		std::map<int, IvsImpulseSignalListShared> listsIDs;
+		std::map<DataType_ListID, IvsImpulseSignalListShared> listsIDs;
 
 		for(SignalListShared& l : m_signalLists)
 		{
@@ -1000,19 +1000,28 @@ namespace Gateway
 
 			TEST_PTR_CONTINUE(sl);
 
-			auto it = listsIDs.find(sl->listNo());
+			if (sl->listNo() < 1 || sl->listNo() > 255)
+			{
+				SettingValue sv = sl->getSettingValue(E::Setting::ListNo);
+				log.logError(QString("ListNo should be in range from 1 to 255 (line %1)").arg(sv.lineNo));
+				result = false;
+				continue;
+			}
+
+			auto it = listsIDs.find({sl->dataType(), sl->listNo()});
 
 			if (it == listsIDs.end())
 			{
-				listsIDs.insert({ sl->listNo(), sl });
+				listsIDs.insert({{sl->dataType(), sl->listNo()}, sl });
 				continue;
 			}
 
 			SettingValue sv1 = it->second->getSettingValue(E::Setting::ListNo);
 			SettingValue sv2 = sl->getSettingValue(E::Setting::ListNo);
 
-			log.logError(QString("duplicate signal lists ListNo = %1 (lines %2, %3)").
-						 arg(sl->listNo()).arg(sv1.lineNo).arg(sv2.lineNo));
+			log.logError(QString("duplicate signal lists ListNo = %1 of data type %2 (lines %3, %4)").
+						 arg(sl->listNo()).arg(::E::valueToString<E::SignalListDataType>(sl->dataType())).
+						 arg(sv1.lineNo).arg(sv2.lineNo));
 
 			result = false;
 		}
@@ -1025,7 +1034,7 @@ namespace Gateway
 		m_files.clear();
 		bool result = true;
 
-		for(SignalListShared l : m_signalLists)
+		for(SignalListShared& l : m_signalLists)
 		{
 			IvsImpulseSignalListShared sl =
 					std::dynamic_pointer_cast<IvsImpulseSignalList>(l);
@@ -1149,4 +1158,11 @@ namespace Gateway
 
 		return result;
 	}
+
+	bool operator < (const IvsImpulseGateway::DataType_ListID& s1,
+					 const IvsImpulseGateway::DataType_ListID& s2)
+	{
+		return (TO_INT(s1.dataType) * 1000 + s1.listID) < (TO_INT(s2.dataType) * 1000 + s2.listID);
+	}
+
 }
