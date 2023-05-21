@@ -15,13 +15,13 @@ namespace Gateway
 		int startIndex = -1;
 		int size = -1;
 
-		quint16 iventsPacketNo = 0;
+		quint16 eventsPacketNo = 0;
 
-		std::map<Hash, int> hashToListIndex;		// Hash(appSignalID) => index in signal list
+		std::map<Hash, std::vector<int>> hashToListIndexes;		// Hash(appSignalID) => indexes in signal list
+																// vector is required if same signal repeated in list several times
 
 		SimpleMutex stateChangesMutex;
 
-		Times minTime;
 		std::vector<GatewayAppSignalState> stateChangesToRead;
 		std::vector<GatewayAppSignalState> stateChangesToWrite;
 
@@ -66,7 +66,7 @@ namespace Gateway
 
 		// signal hash => lists where this signal live
 		//
-		std::map<Hash, std::vector<IvsImpulseListInfoShared>> m_hashToLists;
+		std::map<Hash, std::set<IvsImpulseListInfoShared>> m_hashToLists;
 
 		AppDataServiceClientThread* m_appDataServiceClientThread = nullptr;
 		IvsImpulseCommThread* m_ivsImpulseCommThread = nullptr;

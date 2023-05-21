@@ -112,14 +112,9 @@ message GatewayAppSignalState
 message GatewayGetAppSignalStateChangesReply
 {
 	optional int32 error = 1 [default = 0];
+	optional int32 pendingStatesCount = 2 [default = 0];
 
-	optional int64 minPlantTime = 2 [default = 0];
-	optional int64 minSystemTime = 3 [default = 0];
-	optional int64 minLocalTime = 4 [default = 0];
-
-	optional int32 pendingStatesCount = 5 [default = 0];
-
-	repeated GatewayAppSignalState appSignalStates = 6;		// Limited to ADS_GET_APP_SIGNAL_STATE_MAX (2000)
+        repeated GatewayAppSignalState appSignalStates = 3;		// Limited to ADS_GET_APP_SIGNAL_STATE_MAX (2000)
 }
 
 //

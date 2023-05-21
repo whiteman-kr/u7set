@@ -106,7 +106,16 @@ namespace Gateway
 					AppSignalState& newState = m_states.emplace_back(h, ivsList->sendEvents());
 					newState.setListIndex(listIndex);
 
-					li->hashToListIndex.insert({h, listIndex});
+					auto it = li->hashToListIndexes.find(h);
+
+					if (it == li->hashToListIndexes.end())
+					{
+						li->hashToListIndexes.insert({h, {listIndex}});
+					}
+					else
+					{
+						it->second.push_back(listIndex);
+					}
 				}
 				else
 				{
@@ -125,7 +134,7 @@ namespace Gateway
 
 		//
 
-		for(auto& list : m_lists)
+		for(IvsImpulseListInfoShared& list : m_lists)
 		{
 			const auto& ids = list->info->signalIDs();
 
@@ -137,12 +146,12 @@ namespace Gateway
 
 				if (it == m_hashToLists.end())
 				{
-					auto p = m_hashToLists.emplace(h, std::vector<IvsImpulseListInfoShared>());
+					auto p = m_hashToLists.emplace(h, std::set<IvsImpulseListInfoShared>());
 
 					it = p.first;
 				}
 
-				it->second.push_back(list);
+				it->second.insert(list);
 			}
 		}
 

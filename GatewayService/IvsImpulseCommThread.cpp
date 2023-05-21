@@ -138,37 +138,7 @@ namespace Gateway
 			//
 			header.time = static_cast<qint32>(time / 1000);
 
-			for(auto& ci : m_channelsInfo)
-			{
-				if (ci.socket == nullptr)
-				{
-					continue;
-				}
-
-				qint64 res = ci.socket->writeDatagram(m_sendBuffer, packetSize,
-									   ci.remoteGatewayIP.address(), ci.remoteGatewayIP.port());
-
-				if (res == -1)
-				{
-					DEBUG_LOG_ERR(m_log, QString("Error send packet to %1 via %2 (%3). Socket closed.").
-											arg(ci.remoteGatewayIP.addressPortStr()).
-											arg(ci.localGatewayIP.addressPortStr()).
-											arg(ci.socket->errorString()));
-					ci.clearSocket();
-
-					continue;
-				}
-
-				ci.statesPacketsSentCount++;
-
-				if ((ci.statesPacketsSentCount % 20) == 0)
-				{
-					qDebug() << C_STR(QString("State packets send to %1 via %2: %3").
-									  arg(ci.remoteGatewayIP.addressPortStr()).
-									  arg(ci.localGatewayIP.addressPortStr()).
-									  arg(ci.statesPacketsSentCount));
-				}
-			}
+			sendPacket(m_sendBuffer, packetSize, false);
 		}
 
 		m_signalStatesUpdated = false;
@@ -202,7 +172,7 @@ namespace Gateway
 			li->stateChangesMutex.lock(thread);
 
 			int writtenParamCount = 0;
-			qint64 baseTime_ms = 0;
+			qint64 baseTime_ms = -1;
 
 			packetSize += writeStateChangesToPacket(li,
 													&packet->signalEvents,
@@ -210,12 +180,7 @@ namespace Gateway
 													baseTime_ms,
 													li->stateChangesToRead,
 													writtenParamCount);
-
-			Q_ASSERT(writtenParamCount == static_cast<int>(li->stateChangesToRead.size()));
-
 			li->stateChangesToRead.clear();
-			li->minTime.clear();
-
 			li->stateChangesMutex.unlock(thread);
 
 			//
@@ -224,35 +189,99 @@ namespace Gateway
 
 			header.time = static_cast<qint32>(baseTime_ms / 1000);	// milliseconds -> seconds
 
-			for(auto& ci : m_channelsInfo)
+			sendPacket(m_sendBuffer, packetSize, true);
+		}
+	}
+
+	void IvsImpulseCommThreadWorker::sendPacket(const char* packet, qint64 packetSize, bool eventsPacket)
+	{
+		TEST_PTR_RETURN(packet);
+
+		for(GatewayChannelInfo& ci : m_channelsInfo)
+		{
+			TEST_PTR_CONTINUE(ci.socket);
+
+			quint64 res = ci.socket->writeDatagram(packet, packetSize,
+								   ci.remoteGatewayIP.address(), ci.remoteGatewayIP.port());
+
+			if (res == -1)
 			{
-				TEST_PTR_CONTINUE(ci.socket);
+				DEBUG_LOG_ERR(m_log, QString("Error send packet to %1 via %2 (%3). Socket closed.").
+										arg(ci.remoteGatewayIP.addressPortStr()).
+										arg(ci.localGatewayIP.addressPortStr()).
+										arg(ci.socket->errorString()));
+				ci.clearSocket();
 
-				quint64 res = ci.socket->writeDatagram(m_sendBuffer, packetSize,
-									   ci.remoteGatewayIP.address(), ci.remoteGatewayIP.port());
+				continue;
+			}
 
-				if (res == -1)
+			if (eventsPacket == true)
+			{
+				// logEventPacket(packet);
+
+				ci.eventPacketsSentCount++;
+
+				if ((ci.eventPacketsSentCount % 20) == 0)
 				{
-					DEBUG_LOG_ERR(m_log, QString("Error send packet to %1 via %2 (%3). Socket closed.").
-											arg(ci.remoteGatewayIP.addressPortStr()).
-											arg(ci.localGatewayIP.addressPortStr()).
-											arg(ci.socket->errorString()));
-					ci.clearSocket();
-
-					continue;
+					qDebug() << C_STR(QString("Events packets send to %1 via %2: %3").
+									  arg(ci.remoteGatewayIP.addressPortStr()).
+									  arg(ci.localGatewayIP.addressPortStr()).
+									  arg(ci.eventPacketsSentCount));
 				}
-
+			}
+			else
+			{
 				ci.statesPacketsSentCount++;
 
 				if ((ci.statesPacketsSentCount % 20) == 0)
 				{
-					qDebug() << C_STR(QString("State changes packets send to %1 via %2: %3").
+					qDebug() << C_STR(QString("Periodic packets send to %1 via %2: %3").
 									  arg(ci.remoteGatewayIP.addressPortStr()).
 									  arg(ci.localGatewayIP.addressPortStr()).
 									  arg(ci.statesPacketsSentCount));
 				}
+
 			}
 		}
+
+	}
+
+	void IvsImpulseCommThreadWorker::logEventPacket(const char* packet)
+	{
+		TEST_PTR_RETURN(packet);
+
+		auto toBin = [](quint8 b) -> QString
+		{
+			QString binCode;
+
+			for(int i = 0; i < 8; i++)
+			{
+				binCode += (b & 0x80 ? "1" : "0");
+				b <<= 1;
+			}
+
+			return binCode;
+		};
+
+		const IvsImpulseEventsPacket* eventPacket = reinterpret_cast<const IvsImpulseEventsPacket*>(packet);
+		const IvsImpulsePacketHeader& header = eventPacket->header;
+		const IvsImpulseSignalEvent* event = &eventPacket->signalEvents;
+
+		QString&& str = QString("SysID=%1, DataType=%2, ListID=%3, ListVer=%4, FirstIndex=%5, ParamCount=%6, BaseTime=%7, PacketNo=%8: ").
+							arg(header.systemID).arg(header.dataType).arg(header.listID).arg(header.listVersion).
+							arg(header.firstParamIndex).arg(header.paramCount).arg(header.time).
+							arg(*reinterpret_cast<const quint16*>(event + header.paramCount));
+
+		for(quint16 i = 0; i < header.paramCount; i++, event++)
+		{
+			str += QString("[indx=%1, time=%2, prev=%3, new=%4]").
+						arg(event->indexInList).arg(event->timeOffset).
+						arg(toBin(event->prevCode_A.allFlags)).arg(toBin(event->newCode_A.allFlags));
+		}
+
+		str += "\n";
+
+		qDebug() << C_STR(str);
 	}
 
 	int IvsImpulseCommThreadWorker::writeStatesToPacket(IvsImpulseStatesPacket* packet,
@@ -418,13 +447,13 @@ namespace Gateway
 	}
 
 	int IvsImpulseCommThreadWorker::writeStateChangesToPacket(std::shared_ptr<IvsImpulseListInfo>& li,
-															IvsImpulseSignalEvent* event,
+															IvsImpulseSignalEvent* events,
 															E::SignalListDataType dataType,
-															qint64 baseTime_ms,
+															qint64& baseTime_ms,
 															const std::vector<GatewayAppSignalState>& stateChanges,
 															int& paramCount)
 	{
-		TEST_PTR_RETURN_VALUE(event, 0);
+		TEST_PTR_RETURN_VALUE(events, 0);
 
 		::E::TimeType timeType = m_gateway->timeType();
 		paramCount = 0;
@@ -432,17 +461,20 @@ namespace Gateway
 
 		qint64 time = 0;
 
+		m_eventsTimes.clear();
+		baseTime_ms = std::numeric_limits<qint64>::max();
+
+		IvsImpulseSignalEvent* eventPtr = events;
+
 		for(const GatewayAppSignalState& st : stateChanges)
 		{
-			auto it = li->hashToListIndex.find(st.curState.hash);
+			auto it = li->hashToListIndexes.find(st.curState.hash);
 
-			if (it == li->hashToListIndex.end())
+			if (it == li->hashToListIndexes.end())
 			{
 				Q_ASSERT(false);
 				continue;
 			}
-
-			event->indexInList = static_cast<quint16>(it->second);
 
 			switch(timeType)
 			{
@@ -452,7 +484,49 @@ namespace Gateway
 			default: Q_ASSERT(false);
 			}
 
-			qint64 timeOffset = time - baseTime_ms;
+			baseTime_ms = std::min(baseTime_ms, time);							// detect minimal time in events
+
+			std::vector<int>& indexes = it->second;
+
+			for(int indexInList : indexes)
+			{
+				eventPtr->indexInList = static_cast<quint16>(indexInList);
+
+				m_eventsTimes.push_back(time);									// save events times
+
+				switch(dataType)
+				{
+				case E::SignalListDataType::Analog_A:
+					eventPtr->prevCode_A = getAnalogStateCodeA(st.prevState);
+					eventPtr->newCode_A = getAnalogStateCodeA(st.curState);
+					break;
+
+				case E::SignalListDataType::Discrete_D:
+				case E::SignalListDataType::Discrete_B:
+					eventPtr->prevState_D = getDiscreteStateD(st.prevState);
+					eventPtr->newState_D = getDiscreteStateD(st.curState);
+					break;
+
+				default: Q_ASSERT(false);
+				}
+
+				eventPtr++;
+
+				paramCount++;
+				dataSize += sizeof(IvsImpulseSignalEvent);
+			}
+		}
+
+		eventPtr = events;
+
+		baseTime_ms /= 1000;
+		baseTime_ms *= 1000;
+
+		// writing events time offsets
+		//
+		for(int i = 0; i < paramCount; i++)
+		{
+			qint64 timeOffset = m_eventsTimes[i] - baseTime_ms;
 
 			if (timeOffset < 0)
 			{
@@ -460,29 +534,15 @@ namespace Gateway
 				timeOffset = 0;
 			}
 
-			event->timeOffset = static_cast<quint16>(timeOffset);
-
-			switch(dataType)
-			{
-			case E::SignalListDataType::Analog_A:
-				event->prevCode_A = getAnalogStateCodeA(st.prevState);
-				event->newCode_A = getAnalogStateCodeA(st.curState);
-				break;
-
-			case E::SignalListDataType::Discrete_D:
-			case E::SignalListDataType::Discrete_B:
-				event->prevState_D = getDiscreteStateD(st.prevState);
-				event->newState_D = getDiscreteStateD(st.curState);
-				break;
-
-			default: Q_ASSERT(false);
-			}
-
-			event++;
-
-			paramCount++;
-			dataSize += sizeof(IvsImpulseSignalEvent);
+			eventPtr->timeOffset = static_cast<quint16>(timeOffset);
+			eventPtr++;
 		}
+
+		quint16* packetNoPtr = reinterpret_cast<quint16*>(eventPtr);
+
+		*packetNoPtr = li->eventsPacketNo++;
+
+		dataSize += sizeof(quint16);
 
 		return dataSize;
 	}
