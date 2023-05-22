@@ -33,6 +33,10 @@ namespace Gateway
 		void periodicSendStates();
 		void sendStateChanges();
 
+		void sendPacket(const char* packet, qint64 packetSize, bool eventsPacket);
+
+		void logEventPacket(const char* packet);
+
 		int writeStatesToPacket(IvsImpulseStatesPacket* packet,
 								E::SignalListDataType dataType,
 								int startIndex, int size,
@@ -53,7 +57,7 @@ namespace Gateway
 		int writeStateChangesToPacket(std::shared_ptr<IvsImpulseListInfo> &li,
 									  IvsImpulseSignalEvent* events,
 									  E::SignalListDataType dataType,
-									  qint64 baseTime_ms,
+									  qint64& baseTime_ms,
 									  const std::vector<GatewayAppSignalState>& stateChanges,
 									  int& paramCount);
 
@@ -110,6 +114,8 @@ namespace Gateway
 		std::vector<std::shared_ptr<IvsImpulseListInfo>>& m_lists;
 
 		std::vector<GatewayChannelInfo> m_channelsInfo;
+
+		std::vector<qint64> m_eventsTimes;
 
 		char m_sendBuffer[IVS_IMPULSE_PACKET_MAX_SIZE + 100];
 

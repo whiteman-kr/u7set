@@ -294,6 +294,14 @@ namespace Gateway
 		static const std::set<E::Setting> m_optionalSettings;
 
 	public:
+
+		struct DataType_ListID
+		{
+			E::SignalListDataType dataType = E::SignalListDataType::Unknown;
+			int listID = 0;
+		};
+
+	public:
 		IvsImpulseGateway();
 		IvsImpulseGateway(const QString& gwID, const QString& gwDesc);
 
@@ -341,6 +349,9 @@ namespace Gateway
 		::E::TimeType m_timeType = ::E::TimeType::Plant;
 		int m_period = 1000;
 	};
+
+	bool operator < (const IvsImpulseGateway::DataType_ListID& s1,
+					 const IvsImpulseGateway::DataType_ListID& s2);
 
 	using IvsImpulseGatewayShared = std::shared_ptr<IvsImpulseGateway>;
 }

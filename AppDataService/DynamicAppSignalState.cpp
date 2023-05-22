@@ -383,14 +383,7 @@ int DynamicAppSignalState::setState(const Times& time,
 
 	if (m_gatewayQueueMask != 0 && hasGatewaySendReasone(curState.flags) == true)
 	{
-		GatewayAppSignalStateQueueMask state;
-
-		state.gatewayQueueMask = m_gatewayQueueMask;
-		state.gwState.prevState = prevState;
-		state.gwState.curState = curState;
-
-		m_gwStatesQueue->push(state, thread);
-
+		sendAppSignalStateChangeToGateway(prevState, curState, thread);
 		pushedStatesCtr++;
 	}
 
@@ -448,6 +441,8 @@ int DynamicAppSignalState::setUnavailable(const Times& time,
 
 	statesQueue.push(curState, m_archive, thread);
 	pushedStatesCount++;
+
+	sendAppSignalStateChangeToGateway(prevState, curState, thread);
 
 	m_prevStateIsStored = true;
 
@@ -752,6 +747,20 @@ void DynamicAppSignalState::releaseRtProcessingOwnership(const QThread* currentP
 	Q_UNUSED(result);
 }
 
+void DynamicAppSignalState::sendAppSignalStateChangeToGateway(const SimpleAppSignalState& prevState,
+															  const SimpleAppSignalState& newState,
+															  const QThread* thread)
+{
+	GatewayAppSignalStateQueueMask state;
+
+	state.gatewayQueueMask = m_gatewayQueueMask;
+	state.gwState.prevState = prevState;
+	state.gwState.curState = newState;
+
+	m_gwStatesQueue->push(state, thread);
+}
+
+
 void DynamicAppSignalState::setNewCurState(const SimpleAppSignalState& newCurState)
 {
 	int writeStateIndex = m_curStateIndex.load() == 0 ? 1 : 0;
@@ -765,14 +774,14 @@ bool DynamicAppSignalState::hasGatewaySendReasone(AppSignalStateFlags flags) con
 {
 	if (m_signalType == E::SignalType::Discrete)
 	{
-		return ((flags.all & AppSignalStateFlags::MASK_VALIDITY_AND_AVAILABLE_FLAGS) ||
-			   (flags.all & AppSignalStateFlags::MASK_COARSE_APERTURE)) != 0;		// discrete state change
+		return	flags.validityChange ||
+				flags.coarseAperture;		// discrete state change
 	}
 
 	if (m_signalType == E::SignalType::Analog)
 	{
-		return ((flags.all & AppSignalStateFlags::MASK_VALIDITY_AND_AVAILABLE_FLAGS) ||
-			   (flags.all & AppSignalStateFlags::MASK_LIMITS_FLAGS)) != 0;
+		return flags.validityChange ||
+			   flags.limitFlagsChange;
 	}
 
 	return false;

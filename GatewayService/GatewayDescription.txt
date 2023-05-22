@@ -22,8 +22,11 @@ GatewayDescription = description		// free style gateway description
 
 SystemID = 2						// global system identifier
 
-LocalGatewayIP1 = 224.0.0.253		// Local IP and port of IVS gateway channel 1	
-RemoteGatewayIP1 = 224.0.0.221:9090	// Remote IP and port of IVS gateway channel 1
+LocalGatewayIP1 = 127.0.0.1		  	// Local IP and port of IVS gateway channel 1	
+RemoteGatewayIP1 = 127.0.0.11:3000	// Remote IP and port of IVS gateway channel 1
+
+LocalGatewayIP2 = 127.0.0.2		// Local IP and port of IVS gateway channel 1	
+RemoteGatewayIP2 = 127.0.0.22:9090	// Remote IP and port of IVS gateway channel 1
 
 //GatewayIP2 = 224.0.1.222:9090	    // IP and port of IVS gateway channel 2
 
@@ -84,6 +87,14 @@ DataType = D
 #SYSTEMID_RACK01_FSCC01_MD00_PI_MODESTARTUP
 #LM2_LM1_BLINK3
 
+[SignalList]
+
+ListNo = 4
+SendEvents = true   
+IncludeAppSignalID = 0	
+DataType = B 		
+
+#LM2_LM1_BLINK3
 // [Gateway]   
 // 		...
 // [SignalList]

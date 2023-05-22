@@ -89,6 +89,10 @@ private:
 	void takeRtProcessingOwnership(const QThread* newProcessingOwner);
 	void releaseRtProcessingOwnership(const QThread* currentProcessingOwner);
 
+	void sendAppSignalStateChangeToGateway(const SimpleAppSignalState& prevState,
+										   const SimpleAppSignalState& newState,
+										   const QThread* thread);
+
 private:
 	SimpleAppSignalStatesArchiveFlagQueue* m_statesQueue = nullptr;
 	GatewayAppSignalStatesQueue* m_gwStatesQueue = nullptr;

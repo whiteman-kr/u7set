@@ -48,14 +48,21 @@ namespace Gateway
 
 		Network::GatewayGetAppSignalStateChangesRequest initialRequest;
 
-		initialRequest.mutable_signalshashes()->Reserve(TO_INT(m_states.size()));
+		std::set<Hash> eventHashes;
 
-		for(const auto& st : m_states)
+		for(const AppSignalState& st : m_states)
 		{
 			if (st.isWorkable() == true && st.requestEvents() == true)
 			{
-				initialRequest.add_signalshashes(st.hash());
+				eventHashes.insert(st.hash());
 			}
+		}
+
+		initialRequest.mutable_signalshashes()->Reserve(TO_INT(eventHashes.size()));
+
+		for(Hash h : eventHashes)
+		{
+			initialRequest.add_signalshashes(h);
 		}
 
 		sendRequest(ADS_GATEWAY_GET_APP_SIGNAL_STATE_CHANGES, initialRequest);
@@ -138,12 +145,17 @@ namespace Gateway
 			return;
 		}
 
+		int statesCount = reply.appsignalstates_size();
+
+		if (statesCount == 0)
+		{
+			return;
+		}
+
 		for(auto& list : m_lists)
 		{
 			list->stateChangesToWrite.clear();
 		}
-
-		int statesCount = reply.appsignalstates_size();
 
 		GatewayAppSignalState state;
 
@@ -163,9 +175,9 @@ namespace Gateway
 				continue;
 			}
 
-			std::vector<IvsImpulseListInfoShared>& lists = it->second;
+			const std::set<IvsImpulseListInfoShared>& lists = it->second;
 
-			for(IvsImpulseListInfoShared& list : lists)
+			for(const IvsImpulseListInfoShared& list : lists)
 			{
 				list->stateChangesToWrite.push_back(state);
 			}
@@ -176,10 +188,6 @@ namespace Gateway
 		for(IvsImpulseListInfoShared& list : m_lists)
 		{
 			list->stateChangesMutex.lock(thread);
-
-			list->minTime.plant.timeStamp = reply.minplanttime();
-			list->minTime.system.timeStamp = reply.minsystemtime();
-			list->minTime.local.timeStamp = reply.minlocaltime();
 
 			list->stateChangesToWrite.swap(list->stateChangesToRead);
 

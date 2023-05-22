@@ -43,7 +43,7 @@ namespace Gateway
 
 		std::vector<std::shared_ptr<IvsImpulseListInfo>>& m_lists;
 		AppSignalStates& m_states;
-		std::map<Hash, std::vector<std::shared_ptr<IvsImpulseListInfo>>>& m_hashToLists;
+		std::map<Hash, std::set<std::shared_ptr<IvsImpulseListInfo>>>& m_hashToLists;
 		std::atomic_bool& m_signalStatesUpdated;
 
 		//
