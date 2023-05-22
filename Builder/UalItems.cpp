@@ -370,7 +370,7 @@ namespace Builder
 		return m_appLogicItem.afbElement().caption().startsWith(MISMATCH_ITEM_CAPTION);
 	}
 
-	bool UalItem::assignFlags() const
+    bool UalItem::assignFlags(IssueLogger* log) const
 	{
 		const VFrame30::SchemaItemAfb* schemaItemAfb = dynamic_cast<const VFrame30::SchemaItemAfb*>(m_appLogicItem.m_fblItem.get());
 
@@ -384,11 +384,14 @@ namespace Builder
 
 		if (result.has_value() == true)
 		{
-			return result.value();
+            return result.value();
 		}
 
-		assert(false);			// AssignFlags property isn't exist in schemaItemAfb
-								// Why assignFlags() has been called fot this schemaItemAfb ???
+        LOG_ERROR_OBSOLETE(log, IssuePrefix::NotDefined,
+                           QString("Assign flags ualItem %1").
+                           arg(schemaItemAfb->label()));
+//		assert(false);			// AssignFlags property isn't exist in schemaItemAfb
+                                // Why assignFlags() has been called for this schemaItemAfb ???
 		return false;
 	}
 
@@ -1714,14 +1717,16 @@ namespace Builder
 		return m_parentBusSignal->anyParentBusIsAcquired();
 	}
 
-	void UalSignal::setLoopback(std::shared_ptr<Loopback> loopback)
+    bool UalSignal::setLoopback(std::shared_ptr<Loopback> loopback)
 	{
 		if (m_loopback != nullptr)
 		{
-			assert(false);				// reassigning of loopback, why?
+            assert(false);				// reassigning of loopback, why?
+            return false;
 		}
 
 		m_loopback = loopback;
+        return true;
 	}
 
 	std::shared_ptr<Loopback> UalSignal::loopback() const

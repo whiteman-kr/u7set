@@ -3182,7 +3182,7 @@ namespace Builder
 				continue;
 			}
 
-			if (ualItem->assignFlags() == false)
+            if (ualItem->assignFlags(log()) == false)
 			{
 				continue;
 			}
@@ -3255,7 +3255,7 @@ namespace Builder
 				continue;
 			}
 
-			if (ualItem->assignFlags() == false)
+            if (ualItem->assignFlags(log()) == false)
 			{
 				continue;
 			}
