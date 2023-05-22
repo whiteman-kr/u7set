@@ -449,7 +449,8 @@ public:
 
 	void writeToAzpzXml(XmlWriteHelper& xml);
 
-	void writeToXml(XmlWriteHelper& xml);
+    [[nodiscard]] bool writeToXml(XmlWriteHelper& xml);
+
 	void writeDoubleSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName = QString());
 	void writeIntSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName = QString());
 

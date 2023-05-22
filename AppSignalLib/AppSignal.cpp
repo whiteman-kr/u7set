@@ -54,7 +54,7 @@ bool AppSignalSpecPropValue::create(const QString& name, const QVariant& value, 
 	m_value = value;
 	m_isEnum = isEnum;
 
-	return true;
+    return true;
 }
 
 bool AppSignalSpecPropValue::setValue(const QString& name, const QVariant& value, bool isEnum)
@@ -1361,8 +1361,10 @@ void AppSignal::writeToAzpzXml(XmlWriteHelper& xml)
 }
 
 
-void AppSignal::writeToXml(XmlWriteHelper& xml)
+bool AppSignal::writeToXml(XmlWriteHelper& xml)
 {
+    bool result = true;
+
 	xml.writeStartElement(XmlElement::SIGNAL_ELEM);	// <Signal>
 
 	xml.writeIntAttribute(AppSignalPropNames::ID, m_ID);
@@ -1462,13 +1464,15 @@ void AppSignal::writeToXml(XmlWriteHelper& xml)
                 continue;
             }
 
-			Q_ASSERT(false);		// unknown E::* enum type!
+            result = false; //Q_ASSERT(false);		// unknown E::* enum type!
 		}
 	}
 
 	xml.writeStringAttribute(AppSignalPropNames::TAGS, tags().join(Separator::COMMA));
 
 	xml.writeEndElement();				// </Signal>
+
+    return result;
 }
 
 void AppSignal::writeDoubleSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName)

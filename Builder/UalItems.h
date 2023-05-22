@@ -128,7 +128,7 @@ namespace Builder
 		bool isSimLockItem() const;
 		bool isMismatchItem() const;
 
-		bool assignFlags() const;
+        bool assignFlags(IssueLogger* log) const;
 
 		E::UalItemType type() const;
 
@@ -531,7 +531,7 @@ namespace Builder
 
 		bool isLoopbackSource() const { return m_loopback != nullptr; }
 
-		void setLoopback(std::shared_ptr<Loopback> loopback);
+        bool setLoopback(std::shared_ptr<Loopback> loopback);
 		std::shared_ptr<Loopback> loopback() const;
 		QString loopbackID() const;
 

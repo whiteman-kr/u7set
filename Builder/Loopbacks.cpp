@@ -192,8 +192,17 @@ namespace Builder
 		if (loopback->ualSignal() == nullptr)
 		{
 			loopback->setUalSignal(ualSignal);
-			ualSignal->setLoopback(loopback);
-		}
+            bool res = ualSignal->setLoopback(loopback);
+
+ /*           if (res == false)
+            {
+                LOG_ERROR_OBSOLETE(m_compiler.log(), IssuePrefix::NotDefined,
+                                   QString("Assign to signal %1, already LB %2, new LB %3").
+                                        arg(ualSignal->appSignalID()).
+                                        arg(ualSignal->loopbackID()).
+                                   arg(loopback->loopbackID()));
+            } */
+        }
 		else
 		{
 			if (loopback->ualSignal() != ualSignal)
@@ -332,7 +341,7 @@ namespace Builder
 				continue;
 			}
 
-			for(const std::pair<QUuid, const UalItem*>& pr : linkedPins)
+            for(const auto& pr : linkedPins)
 			{
 				QUuid linkedPin = pr.first;
 
