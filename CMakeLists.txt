@@ -20,8 +20,11 @@ project(
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
-	set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+# Add LTO for Rlease and Windows only. 
+# It is diasbale for Unix to speed up CI bulid.
+#
+if(CMAKE_BUILD_TYPE STREQUAL "Release" AND MSVC)
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
 # Where to put binaries.
@@ -89,7 +92,7 @@ if(NOT CODE_COVERAGE)
 
 	add_subdirectory(./Tools/PacketSource)
 	add_subdirectory(./Tools/PacketViewer)	
-endif(CODE_COVERAGE)
+endif()
 
 add_subdirectory(TestSuiteLib)
 add_subdirectory(TestSuite)
