@@ -1,0 +1,131 @@
+#pragma once
+
+#include "ReportObject.h"
+#include "ReportSchemaView.h"
+
+namespace ReportLib
+{
+	//
+	// ReportFileTypeParams
+	//
+
+	struct ReportFileTypeParams
+	{
+		ReportFileTypeParams(int fileId, const QString& caption, bool selected)
+		{
+			this->fileId = fileId;
+			this->caption = caption;
+			this->selected = selected;
+		}
+
+		ReportFileTypeParams(int fileId, const QString& caption, bool selected, QPageLayout pageLayout)
+			:ReportFileTypeParams(fileId, caption, selected)
+		{
+			this->pageLayout = pageLayout;
+		}
+
+		int fileId = -1;
+		QString caption;
+		bool selected = false;
+
+		// Multiple-file report section page options
+		//
+		QPageLayout pageLayout = QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, QMarginsF(15, 15, 15, 15));
+	};
+
+	//
+	// ReportSection
+	//
+
+	class ReportSection
+	{
+	public:
+		static std::shared_ptr<ReportSection> create(const QString& caption);
+
+		ReportSection(const QString& caption);
+		virtual ~ReportSection();
+
+		QTextDocument& textDocument();
+		std::shared_ptr<ReportSchema> schemaObject() const;
+
+		const QString& caption() const;
+
+		// Add object functions
+		//
+		std::shared_ptr<ReportText> addText(const QString& text, const ReportObjectFormat& format);
+		std::shared_ptr<ReportText> addText(std::shared_ptr<ReportText> object);
+
+		std::shared_ptr<ReportTable> addTable(const QStringList& headerLabels, const std::vector<int>& columnWidths, const ReportObjectFormat& format);
+		std::shared_ptr<ReportTable> addTable(std::shared_ptr<ReportTable> object);
+
+		std::shared_ptr<ReportSchema> addSchema(std::shared_ptr<ReportSchema> object);
+
+		// Render functions
+		//
+		void render(QSizeF pageSize);
+
+		int pageCount() const;	// filled after render()!!!
+
+	private:
+		void addObject(std::shared_ptr<ReportObject> object);
+
+	private:
+		QString m_caption;
+
+		std::vector<std::shared_ptr<ReportObject>> m_textObjects;
+		QTextDocument m_textDocument;
+
+		std::shared_ptr<ReportSchema> m_schemaObject;
+
+		int m_pageCount = 0; // filled after render()!!!
+	};
+
+	//
+	// Report
+	//
+
+	class Report
+	{
+	public:
+		Report(const QString& projectName, const QString& path);
+
+	public:
+		QString projectName() const;
+		QString path() const;
+
+		QPageLayout pageLayout() const;
+		void setPageLayout(const QPageLayout& value);
+
+		int resolution() const;
+		void setResolution(int value);
+
+		// Contents functions
+		//
+		const std::vector<std::shared_ptr<ReportSection>>& sections() const;
+
+		std::shared_ptr<ReportSection> addHeaderSection(std::shared_ptr<ReportSection> section);
+		std::shared_ptr<ReportSection> insertSection(int index, std::shared_ptr<ReportSection> section);
+		std::shared_ptr<ReportSection> addSection(std::shared_ptr<ReportSection> section);
+
+		// Margins functions
+		//
+		const std::vector<ReportMarginItem>& marginItems() const;
+		void addMarginItem(const ReportMarginItem& item);
+		void clearMarginItems();
+
+	private:
+		// Page options
+		//
+		QPageLayout m_pageLayout = QPageLayout(QPageSize(QPageSize::A4), QPageLayout::Orientation::Portrait, QMarginsF(15, 15, 15, 15));
+
+		int m_pageResolution = 600;
+
+		std::vector<std::shared_ptr<ReportSection>> m_sections;
+		std::vector<ReportMarginItem> m_marginItems;
+
+		QString m_reportName;
+		QString m_path;
+	};
+
+}
+

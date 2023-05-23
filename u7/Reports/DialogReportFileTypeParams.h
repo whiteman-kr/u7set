@@ -1,8 +1,9 @@
 #pragma once
 
-#include "../Builder/ReportGenerator.h"
+#include "../DbLib/DbController.h"
+#include "../ReportLib/Report.h"
 
-using namespace Builder;
+using namespace ReportLib;
 
 class DialogReportFileTypeParams : public QDialog
 {

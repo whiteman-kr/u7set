@@ -1,6 +1,7 @@
-#include "../Builder/ReportGenerator.h"
+#include "../Builder/SchemasReportGenerator.h"
 
 using namespace Builder;
+using namespace ReportLib;
 
 class SchemasReportDialog : public QDialog
 {

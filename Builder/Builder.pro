@@ -66,6 +66,7 @@ SOURCES += \
 	../GatewayService/GatewayDescription.cpp \
 	../GatewayService/GatewayDescriptionParser.cpp \
 	GatewayServiceCfgGenerator.cpp \
+    SchemasReportGenerator.cpp \
 	SoftwareSettingsGetter.cpp \
     Builder.cpp \
 	AppSignalProperties.cpp \
@@ -79,8 +80,6 @@ SOURCES += \
     Loopbacks.cpp \
     ModuleFirmwareWriter.cpp \
     Parser.cpp \
-    ReportAppSignalProvider.cpp \
-    ReportGenerator.cpp \
     SignalSet.cpp \
     Busses.cpp \
     OptoModule.cpp \
@@ -137,6 +136,7 @@ HEADERS += \
 	../GatewayService/GatewayDescription.h \
 	../GatewayService/GatewayDescriptionParser.h \
 	GatewayServiceCfgGenerator.h \
+    SchemasReportGenerator.h \
 	SoftwareSettingsGetter.h \
 	Builder.h \
 	AppSignalProperties.h \
@@ -145,8 +145,6 @@ HEADERS += \
 	DbMetrologyConnection.h \
     ConnectionStorage.h \
     Loopbacks.h \
-    ReportAppSignalProvider.h \
-    ReportGenerator.h \
     SignalsHeap.h \
     Stable.h \
     IssueLogger.h \

@@ -75,6 +75,14 @@ unix:PRE_TARGETDEPS += $$DESTDIR/libSimulator.a
 INCLUDEPATH += $$PWD/../Simulator
 DEPENDPATH += $$PWD/../Simulator
 
+# ReportLib library
+#
+LIBS += -lReportLib
+win32:PRE_TARGETDEPS += $$DESTDIR/ReportLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libReportLib.a
+INCLUDEPATH += ../ReportLib
+DEPENDPATH += ../ReportLib
+
 # VFrame30 library
 #
 LIBS += -lVFrame30

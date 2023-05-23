@@ -16,7 +16,7 @@
 #include "GatewayServiceCfgGenerator.h"
 #include "../Simulator/Simulator.h"
 #include "../HardwareLib/Subsystem.h"
-#include "ReportGenerator.h"
+#include "SchemasReportGenerator.h"
 
 namespace Builder
 {
@@ -1274,7 +1274,7 @@ namespace Builder
 
 	bool BuildWorkerThread::createSchemasAlbums()
 	{
-		std::shared_ptr<ReportSchemaView> schemaView = std::make_shared<ReportSchemaView>();
+		std::shared_ptr<ReportLib::ReportSchemaView> schemaView = std::make_shared<ReportLib::ReportSchemaView>();
 
 		const BuildInfo& bi = m_context->m_buildResultWriter->buildInfo();
 		schemaView->session().setProject(bi.project);

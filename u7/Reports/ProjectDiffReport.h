@@ -1,12 +1,16 @@
 #pragma once
 
-#include "../Builder/ReportGenerator.h"
+#include "../ReportLib/Report.h"
 
 #include "GlobalMessanger.h"
 #include "../HardwareLib/DeviceObject.h"
 #include "../DbLib/DbController.h"
 
+#include "../ReportLib/ReportAppSignalProvider.h"
+#include "../ReportLib/ReportPrinter.h"
+
 using namespace Builder;
+using namespace ReportLib;
 
 //
 // FileDiff
@@ -108,7 +112,7 @@ public:
 // ProjectDiffGenerator
 //
 
-class ProjectDiffGenerator : public ReportGenerator
+class ProjectDiffGenerator : public QObject
 {
 	Q_OBJECT
 
@@ -135,34 +139,35 @@ public:
 	const QString& filePath() const;
 
 private:
-	// Statistics
-
+	// Statistics data
+	//
 	enum class WorkerStatus
 	{
 		Idle,
-		Analyzing,
+		Comparing,
 		RequestingSignals,
-		Rendering,
 		Printing
 	};
 
-	WorkerStatus currentStatus() const;
+	struct Statistics
+	{
+		WorkerStatus m_state = WorkerStatus::Idle;
 
-	int signalsCount() const;
-	int signalIndex() const;
+		int m_signalsCount = 0;
+		int m_signalIndex = 0;
 
-	int filesCount() const;
-	int fileIndex() const;
+		int m_filesCount = 0;
+		int m_fileIndex = 0;
 
-	int sectionCount() const;
-	int sectionIndex() const;
+		int m_sectionCount = 0;
+		int m_sectionIndex = 0;
 
-	int pagesCount() const;
-	int pageIndex() const;
+		QString m_currentSectionName;
+		QString m_currentObjectName;
+		QString m_printingReportName;
+	};
 
-	QString renderingReportName() const;
-	QString currentSection() const;
-	QString currentObjectName() const;
+	Statistics statistics() const;
 
 signals:
 	void progressChanged(int progress, int progressMin, int progressMax, const QStringList& status);
@@ -171,43 +176,71 @@ signals:
 private:
 	DbController* db();
 
-	void compareProject(std::map<int, std::vector<std::shared_ptr<ReportSection> > >& reportContents);
+	void compareProject();
 
 	void compareFilesRecursive(int rootFileId,
 							   const DbFileTree& filesTree,
 							   const std::shared_ptr<DbFileInfo>& fi,
 							   const CompareData& compareData,
-							   ReportTable* const headerTable,
-							   std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
+							   std::shared_ptr<Report> report,
+							   ReportTable& headerTable);
 
 	void compareFile(int rootFileId,
 					 const DbFileTree& filesTree,
 					 const std::shared_ptr<DbFileInfo>& fi,
 					 const CompareData& compareData,
-					 ReportTable* const headerTable,
-					 std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
+					 std::shared_ptr<Report> report,
+					 ReportTable& headerTable);
 
 	void compareFileContents(int rootFileId,
 							 const std::shared_ptr<DbFile>& sourceFile,
 							 const std::shared_ptr<DbFile>& targetFile,
 							 const QString& fileName,
-							 ReportTable* const headerTable,
-							 std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
+							 std::shared_ptr<Report> report,
+							 ReportTable& headerTable);
 
 	std::shared_ptr<Hardware::DeviceObject> loadDeviceObject(const std::shared_ptr<DbFile>& file, std::map<int, std::shared_ptr<Hardware::DeviceObject>>* const deviceObjectMap) const;
 
 	void compareDeviceObjects(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile,
-							  const std::shared_ptr<Hardware::DeviceObject>& sourceObject, const std::shared_ptr<Hardware::DeviceObject>& targetObject,
-							  ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray, bool fileTypeIsPreset);
-	void compareBusTypes(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
-	void compareSchemas(const QString& fileName, const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
-	void compareConnections(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
-	void compareFilesData(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
+							  const std::shared_ptr<Hardware::DeviceObject>& sourceObject,
+							  const std::shared_ptr<Hardware::DeviceObject>& targetObject,
+							  std::shared_ptr<Report> report,
+							  ReportTable& headerTable,
+							  bool fileTypeIsPreset);
 
-	void compareSignals(const CompareData& compareData, ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
-	void compareSignalContents(const AppSignal& sourceSignal, const AppSignal& targetSignal, ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
+	void compareBusTypes(const std::shared_ptr<DbFile>& sourceFile,
+						 const std::shared_ptr<DbFile>& targetFile,
+						 std::shared_ptr<Report> report,
+						 ReportTable& headerTable);
 
-	void comparePropertyObjects(const PropertyObject& sourceObject, const PropertyObject& targetObject, std::vector<PropertyDiff>* const result) const;
+	void compareSchemas(const QString& fileName,
+						const std::shared_ptr<DbFile>& sourceFile,
+						const std::shared_ptr<DbFile>& targetFile,
+						std::shared_ptr<Report> report,
+						ReportTable& headerTable);
+
+	void compareConnections(const std::shared_ptr<DbFile>& sourceFile,
+							const std::shared_ptr<DbFile>& targetFile,
+							std::shared_ptr<Report> report,
+							ReportTable& headerTable);
+
+	void compareFilesData(const std::shared_ptr<DbFile>& sourceFile,
+						  const std::shared_ptr<DbFile>& targetFile,
+						  std::shared_ptr<Report> report,
+						  ReportTable& headerTable);
+
+	void compareSignals(const CompareData& compareData,
+						std::shared_ptr<Report> report,
+						ReportTable& headerTable);
+
+	void compareSignalContents(const AppSignal& sourceSignal,
+							   const AppSignal& targetSignal,
+							   std::shared_ptr<Report> report,
+							   ReportTable& headerTable);
+
+	void comparePropertyObjects(const PropertyObject& sourceObject,
+								const PropertyObject& targetObject,
+								std::vector<PropertyDiff>* const result) const;
 
 	bool isHardwareFile(const QString& fileName) const;
 	bool isBusTypeFile(const QString& fileName) const;
@@ -215,24 +248,41 @@ private:
 	bool isTextFile(const QString& fileName) const;
 	bool isSchemaFile(const QString& fileName) const;
 
-	void generateTitlePage(QTextDocument* textDocument, const CompareData& compareData, const QString& projectName, const QString& userName, const QString& subreportName) const;
 
-	void generateReportFilesPage(QTextDocument* textDocument, const QStringList& subreportFiles);
+	// Generating title pages functions
+	//
+	std::shared_ptr<ReportSection> generateTitlePage(const CompareData& compareData, const QString& projectName, const QString& userName, const QString& subreportName) const;
 
-	void createMarginItems(const CompareData& compareData, const QString& subreportName);
+	void generateSummaryReport();
+	std::shared_ptr<ReportSection> generateSummaryReportFilesPage(const QStringList& subreportFiles);
 
-	void fillDiffTable(ReportTable* diffTable, const std::vector<PropertyDiff>& diffs);
+	//
+	void createMarginItems(Report& report, const CompareData& compareData, const QString& subreportName);
 
-	void addHeaderTableItem(ReportTable* const headerTable, const QString& caption, const QString& action, std::shared_ptr<DbFile> file);
-	void addHeaderTableItem(ReportTable* const headerTable, const QString& caption, const QString& action, const AppSignal& signal);
+	void fillDiffTable(ReportTable& diffTable, const std::vector<PropertyDiff>& diffs);
+
+	void addHeaderTableItem(ReportTable& headerTable, const QString& caption, const QString& action, std::shared_ptr<DbFile> file);
+	void addHeaderTableItem(ReportTable& headerTable, const QString& caption, const QString& action, const AppSignal& signal);
 
 	QString changesetString(const std::shared_ptr<DbFile>& file);
 	QString changesetString(const AppSignal& signal);
 
-	void renderReport(std::map<int, std::vector<std::shared_ptr<ReportSection> > > reportContents);
+
+	// Format functions
+	void saveFormat();
+	void restoreFormat();
 
 private:
 	DbController m_db;
+	const std::shared_ptr<ReportSchemaView> m_schemaView;
+	ReportPrinter m_reportPrinter;
+
+	ReportAppSignalProvider m_appSignalProvider;
+	VFrame30::AppSignalController m_appSignalController;
+
+	ReportObjectFormat m_format;
+	ReportObjectFormat m_savedFormat;
+	std::vector<std::shared_ptr<Report>> m_generatedReports;
 
 	ProjectDiffReportParams m_reportParams;
 	QString m_filePath;
@@ -249,29 +299,9 @@ private:
 	std::map<int, std::shared_ptr<Hardware::DeviceObject>> m_sourceDeviceObjectMap;
 	std::map<int, std::shared_ptr<Hardware::DeviceObject>> m_targetDeviceObjectMap;
 
-	// Statistics data
-	//
-
-	WorkerStatus m_currentStatus = WorkerStatus::Idle;
-
 	mutable QMutex m_statisticsMutex;
+	Statistics m_statistics;
 
-	int m_signalsCount = 0;
-	int m_signalIndex = 0;
-
-	int m_filesCount = 0;
-	int m_fileIndex = 0;
-
-	int m_sectionCount = 0;
-	int m_sectionIndex = 0;
-
-	int m_pagesCount = 0;	// Calculated after text rendering
-	int m_pageIndex = 0;
-
-	QString m_currentSectionName;
-	QString m_currentObjectName;
-	QString m_currentReportName;
-
-	bool m_stop = false;	// Stop processing flag, set by stop()
+	std::atomic_bool m_stop = false;	// Stop processing flag, set by stop()
 
 };
