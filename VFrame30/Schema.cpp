@@ -1434,6 +1434,33 @@ namespace VFrame30
 
 	void Schema::setSchemaId(const QString& id)
 	{
+		if (id.trimmed().isEmpty() == true)
+		{
+			return;
+		}
+
+		if (m_schemaID != id)
+		{
+			// Update item labels.
+			//
+			QString startWith = QString{"%1_"}.arg(m_schemaID);
+			QString newPrefix = QString{"%1_"}.arg(id);
+
+			for (auto& layer : layers())
+			{
+				for (auto& item : layer->items())
+				{
+					if (item->label().startsWith(startWith, Qt::CaseSensitive) == true)
+					{
+						QString newItemLabel = item->label();
+						newItemLabel.replace(0, startWith.size(), newPrefix);
+
+						item->setLabel(newItemLabel);
+					}
+				}
+			}
+		}
+
 		m_schemaID = id;
 	}
 
