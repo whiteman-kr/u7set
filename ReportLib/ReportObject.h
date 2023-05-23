@@ -13,7 +13,7 @@ namespace ReportLib
 		// Formatting functions
 public:
 		ReportObjectFormat() = default;
-		ReportObjectFormat(const QFont& font, Qt::Alignment alignment);
+		ReportObjectFormat(const QFont& font, Qt::Alignment alignment = Qt::AlignLeft);
 		ReportObjectFormat(const QString& fontName, double fontPointSize, Qt::Alignment alignment);
 
 		void setFont(const QFont& font);

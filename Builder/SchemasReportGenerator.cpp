@@ -652,9 +652,9 @@ namespace Builder
 
 			for (const ReportFileTypeParams& rp : m_reportFileTypeParams)
 			{
-				if (rp.fileId == sfg.fileId)
+				if (rp.fileId() == sfg.fileId)
 				{
-					pl = rp.pageLayout;
+					pl = rp.pageLayout();
 
 					plFound = true;
 					break;

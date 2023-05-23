@@ -136,11 +136,13 @@ namespace ReportLib
 			pagesCount = m_statistics.pagesCount;
 		}
 
-		const QRect fullPageRect = pdfWriter.pageLayout().fullRectPixels(pdfWriter.resolution());
+		int resolution = pdfWriter.resolution();
 
-		const QRect pageRect = pdfWriter.pageLayout().paintRectPixels(pdfWriter.resolution());
+		const QRect fullPageRect = pdfWriter.pageLayout().fullRectPixels(resolution);
 
-		QMargins margins = pdfWriter.pageLayout().marginsPixels(pdfWriter.resolution());
+		const QRect pageRect = pdfWriter.pageLayout().paintRectPixels(resolution);
+
+		QMargins margins = pdfWriter.pageLayout().marginsPixels(resolution);
 
 		QRect topRect(fullPageRect.left() + margins.left() / 2,
 					  fullPageRect.top(),
@@ -167,7 +169,20 @@ namespace ReportLib
 				continue;
 			}
 
-			painter.setFont(item.format.charFormat().font());
+
+			QFont font{item.format.charFormat().font()};
+
+			{
+				QFontMetrics coefMetrics{font};
+
+				double fontCoef = static_cast<double>(coefMetrics.height()) / font.pointSize();
+
+				int pointSize = font.pointSize() * 72 / resolution/*translate points to pixels*/;
+
+				font.setPointSize(static_cast<int>(pointSize * fontCoef));
+			}
+
+			painter.setFont(font);
 
 			QString text = item.text;
 
@@ -184,7 +199,7 @@ namespace ReportLib
 			//painter.fillRect(topRect, Qt::green);
 			//painter.fillRect(bottomRect, Qt::yellow);
 
-			QFontMetrics fm(item.format.charFormat().font());
+			QFontMetrics fm(font);
 			QRect textBoundingRect = fm.boundingRect(text);
 
 			auto itemAlignment = item.format.blockFormat().alignment();

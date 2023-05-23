@@ -3,16 +3,16 @@
 #include "../DbLib/DbController.h"
 #include "../ReportLib/Report.h"
 
-using namespace ReportLib;
-
 class DialogReportFileTypeParams : public QDialog
 {
 	Q_OBJECT
 
 public:
-	explicit DialogReportFileTypeParams(const std::vector<ReportFileTypeParams>& fileTypeParams, std::vector<ReportFileTypeParams> defaultFileTypeParams, QWidget *parent);
+	explicit DialogReportFileTypeParams(const std::vector<ReportLib::ReportFileTypeParams>& fileTypeParams,
+										std::vector<ReportLib::ReportFileTypeParams> defaultFileTypeParams,
+										QWidget *parent);
 
-	std::vector<ReportFileTypeParams> fileTypeParams() const;
+	std::vector<ReportLib::ReportFileTypeParams> fileTypeParams() const;
 
 private slots:
 	void pageSetup();
@@ -25,8 +25,8 @@ private:
 	DbController* m_db = nullptr;
 	QTreeWidget* m_treeWidget = nullptr;
 
-	std::vector<ReportFileTypeParams> m_fileTypeParams;
+	std::vector<ReportLib::ReportFileTypeParams> m_fileTypeParams;
 
-	std::vector<ReportFileTypeParams> m_defaultFileTypeParams;
+	std::vector<ReportLib::ReportFileTypeParams> m_defaultFileTypeParams;
 };
 

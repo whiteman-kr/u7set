@@ -1317,13 +1317,14 @@ void MainWindow::createSchemasAlbums()
 {
 	QString albumPath = QSettings{}.value("MainWindow/Export/AlbumPath").toString();
 
-	static std::vector<ReportFileTypeParams> albumFileTypeParams = {};
+	static std::vector<ReportLib::ReportFileTypeParams> albumFileTypeParams = {};
 	if (albumFileTypeParams.empty() == true)
 	{
-		albumFileTypeParams = SchemasReportGenerator::defaultFileTypeParams(db());
+		albumFileTypeParams = Builder::SchemasReportGenerator::defaultFileTypeParams(db());
 	}
 
-	if (SchemasReportDialog::getReportFilesPath(&albumPath, &albumFileTypeParams, SchemasReportGenerator::defaultFileTypeParams(db()), this) == false)
+	if (SchemasReportDialog::getReportFilesPath(&albumPath, &albumFileTypeParams,
+												Builder::SchemasReportGenerator::defaultFileTypeParams(db()), this) == false)
 	{
 		return;
 	}

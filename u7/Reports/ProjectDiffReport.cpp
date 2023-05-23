@@ -14,6 +14,9 @@
 
 #include "Settings.h"
 
+using namespace Builder;
+using namespace ReportLib;
+
 //
 // FileDiff
 //
@@ -337,6 +340,43 @@ void ProjectDiffGeneratorThread::run(const QString& fileName,
 }
 
 //
+// lineFontSize
+//
+
+static int lineFontSize(const QPageLayout& pageLayout, const QString& fontName, int desiredLinesPerPage)
+{
+	// Function calculates approximal font size in points
+	// for given page layout, font name and desired number of lines in page
+
+	QRect rect = pageLayout.paintRectPoints();
+
+	int lineHeightPoints = rect.height() / desiredLinesPerPage;
+
+	int fontSize = lineHeightPoints;
+
+	QFontMetrics fm{QFont(fontName, fontSize)};
+
+	double fontCoef = fontSize / static_cast<double>(fm.height());
+
+	return static_cast<int>(fontSize * fontCoef);
+
+	/*qDebug() << "Height = " << fm.height();
+	qDebug() << "fontDpi = " << fm.fontDpi();
+	qDebug() << "ascent = " << fm.ascent();
+	qDebug() << "descent = " << fm.descent();
+	qDebug() << "leading = " << fm.leading();
+
+
+	ReportObjectFormat rf{f, Qt::AlignLeft};
+	qDebug() << "lineHeight = " << rf.blockFormat().lineHeight();
+
+	for (int i = 0; i < linesPerPage + 10; i++)
+	{
+		rs->addText(tr("Line: %1\n").arg(i + 1), {fontName, fontSize * fontScaling, Qt::AlignHCenter});
+	}*/
+}
+
+//
 // ProjectDiffWorker
 //
 
@@ -359,10 +399,16 @@ ProjectDiffGenerator::ProjectDiffGenerator(const QString& fileName,
 {
 	// Init fonts
 
-	m_headerFont = QFont("Arial", 36, QFont::Bold);
-	m_normalFont = QFont("Arial", 24);
-	m_tableFont = QFont("Arial", 24);
-	m_marginFont = QFont("Arial", 8);
+	const int fontScaling = m_resolution / 72;
+
+	m_headerFont = QFont("Arial", 12 * fontScaling, QFont::Bold);
+	m_normalFont = QFont("Arial", 9 * fontScaling);
+	m_tableFont =  QFont("Arial", 9 * fontScaling);
+	m_marginFont = QFont("Arial", 9 * fontScaling);
+
+	m_headerFormat = ReportLib::ReportObjectFormat{m_headerFont, Qt::AlignHCenter};
+	m_normalFormat = ReportLib::ReportObjectFormat{m_normalFont, Qt::AlignLeft};
+	m_tableFormat = ReportLib::ReportObjectFormat{m_tableFont};
 
 	return;
 }
@@ -382,27 +428,57 @@ std::vector<ReportFileTypeParams> ProjectDiffGenerator::defaultFileTypeParams(Db
 		return result;
 	}
 
-	result.push_back({db->systemFileId(DbDir::HardwareConfigurationDir), QObject::tr("Hardware Configuration"),	true});
+	QMarginsF portatitMargins{25, 20, 15, 20};
+	QMarginsF langscapeMargins{20, 25, 20, 15};
 
-	result.push_back({applicationSignalsTypeId(), QObject::tr("Application Signals"), true});
+	// Hardware and signals
+
+	result.push_back({db->systemFileId(DbDir::HardwareConfigurationDir), QObject::tr("Hardware Configuration"),	true,
+					 QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins)});
+
+	result.push_back({applicationSignalsTypeId(), QObject::tr("Application Signals"), true,
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins)});
 
 
 	//Schemas
-	result.push_back({db->systemFileId(DbDir::MonitorSchemasDir), QObject::tr("Monitor Schemas"), true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
-	result.push_back({db->systemFileId(DbDir::TuningSchemasDir), QObject::tr("Tuning Schemas"),	true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
-	result.push_back({db->systemFileId(DbDir::DiagnosticsSchemasDir), QObject::tr("Diagnostics Schemas"), true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
-	result.push_back({db->systemFileId(DbDir::AppLogicDir), QObject::tr("Application Logic"), true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
-	result.push_back({db->systemFileId(DbDir::UfblDir), QObject::tr("UFBL Descriptions"), true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
 
-	result.push_back({db->systemFileId(DbDir::BusTypesDir),	QObject::tr("Busses"), true});
-	result.push_back({db->systemFileId(DbDir::ConnectionsDir), QObject::tr("Connections"), true});
+	result.push_back({db->systemFileId(DbDir::MonitorSchemasDir), QObject::tr("Monitor Schemas"), true,
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, langscapeMargins)});
 
-	result.push_back({db->systemFileId(DbDir::SimTestsDir),	QObject::tr("Simulator Tests"), true});
+	result.push_back({db->systemFileId(DbDir::TuningSchemasDir), QObject::tr("Tuning Schemas"),	true,
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, langscapeMargins)});
 
-	result.push_back({db->systemFileId(DbDir::AfblDir),	QObject::tr("AFBL Descriptions"), false});
-	result.push_back({db->systemFileId(DbDir::HardwarePresetsDir), QObject::tr("Hardware Presets"),	false});
-	result.push_back({db->systemFileId(DbDir::ModuleConfigurationDir), QObject::tr("Module Configuration"), false});
-	result.push_back({db->systemFileId(DbDir::EtcDir), QObject::tr("Other Files"), false});
+	result.push_back({db->systemFileId(DbDir::DiagnosticsSchemasDir), QObject::tr("Diagnostics Schemas"), true,
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, langscapeMargins)});
+
+	result.push_back({db->systemFileId(DbDir::AppLogicDir), QObject::tr("Application Logic"), true,
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, langscapeMargins)});
+
+	result.push_back({db->systemFileId(DbDir::UfblDir), QObject::tr("UFBL Descriptions"), true,
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, langscapeMargins)});
+
+	// Other objects
+
+	result.push_back({db->systemFileId(DbDir::BusTypesDir),	QObject::tr("Busses"), true,
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins)});
+
+	result.push_back({db->systemFileId(DbDir::ConnectionsDir), QObject::tr("Connections"), true,
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins)});
+
+	result.push_back({db->systemFileId(DbDir::SimTestsDir),	QObject::tr("Simulator Tests"), true,
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins)});
+
+	result.push_back({db->systemFileId(DbDir::AfblDir),	QObject::tr("AFBL Descriptions"), false,
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins)});
+
+	result.push_back({db->systemFileId(DbDir::HardwarePresetsDir), QObject::tr("Hardware Presets"),	false,
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins)});
+
+	result.push_back({db->systemFileId(DbDir::ModuleConfigurationDir), QObject::tr("Module Configuration"), false,
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins)});
+
+	result.push_back({db->systemFileId(DbDir::EtcDir), QObject::tr("Other Files"), false,
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins)});
 
 	return result;
 
@@ -603,7 +679,7 @@ void ProjectDiffGenerator::compareProject()
 	{
 		ReportFileTypeParams ft = m_reportParams.fileTypeParams[i];
 
-		if (ft.fileId == applicationSignalsTypeId() && ft.selected == true && i != 0)
+		if (ft.fileId() == applicationSignalsTypeId() && ft.selected() == true && i != 0)
 		{
 			m_reportParams.fileTypeParams.erase(m_reportParams.fileTypeParams.begin() + i);
 			m_reportParams.fileTypeParams.insert(m_reportParams.fileTypeParams.begin(), ft);
@@ -622,12 +698,12 @@ void ProjectDiffGenerator::compareProject()
 
 	for (const ReportFileTypeParams& ft : m_reportParams.fileTypeParams)
 	{
-		if (ft.selected == false)
+		if (ft.selected() == false)
 		{
 			continue;
 		}
 
-		if (ft.fileId == applicationSignalsTypeId())
+		if (ft.fileId() == applicationSignalsTypeId())
 		{
 			// This is not a file
 			continue;
@@ -635,17 +711,17 @@ void ProjectDiffGenerator::compareProject()
 
 		{
 			QMutexLocker l(&m_statisticsMutex);
-			m_statistics.m_currentSectionName = ft.caption;
+			m_statistics.m_currentSectionName = ft.caption();
 		}
 
 		filesTrees.push_back({});
 
 		DbFileTree* filesTree = &filesTrees[filesTrees.size() - 1];
 
-		ok = db()->getFileListTree(filesTree, ft.fileId, false/*removeDeleted*/, nullptr);
+		ok = db()->getFileListTree(filesTree, ft.fileId(), false/*removeDeleted*/, nullptr);
 		if (ok == false)
 		{
-			throw(tr("DbController::getFileListTree failed on fileId = %1").arg(ft.fileId));
+			throw(tr("DbController::getFileListTree failed on fileId = %1").arg(ft.fileId()));
 		}
 
 		filesCount += static_cast<int>(filesTree->files().size());
@@ -665,7 +741,7 @@ void ProjectDiffGenerator::compareProject()
 
 	for (const ReportFileTypeParams& ft : m_reportParams.fileTypeParams)
 	{
-		if (ft.selected == false)
+		if (ft.selected() == false)
 		{
 			continue;
 		}
@@ -687,11 +763,11 @@ void ProjectDiffGenerator::compareProject()
 			qsizetype pos = pdfFileName.lastIndexOf('.');
 			if (pos != -1)
 			{
-				pdfFileName.insert(pos, tr("_%1").arg(ft.caption));
+				pdfFileName.insert(pos, tr("_%1").arg(ft.caption()));
 			}
 			else
 			{
-				pdfFileName += tr("_%1.pdf").arg(ft.caption);
+				pdfFileName += tr("_%1.pdf").arg(ft.caption());
 			}
 
 			pdfFileName.replace(' ', '_');
@@ -701,20 +777,21 @@ void ProjectDiffGenerator::compareProject()
 		{
 			// Create report
 			//
-			report = std::make_shared<Report>(ft.caption, pdfFileName);
-			report->setPageLayout(m_reportParams.multipleFiles == true ? ft.pageLayout : m_reportParams.m_albumPageLayout);
+			report = std::make_shared<Report>(ft.caption(), pdfFileName);
+			report->setPageLayout(m_reportParams.multipleFiles == true ? ft.pageLayout() : m_reportParams.pageLayout);
+			report->setResolution(m_resolution);
 			m_generatedReports.push_back(report);
 
 			// Create title page and margins
 			//
-			auto titlePageSection = generateTitlePage(m_reportParams.compareData, m_projectName, m_userName, ft.caption);
+			auto titlePageSection = generateTitlePage(m_reportParams.compareData, m_projectName, m_userName, ft.caption());
 			report->insertSection(0, titlePageSection);
 
 			// Create margins
 			//
 			if (m_reportParams.multipleFiles == true)
 			{
-				createMarginItems(*report, m_reportParams.compareData, m_reportParams.multipleFiles == true ? ft.caption : QString());
+				createMarginItems(*report, m_reportParams.compareData, m_reportParams.multipleFiles == true ? ft.caption() : QString());
 			}
 			else
 			{
@@ -725,21 +802,16 @@ void ProjectDiffGenerator::compareProject()
 		// Specify section name to statistics
 		{
 			QMutexLocker l(&m_statisticsMutex);
-			m_statistics.m_currentSectionName = ft.caption;
+			m_statistics.m_currentSectionName = ft.caption();
 		}
 
 		std::shared_ptr<ReportSection> headerSection = std::make_shared<ReportSection>(QString());
 
-		saveFormat();
-		m_format.setFont(m_normalFont);
-		m_format.setTextAlignment(Qt::AlignHCenter);
-		m_format.setFont(m_headerFont);
-		headerSection->addText(tr("%1\n\n").arg(ft.caption), m_format);
-		restoreFormat();
+		headerSection->addText(tr("%1\n\n").arg(ft.caption()), m_headerFormat);
 
 		std::shared_ptr<ReportTable> headerTable;
 
-		if (ft.fileId == ProjectDiffGenerator::applicationSignalsTypeId())
+		if (ft.fileId() == ProjectDiffGenerator::applicationSignalsTypeId())
 		{
 			// This is application signals
 
@@ -748,23 +820,17 @@ void ProjectDiffGenerator::compareProject()
 				m_statistics.m_currentObjectName.clear();
 			}
 
-			saveFormat();
-			m_format.setFont(m_tableFont);
 			headerTable = ReportTable::create({tr("Signal"), tr("Status"), tr("Changeset"), tr("User"), tr("Date")},
 											  {45, 10, 10, 15, 20},
-											  m_format);
-			restoreFormat();
+											  m_tableFormat);
 
 			compareSignals(m_reportParams.compareData, report, *headerTable);
 		}
 		else
 		{
-			saveFormat();
-			m_format.setFont(m_tableFont);
 			headerTable = ReportTable::create({tr("Object"), tr("Status"), tr("Changeset"), tr("User"), tr("Date")},
 											  {45, 10, 10, 15, 20},
-											  m_format);
-			restoreFormat();
+											  m_tableFormat);
 
 			// Compare files
 
@@ -774,7 +840,7 @@ void ProjectDiffGenerator::compareProject()
 
 			for (const auto& child : children)
 			{
-				compareFilesRecursive(ft.fileId, filesTree, child, m_reportParams.compareData, report, *headerTable);
+				compareFilesRecursive(ft.fileId(), filesTree, child, m_reportParams.compareData, report, *headerTable);
 			}
 		}
 
@@ -1247,15 +1313,11 @@ void ProjectDiffGenerator::compareDeviceObjects(const std::shared_ptr<DbFile>& s
 
 		auto deviceDiffSection = report->addSection(ReportSection::create(sectionName));
 
-		deviceDiffSection->addText(tr("%1, %2\n\n").arg(sectionName).arg(changesetString(targetFile)), m_format);
+		deviceDiffSection->addText(tr("%1, %2\n\n").arg(sectionName).arg(changesetString(targetFile)), m_normalFormat);
 
-		saveFormat();
-		m_format.setFont(m_tableFont);
 		auto diffTable = deviceDiffSection->addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
 													 {15, 15, 35, 35},
-													 m_format);
-
-		restoreFormat();
+													 m_tableFormat);
 
 		fillDiffTable(*diffTable, diffs);
 	}
@@ -1313,20 +1375,13 @@ void ProjectDiffGenerator::compareBusTypes(const std::shared_ptr<DbFile>& source
 	//
 	// Create tables
 
-	saveFormat();
-	m_format.setFont(m_tableFont);
 	std::shared_ptr<ReportTable> busDiffTable = ReportTable::create({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
 																	{15, 15, 35, 35},
-																	m_format);
-	restoreFormat();
+																	m_tableFormat);
 
-	saveFormat();
-	m_format.setFont(m_tableFont);
 	std::shared_ptr<ReportTable> busSignalsDiffTable = ReportTable::create({tr("SignalID"), tr("Caption"), tr("Status")},
 																		   {35, 15, 50},
-																		   m_format);
-
-	restoreFormat();
+																		   m_tableFormat);
 
 	std::vector<PropertyDiff> busDiffs;
 
@@ -1357,12 +1412,9 @@ void ProjectDiffGenerator::compareBusTypes(const std::shared_ptr<DbFile>& source
 
 				if (busSignalDiffs.empty() == false)
 				{
-					saveFormat();
-					m_format.setFont(m_tableFont);
 					std::shared_ptr<ReportTable> busSignalsPropertiesDiffTable = ReportTable::create({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
 																									 {15, 15, 35, 35},
-																									 m_format);
-					restoreFormat();
+																									 m_tableFormat);
 
 					busSignalsPropertiesTables[targetBusSignal.signalId()] = busSignalsPropertiesDiffTable;
 
@@ -1414,12 +1466,12 @@ void ProjectDiffGenerator::compareBusTypes(const std::shared_ptr<DbFile>& source
 		auto busDiffSection = report->addSection(ReportSection::create(tr("Bus: ") + targetBus.busTypeId()));
 
 		busDiffSection->addText(tr("Bus: %1, %2\n\n").arg(targetBus.busTypeId()).arg(changesetString(targetFile)),
-								m_format);
+								m_normalFormat);
 
 		if (busDiffTable->rowCount() != 0)
 		{
 			busDiffSection->addTable(busDiffTable);
-			busDiffSection->addText("\n", m_format);
+			busDiffSection->addText("\n", m_normalFormat);
 		}
 
 		if (busSignalsDiffTable->rowCount() != 0)
@@ -1427,9 +1479,9 @@ void ProjectDiffGenerator::compareBusTypes(const std::shared_ptr<DbFile>& source
 			busSignalsDiffTable->sortByColumn(0);
 
 			busDiffSection->addText(tr("Bus %1 signals:\n\n").arg(targetBus.busTypeId()),
-									m_format);
+									m_normalFormat);
 			busDiffSection->addTable(busSignalsDiffTable);
-			busDiffSection->addText("\n", m_format);
+			busDiffSection->addText("\n", m_normalFormat);
 		}
 
 		for (auto it : busSignalsPropertiesTables)
@@ -1438,7 +1490,7 @@ void ProjectDiffGenerator::compareBusTypes(const std::shared_ptr<DbFile>& source
 			const std::shared_ptr<ReportTable>& itemDiffTable = it.second;
 
 			busDiffSection->addText(tr("Bus: %1, signal: %2\n\n").arg(targetBus.busTypeId()).arg(signalId),
-									m_format);
+									m_normalFormat);
 			busDiffSection->addTable(itemDiffTable);
 		}
 	}
@@ -1484,7 +1536,7 @@ void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 
 		auto reportSchema = ReportSchema::create(
 					tr("Schema: %1, %2\n").arg(singleSchema->schemaId()).arg(changesetString(singleFile)),
-					m_format,
+					m_normalFormat,
 					singleSchema,
 					{});
 
@@ -1512,19 +1564,13 @@ void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 
 	// Create tables
 
-	saveFormat();
-	m_format.setFont(m_tableFont);
 	std::shared_ptr<ReportTable> schemaDiffTable = ReportTable::create({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
 																	   {15, 15, 35, 35},
-																	   m_format);
-	restoreFormat();
+																	   m_tableFormat);
 
-	saveFormat();
-	m_format.setFont(m_tableFont);
 	std::shared_ptr<ReportTable> schemaItemsDiffTable = ReportTable::create({tr("Type"), tr("Label"), tr("Layer"), tr("Status")},
 																			{25, 35, 25, 15},
-																			m_format);
-	restoreFormat();
+																			m_tableFormat);
 
 	// Compare schemas properties
 
@@ -1588,12 +1634,9 @@ void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 
 					schemaItemsDiffTable->insertRow({tr("%1").arg(className), targetItem->label(), targetLayer->name(), tr("Modified")});
 
-					saveFormat();
-					m_format.setFont(m_tableFont);
 					std::shared_ptr<ReportTable> itemDiffTable = ReportTable::create({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
 																					 {15, 15, 35, 35},
-																					 m_format);
-					restoreFormat();
+																					 m_tableFormat);
 
 					fillDiffTable(*itemDiffTable, itemDiffs);
 
@@ -1670,7 +1713,7 @@ void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 					tr("Schema: %1, %2\n")
 					.arg(schemaId)
 					.arg(changesetString(targetFile)),
-					m_format,
+					m_normalFormat,
 					targetSchema,
 					itemsActions);
 
@@ -1683,18 +1726,18 @@ void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 
 		if (schemaDiffTable->rowCount() != 0)
 		{
-			schemaDiffSection->addText(tr("Schema %1 properties:\n\n").arg(schemaId), m_format);
+			schemaDiffSection->addText(tr("Schema %1 properties:\n\n").arg(schemaId), m_normalFormat);
 			schemaDiffSection->addTable(schemaDiffTable);
-			schemaDiffSection->addText("\n", m_format);
+			schemaDiffSection->addText("\n", m_normalFormat);
 		}
 
 		if (schemaItemsDiffTable->rowCount() != 0)
 		{
 			schemaItemsDiffTable->sortByColumn(1);
 
-			schemaDiffSection->addText(tr("Schema %1 items:\n\n").arg(schemaId), m_format);
+			schemaDiffSection->addText(tr("Schema %1 items:\n\n").arg(schemaId), m_normalFormat);
 			schemaDiffSection->addTable(schemaItemsDiffTable);
-			schemaDiffSection->addText("\n", m_format);
+			schemaDiffSection->addText("\n", m_normalFormat);
 		}
 
 		for (const auto& it : itemsTables)
@@ -1707,14 +1750,14 @@ void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 
 			if (item->label().isEmpty() == true)
 			{
-				schemaDiffSection->addText(tr("%1 (no label):\n\n").arg(className), m_format);
+				schemaDiffSection->addText(tr("%1 (no label):\n\n").arg(className), m_normalFormat);
 			}
 			else
 			{
-				schemaDiffSection->addText(tr("%1 %2:\n\n").arg(className).arg(item->label()), m_format);
+				schemaDiffSection->addText(tr("%1 %2:\n\n").arg(className).arg(item->label()), m_normalFormat);
 			}
 			schemaDiffSection->addTable(itemDiffTable);
-			schemaDiffSection->addText(tr("\n"), m_format);
+			schemaDiffSection->addText(tr("\n"), m_normalFormat);
 		}
 	}
 }
@@ -1772,16 +1815,13 @@ void ProjectDiffGenerator::compareConnections(const std::shared_ptr<DbFile>& sou
 	{
 		auto connectionDiffSection = report->addSection(ReportSection::create(tr("Connection: ") + targetConnection.connectionID()));
 
-		connectionDiffSection->addText(tr("Connection: %1, %2\n\n").arg(targetConnection.connectionID()).arg(changesetString(targetFile)), m_format);
+		connectionDiffSection->addText(tr("Connection: %1, %2\n\n").arg(targetConnection.connectionID()).arg(changesetString(targetFile)), m_normalFormat);
 
 		addHeaderTableItem(headerTable, targetConnection.connectionID(), E::valueToString<E::VcsItemAction>(targetFile->action()), targetFile);
 
-		saveFormat();
-		m_format.setFont(m_tableFont);
 		std::shared_ptr<ReportTable> diffTable = connectionDiffSection->addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
 																				 {15, 15, 35, 35},
-																				 m_format);
-		restoreFormat();
+																				 m_tableFormat);
 
 		fillDiffTable(*diffTable, diffs);
 	}
@@ -1821,7 +1861,7 @@ void ProjectDiffGenerator::compareFilesData(const std::shared_ptr<DbFile>& sourc
 	//
 	if (isTextFile(targetFile->fileName()) == true)
 	{
-		fileDiffSection->addText(tr("File: %1, %2\n\n").arg(targetFile->fileName()).arg(changesetString(targetFile)), m_format);
+		fileDiffSection->addText(tr("File: %1, %2\n\n").arg(targetFile->fileName()).arg(changesetString(targetFile)), m_normalFormat);
 
 		std::vector<FileDiff::FileLine> fileLinesSource;
 		std::vector<FileDiff::FileLine> fileLinesTarget;
@@ -1846,12 +1886,9 @@ void ProjectDiffGenerator::compareFilesData(const std::shared_ptr<DbFile>& sourc
 
 		FileDiff::calculateLcs(fileLinesSource, fileLinesTarget, &fileLinesCommon);
 
-		saveFormat();
-		m_format.setFont(m_tableFont);
 		std::shared_ptr<ReportTable> diffTable = fileDiffSection->addTable({tr("Line"), tr("Source"), tr("Line"), tr("Target")},
 																		   {10, 40, 10, 40},
-																		   m_format);
-		restoreFormat();
+																		   m_tableFormat);
 
 		std::vector<FileDiff::FileLine> fileLinesSourceAligned;
 		std::vector<FileDiff::FileLine> fileLinesTargetAligned;
@@ -1913,7 +1950,7 @@ void ProjectDiffGenerator::compareFilesData(const std::shared_ptr<DbFile>& sourc
 			str += tr(" Size changed: %1 -> %2 bytes.").arg(sourceFile->data().size()).arg(targetFile->data().size());
 		}
 
-		fileDiffSection->addText(str + "\n", m_format);
+		fileDiffSection->addText(str + "\n", m_normalFormat);
 	}
 }
 
@@ -2233,16 +2270,13 @@ void ProjectDiffGenerator::compareSignalContents(const AppSignal& sourceSignal,
 	{
 		auto signalDiffSection = report->addSection(ReportSection::create(tr("Signal: ") + targetSignal.appSignalID()));
 
-		signalDiffSection->addText(tr("Signal: %1, %2\n\n").arg(targetSignal.appSignalID()).arg(changesetString(targetSignal)), m_format);
+		signalDiffSection->addText(tr("Signal: %1, %2\n\n").arg(targetSignal.appSignalID()).arg(changesetString(targetSignal)), m_normalFormat);
 
 		addHeaderTableItem(headerTable, targetSignal.appSignalID(), E::valueToString<E::VcsItemAction>(targetSignal.instanceAction()), targetSignal);
 
-		saveFormat();
-		m_format.setFont(m_tableFont);
 		std::shared_ptr<ReportTable> diffTable = signalDiffSection->addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
 																			 {15, 15, 35, 35},
-																			 m_format);
-		restoreFormat();
+																			 m_tableFormat);
 
 		fillDiffTable(*diffTable, diffs);
 	}
@@ -2492,25 +2526,38 @@ bool ProjectDiffGenerator::isSchemaFile(const QString& fileName) const
 }
 
 std::shared_ptr<ReportSection> ProjectDiffGenerator::generateTitlePage(const CompareData& compareData,
-																				  const QString& projectName,
-																				  const QString& userName,
-																				  const QString& subreportName) const
+																	   const QString& projectName,
+																	   const QString& userName,
+																	   const QString& subreportName) const
 {
-	auto rs = ReportSection::create("");
+	auto rs = ReportSection::create("TitlePage");
 
-	const double fontScaling = QApplication::screens()[0]->logicalDotsPerInch() / 96.0;
+	// Initialize font
 
-	rs->addText(tr("Project: %1\n\n").arg(projectName), {"Arial", 72.0 / fontScaling, Qt::AlignHCenter});
-	rs->addText(tr("Differences Report\n\n"), {"Arial", 72.0 / fontScaling, Qt::AlignHCenter});
+	const int fontScaling = m_resolution / 72;
+
+	QString fontName{"Arial"};
+
+	int titleFontSize = lineFontSize(m_reportParams.pageLayout, fontName, 25);
+	int regularFontSize = lineFontSize(m_reportParams.pageLayout, fontName, 50);
+
+	QFont titleFont{fontName, titleFontSize * fontScaling, QFont::Bold};
+	QFont regularFont{fontName, regularFontSize * fontScaling};
+
+	// Report info
+
+	rs->addText(tr("\n\n\n\n\n\nProject: %1\n\n").arg(projectName), {titleFont, Qt::AlignHCenter});
+
+	rs->addText(tr("Differences Report\n\n\n\n"), {titleFont, Qt::AlignHCenter});
 
 	if (subreportName.isEmpty() == false)
 	{
-		rs->addText(QObject::tr("%1\n").arg(subreportName), {"Arial", 72.0 / fontScaling, Qt::AlignHCenter});
+		rs->addText(QObject::tr("%1\n").arg(subreportName), {regularFont, Qt::AlignHCenter});
 	}
 
 	// User name
 
-	rs->addText(tr("User Name: %1\n\n").arg(userName), {"Arial", 72.0 / fontScaling, Qt::AlignHCenter});
+	rs->addText(tr("User Name: %1\n\n").arg(userName), {regularFont, Qt::AlignLeft});
 
 	// Changeset
 
@@ -2523,7 +2570,7 @@ std::shared_ptr<ReportSection> ProjectDiffGenerator::generateTitlePage(const Com
 	case CompareVersionType::Date: changesetStr = tr("Source Date: %1").arg(compareData.sourceDate.toString("dd/MM/yyyy HH:mm:ss")); break;
 	}
 
-	rs->addText(tr("%1\n\n").arg(changesetStr), {"Arial", 72.0 / fontScaling, Qt::AlignHCenter});
+	rs->addText(tr("%1\n\n").arg(changesetStr), {regularFont, Qt::AlignLeft});
 
 	switch(compareData.targetVersionType)
 	{
@@ -2532,17 +2579,17 @@ std::shared_ptr<ReportSection> ProjectDiffGenerator::generateTitlePage(const Com
 	case CompareVersionType::Date: changesetStr = tr("Target Date: %1").arg(compareData.targetDate.toString("dd/MM/yyyy HH:mm:ss")); break;
 	}
 
-	rs->addText(tr("%1\n\n").arg(changesetStr), {"Arial", 72.0 / fontScaling, Qt::AlignHCenter});
+	rs->addText(tr("%1\n\n").arg(changesetStr), {regularFont, Qt::AlignLeft});
 
 	// Generation time
 
-	rs->addText(tr("Generated: %1\n\n").arg(QDateTime::currentDateTime().toString("dd/MM/yyyy  HH:mm:ss")),
-				{"Arial", 72.0 / fontScaling, Qt::AlignHCenter});
+	rs->addText(tr("Generated: %1\n\n").arg(QDateTime::currentDateTime().toString("dd/MM/yyyy HH:mm:ss")),
+				{regularFont, Qt::AlignRight});
 
 	// RPCT Version
 
-	rs->addText(tr("%1 version %2\n\n").arg(qApp->applicationName()).arg(qApp->applicationVersion()),
-				{"Arial", 72.0 / fontScaling, Qt::AlignHCenter});
+	rs->addText(tr("by %1 version %2\n\n").arg(qApp->applicationName()).arg(qApp->applicationVersion()),
+				{regularFont, Qt::AlignRight});
 
 	return rs;
 }
@@ -2552,7 +2599,8 @@ void ProjectDiffGenerator::generateSummaryReport()
 	// Create report
 	//
 	auto summaryReport = std::make_shared<Report>(m_projectName, filePath());
-	summaryReport->setPageLayout(m_reportParams.m_albumPageLayout);
+	summaryReport->setPageLayout(m_reportParams.pageLayout);
+	summaryReport->setResolution(m_resolution);
 
 	// Create title page
 	//
@@ -2578,12 +2626,21 @@ void ProjectDiffGenerator::generateSummaryReport()
 
 std::shared_ptr<ReportSection> ProjectDiffGenerator::generateSummaryReportFilesPage(const QStringList& subreportFiles)
 {
-	auto rs = ReportSection::create("");
+	auto rs = ReportSection::create("SummaryFiles");
 
-	const double fontScaling = QApplication::screens()[0]->logicalDotsPerInch() / 96.0;
+	// Init font
 
-	rs->addText(tr("Content of this report is stored in the following files:\n"),
-				{"Arial", 72.0 / fontScaling, Qt::AlignHCenter});
+	const int fontScaling = m_resolution / 72;
+
+	QString fontName{"Arial"};
+	int fontSize = lineFontSize(m_reportParams.pageLayout, fontName, 50);
+
+	QFont font{fontName, fontSize * fontScaling};
+
+	// Create report
+
+	rs->addText(tr("\n\n\n\nContent of this report is stored in the following files:\n\n"),
+				{font, Qt::AlignHCenter});
 
 	for (QString fileName: subreportFiles)
 	{
@@ -2595,8 +2652,8 @@ std::shared_ptr<ReportSection> ProjectDiffGenerator::generateSummaryReportFilesP
 			fileName = fileName.right(fileName.length() - pos - 1);
 		}
 
-		rs->addText(tr("%1\n\n").arg(fileName),
-					{"Arial", 72.0 / fontScaling, Qt::AlignLeft});
+		rs->addText(tr("%1\n").arg(fileName),
+					{font, Qt::AlignLeft});
 	}
 
 	return rs;
@@ -2796,12 +2853,3 @@ QString ProjectDiffGenerator::changesetString(const AppSignal& signal)
 	}
 }
 
-void ProjectDiffGenerator::saveFormat()
-{
-	m_savedFormat = m_format;
-}
-
-void ProjectDiffGenerator::restoreFormat()
-{
-	m_format = m_savedFormat;
-}

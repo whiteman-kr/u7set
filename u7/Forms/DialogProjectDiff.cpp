@@ -81,11 +81,11 @@ DialogProjectDiff::DialogProjectDiff(DbController* db, QWidget *parent) :
 
 	// Fill file types list
 	//
-	for (const ReportFileTypeParams& ft : m_reportParams.fileTypeParams)
+	for (const ReportLib::ReportFileTypeParams& ft : m_reportParams.fileTypeParams)
 	{
-		QListWidgetItem* item = new QListWidgetItem(tr("%1").arg(ft.caption));
+		QListWidgetItem* item = new QListWidgetItem(tr("%1").arg(ft.caption()));
 
-		if (ft.selected == true)
+		if (ft.selected() == true)
 		{
 			item->setCheckState(Qt::Checked);
 		}
@@ -269,8 +269,9 @@ void DialogProjectDiff::done(int r)
 	{
 		QListWidgetItem* item = ui->categoriesList->item(i);
 
-		m_reportParams.fileTypeParams[i].selected = item->checkState() == Qt::Checked;
-		if (m_reportParams.fileTypeParams[i].selected == true)
+		m_reportParams.fileTypeParams[i].setSelected(item->checkState() == Qt::Checked);
+
+		if (m_reportParams.fileTypeParams[i].selected() == true)
 		{
 			selectedCount++;
 		}
@@ -442,7 +443,7 @@ void DialogProjectDiff::on_pageSetupButton_clicked()
 
 	QPrinter printer(QPrinter::HighResolution);
 
-	QPageSize::PageSizeId id = QPageSize::id(m_reportParams.m_albumPageLayout.pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
+	QPageSize::PageSizeId id = QPageSize::id(m_reportParams.pageLayout.pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
 	if (id == QPageSize::Custom)
 	{
 		id = QPageSize::A4;
@@ -450,8 +451,8 @@ void DialogProjectDiff::on_pageSetupButton_clicked()
 
 	printer.setFullPage(true);
 	printer.setPageSize(QPageSize(id));
-	printer.setPageOrientation(m_reportParams.m_albumPageLayout.orientation());
-	printer.setPageMargins(m_reportParams.m_albumPageLayout.margins(), QPageLayout::Unit::Millimeter);
+	printer.setPageOrientation(m_reportParams.pageLayout.orientation());
+	printer.setPageMargins(m_reportParams.pageLayout.margins(), QPageLayout::Unit::Millimeter);
 
 	QPageSetupDialog d(&printer, this);
 	if (d.exec() != QDialog::Accepted)
@@ -461,9 +462,9 @@ void DialogProjectDiff::on_pageSetupButton_clicked()
 
 	id = QPageSize::id(d.printer()->pageLayout().pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
 
-	m_reportParams.m_albumPageLayout.setPageSize(QPageSize(id));
-	m_reportParams.m_albumPageLayout.setOrientation(d.printer()->pageLayout().orientation());
-	m_reportParams.m_albumPageLayout.setMargins(d.printer()->pageLayout().margins());
+	m_reportParams.pageLayout.setPageSize(QPageSize(id));
+	m_reportParams.pageLayout.setOrientation(d.printer()->pageLayout().orientation());
+	m_reportParams.pageLayout.setMargins(d.printer()->pageLayout().margins());
 
 	updatePageSizeInfo();
 
@@ -472,7 +473,7 @@ void DialogProjectDiff::on_pageSetupButton_clicked()
 
 void DialogProjectDiff::on_pageSetDefault_clicked()
 {
-	m_reportParams.m_albumPageLayout = QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, QMarginsF(15, 15, 15, 15));
+	m_reportParams.pageLayout = QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, QMarginsF(15, 15, 15, 15));
 	updatePageSizeInfo();
 	return;
 }
@@ -488,16 +489,16 @@ void DialogProjectDiff::on_multiFilepageSetupButton_clicked()
 
 void DialogProjectDiff::updatePageSizeInfo()
 {
-	QPageSize::PageSizeId id = QPageSize::id(m_reportParams.m_albumPageLayout.pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
+	QPageSize::PageSizeId id = QPageSize::id(m_reportParams.pageLayout.pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
 	if (id == QPageSize::Custom)
 	{
 		id = QPageSize::A4;
 	}
 
 	ui->labelPageSize->setText(tr("Page Size: %1, %2").arg(QPageSize(id).name())
-							   .arg(m_reportParams.m_albumPageLayout.orientation() == QPageLayout::Portrait ? tr("Portrait") : tr("Landscape")));
+							   .arg(m_reportParams.pageLayout.orientation() == QPageLayout::Portrait ? tr("Portrait") : tr("Landscape")));
 
-	QMarginsF margins = m_reportParams.m_albumPageLayout.margins();
+	QMarginsF margins = m_reportParams.pageLayout.margins();
 	ui->labelPageMargins->setText(tr("Page margins, mm: l%1 t%2 r%3 b%4").arg(margins.left()).arg(margins.top()).arg(margins.right()).arg(margins.bottom()));
 
 	return;

@@ -1,8 +1,5 @@
 #include "../Builder/SchemasReportGenerator.h"
 
-using namespace Builder;
-using namespace ReportLib;
-
 class SchemasReportDialog : public QDialog
 {
 	Q_OBJECT
@@ -13,8 +10,8 @@ public:
 							 QWidget *parent);
 
 	static bool getReportFilesPath(QString* path,
-							 std::vector<ReportFileTypeParams>* reportFileTypeParams,
-							 const std::vector<ReportFileTypeParams>& defaultFileTypeParams,
+							 std::vector<ReportLib::ReportFileTypeParams>* reportFileTypeParams,
+							 const std::vector<ReportLib::ReportFileTypeParams>& defaultFileTypeParams,
 							 QWidget *parent);
 private:
 	enum class Type
@@ -26,8 +23,8 @@ private:
 	SchemasReportDialog(Type type, QString* path,  QWidget *parent);
 
 	SchemasReportDialog(QString* path,
-						std::vector<ReportFileTypeParams>* reportFileTypeParams,
-						const std::vector<ReportFileTypeParams>& defaultFileTypeParams,
+						std::vector<ReportLib::ReportFileTypeParams>* reportFileTypeParams,
+						const std::vector<ReportLib::ReportFileTypeParams>& defaultFileTypeParams,
 						QWidget *parent);
 
 	SchemasReportDialog(QString* fileName,
@@ -47,8 +44,8 @@ private:
 
 	QPageLayout* m_pageLayout = nullptr;
 
-	std::vector<ReportFileTypeParams>* m_reportFileTypeParams = nullptr;
-	std::vector<ReportFileTypeParams> m_defaultFileTypeParams;
+	std::vector<ReportLib::ReportFileTypeParams>* m_reportFileTypeParams = nullptr;
+	std::vector<ReportLib::ReportFileTypeParams> m_defaultFileTypeParams;
 
 	QLineEdit* m_editReportPath = nullptr;
 };
@@ -68,7 +65,7 @@ public:
 
 	void exportSchemasToPdf(const QString& filePath, const std::vector<DbFileInfo>& files);
 	void exportSchemasToAlbum(const QString& filePath, const std::vector<DbFileInfo>& files, const QPageLayout& pageLayout);
-	void exportAllSchemasToAlbum(const QString& filePath, const std::vector<ReportFileTypeParams>& reportFileTypeParams);
+	void exportAllSchemasToAlbum(const QString& filePath, const std::vector<ReportLib::ReportFileTypeParams>& reportFileTypeParams);
 
 private:
 	enum class TaskType
@@ -77,7 +74,11 @@ private:
 		ExportFilesToAlbum,
 		ExportAllSchemasToAlbum
 	};
-	void run(TaskType task, const QString& filePath, const std::vector<DbFileInfo>& files, const QPageLayout& albumPageLayout, const std::vector<ReportFileTypeParams>& albumsFileTypeParams);
+	void run(TaskType task,
+			 const QString& filePath,
+			 const std::vector<DbFileInfo>& files,
+			 const QPageLayout& albumPageLayout,
+			 const std::vector<ReportLib::ReportFileTypeParams>& albumsFileTypeParams);
 
 private:
 	QString m_serverIp;

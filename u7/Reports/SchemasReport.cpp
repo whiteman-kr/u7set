@@ -5,6 +5,9 @@
 #include "DialogReportFileTypeParams.h"
 #include "../UtilsLib/Ui/UiTools.h"
 
+using namespace Builder;
+using namespace ReportLib;
+
 //
 // SchemasReportDialog
 //

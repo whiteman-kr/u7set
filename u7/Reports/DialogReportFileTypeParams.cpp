@@ -3,6 +3,8 @@
 #include <QPrinter>
 #include <QPageSetupDialog>
 
+using namespace ReportLib;
+
 //
 // DialogProjectDiffSections
 //
@@ -95,7 +97,7 @@ void DialogReportFileTypeParams::pageSetup()
 
 	const ReportFileTypeParams& firstFt = m_fileTypeParams[firstIndex];
 
-	QPageLayout pageLayout = firstFt.pageLayout;
+	QPageLayout pageLayout = firstFt.pageLayout();
 
 	QPrinter printer(QPrinter::HighResolution);
 
@@ -129,9 +131,13 @@ void DialogReportFileTypeParams::pageSetup()
 
 		ReportFileTypeParams& ft = m_fileTypeParams[itemIndex];
 
-		ft.pageLayout.setPageSize(QPageSize(id));
-		ft.pageLayout.setOrientation(d.printer()->pageLayout().orientation());
-		ft.pageLayout.setMargins(d.printer()->pageLayout().margins());
+		QPageLayout l(ft.pageLayout());
+
+		l.setPageSize(QPageSize(id));
+		l.setOrientation(d.printer()->pageLayout().orientation());
+		l.setMargins(d.printer()->pageLayout().margins());
+
+		ft.setPageLayout(l);
 	}
 
 	fillTree();
@@ -163,9 +169,9 @@ void DialogReportFileTypeParams::setToDefault()
 
 		for (const ReportFileTypeParams& dft : m_defaultFileTypeParams)
 		{
-			if (dft.fileId == ft.fileId)
+			if (dft.fileId() == ft.fileId())
 			{
-				ft.pageLayout = dft.pageLayout;
+				ft.setPageLayout(dft.pageLayout());
 				break;
 			}
 		}
@@ -199,16 +205,16 @@ void DialogReportFileTypeParams::fillTree()
 			return;
 		}
 
-		QPageSize::PageSizeId id = QPageSize::id(ft.pageLayout.pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
+		QPageSize::PageSizeId id = QPageSize::id(ft.pageLayout().pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
 		if (id == QPageSize::Custom)
 		{
 			id = QPageSize::A4;
 		}
 
-		item->setText(0, ft.caption);
+		item->setText(0, ft.caption());
 		item->setText(1, QPageSize(id).name());
-		item->setText(2, ft.pageLayout.orientation() == QPageLayout::Portrait ? tr("Portrait") : tr("Landscape"));
-		QMarginsF margins = ft.pageLayout.margins();
+		item->setText(2, ft.pageLayout().orientation() == QPageLayout::Portrait ? tr("Portrait") : tr("Landscape"));
+		QMarginsF margins = ft.pageLayout().margins();
 		item->setText(3, tr("l%1 t%2 r%3 b%4").arg(margins.left()).arg(margins.top()).arg(margins.right()).arg(margins.bottom()));
 	}
 

@@ -9,28 +9,28 @@ namespace ReportLib
 	// ReportFileTypeParams
 	//
 
-	struct ReportFileTypeParams
+	class ReportFileTypeParams
 	{
-		ReportFileTypeParams(int fileId, const QString& caption, bool selected)
-		{
-			this->fileId = fileId;
-			this->caption = caption;
-			this->selected = selected;
-		}
+	public:
+		ReportFileTypeParams(int fileId, const QString& caption, bool selected, QPageLayout pageLayout);
 
-		ReportFileTypeParams(int fileId, const QString& caption, bool selected, QPageLayout pageLayout)
-			:ReportFileTypeParams(fileId, caption, selected)
-		{
-			this->pageLayout = pageLayout;
-		}
+		int fileId() const;
+		const QString& caption() const;
 
-		int fileId = -1;
-		QString caption;
-		bool selected = false;
+		bool selected() const;
+		void setSelected(bool value);
+
+		const QPageLayout& pageLayout() const;
+		void setPageLayout(const QPageLayout& layout);
+
+	private:
+		int m_fileId = -1;
+		QString m_caption;
+		bool m_selected = false;
 
 		// Multiple-file report section page options
 		//
-		QPageLayout pageLayout = QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, QMarginsF(15, 15, 15, 15));
+		QPageLayout m_pageLayout;
 	};
 
 	//
@@ -42,7 +42,7 @@ namespace ReportLib
 	public:
 		static std::shared_ptr<ReportSection> create(const QString& caption);
 
-		ReportSection(const QString& caption);
+		explicit ReportSection(const QString& caption);
 		virtual ~ReportSection();
 
 		QTextDocument& textDocument();

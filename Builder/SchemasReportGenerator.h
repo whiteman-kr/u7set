@@ -4,8 +4,6 @@
 #include "../ReportLib/Report.h"
 #include "../DbLib/DbController.h"
 
-using namespace ReportLib;
-
 namespace Builder
 {
 	//
@@ -17,7 +15,7 @@ namespace Builder
 		Q_OBJECT
 
 	public:
-		SchemasReportGenerator(std::shared_ptr<ReportSchemaView> schemaView,
+		SchemasReportGenerator(std::shared_ptr<ReportLib::ReportSchemaView> schemaView,
 								const AppSignalSet* signalSet,
 								const QString& serverIp,
 								int serverPort,
@@ -32,9 +30,9 @@ namespace Builder
 		virtual ~SchemasReportGenerator();
 
 		void setPageLayout(const QPageLayout& pageLayout);
-		void setReportFileTypeParams(const std::vector<ReportFileTypeParams>& reportFileTypeParams);
+		void setReportFileTypeParams(const std::vector<ReportLib::ReportFileTypeParams>& reportFileTypeParams);
 
-		static std::vector<ReportFileTypeParams> defaultFileTypeParams(DbController* db);
+		static std::vector<ReportLib::ReportFileTypeParams> defaultFileTypeParams(DbController* db);
 
 	public slots:
 		void exportFilesToPdf();
@@ -106,15 +104,13 @@ namespace Builder
 
 	private:
 		DbController m_db;
-		const std::shared_ptr<ReportSchemaView> m_schemaView;
+		const std::shared_ptr<ReportLib::ReportSchemaView> m_schemaView;
 
-		ReportAppSignalProvider m_appSignalProvider;
+		ReportLib::ReportAppSignalProvider m_appSignalProvider;
 		VFrame30::AppSignalController m_appSignalController;
 
 
-		std::vector<ReportFileTypeParams> m_reportFileTypeParams;
-
-		//std::vector<std::shared_ptr<Report>> m_generatedReports;
+		std::vector<ReportLib::ReportFileTypeParams> m_reportFileTypeParams;
 
 		// Input files for exportFilesToPdf() and exportFilesToAlbum()
 		//

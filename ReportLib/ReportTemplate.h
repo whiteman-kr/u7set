@@ -2,10 +2,10 @@
 
 namespace ReportLib
 {
-class ReportTemplate
-{
-public:
-	ReportTemplate();
-};
+	class ReportTemplate
+	{
+	public:
+		ReportTemplate();
+	};
 }
 
