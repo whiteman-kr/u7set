@@ -1070,7 +1070,7 @@ namespace Hardware
 		}
 
 		if (childType == DeviceType::Workstation &&
-			deviceType() > DeviceType::Chassis)
+			deviceType() > DeviceType::Module)
 		{
 			return false;
 		}

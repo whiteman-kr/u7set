@@ -475,7 +475,8 @@ public:
 			MPS = 0x5100,
 			BVK4 = 0x5300,	// obsolete, for compatibility
 			BP336 = 0x5500,	// obsolete, for compatibility
-			BVB = 0x5600
+			BVB = 0x5600,
+			VDU = 0x5700
 		};
 		Q_ENUM(FamilyType)
 

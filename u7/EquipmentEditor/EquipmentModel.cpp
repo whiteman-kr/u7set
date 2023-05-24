@@ -369,6 +369,11 @@ void EquipmentModel::fetchMore(const QModelIndex& parentIndex)
 	if (ok == false)
 		return;
 
+	if (files.empty() == true)
+	{
+		return;
+	}
+
 	beginInsertRows(parentIndex, 0, static_cast<int>(files.size()) - 1);
 
 	parentObject->deleteAllChildren();
