@@ -529,11 +529,8 @@ namespace Builder
 
 		bool anyParentBusIsAcquired() const;
 
-		bool isLoopbackSource() const { return m_loopback != nullptr; }
-
         bool setLoopback(std::shared_ptr<Loopback> loopback);
-		std::shared_ptr<Loopback> loopback() const;
-		QString loopbackID() const;
+		bool isLoopbackSource() const { return !m_loopbacks.empty(); }
 
 		//
 
@@ -611,7 +608,7 @@ namespace Builder
 
 		//
 
-		std::shared_ptr<Loopback> m_loopback;
+		std::set<std::shared_ptr<Loopback>> m_loopbacks;
 
 		//
 

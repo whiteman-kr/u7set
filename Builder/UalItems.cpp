@@ -387,11 +387,11 @@ namespace Builder
             return result.value();
 		}
 
-        LOG_ERROR_OBSOLETE(log, IssuePrefix::NotDefined,
-                           QString("Assign flags ualItem %1").
-                           arg(schemaItemAfb->label()));
-//		assert(false);			// AssignFlags property isn't exist in schemaItemAfb
-                                // Why assignFlags() has been called for this schemaItemAfb ???
+		Q_UNUSED(log);
+//		LOG_INTERNAL_ERROR_MSG(log, QString("Property AssignFlags is not exists in ualItem %1").
+//											arg(schemaItemAfb->label()));
+		Q_ASSERT(false);
+
 		return false;
 	}
 
@@ -1719,30 +1719,17 @@ namespace Builder
 
     bool UalSignal::setLoopback(std::shared_ptr<Loopback> loopback)
 	{
-		if (m_loopback != nullptr)
+		auto p = m_loopbacks.insert(loopback);
+
+		if (p.second == false)
 		{
-            assert(false);				// reassigning of loopback, why?
-            return false;
+			// if false - this is a reassigning of loopback, why?
+			//
+			Q_ASSERT(false);
+			return false;
 		}
 
-		m_loopback = loopback;
-        return true;
-	}
-
-	std::shared_ptr<Loopback> UalSignal::loopback() const
-	{
-		return m_loopback;
-	}
-
-	QString UalSignal::loopbackID() const
-	{
-		if (m_loopback == nullptr)
-		{
-			assert(false);
-			return QString();
-		}
-
-		return m_loopback->loopbackID();
+		return true;
 	}
 
 	E::SignalType UalSignal::constType() const
@@ -2414,7 +2401,7 @@ namespace Builder
 	bool UalSignal::canBePlacedInHeap() const
 	{
 		return	m_isAcquired == false &&
-				m_loopback == nullptr &&
+				isLoopbackSource() == false &&
 				m_expectedHeapReadsCount > 0;
 	}
 

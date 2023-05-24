@@ -194,14 +194,12 @@ namespace Builder
 			loopback->setUalSignal(ualSignal);
             bool res = ualSignal->setLoopback(loopback);
 
- /*           if (res == false)
+			if (res == false)
             {
-                LOG_ERROR_OBSOLETE(m_compiler.log(), IssuePrefix::NotDefined,
-                                   QString("Assign to signal %1, already LB %2, new LB %3").
-                                        arg(ualSignal->appSignalID()).
-                                        arg(ualSignal->loopbackID()).
-                                   arg(loopback->loopbackID()));
-            } */
+				LOG_INTERNAL_ERROR_MSG(m_compiler.log(), QString("Loopback %1 is twice assigned to signal %2").
+																arg(loopback->loopbackID()).
+																arg(ualSignal->appSignalID()));
+			}
         }
 		else
 		{
