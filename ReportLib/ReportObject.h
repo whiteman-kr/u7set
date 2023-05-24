@@ -49,7 +49,18 @@ public:
 	class ReportObject
 	{
 	public:
-		ReportObject(const ReportObjectFormat& format);
+		enum class Type
+		{
+			Undefined,
+			Text,
+			Table,
+			Schema,
+			NewPage
+		};
+
+		ReportObject(const ReportObjectFormat& format, Type type);
+
+		Type type() const;
 
 		virtual void renderText(QTextCursor& cursor) const = 0;
 
@@ -57,6 +68,7 @@ public:
 		// Format
 		//
 		ReportObjectFormat m_format;
+		Type m_type;
 	};
 
 	//
@@ -138,6 +150,18 @@ public:
 
 	private:
 		QString m_text;
+	};
+
+	//
+	// ReportNewPage
+	//
+
+	class ReportNewPage : public ReportObject
+	{
+	public:
+		ReportNewPage();
+
+		void renderText(QTextCursor& cursor) const override;
 	};
 
 }

@@ -45,9 +45,6 @@ namespace ReportLib
 		explicit ReportSection(const QString& caption);
 		virtual ~ReportSection();
 
-		QTextDocument& textDocument();
-		std::shared_ptr<ReportSchema> schemaObject() const;
-
 		const QString& caption() const;
 
 		// Add object functions
@@ -60,24 +57,19 @@ namespace ReportLib
 
 		std::shared_ptr<ReportSchema> addSchema(std::shared_ptr<ReportSchema> object);
 
-		// Render functions
-		//
-		void render(QSizeF pageSize);
+		void addNewPage();
 
-		int pageCount() const;	// filled after render()!!!
-
-	private:
 		void addObject(std::shared_ptr<ReportObject> object);
+
+		// Object access functions
+		//
+		size_t objectCount() const;
+		std::shared_ptr<ReportObject> object(size_t index);
 
 	private:
 		QString m_caption;
 
-		std::vector<std::shared_ptr<ReportObject>> m_textObjects;
-		QTextDocument m_textDocument;
-
-		std::shared_ptr<ReportSchema> m_schemaObject;
-
-		int m_pageCount = 0; // filled after render()!!!
+		std::vector<std::shared_ptr<ReportObject>> m_objects;
 	};
 
 	//

@@ -179,21 +179,21 @@ private:
 							   const DbFileTree& filesTree,
 							   const std::shared_ptr<DbFileInfo>& fi,
 							   const CompareData& compareData,
-							   std::shared_ptr<ReportLib::Report> report,
+							   std::shared_ptr<ReportLib::ReportSection> section,
 							   ReportLib::ReportTable& headerTable);
 
 	void compareFile(int rootFileId,
 					 const DbFileTree& filesTree,
 					 const std::shared_ptr<DbFileInfo>& fi,
 					 const CompareData& compareData,
-					 std::shared_ptr<ReportLib::Report> report,
+					 std::shared_ptr<ReportLib::ReportSection> section,
 					 ReportLib::ReportTable& headerTable);
 
 	void compareFileContents(int rootFileId,
 							 const std::shared_ptr<DbFile>& sourceFile,
 							 const std::shared_ptr<DbFile>& targetFile,
 							 const QString& fileName,
-							 std::shared_ptr<ReportLib::Report> report,
+							 std::shared_ptr<ReportLib::ReportSection> section,
 							 ReportLib::ReportTable& headerTable);
 
 	std::shared_ptr<Hardware::DeviceObject> loadDeviceObject(const std::shared_ptr<DbFile>& file, std::map<int, std::shared_ptr<Hardware::DeviceObject>>* const deviceObjectMap) const;
@@ -201,38 +201,38 @@ private:
 	void compareDeviceObjects(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile,
 							  const std::shared_ptr<Hardware::DeviceObject>& sourceObject,
 							  const std::shared_ptr<Hardware::DeviceObject>& targetObject,
-							  std::shared_ptr<ReportLib::Report> report,
+							  std::shared_ptr<ReportLib::ReportSection> section,
 							  ReportLib::ReportTable& headerTable,
 							  bool fileTypeIsPreset);
 
 	void compareBusTypes(const std::shared_ptr<DbFile>& sourceFile,
 						 const std::shared_ptr<DbFile>& targetFile,
-						 std::shared_ptr<ReportLib::Report> report,
+						 std::shared_ptr<ReportLib::ReportSection> section,
 						 ReportLib::ReportTable& headerTable);
 
 	void compareSchemas(const QString& fileName,
 						const std::shared_ptr<DbFile>& sourceFile,
 						const std::shared_ptr<DbFile>& targetFile,
-						std::shared_ptr<ReportLib::Report> report,
+						std::shared_ptr<ReportLib::ReportSection> section,
 						ReportLib::ReportTable& headerTable);
 
 	void compareConnections(const std::shared_ptr<DbFile>& sourceFile,
 							const std::shared_ptr<DbFile>& targetFile,
-							std::shared_ptr<ReportLib::Report> report,
+							std::shared_ptr<ReportLib::ReportSection> section,
 							ReportLib::ReportTable& headerTable);
 
 	void compareFilesData(const std::shared_ptr<DbFile>& sourceFile,
 						  const std::shared_ptr<DbFile>& targetFile,
-						  std::shared_ptr<ReportLib::Report> report,
+						  std::shared_ptr<ReportLib::ReportSection> section,
 						  ReportLib::ReportTable& headerTable);
 
 	void compareSignals(const CompareData& compareData,
-						std::shared_ptr<ReportLib::Report> report,
+						std::shared_ptr<ReportLib::ReportSection> section,
 						ReportLib::ReportTable& headerTable);
 
 	void compareSignalContents(const AppSignal& sourceSignal,
 							   const AppSignal& targetSignal,
-							   std::shared_ptr<ReportLib::Report> report,
+							   std::shared_ptr<ReportLib::ReportSection> section,
 							   ReportLib::ReportTable& headerTable);
 
 	void comparePropertyObjects(const PropertyObject& sourceObject,

@@ -57,20 +57,11 @@ namespace ReportLib
 	ReportSection::ReportSection(const QString& caption):
 		m_caption(caption)
 	{
+		qDebug() << "ReportSection created: " << caption;
 	}
 
 	ReportSection::~ReportSection()
 	{
-	}
-
-	QTextDocument& ReportSection::textDocument()
-	{
-		return m_textDocument;
-	}
-
-	std::shared_ptr<ReportSchema> ReportSection::schemaObject() const
-	{
-		return m_schemaObject;
 	}
 
 	const QString& ReportSection::caption() const
@@ -110,59 +101,38 @@ namespace ReportLib
 
 	std::shared_ptr<ReportSchema> ReportSection::addSchema(std::shared_ptr<ReportSchema> object)
 	{
-		if (m_schemaObject != nullptr)
-		{
-			Q_ASSERT(false);
-			return {};
-		}
-		m_schemaObject = object;
+		addObject(object);
 		return object;
 	}
 
-	void ReportSection::render(QSizeF pageSize)
+	void ReportSection::addNewPage()
 	{
-		// Document has content
-
-		m_textDocument.setPageSize(pageSize);
-
-		QTextCursor textCursor(&m_textDocument);
-
-		for (const std::shared_ptr<ReportObject>& object : m_textObjects)
-		{
-			if (object == nullptr)
-			{
-				Q_ASSERT(object);
-				return;
-			}
-
-			object->renderText(textCursor);
-		}
-
-		if (m_textDocument.isEmpty() == true)
-		{
-			m_pageCount = m_schemaObject == nullptr ? 0 : 1;
-		}
-		else
-		{
-			m_pageCount = m_textDocument.pageCount();
-		}
-
-		return;
-	}
-
-	int ReportSection::pageCount() const
-	{
-		return m_pageCount;
+		std::shared_ptr<ReportNewPage> object = std::make_shared<ReportLib::ReportNewPage>();
+		addObject(object);
 	}
 
 	void ReportSection::addObject(std::shared_ptr<ReportObject> object)
 	{
-		m_textObjects.push_back(object);
+		m_objects.push_back(object);
 	}
 
+	size_t ReportSection::objectCount() const
+	{
+		return m_objects.size();
+	}
+
+	std::shared_ptr<ReportObject> ReportSection::object(size_t index)
+	{
+		if (index >= objectCount())
+		{
+			Q_ASSERT(false);
+			return nullptr;
+		}
+		return m_objects[index];
+	}
 
 	//
-	// ReportGenerator
+	// Report
 	//
 
 	Report::Report(const QString& reportName, const QString& path):

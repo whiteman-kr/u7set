@@ -61,10 +61,15 @@ namespace ReportLib
 
 	}
 
-	ReportObject::ReportObject(const ReportObjectFormat& format):
-		m_format(format)
+	ReportObject::ReportObject(const ReportObjectFormat& format, Type type):
+		m_format(format),
+		m_type(type)
 	{
+	}
 
+	ReportObject::Type ReportObject::type() const
+	{
+		return m_type;
 	}
 
 	//
@@ -83,7 +88,7 @@ namespace ReportLib
 							   const ReportObjectFormat& format,
 							   std::shared_ptr<VFrame30::Schema> schema,
 							   const std::map<QUuid, ReportSchemaCompareAction>& compareActions):
-		ReportObject(format),
+		ReportObject(format, ReportObject::Type::Schema),
 		m_caption(caption),
 		m_schema(schema),
 		m_compareActions(compareActions)
@@ -91,18 +96,8 @@ namespace ReportLib
 
 	}
 
-	void ReportSchema::renderText(QTextCursor& cursor) const
+	void ReportSchema::renderText(QTextCursor& /*cursor*/) const
 	{
-		if (m_format.charFormat().isValid() == true)
-		{
-			cursor.setCharFormat(m_format.charFormat());
-		}
-		if (m_format.blockFormat().isValid() == true)
-		{
-			cursor.setBlockFormat(m_format.blockFormat());
-		}
-
-		cursor.insertText(m_caption);
 	}
 
 	std::shared_ptr<VFrame30::Schema> ReportSchema::schema() const
@@ -120,7 +115,7 @@ namespace ReportLib
 	//
 
 	ReportTable::ReportTable(const QStringList& headerLabels, const std::vector<int>& columnWidths, const ReportObjectFormat& format):
-		ReportObject(format),
+		ReportObject(format, ReportObject::Type::Table),
 		m_headerLabels(headerLabels),
 		m_columnWidths(columnWidths)
 	{
@@ -285,7 +280,7 @@ html += "</tr></tfoot";
 	//
 
 	ReportText::ReportText(const QString& text, const ReportObjectFormat& format):
-		ReportObject(format),
+		ReportObject(format, ReportObject::Type::Text),
 		m_text(text)
 	{
 	}
@@ -308,5 +303,18 @@ html += "</tr></tfoot";
 		}
 
 		cursor.insertText(m_text);
+	}
+
+	//
+	// ReportText
+	//
+
+	ReportNewPage::ReportNewPage():
+		ReportObject({}, ReportObject::Type::NewPage)
+	{
+	}
+
+	void ReportNewPage::renderText(QTextCursor& /*cursor*/) const
+	{
 	}
 }

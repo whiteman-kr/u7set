@@ -751,6 +751,8 @@ void ProjectDiffGenerator::compareProject()
 			return;
 		}
 
+		int in_multiple_files_report_file_is_generated = 1;
+
 		// Create report object and specify its filename
 		//
 
@@ -805,9 +807,10 @@ void ProjectDiffGenerator::compareProject()
 			m_statistics.m_currentSectionName = ft.caption();
 		}
 
-		std::shared_ptr<ReportSection> headerSection = std::make_shared<ReportSection>(QString());
+		std::shared_ptr<ReportSection> fileTypeSummarySection = ReportSection::create(ft.caption());
+		fileTypeSummarySection->addText(tr("%1\n\n").arg(ft.caption()), m_headerFormat);
 
-		headerSection->addText(tr("%1\n\n").arg(ft.caption()), m_headerFormat);
+		std::shared_ptr<ReportSection> fileTypeSection = ReportSection::create(ft.caption());
 
 		std::shared_ptr<ReportTable> headerTable;
 
@@ -824,13 +827,17 @@ void ProjectDiffGenerator::compareProject()
 											  {45, 10, 10, 15, 20},
 											  m_tableFormat);
 
-			compareSignals(m_reportParams.compareData, report, *headerTable);
+			fileTypeSummarySection->addTable(headerTable);
+
+			compareSignals(m_reportParams.compareData, fileTypeSection, *headerTable);
 		}
 		else
 		{
 			headerTable = ReportTable::create({tr("Object"), tr("Status"), tr("Changeset"), tr("User"), tr("Date")},
 											  {45, 10, 10, 15, 20},
 											  m_tableFormat);
+
+			fileTypeSummarySection->addTable(headerTable);
 
 			// Compare files
 
@@ -840,11 +847,9 @@ void ProjectDiffGenerator::compareProject()
 
 			for (const auto& child : children)
 			{
-				compareFilesRecursive(ft.fileId(), filesTree, child, m_reportParams.compareData, report, *headerTable);
+				compareFilesRecursive(ft.fileId(), filesTree, child, m_reportParams.compareData, fileTypeSection, *headerTable);
 			}
 		}
-
-		headerSection->addTable(headerTable);
 
 		// Remove header if no data
 		//
@@ -852,24 +857,12 @@ void ProjectDiffGenerator::compareProject()
 		{
 			headerTable->sortByColumn(0);
 
-			int todo_sort_sections = 1;
+			report->addSection(fileTypeSummarySection);
+		}
 
-			/*
-			std::sort(fileTypeSections.begin(), fileTypeSections.end(), [](const std::shared_ptr<ReportSection>& a, const std::shared_ptr<ReportSection>& b)
-			{
-
-				bool aSchema = a->schema() != nullptr;
-				bool bSchema = b->schema() != nullptr;
-
-				if (aSchema != bSchema)
-				{
-					return aSchema > bSchema;
-				}
-
-				return a->caption() < b->caption();
-			});*/
-
-			report->insertSection(1, headerSection);
+		if (fileTypeSection->objectCount() > 0)
+		{
+			report->addSection(fileTypeSection);
 		}
 	}
 
@@ -882,7 +875,7 @@ void ProjectDiffGenerator::compareFilesRecursive(int rootFileId,
 												 const DbFileTree& filesTree,
 												 const std::shared_ptr<DbFileInfo>& fi,
 												 const CompareData& compareData,
-												 std::shared_ptr<Report> report,
+												 std::shared_ptr<ReportSection> section,
 												 ReportTable& headerTable)
 {
 	if (m_stop == true)
@@ -897,7 +890,7 @@ void ProjectDiffGenerator::compareFilesRecursive(int rootFileId,
 	}
 
 
-	compareFile(rootFileId, filesTree, fi, compareData, report, headerTable);
+	compareFile(rootFileId, filesTree, fi, compareData, section, headerTable);
 
 	// Process children
 	//
@@ -913,7 +906,7 @@ void ProjectDiffGenerator::compareFilesRecursive(int rootFileId,
 			return;
 		}
 
-		compareFilesRecursive(rootFileId, filesTree, fiChild, compareData, report, headerTable);
+		compareFilesRecursive(rootFileId, filesTree, fiChild, compareData, section, headerTable);
 	}
 
 	return;
@@ -923,7 +916,7 @@ void ProjectDiffGenerator::compareFile(int rootFileId,
 									   const DbFileTree& filesTree,
 									   const std::shared_ptr<DbFileInfo>& fi,
 									   const CompareData& compareData,
-									   std::shared_ptr<Report> report,
+									   std::shared_ptr<ReportSection> section,
 									   ReportTable& headerTable)
 {
 	// Print file name
@@ -1041,7 +1034,7 @@ void ProjectDiffGenerator::compareFile(int rootFileId,
 
 	// Compare files
 
-	compareFileContents(rootFileId, sourceFile, targetFile, fileName, report, headerTable);
+	compareFileContents(rootFileId, sourceFile, targetFile, fileName, section, headerTable);
 
 	return;
 }
@@ -1050,7 +1043,7 @@ void ProjectDiffGenerator::compareFileContents(int rootFileId,
 											   const std::shared_ptr<DbFile>& sourceFile,
 											   const std::shared_ptr<DbFile>& targetFile,
 											   const QString& fileName,
-											   std::shared_ptr<Report> report,
+											   std::shared_ptr<ReportSection> section,
 											   ReportTable& headerTable)
 {
 	// No files at all
@@ -1147,29 +1140,29 @@ void ProjectDiffGenerator::compareFileContents(int rootFileId,
 	//
 	if (hardwareObject == true)
 	{
-		compareDeviceObjects(sourceFile, targetFile, sourceObject, targetObject, report, headerTable, fileTypeIsPreset);
+		compareDeviceObjects(sourceFile, targetFile, sourceObject, targetObject, section, headerTable, fileTypeIsPreset);
 		return;
 	}
 
 	if (isConnectionFile(fileName) == true)
 	{
-		compareConnections(sourceFile, targetFile, report, headerTable);
+		compareConnections(sourceFile, targetFile, section, headerTable);
 		return;
 	}
 
 	if (isBusTypeFile(fileName) == true)
 	{
-		compareBusTypes(sourceFile, targetFile, report, headerTable);
+		compareBusTypes(sourceFile, targetFile, section, headerTable);
 		return;
 	}
 
 	if (isSchemaFile(fileName) == true)
 	{
-		compareSchemas(fileName, sourceFile, targetFile, report, headerTable);
+		compareSchemas(fileName, sourceFile, targetFile, section, headerTable);
 		return;
 	}
 
-	compareFilesData(sourceFile, targetFile, report, headerTable);
+	compareFilesData(sourceFile, targetFile, section, headerTable);
 	return;
 }
 
@@ -1226,7 +1219,7 @@ void ProjectDiffGenerator::compareDeviceObjects(const std::shared_ptr<DbFile>& s
 												const std::shared_ptr<DbFile>& targetFile,
 												const std::shared_ptr<Hardware::DeviceObject>& sourceObject,
 												const std::shared_ptr<Hardware::DeviceObject>& targetObject,
-												std::shared_ptr<Report> report,
+												std::shared_ptr<ReportSection> section,
 												ReportTable& headerTable,
 												bool fileTypeIsPreset)
 {
@@ -1311,11 +1304,9 @@ void ProjectDiffGenerator::compareDeviceObjects(const std::shared_ptr<DbFile>& s
 			sectionName = tr("%1: %2").arg(equipmentType).arg(targetObject->equipmentId());
 		}
 
-		auto deviceDiffSection = report->addSection(ReportSection::create(sectionName));
+		section->addText(tr("%1, %2\n\n").arg(sectionName).arg(changesetString(targetFile)), m_normalFormat);
 
-		deviceDiffSection->addText(tr("%1, %2\n\n").arg(sectionName).arg(changesetString(targetFile)), m_normalFormat);
-
-		auto diffTable = deviceDiffSection->addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
+		auto diffTable = section->addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
 													 {15, 15, 35, 35},
 													 m_tableFormat);
 
@@ -1327,7 +1318,7 @@ void ProjectDiffGenerator::compareDeviceObjects(const std::shared_ptr<DbFile>& s
 
 void ProjectDiffGenerator::compareBusTypes(const std::shared_ptr<DbFile>& sourceFile,
 										   const std::shared_ptr<DbFile>& targetFile,
-										   std::shared_ptr<Report> report,
+										   std::shared_ptr<ReportSection> section,
 										   ReportTable& headerTable)
 {
 	// No Files
@@ -1463,25 +1454,23 @@ void ProjectDiffGenerator::compareBusTypes(const std::shared_ptr<DbFile>& source
 
 		// Add tables to section
 
-		auto busDiffSection = report->addSection(ReportSection::create(tr("Bus: ") + targetBus.busTypeId()));
-
-		busDiffSection->addText(tr("Bus: %1, %2\n\n").arg(targetBus.busTypeId()).arg(changesetString(targetFile)),
+		section->addText(tr("Bus: %1, %2\n\n").arg(targetBus.busTypeId()).arg(changesetString(targetFile)),
 								m_normalFormat);
 
 		if (busDiffTable->rowCount() != 0)
 		{
-			busDiffSection->addTable(busDiffTable);
-			busDiffSection->addText("\n", m_normalFormat);
+			section->addTable(busDiffTable);
+			section->addText("\n", m_normalFormat);
 		}
 
 		if (busSignalsDiffTable->rowCount() != 0)
 		{
 			busSignalsDiffTable->sortByColumn(0);
 
-			busDiffSection->addText(tr("Bus %1 signals:\n\n").arg(targetBus.busTypeId()),
+			section->addText(tr("Bus %1 signals:\n\n").arg(targetBus.busTypeId()),
 									m_normalFormat);
-			busDiffSection->addTable(busSignalsDiffTable);
-			busDiffSection->addText("\n", m_normalFormat);
+			section->addTable(busSignalsDiffTable);
+			section->addText("\n", m_normalFormat);
 		}
 
 		for (auto it : busSignalsPropertiesTables)
@@ -1489,9 +1478,9 @@ void ProjectDiffGenerator::compareBusTypes(const std::shared_ptr<DbFile>& source
 			const QString& signalId = it.first;
 			const std::shared_ptr<ReportTable>& itemDiffTable = it.second;
 
-			busDiffSection->addText(tr("Bus: %1, signal: %2\n\n").arg(targetBus.busTypeId()).arg(signalId),
+			section->addText(tr("Bus: %1, signal: %2\n\n").arg(targetBus.busTypeId()).arg(signalId),
 									m_normalFormat);
-			busDiffSection->addTable(itemDiffTable);
+			section->addTable(itemDiffTable);
 		}
 	}
 
@@ -1502,7 +1491,7 @@ void ProjectDiffGenerator::compareBusTypes(const std::shared_ptr<DbFile>& source
 void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 										  const std::shared_ptr<DbFile>& sourceFile,
 										  const std::shared_ptr<DbFile>& targetFile,
-										  std::shared_ptr<Report> report,
+										  std::shared_ptr<ReportSection> section,
 										  ReportTable& headerTable)
 {
 	auto context = VFrame30::Context::create(&m_appSignalController, nullptr, nullptr, nullptr);
@@ -1532,6 +1521,8 @@ void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 
 		singleSchema->setContext(context);
 
+		section->addText(tr("Schema: %1\n").arg(singleSchema->schemaId()), m_normalFormat);
+
 		// Add schema drawing
 
 		auto reportSchema = ReportSchema::create(
@@ -1540,8 +1531,7 @@ void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 					singleSchema,
 					{});
 
-		auto schemaDrawingSection = report->addSection(ReportSection::create(tr("Schema: ") + fileName));
-		schemaDrawingSection->addSchema(reportSchema);
+		section->addSchema(reportSchema);
 
 		return;
 	}
@@ -1705,6 +1695,8 @@ void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 	{
 		addHeaderTableItem(headerTable, fileName, E::valueToString<E::VcsItemAction>(targetFile->action()), targetFile);
 
+		section->addText(tr("Schema: %1\n").arg(targetSchema->schemaId()), m_normalFormat);
+
 		// Add schema differences drawing
 
 		QString schemaId = targetSchema->schemaId();
@@ -1717,27 +1709,24 @@ void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 					targetSchema,
 					itemsActions);
 
-		auto schemaDrawingSection = report->addSection(ReportSection::create(tr("Schema: ") + fileName));
-		schemaDrawingSection->addSchema(reportSchema);
+		section->addSchema(reportSchema);
 
 		// Add schema differences tables
 
-		auto schemaDiffSection = report->addSection(ReportSection::create(tr("Schema: ") + fileName));
-
 		if (schemaDiffTable->rowCount() != 0)
 		{
-			schemaDiffSection->addText(tr("Schema %1 properties:\n\n").arg(schemaId), m_normalFormat);
-			schemaDiffSection->addTable(schemaDiffTable);
-			schemaDiffSection->addText("\n", m_normalFormat);
+			section->addText(tr("Schema %1 properties:\n\n").arg(schemaId), m_normalFormat);
+			section->addTable(schemaDiffTable);
+			section->addText("\n", m_normalFormat);
 		}
 
 		if (schemaItemsDiffTable->rowCount() != 0)
 		{
 			schemaItemsDiffTable->sortByColumn(1);
 
-			schemaDiffSection->addText(tr("Schema %1 items:\n\n").arg(schemaId), m_normalFormat);
-			schemaDiffSection->addTable(schemaItemsDiffTable);
-			schemaDiffSection->addText("\n", m_normalFormat);
+			section->addText(tr("Schema %1 items:\n\n").arg(schemaId), m_normalFormat);
+			section->addTable(schemaItemsDiffTable);
+			section->addText("\n", m_normalFormat);
 		}
 
 		for (const auto& it : itemsTables)
@@ -1750,21 +1739,21 @@ void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 
 			if (item->label().isEmpty() == true)
 			{
-				schemaDiffSection->addText(tr("%1 (no label):\n\n").arg(className), m_normalFormat);
+				section->addText(tr("%1 (no label):\n\n").arg(className), m_normalFormat);
 			}
 			else
 			{
-				schemaDiffSection->addText(tr("%1 %2:\n\n").arg(className).arg(item->label()), m_normalFormat);
+				section->addText(tr("%1 %2:\n\n").arg(className).arg(item->label()), m_normalFormat);
 			}
-			schemaDiffSection->addTable(itemDiffTable);
-			schemaDiffSection->addText(tr("\n"), m_normalFormat);
+			section->addTable(itemDiffTable);
+			section->addText(tr("\n"), m_normalFormat);
 		}
 	}
 }
 
 void ProjectDiffGenerator::compareConnections(const std::shared_ptr<DbFile>& sourceFile,
 											  const std::shared_ptr<DbFile>& targetFile,
-											  std::shared_ptr<Report> report,
+											  std::shared_ptr<ReportSection> section,
 											  ReportTable& headerTable)
 {
 	// No Files
@@ -1813,13 +1802,11 @@ void ProjectDiffGenerator::compareConnections(const std::shared_ptr<DbFile>& sou
 
 	if (diffs.empty() == false)
 	{
-		auto connectionDiffSection = report->addSection(ReportSection::create(tr("Connection: ") + targetConnection.connectionID()));
-
-		connectionDiffSection->addText(tr("Connection: %1, %2\n\n").arg(targetConnection.connectionID()).arg(changesetString(targetFile)), m_normalFormat);
+		section->addText(tr("Connection: %1, %2\n\n").arg(targetConnection.connectionID()).arg(changesetString(targetFile)), m_normalFormat);
 
 		addHeaderTableItem(headerTable, targetConnection.connectionID(), E::valueToString<E::VcsItemAction>(targetFile->action()), targetFile);
 
-		std::shared_ptr<ReportTable> diffTable = connectionDiffSection->addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
+		std::shared_ptr<ReportTable> diffTable = section->addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
 																				 {15, 15, 35, 35},
 																				 m_tableFormat);
 
@@ -1829,7 +1816,7 @@ void ProjectDiffGenerator::compareConnections(const std::shared_ptr<DbFile>& sou
 
 void ProjectDiffGenerator::compareFilesData(const std::shared_ptr<DbFile>& sourceFile,
 											const std::shared_ptr<DbFile>& targetFile,
-											std::shared_ptr<Report> report,
+											std::shared_ptr<ReportSection> section,
 											ReportTable& headerTable)
 {
 	// No Files
@@ -1856,28 +1843,15 @@ void ProjectDiffGenerator::compareFilesData(const std::shared_ptr<DbFile>& sourc
 
 	addHeaderTableItem(headerTable, targetFile->fileName(), E::valueToString<E::VcsItemAction>(targetFile->action()), targetFile);
 
-	auto fileDiffSection = report->addSection(ReportSection::create(tr("File: ") + targetFile->fileName()));
 	// Both Files
 	//
 	if (isTextFile(targetFile->fileName()) == true)
 	{
-		fileDiffSection->addText(tr("File: %1, %2\n\n").arg(targetFile->fileName()).arg(changesetString(targetFile)), m_normalFormat);
+		section->addText(tr("File: %1, %2\n\n").arg(targetFile->fileName()).arg(changesetString(targetFile)), m_normalFormat);
 
 		std::vector<FileDiff::FileLine> fileLinesSource;
 		std::vector<FileDiff::FileLine> fileLinesTarget;
 		std::vector<FileDiff::FileLine> fileLinesCommon;
-
-		/*
-		{
-			QFile f1("d:\\Source" + targetFile->fileName());
-			f1.open(QFile::WriteOnly);
-			f1.write(sourceFile->data());
-
-			QFile f2("d:\\Target" + targetFile->fileName());
-			f2.open(QFile::WriteOnly);
-			f2.write(targetFile->data());
-		}
-		*/
 
 		FileDiff::loadFileData(sourceFile->data(), &fileLinesSource);
 		FileDiff::loadFileData(targetFile->data(), &fileLinesTarget);
@@ -1886,7 +1860,7 @@ void ProjectDiffGenerator::compareFilesData(const std::shared_ptr<DbFile>& sourc
 
 		FileDiff::calculateLcs(fileLinesSource, fileLinesTarget, &fileLinesCommon);
 
-		std::shared_ptr<ReportTable> diffTable = fileDiffSection->addTable({tr("Line"), tr("Source"), tr("Line"), tr("Target")},
+		std::shared_ptr<ReportTable> diffTable = section->addTable({tr("Line"), tr("Source"), tr("Line"), tr("Target")},
 																		   {10, 40, 10, 40},
 																		   m_tableFormat);
 
@@ -1950,12 +1924,12 @@ void ProjectDiffGenerator::compareFilesData(const std::shared_ptr<DbFile>& sourc
 			str += tr(" Size changed: %1 -> %2 bytes.").arg(sourceFile->data().size()).arg(targetFile->data().size());
 		}
 
-		fileDiffSection->addText(str + "\n", m_normalFormat);
+		section->addText(str + "\n", m_normalFormat);
 	}
 }
 
 void ProjectDiffGenerator::compareSignals(const CompareData& compareData,
-										  std::shared_ptr<Report> report,
+										  std::shared_ptr<ReportSection> section,
 										  ReportTable& headerTable)
 {
 	bool ok = false;
@@ -2170,7 +2144,7 @@ void ProjectDiffGenerator::compareSignals(const CompareData& compareData,
 						std::swap(sourceSignal, targetSignal);
 					}
 
-					compareSignalContents(*sourceSignal, *targetSignal, report, headerTable);
+					compareSignalContents(*sourceSignal, *targetSignal, section, headerTable);
 				}
 			}
 		}
@@ -2214,7 +2188,7 @@ void ProjectDiffGenerator::compareSignals(const CompareData& compareData,
 
 void ProjectDiffGenerator::compareSignalContents(const AppSignal& sourceSignal,
 												 const AppSignal& targetSignal,
-												 std::shared_ptr<Report> report,
+												 std::shared_ptr<ReportSection> section,
 												 ReportTable& headerTable)
 {
 	AppSignalProperties sourceProperties(sourceSignal);
@@ -2268,13 +2242,11 @@ void ProjectDiffGenerator::compareSignalContents(const AppSignal& sourceSignal,
 
 	if (diffs.empty() == false)
 	{
-		auto signalDiffSection = report->addSection(ReportSection::create(tr("Signal: ") + targetSignal.appSignalID()));
-
-		signalDiffSection->addText(tr("Signal: %1, %2\n\n").arg(targetSignal.appSignalID()).arg(changesetString(targetSignal)), m_normalFormat);
+		section->addText(tr("Signal: %1, %2\n\n").arg(targetSignal.appSignalID()).arg(changesetString(targetSignal)), m_normalFormat);
 
 		addHeaderTableItem(headerTable, targetSignal.appSignalID(), E::valueToString<E::VcsItemAction>(targetSignal.instanceAction()), targetSignal);
 
-		std::shared_ptr<ReportTable> diffTable = signalDiffSection->addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
+		std::shared_ptr<ReportTable> diffTable = section->addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
 																			 {15, 15, 35, 35},
 																			 m_tableFormat);
 
