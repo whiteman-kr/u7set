@@ -6608,6 +6608,33 @@ void EditSchemaWidget::editPaste()
 			schemaItem->setNewGuid();
 			itemList.push_back(schemaItem);
 
+			// Ensure item is visible after paste
+			//
+			for (SchemaItemPtr& item : itemList)
+			{
+				VFrame30::ISchemaItemPropertiesPos* pos = item.get();
+
+				if (pos->left() + pos->width() > schema()->docWidthRegional())
+				{
+					pos->setLeft(schema()->docWidthRegional() - pos->width());
+				}
+
+				if (pos->left() < 0)
+				{
+					pos->setLeft(0);
+				}
+
+				if (pos->top() + pos->height() > schema()->docHeightRegional())
+				{
+					pos->setTop(schema()->docHeightRegional() - pos->height());
+				}
+
+				if (pos->top() < 0)
+				{
+					pos->setTop(0);
+				}
+			}
+
 			// --
 			//
 			schemaItemAfbIsPresent |= schemaItem->isSchemaItemAfb();
