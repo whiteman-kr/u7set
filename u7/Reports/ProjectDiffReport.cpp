@@ -434,7 +434,7 @@ std::vector<ReportFileTypeParams> ProjectDiffGenerator::defaultFileTypeParams(Db
 	// Hardware and signals
 
 	result.push_back({db->systemFileId(DbDir::HardwareConfigurationDir), QObject::tr("Hardware Configuration"),	true,
-					 QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins)});
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins)});
 
 	result.push_back({applicationSignalsTypeId(), QObject::tr("Application Signals"), true,
 					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins)});
@@ -512,6 +512,13 @@ void ProjectDiffGenerator::process()
 		//
 		for (auto& report : m_generatedReports)
 		{
+			// Don't print report if it has only one title page
+			//
+			if (report->sectionsCount() == 1 && report->section(0)->caption() == titlePageName)
+			{
+				continue;
+			}
+
 			// Print report
 			//
 			{
@@ -751,8 +758,6 @@ void ProjectDiffGenerator::compareProject()
 			return;
 		}
 
-		int in_multiple_files_report_file_is_generated = 1;
-
 		// Create report object and specify its filename
 		//
 
@@ -775,30 +780,25 @@ void ProjectDiffGenerator::compareProject()
 			pdfFileName.replace(' ', '_');
 		}
 
+		// Create report
+		//
 		if (report == nullptr || m_reportParams.multipleFiles == true)
 		{
-			// Create report
-			//
 			report = std::make_shared<Report>(ft.caption(), pdfFileName);
 			report->setPageLayout(m_reportParams.multipleFiles == true ? ft.pageLayout() : m_reportParams.pageLayout);
 			report->setResolution(m_resolution);
 			m_generatedReports.push_back(report);
 
-			// Create title page and margins
+			// Create title page
 			//
-			auto titlePageSection = generateTitlePage(m_reportParams.compareData, m_projectName, m_userName, ft.caption());
+			auto titlePageSection = generateTitlePage(report->pageLayout(), m_reportParams.compareData, m_projectName, m_userName,
+													  m_reportParams.multipleFiles == true ? ft.caption() : QString());
 			report->insertSection(0, titlePageSection);
 
 			// Create margins
 			//
-			if (m_reportParams.multipleFiles == true)
-			{
-				createMarginItems(*report, m_reportParams.compareData, m_reportParams.multipleFiles == true ? ft.caption() : QString());
-			}
-			else
-			{
-				createMarginItems(*report, m_reportParams.compareData, QString());
-			}
+			createMarginItems(*report, m_reportParams.compareData,
+							  m_reportParams.multipleFiles == true ? ft.caption() : QString());
 		}
 
 		// Specify section name to statistics
@@ -1307,8 +1307,8 @@ void ProjectDiffGenerator::compareDeviceObjects(const std::shared_ptr<DbFile>& s
 		section->addText(tr("%1, %2\n\n").arg(sectionName).arg(changesetString(targetFile)), m_normalFormat);
 
 		auto diffTable = section->addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
-													 {15, 15, 35, 35},
-													 m_tableFormat);
+										   {15, 15, 35, 35},
+										   m_tableFormat);
 
 		fillDiffTable(*diffTable, diffs);
 	}
@@ -1455,7 +1455,7 @@ void ProjectDiffGenerator::compareBusTypes(const std::shared_ptr<DbFile>& source
 		// Add tables to section
 
 		section->addText(tr("Bus: %1, %2\n\n").arg(targetBus.busTypeId()).arg(changesetString(targetFile)),
-								m_normalFormat);
+						 m_normalFormat);
 
 		if (busDiffTable->rowCount() != 0)
 		{
@@ -1468,7 +1468,7 @@ void ProjectDiffGenerator::compareBusTypes(const std::shared_ptr<DbFile>& source
 			busSignalsDiffTable->sortByColumn(0);
 
 			section->addText(tr("Bus %1 signals:\n\n").arg(targetBus.busTypeId()),
-									m_normalFormat);
+							 m_normalFormat);
 			section->addTable(busSignalsDiffTable);
 			section->addText("\n", m_normalFormat);
 		}
@@ -1479,7 +1479,7 @@ void ProjectDiffGenerator::compareBusTypes(const std::shared_ptr<DbFile>& source
 			const std::shared_ptr<ReportTable>& itemDiffTable = it.second;
 
 			section->addText(tr("Bus: %1, signal: %2\n\n").arg(targetBus.busTypeId()).arg(signalId),
-									m_normalFormat);
+							 m_normalFormat);
 			section->addTable(itemDiffTable);
 		}
 	}
@@ -1807,8 +1807,8 @@ void ProjectDiffGenerator::compareConnections(const std::shared_ptr<DbFile>& sou
 		addHeaderTableItem(headerTable, targetConnection.connectionID(), E::valueToString<E::VcsItemAction>(targetFile->action()), targetFile);
 
 		std::shared_ptr<ReportTable> diffTable = section->addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
-																				 {15, 15, 35, 35},
-																				 m_tableFormat);
+																   {15, 15, 35, 35},
+																   m_tableFormat);
 
 		fillDiffTable(*diffTable, diffs);
 	}
@@ -1861,8 +1861,8 @@ void ProjectDiffGenerator::compareFilesData(const std::shared_ptr<DbFile>& sourc
 		FileDiff::calculateLcs(fileLinesSource, fileLinesTarget, &fileLinesCommon);
 
 		std::shared_ptr<ReportTable> diffTable = section->addTable({tr("Line"), tr("Source"), tr("Line"), tr("Target")},
-																		   {10, 40, 10, 40},
-																		   m_tableFormat);
+																   {10, 40, 10, 40},
+																   m_tableFormat);
 
 		std::vector<FileDiff::FileLine> fileLinesSourceAligned;
 		std::vector<FileDiff::FileLine> fileLinesTargetAligned;
@@ -2247,8 +2247,8 @@ void ProjectDiffGenerator::compareSignalContents(const AppSignal& sourceSignal,
 		addHeaderTableItem(headerTable, targetSignal.appSignalID(), E::valueToString<E::VcsItemAction>(targetSignal.instanceAction()), targetSignal);
 
 		std::shared_ptr<ReportTable> diffTable = section->addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
-																			 {15, 15, 35, 35},
-																			 m_tableFormat);
+																   {15, 15, 35, 35},
+																   m_tableFormat);
 
 		fillDiffTable(*diffTable, diffs);
 	}
@@ -2497,12 +2497,13 @@ bool ProjectDiffGenerator::isSchemaFile(const QString& fileName) const
 	return false;
 }
 
-std::shared_ptr<ReportSection> ProjectDiffGenerator::generateTitlePage(const CompareData& compareData,
+std::shared_ptr<ReportSection> ProjectDiffGenerator::generateTitlePage(const QPageLayout& layout,
+																	   const CompareData& compareData,
 																	   const QString& projectName,
 																	   const QString& userName,
 																	   const QString& subreportName) const
 {
-	auto rs = ReportSection::create("TitlePage");
+	auto rs = ReportSection::create(titlePageName);
 
 	// Initialize font
 
@@ -2513,18 +2514,26 @@ std::shared_ptr<ReportSection> ProjectDiffGenerator::generateTitlePage(const Com
 	int titleFontSize = lineFontSize(m_reportParams.pageLayout, fontName, 25);
 	int regularFontSize = lineFontSize(m_reportParams.pageLayout, fontName, 50);
 
-	QFont titleFont{fontName, titleFontSize * fontScaling, QFont::Bold};
+	QFont titleFont{fontName, titleFontSize * fontScaling};
 	QFont regularFont{fontName, regularFontSize * fontScaling};
 
 	// Report info
 
-	rs->addText(tr("\n\n\n\n\n\nProject: %1\n\n").arg(projectName), {titleFont, Qt::AlignHCenter});
-
-	rs->addText(tr("Differences Report\n\n\n\n"), {titleFont, Qt::AlignHCenter});
-
-	if (subreportName.isEmpty() == false)
+	if (layout.orientation() == QPageLayout::Orientation::Portrait)
 	{
-		rs->addText(QObject::tr("%1\n").arg(subreportName), {regularFont, Qt::AlignHCenter});
+		rs->addText(tr("\n\n\n"), {titleFont, Qt::AlignHCenter});
+	}
+
+	rs->addText(tr("\n\n\n\n\nProject: %1\n\n").arg(projectName), {titleFont, Qt::AlignHCenter});
+
+	if (subreportName.isEmpty() == true)
+	{
+		rs->addText(tr("Differences Report\n\n\n\n\n"), {titleFont, Qt::AlignHCenter});
+	}
+	else
+	{
+		rs->addText(tr("Differences Report\n\n"), {titleFont, Qt::AlignHCenter});
+		rs->addText(QObject::tr("%1\n\n\n\n").arg(subreportName), {regularFont, Qt::AlignHCenter});
 	}
 
 	// User name
@@ -2576,7 +2585,7 @@ void ProjectDiffGenerator::generateSummaryReport()
 
 	// Create title page
 	//
-	auto titlePageSection = generateTitlePage(m_reportParams.compareData, m_projectName, m_userName, QString());
+	auto titlePageSection = generateTitlePage(summaryReport->pageLayout(), m_reportParams.compareData, m_projectName, m_userName, QString());
 	summaryReport->insertSection(0, titlePageSection);
 
 

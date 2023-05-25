@@ -105,12 +105,6 @@ namespace ReportLib
 		return object;
 	}
 
-	void ReportSection::addNewPage()
-	{
-		std::shared_ptr<ReportNewPage> object = std::make_shared<ReportLib::ReportNewPage>();
-		addObject(object);
-	}
-
 	void ReportSection::addObject(std::shared_ptr<ReportObject> object)
 	{
 		m_objects.push_back(object);
@@ -169,6 +163,21 @@ namespace ReportLib
 	void Report::setResolution(int value)
 	{
 		m_pageResolution = value;
+	}
+
+	size_t Report::sectionsCount() const
+	{
+		return m_sections.size();
+	}
+
+	std::shared_ptr<ReportSection> Report::section(size_t index) const
+	{
+		if (index >= sectionsCount())
+		{
+			Q_ASSERT(false);
+			return nullptr;
+		}
+		return m_sections[index];
 	}
 
 	const std::vector<std::shared_ptr<ReportSection>>& Report::sections() const

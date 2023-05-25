@@ -54,8 +54,7 @@ public:
 			Undefined,
 			Text,
 			Table,
-			Schema,
-			NewPage
+			Schema
 		};
 
 		ReportObject(const ReportObjectFormat& format, Type type);
@@ -151,17 +150,4 @@ public:
 	private:
 		QString m_text;
 	};
-
-	//
-	// ReportNewPage
-	//
-
-	class ReportNewPage : public ReportObject
-	{
-	public:
-		ReportNewPage();
-
-		void renderText(QTextCursor& cursor) const override;
-	};
-
 }

@@ -57,8 +57,6 @@ namespace ReportLib
 
 		std::shared_ptr<ReportSchema> addSchema(std::shared_ptr<ReportSchema> object);
 
-		void addNewPage();
-
 		void addObject(std::shared_ptr<ReportObject> object);
 
 		// Object access functions
@@ -91,10 +89,15 @@ namespace ReportLib
 		int resolution() const;
 		void setResolution(int value);
 
-		// Contents functions
+		// Contents access functions
 		//
+		size_t sectionsCount() const;
+		std::shared_ptr<ReportSection> section(size_t index) const;
+
 		const std::vector<std::shared_ptr<ReportSection>>& sections() const;
 
+		// Add sectinons functions
+		//
 		std::shared_ptr<ReportSection> addHeaderSection(std::shared_ptr<ReportSection> section);
 		std::shared_ptr<ReportSection> insertSection(int index, std::shared_ptr<ReportSection> section);
 		std::shared_ptr<ReportSection> addSection(std::shared_ptr<ReportSection> section);

@@ -248,7 +248,7 @@ private:
 
 	// Generating title pages functions
 	//
-	std::shared_ptr<ReportLib::ReportSection> generateTitlePage(const CompareData& compareData, const QString& projectName, const QString& userName, const QString& subreportName) const;
+	std::shared_ptr<ReportLib::ReportSection> generateTitlePage(const QPageLayout& layout, const CompareData& compareData, const QString& projectName, const QString& userName, const QString& subreportName) const;
 
 	void generateSummaryReport();
 	std::shared_ptr<ReportLib::ReportSection> generateSummaryReportFilesPage(const QStringList& subreportFiles);
@@ -299,5 +299,7 @@ private:
 	Statistics m_statistics;
 
 	std::atomic_bool m_stop = false;	// Stop processing flag, set by stop()
+
+	static inline const QString titlePageName{"TitlePage"};
 
 };

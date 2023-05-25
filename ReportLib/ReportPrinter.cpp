@@ -7,10 +7,12 @@ namespace ReportLib
 	// PrintText
 	//
 
-	PrintText::PrintText(QSizeF pageSize):
+	PrintText::PrintText(QSizeF pageSize, int verticalOffset, bool newPageBefore):
 		m_textCusror(&m_textDocument)
 	{
 		m_type = Type::Text;
+		m_verticalOffset = verticalOffset;
+		m_newPageBefore = newPageBefore;
 		m_textDocument.setPageSize(pageSize);
 	}
 
@@ -29,13 +31,24 @@ namespace ReportLib
 		return QRect(QPoint(0, 0), m_textDocument.size().toSize());
 	}
 
-	void PrintText::print(QPdfWriter& pdfWriter, QPainter& painter, int /*vOffset*/)
+	void PrintText::print(ReportPrinter& printer, QPdfWriter& pdfWriter, QPainter& painter, const std::vector<ReportMarginItem>& marginItems,
+						  int /*pageCount*/, int& pageIndex, QMutex& pageCounterMutex)
 	{
+		if (m_newPageBefore == true)
+		{
+			pdfWriter.newPage();
+		}
+
 		if (m_textDocument.isEmpty() == true)
 		{
 			return;
-
 		}
+
+		if (m_verticalOffset == 0)
+		{
+			printer.printMarginItems(pdfWriter, painter, QString(), marginItems);
+		}
+
 		// Page contains text
 
 		const QRect pageRect = pdfWriter.pageLayout().paintRectPixels(pdfWriter.resolution());
@@ -48,11 +61,10 @@ namespace ReportLib
 
 		while (currentRect.intersects(contentRect) == true)
 		{
-			// Increase the page number
-			/*{
-				QMutexLocker l(&m_statisticsMutex);
-				m_statistics.pageIndex++;
-			}*/
+			{
+				QMutexLocker l(&pageCounterMutex);
+				pageIndex++;
+			}
 
 			// Print document part
 
@@ -74,23 +86,15 @@ namespace ReportLib
 			if (currentRect.intersects(contentRect))
 			{
 				pdfWriter.newPage();
+
+				printer.printMarginItems(pdfWriter, painter, QString(), marginItems);
 			}
 		}
 	}
 
-	PrintNewPage::PrintNewPage()
+	int PrintText::pageCount() const
 	{
-		m_type = Type::NewPage;
-	}
-
-	void PrintNewPage::print(QPdfWriter& pdfWriter, QPainter& /*painter*/, int /*vOffset*/)
-	{
-		pdfWriter.newPage();
-	}
-
-	QRect PrintNewPage::contentRect() const
-	{
-		return QRect{0, 0, 0, 0};
+		return m_textDocument.pageCount();
 	}
 
 	//
@@ -99,12 +103,16 @@ namespace ReportLib
 
 	PrintSchema::PrintSchema(const std::shared_ptr<ReportSchemaView>& schemaView,
 							 const std::shared_ptr<VFrame30::Schema>& schema,
-							 const std::map<QUuid, ReportSchemaCompareAction>& compareActions):
+							 const std::map<QUuid, ReportSchemaCompareAction>& compareActions,
+							 int verticalOffset,
+							 bool newPageBefore):
 		m_schemaView(schemaView),
 		m_schema(schema),
 		m_compareActions(compareActions)
 	{
 		m_type = Type::Schema;
+		m_verticalOffset = verticalOffset;
+		m_newPageBefore = newPageBefore;
 	}
 
 	QRect PrintSchema::contentRect() const
@@ -112,7 +120,8 @@ namespace ReportLib
 		return QRect{0, 0, 0, 0};
 	}
 
-	void PrintSchema::print(QPdfWriter& pdfWriter, QPainter& painter, int vOffset)
+	void PrintSchema::print(ReportPrinter& printer, QPdfWriter& pdfWriter, QPainter& painter, const std::vector<ReportMarginItem>& marginItems,
+							int /*pageCount*/, int& pageIndex, QMutex& pageCounterMutex)
 	{
 		if (m_schemaView == nullptr || m_schema == nullptr)
 		{
@@ -121,11 +130,25 @@ namespace ReportLib
 			return;
 		}
 
+		if (m_newPageBefore == true)
+		{
+			pdfWriter.newPage();
+			{
+				QMutexLocker l(&pageCounterMutex);
+				pageIndex++;
+			}
+		}
+
+		if (m_verticalOffset == 0)
+		{
+			printer.printMarginItems(pdfWriter, painter, m_schema->caption(), marginItems);
+		}
+
 		// Calculate the upper schema offset
 		//
 		const QRect pageRect = pdfWriter.pageLayout().paintRectPixels(pdfWriter.resolution());
 
-		int schemaTop = vOffset;
+		int schemaTop = m_verticalOffset;
 		int schemaLeft = 0;
 
 		const int schemaMaxHeight = pageRect.height() - schemaTop;
@@ -181,6 +204,14 @@ namespace ReportLib
 		return;
 	}
 
+	int PrintSchema::pageCount() const
+	{
+		if (m_verticalOffset == 0)
+			return 1;
+
+		return 0;
+	}
+
 	//
 	// ReportPrinter
 	//
@@ -211,13 +242,9 @@ namespace ReportLib
 
 	bool ReportPrinter::print(const Report& report, QBuffer& buffer, std::atomic_bool& stop)
 	{
-		int add_margins_and_page_counter_print = 1;
-
 		m_printObjects.clear();
 
 		buffer.open(QIODevice::WriteOnly);
-
-		int sectionsPagesCount = 0;
 
 		{
 			QMutexLocker l(&m_statisticsMutex);
@@ -239,26 +266,16 @@ namespace ReportLib
 
 		QPainter painter(&pdfWriter);
 
-		bool firstSection = true;
-
 		// Render all objects to print objects
 		//
+
+		bool firstSection = true;
+
 		for (const std::shared_ptr<ReportSection>& section : report.sections())
 		{
 			if (stop == true)
 			{
 				return true;
-			}
-
-			if (firstSection == true)
-			{
-				firstSection = false;
-			}
-			else
-			{
-				// New section starts from new page
-				auto pnp = std::make_shared<PrintNewPage>();
-				m_printObjects.push_back(pnp);
 			}
 
 			{
@@ -268,90 +285,105 @@ namespace ReportLib
 
 			size_t count = section->objectCount();
 
-			bool firstObject = true;
-
-			std::shared_ptr<PrintText> pt;
+			std::shared_ptr<PrintText> printText;
 			std::shared_ptr<PrintSchema> ps;
 
 			ReportObject::Type lastObjectType = ReportObject::Type::Undefined;
+
+			int lastDocumentTextPageHeight = 0; // Height of the text on the last page of QTextDocument
+
+			bool firstObject = true;
 
 			for (size_t i = 0; i < count; i++)
 			{
 				std::shared_ptr<ReportObject> object = section->object(i);
 
-				if (firstObject == true || lastObjectType == ReportObject::Type::Schema)
+				switch (object->type())
 				{
-					firstObject = false;
-					lastObjectType = object->type();
-
-					// Create new text print object
-					//
-					if (object->type() == ReportObject::Type::Text || object->type() == ReportObject::Type::Table)
+				case ReportObject::Type::Text:
+				case ReportObject::Type::Table:
 					{
-						pt = std::make_shared<PrintText>(pageRectPixels.size());
-						m_printObjects.push_back(pt);
+						// Create new text print object in cases:
+						// 1. This is first text object
+						// 2. New page has been started
+						// 3. Schema has been drawn
+						//
+						if (printText == nullptr ||
+								lastObjectType == ReportObject::Type::Schema)
+						{
+							printText = std::make_shared<PrintText>(pageRectPixels.size(),
+																	lastDocumentTextPageHeight,
+																	lastObjectType == ReportObject::Type::Schema ||
+																	(firstObject == true && firstSection == false));
+							m_printObjects.push_back(printText);
+						}
+						break;
 					}
+				case ReportObject::Type::Schema:
+					{
+						// Create new schema print object
+						//
+						ReportSchema* rs = dynamic_cast<ReportSchema*>(object.get());
+						if (rs == nullptr)
+						{
+							Q_ASSERT(rs);
+							continue;
+						}
+
+						ps = std::make_shared<PrintSchema>(m_schemaView,
+														   rs->schema(),
+														   rs->compareActions(),
+														   lastDocumentTextPageHeight,
+														   (firstObject == true && firstSection == false));
+						m_printObjects.push_back(ps);
+
+
+					break;
+					}
+				default:
+					Q_ASSERT(false);
 				}
 
-				// Create new schema print object
-				//
-				if (object->type() == ReportObject::Type::Schema)
-				{
-					ReportSchema* rs = dynamic_cast<ReportSchema*>(object.get());
-					if (rs == nullptr)
-					{
-						Q_ASSERT(rs);
-						continue;
-					}
-
-					ps = std::make_shared<PrintSchema>(m_schemaView,
-													   rs->schema(),
-													   rs->compareActions());
-					m_printObjects.push_back(ps);
-
-					// Insert new page after schema if this object is not last
-					//
-					if (i != count -1)
-					{
-						auto pnp = std::make_shared<PrintNewPage>();
-						m_printObjects.push_back(pnp);
-					}
-				}
-
-				// Create new page object
-				//
-				if (object->type() == ReportObject::Type::NewPage)
-				{
-					auto pnp = std::make_shared<PrintNewPage>();
-					m_printObjects.push_back(pnp);
-				}
-
-				// Render contents to print object
+				// Render text to print object
 				//
 				if (object->type() == ReportObject::Type::Text || object->type() == ReportObject::Type::Table)
 				{
-					if (pt == nullptr)
+					if (printText == nullptr)
 					{
-						Q_ASSERT(pt);
+						Q_ASSERT(printText);
 						return false;
 					}
 
-					object->renderText(pt->textCursor());
-				}
+					object->renderText(printText->textCursor());
 
-				/*
-				if (m_textDocument.isEmpty() == true)
-				{
-					m_pageCount = m_schemaObject == nullptr ? 0 : 1;
+					lastDocumentTextPageHeight = printText->contentRect().height() % pageRectPixels.height();
 				}
 				else
 				{
-					m_pageCount = m_textDocument.pageCount();
+					lastDocumentTextPageHeight = 0;
 				}
-				*/
+
+				lastObjectType = object->type();
+
+				if (firstObject == true)
+				{
+					firstObject = false;
+				}
 			}
 
-			//sectionsPagesCount += section->pageCount();
+			if (firstSection == true)
+			{
+				firstSection = false;
+			}
+		}
+
+		// Count pages count
+
+		int pagesCount = 0;
+
+		for (const std::shared_ptr<PrintObject>& po : m_printObjects)
+		{
+			pagesCount += po->pageCount();
 		}
 
 		// Print PDF
@@ -359,10 +391,9 @@ namespace ReportLib
 		{
 			QMutexLocker l(&m_statisticsMutex);
 			m_statistics.status = Statistics::Status::Printing;
-			m_statistics.pagesCount = sectionsPagesCount;
+			m_statistics.pagesCount = pagesCount;
+			m_statistics.pageIndex = 1;
 		}
-
-		int textBottomOffset = 0;
 
 		for (const std::shared_ptr<PrintObject>& po : m_printObjects)
 		{
@@ -371,9 +402,8 @@ namespace ReportLib
 				return true;
 			}
 
-			po->print(pdfWriter, painter, textBottomOffset);
-
-			textBottomOffset = po->contentRect().height() % pageRectPixels.height();
+			po->print(*this, pdfWriter, painter, report.marginItems(),
+					  pagesCount, m_statistics.pageIndex, m_statisticsMutex);
 		}
 
 		{
@@ -390,7 +420,8 @@ namespace ReportLib
 		return m_statistics;
 	}
 
-	/*void ReportPrinter::printMarginItems(QPdfWriter& pdfWriter, QPainter& painter, const QString& objectName, const std::vector<ReportMarginItem>& marginItems) const
+	void ReportPrinter::printMarginItems(QPdfWriter& pdfWriter, QPainter& painter, const QString& objectName,
+										 const std::vector<ReportMarginItem>& marginItems) const
 	{
 		int page = 0;
 		int pagesCount = 0;
@@ -442,7 +473,7 @@ namespace ReportLib
 
 				double fontCoef = static_cast<double>(coefMetrics.height()) / font.pointSize();
 
-				int pointSize = font.pointSize() * 72 / resolution/*translate points to pixels*//*;
+				int pointSize = font.pointSize() * 72 / resolution/*translate points to pixels*/;
 
 				font.setPointSize(static_cast<int>(pointSize * fontCoef));
 			}
@@ -490,54 +521,5 @@ namespace ReportLib
 			}
 		}
 		painter.restore();
-	}*/
-
-	/*
-	void ReportPrinter::printSection(QPdfWriter& pdfWriter,
-									 QPainter& painter,
-									 ReportSection& section,
-									 const std::vector<ReportMarginItem>& marginItems) const
-	{
-		QTextDocument& textDocument = section.textDocument();
-
-		auto schemaObject = section.schemaObject();
-
-		if (textDocument.isEmpty() == true)
-		{
-			if (schemaObject != nullptr)
-			{
-				// Page contains no text, but contains schema
-
-				// Increase the page number
-				{
-					QMutexLocker l(&m_statisticsMutex);
-					m_statistics.pageIndex++;
-				}
-
-				// Print margins
-
-				printMarginItems(pdfWriter, painter, section.caption(), marginItems);
-			}
-		}
-		else
-		{
-
-			}
-		}
-
-		// Print schema
-		//
-		if (schemaObject != nullptr)
-		{
-			printSectionSchema(pdfWriter, painter, section);
-		}
-
-		return;
 	}
-
-	void ReportPrinter::printSectionSchema(QPdfWriter& pdfWriter,
-										   QPainter& painter,
-										   ReportSection& section) const
-	{
-	}*/
 }

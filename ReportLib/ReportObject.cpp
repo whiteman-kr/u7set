@@ -304,17 +304,4 @@ html += "</tr></tfoot";
 
 		cursor.insertText(m_text);
 	}
-
-	//
-	// ReportText
-	//
-
-	ReportNewPage::ReportNewPage():
-		ReportObject({}, ReportObject::Type::NewPage)
-	{
-	}
-
-	void ReportNewPage::renderText(QTextCursor& /*cursor*/) const
-	{
-	}
 }

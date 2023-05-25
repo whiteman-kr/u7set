@@ -5,7 +5,7 @@
 namespace ReportLib
 {
 
-
+	class ReportPrinter;
 
 	class PrintObject
 	{
@@ -14,55 +14,58 @@ namespace ReportLib
 		{
 			Undefined,
 			Text,
-			Schema,
-			NewPage
+			Schema
 		};
 
 		virtual QRect contentRect() const = 0;
 
-		virtual void print(QPdfWriter& pdfWriter, QPainter& painter, int vOffset) = 0;
+		Type type() const {return m_type;}
+
+		virtual void print(ReportPrinter& printer, QPdfWriter& pdfWriter, QPainter& painter, const std::vector<ReportMarginItem>& marginItems,
+						   int pageCount, int& pageIndex, QMutex& pageCounterMutex) = 0;
+
+		virtual int pageCount() const = 0;
 
 	protected:
 		Type m_type{Type::Undefined};
+		int m_verticalOffset{0};
+		bool m_newPageBefore{false};
 	};
 
 	class PrintText : public PrintObject
 	{
 	public:
-		PrintText(QSizeF pageSize);
+		PrintText(QSizeF pageSize, int verticalOffset, bool newPageBefore);
 
 		QTextCursor& textCursor();
 
 		virtual QRect contentRect() const override;
 
-		virtual void print(QPdfWriter& pdfWriter, QPainter& painter, int vOffset) override;
+		virtual void print(ReportPrinter& printer, QPdfWriter& pdfWriter, QPainter& painter, const std::vector<ReportMarginItem>& marginItems,
+						   int pageCount, int& pageIndex, QMutex& pageCounterMutex) override;
+
+		virtual int pageCount() const override;
 
 	private:
 		QTextDocument m_textDocument;
 		QTextCursor m_textCusror;
 	};
 
-	class PrintNewPage : public PrintObject
-	{
-	public:
-		PrintNewPage();
-
-		virtual QRect contentRect() const override;
-
-		virtual void print(QPdfWriter& pdfWriter, QPainter& painter, int vOffset) override;
-	};
-
-
 	class PrintSchema: public PrintObject
 	{
 	public:
 		PrintSchema(const std::shared_ptr<ReportSchemaView>& schemaView,
 					const std::shared_ptr<VFrame30::Schema>& schema,
-					const std::map<QUuid, ReportSchemaCompareAction>& compareActions);
+					const std::map<QUuid, ReportSchemaCompareAction>& compareActions,
+					int verticalOffset,
+					bool newPageBefore);
 
 		virtual QRect contentRect() const override;
 
-		virtual void print(QPdfWriter& pdfWriter, QPainter& painter, int vOffset) override;
+		virtual void print(ReportPrinter& printer, QPdfWriter& pdfWriter, QPainter& painter, const std::vector<ReportMarginItem>& marginItems,
+						   int pageCount, int& pageIndex, QMutex& pageCounterMutex) override;
+
+		virtual int pageCount() const override;
 
 	private:
 		// Schema data
@@ -107,23 +110,10 @@ namespace ReportLib
 
 		Statistics statistics() const;
 
-	private:
-		/*void printMarginItems(QPdfWriter& pdfWriter,
+		void printMarginItems(QPdfWriter& pdfWriter,
 							  QPainter& painter,
 							  const QString& objectName,
-							  const std::vector<ReportMarginItem>& marginItems) const;*/
-
-
-		/*
-		void printSection(QPdfWriter&
-							  pdfWriter,
-							  QPainter& painter,
-							  ReportSection& section,
 							  const std::vector<ReportMarginItem>& marginItems) const;
-
-		void printSectionSchema(QPdfWriter& pdfWriter,
-								QPainter& painter,
-								ReportSection& section) const;*/
 
 	private:
 		std::vector<std::shared_ptr<PrintObject>> m_printObjects;
