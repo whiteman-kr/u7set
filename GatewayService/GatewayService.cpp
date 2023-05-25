@@ -74,21 +74,16 @@ void GatewayServiceWorker::initCmdLineParser()
 	cp.addSingleValueOption(CmdLineOption::CFG_IP1, SoftwareSetting::CFG_SERVICE_IP1, "IP address of first Configuration Service.", "IPv4:Port");
 	cp.addSingleValueOption(CmdLineOption::CFG_IP2, SoftwareSetting::CFG_SERVICE_IP2, "IP address of second Configuration Service.", "IPv4:Port");
 
-	cp.addSimpleOption(CmdLineOption::CFG_PARSE, "Parse gateway description file.");
+	cp.addSimpleOption(CmdLineOption::LOG_GATEWAY_PACKETS, "Turn On 2 hours gateway packet logging.");
 
-	cp.addSingleValueOption(CmdLineOption::CFG_FILE,
-							SoftwareSetting::GATEWAY_DESCRIPTION_FILE, "Gateway description file name.", "file");
+//	cp.addSimpleOption(CmdLineOption::CFG_PARSE, "Parse gateway description file.");
+
+//	cp.addSingleValueOption(CmdLineOption::CFG_FILE,
+	//						SoftwareSetting::GATEWAY_DESCRIPTION_FILE, "Gateway description file name.", "file");
 }
 
 void GatewayServiceWorker::loadSettings()
 {
-/*	m_appDataProcessingThreadCount = QString(getStrSetting(SoftwareSetting::PROCESSING_THREADS_COUNT)).toInt();
-
-	m_strCmdLineAppDataReceivingIP = getStrSetting(SoftwareSetting::OVERRIDE_APP_DATA_RECEIVING_IP);
-	m_cmdLineAppDataReceivingIP.setAddressPortStr(m_strCmdLineAppDataReceivingIP, PORT_APP_DATA_SERVICE_DATA);
-
-	m_logRupTimeErrors = cmdLineParser().optionIsSet(CmdLineOption::LOG_RUP_TIME_ERR);*/
-
 	DEBUG_LOG_MSG(logger(), QString(tr("Settings from command line or registry:")));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::EQUIPMENT_ID).arg(equipmentID()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStrIfSet()));
@@ -127,6 +122,13 @@ bool GatewayServiceWorker::processCustomCmdLineSettings()
 
 void GatewayServiceWorker::initialize()
 {
+	const CommandLineParser& clp = cmdLineParser();
+
+	if (clp.optionIsSet(CmdLineOption::LOG_GATEWAY_PACKETS) == true)
+	{
+		m_logGatewayPackets = true;
+	}
+
 	DEBUG_LOG_MSG(logger(), "GatewayServiceWorker is started");
 
 	runCfgLoaderThread();
@@ -290,54 +292,6 @@ bool GatewayServiceWorker::readGatewayDescription(const QByteArray& fileData)
 	return result;
 }
 
-void GatewayServiceWorker::createAndInitSignalStates()
-{/*
-//	m_appSignalStates.clear();
-
-	if (m_appSignals.isEmpty())
-	{
-		return;
-	}
-
-	int signalCount = 0;
-
-	for(AppSignal* signal : m_appSignals)
-	{
-		TEST_PTR_CONTINUE(signal);
-
-		if (signal->isBus() == true)
-		{
-			continue;
-		}
-
-		signalCount++;
-	}
-
-	//m_appSignalStates.setSize(signalCount);
-
-	int index = 0;
-
-	for(AppSignal* signal : m_appSignals)
-	{
-		TEST_PTR_CONTINUE(signal);
-
-		if (signal->isBus() == true)
-		{
-			continue;
-		}
-
-		DynamicAppSignalState* signalState = m_appSignalStates[index];
-
-		signalState->setSignalParams(signal, m_appSignals);
-
-		index++;
-	}
-
-	m_appSignalStates.buidlHash2State();
-
-	m_appSignalStates.setAutoArchivingGroups(m_autoArchivingGroupsCount);*/
-}
-
 void GatewayServiceWorker::applyNewConfiguration()
 {
 	DEBUG_LOG_MSG(logger(), QString("Applying new configuration..."));
@@ -349,8 +303,8 @@ void GatewayServiceWorker::applyNewConfiguration()
 
 	bool result = true;
 
-	result &= m_handlers.init(m_gateways, softwareInfo(), m_curSettingsProfile, m_appSignals, logger());
-
+	result &= m_handlers.init(m_gateways, softwareInfo(), m_curSettingsProfile, m_appSignals,
+							  logger(), m_logGatewayPackets);
 	if (result == false)
 	{
 		DEBUG_LOG_ERR(logger(), QString("Handlers initialization ERROR!"));

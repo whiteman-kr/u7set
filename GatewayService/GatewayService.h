@@ -33,10 +33,6 @@ public:
 
 	const AppSignals& appSignals() const { return m_appSignals; }
 
-/*	const DynamicAppSignalStates& appSignalStates() const { return m_appSignalStates; }
-	DynamicAppSignalStates& appSignalStates() { return m_appSignalStates; }*/
-
-
 private:
 	virtual void initCmdLineParser() override;
 	virtual void loadSettings() override;
@@ -59,8 +55,6 @@ private:
 	bool readAppSignals(const QByteArray& fileData);
 	bool readGatewayDescription(const QByteArray& fileData);
 
-	void createAndInitSignalStates();
-
 	void applyNewConfiguration();
 	void clearConfiguration();
 
@@ -80,6 +74,8 @@ private:
 
 	std::set<Hash> m_acquiredSignals;		// set of Hash(appSignalID) of acquired signals
 	AppSignals m_appSignals;
+
+	bool m_logGatewayPackets = false;
 
 	Gateway::Gateways m_gateways;
 	Gateway::Handlers m_handlers;

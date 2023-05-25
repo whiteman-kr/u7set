@@ -387,6 +387,7 @@ namespace SoftwareSetting
 	inline const QString OVERRIDE_APP_DATA_RECEIVING_IP("OverrideAppDataReceivingIP");
 
 	inline const QString GATEWAY_DESCRIPTION_FILE("GatewayDescriptionFile");
+	inline const QString LOG_GATEWAY_PACKETS("LogGatewayPackets");
 }
 
 namespace CmdLineOption
@@ -396,6 +397,7 @@ namespace CmdLineOption
 	inline const QString CFG_IP2("cfgip2");
 	inline const QString CFG_FILE("f");
 	inline const QString CFG_PARSE("parse");
+	inline const QString LOG_GATEWAY_PACKETS("logpckt");
 	inline const QString LOG_RUP_TIME_ERR("logRupTimeErr");
 }
 
