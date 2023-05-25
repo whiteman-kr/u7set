@@ -1,5 +1,6 @@
 VDU-1
 	24.05.2023	Version: 0	VDU-1_v0.u7devp RPCT-3550: Create VDU preset
+	24.05.2023	Version: 1	VDU-1_v1.u7devp RPCT-3550: FamilyType changed from 0x5700 to 0x7100
 
 
 
