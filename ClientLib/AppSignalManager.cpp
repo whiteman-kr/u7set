@@ -721,6 +721,27 @@ namespace ClientLib
 		return signalParam(appSignalIdHash, found);
 	}
 
+	std::vector<AppSignalManager::SourceState> AppSignalManager::signalStateAllSources(const QString& appSignalId) const
+	{
+		std::vector<AppSignalManager::SourceState> result;
+		result.reserve(4);
+
+		QReadLocker rl(&m_statesLocker);
+
+		auto foundState = m_states.find(::calcHash(appSignalId));
+		if (foundState != m_states.end())
+		{
+			const Sources& sources = foundState->second;
+
+			for (const auto& source : sources.sources)
+			{
+				result.push_back(source);
+			}
+		}
+
+		return result;
+	}
+
 	void AppSignalManager::Sources::set(const AppSignalState& state, Qt::HANDLE sourceThreadId)
 	{
 		SourceState* emptyState = nullptr;

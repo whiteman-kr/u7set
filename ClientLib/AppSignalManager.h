@@ -157,12 +157,7 @@ namespace ClientLib
 	public:
 		AppSignalParam signalParamByEquipemntId(const QString& equipmentId, bool* found) const;
 
-	signals:
-		void signalParamsUpdated();
-
-	private:
-		HasLogFile m_logFile;
-
+	public:
 		struct SourceState
 		{
 			AppSignalState state{};
@@ -170,6 +165,12 @@ namespace ClientLib
 			std::chrono::time_point<std::chrono::system_clock> lastUpdateTime{};	// State last time received or updated
 		};
 
+		std::vector<SourceState> signalStateAllSources(const QString& appSignalId) const;
+
+	signals:
+		void signalParamsUpdated();
+
+	private:
 		struct Sources
 		{
 			size_t size = 0;
@@ -180,6 +181,9 @@ namespace ClientLib
 
 			[[nodiscard]] const AppSignalState& get() const;
 		};
+
+
+		HasLogFile m_logFile;
 
 		mutable QReadWriteLock m_paramsLocker;
 		std::unordered_map<Hash, AppSignalParam, VoidHasher<Hash>> m_signalParams;	// Key is hash from AppSignalID
