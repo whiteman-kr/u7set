@@ -70,6 +70,9 @@ namespace TrendLib
 
 		void on_trendSignals_customContextMenuRequested(const QPoint &pos);
 
+		void on_upSignalButton_clicked();
+		void on_downSignalButton_clicked();
+
 	private:
 		Ui::DialogChooseTrendSignals* ui = nullptr;
 

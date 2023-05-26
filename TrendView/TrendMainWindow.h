@@ -32,6 +32,10 @@ namespace TrendLib
 		bool addSignals(const std::vector<TrendSignalParam>& trendSignals, bool redraw);
 		bool addSignal(const TrendSignalParam& trendSignal, bool redraw);
 
+		/// Add, remove or reorder signals.
+		///
+		void updateSignals(const std::vector<TrendSignalParam>& trendsignals);
+
 	protected:
 		void createToolBar();
 
