@@ -148,6 +148,10 @@ namespace ClientLib
 		virtual bool dataServiceHasSignal(const QString& serviceEquipmentId, const QString& appSignalId) const override;
 		virtual bool dataServiceHasSignal(const QString& serviceEquipmentId, Hash signalHash) const override;
 
+		/// Get all signals for the specified DataServiceID (AppDataService or DiagDataService).
+		///
+		virtual std::vector<Hash> dataServiceSignals(const QString& serviceEquipmentId) const override;
+
 		// Tags
 		//
 		virtual QStringList tags() const override final;
