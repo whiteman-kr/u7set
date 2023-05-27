@@ -44,17 +44,17 @@ void ArchivingService::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo)
 	serviceInfo.set_settingsxml(xmlString.toStdString());
 }
 
-void ArchivingService::initCmdLineParser()
+void ArchivingService::initCustomCmdLineOptions()
 {
 	CommandLineParser& cp = cmdLineParser();
 
-	cp.addSingleValueOption("id", SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
-	cp.addSingleValueOption("cfgip1", SoftwareSetting::CFG_SERVICE_IP1, "IP-addres of first Configuration Service.", "");
-	cp.addSingleValueOption("cfgip2", SoftwareSetting::CFG_SERVICE_IP2, "IP-addres of second Configuration Service.", "");
-	cp.addSingleValueOption("location",
+	cp.addValueOption("id", SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
+	cp.addValueOption("cfgip1", SoftwareSetting::CFG_SERVICE_IP1, "IP-addres of first Configuration Service.", "");
+	cp.addValueOption("cfgip2", SoftwareSetting::CFG_SERVICE_IP2, "IP-addres of second Configuration Service.", "");
+	cp.addValueOption("location",
 							SoftwareSetting::ARCHIVE_LOCATION,
 							"Path to archive location (overwrite ArchiveLocation from project settings)", "D:\\Archives");
-	cp.addSingleValueOption("mq",
+	cp.addValueOption("mq",
 							SoftwareSetting::MIN_QUEUE_SIZE_FOR_FLUSHING,
 							QString("Minimum size of signal states queue for flushing to disk (default = %1 states).").
 								arg(Archive::DEFAULT_QUEUE_SIZE_FOR_FLUSHING), "");

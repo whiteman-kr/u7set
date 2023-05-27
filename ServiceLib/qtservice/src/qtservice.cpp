@@ -798,7 +798,9 @@ int QtServiceBase::exec()
 			continue;	// skip service command line
 		}
 
-		if (arg.trimmed().toLower().startsWith(QtService::ARG_INSTANCE_ID))
+		arg = arg.trimmed().toLower();
+
+		if (arg.startsWith(QtService::ARG_INSTANCE_ID))
 		{
 			continue;
 		}

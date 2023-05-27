@@ -388,16 +388,27 @@ namespace SoftwareSetting
 
 	inline const QString GATEWAY_DESCRIPTION_FILE("GatewayDescriptionFile");
 	inline const QString LOG_GATEWAY_PACKETS("LogGatewayPackets");
+
+	inline const QString LOG_RUP_TIME_ERRORS("LogRupTimeErrors");
 }
 
 namespace CmdLineOption
 {
+	inline const QString HELP("h");
+	inline const QString VERSION("v");
+	inline const QString EXEC_AS_APP("e");
+	inline const QString INSTALL("i");
+	inline const QString UNINSTALL("u");
+	inline const QString TERMINATE("t");
+	inline const QString INSTANCE("inst");
+	inline const QString CLEAR("clr");
+
 	inline const QString ID("id");
 	inline const QString CFG_IP1("cfgip1");
 	inline const QString CFG_IP2("cfgip2");
 	inline const QString CFG_FILE("f");
 	inline const QString CFG_PARSE("parse");
-	inline const QString LOG_GATEWAY_PACKETS("logpckt");
+	inline const QString LOG_GATEWAY_PACKETS("logGwPackets");
 	inline const QString LOG_RUP_TIME_ERR("logRupTimeErr");
 }
 
@@ -455,6 +466,7 @@ namespace Separator
 {
 	inline const QString SEMICOLON_SPACE("; ");
 	inline const QString SEMICOLON(";");
+	inline const QString MINUS("-");
 	inline const QString COMMA(",");
 	inline const QString COMMA_SPACE(", ");
 	inline const QString LINE("-------------------------------------------------------------------------------");

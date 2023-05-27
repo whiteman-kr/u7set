@@ -47,24 +47,24 @@ void CmdLineParam::getParams(int& argc, char** argv)
 
 	// desciption keys from cmd line
 	//
-	m_cmdLineParser.addSimpleOption("h", "Print this help.");
+	m_cmdLineParser.addSimpleNoWritableOption(CmdLineOption::HELP, "Print this help.");
 		// main keys
 		//
-	m_cmdLineParser.addSingleValueOption("cfgip1", SETTING_CFG_SERVICE_IP1, "IP-address of first Configuration Service.", "IPv4");
-	m_cmdLineParser.addSingleValueOption("cfgip2", SETTING_CFG_SERVICE_IP2, "IP-address of second Configuration Service.", "IPv4");
-	m_cmdLineParser.addSingleValueOption("id", SETTING_EQUIPMENT_ID, "EquipmentID of software \"TestClient\".", "EQUIPMENT_ID_UALTESTER");
-	m_cmdLineParser.addSingleValueOption("f", SETTING_TEST_FILE_NAME, "Test file name.", "TestFileName.txt");
+	m_cmdLineParser.addValueOption(CmdLineOption::CFG_IP1, SETTING_CFG_SERVICE_IP1, "IP-address of first Configuration Service.", "IPv4");
+	m_cmdLineParser.addValueOption(CmdLineOption::CFG_IP1, SETTING_CFG_SERVICE_IP2, "IP-address of second Configuration Service.", "IPv4");
+	m_cmdLineParser.addValueOption(CmdLineOption::ID, SETTING_EQUIPMENT_ID, "EquipmentID of software \"TestClient\".", "EQUIPMENT_ID_UALTESTER");
+	m_cmdLineParser.addValueOption("f", SETTING_TEST_FILE_NAME, "Test file name.", "TestFileName.txt");
 
 		// optional keys
 		//
-	m_cmdLineParser.addSingleValueOption("psip", SETTING_PACKET_SOURCE_IP, "IP-address for connection to PacketSource.", "IPv4");
-	m_cmdLineParser.addSingleValueOption("errignore", SETTING_ERROR_IGNORE, "Stop testing if errors was found.", "No");
-	m_cmdLineParser.addSingleValueOption("test", SETTING_TEST_ID, "Run a specific test.", "TEST_ID");
-	m_cmdLineParser.addSingleValueOption("from", SETTING_FROM_TEST_ID, "Run from the specific test.", "TEST_ID");
-	m_cmdLineParser.addSingleValueOption("trace", SETTING_TRACE, "Print full line-by-line report of test.", "No");
-	m_cmdLineParser.addSingleValueOption("report", SETTING_REPORT_FILENAME, "Report file name of test results.", "ReportFileName.txt");
-	m_cmdLineParser.addSingleValueOption("lm", SETTING_PRESET_LM, "Run only tests compatible with the specified LM preset.", "LM_ID");
-	m_cmdLineParser.addSingleValueOption("b", SETTING_OPTION_FILENAME, "Options of command line in the file name.", "OptionsFileName.txt");
+	m_cmdLineParser.addValueOption("psip", SETTING_PACKET_SOURCE_IP, "IP-address for connection to PacketSource.", "IPv4");
+	m_cmdLineParser.addValueOption("errignore", SETTING_ERROR_IGNORE, "Stop testing if errors was found.", "No");
+	m_cmdLineParser.addValueOption("test", SETTING_TEST_ID, "Run a specific test.", "TEST_ID");
+	m_cmdLineParser.addValueOption("from", SETTING_FROM_TEST_ID, "Run from the specific test.", "TEST_ID");
+	m_cmdLineParser.addValueOption("trace", SETTING_TRACE, "Print full line-by-line report of test.", "No");
+	m_cmdLineParser.addValueOption("report", SETTING_REPORT_FILENAME, "Report file name of test results.", "ReportFileName.txt");
+	m_cmdLineParser.addValueOption("lm", SETTING_PRESET_LM, "Run only tests compatible with the specified LM preset.", "LM_ID");
+	m_cmdLineParser.addValueOption("b", SETTING_OPTION_FILENAME, "Options of command line in the file name.", "OptionsFileName.txt");
 }
 
 bool CmdLineParam::parse()
@@ -73,7 +73,7 @@ bool CmdLineParam::parse()
 
 	// print Help and exit if "-h" is set
 	//
-	if (m_cmdLineParser.argCount() == 1 || m_cmdLineParser.optionIsSet("h") == true)
+	if (m_cmdLineParser.argCount() == 1 || m_cmdLineParser.optionIsSetFromCmdLine("h") == true)
 	{
 		std::cout << m_cmdLineParser.helpText().toLocal8Bit().constData();
 		std::cout << REQUIRED_OPTIONS;
@@ -82,7 +82,7 @@ bool CmdLineParam::parse()
 
 	// if "-b" is set than take param form file
 	//
-	if (m_cmdLineParser.optionIsSet("b") == true)
+	if (m_cmdLineParser.optionIsSetFromCmdLine("b") == true)
 	{
 		if (m_cmdLineParser.argCount() > 2)
 		{

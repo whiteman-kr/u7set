@@ -111,7 +111,7 @@ bool ServiceWorker::initAndProcessCmdLineSettings()
 
 	init();
 
-	m_cmdLineParser.processSettings(m_settings, m_logger);
+	m_cmdLineParser.writeSettingsToRegistry(m_settings, m_logger);
 
 	return processCustomCmdLineSettings();
 }
@@ -219,24 +219,24 @@ E::ServiceRunMode ServiceWorker::serviceRunMode() const
 
 void ServiceWorker::init()
 {
-	m_cmdLineParser.addSimpleOption("h", "Print this help.");
-	m_cmdLineParser.addSimpleOption("v", "Display version of service.");
-	m_cmdLineParser.addSimpleOption("e", "Run service as a regular application.");
-	m_cmdLineParser.addSimpleOption("i", "Install the service. Needs administrator rights.");
-	m_cmdLineParser.addSimpleOption("u", "Uninstall the service. Needs administrator rights.");
-	m_cmdLineParser.addSimpleOption("t", "Terminate (stop) the service.");
-	m_cmdLineParser.addSingleValueOption("inst", "ServiceInstanceID", "Set service instance ID.", "InstanceID");
-	m_cmdLineParser.addSimpleOption("clr", "Clear all service settings.");
+	m_cmdLineParser.addSimpleNoWritableOption(CmdLineOption::HELP, "Print this help.");
+	m_cmdLineParser.addSimpleNoWritableOption(CmdLineOption::VERSION, "Display version of service.");
+	m_cmdLineParser.addSimpleNoWritableOption(CmdLineOption::EXEC_AS_APP, "Run service as a regular application.");
+	m_cmdLineParser.addSimpleNoWritableOption(CmdLineOption::INSTALL, "Install the service. Needs administrator rights.");
+	m_cmdLineParser.addSimpleNoWritableOption(CmdLineOption::UNINSTALL, "Uninstall the service. Needs administrator rights.");
+	m_cmdLineParser.addSimpleNoWritableOption(CmdLineOption::TERMINATE, "Terminate (stop) the service.");
+	m_cmdLineParser.addValueOption(CmdLineOption::INSTANCE, "ServiceInstanceID", "Set service instance ID.", "InstanceID");
+	m_cmdLineParser.addSimpleNoWritableOption(CmdLineOption::CLEAR, "Clear all service settings.");
 
-	initCmdLineParser();
+	initCustomCmdLineOptions();
 
 	m_cmdLineParser.parse();
 }
 
 bool ServiceWorker::processCustomCmdLineSettings()
 {
-	return true;		// continue service running
-						// return false to exit service
+	return true;		// return TRUE to continue service running
+						// return FALSE to exit service
 }
 
 void ServiceWorker::onThreadStarted()
@@ -247,13 +247,16 @@ void ServiceWorker::onThreadStarted()
 
 	m_softwareInfo.setEquipmentID(m_equipmentID);		// !
 
-	m_cfgServiceIP1Str = getStrSetting(SoftwareSetting::CFG_SERVICE_IP1);
+	if (m_softwareInfo.softwareType() != E::SoftwareType::ConfigurationService)
+	{
+		m_cfgServiceIP1Str = getStrSetting(SoftwareSetting::CFG_SERVICE_IP1);
 
-	m_cfgServiceIP1.setAddressPortStr(m_cfgServiceIP1Str, PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
+		m_cfgServiceIP1.setAddressPortStr(m_cfgServiceIP1Str, PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
 
-	m_cfgServiceIP2Str = getStrSetting(SoftwareSetting::CFG_SERVICE_IP2);
+		m_cfgServiceIP2Str = getStrSetting(SoftwareSetting::CFG_SERVICE_IP2);
 
-	m_cfgServiceIP2.setAddressPortStr(m_cfgServiceIP2Str, PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
+		m_cfgServiceIP2.setAddressPortStr(m_cfgServiceIP2Str, PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
+	}
 
 	//
 
@@ -655,7 +658,7 @@ void ServiceStarter::processCmdLineArguments(bool& pauseAndExit, bool& startAsRe
 
 	// print Help and exit if "-h" is set
 	//
-	if (cmdLineParser.optionIsSet("h") == true)
+	if (cmdLineParser.optionIsSetFromCmdLine(CmdLineOption::HELP) == true)
 	{
 		QString helpText = cmdLineParser.helpText();
 
@@ -671,7 +674,7 @@ void ServiceStarter::processCmdLineArguments(bool& pauseAndExit, bool& startAsRe
 
 	// print Version and exit if "-v" is set
 	//
-	if (cmdLineParser.optionIsSet("v") == true)
+	if (cmdLineParser.optionIsSetFromCmdLine(CmdLineOption::VERSION) == true)
 	{
 		QString swInfo = m_serviceWorker.getSoftwareInfoStr();
 
@@ -683,7 +686,7 @@ void ServiceStarter::processCmdLineArguments(bool& pauseAndExit, bool& startAsRe
 
 	// clear settings and exit if "-clr" is set
 	//
-	if (cmdLineParser.optionIsSet("clr") == true)
+	if (cmdLineParser.optionIsSetFromCmdLine(CmdLineOption::CLEAR) == true)
 	{
 		bool res = m_serviceWorker.clearSettings();
 
@@ -702,7 +705,7 @@ void ServiceStarter::processCmdLineArguments(bool& pauseAndExit, bool& startAsRe
 
 	// run service as a regular application if "-e" is set
 	//
-	if (cmdLineParser.optionIsSet("e") == true)
+	if (cmdLineParser.optionIsSetFromCmdLine(CmdLineOption::EXEC_AS_APP) == true)
 	{
 		startAsRegularApp = true;
 		return;

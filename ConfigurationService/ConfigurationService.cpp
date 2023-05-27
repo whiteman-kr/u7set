@@ -56,17 +56,17 @@ void ConfigurationServiceWorker::onBuildPathChanged(QString newBuildPath)
 	startCfgServerThread(newBuildPath);
 }
 
-void ConfigurationServiceWorker::initCmdLineParser()
+void ConfigurationServiceWorker::initCustomCmdLineOptions()
 {
 	CommandLineParser& cp = cmdLineParser();
 
-	cp.addSingleValueOption("id", SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
-	cp.addSingleValueOption("b", SoftwareSetting::AUTOLOAD_BUILD_PATH, "Path to RPCT project's build  for auto load.", "PathToBuild");
-	cp.addSingleValueOption("ip", SoftwareSetting::CLIENT_REQUEST_IP, "Client request IP.", "IPv4");
-	cp.addSingleValueOption("w", SoftwareSetting::WORK_DIRECTORY, "Work directory of Configuration Service.", "Path");
-	cp.addSingleValueOption("checkhostname", SoftwareSetting::CHECK_HOSTNAME, "Check clients hostname.", "on/off");
-	cp.addSingleValueOption("profile", SoftwareSetting::CURRENT_PROFILE, "Current software settings profile.", "ProfileID");
-	cp.addSingleValueOption("mode", SoftwareSetting::RUN_MODE, "Runs all software in simulation mode.", SoftwareSetting::SIMULATION);
+	cp.addValueOption("id", SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
+	cp.addValueOption("b", SoftwareSetting::AUTOLOAD_BUILD_PATH, "Path to RPCT project's build  for auto load.", "PathToBuild");
+	cp.addValueOption("ip", SoftwareSetting::CLIENT_REQUEST_IP, "Client request IP.", "IPv4");
+	cp.addValueOption("w", SoftwareSetting::WORK_DIRECTORY, "Work directory of Configuration Service.", "Path");
+	cp.addValueOption("checkhostname", SoftwareSetting::CHECK_HOSTNAME, "Check clients hostname.", "on/off");
+	cp.addValueOption("profile", SoftwareSetting::CURRENT_PROFILE, "Current software settings profile.", "ProfileID");
+	cp.addValueOption("mode", SoftwareSetting::RUN_MODE, "Runs all software in simulation mode.", SoftwareSetting::SIMULATION);
 }
 
 void ConfigurationServiceWorker::loadSettings()

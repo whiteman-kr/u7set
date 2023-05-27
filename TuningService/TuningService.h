@@ -66,7 +66,7 @@ namespace Tuning
 	public slots:
 
 	private:
-		virtual void initCmdLineParser() override;
+		virtual void initCustomCmdLineOptions() override;
 		virtual void loadSettings() override;
 
 		void clear();

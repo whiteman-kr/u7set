@@ -46,13 +46,13 @@ void DiagDataServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& service
 	serviceInfo.set_settingsxml(xmlString.toStdString());
 }
 
-void DiagDataServiceWorker::initCmdLineParser()
+void DiagDataServiceWorker::initCustomCmdLineOptions()
 {
 	CommandLineParser& cp = cmdLineParser();
 
-	cp.addSingleValueOption("id", SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
-	cp.addSingleValueOption("cfgip1", SoftwareSetting::CFG_SERVICE_IP1, "IP-addres of first Configuration Service.", "");
-	cp.addSingleValueOption("cfgip2", SoftwareSetting::CFG_SERVICE_IP2, "IP-addres of second Configuration Service.", "");
+	cp.addValueOption("id", SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
+	cp.addValueOption("cfgip1", SoftwareSetting::CFG_SERVICE_IP1, "IP-addres of first Configuration Service.", "");
+	cp.addValueOption("cfgip2", SoftwareSetting::CFG_SERVICE_IP2, "IP-addres of second Configuration Service.", "");
 }
 
 void DiagDataServiceWorker::loadSettings()

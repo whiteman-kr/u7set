@@ -49,16 +49,16 @@ namespace Tuning
 		serviceInfo.set_settingsxml(xmlString.toStdString());
 	}
 
-	void TuningServiceWorker::initCmdLineParser()
+	void TuningServiceWorker::initCustomCmdLineOptions()
 	{
 		CommandLineParser& cp = cmdLineParser();
 
-		cp.addSingleValueOption("id", SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
+		cp.addValueOption("id", SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
 
-		cp.addSingleValueOption("cfgip1", SoftwareSetting::CFG_SERVICE_IP1,
+		cp.addValueOption("cfgip1", SoftwareSetting::CFG_SERVICE_IP1,
 								QString("IP-address of first Configuration Service (default port - %1).").
 											arg(PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST), "ip[:port]");
-		cp.addSingleValueOption("cfgip2", SoftwareSetting::CFG_SERVICE_IP2,
+		cp.addValueOption("cfgip2", SoftwareSetting::CFG_SERVICE_IP2,
 								QString("IP-address of second Configuration Service (default port - %1).").
 											arg(PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST), "ip[:port]");
 	}

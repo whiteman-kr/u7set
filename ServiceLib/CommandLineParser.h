@@ -18,7 +18,6 @@ public:
 	{
 		Simple,				//	-a
 		SingleValue,		//	-a=value
-		MultipleValues		//	-a=value1,value2,valueN
 	};
 
 public:
@@ -29,30 +28,36 @@ public:
 
 	qsizetype argCount() const;
 
+	// option is a command line argument like -id
 	// optionName should be specified without "-"
 	//
+	// setting is an option value stored in registry
+
+	bool addSimpleNoWritableOption(const QString& optionName,
+									const QString& description);
+
 	bool addSimpleOption(const QString& optionName,
+						 const QString& settingName,
 						 const QString& description);
 
-	bool addSingleValueOption(const QString& optionName,
-							  const QString& settingName,
-							  const QString& description,
-							  const QString& paramExample);
+	bool addValueNoWritebleOption(const QString& optionName,
+								  const QString& description,
+								  const QString& paramExample);
 
-	bool addMultipleValuesOption(const QString& optionName,
-								 const QStringList& settingsNames,
-								 const QString& description,
-								 const QString& paramsExample);
+	bool addValueOption(const QString& optionName,
+						const QString& settingName,
+						const QString& description,
+						const QString& paramExample);
 	void parse();
 	const QStringList& parsingErrors() { return m_parsingErrors; }
 
-	void processSettings(QSettings& settings, std::shared_ptr<CircularLogger> log);
+	void writeSettingsToRegistry(QSettings& settings, std::shared_ptr<CircularLogger> log);
 
-	static bool checkSettingWriteStatus(QSettings& settings, const QString& settingName, std::shared_ptr<CircularLogger> logger);
+	static bool checkSettingWriteStatus(QSettings& settings, const QString& settingName,
+										std::shared_ptr<CircularLogger> logger);
 
-	bool optionIsSet(const QString& optionName) const;						// use with all option types
+	bool optionIsSetFromCmdLine(const QString& optionName) const;						// use with all option types
 	QString optionValue(const QString& optionName) const;					// use only with OptionType::SingleValue
-	QStringList optionValues(const QString& optionName) const;				// use only with OptionType::MultipleValues
 
 	QString settingValue(const QString& settingName) const;
 
@@ -64,31 +69,32 @@ private:
 	struct Option
 	{
 		OptionType type = OptionType::Simple;
-		QString name;
-		QStringList settingsNames;
+		QString name;							// option name in command line, ex: id
+		bool saveInRegistry = false;
+		QString settingName;					// respectively setting name in registry, ex: EquipmentID
 		QString description;
 		QString paramsExample;
 
-		bool isSet = false;
-		QStringList values;
+		bool isSetFromCmdLine = false;
+		QVariant value;
 
 		int order = -1;
 	};
 
 	bool addOption(OptionType type,
-				   QString name,
-				   const QStringList &settingsNames,
+				   QString optionName,
+				   bool saveInRegistry,
+				   const QString& settingName,
 				   const QString& description,
 				   const QString& paramsExample);
 
-	std::optional<Option> getOption(const QString& optionName) const;
+	const Option* getOption(const QString& optionName) const;
 
 private:
 	QString m_appPath;
 	QVector<QString> m_cmdLineArgs;
 
 	std::map<QString, Option> m_options;			// opName => Option
-	QHash<QString, QString> m_settingsValues;
 	QStringList m_parsingErrors;
 
 	bool m_parsed = false;

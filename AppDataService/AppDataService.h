@@ -66,7 +66,7 @@ public:
 	int acquiredAppSignalIDsCount() const { return static_cast<int>(m_acquiredAppSignalIDs.size()); }
 
 private:
-	virtual void initCmdLineParser() override;
+	virtual void initCustomCmdLineOptions() override;
 	virtual void loadSettings() override;
 
 	virtual void initialize() override;

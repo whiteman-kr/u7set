@@ -24,7 +24,7 @@ public:
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& servicesInfo) const override;
 
 private:
-	void initCmdLineParser() override;
+	void initCustomCmdLineOptions() override;
 	virtual void loadSettings() override;
 
 	virtual void initialize() override;

@@ -135,7 +135,7 @@ protected:
 													// return true - to continue service running
 													// return false - to exit service
 
-	virtual void initCmdLineParser() = 0;			// override to add service-specific options to m_cmdLineParser
+	virtual void initCustomCmdLineOptions() = 0;			// override to add service-specific options to m_cmdLineParser
 	virtual void loadSettings() = 0;				// override to load service-specific settings
 	virtual void initialize() = 0;					// calls on ServiceWorker's thread start
 	virtual void shutdown() = 0;					// calls on ServiceWorker's thread shutdown

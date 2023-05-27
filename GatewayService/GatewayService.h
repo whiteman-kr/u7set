@@ -34,7 +34,7 @@ public:
 	const AppSignals& appSignals() const { return m_appSignals; }
 
 private:
-	virtual void initCmdLineParser() override;
+	virtual void initCustomCmdLineOptions() override;
 	virtual void loadSettings() override;
 
 	bool processCustomCmdLineSettings() override;

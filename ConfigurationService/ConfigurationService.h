@@ -32,7 +32,7 @@ signals:
 	void renameWorkBuildToBackupExcept(QString workDirectoryToLeave);
 
 private:
-	virtual void initCmdLineParser() override;
+	virtual void initCustomCmdLineOptions() override;
 	virtual void loadSettings() override;
 
 	bool loadCfgServiceSettings(const QString& buildPath);

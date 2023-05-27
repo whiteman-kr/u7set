@@ -66,15 +66,15 @@ bool GatewayServiceWorker::isConnectedToConfigurationService(quint32& ip, quint1
 	return false;
 }
 
-void GatewayServiceWorker::initCmdLineParser()
+void GatewayServiceWorker::initCustomCmdLineOptions()
 {
 	CommandLineParser& cp = cmdLineParser();
 
-	cp.addSingleValueOption(CmdLineOption::ID, SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
-	cp.addSingleValueOption(CmdLineOption::CFG_IP1, SoftwareSetting::CFG_SERVICE_IP1, "IP address of first Configuration Service.", "IPv4:Port");
-	cp.addSingleValueOption(CmdLineOption::CFG_IP2, SoftwareSetting::CFG_SERVICE_IP2, "IP address of second Configuration Service.", "IPv4:Port");
+	cp.addValueOption(CmdLineOption::ID, SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
+	cp.addValueOption(CmdLineOption::CFG_IP1, SoftwareSetting::CFG_SERVICE_IP1, "IP address of first Configuration Service.", "IPv4:Port");
+	cp.addValueOption(CmdLineOption::CFG_IP2, SoftwareSetting::CFG_SERVICE_IP2, "IP address of second Configuration Service.", "IPv4:Port");
 
-	cp.addSimpleOption(CmdLineOption::LOG_GATEWAY_PACKETS, "Turn On 2 hours gateway packet logging.");
+	cp.addSimpleOption(CmdLineOption::LOG_GATEWAY_PACKETS, SoftwareSetting::LOG_GATEWAY_PACKETS, "Turn On 2 hours gateway packet logging.");
 
 //	cp.addSimpleOption(CmdLineOption::CFG_PARSE, "Parse gateway description file.");
 
@@ -94,12 +94,12 @@ bool GatewayServiceWorker::processCustomCmdLineSettings()
 {
 	const CommandLineParser& clp = cmdLineParser();
 
-	if (clp.optionIsSet(CmdLineOption::CFG_PARSE) == false)
+	if (clp.optionIsSetFromCmdLine(CmdLineOption::CFG_PARSE) == false)
 	{
 		return true;
 	}
 
-	if (clp.optionIsSet(CmdLineOption::CFG_FILE) == false)
+	if (clp.optionIsSetFromCmdLine(CmdLineOption::CFG_FILE) == false)
 	{
 		DEBUG_LOG_ERR(logger(), "To parse gateway description file cmd line option -f=fileName should be set!");
 		return false;
@@ -124,7 +124,7 @@ void GatewayServiceWorker::initialize()
 {
 	const CommandLineParser& clp = cmdLineParser();
 
-	if (clp.optionIsSet(CmdLineOption::LOG_GATEWAY_PACKETS) == true)
+	if (clp.optionIsSetFromCmdLine(CmdLineOption::LOG_GATEWAY_PACKETS) == true)
 	{
 		m_logGatewayPackets = true;
 	}
