@@ -72,9 +72,9 @@ namespace ClientLib
 
 		virtual void invalidateSignalStates(Qt::HANDLE sourceThreadId) override;
 
-		virtual void setState(const QString& appSignalId, const AppSignalState& state, Qt::HANDLE sourceThreadId) override;
-		virtual void setState(Hash signalHash, const AppSignalState& state, Qt::HANDLE sourceThreadId) override;
-		virtual void setState(const std::vector<AppSignalState>& states, Qt::HANDLE sourceThreadId) override;
+		virtual void setState(const QString& appSignalId, const AppSignalState& state, Hash dataServerHash, Qt::HANDLE sourceThreadId) override;
+		virtual void setState(Hash signalHash, const AppSignalState& state, Hash dataServerHash, Qt::HANDLE sourceThreadId) override;
+		virtual void setState(const std::vector<AppSignalState>& states, Hash dataServerHash, Qt::HANDLE sourceThreadId) override;
 
 	private:
 		void addSignalPrivate(const AppSignalParam& appSignal, const QString& appDataServiceId);
@@ -114,9 +114,13 @@ namespace ClientLib
 
 		virtual AppSignalState signalState(Hash signalHash, bool* found) const override final;
 		virtual AppSignalState signalState(const QString& appSignalId, bool* found) const override final;
+		virtual AppSignalState signalState(Hash signalHash, Hash dataServerHash, bool* found) const override final;
+		virtual AppSignalState signalState(const QString& appSignalId, const QString& dataServerId, bool* found) const override final;
 
 		virtual void signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const override final;
 		virtual void signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const override final;
+		virtual void signalState(const std::vector<Hash>& appSignalHashes, Hash dataServerHash, std::vector<AppSignalState>* result, int* found) const override final;
+		virtual void signalState(const std::vector<QString>& appSignalIds, const QString& dataServerId, std::vector<AppSignalState>* result, int* found) const override final;
 
 		virtual QStringList signalTags(Hash signalHash) const override final;
 		virtual QStringList signalTags(const QString& appSignalId) const override final;
@@ -165,6 +169,7 @@ namespace ClientLib
 		struct SourceState
 		{
 			AppSignalState state{};
+			Hash dataServerHash{UNDEFINED_HASH};
 			Qt::HANDLE sourceThreadId{};
 			std::chrono::time_point<std::chrono::system_clock> lastUpdateTime{};	// State last time received or updated
 		};
@@ -180,10 +185,11 @@ namespace ClientLib
 			size_t size = 0;
 			std::array<SourceState, 4> sources{};	// 4 maximum possible channels of getting signal (2 regular, 2 recent)
 
-			void set(const AppSignalState& state, Qt::HANDLE sourceThreadId);
+			void set(const AppSignalState& state, Hash dataServerHash, Qt::HANDLE sourceThreadId);
 			void invalidateSource(Qt::HANDLE sourceThreadId);
 
 			[[nodiscard]] const AppSignalState& get() const;
+			[[nodiscard]] const AppSignalState& getForDataServer(Hash dataServerHash) const;
 		};
 
 

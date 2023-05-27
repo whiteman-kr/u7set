@@ -30,9 +30,9 @@ namespace ClientLib
 
 		// Set signal states by sources.
 		//
-		virtual void setState(const QString& appSignalId, const AppSignalState& state, Qt::HANDLE sourceThreadId) = 0;
-		virtual void setState(Hash signalHash, const AppSignalState& state, Qt::HANDLE sourceThreadId) = 0;
-		virtual void setState(const std::vector<AppSignalState>& states, Qt::HANDLE sourceThreadId) = 0;
+		virtual void setState(const QString& appSignalId, const AppSignalState& state, Hash dataServerHash, Qt::HANDLE sourceThreadId) = 0;
+		virtual void setState(Hash signalHash, const AppSignalState& state, Hash dataServerHash, Qt::HANDLE sourceThreadId) = 0;
+		virtual void setState(const std::vector<AppSignalState>& states, Hash dataServerHash, Qt::HANDLE sourceThreadId) = 0;
 	};
 
 }
