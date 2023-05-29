@@ -62,6 +62,7 @@ namespace Builder
 
 		std::vector<Hardware::DeviceModule*> m_lmModules;
 		std::vector<Hardware::DeviceModule*> m_fscModules;		// includes LM and BVB modules
+		std::vector<Hardware::DeviceModule*> m_vduModules;		// includes VDU modules
 
 		Sim::Profiles m_simProfiles;
 

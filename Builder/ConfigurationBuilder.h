@@ -121,10 +121,18 @@ namespace Builder
 
 
 	private:
+		bool buildFSCConfiguration();
+		bool buildVDUConfiguration();
+
+
 		DbController* db();
 		IssueLogger* log() const;
 
-		bool runConfigurationScriptFile(const std::vector<Hardware::DeviceModule *> &subsystemModules, LmDescription *lmDescription);
+		bool runConfigurationScriptFile(const QString& subsystemID,
+										int subsystemKey,
+										const std::vector<Hardware::DeviceModule *> &subsystemModules,
+										LmDescription *lmDescription,
+										Hardware::ModuleFirmwareWriter* writer);
 
 		bool writeExtraDataFiles();
 		bool writeDeviceObjectToJson(const Hardware::DeviceObject* object, QJsonObject& jParent);
@@ -137,6 +145,7 @@ namespace Builder
 		DbController* m_db = nullptr;
 		Hardware::DeviceRoot* m_deviceRoot = nullptr;
 		std::vector<Hardware::DeviceModule*> m_fscModules;
+		std::vector<Hardware::DeviceModule*> m_vduModules;
 		LmDescriptionSet* m_lmDescriptions = nullptr;
         SignalSet* m_signalSet = nullptr;
 		SubsystemStorage* m_subsystems = nullptr;

@@ -1,0 +1,95 @@
+"use strict";
+var E;
+(function (E) {
+    let Channel;
+    (function (Channel) {
+        Channel[Channel["A"] = 0] = "A";
+        Channel[Channel["B"] = 1] = "B";
+        Channel[Channel["C"] = 2] = "C";
+        Channel[Channel["D"] = 3] = "D"; /**< Channel D = 3 */
+    })(Channel = E.Channel || (E.Channel = {}));
+    let AnalogFormat;
+    (function (AnalogFormat) {
+        AnalogFormat["e_9e"] = "e";
+        AnalogFormat["E_9E"] = "E";
+        AnalogFormat["f_9"] = "f";
+        AnalogFormat["g_9_or_9e"] = "g";
+        AnalogFormat["G_9_or_9E"] = "G"; /**< G_9_or_9E = 'G' (0x47/71) Use E or f format, whichever is the most concise*/
+    })(AnalogFormat = E.AnalogFormat || (E.AnalogFormat = {}));
+    let ColumnData;
+    (function (ColumnData) {
+        ColumnData[ColumnData["AppSignalID"] = 0] = "AppSignalID";
+        ColumnData[ColumnData["CustomSignalID"] = 1] = "CustomSignalID";
+        ColumnData[ColumnData["Caption"] = 2] = "Caption";
+        ColumnData[ColumnData["State"] = 3] = "State";
+        ColumnData[ColumnData["ImpactAppSignalID"] = 32] = "ImpactAppSignalID";
+        ColumnData[ColumnData["ImpactCustomSignalID"] = 33] = "ImpactCustomSignalID";
+        ColumnData[ColumnData["ImpactCaption"] = 34] = "ImpactCaption";
+        ColumnData[ColumnData["ImpactState"] = 35] = "ImpactState";
+        ColumnData[ColumnData["CustomText"] = 64] = "CustomText"; /**< CustomText = 64*/
+    })(ColumnData = E.ColumnData || (E.ColumnData = {}));
+    let LineStyle;
+    (function (LineStyle) {
+        LineStyle[LineStyle["NoPen"] = 0] = "NoPen";
+        LineStyle[LineStyle["SolidLine"] = 1] = "SolidLine";
+        LineStyle[LineStyle["DashLine"] = 2] = "DashLine";
+        LineStyle[LineStyle["DotLine"] = 3] = "DotLine";
+        LineStyle[LineStyle["DashDotLine"] = 4] = "DashDotLine";
+        LineStyle[LineStyle["DashDotDotLine"] = 5] = "DashDotDotLine"; /**< DashDotDotLine = 5. One dash, two dots, one dash, two dots.*/
+    })(LineStyle = E.LineStyle || (E.LineStyle = {}));
+    let TextFormat;
+    (function (TextFormat) {
+        TextFormat[TextFormat["PlainText"] = 0] = "PlainText";
+        TextFormat[TextFormat["Markdown"] = 1] = "Markdown";
+        TextFormat[TextFormat["HtmlSubset"] = 2] = "HtmlSubset"; /**< HtmlSubset = 2. HTML-formatted text in the html string. Support of the limited HTML Subset.*/
+    })(TextFormat = E.TextFormat || (E.TextFormat = {}));
+    let HorzAlign;
+    (function (HorzAlign) {
+        HorzAlign[HorzAlign["AlignLeft"] = 1] = "AlignLeft";
+        HorzAlign[HorzAlign["AlignRight"] = 2] = "AlignRight";
+        HorzAlign[HorzAlign["AlignHCenter"] = 4] = "AlignHCenter";
+        HorzAlign[HorzAlign["AlignJustify"] = 8] = "AlignJustify"; /**< AlignJustify = 0x08*/
+    })(HorzAlign = E.HorzAlign || (E.HorzAlign = {}));
+    let VertAlign;
+    (function (VertAlign) {
+        VertAlign[VertAlign["AlignTop"] = 32] = "AlignTop";
+        VertAlign[VertAlign["AlignBottom"] = 64] = "AlignBottom";
+        VertAlign[VertAlign["AlignVCenter"] = 128] = "AlignVCenter";
+        VertAlign[VertAlign["AlignBaseline"] = 256] = "AlignBaseline"; /**< AlignBaseline = 0x100*/
+    })(VertAlign = E.VertAlign || (E.VertAlign = {}));
+    let Alignment;
+    (function (Alignment) {
+        Alignment[Alignment["AlignLeft"] = 1] = "AlignLeft";
+        Alignment[Alignment["AlignRight"] = 2] = "AlignRight";
+        Alignment[Alignment["AlignHCenter"] = 4] = "AlignHCenter";
+        Alignment[Alignment["AlignJustify"] = 8] = "AlignJustify";
+        Alignment[Alignment["AlignAbsolute"] = 16] = "AlignAbsolute";
+        Alignment[Alignment["AlignTop"] = 32] = "AlignTop";
+        Alignment[Alignment["AlignBottom"] = 64] = "AlignBottom";
+        Alignment[Alignment["AlignVCenter"] = 128] = "AlignVCenter";
+        Alignment[Alignment["AlignBaseline"] = 256] = "AlignBaseline"; /**< AlignBaseline = 0x100*/
+    })(Alignment = E.Alignment || (E.Alignment = {}));
+})(E || (E = {}));
+//declare var app: App.ScriptMonitorApplication;		// For Monitor script
+//declare var app: App.ScriptTuningClientApplication;	// For TuningClient script
+// Global functions
+function showSignalValue(schemaItem, signalId) {
+    schemaItem.alignHorz = E.HorzAlign.AlignHCenter;
+    schemaItem.alignVert = E.VertAlign.AlignVCenter;
+    if (signals.signalExists(signalId) == false) {
+        schemaItem.text = "Signal not found!";
+        return;
+    }
+    let state = signals.signalState(signalId);
+    if (state == null) {
+        schemaItem.text = "State not found!";
+        return;
+    }
+    if (state.valid == true) {
+        schemaItem.text = state.value.toString();
+    }
+    else {
+        schemaItem.text = "???";
+    }
+    return;
+}

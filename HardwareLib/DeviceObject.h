@@ -522,6 +522,7 @@ public:
 		[[nodiscard]] bool isFSCConfigurationModule() const;
 		[[nodiscard]] bool isOptoModule() const;
 		[[nodiscard]] bool isBvb() const;
+		[[nodiscard]] bool isVdu() const;
 
 		// Data
 		//

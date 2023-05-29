@@ -664,6 +664,13 @@ namespace Builder
 			}
 		}
 
+		findModulesByFamily(m_context->m_equipmentSet->root().get(), &m_context->m_vduModules, Hardware::DeviceModule::FamilyType::VDU);
+
+		for (Hardware::DeviceModule* vdu : m_context->m_vduModules)
+		{
+			result &= loadLogicModuleDescription(vdu, m_context->m_lmDescriptions.get());
+		}
+
 		return result;
 	}
 

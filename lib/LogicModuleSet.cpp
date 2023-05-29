@@ -176,10 +176,11 @@ std::shared_ptr<LmDescription> LogicModuleSet::get(const Hardware::DeviceModule*
 std::shared_ptr<LmDescription> LogicModuleSet::get(Hardware::DeviceModule* logicModule)
 {
 	if (logicModule == nullptr ||
-		logicModule->isFSCConfigurationModule() == false)
+		(logicModule->isFSCConfigurationModule() == false && logicModule->isVdu() == false))
 	{
 		assert(logicModule);
-		assert(logicModule->isFSCConfigurationModule());
+		assert(logicModule->isFSCConfigurationModule() || logicModule->isVdu());
+
 		return std::shared_ptr<LmDescription>();
 	}
 
@@ -203,6 +204,7 @@ std::shared_ptr<LmDescription> LogicModuleSet::get(Hardware::DeviceModule* logic
 QString LogicModuleSet::lmDescriptionFile(const Hardware::DeviceModule* logicModule)
 {
 	assert(logicModule);
-	assert(logicModule->isFSCConfigurationModule());
+	assert(logicModule->isFSCConfigurationModule() || logicModule->isVdu());
+
 	return LmDescription::lmDescriptionFile(logicModule);
 }

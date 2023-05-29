@@ -1930,6 +1930,11 @@ R"DELIM({
 		return moduleFamily() == FamilyType::BVB;
 	}
 
+	[[nodiscard]] bool DeviceModule::isVdu() const
+	{
+		return moduleFamily() == FamilyType::VDU;
+	}
+
 
 	//
 	//
