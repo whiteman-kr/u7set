@@ -44,7 +44,7 @@ namespace Tuning
 
 	void TuningServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
 	{
-		QString xmlString = SoftwareSettingsSet::writeSettingsToXmlString(E::SoftwareType::TuningService, m_settings);
+		QString xmlString = SoftwareSettingsSet::writeSettingsToXmlString(E::SoftwareType::TuningService, m_serviceSettings);
 
 		serviceInfo.set_settingsxml(xmlString.toStdString());
 	}
@@ -122,7 +122,7 @@ namespace Tuning
 
 	bool TuningServiceWorker::singleLmControl() const
 	{
-		return m_settings.singleLmControl;
+		return m_serviceSettings.singleLmControl;
 	}
 
 	// called from TcpTuningServer thread!!!
@@ -137,7 +137,7 @@ namespace Tuning
 			return E::NetworkError::InternalError;
 		}
 
-		if (m_settings.singleLmControl == false)
+		if (m_serviceSettings.singleLmControl == false)
 		{
 			controlledTuningSource->clear();
 			*controlIsActive = false;
@@ -183,7 +183,7 @@ namespace Tuning
 
 		AUTO_LOCK(m_mainMutex);
 
-		if (m_settings.singleLmControl == true)
+		if (m_serviceSettings.singleLmControl == true)
 		{
 			if (m_activeClientInfo.equipmentID().isEmpty() == true)
 			{
@@ -209,7 +209,7 @@ namespace Tuning
 
 		AUTO_LOCK(m_mainMutex);
 
-		if (m_settings.singleLmControl == true)
+		if (m_serviceSettings.singleLmControl == true)
 		{
 			if (m_activeClientInfo.equipmentID() == softwareInfo.equipmentID() &&
 				m_activeClientIP == clientIP)
@@ -236,7 +236,7 @@ namespace Tuning
 
 		AUTO_LOCK(m_mainMutex);
 
-		if (m_settings.singleLmControl == true)
+		if (m_serviceSettings.singleLmControl == true)
 		{
 			m_activeClientInfo = softwareInfo;
 			m_activeClientIP = clientIP;
@@ -321,7 +321,7 @@ namespace Tuning
 
 	E::SecurityLevel TuningServiceWorker::securityLevel() const
 	{
-		return m_settings.securityLevel;
+		return m_serviceSettings.securityLevel;
 	}
 
 	void TuningServiceWorker::initialize()
@@ -400,7 +400,7 @@ namespace Tuning
 	{
 		m_tuningSources = newSources;
 		fillControlledLans();
-		m_clientContextMap.init(m_settings, m_tuningSources);
+		m_clientContextMap.init(m_serviceSettings, m_tuningSources);
 	}
 
 	void TuningServiceWorker::clearServiceMaps()
@@ -416,7 +416,7 @@ namespace Tuning
 
 		for(int channel = CHANNEL_1; channel < TuningServiceSettings::CHANNELS_COUNT; channel++)
 		{
-			const TuningServiceSettings::ChannelSettings& ch = m_settings.channelSettings[channel];
+			const TuningServiceSettings::ChannelSettings& ch = m_serviceSettings.channelSettings[channel];
 
 			if (ch.enable == false)
 			{
@@ -457,7 +457,7 @@ namespace Tuning
 
 			if (typedSettingsPtr != nullptr)
 			{
-				m_settings = *typedSettingsPtr;
+				m_serviceSettings = *typedSettingsPtr;
 			}
 			else
 			{
@@ -529,7 +529,7 @@ namespace Tuning
 
 		TcpTuningServer* tcpTuningSever = new TcpTuningServer(*this, m_tuningSources, m_logger);
 
-		m_tcpTuningServerThread = new TcpTuningServerThread(m_settings.clientRequestIP,
+		m_tcpTuningServerThread = new TcpTuningServerThread(m_serviceSettings.clientRequestIP,
 												tcpTuningSever,
 												m_logger);
 		m_tcpTuningServerThread->start();
@@ -549,7 +549,7 @@ namespace Tuning
 
 	void TuningServiceWorker::runTuningSourceThreads()
 	{
-		if (m_settings.singleLmControl == false)
+		if (m_serviceSettings.singleLmControl == false)
 		{
 			// running all TuningSourceWorkers at once if SingleLmControl is disabled
 			//
@@ -574,7 +574,7 @@ namespace Tuning
 				continue;
 			}
 
-			if (m_settings.isSourceExists(tuningSource.moduleEquipmentID()) == false)
+			if (m_serviceSettings.isSourceExists(tuningSource.moduleEquipmentID()) == false)
 			{
 				continue;
 			}
@@ -621,7 +621,7 @@ namespace Tuning
 
 		TuningSourceThreadShared sourceThread =
 				std::make_shared<TuningSourceThread>(	*this,
-														m_settings,
+														m_serviceSettings,
 														source,
 														sessionParams().softwareRunMode,
 														m_logger,
@@ -679,7 +679,7 @@ namespace Tuning
 
 		for(int channel = CHANNEL_1; channel < TuningServiceSettings::CHANNELS_COUNT; channel++)
 		{
-			const TuningServiceSettings::ChannelSettings& ch = m_settings.channelSettings[channel];
+			const TuningServiceSettings::ChannelSettings& ch = m_serviceSettings.channelSettings[channel];
 
 			if (isSourceHandlerExistsForChannel(channel) == false)
 			{
@@ -787,7 +787,7 @@ namespace Tuning
 			return;
 		}
 
-		m_settings = *typedSettingsPtr;
+		m_serviceSettings = *typedSettingsPtr;
 
 		bool result = true;
 

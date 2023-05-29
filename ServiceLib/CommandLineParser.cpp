@@ -131,6 +131,7 @@ void CommandLineParser::parse()
 		{
 		case OptionType::Simple:
 			op.isSetFromCmdLine = true;
+			op.value = true;
 			break;
 
 		case OptionType::SingleValue:
@@ -145,8 +146,6 @@ void CommandLineParser::parse()
 				}
 
 				op.value = cmdLineArgValue;
-
-//				m_settingsValues.insert(op.settingName, cmdLineArgValue);
 			}
 			break;
 
@@ -291,6 +290,33 @@ QString CommandLineParser::settingValue(const QString& settingName) const
 	Q_ASSERT(false);				// setting not found
 
 	return QString();
+}
+
+bool CommandLineParser::settingIsSet(const QString& settingName) const
+{
+	Q_ASSERT(m_parsed == true);
+
+	for(const auto& p : m_options)
+	{
+		const Option& op = p.second;
+
+		if (op.settingName != settingName)
+		{
+			continue;
+		}
+
+		if (op.type != OptionType::Simple)
+		{
+			Q_ASSERT(false);				// wrong option type
+			return false;
+		}
+
+		return op.value.toBool();
+	}
+
+	Q_ASSERT(false);				// setting not found
+
+	return false;
 }
 
 QString CommandLineParser::helpText() const

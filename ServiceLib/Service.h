@@ -105,6 +105,7 @@ public:
 	HostAddressPort cfgServiceIP1() const { return m_cfgServiceIP1; }
 	HostAddressPort cfgServiceIP2() const { return m_cfgServiceIP2; }
 
+	const QSettings& serviceSettings() const { return m_serviceSettings; }
 	bool clearSettings();								// clear all service settings
 
 	CircularLoggerShared logger() const { return m_logger; }
@@ -164,7 +165,7 @@ private:
 	CircularLoggerShared m_logger;
 	E::ServiceRunMode m_serviceRunMode = E::ServiceRunMode::ConsoleApp;
 
-	QSettings m_settings;
+	QSettings m_serviceSettings;		// service settings saved in registry on Windows or INI-files on Linux
 
 	CommandLineParser m_cmdLineParser;
 

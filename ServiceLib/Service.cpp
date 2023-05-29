@@ -26,7 +26,7 @@ ServiceWorker::ServiceWorker(const SoftwareInfo& softwareInfo,
 	m_argv(argv),
 	m_logger(logger),
 	m_serviceRunMode(runMode),
-	m_settings(QSettings::SystemScope, Manufacturer::RADIY, serviceName, this),
+	m_serviceSettings(QSettings::SystemScope, Manufacturer::RADIY, serviceName, this),
 	m_cmdLineParser(argc, argv),
 	m_softwareSettingsSet(softwareInfo.softwareType())
 {
@@ -111,7 +111,7 @@ bool ServiceWorker::initAndProcessCmdLineSettings()
 
 	init();
 
-	m_cmdLineParser.writeSettingsToRegistry(m_settings, m_logger);
+	m_cmdLineParser.writeSettingsToRegistry(m_serviceSettings, m_logger);
 
 	return processCustomCmdLineSettings();
 }
@@ -139,11 +139,11 @@ void ServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) co
 
 bool ServiceWorker::clearSettings()
 {
-	m_settings.clear();
+	m_serviceSettings.clear();
 
-	m_settings.sync();
+	m_serviceSettings.sync();
 
-	return CommandLineParser::checkSettingWriteStatus(m_settings, "", nullptr);
+	return CommandLineParser::checkSettingWriteStatus(m_serviceSettings, "", nullptr);
 }
 
 QString ServiceWorker::getStrSetting(const QString& settingName)
@@ -152,7 +152,7 @@ QString ServiceWorker::getStrSetting(const QString& settingName)
 
 	if (cmdLineValue.isEmpty() == true)
 	{
-		return m_settings.value(settingName).toString();
+		return m_serviceSettings.value(settingName).toString();
 	}
 
 	return cmdLineValue;
@@ -166,7 +166,7 @@ OptionalBool ServiceWorker::getBoolSetting(const QString& settingName)
 
 	if (cmdLineValue.isEmpty() == true)
 	{
-		cmdLineValue = m_settings.value(settingName).toString();
+		cmdLineValue = m_serviceSettings.value(settingName).toString();
 	}
 
 	result = CommandLineParser::strToBool(cmdLineValue);

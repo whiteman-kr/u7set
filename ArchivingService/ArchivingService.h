@@ -63,7 +63,6 @@ private slots:
 private:
 	QString m_overwriteArchiveLocation;
 	int m_minQueueSizeForFlushing = 0;
-	QSettings m_settings;
 
 	ArchivingServiceSettings m_serviceSettings;
 	Builder:: BuildInfo m_buildInfo;

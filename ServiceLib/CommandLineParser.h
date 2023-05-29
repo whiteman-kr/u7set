@@ -56,10 +56,11 @@ public:
 	static bool checkSettingWriteStatus(QSettings& settings, const QString& settingName,
 										std::shared_ptr<CircularLogger> logger);
 
-	bool optionIsSetFromCmdLine(const QString& optionName) const;						// use with all option types
+	bool optionIsSetFromCmdLine(const QString& optionName) const;			// use with all option types
 	QString optionValue(const QString& optionName) const;					// use only with OptionType::SingleValue
 
 	QString settingValue(const QString& settingName) const;
+	bool settingIsSet(const QString& settingName) const;
 
 	QString helpText() const;
 

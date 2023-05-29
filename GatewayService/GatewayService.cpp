@@ -21,6 +21,9 @@ GatewayServiceWorker::GatewayServiceWorker(const SoftwareInfo& softwareInfo,
 	ServiceWorker(softwareInfo, serviceName, argc, argv, logger, runMode),
 	m_timer(this)
 {
+	QVariant v = serviceSettings().value(SoftwareSetting::LOG_GATEWAY_PACKETS);
+
+	DEBUG_LOG_MSG(logger, QString("LLLOOOOGG %1").arg(v.toBool()));
 }
 
 GatewayServiceWorker::~GatewayServiceWorker()
@@ -84,15 +87,20 @@ void GatewayServiceWorker::initCustomCmdLineOptions()
 
 void GatewayServiceWorker::loadSettings()
 {
+	const CommandLineParser& clp = cmdLineParser();
+
+	m_logGatewayPackets = serviceSettings().value(SoftwareSetting::LOG_GATEWAY_PACKETS).toBool();
+
 	DEBUG_LOG_MSG(logger(), QString(tr("Settings from command line or registry:")));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::EQUIPMENT_ID).arg(equipmentID()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStrIfSet()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStrIfSet()));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::LOG_GATEWAY_PACKETS).arg(m_logGatewayPackets));
 }
 
 bool GatewayServiceWorker::processCustomCmdLineSettings()
 {
-	const CommandLineParser& clp = cmdLineParser();
+/*	const CommandLineParser& clp = cmdLineParser();
 
 	if (clp.optionIsSetFromCmdLine(CmdLineOption::CFG_PARSE) == false)
 	{
@@ -115,20 +123,13 @@ bool GatewayServiceWorker::processCustomCmdLineSettings()
 		return false;
 	}
 
-	parseGatewayDescription(fileName, file.readAll());
+	parseGatewayDescription(fileName, file.readAll());*/
 
-	return false;
+	return true;
 }
 
 void GatewayServiceWorker::initialize()
 {
-	const CommandLineParser& clp = cmdLineParser();
-
-	if (clp.optionIsSetFromCmdLine(CmdLineOption::LOG_GATEWAY_PACKETS) == true)
-	{
-		m_logGatewayPackets = true;
-	}
-
 	DEBUG_LOG_MSG(logger(), "GatewayServiceWorker is started");
 
 	runCfgLoaderThread();

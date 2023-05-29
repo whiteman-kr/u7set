@@ -53,7 +53,7 @@ namespace Tuning
 		QString activeClientID() const;
 		QString activeClientIP() const;
 
-		const TuningServiceSettings& tuningServiceSettings() const { return m_settings; }
+		const TuningServiceSettings& tuningServiceSettings() const { return m_serviceSettings; }
 
 		bool isControlled(const QString& lmEquipmentID, const QString& lanEquipmentID) const;
 
@@ -119,7 +119,7 @@ namespace Tuning
 		CircularLoggerShared m_tuningLog;
 		CircularLoggerShared m_tuningPacketLog;
 
-		TuningServiceSettings m_settings;
+		TuningServiceSettings m_serviceSettings;
 
 		std::map<QString, TuningSourceThreadShared> m_sourceThreads;	// module EquipmentID => TuningSourceThreadShared
 		std::map<quint32, TuningSourceThreadShared> m_ip2sourceThread;	// TuningSource LANs ipV4 => TuningSourceThreadShared
