@@ -10,99 +10,99 @@ CommandLineParser::CommandLineParser()
 {
 }
 
-CommandLineParser::CommandLineParser(int argc, char** argv)
+CommandLineParser::CommandLineParser(const QStringList& argv)
 {
-	setCmdLineArgs(argc, argv);
+	setCmdLineArgs(argv);
 }
 
-void CommandLineParser::setCmdLineArgs(int argc, char** argv)
+void CommandLineParser::setCmdLineArgs(const QStringList& argv)
 {
-	m_cmdLineArgsIsSet = false;
-
-	if (argc < 1)
+	if (argv.size() < 1)
 	{
 		Q_ASSERT(false);		// argc must be >= 1
 		return;
 	}
 
-	if (argv == nullptr)
+	m_argv = argv;
+	m_appPath = m_argv[0];
+
+	for(auto& p : m_cmdLineArgs)
 	{
-		Q_ASSERT(false);
-		return;
-	}
-
-	m_cmdLineArgs.clear();
-	m_appPath.clear();
-
-	for(int i = 0; i < argc; i++)
-	{
-		QString arg(argv[i]);
-
-		arg = arg.trimmed();
-
-		if (i == 0)
-		{
-			m_appPath = arg;
-			continue;
-		}
-
-		m_cmdLineArgs.append(arg);
-	}
-
-	for(auto& p : m_options)
-	{
-		Option& op = p.second;
+		CmdLineArg& op = p.second;
 
 		op.isSetFromCmdLine = false;
-		op.value.clear();
+		op.valueStr.clear();
 	}
 
-	m_cmdLineArgsIsSet = true;
 	m_parsed = false;
 }
 
-qsizetype CommandLineParser::argCount() const
+void CommandLineParser::setCmdLineArgs(int argc, const char** argv)
 {
-	return m_cmdLineArgs.count() + 1;	// 1 == application path arg
+	Q_ASSERT(argc >= 1);
+	TEST_PTR_RETURN(argv);
+
+	QStringList cmdLineArgs;
+
+	for(int i = 0; i < argc; i++)
+	{
+		TEST_PTR_CONTINUE(argv[i]);
+
+		cmdLineArgs.append(QString(argv[i]).trimmed());
+	}
+
+	setCmdLineArgs(cmdLineArgs);
 }
 
+qsizetype CommandLineParser::cmdLineArgCount() const
+{
+	return m_argv.count();
+}
 
-bool CommandLineParser::addSimpleNoWritableOption(const QString& optionName,
+bool CommandLineParser::addSimpleNoWritableCmdLineArg(const QString& cmdLineArgName,
 												 const QString& description)
 {
-	return addOption(OptionType::Simple, optionName, false, QString(), description, QString());
+	return addCmdLineArg(CmdLineArgType::Simple, cmdLineArgName, false, QString(), description, QString());
 }
 
-bool CommandLineParser::addSimpleOption(const QString& optionName,
+bool CommandLineParser::addSimpleCmdLineArg(const QString& cmdLineArgName,
 										const QString& settingName,
 										const QString& description)
 {
-	return addOption(OptionType::Simple, optionName, true, settingName, description, QString());
+	return addCmdLineArg(CmdLineArgType::Simple, cmdLineArgName, true, settingName, description, QString());
 }
 
-bool CommandLineParser::addValueNoWritebleOption(const QString& optionName,
+bool CommandLineParser::addValueNoWritebleCmdLineArg(const QString& cmdLineArgName,
 										const QString& description,
 										const QString& paramExample)
 {
-	return addOption(OptionType::SingleValue, optionName, false, QString(), description, paramExample);
+	return addCmdLineArg(CmdLineArgType::SingleValue, cmdLineArgName, false, QString(), description, paramExample);
 }
 
-bool CommandLineParser::addValueOption(const QString& optionName,
+bool CommandLineParser::addValueCmdLineArg(const QString& cmdLineArgName,
 										const QString& settingName,
 										const QString& description,
 										const QString& paramExample)
 {
-	return addOption(OptionType::SingleValue, optionName, true, settingName, description, paramExample);
+	return addCmdLineArg(CmdLineArgType::SingleValue, cmdLineArgName, true, settingName, description, paramExample);
 }
 
 void CommandLineParser::parse()
 {
-	Q_ASSERT(m_cmdLineArgsIsSet == true);
+	Q_ASSERT(m_argv.size() >= 1);
 
 	m_parsingErrors.clear();
 
-	for(QString cmdLineArg : m_cmdLineArgs)
+	bool first = true;
+
+	for(const QString& cmdLineArg : m_argv)
 	{
+		if (first == true)
+		{
+			first = false;
+			continue;
+		}
+
 		QStringList cmdLineArgAndValue = cmdLineArg.split("=", Qt::SkipEmptyParts);
 
 		if (cmdLineArgAndValue.isEmpty() == true)
@@ -110,33 +110,33 @@ void CommandLineParser::parse()
 			continue;
 		}
 
-		QString optionName = cmdLineArgAndValue.first().trimmed().toLower();
+		QString argName = cmdLineArgAndValue.first().trimmed().toLower();
 
-		while(optionName.isEmpty() == false && optionName[0].isLetterOrNumber() == false)
+		while(argName.isEmpty() == false && argName[0].isLetterOrNumber() == false)
 		{
-			optionName.remove(0, 1);
+			argName.remove(0, 1);
 		}
 
-		auto it = m_options.find(optionName);
+		auto it = m_cmdLineArgs.find(argName);
 
-		if (it == m_options.end())
+		if (it == m_cmdLineArgs.end())
 		{
 			m_parsingErrors.append(QString("Unknown command line argument: %1").arg(cmdLineArg));
 			continue;
 		}
 
-		Option& op = it->second;
+		CmdLineArg& arg = it->second;
 
-		switch(op.type)
+		switch(arg.type)
 		{
-		case OptionType::Simple:
-			op.isSetFromCmdLine = true;
-			op.value = true;
+		case CmdLineArgType::Simple:
+			arg.isSetFromCmdLine = true;
+			arg.valueStr = boolToString(true);
 			break;
 
-		case OptionType::SingleValue:
+		case CmdLineArgType::SingleValue:
 			{
-				op.isSetFromCmdLine = true;
+				arg.isSetFromCmdLine = true;
 
 				QString cmdLineArgValue;
 
@@ -145,7 +145,7 @@ void CommandLineParser::parse()
 					cmdLineArgValue = cmdLineArgAndValue[1];
 				}
 
-				op.value = cmdLineArgValue;
+				arg.valueStr = cmdLineArgValue;
 			}
 			break;
 
@@ -161,27 +161,37 @@ void CommandLineParser::writeSettingsToRegistry(QSettings& settings, std::shared
 {
 	Q_ASSERT(m_parsed == true);
 
-
-	for(const auto& p : m_options)
+	for(const auto& p : m_cmdLineArgs)
 	{
-		const Option& op = p.second;
+		const CmdLineArg& arg = p.second;
 
-		if (op.saveInRegistry == false ||
-			op.isSetFromCmdLine == false)
+		if (arg.settingName == SoftwareSetting::EQUIPMENT_ID)
+		{
+			DEBUG_STOP;
+		}
+
+		if (arg.saveInRegistry == false ||
+			arg.isSetFromCmdLine == false)
 		{
 			continue;
 		}
 
-		if (op.settingName.isEmpty() == true)
+		if (arg.settingName.isEmpty() == true)
 		{
 			Q_ASSERT(false);
 			continue;
 		}
 
-		settings.setValue(op.settingName, QVariant(op.value));
-		settings.sync();
-		checkSettingWriteStatus(settings, op.settingName, log);
+		settings.setValue(arg.settingName, QVariant(arg.valueStr));
+		qDebug() << settings.value(SoftwareSetting::EQUIPMENT_ID);
 	}
+
+	qDebug() << settings.value(SoftwareSetting::EQUIPMENT_ID);
+
+	settings.sync();
+	checkSettingWriteStatus(settings, QString(), log);
+
+	qDebug() << settings.value(SoftwareSetting::EQUIPMENT_ID);
 }
 
 bool CommandLineParser::checkSettingWriteStatus(QSettings& settings, const QString& settingName, std::shared_ptr<CircularLogger> logger)
@@ -229,22 +239,24 @@ bool CommandLineParser::checkSettingWriteStatus(QSettings& settings, const QStri
 	return false;
 }
 
-bool CommandLineParser::optionIsSetFromCmdLine(const QString& optionName) const
+bool CommandLineParser::cmdLineArgIsSet(const QString& cmdLineArgName) const
 {
 	Q_ASSERT(m_parsed == true);
 
-	auto it = m_options.find(optionName.trimmed().toLower());
+	QString name = cmdLineArgName;
 
-	if (it == m_options.end())
+	auto it = m_cmdLineArgs.find(name.trimmed().toLower());
+
+	if (it == m_cmdLineArgs.end())
 	{
-		Q_ASSERT(false);		// unknown option name
+		Q_ASSERT(false);		// unknown cmdLineArg name
 		return false;
 	}
 
 	return it->second.isSetFromCmdLine;
 }
 
-QString CommandLineParser::optionValue(const QString& optionName) const
+/*QString CommandLineParser::optionValue(const QString& optionName) const
 {
 	Q_ASSERT(m_parsed == true);
 
@@ -256,35 +268,29 @@ QString CommandLineParser::optionValue(const QString& optionName) const
 		return QString("");
 	}
 
-	if (op->type != OptionType::SingleValue)
+	if (op->type != CmdLineArgType::SingleValue)
 	{
 		Q_ASSERT(false);				// wrong option type
 		return QString("");
 	}
 
 	return op->value.toString();
-}
+}*/
 
 QString CommandLineParser::settingValue(const QString& settingName) const
 {
 	Q_ASSERT(m_parsed == true);
 
-	for(const auto& p : m_options)
+	for(const auto& p : m_cmdLineArgs)
 	{
-		const Option& op = p.second;
+		const CmdLineArg& arg = p.second;
 
-		if (op.settingName != settingName)
+		if (arg.settingName != settingName)
 		{
 			continue;
 		}
 
-		if (op.type != OptionType::SingleValue)
-		{
-			Q_ASSERT(false);				// wrong option type
-			return QString("");
-		}
-
-		return op.value.toString();
+		return arg.valueStr;
 	}
 
 	Q_ASSERT(false);				// setting not found
@@ -292,6 +298,7 @@ QString CommandLineParser::settingValue(const QString& settingName) const
 	return QString();
 }
 
+/*
 bool CommandLineParser::settingIsSet(const QString& settingName) const
 {
 	Q_ASSERT(m_parsed == true);
@@ -305,7 +312,7 @@ bool CommandLineParser::settingIsSet(const QString& settingName) const
 			continue;
 		}
 
-		if (op.type != OptionType::Simple)
+		if (op.type != CmdLineArgType::Simple)
 		{
 			Q_ASSERT(false);				// wrong option type
 			return false;
@@ -317,21 +324,21 @@ bool CommandLineParser::settingIsSet(const QString& settingName) const
 	Q_ASSERT(false);				// setting not found
 
 	return false;
-}
+}*/
 
 QString CommandLineParser::helpText() const
 {
 	std::list<std::pair<QString, QString>> opStrs;
 
-	int opCount = static_cast<int>(m_options.size());
+	int opCount = static_cast<int>(m_cmdLineArgs.size());
 
 	int opMaxLen = 0;
 
 	for(int i = 0; i < opCount; i++)
 	{
-		for(const auto& p : m_options)
+		for(const auto& p : m_cmdLineArgs)
 		{
-			const Option& op = p.second;
+			const CmdLineArg& op = p.second;
 
 			if (op.order != i)
 			{
@@ -342,11 +349,11 @@ QString CommandLineParser::helpText() const
 
 			switch(op.type)
 			{
-			case OptionType::Simple:
+			case CmdLineArgType::Simple:
 				opStr = Separator::MINUS + op.name;
 				break;
 
-			case OptionType::SingleValue:
+			case CmdLineArgType::SingleValue:
 				if (op.paramsExample.isEmpty() == true)
 				{
 					opStr = Separator::MINUS + op.name + "=value";
@@ -399,34 +406,7 @@ QString CommandLineParser::helpText() const
 	return helpText;
 }
 
-OptionalBool CommandLineParser::strToBool(QString str)
-{
-	str = str.trimmed().toLower();
-
-	OptionalBool result;
-
-	if (str == "on" ||
-		str == "1" ||
-		str == "true" ||
-		str == "yes")
-	{
-		result = true;
-	}
-	else
-	{
-		if (str == "off" ||
-			str == "0" ||
-			str == "false" ||
-			str == "no")
-		{
-			result = false;
-		}
-	}
-
-	return result;
-}
-
-bool CommandLineParser::addOption(OptionType type,
+bool CommandLineParser::addCmdLineArg(CmdLineArgType type,
 								  QString optionName,
 								  bool saveToRegistry,
 								  const QString& settingName,
@@ -441,13 +421,13 @@ bool CommandLineParser::addOption(OptionType type,
 		return false;
 	}
 
-	if (m_options.contains(optionName))
+	if (m_cmdLineArgs.contains(optionName))
 	{
 		Q_ASSERT(false);			// option with same name already exists
 		return false;
 	}
 
-	Option op;
+	CmdLineArg op;
 
 	op.type = type;
 	op.name = optionName;
@@ -458,32 +438,32 @@ bool CommandLineParser::addOption(OptionType type,
 
 	switch(op.type)
 	{
-	case OptionType::Simple:
-		op.value = false;
+	case CmdLineArgType::Simple:
+		op.valueStr = boolToString(false);
 		break;
 
-	case OptionType::SingleValue:
-		op.value = QString();
+	case CmdLineArgType::SingleValue:
+		op.valueStr = QString();
 		break;
 
 	default:
 		Q_ASSERT(false);
 	}
 
-	op.order = static_cast<int>(m_options.size());
+	op.order = static_cast<int>(m_cmdLineArgs.size());
 
-	m_options.insert({optionName, op});
+	m_cmdLineArgs.insert({optionName, op});
 
 	return true;
 }
 
-const CommandLineParser::Option* CommandLineParser::getOption(const QString& optionName) const
+const CommandLineParser::CmdLineArg* CommandLineParser::getOption(const QString& optionName) const
 {
 	Q_ASSERT(m_parsed == true);
 
-	auto it = m_options.find(optionName);
+	auto it = m_cmdLineArgs.find(optionName);
 
-	if (it == m_options.end())
+	if (it == m_cmdLineArgs.end())
 	{
 		return nullptr;
 	}

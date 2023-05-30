@@ -12,14 +12,19 @@ namespace Tuning
 
 	TuningServiceWorker::TuningServiceWorker(const SoftwareInfo& softwareInfo,
 											 const QString& serviceName,
-											 int& argc,
+											 int argc,
 											 char** argv,
 											 CircularLoggerShared logger,
-											 E::ServiceRunMode runMode,
 											 CircularLoggerShared tuningLog) :
-		ServiceWorker(softwareInfo, serviceName, argc, argv, logger, runMode),
+		ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
 		m_logger(logger),
 		m_tuningLog(tuningLog)
+	{
+	}
+
+	TuningServiceWorker::TuningServiceWorker(const TuningServiceWorker* worker) :
+		ServiceWorker(worker),
+		m_tuningLog(worker->tuningLog())
 	{
 	}
 
@@ -30,15 +35,7 @@ namespace Tuning
 
 	ServiceWorker* TuningServiceWorker::createInstance() const
 	{
-		TuningServiceWorker* newInstance = new TuningServiceWorker(softwareInfo(),
-																   serviceName(),
-																   argc(), argv(),
-																   logger(),
-																   serviceRunMode(),
-																   m_tuningLog);
-
-		newInstance->init();
-
+		TuningServiceWorker* newInstance = new TuningServiceWorker(this);
 		return newInstance;
 	}
 
@@ -49,16 +46,14 @@ namespace Tuning
 		serviceInfo.set_settingsxml(xmlString.toStdString());
 	}
 
-	void TuningServiceWorker::initCustomCmdLineOptions()
+	void TuningServiceWorker::initCustomCmdLineArgs()
 	{
-		CommandLineParser& cp = cmdLineParser();
+		addValueCmdLineArg(CmdLineArg::ID, SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
 
-		cp.addValueOption("id", SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
-
-		cp.addValueOption("cfgip1", SoftwareSetting::CFG_SERVICE_IP1,
+		addValueCmdLineArg(CmdLineArg::CFG_IP1, SoftwareSetting::CFG_SERVICE_IP1,
 								QString("IP-address of first Configuration Service (default port - %1).").
 											arg(PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST), "ip[:port]");
-		cp.addValueOption("cfgip2", SoftwareSetting::CFG_SERVICE_IP2,
+		addValueCmdLineArg(CmdLineArg::CFG_IP2, SoftwareSetting::CFG_SERVICE_IP2,
 								QString("IP-address of second Configuration Service (default port - %1).").
 											arg(PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST), "ip[:port]");
 	}

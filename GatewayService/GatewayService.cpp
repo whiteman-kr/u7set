@@ -14,16 +14,18 @@
 
 GatewayServiceWorker::GatewayServiceWorker(const SoftwareInfo& softwareInfo,
 										   const QString& serviceName,
-										   int& argc,
+										   int argc,
 										   char** argv,
-										   CircularLoggerShared logger,
-										   E::ServiceRunMode runMode) :
-	ServiceWorker(softwareInfo, serviceName, argc, argv, logger, runMode),
+										   CircularLoggerShared logger) :
+	ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
 	m_timer(this)
 {
 	QVariant v = serviceSettings().value(SoftwareSetting::LOG_GATEWAY_PACKETS);
+}
 
-	DEBUG_LOG_MSG(logger, QString("LLLOOOOGG %1").arg(v.toBool()));
+GatewayServiceWorker::GatewayServiceWorker(const GatewayServiceWorker* worker) :
+	ServiceWorker(worker)
+{
 }
 
 GatewayServiceWorker::~GatewayServiceWorker()
@@ -32,13 +34,7 @@ GatewayServiceWorker::~GatewayServiceWorker()
 
 ServiceWorker* GatewayServiceWorker::createInstance() const
 {
-	GatewayServiceWorker* newInstance = new GatewayServiceWorker(softwareInfo(),
-																 serviceName(),
-																 argc(), argv(),
-																 logger(),
-																 serviceRunMode());
-	newInstance->init();
-
+	GatewayServiceWorker* newInstance = new GatewayServiceWorker(this);
 	return newInstance;
 }
 
@@ -69,15 +65,13 @@ bool GatewayServiceWorker::isConnectedToConfigurationService(quint32& ip, quint1
 	return false;
 }
 
-void GatewayServiceWorker::initCustomCmdLineOptions()
+void GatewayServiceWorker::initCustomCmdLineArgs()
 {
-	CommandLineParser& cp = cmdLineParser();
+	addValueCmdLineArg(CmdLineArg::ID, SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
+	addValueCmdLineArg(CmdLineArg::CFG_IP1, SoftwareSetting::CFG_SERVICE_IP1, "IP address of first Configuration Service.", "IPv4:Port");
+	addValueCmdLineArg(CmdLineArg::CFG_IP2, SoftwareSetting::CFG_SERVICE_IP2, "IP address of second Configuration Service.", "IPv4:Port");
 
-	cp.addValueOption(CmdLineOption::ID, SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
-	cp.addValueOption(CmdLineOption::CFG_IP1, SoftwareSetting::CFG_SERVICE_IP1, "IP address of first Configuration Service.", "IPv4:Port");
-	cp.addValueOption(CmdLineOption::CFG_IP2, SoftwareSetting::CFG_SERVICE_IP2, "IP address of second Configuration Service.", "IPv4:Port");
-
-	cp.addSimpleOption(CmdLineOption::LOG_GATEWAY_PACKETS, SoftwareSetting::LOG_GATEWAY_PACKETS, "Turn On 2 hours gateway packet logging.");
+	addSimpleCmdLineArg(CmdLineArg::LOG_GATEWAY_PACKETS, SoftwareSetting::LOG_GATEWAY_PACKETS, "Turn On 2 hours gateway packet logging.");
 
 //	cp.addSimpleOption(CmdLineOption::CFG_PARSE, "Parse gateway description file.");
 
@@ -87,9 +81,7 @@ void GatewayServiceWorker::initCustomCmdLineOptions()
 
 void GatewayServiceWorker::loadSettings()
 {
-	const CommandLineParser& clp = cmdLineParser();
-
-	m_logGatewayPackets = serviceSettings().value(SoftwareSetting::LOG_GATEWAY_PACKETS).toBool();
+	m_logGatewayPackets = getBoolSettingValue(SoftwareSetting::LOG_GATEWAY_PACKETS);
 
 	DEBUG_LOG_MSG(logger(), QString(tr("Settings from command line or registry:")));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::EQUIPMENT_ID).arg(equipmentID()));
@@ -98,7 +90,7 @@ void GatewayServiceWorker::loadSettings()
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::LOG_GATEWAY_PACKETS).arg(m_logGatewayPackets));
 }
 
-bool GatewayServiceWorker::processCustomCmdLineSettings()
+bool GatewayServiceWorker::processCustomCmdLineArgs()
 {
 /*	const CommandLineParser& clp = cmdLineParser();
 

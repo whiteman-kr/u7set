@@ -31,10 +31,12 @@ public:
 public:
 	AppDataServiceWorker(const SoftwareInfo& softwareInfo,
 						 const QString& serviceInstanceName,
-						 int& argc,
+						 int argc,
 						 char** argv,
-						 CircularLoggerShared logger,
-						 E::ServiceRunMode runMode);
+						 CircularLoggerShared logger);
+
+	AppDataServiceWorker(const AppDataServiceWorker* worker);
+
 	~AppDataServiceWorker();
 
 	virtual ServiceWorker* createInstance() const override;
@@ -66,7 +68,7 @@ public:
 	int acquiredAppSignalIDsCount() const { return static_cast<int>(m_acquiredAppSignalIDs.size()); }
 
 private:
-	virtual void initCustomCmdLineOptions() override;
+	virtual void initCustomCmdLineArgs() override;
 	virtual void loadSettings() override;
 
 	virtual void initialize() override;

@@ -17,12 +17,16 @@
 
 AppDataServiceWorker::AppDataServiceWorker(const SoftwareInfo& softwareInfo,
 										   const QString& serviceName,
-										   int& argc,
+										   int argc,
 										   char** argv,
-										   CircularLoggerShared logger,
-										   E::ServiceRunMode runMode) :
-	ServiceWorker(softwareInfo, serviceName, argc, argv, logger, runMode),
+										   CircularLoggerShared logger) :
+	ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
 	m_timer(this)
+{
+}
+
+AppDataServiceWorker::AppDataServiceWorker(const AppDataServiceWorker* worker) :
+	ServiceWorker(worker)
 {
 }
 
@@ -32,12 +36,7 @@ AppDataServiceWorker::~AppDataServiceWorker()
 
 ServiceWorker* AppDataServiceWorker::createInstance() const
 {
-	AppDataServiceWorker* newInstance = new AppDataServiceWorker(softwareInfo(),
-																 serviceName(),
-																 argc(), argv(),
-																 logger(),
-																 serviceRunMode());
-	newInstance->init();
+	AppDataServiceWorker* newInstance = new AppDataServiceWorker(this);
 
 	return newInstance;
 }
@@ -137,26 +136,24 @@ void AppDataServiceWorker::fillAppDataReceiveState(Network::AppDataReceiveState*
 	}
 }
 
-void AppDataServiceWorker::initCustomCmdLineOptions()
+void AppDataServiceWorker::initCustomCmdLineArgs()
 {
-	CommandLineParser& cp = cmdLineParser();
-
-	cp.addValueOption(CmdLineOption::ID, SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
-	cp.addValueOption(CmdLineOption::CFG_IP1, SoftwareSetting::CFG_SERVICE_IP1, "IP address of first Configuration Service.", "IPv4:Port");
-	cp.addValueOption(CmdLineOption::CFG_IP2, SoftwareSetting::CFG_SERVICE_IP2, "IP address of second Configuration Service.", "IPv4:Port");
-	cp.addValueOption("ptc", SoftwareSetting::PROCESSING_THREADS_COUNT, "App data processing threads count", "N");
-	cp.addValueOption("recvip", SoftwareSetting::OVERRIDE_APP_DATA_RECEIVING_IP, "Override AppDataReceivingIP", "IPv4:Port");
-	cp.addSimpleOption(CmdLineOption::LOG_RUP_TIME_ERR, SoftwareSetting::LOG_RUP_TIME_ERRORS, "Log RUP frames time errors");
+	addValueCmdLineArg(CmdLineArg::ID, SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
+	addValueCmdLineArg(CmdLineArg::CFG_IP1, SoftwareSetting::CFG_SERVICE_IP1, "IP address of first Configuration Service.", "IPv4:Port");
+	addValueCmdLineArg(CmdLineArg::CFG_IP2, SoftwareSetting::CFG_SERVICE_IP2, "IP address of second Configuration Service.", "IPv4:Port");
+	addValueCmdLineArg("ptc", SoftwareSetting::PROCESSING_THREADS_COUNT, "App data processing threads count", "N");
+	addValueCmdLineArg("recvip", SoftwareSetting::OVERRIDE_APP_DATA_RECEIVING_IP, "Override AppDataReceivingIP", "IPv4:Port");
+	addSimpleCmdLineArg(CmdLineArg::LOG_RUP_TIME_ERR, SoftwareSetting::LOG_RUP_TIME_ERRORS, "Log RUP frames time errors");
 }
 
 void AppDataServiceWorker::loadSettings()
 {
-	m_appDataProcessingThreadCount = QString(getStrSetting(SoftwareSetting::PROCESSING_THREADS_COUNT)).toInt();
+	m_appDataProcessingThreadCount = getSettingValue(SoftwareSetting::PROCESSING_THREADS_COUNT).toInt();
 
-	m_strCmdLineAppDataReceivingIP = getStrSetting(SoftwareSetting::OVERRIDE_APP_DATA_RECEIVING_IP);
+	m_strCmdLineAppDataReceivingIP = getSettingValue(SoftwareSetting::OVERRIDE_APP_DATA_RECEIVING_IP);
 	m_cmdLineAppDataReceivingIP.setAddressPortStr(m_strCmdLineAppDataReceivingIP, PORT_APP_DATA_SERVICE_DATA);
 
-	m_logRupTimeErrors = cmdLineParser().optionIsSetFromCmdLine(CmdLineOption::LOG_RUP_TIME_ERR);
+	m_logRupTimeErrors = cmdLineArgIsSet(CmdLineArg::LOG_RUP_TIME_ERR);
 
 	DEBUG_LOG_MSG(logger(), QString(tr("Settings from command line or registry:")));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::EQUIPMENT_ID).arg(equipmentID()));
@@ -180,7 +177,6 @@ void AppDataServiceWorker::runAppDataReceiverThread()
 											m_appDataProcessingThreadCount,
 											sessionParams().softwareRunMode,
 											logger());
-
 	m_appDataReceiver->start();
 }
 

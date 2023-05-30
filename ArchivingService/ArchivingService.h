@@ -18,17 +18,18 @@ class ArchivingService : public ServiceWorker
 public:
 	ArchivingService(const SoftwareInfo& softwareInfo,
 						   const QString &serviceInstanceName,
-						   int &argc,
+						   int argc,
 						   char **argv,
-						   std::shared_ptr<CircularLogger> logger,
-						   E::ServiceRunMode runMode);
+						   std::shared_ptr<CircularLogger> logger);
+	ArchivingService(const ArchivingService* worker);
+
 	~ArchivingService();
 
 	virtual ServiceWorker* createInstance() const override;
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& servicesInfo) const override;
 
 private:
-	virtual void initCustomCmdLineOptions() override;
+	virtual void initCustomCmdLineArgs() override;
 	virtual void loadSettings() override;
 
 	virtual void initialize() override;

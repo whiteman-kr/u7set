@@ -1,3 +1,4 @@
+#include "../ServiceLib/ServiceStarter.h"
 #include "ArchivingService.h"
 #include "../UtilsLib/WUtils.h"
 
@@ -22,8 +23,7 @@ int main(int argc, char *argv[])
 
 	ArchivingService archServiceWorker(si,
 									   Service::getServiceInstanceName("Archiving Service", argc, argv),
-									   argc, argv, logger,
-									   E::ServiceRunMode::ConsoleApp);	// run mode will be refined after cmd line processing
+									   argc, argv, logger);
 
 	ServiceStarter serviceStarter(app, archServiceWorker, logger);
 

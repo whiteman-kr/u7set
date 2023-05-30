@@ -41,30 +41,30 @@ CmdLineParam::~CmdLineParam()
 {
 }
 
-void CmdLineParam::getParams(int& argc, char** argv)
+void CmdLineParam::getParams(int argc, char** argv)
 {
-	m_cmdLineParser.setCmdLineArgs(argc, argv);
-
 	// desciption keys from cmd line
 	//
-	m_cmdLineParser.addSimpleNoWritableOption(CmdLineOption::HELP, "Print this help.");
+	m_cmdLineParser.addSimpleNoWritableCmdLineArg(CmdLineArg::HELP, "Print this help.");
 		// main keys
 		//
-	m_cmdLineParser.addValueOption(CmdLineOption::CFG_IP1, SETTING_CFG_SERVICE_IP1, "IP-address of first Configuration Service.", "IPv4");
-	m_cmdLineParser.addValueOption(CmdLineOption::CFG_IP1, SETTING_CFG_SERVICE_IP2, "IP-address of second Configuration Service.", "IPv4");
-	m_cmdLineParser.addValueOption(CmdLineOption::ID, SETTING_EQUIPMENT_ID, "EquipmentID of software \"TestClient\".", "EQUIPMENT_ID_UALTESTER");
-	m_cmdLineParser.addValueOption("f", SETTING_TEST_FILE_NAME, "Test file name.", "TestFileName.txt");
+	m_cmdLineParser.addValueCmdLineArg(CmdLineArg::CFG_IP1, SETTING_CFG_SERVICE_IP1, "IP-address of first Configuration Service.", "IPv4");
+	m_cmdLineParser.addValueCmdLineArg(CmdLineArg::CFG_IP1, SETTING_CFG_SERVICE_IP2, "IP-address of second Configuration Service.", "IPv4");
+	m_cmdLineParser.addValueCmdLineArg(CmdLineArg::ID, SETTING_EQUIPMENT_ID, "EquipmentID of software \"TestClient\".", "EQUIPMENT_ID_UALTESTER");
+	m_cmdLineParser.addValueCmdLineArg("f", SETTING_TEST_FILE_NAME, "Test file name.", "TestFileName.txt");
 
 		// optional keys
 		//
-	m_cmdLineParser.addValueOption("psip", SETTING_PACKET_SOURCE_IP, "IP-address for connection to PacketSource.", "IPv4");
-	m_cmdLineParser.addValueOption("errignore", SETTING_ERROR_IGNORE, "Stop testing if errors was found.", "No");
-	m_cmdLineParser.addValueOption("test", SETTING_TEST_ID, "Run a specific test.", "TEST_ID");
-	m_cmdLineParser.addValueOption("from", SETTING_FROM_TEST_ID, "Run from the specific test.", "TEST_ID");
-	m_cmdLineParser.addValueOption("trace", SETTING_TRACE, "Print full line-by-line report of test.", "No");
-	m_cmdLineParser.addValueOption("report", SETTING_REPORT_FILENAME, "Report file name of test results.", "ReportFileName.txt");
-	m_cmdLineParser.addValueOption("lm", SETTING_PRESET_LM, "Run only tests compatible with the specified LM preset.", "LM_ID");
-	m_cmdLineParser.addValueOption("b", SETTING_OPTION_FILENAME, "Options of command line in the file name.", "OptionsFileName.txt");
+	m_cmdLineParser.addValueCmdLineArg("psip", SETTING_PACKET_SOURCE_IP, "IP-address for connection to PacketSource.", "IPv4");
+	m_cmdLineParser.addValueCmdLineArg("errignore", SETTING_ERROR_IGNORE, "Stop testing if errors was found.", "No");
+	m_cmdLineParser.addValueCmdLineArg("test", SETTING_TEST_ID, "Run a specific test.", "TEST_ID");
+	m_cmdLineParser.addValueCmdLineArg("from", SETTING_FROM_TEST_ID, "Run from the specific test.", "TEST_ID");
+	m_cmdLineParser.addValueCmdLineArg("trace", SETTING_TRACE, "Print full line-by-line report of test.", "No");
+	m_cmdLineParser.addValueCmdLineArg("report", SETTING_REPORT_FILENAME, "Report file name of test results.", "ReportFileName.txt");
+	m_cmdLineParser.addValueCmdLineArg("lm", SETTING_PRESET_LM, "Run only tests compatible with the specified LM preset.", "LM_ID");
+	m_cmdLineParser.addValueCmdLineArg("b", SETTING_OPTION_FILENAME, "Options of command line in the file name.", "OptionsFileName.txt");
+
+	m_cmdLineParser.setCmdLineArgs(argc, const_cast<const char**>(argv));
 }
 
 bool CmdLineParam::parse()
@@ -73,7 +73,7 @@ bool CmdLineParam::parse()
 
 	// print Help and exit if "-h" is set
 	//
-	if (m_cmdLineParser.argCount() == 1 || m_cmdLineParser.optionIsSetFromCmdLine("h") == true)
+	if (m_cmdLineParser.cmdLineArgCount() == 1 || m_cmdLineParser.cmdLineArgIsSet("h") == true)
 	{
 		std::cout << m_cmdLineParser.helpText().toLocal8Bit().constData();
 		std::cout << REQUIRED_OPTIONS;
@@ -82,9 +82,9 @@ bool CmdLineParam::parse()
 
 	// if "-b" is set than take param form file
 	//
-	if (m_cmdLineParser.optionIsSetFromCmdLine("b") == true)
+	if (m_cmdLineParser.cmdLineArgIsSet("b") == true)
 	{
-		if (m_cmdLineParser.argCount() > 2)
+		if (m_cmdLineParser.cmdLineArgCount() > 2)
 		{
 			std::cout << "Option \"-b\" is not compatible with other options" << std::endl;
 			return false;
@@ -130,16 +130,7 @@ bool CmdLineParam::parse()
 
 			args.insert(0, QCoreApplication::applicationFilePath());
 
-			QVector<char*> argv;
-			for (int i = 0; i < args.count(); i++)
-			{
-				unsigned int strLen = static_cast<unsigned int>(args[i].length()) + 1;
-				char* pArg = new char[strLen];
-				memcpy(pArg, args[i].toLatin1().data(), strLen);
-				argv.append(pArg);
-			}
-
-			m_cmdLineParser.setCmdLineArgs(TO_INT(args.count()), argv.data());
+			m_cmdLineParser.setCmdLineArgs(args);
 			m_cmdLineParser.parse();
 		}
 	}

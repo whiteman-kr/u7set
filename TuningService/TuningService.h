@@ -19,15 +19,19 @@ namespace Tuning
 	public:
 		TuningServiceWorker(const SoftwareInfo& softwareInfo,
 							const QString &serviceInstanceName,
-							int &argc,
-							char **argv,
+							int argc,
+							char** argv,
 							CircularLoggerShared logger,
-							E::ServiceRunMode runMode,
 							CircularLoggerShared tuningLog);
+
+		TuningServiceWorker(const TuningServiceWorker* worker);
+
 		~TuningServiceWorker();
 
 		virtual ServiceWorker* createInstance() const override;
 		virtual void getServiceSpecificInfo(Network::ServiceInfo& servicesInfo) const override;
+
+		CircularLoggerShared tuningLog() const { return m_tuningLog; }
 
 		const TuningClientContext* getClientContext(QString clientID) const;
 		const TuningClientContext* getClientContext(const std::string& clientID) const;
@@ -66,7 +70,7 @@ namespace Tuning
 	public slots:
 
 	private:
-		virtual void initCustomCmdLineOptions() override;
+		virtual void initCustomCmdLineArgs() override;
 		virtual void loadSettings() override;
 
 		void clear();
