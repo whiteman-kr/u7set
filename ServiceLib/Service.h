@@ -66,7 +66,7 @@ public:
 	//
 	ServiceWorker(const SoftwareInfo& softwareInfo,
 				  const QString& serviceInstanceName,
-				  int& argc,
+				  int argc,
 				  char** argv,
 				  CircularLoggerShared logger);
 
@@ -112,7 +112,6 @@ public:
 	HostAddressPort cfgServiceIP1() const { return m_cfgServiceIP1; }
 	HostAddressPort cfgServiceIP2() const { return m_cfgServiceIP2; }
 
-	const QSettings& serviceSettings() const { return m_serviceSettings; }
 	bool clearSettings();								// clear all service settings
 
 	CircularLoggerShared logger() const { return m_logger; }
@@ -150,6 +149,8 @@ public:
 	bool cmdLineArgIsSet(const QString& cmdLineArgName) const;
 	QString helpText() const;
 
+	int thisInstanceNo() const { return m_thisInstanceNo; }
+
 signals:
 	void work();
 	void stopped();
@@ -163,17 +164,18 @@ protected:
 	virtual bool processCustomCmdLineArgs();		// override to process service-specific cmd line settings
 													// return true - to continue service running
 													// return false - to exit service
+	virtual void loadSettings()
+	{
+		DEBUG_LOG_MSG(m_logger, QString("ServiceWorker::loadSettings() override to load service-specific settings"));
+	}
 
-	virtual void loadSettings() = 0;				// override to load service-specific settings
-
+	const CommandLineParser& commandLineParser() const { return m_cmdLineParser; }
 
 private:
 	void initThisInstanceNo();
 
 	void copyCmdLineArgs(int argc, const char** argv);
 	const QStringList cmdLineArgs() const { return m_cmdLineArgs; }
-
-	void copyServiceSettings(const QSettings& st);
 
 	void onThreadStarted() override final;
 	void onThreadFinished() override final;
@@ -204,9 +206,7 @@ private:
 	CircularLoggerShared m_logger;
 	E::ServiceRunMode m_serviceRunMode = E::ServiceRunMode::ConsoleApp;
 
-	QSettings m_serviceSettings;		// service settings saved in registry on Windows or INI-files on Linux
-
-	CommandLineParser* m_cmdLineParser = nullptr;
+	CommandLineParser m_cmdLineParser;
 
 	Service* m_service = nullptr;
 
@@ -217,7 +217,6 @@ private:
 
 	static int m_instanceNo;
 };
-
 
 // -------------------------------------------------------------------------------------
 //

@@ -15,7 +15,7 @@
 //
 // -------------------------------------------------------------------------------------------------------------------
 
-UalTester::UalTester(int& argc, char** argv, std::shared_ptr<CircularLogger> logger) :
+UalTester::UalTester(int argc, char** argv, std::shared_ptr<CircularLogger> logger) :
 	m_log(logger),
 	m_waitSocketsConnectionTimer(this)
 {

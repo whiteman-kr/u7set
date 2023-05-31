@@ -12,7 +12,7 @@
 
 DiagDataServiceWorker::DiagDataServiceWorker(const SoftwareInfo& softwareInfo,
 											 const QString& serviceName,
-											 int& argc,
+											 int argc,
 											 char** argv,
 											 CircularLoggerShared logger) :
 	ServiceWorker(softwareInfo, serviceName, argc, argv, logger)

@@ -14,7 +14,7 @@ class DiagDataServiceWorker : public ServiceWorker
 public:
 	DiagDataServiceWorker(const SoftwareInfo& softwareInfo,
 						  const QString& serviceInstanceName,
-						  int& argc,
+						  int argc,
 						  char** argv,
 						  CircularLoggerShared logger);
 

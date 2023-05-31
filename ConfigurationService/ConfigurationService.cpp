@@ -27,7 +27,16 @@ ConfigurationServiceWorker::ConfigurationServiceWorker(const ConfigurationServic
 
 ServiceWorker* ConfigurationServiceWorker::createInstance() const
 {
+	DEBUG_LOG_MSG(m_logger, QString("---------- Instance %1 cmdLineArgs").arg(thisInstanceNo()));
+
+	commandLineParser().printCmdLineArgs(m_logger);
+
 	ConfigurationServiceWorker* newInstance = new ConfigurationServiceWorker(this);
+
+	DEBUG_LOG_MSG(m_logger, QString("----------- Next istance cmdLineArgs"));
+
+	newInstance->commandLineParser().printCmdLineArgs(m_logger);
+
 	return newInstance;
 }
 
@@ -67,10 +76,14 @@ void ConfigurationServiceWorker::initCustomCmdLineArgs()
 
 void ConfigurationServiceWorker::loadSettings()
 {
+	DEBUG_LOG_MSG(m_logger, "in ConfigurationServiceWorker::loadSettings()");
+
 	m_autoloadBuildPath = getSettingValue(SoftwareSetting::AUTOLOAD_BUILD_PATH);
 	m_clientIPStr = getSettingValue(SoftwareSetting::CLIENT_REQUEST_IP);
 	m_workDirectory = getSettingValue(SoftwareSetting::WORK_DIRECTORY);
 	m_checkHostname = getBoolSettingValue(SoftwareSetting::CHECK_HOSTNAME);
+
+	DEBUG_LOG_MSG(m_logger, "ConfigurationServiceWorker::loadSettings() check1");
 
 	SessionParams sp;
 
@@ -85,6 +98,8 @@ void ConfigurationServiceWorker::loadSettings()
 
 	setSessionParams(sp);
 
+	DEBUG_LOG_MSG(m_logger, "ConfigurationServiceWorker::loadSettings() check2");
+
 	DEBUG_LOG_MSG(m_logger, QString("Settings from command line or registry:"));
 	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SoftwareSetting::EQUIPMENT_ID).arg(equipmentID()));
 	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SoftwareSetting::AUTOLOAD_BUILD_PATH).arg(m_autoloadBuildPath));
@@ -94,6 +109,8 @@ void ConfigurationServiceWorker::loadSettings()
 	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SoftwareSetting::CURRENT_PROFILE).arg(sessionParams().currentSettingsProfile));
 	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SoftwareSetting::RUN_MODE).arg(E::valueToString<E::SoftwareRunMode>(sessionParams().softwareRunMode)));
 	DEBUG_LOG_MSG(m_logger, QString());
+
+	DEBUG_LOG_MSG(m_logger, "ConfigurationServiceWorker::loadSettings() check3");
 }
 
 bool ConfigurationServiceWorker::loadCfgServiceSettings(const QString& buildPath)
@@ -172,7 +189,7 @@ void ConfigurationServiceWorker::initialize()
 {
 	startCfgCheckerThread();
 
-	DEBUG_LOG_MSG(m_logger, QString(tr("ServiceWorker is initialized")));
+	DEBUG_LOG_MSG(m_logger, QString(tr("ConfigurationServiceWorker is initialized")));
 }
 
 void ConfigurationServiceWorker::shutdown()
@@ -181,7 +198,7 @@ void ConfigurationServiceWorker::shutdown()
 
 	stopCfgServerThread();
 
-	DEBUG_LOG_MSG(m_logger, QString(tr("ServiceWorker is shutting down")));
+	DEBUG_LOG_MSG(m_logger, QString(tr("ConfigurationServiceWorker is shutting down")));
 }
 
 void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)

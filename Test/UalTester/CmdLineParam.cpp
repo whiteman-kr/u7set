@@ -33,7 +33,8 @@ const char* const CmdLineParam::REQUIRED_OPTIONS =	"Options: \"-cfgip1\", \"-cfg
 													"For example: -cfgip1=127.0.0.1 -cfgip2=192.168.0.1 -id=EQUIPMENT_ID_UALTESTER -f=test.txt\n";
 
 
-CmdLineParam::CmdLineParam()
+CmdLineParam::CmdLineParam() :
+	m_cmdLineParser(Manufacturer::RADIY, "UalTester", 0, nullptr)
 {
 }
 
@@ -43,6 +44,8 @@ CmdLineParam::~CmdLineParam()
 
 void CmdLineParam::getParams(int argc, char** argv)
 {
+	m_cmdLineParser.setCmdLineArgs(argc, argv);
+
 	// desciption keys from cmd line
 	//
 	m_cmdLineParser.addSimpleNoWritableCmdLineArg(CmdLineArg::HELP, "Print this help.");
@@ -63,13 +66,11 @@ void CmdLineParam::getParams(int argc, char** argv)
 	m_cmdLineParser.addValueCmdLineArg("report", SETTING_REPORT_FILENAME, "Report file name of test results.", "ReportFileName.txt");
 	m_cmdLineParser.addValueCmdLineArg("lm", SETTING_PRESET_LM, "Run only tests compatible with the specified LM preset.", "LM_ID");
 	m_cmdLineParser.addValueCmdLineArg("b", SETTING_OPTION_FILENAME, "Options of command line in the file name.", "OptionsFileName.txt");
-
-	m_cmdLineParser.setCmdLineArgs(argc, const_cast<const char**>(argv));
 }
 
 bool CmdLineParam::parse()
 {
-	m_cmdLineParser.parse();
+	m_cmdLineParser.parseAndApplyCmdLineArgs();
 
 	// print Help and exit if "-h" is set
 	//
@@ -90,7 +91,7 @@ bool CmdLineParam::parse()
 			return false;
 		}
 
-		m_optionFileName = m_cmdLineParser.settingValue(SETTING_OPTION_FILENAME);
+		m_optionFileName = m_cmdLineParser.getSettingValue(SETTING_OPTION_FILENAME);
 		if (m_optionFileName.isEmpty() == true)
 		{
 			std::cout << "Option \"-b\" is empty";
@@ -131,7 +132,7 @@ bool CmdLineParam::parse()
 			args.insert(0, QCoreApplication::applicationFilePath());
 
 			m_cmdLineParser.setCmdLineArgs(args);
-			m_cmdLineParser.parse();
+			m_cmdLineParser.parseAndApplyCmdLineArgs();
 		}
 	}
 
@@ -139,20 +140,20 @@ bool CmdLineParam::parse()
 	//
 		// main keys
 		//
-	m_cfgServiceIP1 = m_cmdLineParser.settingValue(SETTING_CFG_SERVICE_IP1);
-	m_cfgServiceIP2 = m_cmdLineParser.settingValue(SETTING_CFG_SERVICE_IP2);
-	m_equipmentID = m_cmdLineParser.settingValue(SETTING_EQUIPMENT_ID);
-	QString testFileName = m_cmdLineParser.settingValue(SETTING_TEST_FILE_NAME);
+	m_cfgServiceIP1 = m_cmdLineParser.getSettingValue(SETTING_CFG_SERVICE_IP1);
+	m_cfgServiceIP2 = m_cmdLineParser.getSettingValue(SETTING_CFG_SERVICE_IP2);
+	m_equipmentID = m_cmdLineParser.getSettingValue(SETTING_EQUIPMENT_ID);
+	QString testFileName = m_cmdLineParser.getSettingValue(SETTING_TEST_FILE_NAME);
 
 		// optional keys
 		//
-	m_packetSourceIP = m_cmdLineParser.settingValue(SETTING_PACKET_SOURCE_IP);
-	m_errorIngnoreStr = m_cmdLineParser.settingValue(SETTING_ERROR_IGNORE);
-	m_testID = m_cmdLineParser.settingValue(SETTING_TEST_ID);
-	m_fromTestID = m_cmdLineParser.settingValue(SETTING_FROM_TEST_ID);
-	m_traceStr = m_cmdLineParser.settingValue(SETTING_TRACE);
-	m_reportFileName = m_cmdLineParser.settingValue(SETTING_REPORT_FILENAME);
-	m_presetLM = m_cmdLineParser.settingValue(SETTING_PRESET_LM);
+	m_packetSourceIP = m_cmdLineParser.getSettingValue(SETTING_PACKET_SOURCE_IP);
+	m_errorIngnoreStr = m_cmdLineParser.getSettingValue(SETTING_ERROR_IGNORE);
+	m_testID = m_cmdLineParser.getSettingValue(SETTING_TEST_ID);
+	m_fromTestID = m_cmdLineParser.getSettingValue(SETTING_FROM_TEST_ID);
+	m_traceStr = m_cmdLineParser.getSettingValue(SETTING_TRACE);
+	m_reportFileName = m_cmdLineParser.getSettingValue(SETTING_REPORT_FILENAME);
+	m_presetLM = m_cmdLineParser.getSettingValue(SETTING_PRESET_LM);
 
 	// main settings
 	//

@@ -20,7 +20,6 @@ GatewayServiceWorker::GatewayServiceWorker(const SoftwareInfo& softwareInfo,
 	ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
 	m_timer(this)
 {
-	QVariant v = serviceSettings().value(SoftwareSetting::LOG_GATEWAY_PACKETS);
 }
 
 GatewayServiceWorker::GatewayServiceWorker(const GatewayServiceWorker* worker) :

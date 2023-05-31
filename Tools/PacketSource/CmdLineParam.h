@@ -14,7 +14,7 @@ class CmdLineParam
 public:
 
 	explicit CmdLineParam();
-	CmdLineParam(int& argc, char** argv);
+	CmdLineParam(int argc, char** argv);
 	virtual ~CmdLineParam();
 
 public:

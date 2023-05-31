@@ -16,15 +16,15 @@ int ServiceWorker::m_instanceNo = 0;
 
 ServiceWorker::ServiceWorker(const SoftwareInfo& softwareInfo,
 							 const QString& serviceName,
-							 int& argc,
+							 int argc,
 							 char** argv,
 							 CircularLoggerShared logger) :
 	m_softwareInfo(softwareInfo),
 	m_serviceName(serviceName),
 	m_argc(argc),
 	m_argv(const_cast<const char**>(argv)),
+	m_cmdLineParser(Manufacturer::RADIY, serviceName, argc, argv),
 	m_logger(logger),
-	m_serviceSettings(QSettings::SystemScope, Manufacturer::RADIY, serviceName, this),
 	m_softwareSettingsSet(softwareInfo.softwareType())
 {
 	TEST_PTR_RETURN(argv);
@@ -34,8 +34,6 @@ ServiceWorker::ServiceWorker(const SoftwareInfo& softwareInfo,
 	Q_ASSERT(m_thisInstanceNo == 1);
 
 	copyCmdLineArgs(m_argc, m_argv);
-
-	m_cmdLineParser = new CommandLineParser(m_cmdLineArgs);
 }
 
 ServiceWorker::ServiceWorker(const ServiceWorker* prevInstance) :
@@ -45,19 +43,16 @@ ServiceWorker::ServiceWorker(const ServiceWorker* prevInstance) :
 	m_argc(prevInstance->argc()),
 	m_argv(prevInstance->argv()),
 	m_cmdLineArgs(prevInstance->cmdLineArgs()),
-	m_serviceSettings(QSettings::SystemScope, Manufacturer::RADIY, prevInstance->serviceName(), this),
+	m_cmdLineParser(prevInstance->commandLineParser()),
 	m_softwareSettingsSet(prevInstance->softwareInfo().softwareType())
 {
 	initThisInstanceNo();
 
 	Q_ASSERT(m_thisInstanceNo > 1);
-
-	copyServiceSettings(prevInstance->serviceSettings());
 }
 
 ServiceWorker::~ServiceWorker()
 {
-	DELETE_IF_NOT_NULL(m_cmdLineParser);
 }
 
 QString ServiceWorker::appPath() const
@@ -101,22 +96,24 @@ bool ServiceWorker::initInstance1()
 		return true;
 	}
 
-	TEST_PTR_RETURN_FALSE(m_cmdLineParser);
-
-	m_cmdLineParser->addSimpleNoWritableCmdLineArg(CmdLineArg::HELP, "Print this help.");
-	m_cmdLineParser->addSimpleNoWritableCmdLineArg(CmdLineArg::VERSION, "Display version of service.");
-	m_cmdLineParser->addSimpleNoWritableCmdLineArg(CmdLineArg::EXEC_AS_APP, "Run service as a regular application.");
-	m_cmdLineParser->addSimpleNoWritableCmdLineArg(CmdLineArg::INSTALL, "Install the service. Needs administrator rights.");
-	m_cmdLineParser->addSimpleNoWritableCmdLineArg(CmdLineArg::UNINSTALL, "Uninstall the service. Needs administrator rights.");
-	m_cmdLineParser->addSimpleNoWritableCmdLineArg(CmdLineArg::TERMINATE, "Terminate (stop) the service.");
-	m_cmdLineParser->addValueCmdLineArg(CmdLineArg::INSTANCE, "ServiceInstanceID", "Set service instance ID.", "InstanceID");
-	m_cmdLineParser->addSimpleNoWritableCmdLineArg(CmdLineArg::CLEAR, "Clear all service settings.");
+	m_cmdLineParser.addSimpleNoWritableCmdLineArg(CmdLineArg::HELP, "Print this help.");
+	m_cmdLineParser.addSimpleNoWritableCmdLineArg(CmdLineArg::VERSION, "Display version of service.");
+	m_cmdLineParser.addSimpleNoWritableCmdLineArg(CmdLineArg::EXEC_AS_APP, "Run service as a regular application.");
+	m_cmdLineParser.addSimpleNoWritableCmdLineArg(CmdLineArg::INSTALL, "Install the service. Needs administrator rights.");
+	m_cmdLineParser.addSimpleNoWritableCmdLineArg(CmdLineArg::UNINSTALL, "Uninstall the service. Needs administrator rights.");
+	m_cmdLineParser.addSimpleNoWritableCmdLineArg(CmdLineArg::TERMINATE, "Terminate (stop) the service.");
+	m_cmdLineParser.addValueCmdLineArg(CmdLineArg::INSTANCE, "ServiceInstanceID", "Set service instance ID.", "InstanceID");
+	m_cmdLineParser.addSimpleNoWritableCmdLineArg(CmdLineArg::CLEAR, "Clear all service settings.");
 
 	initCustomCmdLineArgs();
 
-	m_cmdLineParser->parse();
+	m_cmdLineParser.readAndApplySettingsFromRegistry();
 
-	m_cmdLineParser->writeSettingsToRegistry(m_serviceSettings, m_logger);
+	m_cmdLineParser.parseAndApplyCmdLineArgs();
+
+	m_cmdLineParser.writeSettingsToRegistry(m_logger);
+
+	loadSettings();
 
 	return true;
 }
@@ -128,7 +125,7 @@ void ServiceWorker::setService(Service* service)
 
 Service* ServiceWorker::service()
 {
-	assert(m_service != nullptr);
+	Q_ASSERT(m_service != nullptr);
 	return m_service;
 }
 
@@ -139,25 +136,12 @@ void ServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) co
 
 bool ServiceWorker::clearSettings()
 {
-	m_serviceSettings.clear();
-
-	m_serviceSettings.sync();
-
-	return CommandLineParser::checkSettingWriteStatus(m_serviceSettings, "", nullptr);
+	return m_cmdLineParser.clearSettings();
 }
 
 QString ServiceWorker::getSettingValue(const QString& settingName)
 {
-	QVariant v = m_serviceSettings.value(settingName).toString();
-
-	if (v.isNull() == true ||
-		v.isValid() == false)
-	{
-		Q_ASSERT(false);
-		return QString();
-	}
-
-	return v.toString();
+	return m_cmdLineParser.getSettingValue(settingName);
 }
 
 bool ServiceWorker::getBoolSettingValue(const QString& settingName)
@@ -218,27 +202,21 @@ E::ServiceRunMode ServiceWorker::serviceRunMode() const
 bool ServiceWorker::addSimpleNoWritableCmdLineArg(const QString& cmdLineArgName,
 												  const QString& description)
 {
-	TEST_PTR_RETURN_FALSE(m_cmdLineParser);
-
-	return m_cmdLineParser->addSimpleNoWritableCmdLineArg(cmdLineArgName, description);
+	return m_cmdLineParser.addSimpleNoWritableCmdLineArg(cmdLineArgName, description);
 }
 
 bool ServiceWorker::addSimpleCmdLineArg(const QString& cmdLineArgName,
 						 const QString& settingName,
 						 const QString& description)
 {
-	TEST_PTR_RETURN_FALSE(m_cmdLineParser);
-
-	return m_cmdLineParser->addSimpleCmdLineArg(cmdLineArgName, settingName, description);
+	return m_cmdLineParser.addSimpleCmdLineArg(cmdLineArgName, settingName, description);
 }
 
 bool ServiceWorker::addValueNoWritebleCmdLineArg(const QString& cmdLineArgName,
 								  const QString& description,
 								  const QString& paramExample)
 {
-	TEST_PTR_RETURN_FALSE(m_cmdLineParser);
-
-	return m_cmdLineParser->addValueNoWritebleCmdLineArg(cmdLineArgName, description, paramExample);
+	return m_cmdLineParser.addValueNoWritebleCmdLineArg(cmdLineArgName, description, paramExample);
 }
 
 bool ServiceWorker::addValueCmdLineArg(const QString& cmdLineArgName,
@@ -246,23 +224,17 @@ bool ServiceWorker::addValueCmdLineArg(const QString& cmdLineArgName,
 						const QString& description,
 						const QString& paramExample)
 {
-	TEST_PTR_RETURN_FALSE(m_cmdLineParser);
-
-	return m_cmdLineParser->addValueCmdLineArg(cmdLineArgName, settingName, description, paramExample);
+	return m_cmdLineParser.addValueCmdLineArg(cmdLineArgName, settingName, description, paramExample);
 }
 
 bool ServiceWorker::cmdLineArgIsSet(const QString& cmdLineArgName) const
 {
-	TEST_PTR_RETURN_FALSE(m_cmdLineParser);
-
-	return m_cmdLineParser->cmdLineArgIsSet(cmdLineArgName);
+	return m_cmdLineParser.cmdLineArgIsSet(cmdLineArgName);
 }
 
 QString ServiceWorker::helpText() const
 {
-	TEST_PTR_RETURN_VALUE(m_cmdLineParser, QString());
-
-	return m_cmdLineParser->helpText();
+	return m_cmdLineParser.helpText();
 }
 
 bool ServiceWorker::processCustomCmdLineArgs()
@@ -294,22 +266,11 @@ void ServiceWorker::copyCmdLineArgs(int argc, const char** argv)
 	}
 }
 
-void ServiceWorker::copyServiceSettings(const QSettings& st)
-{
-	Q_ASSERT(m_thisInstanceNo > 1);
-
-	m_serviceSettings.clear();
-
-	QStringList keys = st.allKeys();
-
-	for(const QString& key : keys)
-	{
-		m_serviceSettings.setValue(key, st.value(key));
-	}
-}
-
 void ServiceWorker::onThreadStarted()
 {
+	DEBUG_LOG_MSG(m_logger, QString("ServiceWorker::onThreadStarted(), instanceNo = %1 of %2").
+						arg(m_thisInstanceNo).arg(metaObject()->className()));
+
 	// loading common settings of services
 
 	m_equipmentID = getSettingValue(SoftwareSetting::EQUIPMENT_ID);
@@ -329,7 +290,13 @@ void ServiceWorker::onThreadStarted()
 
 	//
 
-	loadSettings();
+	m_cmdLineParser.printCmdLineArgs(m_logger);
+
+//	DEBUG_LOG_MSG(m_logger, "before ConfigurationServiceWorker::loadSettings()");
+
+//	loadSettings();
+asdadsasdasd
+//	DEBUG_LOG_MSG(m_logger, "after ConfigurationServiceWorker::loadSettings()");
 
 	initialize();
 
@@ -436,7 +403,7 @@ void Service::onBaseRequest(UdpRequest request)
 			break;
 
 		default:
-			assert(false);
+			Q_ASSERT(false);
 			ack.setErrorCode(RQERROR_UNKNOWN_REQUEST);
 			break;
 	}
@@ -450,13 +417,13 @@ void Service::startServiceWorkerThread()
 
 	if (m_serviceWorkerThread != nullptr)
 	{
-		assert(false);
+		Q_ASSERT(false);
 		return;
 	}
 
 	if (m_state != ServiceState::Stopped)
 	{
-		assert(false);
+		Q_ASSERT(false);
 		return;
 	}
 
