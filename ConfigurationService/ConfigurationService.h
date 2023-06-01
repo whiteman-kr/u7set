@@ -33,8 +33,8 @@ signals:
 	void renameWorkBuildToBackupExcept(QString workDirectoryToLeave);
 
 private:
-	virtual void initCustomCmdLineArgs() override;
-	virtual void loadSettings() override;
+	virtual void initServiceSpecificCmdLineArgs() override;
+	virtual void loadServiceSpecificSettings() override;
 
 	bool loadCfgServiceSettings(const QString& buildPath);
 
@@ -53,7 +53,6 @@ private:
 	E::SoftwareRunMode getSoftwareRunMode(QString runModeStr);
 
 private:
-	std::shared_ptr<CircularLogger> m_logger;
 	UdpSocketThread* m_infoSocketThread = nullptr;
 	Tcp::ServerThread* m_cfgServerThread = nullptr;
 

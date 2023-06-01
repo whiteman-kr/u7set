@@ -18,7 +18,7 @@ namespace Gateway
 							 const HostAddressPort& serverAddressPort1,
 							 const HostAddressPort& serverAddressPort2,
 							 const QString& clientDescription,
-							 IvsImpulseHandler& handler);
+							 IvsImpulseHandler& handler, CircularLoggerShared logger);
 	private:
 		virtual void onClientThreadStarted() override;
 		virtual void onClientThreadFinished() override;
@@ -62,13 +62,15 @@ namespace Gateway
 								   const HostAddressPort& serverAddressPort1,
 								   const HostAddressPort& serverAddressPort2,
 								   const QString& clientDescription,
-								   IvsImpulseHandler& handler)
+								   IvsImpulseHandler& handler,
+								   CircularLoggerShared logger)
 		{
 			addWorker(new AppDataServiceClient(softwareInfo,
 											   serverAddressPort1,
 											   serverAddressPort2,
 											   clientDescription,
-											   handler));
+											   handler,
+											   logger));
 		}
 
 		AppDataServiceClient* client() { return dynamic_cast<AppDataServiceClient*>(m_workerList[0]); }

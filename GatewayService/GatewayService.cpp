@@ -64,13 +64,12 @@ bool GatewayServiceWorker::isConnectedToConfigurationService(quint32& ip, quint1
 	return false;
 }
 
-void GatewayServiceWorker::initCustomCmdLineArgs()
+void GatewayServiceWorker::initServiceSpecificCmdLineArgs()
 {
 	addValueCmdLineArg(CmdLineArg::ID, SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
 	addValueCmdLineArg(CmdLineArg::CFG_IP1, SoftwareSetting::CFG_SERVICE_IP1, "IP address of first Configuration Service.", "IPv4:Port");
 	addValueCmdLineArg(CmdLineArg::CFG_IP2, SoftwareSetting::CFG_SERVICE_IP2, "IP address of second Configuration Service.", "IPv4:Port");
-
-	addSimpleCmdLineArg(CmdLineArg::LOG_GATEWAY_PACKETS, SoftwareSetting::LOG_GATEWAY_PACKETS, "Turn On 2 hours gateway packet logging.");
+	addSimpleNoWritableCmdLineArg(CmdLineArg::LOG_GATEWAY_PACKETS, "Turn On 2 hours gateway packet logging.");
 
 //	cp.addSimpleOption(CmdLineOption::CFG_PARSE, "Parse gateway description file.");
 
@@ -78,18 +77,20 @@ void GatewayServiceWorker::initCustomCmdLineArgs()
 	//						SoftwareSetting::GATEWAY_DESCRIPTION_FILE, "Gateway description file name.", "file");
 }
 
-void GatewayServiceWorker::loadSettings()
+void GatewayServiceWorker::loadServiceSpecificSettings()
 {
-	m_logGatewayPackets = getBoolSettingValue(SoftwareSetting::LOG_GATEWAY_PACKETS);
+	m_logGatewayPackets = cmdLineArgIsSet(CmdLineArg::LOG_GATEWAY_PACKETS);
 
-	DEBUG_LOG_MSG(logger(), QString(tr("Settings from command line or registry:")));
+	DEBUG_LOG_MSG(logger(), "");
+	DEBUG_LOG_MSG(logger(), QString(tr("Service settings:")));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::EQUIPMENT_ID).arg(equipmentID()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStrIfSet()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStrIfSet()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::LOG_GATEWAY_PACKETS).arg(m_logGatewayPackets));
+	DEBUG_LOG_MSG(logger(), "");
 }
 
-bool GatewayServiceWorker::processCustomCmdLineArgs()
+bool GatewayServiceWorker::processServiceSpecificCmdLineArgs()
 {
 /*	const CommandLineParser& clp = cmdLineParser();
 

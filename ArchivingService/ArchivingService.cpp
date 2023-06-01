@@ -41,7 +41,7 @@ void ArchivingService::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo)
 	serviceInfo.set_settingsxml(xmlString.toStdString());
 }
 
-void ArchivingService::initCustomCmdLineArgs()
+void ArchivingService::initServiceSpecificCmdLineArgs()
 {
 	addValueCmdLineArg(CmdLineArg::ID, SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
 	addValueCmdLineArg(CmdLineArg::CFG_IP1, SoftwareSetting::CFG_SERVICE_IP1, "IP-addres of first Configuration Service.", "");
@@ -56,7 +56,7 @@ void ArchivingService::initCustomCmdLineArgs()
 
 }
 
-void ArchivingService::loadSettings()
+void ArchivingService::loadServiceSpecificSettings()
 {
 	m_overwriteArchiveLocation = getSettingValue(SoftwareSetting::ARCHIVE_LOCATION);
 
@@ -71,7 +71,8 @@ void ArchivingService::loadSettings()
 		m_minQueueSizeForFlushing = Archive::DEFAULT_QUEUE_SIZE_FOR_FLUSHING;
 	}
 
-	DEBUG_LOG_MSG(logger(), QString(tr("Settings from command line or registry:")));
+	DEBUG_LOG_MSG(logger(), "");
+	DEBUG_LOG_MSG(logger(), QString(tr("Service settings:")));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::EQUIPMENT_ID).arg(equipmentID()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP1).
 						arg(cfgServiceIP1().addressPortStrIfSet()));
@@ -79,6 +80,7 @@ void ArchivingService::loadSettings()
 						arg(cfgServiceIP2().addressPortStrIfSet()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::ARCHIVE_LOCATION).arg(m_overwriteArchiveLocation));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::MIN_QUEUE_SIZE_FOR_FLUSHING).arg(m_minQueueSizeForFlushing));
+	DEBUG_LOG_MSG(logger(), "");
 }
 
 void ArchivingService::initialize()

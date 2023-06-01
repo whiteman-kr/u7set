@@ -156,31 +156,34 @@ signals:
 	void stopped();
 
 protected:
-	virtual void initialize() = 0;					// calls on ServiceWorker's thread start
-	virtual void shutdown() = 0;					// calls on ServiceWorker's thread shutdown
+	virtual void initialize() = 0;						// calls on ServiceWorker's thread start
+	virtual void shutdown() = 0;						// calls on ServiceWorker's thread shutdown
 
-	virtual void initCustomCmdLineArgs() = 0;		// override to add service-specific options to m_cmdLineParser
+	virtual void initServiceSpecificCmdLineArgs() = 0;	// override to add service-specific options to m_cmdLineParser
 
-	virtual bool processCustomCmdLineArgs();		// override to process service-specific cmd line settings
-													// return true - to continue service running
-													// return false - to exit service
-	virtual void loadSettings()
+	virtual bool processServiceSpecificCmdLineArgs();	// override to process service-specific cmd line settings
+														// return true - to continue service running
+														// return false - to exit service
+	virtual void loadServiceSpecificSettings()
 	{
-		DEBUG_LOG_MSG(m_logger, QString("ServiceWorker::loadSettings() override to load service-specific settings"));
+		DEBUG_LOG_MSG(m_logger, QString("ServiceWorker::loadServiceSpecificSettings() override to load service-specific settings"));
 	}
 
 	const CommandLineParser& commandLineParser() const { return m_cmdLineParser; }
 
 private:
-	void initThisInstanceNo();
+	void setThisInstanceNo();
 
 	void copyCmdLineArgs(int argc, const char** argv);
 	const QStringList cmdLineArgs() const { return m_cmdLineArgs; }
 
+	bool initInstance1();					// called by ServiceStarter only for instance 1 of ServiceWorker derived class
+
 	void onThreadStarted() override final;
 	void onThreadFinished() override final;
 
-	bool initInstance1();							// called by ServiceStarter only for instance 1 of ServiceWorker derived class
+	void loadCommonServicesSettings();
+
 	friend class ServiceStarter;
 
 private:
@@ -198,12 +201,13 @@ private:
 
 	QString m_serviceName;
 
+	CircularLoggerShared m_logger;
+
 	int m_argc = 0;
 	const char** m_argv = nullptr;
 
 	QStringList m_cmdLineArgs;
 
-	CircularLoggerShared m_logger;
 	E::ServiceRunMode m_serviceRunMode = E::ServiceRunMode::ConsoleApp;
 
 	CommandLineParser m_cmdLineParser;

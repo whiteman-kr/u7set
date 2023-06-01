@@ -39,18 +39,13 @@ int DaemonServiceStarter::exec()
 
 void DaemonServiceStarter::start()
 {
-	LOG_CALL(m_logger);
-
 	m_service = new Service(m_serviceWorker, m_logger);
-
 	m_service->start();
 }
 
 void DaemonServiceStarter::stop()
 {
 	stopAndDeleteService();
-
-	LOG_CALL(m_logger);
 }
 
 void DaemonServiceStarter::stopAndDeleteService()
@@ -123,7 +118,7 @@ int ServiceStarter::privateRun()
 		return 0;
 	}
 
-	continueRun = m_serviceWorker.processCustomCmdLineArgs();
+	continueRun = m_serviceWorker.processServiceSpecificCmdLineArgs();
 
 	if (continueRun == false)
 	{

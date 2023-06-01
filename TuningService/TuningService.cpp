@@ -17,7 +17,6 @@ namespace Tuning
 											 CircularLoggerShared logger,
 											 CircularLoggerShared tuningLog) :
 		ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
-		m_logger(logger),
 		m_tuningLog(tuningLog)
 	{
 	}
@@ -46,7 +45,7 @@ namespace Tuning
 		serviceInfo.set_settingsxml(xmlString.toStdString());
 	}
 
-	void TuningServiceWorker::initCustomCmdLineArgs()
+	void TuningServiceWorker::initServiceSpecificCmdLineArgs()
 	{
 		addValueCmdLineArg(CmdLineArg::ID, SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
 
@@ -58,12 +57,14 @@ namespace Tuning
 											arg(PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST), "ip[:port]");
 	}
 
-	void TuningServiceWorker::loadSettings()
+	void TuningServiceWorker::loadServiceSpecificSettings()
 	{
-		DEBUG_LOG_MSG(m_logger, QString(tr("Settings from command line or registry:")));
-		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SoftwareSetting::EQUIPMENT_ID).arg(equipmentID()));
-		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStrIfSet()));
-		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStrIfSet()));
+		DEBUG_LOG_MSG(logger(), "");
+		DEBUG_LOG_MSG(logger(), QString(tr("Service settings:")));
+		DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::EQUIPMENT_ID).arg(equipmentID()));
+		DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStrIfSet()));
+		DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStrIfSet()));
+		DEBUG_LOG_MSG(logger(), "");
 	}
 
 	void TuningServiceWorker::clear()
@@ -341,7 +342,7 @@ namespace Tuning
 
 	void TuningServiceWorker::runCfgLoaderThread()
 	{
-		m_cfgLoaderThread = new CfgLoaderThread(softwareInfo(), 1, cfgServiceIP1(), cfgServiceIP2(), false, m_logger);
+		m_cfgLoaderThread = new CfgLoaderThread(softwareInfo(), 1, cfgServiceIP1(), cfgServiceIP2(), false, logger());
 
 		connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &TuningServiceWorker::onConfigurationReady);
 
@@ -363,7 +364,7 @@ namespace Tuning
 
 	void TuningServiceWorker::clearConfiguration()
 	{
-		DEBUG_LOG_MSG(m_logger, QString("Clear current configuration"));
+		DEBUG_LOG_MSG(logger(), QString("Clear current configuration"));
 
 		stopTcpTuningServerThread();
 
@@ -378,7 +379,7 @@ namespace Tuning
 
 	void TuningServiceWorker::applyNewConfiguration(const TuningSources& newSources)
 	{
-		DEBUG_LOG_MSG(m_logger, QString("Apply new configuration"));
+		DEBUG_LOG_MSG(logger(), QString("Apply new configuration"));
 
 		m_mainMutex.lock();
 
@@ -471,7 +472,7 @@ namespace Tuning
 
 		if (file.open(QIODevice::ReadOnly) == false)
 		{
-			DEBUG_LOG_ERR(m_logger, QString("Error open configuration file: %1").arg(fileName));
+			DEBUG_LOG_ERR(logger(), QString("Error open configuration file: %1").arg(fileName));
 			return false;
 		}
 
@@ -483,11 +484,11 @@ namespace Tuning
 
 		if  (result == true)
 		{
-			DEBUG_LOG_MSG(m_logger, QString("Configuration is loaded from file: %1").arg(fileName));
+			DEBUG_LOG_MSG(logger(), QString("Configuration is loaded from file: %1").arg(fileName));
 		}
 		else
 		{
-			DEBUG_LOG_ERR(m_logger, QString("Loading configuration error from file: %1").arg(fileName));
+			DEBUG_LOG_ERR(logger(), QString("Loading configuration error from file: %1").arg(fileName));
 		}
 
 		return result;
@@ -522,11 +523,11 @@ namespace Tuning
 	{
 		Q_ASSERT(m_tcpTuningServerThread == nullptr);
 
-		TcpTuningServer* tcpTuningSever = new TcpTuningServer(*this, m_tuningSources, m_logger);
+		TcpTuningServer* tcpTuningSever = new TcpTuningServer(*this, m_tuningSources, logger());
 
 		m_tcpTuningServerThread = new TcpTuningServerThread(m_serviceSettings.clientRequestIP,
 												tcpTuningSever,
-												m_logger);
+												logger());
 		m_tcpTuningServerThread->start();
 	}
 
@@ -538,7 +539,7 @@ namespace Tuning
 			delete m_tcpTuningServerThread;
 			m_tcpTuningServerThread = nullptr;
 
-			DEBUG_LOG_MSG(m_logger, QString("TcpTuningServerThread stoped"));
+			DEBUG_LOG_MSG(logger(), QString("TcpTuningServerThread stoped"));
 		}
 	}
 
@@ -576,7 +577,7 @@ namespace Tuning
 
 			if (tuningSource.hasTuningSignals() == false)
 			{
-				DEBUG_LOG_MSG(m_logger,
+				DEBUG_LOG_MSG(logger(),
 							  QString("Tuning source %1 has no signals. Controlling thread wouldn't be run.").
 							  arg(tuningSource.moduleEquipmentID()));
 				continue;
@@ -619,7 +620,7 @@ namespace Tuning
 														m_serviceSettings,
 														source,
 														sessionParams().softwareRunMode,
-														m_logger,
+														logger(),
 														m_tuningLog);
 
 		m_sourceThreads.insert({source.moduleEquipmentID(), sourceThread});
@@ -664,7 +665,7 @@ namespace Tuning
 	{
 		if (m_sourceThreads.size() == 0)
 		{
-			DEBUG_LOG_MSG(m_logger, QString("Tuning sources workers is not running. Listener thread is not run also."));
+			DEBUG_LOG_MSG(logger(), QString("Tuning sources workers is not running. Listener thread is not run also."));
 			return;
 		}
 
@@ -678,7 +679,7 @@ namespace Tuning
 
 			if (isSourceHandlerExistsForChannel(channel) == false)
 			{
-				DEBUG_LOG_MSG(m_logger,
+				DEBUG_LOG_MSG(logger(),
 							  QString("No tuning sources found for channel %1. Therefore Listener of IP %2 will not be run.").
 							  arg(channel + 1).arg(ch.tuningDataIP.addressPortStr()));
 				continue;
@@ -690,7 +691,7 @@ namespace Tuning
 														 ch.tuningDataIP,
 														 channel,
 														 isSimulationMode(),
-														 m_logger);
+														 logger());
 			m_socketListenerThreads.push_back(thread);
 
 			thread->start();
@@ -797,7 +798,7 @@ namespace Tuning
 
 			if (errStr.isEmpty() == false)
 			{
-				DEBUG_LOG_ERR(m_logger, errStr);
+				DEBUG_LOG_ERR(logger(), errStr);
 				result = false;
 				continue;
 			}
@@ -811,18 +812,18 @@ namespace Tuning
 
 			if (result == true)
 			{
-				DEBUG_LOG_MSG(m_logger, QString("Read file %1 OK").arg(bfi.pathFileName));
+				DEBUG_LOG_MSG(logger(), QString("Read file %1 OK").arg(bfi.pathFileName));
 			}
 			else
 			{
-				DEBUG_LOG_ERR(m_logger, QString("Read file %1 ERROR").arg(bfi.pathFileName));
+				DEBUG_LOG_ERR(logger(), QString("Read file %1 ERROR").arg(bfi.pathFileName));
 				break;
 			}
 		}
 
 		if (result == true)
 		{
-			DEBUG_LOG_MSG(m_logger, QString("Configuration reading success"));
+			DEBUG_LOG_MSG(logger(), QString("Configuration reading success"));
 
 			clearConfiguration();
 			applyNewConfiguration(newSources);

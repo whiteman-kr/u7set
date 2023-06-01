@@ -136,17 +136,17 @@ void AppDataServiceWorker::fillAppDataReceiveState(Network::AppDataReceiveState*
 	}
 }
 
-void AppDataServiceWorker::initCustomCmdLineArgs()
+void AppDataServiceWorker::initServiceSpecificCmdLineArgs()
 {
 	addValueCmdLineArg(CmdLineArg::ID, SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
 	addValueCmdLineArg(CmdLineArg::CFG_IP1, SoftwareSetting::CFG_SERVICE_IP1, "IP address of first Configuration Service.", "IPv4:Port");
 	addValueCmdLineArg(CmdLineArg::CFG_IP2, SoftwareSetting::CFG_SERVICE_IP2, "IP address of second Configuration Service.", "IPv4:Port");
 	addValueCmdLineArg("ptc", SoftwareSetting::PROCESSING_THREADS_COUNT, "App data processing threads count", "N");
 	addValueCmdLineArg("recvip", SoftwareSetting::OVERRIDE_APP_DATA_RECEIVING_IP, "Override AppDataReceivingIP", "IPv4:Port");
-	addSimpleCmdLineArg(CmdLineArg::LOG_RUP_TIME_ERR, SoftwareSetting::LOG_RUP_TIME_ERRORS, "Log RUP frames time errors");
+	addSimpleNoWritableCmdLineArg(CmdLineArg::LOG_RUP_TIME_ERR, "Log RUP frames time errors");
 }
 
-void AppDataServiceWorker::loadSettings()
+void AppDataServiceWorker::loadServiceSpecificSettings()
 {
 	m_appDataProcessingThreadCount = getSettingValue(SoftwareSetting::PROCESSING_THREADS_COUNT).toInt();
 
@@ -155,12 +155,15 @@ void AppDataServiceWorker::loadSettings()
 
 	m_logRupTimeErrors = cmdLineArgIsSet(CmdLineArg::LOG_RUP_TIME_ERR);
 
-	DEBUG_LOG_MSG(logger(), QString(tr("Settings from command line or registry:")));
+	DEBUG_LOG_MSG(logger(), "");
+	DEBUG_LOG_MSG(logger(), QString(tr("Service settings:")));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::EQUIPMENT_ID).arg(equipmentID()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStrIfSet()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStrIfSet()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::PROCESSING_THREADS_COUNT).arg(m_appDataProcessingThreadCount));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::OVERRIDE_APP_DATA_RECEIVING_IP).arg(m_cmdLineAppDataReceivingIP.addressPortStrIfSet()));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::OVERRIDE_APP_DATA_RECEIVING_IP).arg(m_cmdLineAppDataReceivingIP.addressPortStrIfSet()));
+	DEBUG_LOG_MSG(logger(), "");
 }
 
 void AppDataServiceWorker::runAppDataReceiverThread()

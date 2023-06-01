@@ -35,10 +35,10 @@ public:
 	const AppSignals& appSignals() const { return m_appSignals; }
 
 private:
-	virtual void initCustomCmdLineArgs() override;
-	virtual void loadSettings() override;
+	virtual void initServiceSpecificCmdLineArgs() override;
+	virtual void loadServiceSpecificSettings() override;
 
-	bool processCustomCmdLineArgs() override;
+	bool processServiceSpecificCmdLineArgs() override;
 
 	virtual void initialize() override;
 	virtual void shutdown() override;

@@ -29,7 +29,7 @@ ServiceWorker::ServiceWorker(const SoftwareInfo& softwareInfo,
 {
 	TEST_PTR_RETURN(argv);
 
-	initThisInstanceNo();
+	setThisInstanceNo();
 
 	Q_ASSERT(m_thisInstanceNo == 1);
 
@@ -44,9 +44,10 @@ ServiceWorker::ServiceWorker(const ServiceWorker* prevInstance) :
 	m_argv(prevInstance->argv()),
 	m_cmdLineArgs(prevInstance->cmdLineArgs()),
 	m_cmdLineParser(prevInstance->commandLineParser()),
+	m_serviceRunMode(prevInstance->serviceRunMode()),
 	m_softwareSettingsSet(prevInstance->softwareInfo().softwareType())
 {
-	initThisInstanceNo();
+	setThisInstanceNo();
 
 	Q_ASSERT(m_thisInstanceNo > 1);
 }
@@ -88,34 +89,22 @@ E::SoftwareType ServiceWorker::softwareType() const
 	return m_softwareInfo.softwareType();
 }
 
-bool ServiceWorker::initInstance1()
+void ServiceWorker::loadCommonServicesSettings()
 {
-	if (m_thisInstanceNo > 1)
+	m_equipmentID = getSettingValue(SoftwareSetting::EQUIPMENT_ID);
+
+	m_softwareInfo.setEquipmentID(m_equipmentID);		// !
+
+	if (m_softwareInfo.softwareType() != E::SoftwareType::ConfigurationService)
 	{
-		Q_ASSERT(false);
-		return true;
+		m_cfgServiceIP1Str = getSettingValue(SoftwareSetting::CFG_SERVICE_IP1);
+
+		m_cfgServiceIP1.setAddressPortStr(m_cfgServiceIP1Str, PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
+
+		m_cfgServiceIP2Str = getSettingValue(SoftwareSetting::CFG_SERVICE_IP2);
+
+		m_cfgServiceIP2.setAddressPortStr(m_cfgServiceIP2Str, PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
 	}
-
-	m_cmdLineParser.addSimpleNoWritableCmdLineArg(CmdLineArg::HELP, "Print this help.");
-	m_cmdLineParser.addSimpleNoWritableCmdLineArg(CmdLineArg::VERSION, "Display version of service.");
-	m_cmdLineParser.addSimpleNoWritableCmdLineArg(CmdLineArg::EXEC_AS_APP, "Run service as a regular application.");
-	m_cmdLineParser.addSimpleNoWritableCmdLineArg(CmdLineArg::INSTALL, "Install the service. Needs administrator rights.");
-	m_cmdLineParser.addSimpleNoWritableCmdLineArg(CmdLineArg::UNINSTALL, "Uninstall the service. Needs administrator rights.");
-	m_cmdLineParser.addSimpleNoWritableCmdLineArg(CmdLineArg::TERMINATE, "Terminate (stop) the service.");
-	m_cmdLineParser.addValueCmdLineArg(CmdLineArg::INSTANCE, "ServiceInstanceID", "Set service instance ID.", "InstanceID");
-	m_cmdLineParser.addSimpleNoWritableCmdLineArg(CmdLineArg::CLEAR, "Clear all service settings.");
-
-	initCustomCmdLineArgs();
-
-	m_cmdLineParser.readAndApplySettingsFromRegistry();
-
-	m_cmdLineParser.parseAndApplyCmdLineArgs();
-
-	m_cmdLineParser.writeSettingsToRegistry(m_logger);
-
-	loadSettings();
-
-	return true;
 }
 
 void ServiceWorker::setService(Service* service)
@@ -237,13 +226,13 @@ QString ServiceWorker::helpText() const
 	return m_cmdLineParser.helpText();
 }
 
-bool ServiceWorker::processCustomCmdLineArgs()
+bool ServiceWorker::processServiceSpecificCmdLineArgs()
 {
 	return true;		// return TRUE to continue service running
 						// return FALSE to exit service
 }
 
-void ServiceWorker::initThisInstanceNo()
+void ServiceWorker::setThisInstanceNo()
 {
 	m_instanceNo++;
 	m_thisInstanceNo = m_instanceNo;
@@ -266,38 +255,43 @@ void ServiceWorker::copyCmdLineArgs(int argc, const char** argv)
 	}
 }
 
-void ServiceWorker::onThreadStarted()
+bool ServiceWorker::initInstance1()
 {
-	DEBUG_LOG_MSG(m_logger, QString("ServiceWorker::onThreadStarted(), instanceNo = %1 of %2").
-						arg(m_thisInstanceNo).arg(metaObject()->className()));
-
-	// loading common settings of services
-
-	m_equipmentID = getSettingValue(SoftwareSetting::EQUIPMENT_ID);
-
-	m_softwareInfo.setEquipmentID(m_equipmentID);		// !
-
-	if (m_softwareInfo.softwareType() != E::SoftwareType::ConfigurationService)
+	if (m_thisInstanceNo > 1)
 	{
-		m_cfgServiceIP1Str = getSettingValue(SoftwareSetting::CFG_SERVICE_IP1);
-
-		m_cfgServiceIP1.setAddressPortStr(m_cfgServiceIP1Str, PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
-
-		m_cfgServiceIP2Str = getSettingValue(SoftwareSetting::CFG_SERVICE_IP2);
-
-		m_cfgServiceIP2.setAddressPortStr(m_cfgServiceIP2Str, PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
+		Q_ASSERT(false);
+		return true;
 	}
 
-	//
+	m_cmdLineParser.addSimpleNoWritableCmdLineArg(CmdLineArg::HELP, "Print this help.");
+	m_cmdLineParser.addSimpleNoWritableCmdLineArg(CmdLineArg::VERSION, "Display version of service.");
+	m_cmdLineParser.addSimpleNoWritableCmdLineArg(CmdLineArg::EXEC_AS_APP, "Run service as a regular application.");
+	m_cmdLineParser.addSimpleNoWritableCmdLineArg(CmdLineArg::INSTALL, "Install the service. Needs administrator rights.");
+	m_cmdLineParser.addSimpleNoWritableCmdLineArg(CmdLineArg::UNINSTALL, "Uninstall the service. Needs administrator rights.");
+	m_cmdLineParser.addSimpleNoWritableCmdLineArg(CmdLineArg::TERMINATE, "Terminate (stop) the service.");
+	m_cmdLineParser.addValueCmdLineArg(CmdLineArg::INSTANCE, "ServiceInstanceID", "Set service instance ID.", "InstanceID");
+	m_cmdLineParser.addSimpleNoWritableCmdLineArg(CmdLineArg::CLEAR, "Clear all service settings.");
 
-	m_cmdLineParser.printCmdLineArgs(m_logger);
+	initServiceSpecificCmdLineArgs();
 
-//	DEBUG_LOG_MSG(m_logger, "before ConfigurationServiceWorker::loadSettings()");
+	m_cmdLineParser.readAndApplySettingsFromRegistry();
 
-//	loadSettings();
-asdadsasdasd
-//	DEBUG_LOG_MSG(m_logger, "after ConfigurationServiceWorker::loadSettings()");
+	m_cmdLineParser.parseAndApplyCmdLineArgs();
 
+	m_cmdLineParser.writeSettingsToRegistry(m_logger);
+
+	return true;
+}
+
+void ServiceWorker::onThreadStarted()
+{
+	DEBUG_LOG_MSG(m_logger, QString("%1::onThreadStarted(), instanceNo = %2, RunMode = %3").
+								arg(metaObject()->className()).
+								arg(m_thisInstanceNo).
+								arg(E::valueToString<E::ServiceRunMode>(m_serviceRunMode)));
+
+	loadCommonServicesSettings();
+	loadServiceSpecificSettings();
 	initialize();
 
 	emit work();
@@ -307,6 +301,10 @@ void ServiceWorker::onThreadFinished()
 {
 	shutdown();
 	emit stopped();
+
+	DEBUG_LOG_MSG(m_logger, QString("%1::onThreadFinished(), instanceNo = %2").
+								arg(metaObject()->className()).
+								arg(m_thisInstanceNo));
 }
 
 // -------------------------------------------------------------------------------------
@@ -535,4 +533,3 @@ void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
 		serviceInfo.set_serviceruntime(0);
 	}
 }
-

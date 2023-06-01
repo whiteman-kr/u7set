@@ -70,8 +70,8 @@ namespace Tuning
 	public slots:
 
 	private:
-		virtual void initCustomCmdLineArgs() override;
-		virtual void loadSettings() override;
+		virtual void initServiceSpecificCmdLineArgs() override;
+		virtual void loadServiceSpecificSettings() override;
 
 		void clear();
 
@@ -119,7 +119,6 @@ namespace Tuning
 								  SessionParams sessionParams,
 								  std::shared_ptr<const SoftwareSettings> curSettingsProfile);
 	private:
-		CircularLoggerShared m_logger;
 		CircularLoggerShared m_tuningLog;
 		CircularLoggerShared m_tuningPacketLog;
 
