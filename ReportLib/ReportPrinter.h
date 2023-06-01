@@ -2,6 +2,9 @@
 
 #include "Report.h"
 
+#include <QPdfWriter>
+#include <QTextDocument>
+
 namespace ReportLib
 {
 
@@ -100,10 +103,9 @@ namespace ReportLib
 			Status status{None};
 		};
 
-	private:
-		ReportPrinter() = default;
 	public:
-		ReportPrinter(std::shared_ptr<ReportSchemaView> reportSchemaView);
+		ReportPrinter() = default;	// Call this constructor if you do not need to print schemas
+		ReportPrinter(std::shared_ptr<ReportSchemaView> reportSchemaView); // Call this constructor if your report contains schemas
 
 		bool print(const Report& report, const QString& fileName, std::atomic_bool& stop);
 		bool print(const Report& report, QBuffer& buffer, std::atomic_bool& stop);

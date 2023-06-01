@@ -1,5 +1,4 @@
-QT -= gui
-QT += qml sql xml widgets svg testlib
+QT += gui widgets qml sql xml svg testlib
 
 
 CONFIG += console
@@ -54,6 +53,12 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 LIBS += -L$$DESTDIR
 LIBS += -L.
 
+# ReportLib
+#
+LIBS += -lReportLib
+win32:PRE_TARGETDEPS += $$DESTDIR/ReportLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libReportLib.a
+
 # TestSuiteLib
 #
 LIBS += -lTestSuiteLib
@@ -61,6 +66,14 @@ win32:PRE_TARGETDEPS += $$DESTDIR/TestSuiteLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libTestSuiteLib.a
 INCLUDEPATH += $$PWD/../TestSuiteLib
 DEPENDPATH += $$PWD/../TestSuiteLib
+
+# VFrame30 library
+#
+LIBS += -lVFrame30
+win32:PRE_TARGETDEPS += $$DESTDIR/VFrame30.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libVFrame30.a
+INCLUDEPATH += ../VFrame30
+DEPENDPATH += ../VFrame30
 
 # ClientLib
 #

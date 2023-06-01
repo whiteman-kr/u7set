@@ -40,8 +40,7 @@
 #include <QJSEngine>
 #include <QJSValue>
 #include <QDomNode>
-
-
+#include <QWidget>
 
 #ifdef _MSC_VER
 	#pragma warning(pop)

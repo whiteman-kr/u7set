@@ -511,6 +511,7 @@ public:
 		LoadFileDialog,
 		Svg,
 		Tags,
+        Report,
 		ChooseFileDialog,
 		ChooseDirectoryDialog
 	};

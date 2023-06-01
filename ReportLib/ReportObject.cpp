@@ -6,17 +6,17 @@ namespace ReportLib
 	// ReportFormat
 	//
 
-	ReportObjectFormat::ReportObjectFormat(const QFont& font, Qt::Alignment alignment)
+    ReportObjectFormat::ReportObjectFormat(const QFont& font, Qt::Alignment alignment)
 	{
 		m_charFormat.setFont(font);
-		m_blockFormat.setAlignment(alignment);
-	}
+        m_blockFormat.setAlignment(alignment);
+    }
 
-	ReportObjectFormat::ReportObjectFormat(const QString& fontName, double fontPointSize, Qt::Alignment alignment)
+    ReportObjectFormat::ReportObjectFormat(const QString& fontName, double fontPointSize, Qt::Alignment alignment)
 	{
-		m_charFormat.setFont(QFont(fontName, static_cast<int>(fontPointSize)));
-		m_blockFormat.setAlignment(alignment);
-	}
+        m_charFormat.setFont(QFont(fontName, static_cast<int>(fontPointSize)));
+        m_blockFormat.setAlignment(alignment);
+    }
 
 	void ReportObjectFormat::setFont(const QFont& font)
 	{
@@ -33,20 +33,20 @@ namespace ReportLib
 		m_charFormat.setBackground(brush);
 	}
 
-	void ReportObjectFormat::setTextAlignment(Qt::Alignment alignment)
-	{
-		m_blockFormat.setAlignment(alignment);
-	}
+    void ReportObjectFormat::setTextAlignment(Qt::Alignment alignment)
+    {
+        m_blockFormat.setAlignment(alignment);
+    }
 
 	const QTextCharFormat& ReportObjectFormat::charFormat() const
 	{
 		return m_charFormat;
 	}
 
-	const QTextBlockFormat& ReportObjectFormat::blockFormat() const
-	{
-		return m_blockFormat;
-	}
+    const QTextBlockFormat& ReportObjectFormat::blockFormat() const
+    {
+        return m_blockFormat;
+    }
 
 	//
 	// ReportMarginItem
@@ -114,16 +114,16 @@ namespace ReportLib
 	// ReportTable
 	//
 
-	ReportTable::ReportTable(const QStringList& headerLabels, const std::vector<int>& columnWidths, const ReportObjectFormat& format):
+    ReportTable::ReportTable(const QStringList& headerLabels, const std::vector<int>& columnWidths, const ReportObjectFormat& format):
 		ReportObject(format, ReportObject::Type::Table),
 		m_headerLabels(headerLabels),
-		m_columnWidths(columnWidths)
-	{
+        m_columnWidths(columnWidths)
+    {
 	}
 
-	std::shared_ptr<ReportTable> ReportTable::create(const QStringList& headerLabels, const std::vector<int>& columnWidths, const ReportObjectFormat& format)
+    std::shared_ptr<ReportTable> ReportTable::create(const QStringList& headerLabels, const std::vector<int>& columnWidths, const ReportObjectFormat& format)
 	{
-		auto result = std::make_shared<ReportTable>(headerLabels, columnWidths, format);
+        auto result = std::make_shared<ReportTable>(headerLabels, columnWidths, format);
 		return result;
 	}
 
@@ -184,7 +184,7 @@ namespace ReportLib
 			cursor.insertText("Table rendering error!");
 			Q_ASSERT(false);
 			return;
-		}
+        }
 
 		QString html = QObject::tr("<html>\
 								   <head>\
@@ -279,15 +279,15 @@ html += "</tr></tfoot";
 	// ReportText
 	//
 
-	ReportText::ReportText(const QString& text, const ReportObjectFormat& format):
+    ReportText::ReportText(const QString& text, const ReportObjectFormat& format):
 		ReportObject(format, ReportObject::Type::Text),
-		m_text(text)
+        m_text(text)
 	{
 	}
 
-	std::shared_ptr<ReportText> ReportText::create(const QString& text, const ReportObjectFormat& format)
+    std::shared_ptr<ReportText> ReportText::create(const QString& text, const ReportObjectFormat& format)
 	{
-		auto result = std::make_shared<ReportText>(text, format);
+        auto result = std::make_shared<ReportText>(text, format);
 		return result;
 	}
 
@@ -296,11 +296,11 @@ html += "</tr></tfoot";
 		if (m_format.charFormat().isValid() == true)
 		{
 			cursor.setCharFormat(m_format.charFormat());
-		}
-		if (m_format.blockFormat().isValid() == true)
-		{
-			cursor.setBlockFormat(m_format.blockFormat());
-		}
+        }
+        if (m_format.blockFormat().isValid() == true)
+        {
+            cursor.setBlockFormat(m_format.blockFormat());
+        }
 
 		cursor.insertText(m_text);
 	}

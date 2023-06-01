@@ -48,6 +48,7 @@ CONFIG(release, debug|release) {
 HEADERS += \
 	Report.h \
 	ReportAppSignalProvider.h \
+	ReportGenerator.h \
 	ReportObject.h \
 	ReportPrinter.h \
 	ReportSchemaView.h \
@@ -57,6 +58,7 @@ HEADERS += \
 SOURCES += \
     Report.cpp \
     ReportAppSignalProvider.cpp \
+    ReportGenerator.cpp \
     ReportObject.cpp \
     ReportPrinter.cpp \
     ReportSchemaView.cpp \

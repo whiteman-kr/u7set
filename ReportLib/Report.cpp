@@ -82,9 +82,9 @@ namespace ReportLib
 		return object;
 	}
 
-	std::shared_ptr<ReportTable> ReportSection::addTable(const QStringList& headerLabels,
-																	const std::vector<int>& columnWidths,
-																	const ReportObjectFormat& format)
+    std::shared_ptr<ReportTable> ReportSection::addTable(const QStringList& headerLabels,
+                                                                    const std::vector<int>& columnWidths,
+                                                                    const ReportObjectFormat& format)
 	{
 		std::shared_ptr<ReportTable> object = std::make_shared<ReportLib::ReportTable>(headerLabels,
 																								  columnWidths,

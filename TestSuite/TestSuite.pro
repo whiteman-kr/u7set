@@ -1,4 +1,4 @@
-QT += core gui widgets sql network qml xml testlib
+QT += core gui widgets sql network qml xml svg testlib
 
 
 TARGET = TestSuite
@@ -44,6 +44,7 @@ RESOURCES += \
 
 SOURCES += \
     ../lib/BuildInfo.cpp \
+    ../lib/ClientBehavior.cpp \
     ../lib/CodeEditor.cpp \
     ../lib/Ui/DialogAbout.cpp \
     ../lib/Ui/DialogAlert.cpp \
@@ -61,6 +62,7 @@ SOURCES += \
 
 HEADERS += \
     ../lib/BuildInfo.h \
+    ../lib/ClientBehavior.h \
     ../lib/CodeEditor.h \
     ../lib/Ui/DialogAbout.h \
     ../lib/Ui/DialogAlert.h \
@@ -87,6 +89,12 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 LIBS += -L$$DESTDIR
 LIBS += -L.
 
+# ReportLib
+#
+LIBS += -lReportLib
+win32:PRE_TARGETDEPS += $$DESTDIR/ReportLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libReportLib.a
+
 # TestSuiteLib
 #
 LIBS += -lTestSuiteLib
@@ -94,6 +102,22 @@ win32:PRE_TARGETDEPS += $$DESTDIR/TestSuiteLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libTestSuiteLib.a
 INCLUDEPATH += $$PWD/../TestSuiteLib
 DEPENDPATH += $$PWD/../TestSuiteLib
+
+# VFrame30 library
+#
+LIBS += -lVFrame30
+win32:PRE_TARGETDEPS += $$DESTDIR/VFrame30.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libVFrame30.a
+INCLUDEPATH += ../VFrame30
+DEPENDPATH += ../VFrame30
+
+# TrendView library
+#
+LIBS += -lTrendView
+win32:PRE_TARGETDEPS += $$DESTDIR/TrendView.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libTrendView.a
+INCLUDEPATH += $$PWD/../TrendView
+DEPENDPATH += $$PWD/../TrendView
 
 # ClientLib
 #

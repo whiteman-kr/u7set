@@ -190,7 +190,7 @@ void TestSuiteMainWindow::createActions()
 	m_clearTestLogAction->setEnabled(true);
 	connect(m_clearTestLogAction, &QAction::triggered, this, &TestSuiteMainWindow::onClearTestLog);
 
-	m_pExitAction = new QAction(tr("Exit"), this);
+    m_pExitAction = new QAction(tr("Exit"), this);
 	m_pExitAction->setStatusTip(tr("Quit the application"));
 	//m_pExitAction->setIcon(QIcon(":/Images/Images/Close.svg"));
 	m_pExitAction->setShortcut(QKeySequence::Quit);
@@ -275,6 +275,9 @@ void TestSuiteMainWindow::createMenu()
 	pReportsMenu->addAction(m_loadTestLogAction);
 	pReportsMenu->addSeparator();
 	pReportsMenu->addAction(m_clearTestLogAction);
+    pReportsMenu->addSeparator();
+
+    m_reportsMenu = pReportsMenu->addMenu("Report");
 
 	// Service
 	//
@@ -535,6 +538,33 @@ void TestSuiteMainWindow::clearTestsTree()
 void TestSuiteMainWindow::fillTestsTree()
 {
 	m_testListWidget->updateTestsList(m_testScriptsStorage.scriptList());
+}
+
+void TestSuiteMainWindow::createReportActions()
+{
+    Q_ASSERT(m_reportsMenu);
+    m_reportsMenu->clear();
+
+    for (QAction* a : m_reportActions)
+    {
+        delete a;
+    }
+    m_reportActions.clear();
+
+    for (const ReportLib::ReportTemplate& report : m_configController.reportTemplates().templates())
+    {
+        QAction* a = new QAction(report.caption(), this);
+        a->setStatusTip(tr("Generate report: %1").arg(report.caption()));
+        a->setEnabled(true);
+        connect(a, &QAction::triggered, this, [this, report](){
+            onGenerateReport(report.caption());
+        });
+
+        m_reportActions.push_back(a);
+        m_reportsMenu->addAction(a);
+    }
+
+    m_reportsMenu->setEnabled(m_reportActions.empty() == false);
 }
 
 void TestSuiteMainWindow::updateActionsState()
@@ -909,12 +939,68 @@ void TestSuiteMainWindow::onTabCloseRequested(int index)
 	m_tabWidget->removeTab(index);
 }
 
+void TestSuiteMainWindow::onGenerateReport(const QString& caption)
+{
+    const std::vector<ReportLib::ReportTemplate>& templates = m_configController.reportTemplates().templates();
+
+    auto templ = std::find_if(templates.begin(),
+                              templates.end(),
+                              [&caption](const ReportLib::ReportTemplate& t){
+        return t.caption() == caption;
+    });
+
+    if (templ == templates.end())
+    {
+        Q_ASSERT(false);
+        return;
+    }
+
+    //m_configController.reportTemplates().templates()
+
+    TestReportGenerator generator(*templ);
+
+
+    std::atomic_bool stop = false;
+    QBuffer buffer;
+
+    if (generator.generate(buffer, stop) == false)
+    {
+        QMessageBox::critical(this, qAppName(), tr("Report '%1' generation error!").arg(caption));
+        return;
+    }
+
+    QString fileName = QFileDialog::getSaveFileName(this,
+                                                    tr("Save File"),
+                                                    tr("%1.pdf").arg(templ->caption()),
+                                                    tr("PDF Files (*.pdf);;All Files (*.*)"));
+
+    if (fileName.isEmpty() == true)
+    {
+        return;
+    }
+
+
+    QFile f(fileName);
+    if (f.open(QFile::WriteOnly) == false || f.write(buffer.data()) == false)
+    {
+        QMessageBox::critical(this, qAppName(), tr("Report file '%1' saving error!").arg(fileName));
+    }
+    else
+    {
+        QMessageBox::information(this, qAppName(), tr("Report file '%1' saved successfully.").arg(fileName));
+    }
+
+    return;
+}
+
 void TestSuiteMainWindow::onConfigurationArrived()
 {
 	if (theSettings.useLocalScriptsPath() == false)
 	{
 		loadScriptsFromConfiguration();
 	}
+
+    createReportActions();
 
 	return;
 }

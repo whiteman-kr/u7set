@@ -81,6 +81,7 @@ HEADERS  += \
     Locator/LocatorProvider.h \
     Locator/SchemaLocatorProvider.h \
     Reports/ProjectDiffReport.h \
+    Reports/ReportPropertyEditor.h \
     SchemaEditor/EditSchemaSignalProvider.h \
     SchemaEditor/EditSchemaTabPage.h \
     SchemaEditor/SchemaControlTabPage.h \
@@ -260,6 +261,7 @@ SOURCES +=\
 	PasswordService.cpp \
     Reports/DialogReportFileTypeParams.cpp \
     Reports/ProjectDiffReport.cpp \
+    Reports/ReportPropertyEditor.cpp \
     SchemaEditor/EditSchemaSignalProvider.cpp \
     SchemaEditor/EditSchemaTabPage.cpp \
     Reports/SchemasReport.cpp \

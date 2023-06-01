@@ -4,6 +4,7 @@
 #include "../OnlineLib/SocketIO.h"
 #include "../UtilsLib/ILogFile.h"
 #include "TestScriptsStorage.h"
+#include "TestReport.h"
 
 namespace TestSuite
 {
@@ -62,6 +63,7 @@ namespace TestSuite
 		ClientLib::ConfigurationInfo configInfo() const;
 
 		std::vector<TestSuite::TestScript> scripts() const;
+		const ReportLib::ReportTemplateStorage& reportTemplates() const;
 
 		// Data section
 		//
@@ -72,5 +74,7 @@ namespace TestSuite
 		ConfigSettings m_configuration;
 
 		std::vector<TestScript> m_scripts;
+
+		ReportLib::ReportTemplateStorage m_templates;
 	};
 }

@@ -44,6 +44,7 @@ private:
 
 	void clearTestsTree();
 	void fillTestsTree();
+    void createReportActions();
 	void updateActionsState();
 	void updateTimeIndicator(const TestSuite::ControlStatus& state);
 
@@ -69,6 +70,7 @@ private slots:
 	void onTestsRefresh();
 	void onShowTestContents(const QString& testName);
 	void onTabCloseRequested(int index);
+    void onGenerateReport(const QString& caption);
 
 	// Processing slots
 	//
@@ -95,6 +97,9 @@ private:
 	QAction* m_saveTestLogAction = nullptr;
 	QAction* m_loadTestLogAction = nullptr;
 	QAction* m_clearTestLogAction = nullptr;
+
+    QMenu* m_reportsMenu;
+    std::vector<QAction*> m_reportActions;
 
 	TabWidgetEx* m_tabWidget = nullptr;
 

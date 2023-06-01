@@ -2,6 +2,10 @@
 
 #include "ReportSchemaView.h"
 
+#include <QTextCharFormat>
+#include <QTextBlockFormat>
+#include <QTextCursor>
+
 namespace ReportLib
 {
 	//
@@ -13,21 +17,21 @@ namespace ReportLib
 		// Formatting functions
 public:
 		ReportObjectFormat() = default;
-		ReportObjectFormat(const QFont& font, Qt::Alignment alignment = Qt::AlignLeft);
-		ReportObjectFormat(const QString& fontName, double fontPointSize, Qt::Alignment alignment);
+        ReportObjectFormat(const QFont& font, Qt::Alignment alignment = Qt::AlignLeft);
+        ReportObjectFormat(const QString& fontName, double fontPointSize, Qt::Alignment alignment);
 
 		void setFont(const QFont& font);
 		void setTextForeground(const QBrush& brush);
 		void setTextBackground(const QBrush& brush);
-		void setTextAlignment(Qt::Alignment alignment);
+        void setTextAlignment(Qt::Alignment alignment);
 
 		const QTextCharFormat& charFormat() const;
-		const QTextBlockFormat& blockFormat() const;
+        const QTextBlockFormat& blockFormat() const;
 
 	private:
 		QTextCharFormat m_charFormat;
-		QTextBlockFormat m_blockFormat;
-	};
+        QTextBlockFormat m_blockFormat;
+    };
 
 	// ReportMarginItem
 
@@ -111,10 +115,10 @@ public:
 	{
 	public:
 		static std::shared_ptr<ReportTable> create(const QStringList& headerLabels,
-												   const std::vector<int>& columnWidths,
+                                                   const std::vector<int>& columnWidths,
 												   const ReportObjectFormat& format);
 		ReportTable(const QStringList& headerLabels,
-					const std::vector<int>& columnWidths,
+                    const std::vector<int>& columnWidths,
 					const ReportObjectFormat& format);
 
 		int columnCount() const;
@@ -130,7 +134,7 @@ public:
 
 	private:
 		QStringList m_headerLabels;
-		std::vector<int> m_columnWidths;
+        std::vector<int> m_columnWidths;
 
 		std::vector<QStringList> m_rows;
 	};
@@ -142,12 +146,12 @@ public:
 	class ReportText : public ReportObject
 	{
 	public:
-		static std::shared_ptr<ReportText> create(const QString& text, const ReportObjectFormat& format);
-		ReportText(const QString& text, const ReportObjectFormat& format);
+        static std::shared_ptr<ReportText> create(const QString& text, const ReportObjectFormat& format);
+        ReportText(const QString& text, const ReportObjectFormat& format);
 
 		void renderText(QTextCursor& cursor) const override;
 
-	private:
-		QString m_text;
-	};
+    private:
+        QString m_text;
+    };
 }

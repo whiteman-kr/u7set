@@ -330,6 +330,12 @@ namespace ReportLib
 							continue;
 						}
 
+						if (m_schemaView == nullptr)
+						{
+							Q_ASSERT(m_schemaView);
+							return false;
+						}
+
 						ps = std::make_shared<PrintSchema>(m_schemaView,
 														   rs->schema(),
 														   rs->compareActions(),
