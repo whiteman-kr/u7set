@@ -38,10 +38,12 @@ PRECOMPILED_HEADER = Stable.h
 
 SOURCES += \
         ../lib/BuildInfo.cpp \
+        ../lib/ClientBehavior.cpp \
         main.cpp
 
 HEADERS += \
     ../lib/BuildInfo.h \
+    ../lib/ClientBehavior.h \
     Stable.h
 
 # Add curent dir to a list of library directory paths
@@ -53,12 +55,6 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 LIBS += -L$$DESTDIR
 LIBS += -L.
 
-# ReportLib
-#
-LIBS += -lReportLib
-win32:PRE_TARGETDEPS += $$DESTDIR/ReportLib.lib
-unix:PRE_TARGETDEPS += $$DESTDIR/libReportLib.a
-
 # TestSuiteLib
 #
 LIBS += -lTestSuiteLib
@@ -67,6 +63,14 @@ unix:PRE_TARGETDEPS += $$DESTDIR/libTestSuiteLib.a
 INCLUDEPATH += $$PWD/../TestSuiteLib
 DEPENDPATH += $$PWD/../TestSuiteLib
 
+# ReportLib
+#
+LIBS += -lReportLib
+win32:PRE_TARGETDEPS += $$DESTDIR/ReportLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libReportLib.a
+INCLUDEPATH += $$PWD/../ReportLib
+DEPENDPATH += $$PWD/../ReportLib
+
 # VFrame30 library
 #
 LIBS += -lVFrame30
@@ -74,6 +78,14 @@ win32:PRE_TARGETDEPS += $$DESTDIR/VFrame30.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libVFrame30.a
 INCLUDEPATH += ../VFrame30
 DEPENDPATH += ../VFrame30
+
+# TrendView library
+#
+zLIBS += -lTrendView
+win32:PRE_TARGETDEPS += $$DESTDIR/TrendView.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libTrendView.a
+INCLUDEPATH += $$PWD/../TrendView
+DEPENDPATH += $$PWD/../TrendView
 
 # ClientLib
 #

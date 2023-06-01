@@ -1,5 +1,10 @@
 #pragma once
 
+#include <memory>
+#include <algorithm>
+#include <set>
+#include <cassert>
+
 // Qt includes
 //
 #ifdef _MSC_VER
