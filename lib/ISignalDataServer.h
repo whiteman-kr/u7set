@@ -18,4 +18,8 @@ public:
 	///
 	virtual bool dataServiceHasSignal(const QString& serviceEquipmentId, const QString& signalId) const = 0;
 	virtual bool dataServiceHasSignal(const QString& serviceEquipmentId, Hash signalHash) const = 0;
+
+	/// Get all signals for the specified DataServiceID (AppDataService or DiagDataService).
+	///
+	virtual std::vector<Hash> dataServiceSignals(const QString& serviceEquipmentId) const = 0;
 };

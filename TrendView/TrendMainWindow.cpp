@@ -219,6 +219,57 @@ namespace TrendLib
 		return true;
 	}
 
+	void TrendMainWindow::updateSignals(const std::vector<TrendSignalParam>& trendsignals)
+	{
+		// Remove signals
+		//
+		std::vector<TrendLib::TrendSignalParam> discreteSignals = signalSet().discreteSignals();
+		std::vector<TrendLib::TrendSignalParam> analogSignals = signalSet().analogSignals();
+
+		for (const TrendLib::TrendSignalParam& ds : discreteSignals)
+		{
+			auto it = std::find_if(trendsignals.begin(), trendsignals.end(),
+							[&ds](const auto& trendSignal)
+							{
+								return trendSignal.appSignalId() == ds.appSignalId() &&
+									   trendSignal.archiveServerShortId() == ds.archiveServerShortId();
+							});
+
+			if (it == trendsignals.end())
+			{
+				signalSet().removeSignal(ds);
+			}
+		}
+
+		for (const TrendLib::TrendSignalParam& as : analogSignals)
+		{
+			auto it = std::find_if(trendsignals.begin(), trendsignals.end(),
+							[&as](const auto& trendSignal)
+							{
+								return trendSignal.appSignalId() == as.appSignalId() &&
+									   trendSignal.archiveServerShortId() == as.archiveServerShortId();
+							});
+
+			if (it == trendsignals.end())
+			{
+				signalSet().removeSignal(as);
+			}
+		}
+
+		// Add new signals.
+		//
+		for (const auto& signal : trendsignals)
+		{
+			addSignal(signal, false);
+		}
+
+		// Make the same order as in trendsignals.
+		//
+		signalSet().reorderSignals(trendsignals);
+
+		return;
+	}
+
 	void TrendMainWindow::createToolBar()
 	{
 		m_toolBar = new QToolBar(this);

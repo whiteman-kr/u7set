@@ -1,5 +1,6 @@
 #pragma once
 #include <map>
+#include <span>
 #include "TrendArchiveServer.h"
 #include "TrendSignal.h"
 #include "TrendSignalState.h"
@@ -79,6 +80,8 @@ namespace TrendLib
 
 		void removeSignal(const TrendLib::TrendSignalParam& signal);
 		void removeAllSignals();
+
+		void reorderSignals(std::span<const TrendSignalParam> targetOrder);
 
 		[[nodiscard]] TrendLib::TrendSignalParam signalParam(const QString& appSignalId, const QString& archiveServerId, bool* ok) const;
 		bool setSignalParam(const TrendLib::TrendSignalParam& signalParam);		// Update data

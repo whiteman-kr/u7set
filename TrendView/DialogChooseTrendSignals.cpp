@@ -331,6 +331,18 @@ namespace TrendLib
 		QDialog(parent)
 	{
 		init(signalHasTag, std::move(trendSignals), acceptedSignals, archiveServers);
+
+		QObject::connect(ui->trendSignals, &QTreeWidget::itemSelectionChanged, [this]()
+			{
+				QList<QTreeWidgetItem*> selectedItems = ui->trendSignals->selectedItems();
+				if (selectedItems.isEmpty() == false)
+				{
+					QTreeWidgetItem* selectedItem = selectedItems.first();
+					ui->trendSignals->setCurrentItem(selectedItem);
+				}
+			});
+
+		return;
 	}
 
 
@@ -590,6 +602,9 @@ namespace TrendLib
 		bool enableRemoveButton = true;
 		bool enableRemoveAll = true;
 
+		bool enableMoveUp = false;
+		bool enableMoveDown = false;
+
 		// Add Signal Button
 		//
 		{
@@ -628,12 +643,26 @@ namespace TrendLib
 			enableRemoveAll = ui->trendSignals->topLevelItemCount() > 0;
 		}
 
+		// Move up/down.
+		//
+		{
+			QModelIndex index = ui->trendSignals->currentIndex();
+
+			if (index.isValid() == true)
+			{
+				enableMoveUp = index.row() > 0;
+				enableMoveDown = (index.row() + 1) < ui->trendSignals->topLevelItemCount();
+			}
+		}
 
 		// --
 		//
 		ui->addSignalButton->setEnabled(enableAddButton);
 		ui->removeSignalButton->setEnabled(enableRemoveButton);
 		ui->removeAllSignalsButton->setEnabled(enableRemoveAll);
+
+		ui->upSignalButton->setEnabled(enableMoveUp);
+		ui->downSignalButton->setEnabled(enableMoveDown);
 
 		return;
 	}
@@ -844,6 +873,52 @@ namespace TrendLib
 		menu.insertAction(nullptr, &action);
 		menu.exec(ui->trendSignals->mapToGlobal(pos));
 
+		return;
+	}
+
+
+	void DialogChooseTrendSignals::on_upSignalButton_clicked()
+	{
+		Q_ASSERT(ui->trendSignals);
+
+		QModelIndex currentIndex = ui->trendSignals->currentIndex();
+
+		if (currentIndex.isValid() == true && currentIndex.row() > 0)
+		{
+			// Reorder item.
+			//
+			QTreeWidgetItem* itemToMove = ui->trendSignals->takeTopLevelItem(currentIndex.row());
+			ui->trendSignals->insertTopLevelItem(currentIndex.row() - 1, itemToMove);
+
+			// Select moved item.
+			//
+			ui->trendSignals->setCurrentItem(itemToMove);
+		}
+
+		disableControls();
+		return;
+	}
+
+
+	void DialogChooseTrendSignals::on_downSignalButton_clicked()
+	{
+		Q_ASSERT(ui->trendSignals);
+
+		QModelIndex currentIndex = ui->trendSignals->currentIndex();
+
+		if (currentIndex.isValid() == true && (currentIndex.row() + 1) < ui->trendSignals->topLevelItemCount())
+		{
+			// Reorder item.
+			//
+			QTreeWidgetItem* itemToMove = ui->trendSignals->takeTopLevelItem(currentIndex.row());
+			ui->trendSignals->insertTopLevelItem(currentIndex.row() + 1, itemToMove);
+
+			// Select moved item.
+			//
+			ui->trendSignals->setCurrentItem(itemToMove);
+		}
+
+		disableControls();
 		return;
 	}
 

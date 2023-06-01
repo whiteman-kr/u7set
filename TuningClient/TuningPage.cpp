@@ -1716,12 +1716,6 @@ void TuningPage::slot_setValue()
 					}
 				}
 
-				if (defaultValue != m_model->defaultValue(asp))
-				{
-					QMessageBox::warning(this, tr("Set Value"), tr("Selected objects have different default values."));
-					return;
-				}
-
 				if (value != state.value())
 				{
 					sameValue = false;
@@ -2006,6 +2000,7 @@ void TuningPage::slot_saveSignalsToExistingFilter()
 	std::shared_ptr<TuningFilter> autoCreatedFilter = root->childFilter(m_autoFilterCaption);
 	if (autoCreatedFilter == nullptr)
 	{
+		QMessageBox::critical(this, qAppName(), tr("Can't add signals - no existing automatic filters found. Please add them to a new filter."));
 		return;
 	}
 
@@ -2683,7 +2678,10 @@ void TuningPage::slot_setAll()
 				continue;
 			}
 
-			if (state.isTuningDefault() == false && ok == true)
+			// If signal is not in default OR default value was overloaded then set it
+
+			if ((state.isTuningDefault() == false || m_model->defaultValue(asp) != asp.tuningDefaultValue())
+					&& ok == true)
 			{
 				TuningValue tvDefault = m_model->defaultValue(asp);
 

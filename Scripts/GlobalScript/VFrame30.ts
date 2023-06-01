@@ -98,16 +98,37 @@ module VFrame30 {
 	export interface SchemaItem {
 		// Properties
 		//
-		objectName: string;
+
+		/** Turns on *ClickScript* script call when user clicks mouse button on schema item.
+		  When this property is set to true, *ClickScript* event handler is called when user clicks left mouse button on a schema item.
+		  Warning: This property has no effect on SchemaItemPushButton and SchemaItemLineEdit.*/
 		acceptClick: boolean;
-		preDrawScript: string;
+
+		/** Value of this property is inverted approximately each 250 milliseconds.*/
 		blinkPhase: boolean;
-		visible: boolean;
+
+		/** Automatically generated unique label associated with SchemaItem.*/
+		label: string;
+
+		/** Object name.*/
+		objectName: string;	
+
+		/** A script to run before each schema redraw event.*/
+		preDrawScript: string;
+
+		/** SchemaItem's tags.*/
 		tags: Array<string>;
+
+		/** Item's type as a string, e.g. SchemaItemInput, SchemaItemUfb, SchemaItemAfb, SchemaItemLine, etc.*/
 		type: string;
+
+		/** Show or hide schema item in client Software (Monitor, TuningClient, etc).*/
+		visible: boolean;
 
 		// Functions
 		//
+
+		/** Check if SchemaItem has specified tag. There is an implicit tag that is the type of the item, e.g. SchemaItemInput, SchemaItemUfb, SchemaItemAfb, SchemaItemLine, etc...*/
 		hasTag(tag: string): boolean;
 
 		propertyValue(name: string): any;
