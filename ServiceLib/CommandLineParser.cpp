@@ -3,7 +3,7 @@
 #endif
 
 #include "../OnlineLib/CircularLogger.h"
-#include "../Lib/ConstStrings.h"
+#include "../lib/ConstStrings.h"
 #include "CommandLineParser.h"
 
 CommandLineParser::CommandLineParser(const QString& organization, const QString& serviceName, int argc, char **argv) :

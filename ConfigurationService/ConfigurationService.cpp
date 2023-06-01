@@ -3,7 +3,7 @@
 
 #include "ConfigurationService.h"
 #include "CfgChecker.h"
-#include "../Lib/ConstStrings.h"
+#include "../lib/ConstStrings.h"
 
 // ------------------------------------------------------------------------------------
 //
