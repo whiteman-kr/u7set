@@ -129,22 +129,74 @@ void ReportPropertyEditor::fillObjectsTree()
 
     for (const ReportLib::ReportTemplate& templ : storage.templates())
     {
-        QTreeWidgetItem* templateItem = new QTreeWidgetItem(QStringList() << templ.caption() << "Report");
+		QTreeWidgetItem* templateItem = new QTreeWidgetItem(QStringList() << "Report" << templ.caption());
         m_treeWidget->addTopLevelItem(templateItem);
+
+		// Header
+
+		if (templ.header().empty() == false)
+		{
+			QTreeWidgetItem* headerItem = new QTreeWidgetItem(QStringList() << "Section" << "Header" << templ.header().caption());
+			templateItem->addChild(headerItem);
+
+			// Objects
+
+			for (const std::shared_ptr<ReportLib::ObjectTemplate>& obj : templ.header().objects())
+			{
+				QTreeWidgetItem* objItem = new QTreeWidgetItem(QStringList() << "Object" << obj->typeStr() << obj->tag());
+				headerItem->addChild(objItem);
+			}
+			headerItem->setExpanded(true);
+		}
+
+		// Sections
 
         for (const ReportLib::SectionTemplate& section : templ.sections())
         {
-            QTreeWidgetItem* sectionItem = new QTreeWidgetItem(QStringList() << section.caption << "Section");
+			QTreeWidgetItem* sectionItem = new QTreeWidgetItem(QStringList() << "Section" << "Section" << section.caption());
             templateItem->addChild(sectionItem);
 
-            for (const std::shared_ptr<ReportLib::ObjectTemplate>& obj : section.objects)
+			// Objects
+
+            for (const std::shared_ptr<ReportLib::ObjectTemplate>& obj : section.objects())
             {
-                QTreeWidgetItem* objItem = new QTreeWidgetItem(QStringList() << "Object" << obj->typeStr() << obj->tag);
+				QTreeWidgetItem* objItem = new QTreeWidgetItem(QStringList() << "Object" << obj->typeStr() << obj->tag());
                 sectionItem->addChild(objItem);
             }
 
-            sectionItem->setExpanded(true);
+			sectionItem->setExpanded(true);
         }
+
+		// Footer
+
+		if (templ.footer().empty() == false)
+		{
+			QTreeWidgetItem* footerItem = new QTreeWidgetItem(QStringList() << "Section" << "Footer" << templ.footer().caption());
+			templateItem->addChild(footerItem);
+
+			// Objects
+
+			for (const std::shared_ptr<ReportLib::ObjectTemplate>& obj : templ.footer().objects())
+			{
+				QTreeWidgetItem* objItem = new QTreeWidgetItem(QStringList() << "Object" << obj->typeStr() << obj->tag());
+				footerItem->addChild(objItem);
+			}
+			footerItem->setExpanded(true);
+		}
+
+		// Margins
+
+		for (const ReportLib::MarginTemplate& mt : templ.margins())
+		{
+			const auto& mi = mt.marginItem();
+
+			QTreeWidgetItem* mtItem = new QTreeWidgetItem(QStringList() <<
+														  "Margin" <<
+														  mi.text <<
+														  QString("Pages %1 .. %2").arg(mi.pageFrom).arg(mi.pageTo));
+			templateItem->addChild(mtItem);
+		}
+
 
         templateItem->setExpanded(true);
     }

@@ -1,29 +1,26 @@
 #pragma once
 
+#include "ReportObject.h"
+
 namespace ReportLib
 {
     class ObjectTemplate
 	{
     public:
-        enum class Type
-        {
-            Unknown,
-            Text,
-            Table
-        };
-
-        explicit ObjectTemplate(Type type);
+        explicit ObjectTemplate(ReportObject::Type type);
         virtual ~ObjectTemplate();
 
         bool load(QXmlStreamReader& reader);
+
+        ReportObject::Type type() const;
         QString typeStr() const;
 
-        Type objectType{Type::Unknown};
-        QString tag;
+        const QString& tag() const;
 
-        QString fontName{"Arial"};
-		int fontSize{12};
-	};
+    private:
+        ReportObject::Type m_type{ReportObject::Type::Undefined};
+        QString m_tag;
+    };
 
 
     class TextTemplate : public ObjectTemplate
@@ -32,8 +29,10 @@ namespace ReportLib
         TextTemplate();
 		bool load(QXmlStreamReader& reader);
 
-		Qt::Alignment alignment{Qt::AlignLeft};
+        const TextFormat& format() const;
 
+    private:
+        TextFormat m_format;
 	};
 
     class TableTemplate : public ObjectTemplate
@@ -42,14 +41,23 @@ namespace ReportLib
         TableTemplate();
         bool load(QXmlStreamReader& reader);
 
-		struct Column
-		{
-			QString caption;
-			Qt::Alignment alignment;
+        const TableFormat& format() const;
+        const QString& separator() const;
 
-		};
-		std::vector<Column> columns;
-        QString separator;
+    private:
+        TableFormat m_format;
+        QString m_separator;
+	};
+
+	class MarginTemplate
+	{
+	public:
+		bool load(QXmlStreamReader& reader);
+
+		const ReportMarginItem& marginItem() const;
+
+	private:
+		ReportMarginItem m_marginItem;
 	};
 
     class SectionTemplate
@@ -58,8 +66,12 @@ namespace ReportLib
 		bool load(QXmlStreamReader& reader);
 		bool empty() const;
 
-        QString caption;
-		std::vector<std::shared_ptr<ObjectTemplate>> objects;
+        const QString& caption() const;
+        const std::vector<std::shared_ptr<ObjectTemplate>>& objects() const;
+
+    private:
+        QString m_caption;
+        std::vector<std::shared_ptr<ObjectTemplate>> m_objects;
 	};
 
     class ReportTemplate
@@ -72,20 +84,22 @@ namespace ReportLib
         const QString& caption() const;
 		const SectionTemplate& header() const;
 		const SectionTemplate& footer() const;
-		const SectionTemplate& pageHeader() const;
-		const SectionTemplate& pageFooter() const;
+		//const SectionTemplate& pageHeader() const;
+		//const SectionTemplate& pageFooter() const;
 
         const std::vector<SectionTemplate>& sections() const;
+		const std::vector<MarginTemplate>& margins() const;
 
 	private:
         QString m_caption;
 
 		SectionTemplate m_reportHeader;
 		SectionTemplate m_reportFooter;
-		SectionTemplate m_pageHeader;
-		SectionTemplate m_pageFooter;
+		//SectionTemplate m_pageHeader;
+		//SectionTemplate m_pageFooter;
 
         std::vector<SectionTemplate> m_sections;
+		std::vector<MarginTemplate> m_margins;
 	};
 
 	class ReportTemplateStorage

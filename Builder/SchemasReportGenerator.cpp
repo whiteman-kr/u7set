@@ -32,7 +32,7 @@ namespace Builder
 		m_projectName(projectName),
 		m_userName(userName),
 		m_userPassword(userPassword),
-		m_marginFont{"Arial", 8}
+		m_marginFont{"Arial", 8, QFont::Normal}
 	{
 		return;
 	}

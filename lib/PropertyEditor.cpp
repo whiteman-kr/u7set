@@ -2179,7 +2179,7 @@ namespace ExtWidgets
 
 			connect(scriptHelpButton, &QPushButton::clicked, [this] ()
 			{
-				UiTools::openHelp(m_propertyEditorBase->scriptHelpFile(), this);
+				UiTools::openPdf(m_propertyEditorBase->scriptHelpFile(), this);
 			});
 
 			connect(this, &QDialog::finished, [this] (int)

@@ -69,7 +69,7 @@ namespace ReportLib
 		return m_caption;
 	}
 
-	std::shared_ptr<ReportLib::ReportText> ReportSection::addText(const QString& text, const ReportObjectFormat& format)
+    std::shared_ptr<ReportLib::ReportText> ReportSection::addText(const QString& text, const TextFormat& format)
 	{
 		std::shared_ptr<ReportLib::ReportText> object = std::make_shared<ReportLib::ReportText>(text, format);
 		addObject(object);
@@ -82,13 +82,9 @@ namespace ReportLib
 		return object;
 	}
 
-    std::shared_ptr<ReportTable> ReportSection::addTable(const QStringList& headerLabels,
-                                                                    const std::vector<int>& columnWidths,
-                                                                    const ReportObjectFormat& format)
+    std::shared_ptr<ReportTable> ReportSection::addTable(const TableFormat& format)
 	{
-		std::shared_ptr<ReportTable> object = std::make_shared<ReportLib::ReportTable>(headerLabels,
-																								  columnWidths,
-																								  format);
+        std::shared_ptr<ReportTable> object = std::make_shared<ReportLib::ReportTable>(format);
 		addObject(object);
 		return object;
 	}

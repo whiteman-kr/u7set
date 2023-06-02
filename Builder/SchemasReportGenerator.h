@@ -139,7 +139,7 @@ namespace Builder
 		QString m_userName;
 		QString m_userPassword;
 
-		QFont m_marginFont;
+		ReportLib::ReportFont m_marginFont;
 
 		QPageLayout m_pageLayout = QPageLayout(QPageSize(QPageSize::A4), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15));
 

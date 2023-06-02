@@ -9,17 +9,20 @@ TestReportGenerator::TestReportGenerator(const ReportLib::ReportTemplate& report
 
 }
 
-QString TestReportGenerator::text(const QString& tag) const
+int TestReportGenerator::count(const QString& tag) const
 {
-    return QObject::tr("TestReportGenerator::text %1\n").arg(tag);
-
+	return 25;
 }
 
-QString TestReportGenerator::tableText(const QString& tag, int column) const
+QString TestReportGenerator::text(const QString& tag, int index) const
 {
-    return QObject::tr("TestReportGenerator::tableText %1 %2").arg(tag).arg(column);
+	return QObject::tr("Text %1 # %2\n").arg(tag).arg(index);
 }
 
+QString TestReportGenerator::tableText(const QString& tag, int index) const
+{
+	return QObject::tr("%1;%2").arg(tag).arg(index);
+}
 
 //
 // TestReport

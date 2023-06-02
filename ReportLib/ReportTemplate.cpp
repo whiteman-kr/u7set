@@ -5,8 +5,8 @@ namespace ReportLib
 	//
 	// ObjectTemplate
 	//
-    ObjectTemplate::ObjectTemplate(Type type) :
-        objectType(type)
+    ObjectTemplate::ObjectTemplate(ReportObject::Type type) :
+        m_type(type)
     {
     }
 
@@ -20,38 +20,33 @@ namespace ReportLib
 	{
         if (reader.attributes().hasAttribute("Tag"))
         {
-            tag = reader.attributes().value("Tag").toString();
+            m_tag = reader.attributes().value("Tag").toString();
         }
 
-        if (reader.attributes().hasAttribute("FontName"))
-		{
-            fontName = reader.attributes().value("FontName").toString();
-		}
-
-        if (reader.attributes().hasAttribute("FontSize"))
-		{
-			bool ok = false;
-            fontSize = reader.attributes().value("FontSize").toInt(&ok);
-
-			if (ok == false)
-			{
-				reader.raiseError(QObject::tr("Failed to load ObjectTemplate element - unknown font size."));
-				return false;
-			}
-		}
 		return true;
 	}
 
+    ReportObject::Type ObjectTemplate::type() const
+    {
+        return m_type;
+    }
+
     QString ObjectTemplate::typeStr() const
     {
-        switch(objectType)
+        switch(m_type)
         {
-        case Type::Text:    return QObject::tr("Text");  break;
-        case Type::Table:   return QObject::tr("Table"); break;
+        case ReportObject::Type::Text:    return QObject::tr("Text");  break;
+        case ReportObject::Type::Table:   return QObject::tr("Table"); break;
+        case ReportObject::Type::Schema:  return QObject::tr("Schema"); break;
         default:
             Q_ASSERT(false);
             return "???";
         }
+    }
+
+    const QString& ObjectTemplate::tag() const
+    {
+        return m_tag;
     }
 
 	//
@@ -59,7 +54,7 @@ namespace ReportLib
 	//
 
     TextTemplate::TextTemplate():
-        ObjectTemplate(Type::Text)
+        ObjectTemplate(ReportObject::Type::Text)
     {
     }
 
@@ -71,7 +66,27 @@ namespace ReportLib
 			return false;
 		}
 
-		if (reader.attributes().hasAttribute("Alignment"))
+        QString fontName{"Arial"};
+        int fontSize{12};
+        Qt::Alignment alignment{Qt::AlignLeft};
+
+        if (reader.attributes().hasAttribute("FontName"))
+        {
+            fontName = reader.attributes().value("FontName").toString();
+        }
+
+        if (reader.attributes().hasAttribute("FontSize"))
+        {
+            fontSize = reader.attributes().value("FontSize").toInt(&ok);
+
+            if (ok == false)
+            {
+				reader.raiseError(QObject::tr("Failed to load Text element - unknown font size."));
+                return false;
+            }
+        }
+
+        if (reader.attributes().hasAttribute("Alignment"))
 		{
 			QString alignmentText = reader.attributes().value("Alignment").toString();
 
@@ -103,16 +118,23 @@ namespace ReportLib
         QXmlStreamReader::TokenType tt = reader.readNext();
         Q_ASSERT(tt == QXmlStreamReader::TokenType::EndElement);
 
+		m_format = {ReportFont{fontName, fontSize, QFont::Normal}, alignment};
+
 		return true;
 
 	}
+
+    const TextFormat& TextTemplate::format() const
+    {
+        return m_format;
+    }
 
 	//
 	// TableTemplate
 	//
 
     TableTemplate::TableTemplate():
-        ObjectTemplate(Type::Table)
+        ObjectTemplate(ReportObject::Type::Table)
     {
     }
 
@@ -124,16 +146,36 @@ namespace ReportLib
             return false;
         }
 
+        QString fontName{"Arial"};
+        int fontSize{12};
+        std::vector<TableFormat::ColumnFormat> columns;
+
+        if (reader.attributes().hasAttribute("FontName"))
+        {
+            fontName = reader.attributes().value("FontName").toString();
+        }
+
+        if (reader.attributes().hasAttribute("FontSize"))
+        {
+            fontSize = reader.attributes().value("FontSize").toInt(&ok);
+
+            if (ok == false)
+            {
+				reader.raiseError(QObject::tr("Failed to load Table element - unknown font size."));
+                return false;
+            }
+        }
+
         if (reader.attributes().hasAttribute("Separator"))
         {
-            separator = reader.attributes().value("Separator").toString();
+            m_separator = reader.attributes().value("Separator").toString();
         }
 
         while (reader.readNextStartElement())
         {
             if(reader.name() == QLatin1String("Column"))
             {
-                Column c;
+                TableFormat::ColumnFormat c;
 
                 if (reader.attributes().hasAttribute("Caption"))
                 {
@@ -169,6 +211,17 @@ namespace ReportLib
                     }
                 }
 
+                if (reader.attributes().hasAttribute("Width"))
+                {
+                    c.width = reader.attributes().value("Width").toInt(&ok);
+                    if (ok == false)
+                    {
+                        reader.raiseError(QObject::tr("Failed to load TableTemplate element - unknown column width."));
+                        return false;
+                    }
+                }
+
+
                 QXmlStreamReader::TokenType tt = reader.readNext();
                 Q_ASSERT(tt == QXmlStreamReader::TokenType::EndElement);
 
@@ -181,11 +234,154 @@ namespace ReportLib
             }
         }
 
+		m_format = {ReportFont{fontName, fontSize, QFont::Normal}, columns};
+
         //QXmlStreamReader::TokenType tt = reader.readNext();
         //Q_ASSERT(tt == QXmlStreamReader::TokenType::EndElement);
 
         return true;
     }
+
+    const TableFormat& TableTemplate::format() const
+    {
+        return m_format;
+    }
+
+    const QString& TableTemplate::separator() const
+    {
+        return m_separator;
+    }
+
+	//
+	// MarginTemplate
+	//
+
+	bool MarginTemplate::load(QXmlStreamReader& reader)
+	{
+		QString text;
+		int pageFrom = -1;
+		int pageTo = -1;
+
+		QString fontName{"Arial"};
+		int fontSize{12};
+		Qt::Alignment alignment{Qt::AlignLeft};
+
+		//
+
+		bool ok = false;
+
+		if (reader.attributes().hasAttribute("FontName"))
+		{
+			fontName = reader.attributes().value("FontName").toString();
+		}
+
+		if (reader.attributes().hasAttribute("FontSize"))
+		{
+			fontSize = reader.attributes().value("FontSize").toInt(&ok);
+
+			if (ok == false)
+			{
+				reader.raiseError(QObject::tr("Failed to load MarginItem element - unknown font size."));
+				return false;
+			}
+		}
+
+		if (reader.attributes().hasAttribute("HorzPosition"))
+		{
+			QString horzPositionText = reader.attributes().value("HorzPosition").toString();
+
+			if (horzPositionText == "Left")
+			{
+				alignment = Qt::AlignLeft;
+			}
+			else
+			{
+				if (horzPositionText == "Right")
+				{
+					alignment = Qt::AlignRight;
+				}
+				else
+				{
+					if (horzPositionText == "Center")
+					{
+						alignment = Qt::AlignHCenter;
+					}
+					else
+					{
+						reader.raiseError(QObject::tr("Failed to load MarginItem element - unknown HorzPosition (%1)").arg(horzPositionText));
+						return false;
+					}
+				}
+			}
+		}
+		else
+		{
+			alignment = Qt::AlignLeft;
+		}
+
+		if (reader.attributes().hasAttribute("VertPosition"))
+		{
+			QString vertPositionText = reader.attributes().value("VertPosition").toString();
+
+			if (vertPositionText == "Top")
+			{
+				alignment |= Qt::AlignTop;
+			}
+			else
+			{
+				if (vertPositionText == "Bottom")
+				{
+					alignment |= Qt::AlignBottom;
+				}
+				else
+				{
+					reader.raiseError(QObject::tr("Failed to load MarginItem element - unknown VertPosition (%1)").arg(vertPositionText));
+					return false;
+				}
+			}
+		}
+		else
+		{
+			alignment |= Qt::AlignTop;
+		}
+
+		if (reader.attributes().hasAttribute("PageFrom"))
+		{
+			pageFrom = reader.attributes().value("PageFrom").toInt(&ok);
+			if (ok == false)
+			{
+				reader.raiseError(QObject::tr("Failed to load MarginItem element - unknown PageFrom."));
+				return false;
+			}
+		}
+
+		if (reader.attributes().hasAttribute("PageTo"))
+		{
+			pageTo = reader.attributes().value("PageTo").toInt(&ok);
+			if (ok == false)
+			{
+				reader.raiseError(QObject::tr("Failed to load MarginItem element - unknown PageTo."));
+				return false;
+			}
+		}
+
+		if (reader.attributes().hasAttribute("Text"))
+		{
+			text = reader.attributes().value("Text").toString();
+		}
+
+		QXmlStreamReader::TokenType tt = reader.readNext();
+		Q_ASSERT(tt == QXmlStreamReader::TokenType::EndElement);
+
+		m_marginItem = {text, pageFrom, pageTo, {ReportFont{fontName, fontSize, QFont::Normal}, alignment}};
+
+		return true;
+	}
+
+	const ReportMarginItem& MarginTemplate::marginItem() const
+	{
+		return m_marginItem;
+	}
 
 	//
     // SectionTemplate
@@ -195,18 +391,18 @@ namespace ReportLib
 	{
         if (reader.attributes().hasAttribute("Caption"))
         {
-            caption = reader.attributes().value("Caption").toString();
+            m_caption = reader.attributes().value("Caption").toString();
         }
 
         while (reader.readNextStartElement())
         {
-            if(reader.name() == QLatin1String("TextTemplate"))
+			if(reader.name() == QLatin1String("Text"))
             {
                 std::shared_ptr<TextTemplate> tt = std::make_shared<TextTemplate>();
 
                 if (tt->load(reader) == true)
                 {
-                    objects.push_back(tt);
+                    m_objects.push_back(tt);
                 }
                 else
                 {
@@ -215,13 +411,13 @@ namespace ReportLib
             }
             else
             {
-                if(reader.name() == QLatin1String("TableTemplate"))
+				if(reader.name() == QLatin1String("Table"))
                 {
                     std::shared_ptr<TableTemplate> tt = std::make_shared<TableTemplate>();
 
                     if (tt->load(reader) == true)
                     {
-                        objects.push_back(tt);
+                        m_objects.push_back(tt);
                     }
                     else
                     {
@@ -241,8 +437,18 @@ namespace ReportLib
 
 	bool SectionTemplate::empty() const
 	{
-		return objects.empty();
+        return m_objects.empty();
 	}
+
+    const QString& SectionTemplate::caption() const
+    {
+        return m_caption;
+    }
+
+    const std::vector<std::shared_ptr<ObjectTemplate>>& SectionTemplate::objects() const
+    {
+        return m_objects;
+    }
 
 	//
 	// ReportTemplate
@@ -262,24 +468,52 @@ namespace ReportLib
 
         while (reader.readNextStartElement())
         {
-            if(reader.name() == QLatin1String("SectionTemplate"))
-            {
-                SectionTemplate st;
+			if(reader.name() == QLatin1String("Section"))
+			{
+				SectionTemplate st;
 
-                if (st.load(reader) == true)
-                {
-                    m_sections.push_back(st);
-                }
-                else
-                {
-                    return !reader.hasError();
-                }
-            }
-            else
-            {
-                reader.raiseError(QObject::tr("Unknown tag: ") + reader.name().toString());
-                return !reader.hasError();
-            }
+				if (st.load(reader) == false)
+				{
+					return !reader.hasError();
+				}
+
+				m_sections.push_back(st);
+				continue;
+			}
+
+			if(reader.name() == QLatin1String("Header"))
+			{
+				if (m_reportHeader.load(reader) == false)
+				{
+					return !reader.hasError();
+				}
+				continue;
+			}
+
+			if(reader.name() == QLatin1String("Footer"))
+			{
+				if (m_reportFooter.load(reader) == false)
+				{
+					return !reader.hasError();
+				}
+				continue;
+			}
+
+			if(reader.name() == QLatin1String("MarginItem"))
+			{
+				MarginTemplate mt;
+
+				if (mt.load(reader) == false)
+				{
+					return !reader.hasError();
+				}
+
+				m_margins.push_back(mt);
+				continue;
+			}
+
+			reader.raiseError(QObject::tr("Unknown tag: ") + reader.name().toString());
+			return !reader.hasError();
         }
 
 		return true;
@@ -300,7 +534,7 @@ namespace ReportLib
 		return m_reportFooter;
 	}
 
-	const SectionTemplate& ReportTemplate::pageHeader() const
+	/*const SectionTemplate& ReportTemplate::pageHeader() const
 	{
 		return m_pageHeader;
 	}
@@ -308,12 +542,17 @@ namespace ReportLib
     const SectionTemplate& ReportTemplate::pageFooter() const
 	{
 		return m_pageFooter;
-	}
+	}*/
 
     const std::vector<SectionTemplate>& ReportTemplate::sections() const
     {
         return m_sections;
     }
+
+	const std::vector<MarginTemplate>& ReportTemplate::margins() const
+	{
+		return m_margins;
+	}
 
 	//
 	// ReportTemplateStorage
@@ -354,7 +593,7 @@ namespace ReportLib
 		//
 		while (reader.readNextStartElement())
 		{
-			if(reader.name() == QLatin1String("ReportTemplate"))
+			if(reader.name() == QLatin1String("Report"))
 			{
 				ReportTemplate rt;
 

@@ -283,14 +283,13 @@ private:
 
 	int m_resolution{600};
 
-	QFont m_headerFont;
-	QFont m_normalFont;
-	QFont m_tableFont;
-	QFont m_marginFont;
+	ReportLib::ReportFont m_headerFont;
+	ReportLib::ReportFont m_normalFont;
+	ReportLib::ReportFont m_tableFont;
+	ReportLib::ReportFont m_marginFont;
 
-	ReportLib::ReportObjectFormat m_headerFormat;
-	ReportLib::ReportObjectFormat m_normalFormat;
-	ReportLib::ReportObjectFormat m_tableFormat;
+    ReportLib::TextFormat m_headerFormat;
+    ReportLib::TextFormat m_normalFormat;
 
 	std::map<int, std::shared_ptr<Hardware::DeviceObject>> m_sourceDeviceObjectMap;
 	std::map<int, std::shared_ptr<Hardware::DeviceObject>> m_targetDeviceObjectMap;

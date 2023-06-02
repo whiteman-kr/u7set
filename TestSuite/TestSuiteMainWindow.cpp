@@ -278,6 +278,7 @@ void TestSuiteMainWindow::createMenu()
     pReportsMenu->addSeparator();
 
     m_reportsMenu = pReportsMenu->addMenu("Report");
+	m_reportsMenu->setEnabled(false);
 
 	// Service
 	//
@@ -987,7 +988,10 @@ void TestSuiteMainWindow::onGenerateReport(const QString& caption)
     }
     else
     {
-        QMessageBox::information(this, qAppName(), tr("Report file '%1' saved successfully.").arg(fileName));
+		if (QMessageBox::question(this, qAppName(), QObject::tr("Report generating has been finished.\n\nDo you with to open it?")) == QMessageBox::Yes)
+		{
+			UiTools::openPdf(fileName, this);
+		}
     }
 
     return;

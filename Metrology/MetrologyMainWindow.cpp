@@ -2034,7 +2034,7 @@ void MainWindow::showOptions()
 
 void MainWindow::showUserManual()
 {
-	UiTools::openHelp(QApplication::applicationDirPath() + "/docs/Metrology_User_Manual.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath() + "/docs/Metrology_User_Manual.pdf", this);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

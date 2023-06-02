@@ -9,8 +9,10 @@ public:
 
 
 private:
-	virtual QString text(const QString& tag) const override;
-	virtual QString tableText(const QString& tag, int column) const override;
+	virtual int count(const QString& tag) const override;
+
+	virtual QString text(const QString& tag, int index) const override;
+	virtual QString tableText(const QString& tag, int index) const override;
 
 
 };

@@ -348,7 +348,7 @@ void SchemasReportGeneratorThread::run(TaskType task,
 		{
 			if (QMessageBox::question(m_parent, qAppName(), QObject::tr("Album generating has been finished.\n\nDo you with to open it?")) == QMessageBox::Yes)
 			{
-				UiTools::openHelp(filePath, m_parent);
+				UiTools::openPdf(filePath, m_parent);
 			}
 		}
 		else

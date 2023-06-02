@@ -51,10 +51,10 @@ namespace ReportLib
 
 		// Add object functions
 		//
-		std::shared_ptr<ReportText> addText(const QString& text, const ReportObjectFormat& format);
+        std::shared_ptr<ReportText> addText(const QString& text, const TextFormat& format);
 		std::shared_ptr<ReportText> addText(std::shared_ptr<ReportText> object);
 
-        std::shared_ptr<ReportTable> addTable(const QStringList& headerLabels, const std::vector<int>& columnWidths, const ReportObjectFormat& format);
+        std::shared_ptr<ReportTable> addTable(const TableFormat& format);
 		std::shared_ptr<ReportTable> addTable(std::shared_ptr<ReportTable> object);
 
 		std::shared_ptr<ReportSchema> addSchema(std::shared_ptr<ReportSchema> object);

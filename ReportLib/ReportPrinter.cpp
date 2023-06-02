@@ -264,6 +264,19 @@ namespace ReportLib
 
 		const QRect pageRectPixels = pdfWriter.pageLayout().paintRectPixels(pdfWriter.resolution());
 
+		double fontScaling = report.resolution() / 72.0;
+
+		{
+			QFont font{"Arial", 72, QFont::Normal};
+
+			QFontMetrics coefMetrics{font};
+
+			double kFont = font.pointSize() / static_cast<double>(coefMetrics.height());
+
+			fontScaling *= kFont;
+		}
+
+
 		QPainter painter(&pdfWriter);
 
 		// Render all objects to print objects
@@ -360,7 +373,7 @@ namespace ReportLib
 						return false;
 					}
 
-					object->renderText(printText->textCursor());
+					object->renderText(printText->textCursor(), fontScaling);
 
 					lastDocumentTextPageHeight = printText->contentRect().height() % pageRectPixels.height();
 				}
@@ -471,21 +484,6 @@ namespace ReportLib
 				continue;
 			}
 
-
-			QFont font{item.format.charFormat().font()};
-
-			{
-				QFontMetrics coefMetrics{font};
-
-				double fontCoef = static_cast<double>(coefMetrics.height()) / font.pointSize();
-
-				int pointSize = font.pointSize() * 72 / resolution/*translate points to pixels*/;
-
-				font.setPointSize(static_cast<int>(pointSize * fontCoef));
-			}
-
-			painter.setFont(font);
-
 			QString text = item.text;
 
 			if (text == "%PAGE%")
@@ -498,14 +496,15 @@ namespace ReportLib
 				text = objectName;
 			}
 
+			painter.setFont(item.format.font());
+
 			//painter.fillRect(topRect, Qt::green);
 			//painter.fillRect(bottomRect, Qt::yellow);
 
-			QFontMetrics fm(font);
+			QFontMetrics fm(item.format.font());
 			QRect textBoundingRect = fm.boundingRect(text);
 
-			auto itemAlignment = item.format.blockFormat().alignment();
-
+            auto itemAlignment = item.format.alignment();
 			if (itemAlignment & Qt::AlignTop)
 			{
 				if (topRect.width() >= textBoundingRect.width() && topRect.height() >= textBoundingRect.height())

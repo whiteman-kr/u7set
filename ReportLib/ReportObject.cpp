@@ -2,57 +2,81 @@
 
 namespace ReportLib
 {
-	//
-	// ReportFormat
-	//
+    //
+    // TextFormat
+    //
 
-    ReportObjectFormat::ReportObjectFormat(const QFont& font, Qt::Alignment alignment)
-	{
-		m_charFormat.setFont(font);
-        m_blockFormat.setAlignment(alignment);
-    }
-
-    ReportObjectFormat::ReportObjectFormat(const QString& fontName, double fontPointSize, Qt::Alignment alignment)
-	{
-        m_charFormat.setFont(QFont(fontName, static_cast<int>(fontPointSize)));
-        m_blockFormat.setAlignment(alignment);
-    }
-
-	void ReportObjectFormat::setFont(const QFont& font)
-	{
-		m_charFormat.setFont(font);
-	}
-
-	void ReportObjectFormat::setTextForeground(const QBrush& brush)
-	{
-		m_charFormat.setForeground(brush);
-	}
-
-	void ReportObjectFormat::setTextBackground(const QBrush& brush)
-	{
-		m_charFormat.setBackground(brush);
-	}
-
-    void ReportObjectFormat::setTextAlignment(Qt::Alignment alignment)
+	TextFormat::TextFormat(const ReportFont& font, Qt::Alignment alignment):
+		m_font(font),
+        m_alignment(alignment)
     {
-        m_blockFormat.setAlignment(alignment);
     }
 
-	const QTextCharFormat& ReportObjectFormat::charFormat() const
+	const ReportFont& TextFormat::font() const
+    {
+		return m_font;
+    }
+
+    Qt::Alignment TextFormat::alignment() const
+    {
+        return m_alignment;
+    }
+
+    /*void TextFormat::setTextForeground(const QBrush& brush)
+    {
+        m_charFormat.setForeground(brush);
+    }
+
+    void TextFormat::setTextBackground(const QBrush& brush)
+    {
+        m_charFormat.setBackground(brush);
+    }*/
+
+    //
+    // TableFormat
+    //
+
+	TableFormat::TableFormat(const ReportFont& font,
+                             const QStringList& headerLabels,
+                             const std::vector<int> columnWidths,
+							 Qt::Alignment alignment):
+		m_font(font)
+    {
+        if (static_cast<int>(headerLabels.size()) != columnWidths.size())
+        {
+            Q_ASSERT(static_cast<int>(headerLabels.size()) != columnWidths.size());
+            return;
+        }
+
+        int index = 0;
+        for (const QString& hl : headerLabels)
+        {
+            m_columnsFormat.push_back({hl, columnWidths[index++], alignment});
+        }
+    }
+
+	TableFormat::TableFormat(const ReportFont& font,
+                             const std::vector<ColumnFormat>& columnsFormat):
+		m_font(font),
+		m_columnsFormat(columnsFormat)
+    {
+    }
+
+	const ReportFont& TableFormat::font() const
 	{
-		return m_charFormat;
+		return m_font;
 	}
 
-    const QTextBlockFormat& ReportObjectFormat::blockFormat() const
+    const std::vector<TableFormat::ColumnFormat>& TableFormat::columnsFormat() const
     {
-        return m_blockFormat;
+        return m_columnsFormat;
     }
 
-	//
+    //
 	// ReportMarginItem
 	//
 
-	ReportMarginItem::ReportMarginItem(const QString& text, int pageFrom, int pageTo, const ReportObjectFormat& format):
+    ReportMarginItem::ReportMarginItem(const QString& text, int pageFrom, int pageTo, const TextFormat& format):
 		text(text),
 		pageFrom(pageFrom),
 		pageTo(pageTo),
@@ -61,13 +85,12 @@ namespace ReportLib
 
 	}
 
-	ReportObject::ReportObject(const ReportObjectFormat& format, Type type):
-		m_format(format),
+    ReportObject::ReportObject(ReportObject::Type type):
 		m_type(type)
 	{
 	}
 
-	ReportObject::Type ReportObject::type() const
+    ReportObject::Type ReportObject::type() const
 	{
 		return m_type;
 	}
@@ -76,7 +99,7 @@ namespace ReportLib
 	// ReportSchema
 	//
 	std::shared_ptr<ReportSchema> ReportSchema::create(const QString& caption,
-													   const ReportObjectFormat& format,
+                                                       const SchemaFormat& format,
 													   std::shared_ptr<VFrame30::Schema> schema,
 													   const std::map<QUuid, ReportSchemaCompareAction>& compareActions)
 	{
@@ -85,18 +108,19 @@ namespace ReportLib
 	}
 
 	ReportSchema::ReportSchema(const QString& caption,
-							   const ReportObjectFormat& format,
+                               const SchemaFormat& format,
 							   std::shared_ptr<VFrame30::Schema> schema,
 							   const std::map<QUuid, ReportSchemaCompareAction>& compareActions):
-		ReportObject(format, ReportObject::Type::Schema),
+        ReportObject(Type::Schema),
 		m_caption(caption),
+        m_format(format),
 		m_schema(schema),
 		m_compareActions(compareActions)
 	{
 
 	}
 
-	void ReportSchema::renderText(QTextCursor& /*cursor*/) const
+	void ReportSchema::renderText(QTextCursor& /*cursor*/, double /*fontScaling*/) const
 	{
 	}
 
@@ -114,22 +138,21 @@ namespace ReportLib
 	// ReportTable
 	//
 
-    ReportTable::ReportTable(const QStringList& headerLabels, const std::vector<int>& columnWidths, const ReportObjectFormat& format):
-		ReportObject(format, ReportObject::Type::Table),
-		m_headerLabels(headerLabels),
-        m_columnWidths(columnWidths)
+    ReportTable::ReportTable(const TableFormat& format):
+        ReportObject(Type::Table),
+        m_format(format)
     {
-	}
+    }
 
-    std::shared_ptr<ReportTable> ReportTable::create(const QStringList& headerLabels, const std::vector<int>& columnWidths, const ReportObjectFormat& format)
+    std::shared_ptr<ReportTable> ReportTable::create(const TableFormat& format)
 	{
-        auto result = std::make_shared<ReportTable>(headerLabels, columnWidths, format);
+        auto result = std::make_shared<ReportTable>(format);
 		return result;
 	}
 
 	int ReportTable::columnCount() const
 	{
-		return static_cast<int>(m_headerLabels.size());
+        return static_cast<int>(m_format.columnsFormat().size());
 	}
 
 	int ReportTable::rowCount() const
@@ -174,19 +197,12 @@ namespace ReportLib
 		});
 	}
 
-	void ReportTable::renderText(QTextCursor& cursor) const
+	void ReportTable::renderText(QTextCursor& cursor, double fontScaling) const
 	{
 		int cols = columnCount();
 		int rows = rowCount();
 
-		if (static_cast<int>(m_columnWidths.size()) != cols || m_headerLabels.size() != cols)
-		{
-			cursor.insertText("Table rendering error!");
-			Q_ASSERT(false);
-			return;
-        }
-
-		QString html = QObject::tr("<html>\
+        QString html = QObject::tr("<html>\
 								   <head>\
 								   <style>\
 								   table, th, td {\
@@ -213,17 +229,21 @@ namespace ReportLib
 								   </head>\
 								   <body>\
 								   <table width=\"100%\">")
-				.arg(m_format.charFormat().font().family())
-				.arg(m_format.charFormat().fontPointSize());
+				.arg(m_format.font().family)
+				.arg(m_format.font().pointSize * fontScaling);
 
 		html += "<thead><tr>";
 		for (int c = 0; c < cols; c++)
 		{
-			const QString& str = m_headerLabels[c];
+            const TableFormat::ColumnFormat& colFormat = m_format.columnsFormat()[c];
 
-			html += QObject::tr("<th width=%1%>%2</th>").arg(m_columnWidths[c]).arg(str);
+            const QString& str = colFormat.caption;
+
+            html += QObject::tr("<th width=%1%>%2</th>").arg(colFormat.width).arg(str);
 		}
 		html += "</tr></thead>";
+
+        int todo_process_table_alignment = 1;
 
 		html += "<tbody>";
 
@@ -245,9 +265,11 @@ namespace ReportLib
 
 			for (int c = 0; c < cols; c++)
 			{
-				const QString str = row[c];
+                const QString& str = row[c];
 
-				html += QObject::tr("<td width=%1%>%2</td>").arg(m_columnWidths[c]).arg(str.toHtmlEscaped());
+                const TableFormat::ColumnFormat& colFormat = m_format.columnsFormat()[c];
+
+                html += QObject::tr("<td width=%1%>%2</td>").arg(colFormat.width).arg(str.toHtmlEscaped());
 			}
 
 			html += "</tr>";
@@ -279,28 +301,29 @@ html += "</tr></tfoot";
 	// ReportText
 	//
 
-    ReportText::ReportText(const QString& text, const ReportObjectFormat& format):
-		ReportObject(format, ReportObject::Type::Text),
+    ReportText::ReportText(const QString& text, const TextFormat &format):
+        ReportObject(Type::Text),
+        m_format(format),
         m_text(text)
 	{
 	}
 
-    std::shared_ptr<ReportText> ReportText::create(const QString& text, const ReportObjectFormat& format)
+    std::shared_ptr<ReportText> ReportText::create(const QString& text, const TextFormat& format)
 	{
         auto result = std::make_shared<ReportText>(text, format);
 		return result;
 	}
 
-	void ReportText::renderText(QTextCursor& cursor) const
+	void ReportText::renderText(QTextCursor& cursor, double fontScaling) const
 	{
-		if (m_format.charFormat().isValid() == true)
-		{
-			cursor.setCharFormat(m_format.charFormat());
-        }
-        if (m_format.blockFormat().isValid() == true)
-        {
-            cursor.setBlockFormat(m_format.blockFormat());
-        }
+
+		QTextCharFormat cf = cursor.charFormat();
+		cf.setFont(m_format.font()(fontScaling));
+		cursor.setCharFormat(cf);
+
+        QTextBlockFormat bf = cursor.blockFormat();
+        bf.setAlignment(m_format.alignment());
+        cursor.setBlockFormat(bf);
 
 		cursor.insertText(m_text);
 	}

@@ -740,52 +740,52 @@ void MainWindow::showShortcuts()
 
 void MainWindow::showRpctUserManual()
 {
-	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/D11.6_RPCT-UM.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.6_RPCT-UM.pdf", this);
 }
 
 void MainWindow::showRpctInstallManual()
 {
-	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/Installing and configuring RPCT.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/Installing and configuring RPCT.pdf", this);
 }
 
 void MainWindow::showRpctQuickStart()
 {
-	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/RPCT Quick Start Guide.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/RPCT Quick Start Guide.pdf", this);
 }
 
 void MainWindow::showRpctUserManualAppendixA()
 {
-	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/Appendixes/D11.6 RPCT User Manual Appendix A Warnings and Errors List.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/Appendixes/D11.6 RPCT User Manual Appendix A Warnings and Errors List.pdf", this);
 }
 
 void MainWindow::showRpctUserManualAppendixB()
 {
-	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/Appendixes/D11.6 RPCT User Manual Appendix B Build Directory and Output Bitstream File Description.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/Appendixes/D11.6 RPCT User Manual Appendix B Build Directory and Output Bitstream File Description.pdf", this);
 }
 
 void MainWindow::showRpctUserManualAppendixC()
 {
-	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/Appendixes/D11.6 RPCT User Manual Appendix C JavaScript Manual.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/Appendixes/D11.6 RPCT User Manual Appendix C JavaScript Manual.pdf", this);
 }
 
 void MainWindow::showAfblReference()
 {
-	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/D11.5_AFBL_RM.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.5_AFBL_RM.pdf", this);
 }
 
 void MainWindow::showScriptHelp()
 {
-	UiTools::openHelp(QApplication::applicationDirPath()+"/scripthelp/index.html", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/scripthelp/index.html", this);
 }
 
 void MainWindow::showMatsUserManual()
 {
-	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/D11.8_FSC_MATS_User_Manual.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.8_FSC_MATS_User_Manual.pdf", this);
 }
 
 void MainWindow::showTuningUserManual()
 {
-	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/D11.9_FSC_Tuning_User_Manual.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.9_FSC_Tuning_User_Manual.pdf", this);
 }
 
 
