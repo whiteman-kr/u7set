@@ -1459,7 +1459,37 @@ void AppSignal::writeToXml(XmlWriteHelper& xml)
 
 	for(const AppSignalSpecPropValue& spv :  m_cachedSpecPropValues->values())
 	{
-		xml.writeQVariantAttribute(spv.name(), spv.value());
+		if (spv.isEnum() == false)
+		{
+			xml.writeQVariantAttribute(spv.name(), spv.value());
+		}
+		else
+		{
+			QString name = spv.name();
+
+			if (name == AppSignalPropNames::ELECTRIC_UNIT)
+			{
+				E::ElectricUnit e = static_cast<E::ElectricUnit>(spv.value().toInt());
+				xml.writeEnumKeyValueAttribute(name, e);
+				continue;
+			}
+
+			if (name == AppSignalPropNames::SENSOR_TYPE)
+			{
+				E::SensorType e = static_cast<E::SensorType>(spv.value().toInt());
+				xml.writeEnumKeyValueAttribute(name, e);
+				continue;
+			}
+
+			if (name == AppSignalPropNames::OUTPUT_MODE)
+			{
+				E::OutputMode e = static_cast<E::OutputMode>(spv.value().toInt());
+				xml.writeEnumKeyValueAttribute(name, e);
+				continue;
+			}
+
+			xml.writeQVariantAttribute(spv.name(), spv.value());
+		}
 	}
 
 	xml.writeStringAttribute(AppSignalPropNames::TAGS, tags().join(Separator::COMMA));

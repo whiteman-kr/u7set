@@ -23,7 +23,8 @@ GatewayServiceWorker::GatewayServiceWorker(const SoftwareInfo& softwareInfo,
 }
 
 GatewayServiceWorker::GatewayServiceWorker(const GatewayServiceWorker* worker) :
-	ServiceWorker(worker)
+	ServiceWorker(worker),
+	m_timer(this)
 {
 }
 
