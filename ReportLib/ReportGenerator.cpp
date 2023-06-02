@@ -76,7 +76,7 @@ namespace ReportLib
 		return m_printer.statistics();
 	}
 
-	bool ReportGenerator::generateSection(ReportSection& section, const SectionTemplate& sectionTemplate) const
+	bool ReportGenerator::generateSection(ReportSection& section, const SectionTemplate& sectionTemplate)
 	{
 
 		for (const std::shared_ptr<ObjectTemplate>& object : sectionTemplate.objects())
@@ -90,13 +90,25 @@ namespace ReportLib
 					return false;
 				}
 
-				// Create text object
-
-				int tagCount = count(t->tag());
-
-				for (int i = 0; i < tagCount; i++)
+				if (t->tag().isEmpty() == false)
 				{
-					section.addText(text(t->tag(), i), t->format());
+
+					// Create text object
+					bool ok = false;
+					do
+					{
+						QString s = text(t->tag(), &ok);
+						if (ok == true)
+						{
+							section.addText(s + "\n", t->format());
+						}
+					}while (ok == true);
+				}
+				else
+				{
+					QString s = t->text();
+					s.replace("\\n", "\n");
+					section.addText(s + "\n", t->format());
 				}
 			}
 
@@ -109,25 +121,24 @@ namespace ReportLib
 				auto table = section.addTable(t->format());
 
 				// Fill table with data
-
-				int tagCount = count(t->tag());
-
-				for (int i = 0; i < tagCount; i++)
+				bool ok = false;
+				do
 				{
-					QString s = tableText(t->tag(), i);
-
-					QStringList l;
-					if (t->separator().isEmpty() == false)
+					QString s = text(t->tag(), &ok);
+					if (ok == true)
 					{
-						l = s.split(t->separator(), Qt::SkipEmptyParts);
+						QStringList l;
+						if (t->separator().isEmpty() == false)
+						{
+							l = s.split(t->separator(), Qt::SkipEmptyParts);
+						}
+						else
+						{
+							l << s;
+						}
+						table->insertRow(l);
 					}
-					else
-					{
-						l << s;
-					}
-					table->insertRow(l);
-				}
-
+				}while (ok == true);
 			}
 		}
 

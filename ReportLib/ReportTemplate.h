@@ -15,11 +15,15 @@ namespace ReportLib
         ReportObject::Type type() const;
         QString typeStr() const;
 
+		virtual QString propToText() const = 0;
+
+		const QString& text() const;
         const QString& tag() const;
 
     private:
         ReportObject::Type m_type{ReportObject::Type::Undefined};
-        QString m_tag;
+		QString m_text;	// Static text
+		QString m_tag;	// Tag to take text dynamically
     };
 
 
@@ -30,6 +34,8 @@ namespace ReportLib
 		bool load(QXmlStreamReader& reader);
 
         const TextFormat& format() const;
+
+		virtual QString propToText() const override;
 
     private:
         TextFormat m_format;
@@ -43,6 +49,8 @@ namespace ReportLib
 
         const TableFormat& format() const;
         const QString& separator() const;
+
+		virtual QString propToText() const override;
 
     private:
         TableFormat m_format;

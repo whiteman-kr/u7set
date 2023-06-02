@@ -23,6 +23,11 @@ namespace ReportLib
             m_tag = reader.attributes().value("Tag").toString();
         }
 
+		if (reader.attributes().hasAttribute("Text"))
+		{
+			m_text = reader.attributes().value("Text").toString();
+		}
+
 		return true;
 	}
 
@@ -44,7 +49,12 @@ namespace ReportLib
         }
     }
 
-    const QString& ObjectTemplate::tag() const
+	const QString& ObjectTemplate::text() const
+	{
+		return m_text;
+	}
+
+	const QString& ObjectTemplate::tag() const
     {
         return m_tag;
     }
@@ -128,6 +138,16 @@ namespace ReportLib
     {
         return m_format;
     }
+
+	QString TextTemplate::propToText() const
+	{
+		if (tag().isEmpty() == true)
+		{
+			return text();
+		}
+
+		return tag();
+	}
 
 	//
 	// TableTemplate
@@ -251,6 +271,11 @@ namespace ReportLib
     {
         return m_separator;
     }
+
+	QString TableTemplate::propToText() const
+	{
+		return QString("Tag: '%1', Sep: '%2', Cols: %3").arg(tag()).arg(separator()).arg(m_format.columnsFormat().size());
+	}
 
 	//
 	// MarginTemplate

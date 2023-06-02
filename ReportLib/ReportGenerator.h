@@ -17,12 +17,10 @@ namespace ReportLib
 
 	protected:
 		virtual int count(const QString& tag) const = 0;
-
-		virtual QString text(const QString& tag, int index) const = 0;
-		virtual QString tableText(const QString& tag, int index) const = 0;
+		virtual QString text(const QString& tag, bool* ok) = 0;
 
 	private:
-		bool generateSection(ReportSection& section, const SectionTemplate& sectionTemplate) const;
+		bool generateSection(ReportSection& section, const SectionTemplate& sectionTemplate);
 
 	private:
 		const ReportTemplate& m_template;

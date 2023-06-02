@@ -34,6 +34,10 @@ namespace TestSuite
 		QStringList toStringList() const;
 		static TestLogItem fromStringList(const QString& str, bool* ok);
 
+		const QDateTime& dateTime() const;
+		const QString& message() const;
+		const QString& tag() const;
+
 		TestLogItemType type() const;
 		bool isError() const;
 		bool isWarning() const;

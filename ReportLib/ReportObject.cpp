@@ -174,7 +174,7 @@ namespace ReportLib
 
 	void ReportTable::insertRow(const QStringList& row)
 	{
-		if (row.size() != columnCount())
+		if (row.size() > columnCount())
 		{
 			Q_ASSERT(false);
 			return;
@@ -239,7 +239,7 @@ namespace ReportLib
 
             const QString& str = colFormat.caption;
 
-            html += QObject::tr("<th width=%1%>%2</th>").arg(colFormat.width).arg(str);
+            html += QObject::tr("<th width=%1% align=>%2</th>").arg(colFormat.width).arg(str);
 		}
 		html += "</tr></thead>";
 
@@ -263,13 +263,28 @@ namespace ReportLib
 
 			const QStringList& row = m_rows[r];
 
-			for (int c = 0; c < cols; c++)
+			int c = 0;
+			for (const QString& str : row)
 			{
-                const QString& str = row[c];
+				const TableFormat::ColumnFormat& colFormat = m_format.columnsFormat()[c];
 
-                const TableFormat::ColumnFormat& colFormat = m_format.columnsFormat()[c];
+				QString alignStr;
+				switch (colFormat.alignment)
+				{
+				case Qt::AlignLeft:		alignStr = "Left";		break;
+				case Qt::AlignHCenter:	alignStr = "Center";	break;
+				case Qt::AlignRight:	alignStr = "Right";		break;
+				default:
+					alignStr = "Left";
+					Q_ASSERT(false);
+				}
 
-                html += QObject::tr("<td width=%1%>%2</td>").arg(colFormat.width).arg(str.toHtmlEscaped());
+				html += QObject::tr("<td width=%1% align=%2>%3</td>").arg(colFormat.width).arg(alignStr).arg(str.toHtmlEscaped());
+
+				if (c++ >= cols)
+				{
+					break;
+				}
 			}
 
 			html += "</tr>";

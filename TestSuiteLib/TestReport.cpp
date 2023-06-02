@@ -1,33 +1,65 @@
 #include "TestReport.h"
 
-//
-// TestReportGenerator
-//
-TestReportGenerator::TestReportGenerator(const ReportLib::ReportTemplate& reportTemplate):
-	ReportLib::ReportGenerator(reportTemplate)
+namespace TestSuite
 {
+	//
+	// TestReportGenerator
+	//
+	TestReportGenerator::TestReportGenerator(const ReportLib::ReportTemplate& reportTemplate, const TestLog& testLog):
+		ReportLib::ReportGenerator(reportTemplate),
+		m_items(testLog.items())
+	{
 
-}
+	}
 
-int TestReportGenerator::count(const QString& tag) const
-{
-	return 25;
-}
+	int TestReportGenerator::count(const QString& /*tag*/) const
+	{
+		return 0;
+	}
 
-QString TestReportGenerator::text(const QString& tag, int index) const
-{
-	return QObject::tr("Text %1 # %2\n").arg(tag).arg(index);
-}
+	QString TestReportGenerator::text(const QString& tag, bool* found)
+	{
+		if (found == nullptr)
+		{
+			Q_ASSERT(found);
+			return QString();
+		}
 
-QString TestReportGenerator::tableText(const QString& tag, int index) const
-{
-	return QObject::tr("%1;%2").arg(tag).arg(index);
-}
+		if (m_lastTag != tag)
+		{
+			m_lastTag = tag;
+			m_lastIndex = 0;
+		}
+		else
+		{
+			m_lastIndex++;
+		}
 
-//
-// TestReport
-//
-TestReport::TestReport()
-{
+		if (m_items.empty() == true)
+		{
+			*found = false;
+			return QString();
+		}
 
+		int count = static_cast<int>(m_items.size());
+		for (; m_lastIndex < count; m_lastIndex++)
+		{
+			if (m_items[m_lastIndex].tag() == tag)
+			{
+				*found = true;
+				return m_items[m_lastIndex].message();
+			}
+		}
+
+		*found = false;
+		return QString();
+	}
+
+	//
+	// TestReport
+	//
+	TestReport::TestReport()
+	{
+
+	}
 }

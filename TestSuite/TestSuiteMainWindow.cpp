@@ -956,10 +956,7 @@ void TestSuiteMainWindow::onGenerateReport(const QString& caption)
         return;
     }
 
-    //m_configController.reportTemplates().templates()
-
-    TestReportGenerator generator(*templ);
-
+	TestSuite::TestReportGenerator generator(*templ, m_testSuite.testLog());
 
     std::atomic_bool stop = false;
     QBuffer buffer;

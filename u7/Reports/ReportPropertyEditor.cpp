@@ -143,7 +143,7 @@ void ReportPropertyEditor::fillObjectsTree()
 
 			for (const std::shared_ptr<ReportLib::ObjectTemplate>& obj : templ.header().objects())
 			{
-				QTreeWidgetItem* objItem = new QTreeWidgetItem(QStringList() << "Object" << obj->typeStr() << obj->tag());
+				QTreeWidgetItem* objItem = new QTreeWidgetItem(QStringList() << "Object" << obj->typeStr() << obj->propToText());
 				headerItem->addChild(objItem);
 			}
 			headerItem->setExpanded(true);
@@ -160,7 +160,7 @@ void ReportPropertyEditor::fillObjectsTree()
 
             for (const std::shared_ptr<ReportLib::ObjectTemplate>& obj : section.objects())
             {
-				QTreeWidgetItem* objItem = new QTreeWidgetItem(QStringList() << "Object" << obj->typeStr() << obj->tag());
+				QTreeWidgetItem* objItem = new QTreeWidgetItem(QStringList() << "Object" << obj->typeStr() << obj->propToText());
                 sectionItem->addChild(objItem);
             }
 
@@ -178,7 +178,7 @@ void ReportPropertyEditor::fillObjectsTree()
 
 			for (const std::shared_ptr<ReportLib::ObjectTemplate>& obj : templ.footer().objects())
 			{
-				QTreeWidgetItem* objItem = new QTreeWidgetItem(QStringList() << "Object" << obj->typeStr() << obj->tag());
+				QTreeWidgetItem* objItem = new QTreeWidgetItem(QStringList() << "Object" << obj->typeStr() << obj->propToText());
 				footerItem->addChild(objItem);
 			}
 			footerItem->setExpanded(true);

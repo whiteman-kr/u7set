@@ -168,6 +168,21 @@ namespace TestSuite
 		return result;
 	}
 
+	const QDateTime& TestLogItem::dateTime() const
+	{
+		return m_dateTime;
+	}
+
+	const QString& TestLogItem::message() const
+	{
+		return m_message;
+	}
+
+	const QString& TestLogItem::tag() const
+	{
+		return m_tag;
+	}
+
 	TestLogItemType TestLogItem::type() const
 	{
 		return m_type;
