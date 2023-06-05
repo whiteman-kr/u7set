@@ -146,6 +146,10 @@ public:
 							const QString& description,
 							const QString& paramExample);
 
+	bool addBoolCmdLineArg(const QString& cmdLineArgName,
+							const QString& settingName,
+							const QString& description);
+
 	bool cmdLineArgIsSet(const QString& cmdLineArgName) const;
 	QString helpText() const;
 

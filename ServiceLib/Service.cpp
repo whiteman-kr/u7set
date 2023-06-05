@@ -216,6 +216,13 @@ bool ServiceWorker::addValueCmdLineArg(const QString& cmdLineArgName,
 	return m_cmdLineParser.addValueCmdLineArg(cmdLineArgName, settingName, description, paramExample);
 }
 
+bool ServiceWorker::addBoolCmdLineArg(const QString& cmdLineArgName,
+						const QString& settingName,
+						const QString& description)
+{
+	return m_cmdLineParser.addBoolCmdLineArg(cmdLineArgName, settingName, description);
+}
+
 bool ServiceWorker::cmdLineArgIsSet(const QString& cmdLineArgName) const
 {
 	return m_cmdLineParser.cmdLineArgIsSet(cmdLineArgName);

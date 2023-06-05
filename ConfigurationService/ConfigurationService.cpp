@@ -59,7 +59,7 @@ void ConfigurationServiceWorker::initServiceSpecificCmdLineArgs()
 	addValueCmdLineArg(CmdLineArg::BUILD_PATH, SoftwareSetting::AUTOLOAD_BUILD_PATH, "Path to RPCT project's build for auto load.", "PathToBuild");
 	addValueCmdLineArg(CmdLineArg::IP, SoftwareSetting::CLIENT_REQUEST_IP, "Client request IP.", "IPv4");
 	addValueCmdLineArg(CmdLineArg::WORK_DIRECTORY, SoftwareSetting::WORK_DIRECTORY, "Work directory of Configuration Service.", "Path");
-	addValueCmdLineArg(CmdLineArg::CHECKHOSTNAME, SoftwareSetting::CHECK_HOSTNAME, "Check clients hostname.", "on/off");
+	addBoolCmdLineArg(CmdLineArg::CHECKHOSTNAME, SoftwareSetting::CHECK_HOSTNAME, "Check clients hostname.");
 	addValueCmdLineArg(CmdLineArg::PROFILE, SoftwareSetting::CURRENT_PROFILE, "Current software settings profile.", "ProfileID");
 	addValueCmdLineArg(CmdLineArg::MODE, SoftwareSetting::RUN_MODE, "Runs all software in simulation mode.", SoftwareSetting::SIMULATION);
 }

@@ -84,6 +84,20 @@ bool CommandLineParser::addSimpleCmdLineArg(const QString& cmdLineArgName,
 	return addCmdLineArg(CmdLineArgType::Simple, cmdLineArgName, true, settingName, description, QString());
 }
 
+bool CommandLineParser::addBoolNoWritableCmdLineArg(const QString& cmdLineArgName,
+												 const QString& description)
+{
+	return addCmdLineArg(CmdLineArgType::Bool, cmdLineArgName, false, QString(), description, QString());
+}
+
+bool CommandLineParser::addBoolCmdLineArg(const QString& cmdLineArgName,
+										const QString& settingName,
+										const QString& description)
+{
+	return addCmdLineArg(CmdLineArgType::Bool, cmdLineArgName, true, settingName, description, QString());
+}
+
+
 bool CommandLineParser::addValueNoWritebleCmdLineArg(const QString& cmdLineArgName,
 										const QString& description,
 										const QString& paramExample)
@@ -171,6 +185,7 @@ void CommandLineParser::parseAndApplyCmdLineArgs()
 		switch(arg.type)
 		{
 		case CmdLineArgType::Simple:
+		case CmdLineArgType::Bool:
 			arg.isSetFromCmdLine = true;
 			arg.valueStr = boolToString(true);
 			break;
@@ -299,27 +314,6 @@ bool CommandLineParser::cmdLineArgIsSet(const QString& cmdLineArgName) const
 	return it->second.isSetFromCmdLine;
 }
 
-/*QString CommandLineParser::optionValue(const QString& optionName) const
-{
-	Q_ASSERT(m_parsed == true);
-
-	const Option* op = getOption(optionName);
-
-	if (op == nullptr)
-	{
-		Q_ASSERT(false);				// unknown optionName
-		return QString("");
-	}
-
-	if (op->type != CmdLineArgType::SingleValue)
-	{
-		Q_ASSERT(false);				// wrong option type
-		return QString("");
-	}
-
-	return op->value.toString();
-}*/
-
 QString CommandLineParser::getSettingValue(const QString& settingName) const
 {
 	Q_ASSERT(m_parsed == true);
@@ -342,34 +336,6 @@ QString CommandLineParser::getSettingValue(const QString& settingName) const
 
 	return it2->second.valueStr;
 }
-
-/*
-bool CommandLineParser::settingIsSet(const QString& settingName) const
-{
-	Q_ASSERT(m_parsed == true);
-
-	for(const auto& p : m_options)
-	{
-		const Option& op = p.second;
-
-		if (op.settingName != settingName)
-		{
-			continue;
-		}
-
-		if (op.type != CmdLineArgType::Simple)
-		{
-			Q_ASSERT(false);				// wrong option type
-			return false;
-		}
-
-		return op.value.toBool();
-	}
-
-	Q_ASSERT(false);				// setting not found
-
-	return false;
-}*/
 
 QString CommandLineParser::helpText() const
 {
@@ -396,6 +362,10 @@ QString CommandLineParser::helpText() const
 			{
 			case CmdLineArgType::Simple:
 				opStr = Separator::MINUS + op.name;
+				break;
+
+			case CmdLineArgType::Bool:
+				opStr = Separator::MINUS + op.name + "=yes|no";
 				break;
 
 			case CmdLineArgType::SingleValue:
@@ -499,6 +469,7 @@ bool CommandLineParser::addCmdLineArg(CmdLineArgType type,
 	switch(op.type)
 	{
 	case CmdLineArgType::Simple:
+	case CmdLineArgType::Bool:
 		op.valueStr = boolToString(false);
 		break;
 
