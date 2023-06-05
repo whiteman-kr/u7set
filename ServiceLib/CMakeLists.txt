@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(ServiceLib LANGUAGES CXX)
-message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -16,6 +15,8 @@ add_library(${TARGET} STATIC
 	CommandLineParser.cpp
 	Service.h
 	Service.cpp
+	ServiceStarter.h
+	ServiceStarter.cpp
 )
 
 if(WIN32)

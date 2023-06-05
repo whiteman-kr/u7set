@@ -17,6 +17,8 @@ project(
 	DESCRIPTION "Radiy Platform Configuration Tools"
 	HOMEPAGE_URL "radiy.com")
 
+message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 

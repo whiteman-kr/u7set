@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(ClientTests LANGUAGES CXX)
-message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 enable_testing()
 
