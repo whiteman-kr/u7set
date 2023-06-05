@@ -143,6 +143,7 @@ bool ServiceWorker::getBoolSettingValue(const QString& settingName)
 
 	if (ok == false)
 	{
+		qDebug() << "ServiceWorker::getBoolSettingValue: Cannot convert setting" << settingName << ", value " << valueStr << " to bool.";
 		Q_ASSERT(false);
 		result = false;
 	}

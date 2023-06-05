@@ -26,6 +26,7 @@ namespace Sim
 		Script,			// Script is used to define override value
 	};
 
+
 	class OverrideSignalParam
 	{
 	public:
@@ -48,6 +49,8 @@ namespace Sim
 		void setSignedIntvalue(qint32 value);
 		void setFloatValue(float value);
 		void setDoubleValue(double value);
+
+		bool sameType(const OverrideSignalParam& another) const;
 
 		// Properties
 		//
