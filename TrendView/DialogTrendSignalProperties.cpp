@@ -236,6 +236,17 @@ bool DialogTrendSignalProperties::applyProperties()
 			return false;
 		}
 
+		QString analogFormatString = ui->viewFormatCombo->currentText();
+		E::AnalogFormat analogFormat = E::stringToValue<E::AnalogFormat>(analogFormatString, &ok);
+		if (ok == true)
+		{
+			m_trendSignal.setAnalogFormat(analogFormat);
+		}
+		else
+		{
+			Q_ASSERT(ok);
+		}
+
 		m_trendSignal.setViewHighLimit(m_scaleType, qMax(viewHighLimit, viewLowLimit));
 		m_trendSignal.setViewLowLimit(m_scaleType, qMin(viewHighLimit, viewLowLimit));
 		m_trendSignal.setPrecision(precision);

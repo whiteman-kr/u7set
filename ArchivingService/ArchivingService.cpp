@@ -11,14 +11,17 @@
 
 ArchivingService::ArchivingService(const SoftwareInfo& softwareInfo,
 											   const QString& serviceName,
-											   int& argc,
+											   int argc,
 											   char** argv,
-											   CircularLoggerShared logger,
-											   E::ServiceRunMode runMode) :
-	ServiceWorker(softwareInfo, serviceName, argc, argv, logger, runMode)
+											   CircularLoggerShared logger) :
+	ServiceWorker(softwareInfo, serviceName, argc, argv, logger)
 {
 }
 
+ArchivingService::ArchivingService(const ArchivingService* worker) :
+	ServiceWorker(worker)
+{
+}
 
 ArchivingService::~ArchivingService()
 {
@@ -27,13 +30,7 @@ ArchivingService::~ArchivingService()
 
 ServiceWorker* ArchivingService::createInstance() const
 {
-	ArchivingService* archServiceWorker = new ArchivingService(softwareInfo(),
-															   serviceName(),
-															   argc(), argv(),
-															   logger(),
-															   serviceRunMode());
-	archServiceWorker->init();
-
+	ArchivingService* archServiceWorker = new ArchivingService(this);
 	return archServiceWorker;
 }
 
@@ -44,28 +41,26 @@ void ArchivingService::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo)
 	serviceInfo.set_settingsxml(xmlString.toStdString());
 }
 
-void ArchivingService::initCmdLineParser()
+void ArchivingService::initServiceSpecificCmdLineArgs()
 {
-	CommandLineParser& cp = cmdLineParser();
-
-	cp.addSingleValueOption("id", SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
-	cp.addSingleValueOption("cfgip1", SoftwareSetting::CFG_SERVICE_IP1, "IP-addres of first Configuration Service.", "");
-	cp.addSingleValueOption("cfgip2", SoftwareSetting::CFG_SERVICE_IP2, "IP-addres of second Configuration Service.", "");
-	cp.addSingleValueOption("location",
-							SoftwareSetting::ARCHIVE_LOCATION,
-							"Path to archive location (overwrite ArchiveLocation from project settings)", "D:\\Archives");
-	cp.addSingleValueOption("mq",
+	addValueCmdLineArg(CmdLineArg::ID, SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
+	addValueCmdLineArg(CmdLineArg::CFG_IP1, SoftwareSetting::CFG_SERVICE_IP1, "IP-addres of first Configuration Service.", "");
+	addValueCmdLineArg(CmdLineArg::CFG_IP2, SoftwareSetting::CFG_SERVICE_IP2, "IP-addres of second Configuration Service.", "");
+	addValueCmdLineArg("location",
+						SoftwareSetting::ARCHIVE_LOCATION,
+						"Path to archive location (overwrite ArchiveLocation from project settings)", "D:\\Archives");
+	addValueCmdLineArg("mq",
 							SoftwareSetting::MIN_QUEUE_SIZE_FOR_FLUSHING,
 							QString("Minimum size of signal states queue for flushing to disk (default = %1 states).").
 								arg(Archive::DEFAULT_QUEUE_SIZE_FOR_FLUSHING), "");
 
 }
 
-void ArchivingService::loadSettings()
+void ArchivingService::loadServiceSpecificSettings()
 {
-	m_overwriteArchiveLocation = QString(getStrSetting(SoftwareSetting::ARCHIVE_LOCATION));
+	m_overwriteArchiveLocation = getSettingValue(SoftwareSetting::ARCHIVE_LOCATION);
 
-	QString sizeStr = getStrSetting(SoftwareSetting::MIN_QUEUE_SIZE_FOR_FLUSHING);
+	QString sizeStr = getSettingValue(SoftwareSetting::MIN_QUEUE_SIZE_FOR_FLUSHING);
 
 	bool ok = false;
 
@@ -76,7 +71,8 @@ void ArchivingService::loadSettings()
 		m_minQueueSizeForFlushing = Archive::DEFAULT_QUEUE_SIZE_FOR_FLUSHING;
 	}
 
-	DEBUG_LOG_MSG(logger(), QString(tr("Settings from command line or registry:")));
+	DEBUG_LOG_MSG(logger(), "");
+	DEBUG_LOG_MSG(logger(), QString(tr("Service settings:")));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::EQUIPMENT_ID).arg(equipmentID()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP1).
 						arg(cfgServiceIP1().addressPortStrIfSet()));
@@ -84,6 +80,7 @@ void ArchivingService::loadSettings()
 						arg(cfgServiceIP2().addressPortStrIfSet()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::ARCHIVE_LOCATION).arg(m_overwriteArchiveLocation));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::MIN_QUEUE_SIZE_FOR_FLUSHING).arg(m_minQueueSizeForFlushing));
+	DEBUG_LOG_MSG(logger(), "");
 }
 
 void ArchivingService::initialize()

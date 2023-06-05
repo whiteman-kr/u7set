@@ -4,6 +4,7 @@
 #include <QElapsedTimer>
 #include <QDebug>
 #include <cmath>
+#include <set>
 
 #define ASSERT_RESULT_FALSE_BREAK	Q_ASSERT(false); \
 									result = false; \
@@ -227,4 +228,56 @@ inline QString formatUptime(qint64 uptime)
 						arg(s, 2, 10, QChar('0'));
 
 	return uptimeStr;
+}
+
+inline bool stringToBool(const QString str, bool* ok)
+{
+	QString boolStr = str.trimmed().toLower();
+
+	static const std::set<QString> trueStr =
+	{
+		QString("1"),
+		QString("true"),
+		QString("yes"),
+		QString("on"),
+	};
+
+	static const std::set<QString> falseStr =
+	{
+		QString("0"),
+		QString("false"),
+		QString("no"),
+		QString("off"),
+	};
+
+	bool _ok = true;
+	bool result = false;
+
+	if (trueStr.contains(boolStr) == true)
+	{
+		result = true;
+	}
+	else
+	{
+		if (falseStr.contains(boolStr) == true)
+		{
+			result = false;
+		}
+		else
+		{
+			_ok = false;
+		}
+	}
+
+	if (ok != nullptr)
+	{
+		*ok = _ok;
+	}
+
+	return result;
+}
+
+inline QString boolToString(bool value)
+{
+	return QString(value ? "true" : "false");
 }

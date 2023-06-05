@@ -52,6 +52,7 @@ namespace Locator
 		if (m_dbc.isProjectOpened() == true)
 		{
 			m_files.clear();
+			m_schemaDetails.clear();
 			m_dbc.closeProject(nullptr);
 		}
 
@@ -85,18 +86,47 @@ namespace Locator
 		result.reserve(32);
 		bool addMoreSchemas = false;
 
-		for (const auto&[_, file] : m_files.files())
+		for (const auto&[fileId, file] : m_files)
 		{
 			if (file->isFolder() == true)
 			{
 				continue;
 			}
 
-			QString name = file->fileName();
-
-			if (name.contains(text, Qt::CaseInsensitive) == false)
+			if (QString name = file->fileName();
+				name.contains(text, Qt::CaseInsensitive) == true)
 			{
-				continue;
+				QString path = m_files.filePath(file->fileId());
+				if (path.startsWith(QChar{'/'}) == true)
+				{
+					path = path.right(path.size() - 1);
+				}
+
+				result.emplace_back(name, path, QVariant::fromValue(*file.get()));
+			}
+
+			if (auto schemaDetailsIt = m_schemaDetails.find(fileId);
+				schemaDetailsIt != m_schemaDetails.end())
+			{
+				const VFrame30::SchemaDetails& schemaDetails = schemaDetailsIt->second;
+
+				QUuid guid = QUuid::fromString(text);
+
+				if (schemaDetails.hasSignal(text) == true ||
+					schemaDetails.hasEquipmentId(text) == true ||
+					schemaDetails.hasLoopback(text) == true ||
+					schemaDetails.hasLabel(text) == true ||
+					schemaDetails.hasConnection(text) == true ||
+					(guid.isNull() == false && schemaDetails.hasGuid(guid) == true))
+				{
+					QString path = m_files.filePath(file->fileId());
+					if (path.startsWith(QChar{'/'}) == true)
+					{
+						path = path.right(path.size() - 1);
+					}
+
+					result.emplace_back(text + " on schema " + file->fileName(), path, QVariant::fromValue(*file.get()));
+				}
 			}
 
 			if (result.size() > 255)
@@ -107,13 +137,6 @@ namespace Locator
 				break;
 			}
 
-			QString path = m_files.filePath(file->fileId());
-			if (path.startsWith(QChar{'/'}) == true)
-			{
-				path = path.right(path.size() - 1);
-			}
-
-			result.emplace_back(name, path, QVariant::fromValue(*file.get()));
 		}
 
 		// Sort by caption (path) first.
@@ -129,6 +152,8 @@ namespace Locator
 			result.emplace_back("...", tr("...more schemas..."));
 		}
 
+		// --
+		//
 		emit resultReady(text, std::move(result));
 		return;
 	}
@@ -145,6 +170,8 @@ namespace Locator
 		}
 
 		m_files.clear();
+		m_schemaDetails.clear();
+
 		bool ok = m_dbc.getFileListTree(&m_files, m_dbc.systemFileId(DbDir::SchemasDir), true, nullptr);
 		if (ok == false)
 		{
@@ -155,6 +182,12 @@ namespace Locator
 		m_files.removeFilesWithExtension(Db::File::MvsTemplExtension);
 		m_files.removeFilesWithExtension(Db::File::UfbTemplExtension);
 		m_files.removeFilesWithExtension(Db::File::DvsTemplExtension);
+
+		m_schemaDetails.reserve(m_files.size());
+		for (const auto&[fileId, fileInfo] : m_files)
+		{
+			m_schemaDetails[fileId] = VFrame30::SchemaDetails{fileInfo->details()};
+		}
 
 		return true;
 	}

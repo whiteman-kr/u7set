@@ -54,7 +54,7 @@ bool AppSignalSpecPropValue::create(const QString& name, const QVariant& value, 
 	m_value = value;
 	m_isEnum = isEnum;
 
-	return true;
+    return true;
 }
 
 bool AppSignalSpecPropValue::setValue(const QString& name, const QVariant& value, bool isEnum)
@@ -1360,6 +1360,37 @@ void AppSignal::writeToAzpzXml(XmlWriteHelper& xml)
 	xml.writeEndElement();				// </Signal>
 }
 
+void AppSignal::writeDoubleSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName)
+{
+	QVariant v;
+	bool isEnum = false;
+	bool res = getSpecPropValue(propName, &v, &isEnum, nullptr);
+
+	if (res == true)
+	{
+		xml.writeDoubleAttribute(attributeName.isEmpty() == true ? propName : attributeName, v.toDouble());
+	}
+	else
+	{
+		xml.writeStringAttribute(attributeName.isEmpty() == true ? propName : attributeName, QString());
+	}
+}
+
+void AppSignal::writeIntSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName)
+{
+	QVariant v;
+	bool isEnum = false;
+	bool res = getSpecPropValue(propName, &v, &isEnum, nullptr);
+
+	if (res == true)
+	{
+		xml.writeIntAttribute(attributeName.isEmpty() == true ? propName : attributeName, v.toInt());
+	}
+	else
+	{
+		xml.writeStringAttribute(attributeName.isEmpty() == true ? propName : attributeName, QString());
+	}
+}
 
 void AppSignal::writeToXml(XmlWriteHelper& xml)
 {
@@ -1457,50 +1488,13 @@ void AppSignal::writeToXml(XmlWriteHelper& xml)
 				continue;
 			}
 
-            if (name == AppSignalPropNames::INPUT_RANGE)
-            {
-                continue;
-            }
-
-			Q_ASSERT(false);		// unknown E::* enum type!
+			xml.writeQVariantAttribute(spv.name(), spv.value());
 		}
 	}
 
 	xml.writeStringAttribute(AppSignalPropNames::TAGS, tags().join(Separator::COMMA));
 
 	xml.writeEndElement();				// </Signal>
-}
-
-void AppSignal::writeDoubleSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName)
-{
-	QVariant v;
-	bool isEnum = false;
-	bool res = getSpecPropValue(propName, &v, &isEnum, nullptr);
-
-	if (res == true)
-	{
-		xml.writeDoubleAttribute(attributeName.isEmpty() == true ? propName : attributeName, v.toDouble());
-	}
-	else
-	{
-		xml.writeStringAttribute(attributeName.isEmpty() == true ? propName : attributeName, QString());
-	}
-}
-
-void AppSignal::writeIntSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName)
-{
-	QVariant v;
-	bool isEnum = false;
-	bool res = getSpecPropValue(propName, &v, &isEnum, nullptr);
-
-	if (res == true)
-	{
-		xml.writeIntAttribute(attributeName.isEmpty() == true ? propName : attributeName, v.toInt());
-	}
-	else
-	{
-		xml.writeStringAttribute(attributeName.isEmpty() == true ? propName : attributeName, QString());
-	}
 }
 
 bool AppSignal::readFromXml(XmlReadHelper& xml)
@@ -1614,18 +1608,10 @@ bool AppSignal::readFromXml(XmlReadHelper& xml)
 			continue;
 		}
 
-		if (spv.isEnum() == false)
-		{
-			QVariant qv = spv.value();			// to set Type of qv equal to Type of spv.value()
-			result &= xml.readQVariantAttribute(name, &qv);
-			spv.setValue(name, qv, false);
-		}
-		else
-		{
-			int iv = 0;
-			result &= xml.readIntAttribute(name, &iv);
-			spv.setValue(name, QVariant(iv), true);
-		}
+		QVariant qv = spv.value();			// to set Type of qv equal to Type of spv.value()
+
+		result &= xml.readQVariantAttribute(name, &qv);
+		spv.setValue(name, qv, spv.isEnum());
 	}
 
 	spvs.serializeValuesToArray(&m_protoSpecPropValues);

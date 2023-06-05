@@ -36,7 +36,7 @@ class UalTester : public QObject
 
 public:
 
-	UalTester(int& argc, char** argv, std::shared_ptr<CircularLogger> logger);
+	UalTester(int argc, char** argv, std::shared_ptr<CircularLogger> logger);
 	~UalTester();
 
 public:

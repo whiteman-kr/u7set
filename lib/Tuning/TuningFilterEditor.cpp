@@ -211,11 +211,11 @@ void ChooseTuningSignalsWidget::setReadOnly(bool value)
 
 	m_removeValue->setEnabled(readOnly() == false && selectedFilterValuesItems.size() > 0);
 
-	m_setValue->setEnabled(readOnly() == false && selectedFilterValuesItems.size() == 1);
+    m_setValue->setEnabled(readOnly() == false && selectedFilterValuesItems.size() > 0);
 
 	if (m_setCurrent != nullptr)
 	{
-		m_setCurrent->setEnabled(readOnly() == false && selectedFilterValuesItems.size() == 1);
+        m_setCurrent->setEnabled(readOnly() == false && selectedFilterValuesItems.size() > 0);
 	}
 
 	return;
@@ -610,12 +610,6 @@ void ChooseTuningSignalsWidget::on_m_setValue_clicked()
 				}
 			}
 
-			if (asp.tuningDefaultValue() != defaultValue)
-			{
-				QMessageBox::warning(this, tr("Filter Editor"), tr("Selected signals have different default value."));
-				return;
-			}
-
 			if (fv.useValue() == true && fv.value() != value)
 			{
 				sameValue = false;
@@ -965,11 +959,11 @@ void ChooseTuningSignalsWidget::on_m_filterValuesTree_itemSelectionChanged()
 
 	m_removeValue->setEnabled(readOnly() == false && selectedFilterValuesItems.size() > 0);
 
-	m_setValue->setEnabled(readOnly() == false && selectedFilterValuesItems.size() == 1);
+    m_setValue->setEnabled(readOnly() == false && selectedFilterValuesItems.size() > 0);
 
 	if (m_setCurrent != nullptr)
 	{
-		m_setCurrent->setEnabled(readOnly() == false && selectedFilterValuesItems.size() == 1);
+        m_setCurrent->setEnabled(readOnly() == false && selectedFilterValuesItems.size() > 0);
 	}
 
 	return;

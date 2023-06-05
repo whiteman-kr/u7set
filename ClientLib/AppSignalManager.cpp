@@ -688,6 +688,24 @@ namespace ClientLib
 		return it->second.contains(signalHash);
 	}
 
+	std::vector<Hash> AppSignalManager::dataServiceSignals(const QString& serviceEquipmentId) const
+	{
+		std::vector<Hash> result;
+
+		QReadLocker rl(&m_paramsLocker);
+
+		auto it = m_appDataServiceToSignalHashList.find(serviceEquipmentId);
+		if (it != m_appDataServiceToSignalHashList.end())
+		{
+			const auto& signalsByDataService = it->second;
+
+			result.reserve(signalsByDataService.size());
+			std::copy(signalsByDataService.begin(), signalsByDataService.end(), std::back_inserter(result));
+		}
+
+		return result;
+	}
+
 	QStringList AppSignalManager::tags() const
 	{
 		QReadLocker rl(&m_paramsLocker);
@@ -719,6 +737,27 @@ namespace ClientLib
 		}
 
 		return signalParam(appSignalIdHash, found);
+	}
+
+	std::vector<AppSignalManager::SourceState> AppSignalManager::signalStateAllSources(const QString& appSignalId) const
+	{
+		std::vector<AppSignalManager::SourceState> result;
+		result.reserve(4);
+
+		QReadLocker rl(&m_statesLocker);
+
+		auto foundState = m_states.find(::calcHash(appSignalId));
+		if (foundState != m_states.end())
+		{
+			const Sources& sources = foundState->second;
+
+			for (const auto& source : sources.sources)
+			{
+				result.push_back(source);
+			}
+		}
+
+		return result;
 	}
 
 	void AppSignalManager::Sources::set(const AppSignalState& state, Qt::HANDLE sourceThreadId)

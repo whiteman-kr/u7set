@@ -12,8 +12,9 @@ namespace Gateway
 										 const GatewayServiceSettings& settings,
 										 IvsImpulseGatewayShared gateway,
 										 const AppSignals& appSignals,
-										 CircularLoggerShared log) :
-		Handler(swInfo, settings, log),
+										 CircularLoggerShared log,
+										 bool logGatewayPackets) :
+		Handler(swInfo, settings, log, logGatewayPackets),
 		m_softwareInfo(swInfo),
 		m_appDataService1(settings.appDataService1.address),
 		m_appDataService2(settings.appDataService2.address),
@@ -36,7 +37,7 @@ namespace Gateway
 												m_appDataService1,
 												m_appDataService2,
 												QString("GatewayService %1").arg(m_softwareInfo.equipmentID()),
-												*this);
+												*this, m_log);
 		m_appDataServiceClientThread->start();
 
 		m_ivsImpulseCommThread = new IvsImpulseCommThread(*this);

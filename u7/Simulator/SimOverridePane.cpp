@@ -13,23 +13,8 @@ SimOverridePane::SimOverridePane(Sim::Simulator* simulator, DbController* dbc, Q
 	assert(m_simulator);
 
 	m_treeWidget = new QOverrideListWidget(m_simulator, this);
+
 	m_treeWidget->installEventFilter(this);
-
-	m_treeWidget->setRootIsDecorated(false);
-	m_treeWidget->setUniformRowHeights(true);
-
-	m_treeWidget->setColumnCount(static_cast<int>(QOverrideTreeWidgetItem::Columns::ColumnCount));
-
-	QStringList headerLabels;
-	headerLabels << "No";
-	headerLabels << "SignalID";
-	headerLabels << "Caption";
-	headerLabels << "Type";
-	headerLabels << "Override Value";
-
-	assert(headerLabels.size() == static_cast<int>(QOverrideTreeWidgetItem::Columns::ColumnCount));
-
-	m_treeWidget->setHeaderLabels(headerLabels);
 
 	// --
 	//
@@ -70,6 +55,8 @@ SimOverridePane::SimOverridePane(Sim::Simulator* simulator, DbController* dbc, Q
 	m_currentFormat = static_cast<E::AnalogFormat>(settings.value("SimulatorWidget/SimOverridenSignals/m_currentFormat", 'g').toInt());
 	m_currentPrecision = settings.value("SimulatorWidget/SimOverridenSignals/m_currentPrecision", -1).toInt();
 
+	startTimer(std::chrono::milliseconds{200});
+
 	return;
 }
 
@@ -85,6 +72,11 @@ SimOverridePane::~SimOverridePane()
 	settings.setValue("SimulatorWidget/SimOverridenSignals/m_currentPrecision", m_currentPrecision);
 
 	return;
+}
+
+void SimOverridePane::timerEvent(QTimerEvent* /*event*/)
+{
+	updateValueColumn();
 }
 
 void SimOverridePane::dragEnterEvent(QDragEnterEvent* event)
@@ -211,9 +203,17 @@ bool SimOverridePane::eventFilter(QObject* obj, QEvent* event)
 			{
 				// Switch discrete signal 1 - 0 - 1 - 0...
 				//
-				QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(m_treeWidget->currentItem());
-				if (item != nullptr)
+				QList<QTreeWidgetItem*> selectedItems = m_treeWidget->selectedItems();
+
+				std::sort(selectedItems.begin(), selectedItems.end(), [this](QTreeWidgetItem* i1, QTreeWidgetItem* i2) {
+					return m_treeWidget->indexOfTopLevelItem(i1) < m_treeWidget->indexOfTopLevelItem(i2);
+				});
+
+				for (QTreeWidgetItem* selectedItem : selectedItems)
 				{
+					QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(selectedItem);
+					assert(item != nullptr);
+
 					if (item->m_overrideSignal.signalType() == E::SignalType::Discrete)
 					{
 						quint16 currentValue = item->m_overrideSignal.value().value<quint16>();
@@ -233,26 +233,60 @@ bool SimOverridePane::eventFilter(QObject* obj, QEvent* event)
 //					//
 //					item->setCheckState(0, item->checkState(0) == Qt::Checked ? Qt::Unchecked : Qt::Checked);
 //				}
+
+				updateValueColumn();
 			}
 			return true;
 		case Qt::Key_0:
 			{
-				QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(m_treeWidget->currentItem());
-				if (item != nullptr)
+				QList<QTreeWidgetItem*> selectedItems = m_treeWidget->selectedItems();
+
+				std::sort(selectedItems.begin(), selectedItems.end(), [this](QTreeWidgetItem* i1, QTreeWidgetItem* i2) {
+					return m_treeWidget->indexOfTopLevelItem(i1) < m_treeWidget->indexOfTopLevelItem(i2);
+				});
+
+				for (QTreeWidgetItem* selectedItem : selectedItems)
 				{
-					QString appSignalId = item->m_overrideSignal.appSignalId();
-					setValue(appSignalId, Sim::OverrideSignalMethod::Value, QVariant::fromValue<qint32>(0));
+					QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(selectedItem);
+					assert(item != nullptr);
+
+					if (item->m_overrideSignal.signalType() == E::SignalType::Discrete)
+					{
+						quint16 currentValue = item->m_overrideSignal.value().value<quint16>();
+						currentValue = currentValue ? 0 : 1;
+
+						QString appSignalId = item->m_overrideSignal.appSignalId();
+						setValue(appSignalId, Sim::OverrideSignalMethod::Value, QVariant::fromValue<qint32>(0));
+					}
 				}
+
+				updateValueColumn();
 			}
 			return true;
 		case Qt::Key_1:
 			{
-				QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(m_treeWidget->currentItem());
-				if (item != nullptr)
+				QList<QTreeWidgetItem*> selectedItems = m_treeWidget->selectedItems();
+
+				std::sort(selectedItems.begin(), selectedItems.end(), [this](QTreeWidgetItem* i1, QTreeWidgetItem* i2) {
+					return m_treeWidget->indexOfTopLevelItem(i1) < m_treeWidget->indexOfTopLevelItem(i2);
+				});
+
+				for (QTreeWidgetItem* selectedItem : selectedItems)
 				{
-					QString appSignalId = item->m_overrideSignal.appSignalId();
-					setValue(appSignalId, Sim::OverrideSignalMethod::Value, QVariant::fromValue<qint32>(1));
+					QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(selectedItem);
+					assert(item != nullptr);
+
+					if (item->m_overrideSignal.signalType() == E::SignalType::Discrete)
+					{
+						quint16 currentValue = item->m_overrideSignal.value().value<quint16>();
+						currentValue = currentValue ? 0 : 1;
+
+						QString appSignalId = item->m_overrideSignal.appSignalId();
+						setValue(appSignalId, Sim::OverrideSignalMethod::Value, QVariant::fromValue<qint32>(1));
+					}
 				}
+
+				updateValueColumn();
 			}
 			return true ;
 		}
@@ -267,26 +301,45 @@ void SimOverridePane::contextMenuEvent(QContextMenuEvent* event)
 {
 	QList<QTreeWidgetItem*> selectedItems = m_treeWidget->selectedItems();
 
-	QString appSignalId;
-	if (selectedItems.size() == 1)
+	QStringList appSignalIds;
+	appSignalIds.reserve(selectedItems.size());
+
+	bool signalsHaveTheSameType = true;
+	std::optional<Sim::OverrideSignalParam> firstSignal;
+
+	for (QTreeWidgetItem* selectedItem : selectedItems)
 	{
-		QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(selectedItems.front());
+		QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(selectedItem);
 		assert(item != nullptr);
 
-		appSignalId = item->m_overrideSignal.appSignalId();
+		appSignalIds.push_back(item->m_overrideSignal.appSignalId());
+
+		// Check if selected isgnals have the same type and data format.
+		//
+		if (firstSignal.has_value() == false)
+		{
+			firstSignal = item->m_overrideSignal;
+		}
+		else
+		{
+			signalsHaveTheSameType &= firstSignal->sameType(item->m_overrideSignal);
+		}
 	}
 
-	QMenu menu(this);
+	QMenu menu{this};
+
 
 	// Set Value
 	//
 	QAction* setValueAction = menu.addAction(tr("Set Value..."),
-											[this, &appSignalId]
+											[this, &appSignalIds, signalsHaveTheSameType]
 											{
-												showSetValueDialog(appSignalId);
+												if (signalsHaveTheSameType == true && appSignalIds.empty() == false)
+												{
+													showSetValueDialog(appSignalIds);
+												}
 											});
-
-	setValueAction->setEnabled(!appSignalId.isEmpty());
+	setValueAction->setEnabled(signalsHaveTheSameType == true && appSignalIds.empty() == false);
 
 	menu.setDefaultAction(setValueAction);
 
@@ -301,18 +354,18 @@ void SimOverridePane::contextMenuEvent(QContextMenuEvent* event)
 
 	// Remove Signal
 	//
-	QAction* removeSignalAction = menu.addAction(tr("Remove Signal"),
-												[this, &appSignalId]
+	QAction* removeSignalAction = menu.addAction(tr("Remove Signal(s)"),
+												[this]
 												{
-													removeSignal(appSignalId);
+													removeSelectedSignals();
 												});
 	removeSignalAction->setShortcut(QKeySequence::Delete);
-	removeSignalAction->setEnabled(!appSignalId.isEmpty());
+	removeSignalAction->setEnabled(appSignalIds.isEmpty() == false);
 
 	// Clear
 	//
-	QAction* clearAction = menu.addAction(tr("Clear"), [this]{clear();});
-	clearAction->setEnabled(!selectedItems.empty());
+	QAction* clearAction = menu.addAction(tr("Clear All"), [this](){ clear(); });
+	Q_UNUSED(clearAction);
 
 	// ---------------------------------------
 	//
@@ -476,7 +529,7 @@ void SimOverridePane::contextMenuEvent(QContextMenuEvent* event)
 											}
 										});
 
-	copyAction->setEnabled(!appSignalId.isEmpty());
+	copyAction->setEnabled(appSignalIds.size() == 1);
 
 	// --
 	//
@@ -485,7 +538,7 @@ void SimOverridePane::contextMenuEvent(QContextMenuEvent* event)
 	if (formatChanged == true)
 	{
 		updateValueColumn();
-		SimOverrideUI::OverrideValueWidget::setViewOptions(appSignalId, m_currentBase, m_currentFormat, m_currentPrecision);
+		SimOverrideUI::OverrideDialog::setViewOptions(appSignalIds, m_currentBase, m_currentFormat, m_currentPrecision);
 	}
 
 	return;
@@ -560,6 +613,7 @@ void SimOverridePane::fillListWidget(const std::vector<Sim::OverrideSignalParam>
 void SimOverridePane::selectSignal(QString appSignalId)
 {
 	int count = m_treeWidget->topLevelItemCount();
+	m_treeWidget->setCurrentItem(nullptr);
 
 	for (int i = 0; i < count; i++)
 	{
@@ -571,23 +625,80 @@ void SimOverridePane::selectSignal(QString appSignalId)
 			return;
 		}
 
-		item->setSelected(item->m_overrideSignal.appSignalId() == appSignalId);
-
-		if (item->isSelected() == true)
+		if (item->m_overrideSignal.appSignalId() == appSignalId)
 		{
+			item->setSelected(true);
+			m_treeWidget->setCurrentItem(item);
 			m_treeWidget->scrollToItem(item);
+		}
+		else
+		{
+			item->setSelected(false);
 		}
 	}
 
 	return;
 }
 
-void SimOverridePane::itemDoubleClicked(QTreeWidgetItem* item, int /*column*/)
+void SimOverridePane::itemDoubleClicked(QTreeWidgetItem* /*item*/, int /*column*/)
 {
-	QOverrideTreeWidgetItem* toItem = dynamic_cast<QOverrideTreeWidgetItem*>(item);
-	assert(toItem);
+	QList<QTreeWidgetItem*> selectedItems = m_treeWidget->selectedItems();
 
-	showSetValueDialog(toItem->m_overrideSignal.appSignalId());
+	QStringList appSignalIds;
+	appSignalIds.reserve(selectedItems.size());
+
+	bool signalsHaveTheSameType = true;
+	std::optional<Sim::OverrideSignalParam> firstSignal;
+
+	QString detailsText;
+
+	for (QTreeWidgetItem* selectedItem : selectedItems)
+	{
+		QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(selectedItem);
+		assert(item != nullptr);
+
+		appSignalIds.push_back(item->m_overrideSignal.appSignalId());
+
+		// Check if selected isgnals have the same type and data format.
+		//
+		if (firstSignal.has_value() == false)
+		{
+			firstSignal = item->m_overrideSignal;
+		}
+		else
+		{
+			signalsHaveTheSameType &= firstSignal->sameType(item->m_overrideSignal);
+		}
+
+		if (item->m_overrideSignal.signalType() == E::SignalType::Analog)
+		{
+			detailsText += QString{"%1, type: %2, data format: %3\n"}
+						   .arg(item->m_overrideSignal.appSignalId())
+						   .arg(E::valueToString(item->m_overrideSignal.signalType()))
+						   .arg(E::valueToString(item->m_overrideSignal.dataFormat()));
+		}
+
+		if (item->m_overrideSignal.signalType() == E::SignalType::Discrete)
+		{
+			detailsText += QString{"%1, type: %2\n"}
+						   .arg(item->m_overrideSignal.appSignalId())
+						   .arg(E::valueToString(item->m_overrideSignal.signalType()));
+		}
+
+	}
+
+	if (signalsHaveTheSameType == false)
+	{
+		QMessageBox mb{this};
+		mb.setIcon(QMessageBox::Warning);
+		mb.setText(tr("Selected signals must have the same type and data format."));
+		mb.setDetailedText(detailsText);
+
+		mb.exec();
+		return;
+	}
+
+	showSetValueDialog(appSignalIds);
 
 	return;
 }
@@ -625,7 +736,29 @@ void SimOverridePane::signalsChanged(QStringList addedAppSignalIds)
 
 void SimOverridePane::signalStateChanged(QStringList /*appSignalId*/)
 {
+	// This slot can be called very frequently if the FastForward mode is on.
+	// To avoid UI freezing, skip updating values if they come too often.
+	// Also, signal states are sometimes updated by timer.
+	//
+	if (m_signalStateSlotTimer.isValid() == false)
+	{
+		m_signalStateSlotTimer.start();
+	}
+	else
+	{
+		if (m_signalStateSlotTimer.elapsed() < 50)	// ms
+		{
+			return;
+		}
+	}
+
+	m_signalStateSlotTimer.restart();
+
+	// --
+	//
 	updateValueColumn();
+
+	return;
 }
 
 void SimOverridePane::clear()
@@ -635,44 +768,50 @@ void SimOverridePane::clear()
 
 void SimOverridePane::removeSelectedSignals()
 {
-	QTreeWidgetItem* currentItem = m_treeWidget->currentItem();
+	QList<QTreeWidgetItem*> selectedItems = m_treeWidget->selectedItems();
 
-	if (currentItem != nullptr)
+	std::sort(selectedItems.begin(), selectedItems.end(), [this](QTreeWidgetItem* i1, QTreeWidgetItem* i2) {
+		return m_treeWidget->indexOfTopLevelItem(i1) < m_treeWidget->indexOfTopLevelItem(i2);
+	});
+
+	QStringList appSignalIds;
+	appSignalIds.reserve(selectedItems.size());
+
+	QString belowSignalId;
+
+	for (QTreeWidgetItem* selectedItem : selectedItems)
 	{
-		int index = m_treeWidget->indexOfTopLevelItem(currentItem);
-
-		QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(currentItem);
+		QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(selectedItem);
 		assert(item != nullptr);
 
-		QString appSignalId = item->m_overrideSignal.appSignalId();
-		removeSignal(appSignalId);
+		QString appSignalId  = item->m_overrideSignal.appSignalId();
+		appSignalIds.push_back(appSignalId);
 
-		// Select next item
-		//
-		if (index < m_treeWidget->topLevelItemCount())
+		if (item == selectedItems.back())
 		{
-			QTreeWidgetItem* nextItem = m_treeWidget->topLevelItem(index);
-			assert(nextItem);
-
-			if (nextItem != nullptr)
+			if (auto itemBelow = dynamic_cast<QOverrideTreeWidgetItem*>(m_treeWidget->itemBelow(item));
+				itemBelow != nullptr)
 			{
-				nextItem->setSelected(true);
-				m_treeWidget->setCurrentItem(nextItem);
+				belowSignalId = itemBelow->m_overrideSignal.appSignalId();
 			}
 		}
-		else
-		{
-			if (m_treeWidget->topLevelItemCount() != 0)
-			{
-				QTreeWidgetItem* lastItem = m_treeWidget->topLevelItem(m_treeWidget->topLevelItemCount() - 1);
-				assert(lastItem);
+	}
 
-				if (lastItem != nullptr)
-				{
-					lastItem->setSelected(true);
-					m_treeWidget->setCurrentItem(lastItem);
-				}
-			}
+	for (const QString& appSignalId : appSignalIds)
+	{
+		removeSignal(appSignalId);
+	}
+
+	if (belowSignalId.isEmpty() == false)
+	{
+		selectSignal(belowSignalId);
+	}
+	else
+	{
+		if (m_treeWidget->topLevelItemCount() != 0)
+		{
+			auto lastItem = m_treeWidget->topLevelItem(m_treeWidget->topLevelItemCount() - 1);
+			lastItem->setSelected(true);
 		}
 	}
 
@@ -798,18 +937,26 @@ void SimOverridePane::restoreWorkspace()
 	return;
 }
 
-void SimOverridePane::showSetValueDialog(QString appSignalId)
+void SimOverridePane::showSetValueDialog(const QStringList& appSignalIds)
 {
-	std::optional<Sim::OverrideSignalParam> osp = m_simulator->overrideSignals().overrideSignal(appSignalId);
+	std::vector<Sim::OverrideSignalParam> overrideValueSignals;
+	overrideValueSignals.reserve(appSignalIds.size());
 
-	if (osp.has_value() == false)
+	for (const QString& appSignalId : appSignalIds)
 	{
-		assert(osp.has_value());
-		return;
+		std::optional<Sim::OverrideSignalParam> osp = m_simulator->overrideSignals().overrideSignal(appSignalId);
+
+		if (osp.has_value() == false)
+		{
+			assert(osp.has_value());
+			return;
+		}
+
+		overrideValueSignals.emplace_back(osp.value());
 	}
 
-	SimOverrideUI::OverrideValueWidget::showDialog(osp.value(), m_simulator, dbc(), this);
-	SimOverrideUI::OverrideValueWidget::setViewOptions(osp.value().appSignalId(), m_currentBase, m_currentFormat, m_currentPrecision);
+	SimOverrideUI::OverrideDialog::showDialog(overrideValueSignals, *m_simulator, dbc(), this);
+	SimOverrideUI::OverrideDialog::setViewOptions(appSignalIds, m_currentBase, m_currentFormat, m_currentPrecision);
 
 	return;
 }
@@ -820,26 +967,82 @@ void SimOverridePane::setValue(QString appSignalId, Sim::OverrideSignalMethod me
 }
 
 
+namespace
+{
+	class NoCurrentRectItemDelegate : public QStyledItemDelegate
+	{
+	protected:
+		void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
+		{
+			QStyleOptionViewItem itemOption{option};
+			itemOption.state &= ~QStyle::State_HasFocus;
+
+			QStyledItemDelegate::paint(painter, itemOption, index);
+			return;
+		}
+	};
+}
+
+
 QOverrideListWidget::QOverrideListWidget(Sim::Simulator* simulator, QWidget* parent) :
 	QTreeWidget(parent),
 	m_simulator(simulator)
 {
 	assert(m_simulator);
+
+	setRootIsDecorated(false);
+	setUniformRowHeights(true);
+
+	setColumnCount(static_cast<int>(QOverrideTreeWidgetItem::Columns::ColumnCount));
+
+	QStringList headerLabels;
+	headerLabels << "No";
+	headerLabels << "SignalID";
+	headerLabels << "Caption";
+	headerLabels << "Type";
+	headerLabels << "Override Value";
+
+	assert(headerLabels.size() == static_cast<int>(QOverrideTreeWidgetItem::Columns::ColumnCount));
+
+	setHeaderLabels(headerLabels);
+
+	// Set selection and draw focused cell workaround.
+	//
+	setSelectionMode(QAbstractItemView::ExtendedSelection);
+	setItemDelegate(new NoCurrentRectItemDelegate);
+
+	return;
 }
 
 void QOverrideListWidget::mousePressEvent(QMouseEvent* event)
 {
-	if (QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(this->itemAt(event->pos()));
-		event->buttons().testFlag(Qt::LeftButton) == true &&
-		item != nullptr)
+	// Get all selected items
+	//
+	QList<QTreeWidgetItem*> selectedItems = this->selectedItems();
+
+	QStringList appDataIds;
+	appDataIds.reserve(selectedItems.size());
+
+	for (QTreeWidgetItem* selectedItem : selectedItems)
+	{
+		QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(selectedItem);
+		assert(item != nullptr);
+
+		appDataIds.push_back(item->m_overrideSignal.appSignalId());
+	}
+
+
+	// --
+	//
+	if (appDataIds.isEmpty() == false && event->buttons().testFlag(Qt::LeftButton) == true)
 	{
 		m_dragStartPos = event->pos();
-		m_dragAppSignalId = item->appSignalId();
+		m_dragAppSignalIds = std::move(appDataIds);
 	}
 	else
 	{
 		m_dragStartPos = {};
-		m_dragAppSignalId.clear();
+		m_dragAppSignalIds.clear();
 	}
 
 	if (state() == DragSelectingState ||
@@ -856,7 +1059,9 @@ void QOverrideListWidget::mousePressEvent(QMouseEvent* event)
 
 void QOverrideListWidget::mouseMoveEvent(QMouseEvent* event)
 {
-	if (m_dragAppSignalId.isEmpty() == false &&
+	QTreeWidget::mouseMoveEvent(event);
+
+	if (m_dragAppSignalIds.isEmpty() == false &&
 		event->buttons().testFlag(Qt::LeftButton) == true &&
 		(event->pos() - m_dragStartPos).manhattanLength() >= QApplication::startDragDistance())
 	{
@@ -864,18 +1069,21 @@ void QOverrideListWidget::mouseMoveEvent(QMouseEvent* event)
 		//
 		::Proto::AppSignalSet protoSetMessage;
 
-		bool ok = false;
-		AppSignalParam signalParam = m_simulator->appSignalManager().signalParam(m_dragAppSignalId, &ok);
-
-		if (ok == false)
+		for (const QString& appSignalId : m_dragAppSignalIds)
 		{
-			return QTreeWidget::mouseMoveEvent(event);
+			bool ok = false;
+
+			AppSignalParam signalParam = m_simulator->appSignalManager().signalParam(appSignalId, &ok);
+			if (ok == false)
+			{
+				continue;
+			}
+
+			assert(signalParam.appSignalId() == appSignalId) ;
+
+			::Proto::AppSignal* protoSignalMessage = protoSetMessage.add_appsignal();
+			signalParam.save(protoSignalMessage);
 		}
-
-		assert(signalParam.appSignalId() == m_dragAppSignalId) ;
-
-		::Proto::AppSignal* protoSignalMessage = protoSetMessage.add_appsignal();
-		signalParam.save(protoSignalMessage);
 
 		QByteArray data;
 		data.resize(static_cast<int>(protoSetMessage.ByteSizeLong()));
@@ -884,7 +1092,7 @@ void QOverrideListWidget::mouseMoveEvent(QMouseEvent* event)
 
 		// --
 		//
-		if (data.isEmpty() == false)
+		if (protoSetMessage.appsignal_size() > 0 && data.isEmpty() == false)
 		{
 			QDrag* drag = new QDrag(this);
 			QMimeData* mimeData = new QMimeData;
@@ -896,7 +1104,7 @@ void QOverrideListWidget::mouseMoveEvent(QMouseEvent* event)
 		}
 	}
 
-	return QTreeWidget::mouseMoveEvent(event);
+	return;
 }
 
 

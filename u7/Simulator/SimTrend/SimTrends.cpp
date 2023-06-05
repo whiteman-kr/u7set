@@ -268,64 +268,24 @@ void SimTrendsWidget::signalsButton()
 											  this);
 	
 	int result = dialog.exec();
-	
 	if (result == QDialog::Rejected)
 	{
 		return;
 	}
 
+	std::vector<TrendLib::TrendSignalParam> oldAnalogSignals = signalSet().analogSignals();
+
 	std::vector<TrendLib::TrendSignalParam> acceptedSignals = dialog.acceptedSignals();
-
-	// Remove signals
-	//
-	std::vector<TrendLib::TrendSignalParam> discreteSignals = signalSet().discreteSignals();
-	std::vector<TrendLib::TrendSignalParam> analogSignals = signalSet().analogSignals();
-
-	for (const TrendLib::TrendSignalParam& ds : discreteSignals)
-	{
-		auto it = std::find_if(acceptedSignals.begin(), acceptedSignals.end(),
-						[&ds](const auto& trendSignal)
-						{
-							return trendSignal.appSignalId() == ds.appSignalId();
-						});
-
-		if (it == acceptedSignals.end())
-		{
-			signalSet().removeSignal(ds);
-		}
-	}
-
-	for (const TrendLib::TrendSignalParam& as : analogSignals)
-	{
-		auto it = std::find_if(acceptedSignals.begin(), acceptedSignals.end(),
-						[&as](const auto& trendSignal)
-						{
-							return trendSignal.appSignalId() == as.appSignalId();
-						});
-
-		if (it == acceptedSignals.end())
-		{
-			signalSet().removeSignal(as);
-		}
-	}
-
-	// Add new signals
-	//
-	for (const auto& signal : acceptedSignals)
-	{
-		addSignal(signal, false);
-	}
+	updateSignals(acceptedSignals);
 
 	// Set default scale type if analog signals are empty and selected signals have special tags
 	//
-
-	if (analogSignals.empty() == true)
+	if (oldAnalogSignals.empty() == true)
 	{
 		autoSelectScaleType(acceptedSignals);
 	}
 
 	updateWidget();
-
 	return;
 }
 

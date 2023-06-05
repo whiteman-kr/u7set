@@ -360,6 +360,9 @@ namespace VFrame30
 		[[nodiscard]] bool hasEquipmentId(const QString& equipmentId) const;
 		[[nodiscard]] bool hasSignal(const QString& signalId) const;
 		[[nodiscard]] bool hasLoopback(const QString& loopbackId) const;
+		[[nodiscard]] bool hasLabel(const QString& label) const;
+		[[nodiscard]] bool hasConnection(const QString& connectionId) const;
+		[[nodiscard]] bool hasGuid(QUuid guid) const;
 
 	public:
 		int m_version = 0;

@@ -13,7 +13,8 @@ namespace Gateway
 	public:
 		Handler(const SoftwareInfo& swInfo,
 				const GatewayServiceSettings& settings,
-				CircularLoggerShared log);
+				CircularLoggerShared log,
+				bool logGatewayPackets);
 
 		virtual void run() = 0;
 		virtual void shutdown() = 0;
@@ -22,6 +23,8 @@ namespace Gateway
 		const SoftwareInfo& m_swInfo;
 		const GatewayServiceSettings& m_settings;
 		CircularLoggerShared m_log;
+
+		bool m_logGatewayPackets = false;
 	};
 
 	using HandlerShared = std::shared_ptr<Handler>;
@@ -35,7 +38,8 @@ namespace Gateway
 				  const SoftwareInfo& swInfo,
 				  const GatewayServiceSettings& settings,
 				  const AppSignals& appSignals,
-				  CircularLoggerShared log);
+				  CircularLoggerShared log,
+				  bool logGatewayPackets);
 		void run();
 		void shutdown();
 

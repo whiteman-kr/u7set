@@ -317,6 +317,18 @@ public:
 	DbFileTree& operator=(DbFileTree&& src) noexcept;
 
 public:
+	// Iteration
+	//
+	[[nodiscard]] auto begin() const
+	{
+		return m_files.begin();
+	}
+
+	[[nodiscard]] auto end() const
+	{
+		return m_files.end();
+	}
+
 	void clear();
 
 	[[nodiscard]] int size() const;
