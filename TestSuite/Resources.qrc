@@ -8,5 +8,8 @@
         <file>Images/CloseButtonBlack.svg</file>
         <file>Images/CloseButtonGray.svg</file>
         <file>Images/TestSuite.ico</file>
+        <file>Images/TestsReport.svg</file>
+        <file>Images/OpenLog.svg</file>
+        <file>Images/SaveLog.svg</file>
     </qresource>
 </RCC>

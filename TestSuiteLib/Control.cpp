@@ -31,7 +31,7 @@ namespace TestSuite
 		m_softwareInfo = softwareInfo;
 		m_settings = settings;
 
-		m_scriptsFiles = scriptsFiles;
+		m_scriptsToRun = scriptsFiles;
 		m_scriptsPath = scriptsPath;
 		m_testsFilter = testsFilter;
 
@@ -44,8 +44,25 @@ namespace TestSuite
 		return m_result.load();
 	}
 
+	ControlStatus ControlThread::status() const
+	{
+		QMutexLocker l(&m_statusMutex);
+		return m_status;
+	}
+
+	ReportLib::ReportTemplateStorage ControlThread::reportTemplates() const
+	{
+		QMutexLocker l(&m_reportTemplatesMutex);
+		return m_reportTemplates;
+	}
+
 	void ControlThread::run()
 	{
+		{
+			QMutexLocker l(&m_statusMutex);
+			m_status.reset();
+		}
+
 		m_appLog.writeMessage("ThreadStarted");
 		m_result.store(0);
 
@@ -84,6 +101,11 @@ namespace TestSuite
 		m_signals.reset();
 		m_inputController.reset();
 		m_outputController.reset();
+
+		{
+			QMutexLocker l(&m_statusMutex);
+			m_status.reset();
+		}
 		return;
 	}
 
@@ -100,6 +122,11 @@ namespace TestSuite
 
 	void ControlThread::taskCfgServiceConnection()
 	{
+		{
+			QMutexLocker l(&m_statusMutex);
+			m_status.m_state = ControlState::RequestingConfiguration;
+		}
+
 		TestSuiteConfigController configController{m_softwareInfo,
 					m_settings.configuratorAddress1(),
 					m_settings.configuratorAddress2(),
@@ -167,11 +194,21 @@ namespace TestSuite
 		}
 
 		m_configuration = configController.configuration();
+
+		{
+			QMutexLocker l(&m_reportTemplatesMutex);
+			m_reportTemplates = configController.reportTemplates();
+		}
 		return;
 	}
 
 	void ControlThread::taskInitInputController()
 	{
+		{
+			QMutexLocker l(&m_statusMutex);
+			m_status.m_state = ControlState::InitInputController;
+		}
+
 		auto controller = std::make_unique<AdsInputController>(m_signals,
 															   m_softwareInfo,
 															   m_configuration.appDataServices,
@@ -188,6 +225,11 @@ namespace TestSuite
 
 	void ControlThread::taskInitOutputController()
 	{
+		{
+			QMutexLocker l(&m_statusMutex);
+			m_status.m_state = ControlState::InitOutputController;
+		}
+
 		if (m_configuration.tuningEnabled == false)
 		{
 			m_outputController.reset();
@@ -214,29 +256,50 @@ namespace TestSuite
 		Q_ASSERT(m_inputController);
 		Q_ASSERT(m_outputController);
 
-		TestController testController{*m_inputController, *m_outputController};
+		std::vector<const TestScript*> runScripts;
 
-		bool fileTestResult = true;
+		// Build list of scripts to run
 
 		for (const auto& script : m_scripts)
 		{
 			// Process script files list, if it is not empty
 			//
-			if (m_scriptsFiles.empty() == false)
+			if (m_scriptsToRun.empty() == false)
 			{
-				if (std::find(m_scriptsFiles.begin(), m_scriptsFiles.end(), script.fileName()) == m_scriptsFiles.end())
+				if (std::find(m_scriptsToRun.begin(), m_scriptsToRun.end(), script.fileName()) == m_scriptsToRun.end())
 				{
 					continue;
 				}
 			}
 
+			runScripts.push_back(&script);
+		}
+
+		{
+			QMutexLocker l(&m_statusMutex);
+			m_status.m_state = ControlState::RunningTests;
+			m_status.m_scriptCount = runScripts.size();
+		}
+
+		TestController testController{*m_inputController, *m_outputController};
+
+		bool fileTestResult = true;
+
+		for (const auto& script : runScripts)
+		{
+			{
+				QMutexLocker l(&m_statusMutex);
+				m_status.m_scriptIndex++;
+				m_status.m_scriptFile = script->fileName();
+			}
+
 			checkAndInterruptTestExecution();
 
-			QString logMessage = tr("Run test script: %1").arg(script.fileName());
+			QString logMessage = tr("Run test script: %1").arg(script->fileName());
 			m_appLog.writeMessage(logMessage);
 
-			ScriptRunner scriptRunner{testController, *m_testLog};
-			fileTestResult &= scriptRunner.runScript(script, m_testsFilter);
+			ScriptRunner scriptRunner{testController, *m_testLog, m_status, m_statusMutex};
+			fileTestResult &= scriptRunner.runScript(*script, m_testsFilter);
 		}
 
 		if (fileTestResult == false)
@@ -245,6 +308,17 @@ namespace TestSuite
 		}
 
 		return;
+	}
+
+	void ControlThread::taskCreateReports()
+	{
+		{
+			QMutexLocker l(&m_statusMutex);
+			m_status.m_state = ControlState::CreatingReports;
+		}
+
+		return;
+
 	}
 
 
@@ -305,5 +379,16 @@ namespace TestSuite
 	{
 		return m_controlThread.isRunning();
 	}
+
+	ControlStatus Control::status() const
+	{
+		return m_controlThread.status();
+	}
+
+	ReportLib::ReportTemplateStorage Control::reportTemplates() const
+	{
+		return m_controlThread.reportTemplates();
+	}
+
 }
 

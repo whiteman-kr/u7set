@@ -652,5 +652,32 @@ namespace ReportLib
 		return m_templates;
 	}
 
+	const ReportTemplate& ReportTemplateStorage::templateByCaption(const QString& caption, bool* found) const
+	{
+		auto templ = std::find_if(m_templates.begin(),
+								  m_templates.end(),
+								  [&caption](const ReportLib::ReportTemplate& t){
+			return t.caption() == caption;
+		});
+
+		if (templ == m_templates.end())
+		{
+			Q_ASSERT(false);
+			if (found != nullptr)
+			{
+				*found = false;
+			}
+			static ReportTemplate err;
+			return err;
+		}
+
+		if (found != nullptr)
+		{
+			*found = true;
+		}
+		return *templ;
+
+	}
+
 
 }

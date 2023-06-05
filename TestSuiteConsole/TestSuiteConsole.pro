@@ -1,4 +1,4 @@
-QT += gui widgets qml sql xml svg testlib
+QT += core gui widgets sql network qml xml svg testlib
 
 
 CONFIG += console
@@ -71,7 +71,7 @@ unix:PRE_TARGETDEPS += $$DESTDIR/libReportLib.a
 INCLUDEPATH += $$PWD/../ReportLib
 DEPENDPATH += $$PWD/../ReportLib
 
-# VFrame30 library
+s# VFrame30 library
 #
 LIBS += -lVFrame30
 win32:PRE_TARGETDEPS += $$DESTDIR/VFrame30.lib
@@ -81,7 +81,7 @@ DEPENDPATH += ../VFrame30
 
 # TrendView library
 #
-zLIBS += -lTrendView
+LIBS += -lTrendView
 win32:PRE_TARGETDEPS += $$DESTDIR/TrendView.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libTrendView.a
 INCLUDEPATH += $$PWD/../TrendView

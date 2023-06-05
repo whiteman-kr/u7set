@@ -52,6 +52,7 @@ SOURCES += \
     ../lib/Ui/TabWidgetEx.cpp \
     AppConfigSettings.cpp \
     AppLogOutputWidget.cpp \
+    DialogReport.cpp \
     TestListWidget.cpp \
     TestLogTabPage.cpp \
     TestSuiteDialogSettings.cpp \
@@ -70,6 +71,7 @@ HEADERS += \
     ../lib/Ui/TabWidgetEx.h \
     AppConfigSettings.h \
     AppLogOutputWidget.h \
+    DialogReport.h \
     TestListWidget.h \
     TestLogTabPage.h \
     TestSuiteDialogSettings.h \
@@ -78,6 +80,7 @@ HEADERS += \
     TestViewTabPage.h
 
 FORMS += \
+    DialogReport.ui \
     TestSuiteDialogSettings.ui
 
 # Add curent dir to a list of library directory paths

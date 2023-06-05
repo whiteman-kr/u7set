@@ -4,6 +4,7 @@
 #include "ScriptTestLog.h"
 #include "TestScriptsStorage.h"
 #include "../UtilsLib/ILogFile.h"
+#include "ControlState.h"
 
 namespace TestSuite
 {
@@ -14,7 +15,7 @@ namespace TestSuite
 		Q_OBJECT
 
 	public:
-		ScriptRunner(TestController& testController, ITestLog& scriptTestLog);
+		ScriptRunner(TestController& testController, ITestLog& scriptTestLog, ControlStatus& status, QMutex& statusMutex);
 		virtual ~ScriptRunner();
 
 	public:
@@ -30,5 +31,8 @@ namespace TestSuite
 		QJSEngine m_jsEngine;
 		QJSValue m_jsTestController;
 		QJSValue m_jsLog;
+
+		ControlStatus& m_status;
+		QMutex& m_statusMutex;
 	};
 }

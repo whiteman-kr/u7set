@@ -215,6 +215,12 @@ namespace TestSuite
 		m_items.clear();
 	}
 
+	bool TestLog::empty() const
+	{
+		QWriteLocker l(&m_itemsLock);
+		return m_items.empty();
+	}
+
 	void TestLog::writeError(const QString& text, const QString& tag)
 	{
 		if (m_logOutput == nullptr)

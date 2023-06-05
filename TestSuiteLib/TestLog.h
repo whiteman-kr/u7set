@@ -71,6 +71,7 @@ namespace TestSuite
 		explicit TestLog(ITestLogOutput* logOutput);
 
 		void clear();
+		bool empty() const;
 
 		void writeError(const QString& text, const QString& tag) override;
 		void writeWarning(const QString& text, const QString& tag) override;

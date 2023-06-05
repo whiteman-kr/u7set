@@ -117,6 +117,8 @@ namespace ReportLib
 		bool load(const QByteArray& data, QString* errorCode);
 		const std::vector<ReportTemplate>& templates() const;
 
+		const ReportTemplate& templateByCaption(const QString& caption, bool* found) const;
+
 	private:
 		std::vector<ReportTemplate> m_templates;
 	};

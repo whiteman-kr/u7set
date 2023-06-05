@@ -2,9 +2,11 @@
 
 namespace TestSuite
 {
-	ScriptRunner::ScriptRunner(TestController& testController, ITestLog& scriptTestLog) :
+	ScriptRunner::ScriptRunner(TestController& testController, ITestLog& scriptTestLog, ControlStatus& status, QMutex& statusMutex) :
 		m_testController(testController),
-		m_scriptTestLog(scriptTestLog)
+		m_scriptTestLog(scriptTestLog),
+		m_status(status),
+		m_statusMutex(statusMutex)
 	{
 		m_jsEngine.installExtensions(QJSEngine::ConsoleExtension);
 
@@ -32,6 +34,12 @@ namespace TestSuite
 
 	bool ScriptRunner::runScript(const TestScript& script, const QString& functionsFilter)
 	{
+		{
+			QMutexLocker l(&m_statusMutex);
+			m_status.m_testIndex = 0;
+			m_status.m_testFunction = "evaluate";
+		}
+
 		qDebug() << "ScriptRunner::runScript(), script file: " << script.fileName();
 
 		m_scriptTestLog.writeMessage(tr("********** Start testing of %1 **********").arg(script.fileName()));
@@ -61,6 +69,11 @@ namespace TestSuite
 		//
 		QElapsedTimer timer;
 		timer.start();
+
+		{
+			QMutexLocker l(&m_statusMutex);
+			m_status.m_testFunction = "initTestCase";
+		}
 
 		// initTestCase() - will be called before the first test function is executed.
 		//
@@ -113,9 +126,22 @@ namespace TestSuite
 
 		std::sort(testList.begin(), testList.end());
 
+		{
+			QMutexLocker l(&m_statusMutex);
+			m_status.m_testIndex = 0;
+			m_status.m_testCount = testList.size();
+		}
+
+
 		int failed = 0;
 		for (const QString& testFunc : testList)
 		{
+			{
+				QMutexLocker l(&m_statusMutex);
+				m_status.m_testIndex++;
+				m_status.m_testFunction = testFunc;
+			}
+
 			// init() - called before each test function is executed.
 			//
 			if (bool initOk = runScriptFunction("init");
@@ -149,6 +175,11 @@ namespace TestSuite
 
 		// cleanupTestCase() - will be called after the last test function was executed.
 		//
+		{
+			QMutexLocker l(&m_statusMutex);
+			m_status.m_testFunction = "cleanupTestCase";
+		}
+
 		if (bool cleanupTestCaseResult = runScriptFunction("cleanupTestCase");
 			cleanupTestCaseResult == false)
 		{

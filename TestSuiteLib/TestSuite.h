@@ -47,6 +47,10 @@ namespace TestSuite
 
 		TestLog& testLog();
 
+		ControlStatus status() const;
+
+		ReportLib::ReportTemplateStorage reportTemplates() const;	// Returns templates received by taskCfgServiceConnection in Control thread
+
 	signals:
 		void finished(int result);
 

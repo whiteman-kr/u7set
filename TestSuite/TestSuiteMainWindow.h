@@ -46,7 +46,11 @@ private:
 	void fillTestsTree();
     void createReportActions();
 	void updateActionsState();
-	void updateTimeIndicator(const TestSuite::ControlStatus& state);
+
+	bool loadTestLog();
+	bool saveTestLog();
+
+	void updateStatusIndicator();
 
 	bool eventFilter(QObject *object, QEvent *event) override;
 	void timerEvent(QTimerEvent* event) override;
@@ -57,6 +61,7 @@ private slots:
 	void onExit();
 	void on_m_run_clicked();
 	void on_m_stop_clicked();
+	void on_m_report_clicked();
 
 	void onSaveTestLog();
 	void onLoadTestLog();
@@ -94,6 +99,8 @@ private:
 	//QAction* m_pauseAction = nullptr;
 	QAction* m_stopAction = nullptr;
 
+	QAction* m_reportAction = nullptr;
+
 	QAction* m_saveTestLogAction = nullptr;
 	QAction* m_loadTestLogAction = nullptr;
 	QAction* m_clearTestLogAction = nullptr;
@@ -104,8 +111,7 @@ private:
 	TabWidgetEx* m_tabWidget = nullptr;
 
 	QToolBar* m_toolBar = nullptr;
-	QLabel* m_timeIndicator = nullptr;	// Widget on toolbar to show current simulation time
-
+	QLabel* m_statusIndicator = nullptr;
 
 	TestListWidget* m_testListWidget = nullptr;
 	TestLogTabPage* m_testLogTabPage = nullptr;

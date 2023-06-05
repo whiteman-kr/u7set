@@ -1,5 +1,5 @@
 #include <iostream>
-#include <QCoreApplication>
+#include <QGuiApplication>
 #include <QTimer>
 #include "../TestSuiteLib/TestSuiteSettings.h"
 #include "../TestSuiteLib/TestSuite.h"
@@ -28,15 +28,18 @@ void showHelp()
 	std::cout << "TestSuiteConsole is a command-line tool that performs hardware testing of RPCT projects." << std::endl;
 	std::cout << std::endl << "Command line parameters:" << std::endl;
 #ifdef Q_OS_WINDOWS
-	std::cout << "\tTestSuiteConsole -settings=<FileName.xml> [-scripts_path=<ScriptsPath>] [-tests_filter=<TestsFilter>] [-testlog=<filename>|default] [-cp=NNNN]- run build task with settings taken from <FileName.xml> file." << std::endl;
+	std::cout << "\tTestSuiteConsole -settings=<FileName.xml> [-scripts_path=<ScriptsPath>] [-tests_filter=<TestsFilter>] [-tests_log=<filename>|default] [-cp=NNNN]- run build task with settings taken from <FileName.xml> file." << std::endl;
 #else
-	std::cout << "\tTestSuiteConsole -settings=<FileName.xml> [-scripts_path=<ScriptsPath>] [-tests_filter=<TestsFilter>] [-testlog=<filename>|default] - run build task with settings taken from <FileName.xml> file." << std::endl;
+	std::cout << "\tTestSuiteConsole -settings=<FileName.xml> [-scripts_path=<ScriptsPath>] [-tests_filter=<TestsFilter>] [-tests_log=<filename>|default] - run build task with settings taken from <FileName.xml> file." << std::endl;
 #endif
 	std::cout << "\t\t\tOptional -scripts_path parameter specifies a directory where test scripts are stored." << std::endl;
 	std::cout << "\t\t\tOptional -tests_filter parameter specifies a filter for running tests. Filter contains test function name" << std::endl;
 	std::cout << "\t\t\twith wildcards (\'*\' and \'?\' symbols). If filters starts from '-' symbol, specified tests are excluded." << std::endl;
 	std::cout << "\t\t\tSeveral filters can be separated by a semicolon." << std::endl;
-	std::cout << "\t\t\tOptional -testlog parameter specifies the file name to store test log(for example, TestLog.tsl)." << std::endl;
+	std::cout << "\t\t\tOptional -test_log parameter specifies the file name to store test log(for example, TestLog.tsl or default)." << std::endl;
+	std::cout << "\t\t\tIf default specified, log is saved to a file named TestLog_<ddmmyyyy_hhmmss>.tsl." << std::endl;
+	std::cout << "\t\t\tOptional -reports_path parameter specifies the path to store generated reports(for example, TestReports or default)." << std::endl;
+	std::cout << "\t\t\tIf default specified, log is saved to a folder named TestReport_<ddmmyyyy_hhmmss>." << std::endl;
 #ifdef Q_OS_WINDOWS
 	std::cout << "\t\t\tOptional -cp parameter specifies the codepage (for example, 1251)." << std::endl;
 #endif
@@ -59,6 +62,12 @@ void showHelp()
 
 	std::cout << "Example 5 - create settings file template:" << std::endl;
 	std::cout << "\tTestSuiteConsole.exe -create=TestSuiteSettings.xml" << std::endl;
+
+	std::cout << "Example 6 - run tests contained in the project and save test log to specified file:" << std::endl;
+	std::cout << "\tTestSuiteConsole.exe -settings=TestSuiteSettings.xml -test_log=d:\\Tests\\ResultLog.tsl" << std::endl;
+
+	std::cout << "Example 7 - run tests contained in the project and save test log to file TestLog_<ddmmyyyy_hhmmss>.tsl:" << std::endl;
+	std::cout << "\tTestSuiteConsole.exe -settings=TestSuiteSettings.xml -test_log=default" << std::endl;
 #else
 	std::cout << "Example 1 - run tests contained in the project:" << std::endl;
 	std::cout << "\t./TestSuiteConsole -settings=Settings.xml" << std::endl;
@@ -74,6 +83,12 @@ void showHelp()
 
 	std::cout << "Example 5 - create settings file template:" << std::endl;
 	std::cout << "\t./TestSuiteConsole -create=Settings.xml" << std::endl;
+
+	std::cout << "Example 6 - run tests contained in the project and save test log to specified file:" << std::endl;
+	std::cout << "\t./TestSuiteConsole -settings=TestSuiteSettings.xml -test_log=~/Tests/ResultLog.tsl" << std::endl;
+
+	std::cout << "Example 7 - run tests contained in the project and save test log to file TestLog_<ddmmyyyy_hhmmss>.tsl:" << std::endl;
+	std::cout << "\t./TestSuiteConsole -settings=TestSuiteSettings.xml -test_log=default" << std::endl;
 #endif
 
 	return;
@@ -163,6 +178,7 @@ struct CommandLineArgs
 	QString testsFilter;
 	QString codepage;
 	QString testLogFileName;
+	QString reportsPath;
 };
 
 CommandLineArgs parseCommandLine(const QStringList args)
@@ -206,15 +222,64 @@ CommandLineArgs parseCommandLine(const QStringList args)
 			continue;
 		}
 
-		if (arg.startsWith("-testlog=", Qt::CaseInsensitive) == true)
+		if (arg.startsWith("-test_log=", Qt::CaseInsensitive) == true)
 		{
 			result.testLogFileName = arg;
-			result.testLogFileName.replace("-testlog=", "", Qt::CaseInsensitive);
+			result.testLogFileName.replace("-test_log=", "", Qt::CaseInsensitive);
+			continue;
+		}
+
+		if (arg.startsWith("-reports_path=", Qt::CaseInsensitive) == true)
+		{
+			result.reportsPath = arg;
+			result.reportsPath.replace("-reports_path=", "", Qt::CaseInsensitive);
 			continue;
 		}
 	}
 
 	return result;
+}
+
+void saveTestLog(QString fileName, TestSuite::TestLog& testLog, ConsoleLogFile& appLog)
+{
+	if (fileName.isEmpty() == true)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	if (fileName.contains("default") == true)
+	{
+		fileName.replace("default", QString("TestLog_%1.tsl").arg(QDateTime::currentDateTime().toString("ddMMyyyy_HHmmss")));
+	}
+
+	QString errorMsg;
+	bool ok = testLog.saveToCSV(fileName, &errorMsg);
+	if (ok == false)
+	{
+		appLog.writeError(errorMsg);
+	}
+	else
+	{
+		appLog.writeMessage(QObject::tr("Test log is saved to the file: '%1'.").arg(fileName));
+	}
+	return;
+}
+
+void createTestReports(const ReportLib::ReportTemplateStorage& templates,
+					   const TestSuite::TestLog& testLog,
+					   const QString& path,
+					   ILogFile* appLog)
+{
+	QString reportsPath{path};
+
+	if (reportsPath.contains("default") == true)
+	{
+		reportsPath.replace("default", QString("TestReport_%1").arg(QDateTime::currentDateTime().toString("ddMMyyyy_HHmmss")));
+	}
+
+	TestSuite::TestReport::generateReports(templates, testLog, QString(), reportsPath, appLog);
+	return;
 }
 
 int main(int argc, char* argv[])
@@ -228,7 +293,8 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 
-	QCoreApplication app(argc, argv);
+	QGuiApplication app(argc,argv);
+	//QCoreApplication app(argc, argv);
 
 	app.setApplicationName("TestSuite");
 	app.setOrganizationName(Manufacturer::RADIY);
@@ -328,27 +394,20 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 
-	QObject::connect(&testSuite, &TestSuite::TestSuite::finished, [&args, &appLog, &testSuite](int)
+	QObject::connect(&testSuite, &TestSuite::TestSuite::finished, [&args, &testSuite, &appLog](int)
 	{
 		// Save test log to the file
 		//
 		if (args.testLogFileName.isEmpty() == false)
 		{
-			QString fileName = args.testLogFileName;
-			if (fileName == "default")
-			{
-				fileName = QString("TestLog_%1.tsl").arg(QDateTime::currentDateTime().toString("ddMMyyyy_HHmmss"));
-			}
-			QString errorMsg;
-			bool ok = testSuite.testLog().saveToCSV(fileName, &errorMsg);
-			if (ok == false)
-			{
-				appLog.writeError(errorMsg);
-			}
-			else
-			{
-				appLog.writeMessage(QObject::tr("Test log is saved to the file: '%1'.").arg(fileName));
-			}
+			saveTestLog(args.testLogFileName, testSuite.testLog(), appLog);
+		}
+
+		// Save test log to the file
+		//
+		if (args.reportsPath.isEmpty() == false)
+		{
+			createTestReports(testSuite.reportTemplates(), testSuite.testLog(), args.reportsPath, &appLog);
 		}
 
 		// Exit the application

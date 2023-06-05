@@ -75,6 +75,17 @@ namespace TestSuite
 		return m_testLog;
 	}
 
+	ControlStatus TestSuite::status() const
+	{
+		return m_control.status();
+	}
+
+	ReportLib::ReportTemplateStorage TestSuite::reportTemplates() const
+	{
+		return m_control.reportTemplates();
+	}
+
+
 	//void TestLibrary::runTests()
 	//{
 	//	if (state() == TestLibraryState::Running)

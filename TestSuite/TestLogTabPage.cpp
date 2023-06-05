@@ -93,7 +93,7 @@ void TestLogTabPage::testingWasStarted()
 
 }
 
-void TestLogTabPage::testingWasFinished(int errorCount)
+void TestLogTabPage::testingWasFinished(int /*errorCount*/)
 {
 
 }

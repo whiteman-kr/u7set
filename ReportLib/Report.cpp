@@ -57,7 +57,6 @@ namespace ReportLib
 	ReportSection::ReportSection(const QString& caption):
 		m_caption(caption)
 	{
-		qDebug() << "ReportSection created: " << caption;
 	}
 
 	ReportSection::~ReportSection()

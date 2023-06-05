@@ -61,6 +61,7 @@ SOURCES += \
 HEADERS += \
     AdsInputController.h \
     Control.h \
+    ControlState.h \
     IInputController.h \
     IOutputController.h \
     ScriptRunner.h \
