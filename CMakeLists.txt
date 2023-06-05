@@ -1,13 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
 
-# Version, example: 23.6.1.2570
-# Year (two last digits) / Month (1-12) / PatchNo (0-...) / PipelineID (2000-...)
-#
-
-# Version, example: 385.1.2570
-# Project DB Version / PatchNo (0-...) / PipelineID (2000-...)
-# 
-
 # Git based 
 # CI_PIPELINE_ID (2570) CI_COMMIT_SHA
 #
@@ -35,10 +27,10 @@ if (DEFINED BIN_OUT_DIR)
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN_OUT_DIR})
 	unset(BIN_OUT_DIR)
 else()
-	# ${CMAKE_BUILD_TYPE} can be empty, for example in VS Code, which makes configuration for multiple types?
-	#
-	string(TOLOWER "${CMAKE_BUILD_TYPE}" LOWERCASE_BUILD_TYPE)
-	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/${LOWERCASE_BUILD_TYPE})
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin/debug)
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin/release)
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_BINARY_DIR}/bin/minsizerel)
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR}/bin/relwithdebuginfo)
 endif()
 
 option(CODE_COVERAGE "Code coverage (Linux only)" OFF)

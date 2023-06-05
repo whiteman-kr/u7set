@@ -20,8 +20,6 @@ add_executable(${TARGET}
 	BuildTask.cpp
 )
 
-set_target_properties(${TARGET} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-
 target_link_libraries(${TARGET} PRIVATE Qt6::Qml Qt6::Sql Qt6::Xml Qt6::Widgets Qt6::Svg)
 target_link_libraries(${TARGET} PRIVATE HardwareLib VFrame30 Builder Simulator Protobuf)
 

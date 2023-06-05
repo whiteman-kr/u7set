@@ -27,8 +27,6 @@ add_executable(${TARGET}
 	TuninsUserManagerTests.cpp
 )
 
-set_target_properties(${TARGET} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-
 target_precompile_headers(${TARGET} PRIVATE
 	<algorithm>
 	<chrono>
