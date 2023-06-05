@@ -33,6 +33,13 @@ public:
 							 const QString& settingName,
 							 const QString& description);
 
+	bool addBoolNoWritableCmdLineArg(	const QString& cmdLineArgName,
+										const QString& description);
+
+	bool addBoolCmdLineArg(const QString& cmdLineArgName,
+							 const QString& settingName,
+							 const QString& description);
+
 	bool addValueNoWritebleCmdLineArg(const QString& cmdLineArgName,
 									  const QString& description,
 									  const QString& paramExample);
@@ -66,6 +73,7 @@ private:
 	enum CmdLineArgType
 	{
 		Simple,				//	-a, if not specified asumed as "false"
+		Bool,				//  -a=yes (yes/no, on/off, true/false, 1/0)
 		SingleValue,		//	-a=value, if not specified assumed as ""
 	};
 
