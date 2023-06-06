@@ -25,6 +25,8 @@ add_library(${TARGET} STATIC
 	TestController.h
 	TestLog.cpp
 	TestLog.h
+	TestReport.cpp
+	TestReport.h
 	TestScriptsStorage.cpp
 	TestScriptsStorage.h
 	TestSuite.cpp

@@ -34,6 +34,8 @@ add_executable(${TARGET}
 	AppConfigSettings.h
 	AppLogOutputWidget.cpp
 	AppLogOutputWidget.h
+	DialogReport.cpp
+	DialogReport.h
 	main.cpp
 	TestListWidget.cpp
 	TestListWidget.h
@@ -68,7 +70,7 @@ target_precompile_headers(${TARGET} PRIVATE
 )
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network Qt6::Qml Qt6::Sql Qt6::Xml Qt6::Test)
-target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib OnlineLib ClientLib TestSuiteLib)
+target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib OnlineLib ClientLib TestSuiteLib ReportLib)
 
 # Link Visaul Leak Detector
 #

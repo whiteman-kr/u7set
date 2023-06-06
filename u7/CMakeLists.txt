@@ -198,6 +198,8 @@ set (U7_SOURCES
 	Reports/DialogReportFileTypeParams.h
 	Reports/ProjectDiffReport.cpp
 	Reports/ProjectDiffReport.h
+	Reports/ReportPropertyEditor.cpp
+	Reports/ReportPropertyEditor.h
 	Reports/SchemasReport.cpp
 	Reports/SchemasReport.h
 	SchemaEditor/CreateSchemaDialog.cpp
@@ -382,7 +384,7 @@ target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Sql
 	Qt6::SerialPort Qt6::Xml Qt6::PrintSupport Qt6::Test Qt6::Concurrent Qt6::DBus)
 
 target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib HardwareLib DbLib OnlineLib
-	TrendView Simulator qt6keychain Builder VFrame30)
+	TrendView Simulator qt6keychain Builder VFrame30 ReportLib)
 
 # Link Visaul Leak Detector
 #

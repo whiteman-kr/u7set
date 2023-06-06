@@ -18,7 +18,7 @@ add_executable(${TARGET}
 )
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Xml Qt6::Sql Qt6::Qml Qt6::Svg Qt6::Test)
-target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib OnlineLib ClientLib TestSuiteLib)
+target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib OnlineLib ClientLib TestSuiteLib ReportLib)
 
 
 # Link Visaul Leak Detector
