@@ -107,7 +107,7 @@ endif (MSVC)
 
 set(TARGET TuningClient)
 
-add_executable(${TARGET}
+add_executable(${TARGET} WIN32
 	${TC_FORMS}
 	${TC_SOURCES}
 	${TC_RESOURCES}

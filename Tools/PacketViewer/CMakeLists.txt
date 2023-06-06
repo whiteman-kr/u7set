@@ -13,7 +13,7 @@ qt_standard_project_setup()
 
 set(TARGET PacketViewer)
 
-add_executable(${TARGET}
+add_executable(${TARGET} WIN32
 	../../lib/DataSource.cpp
 	../../lib/DataSource.h
 	main.cpp

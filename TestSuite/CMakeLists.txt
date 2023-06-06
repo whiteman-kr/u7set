@@ -19,7 +19,7 @@ if (MSVC)
 	set (WINDOWS_RESOURCES ./WinResources/WinResources.rc)
 endif (MSVC)
 
-add_executable(${TARGET}
+add_executable(${TARGET} WIN32
 	../lib/CodeEditor.cpp
 	../lib/CodeEditor.h
 	../lib/Ui/DialogAbout.cpp
