@@ -535,6 +535,7 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 								   QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogSignalInfo),
+	m_dialogType(dialogType),
 	m_signal(signal),
 	m_appSignalManager(appSignalManager),
 	m_tuningController(tuningController),	// it can be nullptr
@@ -600,7 +601,7 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 
 	if (dialogType == DialogType::Monitor)
 	{
-		removeTabPage("Extended");
+		removeTabPage(tr("Extended"));
 	}
 
 	ui->labelValue->setWordWrap(true);
@@ -1219,7 +1220,10 @@ void DialogSignalInfo::fillSignalData()
 
 	fillSignalInfo();
 	fillProperties();
-	fillExtProperties();
+	if (m_dialogType == DialogType::Simulator)
+	{
+		fillExtProperties();
+	}
 	fillSetpoints();
 	fillSchemas();
 	fillTuningTab();
