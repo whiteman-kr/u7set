@@ -1434,6 +1434,33 @@ namespace VFrame30
 
 	void Schema::setSchemaId(const QString& id)
 	{
+		if (id.trimmed().isEmpty() == true)
+		{
+			return;
+		}
+
+		if (m_schemaID != id)
+		{
+			// Update item labels.
+			//
+			QString startWith = QString{"%1_"}.arg(m_schemaID);
+			QString newPrefix = QString{"%1_"}.arg(id);
+
+			for (auto& layer : layers())
+			{
+				for (auto& item : layer->items())
+				{
+					if (item->label().startsWith(startWith, Qt::CaseSensitive) == true)
+					{
+						QString newItemLabel = item->label();
+						newItemLabel.replace(0, startWith.size(), newPrefix);
+
+						item->setLabel(newItemLabel);
+					}
+				}
+			}
+		}
+
 		m_schemaID = id;
 	}
 
@@ -1934,7 +1961,11 @@ namespace VFrame30
 						if (const SchemaItemConnection* connItem = item->toType<SchemaItemConnection>();
 							connItem != nullptr)
 						{
-							connections.insert(connItem->connectionIds());
+							for (const auto& connectionIds = connItem->connectionIdsAsList();
+								 const QString& connectionId : connectionIds)
+							{
+								connections.insert(connectionId);
+							}
 						}
 
 						if (const SchemaItemReceiver* receiver = item->toType<SchemaItemReceiver>();
@@ -2480,6 +2511,21 @@ namespace VFrame30
 	bool SchemaDetails::hasLoopback(const QString& loopbackId) const
 	{
 		return m_loopbacks.contains(loopbackId);
+	}
+
+	bool SchemaDetails::hasConnection(const QString& connectionId) const
+	{
+		return m_connections.contains(connectionId);
+	}
+
+	bool SchemaDetails::hasLabel(const QString& label) const
+	{
+		return m_labels.contains(label);
+	}
+
+	bool SchemaDetails::hasGuid(QUuid guid) const
+	{
+		return m_guids.contains(guid);
 	}
 
 	SchemaDetails::TrendIndicatorSchemaItems::TrendIndicatorSchemaItems(QUuid _itemUuid,

@@ -1,5 +1,6 @@
 #include "../../ClientLib/TuningConnection.h"
 #include "../../ClientLib/ITuningLog.h"
+#include "ConnectionPorts.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -465,8 +466,8 @@ TEST_F(TuningConnectionTests, activeClientInfo)
 			infoA = tcA.clientControlInfo();
 			infoB = tcB.clientControlInfo();
 
-			if(infoA.contains("active client is SYSTEMID_CLIENTTEST_WS04_TUNA") == true &&
-					infoB.contains("active client is SYSTEMID_CLIENTTEST_WS04_TUNA") == true)
+			if (infoA.contains("active client is SYSTEMID_CLIENTTEST_WS04_TUNA") == true &&
+				infoB.contains("active client is SYSTEMID_CLIENTTEST_WS04_TUNA") == true)
 			{
 				break;
 			}

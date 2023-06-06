@@ -52,7 +52,6 @@ SOURCES += \
     ../../lib/Crc.cpp \
     ../../lib/DataSource.cpp \
     ../../Builder/IssueLogger.cpp \
-    ../../lib/OutputLog.cpp \
     ../../lib/Signal.cpp \
     ../../lib/SignalProperties.cpp \
     ../../lib/TuningValue.cpp \
@@ -100,7 +99,6 @@ HEADERS += \
     ../../lib/Crc.h \
     ../../lib/DataSource.h \
     ../../Builder/IssueLogger.h \
-    ../../lib/OutputLog.h \
     ../../lib/Signal.h \
     ../../lib/SignalProperties.h \
     ../../lib/TuningValue.h \

@@ -1,5 +1,6 @@
 #include "GatewayHandler.h"
 #include "IvsImpulseGatewayHandler.h"
+#include "../ServiceLib/Service.h"
 
 namespace Gateway
 {
@@ -10,9 +11,12 @@ namespace Gateway
 	// ---------------------------------------------------------------------------------
 
 	Handler::Handler(const SoftwareInfo& swInfo,
-					 const GatewayServiceSettings& settings) :
+					 const GatewayServiceSettings& settings,
+					 CircularLoggerShared log, bool logGatewayPackets) :
 		m_swInfo(swInfo),
-		m_settings(settings)
+		m_settings(settings),
+		m_log(log),
+		m_logGatewayPackets(logGatewayPackets)
 	{
 	}
 
@@ -29,7 +33,9 @@ namespace Gateway
 	bool Handlers::init(const Gateways& gateways,
 						const SoftwareInfo& swInfo,
 						const GatewayServiceSettings& settings,
-						const AppSignals& appSignals)
+						const AppSignals& appSignals,
+						CircularLoggerShared log,
+						bool logGatewayPackets)
 	{
 		Q_ASSERT(m_handlers.empty());
 
@@ -50,7 +56,8 @@ namespace Gateway
 					}
 
 					IvsImpulseHandlerShared ivsHandler =
-							std::make_shared<IvsImpulseHandler>(swInfo, settings, ivsGateway, appSignals);
+							std::make_shared<IvsImpulseHandler>(swInfo, settings, ivsGateway, appSignals,
+																log, logGatewayPackets);
 
 					m_handlers.push_back(ivsHandler);
 				}

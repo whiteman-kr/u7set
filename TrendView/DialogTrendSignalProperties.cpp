@@ -1,3 +1,7 @@
+#include <QMessageBox>
+#include <QPainter>
+#include <QPaintEvent>
+#include <QColorDialog>
 #include "DialogTrendSignalProperties.h"
 #include "ui_DialogTrendSignalProperties.h"
 #include "DialogTrendSignalPoints.h"
@@ -230,6 +234,17 @@ bool DialogTrendSignalProperties::applyProperties()
 		{
 			ui->viewPrecisionEdit->setFocus();
 			return false;
+		}
+
+		QString analogFormatString = ui->viewFormatCombo->currentText();
+		E::AnalogFormat analogFormat = E::stringToValue<E::AnalogFormat>(analogFormatString, &ok);
+		if (ok == true)
+		{
+			m_trendSignal.setAnalogFormat(analogFormat);
+		}
+		else
+		{
+			Q_ASSERT(ok);
 		}
 
 		m_trendSignal.setViewHighLimit(m_scaleType, qMax(viewHighLimit, viewLowLimit));

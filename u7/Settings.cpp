@@ -2,7 +2,7 @@
 #include "../lib/PropertyEditor.h"
 #include "Simulator/SimSignalSnapshot.h"
 #include "../lib/Ui/DialogSignalSearch.h"
-#include "keychain.h"
+#include "../Tools/qtkeychain/keychain.h"
 
 Settings theSettings;
 

@@ -37,12 +37,10 @@ CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
 SOURCES += \
-        ../lib/BuildInfo.cpp \
         ../lib/ClientBehavior.cpp \
         main.cpp
 
 HEADERS += \
-    ../lib/BuildInfo.h \
     ../lib/ClientBehavior.h \
     Stable.h
 

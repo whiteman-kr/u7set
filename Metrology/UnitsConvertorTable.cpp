@@ -1,4 +1,5 @@
 ﻿#include "UnitsConvertorTable.h"
+#include <cmath>
 #include <limits>
 
 double findConversionVal(double val, const double* pArray, int size, bool isDegree)

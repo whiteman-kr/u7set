@@ -17,6 +17,5 @@ namespace TrendLib
 	{
 		return std::tuple{appSignalId, archiveServerId} < std::tuple{that.appSignalId, that.archiveServerId};
 	}
-
 }
 

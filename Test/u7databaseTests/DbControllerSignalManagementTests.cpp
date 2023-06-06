@@ -1,6 +1,11 @@
 #include "DbControllerSignalManagementTests.h"
 #include "Settings.h"
 
+//#ifdef Q_CC_MSVC
+//	#pragma warning(push)
+//	#pragma warning(disable : 4834)		//	TS_EXEC_QUERY(...) generates a lot warning: C4834: discarding return value of function with 'nodiscard' attribute"
+//#endif
+
 DbControllerSignalTests::DbControllerSignalTests(const QString& projectName):
 	m_projectName(projectName),
 	m_databaseHost(theSettings.databaseHost()),
@@ -2715,4 +2720,6 @@ int DbControllerSignalTests::rand0to(int upRange) const
 	return std::rand() % (upRange + 1);
 }
 
-
+//#ifdef Q_CC_MSVC
+//	#pragma warning(pop)
+//#endif

@@ -61,12 +61,6 @@ unix:PRE_TARGETDEPS += $$DESTDIR/libBuilder.a
 INCLUDEPATH += $$PWD/../Builder
 DEPENDPATH += $$PWD/../Builder
 
-# HardwareLib
-#
-LIBS += -lHardwareLib
-win32:PRE_TARGETDEPS += $$DESTDIR/HardwareLib.lib
-unix:PRE_TARGETDEPS += $$DESTDIR/libHardwareLib.a
-
 # Simulator Lib
 #
 LIBS += -lSimulator
@@ -97,12 +91,23 @@ LIBS += -lTrendView
 win32:PRE_TARGETDEPS += $$DESTDIR/TrendView.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libTrendView.a
 
-# Protobuf
+# OnlineLib
 #
-LIBS += -lprotobuf
-win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
-unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
-INCLUDEPATH += ./../Protobuf
+LIBS += -lOnlineLib
+win32:PRE_TARGETDEPS += $$DESTDIR/OnlineLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libOnlineLib.a
+
+# DbLib
+#
+LIBS += -lDbLib
+win32:PRE_TARGETDEPS += $$DESTDIR/DbLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libDbLib.a
+
+# HardwareLib
+#
+LIBS += -lHardwareLib
+win32:PRE_TARGETDEPS += $$DESTDIR/HardwareLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libHardwareLib.a
 
 # AppSignalLib
 #
@@ -110,23 +115,18 @@ LIBS += -lAppSignalLib
 win32:PRE_TARGETDEPS += $$DESTDIR/AppSignalLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libAppSignalLib.a
 
-# OnlineLib
-#
-LIBS += -lOnlineLib
-win32:PRE_TARGETDEPS += $$DESTDIR/OnlineLib.lib
-unix:PRE_TARGETDEPS += $$DESTDIR/libOnlineLib.a
-
 # UtilsLib
 #
 LIBS += -lUtilsLib
 win32:PRE_TARGETDEPS += $$DESTDIR/UtilsLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libUtilsLib.a
 
-# DbLib
+# Protobuf
 #
-LIBS += -lDbLib
-win32:PRE_TARGETDEPS += $$DESTDIR/DbLib.lib
-unix:PRE_TARGETDEPS += $$DESTDIR/libDbLib.a
+LIBS += -lprotobuf
+win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
+INCLUDEPATH += ./../Protobuf
 
 # CommonLib
 #

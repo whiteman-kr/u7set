@@ -370,7 +370,7 @@ namespace Builder
 		return m_appLogicItem.afbElement().caption().startsWith(MISMATCH_ITEM_CAPTION);
 	}
 
-	bool UalItem::assignFlags() const
+    bool UalItem::assignFlags(IssueLogger* log) const
 	{
 		const VFrame30::SchemaItemAfb* schemaItemAfb = dynamic_cast<const VFrame30::SchemaItemAfb*>(m_appLogicItem.m_fblItem.get());
 
@@ -384,11 +384,14 @@ namespace Builder
 
 		if (result.has_value() == true)
 		{
-			return result.value();
+            return result.value();
 		}
 
-		assert(false);			// AssignFlags property isn't exist in schemaItemAfb
-								// Why assignFlags() has been called fot this schemaItemAfb ???
+		Q_UNUSED(log);
+//		LOG_INTERNAL_ERROR_MSG(log, QString("Property AssignFlags is not exists in ualItem %1").
+//											arg(schemaItemAfb->label()));
+		Q_ASSERT(false);
+
 		return false;
 	}
 
@@ -1714,30 +1717,19 @@ namespace Builder
 		return m_parentBusSignal->anyParentBusIsAcquired();
 	}
 
-	void UalSignal::setLoopback(std::shared_ptr<Loopback> loopback)
+    bool UalSignal::setLoopback(std::shared_ptr<Loopback> loopback)
 	{
-		if (m_loopback != nullptr)
+		auto p = m_loopbacks.insert(loopback);
+
+		if (p.second == false)
 		{
-			assert(false);				// reassigning of loopback, why?
+			// if false - this is a reassigning of loopback, why?
+			//
+			Q_ASSERT(false);
+			return false;
 		}
 
-		m_loopback = loopback;
-	}
-
-	std::shared_ptr<Loopback> UalSignal::loopback() const
-	{
-		return m_loopback;
-	}
-
-	QString UalSignal::loopbackID() const
-	{
-		if (m_loopback == nullptr)
-		{
-			assert(false);
-			return QString();
-		}
-
-		return m_loopback->loopbackID();
+		return true;
 	}
 
 	E::SignalType UalSignal::constType() const
@@ -2409,7 +2401,7 @@ namespace Builder
 	bool UalSignal::canBePlacedInHeap() const
 	{
 		return	m_isAcquired == false &&
-				m_loopback == nullptr &&
+				isLoopbackSource() == false &&
 				m_expectedHeapReadsCount > 0;
 	}
 

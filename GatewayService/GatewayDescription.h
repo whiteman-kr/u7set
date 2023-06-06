@@ -39,8 +39,10 @@ namespace Gateway
 			// IVS Impulse specific settings
 
 			SystemID,
-			GatewayIP1,
-			GatewayIP2,
+			LocalGatewayIP1,
+			RemoteGatewayIP1,
+			LocalGatewayIP2,
+			RemoteGatewayIP2,
 			ListsVersion,
 			Period,
 			TimeType,
@@ -289,6 +291,15 @@ namespace Gateway
 	{
 	public:
 		static const std::set<E::Setting> m_requiredSettings;
+		static const std::set<E::Setting> m_optionalSettings;
+
+	public:
+
+		struct DataType_ListID
+		{
+			E::SignalListDataType dataType = E::SignalListDataType::Unknown;
+			int listID = 0;
+		};
 
 	public:
 		IvsImpulseGateway();
@@ -302,8 +313,10 @@ namespace Gateway
 		//
 
 		int systemID() const;
-		HostAddressPort gatewayIP1() const;
-		HostAddressPort gatewayIP2() const;
+		HostAddressPort localGatewayIP1() const;
+		HostAddressPort remoteGatewayIP1() const;
+		HostAddressPort localGatewayIP2() const;
+		HostAddressPort remoteGatewayIP2() const;
 		int listsVersion() const;
 		::E::TimeType timeType() const;
 		int period() const;
@@ -325,12 +338,20 @@ namespace Gateway
 
 	private:
 		int m_systemID = 0;
-		HostAddressPort m_gatewayIP1;
-		HostAddressPort m_gatewayIP2;
+
+		HostAddressPort m_localGatewayIP1;
+		HostAddressPort m_remoteGatewayIP1;
+
+		HostAddressPort m_localGatewayIP2;
+		HostAddressPort m_remoteGatewayIP2;
+
 		int m_listsVersion = 0;
 		::E::TimeType m_timeType = ::E::TimeType::Plant;
 		int m_period = 1000;
 	};
+
+	bool operator < (const IvsImpulseGateway::DataType_ListID& s1,
+					 const IvsImpulseGateway::DataType_ListID& s2);
 
 	using IvsImpulseGatewayShared = std::shared_ptr<IvsImpulseGateway>;
 }

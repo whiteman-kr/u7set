@@ -301,6 +301,39 @@ namespace TrendLib
 		return;
 	}
 
+	void TrendSignalSet::reorderSignals(std::span<const TrendLib::TrendSignalParam> targetOrder)
+	{
+		QMutexLocker locker(&m_paramMutex);
+
+		// Move items in signalIds order.
+		//
+		std::list<TrendSignalParam> newSignalList;
+
+		for (const auto& targetSignal : targetOrder)
+		{
+			auto it = std::find_if(m_signalParams.begin(), m_signalParams.end(), [&targetSignal](const TrendSignalParam& ts)
+				{
+					return ts.appSignalId() == targetSignal.appSignalId() &&
+						   ts.archiveServerId() == targetSignal.archiveServerId();
+				});
+
+			if (it != m_signalParams.end())
+			{
+				newSignalList.splice(newSignalList.end(), m_signalParams, it);
+			}
+		}
+
+		// Move all other items in the same order
+		//
+		newSignalList.splice(newSignalList.end(), m_signalParams);
+
+		// Set result.
+		//
+		m_signalParams = std::move(newSignalList);
+
+		return;
+	}
+
 	TrendLib::TrendSignalParam TrendSignalSet::signalParam(const QString& appSignalId, const QString& archiveServerId, bool* ok) const
 	{
 		if (ok != nullptr)

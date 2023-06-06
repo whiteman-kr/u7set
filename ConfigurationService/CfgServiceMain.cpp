@@ -2,7 +2,7 @@
 
 #define CIRCULAR_LOGGER_PTR_ASSERTING
 
-int main(int argc, char *argv[])
+int main(int argc, char** argv)
 {
 	QCoreApplication app(argc, argv);
 
@@ -16,10 +16,8 @@ int main(int argc, char *argv[])
 
 	si.init(E::SoftwareType::ConfigurationService, "", 1, 0);
 
-	ConfigurationServiceWorker cfgServiceWorker(si,
-												Service::getServiceInstanceName("Configuration Service", argc, argv),
-												argc, argv, logger,
-												E::ServiceRunMode::ConsoleApp);	// run mode will be refined after cmd line processing
+	ConfigurationServiceWorker cfgServiceWorker(si, Service::getServiceInstanceName("Configuration Service", argc, argv),
+												argc, argv, logger);
 
 	ServiceStarter serviceStarter(app, cfgServiceWorker, logger);
 

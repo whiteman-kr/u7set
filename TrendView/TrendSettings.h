@@ -1,6 +1,11 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
+#include <QPoint>
+#include <QByteArray>
+#include <QMutex>
+#include <QSettings>
+
 namespace TrendLib
 {
 

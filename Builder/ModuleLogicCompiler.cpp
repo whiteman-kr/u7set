@@ -1,10 +1,10 @@
 #include "../Builder/ModuleLogicCompiler.h"
 #include "../Builder/ApplicationLogicCompiler.h"
-#include "../lib/DeviceHelper.h"
 #include "../UtilsLib/Crc.h"
 #include "../HardwareLib/Connection.h"
-#include "../lib/LanControllerInfoHelper.h"
 
+#include "LanControllerInfoHelper.h"
+#include "DeviceHelper.h"
 #include "SoftwareCfgGenerator.h"
 #include "Parser.h"
 #include "LmDescriptionSet.h" 
@@ -3182,7 +3182,7 @@ namespace Builder
 				continue;
 			}
 
-			if (ualItem->assignFlags() == false)
+            if (ualItem->assignFlags(log()) == false)
 			{
 				continue;
 			}
@@ -3255,7 +3255,7 @@ namespace Builder
 				continue;
 			}
 
-			if (ualItem->assignFlags() == false)
+            if (ualItem->assignFlags(log()) == false)
 			{
 				continue;
 			}

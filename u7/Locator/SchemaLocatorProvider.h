@@ -1,6 +1,7 @@
 #pragma once
 
 #include "LocatorProvider.h"
+#include "../../VFrame30/Schema.h"
 #include "../../DbLib/DbController.h"
 
 namespace Locator
@@ -32,6 +33,7 @@ namespace Locator
 
 		QElapsedTimer m_lastSearchTimer;
 		DbFileTree m_files;
+		std::unordered_map<int, VFrame30::SchemaDetails> m_schemaDetails;		// Key is fileId
 
 		// m_text is used to skip messages which are in the queue.
 		//

@@ -11,8 +11,10 @@ namespace Gateway
 	IvsImpulseHandler::IvsImpulseHandler(const SoftwareInfo& swInfo,
 										 const GatewayServiceSettings& settings,
 										 IvsImpulseGatewayShared gateway,
-										 const AppSignals& appSignals) :
-		Handler(swInfo, settings),
+										 const AppSignals& appSignals,
+										 CircularLoggerShared log,
+										 bool logGatewayPackets) :
+		Handler(swInfo, settings, log, logGatewayPackets),
 		m_softwareInfo(swInfo),
 		m_appDataService1(settings.appDataService1.address),
 		m_appDataService2(settings.appDataService2.address),
@@ -35,7 +37,7 @@ namespace Gateway
 												m_appDataService1,
 												m_appDataService2,
 												QString("GatewayService %1").arg(m_softwareInfo.equipmentID()),
-												*this);
+												*this, m_log);
 		m_appDataServiceClientThread->start();
 
 		m_ivsImpulseCommThread = new IvsImpulseCommThread(*this);
@@ -105,7 +107,16 @@ namespace Gateway
 					AppSignalState& newState = m_states.emplace_back(h, ivsList->sendEvents());
 					newState.setListIndex(listIndex);
 
-					li->hashToListIndex.insert({h, listIndex});
+					auto it = li->hashToListIndexes.find(h);
+
+					if (it == li->hashToListIndexes.end())
+					{
+						li->hashToListIndexes.insert({h, {listIndex}});
+					}
+					else
+					{
+						it->second.push_back(listIndex);
+					}
 				}
 				else
 				{
@@ -124,7 +135,7 @@ namespace Gateway
 
 		//
 
-		for(auto& list : m_lists)
+		for(IvsImpulseListInfoShared& list : m_lists)
 		{
 			const auto& ids = list->info->signalIDs();
 
@@ -136,12 +147,12 @@ namespace Gateway
 
 				if (it == m_hashToLists.end())
 				{
-					auto p = m_hashToLists.emplace(h, std::vector<IvsImpulseListInfoShared>());
+					auto p = m_hashToLists.emplace(h, std::set<IvsImpulseListInfoShared>());
 
 					it = p.first;
 				}
 
-				it->second.push_back(list);
+				it->second.insert(list);
 			}
 		}
 

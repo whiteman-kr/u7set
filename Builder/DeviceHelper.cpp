@@ -1,0 +1,814 @@
+#include "DeviceHelper.h"
+#include "../UtilsLib/WUtils.h"
+#include "../OnlineLib/SocketIO.h"
+#include "../lib/ConstStrings.h"
+#include <QHostAddress>
+
+
+const char* DeviceHelper::LM_PLATFORM_INTERFACE_CONTROLLER_SUFFUX = "_PI";
+
+void DeviceHelper::init()
+{
+//	assert(m_modulesRawDataDescription.count() == 0);
+}
+
+
+void DeviceHelper::shutdown()
+{
+}
+
+bool DeviceHelper::getIntProperty(const Hardware::DeviceObject* device, const QString& name, qint32* value, Builder::IssueLogger *log)
+{
+	if (device == nullptr ||
+		value == nullptr ||
+		log == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	QVariant val = device->propertyValue(name);
+
+	if (val.isValid() == false)
+	{
+		logPropertyNotFoundError(device, name, log);
+		return false;
+	}
+
+	bool ok = false;
+
+	*value = val.toInt(&ok);
+
+	if (ok == false)
+	{
+		// Property '%1.%2' conversion error.
+		//
+		log->errCFG3023(device->equipmentIdTemplate(), name);
+		return false;
+	}
+
+	return true;
+}
+
+bool DeviceHelper::getUIntProperty(const Hardware::DeviceObject* device, const QString& name, quint32* value, Builder::IssueLogger *log)
+{
+	if (device == nullptr ||
+		value == nullptr ||
+		log == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	QVariant val = device->propertyValue(name);
+
+	if (val.isValid() == false)
+	{
+		logPropertyNotFoundError(device, name, log);
+		return false;
+	}
+
+	bool ok = false;
+
+	*value = val.toUInt(&ok);
+
+	if (ok == false)
+	{
+		// Property '%1.%2' conversion error.
+		//
+		log->errCFG3023(device->equipmentIdTemplate(), name);
+		return false;
+	}
+
+	return true;
+}
+
+bool DeviceHelper::getStrProperty(const Hardware::DeviceObject* device, const QString& name, QString* value, Builder::IssueLogger* log)
+{
+	if (device == nullptr ||
+		value == nullptr ||
+		log == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	QVariant val = device->propertyValue(name);
+
+	if (val.isValid() == false)
+	{
+		logPropertyNotFoundError(device, name, log);
+		return false;
+	}
+
+	*value = val.toString();
+
+	return true;
+}
+
+bool DeviceHelper::getStrListProperty(const Hardware::DeviceObject* device, const QString& name, QStringList* strList, Builder::IssueLogger* log)
+{
+	if (device == nullptr ||
+		strList == nullptr ||
+		log == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	bool result = true;
+
+	QString str;
+
+	result &= DeviceHelper::getStrProperty(device, name, &str, log);
+
+	str.replace(QChar(QChar::Space), Separator::SEMICOLON);
+	str.replace(QChar(QChar::LineFeed), Separator::SEMICOLON);
+	str.replace(QChar(QChar::CarriageReturn), Separator::SEMICOLON);
+	str.replace(QChar(QChar::Tabulation), Separator::SEMICOLON);
+	str.replace(Separator::COMMA, Separator::SEMICOLON);
+
+	*strList = str.split(Separator::SEMICOLON, Qt::SkipEmptyParts);
+
+	return result;
+}
+
+bool DeviceHelper::getStrListPropertyAsString(const Hardware::DeviceObject* device, const QString& name, QString* str, Builder::IssueLogger* log)
+{
+	TEST_PTR_RETURN_FALSE(log);
+	TEST_PTR_RETURN_FALSE(device);
+	TEST_PTR_RETURN_FALSE(str);
+
+	QStringList list;
+
+	if (getStrListProperty(device, name, &list, log) == false)
+	{
+		return false;
+	}
+
+	*str = list.join(Separator::SEMICOLON);
+
+	return true;
+}
+
+bool DeviceHelper::getBoolProperty(const Hardware::DeviceObject* device, const QString& name, bool* value, Builder::IssueLogger *log)
+{
+	if (device == nullptr ||
+		value == nullptr ||
+		log == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	QVariant val = device->propertyValue(name);
+
+	if (val.isValid() == false)
+	{
+		logPropertyNotFoundError(device, name, log);
+		return false;
+	}
+
+	*value = val.toBool();
+
+	return true;
+}
+
+bool DeviceHelper::getIPv4Property(const Hardware::DeviceObject* device,
+								   const QString& name,
+								   QString* value,
+								   bool emptyAllowed,
+								   const QString& defaultIp,
+								   Builder::IssueLogger *log)
+{
+	TEST_PTR_RETURN_FALSE(log);
+
+	QHostAddress addr;
+
+	bool res = true;
+
+	if (emptyAllowed == true)
+	{
+		// defaultIp checking
+		//
+		addr.setAddress(defaultIp);
+
+		if (res == false)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(log);			// defaultIp is not valid IPv4 str
+			return false;
+		}
+	}
+
+	res = getStrProperty(device, name, value, log);
+
+	if (res == false)
+	{
+		return false;
+	}
+
+	if (value->isEmpty() == true)
+	{
+		if (emptyAllowed == false)
+		{
+			// Property '%1.%2' is empty.
+			//
+			log->errCFG3022(device->equipmentIdTemplate(), name);
+			return false;
+		}
+		else
+		{
+			*value = defaultIp;
+		}
+	}
+
+	res = addr.setAddress(*value);
+
+	if (res == false)
+	{
+		// Value of property %1.%2 is not valid IPv4 address.
+		//
+		log->errCFG3026(device->equipmentIdTemplate(), name);
+		return false;
+	}
+
+	return true;
+}
+
+bool DeviceHelper::getIPv4Property(	const Hardware::DeviceObject* device,
+									const QString& name,
+									QHostAddress* value,
+									bool emptyAllowed,
+									const QString& defaultIp,
+									Builder::IssueLogger* log)
+{
+	TEST_PTR_RETURN_FALSE(log);
+
+	if (value == nullptr)
+	{
+		LOG_NULLPTR_ERROR(log);
+		return false;
+	}
+
+	QString ipStr;
+
+	bool res = getIPv4Property(device, name, &ipStr, emptyAllowed, defaultIp, log);
+
+	if (res == false)
+	{
+		return false;
+	}
+
+	return value->setAddress(ipStr);
+}
+
+bool DeviceHelper::getPortProperty(const Hardware::DeviceObject* device,
+								   const QString& name,
+								   int* value,
+								   bool emptyAllowed,
+								   int defaultPort,
+								   Builder::IssueLogger* log)
+{
+	TEST_PTR_RETURN_FALSE(log);
+
+	if (emptyAllowed == true)
+	{
+		// defaultPort checking
+		//
+		if (defaultPort < Socket::PORT_LOWEST || defaultPort > Socket::PORT_HIGHEST)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(log);
+			return false;
+		}
+	}
+
+	QString portStr;
+
+	if (getStrProperty(device, name, &portStr, log) == false)
+	{
+		return false;
+	}
+
+	if (portStr.isEmpty() == true)
+	{
+		if (emptyAllowed == false)
+		{
+			// Property '%1.%2' is empty.
+			//
+			log->errCFG3022(device->equipmentIdTemplate(), name);
+			return false;
+		}
+
+		*value = defaultPort;
+	}
+	else
+	{
+		bool ok = false;
+
+		*value = portStr.toInt(&ok);
+
+		if (ok == false)
+		{
+			// Property '%1.%2' conversion error.
+			//
+			log->errCFG3023(device->equipmentIdTemplate(), name);
+			return false;
+		}
+	}
+
+	if (*value < Socket::PORT_LOWEST || *value > Socket::PORT_HIGHEST)
+	{
+		// Ethernet port number property %1.%2 should be in range 0..65535.
+		//
+		log->errCFG3027(device->equipmentIdTemplate(), name);
+		return false;
+	}
+
+	return true;
+}
+
+bool DeviceHelper:: getIpPortProperty(const Hardware::DeviceObject* device,
+									  const QString& ipProperty,
+									  const QString& portProperty,
+									  HostAddressPort* ipPort,
+									  bool emptyAllowed,
+									  const QString& defaultIP,
+									  int defaultPort,
+									  Builder::IssueLogger* log)
+{
+	TEST_PTR_RETURN_FALSE(log);
+
+	if (device == nullptr || ipPort == nullptr)
+	{
+		LOG_NULLPTR_ERROR(log);
+		return false;
+	}
+
+	QString ipStr;
+
+	bool result = getIPv4Property(device, ipProperty, &ipStr, emptyAllowed, defaultIP, log);
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	int port = 0;
+
+	result = getPortProperty(device, portProperty, &port, emptyAllowed, defaultPort, log);
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	ipPort->setAddress(ipStr);
+	ipPort->setPort(port);
+
+	return result;
+}
+
+bool DeviceHelper::isPropertyExists(const Hardware::DeviceObject* device, const QString& name)
+{
+	TEST_PTR_RETURN_FALSE(device);
+
+	return device->propertyExists(name);
+}
+
+bool DeviceHelper::setIntProperty(Hardware::DeviceObject* device, const QString& name, qint32 value, Builder::IssueLogger* log)
+{
+	if (device == nullptr ||
+		log == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	if (device->propertyExists(name) == false)
+	{
+		logPropertyNotFoundError(device, name, log);
+		return false;
+	}
+
+	QVariant v(value);
+
+	bool result = device->setPropertyValue(name, v);
+
+	if (result == false)
+	{
+		logPropertyWriteError(device, name, log);
+	}
+
+	return result;
+}
+
+bool DeviceHelper::setUIntProperty(Hardware::DeviceObject* device, const QString& name, quint32 value, Builder::IssueLogger* log)
+{
+	if (device == nullptr ||
+		log == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	if (device->propertyExists(name) == false)
+	{
+		logPropertyNotFoundError(device, name, log);
+		return false;
+	}
+
+	QVariant v(value);
+
+	bool result = device->setPropertyValue(name, v);
+
+	if (result == false)
+	{
+		logPropertyWriteError(device, name, log);
+	}
+
+	return result;
+
+}
+
+Hardware::DeviceObject* DeviceHelper::getChildDeviceObjectBySuffix(const Hardware::DeviceObject* device, const QString& suffix)
+{
+	return getChildDeviceObjectBySuffix(device, suffix, nullptr);
+}
+
+
+Hardware::DeviceObject* DeviceHelper::getChildDeviceObjectBySuffix(const Hardware::DeviceObject* device, const QString& suffix, Builder::IssueLogger* log)
+{
+	if (device == nullptr)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	int childrenCount = device->childrenCount();
+
+	for(int i = 0; i < childrenCount; i++)
+	{
+		Hardware::DeviceObject* object = device->child(i).get();
+
+		if (object == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+
+		if (object->equipmentIdTemplate().endsWith(suffix) == true)
+		{
+			return  object;
+		}
+	}
+
+	if (log != nullptr)
+	{
+		log->errCFG3014(suffix, device->equipmentIdTemplate());
+	}
+
+	return nullptr;
+}
+
+Hardware::DeviceController* DeviceHelper::getChildControllerBySuffix(const Hardware::DeviceObject* device, const QString& suffix)
+{
+	return getChildControllerBySuffix(device, suffix, nullptr);
+}
+
+Hardware::DeviceController* DeviceHelper::getChildControllerBySuffix(const Hardware::DeviceObject* device, const QString& suffix, Builder::IssueLogger* log)
+{
+	if (device == nullptr)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	Hardware::DeviceObject* deviceObject = getChildDeviceObjectBySuffix(device, suffix, log);
+
+	if (deviceObject == nullptr)
+	{
+		return nullptr;
+	}
+
+	Hardware::DeviceController* deviceController = deviceObject->toController().get();
+
+	if (deviceController != nullptr)
+	{
+		return deviceController;
+	}
+
+	if (log != nullptr)
+	{
+		log->errCFG3025(suffix, device->equipmentIdTemplate());
+	}
+
+	return nullptr;
+}
+
+Hardware::DeviceController* DeviceHelper::getPlatformInterfaceController(const Hardware::DeviceModule* module, Builder::IssueLogger* log)
+{
+	if (module->isModule() == false)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	return getChildControllerBySuffix(module, LM_PLATFORM_INTERFACE_CONTROLLER_SUFFUX, log);
+}
+
+const Hardware::DeviceModule *DeviceHelper::getModuleOnPlace(const Hardware::DeviceModule* lm, int place)
+{
+	if (lm == nullptr)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	const Hardware::DeviceChassis* chassis = lm->getParentChassis();
+
+	if (chassis == nullptr)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	int count = chassis->childrenCount();
+
+	for(int i = 0; i < count; i++)
+	{
+		Hardware::DeviceObject* device = chassis->child(i).get();
+
+		if (device == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+
+		if (device->isModule() == false)
+		{
+			continue;
+		}
+
+		const Hardware::DeviceModule* module = device->toModule().get();
+
+		if (module == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+
+		if (module->place() != place)
+		{
+			continue;
+		}
+
+		return module;
+	}
+
+	return nullptr;
+}
+
+
+const Hardware::DeviceModule* DeviceHelper::getLm(const Hardware::DeviceChassis* chassis)
+{
+	if (chassis == nullptr)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	int count = chassis->childrenCount();
+
+	for(int i = 0; i < count; i++)
+	{
+		Hardware::DeviceObject* device = chassis->child(i).get();
+
+		if (device == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+
+		if (device->isModule() == false)
+		{
+			continue;
+		}
+
+		Hardware::DeviceModule* module =  device->toModule().get();
+
+		if (module == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+
+		if (module->isLogicModule() == true)
+		{
+			if (module->place() == LM1_PLACE)
+			{
+				return 	module;
+			}
+
+			assert(false);
+			break;
+		}
+	}
+
+	return nullptr;
+}
+
+const Hardware::DeviceModule* DeviceHelper::getLmOrBvb(const Hardware::DeviceChassis* chassis)
+{
+	if (chassis == nullptr)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	int count = chassis->childrenCount();
+
+	for(int i = 0; i < count; i++)
+	{
+		Hardware::DeviceObject* device = chassis->child(i).get();
+
+		if (device == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+
+		if (device->isModule() == false)
+		{
+			continue;
+		}
+
+		Hardware::DeviceModule* module =  device->toModule().get();
+
+		if (module == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+
+		if (module->isLogicModule() == true || module->isBvb() == true)
+		{
+			return 	module;
+		}
+	}
+
+	return nullptr;
+}
+
+
+
+const Hardware::DeviceModule* DeviceHelper::getAssociatedLm(const Hardware::DeviceObject* object)
+{
+	//
+	// object is under chassis
+	//
+
+	if (object == nullptr)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	const Hardware::DeviceChassis* chassis = object->getParentChassis();
+
+	if (chassis == nullptr)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	return getLm(chassis);
+}
+
+const Hardware::DeviceModule* DeviceHelper::getAssociatedLmOrBvb(const Hardware::DeviceObject* object)
+{
+	//
+	// object is under chassis
+	//
+
+	if (object == nullptr)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	const Hardware::DeviceChassis* chassis = object->getParentChassis();
+
+	if (chassis == nullptr)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	return getLmOrBvb(chassis);
+}
+
+const Hardware::Software* DeviceHelper::getSoftware(const Hardware::EquipmentSet* equipment, const QString& softwareID)
+{
+	if (equipment == nullptr)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	const Hardware::DeviceObject* device = equipment->deviceObject(softwareID).get();
+
+	if (device == nullptr)
+	{
+		return nullptr;
+	}
+
+	return device->toSoftware().get();
+}
+
+QStringList DeviceHelper::getSoftwareControllersIDs(const Hardware::Software* software)
+{
+	if (software == nullptr)
+	{
+		Q_ASSERT(false);
+		return QStringList();
+	}
+
+	QStringList controllersIDs;
+
+	for(const std::shared_ptr<Hardware::DeviceObject>& child : software->children())
+	{
+		if (child == nullptr)
+		{
+			Q_ASSERT(false);
+			continue;
+		}
+
+		if (child->isController() == true)
+		{
+			controllersIDs.append(child->equipmentIdTemplate());
+		}
+	}
+
+	return controllersIDs;
+}
+
+
+bool DeviceHelper::isTwoChannelSoftware(const Hardware::DeviceObject* swObject, QStringList* channelsCntrollersIds)
+{
+	if (swObject->isSoftware() == false)
+	{
+		Q_ASSERT(false);
+		return false;
+	}
+
+	if (channelsCntrollersIds != nullptr)
+	{
+		channelsCntrollersIds->clear();
+	}
+
+	for(int ch = CHANNEL_1; ch < 2;  ch++)
+	{
+		QString suffix = EquipmentPropNames::CONTROLLER_SUFFIX_CH_TEMPLATE.arg(ch + 1);
+
+		Hardware::DeviceObject* controller = getChildControllerBySuffix(swObject, suffix, nullptr);
+
+		if (controller == nullptr || controller->isController() == false)
+		{
+			if (channelsCntrollersIds != nullptr)
+			{
+				channelsCntrollersIds->clear();
+			}
+
+			return false;
+		}
+
+		if (channelsCntrollersIds != nullptr)
+		{
+			channelsCntrollersIds->append(controller->equipmentIdTemplate());
+		}
+	}
+
+	return true;
+}
+
+void DeviceHelper::logPropertyNotFoundError(const Hardware::DeviceObject* device, const QString& propertyName, Builder::IssueLogger *log)
+{
+	if (log != nullptr && device != nullptr)
+	{
+		log->errCFG3020(device->equipmentIdTemplate(), propertyName);
+		return;
+	}
+}
+
+void DeviceHelper::logPropertyWriteError(const Hardware::DeviceObject* device, const QString& propertyName, Builder::IssueLogger *log)
+{
+	if (log != nullptr && device != nullptr)
+	{
+		log->errCFG3019(device->equipmentIdTemplate(), propertyName);
+		return;
+	}
+}
+
+

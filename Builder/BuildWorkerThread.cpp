@@ -17,6 +17,7 @@
 #include "../Simulator/Simulator.h"
 #include "../HardwareLib/Subsystem.h"
 #include "SchemasReportGenerator.h"
+#include "LogicModulesInfoWriter.h"
 
 namespace Builder
 {
@@ -351,7 +352,7 @@ namespace Builder
 		m_context->m_buildResultWriter = std::make_shared<BuildResultWriter>();
 		bool ok = m_context->m_buildResultWriter->start(buildOutputPath(), &m_context->m_db, m_context->m_log, 0 /* Load correct ChangesetID */);
 
-		const BuildInfo& bi = m_context->m_buildResultWriter->buildInfo();
+		const OnlineLib::BuildInfo& bi = m_context->m_buildResultWriter->buildInfo();
 		m_context->m_buildResultWriter->firmwareWriter()->setProjectInfo(bi.project, bi.user, bi.id, bi.changeset);
 
 		return ok;
@@ -994,7 +995,7 @@ namespace Builder
 
 		// Script comments
 		//
-        BuildInfo b = m_context->m_buildResultWriter->buildInfo();
+		OnlineLib::BuildInfo b = m_context->m_buildResultWriter->buildInfo();
 
 		QString commStartWindows = "@rem ";
 		QString commStartLinux = "# ";
@@ -1276,7 +1277,7 @@ namespace Builder
 	{
 		std::shared_ptr<ReportLib::ReportSchemaView> schemaView = std::make_shared<ReportLib::ReportSchemaView>();
 
-		const BuildInfo& bi = m_context->m_buildResultWriter->buildInfo();
+		const OnlineLib::BuildInfo& bi = m_context->m_buildResultWriter->buildInfo();
 		schemaView->session().setProject(bi.project);
 		schemaView->session().setUsername(bi.user);
 		schemaView->session().setHost(QHostInfo::localHostName());

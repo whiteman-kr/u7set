@@ -66,7 +66,6 @@ CONFIG(release, debug|release) {
 
 
 HEADERS  += \
-    ../UtilsLib/CrashExceptionHandler.h \
     ../lib/Ui/ClickableLabel.h \
     ../lib/Ui/DialogChooseTags.h \
     ../lib/CodeEditor.h \
@@ -208,7 +207,6 @@ HEADERS  += \
 	SvgEditor.h \
 
 SOURCES +=\
-    ../UtilsLib/CrashExceptionHandler.cpp \
 	../lib/ExportPrint.cpp \
     ../lib/Ui/DialogChooseTags.cpp \
 	../lib/Ui/DialogSignalInfo.cpp \
@@ -471,14 +469,6 @@ unix:PRE_TARGETDEPS += $$DESTDIR/libVFrame30.a
 INCLUDEPATH += ../VFrame30
 DEPENDPATH += ../VFrame30
 
-# Builder Lib
-#
-LIBS += -lBuilder
-win32:PRE_TARGETDEPS += $$DESTDIR/Builder.lib
-unix:PRE_TARGETDEPS += $$DESTDIR/libBuilder.a
-INCLUDEPATH += $$PWD/../Builder
-DEPENDPATH += $$PWD/../Builder
-
 # QtKeychain Lib
 #
 LIBS += -lQtkeychain
@@ -490,12 +480,13 @@ DEPENDPATH += $$PWD/../Tools/qtkeychain
 DEFINES += QTKEYCHAIN_NO_EXPORT
 DEFINES += USE_CREDENTIAL_STORE
 
-win32 {
-	LIBS += Advapi32.lib
-}
-unix {
-	LIBS += -lglib-2.0
-}
+# Builder Lib
+#
+LIBS += -lBuilder
+win32:PRE_TARGETDEPS += $$DESTDIR/Builder.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libBuilder.a
+INCLUDEPATH += $$PWD/../Builder
+DEPENDPATH += $$PWD/../Builder
 
 # Simulator Lib
 #
@@ -505,6 +496,14 @@ unix:PRE_TARGETDEPS += $$DESTDIR/libSimulator.a
 INCLUDEPATH += $$PWD/../Simulator
 DEPENDPATH += $$PWD/../Simulator
 
+# VFrame30 library
+#
+LIBS += -lVFrame30
+win32:PRE_TARGETDEPS += $$DESTDIR/VFrame30.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libVFrame30.a
+INCLUDEPATH += ../VFrame30
+DEPENDPATH += ../VFrame30
+
 # TrendView library
 #
 LIBS += -lTrendView
@@ -513,30 +512,11 @@ unix:PRE_TARGETDEPS += $$DESTDIR/libTrendView.a
 INCLUDEPATH += $$PWD/../TrendView
 DEPENDPATH += $$PWD/../TrendView
 
-# Protobuf
-#
-LIBS += -lprotobuf
-win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
-unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
-INCLUDEPATH += ./../Protobuf
-
-# AppSignalLib
-#
-LIBS += -lAppSignalLib
-win32:PRE_TARGETDEPS += $$DESTDIR/AppSignalLib.lib
-unix:PRE_TARGETDEPS += $$DESTDIR/libAppSignalLib.a
-
 # OnlineLib
 #
 LIBS += -lOnlineLib
 win32:PRE_TARGETDEPS += $$DESTDIR/OnlineLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libOnlineLib.a
-
-# UtilsLib
-#
-LIBS += -lUtilsLib
-win32:PRE_TARGETDEPS += $$DESTDIR/UtilsLib.lib
-unix:PRE_TARGETDEPS += $$DESTDIR/libUtilsLib.a
 
 # DbLib
 #
@@ -550,9 +530,35 @@ LIBS += -lHardwareLib
 win32:PRE_TARGETDEPS += $$DESTDIR/HardwareLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libHardwareLib.a
 
+# AppSignalLib
+#
+LIBS += -lAppSignalLib
+win32:PRE_TARGETDEPS += $$DESTDIR/AppSignalLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libAppSignalLib.a
+
+# UtilsLib
+#
+LIBS += -lUtilsLib
+win32:PRE_TARGETDEPS += $$DESTDIR/UtilsLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libUtilsLib.a
+
+# Protobuf
+#
+LIBS += -lprotobuf
+win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
+INCLUDEPATH += ./../Protobuf
+
 # CommonLib
 #
 LIBS += -lCommonLib
 win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libCommonLib.a
 
+
+win32 {
+	LIBS += Advapi32.lib
+}
+unix {
+	LIBS += -lglib-2.0
+}

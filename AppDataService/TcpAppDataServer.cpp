@@ -486,29 +486,7 @@ void TcpAppDataServer::onGatewayGetAppSignalStateChangesRequest(const char* requ
 
 	GatewayAppSignalStateQueueMask state;
 
-	qint64 minPlantTime = std::numeric_limits<qint64>::max();
-	qint64 minSystemTime = std::numeric_limits<qint64>::max();
-	qint64 minLocalTime = std::numeric_limits<qint64>::max();
-
 	int pendingStatesCount = 0;
-
-	auto getMinTimes = [&minPlantTime, &minSystemTime, &minLocalTime](const SimpleAppSignalState& st)
-					   {
-							if (st.time.plant.timeStamp != 0)
-							{
-								minPlantTime = std::min(minPlantTime, st.time.plant.timeStamp);
-							}
-
-							if (st.time.system.timeStamp != 0)
-							{
-								minSystemTime = std::min(minSystemTime, st.time.system.timeStamp);
-							}
-
-							if (st.time.local.timeStamp != 0)
-							{
-								minLocalTime = std::min(minLocalTime, st.time.local.timeStamp);
-							}
-					   };
 
 	for(int i = 0; i < ADS_GET_APP_SIGNAL_STATE_MAX; i++)
 	{
@@ -523,9 +501,6 @@ void TcpAppDataServer::onGatewayGetAppSignalStateChangesRequest(const char* requ
 
 		state.gwState.saveToProto(protoState);
 
-		getMinTimes(state.gwState.prevState);
-		getMinTimes(state.gwState.curState);
-
 		if (i + 1 == ADS_GET_APP_SIGNAL_STATE_MAX)
 		{
 			// on last iteration set pendingStatesCount to actual value
@@ -535,9 +510,6 @@ void TcpAppDataServer::onGatewayGetAppSignalStateChangesRequest(const char* requ
 	}
 
 	reply.set_pendingstatescount(pendingStatesCount);
-	reply.set_minplanttime(minPlantTime);
-	reply.set_minsystemtime(minSystemTime);
-	reply.set_minlocaltime(minLocalTime);
 
 	sendReply(reply);
 

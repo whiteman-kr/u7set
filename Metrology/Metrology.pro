@@ -52,7 +52,6 @@ unix {
 }
 
 SOURCES += \
-	../lib/BuildInfo.cpp \
 	../lib/PropertyEditor.cpp \
 	../lib/Ui/DialogAbout.cpp \
 	ChartView.cpp \
@@ -103,7 +102,6 @@ SOURCES += \
 	Visa/visa.h
 
 HEADERS  += \
-	../lib/BuildInfo.h \
     ../lib/PropertyEditor.h \
 	../lib/Ui/DialogAbout.h \
     ChartView.h \

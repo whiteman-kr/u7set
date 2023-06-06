@@ -3,7 +3,7 @@
 #include "../Builder/Builder.h"
 #include "../Builder/IssueLogger.h"
 #include "../HardwareLib/DeviceObject.h"
-#include "../lib/OutputLog.h"
+#include "../UtilsLib/OutputLog.h"
 
 class DbController;
 class QCheckBox;

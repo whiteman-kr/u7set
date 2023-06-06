@@ -1,7 +1,7 @@
 #pragma once
-#include "../Builder/SignalSet.h"
-#include "AppSignalProperties.h"
 #include "../AppSignalLib/AppSignalParam.h"
+#include "../Builder/SignalSet.h"
+#include "../Builder/AppSignalProperties.h"
 #include "../DbLib/DbStruct.h"
 
 #define SIGNAL_TYPE_COUNT (QMetaEnum::fromType<E::SignalType>().keyCount())

@@ -1,10 +1,11 @@
-#include "SimAfbParamTests.h"
-#include "../../Simulator/SimAfb.h"
-#include "../../Simulator/SimException.h"
 #include <memory>
 #include <limits>
 #include <cmath>
 #include <numbers>
+#include <QTest>
+#include "SimAfbParamTests.h"
+#include <SimAfb.h>
+#include <SimException.h>
 
 void SimAfbParamTests::initTestCase()
 {

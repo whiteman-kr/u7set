@@ -39,7 +39,7 @@ namespace TestSuite
 
 		// Get test files list
 		//
-		for (const Builder::BuildFileInfo& buildFileInfo : files)
+		for (const OnlineLib::BuildFileInfo& buildFileInfo : files)
 		{
 			if (buildFileInfo.pathFileName.endsWith(".js") == false)
 			{

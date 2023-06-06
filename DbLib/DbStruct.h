@@ -317,6 +317,18 @@ public:
 	DbFileTree& operator=(DbFileTree&& src) noexcept;
 
 public:
+	// Iteration
+	//
+	[[nodiscard]] auto begin() const
+	{
+		return m_files.begin();
+	}
+
+	[[nodiscard]] auto end() const
+	{
+		return m_files.end();
+	}
+
 	void clear();
 
 	[[nodiscard]] int size() const;
@@ -694,7 +706,7 @@ Q_DECLARE_METATYPE(DbProject)
 Q_DECLARE_METATYPE(std::vector<DbProject>)
 Q_DECLARE_METATYPE(std::vector<DbFileInfo>)
 Q_DECLARE_METATYPE(std::vector<std::shared_ptr<DbFile>>)
-Q_DECLARE_METATYPE(std::vector<int>)
+//Q_DECLARE_METATYPE(std::vector<int>)
 Q_DECLARE_METATYPE(std::vector<DbChangeset>)
 Q_DECLARE_METATYPE(std::vector<DbChangesetDetails>)
 

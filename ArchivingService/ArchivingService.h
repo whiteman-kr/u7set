@@ -18,18 +18,19 @@ class ArchivingService : public ServiceWorker
 public:
 	ArchivingService(const SoftwareInfo& softwareInfo,
 						   const QString &serviceInstanceName,
-						   int &argc,
+						   int argc,
 						   char **argv,
-						   std::shared_ptr<CircularLogger> logger,
-						   E::ServiceRunMode runMode);
+						   std::shared_ptr<CircularLogger> logger);
+	ArchivingService(const ArchivingService* worker);
+
 	~ArchivingService();
 
 	virtual ServiceWorker* createInstance() const override;
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& servicesInfo) const override;
 
 private:
-	virtual void initCmdLineParser() override;
-	virtual void loadSettings() override;
+	virtual void initServiceSpecificCmdLineArgs() override;
+	virtual void loadServiceSpecificSettings() override;
 
 	virtual void initialize() override;
 	virtual void shutdown() override;
@@ -63,10 +64,9 @@ private slots:
 private:
 	QString m_overwriteArchiveLocation;
 	int m_minQueueSizeForFlushing = 0;
-	QSettings m_settings;
 
 	ArchivingServiceSettings m_serviceSettings;
-	Builder:: BuildInfo m_buildInfo;
+	OnlineLib::BuildInfo m_buildInfo;
 	Proto::ArchSignals* m_archSignalsProto = nullptr;
 
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;

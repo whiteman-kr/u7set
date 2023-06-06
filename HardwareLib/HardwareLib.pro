@@ -47,16 +47,27 @@ CONFIG(release, debug|release) {
 
 HEADERS += \
 	Connection.h \
+	ConnectionsInfo.h \
 	DeviceObject.h \
 	ModuleFirmware.h \
 	ScriptDeviceObject.h \
 	Stable.h \
-	Subsystem.h
+	Subsystem.h \
+	LmDescription.h \
+	LogicModulesInfo.h \
+	LanControllerInfo.h \
+	DataProtocols.h \
+	Afb.h
 
 SOURCES += \
     Connection.cpp \
+	ConnectionsInfo.cpp \
     DeviceObject.cpp \
     ModuleFirmware.cpp \
     ScriptDeviceObject.cpp \
-    Subsystem.cpp
-
+    Subsystem.cpp \
+	LmDescription.cpp \
+	LogicModulesInfo.cpp \
+	LanControllerInfo.cpp \
+	DataProtocols.cpp \
+	Afb.cpp

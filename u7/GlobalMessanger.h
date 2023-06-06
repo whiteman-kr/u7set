@@ -1,7 +1,7 @@
 #ifndef GLOBALMESSANGER_H
 #define GLOBALMESSANGER_H
 
-#include "../lib/OutputLog.h"
+#include "../UtilsLib/OutputLog.h"
 #include "../DbLib/DbStruct.h"
 #include "../Builder/IssueLogger.h"
 #include "../Builder/RunOrder.h"
@@ -83,7 +83,7 @@ public:
 	void fireCompareObject(DbChangesetObject object, CompareData compareData);
 
 public slots:
-	void runOrderReady(Builder::RunOrder runOrder);
+	void runOrderReady(::Builder::RunOrder runOrder);
 
 	// --
 	//

@@ -2866,14 +2866,11 @@ class GatewayGetAppSignalStateChangesReply PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kAppSignalStatesFieldNumber = 6,
-    kMinPlantTimeFieldNumber = 2,
-    kMinSystemTimeFieldNumber = 3,
+    kAppSignalStatesFieldNumber = 3,
     kErrorFieldNumber = 1,
-    kPendingStatesCountFieldNumber = 5,
-    kMinLocalTimeFieldNumber = 4,
+    kPendingStatesCountFieldNumber = 2,
   };
-  // repeated .Network.GatewayAppSignalState appSignalStates = 6;
+  // repeated .Network.GatewayAppSignalState appSignalStates = 3;
   int appsignalstates_size() const;
   private:
   int _internal_appsignalstates_size() const;
@@ -2891,32 +2888,6 @@ class GatewayGetAppSignalStateChangesReply PROTOBUF_FINAL :
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Network::GatewayAppSignalState >&
       appsignalstates() const;
 
-  // optional int64 minPlantTime = 2 [default = 0];
-  bool has_minplanttime() const;
-  private:
-  bool _internal_has_minplanttime() const;
-  public:
-  void clear_minplanttime();
-  ::PROTOBUF_NAMESPACE_ID::int64 minplanttime() const;
-  void set_minplanttime(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_minplanttime() const;
-  void _internal_set_minplanttime(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional int64 minSystemTime = 3 [default = 0];
-  bool has_minsystemtime() const;
-  private:
-  bool _internal_has_minsystemtime() const;
-  public:
-  void clear_minsystemtime();
-  ::PROTOBUF_NAMESPACE_ID::int64 minsystemtime() const;
-  void set_minsystemtime(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_minsystemtime() const;
-  void _internal_set_minsystemtime(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
   // optional int32 error = 1 [default = 0];
   bool has_error() const;
   private:
@@ -2930,7 +2901,7 @@ class GatewayGetAppSignalStateChangesReply PROTOBUF_FINAL :
   void _internal_set_error(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
-  // optional int32 pendingStatesCount = 5 [default = 0];
+  // optional int32 pendingStatesCount = 2 [default = 0];
   bool has_pendingstatescount() const;
   private:
   bool _internal_has_pendingstatescount() const;
@@ -2943,19 +2914,6 @@ class GatewayGetAppSignalStateChangesReply PROTOBUF_FINAL :
   void _internal_set_pendingstatescount(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
-  // optional int64 minLocalTime = 4 [default = 0];
-  bool has_minlocaltime() const;
-  private:
-  bool _internal_has_minlocaltime() const;
-  public:
-  void clear_minlocaltime();
-  ::PROTOBUF_NAMESPACE_ID::int64 minlocaltime() const;
-  void set_minlocaltime(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_minlocaltime() const;
-  void _internal_set_minlocaltime(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
   // @@protoc_insertion_point(class_scope:Network.GatewayGetAppSignalStateChangesReply)
  private:
   class _Internal;
@@ -2966,11 +2924,8 @@ class GatewayGetAppSignalStateChangesReply PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Network::GatewayAppSignalState > appsignalstates_;
-  ::PROTOBUF_NAMESPACE_ID::int64 minplanttime_;
-  ::PROTOBUF_NAMESPACE_ID::int64 minsystemtime_;
   ::PROTOBUF_NAMESPACE_ID::int32 error_;
   ::PROTOBUF_NAMESPACE_ID::int32 pendingstatescount_;
-  ::PROTOBUF_NAMESPACE_ID::int64 minlocaltime_;
   friend struct ::TableStruct_network_2eproto;
 };
 // -------------------------------------------------------------------
@@ -16678,7 +16633,7 @@ inline void GatewayAppSignalState::set_allocated_curstate(::Proto::AppSignalStat
 
 // optional int32 error = 1 [default = 0];
 inline bool GatewayGetAppSignalStateChangesReply::_internal_has_error() const {
-  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
 }
 inline bool GatewayGetAppSignalStateChangesReply::has_error() const {
@@ -16686,7 +16641,7 @@ inline bool GatewayGetAppSignalStateChangesReply::has_error() const {
 }
 inline void GatewayGetAppSignalStateChangesReply::clear_error() {
   error_ = 0;
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000001u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 GatewayGetAppSignalStateChangesReply::_internal_error() const {
   return error_;
@@ -16696,7 +16651,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 GatewayGetAppSignalStateChangesReply::erro
   return _internal_error();
 }
 inline void GatewayGetAppSignalStateChangesReply::_internal_set_error(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000001u;
   error_ = value;
 }
 inline void GatewayGetAppSignalStateChangesReply::set_error(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -16704,93 +16659,9 @@ inline void GatewayGetAppSignalStateChangesReply::set_error(::PROTOBUF_NAMESPACE
   // @@protoc_insertion_point(field_set:Network.GatewayGetAppSignalStateChangesReply.error)
 }
 
-// optional int64 minPlantTime = 2 [default = 0];
-inline bool GatewayGetAppSignalStateChangesReply::_internal_has_minplanttime() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
-  return value;
-}
-inline bool GatewayGetAppSignalStateChangesReply::has_minplanttime() const {
-  return _internal_has_minplanttime();
-}
-inline void GatewayGetAppSignalStateChangesReply::clear_minplanttime() {
-  minplanttime_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 GatewayGetAppSignalStateChangesReply::_internal_minplanttime() const {
-  return minplanttime_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 GatewayGetAppSignalStateChangesReply::minplanttime() const {
-  // @@protoc_insertion_point(field_get:Network.GatewayGetAppSignalStateChangesReply.minPlantTime)
-  return _internal_minplanttime();
-}
-inline void GatewayGetAppSignalStateChangesReply::_internal_set_minplanttime(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00000001u;
-  minplanttime_ = value;
-}
-inline void GatewayGetAppSignalStateChangesReply::set_minplanttime(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_minplanttime(value);
-  // @@protoc_insertion_point(field_set:Network.GatewayGetAppSignalStateChangesReply.minPlantTime)
-}
-
-// optional int64 minSystemTime = 3 [default = 0];
-inline bool GatewayGetAppSignalStateChangesReply::_internal_has_minsystemtime() const {
-  bool value = (_has_bits_[0] & 0x00000002u) != 0;
-  return value;
-}
-inline bool GatewayGetAppSignalStateChangesReply::has_minsystemtime() const {
-  return _internal_has_minsystemtime();
-}
-inline void GatewayGetAppSignalStateChangesReply::clear_minsystemtime() {
-  minsystemtime_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00000002u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 GatewayGetAppSignalStateChangesReply::_internal_minsystemtime() const {
-  return minsystemtime_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 GatewayGetAppSignalStateChangesReply::minsystemtime() const {
-  // @@protoc_insertion_point(field_get:Network.GatewayGetAppSignalStateChangesReply.minSystemTime)
-  return _internal_minsystemtime();
-}
-inline void GatewayGetAppSignalStateChangesReply::_internal_set_minsystemtime(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00000002u;
-  minsystemtime_ = value;
-}
-inline void GatewayGetAppSignalStateChangesReply::set_minsystemtime(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_minsystemtime(value);
-  // @@protoc_insertion_point(field_set:Network.GatewayGetAppSignalStateChangesReply.minSystemTime)
-}
-
-// optional int64 minLocalTime = 4 [default = 0];
-inline bool GatewayGetAppSignalStateChangesReply::_internal_has_minlocaltime() const {
-  bool value = (_has_bits_[0] & 0x00000010u) != 0;
-  return value;
-}
-inline bool GatewayGetAppSignalStateChangesReply::has_minlocaltime() const {
-  return _internal_has_minlocaltime();
-}
-inline void GatewayGetAppSignalStateChangesReply::clear_minlocaltime() {
-  minlocaltime_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00000010u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 GatewayGetAppSignalStateChangesReply::_internal_minlocaltime() const {
-  return minlocaltime_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 GatewayGetAppSignalStateChangesReply::minlocaltime() const {
-  // @@protoc_insertion_point(field_get:Network.GatewayGetAppSignalStateChangesReply.minLocalTime)
-  return _internal_minlocaltime();
-}
-inline void GatewayGetAppSignalStateChangesReply::_internal_set_minlocaltime(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00000010u;
-  minlocaltime_ = value;
-}
-inline void GatewayGetAppSignalStateChangesReply::set_minlocaltime(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_minlocaltime(value);
-  // @@protoc_insertion_point(field_set:Network.GatewayGetAppSignalStateChangesReply.minLocalTime)
-}
-
-// optional int32 pendingStatesCount = 5 [default = 0];
+// optional int32 pendingStatesCount = 2 [default = 0];
 inline bool GatewayGetAppSignalStateChangesReply::_internal_has_pendingstatescount() const {
-  bool value = (_has_bits_[0] & 0x00000008u) != 0;
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
   return value;
 }
 inline bool GatewayGetAppSignalStateChangesReply::has_pendingstatescount() const {
@@ -16798,7 +16669,7 @@ inline bool GatewayGetAppSignalStateChangesReply::has_pendingstatescount() const
 }
 inline void GatewayGetAppSignalStateChangesReply::clear_pendingstatescount() {
   pendingstatescount_ = 0;
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 GatewayGetAppSignalStateChangesReply::_internal_pendingstatescount() const {
   return pendingstatescount_;
@@ -16808,7 +16679,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 GatewayGetAppSignalStateChangesReply::pend
   return _internal_pendingstatescount();
 }
 inline void GatewayGetAppSignalStateChangesReply::_internal_set_pendingstatescount(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000002u;
   pendingstatescount_ = value;
 }
 inline void GatewayGetAppSignalStateChangesReply::set_pendingstatescount(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -16816,7 +16687,7 @@ inline void GatewayGetAppSignalStateChangesReply::set_pendingstatescount(::PROTO
   // @@protoc_insertion_point(field_set:Network.GatewayGetAppSignalStateChangesReply.pendingStatesCount)
 }
 
-// repeated .Network.GatewayAppSignalState appSignalStates = 6;
+// repeated .Network.GatewayAppSignalState appSignalStates = 3;
 inline int GatewayGetAppSignalStateChangesReply::_internal_appsignalstates_size() const {
   return appsignalstates_.size();
 }

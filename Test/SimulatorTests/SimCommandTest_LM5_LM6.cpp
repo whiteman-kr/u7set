@@ -6,6 +6,7 @@
 #include "../../Simulator/SimDeviceEmulator.h"
 #include "../../Simulator/SimException.h"
 
+
 SimCommandTest_LM5_LM6::SimCommandTest_LM5_LM6()
 {
 }
@@ -118,9 +119,9 @@ void SimCommandTest_LM5_LM6::testCommandNop()
 //
 void SimCommandTest_LM5_LM6::testCommandStartAfb()
 {
-	const quint16 opcode = {2};
-	const quint16 afbOpCode = {1};
-	const quint16 afbInstance = {0};
+    const quint16 opcode = 2;
+    const quint16 afbOpCode = 1;
+    const quint16 afbInstance = 0;
 
 	// Parse
 	//
@@ -244,9 +245,11 @@ void SimCommandTest_LM5_LM6::testCommandStop()
 //
 void SimCommandTest_LM5_LM6::testCommandMov()
 {
-	const quint16 opCode = {4};
-	const quint16 dst = {AppLogicWordDataOffset + 10u};
-	const quint16 src = {AppLogicWordDataOffset + 20u};
+    const quint16 opCode = 4;
+
+    quint16 appLogicWordDataOffset = AppLogicWordDataOffset;
+    const quint16 dst = appLogicWordDataOffset + 10u;
+    const quint16 src = AppLogicWordDataOffset + 20u;
 
 	// Parse
 	//
@@ -298,10 +301,10 @@ void SimCommandTest_LM5_LM6::testCommandMov()
 //
 void SimCommandTest_LM5_LM6::testCommandMovMem()
 {
-	const quint16 opCode = {5};
-	const quint16 dst = {AppLogicWordDataOffset + 10u};
-	const quint16 src = {AppLogicWordDataOffset + 200u};
-	const quint16 size = {16};
+    const quint16 opCode = 5;
+    const quint16 dst = AppLogicWordDataOffset + 10;
+    const quint16 src = AppLogicWordDataOffset + 200;
+    const quint16 size = 16;
 
 	// Parse
 	//
@@ -479,10 +482,10 @@ void SimCommandTest_LM5_LM6::testCommandMovbc()
 void SimCommandTest_LM5_LM6::testCommandWrfb()
 {
 	const quint16 opcode = 8;
-	const quint16 src = {AppLogicWordDataOffset + 200u};
-	const quint16 afbOpCode = {1};
-	const quint16 afbInstance = {0};
-	const quint16 afbPinOpCode = {1};
+    const quint16 src = AppLogicWordDataOffset + 200u;
+    const quint16 afbOpCode = 1;
+    const quint16 afbInstance = 0;
+    const quint16 afbPinOpCode = 1;
 
 	// Parse
 	//
@@ -540,11 +543,11 @@ void SimCommandTest_LM5_LM6::testCommandWrfb()
 //
 void SimCommandTest_LM5_LM6::testCommandRdfb()
 {
-	const quint16 opcode = {9};
-	const quint16 dst = {AppLogicWordDataOffset + 15u};
-	const quint16 afbOpCode = {1};
-	const quint16 afbInstance = {0};
-	const quint16 afbPinOpCode = {1};
+    const quint16 opcode = 9;
+    const quint16 dst = AppLogicWordDataOffset + 15u;
+    const quint16 afbOpCode = 1;
+    const quint16 afbInstance = 0;
+    const quint16 afbPinOpCode = 1;
 
 	// Parse
 	//
@@ -600,11 +603,11 @@ void SimCommandTest_LM5_LM6::testCommandRdfb()
 //
 void SimCommandTest_LM5_LM6::testCommandWrfbc()
 {
-	const quint16 opCode = {10};
-	const quint16 afbOpCode = {10};
-	const quint16 afbInstance = {1};
-	const quint16 afbPinOpCode = {1};
-	const quint16 data = {0x59BA};
+    const quint16 opCode = 10;
+    const quint16 afbOpCode = 10;
+    const quint16 afbInstance = 1;
+    const quint16 afbPinOpCode = 1;
+    const quint16 data = 0x59BA;
 
 	// Parse
 	//
@@ -659,11 +662,11 @@ void SimCommandTest_LM5_LM6::testCommandWrfbc()
 void SimCommandTest_LM5_LM6::testCommandWrfbb()
 {
 	const quint16 opcode = 11;
-	const quint16 src = {AppLogicWordDataOffset + 90u};
+    const quint16 src = AppLogicWordDataOffset + 90u;
 	const quint16 bitNo = 5;
-	const quint16 afbOpCode = {4};
-	const quint16 afbInstance = {99};
-	const quint16 afbPinOpCode = {6};
+    const quint16 afbOpCode = 4;
+    const quint16 afbInstance = 99;
+    const quint16 afbPinOpCode = 6;
 
 	// Parse
 	//
@@ -735,12 +738,12 @@ void SimCommandTest_LM5_LM6::testCommandWrfbb()
 //
 void SimCommandTest_LM5_LM6::testCommandRdfbb()
 {
-	const quint16 opcode = {12};
-	const quint16 dst = {AppLogicWordDataOffset + 15u};
-	const quint16 bitNo = {5};
-	const quint16 afbOpCode = {4};
-	const quint16 afbInstance = {12};
-	const quint16 afbPinOpCode = {6};
+    const quint16 opcode = 12;
+    const quint16 dst = AppLogicWordDataOffset + 15u;
+    const quint16 bitNo = 5;
+    const quint16 afbOpCode = 4;
+    const quint16 afbInstance = 12;
+    const quint16 afbPinOpCode = 6;
 
 	// Parse
 	//
@@ -802,11 +805,11 @@ void SimCommandTest_LM5_LM6::testCommandRdfbb()
 //
 void SimCommandTest_LM5_LM6::testCommandRdfbCmp()
 {
-	const quint16 opCode = {13};
-	const quint16 afbOpCode = {4};
-	const quint16 afbInstance = {11};
-	const quint16 afbPinOpCode = {9};
-	const quint16 data = {0x9871};
+    const quint16 opCode = 13;
+    const quint16 afbOpCode = 4;
+    const quint16 afbInstance = 11;
+    const quint16 afbPinOpCode = 9;
+    const quint16 data = 0x9871;
 
 	// Parse
 	//
@@ -877,10 +880,10 @@ void SimCommandTest_LM5_LM6::testCommandRdfbCmp()
 //
 void SimCommandTest_LM5_LM6::testCommandSetMem()
 {
-	const quint16 opCode = {14};
-	const quint16 dst = {AppLogicWordDataOffset + 10u};
-	const quint16 data = {0x9876};
-	const quint16 size = {300};
+    const quint16 opCode = 14;
+    const quint16 dst = AppLogicWordDataOffset + 10;
+    const quint16 data = 0x9876;
+    const quint16 size = 300;
 
 	// Parse
 	//
@@ -935,10 +938,10 @@ void SimCommandTest_LM5_LM6::testCommandSetMem()
 //
 void SimCommandTest_LM5_LM6::testCommandMovb()
 {
-	const quint16 opCode = {15};
-	const quint16 src = {AppLogicWordDataOffset + 55u};
+    const quint16 opCode = 15;
+    const quint16 src = AppLogicWordDataOffset + 55u;
 	const quint16 srcBitNo = 15;
-	const quint16 dst = {AppLogicWordDataOffset + 0u};
+    const quint16 dst = AppLogicWordDataOffset + 0u;
 	const quint16 dstBitNo = 2;
 
 
@@ -1162,11 +1165,11 @@ void SimCommandTest_LM5_LM6::testCommandMovc32()
 //
 void SimCommandTest_LM5_LM6::testCommandWrfb32()
 {
-	const quint16 opcode = {20};
-	const quint16 src = {AppLogicWordDataOffset + 200u};
-	const quint16 afbOpCode = {1};
-	const quint16 afbInstance = {0};
-	const quint16 afbPinOpCode = {1};
+    const quint16 opcode = 20;
+    const quint16 src = AppLogicWordDataOffset + 200u;
+    const quint16 afbOpCode = 1;
+    const quint16 afbInstance = 0;
+    const quint16 afbPinOpCode = 1;
 
 	// Parse
 	//
@@ -1223,11 +1226,11 @@ void SimCommandTest_LM5_LM6::testCommandWrfb32()
 //
 void SimCommandTest_LM5_LM6::testCommandRdfb32()
 {
-	const quint16 opcode = {21};
-	const quint16 dst = {AppLogicWordDataOffset + 15u};
-	const quint16 afbOpCode = {4};
-	const quint16 afbInstance = {7};
-	const quint16 afbPinOpCode = {3};
+    const quint16 opcode = 21;
+    const quint16 dst = AppLogicWordDataOffset + 15u;
+    const quint16 afbOpCode = 4;
+    const quint16 afbInstance = 7;
+    const quint16 afbPinOpCode = 3;
 
 	// Parse
 	//
@@ -1284,11 +1287,11 @@ void SimCommandTest_LM5_LM6::testCommandRdfb32()
 //
 void SimCommandTest_LM5_LM6::testCommandWrfbc32()
 {
-	const quint16 opCode = {22};
-	const quint16 afbOpCode = {22};
-	const quint16 afbInstance = {1};
-	const quint16 afbPinOpCode = {1};
-	const quint32 data = {0x59BA3214};
+    const quint16 opCode = 22;
+    const quint16 afbOpCode = 22;
+    const quint16 afbInstance = 1;
+    const quint16 afbPinOpCode = 1;
+    const quint32 data = 0x59BA3214;
 
 	// Parse
 	//
@@ -1342,11 +1345,11 @@ void SimCommandTest_LM5_LM6::testCommandWrfbc32()
 //
 void SimCommandTest_LM5_LM6::testCommandRdfbCmp32()
 {
-	const quint16 opCode = {23};
-	const quint16 afbOpCode = {4};
-	const quint16 afbInstance = {11};
-	const quint16 afbPinOpCode = {9};
-	const quint32 data = {0x9871ABCD};
+    const quint16 opCode = 23;
+    const quint16 afbOpCode = 4;
+    const quint16 afbInstance = 11;
+    const quint16 afbPinOpCode = 9;
+    const quint32 data = 0x9871ABCD;
 
 	// Parse
 	//
@@ -1416,8 +1419,8 @@ void SimCommandTest_LM5_LM6::testCommandRdfbCmp32()
 //
 void SimCommandTest_LM5_LM6::testCommandMovCmpf()
 {
-	const quint16 opCode = {24};
-	const quint16 dst = {AppLogicWordDataOffset + 10u};
+    const quint16 opCode = 24;
+    const quint16 dst = AppLogicWordDataOffset + 10u;
 	const quint16 bitNo = 13;
 
 	// Parse
@@ -1594,10 +1597,10 @@ void SimCommandTest_LM5_LM6::testCommandPmov32()
 //
 void SimCommandTest_LM5_LM6::testCommandFillb()
 {
-	const quint16 opCode = {27};
-	const quint16 dst = {AppLogicWordDataOffset + 90u};
-	const quint16 src = {AppLogicWordDataOffset + 77u};
-	const quint16 srcBitNo = {7};
+    const quint16 opCode = 27;
+    const quint16 dst = AppLogicWordDataOffset + 90u;
+    const quint16 src = AppLogicWordDataOffset + 77u;
+    const quint16 srcBitNo = 7;
 
 	// Parse
 	//

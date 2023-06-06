@@ -1,6 +1,6 @@
 #include "DialogFileEditor.h"
 #include "Settings.h"
-#include "../VFrame30/Afb.h"
+#include "../HardwareLib/Afb.h"
 
 DialogFileEditor::DialogFileEditor(const QString& fileName, QByteArray *pData, DbController* pDbController, bool readOnly, QWidget *parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowMaximizeButtonHint),

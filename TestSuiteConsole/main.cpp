@@ -1,6 +1,7 @@
 #include <iostream>
 #include <QGuiApplication>
 #include <QTimer>
+#include <QStandardPaths>
 #include "../TestSuiteLib/TestSuiteSettings.h"
 #include "../TestSuiteLib/TestSuite.h"
 #include "../UtilsLib/LogFile.h"

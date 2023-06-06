@@ -4,6 +4,7 @@
 #include "../AppSignalLib/AppSignal.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/SoftwareInfo.h"
+#include "../OnlineLib/CircularLogger.h"
 
 namespace Gateway
 {
@@ -11,7 +12,9 @@ namespace Gateway
 	{
 	public:
 		Handler(const SoftwareInfo& swInfo,
-				const GatewayServiceSettings& settings);
+				const GatewayServiceSettings& settings,
+				CircularLoggerShared log,
+				bool logGatewayPackets);
 
 		virtual void run() = 0;
 		virtual void shutdown() = 0;
@@ -19,6 +22,9 @@ namespace Gateway
 	protected:
 		const SoftwareInfo& m_swInfo;
 		const GatewayServiceSettings& m_settings;
+		CircularLoggerShared m_log;
+
+		bool m_logGatewayPackets = false;
 	};
 
 	using HandlerShared = std::shared_ptr<Handler>;
@@ -31,7 +37,9 @@ namespace Gateway
 		bool init(const Gateways& gateways,
 				  const SoftwareInfo& swInfo,
 				  const GatewayServiceSettings& settings,
-				  const AppSignals& appSignals);
+				  const AppSignals& appSignals,
+				  CircularLoggerShared log,
+				  bool logGatewayPackets);
 		void run();
 		void shutdown();
 

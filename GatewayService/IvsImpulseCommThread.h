@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../UtilsLib/SimpleThread.h"
+#include "../OnlineLib/CircularLogger.h"
 #include "GatewayDescription.h"
 #include "AppSignalState.h"
 #include "IvsImpulseDataProtocol.h"
@@ -27,8 +28,21 @@ namespace Gateway
 
 		void onTimer();
 
+		bool tryCreateSockets();
+		bool isWorkableSocketExists() const;
 		void periodicSendStates();
 		void sendStateChanges();
+
+		void sendPacket(const char* packet, qint64 packetSize, bool eventsPacket);
+
+		void logEventsPacket(const char* packet);
+		void logPeriodicPacket(const char* packet);
+
+		void checkLogTime();
+
+		qint64 convertTimeToUTC(quint64 time, ::E::TimeType timeType) const;
+
+		QString formatTime(quint32 seconds);
 
 		int writeStatesToPacket(IvsImpulseStatesPacket* packet,
 								E::SignalListDataType dataType,
@@ -50,7 +64,7 @@ namespace Gateway
 		int writeStateChangesToPacket(std::shared_ptr<IvsImpulseListInfo> &li,
 									  IvsImpulseSignalEvent* events,
 									  E::SignalListDataType dataType,
-									  qint64 baseTime_ms,
+									  qint64& baseTime_ms,
 									  const std::vector<GatewayAppSignalState>& stateChanges,
 									  int& paramCount);
 
@@ -58,14 +72,38 @@ namespace Gateway
 		DiscreteState_D getDiscreteStateD(const SimpleAppSignalState& state) const;
 
 	private:
+
+		static const int TRY_CREATE_SOCKET_INTERVAL_MS = 3000;
+
 		struct GatewayChannelInfo
 		{
-			GatewayChannelInfo(const HostAddressPort& ip)
+			GatewayChannelInfo(const HostAddressPort& localIP, const HostAddressPort& remoteIP)
 			{
-				 gatewayIP = ip;
+				 localGatewayIP = localIP;
+				 remoteGatewayIP = remoteIP;
 			}
 
-			HostAddressPort gatewayIP;
+			~GatewayChannelInfo()
+			{
+				clearSocket();
+			}
+
+			void clearSocket()
+			{
+				DELETE_IF_NOT_NULL(socket);
+
+				prevTryCreateSocketTime = QDateTime::currentMSecsSinceEpoch();
+			}
+
+			HostAddressPort localGatewayIP;
+			HostAddressPort remoteGatewayIP;
+
+			//
+
+			bool tryCreateSocket(CircularLoggerShared log);
+
+			qint64 prevTryCreateSocketTime = 0;
+			QUdpSocket* socket = nullptr;
 
 			int statesPacketsSentCount = 0;
 			int eventPacketsSentCount = 0;
@@ -73,6 +111,7 @@ namespace Gateway
 
 
 	private:
+		CircularLoggerShared m_log;
 		IvsImpulseGatewayShared m_gateway;
 		const AppSignals& m_appSignals;
 
@@ -83,12 +122,18 @@ namespace Gateway
 
 		std::vector<GatewayChannelInfo> m_channelsInfo;
 
+		std::vector<qint64> m_eventsTimes;
+
 		char m_sendBuffer[IVS_IMPULSE_PACKET_MAX_SIZE + 100];
+
+		bool m_logGatewayPackets = false;
+		CircularLoggerShared m_packetsLog;
+		qint64 m_logStartTime = 0;
+		int m_checkLogTimeCtr = 0;
 
 		//
 
 		QTimer m_timer;
-		QUdpSocket m_socket;
 	};
 
 	class IvsImpulseCommThread : public SimpleThread

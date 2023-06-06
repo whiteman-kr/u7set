@@ -1,7 +1,12 @@
+#include <cstring>
+#include <QPainter>
+#include <QPdfWriter>
+#include <QPrinter>
+#include <QMouseEvent>
 #include "TrendWidget.h"
 #include "../Proto/trends.pb.h"
 #include "TrendScale.h"
-#include <cstring>
+
 
 namespace TrendLib
 {

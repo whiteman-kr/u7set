@@ -1,5 +1,5 @@
 #ifndef APP_SIGNAL_LIB_DOMAIN
-#error Don't include this file in the project! Link AppSignalLib instead.
+#error Do not include this file in the project! Link AppSignalLib instead.
 #endif
 
 #include "AppSignalStateFlags.h"

@@ -2,6 +2,7 @@
 #define DIALOGTRENDSIGNALPROPERTIES_H
 
 #include <QDialog>
+#include <QLabel>
 #include "TrendSignalSet.h"
 #include "TrendParam.h"
 

@@ -310,8 +310,10 @@ namespace XmlAttribute
 	inline const QString SIGNAL_LISTS_COUNT("SignalListsCount");
 
 	inline const QString SYSTEM_ID("SystemID");
-	inline const QString GATEWAY_IP1("GatewayIP1");
-	inline const QString GATEWAY_IP2("GatewayIP2");
+	inline const QString LOCAL_GATEWAY_IP1("LocalGatewayIP1");
+	inline const QString REMOTE_GATEWAY_IP1("RemoteGatewayIP1");
+	inline const QString LOCAL_GATEWAY_IP2("LocalGatewayIP2");
+	inline const QString REMOTE_GATEWAY_IP2("RemoteGatewayIP2");
 	inline const QString LISTS_VERSION("ListsVersion");
 	inline const QString TIME_TYPE("TimeType");
 	inline const QString PERIOD("Period");
@@ -386,15 +388,37 @@ namespace SoftwareSetting
 	inline const QString OVERRIDE_APP_DATA_RECEIVING_IP("OverrideAppDataReceivingIP");
 
 	inline const QString GATEWAY_DESCRIPTION_FILE("GatewayDescriptionFile");
+	inline const QString LOG_GATEWAY_PACKETS("LogGatewayPackets");
+
+	inline const QString LOG_RUP_TIME_ERRORS("LogRupTimeErrors");
 }
 
-namespace CmdLineOption
+namespace CmdLineArg
 {
+	inline const QString HELP("h");
+	inline const QString VERSION("v");
+	inline const QString EXEC_AS_APP("e");
+	inline const QString INSTALL("i");
+	inline const QString UNINSTALL("u");
+	inline const QString TERMINATE("t");
+	inline const QString INSTANCE("inst");
+	inline const QString CLEAR("clr");
+
 	inline const QString ID("id");
+	inline const QString IP("ip");
 	inline const QString CFG_IP1("cfgip1");
 	inline const QString CFG_IP2("cfgip2");
+
 	inline const QString CFG_FILE("f");
 	inline const QString CFG_PARSE("parse");
+
+	inline const QString CHECKHOSTNAME("checkhostname");
+	inline const QString PROFILE("profile");
+	inline const QString MODE("mode");
+	inline const QString WORK_DIRECTORY("w");
+	inline const QString BUILD_PATH("b");
+
+	inline const QString LOG_GATEWAY_PACKETS("logGwPackets");
 	inline const QString LOG_RUP_TIME_ERR("logRupTimeErr");
 }
 
@@ -452,6 +476,7 @@ namespace Separator
 {
 	inline const QString SEMICOLON_SPACE("; ");
 	inline const QString SEMICOLON(";");
+	inline const QString MINUS("-");
 	inline const QString COMMA(",");
 	inline const QString COMMA_SPACE(", ");
 	inline const QString LINE("-------------------------------------------------------------------------------");

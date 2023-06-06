@@ -1,9 +1,10 @@
 #ifndef DB_LIB_DOMAIN
-#error Don't include this file in the project! Link DbLib instead.
+#error Do not include this file in the project! Link DbLib instead.
 #endif
 
 #include <functional>
 #include <QDateTime>
+#include <QApplication>
 #include <QFile>
 #include <QSqlDriver>
 #include <QSqlError>

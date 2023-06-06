@@ -1,5 +1,8 @@
 #pragma once
 
+#include <QDialog>
+#include <QItemSelection>
+#include <QCompleter>
 #include "../lib/ISignalHasTag.h"
 #include "../TrendView/TrendSignal.h"
 
@@ -69,6 +72,9 @@ namespace TrendLib
 		void on_buttonBox_accepted();
 
 		void on_trendSignals_customContextMenuRequested(const QPoint &pos);
+
+		void on_upSignalButton_clicked();
+		void on_downSignalButton_clicked();
 
 	private:
 		Ui::DialogChooseTrendSignals* ui = nullptr;

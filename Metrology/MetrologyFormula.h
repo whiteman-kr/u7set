@@ -1,5 +1,6 @@
 #ifndef METROLOGY_FORMULA_H
 #define METROLOGY_FORMULA_H
+#include <QObject>
 
 // ==============================================================================================
 

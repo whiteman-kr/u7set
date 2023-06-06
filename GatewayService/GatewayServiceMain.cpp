@@ -1,3 +1,4 @@
+#include "../ServiceLib/ServiceStarter.h"
 #include "GatewayService.h"
 
 int main(int argc, char *argv[])
@@ -18,8 +19,7 @@ int main(int argc, char *argv[])
 
 	GatewayServiceWorker gatewayServiceWorker(si,
 											  Service::getServiceInstanceName("Gateway Service", argc, argv),
-											  argc, argv, logger,
-											  E::ServiceRunMode::ConsoleApp);	// run mode will be refined after cmd line processing
+											  argc, argv, logger);
 
 	ServiceStarter serviceStarter(app, gatewayServiceWorker, logger);
 

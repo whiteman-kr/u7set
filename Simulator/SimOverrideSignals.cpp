@@ -457,6 +457,12 @@ namespace Sim
 		return;
 	}
 
+	bool OverrideSignalParam::sameType(const OverrideSignalParam& another) const
+	{
+		return (signalType() == E::SignalType::Discrete && another.signalType() == E::SignalType::Discrete) ||
+			   (signalType() == E::SignalType::Analog && another.signalType() == E::SignalType::Analog && dataFormat() == another.dataFormat());
+	}
+
 	bool OverrideSignalParam::enabled() const
 	{
 		return m_enabled;

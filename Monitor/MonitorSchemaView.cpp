@@ -1,6 +1,7 @@
 #include "MonitorSchemaView.h"
 #include "MonitorSchemaManager.h"
 #include "MonitorAppSettings.h"
+#include "Globals.h"
 #include "../VFrame30/DrawParam.h"
 #include "../VFrame30/PropertyNames.h"
 #include "../VFrame30/AppSignalController.h"

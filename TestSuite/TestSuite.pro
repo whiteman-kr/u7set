@@ -43,7 +43,6 @@ RESOURCES += \
     Resources.qrc
 
 SOURCES += \
-    ../lib/BuildInfo.cpp \
     ../lib/ClientBehavior.cpp \
     ../lib/CodeEditor.cpp \
     ../lib/Ui/DialogAbout.cpp \
@@ -62,7 +61,6 @@ SOURCES += \
     TestSuiteMainWindow.cpp
 
 HEADERS += \
-    ../lib/BuildInfo.h \
     ../lib/ClientBehavior.h \
     ../lib/CodeEditor.h \
     ../lib/Ui/DialogAbout.h \

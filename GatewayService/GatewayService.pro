@@ -29,7 +29,6 @@ unix {
 }
 
 SOURCES += \
-	../lib/BuildInfo.cpp \
 	AppDataServiceClient.cpp \
 	AppSignalState.cpp \
 	GatewayDescription.cpp \
@@ -42,14 +41,12 @@ SOURCES += \
 
 HEADERS += \
 	../lib/ConstStrings.h \
-	../lib/BuildInfo.h \
 	AppDataServiceClient.h \
 	AppSignalState.h \
 	GatewayDescription.h \
 	GatewayDescriptionParser.h \
 	GatewayHandler.h \
 	GatewayService.h \
-	InfoServer/IvsSocketThread.h \
 	IvsImpulseCommThread.h \
 	IvsImpulseDataProtocol.h \
 	IvsImpulseGatewayHandler.h

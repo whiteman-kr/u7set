@@ -1,5 +1,5 @@
 #ifndef CLIENT_LIB_DOMAIN
-#error Don't include this file in the project! Link ClientLib instead.
+#error Do not include this file in the project! Link ClientLib instead.
 #endif
 
 #include "TcpAppSourcesState.h"

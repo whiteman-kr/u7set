@@ -111,6 +111,8 @@ namespace Tuning
 		int m_tuningDataFramePayloadW = 0;
 		int m_tuningDataFrameSizeW = 0;
 
+		//
+
 		quint64 m_uniqueID = 0;
 		int m_tuningDataUsedFramesCount = 0;
 

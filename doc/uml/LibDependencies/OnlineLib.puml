@@ -4,12 +4,9 @@
 !include ./UtilsLib.puml
 !include ./Protobuf.puml
 
-!include ./AppSignalLib.puml
-
 [OnlineLib]
 OnlineLib -up-> CommonLib
-OnlineLib -up-> UtilsLib
-OnlineLib -up-> AppSignalLib
 OnlineLib -up-> Protobuf
+OnlineLib -up-> UtilsLib
 
-@enduml  
+@enduml

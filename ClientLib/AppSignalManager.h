@@ -148,6 +148,10 @@ namespace ClientLib
 		virtual bool dataServiceHasSignal(const QString& serviceEquipmentId, const QString& appSignalId) const override;
 		virtual bool dataServiceHasSignal(const QString& serviceEquipmentId, Hash signalHash) const override;
 
+		/// Get all signals for the specified DataServiceID (AppDataService or DiagDataService).
+		///
+		virtual std::vector<Hash> dataServiceSignals(const QString& serviceEquipmentId) const override;
+
 		// Tags
 		//
 		virtual QStringList tags() const override final;
@@ -157,12 +161,7 @@ namespace ClientLib
 	public:
 		AppSignalParam signalParamByEquipemntId(const QString& equipmentId, bool* found) const;
 
-	signals:
-		void signalParamsUpdated();
-
-	private:
-		HasLogFile m_logFile;
-
+	public:
 		struct SourceState
 		{
 			AppSignalState state{};
@@ -170,6 +169,12 @@ namespace ClientLib
 			std::chrono::time_point<std::chrono::system_clock> lastUpdateTime{};	// State last time received or updated
 		};
 
+		std::vector<SourceState> signalStateAllSources(const QString& appSignalId) const;
+
+	signals:
+		void signalParamsUpdated();
+
+	private:
 		struct Sources
 		{
 			size_t size = 0;
@@ -180,6 +185,9 @@ namespace ClientLib
 
 			[[nodiscard]] const AppSignalState& get() const;
 		};
+
+
+		HasLogFile m_logFile;
 
 		mutable QReadWriteLock m_paramsLocker;
 		std::unordered_map<Hash, AppSignalParam, VoidHasher<Hash>> m_signalParams;	// Key is hash from AppSignalID

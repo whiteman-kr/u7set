@@ -28,9 +28,7 @@ unix {
 }
 
 SOURCES += \
-    ../lib/BuildInfo.cpp \
     ../lib/DataSource.cpp \
-	../lib/LanControllerInfo.cpp \
 	../lib/TuningDataStorage.cpp \
 	TuningService.cpp \
 	TcpTuningServer.cpp \
@@ -42,9 +40,7 @@ SOURCES += \
 
 HEADERS += \
 	Stable.h \
-    ../lib/BuildInfo.h \
     ../lib/DataSource.h \
-	../lib/LanControllerInfo.h \
 	../lib/TuningDataStorage.h \
 	TuningService.h \
 	TcpTuningServer.h \
@@ -69,18 +65,17 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 LIBS += -L$$DESTDIR
 LIBS += -L.
 
-# Protobuf
-#
-LIBS += -lprotobuf
-win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
-unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
-INCLUDEPATH += ./../Protobuf
-
 # ServiceLib
 #
 LIBS += -lServiceLib
 win32:PRE_TARGETDEPS += $$DESTDIR/ServiceLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libServiceLib.a
+
+# HardwareLib
+#
+LIBS += -lHardwareLib
+win32:PRE_TARGETDEPS += $$DESTDIR/HardwareLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libHardwareLib.a
 
 # UtilsLib
 #
@@ -105,4 +100,12 @@ unix:PRE_TARGETDEPS += $$DESTDIR/libAppSignalLib.a
 LIBS += -lCommonLib
 win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libCommonLib.a
+
+# Protobuf
+#
+LIBS += -lprotobuf
+win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
+INCLUDEPATH += ./../Protobuf
+
 

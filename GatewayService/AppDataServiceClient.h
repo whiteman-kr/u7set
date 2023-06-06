@@ -18,7 +18,7 @@ namespace Gateway
 							 const HostAddressPort& serverAddressPort1,
 							 const HostAddressPort& serverAddressPort2,
 							 const QString& clientDescription,
-							 IvsImpulseHandler& handler);
+							 IvsImpulseHandler& handler, CircularLoggerShared logger);
 	private:
 		virtual void onClientThreadStarted() override;
 		virtual void onClientThreadFinished() override;
@@ -43,7 +43,7 @@ namespace Gateway
 
 		std::vector<std::shared_ptr<IvsImpulseListInfo>>& m_lists;
 		AppSignalStates& m_states;
-		std::map<Hash, std::vector<std::shared_ptr<IvsImpulseListInfo>>>& m_hashToLists;
+		std::map<Hash, std::set<std::shared_ptr<IvsImpulseListInfo>>>& m_hashToLists;
 		std::atomic_bool& m_signalStatesUpdated;
 
 		//
@@ -62,13 +62,15 @@ namespace Gateway
 								   const HostAddressPort& serverAddressPort1,
 								   const HostAddressPort& serverAddressPort2,
 								   const QString& clientDescription,
-								   IvsImpulseHandler& handler)
+								   IvsImpulseHandler& handler,
+								   CircularLoggerShared logger)
 		{
 			addWorker(new AppDataServiceClient(softwareInfo,
 											   serverAddressPort1,
 											   serverAddressPort2,
 											   clientDescription,
-											   handler));
+											   handler,
+											   logger));
 		}
 
 		AppDataServiceClient* client() { return dynamic_cast<AppDataServiceClient*>(m_workerList[0]); }

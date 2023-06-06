@@ -14,83 +14,103 @@ class CommandLineParser : public QObject
 	Q_OBJECT
 
 public:
-	enum OptionType
-	{
-		Simple,				//	-a
-		SingleValue,		//	-a=value
-		MultipleValues		//	-a=value1,value2,valueN
-	};
+	CommandLineParser() = delete;
+	CommandLineParser(const QString& organization, const QString& serviceName,int argc, char** argv);
+	CommandLineParser(const CommandLineParser& clp);
 
-public:
-	CommandLineParser();
-	CommandLineParser(int argc, char** argv);
+	void setCmdLineArgs(const QStringList& argv);
+	void setCmdLineArgs(int argc, char **argv);
 
-	void setCmdLineArgs(int argc, char** argv);
+	qsizetype cmdLineArgCount() const;
 
-	qsizetype argCount() const;
+	// cmdLineArgName should be specified without "-"
+	// setting is a cmdLineArg value stored in registry
 
-	// optionName should be specified without "-"
-	//
-	bool addSimpleOption(const QString& optionName,
-						 const QString& description);
+	bool addSimpleNoWritableCmdLineArg(	const QString& cmdLineArgName,
+										const QString& description);
 
-	bool addSingleValueOption(const QString& optionName,
-							  const QString& settingName,
-							  const QString& description,
-							  const QString& paramExample);
+	bool addSimpleCmdLineArg(const QString& cmdLineArgName,
+							 const QString& settingName,
+							 const QString& description);
 
-	bool addMultipleValuesOption(const QString& optionName,
-								 const QStringList& settingsNames,
-								 const QString& description,
-								 const QString& paramsExample);
-	void parse();
+	bool addBoolNoWritableCmdLineArg(	const QString& cmdLineArgName,
+										const QString& description);
+
+	bool addBoolCmdLineArg(const QString& cmdLineArgName,
+							 const QString& settingName,
+							 const QString& description);
+
+	bool addValueNoWritebleCmdLineArg(const QString& cmdLineArgName,
+									  const QString& description,
+									  const QString& paramExample);
+
+	bool addValueCmdLineArg(const QString& cmdLineArgName,
+							const QString& settingName,
+							const QString& description,
+							const QString& paramExample);
+
+	void readAndApplySettingsFromRegistry();
+	void parseAndApplyCmdLineArgs();
 	const QStringList& parsingErrors() { return m_parsingErrors; }
 
-	void processSettings(QSettings& settings, std::shared_ptr<CircularLogger> log);
+	void writeSettingsToRegistry(std::shared_ptr<CircularLogger> log);
+	bool clearSettings();
 
-	static bool checkSettingWriteStatus(QSettings& settings, const QString& settingName, std::shared_ptr<CircularLogger> logger);
+	static bool checkSettingWriteStatus(QSettings& settings, const QString& settingName,
+										std::shared_ptr<CircularLogger> logger);
 
-	bool optionIsSet(const QString& optionName) const;						// use with all option types
-	QString optionValue(const QString& optionName) const;					// use only with OptionType::SingleValue
-	QStringList optionValues(const QString& optionName) const;				// use only with OptionType::MultipleValues
+	bool cmdLineArgIsSet(const QString& cmdLineArgName) const;			// use with all option types
+//	QString optionValue(const QString& optionName) const;					// use only with OptionType::SingleValue
 
-	QString settingValue(const QString& settingName) const;
+	QString getSettingValue(const QString& settingName) const;
+//	bool settingIsSet(const QString& settingName) const;
 
 	QString helpText() const;
 
-	static OptionalBool strToBool(QString str);
+	void printCmdLineArgs(std::shared_ptr<CircularLogger> log) const;
 
 private:
-	struct Option
+	enum CmdLineArgType
 	{
-		OptionType type = OptionType::Simple;
-		QString name;
-		QStringList settingsNames;
+		Simple,				//	-a, if not specified asumed as "false"
+		Bool,				//  -a=yes (yes/no, on/off, true/false, 1/0)
+		SingleValue,		//	-a=value, if not specified assumed as ""
+	};
+
+	struct CmdLineArg
+	{
+		CmdLineArgType type = CmdLineArgType::Simple;
+		QString name;							// option name in command line, ex: id
+		bool saveInRegistry = false;
+		QString settingName;					// respectively setting name in registry, ex: EquipmentID
 		QString description;
 		QString paramsExample;
 
-		bool isSet = false;
-		QStringList values;
+		bool isSetFromCmdLine = false;
+		QString valueStr;
 
 		int order = -1;
 	};
 
-	bool addOption(OptionType type,
-				   QString name,
-				   const QStringList &settingsNames,
+	bool addCmdLineArg(CmdLineArgType type,
+				   QString cmdLineArgName,
+				   bool saveInRegistry,
+				   const QString& settingName,
 				   const QString& description,
 				   const QString& paramsExample);
 
-	std::optional<Option> getOption(const QString& optionName) const;
+	const CmdLineArg* getOption(const QString& optionName) const;
 
 private:
+	QString m_organization;
+	QString m_serviceName;
 	QString m_appPath;
-	QVector<QString> m_cmdLineArgs;
+	QStringList m_argv;
 
-	std::map<QString, Option> m_options;			// opName => Option
-	QHash<QString, QString> m_settingsValues;
+	std::map<QString, CmdLineArg> m_cmdLineArgs;			// cmdLineArgName => CmdLineArg
+	std::map<QString, QString> m_settingToArgName;			// settingName => cmdLineArgName
+
 	QStringList m_parsingErrors;
 
 	bool m_parsed = false;
-	bool m_cmdLineArgsIsSet = false;
 };

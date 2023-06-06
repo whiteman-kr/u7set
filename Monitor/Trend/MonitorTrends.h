@@ -2,7 +2,7 @@
 #define MONITORTRENDS_H
 
 #include "../ClientLib/RtDataProvider.h"
-#include "TrendMainWindow.h"
+#include "../TrendView/TrendMainWindow.h"
 #include "MonitorConfigController.h"
 #include "MonitorSignalManager.h"
 #include "MonitorTrendArchiveConnections.h"

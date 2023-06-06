@@ -49,6 +49,7 @@ CONFIG(release, debug|release) {
 }
 
 HEADERS += \
+	ServiceStarter.h \
 	Stable.h \
 	Service.h \
 	CommandLineParser.h \
@@ -56,4 +57,5 @@ HEADERS += \
 SOURCES += \
 	Service.cpp \
 	CommandLineParser.cpp \
+	ServiceStarter.cpp
 

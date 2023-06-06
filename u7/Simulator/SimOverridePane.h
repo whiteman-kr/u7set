@@ -13,6 +13,8 @@ public:
 	virtual ~SimOverridePane();
 
 protected:
+	virtual void timerEvent(QTimerEvent* event) override;
+
 	virtual void dragEnterEvent(QDragEnterEvent* event) override;
 	virtual void dropEvent(QDropEvent* event) override;
 
@@ -40,7 +42,7 @@ protected slots:
 	void saveWorkspace();
 	void restoreWorkspace();
 
-	void showSetValueDialog(QString appSignalId);
+	void showSetValueDialog(const QStringList& appSignalIds);
 	void setValue(QString appSignalId, Sim::OverrideSignalMethod method, const QVariant& value);
 
 private:
@@ -51,6 +53,8 @@ private:
 	int m_currentBase = 10;											// Base for integer signals: 10, 16
 	E::AnalogFormat m_currentFormat = E::AnalogFormat::g_9_or_9e;	// Current format for floating point signals
 	int m_currentPrecision = -1;									// Current procision for floating point signals
+
+	QElapsedTimer m_signalStateSlotTimer;
 };
 
 
@@ -69,7 +73,7 @@ private:
 	Sim::Simulator* m_simulator = nullptr;
 
 	QPoint m_dragStartPos;
-	QString m_dragAppSignalId;
+	QStringList m_dragAppSignalIds;
 };
 
 

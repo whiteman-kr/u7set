@@ -39,7 +39,6 @@ PRECOMPILED_HEADER = Stable.h
 
 HEADERS += \
 	Stable.h \
-    ../lib/BuildInfo.h \
     FileArchReader.h \
     ArchFile.h \
     BinSearch.h \
@@ -55,7 +54,6 @@ HEADERS += \
 	TimeFilter.h \
 
 SOURCES += \
-	../lib/BuildInfo.cpp \
 	ArchivingService.cpp \
 	ArchServiceMain.cpp \
 	TcpAppDataServer.cpp \
@@ -102,6 +100,12 @@ LIBS += -lOnlineLib
 win32:PRE_TARGETDEPS += $$DESTDIR/OnlineLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libOnlineLib.a
 
+# AppSignalLib
+#
+LIBS += -lAppSignalLib
+win32:PRE_TARGETDEPS += $$DESTDIR/AppSignalLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libAppSignalLib.a
+
 # UtilsLib
 #
 LIBS += -lUtilsLib
@@ -113,12 +117,6 @@ unix:PRE_TARGETDEPS += $$DESTDIR/libUtilsLib.a
 LIBS += -lprotobuf
 win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
-
-# AppSignalLib
-#
-LIBS += -lAppSignalLib
-win32:PRE_TARGETDEPS += $$DESTDIR/AppSignalLib.lib
-unix:PRE_TARGETDEPS += $$DESTDIR/libAppSignalLib.a
 
 # CommonLib
 #
