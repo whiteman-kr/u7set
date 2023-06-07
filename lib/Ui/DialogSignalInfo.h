@@ -119,8 +119,7 @@ protected:
 
 	DialogSignalInfo(const AppSignalParam& signal,
 					 IAppSignalManager* appSignalManager,
-					 ISignalDataServer* signalDataServer,			// it can be nullptr
-					 const QStringList& appDataServices,			// Can be empty, e.g. in Simulator
+					 ISignalDataServer* signalDataServer,			// Can be empty, e.g. in Simulator
 					 VFrame30::TuningController* tuningController,	// it can be nullptr
 					 bool tuningEnabled,
 					 DialogType dialogType,
@@ -234,7 +233,7 @@ private:
 
 	IAppSignalManager* m_appSignalManager = nullptr;
 	ISignalDataServer* m_signalDataServer = nullptr;
-	QStringList m_appDataServices;
+	QStringList m_dataServiceIds;
 
 	VFrame30::TuningController* m_tuningController = nullptr;	// Can be null if tuning is not enabled
 	bool m_tuningEnabled = false;

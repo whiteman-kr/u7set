@@ -530,7 +530,6 @@ std::map<QString, DialogSignalInfo*> DialogSignalInfo::m_dialogSignalInfoMap;
 DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 								   IAppSignalManager* appSignalManager,
 								   ISignalDataServer* signalDataServer,
-								   const QStringList& appDataServices,
 								   VFrame30::TuningController* tuningController,
 								   bool tuningEnabled,
 								   DialogSignalInfo::DialogType dialogType,
@@ -541,7 +540,6 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 	m_signal(signal),
 	m_appSignalManager(appSignalManager),
 	m_signalDataServer(signalDataServer),	// it can be nullptr
-	m_appDataServices(appDataServices),
 	m_tuningController(tuningController),	// it can be nullptr
 	m_tuningEnabled(tuningEnabled)
 {
@@ -549,6 +547,11 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 	{
 		Q_ASSERT(m_appSignalManager);
 		return;
+	}
+
+	if (m_signalDataServer != nullptr)
+	{
+		m_dataServiceIds = m_signalDataServer->dataServiceIds(signal.appSignalId());
 	}
 
 	ui->setupUi(this);
@@ -622,7 +625,13 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 								   IAppSignalManager* appSignalManager,
 								   DialogType dialogType,
 								   QWidget* parent):
-	DialogSignalInfo(signal, appSignalManager, nullptr, {}, nullptr, false, dialogType, parent)
+	DialogSignalInfo(signal,
+					 appSignalManager,
+					 nullptr/*signalDataServer*/,
+					 nullptr/*tuningController*/,
+					 false/*tuningEnabled*/,
+					 dialogType,
+					 parent)
 {
 }
 
@@ -2111,7 +2120,7 @@ void DialogSignalInfo::stateContextMenu(QPoint pos)
 
 	// Server
 	//
-	if (m_appDataServices.size() > 1)
+	if (m_dataServiceIds.size() > 1)
 	{
 		QMenu* serversMenu = menu.addMenu(tr("Server State"));
 
@@ -2139,7 +2148,7 @@ void DialogSignalInfo::stateContextMenu(QPoint pos)
 
 		// Servers actions
 		//
-		for (const QString& server : m_appDataServices)
+		for (const QString& server : m_dataServiceIds)
 		{
 			QAction* actionServer = new QAction(server, &menu);
 			actionServer->setCheckable(true);
