@@ -1,5 +1,5 @@
 #ifndef SERVICE_LIB_DOMAIN
-#error Don't include this file in the project! Link ServiceLib instead.
+#error Do not include this file in the project! Link ServiceLib instead.
 #endif
 
 #include "Service.h"

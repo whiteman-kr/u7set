@@ -1,12 +1,11 @@
 #pragma once
 
-#include "../lib/OutputLog.h"
 #include "../CommonLib/OrderedHash.h"
+#include "../UtilsLib/OutputLog.h"
 #include "../HardwareLib/DeviceObject.h"
-#include "../lib/BuildInfo.h"
+#include "../OnlineLib/BuildInfo.h"
 #include "../lib/ConstStrings.h"
 #include "ModuleFirmwareWriter.h"
-#include <QFile>
 
 class DbController;
 
@@ -42,7 +41,7 @@ namespace Builder
 
 		QFile& file() { return m_file; }
 
-		BuildFileInfo getBuildFileInfo() const { return m_info; }
+		OnlineLib::BuildFileInfo getBuildFileInfo() const { return m_info; }
 
 		static QString constructPathFileName(const QString& subDir, const QString& fileName);
 
@@ -59,7 +58,7 @@ namespace Builder
 	private:
 		QString m_fileName;			// filename only, like "filename.xml"
 
-		BuildFileInfo m_info;
+		OnlineLib::BuildFileInfo m_info;
 
 		QFile m_file;
 
@@ -102,7 +101,7 @@ namespace Builder
 	public:
 		BuildResult();
 
-		bool create(const QString& buildDir, const QString& fullPath, const BuildInfo& buildInfo, IssueLogger* log);
+		bool create(const QString& buildDir, const QString& fullPath, const OnlineLib::BuildInfo& buildInfo, IssueLogger* log);
 		bool finalize(const HashedVector<QString, BuildFile*>& buildFiles);
 
 		bool enableMessages() const { return m_enableMessages; }
@@ -114,7 +113,7 @@ namespace Builder
 		bool createBuildDirectory();
 		void clearDirectory(const QString& directory);
 
-		bool createBuildXml(const BuildInfo& buildInfo);
+		bool createBuildXml(const OnlineLib::BuildInfo& buildInfo);
 		bool writeBuildXmlFilesSection(const HashedVector<QString, BuildFile*>& buildFiles);
 		bool closeBuildXml();
 
@@ -157,7 +156,7 @@ namespace Builder
 
 		bool writeConfigurationXmlFiles();
 
-		BuildInfo buildInfo() const { return m_buildInfo; }
+		OnlineLib::BuildInfo buildInfo() const { return m_buildInfo; }
 
 		IssueLogger* log() { return m_log; }
 
@@ -189,7 +188,7 @@ namespace Builder
 
 		BuildResult m_buildResults[BUILD_RESULT_COUNT];
 
-		BuildInfo m_buildInfo;
+		OnlineLib::BuildInfo m_buildInfo;
 
 		IssueLogger* m_log = nullptr;
 		DbController* m_dbController = nullptr;

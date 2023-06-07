@@ -66,7 +66,7 @@ private:
 	int m_minQueueSizeForFlushing = 0;
 
 	ArchivingServiceSettings m_serviceSettings;
-	Builder:: BuildInfo m_buildInfo;
+	OnlineLib::BuildInfo m_buildInfo;
 	Proto::ArchSignals* m_archSignalsProto = nullptr;
 
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;

@@ -83,7 +83,6 @@ HEADERS += \
     HorzVertLinks.h \
 	Configuration.h \
 	MonitorSchema.h \
-    Afb.h \
     Schema.h \
     LogicSchema.h \
     VFrameTools.h \
@@ -124,8 +123,7 @@ HEADERS += \
     TuningSchema.h \
     SchemaItemImage.h \
     SchemaItemImageValue.h \
-    ImageItem.h \
-    ../lib/OutputLog.h
+    ImageItem.h 
 
 SOURCES += \
     Context.cpp \
@@ -149,7 +147,6 @@ SOURCES += \
     HorzVertLinks.cpp \
 	Configuration.cpp \
 	MonitorSchema.cpp \
-    Afb.cpp \
     Schema.cpp \
     LogicSchema.cpp \
     VFrameTools.cpp \

@@ -1,5 +1,5 @@
 #pragma once
-
+#include <QReadWriteLock>
 #include "../ClientLib/ConfigController.h"
 #include "../OnlineLib/SocketIO.h"
 #include "../UtilsLib/ILogFile.h"

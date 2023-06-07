@@ -4,7 +4,7 @@
 #include <memory>
 #include <unordered_map>
 #include "../../AppSignalLib/AppSignal.h"
-#include "../../OnlineLib/DataProtocols.h"
+#include "../../HardwareLib/DataProtocols.h"
 #include "../../lib/DataSource.h"
 #include "../../HardwareLib/DeviceObject.h"
 

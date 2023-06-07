@@ -659,7 +659,7 @@ void ExportData::startExportThread(ExportData* pThis, const QString& fileName)
 		return;
 	}
 
-	QString fileExt = fileName.right(fileName.count() - fileName.lastIndexOf(".") - 1);
+    QString fileExt = fileName.right(fileName.size() - fileName.lastIndexOf(".") - 1);
 	if (fileExt.isEmpty() == true)
 	{
 		return;

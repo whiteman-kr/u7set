@@ -867,7 +867,7 @@ namespace Sim
 
 		replyRupHeader.protocolVersion = static_cast<quint16>(m_rupVersion);
 		replyRupHeader.numerator = requestRupHeader.numerator;
-		replyRupHeader.frameSize = Socket::ENTIRE_UDP_SIZE;
+		replyRupHeader.frameSize = Rup::ENTIRE_UDP_SIZE;
 
 		replyRupHeader.flags.all = 0;
 		replyRupHeader.flags.tuningData = 1;
@@ -967,7 +967,7 @@ namespace Sim
 			return false;
 		}
 
-		if (rupHeader.frameSize != Socket::ENTIRE_UDP_SIZE)
+		if (rupHeader.frameSize != Rup::ENTIRE_UDP_SIZE)
 		{
 			return false;
 		}

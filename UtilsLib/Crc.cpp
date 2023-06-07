@@ -1,5 +1,5 @@
 #ifndef UTILS_LIB_DOMAIN
-#error Don't include this file in the project! Link UtilsLib instead.
+#error Do not include this file in the project! Link UtilsLib instead.
 #endif
 
 #include <QtEndian>

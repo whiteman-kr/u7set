@@ -216,6 +216,7 @@ private:
 
 private:
 	Ui::DialogSignalInfo *ui;
+	DialogSignalInfo::DialogType m_dialogType;
 
 	static std::map<QString, DialogSignalInfo*> m_dialogSignalInfoMap;
 

@@ -1,3 +1,9 @@
+#include <QSettings>
+#include <QResizeEvent>
+#include <QMessageBox>
+#include <QStringListModel>
+#include <QClipboard>
+#include <QMenu>
 #include "DialogChooseTrendSignals.h"
 #include "ui_DialogChooseTrendSignals.h"
 

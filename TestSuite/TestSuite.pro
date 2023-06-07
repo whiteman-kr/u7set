@@ -43,7 +43,6 @@ RESOURCES += \
     Resources.qrc
 
 SOURCES += \
-    ../lib/BuildInfo.cpp \
     ../lib/CodeEditor.cpp \
     ../lib/Ui/DialogAbout.cpp \
     ../lib/Ui/DialogAlert.cpp \
@@ -60,7 +59,6 @@ SOURCES += \
     TestSuiteMainWindow.cpp
 
 HEADERS += \
-    ../lib/BuildInfo.h \
     ../lib/CodeEditor.h \
     ../lib/Ui/DialogAbout.h \
     ../lib/Ui/DialogAlert.h \

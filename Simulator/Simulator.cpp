@@ -4,7 +4,7 @@
 #include <QDir>
 #include <QtConcurrent/QtConcurrent>
 #include "../HardwareLib/ModuleFirmware.h"
-#include "../lib/LogicModulesInfo.h"
+#include "../HardwareLib/LogicModulesInfo.h"
 #include "SimScriptRamAddress.h"
 #include "SimScriptLogicModule.h"
 #include "SimScriptSignal.h"

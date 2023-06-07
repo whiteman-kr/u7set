@@ -1,5 +1,5 @@
 #ifndef ONLINE_LIB_DOMAIN
-#error Don't include this file in the project! Link OnlineLib instead.
+#error Do not include this file in the project! Link OnlineLib instead.
 #endif
 
 #include "CfgServerLoader.h"
@@ -133,7 +133,7 @@ void CfgServer::readBuildXml()
 			continue;
 		}
 
-		Builder::BuildFileInfo bfi;
+		OnlineLib::BuildFileInfo bfi;
 
 		bfi.readFromXml(xmlReader);
 
@@ -340,7 +340,7 @@ bool CfgLoader::hasFileID(QString fileID) const
 	return m_fileIDPathMap.contains(fileID);
 }
 
-Builder::BuildInfo CfgLoader::buildInfo()
+OnlineLib::BuildInfo CfgLoader::buildInfo()
 {
 	AUTO_LOCK(m_mutex);
 
@@ -658,7 +658,7 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 
 				for(const CfgFileInfo& cfi : m_cfgFilesInfo)
 				{
-					Builder::BuildFileInfo bfi = cfi;
+					OnlineLib::BuildFileInfo bfi = cfi;
 
 					bfiArray.append(bfi);
 				}
@@ -1094,7 +1094,7 @@ bool CfgLoaderThread::hasFileID(QString fileID) const
 	return m_cfgLoader->hasFileID(fileID);
 }
 
-Builder::BuildInfo CfgLoaderThread::buildInfo()
+OnlineLib::BuildInfo CfgLoaderThread::buildInfo()
 {
 	AUTO_LOCK(m_mutex);
 

@@ -7,9 +7,9 @@
 #include "../HardwareLib/DeviceObject.h"
 #include "../CommonLib/PropertyObject.h"
 #include "../CommonLib/Times.h"
-#include "../lib/LmDescription.h"
+#include "../HardwareLib/LmDescription.h"
+#include "../HardwareLib/LogicModulesInfo.h"
 #include "../lib/Configurator.h"
-#include "../lib/LogicModulesInfo.h"
 #include "../Builder/Builder.h"
 #include "../AppSignalLib/AppSignal.h"
 #include <QList>

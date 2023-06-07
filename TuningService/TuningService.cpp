@@ -789,7 +789,7 @@ namespace Tuning
 
 		TuningSources newSources;
 
-		for(Builder::BuildFileInfo bfi : buildFileInfoArray)
+		for(OnlineLib::BuildFileInfo bfi : buildFileInfoArray)
 		{
 			QByteArray fileData;
 			QString errStr;

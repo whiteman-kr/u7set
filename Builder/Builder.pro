@@ -46,17 +46,11 @@ DEFINES += IS_BUILDER
 
 SOURCES += \
     ../lib/ClientBehavior.cpp \
-    ../lib/DeviceHelper.cpp \
-	../lib/LanControllerInfo.cpp \
-    ../lib/LanControllerInfoHelper.cpp \
-    ../lib/LogicModulesInfo.cpp \
-    ../lib/OutputLog.cpp \
+	DeviceHelper.cpp \
+	LanControllerInfoHelper.cpp \
     ../lib/LogicModuleSet.cpp \
     ../lib/DataSource.cpp \
     ../lib/Tuning/TuningFilter.cpp \
-    ../lib/BuildInfo.cpp \
-    ../lib/LmDescription.cpp \
-    ../lib/ConnectionsInfo.cpp \
 	../lib/TuningDataStorage.cpp \
 	../TuningService/TuningSource.cpp \
 	../Metrology/MetrologySignal.cpp \
@@ -66,6 +60,8 @@ SOURCES += \
 	../GatewayService/GatewayDescription.cpp \
 	../GatewayService/GatewayDescriptionParser.cpp \
 	GatewayServiceCfgGenerator.cpp \
+	LogicModulesInfoWriter.cpp \
+	ConnectionsInfoWriter.cpp \
 	SoftwareSettingsGetter.cpp \
     Builder.cpp \
 	AppSignalProperties.cpp \
@@ -111,24 +107,17 @@ SOURCES += \
     TuningBuilder.cpp \
     RunOrder.cpp \
     TestClientCfgGenerator.cpp \
-    Context.cpp \
+	Context.cpp
 
 HEADERS += \
     ../lib/ClientBehavior.h \
     ../lib/ConstStrings.h \
-    ../lib/DeviceHelper.h \
-    ../lib/LanControllerInfo.h \
-    ../lib/LanControllerInfoHelper.h \
-    ../lib/LogicModulesInfo.h \
-    ../lib/OutputLog.h \
+	DeviceHelper.h \
+	LanControllerInfoHelper.h \
     ../lib/LogicModuleSet.h \
     ../lib/DataSource.h \
     ../lib/Tuning/TuningFilter.h \
-    ../lib/BuildInfo.h \
-    ../lib/LmDescription.h \
-    ../lib/ConnectionsInfo.h \
 	../lib/TuningDataStorage.h \
-	../CommonLib/PropertyObject.h \
 	../TuningService/TuningSource.h \
 	../Metrology/MetrologySignal.h \
 	../Metrology/MetrologyConnection.h \
@@ -137,7 +126,9 @@ HEADERS += \
 	../GatewayService/GatewayDescription.h \
 	../GatewayService/GatewayDescriptionParser.h \
 	GatewayServiceCfgGenerator.h \
+	LogicModulesInfoWriter.h \
 	SoftwareSettingsGetter.h \
+	ConnectionsInfoWriter.h \
 	Builder.h \
 	AppSignalProperties.h \
 	CodeChecker.h \
@@ -182,7 +173,7 @@ HEADERS += \
     BdfFile.h \
     RunOrder.h \
     TestClientCfgGenerator.h \
-    Context.h \
+	Context.h
 
 unix {
     target.path = /usr/lib

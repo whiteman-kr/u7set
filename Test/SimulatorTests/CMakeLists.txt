@@ -1,0 +1,34 @@
+cmake_minimum_required(VERSION 3.16)
+
+project(SimulatorTests LANGUAGES CXX)
+
+enable_testing()
+
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+find_package(Qt6 REQUIRED COMPONENTS Test Core Network Qml Xml Concurrent)
+qt_standard_project_setup()
+
+set(TARGET SimulatorTests)
+
+add_executable(${TARGET}
+	main.cpp
+	SimAfbParamTests.cpp
+	SimAfbParamTests.h
+	SimCommandTest_LM5_LM6.cpp
+	SimCommandTest_LM5_LM6.h
+	SimProfilesTest.cpp
+	SimProfilesTest.h
+	SimRamTests.cpp
+	SimRamTests.h
+
+	Resources.qrc
+)
+
+target_link_libraries(${TARGET} PRIVATE Qt6::Test Qt6::Core Qt6::Network Qt6::Qml Qt6::Xml Qt6::Concurrent)
+target_link_libraries(${TARGET} PRIVATE Protobuf HardwareLib Simulator)
+
+add_code_coverage_options(${TARGET} CODE_COVERAGE)

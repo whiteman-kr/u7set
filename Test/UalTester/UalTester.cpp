@@ -81,7 +81,7 @@ void UalTester::slot_loadConfiguration(const QByteArray configurationXmlData,
 
 	// load signals
 	//
-	for(Builder::BuildFileInfo bfi : buildFileInfoArray)
+	for(OnlineLib::BuildFileInfo bfi : buildFileInfoArray)
 	{
 		QByteArray fileData;
 		QString errStr;

@@ -26,7 +26,6 @@ PRECOMPILED_HEADER = stable.h
 
 HEADERS += \
     ../lib/Ui/DialogAbout.h \
-	../lib/OutputLog.h \
 	../CommonLib/PropertyObject.h \
 	../lib/Configurator.h \
 	Stable.h \
@@ -39,7 +38,6 @@ HEADERS += \
 
 SOURCES += \
     ../lib/Ui/DialogAbout.cpp \
-	../lib/OutputLog.cpp \
 	../lib/Configurator.cpp \
 	main.cpp \
     Settings.cpp \
@@ -87,15 +85,15 @@ LIBS += -lUtilsLib
 win32:PRE_TARGETDEPS += $$DESTDIR/UtilsLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libUtilsLib.a
 
-# CommonLib
-#
-LIBS += -lCommonLib
-win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
-unix:PRE_TARGETDEPS += $$DESTDIR/libCommonLib.a
-
 # Protobuf
 #
 LIBS += -lprotobuf
 win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
 INCLUDEPATH += ./../Protobuf
+
+# CommonLib
+#
+LIBS += -lCommonLib
+win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libCommonLib.a

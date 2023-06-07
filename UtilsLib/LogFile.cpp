@@ -1,7 +1,8 @@
 #ifndef UTILS_LIB_DOMAIN
-#error Don't include this file in the project! Link UtilsLib instead.
+#error Do not include this file in the project! Link UtilsLib instead.
 #endif
 
+#include <array>
 #include "LogFile.h"
 #include <QApplication>
 #include <QDir>
@@ -26,7 +27,10 @@
 #include <QDesktopServices>
 #include <QDateTimeEdit>
 #include <QScrollBar>
-#include <array>
+#include <QStandardPaths>
+#include <QSettings>
+#include <QProcess>
+#include <QOperatingSystemVersion>
 #include "./Ui/UiTools.h"
 #include "../CommonLib/Hash.h"
 

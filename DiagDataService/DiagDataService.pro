@@ -27,13 +27,11 @@ unix {
 }
 
 SOURCES += \
-    ../lib/BuildInfo.cpp \
 	DiagDataService.cpp \
 	DiagDataServiceMain.cpp \
 
 HEADERS += \
 	Stable.h \
-    ../lib/BuildInfo.h \
 	DiagDataService.h \
 
 CONFIG += precompile_header

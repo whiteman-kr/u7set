@@ -1,9 +1,9 @@
 #include "SoftwareCfgGenerator.h"
 #include "ApplicationLogicCompiler.h"
+#include "DeviceHelper.h"
+#include "LanControllerInfoHelper.h"
 #include "../VFrame30/SchemaLayer.h"
 #include "../OnlineLib/SoftwareSettings.h"
-#include "../lib/DeviceHelper.h"
-#include "../lib/LanControllerInfoHelper.h"
 
 
 namespace Builder
@@ -974,7 +974,7 @@ namespace Builder
 	{
 		QString commStart = getCommentStart(os);
 
-        BuildInfo b = m_buildResultWriter->buildInfo();
+		OnlineLib::BuildInfo b = m_buildResultWriter->buildInfo();
 
 		QString comments;
 

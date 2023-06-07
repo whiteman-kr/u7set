@@ -35,7 +35,7 @@ public:
 
 	virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
 
-	const Builder::BuildInfo& buildInfo() { return m_buildInfo; }
+	const OnlineLib::BuildInfo& buildInfo() { return m_buildInfo; }
 	bool buildInfoIsReady() { return m_buildInfoIsReady; }
 
 	const Network::ConfigurationServiceState& serviceState() { return m_configurationServiceStateMessage; }
@@ -68,7 +68,7 @@ private:
 	void onGetConfigurationServiceSettingsReply(const char* replyData, quint32 replyDataSize);
 
 	QTimer* m_updateStatesTimer = nullptr;
-	Builder::BuildInfo m_buildInfo;
+	OnlineLib::BuildInfo m_buildInfo;
 	Network::ConfigurationServiceState m_configurationServiceStateMessage;
 	Network::ServiceClients m_serviceClientsMessage;
 

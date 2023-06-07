@@ -1,3 +1,7 @@
+#include <QMessageBox>
+#include <QPainter>
+#include <QPaintEvent>
+#include <QColorDialog>
 #include "DialogTrendSignalProperties.h"
 #include "ui_DialogTrendSignalProperties.h"
 #include "DialogTrendSignalPoints.h"

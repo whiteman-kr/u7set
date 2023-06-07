@@ -367,7 +367,7 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 
 	bool result = true;
 
-	for(const Builder::BuildFileInfo& bfi : buildFileInfoArray)
+	for(const OnlineLib::BuildFileInfo& bfi : buildFileInfoArray)
 	{
 		QByteArray fileData;
 		QString errStr;

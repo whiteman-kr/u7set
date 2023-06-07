@@ -1,4 +1,5 @@
 #pragma once
+#include <QString>
 
 /// Interface for detecting if signal has a specified tag.
 ///

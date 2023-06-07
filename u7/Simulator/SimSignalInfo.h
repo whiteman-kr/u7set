@@ -3,7 +3,7 @@
 
 #include "../lib/Ui/DialogSignalInfo.h"
 #include "../../VFrame30/AppSignalController.h"
-#include "SimAppSignalManager.h"
+#include "../../Simulator/SimAppSignalManager.h"
 
 class SimWidget;
 class SimIdeSimulator;
@@ -11,6 +11,7 @@ class SimIdeSimulator;
 class SimSignalInfo : public DialogSignalInfo
 {
 	Q_OBJECT
+
 public:
 	static bool showDialog(QString appSignalId,
 						   SimIdeSimulator* simuator,
@@ -34,7 +35,6 @@ private:
 
 private:
 	SimIdeSimulator* m_simuator = nullptr;
-
 };
 
 #endif // SIMSIGNALINFO_H

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SimBasePage.h"
-#include "SimLogicModule.h"
+#include "../../Simulator/SimLogicModule.h"
 #include "../../VFrame30/AppSignalController.h"
 
 class SimLogicModulePage : public SimBasePage

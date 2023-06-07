@@ -388,9 +388,9 @@ void PanelFindMeasure::find()
 				continue;
 			}
 
-			int len = static_cast<int>(m_findText.count());
+            int len = static_cast<int>(m_findText.size());
 
-			findItemList.push_back(FindItem(row, column, text, pos, pos + len));
+            findItemList.emplace_back(row, column, text, pos, pos + len);
 		}
 	}
 

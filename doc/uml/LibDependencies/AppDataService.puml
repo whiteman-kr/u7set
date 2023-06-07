@@ -6,6 +6,7 @@
 !include ./Protobuf.puml
 !include ./ServiceLib.puml
 !include ./AppSignalLib.puml
+!include ./HardwareLib.puml
 
 [AppDataService]
 AppDataService -up-> [CommonLib]
@@ -14,5 +15,6 @@ AppDataService -up-> [UtilsLib]
 AppDataService -up-> [Protobuf]
 AppDataService -up-> [ServiceLib]
 AppDataService -up-> [AppSignalLib]
+AppDataService -up-> [HardwareLib]
 
 @enduml

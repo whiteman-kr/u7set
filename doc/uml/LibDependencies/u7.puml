@@ -6,6 +6,7 @@
 !include ./AppSignalLib.puml
 !include ./HardwareLib.puml
 !include ./DbLib.puml
+!include ./OnlineLib.puml
 
 '!include ./TrendView.puml
 '!include ./VFrame30.puml
@@ -16,8 +17,8 @@
 
 [u7]
 u7 -up-> [CommonLib]
-u7 -up-> [UtilsLib]
 u7 -up-> [Protobuf]
+u7 -up-> [UtilsLib]
 u7 -up-> [AppSignalLib]
 u7 -up-> [HardwareLib]
 u7 -up-> [DbLib]
@@ -26,6 +27,7 @@ u7 -up-> [VFrame30]
 u7 -up-> [Metrology]
 u7 -up-> [Builder]
 u7 -up-> [Simulator]
+u7 -up-> [OnlineLib]
 
 
 @enduml

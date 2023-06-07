@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QDomDocument>
 #include "../CommonLib/HostAddressPort.h"
 
 namespace TestSuite
