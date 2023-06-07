@@ -43,9 +43,17 @@ bool MonitorSignalInfo::showDialog(QString appSignalId,
 		{
 			bool tuningEnabled = configController->configuration().tuningEnabled == true;
 
+			QStringList appDataServices;
+			for (const SoftwareEndpoint::AppDataService& ads : configController->configuration().appDataServices)
+			{
+				appDataServices.push_back(ads.equipmentId);
+			}
+
 			MonitorSignalInfo* msi = new MonitorSignalInfo(signal,
 														   configController,
 														   signalManager,
+														   signalManager,
+														   appDataServices,
 														   centralWidget->tuningController(),
 														   tuningEnabled,
 														   centralWidget);
@@ -71,11 +79,15 @@ bool MonitorSignalInfo::showDialog(QString appSignalId,
 MonitorSignalInfo::MonitorSignalInfo(const AppSignalParam& signal,
 									 MonitorConfigController* configController,
 									 IAppSignalManager* appSignalManager,
+									 ISignalDataServer* signalDataServer,			// it can be nullptr
+									 const QStringList& appDataServices,			// Can be empty, e.g. in Simulator
 									 VFrame30::TuningController* tuningController,
 									 bool tuningEnabled,
 									 MonitorCentralWidget* centralWidget):
 	DialogSignalInfo(signal,
 					 appSignalManager,
+					 signalDataServer,
+					 appDataServices,
 					 tuningController,
 					 tuningEnabled,
 					 DialogType::Monitor,

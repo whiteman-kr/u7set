@@ -3,6 +3,7 @@
 #include <optional>
 #include "../VFrame30/TuningController.h"
 #include "../AppSignalLib/IAppSignalManager.h"
+#include "../lib/ISignalDataServer.h"
 #include "../lib/Ui/DragDropHelper.h"
 #include "../../AppSignalLib/AppSignal.h"
 
@@ -118,10 +119,18 @@ protected:
 
 	DialogSignalInfo(const AppSignalParam& signal,
 					 IAppSignalManager* appSignalManager,
-					 VFrame30::TuningController* tuningController,
+					 ISignalDataServer* signalDataServer,			// it can be nullptr
+					 const QStringList& appDataServices,			// Can be empty, e.g. in Simulator
+					 VFrame30::TuningController* tuningController,	// it can be nullptr
 					 bool tuningEnabled,
 					 DialogType dialogType,
 					 QWidget* parent);
+
+	DialogSignalInfo(const AppSignalParam& signal,
+					 IAppSignalManager* appSignalManager,
+					 DialogType dialogType,
+					 QWidget* parent);
+
 	virtual ~DialogSignalInfo();
 
 	// Register functions
@@ -220,8 +229,11 @@ private:
 	static std::map<QString, DialogSignalInfo*> m_dialogSignalInfoMap;
 
 	AppSignalParam m_signal;
+	QString m_dataServiceId;	// Specifies server to take data. If empty - take latest
 
 	IAppSignalManager* m_appSignalManager = nullptr;
+	ISignalDataServer* m_signalDataServer = nullptr;
+	QStringList m_appDataServices;
 
 	VFrame30::TuningController* m_tuningController = nullptr;	// Can be null if tuning is not enabled
 	bool m_tuningEnabled = false;

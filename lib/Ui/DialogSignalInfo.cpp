@@ -529,6 +529,8 @@ std::map<QString, DialogSignalInfo*> DialogSignalInfo::m_dialogSignalInfoMap;
 
 DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 								   IAppSignalManager* appSignalManager,
+								   ISignalDataServer* signalDataServer,
+								   const QStringList& appDataServices,
 								   VFrame30::TuningController* tuningController,
 								   bool tuningEnabled,
 								   DialogSignalInfo::DialogType dialogType,
@@ -537,6 +539,8 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 	ui(new Ui::DialogSignalInfo),
 	m_signal(signal),
 	m_appSignalManager(appSignalManager),
+	m_signalDataServer(signalDataServer),	// it can be nullptr
+	m_appDataServices(appDataServices),
 	m_tuningController(tuningController),	// it can be nullptr
 	m_tuningEnabled(tuningEnabled)
 {
@@ -600,7 +604,7 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 
 	if (dialogType == DialogType::Monitor)
 	{
-		removeTabPage("Extended");
+		removeTabPage(tr("Extended"));
 	}
 
 	ui->labelValue->setWordWrap(true);
@@ -611,6 +615,14 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 	m_updateStateTimerId = startTimer(200);
 
 	setAcceptDrops(true);
+}
+
+DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
+								   IAppSignalManager* appSignalManager,
+								   DialogType dialogType,
+								   QWidget* parent):
+	DialogSignalInfo(signal, appSignalManager, nullptr, {}, nullptr, false, dialogType, parent)
+{
 }
 
 DialogSignalInfo::~DialogSignalInfo()
@@ -1280,14 +1292,22 @@ void DialogSignalInfo::fillProperties()
 	// Fill properties list
 	//
 	QStringList columns;
-	columns << "Caption";
-	columns << "Value";
+	columns << tr("Caption");
+	columns << tr("Value");
 	ui->treeProperties->setHeaderLabels(columns);
 
 	QTreeWidgetItem* itemGroup1 = new QTreeWidgetItem(QStringList()<<tr("General"));
 
 	itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("AppSignalID") << m_signal.appSignalId()));
 	itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("EquipmentID") << m_signal.equipmentId()));
+
+
+
+	if (m_signalDataServer != nullptr)
+	{
+		itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("Servers") <<
+												 m_signalDataServer->dataServiceIds(m_signal.appSignalId()).join(';')));
+	}
 
 	if (m_signal.isAnalog())
 	{
@@ -1393,8 +1413,8 @@ void DialogSignalInfo::fillExtProperties()
 	// Fill properties list
 	//
 	QStringList columns;
-	columns << "Caption";
-	columns << "Value";
+	columns << tr("Caption");
+	columns << tr("Value");
 	ui->treePropertiesExt->setHeaderLabels(columns);
 
 	QTreeWidgetItem* itemGroup1 = new QTreeWidgetItem(QStringList()<<tr("General"));
@@ -1776,7 +1796,18 @@ void DialogSignalInfo::updateAppSignalState()
 {
 	bool ok = false;
 
-	AppSignalState appSignalState = m_appSignalManager->signalState(m_signal.hash(), &ok);
+	AppSignalState appSignalState;
+
+	if (m_dataServiceId.isEmpty() == true)
+	{
+		// Latest server state
+		appSignalState = m_appSignalManager->signalState(m_signal.hash(), &ok);
+	}
+	else
+	{
+		// Specific server state
+		appSignalState = m_appSignalManager->signalState(m_signal.hash(), ::calcHash(m_dataServiceId), &ok);
+	}
 	if (ok == false)
 	{
 		return;
@@ -1880,7 +1911,18 @@ void DialogSignalInfo::updateSetpoints()
 
 			bool ok = false;
 
-			AppSignalState stateCompare = m_appSignalManager->signalState(paramCompare.hash(), &ok);
+			AppSignalState stateCompare;
+
+			if (m_dataServiceId.isEmpty() == true)
+			{
+				// Latest server state
+				stateCompare = m_appSignalManager->signalState(paramCompare.hash(), &ok);
+			}
+			else
+			{
+				// Specific server state
+				stateCompare = m_appSignalManager->signalState(paramCompare.hash(), ::calcHash(m_dataServiceId), &ok);
+			}
 			if (ok == false)
 			{
 				item->setText(static_cast<int>(SetpointsColumns::CompareToValue), "?");
@@ -1901,7 +1943,18 @@ void DialogSignalInfo::updateSetpoints()
 
 			bool ok = false;
 
-			AppSignalState stateOutput = m_appSignalManager->signalState(paramOutput.hash(), &ok);
+			AppSignalState stateOutput;
+
+			if (m_dataServiceId.isEmpty() == true)
+			{
+				// Latest server state
+				stateOutput = m_appSignalManager->signalState(paramOutput.hash(), &ok);
+			}
+			else
+			{
+				// Specific server state
+				stateOutput = m_appSignalManager->signalState(paramOutput.hash(), ::calcHash(m_dataServiceId), &ok);
+			}
 			if (ok == false)
 			{
 				item->setText(static_cast<int>(SetpointsColumns::OutputValue), "?");
@@ -2007,7 +2060,7 @@ void DialogSignalInfo::stateContextMenu(QPoint pos)
 
 	// View type
 	//
-	QActionGroup *viewGroup = new QActionGroup(this);
+	QActionGroup* viewGroup = new QActionGroup(this);
 	viewGroup->setExclusive(true);
 
 	for (int i = 0; i < static_cast<int>(E::ValueViewType::Count); i++)
@@ -2051,6 +2104,57 @@ void DialogSignalInfo::stateContextMenu(QPoint pos)
 	connect(actionCopy, &QAction::triggered, this, f);
 
 	menu.addAction(actionCopy);
+
+	// Server
+	//
+	if (m_appDataServices.size() > 1)
+	{
+		QMenu* serversMenu = menu.addMenu(tr("Server State"));
+
+		QActionGroup* serverGroup = new QActionGroup(this);
+		serverGroup->setExclusive(true);
+
+		// Latest action
+		//
+		{
+			QAction* actionServer = new QAction("Latest", &menu);
+			actionServer->setCheckable(true);
+
+			if (m_dataServiceId.isEmpty() == true)
+			{
+				actionServer->setChecked(true);
+			}
+
+			connect(actionServer, &QAction::triggered, this, [this]()
+			{
+				m_dataServiceId.clear();
+			});
+
+			serverGroup->addAction(actionServer);
+		}
+
+		// Servers actions
+		//
+		for (const QString& server : m_appDataServices)
+		{
+			QAction* actionServer = new QAction(server, &menu);
+			actionServer->setCheckable(true);
+
+			if (server == m_dataServiceId)
+			{
+				actionServer->setChecked(true);
+			}
+
+			connect(actionServer, &QAction::triggered, this, [this, server]() -> void
+			{
+				m_dataServiceId = server;
+			});
+
+			serverGroup->addAction(actionServer);
+		}
+
+		serversMenu->addActions(serverGroup->actions());
+	}
 
 	// --
 	//
