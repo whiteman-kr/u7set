@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../lib/ExportPrint.h"
+#include "../lib/ISignalDataServer.h"
 #include "../VFrame30/Schema.h"
 #include "DragDropHelper.h"
 
@@ -93,7 +94,7 @@ public:
 	};
 
 public:
-	SignalSnapshotModel(IAppSignalManager* appSignalManager, QObject *parent);
+	SignalSnapshotModel(IAppSignalManager* appSignalManager, ISignalDataServer* signalDataServer, QObject *parent);
 
 	void setSignals(std::vector<AppSignalParam>& signalList);
 
@@ -119,6 +120,8 @@ public:
 	void setMasks(const QStringList& masks);
 
 	void setTags(const QStringList& tags);
+
+	void setDataServiceId(const QString& dataServiceId);
 
 	void setSchemaAppSignals(std::set<QString> schemaAppSignals);
 
@@ -147,31 +150,28 @@ protected:
 
 private:
 	IAppSignalManager* m_appSignalManager = nullptr;
+	ISignalDataServer* m_signalDataServer = nullptr;
 
 	QStringList m_columnsNames;
 
 	// Model data
 
 	std::vector<AppSignalParam> m_allSignals;
-
 	std::vector<AppSignalState> m_allStates;
-
 	std::vector<int> m_filteredSignals;
 
 	// Filtering parameters
 
 	SignalType m_signalType = SignalType::All;
-
 	MaskType m_maskType = MaskType::AppSignalId;
-
 	QStringList m_masks;
-
 	QStringList m_tags;
-
+	QString m_dataServiceId;
 	std::set<QString> m_schemaAppSignals;
 
-	E::AnalogFormat m_analogFormat = E::AnalogFormat::g_9_or_9e;
+	// View params
 
+	E::AnalogFormat m_analogFormat = E::AnalogFormat::g_9_or_9e;
 	int m_analogPrecision = -1;
 };
 
@@ -221,10 +221,17 @@ class DialogSignalSnapshot : public QDialog
 	Q_OBJECT
 
 protected:
-	explicit DialogSignalSnapshot(IAppSignalManager* appSignalManager,
-								  QString projectName,
-								  QString softwareEquipmentId,
-								  QWidget *parent);
+	DialogSignalSnapshot(IAppSignalManager* appSignalManager,
+						 ISignalDataServer* signalDataServer,	// Can be nullptr, e.g. in Simulator
+						 const QStringList& appDataServices,	// Can be empty, e.g. in Simulator
+						 const QString& projectName,
+						 const QString& equipmentId,
+						 QWidget *parent);
+
+	DialogSignalSnapshot(IAppSignalManager* appSignalManager,
+						 const QString& projectName,
+						 const QString& equipmentId,
+						 QWidget *parent);
 
 	virtual ~DialogSignalSnapshot();
 
@@ -270,28 +277,35 @@ private slots:
 	void editTagsReturnPressed();
 	void schemaComboCurrentIndexChanged(int index);
 	void maskTypeComboCurrentIndexChanged(int index);
+	void serverComboIndexChanged(int index);
 	void buttonExportClicked();
 	void buttonPrintClicked();
     void buttonChooseTagsClicked();
 
 private:
-	void setupUi();
+	void createControls();
 	void createMenus();
+	void initFiltersView();
+	void initSignalsView();
 
 	void fillSchemas();
 	void fillSignals();
 
-	virtual void timerEvent(QTimerEvent* event) override;
+	void timerEvent(QTimerEvent* event) override;
 	void updateTableItems();
 
 	void maskChanged(bool addToCompleter);
 	void tagsChanged();
 
 private:
+	IAppSignalManager* m_appSignalManager = nullptr;
+	ISignalDataServer* m_signalDataServer = nullptr;
 
+	// Ui
 	QComboBox* m_typeCombo = nullptr;
 	QComboBox* m_schemaCombo = nullptr;
 	QComboBox* m_maskTypeCombo = nullptr;
+	QComboBox* m_serverCombo = nullptr;
 
 	QLineEdit* m_editMask = nullptr;
 	QLineEdit* m_editTags = nullptr;
@@ -300,29 +314,7 @@ private:
 	QPushButton* m_buttonFixate = nullptr;
 
 	SnapshotTableView* m_tableView = nullptr;
-
-	//
-
-	QString m_projectName;
-	QString m_softwareEquipmentId;
-
-	IAppSignalManager* m_appSignalManager = nullptr;
-
-	SignalSnapshotModel *m_model = nullptr;
-
-	std::vector<AppSignalParam> m_specificSignals;
-
-	int m_updateStateTimerId = -1;
-
-	bool m_firstShow = true;
-
-	QCompleter* m_maskCompleter = nullptr;
-	QCompleter* m_tagsCompleter = nullptr;
-
-	static const QString m_maskHelp;
-	static const QString m_tagsHelp;
-
-	DialogSignalSnapshotSettings m_settings;
+	SignalSnapshotModel* m_model = nullptr;
 
 	QAction* m_formatAutoSelect = nullptr;
 	QAction* m_formatDecimal = nullptr;
@@ -331,6 +323,25 @@ private:
 	QAction* m_precisionDefault = nullptr;
 	QList<QAction*> m_precisionActions;
 
+	QCompleter* m_maskCompleter = nullptr;
+	QCompleter* m_tagsCompleter = nullptr;
+
 	QMenu m_formatMenu;
+
+	// Project Data
+	QString m_projectName;
+	QString m_equipmentId;
+	QStringList m_appDataServices;
+
+	std::vector<AppSignalParam> m_specificSignals;
+
+	int m_updateStateTimerId = -1;
+
+	bool m_firstShow = true;
+
+	static const QString m_maskHelp;
+	static const QString m_tagsHelp;
+
+	DialogSignalSnapshotSettings m_settings;
 };
 

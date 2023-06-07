@@ -13,8 +13,18 @@ MonitorDialogSignalSnapshot* MonitorDialogSignalSnapshot::createDialog(MonitorCo
 		return nullptr;
 	}
 
+	QStringList appDataServices;
+	for (const SoftwareEndpoint::AppDataService& srv : configController->configuration().appDataServices)
+	{
+		appDataServices.push_back(srv.equipmentId);
+	}
+
 	MonitorDialogSignalSnapshot* dss = new MonitorDialogSignalSnapshot(configController,
 																	   monitorSignalManager,
+																	   monitorSignalManager,
+																	   appDataServices,
+																	   configController->configInfo().project,
+																	   configController->configInfo().softwareEquipmentId,
 																	   centralWidget);
 
 	connect(dss, &DialogSignalSnapshot::signalContextMenu, centralWidget, &MonitorCentralWidget::slot_signalContextMenu);
@@ -27,14 +37,20 @@ MonitorDialogSignalSnapshot* MonitorDialogSignalSnapshot::createDialog(MonitorCo
 }
 
 
-MonitorDialogSignalSnapshot::MonitorDialogSignalSnapshot(MonitorConfigController *configController,
-														 MonitorSignalManager* monitorSignalManager,
+MonitorDialogSignalSnapshot::MonitorDialogSignalSnapshot(MonitorConfigController* configController,
+														 IAppSignalManager* appSignalManager,
+														 ISignalDataServer* signalDataServer,
+														 const QStringList& appDataServices,
+														 const QString& projectName,
+														 const QString& equipmentId,
 														 QWidget *parent) :
-	DialogSignalSnapshot(monitorSignalManager,
-						 configController->configuration().configInfo.project,
-						 configController->configuration().configInfo.softwareEquipmentId,
+	DialogSignalSnapshot(appSignalManager,
+						 signalDataServer,
+						 appDataServices,
+						 projectName,
+						 equipmentId,
 						 parent),
-	  m_configController(configController)
+	m_configController(configController)
 {
 	if (m_configController == nullptr)
 	{
