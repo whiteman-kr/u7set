@@ -388,9 +388,9 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 			result &= readAppDataSources(fileData, sessionParams.currentSettingsProfile);			// fill m_appDataSources
 		}
 
-		if (bfi.ID == CfgFileId::APP_SIGNAL_SET)
+		if (bfi.ID == CfgFileId::ACQUIRED_APP_SIGNALS)
 		{
-			result &= readAppSignals(fileData);				// fill m_unitInfo and m_appSignals
+			result &= readAppSignals(fileData);				// fills m_appSignals
 		}
 
 		if (result == true)

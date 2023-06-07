@@ -16,17 +16,15 @@ namespace Builder
 		virtual bool generateConfigurationStep1() override;
 
 	private:
-		bool getAssociatedLMs();
-
 		bool writeAppDataSourcesXml();
 		bool writeAppSignalsXml();
-		bool addLinkToAppSignalsFile();
+		bool writeAcquiredAppSignalsFile();
 
 		bool writeRunScriptFile(const QString& profile, const AppDataServiceSettings& settings, E::OS os);
 
-		bool findAppDataSourceAssociatedSignals(DataSource& appDataSource);
+		bool findAppDataSourceAcquiredSignals(DataSource& appDataSource);
 
 	private:
-		std::set<QString> m_associatedAppSignals;
+		std::set<QString> m_acquiredAppSignals;
 	};
 }
