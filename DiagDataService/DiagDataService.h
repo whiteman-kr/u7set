@@ -14,25 +14,25 @@ class DiagDataServiceWorker : public ServiceWorker
 public:
 	DiagDataServiceWorker(const SoftwareInfo& softwareInfo,
 						  const QString& serviceInstanceName,
-						  int& argc,
+						  int argc,
 						  char** argv,
-						  CircularLoggerShared logger,
-						  E::ServiceRunMode runMode);
+						  CircularLoggerShared logger);
+
+	DiagDataServiceWorker(const DiagDataServiceWorker* worker);
+
 	virtual ~DiagDataServiceWorker();
 
 	virtual ServiceWorker* createInstance() const override;
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& servicesInfo) const override;
 
 private:
-	void initCmdLineParser() override;
-	virtual void loadSettings() override;
+	void initServiceSpecificCmdLineArgs() override;
+	virtual void loadServiceSpecificSettings() override;
 
 	virtual void initialize() override;
 	virtual void shutdown() override;
 
 private:
-	std::shared_ptr<CircularLogger> m_logger;
-
 	std::shared_ptr<const DiagDataServiceSettings> m_serviceSettings;
 };
 

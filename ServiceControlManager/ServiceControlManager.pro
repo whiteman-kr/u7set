@@ -29,7 +29,6 @@ unix {
 SOURCES += \
     ../lib/DataSource.cpp \
     ../lib/WidgetUtils.cpp \
-	../lib/LanControllerInfo.cpp \
 	../AppDataService/DynamicAppSignalState.cpp \
 	../AppDataService/AppDataSource.cpp \
 	../AppDataService/RtTrendsServer.cpp \
@@ -51,7 +50,6 @@ HEADERS  += \
 	Stable.h \
     ../lib/DataSource.h \
     ../lib/WidgetUtils.h \
-	../lib/LanControllerInfo.h \
 	../AppDataService/DynamicAppSignalState.h \
 	../AppDataService/AppDataSource.h \
 	../AppDataService/RtTrendsServer.h \
@@ -109,6 +107,12 @@ unix:PRE_TARGETDEPS += $$DESTDIR/libOnlineLib.a
 LIBS += -lServiceLib
 win32:PRE_TARGETDEPS += $$DESTDIR/ServiceLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libServiceLib.a
+
+# HardwareLib
+#
+LIBS += -lHardwareLib
+win32:PRE_TARGETDEPS += $$DESTDIR/HardwareLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libHardwareLib.a
 
 # UtilsLib
 #

@@ -1,6 +1,7 @@
 #pragma once
 #include <map>
 #include <span>
+#include <QMutex>
 #include "TrendArchiveServer.h"
 #include "TrendSignal.h"
 #include "TrendSignalState.h"

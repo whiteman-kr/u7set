@@ -20,10 +20,11 @@ public:
 public:
 	GatewayServiceWorker(const SoftwareInfo& softwareInfo,
 						 const QString& serviceInstanceName,
-						 int& argc,
+						 int argc,
 						 char** argv,
-						 CircularLoggerShared logger,
-						 E::ServiceRunMode runMode);
+						 CircularLoggerShared logger);
+	GatewayServiceWorker(const GatewayServiceWorker* worker);
+
 	~GatewayServiceWorker();
 
 	virtual ServiceWorker* createInstance() const override;
@@ -34,10 +35,10 @@ public:
 	const AppSignals& appSignals() const { return m_appSignals; }
 
 private:
-	virtual void initCmdLineParser() override;
-	virtual void loadSettings() override;
+	virtual void initServiceSpecificCmdLineArgs() override;
+	virtual void loadServiceSpecificSettings() override;
 
-	bool processCustomCmdLineSettings() override;
+	bool processServiceSpecificCmdLineArgs() override;
 
 	virtual void initialize() override;
 	virtual void shutdown() override;

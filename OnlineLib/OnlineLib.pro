@@ -56,7 +56,7 @@ HEADERS += \
 	CfgServerLoader.h \
 	CircularLogger.h \
 	SoftwareSettings.h \
-	DataProtocols.h \
+	BuildInfo.h \
 
 SOURCES += \
 	SoftwareInfo.cpp \
@@ -68,7 +68,7 @@ SOURCES += \
 	CfgServerLoader.cpp \
 	CircularLogger.cpp \
 	SoftwareSettings.cpp \
-	DataProtocols.cpp \
+	BuildInfo.cpp \
 
 DISTFILES += \
 	../Tools/SslCertificates/ReadMe.txt \

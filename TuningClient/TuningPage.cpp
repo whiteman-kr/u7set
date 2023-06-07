@@ -1716,12 +1716,6 @@ void TuningPage::slot_setValue()
 					}
 				}
 
-				if (defaultValue != m_model->defaultValue(asp))
-				{
-					QMessageBox::warning(this, tr("Set Value"), tr("Selected objects have different default values."));
-					return;
-				}
-
 				if (value != state.value())
 				{
 					sameValue = false;

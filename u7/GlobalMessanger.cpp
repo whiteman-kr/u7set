@@ -110,7 +110,7 @@ void GlobalMessanger::fireCompareObject(DbChangesetObject object, CompareData co
 	emit compareObject(object, compareData);
 }
 
-void GlobalMessanger::runOrderReady(Builder::RunOrder runOrder)
+void GlobalMessanger::runOrderReady(::Builder::RunOrder runOrder)
 {
 	QMutexLocker ml(&m_buildResultMutex);
 	m_runOrder = std::move(runOrder);

@@ -5,7 +5,7 @@
 #include <QHostAddress>
 #include <QAbstractSocket>
 
-#include "../lib/BuildInfo.h"
+#include "../OnlineLib/BuildInfo.h"
 #include "../CommonLib/HostAddressPort.h"
 
 namespace Socket
@@ -20,7 +20,7 @@ namespace Socket
 	const int PORT_LOWEST = 0;
 	const int PORT_HIGHEST = 65535;
 
-	const int ENTIRE_UDP_SIZE = 1472;
+	const int ENTIRE_UDP_SIZE = 1472;		// Also duplicated in DataProtocols.h
 }
 
 const int MAX_DATAGRAM_SIZE = 4096;

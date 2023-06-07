@@ -1,12 +1,14 @@
 @startuml
 
 !include ./CommonLib.puml
-!include ./HardwareLib.puml
 !include ./Protobuf.puml
+!include ./UtilsLib.puml
+!include ./HardwareLib.puml
 
 [mconf]
 mconf -up-> [CommonLib]
 mconf -up-> [HardwareLib]
 mconf -up-> [Protobuf]
+mconf -up-> [UtilsLib]
 
 @enduml

@@ -137,7 +137,7 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
 		return;
 	}
 
-	for(const Builder::BuildFileInfo& bfi : buildFileInfoArray)
+	for(const OnlineLib::BuildFileInfo& bfi : buildFileInfoArray)
 	{
 		QByteArray fileData;
 		QString errStr;

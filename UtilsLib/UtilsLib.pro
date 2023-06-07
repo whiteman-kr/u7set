@@ -62,6 +62,8 @@ HEADERS += \
     Ui/UiTools.h \
 	WUtils.h \
 	XmlHelper.h \
+	OutputLog.h \
+	CrashExceptionHandler.h \
 
 SOURCES += \
 	Crc.cpp \
@@ -72,3 +74,5 @@ SOURCES += \
 	SimpleThread.cpp \
     Ui/UiTools.cpp \
 	XmlHelper.cpp \
+	OutputLog.cpp \
+	CrashExceptionHandler.cpp \

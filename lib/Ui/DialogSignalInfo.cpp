@@ -537,6 +537,7 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 								   QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogSignalInfo),
+	m_dialogType(dialogType),
 	m_signal(signal),
 	m_appSignalManager(appSignalManager),
 	m_signalDataServer(signalDataServer),	// it can be nullptr
@@ -1231,7 +1232,10 @@ void DialogSignalInfo::fillSignalData()
 
 	fillSignalInfo();
 	fillProperties();
-	fillExtProperties();
+	if (m_dialogType == DialogType::Simulator)
+	{
+		fillExtProperties();
+	}
 	fillSetpoints();
 	fillSchemas();
 	fillTuningTab();

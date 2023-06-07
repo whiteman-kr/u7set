@@ -21,7 +21,7 @@
 #include <QDialogButtonBox>
 
 #include "AppSignalSetProvider.h"
-#include "DbMetrologyConnection.h"
+#include "../Builder/DbMetrologyConnection.h"
 
 // ==============================================================================================
 

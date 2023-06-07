@@ -14,12 +14,12 @@ class CmdLineParam
 public:
 
 	explicit CmdLineParam();
-	CmdLineParam(int& argc, char** argv);
+	CmdLineParam(int argc, char** argv);
 	virtual ~CmdLineParam();
 
 public:
 
-	int argCout() { return static_cast<int>(m_cmdLineParser.argCount()); }
+	int argCout() { return static_cast<int>(m_cmdLineParser.cmdLineArgCount()); }
 
 	QString cfgEquipmentID() const { return m_cfgEquipmentID; }
 	HostAddressPort cfgServIP() const { return m_cfgSrvIP; }

@@ -1,10 +1,11 @@
-#include "../lib/DeviceHelper.h"
-#include "../lib/LmDescription.h"
 #include "../lib/DataSource.h"
-#include "../lib/ConnectionsInfo.h"
-#include "../lib/LogicModulesInfo.h"
+#include "../HardwareLib/LmDescription.h"
+#include "../HardwareLib/LogicModulesInfo.h"
 #include "../OnlineLib/SoftwareSettings.h"
 
+#include "DeviceHelper.h"
+#include "ConnectionsInfoWriter.h"
+#include "LanControllerInfoHelper.h"
 #include "ApplicationLogicCompiler.h"
 #include "SoftwareCfgGenerator.h"
 #include "BdfFile.h"
@@ -175,7 +176,7 @@ namespace Builder
 		return m_context->m_fscModules;
 	}
 
-	BuildInfo ApplicationLogicCompiler::buildInfo()
+	OnlineLib::BuildInfo ApplicationLogicCompiler::buildInfo()
 	{
 		return m_context->m_buildResultWriter->buildInfo();
 	}
@@ -813,7 +814,7 @@ namespace Builder
 		list.append("-- This file has been generated automatically by RPCT software");
 		list.append("--");
 
-		BuildInfo bi = buildInfo();
+		OnlineLib::BuildInfo bi = buildInfo();
 
 		str = QString("-- Project:\t%1").arg(bi.project);
 		list.append(str);
@@ -995,7 +996,7 @@ namespace Builder
 		list.append("-- This file has been generated automatically by RPCT software");
 		list.append("--");
 
-		BuildInfo bi = buildInfo();
+		OnlineLib::BuildInfo bi = buildInfo();
 
 		str = QString("-- Project:\t%1").arg(bi.project);
 		list.append(str);

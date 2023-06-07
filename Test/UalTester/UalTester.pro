@@ -33,7 +33,6 @@ CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
 SOURCES += \
-	../../lib/BuildInfo.cpp \
 	main.cpp \
 	UalTester.cpp \
 	SignalBase.cpp \
@@ -46,7 +45,6 @@ SOURCES += \
 HEADERS += \
 	Stable.h \
 	../../lib/ConstStrings.h \
-    ../../lib/BuildInfo.h \
     SignalBase.h \
     TestFile.h \
     TuningSocket.h \

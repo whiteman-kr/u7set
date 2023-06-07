@@ -336,7 +336,7 @@ void UploadTabPage::refreshProjectBuilds()
 
 		for (const QString& buildName : buildList)
 		{
-			Builder::BuildInfo buildInfo;
+			OnlineLib::BuildInfo buildInfo;
 			bool buildSuccess = false;
 
 			QString buildPath = QString("%1/%2").arg(m_buildSearchPath).arg(buildName);
@@ -790,7 +790,7 @@ void UploadTabPage::refreshBinaryFile()
 	emit loadBinaryFile(m_currentFilePath, &m_firmware);
 }
 
-bool UploadTabPage::readBuildInfo(const QString& buildPath, Builder::BuildInfo* buildInfo, bool* buildSuccess)
+bool UploadTabPage::readBuildInfo(const QString& buildPath, OnlineLib::BuildInfo* buildInfo, bool* buildSuccess)
 {
 	if (buildInfo == nullptr || buildSuccess == nullptr)
 	{

@@ -1,9 +1,11 @@
 #include "TrendSlider.h"
+#include <QDialog>
 #include <QPainter>
 #include <QPushButton>
 #include <QHBoxLayout>
 #include <QDateTimeEdit>
 #include <QDialogButtonBox>
+#include <QMouseEvent>
 #include "../UtilsLib/CUtils.h"
 
 TrendSlider::TrendSlider(TrendLib::TrendRulerSet* rulerSet) :

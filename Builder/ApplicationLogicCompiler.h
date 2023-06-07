@@ -40,7 +40,7 @@ namespace Builder
 		const VFrame30::BusSet* busSet();
 		Hardware::OptoModuleStorage* opticModuleStorage();
 		std::vector<Hardware::DeviceModule*>& lmModules();
-		BuildInfo buildInfo();
+		OnlineLib::BuildInfo buildInfo();
 		std::vector<Hardware::DeviceModule*>& fscModules();
 
 		//

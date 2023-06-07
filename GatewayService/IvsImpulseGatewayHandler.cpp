@@ -37,7 +37,7 @@ namespace Gateway
 												m_appDataService1,
 												m_appDataService2,
 												QString("GatewayService %1").arg(m_softwareInfo.equipmentID()),
-												*this);
+												*this, m_log);
 		m_appDataServiceClientThread->start();
 
 		m_ivsImpulseCommThread = new IvsImpulseCommThread(*this);

@@ -2,7 +2,7 @@
 #include <QtConcurrentRun>
 
 #include "../DbLib/DbController.h"
-#include "../lib/LmDescription.h"
+#include "../HardwareLib/LmDescription.h"
 
 #include "../VFrame30/UfbSchema.h"
 #include "../VFrame30/SchemaPoint.h"

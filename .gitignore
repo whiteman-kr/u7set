@@ -4,6 +4,9 @@ version.h
 gitlab_version.h
 Makefile*
 *.o
+build-*/**
+build/**
+out/**
 *embed.manifest
 GetGitProjectVersion.exe
 GetGitProjectVersion
@@ -13,6 +16,7 @@ GetGitProjectVersion
 .vs
 Scripts/out
 Test/build-*/**
+*.aps
 Test/bin/**
 Metrology/Metrology.db
 Tools/build-*/**

@@ -1,7 +1,7 @@
 #ifndef SOURCEWORKER_H
 #define SOURCEWORKER_H
 
-#include "../../OnlineLib/DataProtocols.h"
+#include "../../HardwareLib/DataProtocols.h"
 
 // ==============================================================================================
 

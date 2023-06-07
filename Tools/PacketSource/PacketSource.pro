@@ -40,8 +40,6 @@ unix {
 SOURCES += \
     ../../lib/Ui/DialogAbout.cpp \
 	../../lib/DataSource.cpp \
-    ../../lib/BuildInfo.cpp \
-	../../lib/LanControllerInfo.cpp \
 	main.cpp \
 	BuildOption.cpp \
 	ConfigSocket.cpp \
@@ -65,8 +63,6 @@ HEADERS += \
 	Stable.h \
     ../../lib/Ui/DialogAbout.h \
 	../../lib/DataSource.h \
-    ../../lib/BuildInfo.h \
-	../../lib/LanControllerInfo.h \
 	../../CommonLib/PropertyObject.h \
 	../../CommonLib/Types.h \
 	BuildOption.h \
@@ -110,6 +106,18 @@ LIBS += -lOnlineLib
 win32:PRE_TARGETDEPS += $$DESTDIR/OnlineLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libOnlineLib.a
 
+# HardwareLib
+#
+LIBS += -lHardwareLib
+win32:PRE_TARGETDEPS += $$DESTDIR/HardwareLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libHardwareLib.a
+
+# AppSignalLib
+#
+LIBS += -lAppSignalLib
+win32:PRE_TARGETDEPS += $$DESTDIR/AppSignalLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libAppSignalLib.a
+
 # UtilsLib
 #
 LIBS += -lUtilsLib
@@ -122,12 +130,6 @@ LIBS += -lprotobuf
 win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
 INCLUDEPATH += ./../../Protobuf
-
-# AppSignalLib
-#
-LIBS += -lAppSignalLib
-win32:PRE_TARGETDEPS += $$DESTDIR/AppSignalLib.lib
-unix:PRE_TARGETDEPS += $$DESTDIR/libAppSignalLib.a
 
 # CommonLib
 #

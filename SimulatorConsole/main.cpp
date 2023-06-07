@@ -1,5 +1,9 @@
+#include <atomic>
 #include <QCoreApplication>
 #include <QDebug>
+#include <QVector>
+#include <QFloat16>
+#include <QtCore>
 
 #include "../Simulator/Simulator.h"
 #include "../Simulator/SimConsoleLogFile.h"

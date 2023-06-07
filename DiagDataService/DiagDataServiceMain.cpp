@@ -1,3 +1,4 @@
+#include "../ServiceLib/ServiceStarter.h"
 #include "DiagDataService.h"
 
 int main(int argc, char *argv[])
@@ -16,8 +17,7 @@ int main(int argc, char *argv[])
 
 	DiagDataServiceWorker diagDataServiceWorker(si,
 												Service::getServiceInstanceName("RPCT Diag Data Service", argc, argv),
-												argc, argv, logger,
-												E::ServiceRunMode::ConsoleApp);	// run mode will be refined after cmd line processing
+												argc, argv, logger);
 
 	ServiceStarter serviceStarter(app, diagDataServiceWorker, logger);
 

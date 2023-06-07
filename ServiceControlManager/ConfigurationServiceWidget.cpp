@@ -162,7 +162,7 @@ void ConfigurationServiceWidget::updateBuildInfo()
 		return;
 	}
 
-	const Builder::BuildInfo& b = m_tcpClientSocket->buildInfo();
+	const OnlineLib::BuildInfo& b = m_tcpClientSocket->buildInfo();
 
 	m_buildTabModel->setData(m_buildTabModel->index(0, 1), "Loaded");
 

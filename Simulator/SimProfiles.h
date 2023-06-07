@@ -1,5 +1,12 @@
 #pragma once
+#include <map>
+#include <memory>
 #include "../CommonLib/PropertyObject.h"
+
+// <filesystem> must be included after some Qt include.
+// https://bugreports.qt.io/browse/QTBUG-7323
+//
+#include <filesystem>
 
 namespace Sim
 {

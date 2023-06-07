@@ -1,5 +1,5 @@
+#include <QCoreApplication>
 #include "MetrologyFormula.h"
-
 #include "UnitsConvertorTable.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -260,7 +260,7 @@ namespace Measure
 				caption = QT_TRANSLATE_NOOP("MetrologyFormula", "Unknown");
 		}
 
-		return qApp->translate("MetrologyFormula", caption.toUtf8());
+		return QCoreApplication::instance()->translate("MetrologyFormula", caption.toUtf8());
 	};
 
 	QString MT::CalcErrorRangeCaptionTr(CalcErrorRange byRange)

@@ -85,7 +85,6 @@ protected slots:
 	void showRpctQuickStart();
 	void showRpctUserManualAppendixA();
 	void showRpctUserManualAppendixB();
-	void showRpctUserManualAppendixC();
 	void showAfblReference();
 	void showScriptHelp();
 	void showMatsUserManual();
@@ -137,7 +136,6 @@ private:
 	QAction* m_rpctQuickStartAction = nullptr;
 	QAction* m_manualRpctAppendixAAction = nullptr;
 	QAction* m_manualRpctAppendixBAction = nullptr;
-	QAction* m_manualRpctAppendixCAction = nullptr;
 	QAction* m_manualAfblAction = nullptr;
 	QAction* m_scriptHelpAction = nullptr;
 	QAction* m_manualMatsAction = nullptr;

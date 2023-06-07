@@ -11,7 +11,7 @@
 #include "SourceStatusWidget.h"
 #include <QDirIterator>
 #include <QMessageBox>
-#include "../OnlineLib/DataProtocols.h"
+#include "../HardwareLib/DataProtocols.h"
 #include "../lib/DataSource.h"
 #include <QTimer>
 

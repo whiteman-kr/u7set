@@ -151,7 +151,7 @@ int startBuild(QString buildArgsFileName)
 		return 1;
 	}
 
-	if (doc.setContent(&file) == false)
+    if (static_cast<bool>(doc.setContent(&file)) == false)
 	{
 		QString errorMsg = QObject::tr("Failed to load contents of the file %1.").arg(buildArgsFileName);
 		std::cout << errorMsg.toStdString() << std::endl;

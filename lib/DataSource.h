@@ -8,13 +8,13 @@
 #include "../UtilsLib/Queue.h"
 #include "../UtilsLib/XmlHelper.h"
 #include "../UtilsLib/SimpleThread.h"
-#include "../OnlineLib/DataProtocols.h"
+#include "../HardwareLib/DataProtocols.h"
 #include "../OnlineLib/SocketIO.h"
 #include "../OnlineLib/CircularLogger.h"
 #include "../CommonLib/Times.h"
 #include "../CommonLib/HostAddressPort.h"
 #include "ConstStrings.h"
-#include "LanControllerInfo.h"
+#include "../HardwareLib/LanControllerInfo.h"
 
 class DataSource
 {

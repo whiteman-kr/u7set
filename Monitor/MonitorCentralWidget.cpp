@@ -1,6 +1,7 @@
 #include "MonitorCentralWidget.h"
 #include "MonitorSchemaManager.h"
 #include "MonitorAppSettings.h"
+#include "MonitorSchemaView.h"
 #include "../VFrame30/MonitorSchema.h"
 
 
@@ -341,6 +342,62 @@ void MonitorCentralWidget::slot_signalContextMenu(const QStringList signalList, 
 void MonitorCentralWidget::slot_signalInfo(QString signalId)
 {
 	currentTab()->signalInfo(signalId);
+}
+
+void MonitorCentralWidget::slot_saveToPdf()
+{
+	auto schema = currentTab()->monitorSchemaView()->schema();
+	if (schema == nullptr)
+	{
+		Q_ASSERT(schema);
+		return;
+	}
+	QString fileName = QFileDialog::getSaveFileName(this,
+													tr("Save Schema to PDF"),
+													schema->schemaId() + ".pdf",
+													tr("PDF File (*.pdf)"));
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
+	if (fileName.endsWith(".pdf", Qt::CaseInsensitive) == false)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Wrong file '%1' extension, expected '.pdf'!").arg(fileName));
+		return;
+	}
+
+	if (currentTab()->monitorSchemaView()->saveSchemaToPdf(fileName) == false)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Failed to save file '%1'!").arg(fileName));
+	}
+}
+
+void MonitorCentralWidget::slot_saveToPng()
+{
+	auto schema = currentTab()->monitorSchemaView()->schema();
+	if (schema == nullptr)
+	{
+		Q_ASSERT(schema);
+		return;
+	}
+	QString fileName = QFileDialog::getSaveFileName(this,
+													tr("Save Schema to PNG"),
+													schema->schemaId() + ".png",
+													tr("PNG File (*.png)"));
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
+	if (fileName.endsWith(".png", Qt::CaseInsensitive) == false)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Wrong file '%1' extension, expected '.png'!").arg(fileName));
+		return;
+	}
+
+	if (currentTab()->monitorSchemaView()->saveSchemaToPng(fileName) == false)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Failed to save file '%1'!").arg(fileName));
+	}
 }
 
 void MonitorCentralWidget::slot_tabCloseRequested(int index)

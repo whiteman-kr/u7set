@@ -1,6 +1,6 @@
 #include "Stable.h"
 #include "ApplicationTabPage.h"
-#include "../lib/OutputLog.h"
+#include "../UtilsLib/OutputLog.h"
 
 #include "../lib/Configurator.h"
 

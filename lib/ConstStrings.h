@@ -336,6 +336,7 @@ namespace CfgFileId
 
 	inline const QString APP_DATA_SOURCES("APP_DATA_SOURCES");
 	inline const QString APP_SIGNALS("APP_SIGNALS");
+	inline const QString ACQUIRED_APP_SIGNALS("ACQUIRED_APP_SIGNALS");
 	inline const QString APP_SIGNALS_EXT("APP_SIGNALS_EXT");
 	inline const QString APP_SIGNAL_SET("APP_SIGNAL_SET");
 	inline const QString COMPARATOR_SET("COMPARATOR_SET");
@@ -388,16 +389,36 @@ namespace SoftwareSetting
 
 	inline const QString GATEWAY_DESCRIPTION_FILE("GatewayDescriptionFile");
 	inline const QString LOG_GATEWAY_PACKETS("LogGatewayPackets");
+
+	inline const QString LOG_RUP_TIME_ERRORS("LogRupTimeErrors");
 }
 
-namespace CmdLineOption
+namespace CmdLineArg
 {
+	inline const QString HELP("h");
+	inline const QString VERSION("v");
+	inline const QString EXEC_AS_APP("e");
+	inline const QString INSTALL("i");
+	inline const QString UNINSTALL("u");
+	inline const QString TERMINATE("t");
+	inline const QString INSTANCE("inst");
+	inline const QString CLEAR("clr");
+
 	inline const QString ID("id");
+	inline const QString IP("ip");
 	inline const QString CFG_IP1("cfgip1");
 	inline const QString CFG_IP2("cfgip2");
+
 	inline const QString CFG_FILE("f");
 	inline const QString CFG_PARSE("parse");
-	inline const QString LOG_GATEWAY_PACKETS("logpckt");
+
+	inline const QString CHECKHOSTNAME("checkhostname");
+	inline const QString PROFILE("profile");
+	inline const QString MODE("mode");
+	inline const QString WORK_DIRECTORY("w");
+	inline const QString BUILD_PATH("b");
+
+	inline const QString LOG_GATEWAY_PACKETS("logGwPackets");
 	inline const QString LOG_RUP_TIME_ERR("logRupTimeErr");
 }
 
@@ -419,6 +440,7 @@ namespace Directory
 namespace File
 {
 	inline const QString APP_SIGNALS_ASGS("AppSignals.asgs");
+	inline const QString ACQUIRED_APP_SIGNALS_ASGS("AcquiredAppSignals.asgs");
 	inline const QString APP_SIGNALS_XML("AppSignals.xml");
 	inline const QString APP_SIGNALS_EXT_XML("AppSignalsExt.xml");
 	inline const QString COMPARATORS_SET("Comparators.set");
@@ -455,6 +477,7 @@ namespace Separator
 {
 	inline const QString SEMICOLON_SPACE("; ");
 	inline const QString SEMICOLON(";");
+	inline const QString MINUS("-");
 	inline const QString COMMA(",");
 	inline const QString COMMA_SPACE(", ");
 	inline const QString LINE("-------------------------------------------------------------------------------");
