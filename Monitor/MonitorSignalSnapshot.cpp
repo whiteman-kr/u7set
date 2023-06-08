@@ -13,16 +13,9 @@ MonitorDialogSignalSnapshot* MonitorDialogSignalSnapshot::createDialog(MonitorCo
 		return nullptr;
 	}
 
-	QStringList appDataServices;
-	for (const SoftwareEndpoint::AppDataService& srv : configController->configuration().appDataServices)
-	{
-		appDataServices.push_back(srv.equipmentId);
-	}
-
 	MonitorDialogSignalSnapshot* dss = new MonitorDialogSignalSnapshot(configController,
 																	   monitorSignalManager,
 																	   monitorSignalManager,
-																	   appDataServices,
 																	   configController->configInfo().project,
 																	   configController->configInfo().softwareEquipmentId,
 																	   centralWidget);
@@ -40,13 +33,12 @@ MonitorDialogSignalSnapshot* MonitorDialogSignalSnapshot::createDialog(MonitorCo
 MonitorDialogSignalSnapshot::MonitorDialogSignalSnapshot(MonitorConfigController* configController,
 														 IAppSignalManager* appSignalManager,
 														 ISignalDataServer* signalDataServer,
-														 const QStringList& appDataServices,
 														 const QString& projectName,
 														 const QString& equipmentId,
 														 QWidget *parent) :
 	DialogSignalSnapshot(appSignalManager,
 						 signalDataServer,
-						 appDataServices,
+						 configController->configuration().appDataServices,
 						 projectName,
 						 equipmentId,
 						 parent),

@@ -1111,7 +1111,7 @@ void SnapshotTableView::mouseMoveEvent(QMouseEvent* event)
 //
 DialogSignalSnapshot::DialogSignalSnapshot(IAppSignalManager* appSignalManager,
 										   ISignalDataServer* signalDataServer,
-										   const QStringList& appDataServices,
+										   const std::vector<SoftwareEndpoint::AppDataService>& appDataServices,
 										   const QString& projectName,
 										   const QString& equipmentId,
 										   QWidget *parent) :
@@ -1671,12 +1671,12 @@ void DialogSignalSnapshot::initFiltersView()
 	// Servers setup
 	//
 	m_serverCombo->blockSignals(true);
-	m_serverCombo->addItem(tr("All Servers"));
-	if (m_appDataServices.empty() == false)
+	m_serverCombo->addItem(tr("All Servers"), QString());
+	for (const auto& ads : m_appDataServices)
 	{
-		m_serverCombo->addItems(m_appDataServices);
+		m_serverCombo->addItem(ads.shortenId, ads.equipmentId);
 	}
-	else
+	if (m_appDataServices.empty() == true)
 	{
 		m_serverCombo->setEnabled(false);
 	}
@@ -2032,10 +2032,9 @@ void DialogSignalSnapshot::maskTypeComboCurrentIndexChanged(int index)
 	fillSignals();
 }
 
-void DialogSignalSnapshot::serverComboIndexChanged(int index)
+void DialogSignalSnapshot::serverComboIndexChanged(int /*index*/)
 {
-	m_model->setDataServiceId(index == 0 ? QString() : m_serverCombo->currentText());
-
+	m_model->setDataServiceId(m_serverCombo->currentData().toString());
 	fillSignals();
 }
 

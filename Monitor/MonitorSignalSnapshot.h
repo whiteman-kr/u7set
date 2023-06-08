@@ -15,8 +15,7 @@ public:
 private:
 	explicit MonitorDialogSignalSnapshot(MonitorConfigController *configController,
 										 IAppSignalManager* appSignalManager,
-										 ISignalDataServer* signalDataServer,	// Can be nullptr, e.g. in Simulator
-										 const QStringList& appDataServices,	// Can be empty, e.g. in Simulator
+										 ISignalDataServer* signalDataServer,
 										 const QString& projectName,
 										 const QString& equipmentId,
 										 QWidget *parent);

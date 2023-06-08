@@ -2,6 +2,7 @@
 
 #include "../lib/ExportPrint.h"
 #include "../lib/ISignalDataServer.h"
+#include "../OnlineLib/SoftwareSettings.h"
 #include "../VFrame30/Schema.h"
 #include "DragDropHelper.h"
 
@@ -223,7 +224,7 @@ class DialogSignalSnapshot : public QDialog
 protected:
 	DialogSignalSnapshot(IAppSignalManager* appSignalManager,
 						 ISignalDataServer* signalDataServer,	// Can be nullptr, e.g. in Simulator
-						 const QStringList& appDataServices,	// Can be empty, e.g. in Simulator
+						 const std::vector<SoftwareEndpoint::AppDataService>& appDataServices,	// Can be empty, e.g. in Simulator
 						 const QString& projectName,
 						 const QString& equipmentId,
 						 QWidget *parent);
@@ -331,7 +332,7 @@ private:
 	// Project Data
 	QString m_projectName;
 	QString m_equipmentId;
-	QStringList m_appDataServices;
+	std::vector<SoftwareEndpoint::AppDataService> m_appDataServices;
 
 	std::vector<AppSignalParam> m_specificSignals;
 

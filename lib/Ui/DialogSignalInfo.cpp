@@ -529,7 +529,7 @@ std::map<QString, DialogSignalInfo*> DialogSignalInfo::m_dialogSignalInfoMap;
 
 DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 								   IAppSignalManager* appSignalManager,
-								   ISignalDataServer* signalDataServer,
+								   ISignalDataServer* signalDataServer, const std::vector<SoftwareEndpoint::AppDataService>& appDataServices,
 								   VFrame30::TuningController* tuningController,
 								   bool tuningEnabled,
 								   DialogSignalInfo::DialogType dialogType,
@@ -540,6 +540,7 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 	m_signal(signal),
 	m_appSignalManager(appSignalManager),
 	m_signalDataServer(signalDataServer),	// it can be nullptr
+	m_appDataServices(appDataServices),		// it can be emptu
 	m_tuningController(tuningController),	// it can be nullptr
 	m_tuningEnabled(tuningEnabled)
 {
@@ -628,6 +629,7 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 	DialogSignalInfo(signal,
 					 appSignalManager,
 					 nullptr/*signalDataServer*/,
+					 {}/*appDataServices*/,
 					 nullptr/*tuningController*/,
 					 false/*tuningEnabled*/,
 					 dialogType,
@@ -1318,8 +1320,17 @@ void DialogSignalInfo::fillProperties()
 
 	if (m_signalDataServer != nullptr)
 	{
-		itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("Servers") <<
-												 m_signalDataServer->dataServiceIds(m_signal.appSignalId()).join(';')));
+		QStringList shortenIds;
+		QStringList dataServiceIds =  m_signalDataServer->dataServiceIds(m_signal.appSignalId());
+		for (const auto& ads : m_appDataServices)
+		{
+			if (std::find(dataServiceIds.begin(), dataServiceIds.end(), ads.equipmentId) != dataServiceIds.end())
+			{
+				shortenIds.push_back(ads.shortenId);
+			}
+		}
+
+		itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("Servers") << shortenIds.join("; ")));
 	}
 
 	if (m_signal.isAnalog())
@@ -2148,19 +2159,29 @@ void DialogSignalInfo::stateContextMenu(QPoint pos)
 
 		// Servers actions
 		//
-		for (const QString& server : m_dataServiceIds)
+		for (const QString& serverId : m_dataServiceIds)
 		{
-			QAction* actionServer = new QAction(server, &menu);
+			QString serverShortenId;
+			for (const auto& ads : m_appDataServices)
+			{
+				if (ads.equipmentId == serverId)
+				{
+					serverShortenId = ads.shortenId;
+					break;
+				}
+			}
+
+			QAction* actionServer = new QAction(serverShortenId, &menu);
 			actionServer->setCheckable(true);
 
-			if (server == m_dataServiceId)
+			if (serverId == m_dataServiceId)
 			{
 				actionServer->setChecked(true);
 			}
 
-			connect(actionServer, &QAction::triggered, this, [this, server]() -> void
+			connect(actionServer, &QAction::triggered, this, [this, serverId]() -> void
 			{
-				m_dataServiceId = server;
+				m_dataServiceId = serverId;
 			});
 
 			serverGroup->addAction(actionServer);
