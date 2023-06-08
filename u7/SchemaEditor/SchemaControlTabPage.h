@@ -168,6 +168,7 @@ protected:
 	void createContextMenu();
 
 	virtual void timerEvent(QTimerEvent* event) override;
+	virtual void keyPressEvent(QKeyEvent* event) override;
 
 	// Methods
 	//
@@ -269,6 +270,10 @@ class SchemaControlTabPage : public QWidget, public HasDbController
 public:
 	SchemaControlTabPage(DbController* db, AppSignalSetProvider* signalSetProvider);
 	virtual ~SchemaControlTabPage();
+
+protected:
+	virtual void showEvent(QShowEvent* event) override;
+	virtual void hideEvent(QHideEvent* event) override;
 
 public:
 	bool hasUnsavedSchemas() const;
