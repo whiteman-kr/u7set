@@ -344,7 +344,7 @@ void MonitorCentralWidget::slot_signalInfo(QString signalId)
 	currentTab()->signalInfo(signalId);
 }
 
-void MonitorCentralWidget::slot_saveToPdf()
+void MonitorCentralWidget::slot_export()
 {
 	auto schema = currentTab()->monitorSchemaView()->schema();
 	if (schema == nullptr)
@@ -353,48 +353,34 @@ void MonitorCentralWidget::slot_saveToPdf()
 		return;
 	}
 	QString fileName = QFileDialog::getSaveFileName(this,
-													tr("Save Schema to PDF"),
+													tr("Export Schema"),
 													schema->schemaId() + ".pdf",
-													tr("PDF File (*.pdf)"));
+													tr("PDF Files (*.pdf);;PNG Files (*.png)"));
 	if (fileName.isEmpty() == true)
 	{
 		return;
 	}
-	if (fileName.endsWith(".pdf", Qt::CaseInsensitive) == false)
+
+	bool ok = false;
+
+	if (fileName.endsWith(".pdf", Qt::CaseInsensitive) == true)
 	{
-		QMessageBox::critical(this, qAppName(), tr("Wrong file '%1' extension, expected '.pdf'!").arg(fileName));
-		return;
+		ok = currentTab()->monitorSchemaView()->saveSchemaToPdf(fileName);
+	}
+	else
+	{
+		if (fileName.endsWith(".png", Qt::CaseInsensitive) == true)
+		{
+			ok = currentTab()->monitorSchemaView()->saveSchemaToPng(fileName);
+		}
+		else
+		{
+			QMessageBox::critical(this, qAppName(), tr("Wrong file '%1' format, expected '.png' or '.pdf'!").arg(fileName));
+			return;
+		}
 	}
 
-	if (currentTab()->monitorSchemaView()->saveSchemaToPdf(fileName) == false)
-	{
-		QMessageBox::critical(this, qAppName(), tr("Failed to save file '%1'!").arg(fileName));
-	}
-}
-
-void MonitorCentralWidget::slot_saveToPng()
-{
-	auto schema = currentTab()->monitorSchemaView()->schema();
-	if (schema == nullptr)
-	{
-		Q_ASSERT(schema);
-		return;
-	}
-	QString fileName = QFileDialog::getSaveFileName(this,
-													tr("Save Schema to PNG"),
-													schema->schemaId() + ".png",
-													tr("PNG File (*.png)"));
-	if (fileName.isEmpty() == true)
-	{
-		return;
-	}
-	if (fileName.endsWith(".png", Qt::CaseInsensitive) == false)
-	{
-		QMessageBox::critical(this, qAppName(), tr("Wrong file '%1' extension, expected '.png'!").arg(fileName));
-		return;
-	}
-
-	if (currentTab()->monitorSchemaView()->saveSchemaToPng(fileName) == false)
+	if (ok == false)
 	{
 		QMessageBox::critical(this, qAppName(), tr("Failed to save file '%1'!").arg(fileName));
 	}

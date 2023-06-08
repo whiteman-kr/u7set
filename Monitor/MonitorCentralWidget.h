@@ -56,8 +56,7 @@ public slots:
 	void slot_signalContextMenu(const QStringList signalList, const QList<QMenu*>& customMenu);
 	void slot_signalInfo(QString signalId);
 
-	void slot_saveToPdf();
-	void slot_saveToPng();
+	void slot_export();
 
 protected slots:
 	void slot_tabCloseRequested(int index);

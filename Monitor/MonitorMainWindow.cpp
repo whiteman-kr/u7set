@@ -369,19 +369,12 @@ void MonitorMainWindow::showLogo()
 
 void MonitorMainWindow::createActions()
 {
-	m_pSavePdfAction = new QAction(tr("Export to PDF..."), this);
-	m_pSavePdfAction->setStatusTip(tr("Export current schema to PDF"));
-	m_pSavePdfAction->setEnabled(true);
-	m_pSavePdfAction->setShortcuts(QList<QKeySequence>{}
-									 <<  QKeySequence{Qt::CTRL | Qt::Key_P});
-	connect(m_pSavePdfAction, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_saveToPdf);
-
-	m_pSavePngAction = new QAction(tr("Export to PNG..."), this);
-	m_pSavePngAction->setStatusTip(tr("Export current schema to PNG"));
-	m_pSavePngAction->setEnabled(true);
-	m_pSavePngAction->setShortcuts(QList<QKeySequence>{}
+	m_pExportAction = new QAction(tr("Export Schema..."), this);
+	m_pExportAction->setStatusTip(tr("Export current schema to a file"));
+	m_pExportAction->setEnabled(true);
+	m_pExportAction->setShortcuts(QList<QKeySequence>{}
 									 <<  QKeySequence{Qt::CTRL | Qt::Key_S});
-	connect(m_pSavePngAction, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_saveToPng);
+	connect(m_pExportAction, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_export);
 
 	m_pExitAction = new QAction(tr("Exit"), this);
 	m_pExitAction->setStatusTip(tr("Quit the application"));
@@ -557,8 +550,7 @@ void MonitorMainWindow::createMenus()
 	//
 	QMenu* pFileMenu = menuBar()->addMenu(tr("&File"));
 
-	pFileMenu->addAction(m_pSavePdfAction);
-	pFileMenu->addAction(m_pSavePngAction);
+	pFileMenu->addAction(m_pExportAction);
 	pFileMenu->addSeparator();
 	pFileMenu->addAction(m_pExitAction);
 

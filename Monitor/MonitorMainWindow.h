@@ -171,8 +171,7 @@ private:
 
 	// File menu
 	//
-	QAction* m_pSavePdfAction = nullptr;
-	QAction* m_pSavePngAction = nullptr;
+	QAction* m_pExportAction = nullptr;
 	QAction* m_pExitAction = nullptr;
 
 	// Tools menu
