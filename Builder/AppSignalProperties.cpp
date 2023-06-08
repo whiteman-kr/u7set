@@ -17,12 +17,57 @@
 	}
 
 
+void AppSignalPropertyDescription::setEnumValues(const std::vector<std::pair<int, QString>>& enumValuesVector)
+{
+	enumValues.clear();
+
+	for(const auto& p : enumValuesVector)
+	{
+		enumValues.emplace(p.first, p.second);
+	}
+}
+
+void AppSignalPropertyDescription::joinEnumValues(const std::vector<std::pair<int, QString>>& enumValuesVector)
+{
+	for(const auto& p : enumValuesVector)
+	{
+#ifdef QT_DEBUG
+		auto it = enumValues.find(p.first);
+
+		if (it != enumValues.end())
+		{
+			Q_ASSERT(p.second == it->second);
+		}
+#endif
+		enumValues.emplace(p.first, p.second);
+	}
+}
+
+bool AppSignalPropertyDescription::isEnumProperty() const
+{
+	return enumValues.size() > 0;
+}
+
+void AppSignalPropertyDescription::appendSignalID(int signalID)
+{
+	signalsWithThisProperty.insert(signalID);
+}
+
+bool AppSignalPropertyDescription::isSignalHaveProperty(int signalID) const
+{
+	return signalsWithThisProperty.contains(signalID);
+}
+
+bool AppSignalPropertyDescription::isSpecificProperty() const
+{
+	return specificProperty;
+}
+
 // -------------------------------------------------------------------------------------------------------------
 //
 // SignalSpecPropValue class implementation
 //
 // -------------------------------------------------------------------------------------------------------------
-
 
 const QString AppSignalProperties::categoryIdentification("1 Identification");
 const QString AppSignalProperties::categorySignalType("2 Signal type");

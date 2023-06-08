@@ -24,6 +24,7 @@ public:
 	};
 
 	static const E::PropertyBehaviourType defaultBehaviour = E::PropertyBehaviourType::Write;
+	static const std::map<int, QString> m_emptyEnumValuesMap;
 
 signals:
 	void propertyCountWillIncrease(int newPropertyCount);
@@ -46,7 +47,9 @@ public:
 	QString name(int propertyIndex);
 
 	QVariant value(const AppSignal* signal, int propertyIndex, bool isExpert) const;
-	const std::vector<std::pair<int, QString>> values(int propertyIndex) const;
+	bool getSignalEnumPropertyValues(const AppSignal& s, int propertyIndex,
+									 std::vector<std::pair<int, QString>>* enumValues) const;
+	bool isEnumProperty(int propertyIndex) const;
 
 	void setValue(AppSignal* signal, int propertyIndex, const QVariant& value, bool isExpert);
 
@@ -67,6 +70,11 @@ public slots:
 	void detectNewProperties(const AppSignal& signal);
 
 private:
+	void updatePropertyName2IndexMap();
+
+	int propertyIndex(const QString& propName) const;
+	int behaviourIndex(int propertyIndex) const;
+
 	bool isNotCorrect(int propertyIndex) const;
 	QString typeName(E::SignalType type, E::SignalInOutType inOutType);
 	QString typeName(int typeIndex, int inOutTypeIndex);
@@ -77,54 +85,18 @@ private:
 
 	static void trimm(QStringList& stringList);
 
-	std::vector<PropertyBehaviourDescription> m_propertyBehaviorDescription;
-	QHash<QString, int> m_propertyName2IndexMap;
-	QHash<int, int> m_propertyIndex2BehaviourIndexMap;
-
+private:
 	DbController* m_dbController;
 	QWidget* m_parentWidget;
 	static AppSignalPropertyManager* m_instance;
 
-	// is initialized by non specific properties
-	//
-	std::vector<AppSignalPropertyDescription> m_basicPropertyDescription = {
-		{ AppSignalPropNames::APP_SIGNAL_ID,
-		  AppSignalPropNames::APP_SIGNAL_ID,
-		  QMetaType::QString, {},
-		  [](const AppSignal* s){ return s->appSignalID(); },
-		  [](AppSignal* s, QVariant v){ s->setAppSignalID(v.toString()); }, },
+	static const std::vector<AppSignalPropertyDescription> m_replacedPropertyDescription;
 
-		{ AppSignalPropNames::CUSTOM_APP_SIGNAL_ID,
-		  AppSignalPropNames::CUSTOM_APP_SIGNAL_ID,
-		  QMetaType::QString, {},
-		  [](const AppSignal* s){ return s->customAppSignalID(); },
-		  [](AppSignal* s, QVariant v){ s->setCustomAppSignalID(v.toString()); }, },
-
-		{ AppSignalPropNames::EQUIPMENT_ID,
-		  AppSignalPropNames::EQUIPMENT_ID,
-		  QMetaType::QString, {},
-		  [](const AppSignal* s){ return s->equipmentID(); },
-		  [](AppSignal* s, QVariant v){ s->setEquipmentID(v.toString()); }, },
-
-		{ AppSignalPropNames::BUS_TYPE_ID,
-		  AppSignalPropNames::BUS_TYPE_ID,
-		  QMetaType::QString, {},
-		  [](const AppSignal* s){ return s->busTypeID(); },
-		  [](AppSignal* s, QVariant v){ s->setBusTypeID(v.toString()); }, },
-
-		{ AppSignalPropNames::TYPE,
-		  "A/D/B",
-		  QMetaType::QString, {},
-		  [](const AppSignal* s){ return E::valueToString<E::SignalType>(s->signalType()).left(1); },
-		  nullptr },
-
-		{ AppSignalPropNames::IN_OUT_TYPE,
-		  "Input-output type",
-		  QMetaType::Int, E::enumValues<E::SignalInOutType>(),
-		  [](const AppSignal* s){ return TO_INT(s->inOutType()); },
-		  [](AppSignal* s, QVariant v){ s->setInOutType(IntToEnum<E::SignalInOutType>(v.toInt())); }, },
-	};
 	std::vector<AppSignalPropertyDescription> m_propertyDescription;
+	std::map<QString, int> m_propertyName2IndexMap;		// propName => index in m_propertyDescription
+
+	std::vector<PropertyBehaviourDescription> m_propertyBehaviorDescription;
+	std::map<int, int> m_propertyIndex2BehaviourIndexMap;
 };
 
 class AppSignalSetProvider : public QObject
@@ -198,7 +170,7 @@ public slots:
 	void loadUsers();
 	void loadSignals();
 	void loadSignalSet(QVector<int> keys);
-	void loadSignal(int signalId);
+	const AppSignal* loadSignal(int signalId);
 
 private:
 	QString errorMessage(const ObjectState& state);	// Converts ObjectState to human readable text

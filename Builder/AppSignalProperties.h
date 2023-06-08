@@ -8,14 +8,27 @@
 
 struct AppSignalPropertyDescription
 {
+	bool specificProperty = false;
 	QString name;
 	QString caption;
 	QMetaType::Type type;
 
-	std::vector<std::pair<int, QString>> enumValues;
-
 	std::function<QVariant (const AppSignal*)> valueGetter;
 	std::function<void (AppSignal*, const QVariant&)> valueSetter;
+
+	//
+
+	std::map<int, QString> enumValues;
+	std::set<int> signalsWithThisProperty;			// set of Signal.ID
+
+	//
+
+	void setEnumValues(const std::vector<std::pair<int, QString>>& enumValuesVector);
+	void joinEnumValues(const std::vector<std::pair<int, QString>>& enumValuesVector);
+	bool isEnumProperty() const;
+	void appendSignalID(int signalID);
+	bool isSignalHaveProperty(int signalID) const;
+	bool isSpecificProperty() const;
 };
 
 class AppSignalProperties : public PropertyObject
@@ -129,7 +142,7 @@ AppSignalProperties::addPropertyDescription(const QString& name,
 	newProperty.name = name;
 	newProperty.caption = generateCaption(name);
 
-	newProperty.enumValues = E::enumValues<TYPE>();
+	newProperty.enumValues = E::enumValuesMap<TYPE>();
 	newProperty.type = QMetaType::Int;
 
 	newProperty.valueGetter = [getter](const AppSignal* s){ return TO_INT(getter(*s)); };

@@ -799,6 +799,28 @@ public:
 		return result;
 	}
 
+	// Get map of enum values and assigned String
+	//
+	template <typename ENUM_TYPE>
+	static std::map<int, QString> enumValuesMap()
+	{
+		static_assert(std::is_enum<ENUM_TYPE>::value);
+
+		static QMetaEnum me = metaEnum<ENUM_TYPE>();
+
+		std::map<int, QString> result;
+
+		int keyCount = me.keyCount();
+
+		for (int i = 0; i < keyCount; i++)
+		{
+			result.emplace(me.value(i), QString::fromLocal8Bit(me.key(i)));
+		}
+
+		return result;
+	}
+
+
 	// Get list of enum keys converted to QString
 	//
 	template <typename ENUM_TYPE>

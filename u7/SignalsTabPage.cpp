@@ -71,17 +71,23 @@ QWidget* SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		return nullptr;
 	}
 
-	m_signalSetProvider->loadSignal(m_signalSetProvider->key(row));	// update new checkedOut state on view
+	const AppSignal* appSignal = m_signalSetProvider->loadSignal(m_signalSetProvider->key(row));	// update new checkedOut state on view
 
-	auto values = manager.values(col);
+	TEST_PTR_RETURN_VALUE(appSignal, nullptr);
 
-	if (values.size() > 0)
+	if (manager.isEnumProperty(col) == true)
 	{
+		std::vector<std::pair<int, QString>> enumPropValues;
+
+		manager.getSignalEnumPropertyValues(*appSignal, col, &enumPropValues);
+
 		QComboBox* cb = new QComboBox(parent);
-		for (const auto& value : values)
+
+		for (const auto& value : enumPropValues)
 		{
 			cb->addItem(value.second, value.first);
 		}
+
 		return cb;
 	}
 
@@ -171,9 +177,7 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 	AppSignalPropertyManager& manager = m_signalSetProvider->signalPropertyManager();
 	bool isExpert = theSettings.isExpertMode();
 
-	const auto values = manager.values(col);
-
-	if (values.size() > 0)
+	if (manager.isEnumProperty(col))
 	{
 		if (cb == nullptr)
 		{
@@ -181,7 +185,8 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 			return;
 		}
 
-		cb->setCurrentIndex(cb->findData(manager.value(&s, col, isExpert)));
+		int curIndex = cb->findText(manager.value(&s, col, isExpert).toString());
+		cb->setCurrentIndex(curIndex);
 		return;
 	}
 
@@ -243,9 +248,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 	AppSignalPropertyManager& manager = m_signalSetProvider->signalPropertyManager();
 	bool isExpert = theSettings.isExpertMode();
 
-	const auto values = manager.values(col);
-
-	if (values.size() > 0)
+	if (manager.isEnumProperty(col) == true)
 	{
 		if (cb == nullptr)
 		{
