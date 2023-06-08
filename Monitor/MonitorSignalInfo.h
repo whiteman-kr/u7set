@@ -3,6 +3,7 @@
 
 #include "MonitorSignalManager.h"
 #include "../lib/Ui/DialogSignalInfo.h"
+#include "../lib/ISignalDataServer.h"
 
 class MonitorCentralWidget;
 class MonitorConfigController;
@@ -20,6 +21,7 @@ private:
 	MonitorSignalInfo(const AppSignalParam& signal,
 					  MonitorConfigController* configController,
 					  IAppSignalManager* appSignalManager,
+					  ISignalDataServer* signalDataServer,
 					  VFrame30::TuningController* tuningController,
 					  bool tuningEnabled,
 					  MonitorCentralWidget* centralWidget);
