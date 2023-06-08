@@ -14,7 +14,7 @@ qt_standard_project_setup()
 
 set(TARGET scm)
 
-add_executable(${TARGET}
+add_executable(${TARGET} WIN32
 	../AppDataService/AppDataSource.cpp
 	../AppDataService/AppDataSource.h
 	../AppDataService/DynamicAppSignalState.cpp

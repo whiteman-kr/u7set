@@ -1644,6 +1644,20 @@ void SchemaFileView::timerEvent(QTimerEvent* event)
 	return;
 }
 
+void SchemaFileView::keyPressEvent(QKeyEvent* event)
+{
+	if (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter)
+	{
+		QModelIndex currentIndex = QTreeView::currentIndex();
+		if (currentIndex.isValid())
+		{
+			slot_doubleClicked(currentIndex);
+		}
+	}
+
+	QTreeView::keyPressEvent(event);
+}
+
 std::vector<std::shared_ptr<DbFileInfo>> SchemaFileView::selectedFiles() const
 {
 	std::vector<std::shared_ptr<DbFileInfo>> result;
@@ -2203,6 +2217,30 @@ SchemaControlTabPage::SchemaControlTabPage(DbController* db, AppSignalSetProvide
 
 SchemaControlTabPage::~SchemaControlTabPage()
 {
+}
+
+namespace 
+{
+	// This needed to return the focus to the last active widget in SchemaControlTabPage when it was hidden.
+	// Mainly it is return to the schema list.
+	//
+	QWidget* s_hideEventFocusWidget = nullptr;
+}
+
+void SchemaControlTabPage::showEvent(QShowEvent* event)
+{
+	if (s_hideEventFocusWidget != nullptr)
+	{
+		s_hideEventFocusWidget->setFocus();
+	}
+
+	return;
+}
+
+void SchemaControlTabPage::hideEvent(QHideEvent* event)
+{
+	s_hideEventFocusWidget = focusWidget();
+	return;
 }
 
 bool SchemaControlTabPage::hasUnsavedSchemas() const

@@ -1,6 +1,7 @@
 #include "MonitorCentralWidget.h"
 #include "MonitorSchemaManager.h"
 #include "MonitorAppSettings.h"
+#include "MonitorSchemaView.h"
 #include "../VFrame30/MonitorSchema.h"
 
 
@@ -341,6 +342,48 @@ void MonitorCentralWidget::slot_signalContextMenu(const QStringList signalList, 
 void MonitorCentralWidget::slot_signalInfo(QString signalId)
 {
 	currentTab()->signalInfo(signalId);
+}
+
+void MonitorCentralWidget::slot_export()
+{
+	auto schema = currentTab()->monitorSchemaView()->schema();
+	if (schema == nullptr)
+	{
+		Q_ASSERT(schema);
+		return;
+	}
+	QString fileName = QFileDialog::getSaveFileName(this,
+													tr("Export Schema"),
+													schema->schemaId() + ".pdf",
+													tr("PDF Files (*.pdf);;PNG Files (*.png)"));
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
+
+	bool ok = false;
+
+	if (fileName.endsWith(".pdf", Qt::CaseInsensitive) == true)
+	{
+		ok = currentTab()->monitorSchemaView()->saveSchemaToPdf(fileName);
+	}
+	else
+	{
+		if (fileName.endsWith(".png", Qt::CaseInsensitive) == true)
+		{
+			ok = currentTab()->monitorSchemaView()->saveSchemaToPng(fileName);
+		}
+		else
+		{
+			QMessageBox::critical(this, qAppName(), tr("Wrong file '%1' format, expected '.png' or '.pdf'!").arg(fileName));
+			return;
+		}
+	}
+
+	if (ok == false)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Failed to save file '%1'!").arg(fileName));
+	}
 }
 
 void MonitorCentralWidget::slot_tabCloseRequested(int index)

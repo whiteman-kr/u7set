@@ -137,7 +137,7 @@ set (METROLOGY_FORMS
 
 set(TARGET Metrology)
 
-add_executable(${TARGET}
+add_executable(${TARGET} WIN32
 	${METROLOGY_FORMS}
 	${METROLOGY_SOURCES}
 	${METROLOGY_RESOURCES}
@@ -243,7 +243,16 @@ if (MSVC)
 		${CMAKE_CURRENT_SOURCE_DIR}/../bin_Win64/visaConfMgr.dll
 		${CMAKE_CURRENT_SOURCE_DIR}/../bin_Win64/visaUtilities.dll
 	)
-	add_custom_command(TARGET ${TARGET} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${DLL_COPY_FILE_LIST} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
+	# Get the output directory where the executable will be built
+	#
+	if (DEFINED BIN_OUT_DIR)
+		set(METROLOGY_OUTPUT_DIRECTORY ${BIN_OUT_DIR})
+	else()
+		set(METROLOGY_OUTPUT_DIRECTORY $<TARGET_FILE_DIR:${TARGET}>)
+	endif()
+
+	add_custom_command(TARGET ${TARGET} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${DLL_COPY_FILE_LIST} ${METROLOGY_OUTPUT_DIRECTORY})
 endif()
 
 

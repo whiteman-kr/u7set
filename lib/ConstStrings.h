@@ -336,6 +336,7 @@ namespace CfgFileId
 
 	inline const QString APP_DATA_SOURCES("APP_DATA_SOURCES");
 	inline const QString APP_SIGNALS("APP_SIGNALS");
+	inline const QString ACQUIRED_APP_SIGNALS("ACQUIRED_APP_SIGNALS");
 	inline const QString APP_SIGNALS_EXT("APP_SIGNALS_EXT");
 	inline const QString APP_SIGNAL_SET("APP_SIGNAL_SET");
 	inline const QString COMPARATOR_SET("COMPARATOR_SET");
@@ -440,6 +441,7 @@ namespace Directory
 namespace File
 {
 	inline const QString APP_SIGNALS_ASGS("AppSignals.asgs");
+	inline const QString ACQUIRED_APP_SIGNALS_ASGS("AcquiredAppSignals.asgs");
 	inline const QString APP_SIGNALS_XML("AppSignals.xml");
 	inline const QString APP_SIGNALS_EXT_XML("AppSignalsExt.xml");
 	inline const QString COMPARATORS_SET("Comparators.set");

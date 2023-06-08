@@ -347,10 +347,6 @@ void MainWindow::createActions()
 	m_manualRpctAppendixBAction->setStatusTip(tr("Show Appendix B - Build Directory and Output Bitstream File"));
 	connect(m_manualRpctAppendixBAction, &QAction::triggered, this, &MainWindow::showRpctUserManualAppendixB);
 
-	m_manualRpctAppendixCAction = new QAction(tr("Appendix C - JavaScript Manual"), this);
-	m_manualRpctAppendixCAction->setStatusTip(tr("Show Appendix C - JavaScript Manual"));
-	connect(m_manualRpctAppendixCAction, &QAction::triggered, this, &MainWindow::showRpctUserManualAppendixC);
-
 	m_manualAfblAction = new QAction(tr("AFB Library Reference"), this);
 	m_manualAfblAction->setStatusTip(tr("Show AFB Library Reference"));
 	connect(m_manualAfblAction, &QAction::triggered, this, &MainWindow::showAfblReference);
@@ -571,7 +567,6 @@ void MainWindow::createMenus()
 	QMenu* pRpctAppendixesMenu = pHelpMenu->addMenu(tr("RPCT User Manual Appendixes"));
 	pRpctAppendixesMenu->addAction(m_manualRpctAppendixAAction);
 	pRpctAppendixesMenu->addAction(m_manualRpctAppendixBAction);
-	pRpctAppendixesMenu->addAction(m_manualRpctAppendixCAction);
 
 	pHelpMenu->addSeparator();
 
@@ -761,11 +756,6 @@ void MainWindow::showRpctUserManualAppendixA()
 void MainWindow::showRpctUserManualAppendixB()
 {
 	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/Appendixes/D11.6 RPCT User Manual Appendix B Build Directory and Output Bitstream File Description.pdf", this);
-}
-
-void MainWindow::showRpctUserManualAppendixC()
-{
-	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/Appendixes/D11.6 RPCT User Manual Appendix C JavaScript Manual.pdf", this);
 }
 
 void MainWindow::showAfblReference()

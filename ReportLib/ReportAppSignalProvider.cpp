@@ -114,6 +114,17 @@ namespace ReportLib
 		return result;
 	}
 
+	AppSignalState ReportAppSignalProvider::signalState(Hash signalHash, Hash /*dataServerHash*/, bool* found) const
+	{
+		return signalState(signalHash, found);
+	}
+
+	AppSignalState ReportAppSignalProvider::signalState(const QString& appSignalId, const QString& /*dataServerId*/, bool* found) const
+	{
+		return signalState(appSignalId, found);
+
+	}
+
 	void ReportAppSignalProvider::signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const
 	{
 		// Unlikely this function required for schema editing
@@ -155,6 +166,17 @@ namespace ReportLib
 
 		return;
 	}
+
+	void ReportAppSignalProvider::signalState(const std::vector<Hash>& appSignalHashes, Hash /*dataServerHash*/, std::vector<AppSignalState>* result, int* found) const
+	{
+		signalState(appSignalHashes, result, found);
+	}
+
+	void ReportAppSignalProvider::signalState(const std::vector<QString>& appSignalIds, const QString& /*dataServerId*/, std::vector<AppSignalState>* result, int* found) const
+	{
+		signalState(appSignalIds, result, found);
+	}
+
 
 	QStringList ReportAppSignalProvider::signalTags(Hash signalHash) const
 	{

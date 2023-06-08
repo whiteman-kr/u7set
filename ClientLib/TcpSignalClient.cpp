@@ -455,7 +455,7 @@ namespace ClientLib
 			Q_ASSERT(state.hash() != 0);
 		}
 
-		m_signalUpdater.setState(states, QThread::currentThreadId());
+		m_signalUpdater.setState(states, ::calcHash(m_serverSettings.equipmentId), QThread::currentThreadId());
 
 		if (m_getSignalStateChangesReply.pendingstatescount() >= ADS_GET_APP_SIGNAL_STATE_MAX)
 		{
@@ -531,7 +531,7 @@ namespace ClientLib
 			Q_ASSERT(state.m_hash != 0);
 		}
 
-		m_signalUpdater.setState(states, QThread::currentThreadId());
+		m_signalUpdater.setState(states, ::calcHash(m_serverSettings.equipmentId), QThread::currentThreadId());
 
 		resetToGetState(false);
 		return;

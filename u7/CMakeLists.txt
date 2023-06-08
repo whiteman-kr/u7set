@@ -337,7 +337,7 @@ endif (MSVC)
 
 set(TARGET u7)
 
-add_executable(${TARGET}
+add_executable(${TARGET} WIN32
 	${U7_FORMS}
 	${U7_SOURCES}
 	${U7_RESOURCES}
