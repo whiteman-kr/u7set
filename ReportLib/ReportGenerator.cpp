@@ -11,7 +11,8 @@ namespace ReportLib
 	bool ReportGenerator::generate(QBuffer& buffer, std::atomic_bool& stop)
 	{
 		Report report{"ProjectName", m_template.caption()};
-        report.setResolution(300);
+		report.setResolution(m_template.resolution());
+		report.setPageLayout(m_template.pageLayout());
 
 		// Add margins
 

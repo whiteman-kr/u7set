@@ -129,7 +129,17 @@ void ReportPropertyEditor::fillObjectsTree()
 
     for (const ReportLib::ReportTemplate& templ : storage.templates())
     {
-		QTreeWidgetItem* templateItem = new QTreeWidgetItem(QStringList() << "Report" << templ.caption());
+		const QPageLayout& pl = templ.pageLayout();
+		QString formatStr = QString("%1,%2,[L%3,T%4,R%5,B%6]").
+				arg(pl.pageSize().name())
+				.arg(pl.orientation() == QPageLayout::Orientation::Portrait ? "Portrait" : "Landscape")
+				.arg(pl.margins().left())
+				.arg(pl.margins().top())
+				.arg(pl.margins().right())
+				.arg(pl.margins().bottom());
+
+
+		QTreeWidgetItem* templateItem = new QTreeWidgetItem(QStringList() << "Report" << templ.caption() << formatStr);
         m_treeWidget->addTopLevelItem(templateItem);
 
 		// Header

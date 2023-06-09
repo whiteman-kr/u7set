@@ -486,12 +486,88 @@ namespace ReportLib
 
 	bool ReportTemplate::load(QXmlStreamReader& reader)
 	{
+		// Load basic attributes
+
         if (reader.attributes().hasAttribute("Caption"))
         {
             m_caption = reader.attributes().value("Caption").toString();
         }
 
-        while (reader.readNextStartElement())
+		if (reader.attributes().hasAttribute("Resolution"))
+		{
+			bool ok = false;
+			m_resolution = reader.attributes().value("Resolution").toInt(&ok);
+			if (ok == false)
+			{
+				reader.raiseError(QObject::tr("Failed to load ReportTemplate element - unknown Resolution."));
+				return false;
+			}
+		}
+
+		// Load page layout
+
+		QPageSize pageSize(QPageSize::A4);
+		QPageLayout::Orientation orientation(QPageLayout::Portrait);
+		QMarginsF margins(25, 20, 15, 20);
+
+		if (reader.attributes().hasAttribute("PageSize"))
+		{
+			QString strPageSize = reader.attributes().value("PageSize").toString();
+
+			if (strPageSize == "A4")
+			{
+				pageSize = QPageSize::A4;
+			}
+			else
+			{
+				if (strPageSize == "A3")
+				{
+					pageSize = QPageSize::A3;
+				}
+				else
+				{
+					reader.raiseError(QObject::tr("Failed to load ReportTemplate element - unknown PageSize (A4 or A3 expected)."));
+					return false;
+				}
+			}
+
+		}
+		if (reader.attributes().hasAttribute("Orientation"))
+		{
+			if (reader.attributes().value("Orientation").toString().compare("Landscape", Qt::CaseInsensitive) == 0)
+			{
+				orientation = QPageLayout::Landscape;
+			}
+		}
+
+		if (reader.attributes().hasAttribute("Margins"))
+		{
+			QStringList marginsList = reader.attributes().value("Margins").toString().split(',', Qt::SkipEmptyParts);
+			if (marginsList.size() != 4)
+			{
+				reader.raiseError(QObject::tr("Failed to load ReportTemplate element - Margins should have 4 numbers (e.g. \"left,top,right,bottom\")."));
+				return false;
+			}
+			bool ok[4] = {false};
+			int left = marginsList[0].toInt(&ok[0]);
+			int top = marginsList[1].toInt(&ok[1]);
+			int right = marginsList[2].toInt(&ok[2]);
+			int bottom = marginsList[3].toInt(&ok[3]);
+			if ((ok[0] && ok[1] && ok[2] && ok[3]) != true)
+			{
+				reader.raiseError(QObject::tr("Failed to load ReportTemplate element - incorrect Margins format (e.g. \"30,20,15,20\")."));
+				return false;
+			}
+
+#define mm2p(x) ((x) / 10.0 / 2.54 * 72)
+			margins = QMarginsF(mm2p(left), mm2p(top), mm2p(right), mm2p(bottom));
+		}
+
+		m_pageLayout = QPageLayout(pageSize, orientation, margins);
+
+		// Load contents
+
+		while (reader.readNextStartElement())
         {
 			if(reader.name() == QLatin1String("Section"))
 			{
@@ -544,7 +620,17 @@ namespace ReportLib
 		return true;
 	}
 
-    const QString& ReportTemplate::caption() const
+	const QPageLayout& ReportTemplate::pageLayout() const
+	{
+		return m_pageLayout;
+	}
+
+	int ReportTemplate::resolution() const
+	{
+		return m_resolution;
+	}
+
+	const QString& ReportTemplate::caption() const
     {
         return m_caption;
     }

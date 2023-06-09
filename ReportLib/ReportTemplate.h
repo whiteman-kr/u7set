@@ -89,7 +89,10 @@ namespace ReportLib
 
 		bool load(QXmlStreamReader& reader);
 
-        const QString& caption() const;
+		const QPageLayout& pageLayout() const;
+		int resolution() const;
+
+		const QString& caption() const;
 		const SectionTemplate& header() const;
 		const SectionTemplate& footer() const;
 		//const SectionTemplate& pageHeader() const;
@@ -99,6 +102,11 @@ namespace ReportLib
 		const std::vector<MarginTemplate>& margins() const;
 
 	private:
+		QPageLayout m_pageLayout = QPageLayout(QPageSize(QPageSize::A4),
+											   QPageLayout::Orientation::Portrait,
+											   QMarginsF(15, 15, 15, 15));
+		int m_resolution = 300;
+
         QString m_caption;
 
 		SectionTemplate m_reportHeader;

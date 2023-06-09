@@ -279,6 +279,29 @@ namespace ReportLib
 
 		QPainter painter(&pdfWriter);
 
+//#define DEBUG_PRINT_PAGE_RECT	//	Uncomment this for debug
+#ifdef DEBUG_PRINT_PAGE_RECT
+		auto fullRect = report.pageLayout().fullRectPixels(report.resolution());
+
+		auto pageRect = report.pageLayout().paintRectPixels(report.resolution());
+
+		painter.save();
+
+		painter.translate(-pageRect.left(), -pageRect.top());
+
+		painter.fillRect(fullRect, Qt::lightGray);
+
+		painter.restore();
+
+		painter.save();
+
+		painter.translate(-pageRect.left(), -pageRect.top());
+
+		painter.fillRect(pageRect, Qt::gray);
+
+		painter.restore();
+#endif
+
 		// Render all objects to print objects
 		//
 
@@ -457,22 +480,25 @@ namespace ReportLib
 
 		const QRect pageRect = pdfWriter.pageLayout().paintRectPixels(resolution);
 
-		QMargins margins = pdfWriter.pageLayout().marginsPixels(resolution);
+		//QMargins margins = pdfWriter.pageLayout().marginsPixels(resolution);
 
-		QRect topRect(fullPageRect.left() + margins.left() / 2,
+		QRect topRect(pageRect.left(),
 					  fullPageRect.top(),
-					  pageRect.width() + (margins.left() + margins.right()) / 2,
+					  pageRect.width()/* + (margins.left() + margins.right()) / 2*/,
 					  abs(pageRect.top() - fullPageRect.top()));
 
-		QRect bottomRect(fullPageRect.left() + margins.left() / 2,
+		QRect bottomRect(pageRect.left()/* + margins.left() / 2*/,
 						 pageRect.bottom(),
-						 pageRect.width() + (margins.left() + margins.right()) / 2,
+						 pageRect.width()/* + (margins.left() + margins.right()) / 2*/,
 						 abs(pageRect.bottom() - fullPageRect.bottom()));
 
 		painter.save();
 
 		painter.translate(-pageRect.left(), -pageRect.top());
 
+#ifdef DEBUG_PRINT_PAGE_RECT
+		bool first = true;
+#endif
 		for (const ReportMarginItem& item : marginItems)
 		{
 			if (item.pageFrom != -1 && item.pageFrom > page)
@@ -498,8 +524,14 @@ namespace ReportLib
 
 			painter.setFont(item.format.font());
 
-			//painter.fillRect(topRect, Qt::green);
-			//painter.fillRect(bottomRect, Qt::yellow);
+#ifdef DEBUG_PRINT_PAGE_RECT
+			if (first == true)
+			{
+				painter.fillRect(topRect, Qt::green);
+				painter.fillRect(bottomRect, Qt::yellow);
+				first = false;
+			}
+#endif
 
 			QFontMetrics fm(item.format.font());
 			QRect textBoundingRect = fm.boundingRect(text);
@@ -510,7 +542,7 @@ namespace ReportLib
 				if (topRect.width() >= textBoundingRect.width() && topRect.height() >= textBoundingRect.height())
 				{
 					int alignment = itemAlignment & ~Qt::AlignTop;
-					painter.drawText(topRect, alignment | Qt::AlignVCenter, text);
+					painter.drawText(topRect, alignment | Qt::AlignBottom, text + "\n");
 				}
 			}
 			else
@@ -520,7 +552,7 @@ namespace ReportLib
 					if (bottomRect.width() >= textBoundingRect.width() && bottomRect.height() >= textBoundingRect.height())
 					{
 						int alignment = itemAlignment & ~Qt::AlignBottom;
-						painter.drawText(bottomRect, alignment | Qt::AlignVCenter, text);
+						painter.drawText(bottomRect, alignment | Qt::AlignTop, "\n" + text);
 					}
 				}
 			}
