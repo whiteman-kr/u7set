@@ -91,4 +91,15 @@ namespace TestSuite
 
 		ITestLogOutput* m_logOutput = nullptr;
 	};
+
+	class TestLogStub : public ITestLog
+	{
+	public:
+		virtual ~TestLogStub() = default;
+		virtual void writeError(const QString& /*text*/, const QString& /*tag*/) override {}
+		virtual void writeWarning(const QString& /*text*/, const QString& /*tag*/) override {}
+		virtual void writeMessage(const QString& /*text*/, const QString& /*tag*/) override {}
+		virtual void writeText(const QString& /*text*/, const QString& /*tag*/) override {}
+	};
+
 }

@@ -21,6 +21,10 @@ namespace TestSuite
 		//		loadTestsFromPath();
 		//	}
 
+		connect(&m_control, &Control::testFinished, [this](QString scriptFileName, QString testFunction, bool result){
+			emit testFinished(scriptFileName, testFunction, result);
+		});
+
 		connect(&m_control, &Control::finished, this, &TestSuite::finished);
 		return;
 	}
@@ -52,7 +56,7 @@ namespace TestSuite
 
 	bool TestSuite::execute(const QStringList& scriptsFiles,		// List of script files for execution, if empty then exec all.
 							const QString& scriptsPath,				// Load scripts from disk, path to dir for *.js files.
-							const QString& testsFilter)				// Tests filter
+							const TestScriptFilter& testsFilter)				// Tests filter
 	{
 		m_testLog.clear();
 

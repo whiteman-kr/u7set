@@ -24,7 +24,7 @@ namespace TestSuite
 									  const TestSuiteSettings& settings,
 									  const QStringList& scriptsFiles,		// List of script files for execution, if empty then exec all.
 									  const QString& scriptsPath,			// Load scripts from disk, path to dir for *.js files.)
-									  const QString& testsFilter)			// Tests filter
+									  const TestScriptFilter& testsFilter)			// Tests filter
 	{
 		Q_ASSERT(isRunning() == false);
 
@@ -299,6 +299,11 @@ namespace TestSuite
 			m_appLog.writeMessage(logMessage);
 
 			ScriptRunner scriptRunner{testController, *m_testLog, m_status, m_statusMutex};
+
+			connect(&scriptRunner, &ScriptRunner::testFinished, [this](QString scriptFileName, QString testFunction, bool result){
+				emit testFinished(scriptFileName, testFunction, result);
+			});
+
 			fileTestResult &= scriptRunner.runScript(*script, m_testsFilter);
 		}
 
@@ -335,6 +340,10 @@ namespace TestSuite
 			emit finished(m_controlThread.result());
 		});
 
+		connect(&m_controlThread, &ControlThread::testFinished, [this](QString scriptFileName, QString testFunction, bool result){
+			emit testFinished(scriptFileName, testFunction, result);
+		});
+
 		return;
 	}
 
@@ -342,7 +351,7 @@ namespace TestSuite
 						  const TestSuiteSettings& settings,
 						  const QStringList& scriptsFiles,		// List of script files for execution, if empty then exec all.
 						  const QString& scriptsPath,			// Load scripts from disk, path to dir for *.js files.
-						  const QString& testsFilter)			// Tests filter
+						  const TestScriptFilter& testsFilter)			// Tests filter
 	{
 		if (isRunning() == true)
 		{

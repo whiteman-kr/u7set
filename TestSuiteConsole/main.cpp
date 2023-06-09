@@ -389,7 +389,9 @@ int main(int argc, char* argv[])
 
 	// Run tests.
 	//
-	ok = testSuite.execute({}, args.scriptsPath, args.testsFilter);
+	TestSuite::TestScriptFilter filter(args.testsFilter);
+
+	ok = testSuite.execute({}, args.scriptsPath, filter);
 	if (ok == false)
 	{
 		return EXIT_FAILURE;

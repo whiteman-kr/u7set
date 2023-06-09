@@ -4,6 +4,23 @@
 
 namespace TestSuite
 {
+	class TestScriptFilter
+	{
+	public:
+		TestScriptFilter() = default;
+		explicit TestScriptFilter(const QString& testMasks);
+
+		const QStringList& testMasks() const;
+
+		QStringList scriptFiles() const;
+		const QStringList& testFunctions(const QString& scriptName) const;
+		void setTestFunctions(const QString& scriptName, const QStringList& functons);
+
+	private:
+		QStringList m_testMasks;
+		std::map<QString, QStringList> m_testFunctions;	// Key is script filename, value is list of functions
+	};
+
 	class TestScript
 	{
 	public:
@@ -50,6 +67,7 @@ namespace TestSuite
 		//std::vector<TestScript>& scripts();
 		const std::vector<TestScript>& scripts() const;
 		const TestScript& script(Hash hash) const;
+		const TestScript& script(int index) const;
 
 		qsizetype count() const;
 		QStringList scriptList() const;

@@ -55,6 +55,7 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 	createStatusBar();
 
 	connect(&m_configController, &TestSuite::TestSuiteConfigController::configurationArrived, this, &TestSuiteMainWindow::onConfigurationArrived);
+	connect(&m_testSuite, &TestSuite::TestSuite::testFinished, m_testListWidget, &TestListWidget::onTestFinished);
 	connect(&m_testSuite, &TestSuite::TestSuite::finished, this, &TestSuiteMainWindow::onTestingFinished);
 
 	// Logs
@@ -553,7 +554,7 @@ void TestSuiteMainWindow::clearTestsTree()
 
 void TestSuiteMainWindow::fillTestsTree()
 {
-	m_testListWidget->updateTestsList(m_testScriptsStorage.scriptList());
+	m_testListWidget->updateTestsList(m_testScriptsStorage);
 }
 
 void TestSuiteMainWindow::createReportActions()
@@ -715,6 +716,19 @@ bool TestSuiteMainWindow::eventFilter(QObject *object, QEvent *event)
 	return QWidget::eventFilter(object, event);
 }
 
+void TestSuiteMainWindow::closeEvent(QCloseEvent* event)
+{
+	if (m_testSuite.isRunning() == true)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Please stop testing before closing the application."));
+
+		event->ignore();
+		return;
+	}
+
+	event->accept();
+}
+
 void TestSuiteMainWindow::timerEvent(QTimerEvent* event)
 {
 	assert(event);
@@ -744,8 +758,10 @@ void TestSuiteMainWindow::on_m_run_clicked()
 
 	// Create a list of tests user has selected to run
 	//
-	QStringList scriptsFiles = m_testListWidget->selectedTests();
+	TestSuite::TestScriptFilter filter;
+	m_testListWidget->fillTestScriptFilter(filter);
 
+	QStringList scriptsFiles = filter.scriptFiles();
 	if (scriptsFiles.isEmpty() == true)
 	{
 		QMessageBox::warning(this, qAppName(), tr("Please choose at least one test to run."));
@@ -754,12 +770,16 @@ void TestSuiteMainWindow::on_m_run_clicked()
 
 	m_testSuite.testLog().clear();
 	m_testLogTabPage->clearOutputWidget();
+	m_testListWidget->clearTestsResults();
 
 	m_tabWidget->setCurrentIndex(0);
 
+
 	// Run tests
 	//
-	bool ok = m_testSuite.execute(scriptsFiles, theSettings.useLocalScriptsPath() ? theSettings.localScriptsPath() : QString(), {}/*testsFilter*/);
+	bool ok = m_testSuite.execute(scriptsFiles,
+								  theSettings.useLocalScriptsPath() ? theSettings.localScriptsPath() : QString(),
+								  filter);
 	if (ok == false)
 	{
 		return;

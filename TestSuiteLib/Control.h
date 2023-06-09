@@ -27,13 +27,16 @@ namespace TestSuite
 						   const TestSuiteSettings& settings,
 						   const QStringList& scriptsFiles,		// List of script files for execution, if empty then exec all.
 						   const QString& scriptsPath,			// Load scripts from disk, path to dir for *.js files.
-						   const QString& testsFilter);			// Tests filter
+						   const TestScriptFilter& testsFilter);			// Tests filter
 
 		int result() const;
 
 		ControlStatus status() const;
 
 		ReportLib::ReportTemplateStorage reportTemplates() const;	// Returns templates received by taskCfgServiceConnection
+
+	signals:
+		void testFinished(QString scriptFileName, QString testFunction, bool result);
 
 	protected:
 		virtual void run() override;
@@ -58,7 +61,7 @@ namespace TestSuite
 
 		QStringList m_scriptsToRun;		// List of script files for execution, if empty then exec all.
 		QString m_scriptsPath;			// Load scripts from disk, path to dir for *.js files.
-		QString m_testsFilter;			// Tests filter
+		TestScriptFilter m_testsFilter;		// Tests filter
 
 		// --
 		//
@@ -91,7 +94,7 @@ namespace TestSuite
 					 const TestSuiteSettings& settings,
 					 const QStringList& scriptsFiles,
 					 const QString& scriptsPath,
-					 const QString& testsFilter);
+					 const TestScriptFilter& testsFilter);
 		bool stop();
 		bool isRunning() const;
 
@@ -100,6 +103,7 @@ namespace TestSuite
 		ReportLib::ReportTemplateStorage reportTemplates() const;	// Returns templates received by taskCfgServiceConnection
 
 	signals:
+		void testFinished(QString scriptFileName, QString testFunction, bool result);
 		void finished(int result);
 
 	private:

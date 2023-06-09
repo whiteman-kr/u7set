@@ -40,7 +40,7 @@ namespace TestSuite
 
 		bool execute(const QStringList& scriptsFiles,		// List of script files for execution, if empty then exec all.
 					 const QString& scriptsPath,			// Load scripts from disk, path to dir for *.js files.
-					 const QString& testsFilter);			// Tests filter
+					 const TestScriptFilter& testsFilter);			// Tests filter
 		void stop();
 
 		bool isRunning() const;
@@ -52,6 +52,7 @@ namespace TestSuite
 		ReportLib::ReportTemplateStorage reportTemplates() const;	// Returns templates received by taskCfgServiceConnection in Control thread
 
 	signals:
+		void testFinished(QString scriptFileName, QString testFunction, bool result);
 		void finished(int result);
 
 //	private:

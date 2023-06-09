@@ -32,7 +32,12 @@ namespace TestSuite
 		qDebug() << "ScriptRunner::~ScriptRunner()";
 	}
 
-	bool ScriptRunner::runScript(const TestScript& script, const QString& functionsFilter)
+	bool ScriptRunner::getScriptTestFunctions(const TestScript& script, QStringList& functionsList, QString& errorMsg)
+	{
+		return evaluateScript(script, {}, functionsList, errorMsg);
+	}
+
+	bool ScriptRunner::runScript(const TestScript& script, const TestScriptFilter& filter)
 	{
 		{
 			QMutexLocker l(&m_statusMutex);
@@ -40,27 +45,23 @@ namespace TestSuite
 			m_status.m_testFunction = "evaluate";
 		}
 
-		qDebug() << "ScriptRunner::runScript(), script file: " << script.fileName();
+		// Evaluate script
 
-		m_scriptTestLog.writeMessage(tr("********** Start testing of %1 **********").arg(script.fileName()));
-
-		// Evaluate script.
-		//
-		QJSValue scriptValue = m_jsEngine.evaluate(script.script());
-
-		if (scriptValue.isError() == true)
+		QString errorMsg;
+		QStringList functionsList;
+		if (evaluateScript(script, filter, functionsList, errorMsg) == false)
 		{
-			m_scriptTestLog.writeError(tr("Script %1 evaluate error at line %2\n"
-										  "\tClass: %3\n"
-										  "\tStack: %4\n"
-										  "\tMessage: %5")
-									   .arg(script.fileName())
-									   .arg(scriptValue.property("lineNumber").toInt())
-									   .arg(metaObject()->className())
-									   .arg(scriptValue.property("stack").toString())
-									   .arg(scriptValue.toString()));
+			m_scriptTestLog.writeError(errorMsg);
 			return false;
 		}
+
+		// Exit if no functions to run in this file
+		if (functionsList.empty() == true)
+		{
+			return true;
+		}
+
+		m_scriptTestLog.writeMessage(tr("********** Start test script %1 **********").arg(script.fileName()));
 
 		// initTestCase() - will be called before the first test function is executed.
 		// cleanupTestCase() - will be called after the last test function was executed.
@@ -84,57 +85,14 @@ namespace TestSuite
 			return false;
 		}
 
-		// Find all functions which starts from 'test', like 'testTgnAboveTNom(), using filter'
-		//
-		QStringList testList;
-
-		QStringList testFunctionFilters = functionsFilter.split(';', Qt::SkipEmptyParts);
-
-		QJSValueIterator it(m_jsEngine.globalObject());
-		while (it.hasNext() == true)
-		{
-			it.next();
-
-			if (it.name().startsWith("test"))
-			{
-				bool filterMatch = true;
-
-				// Process test function filter
-				//
-				for (const QString& filter : testFunctionFilters)
-				{
-					bool matchValue = filter.startsWith('-') == false;	// Should match if no '-', otherwise should NOT match
-
-					QRegularExpression rx(QRegularExpression::wildcardToRegularExpression(
-											  matchValue ? filter : filter.right(filter.length() - 1)));
-
-					if(rx.match(it.name()).hasMatch() != matchValue)
-					{
-						filterMatch = false;
-						break;
-					}
-				}
-
-				// Add function for execution
-				//
-				if (filterMatch == true)
-				{
-					testList.push_back(it.name());
-				}
-			}
-		}
-
-		std::sort(testList.begin(), testList.end());
-
 		{
 			QMutexLocker l(&m_statusMutex);
 			m_status.m_testIndex = 0;
-			m_status.m_testCount = testList.size();
+			m_status.m_testCount = functionsList.size();
 		}
 
-
 		int failed = 0;
-		for (const QString& testFunc : testList)
+		for (const QString& testFunc : functionsList)
 		{
 			{
 				QMutexLocker l(&m_statusMutex);
@@ -151,8 +109,8 @@ namespace TestSuite
 				break;
 			}
 
-			if (bool testOk = runScriptFunction(testFunc);
-				testOk == true)
+			bool testOk = runScriptFunction(testFunc);
+			if (testOk == true)
 			{
 				m_scriptTestLog.writeMessage(testFunc + ": ok");
 			}
@@ -165,10 +123,17 @@ namespace TestSuite
 
 			// cleanup() - called after every test function.
 			//
-			if (bool cleanupOk = runScriptFunction("cleanup");
-				cleanupOk == false)
+			bool cleanupOk = runScriptFunction("cleanup");
+			if (cleanupOk == false)
 			{
 				m_scriptTestLog.writeError(testFunc + ": cleanup() failed, test terminated.");
+				break;
+			}
+
+			emit testFinished(script.fileName(), testFunc, testOk);
+
+			if (cleanupOk == false)
+			{
 				break;
 			}
 		}
@@ -190,16 +155,96 @@ namespace TestSuite
 
 		if (failed == 0)
 		{
-			m_scriptTestLog.writeMessage(tr("Totals: %1 tests, %2 failed, %3ms").arg(testList.size()).arg(failed).arg(elapsedMsTotal));
+			m_scriptTestLog.writeMessage(tr("Totals: %1 tests, %2 failed, %3ms").arg(functionsList.size()).arg(failed).arg(elapsedMsTotal));
 		}
 		else
 		{
-			m_scriptTestLog.writeError(tr("Totals: %1 tests, %2 failed, %3ms").arg(testList.size()).arg(failed).arg(elapsedMsTotal));
+			m_scriptTestLog.writeError(tr("Totals: %1 tests, %2 failed, %3ms").arg(functionsList.size()).arg(failed).arg(elapsedMsTotal));
 		}
 
-		m_scriptTestLog.writeMessage(tr("********** Finished testing of %1 **********").arg(script.fileName()));
+		m_scriptTestLog.writeMessage(tr("********** Finished test script %1 **********").arg(script.fileName()));
 
 		return failed == 0;
+	}
+
+	bool ScriptRunner::evaluateScript(const TestScript& script, const TestScriptFilter& filter, QStringList& functionsList, QString& errorMsg)
+	{
+		// Evaluate script.
+		//
+		QJSValue scriptValue = m_jsEngine.evaluate(script.script());
+
+		if (scriptValue.isError() == true)
+		{
+			errorMsg = tr("Script %1 evaluate error at line %2\n"
+						  "\tClass: %3\n"
+						  "\tStack: %4\n"
+						  "\tMessage: %5")
+					.arg(script.fileName())
+					.arg(scriptValue.property("lineNumber").toInt())
+					.arg(metaObject()->className())
+					.arg(scriptValue.property("stack").toString())
+					.arg(scriptValue.toString());
+			return false;
+		}
+
+		// Find all functions which starts from 'test', like 'testTgnAboveTNom(), using filter'
+		//
+		QJSValueIterator it(m_jsEngine.globalObject());
+		while (it.hasNext() == true)
+		{
+			it.next();
+
+			QString functionName = it.name();
+
+			if (functionName.startsWith("test"))
+			{
+				bool filterMatch = true;
+
+				// Process function list filter
+				//
+				const QStringList& functions = filter.testFunctions(script.fileName());
+				if (functions.empty() == false)
+				{
+					if (std::find(functions.begin(), functions.end(), functionName) == functions.end())
+					{
+						filterMatch = false;
+					}
+				}
+
+				if (filterMatch == false)
+				{
+					continue;
+				}
+
+				// Process function mask filter
+				//
+				for (const QString& mask : filter.testMasks())
+				{
+					bool matchValue = mask.startsWith('-') == false;	// Should match if no '-', otherwise should NOT match
+
+					QRegularExpression rx(QRegularExpression::wildcardToRegularExpression(
+											  matchValue ? mask : mask.right(mask.length() - 1)));
+
+					if(rx.match(functionName).hasMatch() != matchValue)
+					{
+						filterMatch = false;
+					}
+				}
+
+				if (filterMatch == false)
+				{
+					continue;
+				}
+
+				// Add function for execution
+				//
+				functionsList.push_back(functionName);
+			}
+		}
+
+		std::sort(functionsList.begin(), functionsList.end());
+
+		return true;
 	}
 
 	bool ScriptRunner::runScriptFunction(const QString& functionName)
