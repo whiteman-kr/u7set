@@ -37,7 +37,7 @@ SignalsDelegate::SignalsDelegate(AppSignalSetProvider* signalSetProvider, Signal
 	connect(this, &QAbstractItemDelegate::closeEditor, this, &SignalsDelegate::onCloseEditorEvent);
 }
 
-QWidget* SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
+QWidget* SignalsDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
 	int col = index.column();
 	int row = m_proxyModel->mapToSource(index).row();
@@ -47,6 +47,14 @@ QWidget* SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 	const AppSignal& s = m_signalSetProvider->getLoadedSignal(row);
 
 	AppSignalPropertyManager& manager = m_signalSetProvider->signalPropertyManager();
+
+	const AppSignalPropertyDescription& propDesc = manager.getPropertyDescription(col);
+
+	if (AppSignalProperties::isPropertyExists(s, propDesc.name) == false)
+	{
+		return nullptr;
+	}
+
 	manager.reloadPropertyBehaviour();
 
 	bool isExpert = theSettings.isExpertMode();
@@ -126,7 +134,8 @@ QWidget* SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 	case QMetaType::Bool:
 	{
 		QComboBox* cb = new QComboBox(parent);
-		cb->addItems(QStringList() << tr("False") << tr("True"));
+		cb->addItem("false", false);
+		cb->addItem("true", true);
 		return cb;
 	}
 	default:
@@ -151,17 +160,21 @@ QWidget* SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 	}
 }
 
-void SignalsDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const
+void SignalsDelegate::updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
+	Q_UNUSED(index);
+
 	editor->setGeometry(option.rect);
+
 	QComboBox* cb = dynamic_cast<QComboBox*>(editor);
+
 	if (cb != nullptr)
 	{
 		cb->showPopup();
 	}
 }
 
-void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
+void SignalsDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
 {
 	int col = index.column();
 	int row = m_proxyModel->mapToSource(index).row();
@@ -200,7 +213,7 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 			return;
 		}
 
-		cb->setCurrentIndex(manager.value(&s, col, isExpert).toBool());
+		cb->setCurrentIndex(cb->findData(manager.value(&s, col, isExpert).toBool()));
 		return;
 	}
 
@@ -232,8 +245,10 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 	}
 }
 
-void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const QModelIndex &index) const
+void SignalsDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
 {
+	Q_UNUSED(model);
+
 	int col = index.column();
 	int row = m_proxyModel->mapToSource(index).row();
 	if (row >= m_signalSetProvider->signalCount())
@@ -279,7 +294,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 			return;
 		}
 
-		manager.setValue(&s, col, cb->currentIndex(), isExpert);
+		manager.setValue(&s, col, cb->currentData(), isExpert);
 		m_signalSetProvider->saveSignal(s);
 		signalIdForUndoOnCancelEditing = -1;
 		return;
@@ -353,8 +368,13 @@ void SignalsDelegate::onCloseEditorEvent(QWidget*, QAbstractItemDelegate::EndEdi
 	}
 }
 
-bool SignalsDelegate::editorEvent(QEvent *event, QAbstractItemModel *, const QStyleOptionViewItem &, const QModelIndex &)
+bool SignalsDelegate::editorEvent(QEvent* event, QAbstractItemModel* model,
+								  const QStyleOptionViewItem& option, const QModelIndex& index)
 {
+	Q_UNUSED(model);
+	Q_UNUSED(option);
+	Q_UNUSED(index);
+
 	if (event->type() == QEvent::MouseButtonDblClick)
 	{
 		emit itemDoubleClicked();
@@ -384,7 +404,6 @@ SignalsModel::~SignalsModel()
 {
 
 }
-
 
 int SignalsModel::rowCount(const QModelIndex& parentIndex) const
 {

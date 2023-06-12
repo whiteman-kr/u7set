@@ -1,103 +1,9 @@
 #pragma once
+
 #include "../AppSignalLib/AppSignalParam.h"
 #include "../Builder/SignalSet.h"
-#include "../Builder/AppSignalProperties.h"
-#include "../DbLib/DbStruct.h"
-
-#define SIGNAL_TYPE_COUNT (QMetaEnum::fromType<E::SignalType>().keyCount())
-#define IN_OUT_TYPE_COUNT (QMetaEnum::fromType<E::SignalInOutType>().keyCount())
-#define TOTAL_SIGNAL_TYPE_COUNT (SIGNAL_TYPE_COUNT * IN_OUT_TYPE_COUNT)
-
-class DbController;
-
-class AppSignalPropertyManager : public QObject
-{
-	Q_OBJECT
-public:
-	struct PropertyBehaviourDescription
-	{
-		QString name;
-		bool dependsOnPrecision = false;
-		std::vector<E::PropertyBehaviourType> behaviourType = std::vector<E::PropertyBehaviourType>(
-					static_cast<size_t>(TOTAL_SIGNAL_TYPE_COUNT),
-					E::PropertyBehaviourType::Write);
-	};
-
-	static const E::PropertyBehaviourType defaultBehaviour = E::PropertyBehaviourType::Write;
-	static const std::map<int, QString> m_emptyEnumValuesMap;
-
-signals:
-	void propertyCountWillIncrease(int newPropertyCount);
-	void propertyCountWillDecrease(int newPropertyCount);
-	void propertyCountIncreased();
-	void propertyCountDecreased();
-
-public:
-	AppSignalPropertyManager(DbController* dbController, QWidget* parentWidget);
-
-	static AppSignalPropertyManager* getInstance();
-
-	// Data for models
-	//
-
-	int count() const;
-
-	int index(const QString& name);
-	QString caption(int propertyIndex) const;
-	QString name(int propertyIndex);
-
-	QVariant value(const AppSignal* signal, int propertyIndex, bool isExpert) const;
-	bool getSignalEnumPropertyValues(const AppSignal& s, int propertyIndex,
-									 std::vector<std::pair<int, QString>>* enumValues) const;
-	bool isEnumProperty(int propertyIndex) const;
-
-	void setValue(AppSignal* signal, int propertyIndex, const QVariant& value, bool isExpert);
-
-	QMetaType::Type type(const int propertyIndex) const;
-	E::PropertyBehaviourType getBehaviour(const AppSignal& signal, const int propertyIndex) const;
-	E::PropertyBehaviourType getBehaviour(E::SignalType type, E::SignalInOutType directionType, const int propertyIndex) const;
-	bool dependsOnPrecision(const int propertyIndex) const;
-	bool isHiddenFor(E::SignalType type, const int propertyIndex, bool isExpert) const;
-	bool isHidden(E::PropertyBehaviourType behaviour, bool isExpert) const;
-	bool isReadOnly(E::PropertyBehaviourType behaviour, bool isExpert) const;
-
-	void loadNotSpecificProperties();
-	void reloadPropertyBehaviour();
-	void clear();
-	void init();
-
-public slots:
-	void detectNewProperties(const AppSignal& signal);
-
-private:
-	void updatePropertyName2IndexMap();
-
-	int propertyIndex(const QString& propName) const;
-	int behaviourIndex(int propertyIndex) const;
-
-	bool isNotCorrect(int propertyIndex) const;
-	QString typeName(E::SignalType type, E::SignalInOutType inOutType);
-	QString typeName(int typeIndex, int inOutTypeIndex);
-
-	static TuningValue variant2TuningValue(const QVariant& variant, TuningValueType type);
-
-	void addNewProperty(const AppSignalPropertyDescription& newProperty);
-
-	static void trimm(QStringList& stringList);
-
-private:
-	DbController* m_dbController;
-	QWidget* m_parentWidget;
-	static AppSignalPropertyManager* m_instance;
-
-	static const std::vector<AppSignalPropertyDescription> m_replacedPropertyDescription;
-
-	std::vector<AppSignalPropertyDescription> m_propertyDescription;
-	std::map<QString, int> m_propertyName2IndexMap;		// propName => index in m_propertyDescription
-
-	std::vector<PropertyBehaviourDescription> m_propertyBehaviorDescription;
-	std::map<int, int> m_propertyIndex2BehaviourIndexMap;
-};
+#include "../DbLib/DbController.h"
+#include "AppSignalPropertyManager.h"
 
 class AppSignalSetProvider : public QObject
 {
@@ -119,7 +25,7 @@ public:
 
 	int signalCount() { return static_cast<int>(m_signalSet.count()); }
 	AppSignal getSignalByID(int signalID) { return m_signalSet.value(signalID); }			// for debug purposes
-	AppSignal* getSignalByStrID(const QString signalStrID);
+	AppSignal* getSignalByStrID(const QString& signalStrID);
 	QVector<int> getChannelSignalsID(int signalGroupID) { return m_signalSet.getChannelSignalsID(signalGroupID); }
 	int key(int index) const { return m_signalSet.key(index); }
 	int keyIndex(int key) { return static_cast<int>(m_signalSet.keyIndex(key)); }
@@ -128,7 +34,7 @@ public:
 	const AppSignal& getLoadedSignal(int index);
 
 	AppSignalParam getAppSignalParam(int index);
-	AppSignalParam getAppSignalParam(QString appSignalId);
+	AppSignalParam getAppSignalParam(const QString& appSignalId);
 
 	bool isEditableSignal(int index) const { return isEditableSignal(m_signalSet[index]); }
 	bool isEditableSignal(const AppSignal& signal) const;

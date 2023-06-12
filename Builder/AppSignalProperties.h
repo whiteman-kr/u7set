@@ -11,7 +11,7 @@ struct AppSignalPropertyDescription
 	bool specificProperty = false;
 	QString name;
 	QString caption;
-	QMetaType::Type type;
+	QMetaType::Type type = QMetaType::UnknownType;
 
 	std::function<QVariant (const AppSignal*)> valueGetter;
 	std::function<void (AppSignal*, const QVariant&)> valueSetter;
@@ -23,8 +23,12 @@ struct AppSignalPropertyDescription
 
 	//
 
+	bool isValid() const;
+
 	void setEnumValues(const std::vector<std::pair<int, QString>>& enumValuesVector);
 	void joinEnumValues(const std::vector<std::pair<int, QString>>& enumValuesVector);
+	bool getEnumValuesVector(std::vector<std::pair<int, QString>>* enumValuesVector) const;
+
 	bool isEnumProperty() const;
 	void appendSignalID(int signalID);
 	bool isSignalHaveProperty(int signalID) const;
@@ -63,6 +67,10 @@ public:
 	int getPrecision();
 
 	std::vector<AppSignalPropertyDescription> getProperties() const { return m_propertyDescription; }
+
+	bool isNonSpecificPropertyExists(const QString& propertyName) const;
+
+	static bool isPropertyExists(const AppSignal& signal, const QString& propertyName);
 
 	static QString lastEditedSignalPropsPrefix(const AppSignal& s);
 
