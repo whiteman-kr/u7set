@@ -1128,6 +1128,21 @@ DialogSignalSnapshot::DialogSignalSnapshot(IAppSignalManager* appSignalManager,
 		return;
 	}
 
+	m_maskHelp = tr("A mask contains '*' and '?' symbols.\n\
+	'*' symbol means any set of symbols on its place, '?' symbol means one symbol on its place.\n\
+	Several masks can be separated by semicolon or space.\n\n\
+	Examples:\n\n\
+	#SF001P014* (mask for AppSignalID),\n\
+	T?30T01? (mask for CustomAppSignalID),\n\
+	#SYSTEMID_RACK01_CH01_MD?? (mask for Equipment ID).\n\n\
+	To apply the filter, enter the mask and press Enter.");
+	m_maskHelp.remove('\t');
+
+	m_tagsHelp = tr("Tags for filtering signals.\n\n\
+	Several tags can be separated by semicolon or space: \"tag1; tag2\" or \"tag1 tag2\".\n\n\
+	To apply the filter, enter tags and press Enter.");
+	m_tagsHelp.remove('\t');
+
 	m_settings.restore();
 
 	setAttribute(Qt::WA_DeleteOnClose);
@@ -1649,11 +1664,11 @@ void DialogSignalSnapshot::initFiltersView()
 	m_editMask->setToolTip(m_maskHelp);
 
 	m_maskTypeCombo->blockSignals(true);
-	m_maskTypeCombo->addItem("All");
-	m_maskTypeCombo->addItem("AppSignalID");
-	m_maskTypeCombo->addItem("CustomAppSignalID");
-	m_maskTypeCombo->addItem("EquipmentID");
-	m_maskTypeCombo->addItem("LmEquipmentID");
+	m_maskTypeCombo->addItem(tr("All"));
+	m_maskTypeCombo->addItem(tr("AppSignalID"));
+	m_maskTypeCombo->addItem(tr("CustomAppSignalID"));
+	m_maskTypeCombo->addItem(tr("EquipmentID"));
+	m_maskTypeCombo->addItem(tr("LmEquipmentID"));
 
 	if (m_settings.maskType >= SignalSnapshotModel::MaskType::All && m_settings.maskType <= SignalSnapshotModel::MaskType::LmEquipmentId)
 	{
@@ -1776,7 +1791,7 @@ void DialogSignalSnapshot::fillSchemas()
 
 	m_schemaCombo->clear();
 
-	m_schemaCombo->addItem("All Schemas", "");
+	m_schemaCombo->addItem(tr("All Schemas"), "");
 
 	int selectedIndex = -1;
 
@@ -2117,15 +2132,3 @@ void DialogSignalSnapshot::buttonChooseTagsClicked()
 
 DialogSignalSnapshotSettings theDialogSignalSnapshotSettings;
 
-const QString DialogSignalSnapshot::m_maskHelp = QObject::tr("A mask contains '*' and '?' symbols.\n\
-'*' symbol means any set of symbols on its place, '?' symbol means one symbol on its place.\n\
-Several masks can be separated by semicolon or space.\n\n\
-Examples:\n\n\
-#SF001P014* (mask for AppSignalID),\n\
-T?30T01? (mask for CustomAppSignalID),\n\
-#SYSTEMID_RACK01_CH01_MD?? (mask for Equipment ID).\n\n\
-To apply the filter, enter the mask and press Enter.");
-
-															 const QString DialogSignalSnapshot::m_tagsHelp = QObject::tr("Tags for filtering signals.\n\n\
-Several tags can be separated by semicolon or space: \"tag1; tag2\" or \"tag1 tag2\".\n\n\
-To apply the filter, enter tags and press Enter.");

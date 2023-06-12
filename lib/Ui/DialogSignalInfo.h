@@ -29,8 +29,6 @@ private:
 
 class SignalFlagsWidget : public QWidget
 {
-	Q_OBJECT
-
 public:
 	SignalFlagsWidget(QWidget* parent = nullptr);
 
@@ -58,6 +56,7 @@ private:
 
 class AppSignalFlagsWidget : public SignalFlagsWidget
 {
+	Q_OBJECT
 public:
 	enum class AppSignalFlagsFields
 	{
@@ -84,6 +83,7 @@ private:
 
 class TuningSignalFlagsWidget : public SignalFlagsWidget
 {
+	Q_OBJECT
 public:
 	enum class TuningSignalFlagsFields
 	{

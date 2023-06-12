@@ -35,12 +35,12 @@ QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowClose
 
 	switch (c->cmpType())
 	{
-		case E::CmpType::Greate:	s += "Type: <b>&gt; (Greater)</b><br>";		break;
-		case E::CmpType::Less:		s += "Type: <b>&lt; (Less)</b><br>";		break;
-		case E::CmpType::Equal:		s += "Type: <b>= (Equal)</b><br>";			break;
-		case E::CmpType::NotEqual:	s += "Type: <b>&lt;&gt; (Not Equal)</b><br>";		break;
-		case E::CmpType::GreateEqual:	s += "Type: <b>&gt;= (Greater or Equal)</b><br>";	break;
-		case E::CmpType::LessEqual:		s += "Type: <b>&lt;= (Less or Equal)</b><br>";		break;
+		case E::CmpType::Greate:	s += tr("Type: <b>&gt; (Greater)</b><br>");		break;
+		case E::CmpType::Less:		s += tr("Type: <b>&lt; (Less)</b><br>");		break;
+		case E::CmpType::Equal:		s += tr("Type: <b>= (Equal)</b><br>");			break;
+		case E::CmpType::NotEqual:	s += tr("Type: <b>&lt;&gt; (Not Equal)</b><br>");		break;
+		case E::CmpType::GreateEqual:	s += tr("Type: <b>&gt;= (Greater or Equal)</b><br>");	break;
+		case E::CmpType::LessEqual:		s += tr("Type: <b>&lt;= (Less or Equal)</b><br>");		break;
 	}
 
 	// Input
@@ -294,26 +294,26 @@ AppSignalFlagsWidget::AppSignalFlagsWidget(QWidget* parent)
 {
 	m_flagNames =
 		{
-			QStringLiteral("VALID"),
-			QStringLiteral("ST.AVAIL"),
-			QStringLiteral("SIM"),
-			QStringLiteral("LOCK"),
-			QStringLiteral("MISMATCH"),
-			QStringLiteral("HIGH"),
-			QStringLiteral("LOW"),
-			QStringLiteral("SW.SIM"),
+			tr("VALID"),
+			tr("ST.AVAIL"),
+			tr("SIM"),
+			tr("LOCK"),
+			tr("MISMATCH"),
+			tr("HIGH"),
+			tr("LOW"),
+			tr("SW.SIM"),
 		};
 
 	m_flagTooltips =
 		{
-			QStringLiteral("Signal Validity\n\nSet to 1 when validity signal of the signal is set to 1.\nSet to 0 when validity signal of the signal is set to 0.\nIf no validity signal exists - equal to \"ST.AVAIL\" flag."),
-			QStringLiteral("Signal State is Available\n\nSet to 1 if application data is received from LM.\nSet to 0 if no application data is received from LM."),
-			QStringLiteral("Signal is Simulated\n\nSet to 1 when simulation signal is set to 1 (see AFB sim_lock),\notherwise set to 0. If no simulation signal exists, also set to 0."),
-			QStringLiteral("Signal is Locked\n\nSet to 1 when locking signal is set to 1 (see AFB sim_lock),\notherwise set to 0. If no locking signal exists, also set to 0."),
-			QStringLiteral("Signal is Mismatched\n\nSet to 1 when mismatch signal is set to 1 (see AFB mismatch),\notherwise set to 0. If no mismatch signal exists, also set to 0."),
-			QStringLiteral("Signal Value is High\n\nSet to 1 when signal value is greater than\nHighEngineeringUnits limit, otherwise set to 0."),
-			QStringLiteral("Signal Value is Low\n\nSet to 1 when signal value is less than\nLowEngineeringUnits limit, otherwise set to 0."),
-			QStringLiteral("Signal Value simulated by software."),
+			tr("Signal Validity\n\nSet to 1 when validity signal of the signal is set to 1.\nSet to 0 when validity signal of the signal is set to 0.\nIf no validity signal exists - equal to \"ST.AVAIL\" flag."),
+			tr("Signal State is Available\n\nSet to 1 if application data is received from LM.\nSet to 0 if no application data is received from LM."),
+			tr("Signal is Simulated\n\nSet to 1 when simulation signal is set to 1 (see AFB sim_lock),\notherwise set to 0. If no simulation signal exists, also set to 0."),
+			tr("Signal is Locked\n\nSet to 1 when locking signal is set to 1 (see AFB sim_lock),\notherwise set to 0. If no locking signal exists, also set to 0."),
+			tr("Signal is Mismatched\n\nSet to 1 when mismatch signal is set to 1 (see AFB mismatch),\notherwise set to 0. If no mismatch signal exists, also set to 0."),
+			tr("Signal Value is High\n\nSet to 1 when signal value is greater than\nHighEngineeringUnits limit, otherwise set to 0."),
+			tr("Signal Value is Low\n\nSet to 1 when signal value is less than\nLowEngineeringUnits limit, otherwise set to 0."),
+			tr("Signal Value simulated by software."),
 		};
 
 }
@@ -416,22 +416,22 @@ TuningSignalFlagsWidget::TuningSignalFlagsWidget(QWidget* parent)
 {
 	m_flagNames =
 		{
-			QStringLiteral("VALID"),
-			QStringLiteral("RANGE"),
-			QStringLiteral("WRITING"),
-			QStringLiteral("CONTROL"),
-			QStringLiteral("ACCESS"),
-			QStringLiteral("DEFAULT"),
+			tr("VALID"),
+			tr("RANGE"),
+			tr("WRITING"),
+			tr("CONTROL"),
+			tr("ACCESS"),
+			tr("DEFAULT"),
 		};
 
 	m_flagTooltips =
 		{
-			QStringLiteral("Signal validity\n\nSet to 1 if tuning data is received from LM.\nSet to 0 if no tuning data is received from LM."),
-			QStringLiteral("Signal is out of range\n\nSet to 1 when tuning value is out of range, otherwise set to 0."),
-			QStringLiteral("Writing in progress\n\nSet to 1 when writing a value is in progress. Resets to 0 after writing was finished "),
-			QStringLiteral("Control is enabled\n\nSet to 1 when  tuning control for LM is enabled by TuningService, otherwise set to 0.\n\nNOTE: if SingleLmControl property of TuningService is set to false, this flag is always set to 1."),
-			QStringLiteral("Writing is enabled\n\nSet to 1 when LM access key is set, otherwise set to 0.\n\nNOTE: this flag is used only when StatusFlagFunction property\nof TuningClient  is set to 'AccessKey'."),
-			QStringLiteral("Default value\n\nSet to 1 tuning signal value is set to default value,\notherwise set to 0."),
+			tr("Signal validity\n\nSet to 1 if tuning data is received from LM.\nSet to 0 if no tuning data is received from LM."),
+			tr("Signal is out of range\n\nSet to 1 when tuning value is out of range, otherwise set to 0."),
+			tr("Writing in progress\n\nSet to 1 when writing a value is in progress. Resets to 0 after writing was finished "),
+			tr("Control is enabled\n\nSet to 1 when  tuning control for LM is enabled by TuningService, otherwise set to 0.\n\nNOTE: if SingleLmControl property of TuningService is set to false, this flag is always set to 1."),
+			tr("Writing is enabled\n\nSet to 1 when LM access key is set, otherwise set to 0.\n\nNOTE: this flag is used only when StatusFlagFunction property\nof TuningClient  is set to 'AccessKey'."),
+			tr("Default value\n\nSet to 1 tuning signal value is set to default value,\notherwise set to 0."),
 		};
 
 }
@@ -1260,7 +1260,7 @@ void DialogSignalInfo::fillSignalInfo()
 	//
 	m_currentPrecision = m_signal.precision();
 
-	setWindowTitle(m_signal.customSignalId() + tr(" - ") + m_signal.caption());
+	setWindowTitle(m_signal.customSignalId() + " - " + m_signal.caption());
 
 	if (m_signal.isAnalog())
 	{
@@ -1287,13 +1287,23 @@ void DialogSignalInfo::fillSignalInfo()
 	ui->editCaption->setPlainText(m_signal.caption());
 	ui->editEquipment->setText(m_signal.equipmentId());
 
-	QString str = E::valueToString<E::SignalType>(m_signal.type());
+	// An array for translation
+	QString signalProperties[] = {tr("Analog"),		//E::SignalType
+								  tr("Discrete"),
+								  tr("Bus"),
+								  tr("Input"),		//E::SignalInOutType
+								  tr("Output"),
+								  tr("Internal")};
+	Q_UNUSED(signalProperties);
+
+	QString str = tr(E::valueToString<E::SignalType>(m_signal.type()).toUtf8());
 	if (m_signal.isAnalog())
 	{
 		str = QString("%1 (%2)").arg(str).arg(E::valueToString<E::AnalogAppSignalFormat>(static_cast<int>(m_signal.analogSignalFormat())));
 	}
 
-	str = QString("%1, %2").arg(str).arg(E::valueToString<E::SignalInOutType>(m_signal.inOutType()));
+
+	str = QString("%1, %2").arg(str).arg(tr(E::valueToString<E::SignalInOutType>(m_signal.inOutType()).toUtf8()));
 
 	ui->editSignalType->setText(str);
 
@@ -1742,7 +1752,7 @@ void DialogSignalInfo::fillSchemas()
 	ui->treeSchemas->clear();
 
 	QStringList columns;
-	columns << "Schema";
+	columns << tr("Schema");
 	ui->treeSchemas->setHeaderLabels(columns);
 
 	QStringList schemas = schemasByAppSignalId(m_signal.appSignalId());
@@ -1762,7 +1772,7 @@ void DialogSignalInfo::fillSchemas()
 
 void DialogSignalInfo::fillTuningTab()
 {
-	const QString tuningTabPageName = QObject::tr("Tuning");
+	const QString tuningTabPageName = tr("Tuning");
 
 	bool tuningEnabled = m_signal.enableTuning() == true && m_tuningEnabled == true;
 	bool tuningTabVisible = tabPageExists(tuningTabPageName);
@@ -2141,7 +2151,7 @@ void DialogSignalInfo::stateContextMenu(QPoint pos)
 		// Latest action
 		//
 		{
-			QAction* actionServer = new QAction("Latest", &menu);
+			QAction* actionServer = new QAction(tr("Latest"), &menu);
 			actionServer->setCheckable(true);
 
 			if (m_dataServiceId.isEmpty() == true)

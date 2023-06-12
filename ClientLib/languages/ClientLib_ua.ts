@@ -316,7 +316,7 @@
     <message>
         <location filename="../TuningUserManager.cpp" line="80"/>
         <source>Cancel</source>
-        <translation>Відміна</translation>
+        <translation>Скасувати</translation>
     </message>
 </context>
 <context>
@@ -335,12 +335,12 @@
     <message>
         <location filename="../TuningLog.cpp" line="64"/>
         <source>EquipmentID/Message</source>
-        <translation>EquipmentID/Повідомлення</translation>
+        <translation>ІД обладнання/Повідомлення</translation>
     </message>
     <message>
         <location filename="../TuningLog.cpp" line="65"/>
         <source>CustomAppSignalID</source>
-        <translation></translation>
+        <translation>ІД сигналу</translation>
     </message>
     <message>
         <location filename="../TuningLog.cpp" line="66"/>

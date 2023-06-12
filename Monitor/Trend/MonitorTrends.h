@@ -31,6 +31,7 @@ private:
 
 class MonitorTrendsWidget : public TrendLib::TrendMainWindow
 {
+	Q_OBJECT
 public:
 	MonitorTrendsWidget(const MonitorSignalManager& signalManager,
 						const MonitorConfigController& configController,

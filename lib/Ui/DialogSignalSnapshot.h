@@ -340,8 +340,8 @@ private:
 
 	bool m_firstShow = true;
 
-	static const QString m_maskHelp;
-	static const QString m_tagsHelp;
+	QString m_maskHelp;
+	QString m_tagsHelp;
 
 	DialogSignalSnapshotSettings m_settings;
 };
