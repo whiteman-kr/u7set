@@ -57,7 +57,7 @@ void DialogAbout::show(QWidget* parent, const QString& description, const QStrin
 	label->setWordWrap(true);
 	vl->addWidget(label);
 
-	QPushButton* copyCommitSHA1Button = new QPushButton("Copy commit SHA1");
+	QPushButton* copyCommitSHA1Button = new QPushButton(tr("Copy commit SHA1"));
 	connect(copyCommitSHA1Button, &QPushButton::clicked, [](bool){
 #ifdef CI_PIPELINE_ID
 		qApp->clipboard()->setText(CI_COMMIT_SHA);

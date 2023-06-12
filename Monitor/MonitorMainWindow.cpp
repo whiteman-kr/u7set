@@ -2,6 +2,7 @@
 #include "MonitorCentralWidget.h"
 #include "DialogSettings.h"
 #include "MonitorSchemaWidget.h"
+#include "MonitorSchemaView.h"
 #include "MonitorSignalSnapshot.h"
 #include "./Archive/MonitorArchive.h"
 #include "DialogDataSources.h"
@@ -368,6 +369,13 @@ void MonitorMainWindow::showLogo()
 
 void MonitorMainWindow::createActions()
 {
+	m_pExportAction = new QAction(tr("Export Schema..."), this);
+	m_pExportAction->setStatusTip(tr("Export current schema to a file"));
+	m_pExportAction->setEnabled(true);
+	m_pExportAction->setShortcuts(QList<QKeySequence>{}
+									 <<  QKeySequence{Qt::CTRL | Qt::Key_S});
+	connect(m_pExportAction, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_export);
+
 	m_pExitAction = new QAction(tr("Exit"), this);
 	m_pExitAction->setStatusTip(tr("Quit the application"));
 	m_pExitAction->setIcon(QIcon(":/Images/Images/Close.svg"));
@@ -542,6 +550,8 @@ void MonitorMainWindow::createMenus()
 	//
 	QMenu* pFileMenu = menuBar()->addMenu(tr("&File"));
 
+	pFileMenu->addAction(m_pExportAction);
+	pFileMenu->addSeparator();
 	pFileMenu->addAction(m_pExitAction);
 
 	// Schema
@@ -738,7 +748,7 @@ void MonitorMainWindow::updateStatusBar()
 	// AppDataService connection
 	//
 	{
-		showSoftwareConnection("AppDataService",
+		showSoftwareConnection(tr("AppDataService"),
 							   m_adsConnection.tcpSignalConnStates(),
 							   m_statusBarAppDataConnection);
 	}
@@ -746,7 +756,7 @@ void MonitorMainWindow::updateStatusBar()
 	// TuningService connection
 	//
 	{
-		showSoftwareConnection("TuningService",
+		showSoftwareConnection(tr("TuningService"),
 							   m_tuningConnection.tcpTuningConnStates(),
 							   m_statusBarTuningConnection);
 	}

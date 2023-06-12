@@ -194,12 +194,12 @@ void MonitorTrendsWidget::timerEvent(QTimerEvent*)
 		ArchiveTrendTcpClient::Stat stat = m_archiveDataProvider.statistics();
 
 		m_statusBarTextLabel->setText(stat.text);
-		m_statusBarQueueSizeLabel->setText(QString(" Queue: %1 ").arg(stat.requestQueueSize));
-		m_statusBarNetworkRequestsLabel->setText(QString(" Requests/replies: %1/%2 ")
+		m_statusBarQueueSizeLabel->setText(QString(tr(" Queue: %1 ")).arg(stat.requestQueueSize));
+		m_statusBarNetworkRequestsLabel->setText(tr(" Requests/replies: %1/%2 ")
 												 .arg(stat.requestCount)
 												 .arg(stat.replyCount));
 
-		m_statusBarConnectionStateLabel->setText(QString(" Connected %1/%2").arg(stat.isConnected).arg(m_archiveDataProvider.size()));
+		m_statusBarConnectionStateLabel->setText(tr(" Connected %1/%2").arg(stat.isConnected).arg(m_archiveDataProvider.size()));
 	}
 	else
 	{

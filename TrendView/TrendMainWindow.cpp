@@ -300,7 +300,7 @@ namespace TrendLib
 
 		// Time ComboBox
 		//
-		QLabel* intervalLabel = new QLabel("  Interval: ");
+		QLabel* intervalLabel = new QLabel(tr("  Interval: "));
 		intervalLabel->setAlignment(Qt::AlignCenter);
 		m_toolBar->addWidget(intervalLabel);
 
@@ -331,7 +331,7 @@ namespace TrendLib
 
 		// Lane Count
 		//
-		QLabel* lanesLabel = new QLabel("  Lanes: ");
+		QLabel* lanesLabel = new QLabel(tr("  Lanes: "));
 		lanesLabel->setAlignment(Qt::AlignCenter);
 		m_toolBar->addWidget(lanesLabel);
 
@@ -347,7 +347,7 @@ namespace TrendLib
 
 		// View Type
 		//
-		QLabel* viewLabel = new QLabel("  View: ");
+		QLabel* viewLabel = new QLabel(tr("  View: "));
 		viewLabel->setAlignment(Qt::AlignCenter);
 		m_toolBar->addWidget(viewLabel);
 
@@ -360,7 +360,7 @@ namespace TrendLib
 
 		// Scale Type
 		//
-		QLabel* scaleTypeLabel = new QLabel("  Scale: ");
+		QLabel* scaleTypeLabel = new QLabel(tr("  Scale: "));
 		scaleTypeLabel->setAlignment(Qt::AlignCenter);
 		m_toolBar->addWidget(scaleTypeLabel);
 
@@ -374,7 +374,7 @@ namespace TrendLib
 
 		// Time Type
 		//
-		QLabel* timeTypeLabel = new QLabel("  Time Type: ");
+		QLabel* timeTypeLabel = new QLabel(tr("  Time Type: "));
 		timeTypeLabel->setAlignment(Qt::AlignCenter);
 		m_toolBar->addWidget(timeTypeLabel);
 

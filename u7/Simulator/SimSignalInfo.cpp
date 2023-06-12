@@ -56,8 +56,6 @@ SimSignalInfo::SimSignalInfo(const AppSignalParam& signal,
 							 SimWidget* simWidget):
 	DialogSignalInfo(signal,
 					 &simuator->appSignalManager(),
-					 nullptr,
-					 false/*tuningEnabled*/,
 					 DialogType::Simulator,
 					 simWidget),
 	m_simuator(simuator)

@@ -7,13 +7,21 @@ if ($args.count -ne 2)
 $fileSource = $args[0]
 $fileTarget = $args[1]
 
-comp.exe /M $fileSource $fileTarget
-
-if ($LASTEXITCODE -eq 1) 
+if (!(Test-Path $fileTarget)) 
 {
-  echo "Updating file $fileSource -> $fileTarget"
-  Remove-Item -Force $fileTarget;
+  echo "Target file $$fileTarget does not exist, creating it from source."
   Rename-Item -Path $fileSource -NewName $fileTarget
+}
+else
+{
+  comp.exe /M $fileSource $fileTarget
+	
+  if ($LASTEXITCODE -eq 1) 
+  {
+    echo "Updating file $fileSource -> $fileTarget"
+    Remove-Item -Force $fileTarget;
+    Rename-Item -Path $fileSource -NewName $fileTarget
+  }
 }
 
 $LASTEXITCODE = 0

@@ -46,6 +46,7 @@ bool MonitorSignalInfo::showDialog(QString appSignalId,
 			MonitorSignalInfo* msi = new MonitorSignalInfo(signal,
 														   configController,
 														   signalManager,
+														   signalManager,
 														   centralWidget->tuningController(),
 														   tuningEnabled,
 														   centralWidget);
@@ -71,11 +72,14 @@ bool MonitorSignalInfo::showDialog(QString appSignalId,
 MonitorSignalInfo::MonitorSignalInfo(const AppSignalParam& signal,
 									 MonitorConfigController* configController,
 									 IAppSignalManager* appSignalManager,
+									 ISignalDataServer* signalDataServer,
 									 VFrame30::TuningController* tuningController,
 									 bool tuningEnabled,
 									 MonitorCentralWidget* centralWidget):
 	DialogSignalInfo(signal,
 					 appSignalManager,
+					 signalDataServer,
+					 configController->configuration().appDataServices,
 					 tuningController,
 					 tuningEnabled,
 					 DialogType::Monitor,
@@ -83,10 +87,11 @@ MonitorSignalInfo::MonitorSignalInfo(const AppSignalParam& signal,
 	m_configController(configController),
 	m_centralWidget(centralWidget)
 {
-	if (m_configController == nullptr || m_centralWidget == nullptr)
+	if (m_configController == nullptr || m_centralWidget == nullptr || signalDataServer == nullptr)
 	{
 		Q_ASSERT(m_configController);
 		Q_ASSERT(m_centralWidget);
+		Q_ASSERT(signalDataServer);
 		return;
 	}
 

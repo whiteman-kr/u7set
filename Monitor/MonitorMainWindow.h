@@ -171,6 +171,7 @@ private:
 
 	// File menu
 	//
+	QAction* m_pExportAction = nullptr;
 	QAction* m_pExitAction = nullptr;
 
 	// Tools menu

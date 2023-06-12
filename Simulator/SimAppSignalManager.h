@@ -79,9 +79,13 @@ namespace Sim
 
 		virtual AppSignalState signalState(Hash signalHash, bool* found) const override;
 		virtual AppSignalState signalState(const QString& appSignalId, bool* found) const override;
+		virtual AppSignalState signalState(Hash signalHash, Hash dataServerHash, bool* found) const override;
+		virtual AppSignalState signalState(const QString& appSignalId, const QString& dataServerId, bool* found) const override;
 
 		virtual void signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const override;
 		virtual void signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const override;
+		virtual void signalState(const std::vector<Hash>& appSignalHashes, Hash dataServerHash, std::vector<AppSignalState>* result, int* found) const override;
+		virtual void signalState(const std::vector<QString>& appSignalIds, const QString& dataServerId, std::vector<AppSignalState>* result, int* found) const override;
 
 		virtual QStringList signalTags(Hash signalHash) const override;
 		virtual QStringList signalTags(const QString& appSignalId) const override;

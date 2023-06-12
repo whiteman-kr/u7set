@@ -326,13 +326,13 @@ namespace ClientLib
 		return;
 	}
 
-	void AppSignalManager::setState(const QString& appSignalId, const AppSignalState& state, Qt::HANDLE sourceThreadId)
+	void AppSignalManager::setState(const QString& appSignalId, const AppSignalState& state, Hash dataServerHash, Qt::HANDLE sourceThreadId)
 	{
 		Hash signalHash = ::calcHash(appSignalId);
-		return setState(signalHash, state, sourceThreadId);
+		return setState(signalHash, state, dataServerHash, sourceThreadId);
 	}
 
-	void AppSignalManager::setState(Hash signalHash, const AppSignalState& arrivedState, Qt::HANDLE sourceThreadId)
+	void AppSignalManager::setState(Hash signalHash, const AppSignalState& arrivedState, Hash dataServerHash, Qt::HANDLE sourceThreadId)
 	{
 		if (signalHash == 0)
 		{
@@ -343,19 +343,19 @@ namespace ClientLib
 		QWriteLocker wl(&m_statesLocker);
 
 		Sources& currentState = m_states[signalHash];
-		currentState.set(arrivedState, sourceThreadId);
+		currentState.set(arrivedState, dataServerHash, sourceThreadId);
 
 		return;
 	}
 
-	void AppSignalManager::setState(const std::vector<AppSignalState>& states, Qt::HANDLE sourceThreadId)
+	void AppSignalManager::setState(const std::vector<AppSignalState>& states, Hash dataServerHash, Qt::HANDLE sourceThreadId)
 	{
 		QWriteLocker wl(&m_statesLocker);
 
 		for (const AppSignalState& newState : states)
 		{
 			Sources& currentStateAndSources = m_states[newState.hash()];
-			currentStateAndSources.set(newState, sourceThreadId);
+			currentStateAndSources.set(newState, dataServerHash, sourceThreadId);
 		}
 
 		return;
@@ -442,9 +442,20 @@ namespace ClientLib
 
 	AppSignalState AppSignalManager::signalState(Hash signalHash, bool* found) const
 	{
+		return signalState(signalHash, {}, found);
+	}
+
+	AppSignalState AppSignalManager::signalState(const QString& appSignalId, bool* found) const
+	{
+		Hash h = ::calcHash(appSignalId);
+		return signalState(h, {}, found);
+	}
+
+	AppSignalState AppSignalManager::signalState(Hash signalHash, Hash dataServerHash, bool* found) const
+	{
 		AppSignalState result;
 
-		if (signalHash == 0)
+		if (signalHash == UNDEFINED_HASH)
 		{
 			if (found != nullptr)
 			{
@@ -467,7 +478,14 @@ namespace ClientLib
 
 		if (foundState != m_states.end())
 		{
-			result = foundState->second.get();
+			if (dataServerHash == UNDEFINED_HASH)
+			{
+				result = foundState->second.get();
+			}
+			else
+			{
+				result = foundState->second.getForDataServer(dataServerHash);
+			}
 		}
 		else
 		{
@@ -478,13 +496,27 @@ namespace ClientLib
 		return result;
 	}
 
-	AppSignalState AppSignalManager::signalState(const QString& appSignalId, bool* found) const
+	AppSignalState AppSignalManager::signalState(const QString& appSignalId, const QString& dataServerId, bool* found) const
 	{
-		Hash h = ::calcHash(appSignalId);
-		return signalState(h, found);
+		Hash signalHash = ::calcHash(appSignalId);
+		Hash dataServerHash = ::calcHash(dataServerId);
+
+		return signalState(signalHash, dataServerHash, found);
 	}
 
+	// Ok
+	//
 	void AppSignalManager::signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const
+	{
+		return signalState(appSignalHashes, {}, result, found);
+	}
+
+	void AppSignalManager::signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const
+	{
+		return signalState(appSignalIds, {}, result, found);
+	}
+
+	void AppSignalManager::signalState(const std::vector<Hash>& appSignalHashes, Hash dataServerHash, std::vector<AppSignalState>* result, int* found) const
 	{
 		if (result == nullptr)
 		{
@@ -508,7 +540,15 @@ namespace ClientLib
 
 				if (foundState != m_states.end())
 				{
-					result->push_back(foundState->second.get());
+					if (dataServerHash == UNDEFINED_HASH)
+					{
+						result->push_back(foundState->second.get());
+					}
+					else
+					{
+						result->push_back(foundState->second.getForDataServer(dataServerHash));
+					}
+
 					foundCount ++;
 				}
 				else
@@ -531,7 +571,7 @@ namespace ClientLib
 		return;
 	}
 
-	void AppSignalManager::signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const
+	void AppSignalManager::signalState(const std::vector<QString>& appSignalIds, const QString& dataServerId, std::vector<AppSignalState>* result, int* found) const
 	{
 		std::vector<Hash> appSignalHashes;
 		appSignalHashes.reserve(appSignalIds.size());
@@ -542,7 +582,9 @@ namespace ClientLib
 			appSignalHashes.push_back(h);
 		}
 
-		return signalState(appSignalHashes, result, found);
+		Hash dataServerHash = ::calcHash(dataServerId);
+
+		return signalState(appSignalHashes, dataServerHash, result, found);
 	}
 
 	QStringList AppSignalManager::signalTags(Hash signalHash) const
@@ -760,7 +802,7 @@ namespace ClientLib
 		return result;
 	}
 
-	void AppSignalManager::Sources::set(const AppSignalState& state, Qt::HANDLE sourceThreadId)
+	void AppSignalManager::Sources::set(const AppSignalState& state, Hash dataServerHash, Qt::HANDLE sourceThreadId)
 	{
 		SourceState* emptyState = nullptr;
 		for (SourceState& sourceState : sources)
@@ -789,7 +831,7 @@ namespace ClientLib
 			emptyState = &sources.back();
 		}
 
-		*emptyState = SourceState{state, sourceThreadId, std::chrono::system_clock::now()};
+		*emptyState = SourceState{state, dataServerHash, sourceThreadId, std::chrono::system_clock::now()};
 
 		return;
 	}
@@ -819,6 +861,55 @@ namespace ClientLib
 		for (const SourceState& sourceState : sources)
 		{
 			if (sourceState.sourceThreadId == 0)
+			{
+				continue;
+			}
+
+			if (sourceState.state.isStateAvailable() == true)
+			{
+				if (stateAvailable == nullptr ||
+					stateAvailable->state.time().plant < sourceState.state.time().plant)
+				{
+					stateAvailable = &sourceState;	// the first state with state available flag
+				}
+			}
+			else
+			{
+				// sourceState.state.isStateAvailable() == false
+				//
+				if (stateNewest == nullptr ||
+					stateNewest->lastUpdateTime < sourceState.lastUpdateTime)
+				{
+					stateNewest = &sourceState;
+				}
+			}
+		}
+
+		if (stateAvailable != nullptr)
+		{
+			return stateAvailable->state;
+		}
+
+		if (stateNewest != nullptr)
+		{
+			return stateNewest->state;
+		}
+
+		static const AppSignalState NotValidState{};
+		return NotValidState;
+	}
+
+
+	const AppSignalState& AppSignalManager::Sources::getForDataServer(Hash dataServerHash) const
+	{
+		// Find the newest available state
+		//
+		const SourceState* stateAvailable = nullptr;
+		const SourceState* stateNewest = nullptr;
+
+		for (const SourceState& sourceState : sources)
+		{
+			if (sourceState.sourceThreadId == 0 || sourceState.dataServerHash != dataServerHash)
 			{
 				continue;
 			}

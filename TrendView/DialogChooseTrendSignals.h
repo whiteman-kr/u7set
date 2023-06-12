@@ -10,6 +10,34 @@ namespace Ui {
 	class DialogChooseTrendSignals;
 }
 
+namespace TrendLibInternal
+{
+	class FilteredTrendSignalsModel : public QAbstractTableModel
+	{
+		Q_OBJECT
+	public:
+		FilteredTrendSignalsModel(const ISignalHasTag* signalHasTag,
+								  const std::vector<TrendLib::TrendSignalParam>& signalss,
+								  QObject* parent);
+
+	public:
+		int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+		int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+		QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+		QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+
+		void filterSignals(QString server, QString filter, QStringList tagList);
+
+		const TrendLib::TrendSignalParam& signalByRow(int row) const;
+
+	private:
+		const ISignalHasTag* m_signalHasTag = nullptr;
+		std::vector<size_t> m_signalIndexes;
+		std::vector<TrendLib::TrendSignalParam> m_signals;
+		std::map<QString, std::vector<size_t>> m_startWithArrays;	// Key is startWith, in lowercase. Values are indexes in m_signals for stratWith
+	};
+}
+
 namespace TrendLib
 {
 
@@ -93,7 +121,7 @@ namespace TrendLib
 		const QString m_tagsCompleterSettingsName = "DialogChooseTrendSignals/trendSignalsDialogTagsCompleter";
 		const QString m_sizeSettingsName = "DialogChooseTrendSignals/size";
 
-		inline static const QString s_allServers{"All Servers"};
+		QString s_allServers;
 		inline static QString s_lastServer;
 	};
 

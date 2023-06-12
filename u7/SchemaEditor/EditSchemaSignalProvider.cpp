@@ -104,13 +104,19 @@ AppSignalState EditSchemaAppSignalProvider::signalState(const QString& appSignal
 	{
 		result.m_flags.valid = 1;
 		result.m_value = 0;
-
-//		result.m_time.plant = TimeStamp{QDateTime::currentDateTime()};
-//		result.m_time.local = result.m_time.plant;
-//		result.m_time.system = TimeStamp{QDateTime::currentDateTimeUtc()};
 	}
 
 	return result;
+}
+
+AppSignalState EditSchemaAppSignalProvider::signalState(Hash signalHash, Hash /*dataServerHash*/, bool* found) const
+{
+	return signalState(signalHash, found);
+}
+
+AppSignalState EditSchemaAppSignalProvider::signalState(const QString& appSignalId, const QString& /*dataServerId*/, bool* found) const
+{
+	return signalState(appSignalId, found);
 }
 
 void EditSchemaAppSignalProvider::signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const
@@ -153,6 +159,16 @@ void EditSchemaAppSignalProvider::signalState(const std::vector<QString>& appSig
 	}
 
 	return;
+}
+
+void EditSchemaAppSignalProvider::signalState(const std::vector<Hash>& appSignalHashes, Hash /*dataServerHash*/, std::vector<AppSignalState>* result, int* found) const
+{
+	return signalState(appSignalHashes, result, found);
+}
+
+void EditSchemaAppSignalProvider::signalState(const std::vector<QString>& appSignalIds, const QString& /*dataServerId*/, std::vector<AppSignalState>* result, int* found) const
+{
+	return signalState(appSignalIds, result, found);
 }
 
 QStringList EditSchemaAppSignalProvider::signalTags(Hash signalHash) const

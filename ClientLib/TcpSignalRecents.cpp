@@ -185,7 +185,7 @@ namespace ClientLib
 			states.emplace_back(protoState);
 		}
 
-		m_signalUpdater.setState(states, QThread::currentThreadId());
+		m_signalUpdater.setState(states, ::calcHash(m_serverSettings.equipmentId), QThread::currentThreadId());
 
 		//qDebug() << "Priority updates state count  "  << states.size();
 

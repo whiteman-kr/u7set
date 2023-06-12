@@ -9,7 +9,6 @@ namespace Ui {
 	class DialogChooseArchiveSignals;
 }
 
-
 class DialogChooseArchiveSignals : public QDialog
 {
 	Q_OBJECT
@@ -80,6 +79,39 @@ private:
 	static ArchiveSignalType s_lastSignalType;
 	static QString s_lastServer;
 
-	inline static const QString s_allServers{"All Servers"};
+	QString s_allServers;
 };
 
+namespace MonitorInternal// Anonymous namespace, as this class is used just in this translation unit
+{
+	class FilteredArchiveSignalsModel : public QAbstractTableModel
+	{
+		 Q_OBJECT
+
+	public:
+		FilteredArchiveSignalsModel(std::vector<ArchiveSignal>&& signalss, QObject* parent);
+
+	public:
+		int rowCount(const QModelIndex& parent = QModelIndex{}) const override;
+		int columnCount(const QModelIndex& parent = QModelIndex{}) const override;
+		QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+		QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+
+		void filterSignals(QString server, DialogChooseArchiveSignals::ArchiveSignalType signalType, QString signalIdFilter);
+
+		[[nodiscard]] ArchiveSignal signalByRow(int row) const;		// can throw std::out_of_range()
+
+	private:
+		std::vector<size_t> m_signalIndexes;
+		std::vector<ArchiveSignal> m_signals;
+		std::map<QString, std::vector<size_t>> m_startWithArrays;	// Key is startWith, in lowercase. Values is indexes in m_signals for startWith
+
+		enum class ColumnType
+		{
+			SignalId,
+			Type,
+			Caption,
+			Server
+		};
+	};
+}
