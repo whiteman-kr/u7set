@@ -481,14 +481,19 @@ void EditColumnsVisibilityDialog::changeVisibility(QStandardItem* item)
 	//
 	int visualIndex = item->row();
 	int logicalIndex = m_header->logicalIndex(visualIndex);
-	setHidden(logicalIndex, item->checkState() != Qt::Checked);
+
+	bool currentChecked = item->checkState() == Qt::Checked;
+
+	setHidden(logicalIndex, !currentChecked);
 
 	m_controller->saveColumnVisibility(logicalIndex, item->checkState() == Qt::Checked);
 
 	// In case if user selected multiple items
 	//
 	m_changingItems = true;
+
 	QModelIndexList&& list = m_columnList->selectionModel()->selectedIndexes();
+
 	foreach(const QModelIndex& index, list)
 	{
 		if (index.row() == visualIndex)
@@ -499,21 +504,12 @@ void EditColumnsVisibilityDialog::changeVisibility(QStandardItem* item)
 		logicalIndex = m_header->logicalIndex(index.row());
 
 		QStandardItem* selectedItem = m_columnModel->item(index.row());
-		if (selectedItem->checkState() == Qt::Checked)
-		{
-			selectedItem->setCheckState(Qt::Unchecked);
 
-			setHidden(logicalIndex, true);
-			m_controller->saveColumnVisibility(logicalIndex, false);
-		}
-		else
-		{
-			selectedItem->setCheckState(Qt::Checked);
-
-			setHidden(logicalIndex, false);
-			m_controller->saveColumnVisibility(logicalIndex, true);
-		}
+		selectedItem->setCheckState(currentChecked ? Qt::Checked : Qt::Unchecked);
+		setHidden(logicalIndex, !currentChecked);
+		m_controller->saveColumnVisibility(logicalIndex, currentChecked);
 	}
+
 	m_changingItems = false;
 
 	//Check if no visible column left
