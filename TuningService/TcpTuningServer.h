@@ -25,6 +25,7 @@ namespace Tuning
 		virtual void onServerThreadStarted() override;
 		virtual void onServerThreadFinished() override;
 
+		virtual void onConnection() override;
 		virtual void onDisconnection() override;
 
 		Tcp::Server* getNewInstance() override;
@@ -49,11 +50,21 @@ namespace Tuning
 		void initClientSourcesList(const QString& clientEquipmentID);
 
 	private:
-		static const char* SCM_CLIENT_ID;
-
 		TuningServiceWorker& m_service;
 
 		const TuningSources& m_tuningSources;
+
+		//
+
+		static const char* SCM_CLIENT_ID;
+
+		static quint64 m_staticTcpConnectionID;
+
+		quint64 m_tcpConnectionID = 0;
+
+		QString m_clientEquipmentID;
+
+		//
 
 		QHash<Hash, const AppSignal*> m_signalHash2SignalPtr;
 		QHash<Hash, quint32> m_signalHash2SourceIP;

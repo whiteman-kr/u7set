@@ -1,5 +1,6 @@
 #include "TuningClientContext.h"
 #include "../UtilsLib/WUtils.h"
+#include <algorithm>
 
 namespace Tuning
 {
@@ -327,6 +328,39 @@ namespace Tuning
 		m_sourceThreadMap.insert_or_assign(tuningSourceID, nullptr);
 	}
 
+	void TuningClientContext::registerStateChangesQueue(qint64 tcpConnectionID)
+	{
+		AUTO_LOCK_BY_CURRENT_THREAD(m_queueMapMutex);
+
+		auto it = m_stateChangesQueueMap.find(tcpConnectionID);
+
+		if(it != m_stateChangesQueueMap.end())
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		m_stateChangesQueueMap.emplace(tcpConnectionID,
+									   new TuningSignalsChangesQueue(getStateChangesQueueSize()));
+	}
+
+	void TuningClientContext::unregisterStateChangesQueue(qint64 tcpConnectionID)
+	{
+		AUTO_LOCK_BY_CURRENT_THREAD(m_queueMapMutex);
+
+		auto it = m_stateChangesQueueMap.find(tcpConnectionID);
+
+		if(it == m_stateChangesQueueMap.end())
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		delete it->second;
+
+		m_stateChangesQueueMap.erase(it);
+	}
+
 	TuningSourceThreadShared TuningClientContext::getSourceThread(const QString& sourceID) const
 	{
 		auto it = m_sourceThreadMap.find(sourceID);
@@ -406,6 +440,13 @@ namespace Tuning
 		m_signalToSourceIdMap.clear();
 	}
 
+	int TuningClientContext::getStateChangesQueueSize() const
+	{
+		int signalCount = static_cast<int>(m_signalToSourceIdMap.size());
+
+		return static_cast<int>(std::max(signalCount * 2, 20));
+	}
+
 	// ----------------------------------------------------------------------------------------------
 	//
 	// TuningClientContextMap class implementation
@@ -426,32 +467,73 @@ namespace Tuning
 	{
 		for(const auto& client : tss.clients)
 		{
-			TuningClientContext* clientContext = new TuningClientContext(client.equipmentID, client.uniqueSourcesIDs(), sources);
+			TuningClientContext* clientContext = new TuningClientContext(client.equipmentID,
+																		 client.uniqueSourcesIDs(),
+																		 sources);
 
-			insert(client.equipmentID, clientContext);
+			m_clientsContextMap.emplace(client.equipmentID, clientContext);
 		}
 	}
 
-	TuningClientContext* TuningClientContextMap::getClientContext(QString clientID) const
+	TuningClientContext* TuningClientContextMap::getClientContext(const QString& clientEquipmentID) const
 	{
-		TuningClientContext* clientContext = value(clientID, nullptr);
+		auto it = m_clientsContextMap.find(clientEquipmentID);
 
-		return clientContext;
+		if (it == m_clientsContextMap.end())
+		{
+			return nullptr;
+		}
+
+		return it->second;
+	}
+
+	void TuningClientContextMap::getAllClientContexts(QVector<const TuningClientContext*>& clientContexts) const
+	{
+		clientContexts.clear();
+
+		for(const auto& p: m_clientsContextMap)
+		{
+			TEST_PTR_CONTINUE(p.second);
+
+			clientContexts.append(p.second);
+		}
+	}
+
+	void TuningClientContextMap::setSourceThreadInTuningClientContexts(TuningSourceThreadShared thread)
+	{
+		for(const auto& p: m_clientsContextMap)
+		{
+			TEST_PTR_CONTINUE(p.second);
+
+			p.second->setSourceThread(thread);
+		}
+	}
+
+	void TuningClientContextMap::removeSourceThreadFromTuningClientContexts(const QString& tuningSourceID)
+	{
+		for(const auto& p: m_clientsContextMap)
+		{
+			TEST_PTR_CONTINUE(p.second);
+
+			p.second->removeSourceThread(tuningSourceID);
+		}
 	}
 
 	void TuningClientContextMap::clear()
 	{
-		for(TuningClientContext* clientContext : *this)
+		for(const auto& p : m_clientsContextMap)
 		{
+			TuningClientContext* clientContext = p.second;
+
 			if (clientContext == nullptr)
 			{
-				assert(false);
+				Q_ASSERT(false);
 				continue;
 			}
 
 			delete clientContext;
 		}
 
-		QHash<QString, TuningClientContext*>::clear();
+		m_clientsContextMap.clear();
 	}
 }

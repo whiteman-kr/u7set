@@ -11,6 +11,7 @@ namespace Tuning
 	// -------------------------------------------------------------------------------
 
 	const char* TcpTuningServer::SCM_CLIENT_ID = "SCM";
+	quint64 TcpTuningServer::m_staticTcpConnectionID = 0;
 
 	TcpTuningServer::TcpTuningServer(TuningServiceWorker& service,
 									 const TuningSources& tuningSources,
@@ -20,6 +21,8 @@ namespace Tuning
 		m_tuningSources(tuningSources),
 		m_logger(logger)
 	{
+		m_tcpConnectionID = ++m_staticTcpConnectionID;
+
 		prepareSignalGetter();
 	}
 
@@ -31,9 +34,20 @@ namespace Tuning
 	{
 	}
 
+	void TcpTuningServer::onConnection()
+	{
+		Tcp::Server::onConnection();
+
+		m_clientEquipmentID = connectedSoftwareInfo().equipmentID();
+
+		m_service.registerStateChangesQueue(m_clientEquipmentID, m_tcpConnectionID);
+	}
+
 	void TcpTuningServer::onDisconnection()
 	{
 		Tcp::Server::onDisconnection();
+
+		m_service.unregisterStateChangesQueue(m_clientEquipmentID, m_tcpConnectionID);
 
 		m_service.clientIsDisconnected(connectedSoftwareInfo(), peerAddr().addressStr());
 	}

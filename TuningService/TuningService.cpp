@@ -17,13 +17,15 @@ namespace Tuning
 											 CircularLoggerShared logger,
 											 CircularLoggerShared tuningLog) :
 		ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
-		m_tuningLog(tuningLog)
+		m_tuningLog(tuningLog),
+		m_signalsChangesQueue(10)		// will be resized
 	{
 	}
 
 	TuningServiceWorker::TuningServiceWorker(const TuningServiceWorker* worker) :
 		ServiceWorker(worker),
-		m_tuningLog(worker->tuningLog())
+		m_tuningLog(worker->tuningLog()),
+		m_signalsChangesQueue(10)		// will be resized
 	{
 	}
 
@@ -108,12 +110,7 @@ namespace Tuning
 
 	void TuningServiceWorker::getAllClientContexts(QVector<const TuningClientContext*>& clientContexts)
 	{
-		clientContexts.clear();
-
-		for(const TuningClientContext* clntContext : m_clientContextMap)
-		{
-			clientContexts.append(clntContext);
-		}
+		m_clientContextMap.getAllClientContexts(clientContexts);
 	}
 
 	bool TuningServiceWorker::singleLmControl() const
@@ -320,6 +317,22 @@ namespace Tuning
 		return m_serviceSettings.securityLevel;
 	}
 
+	void TuningServiceWorker::pushSignalStateChange(const TuningSignal::State& state, QThread* thread)
+	{
+		m_signalsChangesQueue.push(state, thread);
+	}
+
+	void TuningServiceWorker::registerStateChangesQueue(const QString& clientEquipmentID,
+														qint64 tcpConnectionID)
+	{
+
+	}
+
+	void TuningServiceWorker::unregisterStateChangesQueue(const QString& clientEquipmentID, qint64 tcpConnectionID)
+	{
+
+	}
+
 	void TuningServiceWorker::initialize()
 	{
 //		m_tuningPacketLog = std::make_shared<CircularLogger>();
@@ -382,6 +395,10 @@ namespace Tuning
 		DEBUG_LOG_MSG(logger(), QString("Apply new configuration"));
 
 		m_mainMutex.lock();
+
+		int signalsCount = std::max(newSources.getSignalsCount() * 2, 500);
+
+		m_signalsChangesQueue.resize(signalsCount);
 
 		buildServiceMaps(newSources);
 		runTuningSourceThreads();
@@ -715,30 +732,12 @@ namespace Tuning
 	{
 		TEST_PTR_RETURN(thread);
 
-		for(TuningClientContext* clientContext : m_clientContextMap)
-		{
-			if (clientContext == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			clientContext->setSourceThread(thread);
-		}
+		m_clientContextMap.setSourceThreadInTuningClientContexts(thread);
 	}
 
 	void TuningServiceWorker::removeSourceThreadFromTuningClientContexts(const QString& tuningSourceID)
 	{
-		for(TuningClientContext* clientContext : m_clientContextMap)
-		{
-			if (clientContext == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			clientContext->removeSourceThread(tuningSourceID);
-		}
+		m_clientContextMap.removeSourceThreadFromTuningClientContexts(tuningSourceID);
 	}
 
 	bool TuningServiceWorker::isSimulationMode() const
