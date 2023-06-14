@@ -126,7 +126,7 @@ namespace ClientLib
 
 	void TcpSignalClient::resetToGetSignalList()
 	{
-		QThread::msleep(RequestTimeInterval);
+		QThread::msleep(RequestTimeIntervalMs);
 
 		m_signalList.clear();
 		m_signalParamsLoaded.store(false);
@@ -140,7 +140,7 @@ namespace ClientLib
 
 	void TcpSignalClient::resetToGetState(bool resetStateIndex)
 	{
-		QThread::msleep(RequestTimeInterval);
+		QThread::msleep(RequestTimeIntervalMs);
 
 		if (resetStateIndex == true)
 		{
@@ -153,7 +153,7 @@ namespace ClientLib
 		}
 		else
 		{
-			// There is no signals stae to request list again
+			// There is no signals state to request list again.
 			//
 			resetToGetSignalList();
 		}
@@ -188,7 +188,7 @@ namespace ClientLib
 			return;
 		}
 
-		qDebug() << "----------------- processSignalListStart -----------------"  << this->serverAddressPort1().addressPortStr();;
+		qDebug() << "----------------- processSignalListStart -----------------" << this->serverAddressPort1().addressPortStr();;
 		qDebug() << "error: " << m_getSignalListStartReply.error();
 		qDebug() << "totalItemCount: " << m_getSignalListStartReply.totalitemcount();
 		qDebug() << "partCount: " << m_getSignalListStartReply.partcount();
@@ -327,7 +327,7 @@ namespace ClientLib
 
 		if (startIndex == 0)
 		{
-			//theSignals.reset();	no need to reset signal list, signals will be just updates,
+			// theSignals.reset();	no need to reset signal list, signals will be just updates,
 			// if new configuration arrives (ONLY than signal list can be changed) then all signals will be reset in
 			// AdsConnection::configurationArrived
 			//
@@ -428,12 +428,6 @@ namespace ClientLib
 			return;
 		}
 
-		//	optional int32 error = 1 [default = 0];
-		//	optional int64 serverTimeUtc = 2;
-		//	optional int64 serverTimeLocal = 3;
-		//	optional int32 pendingStatesCount = 4 [default = 0];
-		//	repeated Proto.AppSignalState appSignalStates = 5;		// Limited to ADS_GET_APP_SIGNAL_STATE_MAX (2000)
-
 		if (m_getSignalStateChangesReply.error() != 0)
 		{
 			qDebug() << "TcpSignalClient::processSignalStateChanges, error received: " << m_getSignalStateChangesReply.error();
@@ -446,7 +440,9 @@ namespace ClientLib
 
 		int signalStateCount = m_getSignalStateChangesReply.appsignalstates_size();
 
-		std::vector<AppSignalState> states;
+		thread_local std::vector<AppSignalState> states;
+
+		states.clear();
 		states.reserve(signalStateCount);
 
 		for (int i = 0; i < signalStateCount; i++)
@@ -459,7 +455,7 @@ namespace ClientLib
 
 		if (m_getSignalStateChangesReply.pendingstatescount() >= ADS_GET_APP_SIGNAL_STATE_MAX)
 		{
-			// A lot of signals are in teh event queue, request one more time
+			// A lot of signals are in the event queue, request one more time.
 			//
 			requestSignalStateChanges();
 		}
@@ -467,7 +463,7 @@ namespace ClientLib
 		{
 			// Update all signals
 			//
-			requestSignalState(m_lastSignalStateStartIndex + ADS_GET_APP_SIGNAL_STATE_MAX);
+			requestSignalState(m_lastSignalStateStartIndex + MaxStateRequestCount);
 		}
 
 		return;
@@ -487,9 +483,9 @@ namespace ClientLib
 		m_lastSignalStateStartIndex = startIndex;
 
 		m_getSignalStateRequest.mutable_signalhashes()->Clear();
-		m_getSignalStateRequest.mutable_signalhashes()->Reserve(ADS_GET_APP_SIGNAL_STATE_MAX);
+		m_getSignalStateRequest.mutable_signalhashes()->Reserve(MaxStateRequestCount);
 
-		for (int i = startIndex; i < startIndex + ADS_GET_APP_SIGNAL_STATE_MAX && i < std::ssize(m_signalList); i++)
+		for (int i = startIndex; i < startIndex + MaxStateRequestCount && i < std::ssize(m_signalList); i++)
 		{
 			Hash signalHash = m_signalList[i];
 			m_getSignalStateRequest.add_signalhashes(signalHash);
