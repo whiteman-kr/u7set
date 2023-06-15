@@ -72,14 +72,12 @@ namespace VFrame30
 	{
 		QString result = str;
 
-		QRegularExpression reStartIndex(R"(\$\([a-zA-Z0-9]+[\.]?[a-zA-Z0-9]*)");	// Search for $(SomeText[.][SomeText])
-
 		qsizetype index = 0;
 		while (index < result.size())
 		{
-			// Find macro bounds
+			// Find macro bounds, $(SomeText[.][SomeText])
 			//
-			qsizetype startIndexOfMacro = result.indexOf(reStartIndex, index);
+			qsizetype startIndexOfMacro = result.indexOf("$(", index);
 			if (startIndexOfMacro == -1)
 			{
 				break;

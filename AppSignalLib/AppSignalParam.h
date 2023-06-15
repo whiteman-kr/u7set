@@ -328,12 +328,23 @@ class AppSignalParam
 
 public:
 	AppSignalParam() = default;
+
+	// Shallow copy.
+	//
 	AppSignalParam(const AppSignalParam&) = default;
+	AppSignalParam(AppSignalParam&&) noexcept = default;
 	AppSignalParam(const AppSignal& signal);
+
+	AppSignalParam& operator=(const AppSignalParam&) = default;
+	AppSignalParam& operator=(AppSignalParam&&) noexcept = default;
 
 	bool load(const Proto::AppSignal& message);
 	void load(const AppSignal& signal);
 	void save(::Proto::AppSignal* message) const;
+
+	// Make a deep copy of the AppSignalParam.
+	//
+	AppSignalParam clone() const;
 
 	// Properties
 	//
@@ -341,19 +352,19 @@ public:
 	[[nodiscard]] Hash hash() const;
 	void setHash(Hash value);
 
-	[[nodiscard]] const QString& appSignalId() const;
+	[[nodiscard]] QString appSignalId() const;
 	void setAppSignalId(const QString& value);
 
-	[[nodiscard]] const QString& customSignalId() const;
+	[[nodiscard]] QString customSignalId() const;
 	void setCustomSignalId(const QString& value);
 
-	[[nodiscard]] const QString& caption() const;
+	[[nodiscard]] QString caption() const;
 	void setCaption(const QString& value);
 
-	[[nodiscard]] const QString& equipmentId() const;
+	[[nodiscard]] QString equipmentId() const;
 	void setEquipmentId(const QString& value);
 
-	[[nodiscard]] const QString& lmEquipmentId() const;
+	[[nodiscard]] QString lmEquipmentId() const;
 	void setLmEquipmentId(const QString& value);
 
 	[[nodiscard]] E::Channel channel() const;
@@ -378,11 +389,8 @@ public:
 	[[nodiscard]] E::ByteOrder byteOrder() const;
 	void setByteOrder(E::ByteOrder value);
 
-	[[nodiscard]] int unitId() const;
-	void setUnitId(int value);
-
-	[[nodiscard]] const QString& unit() const;
-	void setUnit(QString value);
+	[[nodiscard]] QString unit() const;
+	void setUnit(const QString& value);
 
 	[[nodiscard]] double lowValidRange() const;
 	[[nodiscard]] double highValidRange() const;
@@ -434,10 +442,8 @@ public:
 	[[nodiscard]] QVariant tuningHighBoundToVariant() const;
 	void setTuningHighBound(const TuningValue& value);
 
-	[[nodiscard]] const std::set<QString>& tags() const;
-	[[nodiscard]] std::set<QString>& mutableTags();
+	[[nodiscard]] std::set<QString> tags() const;
 	[[nodiscard]] QStringList tagStringList() const;
-
 	void setTags(std::set<QString> tags);
 
 public slots:
@@ -448,52 +454,63 @@ public:
 	static const int NO_UNIT_ID = 1;
 
 private:
-	Hash m_hash = UNDEFINED_HASH;				// Hash from m_appSignalId
-	QString m_appSignalId;
-	QString m_customSignalId;
-	QString m_caption;
-	QString m_equipmentId;
-	QString m_lmEquipmentId;
+	void detach();
 
-	E::Channel m_channel = E::Channel::A;
-	E::SignalInOutType m_inOutType = E::SignalInOutType::Internal;
-	E::SignalType m_signalType = E::SignalType::Analog;
-	E::AnalogAppSignalFormat m_analogSignalFormat = E::AnalogAppSignalFormat::Float32;
-	E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
+	struct PrivateData
+	{
+		bool load(const Proto::AppSignal& message);
+		void load(const AppSignal& signal);
+		void save(::Proto::AppSignal* message) const;
 
-	QString m_unit;
+		Hash m_hash = UNDEFINED_HASH;				// Hash from m_appSignalId
+		QString m_appSignalId;
+		QString m_customSignalId;
+		QString m_caption;
+		QString m_equipmentId;
+		QString m_lmEquipmentId;
 
-	double m_lowValidRange = 0;
-	double m_highValidRange = 100;
-	double m_lowEngineeringUnits = 0;
-	double m_highEngineeringUnits = 100;
+		E::Channel m_channel = E::Channel::A;
+		E::SignalInOutType m_inOutType = E::SignalInOutType::Internal;
+		E::SignalType m_signalType = E::SignalType::Analog;
+		E::AnalogAppSignalFormat m_analogSignalFormat = E::AnalogAppSignalFormat::Float32;
+		E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
 
-	double m_electricLowLimit = 0;									// low electric value for input range
-	double m_electricHighLimit = 0;									// high electric value for input range
-	E::ElectricUnit m_electricUnit = E::ElectricUnit::NoUnit;		// electric unit for input range (mA, mV, Ohm, V ....)
-	E::SensorType m_sensorType = E::SensorType::NoSensor;			// electric sensor type for input range (was created for m_inputUnitID)
+		QString m_unit;
 
-	double m_outputLowLimit = 0;									// low physical value for output range
-	double m_outputHighLimit = 0;									// high physical value for output range
-	int m_outputUnitId = NO_UNIT_ID;								// physical unit for output range (kg, mm, Pa ...)
-	E::OutputMode m_outputMode = E::OutputMode::Plus0_Plus5_V;		// output electric range (or mode ref. OutputModeStr[])
-	E::SensorType m_outputSensorType = E::SensorType::NoSensor;		// electric sensor type for output range (was created for m_outputMode)
+		double m_lowValidRange = 0;
+		double m_highValidRange = 100;
+		double m_lowEngineeringUnits = 0;
+		double m_highEngineeringUnits = 100;
 
-	int m_precision = 2;
-	double m_coarseAperture = 1;
-	double m_fineAperture = 0.5;
-	double m_filteringTime = 0.005;
-	double m_spreadTolerance = 2;
-	bool m_enableTuning = false;
-	bool m_isEndpoint = false;
-	TuningValue m_tuningDefaultValue;
-	TuningValue m_tuningLowBound;
-	TuningValue m_tuningHighBound;
+		double m_electricLowLimit = 0;									// low electric value for input range
+		double m_electricHighLimit = 0;									// high electric value for input range
+		E::ElectricUnit m_electricUnit = E::ElectricUnit::NoUnit;		// electric unit for input range (mA, mV, Ohm, V ....)
+		E::SensorType m_sensorType = E::SensorType::NoSensor;			// electric sensor type for input range (was created for m_inputUnitID)
 
-	QString m_specPropStruct;
-	QByteArray m_specPropValues;
+		double m_outputLowLimit = 0;									// low physical value for output range
+		double m_outputHighLimit = 0;									// high physical value for output range
+		int m_outputUnitId = NO_UNIT_ID;								// physical unit for output range (kg, mm, Pa ...)
+		E::OutputMode m_outputMode = E::OutputMode::Plus0_Plus5_V;		// output electric range (or mode ref. OutputModeStr[])
+		E::SensorType m_outputSensorType = E::SensorType::NoSensor;		// electric sensor type for output range (was created for m_outputMode)
 
-	std::set<QString> m_tags;
+		int m_precision = 2;
+		double m_coarseAperture = 1;
+		double m_fineAperture = 0.5;
+		double m_filteringTime = 0.005;
+		double m_spreadTolerance = 2;
+		bool m_enableTuning = false;
+		bool m_isEndpoint = false;
+		TuningValue m_tuningDefaultValue;
+		TuningValue m_tuningLowBound;
+		TuningValue m_tuningHighBound;
+
+		QString m_specPropStruct;
+		QByteArray m_specPropValues;
+
+		std::set<QString> m_tags;
+	};
+
+	std::shared_ptr<PrivateData> m_data = std::make_shared<PrivateData>();
 };
 
 Q_DECLARE_METATYPE(AppSignalParam)

@@ -87,7 +87,7 @@ namespace ClientLib
 		virtual void addRecentAppSignal(Hash hash) override;
 		virtual void addRecentAppSignals(const std::vector<Hash>& hashes) override;
 
-		virtual std::vector<Hash> recentlyUsedAppSignals(const QString& appDataServivceId) override;
+		virtual std::vector<Hash> recentlyUsedAppSignals(const QString& appDataServiceId) override;
 
 		//
 		// End of IRecentAppSignals implementation
@@ -152,6 +152,10 @@ namespace ClientLib
 		virtual bool dataServiceHasSignal(const QString& serviceEquipmentId, const QString& appSignalId) const override;
 		virtual bool dataServiceHasSignal(const QString& serviceEquipmentId, Hash signalHash) const override;
 
+		/// Extension, not part of ISignalDataServer, at least yet.
+		///
+		void filterByDataService(const QString& serviceEquipmentId, std::vector<Hash>& inOutSignalHashes) const;
+
 		/// Get all signals for the specified DataServiceID (AppDataService or DiagDataService).
 		///
 		virtual std::vector<Hash> dataServiceSignals(const QString& serviceEquipmentId) const override;
@@ -196,7 +200,7 @@ namespace ClientLib
 		HasLogFile m_logFile;
 
 		mutable QReadWriteLock m_paramsLocker;
-		std::unordered_map<Hash, AppSignalParam, VoidHasher<Hash>> m_signalParams;	// Key is hash from AppSignalID
+		std::unordered_map<Hash, const AppSignalParam, VoidHasher<Hash>> m_signalParams;	// Key is hash from AppSignalID
 		std::unordered_map<QString, QString> m_signalParamByEquipmentId;			// Key is EquipmentId - value is AppSignalID
 		std::unordered_map<QString, QStringList> m_tagToAppSignals;					// Key is tag - value is list of AppSignalIDs with this tag
 		std::set<QString> m_tags;													// All tags for received AppSignals

@@ -43,7 +43,7 @@ bool TuningSignalManager::load(const ::Proto::AppSignalSet& message)
 
 	bool ok = true;
 
-	std::unordered_map<Hash, AppSignalParam> loadedSignals;
+	std::unordered_map<Hash, const AppSignalParam> loadedSignals;
 	loadedSignals.reserve(message.appsignal_size());
 
 	std::unordered_map<QString, QStringList> tagToAppSignals;
@@ -55,14 +55,23 @@ bool TuningSignalManager::load(const ::Proto::AppSignalSet& message)
 
 		Hash hash = ::calcHash(QString::fromStdString(appSignalMessage.appsignalid()));
 
-		AppSignalParam& appSignalParam = loadedSignals[hash];
-		ok &= appSignalParam.load(appSignalMessage);
+		AppSignalParam appSignalParam;
+		
+		bool loadSignalOk = appSignalParam.load(appSignalMessage);
+		ok &= loadSignalOk;
+
+		if (loadSignalOk == false)
+		{
+			continue;
+		}
+
+		loadedSignals.emplace(hash, appSignalParam);
 
 		// Add tags to m_signaIdsByTag
 		//
 		const QString& appSignalId = appSignalParam.appSignalId();
 
-		for (const std::set<QString>& tags = appSignalParam.tags();
+		for (const auto& tags = appSignalParam.tags();
 			 const QString& tag : tags)
 		{
 			QStringList& l = tagToAppSignals[tag];
