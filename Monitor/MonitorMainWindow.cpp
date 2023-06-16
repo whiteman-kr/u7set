@@ -102,7 +102,7 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 
 	m_configController.start();
 
-	m_updateStatusBarTimerId = startTimer(100);
+	m_updateStatusBarTimerId = startTimer(200);
 
 	// Create SchemaList dock widget
 	//

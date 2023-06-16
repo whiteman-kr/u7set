@@ -145,7 +145,7 @@ namespace ClientLib
 
 	std::vector<Hash> RecentUsed::hashes() const
 	{
-		// Restart timer, it indicates that sometheng is fetching data, so this recent thing shoud work.
+		// Restart timer, it indicates that something is fetching data, so this recent thing should work.
 		//
 		m_lastTimeDataFetched.restart();
 
@@ -173,6 +173,7 @@ namespace ClientLib
 
 		{
 			QWriteLocker wl(&m_statesLocker);
+			m_states.max_load_factor(0.75);
 			m_states.reserve(64000);
 		}
 
@@ -233,10 +234,10 @@ namespace ClientLib
 
 	void AppSignalManager::addSignalPrivate(const AppSignalParam& appSignal, const QString& appDataServiceId)
 	{
-		m_signalParams[appSignal.hash()] = appSignal;
+		m_signalParams.emplace(appSignal.hash(), appSignal);
 
 		// Actually, EquipmentID does not starts from the symbol '@',
-		// but we need it particularly for Monitor to distinct AppSignalID from EquimpentID.
+		// but we need it particularly for Monitor to distinct AppSignalID from EquipmentID.
 		//
 		m_signalParamByEquipmentId[QStringLiteral("@") + appSignal.equipmentId()] = appSignal.appSignalId();
 
@@ -280,7 +281,7 @@ namespace ClientLib
 		m_recentUsed.add(hashes);
 	}
 
-	std::vector<Hash> AppSignalManager::recentlyUsedAppSignals(const QString& appDataServivceId)
+	std::vector<Hash> AppSignalManager::recentlyUsedAppSignals(const QString& appDataServiceId)
 	{
 		std::vector<Hash> result;
 
@@ -291,11 +292,8 @@ namespace ClientLib
 			result = m_recentUsed.hashes();
 		}
 
-		std::erase_if(result, [&appDataServivceId, this](Hash hash)
-			{
-				return !this->dataServiceHasSignal(appDataServivceId, hash);
-			});
-
+		filterByDataService(appDataServiceId, result);
+	
 		return result;
 	}
 
@@ -728,6 +726,28 @@ namespace ClientLib
 		}
 
 		return it->second.contains(signalHash);
+	}
+
+	void AppSignalManager::filterByDataService(const QString& serviceEquipmentId, std::vector<Hash>& inOutSignalHashes) const
+	{
+		QReadLocker rl(&m_paramsLocker);
+
+		auto it = m_appDataServiceToSignalHashList.find(serviceEquipmentId);
+		if (it == m_appDataServiceToSignalHashList.end())
+		{
+			inOutSignalHashes.clear();
+			return;
+		}
+
+		const std::unordered_set<Hash>& sh = it->second;
+
+		// Filter all signals which are not belong to serviceEquipmentId.
+		//
+		std::erase_if(inOutSignalHashes, [&sh, this](Hash hash) {
+			return sh.contains(hash) == false;
+		});
+
+		return;
 	}
 
 	std::vector<Hash> AppSignalManager::dataServiceSignals(const QString& serviceEquipmentId) const

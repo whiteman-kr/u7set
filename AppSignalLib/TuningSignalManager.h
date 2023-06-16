@@ -130,7 +130,7 @@ private:
 	// Objects storage
 	//
 	mutable QReadWriteLock m_signalsLock;							// For access to m_signals
-	std::unordered_map<Hash, AppSignalParam> m_signals;
+	std::unordered_map<Hash, const AppSignalParam> m_signals;
 	std::unordered_map<QString, QStringList> m_tagToAppSignals;		// Key is tag - value is list of AppSignalIDs with this tag
 
 	// States storage

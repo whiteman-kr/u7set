@@ -144,6 +144,7 @@ SchemaViewWidget::SchemaViewWidget(std::shared_ptr<Schema> schema, QWidget* pare
 	QWidget(parent),
 	SchemaView(schema)
 {
+	setAttribute(Qt::WA_OpaquePaintEvent);
 	setMouseTracking(true);
 	return;
 }
@@ -351,9 +352,9 @@ void SchemaViewWidget::draw(CDrawParam& drawParam, const QRectF& clipRect)
 
 	// Clear device
 	//
-	p->fillRect(QRectF(0, 0, widthInPixel + 1, heightInPixel + 1), QColor(0xB0, 0xB0, 0xB0));
+	//p->fillRect(QRectF(0, 0, widthInPixel + 1, heightInPixel + 1), QColor(0xB0, 0xB0, 0xB0));
 
-	// Ajust QPainter
+	// Adjust QPainter.
 	//
 	Ajust(p, schema()->unit(), 0, 0, zoom());
 
