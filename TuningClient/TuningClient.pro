@@ -57,6 +57,7 @@ SOURCES +=\
     LogonWorkspace.cpp \
 	MainWindow.cpp \
     ScriptTuningClientApplication.cpp \
+    TreeFilterWidget.cpp \
     TuningConfigController.cpp \
     TuningPage.cpp \
     Settings.cpp \
@@ -94,6 +95,7 @@ HEADERS  += MainWindow.h \
     LogonWorkspace.h \
     ScriptTuningClientApplication.h \
     Stable.h \
+    TreeFilterWidget.h \
     TuningConfigController.h \
     TuningPage.h \
     Settings.h \

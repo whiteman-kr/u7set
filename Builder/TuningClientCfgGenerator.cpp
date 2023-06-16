@@ -336,6 +336,10 @@ namespace Builder
 
 	bool TuningClientCfgGenerator::writeObjectFilters(const TuningSignalManager &tuningSignalManager)
 	{
+		// Create counter filters for schemas and equipment from templates
+
+		m_tuningFilterStorage.createCounterFiltersFromTemplates();
+
 		// Count all hashes contained in filters and save them
 
 		m_tuningFilterStorage.createSignalsAndEqipmentHashes(tuningSignalManager,

@@ -64,7 +64,7 @@ void DialogFilterEditor::onGetCurrentSignalValue(Hash appSignalHash, TuningValue
 {
     *ok = true;
 
-	TuningSignalState tss = m_tuningSignalManager.state(appSignalHash, ok);
+	TuningSignalState tss = m_tuningSignalManager.queuedState(appSignalHash, ok);
 
 	if (*ok == false)
 	{

@@ -55,6 +55,7 @@ HEADERS += \
 	AppSignal.h \
 	AppSignalParam.h \
     TuningSignalManager.h \
+    RecentUsed.h \
 	TuningValue.h \
 	TuningSignalState.h \
 	SimpleAppSignalState.h \
@@ -65,6 +66,7 @@ SOURCES += \
 	AppSignalStateFlags.cpp \
     ComparatorSet.cpp \
     TuningSignalManager.cpp \
+    RecentUsed.cpp \
 	TuningValue.cpp \
 	TuningSignalState.cpp \
 	SimpleAppSignalState.cpp \

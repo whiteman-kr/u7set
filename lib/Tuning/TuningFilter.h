@@ -418,14 +418,15 @@ public:
 
 	void checkFilterSignals(const std::vector<Hash>& signalHashes, std::vector<std::pair<QString, QString> >& notFoundSignalsAndFilters);
 
+	void createCounterFiltersFromTemplates();
+
 	void createSignalsAndEqipmentHashes(const TuningSignalManager &objects,
 										const std::vector<Hash> &allHashes,
 										TuningFilter *filter,
 										TuningFilter::Source source);
+
 protected:
-
 	std::shared_ptr<TuningFilter> m_root = nullptr;
-
 	std::vector<VFrame30::SchemaDetails> m_schemasDetails;
 };
 

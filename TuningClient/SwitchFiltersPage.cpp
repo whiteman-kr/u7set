@@ -119,7 +119,7 @@ SwitchFiltersPage::SwitchFiltersPage(TuningConfigController& configController,
 
 	createControls(m_tuningFilterStorage.root());
 
-	connect(theMainWindow, &MainWindow::timerTick500, this, &SwitchFiltersPage::onTimerTick500);
+	connect(theMainWindow, &MainWindow::timerTick500, this, &SwitchFiltersPage::onTimer);
 
 	setLayout(m_mainLayout);
 }
@@ -685,7 +685,7 @@ int SwitchFiltersPage::countDiscretes(TuningFilter* filter)
 
 	std::vector <TuningFilterSignal> filterSignals = filter->getFilterSignals();
 
-	for (auto tfs : filterSignals)
+	for (const auto& tfs : filterSignals)
 	{
 		bool ok = false;
 
@@ -716,7 +716,7 @@ int SwitchFiltersPage::countWritingEnabled(TuningFilter* filter)
 
 	std::vector <TuningFilterSignal> filterSignals = filter->getFilterSignals();
 
-	for (auto tfs : filterSignals)
+	for (const auto& tfs : filterSignals)
 	{
 		bool ok = false;
 
@@ -749,7 +749,7 @@ void SwitchFiltersPage::showEvent(QShowEvent *ev)
 {
 	Q_UNUSED(ev);
 
-	onTimerTick500();
+	onTimer();
 }
 
 void SwitchFiltersPage::onOptions()
@@ -773,7 +773,7 @@ void SwitchFiltersPage::onOptions()
 		m_prevButton->setVisible(m_buttonFilters.size() > theSettings.m_switchPresetsPageColCount * theSettings.m_switchPresetsPageRowCount);
 		m_nextButton->setVisible(m_buttonFilters.size() > theSettings.m_switchPresetsPageColCount * theSettings.m_switchPresetsPageRowCount);
 
-		onTimerTick500();
+		onTimer();
 	}
 }
 
@@ -785,7 +785,7 @@ void SwitchFiltersPage::onPrev()
 
 		createButtons();
 
-		onTimerTick500();
+		onTimer();
 	}
 }
 void SwitchFiltersPage::onNext()
@@ -796,7 +796,7 @@ void SwitchFiltersPage::onNext()
 
 		createButtons();
 
-		onTimerTick500();
+		onTimer();
 	}
 }
 
@@ -805,7 +805,7 @@ void SwitchFiltersPage::onApply()
 	apply();
 }
 
-void SwitchFiltersPage::onTimerTick500()
+void SwitchFiltersPage::onTimer()
 {
 	if  (isVisible() == false)
 	{

@@ -74,12 +74,12 @@ bool TuningModelSorter::sortFunction(const TuningModelHashSet& set1, const Tunin
 
 	if (ok1 == true && set1.hash[valueColumnIndex] != UNDEFINED_HASH)
 	{
-		tss1 = m_tuningSignalManager.state(set1.hash[valueColumnIndex], &ok1);
+		tss1 = m_tuningSignalManager.queuedState(set1.hash[valueColumnIndex], &ok1);
 	}
 
 	if (ok2 == true && set2.hash[valueColumnIndex] != UNDEFINED_HASH)
 	{
-		tss2 = m_tuningSignalManager.state(set2.hash[valueColumnIndex], &ok2);
+		tss2 = m_tuningSignalManager.queuedState(set2.hash[valueColumnIndex], &ok2);
 	}
 
 	//

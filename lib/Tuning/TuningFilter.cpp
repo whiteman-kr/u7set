@@ -974,6 +974,7 @@ bool TuningFilter::match(const AppSignalParam& object) const
 	{
 		return false;
 	}
+
 	if (signalType() == TuningFilter::SignalType::Discrete && object.isAnalog() == true)
 	{
 		return false;
@@ -2300,6 +2301,57 @@ void TuningFilterStorage::checkFilterSignals(const std::vector<Hash>& signalHash
 	m_root->checkSignals(signalHashes, notFoundSignalsAndFilters);
 }
 
+void TuningFilterStorage::createCounterFiltersFromTemplates()
+{
+	std::vector<std::shared_ptr<TuningFilter>> templateFilters;
+
+	// Find counter templates
+
+	int count = m_root->childFiltersCount();
+	for (int i = count - 1; i >= 0; i--)
+	{
+		std::shared_ptr<TuningFilter> f = m_root->childFilter(i);
+
+		if (f->isCounter() == true && f->counterType() == TuningFilter::CounterType::FilterTree)
+		{
+			templateFilters.insert(templateFilters.begin(), f);
+		}
+	}
+
+	// Add counter filters to every schema and equipment filter
+
+	count = m_root->childFiltersCount();
+
+	for (int i = 0; i < count; i++)
+	{
+		std::shared_ptr<TuningFilter> f = m_root->childFilter(i);
+
+		if (f->isSourceSchema() == true || f->isSourceEquipment() == true) // This is parent schemas or equipment filter
+		{
+			Q_ASSERT(f->hasDiscreteCounter() == false);
+
+			int schemaCount = f->childFiltersCount();
+
+			for (int s = 0; s < schemaCount; s++)
+			{
+				std::shared_ptr<TuningFilter> sf = f->childFilter(s);
+
+				Q_ASSERT(sf->hasDiscreteCounter() == false);
+
+				Q_ASSERT(sf->isSourceSchema() == true || sf->isSourceEquipment() == true);
+
+				for (auto& tf: templateFilters)
+				{
+					std::shared_ptr<TuningFilter> cf = std::make_shared<TuningFilter>(*tf);
+					sf->addChild(cf);
+				}
+			}
+		}
+	}
+
+	return;
+}
+
 void TuningFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalManager& objects,
                                                          const std::vector<Hash>& allHashes,
                                                          TuningFilter* filter,
@@ -2409,4 +2461,3 @@ void TuningFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalManag
         createSignalsAndEqipmentHashes(objects, signalsHashes, filter->childFilter(i).get(), source);
     }
 }
-
