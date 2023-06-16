@@ -13,26 +13,31 @@ namespace Tuning
 	{
 		TEST_PTR_RETURN(tss);
 
+		tss->set_signalhash(signalHash);
+		tss->set_error(TO_INT(E::NetworkError::UnknownSignalHash));
 		tss->set_valid(valid);
 
 		currentValue.save(tss->mutable_value());
 		readLowBound.save(tss->mutable_readlowbound());
 		readHighBound.save(tss->mutable_readhighbound());
 
-		tss->set_tuningdefault(tuningDefaultFlag);
+		tss->set_writeinprogress(writeInProgress());
+		tss->set_writeerrorcode(TO_INT(writeErrorCode));
+		tss->set_writeclient(lastWriteClient);
 
 		tss->set_successfulreadtime(successfulReadTime);
 		tss->set_writerequesttime(writeRequestTime);
 		tss->set_successfulwritetime(successfulWriteTime);
 		tss->set_unsuccessfulwritetime(unsuccessfulWriteTime);
+
+		tss->set_setsor(setSOR);
+		tss->set_writingdisabled(writingDisabled);
+
+		tss->set_tuningdefault(tuningDefaultFlag);
+
 		tss->set_lmtime(lmTime);
 		tss->set_fotipprocessingnumerator(fotipProcessingNumerator);
-
-		tss->set_writeinprogress(writeInProgress());
-		tss->set_writeerrorcode(TO_INT(writeErrorCode));
-		tss->set_writeclient(lastWriteClient);
 	}
-
 
 	// ----------------------------------------------------------------------------------
 	//

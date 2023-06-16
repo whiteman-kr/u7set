@@ -35,15 +35,16 @@ namespace Tuning
 		virtual void onConnectedSoftwareInfoChanged() override;
 
 		void onGetTuningSourcesInfoRequest(const char* requestData, quint32 requestDataSize);
-		void onGetTuningSourcesStateRequest(const char *requestData, quint32 requestDataSize);
-		void onTuningSignalsReadRequest(const char *requestData, quint32 requestDataSize);
-		void onTuningSignalsWriteRequest(const char *requestData, quint32 requestDataSize);
-		void onTuningSignalsApplyRequest(const char *requestData, quint32 requestDataSize);
-		void onChangeControlledTuningSourceRequest(const char *requestData, quint32 requestDataSize);
-		void onGetTuningServiceSettings(const char *requestData, quint32 requestDataSize);
+		void onGetTuningSourcesStateRequest(const char* requestData, quint32 requestDataSize);
+		void onTuningSignalsReadRequest(const char* requestData, quint32 requestDataSize);
+		void onGetTuningSignalsStateChangesRequest(const char* requestData, quint32 requestDataSize);
+		void onTuningSignalsWriteRequest(const char* requestData, quint32 requestDataSize);
+		void onTuningSignalsApplyRequest(const char* requestData, quint32 requestDataSize);
+		void onChangeControlledTuningSourceRequest(const char* requestData, quint32 requestDataSize);
+		void onGetTuningServiceSettings(const char* requestData, quint32 requestDataSize);
 
-		void onGetTuningSourceFilling(const char *requestData, quint32 requestDataSize);
-		void onGetTuningSignalParam(const char *requestData, quint32 requestDataSize);
+		void onGetTuningSourceFilling(const char* requestData, quint32 requestDataSize);
+		void onGetTuningSignalParam(const char* requestData, quint32 requestDataSize);
 
 		void prepareSignalGetter();
 
@@ -56,13 +57,14 @@ namespace Tuning
 
 		//
 
-		static const char* SCM_CLIENT_ID;
+		static const QString SCM_CLIENT_ID;
 
 		static quint64 m_staticTcpConnectionID;
 
-		quint64 m_tcpConnectionID = 0;
+		QThread* m_thread = nullptr;
 
 		QString m_clientEquipmentID;
+		quint64 m_tcpConnectionID = 0;
 
 		//
 
@@ -98,6 +100,8 @@ namespace Tuning
 		Network::GetAppSignalParamReply m_getAppSignalParamReply;
 
 		Network::ServiceSettings m_getServiceSettingsReply;
+
+		Network::GetTuningSignalsStateChangesReply m_getStateChangesReply;
 	};
 
 	// -------------------------------------------------------------------------------

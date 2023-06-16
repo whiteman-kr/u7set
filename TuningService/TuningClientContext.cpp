@@ -361,6 +361,42 @@ namespace Tuning
 		m_stateChangesQueueMap.erase(it);
 	}
 
+	void TuningClientContext::pushSignalStateChange(const TuningSignal::State& state, QThread* thread)
+	{
+		Q_ASSERT(m_signalToSourceIdMap.find(state.signalHash) != m_signalToSourceIdMap.end());
+
+		AUTO_LOCK_BY_THREAD(m_queueMapMutex, thread);
+
+		for(auto& p : m_stateChangesQueueMap)
+		{
+			TuningSignalsChangesQueue* queue = p.second;
+
+			TEST_PTR_CONTINUE(queue);
+
+			queue->push(state, thread);
+		}
+	}
+
+	TuningSignalsChangesQueue* TuningClientContext::getSignalChangesQueue(qint64 tcpConnectionID)
+	{
+		AUTO_LOCK_BY_CURRENT_THREAD(m_queueMapMutex);
+
+		auto it = m_stateChangesQueueMap.find(tcpConnectionID);
+
+		if(it == m_stateChangesQueueMap.end())
+		{
+			Q_ASSERT(false);
+			return nullptr;
+		}
+
+		return it->second;
+	}
+
+	const std::map<Hash, QString>& TuningClientContext::signalToSourceIdMap() const
+	{
+		return m_signalToSourceIdMap;
+	}
+
 	TuningSourceThreadShared TuningClientContext::getSourceThread(const QString& sourceID) const
 	{
 		auto it = m_sourceThreadMap.find(sourceID);
@@ -444,7 +480,7 @@ namespace Tuning
 	{
 		int signalCount = static_cast<int>(m_signalToSourceIdMap.size());
 
-		return static_cast<int>(std::max(signalCount * 2, 20));
+		return static_cast<int>(std::max(signalCount * 2, 100));
 	}
 
 	// ----------------------------------------------------------------------------------------------
@@ -472,6 +508,24 @@ namespace Tuning
 																		 sources);
 
 			m_clientsContextMap.emplace(client.equipmentID, clientContext);
+
+			const std::map<Hash, QString>& signalsMap = clientContext->signalToSourceIdMap();
+
+			for(const auto& p : signalsMap)
+			{
+				Hash signalHash = p.first;
+
+				auto it = m_signalToClientContextMap.find(signalHash);
+
+				if (it == m_signalToClientContextMap.end())
+				{
+					auto res = m_signalToClientContextMap.emplace(signalHash, std::set<TuningClientContext*>());
+
+					it = res.first;
+				}
+
+				it->second.insert(clientContext);
+			}
 		}
 	}
 
@@ -521,6 +575,8 @@ namespace Tuning
 
 	void TuningClientContextMap::clear()
 	{
+		m_signalToClientContextMap.clear();
+
 		for(const auto& p : m_clientsContextMap)
 		{
 			TuningClientContext* clientContext = p.second;
@@ -536,4 +592,22 @@ namespace Tuning
 
 		m_clientsContextMap.clear();
 	}
+
+	void TuningClientContextMap::pushSignalStateChange(const TuningSignal::State& state, QThread* thread)
+	{
+		auto it = m_signalToClientContextMap.find(state.signalHash);
+
+		if (it == m_signalToClientContextMap.end())
+		{
+			return;
+		}
+
+		std::set<TuningClientContext*>& contexts = it->second;
+
+		for(TuningClientContext* context : contexts)
+		{
+			context->pushSignalStateChange(state, thread);
+		}
+	}
+
 }

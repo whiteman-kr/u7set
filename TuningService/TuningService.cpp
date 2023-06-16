@@ -17,15 +17,13 @@ namespace Tuning
 											 CircularLoggerShared logger,
 											 CircularLoggerShared tuningLog) :
 		ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
-		m_tuningLog(tuningLog),
-		m_signalsChangesQueue(10)		// will be resized
+		m_tuningLog(tuningLog)
 	{
 	}
 
 	TuningServiceWorker::TuningServiceWorker(const TuningServiceWorker* worker) :
 		ServiceWorker(worker),
-		m_tuningLog(worker->tuningLog()),
-		m_signalsChangesQueue(10)		// will be resized
+		m_tuningLog(worker->tuningLog())
 	{
 	}
 
@@ -317,28 +315,42 @@ namespace Tuning
 		return m_serviceSettings.securityLevel;
 	}
 
-	void TuningServiceWorker::pushSignalStateChange(const TuningSignal::State& state, QThread* thread)
-	{
-		m_signalsChangesQueue.push(state, thread);
-	}
-
-	void TuningServiceWorker::registerStateChangesQueue(const QString& clientEquipmentID,
+	void TuningServiceWorker::registerSignalsStateChangesQueue(const QString& clientEquipmentID,
 														qint64 tcpConnectionID)
 	{
+		TuningClientContext* clientContext = m_clientContextMap.getClientContext(clientEquipmentID);
 
+		TEST_PTR_RETURN(clientContext);
+
+		clientContext->registerStateChangesQueue(tcpConnectionID);
 	}
 
-	void TuningServiceWorker::unregisterStateChangesQueue(const QString& clientEquipmentID, qint64 tcpConnectionID)
+	void TuningServiceWorker::unregisterSignalsStateChangesQueue(const QString& clientEquipmentID, qint64 tcpConnectionID)
 	{
+		TuningClientContext* clientContext = m_clientContextMap.getClientContext(clientEquipmentID);
 
+		TEST_PTR_RETURN(clientContext);
+
+		clientContext->unregisterStateChangesQueue(tcpConnectionID);
+	}
+
+	void TuningServiceWorker::pushSignalStateChange(const TuningSignal::State& state, QThread* thread)
+	{
+		m_clientContextMap.pushSignalStateChange(state, thread);
+	}
+
+	TuningSignalsChangesQueue* TuningServiceWorker::getSignalChangesQueue(const QString& clientEquipmentID,
+																		  qint64 tcpConnectionID)
+	{
+		TuningClientContext* clientContext = m_clientContextMap.getClientContext(clientEquipmentID);
+
+		TEST_PTR_RETURN_NULLPTR(clientContext);
+
+		return clientContext->getSignalChangesQueue(tcpConnectionID);
 	}
 
 	void TuningServiceWorker::initialize()
 	{
-//		m_tuningPacketLog = std::make_shared<CircularLogger>();
-//		LOGGER_INIT(m_tuningPacketLog, QString("TuningPacket"), Service::getInstanceID(argc(), argv()));
-//		m_tuningPacketLog->setLogCodeInfo(false);
-
 		runCfgLoaderThread();
 	}
 
@@ -395,10 +407,6 @@ namespace Tuning
 		DEBUG_LOG_MSG(logger(), QString("Apply new configuration"));
 
 		m_mainMutex.lock();
-
-		int signalsCount = std::max(newSources.getSignalsCount() * 2, 500);
-
-		m_signalsChangesQueue.resize(signalsCount);
 
 		buildServiceMaps(newSources);
 		runTuningSourceThreads();

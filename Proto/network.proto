@@ -555,7 +555,6 @@ message TuningSignalState
 	optional bool writingDisabled = 15 [default = false];
 
 	optional bool tuningDefault = 16 [default = false];			// flag, sets to 1 if current tunable signal value is equal to tuning default value,
-																// else sets to 0
 
 	optional sfixed64 lmTime = 17 [default = 0];
 	optional fixed64 fotipProcessingNumerator = 18 [default = 0];
@@ -565,6 +564,20 @@ message TuningSignalsReadReply
 {
     optional int32 error = 1 [default = 0];
     repeated TuningSignalState tuningSignalState = 2;
+	optional int32 pendingSignalsStateChanges = 3 [default = 0];
+}
+
+// Get tuning signals state changes request - TDS_GET_SIGNALS_STATE_CHANGES
+//
+message GetTuningSignalsStateChangesRequest
+{
+}
+
+message GetTuningSignalsStateChangesReply
+{
+	optional int32 error = 1 [default = 0];
+	repeated TuningSignalState tuningSignalState = 2;
+	optional int32 pendingSignalsStateChanges = 3 [default = 0];
 }
 
 // Write tuning signals request - TDS_TUNING_SIGNALS_WRITE

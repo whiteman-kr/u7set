@@ -65,10 +65,12 @@ namespace Tuning
 
 		E::SecurityLevel securityLevel() const;
 
+		void registerSignalsStateChangesQueue(const QString& clientEquipmentID, qint64 tcpConnectionID);
+		void unregisterSignalsStateChangesQueue(const QString& clientEquipmentID, qint64 tcpConnectionID);
+
 		void pushSignalStateChange(const TuningSignal::State& state, QThread* thread);
 
-		void registerStateChangesQueue(const QString& clientEquipmentID, qint64 tcpConnectionID);
-		void unregisterStateChangesQueue(const QString& clientEquipmentID, qint64 tcpConnectionID);
+		TuningSignalsChangesQueue* getSignalChangesQueue(const QString& clientEquipmentID, qint64 tcpConnectionID);
 
 	private:
 		virtual void initServiceSpecificCmdLineArgs() override;
@@ -139,8 +141,6 @@ namespace Tuning
 		mutable QMutex m_mainMutex;
 
 		std::vector<TuningSocketListenerThread*> m_socketListenerThreads;
-
-		TuningSignalsChangesQueue m_signalsChangesQueue;
 
 		TuningClientContextMap m_clientContextMap;
 
