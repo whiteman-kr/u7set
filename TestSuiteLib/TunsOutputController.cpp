@@ -9,7 +9,7 @@ namespace TestSuite
 											   ILogFile* logFile):
 		m_signalManager{softwareInfo.equipmentID(), logFile},
 		m_appLog{logFile, "TunsOutputController"},
-		m_connection{m_signalManager, m_signalManager, logFile, &m_tuningLogStub}
+		m_connection{m_signalManager, m_signalManager, m_signalManager, logFile, &m_tuningLogStub}
 	{
 		m_signalManager.load(signalsFile);
 
