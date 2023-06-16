@@ -134,7 +134,7 @@ namespace ClientLib
 
 		for (const auto&[hash, lastAccessTime] : m_signalToTime)
 		{
-			if (now - lastAccessTime > 3000ms.count())
+			if (now - lastAccessTime > ExpiredTimeMs)
 			{
 				hashesToRemove.push_back(hash);
 			}
