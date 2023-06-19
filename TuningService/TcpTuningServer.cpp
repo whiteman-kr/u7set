@@ -399,12 +399,12 @@ namespace Tuning
 			count++;
 		}
 
-		m_tuningSignalsReadReply.set_pendingsignalsstatechanges(queue->size(m_thread));
-		m_tuningSignalsReadReply.set_error(TO_INT(E::NetworkError::Success));
+		m_getStateChangesReply.set_pendingsignalsstatechanges(queue->size(m_thread));
+		m_getStateChangesReply.set_error(TO_INT(E::NetworkError::Success));
 
-		sendReply(m_tuningSignalsReadReply);
+		sendReply(m_getStateChangesReply);
 
-		errCode = static_cast<E::NetworkError>(m_tuningSignalsReadReply.error());
+		errCode = static_cast<E::NetworkError>(m_getStateChangesReply.error());
 
 		if (errCode != E::NetworkError::Success)
 		{
