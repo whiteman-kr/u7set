@@ -298,6 +298,10 @@ namespace ClientLib
 			processTuningSourcesState(data);
 			break;
 
+		case TDS_GET_SIGNALS_STATE_CHANGES:
+			processReadChangedTuningSignals(data);
+			break;
+
 		case TDS_TUNING_SIGNALS_READ:
 			if (m_requestRecentTuningSignals == true)
 			{
@@ -412,28 +416,39 @@ namespace ClientLib
 		{
 			locker.unlock();
 
-			// Select which request interval to use - small for recent request, long for state request
+			// Read tuning signal states
 			//
-			m_requestRecentTuningSignals = false;
-
-			if (m_recentTuningSignals.hasRecentlyUsedAppSignals() == true)
+			if (m_pendingSignalsStateChanges > 0)
 			{
-				if (m_tuningSignalsRequestNumber++ > 0)
-				{
-					m_requestRecentTuningSignals = true;
-				}
-				m_tuningSignalsRequestNumber %= m_tuningSignalsStateRequestFrequency;
-			}
-
-			// Request states
-			//
-			if (m_requestRecentTuningSignals == true)
-			{
-				requestReadRecentTuningSignals();
+				// If changed signals are present - request them first
+				//
+				requestReadChangedTuningSignals();
 			}
 			else
 			{
-				requestReadTuningSignals();
+				// Select which request interval to use - small for recent request, long for state request
+				//
+				m_requestRecentTuningSignals = false;
+
+				if (m_recentTuningSignals.hasRecentlyUsedAppSignals() == true)
+				{
+					if (m_tuningSignalsRequestNumber++ > 0)
+					{
+						m_requestRecentTuningSignals = true;
+					}
+					m_tuningSignalsRequestNumber %= m_tuningSignalsStateRequestFrequency;
+				}
+
+				// Request states
+				//
+				if (m_requestRecentTuningSignals == true)
+				{
+					requestReadRecentTuningSignals();
+				}
+				else
+				{
+					requestReadTuningSignals();
+				}
 			}
 
 			return;
@@ -887,69 +902,67 @@ namespace ClientLib
 		return;
 	}
 
-	bool TuningTcpClient::processTuningSignalsReadReply(const QByteArray& data)
+	void TuningTcpClient::requestReadChangedTuningSignals()
 	{
-		bool ok = m_readTuningSignalsReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
+		if (isConnected() == false)
+		{
+			m_logFile.writeMessage(tr("requestReadChangedTuningSignals(), isConnected() == false."));
+			return;
+		}
+
+		if (isClearToSendRequest() == false)
+		{
+			m_logFile.writeMessage(tr("requestReadChangedTuningSignals(), isClearToSendRequest() == false, reconnecting."));
+			closeConnection();
+			return;
+		}
+
+		sendRequest(TDS_GET_SIGNALS_STATE_CHANGES);
+	}
+
+	void TuningTcpClient::processReadChangedTuningSignals(const QByteArray& data)
+	{
+		bool ok = m_readChangedTuningSignalsReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 
 		if (ok == false)
 		{
 			assert(ok);
 			resetToGetTuningSourcesState();
-			return false;
+			return;
 		}
 
-		if (m_readTuningSignalsReply.error() != static_cast<int>(E::NetworkError::Success))
+		if (m_readChangedTuningSignalsReply.error() != static_cast<int>(E::NetworkError::Success))
 		{
-			m_logFile.writeError(tr("processReadTuningSignals(), error received: %1")
-								 .arg(E::valueToString(static_cast<E::NetworkError>(m_readTuningSignalsReply.error()))));
+			m_logFile.writeError(tr("processReadChangedTuningSignals(), error received: %1")
+								 .arg(E::valueToString(static_cast<E::NetworkError>(m_readChangedTuningSignalsReply.error()))));
 
 			resetToGetTuningSourcesState();
-			return false;
+			return;
 		}
 
-		int stateCount = m_readTuningSignalsReply.tuningsignalstate_size();
+		int stateCount = m_readChangedTuningSignalsReply.tuningsignalstate_size();
 
 		std::vector<TuningSignalState> arrivedStates;
 		arrivedStates.reserve(stateCount);
 
 		for (int i = 0; i < stateCount; i++)
 		{
-
-			const ::Network::TuningSignalState& stateMessage = m_readTuningSignalsReply.tuningsignalstate(i);
-
-			E::NetworkError error = static_cast<E::NetworkError>(stateMessage.error());
-
-			if (error != E::NetworkError::Success && error != E::NetworkError::LmControlIsNotActive)
+			const ::Network::TuningSignalState& stateMessage = m_readChangedTuningSignalsReply.tuningsignalstate(i);
+			if (processTuningSignalStateMessage(stateMessage, arrivedStates) == false)
 			{
-				m_logFile.writeError(tr("processReadTuningSignals(), TuningSignalState error received: %1")
-									 .arg(E::valueToString(error)));
-
 				continue;
 			}
-
-			TuningSignalState arrivedState(stateMessage);
-
-			// When updating states, we have to set some properties locally
-			//
-			arrivedState.m_flags.controlIsEnabled = (error == E::NetworkError::LmControlIsNotActive) ? false : true;
-
-			if (lmStatusFlagMode() != TuningClientSettings::LmStatusFlagMode::AccessKey)
-			{
-				// Set Access key flag to Validity flag & Control flag if Access Key function is inactive
-				//
-				arrivedState.m_flags.writingIsEnabled = arrivedState.valid() & arrivedState.controlIsEnabled();
-			}
-			else
-			{
-				arrivedState.m_flags.writingIsEnabled = arrivedState.valid() & arrivedState.writingIsEnabled();
-			}
-
-			arrivedStates.push_back(arrivedState);
 		}
 
 		m_signalUpdater.setStates(arrivedStates, m_tuningServiceHash);
 
-		return true;
+		m_pendingSignalsStateChanges = m_readChangedTuningSignalsReply.pendingsignalsstatechanges();
+
+		//qDebug() << "Process changed states: " << stateCount << ", " << m_pendingSignalsStateChanges << " pending";
+
+		// Continue the current loop
+		//
+		resetToProcessTuningSignals();
 	}
 
 	void TuningTcpClient::requestWriteTuningSignals()
@@ -1092,6 +1105,82 @@ namespace ClientLib
 		resetToProcessTuningSignals();
 
 		return;
+	}
+
+	bool TuningTcpClient::processTuningSignalsReadReply(const QByteArray& data)
+	{
+		bool ok = m_readTuningSignalsReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
+
+		if (ok == false)
+		{
+			assert(ok);
+			resetToGetTuningSourcesState();
+			return false;
+		}
+
+		if (m_readTuningSignalsReply.error() != static_cast<int>(E::NetworkError::Success))
+		{
+			m_logFile.writeError(tr("processTuningSignalsReadReply(), error received: %1")
+								 .arg(E::valueToString(static_cast<E::NetworkError>(m_readTuningSignalsReply.error()))));
+
+			resetToGetTuningSourcesState();
+			return false;
+		}
+
+		int stateCount = m_readTuningSignalsReply.tuningsignalstate_size();
+
+		std::vector<TuningSignalState> arrivedStates;
+		arrivedStates.reserve(stateCount);
+
+		for (int i = 0; i < stateCount; i++)
+		{
+			const ::Network::TuningSignalState& stateMessage = m_readTuningSignalsReply.tuningsignalstate(i);
+
+			if (processTuningSignalStateMessage(stateMessage, arrivedStates) == false)
+			{
+				continue;
+			}
+		}
+
+		m_signalUpdater.setStates(arrivedStates, m_tuningServiceHash);
+
+		m_pendingSignalsStateChanges = m_readTuningSignalsReply.pendingsignalsstatechanges();
+
+		return true;
+	}
+
+	bool TuningTcpClient::processTuningSignalStateMessage(const ::Network::TuningSignalState& stateMessage, std::vector<TuningSignalState>& arrivedStates)
+	{
+		E::NetworkError error = static_cast<E::NetworkError>(stateMessage.error());
+
+		if (error != E::NetworkError::Success && error != E::NetworkError::LmControlIsNotActive)
+		{
+			m_logFile.writeError(tr("processReadTuningSignals(), TuningSignalState error received: %1")
+								 .arg(E::valueToString(error)));
+
+			return false;
+		}
+
+		TuningSignalState arrivedState(stateMessage);
+
+		// When updating states, we have to set some properties locally
+		//
+		arrivedState.m_flags.controlIsEnabled = (error == E::NetworkError::LmControlIsNotActive) ? false : true;
+
+		if (lmStatusFlagMode() != TuningClientSettings::LmStatusFlagMode::AccessKey)
+		{
+			// Set Access key flag to Validity flag & Control flag if Access Key function is inactive
+			//
+			arrivedState.m_flags.writingIsEnabled = arrivedState.valid() & arrivedState.controlIsEnabled();
+		}
+		else
+		{
+			arrivedState.m_flags.writingIsEnabled = arrivedState.valid() & arrivedState.writingIsEnabled();
+		}
+
+		arrivedStates.push_back(arrivedState);
+
+		return true;
 	}
 
 	bool TuningTcpClient::autoApply() const

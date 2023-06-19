@@ -156,13 +156,19 @@ namespace ClientLib
 		void requestReadTuningSignals();
 		void processReadTuningSignals(const QByteArray& data);
 
-		[[nodiscard]] bool processTuningSignalsReadReply(const QByteArray& data);
+		void requestReadChangedTuningSignals();
+		void processReadChangedTuningSignals(const QByteArray& data);
 
 		void requestWriteTuningSignals();
 		void processWriteTuningSignals(const QByteArray& data);
 
 		void requestApplyTuningSignals();
 		void processApplyTuningSignals(const QByteArray& data);
+
+	private:
+		[[nodiscard]] bool processTuningSignalsReadReply(const QByteArray& data);
+		[[nodiscard]] bool processTuningSignalStateMessage(const ::Network::TuningSignalState& stateMessage, std::vector<TuningSignalState>& arrivedStates);
+
 
 	signals:
 		void tuningSourcesInfoArrived();
@@ -252,6 +258,10 @@ namespace ClientLib
 
 		::Network::TuningSignalsRead m_readTuningSignals;
 		::Network::TuningSignalsReadReply m_readTuningSignalsReply;
+		int m_pendingSignalsStateChanges = 0;
+
+		::Network::GetTuningSignalsStateChangesRequest m_readChangedTuningSignals;
+		::Network::GetTuningSignalsStateChangesReply m_readChangedTuningSignalsReply;
 
 		::Network::TuningSignalsWrite m_writeTuningSignals;
 		::Network::TuningSignalsWriteReply m_writeTuningSignalsReply;

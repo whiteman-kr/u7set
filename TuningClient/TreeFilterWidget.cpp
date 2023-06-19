@@ -539,7 +539,6 @@ void TreeFilterWidget::updateTreeItemStatus(QTreeWidgetItem* treeItem)
 
 		if (filter->isSourceEquipment() == true)
 		{
-			qDebug() << "Updating EQ: " << filter->caption();
 			updateTuningSourceTreeItem(treeItem, filter.get());
 		}
 		else
