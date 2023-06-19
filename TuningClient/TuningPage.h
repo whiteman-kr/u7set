@@ -134,7 +134,7 @@ private slots:
 
 public slots:
 
-	void slot_treeFilterSelectionChanged(std::shared_ptr<TuningFilter> filter);
+	void slot_treeFilterChanged(std::shared_ptr<TuningFilter> filter);
 
 	void slot_pageFilterChanged(std::shared_ptr<TuningFilter> filter);
 
@@ -172,7 +172,7 @@ private:
 
 private slots:
 
-	void slot_timerTick500();
+	void onTimer();
 	void slot_setAll();
 	void slot_undo();
 	void slot_Write();

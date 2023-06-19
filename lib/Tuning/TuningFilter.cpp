@@ -974,6 +974,7 @@ bool TuningFilter::match(const AppSignalParam& object) const
 	{
 		return false;
 	}
+
 	if (signalType() == TuningFilter::SignalType::Discrete && object.isAnalog() == true)
 	{
 		return false;
@@ -2311,6 +2312,14 @@ void TuningFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalManag
         return;
     }
 
+	if (filter->parentFilter() == m_root.get() &&
+			filter->isCounter() == true &&
+			filter->counterType() == TuningFilter::CounterType::FilterTree)
+	{
+		// This filter is a template for schema and equipment counters
+		return;
+	}
+
 	size_t allCount = allHashes.size();
 
     std::vector<Hash> signalsHashes;
@@ -2381,25 +2390,22 @@ void TuningFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalManag
 
         filter->setSignalsHashes(signalsHashes);
 
-        if (filter->isSourceEquipment() == false)
+		// Set equipment hashes
+		//
+		std::vector<Hash> equipmentHashes;
+		if (filter->isSourceEquipment() == false)
         {
-            // Set equipment hashes
-
-            std::vector<Hash> equipmentHashes;
             for (auto it : equipmentHashesMap)
             {
                 equipmentHashes.push_back(it.first);
             }
-            filter->setEquipmentHashes(equipmentHashes);
         }
         else
         {
-            // Equipment filters can be processed easier
-
-            std::vector<Hash> equipmentHashes;
-            equipmentHashes.push_back(::calcHash(filter->caption()));
-            filter->setEquipmentHashes(equipmentHashes);
+			equipmentHashes.push_back(::calcHash(filter->caption()));	// Equipment filters can be processed easier
         }
+
+		filter->setEquipmentHashes(equipmentHashes);
 
         break;
     }
@@ -2409,4 +2415,3 @@ void TuningFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalManag
         createSignalsAndEqipmentHashes(objects, signalsHashes, filter->childFilter(i).get(), source);
     }
 }
-

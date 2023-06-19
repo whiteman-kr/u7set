@@ -147,7 +147,7 @@ private slots:
 	void onPrev();
 	void onNext();
 	void onApply();
-	void onTimerTick500();
+	void onTimer();
 	void onFilterButtonClicked(std::shared_ptr<TuningFilter> filter);
 	void onFilterTablePressed();
 

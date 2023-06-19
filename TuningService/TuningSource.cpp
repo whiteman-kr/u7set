@@ -94,6 +94,16 @@ namespace Tuning
 		return m_enabledLansProvidedTuning.value();
 	}
 
+	int TuningSource::getSignalsCount() const
+	{
+		if (m_tuningData != nullptr)
+		{
+			return m_tuningData->getSignalsCount();
+		}
+
+		Q_ASSERT(false);
+		return 0;
+	}
 
 	// -------------------------------------------------------------------------------
 	//
@@ -146,5 +156,17 @@ namespace Tuning
 		}
 
 		return ids;
+	}
+
+	int TuningSources::getSignalsCount() const
+	{
+		int count = 0;
+
+		for(const TuningSource& ts : *this)
+		{
+			count += ts.getSignalsCount();
+		}
+
+		return count;
 	}
 }

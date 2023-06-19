@@ -422,10 +422,9 @@ public:
 										const std::vector<Hash> &allHashes,
 										TuningFilter *filter,
 										TuningFilter::Source source);
+
 protected:
-
 	std::shared_ptr<TuningFilter> m_root = nullptr;
-
 	std::vector<VFrame30::SchemaDetails> m_schemasDetails;
 };
 

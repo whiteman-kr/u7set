@@ -1,6 +1,7 @@
 #include "../../ClientLib/TuningConnection.h"
 #include "../../ClientLib/ITuningLog.h"
 #include "ConnectionPorts.h"
+#include "../ClientLib/IRecentAppSignals.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -155,6 +156,15 @@ public:
 	MOCK_METHOD(void, notifySignalParamsUpdated, (), (override));
 };
 
+class MockIRecentAppSignals : public ClientLib::IRecentAppSignals
+{
+public:
+	MOCK_METHOD(void, addRecentAppSignal, (Hash hash), (override));
+	MOCK_METHOD(void, addRecentAppSignals, (const std::vector<Hash>& hashes), (override));
+
+	MOCK_METHOD(std::vector<Hash>, recentlyUsedAppSignals, (const QString& appDataServiceId), (override));
+	MOCK_METHOD(bool, hasRecentlyUsedAppSignals, (), (override));
+};
 
 TEST_F(TuningConnectionTests, connect)
 {
@@ -164,6 +174,7 @@ TEST_F(TuningConnectionTests, connect)
 
 	MockITuningSignalManager signalManager{};
 	MockITuningSignalUpdater signalUpdater{};
+	MockIRecentAppSignals recentAppSignals{};
 
 	EXPECT_CALL(signalUpdater, invalidateSignalStates(::calcHash(s_tuningServices[0].equipmentId)))
 			.Times(1);	// 1 times, when connection to TuningService is closed;
@@ -178,7 +189,7 @@ TEST_F(TuningConnectionTests, connect)
 	ClientLib::TuningLogStub tuningLog;
 
 	{
-		ClientLib::TuningConnection tc{signalManager, signalUpdater, &logFile, &tuningLog};
+		ClientLib::TuningConnection tc{signalManager, signalUpdater, recentAppSignals, &logFile, &tuningLog};
 		tc.updateConnections(s_softwareInfo, s_tuningServices, true, TuningClientSettings::LmStatusFlagMode::None);
 
 		// Wait for connection established
@@ -226,7 +237,7 @@ TEST_F(TuningConnectionTests, tuningSourceInfo)
 
 	Hash lmHash = {::calcHash(QStringLiteral("SYSTEMID_CLIENTTEST_CH12_MD00"))};
 
-	ClientLib::TuningConnection tc{signalManager, signalManager, &logFile, &tuningLog};
+	ClientLib::TuningConnection tc{signalManager, signalManager, signalManager, &logFile, &tuningLog};
 	tc.updateConnections(s_safeSoftwareInfoA, s_safeTuningServices, true, TuningClientSettings::LmStatusFlagMode::None);
 
 	// Wait for connection established
@@ -413,8 +424,8 @@ TEST_F(TuningConnectionTests, activeClientInfo)
 
 	// Create 2 tuning connections to the service
 	//
-	ClientLib::TuningConnection tcA{signalManagerA, signalManagerA, &logFile, &tuningLog};
-	ClientLib::TuningConnection tcB{signalManagerB, signalManagerB, &logFile, &tuningLog};
+	ClientLib::TuningConnection tcA{signalManagerA, signalManagerA, signalManagerA, &logFile, &tuningLog};
+	ClientLib::TuningConnection tcB{signalManagerB, signalManagerB, signalManagerB, &logFile, &tuningLog};
 
 	tcA.updateConnections(s_safeSoftwareInfoA, s_safeTuningServices, true, TuningClientSettings::LmStatusFlagMode::SOR);
 	tcB.updateConnections(s_safeSoftwareInfoB, s_safeTuningServices, true, TuningClientSettings::LmStatusFlagMode::SOR);
@@ -546,7 +557,7 @@ TEST_F(TuningConnectionTests, writeAnalogSignals)
 
 	// Create tuning connection to the service
 	//
-	ClientLib::TuningConnection tc{signalManager, signalManager, &logFile, &tuningLog};
+	ClientLib::TuningConnection tc{signalManager, signalManager, signalManager, &logFile, &tuningLog};
 	tc.updateConnections(s_softwareInfo, s_tuningServices, false/*autoApply*/, TuningClientSettings::LmStatusFlagMode::SOR);
 
 	// Wait for connection established
@@ -684,7 +695,7 @@ TEST_F(TuningConnectionTests, applyAnalogSignals)
 
 	// Create tuning connection to the service
 	//
-	ClientLib::TuningConnection tc{signalManager, signalManager, &logFile, &tuningLog};
+	ClientLib::TuningConnection tc{signalManager, signalManager, signalManager, &logFile, &tuningLog};
 	tc.updateConnections(s_softwareInfo, s_tuningServices, false/*autoApply*/, TuningClientSettings::LmStatusFlagMode::SOR);
 
 	// Wait for connection established
@@ -786,7 +797,7 @@ TEST_F(TuningConnectionTests, writeDiscreteSignals)
 
 	// Create tuning connection to the service
 	//
-	ClientLib::TuningConnection tc{signalManager, signalManager, &logFile, &tuningLog};
+	ClientLib::TuningConnection tc{signalManager, signalManager, signalManager, &logFile, &tuningLog};
 	tc.updateConnections(s_softwareInfo, s_tuningServices, false/*autoApply*/, TuningClientSettings::LmStatusFlagMode::AccessKey);
 
 	// Wait for connection established
@@ -889,7 +900,7 @@ TEST_F(TuningConnectionTests, applyDiscreteSignals)
 
 	// Create tuning connection to the service
 	//
-	ClientLib::TuningConnection tc{signalManager, signalManager, &logFile, &tuningLog};
+	ClientLib::TuningConnection tc{signalManager, signalManager, signalManager, &logFile, &tuningLog};
 	tc.updateConnections(s_softwareInfo, s_tuningServices, false/*autoApply*/, TuningClientSettings::LmStatusFlagMode::SOR);
 
 	// Wait for connection established

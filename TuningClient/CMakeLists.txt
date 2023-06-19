@@ -73,6 +73,8 @@ set (TC_SOURCES
 	TuningClientFilterStorage.h
 	TuningConfigController.cpp
 	TuningConfigController.h
+	TreeFilterWidget.cpp
+	TreeFilterWidget.h
 	TuningPage.cpp
 	TuningPage.h
 	TuningSchemaManager.cpp

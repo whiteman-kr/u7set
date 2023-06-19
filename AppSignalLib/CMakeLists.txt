@@ -24,6 +24,8 @@ add_library(${TARGET} STATIC
 	AppSignalParam.cpp
 	TuningSignalManager.h
 	TuningSignalManager.cpp
+	RecentUsed.h
+	RecentUsed.cpp
 	TuningValue.h
 	TuningValue.cpp
 	TuningSignalState.h

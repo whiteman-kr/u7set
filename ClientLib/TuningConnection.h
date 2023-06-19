@@ -28,6 +28,7 @@ namespace ClientLib
 					   bool autoApply,
 					   TuningClientSettings::LmStatusFlagMode lmStatusFlagMode,
 					   ITuningSignalUpdater& signalUpdater,
+					   IRecentAppSignals& recentTuningSignals,
 					   ILogFile* logFile,
 					   ITuningLog* tuningLog);
 			Connection(const Connection&) = delete;
@@ -49,6 +50,7 @@ namespace ClientLib
 	public:
 		explicit TuningConnection(ITuningSignalManager& tuningSignalManager,
 								  ITuningSignalUpdater& tuningSignalUpdater,
+								  IRecentAppSignals& recentTuningSignals,
 								  ILogFile* logFile,
 								  ITuningLog* tuningLog);
 
@@ -114,6 +116,7 @@ namespace ClientLib
 	private:
 		ITuningSignalManager& m_tuningSignalManager;
 		ITuningSignalUpdater& m_tuningSignalUpdater;
+		IRecentAppSignals& m_recentTuningSignals;
 
 		HasLogFile m_logFile;
 		ITuningLog* m_tuningLog = nullptr;

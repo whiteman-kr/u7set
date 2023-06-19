@@ -296,7 +296,7 @@ void ChooseTuningSignalsWidget::fillBaseSignalsList()
 		{
 			bool ok = false;
 
-			const TuningSignalState state = m_signalManager.state(hash, &ok);
+			const TuningSignalState state = m_signalManager.queuedState(hash, &ok);
 
 			if (ok == true && state.valid() == true)
 			{
@@ -435,7 +435,7 @@ void ChooseTuningSignalsWidget::on_m_add_clicked()
 			return;
 		}
 
-		const TuningSignalState s = m_signalManager.state(hash, &ok);
+		const TuningSignalState s = m_signalManager.queuedState(hash, &ok);
 
 		if (m_filter == nullptr)
 		{

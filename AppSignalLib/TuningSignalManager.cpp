@@ -204,6 +204,8 @@ TuningSignalState TuningSignalManager::state(Hash hash, bool* found) const
 		return TuningSignalState();
 	}
 
+	const_cast<TuningSignalManager*>(this)->addRecentAppSignal(hash);
+
 	std::scoped_lock l(m_statesMutex);
 
 	auto foundState = m_states.find(hash);
@@ -240,6 +242,8 @@ TuningSignalState TuningSignalManager::state(Hash hash, Hash tuningServiceHash, 
 		return TuningSignalState();
 	}
 
+	const_cast<TuningSignalManager*>(this)->addRecentAppSignal(hash);
+
 	std::scoped_lock l(m_statesMutex);
 
 	auto foundState = m_states.find(hash);
@@ -275,6 +279,8 @@ void TuningSignalManager::state(const std::vector<Hash>& appSignalHashes, std::v
 		assert(result);
 		return;
 	}
+
+	const_cast<TuningSignalManager*>(this)->addRecentAppSignals(appSignalHashes);
 
 	result->clear();
 	result->reserve(appSignalHashes.size());
@@ -326,6 +332,42 @@ void TuningSignalManager::state(const std::vector<QString>& appSignalIds, std::v
 	return state(appSignalHashes, result, found);
 }
 
+
+TuningSignalState TuningSignalManager::queuedState(Hash hash, bool* found) const
+{
+	m_recentEnabled = false;
+	return state(hash, found);
+}
+
+TuningSignalState TuningSignalManager::queuedState(const QString& appSignalId, bool* found) const
+{
+	m_recentEnabled = false;
+	return state(appSignalId, found);
+}
+
+TuningSignalState TuningSignalManager::queuedState(Hash hash, Hash tuningServiceHash, bool* found) const
+{
+	m_recentEnabled = false;
+	return state(hash, tuningServiceHash, found);
+}
+
+TuningSignalState TuningSignalManager::queuedState(const QString& appSignalId, Hash tuningServiceHash, bool* found) const
+{
+	m_recentEnabled = false;
+	return state(appSignalId, tuningServiceHash, found);
+}
+
+void TuningSignalManager::queuedState(const std::vector<Hash>& appSignalHashes, std::vector<TuningSignalState>* result, int* found) const
+{
+	m_recentEnabled = false;
+	return state(appSignalHashes, result, found);
+}
+
+void TuningSignalManager::queuedState(const std::vector<QString>& appSignalIds, std::vector<TuningSignalState>* result, int* found) const
+{
+	m_recentEnabled = false;
+	return state(appSignalIds, result, found);
+}
 
 QStringList TuningSignalManager::signalIdsByTag(const QString& tag) const
 {
@@ -530,6 +572,70 @@ bool TuningSignalManager::waitForAllApplied(std::chrono::milliseconds timeout) c
 void TuningSignalManager::notifySignalParamsUpdated()
 {
 	emit signalsLoaded();
+}
+
+void TuningSignalManager::addRecentAppSignal(Hash h)
+{
+	if (m_recentEnabled == true)
+	{
+		QMutexLocker locker(&m_recentUsedMutex);
+		m_recentUsed.add(h);
+	}
+	m_recentEnabled = true;
+}
+
+void TuningSignalManager::addRecentAppSignals(const std::vector<Hash>& hashes)
+{
+	if (m_recentEnabled == true)
+	{
+		QMutexLocker locker(&m_recentUsedMutex);
+		m_recentUsed.add(hashes);
+	}
+	m_recentEnabled = true;
+}
+
+std::vector<Hash> TuningSignalManager::recentlyUsedAppSignals(const QString& dataServiceId)
+{
+	std::vector<Hash> result;
+
+	{
+		QMutexLocker locker(&m_recentUsedMutex);
+		m_recentUsed.removeOutdated();
+
+		result = m_recentUsed.hashes();
+	}
+
+	std::erase_if(result, [&dataServiceId, this](Hash hash)
+		{
+			return !this->dataServiceHasSignal(::calcHash(dataServiceId), hash);
+		});
+
+	return result;
+}
+
+bool TuningSignalManager::hasRecentlyUsedAppSignals()
+{
+	QMutexLocker locker(&m_recentUsedMutex);
+	return m_recentUsed.hashes().empty() == false;
+}
+
+bool TuningSignalManager::dataServiceHasSignal(Hash dataServiceHash, Hash signalHash) const
+{
+	auto it = m_states.find(signalHash);
+	if (it == m_states.end())
+	{
+		return false;
+	}
+
+	const Sources& srcs = it->second;
+	for (const SourceState& src : srcs.sources)
+	{
+		if (src.tuningServiceHash == dataServiceHash)
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 void TuningSignalManager::setUnappliedValue(Hash hash, const TuningValue& value)

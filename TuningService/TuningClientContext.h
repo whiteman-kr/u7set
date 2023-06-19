@@ -5,43 +5,6 @@
 
 namespace Tuning
 {
-
-	// ----------------------------------------------------------------------------------------------
-	//
-	// TuningSourceContext class declaration
-	//
-	// ----------------------------------------------------------------------------------------------
-
-/*	class TuningSourceContext
-	{
-	public:
-		TuningSourceContext(const QString& sourceID, const TuningSource* source);
-
-		void getSourceInfo(Network::DataSourceInfo* si) const;
-		void getSourceState(Network::TuningSourceState* tss) const;
-
-		void setSourceThread(TuningSourceThread* thread);
-		void removeSourceThread(TuningSourceThread* thread);
-
-		void readSignalState(Network::TuningSignalState* tss);
-
-		NetworkError writeSignalState(	const QString& clientEquipmentID,
-										const QString& user,
-										Hash signalHash,
-										const TuningValue& newValue);
-
-		NetworkError applySignalStates(	const QString& clientEquipmentID,
-										const QString& user);
-
-	private:
-		QString m_sourceID;			// Tuning source (LM) equipmentID
-		TuningSourceThread* m_sourceThread = nullptr;
-
-		Network::DataSourceInfo m_sourceInfo;
-		Network::TuningSourceState m_sourceState;
-	};
-*/
-
 	// ----------------------------------------------------------------------------------------------
 	//
 	// TuningClientContext class declaration
@@ -69,6 +32,15 @@ namespace Tuning
 		void setSourceThread(TuningSourceThreadShared srcThread);
 		void removeSourceThread(const QString& tuningSourceID);
 
+		void registerStateChangesQueue(qint64 tcpConnectionID);
+		void unregisterStateChangesQueue(qint64 tcpConnectionID);
+
+		void pushSignalStateChange(const TuningSignal::State& state, QThread* thread);
+
+		TuningSignalsChangesQueue* getSignalChangesQueue(qint64 tcpConnectionID);
+
+		const std::map<Hash, QString>& signalToSourceIdMap() const;
+
 	private:
 		TuningSourceThreadShared getSourceThread(const QString& sourceID) const;
 		std::pair<bool, TuningSourceThreadShared> getSourceThreadBySignalHash(Hash signalHash) const;
@@ -77,12 +49,19 @@ namespace Tuning
 
 		void clear();
 
+		int getStateChangesQueueSize() const;
+
 	private:
 		QString m_clientID;			// TuningClient equipmentID
 		const TuningSources& m_tuningSources;
 
 		std::map<QString, TuningSourceThreadShared> m_sourceThreadMap;	// source EquipmentID => TuningSourceThreadShared
 		std::map<Hash, QString> m_signalToSourceIdMap;					// signal Hash => source EquipmentID
+
+		//
+
+		SimpleMutex m_queueMapMutex;
+		std::map<qint64, TuningSignalsChangesQueue*> m_stateChangesQueueMap;		// client tcpConnectionID => state changes queue
 	};
 
 
@@ -92,7 +71,7 @@ namespace Tuning
 	//
 	// ----------------------------------------------------------------------------------------------
 
-	class TuningClientContextMap : public QHash<QString, TuningClientContext*>
+	class TuningClientContextMap
 	{
 	public:
 		TuningClientContextMap();
@@ -100,8 +79,18 @@ namespace Tuning
 
 		void init(const TuningServiceSettings& tss, const TuningSources& sources);
 
-		TuningClientContext *getClientContext(QString clientID) const;
+		TuningClientContext* getClientContext(const QString& clientEquipmentID) const;
+		void getAllClientContexts(QVector<const TuningClientContext*>& clientContexts) const;
+
+		void setSourceThreadInTuningClientContexts(TuningSourceThreadShared thread);
+		void removeSourceThreadFromTuningClientContexts(const QString& tuningSourceID);
 
 		void clear();
+
+		void pushSignalStateChange(const TuningSignal::State& state, QThread* thread);
+
+	private:
+		std::map<QString, TuningClientContext*> m_clientsContextMap;		// clientEquipmentID => TuningClientContext*
+		std::map<Hash, std::set<TuningClientContext*>> m_signalToClientContextMap;	// calcHash(AppSignalID) => set of TuningClientContext*
 	};
 }

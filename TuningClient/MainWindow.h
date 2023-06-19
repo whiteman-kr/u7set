@@ -80,7 +80,6 @@ signals:
 	void timerTick500();
 
 public:
-	int m_mainWindowTimerId_250ms = -1;
 	int m_mainWindowTimerId_500ms = -1;
 
 private:

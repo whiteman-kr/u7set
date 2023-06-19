@@ -94,6 +94,7 @@ namespace ClientLib
 		TuningTcpClient(const SoftwareInfo& softwareInfo,
 						const SoftwareEndpoint::TuningService& tunsInfo,
 						ITuningSignalUpdater& signalUpdater,
+						IRecentAppSignals& recentTuningSignals,
 						ILogFile* log,
 						ITuningLog* tuningLog);
 
@@ -149,8 +150,14 @@ namespace ClientLib
 		void requestActivateTuningSource(Hash equipmentHash, bool enableControl, bool forceTakeControl);
 		void processActivateTuningSource(const QByteArray& data);
 
+		void requestReadRecentTuningSignals();
+		void processReadRecentTuningSignals(const QByteArray& data);
+
 		void requestReadTuningSignals();
 		void processReadTuningSignals(const QByteArray& data);
+
+		void requestReadChangedTuningSignals();
+		void processReadChangedTuningSignals(const QByteArray& data);
 
 		void requestWriteTuningSignals();
 		void processWriteTuningSignals(const QByteArray& data);
@@ -158,8 +165,10 @@ namespace ClientLib
 		void requestApplyTuningSignals();
 		void processApplyTuningSignals(const QByteArray& data);
 
-	public slots:
-		void reset();
+	private:
+		[[nodiscard]] bool processTuningSignalsReadReply(const QByteArray& data);
+		[[nodiscard]] bool processTuningSignalStateMessage(const ::Network::TuningSignalState& stateMessage, std::vector<TuningSignalState>& arrivedStates);
+
 
 	signals:
 		void tuningSourcesInfoArrived();
@@ -167,9 +176,6 @@ namespace ClientLib
 		// Properties
 		//
 	public:
-		int requestInterval() const;
-		void setRequestInterval(int requestInterval);
-
 		bool autoApply() const;
 		void setAutoApply(bool value);
 
@@ -214,14 +220,21 @@ namespace ClientLib
 		TuningClientSettings::LmStatusFlagMode m_lmStatusFlagMode = TuningClientSettings::LmStatusFlagMode::SOR;
 
 		ITuningSignalUpdater& m_signalUpdater;
+		IRecentAppSignals& m_recentTuningSignals;
 
 		// Write processing
 		//
-		mutable QMutex m_writeQueueMutex;					// For access to m_writeQueue
+		std::mutex m_writeQueueMutex;				// For access to m_writeQueue
+		std::condition_variable m_writeQueueCondition;
+
 		std::queue<TuningWriteCommand> m_writeQueue;
 
 		// Reading processing
 		//
+		const int m_tuningSignalsStateRequestFrequency = 5;	// every 5th request asks for states, other requests ask recent states
+		int m_tuningSignalsRequestNumber = 0;
+		bool m_requestRecentTuningSignals = false;
+
 		int m_readTuningSignalIndex = 0;
 		int m_readTuningSignalCount = 0;
 
@@ -245,6 +258,10 @@ namespace ClientLib
 
 		::Network::TuningSignalsRead m_readTuningSignals;
 		::Network::TuningSignalsReadReply m_readTuningSignalsReply;
+		int m_pendingSignalsStateChanges = 0;
+
+		::Network::GetTuningSignalsStateChangesRequest m_readChangedTuningSignals;
+		::Network::GetTuningSignalsStateChangesReply m_readChangedTuningSignalsReply;
 
 		::Network::TuningSignalsWrite m_writeTuningSignals;
 		::Network::TuningSignalsWriteReply m_writeTuningSignalsReply;
