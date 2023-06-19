@@ -2301,57 +2301,6 @@ void TuningFilterStorage::checkFilterSignals(const std::vector<Hash>& signalHash
 	m_root->checkSignals(signalHashes, notFoundSignalsAndFilters);
 }
 
-void TuningFilterStorage::createCounterFiltersFromTemplates()
-{
-	std::vector<std::shared_ptr<TuningFilter>> templateFilters;
-
-	// Find counter templates
-
-	int count = m_root->childFiltersCount();
-	for (int i = count - 1; i >= 0; i--)
-	{
-		std::shared_ptr<TuningFilter> f = m_root->childFilter(i);
-
-		if (f->isCounter() == true && f->counterType() == TuningFilter::CounterType::FilterTree)
-		{
-			templateFilters.insert(templateFilters.begin(), f);
-		}
-	}
-
-	// Add counter filters to every schema and equipment filter
-
-	count = m_root->childFiltersCount();
-
-	for (int i = 0; i < count; i++)
-	{
-		std::shared_ptr<TuningFilter> f = m_root->childFilter(i);
-
-		if (f->isSourceSchema() == true || f->isSourceEquipment() == true) // This is parent schemas or equipment filter
-		{
-			Q_ASSERT(f->hasDiscreteCounter() == false);
-
-			int schemaCount = f->childFiltersCount();
-
-			for (int s = 0; s < schemaCount; s++)
-			{
-				std::shared_ptr<TuningFilter> sf = f->childFilter(s);
-
-				Q_ASSERT(sf->hasDiscreteCounter() == false);
-
-				Q_ASSERT(sf->isSourceSchema() == true || sf->isSourceEquipment() == true);
-
-				for (auto& tf: templateFilters)
-				{
-					std::shared_ptr<TuningFilter> cf = std::make_shared<TuningFilter>(*tf);
-					sf->addChild(cf);
-				}
-			}
-		}
-	}
-
-	return;
-}
-
 void TuningFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalManager& objects,
                                                          const std::vector<Hash>& allHashes,
                                                          TuningFilter* filter,
@@ -2362,6 +2311,14 @@ void TuningFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalManag
         assert(filter);
         return;
     }
+
+	if (filter->parentFilter() == m_root.get() &&
+			filter->isCounter() == true &&
+			filter->counterType() == TuningFilter::CounterType::FilterTree)
+	{
+		// This filter is a template for schema and equipment counters
+		return;
+	}
 
 	size_t allCount = allHashes.size();
 
@@ -2433,25 +2390,22 @@ void TuningFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalManag
 
         filter->setSignalsHashes(signalsHashes);
 
-        if (filter->isSourceEquipment() == false)
+		// Set equipment hashes
+		//
+		std::vector<Hash> equipmentHashes;
+		if (filter->isSourceEquipment() == false)
         {
-            // Set equipment hashes
-
-            std::vector<Hash> equipmentHashes;
             for (auto it : equipmentHashesMap)
             {
                 equipmentHashes.push_back(it.first);
             }
-            filter->setEquipmentHashes(equipmentHashes);
         }
         else
         {
-            // Equipment filters can be processed easier
-
-            std::vector<Hash> equipmentHashes;
-            equipmentHashes.push_back(::calcHash(filter->caption()));
-            filter->setEquipmentHashes(equipmentHashes);
+			equipmentHashes.push_back(::calcHash(filter->caption()));	// Equipment filters can be processed easier
         }
+
+		filter->setEquipmentHashes(equipmentHashes);
 
         break;
     }

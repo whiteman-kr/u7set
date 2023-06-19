@@ -418,8 +418,6 @@ public:
 
 	void checkFilterSignals(const std::vector<Hash>& signalHashes, std::vector<std::pair<QString, QString> >& notFoundSignalsAndFilters);
 
-	void createCounterFiltersFromTemplates();
-
 	void createSignalsAndEqipmentHashes(const TuningSignalManager &objects,
 										const std::vector<Hash> &allHashes,
 										TuningFilter *filter,

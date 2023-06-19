@@ -25,15 +25,15 @@ namespace Builder
 
 		bool createEquipmentList(QStringList* equipmentList);
 		bool createObjectFilters(const TuningSignalManager& tuningSignalManager, const QStringList& equipmentList);
+		bool createEquipmentAndSchemaFilters(const QStringList& equipmentList,const TuningSignalManager& tuningSignalManager);
+		void createCounterFiltersFromTemplates();
 
 		bool writeTuningSignals();
-		bool writeObjectFilters(const TuningSignalManager& tuningSignalManager);
+		bool writeObjectFilters();
 		bool writeTuningSchemas();
 		bool writeGlobalScript();
 		bool writeTuningClientBehavior();
 
-		bool createAutomaticFilters(const QStringList& equipmentList,
-									const TuningSignalManager& tuningSignalManager);
 	private:
 		::Proto::AppSignalSet m_tuningSet;
 
