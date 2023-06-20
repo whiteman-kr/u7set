@@ -64,6 +64,11 @@ LIBS += -L.
 #LIBS += -lAppSignalLib
 #win32:PRE_TARGETDEPS += $$DESTDIR/AppSignalLib.lib
 #unix:PRE_TARGETDEPS += $$DESTDIR/libAppSignalLib.a
+# ServiceLib
+#
+LIBS += -lServiceLib
+win32:PRE_TARGETDEPS += $$DESTDIR/ServiceLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libServiceLib.a
 
 # UtilsLib
 #

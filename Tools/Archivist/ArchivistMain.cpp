@@ -2,6 +2,7 @@
 #include "../../UtilsLib/WUtils.h"
 #include "../../Proto/serialization.pb.h"
 #include "../../OnlineLib/CircularLogger.h"
+#include "../../ServiceLib/CommandLineParser.h"
 
 // To increase time that system waiting to the service shutting down, change value:
 //
@@ -13,6 +14,16 @@ int main(int argc, char* argv[])
 	QCoreApplication app(argc, argv);
 
 	bool result = 0;
+
+    CommandLineParser newPars("Radiy", "Archivist", argc, argv);
+
+    newPars.addSimpleNoWritableCmdLineArg("copyfile",
+                            "Copy file archive");
+
+    newPars.printCmdLineArgs(nullptr);
+
+    return 1;
+
 
 	CircularLoggerShared logger = std::make_shared<CircularLogger>();
 

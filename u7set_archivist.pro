@@ -7,5 +7,6 @@ SUBDIRS += Protobuf \
 	UtilsLib \
 	CommonLib \
 	OnlineLib \
+        ServiceLib \
 	./Tools/Archivist
 
