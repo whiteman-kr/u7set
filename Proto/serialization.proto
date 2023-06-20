@@ -1417,7 +1417,6 @@ message SchemaDetails
 	repeated TrendIndicatorSchemaItems trendIndicators = 30;
 }
 
-
 message ArchSignal
 {
     required uint64 hash = 1;
@@ -1429,6 +1428,13 @@ message ArchSignal
 message ArchSignals
 {
     repeated ArchSignal archSignals = 1;
+}
+
+message ArchiveInfo
+{
+	required string ProjectID = 1;
+	required string ArchServiceID = 2;
+	required ArchSignals = 3;
 }
 
 //

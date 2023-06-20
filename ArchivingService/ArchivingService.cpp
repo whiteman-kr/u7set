@@ -41,6 +41,11 @@ void ArchivingService::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo)
 	serviceInfo.set_settingsxml(xmlString.toStdString());
 }
 
+bool ArchivingService::isReadOnlyArchive() const
+{
+	return !m_readOnlyArchivePath.isEmpty();
+}
+
 void ArchivingService::initServiceSpecificCmdLineArgs()
 {
 	addValueCmdLineArg(CmdLineArg::ID, SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
@@ -53,7 +58,7 @@ void ArchivingService::initServiceSpecificCmdLineArgs()
 							SoftwareSetting::MIN_QUEUE_SIZE_FOR_FLUSHING,
 							QString("Minimum size of signal states queue for flushing to disk (default = %1 states).").
 								arg(Archive::DEFAULT_QUEUE_SIZE_FOR_FLUSHING), "");
-
+	addValueCmdLineArg(CmdLineArg::READ_ONLY, SoftwareSetting::READ_ONLY_ARCHIVE_PATH, "Path to read only archive.", "D:\Archive\ProjectID");
 }
 
 void ArchivingService::loadServiceSpecificSettings()
@@ -71,6 +76,8 @@ void ArchivingService::loadServiceSpecificSettings()
 		m_minQueueSizeForFlushing = Archive::DEFAULT_QUEUE_SIZE_FOR_FLUSHING;
 	}
 
+	m_readOnlyArchivePath = getSettingValue(SoftwareSetting::ARCHIVE_LOCATION);
+
 	DEBUG_LOG_MSG(logger(), "");
 	DEBUG_LOG_MSG(logger(), QString(tr("Service settings:")));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::EQUIPMENT_ID).arg(equipmentID()));
@@ -87,20 +94,41 @@ void ArchivingService::initialize()
 {
 	// Service Main Function initialization
 	//
-	runCfgLoaderThread();
+	if (isReadOnlyArchive() == true)
+	{
+		startReadOnlyArchive();
 
-	DEBUG_LOG_MSG(logger(), QString(tr("ArchivingServiceWorker initialized")));
+		if (m_archive->isWorkable())
+		{
+			startTcpArchRequestsServerThread();
+		}
+
+		DEBUG_LOG_MSG(logger(), QString(tr("ArchivingServiceWorker initialized (Read Only mode)")));
+	}
+	else
+	{
+		runCfgLoaderThread();
+		DEBUG_LOG_MSG(logger(), QString(tr("ArchivingServiceWorker initialized")));
+	}
 }
 
 void ArchivingService::shutdown()
 {
 	// Service Main Function deinitialization
 	//
-	stopAllThreads();
 
-	stopCfgLoaderThread();
-
-	DEBUG_LOG_MSG(logger(), QString(tr("ArchivingServiceWorker stoped")));
+	if (isReadOnlyArchive() == true)
+	{
+		stopTcpArchiveRequestsServerThread();
+		stopArchive();
+		DEBUG_LOG_MSG(logger(), QString(tr("ArchivingServiceWorker stoped (Read Only mode)")));
+	}
+	else
+	{
+		stopAllThreads();
+		stopCfgLoaderThread();
+		DEBUG_LOG_MSG(logger(), QString(tr("ArchivingServiceWorker stoped")));
+	}
 }
 
 void ArchivingService::runCfgLoaderThread()
@@ -175,6 +203,11 @@ void ArchivingService::startArchive()
 	{
 		assert(false);
 	}
+}
+
+void ArchivingService::startReadOnlyArchive()
+{
+
 }
 
 void ArchivingService::stopArchive()

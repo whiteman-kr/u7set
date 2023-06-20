@@ -28,6 +28,8 @@ public:
 	virtual ServiceWorker* createInstance() const override;
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& servicesInfo) const override;
 
+	bool isReadOnlyArchive() const;
+
 private:
 	virtual void initServiceSpecificCmdLineArgs() override;
 	virtual void loadServiceSpecificSettings() override;
@@ -42,6 +44,7 @@ private:
 	void stopAllThreads();
 
 	void startArchive();
+	void startReadOnlyArchive();
 	void stopArchive();
 
 	void startTcpAppDataServerThread();
@@ -64,6 +67,7 @@ private slots:
 private:
 	QString m_overwriteArchiveLocation;
 	int m_minQueueSizeForFlushing = 0;
+	QString m_readOnlyArchivePath;
 
 	ArchivingServiceSettings m_serviceSettings;
 	OnlineLib::BuildInfo m_buildInfo;
