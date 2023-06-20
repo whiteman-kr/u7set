@@ -12,19 +12,57 @@
 #include "ITuningLog.h"
 
 //
+//		  OnConnection
+//				|
 //		TDS_GET_TUNING_SOURCES_INFO
 //				|
-//		TDS_GET_TUNING_SOURCES_STATES <-------+
-//              |                             |
-//		TDS_TUNING_SIGNALS_READ               |
-//				|						      |
-//		TDS_TUNING_SIGNALS_WRITE?             |
-//				|						      |
-//		TDS_TUNING_SIGNALS_APPLY?             |
-//				|						      |
-//		TDS_CHANGE_CONTROLLED_TUNING_SOURCE?  |
-//				+-----------------------------+
-//
+//				|<----------------------------------------------------------------------o
+//				|																		|
+//		TDS_GET_TUNING_SOURCES_STATES													|
+//              |																		|
+//              |																		|
+//          Wait 100ms                              									|
+//           or until																	|
+//			WriteQueue --->----Yes---->---WriteCommand-->---Yes----o						|
+//			 has data?				  ^  is WriteValue?            |					|
+//				|					  |	      |			TDS_TUNING_SIGNALS_WRITE		|
+//			    No					  |	      No				  o-------------------->|
+//              |					  |		  |											|
+//              |<-----------------o  |	      |											|
+//				|                  |  |	      |											|
+//	 TDS_GET_SIGNALS_STATE_CHANGES |  |	      |											|
+//				|				   |  |	      |											|
+//			   More				   |  |	      |											|
+//			  Changes?--->--Yes----o  |	      |											|
+//				|					  |		  |											|
+//				|					  |	WriteCommand-->---Yes-----o						|
+//			Wait 100ms				  |	   is Apply?			  |						|
+//			or until				  |	      |			TDS_TUNING_SIGNALS_APPLY		|
+//			WriteQueue --->----Yes--->|	      No				  o-------------------->|
+//			 has data?				  |		  |											|
+//				|					  |		  |											|
+//			    No  				  |		  |											|
+//				|					  |		  |											|
+//				|					  |	 WriteCommand-->---Yes----o						|
+//	    TDS_TUNING_SIGNALS_READ 	  |	   is ActivateLM?		  |		     			|
+//		(Recent Signal Hashes,		  |	      |		TDS_CHANGE_CONTROLLED_TUNING_SOURCE	|
+//			  Max 250)				  |	      |					  o-------------------->|
+//				|					  |	      |											|
+//				|					  |	      |											|
+//			Wait  100ms				  |	      |											|
+//			 or until				  |  	  |											|
+//			WriteQueue --->----Yes----o		  |											|
+//			  has data?						  |											|
+//				|							  |											|
+//			    No							  |											|
+//				|							  |											|
+//				|						      o----------------ASSERT------------------>|
+//		TDS_TUNING_SIGNALS_READ															|
+//		(Next Queued Signal Hashes,														|
+//			  Max 250)																	|
+//				|																		|
+//				o---->------------------------------------------------------------------o
+
 
 namespace ClientLib
 {
@@ -136,10 +174,14 @@ namespace ClientLib
 
 		virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
 
-	protected:
+		// Sending requests and processing replies functions
+		//
 		void resetToGetTuningSources();
 		void resetToGetTuningSourcesState();
 		void resetToProcessTuningSignals();
+
+		void askToWriteTuningSignals(bool& nothingToWrite);
+		void askToReadTuningSignals();
 
 		void requestTuningSourcesInfo();
 		void processTuningSourcesInfo(const QByteArray& data);
@@ -159,16 +201,14 @@ namespace ClientLib
 		void requestReadChangedTuningSignals();
 		void processReadChangedTuningSignals(const QByteArray& data);
 
-		void requestWriteTuningSignals();
+		void requestWriteTuningSignals(std::queue<TuningWriteCommand> writeQueue);
 		void processWriteTuningSignals(const QByteArray& data);
 
 		void requestApplyTuningSignals();
 		void processApplyTuningSignals(const QByteArray& data);
 
-	private:
 		[[nodiscard]] bool processTuningSignalsReadReply(const QByteArray& data);
 		[[nodiscard]] bool processTuningSignalStateMessage(const ::Network::TuningSignalState& stateMessage, std::vector<TuningSignalState>& arrivedStates);
-
 
 	signals:
 		void tuningSourcesInfoArrived();
@@ -193,6 +233,10 @@ namespace ClientLib
 
 		TuningClientSettings::LmStatusFlagMode lmStatusFlagMode() const;
 		void setLmStatusFlagMode(const TuningClientSettings::LmStatusFlagMode& mode);
+
+	public:
+		inline static const int MaxStateRequestCount = TDS_TUNING_MAX_READ_STATES / 8;  // 250 signals per TDS_TUNING_MAX_READ_STATES
+		inline static const int MaxStateWriteCount = TDS_TUNING_MAX_WRITE_RECORDS / 8;  // 250 signals per TDS_TUNING_MAX_WRITE_RECORDS
 
 	protected:
 		// Tuning sources
@@ -231,9 +275,13 @@ namespace ClientLib
 
 		// Reading processing
 		//
-		const int m_tuningSignalsStateRequestFrequency = 5;	// every 5th request asks for states, other requests ask recent states
-		int m_tuningSignalsRequestNumber = 0;
-		bool m_requestRecentTuningSignals = false;
+		enum class ReadRequestType
+		{
+			Changed,
+			Recent,
+			Generic
+		};
+		ReadRequestType m_lastReadRequestType{ReadRequestType::Generic};
 
 		int m_readTuningSignalIndex = 0;
 		int m_readTuningSignalCount = 0;
@@ -258,7 +306,6 @@ namespace ClientLib
 
 		::Network::TuningSignalsRead m_readTuningSignals;
 		::Network::TuningSignalsReadReply m_readTuningSignalsReply;
-		int m_pendingSignalsStateChanges = 0;
 
 		::Network::GetTuningSignalsStateChangesRequest m_readChangedTuningSignals;
 		::Network::GetTuningSignalsStateChangesReply m_readChangedTuningSignalsReply;
