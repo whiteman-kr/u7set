@@ -14,7 +14,7 @@ namespace Tuning
 		TEST_PTR_RETURN(tss);
 
 		tss->set_signalhash(signalHash);
-		tss->set_error(TO_INT(E::NetworkError::UnknownSignalHash));
+		tss->set_error(TO_INT(E::NetworkError::Success));
 		tss->set_valid(valid);
 
 		currentValue.save(tss->mutable_value());
