@@ -23,7 +23,7 @@
 //              |																		|
 //          Wait 100ms                              									|
 //           or until																	|
-//			WriteQueue --->----Yes---->---WriteCommand-->---Yes----o						|
+//			WriteQueue --->----Yes---->---WriteCommand-->---Yes----o					|
 //			 has data?				  ^  is WriteValue?            |					|
 //				|					  |	      |			TDS_TUNING_SIGNALS_WRITE		|
 //			    No					  |	      No				  o-------------------->|

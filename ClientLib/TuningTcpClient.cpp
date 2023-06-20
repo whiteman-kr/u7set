@@ -916,17 +916,11 @@ namespace ClientLib
 		if (m_readTuningSignalIndex >= totalSignalCount)
 		{
 			m_readTuningSignalIndex = 0;
+		}
 
-			// Start the new loop
-			//
-			resetToGetTuningSourcesState();
-		}
-		else
-		{
-			// Continue the current loop
-			//
-			resetToProcessTuningSignals();
-		}
+		// Start the new loop
+		//
+		resetToGetTuningSourcesState();
 
 		return;
 	}
@@ -971,19 +965,22 @@ namespace ClientLib
 
 		int stateCount = m_readChangedTuningSignalsReply.tuningsignalstate_size();
 
-		std::vector<TuningSignalState> arrivedStates;
-		arrivedStates.reserve(stateCount);
-
-		for (int i = 0; i < stateCount; i++)
+		if (stateCount > 0)
 		{
-			const ::Network::TuningSignalState& stateMessage = m_readChangedTuningSignalsReply.tuningsignalstate(i);
-			if (processTuningSignalStateMessage(stateMessage, arrivedStates) == false)
-			{
-				continue;
-			}
-		}
+			std::vector<TuningSignalState> arrivedStates;
+			arrivedStates.reserve(stateCount);
 
-		m_signalUpdater.setStates(arrivedStates, m_tuningServiceHash);
+			for (int i = 0; i < stateCount; i++)
+			{
+				const ::Network::TuningSignalState& stateMessage = m_readChangedTuningSignalsReply.tuningsignalstate(i);
+				if (processTuningSignalStateMessage(stateMessage, arrivedStates) == false)
+				{
+					continue;
+				}
+			}
+
+			m_signalUpdater.setStates(arrivedStates, m_tuningServiceHash);
+		}
 
 		if (m_readChangedTuningSignalsReply.pendingsignalsstatechanges() > 0)
 		{
