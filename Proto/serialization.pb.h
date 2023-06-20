@@ -61,7 +61,7 @@ struct TableStruct_serialization_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[107]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[108]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -103,12 +103,15 @@ extern AppSignalSetDefaultTypeInternal _AppSignalSet_default_instance_;
 class AppSignalState;
 struct AppSignalStateDefaultTypeInternal;
 extern AppSignalStateDefaultTypeInternal _AppSignalState_default_instance_;
+class ArchInfo;
+struct ArchInfoDefaultTypeInternal;
+extern ArchInfoDefaultTypeInternal _ArchInfo_default_instance_;
 class ArchSignal;
 struct ArchSignalDefaultTypeInternal;
 extern ArchSignalDefaultTypeInternal _ArchSignal_default_instance_;
-class ArchSignals;
-struct ArchSignalsDefaultTypeInternal;
-extern ArchSignalsDefaultTypeInternal _ArchSignals_default_instance_;
+class BuildInfo;
+struct BuildInfoDefaultTypeInternal;
+extern BuildInfoDefaultTypeInternal _BuildInfo_default_instance_;
 class Bus;
 struct BusDefaultTypeInternal;
 extern BusDefaultTypeInternal _Bus_default_instance_;
@@ -404,8 +407,9 @@ template<> ::Proto::AppSignalCalculatedParam* Arena::CreateMaybeMessage<::Proto:
 template<> ::Proto::AppSignalDbField* Arena::CreateMaybeMessage<::Proto::AppSignalDbField>(Arena*);
 template<> ::Proto::AppSignalSet* Arena::CreateMaybeMessage<::Proto::AppSignalSet>(Arena*);
 template<> ::Proto::AppSignalState* Arena::CreateMaybeMessage<::Proto::AppSignalState>(Arena*);
+template<> ::Proto::ArchInfo* Arena::CreateMaybeMessage<::Proto::ArchInfo>(Arena*);
 template<> ::Proto::ArchSignal* Arena::CreateMaybeMessage<::Proto::ArchSignal>(Arena*);
-template<> ::Proto::ArchSignals* Arena::CreateMaybeMessage<::Proto::ArchSignals>(Arena*);
+template<> ::Proto::BuildInfo* Arena::CreateMaybeMessage<::Proto::BuildInfo>(Arena*);
 template<> ::Proto::Bus* Arena::CreateMaybeMessage<::Proto::Bus>(Arena*);
 template<> ::Proto::BusSignal* Arena::CreateMaybeMessage<::Proto::BusSignal>(Arena*);
 template<> ::Proto::Comparator* Arena::CreateMaybeMessage<::Proto::Comparator>(Arena*);
@@ -23458,6 +23462,258 @@ class SchemaDetails PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class BuildInfo PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.BuildInfo) */ {
+ public:
+  inline BuildInfo() : BuildInfo(nullptr) {}
+  virtual ~BuildInfo();
+  explicit constexpr BuildInfo(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  BuildInfo(const BuildInfo& from);
+  BuildInfo(BuildInfo&& from) noexcept
+    : BuildInfo() {
+    *this = ::std::move(from);
+  }
+
+  inline BuildInfo& operator=(const BuildInfo& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline BuildInfo& operator=(BuildInfo&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
+    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
+  }
+  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
+    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const BuildInfo& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const BuildInfo* internal_default_instance() {
+    return reinterpret_cast<const BuildInfo*>(
+               &_BuildInfo_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    94;
+
+  friend void swap(BuildInfo& a, BuildInfo& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(BuildInfo* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(BuildInfo* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline BuildInfo* New() const final {
+    return CreateMaybeMessage<BuildInfo>(nullptr);
+  }
+
+  BuildInfo* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<BuildInfo>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const BuildInfo& from);
+  void MergeFrom(const BuildInfo& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(BuildInfo* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Proto.BuildInfo";
+  }
+  protected:
+  explicit BuildInfo(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_serialization_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kProjectFieldNumber = 1,
+    kDateTimeFieldNumber = 3,
+    kUserFieldNumber = 5,
+    kWorkstationFieldNumber = 6,
+    kBuildNoFieldNumber = 2,
+    kChangesetFieldNumber = 4,
+  };
+  // optional string project = 1;
+  bool has_project() const;
+  private:
+  bool _internal_has_project() const;
+  public:
+  void clear_project();
+  const std::string& project() const;
+  void set_project(const std::string& value);
+  void set_project(std::string&& value);
+  void set_project(const char* value);
+  void set_project(const char* value, size_t size);
+  std::string* mutable_project();
+  std::string* release_project();
+  void set_allocated_project(std::string* project);
+  private:
+  const std::string& _internal_project() const;
+  void _internal_set_project(const std::string& value);
+  std::string* _internal_mutable_project();
+  public:
+
+  // optional string dateTime = 3;
+  bool has_datetime() const;
+  private:
+  bool _internal_has_datetime() const;
+  public:
+  void clear_datetime();
+  const std::string& datetime() const;
+  void set_datetime(const std::string& value);
+  void set_datetime(std::string&& value);
+  void set_datetime(const char* value);
+  void set_datetime(const char* value, size_t size);
+  std::string* mutable_datetime();
+  std::string* release_datetime();
+  void set_allocated_datetime(std::string* datetime);
+  private:
+  const std::string& _internal_datetime() const;
+  void _internal_set_datetime(const std::string& value);
+  std::string* _internal_mutable_datetime();
+  public:
+
+  // optional string user = 5;
+  bool has_user() const;
+  private:
+  bool _internal_has_user() const;
+  public:
+  void clear_user();
+  const std::string& user() const;
+  void set_user(const std::string& value);
+  void set_user(std::string&& value);
+  void set_user(const char* value);
+  void set_user(const char* value, size_t size);
+  std::string* mutable_user();
+  std::string* release_user();
+  void set_allocated_user(std::string* user);
+  private:
+  const std::string& _internal_user() const;
+  void _internal_set_user(const std::string& value);
+  std::string* _internal_mutable_user();
+  public:
+
+  // optional string workstation = 6;
+  bool has_workstation() const;
+  private:
+  bool _internal_has_workstation() const;
+  public:
+  void clear_workstation();
+  const std::string& workstation() const;
+  void set_workstation(const std::string& value);
+  void set_workstation(std::string&& value);
+  void set_workstation(const char* value);
+  void set_workstation(const char* value, size_t size);
+  std::string* mutable_workstation();
+  std::string* release_workstation();
+  void set_allocated_workstation(std::string* workstation);
+  private:
+  const std::string& _internal_workstation() const;
+  void _internal_set_workstation(const std::string& value);
+  std::string* _internal_mutable_workstation();
+  public:
+
+  // optional int32 buildNo = 2 [default = 0];
+  bool has_buildno() const;
+  private:
+  bool _internal_has_buildno() const;
+  public:
+  void clear_buildno();
+  ::PROTOBUF_NAMESPACE_ID::int32 buildno() const;
+  void set_buildno(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_buildno() const;
+  void _internal_set_buildno(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int32 changeset = 4 [default = 0];
+  bool has_changeset() const;
+  private:
+  bool _internal_has_changeset() const;
+  public:
+  void clear_changeset();
+  ::PROTOBUF_NAMESPACE_ID::int32 changeset() const;
+  void set_changeset(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_changeset() const;
+  void _internal_set_changeset(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:Proto.BuildInfo)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr project_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr datetime_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr user_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr workstation_;
+  ::PROTOBUF_NAMESPACE_ID::int32 buildno_;
+  ::PROTOBUF_NAMESPACE_ID::int32 changeset_;
+  friend struct ::TableStruct_serialization_2eproto;
+};
+// -------------------------------------------------------------------
+
 class ArchSignal PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.ArchSignal) */ {
  public:
@@ -23508,7 +23764,7 @@ class ArchSignal PROTOBUF_FINAL :
                &_ArchSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    94;
+    95;
 
   friend void swap(ArchSignal& a, ArchSignal& b) {
     a.Swap(&b);
@@ -23578,11 +23834,15 @@ class ArchSignal PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kAppSignalIDFieldNumber = 3,
-    kHashFieldNumber = 1,
-    kIsAnalogFieldNumber = 2,
+    kAppSignalIDFieldNumber = 1,
+    kUnitFieldNumber = 5,
+    kLowLimitFieldNumber = 3,
+    kHighLimitFieldNumber = 4,
+    kFineApertureFieldNumber = 6,
+    kCoarseApertureFieldNumber = 7,
+    kSignaltypeFieldNumber = 2,
   };
-  // required string appSignalID = 3;
+  // required string appSignalID = 1;
   bool has_appsignalid() const;
   private:
   bool _internal_has_appsignalid() const;
@@ -23602,30 +23862,89 @@ class ArchSignal PROTOBUF_FINAL :
   std::string* _internal_mutable_appsignalid();
   public:
 
-  // required uint64 hash = 1;
-  bool has_hash() const;
+  // optional string unit = 5;
+  bool has_unit() const;
   private:
-  bool _internal_has_hash() const;
+  bool _internal_has_unit() const;
   public:
-  void clear_hash();
-  ::PROTOBUF_NAMESPACE_ID::uint64 hash() const;
-  void set_hash(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  void clear_unit();
+  const std::string& unit() const;
+  void set_unit(const std::string& value);
+  void set_unit(std::string&& value);
+  void set_unit(const char* value);
+  void set_unit(const char* value, size_t size);
+  std::string* mutable_unit();
+  std::string* release_unit();
+  void set_allocated_unit(std::string* unit);
   private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_hash() const;
-  void _internal_set_hash(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  const std::string& _internal_unit() const;
+  void _internal_set_unit(const std::string& value);
+  std::string* _internal_mutable_unit();
   public:
 
-  // required bool isAnalog = 2;
-  bool has_isanalog() const;
+  // optional double lowLimit = 3 [default = 0];
+  bool has_lowlimit() const;
   private:
-  bool _internal_has_isanalog() const;
+  bool _internal_has_lowlimit() const;
   public:
-  void clear_isanalog();
-  bool isanalog() const;
-  void set_isanalog(bool value);
+  void clear_lowlimit();
+  double lowlimit() const;
+  void set_lowlimit(double value);
   private:
-  bool _internal_isanalog() const;
-  void _internal_set_isanalog(bool value);
+  double _internal_lowlimit() const;
+  void _internal_set_lowlimit(double value);
+  public:
+
+  // optional double highLimit = 4 [default = 0];
+  bool has_highlimit() const;
+  private:
+  bool _internal_has_highlimit() const;
+  public:
+  void clear_highlimit();
+  double highlimit() const;
+  void set_highlimit(double value);
+  private:
+  double _internal_highlimit() const;
+  void _internal_set_highlimit(double value);
+  public:
+
+  // optional double fineAperture = 6 [default = 0];
+  bool has_fineaperture() const;
+  private:
+  bool _internal_has_fineaperture() const;
+  public:
+  void clear_fineaperture();
+  double fineaperture() const;
+  void set_fineaperture(double value);
+  private:
+  double _internal_fineaperture() const;
+  void _internal_set_fineaperture(double value);
+  public:
+
+  // optional double coarseAperture = 7 [default = 0];
+  bool has_coarseaperture() const;
+  private:
+  bool _internal_has_coarseaperture() const;
+  public:
+  void clear_coarseaperture();
+  double coarseaperture() const;
+  void set_coarseaperture(double value);
+  private:
+  double _internal_coarseaperture() const;
+  void _internal_set_coarseaperture(double value);
+  public:
+
+  // required int32 signaltype = 2;
+  bool has_signaltype() const;
+  private:
+  bool _internal_has_signaltype() const;
+  public:
+  void clear_signaltype();
+  ::PROTOBUF_NAMESPACE_ID::int32 signaltype() const;
+  void set_signaltype(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_signaltype() const;
+  void _internal_set_signaltype(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
   // @@protoc_insertion_point(class_scope:Proto.ArchSignal)
@@ -23641,30 +23960,34 @@ class ArchSignal PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr appsignalid_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 hash_;
-  bool isanalog_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr unit_;
+  double lowlimit_;
+  double highlimit_;
+  double fineaperture_;
+  double coarseaperture_;
+  ::PROTOBUF_NAMESPACE_ID::int32 signaltype_;
   friend struct ::TableStruct_serialization_2eproto;
 };
 // -------------------------------------------------------------------
 
-class ArchSignals PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.ArchSignals) */ {
+class ArchInfo PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.ArchInfo) */ {
  public:
-  inline ArchSignals() : ArchSignals(nullptr) {}
-  virtual ~ArchSignals();
-  explicit constexpr ArchSignals(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+  inline ArchInfo() : ArchInfo(nullptr) {}
+  virtual ~ArchInfo();
+  explicit constexpr ArchInfo(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
 
-  ArchSignals(const ArchSignals& from);
-  ArchSignals(ArchSignals&& from) noexcept
-    : ArchSignals() {
+  ArchInfo(const ArchInfo& from);
+  ArchInfo(ArchInfo&& from) noexcept
+    : ArchInfo() {
     *this = ::std::move(from);
   }
 
-  inline ArchSignals& operator=(const ArchSignals& from) {
+  inline ArchInfo& operator=(const ArchInfo& from) {
     CopyFrom(from);
     return *this;
   }
-  inline ArchSignals& operator=(ArchSignals&& from) noexcept {
+  inline ArchInfo& operator=(ArchInfo&& from) noexcept {
     if (GetArena() == from.GetArena()) {
       if (this != &from) InternalSwap(&from);
     } else {
@@ -23689,20 +24012,20 @@ class ArchSignals PROTOBUF_FINAL :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return GetMetadataStatic().reflection;
   }
-  static const ArchSignals& default_instance() {
+  static const ArchInfo& default_instance() {
     return *internal_default_instance();
   }
-  static inline const ArchSignals* internal_default_instance() {
-    return reinterpret_cast<const ArchSignals*>(
-               &_ArchSignals_default_instance_);
+  static inline const ArchInfo* internal_default_instance() {
+    return reinterpret_cast<const ArchInfo*>(
+               &_ArchInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    95;
+    96;
 
-  friend void swap(ArchSignals& a, ArchSignals& b) {
+  friend void swap(ArchInfo& a, ArchInfo& b) {
     a.Swap(&b);
   }
-  inline void Swap(ArchSignals* other) {
+  inline void Swap(ArchInfo* other) {
     if (other == this) return;
     if (GetArena() == other->GetArena()) {
       InternalSwap(other);
@@ -23710,7 +24033,7 @@ class ArchSignals PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(ArchSignals* other) {
+  void UnsafeArenaSwap(ArchInfo* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetArena() == other->GetArena());
     InternalSwap(other);
@@ -23718,17 +24041,17 @@ class ArchSignals PROTOBUF_FINAL :
 
   // implements Message ----------------------------------------------
 
-  inline ArchSignals* New() const final {
-    return CreateMaybeMessage<ArchSignals>(nullptr);
+  inline ArchInfo* New() const final {
+    return CreateMaybeMessage<ArchInfo>(nullptr);
   }
 
-  ArchSignals* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<ArchSignals>(arena);
+  ArchInfo* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<ArchInfo>(arena);
   }
   void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const ArchSignals& from);
-  void MergeFrom(const ArchSignals& from);
+  void CopyFrom(const ArchInfo& from);
+  void MergeFrom(const ArchInfo& from);
   PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
   bool IsInitialized() const final;
 
@@ -23742,13 +24065,13 @@ class ArchSignals PROTOBUF_FINAL :
   inline void SharedCtor();
   inline void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(ArchSignals* other);
+  void InternalSwap(ArchInfo* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "Proto.ArchSignals";
+    return "Proto.ArchInfo";
   }
   protected:
-  explicit ArchSignals(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  explicit ArchInfo(::PROTOBUF_NAMESPACE_ID::Arena* arena);
   private:
   static void ArenaDtor(void* object);
   inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
@@ -23767,35 +24090,81 @@ class ArchSignals PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kArchSignalsFieldNumber = 1,
+    kArchSignalFieldNumber = 3,
+    kArchiveServiceIDFieldNumber = 2,
+    kBuildInfoFieldNumber = 1,
   };
-  // repeated .Proto.ArchSignal archSignals = 1;
-  int archsignals_size() const;
+  // repeated .Proto.ArchSignal archSignal = 3;
+  int archsignal_size() const;
   private:
-  int _internal_archsignals_size() const;
+  int _internal_archsignal_size() const;
   public:
-  void clear_archsignals();
-  ::Proto::ArchSignal* mutable_archsignals(int index);
+  void clear_archsignal();
+  ::Proto::ArchSignal* mutable_archsignal(int index);
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::ArchSignal >*
-      mutable_archsignals();
+      mutable_archsignal();
   private:
-  const ::Proto::ArchSignal& _internal_archsignals(int index) const;
-  ::Proto::ArchSignal* _internal_add_archsignals();
+  const ::Proto::ArchSignal& _internal_archsignal(int index) const;
+  ::Proto::ArchSignal* _internal_add_archsignal();
   public:
-  const ::Proto::ArchSignal& archsignals(int index) const;
-  ::Proto::ArchSignal* add_archsignals();
+  const ::Proto::ArchSignal& archsignal(int index) const;
+  ::Proto::ArchSignal* add_archsignal();
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::ArchSignal >&
-      archsignals() const;
+      archsignal() const;
 
-  // @@protoc_insertion_point(class_scope:Proto.ArchSignals)
+  // required string archiveServiceID = 2;
+  bool has_archiveserviceid() const;
+  private:
+  bool _internal_has_archiveserviceid() const;
+  public:
+  void clear_archiveserviceid();
+  const std::string& archiveserviceid() const;
+  void set_archiveserviceid(const std::string& value);
+  void set_archiveserviceid(std::string&& value);
+  void set_archiveserviceid(const char* value);
+  void set_archiveserviceid(const char* value, size_t size);
+  std::string* mutable_archiveserviceid();
+  std::string* release_archiveserviceid();
+  void set_allocated_archiveserviceid(std::string* archiveserviceid);
+  private:
+  const std::string& _internal_archiveserviceid() const;
+  void _internal_set_archiveserviceid(const std::string& value);
+  std::string* _internal_mutable_archiveserviceid();
+  public:
+
+  // required .Proto.BuildInfo buildInfo = 1;
+  bool has_buildinfo() const;
+  private:
+  bool _internal_has_buildinfo() const;
+  public:
+  void clear_buildinfo();
+  const ::Proto::BuildInfo& buildinfo() const;
+  ::Proto::BuildInfo* release_buildinfo();
+  ::Proto::BuildInfo* mutable_buildinfo();
+  void set_allocated_buildinfo(::Proto::BuildInfo* buildinfo);
+  private:
+  const ::Proto::BuildInfo& _internal_buildinfo() const;
+  ::Proto::BuildInfo* _internal_mutable_buildinfo();
+  public:
+  void unsafe_arena_set_allocated_buildinfo(
+      ::Proto::BuildInfo* buildinfo);
+  ::Proto::BuildInfo* unsafe_arena_release_buildinfo();
+
+  // @@protoc_insertion_point(class_scope:Proto.ArchInfo)
  private:
   class _Internal;
+
+  // helper for ByteSizeLong()
+  size_t RequiredFieldsByteSizeFallback() const;
 
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::ArchSignal > archsignals_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::ArchSignal > archsignal_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr archiveserviceid_;
+  ::Proto::BuildInfo* buildinfo_;
   friend struct ::TableStruct_serialization_2eproto;
 };
 // -------------------------------------------------------------------
@@ -23850,7 +24219,7 @@ class BusSignal PROTOBUF_FINAL :
                &_BusSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    96;
+    97;
 
   friend void swap(BusSignal& a, BusSignal& b) {
     a.Swap(&b);
@@ -24297,7 +24666,7 @@ class Bus PROTOBUF_FINAL :
                &_Bus_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    97;
+    98;
 
   friend void swap(Bus& a, Bus& b) {
     a.Swap(&b);
@@ -24553,7 +24922,7 @@ class ComparatorSignal PROTOBUF_FINAL :
                &_ComparatorSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    98;
+    99;
 
   friend void swap(ComparatorSignal& a, ComparatorSignal& b) {
     a.Swap(&b);
@@ -24754,7 +25123,7 @@ class Comparator PROTOBUF_FINAL :
                &_Comparator_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    99;
+    100;
 
   friend void swap(Comparator& a, Comparator& b) {
     a.Swap(&b);
@@ -25092,7 +25461,7 @@ class LmComparatorSet PROTOBUF_FINAL :
                &_LmComparatorSet_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    100;
+    101;
 
   friend void swap(LmComparatorSet& a, LmComparatorSet& b) {
     a.Swap(&b);
@@ -25268,7 +25637,7 @@ class ComparatorSet PROTOBUF_FINAL :
                &_ComparatorSet_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    101;
+    102;
 
   friend void swap(ComparatorSet& a, ComparatorSet& b) {
     a.Swap(&b);
@@ -25421,7 +25790,7 @@ class MetrologySignalLocation PROTOBUF_FINAL :
                &_MetrologySignalLocation_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    102;
+    103;
 
   friend void swap(MetrologySignalLocation& a, MetrologySignalLocation& b) {
     a.Swap(&b);
@@ -25725,7 +26094,7 @@ class MetrologySignal PROTOBUF_FINAL :
                &_MetrologySignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    103;
+    104;
 
   friend void swap(MetrologySignal& a, MetrologySignal& b) {
     a.Swap(&b);
@@ -26034,7 +26403,7 @@ class MetrologySignalSet PROTOBUF_FINAL :
                &_MetrologySignalSet_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    104;
+    105;
 
   friend void swap(MetrologySignalSet& a, MetrologySignalSet& b) {
     a.Swap(&b);
@@ -26187,7 +26556,7 @@ class SimOverrideSignal PROTOBUF_FINAL :
                &_SimOverrideSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    105;
+    106;
 
   friend void swap(SimOverrideSignal& a, SimOverrideSignal& b) {
     a.Swap(&b);
@@ -26430,7 +26799,7 @@ class SimOverrideSignalWorkspace PROTOBUF_FINAL :
                &_SimOverrideSignalWorkspace_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    106;
+    107;
 
   friend void swap(SimOverrideSignalWorkspace& a, SimOverrideSignalWorkspace& b) {
     a.Swap(&b);
@@ -55222,65 +55591,361 @@ SchemaDetails::trendindicators() const {
 
 // -------------------------------------------------------------------
 
-// ArchSignal
+// BuildInfo
 
-// required uint64 hash = 1;
-inline bool ArchSignal::_internal_has_hash() const {
+// optional string project = 1;
+inline bool BuildInfo::_internal_has_project() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool BuildInfo::has_project() const {
+  return _internal_has_project();
+}
+inline void BuildInfo::clear_project() {
+  project_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& BuildInfo::project() const {
+  // @@protoc_insertion_point(field_get:Proto.BuildInfo.project)
+  return _internal_project();
+}
+inline void BuildInfo::set_project(const std::string& value) {
+  _internal_set_project(value);
+  // @@protoc_insertion_point(field_set:Proto.BuildInfo.project)
+}
+inline std::string* BuildInfo::mutable_project() {
+  // @@protoc_insertion_point(field_mutable:Proto.BuildInfo.project)
+  return _internal_mutable_project();
+}
+inline const std::string& BuildInfo::_internal_project() const {
+  return project_.Get();
+}
+inline void BuildInfo::_internal_set_project(const std::string& value) {
+  _has_bits_[0] |= 0x00000001u;
+  project_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void BuildInfo::set_project(std::string&& value) {
+  _has_bits_[0] |= 0x00000001u;
+  project_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.BuildInfo.project)
+}
+inline void BuildInfo::set_project(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000001u;
+  project_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.BuildInfo.project)
+}
+inline void BuildInfo::set_project(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000001u;
+  project_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.BuildInfo.project)
+}
+inline std::string* BuildInfo::_internal_mutable_project() {
+  _has_bits_[0] |= 0x00000001u;
+  return project_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* BuildInfo::release_project() {
+  // @@protoc_insertion_point(field_release:Proto.BuildInfo.project)
+  if (!_internal_has_project()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return project_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void BuildInfo::set_allocated_project(std::string* project) {
+  if (project != nullptr) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  project_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), project,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.BuildInfo.project)
+}
+
+// optional int32 buildNo = 2 [default = 0];
+inline bool BuildInfo::_internal_has_buildno() const {
+  bool value = (_has_bits_[0] & 0x00000010u) != 0;
+  return value;
+}
+inline bool BuildInfo::has_buildno() const {
+  return _internal_has_buildno();
+}
+inline void BuildInfo::clear_buildno() {
+  buildno_ = 0;
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 BuildInfo::_internal_buildno() const {
+  return buildno_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 BuildInfo::buildno() const {
+  // @@protoc_insertion_point(field_get:Proto.BuildInfo.buildNo)
+  return _internal_buildno();
+}
+inline void BuildInfo::_internal_set_buildno(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000010u;
+  buildno_ = value;
+}
+inline void BuildInfo::set_buildno(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_buildno(value);
+  // @@protoc_insertion_point(field_set:Proto.BuildInfo.buildNo)
+}
+
+// optional string dateTime = 3;
+inline bool BuildInfo::_internal_has_datetime() const {
   bool value = (_has_bits_[0] & 0x00000002u) != 0;
   return value;
 }
-inline bool ArchSignal::has_hash() const {
-  return _internal_has_hash();
+inline bool BuildInfo::has_datetime() const {
+  return _internal_has_datetime();
 }
-inline void ArchSignal::clear_hash() {
-  hash_ = PROTOBUF_ULONGLONG(0);
+inline void BuildInfo::clear_datetime() {
+  datetime_.ClearToEmpty();
   _has_bits_[0] &= ~0x00000002u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint64 ArchSignal::_internal_hash() const {
-  return hash_;
+inline const std::string& BuildInfo::datetime() const {
+  // @@protoc_insertion_point(field_get:Proto.BuildInfo.dateTime)
+  return _internal_datetime();
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint64 ArchSignal::hash() const {
-  // @@protoc_insertion_point(field_get:Proto.ArchSignal.hash)
-  return _internal_hash();
+inline void BuildInfo::set_datetime(const std::string& value) {
+  _internal_set_datetime(value);
+  // @@protoc_insertion_point(field_set:Proto.BuildInfo.dateTime)
 }
-inline void ArchSignal::_internal_set_hash(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+inline std::string* BuildInfo::mutable_datetime() {
+  // @@protoc_insertion_point(field_mutable:Proto.BuildInfo.dateTime)
+  return _internal_mutable_datetime();
+}
+inline const std::string& BuildInfo::_internal_datetime() const {
+  return datetime_.Get();
+}
+inline void BuildInfo::_internal_set_datetime(const std::string& value) {
   _has_bits_[0] |= 0x00000002u;
-  hash_ = value;
+  datetime_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
-inline void ArchSignal::set_hash(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_hash(value);
-  // @@protoc_insertion_point(field_set:Proto.ArchSignal.hash)
+inline void BuildInfo::set_datetime(std::string&& value) {
+  _has_bits_[0] |= 0x00000002u;
+  datetime_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.BuildInfo.dateTime)
+}
+inline void BuildInfo::set_datetime(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000002u;
+  datetime_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.BuildInfo.dateTime)
+}
+inline void BuildInfo::set_datetime(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000002u;
+  datetime_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.BuildInfo.dateTime)
+}
+inline std::string* BuildInfo::_internal_mutable_datetime() {
+  _has_bits_[0] |= 0x00000002u;
+  return datetime_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* BuildInfo::release_datetime() {
+  // @@protoc_insertion_point(field_release:Proto.BuildInfo.dateTime)
+  if (!_internal_has_datetime()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000002u;
+  return datetime_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void BuildInfo::set_allocated_datetime(std::string* datetime) {
+  if (datetime != nullptr) {
+    _has_bits_[0] |= 0x00000002u;
+  } else {
+    _has_bits_[0] &= ~0x00000002u;
+  }
+  datetime_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), datetime,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.BuildInfo.dateTime)
 }
 
-// required bool isAnalog = 2;
-inline bool ArchSignal::_internal_has_isanalog() const {
+// optional int32 changeset = 4 [default = 0];
+inline bool BuildInfo::_internal_has_changeset() const {
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
+  return value;
+}
+inline bool BuildInfo::has_changeset() const {
+  return _internal_has_changeset();
+}
+inline void BuildInfo::clear_changeset() {
+  changeset_ = 0;
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 BuildInfo::_internal_changeset() const {
+  return changeset_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 BuildInfo::changeset() const {
+  // @@protoc_insertion_point(field_get:Proto.BuildInfo.changeset)
+  return _internal_changeset();
+}
+inline void BuildInfo::_internal_set_changeset(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000020u;
+  changeset_ = value;
+}
+inline void BuildInfo::set_changeset(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_changeset(value);
+  // @@protoc_insertion_point(field_set:Proto.BuildInfo.changeset)
+}
+
+// optional string user = 5;
+inline bool BuildInfo::_internal_has_user() const {
   bool value = (_has_bits_[0] & 0x00000004u) != 0;
   return value;
 }
-inline bool ArchSignal::has_isanalog() const {
-  return _internal_has_isanalog();
+inline bool BuildInfo::has_user() const {
+  return _internal_has_user();
 }
-inline void ArchSignal::clear_isanalog() {
-  isanalog_ = false;
+inline void BuildInfo::clear_user() {
+  user_.ClearToEmpty();
   _has_bits_[0] &= ~0x00000004u;
 }
-inline bool ArchSignal::_internal_isanalog() const {
-  return isanalog_;
+inline const std::string& BuildInfo::user() const {
+  // @@protoc_insertion_point(field_get:Proto.BuildInfo.user)
+  return _internal_user();
 }
-inline bool ArchSignal::isanalog() const {
-  // @@protoc_insertion_point(field_get:Proto.ArchSignal.isAnalog)
-  return _internal_isanalog();
+inline void BuildInfo::set_user(const std::string& value) {
+  _internal_set_user(value);
+  // @@protoc_insertion_point(field_set:Proto.BuildInfo.user)
 }
-inline void ArchSignal::_internal_set_isanalog(bool value) {
+inline std::string* BuildInfo::mutable_user() {
+  // @@protoc_insertion_point(field_mutable:Proto.BuildInfo.user)
+  return _internal_mutable_user();
+}
+inline const std::string& BuildInfo::_internal_user() const {
+  return user_.Get();
+}
+inline void BuildInfo::_internal_set_user(const std::string& value) {
   _has_bits_[0] |= 0x00000004u;
-  isanalog_ = value;
+  user_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
-inline void ArchSignal::set_isanalog(bool value) {
-  _internal_set_isanalog(value);
-  // @@protoc_insertion_point(field_set:Proto.ArchSignal.isAnalog)
+inline void BuildInfo::set_user(std::string&& value) {
+  _has_bits_[0] |= 0x00000004u;
+  user_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.BuildInfo.user)
+}
+inline void BuildInfo::set_user(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000004u;
+  user_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.BuildInfo.user)
+}
+inline void BuildInfo::set_user(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000004u;
+  user_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.BuildInfo.user)
+}
+inline std::string* BuildInfo::_internal_mutable_user() {
+  _has_bits_[0] |= 0x00000004u;
+  return user_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* BuildInfo::release_user() {
+  // @@protoc_insertion_point(field_release:Proto.BuildInfo.user)
+  if (!_internal_has_user()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000004u;
+  return user_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void BuildInfo::set_allocated_user(std::string* user) {
+  if (user != nullptr) {
+    _has_bits_[0] |= 0x00000004u;
+  } else {
+    _has_bits_[0] &= ~0x00000004u;
+  }
+  user_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), user,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.BuildInfo.user)
 }
 
-// required string appSignalID = 3;
+// optional string workstation = 6;
+inline bool BuildInfo::_internal_has_workstation() const {
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
+  return value;
+}
+inline bool BuildInfo::has_workstation() const {
+  return _internal_has_workstation();
+}
+inline void BuildInfo::clear_workstation() {
+  workstation_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline const std::string& BuildInfo::workstation() const {
+  // @@protoc_insertion_point(field_get:Proto.BuildInfo.workstation)
+  return _internal_workstation();
+}
+inline void BuildInfo::set_workstation(const std::string& value) {
+  _internal_set_workstation(value);
+  // @@protoc_insertion_point(field_set:Proto.BuildInfo.workstation)
+}
+inline std::string* BuildInfo::mutable_workstation() {
+  // @@protoc_insertion_point(field_mutable:Proto.BuildInfo.workstation)
+  return _internal_mutable_workstation();
+}
+inline const std::string& BuildInfo::_internal_workstation() const {
+  return workstation_.Get();
+}
+inline void BuildInfo::_internal_set_workstation(const std::string& value) {
+  _has_bits_[0] |= 0x00000008u;
+  workstation_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void BuildInfo::set_workstation(std::string&& value) {
+  _has_bits_[0] |= 0x00000008u;
+  workstation_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.BuildInfo.workstation)
+}
+inline void BuildInfo::set_workstation(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000008u;
+  workstation_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.BuildInfo.workstation)
+}
+inline void BuildInfo::set_workstation(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000008u;
+  workstation_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.BuildInfo.workstation)
+}
+inline std::string* BuildInfo::_internal_mutable_workstation() {
+  _has_bits_[0] |= 0x00000008u;
+  return workstation_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* BuildInfo::release_workstation() {
+  // @@protoc_insertion_point(field_release:Proto.BuildInfo.workstation)
+  if (!_internal_has_workstation()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000008u;
+  return workstation_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void BuildInfo::set_allocated_workstation(std::string* workstation) {
+  if (workstation != nullptr) {
+    _has_bits_[0] |= 0x00000008u;
+  } else {
+    _has_bits_[0] &= ~0x00000008u;
+  }
+  workstation_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), workstation,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.BuildInfo.workstation)
+}
+
+// -------------------------------------------------------------------
+
+// ArchSignal
+
+// required string appSignalID = 1;
 inline bool ArchSignal::_internal_has_appsignalid() const {
   bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
@@ -55353,47 +56018,416 @@ inline void ArchSignal::set_allocated_appsignalid(std::string* appsignalid) {
   // @@protoc_insertion_point(field_set_allocated:Proto.ArchSignal.appSignalID)
 }
 
+// required int32 signaltype = 2;
+inline bool ArchSignal::_internal_has_signaltype() const {
+  bool value = (_has_bits_[0] & 0x00000040u) != 0;
+  return value;
+}
+inline bool ArchSignal::has_signaltype() const {
+  return _internal_has_signaltype();
+}
+inline void ArchSignal::clear_signaltype() {
+  signaltype_ = 0;
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 ArchSignal::_internal_signaltype() const {
+  return signaltype_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 ArchSignal::signaltype() const {
+  // @@protoc_insertion_point(field_get:Proto.ArchSignal.signaltype)
+  return _internal_signaltype();
+}
+inline void ArchSignal::_internal_set_signaltype(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000040u;
+  signaltype_ = value;
+}
+inline void ArchSignal::set_signaltype(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_signaltype(value);
+  // @@protoc_insertion_point(field_set:Proto.ArchSignal.signaltype)
+}
+
+// optional double lowLimit = 3 [default = 0];
+inline bool ArchSignal::_internal_has_lowlimit() const {
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  return value;
+}
+inline bool ArchSignal::has_lowlimit() const {
+  return _internal_has_lowlimit();
+}
+inline void ArchSignal::clear_lowlimit() {
+  lowlimit_ = 0;
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline double ArchSignal::_internal_lowlimit() const {
+  return lowlimit_;
+}
+inline double ArchSignal::lowlimit() const {
+  // @@protoc_insertion_point(field_get:Proto.ArchSignal.lowLimit)
+  return _internal_lowlimit();
+}
+inline void ArchSignal::_internal_set_lowlimit(double value) {
+  _has_bits_[0] |= 0x00000004u;
+  lowlimit_ = value;
+}
+inline void ArchSignal::set_lowlimit(double value) {
+  _internal_set_lowlimit(value);
+  // @@protoc_insertion_point(field_set:Proto.ArchSignal.lowLimit)
+}
+
+// optional double highLimit = 4 [default = 0];
+inline bool ArchSignal::_internal_has_highlimit() const {
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
+  return value;
+}
+inline bool ArchSignal::has_highlimit() const {
+  return _internal_has_highlimit();
+}
+inline void ArchSignal::clear_highlimit() {
+  highlimit_ = 0;
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline double ArchSignal::_internal_highlimit() const {
+  return highlimit_;
+}
+inline double ArchSignal::highlimit() const {
+  // @@protoc_insertion_point(field_get:Proto.ArchSignal.highLimit)
+  return _internal_highlimit();
+}
+inline void ArchSignal::_internal_set_highlimit(double value) {
+  _has_bits_[0] |= 0x00000008u;
+  highlimit_ = value;
+}
+inline void ArchSignal::set_highlimit(double value) {
+  _internal_set_highlimit(value);
+  // @@protoc_insertion_point(field_set:Proto.ArchSignal.highLimit)
+}
+
+// optional string unit = 5;
+inline bool ArchSignal::_internal_has_unit() const {
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline bool ArchSignal::has_unit() const {
+  return _internal_has_unit();
+}
+inline void ArchSignal::clear_unit() {
+  unit_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline const std::string& ArchSignal::unit() const {
+  // @@protoc_insertion_point(field_get:Proto.ArchSignal.unit)
+  return _internal_unit();
+}
+inline void ArchSignal::set_unit(const std::string& value) {
+  _internal_set_unit(value);
+  // @@protoc_insertion_point(field_set:Proto.ArchSignal.unit)
+}
+inline std::string* ArchSignal::mutable_unit() {
+  // @@protoc_insertion_point(field_mutable:Proto.ArchSignal.unit)
+  return _internal_mutable_unit();
+}
+inline const std::string& ArchSignal::_internal_unit() const {
+  return unit_.Get();
+}
+inline void ArchSignal::_internal_set_unit(const std::string& value) {
+  _has_bits_[0] |= 0x00000002u;
+  unit_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void ArchSignal::set_unit(std::string&& value) {
+  _has_bits_[0] |= 0x00000002u;
+  unit_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.ArchSignal.unit)
+}
+inline void ArchSignal::set_unit(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000002u;
+  unit_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.ArchSignal.unit)
+}
+inline void ArchSignal::set_unit(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000002u;
+  unit_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.ArchSignal.unit)
+}
+inline std::string* ArchSignal::_internal_mutable_unit() {
+  _has_bits_[0] |= 0x00000002u;
+  return unit_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* ArchSignal::release_unit() {
+  // @@protoc_insertion_point(field_release:Proto.ArchSignal.unit)
+  if (!_internal_has_unit()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000002u;
+  return unit_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ArchSignal::set_allocated_unit(std::string* unit) {
+  if (unit != nullptr) {
+    _has_bits_[0] |= 0x00000002u;
+  } else {
+    _has_bits_[0] &= ~0x00000002u;
+  }
+  unit_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), unit,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.ArchSignal.unit)
+}
+
+// optional double fineAperture = 6 [default = 0];
+inline bool ArchSignal::_internal_has_fineaperture() const {
+  bool value = (_has_bits_[0] & 0x00000010u) != 0;
+  return value;
+}
+inline bool ArchSignal::has_fineaperture() const {
+  return _internal_has_fineaperture();
+}
+inline void ArchSignal::clear_fineaperture() {
+  fineaperture_ = 0;
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline double ArchSignal::_internal_fineaperture() const {
+  return fineaperture_;
+}
+inline double ArchSignal::fineaperture() const {
+  // @@protoc_insertion_point(field_get:Proto.ArchSignal.fineAperture)
+  return _internal_fineaperture();
+}
+inline void ArchSignal::_internal_set_fineaperture(double value) {
+  _has_bits_[0] |= 0x00000010u;
+  fineaperture_ = value;
+}
+inline void ArchSignal::set_fineaperture(double value) {
+  _internal_set_fineaperture(value);
+  // @@protoc_insertion_point(field_set:Proto.ArchSignal.fineAperture)
+}
+
+// optional double coarseAperture = 7 [default = 0];
+inline bool ArchSignal::_internal_has_coarseaperture() const {
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
+  return value;
+}
+inline bool ArchSignal::has_coarseaperture() const {
+  return _internal_has_coarseaperture();
+}
+inline void ArchSignal::clear_coarseaperture() {
+  coarseaperture_ = 0;
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline double ArchSignal::_internal_coarseaperture() const {
+  return coarseaperture_;
+}
+inline double ArchSignal::coarseaperture() const {
+  // @@protoc_insertion_point(field_get:Proto.ArchSignal.coarseAperture)
+  return _internal_coarseaperture();
+}
+inline void ArchSignal::_internal_set_coarseaperture(double value) {
+  _has_bits_[0] |= 0x00000020u;
+  coarseaperture_ = value;
+}
+inline void ArchSignal::set_coarseaperture(double value) {
+  _internal_set_coarseaperture(value);
+  // @@protoc_insertion_point(field_set:Proto.ArchSignal.coarseAperture)
+}
+
 // -------------------------------------------------------------------
 
-// ArchSignals
+// ArchInfo
 
-// repeated .Proto.ArchSignal archSignals = 1;
-inline int ArchSignals::_internal_archsignals_size() const {
-  return archsignals_.size();
+// required .Proto.BuildInfo buildInfo = 1;
+inline bool ArchInfo::_internal_has_buildinfo() const {
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  PROTOBUF_ASSUME(!value || buildinfo_ != nullptr);
+  return value;
 }
-inline int ArchSignals::archsignals_size() const {
-  return _internal_archsignals_size();
+inline bool ArchInfo::has_buildinfo() const {
+  return _internal_has_buildinfo();
 }
-inline void ArchSignals::clear_archsignals() {
-  archsignals_.Clear();
+inline void ArchInfo::clear_buildinfo() {
+  if (buildinfo_ != nullptr) buildinfo_->Clear();
+  _has_bits_[0] &= ~0x00000002u;
 }
-inline ::Proto::ArchSignal* ArchSignals::mutable_archsignals(int index) {
-  // @@protoc_insertion_point(field_mutable:Proto.ArchSignals.archSignals)
-  return archsignals_.Mutable(index);
+inline const ::Proto::BuildInfo& ArchInfo::_internal_buildinfo() const {
+  const ::Proto::BuildInfo* p = buildinfo_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Proto::BuildInfo&>(
+      ::Proto::_BuildInfo_default_instance_);
+}
+inline const ::Proto::BuildInfo& ArchInfo::buildinfo() const {
+  // @@protoc_insertion_point(field_get:Proto.ArchInfo.buildInfo)
+  return _internal_buildinfo();
+}
+inline void ArchInfo::unsafe_arena_set_allocated_buildinfo(
+    ::Proto::BuildInfo* buildinfo) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(buildinfo_);
+  }
+  buildinfo_ = buildinfo;
+  if (buildinfo) {
+    _has_bits_[0] |= 0x00000002u;
+  } else {
+    _has_bits_[0] &= ~0x00000002u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.ArchInfo.buildInfo)
+}
+inline ::Proto::BuildInfo* ArchInfo::release_buildinfo() {
+  _has_bits_[0] &= ~0x00000002u;
+  ::Proto::BuildInfo* temp = buildinfo_;
+  buildinfo_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::Proto::BuildInfo* ArchInfo::unsafe_arena_release_buildinfo() {
+  // @@protoc_insertion_point(field_release:Proto.ArchInfo.buildInfo)
+  _has_bits_[0] &= ~0x00000002u;
+  ::Proto::BuildInfo* temp = buildinfo_;
+  buildinfo_ = nullptr;
+  return temp;
+}
+inline ::Proto::BuildInfo* ArchInfo::_internal_mutable_buildinfo() {
+  _has_bits_[0] |= 0x00000002u;
+  if (buildinfo_ == nullptr) {
+    auto* p = CreateMaybeMessage<::Proto::BuildInfo>(GetArena());
+    buildinfo_ = p;
+  }
+  return buildinfo_;
+}
+inline ::Proto::BuildInfo* ArchInfo::mutable_buildinfo() {
+  // @@protoc_insertion_point(field_mutable:Proto.ArchInfo.buildInfo)
+  return _internal_mutable_buildinfo();
+}
+inline void ArchInfo::set_allocated_buildinfo(::Proto::BuildInfo* buildinfo) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete buildinfo_;
+  }
+  if (buildinfo) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(buildinfo);
+    if (message_arena != submessage_arena) {
+      buildinfo = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, buildinfo, submessage_arena);
+    }
+    _has_bits_[0] |= 0x00000002u;
+  } else {
+    _has_bits_[0] &= ~0x00000002u;
+  }
+  buildinfo_ = buildinfo;
+  // @@protoc_insertion_point(field_set_allocated:Proto.ArchInfo.buildInfo)
+}
+
+// required string archiveServiceID = 2;
+inline bool ArchInfo::_internal_has_archiveserviceid() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool ArchInfo::has_archiveserviceid() const {
+  return _internal_has_archiveserviceid();
+}
+inline void ArchInfo::clear_archiveserviceid() {
+  archiveserviceid_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& ArchInfo::archiveserviceid() const {
+  // @@protoc_insertion_point(field_get:Proto.ArchInfo.archiveServiceID)
+  return _internal_archiveserviceid();
+}
+inline void ArchInfo::set_archiveserviceid(const std::string& value) {
+  _internal_set_archiveserviceid(value);
+  // @@protoc_insertion_point(field_set:Proto.ArchInfo.archiveServiceID)
+}
+inline std::string* ArchInfo::mutable_archiveserviceid() {
+  // @@protoc_insertion_point(field_mutable:Proto.ArchInfo.archiveServiceID)
+  return _internal_mutable_archiveserviceid();
+}
+inline const std::string& ArchInfo::_internal_archiveserviceid() const {
+  return archiveserviceid_.Get();
+}
+inline void ArchInfo::_internal_set_archiveserviceid(const std::string& value) {
+  _has_bits_[0] |= 0x00000001u;
+  archiveserviceid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void ArchInfo::set_archiveserviceid(std::string&& value) {
+  _has_bits_[0] |= 0x00000001u;
+  archiveserviceid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.ArchInfo.archiveServiceID)
+}
+inline void ArchInfo::set_archiveserviceid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000001u;
+  archiveserviceid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.ArchInfo.archiveServiceID)
+}
+inline void ArchInfo::set_archiveserviceid(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000001u;
+  archiveserviceid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.ArchInfo.archiveServiceID)
+}
+inline std::string* ArchInfo::_internal_mutable_archiveserviceid() {
+  _has_bits_[0] |= 0x00000001u;
+  return archiveserviceid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* ArchInfo::release_archiveserviceid() {
+  // @@protoc_insertion_point(field_release:Proto.ArchInfo.archiveServiceID)
+  if (!_internal_has_archiveserviceid()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return archiveserviceid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ArchInfo::set_allocated_archiveserviceid(std::string* archiveserviceid) {
+  if (archiveserviceid != nullptr) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  archiveserviceid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), archiveserviceid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.ArchInfo.archiveServiceID)
+}
+
+// repeated .Proto.ArchSignal archSignal = 3;
+inline int ArchInfo::_internal_archsignal_size() const {
+  return archsignal_.size();
+}
+inline int ArchInfo::archsignal_size() const {
+  return _internal_archsignal_size();
+}
+inline void ArchInfo::clear_archsignal() {
+  archsignal_.Clear();
+}
+inline ::Proto::ArchSignal* ArchInfo::mutable_archsignal(int index) {
+  // @@protoc_insertion_point(field_mutable:Proto.ArchInfo.archSignal)
+  return archsignal_.Mutable(index);
 }
 inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::ArchSignal >*
-ArchSignals::mutable_archsignals() {
-  // @@protoc_insertion_point(field_mutable_list:Proto.ArchSignals.archSignals)
-  return &archsignals_;
+ArchInfo::mutable_archsignal() {
+  // @@protoc_insertion_point(field_mutable_list:Proto.ArchInfo.archSignal)
+  return &archsignal_;
 }
-inline const ::Proto::ArchSignal& ArchSignals::_internal_archsignals(int index) const {
-  return archsignals_.Get(index);
+inline const ::Proto::ArchSignal& ArchInfo::_internal_archsignal(int index) const {
+  return archsignal_.Get(index);
 }
-inline const ::Proto::ArchSignal& ArchSignals::archsignals(int index) const {
-  // @@protoc_insertion_point(field_get:Proto.ArchSignals.archSignals)
-  return _internal_archsignals(index);
+inline const ::Proto::ArchSignal& ArchInfo::archsignal(int index) const {
+  // @@protoc_insertion_point(field_get:Proto.ArchInfo.archSignal)
+  return _internal_archsignal(index);
 }
-inline ::Proto::ArchSignal* ArchSignals::_internal_add_archsignals() {
-  return archsignals_.Add();
+inline ::Proto::ArchSignal* ArchInfo::_internal_add_archsignal() {
+  return archsignal_.Add();
 }
-inline ::Proto::ArchSignal* ArchSignals::add_archsignals() {
-  // @@protoc_insertion_point(field_add:Proto.ArchSignals.archSignals)
-  return _internal_add_archsignals();
+inline ::Proto::ArchSignal* ArchInfo::add_archsignal() {
+  // @@protoc_insertion_point(field_add:Proto.ArchInfo.archSignal)
+  return _internal_add_archsignal();
 }
 inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::ArchSignal >&
-ArchSignals::archsignals() const {
-  // @@protoc_insertion_point(field_list:Proto.ArchSignals.archSignals)
-  return archsignals_;
+ArchInfo::archsignal() const {
+  // @@protoc_insertion_point(field_list:Proto.ArchInfo.archSignal)
+  return archsignal_;
 }
 
 // -------------------------------------------------------------------
@@ -58729,6 +59763,8 @@ SimOverrideSignalWorkspace::overridesignals() const {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

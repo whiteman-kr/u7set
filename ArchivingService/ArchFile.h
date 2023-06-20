@@ -116,6 +116,8 @@ public:
 	bool isRequiredImmediatelyFlushing() const { return m_requiredImmediatelyFlushing.load(); }
 
 	Hash hash() const { return m_hash; }
+	quint32 group() const { return static_cast<quint32>(m_hash & 0xFF); }
+
 	QString appSignalID() const { return m_appSignalID; }
 
 	bool isAnalog() const { return m_isAnalog; }

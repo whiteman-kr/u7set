@@ -458,12 +458,12 @@ const double ArchFile::QUEUE_REDUCTION_LIMIT = 0.2;		// 20%
 
 ArchFile::ArchFile(const Proto::ArchSignal& protoArchSignal, CircularLoggerShared log) :
 	m_log(log),
-	m_queue(protoArchSignal.isanalog() == true ? QUEUE_MIN_SIZE * 16 : QUEUE_MIN_SIZE)
+	m_queue(static_cast<E::SignalType>(protoArchSignal.signaltype()) == E::SignalType::Analog ?
+																QUEUE_MIN_SIZE * 16 : QUEUE_MIN_SIZE)
 {
-	m_hash = protoArchSignal.hash();
 	m_appSignalID = QString::fromStdString(protoArchSignal.appsignalid());
-	m_isAnalog = protoArchSignal.isanalog();
-
+	m_hash = calcHash(m_appSignalID);
+	m_isAnalog = static_cast<E::SignalType>(protoArchSignal.signaltype()) == E::SignalType::Analog;
 	m_lastRecord.state.flags.valid = 0;
 }
 

@@ -69,12 +69,13 @@ QString Archive::formatTime(qint64 time)
 Archive::Archive(const QString& projectID,
 				 const QString& equipmentID,
 				 const QString& archDir,
-				 const Proto::ArchSignals& protoArchSignals,
+				 QByteArray& archFileInfoData,
 				 int shortTermPeriod,
 				 int longTermPeriod,
 				 int maintenanceDelayMinutes,
 				 int minQueueSizeForFlushing,
 				 CircularLoggerShared logger) :
+	m_readOnlyArchive(false),
 	m_projectID(projectID),
 	m_equipmentID(equipmentID),
 	m_archDir(archDir),
@@ -82,6 +83,7 @@ Archive::Archive(const QString& projectID,
 	m_minQueueSizeForFlushing(minQueueSizeForFlushing),
 	m_log(logger)
 {
+	m_archInfoFileData.swap(archFileInfoData);
 
 	// shortTermPeriod and longTermPeriod limitation
 	//
@@ -102,24 +104,19 @@ Archive::Archive(const QString& projectID,
 	//
 	m_msShortTermPeriod = shortTermPeriod * PARTITION_PERIOD_MS;
 	m_msLongTermPeriod = longTermPeriod * PARTITION_PERIOD_MS;
+}
 
-	int signalsCount = protoArchSignals.archsignals_size();
+Archive::Archive(const QString& readOnlyArchPath,				// Read only archive constructor
+				CircularLoggerShared logger) :
+	m_readOnlyArchive(true),
+	m_readOnlyArchFullPath(readOnlyArchPath),
+	m_log(logger)
+{
+	m_readOnlyArchFullPath = QDir::fromNativeSeparators(m_readOnlyArchFullPath);
 
-	m_archFiles.reserve(static_cast<int>(signalsCount * 1.2));
-	m_archFilesArray.resize(signalsCount);
-	m_regularFilesQueue.reserve(static_cast<int>(signalsCount * 1.2));
-
-	for(int i = 0; i < signalsCount; i++)
+	if (m_readOnlyArchFullPath.endsWith(Separator::DIR) == false)
 	{
-		const Proto::ArchSignal& protoArchSignal = protoArchSignals.archsignals(i);
-
-		ArchFile* archFile = new ArchFile(protoArchSignal, m_log);
-
-		m_archFiles.insert(archFile->hash(), archFile);
-
-		m_archFilesArray[i] = archFile;
-
-		m_regularFilesQueue.append(archFile);
+		m_readOnlyArchFullPath += Separator::DIR;
 	}
 }
 
@@ -132,6 +129,14 @@ void Archive::start()
 {
 	m_isWorkable = false;
 
+	if (m_readOnlyArchive == true)
+	{
+		if (loadArchInfoFile() == false)
+		{
+			return;
+		}
+	}
+
 	bool result = checkAndCreateArchiveDirs();
 
 	if (result == false)
@@ -140,36 +145,25 @@ void Archive::start()
 		return;
 	}
 
-	QVector<QVector<ArchFile*>> archFilesGroups;
-
-	archFilesGroups.resize(256);
-
-	for(ArchFile* archFile : m_archFilesArray)
+	if (initArchFiles() == false)
 	{
-		if (archFile == nullptr)
-		{
-			assert(false);
-			continue;
-		}
-
-		archFile->setArchFullPath(m_archFullPath);
-
-		quint32 group = archFile->hash() & 0xFF;
-
-		archFilesGroups[group].append(archFile);
+		return;
 	}
 
-	writeArchFilesInfoFile(archFilesGroups);
+	if (m_readOnlyArchive == false)
+	{
+		saveArchInfoProtoFile();
 
-	assert(m_archWriterThread == nullptr);
+		Q_ASSERT(m_archWriterThread == nullptr);
 
-	m_archWriterThread = new ArchWriterThread(this, m_log);
-	m_archWriterThread->start();
+		m_archWriterThread = new ArchWriterThread(this, m_log);
+		m_archWriterThread->start();
 
-	assert(m_archMaintenanceThread == nullptr);
+		Q_ASSERT(m_archMaintenanceThread == nullptr);
 
-	m_archMaintenanceThread = new ArchMaintenanceThread(*this, m_log);
-	m_archMaintenanceThread->start();
+		m_archMaintenanceThread = new ArchMaintenanceThread(*this, m_log);
+		m_archMaintenanceThread->start();
+	}
 
 	m_isWorkable = true;
 }
@@ -432,6 +426,98 @@ QString Archive::timeTypeStr(E::TimeType timeType)
 	return QString("???");
 }
 
+bool Archive::loadArchInfoFile()
+{
+	if (m_readOnlyArchFullPath.isEmpty() == true)
+	{
+		Q_ASSERT(false);
+		return false;
+	}
+
+	QString path = m_readOnlyArchFullPath + File::ARCH_INFO_PROTO;
+
+	QFile archInfoFile(path);
+
+	if (archInfoFile.open(QIODeviceBase::ReadOnly | QIODeviceBase::ExistingOnly) == false)
+	{
+		DEBUG_LOG_ERR(m_log, QString("Can't open file %1").arg(path));
+		return false;
+	}
+
+	m_archInfoFileData = archInfoFile.readAll();
+
+	return true;
+}
+
+bool Archive::initArchFiles()
+{
+	if (m_archInfoFileData.isEmpty() == true)
+	{
+		Q_ASSERT(false);
+		return false;
+	}
+
+	Proto::ArchInfo archInfo;
+
+	bool res = archInfo.ParseFromArray(m_archInfoFileData.constData(), static_cast<int>(m_archInfoFileData.size()));
+
+	if (res == false)
+	{
+		DEBUG_LOG_ERR(m_log, "File ArchInfo.proto parsing ERROR!")
+		return false;
+	}
+
+	if (m_readOnlyArchive == true)
+	{
+		m_projectID = QString::fromStdString(archInfo.buildinfo().project());
+		m_equipmentID = QString::fromStdString(archInfo.archiveserviceid());
+
+		QString excludeStr = QString("/%1-archive/%2").arg(m_projectID).arg(m_equipmentID);
+
+		int index = m_readOnlyArchFullPath.toLower().trimmed().indexOf(excludeStr);
+
+		if (index == -1)
+		{
+			return false;
+		}
+
+		m_archDir = m_readOnlyArchFullPath.mid(0, index);
+	}
+
+	int signalsCount = archInfo.archsignal_size();
+
+	m_archFiles.reserve(static_cast<int>(signalsCount * 1.2));
+	m_archFilesArray.resize(signalsCount);
+	m_regularFilesQueue.reserve(static_cast<int>(signalsCount * 1.2));
+
+	std::vector<std::vector<ArchFile*>> archFilesGroups;
+
+	archFilesGroups.resize(256);
+
+	for(int i = 0; i < signalsCount; i++)
+	{
+		const Proto::ArchSignal& protoArchSignal = archInfo.archsignal(i);
+
+		ArchFile* archFile = new ArchFile(protoArchSignal, m_log);
+
+		archFile->setArchFullPath(m_archFullPath);
+
+		m_archFiles.insert(archFile->hash(), archFile);
+
+		m_archFilesArray[i] = archFile;
+
+		m_regularFilesQueue.append(archFile);
+
+		//
+
+		archFilesGroups[archFile->group()].push_back(archFile);
+	}
+
+	writeArchFilesInfoFile(archFilesGroups);
+
+	return true;
+}
+
 bool Archive::checkAndCreateArchiveDirs()
 {
 	bool result = archDirIsWritableChecking();
@@ -575,7 +661,40 @@ bool Archive::createGroupDirs()
 	return result;
 }
 
-void Archive::writeArchFilesInfoFile(const QVector<QVector<ArchFile*>>& archFilesGroups)
+bool Archive::saveArchInfoProtoFile() const
+{
+	QDir dir;
+
+	QString protoFile = m_archFullPath + Separator::DIR + File::ARCH_INFO_PROTO;
+
+	if (dir.exists(protoFile))
+	{
+		QString protoFileBak = m_archFullPath + Separator::DIR + File::ARCH_INFO_PROTO_BAK;
+
+		if (dir.exists(protoFileBak) == true)
+		{
+			dir.remove(protoFileBak);
+		}
+
+		dir.rename(protoFile, protoFileBak);
+		dir.remove(protoFile);
+	}
+
+	QFile pf(protoFile);
+
+	if (pf.open(QIODeviceBase::WriteOnly) == false)
+	{
+		return false;
+	}
+
+	pf.write(m_archInfoFileData);
+
+	pf.close();
+
+	return false;
+}
+
+void Archive::writeArchFilesInfoFile(const std::vector<std::vector<ArchFile*>>& archFilesGroups)
 {
 	QFile infoFile(QString("%1/archive.info").arg(m_archFullPath));
 

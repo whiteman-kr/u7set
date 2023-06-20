@@ -25,6 +25,13 @@
 										continue; \
 									}
 
+#define TEST_PTR_BREAK(ptr)		if (ptr == nullptr) \
+									{	\
+										Q_ASSERT(false);	\
+										break; \
+									}
+
+
 #define TEST_PTR_RETURN(ptr)		if (ptr == nullptr) \
 									{	\
 										Q_ASSERT(false);	\

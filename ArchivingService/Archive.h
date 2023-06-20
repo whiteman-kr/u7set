@@ -38,15 +38,19 @@ public:
 	static QString formatTime(qint64 time);
 
 public:
-	Archive(const QString& projectID,
+	Archive(const QString& projectID,					// Read/write archive constructor
 			const QString& equipmentID,
 			const QString& archDir,
-			const Proto::ArchSignals& protoArchSignals,
+			QByteArray& archFileInfoData,
 			int shortTermPeriod,
 			int longTermPeriod,
 			int maintenanceDelayMinutes,
 			int minQueueSizeForFlushing,
 			CircularLoggerShared logger);
+
+	Archive(const QString& readOnlyArchPath,			// Read only archive constructor
+			CircularLoggerShared logger);
+
 	~Archive();
 
 	void start();
@@ -97,11 +101,15 @@ public:
 	static QString timeTypeStr(E::TimeType timeType);
 
 private:
+	bool loadArchInfoFile();
+	bool initArchFiles();
 	bool checkAndCreateArchiveDirs();
 	bool archDirIsWritableChecking();
 	bool createGroupDirs();
 
-	void writeArchFilesInfoFile(const QVector<QVector<ArchFile*>>& archFilesGroups);
+	bool saveArchInfoProtoFile() const;
+
+	void writeArchFilesInfoFile(const std::vector<std::vector<ArchFile *>>& archFilesGroups);
 
 	quint32 getNewRequestID();
 
@@ -126,6 +134,10 @@ private:
 	void clear();
 
 private:
+	bool m_readOnlyArchive = true;
+	QString m_readOnlyArchFullPath;
+	QByteArray m_archInfoFileData;
+
 	QString m_projectID;
 	QString m_equipmentID;
 	QString m_archDir;

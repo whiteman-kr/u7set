@@ -1646,11 +1646,32 @@ struct SchemaDetailsDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT SchemaDetailsDefaultTypeInternal _SchemaDetails_default_instance_;
+constexpr BuildInfo::BuildInfo(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : project_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , datetime_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , user_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , workstation_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , buildno_(0)
+  , changeset_(0){}
+struct BuildInfoDefaultTypeInternal {
+  constexpr BuildInfoDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~BuildInfoDefaultTypeInternal() {}
+  union {
+    BuildInfo _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT BuildInfoDefaultTypeInternal _BuildInfo_default_instance_;
 constexpr ArchSignal::ArchSignal(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : appsignalid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , hash_(PROTOBUF_ULONGLONG(0))
-  , isanalog_(false){}
+  , unit_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , lowlimit_(0)
+  , highlimit_(0)
+  , fineaperture_(0)
+  , coarseaperture_(0)
+  , signaltype_(0){}
 struct ArchSignalDefaultTypeInternal {
   constexpr ArchSignalDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -1660,18 +1681,20 @@ struct ArchSignalDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ArchSignalDefaultTypeInternal _ArchSignal_default_instance_;
-constexpr ArchSignals::ArchSignals(
+constexpr ArchInfo::ArchInfo(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : archsignals_(){}
-struct ArchSignalsDefaultTypeInternal {
-  constexpr ArchSignalsDefaultTypeInternal()
+  : archsignal_()
+  , archiveserviceid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , buildinfo_(nullptr){}
+struct ArchInfoDefaultTypeInternal {
+  constexpr ArchInfoDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
-  ~ArchSignalsDefaultTypeInternal() {}
+  ~ArchInfoDefaultTypeInternal() {}
   union {
-    ArchSignals _instance;
+    ArchInfo _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ArchSignalsDefaultTypeInternal _ArchSignals_default_instance_;
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ArchInfoDefaultTypeInternal _ArchInfo_default_instance_;
 constexpr BusSignal::BusSignal(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : signalid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
@@ -1866,7 +1889,7 @@ struct SimOverrideSignalWorkspaceDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT SimOverrideSignalWorkspaceDefaultTypeInternal _SimOverrideSignalWorkspace_default_instance_;
 }  // namespace Proto
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_serialization_2eproto[107];
+static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_serialization_2eproto[108];
 static const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* file_level_enum_descriptors_serialization_2eproto[4];
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_serialization_2eproto = nullptr;
 
@@ -3480,23 +3503,53 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_serialization_2eproto::offsets
   ~0u,
   ~0u,
   ~0u,
+  PROTOBUF_FIELD_OFFSET(::Proto::BuildInfo, _has_bits_),
+  PROTOBUF_FIELD_OFFSET(::Proto::BuildInfo, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::Proto::BuildInfo, project_),
+  PROTOBUF_FIELD_OFFSET(::Proto::BuildInfo, buildno_),
+  PROTOBUF_FIELD_OFFSET(::Proto::BuildInfo, datetime_),
+  PROTOBUF_FIELD_OFFSET(::Proto::BuildInfo, changeset_),
+  PROTOBUF_FIELD_OFFSET(::Proto::BuildInfo, user_),
+  PROTOBUF_FIELD_OFFSET(::Proto::BuildInfo, workstation_),
+  0,
+  4,
+  1,
+  5,
+  2,
+  3,
   PROTOBUF_FIELD_OFFSET(::Proto::ArchSignal, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::Proto::ArchSignal, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::Proto::ArchSignal, hash_),
-  PROTOBUF_FIELD_OFFSET(::Proto::ArchSignal, isanalog_),
   PROTOBUF_FIELD_OFFSET(::Proto::ArchSignal, appsignalid_),
-  1,
-  2,
+  PROTOBUF_FIELD_OFFSET(::Proto::ArchSignal, signaltype_),
+  PROTOBUF_FIELD_OFFSET(::Proto::ArchSignal, lowlimit_),
+  PROTOBUF_FIELD_OFFSET(::Proto::ArchSignal, highlimit_),
+  PROTOBUF_FIELD_OFFSET(::Proto::ArchSignal, unit_),
+  PROTOBUF_FIELD_OFFSET(::Proto::ArchSignal, fineaperture_),
+  PROTOBUF_FIELD_OFFSET(::Proto::ArchSignal, coarseaperture_),
   0,
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::Proto::ArchSignals, _internal_metadata_),
+  6,
+  2,
+  3,
+  1,
+  4,
+  5,
+  PROTOBUF_FIELD_OFFSET(::Proto::ArchInfo, _has_bits_),
+  PROTOBUF_FIELD_OFFSET(::Proto::ArchInfo, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::Proto::ArchSignals, archsignals_),
+  PROTOBUF_FIELD_OFFSET(::Proto::ArchInfo, buildinfo_),
+  PROTOBUF_FIELD_OFFSET(::Proto::ArchInfo, archiveserviceid_),
+  PROTOBUF_FIELD_OFFSET(::Proto::ArchInfo, archsignal_),
+  1,
+  0,
+  ~0u,
   PROTOBUF_FIELD_OFFSET(::Proto::BusSignal, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::Proto::BusSignal, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -3789,19 +3842,20 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 1553, -1, sizeof(::Proto::SchemaDetailsSet)},
   { 1559, 1569, sizeof(::Proto::SchemaDetails_TrendIndicatorSchemaItems)},
   { 1574, 1594, sizeof(::Proto::SchemaDetails)},
-  { 1609, 1617, sizeof(::Proto::ArchSignal)},
-  { 1620, -1, sizeof(::Proto::ArchSignals)},
-  { 1626, 1650, sizeof(::Proto::BusSignal)},
-  { 1669, 1681, sizeof(::Proto::Bus)},
-  { 1688, 1697, sizeof(::Proto::ComparatorSignal)},
-  { 1701, 1717, sizeof(::Proto::Comparator)},
-  { 1728, 1735, sizeof(::Proto::LmComparatorSet)},
-  { 1737, -1, sizeof(::Proto::ComparatorSet)},
-  { 1743, 1757, sizeof(::Proto::MetrologySignalLocation)},
-  { 1766, 1782, sizeof(::Proto::MetrologySignal)},
-  { 1793, -1, sizeof(::Proto::MetrologySignalSet)},
-  { 1799, 1810, sizeof(::Proto::SimOverrideSignal)},
-  { 1816, -1, sizeof(::Proto::SimOverrideSignalWorkspace)},
+  { 1609, 1620, sizeof(::Proto::BuildInfo)},
+  { 1626, 1638, sizeof(::Proto::ArchSignal)},
+  { 1645, 1653, sizeof(::Proto::ArchInfo)},
+  { 1656, 1680, sizeof(::Proto::BusSignal)},
+  { 1699, 1711, sizeof(::Proto::Bus)},
+  { 1718, 1727, sizeof(::Proto::ComparatorSignal)},
+  { 1731, 1747, sizeof(::Proto::Comparator)},
+  { 1758, 1765, sizeof(::Proto::LmComparatorSet)},
+  { 1767, -1, sizeof(::Proto::ComparatorSet)},
+  { 1773, 1787, sizeof(::Proto::MetrologySignalLocation)},
+  { 1796, 1812, sizeof(::Proto::MetrologySignal)},
+  { 1823, -1, sizeof(::Proto::MetrologySignalSet)},
+  { 1829, 1840, sizeof(::Proto::SimOverrideSignal)},
+  { 1846, -1, sizeof(::Proto::SimOverrideSignalWorkspace)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -3899,8 +3953,9 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_SchemaDetailsSet_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_SchemaDetails_TrendIndicatorSchemaItems_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_SchemaDetails_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_BuildInfo_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_ArchSignal_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_ArchSignals_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_ArchInfo_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_BusSignal_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_Bus_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_ComparatorSignal_default_instance_),
@@ -4352,76 +4407,83 @@ const char descriptor_table_protodef_serialization_2eproto[] PROTOBUF_SECTION_VA
   "dIndicatorSchemaItems\022\035\n\010itemUuid\030\002 \001(\0132"
   "\013.Proto.Uuid\022\024\n\014samplePeriod\030\003 \001(\005\022\020\n\010ti"
   "meType\030\004 \001(\005\022\027\n\017durationSeconds\030\005 \001(\005\022\024\n"
-  "\014appSignalIds\030\006 \003(\t\"A\n\nArchSignal\022\014\n\004has"
-  "h\030\001 \002(\004\022\020\n\010isAnalog\030\002 \002(\010\022\023\n\013appSignalID"
-  "\030\003 \002(\t\"5\n\013ArchSignals\022&\n\013archSignals\030\001 \003"
-  "(\0132\021.Proto.ArchSignal\"\326\003\n\tBusSignal\022\020\n\010s"
-  "ignalId\030\001 \001(\t\022\017\n\007caption\030\002 \001(\t\022\014\n\004type\030\003"
-  " \001(\005\022\r\n\005units\030\004 \001(\t\022\024\n\014analogFormat\030\n \001("
-  "\005\022\024\n\tprecision\030\013 \001(\005:\0012\022\031\n\016coarseApertur"
-  "e\030\014 \001(\001:\0011\022\031\n\014fineAperture\030\r \001(\001:\0030.5\022\037\n"
-  "\020adaptiveAperture\030\016 \001(\010:\005false\022\021\n\tbusTyp"
-  "eId\030\017 \001(\t\022\023\n\013inbusOffset\030  \001(\005\022\032\n\022inbusD"
-  "iscreteBitNo\030( \001(\005\022\027\n\017inbusAnalogSize\0302 "
-  "\001(\005\022\031\n\021inbusAnalogFormat\0303 \001(\005\022\034\n\024inbusA"
-  "nalogByteOrder\0304 \001(\005\022\031\n\021busAnalogLowLimi"
-  "t\0305 \001(\001\022\032\n\022busAnalogHighLimit\0306 \001(\001\022\033\n\023i"
-  "nbusAnalogLowLimit\0307 \001(\001\022\034\n\024inbusAnalogH"
-  "ighLimit\0308 \001(\001\"\355\001\n\003Bus\022\031\n\004uuid\030\001 \001(\0132\013.P"
-  "roto.Uuid\022\021\n\tbusTypeId\030\002 \001(\t\022$\n\nbusSigna"
-  "ls\030\003 \003(\0132\020.Proto.BusSignal\022!\n\023autoSignal"
-  "Placement\030\n \001(\010:\004true\022\030\n\rmanualBusSize\030\013"
-  " \001(\005:\0010\022\"\n\023enableManualBusSize\030\014 \001(\010:\005fa"
-  "lse\0221\n#enableManualBusSizeIsNotInitializ"
-  "ed\030\r \001(\010:\004true\"p\n\020ComparatorSignal\022\025\n\007is"
-  "Const\030\001 \001(\010:\004true\022\025\n\nconstValue\030\002 \001(\001:\0010"
-  "\022\023\n\013appSignalId\030\003 \001(\t\022\031\n\nisAcquired\030\004 \001("
-  "\010:\005false\"\352\002\n\nComparator\022\022\n\007cmpType\030\001 \001(\005"
-  ":\0011\022\037\n\024inAnalogSignalFormat\030\002 \001(\005:\0011\022&\n\005"
-  "input\030\003 \001(\0132\027.Proto.ComparatorSignal\022(\n\007"
-  "compare\030\004 \001(\0132\027.Proto.ComparatorSignal\022+"
-  "\n\nhysteresis\030\005 \001(\0132\027.Proto.ComparatorSig"
-  "nal\022\'\n\006output\030\006 \001(\0132\027.Proto.ComparatorSi"
-  "gnal\022#\n\024allSignalsIsAcquired\030\007 \001(\010:\005fals"
-  "e\022\024\n\tprecision\030\010 \001(\005:\0012\022\r\n\005label\030\t \001(\t\022\020"
-  "\n\010schemaId\030\n \001(\t\022#\n\016schemaItemUuid\030\013 \001(\013"
-  "2\013.Proto.Uuid\"O\n\017LmComparatorSet\022\025\n\rlmEq"
-  "uipmentID\030\001 \001(\t\022%\n\ncomparator\030\002 \003(\0132\021.Pr"
-  "oto.Comparator\"@\n\rComparatorSet\022/\n\017lmCom"
-  "paratorSet\030\001 \003(\0132\026.Proto.LmComparatorSet"
-  "\"\321\001\n\027MetrologySignalLocation\022\016\n\006rackID\030\001"
-  " \001(\t\022\021\n\tchassisID\030\002 \001(\t\022\023\n\007chassis\030\003 \001(\005"
-  ":\002-1\022\025\n\rmoduleCaption\030\t \001(\t\022\020\n\010moduleID\030"
-  "\004 \001(\t\022\022\n\006module\030\005 \001(\005:\002-1\022\021\n\005place\030\006 \001(\005"
-  ":\002-1\022\017\n\007contact\030\007 \001(\t\022\035\n\016shownOnSchemas\030"
-  "\010 \001(\010:\005false\"\347\002\n\017MetrologySignal\022#\n\tappS"
-  "ignal\030\001 \001(\0132\020.Proto.AppSignal\0220\n\010locatio"
-  "n\030\002 \001(\0132\036.Proto.MetrologySignalLocation\022"
-  "\033\n\020electricLowLimit\030\003 \001(\001:\0010\022\034\n\021electric"
-  "HighLimit\030\004 \001(\001:\0010\022\031\n\016electricUnitID\030\005 \001"
-  "(\005:\0011\022\035\n\022electricSensorType\030\006 \001(\005:\0011\022\030\n\r"
-  "electricRload\030\013 \001(\001:\0010\022\025\n\nelectricR0\030\007 \001"
-  "(\001:\0010\022\034\n\021electricPrecision\030\010 \001(\005:\0014\022\033\n\020p"
-  "hysicalLowLimit\030\t \001(\001:\0010\022\034\n\021physicalHigh"
-  "Limit\030\n \001(\001:\0010\"E\n\022MetrologySignalSet\022/\n\017"
-  "metrologySignal\030\001 \003(\0132\026.Proto.MetrologyS"
-  "ignal\"\240\001\n\021SimOverrideSignal\022\017\n\007enabled\030\002"
-  " \001(\010\022\r\n\005index\030\003 \001(\005\022\023\n\013appSignalId\030\n \001(\t"
-  "\022\026\n\016overrideMethod\030\036 \001(\005\022&\n\roverrideValu"
-  "e\030( \001(\0132\017.Proto.qvariant\022\026\n\016overrideScri"
-  "pt\0302 \001(\t\"O\n\032SimOverrideSignalWorkspace\0221"
-  "\n\017overrideSignals\030\002 \003(\0132\030.Proto.SimOverr"
-  "ideSignal*3\n\nSchemaUnit\022\013\n\007Display\020\000\022\016\n\n"
-  "Millimeter\020\001\022\010\n\004Inch\020\002*-\n\024ConnectionDirr"
-  "ection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rFblSign"
-  "alType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*:\n\rFblD"
-  "ataFormat\022\017\n\013UnsignedInt\020\000\022\r\n\tSignedInt\020"
-  "\001\022\t\n\005Float\020\002"
+  "\014appSignalIds\030\006 \003(\t\"{\n\tBuildInfo\022\017\n\007proj"
+  "ect\030\001 \001(\t\022\022\n\007buildNo\030\002 \001(\005:\0010\022\020\n\010dateTim"
+  "e\030\003 \001(\t\022\024\n\tchangeset\030\004 \001(\005:\0010\022\014\n\004user\030\005 "
+  "\001(\t\022\023\n\013workstation\030\006 \001(\t\"\242\001\n\nArchSignal\022"
+  "\023\n\013appSignalID\030\001 \002(\t\022\022\n\nsignaltype\030\002 \002(\005"
+  "\022\023\n\010lowLimit\030\003 \001(\001:\0010\022\024\n\thighLimit\030\004 \001(\001"
+  ":\0010\022\014\n\004unit\030\005 \001(\t\022\027\n\014fineAperture\030\006 \001(\001:"
+  "\0010\022\031\n\016coarseAperture\030\007 \001(\001:\0010\"p\n\010ArchInf"
+  "o\022#\n\tbuildInfo\030\001 \002(\0132\020.Proto.BuildInfo\022\030"
+  "\n\020archiveServiceID\030\002 \002(\t\022%\n\narchSignal\030\003"
+  " \003(\0132\021.Proto.ArchSignal\"\326\003\n\tBusSignal\022\020\n"
+  "\010signalId\030\001 \001(\t\022\017\n\007caption\030\002 \001(\t\022\014\n\004type"
+  "\030\003 \001(\005\022\r\n\005units\030\004 \001(\t\022\024\n\014analogFormat\030\n "
+  "\001(\005\022\024\n\tprecision\030\013 \001(\005:\0012\022\031\n\016coarseApert"
+  "ure\030\014 \001(\001:\0011\022\031\n\014fineAperture\030\r \001(\001:\0030.5\022"
+  "\037\n\020adaptiveAperture\030\016 \001(\010:\005false\022\021\n\tbusT"
+  "ypeId\030\017 \001(\t\022\023\n\013inbusOffset\030  \001(\005\022\032\n\022inbu"
+  "sDiscreteBitNo\030( \001(\005\022\027\n\017inbusAnalogSize\030"
+  "2 \001(\005\022\031\n\021inbusAnalogFormat\0303 \001(\005\022\034\n\024inbu"
+  "sAnalogByteOrder\0304 \001(\005\022\031\n\021busAnalogLowLi"
+  "mit\0305 \001(\001\022\032\n\022busAnalogHighLimit\0306 \001(\001\022\033\n"
+  "\023inbusAnalogLowLimit\0307 \001(\001\022\034\n\024inbusAnalo"
+  "gHighLimit\0308 \001(\001\"\355\001\n\003Bus\022\031\n\004uuid\030\001 \001(\0132\013"
+  ".Proto.Uuid\022\021\n\tbusTypeId\030\002 \001(\t\022$\n\nbusSig"
+  "nals\030\003 \003(\0132\020.Proto.BusSignal\022!\n\023autoSign"
+  "alPlacement\030\n \001(\010:\004true\022\030\n\rmanualBusSize"
+  "\030\013 \001(\005:\0010\022\"\n\023enableManualBusSize\030\014 \001(\010:\005"
+  "false\0221\n#enableManualBusSizeIsNotInitial"
+  "ized\030\r \001(\010:\004true\"p\n\020ComparatorSignal\022\025\n\007"
+  "isConst\030\001 \001(\010:\004true\022\025\n\nconstValue\030\002 \001(\001:"
+  "\0010\022\023\n\013appSignalId\030\003 \001(\t\022\031\n\nisAcquired\030\004 "
+  "\001(\010:\005false\"\352\002\n\nComparator\022\022\n\007cmpType\030\001 \001"
+  "(\005:\0011\022\037\n\024inAnalogSignalFormat\030\002 \001(\005:\0011\022&"
+  "\n\005input\030\003 \001(\0132\027.Proto.ComparatorSignal\022("
+  "\n\007compare\030\004 \001(\0132\027.Proto.ComparatorSignal"
+  "\022+\n\nhysteresis\030\005 \001(\0132\027.Proto.ComparatorS"
+  "ignal\022\'\n\006output\030\006 \001(\0132\027.Proto.Comparator"
+  "Signal\022#\n\024allSignalsIsAcquired\030\007 \001(\010:\005fa"
+  "lse\022\024\n\tprecision\030\010 \001(\005:\0012\022\r\n\005label\030\t \001(\t"
+  "\022\020\n\010schemaId\030\n \001(\t\022#\n\016schemaItemUuid\030\013 \001"
+  "(\0132\013.Proto.Uuid\"O\n\017LmComparatorSet\022\025\n\rlm"
+  "EquipmentID\030\001 \001(\t\022%\n\ncomparator\030\002 \003(\0132\021."
+  "Proto.Comparator\"@\n\rComparatorSet\022/\n\017lmC"
+  "omparatorSet\030\001 \003(\0132\026.Proto.LmComparatorS"
+  "et\"\321\001\n\027MetrologySignalLocation\022\016\n\006rackID"
+  "\030\001 \001(\t\022\021\n\tchassisID\030\002 \001(\t\022\023\n\007chassis\030\003 \001"
+  "(\005:\002-1\022\025\n\rmoduleCaption\030\t \001(\t\022\020\n\010moduleI"
+  "D\030\004 \001(\t\022\022\n\006module\030\005 \001(\005:\002-1\022\021\n\005place\030\006 \001"
+  "(\005:\002-1\022\017\n\007contact\030\007 \001(\t\022\035\n\016shownOnSchema"
+  "s\030\010 \001(\010:\005false\"\347\002\n\017MetrologySignal\022#\n\tap"
+  "pSignal\030\001 \001(\0132\020.Proto.AppSignal\0220\n\010locat"
+  "ion\030\002 \001(\0132\036.Proto.MetrologySignalLocatio"
+  "n\022\033\n\020electricLowLimit\030\003 \001(\001:\0010\022\034\n\021electr"
+  "icHighLimit\030\004 \001(\001:\0010\022\031\n\016electricUnitID\030\005"
+  " \001(\005:\0011\022\035\n\022electricSensorType\030\006 \001(\005:\0011\022\030"
+  "\n\relectricRload\030\013 \001(\001:\0010\022\025\n\nelectricR0\030\007"
+  " \001(\001:\0010\022\034\n\021electricPrecision\030\010 \001(\005:\0014\022\033\n"
+  "\020physicalLowLimit\030\t \001(\001:\0010\022\034\n\021physicalHi"
+  "ghLimit\030\n \001(\001:\0010\"E\n\022MetrologySignalSet\022/"
+  "\n\017metrologySignal\030\001 \003(\0132\026.Proto.Metrolog"
+  "ySignal\"\240\001\n\021SimOverrideSignal\022\017\n\007enabled"
+  "\030\002 \001(\010\022\r\n\005index\030\003 \001(\005\022\023\n\013appSignalId\030\n \001"
+  "(\t\022\026\n\016overrideMethod\030\036 \001(\005\022&\n\roverrideVa"
+  "lue\030( \001(\0132\017.Proto.qvariant\022\026\n\016overrideSc"
+  "ript\0302 \001(\t\"O\n\032SimOverrideSignalWorkspace"
+  "\0221\n\017overrideSignals\030\002 \003(\0132\030.Proto.SimOve"
+  "rrideSignal*3\n\nSchemaUnit\022\013\n\007Display\020\000\022\016"
+  "\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024ConnectionDi"
+  "rrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rFblSi"
+  "gnalType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*:\n\rFb"
+  "lDataFormat\022\017\n\013UnsignedInt\020\000\022\r\n\tSignedIn"
+  "t\020\001\022\t\n\005Float\020\002"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_serialization_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_serialization_2eproto = {
-  false, false, 20052, descriptor_table_protodef_serialization_2eproto, "serialization.proto", 
-  &descriptor_table_serialization_2eproto_once, nullptr, 0, 107,
+  false, false, 20334, descriptor_table_protodef_serialization_2eproto, "serialization.proto", 
+  &descriptor_table_serialization_2eproto_once, nullptr, 0, 108,
   schemas, file_default_instances, TableStruct_serialization_2eproto::offsets,
   file_level_metadata_serialization_2eproto, file_level_enum_descriptors_serialization_2eproto, file_level_service_descriptors_serialization_2eproto,
 };
@@ -42355,20 +42417,463 @@ void SchemaDetails::InternalSwap(SchemaDetails* other) {
 
 // ===================================================================
 
+class BuildInfo::_Internal {
+ public:
+  using HasBits = decltype(std::declval<BuildInfo>()._has_bits_);
+  static void set_has_project(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
+  static void set_has_buildno(HasBits* has_bits) {
+    (*has_bits)[0] |= 16u;
+  }
+  static void set_has_datetime(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
+  }
+  static void set_has_changeset(HasBits* has_bits) {
+    (*has_bits)[0] |= 32u;
+  }
+  static void set_has_user(HasBits* has_bits) {
+    (*has_bits)[0] |= 4u;
+  }
+  static void set_has_workstation(HasBits* has_bits) {
+    (*has_bits)[0] |= 8u;
+  }
+};
+
+BuildInfo::BuildInfo(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:Proto.BuildInfo)
+}
+BuildInfo::BuildInfo(const BuildInfo& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message(),
+      _has_bits_(from._has_bits_) {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  project_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_project()) {
+    project_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_project(), 
+      GetArena());
+  }
+  datetime_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_datetime()) {
+    datetime_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_datetime(), 
+      GetArena());
+  }
+  user_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_user()) {
+    user_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_user(), 
+      GetArena());
+  }
+  workstation_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_workstation()) {
+    workstation_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_workstation(), 
+      GetArena());
+  }
+  ::memcpy(&buildno_, &from.buildno_,
+    static_cast<size_t>(reinterpret_cast<char*>(&changeset_) -
+    reinterpret_cast<char*>(&buildno_)) + sizeof(changeset_));
+  // @@protoc_insertion_point(copy_constructor:Proto.BuildInfo)
+}
+
+void BuildInfo::SharedCtor() {
+project_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+datetime_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+user_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+workstation_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&buildno_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&changeset_) -
+    reinterpret_cast<char*>(&buildno_)) + sizeof(changeset_));
+}
+
+BuildInfo::~BuildInfo() {
+  // @@protoc_insertion_point(destructor:Proto.BuildInfo)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void BuildInfo::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+  project_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  datetime_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  user_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  workstation_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+}
+
+void BuildInfo::ArenaDtor(void* object) {
+  BuildInfo* _this = reinterpret_cast< BuildInfo* >(object);
+  (void)_this;
+}
+void BuildInfo::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void BuildInfo::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void BuildInfo::Clear() {
+// @@protoc_insertion_point(message_clear_start:Proto.BuildInfo)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _has_bits_[0];
+  if (cached_has_bits & 0x0000000fu) {
+    if (cached_has_bits & 0x00000001u) {
+      project_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000002u) {
+      datetime_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000004u) {
+      user_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000008u) {
+      workstation_.ClearNonDefaultToEmpty();
+    }
+  }
+  if (cached_has_bits & 0x00000030u) {
+    ::memset(&buildno_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&changeset_) -
+        reinterpret_cast<char*>(&buildno_)) + sizeof(changeset_));
+  }
+  _has_bits_.Clear();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* BuildInfo::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  _Internal::HasBits has_bits{};
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // optional string project = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          auto str = _internal_mutable_project();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.BuildInfo.project");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int32 buildNo = 2 [default = 0];
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
+          _Internal::set_has_buildno(&has_bits);
+          buildno_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional string dateTime = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
+          auto str = _internal_mutable_datetime();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.BuildInfo.dateTime");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int32 changeset = 4 [default = 0];
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
+          _Internal::set_has_changeset(&has_bits);
+          changeset_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional string user = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 42)) {
+          auto str = _internal_mutable_user();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.BuildInfo.user");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional string workstation = 6;
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 50)) {
+          auto str = _internal_mutable_workstation();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.BuildInfo.workstation");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  _has_bits_.Or(has_bits);
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* BuildInfo::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:Proto.BuildInfo)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  cached_has_bits = _has_bits_[0];
+  // optional string project = 1;
+  if (cached_has_bits & 0x00000001u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_project().data(), static_cast<int>(this->_internal_project().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Proto.BuildInfo.project");
+    target = stream->WriteStringMaybeAliased(
+        1, this->_internal_project(), target);
+  }
+
+  // optional int32 buildNo = 2 [default = 0];
+  if (cached_has_bits & 0x00000010u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(2, this->_internal_buildno(), target);
+  }
+
+  // optional string dateTime = 3;
+  if (cached_has_bits & 0x00000002u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_datetime().data(), static_cast<int>(this->_internal_datetime().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Proto.BuildInfo.dateTime");
+    target = stream->WriteStringMaybeAliased(
+        3, this->_internal_datetime(), target);
+  }
+
+  // optional int32 changeset = 4 [default = 0];
+  if (cached_has_bits & 0x00000020u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(4, this->_internal_changeset(), target);
+  }
+
+  // optional string user = 5;
+  if (cached_has_bits & 0x00000004u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_user().data(), static_cast<int>(this->_internal_user().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Proto.BuildInfo.user");
+    target = stream->WriteStringMaybeAliased(
+        5, this->_internal_user(), target);
+  }
+
+  // optional string workstation = 6;
+  if (cached_has_bits & 0x00000008u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_workstation().data(), static_cast<int>(this->_internal_workstation().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Proto.BuildInfo.workstation");
+    target = stream->WriteStringMaybeAliased(
+        6, this->_internal_workstation(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:Proto.BuildInfo)
+  return target;
+}
+
+size_t BuildInfo::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:Proto.BuildInfo)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _has_bits_[0];
+  if (cached_has_bits & 0x0000003fu) {
+    // optional string project = 1;
+    if (cached_has_bits & 0x00000001u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_project());
+    }
+
+    // optional string dateTime = 3;
+    if (cached_has_bits & 0x00000002u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_datetime());
+    }
+
+    // optional string user = 5;
+    if (cached_has_bits & 0x00000004u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_user());
+    }
+
+    // optional string workstation = 6;
+    if (cached_has_bits & 0x00000008u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_workstation());
+    }
+
+    // optional int32 buildNo = 2 [default = 0];
+    if (cached_has_bits & 0x00000010u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_buildno());
+    }
+
+    // optional int32 changeset = 4 [default = 0];
+    if (cached_has_bits & 0x00000020u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_changeset());
+    }
+
+  }
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void BuildInfo::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:Proto.BuildInfo)
+  GOOGLE_DCHECK_NE(&from, this);
+  const BuildInfo* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<BuildInfo>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.BuildInfo)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.BuildInfo)
+    MergeFrom(*source);
+  }
+}
+
+void BuildInfo::MergeFrom(const BuildInfo& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:Proto.BuildInfo)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  cached_has_bits = from._has_bits_[0];
+  if (cached_has_bits & 0x0000003fu) {
+    if (cached_has_bits & 0x00000001u) {
+      _internal_set_project(from._internal_project());
+    }
+    if (cached_has_bits & 0x00000002u) {
+      _internal_set_datetime(from._internal_datetime());
+    }
+    if (cached_has_bits & 0x00000004u) {
+      _internal_set_user(from._internal_user());
+    }
+    if (cached_has_bits & 0x00000008u) {
+      _internal_set_workstation(from._internal_workstation());
+    }
+    if (cached_has_bits & 0x00000010u) {
+      buildno_ = from.buildno_;
+    }
+    if (cached_has_bits & 0x00000020u) {
+      changeset_ = from.changeset_;
+    }
+    _has_bits_[0] |= cached_has_bits;
+  }
+}
+
+void BuildInfo::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:Proto.BuildInfo)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void BuildInfo::CopyFrom(const BuildInfo& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:Proto.BuildInfo)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool BuildInfo::IsInitialized() const {
+  return true;
+}
+
+void BuildInfo::InternalSwap(BuildInfo* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  swap(_has_bits_[0], other->_has_bits_[0]);
+  project_.Swap(&other->project_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  datetime_.Swap(&other->datetime_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  user_.Swap(&other->user_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  workstation_.Swap(&other->workstation_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(BuildInfo, changeset_)
+      + sizeof(BuildInfo::changeset_)
+      - PROTOBUF_FIELD_OFFSET(BuildInfo, buildno_)>(
+          reinterpret_cast<char*>(&buildno_),
+          reinterpret_cast<char*>(&other->buildno_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata BuildInfo::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
 class ArchSignal::_Internal {
  public:
   using HasBits = decltype(std::declval<ArchSignal>()._has_bits_);
-  static void set_has_hash(HasBits* has_bits) {
-    (*has_bits)[0] |= 2u;
-  }
-  static void set_has_isanalog(HasBits* has_bits) {
-    (*has_bits)[0] |= 4u;
-  }
   static void set_has_appsignalid(HasBits* has_bits) {
     (*has_bits)[0] |= 1u;
   }
+  static void set_has_signaltype(HasBits* has_bits) {
+    (*has_bits)[0] |= 64u;
+  }
+  static void set_has_lowlimit(HasBits* has_bits) {
+    (*has_bits)[0] |= 4u;
+  }
+  static void set_has_highlimit(HasBits* has_bits) {
+    (*has_bits)[0] |= 8u;
+  }
+  static void set_has_unit(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
+  }
+  static void set_has_fineaperture(HasBits* has_bits) {
+    (*has_bits)[0] |= 16u;
+  }
+  static void set_has_coarseaperture(HasBits* has_bits) {
+    (*has_bits)[0] |= 32u;
+  }
   static bool MissingRequiredFields(const HasBits& has_bits) {
-    return ((has_bits[0] & 0x00000007) ^ 0x00000007) != 0;
+    return ((has_bits[0] & 0x00000041) ^ 0x00000041) != 0;
   }
 };
 
@@ -42387,18 +42892,24 @@ ArchSignal::ArchSignal(const ArchSignal& from)
     appsignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_appsignalid(), 
       GetArena());
   }
-  ::memcpy(&hash_, &from.hash_,
-    static_cast<size_t>(reinterpret_cast<char*>(&isanalog_) -
-    reinterpret_cast<char*>(&hash_)) + sizeof(isanalog_));
+  unit_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_unit()) {
+    unit_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_unit(), 
+      GetArena());
+  }
+  ::memcpy(&lowlimit_, &from.lowlimit_,
+    static_cast<size_t>(reinterpret_cast<char*>(&signaltype_) -
+    reinterpret_cast<char*>(&lowlimit_)) + sizeof(signaltype_));
   // @@protoc_insertion_point(copy_constructor:Proto.ArchSignal)
 }
 
 void ArchSignal::SharedCtor() {
 appsignalid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+unit_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-    reinterpret_cast<char*>(&hash_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&isanalog_) -
-    reinterpret_cast<char*>(&hash_)) + sizeof(isanalog_));
+    reinterpret_cast<char*>(&lowlimit_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&signaltype_) -
+    reinterpret_cast<char*>(&lowlimit_)) + sizeof(signaltype_));
 }
 
 ArchSignal::~ArchSignal() {
@@ -42410,6 +42921,7 @@ ArchSignal::~ArchSignal() {
 void ArchSignal::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
   appsignalid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  unit_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
 void ArchSignal::ArenaDtor(void* object) {
@@ -42429,13 +42941,18 @@ void ArchSignal::Clear() {
   (void) cached_has_bits;
 
   cached_has_bits = _has_bits_[0];
-  if (cached_has_bits & 0x00000001u) {
-    appsignalid_.ClearNonDefaultToEmpty();
+  if (cached_has_bits & 0x00000003u) {
+    if (cached_has_bits & 0x00000001u) {
+      appsignalid_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000002u) {
+      unit_.ClearNonDefaultToEmpty();
+    }
   }
-  if (cached_has_bits & 0x00000006u) {
-    ::memset(&hash_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&isanalog_) -
-        reinterpret_cast<char*>(&hash_)) + sizeof(isanalog_));
+  if (cached_has_bits & 0x0000007cu) {
+    ::memset(&lowlimit_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&signaltype_) -
+        reinterpret_cast<char*>(&lowlimit_)) + sizeof(signaltype_));
   }
   _has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -42449,31 +42966,66 @@ const char* ArchSignal::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID:
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     CHK_(ptr);
     switch (tag >> 3) {
-      // required uint64 hash = 1;
+      // required string appSignalID = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          _Internal::set_has_hash(&has_bits);
-          hash_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // required bool isAnalog = 2;
-      case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
-          _Internal::set_has_isanalog(&has_bits);
-          isanalog_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // required string appSignalID = 3;
-      case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
           auto str = _internal_mutable_appsignalid();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           #ifndef NDEBUG
           ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.ArchSignal.appSignalID");
           #endif  // !NDEBUG
           CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // required int32 signaltype = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
+          _Internal::set_has_signaltype(&has_bits);
+          signaltype_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional double lowLimit = 3 [default = 0];
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 25)) {
+          _Internal::set_has_lowlimit(&has_bits);
+          lowlimit_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
+          ptr += sizeof(double);
+        } else goto handle_unusual;
+        continue;
+      // optional double highLimit = 4 [default = 0];
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 33)) {
+          _Internal::set_has_highlimit(&has_bits);
+          highlimit_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
+          ptr += sizeof(double);
+        } else goto handle_unusual;
+        continue;
+      // optional string unit = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 42)) {
+          auto str = _internal_mutable_unit();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.ArchSignal.unit");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional double fineAperture = 6 [default = 0];
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 49)) {
+          _Internal::set_has_fineaperture(&has_bits);
+          fineaperture_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
+          ptr += sizeof(double);
+        } else goto handle_unusual;
+        continue;
+      // optional double coarseAperture = 7 [default = 0];
+      case 7:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 57)) {
+          _Internal::set_has_coarseaperture(&has_bits);
+          coarseaperture_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
+          ptr += sizeof(double);
         } else goto handle_unusual;
         continue;
       default: {
@@ -42506,26 +43058,54 @@ failure:
   (void) cached_has_bits;
 
   cached_has_bits = _has_bits_[0];
-  // required uint64 hash = 1;
-  if (cached_has_bits & 0x00000002u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_hash(), target);
-  }
-
-  // required bool isAnalog = 2;
-  if (cached_has_bits & 0x00000004u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(2, this->_internal_isanalog(), target);
-  }
-
-  // required string appSignalID = 3;
+  // required string appSignalID = 1;
   if (cached_has_bits & 0x00000001u) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_appsignalid().data(), static_cast<int>(this->_internal_appsignalid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
       "Proto.ArchSignal.appSignalID");
     target = stream->WriteStringMaybeAliased(
-        3, this->_internal_appsignalid(), target);
+        1, this->_internal_appsignalid(), target);
+  }
+
+  // required int32 signaltype = 2;
+  if (cached_has_bits & 0x00000040u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(2, this->_internal_signaltype(), target);
+  }
+
+  // optional double lowLimit = 3 [default = 0];
+  if (cached_has_bits & 0x00000004u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(3, this->_internal_lowlimit(), target);
+  }
+
+  // optional double highLimit = 4 [default = 0];
+  if (cached_has_bits & 0x00000008u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(4, this->_internal_highlimit(), target);
+  }
+
+  // optional string unit = 5;
+  if (cached_has_bits & 0x00000002u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_unit().data(), static_cast<int>(this->_internal_unit().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Proto.ArchSignal.unit");
+    target = stream->WriteStringMaybeAliased(
+        5, this->_internal_unit(), target);
+  }
+
+  // optional double fineAperture = 6 [default = 0];
+  if (cached_has_bits & 0x00000010u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(6, this->_internal_fineaperture(), target);
+  }
+
+  // optional double coarseAperture = 7 [default = 0];
+  if (cached_has_bits & 0x00000020u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(7, this->_internal_coarseaperture(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -42541,22 +43121,17 @@ size_t ArchSignal::RequiredFieldsByteSizeFallback() const {
   size_t total_size = 0;
 
   if (_internal_has_appsignalid()) {
-    // required string appSignalID = 3;
+    // required string appSignalID = 1;
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_appsignalid());
   }
 
-  if (_internal_has_hash()) {
-    // required uint64 hash = 1;
+  if (_internal_has_signaltype()) {
+    // required int32 signaltype = 2;
     total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_hash());
-  }
-
-  if (_internal_has_isanalog()) {
-    // required bool isAnalog = 2;
-    total_size += 1 + 1;
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+        this->_internal_signaltype());
   }
 
   return total_size;
@@ -42565,19 +43140,16 @@ size_t ArchSignal::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:Proto.ArchSignal)
   size_t total_size = 0;
 
-  if (((_has_bits_[0] & 0x00000007) ^ 0x00000007) == 0) {  // All required fields are present.
-    // required string appSignalID = 3;
+  if (((_has_bits_[0] & 0x00000041) ^ 0x00000041) == 0) {  // All required fields are present.
+    // required string appSignalID = 1;
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_appsignalid());
 
-    // required uint64 hash = 1;
+    // required int32 signaltype = 2;
     total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_hash());
-
-    // required bool isAnalog = 2;
-    total_size += 1 + 1;
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+        this->_internal_signaltype());
 
   } else {
     total_size += RequiredFieldsByteSizeFallback();
@@ -42586,6 +43158,36 @@ size_t ArchSignal::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
+  cached_has_bits = _has_bits_[0];
+  if (cached_has_bits & 0x0000003eu) {
+    // optional string unit = 5;
+    if (cached_has_bits & 0x00000002u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_unit());
+    }
+
+    // optional double lowLimit = 3 [default = 0];
+    if (cached_has_bits & 0x00000004u) {
+      total_size += 1 + 8;
+    }
+
+    // optional double highLimit = 4 [default = 0];
+    if (cached_has_bits & 0x00000008u) {
+      total_size += 1 + 8;
+    }
+
+    // optional double fineAperture = 6 [default = 0];
+    if (cached_has_bits & 0x00000010u) {
+      total_size += 1 + 8;
+    }
+
+    // optional double coarseAperture = 7 [default = 0];
+    if (cached_has_bits & 0x00000020u) {
+      total_size += 1 + 8;
+    }
+
+  }
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
         _internal_metadata_, total_size, &_cached_size_);
@@ -42618,15 +43220,27 @@ void ArchSignal::MergeFrom(const ArchSignal& from) {
   (void) cached_has_bits;
 
   cached_has_bits = from._has_bits_[0];
-  if (cached_has_bits & 0x00000007u) {
+  if (cached_has_bits & 0x0000007fu) {
     if (cached_has_bits & 0x00000001u) {
       _internal_set_appsignalid(from._internal_appsignalid());
     }
     if (cached_has_bits & 0x00000002u) {
-      hash_ = from.hash_;
+      _internal_set_unit(from._internal_unit());
     }
     if (cached_has_bits & 0x00000004u) {
-      isanalog_ = from.isanalog_;
+      lowlimit_ = from.lowlimit_;
+    }
+    if (cached_has_bits & 0x00000008u) {
+      highlimit_ = from.highlimit_;
+    }
+    if (cached_has_bits & 0x00000010u) {
+      fineaperture_ = from.fineaperture_;
+    }
+    if (cached_has_bits & 0x00000020u) {
+      coarseaperture_ = from.coarseaperture_;
+    }
+    if (cached_has_bits & 0x00000040u) {
+      signaltype_ = from.signaltype_;
     }
     _has_bits_[0] |= cached_has_bits;
   }
@@ -42656,12 +43270,13 @@ void ArchSignal::InternalSwap(ArchSignal* other) {
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   swap(_has_bits_[0], other->_has_bits_[0]);
   appsignalid_.Swap(&other->appsignalid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  unit_.Swap(&other->unit_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(ArchSignal, isanalog_)
-      + sizeof(ArchSignal::isanalog_)
-      - PROTOBUF_FIELD_OFFSET(ArchSignal, hash_)>(
-          reinterpret_cast<char*>(&hash_),
-          reinterpret_cast<char*>(&other->hash_));
+      PROTOBUF_FIELD_OFFSET(ArchSignal, signaltype_)
+      + sizeof(ArchSignal::signaltype_)
+      - PROTOBUF_FIELD_OFFSET(ArchSignal, lowlimit_)>(
+          reinterpret_cast<char*>(&lowlimit_),
+          reinterpret_cast<char*>(&other->lowlimit_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata ArchSignal::GetMetadata() const {
@@ -42671,74 +43286,134 @@ void ArchSignal::InternalSwap(ArchSignal* other) {
 
 // ===================================================================
 
-class ArchSignals::_Internal {
+class ArchInfo::_Internal {
  public:
+  using HasBits = decltype(std::declval<ArchInfo>()._has_bits_);
+  static const ::Proto::BuildInfo& buildinfo(const ArchInfo* msg);
+  static void set_has_buildinfo(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
+  }
+  static void set_has_archiveserviceid(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
+  static bool MissingRequiredFields(const HasBits& has_bits) {
+    return ((has_bits[0] & 0x00000003) ^ 0x00000003) != 0;
+  }
 };
 
-ArchSignals::ArchSignals(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+const ::Proto::BuildInfo&
+ArchInfo::_Internal::buildinfo(const ArchInfo* msg) {
+  return *msg->buildinfo_;
+}
+ArchInfo::ArchInfo(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena),
-  archsignals_(arena) {
+  archsignal_(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
-  // @@protoc_insertion_point(arena_constructor:Proto.ArchSignals)
+  // @@protoc_insertion_point(arena_constructor:Proto.ArchInfo)
 }
-ArchSignals::ArchSignals(const ArchSignals& from)
+ArchInfo::ArchInfo(const ArchInfo& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
-      archsignals_(from.archsignals_) {
+      _has_bits_(from._has_bits_),
+      archsignal_(from.archsignal_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  // @@protoc_insertion_point(copy_constructor:Proto.ArchSignals)
+  archiveserviceid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_archiveserviceid()) {
+    archiveserviceid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_archiveserviceid(), 
+      GetArena());
+  }
+  if (from._internal_has_buildinfo()) {
+    buildinfo_ = new ::Proto::BuildInfo(*from.buildinfo_);
+  } else {
+    buildinfo_ = nullptr;
+  }
+  // @@protoc_insertion_point(copy_constructor:Proto.ArchInfo)
 }
 
-void ArchSignals::SharedCtor() {
+void ArchInfo::SharedCtor() {
+archiveserviceid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+buildinfo_ = nullptr;
 }
 
-ArchSignals::~ArchSignals() {
-  // @@protoc_insertion_point(destructor:Proto.ArchSignals)
+ArchInfo::~ArchInfo() {
+  // @@protoc_insertion_point(destructor:Proto.ArchInfo)
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void ArchSignals::SharedDtor() {
+void ArchInfo::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
+  archiveserviceid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (this != internal_default_instance()) delete buildinfo_;
 }
 
-void ArchSignals::ArenaDtor(void* object) {
-  ArchSignals* _this = reinterpret_cast< ArchSignals* >(object);
+void ArchInfo::ArenaDtor(void* object) {
+  ArchInfo* _this = reinterpret_cast< ArchInfo* >(object);
   (void)_this;
 }
-void ArchSignals::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+void ArchInfo::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 }
-void ArchSignals::SetCachedSize(int size) const {
+void ArchInfo::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
 
-void ArchSignals::Clear() {
-// @@protoc_insertion_point(message_clear_start:Proto.ArchSignals)
+void ArchInfo::Clear() {
+// @@protoc_insertion_point(message_clear_start:Proto.ArchInfo)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  archsignals_.Clear();
+  archsignal_.Clear();
+  cached_has_bits = _has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    if (cached_has_bits & 0x00000001u) {
+      archiveserviceid_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000002u) {
+      GOOGLE_DCHECK(buildinfo_ != nullptr);
+      buildinfo_->Clear();
+    }
+  }
+  _has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* ArchSignals::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* ArchInfo::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  _Internal::HasBits has_bits{};
   while (!ctx->Done(&ptr)) {
     ::PROTOBUF_NAMESPACE_ID::uint32 tag;
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     CHK_(ptr);
     switch (tag >> 3) {
-      // repeated .Proto.ArchSignal archSignals = 1;
+      // required .Proto.BuildInfo buildInfo = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          ptr = ctx->ParseMessage(_internal_mutable_buildinfo(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // required string archiveServiceID = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+          auto str = _internal_mutable_archiveserviceid();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.ArchInfo.archiveServiceID");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // repeated .Proto.ArchSignal archSignal = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
           ptr -= 1;
           do {
             ptr += 1;
-            ptr = ctx->ParseMessage(_internal_add_archsignals(), ptr);
+            ptr = ctx->ParseMessage(_internal_add_archsignal(), ptr);
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
-          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<10>(ptr));
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<26>(ptr));
         } else goto handle_unusual;
         continue;
       default: {
@@ -42756,6 +43431,7 @@ const char* ArchSignals::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID
     }  // switch
   }  // while
 success:
+  _has_bits_.Or(has_bits);
   return ptr;
 failure:
   ptr = nullptr;
@@ -42763,39 +43439,92 @@ failure:
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* ArchSignals::_InternalSerialize(
+::PROTOBUF_NAMESPACE_ID::uint8* ArchInfo::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:Proto.ArchSignals)
+  // @@protoc_insertion_point(serialize_to_array_start:Proto.ArchInfo)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // repeated .Proto.ArchSignal archSignals = 1;
-  for (unsigned int i = 0,
-      n = static_cast<unsigned int>(this->_internal_archsignals_size()); i < n; i++) {
+  cached_has_bits = _has_bits_[0];
+  // required .Proto.BuildInfo buildInfo = 1;
+  if (cached_has_bits & 0x00000002u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(1, this->_internal_archsignals(i), target, stream);
+      InternalWriteMessage(
+        1, _Internal::buildinfo(this), target, stream);
+  }
+
+  // required string archiveServiceID = 2;
+  if (cached_has_bits & 0x00000001u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_archiveserviceid().data(), static_cast<int>(this->_internal_archiveserviceid().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Proto.ArchInfo.archiveServiceID");
+    target = stream->WriteStringMaybeAliased(
+        2, this->_internal_archiveserviceid(), target);
+  }
+
+  // repeated .Proto.ArchSignal archSignal = 3;
+  for (unsigned int i = 0,
+      n = static_cast<unsigned int>(this->_internal_archsignal_size()); i < n; i++) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(3, this->_internal_archsignal(i), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:Proto.ArchSignals)
+  // @@protoc_insertion_point(serialize_to_array_end:Proto.ArchInfo)
   return target;
 }
 
-size_t ArchSignals::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:Proto.ArchSignals)
+size_t ArchInfo::RequiredFieldsByteSizeFallback() const {
+// @@protoc_insertion_point(required_fields_byte_size_fallback_start:Proto.ArchInfo)
   size_t total_size = 0;
 
+  if (_internal_has_archiveserviceid()) {
+    // required string archiveServiceID = 2;
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_archiveserviceid());
+  }
+
+  if (_internal_has_buildinfo()) {
+    // required .Proto.BuildInfo buildInfo = 1;
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *buildinfo_);
+  }
+
+  return total_size;
+}
+size_t ArchInfo::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:Proto.ArchInfo)
+  size_t total_size = 0;
+
+  if (((_has_bits_[0] & 0x00000003) ^ 0x00000003) == 0) {  // All required fields are present.
+    // required string archiveServiceID = 2;
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_archiveserviceid());
+
+    // required .Proto.BuildInfo buildInfo = 1;
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *buildinfo_);
+
+  } else {
+    total_size += RequiredFieldsByteSizeFallback();
+  }
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated .Proto.ArchSignal archSignals = 1;
-  total_size += 1UL * this->_internal_archsignals_size();
-  for (const auto& msg : this->archsignals_) {
+  // repeated .Proto.ArchSignal archSignal = 3;
+  total_size += 1UL * this->_internal_archsignal_size();
+  for (const auto& msg : this->archsignal_) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
@@ -42809,57 +43538,70 @@ size_t ArchSignals::ByteSizeLong() const {
   return total_size;
 }
 
-void ArchSignals::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:Proto.ArchSignals)
+void ArchInfo::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:Proto.ArchInfo)
   GOOGLE_DCHECK_NE(&from, this);
-  const ArchSignals* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<ArchSignals>(
+  const ArchInfo* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<ArchInfo>(
           &from);
   if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.ArchSignals)
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.ArchInfo)
     ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
   } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.ArchSignals)
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.ArchInfo)
     MergeFrom(*source);
   }
 }
 
-void ArchSignals::MergeFrom(const ArchSignals& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:Proto.ArchSignals)
+void ArchInfo::MergeFrom(const ArchInfo& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:Proto.ArchInfo)
   GOOGLE_DCHECK_NE(&from, this);
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  archsignals_.MergeFrom(from.archsignals_);
+  archsignal_.MergeFrom(from.archsignal_);
+  cached_has_bits = from._has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    if (cached_has_bits & 0x00000001u) {
+      _internal_set_archiveserviceid(from._internal_archiveserviceid());
+    }
+    if (cached_has_bits & 0x00000002u) {
+      _internal_mutable_buildinfo()->::Proto::BuildInfo::MergeFrom(from._internal_buildinfo());
+    }
+  }
 }
 
-void ArchSignals::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:Proto.ArchSignals)
+void ArchInfo::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:Proto.ArchInfo)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void ArchSignals::CopyFrom(const ArchSignals& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:Proto.ArchSignals)
+void ArchInfo::CopyFrom(const ArchInfo& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:Proto.ArchInfo)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool ArchSignals::IsInitialized() const {
-  if (!::PROTOBUF_NAMESPACE_ID::internal::AllAreInitialized(archsignals_)) return false;
+bool ArchInfo::IsInitialized() const {
+  if (_Internal::MissingRequiredFields(_has_bits_)) return false;
+  if (!::PROTOBUF_NAMESPACE_ID::internal::AllAreInitialized(archsignal_)) return false;
   return true;
 }
 
-void ArchSignals::InternalSwap(ArchSignals* other) {
+void ArchInfo::InternalSwap(ArchInfo* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
-  archsignals_.InternalSwap(&other->archsignals_);
+  swap(_has_bits_[0], other->_has_bits_[0]);
+  archsignal_.InternalSwap(&other->archsignal_);
+  archiveserviceid_.Swap(&other->archiveserviceid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  swap(buildinfo_, other->buildinfo_);
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata ArchSignals::GetMetadata() const {
+::PROTOBUF_NAMESPACE_ID::Metadata ArchInfo::GetMetadata() const {
   return GetMetadataStatic();
 }
 
@@ -47618,11 +48360,14 @@ template<> PROTOBUF_NOINLINE ::Proto::SchemaDetails_TrendIndicatorSchemaItems* A
 template<> PROTOBUF_NOINLINE ::Proto::SchemaDetails* Arena::CreateMaybeMessage< ::Proto::SchemaDetails >(Arena* arena) {
   return Arena::CreateMessageInternal< ::Proto::SchemaDetails >(arena);
 }
+template<> PROTOBUF_NOINLINE ::Proto::BuildInfo* Arena::CreateMaybeMessage< ::Proto::BuildInfo >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::Proto::BuildInfo >(arena);
+}
 template<> PROTOBUF_NOINLINE ::Proto::ArchSignal* Arena::CreateMaybeMessage< ::Proto::ArchSignal >(Arena* arena) {
   return Arena::CreateMessageInternal< ::Proto::ArchSignal >(arena);
 }
-template<> PROTOBUF_NOINLINE ::Proto::ArchSignals* Arena::CreateMaybeMessage< ::Proto::ArchSignals >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::Proto::ArchSignals >(arena);
+template<> PROTOBUF_NOINLINE ::Proto::ArchInfo* Arena::CreateMaybeMessage< ::Proto::ArchInfo >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::Proto::ArchInfo >(arena);
 }
 template<> PROTOBUF_NOINLINE ::Proto::BusSignal* Arena::CreateMaybeMessage< ::Proto::BusSignal >(Arena* arena) {
   return Arena::CreateMessageInternal< ::Proto::BusSignal >(arena);

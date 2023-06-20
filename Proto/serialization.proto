@@ -1417,24 +1417,32 @@ message SchemaDetails
 	repeated TrendIndicatorSchemaItems trendIndicators = 30;
 }
 
+message BuildInfo
+{
+	optional string project = 1;
+	optional int32 buildNo = 2 [default = 0];
+	optional string dateTime = 3;
+	optional int32 changeset = 4 [default = 0];
+	optional string user = 5;
+	optional string workstation = 6;
+}
+
 message ArchSignal
 {
-    required uint64 hash = 1;
-    required bool isAnalog = 2;
-    required string appSignalID = 3;
+	required string appSignalID = 1;
+	required int32 signalType = 2;
+	optional double lowLimit = 3 [default = 0];
+	optional double highLimit = 4 [default = 0];
+	optional string unit = 5;
+	optional double fineAperture = 6 [default = 0];
+	optional double coarseAperture = 7 [default = 0];
 }
 
-
-message ArchSignals
+message ArchInfo
 {
-    repeated ArchSignal archSignals = 1;
-}
-
-message ArchiveInfo
-{
-	required string ProjectID = 1;
-	required string ArchServiceID = 2;
-	required ArchSignals = 3;
+	required BuildInfo buildInfo = 1;
+	required string archiveServiceID = 2;
+	repeated ArchSignal archSignal = 3;
 }
 
 //

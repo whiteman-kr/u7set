@@ -475,6 +475,10 @@ namespace File
 
 	inline const QString CRYPTO_CA_CLIENT_CERTIFICATE = "/Crypto/ca_client.crt";
 	inline const QString CRYPTO_CA_CLIENT_PRIVATE_KEY = "/Crypto/ca_client_private.key";
+
+	inline const QString ARCH_INFO_PROTO = "ArchInfo.proto";
+	inline const QString ARCH_INFO_PROTO_BAK = "ArchInfo.proto.bak";
+	inline const QString ARCH_INFO_PROTO_BAK2 = "ArchInfo.proto.bak2";
 }
 
 namespace Separator

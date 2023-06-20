@@ -44,7 +44,6 @@ private:
 	void stopAllThreads();
 
 	void startArchive();
-	void startReadOnlyArchive();
 	void stopArchive();
 
 	void startTcpAppDataServerThread();
@@ -52,9 +51,6 @@ private:
 
 	void startTcpArchRequestsServerThread();
 	void stopTcpArchiveRequestsServerThread();
-
-	bool loadArchSignalsProto(const QByteArray& fileData);
-	void deleteArchSignalsProto();
 
 	void logFileLoadResult(bool loadOk, const QString& fileName);
 
@@ -71,7 +67,7 @@ private:
 
 	ArchivingServiceSettings m_serviceSettings;
 	OnlineLib::BuildInfo m_buildInfo;
-	Proto::ArchSignals* m_archSignalsProto = nullptr;
+	QByteArray m_archInfoFileData;
 
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
