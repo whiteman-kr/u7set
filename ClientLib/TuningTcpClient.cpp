@@ -442,7 +442,7 @@ namespace ClientLib
 
 				locker.unlock();
 
-				requestWriteTuningSignals(writeQueue);
+				requestWriteTuningSignals(std::move(writeQueue));
 
 				break;
 			}
@@ -793,10 +793,10 @@ namespace ClientLib
 		std::vector<Hash> recentSignals = m_recentTuningSignals.recentlyUsedAppSignals(connectedSoftwareInfo().equipmentID());
 
 		int recentCount = static_cast<int>(recentSignals.size());
-		if (recentCount > MaxStateWriteCount)
+		if (recentCount > MaxStateRequestCount)
 		{
-			Q_ASSERT(recentCount <= MaxStateWriteCount);
-			recentCount = MaxStateWriteCount;
+			Q_ASSERT(recentCount <= MaxStateRequestCount);
+			recentCount = MaxStateRequestCount;
 		}
 
 		// Create the request
