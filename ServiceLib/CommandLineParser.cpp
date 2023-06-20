@@ -426,7 +426,16 @@ void CommandLineParser::printCmdLineArgs(std::shared_ptr<CircularLogger> log) co
 	for(auto& p : m_cmdLineArgs)
 	{
 		const CmdLineArg& cla = p.second;
-		DEBUG_LOG_MSG(log, QString("%1 (%2) = %3").arg(cla.name).arg(cla.settingName).arg(cla.valueStr));
+		QString msg = QString("%1 (%2) = %3").arg(cla.name).arg(cla.settingName).arg(cla.valueStr);
+
+		if (log != nullptr)
+		{
+			DEBUG_LOG_MSG(log, msg);
+		}
+		else
+		{
+			qDebug() << C_STR(msg);
+		}
 	}
 }
 
@@ -492,18 +501,3 @@ bool CommandLineParser::addCmdLineArg(CmdLineArgType type,
 
 	return true;
 }
-
-const CommandLineParser::CmdLineArg* CommandLineParser::getOption(const QString& optionName) const
-{
-	Q_ASSERT(m_parsed == true);
-
-	auto it = m_cmdLineArgs.find(optionName);
-
-	if (it == m_cmdLineArgs.end())
-	{
-		return nullptr;
-	}
-
-	return &it->second;
-}
-

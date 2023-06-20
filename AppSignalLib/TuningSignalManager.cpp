@@ -3,6 +3,7 @@
 #endif
 
 #include "TuningSignalManager.h"
+#include "../ClientLib/TuningTcpClient.h"
 
 #define ANY_HASH UNDEFINED_HASH
 
@@ -12,7 +13,8 @@
 TuningSignalManager::TuningSignalManager(const QString& clientEquipmentId, ILogFile* logFile, QObject* parent) :
 	QObject(parent),
 	m_tuningClientHash(::calcHash(clientEquipmentId)),
-	m_logFile(logFile, "TuningSignalManager")
+	m_logFile(logFile, "TuningSignalManager"),
+	m_recentUsed(ClientLib::TuningTcpClient::MaxStateWriteCount)
 {
 }
 

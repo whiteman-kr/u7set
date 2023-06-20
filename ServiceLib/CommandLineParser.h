@@ -24,7 +24,7 @@ public:
 	qsizetype cmdLineArgCount() const;
 
 	// cmdLineArgName should be specified without "-"
-	// setting is a cmdLineArg value stored in registry
+	// setting is a name of registry key where cmdLineArg value stored
 
 	bool addSimpleNoWritableCmdLineArg(	const QString& cmdLineArgName,
 										const QString& description);
@@ -59,11 +59,9 @@ public:
 	static bool checkSettingWriteStatus(QSettings& settings, const QString& settingName,
 										std::shared_ptr<CircularLogger> logger);
 
-	bool cmdLineArgIsSet(const QString& cmdLineArgName) const;			// use with all option types
-//	QString optionValue(const QString& optionName) const;					// use only with OptionType::SingleValue
+	bool cmdLineArgIsSet(const QString& cmdLineArgName) const;			// use with all cmd line args types
 
 	QString getSettingValue(const QString& settingName) const;
-//	bool settingIsSet(const QString& settingName) const;
 
 	QString helpText() const;
 
@@ -80,7 +78,7 @@ private:
 	struct CmdLineArg
 	{
 		CmdLineArgType type = CmdLineArgType::Simple;
-		QString name;							// option name in command line, ex: id
+		QString name;							// arg name in command line, ex: id
 		bool saveInRegistry = false;
 		QString settingName;					// respectively setting name in registry, ex: EquipmentID
 		QString description;
@@ -98,8 +96,6 @@ private:
 				   const QString& settingName,
 				   const QString& description,
 				   const QString& paramsExample);
-
-	const CmdLineArg* getOption(const QString& optionName) const;
 
 private:
 	QString m_organization;
