@@ -36,10 +36,16 @@ CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
 HEADERS += \
+    Archivist.h \
+    DbArchivist.h \
+    FileArchivist.h \
 	Stable.h \
 
 SOURCES += \
+    Archivist.cpp \
 	ArchivistMain.cpp \
+    DbArchivist.cpp \
+    FileArchivist.cpp
 
 INCLUDEPATH += ./../../Protobuf
 

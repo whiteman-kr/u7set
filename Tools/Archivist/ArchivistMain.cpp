@@ -2,7 +2,10 @@
 #include "../../UtilsLib/WUtils.h"
 #include "../../Proto/serialization.pb.h"
 #include "../../OnlineLib/CircularLogger.h"
-#include "../../ServiceLib/CommandLineParser.h"
+#include <iostream>
+#include "Archivist.h"
+#include "FileArchivist.h"
+#include "DbArchivist.h"
 
 // To increase time that system waiting to the service shutting down, change value:
 //
@@ -13,25 +16,20 @@ int main(int argc, char* argv[])
 {
 	QCoreApplication app(argc, argv);
 
+	CircularLoggerShared logger = std::make_shared<CircularLogger>();
+
 	bool result = 0;
 
-    CommandLineParser newPars("Radiy", "Archivist", argc, argv);
+	Archivist* archivist = new DbArchivist(argc, argv);
 
-    newPars.addSimpleNoWritableCmdLineArg("copyfile",
-                            "Copy file archive");
-
-    newPars.printCmdLineArgs(nullptr);
-
-    return 1;
+	archivist->start();
 
 
-	CircularLoggerShared logger = std::make_shared<CircularLogger>();
+
 
 //	LOGGER_INIT(logger, QString(), getServiceInstanceID(argc, argv));
 
 //	logger->setLogCodeInfo(false);
-
-	std::cout << "\nHello!\n\n";
 
 	google::protobuf::ShutdownProtobufLibrary();
 

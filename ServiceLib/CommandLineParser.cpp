@@ -334,6 +334,22 @@ QString CommandLineParser::getSettingValue(const QString& settingName) const
 		return QString();
 	}
 
+
+	return it2->second.valueStr;
+}
+
+QString CommandLineParser::getCmdLineArgValue(const QString& cmdLineArgName) const
+{
+	Q_ASSERT(m_parsed == true);
+
+	auto it2 = m_cmdLineArgs.find(cmdLineArgName.toLower().trimmed());
+
+	if (it2 == m_cmdLineArgs.end())
+	{
+		Q_ASSERT(false);
+		return QString();
+	}
+
 	return it2->second.valueStr;
 }
 

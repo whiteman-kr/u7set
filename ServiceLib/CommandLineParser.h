@@ -62,6 +62,7 @@ public:
 	bool cmdLineArgIsSet(const QString& cmdLineArgName) const;			// use with all cmd line args types
 
 	QString getSettingValue(const QString& settingName) const;
+	QString getCmdLineArgValue(const QString& cmdLineArgName) const;
 
 	QString helpText() const;
 
