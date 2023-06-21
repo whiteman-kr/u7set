@@ -468,12 +468,14 @@ void ModuleConfigurator::readClicked()
 		{
 			ApplicationTabPage* page = dynamic_cast<ApplicationTabPage*>(m_tabWidget->currentWidget());
 
-			QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"));
+			static QString path{"."};
+			QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), path + QDir::separator());
 
 			if (fileName.isEmpty() == true)
 			{
 				return;
 			}
+			path = QFileInfo(fileName).path(); // store path for next time
 
 			std::optional<std::vector<int>> selectedUarts = page->selectedUarts();
 

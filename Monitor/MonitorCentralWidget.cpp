@@ -352,14 +352,16 @@ void MonitorCentralWidget::slot_export()
 		Q_ASSERT(schema);
 		return;
 	}
+	static QString path{"."};
 	QString fileName = QFileDialog::getSaveFileName(this,
 													tr("Export Schema"),
-													schema->schemaId() + ".pdf",
+													path + QDir::separator() + schema->schemaId() + ".pdf",
 													tr("PDF Files (*.pdf);;PNG Files (*.png)"));
 	if (fileName.isEmpty() == true)
 	{
 		return;
 	}
+	path = QFileInfo(fileName).path(); // store path for next time
 
 	bool ok = false;
 

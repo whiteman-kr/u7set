@@ -229,15 +229,17 @@ void DialogSettings::saveAs_clicked()
 		return;
 	}
 
+	static QString path{"."};
 	QString fileName = QFileDialog::getSaveFileName(this,
 													tr("Save File"),
-													QString{},
+													path + QDir::separator(),
 													tr("ini File (*.ini);;All Files (*.*)"));
 
 	if (fileName.isEmpty() == true)
 	{
 		return;
 	}
+	path = QFileInfo(fileName).path(); // store path for next time
 
 	MonitorAppSettings ms;
 	ms.set(d.value());

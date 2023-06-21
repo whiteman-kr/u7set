@@ -907,15 +907,17 @@ void SimOverridePane::saveWorkspace()
 		return;
 	}
 
+	static QString path{QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/untitled.sow"};
 	QString fileName = QFileDialog::getSaveFileName(this,
 													tr("Save File"),
-													QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/untitled.sow",
+													path + QDir::separator() + "untitled.sow",
 													tr("u7 Signal Override Workspace (*.sow);;All files (*.*)"));
 
 	if (fileName.isEmpty() == true)
 	{
 		return;
 	}
+	path = QFileInfo(fileName).path(); // store path for next time
 
 	m_simulator->overrideSignals().saveWorkspace(fileName);
 	return;

@@ -584,15 +584,16 @@ void ArchiveWidget::exportButton()
 		return;
 	}
 
+	static QString path{"."};
 	QString fileName = QFileDialog::getSaveFileName(this,
 													tr("Save File"),
-													"untitled.pdf",
+													path + QDir::separator() + "untitled.pdf",
 													tr("Portable Documnet Format (*.pdf);;CSV Files, semicolon separated (*.csv);;Plaintext (*.txt);;HTML (*.html)"));
-
 	if (fileName.isEmpty() == true)
 	{
 		return;
 	}
+	path = QFileInfo(fileName).path(); // store path for next time
 
 	QFileInfo fileInfo(fileName);
 	QString extension = fileInfo.completeSuffix();

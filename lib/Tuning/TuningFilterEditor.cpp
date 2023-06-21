@@ -717,14 +717,16 @@ void ChooseTuningSignalsWidget::on_m_exportValues_clicked()
 
 	int rowCount = m_filterValuesTree->topLevelItemCount();
 
+	static QString path{"."};
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Export to CSV"),
-													QString(),
+													path + QDir::separator(),
 													tr("CSV (*.csv)"));
 
 	if (fileName.isEmpty() == true)
 	{
 		return;
 	}
+	path = QFileInfo(fileName).path(); // store path for next time
 
 	QFile file(fileName);
 	if (file.open(QFile::WriteOnly | QFile::Truncate) == false)
@@ -781,14 +783,16 @@ void ChooseTuningSignalsWidget::on_m_importValues_clicked()
 		return;
 	}
 
+	static QString path{"."};
 	QString fileName = QFileDialog::getOpenFileName(this, tr("Import from CSV"),
-													QString(),
+													path,
 													tr("CSV (*.csv)"));
 
 	if (fileName.isEmpty() == true)
 	{
 		return;
 	}
+	path = QFileInfo(fileName).path(); // store path for next time
 
 	QFile file(fileName);
 	if (file.open(QFile::ReadOnly) == false)
