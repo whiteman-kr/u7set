@@ -67,6 +67,7 @@ public:
 	QString archFullPath() const { return m_archFullPath; }
 
 	bool isWorkable() const { return m_isWorkable; }
+	bool isReadOnly() const { return m_readOnlyArchive; }
 
 	std::shared_ptr<ArchRequest> startNewRequest(E::TimeType timeType,
 												 qint64 sartTime,
@@ -136,7 +137,7 @@ private:
 private:
 	bool m_readOnlyArchive = true;
 	QString m_readOnlyArchFullPath;
-	QByteArray m_archInfoFileData;
+	QByteArray* m_archInfoFileData = nullptr;
 
 	QString m_projectID;
 	QString m_equipmentID;

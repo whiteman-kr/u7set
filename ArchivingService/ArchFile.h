@@ -97,10 +97,8 @@ private:
 	static const double QUEUE_REDUCTION_LIMIT;
 
 public:
-	ArchFile(const Proto::ArchSignal& protoArchSignal, CircularLoggerShared log);
+	ArchFile(const Proto::ArchSignal& protoArchSignal, const QString& archFullPath, CircularLoggerShared log);
 	~ArchFile();
-
-	void setArchFullPath(const QString& archFullPath);
 
 	bool pushState(const SimpleAppSignalState& state);
 

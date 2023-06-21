@@ -154,11 +154,17 @@ void ArchivingService::startAllThreads()
 {
 	startArchive();
 
-	if (m_archive->isWorkable() == true)
+	if (m_archive->isWorkable() == false)
+	{
+		return;
+	}
+
+	if (m_archive->isReadOnly() == false)
 	{
 		startTcpAppDataServerThread();
-		startTcpArchRequestsServerThread();
 	}
+
+	startTcpArchRequestsServerThread();
 }
 
 void ArchivingService::stopAllThreads()
@@ -173,7 +179,11 @@ void ArchivingService::startArchive()
 {
 	Q_ASSERT(m_archive == nullptr);
 
-	if (isReadOnlyArchive() == false)
+	if (isReadOnlyArchive() == true)
+	{
+		m_archive = new Archive(m_readOnlyArchivePath, logger());
+	}
+	else
 	{
 		Q_ASSERT(m_archInfoFileData.isEmpty() == false);
 
@@ -186,21 +196,17 @@ void ArchivingService::startArchive()
 								Archive::DEFAULT_MAINTENANCE_DELAY_MINUTES,
 								m_minQueueSizeForFlushing,
 								logger());
+	}
 
-		m_archive->start();
+	m_archive->start();
 
-		if (m_archive->isWorkable() == true)
-		{
-			DEBUG_LOG_MSG(logger(), QString("Archive is workable. Directory: %1").arg(m_archive->archFullPath()));
-		}
-		else
-		{
-			DEBUG_LOG_ERR(logger(), QString("Archive is NOT WORKABLE!"));
-		}
+	if (m_archive->isWorkable() == true)
+	{
+		DEBUG_LOG_MSG(logger(), QString("Archive is workable. Directory: %1").arg(m_archive->archFullPath()));
 	}
 	else
 	{
-		m_archive = new Archive(m_readOnlyArchivePath, logger());
+		DEBUG_LOG_ERR(logger(), QString("Archive is NOT WORKABLE!"));
 	}
 }
 

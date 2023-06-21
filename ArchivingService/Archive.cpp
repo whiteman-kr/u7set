@@ -81,9 +81,10 @@ Archive::Archive(const QString& projectID,
 	m_archDir(archDir),
 	m_maintenanceDelayMinutes(maintenanceDelayMinutes),
 	m_minQueueSizeForFlushing(minQueueSizeForFlushing),
-	m_log(logger)
+	m_log(logger),
+	m_archInfoFileData(new QByteArray)
 {
-	m_archInfoFileData.swap(archFileInfoData);
+	m_archInfoFileData->swap(archFileInfoData);
 
 	// shortTermPeriod and longTermPeriod limitation
 	//
@@ -110,14 +111,10 @@ Archive::Archive(const QString& readOnlyArchPath,				// Read only archive constr
 				CircularLoggerShared logger) :
 	m_readOnlyArchive(true),
 	m_readOnlyArchFullPath(readOnlyArchPath),
-	m_log(logger)
+	m_log(logger),
+	m_archInfoFileData(new QByteArray)
 {
 	m_readOnlyArchFullPath = QDir::fromNativeSeparators(m_readOnlyArchFullPath);
-
-	if (m_readOnlyArchFullPath.endsWith(Separator::DIR) == false)
-	{
-		m_readOnlyArchFullPath += Separator::DIR;
-	}
 }
 
 Archive::~Archive()
@@ -164,6 +161,8 @@ void Archive::start()
 		m_archMaintenanceThread = new ArchMaintenanceThread(*this, m_log);
 		m_archMaintenanceThread->start();
 	}
+
+	DELETE_IF_NOT_NULL(m_archInfoFileData);		// no more required
 
 	m_isWorkable = true;
 }
@@ -434,7 +433,7 @@ bool Archive::loadArchInfoFile()
 		return false;
 	}
 
-	QString path = m_readOnlyArchFullPath + File::ARCH_INFO_PROTO;
+	QString path = m_readOnlyArchFullPath + Separator::DIR + File::ARCH_INFO_PROTO;
 
 	QFile archInfoFile(path);
 
@@ -444,14 +443,14 @@ bool Archive::loadArchInfoFile()
 		return false;
 	}
 
-	m_archInfoFileData = archInfoFile.readAll();
+	*m_archInfoFileData = archInfoFile.readAll();
 
 	return true;
 }
 
 bool Archive::initArchFiles()
 {
-	if (m_archInfoFileData.isEmpty() == true)
+	if (m_archInfoFileData->isEmpty() == true)
 	{
 		Q_ASSERT(false);
 		return false;
@@ -459,7 +458,7 @@ bool Archive::initArchFiles()
 
 	Proto::ArchInfo archInfo;
 
-	bool res = archInfo.ParseFromArray(m_archInfoFileData.constData(), static_cast<int>(m_archInfoFileData.size()));
+	bool res = archInfo.ParseFromArray(m_archInfoFileData->constData(), static_cast<int>(m_archInfoFileData->size()));
 
 	if (res == false)
 	{
@@ -474,7 +473,7 @@ bool Archive::initArchFiles()
 
 		QString excludeStr = QString("/%1-archive/%2").arg(m_projectID).arg(m_equipmentID);
 
-		int index = m_readOnlyArchFullPath.toLower().trimmed().indexOf(excludeStr);
+		qsizetype index = m_readOnlyArchFullPath.toLower().trimmed().indexOf(excludeStr);
 
 		if (index == -1)
 		{
@@ -498,9 +497,9 @@ bool Archive::initArchFiles()
 	{
 		const Proto::ArchSignal& protoArchSignal = archInfo.archsignal(i);
 
-		ArchFile* archFile = new ArchFile(protoArchSignal, m_log);
+		ArchFile* archFile = new ArchFile(protoArchSignal, m_archFullPath, m_log);
 
-		archFile->setArchFullPath(m_archFullPath);
+//		archFile->setArchFullPath(m_archFullPath);
 
 		m_archFiles.insert(archFile->hash(), archFile);
 
@@ -687,7 +686,7 @@ bool Archive::saveArchInfoProtoFile() const
 		return false;
 	}
 
-	pf.write(m_archInfoFileData);
+	pf.write(*m_archInfoFileData);
 
 	pf.close();
 
