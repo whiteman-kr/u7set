@@ -146,7 +146,7 @@ namespace ClientLib
 
 		{
 			std::lock_guard locker(m_writeQueueMutex);
-			m_writeQueue.emplace(TuningWriteCommand(equipmentHash, enableControl, forceTakeControl));
+			m_writeQueue.push(TuningWriteCommand(equipmentHash, enableControl, forceTakeControl));
 			m_writeQueueCondition.notify_one();
 		}
 
@@ -187,7 +187,7 @@ namespace ClientLib
 			{
 				// Push command to the queue
 				//
-				m_writeQueue.emplace(command);
+				m_writeQueue.push(command);
 			}
 			m_writeQueueCondition.notify_one();
 		}
@@ -206,7 +206,7 @@ namespace ClientLib
 
 		{
 			std::lock_guard locker(m_writeQueueMutex);
-			m_writeQueue.emplace(TuningWriteCommand(true));
+			m_writeQueue.emplace(true);
 			m_writeQueueCondition.notify_one();
 		}
 
@@ -246,7 +246,7 @@ namespace ClientLib
 
 		m_lastReadRequestType = ReadRequestType::Generic;
 
-		resetToGetTuningSources();
+		requestTuningSourcesInfo();
 
 		return;
 	}
@@ -299,29 +299,26 @@ namespace ClientLib
 			break;
 
 		case TDS_GET_TUNING_SOURCES_STATES:
+			Q_ASSERT(m_lastReadRequestType == ReadRequestType::SourceState);
 			processTuningSourcesState(data);
 			break;
 
 		case TDS_GET_SIGNALS_STATE_CHANGES:
-			{
-				Q_ASSERT(m_lastReadRequestType == ReadRequestType::Changed);
-				processReadChangedTuningSignals(data);
-				break;
-			}
+			Q_ASSERT(m_lastReadRequestType == ReadRequestType::Changed);
+			processReadChangedTuningSignals(data);
+			break;
 
 		case TDS_TUNING_SIGNALS_READ:
+			if (m_lastReadRequestType == ReadRequestType::Recent)
 			{
-				if (m_lastReadRequestType == ReadRequestType::Recent)
-				{
-					processReadRecentTuningSignals(data);
-				}
-				else
-				{
-					Q_ASSERT(m_lastReadRequestType == ReadRequestType::Generic);
-					processReadTuningSignals(data);
-				}
-				break;
+				processReadRecentTuningSignals(data);
 			}
+			else
+			{
+				Q_ASSERT(m_lastReadRequestType == ReadRequestType::Generic);
+				processReadTuningSignals(data);
+			}
+			break;
 
 		case TDS_TUNING_SIGNALS_WRITE:
 			processWriteTuningSignals(data);
@@ -339,54 +336,86 @@ namespace ClientLib
 			assert(false);
 			m_logFile.writeError(tr("processReply(): Wrong requestId, %1").arg(requestID));
 
-			resetToGetTuningSources();
+			requestTuningSourcesInfo();
 		}
 
 		return;
 	}
 
-	void TuningTcpClient::resetToGetTuningSources()
+	void TuningTcpClient::continueRequestLoop()
 	{
-		requestTuningSourcesInfo();
-		return;
-	}
-
-	void TuningTcpClient::resetToGetTuningSourcesState()
-	{
-		requestTuningSourcesState();
-		return;
-	}
-
-	void TuningTcpClient::resetToProcessTuningSignals()
-	{
-		bool nothingToWrite = true;
-
-		askToWriteTuningSignals(nothingToWrite);
-
-		if (nothingToWrite == true)
-		{
-			askToReadTuningSignals();
-		}
-		return;
-	}
-
-	void TuningTcpClient::askToWriteTuningSignals(bool& nothingToWrite)
-	{
-		// Wait interval of time before requesting pack of signal states.
-		// If write queue is not empty - do not wait, write them immediately
+		// Choose which read request to send based on previous request
 		//
+		switch(m_lastReadRequestType)
+		{
+
+		case ReadRequestType::Generic:
+			{
+				if (sendWriteRequest(m_requestInterval) == false)
+				{
+					m_lastReadRequestType = ReadRequestType::SourceState;
+					requestTuningSourcesState();
+				}
+				break;
+			}
+		case ReadRequestType::SourceState:
+			{
+				if (sendWriteRequest(0) == false)
+				{
+					m_lastReadRequestType = ReadRequestType::Changed;
+					requestReadChangedTuningSignals();
+				}
+				break;
+			}
+		case ReadRequestType::Changed:
+			{
+				if (sendWriteRequest(0) == false)
+				{
+					m_lastReadRequestType = ReadRequestType::Recent;
+					requestReadRecentTuningSignals();
+				}
+				break;
+			}
+		case ReadRequestType::Recent:
+			{
+				if (sendWriteRequest(0) == false)
+				{
+					m_lastReadRequestType = ReadRequestType::Generic;
+					requestReadTuningSignals();
+				}
+				break;
+			}
+		default:
+			Q_ASSERT(false);
+		}
+		return;
+	}
+
+	bool TuningTcpClient::sendWriteRequest(int waitTimeMs)
+	{
 		std::unique_lock locker(m_writeQueueMutex);
 
-		nothingToWrite = true;
-
-		if (m_writeQueueCondition.wait_for(locker,
-										   std::chrono::milliseconds{m_requestInterval},
-										   [this](){ return m_writeQueue.empty() == false; }) == false)
+		if (waitTimeMs > 0)
 		{
-			return;
+			// Wait interval of time before requesting pack of signal states.
+			// If write queue is not empty - do not wait, write them immediately
+			//
+			if (m_writeQueueCondition.wait_for(locker,
+											   std::chrono::milliseconds{waitTimeMs},
+											   [this](){ return m_writeQueue.empty() == false; }) == false)
+			{
+				return false;
+			}
 		}
-
-		nothingToWrite = false;
+		else
+		{
+			// If write queue is empty - do not wait, return immediately
+			//
+			if (m_writeQueue.empty() == true)
+			{
+				return false;
+			}
+		}
 
 		// If there is a queued data to write something, write it or apply.
 		//
@@ -453,38 +482,10 @@ namespace ClientLib
 			assert(false);
 			m_writeQueue.pop();
 			locker.unlock();
+			return false;
 		}
 
-		return;
-	}
-
-	void TuningTcpClient::askToReadTuningSignals()
-	{
-		// Choose which read request to send based on previous request
-		//
-		switch(m_lastReadRequestType)
-		{
-		case ReadRequestType::Generic:
-			{
-				m_lastReadRequestType = ReadRequestType::Changed;
-				requestReadChangedTuningSignals();
-				break;
-			}
-		case ReadRequestType::Changed:
-			{
-				m_lastReadRequestType = ReadRequestType::Recent;
-				requestReadRecentTuningSignals();
-				break;
-			}
-		case ReadRequestType::Recent:
-			{
-				m_lastReadRequestType = ReadRequestType::Generic;
-				requestReadTuningSignals();
-				break;
-			}
-		default:
-			Q_ASSERT(false);
-		}
+		return true;
 	}
 
 	void TuningTcpClient::requestTuningSourcesInfo()
@@ -516,7 +517,7 @@ namespace ClientLib
 		if (ok == false)
 		{
 			assert(ok);
-			resetToProcessTuningSignals();
+			continueRequestLoop();
 			return;
 		}
 
@@ -525,7 +526,7 @@ namespace ClientLib
 			m_logFile.writeError(tr("m_tuningDataSourcesInfoReply(), error received: %1")
 								 .arg(E::valueToString(static_cast<E::NetworkError>(m_tuningSourcesInfoReply.error()))));
 
-			resetToProcessTuningSignals();
+			continueRequestLoop();
 			return;
 		}
 
@@ -548,8 +549,6 @@ namespace ClientLib
 			}
 		}
 
-		requestTuningSourcesState();
-
 		// Initialize list of signal hashes processed by this client
 		//
 		{
@@ -568,6 +567,8 @@ namespace ClientLib
 		}
 
 		emit tuningSourcesInfoArrived();
+
+		continueRequestLoop();
 
 		return;
 	}
@@ -601,7 +602,7 @@ namespace ClientLib
 		if (ok == false)
 		{
 			assert(ok);
-			resetToProcessTuningSignals();
+			continueRequestLoop();
 			return;
 		}
 
@@ -610,7 +611,7 @@ namespace ClientLib
 			m_logFile.writeError(tr("processTuningSourcesState(), error received: %1")
 								 .arg(E::valueToString(static_cast<E::NetworkError>(m_tuningSourcesStatesReply.error()))));
 
-			resetToProcessTuningSignals();
+			continueRequestLoop();
 			return;
 		}
 
@@ -703,7 +704,7 @@ namespace ClientLib
 
 		//
 
-		resetToProcessTuningSignals();
+		continueRequestLoop();
 
 		return;
 	}
@@ -757,7 +758,7 @@ namespace ClientLib
 		if (ok == false)
 		{
 			assert(ok);
-			resetToProcessTuningSignals();
+			continueRequestLoop();
 			return;
 		}
 
@@ -769,7 +770,7 @@ namespace ClientLib
 			return;
 		}
 
-		resetToProcessTuningSignals();
+		continueRequestLoop();
 
 		return;
 
@@ -824,7 +825,7 @@ namespace ClientLib
 
 		// Continue the current loop
 		//
-		resetToProcessTuningSignals();
+		continueRequestLoop();
 
 		return;
 	}
@@ -854,7 +855,7 @@ namespace ClientLib
 		{
 			l.unlock();
 
-			resetToGetTuningSourcesState();
+			continueRequestLoop();
 
 			return;
 		}
@@ -920,7 +921,7 @@ namespace ClientLib
 
 		// Start the new loop
 		//
-		resetToGetTuningSourcesState();
+		continueRequestLoop();
 
 		return;
 	}
@@ -950,7 +951,7 @@ namespace ClientLib
 		if (ok == false)
 		{
 			assert(ok);
-			resetToGetTuningSourcesState();
+			continueRequestLoop();
 			return;
 		}
 
@@ -959,7 +960,7 @@ namespace ClientLib
 			m_logFile.writeError(tr("processReadChangedTuningSignals(), error received: %1")
 								 .arg(E::valueToString(static_cast<E::NetworkError>(m_readChangedTuningSignalsReply.error()))));
 
-			resetToGetTuningSourcesState();
+			continueRequestLoop();
 			return;
 		}
 
@@ -982,7 +983,7 @@ namespace ClientLib
 			m_signalUpdater.setStates(arrivedStates, m_tuningServiceHash);
 		}
 
-		if (m_readChangedTuningSignalsReply.pendingsignalsstatechanges() > 0)
+		if (m_readChangedTuningSignalsReply.pendingsignalsstatechanges() > MaxStateRequestCount / 2)
 		{
 			// Request other pending changes immediately
 			//
@@ -992,7 +993,7 @@ namespace ClientLib
 		{
 			// Continue the current loop
 			//
-			resetToProcessTuningSignals();
+			continueRequestLoop();
 		}
 	}
 
@@ -1041,7 +1042,7 @@ namespace ClientLib
 		if (ok == false)
 		{
 			assert(ok);
-			resetToGetTuningSourcesState();
+			continueRequestLoop();
 			return;
 		}
 
@@ -1050,7 +1051,7 @@ namespace ClientLib
 			m_logFile.writeError(tr("processWriteTuningSignals(), error received: %1")
 								 .arg(E::valueToString(static_cast<E::NetworkError>(m_writeTuningSignalsReply.error()))));
 
-			resetToGetTuningSourcesState();
+			continueRequestLoop();
 			return;
 		}
 
@@ -1070,7 +1071,7 @@ namespace ClientLib
 			}
 		}
 
-		resetToProcessTuningSignals();
+		continueRequestLoop();
 
 		return;
 	}
@@ -1102,7 +1103,7 @@ namespace ClientLib
 		if (ok == false)
 		{
 			assert(ok);
-			resetToGetTuningSourcesState();
+			continueRequestLoop();
 			return;
 		}
 
@@ -1111,11 +1112,11 @@ namespace ClientLib
 			m_logFile.writeError(tr("processApplyTuningSignals(), error received: %1")
 								 .arg(E::valueToString(static_cast<E::NetworkError>(m_applyTuningSignalsReply.error()))));
 
-			resetToGetTuningSourcesState();
+			continueRequestLoop();
 			return;
 		}
 
-		resetToProcessTuningSignals();
+		continueRequestLoop();
 
 		return;
 	}
@@ -1127,7 +1128,7 @@ namespace ClientLib
 		if (ok == false)
 		{
 			assert(ok);
-			resetToGetTuningSourcesState();
+			continueRequestLoop();
 			return false;
 		}
 
@@ -1136,7 +1137,7 @@ namespace ClientLib
 			m_logFile.writeError(tr("processTuningSignalsReadReply(), error received: %1")
 								 .arg(E::valueToString(static_cast<E::NetworkError>(m_readTuningSignalsReply.error()))));
 
-			resetToGetTuningSourcesState();
+			continueRequestLoop();
 			return false;
 		}
 

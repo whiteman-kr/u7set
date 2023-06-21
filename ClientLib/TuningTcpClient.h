@@ -176,12 +176,9 @@ namespace ClientLib
 
 		// Sending requests and processing replies functions
 		//
-		void resetToGetTuningSources();
-		void resetToGetTuningSourcesState();
-		void resetToProcessTuningSignals();
+		void continueRequestLoop();
 
-		void askToWriteTuningSignals(bool& nothingToWrite);
-		void askToReadTuningSignals();
+		[[nodiscard]] bool sendWriteRequest(int waitTimeMs);
 
 		void requestTuningSourcesInfo();
 		void processTuningSourcesInfo(const QByteArray& data);
@@ -277,6 +274,7 @@ namespace ClientLib
 		//
 		enum class ReadRequestType
 		{
+			SourceState,
 			Changed,
 			Recent,
 			Generic
