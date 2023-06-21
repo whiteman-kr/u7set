@@ -93,41 +93,16 @@ void ArchivingService::initialize()
 {
 	// Service Main Function initialization
 	//
-	if (isReadOnlyArchive() == true)
-	{
-		startArchive();
-
-		if (m_archive->isWorkable())
-		{
-			startTcpArchRequestsServerThread();
-		}
-
-		DEBUG_LOG_MSG(logger(), QString(tr("ArchivingServiceWorker initialized (Read Only mode)")));
-	}
-	else
-	{
-		runCfgLoaderThread();
-		DEBUG_LOG_MSG(logger(), QString(tr("ArchivingServiceWorker initialized")));
-	}
+	runCfgLoaderThread();
+	DEBUG_LOG_MSG(logger(), QString(tr("ArchivingServiceWorker initialized")));
 }
 
 void ArchivingService::shutdown()
 {
 	// Service Main Function deinitialization
 	//
-
-	if (isReadOnlyArchive() == true)
-	{
-		stopTcpArchiveRequestsServerThread();
-		stopArchive();
-		DEBUG_LOG_MSG(logger(), QString(tr("ArchivingServiceWorker stoped (Read Only mode)")));
-	}
-	else
-	{
-		stopAllThreads();
-		stopCfgLoaderThread();
-		DEBUG_LOG_MSG(logger(), QString(tr("ArchivingServiceWorker stoped")));
-	}
+	stopAllThreads();
+	stopCfgLoaderThread();
 }
 
 void ArchivingService::runCfgLoaderThread()
@@ -181,7 +156,11 @@ void ArchivingService::startArchive()
 
 	if (isReadOnlyArchive() == true)
 	{
-		m_archive = new Archive(m_readOnlyArchivePath, logger());
+		m_archive = new Archive(m_buildInfo.project,
+								equipmentID(),
+								m_readOnlyArchivePath,
+								m_archInfoFileData,
+								logger());
 	}
 	else
 	{
@@ -324,11 +303,7 @@ void ArchivingService::onConfigurationReady(const QByteArray configurationXmlDat
 
 		if (bfi.pathFileName.endsWith(File::ARCH_INFO_PROTO))
 		{
-			qDebug() << fileData.size();
-
 			m_archInfoFileData.swap(fileData);
-
-			qDebug() << m_archInfoFileData.size();
 		}
 	}
 

@@ -424,6 +424,7 @@ namespace CmdLineArg
 	inline const QString LOG_RUP_TIME_ERR("logRupTimeErr");
 
 	inline const QString READ_ONLY("readonly");
+	inline const QString CLIENT_IP("clientip");
 }
 
 namespace Directory
@@ -478,7 +479,8 @@ namespace File
 
 	inline const QString ARCH_INFO_PROTO = "ArchInfo.proto";
 	inline const QString ARCH_INFO_PROTO_BAK = "ArchInfo.proto.bak";
-	inline const QString ARCH_INFO_PROTO_BAK2 = "ArchInfo.proto.bak2";
+
+	inline const QString READONLY = "readonly";
 }
 
 namespace Separator

@@ -107,14 +107,20 @@ Archive::Archive(const QString& projectID,
 	m_msLongTermPeriod = longTermPeriod * PARTITION_PERIOD_MS;
 }
 
-Archive::Archive(const QString& readOnlyArchPath,				// Read only archive constructor
-				CircularLoggerShared logger) :
+Archive::Archive(const QString& projectID,					// Read only archive constructor
+				 const QString& equipmentID,
+				 const QString& readOnlyArchFullPath,
+				 QByteArray& archFileInfoData,
+				 CircularLoggerShared logger) :
 	m_readOnlyArchive(true),
-	m_readOnlyArchFullPath(readOnlyArchPath),
-	m_log(logger),
-	m_archInfoFileData(new QByteArray)
+	m_projectID(projectID),
+	m_equipmentID(equipmentID),
+	m_archInfoFileData(new QByteArray),
+	m_log(logger)
 {
-	m_readOnlyArchFullPath = QDir::fromNativeSeparators(m_readOnlyArchFullPath);
+	m_archInfoFileData->swap(archFileInfoData);
+
+	m_archFullPath = QDir::fromNativeSeparators(readOnlyArchFullPath);
 }
 
 Archive::~Archive()
@@ -126,20 +132,15 @@ void Archive::start()
 {
 	m_isWorkable = false;
 
-	if (m_readOnlyArchive == true)
+	if (m_readOnlyArchive == false)
 	{
-		if (loadArchInfoFile() == false)
+		bool result = checkAndCreateArchiveDirs();		// can set m_readOnlyArchive to true
+														// if "readonly" file exists in archive directory!
+		if (result == false)
 		{
+			DEBUG_LOG_ERR(m_log, "Archive directories creation error");
 			return;
 		}
-	}
-
-	bool result = checkAndCreateArchiveDirs();
-
-	if (result == false)
-	{
-		DEBUG_LOG_ERR(m_log, "Archive directories creation error");
-		return;
 	}
 
 	if (initArchFiles() == false)
@@ -160,6 +161,12 @@ void Archive::start()
 
 		m_archMaintenanceThread = new ArchMaintenanceThread(*this, m_log);
 		m_archMaintenanceThread->start();
+
+		DEBUG_LOG_MSG(m_log, QString("Archive running in READ/WRITE mode!"));
+	}
+	else
+	{
+		DEBUG_LOG_MSG(m_log, QString("Archive running in READ ONLY mode!"));
 	}
 
 	DELETE_IF_NOT_NULL(m_archInfoFileData);		// no more required
@@ -245,6 +252,12 @@ void Archive::getSignalsHashes(QVector<Hash>* hashes)
 
 void Archive::saveState(const SimpleAppSignalState& state)
 {
+	if (m_readOnlyArchive == true)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
 	ArchFile* archFile = m_archFiles.value(state.hash, nullptr);
 
 	if (archFile == nullptr)
@@ -263,6 +276,11 @@ void Archive::saveState(const SimpleAppSignalState& state)
 
 bool Archive::shutdown(ArchFileRecord* buffer, int bufferSize, const QThread* thread)
 {
+	if (m_readOnlyArchive == true)
+	{
+		return true;
+	}
+
 	// shutting down all archive files
 	//
 	qint64 totalFlushed = 0;
@@ -286,6 +304,11 @@ bool Archive::shutdown(ArchFileRecord* buffer, int bufferSize, const QThread* th
 
 bool Archive::flushImmediately(ArchFile* archFile)
 {
+	if (m_readOnlyArchive == true)
+	{
+		return true;
+	}
+
 	TEST_PTR_RETURN_FALSE(archFile);
 
 	QMutexLocker locker(&m_immedaitelyFlushingMutex);
@@ -305,6 +328,12 @@ bool Archive::flushImmediately(ArchFile* archFile)
 
 bool Archive::waitingForImmediatelyFlushing(Hash signalHash, int waitTimeoutSeconds)
 {
+	if (m_readOnlyArchive == true)
+	{
+		Q_ASSERT(false);
+		return true;
+	}
+
 	ArchFile* archFile = m_archFiles.value(signalHash, nullptr);
 
 	TEST_PTR_RETURN_FALSE(archFile);
@@ -337,7 +366,6 @@ bool Archive::waitingForImmediatelyFlushing(Hash signalHash, int waitTimeoutSeco
 	while(1);
 
 	return result;
-
 }
 
 ArchFile* Archive::getNextFileForFlushing(bool* flushAnyway)
@@ -427,25 +455,41 @@ QString Archive::timeTypeStr(E::TimeType timeType)
 
 bool Archive::loadArchInfoFile()
 {
-	if (m_readOnlyArchFullPath.isEmpty() == true)
+	TEST_PTR_RETURN_FALSE(m_archInfoFileData);
+
+	if (m_readOnlyArchive == false)
 	{
 		Q_ASSERT(false);
 		return false;
 	}
 
-	QString path = m_readOnlyArchFullPath + Separator::DIR + File::ARCH_INFO_PROTO;
+	m_archInfoFileData->clear();
+
+	QString path = m_archFullPath + Separator::DIR + File::ARCH_INFO_PROTO;
 
 	QFile archInfoFile(path);
 
-	if (archInfoFile.open(QIODeviceBase::ReadOnly | QIODeviceBase::ExistingOnly) == false)
+	if (archInfoFile.open(QIODeviceBase::ReadOnly | QIODeviceBase::ExistingOnly) == true)
 	{
-		DEBUG_LOG_ERR(m_log, QString("Can't open file %1").arg(path));
-		return false;
+		*m_archInfoFileData = archInfoFile.readAll();
+		DEBUG_LOG_MSG(m_log, QString("File has read %1, size %2").arg(path).arg(m_archInfoFileData->size()));
+		return true;
 	}
 
-	*m_archInfoFileData = archInfoFile.readAll();
+	QString pathBak = m_archFullPath + Separator::DIR + File::ARCH_INFO_PROTO_BAK;
 
-	return true;
+	QFile archInfoFileBak(pathBak);
+
+	if (archInfoFileBak.open(QIODeviceBase::ReadOnly | QIODeviceBase::ExistingOnly) == true)
+	{
+		*m_archInfoFileData = archInfoFileBak.readAll();
+		DEBUG_LOG_MSG(m_log, QString("File has read %1, size %2").arg(path).arg(m_archInfoFileData->size()));
+		return true;
+	}
+
+	DEBUG_LOG_ERR(m_log, QString("Can't open file %1 or %2").arg(path).arg(pathBak));
+
+	return false;
 }
 
 bool Archive::initArchFiles()
@@ -466,23 +510,6 @@ bool Archive::initArchFiles()
 		return false;
 	}
 
-	if (m_readOnlyArchive == true)
-	{
-		m_projectID = QString::fromStdString(archInfo.buildinfo().project());
-		m_equipmentID = QString::fromStdString(archInfo.archiveserviceid());
-
-		QString excludeStr = QString("/%1-archive/%2").arg(m_projectID).arg(m_equipmentID);
-
-		qsizetype index = m_readOnlyArchFullPath.toLower().trimmed().indexOf(excludeStr);
-
-		if (index == -1)
-		{
-			return false;
-		}
-
-		m_archDir = m_readOnlyArchFullPath.mid(0, index);
-	}
-
 	int signalsCount = archInfo.archsignal_size();
 
 	m_archFiles.reserve(static_cast<int>(signalsCount * 1.2));
@@ -498,8 +525,6 @@ bool Archive::initArchFiles()
 		const Proto::ArchSignal& protoArchSignal = archInfo.archsignal(i);
 
 		ArchFile* archFile = new ArchFile(protoArchSignal, m_archFullPath, m_log);
-
-//		archFile->setArchFullPath(m_archFullPath);
 
 		m_archFiles.insert(archFile->hash(), archFile);
 
@@ -555,6 +580,16 @@ bool Archive::archDirIsWritableChecking()
 		}
 
 		m_archFullPath = QDir(QString("%1/%2-archive/%3").arg(archDir).arg(m_projectID).arg(m_equipmentID)).absolutePath();
+
+		// is "readonly" file exists checking
+
+		if (QDir().exists(m_archFullPath + Separator::DIR + File::READONLY) == true)
+		{
+			m_readOnlyArchive = true;
+			return true;
+		}
+
+		//
 
 		QDir d(m_archFullPath);
 
@@ -668,29 +703,47 @@ bool Archive::saveArchInfoProtoFile() const
 
 	if (dir.exists(protoFile))
 	{
-		QString protoFileBak = m_archFullPath + Separator::DIR + File::ARCH_INFO_PROTO_BAK;
+		QString protoBakFile = m_archFullPath + Separator::DIR + File::ARCH_INFO_PROTO_BAK;
 
-		if (dir.exists(protoFileBak) == true)
+		if (dir.exists(protoBakFile) == true)
 		{
-			dir.remove(protoFileBak);
+			dir.remove(protoBakFile);
 		}
 
-		dir.rename(protoFile, protoFileBak);
-		dir.remove(protoFile);
+		bool res = dir.rename(protoFile, protoBakFile);
+
+		if (res == true)
+		{
+			DEBUG_LOG_MSG(m_log, QString("File %1 renamed to %2").arg(protoFile).arg(protoBakFile));
+		}
+		else
+		{
+			DEBUG_LOG_ERR(m_log, QString("Error renaming file %1 renamed to %2").arg(protoFile).arg(protoBakFile));
+		}
 	}
 
 	QFile pf(protoFile);
 
-	if (pf.open(QIODeviceBase::WriteOnly) == false)
+	if (pf.open(QIODeviceBase::WriteOnly | QIODeviceBase::Truncate) == false)
 	{
+		DEBUG_LOG_ERR(m_log, QString("Can't open file %1 for writing").arg(protoFile));
 		return false;
 	}
 
-	pf.write(*m_archInfoFileData);
+	qint64 res = pf.write(*m_archInfoFileData);
+
+	if (res == -1)
+	{
+		DEBUG_LOG_ERR(m_log, QString("Error writing file %1").arg(protoFile));
+	}
+	else
+	{
+		DEBUG_LOG_MSG(m_log, QString("File %1 written, size %2 bytes").arg(protoFile).arg(res));
+	}
 
 	pf.close();
 
-	return false;
+	return (res != -1);
 }
 
 void Archive::writeArchFilesInfoFile(const std::vector<std::vector<ArchFile*>>& archFilesGroups)

@@ -48,7 +48,10 @@ public:
 			int minQueueSizeForFlushing,
 			CircularLoggerShared logger);
 
-	Archive(const QString& readOnlyArchPath,			// Read only archive constructor
+	Archive(const QString& projectID,					// Read only archive constructor
+			const QString& equipmentID,
+			const QString& readOnlyArchFullPath,
+			QByteArray& archFileInfoData,
 			CircularLoggerShared logger);
 
 	~Archive();
@@ -61,7 +64,6 @@ public:
 	int minQueueSizeForFlushing() const { return m_minQueueSizeForFlushing; }
 	int maintenanceDelayMinutes() const { return m_maintenanceDelayMinutes; }
 
-	QString archDir() const { return m_archDir; }
 	QString projectID() const { return m_projectID; }
 	QString equipmentID() const { return m_equipmentID; }
 	QString archFullPath() const { return m_archFullPath; }
@@ -136,7 +138,6 @@ private:
 
 private:
 	bool m_readOnlyArchive = true;
-	QString m_readOnlyArchFullPath;
 	QByteArray* m_archInfoFileData = nullptr;
 
 	QString m_projectID;
