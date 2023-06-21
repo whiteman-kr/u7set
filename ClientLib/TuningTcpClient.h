@@ -17,8 +17,6 @@
 //		TDS_GET_TUNING_SOURCES_INFO
 //				|
 //				|<----------------------------------------------------------------------o
-//				|																		|
-//		TDS_GET_TUNING_SOURCES_STATES													|
 //              |																		|
 //              |																		|
 //          Wait 100ms                              									|
@@ -28,17 +26,24 @@
 //				|					  |	      |			TDS_TUNING_SIGNALS_WRITE		|
 //			    No					  |	      No				  o-------------------->|
 //              |					  |		  |											|
+//				|					  |       | 										|
+//	 TDS_GET_TUNING_SOURCES_STATES    |       |											|
+//				|					  |		  |											|
+//				|					  |		  |											|
+//			WriteQueue --->----Yes----o		  |											|
+//			 has data?				  |		  |											|
+//				|					  |		  |											|
 //              |<-----------------o  |	      |											|
 //				|                  |  |	      |											|
-//	 TDS_GET_SIGNALS_STATE_CHANGES |  |	      |											|
-//				|				   |  |	      |											|
-//			   More				   |  |	      |											|
-//			  Changes?--->--Yes----o  |	      |											|
+//	 TDS_GET_SIGNALS_STATE_CHANGES |  |	WriteCommand-->---Yes-----o						|
+//				|				   |  |	   is Apply?			  |						|
+//			 Still more	than	   |  |	      |			TDS_TUNING_SIGNALS_APPLY		|
+//			 125 Changes?-->Yes----o  |	      No				  o-------------------->|
 //				|					  |		  |											|
-//				|					  |	WriteCommand-->---Yes-----o						|
-//			Wait 100ms				  |	   is Apply?			  |						|
-//			or until				  |	      |			TDS_TUNING_SIGNALS_APPLY		|
-//			WriteQueue --->----Yes--->|	      No				  o-------------------->|
+//				|					  |		  |											|
+//			    |   				  |		  |											|
+//			    |   				  |		  |											|
+//			WriteQueue --->----Yes--->o		  |											|
 //			 has data?				  |		  |											|
 //				|					  |		  |											|
 //			    No  				  |		  |											|
@@ -49,10 +54,10 @@
 //			  Max 250)				  |	      |					  o-------------------->|
 //				|					  |	      |											|
 //				|					  |	      |											|
-//			Wait  100ms				  |	      |											|
-//			 or until				  |  	  |											|
+//			    |       			  |	      |											|
+//			    |    				  |  	  |											|
 //			WriteQueue --->----Yes----o		  |											|
-//			  has data?						  |											|
+//			 has data?						  |											|
 //				|							  |											|
 //			    No							  |											|
 //				|							  |											|
