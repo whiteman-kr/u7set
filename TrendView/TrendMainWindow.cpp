@@ -26,7 +26,8 @@ namespace TrendLib
 {
 
 	TrendMainWindow::TrendMainWindow(QWidget* parent) :
-		QMainWindow(parent, Qt::WindowSystemMenuHint | Qt::WindowMaximizeButtonHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
+		QMainWindow(parent, Qt::WindowSystemMenuHint | Qt::WindowMinimizeButtonHint |
+					Qt::WindowMaximizeButtonHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 		ui(new Ui::TrendsMainWindow)
 	{
 		ui->setupUi(this);
@@ -627,14 +628,16 @@ namespace TrendLib
 
 	void TrendMainWindow::actionOpenTriggered()
 	{
+		static QString path{"."};
 		QString fileName = QFileDialog::getOpenFileName(this,
 														tr("Open Trend File"),
-														".",
+														path,
 														tr("Trend (*.u7trend);;All Files (*.*)"));
 		if (fileName.isEmpty() == true)
 		{
 			return;
 		}
+		path = QFileInfo(fileName).path(); // store path for next time
 
 		Q_ASSERT(m_trendWidget);
 
@@ -697,15 +700,17 @@ namespace TrendLib
 
 	void TrendMainWindow::actionSaveTriggered()
 	{
+		static QString path{"."};
 		QString fileName = QFileDialog::getSaveFileName(this,
 														tr("Save File"),
-														"untitled.u7trend",
+														path + QDir::separator() + "untitled.u7trend",
 														tr("Trend (*.u7trend);;Images (*.png *.bmp *.jpg);;PDF files (*.pdf)"));
 
 		if (fileName.isEmpty() == true)
 		{
 			return;
 		}
+		path = QFileInfo(fileName).path(); // store path for next time
 
 		QFileInfo fileInfo(fileName);
 		QString extension = fileInfo.completeSuffix();
