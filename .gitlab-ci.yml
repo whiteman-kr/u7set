@@ -244,7 +244,7 @@ windows_test_job:
     - "#               Run XML validation"
     - "# ----------------------------------------------"
     - "pushd ."	
-    - "cd $Env:CI_PROJECT_DIR/Presets/LogicModuleDescription"
+    - "cd $Env:CI_PROJECT_DIR/Presets/LogicModuleDescription/generated"
     - "&./validate_xmls.bat"
     - "popd"
 
@@ -306,7 +306,7 @@ linux_test_job:
 #    - "# ----------------------------------------------"
 #    - "#               Run XML validation"
 #    - "# ----------------------------------------------"
-    - "pushd $CI_PROJECT_DIR/Presets/LogicModuleDescription"
+    - "pushd $CI_PROJECT_DIR/Presets/LogicModuleDescription/generated"
     - "chmod a+x validate_xmls.sh"
     - "./validate_xmls.sh"
     - "popd"
