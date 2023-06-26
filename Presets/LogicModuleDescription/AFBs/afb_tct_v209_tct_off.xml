@@ -1,0 +1,99 @@
+<AFB id="#tct_off_v1" Caption="tct_off" Version="1.0012">
+	<Properties>
+		<Description>Time Counter Block with dynamic time value, turn off delay function</Description>
+		<Category>Delay</Category>
+		<OpCode>3</OpCode>
+		<InternalUse>false</InternalUse>
+		<MinWidth>18</MinWidth>
+	</Properties>
+	<Inputs>
+		<Pin OpName="i_wave" Caption="in" Type="Discrete" ByteOrder="BigEndian" OpIndex="6" Size="1"/>
+		<Pin OpName="i_counter" Caption="time" Type="Analog" ByteOrder="BigEndian" OpIndex="1" Size="32" DataFormat="SignedInt"/>
+		<Pin OpName="i_sync_in" Caption="s_in" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="3" Size="32"/>
+	</Inputs>
+	<Outputs>
+		<Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="8" Size="1"/>
+		<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="12" Size="1"/>
+		<Pin OpName="o_sync_out" Caption="s_out" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="9" Size="32"/>
+	</Outputs>
+	<Params>
+		<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+			<Value>2</Value>
+			<Default>2</Default>
+			<LowLimit>1</LowLimit>
+			<HighLimit>4</HighLimit>
+			<Script>
+				<Changed/>
+			</Script>
+		</Param>
+		<Param OpName="OutParamErr" Caption="OutParamErr" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+			<Value>1</Value>
+			<Default>1</Default>
+			<Script>
+				<Changed>
+					(function(videoItemFblElement, afbElement)
+					{
+						return createSignals(videoItemFblElement, afbElement);
+					})
+				</Changed>
+			</Script>
+		</Param>
+		<Param OpName="SyncStatePins" Caption="SyncStatePins" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+			<Value>0</Value>
+			<Default>0</Default>
+			<Script>
+				<Changed>
+					(function(videoItemFblElement, afbElement)
+					{
+						createSignals(videoItemFblElement, afbElement);
+					})
+				</Changed>
+			</Script>
+		</Param>
+	</Params>
+	<CommonScript>
+		<Library>
+			function createSignals(videoItemFblElement, afbElement)
+			{
+				videoItemFblElement.removeInputSignal("s_in");
+				videoItemFblElement.removeOutputSignal("s_out");
+				videoItemFblElement.removeOutputSignal("param_err");
+
+				var show = videoItemFblElement.getParamBoolValue("SyncStatePins");
+				if (show == true)
+				{
+					var s = afbElement.getAfbSignalByCaption("s_in");
+					if (s != null)
+					{
+						videoItemFblElement.addInputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+					}
+
+					s = afbElement.getAfbSignalByCaption("s_out");
+					if (s != null)
+					{
+						videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+					}
+				}
+
+				var show = videoItemFblElement.getParamBoolValue("OutParamErr");
+				if (show == true)
+				{
+					var s = afbElement.getAfbSignalByCaption("param_err");
+					if (s != null)
+					{
+						videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+					}
+				}
+
+				videoItemFblElement.adjustHeight();
+				return true;
+			}
+		</Library>
+		<AfterCreation>
+			(function(videoItemFblElement, afbElement)
+			{
+				createSignals(videoItemFblElement, afbElement);
+			})
+		</AfterCreation>
+	</CommonScript>
+</AFB>

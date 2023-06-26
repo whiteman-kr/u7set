@@ -1,0 +1,1 @@
+<Command Caption="movcmpf"		Code="0600"	CodeMask="07c0"	SimulationFunc="command_movcmpf"	ParseFunc="parse_movcmpf"	Description="Write compare flag to memory [flag result from rdfbcmp(32)]"/>

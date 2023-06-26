@@ -1,0 +1,11 @@
+<AFBComponent Caption="BCOMP" OpCode="10" HasRam="true" ImpVersion="111" VersionOpIndex="12" MaxInstCount="0" SimulationFunc="afb_bcomp_v111">
+    <Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
+    <Pin OpName="i_sp_s"		OpIndex ="1"	PinType = "Param"/>
+    <Pin OpName="i_sp_r"		OpIndex ="3"	PinType = "Param"/>
+    <Pin OpName="i_result"		OpIndex ="5"	PinType = "Input"/>
+    <Pin OpName="i_data"		OpIndex ="6"	PinType = "Input"/>
+    <Pin OpName="o_result"		OpIndex ="9"	PinType = "Output"/>
+    <Pin OpName="o_nan"		    OpIndex ="10"	PinType = "Output"/>
+    <Pin OpName="o_bcomp_edi"	OpIndex ="11"	PinType = "Output"/>
+    <Pin OpName="o_version"		OpIndex ="12"	PinType = "Output"/>
+</AFBComponent>

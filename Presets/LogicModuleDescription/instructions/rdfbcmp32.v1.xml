@@ -1,0 +1,1 @@
+<Command Caption="rdfbcmp32"	Code="05C0"	CodeMask="07c0"	SimulationFunc="command_rdfbcmp32"	ParseFunc="parse_rdfbcmp32"	Description="Read 32-bit data from AFB output, compare to constant and set flag if equal"/>

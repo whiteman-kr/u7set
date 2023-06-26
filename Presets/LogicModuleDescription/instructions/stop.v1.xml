@@ -1,0 +1,1 @@
+<Command Caption="stop" Code="00C0" CodeMask="07c0" SimulationFunc="command_stop" ParseFunc="parse_stop" Description="Stop phase (IDR or ALP)"/>

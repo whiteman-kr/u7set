@@ -1,0 +1,1 @@
+<Command Caption="wrfbc"		Code="0280"	CodeMask="07c0"	SimulationFunc="command_wrfbc"		ParseFunc="parse_wrfbc"		Description="Write 16-bit word constant to AFB input"/>
