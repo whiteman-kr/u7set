@@ -82,7 +82,11 @@ public:
 		AnalogInput,
 		AnalogOutput,
 		DiscreteInput,
-		DiscreteOutput
+		DiscreteOutput,
+		AnalogInternal,
+		DiscreteInternal,
+		Tunable,
+		Count
 	};
 
 	enum class MaskType
@@ -91,7 +95,8 @@ public:
 		AppSignalId,
 		CustomAppSignalId,
 		EquipmentId,
-		LmEquipmentId
+		LmEquipmentId,
+		Count
 	};
 
 public:

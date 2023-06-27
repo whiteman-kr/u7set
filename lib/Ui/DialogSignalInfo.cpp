@@ -1302,7 +1302,6 @@ void DialogSignalInfo::fillSignalInfo()
 		str = QString("%1 (%2)").arg(str).arg(E::valueToString<E::AnalogAppSignalFormat>(static_cast<int>(m_signal.analogSignalFormat())));
 	}
 
-
 	str = QString("%1, %2").arg(str).arg(tr(E::valueToString<E::SignalInOutType>(m_signal.inOutType()).toUtf8()));
 
 	ui->editSignalType->setText(str);
