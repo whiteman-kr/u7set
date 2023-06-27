@@ -207,6 +207,11 @@ void DialogSettings::ok_clicked()
 
 	if (d.has_value() == true)
 	{
+		if (d.value().language != m_settings.language)
+		{
+			QMessageBox::warning(this, tr("Monitor"), tr("Language has been changed, please restart the application."));
+		}
+
 		m_settings = d.value();
 		accept();
 	}
