@@ -28,21 +28,21 @@ void DialogAbout::show(QWidget* parent, const QString& description, const QStrin
 	QString text = "<h3>" + qApp->applicationName() +" v" + qApp->applicationVersion() + "</h3>";
 
 #ifndef QT_DEBUG
-	text += "Build: Release";
+	text += tr("Build: Release");
 #else
-	text += "Build: Debug";
+	text += tr("Build: Debug");
 #endif
 
 #ifdef GITLAB_CI_BUILD
-	text += "<br>Commit SHA: "	CI_COMMIT_SHA;
-	text += "<br>Branch: "		CI_BUILD_REF_SLUG;
-	text += "<br>Build Date: "	BUILD_DATE;
-	text += "<br>Build Host: "	COMPUTERNAME;
+	text += tr("<br>Commit SHA: %1").arg(CI_COMMIT_SHA);
+	text += tr("<br>Branch: %1").arg(CI_BUILD_REF_SLUG);
+	text += tr("<br>Build Date: %1").arg(BUILD_DATE);
+	text += tr("<br>Build Host: %1").arg(COMPUTERNAME);
 #else
-	text += "<br>Commit SHA1: No data";
-	text += "<br>Branch: No data";
-	text += "<br>Date: No data";
-	text += "<br>Host: No data";
+	text += tr("<br>Commit SHA1: No data");
+	text += tr("<br>Branch: No data");
+	text += tr("<br>Date: No data");
+	text += tr("<br>Host: No data");
 #endif
 
 	QLabel* label = new QLabel(text, &aboutDialog);

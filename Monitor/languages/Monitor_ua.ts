@@ -539,6 +539,56 @@ LowEngineeringUnits limit, otherwise set to 0.</source>
 <context>
     <name>DialogAbout</name>
     <message>
+        <location filename="../../lib/Ui/DialogAbout.cpp" line="31"/>
+        <source>Build: Release</source>
+        <translation>Збірка: реліз</translation>
+    </message>
+    <message>
+        <location filename="../../lib/Ui/DialogAbout.cpp" line="33"/>
+        <source>Build: Debug</source>
+        <translation>Збірка: відлагодження</translation>
+    </message>
+    <message>
+        <location filename="../../lib/Ui/DialogAbout.cpp" line="37"/>
+        <source>&lt;br&gt;Commit SHA: %1</source>
+        <translation>&lt;br&gt;SHA коміту: %1</translation>
+    </message>
+    <message>
+        <location filename="../../lib/Ui/DialogAbout.cpp" line="38"/>
+        <source>&lt;br&gt;Branch: %1</source>
+        <translation>&lt;br&gt;Гілка: %1</translation>
+    </message>
+    <message>
+        <location filename="../../lib/Ui/DialogAbout.cpp" line="39"/>
+        <source>&lt;br&gt;Build Date: %1</source>
+        <translation>&lt;br&gt;Дата збірки: %1</translation>
+    </message>
+    <message>
+        <location filename="../../lib/Ui/DialogAbout.cpp" line="40"/>
+        <source>&lt;br&gt;Build Host: %1</source>
+        <translation>&lt;br&gt;Хост збірки: %1</translation>
+    </message>
+    <message>
+        <location filename="../../lib/Ui/DialogAbout.cpp" line="42"/>
+        <source>&lt;br&gt;Commit SHA1: No data</source>
+        <translation>&lt;br&gt;SHA1 коміту: Немає даних</translation>
+    </message>
+    <message>
+        <location filename="../../lib/Ui/DialogAbout.cpp" line="43"/>
+        <source>&lt;br&gt;Branch: No data</source>
+        <translation>&lt;br&gt;Гілка: Немає даних</translation>
+    </message>
+    <message>
+        <location filename="../../lib/Ui/DialogAbout.cpp" line="44"/>
+        <source>&lt;br&gt;Date: No data</source>
+        <translation>&lt;br&gt;Дата збірки: Немає даних</translation>
+    </message>
+    <message>
+        <location filename="../../lib/Ui/DialogAbout.cpp" line="45"/>
+        <source>&lt;br&gt;Host: No data</source>
+        <translation>&lt;br&gt;Хост збірки: Немає даних</translation>
+    </message>
+    <message>
         <location filename="../../lib/Ui/DialogAbout.cpp" line="60"/>
         <source>Copy commit SHA1</source>
         <translation>Копіювати SHA1 коміту</translation>
