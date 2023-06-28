@@ -407,8 +407,8 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0384.sql", "Upgrade to version 384, Set ConfigService.CheckHostname to false by default"},
 	{":/DatabaseUpgrade/Upgrade0385.sql", "Upgrade to version 385, Set default value Monitor.StartSchemaID to empty"},
 	{":/DatabaseUpgrade/Upgrade0386.sql", "Upgrade to version 386, Removed output median_fp(si).validity (AFB version 8) from LMs LM1_SR05, LM1_SR20, LM11_SR90"},
-	{":/DatabaseUpgrade/Upgrade0387.sql", "Upgrade to version 387, MOve from manual LM Descriptions to generated, removed all LMs except SF40, SR03, SR04, SR05, SR20, SR90"},
-	{":/DatabaseUpgrade/Upgrade0388.sql", "Upgrade to version 388, Add presets of LMs SR05 and SR20 "},
+	{":/DatabaseUpgrade/Upgrade0387.sql", "Upgrade to version 387, Move from manual LM Descriptions to generated, removed all LMs except SF40, SR03, SR04, SR05, SR20, SR90"},
+	{":/DatabaseUpgrade/Upgrade0388.sql", "Upgrade to version 388, Add presets of LMs SR05 and SR20"},
 };
 
 int DbWorker::counter = 0;

@@ -106,7 +106,7 @@ windows_build_job:
   tags:
     - vs2017
   script:
-    - "# dir env:"
+    - "dir env:"
     - "echo $Env:CI_COMMIT_SHA"
     - "git status"
     - "git log -1"
