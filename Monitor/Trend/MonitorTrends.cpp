@@ -4,34 +4,33 @@
 #include "../TrendView/TrendWidget.h"
 #include "../TrendView/DialogChooseTrendSignals.h"
 
-std::map<QString, MonitorTrendsWidget*> MonitorTrends::m_trendsList;
+std::list<MonitorTrendsWidget*> MonitorTrends::s_trendsList;
 
-std::vector<QString> MonitorTrends::getTrendsList()
+std::vector<MonitorTrendsWidget*> MonitorTrends::getTrendsList()
 {
-	std::vector<QString> result;
-	result.reserve(m_trendsList.size());
-
-	for (std::pair<QString, MonitorTrendsWidget*> p : m_trendsList)
-	{
-		result.push_back(p.first);
-	}
-
+	std::vector<MonitorTrendsWidget*> result{s_trendsList.begin(), s_trendsList.end()};
 	return result;
 }
 
-bool MonitorTrends::activateTrendWindow(QString trendName)
+bool MonitorTrends::activateTrendWindow(MonitorTrendsWidget* trendWidget)
 {
-	if (m_trendsList.count(trendName) != 1)
+	if (trendWidget == nullptr)
 	{
-		Q_ASSERT(m_trendsList.count(trendName) != 1);
+		Q_ASSERT(trendWidget);
 		return false;
 	}
 
-	MonitorTrendsWidget* widget = m_trendsList[trendName];
-	Q_ASSERT(widget);
+#ifdef QT_DEBUG
+	if (auto it = std::find(s_trendsList.begin(), s_trendsList.end(), trendWidget);
+		it == s_trendsList.end())
+	{
+		Q_ASSERT(false);
+		return false;
+	}
+#endif
 
-	widget->activateWindow();
-	widget->ensureVisible();
+	trendWidget->activateWindow();
+	trendWidget->ensureVisible();
 
 	return true;
 }
@@ -98,16 +97,27 @@ bool MonitorTrends::startTrendApp(const MonitorSignalManager& signalManager,
 	return false;
 }
 
-void MonitorTrends::registerTrendWindow(QString name, MonitorTrendsWidget* window)
+void MonitorTrends::registerTrendWindow(MonitorTrendsWidget* window)
 {
-	Q_ASSERT(m_trendsList.count(name) == 0);
-	m_trendsList[name] = window;
+#ifdef QT_DEBUG
+	auto it = std::find_if(s_trendsList.begin(), s_trendsList.end(), [&window](MonitorTrendsWidget* w)
+						   {
+							   return w == window;
+						   });
+
+	Q_ASSERT(it == s_trendsList.end());
+#endif
+
+	s_trendsList.push_back(window);
+	return;
 }
 
-void MonitorTrends::unregisterTrendWindow(QString name)
+void MonitorTrends::unregisterTrendWindow(const MonitorTrendsWidget* window)
 {
-	Q_ASSERT(m_trendsList.count(name) == 1);
-	m_trendsList.erase(name);
+	[[maybe_unused]] auto removed = s_trendsList.remove_if([window](MonitorTrendsWidget* w) { return w == window; });
+	Q_ASSERT(removed == 1);
+
+	return;
 }
 
 
@@ -122,7 +132,7 @@ MonitorTrendsWidget::MonitorTrendsWidget(const MonitorSignalManager& signalManag
 {
 static int no = 1;
 	QString trendName = tr("Monitor Trends %1").arg(no++);
-	MonitorTrends::registerTrendWindow(trendName, this);
+	MonitorTrends::registerTrendWindow(this);
 
 	setWindowTitle(trendName);
 
@@ -149,7 +159,7 @@ static int no = 1;
 	//
 	connect(m_trendWidget, &TrendLib::TrendWidget::trendModeChanged, this, &MonitorTrendsWidget::slot_trendModeChanged);
 
-	// Acrhive connection
+	// Archive connection
 	//
 	connect(&m_trendWidget->signalSet(), &TrendLib::TrendSignalSet::requestData, this, &MonitorTrendsWidget::slot_requestData);
 	connect(&m_archiveDataProvider, &MonitorTrendArchiveConnections::dataReady, &signalSet(), &TrendLib::TrendSignalSet::slot_archiveDataReceived);
@@ -176,7 +186,7 @@ static int no = 1;
 
 MonitorTrendsWidget::~MonitorTrendsWidget()
 {
-	MonitorTrends::unregisterTrendWindow(this->windowTitle());
+	MonitorTrends::unregisterTrendWindow(this);
 
 	m_archiveDataProvider.clear();
 	m_realtimeDataProvider.clear();
@@ -225,7 +235,7 @@ void MonitorTrendsWidget::timerEvent(QTimerEvent*)
 
 void MonitorTrendsWidget::signalsButton()
 {
-	// Get archiev services
+	// Get archive services
 	//
 	auto archiveServers = m_configController.configuration().archiveServices;
 	std::vector<TrendLib::ArchiveServer> trendArchiveServers;
@@ -236,7 +246,7 @@ void MonitorTrendsWidget::signalsButton()
 		trendArchiveServers.emplace_back(as.equipmentId, as.shortenId, as.appDataServiceId);
 	}
 
-	// Create signal list converted to TrendSignalParam	and expanded to diffrent archive services
+	// Create signal list converted to TrendSignalParam	and expanded to different archive services
 	//
 	std::vector<TrendLib::TrendSignalParam> trendSignals;
 	trendSignals.reserve(m_signalManager.signalsCount());
@@ -257,7 +267,7 @@ void MonitorTrendsWidget::signalsButton()
 		}
 	}
 
-	// Get alread added signals
+	// Get already added signals
 	//
 	std::vector<TrendLib::TrendSignalParam> addedTrendSignals = signalSet().trendSignals();
 

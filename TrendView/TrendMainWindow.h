@@ -67,7 +67,7 @@ namespace TrendLib
 		void actionExitTriggered();
 		void actionAboutTriggered();
 		void actionRefreshTriggered();
-		void actionAutoSclaeTriggered();
+		void actionAutoScaleTriggered();
 
 		void actionAddRuler(QPoint mousePos);
 		void actionDeleteRuler(int rulerIndex);

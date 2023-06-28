@@ -1255,15 +1255,15 @@ void MonitorMainWindow::slot_trends()
 {
 	// Get Trends list
 	//
-	std::vector<QString> trends = MonitorTrends::getTrendsList();
+	std::vector<MonitorTrendsWidget*> trends = MonitorTrends::getTrendsList();
 
 	// Choose trend
 	//
-	QString trendToActivate;
+	MonitorTrendsWidget* trendToActivate = nullptr;
 
 	if (trends.empty() == true)
 	{
-		trendToActivate.clear();	// if trendToActivate is empty, then create new trend
+		trendToActivate = nullptr;	// if trendToActivate is nullptr, then create a new trend.
 	}
 	else
 	{
@@ -1276,7 +1276,7 @@ void MonitorMainWindow::slot_trends()
 
 		for (size_t i = 0; i < trends.size(); i++)
 		{
-			QAction* a = menu.addAction(trends[i]);
+			QAction* a = menu.addAction(trends[i]->windowTitle());
 			Q_ASSERT(a);
 
 			a->setData(QVariant::fromValue<int>(static_cast<int>(i)));		// Data is index in trend vector
@@ -1295,7 +1295,7 @@ void MonitorMainWindow::slot_trends()
 
 		if (trendIndex == -1)
 		{
-			trendToActivate.clear();	// if trendToActivate is empty, then create new trend
+			trendToActivate = nullptr;	// if trendToActivate is nullptr, then create a new trend.
 		}
 		else
 		{
@@ -1312,7 +1312,7 @@ void MonitorMainWindow::slot_trends()
 
 	// Start new trend or activate chosen one
 	//
-	if (trendToActivate.isEmpty() == true)
+	if (trendToActivate == nullptr)
 	{
 		std::vector<AppSignalParam> appSignals;
 		MonitorTrends::startTrendApp(m_signalManager, m_configController, appSignals, this);

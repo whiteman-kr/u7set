@@ -79,7 +79,7 @@ namespace TrendLib
 		connect(ui->actionPrint, &QAction::triggered, this, &TrendMainWindow::actionPrintTriggered);
 		connect(ui->actionExit, &QAction::triggered, this, &TrendMainWindow::actionExitTriggered);
 		connect(ui->actionAbout, &QAction::triggered, this, &TrendMainWindow::actionAboutTriggered);
-		connect(ui->actionAutoScale, &QAction::triggered, this, &TrendMainWindow::actionAutoSclaeTriggered);
+		connect(ui->actionAutoScale, &QAction::triggered, this, &TrendMainWindow::actionAutoScaleTriggered);
 
 		createToolBar();
 
@@ -637,6 +637,9 @@ namespace TrendLib
 		{
 			return;
 		}
+
+		setWindowTitle(QFileInfo(fileName).baseName());
+
 		path = QFileInfo(fileName).path(); // store path for next time
 
 		Q_ASSERT(m_trendWidget);
@@ -710,10 +713,13 @@ namespace TrendLib
 		{
 			return;
 		}
+
 		path = QFileInfo(fileName).path(); // store path for next time
 
 		QFileInfo fileInfo(fileName);
 		QString extension = fileInfo.completeSuffix();
+
+		setWindowTitle(fileInfo.baseName());
 
 		if (extension.compare(QLatin1String("u7trend"), Qt::CaseInsensitive) == 0)
 		{
@@ -923,7 +929,7 @@ namespace TrendLib
 		return;
 	}
 
-	void TrendMainWindow::actionAutoSclaeTriggered()
+	void TrendMainWindow::actionAutoScaleTriggered()
 	{
 		qDebug() << "Autoscale trend";
 
@@ -1335,7 +1341,7 @@ namespace TrendLib
 			});
 
 			QAction* autoscale = menu.addAction(tr("Scale to Fit"));
-			connect(autoscale, &QAction::triggered, this, &TrendMainWindow::actionAutoSclaeTriggered);
+			connect(autoscale, &QAction::triggered, this, &TrendMainWindow::actionAutoScaleTriggered);
 
 			QAction* remove = menu.addAction(tr("Remove"));
 			connect(remove, &QAction::triggered, this,
