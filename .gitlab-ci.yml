@@ -116,11 +116,10 @@ windows_build_job:
     - "'#pragma once' > gitlabci_version.h"
     - "' ' >> gitlabci_version.h"
     - "'#define GITLAB_CI_BUILD' >> gitlabci_version.h"
-    - "'#define CI_BUILD_REF_SLUG \"' + $env:CI_BUILD_REF_SLUG + '\"' >> gitlabci_version.h"
+    - "'#define CI_COMMIT_REF_SLUG \"' + $env:CI_COMMIT_REF_SLUG + '\"' >> gitlabci_version.h"
     - "'#define CI_COMMIT_SHA \"' + $env:CI_COMMIT_SHA + '\"' >> gitlabci_version.h"
     - "'#define GITLAB_USER_NAME \"' + $env:GITLAB_USER_NAME + '\"' >> gitlabci_version.h"
     - "'#define CI_PIPELINE_ID ' + $env:CI_PIPELINE_ID + '' >> gitlabci_version.h"
-    - "'#define COMPUTERNAME \"' + $env:HOSTNAME + '\"' >> gitlabci_version.h"
     - "$Env:timestamp = Get-Date -Format 'dd MMMM yyyy HH:mm (K)'"
     - "'#define BUILD_DATE \"' + $Env:timestamp + '\"' >> gitlabci_version.h"
 #Build Project
@@ -195,7 +194,7 @@ windows_build_job:
 #    - "&$SIGNTOOL sign /v /a  /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD $Env:BIN_OUT_DIR\\..\\*.exe"
 
   artifacts:
-    name: "u7set_0.9.$CI_PIPELINE_ID $CI_BUILD_REF_SLUG $CI_COMMIT_SHA"
+    name: "u7set_0.9.$CI_PIPELINE_ID $CI_COMMIT_REF_SLUG $CI_COMMIT_SHA"
     paths:
       - bin/*.exe
       - bin/release/*.exe
@@ -428,7 +427,7 @@ linux_code_coverage_job:
 
   coverage: '/lines......: \d+\.\d+/'
   artifacts:
-    name: "coverage_report.$CI_PIPELINE_ID $CI_BUILD_REF_SLUG $CI_COMMIT_SHA"
+    name: "coverage_report.$CI_PIPELINE_ID $CI_COMMIT_REF_SLUG $CI_COMMIT_SHA"
     paths:
 #      - CodeCoverage/coverage.xml
       - CodeCoverage/Report/

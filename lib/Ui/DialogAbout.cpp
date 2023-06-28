@@ -35,14 +35,12 @@ void DialogAbout::show(QWidget* parent, const QString& description, const QStrin
 
 #ifdef GITLAB_CI_BUILD
 	text += tr("<br>Commit SHA: %1").arg(CI_COMMIT_SHA);
-	text += tr("<br>Branch: %1").arg(CI_BUILD_REF_SLUG);
+	text += tr("<br>Branch: %1").arg(CI_COMMIT_REF_SLUG);
 	text += tr("<br>Build Date: %1").arg(BUILD_DATE);
-	text += tr("<br>Build Host: %1").arg(COMPUTERNAME);
 #else
 	text += tr("<br>Commit SHA1: No data");
 	text += tr("<br>Branch: No data");
 	text += tr("<br>Date: No data");
-	text += tr("<br>Host: No data");
 #endif
 
 	QLabel* label = new QLabel(text, &aboutDialog);

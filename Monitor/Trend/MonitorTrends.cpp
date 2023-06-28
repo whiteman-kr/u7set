@@ -121,7 +121,7 @@ MonitorTrendsWidget::MonitorTrendsWidget(const MonitorSignalManager& signalManag
 	m_realtimeDataProvider(m_signalManager, m_configController.logFile())
 {
 static int no = 1;
-	QString trendName = QString("Monitor Trends %1").arg(no++);
+	QString trendName = tr("Monitor Trends %1").arg(no++);
 	MonitorTrends::registerTrendWindow(trendName, this);
 
 	setWindowTitle(trendName);
