@@ -269,7 +269,7 @@ LowEngineeringUnits limit, otherwise set to 0.</source>
     <message>
         <location filename="../Archive/ArchiveModelView.cpp" line="60"/>
         <source>Mismatch</source>
-        <translation>Невідповідність</translation>
+        <translation>Розбіжність</translation>
     </message>
     <message>
         <location filename="../Archive/ArchiveModelView.cpp" line="63"/>
@@ -372,9 +372,19 @@ Server: %14</source>
 <context>
     <name>ArchiveTcpClient2</name>
     <message>
+        <location filename="../Archive/ArchiveTcpClient2.cpp" line="28"/>
+        <source>Construction</source>
+        <translation>Ініціалізація</translation>
+    </message>
+    <message>
         <location filename="../Archive/ArchiveTcpClient2.cpp" line="46"/>
         <source>cancelRequest()</source>
         <translation></translation>
+    </message>
+    <message>
+        <location filename="../Archive/ArchiveTcpClient2.cpp" line="49"/>
+        <source>Canceled</source>
+        <translation>Скасовано</translation>
     </message>
     <message>
         <location filename="../Archive/ArchiveTcpClient2.cpp" line="96"/>
@@ -387,9 +397,29 @@ Server: %14</source>
         <translation>Завершено</translation>
     </message>
     <message>
+        <location filename="../Archive/ArchiveTcpClient2.cpp" line="115"/>
+        <source>TryConnect</source>
+        <translation>З&apos;єднання</translation>
+    </message>
+    <message>
         <location filename="../Archive/ArchiveTcpClient2.cpp" line="128"/>
         <source>Cannot establish connection to ArchiveService %1, %2.</source>
         <translation></translation>
+    </message>
+    <message>
+        <location filename="../Archive/ArchiveTcpClient2.cpp" line="143"/>
+        <source>Connected</source>
+        <translation>З&apos;єднано</translation>
+    </message>
+    <message>
+        <location filename="../Archive/ArchiveTcpClient2.cpp" line="159"/>
+        <source>Disconnected</source>
+        <translation>З&apos;єднання розірване</translation>
+    </message>
+    <message>
+        <location filename="../Archive/ArchiveTcpClient2.cpp" line="169"/>
+        <source>Timeout</source>
+        <translation>Таймаут</translation>
     </message>
     <message>
         <location filename="../Archive/ArchiveTcpClient2.cpp" line="171"/>
@@ -510,8 +540,8 @@ Server: %14</source>
     </message>
     <message>
         <location filename="../Archive/ArchiveWidget.cpp" line="167"/>
-        <location filename="../Archive/ArchiveWidget.cpp" line="561"/>
-        <location filename="../Archive/ArchiveWidget.cpp" line="628"/>
+        <location filename="../Archive/ArchiveWidget.cpp" line="563"/>
+        <location filename="../Archive/ArchiveWidget.cpp" line="630"/>
         <source>Update</source>
         <translation>Оновити</translation>
     </message>
@@ -521,77 +551,77 @@ Server: %14</source>
         <translation>Сигнали...</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveWidget.cpp" line="185"/>
+        <location filename="../Archive/ArchiveWidget.cpp" line="187"/>
         <source> Start Time: </source>
         <translation> Час початку: </translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveWidget.cpp" line="188"/>
+        <location filename="../Archive/ArchiveWidget.cpp" line="190"/>
         <source>   End Time: </source>
         <translation>   Час кінця: </translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveWidget.cpp" line="195"/>
+        <location filename="../Archive/ArchiveWidget.cpp" line="197"/>
         <source>Server Time</source>
         <translation>Час сервера</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveWidget.cpp" line="196"/>
+        <location filename="../Archive/ArchiveWidget.cpp" line="198"/>
         <source>Server Time UTC%100</source>
         <translation>Час сервера UTC%100</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveWidget.cpp" line="197"/>
+        <location filename="../Archive/ArchiveWidget.cpp" line="199"/>
         <source>Plant Time</source>
         <translation>Час станції</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveWidget.cpp" line="207"/>
+        <location filename="../Archive/ArchiveWidget.cpp" line="209"/>
         <source>   Time Type: </source>
         <translation>   Тип часу: </translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveWidget.cpp" line="392"/>
+        <location filename="../Archive/ArchiveWidget.cpp" line="394"/>
         <source>Select signal(s) to request data from archive.</source>
         <translation>Оберіть сигнали для запиту з архіву.</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveWidget.cpp" line="556"/>
+        <location filename="../Archive/ArchiveWidget.cpp" line="558"/>
         <source>Cancel</source>
         <translation>Скасувати</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveWidget.cpp" line="583"/>
+        <location filename="../Archive/ArchiveWidget.cpp" line="585"/>
         <source>Nothing to export.</source>
         <translation>Немає даних для експорту.</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveWidget.cpp" line="589"/>
+        <location filename="../Archive/ArchiveWidget.cpp" line="591"/>
         <source>Save File</source>
         <translation>Зберегти файл</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveWidget.cpp" line="591"/>
+        <location filename="../Archive/ArchiveWidget.cpp" line="593"/>
         <source>Portable Documnet Format (*.pdf);;CSV Files, semicolon separated (*.csv);;Plaintext (*.txt);;HTML (*.html)</source>
         <translation>Формат PDF (*.pdf);;Формат CSV (*.csv);;Plaintext (*.txt);;Формат HTML (*.html)</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveWidget.cpp" line="614"/>
+        <location filename="../Archive/ArchiveWidget.cpp" line="616"/>
         <source>Unsupported file format.</source>
         <translation>Непідтримуваний формат.</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveWidget.cpp" line="632"/>
+        <location filename="../Archive/ArchiveWidget.cpp" line="634"/>
         <source>Select at least one signal to request archive data.</source>
         <translation>Оберіть хоча б один сигнал для запиту.</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveWidget.cpp" line="741"/>
+        <location filename="../Archive/ArchiveWidget.cpp" line="743"/>
         <source>States received: %1</source>
         <translation>Записів прийнято: %1</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveWidget.cpp" line="743"/>
+        <location filename="../Archive/ArchiveWidget.cpp" line="745"/>
         <source> Network requests/replies: %1 / %2 </source>
         <translation> Запитів/відповідей: %1 / %2 </translation>
     </message>
@@ -662,32 +692,30 @@ Server: %14</source>
         <translation>&lt;br&gt;Дата збірки: %1</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogAbout.cpp" line="40"/>
         <source>&lt;br&gt;Build Host: %1</source>
-        <translation>&lt;br&gt;Хост збірки: %1</translation>
+        <translation type="vanished">&lt;br&gt;Хост збірки: %1</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogAbout.cpp" line="42"/>
+        <location filename="../../lib/Ui/DialogAbout.cpp" line="41"/>
         <source>&lt;br&gt;Commit SHA1: No data</source>
         <translation>&lt;br&gt;SHA1 коміту: Немає даних</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogAbout.cpp" line="43"/>
+        <location filename="../../lib/Ui/DialogAbout.cpp" line="42"/>
         <source>&lt;br&gt;Branch: No data</source>
         <translation>&lt;br&gt;Гілка: Немає даних</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogAbout.cpp" line="44"/>
+        <location filename="../../lib/Ui/DialogAbout.cpp" line="43"/>
         <source>&lt;br&gt;Date: No data</source>
         <translation>&lt;br&gt;Дата збірки: Немає даних</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogAbout.cpp" line="45"/>
         <source>&lt;br&gt;Host: No data</source>
-        <translation>&lt;br&gt;Хост збірки: Немає даних</translation>
+        <translation type="vanished">&lt;br&gt;Хост збірки: Немає даних</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogAbout.cpp" line="60"/>
+        <location filename="../../lib/Ui/DialogAbout.cpp" line="58"/>
         <source>Copy commit SHA1</source>
         <translation>Копіювати SHA1 коміту</translation>
     </message>
@@ -807,7 +835,7 @@ Server: %14</source>
     <message>
         <location filename="../Archive/DialogChooseArchiveSignals.ui" line="231"/>
         <source>Request Start Time</source>
-        <translation>Кінцевий час</translation>
+        <translation>Початковий час</translation>
     </message>
     <message>
         <location filename="../Archive/DialogChooseArchiveSignals.ui" line="238"/>
