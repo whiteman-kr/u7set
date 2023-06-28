@@ -88,7 +88,7 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 			[this](bool allowed)
 	{
 		Q_ASSERT(m_closeTabAction);
-		m_closeTabAction->setEnabled(allowed);
+		m_closeTabAction->setEnabled(MonitorAppSettings::instance().showSchemasTabBar() && allowed);
 	});
 
 	connect(monitorCentralWidget, &MonitorCentralWidget::signal_historyChanged, this, &MonitorMainWindow::slot_historyChanged);
@@ -450,7 +450,8 @@ void MonitorMainWindow::createActions()
 	m_newTabAction = new QAction(tr("New Tab"), this);
 	m_newTabAction->setStatusTip(tr("Open current schema in new tab page"));
 	m_newTabAction->setIcon(QIcon(":/Images/Images/NewSchema.svg"));
-	m_newTabAction->setEnabled(true);
+	m_newTabAction->setEnabled(MonitorAppSettings::instance().showSchemasTabBar());
+	m_newTabAction->setVisible(MonitorAppSettings::instance().showSchemasTabBar());
 	QList<QKeySequence> newTabShortcuts;
 	newTabShortcuts << QKeySequence::AddTab;
 	newTabShortcuts << QKeySequence::New;
@@ -460,9 +461,9 @@ void MonitorMainWindow::createActions()
 	m_closeTabAction = new QAction(tr("Close Tab"), this);
 	m_closeTabAction->setStatusTip(tr("Close current tab page"));
 	m_closeTabAction->setIcon(QIcon(":/Images/Images/Close.svg"));
-	m_closeTabAction->setEnabled(true);
+	m_closeTabAction->setEnabled(MonitorAppSettings::instance().showSchemasTabBar() && monitorCentralWidget()->count() > 1);
+	m_closeTabAction->setVisible(MonitorAppSettings::instance().showSchemasTabBar());
 	m_closeTabAction->setShortcuts(QKeySequence::Close);
-	m_closeTabAction->setEnabled(monitorCentralWidget()->count() > 1);
 	connect(m_closeTabAction, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_closeCurrentTab);
 
 	m_zoomInAction = new QAction(tr("Zoom In"), this);
@@ -1594,6 +1595,12 @@ void MonitorMainWindow::setVisibleTabBar(bool visible)
 	{
 		m->tabBar()->setVisible(visible);
 	}
+
+	m_newTabAction->setVisible(visible);
+	m_newTabAction->setEnabled(visible);
+
+	m_closeTabAction->setEnabled(visible);
+	m_closeTabAction->setVisible(visible);
 
 	return;
 }
