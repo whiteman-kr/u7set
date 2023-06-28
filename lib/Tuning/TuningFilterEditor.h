@@ -15,13 +15,19 @@ public:
 
 	ChooseTuningSignalsWidget(TuningSignalManager& signalManager, bool requestValuesEnabled, QWidget* parent);
 
-	enum class FilterType
+	enum class BaseFilterType
 	{
 		All,
 		AppSignalID,
 		CustomAppSignalID,
 		EquipmentID,
 		Caption,
+		Tag
+	};
+
+	enum class ValueFilterType
+	{
+		All,
 		Zero,
 		One
 	};
@@ -108,7 +114,7 @@ private slots:
 
 	void on_m_baseFilterValueCombo_currentIndexChanged(int index);
 
-	void on_m_baseFilterText_returnPressed();
+	void on_m_baseFilterText_Changed();
 
 	void on_m_baseSignalTypeCombo_currentIndexChanged(int index);
 

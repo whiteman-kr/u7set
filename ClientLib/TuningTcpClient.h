@@ -237,8 +237,8 @@ namespace ClientLib
 		void setLmStatusFlagMode(const TuningClientSettings::LmStatusFlagMode& mode);
 
 	public:
-		inline static const int MaxStateRequestCount = TDS_TUNING_MAX_READ_STATES / 8;  // 250 signals per TDS_TUNING_MAX_READ_STATES
-		inline static const int MaxStateWriteCount = TDS_TUNING_MAX_WRITE_RECORDS / 8;  // 250 signals per TDS_TUNING_MAX_WRITE_RECORDS
+		inline static const int MaxStateRequestCount = TDS_TUNING_MAX_READ_STATES / 4;  // 250 signals per TDS_TUNING_MAX_READ_STATES
+		inline static const int MaxStateWriteCount = TDS_TUNING_MAX_WRITE_RECORDS / 4;  // 250 signals per TDS_TUNING_MAX_WRITE_RECORDS
 
 	protected:
 		// Tuning sources

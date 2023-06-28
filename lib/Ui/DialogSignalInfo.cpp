@@ -982,6 +982,14 @@ void DialogSignalInfo::on_pushButtonSetValue_clicked()
 		return;
 	}
 
+	if (value < m_signal.tuningLowBound().toDouble() || value > m_signal.tuningHighBound().toDouble())
+	{
+		QMessageBox::critical(this, qAppName(), tr("Input value is out of range (%1..%2)!")
+							  .arg(m_signal.tuningLowBound().toString())
+							  .arg(m_signal.tuningHighBound().toString()));
+		return;
+	}
+
 	int result = QMessageBox::warning(this, qAppName(),
 									  tr("Are you sure you want to write value '%1'\n\nto signal '%2' ('%3')?")
 									  .arg(strValue).
@@ -1301,7 +1309,6 @@ void DialogSignalInfo::fillSignalInfo()
 	{
 		str = QString("%1 (%2)").arg(str).arg(E::valueToString<E::AnalogAppSignalFormat>(static_cast<int>(m_signal.analogSignalFormat())));
 	}
-
 
 	str = QString("%1, %2").arg(str).arg(tr(E::valueToString<E::SignalInOutType>(m_signal.inOutType()).toUtf8()));
 
