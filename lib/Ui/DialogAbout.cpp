@@ -28,21 +28,19 @@ void DialogAbout::show(QWidget* parent, const QString& description, const QStrin
 	QString text = "<h3>" + qApp->applicationName() +" v" + qApp->applicationVersion() + "</h3>";
 
 #ifndef QT_DEBUG
-	text += "Build: Release";
+	text += tr("Build: Release");
 #else
-	text += "Build: Debug";
+	text += tr("Build: Debug");
 #endif
 
 #ifdef GITLAB_CI_BUILD
-	text += "<br>Commit SHA: "	CI_COMMIT_SHA;
-	text += "<br>Branch: "		CI_BUILD_REF_SLUG;
-	text += "<br>Build Date: "	BUILD_DATE;
-	text += "<br>Build Host: "	COMPUTERNAME;
+	text += tr("<br>Commit SHA: %1").arg(CI_COMMIT_SHA);
+	text += tr("<br>Branch: %1").arg(CI_COMMIT_REF_SLUG);
+	text += tr("<br>Build Date: %1").arg(BUILD_DATE);
 #else
-	text += "<br>Commit SHA1: No data";
-	text += "<br>Branch: No data";
-	text += "<br>Date: No data";
-	text += "<br>Host: No data";
+	text += tr("<br>Commit SHA1: No data");
+	text += tr("<br>Branch: No data");
+	text += tr("<br>Date: No data");
 #endif
 
 	QLabel* label = new QLabel(text, &aboutDialog);
@@ -57,7 +55,7 @@ void DialogAbout::show(QWidget* parent, const QString& description, const QStrin
 	label->setWordWrap(true);
 	vl->addWidget(label);
 
-	QPushButton* copyCommitSHA1Button = new QPushButton("Copy commit SHA1");
+	QPushButton* copyCommitSHA1Button = new QPushButton(tr("Copy commit SHA1"));
 	connect(copyCommitSHA1Button, &QPushButton::clicked, [](bool){
 #ifdef CI_PIPELINE_ID
 		qApp->clipboard()->setText(CI_COMMIT_SHA);

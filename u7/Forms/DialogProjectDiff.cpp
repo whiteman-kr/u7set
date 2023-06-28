@@ -420,14 +420,15 @@ void DialogProjectDiff::on_fileBrowseButton_clicked()
 {
 	// Get filename
 	//
-
+	static QString path{"."};
 	QString fileName = QFileDialog::getSaveFileName(this, QObject::tr("Diff Report"),
-													"./",
+													path + QDir::separator(),
 													QObject::tr("PDF documents (*.pdf)"));
 	if (fileName.isNull() == true)
 	{
 		return;
 	}
+	path = QFileInfo(fileName).path(); // store path for next time
 
 	fileName = QDir::toNativeSeparators(fileName);
 

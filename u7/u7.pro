@@ -114,6 +114,7 @@ HEADERS  += \
 	../lib/PropertyTable.h \
 	../Metrology/MetrologyConnection.h \
 	AppSignalSetProvider.h \
+	AppSignalPropertyManager.h \
 	DlgMetrologyConnection.h \
 	CentralWidget.h \
     CreateProjectDialog.h \
@@ -229,6 +230,7 @@ SOURCES +=\
 	../lib/PropertyTable.cpp \
 	../Metrology/MetrologyConnection.cpp \
 	AppSignalSetProvider.cpp \
+	AppSignalPropertyManager.cpp \
     ../lib/CodeEditor.cpp \
     DbTagsEditor.cpp \
 	DlgMetrologyConnection.cpp \

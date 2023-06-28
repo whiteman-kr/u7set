@@ -1,0 +1,1 @@
+<Command Caption="movmem"		Code="0140"	CodeMask="07c0"	SimulationFunc="command_movmem"		ParseFunc="parse_movmem"	Description="Copy array of 16-bit words from memory to memory"/>

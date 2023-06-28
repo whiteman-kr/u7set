@@ -65,9 +65,12 @@ namespace Tuning
 
 		E::SecurityLevel securityLevel() const;
 
-	signals:
+		void registerSignalsStateChangesQueue(const QString& clientEquipmentID, qint64 tcpConnectionID);
+		void unregisterSignalsStateChangesQueue(const QString& clientEquipmentID, qint64 tcpConnectionID);
 
-	public slots:
+		void pushSignalStateChange(const TuningSignal::State& state, QThread* thread);
+
+		TuningSignalsChangesQueue* getSignalChangesQueue(const QString& clientEquipmentID, qint64 tcpConnectionID);
 
 	private:
 		virtual void initServiceSpecificCmdLineArgs() override;

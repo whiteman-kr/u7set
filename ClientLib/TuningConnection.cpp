@@ -14,10 +14,11 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 										 bool autoApply,
 										 TuningClientSettings::LmStatusFlagMode lmStatusFlagMode,
 										 ITuningSignalUpdater& signalUpdater,
+										 IRecentAppSignals& recentTuningSignals,
 										 ILogFile* logFile,
 										 ITuningLog* tuningLog)
 	{
-		tcpTuningClient = new TuningTcpClient{softwareInfo, tuns, signalUpdater, logFile, tuningLog};
+		tcpTuningClient = new TuningTcpClient{softwareInfo, tuns, signalUpdater, recentTuningSignals, logFile, tuningLog};
 		tcpTuningClient->setServers(tuns.clientRequestAddress, tuns.clientRequestAddress, true);
 		tcpTuningClient->setAutoApply(autoApply);
 		tcpTuningClient->setLmStatusFlagMode(lmStatusFlagMode);
@@ -55,10 +56,12 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 
 	TuningConnection::TuningConnection(ITuningSignalManager& tuningSignalManager,
 									   ITuningSignalUpdater& tuningSignalUpdater,
+									   IRecentAppSignals& recentTuningSignals,
 									   ILogFile* logFile,
 									   ITuningLog* tuningLog) :
 		m_tuningSignalManager{tuningSignalManager},
 		m_tuningSignalUpdater{tuningSignalUpdater},
+		m_recentTuningSignals(recentTuningSignals),
 		m_logFile{logFile, "TuningConnection"},
 		m_tuningLog(tuningLog)
 	{
@@ -88,7 +91,8 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 				continue;
 			}
 
-			m_conns.emplace_back(softwareInfo, tuns, autoApply, lmStatusFlagMode, m_tuningSignalUpdater, m_logFile.logFile(), m_tuningLog);
+			m_conns.emplace_back(softwareInfo, tuns, autoApply, lmStatusFlagMode, m_tuningSignalUpdater, m_recentTuningSignals,
+								 m_logFile.logFile(), m_tuningLog);
 		}
 
 		return;
@@ -390,10 +394,6 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 
 				if (valueType == QMetaType::Double)
 				{
-					m_logFile.writeWarning(tr("writeTuningSignal(%1, %2) - casting double to SignedInt32 can result in loss of precision.")
-										 .arg(appSignalId)
-										 .arg(value.toString()));
-
 					if (double valueDouble = value.toDouble();
 						valueDouble < std::numeric_limits<qint32>::min() || valueDouble > std::numeric_limits<qint32>::max())
 					{

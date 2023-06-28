@@ -28,6 +28,7 @@ namespace
 		MOCK_METHOD(void, addRecentAppSignal, (Hash h), (override));
 		MOCK_METHOD(void, addRecentAppSignals, (const std::vector<Hash>& hashes), (override));
 		MOCK_METHOD(std::vector<Hash>, recentlyUsedAppSignals, (const QString& appDataServivceId), (override));
+		MOCK_METHOD(bool, hasRecentlyUsedAppSignals, (), (override));
 	};
 }
 

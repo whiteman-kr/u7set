@@ -93,8 +93,9 @@ namespace VFrame30
 		QWidget* widget = m_clientSchemaView->findChild<QWidget*>(schemaItem->guid().toString());
 		if (widget == nullptr)
 		{
-			qDebug() << "Can't find widget with UUID = " << schemaItem->guid().toString();
-			assert(widget);
+			// It can happen if the schema was changed in scripts, but this is still the same cycle of draw items.
+			//
+			qDebug() << "Can't find widget with objectName " << objectName << ", UUID = " << schemaItem->guid().toString();
 			return nullptr;
 		}
 

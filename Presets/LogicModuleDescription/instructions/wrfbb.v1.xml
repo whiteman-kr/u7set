@@ -1,0 +1,1 @@
+<Command Caption="wrfbb"		Code="02C0"	CodeMask="07c0"	SimulationFunc="command_wrfbb"		ParseFunc="parse_wrfbb"		Description="Read 1-bit from memory and write to AFB input"/>

@@ -1,7 +1,7 @@
 #pragma once
 
 #ifdef _DEBUG
-	#include <QAbstractItemModelTester>
+#include <QAbstractItemModelTester>
 #endif
 #include "../DbLib/DbController.h"
 #include "../VFrame30/Schema.h"

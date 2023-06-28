@@ -67,6 +67,8 @@ set (U7_SOURCES
 	../lib/Ui/TextEditCompleter.h
 	../lib/WidgetUtils.cpp
 	../lib/WidgetUtils.h
+	AppSignalPropertyManager.cpp
+	AppSignalPropertyManager.h
 	AppSignalSetProvider.cpp
 	AppSignalSetProvider.h
 	BuildTabPage.cpp

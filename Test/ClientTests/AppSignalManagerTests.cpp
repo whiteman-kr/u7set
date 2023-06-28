@@ -362,7 +362,7 @@ TEST(AppSignalManagerTests, addRecentAppSignal)
 	AppSignalParam sp3;
 	sp1.setAppSignalId("#SP1");
 	sp2.setAppSignalId("#SP2");
-	sp2.setAppSignalId("#SP3");
+	sp3.setAppSignalId("#SP3");
 
 	std::vector<AppSignalParam> v1;
 	v1.push_back(sp1);

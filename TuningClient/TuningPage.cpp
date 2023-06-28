@@ -496,7 +496,7 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 
 		AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
 
-		TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
+		TuningSignalState state = m_tuningSignalManager.queuedState(hash, &ok);
 
 		if (role == Qt::EditRole &&
 				state.valid() == true &&
@@ -586,7 +586,7 @@ bool TuningTableView::edit(const QModelIndex&  index, EditTrigger trigger, QEven
 		{
 			AppSignalParam asp = m_model->tuningSignalManager().signalParam(hash, &ok);
 
-			TuningSignalState state = m_model->tuningSignalManager().state(hash, &ok);
+			TuningSignalState state = m_model->tuningSignalManager().queuedState(hash, &ok);
 
 			if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
 			{
@@ -996,7 +996,7 @@ TuningPage::TuningPage(TuningConfigController& configController,
 
 	//
 
-	connect(theMainWindow, &MainWindow::timerTick500, this, &TuningPage::slot_timerTick500);
+	connect(theMainWindow, &MainWindow::timerTick500, this, &TuningPage::onTimer);
 
 }
 
@@ -1311,15 +1311,16 @@ void TuningPage::fillObjectsList()
 
 	// Sort list
 	//
-	try
-	{
-		const std::pair<int, Qt::SortOrder>& sortData = m_sortData.at(m_pageFilter->ID());
-		m_objectList->sortByColumn(sortData.first, sortData.second);
-	}
-	catch (std::out_of_range&)
+	const auto& it = m_sortData.find(m_pageFilter->ID());
+	if (it == m_sortData.end())
 	{
 		const std::pair<int, Qt::SortOrder> sortData = std::make_pair(0, Qt::AscendingOrder);
 		m_sortData[m_pageFilter->ID()] = sortData;
+		m_objectList->sortByColumn(sortData.first, sortData.second);
+	}
+	else
+	{
+		const std::pair<int, Qt::SortOrder>& sortData = it->second;
 		m_objectList->sortByColumn(sortData.first, sortData.second);
 	}
 
@@ -1394,7 +1395,7 @@ bool TuningPage::write()
 
 		bool ok = false;
 
-		TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
+		TuningSignalState state = m_tuningSignalManager.queuedState(hash, &ok);
 
 		if (ok == false || state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
 		{
@@ -1552,7 +1553,7 @@ void TuningPage::apply()
 	{
 		bool ok = false;
 
-		TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
+		TuningSignalState state = m_tuningSignalManager.queuedState(hash, &ok);
 
 		if (ok == false || state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
 		{
@@ -1667,7 +1668,7 @@ void TuningPage::slot_setValue()
 
 			AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
 
-			TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
+			TuningSignalState state = m_tuningSignalManager.queuedState(hash, &ok);
 
 			if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
 			{
@@ -2021,14 +2022,16 @@ void TuningPage::slot_exportContentsToCSV()
 
 	int rowCount = m_model->rowCount();
 
+	static QString path{"."};
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Export to CSV"),
-													QString(),
+													path + QDir::separator(),
 													tr("CSV (*.csv)"));
 
 	if (fileName.isEmpty() == true)
 	{
 		return;
 	}
+	path = QFileInfo(fileName).path(); // store path for next time
 
 	QFile file(fileName);
 	if (file.open(QFile::WriteOnly | QFile::Truncate) == false)
@@ -2124,7 +2127,7 @@ void TuningPage::slot_ApplyFilter()
 	fillObjectsList();
 }
 
-void TuningPage::slot_treeFilterSelectionChanged(std::shared_ptr<TuningFilter> filter)
+void TuningPage::slot_treeFilterChanged(std::shared_ptr<TuningFilter> filter)
 {
 	m_treeFilter = filter;
 
@@ -2202,7 +2205,7 @@ void TuningPage::invertValue()
 
 			AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
 
-			TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
+			TuningSignalState state = m_tuningSignalManager.queuedState(hash, &ok);
 
 			if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
 			{
@@ -2269,7 +2272,7 @@ void TuningPage::addSelectedSignalsToFilter(TuningFilter* filter)
 				return;
 			}
 
-			TuningSignalState state = m_tuningSignalManager.state(hash, &found);
+			TuningSignalState state = m_tuningSignalManager.queuedState(hash, &found);
 
 			if (found == false)
 			{
@@ -2354,7 +2357,7 @@ void TuningPage::restoreSignalsFromFilter(TuningFilter* filter)
 
 				bool found = false;
 
-				TuningSignalState state = m_tuningSignalManager.state(hash, &found);
+				TuningSignalState state = m_tuningSignalManager.queuedState(hash, &found);
 				if (found == false)
 				{
 					continue;
@@ -2407,7 +2410,7 @@ void TuningPage::setActionButtonsState()
 			sourceHashes.insert(::calcHash(asp.lmEquipmentId()));
 		}
 
-		TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
+		TuningSignalState state = m_tuningSignalManager.queuedState(hash, &ok);
 
 		if (ok == false ||
 				state.valid() == false ||
@@ -2446,7 +2449,7 @@ void TuningPage::setActionButtonsState()
 					continue;
 				}
 
-				TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
+				TuningSignalState state = m_tuningSignalManager.queuedState(hash, &ok);
 				if (ok == true &&
 						state.valid() == true &&
 						state.controlIsEnabled() == true &&
@@ -2553,7 +2556,7 @@ void TuningPage::updateVisibleItems()
 	}
 }
 
-void TuningPage::slot_timerTick500()
+void TuningPage::onTimer()
 {
 	if  (isVisible() == true && m_model->rowCount() > 0)
 	{
@@ -2577,7 +2580,7 @@ void TuningPage::slot_setAll()
 		{
 			AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
 
-			TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
+			TuningSignalState state = m_tuningSignalManager.queuedState(hash, &ok);
 
 			if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
 			{
@@ -2608,7 +2611,7 @@ void TuningPage::slot_setAll()
 		{
 			AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
 
-			TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
+			TuningSignalState state = m_tuningSignalManager.queuedState(hash, &ok);
 
 			if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
 			{
@@ -2639,7 +2642,7 @@ void TuningPage::slot_setAll()
 		{
 			AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
 
-			TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
+			TuningSignalState state = m_tuningSignalManager.queuedState(hash, &ok);
 
 			if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
 			{
@@ -2671,7 +2674,7 @@ void TuningPage::slot_setAll()
 		{
 			AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
 
-			TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
+			TuningSignalState state = m_tuningSignalManager.queuedState(hash, &ok);
 
 			if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
 			{
@@ -2722,7 +2725,7 @@ void TuningPage::slot_undo()
 
 	for (Hash hash : hashes)
 	{
-		TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
+		TuningSignalState state = m_tuningSignalManager.queuedState(hash, &ok);
 		m_tuningSignalManager.setUnappliedValue(hash, state.value());
 	}
 }

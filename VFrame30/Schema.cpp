@@ -203,8 +203,8 @@ namespace VFrame30
 	int ScriptSchema::layerCount() const
 	{
 		return m_schema ?
-					static_cast<int>(m_schema->layers().size()) :
-					0;
+			static_cast<int>(m_schema->layers().size()) :
+			0;
 	}
 
 	//
@@ -250,10 +250,10 @@ namespace VFrame30
 			->setViewOrder(104);
 
 		addProperty<QString, Schema, &Schema::preDrawScript, &Schema::setPreDrawScript>(PropertyNames::preDrawScript, PropertyNames::scriptsCategory, true)
-				->setIsScript(true);
+			->setIsScript(true);
 
 		addProperty<QString, Schema, &Schema::onShowScript, &Schema::setOnShowScript>(PropertyNames::onShowScript, PropertyNames::scriptsCategory, true)
-				->setIsScript(true);
+			->setIsScript(true);
 
 		m_guid = QUuid();  // GUID_NULL
 
@@ -267,27 +267,27 @@ namespace VFrame30
 	//
 	bool Schema::SaveData(Proto::Envelope* message) const
 	{
-//		// Set new uuids and labels to the schema
-//		//
-//		Schema* sss = const_cast<Schema*>(this);
-//		sss->setGuid(QUuid::createUuid());
+		//		// Set new uuids and labels to the schema
+		//		//
+		//		Schema* sss = const_cast<Schema*>(this);
+		//		sss->setGuid(QUuid::createUuid());
 
-//		for (auto layer : sss->Layers)
-//		{
-//			layer->setGuid(QUuid::createUuid());
+		//		for (auto layer : sss->Layers)
+		//		{
+		//			layer->setGuid(QUuid::createUuid());
 
-//			for (SchemaItemPtr item : layer->Items)
-//			{
-//				item->setNewGuid();
+		//			for (SchemaItemPtr item : layer->Items)
+		//			{
+		//				item->setNewGuid();
 
-//				if (item->isFblItemRect() == true)
-//				{
-//static int counterValue = 18000;
-//					//int counterValue = //m_db->nextCounterValue();
-//					item->toFblItemRect()->setLabel(schemaId() + "_" + QString::number(counterValue++));
-//				}
-//			}
-//		}
+		//				if (item->isFblItemRect() == true)
+		//				{
+		//static int counterValue = 18000;
+		//					//int counterValue = //m_db->nextCounterValue();
+		//					item->toFblItemRect()->setLabel(schemaId() + "_" + QString::number(counterValue++));
+		//				}
+		//			}
+		//		}
 
 		std::string className = this->metaObject()->className();
 		quint32 classnamehash = ::ClassNameHashCode(className);
@@ -337,11 +337,11 @@ namespace VFrame30
 
 	bool Schema::LoadData(const Proto::Envelope& message)
 	{
-//		qDebug() << Q_FUNC_INFO;
-//		qDebug() << "        Start loading Schema....";
+		//		qDebug() << Q_FUNC_INFO;
+		//		qDebug() << "        Start loading Schema....";
 
-//		QTime t;
-//		t.start();
+		//		QTime t;
+		//		t.start();
 
 		if (message.has_schema() == false)
 		{
@@ -408,8 +408,8 @@ namespace VFrame30
 			return false;
 		}
 
-//		int elapsed = t.elapsed();
-//		qDebug() << "        Schema " << schemaId() << " is loaded for " << elapsed << " ms";
+		//		int elapsed = t.elapsed();
+		//		qDebug() << "        Schema " << schemaId() << " is loaded for " << elapsed << " ms";
 
 		return true;
 	}
@@ -459,8 +459,8 @@ namespace VFrame30
 		// --
 		//
 		ClientSchemaView* clientView = drawParam->drawMode() == DrawMode::Editor ?
-										   nullptr :
-										   drawParam->clientSchemaView();
+			nullptr :
+			drawParam->clientSchemaView();
 
 		ILogFile* log = context()->log();
 
@@ -489,14 +489,13 @@ namespace VFrame30
 			}
 		}
 
-		// Cleare client area by "grey" color
+		// Clear client area by "grey" color.
 		//
 		QPainter* p = drawParam->painter();
-		//p->fill(0xB0, 0xB0, 0xB0);	-- Done in? CDrawParam::BeginPaint
 
 		// ---
 		//
-		QRectF pageRect(0.0, 0.0, static_cast<qreal>(docWidth()), static_cast<qreal>(docHeight()));
+		QRectF pageRect(-0.1, -0.1, docWidth() + 0.1, docHeight() + 0.1);  // +/- some space to avoid single line not filled.
 		p->fillRect(pageRect, backgroundColor());
 
 		// Draw items by layers which has Show flag
@@ -512,7 +511,7 @@ namespace VFrame30
 		bool isClientMode = clientView != nullptr;
 
 		// DrawParam requires for preDrawScript and for draw itself
-		// Set it for all items in schema, it allowes to cross use of items.
+		// Set it for all items in schema, it allows to cross use of items.
 		//
 		auto setDrawParam = [this](CDrawParam* drawParam)
 		{
@@ -684,7 +683,7 @@ namespace VFrame30
 		}
 
 		qDebug() << "Schema::Draw " << elapsedAverage.back() <<
-					", average " << std::accumulate(elapsedAverage.begin(), elapsedAverage.end(), 0) / elapsedAverage.size();
+			", average " << std::accumulate(elapsedAverage.begin(), elapsedAverage.end(), 0) / elapsedAverage.size();
 #endif
 
 		return;
@@ -915,7 +914,7 @@ namespace VFrame30
 			{
 				std::shared_ptr<VFrame30::SchemaItemUfb> schemaUfbItem = std::dynamic_pointer_cast<VFrame30::SchemaItemUfb>(si);
 
-				if (schemaUfbItem != nullptr  && schemaUfbItem->isCommented() == false)
+				if (schemaUfbItem != nullptr && schemaUfbItem->isCommented() == false)
 				{
 					schemaUfbItems.push_back(schemaUfbItem);
 				}
@@ -1276,10 +1275,10 @@ namespace VFrame30
 							  "\tItem: %2 %3\n"
 							  "\tStack: %4\n"
 							  "\tMessage: %5")
-					  .arg(scriptValue.property("lineNumber").toInt())
-					  .arg(guid().toString()).arg(metaObject()->className())
-					  .arg(scriptValue.property("stack").toString())
-					  .arg(scriptValue.toString());
+			.arg(scriptValue.property("lineNumber").toInt())
+			.arg(guid().toString()).arg(metaObject()->className())
+			.arg(scriptValue.property("stack").toString())
+			.arg(scriptValue.toString());
 
 		return str;
 	}
@@ -2735,7 +2734,7 @@ namespace VFrame30
 	{
 		std::shared_ptr<SchemaDetails> result;
 
-		if (index >=0 && index < static_cast<int>(m_details.size()))
+		if (index >= 0 && index < static_cast<int>(m_details.size()))
 		{
 			auto it = m_details.begin();
 			std::advance(it, index);
@@ -2798,7 +2797,7 @@ namespace VFrame30
 
 	QString SchemaDetailsSet::schemaCaptionByIndex(int schemaIndex) const
 	{
-		if (schemaIndex >=0 && schemaIndex < static_cast<int>(m_details.size()))
+		if (schemaIndex >= 0 && schemaIndex < static_cast<int>(m_details.size()))
 		{
 			auto it = m_details.begin();
 			std::advance(it, schemaIndex);
@@ -2811,7 +2810,7 @@ namespace VFrame30
 
 	QString SchemaDetailsSet::schemaIdByIndex(int schemaIndex) const
 	{
-		if (schemaIndex >=0 && schemaIndex < static_cast<int>(m_details.size()))
+		if (schemaIndex >= 0 && schemaIndex < static_cast<int>(m_details.size()))
 		{
 			auto it = m_details.begin();
 			std::advance(it, schemaIndex);
@@ -2827,7 +2826,7 @@ namespace VFrame30
 		std::vector<SchemaDetails::TrendIndicatorSchemaItems> result;
 		result.reserve(128);
 
-		for (const auto&[schemaId, schemaDetails] : m_details)
+		for (const auto& [schemaId, schemaDetails] : m_details)
 		{
 			result.insert(result.end(), schemaDetails->m_trendsIndicators.begin(), schemaDetails->m_trendsIndicators.end());
 		}

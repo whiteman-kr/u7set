@@ -43,7 +43,6 @@ const int	FI_ANY = 0,
 			FI_CAPTION = 4,
 			FI_TAGS = 5;
 
-
 struct CreatingSignalOptions
 {
 	QStringList lmEquipmentIdList;
@@ -55,19 +54,18 @@ struct CreatingSignalOptions
 	QRect settingsWindowPositionRect;
 };
 
-
 class SignalsDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
 	explicit SignalsDelegate(AppSignalSetProvider* signalSetProvider, SignalsModel* model, SignalsProxyModel* signalsProxyModel, QObject *parent = nullptr);
 
-    QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+	QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const;
 
-    void setEditorData(QWidget *editor, const QModelIndex &index) const;
-    void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const;
+	void setEditorData(QWidget* editor, const QModelIndex& index) const;
+	void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const;
 
-    void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+	void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const;
 
 signals:
 	void itemDoubleClicked();
@@ -76,7 +74,8 @@ public slots:
 	void onCloseEditorEvent(QWidget* editor, EndEditHint hint);
 
 protected:
-	bool editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index);
+	bool editorEvent(QEvent* event, QAbstractItemModel* model,
+					 const QStyleOptionViewItem& option, const QModelIndex& index);
 
 private:
 	AppSignalSetProvider* m_signalSetProvider;

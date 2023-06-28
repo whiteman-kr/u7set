@@ -308,7 +308,7 @@ int main(int argc, char* argv[])
 							.arg(MajorVersion)
 							.arg(MinorVersion)
 							.arg(buildNo)
-							.arg(CI_BUILD_REF_SLUG));
+							.arg(CI_COMMIT_REF_SLUG));
 #else
 	const int buildNo = -1;
 

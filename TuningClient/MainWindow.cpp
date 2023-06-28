@@ -23,7 +23,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	m_tuningLog(m_userManager, "TuningClientSignals", QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + softwareInfo.equipmentID()),
 	m_configController(softwareInfo, theSettings.configuratorAddress1(), theSettings.configuratorAddress2(), &m_logFile),
 	m_tuningSignalManager(softwareInfo.equipmentID(), &m_logFile),
-	m_tuningConnection{m_tuningSignalManager, m_tuningSignalManager, &m_logFile, &m_tuningLog}
+	m_tuningConnection{m_tuningSignalManager, m_tuningSignalManager, m_tuningSignalManager, &m_logFile, &m_tuningLog}
 
 {
 	// Init translator
@@ -95,8 +95,6 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	}
 
 	//
-
-	m_mainWindowTimerId_250ms = startTimer(250);
 
 	m_mainWindowTimerId_500ms = startTimer(500);
 
@@ -315,9 +313,7 @@ void MainWindow::timerEvent(QTimerEvent* event)
 {
 	assert(event);
 
-	// Update status bar
-	//
-	if  (event->timerId() == m_mainWindowTimerId_250ms)
+	if  (event->timerId() == m_mainWindowTimerId_500ms)
 	{
 		if (theSharedMemorySingleApp != nullptr)
 		{
@@ -350,21 +346,19 @@ void MainWindow::timerEvent(QTimerEvent* event)
 			}
 		}
 
-		updateStatusBar();
-
+		// Update filter counters every 1 second
 		//
-
-		if (m_tuningWorkspace != nullptr)
+		static int updateCountersCounter = 0;
+		if (updateCountersCounter++ == 0)
 		{
-			m_tuningWorkspace->onTimer();
+			std::vector<ClientLib::TuningSource> sourcesInfo = m_tuningConnection.tuningSourcesInfo();
+			m_filterStorage.updateCounters(m_tuningSignalManager, m_tuningConnection, sourcesInfo, m_configController.configuration().lmStatusFlagMode(), nullptr);
 		}
-	}
+		updateCountersCounter %= 2;
 
-	if  (event->timerId() == m_mainWindowTimerId_500ms)
-	{
-		std::vector<ClientLib::TuningSource> sourcesInfo = m_tuningConnection.tuningSourcesInfo();
-
-		m_filterStorage.updateCounters(m_tuningSignalManager, m_tuningConnection, sourcesInfo, m_configController.configuration().lmStatusFlagMode(), nullptr);
+		// Update user interface
+		//
+		updateStatusBar();
 
 		emit timerTick500();
 	}
@@ -492,6 +486,7 @@ void MainWindow::createWorkspace()
 												m_tuningConnection,
 												nullptr,
 												m_filterStorage.root(),
+												true/*hasFilterTree*/,
 												this);
 	}
 
@@ -1084,10 +1079,6 @@ void MainWindow::slot_projectFiltersUpdated(QByteArray data)
 		QString completeErrorMessage = QObject::tr("Object Filters file loading error: %1").arg(errorStr);
 		m_logFile.writeError(completeErrorMessage);
 	}
-
-	m_filterStorage.createSchemaCounterFilters();
-
-
 }
 
 void MainWindow::slot_signalsUpdated(QByteArray data)
@@ -1253,7 +1244,7 @@ void MainWindow::slot_userFiltersChanged()
 
 	if (m_tuningWorkspace != nullptr)
 	{
-		m_tuningWorkspace->updateFilters(m_filterStorage.root());
+		m_tuningWorkspace->updateFilters();
 	}
 
 }

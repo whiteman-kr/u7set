@@ -5,7 +5,7 @@
 class SchemaDrawStatistics : public ITimeStats
 {
 public:
-	// ITimeStats implememntation
+	// ITimeStats implementation.
 	//
 	virtual void clear(const QString& module) override;
 	virtual void clear(const QString& module, const QString& item) override;

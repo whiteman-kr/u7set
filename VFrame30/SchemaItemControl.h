@@ -10,7 +10,7 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
-		/// \brief Get widget linked to SchemaItem.
+		/// \brief Get widget linked to SchemaItem. User must check the returned value for null. 
 		Q_PROPERTY(QWidget* widget MEMBER m_widget)
 
 	public:

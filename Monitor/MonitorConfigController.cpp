@@ -238,7 +238,7 @@ void MonitorConfigController::dump(const ConfigSettings& config) const
 
 	// --
 	//
-	m_logFile.writeMessage(QString("TuningEnabled = %.1").arg(config.tuningEnabled));
+	m_logFile.writeMessage(QString("TuningEnabled = %1").arg(config.tuningEnabled));
 	if (config.tuningEnabled == true)
 	{
 		for (const auto& ts : config.tuningServices)

@@ -1,0 +1,1 @@
+<Command Caption="wrfb32"		Code="0500"	CodeMask="07c0"	SimulationFunc="command_wrfb32"		ParseFunc="parse_wrfb32"	Description="Read 32-bit data from memory and write to AFB input"/>

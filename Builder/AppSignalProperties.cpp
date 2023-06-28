@@ -17,12 +17,83 @@
 	}
 
 
+bool AppSignalPropertyDescription::isValid() const
+{
+	return name.isEmpty() == false;
+}
+
+void AppSignalPropertyDescription::setEnumValues(const std::vector<std::pair<int, QString>>& enumValuesVector)
+{
+	enumValues.clear();
+
+	for(const auto& p : enumValuesVector)
+	{
+		enumValues.emplace(p.first, p.second);
+	}
+}
+
+void AppSignalPropertyDescription::joinEnumValues(const std::vector<std::pair<int, QString>>& enumValuesVector)
+{
+	for(const auto& p : enumValuesVector)
+	{
+#ifdef QT_DEBUG
+		auto it = enumValues.find(p.first);
+
+		if (it != enumValues.end())
+		{
+			Q_ASSERT(p.second == it->second);
+		}
+#endif
+		enumValues.emplace(p.first, p.second);
+	}
+}
+
+bool AppSignalPropertyDescription::getEnumValuesVector(std::vector<std::pair<int, QString>>* enumValuesVector) const
+{
+	TEST_PTR_RETURN_FALSE(enumValuesVector);
+
+	if (isEnumProperty() == false)
+	{
+		Q_ASSERT(false);
+		return false;
+	}
+
+	enumValuesVector->clear();
+	enumValuesVector->reserve(enumValues.size());
+
+	for(const auto& p : enumValues)
+	{
+		enumValuesVector->emplace_back(p.first, p.second);
+	}
+
+	return true;
+}
+
+bool AppSignalPropertyDescription::isEnumProperty() const
+{
+	return enumValues.size() > 0;
+}
+
+void AppSignalPropertyDescription::appendSignalID(int signalID)
+{
+	signalsWithThisProperty.insert(signalID);
+}
+
+bool AppSignalPropertyDescription::isSignalHaveProperty(int signalID) const
+{
+	return signalsWithThisProperty.contains(signalID);
+}
+
+bool AppSignalPropertyDescription::isSpecificProperty() const
+{
+	return specificProperty;
+}
+
 // -------------------------------------------------------------------------------------------------------------
 //
 // SignalSpecPropValue class implementation
 //
 // -------------------------------------------------------------------------------------------------------------
-
 
 const QString AppSignalProperties::categoryIdentification("1 Identification");
 const QString AppSignalProperties::categorySignalType("2 Signal type");
@@ -138,6 +209,37 @@ int AppSignalProperties::getPrecision()
 	}
 
 	return precision;
+}
+
+bool AppSignalProperties::isNonSpecificPropertyExists(const QString& propertyName) const
+{
+	Q_ASSERT(m_propertyDescription.size() > 0);
+
+	for(const AppSignalPropertyDescription& prop : m_propertyDescription)
+	{
+		if (prop.name == propertyName)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool AppSignalProperties::isPropertyExists(const AppSignal& signal, const QString& propertyName)
+{
+	AppSignalProperties signalProperties(signal, true);
+
+	if (signalProperties.isNonSpecificPropertyExists(propertyName) == true)
+	{
+		return true;
+	}
+
+	PropertyObject propObj;
+
+	propObj.parseSpecificPropertiesStruct(signal.specPropStruct());
+
+	return propObj.propertyExists(propertyName);
 }
 
 QString AppSignalProperties::lastEditedSignalPropsPrefix(const AppSignal& s)

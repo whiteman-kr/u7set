@@ -128,7 +128,7 @@ ArchiveWidget::ArchiveWidget(MonitorSignalManager* signalManager,
 	Q_ASSERT(m_signalManager);
 
 	static int no = 1;
-	QString name = QString("Monitor Archive %1").arg(no++);
+	QString name = tr("Monitor Archive %1").arg(no++);
 	MonitorArchive::registerWindow(name, this);
 
 	setAttribute(Qt::WA_DeleteOnClose);
@@ -584,15 +584,16 @@ void ArchiveWidget::exportButton()
 		return;
 	}
 
+	static QString path{"."};
 	QString fileName = QFileDialog::getSaveFileName(this,
 													tr("Save File"),
-													"untitled.pdf",
+													path + QDir::separator() + "untitled.pdf",
 													tr("Portable Documnet Format (*.pdf);;CSV Files, semicolon separated (*.csv);;Plaintext (*.txt);;HTML (*.html)"));
-
 	if (fileName.isEmpty() == true)
 	{
 		return;
 	}
+	path = QFileInfo(fileName).path(); // store path for next time
 
 	QFileInfo fileInfo(fileName);
 	QString extension = fileInfo.completeSuffix();
@@ -624,7 +625,7 @@ void ArchiveWidget::printButton()
 
 void ArchiveWidget::updateOrCancelButton()
 {
-	if (m_updateButton->text() == "Update")
+	if (m_updateButton->text() == tr("Update"))
 	{
 		if (m_source.acceptedSignals.empty() == true)
 		{
@@ -737,9 +738,9 @@ void ArchiveWidget::requestStatus(QString serverStatus, int requests, int replie
 	Q_ASSERT(m_statusBar);
 
 	m_statusBarTextLabel->setText(serverStatus);
-	m_statusBarStatesReceivedLabel->setText(QString("States received: %1").arg(states));
+	m_statusBarStatesReceivedLabel->setText(tr("States received: %1").arg(states));
 
-	m_statusBarNetworkRequestsLabel->setText(QString(" Network requests/replies: %1 / %2 ").arg(requests).arg(replies));
+	m_statusBarNetworkRequestsLabel->setText(tr(" Network requests/replies: %1 / %2 ").arg(requests).arg(replies));
 
 	updateUiState();
 	return;

@@ -2374,11 +2374,13 @@ namespace Log
 
 	void LogFileDialog::onLoad()
 	{
-		QString fileName = QFileDialog::getOpenFileName(this, tr("Select File"), QString(), "Log Files (*.log)");
+		static QString path{"."};
+		QString fileName = QFileDialog::getOpenFileName(this, tr("Select File"), path, "Log Files (*.log)");
 		if (fileName.isEmpty() == true)
 		{
 			return;
 		}
+		path = QFileInfo(fileName).path(); // store path for next time
 
 		m_loadedFromFile = true;
         m_loadedFileName = fileName;
@@ -2414,15 +2416,17 @@ namespace Log
 
 	void LogFileDialog::onExport()
 	{
+		static QString path{"."};
         QString fileName = QFileDialog::getSaveFileName(this,
 														tr("Save File"),
-														"Untitled.log",
+														path + QDir::separator() + "Untitled.log",
 														tr("Log files (*.log)"));
 
 		if (fileName.isEmpty() == true)
 		{
 			return;
 		}
+		path = QFileInfo(fileName).path(); // store path for next time
 
 		std::vector<LogFileRecord> exportRecords;
 

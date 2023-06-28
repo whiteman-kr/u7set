@@ -32,6 +32,8 @@ add_executable(${TARGET}
 	TuningSource.h
 	TuningSourceThread.cpp
 	TuningSourceThread.h
+	TuningSignal.cpp
+	TuningSignal.h
 )
 
 target_precompile_headers(${TARGET} PRIVATE

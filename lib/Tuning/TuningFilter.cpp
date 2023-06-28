@@ -974,33 +974,34 @@ bool TuningFilter::match(const AppSignalParam& object) const
 	{
 		return false;
 	}
+
 	if (signalType() == TuningFilter::SignalType::Discrete && object.isAnalog() == true)
 	{
 		return false;
 	}
 
-	if (processMaskList(object.lmEquipmentId(), m_equipmentIDMasks) == false)
+	if (processMaskList(object.lmEquipmentId(), m_cachedEquipmentIDMasks) == false)
 	{
 		return false;
 	}
 
-	if (processMaskList(object.appSignalId(), m_appSignalIDMasks) == false)
+	if (processMaskList(object.appSignalId(), m_cachedAppSignalIDMasks) == false)
 	{
 		return false;
 	}
 
-	if (processMaskList(object.customSignalId(), m_customAppSignalIDMasks) == false)
+	if (processMaskList(object.customSignalId(), m_cachedCustomAppSignalIDMasks) == false)
 	{
 		return false;
 	}
 
-	if (m_appSignalTags.isEmpty() == false)
+	if (m_cachedAppSignalTags.isEmpty() == false)
 	{
 		bool tagsFound = false;
 
-		const std::set<QString>& objectTags = object.tags();
+		auto objectTags = object.tags();
 
-		for (const QString& tag : m_appSignalTags)
+		for (const QString& tag : m_cachedAppSignalTags)
 		{
 			if (objectTags.find(tag) != objectTags.end())
 			{
@@ -1136,10 +1137,10 @@ bool TuningFilter::isEmpty() const
 {
 	if (m_signalType == SignalType::All &&
 		filterSignalsCount() == 0 &&
-		m_appSignalIDMasks.empty() == true &&
-		m_customAppSignalIDMasks.empty() == true &&
-		m_equipmentIDMasks.empty() == true &&
-		m_appSignalTags.empty() == true
+		m_cachedCustomAppSignalIDMasks.empty() == true &&
+		m_cachedEquipmentIDMasks.empty() == true &&
+		m_cachedAppSignalIDMasks.empty() == true &&
+		m_cachedAppSignalTags.empty() == true
 		)
 	{
 		return true;
@@ -1310,98 +1311,78 @@ void TuningFilter::setHasDiscreteCounter(bool value)
 
 QString TuningFilter::customAppSignalIDMask() const
 {
-	QString result;
-    for (const auto& s : m_customAppSignalIDMasks)
-	{
-		result += s + ';';
-	}
-	result.remove(result.length() - 1, 1);
-
-	return result;
+	return m_customAppSignalIDMasks;
 }
 
-void TuningFilter::setCustomAppSignalIDMask(const QString& value)
+void TuningFilter::setCustomAppSignalIDMask(QString value)
 {
+	m_customAppSignalIDMasks = value;
 	if (value.isEmpty() == true)
 	{
-		m_customAppSignalIDMasks.clear();
+		m_cachedCustomAppSignalIDMasks.clear();
 	}
 	else
 	{
-		m_customAppSignalIDMasks = value.split(';', Qt::SkipEmptyParts);
+		value.replace('\n', ';');
+		m_cachedCustomAppSignalIDMasks = value.split(';', Qt::SkipEmptyParts);
 	}
 
 }
 
 QString TuningFilter::equipmentIDMask() const
 {
-	QString result;
-    for (const auto& s : m_equipmentIDMasks)
-	{
-		result += s + ';';
-	}
-	result.remove(result.length() - 1, 1);
-
-	return result;
+	return m_equipmentIDMasks;
 }
 
-void TuningFilter::setEquipmentIDMask(const QString& value)
+void TuningFilter::setEquipmentIDMask(QString value)
 {
+	m_equipmentIDMasks = value;
 	if (value.isEmpty() == true)
 	{
-		m_equipmentIDMasks.clear();
+		m_cachedEquipmentIDMasks.clear();
 	}
 	else
 	{
-		m_equipmentIDMasks = value.split(';', Qt::SkipEmptyParts);
+		value.replace('\n', ';');
+		m_cachedEquipmentIDMasks = value.split(';', Qt::SkipEmptyParts);
 	}
 }
 
 QString TuningFilter::appSignalIDMask() const
 {
-	QString result;
-    for (const auto& s : m_appSignalIDMasks)
-	{
-		result += s + ';';
-	}
-	result.remove(result.length() - 1, 1);
-
-	return result;
+	return m_appSignalIDMasks;
 }
 
-void TuningFilter::setAppSignalIDMask(const QString& value)
+void TuningFilter::setAppSignalIDMask(QString value)
 {
+	m_appSignalIDMasks = value;
 	if (value.isEmpty() == true)
 	{
-		m_appSignalIDMasks.clear();
+		m_cachedAppSignalIDMasks.clear();
 	}
 	else
 	{
-		m_appSignalIDMasks = value.split(';', Qt::SkipEmptyParts);
+		value.replace('\n', ';');
+		m_cachedAppSignalIDMasks = value.split(';', Qt::SkipEmptyParts);
 	}
 }
 
 QString TuningFilter::appSignalTags() const
 {
-	QString result;
-    for (const auto& s : m_appSignalTags)
-	{
-		result += s + ';';
-	}
-	result.remove(result.length() - 1, 1);
-
-	return result;
+	return m_appSignalTags;
 }
 
-void TuningFilter::setAppSignalTags(const QString& value)
+void TuningFilter::setAppSignalTags(QString value)
 {
+	m_appSignalTags = value;
 	if (value.isEmpty() == true)
 	{
-		m_appSignalTags.clear();
+		m_cachedAppSignalTags.clear();
 	}
 	else
 	{
-		m_appSignalTags = value.split(';', Qt::SkipEmptyParts);
+		value.replace('\n', ';');
+		m_cachedAppSignalTags = value.split(';', Qt::SkipEmptyParts);
 	}
 }
 
@@ -2311,6 +2292,14 @@ void TuningFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalManag
         return;
     }
 
+	if (filter->parentFilter() == m_root.get() &&
+			filter->isCounter() == true &&
+			filter->counterType() == TuningFilter::CounterType::FilterTree)
+	{
+		// This filter is a template for schema and equipment counters
+		return;
+	}
+
 	size_t allCount = allHashes.size();
 
     std::vector<Hash> signalsHashes;
@@ -2381,25 +2370,22 @@ void TuningFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalManag
 
         filter->setSignalsHashes(signalsHashes);
 
-        if (filter->isSourceEquipment() == false)
+		// Set equipment hashes
+		//
+		std::vector<Hash> equipmentHashes;
+		if (filter->isSourceEquipment() == false)
         {
-            // Set equipment hashes
-
-            std::vector<Hash> equipmentHashes;
             for (auto it : equipmentHashesMap)
             {
                 equipmentHashes.push_back(it.first);
             }
-            filter->setEquipmentHashes(equipmentHashes);
         }
         else
         {
-            // Equipment filters can be processed easier
-
-            std::vector<Hash> equipmentHashes;
-            equipmentHashes.push_back(::calcHash(filter->caption()));
-            filter->setEquipmentHashes(equipmentHashes);
+			equipmentHashes.push_back(::calcHash(filter->caption()));	// Equipment filters can be processed easier
         }
+
+		filter->setEquipmentHashes(equipmentHashes);
 
         break;
     }
@@ -2409,4 +2395,3 @@ void TuningFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalManag
         createSignalsAndEqipmentHashes(objects, signalsHashes, filter->childFilter(i).get(), source);
     }
 }
-

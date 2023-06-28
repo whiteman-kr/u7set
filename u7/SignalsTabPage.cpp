@@ -37,7 +37,7 @@ SignalsDelegate::SignalsDelegate(AppSignalSetProvider* signalSetProvider, Signal
 	connect(this, &QAbstractItemDelegate::closeEditor, this, &SignalsDelegate::onCloseEditorEvent);
 }
 
-QWidget* SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
+QWidget* SignalsDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
 	int col = index.column();
 	int row = m_proxyModel->mapToSource(index).row();
@@ -47,6 +47,14 @@ QWidget* SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 	const AppSignal& s = m_signalSetProvider->getLoadedSignal(row);
 
 	AppSignalPropertyManager& manager = m_signalSetProvider->signalPropertyManager();
+
+	const AppSignalPropertyDescription& propDesc = manager.getPropertyDescription(col);
+
+	if (AppSignalProperties::isPropertyExists(s, propDesc.name) == false)
+	{
+		return nullptr;
+	}
+
 	manager.reloadPropertyBehaviour();
 
 	bool isExpert = theSettings.isExpertMode();
@@ -71,17 +79,23 @@ QWidget* SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		return nullptr;
 	}
 
-	m_signalSetProvider->loadSignal(m_signalSetProvider->key(row));	// update new checkedOut state on view
+	const AppSignal* appSignal = m_signalSetProvider->loadSignal(m_signalSetProvider->key(row));	// update new checkedOut state on view
 
-	auto values = manager.values(col);
+	TEST_PTR_RETURN_VALUE(appSignal, nullptr);
 
-	if (values.size() > 0)
+	if (manager.isEnumProperty(col) == true)
 	{
+		std::vector<std::pair<int, QString>> enumPropValues;
+
+		manager.getSignalEnumPropertyValues(*appSignal, col, &enumPropValues);
+
 		QComboBox* cb = new QComboBox(parent);
-		for (const auto& value : values)
+
+		for (const auto& value : enumPropValues)
 		{
 			cb->addItem(value.second, value.first);
 		}
+
 		return cb;
 	}
 
@@ -120,7 +134,8 @@ QWidget* SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 	case QMetaType::Bool:
 	{
 		QComboBox* cb = new QComboBox(parent);
-		cb->addItems(QStringList() << tr("False") << tr("True"));
+		cb->addItem("false", false);
+		cb->addItem("true", true);
 		return cb;
 	}
 	default:
@@ -145,17 +160,21 @@ QWidget* SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 	}
 }
 
-void SignalsDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const
+void SignalsDelegate::updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
+	Q_UNUSED(index);
+
 	editor->setGeometry(option.rect);
+
 	QComboBox* cb = dynamic_cast<QComboBox*>(editor);
+
 	if (cb != nullptr)
 	{
 		cb->showPopup();
 	}
 }
 
-void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
+void SignalsDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
 {
 	int col = index.column();
 	int row = m_proxyModel->mapToSource(index).row();
@@ -171,9 +190,7 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 	AppSignalPropertyManager& manager = m_signalSetProvider->signalPropertyManager();
 	bool isExpert = theSettings.isExpertMode();
 
-	const auto values = manager.values(col);
-
-	if (values.size() > 0)
+	if (manager.isEnumProperty(col))
 	{
 		if (cb == nullptr)
 		{
@@ -181,7 +198,8 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 			return;
 		}
 
-		cb->setCurrentIndex(cb->findData(manager.value(&s, col, isExpert)));
+		int curIndex = cb->findText(manager.value(&s, col, isExpert).toString());
+		cb->setCurrentIndex(curIndex);
 		return;
 	}
 
@@ -195,7 +213,7 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 			return;
 		}
 
-		cb->setCurrentIndex(manager.value(&s, col, isExpert).toBool());
+		cb->setCurrentIndex(cb->findData(manager.value(&s, col, isExpert).toBool()));
 		return;
 	}
 
@@ -227,8 +245,10 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 	}
 }
 
-void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const QModelIndex &index) const
+void SignalsDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
 {
+	Q_UNUSED(model);
+
 	int col = index.column();
 	int row = m_proxyModel->mapToSource(index).row();
 	if (row >= m_signalSetProvider->signalCount())
@@ -243,9 +263,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 	AppSignalPropertyManager& manager = m_signalSetProvider->signalPropertyManager();
 	bool isExpert = theSettings.isExpertMode();
 
-	const auto values = manager.values(col);
-
-	if (values.size() > 0)
+	if (manager.isEnumProperty(col) == true)
 	{
 		if (cb == nullptr)
 		{
@@ -276,7 +294,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 			return;
 		}
 
-		manager.setValue(&s, col, cb->currentIndex(), isExpert);
+		manager.setValue(&s, col, cb->currentData(), isExpert);
 		m_signalSetProvider->saveSignal(s);
 		signalIdForUndoOnCancelEditing = -1;
 		return;
@@ -350,8 +368,13 @@ void SignalsDelegate::onCloseEditorEvent(QWidget*, QAbstractItemDelegate::EndEdi
 	}
 }
 
-bool SignalsDelegate::editorEvent(QEvent *event, QAbstractItemModel *, const QStyleOptionViewItem &, const QModelIndex &)
+bool SignalsDelegate::editorEvent(QEvent* event, QAbstractItemModel* model,
+								  const QStyleOptionViewItem& option, const QModelIndex& index)
 {
+	Q_UNUSED(model);
+	Q_UNUSED(option);
+	Q_UNUSED(index);
+
 	if (event->type() == QEvent::MouseButtonDblClick)
 	{
 		emit itemDoubleClicked();
@@ -381,7 +404,6 @@ SignalsModel::~SignalsModel()
 {
 
 }
-
 
 int SignalsModel::rowCount(const QModelIndex& parentIndex) const
 {

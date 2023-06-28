@@ -33,6 +33,7 @@ SOURCES += \
 	TuningService.cpp \
 	TcpTuningServer.cpp \
 	TuningSource.cpp \
+	TuningSignal.cpp \
 	TuningMemory.cpp \
 	TuningClientContext.cpp \
 	TuningServiceMain.cpp \
@@ -45,6 +46,7 @@ HEADERS += \
 	TuningService.h \
 	TcpTuningServer.h \
 	TuningSource.h \
+	TuningSignal.h \
 	TuningMemory.h \
 	TuningClientContext.h \
 	TuningSourceThread.h

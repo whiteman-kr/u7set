@@ -1,0 +1,15 @@
+<AFBComponent Caption="SCALE" OpCode="14" HasRam="false" ImpVersion="108" VersionOpIndex="16" MaxInstCount="0" SimulationFunc="afb_scale_v108">
+    <Pin OpName="i_conf"		    OpIndex ="0"	PinType = "Param"/>
+    <Pin OpName="i_scal_k1_coef"    OpIndex ="1"	PinType = "Param"/>
+    <Pin OpName="i_scal_k2_coef"	OpIndex ="3"	PinType = "Param"/>
+    <Pin OpName="i_ui_data"		    OpIndex ="5"	PinType = "Input"/>
+    <Pin OpName="i_si_fp_data"	    OpIndex ="6"	PinType = "Input"/>
+    <Pin OpName="o_ui_result"	    OpIndex ="8"	PinType = "Output"/>
+    <Pin OpName="o_si_fp_result"	OpIndex ="9"	PinType = "Output"/>
+    <Pin OpName="o_scal_edi"	    OpIndex ="11"	PinType = "Output"/>
+    <Pin OpName="o_overflow"	    OpIndex ="12"	PinType = "Output"/>
+    <Pin OpName="o_underflow"	    OpIndex ="13"	PinType = "Output"/>
+    <Pin OpName="o_zero"		    OpIndex ="14"	PinType = "Output"/>
+    <Pin OpName="o_nan"		        OpIndex ="15"	PinType = "Output"/>
+    <Pin OpName="o_version"		    OpIndex ="16"	PinType = "Output"/>
+</AFBComponent>

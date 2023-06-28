@@ -93,12 +93,12 @@ void ArchiveTcpClient2::finish(QString error /*= QString{}*/)
 
 	if (error.isEmpty() == false)
 	{
-		updateStatistics("Finished: " + error);
+		updateStatistics(tr("Finished: ") + error);
 		m_logFile.writeError(error);
 	}
 	else
 	{
-		updateStatistics("Finished");
+		updateStatistics(tr("Finished"));
 	}
 
 	auto result = std::make_shared<ArchiveRequestResult>(std::move(m_result));

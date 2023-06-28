@@ -207,6 +207,11 @@ void DialogSettings::ok_clicked()
 
 	if (d.has_value() == true)
 	{
+		if (d.value().language != m_settings.language)
+		{
+			QMessageBox::warning(this, tr("Monitor"), tr("Language has been changed, please restart the application."));
+		}
+
 		m_settings = d.value();
 		accept();
 	}
@@ -229,15 +234,17 @@ void DialogSettings::saveAs_clicked()
 		return;
 	}
 
+	static QString path{"."};
 	QString fileName = QFileDialog::getSaveFileName(this,
 													tr("Save File"),
-													QString{},
+													path + QDir::separator(),
 													tr("ini File (*.ini);;All Files (*.*)"));
 
 	if (fileName.isEmpty() == true)
 	{
 		return;
 	}
+	path = QFileInfo(fileName).path(); // store path for next time
 
 	MonitorAppSettings ms;
 	ms.set(d.value());

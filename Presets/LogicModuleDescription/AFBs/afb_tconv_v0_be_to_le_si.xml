@@ -1,0 +1,30 @@
+<AFB id="#be_to_le_si_v1" Caption="be_to_le_si" Version="1.0005">
+	<Properties>
+		<Description>Converts big-endian to little-endian</Description>
+		<Category>Converter</Category>
+		<OpCode>28</OpCode>
+		<InternalUse>true</InternalUse>
+		<MinWidth>36</MinWidth>
+	</Properties>
+	<Inputs>
+		<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="2" Size="32"/>
+	</Inputs>
+	<Outputs>
+		<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="LittleEndian" DataFormat="SignedInt" OpIndex="5" Size="32"/>
+	</Outputs>
+	<Params>
+		<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+			<Value>2</Value>
+			<Default>2</Default>
+			<LowLimit>1</LowLimit>
+			<HighLimit>4</HighLimit>
+			<Script>
+				<Changed/>
+			</Script>
+		</Param>
+	</Params>
+	<CommonScript>
+		<Library/>
+		<AfterCreation/>
+	</CommonScript>
+</AFB>

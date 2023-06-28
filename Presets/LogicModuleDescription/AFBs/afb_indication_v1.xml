@@ -1,0 +1,10 @@
+<AFBComponent Caption="INDICATION" OpCode="29" HasRam="true" ImpVersion="1" VersionOpIndex="13" MaxInstCount="0" SimulationFunc="afb_indication_v1">
+	<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
+	<Pin OpName="i_input"		OpIndex ="4"	PinType = "Input"/>
+	<Pin OpName="i_ack"			OpIndex ="5"	PinType = "Input"/>
+	<Pin OpName="i_test"		OpIndex ="6"	PinType = "Input"/>
+	<Pin OpName="i_sync"		OpIndex ="7"	PinType = "Input"/>
+	<Pin OpName="o_result"		OpIndex ="8"	PinType = "Output"/>
+	<Pin OpName="o_version"		OpIndex ="13"	PinType = "Output"/>
+	<Pin OpName="o_univibrator"	OpIndex ="14"	PinType = "Output"/>
+</AFBComponent>

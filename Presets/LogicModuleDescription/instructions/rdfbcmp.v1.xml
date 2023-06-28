@@ -1,0 +1,1 @@
+<Command Caption="rdfbcmp"		Code="0340"	CodeMask="07c0"	SimulationFunc="command_rdfbcmp"	ParseFunc="parse_rdfbcmp"	Description="Read 16-bit word from AFB output, compare to constant and set flag if equal"/>

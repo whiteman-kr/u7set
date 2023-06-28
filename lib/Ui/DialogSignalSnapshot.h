@@ -82,7 +82,11 @@ public:
 		AnalogInput,
 		AnalogOutput,
 		DiscreteInput,
-		DiscreteOutput
+		DiscreteOutput,
+		AnalogInternal,
+		DiscreteInternal,
+		Tunable,
+		Count
 	};
 
 	enum class MaskType
@@ -91,7 +95,8 @@ public:
 		AppSignalId,
 		CustomAppSignalId,
 		EquipmentId,
-		LmEquipmentId
+		LmEquipmentId,
+		Count
 	};
 
 public:
@@ -340,8 +345,8 @@ private:
 
 	bool m_firstShow = true;
 
-	static const QString m_maskHelp;
-	static const QString m_tagsHelp;
+	QString m_maskHelp;
+	QString m_tagsHelp;
 
 	DialogSignalSnapshotSettings m_settings;
 };

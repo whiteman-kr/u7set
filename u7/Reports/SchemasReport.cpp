@@ -128,14 +128,16 @@ void SchemasReportDialog::browseClicked()
 {
 	if (m_type == Type::SelectFile)
 	{
-		QString path = QFileDialog::getSaveFileName(this, qAppName(), "./", QObject::tr("PDF documents (*.pdf)"));
+		static QString path{"."};
+		QString fileName = QFileDialog::getSaveFileName(this, qAppName(), path + QDir::separator(), QObject::tr("PDF documents (*.pdf)"));
 
-		if (path.isNull() == true || path.isEmpty() == true)
+		if (fileName.isNull() == true || fileName.isEmpty() == true)
 		{
 			return;
 		}
+		path = QFileInfo(fileName).path(); // store path for next time
 
-		m_editReportPath->setText(QDir::toNativeSeparators(path));
+		m_editReportPath->setText(QDir::toNativeSeparators(fileName));
 	}
 	else
 	{

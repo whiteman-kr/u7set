@@ -225,9 +225,8 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 
 #ifdef GITLAB_CI_BUILD
 	theLog.writeMessage(tr("Commit SHA: %1").arg(CI_COMMIT_SHA));
-	theLog.writeMessage(tr("Branch: %1").arg(CI_BUILD_REF_SLUG));
+	theLog.writeMessage(tr("Branch: %1").arg(CI_COMMIT_REF_SLUG));
 	theLog.writeMessage(tr("Build Date: %1").arg(BUILD_DATE));
-	theLog.writeMessage(tr("Build Host: %1").arg(COMPUTERNAME));
 #else
 #endif
 
@@ -468,12 +467,14 @@ void ModuleConfigurator::readClicked()
 		{
 			ApplicationTabPage* page = dynamic_cast<ApplicationTabPage*>(m_tabWidget->currentWidget());
 
-			QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"));
+			static QString path{"."};
+			QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), path + QDir::separator());
 
 			if (fileName.isEmpty() == true)
 			{
 				return;
 			}
+			path = QFileInfo(fileName).path(); // store path for next time
 
 			std::optional<std::vector<int>> selectedUarts = page->selectedUarts();
 

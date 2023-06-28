@@ -2291,8 +2291,6 @@ bool DbController::getLatestSignalsWithUserID(std::vector<AppSignal>* out, QWidg
 
 }
 
-
-
 bool DbController::checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates, QWidget* parentWidget)
 {
 	if (signalIDs == nullptr)
