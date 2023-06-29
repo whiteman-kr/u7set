@@ -78,13 +78,18 @@ public:
 
 	enum class SignalType
 	{
-		All = 0,
-		AnalogInput,
-		AnalogOutput,
-		DiscreteInput,
-		DiscreteOutput,
-		AnalogInternal,
-		DiscreteInternal,
+		Any = 0,
+		Analog,
+		Discrete,
+		Count
+	};
+
+	enum class SignalRole
+	{
+		Any = 0,
+		Input,
+		Output,
+		Internal,
 		Tunable,
 		Count
 	};
@@ -120,6 +125,8 @@ public:
 	// Operations
 
 	void setSignalType(SignalType type);
+
+	void setSignalRole(SignalRole role);
 
 	void setMaskType(SignalSnapshotModel::MaskType type);
 
@@ -168,8 +175,9 @@ private:
 
 	// Filtering parameters
 
-	SignalType m_signalType = SignalType::All;
-	MaskType m_maskType = MaskType::AppSignalId;
+	SignalType m_signalType = SignalType::Any;
+	SignalRole m_signalRole = SignalRole::Any;
+	MaskType m_maskType = MaskType::CustomAppSignalId;
 	QStringList m_masks;
 	QStringList m_tags;
 	QString m_dataServiceId;
@@ -189,15 +197,15 @@ struct DialogSignalSnapshotSettings
 	QByteArray horzHeader;
 	int horzHeaderCount = 0;	// Stores SnapshotColumns::ColumnCount constant to restore default settings if columns set changes
 
-	bool typeSetAutomatically = false;
-	SignalSnapshotModel::SignalType signalType = SignalSnapshotModel::SignalType::All;
+	//bool typeSetAutomatically = false;
+	//SignalSnapshotModel::SignalType signalType = SignalSnapshotModel::SignalType::All;
 
-	bool maskSetAutomatically = false;
+	//bool maskSetAutomatically = false;
 	QStringList maskList;
-	SignalSnapshotModel::MaskType maskType = SignalSnapshotModel::MaskType::AppSignalId;
+	//SignalSnapshotModel::MaskType maskType = SignalSnapshotModel::MaskType::AppSignalId;
 
-	bool tagsSetAutomatically = false;
-	QStringList tagsList;
+	//bool tagsSetAutomatically = false;
+	//QStringList tagsList;
 
 	int sortColumn = 0;
 	Qt::SortOrder sortOrder = Qt::AscendingOrder;
@@ -251,7 +259,6 @@ public:
 	void setLmEquipmentId(const QString& lmEquipmentId);
 	void setSignalsMask(const QStringList& masks);
 	void setSignalsTags(const QStringList& tags);
-
 	void resetSignalsType();
 
 public slots:
@@ -279,6 +286,7 @@ private slots:
 	void tableViewdoubleClicked(const QModelIndex &index);
 	void sortIndicatorChanged(int column, Qt::SortOrder order);
 	void typeComboCurrentIndexChanged(int index);
+	void roleComboCurrentIndexChanged(int index);
 	void editMaskReturnPressed();
 	void editTagsReturnPressed();
 	void schemaComboCurrentIndexChanged(int index);
@@ -309,6 +317,7 @@ private:
 
 	// Ui
 	QComboBox* m_typeCombo = nullptr;
+	QComboBox* m_roleCombo = nullptr;
 	QComboBox* m_schemaCombo = nullptr;
 	QComboBox* m_maskTypeCombo = nullptr;
 	QComboBox* m_serverCombo = nullptr;
@@ -349,5 +358,14 @@ private:
 	QString m_tagsHelp;
 
 	DialogSignalSnapshotSettings m_settings;
+
+	bool m_storeType = true;
+	bool m_storeRole = true;
+	bool m_storeMaskData = true;
+	bool m_storeTags = true;
+	static inline SignalSnapshotModel::SignalType m_storedType{SignalSnapshotModel::SignalType::Any};
+	static inline SignalSnapshotModel::SignalRole m_storedRole{SignalSnapshotModel::SignalRole::Any};
+	static inline SignalSnapshotModel::MaskType m_storedMaskType{SignalSnapshotModel::MaskType::All};
+	static inline QStringList m_storedTags;
 };
 
