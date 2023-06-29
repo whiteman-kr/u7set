@@ -333,7 +333,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0310.sql", "Upgrade to version 310, LAN section is modified in LM description files"},
 	{":/DatabaseUpgrade/Upgrade0311.sql", "Upgrade to version 311, Added AdditionSizes section to AFB bus_switch in LM description files"},
 	{":/DatabaseUpgrade/Upgrade0312.sql", "Upgrade to version 312, Removed outs med_in, max_in, min_in for median AFBs, set sim functions for AFBs"},
-	{":/DatabaseUpgrade/Upgrade0313.sql", "Upgrade to version 313, Changed set_flags vesrion so it can be updated after new opcode 255"},
+	{":/DatabaseUpgrade/Upgrade0313.sql", "Upgrade to version 313, Changed set_flags version so it can be updated after new opcode 255"},
 	{":/DatabaseUpgrade/Upgrade0314.sql", "Upgrade to version 314, Added SetFlagsToInput property to simlock, mismatch_* AFB"},
 	{":/DatabaseUpgrade/Upgrade0315.sql", "Upgrade to version 315, SetFlagsToInput renamed to AssignFlags in simlock, mismatch_* AFB"},
 	{":/DatabaseUpgrade/Upgrade0316.sql", "Upgrade to version 316, AFB integrator and derive have min and max as inputs"},
@@ -409,6 +409,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0386.sql", "Upgrade to version 386, Removed output median_fp(si).validity (AFB version 8) from LMs LM1_SR05, LM1_SR20, LM11_SR90"},
 	{":/DatabaseUpgrade/Upgrade0387.sql", "Upgrade to version 387, Move from manual LM Descriptions to generated, removed all LMs except SF40, SR03, SR04, SR05, SR20, SR90"},
 	{":/DatabaseUpgrade/Upgrade0388.sql", "Upgrade to version 388, Add presets of LMs SR05 and SR20"},
+	{":/DatabaseUpgrade/Upgrade0389.sql", "Upgrade to version 389, LMs SR05, SR20, SR90: AFB MEM changed from version 8 to version 9"},
 };
 
 int DbWorker::counter = 0;
