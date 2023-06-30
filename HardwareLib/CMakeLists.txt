@@ -10,7 +10,7 @@ find_package(Qt6 REQUIRED COMPONENTS Core Network Xml Concurrent Qml)
 
 set(TARGET HardwareLib)
 
-add_library(${TARGET} STATIC
+qt_add_library(${TARGET} STATIC
 	Afb.cpp
 	Afb.h
 	Connection.cpp

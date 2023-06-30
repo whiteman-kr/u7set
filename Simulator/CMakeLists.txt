@@ -18,7 +18,7 @@ endif (MSVC)
 
 set(TARGET Simulator)
 
-add_library(${TARGET} STATIC
+qt_add_library(${TARGET} STATIC
 	SimAfb.cpp
 	SimAfb.h
 	SimAppDataLanInterface.cpp

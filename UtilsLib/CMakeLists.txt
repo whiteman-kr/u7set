@@ -10,7 +10,7 @@ find_package(Qt6 REQUIRED COMPONENTS Core Network Xml Widgets)
 
 set(TARGET UtilsLib)
 
-add_library(${TARGET} STATIC
+qt_add_library(${TARGET} STATIC
 	CUtils.h
 	CsvFile.h
 	CsvFile.cpp
