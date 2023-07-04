@@ -9,6 +9,16 @@
         <translation>Фільтр часу</translation>
     </message>
     <message>
+        <location filename="../LogFile.cpp" line="1587"/>
+        <source>Start Time:</source>
+        <translation>Початковий час:</translation>
+    </message>
+    <message>
+        <location filename="../LogFile.cpp" line="1592"/>
+        <source>End Time:</source>
+        <translation>Кінцевий час:</translation>
+    </message>
+    <message>
         <location filename="../LogFile.cpp" line="1612"/>
         <source>Set</source>
         <translation>Встановити</translation>
@@ -32,12 +42,12 @@
 <context>
     <name>Log::LogFile</name>
     <message>
-        <location filename="../LogFile.cpp" line="2515"/>
+        <location filename="../LogFile.cpp" line="2519"/>
         <source>Logging started:</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="2516"/>
+        <location filename="../LogFile.cpp" line="2520"/>
         <source>-- SessionHash: %1</source>
         <translation></translation>
     </message>
@@ -46,9 +56,14 @@
     <name>Log::LogFileDialog</name>
     <message>
         <location filename="../LogFile.cpp" line="1726"/>
-        <location filename="../LogFile.cpp" line="2411"/>
+        <location filename="../LogFile.cpp" line="2413"/>
         <source>Log View - %1</source>
         <translation>Журнал - %1</translation>
+    </message>
+    <message>
+        <location filename="../LogFile.cpp" line="1736"/>
+        <source>Type:</source>
+        <translation>Тип:</translation>
     </message>
     <message>
         <location filename="../LogFile.cpp" line="1739"/>
@@ -159,7 +174,7 @@
         <location filename="../LogFile.cpp" line="2132"/>
         <location filename="../LogFile.cpp" line="2224"/>
         <location filename="../LogFile.cpp" line="2289"/>
-        <location filename="../LogFile.cpp" line="2403"/>
+        <location filename="../LogFile.cpp" line="2405"/>
         <source>Total records: %1, Errors: %2, Warnings: %3</source>
         <translation>Всього записів: %1, помилок: %2, попереджень: %3</translation>
     </message>
@@ -169,32 +184,32 @@
         <translation>Текст не знайдено!</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="2377"/>
+        <location filename="../LogFile.cpp" line="2378"/>
         <source>Select File</source>
         <translation>Обрати файл</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="2418"/>
+        <location filename="../LogFile.cpp" line="2421"/>
         <source>Save File</source>
         <translation>Зберегти файл</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="2420"/>
+        <location filename="../LogFile.cpp" line="2423"/>
         <source>Log files (*.log)</source>
         <translation>Файли журналу (*.log)</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="2441"/>
+        <location filename="../LogFile.cpp" line="2445"/>
         <source>No data to export!</source>
         <translation>Немає даних для експорту!</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="2448"/>
+        <location filename="../LogFile.cpp" line="2452"/>
         <source>File creation error!</source>
         <translation>Помилка створення файлу!</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="2459"/>
+        <location filename="../LogFile.cpp" line="2463"/>
         <source>Export complete.</source>
         <translation>Ескпорт завершено.</translation>
     </message>

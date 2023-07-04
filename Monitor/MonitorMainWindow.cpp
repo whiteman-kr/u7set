@@ -279,9 +279,10 @@ void MonitorMainWindow::showTuningLoginControls()
 
 		// Adjust m_loginUserNameLabel width to have place for all usernames
 		//
-		int maxUsernameSpace = -1;
-
 		QWidget* loginUserTimeoutActionWidget = m_toolBar->widgetForAction(m_loginUserTimeoutAction);
+
+		int maxUsernameSpace = loginUserTimeoutActionWidget->fontMetrics().horizontalAdvance(m_loginUserTimeoutAction->text());
+
 		if (loginUserTimeoutActionWidget == nullptr)
 		{
 			Q_ASSERT(loginUserTimeoutActionWidget);

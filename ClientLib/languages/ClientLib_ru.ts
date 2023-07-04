@@ -40,6 +40,34 @@
     </message>
 </context>
 <context>
+    <name>ClientLib::DialogTuningPassword</name>
+    <message>
+        <location filename="../TuningUserManager.cpp" line="222"/>
+        <source>Tuning Login</source>
+        <translation type="unfinished">Ввод пароля</translation>
+    </message>
+    <message>
+        <location filename="../TuningUserManager.cpp" line="234"/>
+        <source>Login:</source>
+        <translation type="unfinished">Логин:</translation>
+    </message>
+    <message>
+        <location filename="../TuningUserManager.cpp" line="237"/>
+        <source>Password:</source>
+        <translation type="unfinished">Пароль:</translation>
+    </message>
+    <message>
+        <location filename="../TuningUserManager.cpp" line="244"/>
+        <source>OK</source>
+        <translation type="unfinished">ОК</translation>
+    </message>
+    <message>
+        <location filename="../TuningUserManager.cpp" line="248"/>
+        <source>Cancel</source>
+        <translation type="unfinished">Отмена</translation>
+    </message>
+</context>
+<context>
     <name>ClientLib::RtTrendTcpClient</name>
     <message>
         <location filename="../RtTrendTcpClient.cpp" line="237"/>
@@ -68,43 +96,38 @@
 <context>
     <name>ClientLib::TuningConnection</name>
     <message>
-        <location filename="../TuningConnection.cpp" line="208"/>
+        <location filename="../TuningConnection.cpp" line="212"/>
         <source>%1: </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningConnection.cpp" line="215"/>
+        <location filename="../TuningConnection.cpp" line="219"/>
         <source>active client is %1, %2</source>
         <translation>активный клиент: %1, %2</translation>
     </message>
     <message>
-        <location filename="../TuningConnection.cpp" line="219"/>
+        <location filename="../TuningConnection.cpp" line="223"/>
         <source> (current)</source>
         <translation> (текущий)</translation>
     </message>
     <message>
-        <location filename="../TuningConnection.cpp" line="224"/>
+        <location filename="../TuningConnection.cpp" line="228"/>
         <source>active</source>
         <translation>активный</translation>
     </message>
     <message>
-        <location filename="../TuningConnection.cpp" line="295"/>
+        <location filename="../TuningConnection.cpp" line="299"/>
         <source>writeTuningSignal(), There is limits mismatch in signal &apos;%1&apos;. Operation is disabled.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningConnection.cpp" line="344"/>
+        <location filename="../TuningConnection.cpp" line="348"/>
         <source>writeTuningSignal(%1, %2) - Unsupported value type (%3), type must be bool, integer or double.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningConnection.cpp" line="378"/>
+        <location filename="../TuningConnection.cpp" line="382"/>
         <source>writeTuningSignal(%1, %2) - type bool is implicitly converted to SignedInt32.</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../TuningConnection.cpp" line="393"/>
-        <source>writeTuningSignal(%1, %2) - casting double to SignedInt32 can result in loss of precision.</source>
         <translation></translation>
     </message>
     <message>
@@ -131,192 +154,230 @@
 <context>
     <name>ClientLib::TuningTcpClient</name>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="143"/>
+        <location filename="../TuningTcpClient.cpp" line="145"/>
         <source>Tuning Source [%1] is %2.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="143"/>
+        <location filename="../TuningTcpClient.cpp" line="145"/>
         <source>activated</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="143"/>
+        <location filename="../TuningTcpClient.cpp" line="145"/>
         <source>deactivated</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="204"/>
+        <location filename="../TuningTcpClient.cpp" line="213"/>
         <source>&apos;Apply&apos; command is sent.</source>
         <translation>Отправлена команда Apply.</translation>
     </message>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="222"/>
+        <location filename="../TuningTcpClient.cpp" line="229"/>
         <source>onClientThreadFinished(), connection established.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="245"/>
+        <location filename="../TuningTcpClient.cpp" line="256"/>
         <source>onDisconnection(), connection closed.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="267"/>
+        <location filename="../TuningTcpClient.cpp" line="278"/>
         <source>onReplyTimeout(), reply timeout.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="312"/>
+        <location filename="../TuningTcpClient.cpp" line="337"/>
         <source>processReply(): Wrong requestId, %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="414"/>
+        <location filename="../TuningTcpClient.cpp" line="495"/>
         <source>requestTuningSourcesInfo(), isConnected() == false.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="420"/>
+        <location filename="../TuningTcpClient.cpp" line="501"/>
         <source>requestTuningSourcesInfo(), isClearToSendRequest() == false, reconnecting.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="445"/>
+        <location filename="../TuningTcpClient.cpp" line="526"/>
         <source>m_tuningDataSourcesInfoReply(), error received: %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="499"/>
+        <location filename="../TuningTcpClient.cpp" line="580"/>
         <source>requestTuningSourcesState(), isConnected() == false.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="505"/>
+        <location filename="../TuningTcpClient.cpp" line="586"/>
         <source>requestTuningSourcesState(), isClearToSendRequest() == false, reconnecting.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="530"/>
+        <location filename="../TuningTcpClient.cpp" line="611"/>
         <source>processTuningSourcesState(), error received: %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="581"/>
+        <location filename="../TuningTcpClient.cpp" line="662"/>
         <source>Access Key</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="586"/>
+        <location filename="../TuningTcpClient.cpp" line="667"/>
         <source>SOR is set</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="591"/>
+        <location filename="../TuningTcpClient.cpp" line="672"/>
         <source>LM Status Flag</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="636"/>
+        <location filename="../TuningTcpClient.cpp" line="717"/>
         <source>requestActivateTuningSource(), isConnected() == false.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="642"/>
+        <location filename="../TuningTcpClient.cpp" line="723"/>
         <source>requestActivateTuningSource(), isClearToSendRequest() == false, reconnecting.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="686"/>
+        <location filename="../TuningTcpClient.cpp" line="767"/>
         <source>processActivateTuningSource(), error received: %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="702"/>
+        <location filename="../TuningTcpClient.cpp" line="783"/>
+        <source>requestReadRecentTuningSignals(), isConnected() == false.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../TuningTcpClient.cpp" line="789"/>
+        <source>requestReadRecentTuningSignals(), isClearToSendRequest() == false, reconnecting.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../TuningTcpClient.cpp" line="837"/>
         <source>requestReadTuningSignals(), isConnected() == false.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="708"/>
+        <location filename="../TuningTcpClient.cpp" line="843"/>
         <source>isClearToSendRequest(), isClearToSendRequest() == false, reconnecting.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="776"/>
-        <source>processReadTuningSignals(), error received: %1</source>
-        <translation></translation>
+        <location filename="../TuningTcpClient.cpp" line="933"/>
+        <source>requestReadChangedTuningSignals(), isConnected() == false.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="797"/>
-        <source>processReadTuningSignals(), TuningSignalState error received: %1</source>
-        <translation></translation>
+        <location filename="../TuningTcpClient.cpp" line="939"/>
+        <source>requestReadChangedTuningSignals(), isClearToSendRequest() == false, reconnecting.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="858"/>
+        <location filename="../TuningTcpClient.cpp" line="960"/>
+        <source>processReadChangedTuningSignals(), error received: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../TuningTcpClient.cpp" line="1137"/>
+        <source>processTuningSignalsReadReply(), error received: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../TuningTcpClient.cpp" line="1170"/>
+        <source>processTuningSignalStateMessage(), TuningSignalState error received: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../TuningTcpClient.cpp" line="1004"/>
         <source>requestWriteTuningSignals(), isConnected() == false.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="864"/>
+        <location filename="../TuningTcpClient.cpp" line="1010"/>
         <source>requestWriteTuningSignals(), isClearToSendRequest() == false, reconnecting.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="923"/>
+        <location filename="../TuningTcpClient.cpp" line="1051"/>
         <source>processWriteTuningSignals(), error received: %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="938"/>
+        <location filename="../TuningTcpClient.cpp" line="1066"/>
         <source>processWriteTuningSignals(), TuningSignalWriteResult error received: %1, hash = %2</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="955"/>
+        <location filename="../TuningTcpClient.cpp" line="1083"/>
         <source>requestApplyTuningSignals(), isConnected() == false.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="961"/>
+        <location filename="../TuningTcpClient.cpp" line="1089"/>
         <source>requestApplyTuningSignals(), isClearToSendRequest() == false, reconnecting.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="984"/>
+        <location filename="../TuningTcpClient.cpp" line="1112"/>
         <source>processApplyTuningSignals(), error received: %1</source>
         <translation></translation>
     </message>
+</context>
+<context>
+    <name>ClientLibUi::DialogTuningPassword</name>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="998"/>
-        <source>reset()</source>
-        <translation></translation>
+        <source>Tuning Login</source>
+        <translation type="obsolete">Ввод пароля</translation>
+    </message>
+    <message>
+        <source>Login:</source>
+        <translation type="obsolete">Логин:</translation>
+    </message>
+    <message>
+        <source>Password:</source>
+        <translation type="obsolete">Пароль:</translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation type="obsolete">ОК</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation type="obsolete">Отмена</translation>
     </message>
 </context>
 <context>
     <name>DialogTuningPassword</name>
     <message>
-        <location filename="../TuningUserManager.cpp" line="54"/>
         <source>Tuning Login</source>
-        <translation>Ввод пароля</translation>
+        <translation type="vanished">Ввод пароля</translation>
     </message>
     <message>
-        <location filename="../TuningUserManager.cpp" line="66"/>
         <source>Login:</source>
-        <translation>Логин:</translation>
+        <translation type="vanished">Логин:</translation>
     </message>
     <message>
-        <location filename="../TuningUserManager.cpp" line="69"/>
         <source>Password:</source>
-        <translation>Пароль:</translation>
+        <translation type="vanished">Пароль:</translation>
     </message>
     <message>
-        <location filename="../TuningUserManager.cpp" line="76"/>
         <source>OK</source>
-        <translation>ОК</translation>
+        <translation type="vanished">ОК</translation>
     </message>
     <message>
-        <location filename="../TuningUserManager.cpp" line="80"/>
         <source>Cancel</source>
-        <translation>Отмена</translation>
+        <translation type="vanished">Отмена</translation>
     </message>
 </context>
 <context>
@@ -353,7 +414,7 @@
         <translation>Новое значение</translation>
     </message>
     <message>
-        <location filename="../TuningUserManager.cpp" line="331"/>
+        <location filename="../TuningUserManager.cpp" line="202"/>
         <source>Wrong password!</source>
         <translation>Неверный пароль!</translation>
     </message>
