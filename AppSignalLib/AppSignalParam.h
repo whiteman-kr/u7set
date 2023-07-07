@@ -415,8 +415,11 @@ public:
 	[[nodiscard]] int precision() const;
 	void setPrecision(int value);
 
-	[[nodiscard]] double aperture();
-	void setAperture(double value);
+	[[nodiscard]] double fineAaperture();
+	void setFineAperture(double value);
+
+	[[nodiscard]] double coarseAaperture();
+	void setCoarseAperture(double value);
 
 	[[nodiscard]] double filteringTime();
 	void setFilteringTime(double value);
