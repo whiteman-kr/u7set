@@ -1628,6 +1628,15 @@ void DialogSignalSnapshot::createControls()
 		filterLayout->addLayout(tagsLayout, row, col++);
 	}
 
+	col++;
+
+	{
+		m_clearFilterButton = new QPushButton(tr("Clear Filter"));
+		m_clearFilterButton->setAutoDefault(false);
+		filterLayout->addWidget(m_clearFilterButton, row, col++);
+		connect(m_clearFilterButton, &QToolButton::clicked, this, &DialogSignalSnapshot::buttonClearFilterClicked);
+	}
+
 	filterLayout->setSpacing(4);
 
 	filterLayout->setColumnStretch(0, 0);
@@ -1642,16 +1651,19 @@ void DialogSignalSnapshot::createControls()
 	QHBoxLayout* exPrintLayout = new QHBoxLayout();
 
 	QPushButton* b = new QPushButton(tr("Export..."));
+	b->setAutoDefault(false);
 	connect(b, &QPushButton::clicked, this, &DialogSignalSnapshot::buttonExportClicked);
 	exPrintLayout->addWidget(b);
 
 	b = new QPushButton(tr("Print..."));
+	b->setAutoDefault(false);
 	connect(b, &QPushButton::clicked, this, &DialogSignalSnapshot::buttonPrintClicked);
 	exPrintLayout->addWidget(b);
 
 	exPrintLayout->addStretch();
 
 	m_buttonFixate = new QPushButton(tr("Fixate"));
+	m_buttonFixate->setAutoDefault(false);
 	m_buttonFixate->setCheckable(true);
 	exPrintLayout->addWidget(m_buttonFixate);
 
@@ -2207,6 +2219,60 @@ void DialogSignalSnapshot::buttonChooseTagsClicked()
 
     QSettings().setValue("DialogSignalSnapshot/tagsSelectorDialog/width", tagsSelectorDialog.width());
     QSettings().setValue("DialogSignalSnapshot/tagsSelectorDialog/height", tagsSelectorDialog.height());
+}
+
+void DialogSignalSnapshot::buttonClearFilterClicked()
+{
+	// Type
+	//
+	m_typeCombo->blockSignals(true);
+	m_typeCombo->setCurrentIndex(static_cast<int>(SignalSnapshotModel::SignalType::Any));
+	m_typeCombo->blockSignals(false);
+	m_model->setSignalType(SignalSnapshotModel::SignalType::Any);
+
+	// Role
+	//
+	m_roleCombo->blockSignals(true);
+	m_roleCombo->setCurrentIndex(static_cast<int>(SignalSnapshotModel::SignalRole::Any));
+	m_roleCombo->blockSignals(false);
+	m_model->setSignalRole(SignalSnapshotModel::SignalRole::Any);
+
+	// Mask
+	//
+	m_editMask->blockSignals(true);
+	m_editMask->clear();
+	m_editMask->blockSignals(false);
+
+	m_maskTypeCombo->blockSignals(true);	// Block to prevent signals from updating automatically
+	m_maskTypeCombo->setCurrentIndex(static_cast<int>(SignalSnapshotModel::MaskType::All));
+	m_maskTypeCombo->blockSignals(false);
+
+	m_model->setMasks({});
+
+	// Server
+	//
+	m_serverCombo->blockSignals(true);
+	m_serverCombo->setCurrentIndex(0);
+	m_serverCombo->blockSignals(false);
+	m_model->setDataServiceId({});
+
+	// Schema
+	//
+	m_schemaCombo->blockSignals(true);
+	m_schemaCombo->setCurrentIndex(0);
+	m_schemaCombo->blockSignals(false);
+	m_model->setSchemaAppSignals({});
+
+	// Tags
+	//
+	m_editTags->blockSignals(true);
+	m_editTags->clear();
+	m_editTags->blockSignals(false);
+
+	m_model->setTags({});
+
+	//
+	fillSignals();
 }
 
 DialogSignalSnapshotSettings theDialogSignalSnapshotSettings;

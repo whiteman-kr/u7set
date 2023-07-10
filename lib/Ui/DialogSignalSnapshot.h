@@ -295,6 +295,7 @@ private slots:
 	void buttonExportClicked();
 	void buttonPrintClicked();
     void buttonChooseTagsClicked();
+	void buttonClearFilterClicked();
 
 private:
 	void createControls();
@@ -340,6 +341,8 @@ private:
 
 	QCompleter* m_maskCompleter = nullptr;
 	QCompleter* m_tagsCompleter = nullptr;
+
+	QPushButton* m_clearFilterButton = nullptr;
 
 	QMenu m_formatMenu;
 

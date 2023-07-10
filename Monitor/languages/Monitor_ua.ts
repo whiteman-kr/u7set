@@ -1193,44 +1193,44 @@ Server: %14</source>
         <translation>Languauge/Мова:</translation>
     </message>
     <message>
-        <location filename="../DialogSettings.cpp" line="104"/>
+        <location filename="../DialogSettings.cpp" line="113"/>
         <source>Instance StrID cannot be empty</source>
         <translation>IД екземпляра не може бути порожнім</translation>
     </message>
     <message>
-        <location filename="../DialogSettings.cpp" line="120"/>
-        <location filename="../DialogSettings.cpp" line="151"/>
+        <location filename="../DialogSettings.cpp" line="129"/>
+        <location filename="../DialogSettings.cpp" line="160"/>
         <source>Incorrect format of the configurator IP Address.</source>
         <translation>Невірний формат IP-адреси.</translation>
     </message>
     <message>
-        <location filename="../DialogSettings.cpp" line="136"/>
-        <location filename="../DialogSettings.cpp" line="167"/>
+        <location filename="../DialogSettings.cpp" line="145"/>
+        <location filename="../DialogSettings.cpp" line="176"/>
         <source>Incorrect server port.</source>
         <translation>Невірний порт сервера.</translation>
     </message>
     <message>
-        <location filename="../DialogSettings.cpp" line="212"/>
+        <location filename="../DialogSettings.cpp" line="221"/>
         <source>Monitor</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../DialogSettings.cpp" line="212"/>
+        <location filename="../DialogSettings.cpp" line="221"/>
         <source>Language has been changed, please restart the application.</source>
         <translation>Мова була змінена, потрібно перезапустити програму.</translation>
     </message>
     <message>
-        <location filename="../DialogSettings.cpp" line="239"/>
+        <location filename="../DialogSettings.cpp" line="248"/>
         <source>Save File</source>
         <translation>Зберегти файл</translation>
     </message>
     <message>
-        <location filename="../DialogSettings.cpp" line="241"/>
+        <location filename="../DialogSettings.cpp" line="250"/>
         <source>ini File (*.ini);;All Files (*.*)</source>
         <translation>ini файл (*.ini);;Всі файли (*.*)</translation>
     </message>
     <message>
-        <location filename="../DialogSettings.cpp" line="255"/>
+        <location filename="../DialogSettings.cpp" line="264"/>
         <source>File %1 saving error.</source>
         <translation>Помилка запису файла %1.</translation>
     </message>
@@ -2071,47 +2071,47 @@ T?30T01? (маска для CustomAppSignalID),
         <translation>Теги</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1644"/>
+        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1653"/>
         <source>Export...</source>
         <translation>Експорт...</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1648"/>
+        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1658"/>
         <source>Print...</source>
         <translation>Друк...</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1654"/>
+        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1665"/>
         <source>Fixate</source>
         <translation>Фіксувати</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1679"/>
+        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1691"/>
         <source>Format</source>
         <translation>Формат</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1681"/>
+        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1693"/>
         <source>Auto-select</source>
         <translation>Авто-вибір</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1686"/>
+        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1698"/>
         <source>Decimal (as [-]9.9)</source>
         <translation>Десятковий (як [-]9.9)</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1691"/>
+        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1703"/>
         <source>Exponential (as [-]9.9e[+|-]999)</source>
         <translation>Експоненційний (як [-]9.9e[+|-]999)</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1698"/>
+        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1710"/>
         <source>Default</source>
         <translation>За замовч</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1705"/>
+        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1717"/>
         <source>.%1</source>
         <translation></translation>
     </message>
@@ -2134,93 +2134,98 @@ T?30T01? (маска для CustomAppSignalID),
         <translation>Роль</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1721"/>
-        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1730"/>
+        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1634"/>
+        <source>Clear Filter</source>
+        <translation>Скинути фільтр</translation>
+    </message>
+    <message>
+        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1733"/>
+        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1742"/>
         <source>Any</source>
         <translation>Будь-який</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1722"/>
+        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1734"/>
         <source>Analog</source>
         <translation>Аналоговий</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1723"/>
+        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1735"/>
         <source>Discrete</source>
         <translation>Дискретний</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1731"/>
+        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1743"/>
         <source>Input</source>
         <translation>Вхідний</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1732"/>
+        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1744"/>
         <source>Output</source>
         <translation>Вихідний</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1733"/>
+        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1745"/>
         <source>Internal</source>
         <translation>Внутрішній</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1734"/>
+        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1746"/>
         <source>Tunable</source>
         <translation>Сигнал тюнінгу</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1747"/>
+        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1759"/>
         <source>All</source>
         <translation>Весь текст</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1748"/>
+        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1760"/>
         <source>AppSignalID</source>
         <translation>Внутрішній ІД</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1749"/>
+        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1761"/>
         <source>CustomAppSignalID</source>
         <translation>ІД сигналу</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1750"/>
+        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1762"/>
         <source>EquipmentID</source>
         <translation>ІД обладнання</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1751"/>
+        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1763"/>
         <source>LmEquipmentID</source>
         <translation>ІД логічного модуля</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1761"/>
+        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1773"/>
         <source>All Servers</source>
         <translation>Всі сервери</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1867"/>
+        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="1879"/>
         <source>All Schemas</source>
         <translation>Всі схеми</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="2138"/>
+        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="2150"/>
         <source>Nothing to export.</source>
         <translation>Немає даних для експорту.</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="2144"/>
+        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="2156"/>
         <source>Save File</source>
         <translation>Зберегти файл</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="2146"/>
+        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="2158"/>
         <source>Portable Documnet Format (*.pdf);;CSV Files, semicolon separated (*.csv);;Plaintext (*.txt);;HTML (*.html)</source>
         <translation>Формат PDF (*.pdf);;Формат CSV (*.csv);;Plaintext (*.txt);;Формат HTML (*.html)</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="2169"/>
+        <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="2181"/>
         <source>Unsupported file format.</source>
         <translation>Непідтримуваний формат.</translation>
     </message>
