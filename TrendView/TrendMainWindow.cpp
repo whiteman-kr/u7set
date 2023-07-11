@@ -26,7 +26,8 @@ namespace TrendLib
 {
 
 	TrendMainWindow::TrendMainWindow(QWidget* parent) :
-		QMainWindow(parent, Qt::WindowSystemMenuHint | Qt::WindowMaximizeButtonHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
+		QMainWindow(parent, Qt::WindowSystemMenuHint | Qt::WindowMinimizeButtonHint |
+					Qt::WindowMaximizeButtonHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 		ui(new Ui::TrendsMainWindow)
 	{
 		ui->setupUi(this);
@@ -78,7 +79,7 @@ namespace TrendLib
 		connect(ui->actionPrint, &QAction::triggered, this, &TrendMainWindow::actionPrintTriggered);
 		connect(ui->actionExit, &QAction::triggered, this, &TrendMainWindow::actionExitTriggered);
 		connect(ui->actionAbout, &QAction::triggered, this, &TrendMainWindow::actionAboutTriggered);
-		connect(ui->actionAutoScale, &QAction::triggered, this, &TrendMainWindow::actionAutoSclaeTriggered);
+		connect(ui->actionAutoScale, &QAction::triggered, this, &TrendMainWindow::actionAutoScaleTriggered);
 
 		createToolBar();
 
@@ -627,14 +628,19 @@ namespace TrendLib
 
 	void TrendMainWindow::actionOpenTriggered()
 	{
+		static QString path{"."};
 		QString fileName = QFileDialog::getOpenFileName(this,
 														tr("Open Trend File"),
-														".",
+														path,
 														tr("Trend (*.u7trend);;All Files (*.*)"));
 		if (fileName.isEmpty() == true)
 		{
 			return;
 		}
+
+		setWindowTitle(QFileInfo(fileName).baseName());
+
+		path = QFileInfo(fileName).path(); // store path for next time
 
 		Q_ASSERT(m_trendWidget);
 
@@ -697,9 +703,10 @@ namespace TrendLib
 
 	void TrendMainWindow::actionSaveTriggered()
 	{
+		static QString path{"."};
 		QString fileName = QFileDialog::getSaveFileName(this,
 														tr("Save File"),
-														"untitled.u7trend",
+														path + QDir::separator() + "untitled.u7trend",
 														tr("Trend (*.u7trend);;Images (*.png *.bmp *.jpg);;PDF files (*.pdf)"));
 
 		if (fileName.isEmpty() == true)
@@ -707,8 +714,12 @@ namespace TrendLib
 			return;
 		}
 
+		path = QFileInfo(fileName).path(); // store path for next time
+
 		QFileInfo fileInfo(fileName);
 		QString extension = fileInfo.completeSuffix();
+
+		setWindowTitle(fileInfo.baseName());
 
 		if (extension.compare(QLatin1String("u7trend"), Qt::CaseInsensitive) == 0)
 		{
@@ -918,7 +929,7 @@ namespace TrendLib
 		return;
 	}
 
-	void TrendMainWindow::actionAutoSclaeTriggered()
+	void TrendMainWindow::actionAutoScaleTriggered()
 	{
 		qDebug() << "Autoscale trend";
 
@@ -1330,7 +1341,7 @@ namespace TrendLib
 			});
 
 			QAction* autoscale = menu.addAction(tr("Scale to Fit"));
-			connect(autoscale, &QAction::triggered, this, &TrendMainWindow::actionAutoSclaeTriggered);
+			connect(autoscale, &QAction::triggered, this, &TrendMainWindow::actionAutoScaleTriggered);
 
 			QAction* remove = menu.addAction(tr("Remove"));
 			connect(remove, &QAction::triggered, this,

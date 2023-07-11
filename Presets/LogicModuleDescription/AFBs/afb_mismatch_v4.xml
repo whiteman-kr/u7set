@@ -1,0 +1,19 @@
+<AFBComponent Caption="MISMATCH" OpCode="27" HasRam="false" ImpVersion="4" VersionOpIndex="22" MaxInstCount="0" SimulationFunc="afb_mismatch_v4">
+    <Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
+    <Pin OpName="i_conf_n"		OpIndex ="1"	PinType = "Param"/>
+    <Pin OpName="i_ust"			OpIndex ="2"	PinType = "Param"/>
+    <Pin OpName="i_x1_data"		OpIndex ="4"	PinType = "Input"/>
+    <Pin OpName="i_x2_data"		OpIndex ="6"	PinType = "Input"/>
+    <Pin OpName="i_x3_data"		OpIndex ="8"	PinType = "Input"/>
+    <Pin OpName="i_x4_data"		OpIndex ="10"	PinType = "Input"/>
+    <Pin OpName="o_x1_mismatch"	OpIndex ="12"	PinType = "Output"/>
+    <Pin OpName="o_x2_mismatch"	OpIndex ="13"	PinType = "Output"/>
+    <Pin OpName="o_x3_mismatch"	OpIndex ="14"	PinType = "Output"/>
+    <Pin OpName="o_x4_mismatch"	OpIndex ="15"	PinType = "Output"/>
+    <Pin OpName="o_param_err"	OpIndex ="16"	PinType = "Output"/>
+    <Pin OpName="o_overflow"	OpIndex ="17"	PinType = "Output"/>
+    <Pin OpName="o_underflow"	OpIndex ="18"	PinType = "Output"/>
+    <Pin OpName="o_nan"			OpIndex ="20"	PinType = "Output"/>
+    <Pin OpName="o_amismatch_edi"	OpIndex ="21"	PinType = "Output"/>
+    <Pin OpName="o_version"		OpIndex ="22"	PinType = "Output"/>
+</AFBComponent>

@@ -4,34 +4,33 @@
 #include "../../../TrendView/TrendWidget.h"
 
 
-std::map<QString, SimTrendsWidget*> SimTrends::m_trendsList;
+std::list<SimTrendsWidget*> SimTrends::s_trendsList;
 
-std::vector<QString> SimTrends::getTrendsList()
+std::vector<SimTrendsWidget*> SimTrends::getTrendsList()
 {
-	std::vector<QString> result;
-	result.reserve(m_trendsList.size());
-
-	for (std::pair<QString, SimTrendsWidget*> p : m_trendsList)
-	{
-		result.push_back(p.first);
-	}
-
+	std::vector<SimTrendsWidget*> result{s_trendsList.begin(), s_trendsList.end()};
 	return result;
 }
 
-bool SimTrends::activateTrendWindow(QString trendName)
+bool SimTrends::activateTrendWindow(SimTrendsWidget* trendWidget)
 {
-	if (m_trendsList.count(trendName) != 1)
+	if (trendWidget == nullptr)
 	{
-		Q_ASSERT(m_trendsList.count(trendName) != 1);
+		Q_ASSERT(trendWidget);
 		return false;
 	}
 
-	SimTrendsWidget* widget = m_trendsList[trendName];
-	Q_ASSERT(widget);
+#ifdef QT_DEBUG
+	if (auto it = std::find(s_trendsList.begin(), s_trendsList.end(), trendWidget);
+		it == s_trendsList.end())
+	{
+		Q_ASSERT(false);
+		return false;
+	}
+#endif
 
-	widget->activateWindow();
-	widget->ensureVisible();
+	trendWidget->activateWindow();
+	trendWidget->ensureVisible();
 
 	return true;
 }
@@ -56,16 +55,27 @@ bool SimTrends::startTrendApp(std::shared_ptr<SimIdeSimulator> simulator, const 
 	return false;
 }
 
-void SimTrends::registerTrendWindow(QString name, SimTrendsWidget* window)
+void SimTrends::registerTrendWindow(SimTrendsWidget* window)
 {
-	Q_ASSERT(m_trendsList.count(name) == 0);
-	m_trendsList[name] = window;
+#ifdef QT_DEBUG
+	auto it = std::find_if(s_trendsList.begin(), s_trendsList.end(), [&window](auto w)
+						   {
+							   return w == window;
+						   });
+
+	Q_ASSERT(it == s_trendsList.end());
+#endif
+
+	s_trendsList.push_back(window);
+	return;
 }
 
-void SimTrends::unregisterTrendWindow(QString name)
+void SimTrends::unregisterTrendWindow(const SimTrendsWidget* window)
 {
-	Q_ASSERT(m_trendsList.count(name) == 1);
-	m_trendsList.erase(name);
+	[[maybe_unused]] auto removed = s_trendsList.remove_if([window](auto w) { return w == window; });
+	Q_ASSERT(removed == 1);
+
+	return;
 }
 
 
@@ -76,16 +86,16 @@ SimTrendsWidget::SimTrendsWidget(std::shared_ptr<SimIdeSimulator> simulator, QWi
 	assert(m_simulator);
 
 static int no = 1;
-	QString trendName = QString("Simulator Trends %1").arg(no++);
-	SimTrends::registerTrendWindow(trendName, this);
+	QString trendName = tr("Simulator Trends %1").arg(no++);
+	SimTrends::registerTrendWindow(this);
 
 	setWindowTitle(trendName);
 
-	// Set ruller step to 5ms, as in simulator cycle alway multiple to 5
+	// Set ruler step to 5ms, as in simulator cycle always multiple to 5
 	//
 	trend().rulerSet().setRulerStep(5);
 
-	// Set deafult lane duration (5m), it differs from default value (1h)
+	// Set default lane duration (5m), it differs from default value (1h)
 	//
 	m_timeCombo->setCurrentIndex(5);	// 5 is index in combo box
 	m_trendWidget->setLaneDuration(5_min);
@@ -97,7 +107,7 @@ static int no = 1;
 
 	m_refreshAction->setVisible(false);
 
-	// TimeType, assume we have only simulated PlandTime
+	// TimeType, assume we have only simulated PlantTime
 	//
 	m_trendWidget->setTimeType(E::TimeType::Plant);
 	m_timeTypeCombo->setCurrentIndex(m_timeTypeCombo->findData(QVariant::fromValue(E::TimeType::Plant)));
@@ -136,7 +146,7 @@ static int no = 1;
 
 SimTrendsWidget::~SimTrendsWidget()
 {
-	SimTrends::unregisterTrendWindow(this->windowTitle());
+	SimTrends::unregisterTrendWindow(this);
 	return;
 }
 
@@ -232,7 +242,7 @@ void SimTrendsWidget::timerEvent(QTimerEvent*)
 void SimTrendsWidget::signalsButton()
 {
 	std::vector<TrendLib::TrendSignalParam> acceptedTrendSignals = signalSet().trendSignals();
-	std::vector<TrendLib::ArchiveServer> archiveServers;	// Simulation does not have acrhve servers;
+	std::vector<TrendLib::ArchiveServer> archiveServers;	// Simulation does not have archive servers;
 
 	// --
 	//

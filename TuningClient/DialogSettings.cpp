@@ -156,14 +156,15 @@ void DialogSettings::on_m_useCustomFilters_stateChanged(int arg1)
 
 void DialogSettings::on_m_filtersBrowse_clicked()
 {
+	static QString path{"."};
 	QString fileName = QFileDialog::getOpenFileName(this, tr("Filters File"),
-													QString(),
+													path,
 													tr("Filter Files (*.xml)"));
-
 	if (fileName.isNull() == true)
 	{
 		return;
 	}
+	path = QFileInfo(fileName).path(); // store path for next time
 
 	ui->m_customFiltersEdit->setText(QDir::toNativeSeparators(fileName));
 

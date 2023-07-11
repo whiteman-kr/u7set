@@ -10,7 +10,7 @@ find_package(Qt6 REQUIRED COMPONENTS Network)
 
 set(TARGET AppSignalLib)
 
-add_library(${TARGET} STATIC
+qt_add_library(${TARGET} STATIC
 	AppSignalStateFlags.h
 	AppSignalStateFlags.cpp
 	ComparatorSet.h

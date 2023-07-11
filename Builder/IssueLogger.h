@@ -446,7 +446,7 @@ namespace Builder
 		void errALC5162(QString connectionID);											// In single-port connection %1 Port2EquipmentID property is not empty.
 		void errALC5163(QString connectionID);											// Port1EquipmentID property is empty in connection %1.
 		void errALC5164(QString connectionID);											// Port2EquipmentID property is empty in connection %1.
-		void wrnALC5165(QString lmEquipmentID);											// Tuning is enabled for module %1 but tunable signals is not found.
+		void wrnALC5165(QString lmEquipmentID);											// Tuning is enabled for module %1 but tunable signals are not found.
 		void errALC5166(QString lmEquipmentID);											// Tunable signals is found in module %1 but tuning is not enabled.
 		void wrnALC5167(QString appSignalID);											// Signal %1 is excluded from build.
 		void errALC5168(QString flagSignalID,

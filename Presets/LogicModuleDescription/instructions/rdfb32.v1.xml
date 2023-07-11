@@ -1,0 +1,1 @@
+<Command Caption="rdfb32"		Code="0540"	CodeMask="07c0"	SimulationFunc="command_rdfb32"		ParseFunc="parse_rdfb32"	Description="Read 32-bit data from AFB output and write to memory"/>

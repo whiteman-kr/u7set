@@ -286,6 +286,7 @@ namespace Sim
 		//
 		void afb_mem_v7(AfbComponentInstance* instance);
 		void afb_mem_v8(AfbComponentInstance* instance);
+		void afb_mem_v9(AfbComponentInstance* instance);
 		void afb_mem_private(AfbComponentInstance* instance, int conf, int count, int version);
 
 		//	MATH, OpCode 13
@@ -434,6 +435,7 @@ namespace Sim
 			{QStringLiteral("afb_damper_v112"),		&CommandProcessor_LM5_LM6::afb_damper_v112},			// 11
 			{QStringLiteral("afb_mem_v7"),			&CommandProcessor_LM5_LM6::afb_mem_v7},					// 12
 			{QStringLiteral("afb_mem_v8"),			&CommandProcessor_LM5_LM6::afb_mem_v8},					// 12
+			{QStringLiteral("afb_mem_v9"),			&CommandProcessor_LM5_LM6::afb_mem_v9},					// 12
 			{QStringLiteral("afb_math_v104"),		&CommandProcessor_LM5_LM6::afb_math_v104},				// 13
 			{QStringLiteral("afb_math_v105"),		&CommandProcessor_LM5_LM6::afb_math_v105},				// 13
 			{QStringLiteral("afb_scale_v108"),		&CommandProcessor_LM5_LM6::afb_scale_v108},				// 14

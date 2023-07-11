@@ -187,16 +187,16 @@ public:
 	// Signal Masks
 
 	QString customAppSignalIDMask() const;
-	void setCustomAppSignalIDMask(const QString& value);
+	void setCustomAppSignalIDMask(QString value);
 
 	QString equipmentIDMask() const;
-	void setEquipmentIDMask(const QString& value);
+	void setEquipmentIDMask(QString value);
 
 	QString appSignalIDMask() const;
-	void setAppSignalIDMask(const QString& value);
+	void setAppSignalIDMask(QString value);
 
 	QString appSignalTags() const;
-	void setAppSignalTags(const QString& value);
+	void setAppSignalTags(QString value);
 
 	// Filter Signals
 
@@ -334,10 +334,17 @@ private:
 
 	// Filters
 	//
-	QStringList m_customAppSignalIDMasks;
-	QStringList m_equipmentIDMasks;
-	QStringList m_appSignalIDMasks;
-	QStringList m_appSignalTags;
+	QString m_customAppSignalIDMasks;
+	QString m_equipmentIDMasks;
+	QString m_appSignalIDMasks;
+	QString m_appSignalTags;
+
+	// Cached filters splitted to string list, \n replaced to ';'
+	//
+	QStringList m_cachedCustomAppSignalIDMasks;
+	QStringList m_cachedEquipmentIDMasks;
+	QStringList m_cachedAppSignalIDMasks;
+	QStringList m_cachedAppSignalTags;
 
 	// Tab appearance
 	//

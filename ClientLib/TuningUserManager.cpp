@@ -13,141 +13,12 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
-#include <QComboBox>
-#include <QLineEdit>
 #include <QPushButton>
 #include <QMessageBox>
 #include <QDateTime>
 
-namespace
-{
-	//
-	// DialogTuningPassword
-	//
-
-	class DialogTuningPassword : public QDialog
-	{
-	public:
-		explicit DialogTuningPassword(const ClientLib::TuningUserManager& userManager, QWidget* parent);
-		~DialogTuningPassword() = default;
-
-		[[nodiscard]] QString userName() const;
-		[[nodiscard]] QString password() const;
-
-	private:
-		virtual void accept();
-
-	private:
-		const ClientLib::TuningUserManager& m_tuningUserManager;
-
-		QString m_password;
-		static inline QString m_lastUser;
-
-		QComboBox* m_userCombo = nullptr;
-		QLineEdit* m_passwordEdit = nullptr;
-	};
-
-	DialogTuningPassword::DialogTuningPassword(const ClientLib::TuningUserManager& userManager, QWidget* parent) :
-		QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
-		m_tuningUserManager(userManager)
-	{
-		setWindowTitle(tr("Tuning Login"));
-
-		setMinimumSize(400, 150);
-
-		// Setup UI
-
-		m_userCombo = new QComboBox();
-
-		m_passwordEdit = new QLineEdit();
-		m_passwordEdit->setEchoMode(QLineEdit::Password);
-
-		QVBoxLayout* mainLayout = new QVBoxLayout();
-		mainLayout->addWidget(new QLabel(tr("Login:")));
-		mainLayout->addWidget(m_userCombo);
-		mainLayout->addStretch();
-		mainLayout->addWidget(new QLabel(tr("Password:")));
-		mainLayout->addWidget(m_passwordEdit);
-		mainLayout->addStretch();
-
-		QHBoxLayout* buttonsLayout = new QHBoxLayout();
-		buttonsLayout->addStretch();
-
-		QPushButton* b = new QPushButton(tr("OK"));
-		connect(b, &QPushButton::clicked, this, &DialogTuningPassword::accept);
-		buttonsLayout->addWidget(b);
-
-		b = new QPushButton(tr("Cancel"));
-		connect(b, &QPushButton::clicked, this, &DialogTuningPassword::reject);
-		buttonsLayout->addWidget(b);
-
-		mainLayout->addLayout(buttonsLayout);
-
-		setLayout(mainLayout);
-
-		m_passwordEdit->setFocus();
-
-		// Fill user list
-
-		int selectedIndex = -1;
-
-		int i = 0;
-
-		for (const QString& user : m_tuningUserManager.tuningUserAccounts())
-		{
-			m_userCombo->addItem(user, i);
-
-			if (user == m_lastUser)
-			{
-				selectedIndex = i;
-			}
-
-			i++;
-		}
-
-		if (selectedIndex != -1)
-		{
-			m_userCombo->setCurrentIndex(selectedIndex);
-		}
-	}
-
-	QString DialogTuningPassword::userName() const
-	{
-		return m_lastUser;
-	}
-
-	QString DialogTuningPassword::password() const
-	{
-		return m_password;
-	}
-
-	void DialogTuningPassword::accept()
-	{
-		QVariant data = m_userCombo->currentData();
-		if (data.isValid() == false)
-		{
-			return;
-		}
-
-		int index = data.toInt();
-
-		if (index < 0 || index >= m_tuningUserManager.tuningUserAccounts().size())
-		{
-			assert(false);
-			return;
-		}
-
-		m_lastUser =  m_userCombo->currentText();
-		m_password = m_passwordEdit->text();
-
-		QDialog::accept();
-	}
-}
-
-
 namespace ClientLib
 {
-
 	//
 	// TuningUserManager
 	//
@@ -289,7 +160,7 @@ namespace ClientLib
 			return false;
 		}
 
-		DialogTuningPassword d(*this, parent);
+		ClientLib::DialogTuningPassword d(*this, parent);
 		if (d.exec() != QDialog::Accepted)
 		{
 			return false;
@@ -339,5 +210,104 @@ namespace ClientLib
 		}
 
 		return result;
+	}
+
+	//
+	// DialogTuningPassword
+	//
+	DialogTuningPassword::DialogTuningPassword(const ClientLib::TuningUserManager& userManager, QWidget* parent) :
+		QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
+		m_tuningUserManager(userManager)
+	{
+		setWindowTitle(tr("Tuning Login"));
+
+		setMinimumSize(400, 150);
+
+		// Setup UI
+
+		m_userCombo = new QComboBox();
+
+		m_passwordEdit = new QLineEdit();
+		m_passwordEdit->setEchoMode(QLineEdit::Password);
+
+		QVBoxLayout* mainLayout = new QVBoxLayout();
+		mainLayout->addWidget(new QLabel(tr("Login:")));
+		mainLayout->addWidget(m_userCombo);
+		mainLayout->addStretch();
+		mainLayout->addWidget(new QLabel(tr("Password:")));
+		mainLayout->addWidget(m_passwordEdit);
+		mainLayout->addStretch();
+
+		QHBoxLayout* buttonsLayout = new QHBoxLayout();
+		buttonsLayout->addStretch();
+
+		QPushButton* b = new QPushButton(tr("OK"));
+		connect(b, &QPushButton::clicked, this, &DialogTuningPassword::accept);
+		buttonsLayout->addWidget(b);
+
+		b = new QPushButton(tr("Cancel"));
+		connect(b, &QPushButton::clicked, this, &DialogTuningPassword::reject);
+		buttonsLayout->addWidget(b);
+
+		mainLayout->addLayout(buttonsLayout);
+
+		setLayout(mainLayout);
+
+		m_passwordEdit->setFocus();
+
+		// Fill user list
+
+		int selectedIndex = -1;
+
+		int i = 0;
+
+		for (const QString& user : m_tuningUserManager.tuningUserAccounts())
+		{
+			m_userCombo->addItem(user, i);
+
+			if (user == m_lastUser)
+			{
+				selectedIndex = i;
+			}
+
+			i++;
+		}
+
+		if (selectedIndex != -1)
+		{
+			m_userCombo->setCurrentIndex(selectedIndex);
+		}
+	}
+
+	QString DialogTuningPassword::userName() const
+	{
+		return m_lastUser;
+	}
+
+	QString DialogTuningPassword::password() const
+	{
+		return m_password;
+	}
+
+	void DialogTuningPassword::accept()
+	{
+		QVariant data = m_userCombo->currentData();
+		if (data.isValid() == false)
+		{
+			return;
+		}
+
+		int index = data.toInt();
+
+		if (index < 0 || index >= m_tuningUserManager.tuningUserAccounts().size())
+		{
+			assert(false);
+			return;
+		}
+
+		m_lastUser =  m_userCombo->currentText();
+		m_password = m_passwordEdit->text();
+
+		QDialog::accept();
 	}
 }

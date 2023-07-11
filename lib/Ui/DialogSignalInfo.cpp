@@ -982,6 +982,14 @@ void DialogSignalInfo::on_pushButtonSetValue_clicked()
 		return;
 	}
 
+	if (value < m_signal.tuningLowBound().toDouble() || value > m_signal.tuningHighBound().toDouble())
+	{
+		QMessageBox::critical(this, qAppName(), tr("Input value is out of range (%1..%2)!")
+							  .arg(m_signal.tuningLowBound().toString())
+							  .arg(m_signal.tuningHighBound().toString()));
+		return;
+	}
+
 	int result = QMessageBox::warning(this, qAppName(),
 									  tr("Are you sure you want to write value '%1'\n\nto signal '%2' ('%3')?")
 									  .arg(strValue).
@@ -1302,7 +1310,6 @@ void DialogSignalInfo::fillSignalInfo()
 		str = QString("%1 (%2)").arg(str).arg(E::valueToString<E::AnalogAppSignalFormat>(static_cast<int>(m_signal.analogSignalFormat())));
 	}
 
-
 	str = QString("%1, %2").arg(str).arg(tr(E::valueToString<E::SignalInOutType>(m_signal.inOutType()).toUtf8()));
 
 	ui->editSignalType->setText(str);
@@ -1367,7 +1374,8 @@ void DialogSignalInfo::fillProperties()
 		QTreeWidgetItem* itemGroup3 = new QTreeWidgetItem(QStringList() << tr("Parameters"));
 
 		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("Precision") << QString::number(m_signal.precision())));
-		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("Aperture") << QString::number(m_signal.aperture(), 'f', m_signal.precision())));
+		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("FineAperture") << QString::number(m_signal.fineAaperture(), 'f', m_signal.precision())));
+		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("CoarseAperture") << QString::number(m_signal.coarseAaperture(), 'f', m_signal.precision())));
 		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("FilteringTime") << QString::number(m_signal.filteringTime(), 'f', m_signal.precision())));
 		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("SpreadTolerance") << QString::number(m_signal.spreadTolerance(), 'f', m_signal.precision())));
 

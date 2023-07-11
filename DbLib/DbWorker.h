@@ -21,10 +21,8 @@ class DbWorker : public QObject
 {
 	Q_OBJECT
 
-private:
-	DbWorker();
-
 public:
+	DbWorker() = delete;
     DbWorker(DbProgress* progress);
 
 	static void getSignalData(QSqlQuery& q, AppSignal &s);

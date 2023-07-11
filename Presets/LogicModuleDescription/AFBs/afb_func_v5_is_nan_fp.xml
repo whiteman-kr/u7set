@@ -1,0 +1,30 @@
+<AFB id="#is_nan_fp_v1" Caption="is_nan_fp" Version="1.1">
+	<Properties>
+		<Description>Function Block determines if the floating point input signal is a not-a-number (NaN) value.</Description>
+		<Category>Math</Category>
+		<OpCode>16</OpCode>
+		<InternalUse>false</InternalUse>
+		<MinWidth>26</MinWidth>
+	</Properties>
+	<Inputs>
+		<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="1" Size="32"/>
+	</Inputs>
+	<Outputs>
+		<Pin OpName="o_result" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="10" Size="1"/>
+	</Outputs>
+	<Params>
+		<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+			<Value>13</Value>
+			<Default>13</Default>
+			<LowLimit>1</LowLimit>
+			<HighLimit>16</HighLimit>
+			<Script>
+				<Changed/>
+			</Script>
+		</Param>
+	</Params>
+	<CommonScript>
+		<Library/>
+		<AfterCreation/>
+	</CommonScript>
+</AFB>

@@ -28,7 +28,7 @@ namespace VFrame30
 
 		sRepresents a class that contains schemas displayed on the screen. In scripts this object is accessed by global <b>view</b> object.
 
-		Implements following functons:
+		Implements following functions:
 
 		- schemas switching;
 		- items and widgets searching;
@@ -124,7 +124,7 @@ namespace VFrame30
 		Q_PROPERTY(QString schemaCaption READ schemaCaption)
 		Q_PROPERTY(QString SchemaCaption READ schemaCaption)
 
-		/// \brief Get current ScriptSchema object. To get SchemaID or SchemaCaption for perfomance reason use appropriate properties of view <b>view.schemaID</b> and <b>view.schemaCaption</b>.
+		/// \brief Get current ScriptSchema object. To get SchemaID or SchemaCaption for performance reason use appropriate properties of view <b>view.schemaID</b> and <b>view.schemaCaption</b>.
 		Q_PROPERTY(QObject* schema READ schema)
 		Q_PROPERTY(QObject* Schema READ schema)
 
@@ -218,7 +218,7 @@ namespace VFrame30
 		/// \brief Sets the value of the variable specified by name.
 		void setVariable(QString name, const QVariant& value);
 
-		/// \brief Get schema by index. Avoid using this function for perfomance reason. To get schemas' identifiers and captions use schemaCaptionById, schemaCaptionByIndex, schemaIdByIndex
+		/// \brief Get schema by index. Avoid using this function for performance reason. To get schemas' identifiers and captions use schemaCaptionById, schemaCaptionByIndex, schemaIdByIndex
 		QObject* schemaByIndex(int schemaIndex);
 
 		/// \brief Get schema caption by schema identifier.

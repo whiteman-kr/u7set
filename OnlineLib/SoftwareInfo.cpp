@@ -31,7 +31,7 @@ void SoftwareInfo::init(E::SoftwareType softwareType,
 	m_minorVersion = minorVersion;
 
 #ifdef GITLAB_CI_BUILD
-	m_buildBranch = CI_BUILD_REF_SLUG;
+	m_buildBranch = CI_COMMIT_REF_SLUG;
 	m_commitSHA = CI_COMMIT_SHA;
 	m_commitNo = CI_PIPELINE_ID;
 #else

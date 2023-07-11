@@ -307,7 +307,7 @@ DialogSignalSearch::DialogSignalSearch(QWidget *parent, IAppSignalManager* appSi
 
 	// Setup UI
 	//
-	QLabel* l = new QLabel("SignalID");
+	QLabel* l = new QLabel(tr("SignalID"));
 	m_editSignalID = new QLineEdit();
 	connect(m_editSignalID, &QLineEdit::textEdited, this, &DialogSignalSearch::textEdited);
 
@@ -317,6 +317,7 @@ DialogSignalSearch::DialogSignalSearch(QWidget *parent, IAppSignalManager* appSi
 
 	m_tableView = new SignalSearchTableView();
 	m_tableView->horizontalHeader()->setHighlightSections(false);
+	m_tableView->horizontalHeader()->setStretchLastSection(true);
 
 	m_labelFound = new QLabel();
 
@@ -481,7 +482,7 @@ void DialogSignalSearch::search()
 		}
 	}
 
-	m_labelFound->setText(QString("Signals found: %1").arg(foundSignals.size()));
+	m_labelFound->setText(tr("Signals found: %1").arg(foundSignals.size()));
 
 	m_model.setSignals(&foundSignals);
 }

@@ -18,7 +18,7 @@ endif (MSVC)
 
 set(TARGET Builder)
 
-add_library(${TARGET} STATIC
+qt_add_library(${TARGET} STATIC
 	../GatewayService/GatewayDescription.cpp
 	../GatewayService/GatewayDescription.h
 	../GatewayService/GatewayDescriptionParser.cpp

@@ -11,7 +11,7 @@ find_package(Qt6 REQUIRED COMPONENTS Gui Svg Widgets PrintSupport)
 
 set(TARGET TrendView)
 
-add_library(${TARGET} STATIC
+qt_add_library(${TARGET} STATIC
 	../lib/ISignalDataServer.h
 	../lib/ISignalHasTag.h
 	DialogChooseTrendSignals.cpp

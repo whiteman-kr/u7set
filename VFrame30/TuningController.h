@@ -125,6 +125,15 @@ namespace VFrame30
 		/// \brief Writes value of tuning signal. On success, returns true. Returns false if signal is not found, connection to TuningService is not established or value is out of range.
 		bool writeValue(QString appSignalId, QVariant value);
 
+		/// \brief Writes value of tuning signal of boolean value. On success, returns true. Returns false if signal is not found, connection to TuningService is not established.
+		bool writeValueBool(QString appSignalId, bool value);
+
+		/// \brief Writes value of tuning signal of integer value. On success, returns true. Returns false if signal is not found, connection to TuningService is not established.
+		bool writeValueInt(QString appSignalId, int value);
+
+		/// \brief Writes value of tuning signal of double value. On success, returns true. Returns false if signal is not found, connection to TuningService is not established.
+		bool writeValueDouble(QString appSignalId, double value);
+
 		/// \brief Copies written values from <b>Tuning Mode Tuning Values</b> area to <b>Run Mode Tuning Values</b> area. Should be used in TuningClient scripts only when <b>AutoApply</b> property is set to <b>false</b>. Monitor always applies values automatically.
 		void apply();
 

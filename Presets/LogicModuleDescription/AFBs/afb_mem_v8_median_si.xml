@@ -1,0 +1,178 @@
+<AFB id="#median_si_v1" Caption="median_si" Version="1.0020">
+	<Properties>
+		<Description>Median and extremum Block outputs a median value and an extremum value (minimum and maximum) in accordance with control signals. Signed int data format</Description>
+		<Category>Logic</Category>
+		<OpCode>12</OpCode>
+		<InternalUse>false</InternalUse>
+		<MinWidth>28</MinWidth>
+	</Properties>
+	<Inputs>
+		<Pin OpName="i_1_oprd" Caption="in_1" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="10" Size="32"/>
+		<Pin OpName="i_2_oprd" Caption="in_2" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="12" Size="32"/>
+		<Pin OpName="i_3_oprd" Caption="in_3" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="14" Size="32"/>
+		<Pin OpName="i_4_oprd" Caption="in_4" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="16" Size="32"/>
+		<Pin OpName="i_5_oprd" Caption="in_5" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="18" Size="32"/>
+		<Pin OpName="i_6_oprd" Caption="in_6" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="20" Size="32"/>
+		<Pin OpName="i_7_oprd" Caption="in_7" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="22" Size="32"/>
+		<Pin OpName="i_8_oprd" Caption="in_8" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="24" Size="32"/>
+		<Pin OpName="i_1_en" Caption="in_1_en" Type="Discrete" ByteOrder="BigEndian" OpIndex="2" Size="1"/>
+		<Pin OpName="i_2_en" Caption="in_2_en" Type="Discrete" ByteOrder="BigEndian" OpIndex="3" Size="1"/>
+		<Pin OpName="i_3_en" Caption="in_3_en" Type="Discrete" ByteOrder="BigEndian" OpIndex="4" Size="1"/>
+		<Pin OpName="i_4_en" Caption="in_4_en" Type="Discrete" ByteOrder="BigEndian" OpIndex="5" Size="1"/>
+		<Pin OpName="i_5_en" Caption="in_5_en" Type="Discrete" ByteOrder="BigEndian" OpIndex="6" Size="1"/>
+		<Pin OpName="i_6_en" Caption="in_6_en" Type="Discrete" ByteOrder="BigEndian" OpIndex="7" Size="1"/>
+		<Pin OpName="i_7_en" Caption="in_7_en" Type="Discrete" ByteOrder="BigEndian" OpIndex="8" Size="1"/>
+		<Pin OpName="i_8_en" Caption="in_8_en" Type="Discrete" ByteOrder="BigEndian" OpIndex="9" Size="1"/>
+	</Inputs>
+	<Outputs>
+		<Pin OpName="o_med" Caption="med" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="28" Size="32"/>
+		<Pin OpName="o_max" Caption="max" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="30" Size="32"/>
+		<Pin OpName="o_min" Caption="min" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="32" Size="32"/>
+	</Outputs>
+	<Params>
+		<Param OpName="i_count" Caption="OperandCount" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+			<Value>3</Value>
+			<Default>3</Default>
+			<LowLimit>3</LowLimit>
+			<HighLimit>8</HighLimit>
+			<Script>
+				<Changed>
+					(function(videoItemFblElement, afbElement)
+					{
+						return createInputSignals(videoItemFblElement, afbElement);
+					})
+				</Changed>
+			</Script>
+		</Param>
+		<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="1" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+			<Value>1</Value>
+			<Script>
+				<Changed/>
+			</Script>
+		</Param>
+		<Param OpName="OutMax" Caption="OutMax" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+			<Value>0</Value>
+			<Default>0</Default>
+			<Script>
+				<Changed>
+					(function(videoItemFblElement, afbElement)
+					{
+						return createOutputSignals(videoItemFblElement, afbElement);
+					})
+				</Changed>
+			</Script>
+		</Param>
+		<Param OpName="OutMin" Caption="OutMin" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+			<Value>0</Value>
+			<Default>0</Default>
+			<Script>
+				<Changed>
+					(function(videoItemFblElement, afbElement)
+					{
+						return createOutputSignals(videoItemFblElement, afbElement);
+					})
+				</Changed>
+			</Script>
+		</Param>
+	</Params>
+	<CommonScript>
+		<Library>
+			function createInputSignals(videoItemFblElement, afbElement)
+			{
+				videoItemFblElement.removeInputSignals();
+
+				var count = videoItemFblElement.getParamIntValue("OperandCount");
+				if (count == -1)
+				{
+					return false;
+				}
+				if (count &lt; 3)
+				{
+					count = 3;
+				}
+				if (count &gt; 8)
+				{
+					count = 8;
+				}
+
+				var opIndex = 10;
+				for (var i = 0; i &lt; count; i++)
+				{
+					var afbInputSignal = afbElement.getAfbSignalByOpIndex(opIndex);
+					if (afbInputSignal != null)
+					{
+						var caption = afbInputSignal.jsCaption();
+						var type = afbInputSignal.jsType();
+						var operandIndex = afbInputSignal.operandIndex();
+						var size = afbInputSignal.size();
+						videoItemFblElement.addInputSignal(caption, type, operandIndex, size);
+					}
+					opIndex+=2;
+				}
+
+				opIndex = 2;
+				for (var i = 0; i &lt; count; i++)
+				{
+					var afbInputSignal = afbElement.getAfbSignalByOpIndex(opIndex);
+					if (afbInputSignal != null)
+					{
+						var caption = afbInputSignal.jsCaption();
+						var type = afbInputSignal.jsType();
+						var operandIndex = afbInputSignal.operandIndex();
+						var size = afbInputSignal.size();
+						videoItemFblElement.addInputSignal(caption, type, operandIndex, size);
+					}
+					opIndex++;
+				}
+
+				videoItemFblElement.adjustHeight();
+
+				return true;
+			}
+
+			function createOutputUnconditional(videoItemFblElement, afbElement, signalCaption)
+			{
+				var s = afbElement.getAfbSignalByCaption(signalCaption);
+				if (s != null)
+				{
+					videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+				}
+			}
+
+			function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
+			{
+				var show = videoItemFblElement.getParamBoolValue(paramName);
+				if (show == true)
+				{
+					var s = afbElement.getAfbSignalByCaption(signalCaption);
+					if (s != null)
+					{
+						videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+					}
+				}
+			}
+
+			function createOutputSignals(videoItemFblElement, afbElement)
+			{
+				videoItemFblElement.removeOutputSignals();
+
+				createOutputUnconditional(videoItemFblElement, afbElement, "med");	
+
+				createOutput(videoItemFblElement, afbElement, "OutMax", "max");
+				createOutput(videoItemFblElement, afbElement, "OutMin", "min");
+
+				videoItemFblElement.adjustHeight();
+
+				return true;
+			}
+		</Library>
+		<AfterCreation>
+			(function(videoItemFblElement, afbElement)
+			{
+				createInputSignals(videoItemFblElement, afbElement);
+				createOutputSignals(videoItemFblElement, afbElement);
+				return;
+			})
+		</AfterCreation>
+	</CommonScript>
+</AFB>

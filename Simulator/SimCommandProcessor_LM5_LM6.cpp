@@ -3761,6 +3761,21 @@ namespace Sim
 		return afb_mem_private(instance, conf, count, 8);
 	}
 
+	void CommandProcessor_LM5_LM6::afb_mem_v9(AfbComponentInstance* instance)
+	{
+		const int i_count = 0;			// Input count
+		const int i_conf = 1;			// SI/FP
+		const int maxInputCount = 8;
+
+		quint16 count = instance->param(i_count)->wordValue();
+		quint16 conf = instance->param(i_conf)->wordValue();
+
+		checkParamRange(count, 3, maxInputCount, QStringLiteral("i_count"));
+		checkParamRange(conf, 1, 2, QStringLiteral("i_conf"));
+
+		return afb_mem_private(instance, conf, count, 8);
+	}
+
 	void CommandProcessor_LM5_LM6::afb_mem_private(AfbComponentInstance* instance, int conf, int count, int version)
 	{
 		const int i_enable_1 = 2;		// up to 8 - opcodes: 2, 3, 4, 5, 6, 7, 8, 9
@@ -3787,7 +3802,7 @@ namespace Sim
 		//instance->addParamWord(o_med_index, 0);
 		//instance->addParamWord(o_max_index, 0);
 		//instance->addParamWord(o_min_index, 0);
-		//instance->addParamWord(o_dev_by_zero, 0);	// There is impossible div by zero, version 7. In version 8, 41st outpust is o_validity
+		//instance->addParamWord(o_dev_by_zero, 0);	// There is impossible div by zero, version 7. In version 9, 41st outpust is o_validity
 
 		if (conf == 1)		// SI - SignedInteger
 		{
@@ -3889,7 +3904,7 @@ namespace Sim
 
 		if (conf == 2)
 		{
-			// Floting Point
+			// Floating Point
 			//
 			struct Operand
 			{

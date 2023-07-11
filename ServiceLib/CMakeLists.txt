@@ -10,7 +10,7 @@ find_package(Qt6 REQUIRED COMPONENTS Core Network)
 
 set(TARGET ServiceLib)
 
-add_library(${TARGET} STATIC
+qt_add_library(${TARGET} STATIC
 	CommandLineParser.h
 	CommandLineParser.cpp
 	Service.h

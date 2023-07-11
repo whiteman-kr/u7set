@@ -25,7 +25,7 @@ ArchiveTcpClient2::ArchiveTcpClient2(const ArchiveSource& request,
 	m_result.archiveServiceId = m_serverSettings.equipmentId;
 
 	setRequestData(request);
-	updateStatistics("Construction");
+	updateStatistics(tr("Construction"));
 
 	connect(this, &Tcp::Client::signal_wrongServerID,
 		[this](const QString& errorMessage)
@@ -46,7 +46,7 @@ void ArchiveTcpClient2::cancelRequest()
 	m_logFile.writeMessage(tr("cancelRequest()"));
 	m_needCancelRequest = true;
 
-	updateStatistics("Canceled");
+	updateStatistics(tr("Canceled"));
 
 	return;
 }
@@ -93,12 +93,12 @@ void ArchiveTcpClient2::finish(QString error /*= QString{}*/)
 
 	if (error.isEmpty() == false)
 	{
-		updateStatistics("Finished: " + error);
+		updateStatistics(tr("Finished: ") + error);
 		m_logFile.writeError(error);
 	}
 	else
 	{
-		updateStatistics("Finished");
+		updateStatistics(tr("Finished"));
 	}
 
 	auto result = std::make_shared<ArchiveRequestResult>(std::move(m_result));
@@ -112,7 +112,7 @@ void ArchiveTcpClient2::finish(QString error /*= QString{}*/)
 
 void ArchiveTcpClient2::onTryConnectToServer(const HostAddressPort& serverAddr)
 {
-	updateStatistics("TryConnect");
+	updateStatistics(tr("TryConnect"));
 	Tcp::Client::onTryConnectToServer(serverAddr);
 
 	if (m_needCancelRequest == true)
@@ -140,7 +140,7 @@ void ArchiveTcpClient2::onTryConnectToServer(const HostAddressPort& serverAddr)
 
 void ArchiveTcpClient2::onConnection()
 {
-	updateStatistics("Connected");
+	updateStatistics(tr("Connected"));
 
 	qDebug() << "ArchiveTcpClient::onConnection()";
 	m_logFile.writeMessage(QString("onConnection()"));
@@ -156,7 +156,7 @@ void ArchiveTcpClient2::onConnection()
 
 void ArchiveTcpClient2::onDisconnection()
 {
-	updateStatistics("Disconnected");
+	updateStatistics(tr("Disconnected"));
 
 	qDebug() << "ArchiveTcpClient::onDisconnection";
 	m_logFile.writeMessage(QString("onDisconnection()"));
@@ -166,7 +166,7 @@ void ArchiveTcpClient2::onDisconnection()
 
 void ArchiveTcpClient2::onReplyTimeout()
 {
-	updateStatistics("Timeout");
+	updateStatistics(tr("Timeout"));
 
 	QString error = tr("ArchiveService (%1, %2) reply timeout.")
 			.arg(m_serverSettings.shortenId)

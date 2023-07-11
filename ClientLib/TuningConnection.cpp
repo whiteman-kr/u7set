@@ -394,10 +394,6 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 
 				if (valueType == QMetaType::Double)
 				{
-					m_logFile.writeWarning(tr("writeTuningSignal(%1, %2) - casting double to SignedInt32 can result in loss of precision.")
-										 .arg(appSignalId)
-										 .arg(value.toString()));
-
 					if (double valueDouble = value.toDouble();
 						valueDouble < std::numeric_limits<qint32>::min() || valueDouble > std::numeric_limits<qint32>::max())
 					{

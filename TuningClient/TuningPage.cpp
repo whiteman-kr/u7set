@@ -2022,14 +2022,16 @@ void TuningPage::slot_exportContentsToCSV()
 
 	int rowCount = m_model->rowCount();
 
+	static QString path{"."};
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Export to CSV"),
-													QString(),
+													path + QDir::separator(),
 													tr("CSV (*.csv)"));
 
 	if (fileName.isEmpty() == true)
 	{
 		return;
 	}
+	path = QFileInfo(fileName).path(); // store path for next time
 
 	QFile file(fileName);
 	if (file.open(QFile::WriteOnly | QFile::Truncate) == false)

@@ -1,0 +1,12 @@
+<AFBComponent Caption="TCONV" OpCode="28" HasRam="false" ImpVersion="1" VersionOpIndex="11" MaxInstCount="0" SimulationFunc="afb_tconv_v1">
+	<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
+	<Pin OpName="i_data_x"		OpIndex ="1"	PinType = "Input"/>
+	<Pin OpName="i_data"		OpIndex ="2"	PinType = "Input"/>
+	<Pin OpName="o_result_y"	OpIndex ="4"	PinType = "Output"/>
+	<Pin OpName="o_result"		OpIndex ="5"	PinType = "Output"/>
+	<Pin OpName="o_overflow"	OpIndex ="7"	PinType = "Output"/>
+	<Pin OpName="o_underflow"	OpIndex ="8"	PinType = "Output"/>
+	<Pin OpName="o_nan"			OpIndex ="9"	PinType = "Output"/>
+	<Pin OpName="o_tconv_edi"	OpIndex ="10"	PinType = "Output"/>
+	<Pin OpName="o_version"		OpIndex ="11"	PinType = "Output"/>
+</AFBComponent>
