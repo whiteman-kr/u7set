@@ -228,7 +228,7 @@ message AppDataSourceState
 	optional bool receivesData = 4 [default = false];
 	optional int64 uptime = 5 [default = 0];					// time from start of data receiving
 	optional uint32 receivedDataID = 6 [default = 0];
-	optional int64 rupFramePlantTime = 7 [default = 0];
+	optional int64 lmTime = 7 [default = 0];
 	optional uint32 rupFrameNumerator = 8 [default = 0];
 
 	optional double dataReceivingSpeed = 9 [default = 0];	    // bytes/sec
@@ -487,6 +487,8 @@ message TuningSourceState
 	optional int64 errReplySize = 73 [default = 0];
 	optional int64 errNoReply = 74 [default = 0];
 	optional int64 errTuningFrameUpdate = 75 [default = 0];
+
+	optional int64 lmTime = 76 [ default = 0];
 }
 
 message GetTuningSourcesStatesReply

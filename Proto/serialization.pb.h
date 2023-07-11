@@ -23840,7 +23840,7 @@ class ArchSignal PROTOBUF_FINAL :
     kHighLimitFieldNumber = 4,
     kFineApertureFieldNumber = 6,
     kCoarseApertureFieldNumber = 7,
-    kSignaltypeFieldNumber = 2,
+    kSignalTypeFieldNumber = 2,
   };
   // required string appSignalID = 1;
   bool has_appsignalid() const;
@@ -23934,7 +23934,7 @@ class ArchSignal PROTOBUF_FINAL :
   void _internal_set_coarseaperture(double value);
   public:
 
-  // required int32 signaltype = 2;
+  // required int32 signalType = 2;
   bool has_signaltype() const;
   private:
   bool _internal_has_signaltype() const;
@@ -56018,7 +56018,7 @@ inline void ArchSignal::set_allocated_appsignalid(std::string* appsignalid) {
   // @@protoc_insertion_point(field_set_allocated:Proto.ArchSignal.appSignalID)
 }
 
-// required int32 signaltype = 2;
+// required int32 signalType = 2;
 inline bool ArchSignal::_internal_has_signaltype() const {
   bool value = (_has_bits_[0] & 0x00000040u) != 0;
   return value;
@@ -56034,7 +56034,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 ArchSignal::_internal_signaltype() const {
   return signaltype_;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 ArchSignal::signaltype() const {
-  // @@protoc_insertion_point(field_get:Proto.ArchSignal.signaltype)
+  // @@protoc_insertion_point(field_get:Proto.ArchSignal.signalType)
   return _internal_signaltype();
 }
 inline void ArchSignal::_internal_set_signaltype(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -56043,7 +56043,7 @@ inline void ArchSignal::_internal_set_signaltype(::PROTOBUF_NAMESPACE_ID::int32 
 }
 inline void ArchSignal::set_signaltype(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_signaltype(value);
-  // @@protoc_insertion_point(field_set:Proto.ArchSignal.signaltype)
+  // @@protoc_insertion_point(field_set:Proto.ArchSignal.signalType)
 }
 
 // optional double lowLimit = 3 [default = 0];

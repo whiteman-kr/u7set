@@ -220,7 +220,7 @@ void DialogAppDataSourceInfo::updateData()
 
 	tm.setTimeSpec(Qt::UTC);
 
-	tm.setMSecsSinceEpoch(adsState->state.rupframeplanttime());
+	tm.setMSecsSinceEpoch(adsState->state.lmtime());
 	setDataItemText("RupFramePlantTime", tm.toString("dd/MM/yyyy HH:mm:ss.zzz"));
 
 	setDataItemNumber("RupFrameNumerator", adsState->state.rupframenumerator());

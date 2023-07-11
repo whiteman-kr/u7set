@@ -4411,7 +4411,7 @@ const char descriptor_table_protodef_serialization_2eproto[] PROTOBUF_SECTION_VA
   "ect\030\001 \001(\t\022\022\n\007buildNo\030\002 \001(\005:\0010\022\020\n\010dateTim"
   "e\030\003 \001(\t\022\024\n\tchangeset\030\004 \001(\005:\0010\022\014\n\004user\030\005 "
   "\001(\t\022\023\n\013workstation\030\006 \001(\t\"\242\001\n\nArchSignal\022"
-  "\023\n\013appSignalID\030\001 \002(\t\022\022\n\nsignaltype\030\002 \002(\005"
+  "\023\n\013appSignalID\030\001 \002(\t\022\022\n\nsignalType\030\002 \002(\005"
   "\022\023\n\010lowLimit\030\003 \001(\001:\0010\022\024\n\thighLimit\030\004 \001(\001"
   ":\0010\022\014\n\004unit\030\005 \001(\t\022\027\n\014fineAperture\030\006 \001(\001:"
   "\0010\022\031\n\016coarseAperture\030\007 \001(\001:\0010\"p\n\010ArchInf"
@@ -42977,7 +42977,7 @@ const char* ArchSignal::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID:
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // required int32 signaltype = 2;
+      // required int32 signalType = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
           _Internal::set_has_signaltype(&has_bits);
@@ -43068,7 +43068,7 @@ failure:
         1, this->_internal_appsignalid(), target);
   }
 
-  // required int32 signaltype = 2;
+  // required int32 signalType = 2;
   if (cached_has_bits & 0x00000040u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(2, this->_internal_signaltype(), target);
@@ -43128,7 +43128,7 @@ size_t ArchSignal::RequiredFieldsByteSizeFallback() const {
   }
 
   if (_internal_has_signaltype()) {
-    // required int32 signaltype = 2;
+    // required int32 signalType = 2;
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
         this->_internal_signaltype());
@@ -43146,7 +43146,7 @@ size_t ArchSignal::ByteSizeLong() const {
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_appsignalid());
 
-    // required int32 signaltype = 2;
+    // required int32 signalType = 2;
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
         this->_internal_signaltype());
