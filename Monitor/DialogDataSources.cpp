@@ -88,11 +88,11 @@ DialogDataSources::DialogDataSources(const MonitorConfigController& configContro
 
 	if (m_configController.configuration().tuningEnabled == true)
 	{
-		setMinimumSize(1100, 500);
+		setMinimumSize(1150, 500);
 	}
 	else
 	{
-		setMinimumSize(1100, 300);
+		setMinimumSize(1150, 300);
 	}
 
 	// --

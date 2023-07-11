@@ -637,34 +637,34 @@ Data will not be available at the time of reconnection.</source>
         <translation>2-Стан джерела</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="79"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="80"/>
         <source>3-Errors in Reply RupFrameHeader</source>
         <translation>3-Помилки в Reply RupFrameHeader</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="91"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="92"/>
         <source>4-Errors in Reply FotipHeader</source>
         <translation>4-Помилки в Reply FotipHeader</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="105"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="106"/>
         <source>5-Errors Reported by LM in Reply FotipHeader.flags</source>
         <translation>5-Помилки в Reply FotipHeader.flags</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="151"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="152"/>
         <source>Tuning Source - </source>
         <translation>Джерело - </translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="168"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="169"/>
         <source>Tuning Source - %1</source>
         <translation>Джерело - %1</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="204"/>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="215"/>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="218"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="205"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="216"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="219"/>
         <source>%1 (%2h)</source>
         <translation></translation>
     </message>
@@ -2602,109 +2602,114 @@ Are you sure you STILL WANT TO APPLY the changes?</source>
 <context>
     <name>TuningSourcesWidget</name>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="367"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="375"/>
         <source>Tuning Sources</source>
         <translation>Джерела тюнінгу</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="391"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="399"/>
         <source>EquipmentId</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="392"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="400"/>
         <source>IP</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="393"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="401"/>
         <source>Port</source>
         <translation>Порт</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="394"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="402"/>
         <source>Channel</source>
         <translation>Канал</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="395"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="403"/>
         <source>SubsystemID</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="396"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="404"/>
         <source>LmNumber</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="398"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="406"/>
         <source>State</source>
         <translation>Стан</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="399"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="407"/>
+        <source>LmTime</source>
+        <translation>Час LM</translation>
+    </message>
+    <message>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="408"/>
         <source>IsActive</source>
         <translation>Активний</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="400"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="409"/>
         <source>HasUnapplied</source>
         <translation>Не застосовано</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="401"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="410"/>
         <source>RequestCount</source>
         <translation>Запитів</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="402"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="411"/>
         <source>ReplyCount</source>
         <translation>Відповідей</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="487"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="496"/>
         <source>Details...</source>
         <translation>Детально...</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="492"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="501"/>
         <source>Activate...</source>
         <translation>Активувати...</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="498"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="507"/>
         <source>Deactivate...</source>
         <translation>Деактивувати...</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="653"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="663"/>
         <source>No Reply</source>
         <translation>Нема відповіді</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="663"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="673"/>
         <source>Active</source>
         <translation>Активний</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="669"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="679"/>
         <source>E: %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="675"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="685"/>
         <source>Inactive</source>
         <translation>Неактивний</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="680"/>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="681"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="696"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="697"/>
         <source>Yes</source>
         <translation>Так</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="680"/>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="681"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="696"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="697"/>
         <source>No</source>
         <translation>Ні</translation>
     </message>
