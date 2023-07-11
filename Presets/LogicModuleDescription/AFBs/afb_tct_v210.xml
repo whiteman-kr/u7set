@@ -1,0 +1,13 @@
+<AFBComponent Caption="TCT" OpCode="3" HasRam="true" ImpVersion="210" VersionOpIndex="14" MaxInstCount="0" SimulationFunc="afb_tct_v210">
+	<Pin OpName="i_conf" OpIndex="0" PinType="Param"/>
+	<Pin OpName="i_counter" OpIndex="1" PinType="Input"/>
+	<Pin OpName="i_counter_dff" OpIndex="3" PinType="Input"/>
+	<Pin OpName="i_wave_dff_in" OpIndex="5" PinType="Input"/>
+	<Pin OpName="i_wave" OpIndex="6" PinType="Input"/>
+	<Pin OpName="o_result" OpIndex="8" PinType="Output"/>
+	<Pin OpName="o_counter_dff" OpIndex="9" PinType="Output"/>
+	<Pin OpName="o_wave_dff_in" OpIndex="11" PinType="Output"/>
+	<Pin OpName="o_param_err" OpIndex="12" PinType="Output"/>
+	<Pin OpName="o_tct_edi" OpIndex="13" PinType="Output"/>
+	<Pin OpName="o_version" OpIndex="14" PinType="Output"/>
+</AFBComponent>

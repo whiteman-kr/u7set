@@ -17,28 +17,33 @@
 //		TDS_GET_TUNING_SOURCES_INFO
 //				|
 //				|<----------------------------------------------------------------------o
-//				|																		|
-//		TDS_GET_TUNING_SOURCES_STATES													|
 //              |																		|
 //              |																		|
 //          Wait 100ms                              									|
 //           or until																	|
-//			WriteQueue --->----Yes---->---WriteCommand-->---Yes----o						|
+//			WriteQueue --->----Yes---->---WriteCommand-->---Yes----o					|
 //			 has data?				  ^  is WriteValue?            |					|
 //				|					  |	      |			TDS_TUNING_SIGNALS_WRITE		|
 //			    No					  |	      No				  o-------------------->|
 //              |					  |		  |											|
+//				|					  |       | 										|
+//	 TDS_GET_TUNING_SOURCES_STATES    |       |											|
+//				|					  |		  |											|
+//				|					  |		  |											|
+//			WriteQueue --->----Yes----o		  |											|
+//			 has data?				  |		  |											|
+//				|					  |		  |											|
 //              |<-----------------o  |	      |											|
 //				|                  |  |	      |											|
-//	 TDS_GET_SIGNALS_STATE_CHANGES |  |	      |											|
-//				|				   |  |	      |											|
-//			   More				   |  |	      |											|
-//			  Changes?--->--Yes----o  |	      |											|
+//	 TDS_GET_SIGNALS_STATE_CHANGES |  |	WriteCommand-->---Yes-----o						|
+//				|				   |  |	   is Apply?			  |						|
+//			 Still more	than	   |  |	      |			TDS_TUNING_SIGNALS_APPLY		|
+//			 125 Changes?-->Yes----o  |	      No				  o-------------------->|
 //				|					  |		  |											|
-//				|					  |	WriteCommand-->---Yes-----o						|
-//			Wait 100ms				  |	   is Apply?			  |						|
-//			or until				  |	      |			TDS_TUNING_SIGNALS_APPLY		|
-//			WriteQueue --->----Yes--->|	      No				  o-------------------->|
+//				|					  |		  |											|
+//			    |   				  |		  |											|
+//			    |   				  |		  |											|
+//			WriteQueue --->----Yes--->o		  |											|
 //			 has data?				  |		  |											|
 //				|					  |		  |											|
 //			    No  				  |		  |											|
@@ -49,10 +54,10 @@
 //			  Max 250)				  |	      |					  o-------------------->|
 //				|					  |	      |											|
 //				|					  |	      |											|
-//			Wait  100ms				  |	      |											|
-//			 or until				  |  	  |											|
+//			    |       			  |	      |											|
+//			    |    				  |  	  |											|
 //			WriteQueue --->----Yes----o		  |											|
-//			  has data?						  |											|
+//			 has data?						  |											|
 //				|							  |											|
 //			    No							  |											|
 //				|							  |											|
@@ -176,12 +181,9 @@ namespace ClientLib
 
 		// Sending requests and processing replies functions
 		//
-		void resetToGetTuningSources();
-		void resetToGetTuningSourcesState();
-		void resetToProcessTuningSignals();
+		void continueRequestLoop();
 
-		void askToWriteTuningSignals(bool& nothingToWrite);
-		void askToReadTuningSignals();
+		[[nodiscard]] bool sendWriteRequest(int waitTimeMs);
 
 		void requestTuningSourcesInfo();
 		void processTuningSourcesInfo(const QByteArray& data);
@@ -235,8 +237,8 @@ namespace ClientLib
 		void setLmStatusFlagMode(const TuningClientSettings::LmStatusFlagMode& mode);
 
 	public:
-		inline static const int MaxStateRequestCount = TDS_TUNING_MAX_READ_STATES / 8;  // 250 signals per TDS_TUNING_MAX_READ_STATES
-		inline static const int MaxStateWriteCount = TDS_TUNING_MAX_WRITE_RECORDS / 8;  // 250 signals per TDS_TUNING_MAX_WRITE_RECORDS
+		inline static const int MaxStateRequestCount = TDS_TUNING_MAX_READ_STATES / 4;  // 250 signals per TDS_TUNING_MAX_READ_STATES
+		inline static const int MaxStateWriteCount = TDS_TUNING_MAX_WRITE_RECORDS / 4;  // 250 signals per TDS_TUNING_MAX_WRITE_RECORDS
 
 	protected:
 		// Tuning sources
@@ -277,6 +279,7 @@ namespace ClientLib
 		//
 		enum class ReadRequestType
 		{
+			SourceState,
 			Changed,
 			Recent,
 			Generic

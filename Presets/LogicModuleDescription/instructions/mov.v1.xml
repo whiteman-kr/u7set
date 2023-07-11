@@ -1,0 +1,1 @@
+<Command Caption="mov" Code="0100" CodeMask="07c0" SimulationFunc="command_mov" ParseFunc="parse_mov" Description="Copy 16-bit word from memory to memory"/>

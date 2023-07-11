@@ -1,0 +1,21 @@
+<AFBComponent Caption="POL" OpCode="25" HasRam="false" ImpVersion="3" VersionOpIndex="31" MaxInstCount="0" SimulationFunc="afb_pol_v3">
+    <Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
+    <Pin OpName="i_1_oprd"		OpIndex ="1"	PinType = "Param"/>
+    <Pin OpName="i_2_oprd"		OpIndex ="3"	PinType = "Param"/>
+    <Pin OpName="i_3_oprd"		OpIndex ="5"	PinType = "Param"/>
+    <Pin OpName="i_4_oprd"		OpIndex ="7"	PinType = "Param"/>
+    <Pin OpName="i_5_oprd"		OpIndex ="9"	PinType = "Param"/>
+    <Pin OpName="i_6_oprd"		OpIndex ="11"	PinType = "Param"/>
+    <Pin OpName="i_7_oprd"		OpIndex ="13"	PinType = "Param"/>
+    <Pin OpName="i_8_oprd"		OpIndex ="15"	PinType = "Param"/>
+    <Pin OpName="i_9_oprd"		OpIndex ="17"	PinType = "Param"/>
+    <Pin OpName="i_10_oprd"		OpIndex ="19"	PinType = "Param"/>
+    <Pin OpName="i_data"		OpIndex ="21"	PinType = "Input"/>
+    <Pin OpName="o_result"		OpIndex ="24"	PinType = "Output"/>
+    <Pin OpName="o_pol_edi"		OpIndex ="26"	PinType = "Output"/>
+    <Pin OpName="o_overflow"	OpIndex ="27"	PinType = "Output"/>
+    <Pin OpName="o_underflow"	OpIndex ="28"	PinType = "Output"/>
+    <Pin OpName="o_zero"		OpIndex ="29"	PinType = "Output"/>
+    <Pin OpName="o_nan"		    OpIndex ="30"	PinType = "Output"/>
+    <Pin OpName="o_version"		OpIndex ="31"	PinType = "Output"/>
+</AFBComponent>

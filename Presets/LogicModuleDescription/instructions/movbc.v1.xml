@@ -1,0 +1,1 @@
+<Command Caption="movbc"		Code="01C0"	CodeMask="07c0"	SimulationFunc="command_movbc"		ParseFunc="parse_movbc"		Description="Write 1-bit constant to memory"/>

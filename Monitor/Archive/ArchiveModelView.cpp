@@ -199,27 +199,27 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 
 				if (m_cachedSignalState.appState.m_flags.validityChange == true)
 				{
-					resultString << QStringLiteral("VALIDITY");
+					resultString << tr("VALIDITY");
 				}
 				if (m_cachedSignalState.appState.m_flags.simBlockMismatchChange == true)
 				{
-					resultString << QStringLiteral("SIMLOCK");
+					resultString << tr("SIMLOCK");
 				}
 				if (m_cachedSignalState.appState.m_flags.limitFlagsChange == true)
 				{
-					resultString << QStringLiteral("LIMIT");
+					resultString << tr("LIMIT");
 				}
 				if (m_cachedSignalState.appState.m_flags.autoPoint == true)
 				{
-					resultString << QStringLiteral("AUTO");
+					resultString << tr("AUTO");
 				}
 				if (m_cachedSignalState.appState.m_flags.fineAperture == true)
 				{
-					resultString << QStringLiteral("FINEAP");
+					resultString << tr("FINEAP");
 				}
 				if (m_cachedSignalState.appState.m_flags.coarseAperture == true)
 				{
-					resultString << QStringLiteral("COARSEAP");
+					resultString << tr("COARSEAP");
 				}
 
 				result = resultString.join(' ');
@@ -288,7 +288,7 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 			Q_ASSERT(false);
 		}
 
-		QString toolTip = QString("StateIndex: %1\n"
+		QString toolTip = tr("StateIndex: %1\n"
 								  "SignalID: %2\n"
 								  "AppSignalID: %3\n"
 								  "Caption: %4\n"
@@ -362,7 +362,7 @@ QString ArchiveModel::getValueString(const AppSignalState& state, const ArchiveS
 		}
 		break;
 	case E::SignalType::Bus:
-		result = QStringLiteral("Unsuported");
+		result = tr("Unsuported");
 		break;
 	default:
 		assert(false);
@@ -614,7 +614,7 @@ void ArchiveView::contextMenuEvent(QContextMenuEvent* event)
 
 			if (archiveSignalParam.signalParam.isAnalog() == true)
 			{
-				QMenu* viewMenu = menu.addMenu(QString("View %1").arg(archiveSignalParam.signalParam.customSignalId()));
+				QMenu* viewMenu = menu.addMenu(tr("View %1").arg(archiveSignalParam.signalParam.customSignalId()));
 				QList<QAction*> actions;
 
 				// Precision
@@ -713,7 +713,7 @@ void ArchiveView::contextMenuEvent(QContextMenuEvent* event)
 	{
 		for (const ArchiveSignal& archSignal : archiveSignals)
 		{
-			QAction* action = menu.addAction(QLatin1String("Remove ") + archSignal.signalParam.customSignalId() + "(" + archSignal.archiveServiceShortenId + ")");
+			QAction* action = menu.addAction(tr("Remove ") + archSignal.signalParam.customSignalId() + "(" + archSignal.archiveServiceShortenId + ")");
 
 			QString appSignalId = archSignal.signalParam.appSignalId();
 			QString archiveServiceId = archSignal.archiveServiceId;

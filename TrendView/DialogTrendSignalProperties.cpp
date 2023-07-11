@@ -127,12 +127,12 @@ void DialogTrendSignalProperties::fillProperties()
 	ui->signalIdEdit->setText(m_trendSignal.signalId());
 	ui->captionEdit->setText(m_trendSignal.caption());
 
-	ui->typeEdit->setText(E::valueToString<E::SignalType>(m_trendSignal.type()));
-
 	ui->viewLineWeightEdit->setText(QString::number(static_cast<int>(m_trendSignal.lineWeight())));
 
 	if (m_trendSignal.type() == E::SignalType::Analog)
 	{
+		ui->typeEdit->setText(tr("Analog"));
+
 		double viewHighLimit = m_trendSignal.viewHighLimit(m_scaleType);
 		double viewLowLimit = m_trendSignal.viewLowLimit(m_scaleType);
 
@@ -168,6 +168,8 @@ void DialogTrendSignalProperties::fillProperties()
 
 	if (m_trendSignal.type() == E::SignalType::Discrete)
 	{
+		ui->typeEdit->setText(tr("Discrete"));
+
 		ui->limitsEdit->setText(tr("0 - 1"));
 		ui->viewHighEdit->setText(QString::number(1));
 		ui->viewLowEdit->setText(QString::number(0));

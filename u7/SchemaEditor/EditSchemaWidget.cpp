@@ -4553,13 +4553,15 @@ void EditSchemaWidget::exportToPdf()
 {
 	assert(schema());
 
+	static QString path{"."};
 	QString fileName = QFileDialog::getSaveFileName(
-		this, "Export schema to PDF", schema()->schemaId() + ".pdf", "PDF (*.pdf);;All files (*.*)");
+		this, "Export schema to PDF", path + QDir::separator() + schema()->schemaId() + ".pdf", "PDF (*.pdf);;All files (*.*)");
 
 	if (fileName.isEmpty())
 	{
 		return;
 	}
+	path = QFileInfo(fileName).path(); // store path for next time
 
 	qDebug() << "Export schema " << schema()->caption() << " " << schema()->schemaId() << " to PDF, " << fileName;
 

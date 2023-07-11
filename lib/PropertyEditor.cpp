@@ -2436,11 +2436,13 @@ namespace ExtWidgets
 
 		if (m_property->specificEditor() == E::PropertySpecificEditor::LoadFileDialog)
 		{
-			QString fileName = QFileDialog::getOpenFileName(this->parentWidget(), tr("Select File"), QString(), m_property->validator());
+			static QString path{"."};
+			QString fileName = QFileDialog::getOpenFileName(this->parentWidget(), tr("Select File"), path, m_property->validator());
 			if (fileName.isEmpty() == true)
 			{
 				return;
 			}
+			path = QFileInfo(fileName).path(); // store path for next time
 
 			QFile f(fileName);
 			if (f.open(QFile::ReadOnly) == false)

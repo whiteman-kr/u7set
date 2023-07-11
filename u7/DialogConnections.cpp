@@ -1029,14 +1029,16 @@ void DialogConnections::reject()
 
 void DialogConnections::onReport()
 {
+	static QString path{"."};
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Export"),
-													"./",
+													path + QDir::separator(),
 													tr("Text files (*.txt);; All files (*.*)"));
 
 	if (fileName.isNull() == true)
 	{
 		return;
 	}
+	path = QFileInfo(fileName).path(); // store path for next time
 
 	QFile file(fileName);
 

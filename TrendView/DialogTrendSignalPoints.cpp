@@ -196,15 +196,15 @@ QVariant TrendPointsModel::headerData(int section, Qt::Orientation orientation, 
 			case static_cast<int>(Columns::Number):
 				return QStringLiteral("#");
 			case static_cast<int>(Columns::Record):
-				return QStringLiteral("Record");
+				return tr("Record");
 			case static_cast<int>(Columns::Index):
-				return QStringLiteral("Index");
+				return tr("Index");
 			case static_cast<int>(Columns::Time):
-				return QStringLiteral("Time");
+				return tr("Time");
 			case static_cast<int>(Columns::Value):
-				return QStringLiteral("Value");
+				return tr("Value");
 			case static_cast<int>(Columns::Realtime):
-				return QStringLiteral("Realtime");
+				return tr("Realtime");
 			default:
 				Q_ASSERT(false);
 			}

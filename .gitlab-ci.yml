@@ -1,8 +1,8 @@
 variables:
   GIT_DEPTH: "1"
-  QT_VERSION: "6.4.3"
-  COMPILER_TESTS_PROJECT_NAME: "compiler_tests_v385"
-  SIMULATOR_PROJECT_NAME: "test_simulator_v385"
+  QT_VERSION: "6.5.1"
+  COMPILER_TESTS_PROJECT_NAME: "compiler_tests_v389"
+  SIMULATOR_PROJECT_NAME: "test_simulator_v387"
   PGPASSWORD: "P2ssw0rd"
   
 stages:
@@ -70,7 +70,7 @@ linux_build_job:
     - "echo '#pragma once' > gitlabci_version.h"
     - "echo >> gitlabci_version.h"
     - "echo '#define GITLAB_CI_BUILD' >> gitlabci_version.h"
-    - echo '#define CI_BUILD_REF_SLUG' \"$CI_BUILD_REF_SLUG\" >> gitlabci_version.h
+    - echo '#define CI_COMMIT_REF_SLUG' \"$CI_COMMIT_REF_SLUG\" >> gitlabci_version.h
     - echo '#define CI_COMMIT_SHA' \"$CI_COMMIT_SHA\" >> gitlabci_version.h
     - echo '#define GITLAB_USER_NAME' \"$GITLAB_USER_NAME\" >> gitlabci_version.h
     - echo '#define CI_PIPELINE_ID' $CI_PIPELINE_ID >> gitlabci_version.h
@@ -85,7 +85,7 @@ linux_build_job:
     - "cmake --build ./build"
 
   artifacts:
-    name: "u7set_linux_0.9.$CI_PIPELINE_ID $CI_BUILD_REF_SLUG $CI_COMMIT_SHA"
+    name: "u7set_linux_0.9.$CI_PIPELINE_ID $CI_COMMIT_REF_SLUG $CI_COMMIT_SHA"
     paths:
       - bin/release/*
     exclude:
@@ -106,7 +106,7 @@ windows_build_job:
   tags:
     - vs2017
   script:
-    - "# dir env:"
+    - "dir env:"
     - "echo $Env:CI_COMMIT_SHA"
     - "git status"
     - "git log -1"
@@ -116,11 +116,10 @@ windows_build_job:
     - "'#pragma once' > gitlabci_version.h"
     - "' ' >> gitlabci_version.h"
     - "'#define GITLAB_CI_BUILD' >> gitlabci_version.h"
-    - "'#define CI_BUILD_REF_SLUG \"' + $env:CI_BUILD_REF_SLUG + '\"' >> gitlabci_version.h"
+    - "'#define CI_COMMIT_REF_SLUG \"' + $env:CI_COMMIT_REF_SLUG + '\"' >> gitlabci_version.h"
     - "'#define CI_COMMIT_SHA \"' + $env:CI_COMMIT_SHA + '\"' >> gitlabci_version.h"
     - "'#define GITLAB_USER_NAME \"' + $env:GITLAB_USER_NAME + '\"' >> gitlabci_version.h"
     - "'#define CI_PIPELINE_ID ' + $env:CI_PIPELINE_ID + '' >> gitlabci_version.h"
-    - "'#define COMPUTERNAME \"' + $env:HOSTNAME + '\"' >> gitlabci_version.h"
     - "$Env:timestamp = Get-Date -Format 'dd MMMM yyyy HH:mm (K)'"
     - "'#define BUILD_DATE \"' + $Env:timestamp + '\"' >> gitlabci_version.h"
 #Build Project
@@ -195,7 +194,7 @@ windows_build_job:
 #    - "&$SIGNTOOL sign /v /a  /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD $Env:BIN_OUT_DIR\\..\\*.exe"
 
   artifacts:
-    name: "u7set_0.9.$CI_PIPELINE_ID $CI_BUILD_REF_SLUG $CI_COMMIT_SHA"
+    name: "u7set_0.9.$CI_PIPELINE_ID $CI_COMMIT_REF_SLUG $CI_COMMIT_SHA"
     paths:
       - bin/*.exe
       - bin/release/*.exe
@@ -244,7 +243,7 @@ windows_test_job:
     - "#               Run XML validation"
     - "# ----------------------------------------------"
     - "pushd ."	
-    - "cd $Env:CI_PROJECT_DIR/Presets/LogicModuleDescription"
+    - "cd $Env:CI_PROJECT_DIR/Presets/LogicModuleDescription/generated"
     - "&./validate_xmls.bat"
     - "popd"
 
@@ -306,7 +305,7 @@ linux_test_job:
 #    - "# ----------------------------------------------"
 #    - "#               Run XML validation"
 #    - "# ----------------------------------------------"
-    - "pushd $CI_PROJECT_DIR/Presets/LogicModuleDescription"
+    - "pushd $CI_PROJECT_DIR/Presets/LogicModuleDescription/generated"
     - "chmod a+x validate_xmls.sh"
     - "./validate_xmls.sh"
     - "popd"
@@ -428,7 +427,7 @@ linux_code_coverage_job:
 
   coverage: '/lines......: \d+\.\d+/'
   artifacts:
-    name: "coverage_report.$CI_PIPELINE_ID $CI_BUILD_REF_SLUG $CI_COMMIT_SHA"
+    name: "coverage_report.$CI_PIPELINE_ID $CI_COMMIT_REF_SLUG $CI_COMMIT_SHA"
     paths:
 #      - CodeCoverage/coverage.xml
       - CodeCoverage/Report/

@@ -476,12 +476,14 @@ void UploadTabPage::read()
 
 	try
 	{
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"));
+		static QString path{"."};
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), path + QDir::separator());
 
 		if (fileName.isEmpty() == true)
 		{
 			return;
 		}
+		path = QFileInfo(fileName).path(); // store path for next time
 
 		m_outputLog.writeMessage("");
 		m_outputLog.writeMessage(tr("Reading firmware to file %1...").arg(fileName));

@@ -205,7 +205,7 @@ TEST_F(TuningConnectionTests, connect)
 			// Wait for several replies
 			//
 			std::vector<Tcp::ConnectionState> connStates = tc.tcpTuningConnStates();
-			if (std::all_of(connStates.begin(), connStates.end(), [](const auto& s) { return s.isConnected && s.replyCount > 2; }))
+			if (std::all_of(connStates.begin(), connStates.end(), [](const auto& s) { return s.isConnected && s.replyCount > 4; }))
 			{
 				break;
 			}
@@ -254,7 +254,7 @@ TEST_F(TuningConnectionTests, tuningSourceInfo)
 			// Wait for several replies
 			//
 			std::vector<Tcp::ConnectionState> connStates = tc.tcpTuningConnStates();
-			if (std::all_of(connStates.begin(), connStates.end(), [](const auto& s) { return s.isConnected && s.replyCount > 2; }))
+			if (std::all_of(connStates.begin(), connStates.end(), [](const auto& s) { return s.isConnected && s.replyCount > 4; }))
 			{
 				QThread::msleep(2000);
 				break;
@@ -447,8 +447,9 @@ TEST_F(TuningConnectionTests, activeClientInfo)
 			std::vector<Tcp::ConnectionState> connStatesB = tcB.tcpTuningConnStates();
 
 			connStatesA.insert(connStatesA.end(), connStatesB.begin(), connStatesB.end());
-			if (std::all_of(connStatesA.begin(), connStatesA.end(), [](const auto& s) { return s.isConnected && s.replyCount > 2; }))
+			if (std::all_of(connStatesA.begin(), connStatesA.end(), [](const auto& s) { return s.isConnected && s.replyCount > 4; }))
 			{
+				QThread::msleep(2000);
 				break;
 			}
 		}

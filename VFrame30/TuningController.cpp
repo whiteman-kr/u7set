@@ -189,6 +189,21 @@ namespace VFrame30
 		return m_tuningConnection->writeTuningSignal(appSignalId, value);
 	}
 
+	bool TuningController::writeValueBool(QString appSignalId, bool value)
+	{
+		return writeValue(appSignalId, value);
+	}
+
+	bool TuningController::writeValueInt(QString appSignalId, int value)
+	{
+		return writeValue(appSignalId, value);
+	}
+
+	bool TuningController::writeValueDouble(QString appSignalId, double value)
+	{
+		return writeValue(appSignalId, value);
+	}
+
 	void TuningController::apply()
 	{
 		if (checkTuningAccess() == false)

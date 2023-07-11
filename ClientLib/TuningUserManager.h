@@ -1,15 +1,18 @@
 #pragma once
 
 #include <QObject>
+#include <QDialog>
+#include <QComboBox>
+#include <QLineEdit>
 
 #ifdef Q_OS_LINUX
 #include <security/pam_appl.h>
 #include <security/pam_misc.h>
 #endif
 
+
 namespace ClientLib
 {
-
 	class TuningUserManager : public QObject
 	{
 		Q_OBJECT
@@ -66,4 +69,30 @@ namespace ClientLib
 #endif
 	};
 
+	//
+	// DialogTuningPassword
+	//
+
+	class DialogTuningPassword : public QDialog
+	{
+		Q_OBJECT
+	public:
+		explicit DialogTuningPassword(const ClientLib::TuningUserManager& userManager, QWidget* parent);
+		~DialogTuningPassword() = default;
+
+		[[nodiscard]] QString userName() const;
+		[[nodiscard]] QString password() const;
+
+	private:
+		virtual void accept();
+
+	private:
+		const ClientLib::TuningUserManager& m_tuningUserManager;
+
+		QString m_password;
+		static inline QString m_lastUser;
+
+		QComboBox* m_userCombo = nullptr;
+		QLineEdit* m_passwordEdit = nullptr;
+	};
 }

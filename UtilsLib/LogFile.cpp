@@ -1584,12 +1584,12 @@ namespace Log
 
 		QVBoxLayout* mainLayout = new QVBoxLayout();
 
-		mainLayout->addWidget(new QLabel("Start Time:"));
+		mainLayout->addWidget(new QLabel(tr("Start Time:")));
 		m_timeFromEdit = new QDateTimeEdit(this);
 		m_timeFromEdit->setDisplayFormat(messageTimeFormat);
 		mainLayout->addWidget(m_timeFromEdit);
 
-		mainLayout->addWidget(new QLabel("End Time:"));
+		mainLayout->addWidget(new QLabel(tr("End Time:")));
 		m_timeToEdit = new QDateTimeEdit(this);
 		m_timeToEdit->setDisplayFormat(messageTimeFormat);
 		mainLayout->addWidget(m_timeToEdit);
@@ -1733,7 +1733,7 @@ namespace Log
 
 		if (useMessageType == true)
 		{
-			topLayout->addWidget(new QLabel("Type:"));
+			topLayout->addWidget(new QLabel(tr("Type:")));
 
 			m_recordTypeCombo = new QComboBox();
 			m_recordTypeCombo->addItem(tr("All Messages"), MessageType::All);
@@ -2374,11 +2374,13 @@ namespace Log
 
 	void LogFileDialog::onLoad()
 	{
-		QString fileName = QFileDialog::getOpenFileName(this, tr("Select File"), QString(), "Log Files (*.log)");
+		static QString path{"."};
+		QString fileName = QFileDialog::getOpenFileName(this, tr("Select File"), path, "Log Files (*.log)");
 		if (fileName.isEmpty() == true)
 		{
 			return;
 		}
+		path = QFileInfo(fileName).path(); // store path for next time
 
 		m_loadedFromFile = true;
         m_loadedFileName = fileName;
@@ -2414,15 +2416,17 @@ namespace Log
 
 	void LogFileDialog::onExport()
 	{
+		static QString path{"."};
         QString fileName = QFileDialog::getSaveFileName(this,
 														tr("Save File"),
-														"Untitled.log",
+														path + QDir::separator() + "Untitled.log",
 														tr("Log files (*.log)"));
 
 		if (fileName.isEmpty() == true)
 		{
 			return;
 		}
+		path = QFileInfo(fileName).path(); // store path for next time
 
 		std::vector<LogFileRecord> exportRecords;
 

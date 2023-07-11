@@ -14,24 +14,25 @@ class QLabel;
 class MonitorTrends
 {
 public:
-	static std::vector<QString> getTrendsList();
-	static bool activateTrendWindow(QString trendName);
+	static std::vector<MonitorTrendsWidget*> getTrendsList();
+	static bool activateTrendWindow(MonitorTrendsWidget* trendWidget);
 	static bool startTrendApp(const MonitorSignalManager& signalManager,
 							  const MonitorConfigController& configController,
 							  const std::vector<AppSignalParam>& appSignals,
 							  QWidget* parent);
 
-	static void registerTrendWindow(QString name, MonitorTrendsWidget* window);
-	static void unregisterTrendWindow(QString name);
+	static void registerTrendWindow(MonitorTrendsWidget* window);
+	static void unregisterTrendWindow(const MonitorTrendsWidget* window);
 
 private:
-	static std::map<QString, MonitorTrendsWidget*> m_trendsList;
+	static std::list<MonitorTrendsWidget*> s_trendsList;
 };
 
 
 class MonitorTrendsWidget : public TrendLib::TrendMainWindow
 {
 	Q_OBJECT
+
 public:
 	MonitorTrendsWidget(const MonitorSignalManager& signalManager,
 						const MonitorConfigController& configController,

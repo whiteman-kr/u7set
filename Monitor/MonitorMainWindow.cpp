@@ -88,7 +88,7 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 			[this](bool allowed)
 	{
 		Q_ASSERT(m_closeTabAction);
-		m_closeTabAction->setEnabled(allowed);
+		m_closeTabAction->setEnabled(MonitorAppSettings::instance().showSchemasTabBar() && allowed);
 	});
 
 	connect(monitorCentralWidget, &MonitorCentralWidget::signal_historyChanged, this, &MonitorMainWindow::slot_historyChanged);
@@ -106,7 +106,7 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 
 	// Create SchemaList dock widget
 	//
-	m_schemaListDock = new QDockWidget{"Schemas List", this};
+	m_schemaListDock = new QDockWidget{tr("Schemas List"), this};
 	m_schemaListDock->setObjectName("SchemaList");
 	m_schemaListDock->setFeatures(QDockWidget::DockWidgetVerticalTitleBar);
 	m_schemaListDock->setTitleBarWidget(new QWidget{});		// Hides title bar
@@ -279,9 +279,10 @@ void MonitorMainWindow::showTuningLoginControls()
 
 		// Adjust m_loginUserNameLabel width to have place for all usernames
 		//
-		int maxUsernameSpace = -1;
-
 		QWidget* loginUserTimeoutActionWidget = m_toolBar->widgetForAction(m_loginUserTimeoutAction);
+
+		int maxUsernameSpace = loginUserTimeoutActionWidget->fontMetrics().horizontalAdvance(m_loginUserTimeoutAction->text());
+
 		if (loginUserTimeoutActionWidget == nullptr)
 		{
 			Q_ASSERT(loginUserTimeoutActionWidget);
@@ -450,7 +451,8 @@ void MonitorMainWindow::createActions()
 	m_newTabAction = new QAction(tr("New Tab"), this);
 	m_newTabAction->setStatusTip(tr("Open current schema in new tab page"));
 	m_newTabAction->setIcon(QIcon(":/Images/Images/NewSchema.svg"));
-	m_newTabAction->setEnabled(true);
+	m_newTabAction->setEnabled(MonitorAppSettings::instance().showSchemasTabBar());
+	m_newTabAction->setVisible(MonitorAppSettings::instance().showSchemasTabBar());
 	QList<QKeySequence> newTabShortcuts;
 	newTabShortcuts << QKeySequence::AddTab;
 	newTabShortcuts << QKeySequence::New;
@@ -460,9 +462,9 @@ void MonitorMainWindow::createActions()
 	m_closeTabAction = new QAction(tr("Close Tab"), this);
 	m_closeTabAction->setStatusTip(tr("Close current tab page"));
 	m_closeTabAction->setIcon(QIcon(":/Images/Images/Close.svg"));
-	m_closeTabAction->setEnabled(true);
+	m_closeTabAction->setEnabled(MonitorAppSettings::instance().showSchemasTabBar() && monitorCentralWidget()->count() > 1);
+	m_closeTabAction->setVisible(MonitorAppSettings::instance().showSchemasTabBar());
 	m_closeTabAction->setShortcuts(QKeySequence::Close);
-	m_closeTabAction->setEnabled(monitorCentralWidget()->count() > 1);
 	connect(m_closeTabAction, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_closeCurrentTab);
 
 	m_zoomInAction = new QAction(tr("Zoom In"), this);
@@ -620,7 +622,7 @@ void MonitorMainWindow::createMenus()
 
 void MonitorMainWindow::createToolBars()
 {
-	m_toolBar = new MonitorToolBar("ToolBar", this);
+	m_toolBar = new MonitorToolBar(tr("ToolBar"), this);
 	m_toolBar->setObjectName("MonitorMainToolBar");
 
 	m_toolBar->addAction(m_schemaListAction);
@@ -1254,15 +1256,15 @@ void MonitorMainWindow::slot_trends()
 {
 	// Get Trends list
 	//
-	std::vector<QString> trends = MonitorTrends::getTrendsList();
+	std::vector<MonitorTrendsWidget*> trends = MonitorTrends::getTrendsList();
 
 	// Choose trend
 	//
-	QString trendToActivate;
+	MonitorTrendsWidget* trendToActivate = nullptr;
 
 	if (trends.empty() == true)
 	{
-		trendToActivate.clear();	// if trendToActivate is empty, then create new trend
+		trendToActivate = nullptr;	// if trendToActivate is nullptr, then create a new trend.
 	}
 	else
 	{
@@ -1275,7 +1277,7 @@ void MonitorMainWindow::slot_trends()
 
 		for (size_t i = 0; i < trends.size(); i++)
 		{
-			QAction* a = menu.addAction(trends[i]);
+			QAction* a = menu.addAction(trends[i]->windowTitle());
 			Q_ASSERT(a);
 
 			a->setData(QVariant::fromValue<int>(static_cast<int>(i)));		// Data is index in trend vector
@@ -1294,7 +1296,7 @@ void MonitorMainWindow::slot_trends()
 
 		if (trendIndex == -1)
 		{
-			trendToActivate.clear();	// if trendToActivate is empty, then create new trend
+			trendToActivate = nullptr;	// if trendToActivate is nullptr, then create a new trend.
 		}
 		else
 		{
@@ -1311,7 +1313,7 @@ void MonitorMainWindow::slot_trends()
 
 	// Start new trend or activate chosen one
 	//
-	if (trendToActivate.isEmpty() == true)
+	if (trendToActivate == nullptr)
 	{
 		std::vector<AppSignalParam> appSignals;
 		MonitorTrends::startTrendApp(m_signalManager, m_configController, appSignals, this);
@@ -1594,6 +1596,12 @@ void MonitorMainWindow::setVisibleTabBar(bool visible)
 	{
 		m->tabBar()->setVisible(visible);
 	}
+
+	m_newTabAction->setVisible(visible);
+	m_newTabAction->setEnabled(visible);
+
+	m_closeTabAction->setEnabled(visible);
+	m_closeTabAction->setVisible(visible);
 
 	return;
 }

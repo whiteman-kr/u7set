@@ -71,7 +71,6 @@ private:
 	void showSoftwareConnection(const QString& caption,
 								const std::vector<Tcp::ConnectionState>& connectionStates,
 								QLabel* label);
-
 	// Commands
 	//
 protected slots:

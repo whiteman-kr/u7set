@@ -2478,11 +2478,14 @@ void FileTreeView::setWorkcopy()
 
 	// Select file
 	//
-	QString fileName = QFileDialog::getOpenFileName(this, tr("Select File"));
+	static QString path{"."};
+	QString fileName = QFileDialog::getOpenFileName(this, tr("Select File"), path);
 	if (fileName.isEmpty() == true)
 	{
 		return;
 	}
+	path = QFileInfo(fileName).path(); // store path for next time
+
 
 	std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
 	static_cast<DbFileInfo*>(file.get())->operator=(fileInfo);

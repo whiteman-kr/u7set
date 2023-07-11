@@ -110,11 +110,11 @@ void SimOverridePane::dropEvent(QDropEvent* event)
 		return;
 	}
 
-	// Parse data
+	// Parse data.
 	//
 	QStringList signalIds;
 	std::vector<std::tuple<QString, bool, double>> signalValues;
-
+	
 	signalIds.reserve(protoSetMessage.appsignal_size());
 	signalValues.reserve(protoSetMessage.appsignal_size());
 
@@ -139,7 +139,7 @@ void SimOverridePane::dropEvent(QDropEvent* event)
 
 	if (signalIds.isEmpty() == false)
 	{
-		// Check that signals are not optimized constants
+		// Check that signals are not optimized constants.
 		//
 		for (const QString& id : signalIds)
 		{
@@ -163,19 +163,27 @@ void SimOverridePane::dropEvent(QDropEvent* event)
 		int actuallyAdded = m_simulator->overrideSignals().addSignals(signalIds);
 		if (actuallyAdded == 0)
 		{
-			// Appartently signal already added, select it
+			// Apparently signal already added, select it.
 			//
 			selectSignal(signalIds.back());
 		}
 
-		// SetInitialValues to currents
+		// SetInitialValues to currents.
 		//
+		std::vector<Sim::OverrideSignals::SetValueData> overrideData;
+		overrideData.reserve(signalValues.size());
+
 		for (auto&[appSignalId, isAlreadyOverriden, value] : signalValues)
 		{
 			if (isAlreadyOverriden == false)
 			{
-				m_simulator->overrideSignals().setValue(appSignalId, Sim::OverrideSignalMethod::Value, value);
+				overrideData.emplace_back(appSignalId, Sim::OverrideSignalMethod::Value, value);
 			}
+		}
+
+		if (overrideData.empty() == false)
+		{
+			m_simulator->overrideSignals().setValues(overrideData);
 		}
 	}
 
@@ -209,6 +217,9 @@ bool SimOverridePane::eventFilter(QObject* obj, QEvent* event)
 					return m_treeWidget->indexOfTopLevelItem(i1) < m_treeWidget->indexOfTopLevelItem(i2);
 				});
 
+				std::vector<Sim::OverrideSignals::SetValueData> overrideData;
+				overrideData.reserve(selectedItems.size());
+
 				for (QTreeWidgetItem* selectedItem : selectedItems)
 				{
 					QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(selectedItem);
@@ -220,8 +231,14 @@ bool SimOverridePane::eventFilter(QObject* obj, QEvent* event)
 						currentValue = currentValue ? 0 : 1;
 
 						QString appSignalId = item->m_overrideSignal.appSignalId();
-						setValue(appSignalId, Sim::OverrideSignalMethod::Value, QVariant::fromValue<qint32>(currentValue));
+
+						overrideData.emplace_back(appSignalId, Sim::OverrideSignalMethod::Value, QVariant::fromValue<qint32>(currentValue));
 					}
+				}
+
+				if (overrideData.empty() == false)
+				{
+					m_simulator->overrideSignals().setValues(overrideData);
 				}
 
 				// Turn off/on override for current signal
@@ -245,6 +262,9 @@ bool SimOverridePane::eventFilter(QObject* obj, QEvent* event)
 					return m_treeWidget->indexOfTopLevelItem(i1) < m_treeWidget->indexOfTopLevelItem(i2);
 				});
 
+				std::vector<Sim::OverrideSignals::SetValueData> overrideData;
+				overrideData.reserve(selectedItems.size());
+
 				for (QTreeWidgetItem* selectedItem : selectedItems)
 				{
 					QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(selectedItem);
@@ -256,8 +276,14 @@ bool SimOverridePane::eventFilter(QObject* obj, QEvent* event)
 						currentValue = currentValue ? 0 : 1;
 
 						QString appSignalId = item->m_overrideSignal.appSignalId();
-						setValue(appSignalId, Sim::OverrideSignalMethod::Value, QVariant::fromValue<qint32>(0));
+
+						overrideData.emplace_back(appSignalId, Sim::OverrideSignalMethod::Value, QVariant::fromValue<qint32>(currentValue));
 					}
+				}
+
+				if (overrideData.empty() == false)
+				{
+					m_simulator->overrideSignals().setValues(overrideData);
 				}
 
 				updateValueColumn();
@@ -271,6 +297,9 @@ bool SimOverridePane::eventFilter(QObject* obj, QEvent* event)
 					return m_treeWidget->indexOfTopLevelItem(i1) < m_treeWidget->indexOfTopLevelItem(i2);
 				});
 
+				std::vector<Sim::OverrideSignals::SetValueData> overrideData;
+				overrideData.reserve(selectedItems.size());
+
 				for (QTreeWidgetItem* selectedItem : selectedItems)
 				{
 					QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(selectedItem);
@@ -282,8 +311,14 @@ bool SimOverridePane::eventFilter(QObject* obj, QEvent* event)
 						currentValue = currentValue ? 0 : 1;
 
 						QString appSignalId = item->m_overrideSignal.appSignalId();
-						setValue(appSignalId, Sim::OverrideSignalMethod::Value, QVariant::fromValue<qint32>(1));
+						
+						overrideData.emplace_back(appSignalId, Sim::OverrideSignalMethod::Value, QVariant::fromValue<qint32>(currentValue));
 					}
+				}
+
+				if (overrideData.empty() == false)
+				{
+					m_simulator->overrideSignals().setValues(overrideData);
 				}
 
 				updateValueColumn();
@@ -907,15 +942,17 @@ void SimOverridePane::saveWorkspace()
 		return;
 	}
 
+	static QString path{QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/untitled.sow"};
 	QString fileName = QFileDialog::getSaveFileName(this,
 													tr("Save File"),
-													QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/untitled.sow",
+													path + QDir::separator() + "untitled.sow",
 													tr("u7 Signal Override Workspace (*.sow);;All files (*.*)"));
 
 	if (fileName.isEmpty() == true)
 	{
 		return;
 	}
+	path = QFileInfo(fileName).path(); // store path for next time
 
 	m_simulator->overrideSignals().saveWorkspace(fileName);
 	return;

@@ -128,9 +128,12 @@ namespace SimOverrideUI
 			return;
 		}
 
+		std::vector<Sim::OverrideSignals::SetValueData> overrideData;
+		overrideData.reserve(m_signals.size());
+
 		for (const auto& signal : m_signals)
 		{
-			m_simulator.overrideSignals().setValue(signal.appSignalId(), method, value);
+			overrideData.emplace_back(signal.appSignalId(), method, value);
 
 			// Save script to user settings
 			//
@@ -165,6 +168,8 @@ namespace SimOverrideUI
 				}
 			}
 		}
+
+		m_simulator.overrideSignals().setValues(overrideData);
 
 		return;
 	}
@@ -665,11 +670,13 @@ namespace SimOverrideUI
 		m.addAction(tr("Load from File..."),
 					[this]()
 					{
-						QString fileName = QFileDialog::getOpenFileName(this, "", "", tr("Scripts (*.js *.script);;All Files(*.*)"));
+						static QString path{"."};
+						QString fileName = QFileDialog::getOpenFileName(this, "", path, tr("Scripts (*.js *.script);;All Files(*.*)"));
 						if (fileName.isEmpty() == true)
 						{
 							return;
 						}
+						path = QFileInfo(fileName).path(); // store path for next time
 
 						int r = QMessageBox::question(this,
 													  qAppName(),
@@ -794,9 +801,11 @@ namespace SimOverrideUI
 		m.addAction(tr("Save to File..."),
 					[this]()
 					{
-						QString fileName = QFileDialog::getSaveFileName(this, "", "", tr("Scripts (*.js *.script);;All Files(*.*)"));
+						static QString path{"."};
+						QString fileName = QFileDialog::getSaveFileName(this, "", path + QDir::separator(), tr("Scripts (*.js *.script);;All Files(*.*)"));
 						if (fileName.isEmpty() == false)
 						{
+							path = QFileInfo(fileName).path(); // store path for next time
 							QFile file(fileName);
 							if (file.open(QIODevice::WriteOnly | QIODevice::Text) == false)
 							{

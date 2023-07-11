@@ -1,0 +1,1 @@
+<Command Caption="startafb" Code="0080" CodeMask="07c0" SimulationFunc="command_startafb" ParseFunc="parse_startafb" Description="Start AFB"/>

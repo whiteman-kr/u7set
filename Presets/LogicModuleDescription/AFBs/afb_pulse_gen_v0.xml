@@ -1,0 +1,12 @@
+<AFBComponent Caption="PULSE_GEN" OpCode="30" HasRam="true" ImpVersion="0" VersionOpIndex="17" MaxInstCount="0" SimulationFunc="afb_pulse_gen_v0">
+	<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
+	<Pin OpName="i_t_high"		OpIndex ="1"	PinType = "Param"/>
+	<Pin OpName="i_t_low"		OpIndex ="3"	PinType = "Param"/>
+	<Pin OpName="i_start_from"	OpIndex ="8"	PinType = "Input"/>
+	<Pin OpName="i_enable"		OpIndex ="9"	PinType = "Input"/>
+	<Pin OpName="i_sync"		OpIndex ="10"	PinType = "Input"/>
+	<Pin OpName="o_result"		OpIndex ="13"	PinType = "Output"/>
+	<Pin OpName="o_sync"		OpIndex ="14"	PinType = "Output"/>
+	<Pin OpName="o_param_err"	OpIndex ="16"	PinType = "Output"/>
+	<Pin OpName="o_version"		OpIndex ="17"	PinType = "Output"/>
+</AFBComponent>

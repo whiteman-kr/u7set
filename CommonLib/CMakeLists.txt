@@ -9,7 +9,7 @@ find_package(Qt6 REQUIRED COMPONENTS Core)
 
 set(TARGET CommonLib)
 
-add_library(${TARGET} STATIC
+qt_add_library(${TARGET} STATIC
   AfbParamValue.h
   AfbParamValue.cpp
   DebugInstCounter.h

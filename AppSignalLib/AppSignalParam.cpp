@@ -588,12 +588,23 @@ void AppSignalParam::setPrecision(int value)
 	m_data->m_precision = value;
 }
 
-double AppSignalParam::aperture()
+double AppSignalParam::fineAaperture()
+{
+	return m_data->m_fineAperture;
+}
+
+void AppSignalParam::setFineAperture(double value)
+{
+	detach();
+	m_data->m_fineAperture = value;
+}
+
+double AppSignalParam::coarseAaperture()
 {
 	return m_data->m_coarseAperture;
 }
 
-void AppSignalParam::setAperture(double value)
+void AppSignalParam::setCoarseAperture(double value)
 {
 	detach();
 	m_data->m_coarseAperture = value;

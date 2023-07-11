@@ -174,6 +174,7 @@ private:
 	std::set<Hash> m_unappliedStates;
 
 	//Recent Used
+	inline static const int MaxRecentCount = 250;  // Max 250 signals can be added to Recent storage to reduce network load
 	mutable bool m_recentEnabled = true;
 	mutable QMutex m_recentUsedMutex;	// It cannot be read/write locker, as every fetch the time insede RecentUsed is reset (what is write operation).
 	ClientLib::RecentUsed m_recentUsed;

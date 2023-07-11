@@ -10,7 +10,7 @@ find_package(Qt6 REQUIRED COMPONENTS Network)
 
 set(TARGET OnlineLib)
 
-add_library(${TARGET} STATIC
+qt_add_library(${TARGET} STATIC
 	BuildInfo.cpp
 	BuildInfo.h
 	CfgServerLoader.cpp

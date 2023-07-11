@@ -734,23 +734,38 @@ namespace Sim
 
 	void OverrideSignals::setValue(QString appSignalId, OverrideSignalMethod method, const QVariant& value)
 	{
+		std::vector<SetValueData> v;
+		v.emplace_back(appSignalId, method, value);
+
+		return setValues(v);
+	}
+
+	void OverrideSignals::setValues(const std::vector<SetValueData>& overrideData)
+	{
+		QStringList appSignalIds;
+		appSignalIds.reserve(overrideData.size());
+
 		{
 			QWriteLocker locker(&m_lock);
-			m_changesCounter ++;
+			m_changesCounter++;
 
-			auto it = m_signals.find(appSignalId);
-
-			if (it == m_signals.end())
+			for (const auto& d : overrideData)
 			{
-				m_log.writeError(tr("Can't set new value for %1, signal not found").arg(appSignalId));
-				return;
-			}
+				auto it = m_signals.find(d.appSignalId);
+				if (it == m_signals.end())
+				{
+					m_log.writeError(tr("Can't set new value for %1, signal not found").arg(d.appSignalId));
+					continue;
+				}
 
-			OverrideSignalParam& osp = it->second;
-			osp.setValue(value, method, true);
+				OverrideSignalParam& osp = it->second;
+				osp.setValue(d.value, d.method, true);
+
+				appSignalIds.push_back(d.appSignalId);
+			}
 		}
 
-		emit stateChanged(QStringList{} << appSignalId);
+		emit stateChanged(appSignalIds);
 		return;
 	}
 
