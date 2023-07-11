@@ -43,6 +43,8 @@ set (TC_SOURCES
 	../lib/Ui/DialogTcpStatistics.h
 	../lib/Ui/TuningSourcesWidget.cpp
 	../lib/Ui/TuningSourcesWidget.h
+	../lib/Ui/DialogWriteValues.cpp
+	../lib/Ui/DialogWriteValues.h
 	DialogChooseFilter.cpp
 	DialogChooseFilter.h
 	DialogFilterEditor.cpp

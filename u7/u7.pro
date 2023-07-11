@@ -110,6 +110,7 @@ HEADERS  += \
 	../lib/WidgetUtils.h \
 	../lib/Ui/DialogAbout.h \
 	../lib/Ui/TextEditCompleter.h \
+	../lib/Ui/DialogWriteValues.h \
 	../lib/PropertyTable.h \
 	../Metrology/MetrologyConnection.h \
 	AppSignalSetProvider.h \
@@ -226,6 +227,7 @@ SOURCES +=\
 	../lib/Ui/DialogAbout.cpp \
 	../lib/WidgetUtils.cpp \
 	../lib/Ui/TextEditCompleter.cpp \
+	../lib/Ui/DialogWriteValues.cpp \
 	../lib/PropertyTable.cpp \
 	../Metrology/MetrologyConnection.cpp \
 	AppSignalSetProvider.cpp \

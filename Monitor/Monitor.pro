@@ -52,6 +52,7 @@ CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
 SOURCES += main.cpp \
+    ../lib/Ui/DialogWriteValues.cpp \
     ../lib/ClientBehavior.cpp \
     ../lib/Ui/DialogChooseTags.cpp \
     ../lib/Ui/DialogSignalSnapshot.cpp \
@@ -98,6 +99,7 @@ SOURCES += main.cpp \
 	../lib/ExportPrint.cpp
 
 HEADERS  += \
+    ../lib/Ui/DialogWriteValues.h \
     ../lib/ClientBehavior.h \
     ../lib/ConstStrings.h \
 	../UtilsLib/ILogFile.h \

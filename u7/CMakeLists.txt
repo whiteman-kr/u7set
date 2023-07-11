@@ -65,6 +65,8 @@ set (U7_SOURCES
 	../lib/Ui/TagSelectorWidget.h
 	../lib/Ui/TextEditCompleter.cpp
 	../lib/Ui/TextEditCompleter.h
+	../lib/Ui/DialogWriteValues.cpp
+	../lib/Ui/DialogWriteValues.h
 	../lib/WidgetUtils.cpp
 	../lib/WidgetUtils.h
 	AppSignalPropertyManager.cpp
