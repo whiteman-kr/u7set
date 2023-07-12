@@ -10,7 +10,7 @@ find_package(Qt6 REQUIRED COMPONENTS Qml Xml Test)
 
 set(TARGET TestSuiteLib)
 
-add_library(${TARGET} STATIC
+qt_add_library(${TARGET} STATIC
 	AdsInputController.cpp
 	AdsInputController.h
 	Control.cpp

@@ -51,62 +51,68 @@ DialogAppDataSourceInfo::DialogAppDataSourceInfo(const ClientLib::AdsSourceState
 	m_treeWidget->setColumnCount(static_cast<int>(headerLabels.size()));
 	m_treeWidget->setHeaderLabels(headerLabels);
 
-	QTreeWidgetItem* infoItem = new QTreeWidgetItem(QStringList() << tr("1-Source Information"));
+	{
+		QTreeWidgetItem* infoItem = new QTreeWidgetItem(QStringList() << tr("1-Source Information"));
 
-	createDataItem(infoItem, "ID");
-	createDataItem(infoItem, "EquipmentID");
-	createDataItem(infoItem, "Caption");
-	createDataItem(infoItem, "DataType");
-	createDataItem(infoItem, "IP");
-	createDataItem(infoItem, "Port");
-	createDataItem(infoItem, "Channel");
-	createDataItem(infoItem, "SubsystemID");
-	createDataItem(infoItem, "Subsystem");
+		createDataItem(infoItem, "ID");
+		createDataItem(infoItem, "EquipmentID");
+		createDataItem(infoItem, "Caption");
+		createDataItem(infoItem, "DataType");
+		createDataItem(infoItem, "IP");
+		createDataItem(infoItem, "Port");
+		createDataItem(infoItem, "Channel");
+		createDataItem(infoItem, "SubsystemID");
+		createDataItem(infoItem, "Subsystem");
 
-	createDataItem(infoItem, "LmNumber");
-	createDataItem(infoItem, "LmModuleType");
-	createDataItem(infoItem, "LmAdapterID");
-	createDataItem(infoItem, "LmDataEnable");
-	createDataItem(infoItem, "LmDataID");
+		createDataItem(infoItem, "LmNumber");
+		createDataItem(infoItem, "LmModuleType");
+		createDataItem(infoItem, "LmAdapterID");
+		createDataItem(infoItem, "LmDataEnable");
+		createDataItem(infoItem, "LmDataID");
+		createDataItem(infoItem, "ReceivesData");
 
-	m_treeWidget->addTopLevelItem(infoItem);
+		m_treeWidget->addTopLevelItem(infoItem);
 
-	infoItem->setExpanded(true);
+		infoItem->setExpanded(true);
+	}
 
-	QTreeWidgetItem* stateItem = new QTreeWidgetItem(QStringList() << tr("2-Source State"));
+	{
+		QTreeWidgetItem* stateItem = new QTreeWidgetItem(QStringList() << tr("2-Source State"));
 
-	createDataItem(infoItem, "Uptime");
-	createDataItem(infoItem, "ReceivesData");
-	createDataItem(stateItem, "DataReceivingRate");
-	createDataItem(stateItem, "LostPacketCount");
-	createDataItem(stateItem, "DataProcessingEnabled");
-	createDataItem(stateItem, "ReceivedDataID");
-	createDataItem(stateItem, "ReceivedDataSize");
-	createDataItem(stateItem, "ReceivedFramesCount");
-	createDataItem(stateItem, "ReceivedPacketCount");
-	createDataItem(stateItem, "RupFramePlantTime");
-	createDataItem(stateItem, "RupFrameNumerator");
-	createDataItem(stateItem, "SignalStatesQueueCurSize");
-	createDataItem(stateItem, "SignalStatesQueueCurMaxSize");
-	createDataItem(stateItem, "AcquiredSignalsCount");
+		createDataItem(stateItem, "Uptime");
+		createDataItem(stateItem, "LmTime");
+		createDataItem(stateItem, "DataReceivingRate");
+		createDataItem(stateItem, "LostPacketCount");
+		createDataItem(stateItem, "DataProcessingEnabled");
+		createDataItem(stateItem, "ReceivedDataID");
+		createDataItem(stateItem, "ReceivedDataSize");
+		createDataItem(stateItem, "ReceivedFramesCount");
+		createDataItem(stateItem, "ReceivedPacketCount");
+		createDataItem(stateItem, "RupFrameNumerator");
+		createDataItem(stateItem, "SignalStatesQueueCurSize");
+		createDataItem(stateItem, "SignalStatesQueueCurMaxSize");
+		createDataItem(stateItem, "AcquiredSignalsCount");
 
-	m_treeWidget->addTopLevelItem(stateItem);
+		m_treeWidget->addTopLevelItem(stateItem);
 
-	stateItem->setExpanded(true);
+		stateItem->setExpanded(true);
+	}
 
-	QTreeWidgetItem* errorItem = new QTreeWidgetItem(QStringList() << tr("3-Errors"));
+	{
+		QTreeWidgetItem* errorItem = new QTreeWidgetItem(QStringList() << tr("3-Errors"));
 
-	createDataItem(errorItem, "ErrorProtocolVersion");
-	createDataItem(errorItem, "ErrorFramesQuantity");
-	createDataItem(errorItem, "ErrorFrameNo");
-	createDataItem(errorItem, "ErrorFrameCRC");
-	createDataItem(errorItem, "ErrorDataID");
-	createDataItem(errorItem, "ErrorDuplicatePlantTime");
-	createDataItem(errorItem, "ErrorNonmonotonicPlantTime");
+		createDataItem(errorItem, "ErrorProtocolVersion");
+		createDataItem(errorItem, "ErrorFramesQuantity");
+		createDataItem(errorItem, "ErrorFrameNo");
+		createDataItem(errorItem, "ErrorFrameCRC");
+		createDataItem(errorItem, "ErrorDataID");
+		createDataItem(errorItem, "ErrorDuplicatePlantTime");
+		createDataItem(errorItem, "ErrorNonmonotonicPlantTime");
 
-	m_treeWidget->addTopLevelItem(errorItem);
+		m_treeWidget->addTopLevelItem(errorItem);
 
-	errorItem->setExpanded(true);
+		errorItem->setExpanded(true);
+	}
 
 	updateData();
 
@@ -201,11 +207,12 @@ void DialogAppDataSourceInfo::updateData()
 		}
 	}
 
-	auto time = adsState->state.uptime();
-	int s = time % 60; time /= 60;
-	int m = time % 60; time /= 60;
-	int h = time % 24; time /= 24;
-	setDataItemText("Uptime", QString("%1d %2:%3:%4").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0')));
+
+	QDateTime tm;
+	tm.setTimeSpec(Qt::UTC);
+
+	tm.setMSecsSinceEpoch(adsState->state.uptime());
+	setDataItemText("Uptime", tm.toString("dd/MM/yyyy HH:mm:ss.zzz"));
 
 	setDataItemNumber("ReceivedDataID", adsState->state.receiveddataid());
 	double datareceivingrate = adsState->state.datareceivingspeed();
@@ -216,12 +223,8 @@ void DialogAppDataSourceInfo::updateData()
 	setDataItemNumber("LostPacketCount", adsState->state.lostpacketcount());
 	setDataItemText("DataProcessingEnabled", adsState->state.dataprocessingenabled() ? "Yes" : "No");
 
-	QDateTime tm;
-
-	tm.setTimeSpec(Qt::UTC);
-
-	tm.setMSecsSinceEpoch(adsState->state.rupframeplanttime());
-	setDataItemText("RupFramePlantTime", tm.toString("dd/MM/yyyy HH:mm:ss.zzz"));
+	tm.setMSecsSinceEpoch(adsState->state.lmtime());
+	setDataItemText("LmTime", tm.toString("dd/MM/yyyy HH:mm:ss.zzz"));
 
 	setDataItemNumber("RupFrameNumerator", adsState->state.rupframenumerator());
 	setDataItemNumber("SignalStatesQueueCurSize", adsState->state.signalstatesqueuecursize());
@@ -286,7 +289,7 @@ AppDataSourcesWidget::AppDataSourcesWidget(const ClientLib::AdsSourceStateConnec
 	headerLabels << tr("LmNumber");
 
 	headerLabels << tr("State");
-	headerLabels << tr("Uptime");
+	headerLabels << tr("LmTime");
 	headerLabels << tr("ReceivedCount");
 	headerLabels << tr("Receiving Rate, KB/sec");
 
@@ -420,12 +423,12 @@ void AppDataSourcesWidget::update(bool refreshOnly)
 			continue;
 		}
 
-		auto time = adsState->state.uptime();
-		int s = time % 60; time /= 60;
-		int m = time % 60; time /= 60;
-		int h = time % 24; time /= 24;
+		QDateTime tm;
+		tm.setTimeSpec(Qt::UTC);
 
-		item->setText(static_cast<int>(Columns::Uptime), QString("%1d %2:%3:%4").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0')));
+		tm.setMSecsSinceEpoch(adsState->state.lmtime());
+		item->setText(static_cast<int>(Columns::LmTime), tm.toString("dd/MM/yyyy HH:mm:ss.zzz"));
+
 		item->setText(static_cast<int>(Columns::ReceivedPacketCount), QString::number(adsState->state.receivedpacketcount()));
 		double datareceivingrate = adsState->state.datareceivingspeed();
 		item->setText(static_cast<int>(Columns::DataReceivingRate), QString::number(datareceivingrate, 'f', 1));
@@ -472,7 +475,6 @@ void AppDataSourcesWidget::update(bool refreshOnly)
 		}
 
 		m_treeWidget->setColumnWidth(static_cast<int>(Columns::State), 120);
-		m_treeWidget->setColumnWidth(static_cast<int>(Columns::Uptime), 120);
 	}
 }
 

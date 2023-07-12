@@ -18,7 +18,7 @@ endif (MSVC)
 
 set(TARGET VFrame30)
 
-add_library(${TARGET} STATIC
+qt_add_library(${TARGET} STATIC
 	../lib/ClientBehavior.cpp
 	../lib/ClientBehavior.h
 	../lib/ITimeStats.h

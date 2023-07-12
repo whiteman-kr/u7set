@@ -18,6 +18,7 @@ void MonitorAppSettings::restore()
 {
 	QSettings s{};
 	load(s);
+	m_wasLoadedFromFile = false;
 	return;
 }
 
@@ -33,7 +34,13 @@ bool MonitorAppSettings::loadFromFile(QString fileName)
 {
 	QSettings s{fileName, QSettings::IniFormat};
 	load(s);
+	m_wasLoadedFromFile = true;
 	return s.status() == QSettings::Status::NoError;
+}
+
+bool MonitorAppSettings::wasLoadedFromFile() const
+{
+	return m_wasLoadedFromFile;
 }
 
 void MonitorAppSettings::save(QSettings& settings) const

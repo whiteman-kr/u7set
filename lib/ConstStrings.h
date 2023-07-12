@@ -392,6 +392,8 @@ namespace SoftwareSetting
 	inline const QString LOG_GATEWAY_PACKETS("LogGatewayPackets");
 
 	inline const QString LOG_RUP_TIME_ERRORS("LogRupTimeErrors");
+
+	inline const QString READ_ONLY_ARCHIVE_PATH("ReadOnlyArchivePath");
 }
 
 namespace CmdLineArg
@@ -421,6 +423,9 @@ namespace CmdLineArg
 
 	inline const QString LOG_GATEWAY_PACKETS("logGwPackets");
 	inline const QString LOG_RUP_TIME_ERR("logRupTimeErr");
+
+	inline const QString READ_ONLY("readonly");
+	inline const QString CLIENT_IP("clientip");
 }
 
 namespace Directory
@@ -472,6 +477,11 @@ namespace File
 
 	inline const QString CRYPTO_CA_CLIENT_CERTIFICATE = "/Crypto/ca_client.crt";
 	inline const QString CRYPTO_CA_CLIENT_PRIVATE_KEY = "/Crypto/ca_client_private.key";
+
+	inline const QString ARCH_INFO_PROTO = "ArchInfo.proto";
+	inline const QString ARCH_INFO_PROTO_BAK = "ArchInfo.proto.bak";
+
+	inline const QString READONLY = "readonly";
 }
 
 namespace Separator

@@ -4483,7 +4483,7 @@ namespace Builder
 		{
 			if (tuningEnabled == true)
 			{
-				// Tuning is enabled for module %1 but tunable signals is not found.
+				// Tuning is enabled for module %1 but tunable signals are not found.
 				//
 				m_log->wrnALC5165(lmEquipmentID());
 			}

@@ -1,6 +1,6 @@
 #include "BuildInfo.h"
 #include "../lib/ConstStrings.h"
-
+#include "../UtilsLib/WUtils.h"
 
 namespace OnlineLib
 {
@@ -10,6 +10,8 @@ namespace OnlineLib
 	//	BuildInfo structure implementation
 	//
 	// --------------------------------------------------------------------------------------
+
+	const QString BuildInfo::dateTimeFormatStr("dd.MM.yyyy hh:mm:ss");
 
 	void BuildInfo::writeToXml(QXmlStreamWriter& xmlWriter) const
 	{
@@ -38,7 +40,7 @@ namespace OnlineLib
 		id = xmlReader.attributes().value("ID").toInt();
 
 		QString dateTimeStr = xmlReader.attributes().value("Date").toString();
-		date = QDateTime::fromString(dateTimeStr, "dd.MM.yyyy hh:mm:ss");
+		date = QDateTime::fromString(dateTimeStr, dateTimeFormatStr);
 
 		changeset = xmlReader.attributes().value("Changeset").toInt();
 
@@ -47,6 +49,27 @@ namespace OnlineLib
 		workstation = xmlReader.attributes().value("Workstation").toString();
 	}
 
+	void BuildInfo::saveToProto(Proto::BuildInfo* proto) const
+	{
+		TEST_PTR_RETURN(proto);
+
+		proto->set_project(project.toStdString());
+		proto->set_buildno(id);
+		proto->set_datetime(dateStr().toStdString());
+		proto->set_changeset(changeset);
+		proto->set_user(user.toStdString());
+		proto->set_workstation(workstation.toStdString());
+	}
+
+	void BuildInfo::loadFromProto(const Proto::BuildInfo& proto)
+	{
+		project = QString::fromStdString(proto.project());
+		id = proto.buildno();
+		date = QDateTime::fromString(QString::fromStdString(proto.datetime()), dateTimeFormatStr);
+		changeset = proto.changeset();
+		user = QString::fromStdString(proto.user());
+		workstation = QString::fromStdString(proto.workstation());
+	}
 
 	// --------------------------------------------------------------------------------------
 	//

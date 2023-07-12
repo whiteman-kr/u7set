@@ -25,7 +25,6 @@ ArchivingService::ArchivingService(const ArchivingService* worker) :
 
 ArchivingService::~ArchivingService()
 {
-	deleteArchSignalsProto();
 }
 
 ServiceWorker* ArchivingService::createInstance() const
@@ -41,6 +40,11 @@ void ArchivingService::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo)
 	serviceInfo.set_settingsxml(xmlString.toStdString());
 }
 
+bool ArchivingService::isReadOnlyArchive() const
+{
+	return !m_readOnlyArchivePath.isEmpty();
+}
+
 void ArchivingService::initServiceSpecificCmdLineArgs()
 {
 	addValueCmdLineArg(CmdLineArg::ID, SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
@@ -53,7 +57,7 @@ void ArchivingService::initServiceSpecificCmdLineArgs()
 							SoftwareSetting::MIN_QUEUE_SIZE_FOR_FLUSHING,
 							QString("Minimum size of signal states queue for flushing to disk (default = %1 states).").
 								arg(Archive::DEFAULT_QUEUE_SIZE_FOR_FLUSHING), "");
-
+	addValueCmdLineArg(CmdLineArg::READ_ONLY, SoftwareSetting::READ_ONLY_ARCHIVE_PATH, "Path to read only archive.", "D:\\Archive\\ProjectID");
 }
 
 void ArchivingService::loadServiceSpecificSettings()
@@ -70,6 +74,8 @@ void ArchivingService::loadServiceSpecificSettings()
 	{
 		m_minQueueSizeForFlushing = Archive::DEFAULT_QUEUE_SIZE_FOR_FLUSHING;
 	}
+
+	m_readOnlyArchivePath = getSettingValue(SoftwareSetting::READ_ONLY_ARCHIVE_PATH);
 
 	DEBUG_LOG_MSG(logger(), "");
 	DEBUG_LOG_MSG(logger(), QString(tr("Service settings:")));
@@ -88,7 +94,6 @@ void ArchivingService::initialize()
 	// Service Main Function initialization
 	//
 	runCfgLoaderThread();
-
 	DEBUG_LOG_MSG(logger(), QString(tr("ArchivingServiceWorker initialized")));
 }
 
@@ -97,10 +102,7 @@ void ArchivingService::shutdown()
 	// Service Main Function deinitialization
 	//
 	stopAllThreads();
-
 	stopCfgLoaderThread();
-
-	DEBUG_LOG_MSG(logger(), QString(tr("ArchivingServiceWorker stoped")));
 }
 
 void ArchivingService::runCfgLoaderThread()
@@ -127,11 +129,17 @@ void ArchivingService::startAllThreads()
 {
 	startArchive();
 
-	if (m_archive->isWorkable() == true)
+	if (m_archive->isWorkable() == false)
+	{
+		return;
+	}
+
+	if (m_archive->isReadOnly() == false)
 	{
 		startTcpAppDataServerThread();
-		startTcpArchRequestsServerThread();
 	}
+
+	startTcpArchRequestsServerThread();
 }
 
 void ArchivingService::stopAllThreads()
@@ -144,36 +152,40 @@ void ArchivingService::stopAllThreads()
 
 void ArchivingService::startArchive()
 {
-	TEST_PTR_RETURN(m_archSignalsProto);
+	Q_ASSERT(m_archive == nullptr);
 
-	if (m_archive == nullptr)
+	if (isReadOnlyArchive() == true)
 	{
 		m_archive = new Archive(m_buildInfo.project,
 								equipmentID(),
+								m_readOnlyArchivePath,
+								m_archInfoFileData,
+								logger());
+	}
+	else
+	{
+		Q_ASSERT(m_archInfoFileData.isEmpty() == false);
+
+		m_archive = new Archive(m_buildInfo.project,
+								equipmentID(),
 								m_serviceSettings.archiveLocation,
-								*m_archSignalsProto,
+								m_archInfoFileData,
 								m_serviceSettings.shortTermArchivePeriod,
 								m_serviceSettings.longTermArchivePeriod,
 								Archive::DEFAULT_MAINTENANCE_DELAY_MINUTES,
 								m_minQueueSizeForFlushing,
 								logger());
+	}
 
-		deleteArchSignalsProto();				// no more required
+	m_archive->start();
 
-		m_archive->start();
-
-		if (m_archive->isWorkable() == true)
-		{
-			DEBUG_LOG_MSG(logger(), QString("Archive is workable. Directory: %1").arg(m_archive->archFullPath()));
-		}
-		else
-		{
-			DEBUG_LOG_ERR(logger(), QString("Archive is NOT WORKABLE!"));
-		}
+	if (m_archive->isWorkable() == true)
+	{
+		DEBUG_LOG_MSG(logger(), QString("Archive is workable. Directory: %1").arg(m_archive->archFullPath()));
 	}
 	else
 	{
-		assert(false);
+		DEBUG_LOG_ERR(logger(), QString("Archive is NOT WORKABLE!"));
 	}
 }
 
@@ -236,26 +248,6 @@ void ArchivingService::stopTcpArchiveRequestsServerThread()
 	}
 }
 
-bool ArchivingService::loadArchSignalsProto(const QByteArray& fileData)
-{
-	deleteArchSignalsProto();
-
-	m_archSignalsProto = new Proto::ArchSignals;
-
-	bool result = m_archSignalsProto->ParseFromArray(fileData.constData(), static_cast<int>(fileData.size()));
-
-	return result;
-}
-
-void ArchivingService::deleteArchSignalsProto()
-{
-	if (m_archSignalsProto != nullptr)
-	{
-		delete m_archSignalsProto;
-		m_archSignalsProto = nullptr;
-	}
-}
-
 void ArchivingService::logFileLoadResult(bool loadOk, const QString& fileName)
 {
 	if (loadOk == true)
@@ -294,6 +286,8 @@ void ArchivingService::onConfigurationReady(const QByteArray configurationXmlDat
 
 	bool fileResult = true;
 
+	m_archInfoFileData.clear();
+
 	for(const OnlineLib::BuildFileInfo& bfi : buildFileInfoArray)
 	{
 		QByteArray fileData;
@@ -307,19 +301,9 @@ void ArchivingService::onConfigurationReady(const QByteArray configurationXmlDat
 			continue;
 		}
 
-		bool res = true;
-
-		if (bfi.pathFileName.endsWith("ArchSignals.proto"))
+		if (bfi.pathFileName.endsWith(File::ARCH_INFO_PROTO))
 		{
-			res = loadArchSignalsProto(fileData);
-
-			logFileLoadResult(res, bfi.pathFileName);
-		}
-
-		if (res == false)
-		{
-			fileResult = false;
-			break;
+			m_archInfoFileData.swap(fileData);
 		}
 	}
 

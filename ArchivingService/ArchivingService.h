@@ -28,6 +28,8 @@ public:
 	virtual ServiceWorker* createInstance() const override;
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& servicesInfo) const override;
 
+	bool isReadOnlyArchive() const;
+
 private:
 	virtual void initServiceSpecificCmdLineArgs() override;
 	virtual void loadServiceSpecificSettings() override;
@@ -50,9 +52,6 @@ private:
 	void startTcpArchRequestsServerThread();
 	void stopTcpArchiveRequestsServerThread();
 
-	bool loadArchSignalsProto(const QByteArray& fileData);
-	void deleteArchSignalsProto();
-
 	void logFileLoadResult(bool loadOk, const QString& fileName);
 
 private slots:
@@ -64,10 +63,11 @@ private slots:
 private:
 	QString m_overwriteArchiveLocation;
 	int m_minQueueSizeForFlushing = 0;
+	QString m_readOnlyArchivePath;
 
 	ArchivingServiceSettings m_serviceSettings;
 	OnlineLib::BuildInfo m_buildInfo;
-	Proto::ArchSignals* m_archSignalsProto = nullptr;
+	QByteArray m_archInfoFileData;
 
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 

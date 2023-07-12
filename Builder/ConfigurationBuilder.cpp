@@ -316,6 +316,7 @@ namespace Builder
 
 		// Find Logic modules for each subsystem and execute configuration script for each subsystem
 		//
+		int errorCount = m_log->errorCount();	// Save log errors count for later comparing
 
 		for (int i = 0; i < subsystemsCount; i++)
 		{
@@ -520,6 +521,12 @@ namespace Builder
 		if (m_buildResultWriter->addFile("Reports", "LmJumpers.txt", lmReportData) == nullptr)
 		{
 			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Failed to save LmJumpers.txt file!"));
+			return false;
+		}
+
+		if (m_log->errorCount() > errorCount)
+		{
+			// New error messages arrived during build - build failed
 			return false;
 		}
 

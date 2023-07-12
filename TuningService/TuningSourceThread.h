@@ -42,6 +42,7 @@ namespace Tuning
 		std::atomic<bool> setSOR = false;
 		std::atomic<bool> writingDisabled = false;
 		std::atomic<bool> hasUnappliedParams = false;
+		std::atomic<qint64> lmTime = 0;
 
 		// flags reported by LM in reply FotipHeader.flags
 		//

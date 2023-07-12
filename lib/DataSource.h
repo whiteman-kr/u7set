@@ -211,7 +211,7 @@ public:
 	qint64 receivedFramesCount() const { return m_receivedFramesCount; }
 	qint64 receivedPacketCount() const { return m_receivedPacketCount; }
 	quint32 receivedDataID() const { return m_receivedDataID; }
-	qint64 rupFramePlantTime() const { return m_rupFramePlantTime; }
+	qint64 rupFramePlantTime() const { return m_lmTime; }
 	QString rupFramePlantTimeStr() const;
 	quint16 rupFrameNumerator() const { return static_cast<quint16>(m_rupFrameNumerator); }
 	qint64 lostPacketCount() const { return m_lostPacketCount; }
@@ -258,7 +258,7 @@ protected:
 	qint64 m_uptime = 0;										// in seconds!
 	quint32 m_receivedDataID = 0;
 
-	qint64 m_rupFramePlantTime = 0;
+	qint64 m_lmTime = 0;
 	qint64 m_rupFrameNumerator = -1;			// qint64 is Ok!
 
 	std::atomic<double> m_dataReceivingSpeed = { 0 };

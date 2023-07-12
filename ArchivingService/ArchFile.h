@@ -97,10 +97,8 @@ private:
 	static const double QUEUE_REDUCTION_LIMIT;
 
 public:
-	ArchFile(const Proto::ArchSignal& protoArchSignal, CircularLoggerShared log);
+	ArchFile(const Proto::ArchSignal& protoArchSignal, const QString& archFullPath, CircularLoggerShared log);
 	~ArchFile();
-
-	void setArchFullPath(const QString& archFullPath);
 
 	bool pushState(const SimpleAppSignalState& state);
 
@@ -116,6 +114,8 @@ public:
 	bool isRequiredImmediatelyFlushing() const { return m_requiredImmediatelyFlushing.load(); }
 
 	Hash hash() const { return m_hash; }
+	quint32 group() const { return static_cast<quint32>(m_hash & 0xFF); }
+
 	QString appSignalID() const { return m_appSignalID; }
 
 	bool isAnalog() const { return m_isAnalog; }

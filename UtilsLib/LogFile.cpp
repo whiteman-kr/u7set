@@ -1584,12 +1584,12 @@ namespace Log
 
 		QVBoxLayout* mainLayout = new QVBoxLayout();
 
-		mainLayout->addWidget(new QLabel("Start Time:"));
+		mainLayout->addWidget(new QLabel(tr("Start Time:")));
 		m_timeFromEdit = new QDateTimeEdit(this);
 		m_timeFromEdit->setDisplayFormat(messageTimeFormat);
 		mainLayout->addWidget(m_timeFromEdit);
 
-		mainLayout->addWidget(new QLabel("End Time:"));
+		mainLayout->addWidget(new QLabel(tr("End Time:")));
 		m_timeToEdit = new QDateTimeEdit(this);
 		m_timeToEdit->setDisplayFormat(messageTimeFormat);
 		mainLayout->addWidget(m_timeToEdit);
@@ -1733,7 +1733,7 @@ namespace Log
 
 		if (useMessageType == true)
 		{
-			topLayout->addWidget(new QLabel("Type:"));
+			topLayout->addWidget(new QLabel(tr("Type:")));
 
 			m_recordTypeCombo = new QComboBox();
 			m_recordTypeCombo->addItem(tr("All Messages"), MessageType::All);

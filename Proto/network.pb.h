@@ -4759,7 +4759,7 @@ class AppDataSourceState PROTOBUF_FINAL :
     kReceivesDataFieldNumber = 4,
     kReceivedDataIDFieldNumber = 6,
     kUptimeFieldNumber = 5,
-    kRupFramePlantTimeFieldNumber = 7,
+    kLmTimeFieldNumber = 7,
     kDataReceivingSpeedFieldNumber = 9,
     kReceivedDataSizeFieldNumber = 10,
     kReceivedFramesCountFieldNumber = 11,
@@ -4862,17 +4862,17 @@ class AppDataSourceState PROTOBUF_FINAL :
   void _internal_set_uptime(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
-  // optional int64 rupFramePlantTime = 7 [default = 0];
-  bool has_rupframeplanttime() const;
+  // optional int64 lmTime = 7 [default = 0];
+  bool has_lmtime() const;
   private:
-  bool _internal_has_rupframeplanttime() const;
+  bool _internal_has_lmtime() const;
   public:
-  void clear_rupframeplanttime();
-  ::PROTOBUF_NAMESPACE_ID::int64 rupframeplanttime() const;
-  void set_rupframeplanttime(::PROTOBUF_NAMESPACE_ID::int64 value);
+  void clear_lmtime();
+  ::PROTOBUF_NAMESPACE_ID::int64 lmtime() const;
+  void set_lmtime(::PROTOBUF_NAMESPACE_ID::int64 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_rupframeplanttime() const;
-  void _internal_set_rupframeplanttime(::PROTOBUF_NAMESPACE_ID::int64 value);
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_lmtime() const;
+  void _internal_set_lmtime(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
   // optional double dataReceivingSpeed = 9 [default = 0];
@@ -5098,7 +5098,7 @@ class AppDataSourceState PROTOBUF_FINAL :
   bool receivesdata_;
   ::PROTOBUF_NAMESPACE_ID::uint32 receiveddataid_;
   ::PROTOBUF_NAMESPACE_ID::int64 uptime_;
-  ::PROTOBUF_NAMESPACE_ID::int64 rupframeplanttime_;
+  ::PROTOBUF_NAMESPACE_ID::int64 lmtime_;
   double datareceivingspeed_;
   ::PROTOBUF_NAMESPACE_ID::int64 receiveddatasize_;
   ::PROTOBUF_NAMESPACE_ID::int64 receivedframescount_;
@@ -9315,8 +9315,8 @@ class TuningSourceState PROTOBUF_FINAL :
     kFotipFlagWritingDisabledFieldNumber = 44,
     kFotipProcessingNumeratorFieldNumber = 45,
     kErrRupProtocolVersionFieldNumber = 50,
-    kHasUnappliedParamsFieldNumber = 17,
     kErrRupFrameSizeFieldNumber = 51,
+    kHasUnappliedParamsFieldNumber = 17,
     kErrRupNonTuningDataFieldNumber = 52,
     kErrRupModuleTypeFieldNumber = 53,
     kErrRupFramesQuantityFieldNumber = 54,
@@ -9338,6 +9338,7 @@ class TuningSourceState PROTOBUF_FINAL :
     kErrReplySizeFieldNumber = 73,
     kErrNoReplyFieldNumber = 74,
     kErrTuningFrameUpdateFieldNumber = 75,
+    kLmTimeFieldNumber = 76,
   };
   // optional string lanEquipmentID = 2;
   bool has_lanequipmentid() const;
@@ -9684,19 +9685,6 @@ class TuningSourceState PROTOBUF_FINAL :
   void _internal_set_errrupprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
-  // optional bool hasUnappliedParams = 17 [default = false];
-  bool has_hasunappliedparams() const;
-  private:
-  bool _internal_has_hasunappliedparams() const;
-  public:
-  void clear_hasunappliedparams();
-  bool hasunappliedparams() const;
-  void set_hasunappliedparams(bool value);
-  private:
-  bool _internal_hasunappliedparams() const;
-  void _internal_set_hasunappliedparams(bool value);
-  public:
-
   // optional int64 errRupFrameSize = 51 [default = 0];
   bool has_errrupframesize() const;
   private:
@@ -9708,6 +9696,19 @@ class TuningSourceState PROTOBUF_FINAL :
   private:
   ::PROTOBUF_NAMESPACE_ID::int64 _internal_errrupframesize() const;
   void _internal_set_errrupframesize(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional bool hasUnappliedParams = 17 [default = false];
+  bool has_hasunappliedparams() const;
+  private:
+  bool _internal_has_hasunappliedparams() const;
+  public:
+  void clear_hasunappliedparams();
+  bool hasunappliedparams() const;
+  void set_hasunappliedparams(bool value);
+  private:
+  bool _internal_hasunappliedparams() const;
+  void _internal_set_hasunappliedparams(bool value);
   public:
 
   // optional int64 errRupNonTuningData = 52 [default = 0];
@@ -9983,6 +9984,19 @@ class TuningSourceState PROTOBUF_FINAL :
   void _internal_set_errtuningframeupdate(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
+  // optional int64 lmTime = 76 [default = 0];
+  bool has_lmtime() const;
+  private:
+  bool _internal_has_lmtime() const;
+  public:
+  void clear_lmtime();
+  ::PROTOBUF_NAMESPACE_ID::int64 lmtime() const;
+  void set_lmtime(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_lmtime() const;
+  void _internal_set_lmtime(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:Network.TuningSourceState)
  private:
   class _Internal;
@@ -10018,8 +10032,8 @@ class TuningSourceState PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::int64 fotipflagwritingdisabled_;
   ::PROTOBUF_NAMESPACE_ID::uint64 fotipprocessingnumerator_;
   ::PROTOBUF_NAMESPACE_ID::int64 errrupprotocolversion_;
-  bool hasunappliedparams_;
   ::PROTOBUF_NAMESPACE_ID::int64 errrupframesize_;
+  bool hasunappliedparams_;
   ::PROTOBUF_NAMESPACE_ID::int64 errrupnontuningdata_;
   ::PROTOBUF_NAMESPACE_ID::int64 errrupmoduletype_;
   ::PROTOBUF_NAMESPACE_ID::int64 errrupframesquantity_;
@@ -10041,6 +10055,7 @@ class TuningSourceState PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::int64 errreplysize_;
   ::PROTOBUF_NAMESPACE_ID::int64 errnoreply_;
   ::PROTOBUF_NAMESPACE_ID::int64 errtuningframeupdate_;
+  ::PROTOBUF_NAMESPACE_ID::int64 lmtime_;
   friend struct ::TableStruct_network_2eproto;
 };
 // -------------------------------------------------------------------
@@ -19830,32 +19845,32 @@ inline void AppDataSourceState::set_receiveddataid(::PROTOBUF_NAMESPACE_ID::uint
   // @@protoc_insertion_point(field_set:Network.AppDataSourceState.receivedDataID)
 }
 
-// optional int64 rupFramePlantTime = 7 [default = 0];
-inline bool AppDataSourceState::_internal_has_rupframeplanttime() const {
+// optional int64 lmTime = 7 [default = 0];
+inline bool AppDataSourceState::_internal_has_lmtime() const {
   bool value = (_has_bits_[0] & 0x00000040u) != 0;
   return value;
 }
-inline bool AppDataSourceState::has_rupframeplanttime() const {
-  return _internal_has_rupframeplanttime();
+inline bool AppDataSourceState::has_lmtime() const {
+  return _internal_has_lmtime();
 }
-inline void AppDataSourceState::clear_rupframeplanttime() {
-  rupframeplanttime_ = PROTOBUF_LONGLONG(0);
+inline void AppDataSourceState::clear_lmtime() {
+  lmtime_ = PROTOBUF_LONGLONG(0);
   _has_bits_[0] &= ~0x00000040u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_rupframeplanttime() const {
-  return rupframeplanttime_;
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::_internal_lmtime() const {
+  return lmtime_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::rupframeplanttime() const {
-  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.rupFramePlantTime)
-  return _internal_rupframeplanttime();
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppDataSourceState::lmtime() const {
+  // @@protoc_insertion_point(field_get:Network.AppDataSourceState.lmTime)
+  return _internal_lmtime();
 }
-inline void AppDataSourceState::_internal_set_rupframeplanttime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+inline void AppDataSourceState::_internal_set_lmtime(::PROTOBUF_NAMESPACE_ID::int64 value) {
   _has_bits_[0] |= 0x00000040u;
-  rupframeplanttime_ = value;
+  lmtime_ = value;
 }
-inline void AppDataSourceState::set_rupframeplanttime(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _internal_set_rupframeplanttime(value);
-  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.rupFramePlantTime)
+inline void AppDataSourceState::set_lmtime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_lmtime(value);
+  // @@protoc_insertion_point(field_set:Network.AppDataSourceState.lmTime)
 }
 
 // optional uint32 rupFrameNumerator = 8 [default = 0];
@@ -23962,7 +23977,7 @@ inline void TuningSourceState::set_writingdisabled(bool value) {
 
 // optional bool hasUnappliedParams = 17 [default = false];
 inline bool TuningSourceState::_internal_has_hasunappliedparams() const {
-  bool value = (_has_bits_[0] & 0x04000000u) != 0;
+  bool value = (_has_bits_[0] & 0x08000000u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_hasunappliedparams() const {
@@ -23970,7 +23985,7 @@ inline bool TuningSourceState::has_hasunappliedparams() const {
 }
 inline void TuningSourceState::clear_hasunappliedparams() {
   hasunappliedparams_ = false;
-  _has_bits_[0] &= ~0x04000000u;
+  _has_bits_[0] &= ~0x08000000u;
 }
 inline bool TuningSourceState::_internal_hasunappliedparams() const {
   return hasunappliedparams_;
@@ -23980,7 +23995,7 @@ inline bool TuningSourceState::hasunappliedparams() const {
   return _internal_hasunappliedparams();
 }
 inline void TuningSourceState::_internal_set_hasunappliedparams(bool value) {
-  _has_bits_[0] |= 0x04000000u;
+  _has_bits_[0] |= 0x08000000u;
   hasunappliedparams_ = value;
 }
 inline void TuningSourceState::set_hasunappliedparams(bool value) {
@@ -24466,7 +24481,7 @@ inline void TuningSourceState::set_errrupprotocolversion(::PROTOBUF_NAMESPACE_ID
 
 // optional int64 errRupFrameSize = 51 [default = 0];
 inline bool TuningSourceState::_internal_has_errrupframesize() const {
-  bool value = (_has_bits_[0] & 0x08000000u) != 0;
+  bool value = (_has_bits_[0] & 0x04000000u) != 0;
   return value;
 }
 inline bool TuningSourceState::has_errrupframesize() const {
@@ -24474,7 +24489,7 @@ inline bool TuningSourceState::has_errrupframesize() const {
 }
 inline void TuningSourceState::clear_errrupframesize() {
   errrupframesize_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x08000000u;
+  _has_bits_[0] &= ~0x04000000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_errrupframesize() const {
   return errrupframesize_;
@@ -24484,7 +24499,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::errrupframesize() const
   return _internal_errrupframesize();
 }
 inline void TuningSourceState::_internal_set_errrupframesize(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x08000000u;
+  _has_bits_[0] |= 0x04000000u;
   errrupframesize_ = value;
 }
 inline void TuningSourceState::set_errrupframesize(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -25078,6 +25093,34 @@ inline void TuningSourceState::_internal_set_errtuningframeupdate(::PROTOBUF_NAM
 inline void TuningSourceState::set_errtuningframeupdate(::PROTOBUF_NAMESPACE_ID::int64 value) {
   _internal_set_errtuningframeupdate(value);
   // @@protoc_insertion_point(field_set:Network.TuningSourceState.errTuningFrameUpdate)
+}
+
+// optional int64 lmTime = 76 [default = 0];
+inline bool TuningSourceState::_internal_has_lmtime() const {
+  bool value = (_has_bits_[1] & 0x00020000u) != 0;
+  return value;
+}
+inline bool TuningSourceState::has_lmtime() const {
+  return _internal_has_lmtime();
+}
+inline void TuningSourceState::clear_lmtime() {
+  lmtime_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[1] &= ~0x00020000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::_internal_lmtime() const {
+  return lmtime_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSourceState::lmtime() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSourceState.lmTime)
+  return _internal_lmtime();
+}
+inline void TuningSourceState::_internal_set_lmtime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[1] |= 0x00020000u;
+  lmtime_ = value;
+}
+inline void TuningSourceState::set_lmtime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_lmtime(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSourceState.lmTime)
 }
 
 // -------------------------------------------------------------------

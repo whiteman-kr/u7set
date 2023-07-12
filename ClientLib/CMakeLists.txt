@@ -10,7 +10,7 @@ find_package(Qt6 REQUIRED COMPONENTS Gui Xml Network Widgets)
 
 set(TARGET ClientLib)
 
-add_library(${TARGET} STATIC
+qt_add_library(${TARGET} STATIC
 	AdsConnection.cpp
 	AdsConnection.h
 	AdsSourceStateConnection.cpp

@@ -84,6 +84,10 @@ namespace Tuning
 		tss->set_errreplysize(errReplySize);
 		tss->set_errnoreply(errNoReply);
 		tss->set_errtuningframeupdate(errTuningFrameUpdate);
+
+		//
+
+		tss->set_lmtime(lmTime);
 	}
 
 	// ----------------------------------------------------------------------------------
@@ -467,6 +471,16 @@ namespace Tuning
 
 			//
 
+			Rup::TimeStamp rts = m_reply.rupHeader.timeStamp;
+
+			rts.reverseBytes();
+
+			m_state.lmTime = QDateTime(	QDate(rts.year, rts.month, rts.day),
+										QTime(rts.hour, rts.minute, rts.second, rts.millisecond),
+										Qt::UTC).toMSecsSinceEpoch();
+
+			//
+
 			auto it = m_alreadyProcessedCommands.find(m_lastProcessedCommand.commandID());
 
 			if (it == m_alreadyProcessedCommands.end())
@@ -533,6 +547,7 @@ namespace Tuning
 
 		m_state.isReply = false;
 		m_waitReply = false;
+		m_state.lmTime = 0;
 		m_lastReplyTime = QDateTime::currentMSecsSinceEpoch();
 
 		return true;				// reply isn't recived but TRUE returned to run other processings

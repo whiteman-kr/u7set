@@ -6,11 +6,11 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Gui Widgets Sql Concurrent Network)
+find_package(Qt6 REQUIRED COMPONENTS Gui Widgets Sql Concurrent Network Qml)
 
 set(TARGET DbLib)
 
-add_library(${TARGET} STATIC
+qt_add_library(${TARGET} STATIC
 	DbController.cpp
 	DbController.h
 	DbControllerTools.cpp
@@ -26,7 +26,7 @@ add_library(${TARGET} STATIC
 	DbWorker.h
 )
 
-target_link_libraries(${TARGET} PUBLIC Qt6::Gui Qt6::Widgets Qt6::Sql Qt6::Concurrent Qt6::Network)
+target_link_libraries(${TARGET} PUBLIC Qt6::Gui Qt6::Widgets Qt6::Sql Qt6::Concurrent Qt6::Network Qt6::Qml)
 target_link_libraries(${TARGET} PUBLIC CommonLib HardwareLib AppSignalLib)
 
 target_compile_definitions(${TARGET} PRIVATE DB_LIB_DOMAIN)

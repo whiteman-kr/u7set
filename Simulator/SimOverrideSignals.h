@@ -155,7 +155,15 @@ R"+++((function(lastOverrideValue, workcycle)
 		bool isSignalInOverrideList(QString appSignalId) const;
 
 		void setEnable(QString appSignalId, bool enable);
+		
+		struct SetValueData
+		{
+			QString appSignalId;
+			OverrideSignalMethod method;
+			QVariant value;
+		};
 		void setValue(QString appSignalId, OverrideSignalMethod method, const QVariant& value);
+		void setValues(const std::vector<SetValueData>& overrideData);
 
 		void updateSignals();								// Update signal descriptions, type, offsets, etc...
 
@@ -189,9 +197,8 @@ R"+++((function(lastOverrideValue, workcycle)
 
 		mutable QReadWriteLock m_lock;
 		std::map<QString, OverrideSignalParam> m_signals;	// Key is AppSignalID
-		int m_changesCounter = 0;							// This variable is inceremented every time m_signals has
-															// any changes, so if it is changeed then RAM requests update
-															//
+		int m_changesCounter = 0;							// This variable is incremented every time m_signals has
+															// any changes, so if it is changed then RAM requests update
 	};
 
 }

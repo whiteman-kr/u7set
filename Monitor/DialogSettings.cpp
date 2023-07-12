@@ -19,6 +19,15 @@ DialogSettings::DialogSettings(const ClientLib::ClientTranslator& translator, QW
 
 	fillLanguagesList(translator);
 
+	auto okButton = ui->buttonBox->button(QDialogButtonBox::Ok);
+	if (okButton != nullptr)
+	{
+		okButton->setEnabled(MonitorAppSettings::instance().wasLoadedFromFile() == false);
+	}
+	else
+	{
+		Q_ASSERT(okButton);
+	}
 	return;
 }
 

@@ -29,7 +29,7 @@ endif (MSVC)
 
 set(TARGET Protobuf)
 
-add_library(${TARGET} STATIC
+qt_add_library(${TARGET} STATIC
 	../Proto/network.pb.cc
 	../Proto/serialization.pb.cc
 	../Proto/trends.pb.cc

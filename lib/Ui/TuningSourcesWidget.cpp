@@ -55,6 +55,7 @@ DialogTuningSourceInfo::DialogTuningSourceInfo(ClientLib::TuningConnection& conn
 
 	QTreeWidgetItem* stateItem = new QTreeWidgetItem(QStringList() << tr("2-Source State"));
 
+	createDataItem(stateItem, "LmTime");
 	createDataItem(stateItem, "LanEquipmentID");
 	createDataItem(stateItem, "IsReply");
 	createDataItem(stateItem, "RequestCount");
@@ -238,6 +239,13 @@ void DialogTuningSourceInfo::updateState(const ClientLib::TuningSource& ts)
 
 	item->setData(0, Qt::UserRole, 0);
 
+	QDateTime tm;
+
+	tm.setTimeSpec(Qt::UTC);
+
+	tm.setMSecsSinceEpoch(state.lmtime());
+	setDataItemText("LmTime", tm.toString("dd/MM/yyyy HH:mm:ss.zzz"));
+
 	setDataItemText("LanEquipmentID", state.lanequipmentid().c_str());
 	setDataItemText("IsReply", state.isreply() ? "Yes" : "No");
 
@@ -396,6 +404,7 @@ TuningSourcesWidget::TuningSourcesWidget(ClientLib::TuningConnection& tuningConn
 	headerLabels << tr("LmNumber");
 
 	headerLabels << tr("State");
+	headerLabels << tr("LmTime");
 	headerLabels << tr("IsActive");
 	headerLabels << tr("HasUnapplied");
 	headerLabels << tr("RequestCount");
@@ -637,6 +646,7 @@ void TuningSourcesWidget::updateTuningSourcesStates()
 			if (ts.valid() == false)
 			{
 				controllerItem->setText(static_cast<int>(Columns::State), QString());
+				controllerItem->setText(static_cast<int>(Columns::LmTime), QString());
 				controllerItem->setText(static_cast<int>(Columns::IsActive), QString());
 				controllerItem->setText(static_cast<int>(Columns::HasUnappliedParams), QString());
 				controllerItem->setText(static_cast<int>(Columns::RequestCount), QString());
@@ -676,6 +686,12 @@ void TuningSourcesWidget::updateTuningSourcesStates()
 
 				controllerItem->setForeground(static_cast<int>(Columns::State), QBrush(Qt::black));
 			}
+
+			QDateTime tm;
+			tm.setTimeSpec(Qt::UTC);
+
+			tm.setMSecsSinceEpoch(state.lmtime());
+			controllerItem->setText(static_cast<int>(Columns::LmTime), tm.toString("dd/MM/yyyy HH:mm:ss.zzz"));
 
 			controllerItem->setText(static_cast<int>(Columns::IsActive), state.controlisactive() ? tr("Yes") : tr("No"));
 			controllerItem->setText(static_cast<int>(Columns::HasUnappliedParams), state.hasunappliedparams() ? tr("Yes") : tr("No"));

@@ -7,11 +7,16 @@
 #include <cassert>
 
 #include "../CommonLib/Types.h"
+#include "../Proto/serialization.pb.h"
 
 namespace OnlineLib
 {
 	struct BuildInfo
 	{
+	private:
+		static const QString dateTimeFormatStr;
+
+	public:
 		QString project;
 		int id = -1;
 		QDateTime date;
@@ -19,10 +24,13 @@ namespace OnlineLib
 		QString user;
 		QString workstation;
 
-		QString dateStr() const { return date.toString("dd.MM.yyyy hh:mm:ss"); }
+		QString dateStr() const { return date.toString(dateTimeFormatStr); }
 
 		void writeToXml(QXmlStreamWriter& xmlWriter) const;
 		void readFromXml(QXmlStreamReader& xmlReader);
+
+		void saveToProto(Proto::BuildInfo* proto) const;
+		void loadFromProto(const Proto::BuildInfo& proto);
 	};
 
 	struct BuildFileInfo

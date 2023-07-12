@@ -106,7 +106,7 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 
 	// Create SchemaList dock widget
 	//
-	m_schemaListDock = new QDockWidget{"Schemas List", this};
+	m_schemaListDock = new QDockWidget{tr("Schemas List"), this};
 	m_schemaListDock->setObjectName("SchemaList");
 	m_schemaListDock->setFeatures(QDockWidget::DockWidgetVerticalTitleBar);
 	m_schemaListDock->setTitleBarWidget(new QWidget{});		// Hides title bar
@@ -279,9 +279,10 @@ void MonitorMainWindow::showTuningLoginControls()
 
 		// Adjust m_loginUserNameLabel width to have place for all usernames
 		//
-		int maxUsernameSpace = -1;
-
 		QWidget* loginUserTimeoutActionWidget = m_toolBar->widgetForAction(m_loginUserTimeoutAction);
+
+		int maxUsernameSpace = loginUserTimeoutActionWidget->fontMetrics().horizontalAdvance(m_loginUserTimeoutAction->text());
+
 		if (loginUserTimeoutActionWidget == nullptr)
 		{
 			Q_ASSERT(loginUserTimeoutActionWidget);
@@ -621,7 +622,7 @@ void MonitorMainWindow::createMenus()
 
 void MonitorMainWindow::createToolBars()
 {
-	m_toolBar = new MonitorToolBar("ToolBar", this);
+	m_toolBar = new MonitorToolBar(tr("ToolBar"), this);
 	m_toolBar->setObjectName("MonitorMainToolBar");
 
 	m_toolBar->addAction(m_schemaListAction);

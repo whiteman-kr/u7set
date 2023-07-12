@@ -125,7 +125,7 @@ bool AppDataSource::getState(Network::AppDataSourceState* proto) const
 	proto->set_receivesdata(m_receivesData);
 	proto->set_uptime(m_uptime);
 	proto->set_receiveddataid(m_receivedDataID);
-	proto->set_rupframeplanttime(m_rupFramePlantTime);
+	proto->set_lmtime(m_lmTime);
 	proto->set_rupframenumerator(static_cast<quint32>(m_rupFrameNumerator));
 
 	//
@@ -157,7 +157,7 @@ void AppDataSource::setState(const Network::AppDataSourceState& proto)
 	m_receivesData = proto.receivesdata();
 	m_uptime = proto.uptime();
 	m_receivedDataID = proto.receiveddataid();
-	m_rupFramePlantTime = proto.rupframeplanttime();
+	m_lmTime = proto.lmtime();
 	m_rupFrameNumerator = proto.rupframenumerator();
 
 	m_dataReceivingSpeed = proto.datareceivingspeed();
@@ -324,7 +324,7 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 	m_rupTimes.system.timeStamp = m_lastPacketServerTime;
 	m_rupTimes.local.timeStamp = localTime.toMSecsSinceEpoch();
 
-	m_rupFramePlantTime = m_rupTimes.plant.timeStamp;
+	m_lmTime = m_rupTimes.plant.timeStamp;
 
 	checkPlantTime(header.timeStamp);
 

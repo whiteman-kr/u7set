@@ -42,6 +42,8 @@ public:
 	bool saveToFile(QString fileName) const;
 	bool loadFromFile(QString fileName);
 
+	bool wasLoadedFromFile() const;
+
 private:
 	void save(QSettings& settings) const;
 	void load(const QSettings& settings);
@@ -78,6 +80,7 @@ public:
 private:
 	mutable QMutex m_mutex;
 	Data m_data;
+	bool m_wasLoadedFromFile = false;
 };
 
 

@@ -4,6 +4,7 @@
 #include "../AppSignalLib/ComparatorSet.h"
 #include "../Proto/serialization.pb.h"
 #include "../UtilsLib/Ui/UiTools.h"
+#include "../lib/Ui/DialogWriteValues.h"
 
 //
 //
@@ -918,15 +919,10 @@ void DialogSignalInfo::on_pushButtonSetZero_clicked()
 		return;
 	}
 
-	int result = QMessageBox::warning(this, qAppName(),
-									  tr("Are you sure you want to write value '%1'\n\nto signal '%2' ('%3')?")
-									  .arg(0).
-									  arg(m_signal.customSignalId()).
-									  arg(m_signal.caption()),
-									  QMessageBox::Yes|QMessageBox::No,
-									  QMessageBox::No);
-
-	if (result != QMessageBox::Yes)
+	if (DialogWriteValues::askConfirmation(m_signal,
+										   m_tuningController->signalState(m_signal.appSignalId(), nullptr).value(),
+										   TuningValue(m_signal.tuningType(), 0),
+										   E::AnalogFormat::f_9, this) != QDialog::Accepted)
 	{
 		return;
 	}
@@ -942,15 +938,10 @@ void DialogSignalInfo::on_pushButtonSetOne_clicked()
 		return;
 	}
 
-	int result = QMessageBox::warning(this, qAppName(),
-									  tr("Are you sure you want to write value '%1'\n\nto signal '%2' ('%3')?")
-									  .arg(1).
-									  arg(m_signal.customSignalId()).
-									  arg(m_signal.caption()),
-									  QMessageBox::Yes|QMessageBox::No,
-									  QMessageBox::No);
-
-	if (result != QMessageBox::Yes)
+	if (DialogWriteValues::askConfirmation(m_signal,
+						m_tuningController->signalState(m_signal.appSignalId(), nullptr).value(),
+						TuningValue(m_signal.tuningType(), 1),
+						E::AnalogFormat::f_9, this) != QDialog::Accepted)
 	{
 		return;
 	}
@@ -990,15 +981,10 @@ void DialogSignalInfo::on_pushButtonSetValue_clicked()
 		return;
 	}
 
-	int result = QMessageBox::warning(this, qAppName(),
-									  tr("Are you sure you want to write value '%1'\n\nto signal '%2' ('%3')?")
-									  .arg(strValue).
-									  arg(m_signal.customSignalId()).
-									  arg(m_signal.caption()),
-									  QMessageBox::Yes|QMessageBox::No,
-									  QMessageBox::No);
-
-	if (result != QMessageBox::Yes)
+	if (DialogWriteValues::askConfirmation(m_signal,
+						m_tuningController->signalState(m_signal.appSignalId(), nullptr).value(),
+						TuningValue(m_signal.tuningType(), value),
+						E::AnalogFormat::f_9, this) != QDialog::Accepted)
 	{
 		return;
 	}
@@ -1374,7 +1360,8 @@ void DialogSignalInfo::fillProperties()
 		QTreeWidgetItem* itemGroup3 = new QTreeWidgetItem(QStringList() << tr("Parameters"));
 
 		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("Precision") << QString::number(m_signal.precision())));
-		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("Aperture") << QString::number(m_signal.aperture(), 'f', m_signal.precision())));
+		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("FineAperture") << QString::number(m_signal.fineAaperture(), 'f', m_signal.precision())));
+		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("CoarseAperture") << QString::number(m_signal.coarseAaperture(), 'f', m_signal.precision())));
 		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("FilteringTime") << QString::number(m_signal.filteringTime(), 'f', m_signal.precision())));
 		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("SpreadTolerance") << QString::number(m_signal.spreadTolerance(), 'f', m_signal.precision())));
 

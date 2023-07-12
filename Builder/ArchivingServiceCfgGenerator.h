@@ -4,7 +4,6 @@
 
 namespace Builder
 {
-
 	class ArchivingServiceCfgGenerator : public SoftwareCfgGenerator
 	{
 	public:

@@ -306,32 +306,30 @@ Updated: %2 signals</source>
         <translation>&lt;br&gt;Дата сборки: %1</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogAbout.cpp" line="40"/>
         <source>&lt;br&gt;Build Host: %1</source>
-        <translation>&lt;br&gt;Хост сборки: %1</translation>
+        <translation type="vanished">&lt;br&gt;Хост сборки: %1</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogAbout.cpp" line="42"/>
+        <location filename="../../lib/Ui/DialogAbout.cpp" line="41"/>
         <source>&lt;br&gt;Commit SHA1: No data</source>
         <translation>&lt;br&gt; SHA1 коммита: Нет данных</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogAbout.cpp" line="43"/>
+        <location filename="../../lib/Ui/DialogAbout.cpp" line="42"/>
         <source>&lt;br&gt;Branch: No data</source>
         <translation>&lt;br&gt;Ветка: Нет данных</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogAbout.cpp" line="44"/>
+        <location filename="../../lib/Ui/DialogAbout.cpp" line="43"/>
         <source>&lt;br&gt;Date: No data</source>
         <translation>&lt;br&gt;Дата сборки: Нет данных</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogAbout.cpp" line="45"/>
         <source>&lt;br&gt;Host: No data</source>
-        <translation>&lt;br&gt;Хост сборки: Нет данных</translation>
+        <translation type="vanished">&lt;br&gt;Хост сборки: Нет данных</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogAbout.cpp" line="60"/>
+        <location filename="../../lib/Ui/DialogAbout.cpp" line="58"/>
         <source>Copy commit SHA1</source>
         <translation>Скопировать SHA1 коммита</translation>
     </message>
@@ -832,7 +830,7 @@ Data will not be available at the time of reconnection.</source>
 <context>
     <name>DialogTuningSourceInfo</name>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="151"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="152"/>
         <source>Tuning Source - </source>
         <translation>Источник - </translation>
     </message>
@@ -857,22 +855,22 @@ Data will not be available at the time of reconnection.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="79"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="80"/>
         <source>3-Errors in Reply RupFrameHeader</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="91"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="92"/>
         <source>4-Errors in Reply FotipHeader</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="105"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="106"/>
         <source>5-Errors Reported by LM in Reply FotipHeader.flags</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="168"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="169"/>
         <source>Tuning Source - %1</source>
         <translation>Источник - %1</translation>
     </message>
@@ -881,9 +879,9 @@ Data will not be available at the time of reconnection.</source>
         <translation type="vanished">Источник - %1, канал %2</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="204"/>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="215"/>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="218"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="205"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="216"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="219"/>
         <source>%1 (%2h)</source>
         <translation></translation>
     </message>
@@ -914,6 +912,49 @@ Data will not be available at the time of reconnection.</source>
         <location filename="../DialogTuningSources.cpp" line="79"/>
         <source>Close</source>
         <translation>Закрыть</translation>
+    </message>
+</context>
+<context>
+    <name>DialogWriteValues</name>
+    <message>
+        <location filename="../../lib/Ui/DialogWriteValues.cpp" line="72"/>
+        <source>The following tuning values will be written. Are you sure you want to continue?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../lib/Ui/DialogWriteValues.cpp" line="77"/>
+        <source>Signal ID</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../lib/Ui/DialogWriteValues.cpp" line="78"/>
+        <source>Caption</source>
+        <translation type="unfinished">Наименование</translation>
+    </message>
+    <message>
+        <location filename="../../lib/Ui/DialogWriteValues.cpp" line="79"/>
+        <source>Default</source>
+        <translation type="unfinished">По умолч</translation>
+    </message>
+    <message>
+        <location filename="../../lib/Ui/DialogWriteValues.cpp" line="80"/>
+        <source>Current</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../lib/Ui/DialogWriteValues.cpp" line="81"/>
+        <source>Writing</source>
+        <translation type="unfinished">Запись</translation>
+    </message>
+    <message>
+        <location filename="../../lib/Ui/DialogWriteValues.cpp" line="109"/>
+        <source>Show All</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../lib/Ui/DialogWriteValues.cpp" line="173"/>
+        <source>and %1 more signals. Press &quot;Show all&quot; to view them.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1876,13 +1917,13 @@ Are you sure you want to take control and activate sources %2?</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1458"/>
+        <location filename="../TuningPage.cpp" line="1459"/>
         <source>Activating control of tuning source &apos;%1&apos; failed!</source>
         <translation>Ошибка активации контроля над источником %1!</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1464"/>
-        <location filename="../TuningPage.cpp" line="1590"/>
+        <location filename="../TuningPage.cpp" line="1465"/>
+        <location filename="../TuningPage.cpp" line="1570"/>
         <source>Taking control of tuning source &apos;%1&apos; failed!</source>
         <translation>Ошибка активации контроля над источником %1!</translation>
     </message>
@@ -2576,43 +2617,43 @@ Are you sure you want to take control and activate the source %1?</source>
 <context>
     <name>TuningPage</name>
     <message>
-        <location filename="../TuningPage.cpp" line="853"/>
+        <location filename="../TuningPage.cpp" line="854"/>
         <source>All Text</source>
         <translation>ID/Наименование</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="854"/>
+        <location filename="../TuningPage.cpp" line="855"/>
         <source>AppSignalID</source>
         <translation>Внутр. ИД</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="855"/>
+        <location filename="../TuningPage.cpp" line="856"/>
         <source>CustomAppSignalID</source>
         <translation>ИД</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="856"/>
+        <location filename="../TuningPage.cpp" line="857"/>
         <source>EquipmentID</source>
         <translation>ИД оборудования</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="857"/>
+        <location filename="../TuningPage.cpp" line="858"/>
         <source>Caption</source>
         <translation>Наименование</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="891"/>
+        <location filename="../TuningPage.cpp" line="892"/>
         <source>Filter</source>
         <translation>Фильтр</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="924"/>
-        <location filename="../TuningPage.cpp" line="2594"/>
+        <location filename="../TuningPage.cpp" line="925"/>
+        <location filename="../TuningPage.cpp" line="2574"/>
         <source>Set All</source>
         <translation>Установить все</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="930"/>
+        <location filename="../TuningPage.cpp" line="931"/>
         <source>Write</source>
         <translation>Запись</translation>
     </message>
@@ -2625,58 +2666,49 @@ Are you sure you want to take control and activate the source %1?</source>
         <translation type="vanished">Отмена</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1379"/>
+        <location filename="../TuningPage.cpp" line="1380"/>
         <source>New values will be written:</source>
         <translation>Будут установлены новые значения:</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1481"/>
         <source>and %1 more values.</source>
-        <translation>и еще %1 значений.</translation>
+        <translation type="vanished">и еще %1 значений.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1499"/>
         <source>Are you sure you want to continue?</source>
-        <translation>Вы уверены, что хотите продолжить?</translation>
+        <translation type="vanished">Вы уверены, что хотите продолжить?</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1501"/>
         <source>Write Changes</source>
-        <translation>Запись изменений</translation>
+        <translation type="vanished">Запись изменений</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1597"/>
+        <location filename="../TuningPage.cpp" line="1577"/>
         <source>Are you sure you want apply the changes?</source>
         <translation>Вы уверены, что хотите применить изменения?</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1494"/>
-        <source>%1 (%2) = %3
-</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../TuningPage.cpp" line="900"/>
+        <location filename="../TuningPage.cpp" line="901"/>
         <source>Value:</source>
         <translation>Значение:</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="904"/>
+        <location filename="../TuningPage.cpp" line="905"/>
         <source>Any Value</source>
         <translation>Все значения</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="905"/>
+        <location filename="../TuningPage.cpp" line="906"/>
         <source>Discrete 0</source>
         <translation>Дискретный 0</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="906"/>
+        <location filename="../TuningPage.cpp" line="907"/>
         <source>Discrete 1</source>
         <translation>Дискретный 1</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="907"/>
+        <location filename="../TuningPage.cpp" line="908"/>
         <source>Not Default</source>
         <translation>Не по умолчанию</translation>
     </message>
@@ -2689,12 +2721,12 @@ Are you sure you want to take control and activate the source %1?</source>
         <translation type="vanished">Нет источников для применения!</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1346"/>
+        <location filename="../TuningPage.cpp" line="1347"/>
         <source>Some values were modified but not written. Please select the following:</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1443"/>
+        <location filename="../TuningPage.cpp" line="1444"/>
         <source>To write changes, all connections to following tuning sources will be activated:
 
 %1
@@ -2703,7 +2735,7 @@ Continue?</source>
         <translation>Для записи изменений все соединения для источников\n\n%1\n\nдолжны быть активированы!\n\nПродолжить?</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1538"/>
+        <location filename="../TuningPage.cpp" line="1518"/>
         <source>Warning!!!
 
 SOR Signal(s) are set in logic modules!
@@ -2720,17 +2752,17 @@ Are you sure you STILL WANT TO APPLY the changes?</source>
 Вы уверены, что хотите применить изменения?</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1682"/>
+        <location filename="../TuningPage.cpp" line="1662"/>
         <source>There is limits mismatch in signal &apos;%1&apos;. Value setting is disabled.</source>
         <translation>Несоответствие границ сигнала %1. Невозможно применить значения.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1707"/>
+        <location filename="../TuningPage.cpp" line="1687"/>
         <source>Please select objects of the same type.</source>
         <translation>Выберите объекты одного типа.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1715"/>
+        <location filename="../TuningPage.cpp" line="1695"/>
         <source>Selected objects have different input range.</source>
         <translation>Выбранные сигналы имеют разный диапазон изменения.</translation>
     </message>
@@ -2739,47 +2771,47 @@ Are you sure you STILL WANT TO APPLY the changes?</source>
         <translation type="vanished">Выбранные сигналы имеют разное значение по умолчанию.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1821"/>
+        <location filename="../TuningPage.cpp" line="1801"/>
         <source>%1 - %2</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1842"/>
+        <location filename="../TuningPage.cpp" line="1822"/>
         <source>...</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1866"/>
+        <location filename="../TuningPage.cpp" line="1846"/>
         <source>Format</source>
         <translation>Формат</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1868"/>
+        <location filename="../TuningPage.cpp" line="1848"/>
         <source>Auto-select</source>
         <translation>Авто-выбор</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1874"/>
+        <location filename="../TuningPage.cpp" line="1854"/>
         <source>Decimal (as [-]9.9)</source>
         <translation>Десятичный (как [-]9.9)</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1880"/>
+        <location filename="../TuningPage.cpp" line="1860"/>
         <source>Exponential (as [-]9.9e[+|-]999)</source>
         <translation>Экспоненциальный (как [-]9.9e[+|-]999)</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1888"/>
+        <location filename="../TuningPage.cpp" line="1868"/>
         <source>More</source>
         <translation>Дополнительно</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1890"/>
+        <location filename="../TuningPage.cpp" line="1870"/>
         <source>Add To New Filter...</source>
         <translation>Добавить к новому фильтру...</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1894"/>
+        <location filename="../TuningPage.cpp" line="1874"/>
         <source>Add To Existing Filter...</source>
         <translation>Добавить к существующему фильтру...</translation>
     </message>
@@ -2788,57 +2820,57 @@ Are you sure you STILL WANT TO APPLY the changes?</source>
         <translation type="vanished">Экспорт данных в CSV...</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1913"/>
+        <location filename="../TuningPage.cpp" line="1893"/>
         <source>Restore Values From Filter...</source>
         <translation>Восстановить из фильтра...</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1920"/>
+        <location filename="../TuningPage.cpp" line="1900"/>
         <source>Export Current View to CSV...</source>
         <translation>Экспорт текущего вида в CSV...</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1936"/>
+        <location filename="../TuningPage.cpp" line="1916"/>
         <source>Add Signals To Filter</source>
         <translation>Добавить сигналы в фильтр</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1937"/>
+        <location filename="../TuningPage.cpp" line="1917"/>
         <source>Enter the filter name:</source>
         <translation>Введите имя фильтра:</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1938"/>
+        <location filename="../TuningPage.cpp" line="1918"/>
         <source>Name</source>
         <translation>Наименование</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2004"/>
+        <location filename="../TuningPage.cpp" line="1984"/>
         <source>Can&apos;t add signals - no existing automatic filters found. Please add them to a new filter.</source>
         <translation>Невозможно добавить сигналы - не найдены автоматически созданные фильтры. Добавьте сигналы в новый фильтр.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2026"/>
+        <location filename="../TuningPage.cpp" line="2006"/>
         <source>Export to CSV</source>
         <translation>Экспорт данных в CSV</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2028"/>
+        <location filename="../TuningPage.cpp" line="2008"/>
         <source>CSV (*.csv)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2039"/>
+        <location filename="../TuningPage.cpp" line="2019"/>
         <source>Error writing file %1!</source>
         <translation>Ошибка создания файла %1!</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2073"/>
+        <location filename="../TuningPage.cpp" line="2053"/>
         <source>Export complete.</source>
         <translation>Экспорт завершен.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2093"/>
+        <location filename="../TuningPage.cpp" line="2073"/>
         <source>No auto-created filters exist.</source>
         <translation>Нет автоматически созданных фильтров.</translation>
     </message>
@@ -2859,71 +2891,71 @@ Are you sure you want to take control and activate the source %1?</source>
 Вы уверены, что хотите активировать клиент и источник %1?</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2300"/>
+        <location filename="../TuningPage.cpp" line="2280"/>
         <source>No signals were added.</source>
         <translation>Нет добавленных сигналов.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2317"/>
+        <location filename="../TuningPage.cpp" line="2297"/>
         <source>Error</source>
         <translation>Ошибка</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2320"/>
+        <location filename="../TuningPage.cpp" line="2300"/>
         <source>Adding signals complete.</source>
         <translation>Добавление сигналов завершено.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2382"/>
+        <location filename="../TuningPage.cpp" line="2362"/>
         <source>No values restored from the filter for current signals.</source>
         <translation>Нет сигналов, восстановленных из фильтра.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2386"/>
+        <location filename="../TuningPage.cpp" line="2366"/>
         <source>%1 values were restored from the filter. Check them and apply the changes.</source>
         <translation>%1 значений было восстановлено из фильтра.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2594"/>
+        <location filename="../TuningPage.cpp" line="2574"/>
         <source>There is limits mismatch in signal &apos;%1&apos;. Operation is disabled.</source>
         <translation>Несоответствие границ сигнала %1. Невозможно выполнить действие.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2602"/>
+        <location filename="../TuningPage.cpp" line="2582"/>
         <source>Set All Discretes To On</source>
         <translation>Установить все дискреты в &quot;1&quot;</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2633"/>
+        <location filename="../TuningPage.cpp" line="2613"/>
         <source>Set All Discretes To Off</source>
         <translation>Установить все дискреты в &quot;0&quot;</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2665"/>
+        <location filename="../TuningPage.cpp" line="2645"/>
         <source>Set All To Defaults</source>
         <translation>Установить все по умолчанию</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2693"/>
+        <location filename="../TuningPage.cpp" line="2673"/>
         <source>Invalid default value &apos;%1&apos; in signal %2 [%3]</source>
         <translation>Недопустимое значение по умолчанию %1 в сигнале %2 [%3]</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="920"/>
-        <location filename="../TuningPage.cpp" line="1682"/>
-        <location filename="../TuningPage.cpp" line="1707"/>
-        <location filename="../TuningPage.cpp" line="1715"/>
+        <location filename="../TuningPage.cpp" line="921"/>
+        <location filename="../TuningPage.cpp" line="1662"/>
+        <location filename="../TuningPage.cpp" line="1687"/>
+        <location filename="../TuningPage.cpp" line="1695"/>
         <source>Set Value</source>
         <translation>Ввод значения</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="940"/>
+        <location filename="../TuningPage.cpp" line="941"/>
         <source>Apply</source>
         <translation>Применить</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="934"/>
-        <location filename="../TuningPage.cpp" line="1348"/>
+        <location filename="../TuningPage.cpp" line="935"/>
+        <location filename="../TuningPage.cpp" line="1349"/>
         <source>Undo</source>
         <translation>Восстановить</translation>
     </message>
@@ -3161,12 +3193,12 @@ Are you sure you want to take control and activate the source %1?</source>
         <translation type="vanished">Режим управления несколькими ЛМ</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="367"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="375"/>
         <source>Tuning Sources</source>
         <translation>Источники</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="487"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="496"/>
         <source>Details...</source>
         <translation>Дополнительно...</translation>
     </message>
@@ -3183,67 +3215,72 @@ Are you sure you want to take control and activate the source %1?</source>
         <translation type="vanished">Закрыть</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="391"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="399"/>
         <source>EquipmentId</source>
         <translation>ИД оборудования</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="392"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="400"/>
         <source>IP</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="393"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="401"/>
         <source>Port</source>
         <translation>Порт</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="394"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="402"/>
         <source>Channel</source>
         <translation>Канал</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="395"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="403"/>
         <source>SubsystemID</source>
         <translation>ИД подсистемы</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="396"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="404"/>
         <source>LmNumber</source>
         <translation>Номер LM</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="398"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="406"/>
         <source>State</source>
         <translation>Состояние</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="399"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="407"/>
+        <source>LmTime</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="408"/>
         <source>IsActive</source>
         <translation>Активен</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="400"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="409"/>
         <source>HasUnapplied</source>
         <translation>Непримененные</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="401"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="410"/>
         <source>RequestCount</source>
         <translation>Запросов</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="402"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="411"/>
         <source>ReplyCount</source>
         <translation>Ответов</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="492"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="501"/>
         <source>Activate...</source>
         <translation>Активировать...</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="498"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="507"/>
         <source>Deactivate...</source>
         <translation>Деактивировать...</translation>
     </message>
@@ -3252,34 +3289,34 @@ Are you sure you want to take control and activate the source %1?</source>
         <translation type="vanished"> (Управление одним ЛМ)</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="653"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="663"/>
         <source>No Reply</source>
         <translation>Нет обмена</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="663"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="673"/>
         <source>Active</source>
         <translation>Активен</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="669"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="679"/>
         <source>E: %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="675"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="685"/>
         <source>Inactive</source>
         <translation>Неактивен</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="680"/>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="681"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="696"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="697"/>
         <source>Yes</source>
         <translation>Да</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="680"/>
-        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="681"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="696"/>
+        <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="697"/>
         <source>No</source>
         <translation>Нет</translation>
     </message>

@@ -6769,19 +6769,19 @@ namespace Builder
 	///
 	/// IssueType: Warning
 	///
-	/// Title: Tuning is enabled for module %1 but tunable signals is not found.
+	/// Title: Tuning is enabled for module %1 but tunable signals are not found.
 	///
 	/// Parameters:
 	///		%1 LM's equipmentID
 	///
 	/// Description:
-	///		Tuning is enabled for specified module but tunable signals is not found.
+	///		Tuning is enabled for specified module but tunable signals are not found.
 	///
 	void IssueLogger::wrnALC5165(QString lmEquipmentID)
 	{
 		LOG_WARNING1(IssueType::AlCompiler,
 				  5165,
-				  QString(tr("Tuning is enabled for module %1 but tunable signals is not found.")).
+				  QString(tr("Tuning is enabled for module %1 but tunable signals are not found.")).
 					arg(lmEquipmentID));
 	}
 
