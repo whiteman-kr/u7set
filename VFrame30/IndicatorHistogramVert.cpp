@@ -1260,7 +1260,7 @@ namespace VFrame30
 				{
 					QStringList setpointSignalTags = context->appSignalController()->signalTags(stateSignal.appSignalID());
 
-					const MonitorBehavior& monitorBehavior = drawParam->monitorBehavor();
+					const MonitorBehavior& monitorBehavior = drawParam->monitorBehavior();
 
 					std::optional<std::pair<QRgb, QRgb>> color = monitorBehavior.tagToColors(setpointSignalTags);
 
@@ -1331,19 +1331,19 @@ namespace VFrame30
 		//
 		if (outOfLimits == true)
 		{
-			flagColor = drawParam->monitorBehavor().tagToColors(MonitorBehavior::outOfLimitsTag);
+			flagColor = drawParam->monitorBehavior().tagToColors(MonitorBehavior::outOfLimitsTag);
 		}
 		else
 		{
 			if (blocked == true)
 			{
-				flagColor = drawParam->monitorBehavor().tagToColors(MonitorBehavior::blockedTag);
+				flagColor = drawParam->monitorBehavior().tagToColors(MonitorBehavior::blockedTag);
 			}
 			else
 			{
 				if (simulated == true)
 				{
-					flagColor = drawParam->monitorBehavor().tagToColors(MonitorBehavior::simulatedTag);
+					flagColor = drawParam->monitorBehavior().tagToColors(MonitorBehavior::simulatedTag);
 				}
 			}
 		}
@@ -1392,7 +1392,7 @@ namespace VFrame30
 			}
 		}
 
-		std::optional<std::pair<QRgb, QRgb>> color = drawParam->monitorBehavor().tagToColors(alertedTags);
+		std::optional<std::pair<QRgb, QRgb>> color = drawParam->monitorBehavior().tagToColors(alertedTags);
 
 		if (color.has_value() == true)
 		{
@@ -1417,7 +1417,7 @@ namespace VFrame30
 		std::vector<DrawSetpointStruct> drawSetpoints;
 		drawSetpoints.reserve(16);
 
-		// Convert setpoints to DrawSetpointStruct whick is convinirnt for drawing
+		// Convert setpoints to DrawSetpointStruct which is convenient for drawing
 		//
 		const QStringList appSignalIds = schemaItem->signalIds();
 
@@ -1553,7 +1553,7 @@ namespace VFrame30
 	{
 		// Power calculation, reverse function for indicatorLog10.
 		// Input value is shifted down by std::numeric_limits<double>::max_exponent10() and power is calculated from its absoulte value.
-		// The sign of the result depened on input value sign.
+		// The sign of the result depends on input value sign.
 		//
 		double result = std::fabs(value);
 		result -= std::numeric_limits<double>::max_exponent10;

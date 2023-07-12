@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "ModuleConfigurator.h"
 #include "../lib/ConstStrings.h"
 #include <QtWidgets/QApplication>

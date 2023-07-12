@@ -8722,7 +8722,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: The specified schema %1 in property %2.StartSchemaID (profile %3) does not exist.
+	/// Title: The specified schema %1 in property %2.StartSchemaID (profile %3) does not exist. Check that Monitor and schema have common tags.
 	///
 	/// Parameters:
 	///		%1 Value of the property StartSchemaID
@@ -8736,7 +8736,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6211,
-				  tr("The specified schema %1 in property %2.StartSchemaID (profile %3) does not exist.")
+				  tr("The specified schema %1 in property %2.StartSchemaID (profile %3) does not exist. Check that Monitor and schema have common tags.")
 					.arg(startSchemaId)
 					.arg(monitorId)
 					.arg(profile));

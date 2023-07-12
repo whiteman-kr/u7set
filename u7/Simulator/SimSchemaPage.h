@@ -22,7 +22,7 @@ public:
 public:
 	QString schemaId() const;
 
-	const QStringList& hightlightIds() const;
+	const QStringList& highlightIds() const;
 	void setHighlightIds(const QStringList& value);
 
 protected slots:

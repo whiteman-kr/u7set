@@ -566,7 +566,7 @@ namespace VFrame30
 		//
 		for (const QString& appSignalId : m_appSignalIds)
 		{
-			if (drawParam->hightlightIds().contains(appSignalId) == true)
+			if (drawParam->highlightIds().contains(appSignalId) == true)
 			{
 				QRectF highlightRect = boundingRectInDocPt(drawParam);
 				drawHighlightRect(drawParam, highlightRect);

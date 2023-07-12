@@ -423,10 +423,10 @@ namespace VFrame30
 		return m_session;
 	}
 
-	const MonitorBehavior& CDrawParam::monitorBehavor() const noexcept
+	const MonitorBehavior& CDrawParam::monitorBehavior() const noexcept
 	{
 		Q_ASSERT(m_schemaView);
-		return clientSchemaView()->monitorBehavor();
+		return clientSchemaView()->monitorBehavior();
 	}
 
 	const TuningClientBehavior& CDrawParam::tuningClientBehavior() const
@@ -435,12 +435,12 @@ namespace VFrame30
 		return clientSchemaView()->tuningClientBehavior();
 	}
 
-	const QStringList& CDrawParam::hightlightIds() const
+	const QStringList& CDrawParam::highlightIds() const
 	{
 		return m_highlightIds;
 	}
 
-	void CDrawParam::setHightlightIds(const QStringList& value)
+	void CDrawParam::setHighlightIds(const QStringList& value)
 	{
 		m_highlightIds = value;
 	}

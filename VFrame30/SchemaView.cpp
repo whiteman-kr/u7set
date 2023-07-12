@@ -212,7 +212,7 @@ void SchemaViewWidget::updateControlWidgets(bool editMode)
 
 		std::shared_ptr<VFrame30::SchemaItemControl> controlItem = foundIt->second;
 
-		controlItem->updateWdgetPosAndSize(childWidget, zoom());
+		controlItem->updateWidgetPosAndSize(childWidget, zoom());
 
 		if (editMode == true)
 		{
@@ -284,7 +284,7 @@ void SchemaViewWidget::deleteControlWidgets()
 		}
 
 		if (auto foundIt = controlItems.find(widgetUuid);
-				foundIt != controlItems.end())
+			foundIt != controlItems.end())
 		{
 			delete childWidget;
 		}

@@ -182,7 +182,7 @@ namespace VFrame30
 			}
 		}
 
-		updateWdgetPosAndSize(control, zoom);
+		updateWidgetPosAndSize(control, zoom);
 
 		control->setVisible(true);
 		control->update();

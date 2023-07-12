@@ -189,7 +189,7 @@ namespace VFrame30
 		void clearLayers();
 		void addLayer(std::shared_ptr<SchemaLayer> layer);
 
-		// Properties and Datas
+		// Properties and Data
 		//
 	public:
 		[[nodiscard]] QUuid guid() const;
@@ -323,7 +323,7 @@ namespace VFrame30
 	};
 
 
-	// SchemaDaetails is a class to parse to/from JSON doc
+	// SchemaDetails is a class to parse to/from JSON doc
 	// Format:
 	//		Version : 1
 	//		SchemaID : "SCHMEAID"
@@ -417,7 +417,7 @@ namespace VFrame30
 		SchemaDetailsSet& operator=(const SchemaDetailsSet&) = default;
 		SchemaDetailsSet& operator=(SchemaDetailsSet&&) noexcept = default;
 
-		// Serializatin implementation of Proto::ObjectSerialization<>
+		// Serialization implementation of Proto::ObjectSerialization<>
 		//
 		friend Proto::ObjectSerialization<SchemaDetailsSet>;
 

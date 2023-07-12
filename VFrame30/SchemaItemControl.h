@@ -33,7 +33,7 @@ namespace VFrame30
 		QWidget* createWidget(QWidget* parent, bool editMode, double zoom);
 		virtual void updateWidgetProperties(QWidget* widget) const;
 
-		void updateWdgetPosAndSize(QWidget* widget, double zoom);
+		void updateWidgetPosAndSize(QWidget* widget, double zoom);
 
 	protected:
 		virtual QWidget* createWidgetImpl(QWidget* parent, bool editMode, double zoom);
