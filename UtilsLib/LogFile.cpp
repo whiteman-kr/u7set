@@ -46,7 +46,8 @@ namespace Log
 
 	const QString messageTimeFormat("dd.MM.yyyy hh:mm:ss.zzz");
 
-	void replaceStringInPlace(std::string& subject, const std::string& search, const std::string& replace) {
+	void replaceStringInPlace(std::string& subject, const std::string& search, const std::string& replace)
+	{
 		size_t pos = 0;
 		while ((pos = subject.find(search, pos)) != std::string::npos)
 		{
