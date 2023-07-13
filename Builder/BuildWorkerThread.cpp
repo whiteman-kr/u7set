@@ -1,7 +1,7 @@
 #include "BuildWorkerThread.h"
 #include "Parser.h"
 #include "ConfigurationBuilder.h"
-#include "ApplicationLogicCompiler.h"
+#include "AppLogicCompiler.h"
 #include "SoftwareCfgGenerator.h"
 #include "AppDataServiceCfgGenerator.h"
 #include "DiagDataServiceCfgGenerator.h"

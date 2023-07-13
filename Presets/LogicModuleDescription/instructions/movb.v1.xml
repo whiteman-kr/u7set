@@ -1,1 +1,13 @@
-<Command Caption="movb"			Code="03C0"	CodeMask="07c0"	SimulationFunc="command_movb"		ParseFunc="parse_movb"		Description="Copy 1-bit from memory to memory"/>
+<Command 
+	Caption="movb"
+	Code="03C0"
+	CodeMask="07c0"	
+	SimulationFunc="command_movb"
+	ParseFunc="parse_movb"
+	Description="Copy 1-bit from memory to memory"
+	CodeSize="4" 
+	ReadTime="14" 
+	WaitFbExecution="false"
+	CheckFunc="check_movb"
+	GetMnemoFunc="mnemo_movb"
+	CalcExecTimeFunc="exectime_movb"/>

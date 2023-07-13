@@ -1,1 +1,14 @@
-<Command Caption="wrfbc32"		Code="0580"	CodeMask="07c0"	SimulationFunc="command_wrfbc32"	ParseFunc="parse_wrfbc32"	Description="Write 32-bit constant to AFB input"/>
+<Command 
+	Caption="wrfbc32"
+	Code="0580"
+	CodeMask="07c0"
+	SimulationFunc="command_wrfbc32"
+	ParseFunc="parse_wrfbc32"
+	Description="Write 32-bit constant to AFB input"
+	CodeSize="4" 
+	ReadTime="14" 
+	ConstRunTime="18"
+	WaitFbExecution="false"
+	CheckFunc="check_wrfbc32"
+	GetMnemoFunc="mnemo_wrfbc32"
+	CalcExecTimeFunc="exectime_const"/>

@@ -1,5 +1,5 @@
 #include "../Builder/ModuleLogicCompiler.h"
-#include "../Builder/ApplicationLogicCompiler.h"
+#include "../Builder/AppLogicCompiler.h"
 #include "../UtilsLib/Crc.h"
 #include "../HardwareLib/Connection.h"
 
@@ -340,7 +340,7 @@ namespace Builder
 		return m_loopbacks.getLoopbacksUalSignals();
 	}
 
-	bool ModuleLogicCompiler::optimizeCode(CodeOptimizationType optimizationType,
+	bool ModuleLogicCompiler::optimizeCode( CodeOptimizationType optimizationType,
 											const CodeSnippet& srcCode,
 											CodeSnippetConstIterator start,
 											CodeSnippetConstIterator end,
@@ -379,7 +379,7 @@ namespace Builder
 
 			replacedCodeSizeW += srcCodeItem.sizeW();
 
-			QString mnemo = srcCodeItem.getAsmCode(false);
+			QString mnemo = srcCodeItem.getAsmCode(m_lmDescription, false);
 
 			optimizedCode << CodeItem().setComment(mnemo);
 
@@ -426,7 +426,7 @@ namespace Builder
 
 		OptimizationInfo& optiInfo = it->second;
 
-		int replacementCodeSizeW  = replacementCode.codeSizeW();
+		int replacementCodeSizeW  = replacementCode.codeSizeW(m_lmDescription);
 
 		Q_ASSERT(replacedCodeSizeW > replacementCodeSizeW);
 
@@ -8013,10 +8013,10 @@ namespace Builder
 
 		cd.newLine();
 
-		cd << cmd.fill(wordAcc1, bitAcc, 3, "word <= bit");
-		cd << cmd.fill(wordAcc1, wordAcc2, 3, "word <= from word");
-		cd << cmd.fill(bitAcc, wordAcc2, 3, "bit <= from word");
-		cd << cmd.fill(bitAcc, bitAcc + 1, 4, "bit <= from bit");
+		cd << cmd.fillb(wordAcc1, bitAcc, 3, "word <= bit");
+		cd << cmd.fillb(wordAcc1, wordAcc2, 3, "word <= from word");
+		cd << cmd.fillb(bitAcc, wordAcc2, 3, "bit <= from word");
+		cd << cmd.fillb(bitAcc, bitAcc + 1, 4, "bit <= from bit");
 
 		cd.newLine();
 
@@ -9203,7 +9203,7 @@ namespace Builder
 				return false;
 			}
 
-			cmd.fill(Address16(wordAccAddr, 0), readUalAddr);
+			cmd.fillb(Address16(wordAccAddr, 0), readUalAddr);
 			code->append(cmd);
 
 			if (inputSize == SIZE_16BIT)
@@ -10715,14 +10715,14 @@ namespace Builder
 				return false;
 			}
 
-			cmd.fill(wordAccAddr, inputSignalAddr.offset(), inputSignalAddr.bit());
+			cmd.fillb(wordAccAddr, inputSignalAddr.offset(), inputSignalAddr.bit());
 			cmd.setComment(QString("%1 <= %2").arg(busChildSignal->appSignalID()).arg(inputSignal->appSignalID()));
 
 			code->append(cmd);
 
 			if (busSizeW > 1)
 			{
-				cmd.fill(wordAccAddr + 1, inputSignalAddr.offset(), inputSignalAddr.bit());
+				cmd.fillb(wordAccAddr + 1, inputSignalAddr.offset(), inputSignalAddr.bit());
 				code->append(cmd);
 			}
 
@@ -14843,7 +14843,7 @@ namespace Builder
 	{
 		QStringList asmCode;
 
-		code.getAsmCode(&asmCode);
+		code.getAsmCode(m_lmDescription, &asmCode);
 
 		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
 									(code.optimized() ? getInfoFileName("asm") : getSrcInfoFileName("asm")),
@@ -15336,7 +15336,7 @@ namespace Builder
 
 		std::vector<QVariantList> metadata;
 
-		m_appLogicCode.getAsmMetadata(&metadata);
+		m_appLogicCode.getAsmMetadata(m_lmDescription, &metadata);
 
 		result &= firmwareWriter->setChannelData(m_lmSubsystemID,
 												 appLogicUartID,
@@ -15619,7 +15619,7 @@ namespace Builder
 	{
 		std::vector<CommandStatistics> stat;
 
-		code.getCommandsStatistics(&stat);
+		code.getCommandsStatistics(m_lmDescription, &stat);
 
 		QString phaseStr;
 		int phaseClocks = 0;
@@ -15760,10 +15760,19 @@ namespace Builder
 
 			//
 
-			file << getStatStr(lmCommands.getMnemo(cs.code),
-							   cs.usedCount, usedPercent,
-							   cs.codeSizeW, sizePercent,
-							   cs.execTime, execPercent, false);
+			const LmCommand* lmCmd = m_lmDescription->commandPtr(cs.code);
+
+			if (lmCmd != nullptr)
+			{
+				file << getStatStr(lmCmd->caption.toUpper(),
+								   cs.usedCount, usedPercent,
+								   cs.codeSizeW, sizePercent,
+								   cs.execTime, execPercent, false);
+			}
+			else
+			{
+				Q_ASSERT(false);
+			}
 		}
 
 		Q_ASSERT(code.commandsCount() == usedCountTotal);

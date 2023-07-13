@@ -63,13 +63,16 @@
 		<OcmRxDataSizeLimit>1850</OcmRxDataSizeLimit>
 	</Other>
 
-    <LogicUnitCommnads>
-		<xi:include href="./instructions/nop.v1.xml" parse="xml"/>
+	<LogicUnitCommnads Version="3">
+		<xi:include href="./instructions/not.v1.xml" parse="xml"/>
 		<xi:include href="./instructions/startafb.v1.xml" parse="xml"/>
 		<xi:include href="./instructions/stop.v1.xml" parse="xml"/>
 		<xi:include href="./instructions/mov.v1.xml" parse="xml"/>
+		<xi:include href="./instructions/mov_addr_acc.v1.xml" parse="xml"/>
+		<xi:include href="./instructions/mov_acc_addr.v1.xml" parse="xml"/>
 		<xi:include href="./instructions/movmem.v1.xml" parse="xml"/>
 		<xi:include href="./instructions/movc.v1.xml" parse="xml"/>
+		<xi:include href="./instructions/movc_acc.v1.xml" parse="xml"/>
 		<xi:include href="./instructions/movbc.v1.xml" parse="xml"/>
 		<xi:include href="./instructions/wrfb.v1.xml" parse="xml"/>
 		<xi:include href="./instructions/rdfb.v1.xml" parse="xml"/>
@@ -79,6 +82,8 @@
 		<xi:include href="./instructions/rdfbcmp.v1.xml" parse="xml"/>
 		<xi:include href="./instructions/setmem.v1.xml" parse="xml"/>
 		<xi:include href="./instructions/movb.v1.xml" parse="xml"/>
+		<xi:include href="./instructions/movb_acc_addr.v1.xml" parse="xml"/>
+		<xi:include href="./instructions/movb_addr_acc.v1.xml" parse="xml"/>
 		<xi:include href="./instructions/nstart.v1.xml" parse="xml"/>
 		<xi:include href="./instructions/appstart.v1.xml" parse="xml"/>
 		<xi:include href="./instructions/mov32.v1.xml" parse="xml"/>

@@ -1,1 +1,13 @@
-<Command Caption="setmem"		Code="0380"	CodeMask="07c0"	SimulationFunc="command_setmem"		ParseFunc="parse_setmem"	Description="Set memory area to 16-bit word constant"/>
+<Command 
+	Caption="setmem"
+	Code="0380"
+	CodeMask="07c0"
+	SimulationFunc="command_setmem"
+	ParseFunc="parse_setmem"
+	Description="Set memory area to 16-bit word constant"
+	CodeSize="4" 
+	ReadTime="14" 
+	WaitFbExecution="false"
+	CheckFunc="check_setmem"
+	GetMnemoFunc="mnemo_setmem"
+	CalcExecTimeFunc="exectime_setmem"/>

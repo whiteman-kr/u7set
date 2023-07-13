@@ -1,1 +1,14 @@
-<Command Caption="nop" Code="0040" CodeMask="07c0" SimulationFunc="command_nop" ParseFunc="parse_nop" Description="No operation"/>
+<Command 
+	Caption="nop" 
+	Code="0040" 
+	CodeMask="07c0" 
+	SimulationFunc="command_nop" 
+	ParseFunc="parse_nop" 
+	Description="No operation"
+	CodeSize="1" 
+	ReadTime="5" 
+	ConstRunTime="2"
+	WaitFbExecution="false"
+	CheckFunc="check_nop"
+	GetMnemoFunc="mnemo_nop"
+	CalcExecTimeFunc="exectime_const"/>

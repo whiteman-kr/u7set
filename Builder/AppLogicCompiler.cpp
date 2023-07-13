@@ -6,7 +6,7 @@
 #include "DeviceHelper.h"
 #include "ConnectionsInfoWriter.h"
 #include "LanControllerInfoHelper.h"
-#include "ApplicationLogicCompiler.h"
+#include "AppLogicCompiler.h"
 #include "SoftwareCfgGenerator.h"
 #include "BdfFile.h"
 

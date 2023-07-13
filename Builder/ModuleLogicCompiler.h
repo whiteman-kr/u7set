@@ -835,7 +835,7 @@ namespace Builder
 		Tuning::TuningDataStorage* m_tuningDataStorage = nullptr;
 		ComparatorSet* m_cmpSet = nullptr;
 
-		std::shared_ptr<LmDescription> m_lmDescription;
+		LmDescriptionConstShared m_lmDescription;
 		AppLogicData* m_appLogicData = nullptr;
 		AppLogicModule* m_moduleLogic = nullptr;
 		BuildResultWriter* m_resultWriter = nullptr;

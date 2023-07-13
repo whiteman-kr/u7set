@@ -636,11 +636,11 @@ namespace Builder
 	{
 		if (m_directMoveDestAddr != BAD_ADDRESS)
 		{
-			code << CodeItem().fill(Address16(m_directMoveDestAddr, 0), m_srcBitAddr);
+			code << CodeItem().fillb(Address16(m_directMoveDestAddr, 0), m_srcBitAddr);
 		}
 		else
 		{
-			code << CodeItem().fill(Address16(m_destAddr, 0), m_srcBitAddr);
+			code << CodeItem().fillb(Address16(m_destAddr, 0), m_srcBitAddr);
 		}
 	}
 

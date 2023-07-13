@@ -46,6 +46,9 @@ DEFINES += IS_BUILDER
 
 SOURCES += \
     ../lib/ClientBehavior.cpp \
+	AppLogicCode.cpp \
+	AppLogicCompiler.cpp \
+	CodeItem.cpp \
 	DeviceHelper.cpp \
 	LanControllerInfoHelper.cpp \
     ../lib/LogicModuleSet.cpp \
@@ -85,10 +88,8 @@ SOURCES += \
     SubsystemStorage.cpp \
     TestSuiteCfgGenerator.cpp \
     UalItems.cpp \
-    ApplicationLogicCode.cpp \
     LmMemoryMap.cpp \
     ConfigurationBuilder.cpp \
-    ApplicationLogicCompiler.cpp \
     ModuleLogicCompiler.cpp \
     MemWriteMap.cpp \
     SoftwareCfgGenerator.cpp \
@@ -112,6 +113,9 @@ SOURCES += \
 HEADERS += \
     ../lib/ClientBehavior.h \
     ../lib/ConstStrings.h \
+	AppLogicCode.h \
+	AppLogicCompiler.h \
+	CodeItem.h \
 	DeviceHelper.h \
 	LanControllerInfoHelper.h \
     ../lib/LogicModuleSet.h \
@@ -152,11 +156,9 @@ HEADERS += \
     SubsystemStorage.h \
     TestSuiteCfgGenerator.h \
     UalItems.h \
-    ApplicationLogicCode.h \
     LmMemoryMap.h \
     TuningBuilder.h \
     ConfigurationBuilder.h \
-    ApplicationLogicCompiler.h \
     ModuleLogicCompiler.h \
     MemWriteMap.h \
     SoftwareCfgGenerator.h \

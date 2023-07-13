@@ -3,6 +3,7 @@
 #endif
 
 #include "DomXmlHelper.h"
+#include "WUtils.h"
 
 QString DomXmlHelper::errElementNotFound(const QString& elemName)
 {
@@ -58,7 +59,7 @@ bool DomXmlHelper::getSingleChildElement(const QDomElement& parentElement, const
 	return true;
 }
 
-bool DomXmlHelper::getIntAttribute(const QDomElement& elem, const QString& attrName, int* value, QString* errMsg)
+bool DomXmlHelper::getIntAttribute(const QDomElement& elem, const QString& attrName, int* value, QString* errMsg, int base)
 {
 	if (value == nullptr)
 	{
@@ -77,7 +78,7 @@ bool DomXmlHelper::getIntAttribute(const QDomElement& elem, const QString& attrN
 
 	bool ok = false;
 
-	*value = attrValue.toInt(&ok);
+	*value = attrValue.toInt(&ok, base);
 
 	if (ok == false)
 	{
@@ -125,20 +126,17 @@ bool DomXmlHelper::getBoolAttribute(const QDomElement& elem, const QString& attr
 
 	QString attrValue = elem.attribute(attrName);
 
-	if (attrValue == "true")
+	bool ok = false;
+
+	*value = stringToBool(attrValue, &ok);
+
+	if (ok == false)
 	{
-		*value = true;
-		return true;
+		*errMsg = errAttributeParsing(elem, attrName);
+		return false;
 	}
 
-	if (attrValue == "false")
-	{
-		*value = false;
-		return true;
-	}
-
-	*errMsg = errAttributeParsing(elem, attrName);
-	return false;
+	return true;
 }
 
 bool DomXmlHelper::getAddress16Attribute(const QDomElement& elem, const QString& attrName, Address16* value, QString* errMsg)

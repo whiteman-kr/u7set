@@ -13,8 +13,11 @@ namespace Hardware
 	class DeviceModule;
 }
 
+using LmCommandCode = quint16;
+
 struct LmCommand
 {
+
 	quint16 code = 0;
 	quint16 codeMask = 0;
 	QString caption;
@@ -22,9 +25,60 @@ struct LmCommand
 	QString parseFunc;
 	QString description;
 
-	bool loadFromXml(const QDomElement& element, QString* errorMessage);
-};
+	//
 
+	int codeSize = 0;					// command length in words
+	int readTime = 0;
+	bool waitFbExecution = false;
+
+	static const int CALC_RUNTIME = -1;
+
+	int constRuntime = CALC_RUNTIME;	// runtime calculation required if == CALC_RUNTIME
+	int writeToBitMemRuntime = -1;
+	int writeToWordMemRuntime = -1;
+
+	QString checkFunc;				// CodeChecker function name to check command params
+	QString getMnemoFunc;			// CodeItem function name to get command mnemonics
+	QString calcExecTimeFunc;		// CodeItem function name to calculate command execution time
+
+	bool loadFromXml(const QDomElement& element, QString* errorMessage);
+
+public:
+	static const LmCommandCode NO_COMMAND		= 0x0000;
+	static const LmCommandCode NOP				= 0x0040;		// Version 2
+	static const LmCommandCode NOT				= 0x0040;		// Version 3
+	static const LmCommandCode START			= 0x0080;
+	static const LmCommandCode STOP				= 0x00C0;
+	static const LmCommandCode MOV				= 0x0100;
+	static const LmCommandCode MOV_ADDR_ACC		= 0x0120;
+	static const LmCommandCode MOV_ACC_ADDR		= 0x0110;
+	static const LmCommandCode MOVMEM			= 0x0140;
+	static const LmCommandCode MOVC				= 0x0180;
+	static const LmCommandCode MOVC_ACC			= 0x01A0;
+	static const LmCommandCode MOVBC			= 0x01C0;
+	static const LmCommandCode WRFB				= 0x0200;
+	static const LmCommandCode RDFB				= 0x0240;
+	static const LmCommandCode WRFBC			= 0x0280;
+	static const LmCommandCode WRFBB			= 0x02C0;
+	static const LmCommandCode RDFBB			= 0x0300;
+	static const LmCommandCode RDFBCMP			= 0x0340;
+	static const LmCommandCode SETMEM			= 0x0380;
+	static const LmCommandCode MOVB				= 0x03C0;
+	static const LmCommandCode MOVB_ACC_ADDR	= 0x03E0;
+	static const LmCommandCode MOVB_ADDR_ACC	= 0x03D0;
+	static const LmCommandCode NSTART			= 0x0400;
+	static const LmCommandCode APPSTART			= 0x0440;
+	static const LmCommandCode MOV32			= 0x0480;
+	static const LmCommandCode MOVC32			= 0x04C0;
+	static const LmCommandCode WRFB32			= 0x0500;
+	static const LmCommandCode RDFB32			= 0x0540;
+	static const LmCommandCode WRFBC32			= 0x0580;
+	static const LmCommandCode RDFBCMP32		= 0x05C0;
+	static const LmCommandCode MOVCMPF			= 0x0600;
+	static const LmCommandCode PMOV				= 0x0640;
+	static const LmCommandCode PMOV32			= 0x0680;
+	static const LmCommandCode FILLB			= 0x06C0;
+};
 
 class LmDescription : public QObject
 {
@@ -233,13 +287,15 @@ public:
 	const std::map<int, std::shared_ptr<Afb::AfbComponent>>& afbComponents() const;
 
 	LmCommand command(int commandCode) const;
+	const LmCommand* commandPtr(int commandCode) const;
 	const std::map<int, LmCommand>& commands() const;
 	std::vector<LmCommand> commandsAsVector() const;
+	int logicUnitCommandsVersion() const;
 
 	// Data
 	//
 private:
-	// !!! Copy constructor is defined, don't forget to add new memers copy to it
+	// !!! Copy constructor is defined, don't forget to add new members copy to it
 	//
 	QString m_name;
 	int m_descriptionNumber = -1;
@@ -256,6 +312,7 @@ private:
 	// Possible commands
 	//
 	std::map<int, LmCommand> m_commands;		// Key is command.code
+	int m_logicUnitCommandsVersion = 0;
 
 	// AFBs
 	//
@@ -268,5 +325,8 @@ private:
 	// !!! Copy constructor is defined, don't forget to add new memers copy to it
 	//
 };
+
+using LmDescriptionShared = std::shared_ptr<LmDescription>;
+using LmDescriptionConstShared = std::shared_ptr<const LmDescription>;
 
 

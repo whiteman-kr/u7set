@@ -6,6 +6,7 @@
 #include "LmDescription.h"
 #include "DeviceObject.h"
 #include "DataProtocols.h"
+#include "../UtilsLib/DomXmlHelper.h"
 
 bool LmCommand::loadFromXml(const QDomElement& element, QString* errorMessage)
 {
@@ -21,83 +22,112 @@ bool LmCommand::loadFromXml(const QDomElement& element, QString* errorMessage)
 
 	// Caption
 	//
-	if (element.hasAttribute(QLatin1String("Caption")) == false)
+	if (DomXmlHelper::getStringAttribute(element, "Caption", &caption, errorMessage) == false)
 	{
-		*errorMessage = QObject::tr("Cant find attribute Caption.");
 		return false;
 	}
-	else
-	{
-		caption = element.attribute(QLatin1String("Caption"));
-	}
+
+	int intValue = 0;
 
 	// Code
 	//
-	if (element.hasAttribute(QLatin1String("Code")) == false)
+	if (DomXmlHelper::getIntAttribute(element, "Code", &intValue, errorMessage, 16) == false)
 	{
-		*errorMessage = QObject::tr("Cant find attribute Code.");
 		return false;
 	}
-	else
-	{
-		QString str = element.attribute(QLatin1String("Code"));
-		bool ok = false;
-		code = static_cast<quint16>(str.toInt(&ok, 16));
-	}
+
+	code = static_cast<quint16>(intValue);
 
 	// CodeMask
 	//
-	if (element.hasAttribute(QLatin1String("CodeMask")) == false)
+	if (DomXmlHelper::getIntAttribute(element, "CodeMask", &intValue, errorMessage, 16) == false)
 	{
-		*errorMessage = QObject::tr("Cant find attribute CodeMask.");
 		return false;
 	}
-	else
-	{
-		QString str = element.attribute(QLatin1String("CodeMask"));
-		bool ok = false;
-		codeMask = static_cast<quint16>(str.toInt(&ok, 16));
-	}
+
+	codeMask = static_cast<quint16>(intValue);
+
+	Q_ASSERT((code & (!codeMask)) == 0);
 
 	// SimulationFunc
 	//
-	if (element.hasAttribute(QLatin1String("SimulationFunc")) == false)
+	if (DomXmlHelper::getStringAttribute(element, "SimulationFunc", &simulationFunc, errorMessage) == false)
 	{
-		*errorMessage = QObject::tr("Cant find attribute SimulationFunc.");
 		return false;
-	}
-	else
-	{
-		simulationFunc = element.attribute(QLatin1String("SimulationFunc"));
 	}
 
 	// ParseFunc
 	//
-	if (element.hasAttribute(QLatin1String("ParseFunc")) == false)
+	if (DomXmlHelper::getStringAttribute(element, "ParseFunc", &parseFunc, errorMessage) == false)
 	{
-		*errorMessage = QObject::tr("Cant find attribute ParseFunc.");
 		return false;
-	}
-	else
-	{
-		parseFunc = element.attribute(QLatin1String("ParseFunc"));
 	}
 
 	// Description
 	//
-	if (element.hasAttribute(QLatin1String("Description")) == false)
+	if (DomXmlHelper::getStringAttribute(element, "Description", &description, errorMessage) == false)
 	{
-		*errorMessage = QObject::tr("Cant find attribute Description.");
 		return false;
+	}
+
+	// CodeSize
+	//
+	if (DomXmlHelper::getIntAttribute(element, "CodeSize", &codeSize, errorMessage, 10) == false)
+	{
+		return false;
+	}
+
+	// ReadTime
+	//
+	if (DomXmlHelper::getIntAttribute(element, "ReadTime", &readTime, errorMessage, 10) == false)
+	{
+		return false;
+	}
+
+	// ConstRunTime
+	//
+	if (element.hasAttribute("ConstRunTime") == false)
+	{
+		constRuntime = LmCommand::CALC_RUNTIME;
 	}
 	else
 	{
-		description = element.attribute(QLatin1String("Description"));
+		if (DomXmlHelper::getIntAttribute(element, "ReadTime", &constRuntime, errorMessage, 10) == false)
+		{
+			return false;
+		}
+	}
+
+	// WaitFbExecution
+	//
+	if (DomXmlHelper::getBoolAttribute(element, "WaitFbExecution", &waitFbExecution, errorMessage) == false)
+	{
+		return false;
+	}
+
+	// CheckFunc
+	//
+	if (DomXmlHelper::getStringAttribute(element, "CheckFunc", &checkFunc, errorMessage) == false)
+	{
+		return false;
+	}
+
+	// GetMnemoFunc
+	//
+	if (DomXmlHelper::getStringAttribute(element, "GetMnemoFunc", &getMnemoFunc, errorMessage) == false)
+	{
+		return false;
+	}
+
+	// CalcExecTimeFunc
+	//
+	if (DomXmlHelper::getStringAttribute(element, "CalcExecTimeFunc", &calcExecTimeFunc, errorMessage) == false)
+	{
+		return false;
 	}
 
 	return true;
 }
-
 
 LmDescription::LmDescription(QObject *parent)
 	: QObject(parent)
@@ -130,6 +160,7 @@ LmDescription& LmDescription::operator=(const LmDescription& src)
 	// LmCommands
 	//
 	m_commands = src.m_commands;
+	m_logicUnitCommandsVersion = src.m_logicUnitCommandsVersion;
 
 	// AFBs
 	//
@@ -326,7 +357,7 @@ bool LmDescription::load(QDomDocument doc, QString* errorMessage)
 		return false;
 	}
 
-	// <LogicUnitCommnads> -- Loading Application Functional Components
+	// <LogicUnitCommnads> -- Loading logic unit commands
 	//
 	{
 		QDomNodeList commandElementList = logicModuleElement.elementsByTagName(QLatin1String("LogicUnitCommnads"));
@@ -418,6 +449,11 @@ bool LmDescription::loadCommands(const QDomElement& element, QString* errorMessa
 	if (errorMessage == nullptr)
 	{
 		assert(errorMessage);
+		return false;
+	}
+
+	if (DomXmlHelper::getIntAttribute(element, "Version", &m_logicUnitCommandsVersion, errorMessage) == false)
+	{
 		return false;
 	}
 
@@ -1450,6 +1486,20 @@ LmCommand LmDescription::command(int commandCode) const
 	}
 }
 
+const LmCommand* LmDescription::commandPtr(int commandCode) const
+{
+	auto it = m_commands.find(commandCode);
+
+	if (it !=m_commands.end())
+	{
+		return &it->second;
+	}
+	else
+	{
+		return nullptr;
+	}
+}
+
 const std::map<int, LmCommand>& LmDescription::commands() const
 {
 	return m_commands;
@@ -1467,4 +1517,10 @@ std::vector<LmCommand> LmDescription::commandsAsVector() const
 
 	return result;
 }
+
+int LmDescription::logicUnitCommandsVersion() const
+{
+	return m_logicUnitCommandsVersion;
+}
+
 

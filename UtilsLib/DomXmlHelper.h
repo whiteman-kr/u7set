@@ -15,7 +15,7 @@ public:
 	static bool getSingleChildElement(const QDomElement& parentElement, const QString& childElementTagName,
 									  QDomElement* childElem, QString* errMsg);
 
-	static bool getIntAttribute(const QDomElement& elem, const QString& attrName, int* value, QString* errMsg);
+	static bool getIntAttribute(const QDomElement& elem, const QString& attrName, int* value, QString* errMsg, int base = 10);
 	static bool getStringAttribute(const QDomElement& elem, const QString& attrName, QString* value, QString* errMsg);
 	static bool getBoolAttribute(const QDomElement& elem, const QString& attrName, bool* value, QString* errMsg);
 	static bool getAddress16Attribute(const QDomElement& elem, const QString& attrName, Address16* value, QString* errMsg);

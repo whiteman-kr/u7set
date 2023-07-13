@@ -1,1 +1,1 @@
-generated LD Description files will apear here
+generated LM Description files will apear here

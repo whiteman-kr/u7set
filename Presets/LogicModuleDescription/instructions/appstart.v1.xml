@@ -1,1 +1,14 @@
-<Command Caption="appstart"		Code="0440"	CodeMask="07c0"	SimulationFunc="command_appstart"	ParseFunc="parse_appstart"	Description="Set ALP phase start address"/>
+<Command 
+	Caption="appstart" 
+	Code="0440"	
+	CodeMask="07c0"	
+	SimulationFunc="command_appstart" 
+	ParseFunc="parse_appstart" 
+	Description="Set ALP phase start address" 
+	CodeSize="2" 
+	ReadTime="8" 
+	ConstRunTime="2"
+	WaitFbExecution="false"
+	CheckFunc="check_appstart"
+	GetMnemoFunc="mnemo_appstart"
+	CalcExecTimeFunc="exectime_const"/>

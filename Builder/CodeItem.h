@@ -8,110 +8,7 @@
 
 namespace Builder
 {
-	struct LmCommand
-	{
-		enum class Code
-		{
-			NoCommand = 0,
-			NOP = 1,
-			START = 2,
-			STOP = 3,
-			MOV = 4,
-			MOVMEM = 5,
-			MOVC = 6,
-			MOVBC = 7,
-			WRFB = 8,
-			RDFB = 9,
-			WRFBC = 10,
-			WRFBB = 11,
-			RDFBB = 12,
-			RDFBCMP = 13,
-			SETMEM = 14,
-			MOVB = 15,
-			NSTART = 16,
-			APPSTART = 17,
-			MOV32 = 18,
-			MOVC32 = 19,
-			WRFB32 = 20,
-			RDFB32 = 21,
-			WRFBC32 = 22,
-			RDFBCMP32 = 23,
-			MOVCMPF = 24,
-			PMOV = 25,
-			PMOV32 = 26,
-			FILL = 27,
-		};
-
-		static const int CALC_RUNTIME = 99999;
-		static const quint16 MAX_FB_TYPE = 64 - 1;
-
-		static const quint16 MIN_FB_PARAM_NO = 0;
-		static const quint16 MAX_FB_PARAM_NO = 64 - 1;
-
-		static const quint16 MAX_BIT_NO_16 = 16 - 1;
-
-		LmCommand::Code code;
-		int sizeW = 0;
-		const char* mnemo = nullptr;
-
-		bool waitFbExecution = false;
-
-		int readTime = 0;
-		int runTime = 0;
-	};
-
-	inline const LmCommand lmCommandSet[] =
-	{
-		{	LmCommand::Code::NoCommand,	0,	"NO_CMD",		false,	0,	0						},
-		{	LmCommand::Code::NOP,		1,	"NOP",			false,	5,	2						},
-		{	LmCommand::Code::START,		2,	"START",		true,	8,	6						},
-		{	LmCommand::Code::STOP,		1,	"STOP",			false,	5,	1						},
-		{	LmCommand::Code::MOV,		3,	"MOV",			false,	11,	LmCommand::CALC_RUNTIME	},
-		{	LmCommand::Code::MOVMEM,	4,	"MOVMEM",		false,	14,	LmCommand::CALC_RUNTIME	},
-		{	LmCommand::Code::MOVC,		3,	"MOVC",			false,	11, LmCommand::CALC_RUNTIME	},
-		{	LmCommand::Code::MOVBC,		4,	"MOVBC",		false,	14, LmCommand::CALC_RUNTIME	},
-		{	LmCommand::Code::WRFB,		3,	"WRFB",			false,	11,	13						},
-		{	LmCommand::Code::RDFB,		3,	"RDFB",			true,	11,	LmCommand::CALC_RUNTIME	},
-		{	LmCommand::Code::WRFBC,		3,	"WRFBC",		false,	11,	9						},
-		{	LmCommand::Code::WRFBB,		4,	"WRFBB",		false,	14,	13						},
-		{	LmCommand::Code::RDFBB,		4,	"RDFBB",		true,	14,	LmCommand::CALC_RUNTIME	},
-		{	LmCommand::Code::RDFBCMP,	3,	"RDFBCMP",		true,	11,	6						},
-		{	LmCommand::Code::SETMEM,	4,	"SETMEM",		false,	14, LmCommand::CALC_RUNTIME	},
-		{	LmCommand::Code::MOVB,		4,	"MOVB",			false,	14,	LmCommand::CALC_RUNTIME	},
-		{	LmCommand::Code::NSTART,	3,	"NSTART",		true,	11,	LmCommand::CALC_RUNTIME	},
-		{	LmCommand::Code::APPSTART,	2,	"APPSTART",		false,	8,	2						},
-		{	LmCommand::Code::MOV32,		3,	"MOV32",		false,	11,	20						},
-		{	LmCommand::Code::MOVC32,	4,	"MOVC32",		false,	14, 10						},
-		{	LmCommand::Code::WRFB32,	3,	"WRFB32",		false,	11,	24						},
-		{	LmCommand::Code::RDFB32,	3,	"RDFB32",		true,	11,	LmCommand::CALC_RUNTIME	},
-		{	LmCommand::Code::WRFBC32,	4,	"WRFBC32",		false,	14,	18						},
-		{	LmCommand::Code::RDFBCMP32,	4,	"RDFBCMP32",	true,	14,	10						},
-		{	LmCommand::Code::MOVCMPF,	3,	"MOVCMPF",		false,	11,	LmCommand::CALC_RUNTIME	},
-		{	LmCommand::Code::PMOV,		3,	"PMOV",			false,	11,	LmCommand::CALC_RUNTIME	},
-		{	LmCommand::Code::PMOV32,	3,	"PMOV32",		false,	11,	18						},
-		{	LmCommand::Code::FILL,		4,	"FILL",			false,	11,	LmCommand::CALC_RUNTIME	},
-	};
-
-	const int LM_COMMANDS_COUNT = sizeof(lmCommandSet) / sizeof(LmCommand);
-
-	class LmCommands : public std::map<int, const LmCommand>
-	{
-	public:
-		LmCommands();
-
-		bool isValidCode(LmCommand::Code commandCode) const;
-		bool isValidCode(int commandCode) const;
-
-		int getSizeW(LmCommand::Code commandCode) const;
-		int getSizeW(int commandCode) const;
-
-		QString getMnemo(LmCommand::Code commandCode) const;
-		QString getMnemo(int commandCode) const;
-	};
-
-	extern LmCommands lmCommands;
-
-	class CommandCode
+	class BinCommandCode
 	{
 	private:
 
@@ -154,29 +51,22 @@ namespace Builder
 
 #pragma pack(pop)
 
-		QString m_fbCaption;
-
-		union
-		{
-			qint32 int32Value;
-			float floatValue;
-			quint32 uint32Value;
-		} m_const;
-
-		E::DataFormat m_constDataFormat = E::DataFormat::Float;
+	public:
+		static const quint16 MAX_FB_TYPE = 64 - 1;
+		static const quint16 MAX_FB_PARAM_NO = 64 - 1;
+		static const quint16 MAX_BIT_NO_16 = 16 - 1;
 
 	public:
-		CommandCode();
-		CommandCode(const CommandCode& cCode);
+		BinCommandCode();
+		BinCommandCode(const BinCommandCode& cCode);
 
-		CommandCode& operator = (const CommandCode& cCode);
+		BinCommandCode& operator = (const BinCommandCode& cCode);
 
-		void setNoCommand() { opCode.code = static_cast<int>(LmCommand::Code::NoCommand); }
-		bool isNoCommand() const { return opCode.code == TO_INT(LmCommand::Code::NoCommand); }
+		void setNoCommand() { word1 = LmCommand::NO_COMMAND; }
+		bool isNoCommand() const { return word1 == LmCommand::NO_COMMAND; }
 
-		void setOpCode(LmCommand::Code code);
-		int getOpCodeInt() const { return opCode.code; }
-		LmCommand::Code getOpCode() const { return static_cast<LmCommand::Code>(opCode.code); }
+		void setOpCode(LmCommandCode code, quint16 cmdCodeMask);
+//		LmCommandCode getOpCode() const { return static_cast<LmCommandCode>(opCode.code); }
 
 		void setFbType(int fbType);
 		quint16 getFbType() const { return opCode.fbType; }
@@ -185,12 +75,11 @@ namespace Builder
 		quint16 getFbInstance() const { return param.fbInstance; }
 		int getFbInstanceInt() const { return int(param.fbInstance); }
 
-		void setFbCaption(const QString& fbCaption) { m_fbCaption = fbCaption.toUpper(); }
-		QString getFbCaption() const { return m_fbCaption; }
-
 		void setFbParamNo(int fbParamNo);
 		quint16 getFbParamNo() const { return param.fbParamNo; }
 		int getFbParamNoInt() const { return int(param.fbParamNo); }
+
+		quint16 getWord1BitNo() const { return word1 & 0x0F; }
 
 		void setWord2(quint16 value) { word2 = value; }
 		void setWord2(int value) { word2 = CHECK_AND_CAST_TO_QUINT16(value); }
@@ -214,19 +103,6 @@ namespace Builder
 
 		quint16 getWord(int index) const;
 
-		void setConstFloat(float floatValue);
-		float getConstFloat() const;
-
-		void setConstInt32(qint32 int32Value);
-		qint32 getConstInt32() const;
-
-		void setConstUInt32(quint32 uint32Value);
-		quint32 getConstUInt32() const;
-
-		E::DataFormat constDataFormat() const { return m_constDataFormat; }
-
-		int sizeW() const;
-
 		void calcCrc5();
 
 		void clear();
@@ -234,14 +110,14 @@ namespace Builder
 
 	struct CommandStatistics
 	{
-		LmCommand::Code code;
+		LmCommandCode code;
 
 		int usedCount = 0;
 		int codeSizeW = 0;
 		int execTime = 0;					// waitTime + execTime
 
 		CommandStatistics() = delete;
-		CommandStatistics(LmCommand::Code cd) { code = cd; }
+		CommandStatistics(LmCommandCode cd) { code = cd; }
 	};
 
 	class CodeItem
@@ -249,7 +125,6 @@ namespace Builder
 	public:
 		CodeItem();
 
-		CodeItem& nop(const QString& comment = Separator::EMPTY_STR);
 		CodeItem& start(int fbType, int fbInstance, const QString& fbCaption, int fbRunTime,
 				   const QString& comment = Separator::EMPTY_STR);
 		CodeItem& stop(const QString& comment = Separator::EMPTY_STR);
@@ -337,23 +212,26 @@ namespace Builder
 						  const QString& comment = Separator::EMPTY_STR);
 		CodeItem& prevMov32(int addrTo, int addrFrom,
 							const QString& comment = Separator::EMPTY_STR);
-		CodeItem& fill(int addrTo, int addrFrom, int addrBit,
+		CodeItem& fillb(int addrTo, int addrFrom, int addrBit,
 					   const QString& comment = Separator::EMPTY_STR);
-		CodeItem& fill(Address16 addrTo, Address16 addrFrom,
+		CodeItem& fillb(Address16 addrTo, Address16 addrFrom,
 					   const QString& comment = Separator::EMPTY_STR);
 
-		LmCommand::Code getOpcode() const { return m_code.getOpCode(); }
+		E::DataFormat constDataFormat() const { return m_constDataFormat; }
 
-		int address() const { assert(m_isCommand == true); return m_address; }
-		void setAddress(int address) { m_address = address; }
+		LmCommandCode lmCommandCode() const { return m_lmCmdCode; }
+
+		bool setBinParams(LmDescriptionConstShared lmDesc, int address);
+
+		int address() const;
+		int sizeW() const;
+		bool isWaitingForFbExecution() const;
 
 		QString comment() const { return m_comment; }
 		CodeItem& setComment(const QString& comment);
 		void clearComment() { m_comment.clear(); }
 
 		void setClockCount(int clockCount) { m_clockCount = clockCount; }
-
-		int sizeW() const { return m_code.sizeW(); }
 
 		bool isCommand() const { return m_isCommand == true; }
 		bool isComment() const { return m_isCommand == false; }
@@ -363,8 +241,7 @@ namespace Builder
 
 		bool isNoCommand() const { return m_code.isNoCommand(); }
 
-		bool isOpCode(LmCommand::Code code) const { return m_code.getOpCode() == code; }
-		bool isWaitingForFbExecution() const;
+		bool isOpCode(LmCommandCode code) const { return m_lmCmdCode == code; }
 
 		quint16 getWord2() const { return m_code.getWord2(); }
 		quint16 getWord3() const { return m_code.getWord3(); }
@@ -395,12 +272,12 @@ namespace Builder
 		bool isMoveConst32Cmd() const;
 		bool isSetMemCmd() const;
 
-		bool isValidCommand() const { return m_code.getOpCode() != LmCommand::Code::NoCommand; }
+		bool isValidCommand() const { return m_lmCmdCode != LmCommand::NO_COMMAND; }
 
 		bool generateBinCode(QByteArray* binCode) const;
 
-		QString getAsmCode(bool printCmdCode) const;
-		QString mnemoCode() const;
+		QString getAsmCode(LmDescriptionConstShared lmDesc, bool printCmdCode) const;
+		QString mnemoCode(LmDescriptionConstShared lmDesc) const;
 		QString getConstValueString() const;
 
 		bool calcRunTime(const LmDescription& lmDesc,
@@ -421,6 +298,17 @@ namespace Builder
 	private:
 		void initCommand();
 
+		void setFbCaption(const QString& fbCaption) { m_fbCaption = fbCaption.toUpper(); }
+
+		void setConstFloat(float floatValue);
+		float getConstFloat() const;
+
+		void setConstInt32(qint32 int32Value);
+		qint32 getConstInt32() const;
+
+		void setConstUInt32(quint32 uint32Value);
+		quint32 getConstUInt32() const;
+
 		QString getCodeWordStr(int wordNo) const;
 
 		bool isAddrInBitMem(const LmDescription& lmDesc, quint32 addr) const;
@@ -432,10 +320,116 @@ namespace Builder
 							int postFbReadTime) const;
 
 	private:
+		QString mnemo_nop() const;
+		QString mnemo_not() const;
+		QString mnemo_startafb() const;
+		QString mnemo_stop() const;
+		QString mnemo_mov() const;
+		QString mnemo_mov_addr_acc() const;
+		QString mnemo_mov_acc_addr() const;
+		QString mnemo_movmem() const;
+		QString mnemo_movc() const;
+		QString mnemo_movc_acc() const;
+		QString mnemo_movbc() const;
+		QString mnemo_wrfb() const;
+		QString mnemo_rdfb() const;
+		QString mnemo_wrfbc() const;
+		QString mnemo_wrfbb() const;
+		QString mnemo_rdfbb() const;
+		QString mnemo_rdfbcmp() const;
+		QString mnemo_setmem() const;
+		QString mnemo_movb() const;
+		QString mnemo_movb_acc_addr() const;
+		QString mnemo_movb_addr_acc() const;
+		QString mnemo_nstart() const;
+		QString mnemo_appstart() const;
+		QString mnemo_mov32() const;
+		QString mnemo_movc32() const;
+		QString mnemo_wrfb32() const;
+		QString mnemo_rdfb32() const;
+		QString mnemo_wrfbc32() const;
+		QString mnemo_rdfbcmp32() const;
+		QString mnemo_movcmpf() const;
+		QString mnemo_pmov() const;
+		QString mnemo_pmov32() const;
+		QString mnemo_fillb() const;
+
+		using GetMnemoFuncPtr = QString (CodeItem::*)() const;
+
+		static inline const std::map<QString, GetMnemoFuncPtr> m_getMnemoFuncMap =	// getMnemoFuncName => getMnemoFuncPtr
+		{
+			{ QStringLiteral("mnemo_nop"), &CodeItem::mnemo_nop },
+			{ QStringLiteral("mnemo_not"), &CodeItem::mnemo_not },
+			{ QStringLiteral("mnemo_startafb"), &CodeItem::mnemo_startafb },
+			{ QStringLiteral("mnemo_stop"), &CodeItem::mnemo_stop },
+			{ QStringLiteral("mnemo_mov"), &CodeItem::mnemo_mov },
+			{ QStringLiteral("mnemo_mov_addr_acc"), &CodeItem::mnemo_mov_addr_acc },
+			{ QStringLiteral("mnemo_mov_acc_addr"), &CodeItem::mnemo_mov_acc_addr },
+			{ QStringLiteral("mnemo_movmem"), &CodeItem::mnemo_movmem },
+			{ QStringLiteral("mnemo_movc"), &CodeItem::mnemo_movc },
+			{ QStringLiteral("mnemo_movc_acc"), &CodeItem::mnemo_movc_acc },
+			{ QStringLiteral("mnemo_movbc"), &CodeItem::mnemo_movbc },
+			{ QStringLiteral("mnemo_wrfb"), &CodeItem::mnemo_wrfb },
+			{ QStringLiteral("mnemo_rdfb"), &CodeItem::mnemo_rdfb },
+			{ QStringLiteral("mnemo_wrfbc"), &CodeItem::mnemo_wrfbc },
+			{ QStringLiteral("mnemo_wrfbb"), &CodeItem::mnemo_wrfbb },
+			{ QStringLiteral("mnemo_rdfbb"), &CodeItem::mnemo_rdfbb },
+			{ QStringLiteral("mnemo_rdfbcmp"), &CodeItem::mnemo_rdfbcmp },
+			{ QStringLiteral("mnemo_setmem"), &CodeItem::mnemo_setmem },
+			{ QStringLiteral("mnemo_movb"), &CodeItem::mnemo_movb },
+			{ QStringLiteral("mnemo_movb_acc_addr"), &CodeItem::mnemo_movb_acc_addr },
+			{ QStringLiteral("mnemo_movb_addr_acc"), &CodeItem::mnemo_movb_addr_acc },
+			{ QStringLiteral("mnemo_nstart"), &CodeItem::mnemo_nstart },
+			{ QStringLiteral("mnemo_appstart"), &CodeItem::mnemo_appstart },
+			{ QStringLiteral("mnemo_mov32"), &CodeItem::mnemo_mov32 },
+			{ QStringLiteral("mnemo_movc32"), &CodeItem::mnemo_movc32 },
+			{ QStringLiteral("mnemo_wrfb32"), &CodeItem::mnemo_wrfb32 },
+			{ QStringLiteral("mnemo_rdfb32"), &CodeItem::mnemo_rdfb32 },
+			{ QStringLiteral("mnemo_wrfbc32"), &CodeItem::mnemo_wrfbc32 },
+			{ QStringLiteral("mnemo_rdfbcmp32"), &CodeItem::mnemo_rdfbcmp32 },
+			{ QStringLiteral("mnemo_movcmpf"), &CodeItem::mnemo_movcmpf },
+			{ QStringLiteral("mnemo_pmov"), &CodeItem::mnemo_pmov },
+			{ QStringLiteral("mnemo_pmov32"), &CodeItem::mnemo_pmov32 },
+			{ QStringLiteral("mnemo_fillb"), &CodeItem::mnemo_fillb }
+		};
+
+		// exectime_* function fills:
+		//		m_execTime
+		//		m_waitTime
+		//
+		void exectime_const(int waitFbTime, int* fbExecTime) const;
+		void exectime_startafb(int waitFbTime, int* fbExecTime) const;
+		void exectime_nstart(int waitFbTime, int* fbExecTime) const;
+
+		using CalcExecTimeFuncPtr = void (CodeItem::*)(int waitFbTime, int* fbExecTime) const;
+
+		static inline const std::map<QString, CalcExecTimeFuncPtr> m_calcExecTimeFuncMap =	// calcExecTimeFuncName => calcExecTimeFuncPtr
+		{
+			{ QStringLiteral("exectime_const"), &CodeItem::exectime_const },
+			{ QStringLiteral("exectime_startafb"), &CodeItem::exectime_startafb },
+		};
+
+	private:
+		LmCommandCode m_lmCmdCode = LmCommand::NO_COMMAND;
+
+		QString m_fbCaption;
+
+		E::DataFormat m_constDataFormat = E::DataFormat::Float;
+
+		union
+		{
+			qint32 int32Value;
+			float floatValue;
+			quint32 uint32Value;
+		} m_const;
+
+
 		bool m_isCommand = false;
 
 		int m_address = -1;
-		CommandCode m_code;
+		const LmCommand* m_lmCmd = nullptr;
+
+		BinCommandCode m_code;
 		QString m_comment;
 
 		int m_fbExecTime = 0;			// != 0 for commands START and NSTART only
@@ -445,132 +439,5 @@ namespace Builder
 		int m_waitTime = -1;
 		int m_execTime = -1;
 		int m_clockCount = -1;			// total code execution time after this command running
-	};
-
-	using CodeSnippetIterator = std::vector<CodeItem>::iterator;
-	using CodeSnippetConstIterator = std::vector<CodeItem>::const_iterator;
-
-	class CodeSnippet
-	{
-	public:
-		CodeSnippet();
-
-		// code snippet modification methods
-		//
-		void append(const CodeItem& codeItem);
-		void append(const CodeSnippet& codeShippet);
-
-		CodeSnippet& operator << (const CodeItem& ci);
-		CodeSnippet& operator << (const CodeSnippet& codeShippet);
-		CodeSnippet& operator << (const QString& commentStr);
-
-		void comment(const QString& cmt);
-		void newLine();
-		void comment_nl(const QString& cmt);
-		void finalizeByNewLine();
-		void clear();
-		void reserve(int size);
-
-		void swap(CodeSnippet& code);
-
-		//
-
-		bool isEmpty() const;
-		int itemsCount() const;
-		int codeSizeW() const;
-
-		//
-
-		void getAsmCode(QStringList* asmCode) const;
-		void getBinCode(QByteArray* binCode) const;
-		void getMifCode(QStringList* mifCode) const;
-
-		void getAsmMetadataFields(QStringList* metadataFields, int* metadataVersion) const;
-		void getAsmMetadata(std::vector<QVariantList>* metadata) const;
-
-		const std::vector<CodeItem>& code() const;
-
-		CodeSnippetIterator begin();
-		CodeSnippetConstIterator begin() const;
-
-		CodeSnippetIterator end();
-		CodeSnippetConstIterator end() const;
-
-	protected:
-		std::vector<CodeItem> m_code;
-	};
-
-	class AppLogicCode : public CodeSnippet
-	{
-	public:
-		enum class Type
-		{
-			Unknown,
-			IDR_Code,
-			ALP_Code,
-			AllCode
-		};
-
-	public:
-		AppLogicCode(Type type, bool optimized);
-
-		void setAppStartAddr(int addr);
-
-		[[nodiscard]] bool finalize(std::shared_ptr<const LmDescription> lmDesc);
-
-		void clear();
-
-		Type codeType() const;
-
-		bool optimized() const;
-		void setOptimized( bool optimized);
-
-		int codeSizeW() const;
-		int clockCount() const;
-		int commandsCount() const;
-
-		double lmCodeMemoryUsage() const;
-		double execTimeMcs() const;
-		double lmCycleTimeUsage() const;
-
-		bool getCommandsStatistics(std::vector<CommandStatistics>* stat) const;
-
-		void removeStopCommand();
-
-	private:
-		void startFbExec(int fbOpCode, int fbRuntime);
-		void decFbExecTime(int time);
-		int getFbRemainingExecTime(int fbOpCode);
-		int getMaxFbRemainingExecTimeAndClear();
-
-	private:
-		Type m_codeType = Type::Unknown;
-		bool m_optimized = false;
-
-		std::map<int, int> m_runningAfbs;		// AFB opCode -> AFB runtime
-
-		int m_codeSizeW = -1;
-		int m_commandsCount = -1;
-		int m_clockCount = -1;
-
-		double m_lmCodeMemUsage = 0;
-		double m_execTimeMcs = 0;
-		double m_lmCycleTimeUsage = 0;
-	};
-
-	struct CodeSnippetMetrics
-	{
-		void setStartAddr(int startAddr) { m_startAddr = startAddr; }
-		void setEndAddr(int endAddr);
-
-		double codePercent() const { return m_codePercent; }
-		QString codePercentStr() const;
-
-	private:
-		int m_startAddr = 0;
-		int m_endAddr = 0;
-		int m_runTime = 0;
-
-		double m_codePercent = 0;
 	};
 }
