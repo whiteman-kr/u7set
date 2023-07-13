@@ -415,16 +415,16 @@ public:
 	[[nodiscard]] int precision() const;
 	void setPrecision(int value);
 
-	[[nodiscard]] double fineAaperture();
+	[[nodiscard]] double fineAaperture() const;
 	void setFineAperture(double value);
 
-	[[nodiscard]] double coarseAaperture();
+	[[nodiscard]] double coarseAaperture() const;
 	void setCoarseAperture(double value);
 
-	[[nodiscard]] double filteringTime();
+	[[nodiscard]] double filteringTime() const;
 	void setFilteringTime(double value);
 
-	[[nodiscard]] double spreadTolerance();
+	[[nodiscard]] double spreadTolerance() const;
 	void setSpreadTolerance(double value);
 
 	[[nodiscard]] bool enableTuning() const;

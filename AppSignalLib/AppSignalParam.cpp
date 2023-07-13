@@ -588,7 +588,7 @@ void AppSignalParam::setPrecision(int value)
 	m_data->m_precision = value;
 }
 
-double AppSignalParam::fineAaperture()
+double AppSignalParam::fineAaperture() const
 {
 	return m_data->m_fineAperture;
 }
@@ -599,7 +599,7 @@ void AppSignalParam::setFineAperture(double value)
 	m_data->m_fineAperture = value;
 }
 
-double AppSignalParam::coarseAaperture()
+double AppSignalParam::coarseAaperture() const
 {
 	return m_data->m_coarseAperture;
 }
@@ -610,7 +610,7 @@ void AppSignalParam::setCoarseAperture(double value)
 	m_data->m_coarseAperture = value;
 }
 
-double AppSignalParam::filteringTime()
+double AppSignalParam::filteringTime() const
 {
 	return m_data->m_filteringTime;
 }
@@ -621,7 +621,7 @@ void AppSignalParam::setFilteringTime(double value)
 	m_data->m_filteringTime = value;
 }
 
-double AppSignalParam::spreadTolerance()
+double AppSignalParam::spreadTolerance() const
 {
 	return m_data->m_spreadTolerance;
 }
