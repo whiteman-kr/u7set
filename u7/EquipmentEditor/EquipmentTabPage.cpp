@@ -1626,7 +1626,7 @@ void EquipmentTabPage::importPreset()
 	bool ok = fileMessage.ParseFromIstream(&input);
 	if (ok == false)
 	{
-		QMessageBox::critical(this, qAppName(), tr("Pase file %1 error. File may be corrupted.").arg(fileName));
+		QMessageBox::critical(this, qAppName(), tr("Parse file %1 error. File may be corrupted.").arg(fileName));
 		return;
 	}
 
