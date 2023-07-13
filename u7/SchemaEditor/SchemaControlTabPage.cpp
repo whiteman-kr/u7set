@@ -4333,7 +4333,7 @@ void SchemaControlTabPage::exportToPdf()
 
 	std::vector<DbFileInfo> files;
 
-	for (auto f : selectedFiles)
+	for (auto& f : selectedFiles)
 	{
 		if (f->directoryAttribute() == true)
 		{
@@ -4376,7 +4376,7 @@ void SchemaControlTabPage::exportToAlbum()
 
 	std::vector<DbFileInfo> files;
 
-	for (auto f : selectedFiles)
+	for (auto& f : selectedFiles)
 	{
 		if (f->directoryAttribute() == true)
 		{
@@ -4395,7 +4395,10 @@ void SchemaControlTabPage::exportToAlbum()
 	//
 	QString albumPath = QSettings{}.value("SchemeEditor/Export/AlbumPath", "Schemas.pdf").toString();
 
-	static QPageLayout albumPageLayout = QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15));
+	static QPageLayout albumPageLayout = QPageLayout(QPageSize(QPageSize::A3),
+													 QPageLayout::Orientation::Landscape,
+													 QMarginsF(30, 20, 15, 20),
+													 QPageLayout::Unit::Millimeter);
 
 	if (SchemasReportDialog::getReportFileName(&albumPath, &albumPageLayout, this) == false)
 	{

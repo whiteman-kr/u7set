@@ -104,7 +104,8 @@ namespace ReportLib
 	private:
 		QPageLayout m_pageLayout = QPageLayout(QPageSize(QPageSize::A4),
 											   QPageLayout::Orientation::Portrait,
-											   QMarginsF(15, 15, 15, 15));
+											   QMarginsF(30, 20, 15, 20),
+											   QPageLayout::Unit::Millimeter);
 		int m_resolution = 300;
 
         QString m_caption;

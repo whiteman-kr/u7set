@@ -474,7 +474,10 @@ void DialogProjectDiff::on_pageSetupButton_clicked()
 
 void DialogProjectDiff::on_pageSetDefault_clicked()
 {
-	m_reportParams.pageLayout = QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, QMarginsF(15, 15, 15, 15));
+	m_reportParams.pageLayout = QPageLayout(QPageSize(QPageSize::A3),
+											QPageLayout::Orientation::Portrait,
+											QMarginsF(30, 20, 15, 20),
+											QPageLayout::Unit::Millimeter);
 	updatePageSizeInfo();
 	return;
 }

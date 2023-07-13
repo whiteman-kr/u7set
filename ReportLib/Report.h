@@ -113,7 +113,10 @@ namespace ReportLib
 	private:
 		// Page options
 		//
-		QPageLayout m_pageLayout = QPageLayout(QPageSize(QPageSize::A4), QPageLayout::Orientation::Portrait, QMarginsF(15, 15, 15, 15));
+		QPageLayout m_pageLayout = QPageLayout(QPageSize(QPageSize::A4),
+											   QPageLayout::Orientation::Portrait,
+											   QMarginsF(30, 20, 15, 20),
+											   QPageLayout::Unit::Millimeter);
 
 		int m_pageResolution = 600;
 

@@ -13,8 +13,6 @@
 #include <QInputDialog>
 #include <QFileDialog>
 
-int todo_crash_if_modal_dialog_in_reload_config;
-
 class SelectionControlDelegate : public QStyledItemDelegate
 {
 public:

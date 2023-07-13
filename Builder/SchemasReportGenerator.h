@@ -141,7 +141,10 @@ namespace Builder
 
 		ReportLib::ReportFont m_marginFont;
 
-		QPageLayout m_pageLayout = QPageLayout(QPageSize(QPageSize::A4), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15));
+		QPageLayout m_pageLayout = QPageLayout(QPageSize(QPageSize::A4),
+											   QPageLayout::Orientation::Landscape,
+											   QMarginsF(30, 20, 15, 20),
+											   QPageLayout::Unit::Millimeter);
 
 		mutable QMutex m_statisticsMutex;
 		Statistics m_statistics;

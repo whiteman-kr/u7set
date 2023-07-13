@@ -243,8 +243,6 @@ namespace ReportLib
 		}
 		html += "</tr></thead>";
 
-        int todo_process_table_alignment = 1;
-
 		html += "<tbody>";
 
 		bool alternateRow = (rows & 1) != 0;	// odd number of rows, first is alternate

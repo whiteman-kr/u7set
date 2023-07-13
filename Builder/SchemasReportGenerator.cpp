@@ -62,11 +62,43 @@ namespace Builder
 			return result;
 		}
 
-		result.push_back({db->systemFileId(DbDir::MonitorSchemasDir), QObject::tr("Monitor Schemas"),			true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
-		result.push_back({db->systemFileId(DbDir::TuningSchemasDir), QObject::tr("Tuning Schemas"),			true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
-		result.push_back({db->systemFileId(DbDir::DiagnosticsSchemasDir), QObject::tr("Diagnostics Schemas"),		true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
-		result.push_back({db->systemFileId(DbDir::AppLogicDir), QObject::tr("Application Logic"),		true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
-		result.push_back({db->systemFileId(DbDir::UfblDir), QObject::tr("UFBL Descriptions"),		true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
+		result.push_back({db->systemFileId(DbDir::MonitorSchemasDir),
+						  QObject::tr("Monitor Schemas"),
+						  true,
+						  QPageLayout(QPageSize(QPageSize::A3),
+						  QPageLayout::Orientation::Landscape,
+						  QMarginsF(30, 20, 15, 20),
+						  QPageLayout::Unit::Millimeter)});
+
+		result.push_back({db->systemFileId(DbDir::TuningSchemasDir),
+						  QObject::tr("Tuning Schemas"),
+						  true, QPageLayout(QPageSize(QPageSize::A3),
+						  QPageLayout::Orientation::Landscape,
+						  QMarginsF(30, 20, 15, 20),
+						  QPageLayout::Unit::Millimeter)});
+
+		result.push_back({db->systemFileId(DbDir::DiagnosticsSchemasDir),
+						  QObject::tr("Diagnostics Schemas"),
+						  true, QPageLayout(QPageSize(QPageSize::A3),
+						  QPageLayout::Orientation::Landscape,
+						  QMarginsF(30, 20, 15, 20),
+						  QPageLayout::Unit::Millimeter)});
+
+		result.push_back({db->systemFileId(DbDir::AppLogicDir),
+						  QObject::tr("Application Logic"),
+						  true,
+						  QPageLayout(QPageSize(QPageSize::A3),
+						  QPageLayout::Orientation::Landscape,
+						  QMarginsF(30, 20, 15, 20),
+						  QPageLayout::Unit::Millimeter)});
+
+		result.push_back({db->systemFileId(DbDir::UfblDir),
+						  QObject::tr("UFBL Descriptions"),
+						  true,
+						  QPageLayout(QPageSize(QPageSize::A3),
+						  QPageLayout::Orientation::Landscape,
+						  QMarginsF(30, 20, 15, 20),
+						  QPageLayout::Unit::Millimeter)});
 
 		return result;
 	}
@@ -192,6 +224,8 @@ namespace Builder
 		report->addMarginItem({tr("Project: %1").arg(m_projectName), -1, -1, {m_marginFont, Qt::AlignLeft | Qt::AlignTop}});
 
 		report->addMarginItem({tr("%OBJECT%"), -1, -1, {m_marginFont, Qt::AlignRight | Qt::AlignTop}});
+
+		report->addMarginItem({tr("%PAGE%"), -1, -1, {m_marginFont, Qt::AlignRight | Qt::AlignBottom}});
 
 		{
 			for (auto it = schemas.begin(); it != schemas.end(); it++)

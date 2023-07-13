@@ -89,7 +89,10 @@ struct ProjectDiffReportParams
 
 	// Single-file report page options
 	//
-	QPageLayout pageLayout = QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, QMarginsF(25, 20, 15, 20));
+	QPageLayout pageLayout = QPageLayout(QPageSize(QPageSize::A3),
+										 QPageLayout::Orientation::Portrait,
+										 QMarginsF(30, 20, 15, 20),
+										 QPageLayout::Unit::Millimeter);
 };
 
 class ProjectDiffGeneratorThread

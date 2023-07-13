@@ -559,11 +559,10 @@ namespace ReportLib
 				return false;
 			}
 
-#define mm2p(x) ((x) / 10.0 / 2.54 * 72)
-			margins = QMarginsF(mm2p(left), mm2p(top), mm2p(right), mm2p(bottom));
+			margins = QMarginsF(left, top, right, bottom);
 		}
 
-		m_pageLayout = QPageLayout(pageSize, orientation, margins);
+		m_pageLayout = QPageLayout(pageSize, orientation, margins, QPageLayout::Unit::Millimeter);
 
 		// Load contents
 
