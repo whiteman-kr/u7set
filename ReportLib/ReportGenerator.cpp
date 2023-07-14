@@ -12,7 +12,6 @@ namespace ReportLib
 	{
 		Report report{"ProjectName", m_template.caption()};
 		report.setResolution(m_template.resolution());
-		report.setPageLayout(m_template.pageLayout());
 
 		// Add margins
 
@@ -28,7 +27,7 @@ namespace ReportLib
 		const auto& header = m_template.header();
 		if (header.empty() == false)
 		{
-			rs = ReportSection::create(header.caption());
+			rs = ReportSection::create(header.caption(), m_template.pageLayout());
 			report.addSection(rs);
 
 			generateSection(*rs, header);
@@ -43,7 +42,7 @@ namespace ReportLib
 		{
 			if (rs == nullptr || firstSection == false)
 			{
-				rs = ReportSection::create(section.caption());
+				rs = ReportSection::create(section.caption(), m_template.pageLayout());
 				report.addSection(rs);
 			}
 
@@ -62,7 +61,7 @@ namespace ReportLib
 		{
 			if (rs == nullptr)
 			{
-				rs = ReportSection::create(footer.caption());
+				rs = ReportSection::create(footer.caption(), m_template.pageLayout());
 				report.addSection(rs);
 			}
 

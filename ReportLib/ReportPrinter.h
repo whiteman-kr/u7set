@@ -118,8 +118,6 @@ namespace ReportLib
 							  const std::vector<ReportMarginItem>& marginItems) const;
 
 	private:
-		std::vector<std::shared_ptr<PrintObject>> m_printObjects;
-
 		mutable QMutex m_statisticsMutex;
 		mutable Statistics m_statistics;
 

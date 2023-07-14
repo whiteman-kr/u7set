@@ -48,9 +48,10 @@ namespace ReportLib
 	// ReportSection
 	//
 
-	std::shared_ptr<ReportSection> ReportSection::create(const QString& caption)
+	std::shared_ptr<ReportSection> ReportSection::create(const QString& caption, const QPageLayout& pageLayout)
 	{
 		auto section = std::make_shared<ReportSection>(caption);
+		section->setPageLayout(pageLayout);
 		return section;
 	}
 
@@ -68,7 +69,17 @@ namespace ReportLib
 		return m_caption;
 	}
 
-    std::shared_ptr<ReportLib::ReportText> ReportSection::addText(const QString& text, const TextFormat& format)
+	QPageLayout ReportSection::pageLayout() const
+	{
+		return m_pageLayout;
+	}
+
+	void ReportSection::setPageLayout(const QPageLayout& value)
+	{
+		m_pageLayout = value;
+	}
+
+	std::shared_ptr<ReportLib::ReportText> ReportSection::addText(const QString& text, const TextFormat& format)
 	{
 		std::shared_ptr<ReportLib::ReportText> object = std::make_shared<ReportLib::ReportText>(text, format);
 		addObject(object);
@@ -138,16 +149,6 @@ namespace ReportLib
 	QString Report::path() const
 	{
 		return m_path;
-	}
-
-	QPageLayout Report::pageLayout() const
-	{
-		return m_pageLayout;
-	}
-
-	void Report::setPageLayout(const QPageLayout& value)
-	{
-		m_pageLayout = value;
 	}
 
 	int Report::resolution() const

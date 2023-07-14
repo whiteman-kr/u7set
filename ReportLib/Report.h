@@ -42,12 +42,15 @@ namespace ReportLib
 	class ReportSection
 	{
 	public:
-		static std::shared_ptr<ReportSection> create(const QString& caption);
+		static std::shared_ptr<ReportSection> create(const QString& caption, const QPageLayout& pageLayout);
 
 		explicit ReportSection(const QString& caption);
 		virtual ~ReportSection();
 
 		const QString& caption() const;
+
+		QPageLayout pageLayout() const;
+		void setPageLayout(const QPageLayout& value);
 
 		// Add object functions
 		//
@@ -68,7 +71,10 @@ namespace ReportLib
 
 	private:
 		QString m_caption;
-
+		QPageLayout m_pageLayout = QPageLayout(QPageSize(QPageSize::A4),
+											   QPageLayout::Orientation::Portrait,
+											   QMarginsF(30, 20, 15, 20),
+											   QPageLayout::Unit::Millimeter);
 		std::vector<std::shared_ptr<ReportObject>> m_objects;
 	};
 
@@ -84,9 +90,6 @@ namespace ReportLib
 	public:
 		QString projectName() const;
 		QString path() const;
-
-		QPageLayout pageLayout() const;
-		void setPageLayout(const QPageLayout& value);
 
 		int resolution() const;
 		void setResolution(int value);
@@ -113,11 +116,6 @@ namespace ReportLib
 	private:
 		// Page options
 		//
-		QPageLayout m_pageLayout = QPageLayout(QPageSize(QPageSize::A4),
-											   QPageLayout::Orientation::Portrait,
-											   QMarginsF(30, 20, 15, 20),
-											   QPageLayout::Unit::Millimeter);
-
 		int m_pageResolution = 600;
 
 		std::vector<std::shared_ptr<ReportSection>> m_sections;

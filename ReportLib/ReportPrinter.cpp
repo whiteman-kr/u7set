@@ -242,9 +242,13 @@ namespace ReportLib
 
 	bool ReportPrinter::print(const Report& report, QBuffer& buffer, std::atomic_bool& stop)
 	{
-		m_printObjects.clear();
+		struct RenderedSection
+		{
+			QPageLayout pageLayout;
+			std::vector<std::shared_ptr<PrintObject>> printObjects;
+		};
 
-		buffer.open(QIODevice::WriteOnly);
+		std::vector<RenderedSection> renderedSections;
 
 		{
 			QMutexLocker l(&m_statisticsMutex);
@@ -256,13 +260,6 @@ namespace ReportLib
 		}
 
 		// Create PDF writer
-
-		QPdfWriter pdfWriter(&buffer);
-		pdfWriter.setTitle(report.path());
-		pdfWriter.setPageLayout(report.pageLayout());
-		pdfWriter.setResolution(report.resolution());
-
-		const QRect pageRectPixels = pdfWriter.pageLayout().paintRectPixels(pdfWriter.resolution());
 
 		double fontScaling = report.resolution() / 72.0;
 
@@ -276,32 +273,6 @@ namespace ReportLib
 			fontScaling *= kFont;
 		}
 
-
-		QPainter painter(&pdfWriter);
-
-//#define DEBUG_PRINT_PAGE_RECT	//	Uncomment this for debug
-#ifdef DEBUG_PRINT_PAGE_RECT
-		auto fullRect = report.pageLayout().fullRectPixels(report.resolution());
-
-		auto pageRect = report.pageLayout().paintRectPixels(report.resolution());
-
-		painter.save();
-
-		painter.translate(-pageRect.left(), -pageRect.top());
-
-		painter.fillRect(fullRect, Qt::lightGray);
-
-		painter.restore();
-
-		painter.save();
-
-		painter.translate(-pageRect.left(), -pageRect.top());
-
-		painter.fillRect(pageRect, Qt::gray);
-
-		painter.restore();
-#endif
-
 		// Render all objects to print objects
 		//
 
@@ -309,6 +280,11 @@ namespace ReportLib
 
 		for (const std::shared_ptr<ReportSection>& section : report.sections())
 		{
+			renderedSections.push_back(RenderedSection{section->pageLayout(), {}});
+			std::vector<std::shared_ptr<PrintObject>>& printObjects = renderedSections.back().printObjects;
+
+			const QRect pageRectPixels = section->pageLayout().paintRectPixels(report.resolution());
+
 			if (stop == true)
 			{
 				return true;
@@ -351,7 +327,7 @@ namespace ReportLib
 																	lastDocumentTextPageHeight,
 																	lastObjectType == ReportObject::Type::Schema ||
 																	(firstObject == true && firstSection == false));
-							m_printObjects.push_back(printText);
+							printObjects.push_back(printText);
 						}
 						break;
 					}
@@ -377,7 +353,7 @@ namespace ReportLib
 														   rs->compareActions(),
 														   lastDocumentTextPageHeight,
 														   (firstObject == true && firstSection == false));
-						m_printObjects.push_back(ps);
+						printObjects.push_back(ps);
 
 
 					break;
@@ -423,9 +399,12 @@ namespace ReportLib
 
 		int pagesCount = 0;
 
-		for (const std::shared_ptr<PrintObject>& po : m_printObjects)
+		for (const auto& rs : renderedSections)
 		{
-			pagesCount += po->pageCount();
+			for (const std::shared_ptr<PrintObject>& po : rs.printObjects)
+			{
+				pagesCount += po->pageCount();
+			}
 		}
 
 		// Print PDF
@@ -437,15 +416,65 @@ namespace ReportLib
 			m_statistics.pageIndex = 1;
 		}
 
-		for (const std::shared_ptr<PrintObject>& po : m_printObjects)
+		buffer.open(QIODevice::WriteOnly);
+
+		QPdfWriter pdfWriter(&buffer);
+		pdfWriter.setTitle(report.path());
+		if (renderedSections.empty() == false)
 		{
-			if (stop == true)
+			pdfWriter.setPageLayout(renderedSections[0].pageLayout);
+		}
+		pdfWriter.setResolution(report.resolution());
+
+		QPainter painter(&pdfWriter);
+
+		//#define DEBUG_PRINT_PAGE_RECT	//	Uncomment this for debug
+		#ifdef DEBUG_PRINT_PAGE_RECT
+		auto fullRect = report.pageLayout().fullRectPixels(report.resolution());
+
+		auto pageRect = report.pageLayout().paintRectPixels(report.resolution());
+
+		painter.save();
+
+		painter.translate(-pageRect.left(), -pageRect.top());
+
+		painter.fillRect(fullRect, Qt::lightGray);
+
+		painter.restore();
+
+		painter.save();
+
+		painter.translate(-pageRect.left(), -pageRect.top());
+
+		painter.fillRect(pageRect, Qt::gray);
+
+		painter.restore();
+		#endif
+
+		bool firstRenderedSection = true;
+
+		for (const auto& rs : renderedSections)
+		{
+			if (firstRenderedSection == true)
 			{
-				return true;
+				firstRenderedSection = false;
+			}
+			else
+			{
+				pdfWriter.setPageLayout(rs.pageLayout);
 			}
 
-			po->print(*this, pdfWriter, painter, report.marginItems(),
-					  pagesCount, m_statistics.pageIndex, m_statisticsMutex);
+			for (const std::shared_ptr<PrintObject>& po : rs.printObjects)
+			{
+				if (stop == true)
+				{
+					return true;
+				}
+
+
+				po->print(*this, pdfWriter, painter, report.marginItems(),
+						  pagesCount, m_statistics.pageIndex, m_statisticsMutex);
+			}
 		}
 
 		{
