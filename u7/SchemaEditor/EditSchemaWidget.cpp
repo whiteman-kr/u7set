@@ -1522,6 +1522,29 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 			}
 		}
 
+		// Create proposed connection for FblItem pins.
+		//
+		for (auto lines = editSchemaView()->m_autoFblItemConnection.getPropositions();
+			 const auto& line : lines)
+		{
+			if (line.addButtonRect.contains(docPoint) == true)
+			{
+				// Save selection for mo convenient control.
+				// We don't want to select just created link, we want to keep selection so we can create other 
+				// links in the next mouse click.
+				//
+				auto selection = selectedItems();
+
+				createProposedAfbLink(line);
+
+				editSchemaView()->setSelectedItems(selection);
+				editSchemaView()->update();
+				return;
+			}
+		}
+
+		// --
+		//
 		for (auto si : selectedItems())
 		{
 			int movingEdgePointIndex = 0;
@@ -1554,7 +1577,7 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 			}
 		}
 
-		// If mouse is over pin, star drawing SchmeItemLink
+		// If mouse is over pin, start drawing SchemaItemLink.
 		//
 		{
 			std::vector<VFrame30::AfbPin> itemPins;
@@ -1603,7 +1626,7 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 			}
 		}
 
-		// --
+		// Start moving.
 		//
 		auto itemUnderPoint = editSchemaView()->activeLayer()->getItemUnderPoint(docPoint);
 
@@ -3311,6 +3334,18 @@ void EditSchemaWidget::setMouseCursor(QPoint mousePos)
 		//
 		QPointF docPos = widgetPointToDocument(mousePos, false);
 
+		// Create proposed connection for FblItem pins.
+		//
+		for (auto lines = editSchemaView()->m_autoFblItemConnection.getPropositions();
+			 const auto & line : lines)
+		{
+			if (line.addButtonRect.contains(docPos) == true)
+			{
+				setCursor(Qt::PointingHandCursor);
+				return;
+			}
+		}
+
 		if (selectedItems().empty() == true)
 		{
 			SchemaItemPtr itemUnderPoint = editSchemaView()->activeLayer()->getItemUnderPoint(docPos);
@@ -3399,6 +3434,8 @@ void EditSchemaWidget::setMouseCursor(QPoint mousePos)
 			}
 		}
 
+		// --
+		//
 		setCursor(Qt::ArrowCursor);
 		return;
 	}
@@ -3563,7 +3600,7 @@ void EditSchemaWidget::initMoveAfbsConnectionLinks(MouseState mouseState)
 	editSchemaView()->m_editConnectionLines.clear();
 	editSchemaView()->m_doNotMoveConnectionLines = false;
 
-	// Go over all selected itmes pins, and add data to m_editConnectionLines
+	// Go over all selected items pins, and add data to m_editConnectionLines
 	//
 	std::vector<SchemaItemPtr> selected = selectedNonLockedItems();
 	std::multiset<std::shared_ptr<VFrame30::SchemaItemLink>> commonLinks;
@@ -3664,7 +3701,7 @@ void EditSchemaWidget::initMoveAfbsConnectionLinks(MouseState mouseState)
 		}
 	}
 
-	// Ckeck if there is EditConnectionLine which is going to be moved from both sides
+	// Check if there is EditConnectionLine which is going to be moved from both sides
 	// If [SIGNAL1] and [SIGNAL2] are selected, the select their common links, and remove it from editSchemaView()->m_editConnectionLines
 	//
 	// [SIGNAL1]-+---------------+-[SIGNAL2]
@@ -3686,7 +3723,7 @@ void EditSchemaWidget::initMoveAfbsConnectionLinks(MouseState mouseState)
 			{
 				it->moveToPin_setMoveWholeLink();
 
-				// Remmove all other occurances of Link in m_editConnectionLines
+				// Remove all other occurrences of Link in m_editConnectionLines
 				//
 				auto removeIt = std::remove_if(++it, editSchemaView()->m_editConnectionLines.end(),
 												[cl](const EditConnectionLine& ecl)
@@ -3846,6 +3883,41 @@ void EditSchemaWidget::finishMoveAfbsConnectionLinks()
 
 		editSchemaView()->m_editConnectionLines.clear();
 	}
+
+	return;
+}
+
+void EditSchemaWidget::createProposedAfbLink(const AutoFblConnectionProposition& proposition)
+{
+	VFrame30::SchemaPoint from = proposition.from;
+	VFrame30::SchemaPoint to = proposition.to;
+
+	if (std::abs(from.X - to.X) < 0.000001 && std::abs(from.Y - to.Y) < 0.000001)
+	{
+		return;
+	}
+
+	std::shared_ptr<VFrame30::SchemaItemLink> link = std::make_shared<VFrame30::SchemaItemLink>(schema()->unit());
+	link->AddPoint(from.X, from.Y);
+	link->AddPoint(from.X, from.Y);
+
+	EditConnectionLine ecl{link, EditConnectionLine::AddToEnd};
+
+	ecl.addExtensionPoint(to);
+	ecl.moveEndPointPos(activeLayer(), to, EditConnectionLine::Auto, schema()->gridSize());
+	ecl.moveExtensionPointsToBasePoints();
+
+	ecl.setPointToItem(link);
+	link->RemoveSamePoints();
+
+	if (auto pl = link->GetPointList();
+		pl.size() < 1)
+	{
+		Q_ASSERT(pl.size() > 2);
+		return;
+	}
+
+	m_editEngine->runAddItem(link, activeLayer());
 
 	return;
 }

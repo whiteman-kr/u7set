@@ -82,10 +82,10 @@ namespace VFrame30
 	public:
 		std::shared_ptr<SchemaItem> getItemById(const QUuid id) const;
 
-		// If in the connectioMap there is a pinPos, then increment value, if not then add new record with value 1
+		// If in the connectionMap there is a pinPos, then increment value, if not then add new record with value 1
 		//
 		void ConnectionMapPosInc(SchemaPoint pinPos);
-		int GetPinPosConnectinCount(SchemaPoint pinPos, SchemaUnit unit) const;
+		int GetPinPosConnectinCount(SchemaPoint pinPos) const;
 
 		template<typename SchemaItemType>
 		std::shared_ptr<SchemaItemType> getItemUnderPointByType(QPointF point) const;		// This will work only inside VFrame30 :(

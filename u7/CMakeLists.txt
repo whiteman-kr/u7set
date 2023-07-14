@@ -206,6 +206,8 @@ set (U7_SOURCES
 	Reports/ReportPropertyEditor.h
 	Reports/SchemasReport.cpp
 	Reports/SchemasReport.h
+	SchemaEditor/AutoFblItemConnection.cpp
+	SchemaEditor/AutoFblItemConnection.h
 	SchemaEditor/CreateSchemaDialog.cpp
 	SchemaEditor/CreateSchemaDialog.h
 	SchemaEditor/CreateSignalDialog.cpp
