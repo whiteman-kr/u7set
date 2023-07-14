@@ -5,10 +5,13 @@
 	SimulationFunc="command_nop" 
 	ParseFunc="parse_nop" 
 	Description="No operation"
+
 	CodeSize="1" 
 	ReadTime="5" 
-	ConstRunTime="2"
 	WaitFbExecution="false"
-	CheckFunc="check_nop"
+
+	ConstRuntime="2"
+
+	CheckFunc="check_nothing"
 	GetMnemoFunc="mnemo_nop"
 	CalcExecTimeFunc="exectime_const"/>

@@ -5,9 +5,14 @@
 	SimulationFunc="command_rdfb32"
 	ParseFunc="parse_rdfb32"
 	Description="Read 32-bit data from AFB output and write to memory"
+
 	CodeSize="3" 
 	ReadTime="11" 
 	WaitFbExecution="true"
+
+	PreFbReadWordTime="2"
+	PostFbReadWordTime="18"
+
 	CheckFunc="check_rdfb32"
 	GetMnemoFunc="mnemo_rdfb32"
-	CalcExecTimeFunc="exectime_rdfb32"/>
+	CalcExecTimeFunc="exectime_rdfb"/>

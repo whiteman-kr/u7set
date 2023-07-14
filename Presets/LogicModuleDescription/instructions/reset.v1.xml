@@ -1,10 +1,10 @@
 <Command 
-	Caption="not"
-	Code="0068"
-	CodeMask="07F80"	
-	SimulationFunc="command_not"
-	ParseFunc="parse_not"
-	Description="Invert ACC[0] bit"
+	Caption="set"
+	Code="0050"
+	CodeMask="07F8"	
+	SimulationFunc="command_set"
+	ParseFunc="parse_set"
+	Description="Set ACC to 0xFF"
 
 	CodeSize="1" 
 	ReadTime="5" 

@@ -84,23 +84,65 @@ bool LmCommand::loadFromXml(const QDomElement& element, QString* errorMessage)
 		return false;
 	}
 
-	// ConstRunTime
-	//
-	if (element.hasAttribute("ConstRunTime") == false)
-	{
-		constRuntime = LmCommand::CALC_RUNTIME;
-	}
-	else
-	{
-		if (DomXmlHelper::getIntAttribute(element, "ReadTime", &constRuntime, errorMessage, 10) == false)
-		{
-			return false;
-		}
-	}
-
 	// WaitFbExecution
 	//
 	if (DomXmlHelper::getBoolAttribute(element, "WaitFbExecution", &waitFbExecution, errorMessage) == false)
+	{
+		return false;
+	}
+
+	// ConstRuntime
+	//
+	if (DomXmlHelper::getIntAttributeIfExists(element, "ConstRuntime", LmCommand::UNDEFINED_PARAM,
+											  &constRuntime, errorMessage, 10) == false)
+	{
+		return false;
+	}
+
+	// WriteToBitMemRuntime
+	//
+	if (DomXmlHelper::getIntAttributeIfExists(element, "WriteToBitMemRuntime", LmCommand::UNDEFINED_PARAM,
+											  &writeToBitMemRuntime, errorMessage, 10) == false)
+	{
+		return false;
+	}
+
+	// WriteToWordMemRuntime
+	//
+	if (DomXmlHelper::getIntAttributeIfExists(element, "WriteToWordMemRuntime", LmCommand::UNDEFINED_PARAM,
+											  &writeToWordMemRuntime, errorMessage, 10) == false)
+	{
+		return false;
+	}
+
+	// PreFbReadWordTime
+	//
+	if (DomXmlHelper::getIntAttributeIfExists(element, "PreFbReadWordTime", LmCommand::UNDEFINED_PARAM,
+											  &preFbReadWordTime, errorMessage, 10) == false)
+	{
+		return false;
+	}
+
+	// PostFbReadWordTime
+	//
+	if (DomXmlHelper::getIntAttributeIfExists(element, "PostFbReadWordTime", LmCommand::UNDEFINED_PARAM,
+											  &postFbReadWordTime, errorMessage, 10) == false)
+	{
+		return false;
+	}
+
+	// PreFbReadBitTime
+	//
+	if (DomXmlHelper::getIntAttributeIfExists(element, "PreFbReadBitTime", LmCommand::UNDEFINED_PARAM,
+											  &preFbReadBitTime, errorMessage, 10) == false)
+	{
+		return false;
+	}
+
+	// PostFbReadBitTime
+	//
+	if (DomXmlHelper::getIntAttributeIfExists(element, "PostFbReadBitTime", LmCommand::UNDEFINED_PARAM,
+											  &postFbReadBitTime, errorMessage, 10) == false)
 	{
 		return false;
 	}
@@ -112,6 +154,8 @@ bool LmCommand::loadFromXml(const QDomElement& element, QString* errorMessage)
 		return false;
 	}
 
+	Q_ASSERT(checkFunc.isEmpty() == false);
+
 	// GetMnemoFunc
 	//
 	if (DomXmlHelper::getStringAttribute(element, "GetMnemoFunc", &getMnemoFunc, errorMessage) == false)
@@ -119,12 +163,16 @@ bool LmCommand::loadFromXml(const QDomElement& element, QString* errorMessage)
 		return false;
 	}
 
+	Q_ASSERT(getMnemoFunc.isEmpty() == false);
+
 	// CalcExecTimeFunc
 	//
 	if (DomXmlHelper::getStringAttribute(element, "CalcExecTimeFunc", &calcExecTimeFunc, errorMessage) == false)
 	{
 		return false;
 	}
+
+	Q_ASSERT(calcExecTimeFunc.isEmpty() == false);
 
 	return true;
 }

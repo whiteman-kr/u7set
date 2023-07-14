@@ -59,17 +59,14 @@ namespace Builder
 
 		//
 
-		bool check_nop(const CodeItem& cmd);
-		bool check_not(const CodeItem& cmd);
+		bool check_nothing(const CodeItem& cmd);
 		bool check_startafb(const CodeItem& cmd);
-		bool check_stop(const CodeItem& cmd);
 		bool check_mov(const CodeItem& cmd);
 		bool check_mov_addr_acc(const CodeItem& cmd);
 		bool check_mov_acc_addr(const CodeItem& cmd);
 		bool check_movmem(const CodeItem& cmd);
 		bool check_movc(const CodeItem& cmd);
-		bool check_movc_acc(const CodeItem& cmd);
-		bool check_movbct(const CodeItem& cmd);
+		bool check_movbc(const CodeItem& cmd);
 		bool check_wrfb(const CodeItem& cmd);
 		bool check_rdfb(const CodeItem& cmd);
 		bool check_wrfbc(const CodeItem& cmd);
@@ -81,7 +78,6 @@ namespace Builder
 		bool check_movb_acc_addr(const CodeItem& cmd);
 		bool check_movb_addr_acc(const CodeItem& cmd);
 		bool check_nstart(const CodeItem& cmd);
-		bool check_appstart(const CodeItem& cmd);
 		bool check_mov32(const CodeItem& cmd);
 		bool check_movc32(const CodeItem& cmd);
 		bool check_wrfb32(const CodeItem& cmd);
@@ -127,17 +123,14 @@ namespace Builder
 
 		static inline const std::map<QString, CheckFuncPtr> m_checkFuncMap =		// checkFuncName => checkFuncPtr
 		{
-			{ QStringLiteral("check_nop"), &CodeChecker::check_nop },
-			{ QStringLiteral("check_not"), &CodeChecker::check_not },
+			{ QStringLiteral("check_nothing"), &CodeChecker::check_nothing },
 			{ QStringLiteral("check_startafb"), &CodeChecker::check_startafb },
-			{ QStringLiteral("check_stop"), &CodeChecker::check_stop },
 			{ QStringLiteral("check_mov"), &CodeChecker::check_mov },
 			{ QStringLiteral("check_mov_addr_acc"), &CodeChecker::check_mov_addr_acc },
 			{ QStringLiteral("check_mov_acc_addr"), &CodeChecker::check_mov_acc_addr },
 			{ QStringLiteral("check_movmem"), &CodeChecker::check_movmem },
 			{ QStringLiteral("check_movc"), &CodeChecker::check_movc },
-			{ QStringLiteral("check_movc_acc"), &CodeChecker::check_movc_acc },
-			{ QStringLiteral("check_movbct"), &CodeChecker::check_movbct },
+			{ QStringLiteral("check_movbc"), &CodeChecker::check_movbc },
 			{ QStringLiteral("check_wrfb"), &CodeChecker::check_wrfb },
 			{ QStringLiteral("check_rdfb"), &CodeChecker::check_rdfb },
 			{ QStringLiteral("check_wrfbc"), &CodeChecker::check_wrfbc },
@@ -149,7 +142,6 @@ namespace Builder
 			{ QStringLiteral("check_movb_acc_addr"), &CodeChecker::check_movb_acc_addr },
 			{ QStringLiteral("check_movb_addr_acc"), &CodeChecker::check_movb_addr_acc },
 			{ QStringLiteral("check_nstart"), &CodeChecker::check_nstart },
-			{ QStringLiteral("check_appstart"), &CodeChecker::check_appstart },
 			{ QStringLiteral("check_mov32"), &CodeChecker::check_mov32 },
 			{ QStringLiteral("check_movc32"), &CodeChecker::check_movc32 },
 			{ QStringLiteral("check_wrfb32"), &CodeChecker::check_wrfb32 },

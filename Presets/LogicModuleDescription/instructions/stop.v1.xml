@@ -5,10 +5,13 @@
 	SimulationFunc="command_stop" 
 	ParseFunc="parse_stop" 
 	Description="Stop phase (IDR or ALP)"
+
 	CodeSize="1" 
 	ReadTime="5" 
-	ConstRunTime="1"
 	WaitFbExecution="false"
-	CheckFunc="check_stop"
+
+	ConstRuntime="1"
+
+	CheckFunc="check_nothing"
 	GetMnemoFunc="mnemo_stop"
 	CalcExecTimeFunc="exectime_const"/>

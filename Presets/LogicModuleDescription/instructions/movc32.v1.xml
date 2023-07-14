@@ -5,10 +5,13 @@
 	SimulationFunc="command_movc32"
 	ParseFunc="parse_movc32"
 	Description="Write 32-bit constant to memory"
+
 	CodeSize="4" 
 	ReadTime="14" 
-	ConstRunTime="10"
 	WaitFbExecution="false"
+
+	ConstRuntime="10"
+
 	CheckFunc="check_movc32"
 	GetMnemoFunc="mnemo_movc32"
 	CalcExecTimeFunc="exectime_const"/>

@@ -5,9 +5,13 @@
 	SimulationFunc="command_setmem"
 	ParseFunc="parse_setmem"
 	Description="Set memory area to 16-bit word constant"
+
 	CodeSize="4" 
 	ReadTime="14" 
 	WaitFbExecution="false"
+
+	ConstRuntime="6"
+
 	CheckFunc="check_setmem"
 	GetMnemoFunc="mnemo_setmem"
 	CalcExecTimeFunc="exectime_setmem"/>

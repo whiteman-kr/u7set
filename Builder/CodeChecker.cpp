@@ -487,13 +487,7 @@ namespace Builder
 		return (this->*checkFuncPtr)(cmd);
 	}
 
-	bool CodeChecker::check_nop(const CodeItem& cmd)
-	{
-		Q_UNUSED(cmd);
-		return true;
-	}
-
-	bool CodeChecker::check_not(const CodeItem& cmd)
+	bool CodeChecker::check_nothing(const CodeItem& cmd)
 	{
 		Q_UNUSED(cmd);
 		return true;
@@ -502,12 +496,6 @@ namespace Builder
 	bool CodeChecker::check_startafb(const CodeItem& cmd)
 	{
 		return checkFbTypeAndInstance(cmd);
-	}
-
-	bool CodeChecker::check_stop(const CodeItem& cmd)
-	{
-		Q_UNUSED(cmd);
-		return true;
 	}
 
 	bool CodeChecker::check_mov(const CodeItem& cmd)
@@ -552,13 +540,7 @@ namespace Builder
 		return checkCanWrite16(cmd, writeAddr);
 	}
 
-	bool CodeChecker::check_movc_acc(const CodeItem& cmd)
-	{
-		Q_UNUSED(cmd);
-		return true;
-	}
-
-	bool CodeChecker::check_movbct(const CodeItem& cmd)
+	bool CodeChecker::check_movbc(const CodeItem& cmd)
 	{
 		quint32 writeAddr = cmd.getWord2();
 		quint32 bitNo = cmd.getWord4();
@@ -652,12 +634,6 @@ namespace Builder
 	bool CodeChecker::check_nstart(const CodeItem& cmd)
 	{
 		checkFbTypeAndInstance(cmd);
-		return true;
-	}
-
-	bool CodeChecker::check_appstart(const CodeItem& cmd)
-	{
-		Q_UNUSED(cmd);
 		return true;
 	}
 

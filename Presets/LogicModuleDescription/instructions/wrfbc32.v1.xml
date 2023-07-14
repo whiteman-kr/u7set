@@ -5,10 +5,13 @@
 	SimulationFunc="command_wrfbc32"
 	ParseFunc="parse_wrfbc32"
 	Description="Write 32-bit constant to AFB input"
+
 	CodeSize="4" 
 	ReadTime="14" 
-	ConstRunTime="18"
 	WaitFbExecution="false"
+
+	ConstRuntime="18"
+
 	CheckFunc="check_wrfbc32"
 	GetMnemoFunc="mnemo_wrfbc32"
 	CalcExecTimeFunc="exectime_const"/>

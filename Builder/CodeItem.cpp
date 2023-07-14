@@ -195,7 +195,7 @@ namespace Builder
 	{
 	}
 
-	CodeItem& CodeItem::start(int fbType, int fbInstance, const QString& fbCaption, int fbRunTime,
+	CodeItem& CodeItem::startafb(int fbType, int fbInstance, const QString& fbCaption, int fbRunTime,
 						 const QString& comment)
 	{
 		initCommand();
@@ -206,7 +206,7 @@ namespace Builder
 
 		m_fbExecTime = fbRunTime;
 
-		m_lmCmdCode = LmCommand::START;
+		m_lmCmdCode = LmCommand::STARTAFB;
 
 		m_code.setFbType(fbType);
 		m_code.setFbInstance(fbInstance);
@@ -258,6 +258,56 @@ namespace Builder
 		Q_ASSERT(addrFrom.bit() == 0);
 
 		return mov(addrTo.offset(), addrFrom.offset(), comment);
+	}
+
+	CodeItem& CodeItem::movAddrAcc(int addrTo, int bitNo, const QString& comment)
+	{
+		Q_ASSERT(addrTo >= 0);
+		Q_ASSERT(bitNo >= 0 && bitNo < 16);
+
+		initCommand();
+
+		m_result = true;
+
+		m_lmCmdCode = LmCommand::MOV_ADDR_ACC;
+
+		m_code.setWord2(addrTo);
+
+		setComment(comment);
+
+		return *this;
+	}
+
+	CodeItem& CodeItem::movAddrAcc(Address16 addrTo, const QString& comment)
+	{
+		Q_ASSERT(addrTo.isValid() == true);
+
+		return movAddrAcc(addrTo.offset(), addrTo.bit(), comment);
+	}
+
+	CodeItem& CodeItem::movAccAddr(int addrFrom, int bitNo, const QString& comment)
+	{
+		Q_ASSERT(addrFrom >= 0);
+		Q_ASSERT(bitNo >= 0 && bitNo < 16);
+
+		initCommand();
+
+		m_result = true;
+
+		m_lmCmdCode = LmCommand::MOV_ACC_ADDR;
+
+		m_code.setWord2(addrFrom);
+
+		setComment(comment);
+
+		return *this;
+	}
+
+	CodeItem& CodeItem::movAccAddr(Address16 addrFrom, const QString& comment)
+	{
+		Q_ASSERT(addrFrom.isValid() == true);
+
+		return movAccAddr(addrFrom.offset(), addrFrom.bit(), comment);
 	}
 
 	CodeItem& CodeItem::movMem(int addrTo, int addrFrom, int sizeW, const QString& comment)
@@ -314,6 +364,21 @@ namespace Builder
 		Q_ASSERT(addrTo.bit() == 0);
 
 		return movConst(addrTo.offset(), constVal, comment);
+	}
+
+	CodeItem& CodeItem::movAccConst(int constVal, const QString& comment)
+	{
+		initCommand();
+
+		m_result = true;
+
+		m_lmCmdCode = LmCommand::MOVC_ACC;
+
+		m_code.setWord2(constVal);
+
+		setComment(comment);
+
+		return *this;
 	}
 
 	CodeItem& CodeItem::movBitConst(int addrTo, int bitNo, int constBit, const QString& comment)
@@ -562,6 +627,58 @@ namespace Builder
 		Q_ASSERT(addrFrom.isValid() == true);
 
 		return movBit(addrTo.offset(), addrTo.bit(), addrFrom.offset(), addrFrom.bit(), comment);
+	}
+
+	CodeItem& CodeItem::movBitAccAddr(int addrFrom, int bitNo, const QString& comment)
+	{
+		Q_ASSERT(addrFrom >=0);
+		Q_ASSERT(bitNo >= 0 && bitNo < 16);
+
+		initCommand();
+
+		m_result = true;
+
+		m_lmCmdCode = LmCommand::MOVB_ACC_ADDR;
+
+		m_code.setWord1(bitNo & 0x0F);
+		m_code.setWord2(addrFrom);
+
+		setComment(comment);
+
+		return *this;
+	}
+
+	CodeItem& CodeItem::movBitAccAddr(Address16 addrFrom, const QString& comment)
+	{
+		Q_ASSERT(addrFrom.isValid() == true);
+
+		return movBitAccAddr(addrFrom.offset(), addrFrom.bit(), comment);
+	}
+
+	CodeItem& CodeItem::movBitAddrAcc(int addrTo, int bitNo, const QString& comment)
+	{
+		Q_ASSERT(addrTo >=0);
+		Q_ASSERT(bitNo >= 0 && bitNo < 16);
+
+		initCommand();
+
+		m_result = true;
+
+		m_lmCmdCode = LmCommand::MOVB_ADDR_ACC;
+
+		m_code.setWord1(bitNo & 0x0F);
+		m_code.setWord2(addrTo);
+
+		setComment(comment);
+
+		return *this;
+	}
+
+	CodeItem& CodeItem::movBitAddrAcc(Address16 addrTo, const QString& comment)
+	{
+		Q_ASSERT(addrTo.isValid() == true);
+
+		return movBitAddrAcc(addrTo.offset(), addrTo.bit(), comment);
 	}
 
 	CodeItem& CodeItem::nstart(int fbType, int fbInstance, int startCount,
@@ -944,6 +1061,46 @@ namespace Builder
 		Q_ASSERT(addrFrom.isValid() == true);
 
 		return fillb(addrTo.offset(), addrFrom.offset(), addrFrom.bit(), comment);
+	}
+
+	CodeItem& CodeItem::resetAcc()
+	{
+		initCommand();
+		m_result = true;
+		m_lmCmdCode = LmCommand::RESET;
+		return *this;
+	}
+
+	CodeItem& CodeItem::setAcc()
+	{
+		initCommand();
+		m_result = true;
+		m_lmCmdCode = LmCommand::SET;
+		return *this;
+
+	}
+	CodeItem& CodeItem::orAcc()
+	{
+		initCommand();
+		m_result = true;
+		m_lmCmdCode = LmCommand::OR;
+		return *this;
+	}
+
+	CodeItem& CodeItem::andAcc()
+	{
+		initCommand();
+		m_result = true;
+		m_lmCmdCode = LmCommand::AND;
+		return *this;
+	}
+
+	CodeItem& CodeItem::notAcc()
+	{
+		initCommand();
+		m_result = true;
+		m_lmCmdCode = LmCommand::NOT;
+		return *this;
 	}
 
 	CodeItem& CodeItem::setComment(const QString& comment)
@@ -1365,7 +1522,7 @@ namespace Builder
 		return QString();
 	}
 
-	bool CodeItem::calcRunTime(const LmDescription& lmDesc,
+	bool CodeItem::calcRunTime(LmDescriptionConstShared lmDesc,
 							   int prevCmdExecTime,
 							   int waitFbTime,
 							   int* waitTime,
@@ -1413,7 +1570,7 @@ namespace Builder
 
 		CalcExecTimeFuncPtr calcExecTimeFuncPtr = it->second;
 
-		(this->*calcExecTimeFuncPtr)(waitFbTime);
+		(this->*calcExecTimeFuncPtr)(lmDesc, waitFbTime, fbExecTime);
 
 /*		switch(m_lmCmdCode)
 		{
@@ -1672,11 +1829,11 @@ namespace Builder
 		return str;
 	}
 
-	bool CodeItem::isAddrInBitMem(const LmDescription& lmDesc, quint32 addr) const
+	bool CodeItem::isAddrInBitMem(LmDescriptionConstShared lmDesc, quint32 addr) const
 	{
-		return (addr >= lmDesc.memory().m_appLogicBitDataOffset &&
-				addr < (lmDesc.memory().m_appLogicBitDataOffset +
-						lmDesc.memory().m_appLogicBitDataSize));
+		return (addr >= lmDesc->memory().m_appLogicBitDataOffset &&
+				addr < (lmDesc->memory().m_appLogicBitDataOffset +
+						lmDesc->memory().m_appLogicBitDataSize));
 	}
 
 	bool CodeItem::isAddrInWordMem(const LmDescription& lmDesc, quint32 addr) const
@@ -1709,12 +1866,12 @@ namespace Builder
 
 	QString CodeItem::mnemo_nop() const
 	{
-		return QString();
+		return QStringLiteral("");
 	}
 
-	QString CodeItem::mnemo_not() const
+	QString CodeItem::mnemo_acc() const
 	{
-		return QString();
+		return QStringLiteral("ACC");
 	}
 
 	QString CodeItem::mnemo_startafb() const
@@ -1726,7 +1883,7 @@ namespace Builder
 
 	QString CodeItem::mnemo_stop() const
 	{
-		return QString();
+		return QStringLiteral("");
 	}
 
 	QString CodeItem::mnemo_mov() const
@@ -1957,118 +2114,52 @@ namespace Builder
 					arg(m_code.getWord4());
 	}
 
-	/*
-	switch(m_lmCmdCode)
-			{
-				// specific commands START, NSTART
-				//
-			case LmCommand::NSTART:
-				{
-				}
-				break;
-
-				// commands with calculated runtime
-				//
-			case LmCommand::RDFB:
-				Q_ASSERT(lmCommand.constRuntime == LmCommand::CALC_RUNTIME);
-				cmdExecTime = calcRdFbRuntime(m_waitTime, 2, waitFbTime, 7);
-				break;
-
-			case LmCommand::RDFB32:
-				Q_ASSERT(lmCommand.constRuntime == LmCommand::CALC_RUNTIME);
-				cmdExecTime = calcRdFbRuntime(m_waitTime, 2, waitFbTime, 18);
-				break;
-
-			case LmCommand::RDFBB:
-				Q_ASSERT(lmCommand.constRuntime == LmCommand::CALC_RUNTIME);
-				if (isAddrInBitMem(lmDesc, m_code.getWord3()) == true)
-				{
-					cmdExecTime = calcRdFbRuntime(m_waitTime, 4, waitFbTime, 7);
-				}
-				else
-				{
-					cmdExecTime = calcRdFbRuntime(m_waitTime, 6, waitFbTime, 8);
-				}
-				break;
-
-			case LmCommand::MOV:
-				Q_ASSERT(lmCommand.constRuntime == LmCommand::CALC_RUNTIME);
-				cmdExecTime = isAddrInBitMem(lmDesc, m_code.getWord2()) == true ? 70 : 10;
-				break;
-
-			case LmCommand::MOVMEM:
-				{
-					Q_ASSERT(lmCommand.constRuntime == LmCommand::CALC_RUNTIME);
-
-					quint16 n = m_code.getWord4();
-
-					Q_ASSERT(n > 0);
-
-					cmdExecTime = 8 + (n - 1) * 8 + 2;
-				}
-				break;
-
-			case LmCommand::MOVC:
-				Q_ASSERT(lmCommand.constRuntime == LmCommand::CALC_RUNTIME);
-				cmdExecTime = isAddrInBitMem(lmDesc, m_code.getWord2()) == true ? 67 : 6;
-				break;
-
-			case LmCommand::MOVBC:
-				Q_ASSERT(lmCommand.constRuntime == LmCommand::CALC_RUNTIME);
-				cmdExecTime = isAddrInBitMem(lmDesc, m_code.getWord2()) == true ? 6 : 14;
-				break;
-
-			case LmCommand::SETMEM:
-				{
-					Q_ASSERT(lmCommand.constRuntime == LmCommand::CALC_RUNTIME);
-
-					quint16 n = m_code.getWord4();
-
-					Q_ASSERT(n > 0);
-
-					cmdExecTime = 5 + (n - 1) * 4 + 1;
-				}
-				break;
-
-			case LmCommand::MOVB:
-				Q_ASSERT(lmCommand.constRuntime == LmCommand::CALC_RUNTIME);
-				cmdExecTime = isAddrInBitMem(lmDesc, m_code.getWord2()) == true ? 10 : 17;
-				break;
-
-			case LmCommand::MOVCMPF:
-				Q_ASSERT(lmCommand.constRuntime == LmCommand::CALC_RUNTIME);
-				cmdExecTime = isAddrInBitMem(lmDesc, m_code.getWord2()) == true ? 6 : 14;
-				break;
-
-			case LmCommand::PMOV:
-				Q_ASSERT(lmCommand.constRuntime == LmCommand::CALC_RUNTIME);
-				cmdExecTime = isAddrInBitMem(lmDesc, m_code.getWord2()) == true ? 69 : 10;
-				break;
-
-			case LmCommand::FILLB:
-				Q_ASSERT(lmCommand.constRuntime == LmCommand::CALC_RUNTIME);
-				cmdExecTime = isAddrInBitMem(lmDesc, m_code.getWord2()) == true ? 69 : 11;
-				break;
-
-			default:
-				Q_ASSERT(false);								// unknown command code
-			}*/
-
-	void CodeItem::exectime_const(int waitFbTime, int* fbExecTime) const
+	void CodeItem::exectime_const(LmDescriptionConstShared lmDesc, int waitFbTime, int* fbExecTime)
 	{
-		TEST_PTR_RETURN_VALUE(m_lmCmd, 0);
-		Q_ASSERT(m_lmCmd->constRuntime != LmCommand::CALC_RUNTIME);
+		Q_UNUSED(lmDesc);
 		Q_UNUSED(waitFbTime);
 		Q_UNUSED(fbExecTime);
+
+		TEST_PTR_RETURN(m_lmCmd);
+
+		Q_ASSERT(m_lmCmd->constRuntime != LmCommand::UNDEFINED_PARAM);
+
+		// LmCommand::NOP
+		// LmCommand::RESET
+		// LmCommand::SET
+		// LmCommand::OR
+		// LmCommand::AND
+		// LmCommand::NOT
+		// LmCommand::STOP
+		// LmCommand::WRFB
+		// LmCommand::WRFBC
+		// LmCommand::WRFBB
+		// LmCommand::APPSTART
+		// LmCommand::MOV32
+		// LmCommand::MOVC32
+		// LmCommand::MOVB_ACC_ADDR
+		// LmCommand::MOVC_ACC
+		// LmCommand::MOV_ACC_ADDR
+		// LmCommand::MOV_ADDR_ACC
+		// LmCommand::WRFB32
+		// LmCommand::WRFBC32
+		// LmCommand::RDFBCMP
+		// LmCommand::RDFBCMP32
+		// LmCommand::PMOV32
 
 		m_execTime = m_lmCmd->constRuntime;
 	}
 
-	void CodeItem::exectime_startafb(int waitFbTime, int* fbExecTime) const
+	void CodeItem::exectime_startafb(LmDescriptionConstShared lmDesc, int waitFbTime, int* fbExecTime)
 	{
-		TEST_PTR_RETURN_VALUE(m_lmCmd, 0);
-		Q_ASSERT(m_lmCmd->constRuntime != LmCommand::CALC_RUNTIME);
+		Q_UNUSED(lmDesc);
 		Q_UNUSED(fbExecTime);
+
+		TEST_PTR_RETURN(m_lmCmd);
+
+		Q_ASSERT(m_lmCmd->constRuntime != LmCommand::UNDEFINED_PARAM);
+
+		// LmCommand::STARTAFB
 
 		m_execTime = m_lmCmd->constRuntime;
 
@@ -2080,11 +2171,16 @@ namespace Builder
 		*fbExecTime = m_fbExecTime;
 	}
 
-	void CodeItem::exectime_nstart(int waitFbTime, int* fbExecTime) const
+	void CodeItem::exectime_nstart(LmDescriptionConstShared lmDesc, int waitFbTime, int* fbExecTime)
 	{
-		TEST_PTR_RETURN_VALUE(m_lmCmd, 0);
-		Q_ASSERT(m_lmCmd->constRuntime != LmCommand::CALC_RUNTIME);
+		Q_UNUSED(lmDesc);
 		Q_UNUSED(waitFbTime);
+
+		TEST_PTR_RETURN(m_lmCmd);
+
+		Q_ASSERT(m_lmCmd->constRuntime != LmCommand::UNDEFINED_PARAM);
+
+		// LmCommand::NSTART
 
 		quint16 n = m_code.getWord3();
 
@@ -2093,5 +2189,103 @@ namespace Builder
 		*fbExecTime = m_fbExecTime;
 	}
 
+	void CodeItem::exectime_write_bit_or_word_mem(LmDescriptionConstShared lmDesc, int waitFbTime, int* fbExecTime)
+	{
+		Q_UNUSED(waitFbTime);
+		Q_UNUSED(fbExecTime);
 
+		TEST_PTR_RETURN(m_lmCmd);
+
+		Q_ASSERT(m_lmCmd->writeToBitMemRuntime != LmCommand::UNDEFINED_PARAM);
+		Q_ASSERT(m_lmCmd->writeToWordMemRuntime != LmCommand::UNDEFINED_PARAM);
+
+		// LmCommand::MOV
+		// LmCommand::MOVC
+		// LmCommand::MOVBC
+		// LmCommand::MOVB
+		// LmCommand::MOVB_ADDR_ACC
+		// LmCommand::MOVCMPF
+		// LmCommand::PMOV
+		// LmCommand::FILLB
+
+		m_execTime = isAddrInBitMem(lmDesc, m_code.getWord2()) == true ?
+							m_lmCmd->writeToBitMemRuntime :
+							m_lmCmd->writeToWordMemRuntime;
+	}
+
+	void CodeItem::exectime_movmem(LmDescriptionConstShared lmDesc, int waitFbTime, int* fbExecTime)
+	{
+		Q_UNUSED(lmDesc);
+		Q_UNUSED(waitFbTime);
+		Q_UNUSED(fbExecTime);
+
+		TEST_PTR_RETURN(m_lmCmd);
+
+		Q_ASSERT(m_lmCmd->constRuntime != LmCommand::UNDEFINED_PARAM);
+
+		// LmCommand::MOVMEM
+
+		quint16 n = m_code.getWord4();
+
+		m_execTime = m_lmCmd->constRuntime + (n - 1) * 8;
+	}
+
+	void CodeItem::exectime_setmem(LmDescriptionConstShared lmDesc, int waitFbTime, int* fbExecTime)
+	{
+		Q_UNUSED(lmDesc);
+		Q_UNUSED(waitFbTime);
+		Q_UNUSED(fbExecTime);
+
+		TEST_PTR_RETURN(m_lmCmd);
+
+		Q_ASSERT(m_lmCmd->constRuntime != LmCommand::UNDEFINED_PARAM);
+
+		// LmCommand::SETMEM
+
+		quint16 n = m_code.getWord4();
+
+		m_execTime = m_lmCmd->constRuntime + (n - 1) * 4;
+	}
+
+	void CodeItem::exectime_rdfb(LmDescriptionConstShared lmDesc, int waitFbTime, int* fbExecTime)
+	{
+		Q_UNUSED(lmDesc);
+		Q_UNUSED(fbExecTime);
+
+		TEST_PTR_RETURN(m_lmCmd);
+
+		Q_ASSERT(m_lmCmd->preFbReadWordTime != LmCommand::UNDEFINED_PARAM);
+		Q_ASSERT(m_lmCmd->postFbReadWordTime != LmCommand::UNDEFINED_PARAM);
+
+		// LmCommand::RDFB
+		// LmCommand::RDFB32
+
+		m_execTime = calcRdFbRuntime(m_waitTime, m_lmCmd->preFbReadWordTime,
+									 waitFbTime, m_lmCmd->postFbReadWordTime);
+	}
+
+	void CodeItem::exectime_rdfb_bit(LmDescriptionConstShared lmDesc, int waitFbTime, int* fbExecTime)
+	{
+		Q_UNUSED(fbExecTime);
+
+		TEST_PTR_RETURN(m_lmCmd);
+
+		Q_ASSERT(m_lmCmd->preFbReadWordTime != LmCommand::UNDEFINED_PARAM);
+		Q_ASSERT(m_lmCmd->postFbReadWordTime != LmCommand::UNDEFINED_PARAM);
+		Q_ASSERT(m_lmCmd->preFbReadBitTime != LmCommand::UNDEFINED_PARAM);
+		Q_ASSERT(m_lmCmd->postFbReadBitTime != LmCommand::UNDEFINED_PARAM);
+
+		// LmCommand::RDFBB
+
+		if (isAddrInBitMem(lmDesc, m_code.getWord3()) == true)
+		{
+			m_execTime = calcRdFbRuntime(m_waitTime, m_lmCmd->preFbReadBitTime,
+										 waitFbTime, m_lmCmd->postFbReadBitTime);
+		}
+		else
+		{
+			m_execTime = calcRdFbRuntime(m_waitTime, m_lmCmd->preFbReadWordTime,
+										 waitFbTime, m_lmCmd->postFbReadWordTime);
+		}
+	}
 }

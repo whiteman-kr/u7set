@@ -7944,7 +7944,7 @@ namespace Builder
 		cd << cmd.writeFuncBlockConst(14, 1, 0, 1, "SCALE_16UI_16UI", "init SCALE_16UI_16UI");
 		cd << cmd.writeFuncBlock(14, 1, 5, wordAcc1, "SCALE_16UI_16UI", "fb.input16 <= word");
 		cd << cmd.writeFuncBlock(14, 1, 5, bitAcc, "SCALE_16UI_16UI", "fb.input16 <= bit");
-		cd << cmd.start(14, 1, "SCALE_16UI_16UI", 4);
+		cd << cmd.startafb(14, 1, "SCALE_16UI_16UI", 4);
 		cd << cmd.readFuncBlock(wordAcc1, 14, 1, 8, "SCALE_16UI_16UI", "word <= fb.output16");
 		cd << cmd.readFuncBlock(bitAcc, 14, 1, 8, "SCALE_16UI_16UI", "bit <= fb.output16");
 
@@ -7957,7 +7957,7 @@ namespace Builder
 		cd << cmd.writeFuncBlockBit(1, 0, 3, bitAcc, 7, "AND", "fb.input <= bit");
 		cd << cmd.writeFuncBlockBit(1, 0, 4, wordAcc1, 11, "AND", "fb.input <= word");
 
-		cd << cmd.start(1, 0, "AND", 5);
+		cd << cmd.startafb(1, 0, "AND", 5);
 
 		cd << cmd.readFuncBlockBit(wordAcc1, 12, 1, 0, 20, "AND", "word <= fb.output");
 		cd << cmd.readFuncBlockBit(bitAcc,4, 1, 0, 20, "AND", "bit <= fb.output");
@@ -7990,7 +7990,7 @@ namespace Builder
 		cd << cmd.writeFuncBlockConst(14, 2, 0, 2, "SCALE_16UI_SI", "init SCALE_16UI_SI");
 		cd << cmd.writeFuncBlockConstInt32(14, 2, 1, 32768, "SCALE_16UI_SI", "fb.input32 <= const32");
 		cd << cmd.writeFuncBlock32(14, 2, 2, wordAcc1, "SCALE_16UI_SI", "fb.input32 <= word");
-		cd << cmd.start(14, 2, "SCALE_16UI_SI", 4);
+		cd << cmd.startafb(14, 2, "SCALE_16UI_SI", 4);
 		cd << cmd.readFuncBlock32(wordAcc1, 14, 2, 9, "SCALE_16UI_SI", "word <= fb.output32");
 
 		cd.newLine();
@@ -8698,7 +8698,7 @@ namespace Builder
 			cmd.setComment(QString(tr("conversion of analog input %1")).arg(s->appSignalID()));
 			code->append(cmd);
 
-			cmd.start(appFb->opcode(), appFb->instance(), appFb->caption(), appFb->runTime());
+			cmd.startafb(appFb->opcode(), appFb->instance(), appFb->caption(), appFb->runTime());
 			cmd.clearComment();
 			code->append(cmd);
 
@@ -9310,7 +9310,7 @@ namespace Builder
 
 		CodeItem cmd;
 
-		cmd.start(ualAfb->opcode(), ualAfb->instance(), ualAfb->caption(), ualAfb->runTime());
+		cmd.startafb(ualAfb->opcode(), ualAfb->instance(), ualAfb->caption(), ualAfb->runTime());
 
 		if (ualAfb->isBusProcessing() == false || bpStepInfo.stepsNumber == 1)
 		{
@@ -11312,7 +11312,7 @@ namespace Builder
 								  select->afbOperandIndex(), readAddr, swtch->caption());
 			code->append(cmd);
 
-			cmd.start(swtch->opcode(), swtch->instance(), swtch->caption(), swtch->runTime());
+			cmd.startafb(swtch->opcode(), swtch->instance(), swtch->caption(), swtch->runTime());
 			code->append(cmd);
 
 			cmd.readFuncBlock32(writeAddr,
@@ -13316,7 +13316,7 @@ namespace Builder
 				code->append(cmd);
 			}
 
-			cmd.start(appFb->opcode(), appFb->instance(), appFb->caption(), appFb->runTime());
+			cmd.startafb(appFb->opcode(), appFb->instance(), appFb->caption(), appFb->runTime());
 			cmd.clearComment();
 			code->append(cmd);
 

@@ -5,9 +5,13 @@
 	SimulationFunc="command_movmem"
 	ParseFunc="parse_movmem"
 	Description="Copy array of 16-bit words from memory to memory"
+
 	CodeSize="4" 
 	ReadTime="14" 
 	WaitFbExecution="false"
+
+	ConstRuntime="10"
+
 	CheckFunc="check_movmem"
 	GetMnemoFunc="mnemo_movmem"
 	CalcExecTimeFunc="exectime_movmem"/>

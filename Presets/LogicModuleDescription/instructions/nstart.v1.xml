@@ -5,10 +5,13 @@
 	SimulationFunc="command_nstart"
 	ParseFunc="parse_nstart"
 	Description="Start AFB n-times"
+
 	CodeSize="3" 
 	ReadTime="11" 
-	ConstRunTime="4"
 	WaitFbExecution="true"
+
+	ConstRuntime="4"
+
 	CheckFunc="check_nstart"
 	GetMnemoFunc="mnemo_nstart"
 	CalcExecTimeFunc="exectime_nstart"/>

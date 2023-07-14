@@ -81,6 +81,9 @@ namespace Builder
 
 		quint16 getWord1BitNo() const { return word1 & 0x0F; }
 
+		void setWord1(quint16 value) { word1 = value; }
+		void setWord1(int value) { word1 = CHECK_AND_CAST_TO_QUINT16(value); }
+
 		void setWord2(quint16 value) { word2 = value; }
 		void setWord2(int value) { word2 = CHECK_AND_CAST_TO_QUINT16(value); }
 		quint16 getWord2() const { return word2; }
@@ -125,12 +128,19 @@ namespace Builder
 	public:
 		CodeItem();
 
-		CodeItem& start(int fbType, int fbInstance, const QString& fbCaption, int fbRunTime,
+		CodeItem& startafb(int fbType, int fbInstance, const QString& fbCaption, int fbRunTime,
 				   const QString& comment = Separator::EMPTY_STR);
 		CodeItem& stop(const QString& comment = Separator::EMPTY_STR);
 		CodeItem& mov(int addrTo, int addrFrom, const QString& comment = Separator::EMPTY_STR);
 		CodeItem& mov(Address16 addrTo, Address16 addrFrom,
 					  const QString& comment = Separator::EMPTY_STR);
+
+		CodeItem& movAddrAcc(int addrTo, int bitNo, const QString& comment = Separator::EMPTY_STR);
+		CodeItem& movAddrAcc(Address16 addrTo, const QString& comment = Separator::EMPTY_STR);
+
+		CodeItem& movAccAddr(int addrFrom, int bitNo, const QString& comment = Separator::EMPTY_STR);
+		CodeItem& movAccAddr(Address16 addrFrom, const QString& comment = Separator::EMPTY_STR);
+
 		CodeItem& movMem(int addrTo, int addrFrom, int sizeW,
 						 const QString& comment = Separator::EMPTY_STR);
 		CodeItem& movMem(Address16 addrTo, Address16 addrFrom, int sizeW,
@@ -141,6 +151,8 @@ namespace Builder
 
 		CodeItem& movConst(Address16 addrTo, int constVal,
 						   const QString& comment = Separator::EMPTY_STR);
+
+		CodeItem& movAccConst(int constVal, const QString& comment = Separator::EMPTY_STR);
 
 		CodeItem& movBitConst(int addrTo, int bitNo, int constBit,
 							  const QString& comment = Separator::EMPTY_STR);
@@ -170,10 +182,18 @@ namespace Builder
 						 const QString& comment = Separator::EMPTY_STR);
 		CodeItem& setMem(Address16 addr, int constValue, int sizeW,
 						 const QString& comment = Separator::EMPTY_STR);
+
 		CodeItem& movBit(int addrTo, int bitTo, int addrFrom, int bitFrom,
 						 const QString& comment = Separator::EMPTY_STR);
 		CodeItem& movBit(Address16 addrTo, Address16 addrFrom,
 						 const QString& comment = Separator::EMPTY_STR);
+
+		CodeItem& movBitAccAddr(int addrFrom, int bitNo, const QString& comment = Separator::EMPTY_STR);
+		CodeItem& movBitAccAddr(Address16 addrFrom, const QString& comment = Separator::EMPTY_STR);
+
+		CodeItem& movBitAddrAcc(int addrTo, int bitNo, const QString& comment = Separator::EMPTY_STR);
+		CodeItem& movBitAddrAcc(Address16 addrTo, const QString& comment = Separator::EMPTY_STR);
+
 		CodeItem& nstart(int fbType, int fbInstance, int startCount, const QString& fbCaption,
 						 int fbRunTime, const QString& comment = Separator::EMPTY_STR);
 
@@ -216,6 +236,12 @@ namespace Builder
 					   const QString& comment = Separator::EMPTY_STR);
 		CodeItem& fillb(Address16 addrTo, Address16 addrFrom,
 					   const QString& comment = Separator::EMPTY_STR);
+
+		CodeItem& resetAcc();
+		CodeItem& setAcc();
+		CodeItem& orAcc();
+		CodeItem& andAcc();
+		CodeItem& notAcc();
 
 		E::DataFormat constDataFormat() const { return m_constDataFormat; }
 
@@ -280,7 +306,7 @@ namespace Builder
 		QString mnemoCode(LmDescriptionConstShared lmDesc) const;
 		QString getConstValueString() const;
 
-		bool calcRunTime(const LmDescription& lmDesc,
+		bool calcRunTime(LmDescriptionConstShared lmDesc,
 						 int prevCmdExecTime,
 						 int waitFbTime,
 						 int* waitTime,
@@ -311,7 +337,7 @@ namespace Builder
 
 		QString getCodeWordStr(int wordNo) const;
 
-		bool isAddrInBitMem(const LmDescription& lmDesc, quint32 addr) const;
+		bool isAddrInBitMem(LmDescriptionConstShared lmDesc, quint32 addr) const;
 		bool isAddrInWordMem(const LmDescription& lmDesc, quint32 addr) const;
 
 		int calcRdFbRuntime(int cmdWaitTime,
@@ -321,7 +347,7 @@ namespace Builder
 
 	private:
 		QString mnemo_nop() const;
-		QString mnemo_not() const;
+		QString mnemo_acc() const;
 		QString mnemo_startafb() const;
 		QString mnemo_stop() const;
 		QString mnemo_mov() const;
@@ -359,7 +385,7 @@ namespace Builder
 		static inline const std::map<QString, GetMnemoFuncPtr> m_getMnemoFuncMap =	// getMnemoFuncName => getMnemoFuncPtr
 		{
 			{ QStringLiteral("mnemo_nop"), &CodeItem::mnemo_nop },
-			{ QStringLiteral("mnemo_not"), &CodeItem::mnemo_not },
+			{ QStringLiteral("mnemo_acc"), &CodeItem::mnemo_acc },
 			{ QStringLiteral("mnemo_startafb"), &CodeItem::mnemo_startafb },
 			{ QStringLiteral("mnemo_stop"), &CodeItem::mnemo_stop },
 			{ QStringLiteral("mnemo_mov"), &CodeItem::mnemo_mov },
@@ -393,20 +419,31 @@ namespace Builder
 			{ QStringLiteral("mnemo_fillb"), &CodeItem::mnemo_fillb }
 		};
 
-		// exectime_* function fills:
-		//		m_execTime
-		//		m_waitTime
+		// exectime_* function calculates and set:
+		//		CodeItem::m_execTime
+		//		CodeItem::m_waitTime
 		//
-		void exectime_const(int waitFbTime, int* fbExecTime) const;
-		void exectime_startafb(int waitFbTime, int* fbExecTime) const;
-		void exectime_nstart(int waitFbTime, int* fbExecTime) const;
+		void exectime_const(LmDescriptionConstShared lmDesc, int waitFbTime, int* fbExecTime);
+		void exectime_startafb(LmDescriptionConstShared lmDesc, int waitFbTime, int* fbExecTime);
+		void exectime_nstart(LmDescriptionConstShared lmDesc, int waitFbTime, int* fbExecTime);
+		void exectime_write_bit_or_word_mem(LmDescriptionConstShared lmDesc, int waitFbTime, int* fbExecTime);
+		void exectime_movmem(LmDescriptionConstShared lmDesc, int waitFbTime, int* fbExecTime);
+		void exectime_setmem(LmDescriptionConstShared lmDesc, int waitFbTime, int* fbExecTime);
+		void exectime_rdfb(LmDescriptionConstShared lmDesc, int waitFbTime, int* fbExecTime);
+		void exectime_rdfb_bit(LmDescriptionConstShared lmDesc, int waitFbTime, int* fbExecTime);
 
-		using CalcExecTimeFuncPtr = void (CodeItem::*)(int waitFbTime, int* fbExecTime) const;
+		using CalcExecTimeFuncPtr = void (CodeItem::*)(LmDescriptionConstShared lmDesc, int waitFbTime, int* fbExecTime);
 
 		static inline const std::map<QString, CalcExecTimeFuncPtr> m_calcExecTimeFuncMap =	// calcExecTimeFuncName => calcExecTimeFuncPtr
 		{
 			{ QStringLiteral("exectime_const"), &CodeItem::exectime_const },
 			{ QStringLiteral("exectime_startafb"), &CodeItem::exectime_startafb },
+			{ QStringLiteral("exectime_nstart"), &CodeItem::exectime_nstart },
+			{ QStringLiteral("exectime_write_bit_or_word_mem"), &CodeItem::exectime_write_bit_or_word_mem },
+			{ QStringLiteral("exectime_movmem"), &CodeItem::exectime_movmem },
+			{ QStringLiteral("exectime_setmem"), &CodeItem::exectime_setmem },
+			{ QStringLiteral("exectime_rdfb"), &CodeItem::exectime_rdfb },
+			{ QStringLiteral("exectime_rdfb_bit"), &CodeItem::exectime_rdfb_bit },
 		};
 
 	private:

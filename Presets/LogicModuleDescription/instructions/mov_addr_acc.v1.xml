@@ -5,10 +5,13 @@
 	SimulationFunc="command_mov_addr_acc" 
 	ParseFunc="parse_mov_addr_acc" 
 	Description="Copy 16-bit word from ACC to memory"
+
 	CodeSize="2" 
 	ReadTime="8" 
-	ConstRunTime="6"
 	WaitFbExecution="false"
+
+	ConstRuntime="6"
+
 	CheckFunc="check_mov_addr_acc"
 	GetMnemoFunc="mnemo_mov_addr_acc"
 	CalcExecTimeFunc="exectime_const"/>

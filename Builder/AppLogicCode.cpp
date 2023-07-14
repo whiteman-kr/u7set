@@ -416,8 +416,6 @@ namespace Builder
 		int phaseClockCount = 0;
 		bool firstAlpCommand = false;
 
-		const LmDescription& lmDescRef = *lmDesc.get();
-
 		for(CodeItem& codeItem : m_code)
 		{
 			if (codeItem.isCommand() == false)
@@ -438,7 +436,7 @@ namespace Builder
 				waitFbTime = getFbRemainingExecTime(codeItem.getFbType());
 			}
 
-			codeItem.calcRunTime(lmDescRef, prevCmdExecTime, waitFbTime,
+			codeItem.calcRunTime(lmDesc, prevCmdExecTime, waitFbTime,
 								 &waitTime, &execTime, &fbExecTime, firstAlpCommand);
 
 			firstAlpCommand = false;
@@ -454,7 +452,7 @@ namespace Builder
 
 			if (fbExecTime != 0)
 			{
-				Q_ASSERT(codeItem.lmCommandCode() == LmCommand::START ||
+				Q_ASSERT(codeItem.lmCommandCode() == LmCommand::STARTAFB ||
 						 codeItem.lmCommandCode() == LmCommand::NSTART);
 
 				startFbExec(codeItem.getFbType(), fbExecTime);

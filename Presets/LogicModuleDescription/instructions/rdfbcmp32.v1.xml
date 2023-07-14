@@ -5,10 +5,13 @@
 	SimulationFunc="command_rdfbcmp32"
 	ParseFunc="parse_rdfbcmp32"
 	Description="Read 32-bit data from AFB output, compare to constant and set flag if equal"
+
 	CodeSize="4" 
 	ReadTime="14" 
-	ConstRunTime="10"
 	WaitFbExecution="true"
+
+	ConstRuntime="10"
+
 	CheckFunc="check_rdfbcmp32"
 	GetMnemoFunc="mnemo_rdfbcmp32"
 	CalcExecTimeFunc="exectime_const"/>

@@ -1,10 +1,10 @@
 <Command 
-	Caption="not"
-	Code="0068"
-	CodeMask="07F80"	
-	SimulationFunc="command_not"
-	ParseFunc="parse_not"
-	Description="Invert ACC[0] bit"
+	Caption="and"
+	Code="0048"
+	CodeMask="07F8"	
+	SimulationFunc="command_and"
+	ParseFunc="parse_or"
+	Description="AND all ACC bits to ACC[0]"
 
 	CodeSize="1" 
 	ReadTime="5" 

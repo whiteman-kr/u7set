@@ -17,7 +17,8 @@ using LmCommandCode = quint16;
 
 struct LmCommand
 {
-
+	// required parameters
+	//
 	quint16 code = 0;
 	quint16 codeMask = 0;
 	QString caption;
@@ -25,18 +26,24 @@ struct LmCommand
 	QString parseFunc;
 	QString description;
 
-	//
+	static const int UNDEFINED_PARAM = -1;
 
-	int codeSize = 0;					// command length in words
-	int readTime = 0;
+	int codeSize = UNDEFINED_PARAM;					// command length in words
+	int readTime = UNDEFINED_PARAM;
 	bool waitFbExecution = false;
 
-	static const int CALC_RUNTIME = -1;
+	// optional parameters
+	//
+	int constRuntime = UNDEFINED_PARAM;
+	int writeToBitMemRuntime = UNDEFINED_PARAM;
+	int writeToWordMemRuntime = UNDEFINED_PARAM;
+	int preFbReadWordTime = UNDEFINED_PARAM;
+	int postFbReadWordTime = UNDEFINED_PARAM;
+	int preFbReadBitTime = UNDEFINED_PARAM;
+	int postFbReadBitTime = UNDEFINED_PARAM;
 
-	int constRuntime = CALC_RUNTIME;	// runtime calculation required if == CALC_RUNTIME
-	int writeToBitMemRuntime = -1;
-	int writeToWordMemRuntime = -1;
-
+	// required parameters
+	//
 	QString checkFunc;				// CodeChecker function name to check command params
 	QString getMnemoFunc;			// CodeItem function name to get command mnemonics
 	QString calcExecTimeFunc;		// CodeItem function name to calculate command execution time
@@ -45,9 +52,13 @@ struct LmCommand
 
 public:
 	static const LmCommandCode NO_COMMAND		= 0x0000;
-	static const LmCommandCode NOP				= 0x0040;		// Version 2
-	static const LmCommandCode NOT				= 0x0040;		// Version 3
-	static const LmCommandCode START			= 0x0080;
+	static const LmCommandCode NOP				= 0x0040;
+	static const LmCommandCode RESET			= 0x0060;
+	static const LmCommandCode SET				= 0x0050;
+	static const LmCommandCode OR				= 0x0070;
+	static const LmCommandCode AND				= 0x0048;
+	static const LmCommandCode NOT				= 0x0068;
+	static const LmCommandCode STARTAFB			= 0x0080;
 	static const LmCommandCode STOP				= 0x00C0;
 	static const LmCommandCode MOV				= 0x0100;
 	static const LmCommandCode MOV_ADDR_ACC		= 0x0120;
