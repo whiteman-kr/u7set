@@ -30,9 +30,9 @@ namespace Builder
 
 	void BinCommandCode::setOpCode(LmCommandCode code, quint16 cmdCodeMask)
 	{
-		Q_ASSERT((code & (!cmdCodeMask)) == 0);
+		Q_ASSERT((code & (~cmdCodeMask)) == 0);
 
-		word1 &= !cmdCodeMask;
+		word1 &= ~cmdCodeMask;
 		word1 |= (code & cmdCodeMask);
 	}
 
@@ -1115,9 +1115,7 @@ namespace Builder
 		TEST_PTR_RETURN_FALSE(lmDesc);
 
 		if (m_isCommand == false ||
-			m_lmCmdCode == LmCommand::NO_COMMAND ||
-			m_address != -1 ||
-			m_lmCmd != nullptr)
+			m_lmCmdCode == LmCommand::NO_COMMAND)
 		{
 			Q_ASSERT(false);
 			return false;
@@ -1151,7 +1149,10 @@ namespace Builder
 
 	int CodeItem::sizeW() const
 	{
-		Q_ASSERT(m_isCommand == true);
+		if (m_isCommand == false)
+		{
+			return 0;
+		}
 
 		if (m_lmCmd == nullptr)
 		{
@@ -1484,7 +1485,7 @@ namespace Builder
 							arg(m_lmCmdCode).arg(lmDesc->name());
 		}
 
-		QString mnemoCode = lmCmd->caption.leftJustified(10, ' ', false);
+		QString mnemoCode = lmCmd->caption.leftJustified(10, ' ', false).toUpper();
 
 		auto it = m_getMnemoFuncMap.find(lmCmd->getMnemoFunc);
 
@@ -1499,7 +1500,7 @@ namespace Builder
 
 		QString params = (this->*getMnemoFunc)();
 
-		return mnemoCode + params;
+		return mnemoCode + params.toUpper();
 	}
 
 	QString CodeItem::getConstValueString() const
