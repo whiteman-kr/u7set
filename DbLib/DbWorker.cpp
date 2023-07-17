@@ -410,6 +410,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0387.sql", "Upgrade to version 387, Move from manual LM Descriptions to generated, removed all LMs except SF40, SR03, SR04, SR05, SR20, SR90"},
 	{":/DatabaseUpgrade/Upgrade0388.sql", "Upgrade to version 388, Add presets of LMs SR05 and SR20"},
 	{":/DatabaseUpgrade/Upgrade0389.sql", "Upgrade to version 389, LMs SR05, SR20, SR90: AFB MEM changed from version 8 to version 9"},
+	{":/DatabaseUpgrade/Upgrade0390.sql", "Upgrade to version 390, New instructions for LMs SR05, SR20, SR90"},
 };
 
 int DbWorker::counter = 0;
