@@ -142,7 +142,7 @@ protected:
 
 	// Create proposed FblItem Link
 	//
-	void createProposedAfbLink(const AutoFblConnectionProposition& proposition);
+	void createProposedAfbLink(const std::vector<AutoFblConnectionProposition>& links);
 
 	// --
 	//

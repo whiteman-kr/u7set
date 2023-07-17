@@ -145,5 +145,23 @@ std::vector<AutoFblConnectionProposition> AutoFblItemConnection::getPropositions
 		++inputIt;
 	}
 
+	// If there are too many different propositions and fbl items are far away from each other, then it becomes messy.
+	// To avoid it we just clear the result if the distances differences (size of links) is above 1 inch.
+	//
+	double minDist = std::numeric_limits<double>::max();
+	double maxDist = std::numeric_limits<double>::lowest();
+
+	for (const auto& link : result)
+	{
+		double d = link.distance();
+		minDist = std::min(minDist, d);
+		maxDist = std::max(maxDist, d);
+	};
+
+	if (result.empty() == false && std::abs(maxDist - minDist) >= 1.0)
+	{
+		result.clear();
+	}
+
 	return result;
 }

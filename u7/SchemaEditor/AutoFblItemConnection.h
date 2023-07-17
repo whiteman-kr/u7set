@@ -8,6 +8,13 @@ struct AutoFblConnectionProposition
 	VFrame30::SchemaPoint to;
 
 	QRectF addButtonRect;
+
+	double distance() const
+	{
+		auto dx = std::abs(from.X - to.X);
+		auto dy = std::abs(from.Y - to.Y);
+		return std::sqrt(dx * dx + dy * dy);
+	}
 };
 
 class AutoFblItemConnection

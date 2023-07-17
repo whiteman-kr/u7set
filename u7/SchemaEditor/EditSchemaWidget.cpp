@@ -1535,7 +1535,7 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 				//
 				auto selection = selectedItems();
 
-				createProposedAfbLink(line);
+				createProposedAfbLink(std::vector{line});
 
 				editSchemaView()->setSelectedItems(selection);
 				editSchemaView()->update();
@@ -2974,6 +2974,22 @@ void EditSchemaWidget::mouseRightUp_None(QMouseEvent* event)
 {
 	QPointF docPoint = widgetPointToDocument(event->pos(), false);
 
+	// Proposed links.
+	//
+	{
+		auto proposedLinks = editSchemaView()->m_autoFblItemConnection.getPropositions();
+
+		bool clickOnAddRectArea = std::any_of(proposedLinks.begin(), proposedLinks.end(),
+											  [&docPoint](const auto& link)
+											  {
+												  return link.addButtonRect.contains(docPoint);
+											  });
+		if (clickOnAddRectArea == true)
+		{
+			return;
+		}
+	}
+
 	// Selected one item, check if we hit in it, on item, control bars, etc
 	//
 	if (selectedItems().size() == 1)
@@ -3334,18 +3350,23 @@ void EditSchemaWidget::setMouseCursor(QPoint mousePos)
 		//
 		QPointF docPos = widgetPointToDocument(mousePos, false);
 
-		// Create proposed connection for FblItem pins.
+		// Create proposed connections for FblItem pins.
 		//
-		for (auto lines = editSchemaView()->m_autoFblItemConnection.getPropositions();
-			 const auto & line : lines)
+		auto proposedLinks = editSchemaView()->m_autoFblItemConnection.getPropositions();
+		
+		bool inRect = std::any_of(proposedLinks.begin(), proposedLinks.end(),
+								  [&docPos](const auto& link)
+								  {
+									  return link.addButtonRect.contains(docPos);
+								  });
+		if (inRect == true)
 		{
-			if (line.addButtonRect.contains(docPos) == true)
-			{
-				setCursor(Qt::PointingHandCursor);
-				return;
-			}
+			setCursor(Qt::PointingHandCursor);
+			return;
 		}
 
+		// --
+		//
 		if (selectedItems().empty() == true)
 		{
 			SchemaItemPtr itemUnderPoint = editSchemaView()->activeLayer()->getItemUnderPoint(docPos);
@@ -3887,37 +3908,44 @@ void EditSchemaWidget::finishMoveAfbsConnectionLinks()
 	return;
 }
 
-void EditSchemaWidget::createProposedAfbLink(const AutoFblConnectionProposition& proposition)
+void EditSchemaWidget::createProposedAfbLink(const std::vector<AutoFblConnectionProposition>& links)
 {
-	VFrame30::SchemaPoint from = proposition.from;
-	VFrame30::SchemaPoint to = proposition.to;
+	std::list<SchemaItemPtr> addItems;
 
-	if (std::abs(from.X - to.X) < 0.000001 && std::abs(from.Y - to.Y) < 0.000001)
+	for (const auto& link : links)
 	{
-		return;
+		VFrame30::SchemaPoint from = link.from;
+		VFrame30::SchemaPoint to = link.to;
+
+		if (std::abs(from.X - to.X) < 0.000001 && std::abs(from.Y - to.Y) < 0.000001)
+		{
+			continue;
+		}
+
+		std::shared_ptr<VFrame30::SchemaItemLink> linkItem = std::make_shared<VFrame30::SchemaItemLink>(schema()->unit());
+		linkItem->AddPoint(from.X, from.Y);
+		linkItem->AddPoint(from.X, from.Y);
+
+		EditConnectionLine ecl{linkItem, EditConnectionLine::AddToEnd};
+
+		ecl.addExtensionPoint(to);
+		ecl.moveEndPointPos(activeLayer(), to, EditConnectionLine::Auto, schema()->gridSize());
+		ecl.moveExtensionPointsToBasePoints();
+
+		ecl.setPointToItem(linkItem);
+		linkItem->RemoveSamePoints();
+
+		if (auto pl = linkItem->GetPointList();
+			pl.size() < 1)
+		{
+			Q_ASSERT(pl.size() > 2);
+			continue;
+		}
+
+		addItems.push_back(linkItem);
 	}
 
-	std::shared_ptr<VFrame30::SchemaItemLink> link = std::make_shared<VFrame30::SchemaItemLink>(schema()->unit());
-	link->AddPoint(from.X, from.Y);
-	link->AddPoint(from.X, from.Y);
-
-	EditConnectionLine ecl{link, EditConnectionLine::AddToEnd};
-
-	ecl.addExtensionPoint(to);
-	ecl.moveEndPointPos(activeLayer(), to, EditConnectionLine::Auto, schema()->gridSize());
-	ecl.moveExtensionPointsToBasePoints();
-
-	ecl.setPointToItem(link);
-	link->RemoveSamePoints();
-
-	if (auto pl = link->GetPointList();
-		pl.size() < 1)
-	{
-		Q_ASSERT(pl.size() > 2);
-		return;
-	}
-
-	m_editEngine->runAddItem(link, activeLayer());
+	m_editEngine->runAddItem(addItems, activeLayer());
 
 	return;
 }
@@ -4271,6 +4299,33 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 		return;
 	}
 
+	// Context menu for proposed link.
+	//
+	const QPointF docPoint = widgetPointToDocument(pos, false);
+
+	{
+		auto proposedLinks = editSchemaView()->m_autoFblItemConnection.getPropositions();
+
+		bool clickOnAddRectArea = std::any_of(proposedLinks.begin(), proposedLinks.end(),
+											  [&docPoint](const auto& link)
+											  {
+												  return link.addButtonRect.contains(docPoint);
+											  });
+		if (clickOnAddRectArea == true)
+		{
+			QAction action{proposedLinks.size() == 1 ? tr("Add") : tr("Add all %1").arg(proposedLinks.size())};
+			QList<QAction*> al{&action};
+
+			auto menuResult = QMenu::exec(al, mapToGlobal(pos));
+			if (menuResult != nullptr)
+			{
+				createProposedAfbLink(proposedLinks);
+			}
+
+			return;
+		}
+	}
+
 	// All selected are signals?
 	//
 	bool allSelectedAreSignals = selectedItems().empty() == true ? false : true;
@@ -4290,7 +4345,6 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 	bool possibleDeleteVertexOnConnLine = false;
 
 	int movingEdgePointIndex = 0;
-	QPointF docPoint = widgetPointToDocument(pos, false);
 
 	if (selectedOneConnectionLine == true)
 	{
