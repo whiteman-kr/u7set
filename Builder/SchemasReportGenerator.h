@@ -7,6 +7,48 @@
 namespace Builder
 {
 	//
+	// SchemasReportOptions
+	//
+
+	struct SchemasReportOptions
+	{
+		bool load(DbController* db);
+		bool save(DbController* db);
+
+		bool addPageNumbers = false;
+		bool infoMode = false;
+		bool addLogicSchemaDetails = false;
+	};
+
+	//
+	// SchemasReportFileTypeParams
+	//
+
+	class SchemaTypesParams
+	{
+	public:
+		SchemaTypesParams(int fileId, const QString& caption, bool selected, QPageLayout pageLayout);
+
+		int fileId() const;
+		const QString& caption() const;
+
+		bool selected() const;
+		void setSelected(bool value);
+
+		const QPageLayout& pageLayout() const;
+		void setPageLayout(const QPageLayout& layout);
+
+	private:
+		int m_fileId = -1;
+		QString m_caption;
+		bool m_selected = false;
+
+		// Multiple-file report section page options
+		//
+		QPageLayout m_pageLayout;
+	};
+
+	//
 	// SchemasReportGenerator
 	//
 
@@ -16,27 +58,26 @@ namespace Builder
 
 	public:
 		SchemasReportGenerator(std::shared_ptr<ReportLib::ReportSchemaView> schemaView,
-								const AppSignalSet* signalSet,
-								const QString& serverIp,
-								int serverPort,
-								const QString& serverUserName,
-								const QString& serverPassword,
-								const QString& projectName,
-								const QString& userName,
-								const QString& userPassword,
-								std::vector<DbFileInfo> files,
-								const QString& filePath);
+							   const AppSignalSet* signalSet,
+							   const QString& serverIp,
+							   int serverPort,
+							   const QString& serverUserName,
+							   const QString& serverPassword,
+							   const QString& projectName,
+							   const QString& userName,
+							   const QString& userPassword,
+							   std::vector<DbFileInfo> files,
+							   const QString& filePath,
+							   const SchemasReportOptions& options,
+							   const std::vector<SchemaTypesParams>& schemaTypesParams);
 
 		virtual ~SchemasReportGenerator();
 
-		void setPageLayout(const QPageLayout& pageLayout);
-		void setReportFileTypeParams(const std::vector<ReportLib::ReportFileTypeParams>& reportFileTypeParams);
-
-		static std::vector<ReportLib::ReportFileTypeParams> defaultFileTypeParams(DbController* db);
+		static std::vector<SchemaTypesParams> defaultFileTypesParams(DbController* db);
 
 	public slots:
-		void exportFilesToPdf();
-		void exportFilesToAlbum();
+		void exportFilesToMultiplePdf();
+		void exportFilesToSinglePdf();
 		void exportAllSchemasToAlbums();
 
 		void stop();
@@ -98,9 +139,13 @@ namespace Builder
 		void openProject();
 		void closeProject();
 
-		void loadSchemas(const std::vector<DbFileInfo>& files, std::map<QString, std::shared_ptr<VFrame30::Schema>>& schemas);
-		void renderSchemas(const SchemaFilesGroup& sfg);
+		void loadSchemas(const std::vector<DbFileInfo>& files, std::map<QString, std::shared_ptr<VFrame30::Schema>>& schemas, VFrame30::SchemaDetailsSet& detailsSet);
+		void renderSchemas(const SchemaFilesGroup& sfg, const VFrame30::SchemaDetailsSet& detailsSet);
 		void clearSchemas(SchemaFilesGroup& sfg);
+
+		[[nodiscard]] QPageLayout getSchemaPageLayout(const std::shared_ptr<VFrame30::Schema>& schema) const;
+		void createSchemaDetailsSection(std::shared_ptr<ReportLib::ReportSection> section, const std::shared_ptr<VFrame30::Schema>& schema, const VFrame30::SchemaDetailsSet& detailsSet);
+
 
 	private:
 		DbController m_db;
@@ -109,8 +154,10 @@ namespace Builder
 		ReportLib::ReportAppSignalProvider m_appSignalProvider;
 		VFrame30::AppSignalController m_appSignalController;
 
-
-		std::vector<ReportLib::ReportFileTypeParams> m_reportFileTypeParams;
+		// Report options, page sizes for different file groups etc
+		//
+		SchemasReportOptions m_options;
+		std::vector<SchemaTypesParams> m_schemaTypesParams;
 
 		// Input files for exportFilesToPdf() and exportFilesToAlbum()
 		//
@@ -139,12 +186,8 @@ namespace Builder
 		QString m_userName;
 		QString m_userPassword;
 
+		ReportLib::ReportFont m_tableFont;
 		ReportLib::ReportFont m_marginFont;
-
-		QPageLayout m_pageLayout = QPageLayout(QPageSize(QPageSize::A4),
-											   QPageLayout::Orientation::Landscape,
-											   QMarginsF(30, 20, 15, 20),
-											   QPageLayout::Unit::Millimeter);
 
 		mutable QMutex m_statisticsMutex;
 		Statistics m_statistics;

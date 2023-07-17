@@ -8,6 +8,7 @@
 
 #include "../ReportLib/ReportAppSignalProvider.h"
 #include "../ReportLib/ReportPrinter.h"
+#include "../Builder/SchemasReportGenerator.h"
 
 //
 // FileDiff
@@ -82,14 +83,14 @@ struct PropertyDiff
 struct ProjectDiffReportParams
 {
 	CompareData compareData;
-	std::vector<ReportLib::ReportFileTypeParams> fileTypeParams;
+	std::vector<Builder::SchemaTypesParams> schemaTypesParams;
 
 	bool expertProperties = false;
 	bool multipleFiles = false;
 
 	// Single-file report page options
 	//
-	QPageLayout pageLayout = QPageLayout(QPageSize(QPageSize::A3),
+	QPageLayout singleFilePageLayout = QPageLayout(QPageSize(QPageSize::A3),
 										 QPageLayout::Orientation::Portrait,
 										 QMarginsF(30, 20, 15, 20),
 										 QPageLayout::Unit::Millimeter);
@@ -126,7 +127,7 @@ public:
 						 const QString& userPassword);
 	virtual ~ProjectDiffGenerator();
 
-	static std::vector<ReportLib::ReportFileTypeParams> defaultFileTypeParams(DbController* db);
+	static std::vector<Builder::SchemaTypesParams> defaultFileTypeParams(DbController* db);
 	static int applicationSignalsTypeId() { return -256; }
 
 public slots:
@@ -253,8 +254,8 @@ private:
 	//
 	std::shared_ptr<ReportLib::ReportSection> generateTitlePage(const QPageLayout& layout, const CompareData& compareData, const QString& projectName, const QString& userName, const QString& subreportName) const;
 
-	void generateSummaryReport();
-	std::shared_ptr<ReportLib::ReportSection> generateSummaryReportFilesPage(const QStringList& subreportFiles);
+	void generateSummaryReport(const QPageLayout& pageLayout);
+	std::shared_ptr<ReportLib::ReportSection> generateSummaryReportFilesPage(const QPageLayout& layout, const QStringList& subreportFiles);
 
 	//
 	void createMarginItems(ReportLib::Report& report, const CompareData& compareData, const QString& subreportName);

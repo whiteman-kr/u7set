@@ -79,13 +79,14 @@ HEADERS  += \
     Locator/LocatorListWidget.h \
     Locator/LocatorProvider.h \
     Locator/SchemaLocatorProvider.h \
+    Reports/DialogSchemasExport.h \
+    Reports/DialogSchemasReport.h \
     Reports/ProjectDiffReport.h \
     Reports/ReportPropertyEditor.h \
     SchemaEditor/EditSchemaSignalProvider.h \
     SchemaEditor/EditSchemaTabPage.h \
     SchemaEditor/SchemaControlTabPage.h \
     SchemaEditor/SchemasTabPage.h \
-    Reports/DialogReportFileTypeParams.h \
     Reports/SchemasReport.h \
     Simulator/ScriptSimApplication.h \
     Simulator/SimTuningConnection.h \
@@ -261,7 +262,8 @@ SOURCES +=\
 	MainTabPage.cpp \
 	MainWindow.cpp \
 	PasswordService.cpp \
-    Reports/DialogReportFileTypeParams.cpp \
+    Reports/DialogSchemasExport.cpp \
+    Reports/DialogSchemasReport.cpp \
     Reports/ProjectDiffReport.cpp \
     Reports/ReportPropertyEditor.cpp \
     SchemaEditor/EditSchemaSignalProvider.cpp \
@@ -356,6 +358,7 @@ FORMS    += \
     Forms/DialogProjectDiff.ui \
     DialogTagsEditor.ui \
     LoginDialog.ui \
+    Reports/DialogSchemasExport.ui \
     Simulator/SimSelectBuildDialog.ui \
     UserManagementDialog.ui \
     CheckInDialog.ui \

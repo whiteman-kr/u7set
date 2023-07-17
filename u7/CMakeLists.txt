@@ -198,8 +198,10 @@ set (U7_SOURCES
 	PasswordService.h
 	ProjectsTabPage.cpp
 	ProjectsTabPage.h
-	Reports/DialogReportFileTypeParams.cpp
-	Reports/DialogReportFileTypeParams.h
+	Reports/DialogSchemasReport.cpp
+	Reports/DialogSchemasReport.h
+	Reports/DialogSchemasExport.cpp
+	Reports/DialogSchemasExport.h
 	Reports/ProjectDiffReport.cpp
 	Reports/ProjectDiffReport.h
 	Reports/ReportPropertyEditor.cpp
@@ -319,6 +321,7 @@ set (U7_FORMS
 	CheckInDialog.ui
 	DialogSubsystemListEditor.ui
 	Forms/ChooseAfbDialog.ui
+	Reports/DialogSchemasExport.ui
 	EquipmentEditor/EquipmentVcsDialog.ui
 	SchemaEditor/CreateSchemaDialog.ui
 	SchemaEditor/SchemaLayersDialog.ui

@@ -1275,7 +1275,11 @@ namespace Builder
 
 	bool BuildWorkerThread::createSchemasAlbums()
 	{
-		std::shared_ptr<ReportLib::ReportSchemaView> schemaView = std::make_shared<ReportLib::ReportSchemaView>();
+		SchemasReportOptions options;
+		options.load(&m_context->m_db);
+		options.addPageNumbers = true;
+
+		std::shared_ptr<ReportLib::ReportSchemaView> schemaView = std::make_shared<ReportLib::ReportSchemaView>(options.infoMode);
 
 		const OnlineLib::BuildInfo& bi = m_context->m_buildResultWriter->buildInfo();
 		schemaView->session().setProject(bi.project);
@@ -1292,9 +1296,9 @@ namespace Builder
 									  projectUserName(),
 									  projectUserPassword(),
 									  {},
-									  QString()/*data will be saved to output buffers*/);
-
-		worker.setReportFileTypeParams(SchemasReportGenerator::defaultFileTypeParams(&m_context->m_db));
+									  QString()/*data will be saved to output buffers*/,
+									  options,
+									  SchemasReportGenerator::defaultFileTypesParams(&m_context->m_db));
 
 		// Create thread
 

@@ -6,20 +6,101 @@ namespace Builder
 	using namespace ReportLib;
 
 	//
+	// SchemasReportOptions
+	//
+	bool SchemasReportOptions::load(DbController* db)
+	{
+		if (db == nullptr)
+		{
+			Q_ASSERT(db);
+			return false;
+		}
+
+		QString value;
+		db->getUserProperty("SchemasReportOptions.addPageNumbers", &value, "false", nullptr);
+		addPageNumbers = (value == "true") ? true : false;
+
+		db->getUserProperty("SchemasReportOptions.infoMode", &value, "false", nullptr);
+		infoMode = (value == "true") ? true : false;
+
+		db->getUserProperty("SchemasReportOptions.addLogicSchemaDetails", &value, "false", nullptr);
+		addLogicSchemaDetails = (value == "true") ? true : false;
+
+		return true;
+	}
+
+	bool SchemasReportOptions::save(DbController* db)
+	{
+		if (db == nullptr)
+		{
+			Q_ASSERT(db);
+			return false;
+		}
+
+		db->setUserProperty("SchemasReportOptions.addPageNumbers", addPageNumbers ? "true" : "false", nullptr);
+		db->setUserProperty("SchemasReportOptions.infoMode", infoMode ? "true" : "false", nullptr);
+		db->setUserProperty("SchemasReportOptions.addLogicSchemaDetails", addLogicSchemaDetails ? "true" : "false", nullptr);
+		return true;
+	}
+
+	//
+	// SchemasReportFileTypeParams
+	//
+	SchemaTypesParams::SchemaTypesParams(int fileId, const QString& caption, bool selected, QPageLayout pageLayout):
+		m_fileId(fileId),
+		m_caption(caption),
+		m_selected(selected),
+		m_pageLayout(pageLayout)
+	{
+	}
+
+	int SchemaTypesParams::fileId() const
+	{
+		return m_fileId;
+	}
+
+	const QString& SchemaTypesParams::caption() const
+	{
+		return m_caption;
+	}
+
+	bool SchemaTypesParams::selected() const
+	{
+		return m_selected;
+	}
+
+	void SchemaTypesParams::setSelected(bool value)
+	{
+		m_selected = value;
+	}
+
+	const QPageLayout& SchemaTypesParams::pageLayout() const
+	{
+		return m_pageLayout;
+	}
+
+	void SchemaTypesParams::setPageLayout(const QPageLayout& layout)
+	{
+		m_pageLayout = layout;
+	}
+
+	//
 	// SchemasReportGenerator
 	//
 
 	SchemasReportGenerator::SchemasReportGenerator(std::shared_ptr<ReportSchemaView> schemaView,
-													 const AppSignalSet *signalSet,
-													 const QString& serverIp,
-													 int serverPort,
-													 const QString& serverUserName,
-													 const QString& serverPassword,
-													 const QString& projectName,
-													 const QString& userName,
-													 const QString& userPassword,
-													 std::vector<DbFileInfo> files,
-													 const QString& filePath):
+												   const AppSignalSet *signalSet,
+												   const QString& serverIp,
+												   int serverPort,
+												   const QString& serverUserName,
+												   const QString& serverPassword,
+												   const QString& projectName,
+												   const QString& userName,
+												   const QString& userPassword,
+												   std::vector<DbFileInfo> files,
+												   const QString& filePath,
+												   const SchemasReportOptions& options,
+												   const std::vector<SchemaTypesParams>& schemaTypesParams):
 		m_schemaView(schemaView),
 		m_appSignalProvider(signalSet),
 		m_appSignalController(&m_appSignalProvider, nullptr),
@@ -32,7 +113,10 @@ namespace Builder
 		m_projectName(projectName),
 		m_userName(userName),
 		m_userPassword(userPassword),
-		m_marginFont{"Arial", 8, QFont::Normal}
+		m_marginFont{"Arial", 8, QFont::Normal},
+		m_tableFont{"Arial", 9, QFont::Normal},
+		m_options(options),
+		m_schemaTypesParams(schemaTypesParams)
 	{
 		return;
 	}
@@ -42,19 +126,9 @@ namespace Builder
 		qDebug() << "SchemasReportWorker deleted";
 	}
 
-	void SchemasReportGenerator::setPageLayout(const QPageLayout& pageLayout)
+	std::vector<SchemaTypesParams> SchemasReportGenerator::defaultFileTypesParams(DbController* db)
 	{
-		m_pageLayout = pageLayout;
-	}
-
-	void SchemasReportGenerator::setReportFileTypeParams(const std::vector<ReportFileTypeParams>& reportFileTypeParams)
-	{
-		m_reportFileTypeParams = reportFileTypeParams;
-	}
-
-	std::vector<ReportFileTypeParams> SchemasReportGenerator::defaultFileTypeParams(DbController* db)
-	{
-		std::vector<ReportFileTypeParams> result;
+		std::vector<SchemaTypesParams> result;
 
 		if (db == nullptr || db->isProjectOpened() == false)
 		{
@@ -103,15 +177,16 @@ namespace Builder
 		return result;
 	}
 
-	void SchemasReportGenerator::exportFilesToPdf()
+	void SchemasReportGenerator::exportFilesToMultiplePdf()
 	{
+		VFrame30::SchemaDetailsSet detailsSet;
 		std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas;	// Key is full path to schema file
 
 		try
 		{
 			openProject();
 
-			loadSchemas(m_inputFiles, schemas);
+			loadSchemas(m_inputFiles, schemas, detailsSet);
 
 			closeProject();
 		}
@@ -158,12 +233,12 @@ namespace Builder
 			fileName += tr(".pdf");
 
 			std::shared_ptr<Report> report = std::make_shared<Report>(m_projectName, fileName);
-			report->setPageLayout(m_pageLayout);
 
 			{
 				auto reportSchema = ReportSchema::create(tr("Schema: %1").arg(schema->schemaId()), {}, schema, {});
 
-				auto schemaDrawingSection = report->addSection(ReportSection::create(tr("Schema: %1").arg(schema->schemaId())));
+				auto schemaDrawingSection = report->addSection(ReportSection::create(tr("Schema: %1").arg(schema->schemaId()),
+																					 getSchemaPageLayout(schema)));
 				schemaDrawingSection->addSchema(reportSchema);
 			}
 
@@ -173,7 +248,7 @@ namespace Builder
 			{
 				// Print to file
 				//
-				printer.print(*report, filePath() + fileName, m_stop);
+				printer.print(*report, filePath() + QDir::separator() + fileName, m_stop);
 			}
 			else
 			{
@@ -190,15 +265,16 @@ namespace Builder
 		return;
 	}
 
-	void SchemasReportGenerator::exportFilesToAlbum()
+	void SchemasReportGenerator::exportFilesToSinglePdf()
 	{
+		VFrame30::SchemaDetailsSet detailsSet;
 		std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas;	// Key is full path to schema file
 
 		try
 		{
 			openProject();
 
-			loadSchemas(m_inputFiles, schemas);
+			loadSchemas(m_inputFiles, schemas, detailsSet);
 
 			closeProject();
 		}
@@ -217,17 +293,17 @@ namespace Builder
 		}
 
 		std::shared_ptr<Report> report = std::make_shared<Report>(m_projectName, filePath());
-		report->setPageLayout(m_pageLayout);
 
 		// Init margins
 		//
-		report->addMarginItem({tr("Project: %1").arg(m_projectName), -1, -1, {m_marginFont, Qt::AlignLeft | Qt::AlignTop}});
-
-		report->addMarginItem({tr("%OBJECT%"), -1, -1, {m_marginFont, Qt::AlignRight | Qt::AlignTop}});
-
-		report->addMarginItem({tr("%PAGE%"), -1, -1, {m_marginFont, Qt::AlignRight | Qt::AlignBottom}});
+		if (m_options.addPageNumbers == true)
+		{
+			report->addMarginItem({tr("Project: %1").arg(m_projectName), -1, -1, {m_marginFont, Qt::AlignLeft | Qt::AlignTop}});
+			report->addMarginItem({tr("%PAGE%"), -1, -1, {m_marginFont, Qt::AlignRight | Qt::AlignBottom}});
+		}
 
 		{
+			int pageIndex = 1;
 			for (auto it = schemas.begin(); it != schemas.end(); it++)
 			{
 				if (m_stop == true)
@@ -246,8 +322,23 @@ namespace Builder
 
 				auto reportSchema = ReportSchema::create(tr("Schema: %1").arg(schemaId), {}, schema, {});
 
-				auto schemaDrawingSection = report->addSection(ReportSection::create(tr("Schema: %1").arg(schemaId)));
+				auto schemaDrawingSection = report->addSection(ReportSection::create(tr("Schema: %1").arg(schemaId),
+																					 getSchemaPageLayout(schema)));
 				schemaDrawingSection->addSchema(reportSchema);
+
+				report->addMarginItem({schema->caption(), pageIndex, pageIndex, {m_marginFont, Qt::AlignRight | Qt::AlignTop}});
+				pageIndex++;
+
+				if (schema->isLogicSchema() == true && m_options.addLogicSchemaDetails == true)
+				{
+					auto schemaDetailsSection = report->addSection(ReportSection::create(tr("Schema: %1").arg(schemaId),
+																						 getSchemaPageLayout(schema)));
+
+					createSchemaDetailsSection(schemaDetailsSection, schema, detailsSet);
+
+					report->addMarginItem({tr("%1 [Details]").arg(schema->caption()), pageIndex, pageIndex, {m_marginFont, Qt::AlignRight | Qt::AlignTop}});
+					pageIndex++;
+				}
 			}
 		}
 
@@ -295,6 +386,8 @@ namespace Builder
 
 				// Fill schemas files
 				//
+				VFrame30::SchemaDetailsSet detailsSet;
+
 				DbFileTree fileTree;
 
 				{
@@ -328,7 +421,7 @@ namespace Builder
 
 				// Load and parse schemas
 				//
-				loadSchemas(sfg.schemasFiles, sfg.schemas);
+				loadSchemas(sfg.schemasFiles, sfg.schemas, detailsSet);
 
 				if (m_stop == true)
 				{
@@ -342,7 +435,7 @@ namespace Builder
 
 				// Render schemas
 				//
-				renderSchemas(sfg);
+				renderSchemas(sfg, detailsSet);
 
 
 				// Clear loaded schemas after parsing
@@ -535,7 +628,9 @@ namespace Builder
 	}
 
 
-	void SchemasReportGenerator::loadSchemas(const std::vector<DbFileInfo>& files, std::map<QString, std::shared_ptr<VFrame30::Schema> >& schemas)
+	void SchemasReportGenerator::loadSchemas(const std::vector<DbFileInfo>& files,
+											 std::map<QString, std::shared_ptr<VFrame30::Schema>>& schemas,
+											 VFrame30::SchemaDetailsSet& detailsSet)
 	{
 		schemas.clear();
 
@@ -652,12 +747,17 @@ namespace Builder
 			}
 
 			schemas[fileName] = schema;
+
+			if (m_options.addLogicSchemaDetails == true)
+			{
+				detailsSet.add(schema->details("."));
+			}
 		}
 
 		return;
 	}
 
-	void SchemasReportGenerator::renderSchemas(const SchemaFilesGroup& sfg)
+	void SchemasReportGenerator::renderSchemas(const SchemaFilesGroup& sfg, const VFrame30::SchemaDetailsSet& detailsSet)
 	{
 		// Render schemas
 		//
@@ -670,26 +770,27 @@ namespace Builder
 		}
 
 		std::shared_ptr<Report> report = std::make_shared<Report>(m_projectName, filePath());
-		report->setPageLayout(m_pageLayout);
 
 		// Init margins
-		report->addMarginItem({tr("Project: %1").arg(m_projectName), -1, -1, {m_marginFont, Qt::AlignLeft | Qt::AlignTop}});
-
-		report->addMarginItem({tr("%OBJECT%"), -1, -1, {m_marginFont, Qt::AlignRight | Qt::AlignTop}});
+		//
+		if (m_options.addPageNumbers == true)
+		{
+			report->addMarginItem({tr("Project: %1").arg(m_projectName), -1, -1, {m_marginFont, Qt::AlignLeft | Qt::AlignTop}});
+			report->addMarginItem({tr("%PAGE%"), -1, -1, {m_marginFont, Qt::AlignRight | Qt::AlignBottom}});
+		}
 
 		{
 			// Find page layout
-
-			QPageLayout pl = report->pageLayout();
+			//
+			QPageLayout pageLayout;
 
 			bool plFound = false;
 
-			for (const ReportFileTypeParams& rp : m_reportFileTypeParams)
+			for (const SchemaTypesParams& rp : m_schemaTypesParams)
 			{
 				if (rp.fileId() == sfg.fileId)
 				{
-					pl = rp.pageLayout();
-
+					pageLayout = rp.pageLayout();
 					plFound = true;
 					break;
 				}
@@ -698,11 +799,14 @@ namespace Builder
 			if (plFound == false)
 			{
 				// File type was not found
+				//
 				Q_ASSERT(false);
+				return;
 			}
 
 			// Render schemas
 
+			int pageIndex = 1;
 			for (auto it = sfg.schemas.begin(); it != sfg.schemas.end(); it++)
 			{
 				if (m_stop == true)
@@ -721,8 +825,23 @@ namespace Builder
 
 				auto reportSchema = ReportSchema::create(tr("Schema: %1").arg(schemaId), {}, schema, {});
 
-				auto schemaDrawingSection = report->addSection(ReportSection::create(tr("Schema: %1").arg(schemaId)));
+				auto schemaDrawingSection = report->addSection(ReportSection::create(tr("Schema: %1").arg(schemaId),
+																					 pageLayout));
 				schemaDrawingSection->addSchema(reportSchema);
+
+				report->addMarginItem({schema->caption(), pageIndex, pageIndex, {m_marginFont, Qt::AlignRight | Qt::AlignTop}});
+				pageIndex++;
+
+				if (schema->isLogicSchema() == true && m_options.addLogicSchemaDetails == true)
+				{
+					auto schemaDetailsSection = report->addSection(ReportSection::create(tr("Schema: %1").arg(schemaId),
+																						 getSchemaPageLayout(schema)));
+
+					createSchemaDetailsSection(schemaDetailsSection, schema, detailsSet);
+
+					report->addMarginItem({tr("%1 [Details]").arg(schema->caption()), pageIndex, pageIndex, {m_marginFont, Qt::AlignRight | Qt::AlignTop}});
+					pageIndex++;
+				}
 			}
 		}
 
@@ -748,6 +867,66 @@ namespace Builder
 	void SchemasReportGenerator::clearSchemas(SchemaFilesGroup& sfg)
 	{
 		sfg.schemas.clear();
+	}
 
+	QPageLayout SchemasReportGenerator::getSchemaPageLayout(const std::shared_ptr<VFrame30::Schema>& schema) const
+	{
+		qreal marginSizeMM = m_options.addPageNumbers ? 15 : 0;
+
+		// Initialize PDF page size
+		//
+		QPageLayout::Orientation orientation = (schema->docWidth() < schema->docHeight()) ?
+					QPageLayout::Portrait : QPageLayout::Landscape;
+
+		switch(schema->unit())
+		{
+		case SchemaUnit::Inch:
+			return QPageLayout(QPageSize(QSizeF(schema->docWidth(), schema->docHeight()), QPageSize::Inch),
+							   QPageLayout::Portrait,
+							   QMarginsF(marginSizeMM / 25.4, marginSizeMM / 25.4, marginSizeMM / 25.4, marginSizeMM / 25.4),
+							   QPageLayout::Inch);
+
+		case SchemaUnit::Millimeter:
+			return QPageLayout(QPageSize(QSizeF(schema->docWidth(), schema->docHeight()), QPageSize::Millimeter),
+							   QPageLayout::Portrait,
+							   QMarginsF(marginSizeMM, marginSizeMM, marginSizeMM, marginSizeMM),
+							   QPageLayout::Millimeter);
+
+		default:
+			// If schema size specified in pixels, use A3 format
+			//
+			Q_ASSERT(schema->unit() == SchemaUnit::Display);
+			return QPageLayout(QPageSize(QPageSize::A3), orientation, QMarginsF(marginSizeMM, marginSizeMM, marginSizeMM, marginSizeMM), QPageLayout::Millimeter);
+
+		}
+	}
+
+	void SchemasReportGenerator::createSchemaDetailsSection(std::shared_ptr<ReportLib::ReportSection> section,
+															const std::shared_ptr<VFrame30::Schema>& schema,
+															const VFrame30::SchemaDetailsSet& detailsSet)
+	{
+		ReportLib::ReportFont normalFont{"Arial", 9, QFont::Normal};
+		ReportLib::TextFormat centerTextFormat{normalFont, Qt::AlignHCenter};
+
+		section->addText(tr("Schema '%1 - %2' signals").arg(schema->schemaId()).arg(schema->caption()), centerTextFormat);
+
+		auto table = ReportTable::create({m_tableFont,
+										  {tr("Signal ID"), tr("Signal Type"), tr("Schemas")},
+										  {30, 20, 50},
+										  Qt::AlignLeft});
+
+		section->addTable(table);
+
+		QStringList signalList = schema->getSignalList();
+		for (const QString& id : signalList)
+		{
+			QStringList schemasList = detailsSet.schemasByAppSignalId(id);
+
+			QStringList row;
+			row << id;
+			row << "";
+			row << schemasList.join(", ");
+			table->insertRow(row);
+		}
 	}
 }

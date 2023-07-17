@@ -2,48 +2,6 @@
 
 namespace ReportLib
 {
-
-	//
-	// ReportFileTypeParams
-	//
-	ReportFileTypeParams::ReportFileTypeParams(int fileId, const QString& caption, bool selected, QPageLayout pageLayout):
-		m_fileId(fileId),
-		m_caption(caption),
-		m_selected(selected),
-		m_pageLayout(pageLayout)
-	{
-	}
-
-	int ReportFileTypeParams::fileId() const
-	{
-		return m_fileId;
-	}
-
-	const QString& ReportFileTypeParams::caption() const
-	{
-		return m_caption;
-	}
-
-	bool ReportFileTypeParams::selected() const
-	{
-		return m_selected;
-	}
-
-	void ReportFileTypeParams::setSelected(bool value)
-	{
-		m_selected = value;
-	}
-
-	const QPageLayout& ReportFileTypeParams::pageLayout() const
-	{
-		return m_pageLayout;
-	}
-
-	void ReportFileTypeParams::setPageLayout(const QPageLayout& layout)
-	{
-		m_pageLayout = layout;
-	}
-
 	//
 	// ReportSection
 	//

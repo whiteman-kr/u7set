@@ -24,6 +24,7 @@
 #include "GlobalMessanger.h"
 #include "Forms/DialogProjectDiff.h"
 #include "Reports/SchemasReport.h"
+#include "Reports/DialogSchemasReport.h"
 #include "DialogShortcuts.h"
 #include "./Forms/FileHistoryDialog.h"
 #include "./Forms/ProjectPropertiesForm.h"
@@ -1307,17 +1308,32 @@ void MainWindow::createSchemasAlbums()
 {
 	QString albumPath = QSettings{}.value("MainWindow/Export/AlbumPath").toString();
 
-	static std::vector<ReportLib::ReportFileTypeParams> albumFileTypeParams = {};
-	if (albumFileTypeParams.empty() == true)
+	static std::vector<Builder::SchemaTypesParams> schemaTypesParams = {};
+	if (schemaTypesParams.empty() == true)
 	{
-		albumFileTypeParams = Builder::SchemasReportGenerator::defaultFileTypeParams(db());
+		schemaTypesParams = Builder::SchemasReportGenerator::defaultFileTypesParams(db());
 	}
 
-	if (SchemasReportDialog::getReportFilesPath(&albumPath, &albumFileTypeParams,
-												Builder::SchemasReportGenerator::defaultFileTypeParams(db()), this) == false)
+	Builder::SchemasReportOptions storedOptions;
+	storedOptions.load(db());
+
+	Builder::SchemasReportOptions options;
+	options.addPageNumbers = true;	// When loading and storing options, keep addPageNumbers unchanged!
+	options.infoMode = storedOptions.infoMode;
+	options.addLogicSchemaDetails = storedOptions.addLogicSchemaDetails;
+
+	DialogSchemasReport d(albumPath, schemaTypesParams,
+						  Builder::SchemasReportGenerator::defaultFileTypesParams(db()), options, this);
+	if (d.exec() != QDialog::Accepted)
 	{
 		return;
 	}
+	schemaTypesParams = d.schemaTypesParams();
+	options = d.options();
+
+	storedOptions.infoMode = options.infoMode;
+	storedOptions.addLogicSchemaDetails = options.addLogicSchemaDetails;
+	storedOptions.save(db());
 
 	QSettings{}.setValue("MainWindow/Export/AlbumPath", albumPath);
 
@@ -1329,9 +1345,11 @@ void MainWindow::createSchemasAlbums()
 								   db()->currentUser().username(),
 								   db()->currentUser().password(),
 								   &m_signalSetProvider->signalSet(),
-								   this);
+								   this,
+								   options,
+								   schemaTypesParams);
 
-	r.exportAllSchemasToAlbum(albumPath, albumFileTypeParams);
+	r.exportAllSchemasToAlbum(albumPath);
 	return;
 }
 

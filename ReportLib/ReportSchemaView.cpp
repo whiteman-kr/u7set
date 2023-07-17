@@ -6,8 +6,9 @@ namespace ReportLib
 	// ReportSchemaView
 	//
 
-	ReportSchemaView::ReportSchemaView():
-		VFrame30::SchemaView()
+	ReportSchemaView::ReportSchemaView(bool infoMode):
+		VFrame30::SchemaView(),
+		m_infoMode(infoMode)
 	{
 	}
 
@@ -96,5 +97,15 @@ namespace ReportLib
 	VFrame30::DrawMode ReportSchemaView::drawMode() const
 	{
 		return VFrame30::DrawMode::Editor;
+	}
+
+	bool ReportSchemaView::infoMode() const
+	{
+		return m_infoMode;
+	}
+
+	void ReportSchemaView::setInfoMode(bool value)
+	{
+		m_infoMode = value;
 	}
 }

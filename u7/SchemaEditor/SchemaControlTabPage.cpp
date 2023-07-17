@@ -25,6 +25,7 @@
 #include "../VFrame30/TuningSchema.h"
 #include "DialogClientBehavior.h"
 #include "Reports/SchemasReport.h"
+#include "Reports/DialogSchemasExport.h"
 #include <QPageLayout>
 
 //
@@ -1526,14 +1527,8 @@ void SchemaFileView::createActions()
 	m_importWorkingcopyAction->setEnabled(false);
 
 	m_exportToPdfAction = new QAction(tr("Export to PDF..."), parent());
-	//m_exportToPdfAction->setIcon(QIcon(":/Images/Images/SchemaDownload.svg"));
 	m_exportToPdfAction->setStatusTip(tr("Export selected schemas to PDF files"));
 	m_exportToPdfAction->setEnabled(false);
-
-	m_exportToAlbumAction = new QAction(tr("Export to Album..."), parent());
-	//m_exportToAlbumAction->setIcon(QIcon(":/Images/Images/SchemaDownload.svg"));
-	m_exportToAlbumAction->setStatusTip(tr("Export selected schemas to single PDF album"));
-	m_exportToAlbumAction->setEnabled(false);
 
 	// --
 	//
@@ -1603,7 +1598,6 @@ void SchemaFileView::createContextMenu()
 	addAction(m_importWorkingcopyAction);
 
 	addAction(m_exportToPdfAction);
-	addAction(m_exportToAlbumAction);
 
 	// --
 	//
@@ -2042,7 +2036,6 @@ void SchemaFileView::selectionChanged(const QItemSelection& selected, const QIte
 	m_importWorkingcopyAction->setEnabled(canSetWorkcopy == 1);			// can set work copy just for one file
 
 	m_exportToPdfAction->setEnabled(canExportToPdf > 0);
-	m_exportToAlbumAction->setEnabled(canExportToPdf > 1);
 
 	m_propertiesAction->setEnabled(schemaPoperties);			// can set work copy just for one file
 
@@ -2119,7 +2112,6 @@ SchemaControlTabPage::SchemaControlTabPage(DbController* db, AppSignalSetProvide
 	connect(m_filesView->m_importWorkingcopyAction, &QAction::triggered, this, &SchemaControlTabPage::importWorkcopy);
 
 	connect(m_filesView->m_exportToPdfAction, &QAction::triggered, this, &SchemaControlTabPage::exportToPdf);
-	connect(m_filesView->m_exportToAlbumAction, &QAction::triggered, this, &SchemaControlTabPage::exportToAlbum);
 
 	connect(m_filesView->m_propertiesAction, &QAction::triggered, this, &SchemaControlTabPage::showFileProperties);
 
@@ -2229,7 +2221,7 @@ namespace
 	HideEventFocusWidget s_hideEventFocusWidget;
 }
 
-void SchemaControlTabPage::showEvent(QShowEvent* event)
+void SchemaControlTabPage::showEvent(QShowEvent* /*event*/)
 {
 	if (s_hideEventFocusWidget.widget != nullptr)
 	{
@@ -2239,7 +2231,7 @@ void SchemaControlTabPage::showEvent(QShowEvent* event)
 	return;
 }
 
-void SchemaControlTabPage::hideEvent(QHideEvent* event)
+void SchemaControlTabPage::hideEvent(QHideEvent* /*event*/)
 {
 	if (s_hideEventFocusWidget.widget != nullptr)
 	{
@@ -4329,83 +4321,86 @@ void SchemaControlTabPage::importWorkcopy()
 
 void SchemaControlTabPage::exportToPdf()
 {
-	const std::vector<std::shared_ptr<DbFileInfo>> selectedFiles = m_filesView->selectedFiles();
-
-	std::vector<DbFileInfo> files;
-
-	for (auto& f : selectedFiles)
-	{
-		if (f->directoryAttribute() == true)
-		{
-			continue;
-		}
-
-		files.push_back(*f);
-	}
-
-	if (files.empty() == true)
-	{
-		return;
-	}
-
-	QString pdfDirectory = QFileDialog::getExistingDirectory(this, QObject::tr("Select Directory"), QString(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-
-	if (pdfDirectory.isNull() == true || pdfDirectory.isEmpty() == true)
-	{
-		return;
-	}
-
-	SchemasReportGeneratorThread r(theSettings.serverHost(),
-								   theSettings.serverPort(),
-								   theSettings.serverUsername(),
-								   theSettings.serverPassword(),
-								   db()->currentProject().projectName(),
-								   db()->currentUser().username(),
-								   db()->currentUser().password(),
-								   &m_signalSetProvider->signalSet(),
-								   this);
-
-	r.exportSchemasToPdf(pdfDirectory, files);
-
-	return;
-}
-
-void SchemaControlTabPage::exportToAlbum()
-{
-	const std::vector<std::shared_ptr<DbFileInfo>> selectedFiles = m_filesView->selectedFiles();
-
-	std::vector<DbFileInfo> files;
-
-	for (auto& f : selectedFiles)
-	{
-		if (f->directoryAttribute() == true)
-		{
-			continue;
-		}
-
-		files.push_back(*f);
-	}
-
-	if (files.empty() == true)
-	{
-		return;
-	}
-
-	// "Export schemas to album"... page layout and path
+	// Get selected files list
 	//
-	QString albumPath = QSettings{}.value("SchemeEditor/Export/AlbumPath", "Schemas.pdf").toString();
+	const std::vector<std::shared_ptr<DbFileInfo>> selectedFiles = m_filesView->selectedFiles();
 
-	static QPageLayout albumPageLayout = QPageLayout(QPageSize(QPageSize::A3),
-													 QPageLayout::Orientation::Landscape,
-													 QMarginsF(30, 20, 15, 20),
-													 QPageLayout::Unit::Millimeter);
+	std::vector<DbFileInfo> files;
 
-	if (SchemasReportDialog::getReportFileName(&albumPath, &albumPageLayout, this) == false)
+	for (auto& f : selectedFiles)
+	{
+		if (f->directoryAttribute() == true)
+		{
+			continue;
+		}
+
+		files.push_back(*f);
+	}
+
+	if (files.empty() == true)
 	{
 		return;
 	}
 
-	QSettings{}.setValue("SchemeEditor/Export/AlbumPath", albumPath);
+	// Get export params
+	//
+	bool singleFile = false;
+	QString singleFileName;
+
+	QString pathName;
+	Builder::SchemasReportOptions options{false, false, false};
+
+	if (files.size() == 1)
+	{
+		static QString path{"."};
+
+		QString schemaFileName = files[0].fileName();
+		qsizetype ptPos = schemaFileName.lastIndexOf('.');
+		if (ptPos != -1)
+		{
+			schemaFileName.remove(ptPos, schemaFileName.length() - ptPos);
+		}
+		singleFileName = QFileDialog::getSaveFileName(this,
+														tr("Export to PDF"),
+														path + QDir::separator() + schemaFileName + ".pdf",
+														tr("Portable Documnet Format (*.pdf)"));
+		if (singleFileName.isEmpty() == true)
+		{
+			return;
+		}
+		path = QFileInfo(singleFileName).path(); // store path for next time
+
+		singleFile = true;
+	}
+	else
+	{
+		Builder::SchemasReportOptions storedOptions{options};
+		storedOptions.load(db());
+
+		DialogSchemasExport d(storedOptions,
+							  QSettings{}.value("SchemeEditor/Export/AlbumFilePath", QDir::currentPath()).toString(),
+							  QSettings{}.value("SchemeEditor/Export/AlbumFileName", "Schemas.pdf").toString(),
+							  this);
+		if (d.exec() != QDialog::Accepted)
+		{
+			return;
+		}
+
+		storedOptions = options = d.options();
+		storedOptions.save(db());
+
+		if (d.isSingleFile() == true)
+		{
+			singleFile = true;
+			singleFileName = d.fileName();
+			QSettings{}.setValue("SchemeEditor/Export/AlbumFileName", singleFileName);
+		}
+		else
+		{
+			pathName = d.pathName();
+			QSettings{}.setValue("SchemeEditor/Export/AlbumFilePath", pathName);
+		}
+	}
 
 	SchemasReportGeneratorThread r(theSettings.serverHost(),
 								   theSettings.serverPort(),
@@ -4415,9 +4410,18 @@ void SchemaControlTabPage::exportToAlbum()
 								   db()->currentUser().username(),
 								   db()->currentUser().password(),
 								   &m_signalSetProvider->signalSet(),
-								   this);
+								   this,
+								   options,
+								   {});
 
-	r.exportSchemasToAlbum(albumPath, files, albumPageLayout);
+	if (singleFile == true)
+	{
+		r.exportSchemasToSinglePdf(singleFileName, files);
+	}
+	else
+	{
+		r.exportSchemasToMultiplePdf(pathName, files);
+	}
 
 	return;
 }

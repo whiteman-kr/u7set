@@ -31,12 +31,20 @@ namespace ReportLib
 		return QRect(QPoint(0, 0), m_textDocument.size().toSize());
 	}
 
-	void PrintText::print(ReportPrinter& printer, QPdfWriter& pdfWriter, QPainter& painter, const std::vector<ReportMarginItem>& marginItems,
-						  int /*pageCount*/, int& pageIndex, QMutex& pageCounterMutex)
+	void PrintText::print(ReportPrinter& printer,
+						  QPdfWriter& pdfWriter,
+						  QPainter& painter,
+						  const std::vector<ReportMarginItem>& marginItems,
+						  int /*pageCount*/,
+						  int& pageIndex,
+						  QMutex& pageCounterMutex)
 	{
 		if (m_newPageBefore == true)
 		{
 			pdfWriter.newPage();
+
+			QMutexLocker l(&pageCounterMutex);
+			pageIndex++;
 		}
 
 		if (m_textDocument.isEmpty() == true)
@@ -46,7 +54,7 @@ namespace ReportLib
 
 		if (m_verticalOffset == 0)
 		{
-			printer.printMarginItems(pdfWriter, painter, QString(), marginItems);
+			printer.printMarginItems(pdfWriter, painter, marginItems, tag());
 		}
 
 		// Page contains text
@@ -61,11 +69,6 @@ namespace ReportLib
 
 		while (currentRect.intersects(contentRect) == true)
 		{
-			{
-				QMutexLocker l(&pageCounterMutex);
-				pageIndex++;
-			}
-
 			// Print document part
 
 			painter.save();
@@ -87,7 +90,12 @@ namespace ReportLib
 			{
 				pdfWriter.newPage();
 
-				printer.printMarginItems(pdfWriter, painter, QString(), marginItems);
+				{
+					QMutexLocker l(&pageCounterMutex);
+					pageIndex++;
+				}
+
+				printer.printMarginItems(pdfWriter, painter, marginItems, tag());
 			}
 		}
 	}
@@ -95,6 +103,13 @@ namespace ReportLib
 	int PrintText::pageCount() const
 	{
 		return m_textDocument.pageCount();
+	}
+
+	QString PrintText::tag() const
+	{
+		// For now, tag is only implemented for Schema and returns its caption.
+		// For future, a set of tags can be added for other objects - text or table.
+		return {};
 	}
 
 	//
@@ -120,8 +135,13 @@ namespace ReportLib
 		return QRect{0, 0, 0, 0};
 	}
 
-	void PrintSchema::print(ReportPrinter& printer, QPdfWriter& pdfWriter, QPainter& painter, const std::vector<ReportMarginItem>& marginItems,
-							int /*pageCount*/, int& pageIndex, QMutex& pageCounterMutex)
+	void PrintSchema::print(ReportPrinter& printer,
+							QPdfWriter& pdfWriter,
+							QPainter& painter,
+							const std::vector<ReportMarginItem>& marginItems,
+							int /*pageCount*/,
+							int& pageIndex,
+							QMutex& pageCounterMutex)
 	{
 		if (m_schemaView == nullptr || m_schema == nullptr)
 		{
@@ -141,7 +161,7 @@ namespace ReportLib
 
 		if (m_verticalOffset == 0)
 		{
-			printer.printMarginItems(pdfWriter, painter, m_schema->caption(), marginItems);
+			printer.printMarginItems(pdfWriter, painter, marginItems, tag());
 		}
 
 		// Calculate the upper schema offset
@@ -183,7 +203,7 @@ namespace ReportLib
 		painter.setRenderHint(QPainter::Antialiasing);
 
 		VFrame30::CDrawParam drawParam(&painter, m_schemaView.get(), m_schema->gridSize(), m_schema->pinGridStep(), m_schema->unit());
-		drawParam.setInfoMode(false);
+		drawParam.setInfoMode(m_schemaView->infoMode());
 		drawParam.setPdfMode(true);
 
 		m_schemaView->setSchemaInternal(m_schema);
@@ -212,6 +232,10 @@ namespace ReportLib
 		return 0;
 	}
 
+	QString PrintSchema::tag() const
+	{
+		return m_schema->caption();
+	}
 	//
 	// ReportPrinter
 	//
@@ -352,6 +376,7 @@ namespace ReportLib
 														   rs->schema(),
 														   rs->compareActions(),
 														   lastDocumentTextPageHeight,
+														   lastObjectType == ReportObject::Type::Schema ||
 														   (firstObject == true && firstSection == false));
 						printObjects.push_back(ps);
 
@@ -428,40 +453,43 @@ namespace ReportLib
 
 		QPainter painter(&pdfWriter);
 
-		//#define DEBUG_PRINT_PAGE_RECT	//	Uncomment this for debug
-		#ifdef DEBUG_PRINT_PAGE_RECT
-		auto fullRect = report.pageLayout().fullRectPixels(report.resolution());
-
-		auto pageRect = report.pageLayout().paintRectPixels(report.resolution());
-
-		painter.save();
-
-		painter.translate(-pageRect.left(), -pageRect.top());
-
-		painter.fillRect(fullRect, Qt::lightGray);
-
-		painter.restore();
-
-		painter.save();
-
-		painter.translate(-pageRect.left(), -pageRect.top());
-
-		painter.fillRect(pageRect, Qt::gray);
-
-		painter.restore();
-		#endif
 
 		bool firstRenderedSection = true;
 
 		for (const auto& rs : renderedSections)
 		{
-			if (firstRenderedSection == true)
+			if (firstRenderedSection == false)
 			{
-				firstRenderedSection = false;
+				pdfWriter.setPageLayout(rs.pageLayout);
 			}
 			else
 			{
-				pdfWriter.setPageLayout(rs.pageLayout);
+//#define DEBUG_PRINT_PAGE_RECT	//	Uncomment this for debug
+#ifdef DEBUG_PRINT_PAGE_RECT
+				if (firstRenderedSection == true)
+				{
+					auto fullRect = rs.pageLayout.fullRectPixels(report.resolution());
+
+					auto pageRect = rs.pageLayout.paintRectPixels(report.resolution());
+
+					painter.save();
+
+					painter.translate(-pageRect.left(), -pageRect.top());
+
+					painter.fillRect(fullRect, Qt::lightGray);
+
+					painter.restore();
+
+					painter.save();
+
+					painter.translate(-pageRect.left(), -pageRect.top());
+
+					painter.fillRect(pageRect, Qt::gray);
+
+					painter.restore();
+				}
+#endif
+				firstRenderedSection = false;
 			}
 
 			for (const std::shared_ptr<PrintObject>& po : rs.printObjects)
@@ -491,8 +519,10 @@ namespace ReportLib
 		return m_statistics;
 	}
 
-	void ReportPrinter::printMarginItems(QPdfWriter& pdfWriter, QPainter& painter, const QString& objectName,
-										 const std::vector<ReportMarginItem>& marginItems) const
+	void ReportPrinter::printMarginItems(QPdfWriter& pdfWriter,
+										 QPainter& painter,
+										 const std::vector<ReportMarginItem>& marginItems,
+										 const QString& tag) const
 	{
 		int page = 0;
 		int pagesCount = 0;
@@ -546,12 +576,10 @@ namespace ReportLib
 				text = QObject::tr("Page %1 of %2").arg(page).arg(pagesCount);
 			}
 
-			if (text == "%OBJECT%")
+			if (text == "%TAG%")
 			{
-				text = objectName;
+				text = tag;
 			}
-
-			painter.setFont(item.format.font());
 
 #ifdef DEBUG_PRINT_PAGE_RECT
 			if (first == true)
@@ -562,30 +590,35 @@ namespace ReportLib
 			}
 #endif
 
-			QFontMetrics fm(item.format.font());
-			QRect textBoundingRect = fm.boundingRect(text);
+			if (text.isEmpty() == false)
+			{
+				painter.setFont(item.format.font());
+				QFontMetrics fm(item.format.font());
+				QRect textBoundingRect = fm.boundingRect(text);
 
-            auto itemAlignment = item.format.alignment();
-			if (itemAlignment & Qt::AlignTop)
-			{
-				if (topRect.width() >= textBoundingRect.width() && topRect.height() >= textBoundingRect.height())
+				auto itemAlignment = item.format.alignment();
+				if (itemAlignment & Qt::AlignTop)
 				{
-					int alignment = itemAlignment & ~Qt::AlignTop;
-					painter.drawText(topRect, alignment | Qt::AlignBottom, text + "\n");
-				}
-			}
-			else
-			{
-				if (itemAlignment & Qt::AlignBottom)
-				{
-					if (bottomRect.width() >= textBoundingRect.width() && bottomRect.height() >= textBoundingRect.height())
+					if (topRect.width() >= textBoundingRect.width() && topRect.height() >= textBoundingRect.height())
 					{
-						int alignment = itemAlignment & ~Qt::AlignBottom;
-						painter.drawText(bottomRect, alignment | Qt::AlignTop, "\n" + text);
+						int alignment = itemAlignment & ~Qt::AlignTop;
+						painter.drawText(topRect, alignment | Qt::AlignBottom, text + "\n");
+					}
+				}
+				else
+				{
+					if (itemAlignment & Qt::AlignBottom)
+					{
+						if (bottomRect.width() >= textBoundingRect.width() && bottomRect.height() >= textBoundingRect.height())
+						{
+							int alignment = itemAlignment & ~Qt::AlignBottom;
+							painter.drawText(bottomRect, alignment | Qt::AlignTop, "\n" + text);
+						}
 					}
 				}
 			}
 		}
+
 		painter.restore();
 	}
 }

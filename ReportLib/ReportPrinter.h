@@ -24,10 +24,17 @@ namespace ReportLib
 
 		Type type() const {return m_type;}
 
-		virtual void print(ReportPrinter& printer, QPdfWriter& pdfWriter, QPainter& painter, const std::vector<ReportMarginItem>& marginItems,
-						   int pageCount, int& pageIndex, QMutex& pageCounterMutex) = 0;
+		virtual void print(ReportPrinter& printer,
+						   QPdfWriter& pdfWriter,
+						   QPainter& painter,
+						   const std::vector<ReportMarginItem>& marginItems,
+						   int pageCount,
+						   int& pageIndex,
+						   QMutex& pageCounterMutex) = 0;
 
 		virtual int pageCount() const = 0;
+
+		virtual QString tag() const = 0;
 
 	protected:
 		Type m_type{Type::Undefined};
@@ -44,10 +51,16 @@ namespace ReportLib
 
 		virtual QRect contentRect() const override;
 
-		virtual void print(ReportPrinter& printer, QPdfWriter& pdfWriter, QPainter& painter, const std::vector<ReportMarginItem>& marginItems,
-						   int pageCount, int& pageIndex, QMutex& pageCounterMutex) override;
+		virtual void print(ReportPrinter& printer,
+						   QPdfWriter& pdfWriter,
+						   QPainter& painter,
+						   const std::vector<ReportMarginItem>& marginItems,
+						   int pageCount,
+						   int& pageIndex,
+						   QMutex& pageCounterMutex) override;
 
 		virtual int pageCount() const override;
+		virtual QString tag() const override;
 
 	private:
 		QTextDocument m_textDocument;
@@ -65,10 +78,16 @@ namespace ReportLib
 
 		virtual QRect contentRect() const override;
 
-		virtual void print(ReportPrinter& printer, QPdfWriter& pdfWriter, QPainter& painter, const std::vector<ReportMarginItem>& marginItems,
-						   int pageCount, int& pageIndex, QMutex& pageCounterMutex) override;
+		virtual void print(ReportPrinter& printer,
+						   QPdfWriter& pdfWriter,
+						   QPainter& painter,
+						   const std::vector<ReportMarginItem>& marginItems,
+						   int pageCount,
+						   int& pageIndex,
+						   QMutex& pageCounterMutex) override;
 
 		virtual int pageCount() const override;
+		virtual QString tag() const override;
 
 	private:
 		// Schema data
@@ -114,8 +133,8 @@ namespace ReportLib
 
 		void printMarginItems(QPdfWriter& pdfWriter,
 							  QPainter& painter,
-							  const QString& objectName,
-							  const std::vector<ReportMarginItem>& marginItems) const;
+							  const std::vector<ReportMarginItem>& marginItems,
+							  const QString& tag) const;
 
 	private:
 		mutable QMutex m_statisticsMutex;

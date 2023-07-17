@@ -261,7 +261,7 @@ void ProjectDiffGeneratorThread::run(const QString& fileName,
 {
 	// Create schema view
 
-	std::shared_ptr<ReportSchemaView> schemaView = std::make_shared<ReportSchemaView>();
+	std::shared_ptr<ReportSchemaView> schemaView = std::make_shared<ReportSchemaView>(false/*infoMode*/);
 
 	schemaView->session().setProject(projectName);
 	schemaView->session().setUsername(userName);
@@ -411,9 +411,9 @@ ProjectDiffGenerator::~ProjectDiffGenerator()
 	qDebug() << "ProjectDiffGenerator deleted";
 }
 
-std::vector<ReportFileTypeParams> ProjectDiffGenerator::defaultFileTypeParams(DbController* db)
+std::vector<Builder::SchemaTypesParams> ProjectDiffGenerator::defaultFileTypeParams(DbController* db)
 {
-	std::vector<ReportFileTypeParams> result;
+	std::vector<Builder::SchemaTypesParams> result;
 
 	if (db == nullptr || db->isProjectOpened() == false)
 	{
@@ -493,7 +493,7 @@ void ProjectDiffGenerator::process()
 		//
 		if (m_reportParams.multipleFiles == true)
 		{
-			generateSummaryReport();
+			generateSummaryReport(m_reportParams.singleFilePageLayout);
 		}
 
 		{
@@ -675,14 +675,14 @@ void ProjectDiffGenerator::compareProject()
 
 	// Place signals to front
 	//
-	for (size_t i = 0; i < m_reportParams.fileTypeParams.size(); i++)
+	for (size_t i = 0; i < m_reportParams.schemaTypesParams.size(); i++)
 	{
-		ReportFileTypeParams ft = m_reportParams.fileTypeParams[i];
+		Builder::SchemaTypesParams ft = m_reportParams.schemaTypesParams[i];
 
 		if (ft.fileId() == applicationSignalsTypeId() && ft.selected() == true && i != 0)
 		{
-			m_reportParams.fileTypeParams.erase(m_reportParams.fileTypeParams.begin() + i);
-			m_reportParams.fileTypeParams.insert(m_reportParams.fileTypeParams.begin(), ft);
+			m_reportParams.schemaTypesParams.erase(m_reportParams.schemaTypesParams.begin() + i);
+			m_reportParams.schemaTypesParams.insert(m_reportParams.schemaTypesParams.begin(), ft);
 			break;
 		}
 	}
@@ -696,7 +696,7 @@ void ProjectDiffGenerator::compareProject()
 
 	std::vector<DbFileTree> filesTrees;
 
-	for (const ReportFileTypeParams& ft : m_reportParams.fileTypeParams)
+	for (const Builder::SchemaTypesParams& ft : m_reportParams.schemaTypesParams)
 	{
 		if (ft.selected() == false)
 		{
@@ -739,7 +739,7 @@ void ProjectDiffGenerator::compareProject()
 
 	std::shared_ptr<Report> report;
 
-	for (const ReportFileTypeParams& ft : m_reportParams.fileTypeParams)
+	for (const Builder::SchemaTypesParams& ft : m_reportParams.schemaTypesParams)
 	{
 		if (ft.selected() == false)
 		{
@@ -773,18 +773,19 @@ void ProjectDiffGenerator::compareProject()
 			pdfFileName.replace(' ', '_');
 		}
 
+		QPageLayout pageLayout = m_reportParams.multipleFiles == true ? ft.pageLayout() : m_reportParams.singleFilePageLayout;
+
 		// Create report
 		//
 		if (report == nullptr || m_reportParams.multipleFiles == true)
 		{
 			report = std::make_shared<Report>(ft.caption(), pdfFileName);
-			report->setPageLayout(m_reportParams.multipleFiles == true ? ft.pageLayout() : m_reportParams.pageLayout);
 			report->setResolution(m_resolution);
 			m_generatedReports.push_back(report);
 
 			// Create title page
 			//
-			auto titlePageSection = generateTitlePage(report->pageLayout(), m_reportParams.compareData, m_projectName, m_userName,
+			auto titlePageSection = generateTitlePage(pageLayout, m_reportParams.compareData, m_projectName, m_userName,
 													  m_reportParams.multipleFiles == true ? ft.caption() : QString());
 			report->insertSection(0, titlePageSection);
 
@@ -800,10 +801,10 @@ void ProjectDiffGenerator::compareProject()
 			m_statistics.m_currentSectionName = ft.caption();
 		}
 
-		std::shared_ptr<ReportSection> fileTypeSummarySection = ReportSection::create(ft.caption());
+		std::shared_ptr<ReportSection> fileTypeSummarySection = ReportSection::create(ft.caption(), pageLayout);
 		fileTypeSummarySection->addText(tr("%1\n\n").arg(ft.caption()), m_headerFormat);
 
-		std::shared_ptr<ReportSection> fileTypeSection = ReportSection::create(ft.caption());
+		std::shared_ptr<ReportSection> fileTypeSection = ReportSection::create(ft.caption(), pageLayout);
 
 		std::shared_ptr<ReportTable> headerTable;
 
@@ -1519,8 +1520,6 @@ void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 		}
 
 		singleSchema->setContext(context);
-
-		section->addText(tr("Schema: %1\n").arg(singleSchema->schemaId()), m_normalFormat);
 
 		// Add schema drawing
 
@@ -2502,46 +2501,46 @@ bool ProjectDiffGenerator::isSchemaFile(const QString& fileName) const
 	return false;
 }
 
-std::shared_ptr<ReportSection> ProjectDiffGenerator::generateTitlePage(const QPageLayout& layout,
+std::shared_ptr<ReportSection> ProjectDiffGenerator::generateTitlePage(const QPageLayout& pageLayout,
 																	   const CompareData& compareData,
 																	   const QString& projectName,
 																	   const QString& userName,
 																	   const QString& subreportName) const
 {
-	auto rs = ReportSection::create(titlePageName);
+	auto rs = ReportSection::create(titlePageName, pageLayout);
 
 	// Initialize font
 
 	QString fontName{"Arial"};
 
-	int titleFontSize = lineFontSize(m_reportParams.pageLayout, fontName, 25);
-	int regularFontSize = lineFontSize(m_reportParams.pageLayout, fontName, 50);
+	int titleFontSize = lineFontSize(pageLayout, fontName, 25);
+	int regularFontSize = lineFontSize(pageLayout, fontName, 50);
 
 	ReportLib::ReportFont titleFont{fontName, titleFontSize, QFont::Normal};
 	ReportLib::ReportFont regularFont{fontName, regularFontSize, QFont::Normal};
 
 	// Report info
 
-	if (layout.orientation() == QPageLayout::Orientation::Portrait)
+	if (pageLayout.orientation() == QPageLayout::Orientation::Portrait)
 	{
 		rs->addText(tr("\n\n\n"), {titleFont, Qt::AlignHCenter});
 	}
 
-	rs->addText(tr("\n\n\n\n\nProject: %1\n\n").arg(projectName), {titleFont, Qt::AlignHCenter});
+	rs->addText(tr("\n\n\n\n\n\n\nProject: %1\n\n\n\n").arg(projectName), {titleFont, Qt::AlignHCenter});
 
 	if (subreportName.isEmpty() == true)
 	{
-		rs->addText(tr("Differences Report\n\n\n\n\n"), {titleFont, Qt::AlignHCenter});
+		rs->addText(tr("Differences Report\n\n\n\n\n\n"), {titleFont, Qt::AlignHCenter});
 	}
 	else
 	{
 		rs->addText(tr("Differences Report\n\n"), {titleFont, Qt::AlignHCenter});
-		rs->addText(QObject::tr("%1\n\n\n\n").arg(subreportName), {regularFont, Qt::AlignHCenter});
+		rs->addText(QObject::tr("%1\n\n\n\n\n").arg(subreportName), {regularFont, Qt::AlignHCenter});
 	}
 
 	// User name
 
-	rs->addText(tr("User Name: %1\n\n").arg(userName), {regularFont, Qt::AlignLeft});
+	rs->addText(tr("User Name: %1\n\n\n").arg(userName), {regularFont, Qt::AlignLeft});
 
 	// Changeset
 
@@ -2578,17 +2577,16 @@ std::shared_ptr<ReportSection> ProjectDiffGenerator::generateTitlePage(const QPa
 	return rs;
 }
 
-void ProjectDiffGenerator::generateSummaryReport()
+void ProjectDiffGenerator::generateSummaryReport(const QPageLayout& pageLayout)
 {
 	// Create report
 	//
 	auto summaryReport = std::make_shared<Report>(m_projectName, filePath());
-	summaryReport->setPageLayout(m_reportParams.pageLayout);
 	summaryReport->setResolution(m_resolution);
 
 	// Create title page
 	//
-	auto titlePageSection = generateTitlePage(summaryReport->pageLayout(), m_reportParams.compareData, m_projectName, m_userName, QString());
+	auto titlePageSection = generateTitlePage(pageLayout, m_reportParams.compareData, m_projectName, m_userName, QString());
 	summaryReport->insertSection(0, titlePageSection);
 
 
@@ -2601,21 +2599,22 @@ void ProjectDiffGenerator::generateSummaryReport()
 	}
 
 	{
-		auto section = generateSummaryReportFilesPage(generatedReportFiles);
+		auto section = generateSummaryReportFilesPage(pageLayout, generatedReportFiles);
 		summaryReport->addSection(section);
 	}
 
 	m_generatedReports.push_back(summaryReport);
 }
 
-std::shared_ptr<ReportSection> ProjectDiffGenerator::generateSummaryReportFilesPage(const QStringList& subreportFiles)
+std::shared_ptr<ReportSection> ProjectDiffGenerator::generateSummaryReportFilesPage(const QPageLayout& pageLayout,
+																					const QStringList& subreportFiles)
 {
-	auto rs = ReportSection::create("SummaryFiles");
+	auto rs = ReportSection::create("SummaryFiles", pageLayout);
 
 	// Init font
 
 	QString fontName{"Arial"};
-	int fontSize = lineFontSize(m_reportParams.pageLayout, fontName, 50);
+	int fontSize = lineFontSize(pageLayout, fontName, 50);
 
 	ReportLib::ReportFont font{fontName, fontSize, QFont::Normal};
 
@@ -2656,7 +2655,7 @@ void ProjectDiffGenerator::createMarginItems(Report& report, const CompareData& 
 
 	report.addMarginItem({projectNameStr, 2, -1, {m_marginFont, Qt::AlignLeft | Qt::AlignTop}});
 
-	report.addMarginItem({tr("%OBJECT%"), 2, -1, {m_marginFont, Qt::AlignRight | Qt::AlignTop}});
+	report.addMarginItem({tr("%TAG%"), 2, -1, {m_marginFont, Qt::AlignRight | Qt::AlignTop}});
 
 	QString changesetStr;
 
