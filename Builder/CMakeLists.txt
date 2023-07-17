@@ -46,10 +46,10 @@ qt_add_library(${TARGET} STATIC
 	../TuningService/TuningSource.h
 	AppDataServiceCfgGenerator.cpp
 	AppDataServiceCfgGenerator.h
-	ApplicationLogicCode.cpp
-	ApplicationLogicCode.h
-	ApplicationLogicCompiler.cpp
-	ApplicationLogicCompiler.h
+	AppLogicCode.cpp
+	AppLogicCode.h
+	AppLogicCompiler.cpp
+	AppLogicCompiler.h
 	AppSignalProperties.cpp
 	AppSignalProperties.h
 	ArchivingServiceCfgGenerator.cpp
@@ -66,6 +66,8 @@ qt_add_library(${TARGET} STATIC
 	Busses.h
 	CodeChecker.cpp
 	CodeChecker.h
+	CodeItem.cpp
+	CodeItem.h
 	CodeOptimization.cpp
 	CodeOptimization.h
 	ConfigurationBuilder.cpp

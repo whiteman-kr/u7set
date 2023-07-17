@@ -727,25 +727,4 @@ namespace Builder
 
 		return maxTime;
 	}
-
-	// -----------------------------------------------------------------------------------------------
-	//
-	// CodeSnippetMetrics struct implementation
-	//
-	// -----------------------------------------------------------------------------------------------
-
-	void CodeSnippetMetrics::setEndAddr(int endAddr)
-	{
-		m_endAddr = endAddr;
-
-		Q_ASSERT(false);			// wrong calc !~!! 65536.0!!!!
-		m_codePercent = static_cast<double>(m_endAddr - m_startAddr) * 100.0 / 65536.0 ;
-	}
-
-
-	QString CodeSnippetMetrics::codePercentStr() const
-	{
-		return QString("%1%%").arg(m_codePercent, 0, 'g', 2);
-	}
-
 }

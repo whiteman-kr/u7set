@@ -115,20 +115,4 @@ namespace Builder
 		double m_execTimeMcs = 0;
 		double m_lmCycleTimeUsage = 0;
 	};
-
-	struct CodeSnippetMetrics
-	{
-		void setStartAddr(int startAddr) { m_startAddr = startAddr; }
-		void setEndAddr(int endAddr);
-
-		double codePercent() const { return m_codePercent; }
-		QString codePercentStr() const;
-
-	private:
-		int m_startAddr = 0;
-		int m_endAddr = 0;
-		int m_runTime = 0;
-
-		double m_codePercent = 0;
-	};
 }

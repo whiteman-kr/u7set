@@ -72,22 +72,6 @@ namespace Builder
 
 			//
 
-			CodeSnippetMetrics initAfbs;
-			CodeSnippetMetrics copyAcquiredRawDataInRegBuf;
-			CodeSnippetMetrics convertAnalogInputSignals;
-			CodeSnippetMetrics appLogicCode;
-			CodeSnippetMetrics copyAcquiredAnalogOptoSignalsToRegBuf;
-			CodeSnippetMetrics copyAcquiredAnalogBusChildSignalsToRegBuf;
-			CodeSnippetMetrics copyAcquiredTuningAnalogSignalsToRegBuf;
-			CodeSnippetMetrics copyAcquiredConstAnalogSignalsToRegBuf;
-			CodeSnippetMetrics copyAcquiredDiscreteInputSignalsToRegBuf;
-			CodeSnippetMetrics copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf;
-			CodeSnippetMetrics copyAcquiredDiscreteOptoAndBusChildSignalsToRegBuf;
-			CodeSnippetMetrics copyAcquiredTuningDiscreteSignalsToRegBuf;
-			CodeSnippetMetrics copyAcquiredDiscreteConstSignalsToRegBuf;
-			CodeSnippetMetrics copyOutputSignalsInOutputModulesMemory;
-			CodeSnippetMetrics copyOptoConnectionsTxData;
-
 			QVector<AfblUsageInfo> afblUsageInfo;
 		};
 
