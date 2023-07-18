@@ -83,6 +83,7 @@ HEADERS  += \
     Reports/DialogSchemasReport.h \
     Reports/ProjectDiffReport.h \
     Reports/ReportPropertyEditor.h \
+    SchemaEditor/AutoFblItemConnection.h \
     SchemaEditor/EditSchemaSignalProvider.h \
     SchemaEditor/EditSchemaTabPage.h \
     SchemaEditor/SchemaControlTabPage.h \
@@ -266,6 +267,7 @@ SOURCES +=\
     Reports/DialogSchemasReport.cpp \
     Reports/ProjectDiffReport.cpp \
     Reports/ReportPropertyEditor.cpp \
+    SchemaEditor/AutoFblItemConnection.cpp \
     SchemaEditor/EditSchemaSignalProvider.cpp \
     SchemaEditor/EditSchemaTabPage.cpp \
     Reports/SchemasReport.cpp \
