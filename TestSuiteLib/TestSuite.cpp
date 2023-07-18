@@ -21,6 +21,10 @@ namespace TestSuite
 		//		loadTestsFromPath();
 		//	}
 
+		connect(&m_control, &Control::testFinished, [this](QString scriptFileName, QString testFunction, bool result){
+			emit testFinished(scriptFileName, testFunction, result);
+		});
+
 		connect(&m_control, &Control::finished, this, &TestSuite::finished);
 		return;
 	}
@@ -50,12 +54,13 @@ namespace TestSuite
 	//	return m_testLog;
 	//}
 
-	bool TestSuite::execute(const QStringList& executionTests,		// List of tests for execution, if empty then exec all.
-							const QString& scriptsPath)				// Load scripts from disk, path to dir for *.js files.);
+	bool TestSuite::execute(const QStringList& scriptsFiles,		// List of script files for execution, if empty then exec all.
+							const QString& scriptsPath,				// Load scripts from disk, path to dir for *.js files.
+							const TestScriptFilter& testsFilter)				// Tests filter
 	{
 		m_testLog.clear();
 
-		return m_control.execute(m_softwareInfo, m_settings, executionTests, scriptsPath);
+		return m_control.execute(m_softwareInfo, m_settings, scriptsFiles, scriptsPath, testsFilter);
 	}
 
 	void TestSuite::stop()
@@ -68,6 +73,22 @@ namespace TestSuite
 	{
 		return m_control.isRunning();
 	}
+
+	TestLog& TestSuite::testLog()
+	{
+		return m_testLog;
+	}
+
+	ControlStatus TestSuite::status() const
+	{
+		return m_control.status();
+	}
+
+	ReportLib::ReportTemplateStorage TestSuite::reportTemplates() const
+	{
+		return m_control.reportTemplates();
+	}
+
 
 	//void TestLibrary::runTests()
 	//{

@@ -226,7 +226,7 @@ namespace VFrame30
 
 			for (const QString& s : valueAsList)
 			{
-				if (s.startsWith(QChar('#')) == true && drawParam->hightlightIds().contains(s))
+				if (s.startsWith(QChar('#')) == true && drawParam->highlightIds().contains(s))
 				{
 					QRectF highlightRect = boundingRectInDocPt(drawParam);
 					drawHighlightRect(drawParam, highlightRect);

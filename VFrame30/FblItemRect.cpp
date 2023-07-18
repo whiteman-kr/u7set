@@ -400,7 +400,7 @@ namespace VFrame30
 			SchemaPoint vip;
 			GetConnectionPointPos(input.guid(), &vip, drawParam->gridSize(), drawParam->pinGridStep());
 
-			int connectionCount = layer->GetPinPosConnectinCount(vip, itemUnit());
+			int connectionCount = layer->GetPinPosConnectinCount(vip);
 
 			// Drawing pin
 			//
@@ -478,7 +478,7 @@ namespace VFrame30
 			SchemaPoint vip;
 			GetConnectionPointPos(output.guid(), &vip, drawParam->gridSize(), drawParam->pinGridStep());
 
-			int connectionCount = layer->GetPinPosConnectinCount(vip, itemUnit());
+			int connectionCount = layer->GetPinPosConnectinCount(vip);
 
 			// Draw pin
 			//

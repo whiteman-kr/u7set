@@ -1,56 +1,6 @@
-#include "../Builder/ReportGenerator.h"
+#pragma once
 
-using namespace Builder;
-
-class SchemasReportDialog : public QDialog
-{
-	Q_OBJECT
-
-public:
-	static bool getReportFileName(QString* fileName,
-							 QPageLayout* pageLayout,
-							 QWidget *parent);
-
-	static bool getReportFilesPath(QString* path,
-							 std::vector<ReportFileTypeParams>* reportFileTypeParams,
-							 const std::vector<ReportFileTypeParams>& defaultFileTypeParams,
-							 QWidget *parent);
-private:
-	enum class Type
-	{
-		SelectFile,
-		SelectPath
-	};
-
-	SchemasReportDialog(Type type, QString* path,  QWidget *parent);
-
-	SchemasReportDialog(QString* path,
-						std::vector<ReportFileTypeParams>* reportFileTypeParams,
-						const std::vector<ReportFileTypeParams>& defaultFileTypeParams,
-						QWidget *parent);
-
-	SchemasReportDialog(QString* fileName,
-						QPageLayout* pageLayout,
-						QWidget *parent);
-
-private slots:
-	void okClicked();
-	void browseClicked();
-	void pageSetupClicked();
-
-private:
-
-	Type m_type = Type::SelectFile;
-
-	QString* m_reportPath = nullptr;
-
-	QPageLayout* m_pageLayout = nullptr;
-
-	std::vector<ReportFileTypeParams>* m_reportFileTypeParams = nullptr;
-	std::vector<ReportFileTypeParams> m_defaultFileTypeParams;
-
-	QLineEdit* m_editReportPath = nullptr;
-};
+#include "../Builder/SchemasReportGenerator.h"
 
 class SchemasReportGeneratorThread
 {
@@ -63,20 +13,24 @@ public:
 								 const QString& userName,
 								 const QString& userPassword,
 								 const AppSignalSet* signalSet,
-								 QWidget *parent);
+								 QWidget *parent,
+								 const Builder::SchemasReportOptions& options,
+								 const std::vector<Builder::SchemaTypesParams>& schemaTypesParams);
 
-	void exportSchemasToPdf(const QString& filePath, const std::vector<DbFileInfo>& files);
-	void exportSchemasToAlbum(const QString& filePath, const std::vector<DbFileInfo>& files, const QPageLayout& pageLayout);
-	void exportAllSchemasToAlbum(const QString& filePath, const std::vector<ReportFileTypeParams>& reportFileTypeParams);
+	void exportSchemasToMultiplePdf(const QString& filePath, const std::vector<DbFileInfo>& files);
+	void exportSchemasToSinglePdf(const QString& filePath, const std::vector<DbFileInfo>& files);
+	void exportAllSchemasToAlbum(const QString& filePath);
 
 private:
 	enum class TaskType
 	{
-		ExportFilesToPdf,
-		ExportFilesToAlbum,
+		ExportFilesToMultiplePdf,
+		ExportFilesToSinglePdf,
 		ExportAllSchemasToAlbum
 	};
-	void run(TaskType task, const QString& filePath, const std::vector<DbFileInfo>& files, const QPageLayout& albumPageLayout, const std::vector<ReportFileTypeParams>& albumsFileTypeParams);
+	void run(TaskType task,
+			 const QString& filePath,
+			 const std::vector<DbFileInfo>& files);
 
 private:
 	QString m_serverIp;
@@ -91,5 +45,8 @@ private:
 	const AppSignalSet* m_signalSet = nullptr;
 
 	QWidget* m_parent = nullptr;
+
+	const Builder::SchemasReportOptions& m_options;
+	const std::vector<Builder::SchemaTypesParams>& m_schemaTypesParams;
 };
 

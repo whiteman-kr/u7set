@@ -44,10 +44,16 @@ private:
 
 	void clearTestsTree();
 	void fillTestsTree();
+    void createReportActions();
 	void updateActionsState();
-	void updateTimeIndicator(const TestSuite::ControlStatus& state);
+
+	bool loadTestLog();
+	bool saveTestLog();
+
+	void updateStatusIndicator();
 
 	bool eventFilter(QObject *object, QEvent *event) override;
+	void closeEvent(QCloseEvent* event) override;
 	void timerEvent(QTimerEvent* event) override;
 
 private slots:
@@ -56,6 +62,12 @@ private slots:
 	void onExit();
 	void on_m_run_clicked();
 	void on_m_stop_clicked();
+	void on_m_report_clicked();
+
+	void onSaveTestLog();
+	void onLoadTestLog();
+	void onClearTestLog();
+
 	void onSettings();
 	void showStatistics();
 	void showAppLog();
@@ -64,6 +76,7 @@ private slots:
 	void onTestsRefresh();
 	void onShowTestContents(const QString& testName);
 	void onTabCloseRequested(int index);
+    void onGenerateReport(const QString& caption);
 
 	// Processing slots
 	//
@@ -87,11 +100,19 @@ private:
 	//QAction* m_pauseAction = nullptr;
 	QAction* m_stopAction = nullptr;
 
+	QAction* m_reportAction = nullptr;
+
+	QAction* m_saveTestLogAction = nullptr;
+	QAction* m_loadTestLogAction = nullptr;
+	QAction* m_clearTestLogAction = nullptr;
+
+    QMenu* m_reportsMenu;
+    std::vector<QAction*> m_reportActions;
+
 	TabWidgetEx* m_tabWidget = nullptr;
 
 	QToolBar* m_toolBar = nullptr;
-	QLabel* m_timeIndicator = nullptr;	// Widget on toolbar to show current simulation time
-
+	QLabel* m_statusIndicator = nullptr;
 
 	TestListWidget* m_testListWidget = nullptr;
 	TestLogTabPage* m_testLogTabPage = nullptr;

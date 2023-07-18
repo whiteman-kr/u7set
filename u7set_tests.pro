@@ -11,6 +11,7 @@ SUBDIRS += Protobuf \
 	HardwareLib \
 	CommonLib \	
 	ClientLib \
+	ReportLib\
 	VFrame30 \
 	DbLib \
 	Simulator \

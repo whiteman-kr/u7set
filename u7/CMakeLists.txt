@@ -65,6 +65,8 @@ set (U7_SOURCES
 	../lib/Ui/TagSelectorWidget.h
 	../lib/Ui/TextEditCompleter.cpp
 	../lib/Ui/TextEditCompleter.h
+	../lib/Ui/DialogWriteValues.cpp
+	../lib/Ui/DialogWriteValues.h
 	../lib/WidgetUtils.cpp
 	../lib/WidgetUtils.h
 	AppSignalPropertyManager.cpp
@@ -196,12 +198,18 @@ set (U7_SOURCES
 	PasswordService.h
 	ProjectsTabPage.cpp
 	ProjectsTabPage.h
-	Reports/DialogReportFileTypeParams.cpp
-	Reports/DialogReportFileTypeParams.h
+	Reports/DialogSchemasReport.cpp
+	Reports/DialogSchemasReport.h
+	Reports/DialogSchemasExport.cpp
+	Reports/DialogSchemasExport.h
 	Reports/ProjectDiffReport.cpp
 	Reports/ProjectDiffReport.h
+	Reports/ReportPropertyEditor.cpp
+	Reports/ReportPropertyEditor.h
 	Reports/SchemasReport.cpp
 	Reports/SchemasReport.h
+	SchemaEditor/AutoFblItemConnection.cpp
+	SchemaEditor/AutoFblItemConnection.h
 	SchemaEditor/CreateSchemaDialog.cpp
 	SchemaEditor/CreateSchemaDialog.h
 	SchemaEditor/CreateSignalDialog.cpp
@@ -313,6 +321,7 @@ set (U7_FORMS
 	CheckInDialog.ui
 	DialogSubsystemListEditor.ui
 	Forms/ChooseAfbDialog.ui
+	Reports/DialogSchemasExport.ui
 	EquipmentEditor/EquipmentVcsDialog.ui
 	SchemaEditor/CreateSchemaDialog.ui
 	SchemaEditor/SchemaLayersDialog.ui
@@ -384,7 +393,7 @@ target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Sql
 	Qt6::SerialPort Qt6::Xml Qt6::PrintSupport Qt6::Test Qt6::Concurrent Qt6::DBus)
 
 target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib HardwareLib DbLib OnlineLib
-	TrendView Simulator qt6keychain Builder VFrame30)
+	TrendView Simulator qt6keychain Builder VFrame30 ReportLib)
 
 # Link Visaul Leak Detector
 #

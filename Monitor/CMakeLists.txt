@@ -55,6 +55,8 @@ set (MONITOR_SOURCES
 	../lib/Ui/TagSelectorWidget.h
 	../lib/Ui/TuningSourcesWidget.cpp
 	../lib/Ui/TuningSourcesWidget.h
+	../lib/Ui/DialogWriteValues.cpp
+	../lib/Ui/DialogWriteValues.h
 	../UtilsLib/ILogFile.h
 	Archive/ArchiveConnection.cpp
 	Archive/ArchiveConnection.h

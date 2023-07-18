@@ -86,7 +86,7 @@ DialogTuningSources::DialogTuningSources(ClientLib::TuningConnection& tuningConn
 	l->addLayout(bottomLayout);
 	setLayout(l);
 
-	setMinimumSize(1024, 300);
+	setMinimumSize(1150, 300);
 }
 
 DialogTuningSources::~DialogTuningSources()

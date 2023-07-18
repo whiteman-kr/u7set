@@ -73,8 +73,8 @@ namespace VFrame30
 
 		double cosmeticPenWidth() const;
 
-		double realDpiX() const noexcept;			// physicalDpiX * devicePixelration
-		double realDpiY() const noexcept;			// physicalDpiY * devicePixelration
+		double realDpiX() const noexcept;			// physicalDpiX * devicePixelRatio
+		double realDpiY() const noexcept;			// physicalDpiY * devicePixelRatio
 		double devicePixelRatio() const noexcept;
 
 		static double realDpiX(QPainter* painter) noexcept;
@@ -103,11 +103,11 @@ namespace VFrame30
 		const Session& session() const noexcept;
 		Session& session();
 
-		const MonitorBehavior& monitorBehavor() const noexcept;
+		const MonitorBehavior& monitorBehavior() const noexcept;
 		const TuningClientBehavior& tuningClientBehavior() const;
 
-		const QStringList& hightlightIds() const;
-		void setHightlightIds(const QStringList& value);
+		const QStringList& highlightIds() const;
+		void setHighlightIds(const QStringList& value);
 
 	private:
 		QPainter* m_painter = nullptr;

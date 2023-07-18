@@ -38,13 +38,21 @@ namespace TestSuite
 		//void setAppSignalTcpClients(std::vector<TcpSignalClient*> tcpClients);
 		//void setTuningTcpClients(std::vector<TuningTcpClient*> tcpClients);
 
-		bool execute(const QStringList& executionTests,		// List of tests for execution, if empty then exec all.
-					 const QString& scriptsPath);			// Load scripts from disk, path to dir for *.js files.);
+		bool execute(const QStringList& scriptsFiles,		// List of script files for execution, if empty then exec all.
+					 const QString& scriptsPath,			// Load scripts from disk, path to dir for *.js files.
+					 const TestScriptFilter& testsFilter);			// Tests filter
 		void stop();
 
 		bool isRunning() const;
 
+		TestLog& testLog();
+
+		ControlStatus status() const;
+
+		ReportLib::ReportTemplateStorage reportTemplates() const;	// Returns templates received by taskCfgServiceConnection in Control thread
+
 	signals:
+		void testFinished(QString scriptFileName, QString testFunction, bool result);
 		void finished(int result);
 
 //	private:

@@ -293,7 +293,7 @@ namespace VFrame30
 		bool infoMode() const;
 		void setInfoMode(bool value);
 
-		const QStringList& hightlightIds() const;
+		const QStringList& highlightIds() const;
 		void setHighlightIds(const QStringList& value);
 
 		// TuningController
@@ -357,7 +357,7 @@ namespace VFrame30
 
 		// ClientBehavior
 		//
-		const MonitorBehavior& monitorBehavor() const noexcept;
+		const MonitorBehavior& monitorBehavior() const noexcept;
 		void setMonitorBehavior(const MonitorBehavior& src);
 		void setMonitorBehavior(MonitorBehavior&& src);
 
@@ -377,9 +377,9 @@ namespace VFrame30
 
 	private:
 		bool m_periodicUpdate = true;		// Update widget every 250 ms
-		bool m_infoMode = false;			// Show some aditional info like labels
+		bool m_infoMode = false;			// Show some additional info like labels
 
-		QStringList m_highlightIds;			// Highligted IDs, can be any, like AppSignalID, ConnectiondID... depends on item
+		QStringList m_highlightIds;			// Highlighted IDs, can be any, like AppSignalID, ConnectionID... depends on item
 
 		// --
 		//
@@ -388,7 +388,7 @@ namespace VFrame30
 
 		QJSEngine m_jsEngine;
 
-		bool m_alloScriptMessageBox = false;// Allow or disable using message box in scripts
+		bool m_allowScriptMessageBox = false; // Allow or disable using message box in scripts
 
 		QString m_globalScript;
 		QString m_onConfigurationArrivedScript;

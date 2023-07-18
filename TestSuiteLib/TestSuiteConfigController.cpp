@@ -72,6 +72,7 @@ namespace TestSuite
 					QWriteLocker locker(&m_confugurationLock);
 					m_configuration = {};
 					m_scripts.clear();
+					m_templates.clear();
 				}
 
 				emit configrationError();
@@ -98,6 +99,26 @@ namespace TestSuite
 			return false;
 		}
 
+		// Get file CfgFileId::REPORT_TEMPLATES
+		//
+		QByteArray data;
+		if (bool result = getFileBlockedById(CfgFileId::TESTSUITE_REPORTTEMPLATES, &data, nullptr);
+			result == false)
+		{
+			m_logFile.writeError("Failed to get report templates file: ReportTemplates.dat");
+			emit configrationError();
+			return false;
+		}
+
+		QString errorMsg;
+		ReportLib::ReportTemplateStorage templates;
+		if (templates.load(data, &errorMsg) == false)
+		{
+			m_logFile.writeError("Failed to load report templates file: ReportTemplates.dat");
+			emit configrationError();
+			return false;
+		}
+
 		// Trace received params
 		//
 		qDebug() << "New configuration arrived.";
@@ -112,6 +133,7 @@ namespace TestSuite
 			config.configurationId = s_configurationIdCounter++;
 			m_configuration = config;		// Cannot move config here as it is used later for `emit configurationArrived(config)`
 			m_scripts = std::move(scripts);
+			m_templates = std::move(templates);
 		}
 
 		// Emit signal to inform everybody about new configuration
@@ -175,5 +197,11 @@ namespace TestSuite
 	{
 		QReadLocker locker(&m_confugurationLock);
 		return m_scripts;
+	}
+
+	const ReportLib::ReportTemplateStorage& TestSuiteConfigController::reportTemplates() const
+	{
+		QReadLocker locker(&m_confugurationLock);
+		return m_templates;
 	}
 }

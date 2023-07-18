@@ -7,12 +7,11 @@
 #include "TuningSourcesHelper.h"
 #include "TuningSignalInfo.h"
 #include "DialogChooseFilter.h"
+#include "../lib/Ui/DialogWriteValues.h"
 
 #include <QTableView>
 #include <QInputDialog>
 #include <QFileDialog>
-
-int todo_crash_if_modal_dialog_in_reload_config;
 
 class SelectionControlDelegate : public QStyledItemDelegate
 {
@@ -1466,46 +1465,25 @@ bool TuningPage::write()
 		}
 	}
 
+	std::vector<AppSignalParam> writeSignalParams;
+	std::vector<TuningValue> oldValues;
+	std::vector<TuningValue> newValues;
+
 	// Ask confirmation question
 	//
-	int listCount = 0;
-
 	for (Hash hash : modifiedHashes)
 	{
 		bool ok = false;
-
-		AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
-
-		if (listCount >= 10)
-		{
-			str += tr("and %1 more values.").arg(modifiedHashes.size() - listCount);
-			break;
-		}
-
-		if (asp.isAnalog() == true)
-		{
-			strValue = m_tuningSignalManager.unappliedValue(hash).toString(m_model->analogFormat(), asp.precision());
-		}
-		else
-		{
-			strValue = m_tuningSignalManager.unappliedValue(hash).toString();
-		}
-
-		str += tr("%1 (%2) = %3\n").arg(asp.appSignalId()).arg(asp.caption()).arg(strValue);
-
-		listCount++;
+		writeSignalParams.push_back(m_tuningSignalManager.signalParam(hash, &ok));
+		oldValues.push_back(m_tuningSignalManager.state(hash, &ok).value());
+		newValues.push_back(m_tuningSignalManager.unappliedValue(hash));
 	}
 
-	str += QString("\n") + tr("Are you sure you want to continue?");
-
-	if (QMessageBox::warning(this, tr("Write Changes"),
-							 str,
-							 QMessageBox::Yes | QMessageBox::No,
-							 QMessageBox::No) != QMessageBox::Yes)
+	if (DialogWriteValues::askConfirmation(writeSignalParams, oldValues, newValues,
+										   m_model->analogFormat(), this) != QDialog::Accepted)
 	{
 		return false;
 	}
-
 
 	// Write values on all clients
 	//

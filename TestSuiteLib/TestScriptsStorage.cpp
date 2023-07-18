@@ -2,11 +2,41 @@
 
 namespace TestSuite
 {
-//	std::vector<TestScript>& TestScriptsStorage::scripts()
-//	{
-//		QReadLocker l(&m_lock);
-//		return m_scripts;
-//	}
+	TestScriptFilter::TestScriptFilter(const QString& testMasks):
+		m_testMasks(testMasks.split(';', Qt::SkipEmptyParts))
+	{
+	}
+
+	const QStringList& TestScriptFilter::testMasks() const
+	{
+		return m_testMasks;
+	}
+
+	QStringList TestScriptFilter::scriptFiles() const
+	{
+		QStringList result;
+		for (auto& it : m_testFunctions)
+		{
+			result.push_back(it.first);
+		}
+		return result;
+	}
+
+	const QStringList& TestScriptFilter::testFunctions(const QString& scriptName) const
+	{
+		const auto& scriptTestFunctionsListIt = m_testFunctions.find(scriptName);
+		if (scriptTestFunctionsListIt == m_testFunctions.end())
+		{
+			static QStringList empty;
+			return empty;
+		}
+		return scriptTestFunctionsListIt->second;
+	}
+
+	void TestScriptFilter::setTestFunctions(const QString& scriptName, const QStringList& functions)
+	{
+		m_testFunctions[scriptName] = functions;
+	}
 
 	const std::vector<TestScript>& TestScriptsStorage::scripts() const
 	{
@@ -28,17 +58,16 @@ namespace TestSuite
 		return err;
 	}
 
-//	const TestScript& TestScriptsStorage::script(int index) const
-//	{
-//		QReadLocker l(&m_lock);
-//		if (index >= m_scripts.size())
-//		{
-//			static TestScript err;
-//			return err;
-//		}
+	const TestScript& TestScriptsStorage::script(int index) const
+	{
+		if (index >= m_scripts.size())
+		{
+			static TestScript err;
+			return err;
+		}
 
-//		return m_scripts[index];
-//	}
+		return m_scripts[index];
+	}
 
 	qsizetype TestScriptsStorage::count() const
 	{

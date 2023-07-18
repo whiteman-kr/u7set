@@ -140,6 +140,10 @@ protected:
 	void moveAfbsConnectionLinks(QPointF offset, MouseState mouseState);
 	void finishMoveAfbsConnectionLinks();
 
+	// Create proposed FblItem Link
+	//
+	void createProposedAfbLink(const std::vector<AutoFblConnectionProposition>& links);
+
 	// --
 	//
 	bool loadAfbsDescriptions(std::vector<std::shared_ptr<Afb::AfbElement>>* out);
@@ -245,6 +249,7 @@ protected:
 	void selectNextUpItem();
 	void selectNextDownItem();
 
+protected:
 	void sameWidth();
 	void sameHeight();
 	void sameSize();

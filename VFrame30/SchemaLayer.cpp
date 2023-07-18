@@ -204,7 +204,7 @@ namespace VFrame30
 		}
 	}
 
-	int SchemaLayer::GetPinPosConnectinCount(SchemaPoint pinPos, SchemaUnit /*unit*/) const
+	int SchemaLayer::GetPinPosConnectinCount(SchemaPoint pinPos) const
 	{
 		auto mapitem = connectionMap.find(pinPos);
 

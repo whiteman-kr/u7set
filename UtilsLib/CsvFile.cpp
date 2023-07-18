@@ -23,6 +23,8 @@ QString CsvFile::stringsToCSV(const QStringList& strings, bool replaceSeparators
 	{
 		QString s = strings[i];
 
+		s.replace('\n', "\\n");
+
 		if (replaceSeparatorsAndQuotes == true)
 		{
 			s.replace(quotes, singleQuotes);
@@ -94,6 +96,7 @@ QStringList CsvFile::csvToStrings(const QString& csvSting)
 		const QRegularExpressionMatch match = matchIt.next();
 
 		QString s = match.capturedTexts().last();
+		s.replace("\\n", "\n");
 		s.replace(doubleQuotesStr, singleQuotesStr);
 		result.push_back(s);
 	}

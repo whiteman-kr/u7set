@@ -22,6 +22,7 @@ protected:
 
 	bool writeTuningSignals();
 	bool writeTestScripts();
+	bool writeReportTemplates();
 
 private:
 	QStringList m_tuningSources;

@@ -7,6 +7,7 @@
 #include "../OnlineLib/TcpClientStatistics.h"
 #include "TestLogTabPage.h"
 #include "TestViewTabPage.h"
+#include "DialogReport.h"
 
 #if __has_include("../gitlabci_version.h")
 #	include "../gitlabci_version.h"
@@ -38,7 +39,7 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 	margins.setTop(0);
 	layout->setContentsMargins(margins);
 
-	m_testLogTabPage = new TestLogTabPage(m_testLogOutput, this);
+	m_testLogTabPage = new TestLogTabPage(m_testSuite.testLog(), m_testLogOutput, this);
 	m_tabWidget->addTab(m_testLogTabPage, "Test Log");
 	m_tabWidget->tabBar()->setTabButton(0, QTabBar::RightSide, 0);	// This tab is not closable
 
@@ -48,12 +49,13 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 	//
 
 	createDocks();
-	createToolbar();
 	createActions();
+	createToolbar();
 	createMenu();
 	createStatusBar();
 
 	connect(&m_configController, &TestSuite::TestSuiteConfigController::configurationArrived, this, &TestSuiteMainWindow::onConfigurationArrived);
+	connect(&m_testSuite, &TestSuite::TestSuite::testFinished, m_testListWidget, &TestListWidget::onTestFinished);
 	connect(&m_testSuite, &TestSuite::TestSuite::finished, this, &TestSuiteMainWindow::onTestingFinished);
 
 	// Logs
@@ -141,13 +143,71 @@ void TestSuiteMainWindow::createToolbar()
 	m_toolBar = new QToolBar{"ToolBar"};
 	addToolBar(m_toolBar);
 
-	//m_openTestsAction = new QAction{QIcon(":/Images/Images/SimOpen.svg"), tr("Open Build"), this};
-	//m_openTestsAction->setShortcut(QKeySequence::Open);
-	//connect(m_openTestsAction, &QAction::triggered, this, &SimWidget::openBuild);
+	//
+	m_statusIndicator = new QLabel;
+	m_statusIndicator->setAlignment(Qt::AlignRight);
+	m_statusIndicator->setMinimumHeight(40);
 
-	//m_closeTestsAction = new QAction{QIcon(":/Images/Images/SimClose.svg"), tr("Close"), this};
-	//m_closeTestsAction->setShortcut(QKeySequence::Close);
-	//connect(m_closeTestsAction, &QAction::triggered, this, &SimWidget::closeBuild);
+#if defined(Q_OS_WIN)
+		QFont f = QFont("Consolas");
+#else
+		QFont f = QFont("Courier");
+#endif
+	m_statusIndicator->setFont(f);
+	updateStatusIndicator();
+
+	// --
+	//
+	m_toolBar->addAction(m_refreshTestsAction);
+
+	m_toolBar->addSeparator();
+	m_toolBar->addAction(m_runAction);
+	m_toolBar->addAction(m_stopAction);
+
+	m_toolBar->addSeparator();
+
+	m_toolBar->addAction(m_loadTestLogAction);
+	m_toolBar->addAction(m_saveTestLogAction);
+	m_toolBar->addAction(m_reportAction);
+
+	m_toolBar->addSeparator();
+
+	QWidget* spacer = new QWidget();
+	spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	m_toolBar->addWidget(spacer);
+
+	m_toolBar->addWidget(m_statusIndicator);
+
+	return;
+}
+
+void TestSuiteMainWindow::createActions()
+{
+	m_loadTestLogAction = new QAction(tr("Load Test Log..."), this);
+	m_loadTestLogAction->setStatusTip(tr("Load Test Log from file"));
+	m_loadTestLogAction->setIcon(QIcon(":/Images/Images/OpenLog.svg"));
+	m_loadTestLogAction->setEnabled(true);
+	connect(m_loadTestLogAction, &QAction::triggered, this, &TestSuiteMainWindow::onLoadTestLog);
+
+	m_saveTestLogAction = new QAction(tr("Save Test Log..."), this);
+	m_saveTestLogAction->setStatusTip(tr("Save Test Log to file"));
+	m_saveTestLogAction->setIcon(QIcon(":/Images/Images/SaveLog.svg"));
+	m_saveTestLogAction->setEnabled(true);
+	connect(m_saveTestLogAction, &QAction::triggered, this, &TestSuiteMainWindow::onSaveTestLog);
+
+	m_clearTestLogAction = new QAction(tr("Clear Test Log"), this);
+	m_clearTestLogAction->setStatusTip(tr("Clear Test Log"));
+	//m_pExitAction->setIcon(QIcon(":/Images/Images/Close.svg"));
+	m_clearTestLogAction->setEnabled(true);
+	connect(m_clearTestLogAction, &QAction::triggered, this, &TestSuiteMainWindow::onClearTestLog);
+
+    m_pExitAction = new QAction(tr("Exit"), this);
+	m_pExitAction->setStatusTip(tr("Quit the application"));
+	//m_pExitAction->setIcon(QIcon(":/Images/Images/Close.svg"));
+	m_pExitAction->setShortcut(QKeySequence::Quit);
+	m_pExitAction->setShortcutContext(Qt::ApplicationShortcut);
+	m_pExitAction->setEnabled(true);
+	connect(m_pExitAction, &QAction::triggered, this, &TestSuiteMainWindow::onExit);
 
 	m_refreshTestsAction = new QAction{QIcon(":/Images/Images/TestsRefresh.svg"), tr("Refresh"), this};
 	m_refreshTestsAction->setShortcut(QKeySequence::Refresh);
@@ -171,42 +231,8 @@ void TestSuiteMainWindow::createToolbar()
 
 	// --
 	//
-	m_timeIndicator = new QLabel;
-
-#if defined(Q_OS_WIN)
-		QFont f = QFont("Consolas");
-#else
-		QFont f = QFont("Courier");
-#endif
-	m_timeIndicator->setFont(f);
-	updateTimeIndicator(TestSuite::ControlStatus{});
-
-	// --
-	//
-//	m_toolBar->addAction(m_openProjectAction);
-//	m_toolBar->addAction(m_closeProjectAction);
-	m_toolBar->addAction(m_refreshTestsAction);
-
-	m_toolBar->addSeparator();
-	m_toolBar->addAction(m_runAction);
-	//m_toolBar->addAction(m_pauseAction);
-	m_toolBar->addAction(m_stopAction);
-
-	m_toolBar->addSeparator();
-	m_toolBar->addWidget(m_timeIndicator);
-
-	return;
-}
-
-void TestSuiteMainWindow::createActions()
-{
-	m_pExitAction = new QAction(tr("Exit"), this);
-	m_pExitAction->setStatusTip(tr("Quit the application"));
-	//m_pExitAction->setIcon(QIcon(":/Images/Images/Close.svg"));
-	m_pExitAction->setShortcut(QKeySequence::Quit);
-	m_pExitAction->setShortcutContext(Qt::ApplicationShortcut);
-	m_pExitAction->setEnabled(true);
-	connect(m_pExitAction, &QAction::triggered, this, &TestSuiteMainWindow::onExit);
+	m_reportAction = new QAction{QIcon(":/Images/Images/TestsReport.svg"), tr("Create Report"), this};
+	connect(m_reportAction, &QAction::triggered, this, &TestSuiteMainWindow::on_m_report_clicked);
 
 	m_pSettingsAction = new QAction(tr("Settings..."), this);
 	m_pSettingsAction->setStatusTip(tr("Change application settings"));
@@ -229,13 +255,8 @@ void TestSuiteMainWindow::createActions()
 	m_pAppLogAction->setStatusTip(tr("Show application log"));
 	connect(m_pAppLogAction, &QAction::triggered, this, &TestSuiteMainWindow::showAppLog);
 
-	/*m_pSignalLogAction = new QAction(tr("Signals Log..."), this);
-	m_pSignalLogAction->setStatusTip(tr("Show signals log"));
-	connect(m_pSignalLogAction, &QAction::triggered, this, &MainWindow::showSignalsLog);*/
-
 	m_aboutQtAction = new QAction(tr("About Qt..."), this);
 	m_aboutQtAction->setStatusTip(tr("Show Qt information"));
-	//m_pAboutAction->setEnabled(true);
 	connect(m_aboutQtAction, &QAction::triggered, this, &TestSuiteMainWindow::showAboutQt);
 
 	m_pAboutAction = new QAction(tr("About TestSuite..."), this);
@@ -257,7 +278,25 @@ void TestSuiteMainWindow::createMenu()
 	QMenu* pFileMenu = menuBar()->addMenu(tr("&File"));
 	pFileMenu->addAction(m_pExitAction);
 
-	// Tools
+	// Tests
+	//
+	QMenu* pTestsMenu = menuBar()->addMenu(tr("&Tests"));
+	pTestsMenu->addAction(m_runAction);
+	pTestsMenu->addAction(m_stopAction);
+
+	// Reports
+	//
+	QMenu* pReportsMenu = menuBar()->addMenu(tr("&Reports"));
+	pReportsMenu->addAction(m_loadTestLogAction);
+	pReportsMenu->addAction(m_saveTestLogAction);
+	pReportsMenu->addSeparator();
+	pReportsMenu->addAction(m_clearTestLogAction);
+    pReportsMenu->addSeparator();
+
+    m_reportsMenu = pReportsMenu->addMenu("Report");
+	m_reportsMenu->setEnabled(false);
+
+	// Service
 	//
 	QMenu* pServiceMenu = menuBar()->addMenu(tr("&Service"));
 	pServiceMenu->addAction(m_pSettingsAction);
@@ -515,7 +554,34 @@ void TestSuiteMainWindow::clearTestsTree()
 
 void TestSuiteMainWindow::fillTestsTree()
 {
-	m_testListWidget->updateTestsList(m_testScriptsStorage.scriptList());
+	m_testListWidget->updateTestsList(m_testScriptsStorage);
+}
+
+void TestSuiteMainWindow::createReportActions()
+{
+    Q_ASSERT(m_reportsMenu);
+    m_reportsMenu->clear();
+
+    for (QAction* a : m_reportActions)
+    {
+        delete a;
+    }
+    m_reportActions.clear();
+
+    for (const ReportLib::ReportTemplate& report : m_configController.reportTemplates().templates())
+    {
+        QAction* a = new QAction(report.caption(), this);
+        a->setStatusTip(tr("Generate report: %1").arg(report.caption()));
+        a->setEnabled(true);
+        connect(a, &QAction::triggered, this, [this, report](){
+            onGenerateReport(report.caption());
+        });
+
+        m_reportActions.push_back(a);
+        m_reportsMenu->addAction(a);
+    }
+
+    m_reportsMenu->setEnabled(m_reportActions.empty() == false);
 }
 
 void TestSuiteMainWindow::updateActionsState()
@@ -524,70 +590,108 @@ void TestSuiteMainWindow::updateActionsState()
 	m_stopAction->setEnabled(m_testSuite.isRunning());
 }
 
-void TestSuiteMainWindow::updateTimeIndicator(const TestSuite::ControlStatus& state)
+bool TestSuiteMainWindow::loadTestLog()
 {
-using namespace std::chrono;
+	QString fileName = QFileDialog::getOpenFileName(this,
+													tr("Load Test Log"),
+													QString(),
+													tr("TestSuite Log File (*.tsl);;CSV Files, semicolon separated (*.csv)"));
 
-	Q_ASSERT(m_timeIndicator);
-
-	milliseconds durration = duration_cast<milliseconds>(state.m_duration);
-
-	qint64 days = durration.count() / 1_day;
-	qint64 hours = (durration.count() % 1_day)  / 1_hour;
-	qint64 minutes = (durration.count() % 1_hour)  / 1_min;
-	qint64 seconds = (durration.count() % 1_min)  / 1_sec;
-	qint64 millisecond = durration.count() % 1_sec;
-
-	auto ms = duration_cast<milliseconds>(state.m_currentTime);
-	QDateTime utcOffset = QDateTime::currentDateTime();
-	TimeStamp plantTime{ms.count() + utcOffset.offsetFromUtc() * 1000};
-
-	QDateTime currentTime = plantTime.toDateTime();
-
-	if (currentTime.date().year() == 1970)
+	if (fileName.isEmpty() == true)
 	{
-		currentTime = QDateTime::currentDateTime();
+		return false;
 	}
 
-	QLocale locale;
+	QString errorMsg;
+	bool ok = m_testSuite.testLog().loadFromCSV(fileName, &errorMsg);
+	if (ok == false)
+	{
+		QMessageBox::critical(this, qAppName(), errorMsg);
+		return false;
+	}
 
-#if 1
-	// IF UNCOMMENTING THIS CODE
-	// and if you want to show milliseconds,
-	// THEN do not forget to send message more frequently
-	// in Sim::Control::processRun emit statusUpdate(ControlStatus{cd});
-	//
-	//        0d 00:20:03.580
-	//05/17/2020 15:18:59.335
+	m_testLogOutput.pushQueue(m_testSuite.testLog().items());
 
-	QString dateText = QString("%6 %7")
-					   .arg(locale.toString(currentTime.date(),  QLocale::FormatType::ShortFormat))
-					   .arg(currentTime.toString(QStringLiteral("hh:mm:ss.zzz")));
+	return true;
+}
 
-	QString text = tr("%1d %2:%3:%4.%5\n%6")
-					.arg(days, static_cast<int>(dateText.size()) - 14, 10, QChar(' '))
-					.arg(hours, 2, 10, QChar('0'))
-					.arg(minutes, 2, 10, QChar('0'))
-					.arg(seconds, 2, 10, QChar('0'))
-					.arg(millisecond, 3, 10, QChar('0'))
-					.arg(dateText);
-#else
-	//        0d 00:20:03
-	//05/17/2020 15:18:59
+bool TestSuiteMainWindow::saveTestLog()
+{
+	QString defaultFileName = QString("TestLog_%1.tsl").arg(QDateTime::currentDateTime().toString("ddMMyyyy_HHmmss"));
 
-	QString dateText = QString("%6 %7")
-					   .arg(locale.toString(currentTime.date(),  QLocale::FormatType::ShortFormat))
-					   .arg(currentTime.toString(QStringLiteral("hh:mm:ss")));
+	QString fileName = QFileDialog::getSaveFileName(this,
+													tr("Save Test Log"),
+													defaultFileName,
+													tr("TestSuite Log File (*.tsl);;CSV Files, semicolon separated (*.csv)"));
 
-	QString text = tr("%1d %2:%3:%4\n%6")
-					.arg(days, static_cast<int>(dateText.size()) - 10, 10, QChar(' '))
-					.arg(hours, 2, 10, QChar('0'))
-					.arg(minutes, 2, 10, QChar('0'))
-					.arg(seconds, 2, 10, QChar('0'))
-					.arg(dateText);
-#endif
+	if (fileName.isEmpty() == true)
+	{
+		return false;
+	}
 
-	m_timeIndicator->setText(text);
+	QString errorMsg;
+	bool ok = m_testSuite.testLog().saveToCSV(fileName, &errorMsg);
+	if (ok == false)
+	{
+		QMessageBox::critical(this, qAppName(), errorMsg);
+		return false;
+	}
+
+	return true;
+}
+
+void TestSuiteMainWindow::updateStatusIndicator()
+{
+	TestSuite::ControlStatus status = m_testSuite.status();
+
+	QString text;
+
+	switch(status.m_state)
+	{
+	case TestSuite::ControlState::Stop:
+		{
+			text = tr("Tests are not running.\n");
+		}
+		break;
+	case TestSuite::ControlState::RequestingConfiguration:
+		{
+			text = tr("Requesting test configuration...\n");
+		}
+		break;
+	case TestSuite::ControlState::InitInputController:
+		{
+			text = tr("Initializing input controller...\n");
+		}
+		break;
+	case TestSuite::ControlState::InitOutputController:
+		{
+			text = tr("Initializing output controller...");
+		}
+		break;
+	case TestSuite::ControlState::RunningTests:
+		{
+			text = tr("Running script file: %1 (%2 of %3)\nTest function: %4 (%5 of %6)")
+					.arg(status.m_scriptFile)
+					.arg(status.m_scriptIndex)
+					.arg(status.m_scriptCount)
+					.arg(status.m_testFunction)
+					.arg(status.m_testIndex)
+					.arg(status.m_testCount);
+		}
+		break;
+	case TestSuite::ControlState::CreatingReports:
+		{
+			text = tr("Creating reports...\n");
+		}
+		break;
+	default:
+		Q_ASSERT(false);
+	}
+
+	if (text != m_statusIndicator->text())
+	{
+		m_statusIndicator->setText(text);
+	}
 
 	return;
 }
@@ -612,6 +716,19 @@ bool TestSuiteMainWindow::eventFilter(QObject *object, QEvent *event)
 	return QWidget::eventFilter(object, event);
 }
 
+void TestSuiteMainWindow::closeEvent(QCloseEvent* event)
+{
+	if (m_testSuite.isRunning() == true)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Please stop testing before closing the application."));
+
+		event->ignore();
+		return;
+	}
+
+	event->accept();
+}
+
 void TestSuiteMainWindow::timerEvent(QTimerEvent* event)
 {
 	assert(event);
@@ -620,6 +737,8 @@ void TestSuiteMainWindow::timerEvent(QTimerEvent* event)
 	if  (event->timerId() == m_mainWindowTimerId_250ms)
 	{
 		updateStatusBar();
+
+		updateStatusIndicator();
 	}
 
 }
@@ -639,21 +758,28 @@ void TestSuiteMainWindow::on_m_run_clicked()
 
 	// Create a list of tests user has selected to run
 	//
-	QStringList scriptsToExecute = m_testListWidget->selectedTests();
+	TestSuite::TestScriptFilter filter;
+	m_testListWidget->fillTestScriptFilter(filter);
 
-	if (scriptsToExecute.isEmpty() == true)
+	QStringList scriptsFiles = filter.scriptFiles();
+	if (scriptsFiles.isEmpty() == true)
 	{
 		QMessageBox::warning(this, qAppName(), tr("Please choose at least one test to run."));
 		return;
 	}
 
-	m_testLogTabPage->clearOutputLog();
+	m_testSuite.testLog().clear();
+	m_testLogTabPage->clearOutputWidget();
+	m_testListWidget->clearTestsResults();
 
 	m_tabWidget->setCurrentIndex(0);
 
+
 	// Run tests
 	//
-	bool ok = m_testSuite.execute(scriptsToExecute, theSettings.useLocalScriptsPath() ? theSettings.localScriptsPath() : QString());
+	bool ok = m_testSuite.execute(scriptsFiles,
+								  theSettings.useLocalScriptsPath() ? theSettings.localScriptsPath() : QString(),
+								  filter);
 	if (ok == false)
 	{
 		return;
@@ -668,6 +794,45 @@ void TestSuiteMainWindow::on_m_stop_clicked()
 	{
 		m_testSuite.stop();
 	}
+}
+
+void TestSuiteMainWindow::on_m_report_clicked()
+{
+	if (m_testSuite.testLog().empty() == true)
+	{
+		if (QMessageBox::question(this, qAppName(),
+								  tr("Test log is empty. Do you want to load test log from file?")) == QMessageBox::Yes)
+		{
+			if (loadTestLog() == false)
+			{
+				return;
+			}
+		}
+		else
+		{
+			QMessageBox::critical(this, qAppName(), tr("No data exist for the report!"));
+			return;
+		}
+	}
+
+	DialogReport d(m_configController, m_testSuite.testLog(), this);
+	d.exec();
+}
+
+void TestSuiteMainWindow::onSaveTestLog()
+{
+	saveTestLog();
+}
+
+void TestSuiteMainWindow::onLoadTestLog()
+{
+	loadTestLog();
+}
+
+void TestSuiteMainWindow::onClearTestLog()
+{
+	m_testSuite.testLog().clear();
+	m_testLogTabPage->clearOutputWidget();
 }
 
 void TestSuiteMainWindow::onSettings()
@@ -835,6 +1000,30 @@ void TestSuiteMainWindow::onTabCloseRequested(int index)
 	m_tabWidget->removeTab(index);
 }
 
+void TestSuiteMainWindow::onGenerateReport(const QString& caption)
+{
+	if (m_testSuite.testLog().empty() == true)
+	{
+		if (QMessageBox::question(this, qAppName(),
+								  tr("Test log is empty. Do you want to load test log from file?")) == QMessageBox::Yes)
+		{
+			if (loadTestLog() == false)
+			{
+				return;
+			}
+		}
+		else
+		{
+			QMessageBox::critical(this, qAppName(), tr("No data exist for the report!"));
+			return;
+		}
+	}
+
+	TestSuite::TestReport::generateReport(m_configController.reportTemplates(), m_testSuite.testLog(), caption, this);
+
+    return;
+}
+
 void TestSuiteMainWindow::onConfigurationArrived()
 {
 	if (theSettings.useLocalScriptsPath() == false)
@@ -842,10 +1031,12 @@ void TestSuiteMainWindow::onConfigurationArrived()
 		loadScriptsFromConfiguration();
 	}
 
+    createReportActions();
+
 	return;
 }
 
-void TestSuiteMainWindow::onTestingFinished(int result)
+void TestSuiteMainWindow::onTestingFinished(int /*result*/)
 {
 	updateActionsState();
 }

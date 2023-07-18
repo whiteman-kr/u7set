@@ -4,6 +4,7 @@
 #include "ScriptTestLog.h"
 #include "TestScriptsStorage.h"
 #include "../UtilsLib/ILogFile.h"
+#include "ControlState.h"
 
 namespace TestSuite
 {
@@ -14,13 +15,18 @@ namespace TestSuite
 		Q_OBJECT
 
 	public:
-		ScriptRunner(TestController& testController, ITestLog& scriptTestLog);
+		ScriptRunner(TestController& testController, ITestLog& scriptTestLog, ControlStatus& status, QMutex& statusMutex);
 		virtual ~ScriptRunner();
 
 	public:
-		bool runScript(const TestScript& script);
+		bool getScriptTestFunctions(const TestScript& script, QStringList& functionsList, QString& errorMsg);
+		bool runScript(const TestScript& script, const TestScriptFilter& filter);
+
+	signals:
+		void testFinished(QString scriptFileName, QString testFunction, bool result);
 
 	private:
+		bool evaluateScript(const TestScript& script, const TestScriptFilter& filter, QStringList& functionsList, QString& errorMsg);
 		bool runScriptFunction(const QString& functionName);
 
 	private:
@@ -30,5 +36,8 @@ namespace TestSuite
 		QJSEngine m_jsEngine;
 		QJSValue m_jsTestController;
 		QJSValue m_jsLog;
+
+		ControlStatus& m_status;
+		QMutex& m_statusMutex;
 	};
 }

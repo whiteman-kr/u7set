@@ -32,7 +32,7 @@ SimSchemaPage::SimSchemaPage(std::shared_ptr<VFrame30::Schema> schema,
 	//
 	connect(&simulator->control(), &Sim::Control::stateChanged, this, &SimSchemaPage::controlStateChanged);
 
-	SimSchemaPage::controlStateChanged(simulator->control().state());	// Slots catches only changes of state, so init the firts time
+	SimSchemaPage::controlStateChanged(simulator->control().state());	// Slots catches only changes of state, so init the first time
 
 	return;
 }
@@ -50,9 +50,9 @@ QString SimSchemaPage::schemaId() const
 	return m_schemaWidget->schemaId();
 }
 
-const QStringList& SimSchemaPage::hightlightIds() const
+const QStringList& SimSchemaPage::highlightIds() const
 {
-	return m_schemaWidget->simSchemaView()->hightlightIds();
+	return m_schemaWidget->simSchemaView()->highlightIds();
 }
 
 void SimSchemaPage::setHighlightIds(const QStringList& value)

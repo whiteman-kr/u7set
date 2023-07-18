@@ -3,6 +3,7 @@
 #include "SpecificPropertiesEditor.h"
 #include "SvgEditor.h"
 #include "DbTagsEditor.h"
+#include "Reports/ReportPropertyEditor.h"
 
 //
 // IdePropertyEditorHelper
@@ -68,7 +69,14 @@ ExtWidgets::PropertyTextEditor* IdePropertyEditorHelper::createPropertyTextEdito
         return new IdeCodePropertyEditor(CodeType::JavaScript, parent);
 	}
 
-	return new ExtWidgets::PropertyPlainTextEditor(parent);
+    if (propertyPtr->specificEditor() == E::PropertySpecificEditor::Report)
+    {
+        // This is Report
+        //
+        return new ReportPropertyEditor(parent);
+    }
+
+    return new ExtWidgets::PropertyPlainTextEditor(parent);
 }
 
 bool IdePropertyEditorHelper::restorePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog)

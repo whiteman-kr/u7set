@@ -62,7 +62,7 @@ namespace TestSuite
 
 		/// \brief Remove all overriden signals.
 		/// <b>Note:</b> At least one work cycle must be run [startForMs(5)] to apply this function.
-		//void overridesReset();
+		void overridesReset();
 
 		/// \brief Checks if a LogicModule exists.
 		//bool logicModuleExists(QString equipmentId) const;

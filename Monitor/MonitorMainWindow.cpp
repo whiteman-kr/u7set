@@ -1010,7 +1010,7 @@ void MonitorMainWindow::showAbout()
 
 void MonitorMainWindow::showMatsUserManual()
 {
-	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/D11.8_FSC_MATS_User_Manual.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.8_FSC_MATS_User_Manual.pdf", this);
 }
 
 void MonitorMainWindow::devTools()

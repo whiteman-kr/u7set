@@ -85,7 +85,7 @@ void UiTools::adjustDialogPlacement(QDialog* dialog)
 	}
 }
 
-void UiTools::openHelp(const QString& file, QWidget* parent)
+void UiTools::openPdf(const QString& file, QWidget* parent)
 {
 	QFile f(file);
 	if (f.exists() == true)
@@ -95,7 +95,7 @@ void UiTools::openHelp(const QString& file, QWidget* parent)
 	}
 	else
 	{
-		QMessageBox::critical(parent, qAppName(), QObject::tr("Help file '%1' does not exist!").arg(file));
+		QMessageBox::critical(parent, qAppName(), QObject::tr("File '%1' does not exist!").arg(file));
 	}
 }
 

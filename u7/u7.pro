@@ -79,12 +79,14 @@ HEADERS  += \
     Locator/LocatorListWidget.h \
     Locator/LocatorProvider.h \
     Locator/SchemaLocatorProvider.h \
+    Reports/DialogSchemasExport.h \
+    Reports/DialogSchemasReport.h \
     Reports/ProjectDiffReport.h \
+    Reports/ReportPropertyEditor.h \
     SchemaEditor/EditSchemaSignalProvider.h \
     SchemaEditor/EditSchemaTabPage.h \
     SchemaEditor/SchemaControlTabPage.h \
     SchemaEditor/SchemasTabPage.h \
-    Reports/DialogReportFileTypeParams.h \
     Reports/SchemasReport.h \
     Simulator/ScriptSimApplication.h \
     Simulator/SimTuningConnection.h \
@@ -110,6 +112,7 @@ HEADERS  += \
 	../lib/WidgetUtils.h \
 	../lib/Ui/DialogAbout.h \
 	../lib/Ui/TextEditCompleter.h \
+	../lib/Ui/DialogWriteValues.h \
 	../lib/PropertyTable.h \
 	../Metrology/MetrologyConnection.h \
 	AppSignalSetProvider.h \
@@ -226,6 +229,7 @@ SOURCES +=\
 	../lib/Ui/DialogAbout.cpp \
 	../lib/WidgetUtils.cpp \
 	../lib/Ui/TextEditCompleter.cpp \
+	../lib/Ui/DialogWriteValues.cpp \
 	../lib/PropertyTable.cpp \
 	../Metrology/MetrologyConnection.cpp \
 	AppSignalSetProvider.cpp \
@@ -258,8 +262,10 @@ SOURCES +=\
 	MainTabPage.cpp \
 	MainWindow.cpp \
 	PasswordService.cpp \
-    Reports/DialogReportFileTypeParams.cpp \
+    Reports/DialogSchemasExport.cpp \
+    Reports/DialogSchemasReport.cpp \
     Reports/ProjectDiffReport.cpp \
+    Reports/ReportPropertyEditor.cpp \
     SchemaEditor/EditSchemaSignalProvider.cpp \
     SchemaEditor/EditSchemaTabPage.cpp \
     Reports/SchemasReport.cpp \
@@ -352,6 +358,7 @@ FORMS    += \
     Forms/DialogProjectDiff.ui \
     DialogTagsEditor.ui \
     LoginDialog.ui \
+    Reports/DialogSchemasExport.ui \
     Simulator/SimSelectBuildDialog.ui \
     UserManagementDialog.ui \
     CheckInDialog.ui \
@@ -452,6 +459,22 @@ LIBS += -L$$DESTDIR
 LIBS += -L.
 
 win32:LIBS += -lGdi32
+
+# ReportLib library
+#
+LIBS += -lReportLib
+win32:PRE_TARGETDEPS += $$DESTDIR/ReportLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libReportLib.a
+INCLUDEPATH += ../ReportLib
+DEPENDPATH += ../ReportLib
+
+# VFrame30 library
+#
+LIBS += -lVFrame30
+win32:PRE_TARGETDEPS += $$DESTDIR/VFrame30.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libVFrame30.a
+INCLUDEPATH += ../VFrame30
+DEPENDPATH += ../VFrame30
 
 # QtKeychain Lib
 #

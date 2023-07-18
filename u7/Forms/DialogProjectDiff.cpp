@@ -2,7 +2,7 @@
 #include "ui_DialogProjectDiff.h"
 #include "../../DbLib/DbController.h"
 #include "SelectChangesetDialog.h"
-#include "Reports/DialogReportFileTypeParams.h"
+#include "Reports/DialogSchemasReport.h"
 
 #include <QPageSetupDialog>
 #include <QPrinter>
@@ -74,18 +74,18 @@ DialogProjectDiff::DialogProjectDiff(DbController* db, QWidget *parent) :
 
 	// Select default file types if they are not selected
 	//
-	if (m_reportParams.fileTypeParams.empty() == true)
+	if (m_reportParams.schemaTypesParams.empty() == true)
 	{
-		m_reportParams.fileTypeParams = ProjectDiffGenerator::defaultFileTypeParams(db);
+		m_reportParams.schemaTypesParams = ProjectDiffGenerator::defaultFileTypeParams(db);
 	}
 
 	// Fill file types list
 	//
-	for (const ReportFileTypeParams& ft : m_reportParams.fileTypeParams)
+	for (const Builder::SchemaTypesParams& ft : m_reportParams.schemaTypesParams)
 	{
-		QListWidgetItem* item = new QListWidgetItem(tr("%1").arg(ft.caption));
+		QListWidgetItem* item = new QListWidgetItem(tr("%1").arg(ft.caption()));
 
-		if (ft.selected == true)
+		if (ft.selected() == true)
 		{
 			item->setCheckState(Qt::Checked);
 		}
@@ -259,7 +259,7 @@ void DialogProjectDiff::done(int r)
 
 	int selectedCount = 0;
 
-	if (ui->categoriesList->count() != m_reportParams.fileTypeParams.size())
+	if (ui->categoriesList->count() != m_reportParams.schemaTypesParams.size())
 	{
 		Q_ASSERT(false);
 		return;
@@ -269,8 +269,9 @@ void DialogProjectDiff::done(int r)
 	{
 		QListWidgetItem* item = ui->categoriesList->item(i);
 
-		m_reportParams.fileTypeParams[i].selected = item->checkState() == Qt::Checked;
-		if (m_reportParams.fileTypeParams[i].selected == true)
+		m_reportParams.schemaTypesParams[i].setSelected(item->checkState() == Qt::Checked);
+
+		if (m_reportParams.schemaTypesParams[i].selected() == true)
 		{
 			selectedCount++;
 		}
@@ -443,7 +444,7 @@ void DialogProjectDiff::on_pageSetupButton_clicked()
 
 	QPrinter printer(QPrinter::HighResolution);
 
-	QPageSize::PageSizeId id = QPageSize::id(m_reportParams.m_albumPageLayout.pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
+	QPageSize::PageSizeId id = QPageSize::id(m_reportParams.singleFilePageLayout.pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
 	if (id == QPageSize::Custom)
 	{
 		id = QPageSize::A4;
@@ -451,8 +452,8 @@ void DialogProjectDiff::on_pageSetupButton_clicked()
 
 	printer.setFullPage(true);
 	printer.setPageSize(QPageSize(id));
-	printer.setPageOrientation(m_reportParams.m_albumPageLayout.orientation());
-	printer.setPageMargins(m_reportParams.m_albumPageLayout.margins(), QPageLayout::Unit::Millimeter);
+	printer.setPageOrientation(m_reportParams.singleFilePageLayout.orientation());
+	printer.setPageMargins(m_reportParams.singleFilePageLayout.margins(), QPageLayout::Unit::Millimeter);
 
 	QPageSetupDialog d(&printer, this);
 	if (d.exec() != QDialog::Accepted)
@@ -462,9 +463,9 @@ void DialogProjectDiff::on_pageSetupButton_clicked()
 
 	id = QPageSize::id(d.printer()->pageLayout().pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
 
-	m_reportParams.m_albumPageLayout.setPageSize(QPageSize(id));
-	m_reportParams.m_albumPageLayout.setOrientation(d.printer()->pageLayout().orientation());
-	m_reportParams.m_albumPageLayout.setMargins(d.printer()->pageLayout().margins());
+	m_reportParams.singleFilePageLayout.setPageSize(QPageSize(id));
+	m_reportParams.singleFilePageLayout.setOrientation(d.printer()->pageLayout().orientation());
+	m_reportParams.singleFilePageLayout.setMargins(d.printer()->pageLayout().margins());
 
 	updatePageSizeInfo();
 
@@ -473,32 +474,35 @@ void DialogProjectDiff::on_pageSetupButton_clicked()
 
 void DialogProjectDiff::on_pageSetDefault_clicked()
 {
-	m_reportParams.m_albumPageLayout = QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, QMarginsF(15, 15, 15, 15));
+	m_reportParams.singleFilePageLayout = QPageLayout(QPageSize(QPageSize::A3),
+											QPageLayout::Orientation::Portrait,
+											QMarginsF(30, 20, 15, 20),
+											QPageLayout::Unit::Millimeter);
 	updatePageSizeInfo();
 	return;
 }
 
 void DialogProjectDiff::on_multiFilepageSetupButton_clicked()
 {
-	DialogReportFileTypeParams d(m_reportParams.fileTypeParams, ProjectDiffGenerator::defaultFileTypeParams(m_db), this);
+	DialogSchemasReportTypePageSetup d(m_reportParams.schemaTypesParams, ProjectDiffGenerator::defaultFileTypeParams(m_db), this);
 	if (d.exec() == QDialog::Accepted)
 	{
-		m_reportParams.fileTypeParams = d.fileTypeParams();
+		m_reportParams.schemaTypesParams = d.schemaTypesParams();
 	}
 }
 
 void DialogProjectDiff::updatePageSizeInfo()
 {
-	QPageSize::PageSizeId id = QPageSize::id(m_reportParams.m_albumPageLayout.pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
+	QPageSize::PageSizeId id = QPageSize::id(m_reportParams.singleFilePageLayout.pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
 	if (id == QPageSize::Custom)
 	{
 		id = QPageSize::A4;
 	}
 
 	ui->labelPageSize->setText(tr("Page Size: %1, %2").arg(QPageSize(id).name())
-							   .arg(m_reportParams.m_albumPageLayout.orientation() == QPageLayout::Portrait ? tr("Portrait") : tr("Landscape")));
+							   .arg(m_reportParams.singleFilePageLayout.orientation() == QPageLayout::Portrait ? tr("Portrait") : tr("Landscape")));
 
-	QMarginsF margins = m_reportParams.m_albumPageLayout.margins();
+	QMarginsF margins = m_reportParams.singleFilePageLayout.margins();
 	ui->labelPageMargins->setText(tr("Page margins, mm: l%1 t%2 r%3 b%4").arg(margins.left()).arg(margins.top()).arg(margins.right()).arg(margins.bottom()));
 
 	return;

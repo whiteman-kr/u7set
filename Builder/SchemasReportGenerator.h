@@ -1,0 +1,196 @@
+#pragma once
+
+#include "../ReportLib/ReportAppSignalProvider.h"
+#include "../ReportLib/Report.h"
+#include "../DbLib/DbController.h"
+
+namespace Builder
+{
+	//
+	// SchemasReportOptions
+	//
+
+	struct SchemasReportOptions
+	{
+		bool load(DbController* db);
+		bool save(DbController* db);
+
+		bool addPageNumbers = false;
+		bool infoMode = false;
+		bool addLogicSchemaDetails = false;
+	};
+
+	//
+	// SchemasReportFileTypeParams
+	//
+
+	class SchemaTypesParams
+	{
+	public:
+		SchemaTypesParams(int fileId, const QString& caption, bool selected, QPageLayout pageLayout);
+
+		int fileId() const;
+		const QString& caption() const;
+
+		bool selected() const;
+		void setSelected(bool value);
+
+		const QPageLayout& pageLayout() const;
+		void setPageLayout(const QPageLayout& layout);
+
+	private:
+		int m_fileId = -1;
+		QString m_caption;
+		bool m_selected = false;
+
+		// Multiple-file report section page options
+		//
+		QPageLayout m_pageLayout;
+	};
+
+	//
+	// SchemasReportGenerator
+	//
+
+	class SchemasReportGenerator : public QObject
+	{
+		Q_OBJECT
+
+	public:
+		SchemasReportGenerator(std::shared_ptr<ReportLib::ReportSchemaView> schemaView,
+							   const AppSignalSet* signalSet,
+							   const QString& serverIp,
+							   int serverPort,
+							   const QString& serverUserName,
+							   const QString& serverPassword,
+							   const QString& projectName,
+							   const QString& userName,
+							   const QString& userPassword,
+							   std::vector<DbFileInfo> files,
+							   const QString& filePath,
+							   const SchemasReportOptions& options,
+							   const std::vector<SchemaTypesParams>& schemaTypesParams);
+
+		virtual ~SchemasReportGenerator();
+
+		static std::vector<SchemaTypesParams> defaultFileTypesParams(DbController* db);
+
+	public slots:
+		void exportFilesToMultiplePdf();
+		void exportFilesToSinglePdf();
+		void exportAllSchemasToAlbums();
+
+		void stop();
+		void progressRequested();
+
+		void getProgress(int* progress, int* progressMin, int* progressMax, QString* progressText);
+
+	signals:
+		void progressChanged(int progress, int progressMin, int progressMax, const QString& progressText);
+		void finished(const QString& errorMessage);
+
+	public:
+		// Access to output data. Output data is filled if fileName is empty
+		//
+		QStringList outputFilesList() const;
+		const QByteArray& outputData(const QString& fileName);
+
+	public:
+		// Statistics data
+		//
+		enum class WorkerStatus
+		{
+			Idle,
+			Loading,
+			Parsing,
+			Rendering
+		};
+		struct Statistics
+		{
+			WorkerStatus m_currentStatus = WorkerStatus::Idle;
+			int m_schemasCount = 0;	// Calculated after text rendering
+			int m_schemaIndex = 0;
+			QString m_currentSchemaType;
+			QString m_currentSchemaId;
+		};
+
+		Statistics statistics() const;
+
+	private:
+		struct SchemaFilesGroup
+		{
+			SchemaFilesGroup(int fileId, const QString& caption)
+			{
+				this->fileId = fileId;
+				this->caption = caption;
+			}
+
+			int fileId = -1;
+			QString caption;
+
+			std::vector<DbFileInfo> schemasFiles;
+			std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas;	// Key is full path to schema file
+		};
+
+	private:
+		DbController* db();
+		const QString& filePath() const;
+
+		void openProject();
+		void closeProject();
+
+		void loadSchemas(const std::vector<DbFileInfo>& files, std::map<QString, std::shared_ptr<VFrame30::Schema>>& schemas, VFrame30::SchemaDetailsSet& detailsSet);
+		void renderSchemas(const SchemaFilesGroup& sfg, const VFrame30::SchemaDetailsSet& detailsSet);
+		void clearSchemas(SchemaFilesGroup& sfg);
+
+		[[nodiscard]] QPageLayout getSchemaPageLayout(const std::shared_ptr<VFrame30::Schema>& schema) const;
+		void createSchemaDetailsSection(std::shared_ptr<ReportLib::ReportSection> section, const std::shared_ptr<VFrame30::Schema>& schema, const VFrame30::SchemaDetailsSet& detailsSet);
+
+
+	private:
+		DbController m_db;
+		const std::shared_ptr<ReportLib::ReportSchemaView> m_schemaView;
+
+		ReportLib::ReportAppSignalProvider m_appSignalProvider;
+		VFrame30::AppSignalController m_appSignalController;
+
+		// Report options, page sizes for different file groups etc
+		//
+		SchemasReportOptions m_options;
+		std::vector<SchemaTypesParams> m_schemaTypesParams;
+
+		// Input files for exportFilesToPdf() and exportFilesToAlbum()
+		//
+		std::vector<DbFileInfo> m_inputFiles;
+
+		// Output file path
+		//
+		QString m_filePath;
+
+		// Output Data
+		//
+		std::map<QString, QByteArray> m_outputData;
+
+		// Report parameters
+
+		std::atomic_bool m_stop = false;	// Stop processing flag, set by stop()
+
+		// Connection information
+
+		QString m_serverIp;
+		int m_serverPort = -1;
+		QString m_serverUserName;
+		QString m_serverPassword;
+
+		QString m_projectName;
+		QString m_userName;
+		QString m_userPassword;
+
+		ReportLib::ReportFont m_tableFont;
+		ReportLib::ReportFont m_marginFont;
+
+		mutable QMutex m_statisticsMutex;
+		Statistics m_statistics;
+
+	};
+}

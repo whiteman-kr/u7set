@@ -1,6 +1,4 @@
-QT -= gui
-
-QT += qml xml testlib
+QT += gui widgets qml xml testlib
 
 TARGET = TestSuiteLib
 
@@ -53,6 +51,7 @@ SOURCES += \
     ScriptTestLog.cpp \
     TestController.cpp \
     TestLog.cpp \
+    TestReport.cpp \
     TestScriptsStorage.cpp \
     TestSuite.cpp \
     TestSuiteConfigController.cpp \
@@ -62,6 +61,7 @@ SOURCES += \
 HEADERS += \
     AdsInputController.h \
     Control.h \
+    ControlState.h \
     IInputController.h \
     IOutputController.h \
     ScriptRunner.h \
@@ -69,6 +69,7 @@ HEADERS += \
     Stable.h \
     TestController.h \
     TestLog.h \
+    TestReport.h \
     TestScriptsStorage.h \
     TestSuite.h \
     TestSuiteConfigController.h \

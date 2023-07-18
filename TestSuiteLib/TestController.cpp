@@ -127,6 +127,12 @@ namespace TestSuite
 		return m_inputController.expectSignalValue(appSignalId, value, timeoutMs);
 	}
 
+	void TestController::overridesReset()
+	{
+		int todo_implement_TestController_overridesReset = 1;
+		throwScriptException(this, tr("TestController::overridesReset() is not yet implemented in TestSuite!"));
+	}
+
 	bool TestController::signalExists(QString appSignalId) const
 	{
 		return m_inputController.signalExists(appSignalId);

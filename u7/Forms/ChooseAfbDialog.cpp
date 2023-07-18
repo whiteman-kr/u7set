@@ -337,5 +337,5 @@ void AfbHelpWidget::setAfb(std::shared_ptr<Afb::AfbElement> afb)
 
 void ChooseAfbDialog::on_btnAfbLibraryHelp_clicked()
 {
-	UiTools::openHelp(QApplication::applicationDirPath() + "/docs/D11.5_AFBL_RM.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath() + "/docs/D11.5_AFBL_RM.pdf", this);
 }

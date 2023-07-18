@@ -570,7 +570,7 @@ namespace VFrame30
 					auto startTimePreDraw = std::chrono::system_clock::now();
 
 					// Call preDrawEvent for all items, even if they out of screen
-					// Some items preDrawEvents may have scipt for caching reasons
+					// Some items preDrawEvents may have script for caching reasons
 					//
 					bool mbe = clientView->setScriptMessageBoxAllowed(false);
 
@@ -594,8 +594,8 @@ namespace VFrame30
 					{
 						using namespace std::chrono;
 						auto now = system_clock::now();
-						auto ellapsed = duration_cast<microseconds>(now - startTimePreDraw);
-						drawParam->timeStats()->addRecord(schemaId(), item->label(), "preDrawEvent", ellapsed);
+						auto elapsed = duration_cast<microseconds>(now - startTimePreDraw);
+						drawParam->timeStats()->addRecord(schemaId(), item->label(), "preDrawEvent", elapsed);
 					}
 				}
 
@@ -632,8 +632,8 @@ namespace VFrame30
 					{
 						using namespace std::chrono;
 						auto now = system_clock::now();
-						auto ellapsed = duration_cast<microseconds>(now - startTimeDraw);
-						drawParam->timeStats()->addRecord(schemaId(), item->label(), "draw", ellapsed);
+						auto elapsed = duration_cast<microseconds>(now - startTimeDraw);
+						drawParam->timeStats()->addRecord(schemaId(), item->label(), "draw", elapsed);
 					}
 				}
 			}
@@ -668,9 +668,9 @@ namespace VFrame30
 			using namespace std::chrono;
 
 			auto now = system_clock::now();
-			auto ellapsed = duration_cast<microseconds>(now - startTime);
+			auto elapsed = duration_cast<microseconds>(now - startTime);
 
-			drawParam->timeStats()->addRecord("Schema", schemaId(), "Draw", ellapsed);
+			drawParam->timeStats()->addRecord("Schema", schemaId(), "Draw", elapsed);
 		}
 
 #if 0
@@ -2107,7 +2107,7 @@ namespace VFrame30
 
 		if (parseError.error != QJsonParseError::NoError)
 		{
-			qDebug() << "Schema details pasing error: " << parseError.errorString();
+			qDebug() << "Schema details parsing error: " << parseError.errorString();
 			qDebug() << "JSON document: " << details;
 			return false;
 		}
@@ -2142,7 +2142,7 @@ namespace VFrame30
 				//
 				m_caption = jsonObject.value(QLatin1String("Caption")).toString();
 
-				// ExcludedeFromBuild
+				// ExcludedFromBuild
 				//
 				QJsonValue excFromBuild = jsonObject.value(QLatin1String("ExcludedFromBuild"));
 				if (excFromBuild.isUndefined() == false && excFromBuild.isBool() == true)

@@ -52,6 +52,7 @@ CONFIG(release, debug|release) {
 
 
 SOURCES +=\
+    ../lib/Ui/DialogWriteValues.cpp \
     ../lib/ClientBehavior.cpp \
     ../lib/Ui/DialogTcpStatistics.cpp \
     LogonWorkspace.cpp \
@@ -88,6 +89,7 @@ SOURCES +=\
     SwitchFiltersPageOptions.cpp
 
 HEADERS  += MainWindow.h \
+    ../lib/Ui/DialogWriteValues.h \
     ../lib/ClientBehavior.h \
     ../lib/ConstStrings.h \
 	../UtilsLib/ILogFile.h \

@@ -378,7 +378,7 @@ namespace VFrame30
 		drawParam.setBlinkPhase(static_cast<bool>((QTime::currentTime().msec() / 250) % 2));	// 0-249 : false, 250-499 : true, 500-749 : false, 750-999 : true
 		drawParam.setInfoMode(m_infoMode);
 
-		drawParam.setHightlightIds(hightlightIds());
+		drawParam.setHighlightIds(highlightIds());
 
 		// Draw schema
 		//
@@ -680,7 +680,7 @@ namespace VFrame30
 		m_infoMode = value;
 	}
 
-	const QStringList& ClientSchemaView::hightlightIds() const
+	const QStringList& ClientSchemaView::highlightIds() const
 	{
 		return m_highlightIds;
 	}
@@ -913,7 +913,7 @@ namespace VFrame30
 			logController()->writeError(message);
 		}
 
-		if (m_alloScriptMessageBox == true)
+		if (m_allowScriptMessageBox == true)
 		{
 			QMessageBox::critical(this, QApplication::applicationDisplayName(), message);
 		}
@@ -923,13 +923,13 @@ namespace VFrame30
 
 	bool ClientSchemaView::scriptMessageBoxAllowed() const
 	{
-		return m_alloScriptMessageBox;
+		return m_allowScriptMessageBox;
 	}
 
 	bool ClientSchemaView::setScriptMessageBoxAllowed(bool enable)
 	{
-		bool prevState = m_alloScriptMessageBox;
-		m_alloScriptMessageBox = enable;
+		bool prevState = m_allowScriptMessageBox;
+		m_allowScriptMessageBox = enable;
 
 		return prevState;
 	}
@@ -969,7 +969,7 @@ namespace VFrame30
 		return m_timeStats;
 	}
 
-	const MonitorBehavior& ClientSchemaView::monitorBehavor() const noexcept
+	const MonitorBehavior& ClientSchemaView::monitorBehavior() const noexcept
 	{
 		return m_monitorBehavior;
 	}

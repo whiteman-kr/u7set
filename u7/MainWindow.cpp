@@ -24,6 +24,7 @@
 #include "GlobalMessanger.h"
 #include "Forms/DialogProjectDiff.h"
 #include "Reports/SchemasReport.h"
+#include "Reports/DialogSchemasReport.h"
 #include "DialogShortcuts.h"
 #include "./Forms/FileHistoryDialog.h"
 #include "./Forms/ProjectPropertiesForm.h"
@@ -735,47 +736,47 @@ void MainWindow::showShortcuts()
 
 void MainWindow::showRpctUserManual()
 {
-	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/D11.6_RPCT-UM.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.6_RPCT-UM.pdf", this);
 }
 
 void MainWindow::showRpctInstallManual()
 {
-	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/Installing and configuring RPCT.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/Installing and configuring RPCT.pdf", this);
 }
 
 void MainWindow::showRpctQuickStart()
 {
-	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/RPCT Quick Start Guide.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/RPCT Quick Start Guide.pdf", this);
 }
 
 void MainWindow::showRpctUserManualAppendixA()
 {
-	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/Appendixes/D11.6 RPCT User Manual Appendix A Warnings and Errors List.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/Appendixes/D11.6 RPCT User Manual Appendix A Warnings and Errors List.pdf", this);
 }
 
 void MainWindow::showRpctUserManualAppendixB()
 {
-	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/Appendixes/D11.6 RPCT User Manual Appendix B Build Directory and Output Bitstream File Description.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/Appendixes/D11.6 RPCT User Manual Appendix B Build Directory and Output Bitstream File Description.pdf", this);
 }
 
 void MainWindow::showAfblReference()
 {
-	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/D11.5_AFBL_RM.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.5_AFBL_RM.pdf", this);
 }
 
 void MainWindow::showScriptHelp()
 {
-	UiTools::openHelp(QApplication::applicationDirPath()+"/scripthelp/index.html", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/scripthelp/index.html", this);
 }
 
 void MainWindow::showMatsUserManual()
 {
-	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/D11.8_FSC_MATS_User_Manual.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.8_FSC_MATS_User_Manual.pdf", this);
 }
 
 void MainWindow::showTuningUserManual()
 {
-	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/D11.9_FSC_Tuning_User_Manual.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.9_FSC_Tuning_User_Manual.pdf", this);
 }
 
 
@@ -1307,16 +1308,32 @@ void MainWindow::createSchemasAlbums()
 {
 	QString albumPath = QSettings{}.value("MainWindow/Export/AlbumPath").toString();
 
-	static std::vector<ReportFileTypeParams> albumFileTypeParams = {};
-	if (albumFileTypeParams.empty() == true)
+	static std::vector<Builder::SchemaTypesParams> schemaTypesParams = {};
+	if (schemaTypesParams.empty() == true)
 	{
-		albumFileTypeParams = SchemasReportGenerator::defaultFileTypeParams(db());
+		schemaTypesParams = Builder::SchemasReportGenerator::defaultFileTypesParams(db());
 	}
 
-	if (SchemasReportDialog::getReportFilesPath(&albumPath, &albumFileTypeParams, SchemasReportGenerator::defaultFileTypeParams(db()), this) == false)
+	Builder::SchemasReportOptions storedOptions;
+	storedOptions.load(db());
+
+	Builder::SchemasReportOptions options;
+	options.addPageNumbers = true;	// When loading and storing options, keep addPageNumbers unchanged!
+	options.infoMode = storedOptions.infoMode;
+	options.addLogicSchemaDetails = storedOptions.addLogicSchemaDetails;
+
+	DialogSchemasReport d(albumPath, schemaTypesParams,
+						  Builder::SchemasReportGenerator::defaultFileTypesParams(db()), options, this);
+	if (d.exec() != QDialog::Accepted)
 	{
 		return;
 	}
+	schemaTypesParams = d.schemaTypesParams();
+	options = d.options();
+
+	storedOptions.infoMode = options.infoMode;
+	storedOptions.addLogicSchemaDetails = options.addLogicSchemaDetails;
+	storedOptions.save(db());
 
 	QSettings{}.setValue("MainWindow/Export/AlbumPath", albumPath);
 
@@ -1328,9 +1345,11 @@ void MainWindow::createSchemasAlbums()
 								   db()->currentUser().username(),
 								   db()->currentUser().password(),
 								   &m_signalSetProvider->signalSet(),
-								   this);
+								   this,
+								   options,
+								   schemaTypesParams);
 
-	r.exportAllSchemasToAlbum(albumPath, albumFileTypeParams);
+	r.exportAllSchemasToAlbum(albumPath);
 	return;
 }
 

@@ -46,13 +46,23 @@ namespace Log
 
 	const QString messageTimeFormat("dd.MM.yyyy hh:mm:ss.zzz");
 
+	void replaceStringInPlace(std::string& subject, const std::string& search, const std::string& replace)
+	{
+		size_t pos = 0;
+		while ((pos = subject.find(search, pos)) != std::string::npos)
+		{
+			 subject.replace(pos, search.length(), replace);
+			 pos += replace.length();
+		}
+	}
+
 	QString LogFileRecord::toString(const QString& sessionHashString) const
 	{
 		if (type == MessageType::Text)
 		{
 			return QString("%1\t%2\r\n")
 					.arg(sessionHashString)
-					.arg(QString::fromLocal8Bit(text.c_str()));
+					.arg(QString::fromLocal8Bit(text.c_str()).replace('\n', "\\n"));
 		}
 
 		size_t intType = static_cast<int>(type);
@@ -66,7 +76,7 @@ namespace Log
 				.arg(sessionHashString)
 				.arg(QDateTime().fromMSecsSinceEpoch(time).toString(messageTimeFormat))
 				.arg(messageTypeTextShort[intType])
-				.arg(QString::fromLocal8Bit(text.c_str()));
+				.arg(QString::fromLocal8Bit(text.c_str()).replace('\n', "\\n"));
 	}
 
     bool LogFileRecord::loadFromString(const char* buf, const qint64 bufSize, const quint64 currentSessionHash)
@@ -243,6 +253,7 @@ namespace Log
 			}
 
 			text.assign(ptr, strLen);
+			replaceStringInPlace(text, "\\n", "\n");
 			return true;
 		}
 
@@ -322,6 +333,7 @@ namespace Log
 			return false;
 		}
 		text.assign(ptr, strLen - 1/*remove last \n*/);
+		replaceStringInPlace(text, "\\n", "\n");
 		return true;
 	}
 
@@ -1491,7 +1503,7 @@ namespace Log
 				}
 				else
 				{
-                    return QString::fromLocal8Bit(rec.text.c_str());
+					return QString::fromLocal8Bit(rec.text.c_str()).replace('\n', ' ');
 				}
 			}
 		}
@@ -1508,6 +1520,17 @@ namespace Log
 				return QBrush{qRgb(0xF8, 0x72, 0x17)};
 			default:
 				return {};
+			}
+		}
+
+		if (role == Qt::ToolTipRole)
+		{
+			// Display tooltip only for text if it contains '\n'
+			if (static_cast<int>(column) >= m_columnText &&
+					rec.type != MessageType::Data &&
+					rec.text.find('\n') != std::string::npos)
+			{
+				return QString::fromLocal8Bit(rec.text.c_str());
 			}
 		}
 
@@ -2224,10 +2247,10 @@ namespace Log
         m_counterLabel->setText(tr("Total records: %1, Errors: %2, Warnings: %3").arg(m_proxyModel.rowCount()).arg(m_proxyModel.errorCount()).arg(m_proxyModel.warningCount()));
 
         if (m_autoScroll->isChecked() == true)
-        {
-            m_table->scrollToBottom();
+		{
+			m_table->scrollToBottom();
         }
-    }
+	}
 
     void LogFileDialog::onLoadComplete()
 	{
@@ -2250,6 +2273,8 @@ namespace Log
         }
 
         enableControls(true);
+
+		m_table->scrollToBottom();
 	}
 
 	void LogFileDialog::onRecordArrived(LogFileRecord record)

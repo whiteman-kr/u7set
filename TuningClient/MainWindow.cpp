@@ -1235,7 +1235,7 @@ void MainWindow::showAbout()
 
 void MainWindow::showTuningUserManual()
 {
-	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/D11.9_FSC_Tuning_User_Manual.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.9_FSC_Tuning_User_Manual.pdf", this);
 }
 
 void MainWindow::slot_userFiltersChanged()

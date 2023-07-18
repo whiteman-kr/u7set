@@ -136,7 +136,7 @@ void EditSchemaView::paintEvent(QPaintEvent* paintEvent)
 	//
 	p.setRenderHint(QPainter::Antialiasing);
 
-	// Ajust QPainter
+	// Adjust QPainter
 	//
 	Ajust(&p, schema()->unit(), 0, 0, zoom());
 
@@ -177,6 +177,10 @@ void EditSchemaView::paintEvent(QPaintEvent* paintEvent)
 	// Items are being moved drawing
 	//
 	drawMovingItems(&drawParam);
+
+	// Draw proposed auto connections.
+	//
+	drawAutoFblItemConnection(drawParam);
 
 	// --
 	//
@@ -838,7 +842,7 @@ void EditSchemaView::drawMovingLinePoint(VFrame30::CDrawParam* drawParam)
 	//
 	VFrame30::SchemaItem::drawOutline(drawParam, m_selectedItems);
 
-	// Resotore points
+	// Restore points
 	//
 	si->setPointList(oldPos);
 
@@ -987,6 +991,31 @@ void EditSchemaView::drawCompareOutlines(VFrame30::CDrawParam* drawParam, const 
 		}
 	}
 
+}
+
+void EditSchemaView::drawAutoFblItemConnection(VFrame30::CDrawParam& drawParam)
+{
+	QPainter* painter = drawParam.painter();
+	
+	QPen pen{Qt::darkGray};
+	pen.setCosmetic(true);
+	pen.setStyle(Qt::PenStyle::DashLine);
+
+	painter->setPen(pen);
+	painter->setBrush(QColor{0xF0, 0xF0, 0xF0, 0xE0});
+
+	static const VFrame30::FontParam font{"Arial", 1.0 / 8.0, false, false};
+
+	for (auto lines = m_autoFblItemConnection.getPropositions();
+		 const auto& line : lines)
+	{
+		painter->drawLine(line.from, line.to);
+		painter->drawRect(line.addButtonRect);
+
+		VFrame30::DrawHelper::drawText(painter, font, SchemaUnit::Inch, "+", line.addButtonRect, Qt::AlignCenter);
+	}
+
+	return;
 }
 
 void EditSchemaView::drawGrid(QPainter* p, const QRectF& clipRect)
@@ -1496,7 +1525,7 @@ void EditSchemaView::setSelectedItems(const std::vector<SchemaItemPtr>& items)
 		}
 	}
 
-	// Check if the selected items are the same, don't do anything and don't emit selectionCanged
+	// Check if the selected items are the same, don't do anything and don't emit selectionChanged
 	//
 	if (uniqueItems.size() == m_selectedItems.size())
 	{
@@ -1521,6 +1550,8 @@ void EditSchemaView::setSelectedItems(const std::vector<SchemaItemPtr>& items)
 	// Set new selection
 	//
 	m_selectedItems = uniqueItems;
+
+	m_autoFblItemConnection.setItems(m_selectedItems);
 
 	emit selectionChanged();
 
@@ -1555,6 +1586,8 @@ void EditSchemaView::setSelectedItems(const std::list<SchemaItemPtr>& items)
 	//
 	m_selectedItems.clear();
 	m_selectedItems.insert(m_selectedItems.begin(), items.begin(), items.end());
+	
+	m_autoFblItemConnection.setItems(m_selectedItems);
 
 	emit selectionChanged();
 
@@ -1571,6 +1604,8 @@ void EditSchemaView::setSelectedItem(const SchemaItemPtr& item)
 	m_selectedItems.clear();
 	m_selectedItems.push_back(item);
 
+	m_autoFblItemConnection.setItems(m_selectedItems);
+
 	emit selectionChanged();
 
 	return;
@@ -1583,6 +1618,7 @@ void EditSchemaView::addSelection(const SchemaItemPtr& item, bool emitSectionCha
 	if (fp == std::end(m_selectedItems))
 	{
 		m_selectedItems.push_back(item);
+		m_autoFblItemConnection.setItems(m_selectedItems);
 
 		if (emitSectionChanged == true)
 		{
@@ -1601,6 +1637,8 @@ void EditSchemaView::clearSelection()
 	}
 
 	m_selectedItems.clear();
+	m_autoFblItemConnection.setItems(m_selectedItems);
+
 	emit selectionChanged();
 
 	return;
@@ -1613,6 +1651,7 @@ bool EditSchemaView::removeFromSelection(const SchemaItemPtr& item, bool emitSec
 	if (findResult != m_selectedItems.end())
 	{
 		m_selectedItems.erase(findResult);
+		m_autoFblItemConnection.setItems(m_selectedItems);
 
 		if (emitSectionChanged == true)
 		{

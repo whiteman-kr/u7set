@@ -1,4 +1,4 @@
-QT += core gui widgets sql network qml xml testlib
+QT += core gui widgets sql network qml xml svg testlib
 
 
 TARGET = TestSuite
@@ -43,6 +43,7 @@ RESOURCES += \
     Resources.qrc
 
 SOURCES += \
+    ../lib/ClientBehavior.cpp \
     ../lib/CodeEditor.cpp \
     ../lib/Ui/DialogAbout.cpp \
     ../lib/Ui/DialogAlert.cpp \
@@ -50,6 +51,7 @@ SOURCES += \
     ../lib/Ui/TabWidgetEx.cpp \
     AppConfigSettings.cpp \
     AppLogOutputWidget.cpp \
+    DialogReport.cpp \
     TestListWidget.cpp \
     TestLogTabPage.cpp \
     TestSuiteDialogSettings.cpp \
@@ -59,6 +61,7 @@ SOURCES += \
     TestSuiteMainWindow.cpp
 
 HEADERS += \
+    ../lib/ClientBehavior.h \
     ../lib/CodeEditor.h \
     ../lib/Ui/DialogAbout.h \
     ../lib/Ui/DialogAlert.h \
@@ -66,6 +69,7 @@ HEADERS += \
     ../lib/Ui/TabWidgetEx.h \
     AppConfigSettings.h \
     AppLogOutputWidget.h \
+    DialogReport.h \
     TestListWidget.h \
     TestLogTabPage.h \
     TestSuiteDialogSettings.h \
@@ -74,6 +78,7 @@ HEADERS += \
     TestViewTabPage.h
 
 FORMS += \
+    DialogReport.ui \
     TestSuiteDialogSettings.ui
 
 # Add curent dir to a list of library directory paths
@@ -92,6 +97,30 @@ win32:PRE_TARGETDEPS += $$DESTDIR/TestSuiteLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libTestSuiteLib.a
 INCLUDEPATH += $$PWD/../TestSuiteLib
 DEPENDPATH += $$PWD/../TestSuiteLib
+
+# ReportLib
+#
+LIBS += -lReportLib
+win32:PRE_TARGETDEPS += $$DESTDIR/ReportLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libReportLib.a
+INCLUDEPATH += $$PWD/../ReportLib
+DEPENDPATH += $$PWD/../ReportLib
+
+s# VFrame30 library
+#
+LIBS += -lVFrame30
+win32:PRE_TARGETDEPS += $$DESTDIR/VFrame30.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libVFrame30.a
+INCLUDEPATH += ../VFrame30
+DEPENDPATH += ../VFrame30
+
+# TrendView library
+#
+LIBS += -lTrendView
+win32:PRE_TARGETDEPS += $$DESTDIR/TrendView.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libTrendView.a
+INCLUDEPATH += $$PWD/../TrendView
+DEPENDPATH += $$PWD/../TrendView
 
 # ClientLib
 #

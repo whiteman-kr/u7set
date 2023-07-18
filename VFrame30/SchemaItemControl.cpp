@@ -188,7 +188,7 @@ namespace VFrame30
 		return;
 	}
 
-	void SchemaItemControl::updateWdgetPosAndSize(QWidget* widget, double zoom)
+	void SchemaItemControl::updateWidgetPosAndSize(QWidget* widget, double zoom)
 	{
 		if (widget == nullptr)
 		{

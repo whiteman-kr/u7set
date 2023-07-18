@@ -1,5 +1,10 @@
 #pragma once
 
+#include <memory>
+#include <algorithm>
+#include <set>
+#include <cassert>
+
 // Qt includes
 //
 #ifdef _MSC_VER
@@ -18,6 +23,7 @@
 #include <QJSValue>
 #include <QJSEngine>
 #include <QDomNode>
+#include <QWidget>
 
 #ifdef _MSC_VER
 	#pragma warning(pop)

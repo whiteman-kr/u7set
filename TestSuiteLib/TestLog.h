@@ -7,25 +7,36 @@ namespace TestSuite
 	{
 	public:
 		virtual ~ITestLog() = default;
-		virtual void writeError(const QString& text) = 0;
-		virtual void writeWarning(const QString& text) = 0;
-		virtual void writeMessage(const QString& text) = 0;
+		virtual void writeError(const QString& text, const QString& tag) = 0;
+		virtual void writeWarning(const QString& text, const QString& tag) = 0;
+		virtual void writeMessage(const QString& text, const QString& tag) = 0;
+		virtual void writeText(const QString& text, const QString& tag) = 0;
 	};
 
 	enum class TestLogItemType
 	{
-		Error,
-		Warning,
-		Message
+		Error = 0x0001,
+		Warning = 0x0002,
+		Message = 0x0004,
+		Text = 0x0008,
+		All = 0xffff
 	};
 
 	class TestLogItem
 	{
 	public:
-		explicit TestLogItem(int no, const QString& text, TestLogItemType type);
+		TestLogItem() = default;
+		TestLogItem(int no, TestLogItemType type, const QString& text, const QString& tag);
 
 		QString toText() const;
 		QString toHtml() const;
+
+		QStringList toStringList() const;
+		static TestLogItem fromStringList(const QString& str, bool* ok);
+
+		const QDateTime& dateTime() const;
+		const QString& message() const;
+		const QString& tag() const;
 
 		TestLogItemType type() const;
 		bool isError() const;
@@ -33,16 +44,18 @@ namespace TestSuite
 		bool isMessage() const;
 
 	private:
-		int m_no = 0;
-		QString m_message;
-		TestLogItemType m_type = TestLogItemType::Message;
+		int m_no{0};
 		QDateTime m_dateTime;
+		TestLogItemType m_type{TestLogItemType::Message};
+		QString m_message;
+		QString m_tag;
 
 //		QString m_file;
 //		int m_fileLine = 0;
 //		QString m_func;
 		QString m_htmlFont;
 
+		static const int CsvVersion = 1;
 	};
 
 	class ITestLogOutput
@@ -58,17 +71,35 @@ namespace TestSuite
 		explicit TestLog(ITestLogOutput* logOutput);
 
 		void clear();
+		bool empty() const;
 
-		void writeError(const QString& text) override;
-		void writeWarning(const QString& text) override;
-		void writeMessage(const QString& text) override;
+		void writeError(const QString& text, const QString& tag) override;
+		void writeWarning(const QString& text, const QString& tag) override;
+		void writeMessage(const QString& text, const QString& tag) override;
+		void writeText(const QString& text, const QString& tag) override;
+
+		std::vector<TestLogItem> items() const;
+
+		bool saveToCSV(const QString& fileName, QString* errorMsg) const;
+		bool loadFromCSV(const QString& fileName, QString* errorMsg);
 
 	private:
 		int no = 0;
 
-		QReadWriteLock m_itemsLock;	// For access to m_items and m_items
+		mutable QReadWriteLock m_itemsLock;	// For access to m_items and m_items
 		std::vector<TestLogItem> m_items;
 
 		ITestLogOutput* m_logOutput = nullptr;
 	};
+
+	class TestLogStub : public ITestLog
+	{
+	public:
+		virtual ~TestLogStub() = default;
+		virtual void writeError(const QString& /*text*/, const QString& /*tag*/) override {}
+		virtual void writeWarning(const QString& /*text*/, const QString& /*tag*/) override {}
+		virtual void writeMessage(const QString& /*text*/, const QString& /*tag*/) override {}
+		virtual void writeText(const QString& /*text*/, const QString& /*tag*/) override {}
+	};
+
 }
