@@ -83,6 +83,7 @@ namespace Builder
 
 		void setWord1(quint16 value) { word1 = value; }
 		void setWord1(int value) { word1 = CHECK_AND_CAST_TO_QUINT16(value); }
+		quint16 getWord1() const { return word1; }
 
 		void setWord2(quint16 value) { word2 = value; }
 		void setWord2(int value) { word2 = CHECK_AND_CAST_TO_QUINT16(value); }
@@ -135,10 +136,10 @@ namespace Builder
 		CodeItem& mov(Address16 addrTo, Address16 addrFrom,
 					  const QString& comment = Separator::EMPTY_STR);
 
-		CodeItem& movAddrAcc(int addrTo, int bitNo, const QString& comment = Separator::EMPTY_STR);
+		CodeItem& movAddrAcc(int addrTo, const QString& comment = Separator::EMPTY_STR);
 		CodeItem& movAddrAcc(Address16 addrTo, const QString& comment = Separator::EMPTY_STR);
 
-		CodeItem& movAccAddr(int addrFrom, int bitNo, const QString& comment = Separator::EMPTY_STR);
+		CodeItem& movAccAddr(int addrFrom, const QString& comment = Separator::EMPTY_STR);
 		CodeItem& movAccAddr(Address16 addrFrom, const QString& comment = Separator::EMPTY_STR);
 
 		CodeItem& movMem(int addrTo, int addrFrom, int sizeW,
@@ -269,15 +270,18 @@ namespace Builder
 
 		bool isOpCode(LmCommandCode code) const { return m_lmCmdCode == code; }
 
+		quint16 getWord1() const { return m_code.getWord1(); }
 		quint16 getWord2() const { return m_code.getWord2(); }
 		quint16 getWord3() const { return m_code.getWord3(); }
 		quint16 getWord4() const { return m_code.getWord4(); }
 
 		quint16 getBitNo1() const { return m_code.getBitNo1(); }
 		quint16 getBitNo2() const { return m_code.getBitNo2(); }
+		quint16 getWord1BitNo() const { return m_code.getWord1BitNo(); }
 
 		int getFbType() const { return m_code.getFbType(); }
 		int getFbInstance() const { return m_code.getFbInstance(); }
+		int getFbParamNo() const { return m_code.getFbParamNo(); }
 
 		quint16 srcAddr() const;
 		Address16 srcBitAddr() const;
@@ -297,6 +301,9 @@ namespace Builder
 		bool isMoveConstCmd() const;
 		bool isMoveConst32Cmd() const;
 		bool isSetMemCmd() const;
+		bool isWriteFuncBlockBitCmd() const;
+		bool isStartAfbCmd() const;
+		bool isReadFuncBlockBitCmd() const;
 
 		bool isValidCommand() const { return m_lmCmdCode != LmCommand::NO_COMMAND; }
 

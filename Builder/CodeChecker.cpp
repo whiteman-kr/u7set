@@ -617,18 +617,16 @@ namespace Builder
 
 	bool CodeChecker::check_movb_acc_addr(const CodeItem& cmd)
 	{
-		quint32 readAddr = cmd.getWord3();
-		quint32 readBitNo = cmd.getBitNo1();
+		Address16 readAddr = cmd.srcBitAddr();
 
-		return  checkCanReadBit(cmd, readAddr, readBitNo);
+		return  checkCanReadBit(cmd, readAddr.offset(), readAddr.bit());
 	}
 
 	bool CodeChecker::check_movb_addr_acc(const CodeItem& cmd)
 	{
-		quint32 writeAddr = cmd.getWord2();
-		quint32 writeBitNo = cmd.getBitNo2();
+		Address16 writeAddr = cmd.destBitAddr();
 
-		return  checkCanWriteBit(cmd, writeAddr, writeBitNo);
+		return  checkCanWriteBit(cmd, writeAddr.offset(), writeAddr.bit());
 	}
 
 	bool CodeChecker::check_nstart(const CodeItem& cmd)

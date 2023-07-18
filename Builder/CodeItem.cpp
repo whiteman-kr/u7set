@@ -260,10 +260,9 @@ namespace Builder
 		return mov(addrTo.offset(), addrFrom.offset(), comment);
 	}
 
-	CodeItem& CodeItem::movAddrAcc(int addrTo, int bitNo, const QString& comment)
+	CodeItem& CodeItem::movAddrAcc(int addrTo, const QString& comment)
 	{
 		Q_ASSERT(addrTo >= 0);
-		Q_ASSERT(bitNo >= 0 && bitNo < 16);
 
 		initCommand();
 
@@ -281,14 +280,14 @@ namespace Builder
 	CodeItem& CodeItem::movAddrAcc(Address16 addrTo, const QString& comment)
 	{
 		Q_ASSERT(addrTo.isValid() == true);
+		Q_ASSERT(addrTo.bit() == 0);
 
-		return movAddrAcc(addrTo.offset(), addrTo.bit(), comment);
+		return movAddrAcc(addrTo.offset(), comment);
 	}
 
-	CodeItem& CodeItem::movAccAddr(int addrFrom, int bitNo, const QString& comment)
+	CodeItem& CodeItem::movAccAddr(int addrFrom, const QString& comment)
 	{
 		Q_ASSERT(addrFrom >= 0);
-		Q_ASSERT(bitNo >= 0 && bitNo < 16);
 
 		initCommand();
 
@@ -306,8 +305,9 @@ namespace Builder
 	CodeItem& CodeItem::movAccAddr(Address16 addrFrom, const QString& comment)
 	{
 		Q_ASSERT(addrFrom.isValid() == true);
+		Q_ASSERT(addrFrom.bit() == 0);
 
-		return movAccAddr(addrFrom.offset(), addrFrom.bit(), comment);
+		return movAccAddr(addrFrom.offset(), comment);
 	}
 
 	CodeItem& CodeItem::movMem(int addrTo, int addrFrom, int sizeW, const QString& comment)
@@ -1190,6 +1190,9 @@ namespace Builder
 
 			return getWord3();
 
+		case LmCommand::MOV_ACC_ADDR:
+			return getWord2();
+
 		default:
 			Q_ASSERT(false);
 		}
@@ -1206,6 +1209,9 @@ namespace Builder
 		case LmCommand::FILLB:
 			return Address16(getWord3(), getBitNo1());
 
+		case LmCommand::MOVB_ACC_ADDR:
+			return Address16(getWord2(), getWord1BitNo());
+
 		default:
 			Q_ASSERT(false);
 		}
@@ -1218,6 +1224,7 @@ namespace Builder
 		switch(lmCommandCode())
 		{
 		case LmCommand::MOV:
+		case LmCommand::MOV_ADDR_ACC:
 		case LmCommand::MOVC:
 		case LmCommand::PMOV:
 		case LmCommand::WRFB:
@@ -1251,6 +1258,9 @@ namespace Builder
 
 		case LmCommand::RDFBB:
 			return Address16(getWord3(), getBitNo1());
+
+		case LmCommand::MOVB_ADDR_ACC:
+			return Address16(getWord2(), getWord1BitNo());
 
 		default:
 			Q_ASSERT(false);
@@ -1347,6 +1357,21 @@ namespace Builder
 	bool CodeItem::isSetMemCmd() const
 	{
 		return m_lmCmdCode == LmCommand::SETMEM;
+	}
+
+	bool CodeItem::isWriteFuncBlockBitCmd() const
+	{
+		return m_lmCmdCode == LmCommand::WRFBB;
+	}
+
+	bool CodeItem::isStartAfbCmd() const
+	{
+		return m_lmCmdCode == LmCommand::STARTAFB;
+	}
+
+	bool CodeItem::isReadFuncBlockBitCmd() const
+	{
+		return m_lmCmdCode == LmCommand::RDFBB;
 	}
 
 	bool CodeItem::generateBinCode(QByteArray* binCode) const

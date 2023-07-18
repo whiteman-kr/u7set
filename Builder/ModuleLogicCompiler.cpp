@@ -7785,6 +7785,8 @@ namespace Builder
 			CODE_OPTIMIZATION_PROC_TO_CALL(ModuleLogicCompiler::optimizeSequentialConstMoves),
 			CODE_OPTIMIZATION_PROC_TO_CALL(ModuleLogicCompiler::optimizeSequentialBitMoves),
 			CODE_OPTIMIZATION_PROC_TO_CALL(ModuleLogicCompiler::optimizeBitFilling),
+			CODE_OPTIMIZATION_PROC_TO_CALL(ModuleLogicCompiler::optimizeBitAccNot),
+			CODE_OPTIMIZATION_PROC_TO_CALL(ModuleLogicCompiler::optimizeSequentialAccBitMoves),
 		};
 
 		bool result = true;
@@ -7852,6 +7854,20 @@ namespace Builder
 		BitFillingOptimization bfo(*this, srcCode);
 
 		return bfo.optimize();
+	}
+
+	bool ModuleLogicCompiler::optimizeBitAccNot(CodeSnippet& srcCode)
+	{
+		BitAccNotOptimization bano(*this, srcCode);
+
+		return bano.optimize();
+	}
+
+	bool ModuleLogicCompiler::optimizeSequentialAccBitMoves(CodeSnippet& srcCode)
+	{
+		SequentialAccBitMovesOptimization sabmo(*this, srcCode);
+
+		return sabmo.optimize();
 	}
 
 	bool ModuleLogicCompiler::checkOptimizedAppLogicCode()
@@ -8047,9 +8063,6 @@ namespace Builder
 		{
 			opCodes.insert(component.second->opCode(), true);
 		}
-
-		const int MIN_AFB_OPCODE = 1;
-		const int MAX_AFB_OPCODE = 63;
 
 		CodeItem cmd;
 		int resultBitNo = 0;

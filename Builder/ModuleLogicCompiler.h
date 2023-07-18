@@ -464,6 +464,8 @@ namespace Builder
 		bool optimizeSequentialConstMoves(CodeSnippet& srcCode);
 		bool optimizeSequentialBitMoves(CodeSnippet& srcCode);
 		bool optimizeBitFilling(CodeSnippet& srcCode);
+		bool optimizeBitAccNot(CodeSnippet& srcCode);
+		bool optimizeSequentialAccBitMoves(CodeSnippet& srcCode);
 
 		bool writeInfoFilesAfterOptimization();
 		bool checkOptimizedAppLogicCode();
@@ -802,6 +804,10 @@ namespace Builder
 		bool partitionOfInteger(int number, const QVector<int>& availableParts, QVector<int>* partition);
 
 		void getChassisSignalsWithEquipmentID(QString& equipmentID, std::vector<const AppSignal *>* resultSignalList);
+
+	public:
+		static const int MIN_AFB_OPCODE = 1;
+		static const int MAX_AFB_OPCODE = 63;
 
 	private:
 		// input parameters

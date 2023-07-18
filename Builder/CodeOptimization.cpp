@@ -1,5 +1,6 @@
 #include "CodeOptimization.h"
 #include "ModuleLogicCompiler.h"
+#include "../HardwareLib/LmDescription.h"
 
 namespace Builder
 {
@@ -23,6 +24,12 @@ namespace Builder
 
 		case CodeOptimizationType::BitFilling:
 			return "BitFilling";
+
+		case CodeOptimizationType::BitAccNot:
+			return "BitAccNot";
+
+		case CodeOptimizationType::SequentialAccBitMoves:
+			return "SequentialAccBitMoves";
 
 		default:
 			Q_ASSERT(false);
@@ -48,6 +55,11 @@ namespace Builder
 
 	bool SequenceOptimization::optimize()
 	{
+		if (isOptimizationPossible() == false)
+		{
+			return true;
+		}
+
 		int commandsInSequence = 0;
 
 		CodeSnippetConstIterator firstSequenceCmd;
@@ -199,6 +211,19 @@ namespace Builder
 		return m_compiler;
 	}
 
+	bool SequenceOptimization::hasRequiredCommands(const std::vector<LmCommandCode>& requiredCmdCodes) const
+	{
+		for(const LmCommandCode cmd : requiredCmdCodes)
+		{
+			if (m_compiler.getLmDescription()->commandPtr(cmd) == nullptr)
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	// ---------------------------------------------------------------------------------------
 	//
 	// SequentialMovesOptimization class implementation
@@ -211,6 +236,11 @@ namespace Builder
 		SequenceOptimization(CodeOptimizationType::SequentialMoves, compiler, srcCode),
 		m_memoryMap(memoryMap)
 	{
+	}
+
+	bool SequentialMovesOptimization::isOptimizationPossible() const
+	{
+		return true;
 	}
 
 	void SequentialMovesOptimization::reinitVars()
@@ -312,6 +342,11 @@ namespace Builder
 		SequenceOptimization(CodeOptimizationType::SequentialConstMoves, compiler, srcCode),
 		m_memoryMap(memoryMap)
 	{
+	}
+
+	bool SequentialConstMovesOptimization::isOptimizationPossible() const
+	{
+		return true;
 	}
 
 	void SequentialConstMovesOptimization::reinitVars()
@@ -445,6 +480,11 @@ namespace Builder
 	{
 	}
 
+	bool SequentialBitMovesOptimization::isOptimizationPossible() const
+	{
+		return true;
+	}
+
 	void SequentialBitMovesOptimization::reinitVars()
 	{
 		m_srcAddr = 0;
@@ -571,6 +611,11 @@ namespace Builder
 	{
 	}
 
+	bool BitFillingOptimization::isOptimizationPossible() const
+	{
+		return true;
+	}
+
 	void BitFillingOptimization::reinitVars()
 	{
 		m_srcBitAddr.reset();
@@ -669,6 +714,261 @@ namespace Builder
 	bool BitFillingOptimization::inSequence() const
 	{
 		return m_bitField != 0;
+	}
+
+	// ---------------------------------------------------------------------------------------
+	//
+	// BitAccNotOptimization class implementation
+	//
+	// ---------------------------------------------------------------------------------------
+
+	BitAccNotOptimization::BitAccNotOptimization(ModuleLogicCompiler& compiler,
+						  CodeSnippet& srcCode) :
+		SequenceOptimization(CodeOptimizationType::BitAccNot, compiler, srcCode)
+	{
+
+	}
+
+	bool BitAccNotOptimization::isOptimizationPossible() const
+	{
+		const std::shared_ptr<Afb::AfbElement> notElem = compiler().getLmDescription()->afbElement("not");
+
+		if (notElem == nullptr ||
+			notElem->opCode() > ModuleLogicCompiler::MAX_AFB_OPCODE)
+		{
+			return false;
+		}
+
+		m_afbNotOpcode = notElem->opCode();
+
+		static const std::vector<LmCommandCode> requiredCommands =
+		{
+			LmCommand::MOVB_ACC_ADDR,
+			LmCommand::NOT,
+			LmCommand::MOVB_ADDR_ACC
+		};
+
+		return hasRequiredCommands(requiredCommands);
+	}
+
+	void BitAccNotOptimization::reinitVars()
+	{
+		m_srcBitAddr.reset();
+		m_destBitAddr.reset();
+		m_sequenceIndex = -1;
+	}
+
+	bool BitAccNotOptimization::canStartSequence(const CodeItem& cmd)
+	{
+		if (!(cmd.isWriteFuncBlockBitCmd() &&
+			cmd.getFbType() == m_afbNotOpcode &&
+			cmd.getFbInstance() == 0 &&
+			cmd.getFbParamNo() == AFB_NOT_IN_PIN_INDEX))
+		{
+			return false;
+		}
+
+		m_sequenceIndex = 0;
+		m_srcBitAddr = cmd.srcBitAddr();
+		return true;
+	}
+
+	bool BitAccNotOptimization::isSequenceContinue(const CodeItem& cmd)
+	{
+		switch(m_sequenceIndex)
+		{
+		case 0:
+			if (cmd.isStartAfbCmd() &&
+				cmd.getFbType() == m_afbNotOpcode &&
+				cmd.getFbInstance() == 0)
+			{
+				m_sequenceIndex++;
+				return true;
+			}
+
+			break;
+
+		case 1:
+			if (cmd.isReadFuncBlockBitCmd() &&
+				cmd.getFbType() == m_afbNotOpcode &&
+				cmd.getFbInstance() == 0 &&
+				cmd.getFbParamNo() == AFB_NOT_OUT_PIN_INDEX)
+			{
+				m_sequenceIndex++;
+				m_destBitAddr = cmd.destBitAddr();
+				return true;
+			}
+
+			break;
+
+		default: ;
+		}
+
+		return false;
+	}
+
+	bool BitAccNotOptimization::canOptimize() const
+	{
+		return m_sequenceIndex == 2;
+	}
+
+	void BitAccNotOptimization::getReplacementCode(CodeSnippet& code)
+	{
+		code << CodeItem().movBitAccAddr(m_srcBitAddr);
+		code << CodeItem().notAcc();
+		code << CodeItem().movBitAddrAcc(m_destBitAddr);
+	}
+
+	bool BitAccNotOptimization::inSequence() const
+	{
+		return m_sequenceIndex >= 0 && m_sequenceIndex <= 2;
+	}
+
+	// ---------------------------------------------------------------------------------------
+	//
+	// SequentialAccBitMovesOptimization class implementation
+	//
+	// ---------------------------------------------------------------------------------------
+
+	SequentialAccBitMovesOptimization::SequentialAccBitMovesOptimization(ModuleLogicCompiler& compiler,
+									CodeSnippet& srcCode) :
+		SequenceOptimization(CodeOptimizationType::SequentialAccBitMoves, compiler, srcCode)
+	{
+	}
+
+	bool SequentialAccBitMovesOptimization::isOptimizationPossible() const
+	{
+		static const std::vector<LmCommandCode> requiredCommands =
+		{
+			LmCommand::RESET,
+			LmCommand::MOVB_ACC_ADDR,
+			LmCommand::MOV_ADDR_ACC
+		};
+
+		return hasRequiredCommands(requiredCommands);
+	}
+
+	void SequentialAccBitMovesOptimization::reinitVars()
+	{
+		m_sequenceState = -1;
+		m_destAccAddr = BAD_ADDRESS;
+
+		for(Address16& bitSrcAddr : m_bitSrcAddrs)
+		{
+			bitSrcAddr.reset();
+		}
+
+		m_movedBitCount = 0;
+		m_directMoveDestAddr = BAD_ADDRESS;
+	}
+
+	bool SequentialAccBitMovesOptimization::canStartSequence(const CodeItem& cmd)
+	{
+		if (cmd.isMoveConstCmd() == true &&
+			cmd.getConst16() == 0 &&
+			m_sequenceState == -1)
+		{
+			m_sequenceState = 0;
+			return true;
+		}
+
+		if (cmd.isMoveBitCmd() == false ||
+			m_sequenceState != -1 ||
+			m_destAccAddr != BAD_ADDRESS ||
+			m_movedBitCount != 0)
+		{
+			return false;
+		}
+
+		Address16 destBitAddr = cmd.destBitAddr();
+
+		if (destBitAddr.bit() != 0)
+		{
+			return false;
+		}
+
+		m_destAccAddr = destBitAddr.offset();
+
+		m_sequenceState = 1;
+
+		m_bitSrcAddrs[m_movedBitCount] = cmd.srcBitAddr();
+
+		m_movedBitCount++;
+
+		return true;
+	}
+
+	bool SequentialAccBitMovesOptimization::isSequenceContinue(const CodeItem& cmd)
+	{
+		if (cmd.isMoveBitCmd() == true &&
+			(m_sequenceState == 0 || m_sequenceState == 1))
+		{
+			if (m_sequenceState == 0)
+			{
+				Address16 destBitAddr = cmd.destBitAddr();
+
+				if (destBitAddr.bit() != 0)
+				{
+					return false;
+				}
+
+				m_destAccAddr = destBitAddr.offset();
+				m_sequenceState = 1;
+			}
+			else
+			{
+				Address16 destBitAddr = cmd.destBitAddr();
+
+				if (m_destAccAddr != destBitAddr.offset() ||
+					m_movedBitCount != destBitAddr.bit() ||
+					m_movedBitCount >= 16)
+				{
+					return false;
+				}
+			}
+
+			m_bitSrcAddrs[m_movedBitCount] = cmd.srcBitAddr();
+			m_movedBitCount++;
+
+			return true;
+		}
+
+		if (cmd.isMoveCmd() == true &&
+			m_sequenceState == 1 &&
+			m_destAccAddr == cmd.srcAddr())
+		{
+
+			m_directMoveDestAddr = cmd.destAddr();
+			m_sequenceState = 2;						// sequence finished
+			return true;
+		}
+
+		return false;
+	}
+
+	bool SequentialAccBitMovesOptimization::canOptimize() const
+	{
+		return m_sequenceState == 2 && m_movedBitCount > 0;
+	}
+
+	void SequentialAccBitMovesOptimization::getReplacementCode(CodeSnippet& code)
+	{
+		if (m_movedBitCount < 16)
+		{
+			code << CodeItem().resetAcc();
+		}
+
+		for(int i = m_movedBitCount - 1; i >= 0; i--)
+		{
+			code << CodeItem().movBitAccAddr(m_bitSrcAddrs[i]);
+		}
+
+		code << CodeItem().movAddrAcc(m_directMoveDestAddr);
+	}
+
+	bool SequentialAccBitMovesOptimization::inSequence() const
+	{
+		return m_sequenceState >= 0 && m_sequenceState <= 2;
 	}
 
 }

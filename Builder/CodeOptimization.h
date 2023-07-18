@@ -11,6 +11,8 @@ namespace Builder
 		SequentialConstMoves,
 		SequentialBitMoves,
 		BitFilling,
+		BitAccNot,
+		SequentialAccBitMoves,
 	};
 
 	struct OptimizationInfo
@@ -35,6 +37,9 @@ namespace Builder
 							 ModuleLogicCompiler& compiler,
 							 CodeSnippet& srcCode);		// on input srcCode contains source code for optimization
 														// after call optimize() srcCode contains optimized code
+
+		virtual bool isOptimizationPossible() const = 0;
+
 		virtual void reinitVars() = 0;
 		virtual bool canStartSequence(const CodeItem& cmd) = 0;
 		virtual bool isSequenceContinue(const CodeItem& cmd) = 0;
@@ -42,6 +47,8 @@ namespace Builder
 		virtual bool canOptimize() const = 0;
 
 		const ModuleLogicCompiler& compiler() const;
+
+		bool hasRequiredCommands(const std::vector<LmCommandCode>& requiredCmdCodes) const;
 
 	public:
 		bool optimize();
@@ -63,6 +70,7 @@ namespace Builder
 									CodeSnippet& srcCode,
 									const LmMemoryMap& memoryMap);
 	private:
+		virtual bool isOptimizationPossible() const override;
 		virtual void reinitVars() override;
 		virtual bool canStartSequence(const CodeItem& cmd) override;
 		virtual bool isSequenceContinue(const CodeItem& cmd) override;
@@ -87,6 +95,7 @@ namespace Builder
 									CodeSnippet& srcCode,
 									const LmMemoryMap& memoryMap);
 	private:
+		virtual bool isOptimizationPossible() const override;
 		virtual void reinitVars() override;
 		virtual bool canStartSequence(const CodeItem& cmd) override;
 		virtual bool isSequenceContinue(const CodeItem& cmd) override;
@@ -106,10 +115,34 @@ namespace Builder
 
 	class SequentialBitMovesOptimization : public SequenceOptimization
 	{
+		// Replace sequential bit mov from one word to another:
+		//
+		//		MOVB      46080[0], 56375[0]
+		//		MOVB      46080[1], 56375[1]
+		//		MOVB      46080[2], 56375[2]
+		//		MOVB      46080[3], 56375[3]
+		//		MOVB      46080[4], 56375[4]
+		//		MOVB      46080[5], 56375[5]
+		//		MOVB      46080[6], 56375[6]
+		//		MOVB      46080[7], 56375[7]
+		//		MOVB      46080[8], 56375[8]
+		//		MOVB      46080[9], 56375[9]
+		//		MOVB      46080[10], 56375[10]
+		//		MOVB      46080[12], 56375[12]
+		//		MOVB      46080[13], 56375[13]
+		//		MOVB      46080[14], 56375[14]
+		//		MOVB      46080[15], 56375[15]
+		//		MOV       56347, 46080
+		//
+		// By single mov word command:
+		//
+		//		MOV       56347, 56375
+
 	public:
 		SequentialBitMovesOptimization(ModuleLogicCompiler& compiler,
 										CodeSnippet& srcCode);
 	private:
+		virtual bool isOptimizationPossible() const override;
 		virtual void reinitVars() override;
 		virtual bool canStartSequence(const CodeItem& cmd) override;
 		virtual bool isSequenceContinue(const CodeItem& cmd) override;
@@ -137,6 +170,7 @@ namespace Builder
 		BitFillingOptimization(ModuleLogicCompiler& compiler,
 										CodeSnippet& srcCode);
 	private:
+		virtual bool isOptimizationPossible() const override;
 		virtual void reinitVars() override;
 		virtual bool canStartSequence(const CodeItem& cmd) override;
 		virtual bool isSequenceContinue(const CodeItem& cmd) override;
@@ -156,6 +190,116 @@ namespace Builder
 		int m_directMoveDestAddr = BAD_ADDRESS;
 
 		int m_bitAccAddr = 0;
+	};
+
+	class BitAccNotOptimization : public SequenceOptimization
+	{
+		//
+		// Replace AFB based NOT operation:
+		//
+		//	WRFBB     NOT.0[0], 46083[0]
+		//	STARTAFB  NOT.0
+		//	RDFBB     46084[0], NOT.0[2]
+		//
+		// with bit ACC based commands:
+		//
+		//	MOVB	  ACC, 46083[0]
+		//	NOT		  ACC
+		//  MOVB	  46084[1], ACC
+		//
+
+	public:
+		BitAccNotOptimization(ModuleLogicCompiler& compiler,
+							  CodeSnippet& srcCode);
+	private:
+		virtual bool isOptimizationPossible() const override;
+		virtual void reinitVars() override;
+		virtual bool canStartSequence(const CodeItem& cmd) override;
+		virtual bool isSequenceContinue(const CodeItem& cmd) override;
+		virtual bool canOptimize() const override;
+		virtual void getReplacementCode(CodeSnippet& code) override;
+
+		bool setBit(int bitNo);
+		bool inSequence() const;
+
+	private:
+		Address16 m_srcBitAddr;
+		Address16 m_destBitAddr;
+
+		int m_sequenceIndex = -1;
+
+		const int AFB_NOT_IN_PIN_INDEX = 0;
+		const int AFB_NOT_OUT_PIN_INDEX = 2;
+
+		mutable int m_afbNotOpcode = -1;
+	};
+
+	class SequentialAccBitMovesOptimization : public SequenceOptimization
+	{
+		// Replace sequential bit mov from one word to another:
+		//
+		//		MOVB      46080[0], 56382[15]
+		//		MOVB      46080[1], 56383[0]
+		//		MOVB      46080[2], 56383[1]
+		//		MOVB      46080[3], 56383[2]
+		//		MOVB      46080[4], 56384[0]
+		//		MOVB      46080[5], 56384[1]
+		//		MOVB      46080[6], 56384[2]
+		//		MOVB      46080[7], 56384[3]
+		//		MOVB      46080[8], 56384[4]
+		//		MOVB      46080[9], 56384[5]
+		//		MOVB      46080[10], 56384[6]
+		//		MOVB      46080[11], 56384[7]
+		//		MOVB      46080[12], 56384[8]
+		//		MOVB      46080[13], 56384[9]
+		//		MOVB      46080[14], 56398[0]
+		//		MOVB      46080[15], 56398[1]
+		//		MOV       56350, 46080
+		//
+		// By bit ACC using commands (reverse order bit loading!):
+		//
+		//		MOVB      ACC, 56398[1]
+		//		MOVB      ACC, 56398[0]
+		//		MOVB      ACC, 56384[9]
+		//		MOVB      ACC, 56384[8]
+		//		MOVB      ACC, 56384[7]
+		//		MOVB      ACC, 56384[6]
+		//		MOVB      ACC, 56384[5]
+		//		MOVB      ACC, 56384[4]
+		//		MOVB      ACC, 56384[3]
+		//		MOVB      ACC, 56384[2]
+		//		MOVB      ACC, 56384[1]
+		//		MOVB      ACC, 56384[0]
+		//		MOVB      ACC, 56383[2]
+		//		MOVB      ACC, 56383[1]
+		//		MOVB      ACC, 56383[0]
+		//		MOVB      ACC, 56382[15]
+		//		MOV       56350, ACC
+
+	public:
+		SequentialAccBitMovesOptimization(ModuleLogicCompiler& compiler,
+										CodeSnippet& srcCode);
+	private:
+		virtual bool isOptimizationPossible() const override;
+		virtual void reinitVars() override;
+		virtual bool canStartSequence(const CodeItem& cmd) override;
+		virtual bool isSequenceContinue(const CodeItem& cmd) override;
+		virtual bool canOptimize() const override;
+		virtual void getReplacementCode(CodeSnippet& code) override;
+
+		bool inSequence() const;
+
+	private:
+		int m_sequenceState = -1;			// -1	no in sequence
+											// 0	pass load const 0 to accumulator
+											// 1	loading bits to accumulator
+											// 2	pass move from accumulator to mem
+		int m_destAccAddr = BAD_ADDRESS;
+
+		Address16 m_bitSrcAddrs[16];
+		int m_movedBitCount = 0;
+
+		int m_directMoveDestAddr = BAD_ADDRESS;
 	};
 
 }
