@@ -2,6 +2,7 @@
 #error Do not include this file in the project! Link ClientLib instead.
 #endif
 
+#include <QTimeZone>
 #include "TcpSignalClient.h"
 
 namespace ClientLib
@@ -59,6 +60,10 @@ namespace ClientLib
 		writeMessage("TcpSignalClient::onConnection()");
 
 		Q_ASSERT(isClearToSendRequest() == true);
+
+		// Reset the date when the time discrepancy was checked.
+		//
+		m_timeDiscrepancyCheckDate = {};
 
 		resetToGetSignalList();
 
@@ -438,6 +443,22 @@ namespace ClientLib
 			return;
 		}
 
+		// Check that the server and client time is the same.
+		//
+		if (m_timeDiscrepancyCheckDate.isNull() == true || m_timeDiscrepancyCheckDate != QDate::currentDate())
+		{
+			const qint64 serverUtcTimeMs = m_getSignalStateChangesReply.servertimeutc();
+			const qint64 serverLocalTimeMs = m_getSignalStateChangesReply.servertimelocal();
+
+			checkTimeDiscrepancy(serverUtcTimeMs, serverLocalTimeMs);
+
+			// Set flag that time was checked for this connection.
+			//
+			m_timeDiscrepancyCheckDate = QDate::currentDate();
+		}
+
+		// --
+		//
 		int signalStateCount = m_getSignalStateChangesReply.appsignalstates_size();
 
 		thread_local std::vector<AppSignalState> states;
@@ -536,6 +557,65 @@ namespace ClientLib
 	bool TcpSignalClient::signalParamsLoaded() const
 	{
 		return m_signalParamsLoaded.load();
+	}
+
+	void TcpSignalClient::checkTimeDiscrepancy(qint64 serverUtcTimeMs, qint64 serverLocalTimeMs)
+	{
+		const qint64 serverTimeZoneDiff = serverLocalTimeMs - serverUtcTimeMs;
+
+		qDebug() << "TcpSignalClient::checkTimeDiscrepancy";
+		qDebug() << "\tserverUtcTime, Ms: " << serverUtcTimeMs;
+		qDebug() << "\tserverLocalTime, Ms: " << serverLocalTimeMs;
+		qDebug() << "\tserver time zone shift (seconds): " << serverTimeZoneDiff / 1000;
+
+		// 1. UTC time is different?
+		//
+		{
+			const qint64 limitMs = static_cast<qint64>(3 * 1'000) * 60;  // 3 minutes.
+			const qint64 utcTimeDiscrepancy = std::abs(serverUtcTimeMs - QDateTime::currentDateTime().toMSecsSinceEpoch());
+
+			qDebug() << "\tutcTimeDiscrepancy, ms: " << utcTimeDiscrepancy;
+
+			if (utcTimeDiscrepancy > limitMs)
+			{
+				auto clientUtcDateTime = QDateTime::fromMSecsSinceEpoch(QDateTime::currentDateTime().toMSecsSinceEpoch(), QTimeZone::UTC);
+				auto serverUtcDateTime = QDateTime::fromMSecsSinceEpoch(serverUtcTimeMs, QTimeZone::UTC);
+
+				writeWarning(QString("UTC time discrepancy detected (%1 seconds). Client UTC time %2, server UTC time %3.")
+							 .arg(utcTimeDiscrepancy / 1000)
+							 .arg(clientUtcDateTime.toString("dd MMM yyyy hh:mm:ss.zzz"))
+							 .arg(serverUtcDateTime.toString("dd MMM yyyy hh:mm:ss.zzz")));
+			}
+			else
+			{
+				writeMessage(QString("UTC Time discrepancy is about %1 ms.").arg(utcTimeDiscrepancy));
+			}
+		}
+
+		// 2. Time zone is different?
+		//
+		{
+			QDateTime clientCurrentTimeLocal = QDateTime::currentDateTime();
+			const qint64 clientUtcMs = clientCurrentTimeLocal.toMSecsSinceEpoch();
+			clientCurrentTimeLocal.setTimeZone(QTimeZone::UTC);
+			const qint64 clientLocalMs = clientCurrentTimeLocal.toMSecsSinceEpoch();
+			
+			const qint64 clientTimeZoneDiff = clientLocalMs - clientUtcMs;
+
+			qint64 timeZoneDiff = std::abs(serverTimeZoneDiff - clientTimeZoneDiff);
+
+			if (timeZoneDiff != 0)
+			{
+				auto clientLocalDateTime = clientCurrentTimeLocal;
+				auto serverLocalDateTime = QDateTime::fromMSecsSinceEpoch(serverLocalTimeMs, QTimeZone::UTC);
+
+				writeWarning(QString("TimeZone discrepancy detected. Client local time %1, server local time %2.")
+							 .arg(clientLocalDateTime.toString("dd MMM yyyy hh:mm:ss.zzz"))
+							 .arg(serverLocalDateTime.toString("dd MMM yyyy hh:mm:ss.zzz")));
+			}
+		}
+
+		return;
 	}
 
 }

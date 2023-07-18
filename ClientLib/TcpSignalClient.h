@@ -84,6 +84,9 @@ namespace ClientLib
 		bool signalParamsLoaded() const;
 
 	private:
+		void checkTimeDiscrepancy(qint64 serverUtcTimeMs, qint64 serverLocalTimeMs);
+
+	private:
 		SoftwareEndpoint::AppDataService m_serverSettings;
 		IAppSignalUpdater& m_signalUpdater;
 
@@ -109,6 +112,10 @@ namespace ClientLib
 		::Network::GetAppSignalStateRequest m_getSignalStateRequest;
 		::Network::GetAppSignalStateReply m_getSignalStateReply;
 		int m_lastSignalStateStartIndex = 0;
+
+		// Check that the server and client time is the same.
+		//
+		QDate m_timeDiscrepancyCheckDate;  // When was the last time the time discrepancy was checked?
 	};
 
 }
