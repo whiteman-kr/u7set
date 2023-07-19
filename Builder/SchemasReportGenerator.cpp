@@ -1,5 +1,6 @@
 #include "SchemasReportGenerator.h"
 #include "../ReportLib/ReportPrinter.h"
+#include "../VFrame30/LogicSchema.h"
 
 namespace Builder
 {
@@ -113,6 +114,7 @@ namespace Builder
 		m_projectName(projectName),
 		m_userName(userName),
 		m_userPassword(userPassword),
+		m_normalFont{"Arial", 9, QFont::Normal},
 		m_marginFont{"Arial", 8, QFont::Normal},
 		m_tableFont{"Arial", 9, QFont::Normal},
 		m_options(options),
@@ -180,7 +182,7 @@ namespace Builder
 	void SchemasReportGenerator::exportFilesToMultiplePdf()
 	{
 		VFrame30::SchemaDetailsSet detailsSet;
-		std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas;	// Key is full path to schema file
+		std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas;	// Key is schema ID
 
 		try
 		{
@@ -221,18 +223,7 @@ namespace Builder
 				m_statistics.m_currentSchemaId = schemaId;
 			}
 
-			QString fileName = it->first;
-
-			fileName.replace('/', '_');
-
-			qsizetype pos = fileName.lastIndexOf('.');
-			if (pos != -1)
-			{
-				fileName = fileName.left(pos);
-			}
-			fileName += tr(".pdf");
-
-			std::shared_ptr<Report> report = std::make_shared<Report>(m_projectName, fileName);
+			std::shared_ptr<Report> report = std::make_shared<Report>(m_projectName, schemaId + ".pdf");
 
 			{
 				auto reportSchema = ReportSchema::create(tr("Schema: %1").arg(schema->schemaId()), {}, schema, {});
@@ -242,19 +233,24 @@ namespace Builder
 				schemaDrawingSection->addSchema(reportSchema);
 			}
 
+			{
+				QMutexLocker l(&m_statisticsMutex);
+				m_statistics.m_currentStatus = WorkerStatus::Printing;
+			}
+
 			ReportPrinter printer(m_schemaView);
 
 			if (filePath().isEmpty() == false)
 			{
 				// Print to file
 				//
-				printer.print(*report, filePath() + QDir::separator() + fileName, m_stop);
+				printer.print(*report, filePath() + QDir::separator() + schemaId + ".pdf", m_stop);
 			}
 			else
 			{
 				// Print to buffer
 				//
-				QBuffer buffer(&m_outputData[fileName]);
+				QBuffer buffer(&m_outputData[schemaId + ".pdf"]);
 				printer.print(*report, buffer, m_stop);
 			}
 
@@ -268,7 +264,7 @@ namespace Builder
 	void SchemasReportGenerator::exportFilesToSinglePdf()
 	{
 		VFrame30::SchemaDetailsSet detailsSet;
-		std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas;	// Key is full path to schema file
+		std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas;		// Key is schema ID
 
 		try
 		{
@@ -300,10 +296,10 @@ namespace Builder
 		{
 			report->addMarginItem({tr("Project: %1").arg(m_projectName), -1, -1, {m_marginFont, Qt::AlignLeft | Qt::AlignTop}});
 			report->addMarginItem({tr("%PAGE%"), -1, -1, {m_marginFont, Qt::AlignRight | Qt::AlignBottom}});
+			report->addMarginItem({"%TAG%", -1, -1, {m_marginFont, Qt::AlignRight | Qt::AlignTop}});
 		}
 
 		{
-			int pageIndex = 1;
 			for (auto it = schemas.begin(); it != schemas.end(); it++)
 			{
 				if (m_stop == true)
@@ -324,22 +320,31 @@ namespace Builder
 
 				auto schemaDrawingSection = report->addSection(ReportSection::create(tr("Schema: %1").arg(schemaId),
 																					 getSchemaPageLayout(schema)));
+				schemaDrawingSection->setTag(schema->caption());
 				schemaDrawingSection->addSchema(reportSchema);
-
-				report->addMarginItem({schema->caption(), pageIndex, pageIndex, {m_marginFont, Qt::AlignRight | Qt::AlignTop}});
-				pageIndex++;
 
 				if (schema->isLogicSchema() == true && m_options.addLogicSchemaDetails == true)
 				{
-					auto schemaDetailsSection = report->addSection(ReportSection::create(tr("Schema: %1").arg(schemaId),
-																						 getSchemaPageLayout(schema)));
+					auto schemaDetailsSection = ReportSection::create(tr("Schema: %1").arg(schemaId),
+																	  getSchemaPageLayout(schema));
 
-					createSchemaDetailsSection(schemaDetailsSection, schema, detailsSet);
+					schemaDetailsSection->setTag(schema->caption() + "[Details]");
+					schemaDetailsSection->addText(tr("Schema '%1 - %2' signals").arg(schema->schemaId()).arg(schema->caption()),
+									 {m_normalFont, Qt::AlignHCenter});
 
-					report->addMarginItem({tr("%1 [Details]").arg(schema->caption()), pageIndex, pageIndex, {m_marginFont, Qt::AlignRight | Qt::AlignTop}});
-					pageIndex++;
+					auto table = createSchemaDetailsTable(schema, schemas, detailsSet);
+					if (table != nullptr && table->rowCount() > 0)
+					{
+						schemaDetailsSection->addTable(table);
+						report->addSection(schemaDetailsSection);
+					}
 				}
 			}
+		}
+
+		{
+			QMutexLocker l(&m_statisticsMutex);
+			m_statistics.m_currentStatus = WorkerStatus::Printing;
 		}
 
 		ReportPrinter printer(m_schemaView);
@@ -371,11 +376,13 @@ namespace Builder
 		{
 			openProject();
 
-			schemaFilesGroups.push_back({db()->systemFileId(DbDir::AppLogicDir), tr("ApplicationLogic")});
-			schemaFilesGroups.push_back({db()->systemFileId(DbDir::MonitorSchemasDir), tr("MonitorSchemas")});
-			schemaFilesGroups.push_back({db()->systemFileId(DbDir::TuningSchemasDir), tr("TuningSchemas")});
-			schemaFilesGroups.push_back({db()->systemFileId(DbDir::DiagnosticsSchemasDir), tr("DiagnosticsSchemas")});
-			schemaFilesGroups.push_back({db()->systemFileId(DbDir::UfblDir), tr("UFBSchemas")});
+			for (auto& stp : m_schemaTypesParams)
+			{
+				if (stp.selected() == true)
+				{
+					schemaFilesGroups.push_back({stp.fileId(), stp.caption()});
+				}
+			}
 
 			for (SchemaFilesGroup& sfg : schemaFilesGroups)
 			{
@@ -549,6 +556,13 @@ namespace Builder
 				*progressMax = stats.m_schemasCount;
 			}
 			break;
+		case SchemasReportGenerator::WorkerStatus::Printing:
+			{
+				*progressText = tr("Printing to PDF Document...");
+				*progress = 0;
+				*progressMax = 0;
+			}
+			break;
 		}
 	}
 
@@ -684,7 +698,7 @@ namespace Builder
 		bool differentParentId = false;
 		int firstParentId = -1;
 
-		for (std::shared_ptr<DbFile> dbFile : out)
+		for (const std::shared_ptr<DbFile>& dbFile : out)
 		{
 			if (firstParentId == -1)
 			{
@@ -724,9 +738,9 @@ namespace Builder
 				m_statistics.m_currentSchemaId = schema->schemaId();
 			}
 
-			QString fileName = dbFile->fileName();
+			//QString fileName = dbFile->fileName();
 
-			if (differentParentId == true)
+			/*if (differentParentId == true)
 			{
 				// Include full file path
 				//
@@ -741,12 +755,12 @@ namespace Builder
 						break;
 					}
 
-					fileName = parentFileInfo.fileName() + '/' + fileName;
+					//fileName = parentFileInfo.fileName() + '/' + fileName;
 					parentId = parentFileInfo.parentId();
 				};
-			}
+			}*/
 
-			schemas[fileName] = schema;
+			schemas[schema->schemaId()] = schema;
 
 			if (m_options.addLogicSchemaDetails == true)
 			{
@@ -777,6 +791,7 @@ namespace Builder
 		{
 			report->addMarginItem({tr("Project: %1").arg(m_projectName), -1, -1, {m_marginFont, Qt::AlignLeft | Qt::AlignTop}});
 			report->addMarginItem({tr("%PAGE%"), -1, -1, {m_marginFont, Qt::AlignRight | Qt::AlignBottom}});
+			report->addMarginItem({"%TAG%", -1, -1, {m_marginFont, Qt::AlignRight | Qt::AlignTop}});
 		}
 
 		{
@@ -806,7 +821,6 @@ namespace Builder
 
 			// Render schemas
 
-			int pageIndex = 1;
 			for (auto it = sfg.schemas.begin(); it != sfg.schemas.end(); it++)
 			{
 				if (m_stop == true)
@@ -827,22 +841,30 @@ namespace Builder
 
 				auto schemaDrawingSection = report->addSection(ReportSection::create(tr("Schema: %1").arg(schemaId),
 																					 pageLayout));
+				schemaDrawingSection->setTag(schema->caption());
 				schemaDrawingSection->addSchema(reportSchema);
-
-				report->addMarginItem({schema->caption(), pageIndex, pageIndex, {m_marginFont, Qt::AlignRight | Qt::AlignTop}});
-				pageIndex++;
 
 				if (schema->isLogicSchema() == true && m_options.addLogicSchemaDetails == true)
 				{
-					auto schemaDetailsSection = report->addSection(ReportSection::create(tr("Schema: %1").arg(schemaId),
-																						 getSchemaPageLayout(schema)));
+					auto schemaDetailsSection = ReportSection::create(tr("Schema: %1").arg(schemaId),
+																						 pageLayout);
+					schemaDetailsSection->setTag(schema->caption() + "[Details]");
+					schemaDetailsSection->addText(tr("Schema '%1 - %2' signals").arg(schema->schemaId()).arg(schema->caption()),
+									 {m_normalFont, Qt::AlignHCenter});
 
-					createSchemaDetailsSection(schemaDetailsSection, schema, detailsSet);
-
-					report->addMarginItem({tr("%1 [Details]").arg(schema->caption()), pageIndex, pageIndex, {m_marginFont, Qt::AlignRight | Qt::AlignTop}});
-					pageIndex++;
+					auto table = createSchemaDetailsTable(schema, sfg.schemas, detailsSet);
+					if (table != nullptr && table->rowCount() > 0)
+					{
+						schemaDetailsSection->addTable(table);
+						report->addSection(schemaDetailsSection);
+					}
 				}
 			}
+		}
+
+		{
+			QMutexLocker l(&m_statisticsMutex);
+			m_statistics.m_currentStatus = WorkerStatus::Printing;
 		}
 
 		ReportPrinter printer(m_schemaView);
@@ -901,32 +923,156 @@ namespace Builder
 		}
 	}
 
-	void SchemasReportGenerator::createSchemaDetailsSection(std::shared_ptr<ReportLib::ReportSection> section,
-															const std::shared_ptr<VFrame30::Schema>& schema,
+	std::shared_ptr<ReportTable> SchemasReportGenerator::createSchemaDetailsTable(const std::shared_ptr<VFrame30::Schema>& schema,
+															const std::map<QString, std::shared_ptr<VFrame30::Schema>>& allSchemas,
 															const VFrame30::SchemaDetailsSet& detailsSet)
 	{
-		ReportLib::ReportFont normalFont{"Arial", 9, QFont::Normal};
-		ReportLib::TextFormat centerTextFormat{normalFont, Qt::AlignHCenter};
-
-		section->addText(tr("Schema '%1 - %2' signals").arg(schema->schemaId()).arg(schema->caption()), centerTextFormat);
+		if (schema->isLogicSchema() == false)
+		{
+			Q_ASSERT(false);
+			return {};
+		}
+		VFrame30::LogicSchema* logicSchema = schema->toLogicSchema();
+		if (logicSchema == nullptr)
+		{
+			Q_ASSERT(false);
+			return {};
+		}
 
 		auto table = ReportTable::create({m_tableFont,
-										  {tr("Signal ID"), tr("Signal Type"), tr("Schemas")},
-										  {30, 20, 50},
+										  {tr("In Signal ID"), tr("FROM Schemas"), tr("Out Signal ID"), tr("TO Schemas")},
+										  {20, 30, 20, 30},
 										  Qt::AlignLeft});
 
-		section->addTable(table);
+		// Get list of signals for current schema
+		//
 
-		QStringList signalList = schema->getSignalList();
-		for (const QString& id : signalList)
+		int question_should_impact_signals_be_included = 1;
+
+		struct SignalsMapInfo
 		{
-			QStringList schemasList = detailsSet.schemasByAppSignalId(id);
+			std::set<QString> map;
+			bool isInput{false};
+			QString endpointText;
+		};
 
-			QStringList row;
-			row << id;
-			row << "";
-			row << schemasList.join(", ");
-			table->insertRow(row);
+		SignalsMapInfo maps[2] {{logicSchema->getInputSignalMap(), true, "Start Point"},
+								{logicSchema->getOutputSignalMap(), false, "End Point"}};
+
+		struct SchemaSignalInfo
+		{
+			QString signalId;
+			QString schemasList;
+		};
+		std::vector<SchemaSignalInfo> schemaSignalsInfos[2];
+
+		for (int i = 0; i < 2; i++)
+		{
+			const SignalsMapInfo& mapInfo = maps[i];
+
+			std::vector<SchemaSignalInfo>& signalsInfo = schemaSignalsInfos[i];
+			signalsInfo.reserve(mapInfo.map.size());
+
+			for (const QString& signalId : mapInfo.map)
+			{
+				QStringList otherSchemasIds;
+
+				// Get list of schemas which contain this signal (other schemas)
+				//
+				QStringList otherSchemasList = detailsSet.schemasByAppSignalId(signalId);
+				for (const QString& otherSchemaId : otherSchemasList)
+				{
+					if (otherSchemaId == schema->schemaId())
+					{
+						continue;	// Skip current schema
+					}
+
+					// Get other schema
+					//
+					const auto& it = allSchemas.find(otherSchemaId);
+					if (it == allSchemas.end())
+					{
+						Q_ASSERT(false);
+						continue;
+					}
+
+					const std::shared_ptr<VFrame30::Schema>& otherSchema = it->second;
+					if (otherSchema == nullptr)
+					{
+						Q_ASSERT(otherSchema);
+						continue;
+					}
+					VFrame30::LogicSchema* otherLogicSchema = otherSchema->toLogicSchema();
+					if (otherLogicSchema == nullptr)
+					{
+						Q_ASSERT(false);
+						return {};
+					}
+
+					if ((mapInfo.isInput == true ? otherLogicSchema->getOutputSignalMap() : otherLogicSchema->getInputSignalMap())
+							.contains(signalId) == true)
+					{
+						if (otherLogicSchema->excludeFromBuild() == true)
+						{
+							otherSchemasIds.push_back(otherSchemaId + " (excluded)");
+						}
+						else
+						{
+							otherSchemasIds.push_back(otherSchemaId);
+						}
+					}
+				}
+
+				if (otherSchemasIds.empty() == false)
+				{
+					signalsInfo.push_back({signalId, otherSchemasIds.join(", ")});
+				}
+				else
+				{
+					signalsInfo.push_back({signalId, mapInfo.endpointText});
+				}
+			}
 		}
+
+		// Output data to a table
+		//
+		int inputIndex = 0;
+		int outputIndex = 0;
+		const std::vector<SchemaSignalInfo>& inputSignalsVector = schemaSignalsInfos[0];
+		const std::vector<SchemaSignalInfo>& outputSignalsVector = schemaSignalsInfos[1];
+		qsizetype inputSignalsCount = inputSignalsVector.size();
+		qsizetype outputSignalsCount = outputSignalsVector.size();
+
+		QStringList l;
+		while((inputIndex < inputSignalsCount) || (outputIndex < outputSignalsCount))
+		{
+			l.clear();
+			if (inputIndex < inputSignalsCount)
+			{
+				l.push_back(inputSignalsVector[inputIndex].signalId);
+				l.push_back(inputSignalsVector[inputIndex].schemasList);
+				inputIndex++;
+			}
+			else
+			{
+				l.push_back(QString());
+				l.push_back(QString());
+			}
+
+			if (outputIndex < outputSignalsCount)
+			{
+				l.push_back(outputSignalsVector[outputIndex].signalId);
+				l.push_back(outputSignalsVector[outputIndex].schemasList);
+				outputIndex++;
+			}
+			else
+			{
+				l.push_back(QString());
+				l.push_back(QString());
+			}
+			table->insertRow(l);
+		}
+
+		return table;
 	}
 }

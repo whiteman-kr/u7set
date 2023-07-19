@@ -24,7 +24,20 @@ namespace VFrame30
 	public:
 		virtual void Draw(CDrawParam* drawParam, const QRectF& clipRect) override;
 
+	private:
+		enum class SignalInOutType
+		{
+			Input,
+			Output,
+			Any
+		};
+
+	public:
+		std::set<QString> getInputSignalMap() const;
+		std::set<QString> getOutputSignalMap() const;
 		std::set<QString> getSignalMap() const;
+
+		std::set<QString> getSignalMap(SignalInOutType signalInOutType) const;
 		virtual QStringList getSignalList() const override;
 
 		// Properties

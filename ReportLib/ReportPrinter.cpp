@@ -7,13 +7,14 @@ namespace ReportLib
 	// PrintText
 	//
 
-	PrintText::PrintText(QSizeF pageSize, int verticalOffset, bool newPageBefore):
+	PrintText::PrintText(QSizeF pageSize, int verticalOffset, bool newPageBefore, const QString& tag):
 		m_textCusror(&m_textDocument)
 	{
 		m_type = Type::Text;
 		m_verticalOffset = verticalOffset;
 		m_newPageBefore = newPageBefore;
 		m_textDocument.setPageSize(pageSize);
+		m_tag = tag;
 	}
 
 	QTextCursor& PrintText::textCursor()
@@ -105,13 +106,6 @@ namespace ReportLib
 		return m_textDocument.pageCount();
 	}
 
-	QString PrintText::tag() const
-	{
-		// For now, tag is only implemented for Schema and returns its caption.
-		// For future, a set of tags can be added for other objects - text or table.
-		return {};
-	}
-
 	//
 	// PrintSchema
 	//
@@ -120,7 +114,8 @@ namespace ReportLib
 							 const std::shared_ptr<VFrame30::Schema>& schema,
 							 const std::map<QUuid, ReportSchemaCompareAction>& compareActions,
 							 int verticalOffset,
-							 bool newPageBefore):
+							 bool newPageBefore,
+							 const QString& tag):
 		m_schemaView(schemaView),
 		m_schema(schema),
 		m_compareActions(compareActions)
@@ -128,6 +123,7 @@ namespace ReportLib
 		m_type = Type::Schema;
 		m_verticalOffset = verticalOffset;
 		m_newPageBefore = newPageBefore;
+		m_tag = tag;
 	}
 
 	QRect PrintSchema::contentRect() const
@@ -232,10 +228,6 @@ namespace ReportLib
 		return 0;
 	}
 
-	QString PrintSchema::tag() const
-	{
-		return m_schema->caption();
-	}
 	//
 	// ReportPrinter
 	//
@@ -350,7 +342,8 @@ namespace ReportLib
 							printText = std::make_shared<PrintText>(pageRectPixels.size(),
 																	lastDocumentTextPageHeight,
 																	lastObjectType == ReportObject::Type::Schema ||
-																	(firstObject == true && firstSection == false));
+																	(firstObject == true && firstSection == false),
+																	section->tag());
 							printObjects.push_back(printText);
 						}
 						break;
@@ -377,7 +370,8 @@ namespace ReportLib
 														   rs->compareActions(),
 														   lastDocumentTextPageHeight,
 														   lastObjectType == ReportObject::Type::Schema ||
-														   (firstObject == true && firstSection == false));
+														   (firstObject == true && firstSection == false),
+														   section->tag());
 						printObjects.push_back(ps);
 
 

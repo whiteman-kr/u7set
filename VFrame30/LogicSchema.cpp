@@ -197,7 +197,22 @@ namespace VFrame30
 		return;
     }
 
+	std::set<QString> LogicSchema::getInputSignalMap() const
+	{
+		return getSignalMap(SignalInOutType::Input);
+	}
+
+	std::set<QString> LogicSchema::getOutputSignalMap() const
+	{
+		return getSignalMap(SignalInOutType::Output);
+	}
+
 	std::set<QString> LogicSchema::getSignalMap() const
+	{
+		return getSignalMap(SignalInOutType::Any);
+	}
+
+	std::set<QString> LogicSchema::getSignalMap(SignalInOutType signalInOutType) const
 	{
 		std::set<QString> signalMap;	// signal ids can be duplicated, std::set removes dupilcates
 
@@ -209,9 +224,21 @@ namespace VFrame30
 				//
 				for (const auto& item : layer->items())
 				{
-					if (item->isType<VFrame30::SchemaItemSignal>() == true)
+					if (signalInOutType == SignalInOutType::Input && item->isType<VFrame30::SchemaItemInput>() == false)
 					{
-						const VFrame30::SchemaItemSignal* itemSignal = item->toType<VFrame30::SchemaItemSignal>();
+						continue;
+					}
+
+					if (signalInOutType == SignalInOutType::Output &&
+							item->isType<VFrame30::SchemaItemOutput>() == false &&
+							item->isType<VFrame30::SchemaItemInOut>() == false)
+					{
+						continue;
+					}
+
+					if (const VFrame30::SchemaItemSignal* itemSignal = item->toType<VFrame30::SchemaItemSignal>();
+							itemSignal != nullptr)
+					{
 						assert(itemSignal);
 
 						QStringList appSignals = itemSignal->appSignalIdList();
@@ -228,7 +255,7 @@ namespace VFrame30
 					}
 
 					if (const VFrame30::SchemaItemReceiver* itemReceiver = item->toType<VFrame30::SchemaItemReceiver>();
-						itemReceiver != nullptr)
+							itemReceiver != nullptr && signalInOutType == SignalInOutType::Any)
 					{
 						for (const QString& appSignalId : itemReceiver->appSignalIdsAsList())
 						{
@@ -237,7 +264,7 @@ namespace VFrame30
 					}
 
 					if (const VFrame30::SchemaItemUfb* itemUfb = item->toType<VFrame30::SchemaItemUfb>();
-						itemUfb != nullptr)
+							itemUfb != nullptr && signalInOutType == SignalInOutType::Any)
 					{
 						std::vector<std::shared_ptr<Property>> props = static_cast<const PropertyObject*>(itemUfb)->specificProperties();
 
@@ -255,7 +282,6 @@ namespace VFrame30
 							}
 						}
 					}
-
 				}
 
 				break;

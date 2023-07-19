@@ -34,18 +34,19 @@ namespace ReportLib
 
 		virtual int pageCount() const = 0;
 
-		virtual QString tag() const = 0;
+		virtual QString tag() const {return m_tag;}
 
 	protected:
 		Type m_type{Type::Undefined};
 		int m_verticalOffset{0};
 		bool m_newPageBefore{false};
+		QString m_tag;	// Text printer in margin with %TAG% text
 	};
 
 	class PrintText : public PrintObject
 	{
 	public:
-		PrintText(QSizeF pageSize, int verticalOffset, bool newPageBefore);
+		PrintText(QSizeF pageSize, int verticalOffset, bool newPageBefore, const QString& tag);
 
 		QTextCursor& textCursor();
 
@@ -60,7 +61,6 @@ namespace ReportLib
 						   QMutex& pageCounterMutex) override;
 
 		virtual int pageCount() const override;
-		virtual QString tag() const override;
 
 	private:
 		QTextDocument m_textDocument;
@@ -74,7 +74,8 @@ namespace ReportLib
 					const std::shared_ptr<VFrame30::Schema>& schema,
 					const std::map<QUuid, ReportSchemaCompareAction>& compareActions,
 					int verticalOffset,
-					bool newPageBefore);
+					bool newPageBefore,
+					const QString& tag);
 
 		virtual QRect contentRect() const override;
 
@@ -87,7 +88,6 @@ namespace ReportLib
 						   QMutex& pageCounterMutex) override;
 
 		virtual int pageCount() const override;
-		virtual QString tag() const override;
 
 	private:
 		// Schema data

@@ -103,7 +103,8 @@ namespace Builder
 			Idle,
 			Loading,
 			Parsing,
-			Rendering
+			Rendering,
+			Printing
 		};
 		struct Statistics
 		{
@@ -129,7 +130,7 @@ namespace Builder
 			QString caption;
 
 			std::vector<DbFileInfo> schemasFiles;
-			std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas;	// Key is full path to schema file
+			std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas;		// Key is schema ID
 		};
 
 	private:
@@ -144,7 +145,9 @@ namespace Builder
 		void clearSchemas(SchemaFilesGroup& sfg);
 
 		[[nodiscard]] QPageLayout getSchemaPageLayout(const std::shared_ptr<VFrame30::Schema>& schema) const;
-		void createSchemaDetailsSection(std::shared_ptr<ReportLib::ReportSection> section, const std::shared_ptr<VFrame30::Schema>& schema, const VFrame30::SchemaDetailsSet& detailsSet);
+		std::shared_ptr<ReportLib::ReportTable> createSchemaDetailsTable(const std::shared_ptr<VFrame30::Schema>& schema,
+										const std::map<QString, std::shared_ptr<VFrame30::Schema> >& allSchemas,
+										const VFrame30::SchemaDetailsSet& detailsSet);
 
 
 	private:
@@ -186,6 +189,7 @@ namespace Builder
 		QString m_userName;
 		QString m_userPassword;
 
+		ReportLib::ReportFont m_normalFont;
 		ReportLib::ReportFont m_tableFont;
 		ReportLib::ReportFont m_marginFont;
 

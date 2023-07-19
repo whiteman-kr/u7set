@@ -27,6 +27,21 @@ namespace ReportLib
 		return m_caption;
 	}
 
+	void ReportSection::setCaption(const QString& value)
+	{
+		m_caption = value;
+	}
+
+	const QString& ReportSection::tag() const
+	{
+		return m_tag;
+	}
+
+	void ReportSection::setTag(const QString& value)
+	{
+		m_tag = value;
+	}
+
 	QPageLayout ReportSection::pageLayout() const
 	{
 		return m_pageLayout;

@@ -1530,6 +1530,7 @@ void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 					{});
 
 		section->addSchema(reportSchema);
+		section->setTag(singleSchema->caption());
 
 		return;
 	}
@@ -1711,6 +1712,7 @@ void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 					itemsActions);
 
 		section->addSchema(reportSchema);
+		section->setTag(targetSchema->caption());
 
 		// Add schema differences tables
 

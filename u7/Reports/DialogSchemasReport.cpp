@@ -335,10 +335,23 @@ void DialogSchemasReport::okClicked()
 	m_options.addLogicSchemaDetails = m_checkAddSignalsSources->isChecked();
 	m_options.infoMode = m_checkInfoMode->isChecked();
 
+	int selectedCount = 0;
+
 	for (int i = 0; i < m_schemaTypesTree->topLevelItemCount(); i++)
 	{
 		QTreeWidgetItem* item = m_schemaTypesTree->topLevelItem(i);
+		if (item->checkState(0) == Qt::Checked)
+		{
+			selectedCount++;
+		}
+
 		m_schemaTypesParams[i].setSelected(item->checkState(0) == Qt::Checked);
+	}
+
+	if (selectedCount == 0)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Please choose at least one file type!"));
+		return;
 	}
 
 	QDialog::accept();
