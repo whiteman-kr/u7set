@@ -14,6 +14,186 @@
 #include "../VFrame30/AppSignalController.h"
 
 
+namespace
+{
+	class QSignalUpdateAction : public QAction
+	{
+	public:
+		explicit QSignalUpdateAction(const AppSignalParam& signalParam,
+									 const IAppSignalManager* signalManager,
+									 qsizetype maxIdSize,
+									 qsizetype maxCaptionSize,
+									 QObject* parent) :
+			QAction{parent},
+			m_signalParam{signalParam},
+			m_signalManager{signalManager},
+			m_maxIdSize{maxIdSize},
+			m_maxCaptionSize{maxCaptionSize}
+		{
+			Q_ASSERT(m_signalManager);
+
+			setText(getActionText());
+			startTimer(200);
+
+			return;
+		}
+
+	protected:
+		void timerEvent(QTimerEvent* event) override
+		{
+			setText(getActionText());
+		}
+
+		QString getActionText()
+		{
+			QString str;
+
+			if (m_signalParam.customSignalId().isEmpty() == true)
+			{
+				// There is no such signal.
+				//
+				str = m_signalParam.appSignalId();
+			}
+			else
+			{
+				AppSignalState state = m_signalManager ?
+					m_signalManager->signalState(m_signalParam.appSignalId(), nullptr) :
+					AppSignalState{};
+
+				QString stateText;
+				if (state.isValid() == false)
+				{
+					stateText = " ? ";
+				}
+				else
+				{
+					// Print signal value.
+					//
+					int precision = (m_signalParam.isAnalog() && m_signalParam.analogSignalFormat() == E::AnalogAppSignalFormat::Float32) ?
+						m_signalParam.precision() :
+						0;
+
+					stateText = QString{"%1"}.arg(state.value(), 8, 'f', precision);
+				}
+
+				str = QString{"%1 | %2 |%3"}
+					.arg(m_signalParam.customSignalId().leftJustified(m_maxIdSize))
+					.arg(m_signalParam.caption().leftJustified(m_maxCaptionSize))
+					.arg(stateText);
+			}
+
+			return str;
+		}
+
+	public:
+		AppSignalParam signalParam() const
+		{
+			return m_signalParam;
+		}
+
+	private:
+		const AppSignalParam m_signalParam;
+		const IAppSignalManager* m_signalManager{};
+
+		qsizetype m_maxIdSize{};
+		qsizetype m_maxCaptionSize{};
+	};
+
+	class QSchemaMenu : public QMenu
+	{
+	public:
+		QSchemaMenu(QWidget* parent = nullptr) : QMenu{parent}
+		{
+#ifdef Q_OS_WIN
+			QFont f;
+			f.setFamily("Consolas");
+			setFont(f);
+#else
+			//QFont f;
+			//f.setFamily("DejaVu Sans Mono");  // https://ianyepan.github.io/posts/system-default-monospace-fonts-pt1/
+			//f.setFamily("DejaVu Sans Mono Book");  // https://ianyepan.github.io/posts/system-default-monospace-fonts-pt1/
+			//setFont(f);
+			setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+#endif 
+		}
+
+	protected:
+		void mousePressEvent(QMouseEvent* event) override
+		{
+			m_dragSignalParam = {};
+			m_dragStartPosition = {};
+
+			QSignalUpdateAction* dragAction = dynamic_cast<QSignalUpdateAction*>(activeAction());
+
+			if (event->button() == Qt::LeftButton && dragAction != nullptr)
+			{
+				m_dragStartPosition = event->pos();
+				m_dragSignalParam = dragAction->signalParam();
+			}
+
+			return QMenu::mousePressEvent(event);
+		}
+
+		void mouseMoveEvent(QMouseEvent* event) override
+		{
+			if (m_dragSignalParam.customSignalId().isEmpty() == true)
+			{
+				QMenu::mouseMoveEvent(event);
+				return;
+			}
+
+			if (!(event->buttons() & Qt::LeftButton))
+			{
+				QMenu::mouseMoveEvent(event);
+				return;
+			}
+
+			if ((event->pos() - m_dragStartPosition).manhattanLength() < QApplication::startDragDistance())
+			{
+				QMenu::mouseMoveEvent(event);
+				return;
+			}
+
+			// Save signals to protobuf.
+			//
+			::Proto::AppSignalSet protoSetMessage;
+			m_dragSignalParam.save(protoSetMessage.add_appsignal());
+
+			QByteArray data;
+			data.resize(static_cast<int>(protoSetMessage.ByteSizeLong()));
+
+			protoSetMessage.SerializeToArray(data.data(), static_cast<int>(protoSetMessage.ByteSizeLong()));
+
+			// --
+			//
+			if (data.isEmpty() == false)
+			{
+				QDrag* drag = new QDrag{this->parentWidget()};
+				QMimeData* mimeData = new QMimeData;
+
+				mimeData->setData(AppSignalParamMimeType::value, data);
+				drag->setMimeData(mimeData);
+
+				// Close this menu, if it is not closed then interface can freeze.
+				//
+				close();
+				m_dragSignalParam = {};
+
+				drag->exec();
+
+				return;
+			}
+
+			return;
+		}
+
+	private:
+		AppSignalParam m_dragSignalParam;
+		QPoint m_dragStartPosition;
+	};
+}
+
+
 //
 //
 //	SimSchemaWidget
@@ -230,7 +410,7 @@ void SimSchemaWidget::signalContextMenu(QStringList appSignals,
 
 	// Compose menu
 	//
-	QMenu menu(this);
+	QSchemaMenu menu{this};
 
 	// Schemas List
 	//
@@ -341,52 +521,94 @@ void SimSchemaWidget::signalContextMenu(QStringList appSignals,
 
 	// SignalInfo list
 	//
-	if (appSignals.isEmpty() == false)
+	std::list<AppSignalParam> appSignalParams;
+	std::list<AppSignalParam> impactSignalsParams;
+
+	qsizetype maxIdSize = 0;
+	qsizetype maxCaptionSize = 0;
+
+	for (const QString& s : appSignals)
+	{
+		bool ok = false;
+		AppSignalParam signal = m_simulator->appSignalManager().signalParam(s, &ok);
+
+		if (ok == false)
+		{
+			signal.setAppSignalId(s);
+			signal.setCustomSignalId({});
+
+			maxIdSize = std::max(maxIdSize, signal.appSignalId().size());
+		}
+		else
+		{
+			maxIdSize = std::max(maxIdSize, signal.customSignalId().size());
+			maxCaptionSize = std::max(maxCaptionSize, signal.caption().size());
+		}
+
+		appSignalParams.push_back(std::move(signal));
+	}
+
+	for (const QString& s : impactSignals)
+	{
+		bool ok = false;
+		AppSignalParam signal = m_simulator->appSignalManager().signalParam(s, &ok);
+
+		if (ok == false)
+		{
+			signal.setAppSignalId(s);
+			signal.setCustomSignalId({});
+
+			maxIdSize = std::max(maxIdSize, signal.appSignalId().size());
+		}
+		else
+		{
+			maxIdSize = std::max(maxIdSize, signal.customSignalId().size());
+			maxCaptionSize = std::max(maxCaptionSize, signal.caption().size());
+		}
+
+		impactSignalsParams.push_back(std::move(signal));
+	}
+
+	// --
+	//
+	if (appSignalParams.empty() == false)
 	{
 		QAction* appSignalSeparator = menu.addSeparator();
 		appSignalSeparator->setText(tr("Signals"));
 
-		for (const QString& s : appSignals)
+		for (const auto& signal : appSignalParams)
 		{
-			bool ok = false;
-			AppSignalParam signal =	m_simulator->appSignalManager().signalParam(s, &ok);
+			auto signalAction = new QSignalUpdateAction{signal, &m_simulator->appSignalManager(), maxIdSize, maxCaptionSize, &menu};
+			menu.addAction(signalAction);
 
-			QString signalId = ok ? QString("%1 %2").arg(signal.customSignalId()).arg(signal.caption()) : s;
-
-			QAction* a = menu.addAction(signalId);
-
-			auto f = [s, thisSimWidget]() -> void
+			auto f = [signal, thisSimWidget]() -> void
 					 {
-						thisSimWidget->signalInfo(s);
+						thisSimWidget->signalInfo(signal.appSignalId());
 					 };
 
-			connect(a, &QAction::triggered, this, f);
+			connect(signalAction, &QAction::triggered, this, f);
 		}
 	}
 
-	if (impactSignals.empty() == false)
+	if (impactSignalsParams.empty() == false)
 	{
-		if (appSignals.empty() == false)
+		if (appSignalParams.empty() == false)
 		{
 			QAction* impactSignalSeparator = menu.addSeparator();
 			impactSignalSeparator->setText(tr("Impact Signals"));
 		}
 
-		for (const QString& s : impactSignals)
+		for (const auto& signal : impactSignalsParams)
 		{
-			bool ok = false;
-			AppSignalParam signal =	m_simulator->appSignalManager().signalParam(s, &ok);
+			auto signalAction = new QSignalUpdateAction{signal, &m_simulator->appSignalManager(), maxIdSize, maxCaptionSize, &menu};
+			menu.addAction(signalAction);
 
-			QString signalId = ok ? QString("%1 %2").arg(signal.customSignalId()).arg(signal.caption()) : s;
-
-			QAction* a = menu.addAction(signalId);
-
-			auto f = [s, thisSimWidget]() -> void
+			auto f = [signal, thisSimWidget]() -> void
 					 {
-						thisSimWidget->signalInfo(s);
+						thisSimWidget->signalInfo(signal.appSignalId());
 					 };
 
-			connect(a, &QAction::triggered, this, f);
+			connect(signalAction, &QAction::triggered, this, f);
 		}
 	}
 

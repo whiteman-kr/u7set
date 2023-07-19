@@ -327,14 +327,13 @@ class AppSignalParam
 	Q_PROPERTY(bool IsEndpoint READ isEndpoint)
 
 public:
-	AppSignalParam() = default;
+	AppSignalParam(const AppSignal& signal);
 
 	// Shallow copy.
 	//
+	AppSignalParam() = default;
 	AppSignalParam(const AppSignalParam&) = default;
 	AppSignalParam(AppSignalParam&&) noexcept = default;
-	AppSignalParam(const AppSignal& signal);
-
 	AppSignalParam& operator=(const AppSignalParam&) = default;
 	AppSignalParam& operator=(AppSignalParam&&) noexcept = default;
 
