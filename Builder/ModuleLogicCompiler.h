@@ -188,6 +188,8 @@ namespace Builder
 
 		const LmMemoryMap& lmMemoryMap() const { return m_memoryMap; }
 
+		const UalAfbsMap& ualAfbs() const;
+
 		QList<const UalSignal*> getLoopbacksUalSignals() const;
 
 		bool optimizeCode(CodeOptimizationType optimizationType,
@@ -200,6 +202,9 @@ namespace Builder
 		int bitAccumulatorAddress() const;
 		int wordAccumulatorAddress() const;
 		int wordAccumulator2Address() const;
+
+		Address16 constBit0Addr() const { return m_memoryMap.constBit0Addr(); }
+		Address16 constBit1Addr() const { return m_memoryMap.constBit1Addr(); }
 
 	private:
 		bool getLmAssociatedOptoPortsAreas(std::vector<CodeChecker::MemArea>* optoAreas, bool rx) const;
@@ -429,7 +434,6 @@ namespace Builder
 		bool getNearestOutSignalID(const LogicPin& outPin, QString* nearestSignalID);
 		bool getNearestSignalID(const LogicPin& inOutPin, QString* nearestSignalID);
 
-
 		bool processSinglePortReceivers();
 		bool processSinglePortReceiver(const UalItem* item);
 
@@ -466,6 +470,7 @@ namespace Builder
 		bool optimizeBitFilling(CodeSnippet& srcCode);
 		bool optimizeBitAccNot(CodeSnippet& srcCode);
 		bool optimizeSequentialAccBitMoves(CodeSnippet& srcCode);
+		bool optimizeBitAccAnd(CodeSnippet& srcCode);
 
 		bool writeInfoFilesAfterOptimization();
 		bool checkOptimizedAppLogicCode();
@@ -785,9 +790,6 @@ namespace Builder
 
 		bool runProcs(const ProcsToCallArray& procArray);
 		bool runCodeGenProcs(const CodeGenProcsToCallArray& procArray, CodeSnippet* code);
-
-		Address16 constBit0Addr() const { return m_memoryMap.constBit0Addr(); }
-		Address16 constBit1Addr() const { return m_memoryMap.constBit1Addr(); }
 
 		Address16 getConstBitAddr(UalSignal* constDiscreteUalSignal);
 

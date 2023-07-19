@@ -301,6 +301,10 @@ namespace Builder
 		void setNumber(int number) { m_number = number; }
 
 		bool getAfbParamByIndex(int index, LogicAfbParam* afbParam) const;
+		const LogicAfbParam* getParamByOpName(const QString& opName) const;
+
+		int getParamIntValueByOpName(const QString& opName, bool* ok) const;
+
 		bool getAfbSignalByIndex(int index, LogicAfbSignal* afbSignal) const;
 		bool getAfbSignalByPin(const LogicPin& pin, LogicAfbSignal* afbSignal) const { return getAfbSignalByIndex(pin.afbOperandIndex(), afbSignal); }
 		bool getAfbSignalByPinUuid(QUuid pinUuid, LogicAfbSignal* afbSignal) const;

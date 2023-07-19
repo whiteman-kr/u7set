@@ -302,6 +302,7 @@ namespace Builder
 		bool isMoveConst32Cmd() const;
 		bool isSetMemCmd() const;
 		bool isWriteFuncBlockBitCmd() const;
+		bool isWriteFuncBlockConstCmd() const;
 		bool isStartAfbCmd() const;
 		bool isReadFuncBlockBitCmd() const;
 

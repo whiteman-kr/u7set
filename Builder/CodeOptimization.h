@@ -13,6 +13,8 @@ namespace Builder
 		BitFilling,
 		BitAccNot,
 		SequentialAccBitMoves,
+		BitAccAnd,
+		BitAccOr,
 	};
 
 	struct OptimizationInfo
@@ -226,8 +228,10 @@ namespace Builder
 		Address16 m_srcBitAddr;
 		Address16 m_destBitAddr;
 
-		int m_sequenceIndex = -1;
-
+		int m_sequenceState = -1;					// -1 not in sequence
+													// 0 bit loaded to AFB NOT
+													// 1 AFB NOT started
+													// 2 result read from AFB NOT and saved
 		const int AFB_NOT_IN_PIN_INDEX = 0;
 		const int AFB_NOT_OUT_PIN_INDEX = 2;
 
@@ -236,7 +240,7 @@ namespace Builder
 
 	class SequentialAccBitMovesOptimization : public SequenceOptimization
 	{
-		// Replace sequential bit mov from one word to another:
+		// Replace sequential bit mov from different words to another word:
 		//
 		//		MOVB      46080[0], 56382[15]
 		//		MOVB      46080[1], 56383[0]
@@ -256,7 +260,7 @@ namespace Builder
 		//		MOVB      46080[15], 56398[1]
 		//		MOV       56350, 46080
 		//
-		// By bit ACC using commands (reverse order bit loading!):
+		// by bit ACC using commands (reverse order bit loading!):
 		//
 		//		MOVB      ACC, 56398[1]
 		//		MOVB      ACC, 56398[0]
@@ -290,7 +294,7 @@ namespace Builder
 		bool inSequence() const;
 
 	private:
-		int m_sequenceState = -1;			// -1	no in sequence
+		int m_sequenceState = -1;			// -1	not in sequence
 											// 0	pass load const 0 to accumulator
 											// 1	loading bits to accumulator
 											// 2	pass move from accumulator to mem
@@ -301,6 +305,81 @@ namespace Builder
 
 		int m_directMoveDestAddr = BAD_ADDRESS;
 	};
+
+	class BitAccAndOptimization : public SequenceOptimization
+	{
+		//
+		// Replace AFB based AND operation:
+		//
+		//	WRFBB     AND.0[3], 46084[0]
+		//	WRFBB     AND.0[4], 46084[1]
+		//	STARTAFB  AND.0
+		//	RDFBB     46083[2], AND.0[20]
+		//
+		// with bit ACC based commands:
+		//
+		//	SET		  ACC
+		//	MOVB	  ACC, 46084[0]
+		//	MOVB	  ACC, 46084[1]
+		//	AND		  ACC
+		//  MOVB	  46083[2], ACC
+		//
+
+	public:
+		BitAccAndOptimization(ModuleLogicCompiler& compiler,
+							  CodeSnippet& srcCode);
+	private:
+		virtual bool isOptimizationPossible() const override;
+		virtual void reinitVars() override;
+		virtual bool canStartSequence(const CodeItem& cmd) override;
+		virtual bool isSequenceContinue(const CodeItem& cmd) override;
+		virtual bool canOptimize() const override;
+		virtual void getReplacementCode(CodeSnippet& code) override;
+
+		bool setBit(int bitNo);
+		bool inSequence() const;
+
+	private:
+		static const int LOGIC_AFB_OPCODE = 1;
+		static const int LOGIC_CONF_AND = 1;
+
+		//
+		mutable Address16 m_constBit0Addr;
+		mutable Address16 m_constBit1Addr;
+		mutable std::map<int, int> m_afbInstances;		// instance => operand count
+		mutable std::set<int> m_inputIndexes;
+		mutable int m_outputIndex = -1;
+
+		//
+
+		int m_sequenceState = -1;					// -1 not in sequence
+													// 0 loading source bits in AFB
+													// 1 AFB AND started
+													// 2 result read from AFB and saved
+		int m_loadBitCount = 0;
+		int m_afbInstance = -1;
+		std::set<Address16> m_srcBitAddrs;
+		Address16 m_destBitAddr;
+	};
+
+
+
+	//
+	// Replace AFB based AND (OR) operation:
+	//
+	//	WRFBB     AND.0[3], 46084[0]	|	WRFBB     OR.0[3], 46084[0]
+	//	WRFBB     AND.0[4], 46084[1]	|	WRFBB     OR.0[4], 46084[1]
+	//	STARTAFB  AND.0					|	STARTAFB  OR.0
+	//	RDFBB     46083[2], AND.0[20]	|	RDFBB     46083[2], OR.0[20]
+	//
+	// with bit ACC based commands:
+	//
+	//	SET		  ACC					|	RESET	  ACC
+	//	MOVB	  ACC, 46084[0]			|	MOVB	  ACC, 46084[0]
+	//	MOVB	  ACC, 46084[1]			|	MOVB	  ACC, 46084[1]
+	//	AND		  ACC					|	OR		  ACC
+	//  MOVB	  46083[2], ACC			|	MOVB	  46083[2], ACC
+	//
 
 }
 

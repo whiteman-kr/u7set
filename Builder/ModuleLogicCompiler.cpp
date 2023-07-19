@@ -335,6 +335,11 @@ namespace Builder
 		return getLmAssociatedOptoPortsAreas(optoTxAreas, false);
 	}
 
+	const UalAfbsMap& ModuleLogicCompiler::ualAfbs() const
+	{
+		return m_ualAfbs;
+	}
+
 	QList<const UalSignal*> ModuleLogicCompiler::getLoopbacksUalSignals() const
 	{
 		return m_loopbacks.getLoopbacksUalSignals();
@@ -7787,6 +7792,7 @@ namespace Builder
 			CODE_OPTIMIZATION_PROC_TO_CALL(ModuleLogicCompiler::optimizeBitFilling),
 			CODE_OPTIMIZATION_PROC_TO_CALL(ModuleLogicCompiler::optimizeBitAccNot),
 			CODE_OPTIMIZATION_PROC_TO_CALL(ModuleLogicCompiler::optimizeSequentialAccBitMoves),
+			CODE_OPTIMIZATION_PROC_TO_CALL(ModuleLogicCompiler::optimizeBitAccAnd),
 		};
 
 		bool result = true;
@@ -7868,6 +7874,13 @@ namespace Builder
 		SequentialAccBitMovesOptimization sabmo(*this, srcCode);
 
 		return sabmo.optimize();
+	}
+
+	bool ModuleLogicCompiler::optimizeBitAccAnd(CodeSnippet& srcCode)
+	{
+		BitAccAndOptimization baao(*this, srcCode);
+
+		return baao.optimize();
 	}
 
 	bool ModuleLogicCompiler::checkOptimizedAppLogicCode()

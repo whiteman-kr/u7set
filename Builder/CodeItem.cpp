@@ -1364,6 +1364,11 @@ namespace Builder
 		return m_lmCmdCode == LmCommand::WRFBB;
 	}
 
+	bool CodeItem::isWriteFuncBlockConstCmd() const
+	{
+		return m_lmCmdCode == LmCommand::WRFBC;
+	}
+
 	bool CodeItem::isStartAfbCmd() const
 	{
 		return m_lmCmdCode == LmCommand::STARTAFB;

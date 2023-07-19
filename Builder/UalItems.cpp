@@ -875,7 +875,9 @@ namespace Builder
 
 	bool UalAfb::getAfbParamByIndex(int index, LogicAfbParam* afbParam) const
 	{
-		for(const LogicAfbParam& param : afb().params())
+		const std::vector<LogicAfbParam>& params = afb().params();
+
+		for(const LogicAfbParam& param : params)
 		{
 			if (param.operandIndex() == index)
 			{
@@ -890,6 +892,44 @@ namespace Builder
 		return false;
 	}
 
+	const LogicAfbParam* UalAfb::getParamByOpName(const QString& opName) const
+	{
+		const std::vector<LogicAfbParam>& params = afb().params();
+
+		for(const LogicAfbParam& param : params)
+		{
+			if (param.opName() == opName)
+			{
+				return &param;
+			}
+		}
+
+		return nullptr;
+	}
+
+	int UalAfb::getParamIntValueByOpName(const QString& opName, bool* ok) const
+	{
+		TEST_PTR_RETURN_VALUE(ok, 0);
+
+		*ok = false;
+
+		const LogicAfbParam* param = getParamByOpName(opName);
+
+		if (param == nullptr)
+		{
+			return 0;
+		}
+
+		int paramValue = param->afbParamValue().value().toInt(ok);
+
+		if (*ok == false)
+		{
+			Q_ASSERT(false);
+			return 0;
+		}
+
+		return paramValue;
+	}
 
 	bool UalAfb::getAfbSignalByIndex(int index, LogicAfbSignal* afbSignal) const
 	{
