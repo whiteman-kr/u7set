@@ -62,10 +62,11 @@ namespace TrendLib
 		{
 			std::unique_lock<std::mutex> locker(m_mutex);
 
-			m_newJob.wait(locker, [this]()
-			{
-				return m_interruptRequested || m_drawParam.has_value();
-			});
+			m_newJob.wait(locker, 
+						  [this]()
+						  {
+							  return m_interruptRequested || m_drawParam.has_value();
+						  });
 
 			if (m_interruptRequested == true)
 			{

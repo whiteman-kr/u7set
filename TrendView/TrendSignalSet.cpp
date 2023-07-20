@@ -573,7 +573,7 @@ namespace TrendLib
 
 	bool TrendSignalSet::getExistingTrendData(const TrendSignalParam& trendSignal, QDateTime from, QDateTime to, E::TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const
 	{
-		// Get already reqquested and received (o read form file) data
+		// Get already requested and received (no read form file) data
 		// Don't request any data if it is not present
 		//
 		if (outData == nullptr ||
@@ -653,6 +653,33 @@ namespace TrendLib
 		}
 
 		return true;
+	}
+
+	std::optional<TrendStateItem> TrendSignalSet::lastRealtimeState(Hash signalHash, E::TimeType timeType) const
+	{
+		std::optional<TrendStateItem> result;
+
+		QMutexLocker ml(&m_lastRealtimePointsMutex);
+		const std::map<Hash, TrendStateItem>* realTimeLastPoints = nullptr;
+
+		switch (timeType)
+		{
+		case E::TimeType::Local:	realTimeLastPoints = &m_lastRealtimePointsLocalTime;	break;
+		case E::TimeType::System:	realTimeLastPoints = &m_lastRealtimePointsSystemTime;	break;
+		case E::TimeType::Plant:	realTimeLastPoints = &m_lastRealtimePointsPlantTime;	break;
+		default:
+			Q_ASSERT(false);
+			return result;
+		}
+
+		auto it = realTimeLastPoints->find(signalHash);
+		if (it == realTimeLastPoints->end())
+		{
+			return result;
+		}
+
+		result = it->second;
+		return result;
 	}
 
 	bool TrendSignalSet::trendData(QUuid /*trendUuid*/,
@@ -1133,6 +1160,23 @@ namespace TrendLib
 
 	void TrendSignalSet::addNonValidPoint(E::TimeType timeType)
 	{
+		{
+			QMutexLocker ml(&m_lastRealtimePointsMutex);
+			std::map<Hash, TrendStateItem>* realTimeLastPoints = nullptr;
+
+			switch (timeType)
+			{
+			case E::TimeType::Local:	realTimeLastPoints = &m_lastRealtimePointsLocalTime;	break;
+			case E::TimeType::System:	realTimeLastPoints = &m_lastRealtimePointsSystemTime;	break;
+			case E::TimeType::Plant:	realTimeLastPoints = &m_lastRealtimePointsPlantTime;	break;
+			default:
+				Q_ASSERT(false);
+				return;
+			}
+
+			realTimeLastPoints->clear();
+		}
+
 		// Add non valid points to all signals, useful in switching mode Archive/RealTime
 		//
 		QMutexLocker locker(&m_archiveMutex);
@@ -1448,6 +1492,24 @@ namespace TrendLib
 		if (states.empty() == true)
 		{
 			return;
+		}
+
+		if (states.empty() == false)
+		{
+			QMutexLocker ml(&m_lastRealtimePointsMutex);
+			std::map<Hash, TrendStateItem>* realTimeLastPoints = nullptr;
+
+			switch (timeType)
+			{
+			case E::TimeType::Local:	realTimeLastPoints = &m_lastRealtimePointsLocalTime;	break;
+			case E::TimeType::System:	realTimeLastPoints = &m_lastRealtimePointsSystemTime;	break;
+			case E::TimeType::Plant:	realTimeLastPoints = &m_lastRealtimePointsPlantTime;	break;
+			default:
+				Q_ASSERT(false);
+				return;
+			}
+
+			(*realTimeLastPoints)[signalhash] = states.back();
 		}
 
 		QMutexLocker locker(&m_archiveMutex);

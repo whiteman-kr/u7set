@@ -425,12 +425,16 @@ namespace TrendLib
 			auto scr = std::make_pair(ts.appSignalId(), testDesctriptionBoundRect);
 			drawParam.signalDescriptionRect().push_back(scr);
 
-			// Draw scale 0/1 for discretes
+			// Draw scale 0/1 for discretes.
 			//
 			QRectF scaleAreaRect = calcScaleAreaRect(laneRect, signalRect);
 
 			drawText(painter, "0 ", scaleAreaRect, drawParam, Qt::AlignRight | Qt::AlignBottom);
 			drawText(painter, "1 ", scaleAreaRect, drawParam, Qt::AlignRight | Qt::AlignTop);
+
+			// Draw realtime mode last (current) value.
+			//
+			drawSignalsDecorRealtimeValue(painter, signalRect, drawParam, ts);
 		}
 
 		// Draw ANALOG signal id, caption and scale for TrendView::Separated mode
@@ -484,22 +488,25 @@ namespace TrendLib
 
 				// Draw description text
 				//
-				QRectF testDesctriptionBoundRect;
-				drawText(painter, signalText, signalRect, drawParam, Qt::AlignLeft | Qt::AlignTop | Qt::TextSingleLine, &testDesctriptionBoundRect);
+				QRectF testDescriptionBoundRect;
+				drawText(painter, signalText, signalRect, drawParam, Qt::AlignLeft | Qt::AlignTop | Qt::TextSingleLine, &testDescriptionBoundRect);
 
-				auto scr = std::make_pair(ts.appSignalId(), testDesctriptionBoundRect);
+				auto scr = std::make_pair(ts.appSignalId(), testDescriptionBoundRect);
 				drawParam.signalDescriptionRect().push_back(scr);
 
 				// Draw horizontal grid and scale
 				//
 				drawAnalogSignalsGridSeparateMode(painter, laneRect, drawParam, ts);
+
+				// Draw realtime mode last value.
+				//
+				drawSignalsDecorRealtimeValue(painter, signalRect, drawParam, ts);
 			}
 		}
 
 		// Draw ANALOG signal id, caption and scale for TrendView::Overlapped mode
 		//
-		if (drawParam.viewMode() == TrendViewMode::Overlapped  &&
-			analogs.empty() == false)
+		if (drawParam.viewMode() == TrendViewMode::Overlapped && analogs.empty() == false)
 		{
 			QRectF signalRect = analogs.front().tempDrawRect();
 
@@ -544,6 +551,10 @@ namespace TrendLib
 				auto scr = std::make_pair(ts.appSignalId(), testDesctriptionBoundRect);
 				drawParam.signalDescriptionRect().push_back(scr);
 
+				// Draw realtime mode last value.
+				//
+				drawSignalsDecorRealtimeValue(painter, signalRect, drawParam, ts);
+
 				// Shift rect
 				//
 				signalRect.setTop(testDesctriptionBoundRect.bottom() + testDesctriptionBoundRect.height() * 0.25);
@@ -557,6 +568,80 @@ namespace TrendLib
 		//		// --
 		//		//
 		painter->setClipping(false);
+
+		return;
+	}
+
+	void Trend::drawSignalsDecorRealtimeValue(QPainter* painter,
+											  const QRectF& signalRect,
+											  const TrendParam& drawParam,
+											  const TrendSignalParam& signalParam) const
+	{
+		if (drawParam.trendMode() != E::TrendMode::Realtime)
+		{
+			return;
+		}
+
+		// Getting data without requesting if it is not present.
+		//
+		std::optional<TrendStateItem> lastStateOpt = signalSet().lastRealtimeState(signalParam.appSignalHash(), drawParam.timeType());
+
+		TrendStateItem lastState = lastStateOpt.value_or(TrendStateItem{});
+		QString strValue;
+
+		if (lastState.isValid() == true)
+		{
+			switch (signalParam.type())
+			{
+			case E::SignalType::Analog:
+				{
+					bool ok = true;
+					double value = TrendScale::valueToScaleValue(lastState.value, drawParam.scaleType(), &ok);
+					if (ok == false)
+					{
+						strValue = "?";
+					}
+					else
+					{
+						strValue = TrendScale::scaleValueText(lastState.value, drawParam.scaleType(), signalParam);
+					}
+				}
+				break;
+			case E::SignalType::Discrete:
+				strValue = QString::number(lastState.value);
+				break;
+			default:
+				strValue = QString::number(lastState.value);
+			}
+		}
+		else
+		{
+			strValue = "?";
+		}
+
+		QString drawTextValue = QString{" %1 "}.arg(strValue);
+
+		// Get bounding rect.
+		// 
+		QRgb color = signalParam.color();
+		painter->setPen(color);
+
+		QRectF boundingRect;
+		drawText(painter, drawTextValue, signalRect, drawParam, Qt::AlignRight | Qt::AlignTop | Qt::TextSingleLine, &boundingRect);
+
+		boundingRect = QRectF{signalRect.right() - boundingRect.width(), signalRect.top(), boundingRect.width(), boundingRect.height()};
+		
+		// Draw realtime value background.
+		//
+		QColor semitransparentColor = drawParam.backColor2nd();
+		semitransparentColor.setAlpha(100);
+
+		QBrush fillRectBrush(semitransparentColor);
+		painter->fillRect(boundingRect, fillRectBrush);
+
+		// Draw realtime value text.
+		//
+		drawText(painter, drawTextValue, boundingRect, drawParam, Qt::AlignRight | Qt::AlignTop | Qt::TextSingleLine, nullptr);
 
 		return;
 	}
@@ -1339,7 +1424,7 @@ namespace TrendLib
 				}
 
 				double x = trendAreaRect.left() + k * static_cast<double>(ruler.timeStamp().timeStamp - startLaneTime.timeStamp);
-				x = static_cast<double>(static_cast<int>(x * dpiX)) / dpiX;		// Ajust x to look nice (not blurred)
+				x = static_cast<double>(static_cast<int>(x * dpiX)) / dpiX;		// Adjust x to look nice (not blurred)
 
 				if (ruler.timeStamp() <= finishLaneTime)
 				{
@@ -1368,11 +1453,11 @@ namespace TrendLib
 					drawText(painter, text, textRect, drawParam, Qt::AlignCenter);
 				}
 
-				// Draw disctance between rulers
+				// Draw distance between rulers
 				//
 				if (i > 0)
 				{
-					// There is a previouse ruler, draw distance to it
+					// There is a previous ruler, draw distance to it
 					//
 					const TrendRuler& prevRuler = laneRulers[i - 1];
 
@@ -1439,13 +1524,13 @@ namespace TrendLib
 						distanceTextRect.setHeight(distanceTextBoundRect.height());
 
 						painter->fillRect(distanceTextRect, backgroundBrush);
-						drawText(painter, distanceText, distanceTextRect, drawParam, Qt::AlignCenter);			// Draw distanmce bewtween rulers
+						drawText(painter, distanceText, distanceTextRect, drawParam, Qt::AlignCenter);			// Draw distance between rulers
 					}
 				}
 
 				if (ruler.timeStamp() > finishLaneTime)
 				{
-					// Break here, not in the begining of the loop
+					// Break here, not in the beginning of the loop
 					// We need to draw this (of lane) ruler, to draw distance to the perv ruler
 					//
 					break;
@@ -1456,10 +1541,10 @@ namespace TrendLib
 				if (ruler.timeStamp() >= startLaneTime &&
 					ruler.timeStamp() <= finishLaneTime)
 				{
-					QColor semitransaprentColor = drawParam.backColor2nd();
-					semitransaprentColor.setAlpha(200);
+					QColor semitransparentColor = drawParam.backColor2nd();
+					semitransparentColor.setAlpha(200);
 
-					QBrush fillRectBrush(semitransaprentColor);
+					QBrush fillRectBrush(semitransparentColor);
 
 					// Join two vectors discretes + analogs
 					// x: calculated pos for ruler
@@ -1603,7 +1688,7 @@ namespace TrendLib
 	{
 		const TimeStamp& rulerTime = ruler.timeStamp();
 
-		// Getting data whitout requesting if it is not present
+		// Getting data without requesting if it is not present
 		//
 		std::list<std::shared_ptr<OneHourData>> signalData;
 
@@ -1646,7 +1731,7 @@ namespace TrendLib
 				//					if (ts >= rulerTime)
 				//					{
 				//						// Got it, we need to return prev point.
-				//						// if currnet state not valid, then we assume last state is not valid also
+				//						// if current state not valid, then we assume last state is not valid also
 				//						//
 				//						if (state.isValid() == false)
 				//						{
@@ -1680,7 +1765,7 @@ namespace TrendLib
 					}
 					else
 					{
-						if (stateIt == states.begin()) // and it is not equeal to the first (se the prev cond)
+						if (stateIt == states.begin()) // and it is not equal to the first (se the prev cond)
 						{
 							// Take the last value from the previous states vector
 							//
