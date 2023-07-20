@@ -44,6 +44,7 @@ public:
 
 	std::vector<Builder::SchemaTypesParams> schemaTypesParams() const;
 	Builder::SchemasReportOptions options() const;
+	QString path() const;
 
 private slots:
 	void okClicked();
@@ -55,8 +56,8 @@ private:
 
 	QTreeWidget* m_schemaTypesTree = nullptr;
 	//QCheckBox* m_checkAddPageNumbers = nullptr;
-	QCheckBox* m_checkInfoMode = nullptr;
-	QCheckBox* m_checkAddSignalsSources = nullptr;
+	QCheckBox* m_checkItemsLabels = nullptr;
+	QCheckBox* m_checkSignalsDetails = nullptr;
 	QLineEdit* m_editReportPath = nullptr;
 
 	QString m_reportPath;

@@ -45,11 +45,13 @@ void SchemasReportGeneratorThread::exportSchemasToMultiplePdf(const QString& pdf
 
 void SchemasReportGeneratorThread::exportSchemasToSinglePdf(const QString& albumPath, const std::vector<DbFileInfo>& files)
 {
+	QDir().mkpath(albumPath);
 	run(TaskType::ExportFilesToSinglePdf, albumPath, files);
 }
 
 void SchemasReportGeneratorThread::exportAllSchemasToAlbum(const QString& albumPath)
 {
+	QDir().mkpath(albumPath);
 	run(TaskType::ExportAllSchemasToAlbum, albumPath, {});
 }
 
@@ -59,7 +61,7 @@ void SchemasReportGeneratorThread::run(TaskType task,
 {
 	// Create View
 
-	std::shared_ptr<ReportSchemaView> schemaView = std::make_shared<ReportSchemaView>(m_options.infoMode);
+	std::shared_ptr<ReportSchemaView> schemaView = std::make_shared<ReportSchemaView>(m_options.itemsLabels);
 
 	schemaView->session().setProject(m_projectName);
 	schemaView->session().setUsername(m_userName);

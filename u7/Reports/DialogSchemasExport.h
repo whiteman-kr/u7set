@@ -37,6 +37,8 @@ private:
 	Builder::SchemasReportOptions m_options;
 	QString m_pathName;
 	QString m_fileName;
+
+	static inline int m_lastTab = 0;
 };
 
 #endif // DIALOGSCHEMASEXPORT_H

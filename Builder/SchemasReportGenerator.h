@@ -15,9 +15,9 @@ namespace Builder
 		bool load(DbController* db);
 		bool save(DbController* db);
 
-		bool addPageNumbers = false;
-		bool infoMode = false;
-		bool addLogicSchemaDetails = false;
+		bool footers = false;
+		bool itemsLabels = false;
+		bool signalsDetails = false;
 	};
 
 	//
@@ -145,9 +145,12 @@ namespace Builder
 		void clearSchemas(SchemaFilesGroup& sfg);
 
 		[[nodiscard]] QPageLayout getSchemaPageLayout(const std::shared_ptr<VFrame30::Schema>& schema) const;
-		std::shared_ptr<ReportLib::ReportTable> createSchemaDetailsTable(const std::shared_ptr<VFrame30::Schema>& schema,
-										const std::map<QString, std::shared_ptr<VFrame30::Schema> >& allSchemas,
-										const VFrame30::SchemaDetailsSet& detailsSet);
+
+		void createLogicSchemaSignalsDetails(const std::shared_ptr<ReportLib::Report> report,
+									  const QPageLayout& pageLayout,
+									  const std::shared_ptr<VFrame30::Schema>& schema,
+									  const std::map<QString, std::shared_ptr<VFrame30::Schema>>& allSchemas,
+									  const VFrame30::SchemaDetailsSet& detailsSet);
 
 
 	private:

@@ -4378,8 +4378,8 @@ void SchemaControlTabPage::exportToPdf()
 		storedOptions.load(db());
 
 		DialogSchemasExport d(storedOptions,
-							  QSettings{}.value("SchemeEditor/Export/AlbumFilePath", QDir::currentPath()).toString(),
-							  QSettings{}.value("SchemeEditor/Export/AlbumFileName", "Schemas.pdf").toString(),
+							  QSettings{}.value("SchemaEditor/Export/SchemaPdfPath", QDir().toNativeSeparators(QDir::currentPath())).toString(),
+							  QSettings{}.value("SchemaEditor/Export/SchemaPdfFile", "Schemas.pdf").toString(),
 							  this);
 		if (d.exec() != QDialog::Accepted)
 		{
@@ -4393,12 +4393,12 @@ void SchemaControlTabPage::exportToPdf()
 		{
 			singleFile = true;
 			singleFileName = d.fileName();
-			QSettings{}.setValue("SchemeEditor/Export/AlbumFileName", singleFileName);
+			QSettings{}.setValue("SchemaEditor/Export/SchemaPdfFile", singleFileName);
 		}
 		else
 		{
 			pathName = d.pathName();
-			QSettings{}.setValue("SchemeEditor/Export/AlbumFilePath", pathName);
+			QSettings{}.setValue("SchemaEditor/Export/SchemaPdfPath", pathName);
 		}
 	}
 

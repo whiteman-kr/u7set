@@ -275,11 +275,11 @@ DialogSchemasReport::DialogSchemasReport(const QString& path,
 	//m_checkAddPageNumbers = new QCheckBox(tr("Add schemas information and page numbers"));
 	//m_checkAddPageNumbers->setChecked(m_options.addPageNumbers);
 
-	m_checkAddSignalsSources= new QCheckBox(tr("Add pages with schemas signals sources and destinations"));
-	m_checkAddSignalsSources->setChecked(m_options.addLogicSchemaDetails);
+	m_checkSignalsDetails= new QCheckBox(tr("Schema signals details"));
+	m_checkSignalsDetails->setChecked(m_options.signalsDetails);
 
-	m_checkInfoMode = new QCheckBox(tr("Add schema items labels"));
-	m_checkInfoMode->setChecked(m_options.infoMode);
+	m_checkItemsLabels = new QCheckBox(tr("Schema items labels"));
+	m_checkItemsLabels->setChecked(m_options.itemsLabels);
 
 	// Buttons layout
 	//
@@ -304,8 +304,8 @@ DialogSchemasReport::DialogSchemasReport(const QString& path,
 	mainLayout->addLayout(reportPathLayout);
 	mainLayout->addWidget(m_schemaTypesTree);
 	//mainLayout->addWidget(m_checkAddPageNumbers);
-	mainLayout->addWidget(m_checkAddSignalsSources);
-	mainLayout->addWidget(m_checkInfoMode);
+	mainLayout->addWidget(m_checkSignalsDetails);
+	mainLayout->addWidget(m_checkItemsLabels);
 	mainLayout->addLayout(buttonsLayout);
 	setLayout(mainLayout);
 }
@@ -320,6 +320,11 @@ Builder::SchemasReportOptions DialogSchemasReport::options() const
 	return m_options;
 }
 
+QString DialogSchemasReport::path() const
+{
+	return m_reportPath;
+}
+
 void DialogSchemasReport::okClicked()
 {
 	QString text = m_editReportPath->text();
@@ -332,8 +337,8 @@ void DialogSchemasReport::okClicked()
 	m_reportPath = text;
 
 	//m_options.addPageNumbers = m_checkAddPageNumbers->isChecked();
-	m_options.addLogicSchemaDetails = m_checkAddSignalsSources->isChecked();
-	m_options.infoMode = m_checkInfoMode->isChecked();
+	m_options.signalsDetails = m_checkSignalsDetails->isChecked();
+	m_options.itemsLabels = m_checkItemsLabels->isChecked();
 
 	int selectedCount = 0;
 

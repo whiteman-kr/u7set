@@ -1306,7 +1306,7 @@ void MainWindow::projectDifference()
 
 void MainWindow::createSchemasAlbums()
 {
-	QString albumPath = QSettings{}.value("MainWindow/Export/AlbumPath").toString();
+	QString path = QSettings{}.value("SchemaEditor/Export/AlbumPath", QDir().toNativeSeparators(QDir::currentPath())).toString();
 
 	static std::vector<Builder::SchemaTypesParams> schemaTypesParams = {};
 	if (schemaTypesParams.empty() == true)
@@ -1314,28 +1314,23 @@ void MainWindow::createSchemasAlbums()
 		schemaTypesParams = Builder::SchemasReportGenerator::defaultFileTypesParams(db());
 	}
 
-	Builder::SchemasReportOptions storedOptions;
-	storedOptions.load(db());
-
 	Builder::SchemasReportOptions options;
-	options.addPageNumbers = true;	// When loading and storing options, keep addPageNumbers unchanged!
-	options.infoMode = storedOptions.infoMode;
-	options.addLogicSchemaDetails = storedOptions.addLogicSchemaDetails;
+	options.load(db());
 
-	DialogSchemasReport d(albumPath, schemaTypesParams,
+	DialogSchemasReport d(path, schemaTypesParams,
 						  Builder::SchemasReportGenerator::defaultFileTypesParams(db()), options, this);
 	if (d.exec() != QDialog::Accepted)
 	{
 		return;
 	}
 	schemaTypesParams = d.schemaTypesParams();
+
 	options = d.options();
+	path = d.path();
+	options.save(db());
+	QSettings{}.setValue("SchemaEditor/Export/AlbumPath", path);
 
-	storedOptions.infoMode = options.infoMode;
-	storedOptions.addLogicSchemaDetails = options.addLogicSchemaDetails;
-	storedOptions.save(db());
-
-	QSettings{}.setValue("MainWindow/Export/AlbumPath", albumPath);
+	options.footers = true;	// When loading and storing options, keep footers true!
 
 	SchemasReportGeneratorThread r(theSettings.serverHost(),
 								   theSettings.serverPort(),
@@ -1349,7 +1344,7 @@ void MainWindow::createSchemasAlbums()
 								   options,
 								   schemaTypesParams);
 
-	r.exportAllSchemasToAlbum(albumPath);
+	r.exportAllSchemasToAlbum(path);
 	return;
 }
 
