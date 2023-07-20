@@ -307,6 +307,11 @@ namespace VFrame30
 		return m_clientSchemaView->schemaManager()->schemaCount();
 	}
 
+	double ScriptSchemaView::zoomFactor() const
+	{
+		return m_clientSchemaView->zoom() / 100.0;
+	}
+
 
 	//
 	// ClientSchemaView

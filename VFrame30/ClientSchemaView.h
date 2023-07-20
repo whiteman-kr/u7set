@@ -132,6 +132,10 @@ namespace VFrame30
 		Q_PROPERTY(int schemaCount READ schemaCount)
 		Q_PROPERTY(int SchemaCount READ schemaCount)
 
+		/// \brief Get zoom factor for schema (100% zoom returns 1.0).
+		Q_PROPERTY(double zoomFactor READ zoomFactor)
+		Q_PROPERTY(double ZoomFactor READ zoomFactor)
+
 	public:
 		explicit ScriptSchemaView(ClientSchemaView* clientSchemaView,
 								  ISchemaViewHistory* schemaViewHistory,
@@ -239,6 +243,7 @@ namespace VFrame30
 		QObject* schema();
 
 		int schemaCount() const;
+		double zoomFactor() const;
 
 		// Data
 		//
