@@ -127,26 +127,30 @@ void ReportPropertyEditor::fillObjectsTree()
         return;
     }
 
-    for (const ReportLib::ReportTemplate& templ : storage.templates())
-    {
-		const QPageLayout& pl = templ.pageLayout();
-		QString formatStr = QString("%1,%2,[L%3,T%4,R%5,B%6]").
+	auto pageLayoutString = [](const QPageLayout& pl) -> QString
+	{
+		return QString("%1,%2,[L%3,T%4,R%5,B%6]").
 				arg(pl.pageSize().name())
 				.arg(pl.orientation() == QPageLayout::Orientation::Portrait ? "Portrait" : "Landscape")
 				.arg(pl.margins().left())
 				.arg(pl.margins().top())
 				.arg(pl.margins().right())
 				.arg(pl.margins().bottom());
+	};
 
-
-		QTreeWidgetItem* templateItem = new QTreeWidgetItem(QStringList() << "Report" << templ.caption() << formatStr);
+    for (const ReportLib::ReportTemplate& templ : storage.templates())
+    {
+		QTreeWidgetItem* templateItem = new QTreeWidgetItem(QStringList() << "Report" << templ.caption());
         m_treeWidget->addTopLevelItem(templateItem);
 
 		// Header
 
 		if (templ.header().empty() == false)
 		{
-			QTreeWidgetItem* headerItem = new QTreeWidgetItem(QStringList() << "Section" << "Header" << templ.header().caption());
+			QTreeWidgetItem* headerItem = new QTreeWidgetItem(QStringList() <<
+															  "Section" << "Header" <<
+															  templ.header().caption()  <<
+															  pageLayoutString(templ.header().pageLayout()));
 			templateItem->addChild(headerItem);
 
 			// Objects
@@ -163,7 +167,10 @@ void ReportPropertyEditor::fillObjectsTree()
 
         for (const ReportLib::SectionTemplate& section : templ.sections())
         {
-			QTreeWidgetItem* sectionItem = new QTreeWidgetItem(QStringList() << "Section" << "Section" << section.caption());
+			QTreeWidgetItem* sectionItem = new QTreeWidgetItem(QStringList() << "Section" <<
+															   "Section" <<
+															   section.caption() <<
+															   pageLayoutString(section.pageLayout()));
             templateItem->addChild(sectionItem);
 
 			// Objects
@@ -181,7 +188,11 @@ void ReportPropertyEditor::fillObjectsTree()
 
 		if (templ.footer().empty() == false)
 		{
-			QTreeWidgetItem* footerItem = new QTreeWidgetItem(QStringList() << "Section" << "Footer" << templ.footer().caption());
+			QTreeWidgetItem* footerItem = new QTreeWidgetItem(QStringList() <<
+															  "Section" <<
+															  "Footer" <<
+															  templ.footer().caption() <<
+															  pageLayoutString(templ.footer().pageLayout()));
 			templateItem->addChild(footerItem);
 
 			// Objects
