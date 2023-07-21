@@ -1,7 +1,7 @@
 <Command 
 	Caption="movc"
 	Code="0180"
-	CodeMask="07c0"
+	CodeMask="07F0"
 	SimulationFunc="command_movc"
 	ParseFunc="parse_movc"
 	Description="Write 16-bit word constant to memory"

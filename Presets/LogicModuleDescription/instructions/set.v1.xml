@@ -1,10 +1,10 @@
 <Command 
-	Caption="reset"
-	Code="0060"
+	Caption="set"
+	Code="0050"
 	CodeMask="07F8"	
-	SimulationFunc="command_reset"
-	ParseFunc="parse_reset"
-	Description="Reset ACC to 0"
+	SimulationFunc="command_set"
+	ParseFunc="parse_set"
+	Description="Ret ACC to 0xFFFF"
 
 	CodeSize="1" 
 	ReadTime="5" 

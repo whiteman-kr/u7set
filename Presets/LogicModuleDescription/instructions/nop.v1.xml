@@ -1,7 +1,7 @@
 <Command 
 	Caption="nop" 
 	Code="0040" 
-	CodeMask="07c0" 
+	CodeMask="07F8" 
 	SimulationFunc="command_nop" 
 	ParseFunc="parse_nop" 
 	Description="No operation"
