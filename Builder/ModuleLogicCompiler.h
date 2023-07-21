@@ -135,6 +135,19 @@ namespace Builder
 			bool isLastStep() const { return currentStep == (stepsNumber - 1); }
 		};
 
+		class BusFilling
+		{
+		public:
+			BusFilling(BusShared bus);
+
+			void fillWord(int offsetInBus);
+			void fillDword(int offsetInBus);
+			void fill(int offsetInBus, int sizeW);
+
+		private:
+			std::vector<quint16> m_busArea;
+		};
+
 	public:
 		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, const Hardware::DeviceModule* lm);
 		~ModuleLogicCompiler();

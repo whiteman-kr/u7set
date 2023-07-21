@@ -92,12 +92,11 @@ namespace Builder
 								{
 									if (commandsInSequence > 1)
 									{
-										if (canOptimize() == true)
+										CodeSnippet replacementCode;
+
+										if (canOptimize() == true &&
+											getReplacementCode(replacementCode) == true)
 										{
-											CodeSnippet replacementCode;
-
-											getReplacementCode(replacementCode);
-
 											m_compiler.optimizeCode(m_optimizationType,
 																	m_srcCode,
 																	firstSequenceCmd,
@@ -305,9 +304,13 @@ namespace Builder
 		return inSequence();
 	}
 
-	void SequentialMovesOptimization::getReplacementCode(CodeSnippet& code)
+	bool SequentialMovesOptimization::getReplacementCode(CodeSnippet& code)
 	{
-		Q_ASSERT(m_sequenceMoveSizeW > 1);
+		if (m_sequenceMoveSizeW <= 1)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
 
 		code.clear();
 
@@ -322,6 +325,8 @@ namespace Builder
 									 m_sequenceStartSrcAddr,
 									 m_sequenceMoveSizeW);
 		}
+
+		return true;
 	}
 
 	bool SequentialMovesOptimization::isAppropriateMoveCmd(const CodeItem& cmd) const
@@ -442,9 +447,13 @@ namespace Builder
 		return inSequence();
 	}
 
-	void SequentialConstMovesOptimization::getReplacementCode(CodeSnippet& code)
+	bool SequentialConstMovesOptimization::getReplacementCode(CodeSnippet& code)
 	{
-		Q_ASSERT(m_sequenceMoveSizeW > 1);
+		if (m_sequenceMoveSizeW <= 1)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
 
 		code.clear();
 
@@ -459,6 +468,8 @@ namespace Builder
 									  static_cast<int>(m_moveConst),
 									  m_sequenceMoveSizeW);
 		}
+
+		return true;
 	}
 
 	bool SequentialConstMovesOptimization::isAppropriateMoveCmd(const CodeItem& cmd) const
@@ -565,7 +576,7 @@ namespace Builder
 		return m_bitCount == 16 && m_bitField == 0xFFFF;
 	}
 
-	void SequentialBitMovesOptimization::getReplacementCode(CodeSnippet& code)
+	bool SequentialBitMovesOptimization::getReplacementCode(CodeSnippet& code)
 	{
 		if (m_directMoveDestAddr != BAD_ADDRESS)
 		{
@@ -575,6 +586,8 @@ namespace Builder
 		{
 			code << CodeItem().mov(m_destAddr, m_srcAddr);
 		}
+
+		return true;
 	}
 
 	bool SequentialBitMovesOptimization::setBit(int bitNo)
@@ -683,7 +696,7 @@ namespace Builder
 		return m_bitCount == 16 && m_bitField == 0xFFFF;
 	}
 
-	void BitFillingOptimization::getReplacementCode(CodeSnippet& code)
+	bool BitFillingOptimization::getReplacementCode(CodeSnippet& code)
 	{
 		if (m_directMoveDestAddr != BAD_ADDRESS)
 		{
@@ -693,6 +706,8 @@ namespace Builder
 		{
 			code << CodeItem().fillb(Address16(m_destAddr, 0), m_srcBitAddr);
 		}
+
+		return true;
 	}
 
 	bool BitFillingOptimization::setBit(int bitNo)
@@ -808,11 +823,13 @@ namespace Builder
 		return m_sequenceState == 2;
 	}
 
-	void BitAccNotOptimization::getReplacementCode(CodeSnippet& code)
+	bool BitAccNotOptimization::getReplacementCode(CodeSnippet& code)
 	{
 		code << CodeItem().movBitAccAddr(m_srcBitAddr);
 		code << CodeItem().notAcc();
 		code << CodeItem().movBitAddrAcc(m_destBitAddr);
+
+		return true;
 	}
 
 	bool BitAccNotOptimization::inSequence() const
@@ -950,7 +967,7 @@ namespace Builder
 						m_sequenceState = 2;						// sequence finished
 					}
 
-					return false;
+					return true;
 				}
 			}
 
@@ -971,7 +988,6 @@ namespace Builder
 			}
 
 			m_movedBitCount++;
-
 			return true;
 		}
 
@@ -981,7 +997,7 @@ namespace Builder
 		{
 			m_directMoveDestAddr = cmd.destAddr();
 			m_sequenceState = 2;						// sequence finished
-			return false;
+			return true;
 		}
 
 		// any another command
@@ -1000,7 +1016,7 @@ namespace Builder
 		return m_sequenceState == 2 && m_movedBitCount > 0;
 	}
 
-	void SequentialAccBitMovesOptimization::getReplacementCode(CodeSnippet& code)
+	bool SequentialAccBitMovesOptimization::getReplacementCode(CodeSnippet& code)
 	{
 		if (m_movedBitCount < 16)
 		{
@@ -1021,6 +1037,12 @@ namespace Builder
 				continue;
 			}
 
+			if (m_bitSrcAddrs[i].isValid() == false)
+			{
+				Q_ASSERT(false);
+				return false;
+			}
+
 			code << CodeItem().movBitAccAddr(m_bitSrcAddrs[i]);
 		}
 
@@ -1032,6 +1054,8 @@ namespace Builder
 		{
 			code << CodeItem().movAddrAcc(m_destAccAddr);
 		}
+
+		return true;
 	}
 
 	bool SequentialAccBitMovesOptimization::inSequence() const
@@ -1222,12 +1246,12 @@ namespace Builder
 		return true;
 	}
 
-	void BitAccAndOptimization::getReplacementCode(CodeSnippet& code)
+	bool BitAccAndOptimization::getReplacementCode(CodeSnippet& code)
 	{
 		if (m_srcBitAddrs.contains(m_constBit0Addr) == true)
 		{
 			code << CodeItem().movBitConst(m_destBitAddr, 0);
-			return;
+			return true;
 		}
 
 		code << CodeItem().setAcc();
@@ -1239,6 +1263,8 @@ namespace Builder
 
 		code << CodeItem().andAcc();
 		code << CodeItem().movBitAddrAcc(m_destBitAddr);
+
+		return true;
 	}
 
 	bool BitAccAndOptimization::inSequence() const
@@ -1469,12 +1495,12 @@ namespace Builder
 		return true;
 	}
 
-	void BitAccOrOptimization::getReplacementCode(CodeSnippet& code)
+	bool BitAccOrOptimization::getReplacementCode(CodeSnippet& code)
 	{
 		if (m_srcBitAddrs.contains(m_constBit1Addr) == true)
 		{
 			code << CodeItem().movBitConst(m_destBitAddr, 1);
-			return;
+			return true;
 		}
 
 		code << CodeItem().resetAcc();
@@ -1486,6 +1512,8 @@ namespace Builder
 
 		code << CodeItem().orAcc();
 		code << CodeItem().movBitAddrAcc(m_destBitAddr);
+
+		return true;
 	}
 
 	bool BitAccOrOptimization::inSequence() const

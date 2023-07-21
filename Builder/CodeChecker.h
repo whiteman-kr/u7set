@@ -157,8 +157,8 @@ namespace Builder
 		quint16* m_mem = nullptr;
 		quint32 m_memSizeW = 0;
 
-		std::map<quint32, MemArea> m_readAreas;
-		std::map<quint32, MemArea> m_writeAreas;
+		std::map<quint32, MemArea> m_readAreas;			// startAddr => MemArea	(startAddr == MemArea.startAddr)
+		std::map<quint32, MemArea> m_writeAreas;		// startAddr => MemArea	(startAddr == MemArea.startAddr)
 
 		std::set<quint32> m_addrCanBeParialWritten;
 

@@ -45,7 +45,7 @@ namespace Builder
 		virtual void reinitVars() = 0;
 		virtual bool canStartSequence(const CodeItem& cmd) = 0;
 		virtual bool isSequenceContinue(const CodeItem& cmd) = 0;
-		virtual void getReplacementCode(CodeSnippet& code) = 0;
+		virtual bool getReplacementCode(CodeSnippet& code) = 0;
 		virtual bool canOptimize() const = 0;
 
 		const ModuleLogicCompiler& compiler() const;
@@ -77,7 +77,7 @@ namespace Builder
 		virtual bool canStartSequence(const CodeItem& cmd) override;
 		virtual bool isSequenceContinue(const CodeItem& cmd) override;
 		virtual bool canOptimize() const override;
-		virtual void getReplacementCode(CodeSnippet& code) override;
+		virtual bool getReplacementCode(CodeSnippet& code) override;
 
 		bool isAppropriateMoveCmd(const CodeItem& cmd) const;
 		bool inSequence() const;
@@ -116,7 +116,7 @@ namespace Builder
 		virtual bool canStartSequence(const CodeItem& cmd) override;
 		virtual bool isSequenceContinue(const CodeItem& cmd) override;
 		virtual bool canOptimize() const override;
-		virtual void getReplacementCode(CodeSnippet& code) override;
+		virtual bool getReplacementCode(CodeSnippet& code) override;
 
 		bool isAppropriateMoveCmd(const CodeItem& cmd) const;
 		bool inSequence() const;
@@ -163,7 +163,7 @@ namespace Builder
 		virtual bool canStartSequence(const CodeItem& cmd) override;
 		virtual bool isSequenceContinue(const CodeItem& cmd) override;
 		virtual bool canOptimize() const override;
-		virtual void getReplacementCode(CodeSnippet& code) override;
+		virtual bool getReplacementCode(CodeSnippet& code) override;
 
 		bool setBit(int bitNo);
 		bool inSequence() const;
@@ -215,7 +215,7 @@ namespace Builder
 		virtual bool canStartSequence(const CodeItem& cmd) override;
 		virtual bool isSequenceContinue(const CodeItem& cmd) override;
 		virtual bool canOptimize() const override;
-		virtual void getReplacementCode(CodeSnippet& code) override;
+		virtual bool getReplacementCode(CodeSnippet& code) override;
 
 		bool setBit(int bitNo);
 		bool inSequence() const;
@@ -257,7 +257,7 @@ namespace Builder
 		virtual bool canStartSequence(const CodeItem& cmd) override;
 		virtual bool isSequenceContinue(const CodeItem& cmd) override;
 		virtual bool canOptimize() const override;
-		virtual void getReplacementCode(CodeSnippet& code) override;
+		virtual bool getReplacementCode(CodeSnippet& code) override;
 
 		bool setBit(int bitNo);
 		bool inSequence() const;
@@ -326,7 +326,7 @@ namespace Builder
 		virtual bool canStartSequence(const CodeItem& cmd) override;
 		virtual bool isSequenceContinue(const CodeItem& cmd) override;
 		virtual bool canOptimize() const override;
-		virtual void getReplacementCode(CodeSnippet& code) override;
+		virtual bool getReplacementCode(CodeSnippet& code) override;
 
 		bool inSequence() const;
 
@@ -375,7 +375,7 @@ namespace Builder
 		virtual bool canStartSequence(const CodeItem& cmd) override;
 		virtual bool isSequenceContinue(const CodeItem& cmd) override;
 		virtual bool canOptimize() const override;
-		virtual void getReplacementCode(CodeSnippet& code) override;
+		virtual bool getReplacementCode(CodeSnippet& code) override;
 
 		bool setBit(int bitNo);
 		bool inSequence() const;
@@ -406,7 +406,6 @@ namespace Builder
 		Address16 m_destBitAddr;
 	};
 
-
 	class BitAccOrOptimization : public SequenceOptimization
 	{
 		//
@@ -435,7 +434,7 @@ namespace Builder
 		virtual bool canStartSequence(const CodeItem& cmd) override;
 		virtual bool isSequenceContinue(const CodeItem& cmd) override;
 		virtual bool canOptimize() const override;
-		virtual void getReplacementCode(CodeSnippet& code) override;
+		virtual bool getReplacementCode(CodeSnippet& code) override;
 
 		bool setBit(int bitNo);
 		bool inSequence() const;

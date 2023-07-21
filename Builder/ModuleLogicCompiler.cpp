@@ -13,6 +13,33 @@
 
 namespace Builder
 {
+
+	// ---------------------------------------------------------------------------------
+	//
+	//	ModuleLogicCompiler::BusFilling class implementation
+	//
+	// ---------------------------------------------------------------------------------
+
+
+	ModuleLogicCompiler::BusFilling::BusFilling(BusShared bus)
+	{
+	}
+
+	void ModuleLogicCompiler::BusFilling::fillWord(int offsetInBus)
+	{
+		fill(offsetInBus, 1);
+	}
+
+	void ModuleLogicCompiler::BusFilling::fillDword(int offsetInBus)
+	{
+		fill(offsetInBus, 2);
+	}
+
+	void ModuleLogicCompiler::BusFilling::fill(int offsetInBus, int sizeW)
+	{
+
+	}
+
 	// ---------------------------------------------------------------------------------
 	//
 	//	ModuleLogicCompiler class implementation
@@ -9908,6 +9935,7 @@ namespace Builder
 		int count = 0;
 
 		code->append(codeSetMemory(ualBusSignal->ualAddr().offset(), 0, bus->sizeW(), QString("init %1").arg(ualBusSignal->appSignalID())));
+
 
 		for(const BusSignal& busSignal : bus->busSignals())
 		{
