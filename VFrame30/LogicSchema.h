@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Schema.h"
+#include "SchemaItemSignal.h"
 
 namespace VFrame30
 {
@@ -24,20 +25,18 @@ namespace VFrame30
 	public:
 		virtual void Draw(CDrawParam* drawParam, const QRectF& clipRect) override;
 
-	private:
-		enum class SignalInOutType
-		{
-			Input,
-			Output,
-			Any
-		};
-
 	public:
-		std::set<QString> getInputSignalMap() const;
-		std::set<QString> getOutputSignalMap() const;
-		std::set<QString> getSignalMap() const;
+		std::map<QString, SchemaItemSignal*> getInputItemsMap() const;
+		std::map<QString, SchemaItemSignal*> getInOutItemsMap() const;
+		std::map<QString, SchemaItemSignal*> getOutputItemsMap() const;
 
-		std::set<QString> getSignalMap(SignalInOutType signalInOutType) const;
+
+		std::set<QString> getInputSignalsSet() const;
+		std::set<QString> getInOutSignalsSet() const;
+		std::set<QString> getOutputSignalsSet() const;
+
+
+		std::set<QString> getSignalMap() const;
 		virtual QStringList getSignalList() const override;
 
 		// Properties
@@ -58,6 +57,13 @@ namespace VFrame30
 		QString lmDescriptionFile() const;
 		void setLmDescriptionFile(QString value);
 
+	private:
+		template <typename SchemaItemSignalType>
+		std::map<QString, SchemaItemSignal*> getSignalItemsMap() const;	// Key is signalID, value is ItemType SchemaItemSignal-derived element
+
+		template <typename SchemaItemSignalType>
+		std::set<QString> getSignalItemsSignals() const;
+
 		// Data
 		//
 	private:
@@ -65,5 +71,4 @@ namespace VFrame30
 		int m_counter = 0;										// Count is used to generate new uniques StrIDs for App Siagnals
 		QString m_lmDescriptionFile = "LogicModule0000.xml";	// LogicModule Description
 	};
-
 }

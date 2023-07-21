@@ -150,6 +150,16 @@ namespace ReportLib
 		return result;
 	}
 
+	bool ReportTable::htmlEscaped() const
+	{
+		return m_htmlEscaped;
+	}
+
+	void ReportTable::setHtmlEscaped(bool value)
+	{
+		m_htmlEscaped = value;
+	}
+
 	int ReportTable::columnCount() const
 	{
         return static_cast<int>(m_format.columnsFormat().size());
@@ -277,7 +287,10 @@ namespace ReportLib
 					Q_ASSERT(false);
 				}
 
-				html += QObject::tr("<td width=%1% align=%2>%3</td>").arg(colFormat.width).arg(alignStr).arg(str.toHtmlEscaped());
+				html += QObject::tr("<td width=%1% align=%2>%3</td>")
+						.arg(colFormat.width)
+						.arg(alignStr)
+						.arg(htmlEscaped() ? str.toHtmlEscaped() : str);
 
 				if (c++ >= cols)
 				{

@@ -1,6 +1,7 @@
 #include "SchemasReportGenerator.h"
 #include "../ReportLib/ReportPrinter.h"
 #include "../VFrame30/LogicSchema.h"
+#include "../VFrame30/SchemaItemSignal.h"
 
 namespace Builder
 {
@@ -913,68 +914,93 @@ namespace Builder
 		auto schemaDetailsSection = ReportSection::create(tr("Schema Details: %1").arg(schema->schemaId()),
 														  pageLayout);
 		schemaDetailsSection->setTag(schema->caption() + "[Details]");
-		schemaDetailsSection->addText(tr("Schema '%1 - %2' signals").arg(schema->schemaId()).arg(schema->caption()),
-									  {m_normalFont, Qt::AlignHCenter});
 
+		createLogicSchemaIOSignalsDetails(schemaDetailsSection, logicSchema, allSchemas, detailsSet);
 
+		if (schemaDetailsSection->objectCount() > 0)
+		{
+			report->addSection(schemaDetailsSection);
+		}
+
+		return;
+	}
+
+	void SchemasReportGenerator::createLogicSchemaIOSignalsDetails(const std::shared_ptr<ReportLib::ReportSection> section,
+										   const VFrame30::LogicSchema* logicSchema,
+										   const std::map<QString, std::shared_ptr<VFrame30::Schema>>& allSchemas,
+										   const VFrame30::SchemaDetailsSet& detailsSet)
+	{
 		auto table = ReportTable::create({m_tableFont,
-										  {tr("In Signal ID"), tr("FROM Schemas"), tr("Out Signal ID"), tr("TO Schemas")},
+										  {tr("Signal ID"), tr("Caption"), tr("Type"), tr("Schemas")},
 										  {20, 30, 20, 30},
 										  Qt::AlignLeft});
+		table->setHtmlEscaped(false);
 
 		// Get list of signals for current schema
 		//
 
-		int mark_impact_signals = 1;
-
-		struct SignalsMapInfo
+		struct ItemsMapInfo
 		{
-			std::set<QString> map;
+			std::map<QString, VFrame30::SchemaItemSignal*> itemsMap;
 			bool isInput{false};
 			QString endpointText;
 		};
 
-		SignalsMapInfo maps[2] {{logicSchema->getInputSignalMap(), true, "Start Point"},
-								{logicSchema->getOutputSignalMap(), false, "End Point"}};
+		std::array<ItemsMapInfo, 3> itemsMaps {{
+				{logicSchema->getInputItemsMap(), true, "Start Point"},
+				{logicSchema->getInOutItemsMap(), false, "End Point"},
+				{logicSchema->getOutputItemsMap(), false, "End Point"}}};
 
 		struct SchemaSignalInfo
 		{
+			bool input = true;
+			bool impact = false;
+			double x = 0;
+			double y = 0;
 			QString signalId;
+			QString caption;
 			QString schemasList;
+			QString color;
 		};
-		std::vector<SchemaSignalInfo> schemaSignalsInfos[2];
 
-		for (int i = 0; i < 2; i++)
+		std::vector<SchemaSignalInfo> tableContents;
 		{
-			const SignalsMapInfo& mapInfo = maps[i];
-
-			std::vector<SchemaSignalInfo>& signalsInfo = schemaSignalsInfos[i];
-			signalsInfo.reserve(mapInfo.map.size());
-
-			for (const QString& signalId : mapInfo.map)
+			size_t reservedCount = 0;
+			for (const ItemsMapInfo& mapInfo : itemsMaps)
 			{
-				QStringList otherSchemasIds;
+				reservedCount += mapInfo.itemsMap.size();
+			}
+			tableContents.reserve(reservedCount);
+		}
+
+		for (const ItemsMapInfo& mapInfo : itemsMaps)
+		{
+			for (const auto& itemIt : mapInfo.itemsMap)
+			{
+				const QString& signalId = itemIt.first;
+				const VFrame30::SchemaItemSignal* item = itemIt.second;
 
 				// Get list of schemas which contain this signal (other schemas)
 				//
+				QStringList otherSchemasIds;
 				QStringList otherSchemasList = detailsSet.schemasByAppSignalId(signalId);
 				for (const QString& otherSchemaId : otherSchemasList)
 				{
-					if (otherSchemaId == schema->schemaId())
+					if (otherSchemaId == logicSchema->schemaId())
 					{
 						continue;	// Skip current schema
 					}
 
 					// Get other schema
 					//
-					const auto& it = allSchemas.find(otherSchemaId);
-					if (it == allSchemas.end())
+					const auto& otherSchemaIt = allSchemas.find(otherSchemaId);
+					if (otherSchemaIt == allSchemas.end())
 					{
 						Q_ASSERT(false);
 						continue;
 					}
 
-					const std::shared_ptr<VFrame30::Schema>& otherSchema = it->second;
+					const std::shared_ptr<VFrame30::Schema>& otherSchema = otherSchemaIt->second;
 					if (otherSchema == nullptr)
 					{
 						Q_ASSERT(otherSchema);
@@ -987,77 +1013,133 @@ namespace Builder
 						return;
 					}
 
-					if ((mapInfo.isInput == true ? otherLogicSchema->getOutputSignalMap() : otherLogicSchema->getInputSignalMap())
-							.contains(signalId) == true)
+					if (mapInfo.isInput == true)
 					{
-						if (otherLogicSchema->excludeFromBuild() == true)
+						auto ioSet = otherLogicSchema->getInOutSignalsSet();
+						auto oSet = otherLogicSchema->getOutputSignalsSet();
+						if (ioSet.find(signalId) != ioSet.end() || oSet.find(signalId) != oSet.end())
 						{
-							otherSchemasIds.push_back(otherSchemaId + " (excluded)");
+							if (otherLogicSchema->excludeFromBuild() == true)
+							{
+								otherSchemasIds.push_back(otherSchemaId + " (excluded)");
+							}
+							else
+							{
+								otherSchemasIds.push_back(otherSchemaId);
+							}
 						}
-						else
+					}
+					else
+					{
+						auto iSet = otherLogicSchema->getInputSignalsSet();
+						if (iSet.find(signalId) != iSet.end())
 						{
-							otherSchemasIds.push_back(otherSchemaId);
+							if (otherLogicSchema->excludeFromBuild() == true)
+							{
+								otherSchemasIds.push_back(otherSchemaId + " (excluded)");
+							}
+							else
+							{
+								otherSchemasIds.push_back(otherSchemaId);
+							}
 						}
 					}
 				}
 
-				if (otherSchemasIds.empty() == false)
+				// Fill signal info
+				//
+
+				SchemaSignalInfo ssi;
+				ssi.input = mapInfo.isInput;
+				ssi.x = item->left();
+				ssi.y = item->top();
+
+
+				bool found = false;
+				AppSignalParam asp = m_appSignalProvider.signalParam(signalId, &found);
+				if (found == true)
 				{
-					signalsInfo.push_back({signalId, otherSchemasIds.join(", ")});
+					ssi.caption = asp.caption();
 				}
 				else
 				{
-					signalsInfo.push_back({signalId, mapInfo.endpointText});
+					ssi.caption = tr("<font color=\"red\">%1</font>").arg(signalId);
 				}
+
+				ssi.impact = item->impactAppSignalIdList().contains(signalId);
+
+				if (item->textColor() != Qt::black)
+				{
+					ssi.color = item->textColor().name();
+					ssi.signalId = tr("<font color=\"%1\">%2</font>").arg(ssi.color).arg(signalId);
+				}
+				else
+				{
+					ssi.signalId = signalId;
+				}
+
+				if (otherSchemasIds.empty() == false)
+				{
+					ssi.schemasList = otherSchemasIds.join(", ");
+				}
+				else
+				{
+					ssi.schemasList = mapInfo.endpointText;
+				}
+
+				tableContents.push_back(ssi);
 			}
 		}
+
+		// Sort signals: input first, then sort by x coordinate, then sort by y coordinate
+		//
+		std::sort(tableContents.begin(), tableContents.end(), [](const SchemaSignalInfo& a, const SchemaSignalInfo& b)->bool
+		{
+			if (a.input != b.input)
+			{
+				return a.input > b.input;
+			}
+
+			if (a.x != b.x)
+			{
+				return a.x < b.x;
+			}
+
+			if (a.y != b.y)
+			{
+				return a.y < b.y;
+			}
+
+			return a.signalId < b.signalId;
+		}
+		);
 
 		// Output data to a table
 		//
-		int inputIndex = 0;
-		int outputIndex = 0;
-		const std::vector<SchemaSignalInfo>& inputSignalsVector = schemaSignalsInfos[0];
-		const std::vector<SchemaSignalInfo>& outputSignalsVector = schemaSignalsInfos[1];
-		qsizetype inputSignalsCount = inputSignalsVector.size();
-		qsizetype outputSignalsCount = outputSignalsVector.size();
-
-		QStringList l;
-		while((inputIndex < inputSignalsCount) || (outputIndex < outputSignalsCount))
+		for (const SchemaSignalInfo& ssi : tableContents)
 		{
-			l.clear();
-			if (inputIndex < inputSignalsCount)
-			{
-				l.push_back(inputSignalsVector[inputIndex].signalId);
-				l.push_back(inputSignalsVector[inputIndex].schemasList);
-				inputIndex++;
-			}
-			else
-			{
-				l.push_back(QString());
-				l.push_back(QString());
-			}
+			QStringList l;
+			l.push_back(ssi.signalId);
+			l.push_back(ssi.caption);
 
-			if (outputIndex < outputSignalsCount)
+			QString typeStr = ssi.input ? tr("Input") : tr("Output");
+			if (ssi.impact == true)
 			{
-				l.push_back(outputSignalsVector[outputIndex].signalId);
-				l.push_back(outputSignalsVector[outputIndex].schemasList);
-				outputIndex++;
+				typeStr += tr(", Impact");
 			}
-			else
-			{
-				l.push_back(QString());
-				l.push_back(QString());
-			}
+			l.push_back(typeStr);
+
+			l.push_back(ssi.schemasList);
 			table->insertRow(l);
 		}
 
-		if (table != nullptr && table->rowCount() > 0)
+		if (table->rowCount() > 0)
 		{
-			schemaDetailsSection->addTable(table);
-			report->addSection(schemaDetailsSection);
+			section->addText(tr("Schema '%1 - %2' signals").arg(logicSchema->schemaId()).arg(logicSchema->caption()),
+										  {m_normalFont, Qt::AlignHCenter});
+			section->addTable(table);
 		}
-
-		return;
-
 	}
+
+
 }

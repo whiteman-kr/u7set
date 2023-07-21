@@ -160,19 +160,15 @@ namespace ReportLib
 	public:
 		static std::shared_ptr<ReportTable> create(const TableFormat& format);
 
-		/*ReportTable(const QString& fontName,
-					double fontPointSize,
-					const QStringList& headerLabels,
-					const std::vector<int>& columnWidths,
-					Qt::Alignment alignment);*/
-
 		ReportTable(const TableFormat& format);
+
+		bool htmlEscaped() const;
+		void setHtmlEscaped(bool value);
 
 		int columnCount() const;
 		int rowCount() const;
 
 		const QStringList& rowAt(int index) const;
-
 		void insertRow(const QStringList& row);
 
 		void sortByColumn(int column);
@@ -182,6 +178,7 @@ namespace ReportLib
 	private:
 		TableFormat m_format;
 		std::vector<QStringList> m_rows;
+		bool m_htmlEscaped = true;	// If set to false, HTML signs (<>) are NOT replaced automatically, User is responsible for that
 	};
 
 	//
