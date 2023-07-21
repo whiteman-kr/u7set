@@ -54,6 +54,7 @@ protected:
 
 	void showTuningLoginControls();
 	void showLogo();
+	void showZoomControls();
 
 	// Private methods
 	//
@@ -193,6 +194,7 @@ private:
 	QAction* m_newTabAction = nullptr;
 	QAction* m_closeTabAction = nullptr;
 
+	QAction* m_zoomToolBarSeparator = nullptr;
 	QAction* m_zoomInAction = nullptr;
 	QAction* m_zoomOutAction = nullptr;
 	QAction* m_zoom100Action = nullptr;

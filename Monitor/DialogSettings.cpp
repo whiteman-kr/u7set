@@ -17,6 +17,14 @@ DialogSettings::DialogSettings(const ClientLib::ClientTranslator& translator, QW
 	connect (ui->buttonBox, &QDialogButtonBox::rejected, this, &DialogSettings::cancel_clicked);
 	connect (ui->saveAsButton, &QPushButton::clicked, this, &DialogSettings::saveAs_clicked);
 
+	// Fill zoom mode combo
+	//
+	ui->zoomModeComboBox->addItem("Manual", QVariant{static_cast<int>(VFrame30::ZoomMode::Manual)});
+	ui->zoomModeComboBox->addItem("Always 100%", QVariant{static_cast<int>(VFrame30::ZoomMode::Always100Percent)});
+	ui->zoomModeComboBox->addItem("FitToScreen", QVariant{static_cast<int>(VFrame30::ZoomMode::FitToScreen)});
+
+	// Fill Languages List
+	//
 	fillLanguagesList(translator);
 
 	auto okButton = ui->buttonBox->button(QDialogButtonBox::Ok);
@@ -28,6 +36,7 @@ DialogSettings::DialogSettings(const ClientLib::ClientTranslator& translator, QW
 	{
 		Q_ASSERT(okButton);
 	}
+
 	return;
 }
 
@@ -58,6 +67,15 @@ void DialogSettings::setSettings(const MonitorAppSettings::Data& value)
 	ui->checkShowItemsLabels->setChecked(m_settings.showItemsLabels);
 	ui->checkSingleInstance->setChecked(m_settings.singleInstance);
 	ui->windowCaptionEdit->setText(m_settings.windowCaption);
+
+	for (int i = 0; i < ui->zoomModeComboBox->count(); i++)
+	{
+		if (static_cast<int>(m_settings.zoomMode) == ui->zoomModeComboBox->itemData(i).toInt())
+		{
+			ui->zoomModeComboBox->setCurrentIndex(i);
+			break;
+		}
+	}
 
 	for (int i = 0; i < ui->m_languageCombo->count(); i++)
 	{
@@ -205,6 +223,20 @@ std::optional<MonitorAppSettings::Data> DialogSettings::parseData()
 	data.singleInstance = ui->checkSingleInstance->isChecked();
 
 	data.language = language;
+
+	// Get selected zoom mode.
+	//
+	{
+		bool ok = false;
+		int zoomValue = ui->zoomModeComboBox->currentData().toInt(&ok);
+		
+		Q_ASSERT(ok);
+
+		if (ok == true)
+		{
+			data.zoomMode = static_cast<VFrame30::ZoomMode>(zoomValue);
+		}
+	}
 
 	return {data};
 }

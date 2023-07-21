@@ -22,6 +22,8 @@ public:
 	~MonitorCentralWidget();
 
 public:
+	void applyZoomMode(VFrame30::ZoomMode zoomMode);
+
 	MonitorSchemaWidget* currentTab();
 	VFrame30::TuningController* tuningController();
 
@@ -31,7 +33,7 @@ protected:
 
 	// Signals
 signals:
-	void signal_tabPageChanged(bool schemaWidgetSelected);		// Emmited to enable/disable QActions dependo on current tab (schema/schemalist)
+	void signal_tabPageChanged(bool schemaWidgetSelected);		// Emitted to enable/disable QActions depend on current tab (schema/schemaList).
 	void signal_actionCloseTabUpdated(bool allowed);
 	void signal_schemaChanged(QString strId);
 	void signal_historyChanged(bool enableBack, bool enableForward);
@@ -80,7 +82,7 @@ private:
 
 	ITimeStats* m_timeStats = nullptr;
 
-	int m_eventLoopTimerId = 0;				// We need to cathc event loop. Start timer, as we enter event loop timerEvent comes
-	int m_eventLoopTimerCounter = 0;		// We need to cathc event loop. Start timer, as we enter event loop timerEvent comes
+	int m_eventLoopTimerId = 0;				// We need to catch event loop. Start timer, as we enter event loop timerEvent comes.
+	int m_eventLoopTimerCounter = 0;		// We need to catch event loop. Start timer, as we enter event loop timerEvent comes.
 };
 

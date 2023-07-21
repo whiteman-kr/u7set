@@ -47,6 +47,21 @@ MonitorCentralWidget::~MonitorCentralWidget()
 	qDebug() << Q_FUNC_INFO;
 }
 
+void MonitorCentralWidget::applyZoomMode(VFrame30::ZoomMode zoomMode)
+{
+	for (int tabIndex = 0; tabIndex < count(); tabIndex++)
+	{
+		auto tabWidget = dynamic_cast<MonitorSchemaWidget*>(widget(tabIndex));
+
+		if (tabWidget != nullptr)
+		{
+			tabWidget->setZoomMode(zoomMode, true);
+		}
+	}
+
+	return;
+}
+
 MonitorSchemaWidget* MonitorCentralWidget::currentTab()
 {
 	return dynamic_cast<MonitorSchemaWidget*>(currentWidget());
@@ -123,6 +138,7 @@ int MonitorCentralWidget::addSchemaTabPage(const QString& schemaId, const QVaria
 																m_timeStats,
 																this);
 
+	schemaWidget->setZoomMode(MonitorAppSettings::instance().zoomMode(), false);
 	schemaWidget->clientSchemaView()->setVariables(variables);
 
 	connect(schemaWidget, &MonitorSchemaWidget::signal_schemaChanged, this, &MonitorCentralWidget::slot_schemaChanged);
@@ -136,7 +152,7 @@ int MonitorCentralWidget::addSchemaTabPage(const QString& schemaId, const QVaria
 		setMovable(true);
 	}
 
-	//  clientSchemaView->setVariables() (line 125) may override already created variables in scripts,
+	// clientSchemaView->setVariables() (line 125) may override already created variables in scripts,
 	// so run onShowScript here, after setting view variables(!). Also onShowScript triggers
 	// running onConfigurationArrivedScript
 	//
@@ -163,7 +179,12 @@ void MonitorCentralWidget::slot_newSchemaTab(QString schemaId)
 		MonitorSchemaWidget* newTab = currentTab();
 		Q_ASSERT(newTab);
 
-		newTab->clientSchemaView()->setZoom(0, false);
+		if (MonitorAppSettings::instance().zoomMode() == VFrame30::ZoomMode::Manual)
+		{
+			// Initially set zoom to "fit to screen".
+			//
+			newTab->setZoom(0, false);
+		}
 
 		emit signal_schemaChanged(newTab->schemaId());		// Different schema could be set, it can happen if schema does not exist
 		newTab->emitHistoryChanged();
@@ -210,7 +231,16 @@ void MonitorCentralWidget::slot_newTab()
 	if (auto newTabWidget = dynamic_cast<MonitorSchemaWidget*>(currentWidget());
 		newTabWidget != nullptr)
 	{
-		newTabWidget->clientSchemaView()->setZoom(0);
+		if (MonitorAppSettings::instance().zoomMode() == VFrame30::ZoomMode::Manual ||
+			 MonitorAppSettings::instance().zoomMode() == VFrame30::ZoomMode::FitToScreen)
+		{
+			newTabWidget->clientSchemaView()->setZoom(0);
+		}
+
+		if (MonitorAppSettings::instance().zoomMode() == VFrame30::ZoomMode::Always100Percent)
+		{
+			newTabWidget->clientSchemaView()->setZoom(100);
+		}
 	}
 
 	return;

@@ -61,6 +61,7 @@ void MonitorAppSettings::save(QSettings& settings) const
 	settings.setValue("MonitorAppSettings/showLogo", data.showLogo);
 	settings.setValue("MonitorAppSettings/showItemsLabels", data.showItemsLabels);
 	settings.setValue("MonitorAppSettings/singleInstance", data.singleInstance);
+	settings.setValue("MonitorAppSettings/zoomMode", static_cast<int>(data.zoomMode));
 
 	return;
 }
@@ -83,6 +84,9 @@ void MonitorAppSettings::load(const QSettings& settings)
 	data.showLogo = settings.value("MonitorAppSettings/showLogo", true).toBool();
 	data.showItemsLabels = settings.value("MonitorAppSettings/showItemsLabels", false).toBool();
 	data.singleInstance = settings.value("MonitorAppSettings/singleInstance", false).toBool();
+
+	data.zoomMode = static_cast<VFrame30::ZoomMode>(settings.value("MonitorAppSettings/zoomMode", 
+																		 static_cast<int>(VFrame30::ZoomMode::Manual)).toInt());
 
 	set(data);
 }
@@ -178,6 +182,12 @@ bool MonitorAppSettings::showItemsLabels() const
 {
 	QMutexLocker l(&m_mutex);
 	return m_data.showItemsLabels;
+}
+
+VFrame30::ZoomMode MonitorAppSettings::zoomMode() const
+{
+	QMutexLocker l(&m_mutex);
+	return m_data.zoomMode;
 }
 
 bool MonitorAppSettings::singleInstance() const

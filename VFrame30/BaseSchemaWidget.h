@@ -30,10 +30,10 @@ namespace VFrame30
 		// Slots
 		//
 	public slots:
-		void zoomIn();
-		void zoomOut();
-		void zoom100();
-		void zoomToFit();
+		virtual void zoomIn();
+		virtual void zoomOut();
+		virtual void zoom100();
+		virtual void zoomToFit();
 
 	protected slots:
 		void screenChanged(QScreen* screen);
@@ -53,7 +53,7 @@ namespace VFrame30
 		const SchemaViewWidget* schemaView() const;
 
 		double zoom() const;
-		void setZoom(double zoom, bool repaint, int horzScrollValue = -1, int vertScrollValue = -1);
+		virtual void setZoom(double zoom, bool repaint, int horzScrollValue = -1, int vertScrollValue = -1);
 
 		// Data
 		//
@@ -65,7 +65,7 @@ namespace VFrame30
 		// Interface data
 		//
 		QPoint m_mousePos;					// Keeps mouse pos during different actions like scrolling etc
-		int m_horzScrollBarValue = 0;		// Horizintal scroll bar value in mousePressEvent -- midButton
+		int m_horzScrollBarValue = 0;		// Horizontal scroll bar value in mousePressEvent -- midButton
 		int m_vertScrollBarValue = 0;		// Vertical scroll bar value in mousePressEvent -- midButton
 	};
 

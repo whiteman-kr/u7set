@@ -181,6 +181,7 @@ void MonitorMainWindow::timerEvent(QTimerEvent* event)
 void MonitorMainWindow::showEvent(QShowEvent*)
 {
 	showLogo();
+	showZoomControls();
 	return;
 }
 
@@ -257,8 +258,6 @@ void MonitorMainWindow::restoreWindowState()
 
 void MonitorMainWindow::showTuningLoginControls()
 {
-
-
 	// Show/hide login controls
 	//
 	if (m_configController.configuration().tuningEnabled == true && m_tuningUserManager.tuningLogin() == true)
@@ -306,6 +305,25 @@ void MonitorMainWindow::showTuningLoginControls()
 		m_loginAction->setVisible(false);
 		m_loginUserTimeoutAction->setVisible(false);
 	}
+}
+
+void MonitorMainWindow::showZoomControls()
+{
+	auto zoomMode = MonitorAppSettings::instance().zoomMode();
+
+	bool visible = zoomMode == VFrame30::ZoomMode::Manual;
+
+	if (m_zoomToolBarSeparator != nullptr)
+	{
+		m_zoomToolBarSeparator->setVisible(visible);
+	}
+
+	m_zoomInAction->setVisible(visible);
+	m_zoomOutAction->setVisible(visible);
+	m_zoom100Action->setVisible(visible);
+	m_zoomToFitAction->setVisible(visible);
+
+	return;
 }
 
 void MonitorMainWindow::showLogo()
@@ -628,7 +646,7 @@ void MonitorMainWindow::createToolBars()
 	m_toolBar->addAction(m_schemaListAction);
 	m_toolBar->addAction(m_newTabAction);
 
-	m_toolBar->addSeparator();
+	m_zoomToolBarSeparator = m_toolBar->addSeparator();
 	m_toolBar->addAction(m_zoomInAction);
 	m_toolBar->addAction(m_zoomOutAction);
 	m_toolBar->addAction(m_zoomToFitAction);
@@ -945,7 +963,9 @@ void MonitorMainWindow::showSettings()
 		// Apply settings here
 		//
 		showLogo();
+		showZoomControls();
 		setVisibleTabBar(MonitorAppSettings::instance().showSchemasTabBar());
+		monitorCentralWidget()->applyZoomMode(MonitorAppSettings::instance().zoomMode());
 
 		// Reconnect
 		//
