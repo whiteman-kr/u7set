@@ -1103,6 +1103,22 @@ namespace Builder
 		return *this;
 	}
 
+	CodeItem& CodeItem::lshift0Acc()
+	{
+		initCommand();
+		m_result = true;
+		m_lmCmdCode = LmCommand::LSHIFT0;
+		return *this;
+	}
+
+	CodeItem& CodeItem::lshift1Acc()
+	{
+		initCommand();
+		m_result = true;
+		m_lmCmdCode = LmCommand::LSHIFT1;
+		return *this;
+	}
+
 	CodeItem& CodeItem::setComment(const QString& comment)
 	{
 		m_comment = comment;
@@ -1324,6 +1340,21 @@ namespace Builder
 		return 0;
 	}
 
+	quint16 CodeItem::getConstBit() const
+	{
+		switch(lmCommandCode())
+		{
+		case LmCommand::MOVBC:
+		case LmCommand::WRFBC:
+			return getWord3();
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		return 0;
+	}
+
 	bool CodeItem::isMoveCmd() const
 	{
 		return m_lmCmdCode == LmCommand::MOV;
@@ -1342,6 +1373,11 @@ namespace Builder
 	bool CodeItem::isMoveBitCmd() const
 	{
 		return m_lmCmdCode == LmCommand::MOVB;
+	}
+
+	bool CodeItem::isMoveBitConstCmd() const
+	{
+		return m_lmCmdCode == LmCommand::MOVBC;
 	}
 
 	bool CodeItem::isMoveConstCmd() const
@@ -1427,7 +1463,7 @@ namespace Builder
 		return true;
 	}
 
-	QString CodeItem::getAsmCode(LmDescriptionConstShared lmDesc, bool printCmdCode) const
+	QString CodeItem::getAsmCode(LmDescriptionConstShared lmDesc, bool printCmdCode, bool printTime) const
 	{
 		if (m_isCommand == false)
 		{
@@ -1472,9 +1508,12 @@ namespace Builder
 
 		Q_ASSERT(m_execTime >= 0);			// check that times already calculated
 
-		char cstr[32];
-		snprintf(cstr, 32, "[%02d:%02d %6d]", m_waitTime, m_execTime, m_clockCount);
-		cmdStr += QString(cstr).leftJustified(16, ' ');
+		if (printTime == true)
+		{
+			char cstr[32];
+			snprintf(cstr, 32, "[%02d:%02d %6d]", m_waitTime, m_execTime, m_clockCount);
+			cmdStr += QString(cstr).leftJustified(16, ' ');
+		}
 
 		QString mnemo = mnemoCode(lmDesc);
 

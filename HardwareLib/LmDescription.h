@@ -58,6 +58,8 @@ public:
 	static const LmCommandCode OR				= 0x0070;
 	static const LmCommandCode AND				= 0x0048;
 	static const LmCommandCode NOT				= 0x0068;
+	static const LmCommandCode LSHIFT0			= 0x0058;
+	static const LmCommandCode LSHIFT1			= 0x0078;
 	static const LmCommandCode STARTAFB			= 0x0080;
 	static const LmCommandCode STOP				= 0x00C0;
 	static const LmCommandCode MOV				= 0x0100;

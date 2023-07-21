@@ -243,6 +243,8 @@ namespace Builder
 		CodeItem& orAcc();
 		CodeItem& andAcc();
 		CodeItem& notAcc();
+		CodeItem& lshift0Acc();
+		CodeItem& lshift1Acc();
 
 		E::DataFormat constDataFormat() const { return m_constDataFormat; }
 
@@ -293,11 +295,13 @@ namespace Builder
 
 		quint16 getConst16() const;
 		quint32 getConst32() const;
+		quint16 getConstBit() const;
 
 		bool isMoveCmd() const;
 		bool isMove32Cmd() const;
 		bool isMoveMemCmd() const;
 		bool isMoveBitCmd() const;
+		bool isMoveBitConstCmd() const;
 		bool isMoveConstCmd() const;
 		bool isMoveConst32Cmd() const;
 		bool isSetMemCmd() const;
@@ -310,7 +314,7 @@ namespace Builder
 
 		bool generateBinCode(QByteArray* binCode) const;
 
-		QString getAsmCode(LmDescriptionConstShared lmDesc, bool printCmdCode) const;
+		QString getAsmCode(LmDescriptionConstShared lmDesc, bool printCmdCode, bool printTime) const;
 		QString mnemoCode(LmDescriptionConstShared lmDesc) const;
 		QString getConstValueString() const;
 

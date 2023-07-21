@@ -92,6 +92,20 @@ namespace Builder
 
 	class SequentialConstMovesOptimization : public SequenceOptimization
 	{
+		//
+		// Replace sequential const loading
+		//
+		//		MOVC32    56055, #0
+		//		MOVC32    56057, #0
+		//		MOVC32    56059, #0
+		//		MOVC32    56061, #0
+		//		MOVC32    56063, #0
+		//
+		// by one command SETMEM
+		//
+		//		SETMEM    56055, #0, 10
+		//
+
 	public:
 		SequentialConstMovesOptimization(ModuleLogicCompiler& compiler,
 									CodeSnippet& srcCode,
@@ -117,7 +131,7 @@ namespace Builder
 
 	class SequentialBitMovesOptimization : public SequenceOptimization
 	{
-		// Replace sequential bit mov from one word to another:
+		// Replace sequential bit mov from one word to another (bit to bit):
 		//
 		//		MOVB      46080[0], 56375[0]
 		//		MOVB      46080[1], 56375[1]
@@ -168,6 +182,30 @@ namespace Builder
 
 	class BitFillingOptimization : public SequenceOptimization
 	{
+		// Replace one bit loading in all bits of word:
+		//
+		//		MOVB      55882[0], 46103[3]
+		//		MOVB      55882[1], 46103[3]
+		//		MOVB      55882[2], 46103[3]
+		//		MOVB      55882[3], 46103[3]
+		//		MOVB      55882[4], 46103[3]
+		//		MOVB      55882[5], 46103[3]
+		//		MOVB      55882[6], 46103[3]
+		//		MOVB      55882[7], 46103[3]
+		//		MOVB      55882[8], 46103[3]
+		//		MOVB      55882[9], 46103[3]
+		//		MOVB      55882[10], 46103[3]
+		//		MOVB      55882[11], 46103[3]
+		//		MOVB      55882[12], 46103[3]
+		//		MOVB      55882[13], 46103[3]
+		//		MOVB      55882[14], 46103[3]
+		//		MOVB      55882[15], 46103[3]
+		//
+		// by one command FILLB:
+		//
+		//		FILLB     55882, 46103[3]
+		//
+
 	public:
 		BitFillingOptimization(ModuleLogicCompiler& compiler,
 										CodeSnippet& srcCode);
@@ -232,10 +270,9 @@ namespace Builder
 													// 0 bit loaded to AFB NOT
 													// 1 AFB NOT started
 													// 2 result read from AFB NOT and saved
-		const int AFB_NOT_IN_PIN_INDEX = 0;
-		const int AFB_NOT_OUT_PIN_INDEX = 2;
-
-		mutable int m_afbNotOpcode = -1;
+		static const int NOT_AFB_OPCODE = 2;
+		static const int AFB_NOT_IN_PIN_INDEX = 0;
+		static const int AFB_NOT_OUT_PIN_INDEX = 2;
 	};
 
 	class SequentialAccBitMovesOptimization : public SequenceOptimization
@@ -248,11 +285,11 @@ namespace Builder
 		//		MOVB      46080[3], 56383[2]
 		//		MOVB      46080[4], 56384[0]
 		//		MOVB      46080[5], 56384[1]
-		//		MOVB      46080[6], 56384[2]
+		//		MOVBC     46080[6], #1
 		//		MOVB      46080[7], 56384[3]
 		//		MOVB      46080[8], 56384[4]
 		//		MOVB      46080[9], 56384[5]
-		//		MOVB      46080[10], 56384[6]
+		//		MOVBC     46080[10], #0
 		//		MOVB      46080[11], 56384[7]
 		//		MOVB      46080[12], 56384[8]
 		//		MOVB      46080[13], 56384[9]
@@ -267,11 +304,11 @@ namespace Builder
 		//		MOVB      ACC, 56384[9]
 		//		MOVB      ACC, 56384[8]
 		//		MOVB      ACC, 56384[7]
-		//		MOVB      ACC, 56384[6]
+		//		LSHIFT0	  ACC
 		//		MOVB      ACC, 56384[5]
 		//		MOVB      ACC, 56384[4]
 		//		MOVB      ACC, 56384[3]
-		//		MOVB      ACC, 56384[2]
+		//		LSHIFT1	  ACC
 		//		MOVB      ACC, 56384[1]
 		//		MOVB      ACC, 56384[0]
 		//		MOVB      ACC, 56383[2]
@@ -294,10 +331,14 @@ namespace Builder
 		bool inSequence() const;
 
 	private:
+		mutable Address16 m_constBit0Addr;
+		mutable Address16 m_constBit1Addr;
+
 		int m_sequenceState = -1;			// -1	not in sequence
 											// 0	pass load const 0 to accumulator
 											// 1	loading bits to accumulator
 											// 2	pass move from accumulator to mem
+		int m_prevDestAccAddr = BAD_ADDRESS;
 		int m_destAccAddr = BAD_ADDRESS;
 
 		Address16 m_bitSrcAddrs[16];
@@ -340,6 +381,9 @@ namespace Builder
 		bool inSequence() const;
 
 	private:
+		bool processCommand(const CodeItem& cmd);
+
+	private:
 		static const int LOGIC_AFB_OPCODE = 1;
 		static const int LOGIC_CONF_AND = 1;
 
@@ -363,23 +407,64 @@ namespace Builder
 	};
 
 
+	class BitAccOrOptimization : public SequenceOptimization
+	{
+		//
+		// Replace AFB based OR operation:
+		//
+		//	WRFBB     OR.0[3], 46084[0]
+		//	WRFBB     OR.0[4], 46084[1]
+		//	STARTAFB  OR.0
+		//	RDFBB     46083[2], OR.0[20]
+		//
+		// with bit ACC based commands:
+		//
+		//	RESET		  ACC
+		//	MOVB	  ACC, 46084[0]
+		//	MOVB	  ACC, 46084[1]
+		//	OR		  ACC
+		//  MOVB	  46083[2], ACC
+		//
 
-	//
-	// Replace AFB based AND (OR) operation:
-	//
-	//	WRFBB     AND.0[3], 46084[0]	|	WRFBB     OR.0[3], 46084[0]
-	//	WRFBB     AND.0[4], 46084[1]	|	WRFBB     OR.0[4], 46084[1]
-	//	STARTAFB  AND.0					|	STARTAFB  OR.0
-	//	RDFBB     46083[2], AND.0[20]	|	RDFBB     46083[2], OR.0[20]
-	//
-	// with bit ACC based commands:
-	//
-	//	SET		  ACC					|	RESET	  ACC
-	//	MOVB	  ACC, 46084[0]			|	MOVB	  ACC, 46084[0]
-	//	MOVB	  ACC, 46084[1]			|	MOVB	  ACC, 46084[1]
-	//	AND		  ACC					|	OR		  ACC
-	//  MOVB	  46083[2], ACC			|	MOVB	  46083[2], ACC
-	//
+	public:
+		BitAccOrOptimization(ModuleLogicCompiler& compiler,
+							  CodeSnippet& srcCode);
+	private:
+		virtual bool isOptimizationPossible() const override;
+		virtual void reinitVars() override;
+		virtual bool canStartSequence(const CodeItem& cmd) override;
+		virtual bool isSequenceContinue(const CodeItem& cmd) override;
+		virtual bool canOptimize() const override;
+		virtual void getReplacementCode(CodeSnippet& code) override;
 
+		bool setBit(int bitNo);
+		bool inSequence() const;
+
+	private:
+		bool processCommand(const CodeItem& cmd);
+
+	private:
+		static const int LOGIC_AFB_OPCODE = 1;
+		static const int LOGIC_CONF_OR = 2;
+
+		//
+
+		mutable Address16 m_constBit0Addr;
+		mutable Address16 m_constBit1Addr;
+		mutable std::map<int, int> m_afbInstances;		// instance => operand count
+		mutable std::set<int> m_inputIndexes;
+		mutable int m_outputIndex = -1;
+
+		//
+
+		int m_sequenceState = -1;					// -1 not in sequence
+													// 0 loading source bits in AFB
+													// 1 AFB AND started
+													// 2 result read from AFB and saved
+		int m_loadBitCount = 0;
+		int m_afbInstance = -1;
+		std::set<Address16> m_srcBitAddrs;
+		Address16 m_destBitAddr;
+	};
 }
 

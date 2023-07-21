@@ -123,7 +123,7 @@ namespace Builder
 
 		for(const CodeItem& codeItem : m_code)
 		{
-			QString str = codeItem.getAsmCode(lmDesc, true);
+			QString str = codeItem.getAsmCode(lmDesc, true, false);
 
 			asmCode->append(str);
 		}

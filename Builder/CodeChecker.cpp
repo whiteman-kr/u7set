@@ -81,11 +81,21 @@ namespace Builder
 
 		bool result = init();
 
-		RETURN_IF_FALSE(result);
+		if (result == false)
+		{
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("CodeChecker init error!"));
+		}
 
 		for(const CodeItem& ci : appLogicCode.code())
 		{
-			result &= check(ci);
+			bool res = check(ci);
+
+			if (res == false)
+			{
+				logError(ci, "check error");
+			}
+
+			result &= res;
 		}
 
 		return result;
@@ -439,7 +449,7 @@ namespace Builder
 	{
 		TEST_PTR_RETURN(m_log);
 
-		LOG_INTERNAL_ERROR_MSG(m_log, QString("%1, command: %2").arg(err).arg(cmd.getAsmCode(m_lmDesc, false)));
+		LOG_INTERNAL_ERROR_MSG(m_log, QString("%1, command: %2").arg(err).arg(cmd.getAsmCode(m_lmDesc, false, false)));
 	}
 
 	bool CodeChecker::check(const CodeItem& cmd)
@@ -545,8 +555,7 @@ namespace Builder
 		quint32 writeAddr = cmd.getWord2();
 		quint32 bitNo = cmd.getWord4();
 
-		return checkCanWriteBit(cmd, writeAddr, bitNo) &&
-			   addrInBitMemArea(writeAddr, 1);
+		return checkCanWriteBit(cmd, writeAddr, bitNo);
 	}
 
 	bool CodeChecker::check_wrfb(const CodeItem& cmd)

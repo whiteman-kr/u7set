@@ -737,16 +737,6 @@ namespace Builder
 
 	bool BitAccNotOptimization::isOptimizationPossible() const
 	{
-		const std::shared_ptr<Afb::AfbElement> notElem = compiler().getLmDescription()->afbElement("not");
-
-		if (notElem == nullptr ||
-			notElem->opCode() > ModuleLogicCompiler::MAX_AFB_OPCODE)
-		{
-			return false;
-		}
-
-		m_afbNotOpcode = notElem->opCode();
-
 		static const std::vector<LmCommandCode> requiredCommands =
 		{
 			LmCommand::MOVB_ACC_ADDR,
@@ -767,7 +757,7 @@ namespace Builder
 	bool BitAccNotOptimization::canStartSequence(const CodeItem& cmd)
 	{
 		if (!(cmd.isWriteFuncBlockBitCmd() &&
-			cmd.getFbType() == m_afbNotOpcode &&
+			cmd.getFbType() == NOT_AFB_OPCODE &&
 			cmd.getFbInstance() == 0 &&
 			cmd.getFbParamNo() == AFB_NOT_IN_PIN_INDEX))
 		{
@@ -785,7 +775,7 @@ namespace Builder
 		{
 		case 0:
 			if (cmd.isStartAfbCmd() &&
-				cmd.getFbType() == m_afbNotOpcode &&
+				cmd.getFbType() == NOT_AFB_OPCODE &&
 				cmd.getFbInstance() == 0)
 			{
 				m_sequenceState = 1;
@@ -796,7 +786,7 @@ namespace Builder
 
 		case 1:
 			if (cmd.isReadFuncBlockBitCmd() &&
-				cmd.getFbType() == m_afbNotOpcode &&
+				cmd.getFbType() == NOT_AFB_OPCODE &&
 				cmd.getFbInstance() == 0 &&
 				cmd.getFbParamNo() == AFB_NOT_OUT_PIN_INDEX)
 			{
@@ -844,11 +834,16 @@ namespace Builder
 
 	bool SequentialAccBitMovesOptimization::isOptimizationPossible() const
 	{
+		m_constBit0Addr = compiler().constBit0Addr();
+		m_constBit1Addr = compiler().constBit1Addr();
+
 		static const std::vector<LmCommandCode> requiredCommands =
 		{
-			LmCommand::RESET,
 			LmCommand::MOVB_ACC_ADDR,
-			LmCommand::MOV_ADDR_ACC
+			LmCommand::MOV_ADDR_ACC,
+			LmCommand::RESET,
+			LmCommand::LSHIFT0,
+			LmCommand::LSHIFT1,
 		};
 
 		return hasRequiredCommands(requiredCommands);
@@ -857,6 +852,7 @@ namespace Builder
 	void SequentialAccBitMovesOptimization::reinitVars()
 	{
 		m_sequenceState = -1;
+		m_prevDestAccAddr = BAD_ADDRESS;
 		m_destAccAddr = BAD_ADDRESS;
 
 		for(Address16& bitSrcAddr : m_bitSrcAddrs)
@@ -870,15 +866,22 @@ namespace Builder
 
 	bool SequentialAccBitMovesOptimization::canStartSequence(const CodeItem& cmd)
 	{
+		if (cmd.isMoveBitConstCmd() && cmd.destBitAddr() == Address16(54280, 0))
+		{
+			DEBUG_STOP;
+		}
+
 		if (cmd.isMoveConstCmd() == true &&
 			cmd.getConst16() == 0 &&
 			m_sequenceState == -1)
 		{
+			m_prevDestAccAddr = cmd.destAddr();
 			m_sequenceState = 0;
 			return true;
 		}
 
-		if (cmd.isMoveBitCmd() == false ||
+		if ((cmd.isMoveBitCmd() == false &&
+			cmd.isMoveBitConstCmd() == false) ||
 			m_sequenceState != -1 ||
 			m_destAccAddr != BAD_ADDRESS ||
 			m_movedBitCount != 0)
@@ -897,7 +900,21 @@ namespace Builder
 
 		m_sequenceState = 1;
 
-		m_bitSrcAddrs[m_movedBitCount] = cmd.srcBitAddr();
+		if (cmd.isMoveBitCmd() == true)
+		{
+			m_bitSrcAddrs[m_movedBitCount] = cmd.srcBitAddr();
+		}
+		else
+		{
+			if (cmd.getConstBit() == 0)
+			{
+				m_bitSrcAddrs[m_movedBitCount] = m_constBit0Addr;
+			}
+			else
+			{
+				m_bitSrcAddrs[m_movedBitCount] = m_constBit1Addr;
+			}
+		}
 
 		m_movedBitCount++;
 
@@ -906,14 +923,14 @@ namespace Builder
 
 	bool SequentialAccBitMovesOptimization::isSequenceContinue(const CodeItem& cmd)
 	{
-		if (cmd.isMoveBitCmd() == true &&
+		if ((cmd.isMoveBitCmd() == true || cmd.isMoveBitConstCmd() == true) &&
 			(m_sequenceState == 0 || m_sequenceState == 1))
 		{
 			if (m_sequenceState == 0)
 			{
 				Address16 destBitAddr = cmd.destBitAddr();
 
-				if (destBitAddr.bit() != 0)
+				if (m_prevDestAccAddr != destBitAddr.offset() || destBitAddr.bit() != 0)
 				{
 					return false;
 				}
@@ -926,14 +943,33 @@ namespace Builder
 				Address16 destBitAddr = cmd.destBitAddr();
 
 				if (m_destAccAddr != destBitAddr.offset() ||
-					m_movedBitCount != destBitAddr.bit() ||
-					m_movedBitCount >= 16)
+					m_movedBitCount != destBitAddr.bit())
 				{
+					if (m_movedBitCount == 16)
+					{
+						m_sequenceState = 2;						// sequence finished
+					}
+
 					return false;
 				}
 			}
 
-			m_bitSrcAddrs[m_movedBitCount] = cmd.srcBitAddr();
+			if (cmd.isMoveBitCmd() == true)
+			{
+				m_bitSrcAddrs[m_movedBitCount] = cmd.srcBitAddr();
+			}
+			else
+			{
+				if (cmd.getConstBit() == 0)
+				{
+					m_bitSrcAddrs[m_movedBitCount] = m_constBit0Addr;
+				}
+				else
+				{
+					m_bitSrcAddrs[m_movedBitCount] = m_constBit1Addr;
+				}
+			}
+
 			m_movedBitCount++;
 
 			return true;
@@ -943,10 +979,17 @@ namespace Builder
 			m_sequenceState == 1 &&
 			m_destAccAddr == cmd.srcAddr())
 		{
-
 			m_directMoveDestAddr = cmd.destAddr();
 			m_sequenceState = 2;						// sequence finished
-			return true;
+			return false;
+		}
+
+		// any another command
+		//
+		if (m_sequenceState == 1 &&
+			m_movedBitCount == 16)
+		{
+			m_sequenceState = 2;						// sequence finished
 		}
 
 		return false;
@@ -966,10 +1009,29 @@ namespace Builder
 
 		for(int i = m_movedBitCount - 1; i >= 0; i--)
 		{
+			if (m_bitSrcAddrs[i] == m_constBit0Addr)
+			{
+				code << CodeItem().lshift0Acc();
+				continue;
+			}
+
+			if (m_bitSrcAddrs[i] == m_constBit1Addr)
+			{
+				code << CodeItem().lshift1Acc();
+				continue;
+			}
+
 			code << CodeItem().movBitAccAddr(m_bitSrcAddrs[i]);
 		}
 
-		code << CodeItem().movAddrAcc(m_directMoveDestAddr);
+		if (m_directMoveDestAddr != BAD_ADDRESS)
+		{
+			code << CodeItem().movAddrAcc(m_directMoveDestAddr);
+		}
+		else
+		{
+			code << CodeItem().movAddrAcc(m_destAccAddr);
+		}
 	}
 
 	bool SequentialAccBitMovesOptimization::inSequence() const
@@ -994,6 +1056,7 @@ namespace Builder
 	{
 		static const std::vector<LmCommandCode> requiredCommands =
 		{
+			LmCommand::SET,
 			LmCommand::MOVB_ACC_ADDR,
 			LmCommand::AND,
 			LmCommand::MOVB_ADDR_ACC
@@ -1084,41 +1147,7 @@ namespace Builder
 		{
 			m_afbInstance = cmd.getFbInstance();
 
-			if (cmd.isWriteFuncBlockBitCmd() == true)
-			{
-				m_srcBitAddrs.insert(cmd.srcBitAddr());
-			}
-			else
-			{
-				if (cmd.isWriteFuncBlockConstCmd() == true)
-				{
-					quint16 constValue = cmd.getConst16();
-
-					switch(constValue)
-					{
-					case 0:
-						m_srcBitAddrs.insert(m_constBit0Addr);
-						break;
-
-					case 1:
-						m_srcBitAddrs.insert(m_constBit1Addr);
-						break;
-
-					default:
-						Q_ASSERT(false);
-						return false;
-					}
-				}
-				else
-				{
-					Q_ASSERT(false);
-					return false;
-				}
-			}
-
-			m_loadBitCount = 1;
-			m_sequenceState = 0;
-			return true;
+			return processCommand(cmd);
 		}
 
 		return false;
@@ -1144,44 +1173,7 @@ namespace Builder
 				 cmd.getFbInstance() == m_afbInstance &&
 				 m_inputIndexes.contains(cmd.getFbParamNo()) == true)
 			{
-				if (cmd.isWriteFuncBlockBitCmd() == true)
-				{
-					m_srcBitAddrs.insert(cmd.srcBitAddr());
-				}
-				else
-				{
-					if (cmd.isWriteFuncBlockConstCmd() == true)
-					{
-						quint16 constValue = cmd.getConst16();
-
-						switch(constValue)
-						{
-						case 0:
-							m_srcBitAddrs.insert(m_constBit0Addr);
-							break;
-
-						case 1:
-							m_srcBitAddrs.insert(m_constBit1Addr);
-							break;
-
-						default:
-							Q_ASSERT(false);
-							return false;
-						}
-					}
-					else
-					{
-						Q_ASSERT(false);
-						return false;
-					}
-				}
-
-				m_loadBitCount++;
-
-				Q_ASSERT(m_loadBitCount <= 16);
-
-				m_sequenceState = 0;
-				return true;
+				return processCommand(cmd);
 			}
 
 			break;
@@ -1252,5 +1244,292 @@ namespace Builder
 	bool BitAccAndOptimization::inSequence() const
 	{
 		return m_sequenceState >= 0 && m_sequenceState <= 2;
+	}
+
+	bool BitAccAndOptimization::processCommand(const CodeItem& cmd)
+	{
+		if (cmd.isWriteFuncBlockBitCmd() == true)
+		{
+			m_srcBitAddrs.insert(cmd.srcBitAddr());
+		}
+		else
+		{
+			if (cmd.isWriteFuncBlockConstCmd() == true)
+			{
+				quint16 constValue = cmd.getConst16();
+
+				switch(constValue)
+				{
+				case 0:
+					m_srcBitAddrs.insert(m_constBit0Addr);
+					break;
+
+				case 1:
+					m_srcBitAddrs.insert(m_constBit1Addr);
+					break;
+
+				default:
+					Q_ASSERT(false);
+					return false;
+				}
+			}
+			else
+			{
+				Q_ASSERT(false);
+				return false;
+			}
+		}
+
+		m_loadBitCount++;
+		Q_ASSERT(m_loadBitCount <= 16);
+		m_sequenceState = 0;
+		return true;
+	}
+
+	// ---------------------------------------------------------------------------------------
+	//
+	// BitAccOrOptimization class implementation
+	//
+	// ---------------------------------------------------------------------------------------
+
+	BitAccOrOptimization::BitAccOrOptimization(ModuleLogicCompiler& compiler,
+						  CodeSnippet& srcCode) :
+		SequenceOptimization(CodeOptimizationType::BitAccOr, compiler, srcCode)
+	{
+
+	}
+
+	bool BitAccOrOptimization::isOptimizationPossible() const
+	{
+		static const std::vector<LmCommandCode> requiredCommands =
+		{
+			LmCommand::RESET,
+			LmCommand::MOVB_ACC_ADDR,
+			LmCommand::OR,
+			LmCommand::MOVB_ADDR_ACC
+		};
+
+		if (hasRequiredCommands(requiredCommands) == false)
+		{
+			return false;
+		}
+
+		std::set<QString> inputsCaptions;
+
+		for(int i = 1; i <= 16; i++)
+		{
+			inputsCaptions.insert(QString("in_%1").arg(i));
+		}
+
+		const UalAfbsMap& ualAfbs = compiler().ualAfbs();
+
+		for(const UalAfb* ualAfb : ualAfbs)
+		{
+			TEST_PTR_CONTINUE(ualAfb);
+
+			if (ualAfb->caption() != QStringLiteral("or"))
+			{
+				continue;
+			}
+
+			bool ok = false;
+
+			int iConfValue = ualAfb->getParamIntValueByOpName("i_conf", &ok);
+
+			if (ok == false ||
+				ualAfb->opcode() != LOGIC_AFB_OPCODE ||
+				iConfValue != LOGIC_CONF_OR)
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			int operandCount = ualAfb->getParamIntValueByOpName("i_oprd_quant", &ok);
+
+			m_afbInstances.insert({ualAfb->instance(), operandCount});
+
+			const std::vector<LogicPin>& inputs = ualAfb->inputs();
+
+			for(const LogicPin& input : inputs)
+			{
+				if (inputsCaptions.contains(input.caption()) == true)
+				{
+					m_inputIndexes.insert(input.afbOperandIndex());
+				}
+			}
+
+			if (m_outputIndex == -1)
+			{
+				const std::vector<LogicPin>& outputs = ualAfb->outputs();
+
+				if (outputs.size() == 1)
+				{
+					m_outputIndex = outputs[0].afbOperandIndex();
+				}
+			}
+		}
+
+		m_constBit0Addr = compiler().constBit0Addr();
+		m_constBit1Addr = compiler().constBit1Addr();
+
+		return true;
+	}
+
+	void BitAccOrOptimization::reinitVars()
+	{
+		m_sequenceState = -1;
+		m_loadBitCount = 0;
+		m_afbInstance = -1;
+		m_srcBitAddrs.clear();
+		m_destBitAddr.reset();
+	}
+
+	bool BitAccOrOptimization::canStartSequence(const CodeItem& cmd)
+	{
+		if ((cmd.isWriteFuncBlockBitCmd() ||
+			 cmd.isWriteFuncBlockConstCmd()) &&
+			 cmd.getFbType() == LOGIC_AFB_OPCODE &&
+			  m_afbInstances.contains(cmd.getFbInstance()) == true &&
+			  m_inputIndexes.contains(cmd.getFbParamNo()) == true)
+		{
+			m_afbInstance = cmd.getFbInstance();
+
+			return processCommand(cmd);
+		}
+
+		return false;
+	}
+
+	bool BitAccOrOptimization::isSequenceContinue(const CodeItem& cmd)
+	{
+		switch(m_sequenceState)
+		{
+		case 0:		// loading bits state
+
+			if (cmd.isStartAfbCmd() &&
+				cmd.getFbType() == LOGIC_AFB_OPCODE  &&
+				cmd.getFbInstance() == m_afbInstance)
+			{
+				m_sequenceState = 1;
+				return true;
+			}
+
+			if ((cmd.isWriteFuncBlockBitCmd() ||
+				 cmd.isWriteFuncBlockConstCmd()) &&
+				 cmd.getFbType() == LOGIC_AFB_OPCODE &&
+				 cmd.getFbInstance() == m_afbInstance &&
+				 m_inputIndexes.contains(cmd.getFbParamNo()) == true)
+			{
+				return processCommand(cmd);
+			}
+
+			break;
+
+		case 1:	// afb started state
+
+			if (cmd.isReadFuncBlockBitCmd() &&
+				cmd.getFbType() == LOGIC_AFB_OPCODE &&
+				cmd.getFbInstance() == m_afbInstance &&
+				cmd.getFbParamNo() == m_outputIndex)
+			{
+				m_destBitAddr = cmd.destBitAddr();
+				m_sequenceState = 2;
+				return true;
+			}
+
+			break;
+
+		default: ;
+		}
+
+		return false;
+	}
+
+	bool BitAccOrOptimization::canOptimize() const
+	{
+		if (m_sequenceState != 2)
+		{
+			return false;
+		}
+
+		auto it = m_afbInstances.find(m_afbInstance);
+
+		if (it == m_afbInstances.end())
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		if (it->second != m_loadBitCount)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		return true;
+	}
+
+	void BitAccOrOptimization::getReplacementCode(CodeSnippet& code)
+	{
+		if (m_srcBitAddrs.contains(m_constBit1Addr) == true)
+		{
+			code << CodeItem().movBitConst(m_destBitAddr, 1);
+			return;
+		}
+
+		code << CodeItem().resetAcc();
+
+		for(const Address16& srcAddr : m_srcBitAddrs)
+		{
+			code << CodeItem().movBitAccAddr(srcAddr);
+		}
+
+		code << CodeItem().orAcc();
+		code << CodeItem().movBitAddrAcc(m_destBitAddr);
+	}
+
+	bool BitAccOrOptimization::inSequence() const
+	{
+		return m_sequenceState >= 0 && m_sequenceState <= 2;
+	}
+
+	bool BitAccOrOptimization::processCommand(const CodeItem& cmd)
+	{
+		if (cmd.isWriteFuncBlockBitCmd() == true)
+		{
+			m_srcBitAddrs.insert(cmd.srcBitAddr());
+		}
+		else
+		{
+			if (cmd.isWriteFuncBlockConstCmd() == true)
+			{
+				quint16 constValue = cmd.getConst16();
+
+				switch(constValue)
+				{
+				case 0:
+					m_srcBitAddrs.insert(m_constBit0Addr);
+					break;
+
+				case 1:
+					m_srcBitAddrs.insert(m_constBit1Addr);
+					break;
+
+				default:
+					Q_ASSERT(false);
+					return false;
+				}
+			}
+			else
+			{
+				Q_ASSERT(false);
+				return false;
+			}
+		}
+
+		m_loadBitCount++;
+		Q_ASSERT(m_loadBitCount <= 16);
+		m_sequenceState = 0;
+		return true;
 	}
 }

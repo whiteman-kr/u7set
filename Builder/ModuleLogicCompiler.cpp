@@ -384,7 +384,7 @@ namespace Builder
 
 			replacedCodeSizeW += srcCodeItem.sizeW();
 
-			QString mnemo = srcCodeItem.getAsmCode(m_lmDescription, false);
+			QString mnemo = srcCodeItem.getAsmCode(m_lmDescription, true, false);
 
 			optimizedCode << CodeItem().setComment(mnemo);
 
@@ -7793,6 +7793,7 @@ namespace Builder
 			CODE_OPTIMIZATION_PROC_TO_CALL(ModuleLogicCompiler::optimizeBitAccNot),
 			CODE_OPTIMIZATION_PROC_TO_CALL(ModuleLogicCompiler::optimizeSequentialAccBitMoves),
 			CODE_OPTIMIZATION_PROC_TO_CALL(ModuleLogicCompiler::optimizeBitAccAnd),
+			CODE_OPTIMIZATION_PROC_TO_CALL(ModuleLogicCompiler::optimizeBitAccOr),
 		};
 
 		bool result = true;
@@ -7881,6 +7882,13 @@ namespace Builder
 		BitAccAndOptimization baao(*this, srcCode);
 
 		return baao.optimize();
+	}
+
+	bool ModuleLogicCompiler::optimizeBitAccOr(CodeSnippet& srcCode)
+	{
+		BitAccOrOptimization baoo(*this, srcCode);
+
+		return baoo.optimize();
 	}
 
 	bool ModuleLogicCompiler::checkOptimizedAppLogicCode()
@@ -10648,12 +10656,16 @@ namespace Builder
 
 		if (inputSignal->isConst() == true)
 		{
-			if (inputSignal->constDiscreteValue() != 0)
-			{
-				cmd.movBitConst(busChildSignal->ualAddr(), inputSignal->constDiscreteValue());
-				cmd.setComment(QString("%1 <= %2").arg(busChildSignalIDs).arg(inputSignal->constDiscreteValue()));
-				code->append(cmd);
-			}
+//			if (inputSignal->constDiscreteValue() != 0)
+//			{
+//				cmd.movBitConst(busChildSignal->ualAddr(), inputSignal->constDiscreteValue());
+//				cmd.setComment(QString("%1 <= %2").arg(busChildSignalIDs).arg(inputSignal->constDiscreteValue()));
+//				code->append(cmd);
+//			}
+
+			cmd.movBitConst(busChildSignal->ualAddr(), inputSignal->constDiscreteValue());
+			cmd.setComment(QString("%1 <= %2").arg(busChildSignalIDs).arg(inputSignal->constDiscreteValue()));
+			code->append(cmd);
 		}
 		else
 		{
@@ -14925,7 +14937,7 @@ namespace Builder
 		printOptiStatistics(m_idrCode, m_optiIdrCode, &file);
 		printOptiStatistics(m_alpCode, m_optiAlpCode, &file);
 		printOptiStatistics(m_appLogicCode, m_optiAppLogicCode, &file);
-		printOptimizationsInfo(&file);
+		printOptimizationsInfo(&file, m_appLogicCode.codeSizeW());
 
 		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
 												getInfoFileName("orpt"), file);
@@ -14997,14 +15009,15 @@ namespace Builder
 		file << Separator::EMPTY_STR;
 	}
 
-	void ModuleLogicCompiler::printOptimizationsInfo(QStringList* outFile) const
+	void ModuleLogicCompiler::printOptimizationsInfo(QStringList* outFile, int srcCodeSize) const
 	{
 		TEST_PTR_RETURN(outFile);
 
 		QStringList& file = *outFile;
 
-		file << QString("   Optimization type    |  Count   | Code reduction");
-		file << QString("------------------------+----------+----------------");
+		file << QString("   Optimization         |  Count   | Code     |  Abs, %  |  Rel, %");
+		file << QString("   type                 |          | decrease |          |");
+		file << QString("------------------------+----------+----------+----------+----------");
 
 		int totalOptimizationCount = 0;
 		int totalCodeReduction = 0;
@@ -15013,19 +15026,37 @@ namespace Builder
 		{
 			const OptimizationInfo& oi = p.second;
 
-			file << QString(" %1 | %2 | %3").
-							arg(OptimizationInfo::typeStr(oi.type), -22).
-							arg(oi.optimizationsCount, 8).
-							arg(oi.codeReductionSizeW, 8);
-
 			totalOptimizationCount += oi.optimizationsCount;
 			totalCodeReduction += oi.codeReductionSizeW;
 		}
 
-		file << QString("------------------------+----------+----------------");
-		file << QString("         Total          | %1 | %2").
+		double totalAbsDiff = 0;
+		double totalRelDiff = 0;
+
+		for(const auto& p : m_optimizationsInfo)
+		{
+			const OptimizationInfo& oi = p.second;
+
+			double absDiff = ((-oi.codeReductionSizeW * 100.0) / srcCodeSize);
+			double relDiff = ((oi.codeReductionSizeW * 100.0) / totalCodeReduction);
+
+			totalAbsDiff += absDiff;
+			totalRelDiff += relDiff;
+
+			file << QString(" %1 | %2 | %3 | %4 | %5").
+							arg(OptimizationInfo::typeStr(oi.type), -22).
+							arg(oi.optimizationsCount, 8).
+							arg(oi.codeReductionSizeW, 8).
+							arg(absDiff, 8, 'f', 3).
+							arg(relDiff, 8, 'f', 3);
+		}
+
+		file << QString("------------------------+----------+----------+----------+----------");
+		file << QString("         Total          | %1 | %2 | %3 | %4").
 						arg(totalOptimizationCount, 8).
-						arg(totalCodeReduction, 8);
+						arg(totalCodeReduction, 8).
+						arg(totalAbsDiff, 8, 'f', 3).
+						arg(totalRelDiff, 8, 'f', 3);
 	}
 
 	bool ModuleLogicCompiler::writeTuningInfoFile() const
@@ -15878,7 +15909,7 @@ namespace Builder
 	{
 		QString str;
 
-		double percentOfUsedCodeMemory = (m_appLogicCode.codeSizeW() * 100.0) / m_lmCodeMemorySize;
+		double percentOfUsedCodeMemory = (m_optiAppLogicCode.codeSizeW() * 100.0) / m_lmCodeMemorySize;
 
 		bool result = true;
 
@@ -15886,7 +15917,7 @@ namespace Builder
 
 		LOG_MESSAGE(m_log, QString(tr("Used resources of %1:")).arg(lmEquipmentID()));
 
-		str.setNum(percentOfUsedCodeMemory, 'g', 2);
+		str.setNum(percentOfUsedCodeMemory, 'f', 2);
 
 		LOG_MESSAGE(m_log, QString(tr("Code memory - %1%")).arg(str));
 
@@ -15911,7 +15942,7 @@ namespace Builder
 
 		double percentOfUsedBitMemory = m_memoryMap.bitAddressedMemoryUsed();
 
-		str.setNum(percentOfUsedBitMemory, 'g', 2);
+		str.setNum(percentOfUsedBitMemory, 'f', 2);
 
 		LOG_MESSAGE(m_log, QString(tr("Bit-addressed memory - %1%")).arg(str));
 
@@ -15936,7 +15967,7 @@ namespace Builder
 
 		double percentOfUsedWordMemory = m_memoryMap.wordAddressedMemoryUsed();
 
-		str.setNum(percentOfUsedWordMemory, 'g', 2);
+		str.setNum(percentOfUsedWordMemory, 'f', 2);
 
 		LOG_MESSAGE(m_log, QString(tr("Word-addressed memory - %1%")).arg(str));
 
@@ -15963,7 +15994,7 @@ namespace Builder
 
 		// display IDR phase timing
 		//
-		double idrPhaseTime = (1.0/m_lmClockFrequency) * m_idrCode.clockCount();
+		double idrPhaseTime = (1.0/m_lmClockFrequency) * m_optiIdrCode.clockCount();
 		double idrPhaseTimeUsed = 0;
 
 		assert(m_lmIDRPhaseTime != 0);
@@ -15973,11 +16004,11 @@ namespace Builder
 			idrPhaseTimeUsed = (idrPhaseTime * 100) / (static_cast<double>(m_lmIDRPhaseTime) / 1000000.0);
 		}
 
-		str_percent.setNum(static_cast<float>(idrPhaseTimeUsed), 'g', 2);
-		str.setNum(static_cast<float>(idrPhaseTime * 1000000), 'g', 2);
+		str_percent.setNum(static_cast<float>(idrPhaseTimeUsed), 'f', 2);
+		str.setNum(static_cast<float>(idrPhaseTime * 1000000), 'f', 2);
 
 		LOG_MESSAGE(m_log, QString(tr("Input Data Receive phase time - %1% (%2 clocks or %3 &micro;s of %4 &micro;s)")).
-					arg(str_percent).arg(m_idrCode.clockCount()).arg(str).arg(m_lmIDRPhaseTime));
+					arg(str_percent).arg(m_optiIdrCode.clockCount()).arg(str).arg(m_lmIDRPhaseTime));
 
 		if (idrPhaseTimeUsed > 90)
 		{
@@ -15998,7 +16029,7 @@ namespace Builder
 
 		// display ALP phase timing
 		//
-		double alpPhaseTime = (1.0/m_lmClockFrequency) * m_alpCode.clockCount();
+		double alpPhaseTime = (1.0/m_lmClockFrequency) * m_optiAlpCode.clockCount();
 		double alpPhaseTimeUsed = 0;
 
 		assert(m_lmALPPhaseTime != 0);
@@ -16008,11 +16039,11 @@ namespace Builder
 			alpPhaseTimeUsed = (alpPhaseTime * 100) / (static_cast<double>(m_lmALPPhaseTime) / 1000000.0);
 		}
 
-		str_percent.setNum(static_cast<float>(alpPhaseTimeUsed), 'g', 2);
-		str.setNum(static_cast<float>(alpPhaseTime * 1000000), 'g', 2);
+		str_percent.setNum(static_cast<float>(alpPhaseTimeUsed), 'f', 2);
+		str.setNum(static_cast<float>(alpPhaseTime * 1000000), 'f', 2);
 
 		LOG_MESSAGE(m_log, QString(tr("Application Logic Processing phase time - %1% (%2 clocks or %3 &micro;s of %4 &micro;s)")).
-					arg(str_percent).arg(m_alpCode.clockCount()).arg(str).arg(m_lmALPPhaseTime));
+					arg(str_percent).arg(m_optiAlpCode.clockCount()).arg(str).arg(m_lmALPPhaseTime));
 
 		if (alpPhaseTimeUsed > 90)
 		{

@@ -125,12 +125,6 @@ namespace Builder
 			int outputSignalIndex = -1;
 		};
 
-		struct BusComposerInfo
-		{
-			bool busFillingCodeAlreadyGenerated = false;
-			int busContentAddress = BAD_ADDRESS;
-		};
-
 		struct BusProcessingStepInfo
 		{
 			int stepsNumber = 0;
@@ -471,6 +465,7 @@ namespace Builder
 		bool optimizeBitAccNot(CodeSnippet& srcCode);
 		bool optimizeSequentialAccBitMoves(CodeSnippet& srcCode);
 		bool optimizeBitAccAnd(CodeSnippet& srcCode);
+		bool optimizeBitAccOr(CodeSnippet& srcCode);
 
 		bool writeInfoFilesAfterOptimization();
 		bool checkOptimizedAppLogicCode();
@@ -734,7 +729,7 @@ namespace Builder
 		void printOptiStatistics(const AppLogicCode& code,
 								 const AppLogicCode& optiCode,
 								 QStringList* outFile) const;
-		void printOptimizationsInfo(QStringList* outFile) const;
+		void printOptimizationsInfo(QStringList* outFile, int srcCodeSize) const;
 
 		bool writeTuningInfoFile() const;
 		bool writeOptoModulesReport() const;
