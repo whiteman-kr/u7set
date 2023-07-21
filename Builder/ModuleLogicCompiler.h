@@ -554,7 +554,8 @@ namespace Builder
 													  const UalSignal* inputSignal,
 													  const UalSignal* busChildSignal,
 													  const BusSignal& busSignal,
-													  const QString& busComposerLabel);
+													  const QString& busComposerLabel,
+													  BusFilling* busFilling);
 
 		bool generateInbusConversionCode(CodeSnippet* code,
 										const UalSignal* inputSignal,
@@ -603,9 +604,22 @@ namespace Builder
 											bool saveResultToAccumulator,
 											const Address16& inbusSignalAddr);
 
-		bool generateDiscreteSignalToBusDiscreteInputCode(CodeSnippet* code, const UalSignal* inputSignal, const UalSignal* busChildSignal, const BusSignal& busSignal);
-		bool generateDiscreteSignalToBusBusInputCode(CodeSnippet* code, UalSignal* inputSignal, UalSignal* busChildSignal);
-		bool generateBusSignalToBusBusInputCode(CodeSnippet* code, UalSignal* inputSignal, UalSignal* busChildSignal, const BusSignal& busSignal);
+		bool generateDiscreteSignalToBusDiscreteInputCode(CodeSnippet* code,
+														  const UalSignal* inputSignal,
+														  const UalSignal* busChildSignal,
+														  const BusSignal& busSignal);
+
+		bool generateDiscreteSignalToBusBusInputCode(CodeSnippet* code,
+													 UalSignal* inputSignal,
+													 UalSignal* busChildSignal,
+													 const BusSignal& busSignal,
+													 BusFilling* busFilling);
+
+		bool generateBusSignalToBusBusInputCode(CodeSnippet* code,
+												UalSignal* inputSignal,
+												UalSignal* busChildSignal,
+												const BusSignal& busSignal,
+												BusFilling* busFilling);
 
 		bool generateBusExtractorCode(CodeSnippet* code, const UalItem* ualItem);
 		bool generateBusExtractorCode(CodeSnippet* code, const UalItem* ualItem, UalSignal* inputBusSignal);

@@ -23,6 +23,9 @@ namespace Builder
 
 	ModuleLogicCompiler::BusFilling::BusFilling(BusShared bus)
 	{
+		TEST_PTR_RETURN(bus);
+
+		m_busArea.assign(bus->sizeW(), 0);
 	}
 
 	void ModuleLogicCompiler::BusFilling::fillWord(int offsetInBus)
@@ -37,7 +40,27 @@ namespace Builder
 
 	void ModuleLogicCompiler::BusFilling::fill(int offsetInBus, int sizeW)
 	{
+		int busSizeW = static_cast<int>(m_busArea.size());
 
+		if (sizeW == 0)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		if (offsetInBus < 0 ||
+			(offsetInBus + sizeW) > busSizeW)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		for(int i = offsetInBus; i < offsetInBus + sizeW; i++)
+		{
+			Q_ASSERT(m_busArea[i] == 0);
+
+			m_busArea[i] = 0xFFFF;
+		}
 	}
 
 	// ---------------------------------------------------------------------------------
@@ -9934,8 +9957,13 @@ namespace Builder
 
 		int count = 0;
 
-		code->append(codeSetMemory(ualBusSignal->ualAddr().offset(), 0, bus->sizeW(), QString("init %1").arg(ualBusSignal->appSignalID())));
+//		code->append(codeSetMemory(ualBusSignal->ualAddr().offset(), 0, bus->sizeW(), QString("init %1").arg(ualBusSignal->appSignalID())));
 
+		BusFilling busFilling(bus);
+
+		// std::map<inbusOffset, std::map<bitNo, std::pair<inputSignal, busChildSignal>>>
+		//
+		std::map<int, std::map<int, std::pair<UalSignal*, UalSignal*>>> discretBusSignals;
 
 		for(const BusSignal& busSignal : bus->busSignals())
 		{
@@ -9977,12 +10005,26 @@ namespace Builder
 
 			switch(busChildSignal->signalType())
 			{
-			case E::SignalType::Analog:
-				res = generateAnalogSignalToBusAnalogInputCode(code, inputSignal, busChildSignal, busSignal, ualItem->label());
+			case E::SignalType::Discrete:
+				{
+					//res = generateDiscreteSignalToBusDiscreteInputCode(code, inputSignal, busChildSignal, busSignal);
+
+					auto it = discretBusSignals.find(busSignal.inbusOffset());
+
+					if (it == discretBusSignals.end())
+					{
+						auto p = discretBusSignals.insert({busSignal.inbusOffset(), {}});
+						it = p.first;
+					}
+
+					it->second.insert({busSignal.inbusAddr.bit(), {inputSignal, busChildSignal}});
+
+					slfsm,df;.mfl;sg;mskldgm;lk
+				}
 				break;
 
-			case E::SignalType::Discrete:
-				res = generateDiscreteSignalToBusDiscreteInputCode(code, inputSignal, busChildSignal, busSignal);
+			case E::SignalType::Analog:
+				res = generateAnalogSignalToBusAnalogInputCode(code, inputSignal, busChildSignal, busSignal, ualItem->label(), &busFilling);
 				break;
 
 			case E::SignalType::Bus:
@@ -9990,11 +10032,11 @@ namespace Builder
 					switch(inputSignal->signalType())
 					{
 					case E::SignalType::Discrete:
-						res = generateDiscreteSignalToBusBusInputCode(code, inputSignal, busChildSignal);
+						res = generateDiscreteSignalToBusBusInputCode(code, inputSignal, busChildSignal, busSignal, &busFilling);
 						break;
 
 					case E::SignalType::Bus:
-						res = generateBusSignalToBusBusInputCode(code, inputSignal, busChildSignal, busSignal);
+						res = generateBusSignalToBusBusInputCode(code, inputSignal, busChildSignal, busSignal, &busFilling);
 						break;
 
 					default:
@@ -10079,18 +10121,26 @@ namespace Builder
 																	   const UalSignal* inputSignal,
 																	   const UalSignal* busChildSignal,
 																	   const BusSignal& busSignal,
-																	   const QString& busComposerLabel)
+																	   const QString& busComposerLabel,
+																	   BusFilling* busFilling)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(inputSignal, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(busChildSignal, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(busFilling, m_log);
 
 		Q_ASSERT(busChildSignal->ualAddrIsValid() == true);
 		Q_ASSERT(busChildSignal->ualAddr().bit() == 0);
 
 		if (busSignal.conversionRequired() == true)
 		{
-			return generateInbusConversionCode(code, inputSignal, busChildSignal, busSignal, busComposerLabel);
+			bool res = generateInbusConversionCode(code, inputSignal, busChildSignal, busSignal, busComposerLabel);
+
+			if (res == true)
+			{
+				busFilling->fill(busSignal.inbusOffset(), busSignal.inbusSizeBits / 16);
+			}
+			return res;
 		}
 
 		QString inputSignalIDs = inputSignal->refSignalIDsJoined();
@@ -10134,6 +10184,8 @@ namespace Builder
 		}
 
 		code->append(cmd);
+
+		busFilling->fillDword(busSignal.inbusOffset());
 
 		return true;
 	}
@@ -10715,7 +10767,9 @@ namespace Builder
 
 	bool ModuleLogicCompiler::generateDiscreteSignalToBusBusInputCode(CodeSnippet* code,
 																	  UalSignal* inputSignal,
-																	  UalSignal* busChildSignal)
+																	  UalSignal* busChildSignal,
+																	  const BusSignal& busSignal,
+																	  BusFilling* busFilling)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(inputSignal, m_log);
@@ -10807,10 +10861,15 @@ namespace Builder
 			code->append(cmd);
 		}
 
+		busFilling->fill(busSignal.inbusOffset(), busSizeW);
 		return true;
 	}
 
-	bool ModuleLogicCompiler::generateBusSignalToBusBusInputCode(CodeSnippet* code, UalSignal* inputSignal, UalSignal* busChildSignal, const BusSignal& busSignal)
+	bool ModuleLogicCompiler::generateBusSignalToBusBusInputCode(CodeSnippet* code,
+																 UalSignal* inputSignal,
+																 UalSignal* busChildSignal,
+																 const BusSignal& busSignal,
+																 BusFilling* busFilling)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(inputSignal, m_log);
@@ -10874,6 +10933,8 @@ namespace Builder
 
 		cmd.setComment(QString("%1 <= %2").arg(busChildSignalIDs).arg(inputSignalIDs));
 		code->append(cmd);
+
+		busFilling->fill(busSignal.inbusOffset(), busSizeW);
 
 		return true;
 	}
