@@ -999,7 +999,28 @@ namespace Builder
 
 	bool SequentialAccBitMovesOptimization::getReplacementCode(CodeSnippet& code)
 	{
+		int upperZeroBitsCount = 0;
+		int startFromBit = 15;
+
 		for(int i = 15; i >= 0; i--)
+		{
+			if (m_bitSrcAddrs[i] == m_constBit0Addr ||
+				m_bitSrcAddrs[i].isValid() == false)
+			{
+				upperZeroBitsCount++;
+				continue;
+			}
+
+			startFromBit = i;
+			break;
+		}
+
+		if (upperZeroBitsCount > 0)
+		{
+			code << CodeItem().resetAcc();
+		}
+
+		for(int i = startFromBit; i >= 0; i--)
 		{
 			if (m_bitSrcAddrs[i] == m_constBit0Addr ||
 				m_bitSrcAddrs[i].isValid() == false)
