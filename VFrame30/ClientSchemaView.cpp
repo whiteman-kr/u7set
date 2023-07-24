@@ -697,17 +697,19 @@ namespace VFrame30
 
 	TuningController* ClientSchemaView::tuningController()
 	{
-		return m_tuningController;
+		return m_tuningController.get();
 	}
 
 	const TuningController* ClientSchemaView::tuningController() const
 	{
-		return m_tuningController;
+		return m_tuningController.get();
 	}
 
-	void ClientSchemaView::setTuningController(TuningController* value)
+	void ClientSchemaView::setTuningController(ITuningSignalManager& signalManager,
+											   ITuningConnection& tuningConnection,
+											   ITuningAuthorization& tuningAuthorization)
 	{
-		m_tuningController = value;
+		m_tuningController = std::make_unique<TuningController>(signalManager, tuningConnection, tuningAuthorization);
 		m_jsEngineGlobalsWereCreated = false;	// it will make jsEngine() to initialize global script vars again
 
 		return;

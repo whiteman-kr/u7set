@@ -143,6 +143,15 @@ public:
 	ClientLib::TuningUserManager& userManager();
 	const ClientLib::TuningUserManager& userManager() const;
 
+	TuningSignalManager& tuningSignalManager();
+	const TuningSignalManager& tuningSignalManager() const;
+
+	ClientLib::TuningConnection& tuningConnection();
+	const ClientLib::TuningConnection& tuningConnection() const;
+
+	ITuningAuthorization& tuningAuthorization();
+	const ITuningAuthorization& tuningAuthorization() const;
+
 protected:
 
 	// Data
@@ -159,7 +168,6 @@ private:
 	MonitorSchemaManager m_schemaManager;
 
 	std::unique_ptr<VFrame30::AppSignalController> m_appSignalController;
-	std::unique_ptr<MonitorTuningController> m_tuningController;
 	std::unique_ptr<VFrame30::LogController> m_logController;
 
 	ClientLib::AdsConnection m_adsConnection{m_signalManager, &m_signalManager, &m_LogFile};

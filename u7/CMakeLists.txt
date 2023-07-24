@@ -284,8 +284,6 @@ set (U7_SOURCES
 	Simulator/SimSignalSnapshot.h
 	Simulator/SimTrend/SimTrends.cpp
 	Simulator/SimTrend/SimTrends.h
-	Simulator/SimTuningConnection.cpp
-	Simulator/SimTuningConnection.h
 	Simulator/SimWidget.cpp
 	Simulator/SimWidget.h
 	SimulatorTabPage.cpp
@@ -296,6 +294,8 @@ set (U7_SOURCES
 	SvgEditor.h
 	TestsTabPage.cpp
 	TestsTabPage.h
+	TuningConnectionStub.cpp
+	TuningConnectionStub.h
 	UploadTabPage.cpp
 	UploadTabPage.h
 	UserManagementDialog.cpp

@@ -90,7 +90,7 @@ HEADERS  += \
     SchemaEditor/SchemasTabPage.h \
     Reports/SchemasReport.h \
     Simulator/ScriptSimApplication.h \
-    Simulator/SimTuningConnection.h \
+    TuningConnectionStub.h \
 	Stable.h \
     ../lib/ExportPrint.h \
     ../lib/QDoublevalidatorEx.h \
@@ -286,7 +286,7 @@ SOURCES +=\
 	Simulator/SimSelectSchemaPage.cpp \
 	Simulator/SimSignalSnapshot.cpp \
 	Simulator/SimTrend/SimTrends.cpp \
-    Simulator/SimTuningConnection.cpp \
+    	TuningConnectionStub.cpp \
 	TestsTabPage.cpp \
 	UserManagementDialog.cpp \
 	EquipmentEditor/EquipmentTabPage.cpp \

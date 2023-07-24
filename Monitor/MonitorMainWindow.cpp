@@ -28,7 +28,7 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	// Init translator
 	//
 	m_translator.addLanguage("en", "English");
-	m_translator.addLanguage("ua", "Ukrainian/Українська");
+	m_translator.addLanguage("ua", "Ukrainian");
 
 	m_translator.addTranslationFile("ua", ":/languages/Monitor_ua.qm");
 	m_translator.addTranslationFile("ua", ":/languages/qtbase_uk.qm");
@@ -54,14 +54,12 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	// Creating signals controllers for VFrame30
 	//
 	m_appSignalController = std::make_unique<VFrame30::AppSignalController>(&m_signalManager);
-	m_tuningController = std::make_unique<MonitorTuningController>(&m_tuningSignalManager, &m_tuningConnection, &m_tuningUserManager);
 	m_logController = std::make_unique<VFrame30::LogController>(&m_LogFile);
 
 	// --
 	//
 	MonitorCentralWidget* monitorCentralWidget = new MonitorCentralWidget(&m_schemaManager,
 																		  m_appSignalController.get(),
-																		  m_tuningController.get(),
 																		  m_logController.get(),
 																		  &m_schemaStats,
 																		  this);
@@ -1749,6 +1747,36 @@ const MonitorSignalManager& MonitorMainWindow::signalManager() const
 }
 
 ClientLib::TuningUserManager& MonitorMainWindow::userManager()
+{
+	return m_tuningUserManager;
+}
+
+TuningSignalManager& MonitorMainWindow::tuningSignalManager()
+{
+	return m_tuningSignalManager;
+}
+
+const TuningSignalManager& MonitorMainWindow::tuningSignalManager() const
+{
+	return m_tuningSignalManager;
+}
+
+ClientLib::TuningConnection& MonitorMainWindow::tuningConnection()
+{
+	return m_tuningConnection;
+}
+
+const ClientLib::TuningConnection& MonitorMainWindow::tuningConnection() const
+{
+	return m_tuningConnection;
+}
+
+ITuningAuthorization& MonitorMainWindow::tuningAuthorization()
+{
+	return m_tuningUserManager;
+}
+
+const ITuningAuthorization& MonitorMainWindow::tuningAuthorization() const
 {
 	return m_tuningUserManager;
 }

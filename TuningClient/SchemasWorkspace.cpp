@@ -5,9 +5,6 @@
 #include <QTreeWidget>
 
 SchemasWorkspace::SchemasWorkspace(TuningConfigController& configController,
-								   TuningSignalManager& tuningSignalManager,
-								   ClientLib::TuningUserManager& userManager,
-								   ClientLib::TuningConnection& tuningConnection,
 								   const QString& caption,
 								   const QStringList& schemasTags,
 								   QString startSchemaId,
@@ -15,10 +12,7 @@ SchemasWorkspace::SchemasWorkspace(TuningConfigController& configController,
 								   QWidget* parent) :
 	QWidget(parent),
 	m_configController(configController),
-	m_tuningController(&tuningSignalManager, &tuningConnection, userManager),
 	m_logController(logFile),
-	m_tuningSignalManager(tuningSignalManager),
-	m_tuningConnection(tuningConnection),
 	m_schemaManager(configController),
 	m_caption(caption),
 	m_startSchemaId(startSchemaId),
@@ -315,11 +309,11 @@ void SchemasWorkspace::createSchemasList()
 			return;
 		}
 
-		m_schemaWidget = new TuningSchemaWidget(m_configController, m_tuningSignalManager, m_tuningConnection, &m_tuningController, &m_logController, schema, m_schemaManager, this);
-
-		// Make sure the new context was set
-		//
-		Q_ASSERT(schema->context()->tuningController() == &m_tuningController);
+		m_schemaWidget = new TuningSchemaWidget(m_configController,
+												&m_logController,
+												schema,
+												m_schemaManager,
+												this);
 
 		m_hSplitter->addWidget(m_schemaWidget);
 
@@ -356,11 +350,10 @@ void SchemasWorkspace::createSchemasTabs()
 
 		std::shared_ptr<VFrame30::Schema> schema = m_schemaManager.schema(schemaId, dummyContext);
 
-		TuningSchemaWidget* schemaWidget = new TuningSchemaWidget(m_configController, m_tuningSignalManager, m_tuningConnection, &m_tuningController, &m_logController,schema, m_schemaManager, this);
-
-		// Make sure the new context was set
-		//
-		Q_ASSERT(schema->context()->tuningController() == &m_tuningController);
+		TuningSchemaWidget* schemaWidget = new TuningSchemaWidget(m_configController,
+																  &m_logController,
+																  schema,
+																  m_schemaManager, this);
 
 		connect(schemaWidget, &TuningSchemaWidget::signal_schemaChanged, this, &SchemasWorkspace::slot_schemaChanged);
 
@@ -450,11 +443,11 @@ void SchemasWorkspace::createSchemasView()
 	auto dummyContext = VFrame30::Context::create(nullptr, nullptr, nullptr, nullptr);
 	std::shared_ptr<VFrame30::Schema> schema = m_schemaManager.schema(startSchemaID, dummyContext);
 
-	m_schemaWidget = new TuningSchemaWidget(m_configController, m_tuningSignalManager, m_tuningConnection, &m_tuningController, &m_logController, schema, m_schemaManager, this);
-
-	// Make sure the new context was set
-	//
-	Q_ASSERT(schema->context()->tuningController() == &m_tuningController);
+	m_schemaWidget = new TuningSchemaWidget(m_configController,
+											&m_logController,
+											schema,
+											m_schemaManager,
+											this);
 
 	mainLayout->addWidget(m_schemaWidget);
 }

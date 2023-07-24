@@ -100,7 +100,6 @@ private:
 	EditSchemaTuningSignalProvider m_tuningSignalProvider;
 
 	VFrame30::AppSignalController m_appSignalController;
-	VFrame30::TuningController m_tuningController;
 
 private:
 	SchemaItemPtr m_newItem;

@@ -1,5 +1,6 @@
 #include "TuningWorkspace.h"
 #include "Settings.h"
+#include "Main.h"
 #include "MainWindow.h"
 
 #include <QButtonGroup>
@@ -230,7 +231,7 @@ TuningWorkspace::TuningWorkspace(TuningConfigController& configController,
 		show();
 	}
 
-	connect(theMainWindow, &MainWindow::timerTick500, this, &TuningWorkspace::onTimer);
+	connect(theApp.mainWindow(), &MainWindow::timerTick500, this, &TuningWorkspace::onTimer);
 }
 
 TuningWorkspace::~TuningWorkspace()

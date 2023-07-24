@@ -39,7 +39,7 @@ namespace
 		}
 
 	protected:
-		void timerEvent(QTimerEvent* event) override
+		void timerEvent(QTimerEvent* /*event*/) override
 		{
 			setText(getActionText());
 		}
@@ -202,7 +202,6 @@ namespace
 SimSchemaWidget::SimSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
 								 SimSchemaManager* schemaManager,
 								 VFrame30::AppSignalController* appSignalController,
-								 VFrame30::TuningController* tuningController,
                                  SimIdeSimulator* simulator,
                                  QWidget* parent) :
     VFrame30::ClientSchemaWidget(new SimSchemaView{schemaManager}, schema, schemaManager, parent),
@@ -213,7 +212,6 @@ SimSchemaWidget::SimSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
 	Q_ASSERT(schema);
 
 	clientSchemaView()->setAppSignalController(appSignalController);
-	clientSchemaView()->setTuningController(tuningController);
 	clientSchemaView()->setLogController(&m_logController);
 
 	auto context = VFrame30::Context::create(clientSchemaView());

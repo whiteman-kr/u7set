@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QComboBox>
 #include <QLineEdit>
+#include "../lib/Tuning/ITuningAuthorization.h"
 
 #ifdef Q_OS_LINUX
 #include <security/pam_appl.h>
@@ -13,7 +14,7 @@
 
 namespace ClientLib
 {
-	class TuningUserManager : public QObject
+	class TuningUserManager : public QObject, public ITuningAuthorization
 	{
 		Q_OBJECT
 
@@ -49,6 +50,10 @@ namespace ClientLib
 	protected:
 		virtual bool askForPassword(QString* userName, QString* password, QWidget* parent);
 		virtual bool checkPassword(const QString& userName, const QString& password);
+
+		// ITuningAuthorization imlementation
+		//
+		bool checkTuningAccess(QWidget* parent) override;
 
 	private:
 		bool requestPassword(QWidget* parent);

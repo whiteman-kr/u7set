@@ -686,7 +686,10 @@ void ArchiveWidget::showSignalInfo(QString appSignalId)
 {
 	MonitorSignalInfo::showDialog(appSignalId,
 								  m_signalManager,
-								  &(theApp.mainWindow()->configController()),
+								  theApp.mainWindow()->tuningSignalManager(),
+								  theApp.mainWindow()->tuningConnection(),
+								  theApp.mainWindow()->tuningAuthorization(),
+								  &theApp.mainWindow()->configController(),
 								  theApp.mainWindow()->monitorCentralWidget());
 }
 

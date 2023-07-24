@@ -305,7 +305,9 @@ namespace VFrame30
 		//
 		TuningController* tuningController();
 		const TuningController* tuningController() const;
-		void setTuningController(TuningController* value);
+		void setTuningController(ITuningSignalManager& signalManager,
+									ITuningConnection& tuningConnection,
+									ITuningAuthorization& tuningAuthorization);
 
 		//  AppSignalController
 		//
@@ -375,7 +377,7 @@ namespace VFrame30
 		VFrame30::ISchemaViewHistory* m_schemaViewHistory = nullptr;		// Can be nullptr if widget does not support history navigation
 
 	protected:
-		TuningController* m_tuningController = nullptr;
+		std::unique_ptr<TuningController> m_tuningController;
 		AppSignalController* m_appSignalController = nullptr;
 		std::unique_ptr<ScriptAppSignalController> m_scriptAppSignalController;
 		LogController* m_logController = nullptr;

@@ -4,6 +4,7 @@
 #include "../lib/Ui/DialogSignalInfo.h"
 #include "../../VFrame30/AppSignalController.h"
 #include "../../Simulator/SimAppSignalManager.h"
+#include "../TuningConnectionStub.h"
 
 class SimWidget;
 class SimIdeSimulator;
@@ -35,6 +36,9 @@ private:
 
 private:
 	SimIdeSimulator* m_simuator = nullptr;
+
+	TuningConnectionStub m_tuningConnection;
+	TuningAuthorizationStub m_tuningAuthorization;
 };
 
 #endif // SIMSIGNALINFO_H

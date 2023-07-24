@@ -122,13 +122,10 @@ protected:
 					 IAppSignalManager* appSignalManager,
 					 ISignalDataServer* signalDataServer,			// Can be empty, e.g. in Simulator
 					 const std::vector<SoftwareEndpoint::AppDataService>& appDataServices,	// Can be empty, e.g. in Simulator
-					 VFrame30::TuningController* tuningController,	// it can be nullptr
+					 ITuningSignalManager& tuningSignalManager,
+					 ITuningConnection& tuningConnection,
+					 ITuningAuthorization& tuningAuthorization,
 					 bool tuningEnabled,
-					 DialogType dialogType,
-					 QWidget* parent);
-
-	DialogSignalInfo(const AppSignalParam& signal,
-					 IAppSignalManager* appSignalManager,
 					 DialogType dialogType,
 					 QWidget* parent);
 
@@ -238,7 +235,7 @@ private:
 	ISignalDataServer* m_signalDataServer = nullptr;
 	std::vector<SoftwareEndpoint::AppDataService> m_appDataServices;
 
-	VFrame30::TuningController* m_tuningController = nullptr;	// Can be null if tuning is not enabled
+	VFrame30::TuningController m_tuningController;
 	bool m_tuningEnabled = false;
 	QWidget* m_tuningTabWidget = nullptr;
 

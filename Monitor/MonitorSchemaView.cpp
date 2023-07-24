@@ -6,6 +6,7 @@
 #include "../VFrame30/PropertyNames.h"
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/TuningController.h"
+#include "MonitorMainWindow.h"
 
 //
 // MonitorView
@@ -13,14 +14,15 @@
 MonitorSchemaView::MonitorSchemaView(MonitorSchemaManager* schemaManager,
 									 VFrame30::ISchemaViewHistory* schemaViewHistory,
 									 VFrame30::AppSignalController* appSignalController,
-									 VFrame30::TuningController* tuningController,
 									 VFrame30::LogController* logController,
 									 ITimeStats* timeStats,
 									 QWidget* parent)
 	: VFrame30::ClientSchemaView(schemaManager, schemaViewHistory, timeStats, parent)
 {
 	setAppSignalController(appSignalController);
-	setTuningController(tuningController);
+	setTuningController(theApp.mainWindow()->tuningSignalManager(),
+						theApp.mainWindow()->tuningConnection(),
+						theApp.mainWindow()->tuningAuthorization());
 	setLogController(logController);
 
 	Q_ASSERT(schemaManager);
@@ -30,6 +32,9 @@ MonitorSchemaView::MonitorSchemaView(MonitorSchemaManager* schemaManager,
 	// Updates scripts
 	//
 	configurationArrived(monitorSchemaManager()->monitorConfigController().configuration());
+
+	//
+	m_app.setMainWindow(theApp.mainWindow());
 
 	return;
 }
@@ -193,8 +198,8 @@ void MonitorSchemaView::updateScriptGlobalVars(QJSEngine& engine)
 	// create global variable "app"
 	//
 	{
-		QJSValue jsApp = engine.newQObject(&theApp);
-		QQmlEngine::setObjectOwnership(&theApp, QQmlEngine::CppOwnership);
+		QJSValue jsApp = engine.newQObject(&m_app);
+		QQmlEngine::setObjectOwnership(&m_app, QQmlEngine::CppOwnership);
 
 		engine.globalObject().setProperty(VFrame30::PropertyNames::scriptGlobalVariableApp, jsApp);
 	}
@@ -202,8 +207,8 @@ void MonitorSchemaView::updateScriptGlobalVars(QJSEngine& engine)
 	// create global variable "tuning"
 	//
 	{
-		QJSValue jsTuning = engine.newQObject(tuningController());
-		QQmlEngine::setObjectOwnership(tuningController(), QQmlEngine::CppOwnership);
+		QJSValue jsTuning = engine.newQObject(m_tuningController.get());
+		QQmlEngine::setObjectOwnership(m_tuningController.get(), QQmlEngine::CppOwnership);
 
 		engine.globalObject().setProperty(VFrame30::PropertyNames::scriptGlobalVariableTuning, jsTuning);
 	}

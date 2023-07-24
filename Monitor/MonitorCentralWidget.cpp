@@ -7,14 +7,12 @@
 
 MonitorCentralWidget::MonitorCentralWidget(MonitorSchemaManager* schemaManager,
 										   VFrame30::AppSignalController* appSignalController,
-										   VFrame30::TuningController* tuningController,
-                                           VFrame30::LogController* logController,
+										   VFrame30::LogController* logController,
 										   ITimeStats* timeStats,
 										   QWidget* parent) :
 	TabWidgetEx(parent),
 	m_schemaManager(schemaManager),
 	m_appSignalController(appSignalController),
-    m_tuningController(tuningController),
 	m_logController(logController),
 	m_timeStats(timeStats)
 {
@@ -65,11 +63,6 @@ void MonitorCentralWidget::applyZoomMode(VFrame30::ZoomMode zoomMode)
 MonitorSchemaWidget* MonitorCentralWidget::currentTab()
 {
 	return dynamic_cast<MonitorSchemaWidget*>(currentWidget());
-}
-
-VFrame30::TuningController* MonitorCentralWidget::tuningController()
-{
-	return m_tuningController;
 }
 
 void MonitorCentralWidget::timerEvent(QTimerEvent* event)
@@ -133,8 +126,7 @@ int MonitorCentralWidget::addSchemaTabPage(const QString& schemaId, const QVaria
 	MonitorSchemaWidget* schemaWidget = new MonitorSchemaWidget(tabSchema,
 																m_schemaManager,
 																m_appSignalController,
-																m_tuningController,
-	                                                            m_logController,
+																m_logController,
 																m_timeStats,
 																this);
 

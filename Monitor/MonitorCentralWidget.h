@@ -15,7 +15,6 @@ class MonitorCentralWidget : public TabWidgetEx
 public:
 	MonitorCentralWidget(MonitorSchemaManager* schemaManager,
 						 VFrame30::AppSignalController* appSignalController,
-						 VFrame30::TuningController* tuningController,
 						 VFrame30::LogController* logController,
 						 ITimeStats* timeStats,
 						 QWidget* parent);
@@ -25,7 +24,6 @@ public:
 	void applyZoomMode(VFrame30::ZoomMode zoomMode);
 
 	MonitorSchemaWidget* currentTab();
-	VFrame30::TuningController* tuningController();
 
 protected:
 	virtual void timerEvent(QTimerEvent* event) override;
@@ -77,7 +75,7 @@ private:
 	MonitorSchemaManager* m_schemaManager = nullptr;
 
 	VFrame30::AppSignalController* m_appSignalController = nullptr;
-	VFrame30::TuningController* m_tuningController = nullptr;
+
 	VFrame30::LogController* m_logController = nullptr;
 
 	ITimeStats* m_timeStats = nullptr;

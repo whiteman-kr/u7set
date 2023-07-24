@@ -13,24 +13,6 @@
 class MonitorSchemaView;
 struct SchemaHistoryItem;
 
-class MonitorTuningController : public VFrame30::TuningController
-{
-	Q_OBJECT
-
-public:
-	MonitorTuningController(ITuningSignalManager* signalManager,
-							ClientLib::TuningConnection* tuningConnection,
-							ClientLib::TuningUserManager* tuningUserManager,
-							QWidget* parent = nullptr);
-
-protected:
-	virtual bool checkTuningAccess() const override;
-
-private:
-	QWidget* m_parentWidget = nullptr;
-	ClientLib::TuningUserManager* m_tuningUserManager = nullptr;
-};
-
 //
 //
 // MonitorSchemaWidget
@@ -47,7 +29,6 @@ public:
 	MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
 						MonitorSchemaManager* schemaManager,
 						VFrame30::AppSignalController* appSignalController,
-						VFrame30::TuningController* tuningController,
 						VFrame30::LogController* logController,
 						ITimeStats* timeStats,
 						QWidget* parent);
@@ -93,5 +74,10 @@ private:
 	//
 	QAction* m_newTabAction = nullptr;
 	QAction* m_closeTabAction = nullptr;
+
+	// Data access
+	VFrame30::LogController* m_logController = nullptr;
+	ITimeStats* m_timeStats = nullptr;
+
 };
 

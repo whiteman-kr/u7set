@@ -39,7 +39,7 @@ namespace
 		}
 
 	protected:
-		void timerEvent(QTimerEvent* event) override
+		void timerEvent(QTimerEvent* /*event*/) override
 		{
 			setText(getActionText());
 		}
@@ -195,35 +195,6 @@ namespace
 
 
 //
-// MonitorTuningController
-//
-MonitorTuningController::MonitorTuningController(ITuningSignalManager* signalManager,
-												 ClientLib::TuningConnection* tuningConnection,
-												 ClientLib::TuningUserManager* tuningUserManager,
-												 QWidget* parent):
-	VFrame30::TuningController(signalManager, tuningConnection, parent),
-	m_tuningUserManager(tuningUserManager),
-	m_parentWidget(parent)
-{
-}
-
-bool MonitorTuningController::checkTuningAccess() const
-{
-	if (m_tuningUserManager == nullptr)
-	{
-		Q_ASSERT(m_tuningUserManager);
-		return false;
-	}
-
-	if (m_tuningUserManager->login(m_parentWidget) == false)
-	{
-		return false;
-	}
-
-	return true;
-}
-
-//
 //
 //	MonitorSchemaWidget
 //
@@ -231,14 +202,16 @@ bool MonitorTuningController::checkTuningAccess() const
 MonitorSchemaWidget::MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
 										 MonitorSchemaManager* schemaManager,
 										 VFrame30::AppSignalController* appSignalController,
-										 VFrame30::TuningController* tuningController,
-                                         VFrame30::LogController* logController,
+										 VFrame30::LogController* logController,
 										 ITimeStats* timeStats,
 										 QWidget* parent) :
-	VFrame30::ClientSchemaWidget(new MonitorSchemaView(schemaManager, this, appSignalController, tuningController, logController, timeStats),
+	VFrame30::ClientSchemaWidget(new MonitorSchemaView(schemaManager, this, appSignalController, logController, timeStats),
 								 schema,
 								 schemaManager,
-								 parent)
+								 parent),
+	m_logController(logController),
+	m_timeStats(timeStats)
+
 {
 	setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(this, &QWidget::customContextMenuRequested, this, &MonitorSchemaWidget::contextMenuRequested);
@@ -596,6 +569,9 @@ void MonitorSchemaWidget::signalInfo(QString appSignalId)
 {
 	MonitorSignalInfo::showDialog(appSignalId,
 								  monitorSignalManager(),
+								  theApp.mainWindow()->tuningSignalManager(),
+								  theApp.mainWindow()->tuningConnection(),
+								  theApp.mainWindow()->tuningAuthorization(),
 								  &theApp.mainWindow()->configController(),
 								  theApp.mainWindow()->monitorCentralWidget());
 	return;

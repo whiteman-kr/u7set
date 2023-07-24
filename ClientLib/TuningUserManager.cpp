@@ -172,6 +172,16 @@ namespace ClientLib
 		return true;
 	}
 
+	bool TuningUserManager::checkTuningAccess(QWidget* parent)
+	{
+		if (login(parent) == false)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
 	bool TuningUserManager::requestPassword(QWidget* parent)
 	{
 		if (m_tuningUserAccounts.empty() == true)
