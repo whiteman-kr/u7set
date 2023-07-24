@@ -464,6 +464,7 @@ namespace Builder
 												arg(OptimizationInfo::typeStr(optimizationType)));
 		optimizedCode << CodeItem();
 
+		int replacementCodeSizeW  = replacementCode.codeSizeW(m_lmDescription);
 		int replacedCodeSizeW = 0;
 
 		do
@@ -496,8 +497,9 @@ namespace Builder
 
 		optimizedCode << CodeItem();
 
-		optimizedCode << CodeItem().setComment(QString("Optimization (%1) ------ End ------").
-											  arg(m_optimizationNo));
+		optimizedCode << CodeItem().setComment(QString("Optimization (%1) ------ End ------ Code size %2").
+											  arg(m_optimizationNo).
+											  arg(replacementCodeSizeW - replacedCodeSizeW));
 		if (start != srcCode.end())
 		{
 			CodeSnippetConstIterator next = start + 1;
@@ -523,10 +525,6 @@ namespace Builder
 		}
 
 		OptimizationInfo& optiInfo = it->second;
-
-		int replacementCodeSizeW  = replacementCode.codeSizeW(m_lmDescription);
-
-		Q_ASSERT(replacedCodeSizeW > replacementCodeSizeW);
 
 		optiInfo.optimizationsCount++;
 		optiInfo.codeReductionSizeW += replacedCodeSizeW - replacementCodeSizeW;

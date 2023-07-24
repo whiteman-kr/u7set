@@ -35,6 +35,9 @@ namespace Builder
 		bool isEmpty() const;
 		int itemsCount() const;
 		int codeSizeW(LmDescriptionConstShared lmDesc) const;
+		int codeSizeW(LmDescriptionConstShared lmDesc,
+					  CodeSnippetConstIterator start,
+					  CodeSnippetConstIterator end) const;
 
 		//
 

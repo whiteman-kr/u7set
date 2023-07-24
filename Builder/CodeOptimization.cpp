@@ -95,7 +95,11 @@ namespace Builder
 										CodeSnippet replacementCode;
 
 										if (canOptimize() == true &&
-											getReplacementCode(replacementCode) == true)
+											getReplacementCode(replacementCode) == true &&
+											replacementCode.codeSizeW(m_compiler.getLmDescription()) <
+														m_srcCode.codeSizeW(m_compiler.getLmDescription(),
+																			firstSequenceCmd,
+																			lastSequenceCmd))
 										{
 											m_compiler.optimizeCode(m_optimizationType,
 																	m_srcCode,

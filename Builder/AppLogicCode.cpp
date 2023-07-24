@@ -105,11 +105,53 @@ namespace Builder
 
 		for(const auto& ci : m_code)
 		{
+			if (ci.isCommand() == false)
+			{
+				continue;
+			}
+
 			const LmCommand* lmCmd = lmDesc->commandPtr(ci.lmCommandCode());
 
 			TEST_PTR_CONTINUE(lmCmd);
 
 			sizeW += lmCmd->codeSize;
+		}
+
+		return sizeW;
+	}
+
+	int CodeSnippet::codeSizeW(LmDescriptionConstShared lmDesc,
+								CodeSnippetConstIterator start,
+								CodeSnippetConstIterator end) const
+	{
+		TEST_PTR_RETURN_VALUE(lmDesc, 0);
+
+		int sizeW = 0;
+
+		CodeSnippetConstIterator it = start;
+
+		while(it != m_code.end())
+		{
+			if (it->isCommand() == true)
+			{
+				const LmCommand* lmCmd = lmDesc->commandPtr(it->lmCommandCode());
+
+				if (lmCmd == nullptr)
+				{
+					Q_ASSERT(false);
+				}
+				else
+				{
+					sizeW += lmCmd->codeSize;
+				}
+			}
+
+			if (it == end)
+			{
+				break;
+			}
+
+			it++;
 		}
 
 		return sizeW;
