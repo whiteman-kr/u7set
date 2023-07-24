@@ -144,6 +144,8 @@ namespace Builder
 			void fillDword(int offsetInBus);
 			void fill(int offsetInBus, int sizeW);
 
+			void getUnfilled(std::vector<std::pair<int, int>>* unfilledAreas) const;	// pair == <startInbusOffset, sizeW>
+
 		private:
 			std::vector<quint16> m_busArea;
 		};
@@ -609,6 +611,15 @@ namespace Builder
 														  const UalSignal* busChildSignal,
 														  const BusSignal& busSignal);
 
+		bool generateDiscreteSignalsToBusDiscreteInputsCode(CodeSnippet* code,
+					const std::map<int, std::map<int, std::pair<UalSignal*, UalSignal*>>>& busDiscretes,
+					const UalSignal& busSignal,
+					BusFilling* busFilling);
+
+		void clearUnusedBusSpace(CodeSnippet* code,
+								const UalSignal& busSignal,
+								const BusFilling& busFilling);
+
 		bool generateDiscreteSignalToBusBusInputCode(CodeSnippet* code,
 													 UalSignal* inputSignal,
 													 UalSignal* busChildSignal,
@@ -815,7 +826,7 @@ namespace Builder
 
 		Address16 getConstBitAddr(UalSignal* constDiscreteUalSignal);
 
-		CodeItem codeSetMemory(int addrFrom, quint16 constValue, int sizeW, const QString& comment);
+		CodeItem codeSetMemory(int addrFrom, quint16 constValue, int sizeW, const QString& comment = QStringLiteral(""));
 
 		UalSignalsMap& ualSignals() { return m_ualSignals; }
 

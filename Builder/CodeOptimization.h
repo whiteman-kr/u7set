@@ -342,7 +342,7 @@ namespace Builder
 		int m_destAccAddr = BAD_ADDRESS;
 
 		Address16 m_bitSrcAddrs[16];
-		int m_movedBitCount = 0;
+		bool m_destAccZeroInitPresent = false;
 
 		int m_directMoveDestAddr = BAD_ADDRESS;
 	};

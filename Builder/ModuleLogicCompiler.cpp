@@ -63,6 +63,49 @@ namespace Builder
 		}
 	}
 
+	void ModuleLogicCompiler::BusFilling::getUnfilled(std::vector<std::pair<int, int>>* unfilledAreas) const
+	{
+		TEST_PTR_RETURN(unfilledAreas);
+
+		unfilledAreas->clear();
+
+		int startUnfilled = -1;
+		int sizeW = 0;
+
+		for(int i = 0; i < static_cast<int>(m_busArea.size()); i++)
+		{
+			if (m_busArea[i] == 0)
+			{
+				if (startUnfilled == -1)
+				{
+					startUnfilled = i;
+					sizeW = 1;
+				}
+				else
+				{
+					sizeW++;
+				}
+
+				continue;
+			}
+
+			// w != 0
+
+			if (startUnfilled != -1)
+			{
+				unfilledAreas->push_back({startUnfilled, sizeW});
+
+				startUnfilled = -1;
+				sizeW = 0;
+			}
+		}
+
+		if (startUnfilled != -1)
+		{
+			unfilledAreas->push_back({startUnfilled, sizeW});
+		}
+	}
+
 	// ---------------------------------------------------------------------------------
 	//
 	//	ModuleLogicCompiler class implementation
@@ -9953,17 +9996,15 @@ namespace Builder
 
 		bool result = true;
 
-		code->comment_nl(QString("BusComposer %1 processing").arg(ualItem->label()));
-
-		int count = 0;
-
-//		code->append(codeSetMemory(ualBusSignal->ualAddr().offset(), 0, bus->sizeW(), QString("init %1").arg(ualBusSignal->appSignalID())));
+		code->comment_nl(QString("BusComposer %1 processing (BusType %2)").
+									arg(ualItem->label()).
+									arg(bus->busTypeID()));
 
 		BusFilling busFilling(bus);
 
 		// std::map<inbusOffset, std::map<bitNo, std::pair<inputSignal, busChildSignal>>>
 		//
-		std::map<int, std::map<int, std::pair<UalSignal*, UalSignal*>>> discretBusSignals;
+		std::map<int, std::map<int, std::pair<UalSignal*, UalSignal*>>> busDiscretes;
 
 		for(const BusSignal& busSignal : bus->busSignals())
 		{
@@ -10009,17 +10050,15 @@ namespace Builder
 				{
 					//res = generateDiscreteSignalToBusDiscreteInputCode(code, inputSignal, busChildSignal, busSignal);
 
-					auto it = discretBusSignals.find(busSignal.inbusOffset());
+					auto it = busDiscretes.find(busSignal.inbusOffset());
 
-					if (it == discretBusSignals.end())
+					if (it == busDiscretes.end())
 					{
-						auto p = discretBusSignals.insert({busSignal.inbusOffset(), {}});
+						auto p = busDiscretes.insert({busSignal.inbusOffset(), {}});
 						it = p.first;
 					}
 
 					it->second.insert({busSignal.inbusAddr.bit(), {inputSignal, busChildSignal}});
-
-					slfsm,df;.mfl;sg;mskldgm;lk
 				}
 				break;
 
@@ -10052,20 +10091,17 @@ namespace Builder
 				result = false;
 			}
 
-			if (res == true)
-			{
-				count++;
-			}
-			else
+			if (res == false)
 			{
 				result = false;
 			}
 		}
 
-		if (count > 0)
-		{
-			code->newLine();
-		}
+		result &= generateDiscreteSignalsToBusDiscreteInputsCode(code, busDiscretes, *ualBusSignal, &busFilling);
+
+		clearUnusedBusSpace(code, *ualBusSignal, busFilling);
+
+		code->newLine();
 
 		return result;
 	}
@@ -10763,6 +10799,98 @@ namespace Builder
 		}
 
 		return true;
+	}
+
+	bool ModuleLogicCompiler::generateDiscreteSignalsToBusDiscreteInputsCode(CodeSnippet* code,
+			const std::map<int, std::map<int, std::pair<UalSignal*, UalSignal*>>>& busDiscretes,
+			const UalSignal& busSignal, BusFilling* busFilling)
+	{
+		// std::map<inbusOffset, std::map<bitNo, std::pair<inputSignal, busChildSignal>>>
+
+		TEST_PTR_RETURN_FALSE(m_log);
+		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(busFilling, m_log);
+
+		int bitAccAddr = bitAccumulatorAddress();
+
+		for(auto const busOffsetDiscretes : busDiscretes)
+		{
+			int inbusOffset = busOffsetDiscretes.first;
+			const std::map<int, std::pair<UalSignal*, UalSignal*>>& discretes = busOffsetDiscretes.second;
+
+			CodeSnippet fillingCode;
+			bool clearBitAcc = false;
+
+			for(int bitNo = 0; bitNo < WORD_SIZE; bitNo++)
+			{
+				auto it = discretes.find(bitNo);
+
+				if (it == discretes.end())
+				{
+					clearBitAcc = true;
+					continue;
+				}
+
+				const UalSignal* inputSignal = it->second.first;
+				const UalSignal* busChildSignal = it->second.second;
+
+				if (inputSignal->isConst() == true)
+				{
+					fillingCode << CodeItem().movBitConst(bitAccAddr, bitNo,
+										inputSignal->constDiscreteValue(),
+										QString("%1 <= %2").arg(busChildSignal->refSignalIDsJoined()).
+															arg(inputSignal->constDiscreteValue()));
+				}
+				else
+				{
+					Address16 readUalAddr = m_ualSignals.getSignalReadAddress(*inputSignal, true);
+
+					if (readUalAddr.isValid() == false)
+					{
+						LOG_INTERNAL_ERROR(m_log);
+						return false;
+					}
+
+					fillingCode << CodeItem().movBit(bitAccAddr, bitNo,
+										 readUalAddr.offset(),
+										 readUalAddr.bit(),
+										 QString("%1 <= %2").arg(busChildSignal->refSignalIDsJoined()).
+															 arg(inputSignal->refSignalIDsJoined()));
+				}
+			}
+
+			fillingCode << CodeItem().mov(busSignal.ualAddr().offset() + inbusOffset, bitAccAddr);
+
+			busFilling->fillWord(inbusOffset);
+
+			if (clearBitAcc == true)
+			{
+				*code << CodeItem().movConst(bitAccAddr, 0);
+			}
+
+			*code << fillingCode;
+		}
+
+		return true;
+	}
+
+	void ModuleLogicCompiler::clearUnusedBusSpace(CodeSnippet* code,
+												const UalSignal& busSignal,
+												const BusFilling& busFilling)
+	{
+		int busSignalAddr = busSignal.ualAddr().offset();
+
+		std::vector<std::pair<int, int>> unfilledAreas;
+
+		busFilling.getUnfilled(&unfilledAreas);
+
+		for(auto const p : unfilledAreas)
+		{
+			int startAddr = p.first;
+			int sizeW = p.second;
+
+			*code << codeSetMemory(busSignalAddr + startAddr, 0, sizeW);
+		}
 	}
 
 	bool ModuleLogicCompiler::generateDiscreteSignalToBusBusInputCode(CodeSnippet* code,
@@ -15453,7 +15581,7 @@ namespace Builder
 
 		QStringList metadataFields;
 
-		m_appLogicCode.getAsmMetadataFields(&metadataFields, &metadataFieldsVersion);
+		m_optiAppLogicCode.getAsmMetadataFields(&metadataFields, &metadataFieldsVersion);
 
 		Hardware::ModuleFirmwareWriter* firmwareWriter = m_resultWriter->firmwareWriter();
 
@@ -15478,11 +15606,11 @@ namespace Builder
 
 		QByteArray binCode;
 
-		m_appLogicCode.getBinCode(&binCode);
+		m_optiAppLogicCode.getBinCode(&binCode);
 
 		std::vector<QVariantList> metadata;
 
-		m_appLogicCode.getAsmMetadata(m_lmDescription, &metadata);
+		m_optiAppLogicCode.getAsmMetadata(m_lmDescription, &metadata);
 
 		result &= firmwareWriter->setChannelData(m_lmSubsystemID,
 												 appLogicUartID,

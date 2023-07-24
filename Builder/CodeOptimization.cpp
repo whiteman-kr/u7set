@@ -870,24 +870,20 @@ namespace Builder
 	{
 		m_sequenceState = -1;
 		m_prevDestAccAddr = BAD_ADDRESS;
+
 		m_destAccAddr = BAD_ADDRESS;
+		m_destAccZeroInitPresent = false;
 
 		for(Address16& bitSrcAddr : m_bitSrcAddrs)
 		{
 			bitSrcAddr.reset();
 		}
 
-		m_movedBitCount = 0;
 		m_directMoveDestAddr = BAD_ADDRESS;
 	}
 
 	bool SequentialAccBitMovesOptimization::canStartSequence(const CodeItem& cmd)
 	{
-		if (cmd.isMoveBitConstCmd() && cmd.destBitAddr() == Address16(54280, 0))
-		{
-			DEBUG_STOP;
-		}
-
 		if (cmd.isMoveConstCmd() == true &&
 			cmd.getConst16() == 0 &&
 			m_sequenceState == -1)
@@ -900,40 +896,31 @@ namespace Builder
 		if ((cmd.isMoveBitCmd() == false &&
 			cmd.isMoveBitConstCmd() == false) ||
 			m_sequenceState != -1 ||
-			m_destAccAddr != BAD_ADDRESS ||
-			m_movedBitCount != 0)
+			m_destAccAddr != BAD_ADDRESS)
 		{
 			return false;
 		}
 
 		Address16 destBitAddr = cmd.destBitAddr();
 
-		if (destBitAddr.bit() != 0)
-		{
-			return false;
-		}
-
 		m_destAccAddr = destBitAddr.offset();
-
 		m_sequenceState = 1;
 
 		if (cmd.isMoveBitCmd() == true)
 		{
-			m_bitSrcAddrs[m_movedBitCount] = cmd.srcBitAddr();
+			m_bitSrcAddrs[destBitAddr.bit()] = cmd.srcBitAddr();
 		}
 		else
 		{
 			if (cmd.getConstBit() == 0)
 			{
-				m_bitSrcAddrs[m_movedBitCount] = m_constBit0Addr;
+				m_bitSrcAddrs[destBitAddr.bit()] = m_constBit0Addr;
 			}
 			else
 			{
-				m_bitSrcAddrs[m_movedBitCount] = m_constBit1Addr;
+				m_bitSrcAddrs[destBitAddr.bit()] = m_constBit1Addr;
 			}
 		}
-
-		m_movedBitCount++;
 
 		return true;
 	}
@@ -953,41 +940,35 @@ namespace Builder
 				}
 
 				m_destAccAddr = destBitAddr.offset();
+				m_destAccZeroInitPresent = true;
 				m_sequenceState = 1;
 			}
 			else
 			{
 				Address16 destBitAddr = cmd.destBitAddr();
 
-				if (m_destAccAddr != destBitAddr.offset() ||
-					m_movedBitCount != destBitAddr.bit())
+				if (m_destAccAddr != destBitAddr.offset())
 				{
-					if (m_movedBitCount == 16)
-					{
-						m_sequenceState = 2;						// sequence finished
-					}
-
-					return true;
+					return false;
 				}
 			}
 
 			if (cmd.isMoveBitCmd() == true)
 			{
-				m_bitSrcAddrs[m_movedBitCount] = cmd.srcBitAddr();
+				m_bitSrcAddrs[cmd.destBitAddr().bit()] = cmd.srcBitAddr();
 			}
 			else
 			{
 				if (cmd.getConstBit() == 0)
 				{
-					m_bitSrcAddrs[m_movedBitCount] = m_constBit0Addr;
+					m_bitSrcAddrs[cmd.destBitAddr().bit()] = m_constBit0Addr;
 				}
 				else
 				{
-					m_bitSrcAddrs[m_movedBitCount] = m_constBit1Addr;
+					m_bitSrcAddrs[cmd.destBitAddr().bit()] = m_constBit1Addr;
 				}
 			}
 
-			m_movedBitCount++;
 			return true;
 		}
 
@@ -1003,7 +984,7 @@ namespace Builder
 		// any another command
 		//
 		if (m_sequenceState == 1 &&
-			m_movedBitCount == 16)
+			m_destAccZeroInitPresent == true)
 		{
 			m_sequenceState = 2;						// sequence finished
 		}
@@ -1013,19 +994,15 @@ namespace Builder
 
 	bool SequentialAccBitMovesOptimization::canOptimize() const
 	{
-		return m_sequenceState == 2 && m_movedBitCount > 0;
+		return m_sequenceState == 2;
 	}
 
 	bool SequentialAccBitMovesOptimization::getReplacementCode(CodeSnippet& code)
 	{
-		if (m_movedBitCount < 16)
+		for(int i = 15; i >= 0; i--)
 		{
-			code << CodeItem().resetAcc();
-		}
-
-		for(int i = m_movedBitCount - 1; i >= 0; i--)
-		{
-			if (m_bitSrcAddrs[i] == m_constBit0Addr)
+			if (m_bitSrcAddrs[i] == m_constBit0Addr ||
+				m_bitSrcAddrs[i].isValid() == false)
 			{
 				code << CodeItem().lshift0Acc();
 				continue;
@@ -1035,12 +1012,6 @@ namespace Builder
 			{
 				code << CodeItem().lshift1Acc();
 				continue;
-			}
-
-			if (m_bitSrcAddrs[i].isValid() == false)
-			{
-				Q_ASSERT(false);
-				return false;
 			}
 
 			code << CodeItem().movBitAccAddr(m_bitSrcAddrs[i]);
