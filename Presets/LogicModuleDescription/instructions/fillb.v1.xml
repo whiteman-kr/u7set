@@ -1,6 +1,6 @@
 <Command 
 	Caption="fillb" 
-	Code="06C0" 
+	Code="06c0" 
 	CodeMask="07c0" 
 	SimulationFunc="command_fillb" 
 	ParseFunc="parse_fillb" 

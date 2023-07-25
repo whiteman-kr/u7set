@@ -1,7 +1,7 @@
 <Command 
 	Caption="set"
 	Code="0050"
-	CodeMask="07F8"	
+	CodeMask="07f8"	
 	SimulationFunc="command_set"
 	ParseFunc="parse_set"
 	Description="Set ACC to 0xFFFF"

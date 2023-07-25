@@ -1,6 +1,6 @@
 <Command 
 	Caption="movbc"
-	Code="01C0"
+	Code="01c0"
 	CodeMask="07c0"
 	SimulationFunc="command_movbc"
 	ParseFunc="parse_movbc"

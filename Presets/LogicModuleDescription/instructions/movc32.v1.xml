@@ -1,6 +1,6 @@
 <Command 
 	Caption="movc32"
-	Code="04C0"
+	Code="04c0"
 	CodeMask="07c0"
 	SimulationFunc="command_movc32"
 	ParseFunc="parse_movc32"

@@ -1294,7 +1294,7 @@ void SimAfbParamTests::afbComponentSet()
 {
 	// --
 	//
-	QFile lmDescritptionFile(":/LM1_SF40.xml");
+	QFile lmDescritptionFile(":/LM1_SR05.xml");
 	if (lmDescritptionFile.open(QIODevice::ReadOnly | QIODevice::Text) == false)
 	{
 		QFAIL(lmDescritptionFile.errorString().toStdString().data());

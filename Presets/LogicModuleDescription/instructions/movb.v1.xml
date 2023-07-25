@@ -1,7 +1,7 @@
 <Command 
 	Caption="movb"
-	Code="03C0"
-	CodeMask="07F0"	
+	Code="03c0"
+	CodeMask="07f0"	
 	SimulationFunc="command_movb"
 	ParseFunc="parse_movb"
 	Description="Copy 1-bit from memory to memory"

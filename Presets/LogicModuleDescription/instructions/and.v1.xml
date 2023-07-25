@@ -1,9 +1,9 @@
 <Command 
 	Caption="and"
 	Code="0048"
-	CodeMask="07F8"	
+	CodeMask="07f8"	
 	SimulationFunc="command_and"
-	ParseFunc="parse_or"
+	ParseFunc="parse_and"
 	Description="AND all ACC bits to ACC[0]"
 
 	CodeSize="1" 

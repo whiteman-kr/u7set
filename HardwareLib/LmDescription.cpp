@@ -530,7 +530,7 @@ bool LmDescription::loadCommands(const QDomElement& element, QString* errorMessa
 			return false;
 		}
 
-		// Check command code uniquness
+		// Check command code uniqueness
 		//
 		if (m_commands.count(lmCommand.code) != 0)
 		{

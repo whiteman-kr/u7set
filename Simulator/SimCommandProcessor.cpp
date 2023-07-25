@@ -5,19 +5,21 @@
 
 namespace Sim
 {
+	// clang-format off
 	const std::map<QString, std::function<CommandProcessor*(DeviceEmulator*)>> CommandProcessor::m_lmToFactory
 		{
-			{"LM1_SF00", [](DeviceEmulator* device)			{	return new CommandProcessor_LM5_LM6(device);	}},
-			{"LM1_SF40", [](DeviceEmulator* device)			{	return new CommandProcessor_LM5_LM6(device);	}},
-			{"LM1_SR01", [](DeviceEmulator* device)			{	return new CommandProcessor_LM5_LM6(device);	}},
-			{"LM1_SR02", [](DeviceEmulator* device)			{	return new CommandProcessor_LM5_LM6(device);	}},
-			{"LM1_SR03", [](DeviceEmulator* device)			{	return new CommandProcessor_LM5_LM6(device);	}},
-			{"LM1_SR04", [](DeviceEmulator* device)			{	return new CommandProcessor_LM5_LM6(device);	}},
-			{"LM1_SR05", [](DeviceEmulator* device)			{	return new CommandProcessor_LM5_LM6(device);	}},
-			{"LM1_SR20", [](DeviceEmulator* device)			{	return new CommandProcessor_LM5_LM6(device);	}},
-			{"LM8_SR10", [](DeviceEmulator* device)			{	return new CommandProcessor_LM5_LM6(device);	}},
-			{"LM11_SR90", [](DeviceEmulator* device)		{	return new CommandProcessor_LM5_LM6(device);	}},
+			{"LM1_SF00",	[](DeviceEmulator* device)	{	return new CommandProcessor_LM5_LM6(device);	}},
+			{"LM1_SF40",	[](DeviceEmulator* device)	{	return new CommandProcessor_LM5_LM6(device);	}},
+			{"LM1_SR01",	[](DeviceEmulator* device)	{	return new CommandProcessor_LM5_LM6(device);	}},
+			{"LM1_SR02",	[](DeviceEmulator* device)	{	return new CommandProcessor_LM5_LM6(device);	}},
+			{"LM1_SR03",	[](DeviceEmulator* device)	{	return new CommandProcessor_LM5_LM6(device);	}},
+			{"LM1_SR04",	[](DeviceEmulator* device)	{	return new CommandProcessor_LM5_LM6(device);	}},
+			{"LM1_SR05",	[](DeviceEmulator* device)	{	return new CommandProcessor_LM5_LM6(device);	}},
+			{"LM1_SR20",	[](DeviceEmulator* device)	{	return new CommandProcessor_LM5_LM6(device);	}},
+			{"LM8_SR10",	[](DeviceEmulator* device)	{	return new CommandProcessor_LM5_LM6(device);	}},
+			{"LM11_SR90",	[](DeviceEmulator* device)	{	return new CommandProcessor_LM5_LM6(device);	}},
 		};
+	// clang-format on
 
 	CommandProcessor::CommandProcessor(DeviceEmulator* device) :
 		QObject(),
@@ -232,6 +234,11 @@ namespace Sim
 					.arg(afb.pinCaption(command->m_afbPinOpCode));
 	}
 
+	QString CommandProcessor::strAcc() const
+	{
+		return QStringLiteral("Acc");
+	}
+
 	QString CommandProcessor::strAddr(quint32 address) const
 	{
 		QString hexAddr = QString("%1").arg(static_cast<ushort>(address), 4, 16, QChar('0')).toUpper();
@@ -252,8 +259,8 @@ namespace Sim
 		}
 
 		return QString("%1[%2]")
-					.arg(hexAddr)
-					.arg(bitNo);
+			.arg(hexAddr)
+			.arg(bitNo);
 	}
 
 	QString CommandProcessor::strBitConst(quint16 data) const

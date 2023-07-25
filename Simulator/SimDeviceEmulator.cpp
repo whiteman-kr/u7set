@@ -382,6 +382,16 @@ namespace Sim
 		m_logicUnit.flags.cmp = value;
 	}
 
+	quint16 DeviceEmulator::acc() const
+	{
+		return m_logicUnit.acc;
+	}
+	
+	void DeviceEmulator::setAcc(quint16 value)
+	{
+		m_logicUnit.acc = value;
+	}
+
 	Sim::AfbComponent DeviceEmulator::afbComponent(int opCode) const
 	{
 		return AfbComponent{m_lmDescription.component(opCode)};
@@ -628,7 +638,7 @@ namespace Sim
 		bool ok = m_ram.writeBit(offsetW, bitNo, data, E::ByteOrder::BigEndian, access);
 		if (ok == false)
 		{
-			SIM_FAULT(QString("Write RAM error, offsetW %1, bitNo %2, acess %3")
+			SIM_FAULT(QString("Write RAM error, offsetW %1, bitNo %2, access %3")
 					  .arg(offsetW)
 					  .arg(bitNo)
 					  .arg(E::valueToString<E::LogicModuleRamAccess>(access)));
@@ -1352,7 +1362,7 @@ namespace Sim
 		//			return false;
 		//		}
 
-		// Run work cylce
+		// Run work cycle
 		//
 		while (m_logicUnit.programCounter < m_plainAppLogic.size() &&
 			  (m_logicUnit.phase == CyclePhase::IdrPhase || m_logicUnit.phase == CyclePhase::AlpPhase))
@@ -1390,7 +1400,7 @@ namespace Sim
 			}
 
 			// If ProgramCounter was not changed in runCommand (can be changed by APPSTART command), then
-			// incerement ProgramCounter to coommand size
+			// increment ProgramCounter to command size
 			//
 			if (m_logicUnit.programCounter == command.m_offset)
 			{
@@ -1424,7 +1434,7 @@ namespace Sim
 						.arg(m_logicUnit.programCounter)
 						.arg(m_logicUnit.programCounter, 4, 16, QChar('0'))
 						.arg(func);
-		QString str3 = QString("\tReasone: %1")
+		QString str3 = QString("\tReason: %1")
 						.arg(reasone);
 
 		m_log.writeError(str1);
