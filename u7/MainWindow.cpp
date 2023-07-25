@@ -1306,45 +1306,7 @@ void MainWindow::projectDifference()
 
 void MainWindow::createSchemasAlbums()
 {
-	QString path = QSettings{}.value("SchemaEditor/Export/AlbumPath", QDir().toNativeSeparators(QDir::currentPath())).toString();
-
-	static std::vector<Builder::SchemaTypesParams> schemaTypesParams = {};
-	if (schemaTypesParams.empty() == true)
-	{
-		schemaTypesParams = Builder::SchemasReportGenerator::defaultFileTypesParams(db());
-	}
-
-	Builder::SchemasReportOptions options;
-	options.load(db());
-
-	DialogSchemasReport d(path, schemaTypesParams,
-						  Builder::SchemasReportGenerator::defaultFileTypesParams(db()), options, this);
-	if (d.exec() != QDialog::Accepted)
-	{
-		return;
-	}
-	schemaTypesParams = d.schemaTypesParams();
-
-	options = d.options();
-	path = d.path();
-	options.save(db());
-	QSettings{}.setValue("SchemaEditor/Export/AlbumPath", path);
-
-	options.footers = true;	// When loading and storing options, keep footers true!
-
-	SchemasReportGeneratorThread r(theSettings.serverHost(),
-								   theSettings.serverPort(),
-								   theSettings.serverUsername(),
-								   theSettings.serverPassword(),
-								   db()->currentProject().projectName(),
-								   db()->currentUser().username(),
-								   db()->currentUser().password(),
-								   &m_signalSetProvider->signalSet(),
-								   this,
-								   options,
-								   schemaTypesParams);
-
-	r.exportAllSchemasToAlbum(path);
+	SchemasAlbumGenerator::createSchemasAlbums(db(), &m_signalSetProvider->signalSet(), this);
 	return;
 }
 

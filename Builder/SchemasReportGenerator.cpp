@@ -1,5 +1,4 @@
 #include "SchemasReportGenerator.h"
-#include "../ReportLib/ReportPrinter.h"
 #include "../VFrame30/LogicSchema.h"
 #include "../VFrame30/SchemaItemSignal.h"
 
@@ -104,6 +103,7 @@ namespace Builder
 												   const SchemasReportOptions& options,
 												   const std::vector<SchemaTypesParams>& schemaTypesParams):
 		m_schemaView(schemaView),
+		m_printer(schemaView),
 		m_appSignalProvider(signalSet),
 		m_appSignalController(&m_appSignalProvider, nullptr),
 		m_inputFiles(files),
@@ -182,8 +182,14 @@ namespace Builder
 
 	void SchemasReportGenerator::exportFilesToMultiplePdf()
 	{
+		if (filePath().isEmpty() == true)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
 		VFrame30::SchemaDetailsSet detailsSet;
-		std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas;	// Key is schema ID
+		std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas;		// Key is schema ID - schemas to be exported
 
 		try
 		{
@@ -193,6 +199,7 @@ namespace Builder
 
 			closeProject();
 		}
+
 		catch (QString errorMessage)
 		{
 			closeProject();
@@ -239,12 +246,6 @@ namespace Builder
 				auto schemaDrawingSection = report->addSection(ReportSection::create(tr("Schema: %1").arg(schema->schemaId()),
 																					 pageLayout));
 				schemaDrawingSection->addSchema(reportSchema);
-
-				if (m_options.signalsDetails == true && schema->isLogicSchema() == true)
-				{
-					int todo_load_all_schemas_for_details = 1;
-					//createLogicSchemaSignalsDetails(report, pageLayout, schema, allSchemas, detailsSet);
-				}
 			}
 
 			{
@@ -252,22 +253,9 @@ namespace Builder
 				m_statistics.m_currentStatus = WorkerStatus::Printing;
 			}
 
-			ReportPrinter printer(m_schemaView);
-
-			if (filePath().isEmpty() == false)
-			{
-				// Print to file
-				//
-				printer.print(*report, filePath() + QDir::separator() + schemaId + ".pdf", m_stop);
-			}
-			else
-			{
-				// Print to buffer
-				//
-				QBuffer buffer(&m_outputData[schemaId + ".pdf"]);
-				printer.print(*report, buffer, m_stop);
-			}
-
+			// Print to file
+			//
+			m_printer.print(*report, filePath() + QDir::separator() + schemaId + ".pdf", m_stop);
 		}
 
 		emit finished(QString());
@@ -278,7 +266,7 @@ namespace Builder
 	void SchemasReportGenerator::exportFilesToSinglePdf()
 	{
 		VFrame30::SchemaDetailsSet detailsSet;
-		std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas;		// Key is schema ID
+		std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas;		// Key is schema ID - schemas to be exported
 
 		try
 		{
@@ -336,13 +324,6 @@ namespace Builder
 																					 pageLayout));
 				schemaDrawingSection->setTag(schema->caption());
 				schemaDrawingSection->addSchema(reportSchema);
-
-				if (m_options.signalsDetails == true && schema->isLogicSchema() == true)
-				{
-					int todo_load_all_schemas_for_details = 1;
-					//createLogicSchemaSignalsDetails(report, pageLayout, schema, allSchemas, detailsSet);
-				}
-
 			}
 		}
 
@@ -351,20 +332,18 @@ namespace Builder
 			m_statistics.m_currentStatus = WorkerStatus::Printing;
 		}
 
-		ReportPrinter printer(m_schemaView);
-
 		if (filePath().isEmpty() == false)
 		{
 			// Print to file
 			//
-			printer.print(*report, filePath(), m_stop);
+			m_printer.print(*report, filePath(), m_stop);
 		}
 		else
 		{
 			// Print to buffer
 			//
 			QBuffer buffer(&m_outputData[filePath()]);
-			printer.print(*report, buffer, m_stop);
+			m_printer.print(*report, buffer, m_stop);
 		}
 
 		emit finished(QString());
@@ -374,45 +353,40 @@ namespace Builder
 
 	void SchemasReportGenerator::exportAllSchemasToAlbums()
 	{
-		std::vector<SchemaFilesGroup> schemaFilesGroups;
-
 		try
 		{
 			openProject();
 
 			for (auto& stp : m_schemaTypesParams)
 			{
-				if (stp.selected() == true)
-				{
-					schemaFilesGroups.push_back({stp.fileId(), stp.caption()});
-				}
-			}
+				std::vector<DbFileInfo> schemasFiles;
 
-			for (SchemaFilesGroup& sfg : schemaFilesGroups)
-			{
 				if (m_stop == true)
 				{
 					break;
 				}
 
+				if (stp.selected() == false)
+				{
+					continue;
+				}
+
 				// Fill schemas files
 				//
-				VFrame30::SchemaDetailsSet detailsSet;
-
 				DbFileTree fileTree;
 
 				{
 					QMutexLocker l(&m_statisticsMutex);
-					m_statistics.m_currentSchemaType = sfg.caption;
+					m_statistics.m_currentSchemaType = stp.caption();
 				}
 
-				bool ok = db()->getFileListTree(&fileTree, sfg.fileId, true/*removeDeleted*/, nullptr);
+				bool ok = db()->getFileListTree(&fileTree, stp.fileId(), true/*removeDeleted*/, nullptr);
 				if (ok == false)
 				{
 					throw(tr("DbController::getFileListTree failed on fileId = %1").arg(db()->systemFileId(DbDir::SchemasDir)));
 				}
 
-				const std::map<int, std::shared_ptr<DbFileInfo>>  files = fileTree.files();
+				const std::map<int, std::shared_ptr<DbFileInfo>>& files = fileTree.files();
 
 				for (auto it = files.begin(); it != files.end(); it++)
 				{
@@ -427,30 +401,29 @@ namespace Builder
 						continue;
 					}
 
-					sfg.schemasFiles.push_back(*fi);
+					schemasFiles.push_back(*fi);
 				}
 
 				// Load and parse schemas
 				//
-				loadSchemas(sfg.schemasFiles, sfg.schemas, detailsSet);
+				std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas;		// Key is schema ID
+				VFrame30::SchemaDetailsSet detailsSet;
 
-				if (m_stop == true)
-				{
-					break;
-				}
+				loadSchemas(schemasFiles, schemas, detailsSet);
 
-				if (sfg.schemas.empty() == true)
+				if (schemas.empty() == true)
 				{
 					continue;
 				}
 
 				// Render schemas
 				//
-				renderSchemas(sfg, detailsSet);
+				if (m_stop == true)
+				{
+					break;
+				}
 
-				// Clear loaded schemas after parsing
-				//
-				clearSchemas(sfg);
+				renderSchemas(schemas, detailsSet, stp.caption(), stp.pageLayout());
 			}
 
 			closeProject();
@@ -562,10 +535,27 @@ namespace Builder
 		case SchemasReportGenerator::WorkerStatus::Printing:
 			{
 				*progressText = tr("Printing to PDF Document...");
-				*progress = 0;
-				*progressMax = 0;
+
+				const ReportPrinter::Statistics ps = m_printer.statistics();
+
+				switch(ps.status)
+				{
+				case ReportPrinter::Statistics::Rendering:
+					*progressText = tr("Rendering section: %1/%2")
+							.arg(ps.sectionIndex)
+							.arg(ps.sectionCount);
+					*progress = ps.sectionIndex;
+					*progressMax = ps.sectionCount;
+				break;
+				case ReportPrinter::Statistics::Printing:
+					*progressText = tr("Printing page: %1/%2")
+							.arg(ps.pageIndex)
+							.arg(ps.pagesCount);
+					*progress = ps.pageIndex;
+					*progressMax = ps.pagesCount;
+				break;
+				}
 			}
-			break;
 		}
 	}
 
@@ -698,7 +688,6 @@ namespace Builder
 
 		// Calculate if selected files have different parent
 		//
-		bool differentParentId = false;
 		int firstParentId = -1;
 
 		for (const std::shared_ptr<DbFile>& dbFile : out)
@@ -711,7 +700,6 @@ namespace Builder
 
 			if (firstParentId != dbFile->parentId())
 			{
-				differentParentId = true;
 				break;
 			}
 		}
@@ -752,16 +740,19 @@ namespace Builder
 		return;
 	}
 
-	void SchemasReportGenerator::renderSchemas(const SchemaFilesGroup& sfg, const VFrame30::SchemaDetailsSet& detailsSet)
+	void SchemasReportGenerator::renderSchemas(const std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas,
+											   const VFrame30::SchemaDetailsSet& detailsSet,
+											   const QString& groupName,
+											   const QPageLayout pageLayout)
 	{
 		// Render schemas
 		//
 		{
 			QMutexLocker l(&m_statisticsMutex);
 			m_statistics.m_currentStatus = WorkerStatus::Rendering;
-			m_statistics.m_currentSchemaType = sfg.caption;
+			m_statistics.m_currentSchemaType = groupName;
 			m_statistics.m_schemaIndex = 0;
-			m_statistics.m_schemasCount = static_cast<int>(sfg.schemas.size());
+			m_statistics.m_schemasCount = static_cast<int>(schemas.size());
 		}
 
 		std::shared_ptr<Report> report = std::make_shared<Report>(m_projectName, filePath());
@@ -776,33 +767,9 @@ namespace Builder
 		}
 
 		{
-			// Find page layout
-			//
-			QPageLayout pageLayout;
-
-			bool plFound = false;
-
-			for (const SchemaTypesParams& rp : m_schemaTypesParams)
-			{
-				if (rp.fileId() == sfg.fileId)
-				{
-					pageLayout = rp.pageLayout();
-					plFound = true;
-					break;
-				}
-			}
-
-			if (plFound == false)
-			{
-				// File type was not found
-				//
-				Q_ASSERT(false);
-				return;
-			}
-
 			// Render schemas
 
-			for (auto it = sfg.schemas.begin(); it != sfg.schemas.end(); it++)
+			for (auto it = schemas.begin(); it != schemas.end(); it++)
 			{
 				if (m_stop == true)
 				{
@@ -827,7 +794,7 @@ namespace Builder
 
 				if (m_options.signalsDetails == true && schema->isLogicSchema() == true)
 				{
-					createLogicSchemaSignalsDetails(report, pageLayout, schema, sfg.schemas, detailsSet);
+					createLogicSchemaSignalsDetails(report, pageLayout, schema, schemas, detailsSet);
 				}
 			}
 		}
@@ -837,28 +804,21 @@ namespace Builder
 			m_statistics.m_currentStatus = WorkerStatus::Printing;
 		}
 
-		ReportPrinter printer(m_schemaView);
-
 		if (filePath().isEmpty() == false)
 		{
-			QString fileName = tr("%1/%2_%3.pdf").arg(filePath()).arg(m_projectName).arg(sfg.caption);
+			QString fileName = tr("%1/%2_%3.pdf").arg(filePath()).arg(m_projectName).arg(groupName);
 			// Print to file
 			//
-			printer.print(*report, fileName, m_stop);
+			m_printer.print(*report, fileName, m_stop);
 		}
 		else
 		{
 			// Print to buffer
 			//
-			QBuffer buffer(&m_outputData[sfg.caption + ".pdf"]);
-			printer.print(*report, buffer, m_stop);
+			QBuffer buffer(&m_outputData[groupName + ".pdf"]);
+			m_printer.print(*report, buffer, m_stop);
 
 		}
-	}
-
-	void SchemasReportGenerator::clearSchemas(SchemaFilesGroup& sfg)
-	{
-		sfg.schemas.clear();
 	}
 
 	QPageLayout SchemasReportGenerator::getSchemaPageLayout(const std::shared_ptr<VFrame30::Schema>& schema) const

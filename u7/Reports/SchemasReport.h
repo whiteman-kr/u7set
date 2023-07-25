@@ -2,6 +2,14 @@
 
 #include "../Builder/SchemasReportGenerator.h"
 
+class DbController;
+
+class SchemasAlbumGenerator
+{
+public:
+	static void createSchemasAlbums(DbController* db, const AppSignalSet* signalSet, QWidget* parent);
+};
+
 class SchemasReportGeneratorThread
 {
 public:
@@ -18,7 +26,7 @@ public:
 								 const std::vector<Builder::SchemaTypesParams>& schemaTypesParams);
 
 	void exportSchemasToMultiplePdf(const QString& filePath, const std::vector<DbFileInfo>& files);
-	void exportSchemasToSinglePdf(const QString& filePath, const std::vector<DbFileInfo>& files);
+	void exportSchemasToSinglePdf(const QString& fileName, const std::vector<DbFileInfo>& files);
 	void exportAllSchemasToAlbum(const QString& filePath);
 
 private:

@@ -14,7 +14,6 @@ DialogSchemasExport::DialogSchemasExport(const Builder::SchemasReportOptions& op
 	ui->setupUi(this);
 
 	ui->checkFooters->setChecked(m_options.footers);
-	ui->checkSignalsDetails->setChecked(m_options.signalsDetails);
 	ui->checkItemsLabels->setChecked(m_options.itemsLabels);
 
 	ui->filePathEdit->setText(m_pathName);
@@ -55,7 +54,6 @@ void DialogSchemasExport::accept()
 	m_pathName = ui->filePathEdit->text();
 
 	m_options.footers = ui->checkFooters->isChecked() == true;
-	m_options.signalsDetails = ui->checkSignalsDetails->isChecked() == true;
 	m_options.itemsLabels = ui->checkItemsLabels->isChecked() == true;
 
 	if (isSingleFile() == false)

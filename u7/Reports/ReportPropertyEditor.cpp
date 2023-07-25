@@ -148,7 +148,7 @@ void ReportPropertyEditor::fillObjectsTree()
 		if (templ.header().empty() == false)
 		{
 			QTreeWidgetItem* headerItem = new QTreeWidgetItem(QStringList() <<
-															  "Section" << "Header" <<
+															  "Header Section" <<
 															  templ.header().caption()  <<
 															  pageLayoutString(templ.header().pageLayout()));
 			templateItem->addChild(headerItem);
@@ -168,7 +168,6 @@ void ReportPropertyEditor::fillObjectsTree()
         for (const ReportLib::SectionTemplate& section : templ.sections())
         {
 			QTreeWidgetItem* sectionItem = new QTreeWidgetItem(QStringList() << "Section" <<
-															   "Section" <<
 															   section.caption() <<
 															   pageLayoutString(section.pageLayout()));
             templateItem->addChild(sectionItem);
@@ -189,8 +188,7 @@ void ReportPropertyEditor::fillObjectsTree()
 		if (templ.footer().empty() == false)
 		{
 			QTreeWidgetItem* footerItem = new QTreeWidgetItem(QStringList() <<
-															  "Section" <<
-															  "Footer" <<
+															  "Footer Section" <<
 															  templ.footer().caption() <<
 															  pageLayoutString(templ.footer().pageLayout()));
 			templateItem->addChild(footerItem);

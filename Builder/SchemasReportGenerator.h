@@ -2,6 +2,7 @@
 
 #include "../ReportLib/ReportAppSignalProvider.h"
 #include "../ReportLib/Report.h"
+#include "../ReportLib/ReportPrinter.h"
 #include "../DbLib/DbController.h"
 
 namespace Builder
@@ -21,7 +22,7 @@ namespace Builder
 	};
 
 	//
-	// SchemasReportFileTypeParams
+	// SchemaTypesParams
 	//
 
 	class SchemaTypesParams
@@ -118,31 +119,20 @@ namespace Builder
 		Statistics statistics() const;
 
 	private:
-		struct SchemaFilesGroup
-		{
-			SchemaFilesGroup(int fileId, const QString& caption)
-			{
-				this->fileId = fileId;
-				this->caption = caption;
-			}
-
-			int fileId = -1;
-			QString caption;
-
-			std::vector<DbFileInfo> schemasFiles;
-			std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas;		// Key is schema ID
-		};
-
-	private:
 		DbController* db();
 		const QString& filePath() const;
 
 		void openProject();
 		void closeProject();
 
-		void loadSchemas(const std::vector<DbFileInfo>& files, std::map<QString, std::shared_ptr<VFrame30::Schema>>& schemas, VFrame30::SchemaDetailsSet& detailsSet);
-		void renderSchemas(const SchemaFilesGroup& sfg, const VFrame30::SchemaDetailsSet& detailsSet);
-		void clearSchemas(SchemaFilesGroup& sfg);
+		void loadSchemas(const std::vector<DbFileInfo>& files,
+						 std::map<QString, std::shared_ptr<VFrame30::Schema>>& schemas,
+						 VFrame30::SchemaDetailsSet& detailsSet);
+
+		void renderSchemas(const std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas,
+						   const VFrame30::SchemaDetailsSet& detailsSet,
+						   const QString& groupName,
+						   const QPageLayout pageLayout);
 
 		[[nodiscard]] QPageLayout getSchemaPageLayout(const std::shared_ptr<VFrame30::Schema>& schema) const;
 
@@ -160,6 +150,8 @@ namespace Builder
 	private:
 		DbController m_db;
 		const std::shared_ptr<ReportLib::ReportSchemaView> m_schemaView;
+		ReportLib::ReportPrinter m_printer;
+
 
 		ReportLib::ReportAppSignalProvider m_appSignalProvider;
 		VFrame30::AppSignalController m_appSignalController;

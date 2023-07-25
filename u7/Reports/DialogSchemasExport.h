@@ -25,7 +25,6 @@ public:
 
 private slots:
 	void on_buttonPathBrowse_clicked();
-
 	void on_buttonFileBrowse_clicked();
 
 private:
