@@ -342,7 +342,7 @@ namespace Builder
 			{
 				std::shared_ptr<TuningFilter> ofTs = std::make_shared<TuningFilter>(TuningFilter::InterfaceType::Tree);
 
-				const std::set<QString> schemaSignals = schema->getSignalMap();
+				const std::set<QString> schemaSignals = schema->getSignalSet();
 				for (const QString& schemaSignal : schemaSignals)
 				{
 					Hash hash = ::calcHash(schemaSignal);

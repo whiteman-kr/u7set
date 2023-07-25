@@ -147,6 +147,11 @@ namespace Builder
 											   const std::map<QString, std::shared_ptr<VFrame30::Schema>>& allSchemas,
 											   const VFrame30::SchemaDetailsSet& detailsSet);
 
+		void createLogicSchemaLoopbacksDetails(const std::shared_ptr<ReportLib::ReportSection> section,
+											   const VFrame30::LogicSchema* logicSchema,
+											   const std::map<QString, std::shared_ptr<VFrame30::Schema>>& allSchemas,
+											   const VFrame30::SchemaDetailsSet& detailsSet);
+
 	private:
 		DbController m_db;
 		const std::shared_ptr<ReportLib::ReportSchemaView> m_schemaView;

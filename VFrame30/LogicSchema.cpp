@@ -196,37 +196,64 @@ namespace VFrame30
 		return;
     }
 
-	std::map<QString, SchemaItemSignal*> LogicSchema::getInputItemsMap() const
+	std::map<QString, SchemaItemSignal*> LogicSchema::getSignalItemsMap() const
 	{
-		return getSignalItemsMap<SchemaItemInput>();
+		std::map<QString, SchemaItemSignal*> result;
+
+		for (const auto& layer : layers())
+		{
+			if (layer->compile() == true)
+			{
+				// Get all signals
+				//
+				for (const auto& item : layer->items())
+				{
+					if (VFrame30::SchemaItemSignal* itemSignal = item->toType<SchemaItemSignal>();
+							itemSignal != nullptr)
+					{
+						QStringList appSignals = itemSignal->appSignalIdList();
+						for (const QString& id : appSignals)
+						{
+							result[id] = itemSignal;
+						}
+
+						appSignals = itemSignal->impactAppSignalIdList();
+						for (const QString& id : appSignals)
+						{
+							result[id] = itemSignal;
+						}
+					}
+				}
+			}
+		}
+
+		return result;
 	}
 
-	std::map<QString, SchemaItemSignal*> LogicSchema::getInOutItemsMap() const
+	std::map<QString, SchemaItemLoopback*> LogicSchema::getLoopbacksMap() const
 	{
-		return getSignalItemsMap<const SchemaItemInOut>();
+		std::map<QString, VFrame30::SchemaItemLoopback*> result;
+
+		for (const auto& layer : layers())
+		{
+			if (layer->compile() == true)
+			{
+				// Get all signals
+				//
+				for (const auto& item : layer->items())
+				{
+					if (VFrame30::SchemaItemLoopback* itemLoopback = item->toType<SchemaItemLoopback>();
+							itemLoopback != nullptr)
+					{
+						result[itemLoopback->loopbackId()] = itemLoopback;
+					}
+				}
+			}
+		}
+		return result;
 	}
 
-	std::map<QString, SchemaItemSignal*> LogicSchema::getOutputItemsMap() const
-	{
-		return getSignalItemsMap<SchemaItemOutput>();
-	}
-
-	std::set<QString> LogicSchema::getInputSignalsSet() const
-	{
-		return getSignalItemsSignals<SchemaItemInput>();
-	}
-
-	std::set<QString> LogicSchema::getInOutSignalsSet() const
-	{
-		return getSignalItemsSignals<SchemaItemInOut>();
-	}
-
-	std::set<QString> LogicSchema::getOutputSignalsSet() const
-	{
-		return getSignalItemsSignals<SchemaItemOutput>();
-	}
-
-	std::set<QString> LogicSchema::getSignalMap() const
+	std::set<QString> LogicSchema::getSignalSet() const
 	{
 		std::set<QString> signalMap;	// signal ids can be duplicated, std::set removes dupilcates
 
@@ -296,7 +323,7 @@ namespace VFrame30
 
 	QStringList LogicSchema::getSignalList() const
 	{
-		std::set<QString> signalMap = getSignalMap();	// signal ids can be duplicated, std::set removes dupilcates
+		std::set<QString> signalMap = getSignalSet();	// signal ids can be duplicated, std::set removes dupilcates
 
 		// Move set to list
 		//
@@ -378,84 +405,5 @@ namespace VFrame30
 	void LogicSchema::setLmDescriptionFile(QString value)
 	{
 		m_lmDescriptionFile = value;
-	}
-
-	template <typename SchemaItemSignalType>
-	std::map<QString, SchemaItemSignal*> LogicSchema::getSignalItemsMap() const	// Key is signalID, value is SchemaItemInput
-	{
-		std::map<QString, VFrame30::SchemaItemSignal*> result;
-
-		for (const auto& layer : layers())
-		{
-			if (layer->compile() == true)
-			{
-				// Get all signals
-				//
-				for (const auto& item : layer->items())
-				{
-					if (VFrame30::SchemaItemSignal* itemSignal = item->toType<SchemaItemSignal>();
-							itemSignal != nullptr)
-					{
-						if (SchemaItemSignalType* itemTypeSignal = itemSignal->toType<SchemaItemSignalType>();
-								itemTypeSignal != nullptr)
-						{
-							QStringList appSignals = itemSignal->appSignalIdList();
-							for (const QString& id : appSignals)
-							{
-								result[id] = itemSignal;
-							}
-
-							appSignals = itemSignal->impactAppSignalIdList();
-							for (const QString& id : appSignals)
-							{
-								result[id] = itemSignal;
-							}
-						}
-					}
-
-				}
-			}
-		}
-
-		return result;
-	}
-
-	template <typename SchemaItemSignalType>
-	std::set<QString> LogicSchema::getSignalItemsSignals() const
-	{
-		std::set<QString> result;
-
-		for (const auto& layer : layers())
-		{
-			if (layer->compile() == true)
-			{
-				// Get all signals
-				//
-				for (const auto& item : layer->items())
-				{
-					if (VFrame30::SchemaItemSignal* itemSignal = item->toType<SchemaItemSignal>();
-							itemSignal != nullptr)
-					{
-						if (SchemaItemSignalType* itemTypeSignal = itemSignal->toType<SchemaItemSignalType>();
-								itemTypeSignal != nullptr)
-						{
-							QStringList appSignals = itemSignal->appSignalIdList();
-							for (const QString& id : appSignals)
-							{
-								result.insert(id);
-							}
-
-							appSignals = itemSignal->impactAppSignalIdList();
-							for (const QString& id : appSignals)
-							{
-								result.insert(id);
-							}
-						}
-					}
-				}
-			}
-		}
-
-		return result;
 	}
 }

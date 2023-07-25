@@ -877,6 +877,8 @@ namespace Builder
 
 		createLogicSchemaIOSignalsDetails(schemaDetailsSection, logicSchema, allSchemas, detailsSet);
 
+		createLogicSchemaLoopbacksDetails(schemaDetailsSection, logicSchema, allSchemas, detailsSet);
+
 		if (schemaDetailsSection->objectCount() > 0)
 		{
 			report->addSection(schemaDetailsSection);
@@ -899,21 +901,10 @@ namespace Builder
 		// Get list of signals for current schema
 		//
 
-		struct ItemsMapInfo
-		{
-			std::map<QString, VFrame30::SchemaItemSignal*> itemsMap;
-			bool isInput{false};
-			QString endpointText;
-		};
-
-		std::array<ItemsMapInfo, 3> itemsMaps {{
-				{logicSchema->getInputItemsMap(), true, "Start Point"},
-				{logicSchema->getInOutItemsMap(), false, "End Point"},
-				{logicSchema->getOutputItemsMap(), false, "End Point"}}};
-
 		struct SchemaSignalInfo
 		{
 			bool input = true;
+			bool commented = false;
 			bool impact = false;
 			double x = 0;
 			double y = 0;
@@ -923,132 +914,108 @@ namespace Builder
 			QString color;
 		};
 
+		std::map<QString, VFrame30::SchemaItemSignal*> itemSignalsMap = logicSchema->getSignalItemsMap();
+
 		std::vector<SchemaSignalInfo> tableContents;
-		{
-			size_t reservedCount = 0;
-			for (const ItemsMapInfo& mapInfo : itemsMaps)
-			{
-				reservedCount += mapInfo.itemsMap.size();
-			}
-			tableContents.reserve(reservedCount);
-		}
+		tableContents.reserve(itemSignalsMap.size());
 
-		for (const ItemsMapInfo& mapInfo : itemsMaps)
+		for (const auto& itemIt : itemSignalsMap)
 		{
-			for (const auto& itemIt : mapInfo.itemsMap)
-			{
-				const QString& signalId = itemIt.first;
-				const VFrame30::SchemaItemSignal* item = itemIt.second;
+			const QString& signalId = itemIt.first;
+			const VFrame30::SchemaItemSignal* item = itemIt.second;
 
-				// Get list of schemas which contain this signal (other schemas)
-				//
-				QStringList otherSchemasIds;
-				QStringList otherSchemasList = detailsSet.schemasByAppSignalId(signalId);
-				for (const QString& otherSchemaId : otherSchemasList)
+			// Get list of schemas which contain this signal (other schemas)
+			//
+			QStringList otherSchemasIds;
+			QStringList otherSchemasList = detailsSet.schemasByAppSignalId(signalId);
+			for (const QString& otherSchemaId : otherSchemasList)
+			{
+				if (otherSchemaId == logicSchema->schemaId())
 				{
-					if (otherSchemaId == logicSchema->schemaId())
-					{
-						continue;	// Skip current schema
-					}
+					continue;	// Skip current schema
+				}
 
-					// Get other schema
+				// Get other schema
+				//
+				const auto& otherSchemaIt = allSchemas.find(otherSchemaId);
+				if (otherSchemaIt == allSchemas.end())
+				{
+					Q_ASSERT(false);
+					continue;
+				}
+
+				const std::shared_ptr<VFrame30::Schema>& otherSchema = otherSchemaIt->second;
+				if (otherSchema == nullptr)
+				{
+					Q_ASSERT(otherSchema);
+					continue;
+				}
+				VFrame30::LogicSchema* otherLogicSchema = otherSchema->toLogicSchema();
+				if (otherLogicSchema == nullptr)
+				{
+					Q_ASSERT(false);
+					return;
+				}
+
+				auto otherItemSignalsMap = otherLogicSchema->getSignalItemsMap();
+
+				auto r = std::find_if(otherItemSignalsMap.begin(), otherItemSignalsMap.end(), [item, signalId](const auto& it)
+				{
+					// Find a signal item on other schema that has opposite type (input vs output)
 					//
-					const auto& otherSchemaIt = allSchemas.find(otherSchemaId);
-					if (otherSchemaIt == allSchemas.end())
-					{
-						Q_ASSERT(false);
-						continue;
-					}
-
-					const std::shared_ptr<VFrame30::Schema>& otherSchema = otherSchemaIt->second;
-					if (otherSchema == nullptr)
-					{
-						Q_ASSERT(otherSchema);
-						continue;
-					}
-					VFrame30::LogicSchema* otherLogicSchema = otherSchema->toLogicSchema();
-					if (otherLogicSchema == nullptr)
-					{
-						Q_ASSERT(false);
-						return;
-					}
-
-					if (mapInfo.isInput == true)
-					{
-						auto ioSet = otherLogicSchema->getInOutSignalsSet();
-						auto oSet = otherLogicSchema->getOutputSignalsSet();
-						if (ioSet.find(signalId) != ioSet.end() || oSet.find(signalId) != oSet.end())
-						{
-							if (otherLogicSchema->excludeFromBuild() == true)
-							{
-								otherSchemasIds.push_back(otherSchemaId + " (excluded)");
-							}
-							else
-							{
-								otherSchemasIds.push_back(otherSchemaId);
-							}
-						}
-					}
-					else
-					{
-						auto iSet = otherLogicSchema->getInputSignalsSet();
-						if (iSet.find(signalId) != iSet.end())
-						{
-							if (otherLogicSchema->excludeFromBuild() == true)
-							{
-								otherSchemasIds.push_back(otherSchemaId + " (excluded)");
-							}
-							else
-							{
-								otherSchemasIds.push_back(otherSchemaId);
-							}
-						}
-					}
-				}
-
-				// Fill signal info
-				//
-
-				SchemaSignalInfo ssi;
-				ssi.input = mapInfo.isInput;
-				ssi.x = item->left();
-				ssi.y = item->top();
-
-
-				bool found = false;
-				AppSignalParam asp = m_appSignalProvider.signalParam(signalId, &found);
-				if (found == true)
+					const QString& otherSignalId = it.first;
+					const VFrame30::SchemaItemSignal* otherItem = it.second;
+					return otherItem->isInputSignalElement() != item->isInputSignalElement() &&
+							otherSignalId == signalId;
+				});
+				if (r != otherItemSignalsMap.end())
 				{
-					ssi.caption = asp.caption();
+						otherSchemasIds.push_back(otherSchemaId + (otherLogicSchema->excludeFromBuild() ? " (excluded)" : QString()));
 				}
-				else
-				{
-					ssi.caption = tr("<font color=\"red\">%1</font>").arg(signalId);
-				}
-
-				ssi.impact = item->impactAppSignalIdList().contains(signalId);
-
-				if (item->textColor() != Qt::black)
-				{
-					ssi.color = item->textColor().name();
-					ssi.signalId = tr("<font color=\"%1\">%2</font>").arg(ssi.color).arg(signalId);
-				}
-				else
-				{
-					ssi.signalId = signalId;
-				}
-
-				if (otherSchemasIds.empty() == false)
-				{
-					ssi.schemasList = otherSchemasIds.join(", ");
-				}
-				else
-				{
-					ssi.schemasList = mapInfo.endpointText;
-				}
-
-				tableContents.push_back(ssi);
 			}
+
+			// Fill signal info
+			//
+
+			SchemaSignalInfo ssi;
+			ssi.input = item->isInputSignalElement();
+			ssi.commented = item->commented();
+			ssi.x = item->left();
+			ssi.y = item->top();
+
+			bool found = false;
+			AppSignalParam asp = m_appSignalProvider.signalParam(signalId, &found);
+			if (found == true)
+			{
+				ssi.caption = asp.caption();
+			}
+			else
+			{
+				ssi.caption = tr("<font color=\"red\">%1</font>").arg(signalId);
+			}
+
+			ssi.impact = item->impactAppSignalIdList().contains(signalId);
+
+			if (item->textColor() != Qt::black)
+			{
+				ssi.color = item->textColor().name();
+				ssi.signalId = tr("<font color=\"%1\">%2</font>").arg(ssi.color).arg(signalId);
+			}
+			else
+			{
+				ssi.signalId = signalId;
+			}
+
+			if (otherSchemasIds.empty() == false)
+			{
+				ssi.schemasList = otherSchemasIds.join(", ");
+			}
+			else
+			{
+				ssi.schemasList = ssi.input ? tr("Start Point") : tr("End Point");
+			}
+
+			tableContents.push_back(ssi);
 		}
 
 		// Sort signals: input first, then sort by x coordinate, then sort by y coordinate
@@ -1059,17 +1026,14 @@ namespace Builder
 			{
 				return a.input > b.input;
 			}
-
 			if (a.x != b.x)
 			{
 				return a.x < b.x;
 			}
-
 			if (a.y != b.y)
 			{
 				return a.y < b.y;
 			}
-
 			return a.signalId < b.signalId;
 		}
 		);
@@ -1087,6 +1051,10 @@ namespace Builder
 			{
 				typeStr += tr(", Impact");
 			}
+			if (ssi.commented == true)
+			{
+				typeStr += tr(", Commented");
+			}
 			l.push_back(typeStr);
 
 			l.push_back(ssi.schemasList);
@@ -1095,11 +1063,175 @@ namespace Builder
 
 		if (table->rowCount() > 0)
 		{
-			section->addText(tr("Schema '%1 - %2' signals").arg(logicSchema->schemaId()).arg(logicSchema->caption()),
+			section->addText(tr("Schema '%1 - %2' Signals").arg(logicSchema->schemaId()).arg(logicSchema->caption()),
 										  {m_normalFont, Qt::AlignHCenter});
 			section->addTable(table);
 		}
 	}
+
+	void SchemasReportGenerator::createLogicSchemaLoopbacksDetails(const std::shared_ptr<ReportLib::ReportSection> section,
+										   const VFrame30::LogicSchema* logicSchema,
+										   const std::map<QString, std::shared_ptr<VFrame30::Schema>>& allSchemas,
+										   const VFrame30::SchemaDetailsSet& detailsSet)
+	{
+
+		auto table = ReportTable::create({m_tableFont,
+										  {tr("Loopback ID"), tr("Type"), tr("Schemas")},
+										  {30, 20, 50},
+										  Qt::AlignLeft});
+		table->setHtmlEscaped(false);
+
+		// Get list of signals for current schema
+		//
+
+		std::map<QString, VFrame30::SchemaItemLoopback*> loopbacksMap = logicSchema->getLoopbacksMap();
+
+		struct SchemaLoopbackInfo
+		{
+			bool source = true;
+			bool commented = false;
+			double x = 0;
+			double y = 0;
+			QString loopbackId;
+			QString schemasList;
+			QString color;
+		};
+
+		std::vector<SchemaLoopbackInfo> tableContents;
+		tableContents.reserve(loopbacksMap.size());
+
+		for (const auto& itemIt : loopbacksMap)
+		{
+			const QString& loopbackId = itemIt.first;
+			const VFrame30::SchemaItemLoopback* loopbackItem = itemIt.second;
+
+			// Get list of schemas which contain this loopbackId (other schemas)
+			//
+			QStringList otherSchemasIds;
+			QStringList otherSchemasList = detailsSet.schemasByLoopbackId(loopbackId);
+
+			for (const QString& otherSchemaId : otherSchemasList)
+			{
+				if (otherSchemaId == logicSchema->schemaId())
+				{
+					continue;	// Skip current schema
+				}
+
+				// Get other schema
+				//
+				const auto& otherSchemaIt = allSchemas.find(otherSchemaId);
+				if (otherSchemaIt == allSchemas.end())
+				{
+					Q_ASSERT(false);
+					continue;
+				}
+
+				const std::shared_ptr<VFrame30::Schema>& otherSchema = otherSchemaIt->second;
+				if (otherSchema == nullptr)
+				{
+					Q_ASSERT(otherSchema);
+					continue;
+				}
+				VFrame30::LogicSchema* otherLogicSchema = otherSchema->toLogicSchema();
+				if (otherLogicSchema == nullptr)
+				{
+					Q_ASSERT(false);
+					return;
+				}
+
+				auto otherLoopbackSet = otherLogicSchema->getLoopbacksMap();
+
+				auto r = std::find_if(otherLoopbackSet.begin(), otherLoopbackSet.end(), [loopbackItem, loopbackId](const auto& it)
+				{
+					// Find a loopback on other schema that has opposite type
+					//
+					const VFrame30::SchemaItemLoopback* item = it.second;
+					return loopbackItem->isLoopbackSourceElement() != item->isLoopbackSourceElement() &&
+							item->loopbackId() == loopbackId;
+				});
+				if (r != otherLoopbackSet.end())
+				{
+					otherSchemasIds.push_back(otherSchemaId + (otherLogicSchema->excludeFromBuild() == true ? " (excluded)" :QString()));
+				}
+			}
+
+			// Fill loopback info
+			//
+
+			SchemaLoopbackInfo ssi;
+			ssi.source = loopbackItem->isLoopbackSourceElement();
+			ssi.commented = loopbackItem->commented();
+			ssi.x = loopbackItem->left();
+			ssi.y = loopbackItem->top();
+
+			if (loopbackItem->textColor() != Qt::black)
+			{
+				ssi.color = loopbackItem->textColor().name();
+				ssi.loopbackId = tr("<font color=\"%1\">%2</font>").arg(ssi.color).arg(loopbackId);
+			}
+			else
+			{
+				ssi.loopbackId = loopbackId;
+			}
+
+			if (otherSchemasIds.empty() == false)
+			{
+				ssi.schemasList = otherSchemasIds.join(", ");
+			}
+			else
+			{
+				ssi.schemasList = tr("This Schema Only");
+			}
+
+			tableContents.push_back(ssi);
+		}
+
+		// Sort signals: input first, then sort by x coordinate, then sort by y coordinate
+		//
+		std::sort(tableContents.begin(), tableContents.end(), [](const SchemaLoopbackInfo& a, const SchemaLoopbackInfo& b)->bool
+		{
+			if (a.source != b.source)
+			{
+				return a.source > b.source;
+			}
+			if (a.x != b.x)
+			{
+				return a.x < b.x;
+			}
+			if (a.y != b.y)
+			{
+				return a.y < b.y;
+			}
+			return a.loopbackId < b.loopbackId;
+		}
+		);
+
+		// Output data to a table
+		//
+		for (const SchemaLoopbackInfo& ssi : tableContents)
+		{
+			QStringList l;
+			l.push_back(ssi.loopbackId);
+
+			QString typeStr = ssi.source ? tr("Source") : tr("Target");
+			if (ssi.commented == true)
+			{
+				typeStr += tr(", Commented");
+			}
+			l.push_back(typeStr);
+
+			l.push_back(ssi.schemasList);
+			table->insertRow(l);
+		}
+
+		if (table->rowCount() > 0)
+		{
+			section->addText(tr("\n\nSchema '%1 - %2' Loopbacks").arg(logicSchema->schemaId()).arg(logicSchema->caption()),
+										  {m_normalFont, Qt::AlignHCenter});
+			section->addTable(table);
+		}
+	}
+
 
 
 }

@@ -2,6 +2,7 @@
 
 #include "Schema.h"
 #include "SchemaItemSignal.h"
+#include "SchemaItemLoopback.h"
 
 namespace VFrame30
 {
@@ -26,17 +27,10 @@ namespace VFrame30
 		virtual void Draw(CDrawParam* drawParam, const QRectF& clipRect) override;
 
 	public:
-		std::map<QString, SchemaItemSignal*> getInputItemsMap() const;
-		std::map<QString, SchemaItemSignal*> getInOutItemsMap() const;
-		std::map<QString, SchemaItemSignal*> getOutputItemsMap() const;
+		std::map<QString, SchemaItemSignal*> getSignalItemsMap() const; // Get the map of SchemaItemSignal* items, key is signal ID
+		std::map<QString, SchemaItemLoopback*> getLoopbacksMap() const;	 // Get the map of SchemaItemLoopback* items, key is loopback ID
 
-
-		std::set<QString> getInputSignalsSet() const;
-		std::set<QString> getInOutSignalsSet() const;
-		std::set<QString> getOutputSignalsSet() const;
-
-
-		std::set<QString> getSignalMap() const;
+		std::set<QString> getSignalSet() const;
 		virtual QStringList getSignalList() const override;
 
 		// Properties
@@ -56,13 +50,6 @@ namespace VFrame30
 
 		QString lmDescriptionFile() const;
 		void setLmDescriptionFile(QString value);
-
-	private:
-		template <typename SchemaItemSignalType>
-		std::map<QString, SchemaItemSignal*> getSignalItemsMap() const;	// Key is signalID, value is ItemType SchemaItemSignal-derived element
-
-		template <typename SchemaItemSignalType>
-		std::set<QString> getSignalItemsSignals() const;
 
 		// Data
 		//
