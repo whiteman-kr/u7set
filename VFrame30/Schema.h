@@ -445,6 +445,7 @@ namespace VFrame30
 		std::shared_ptr<SchemaDetails> schemaDetails(int index) const;
 
 		QStringList schemasByAppSignalId(const QString& appSignalId) const;
+		QStringList schemasByConnectionId(const QString& connectionId) const;
 		QStringList schemasByLoopbackId(const QString& loopbackId) const;
 
 		int schemaCount() const;

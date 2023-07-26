@@ -5,6 +5,10 @@
 #include "../ReportLib/ReportPrinter.h"
 #include "../DbLib/DbController.h"
 
+#include "../VFrame30/SchemaItemSignal.h"
+#include "../VFrame30/SchemaItemConnection.h"
+#include "../VFrame30/SchemaItemLoopback.h"
+
 namespace Builder
 {
 	//
@@ -49,6 +53,68 @@ namespace Builder
 		QPageLayout m_pageLayout;
 	};
 
+	//
+	// SchemaSignalInfo
+	//
+	struct SchemaSignalInfo
+	{
+		SchemaSignalInfo(const VFrame30::FblItemRect* item, const QString& appSignalId, const QStringList& otherSchemasIds, IAppSignalManager& appSignals);
+		QStringList toStringList() const;
+
+		static bool less(const SchemaSignalInfo& a, const SchemaSignalInfo& b);
+
+	private:
+		bool input = true;
+		bool commented = false;
+		bool impact = false;
+		bool received = false;	// Signal comes from receiver
+		double x = 0;
+		double y = 0;
+		QString signalId;
+		QString caption;
+		QString schemasList;
+		QString color;
+	};
+
+	//
+	// SchemaLoopbackInfo
+	//
+	struct SchemaLoopbackInfo
+	{
+		SchemaLoopbackInfo(const VFrame30::SchemaItemLoopback* loopbackItem, const QStringList& otherSchemasIds);
+		QStringList toStringList() const;
+
+		static bool less(const SchemaLoopbackInfo& a, const SchemaLoopbackInfo& b);
+
+	private:
+		bool source = true;
+		bool commented = false;
+		double x = 0;
+		double y = 0;
+		QString loopbackId;
+		QString schemasList;
+		QString color;
+	};
+
+	//
+	// SchemaLoopbackInfo
+	//
+	struct SchemaConnectionInfo
+	{
+		SchemaConnectionInfo(const VFrame30::SchemaItemConnection* connectionItem, const QString& connectionId, const QStringList& otherSchemasIds);
+		QStringList toStringList() const;
+
+		static bool less(const SchemaConnectionInfo& a, const SchemaConnectionInfo& b);
+
+	private:
+		bool transmitter = true;
+		bool commented = false;
+		double x = 0;
+		double y = 0;
+		QString connectionId;
+		QString schemasList;
+		QString color;
+	};
 
 	// SchemasReportGenerator
 	//
@@ -151,6 +217,11 @@ namespace Builder
 											   const VFrame30::LogicSchema* logicSchema,
 											   const std::map<QString, std::shared_ptr<VFrame30::Schema>>& allSchemas,
 											   const VFrame30::SchemaDetailsSet& detailsSet);
+
+		void createLogicSchemaConnectionsDetails(const std::shared_ptr<ReportLib::ReportSection> section,
+												 const VFrame30::LogicSchema* logicSchema,
+												 const std::map<QString, std::shared_ptr<VFrame30::Schema>>& allSchemas,
+												 const VFrame30::SchemaDetailsSet& detailsSet);
 
 	private:
 		DbController m_db;

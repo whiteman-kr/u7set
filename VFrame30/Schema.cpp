@@ -2766,6 +2766,24 @@ namespace VFrame30
 		return result;
 	}
 
+	QStringList SchemaDetailsSet::schemasByConnectionId(const QString& connectionId) const
+	{
+		QStringList result;
+		result.reserve(16);
+
+		for (const auto&[schemaId, schemaDetails] : m_details)
+		{
+			Q_ASSERT(schemaDetails);
+
+			if (schemaDetails->hasConnection(connectionId) == true)
+			{
+				result.push_back(schemaId);
+			}
+		}
+
+		return result;
+	}
+
 	QStringList SchemaDetailsSet::schemasByLoopbackId(const QString& loopbackId) const
 	{
 		QStringList result;

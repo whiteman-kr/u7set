@@ -230,6 +230,34 @@ namespace VFrame30
 		return result;
 	}
 
+	std::map<QString, SchemaItemReceiver*> LogicSchema::getSignalReceiversMap() const
+	{
+		std::map<QString, SchemaItemReceiver*> result;
+
+		for (const auto& layer : layers())
+		{
+			if (layer->compile() == true)
+			{
+				// Get all signals
+				//
+				for (const auto& item : layer->items())
+				{
+					if (VFrame30::SchemaItemReceiver* itemReceiver = item->toType<SchemaItemReceiver>();
+							itemReceiver != nullptr)
+					{
+						QStringList appSignals = itemReceiver->appSignalIdsAsList();
+						for (const QString& id : appSignals)
+						{
+							result[id] = itemReceiver;
+						}
+					}
+				}
+			}
+		}
+
+		return result;
+	}
+
 	std::map<QString, SchemaItemLoopback*> LogicSchema::getLoopbacksMap() const
 	{
 		std::map<QString, VFrame30::SchemaItemLoopback*> result;
@@ -246,6 +274,58 @@ namespace VFrame30
 							itemLoopback != nullptr)
 					{
 						result[itemLoopback->loopbackId()] = itemLoopback;
+					}
+				}
+			}
+		}
+		return result;
+	}
+
+	std::map<QString, SchemaItemTransmitter*> LogicSchema::getTransmittersMap() const
+	{
+		std::map<QString, VFrame30::SchemaItemTransmitter*> result;
+
+		for (const auto& layer : layers())
+		{
+			if (layer->compile() == true)
+			{
+				// Get all signals
+				//
+				for (const auto& item : layer->items())
+				{
+					if (VFrame30::SchemaItemTransmitter* itemTransmitter = item->toType<SchemaItemTransmitter>();
+							itemTransmitter != nullptr)
+					{
+						for (const QString& c : itemTransmitter->connectionIdsAsList())
+						{
+							result[c] = itemTransmitter;
+						}
+					}
+				}
+			}
+		}
+		return result;
+	}
+
+	std::map<QString, SchemaItemReceiver*> LogicSchema::getReceiversMap() const
+	{
+		std::map<QString, VFrame30::SchemaItemReceiver*> result;
+
+		for (const auto& layer : layers())
+		{
+			if (layer->compile() == true)
+			{
+				// Get all signals
+				//
+				for (const auto& item : layer->items())
+				{
+					if (VFrame30::SchemaItemReceiver* itemReceiver = item->toType<SchemaItemReceiver>();
+							itemReceiver != nullptr)
+					{
+						for (const QString& c : itemReceiver->connectionIdsAsList())
+						{
+							result[c] = itemReceiver;
+						}
 					}
 				}
 			}
@@ -297,7 +377,7 @@ namespace VFrame30
 					{
 						std::vector<std::shared_ptr<Property>> props = static_cast<const PropertyObject*>(itemUfb)->specificProperties();
 
-						for (auto p : props)
+						for (const auto& p : props)
 						{
 							QString v = p->value().toString();
 							QStringList valueAsList = v.split(QChar::LineFeed, Qt::SkipEmptyParts);
