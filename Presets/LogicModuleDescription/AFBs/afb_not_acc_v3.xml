@@ -1,0 +1,5 @@
+<AFBComponent Caption="NOT" OpCode="254" HasRam="false" ImpVersion="3" VersionOpIndex="-1" MaxInstCount="-1" SimulationFunc="afb_no_simulation">
+    <Pin OpName="i_oprd"		OpIndex ="0"	PinType = "Input"/>
+    <Pin OpName="o_result"		OpIndex ="2"	PinType = "Output"/>
+    <Pin OpName="o_version"		OpIndex ="3"	PinType = "Output"/>
+</AFBComponent>

@@ -128,7 +128,7 @@
       <Pin OpName="o_logic_edi" OpIndex="21" PinType="Output" />
       <Pin OpName="o_version" OpIndex="22" PinType="Output" />
     </AFBComponent>
-    <AFBComponent Caption="NOT" OpCode="2" HasRam="false" ImpVersion="103" VersionOpIndex="3" MaxInstCount="256" SimulationFunc="afb_not_v103">
+    <AFBComponent Caption="NOT" OpCode="254" HasRam="false" ImpVersion="3" VersionOpIndex="-1" MaxInstCount="-1" SimulationFunc="afb_no_simulation">
       <Pin OpName="i_oprd" OpIndex="0" PinType="Input" />
       <Pin OpName="o_result" OpIndex="2" PinType="Output" />
       <Pin OpName="o_version" OpIndex="3" PinType="Output" />
@@ -1125,11 +1125,11 @@
       </CommonScript>
     </AFB>
     
-    <AFB id="#bus_not_v1" Caption="bus_not" Version="1.0002">
+    <AFB id="#bus_not_v1" Caption="bus_not" Version="1.0003">
       <Properties>
         <Description>NOT Block outputs the logical inverse of the input in accordance with control signal.</Description>
         <Category>Bus Logic</Category>
-        <OpCode>2</OpCode>
+        <OpCode>254</OpCode>
         <InternalUse>false</InternalUse>
         <MinWidth>19</MinWidth>
       </Properties>
@@ -1146,11 +1146,11 @@
         <AfterCreation />
       </CommonScript>
     </AFB>
-    <AFB id="#not_v1" Caption="not" Version="1.0006">
+    <AFB id="#not_v1" Caption="not" Version="1.0007">
       <Properties>
         <Description>NOT Block outputs the logical inverse of the input in accordance with control signal.</Description>
         <Category>Logic</Category>
-        <OpCode>2</OpCode>
+        <OpCode>254</OpCode>
         <InternalUse>false</InternalUse>
         <MinWidth>14</MinWidth>
       </Properties>

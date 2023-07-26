@@ -1,6 +1,6 @@
 <root>
 	<inst_count id="LOGIC" MaxInstCount="256" />
-	<inst_count id="NOT" MaxInstCount="256" />
+	<inst_count id="NOT" MaxInstCount="-1" />
 	<inst_count id="TCT" MaxInstCount="1024" />
 	<inst_count id="FLIP_FLOP" MaxInstCount="256" />
 	<inst_count id="CTUD" MaxInstCount="256" />
