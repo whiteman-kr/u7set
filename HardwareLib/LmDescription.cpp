@@ -209,6 +209,7 @@ LmDescription& LmDescription::operator=(const LmDescription& src)
 	//
 	m_commands = src.m_commands;
 	m_logicUnitCommandsVersion = src.m_logicUnitCommandsVersion;
+	m_bitAccAvailable = src.m_bitAccAvailable;
 
 	// AFBs
 	//
@@ -1569,6 +1570,45 @@ std::vector<LmCommand> LmDescription::commandsAsVector() const
 int LmDescription::logicUnitCommandsVersion() const
 {
 	return m_logicUnitCommandsVersion;
+}
+
+bool LmDescription::isCommandsAvailable(const std::vector<LmCommandCode>& commandsCodes) const
+{
+	for(const LmCommandCode cmd : commandsCodes)
+	{
+		if (commandPtr(cmd) == nullptr)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool LmDescription::isBitAccAvailable() const
+{
+	if (m_bitAccAvailable.has_value() == false)
+	{
+		static const std::vector<LmCommandCode> bitAccCommands =
+		{
+			LmCommand::RESET,
+			LmCommand::SET,
+			LmCommand::OR,
+			LmCommand::AND,
+			LmCommand::NOT,
+			LmCommand::LSHIFT0,
+			LmCommand::LSHIFT1,
+			LmCommand::MOV_ADDR_ACC,
+			LmCommand::MOV_ACC_ADDR,
+			LmCommand::MOVC_ACC,
+			LmCommand::MOVB_ACC_ADDR,
+			LmCommand::MOVB_ADDR_ACC,
+		};
+
+		m_bitAccAvailable = isCommandsAvailable(bitAccCommands);
+	}
+
+	return m_bitAccAvailable.value();
 }
 
 

@@ -540,6 +540,7 @@ namespace Builder
 
 		bool isConst() const { return m_isConst; }
 		E::SignalType constType() const;
+		bool isConstDiscrete() const { return m_isConst && constType() == E::SignalType::Discrete; }
 		E::AnalogAppSignalFormat constAnalogFormat() const;
 		int constDiscreteValue() const;
 		int constAnalogIntValue() const;

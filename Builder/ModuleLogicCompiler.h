@@ -210,6 +210,7 @@ namespace Builder
 
 		int bitAccumulatorAddress() const;
 		int wordAccumulatorAddress() const;
+		Address16 wordAccumulatorAddress16() const;
 		int wordAccumulator2Address() const;
 
 		Address16 constBit0Addr() const { return m_memoryMap.constBit0Addr(); }
@@ -541,6 +542,20 @@ namespace Builder
 		bool generateAfbBusOutputToBusSignalCode(CodeSnippet* code, const UalAfb* ualAfb,
 												 const LogicAfbSignal& outAfbSignal, const UalSignal* outUalSignal,
 												 const BusProcessingStepInfo& bpStepInfo);
+
+		bool generateAfbBitAccCode(CodeSnippet* code, const UalAfb* ualAfb,
+									const BusProcessingStepInfo& bpStepInfo, bool* result);
+
+		bool generateAfbBitAccNotCode(CodeSnippet* code, const UalAfb* ualAfb,
+										const BusProcessingStepInfo& bpStepInfo, bool* result);
+
+		bool generateAfbBitAcc1NotCode(	CodeSnippet* code, const UalAfb* ualAfb,
+										UalSignal* inSignal, UalSignal* outSignal,
+										bool* result);
+
+		bool generateAfbBitAccBusNotCode(CodeSnippet* code, const UalAfb* ualAfb,
+										 const BusProcessingStepInfo& bpStepInfo,
+										 UalSignal* inSignal, UalSignal* outSignal, bool* result);
 
 		bool calcBusProcessingSteps(const UalAfb* ualAfb, std::vector<int>* busProcessingStepsSizes);
 		bool getPinsAndSignalsBusSizes(const UalAfb* ualAfb, const std::vector<LogicPin>& pins,
@@ -885,6 +900,8 @@ namespace Builder
 		int m_lmSubsystemKey = 0;
 		int m_lmNumber = 0;
 		int m_lmChannel = 0;
+
+		bool m_bitAccAvailable = false;
 
 		quint64 m_appLogicUniqueID = 0;
 

@@ -739,6 +739,11 @@ namespace Afb
 	inline const QString PARAM_I_CONF("i_conf");
 	inline const QString PARAM_I_DATA_X1("i_data_x1");
 	inline const QString PARAM_I_DATA_X2("i_data_x2");
+
+	inline const QString AFB_NOT("not");
+	inline const QString AFB_BUS_NOT("bus_not");
+	inline const QString AFB_OR("or");
+	inline const QString AFB_AND("and");
 }
 
 namespace LmDescriptionName

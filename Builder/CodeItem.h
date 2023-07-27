@@ -242,7 +242,7 @@ namespace Builder
 		CodeItem& setAcc();
 		CodeItem& orAcc();
 		CodeItem& andAcc();
-		CodeItem& notAcc();
+		CodeItem& notAcc(const QString& comment = Separator::EMPTY_STR);
 		CodeItem& lshift0Acc();
 		CodeItem& lshift1Acc();
 

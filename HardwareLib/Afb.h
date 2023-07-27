@@ -182,6 +182,8 @@ namespace Afb
 		Last = PULSE_GEN,				// update on adding new AFBs !!!
 	};
 
+	inline const int AFB_NOT_ACC_OPCODE = 254;		// bit ACC based NOT opcode
+
 	//
 	// AfbSignal
 	//

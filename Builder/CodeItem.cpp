@@ -1095,11 +1095,12 @@ namespace Builder
 		return *this;
 	}
 
-	CodeItem& CodeItem::notAcc()
+	CodeItem& CodeItem::notAcc(const QString& comment)
 	{
 		initCommand();
 		m_result = true;
 		m_lmCmdCode = LmCommand::NOT;
+		setComment(comment);
 		return *this;
 	}
 

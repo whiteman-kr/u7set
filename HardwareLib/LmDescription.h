@@ -51,23 +51,16 @@ struct LmCommand
 	bool loadFromXml(const QDomElement& element, QString* errorMessage);
 
 public:
+
+	// Logic Unit Version 2 commands
+	//
 	static const LmCommandCode NO_COMMAND		= 0x0000;
 	static const LmCommandCode NOP				= 0x0040;
-	static const LmCommandCode RESET			= 0x0060;
-	static const LmCommandCode SET				= 0x0050;
-	static const LmCommandCode OR				= 0x0070;
-	static const LmCommandCode AND				= 0x0048;
-	static const LmCommandCode NOT				= 0x0068;
-	static const LmCommandCode LSHIFT0			= 0x0058;
-	static const LmCommandCode LSHIFT1			= 0x0078;
 	static const LmCommandCode STARTAFB			= 0x0080;
 	static const LmCommandCode STOP				= 0x00C0;
 	static const LmCommandCode MOV				= 0x0100;
-	static const LmCommandCode MOV_ADDR_ACC		= 0x0120;
-	static const LmCommandCode MOV_ACC_ADDR		= 0x0110;
 	static const LmCommandCode MOVMEM			= 0x0140;
 	static const LmCommandCode MOVC				= 0x0180;
-	static const LmCommandCode MOVC_ACC			= 0x01A0;
 	static const LmCommandCode MOVBC			= 0x01C0;
 	static const LmCommandCode WRFB				= 0x0200;
 	static const LmCommandCode RDFB				= 0x0240;
@@ -77,8 +70,6 @@ public:
 	static const LmCommandCode RDFBCMP			= 0x0340;
 	static const LmCommandCode SETMEM			= 0x0380;
 	static const LmCommandCode MOVB				= 0x03C0;
-	static const LmCommandCode MOVB_ACC_ADDR	= 0x03E0;
-	static const LmCommandCode MOVB_ADDR_ACC	= 0x03D0;
 	static const LmCommandCode NSTART			= 0x0400;
 	static const LmCommandCode APPSTART			= 0x0440;
 	static const LmCommandCode MOV32			= 0x0480;
@@ -91,6 +82,21 @@ public:
 	static const LmCommandCode PMOV				= 0x0640;
 	static const LmCommandCode PMOV32			= 0x0680;
 	static const LmCommandCode FILLB			= 0x06C0;
+
+	// Logic Unit Version 3 additional commands
+	//
+	static const LmCommandCode RESET			= 0x0060;
+	static const LmCommandCode SET				= 0x0050;
+	static const LmCommandCode OR				= 0x0070;
+	static const LmCommandCode AND				= 0x0048;
+	static const LmCommandCode NOT				= 0x0068;
+	static const LmCommandCode LSHIFT0			= 0x0058;
+	static const LmCommandCode LSHIFT1			= 0x0078;
+	static const LmCommandCode MOV_ADDR_ACC		= 0x0120;
+	static const LmCommandCode MOV_ACC_ADDR		= 0x0110;
+	static const LmCommandCode MOVC_ACC			= 0x01A0;
+	static const LmCommandCode MOVB_ACC_ADDR	= 0x03E0;
+	static const LmCommandCode MOVB_ADDR_ACC	= 0x03D0;
 };
 
 class LmDescription : public QObject
@@ -304,6 +310,8 @@ public:
 	const std::map<int, LmCommand>& commands() const;
 	std::vector<LmCommand> commandsAsVector() const;
 	int logicUnitCommandsVersion() const;
+	bool isCommandsAvailable(const std::vector<LmCommandCode>& commandsCodes) const;
+	bool isBitAccAvailable() const;
 
 	// Data
 	//
@@ -326,6 +334,8 @@ private:
 	//
 	std::map<int, LmCommand> m_commands;		// Key is command.code
 	int m_logicUnitCommandsVersion = 0;
+
+	mutable std::optional<bool> m_bitAccAvailable;
 
 	// AFBs
 	//

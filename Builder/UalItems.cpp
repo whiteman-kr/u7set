@@ -158,14 +158,21 @@ namespace Builder
 
 			instance = m_fblInstance[opCode];
 
-			instance++;
-
-			if (instance >= maxInstances)
+			if (maxInstances > 0)
 			{
-				// Max instances (%1) of AFB component '%2' is used (Logic schema %3, item %4)
-				//
-				log->errALC5130(maxInstances, ualAfb->componentCaption(), ualAfb->guid(), ualAfb->schemaID(), ualAfb->label());
-				return false;
+				instance++;
+
+				if (instance >= maxInstances)
+				{
+					// Max instances (%1) of AFB component '%2' is used (Logic schema %3, item %4)
+					//
+					log->errALC5130(maxInstances, ualAfb->componentCaption(), ualAfb->guid(), ualAfb->schemaID(), ualAfb->label());
+					return false;
+				}
+			}
+			else
+			{
+				instance = 0;
 			}
 
 			m_fblInstance[opCode] = instance;

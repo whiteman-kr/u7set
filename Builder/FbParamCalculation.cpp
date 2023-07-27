@@ -45,7 +45,8 @@ namespace Builder
 			return true;
 		}
 
-		if (isSetFlagsItem() == true)
+		if (isSetFlagsItem() == true ||
+			afb().opCode() == Afb::AFB_NOT_ACC_OPCODE)
 		{
 			return true;			// no parameters processing required
 		}
