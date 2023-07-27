@@ -19,9 +19,9 @@ DialogSettings::DialogSettings(const ClientLib::ClientTranslator& translator, QW
 
 	// Fill zoom mode combo
 	//
-	ui->zoomModeComboBox->addItem("Manual", QVariant{static_cast<int>(VFrame30::ZoomMode::Manual)});
-	ui->zoomModeComboBox->addItem("Always 100%", QVariant{static_cast<int>(VFrame30::ZoomMode::Always100Percent)});
-	ui->zoomModeComboBox->addItem("FitToScreen", QVariant{static_cast<int>(VFrame30::ZoomMode::FitToScreen)});
+	ui->zoomModeComboBox->addItem(tr("Manual"), QVariant{static_cast<int>(VFrame30::ZoomMode::Manual)});
+	ui->zoomModeComboBox->addItem(tr("Always 100%"), QVariant{static_cast<int>(VFrame30::ZoomMode::Always100Percent)});
+	ui->zoomModeComboBox->addItem(tr("FitToScreen"), QVariant{static_cast<int>(VFrame30::ZoomMode::FitToScreen)});
 
 	// Fill Languages List
 	//
