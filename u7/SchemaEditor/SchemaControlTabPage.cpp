@@ -1528,7 +1528,12 @@ void SchemaFileView::createActions()
 
 	m_exportToPdfAction = new QAction(tr("Export to PDF..."), parent());
 	m_exportToPdfAction->setStatusTip(tr("Export selected schemas to PDF files"));
+	m_exportToPdfAction->setIcon(QIcon(":/Images/Images/SchemaToPdf.svg"));
 	m_exportToPdfAction->setEnabled(false);
+
+	m_exportToAlbumAction = new QAction(tr("Create Schemas Albums..."), parent());
+	m_exportToAlbumAction->setStatusTip(tr("Create Schemas Albums in PDF format"));
+	m_exportToAlbumAction->setIcon(QIcon(":/Images/Images/SchemaToAlbum.svg"));
 
 	// --
 	//
@@ -2112,6 +2117,7 @@ SchemaControlTabPage::SchemaControlTabPage(DbController* db, AppSignalSetProvide
 	connect(m_filesView->m_importWorkingcopyAction, &QAction::triggered, this, &SchemaControlTabPage::importWorkcopy);
 
 	connect(m_filesView->m_exportToPdfAction, &QAction::triggered, this, &SchemaControlTabPage::exportToPdf);
+	connect(m_filesView->m_exportToAlbumAction, &QAction::triggered, this, &SchemaControlTabPage::exportToAlbum);
 
 	connect(m_filesView->m_propertiesAction, &QAction::triggered, this, &SchemaControlTabPage::showFileProperties);
 
@@ -2329,6 +2335,10 @@ void SchemaControlTabPage::createToolBar()
 	m_toolBar->addAction(m_filesView->m_refreshFileAction);
 	m_toolBar->addAction(m_filesView->m_behaviorAction);
 	m_toolBar->addAction(m_filesView->m_propertiesAction);
+
+	m_toolBar->addSeparator();
+	m_toolBar->addAction(m_filesView->m_exportToPdfAction);
+	m_toolBar->addAction(m_filesView->m_exportToAlbumAction);
 
 	//m_toolBar->addSeparator();
 
@@ -4378,8 +4388,8 @@ void SchemaControlTabPage::exportToPdf()
 		storedOptions.load(db());
 
 		DialogSchemasExport d(storedOptions,
-							  QSettings{}.value("SchemeEditor/Export/AlbumFilePath", QDir::currentPath()).toString(),
-							  QSettings{}.value("SchemeEditor/Export/AlbumFileName", "Schemas.pdf").toString(),
+							  QSettings{}.value("SchemaEditor/Export/SchemaPdfPath", QDir().toNativeSeparators(QDir::currentPath())).toString(),
+							  QSettings{}.value("SchemaEditor/Export/SchemaPdfFile", "Schemas.pdf").toString(),
 							  this);
 		if (d.exec() != QDialog::Accepted)
 		{
@@ -4393,12 +4403,12 @@ void SchemaControlTabPage::exportToPdf()
 		{
 			singleFile = true;
 			singleFileName = d.fileName();
-			QSettings{}.setValue("SchemeEditor/Export/AlbumFileName", singleFileName);
+			QSettings{}.setValue("SchemaEditor/Export/SchemaPdfFile", singleFileName);
 		}
 		else
 		{
 			pathName = d.pathName();
-			QSettings{}.setValue("SchemeEditor/Export/AlbumFilePath", pathName);
+			QSettings{}.setValue("SchemaEditor/Export/SchemaPdfPath", pathName);
 		}
 	}
 
@@ -4423,6 +4433,12 @@ void SchemaControlTabPage::exportToPdf()
 		r.exportSchemasToMultiplePdf(pathName, files);
 	}
 
+	return;
+}
+
+void SchemaControlTabPage::exportToAlbum()
+{
+	SchemasAlbumGenerator::createSchemasAlbums(db(), &m_signalSetProvider->signalSet(), this);
 	return;
 }
 

@@ -92,6 +92,8 @@
         <file>Images/ZoomOut.svg</file>
         <file>Images/SchemaList.svg</file>
         <file>Images/LocatorFind.svg</file>
+        <file>Images/SchemaToAlbum.svg</file>
+        <file>Images/SchemaToPdf.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>ScriptHelp/scripthelp.html</file>

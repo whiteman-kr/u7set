@@ -1277,9 +1277,9 @@ namespace Builder
 	{
 		SchemasReportOptions options;
 		options.load(&m_context->m_db);
-		options.addPageNumbers = true;
+		options.footers = true;
 
-		std::shared_ptr<ReportLib::ReportSchemaView> schemaView = std::make_shared<ReportLib::ReportSchemaView>(options.infoMode);
+		std::shared_ptr<ReportLib::ReportSchemaView> schemaView = std::make_shared<ReportLib::ReportSchemaView>(options.itemsLabels);
 
 		const OnlineLib::BuildInfo& bi = m_context->m_buildResultWriter->buildInfo();
 		schemaView->session().setProject(bi.project);

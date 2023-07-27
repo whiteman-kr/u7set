@@ -1,3 +1,4 @@
+#include "Report.h"
 #include "ReportObject.h"
 
 namespace ReportLib
@@ -85,6 +86,45 @@ namespace ReportLib
 
 	}
 
+	//
+	// ReportTagStorage
+	//
+
+	ReportTagStorage::ReportTagStorage(const std::map<QString, std::shared_ptr<ReportSection>>& allSections):
+		m_allSections(allSections)
+	{
+	}
+
+	QString ReportTagStorage::processTags(const QString& str) const
+	{
+		QString result{str};
+		while (true)
+		{
+			qsizetype pos = result.indexOf(tagSectionStartPage);
+			if (pos == -1)
+			{
+				break;
+			}
+			qsizetype openPos = result.indexOf('(', pos + 1);
+			qsizetype closePos = result.indexOf(')', pos + 1);
+			if (openPos != -1 && closePos != -1 && openPos < closePos)
+			{
+				QString schemaId = result.mid(openPos + 1, closePos - openPos - 1);
+
+				auto it = m_allSections.find(schemaId);
+				if (it != m_allSections.end())
+				{
+					result.remove(pos, closePos - pos + 1);
+					result.insert(pos, QString::number(it->second->startPage()));
+				}
+			}
+		}
+		return result;
+	}
+
+	//
+	// ReportObject
+	//
     ReportObject::ReportObject(ReportObject::Type type):
 		m_type(type)
 	{
@@ -120,7 +160,7 @@ namespace ReportLib
 
 	}
 
-	void ReportSchema::renderText(QTextCursor& /*cursor*/, double /*fontScaling*/) const
+	void ReportSchema::renderText(QTextCursor& /*cursor*/, double /*fontScaling*/, const ReportTagStorage& /*tagStorage*/) const
 	{
 	}
 
@@ -148,6 +188,16 @@ namespace ReportLib
 	{
         auto result = std::make_shared<ReportTable>(format);
 		return result;
+	}
+
+	bool ReportTable::htmlEscaped() const
+	{
+		return m_htmlEscaped;
+	}
+
+	void ReportTable::setHtmlEscaped(bool value)
+	{
+		m_htmlEscaped = value;
 	}
 
 	int ReportTable::columnCount() const
@@ -197,7 +247,7 @@ namespace ReportLib
 		});
 	}
 
-	void ReportTable::renderText(QTextCursor& cursor, double fontScaling) const
+	void ReportTable::renderText(QTextCursor& cursor, double fontScaling, const ReportTagStorage& tagStorage) const
 	{
 		int cols = columnCount();
 		int rows = rowCount();
@@ -264,6 +314,8 @@ namespace ReportLib
 			int c = 0;
 			for (const QString& str : row)
 			{
+				QString text = tagStorage.processTags(str);
+
 				const TableFormat::ColumnFormat& colFormat = m_format.columnsFormat()[c];
 
 				QString alignStr;
@@ -277,7 +329,10 @@ namespace ReportLib
 					Q_ASSERT(false);
 				}
 
-				html += QObject::tr("<td width=%1% align=%2>%3</td>").arg(colFormat.width).arg(alignStr).arg(str.toHtmlEscaped());
+				html += QObject::tr("<td width=%1% align=%2>%3</td>")
+						.arg(colFormat.width)
+						.arg(alignStr)
+						.arg(htmlEscaped() ? text.toHtmlEscaped() : text);
 
 				if (c++ >= cols)
 				{
@@ -327,7 +382,7 @@ html += "</tr></tfoot";
 		return result;
 	}
 
-	void ReportText::renderText(QTextCursor& cursor, double fontScaling) const
+	void ReportText::renderText(QTextCursor& cursor, double fontScaling, const ReportTagStorage& tagStorage) const
 	{
 
 		QTextCharFormat cf = cursor.charFormat();
@@ -338,6 +393,6 @@ html += "</tr></tfoot";
         bf.setAlignment(m_format.alignment());
         cursor.setBlockFormat(bf);
 
-		cursor.insertText(m_text);
+		cursor.insertText(tagStorage.processTags(m_text));
 	}
 }

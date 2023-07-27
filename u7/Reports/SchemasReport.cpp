@@ -4,9 +4,53 @@
 #include <QPrinter>
 #include "DialogSchemasReport.h"
 #include "../UtilsLib/Ui/UiTools.h"
+#include "Settings.h"
 
 using namespace ReportLib;
 using namespace Builder;
+
+void SchemasAlbumGenerator::createSchemasAlbums(DbController* db, const AppSignalSet* signalSet, QWidget* parent)
+{
+	QString path = QSettings{}.value("SchemaEditor/Export/AlbumPath", QDir().toNativeSeparators(QDir::currentPath())).toString();
+
+	static std::vector<Builder::SchemaTypesParams> schemaTypesParams = {};
+	if (schemaTypesParams.empty() == true)
+	{
+		schemaTypesParams = Builder::SchemasReportGenerator::defaultFileTypesParams(db);
+	}
+
+	Builder::SchemasReportOptions options;
+	options.load(db);
+
+	DialogSchemasReport d(path, schemaTypesParams,
+						  Builder::SchemasReportGenerator::defaultFileTypesParams(db), options, parent);
+	if (d.exec() != QDialog::Accepted)
+	{
+		return;
+	}
+	schemaTypesParams = d.schemaTypesParams();
+
+	options = d.options();
+	path = d.path();
+	options.save(db);
+	QSettings{}.setValue("SchemaEditor/Export/AlbumPath", path);
+
+	options.footers = true;	// When loading and storing options, keep footers true!
+
+	SchemasReportGeneratorThread r(theSettings.serverHost(),
+								   theSettings.serverPort(),
+								   theSettings.serverUsername(),
+								   theSettings.serverPassword(),
+								   db->currentProject().projectName(),
+								   db->currentUser().username(),
+								   db->currentUser().password(),
+								   signalSet,
+								   parent,
+								   options,
+								   schemaTypesParams);
+
+	r.exportAllSchemasToAlbum(path);
+}
 
 //
 // SchemasReportGeneratorThread
@@ -40,17 +84,22 @@ SchemasReportGeneratorThread::SchemasReportGeneratorThread(const QString& server
 
 void SchemasReportGeneratorThread::exportSchemasToMultiplePdf(const QString& pdfPath, const std::vector<DbFileInfo>& files)
 {
+	QDir().mkpath(pdfPath);
 	run(TaskType::ExportFilesToMultiplePdf, pdfPath, files);
 }
 
-void SchemasReportGeneratorThread::exportSchemasToSinglePdf(const QString& albumPath, const std::vector<DbFileInfo>& files)
+void SchemasReportGeneratorThread::exportSchemasToSinglePdf(const QString& fileName, const std::vector<DbFileInfo>& files)
 {
-	run(TaskType::ExportFilesToSinglePdf, albumPath, files);
+	QString pdfPath = QFileInfo(fileName).absolutePath();
+	QDir().mkpath(pdfPath);
+	run(TaskType::ExportFilesToSinglePdf, fileName, files);
 }
 
-void SchemasReportGeneratorThread::exportAllSchemasToAlbum(const QString& albumPath)
+void SchemasReportGeneratorThread::exportAllSchemasToAlbum(const QString& fileName)
 {
-	run(TaskType::ExportAllSchemasToAlbum, albumPath, {});
+	QString pdfPath = QFileInfo(fileName).absolutePath();
+	QDir().mkpath(pdfPath);
+	run(TaskType::ExportAllSchemasToAlbum, fileName, {});
 }
 
 void SchemasReportGeneratorThread::run(TaskType task,
@@ -59,7 +108,7 @@ void SchemasReportGeneratorThread::run(TaskType task,
 {
 	// Create View
 
-	std::shared_ptr<ReportSchemaView> schemaView = std::make_shared<ReportSchemaView>(m_options.infoMode);
+	std::shared_ptr<ReportSchemaView> schemaView = std::make_shared<ReportSchemaView>(m_options.itemsLabels);
 
 	schemaView->session().setProject(m_projectName);
 	schemaView->session().setUsername(m_userName);
