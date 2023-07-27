@@ -6,8 +6,11 @@
 #include <QTextBlockFormat>
 #include <QTextCursor>
 
+
 namespace ReportLib
 {
+	class ReportSection;
+
 	struct ReportFont
 	{
 		QString family;
@@ -92,6 +95,22 @@ namespace ReportLib
 		TextFormat format;
 	};
 
+	class ReportTagStorage
+	{
+
+	public:
+		ReportTagStorage(const std::map<QString, std::shared_ptr<ReportSection> >& allSections);
+
+		QString processTags(const QString& str) const;
+
+	public:
+		// Usage: $PAGE(SECTIONCAPTION), replaces SECTIONCAPTION with section start page
+		static inline QLatin1String tagSectionStartPage{"$PAGE"};
+
+	private:
+		const std::map<QString, std::shared_ptr<ReportSection>>& m_allSections;
+	};
+
 	//
 	// ReportObject
 	//
@@ -106,12 +125,11 @@ namespace ReportLib
 			Schema
 		};
 
-
 		ReportObject(Type type);
 
 		Type type() const;
 
-		virtual void renderText(QTextCursor& cursor, double fontScaling) const = 0;
+		virtual void renderText(QTextCursor& cursor, double fontScaling, const ReportTagStorage& tagStorage) const = 0;
 
 	protected:
 		Type m_type;
@@ -136,7 +154,7 @@ namespace ReportLib
 
 		// Schema functions
 
-		void renderText(QTextCursor& cursor, double fontScaling) const override;
+		void renderText(QTextCursor& cursor, double fontScaling, const ReportTagStorage& tagStorage) const override;
 		std::shared_ptr<VFrame30::Schema> schema() const;
 
 		const std::map<QUuid, ReportSchemaCompareAction>& compareActions() const;
@@ -173,7 +191,7 @@ namespace ReportLib
 
 		void sortByColumn(int column);
 
-		void renderText(QTextCursor& cursor, double fontScaling) const override;
+		void renderText(QTextCursor& cursor, double fontScaling, const ReportTagStorage& tagStorage) const override;
 
 	private:
 		TableFormat m_format;
@@ -191,7 +209,7 @@ namespace ReportLib
 		static std::shared_ptr<ReportText> create(const QString& text, const TextFormat &format);
 		ReportText(const QString& text, const TextFormat& format);
 
-		void renderText(QTextCursor& cursor, double fontScaling) const override;
+		void renderText(QTextCursor& cursor, double fontScaling, const ReportTagStorage& tagStorage) const override;
 
 	private:
 		TextFormat m_format;

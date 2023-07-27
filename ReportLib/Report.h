@@ -25,8 +25,11 @@ namespace ReportLib
 		const QString& tag() const;
 		void setTag(const QString& value);
 
-		QPageLayout pageLayout() const;
+		const QPageLayout& pageLayout() const;
 		void setPageLayout(const QPageLayout& value);
+
+		int startPage() const;
+		void setStartPage(int page);
 
 		// Add object functions
 		//
@@ -48,6 +51,7 @@ namespace ReportLib
 	private:
 		QString m_caption;
 		QString m_tag;	// Text printed in margin with %TAG% text
+		int m_startPage;
 		QPageLayout m_pageLayout = QPageLayout(QPageSize(QPageSize::A4),
 											   QPageLayout::Orientation::Portrait,
 											   QMarginsF(30, 20, 15, 20),

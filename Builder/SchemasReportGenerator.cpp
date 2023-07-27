@@ -116,7 +116,7 @@ namespace Builder
 
 		if (otherSchemasIds.empty() == false)
 		{
-			schemasList = otherSchemasIds.join(", ");
+			schemasList = otherSchemasIds.join("<br>");
 		}
 		else
 		{
@@ -206,7 +206,7 @@ namespace Builder
 
 		if (otherSchemasIds.empty() == false)
 		{
-			schemasList = otherSchemasIds.join(", ");
+			schemasList = otherSchemasIds.join("<br>");
 		}
 		else
 		{
@@ -274,7 +274,7 @@ namespace Builder
 
 		if (otherSchemasIds.empty() == false)
 		{
-			schemasList = otherSchemasIds.join(", ");
+			schemasList = otherSchemasIds.join("<br>");
 		}
 		else
 		{
@@ -474,7 +474,8 @@ namespace Builder
 				m_statistics.m_currentSchemaId = schemaId;
 			}
 
-			std::shared_ptr<Report> report = std::make_shared<Report>(m_projectName, schemaId + ".pdf");
+			std::shared_ptr<Report> report = std::make_shared<Report>(m_projectName,
+																	  filePath() + QDir::separator() + schemaId + ".pdf");
 
 			if (m_options.footers == true)
 			{
@@ -486,8 +487,7 @@ namespace Builder
 			{
 				auto reportSchema = ReportSchema::create(tr("Schema: %1").arg(schema->schemaId()), {}, schema, {});
 				auto pageLayout = getSchemaPageLayout(schema);
-				auto schemaDrawingSection = report->addSection(ReportSection::create(tr("Schema: %1").arg(schema->schemaId()),
-																					 pageLayout));
+				auto schemaDrawingSection = report->addSection(ReportSection::create(schema->schemaId(), pageLayout));
 				schemaDrawingSection->addSchema(reportSchema);
 			}
 
@@ -498,7 +498,7 @@ namespace Builder
 
 			// Print to file
 			//
-			m_printer.print(*report, filePath() + QDir::separator() + schemaId + ".pdf", m_stop);
+			m_printer.print(*report, report->path(), m_stop);
 		}
 
 		emit finished(QString());
@@ -508,6 +508,12 @@ namespace Builder
 
 	void SchemasReportGenerator::exportFilesToSinglePdf()
 	{
+		if (filePath().isEmpty() == true)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
 		VFrame30::SchemaDetailsSet detailsSet;
 		std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas;		// Key is schema ID - schemas to be exported
 
@@ -563,8 +569,7 @@ namespace Builder
 
 				auto reportSchema = ReportSchema::create(tr("Schema: %1").arg(schemaId), {}, schema, {});
 				auto pageLayout = getSchemaPageLayout(schema);
-				auto schemaDrawingSection = report->addSection(ReportSection::create(tr("Schema: %1").arg(schemaId),
-																					 pageLayout));
+				auto schemaDrawingSection = report->addSection(ReportSection::create(schemaId, pageLayout));
 				schemaDrawingSection->setTag(tr("%1 - %2").arg(schema->schemaId()).arg(schema->caption()));
 				schemaDrawingSection->addSchema(reportSchema);
 			}
@@ -575,19 +580,9 @@ namespace Builder
 			m_statistics.m_currentStatus = WorkerStatus::Printing;
 		}
 
-		if (filePath().isEmpty() == false)
-		{
-			// Print to file
-			//
-			m_printer.print(*report, filePath(), m_stop);
-		}
-		else
-		{
-			// Print to buffer
-			//
-			QBuffer buffer(&m_outputData[filePath()]);
-			m_printer.print(*report, buffer, m_stop);
-		}
+		// Print to file
+		//
+		m_printer.print(*report, report->path(), m_stop);
 
 		emit finished(QString());
 
@@ -783,15 +778,22 @@ namespace Builder
 
 				switch(ps.status)
 				{
+				case ReportPrinter::Statistics::Preview:
+					*progressText = tr("Generating preview, section: %1/%2")
+							.arg(ps.sectionIndex)
+							.arg(ps.sectionCount);
+					*progress = ps.sectionIndex;
+					*progressMax = ps.sectionCount;
+				break;
 				case ReportPrinter::Statistics::Rendering:
-					*progressText = tr("Rendering section: %1/%2")
+					*progressText = tr("Rendering report, section: %1/%2")
 							.arg(ps.sectionIndex)
 							.arg(ps.sectionCount);
 					*progress = ps.sectionIndex;
 					*progressMax = ps.sectionCount;
 				break;
 				case ReportPrinter::Statistics::Printing:
-					*progressText = tr("Printing page: %1/%2")
+					*progressText = tr("Printing report, page: %1/%2")
 							.arg(ps.pageIndex)
 							.arg(ps.pagesCount);
 					*progress = ps.pageIndex;
@@ -998,7 +1000,8 @@ namespace Builder
 			m_statistics.m_schemasCount = static_cast<int>(schemas.size());
 		}
 
-		std::shared_ptr<Report> report = std::make_shared<Report>(m_projectName, filePath());
+		std::shared_ptr<Report> report = std::make_shared<Report>(m_projectName,
+																  tr("%1/%2_%3.pdf").arg(filePath()).arg(m_projectName).arg(groupName));
 
 		// Init margins
 		//
@@ -1009,18 +1012,50 @@ namespace Builder
 			report->addMarginItem({"%TAG%", -1, -1, {m_marginFont, Qt::AlignRight | Qt::AlignTop}});
 		}
 
+		// Create table of contents
+		//
 		{
-			// Render schemas
+			auto contentsSection = report->addSection(ReportSection::create("Table of Contents", pageLayout));
+			contentsSection->setTag(groupName);
 
-			for (auto it = schemas.begin(); it != schemas.end(); it++)
+			contentsSection->addText(tr("Table of Contents"), {m_normalFont, Qt::AlignHCenter});
+
+			auto contentsTable = ReportTable::create({m_tableFont,
+													  {tr("Schema ID"), tr("Caption"), tr("Page")},
+													  {30, 50, 20},
+													  Qt::AlignLeft});
+
+			contentsSection->addTable(contentsTable);
+
+
+			for (const auto &[schemaId, schema] : schemas)
 			{
 				if (m_stop == true)
 				{
 					break;
 				}
 
-				const std::shared_ptr<VFrame30::Schema> schema = it->second;
-				const QString& schemaId = schema->schemaId();
+				QStringList l;
+				l.push_back(schemaId);
+				l.push_back(schema->caption());
+				l.push_back(tr("%1(%2)")
+							.arg(ReportTagStorage::tagSectionStartPage)
+							.arg(schemaId));
+
+				contentsTable->insertRow(l);
+
+			}
+		}
+
+		// Render schemas
+		//
+		{
+			for (const auto &[schemaId, schema] : schemas)
+			{
+				if (m_stop == true)
+				{
+					break;
+				}
 
 				{
 					QMutexLocker l(&m_statisticsMutex);
@@ -1030,8 +1065,7 @@ namespace Builder
 
 				auto reportSchema = ReportSchema::create(tr("Schema: %1").arg(schemaId), {}, schema, {});
 
-				auto schemaDrawingSection = report->addSection(ReportSection::create(tr("Schema: %1").arg(schemaId),
-																					 pageLayout));
+				auto schemaDrawingSection = report->addSection(ReportSection::create(schemaId, pageLayout));
 				schemaDrawingSection->setTag(tr("%1 - %2").arg(schema->schemaId()).arg(schema->caption()));
 				schemaDrawingSection->addSchema(reportSchema);
 
@@ -1047,12 +1081,29 @@ namespace Builder
 			m_statistics.m_currentStatus = WorkerStatus::Printing;
 		}
 
-		if (filePath().isEmpty() == false)
+		// Preview the report to calculate page numbers for every section
 		{
-			QString fileName = tr("%1/%2_%3.pdf").arg(filePath()).arg(m_projectName).arg(groupName);
+			std::vector<ReportLib::RenderedSection> renderedSections;
+			if (m_printer.preview(*report, renderedSections, m_stop) == false)
+			{
+				return;
+			}
+
+			int page = 1;
+			for (const ReportLib::RenderedSection& rs : renderedSections)
+			{
+				rs.section()->setStartPage(page);
+				page += rs.pagesCount();
+			}
+		}
+
+		// Print report to PDF
+
+		if (report->path().isEmpty() == false)
+		{
 			// Print to file
 			//
-			m_printer.print(*report, fileName, m_stop);
+			m_printer.print(*report, report->path(), m_stop);
 		}
 		else
 		{
@@ -1114,8 +1165,7 @@ namespace Builder
 			return;
 		}
 
-		auto schemaDetailsSection = ReportSection::create(tr("Schema Details: %1").arg(schema->schemaId()),
-														  pageLayout);
+		auto schemaDetailsSection = ReportSection::create(tr("Schema Details: %1").arg(schema->schemaId()), pageLayout);
 		schemaDetailsSection->setTag(tr("%1 - %2 [Details]").arg(schema->schemaId()).arg(schema->caption()));
 
 		createLogicSchemaIOSignalsDetails(schemaDetailsSection, logicSchema, allSchemas, detailsSet);
@@ -1200,7 +1250,10 @@ namespace Builder
 					});
 					if (r != otherItemSignalsMap.end())
 					{
-						otherSchemasIds.push_back(otherSchemaId + (otherLogicSchema->excludeFromBuild() ? " (excluded)" : QString()));
+						otherSchemasIds.push_back(tr("%1 [p.%2(%1)]%3")
+												  .arg(otherSchemaId)
+												  .arg(ReportTagStorage::tagSectionStartPage)
+												  .arg(otherLogicSchema->excludeFromBuild() ? " (excluded)" : ""));
 					}
 				}
 
@@ -1219,7 +1272,10 @@ namespace Builder
 					});
 					if (r != otherItemSignalSet.end())
 					{
-						otherSchemasIds.push_back(otherSchemaId + (otherLogicSchema->excludeFromBuild() ? " (excluded)" : QString()));
+						otherSchemasIds.push_back(tr("%1 [p.%2(%1)]%3")
+												  .arg(otherSchemaId)
+												  .arg(ReportTagStorage::tagSectionStartPage)
+												  .arg(otherLogicSchema->excludeFromBuild() ? " (excluded)" : ""));
 					}
 				}
 			}
@@ -1335,7 +1391,10 @@ namespace Builder
 				});
 				if (r != otherLoopbackSet.end())
 				{
-					otherSchemasIds.push_back(otherSchemaId + (otherLogicSchema->excludeFromBuild() == true ? " (excluded)" :QString()));
+					otherSchemasIds.push_back(tr("%1 [p.%2(%1)]%3")
+											  .arg(otherSchemaId)
+											  .arg(ReportTagStorage::tagSectionStartPage)
+											  .arg(otherLogicSchema->excludeFromBuild() ? " (excluded)" : ""));
 				}
 			}
 
@@ -1431,7 +1490,10 @@ namespace Builder
 				});
 				if (r != otherReceiversMap.end())
 				{
-					otherSchemasIds.push_back(otherSchemaId + (otherLogicSchema->excludeFromBuild() == true ? " (excluded)" :QString()));
+					otherSchemasIds.push_back(tr("%1 [p.%2(%1)]%3")
+											  .arg(otherSchemaId)
+											  .arg(ReportTagStorage::tagSectionStartPage)
+											  .arg(otherLogicSchema->excludeFromBuild() ? " (excluded)" : ""));
 				}
 			}
 
@@ -1489,7 +1551,10 @@ namespace Builder
 				});
 				if (r != otherTransmittersMap.end())
 				{
-					otherSchemasIds.push_back(otherSchemaId + (otherLogicSchema->excludeFromBuild() == true ? " (excluded)" :QString()));
+					otherSchemasIds.push_back(tr("%1 [p.%2(%1)]%3")
+											  .arg(otherSchemaId)
+											  .arg(ReportTagStorage::tagSectionStartPage)
+											  .arg(otherLogicSchema->excludeFromBuild() ? " (excluded)" : ""));
 				}
 			}
 

@@ -98,6 +98,60 @@ namespace ReportLib
 	};
 
 	//
+	// RenderedSection
+	//
+	struct RenderedSection
+	{
+		RenderedSection(std::shared_ptr<ReportSection> section):
+			m_section(section)
+		{
+		}
+
+		int pagesCount() const
+		{
+			int result = 0;
+			for (const std::shared_ptr<PrintObject>& po : m_printObjects)
+			{
+				result += po->pageCount();
+			}
+			return result;
+		}
+
+		// ReportSection access
+		//
+		std::shared_ptr<ReportSection>& section()
+		{
+			return m_section;
+		}
+		const std::shared_ptr<ReportSection>& section() const
+		{
+			return m_section;
+		}
+
+		// Data access
+		//
+		const QPageLayout& pageLayout() const
+		{
+			return m_section->pageLayout();
+		}
+
+		// Rendered objects access
+		//
+		std::vector<std::shared_ptr<PrintObject>>& printObjects()
+		{
+			return m_printObjects;
+		}
+		const std::vector<std::shared_ptr<PrintObject>>& printObjects() const
+		{
+			return m_printObjects;
+		}
+
+	private:
+		std::shared_ptr<ReportSection> m_section;
+		std::vector<std::shared_ptr<PrintObject>> m_printObjects;
+	};
+
+	//
 	// ReportPrinter
 	//
 
@@ -109,6 +163,7 @@ namespace ReportLib
 			enum Status
 			{
 				None,
+				Preview,
 				Rendering,
 				Printing
 			};
@@ -126,6 +181,8 @@ namespace ReportLib
 		ReportPrinter() = default;	// Call this constructor if you do not need to print schemas
 		ReportPrinter(std::shared_ptr<ReportSchemaView> reportSchemaView); // Call this constructor if your report contains schemas
 
+		bool preview(const Report& report, std::vector<RenderedSection>& renderedSections, std::atomic_bool& stop);
+
 		bool print(const Report& report, const QString& fileName, std::atomic_bool& stop);
 		bool print(const Report& report, QBuffer& buffer, std::atomic_bool& stop);
 
@@ -137,6 +194,9 @@ namespace ReportLib
 							  const QString& tag) const;
 
 	private:
+		[[nodiscard]] bool createRenderedSections(const Report& report, std::vector<RenderedSection>& renderedSections, Statistics::Status status, std::atomic_bool& stop);
+		[[nodiscard]] bool printRenderedSections(const Report& report, const std::vector<RenderedSection>& renderedSections, QBuffer& buffer, std::atomic_bool& stop);
+
 		mutable QMutex m_statisticsMutex;
 		mutable Statistics m_statistics;
 

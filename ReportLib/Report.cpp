@@ -14,7 +14,8 @@ namespace ReportLib
 	}
 
 	ReportSection::ReportSection(const QString& caption):
-		m_caption(caption)
+		m_caption(caption),
+		m_startPage(0)
 	{
 	}
 
@@ -42,7 +43,7 @@ namespace ReportLib
 		m_tag = value;
 	}
 
-	QPageLayout ReportSection::pageLayout() const
+	const QPageLayout& ReportSection::pageLayout() const
 	{
 		return m_pageLayout;
 	}
@@ -50,6 +51,16 @@ namespace ReportLib
 	void ReportSection::setPageLayout(const QPageLayout& value)
 	{
 		m_pageLayout = value;
+	}
+
+	int ReportSection::startPage() const
+	{
+		return m_startPage;
+	}
+
+	void ReportSection::setStartPage(int page)
+	{
+		m_startPage = page;
 	}
 
 	std::shared_ptr<ReportLib::ReportText> ReportSection::addText(const QString& text, const TextFormat& format)
