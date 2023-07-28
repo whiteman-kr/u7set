@@ -30,6 +30,11 @@ namespace TestSuite
 		std::vector<SoftwareEndpoint::TuningService> tuningServices;
 		QByteArray tuningSignalsFile;
 
+		// Security
+		//
+		bool login = false;
+		QStringList userAccounts;
+
 		// Scripts list
 		//
 		QStringList scriptFiles;

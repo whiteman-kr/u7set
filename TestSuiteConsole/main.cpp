@@ -29,9 +29,9 @@ void showHelp()
 	std::cout << "TestSuiteConsole is a command-line tool that performs hardware testing of RPCT projects." << std::endl;
 	std::cout << std::endl << "Command line parameters:" << std::endl;
 #ifdef Q_OS_WINDOWS
-	std::cout << "\tTestSuiteConsole -settings=<FileName.xml> [-scripts_path=<ScriptsPath>] [-tests_filter=<TestsFilter>] [-tests_log=<filename>|default] [-cp=NNNN]- run build task with settings taken from <FileName.xml> file." << std::endl;
+	std::cout << "\tTestSuiteConsole -settings=<FileName.xml> [-scripts_path=<ScriptsPath>] [-tests_filter=<TestsFilter>] [-tests_log=<filename>|default] [-cp=NNNN] [-nosecurity] - run build task with settings taken from <FileName.xml> file." << std::endl;
 #else
-	std::cout << "\tTestSuiteConsole -settings=<FileName.xml> [-scripts_path=<ScriptsPath>] [-tests_filter=<TestsFilter>] [-tests_log=<filename>|default] - run build task with settings taken from <FileName.xml> file." << std::endl;
+	std::cout << "\tTestSuiteConsole -settings=<FileName.xml> [-scripts_path=<ScriptsPath>] [-tests_filter=<TestsFilter>] [-tests_log=<filename>|default]  [-nosecurity] - run build task with settings taken from <FileName.xml> file." << std::endl;
 #endif
 	std::cout << "\t\t\tOptional -scripts_path parameter specifies a directory where test scripts are stored." << std::endl;
 	std::cout << "\t\t\tOptional -tests_filter parameter specifies a filter for running tests. Filter contains test function name" << std::endl;
@@ -44,6 +44,7 @@ void showHelp()
 #ifdef Q_OS_WINDOWS
 	std::cout << "\t\t\tOptional -cp parameter specifies the codepage (for example, 1251)." << std::endl;
 #endif
+	std::cout << "\t\t\tOptional -nosecurity parameter disables requesting username and password if test security control is disabled in the project." << std::endl;
 	std::cout << "or" << std::endl;
 	std::cout << "\tTestSuiteConsole [-create=<FileName.xml>] - create settings template in <FileName.xml> file." << std::endl;
 	std::cout << std::endl;
@@ -180,6 +181,7 @@ struct CommandLineArgs
 	QString codepage;
 	QString testLogFileName;
 	QString reportsPath;
+	bool nosecurity = false;
 };
 
 CommandLineArgs parseCommandLine(const QStringList args)
@@ -234,6 +236,12 @@ CommandLineArgs parseCommandLine(const QStringList args)
 		{
 			result.reportsPath = arg;
 			result.reportsPath.replace("-reports_path=", "", Qt::CaseInsensitive);
+			continue;
+		}
+
+		if (arg.startsWith("-nosecurity", Qt::CaseInsensitive) == true)
+		{
+			result.nosecurity = true;
 			continue;
 		}
 	}
@@ -387,11 +395,45 @@ int main(int argc, char* argv[])
 
 	TestSuite::TestSuite testSuite{softwareInfo, settings, &appLog, &testLog};
 
+	// Ask for password
+	//
+	std::string userName;
+	std::string password;
+
+	if (args.nosecurity == true)
+	{
+		std::cout << "Warning: No username and password supplied." << std::endl;
+	}
+	else
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			std::cout << "Enter test user name: ";
+			std::getline(std::cin, userName);
+			if (userName.empty() == false)
+			{
+				break;
+			}
+			if (i < 2)
+			{
+				std::cout << "Error - test user name can't be empty! Please try again." << std::endl;
+			}
+		}
+		if (userName.empty() == true)
+		{
+			std::cout << "Error - test user name was not supplied." << std::endl;
+			return EXIT_FAILURE;
+		}
+
+		std::cout << "Enter password: ";
+		std::getline(std::cin, password);
+	}
+
 	// Run tests.
 	//
 	TestSuite::TestScriptFilter filter(args.testsFilter);
 
-	ok = testSuite.execute({}, args.scriptsPath, filter);
+	ok = testSuite.execute({}, args.scriptsPath, filter, QString::fromStdString(userName), QString::fromStdString(password));
 	if (ok == false)
 	{
 		return EXIT_FAILURE;

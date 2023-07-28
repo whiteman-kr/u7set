@@ -11,6 +11,26 @@ namespace
 
 namespace TestSuite
 {
+	//
+	// TestSuiteUserManager
+	//
+	TestSuiteUserManager::TestSuiteUserManager(const QString& userName, const QString& password):
+		m_userName(userName),
+		m_password(password)
+	{
+	}
+
+	bool TestSuiteUserManager::askForPassword(QString* userName, QString* password, QWidget* /*parent*/)
+	{
+		*userName = m_userName;
+		*password = m_password;
+		return true;
+	}
+
+	//
+	// ControlThread
+	//
+
 	ControlThread::ControlThread(ILogFile* appLog, ITestLog* testLog) :
 		m_appLog{appLog, "ControlThread"},
 		m_testLog{testLog},
@@ -24,7 +44,9 @@ namespace TestSuite
 									  const TestSuiteSettings& settings,
 									  const QStringList& scriptsFiles,		// List of script files for execution, if empty then exec all.
 									  const QString& scriptsPath,			// Load scripts from disk, path to dir for *.js files.)
-									  const TestScriptFilter& testsFilter)			// Tests filter
+									  const TestScriptFilter& testsFilter,			// Tests filter
+									  const QString& userName,
+									  const QString& password)
 	{
 		Q_ASSERT(isRunning() == false);
 
@@ -34,6 +56,9 @@ namespace TestSuite
 		m_scriptsToRun = scriptsFiles;
 		m_scriptsPath = scriptsPath;
 		m_testsFilter = testsFilter;
+
+		m_userName = userName;
+		m_password = password;
 
 		return;
 	}
@@ -199,6 +224,27 @@ namespace TestSuite
 			QMutexLocker l(&m_reportTemplatesMutex);
 			m_reportTemplates = configController.reportTemplates();
 		}
+
+		// Check user name
+		//
+		if (m_configuration.login == true)
+		{
+			if (m_userName.isEmpty() == true)
+			{
+				m_appLog.writeError(tr("Tests execution failed: no user name is supplied! Please check the configuration."));
+				throw 1;
+			}
+
+			TestSuiteUserManager userManager(m_userName, m_password);
+			userManager.setConfiguration(true, m_configuration.userAccounts, true, 120);
+
+			if (userManager.login(nullptr) == false)
+			{
+				m_appLog.writeError(tr("Tests execution failed: authorization failed!"));
+				throw 1;
+			}
+		}
+
 		return;
 	}
 
@@ -351,7 +397,9 @@ namespace TestSuite
 						  const TestSuiteSettings& settings,
 						  const QStringList& scriptsFiles,		// List of script files for execution, if empty then exec all.
 						  const QString& scriptsPath,			// Load scripts from disk, path to dir for *.js files.
-						  const TestScriptFilter& testsFilter)			// Tests filter
+						  const TestScriptFilter& testsFilter,			// Tests filter
+						  const QString& userName,
+						  const QString& password)
 	{
 		if (isRunning() == true)
 		{
@@ -360,7 +408,7 @@ namespace TestSuite
 
 		m_controlThread.moveToThread(&m_controlThread);
 
-		m_controlThread.setTestParams(softwareInfo, settings, scriptsFiles, scriptsPath, testsFilter);
+		m_controlThread.setTestParams(softwareInfo, settings, scriptsFiles, scriptsPath, testsFilter, userName, password);
 		m_controlThread.start();
 
 		// Wait that ControlThread actually started.

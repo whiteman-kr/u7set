@@ -553,7 +553,7 @@ namespace Builder
 
 		void errEQP6200(QString monotorId);							// Monitor (%1) cannot be used for tuning in Safety Project. Clear option in %1.TuningEnable or override behavior in menu Project->Project Properties...->Safety Project.
 		void errEQP6201(QString tuningServiceId);					// TuningService (%1) cannot be used for multi LM control in Safety Project. Turn On option %1.SingleLmControl or override behavior in menu Project->Project Properties...->Safety Project.
-		void errEQP6202(QString tuningClientMonitorId);				// Property TuningUserAccounts can't be empty in (%1) software if TuningLogin is set to 'true'.
+		void errEQP6202(QString userAccountsProperty, QString loginEnableProperty, QString softwareEquipmentId);				// Property %1 can't be empty in (%3) software if %2 is set to 'true'.
 		void errEQP6203(QString tuningSourceId, QString tuningClientMonitorId, QString tuningServiceId);	// Source %1 specified in %2.TuningSourceEquipmentID is not processed by service %3 which the client is connected to.
 		void errEQP6204(QString tuningClientId);					// %1.TuningSourceEquipmentID property can't be empty in Safety Project. Specify tuning sources which are processed by this client.
 		void errEQP6205(QString tuningClientMonitorId);				// No tuning sources found for %1.
