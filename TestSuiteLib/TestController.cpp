@@ -113,6 +113,10 @@ namespace TestSuite
 			throwScriptException(this, tr("overrideSignalValue(%1, ...), signal write error.").arg(appSignalId));
 			return false;
 		}
+		else
+		{
+			m_overridedSignals.insert(appSignalId);
+		}
 
 		return ok;
 	}
@@ -129,8 +133,18 @@ namespace TestSuite
 
 	void TestController::overridesReset()
 	{
-		int todo_implement_TestController_overridesReset = 1;
-		throwScriptException(this, tr("TestController::overridesReset() is not yet implemented in TestSuite!"));
+		for (const QString& appSignalId : m_overridedSignals)
+		{
+			AppSignalParam asp = signalParam(appSignalId);
+
+			bool ok = m_outputController.writeSignalValue(appSignalId, asp.tuningDefaultValueToVariant());
+			if (ok == false)
+			{
+				throwScriptException(this, tr("overrideSignalValue(%1, ...), signal write error.").arg(appSignalId));
+				return;
+			}
+		}
+		m_overridedSignals.clear();
 	}
 
 	bool TestController::signalExists(QString appSignalId) const
