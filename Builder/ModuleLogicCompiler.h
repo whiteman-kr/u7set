@@ -478,10 +478,6 @@ namespace Builder
 		bool optimizeSequentialConstMoves(CodeSnippet& srcCode);
 		bool optimizeSequentialBitMoves(CodeSnippet& srcCode);
 		bool optimizeBitFilling(CodeSnippet& srcCode);
-		bool optimizeBitAccNot(CodeSnippet& srcCode);
-		bool optimizeSequentialAccBitMoves(CodeSnippet& srcCode);
-		bool optimizeBitAccAnd(CodeSnippet& srcCode);
-		bool optimizeBitAccOr(CodeSnippet& srcCode);
 
 		bool writeInfoFilesAfterOptimization();
 		bool checkOptimizedAppLogicCode();
@@ -556,6 +552,9 @@ namespace Builder
 		bool generateAfbBitAccBusNotCode(CodeSnippet* code, const UalAfb* ualAfb,
 										 const BusProcessingStepInfo& bpStepInfo,
 										 UalSignal* inSignal, UalSignal* outSignal, bool* result);
+
+		bool generateAfbBitAccOrCode(CodeSnippet* code, const UalAfb* ualAfb, bool* result);
+		bool generateAfbBitAccAndCode(CodeSnippet* code, const UalAfb* ualAfb, bool* result);
 
 		bool calcBusProcessingSteps(const UalAfb* ualAfb, std::vector<int>* busProcessingStepsSizes);
 		bool getPinsAndSignalsBusSizes(const UalAfb* ualAfb, const std::vector<LogicPin>& pins,
@@ -705,7 +704,7 @@ namespace Builder
 
 		UalItem* getInputPinAssociatedOutputPinParent(QUuid appItemUuid, const QString& inPinCaption, QUuid* connectedOutPinUuid) const;
 		UalItem* getAssociatedOutputPinParent(const LogicPin& inputPin, QUuid* connectedOutPinUuid = nullptr) const;
-		const UalSignal *getExtractorBusSignal(const UalItem* appBusExtractor);
+		const UalSignal* getExtractorBusSignal(const UalItem* appBusExtractor);
 		bool getConnectedAppItems(const LogicPin& pin, ConnectedAppItems* connectedAppItems);
 		bool getBusProcessingParams(const UalAfb* appFb, bool& isBusProcessingAfb, QString& busTypeID);
 		UalSignal* getPinInputAppSignal(const LogicPin& inPin);
@@ -855,6 +854,8 @@ namespace Builder
 
 		void getChassisSignalsWithEquipmentID(QString& equipmentID, std::vector<const AppSignal *>* resultSignalList);
 
+		void findLogicAfbInstances(const QString& afbCaption, int logicConf, std::map<int, int>* instancesMap);
+
 	public:
 		static const int MIN_AFB_OPCODE = 1;
 		static const int MAX_AFB_OPCODE = 63;
@@ -928,6 +929,9 @@ namespace Builder
 
 		UalSignalsMap m_ualSignals;
 		UalAfbsMap m_ualAfbs;
+
+		std::map<int, int> m_afbOrInstances;		// instanceNo => operand count
+		std::map<int, int> m_afbAndInstances;		// instanceNo => operand count
 
 		QHash<UalSignal*, UalSignal*> m_outUalSignals;		// output UAL signals map: outUalSignal -> sourceUalSignal
 

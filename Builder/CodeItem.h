@@ -240,8 +240,8 @@ namespace Builder
 
 		CodeItem& resetAcc();
 		CodeItem& setAcc();
-		CodeItem& orAcc();
-		CodeItem& andAcc();
+		CodeItem& orAcc(const QString& comment = Separator::EMPTY_STR);
+		CodeItem& andAcc(const QString& comment = Separator::EMPTY_STR);
 		CodeItem& notAcc(const QString& comment = Separator::EMPTY_STR);
 		CodeItem& lshift0Acc();
 		CodeItem& lshift1Acc();

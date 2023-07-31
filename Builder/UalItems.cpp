@@ -1642,7 +1642,7 @@ namespace Builder
 						return true;
 					}
 
-					// Non-discrete busses is not allowed on input '%1'. (Item %2, logic schema %3).
+					// Non-discrete busses is not allowed on pin '%1'. (Item %2, logic schema %3).
 					//
 					log->errALC5172(afbSignal.caption(), ualItem.label(), ualItem.guid(), ualItem.schemaID());
 

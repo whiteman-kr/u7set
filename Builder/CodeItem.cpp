@@ -1079,19 +1079,21 @@ namespace Builder
 		return *this;
 
 	}
-	CodeItem& CodeItem::orAcc()
+	CodeItem& CodeItem::orAcc(const QString& comment)
 	{
 		initCommand();
 		m_result = true;
 		m_lmCmdCode = LmCommand::OR;
+		setComment(comment);
 		return *this;
 	}
 
-	CodeItem& CodeItem::andAcc()
+	CodeItem& CodeItem::andAcc(const QString& comment)
 	{
 		initCommand();
 		m_result = true;
 		m_lmCmdCode = LmCommand::AND;
+		setComment(comment);
 		return *this;
 	}
 

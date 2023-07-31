@@ -964,6 +964,9 @@ namespace Builder
 			}
 		}
 
+		findLogicAfbInstances(Afb::AFB_AND, 1, &m_afbAndInstances);
+		findLogicAfbInstances(Afb::AFB_OR, 2, &m_afbOrInstances);
+
 		return result;
 	}
 
@@ -7888,10 +7891,6 @@ namespace Builder
 			CODE_OPTIMIZATION_PROC_TO_CALL(ModuleLogicCompiler::optimizeSequentialConstMoves),
 			CODE_OPTIMIZATION_PROC_TO_CALL(ModuleLogicCompiler::optimizeSequentialBitMoves),
 			CODE_OPTIMIZATION_PROC_TO_CALL(ModuleLogicCompiler::optimizeBitFilling),
-			CODE_OPTIMIZATION_PROC_TO_CALL(ModuleLogicCompiler::optimizeBitAccNot),
-			CODE_OPTIMIZATION_PROC_TO_CALL(ModuleLogicCompiler::optimizeSequentialAccBitMoves),
-			CODE_OPTIMIZATION_PROC_TO_CALL(ModuleLogicCompiler::optimizeBitAccAnd),
-			CODE_OPTIMIZATION_PROC_TO_CALL(ModuleLogicCompiler::optimizeBitAccOr),
 		};
 
 		bool result = true;
@@ -7959,34 +7958,6 @@ namespace Builder
 		BitFillingOptimization bfo(*this, srcCode);
 
 		return bfo.optimize();
-	}
-
-	bool ModuleLogicCompiler::optimizeBitAccNot(CodeSnippet& srcCode)
-	{
-		BitAccNotOptimization bano(*this, srcCode);
-
-		return bano.optimize();
-	}
-
-	bool ModuleLogicCompiler::optimizeSequentialAccBitMoves(CodeSnippet& srcCode)
-	{
-		SequentialAccBitMovesOptimization sabmo(*this, srcCode);
-
-		return sabmo.optimize();
-	}
-
-	bool ModuleLogicCompiler::optimizeBitAccAnd(CodeSnippet& srcCode)
-	{
-		BitAccAndOptimization baao(*this, srcCode);
-
-		return baao.optimize();
-	}
-
-	bool ModuleLogicCompiler::optimizeBitAccOr(CodeSnippet& srcCode)
-	{
-		BitAccOrOptimization baoo(*this, srcCode);
-
-		return baoo.optimize();
 	}
 
 	bool ModuleLogicCompiler::checkOptimizedAppLogicCode()
@@ -8961,7 +8932,7 @@ namespace Builder
 
 		int currentBusSignalOffsetBits = 0;
 
-		for(int stepNo = 0; stepNo < busProcessingStepsNumber; stepNo++)
+		for(int stepNo = 0; stepNo < busProcessingStepsNumber && result == true; stepNo++)
 		{
 			BusProcessingStepInfo bpStepInfo;
 
@@ -8979,6 +8950,11 @@ namespace Builder
 				bool res = true;
 				bitAccCodeGenerated = generateAfbBitAccCode(code, ualAfb, bpStepInfo, &res);
 				result &= res;
+
+				if (res == false)
+				{
+					continue;
+				}
 			}
 
 			if (bitAccCodeGenerated == false)
@@ -9758,9 +9734,18 @@ namespace Builder
 			return generateAfbBitAccNotCode(code, ualAfb, bpStepInfo, result);
 		}
 
-		// not acc
-		// or acc
-		// and acc
+		if (ualAfb->opcode() == TO_INT(Afb::AfbType::LOGIC))
+		{
+			if (m_afbOrInstances.contains(ualAfb->instance()))
+			{
+				return generateAfbBitAccOrCode(code, ualAfb, result);
+			}
+
+			if (m_afbAndInstances.contains(ualAfb->instance()))
+			{
+				return generateAfbBitAccAndCode(code, ualAfb, result);
+			}
+		}
 
 		return false;
 	}
@@ -9784,7 +9769,7 @@ namespace Builder
 
 		UalSignal* outSignal = getUalSignalByPinCaption(ualAfb, Afb::OUT_PIN_CAPTION, false);
 
-		if (inSignal == nullptr)
+		if (outSignal == nullptr)
 		{
 			LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal not found for 'out' pin of AFB %1 (schema %2)").
 												arg(ualAfb->label()).arg(ualAfb->schemaID()));
@@ -9869,17 +9854,17 @@ namespace Builder
 			return false;
 		}
 
-		*code << CodeItem().movBitAccAddr(readAddr, QString("ACC[0] << %1").
+		*code << CodeItem().movBitAccAddr(readAddr, QString("ACC[0] <= %1").
 											arg(inSignal->refSignalIDsJoined()));
 		*code << CodeItem().notAcc(QString("compute not @%1").arg(ualAfb->label()));
-		*code << CodeItem().movBitAddrAcc(writeAddr, QString("%1 << ACC[0]").
+		*code << CodeItem().movBitAddrAcc(writeAddr, QString("%1 <= ACC[0]").
 											arg(outSignal->refSignalIDsJoined()));
 		return true;
 	}
 
 	bool ModuleLogicCompiler::generateAfbBitAccBusNotCode(CodeSnippet* code, const UalAfb* ualAfb,
 														const BusProcessingStepInfo& bpStepInfo,
-														UalSignal *inSignal, UalSignal *outSignal, bool* result)
+														UalSignal* inSignal, UalSignal* outSignal, bool* result)
 	{
 		if (inSignal->isDiscrete() == false &&
 			inSignal->isConstDiscrete() == false &&
@@ -9892,11 +9877,39 @@ namespace Builder
 			return false;
 		}
 
+		LogicAfbSignal logicInSignal;
+
+		if (ualAfb->getAfbSignalByCaption(Afb::IN_PIN_CAPTION, &logicInSignal) == false)
+		{
+			*result = false;
+			return false;
+		}
+
+		if (inSignal->isCanBeConnectedTo(*ualAfb, logicInSignal, m_log) == false)
+		{
+			*result = false;
+			return false;
+		}
+
 		if (outSignal->isBus() == false)
 		{
 			// Uncompatible signals connection (Logic schema '%1').
 			//
 			m_log->errALC5117(ualAfb->guid(), ualAfb->label(), outSignal->ualItemGuid(), outSignal->ualItemLabel(), ualAfb->schemaID());
+			*result = false;
+			return false;
+		}
+
+		LogicAfbSignal logicOutSignal;
+
+		if (ualAfb->getAfbSignalByCaption(Afb::OUT_PIN_CAPTION, &logicOutSignal) == false)
+		{
+			*result = false;
+			return false;
+		}
+
+		if (outSignal->isCanBeConnectedTo(*ualAfb, logicOutSignal, m_log) == false)
+		{
 			*result = false;
 			return false;
 		}
@@ -9951,14 +9964,14 @@ namespace Builder
 			writeAddr.addWord(bpStepInfo.currentBusSignalOffsetW);
 
 			*code << CodeItem().fillb(wordAccumulatorAddress16(), readAddr,
-									  QString("WordACC << %1").arg(inSignal->refSignalIDsJoined()));
+									  QString("WordACC <= %1").arg(inSignal->refSignalIDsJoined()));
 			*code << CodeItem().movAccAddr(wordAccumulatorAddress());
 			*code << CodeItem().notAcc(QString("compute bus_not @%1 (step %2/%3)").
 														arg(ualAfb->label()).
 														arg(bpStepInfo.currentStep + 1).
 														arg(bpStepInfo.stepsNumber));
-			*code << CodeItem().movAddrAcc(writeAddr, QString("%1 (part %2)) << bus_not.out").
-										   arg(outSignal->appSignalID(), bpStepInfo.currentStep));
+			*code << CodeItem().movAddrAcc(writeAddr, QString("%1 (part %2)) <= bus_not.out").
+										   arg(outSignal->appSignalID()).arg(bpStepInfo.currentStep + 1));
 			return true;
 		}
 
@@ -9990,7 +10003,7 @@ namespace Builder
 
 		writeAddr.addWord(bpStepInfo.currentBusSignalOffsetW);
 
-		*code << CodeItem().movAccAddr(readAddr, QString("ACC << %1 (part %2)").
+		*code << CodeItem().movAccAddr(readAddr, QString("ACC <= %1 (part %2)").
 														arg(inSignal->appSignalID()).
 														arg(bpStepInfo.currentStep + 1));
 
@@ -9999,9 +10012,293 @@ namespace Builder
 											arg(bpStepInfo.currentStep + 1).
 											arg(bpStepInfo.stepsNumber));
 
-		*code << CodeItem().movAddrAcc(writeAddr, QString("%1 (part %2)) << bus_not.out").
+		*code << CodeItem().movAddrAcc(writeAddr, QString("%1 (part %2)) <= bus_not.out").
 														arg(outSignal->appSignalID()).
 														arg(bpStepInfo.currentStep + 1));
+		return true;
+	}
+
+	bool ModuleLogicCompiler::generateAfbBitAccOrCode(CodeSnippet* code, const UalAfb* ualAfb, bool* result)
+	{
+		TEST_PTR_RETURN_FALSE(code);
+		TEST_PTR_RETURN_FALSE(ualAfb);
+		TEST_PTR_RETURN_FALSE(result);
+
+		*result = true;
+
+		std::map<const UalSignal*, Address16> inSignals;			// ualSignal => readAddress
+
+		const std::vector<LogicPin>& inputs = ualAfb->inputs();
+
+		bool hasConst1 = false;
+		bool allInputsConst0 = true;
+
+		for(const LogicPin& inPin : inputs)
+		{
+			UalSignal* inSignal = getUalSignalByPinCaption(ualAfb, inPin.caption(), true);
+
+			if (inSignal == nullptr)
+			{
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal not found for '%1' pin of AFB %2 (schema %3)").
+													arg(inPin.caption()).arg(ualAfb->label()).arg(ualAfb->schemaID()));
+				*result = false;
+				return false;
+			}
+
+			if (inSignal->isConstDiscrete() == true)
+			{
+				if (inSignal->constDiscreteValue() == 1)
+				{
+					hasConst1 = true;
+					break;
+				}
+
+				continue;			// skip const 0 value
+			}
+
+			if (inSignal->isDiscrete() == true)
+			{
+				allInputsConst0 = false;
+
+				Address16 readAddr = m_ualSignals.getSignalReadAddress(*inSignal, true);
+
+				if(readAddr.isValid() == false)
+				{
+					// Undefined UAL address of signal %1 (Logic schema %2).
+					//
+					m_log->errALC5105(inSignal->appSignalID(), inSignal->ualItemGuid(), inSignal->ualItemSchemaID());
+					*result = false;
+					return false;
+				}
+
+				inSignals.insert({ inSignal, readAddr });
+				continue;
+			}
+
+			// Uncompatible signals connection (Logic schema '%1').
+			//
+			m_log->errALC5117(ualAfb->guid(), ualAfb->label(), inSignal->ualItemGuid(), inSignal->ualItemLabel(), ualAfb->schemaID());
+			*result = false;
+			return false;
+		}
+
+		UalSignal* outSignal = getUalSignalByPinCaption(ualAfb, Afb::OUT_PIN_CAPTION, false);
+
+		if (outSignal == nullptr)
+		{
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal not found for 'out' pin of AFB %1 (schema %2)").
+												arg(ualAfb->label()).arg(ualAfb->schemaID()));
+			*result = false;
+			return false;
+		}
+
+		if (outSignal->isDiscrete() == false)
+		{
+			// Uncompatible signals connection (Logic schema '%1').
+			//
+			m_log->errALC5117(ualAfb->guid(), ualAfb->label(), outSignal->ualItemGuid(), outSignal->ualItemLabel(), ualAfb->schemaID());
+			*result = false;
+			return false;
+		}
+
+		Address16 writeAddr = m_ualSignals.getSignalWriteAddress(*outSignal);
+
+		if(writeAddr.isValid() == false)
+		{
+			// Undefined UAL address of signal %1 (Logic schema %2).
+			//
+			m_log->errALC5105(outSignal->appSignalID(), outSignal->ualItemGuid(), outSignal->ualItemSchemaID());
+			*result = false;
+			return false;
+		}
+
+		//
+
+		if (hasConst1 == true)
+		{
+			*code << CodeItem().movBitConst(writeAddr, 1, QString("compute or @%1 (optimized) %2 <= 1").
+											arg(ualAfb->label()).
+											arg(outSignal->refSignalIDsJoined()));
+			return true;
+		}
+
+		if (allInputsConst0 == true)
+		{
+			*code << CodeItem().movBitConst(writeAddr, 0, QString("compute or @%1 (optimized) %2 <= 0").
+											arg(ualAfb->label()).
+											arg(outSignal->refSignalIDsJoined()));
+			return true;
+		}
+
+		//
+
+		if (inSignals.size() == 1)
+		{
+			const UalSignal* inSignal = inSignals.begin()->first;
+			Address16 readAddr = inSignals.begin()->second;
+
+			*code << CodeItem().movBit(writeAddr, readAddr, QString("compute or @%1 (optimized) %2 <= %3").
+									   arg(ualAfb->label()).
+									   arg(outSignal->refSignalIDsJoined()).
+									   arg(inSignal->refSignalIDsJoined()));
+			return true;
+		}
+
+		*code << CodeItem().resetAcc();
+
+		for(auto const& p : inSignals)
+		{
+			const UalSignal* inSignal = p.first;
+			Address16 readAddr = p.second;
+
+			*code << CodeItem().movBitAccAddr(readAddr, QString("ACC <= %1").arg(inSignal->refSignalIDsJoined()));
+		}
+
+		*code << CodeItem().orAcc(QString("compute or @%1").arg(ualAfb->label()));
+		*code << CodeItem().movBitAddrAcc(writeAddr, QString("%1 <= ACC[0]").arg(outSignal->refSignalIDsJoined()));
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::generateAfbBitAccAndCode(CodeSnippet* code, const UalAfb* ualAfb, bool* result)
+	{
+		TEST_PTR_RETURN_FALSE(code);
+		TEST_PTR_RETURN_FALSE(ualAfb);
+		TEST_PTR_RETURN_FALSE(result);
+
+		*result = true;
+
+		std::map<const UalSignal*, Address16> inSignals;			// ualSignal => readAddress
+
+		const std::vector<LogicPin>& inputs = ualAfb->inputs();
+
+		bool hasConst0 = false;
+		bool allInputsConst1 = true;
+
+		for(const LogicPin& inPin : inputs)
+		{
+			UalSignal* inSignal = getUalSignalByPinCaption(ualAfb, inPin.caption(), true);
+
+			if (inSignal == nullptr)
+			{
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal not found for '%1' pin of AFB %2 (schema %3)").
+													arg(inPin.caption()).arg(ualAfb->label()).arg(ualAfb->schemaID()));
+				*result = false;
+				return false;
+			}
+
+			if (inSignal->isConstDiscrete() == true)
+			{
+				if (inSignal->constDiscreteValue() == 0)
+				{
+					hasConst0 = true;
+					break;
+				}
+
+				continue;			// skip const 1 value
+			}
+
+			if (inSignal->isDiscrete() == true)
+			{
+				allInputsConst1 = false;
+
+				Address16 readAddr = m_ualSignals.getSignalReadAddress(*inSignal, true);
+
+				if(readAddr.isValid() == false)
+				{
+					// Undefined UAL address of signal %1 (Logic schema %2).
+					//
+					m_log->errALC5105(inSignal->appSignalID(), inSignal->ualItemGuid(), inSignal->ualItemSchemaID());
+					*result = false;
+					return false;
+				}
+
+				inSignals.insert({ inSignal, readAddr });
+				continue;
+			}
+
+			// Uncompatible signals connection (Logic schema '%1').
+			//
+			m_log->errALC5117(ualAfb->guid(), ualAfb->label(), inSignal->ualItemGuid(), inSignal->ualItemLabel(), ualAfb->schemaID());
+			*result = false;
+			return false;
+		}
+
+		UalSignal* outSignal = getUalSignalByPinCaption(ualAfb, Afb::OUT_PIN_CAPTION, false);
+
+		if (outSignal == nullptr)
+		{
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal not found for 'out' pin of AFB %1 (schema %2)").
+												arg(ualAfb->label()).arg(ualAfb->schemaID()));
+			*result = false;
+			return false;
+		}
+
+		if (outSignal->isDiscrete() == false)
+		{
+			// Uncompatible signals connection (Logic schema '%1').
+			//
+			m_log->errALC5117(ualAfb->guid(), ualAfb->label(), outSignal->ualItemGuid(), outSignal->ualItemLabel(), ualAfb->schemaID());
+			*result = false;
+			return false;
+		}
+
+		Address16 writeAddr = m_ualSignals.getSignalWriteAddress(*outSignal);
+
+		if(writeAddr.isValid() == false)
+		{
+			// Undefined UAL address of signal %1 (Logic schema %2).
+			//
+			m_log->errALC5105(outSignal->appSignalID(), outSignal->ualItemGuid(), outSignal->ualItemSchemaID());
+			*result = false;
+			return false;
+		}
+
+		//
+
+		if (hasConst0 == true)
+		{
+			*code << CodeItem().movBitConst(writeAddr, 0, QString("compute and @%1 (optimized) %2 <= 0").
+											arg(ualAfb->label()).
+											arg(outSignal->refSignalIDsJoined()));
+			return true;
+		}
+
+		if (allInputsConst1 == true)
+		{
+			*code << CodeItem().movBitConst(writeAddr, 1, QString("compute and @%1 (optimized) %2 <= 1").
+											arg(ualAfb->label()).
+											arg(outSignal->refSignalIDsJoined()));
+			return true;
+		}
+
+		//
+
+		if (inSignals.size() == 1)
+		{
+			const UalSignal* inSignal = inSignals.begin()->first;
+			Address16 readAddr = inSignals.begin()->second;
+
+			*code << CodeItem().movBit(writeAddr, readAddr, QString("compute and @%1 (optimized) %2 <= %3").
+									   arg(ualAfb->label()).
+									   arg(outSignal->refSignalIDsJoined()).
+									   arg(inSignal->refSignalIDsJoined()));
+			return true;
+		}
+
+		*code << CodeItem().setAcc();
+
+		for(auto const& p : inSignals)
+		{
+			const UalSignal* inSignal = p.first;
+			Address16 readAddr = p.second;
+
+			*code << CodeItem().movBitAccAddr(readAddr, QString("ACC <= %1").arg(inSignal->refSignalIDsJoined()));
+		}
+
+		*code << CodeItem().andAcc(QString("compute and @%1").arg(ualAfb->label()));
+		*code << CodeItem().movBitAddrAcc(writeAddr, QString("%1 <= ACC[0]").arg(outSignal->refSignalIDsJoined()));
+
 		return true;
 	}
 
@@ -17427,6 +17724,52 @@ namespace Builder
 			}
 
 			resultSignalList->push_back(it->second);
+		}
+	}
+
+	void ModuleLogicCompiler::findLogicAfbInstances(const QString& afbCaption, int logicConfValue, std::map<int, int>* instancesMap)
+	{
+		TEST_PTR_RETURN(instancesMap);
+
+		for(const UalAfb* ualAfb : m_ualAfbs)
+		{
+			TEST_PTR_CONTINUE(ualAfb);
+
+			if (ualAfb->caption() != afbCaption)
+			{
+				continue;
+			}
+
+			if (ualAfb->opcode() != TO_INT(Afb::AfbType::LOGIC))
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			bool ok = false;
+
+			int iConfValue = ualAfb->getParamIntValueByOpName("i_conf", &ok);
+
+			if (ok == false )
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			if (iConfValue != logicConfValue)
+			{
+				continue;
+			}
+
+			int operandCount = ualAfb->getParamIntValueByOpName("i_oprd_quant", &ok);
+
+			if (ok == false )
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			instancesMap->insert({ualAfb->instance(), operandCount});
 		}
 	}
 
