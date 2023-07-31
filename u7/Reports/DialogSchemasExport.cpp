@@ -13,18 +13,18 @@ DialogSchemasExport::DialogSchemasExport(const Builder::SchemasReportOptions& op
 {
 	ui->setupUi(this);
 
-	ui->checkAddMargins->setChecked(m_options.addPageNumbers);
-	ui->checkAddSchemaSignals->setChecked(m_options.addLogicSchemaDetails);
-	ui->checkAddItemsLabels->setChecked(m_options.infoMode);
+	ui->checkFooters->setChecked(m_options.footers);
+	ui->checkItemsLabels->setChecked(m_options.itemsLabels);
 
 	ui->filePathEdit->setText(m_pathName);
 	ui->fileNameEdit->setText(m_fileName);
 
-	ui->filePathEdit->setFocus();
+	QTimer::singleShot(10, [this](){ui->tabWidget->setCurrentIndex(m_lastTab);});
 }
 
 DialogSchemasExport::~DialogSchemasExport()
 {
+	m_lastTab = ui->tabWidget->currentIndex();
 	delete ui;
 }
 
@@ -53,9 +53,8 @@ void DialogSchemasExport::accept()
 	m_fileName = ui->fileNameEdit->text();
 	m_pathName = ui->filePathEdit->text();
 
-	m_options.addPageNumbers = ui->checkAddMargins->isChecked() == true;
-	m_options.addLogicSchemaDetails = ui->checkAddSchemaSignals->isChecked() == true;
-	m_options.infoMode = ui->checkAddItemsLabels->isChecked() == true;
+	m_options.footers = ui->checkFooters->isChecked() == true;
+	m_options.itemsLabels = ui->checkItemsLabels->isChecked() == true;
 
 	if (isSingleFile() == false)
 	{

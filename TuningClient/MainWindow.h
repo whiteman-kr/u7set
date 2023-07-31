@@ -29,6 +29,15 @@ public:
 	explicit MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent = 0);
 	~MainWindow();
 
+	TuningSignalManager& tuningSignalManager();
+	const TuningSignalManager& tuningSignalManager() const;
+
+	ClientLib::TuningConnection& tuningConnection();
+	const ClientLib::TuningConnection& tuningConnection() const;
+
+	ITuningAuthorization& tuningAuthorization();
+	const ITuningAuthorization& tuningAuthorization() const;
+
 private:
 	void createActions();
 	void createMenu();
@@ -148,8 +157,5 @@ private:
 	QString m_sorTooltipText;
 };
 
-// Global definitions
-
-extern MainWindow* theMainWindow;
 
 

@@ -43,9 +43,9 @@ void CreateMiniDump(EXCEPTION_POINTERS* pep)
 		0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
 	HWND hWnd = NULL;
-	if (theMainWindow != nullptr)
+	if (theApp.mainWindow() != nullptr)
 	{
-		hWnd = reinterpret_cast<HWND>(theMainWindow->winId());
+		hWnd = reinterpret_cast<HWND>(theApp.mainWindow()->winId());
 	}
 
 	if ((hFile != NULL) && (hFile != INVALID_HANDLE_VALUE))
@@ -238,13 +238,17 @@ int main(int argc, char* argv[])
 
 			// Run the application
 			//
-			theMainWindow = new MainWindow(softwareInfo);
-			theMainWindow->show();
+			{
+				MainWindow mainWindow(softwareInfo);
 
-			result = a.exec();
+				theApp.setMainWindow(&mainWindow);
 
-			delete theMainWindow;
-			theMainWindow = nullptr;
+				mainWindow.show();
+
+				result = a.exec();
+
+				theApp.setMainWindow(nullptr);
+			}
 
 			theSettings.StoreUser();
 		}

@@ -133,7 +133,7 @@ namespace TrendLib
 
 		std::set<QString> m_tags;
 
-		E::AnalogFormat m_analogFormat = E::AnalogFormat::g_9_or_9e;
+		E::AnalogFormat m_analogFormat = E::AnalogFormat::f_9;
 		int m_precision = 0;
 
 		double m_lineWeight = 0;		// 0 is cosmetic pen

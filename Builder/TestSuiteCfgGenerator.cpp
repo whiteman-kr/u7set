@@ -60,6 +60,12 @@ namespace Builder
 			// Generate tuning signals file
 			//
 			result &= writeTuningSignals();
+
+			if (settings->login == true && settings->userAccounts.isEmpty() == true)
+			{
+				m_log->errEQP6202(EquipmentPropNames::TESTING_USER_ACCOUNTS, EquipmentPropNames::TESTING_LOGIN, m_software->equipmentIdTemplate());
+				return false;
+			}
 		}
 
 		result &= writeTestScripts();

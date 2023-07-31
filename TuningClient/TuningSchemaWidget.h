@@ -8,23 +8,6 @@
 #include "../ClientLib/TuningUserManager.h"
 #include "../ClientLib/TuningConnection.h"
 
-
-
-class TuningClientTuningController : public VFrame30::TuningController
-{
-	Q_OBJECT
-
-public:
-	TuningClientTuningController(ITuningSignalManager* signalManager, ClientLib::TuningConnection* tuningConnection, ClientLib::TuningUserManager& userManager, QWidget* parent = nullptr);
-
-protected:
-	[[nodiscard]] virtual bool checkTuningAccess() const override;
-
-private:
-	ClientLib::TuningUserManager& m_userManager;
-};
-
-
 class TuningSchemaWidget : public VFrame30::ClientSchemaWidget
 {
 	Q_OBJECT
@@ -32,9 +15,6 @@ class TuningSchemaWidget : public VFrame30::ClientSchemaWidget
 public:
 	TuningSchemaWidget() = delete;
 	TuningSchemaWidget(TuningConfigController& configController,
-					   TuningSignalManager& tuningSignalManager,
-					   ClientLib::TuningConnection& tuningConnection,
-					   TuningClientTuningController* tuningController,
 					   VFrame30::LogController* logController,
 					   std::shared_ptr<VFrame30::Schema> schema,
 					   TuningSchemaManager& schemaManager,
@@ -53,8 +33,6 @@ public slots:
 
 private:
 	TuningConfigController& m_configController;
-	TuningSignalManager& m_tuningSignalManager;
-	ClientLib::TuningConnection& m_tuningConnection;
 };
 
 #endif // TUNINGSCHEMAWIDGET_H

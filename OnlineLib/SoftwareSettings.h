@@ -556,6 +556,9 @@ public:
 	std::vector<SoftwareEndpoint::AppDataService> appDataServices;
 	bool tuningEnabled = false;
 
+	bool login = false;
+	QString userAccounts;
+
 	std::vector<SoftwareEndpoint::TuningService> tuningServices;
 
 private:
@@ -568,6 +571,7 @@ private:
 
 public:
 	void clear();
+	QStringList getUsersAccounts() const;
 };
 
 class GatewayServiceSettings : virtual public SoftwareSettings

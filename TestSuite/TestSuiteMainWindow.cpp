@@ -8,6 +8,7 @@
 #include "TestLogTabPage.h"
 #include "TestViewTabPage.h"
 #include "DialogReport.h"
+#include "../ClientLib/TuningUserManager.h"
 
 #if __has_include("../gitlabci_version.h")
 #	include "../gitlabci_version.h"
@@ -568,7 +569,7 @@ void TestSuiteMainWindow::createReportActions()
     }
     m_reportActions.clear();
 
-    for (const ReportLib::ReportTemplate& report : m_configController.reportTemplates().templates())
+	for (const ReportLib::ReportTemplate& report : m_configController.reportTemplates().templates())
     {
         QAction* a = new QAction(report.caption(), this);
         a->setStatusTip(tr("Generate report: %1").arg(report.caption()));
@@ -756,6 +757,48 @@ void TestSuiteMainWindow::on_m_run_clicked()
 		return;
 	}
 
+	// Ask for a password
+	//
+	QString userName;
+	QString password;
+
+	if (m_configController.configuration().login == true)
+	{
+		ClientLib::TuningUserManager userManager;
+		userManager.setConfiguration(true, m_configController.configuration().userAccounts, true, 120);
+
+		bool loggedIn = false;
+
+		for (int i = 0; i < 3; i++)
+		{
+			ClientLib::DialogTuningPassword d(userManager, this);
+			if (d.exec() != QDialog::Accepted)
+			{
+				return;
+			}
+			userName = d.userName();
+			password = d.password();
+
+			TestSuite::TestSuiteUserManager checkPasswordUserManager(d.userName(), d.password());
+			checkPasswordUserManager.setConfiguration(true, m_configController.configuration().userAccounts, true, 120);
+
+			if (checkPasswordUserManager.login(nullptr) == true)
+			{
+				loggedIn = true;
+				break;
+			}
+			if (i < 2)
+			{
+				QMessageBox::critical(this, qAppName(), tr("Wrong password! Please try again."));
+			}
+		}
+		if (loggedIn == false)
+		{
+			QMessageBox::critical(this, qAppName(), tr("Tests execution failed: authorization failed!"));
+			return;
+		}
+	}
+
 	// Create a list of tests user has selected to run
 	//
 	TestSuite::TestScriptFilter filter;
@@ -779,7 +822,9 @@ void TestSuiteMainWindow::on_m_run_clicked()
 	//
 	bool ok = m_testSuite.execute(scriptsFiles,
 								  theSettings.useLocalScriptsPath() ? theSettings.localScriptsPath() : QString(),
-								  filter);
+								  filter,
+								  userName,
+								  password);
 	if (ok == false)
 	{
 		return;

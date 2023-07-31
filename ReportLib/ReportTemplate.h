@@ -74,11 +74,20 @@ namespace ReportLib
 		bool load(QXmlStreamReader& reader);
 		bool empty() const;
 
-        const QString& caption() const;
+		const QPageLayout& pageLayout() const;
+
+		const QString& caption() const;
+		const QString& tag() const;
         const std::vector<std::shared_ptr<ObjectTemplate>>& objects() const;
 
     private:
-        QString m_caption;
+		QPageLayout m_pageLayout = QPageLayout(QPageSize(QPageSize::A4),
+											   QPageLayout::Orientation::Portrait,
+											   QMarginsF(30, 20, 15, 20),
+											   QPageLayout::Unit::Millimeter);
+
+		QString m_caption;
+		QString m_tag;	// Section tag
         std::vector<std::shared_ptr<ObjectTemplate>> m_objects;
 	};
 
@@ -89,7 +98,6 @@ namespace ReportLib
 
 		bool load(QXmlStreamReader& reader);
 
-		const QPageLayout& pageLayout() const;
 		int resolution() const;
 
 		const QString& caption() const;
@@ -102,10 +110,6 @@ namespace ReportLib
 		const std::vector<MarginTemplate>& margins() const;
 
 	private:
-		QPageLayout m_pageLayout = QPageLayout(QPageSize(QPageSize::A4),
-											   QPageLayout::Orientation::Portrait,
-											   QMarginsF(30, 20, 15, 20),
-											   QPageLayout::Unit::Millimeter);
 		int m_resolution = 300;
 
         QString m_caption;

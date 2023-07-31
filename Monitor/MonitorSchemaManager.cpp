@@ -29,7 +29,6 @@ std::shared_ptr<VFrame30::Schema> MonitorSchemaManager::loadSchema(QString schem
 {
 	QByteArray data;
 	QString errorString;
-	std::shared_ptr<VFrame30::Schema> schema;
 
 	bool result = m_configController.getFileBlockedById(schemaId, &data, &errorString);
 	if (result == false)

@@ -530,8 +530,11 @@ std::map<QString, DialogSignalInfo*> DialogSignalInfo::m_dialogSignalInfoMap;
 
 DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 								   IAppSignalManager* appSignalManager,
-								   ISignalDataServer* signalDataServer, const std::vector<SoftwareEndpoint::AppDataService>& appDataServices,
-								   VFrame30::TuningController* tuningController,
+								   ISignalDataServer* signalDataServer,
+								   const std::vector<SoftwareEndpoint::AppDataService>& appDataServices,
+								   ITuningSignalManager& tuningSignalManager,
+								   ITuningConnection& tuningConnection,
+								   ITuningAuthorization& tuningAuthorization,
 								   bool tuningEnabled,
 								   DialogSignalInfo::DialogType dialogType,
 								   QWidget* parent) :
@@ -542,7 +545,7 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 	m_appSignalManager(appSignalManager),
 	m_signalDataServer(signalDataServer),	// it can be nullptr
 	m_appDataServices(appDataServices),		// it can be emptu
-	m_tuningController(tuningController),	// it can be nullptr
+	m_tuningController(tuningSignalManager, tuningConnection, tuningAuthorization),
 	m_tuningEnabled(tuningEnabled)
 {
 	if (m_appSignalManager == nullptr)
@@ -621,21 +624,6 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 	m_updateStateTimerId = startTimer(200);
 
 	setAcceptDrops(true);
-}
-
-DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
-								   IAppSignalManager* appSignalManager,
-								   DialogType dialogType,
-								   QWidget* parent):
-	DialogSignalInfo(signal,
-					 appSignalManager,
-					 nullptr/*signalDataServer*/,
-					 {}/*appDataServices*/,
-					 nullptr/*tuningController*/,
-					 false/*tuningEnabled*/,
-					 dialogType,
-					 parent)
-{
 }
 
 DialogSignalInfo::~DialogSignalInfo()
@@ -913,45 +901,45 @@ void DialogSignalInfo::on_treeSetpoints_itemDoubleClicked(QTreeWidgetItem *item,
 
 void DialogSignalInfo::on_pushButtonSetZero_clicked()
 {
-	if (m_tuningController == nullptr || m_signal.isDiscrete() == false)
+	if (m_signal.isDiscrete() == false)
 	{
 		Q_ASSERT(false);
 		return;
 	}
 
 	if (DialogWriteValues::askConfirmation(m_signal,
-										   m_tuningController->signalState(m_signal.appSignalId(), nullptr).value(),
+										   m_tuningController.signalState(m_signal.appSignalId(), nullptr).value(),
 										   TuningValue(m_signal.tuningType(), 0),
 										   E::AnalogFormat::f_9, this) != QDialog::Accepted)
 	{
 		return;
 	}
 
-	m_tuningController->writeValue(m_signal.appSignalId(), false);
+	m_tuningController.writeValue(m_signal.appSignalId(), false);
 }
 
 void DialogSignalInfo::on_pushButtonSetOne_clicked()
 {
-	if (m_tuningController == nullptr || m_signal.isDiscrete() == false)
+	if (m_signal.isDiscrete() == false)
 	{
 		Q_ASSERT(false);
 		return;
 	}
 
 	if (DialogWriteValues::askConfirmation(m_signal,
-						m_tuningController->signalState(m_signal.appSignalId(), nullptr).value(),
+						m_tuningController.signalState(m_signal.appSignalId(), nullptr).value(),
 						TuningValue(m_signal.tuningType(), 1),
 						E::AnalogFormat::f_9, this) != QDialog::Accepted)
 	{
 		return;
 	}
 
-	m_tuningController->writeValue(m_signal.appSignalId(), true);
+	m_tuningController.writeValue(m_signal.appSignalId(), true);
 }
 
 void DialogSignalInfo::on_pushButtonSetValue_clicked()
 {
-	if (m_tuningController == nullptr || m_signal.isAnalog() == false)
+	if (m_signal.isAnalog() == false)
 	{
 		Q_ASSERT(false);
 		return;
@@ -982,14 +970,14 @@ void DialogSignalInfo::on_pushButtonSetValue_clicked()
 	}
 
 	if (DialogWriteValues::askConfirmation(m_signal,
-						m_tuningController->signalState(m_signal.appSignalId(), nullptr).value(),
+						m_tuningController.signalState(m_signal.appSignalId(), nullptr).value(),
 						TuningValue(m_signal.tuningType(), value),
 						E::AnalogFormat::f_9, this) != QDialog::Accepted)
 	{
 		return;
 	}
 
-	m_tuningController->writeValue(m_signal.appSignalId(), value);
+	m_tuningController.writeValue(m_signal.appSignalId(), value);
 }
 
 
@@ -2001,7 +1989,7 @@ void DialogSignalInfo::updateTuningSignalState()
 {
 	// Tuning information
 
-	TuningSignalState tuningSignalState = m_tuningController->signalState(m_signal.appSignalId()).value<TuningSignalState>();
+	TuningSignalState tuningSignalState = m_tuningController.signalState(m_signal.appSignalId()).value<TuningSignalState>();
 
 	QString strValue = tuningSignalStateText(m_signal, tuningSignalState, m_viewType, m_currentPrecision);
 

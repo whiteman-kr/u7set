@@ -1,0 +1,24 @@
+#include "TuningConnectionStub.h"
+
+bool TuningAuthorizationStub::checkTuningAccess(QWidget* /*parent*/)
+{
+	return true;
+}
+
+bool TuningConnectionStub::writeTuningSignal(const QString& /*appSignalId*/, const TuningValue& /*value*/)
+{
+	assert(false);
+	return false;
+}
+
+bool TuningConnectionStub::writeTuningSignal(const QString& /*appSignalId*/, QVariant /*value*/)
+{
+	assert(false);
+	return false;
+}
+
+void TuningConnectionStub::applyTuningSignals()
+{
+	assert(false);
+	return;
+}

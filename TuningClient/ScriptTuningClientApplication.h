@@ -2,6 +2,8 @@
 
 #include <QObject>
 
+class MainWindow;
+
 /*! \class ScriptTuningClientApplication
 	\ingroup controllers
 	\brief Represents a class for access to TuningClient application wide properties and functions.
@@ -27,7 +29,12 @@ public slots:
 	/// Multiple arguments are divided by a semicolon.
 	bool start(QString program, QString arguments = QString(), QString workDir = QString());
 
+public:
+	void setMainWindow(MainWindow* mainWindow);
+	MainWindow* mainWindow();
+	const MainWindow* mainWindow() const;
 
 private:
+	MainWindow* m_mainWindow = nullptr;
 };
 

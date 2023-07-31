@@ -31,7 +31,6 @@ SimWidget::SimWidget(std::shared_ptr<Sim::ConsoleLogFile> ideLogFile,
 	// --
 	//
 	m_appSignalController = new VFrame30::AppSignalController{&m_simulator->appSignalManager(), this};
-	m_tuningController = new VFrame30::TuningController{&m_simulator->tuningSignalManager(), &m_tuningConnection, this};
 
 	// --
 	//
@@ -185,11 +184,10 @@ void SimWidget::openSchemaTabPage(QString schemaId, QStringList highlightIds)
 	}
 
 	SimSchemaPage* page = new SimSchemaPage{schema,
-											m_simulator.get(),
-											&m_schemaManager,
-											m_appSignalController,
-											m_tuningController,
-											m_tabWidget};
+			m_simulator.get(),
+			&m_schemaManager,
+			m_appSignalController,
+			m_tabWidget};
 
 	int tabIndex = m_tabWidget->addTab(page, schema->schemaId());
 	m_tabWidget->setCurrentIndex(tabIndex);

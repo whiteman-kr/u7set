@@ -103,6 +103,7 @@ DialogWriteValues::DialogWriteValues(const std::vector<AppSignalParam>& params,
 	// Buttons
 	//
 	QHBoxLayout *buttonLayout = new QHBoxLayout();
+	rightLayout->addLayout(buttonLayout);
 
 	if (m_params.size() > m_defaultSignalsCount)
 	{
@@ -111,13 +112,17 @@ DialogWriteValues::DialogWriteValues(const std::vector<AppSignalParam>& params,
 		connect(m_showAll, &QPushButton::clicked, this, &DialogWriteValues::onShowAll);
 	}
 
-	QDialogButtonBox* buttons = new QDialogButtonBox(QDialogButtonBox::StandardButton::Yes | QDialogButtonBox::StandardButton::No);
-	buttonLayout->addWidget(buttons);
+	buttonLayout->addStretch();
 
-	rightLayout->addLayout(buttonLayout);
+	QPushButton* yesBtn = new QPushButton(tr("Yes"));
+	buttonLayout->addWidget(yesBtn);
 
-	connect(buttons, &QDialogButtonBox::accepted, this, &DialogWriteValues::accept);
-	connect(buttons, &QDialogButtonBox::rejected, this, &DialogWriteValues::reject);
+	QPushButton* noBtn = new QPushButton(tr("No"));
+	buttonLayout->addWidget(noBtn);
+	noBtn->setDefault(true);
+
+	connect(yesBtn, &QPushButton::clicked, this, &DialogWriteValues::accept);
+	connect(noBtn, &QPushButton::clicked, this, &DialogWriteValues::reject);
 
 	// Icon
 	//
@@ -132,6 +137,8 @@ DialogWriteValues::DialogWriteValues(const std::vector<AppSignalParam>& params,
 	mainLayout->addWidget(logo);
 	mainLayout->addLayout(rightLayout);
 	setLayout(mainLayout);
+
+	noBtn->setFocus();
 
 	return;
 }

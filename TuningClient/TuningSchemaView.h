@@ -1,6 +1,7 @@
 #ifndef TUNINGSCHEMAVIEW_H
 #define TUNINGSCHEMAVIEW_H
 
+#include "ScriptTuningClientApplication.h"
 #include "TuningSchemaManager.h"
 #include "../VFrame30/ClientSchemaView.h"
 
@@ -28,6 +29,7 @@ private slots:
 private:
 	int m_configurationId = -1;		// Last set configuration
 	TuningConfigController& m_configController;
+	ScriptTuningClientApplication m_app;
 };
 
 #endif // TUNINGSCHEMAVIEW_H

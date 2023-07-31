@@ -28,6 +28,8 @@ public:
 		bool showSchemasTabBar = true;
 		bool showLogo = true;
 		bool showItemsLabels = false;
+		VFrame30::ZoomMode zoomMode = VFrame30::ZoomMode::Manual;
+
 		bool singleInstance = false;
 	};
 
@@ -75,6 +77,8 @@ public:
 	bool showSchemasTabBar() const;
 	bool showLogo() const;
 	bool showItemsLabels() const;
+	VFrame30::ZoomMode zoomMode() const;
+
 	bool singleInstance() const;
 
 private:

@@ -247,6 +247,7 @@ public:
 	QAction* m_importWorkingcopyAction = nullptr;
 
 	QAction* m_exportToPdfAction = nullptr;
+	QAction* m_exportToAlbumAction = nullptr;
 
 	// --
 	QAction* m_refreshFileAction = nullptr;
@@ -331,6 +332,7 @@ protected slots:
 	void importWorkcopy();
 
 	void exportToPdf();
+	void exportToAlbum();
 
 	void showFileProperties();
 	void showBehaviorEditor();

@@ -79,9 +79,9 @@ int main(int argc, char *argv[])
 	//
 	auto settings = MonitorAppSettings::instance().get();
 
-	InstanceResolver instanceResover;
+	InstanceResolver instanceResolver;
 
-	if (bool ok = instanceResover.init(settings.equipmentId, settings.singleInstance);
+	if (bool ok = instanceResolver.init(settings.equipmentId, settings.singleInstance);
 		ok == false)
 	{
 		qDebug() << "Another instance is active";
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 	//
 	int result = 0;
 	{
-		MonitorMainWindow mainWindow(instanceResover, softwareInfo);
+		MonitorMainWindow mainWindow(instanceResolver, softwareInfo);
 
 		theApp.setMainWindow(&mainWindow);
 

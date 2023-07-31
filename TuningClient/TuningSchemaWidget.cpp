@@ -1,9 +1,10 @@
+#include "Main.h"
 #include "MainWindow.h"
 #include "TuningSchemaWidget.h"
-#include "../VFrame30/MonitorSchema.h"
-#include "../ClientLib/TuningUserManager.h"
 #include "TuningSignalInfo.h"
 
+#include "../ClientLib/TuningUserManager.h"
+#include "../VFrame30/MonitorSchema.h"
 #include "../VFrame30/SchemaItemSignal.h"
 #include "../VFrame30/SchemaItemValue.h"
 #include "../VFrame30/SchemaItemImageValue.h"
@@ -13,43 +14,19 @@
 #include "../VFrame30/SchemaItemLoopback.h"
 
 //
-// TuningClientTuningController
-//
-TuningClientTuningController::TuningClientTuningController(ITuningSignalManager* signalManager, ClientLib::TuningConnection* tuningConnection, ClientLib::TuningUserManager& userManager, QWidget* parent):
-	VFrame30::TuningController(signalManager, tuningConnection, parent),
-	m_userManager(userManager)
-{
-}
-
-bool TuningClientTuningController::checkTuningAccess() const
-{
-	if (m_userManager.login(theMainWindow) == false)
-	{
-		return false;
-	}
-
-	return true;
-}
-
-//
 // TuningSchemaWidget
 //
 TuningSchemaWidget::TuningSchemaWidget(TuningConfigController& configController,
-									   TuningSignalManager& tuningSignalManager,
-									   ClientLib::TuningConnection& tuningConnection,
-									   TuningClientTuningController* tuningController,
 									   VFrame30::LogController* logController,
 									   std::shared_ptr<VFrame30::Schema> schema,
 									   TuningSchemaManager& schemaManager,
 									   QWidget* parent) :
 	VFrame30::ClientSchemaWidget(new TuningSchemaView{configController, schemaManager}, schema, &schemaManager, parent),
-	m_configController(configController),
-	m_tuningSignalManager(tuningSignalManager),
-	m_tuningConnection(tuningConnection)
+	m_configController(configController)
 {
-	assert(tuningController);
-
-	clientSchemaView()->setTuningController(tuningController);
+	clientSchemaView()->setTuningController(theApp.mainWindow()->tuningSignalManager(),
+											theApp.mainWindow()->tuningConnection(),
+											theApp.mainWindow()->tuningAuthorization());
 	clientSchemaView()->setLogController(logController);
 	clientSchemaView()->setZoom(100, false);
 
@@ -180,7 +157,7 @@ void TuningSchemaWidget::signalContextMenu(QStringList appSignals,
 	for (const QString& s : appSignals)
 	{
 		bool ok = false;
-		AppSignalParam signal =	m_tuningSignalManager.signalParam(s, &ok);
+		AppSignalParam signal =	theApp.mainWindow()->tuningSignalManager().signalParam(s, &ok);
 
 		QString signalId = ok ? QString("%1 %2").arg(signal.customSignalId()).arg(signal.caption()) : s;
 
@@ -206,7 +183,7 @@ void TuningSchemaWidget::signalContextMenu(QStringList appSignals,
 		{
 			bool ok = false;
 
-			AppSignalParam signal =	m_tuningSignalManager.signalParam(s, &ok);
+			AppSignalParam signal =	theApp.mainWindow()->tuningSignalManager().signalParam(s, &ok);
 
 			QString signalId = ok ? QString("%1 %2").arg(signal.customSignalId()).arg(signal.caption()) : s;
 
@@ -232,8 +209,8 @@ void TuningSchemaWidget::signalContextMenu(QStringList appSignals,
 void TuningSchemaWidget::signalInfo(QString appSignalId)
 {
 	TuningSignalInfo* d = new TuningSignalInfo(m_configController,
-											   m_tuningSignalManager,
-											   m_tuningConnection,
+											   theApp.mainWindow()->tuningSignalManager(),
+											   theApp.mainWindow()->tuningConnection(),
 											   ::calcHash(appSignalId),
 											   E::AnalogFormat::g_9_or_9e,
 											   this);

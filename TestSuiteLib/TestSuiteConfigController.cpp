@@ -37,6 +37,14 @@ namespace TestSuite
 			config.tuningServices.clear();
 		}
 
+		config.login = settings.login;
+		config.userAccounts = settings.getUsersAccounts();
+
+		if (config.login == false)
+		{
+			m_logFile.writeWarning(tr("Testing user authorization is disabled. Tests can be executed without supplying a password!"));
+		}
+
 		// Get test files list
 		//
 		for (const OnlineLib::BuildFileInfo& buildFileInfo : files)

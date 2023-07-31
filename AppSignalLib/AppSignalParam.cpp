@@ -744,7 +744,7 @@ void AppSignalParam::detach()
 		return;
 	}
 
-	m_data = clone().m_data;
+	*this = clone();
 	return;
 }
 

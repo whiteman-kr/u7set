@@ -1,14 +1,16 @@
 #include "Settings.h"
+#include "Main.h"
 #include "MainWindow.h"
 #include "TuningPage.h"
-#include <QKeyEvent>
-#include <QPushButton>
-#include "../VFrame30/DrawParam.h"
 #include "TuningSourcesHelper.h"
 #include "TuningSignalInfo.h"
 #include "DialogChooseFilter.h"
-#include "../lib/Ui/DialogWriteValues.h"
 
+#include "../lib/Ui/DialogWriteValues.h"
+#include "../VFrame30/DrawParam.h"
+
+#include <QKeyEvent>
+#include <QPushButton>
 #include <QTableView>
 #include <QInputDialog>
 #include <QFileDialog>
@@ -995,7 +997,7 @@ TuningPage::TuningPage(TuningConfigController& configController,
 
 	//
 
-	connect(theMainWindow, &MainWindow::timerTick500, this, &TuningPage::onTimer);
+	connect(theApp.mainWindow(), &MainWindow::timerTick500, this, &TuningPage::onTimer);
 
 }
 
@@ -2297,7 +2299,7 @@ void TuningPage::addSelectedSignalsToFilter(TuningFilter* filter)
 
 	QMessageBox::information(this, qAppName(), tr("Adding signals complete."));
 
-	QTimer::singleShot(500, theMainWindow, &MainWindow::slot_userFiltersChanged);
+	QTimer::singleShot(500, theApp.mainWindow(), &MainWindow::slot_userFiltersChanged);
 }
 
 void TuningPage::restoreSignalsFromFilter(TuningFilter* filter)

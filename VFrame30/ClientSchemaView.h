@@ -132,6 +132,10 @@ namespace VFrame30
 		Q_PROPERTY(int schemaCount READ schemaCount)
 		Q_PROPERTY(int SchemaCount READ schemaCount)
 
+		/// \brief Get zoom factor for schema (100% zoom returns 1.0).
+		Q_PROPERTY(double zoomFactor READ zoomFactor)
+		Q_PROPERTY(double ZoomFactor READ zoomFactor)
+
 	public:
 		explicit ScriptSchemaView(ClientSchemaView* clientSchemaView,
 								  ISchemaViewHistory* schemaViewHistory,
@@ -239,6 +243,7 @@ namespace VFrame30
 		QObject* schema();
 
 		int schemaCount() const;
+		double zoomFactor() const;
 
 		// Data
 		//
@@ -300,7 +305,9 @@ namespace VFrame30
 		//
 		TuningController* tuningController();
 		const TuningController* tuningController() const;
-		void setTuningController(TuningController* value);
+		void setTuningController(ITuningSignalManager& signalManager,
+									ITuningConnection& tuningConnection,
+									ITuningAuthorization& tuningAuthorization);
 
 		//  AppSignalController
 		//
@@ -370,7 +377,7 @@ namespace VFrame30
 		VFrame30::ISchemaViewHistory* m_schemaViewHistory = nullptr;		// Can be nullptr if widget does not support history navigation
 
 	protected:
-		TuningController* m_tuningController = nullptr;
+		std::unique_ptr<TuningController> m_tuningController;
 		AppSignalController* m_appSignalController = nullptr;
 		std::unique_ptr<ScriptAppSignalController> m_scriptAppSignalController;
 		LogController* m_logController = nullptr;

@@ -15,9 +15,6 @@ class SchemasWorkspace : public QWidget
 
 public:
 	SchemasWorkspace(TuningConfigController& configController,
-					 TuningSignalManager& tuningSignalManager,
-					 ClientLib::TuningUserManager& userManager,
-					 ClientLib::TuningConnection& tuningConnection,
 					 const QString& caption,
 					 const QStringList& schemasTags,
 					 QString startSchemaId,
@@ -46,13 +43,8 @@ private:
 	TuningSchemaWidget* activeSchemaWidget();
 
 private:
-	TuningClientTuningController m_tuningController;
 	VFrame30::LogController m_logController;
-
 	TuningSchemaManager m_schemaManager;
-
-	TuningSignalManager& m_tuningSignalManager;
-	ClientLib::TuningConnection& m_tuningConnection;
 	TuningConfigController& m_configController;
 
 	// Interface members

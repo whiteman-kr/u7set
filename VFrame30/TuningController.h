@@ -2,6 +2,7 @@
 
 #include "../AppSignalLib/ITuningSignalManager.h"
 #include "../lib/Tuning/ITuningConnection.h"
+#include "../lib/Tuning/ITuningAuthorization.h"
 
 class AppSignalParam;
 class TuningSignalState;
@@ -82,13 +83,16 @@ namespace VFrame30
 		}
 		\endcode
 	*/
-	class TuningController : public QObject
+	class TuningController final : public QObject
 	{
 		Q_OBJECT
 
 	public:
 		TuningController() = delete;
-		TuningController(ITuningSignalManager* signalManager, ITuningConnection* tuningConnection, QWidget* parent = nullptr);
+		TuningController(ITuningSignalManager& signalManager,
+						 ITuningConnection& tuningConnection,
+						 ITuningAuthorization& tuningAuthorization,
+						 QWidget* parent = nullptr);
 
 	public:
 		AppSignalParam signalParam(const QString& appSignalId, bool* ok) const;
@@ -137,12 +141,11 @@ namespace VFrame30
 		/// \brief Copies written values from <b>Tuning Mode Tuning Values</b> area to <b>Run Mode Tuning Values</b> area. Should be used in TuningClient scripts only when <b>AutoApply</b> property is set to <b>false</b>. Monitor always applies values automatically.
 		void apply();
 
-	protected:
-		virtual bool checkTuningAccess() const;
-
 	private:
-		ITuningSignalManager* m_signalManager = nullptr;
-		ITuningConnection* m_tuningConnection = nullptr;
+		QWidget* m_parent;
+		ITuningSignalManager& m_signalManager;
+		ITuningConnection& m_tuningConnection;
+		ITuningAuthorization& m_tuningAuthorization;
 	};
 
 }

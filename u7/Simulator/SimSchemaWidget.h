@@ -30,7 +30,6 @@ public:
 	SimSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
 					SimSchemaManager* schemaManager,
 					VFrame30::AppSignalController* appSignalController,
-					VFrame30::TuningController* tuningController,
 					SimIdeSimulator* simulator,
 					QWidget* parent);
 	virtual ~SimSchemaWidget();

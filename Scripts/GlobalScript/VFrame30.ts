@@ -21,6 +21,7 @@ module VFrame30 {
 		schemaCaption: string;
 		schema: Schema;
 		schemaCount: number;
+		zoomFactor: number;
 
 		// Functions
 		//

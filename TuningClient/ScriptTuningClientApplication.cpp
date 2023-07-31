@@ -15,3 +15,20 @@ bool ScriptTuningClientApplication::start(QString program, QString arguments, QS
 {
 	return QProcess::startDetached(program, arguments.split(';', Qt::SkipEmptyParts), workDir);
 }
+
+void ScriptTuningClientApplication::setMainWindow(MainWindow* mainWindow)
+{
+	m_mainWindow = mainWindow;
+
+	return;
+}
+
+MainWindow* ScriptTuningClientApplication::mainWindow()
+{
+	return m_mainWindow;
+}
+
+const MainWindow* ScriptTuningClientApplication::mainWindow() const
+{
+	return m_mainWindow;
+}

@@ -172,6 +172,16 @@ namespace ClientLib
 		return true;
 	}
 
+	bool TuningUserManager::checkTuningAccess(QWidget* parent)
+	{
+		if (login(parent) == false)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
 	bool TuningUserManager::requestPassword(QWidget* parent)
 	{
 		if (m_tuningUserAccounts.empty() == true)
@@ -197,10 +207,11 @@ namespace ClientLib
 
 			if (result == false)
 			{
-                if (parent != nullptr)
+				if (parent == nullptr)
                 {
-                    QMessageBox::critical(parent, qAppName(), QObject::tr("Wrong password!"));
+					break;
                 }
+				QMessageBox::critical(parent, qAppName(), QObject::tr("Wrong password!"));
 			}
 			else
 			{
@@ -219,7 +230,7 @@ namespace ClientLib
 		QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 		m_tuningUserManager(userManager)
 	{
-		setWindowTitle(tr("Tuning Login"));
+		setWindowTitle(tr("User Authorization"));
 
 		setMinimumSize(400, 150);
 

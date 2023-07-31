@@ -209,7 +209,7 @@ void TrendSlider::setMin(const TimeStamp& value)
 	return;
 }
 
-qint64 TrendSlider::signleStep() const
+qint64 TrendSlider::singleStep() const
 {
 	return m_singleStep;
 }
@@ -233,19 +233,19 @@ void TrendSlider::setPageStep(qint64 ms)
 	return;
 }
 
-qint64 TrendSlider::laneDuartion() const
+qint64 TrendSlider::laneDuration() const
 {
-	return m_laneDuartion;
+	return m_laneDuration;
 }
 
 void TrendSlider::setLaneDuration(qint64 ms)
 {
-	m_laneDuartion = ms;
+	m_laneDuration = ms;
 	update();
 }
 
-TrendSliderRailSubcontrol::TrendSliderRailSubcontrol(TrendSlider* threndSlider, TrendLib::TrendRulerSet* rulerSet) :
-	m_trendSlider(threndSlider),
+TrendSliderRailSubcontrol::TrendSliderRailSubcontrol(TrendSlider* trendSlider, TrendLib::TrendRulerSet* rulerSet) :
+	m_trendSlider(trendSlider),
 	m_rulerSet(rulerSet)
 {
 	Q_ASSERT(m_trendSlider);

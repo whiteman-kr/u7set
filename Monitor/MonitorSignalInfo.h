@@ -13,7 +13,10 @@ class MonitorSignalInfo : public DialogSignalInfo
 	Q_OBJECT
 public:
 	static bool showDialog(QString appSignalId,
-						   MonitorSignalManager* signalManager,
+						   MonitorSignalManager* appSignalManager,
+						   ITuningSignalManager& tuningSignalManager,
+						   ITuningConnection& tuningConnection,
+						   ITuningAuthorization& tuningAuthorization,
 						   MonitorConfigController* configController,
 						   MonitorCentralWidget* centralWidget);
 
@@ -22,7 +25,9 @@ private:
 					  MonitorConfigController* configController,
 					  IAppSignalManager* appSignalManager,
 					  ISignalDataServer* signalDataServer,
-					  VFrame30::TuningController* tuningController,
+					  ITuningSignalManager& tuningSignalManager,
+					  ITuningConnection& tuningConnection,
+					  ITuningAuthorization& tuningAuthorization,
 					  bool tuningEnabled,
 					  MonitorCentralWidget* centralWidget);
 

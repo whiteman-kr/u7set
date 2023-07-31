@@ -34,18 +34,19 @@ namespace ReportLib
 
 		virtual int pageCount() const = 0;
 
-		virtual QString tag() const = 0;
+		virtual QString tag() const {return m_tag;}
 
 	protected:
 		Type m_type{Type::Undefined};
 		int m_verticalOffset{0};
 		bool m_newPageBefore{false};
+		QString m_tag;	// Text printer in margin with %TAG% text
 	};
 
 	class PrintText : public PrintObject
 	{
 	public:
-		PrintText(QSizeF pageSize, int verticalOffset, bool newPageBefore);
+		PrintText(QSizeF pageSize, int verticalOffset, bool newPageBefore, const QString& tag);
 
 		QTextCursor& textCursor();
 
@@ -60,7 +61,6 @@ namespace ReportLib
 						   QMutex& pageCounterMutex) override;
 
 		virtual int pageCount() const override;
-		virtual QString tag() const override;
 
 	private:
 		QTextDocument m_textDocument;
@@ -74,7 +74,8 @@ namespace ReportLib
 					const std::shared_ptr<VFrame30::Schema>& schema,
 					const std::map<QUuid, ReportSchemaCompareAction>& compareActions,
 					int verticalOffset,
-					bool newPageBefore);
+					bool newPageBefore,
+					const QString& tag);
 
 		virtual QRect contentRect() const override;
 
@@ -87,7 +88,6 @@ namespace ReportLib
 						   QMutex& pageCounterMutex) override;
 
 		virtual int pageCount() const override;
-		virtual QString tag() const override;
 
 	private:
 		// Schema data
@@ -95,6 +95,60 @@ namespace ReportLib
 		std::shared_ptr<ReportSchemaView> m_schemaView;
 		std::shared_ptr<VFrame30::Schema> m_schema;
 		std::map<QUuid, ReportSchemaCompareAction> m_compareActions;
+	};
+
+	//
+	// RenderedSection
+	//
+	struct RenderedSection
+	{
+		RenderedSection(std::shared_ptr<ReportSection> section):
+			m_section(section)
+		{
+		}
+
+		int pagesCount() const
+		{
+			int result = 0;
+			for (const std::shared_ptr<PrintObject>& po : m_printObjects)
+			{
+				result += po->pageCount();
+			}
+			return result;
+		}
+
+		// ReportSection access
+		//
+		std::shared_ptr<ReportSection>& section()
+		{
+			return m_section;
+		}
+		const std::shared_ptr<ReportSection>& section() const
+		{
+			return m_section;
+		}
+
+		// Data access
+		//
+		const QPageLayout& pageLayout() const
+		{
+			return m_section->pageLayout();
+		}
+
+		// Rendered objects access
+		//
+		std::vector<std::shared_ptr<PrintObject>>& printObjects()
+		{
+			return m_printObjects;
+		}
+		const std::vector<std::shared_ptr<PrintObject>>& printObjects() const
+		{
+			return m_printObjects;
+		}
+
+	private:
+		std::shared_ptr<ReportSection> m_section;
+		std::vector<std::shared_ptr<PrintObject>> m_printObjects;
 	};
 
 	//
@@ -109,6 +163,7 @@ namespace ReportLib
 			enum Status
 			{
 				None,
+				Preview,
 				Rendering,
 				Printing
 			};
@@ -126,6 +181,8 @@ namespace ReportLib
 		ReportPrinter() = default;	// Call this constructor if you do not need to print schemas
 		ReportPrinter(std::shared_ptr<ReportSchemaView> reportSchemaView); // Call this constructor if your report contains schemas
 
+		bool preview(const Report& report, std::vector<RenderedSection>& renderedSections, std::atomic_bool& stop);
+
 		bool print(const Report& report, const QString& fileName, std::atomic_bool& stop);
 		bool print(const Report& report, QBuffer& buffer, std::atomic_bool& stop);
 
@@ -137,6 +194,9 @@ namespace ReportLib
 							  const QString& tag) const;
 
 	private:
+		[[nodiscard]] bool createRenderedSections(const Report& report, std::vector<RenderedSection>& renderedSections, Statistics::Status status, std::atomic_bool& stop);
+		[[nodiscard]] bool printRenderedSections(const Report& report, const std::vector<RenderedSection>& renderedSections, QBuffer& buffer, std::atomic_bool& stop);
+
 		mutable QMutex m_statisticsMutex;
 		mutable Statistics m_statistics;
 

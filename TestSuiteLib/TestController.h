@@ -61,7 +61,7 @@ namespace TestSuite
 		bool expectSignalValue(QString appSignalId, double value, qint64 timeoutMs);
 
 		/// \brief Remove all overriden signals.
-		/// <b>Note:</b> At least one work cycle must be run [startForMs(5)] to apply this function.
+		/// <b>Note:</b> It is recommended to call <b>waitForSignalOverrides<b> after this function to ensure all signals were reset.
 		void overridesReset();
 
 		/// \brief Checks if a LogicModule exists.
@@ -97,25 +97,12 @@ namespace TestSuite
 		//RamAddress createRamAddress(int offset, int bit);
 
 	public:
-		//[[nodiscard]] ScopedLog& log();
-
-		//QString buildPath() const;
-
-		//qint64 executionTimeout() const;
-		//void setExecutionTimeout(qint64 value);
-
-		//bool checkSkipOnBuildConst() const;
-		//void setCheckSkipOnBuildConst(bool value);
-
-		//[[nodiscard]] Simulator* simulator();
-		//[[nodiscard]] const Simulator* simulator() const;
-
 		// Data
 		//
 	private:
 		IInputController& m_inputController;
 		IOutputController& m_outputController;
 
-		//std::atomic<qint64> m_executionTimeout = -1;		// Script execution timeout in milliseconds, negative means no timeout
+		std::set<QString> m_overridedSignals;	// Contains AppSignalIds of overriden signals
 	};
 }

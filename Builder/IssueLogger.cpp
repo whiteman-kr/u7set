@@ -8595,20 +8595,22 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Property TuningUserAccounts can't be empty in (%1) software if TuningEnabled and TuningLogin properties are set to 'true'.
+	/// Title: Property %1 can't be empty in (%3) software if %3 is set to 'true'.
 	///
 	/// Parameters:
 	///		%1 TuningService EquipmentID
 	///
 	/// Description:
-	///		Tuning User Accounts should be set if TuningLogin is set in Monitor or TuningClient applications.
+	///		User Accounts List should be set if Login is enabled in Client applications.
 	///
-	void IssueLogger::errEQP6202(QString tuningClientMonitorId)
+	void IssueLogger::errEQP6202(QString userAccountsProperty, QString loginEnableProperty, QString softwareEquipmentId)
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6202,
-				  tr("Property TuningUserAccounts can't be empty in (%1) software if TuningLogin is set to 'true'.").
-						arg(tuningClientMonitorId));
+				  tr("Property %1 can't be empty in (%3) software if %3 is set to 'true'.").
+				  arg(userAccountsProperty).
+				  arg(softwareEquipmentId).
+				  arg(loginEnableProperty));
 	}
 
 	/// IssueCode: EQP6203

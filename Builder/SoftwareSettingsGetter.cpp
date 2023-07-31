@@ -1886,6 +1886,10 @@ bool TestSuiteSettingsGetter::readSettings(const Builder::Context* context,
 
 	RETURN_IF_FALSE(result);
 
+	result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::TESTING_LOGIN, &login, log);
+
+	result &= DeviceHelper::getStrListPropertyAsString(software, EquipmentPropNames::TESTING_USER_ACCOUNTS, &userAccounts, log);
+
 	return result;
 }
 

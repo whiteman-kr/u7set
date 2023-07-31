@@ -27,7 +27,8 @@ namespace ReportLib
 		const auto& header = m_template.header();
 		if (header.empty() == false)
 		{
-			rs = ReportSection::create(header.caption(), m_template.pageLayout());
+			rs = ReportSection::create(header.caption(), header.pageLayout());
+			rs->setTag(header.tag());
 			report.addSection(rs);
 
 			generateSection(*rs, header);
@@ -42,7 +43,8 @@ namespace ReportLib
 		{
 			if (rs == nullptr || firstSection == false)
 			{
-				rs = ReportSection::create(section.caption(), m_template.pageLayout());
+				rs = ReportSection::create(section.caption(), section.pageLayout());
+				rs->setTag(section.tag());
 				report.addSection(rs);
 			}
 
@@ -61,7 +63,8 @@ namespace ReportLib
 		{
 			if (rs == nullptr)
 			{
-				rs = ReportSection::create(footer.caption(), m_template.pageLayout());
+				rs = ReportSection::create(footer.caption(), footer.pageLayout());
+				rs->setTag(footer.tag());
 				report.addSection(rs);
 			}
 

@@ -347,8 +347,8 @@ void SchemaViewWidget::draw(CDrawParam& drawParam, const QRectF& clipRect)
 
 	// Calc size
 	//
-	int widthInPixel = schema()->GetDocumentWidth(drawParam.realDpiX(), zoom());
-	int heightInPixel = schema()->GetDocumentHeight(drawParam.realDpiY(), zoom());
+	//int widthInPixel = schema()->GetDocumentWidth(drawParam.realDpiX(), zoom());
+	//int heightInPixel = schema()->GetDocumentHeight(drawParam.realDpiY(), zoom());
 
 	// Clear device
 	//

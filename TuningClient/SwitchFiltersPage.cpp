@@ -9,6 +9,7 @@
 #include <QMessageBox>
 
 #include "SwitchFiltersPageOptions.h"
+#include "Main.h"
 #include "MainWindow.h"
 #include "Settings.h"
 
@@ -119,7 +120,7 @@ SwitchFiltersPage::SwitchFiltersPage(TuningConfigController& configController,
 
 	createControls(m_tuningFilterStorage.root());
 
-	connect(theMainWindow, &MainWindow::timerTick500, this, &SwitchFiltersPage::onTimer);
+	connect(theApp.mainWindow(), &MainWindow::timerTick500, this, &SwitchFiltersPage::onTimer);
 
 	setLayout(m_mainLayout);
 }

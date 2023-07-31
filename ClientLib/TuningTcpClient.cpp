@@ -226,7 +226,7 @@ namespace ClientLib
 
 	void TuningTcpClient::onConnection()
 	{
-		m_logFile.writeMessage(tr("onClientThreadFinished(), connection established."));
+		m_logFile.writeMessage(tr("onConnection(), connection established."));
 
 		assert(isClearToSendRequest() == true);
 
@@ -523,7 +523,7 @@ namespace ClientLib
 
 		if (m_tuningSourcesInfoReply.error() != static_cast<int>(E::NetworkError::Success))
 		{
-			m_logFile.writeError(tr("m_tuningDataSourcesInfoReply(), error received: %1")
+			m_logFile.writeError(tr("processTuningSourcesInfo(), in m_tuningSourcesInfoReply error received: %1")
 								 .arg(E::valueToString(static_cast<E::NetworkError>(m_tuningSourcesInfoReply.error()))));
 
 			continueRequestLoop();

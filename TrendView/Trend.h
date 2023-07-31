@@ -55,6 +55,11 @@ namespace TrendLib
 							  const std::vector<TrendSignalParam>& discretes,
 							  const std::vector<TrendSignalParam>& analogs) const;
 
+		void drawSignalsDecorRealtimeValue(QPainter* painter,
+										   const QRectF& signalRect,
+										   const TrendParam& drawParam,
+										   const TrendSignalParam& signalParam) const;
+
 		void drawAnalogSignalsGridSeparateMode(QPainter* painter,
 											   const QRectF& laneRect,
 											   const TrendParam& drawParam,

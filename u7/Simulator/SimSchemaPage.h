@@ -16,7 +16,6 @@ public:
 				  SimIdeSimulator* simulator,
 				  SimSchemaManager* schemaManager,
 				  VFrame30::AppSignalController* appSignalController,
-				  VFrame30::TuningController* tuningController,
 				  QWidget* parent = nullptr);
 
 public:

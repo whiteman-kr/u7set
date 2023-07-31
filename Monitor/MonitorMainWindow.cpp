@@ -28,7 +28,7 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	// Init translator
 	//
 	m_translator.addLanguage("en", "English");
-	m_translator.addLanguage("ua", "Ukrainian/Українська");
+	m_translator.addLanguage("ua", "Ukrainian");
 
 	m_translator.addTranslationFile("ua", ":/languages/Monitor_ua.qm");
 	m_translator.addTranslationFile("ua", ":/languages/qtbase_uk.qm");
@@ -54,14 +54,12 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	// Creating signals controllers for VFrame30
 	//
 	m_appSignalController = std::make_unique<VFrame30::AppSignalController>(&m_signalManager);
-	m_tuningController = std::make_unique<MonitorTuningController>(&m_tuningSignalManager, &m_tuningConnection, &m_tuningUserManager);
 	m_logController = std::make_unique<VFrame30::LogController>(&m_LogFile);
 
 	// --
 	//
 	MonitorCentralWidget* monitorCentralWidget = new MonitorCentralWidget(&m_schemaManager,
 																		  m_appSignalController.get(),
-																		  m_tuningController.get(),
 																		  m_logController.get(),
 																		  &m_schemaStats,
 																		  this);
@@ -181,6 +179,7 @@ void MonitorMainWindow::timerEvent(QTimerEvent* event)
 void MonitorMainWindow::showEvent(QShowEvent*)
 {
 	showLogo();
+	showZoomControls();
 	return;
 }
 
@@ -257,8 +256,6 @@ void MonitorMainWindow::restoreWindowState()
 
 void MonitorMainWindow::showTuningLoginControls()
 {
-
-
 	// Show/hide login controls
 	//
 	if (m_configController.configuration().tuningEnabled == true && m_tuningUserManager.tuningLogin() == true)
@@ -306,6 +303,25 @@ void MonitorMainWindow::showTuningLoginControls()
 		m_loginAction->setVisible(false);
 		m_loginUserTimeoutAction->setVisible(false);
 	}
+}
+
+void MonitorMainWindow::showZoomControls()
+{
+	auto zoomMode = MonitorAppSettings::instance().zoomMode();
+
+	bool visible = zoomMode == VFrame30::ZoomMode::Manual;
+
+	if (m_zoomToolBarSeparator != nullptr)
+	{
+		m_zoomToolBarSeparator->setVisible(visible);
+	}
+
+	m_zoomInAction->setVisible(visible);
+	m_zoomOutAction->setVisible(visible);
+	m_zoom100Action->setVisible(visible);
+	m_zoomToFitAction->setVisible(visible);
+
+	return;
 }
 
 void MonitorMainWindow::showLogo()
@@ -628,7 +644,7 @@ void MonitorMainWindow::createToolBars()
 	m_toolBar->addAction(m_schemaListAction);
 	m_toolBar->addAction(m_newTabAction);
 
-	m_toolBar->addSeparator();
+	m_zoomToolBarSeparator = m_toolBar->addSeparator();
 	m_toolBar->addAction(m_zoomInAction);
 	m_toolBar->addAction(m_zoomOutAction);
 	m_toolBar->addAction(m_zoomToFitAction);
@@ -945,7 +961,9 @@ void MonitorMainWindow::showSettings()
 		// Apply settings here
 		//
 		showLogo();
+		showZoomControls();
 		setVisibleTabBar(MonitorAppSettings::instance().showSchemasTabBar());
+		monitorCentralWidget()->applyZoomMode(MonitorAppSettings::instance().zoomMode());
 
 		// Reconnect
 		//
@@ -1729,6 +1747,36 @@ const MonitorSignalManager& MonitorMainWindow::signalManager() const
 }
 
 ClientLib::TuningUserManager& MonitorMainWindow::userManager()
+{
+	return m_tuningUserManager;
+}
+
+TuningSignalManager& MonitorMainWindow::tuningSignalManager()
+{
+	return m_tuningSignalManager;
+}
+
+const TuningSignalManager& MonitorMainWindow::tuningSignalManager() const
+{
+	return m_tuningSignalManager;
+}
+
+ClientLib::TuningConnection& MonitorMainWindow::tuningConnection()
+{
+	return m_tuningConnection;
+}
+
+const ClientLib::TuningConnection& MonitorMainWindow::tuningConnection() const
+{
+	return m_tuningConnection;
+}
+
+ITuningAuthorization& MonitorMainWindow::tuningAuthorization()
+{
+	return m_tuningUserManager;
+}
+
+const ITuningAuthorization& MonitorMainWindow::tuningAuthorization() const
 {
 	return m_tuningUserManager;
 }

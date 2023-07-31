@@ -1306,50 +1306,7 @@ void MainWindow::projectDifference()
 
 void MainWindow::createSchemasAlbums()
 {
-	QString albumPath = QSettings{}.value("MainWindow/Export/AlbumPath").toString();
-
-	static std::vector<Builder::SchemaTypesParams> schemaTypesParams = {};
-	if (schemaTypesParams.empty() == true)
-	{
-		schemaTypesParams = Builder::SchemasReportGenerator::defaultFileTypesParams(db());
-	}
-
-	Builder::SchemasReportOptions storedOptions;
-	storedOptions.load(db());
-
-	Builder::SchemasReportOptions options;
-	options.addPageNumbers = true;	// When loading and storing options, keep addPageNumbers unchanged!
-	options.infoMode = storedOptions.infoMode;
-	options.addLogicSchemaDetails = storedOptions.addLogicSchemaDetails;
-
-	DialogSchemasReport d(albumPath, schemaTypesParams,
-						  Builder::SchemasReportGenerator::defaultFileTypesParams(db()), options, this);
-	if (d.exec() != QDialog::Accepted)
-	{
-		return;
-	}
-	schemaTypesParams = d.schemaTypesParams();
-	options = d.options();
-
-	storedOptions.infoMode = options.infoMode;
-	storedOptions.addLogicSchemaDetails = options.addLogicSchemaDetails;
-	storedOptions.save(db());
-
-	QSettings{}.setValue("MainWindow/Export/AlbumPath", albumPath);
-
-	SchemasReportGeneratorThread r(theSettings.serverHost(),
-								   theSettings.serverPort(),
-								   theSettings.serverUsername(),
-								   theSettings.serverPassword(),
-								   db()->currentProject().projectName(),
-								   db()->currentUser().username(),
-								   db()->currentUser().password(),
-								   &m_signalSetProvider->signalSet(),
-								   this,
-								   options,
-								   schemaTypesParams);
-
-	r.exportAllSchemasToAlbum(albumPath);
+	SchemasAlbumGenerator::createSchemasAlbums(db(), &m_signalSetProvider->signalSet(), this);
 	return;
 }
 

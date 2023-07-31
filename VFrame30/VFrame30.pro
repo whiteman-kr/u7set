@@ -58,6 +58,7 @@ HEADERS += \
     ../lib/ClientBehavior.h \
 	../UtilsLib/ILogFile.h \
     ../lib/ITimeStats.h \
+    ../lib/Tuning/ITuningAuthorization.h \
     ../lib/Tuning/ITuningConnection.h \
     Context.h \
     ISchemaViewHistory.h \

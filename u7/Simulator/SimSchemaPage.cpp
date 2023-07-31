@@ -6,19 +6,17 @@ SimSchemaPage::SimSchemaPage(std::shared_ptr<VFrame30::Schema> schema,
 							 SimIdeSimulator* simulator,
 							 SimSchemaManager* schemaManager,
 							 VFrame30::AppSignalController* appSignalController,
-							 VFrame30::TuningController* tuningController,
 							 QWidget* parent)
 	: SimBasePage(simulator, parent)
 {
 	assert(schema);
 	assert(schemaManager);
 	assert(appSignalController);
-	assert(tuningController);
 	assert(m_simulator);
 
 	// --
 	//
-	m_schemaWidget = new SimSchemaWidget{schema, schemaManager, appSignalController, tuningController, m_simulator, this};
+	m_schemaWidget = new SimSchemaWidget{schema, schemaManager, appSignalController, m_simulator, this};
 
 	QGridLayout* layout = new QGridLayout();
 	layout->addWidget(m_schemaWidget, 0, 0, 1, 1);

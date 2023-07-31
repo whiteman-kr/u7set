@@ -105,7 +105,7 @@ void SoftwareSettings::setShortId(std::vector<SERVICETYPE>* services)
 		QString shortId = ss[0].shortId;
 
 		if (qsizetype underscoreIndex = shortId.indexOf('_');
-			underscoreIndex != -1)
+				underscoreIndex != -1)
 		{
 			ss[0].shortId = shortId.right(shortId.size() - (underscoreIndex + 1));
 		}
@@ -127,9 +127,9 @@ void SoftwareSettings::setShortId(std::vector<SERVICETYPE>* services)
 
 			bool firstLetterIsSame = std::all_of(ss.begin(), ss.end(),
 												 [firstLetter](const ServiceRecord& sr)
-												 {
-													return sr.currentId[0] == firstLetter;
-												 });
+			{
+				return sr.currentId[0] == firstLetter;
+			});
 
 			if (firstLetterIsSame == true)
 			{
@@ -883,7 +883,7 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 }
 
 bool TuningServiceSettings::writeTuningSourcesToXml(XmlWriteHelper& xml,
-												  const std::vector<TuningSource>& sources)
+													const std::vector<TuningSource>& sources)
 {
 	xml.writeStartElement(XmlElement::TUNING_SOURCES);
 	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(sources.size()));
@@ -1750,17 +1750,17 @@ const TuningClientSettings& TuningClientSettings::operator = (const TuningClient
 bool TuningClientSettings::appearanceChanged(const TuningClientSettings& src) const
 {
 	if (autoApply != src.autoApply ||
-		filterByEquipment != src.filterByEquipment ||
-		filterBySchema != src.filterBySchema ||
-		showSchemasList != src.showSchemasList ||
-		showSchemasTabs != src.showSchemasTabs ||
-		showSchemas != src.showSchemas ||
-		showSignals != src.showSignals ||
-		statusFlagFunction != src.statusFlagFunction ||
-		tuningLogin != src.tuningLogin ||
-		tuningSessionTimeout != src.tuningSessionTimeout ||
-		tuningUserAccounts != src.tuningUserAccounts ||
-		loginPerOperation != src.loginPerOperation)
+			filterByEquipment != src.filterByEquipment ||
+			filterBySchema != src.filterBySchema ||
+			showSchemasList != src.showSchemasList ||
+			showSchemasTabs != src.showSchemasTabs ||
+			showSchemas != src.showSchemas ||
+			showSignals != src.showSignals ||
+			statusFlagFunction != src.statusFlagFunction ||
+			tuningLogin != src.tuningLogin ||
+			tuningSessionTimeout != src.tuningSessionTimeout ||
+			tuningUserAccounts != src.tuningUserAccounts ||
+			loginPerOperation != src.loginPerOperation)
 	{
 		return true;
 	}
@@ -1771,8 +1771,8 @@ bool TuningClientSettings::appearanceChanged(const TuningClientSettings& src) co
 bool TuningClientSettings::connectionChanged(const TuningClientSettings& src) const
 {
 	if (tuningServices.size() != src.tuningServices.size() ||
-		autoApply != src.autoApply ||
-		statusFlagFunction != src.statusFlagFunction)
+			autoApply != src.autoApply ||
+			statusFlagFunction != src.statusFlagFunction)
 	{
 		return true;
 	}
@@ -1849,6 +1849,15 @@ bool TestSuiteSettings::writeToXml(XmlWriteHelper& xml) const
 	xml.writeEndElement();		// </TuningServices>
 
 	//
+
+	// --
+	//
+	xml.writeStartElement(XmlElement::TESTING_SECURITY);
+
+	xml.writeBoolAttribute(EquipmentPropNames::TESTING_LOGIN, login);
+	xml.writeStringAttribute(EquipmentPropNames::TESTING_USER_ACCOUNTS, userAccounts);
+
+	xml.writeEndElement();			// </TestSecurity>
 
 	writeEndSettings(xml);;			// </Settings>
 
@@ -1935,6 +1944,10 @@ bool TestSuiteSettings::readFromXml(XmlReadHelper& xml)
 		tuningServices.push_back(tsc);
 	}
 
+	result &= xml.findElement(XmlElement::TESTING_SECURITY);
+	result &= xml.readBoolAttribute(EquipmentPropNames::TESTING_LOGIN, &login);
+	result &= xml.readStringAttribute(EquipmentPropNames::TESTING_USER_ACCOUNTS, &userAccounts);
+
 	return result;
 }
 
@@ -1942,6 +1955,12 @@ void TestSuiteSettings::clear()
 {
 	*this = TestSuiteSettings{};
 }
+
+QStringList TestSuiteSettings::getUsersAccounts() const
+{
+	return userAccounts.split(Separator::SEMICOLON, Qt::SkipEmptyParts);
+}
+
 
 // -------------------------------------------------------------------------------------
 //

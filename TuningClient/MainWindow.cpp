@@ -29,8 +29,8 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	// Init translator
 	//
 	m_translator.addLanguage("en", "English");
-	m_translator.addLanguage("ru", "Russian/Русский");
-	m_translator.addLanguage("ua", "Ukrainian/Українська");
+	m_translator.addLanguage("ru", "Russian");
+	m_translator.addLanguage("ua", "Ukrainian");
 
 	m_translator.addTranslationFile("ru", ":/languages/TuningClient_ru.qm");
 	m_translator.addTranslationFile("ru", ":/languages/qtbase_ru.qm");
@@ -109,6 +109,37 @@ MainWindow::~MainWindow()
 	theSettings.m_mainWindowGeometry = saveGeometry();
 	theSettings.m_mainWindowState = saveState();
 }
+
+TuningSignalManager& MainWindow::tuningSignalManager()
+{
+	return m_tuningSignalManager;
+}
+
+const TuningSignalManager& MainWindow::tuningSignalManager() const
+{
+	return m_tuningSignalManager;
+}
+
+ClientLib::TuningConnection& MainWindow::tuningConnection()
+{
+	return m_tuningConnection;
+}
+
+const ClientLib::TuningConnection& MainWindow::tuningConnection() const
+{
+	return m_tuningConnection;
+}
+
+ITuningAuthorization& MainWindow::tuningAuthorization()
+{
+	return m_userManager;
+}
+
+const ITuningAuthorization& MainWindow::tuningAuthorization() const
+{
+	return m_userManager;
+}
+
 
 void MainWindow::createActions()
 {
@@ -455,7 +486,7 @@ void MainWindow::createWorkspace()
 			{
 				schemaFiltersFound = true;
 
-				SchemasWorkspace* sw = new SchemasWorkspace(m_configController, m_tuningSignalManager, m_userManager, m_tuningConnection,
+				SchemasWorkspace* sw = new SchemasWorkspace(m_configController,
 															childFilter->caption(),
 															childFilter->tagsList(),
 															childFilter->startSchemaId(),
@@ -467,7 +498,7 @@ void MainWindow::createWorkspace()
 
 		if (schemaFiltersFound == false)
 		{
-			SchemasWorkspace* sw = new SchemasWorkspace(m_configController, m_tuningSignalManager, m_userManager, m_tuningConnection,
+			SchemasWorkspace* sw = new SchemasWorkspace(m_configController,
 														tr("Schemas"),
 														{},
 														m_configController.startSchemaId(),
@@ -1248,6 +1279,3 @@ void MainWindow::slot_userFiltersChanged()
 	}
 
 }
-
-MainWindow* theMainWindow = nullptr;
-

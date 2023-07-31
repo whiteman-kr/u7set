@@ -14,34 +14,185 @@
 #include "../VFrame30/MonitorSchema.h"
 #include "../VFrame30/MacrosExpander.h"
 
-//
-// MonitorTuningController
-//
-MonitorTuningController::MonitorTuningController(ITuningSignalManager* signalManager,
-												 ClientLib::TuningConnection* tuningConnection,
-												 ClientLib::TuningUserManager* tuningUserManager,
-												 QWidget* parent):
-	VFrame30::TuningController(signalManager, tuningConnection, parent),
-	m_tuningUserManager(tuningUserManager),
-	m_parentWidget(parent)
+namespace
 {
+	class QSignalUpdateAction : public QAction
+	{
+	public:
+		explicit QSignalUpdateAction(const AppSignalParam& signalParam,
+									 const IAppSignalManager* signalManager,
+									 qsizetype maxIdSize,
+									 qsizetype maxCaptionSize,
+									 QObject* parent) :
+			QAction{parent},
+			m_signalParam{signalParam},
+			m_signalManager{signalManager},
+			m_maxIdSize{maxIdSize},
+			m_maxCaptionSize{maxCaptionSize}
+		{
+			Q_ASSERT(m_signalManager);
+
+			setText(getActionText());
+			startTimer(200);
+
+			return;
+		}
+
+	protected:
+		void timerEvent(QTimerEvent* /*event*/) override
+		{
+			setText(getActionText());
+		}
+
+		QString getActionText()
+		{
+			QString str;
+			
+			if (m_signalParam.customSignalId().isEmpty() == true)
+			{
+				// There is no such signal.
+				//
+				str = m_signalParam.appSignalId();
+			}
+			else
+			{
+				AppSignalState state = m_signalManager ?
+					m_signalManager->signalState(m_signalParam.appSignalId(), nullptr) :
+					AppSignalState{};
+
+				QString stateText;
+				if (state.isValid() == false)
+				{
+					stateText = " ? ";
+				}
+				else
+				{
+					// Print signal value.
+					//
+					int precision = (m_signalParam.isAnalog() && m_signalParam.analogSignalFormat() == E::AnalogAppSignalFormat::Float32) ?
+						m_signalParam.precision() :
+						0;
+
+					stateText = QString{"%1"}.arg(state.value(), 8, 'f', precision);
+				}
+
+				str = QString{"%1 | %2 |%3"}
+					.arg(m_signalParam.customSignalId().leftJustified(m_maxIdSize))
+					.arg(m_signalParam.caption().leftJustified(m_maxCaptionSize))
+					.arg(stateText);
+			}
+			
+			return str;
+		}
+
+	public:
+		AppSignalParam signalParam() const
+		{
+			return m_signalParam;
+		}
+
+	private:
+		const AppSignalParam m_signalParam;
+		const IAppSignalManager* m_signalManager{};
+
+		qsizetype m_maxIdSize{};
+		qsizetype m_maxCaptionSize{};
+	};
+
+	class QSchemaMenu : public QMenu
+	{
+	public:
+		QSchemaMenu(QWidget* parent = nullptr) : QMenu{parent}
+		{
+#ifdef Q_OS_WIN
+			QFont f;
+			f.setFamily("Consolas");
+			setFont(f);
+#else
+			//QFont f;
+			//f.setFamily("DejaVu Sans Mono");  // https://ianyepan.github.io/posts/system-default-monospace-fonts-pt1/
+			//f.setFamily("DejaVu Sans Mono Book");  // https://ianyepan.github.io/posts/system-default-monospace-fonts-pt1/
+			//setFont(f);
+			setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+#endif 
+		}
+
+	protected:
+		void mousePressEvent(QMouseEvent* event) override
+		{
+			m_dragSignalParam = {};
+			m_dragStartPosition = {};
+
+			QSignalUpdateAction* dragAction = dynamic_cast<QSignalUpdateAction*>(activeAction());
+
+			if (event->button() == Qt::LeftButton && dragAction != nullptr)
+			{
+				m_dragStartPosition = event->pos();
+				m_dragSignalParam = dragAction->signalParam();
+			}
+
+			return QMenu::mousePressEvent(event);
+		}
+
+		void mouseMoveEvent(QMouseEvent* event) override
+		{
+			if (m_dragSignalParam.customSignalId().isEmpty() == true)
+			{
+				QMenu::mouseMoveEvent(event);
+				return;
+			}
+
+			if (!(event->buttons() & Qt::LeftButton))
+			{
+				QMenu::mouseMoveEvent(event);
+				return;
+			}
+
+			if ((event->pos() - m_dragStartPosition).manhattanLength() < QApplication::startDragDistance())
+			{
+				QMenu::mouseMoveEvent(event);
+				return;
+			}
+
+			// Save signals to protobuf.
+			//
+			::Proto::AppSignalSet protoSetMessage;
+			m_dragSignalParam.save(protoSetMessage.add_appsignal());
+
+			QByteArray data;
+			data.resize(static_cast<int>(protoSetMessage.ByteSizeLong()));
+
+			protoSetMessage.SerializeToArray(data.data(), static_cast<int>(protoSetMessage.ByteSizeLong()));
+
+			// --
+			//
+			if (data.isEmpty() == false)
+			{
+				QDrag* drag = new QDrag{this->parentWidget()};
+				QMimeData* mimeData = new QMimeData;
+
+				mimeData->setData(AppSignalParamMimeType::value, data);
+				drag->setMimeData(mimeData);
+
+				// Close this menu, if it is not closed then interface can freeze.
+				//
+				close();
+				m_dragSignalParam = {};
+
+				drag->exec();
+
+				return;
+			}
+
+			return;
+		}
+
+	private:
+		AppSignalParam m_dragSignalParam;
+		QPoint m_dragStartPosition;
+	};
 }
 
-bool MonitorTuningController::checkTuningAccess() const
-{
-	if (m_tuningUserManager == nullptr)
-	{
-		Q_ASSERT(m_tuningUserManager);
-		return false;
-	}
-
-	if (m_tuningUserManager->login(m_parentWidget) == false)
-	{
-		return false;
-	}
-
-	return true;
-}
 
 //
 //
@@ -51,14 +202,16 @@ bool MonitorTuningController::checkTuningAccess() const
 MonitorSchemaWidget::MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
 										 MonitorSchemaManager* schemaManager,
 										 VFrame30::AppSignalController* appSignalController,
-										 VFrame30::TuningController* tuningController,
-                                         VFrame30::LogController* logController,
+										 VFrame30::LogController* logController,
 										 ITimeStats* timeStats,
 										 QWidget* parent) :
-	VFrame30::ClientSchemaWidget(new MonitorSchemaView(schemaManager, this, appSignalController, tuningController, logController, timeStats),
+	VFrame30::ClientSchemaWidget(new MonitorSchemaView(schemaManager, this, appSignalController, logController, timeStats),
 								 schema,
 								 schemaManager,
-								 parent)
+								 parent),
+	m_logController(logController),
+	m_timeStats(timeStats)
+
 {
 	setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(this, &QWidget::customContextMenuRequested, this, &MonitorSchemaWidget::contextMenuRequested);
@@ -196,7 +349,7 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 
 	// Compose menu
 	//
-	QMenu menu(this);
+	QSchemaMenu menu{this};
 
 	// Schemas List
 	//
@@ -248,12 +401,12 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 		for (const QString& schemaId : signalsSchemasSet)
 		{
 			auto f = [this, schemaId, &appSignals, &impactSignals, &loopbacks]()
-					{
-						if (schemaId != this->schemaId())
-						{
-							setSchema(schemaId, appSignals + impactSignals + loopbacks);
-						}
-					};
+			{
+				if (schemaId != this->schemaId())
+				{
+					setSchema(schemaId, appSignals + impactSignals + loopbacks);
+				}
+			};
 
 			QAction* a = schemasSubMenu->addAction(schemaId);
 
@@ -268,12 +421,12 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 		for (const QString& schemaId : impactSignalsSchemasSet)
 		{
 			auto f = [this, schemaId, &appSignals, &impactSignals, &loopbacks]()
-					{
-						if (schemaId != this->schemaId())
-						{
-							setSchema(schemaId, appSignals + impactSignals + loopbacks);
-						}
-					};
+			{
+				if (schemaId != this->schemaId())
+				{
+					setSchema(schemaId, appSignals + impactSignals + loopbacks);
+				}
+			};
 
 			QString actionCaption = (schema()->schemaId() == schemaId) ? QString("-> %1").arg(schemaId) : schemaId;
 
@@ -288,12 +441,12 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 		for (const QString& schemaId : loopbackSchemas)
 		{
 			auto f = [this, schemaId, &appSignals, &impactSignals, &loopbacks]()
-					{
-						if (schemaId != this->schemaId())
-						{
-							setSchema(schemaId, appSignals + impactSignals + loopbacks);
-						}
-					};
+			{
+				if (schemaId != this->schemaId())
+				{
+					setSchema(schemaId, appSignals + impactSignals + loopbacks);
+				}
+			};
 
 			QString actionCaption = (schema()->schemaId() == schemaId) ? QString("-> %1").arg(schemaId) : schemaId;
 
@@ -318,24 +471,72 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 	QAction* appSignalSeparator = menu.addSeparator();
 	appSignalSeparator->setText(tr("Signals"));
 
+	std::list<AppSignalParam> appSignalParams;
+	std::list<AppSignalParam> impactSignalsParams;
+
+	qsizetype maxIdSize = 0;
+	qsizetype maxCaptionSize = 0;
+
 	for (const QString& s : appSignals)
 	{
 		bool ok = false;
-		AppSignalParam signal =	signalManager()->signalParam(s, &ok);
+		AppSignalParam signal = signalManager()->signalParam(s, &ok);
 
-		QString signalId = ok ? QString("%1 %2").arg(signal.customSignalId()).arg(signal.caption()) : s;
+		if (ok == false)
+		{
+			signal.setAppSignalId(s);
+			signal.setCustomSignalId({});
 
-		QAction* a = menu.addAction(signalId);
+			maxIdSize = std::max(maxIdSize, signal.appSignalId().size());
+		}
+		else
+		{
+			maxIdSize = std::max(maxIdSize, signal.customSignalId().size());
+			maxCaptionSize = std::max(maxCaptionSize, signal.caption().size());
+		}
 
-		auto f = [this, signal]() -> void
-				 {
-					signalInfo(signal.appSignalId());
-				 };
-
-		connect(a, &QAction::triggered, this, f);
+		appSignalParams.push_back(std::move(signal));
 	}
 
-	if (impactSignals.empty() == false)
+	for (const QString& s : impactSignals)
+	{
+		bool ok = false;
+		AppSignalParam signal = signalManager()->signalParam(s, &ok);
+
+		if (ok == false)
+		{
+			signal.setAppSignalId(s);
+			signal.setCustomSignalId({});
+			
+			maxIdSize = std::max(maxIdSize, signal.appSignalId().size());
+		}
+		else
+		{
+			maxIdSize = std::max(maxIdSize, signal.customSignalId().size());
+			maxCaptionSize = std::max(maxCaptionSize, signal.caption().size());
+		}
+
+		impactSignalsParams.push_back(std::move(signal));
+	}
+
+	// --
+	//
+	for (const auto& signal : appSignalParams)
+	{
+		auto signalAction = new QSignalUpdateAction{signal, signalManager(), maxIdSize, maxCaptionSize, &menu};
+		menu.addAction(signalAction);
+
+		auto f = [this, signal]() -> void
+		{
+			signalInfo(signal.appSignalId());
+		};
+
+		connect(signalAction, &QAction::triggered, this, f);
+	}
+
+	// --
+	//
+	if (impactSignalsParams.empty() == false)
 	{
 		if (appSignals.empty() == false)
 		{
@@ -343,28 +544,22 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 			impactSignalSeparator->setText(tr("Impact Signals"));
 		}
 
-		for (const QString& s : impactSignals)
+		for (const auto& signal : impactSignalsParams)
 		{
-			bool ok = false;
-
-			AppSignalParam signal =	signalManager()->signalParam(s, &ok);
-
-			QString signalId = ok ? QString("%1 %2").arg(signal.customSignalId()).arg(signal.caption()) : s;
-
-			QAction* a = menu.addAction(signalId);
+			auto signalAction = new QSignalUpdateAction{signal, signalManager(), maxIdSize, maxCaptionSize, &menu};
+			menu.addAction(signalAction);
 
 			auto f = [this, signal]() -> void
 					 {
 						signalInfo(signal.appSignalId());
 					 };
 
-			connect(a, &QAction::triggered, this, f);
+			connect(signalAction, &QAction::triggered, this, f);
 		}
 	}
 
 	// --
 	//
-
 	menu.exec(QCursor::pos());
 
 	return;
@@ -374,6 +569,9 @@ void MonitorSchemaWidget::signalInfo(QString appSignalId)
 {
 	MonitorSignalInfo::showDialog(appSignalId,
 								  monitorSignalManager(),
+								  theApp.mainWindow()->tuningSignalManager(),
+								  theApp.mainWindow()->tuningConnection(),
+								  theApp.mainWindow()->tuningAuthorization(),
 								  &theApp.mainWindow()->configController(),
 								  theApp.mainWindow()->monitorCentralWidget());
 	return;

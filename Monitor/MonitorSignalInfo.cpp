@@ -6,18 +6,21 @@
 class MonitorSignalManager;
 
 bool MonitorSignalInfo::showDialog(QString appSignalId,
-								   MonitorSignalManager* signalManager,
+								   MonitorSignalManager* appSignalManager,
+								   ITuningSignalManager& tuningSignalManager,
+								   ITuningConnection& tuningConnection,
+								   ITuningAuthorization& tuningAuthorization,
 								   MonitorConfigController* configController,
 								   MonitorCentralWidget* centralWidget)
 {
-	Q_ASSERT(signalManager);
+	Q_ASSERT(appSignalManager);
 	Q_ASSERT(configController);
 	Q_ASSERT(centralWidget);
 
 	if (appSignalId.startsWith('@') == true)
 	{
 		bool ok = true;
-		AppSignalParam s = signalManager->signalParamByEquipemntId(appSignalId, &ok);
+		AppSignalParam s = appSignalManager->signalParamByEquipemntId(appSignalId, &ok);
 
 		if (ok == true)
 		{
@@ -37,7 +40,7 @@ bool MonitorSignalInfo::showDialog(QString appSignalId,
 	else
 	{
 		bool ok = false;
-		AppSignalParam signal = signalManager->signalParam(appSignalId, &ok);
+		AppSignalParam signal = appSignalManager->signalParam(appSignalId, &ok);
 
 		if (ok == true)
 		{
@@ -45,13 +48,15 @@ bool MonitorSignalInfo::showDialog(QString appSignalId,
 
 			MonitorSignalInfo* msi = new MonitorSignalInfo(signal,
 														   configController,
-														   signalManager,
-														   signalManager,
-														   centralWidget->tuningController(),
+														   appSignalManager,
+														   appSignalManager,
+														   tuningSignalManager,
+														   tuningConnection,
+														   tuningAuthorization,
 														   tuningEnabled,
 														   centralWidget);
 
-			connect(signalManager, &MonitorSignalManager::signalParamsUpdated, msi, &MonitorSignalInfo::onSignalParamAndUnitsArrived);
+			connect(appSignalManager, &MonitorSignalManager::signalParamsUpdated, msi, &MonitorSignalInfo::onSignalParamAndUnitsArrived);
 
 			msi->show();
 			msi->raise();
@@ -73,14 +78,18 @@ MonitorSignalInfo::MonitorSignalInfo(const AppSignalParam& signal,
 									 MonitorConfigController* configController,
 									 IAppSignalManager* appSignalManager,
 									 ISignalDataServer* signalDataServer,
-									 VFrame30::TuningController* tuningController,
+									 ITuningSignalManager& tuningSignalManager,
+									 ITuningConnection& tuningConnection,
+									 ITuningAuthorization& tuningAuthorization,
 									 bool tuningEnabled,
 									 MonitorCentralWidget* centralWidget):
 	DialogSignalInfo(signal,
 					 appSignalManager,
 					 signalDataServer,
 					 configController->configuration().appDataServices,
-					 tuningController,
+					 tuningSignalManager,
+					 tuningConnection,
+					 tuningAuthorization,
 					 tuningEnabled,
 					 DialogType::Monitor,
 					 centralWidget),
