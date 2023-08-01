@@ -42,27 +42,31 @@
 <context>
     <name>ClientLib::DialogTuningPassword</name>
     <message>
-        <location filename="../TuningUserManager.cpp" line="222"/>
         <source>Tuning Login</source>
-        <translation>Вхід</translation>
+        <translation type="vanished">Вхід</translation>
     </message>
     <message>
-        <location filename="../TuningUserManager.cpp" line="234"/>
+        <location filename="../TuningUserManager.cpp" line="233"/>
+        <source>User Authorization</source>
+        <translation>Авторизація</translation>
+    </message>
+    <message>
+        <location filename="../TuningUserManager.cpp" line="245"/>
         <source>Login:</source>
         <translation>Логін:</translation>
     </message>
     <message>
-        <location filename="../TuningUserManager.cpp" line="237"/>
+        <location filename="../TuningUserManager.cpp" line="248"/>
         <source>Password:</source>
         <translation>Пароль:</translation>
     </message>
     <message>
-        <location filename="../TuningUserManager.cpp" line="244"/>
+        <location filename="../TuningUserManager.cpp" line="255"/>
         <source>OK</source>
         <translation>ОК</translation>
     </message>
     <message>
-        <location filename="../TuningUserManager.cpp" line="248"/>
+        <location filename="../TuningUserManager.cpp" line="259"/>
         <source>Cancel</source>
         <translation>Скасувати</translation>
     </message>
@@ -174,11 +178,6 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningTcpClient.cpp" line="229"/>
-        <source>onClientThreadFinished(), connection established.</source>
-        <translation></translation>
-    </message>
-    <message>
         <location filename="../TuningTcpClient.cpp" line="256"/>
         <source>onDisconnection(), connection closed.</source>
         <translation></translation>
@@ -201,11 +200,6 @@
     <message>
         <location filename="../TuningTcpClient.cpp" line="501"/>
         <source>requestTuningSourcesInfo(), isClearToSendRequest() == false, reconnecting.</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../TuningTcpClient.cpp" line="526"/>
-        <source>m_tuningDataSourcesInfoReply(), error received: %1</source>
         <translation></translation>
     </message>
     <message>
@@ -301,6 +295,16 @@
     <message>
         <location filename="../TuningTcpClient.cpp" line="1004"/>
         <source>requestWriteTuningSignals(), isConnected() == false.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../TuningTcpClient.cpp" line="229"/>
+        <source>onConnection(), connection established.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../TuningTcpClient.cpp" line="526"/>
+        <source>processTuningSourcesInfo(), in m_tuningSourcesInfoReply error received: %1</source>
         <translation></translation>
     </message>
     <message>
@@ -414,7 +418,7 @@
         <translation>Нове значення</translation>
     </message>
     <message>
-        <location filename="../TuningUserManager.cpp" line="202"/>
+        <location filename="../TuningUserManager.cpp" line="214"/>
         <source>Wrong password!</source>
         <translation>Невірний пароль!</translation>
     </message>
