@@ -243,8 +243,8 @@ namespace Builder
 		CodeItem& orAcc(const QString& comment = Separator::EMPTY_STR);
 		CodeItem& andAcc(const QString& comment = Separator::EMPTY_STR);
 		CodeItem& notAcc(const QString& comment = Separator::EMPTY_STR);
-		CodeItem& lshift0Acc();
-		CodeItem& lshift1Acc();
+		CodeItem& lshift0Acc(const QString& comment = Separator::EMPTY_STR);
+		CodeItem& lshift1Acc(const QString& comment = Separator::EMPTY_STR);
 
 		E::DataFormat constDataFormat() const { return m_constDataFormat; }
 

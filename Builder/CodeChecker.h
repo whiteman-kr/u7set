@@ -163,6 +163,7 @@ namespace Builder
 		std::set<quint32> m_addrCanBeParialWritten;
 
 		MemArea m_bitMemArea;
+		MemArea m_appWordMemArea;
 
 		inline static const MemArea m_notValidArea;
 	};

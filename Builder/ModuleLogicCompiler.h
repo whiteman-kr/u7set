@@ -216,6 +216,14 @@ namespace Builder
 		Address16 constBit0Addr() const { return m_memoryMap.constBit0Addr(); }
 		Address16 constBit1Addr() const { return m_memoryMap.constBit1Addr(); }
 
+		bool addressInBitMemory(const Address16& addr) const { return m_memoryMap.addressInBitMemory(addr.offset()); }
+		bool addressInBitMemory(int addr) const { return m_memoryMap.addressInBitMemory(addr); }
+
+		bool addressInWordMemory(const Address16& addr) const { return m_memoryMap.addressInWordMemory(addr.offset()); }
+		bool addressInWordMemory(int addr) const { return m_memoryMap.addressInWordMemory(addr); }
+
+		Address16 getDiscreteUalAddrBitConstIncluded(const UalSignal* ualSignal) const;
+
 	private:
 		bool getLmAssociatedOptoPortsAreas(std::vector<CodeChecker::MemArea>* optoAreas, bool rx) const;
 
@@ -841,6 +849,10 @@ namespace Builder
 		Address16 getConstBitAddr(UalSignal* constDiscreteUalSignal);
 
 		CodeItem codeSetMemory(int addrFrom, quint16 constValue, int sizeW, const QString& comment = QStringLiteral(""));
+
+		bool codeCopyBits(CodeSnippet* code,
+						  int destAddrOffset,
+						  const std::map<Address16, std::pair<const UalSignal*, Address16>>& srcSignals);
 
 		UalSignalsMap& ualSignals() { return m_ualSignals; }
 

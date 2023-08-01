@@ -121,6 +121,9 @@ namespace Builder
 		m_bitMemArea.setStartAddr(m_lmDesc->memory().m_appLogicBitDataOffset);
 		m_bitMemArea.setSizeW(m_lmDesc->memory().m_appLogicBitDataSize);
 
+		m_appWordMemArea.setStartAddr(m_lmDesc->memory().m_appLogicWordDataOffset);
+		m_appWordMemArea.setSizeW(m_lmDesc->memory().m_appLogicWordDataSize);
+
 		bool result = true;
 
 		result &= initReadableAreas();
@@ -867,6 +870,13 @@ namespace Builder
 
 	bool CodeChecker::checkCanWriteBit(const CodeItem& cmd, quint32 writeAddr, quint32 bitNo) const
 	{
+		if (m_bitMemArea.addressInArea(writeAddr, 1) == false &&
+			m_appWordMemArea.addressInArea(writeAddr, 1) == false)
+		{
+			logError(cmd, QString("Can't write address %1[%2]").arg(writeAddr).arg(bitNo));
+			return false;
+		}
+
 		const MemArea& areaToWrite = findMemAreaToWrite(writeAddr, 1);
 
 		if (areaToWrite.isValid() == false)

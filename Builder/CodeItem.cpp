@@ -1106,19 +1106,21 @@ namespace Builder
 		return *this;
 	}
 
-	CodeItem& CodeItem::lshift0Acc()
+	CodeItem& CodeItem::lshift0Acc(const QString& comment)
 	{
 		initCommand();
 		m_result = true;
 		m_lmCmdCode = LmCommand::LSHIFT0;
+		setComment(comment);
 		return *this;
 	}
 
-	CodeItem& CodeItem::lshift1Acc()
+	CodeItem& CodeItem::lshift1Acc(const QString& comment)
 	{
 		initCommand();
 		m_result = true;
 		m_lmCmdCode = LmCommand::LSHIFT1;
+		setComment(comment);
 		return *this;
 	}
 
