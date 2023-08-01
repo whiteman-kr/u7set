@@ -994,7 +994,7 @@ namespace VFrame30
 
 			if (foundIt == busses.end())
 			{
-				*errorMessage += tr("Cant find BusType %1.\n").arg(si->busTypeId());
+				*errorMessage += tr("Cant find BusType %1. Schema %2.\n").arg(si->busTypeId()).arg(si->parentSchema()->schemaId());
 				continue;
 			}
 
