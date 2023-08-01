@@ -1201,8 +1201,8 @@ void SimAfbParamTests::afbComponentInstanceConstruct()
 
 		verifyFunc(afbInst, 0, true);
 		verifyFunc(afbInst, 1, true);
-		verifyFunc(afbInst, 10, true);		// vresion should be created implicitly
-		verifyFunc(afbInst, 18, true);		// vresion should be created implicitly
+		verifyFunc(afbInst, 10, true);		// version should be created implicitly
+		verifyFunc(afbInst, 18, true);		// version should be created implicitly
 
 		// --
 		//
@@ -1317,10 +1317,10 @@ void SimAfbParamTests::afbComponentSet()
 	ok = set.init(lmd);
 	QCOMPARE(ok, true);
 
-	Sim::AfbComponentInstance* afbNot = set.componentInstance(2, 0);	// Afb Component NOT
-	QVERIFY(afbNot);
+	Sim::AfbComponentInstance* afbLogic = set.componentInstance(1, 0);	// Afb Component LOGIC
+	QVERIFY(afbLogic);
 
-	Sim::AfbComponentInstance* afbTct = set.componentInstance(3, 22);	// Afb Component NOT
+	Sim::AfbComponentInstance* afbTct = set.componentInstance(3, 22);	// Afb Component TCT
 	QVERIFY(afbTct);
 
 	Sim::AfbComponentParam param2{2, 0x1122};
