@@ -852,7 +852,7 @@ namespace Builder
 
 		bool codeCopyBits(CodeSnippet* code,
 						  int destAddrOffset,
-						  const std::map<Address16, std::pair<const UalSignal*, Address16>>& srcSignals);
+						  const std::map<Address16, std::tuple<const UalSignal*, Address16, QString>>& srcSignals);
 
 		UalSignalsMap& ualSignals() { return m_ualSignals; }
 

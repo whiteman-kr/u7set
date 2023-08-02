@@ -9304,7 +9304,7 @@ namespace Builder
 
 		bool result = true;
 
-		QString comment = QString("%1.%2 << %3").arg(ualAfb->caption()).arg(inAfbSignal.caption()).arg(inUalSignal->refSignalIDsJoined());
+		QString comment = QString("%1.%2 <= %3").arg(ualAfb->caption()).arg(inAfbSignal.caption()).arg(inUalSignal->refSignalIDsJoined());
 
 		CodeItem cmd;
 
@@ -9433,7 +9433,7 @@ namespace Builder
 			return false;
 		}
 
-		cmd.setComment(QString("%1.%2 << %3 (part %4)").
+		cmd.setComment(QString("%1.%2 <= %3 (part %4)").
 					   arg(ualAfb->caption()).arg(inAfbSignal.caption()).
 					   arg(inUalSignal->refSignalIDsJoined()).arg(bpStepInfo.currentStep + 1));
 
@@ -9728,7 +9728,7 @@ namespace Builder
 			return false;
 		}
 
-		cmd.setComment(QString("%1 (part %2) << %3.%4").
+		cmd.setComment(QString("%1 (part %2) <= %3.%4").
 					   arg(outUalSignal->refSignalIDsJoined()).arg(bpStepInfo.currentStep + 1).
 					   arg(ualAfb->caption()).arg(outAfbSignal.caption()));
 
@@ -10592,7 +10592,7 @@ namespace Builder
 
 		bool result = true;
 
-		code->comment_nl(QString("BusComposer %1 processing (BusType %2)").
+		code->comment_nl(QString("BusComposer %1 processing (BusType %2) start").
 									arg(ualItem->label()).
 									arg(bus->busTypeID()));
 
@@ -10697,8 +10697,10 @@ namespace Builder
 
 		clearUnusedBusSpace(code, *ualBusSignal, busFilling);
 
-		code->newLine();
-
+		code->finalizeByNewLine();
+		code->comment_nl(QString("BusComposer %1 processing (BusType %2) end").
+									arg(ualItem->label()).
+									arg(bus->busTypeID()));
 		return result;
 	}
 
@@ -11407,64 +11409,49 @@ namespace Builder
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(busFilling, m_log);
 
-		int bitAccAddr = bitAccumulatorAddress();
+		bool result = true;
 
-		for(auto const busOffsetDiscretes : busDiscretes)
+		int busSignalUalAddrOffset = m_ualSignals.getSignalWriteAddress(busSignal).offset();
+
+		for(const auto& [inbusOffset, offsetDiscretes] : busDiscretes)
 		{
-			int inbusOffset = busOffsetDiscretes.first;
-			const std::map<int, std::pair<UalSignal*, UalSignal*>>& discretes = busOffsetDiscretes.second;
-
-			CodeSnippet fillingCode;
-			bool clearBitAcc = false;
-
-			for(int bitNo = 0; bitNo < WORD_SIZE; bitNo++)
+			if (offsetDiscretes.empty() == true)
 			{
-				auto it = discretes.find(bitNo);
-
-				if (it == discretes.end())
-				{
-					clearBitAcc = true;
-					continue;
-				}
-
-				const UalSignal* inputSignal = it->second.first;
-				const UalSignal* busChildSignal = it->second.second;
-
-				if (inputSignal->isConst() == true)
-				{
-					fillingCode << CodeItem().movBitConst(bitAccAddr, bitNo,
-										inputSignal->constDiscreteValue(),
-										QString("%1 <= %2").arg(busChildSignal->refSignalIDsJoined()).
-															arg(inputSignal->constDiscreteValue()));
-				}
-				else
-				{
-					Address16 readUalAddr = m_ualSignals.getSignalReadAddress(*inputSignal, true);
-
-					if (readUalAddr.isValid() == false)
-					{
-						LOG_INTERNAL_ERROR(m_log);
-						return false;
-					}
-
-					fillingCode << CodeItem().movBit(bitAccAddr, bitNo,
-										 readUalAddr.offset(),
-										 readUalAddr.bit(),
-										 QString("%1 <= %2").arg(busChildSignal->refSignalIDsJoined()).
-															 arg(inputSignal->refSignalIDsJoined()));
-				}
+				Q_ASSERT(false);
+				continue;
 			}
 
-			fillingCode << CodeItem().mov(busSignal.ualAddr().offset() + inbusOffset, bitAccAddr);
+			std::map<Address16, std::tuple<const UalSignal*, Address16, QString>> srcSignals;
+
+			int busChildSignalsOffset = -1;
+
+			for(const auto& [bitNo, inBusSignals] : offsetDiscretes)
+			{
+				const auto [inSignal, busChildSignal] = inBusSignals;
+
+				if (busChildSignalsOffset == -1)
+				{
+					busChildSignalsOffset = busSignalUalAddrOffset + inbusOffset;
+				}
+
+				Address16 readUalAddr;
+
+				if (inSignal->isConstDiscrete() == false)
+				{
+					readUalAddr = m_ualSignals.getSignalReadAddress(*inSignal, true);
+				}
+
+				QString comment = QString("%1 <= %2").
+											arg(busChildSignal->appSignalID()).
+											arg(inSignal->refSignalIDsJoined());
+
+				srcSignals.insert({ busChildSignal->ualAddr(), { inSignal, readUalAddr, comment } });
+			}
+
+			result &= codeCopyBits(code, busChildSignalsOffset, srcSignals);
+			code->newLine();
 
 			busFilling->fillWord(inbusOffset);
-
-			if (clearBitAcc == true)
-			{
-				*code << CodeItem().movConst(bitAccAddr, 0);
-			}
-
-			*code << fillingCode;
 		}
 
 		return true;
@@ -13867,27 +13854,21 @@ namespace Builder
 			return true;
 		}
 
+		bool result = true;
+
 		code->comment_nl(QString("Copy %1 in regBuf").arg(description));
 
-		int bitAccAddr = m_memoryMap.bitAccumulatorAddress();
+		std::map<Address16, std::tuple<const UalSignal*, Address16, QString>> srcSignals;
 
-		qsizetype signalsCount = signalsList.count();
+		TEST_PTR_LOG_RETURN_FALSE(signalsList[0], m_log);
 
-		int count = 0;
+		int destAddressOffset = signalsList[0]->regBufAddr().offset();
 
-		CodeItem cmd;
-
-		int countReminder16 = 0;
-
-		bool zeroLastWord = (signalsCount % SIZE_16BIT) != 0 ? true : false;
-
-		for(UalSignal* ualSignal : signalsList)
+		for(const UalSignal* ualSignal : signalsList)
 		{
 			TEST_PTR_LOG_RETURN_FALSE(ualSignal, m_log);
 
-			assert(ualSignal->isConst() == false);
-
-			if (ualSignal->ualAddrIsValid() == false ||
+			if (ualSignal->isDiscrete() == false ||
 				ualSignal->regBufAddr().isValid() == false ||
 				ualSignal->regValueAddr().isValid() == false)
 			{
@@ -13896,34 +13877,29 @@ namespace Builder
 				return false;
 			}
 
-			countReminder16 = count % SIZE_16BIT;
-
-			assert(ualSignal->regBufAddr().bit() == countReminder16);
-
-			if (countReminder16 == 0 && (signalsCount - count) < SIZE_16BIT && zeroLastWord == true)
+			if (destAddressOffset != ualSignal->regBufAddr().offset())
 			{
-				cmd.movConst(bitAccAddr, 0);
-				cmd.clearComment();
-				code->append(cmd);
-				zeroLastWord = false;
+				if (srcSignals.empty() == false)
+				{
+					result &= codeCopyBits(code, destAddressOffset, srcSignals);
+					code->newLine();
+
+					srcSignals.clear();
+				}
+
+				destAddressOffset = ualSignal->regBufAddr().offset();
 			}
 
-			cmd.movBit(bitAccAddr, ualSignal->regBufAddr().bit(), ualSignal->ualAddr().offset(), ualSignal->ualAddr().bit());
-			cmd.setComment(QString("copy %1").arg(ualSignal->refSignalIDsJoined()));
-			code->append(cmd);
-
-			count++;
-
-			if ((count % SIZE_16BIT) == 0 || count == signalsCount)
-			{
-				cmd.clearComment();
-				cmd.mov(ualSignal->regBufAddr().offset(), bitAccAddr);
-				code->append(cmd);
-				code->newLine();;
-			}
+			srcSignals.insert({ ualSignal->regBufAddr(), { ualSignal, ualSignal->ualAddr(), Separator::EMPTY_STR }});
 		}
 
-		return true;
+		if (srcSignals.empty() == false)
+		{
+			result &= codeCopyBits(code, destAddressOffset, srcSignals);
+			code->newLine();
+		}
+
+		return result;
 	}
 
 	bool ModuleLogicCompiler::copyOutputSignalsInOutputModulesMemory(CodeSnippet* code)
@@ -14273,7 +14249,7 @@ namespace Builder
 
 		// writeAddresOffset => (map: destAddr (ioBufAddr) => pair <UalSignal_to_copy*, sourceAddr>)
 		//
-		std::map<int, std::map<Address16, std::pair<const UalSignal*, Address16>>> writeAddressesMap;
+		std::map<int, std::map<Address16, std::tuple<const UalSignal*, Address16, QString>>> writeAddressesMap;
 
 		for(AppSignal* s : m_ioSignals)
 		{
@@ -14304,13 +14280,13 @@ namespace Builder
 			if (it == writeAddressesMap.end())
 			{
 				auto p = writeAddressesMap.emplace(writeAddrOffset,
-											std::map<Address16, std::pair<const UalSignal*, Address16>>());
+											std::map<Address16, std::tuple<const UalSignal*, Address16, QString>>());
 
 				//
 				it = p.first;
 			}
 
-			std::map<Address16, std::pair<const UalSignal*, Address16>>& writeAddrSignals = it->second;
+			std::map<Address16, std::tuple<const UalSignal*, Address16, QString>>& writeAddrSignals = it->second;
 
 			if (writeAddrSignals.contains(writeAddr))
 			{
@@ -14319,7 +14295,7 @@ namespace Builder
 				continue;
 			}
 
-			writeAddrSignals.insert({writeAddr, { ualSignal, ualSignal->ualAddrWithoutChecks() }});
+			writeAddrSignals.insert({writeAddr, { ualSignal, ualSignal->ualAddrWithoutChecks(), QString() }});
 		}
 
 		RETURN_IF_FALSE(result);
@@ -14658,7 +14634,9 @@ namespace Builder
 			if (ualSignal->isConst() == false)
 			{
 				cmd.mov32(txSignalAddress.offset(), ualSignal->ualAddr().offset());
-				cmd.setComment(QString("%1 >> %2").arg(ualSignal->refSignalIDsJoined()).arg(port->connectionID()));
+				cmd.setComment(QString("%1 <= %2").
+								arg(port->connectionID()).
+								arg(ualSignal->refSignalIDsJoined()));
 			}
 			else
 			{
@@ -14666,15 +14644,20 @@ namespace Builder
 				{
 				case E::AnalogAppSignalFormat::Float32:
 					cmd.movConstFloat(txSignalAddress.offset(), ualSignal->constAnalogFloatValue());
-					cmd.setComment(QString("%1 (const %2) >> %3").arg(ualSignal->refSignalIDsJoined()).
-								   arg(ualSignal->constAnalogFloatValue()).arg(port->connectionID()));
+					cmd.setComment(QString("%1 <= %2 (const %3)").
+									arg(port->connectionID()).
+									arg(ualSignal->refSignalIDsJoined()).
+									arg(ualSignal->constAnalogFloatValue()));
 					break;
 
 				case E::AnalogAppSignalFormat::SignedInt32:
 					cmd.movConstInt32(txSignalAddress.offset(), ualSignal->constAnalogIntValue());
-					cmd.setComment(QString("%1 (const %2) >> %3").arg(ualSignal->refSignalIDsJoined()).
-								   arg(ualSignal->constAnalogIntValue()).arg(port->connectionID()));
+					cmd.setComment(QString("%1 <= %2 (const %3)").
+									arg(port->connectionID()).
+									arg(ualSignal->refSignalIDsJoined()).
+									arg(ualSignal->constAnalogIntValue()));
 					break;
+
 				default:
 					assert(false);
 				}
@@ -14774,7 +14757,9 @@ namespace Builder
 				cmd.movMem(txSignalAddress, ualSignal->ualAddr(), ualSignal->sizeW());
 			}
 
-			cmd.setComment(QString("%1 >> %2").arg(txSignal->appSignalIDs().join(", ")).arg(port->connectionID()));
+			cmd.setComment(QString("%1 <= %2").
+								arg(port->connectionID()).
+								arg(txSignal->appSignalIDs().join(", ")));
 			code->append(cmd);
 		}
 
@@ -14882,15 +14867,19 @@ namespace Builder
 			if (ualSignal->isConst() == true)
 			{
 				cmd.movBitConst(bitAccumulatorAddress, bit, ualSignal->constDiscreteValue());
-				cmd.setComment(QString("%1 (const %2) >> %3").arg(ualSignal->refSignalIDsJoined()).
-							   arg(ualSignal->constDiscreteValue()).arg(port->connectionID()));
+				cmd.setComment(QString("%1 <= %2 (const %3)").
+									arg(port->connectionID()).
+									arg(ualSignal->refSignalIDsJoined()).
+									arg(ualSignal->constDiscreteValue()));
 
 				copyCode.append(cmd);
 			}
 			else
 			{
 				cmd.movBit(bitAccumulatorAddress, bit, ualSignal->ualAddr().offset(), ualSignal->ualAddr().bit());
-				cmd.setComment(QString("%1 >> %2").arg(ualSignal->refSignalIDsJoined()).arg(port->connectionID()));
+				cmd.setComment(QString("%1 <= %2").
+										arg(port->connectionID()).
+										arg(ualSignal->refSignalIDsJoined()));
 
 				copyCode.append(cmd);
 
@@ -14916,7 +14905,7 @@ namespace Builder
 				if (isCopyOptimizationAllowed(copyCode, &srcAddr) == true)
 				{
 					cmd.mov(txSignalAddress, srcAddr);
-					cmd.setComment(QString("%1 >> %2").arg(ids).arg(port->connectionID()));
+					cmd.setComment(QString("%1 <= %2").arg(port->connectionID()).arg(ids));
 
 					code->append(cmd);
 				}
@@ -15357,7 +15346,9 @@ namespace Builder
 				cmd.mov32(writeAddr, ualSignal->ualAddr().offset());
 			}
 
-			cmd.setComment(QString("%1 >> %2").arg(txSignal->appSignalID()).arg(port->connectionID()));
+			cmd.setComment(QString("%1 <= %2").
+							arg(port->connectionID()).
+							arg(txSignal->appSignalID()));
 
 			code->append(cmd);
 
@@ -15461,7 +15452,9 @@ namespace Builder
 					cmd.movBit(bitAccAddr, addrInBuf.bit(), ualSignal->ualAddr().offset(), ualSignal->ualAddr().bit());
 				}
 
-				cmd.setComment(QString("%1 >> %2").arg(discrete->appSignalID()).arg(port->connectionID()));
+				cmd.setComment(QString("%1 <= %2").
+								arg(port->connectionID()).
+								arg(discrete->appSignalID()));
 
 				code->append(cmd);
 
@@ -15583,7 +15576,9 @@ namespace Builder
 				cmd.movMem(writeAddr, ualSignal->ualAddr().offset(), writeSizeW);
 			}
 
-			cmd.setComment(QString("%1 >> %2").arg(txSignal->appSignalID()).arg(port->connectionID()));
+			cmd.setComment(QString("%1 <= %2").
+							arg(port->connectionID()).
+							arg(txSignal->appSignalID()));
 			code->append(cmd);
 
 			count++;
@@ -17420,23 +17415,32 @@ namespace Builder
 
 	bool ModuleLogicCompiler::codeCopyBits(CodeSnippet* code,
 										   int destAddrOffset,
-										   const std::map<Address16, std::pair<const UalSignal*, Address16>>& srcSignals)
+										   const std::map<Address16, std::tuple<const UalSignal *, Address16, QString> > &srcSignals)
 	{
 		TEST_PTR_RETURN_FALSE(m_log);
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 
+		if (srcSignals.empty() == true)
+		{
+			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
 		bool result = true;
 
-		// map<Address16, std::pair<const UalSignal*, Address16>: destAddr => <srcUalSignal (discrete), srcAddr>
+		// map<Address16, std::pair<const UalSignal*, Address16, QString>: destAddr => <srcUalSignal (discrete), srcAddr, comment>
 
 		int const0Count = 0;
 		int const1Count = 0;
 		int signalCount = 0;
 
+		std::set<Address16> uniqueSrcSignalsAddr;
+
 		for(const auto& srcSignal : srcSignals)
 		{
 			const Address16& destAddr = srcSignal.first;
-			const UalSignal* ualSignal = srcSignal.second.first;
+			const auto& [ualSignal, srcAddr, comment] = srcSignal.second;
 
 			if (destAddr.offset() != destAddrOffset)
 			{
@@ -17461,6 +17465,7 @@ namespace Builder
 				if (ualSignal->isDiscrete() == true)
 				{
 					signalCount++;
+					uniqueSrcSignalsAddr.insert(srcAddr);
 				}
 				else
 				{
@@ -17472,6 +17477,26 @@ namespace Builder
 		}
 
 		RETURN_IF_FALSE(result);
+
+		auto getComment = [](const UalSignal* ualSignal, const QString& comment) -> QString
+		{
+			if (comment.isEmpty() == false)
+			{
+				return comment;
+			}
+
+			return QString("copy %1").arg(ualSignal->refSignalIDsJoined());
+		};
+
+		if (signalCount == SIZE_16BIT && uniqueSrcSignalsAddr.size() == 1)
+		{
+			const auto& [ualSignal, srcAddr, comment] = srcSignals.begin()->second;
+
+			*code << CodeItem().fillb(destAddrOffset,
+									  uniqueSrcSignalsAddr.begin()->offset(), uniqueSrcSignalsAddr.begin()->bit(),
+									  getComment(ualSignal, comment));
+			return true;
+		}
 
 		bool initializedBy0 = false;
 		bool initializedBy1 = false;
@@ -17506,8 +17531,7 @@ namespace Builder
 			for(const auto& srcSignal : srcSignals)
 			{
 				const Address16& destAddr = srcSignal.first;
-				const UalSignal* ualSignal = srcSignal.second.first;
-				const Address16& srcAddr = srcSignal.second.second;
+				const auto& [ualSignal, srcAddr, comment] = srcSignal.second;
 
 				if (ualSignal->isConstDiscrete() == true)
 				{
@@ -17516,7 +17540,7 @@ namespace Builder
 						if (initializedBy0 == false)
 						{
 							*code << CodeItem().movBitConst(destAccAddr, destAddr.bit(), 0,
-															QString("copy %1").arg(ualSignal->refSignalIDsJoined()));
+															getComment(ualSignal, comment));
 						}
 					}
 					else
@@ -17524,14 +17548,14 @@ namespace Builder
 						if (initializedBy1 == false)
 						{
 								*code << CodeItem().movBitConst(destAccAddr, destAddr.bit(), 1,
-																QString("copy %1").arg(ualSignal->refSignalIDsJoined()));
+																getComment(ualSignal, comment));
 						}
 					}
 				}
 				else
 				{
 					*code << CodeItem().movBit(destAccAddr, destAddr.bit(), srcAddr.offset(), srcAddr.bit(),
-													QString("copy %1").arg(ualSignal->refSignalIDsJoined()));
+													getComment(ualSignal, comment));
 				}
 			}
 
@@ -17548,9 +17572,9 @@ namespace Builder
 
 			int usedBit = -1;
 
-			while(srcSignal != srcSignals.rend() && usedBit >= 0)
+			while(srcSignal != srcSignals.rend())
 			{
-				const UalSignal* ualSignal = srcSignal->second.first;
+				const auto& [ualSignal, srcAddr, comment] = srcSignal->second;
 
 				usedBit = srcSignal->first.bit();
 
@@ -17574,8 +17598,7 @@ namespace Builder
 			while(srcSignal != srcSignals.rend() && usedBit >= 0)
 			{
 				const Address16& destAddr = srcSignal->first;
-				const UalSignal* ualSignal = srcSignal->second.first;
-				const Address16& srcAddr = srcSignal->second.second;
+				const auto& [ualSignal, srcAddr, comment] = srcSignal->second;
 
 				if (usedBit == destAddr.bit())
 				{
@@ -17583,16 +17606,16 @@ namespace Builder
 					{
 						if (ualSignal->constDiscreteValue() == 0)
 						{
-							*code << CodeItem().lshift0Acc(QString("copy %1").arg(ualSignal->refSignalIDsJoined()));
+							*code << CodeItem().lshift0Acc(getComment(ualSignal, comment));
 						}
 						else
 						{
-							*code << CodeItem().lshift1Acc(QString("copy %1").arg(ualSignal->refSignalIDsJoined()));
+							*code << CodeItem().lshift1Acc(getComment(ualSignal, comment));
 						}
 					}
 					else
 					{
-						*code << CodeItem().movBitAccAddr(srcAddr, QString("copy %1").arg(ualSignal->refSignalIDsJoined()));
+						*code << CodeItem().movBitAccAddr(srcAddr, getComment(ualSignal, comment));
 					}
 
 					srcSignal++;
