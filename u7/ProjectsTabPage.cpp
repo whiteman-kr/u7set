@@ -297,7 +297,9 @@ void ProjectsTabPage::openProject()
 		QMessageBox mb(this);
 
 		mb.setText(tr("You cannot open this project."));
-		mb.setInformativeText(tr("The project database version is higher than the program version. Please update software."));
+		mb.setInformativeText(tr("The project database version (%1) is higher than the supported project version %2.\n\nPlease update software.")
+							  .arg(projectVersion)
+							  .arg(DbController::databaseVersion()));
 		mb.setFixedSize(mb.minimumSizeHint());
 		mb.exec();
 		return;
@@ -305,21 +307,28 @@ void ProjectsTabPage::openProject()
 
 	if (projectVersion < DbController::databaseVersion())
 	{
-		QMessageBox mb(this);
-
-		mb.setText(tr("You cannot open this project."));
-		mb.setInformativeText(tr("The project database version is lower than the program version. Do you want to upgrade the project to the appropriate version?"));
+		QMessageBox mb{this};
+		
+		mb.setTextFormat(Qt::RichText);
+		mb.setText(tr("<font color='red'>Do you want to upgrade the project to the version %1?</font>").arg(DbController::databaseVersion()));
+		mb.setInformativeText(tr("The project database version (%1) is lower than the supported version %2.")
+			.arg(projectVersion)
+			.arg(DbController::databaseVersion()));
+		mb.setDetailedText(tr("During the upgrade to a newer version a project database backup will be created, it will have a name like u7upgrade%1_%2_[date_and_time_of_upgrade].\n\nThe database administrator can restore the backup by renaming it to u7_[new_name].")
+			.arg(projectVersion)
+			.arg(projectName));
+		
+		mb.setIcon(QMessageBox::Warning);
 		mb.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-		mb.setDefaultButton(QMessageBox::Ok);
-		mb.setFixedSize(mb.minimumSizeHint());
+		mb.setDefaultButton(QMessageBox::Cancel);
 
-		int result = mb.exec();
-		if (result == QMessageBox::Cancel)
+		if (int result = mb.exec();
+			result == QMessageBox::Cancel)
 		{
 			return;
 		}
 
-		// Ask for Administartor's password
+		// Ask for Administrator's password
 		//
 		bool ok = false;
 

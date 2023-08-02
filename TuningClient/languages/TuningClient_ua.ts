@@ -430,7 +430,7 @@ Updated: %2 signals</source>
     <message>
         <location filename="../DialogSettings.ui" line="28"/>
         <source>Instance ID</source>
-        <translation>Ідентифікатор ПЗ</translation>
+        <translation>ІД екземпляра</translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="45"/>
@@ -460,7 +460,7 @@ Updated: %2 signals</source>
     <message>
         <location filename="../DialogSettings.ui" line="107"/>
         <source>Language</source>
-        <translation>Мова</translation>
+        <translation>Language/Мова</translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="117"/>
@@ -629,7 +629,7 @@ Data will not be available at the time of reconnection.</source>
     <message>
         <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="34"/>
         <source>1-Source Information</source>
-        <translation>1-Інформація про джерело</translation>
+        <translation>1-Загальна інформація</translation>
     </message>
     <message>
         <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="56"/>
@@ -639,17 +639,17 @@ Data will not be available at the time of reconnection.</source>
     <message>
         <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="80"/>
         <source>3-Errors in Reply RupFrameHeader</source>
-        <translation>3-Помилки в Reply RupFrameHeader</translation>
+        <translation>3-Помилки в RupFrameHeader</translation>
     </message>
     <message>
         <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="92"/>
         <source>4-Errors in Reply FotipHeader</source>
-        <translation>4-Помилки в Reply FotipHeader</translation>
+        <translation>4-Помилки в FotipHeader</translation>
     </message>
     <message>
         <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="106"/>
         <source>5-Errors Reported by LM in Reply FotipHeader.flags</source>
-        <translation>5-Помилки в Reply FotipHeader.flags</translation>
+        <translation>5-Помилки в FotipHeader.flags</translation>
     </message>
     <message>
         <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="152"/>
@@ -730,12 +730,22 @@ Data will not be available at the time of reconnection.</source>
         <translation>До запису</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogWriteValues.cpp" line="109"/>
+        <location filename="../../lib/Ui/DialogWriteValues.cpp" line="110"/>
         <source>Show All</source>
         <translation>Показати всі</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogWriteValues.cpp" line="173"/>
+        <location filename="../../lib/Ui/DialogWriteValues.cpp" line="117"/>
+        <source>Yes</source>
+        <translation>Так</translation>
+    </message>
+    <message>
+        <location filename="../../lib/Ui/DialogWriteValues.cpp" line="120"/>
+        <source>No</source>
+        <translation>Ні</translation>
+    </message>
+    <message>
+        <location filename="../../lib/Ui/DialogWriteValues.cpp" line="180"/>
         <source>and %1 more signals. Press &quot;Show all&quot; to view them.</source>
         <translation>and %1 more signals. Press &quot;Show all&quot; to view them.</translation>
     </message>
@@ -991,7 +1001,7 @@ Data will not be available at the time of reconnection.</source>
 <context>
     <name>FilterButton</name>
     <message>
-        <location filename="../TuningWorkspace.cpp" line="102"/>
+        <location filename="../TuningWorkspace.cpp" line="103"/>
         <source>					   QPushButton {   						   background-color: %1;						   color: %2;    					   }   					   QPushButton:checked{						   background-color: %3;						   color: %4;    						   border: none;					   }					   </source>
         <translation></translation>
     </message>
@@ -1028,282 +1038,282 @@ Data will not be available at the time of reconnection.</source>
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="94"/>
-        <location filename="../MainWindow.cpp" line="389"/>
-        <location filename="../MainWindow.cpp" line="1155"/>
+        <location filename="../MainWindow.cpp" line="420"/>
+        <location filename="../MainWindow.cpp" line="1186"/>
         <source>Error</source>
         <translation>Помилка</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="115"/>
+        <location filename="../MainWindow.cpp" line="146"/>
         <source>Exit</source>
         <translation>Вихід</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="116"/>
+        <location filename="../MainWindow.cpp" line="147"/>
         <source>Quit the application</source>
         <translation>Вихід</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="124"/>
+        <location filename="../MainWindow.cpp" line="155"/>
         <source>Filter Editor...</source>
         <translation>Редактор фільтрів...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="125"/>
+        <location filename="../MainWindow.cpp" line="156"/>
         <source>Edit user filters</source>
         <translation>Редагувати фільтри</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="130"/>
+        <location filename="../MainWindow.cpp" line="161"/>
         <source>Settings...</source>
         <translation>Налаштування...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="131"/>
+        <location filename="../MainWindow.cpp" line="162"/>
         <source>Change application settings</source>
         <translation>Зміна налаштувань</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="136"/>
+        <location filename="../MainWindow.cpp" line="167"/>
         <source>Tuning sources...</source>
         <translation>Джерела тюнінгу...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="137"/>
+        <location filename="../MainWindow.cpp" line="168"/>
         <source>View tuning sources</source>
         <translation>Перегляд джерел тюнінгу</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="142"/>
+        <location filename="../MainWindow.cpp" line="173"/>
         <source>Connection Statistics...</source>
         <translation>Статистика з&apos;єднань...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="143"/>
+        <location filename="../MainWindow.cpp" line="174"/>
         <source>View Connection Statistics</source>
         <translation>Перегляд статистики</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="147"/>
+        <location filename="../MainWindow.cpp" line="178"/>
         <source>Application Log...</source>
         <translation>Журнал програми...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="148"/>
+        <location filename="../MainWindow.cpp" line="179"/>
         <source>Show application log</source>
         <translation>Перегляд журналу програми</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="151"/>
+        <location filename="../MainWindow.cpp" line="182"/>
         <source>Signals Log...</source>
         <translation>Журнал зміни сигналів...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="152"/>
+        <location filename="../MainWindow.cpp" line="183"/>
         <source>Show signals log</source>
         <translation>Перегляд журналу зміни сигналів</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="155"/>
+        <location filename="../MainWindow.cpp" line="186"/>
         <source>About Qt...</source>
         <translation>Про Qt...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="156"/>
+        <location filename="../MainWindow.cpp" line="187"/>
         <source>Show Qt information</source>
         <translation>Інформація про Qt</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="160"/>
+        <location filename="../MainWindow.cpp" line="191"/>
         <source>About TuningClient...</source>
         <translation>Про TuningClient...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="161"/>
+        <location filename="../MainWindow.cpp" line="192"/>
         <source>Show application information</source>
         <translation>Інформація про TuningClient</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="166"/>
+        <location filename="../MainWindow.cpp" line="197"/>
         <source>Tuning User Manual</source>
         <translation>Посібник користувача</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="167"/>
+        <location filename="../MainWindow.cpp" line="198"/>
         <source>Show Tuning User Manual</source>
         <translation>Перегляд посібника користувача</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="176"/>
+        <location filename="../MainWindow.cpp" line="207"/>
         <source>&amp;File</source>
         <translation>&amp;Файл</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="182"/>
+        <location filename="../MainWindow.cpp" line="213"/>
         <source>&amp;Service</source>
         <translation>&amp;Сервіс</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="190"/>
+        <location filename="../MainWindow.cpp" line="221"/>
         <source>&amp;?</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="225"/>
+        <location filename="../MainWindow.cpp" line="256"/>
         <source>LM Errors (click for details)</source>
         <translation>Помилки LM (клкініть для деталей)</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="247"/>
+        <location filename="../MainWindow.cpp" line="278"/>
         <source>Error and warning counters in the log (click to view log)</source>
         <translation>Лічильники помилок та попереджень (клікніть для перегляду журналу)</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="301"/>
+        <location filename="../MainWindow.cpp" line="332"/>
         <source>Warning! Some values were modified but not written. Are you sure you want to exit?</source>
         <translation>Увага! Деякі значення були модифіковані, але не записані. Ви впевнені, що хочете вийти?</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="471"/>
+        <location filename="../MainWindow.cpp" line="502"/>
         <source>Schemas</source>
         <translation>Схеми</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="508"/>
+        <location filename="../MainWindow.cpp" line="539"/>
         <source>No workspaces exist, configuration error.</source>
         <translation>Відсутні робочі простори, помилка конфігурації.</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="540"/>
+        <location filename="../MainWindow.cpp" line="571"/>
         <source>Signals</source>
         <translation>Сигнали</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="629"/>
+        <location filename="../MainWindow.cpp" line="660"/>
         <source>Project %1, build %2</source>
         <translation>Проект %1, збірка %2</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="652"/>
+        <location filename="../MainWindow.cpp" line="683"/>
         <source> ConfigService: </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="656"/>
+        <location filename="../MainWindow.cpp" line="687"/>
         <source> no connection</source>
         <translation> нема з&apos;єднання</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="660"/>
+        <location filename="../MainWindow.cpp" line="691"/>
         <source>%1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="670"/>
+        <location filename="../MainWindow.cpp" line="701"/>
         <source>Address: %1</source>
         <translation>Адреса: %1</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="722"/>
+        <location filename="../MainWindow.cpp" line="753"/>
         <source>Counter %1</source>
         <translation>Лічильник: %1</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="761"/>
+        <location filename="../MainWindow.cpp" line="792"/>
         <source> %1 %2 </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="796"/>
+        <location filename="../MainWindow.cpp" line="827"/>
         <source> LM Errors: %1 </source>
         <translation> Помилок LM %1 </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="828"/>
+        <location filename="../MainWindow.cpp" line="859"/>
         <source> SOR: -</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="834"/>
+        <location filename="../MainWindow.cpp" line="865"/>
         <source> SOR: ? </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="840"/>
+        <location filename="../MainWindow.cpp" line="871"/>
         <source> SOR: No </source>
         <translation> SOR: Ні </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="846"/>
+        <location filename="../MainWindow.cpp" line="877"/>
         <source> SOR: Yes </source>
         <translation> SOR: Так </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="850"/>
+        <location filename="../MainWindow.cpp" line="881"/>
         <source> SOR: Yes [%1] </source>
         <translation> SOR: Так [%1] </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="890"/>
+        <location filename="../MainWindow.cpp" line="921"/>
         <source> Log E: %1 W: %2 </source>
         <translation> Журнал E: %1 W: %2 </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="920"/>
+        <location filename="../MainWindow.cpp" line="951"/>
         <source>%1:
 </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="924"/>
+        <location filename="../MainWindow.cpp" line="955"/>
         <source>Not configured</source>
         <translation>Не налаштовано</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="941"/>
-        <location filename="../MainWindow.cpp" line="954"/>
+        <location filename="../MainWindow.cpp" line="972"/>
+        <location filename="../MainWindow.cpp" line="985"/>
         <source>ok</source>
         <translation>ок</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="941"/>
-        <location filename="../MainWindow.cpp" line="954"/>
+        <location filename="../MainWindow.cpp" line="972"/>
+        <location filename="../MainWindow.cpp" line="985"/>
         <source>down</source>
         <translation>не з&apos;єднано</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="952"/>
+        <location filename="../MainWindow.cpp" line="983"/>
         <source>%1: %2 (Replies: %3)</source>
         <translation>%1: %2 (Відповідей: %3)</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="959"/>
+        <location filename="../MainWindow.cpp" line="990"/>
         <source>%1: %2/%3 (Replies: %4)</source>
         <translation>%1: %2/%3 (Відповідей: %4)</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="996"/>
-        <location filename="../MainWindow.cpp" line="1015"/>
+        <location filename="../MainWindow.cpp" line="1027"/>
+        <location filename="../MainWindow.cpp" line="1046"/>
         <source>Warning</source>
         <translation>Попередження</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="996"/>
+        <location filename="../MainWindow.cpp" line="1027"/>
         <source>Program configuraton has been changed. Press OK to restart the program.</source>
         <translation>Конфігурація програми змінилася. Натисніть ОК для перезапуску програми.</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1015"/>
+        <location filename="../MainWindow.cpp" line="1046"/>
         <source>Program configuration has been changed and will be updated.</source>
         <translation>Конфігурація програми змінилася та буде оновлена.</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1097"/>
+        <location filename="../MainWindow.cpp" line="1128"/>
         <source>Configuration error: %1</source>
         <translation>Помилка конфігурації: %1</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1232"/>
+        <location filename="../MainWindow.cpp" line="1263"/>
         <source> allows user to modify tuning values.</source>
         <translation> дозволяє користувачеві змінювати значення сигналів тюнінгу.</translation>
     </message>
@@ -1341,12 +1351,12 @@ Colld not save crash dump file:
         <translation></translation>
     </message>
     <message>
-        <location filename="../Main.cpp" line="254"/>
+        <location filename="../Main.cpp" line="258"/>
         <source>Error</source>
         <translation>Помилка</translation>
     </message>
     <message>
-        <location filename="../Main.cpp" line="254"/>
+        <location filename="../Main.cpp" line="258"/>
         <source>Application is already running!</source>
         <translation>Програма вже запущена!</translation>
     </message>
@@ -1356,27 +1366,27 @@ Colld not save crash dump file:
         <translation>Лічильник SOR (клікніть для деталей)</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1032"/>
+        <location filename="../MainWindow.cpp" line="1063"/>
         <source>Single LM Control Mode</source>
         <translation>Режим керування одним LM</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1033"/>
+        <location filename="../MainWindow.cpp" line="1064"/>
         <source>Multiple LM Control Mode</source>
         <translation>Режим керування всіма LM</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1034"/>
+        <location filename="../MainWindow.cpp" line="1065"/>
         <source>Mixed LM Control Mode</source>
         <translation>Змішаний режим керування LM</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1079"/>
+        <location filename="../MainWindow.cpp" line="1110"/>
         <source>Object Filters file loading error: %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1088"/>
+        <location filename="../MainWindow.cpp" line="1119"/>
         <source>Tuning signals file loading error.</source>
         <translation></translation>
     </message>
@@ -1391,13 +1401,13 @@ Colld not save crash dump file:
         <translation>Видалено %1 сигналів.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1459"/>
+        <location filename="../TuningPage.cpp" line="1456"/>
         <source>Activating control of tuning source &apos;%1&apos; failed!</source>
         <translation>Помилка активації джерела тюнінгу %1!</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1465"/>
-        <location filename="../TuningPage.cpp" line="1570"/>
+        <location filename="../TuningPage.cpp" line="1462"/>
+        <location filename="../TuningPage.cpp" line="1567"/>
         <source>Taking control of tuning source &apos;%1&apos; failed!</source>
         <translation>Помилка отримання керування джерела %1!</translation>
     </message>
@@ -1517,19 +1527,19 @@ Colld not save crash dump file:
 <context>
     <name>SchemasWorkspace</name>
     <message>
-        <location filename="../SchemasWorkspace.cpp" line="230"/>
+        <location filename="../SchemasWorkspace.cpp" line="224"/>
         <source>ID</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../SchemasWorkspace.cpp" line="231"/>
+        <location filename="../SchemasWorkspace.cpp" line="225"/>
         <source>Caption</source>
         <translation>Найменування</translation>
     </message>
     <message>
-        <location filename="../SchemasWorkspace.cpp" line="296"/>
-        <location filename="../SchemasWorkspace.cpp" line="374"/>
-        <location filename="../SchemasWorkspace.cpp" line="441"/>
+        <location filename="../SchemasWorkspace.cpp" line="290"/>
+        <location filename="../SchemasWorkspace.cpp" line="367"/>
+        <location filename="../SchemasWorkspace.cpp" line="434"/>
         <source>No schemas exist for current page</source>
         <translation>Для даної сторінки немає схем</translation>
     </message>
@@ -1537,80 +1547,80 @@ Colld not save crash dump file:
 <context>
     <name>SwitchFiltersPage</name>
     <message>
-        <location filename="../SwitchFiltersPage.cpp" line="172"/>
+        <location filename="../SwitchFiltersPage.cpp" line="173"/>
         <source>This tab should be used only with Multiple LM Control Mode of TuningServices. Disable &quot;SingleLMControl&quot; mode for all services.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../SwitchFiltersPage.cpp" line="188"/>
+        <location filename="../SwitchFiltersPage.cpp" line="189"/>
         <source>Apply</source>
         <translation>Застосувати</translation>
     </message>
     <message>
-        <location filename="../SwitchFiltersPage.cpp" line="324"/>
+        <location filename="../SwitchFiltersPage.cpp" line="325"/>
         <source>No filters to display.
 Create filters that contain one of the following tags: &apos;%1&apos; or &apos;%2&apos;.</source>
         <translation>Немає фільтрів для відображення.
 Створіть фільтри що мають теги: &apos;%1&apos; or &apos;%2&apos;.</translation>
     </message>
     <message>
-        <location filename="../SwitchFiltersPage.cpp" line="454"/>
+        <location filename="../SwitchFiltersPage.cpp" line="455"/>
         <source>State</source>
         <translation>Стан</translation>
     </message>
     <message>
-        <location filename="../SwitchFiltersPage.cpp" line="455"/>
+        <location filename="../SwitchFiltersPage.cpp" line="456"/>
         <source>Caption</source>
         <translation>Найменування</translation>
     </message>
     <message>
-        <location filename="../SwitchFiltersPage.cpp" line="456"/>
+        <location filename="../SwitchFiltersPage.cpp" line="457"/>
         <source>Counter</source>
         <translation>Лічильник</translation>
     </message>
     <message>
-        <location filename="../SwitchFiltersPage.cpp" line="491"/>
-        <location filename="../SwitchFiltersPage.cpp" line="938"/>
+        <location filename="../SwitchFiltersPage.cpp" line="492"/>
+        <location filename="../SwitchFiltersPage.cpp" line="939"/>
         <source>OFF</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../SwitchFiltersPage.cpp" line="548"/>
+        <location filename="../SwitchFiltersPage.cpp" line="549"/>
         <source>Are you sure you want to switch ON  signals of the filter &apos;%1&apos;?</source>
         <translation>Ви впевнені, що хочете встановити всі сигнали з фільтру %1 в стан &quot;ТАК&quot;?</translation>
     </message>
     <message>
-        <location filename="../SwitchFiltersPage.cpp" line="561"/>
+        <location filename="../SwitchFiltersPage.cpp" line="562"/>
         <source>Are you sure you want to switch OFF signals of the filter &apos;%1&apos;?</source>
         <translation>Ви впевнені, що хочете встановити всі сигнали з фільтру %1 в стан &quot;НІ&quot;?</translation>
     </message>
     <message>
-        <location filename="../SwitchFiltersPage.cpp" line="573"/>
+        <location filename="../SwitchFiltersPage.cpp" line="574"/>
         <source>Signals of the filter &apos;%1&apos; have different values. Please select the following action:</source>
         <translation>Сигнали фільтру %1 мають різне значення. Оберіть потрібну дію:</translation>
     </message>
     <message>
-        <location filename="../SwitchFiltersPage.cpp" line="574"/>
+        <location filename="../SwitchFiltersPage.cpp" line="575"/>
         <source>Set All to 0</source>
         <translation>Встановити всі в 0</translation>
     </message>
     <message>
-        <location filename="../SwitchFiltersPage.cpp" line="575"/>
+        <location filename="../SwitchFiltersPage.cpp" line="576"/>
         <source>Set All to 1</source>
         <translation>Встановити всі в 1</translation>
     </message>
     <message>
-        <location filename="../SwitchFiltersPage.cpp" line="576"/>
+        <location filename="../SwitchFiltersPage.cpp" line="577"/>
         <source>Set All to 2</source>
         <translation>Встановити всі в 2</translation>
     </message>
     <message>
-        <location filename="../SwitchFiltersPage.cpp" line="649"/>
+        <location filename="../SwitchFiltersPage.cpp" line="650"/>
         <source>Are you sure you want apply the changes?</source>
         <translation>Ви впевнені, що хочете застосувати зміни?</translation>
     </message>
     <message>
-        <location filename="../SwitchFiltersPage.cpp" line="663"/>
+        <location filename="../SwitchFiltersPage.cpp" line="664"/>
         <source>Warning!!!
 
 SOR Signal(s) are set in logic modules!
@@ -1627,30 +1637,30 @@ Are you sure you STILL WANT TO APPLY the changes?</source>
 Ви впевнені, що хочете застосувати зміни?</translation>
     </message>
     <message>
-        <location filename="../SwitchFiltersPage.cpp" line="839"/>
+        <location filename="../SwitchFiltersPage.cpp" line="840"/>
         <source>%1
 
 %2 / %3</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../SwitchFiltersPage.cpp" line="867"/>
-        <location filename="../SwitchFiltersPage.cpp" line="878"/>
+        <location filename="../SwitchFiltersPage.cpp" line="868"/>
+        <location filename="../SwitchFiltersPage.cpp" line="879"/>
         <source>QPushButton { background-color: %1; color: %2 }</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../SwitchFiltersPage.cpp" line="927"/>
+        <location filename="../SwitchFiltersPage.cpp" line="928"/>
         <source>%1 / %2</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../SwitchFiltersPage.cpp" line="947"/>
+        <location filename="../SwitchFiltersPage.cpp" line="948"/>
         <source>ON</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../SwitchFiltersPage.cpp" line="954"/>
+        <location filename="../SwitchFiltersPage.cpp" line="955"/>
         <source>PARTIAL</source>
         <translation></translation>
     </message>
@@ -2123,15 +2133,15 @@ Are you sure you STILL WANT TO APPLY the changes?</source>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="921"/>
-        <location filename="../TuningPage.cpp" line="1662"/>
-        <location filename="../TuningPage.cpp" line="1687"/>
-        <location filename="../TuningPage.cpp" line="1695"/>
+        <location filename="../TuningPage.cpp" line="1659"/>
+        <location filename="../TuningPage.cpp" line="1684"/>
+        <location filename="../TuningPage.cpp" line="1692"/>
         <source>Set Value</source>
         <translation>Задати значення</translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="925"/>
-        <location filename="../TuningPage.cpp" line="2574"/>
+        <location filename="../TuningPage.cpp" line="2571"/>
         <source>Set All</source>
         <translation>Задати всі</translation>
     </message>
@@ -2157,12 +2167,11 @@ Are you sure you STILL WANT TO APPLY the changes?</source>
         <translation>Деякі значення модифіковані, але не записані. Оберіть дію:</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1380"/>
         <source>New values will be written:</source>
-        <translation>Нові значення будуть встановлені:</translation>
+        <translation type="vanished">Нові значення будуть встановлені:</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1444"/>
+        <location filename="../TuningPage.cpp" line="1441"/>
         <source>To write changes, all connections to following tuning sources will be activated:
 
 %1
@@ -2187,7 +2196,7 @@ Continue?</source>
         <translation type="vanished">Запис</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1518"/>
+        <location filename="../TuningPage.cpp" line="1515"/>
         <source>Warning!!!
 
 SOR Signal(s) are set in logic modules!
@@ -2204,22 +2213,22 @@ Are you sure you STILL WANT TO APPLY the changes?</source>
 Ви впевнені, що хочете застосувати зміни?</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1577"/>
+        <location filename="../TuningPage.cpp" line="1574"/>
         <source>Are you sure you want apply the changes?</source>
         <translation>Ви впевнені, що хочете застосувати зміни?</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1662"/>
+        <location filename="../TuningPage.cpp" line="1659"/>
         <source>There is limits mismatch in signal &apos;%1&apos;. Value setting is disabled.</source>
         <translation>Невідповідність лімітів сигналу %1. Задання значення неможливе.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1687"/>
+        <location filename="../TuningPage.cpp" line="1684"/>
         <source>Please select objects of the same type.</source>
         <translation>Оберіть сигнали однакового типу.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1695"/>
+        <location filename="../TuningPage.cpp" line="1692"/>
         <source>Selected objects have different input range.</source>
         <translation>Обрані сигнали мають різні вхідні діапазони.</translation>
     </message>
@@ -2228,152 +2237,152 @@ Are you sure you STILL WANT TO APPLY the changes?</source>
         <translation type="vanished">Обрані сигнали мають різне значення по замовчуванню.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1801"/>
+        <location filename="../TuningPage.cpp" line="1798"/>
         <source>%1 - %2</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1822"/>
+        <location filename="../TuningPage.cpp" line="1819"/>
         <source>...</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1846"/>
+        <location filename="../TuningPage.cpp" line="1843"/>
         <source>Format</source>
         <translation>Формат</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1848"/>
+        <location filename="../TuningPage.cpp" line="1845"/>
         <source>Auto-select</source>
         <translation>Авто</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1854"/>
+        <location filename="../TuningPage.cpp" line="1851"/>
         <source>Decimal (as [-]9.9)</source>
         <translation>Десятковий (як [-]9.9)</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1860"/>
+        <location filename="../TuningPage.cpp" line="1857"/>
         <source>Exponential (as [-]9.9e[+|-]999)</source>
         <translation>Експоненційний (як [-]9.9e[+|-]999)</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1868"/>
+        <location filename="../TuningPage.cpp" line="1865"/>
         <source>More</source>
         <translation>Більше</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1870"/>
+        <location filename="../TuningPage.cpp" line="1867"/>
         <source>Add To New Filter...</source>
         <translation>Додати до нового фільтру...</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1874"/>
+        <location filename="../TuningPage.cpp" line="1871"/>
         <source>Add To Existing Filter...</source>
         <translation>Додати до існуючого фільтру...</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1893"/>
+        <location filename="../TuningPage.cpp" line="1890"/>
         <source>Restore Values From Filter...</source>
         <translation>Відновити значення з фільтру...</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1900"/>
+        <location filename="../TuningPage.cpp" line="1897"/>
         <source>Export Current View to CSV...</source>
         <translation>Експортувати вид до CSV...</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1916"/>
+        <location filename="../TuningPage.cpp" line="1913"/>
         <source>Add Signals To Filter</source>
         <translation>Додати сигнали до фільтру</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1917"/>
+        <location filename="../TuningPage.cpp" line="1914"/>
         <source>Enter the filter name:</source>
         <translation>Введіть назву фільтру:</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1918"/>
+        <location filename="../TuningPage.cpp" line="1915"/>
         <source>Name</source>
         <translation>Найменування</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1984"/>
+        <location filename="../TuningPage.cpp" line="1981"/>
         <source>Can&apos;t add signals - no existing automatic filters found. Please add them to a new filter.</source>
         <translation>Сигнали не додано - немає раніше створених фільтрів зі значенням. Додайте сигнали до нового фільтру.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2006"/>
+        <location filename="../TuningPage.cpp" line="2003"/>
         <source>Export to CSV</source>
         <translation>Експорт до CSV</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2008"/>
+        <location filename="../TuningPage.cpp" line="2005"/>
         <source>CSV (*.csv)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2019"/>
+        <location filename="../TuningPage.cpp" line="2016"/>
         <source>Error writing file %1!</source>
         <translation>Помилка запису файлу %1!</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2053"/>
+        <location filename="../TuningPage.cpp" line="2050"/>
         <source>Export complete.</source>
         <translation>Експорт завершено.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2073"/>
+        <location filename="../TuningPage.cpp" line="2070"/>
         <source>No auto-created filters exist.</source>
         <translation>Автоматично створених фільтрів не існує.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2280"/>
+        <location filename="../TuningPage.cpp" line="2277"/>
         <source>No signals were added.</source>
         <translation>Сигнали не були додані.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2297"/>
+        <location filename="../TuningPage.cpp" line="2294"/>
         <source>Error</source>
         <translation>Помилка</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2300"/>
+        <location filename="../TuningPage.cpp" line="2297"/>
         <source>Adding signals complete.</source>
         <translation>Додавання сигналів завершено.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2362"/>
+        <location filename="../TuningPage.cpp" line="2359"/>
         <source>No values restored from the filter for current signals.</source>
         <translation>Відновлення значень сигналів не відбулося.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2366"/>
+        <location filename="../TuningPage.cpp" line="2363"/>
         <source>%1 values were restored from the filter. Check them and apply the changes.</source>
         <translation>З фільтру було відновлено %1 значень. Перевірте їх та застосуйте зміни.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2574"/>
+        <location filename="../TuningPage.cpp" line="2571"/>
         <source>There is limits mismatch in signal &apos;%1&apos;. Operation is disabled.</source>
         <translation>Невідповідність лімітів сигналу %1. Задання значення неможливе.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2582"/>
+        <location filename="../TuningPage.cpp" line="2579"/>
         <source>Set All Discretes To On</source>
         <translation>Встановити всі в 1</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2613"/>
+        <location filename="../TuningPage.cpp" line="2610"/>
         <source>Set All Discretes To Off</source>
         <translation>Встановити всі в 0</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2645"/>
+        <location filename="../TuningPage.cpp" line="2642"/>
         <source>Set All To Defaults</source>
         <translation>Встановтит всі за замовчуванням</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2673"/>
+        <location filename="../TuningPage.cpp" line="2670"/>
         <source>Invalid default value &apos;%1&apos; in signal %2 [%3]</source>
         <translation>Невірне значення за замовчуванням &apos;%1&apos; в сигналі %2 [%3]</translation>
     </message>
@@ -2386,12 +2395,12 @@ Are you sure you STILL WANT TO APPLY the changes?</source>
 <context>
     <name>TuningSchemaWidget</name>
     <message>
-        <location filename="../TuningSchemaWidget.cpp" line="178"/>
+        <location filename="../TuningSchemaWidget.cpp" line="155"/>
         <source>Signals</source>
         <translation>Сигнали</translation>
     </message>
     <message>
-        <location filename="../TuningSchemaWidget.cpp" line="202"/>
+        <location filename="../TuningSchemaWidget.cpp" line="179"/>
         <source>Impact Signals</source>
         <translation></translation>
     </message>
@@ -2609,12 +2618,12 @@ Are you sure you STILL WANT TO APPLY the changes?</source>
     <message>
         <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="399"/>
         <source>EquipmentId</source>
-        <translation></translation>
+        <translation>ІД обладнання</translation>
     </message>
     <message>
         <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="400"/>
         <source>IP</source>
-        <translation></translation>
+        <translation>Адреса</translation>
     </message>
     <message>
         <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="401"/>
@@ -2629,12 +2638,12 @@ Are you sure you STILL WANT TO APPLY the changes?</source>
     <message>
         <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="403"/>
         <source>SubsystemID</source>
-        <translation></translation>
+        <translation>ІД підсистеми</translation>
     </message>
     <message>
         <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="404"/>
         <source>LmNumber</source>
-        <translation></translation>
+        <translation>Номер M</translation>
     </message>
     <message>
         <location filename="../../lib/Ui/TuningSourcesWidget.cpp" line="406"/>

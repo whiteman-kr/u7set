@@ -33,7 +33,7 @@ namespace Afb
 		//
 		if (xmlElement.hasAttribute(QLatin1String("OpName")) == false)
 		{
-			*errorMessage = "AFBCompoment\\Pin does not have attribute OpName";
+			*errorMessage = "AFBComponent\\Pin does not have attribute OpName";
 			return false;
 		}
 
@@ -43,7 +43,7 @@ namespace Afb
 		//
 		if (xmlElement.hasAttribute(QLatin1String("OpIndex")) == false)
 		{
-			*errorMessage = "AFBCompoment\\Pin does not have attribute OpIndex";
+			*errorMessage = "AFBComponent\\Pin does not have attribute OpIndex";
 			return false;
 		}
 
@@ -53,7 +53,7 @@ namespace Afb
 		//
 		if (xmlElement.hasAttribute(QLatin1String("PinType")) == false)
 		{
-			*errorMessage = "AFBCompoment\\Pin does not have attribute PinType";
+			*errorMessage = "AFBComponent\\Pin does not have attribute PinType";
 			return false;
 		}
 
@@ -129,7 +129,7 @@ namespace Afb
 		//
 		if (xmlElement.hasAttribute(QLatin1String("Caption")) == false)
 		{
-			*errorMessage = "AFBCompoment does not have attribute Caption";
+			*errorMessage = "AFBComponent does not have attribute Caption";
 			return false;
 		}
 
@@ -139,7 +139,7 @@ namespace Afb
 		//
 		if (xmlElement.hasAttribute(QLatin1String("OpCode")) == false)
 		{
-			*errorMessage = QString("AFBCompoment %1 does not have attribute OpCode").arg(m_caption);
+			*errorMessage = QString("AFBComponent %1 does not have attribute OpCode").arg(m_caption);
 			return false;
 		}
 
@@ -149,7 +149,7 @@ namespace Afb
 		//
 		if (xmlElement.hasAttribute(QLatin1String("HasRam")) == false)
 		{
-			*errorMessage = QString("AFBCompoment %1 does not have attribute HasRam").arg(m_caption);
+			*errorMessage = QString("AFBComponent %1 does not have attribute HasRam").arg(m_caption);
 			return false;
 		}
 
@@ -159,7 +159,7 @@ namespace Afb
 		//
 		if (xmlElement.hasAttribute(QLatin1String("ImpVersion")) == false)
 		{
-			*errorMessage = QString("AFBCompoment %1 does not have attribute ImpVersion").arg(m_caption);
+			*errorMessage = QString("AFBComponent %1 does not have attribute ImpVersion").arg(m_caption);
 			return false;
 		}
 
@@ -169,7 +169,7 @@ namespace Afb
 		//
 		if (xmlElement.hasAttribute(QLatin1String("VersionOpIndex")) == false)
 		{
-			*errorMessage = QString("AFBCompoment %1 does not have attribute VersionOpIndex").arg(m_caption);
+			*errorMessage = QString("AFBComponent %1 does not have attribute VersionOpIndex").arg(m_caption);
 			return false;
 		}
 
@@ -179,7 +179,7 @@ namespace Afb
 		//
 		if (xmlElement.hasAttribute(QLatin1String("MaxInstCount")) == false)
 		{
-			*errorMessage = QString("AFBCompoment %1 does not have attribute MaxInstCount").arg(m_caption);
+			*errorMessage = QString("AFBComponent %1 does not have attribute MaxInstCount").arg(m_caption);
 			return false;
 		}
 
@@ -602,7 +602,7 @@ namespace Afb
 		if (m_additionalSizes.empty() == false)
 		{
 			QString str;
-			str.reserve(static_cast<int>(m_additionalSizes.size()) * 4);
+			str.reserve(m_additionalSizes.size() * 4);
 
 			for (size_t i = 0; i < m_additionalSizes.size(); i++)
 			{
@@ -1087,7 +1087,7 @@ namespace Afb
 			m_afbParamValue.setType(E::SignalType::Analog);
 
 			// Analog signal size cannot be less then 16 bits
-			// Fix size, in old versions of LM descriptsions the size og AfbParam could be 4 or 5 (i_conf for example),
+			// Fix size, in old versions of LM descriptions the size og AfbParam could be 4 or 5 (i_conf for example),
 			// but in reality size of param is 16bit, so fix this problem for stored AFB params here
 			// Also puls_gen had an error, discrete signal was saved as 1-bit analog
 			//
@@ -1545,7 +1545,7 @@ namespace Afb
 		m_afbParamValue = v;
 	}
 
-	// Defaut Value
+	// Default Value
 	//
 	const QVariant& AfbParam::defaultValue() const
 	{
@@ -1668,7 +1668,7 @@ namespace Afb
 
 		// Copy via xml serialization is TOO SLOW,
 		// and it's slows down compilation (ordering items).
-		// If ordering items (struct AppLogicItem) is rewriten without copy,
+		// If ordering items (struct AppLogicItem) is rewritten without copy,
 		// then it will be possible to uncomment  xml serialization
 		//
 

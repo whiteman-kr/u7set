@@ -354,6 +354,12 @@ private:
 	TabType m_tabType = TabType::Generic;
 	CounterType m_counterType = CounterType::StatusBar;
 
+	// Values
+	//
+	std::map <Hash, TuningFilterSignal> m_signalValuesMap;
+
+	// Visible columns
+	//
 	bool m_columnCustomAppId = true;
 	bool m_columnAppId = false;
 	bool m_columnEquipmentId = true;
@@ -365,16 +371,10 @@ private:
 	bool m_columnValid = false;
 	bool m_columnOutOfRange = false;
 
-private:
-
 	//
 	// Run-time data
 	//
-
-	// Values
-	//
-	std::map <Hash, TuningFilterSignal> m_signalValuesMap;
-
+private:
 	// Parent and child
 	//
 	TuningFilter* m_parentFilter = nullptr;

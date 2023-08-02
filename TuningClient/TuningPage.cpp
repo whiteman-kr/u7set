@@ -1372,14 +1372,6 @@ bool TuningPage::askForSavePendingChanges()
 
 bool TuningPage::write()
 {
-	if (m_userManager.login(this) == false)
-	{
-		return false;
-	}
-
-	QString str = tr("New values will be written:") + QString("\n\n");
-	QString strValue;
-
 	std::vector<Hash> allHashes = m_model->allHashes();
 
 	std::vector<Hash> modifiedHashes;
@@ -1420,6 +1412,11 @@ bool TuningPage::write()
 	}
 
 	if (modifiedHashes.empty() == true)
+	{
+		return false;
+	}
+
+	if (m_userManager.login(this) == false)
 	{
 		return false;
 	}

@@ -1907,23 +1907,13 @@ void TuningFilter::copy(const TuningFilter& That)
 	m_caption = That.m_caption;
 
 	m_source = That.m_source;
-
-	m_customAppSignalIDMasks = That.m_customAppSignalIDMasks;
-	m_equipmentIDMasks = That.m_equipmentIDMasks;
-	m_appSignalIDMasks = That.m_appSignalIDMasks;
-	m_appSignalTags = That.m_appSignalTags;
-
-	m_signalValuesMap = That.m_signalValuesMap;
-
 	m_interfaceType = That.m_interfaceType;
 	m_signalType = That.m_signalType;
 
-	m_hasDiscreteCounter = That.m_hasDiscreteCounter;
+	m_useColors = That.useColors();
 
 	m_backColor = That.m_backColor;
 	m_textColor = That.m_textColor;
-
-	m_useColors = That.useColors();
 
 	m_backSelectedColor = That.m_backSelectedColor;
 	m_textSelectedColor = That.m_textSelectedColor;
@@ -1931,18 +1921,31 @@ void TuningFilter::copy(const TuningFilter& That)
 	m_backAlertedColor = That.m_backAlertedColor;
 	m_textAlertedColor = That.m_textAlertedColor;
 
+	m_hasDiscreteCounter = That.m_hasDiscreteCounter;
+
+	m_tags = That.m_tags;
+	m_startSchemaId = That.m_startSchemaId;
+
+	m_customAppSignalIDMasks = That.m_customAppSignalIDMasks;
+	m_equipmentIDMasks = That.m_equipmentIDMasks;
+	m_appSignalIDMasks = That.m_appSignalIDMasks;
+	m_appSignalTags = That.m_appSignalTags;
+
+	m_cachedCustomAppSignalIDMasks = That.m_cachedCustomAppSignalIDMasks;
+	m_cachedEquipmentIDMasks = That.m_cachedEquipmentIDMasks;
+	m_cachedAppSignalIDMasks = That.m_cachedAppSignalIDMasks;
+	m_cachedAppSignalTags = That.m_cachedAppSignalTags;
+
 	m_valueColumnsCount = That.m_valueColumnsCount;
 	m_valueColumnsAppSignalIdSuffixes = That.m_valueColumnsAppSignalIdSuffixes;
 
 	m_tabType = That.m_tabType;
 	m_counterType = That.m_counterType;
 
-	m_tags = That.m_tags;
-	m_startSchemaId = That.m_startSchemaId;
-
 	m_equipmentHashes = That.m_equipmentHashes;
 	m_signalsHashes = That.m_signalsHashes;
 
+	m_signalValuesMap = That.m_signalValuesMap;
 
     for (const auto& f : That.m_childFilters)
 	{

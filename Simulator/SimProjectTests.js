@@ -88,8 +88,137 @@ function testAfbNot(sim)
 }
 
 
-// Test for AFB Not (OpCode 2)
-// Schema: TEST_NOT
+// Test for AFB Logic (OpCode 1) for SR_05, there are logic instructions and compile time optimization involved
+// Schema: TEST_LOGIC_INSTRUCTIONS
+//
+function testLogicInstructions(sim)
+{
+	// Test compile time logic
+	//
+	assert(sim.signalValue("#TEST_LOGICINSTR_OR1") === 1);
+	assert(sim.signalValue("#TEST_LOGICINSTR_AND1") === 0);
+	assert(sim.signalValue("#TEST_LOGICINSTR_XOR1") === 0);
+
+	// Compile Time OR
+	//
+	assert(sim.signalValue("#TEST_LOGICINSTR_OR2") === 0);
+	assert(sim.signalValue("#TEST_LOGICINSTR_OR3") === 1);
+	assert(sim.signalValue("#TEST_LOGICINSTR_OR4") === 1);
+
+	// Compile Time AND
+	//	
+	assert(sim.signalValue("#TEST_LOGICINSTR_AND2") === 0);
+	assert(sim.signalValue("#TEST_LOGICINSTR_AND3") === 0);
+	assert(sim.signalValue("#TEST_LOGICINSTR_AND4") === 1);	
+
+	// XOR
+	//	
+	assert(sim.signalValue("#TEST_LOGICINSTR_XOR2") === 0);
+	assert(sim.signalValue("#TEST_LOGICINSTR_XOR3") === 1);
+	assert(sim.signalValue("#TEST_LOGICINSTR_XOR4") === 1);		
+	assert(sim.signalValue("#TEST_LOGICINSTR_XOR5") === 0);
+
+	// OR - instructions
+	//
+	assert(sim.signalValue("#TEST_LOGICINSTR_RT_OR") === 0);
+	assert(sim.signalValue("#TEST_LOGICINSTR_RT_OR2") === 1);
+	assert(sim.signalValue("#TEST_LOGICINSTR_RT_OR3") === 1);
+
+	// AND - instructions
+	//
+	assert(sim.signalValue("#TEST_LOGICINSTR_ANDI1") === 0);
+	assert(sim.signalValue("#TEST_LOGICINSTR_ANDI2") === 0);
+	assert(sim.signalValue("#TEST_LOGICINSTR_ANDI3") === 1);
+
+	// Test NOT instructions
+	//
+	assert(sim.signalValue("#TEST_LOGICINSTR_NOT_1") === 1);
+	assert(sim.signalValue("#TEST_LOGICINSTR_NOT_2") === 0);
+	
+	assert(sim.signalValue("#TEST_LOGICINSTR_NOT_3") === 0);
+	assert(sim.signalValue("#TEST_LOGICINSTR_NOT_20") === 1);
+
+	return;
+}
+
+// Test for AFB Logic (OpCode 1) for SR_05, there are logic instructions and compile time optimization involved
+// Schema: TEST_LOGIC_INSTRUCTIONS
+//
+function testLogicBusInstructions(sim)
+{
+	// Bus OR - AFB
+	//
+	assert(sim.signalValue("#TEST_LOGIC_INST_T90_R1") === 1);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T90_R2") === 1);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T90_R3") === 1);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T90_R4") === 1);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T90_R5") === 0);
+
+	// Bus AND - AFB
+	//
+	assert(sim.signalValue("#TEST_LOGIC_INST_T91_R1") === 0);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T91_R2") === 0);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T91_R3") === 1);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T91_R4") === 0);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T91_R5") === 1);	
+
+	// Bus XOR - AFB
+	//
+	assert(sim.signalValue("#TEST_LOGIC_INST_T92_R1") === 1);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T92_R2") === 0);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T92_R3") === 0);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T92_R4") === 1);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T92_R5") === 0);		
+
+	// Bus NOT - INSTRUCTION
+	//
+	assert(sim.signalValue("#TEST_LOGIC_INST_T90_R1NOT") === 0);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T90_R2NOT") === 0);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T90_R3NOT") === 0);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T90_R4NOT") === 0);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T90_R5NOT") === 1);	
+
+	// Bus NOT - INSTRUCTION
+	//	
+	assert(sim.signalValue("#TEST_LOGIC_INST_T91_R1NOT") === 1);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T91_R2NOT") === 1);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T91_R3NOT") === 0);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T91_R4NOT") === 1);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T91_R5NOT") === 0);
+	
+	// Bus NOT - INSTRUCTION, two 16bit words.
+	//	
+	assert(sim.signalValue("#TEST_LOGIC_INST_T49_BN00") === 1);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T49_BN01") === 0);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T49_BN02") === 0);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T49_BN03") === 1);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T49_BN04") === 0);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T49_BN05") === 1);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T49_BN06") === 0);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T49_BN07") === 0);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T49_BN08") === 1);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T49_BN09") === 0);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T49_BN10") === 0);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T49_BN11") === 1);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T49_BN12") === 1);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T49_BN13") === 1);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T49_BN14") === 1);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T49_BN15") === 1);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T49_BN16") === 0);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T49_BN17") === 1);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T49_BN18") === 1);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T49_BN19") === 1);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T49_BN20") === 1);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T49_BN21") === 1);
+	assert(sim.signalValue("#TEST_LOGIC_INST_TT49_BN22") === 0);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T49_BN23") === 0);
+	assert(sim.signalValue("#TEST_LOGIC_INST_T49_BN24") === 1);
+
+	return;	
+}
+
+// Test for AFB Logic (OpCode 1)
+// Schema: TEST_LOGIC
 //
 function testAfbLogic(sim)
 {

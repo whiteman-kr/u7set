@@ -255,7 +255,7 @@ namespace Builder
 
 			PROC_TO_CALL(ModuleLogicCompiler::generateAlpPhaseCode),
 
-			// Some UalAfb items dinamically creating in time of generateAlpPhaseCode processing.
+			// Some UalAfb items dynamically creating in time of generateAlpPhaseCode processing.
 			// Therefore generateIdrPhaseCode, that produce UalAfb params initialization code,
 			// called AFTER generateAlpPhaseCode!
 			//
@@ -680,7 +680,7 @@ namespace Builder
 
 		m_modules.insert(lmEquipmentID(), m);
 
-		// chek LM subsystem ID
+		// check LM subsystem ID
 		//
 		m_lmSubsystemKey = m_appLogicCompiler.subsystems()->ssKey(m_lmSubsystemID);
 
@@ -1211,7 +1211,7 @@ namespace Builder
 				}
 				else
 				{
-					// has LoopbackSource connected to ouput, auto LoopbackSource is not requred
+					// has LoopbackSource connected to ouput, auto LoopbackSource is not required
 					// init variables for auto LoopbackTarget creation only
 					//
 					autoLoopbackTargetLabel = autoLoopbackID;
@@ -2689,7 +2689,7 @@ namespace Builder
 
 		if (result == false)
 		{
-			// Uncompatible signals connection (Logic schema '%1').
+			// Incompatible signals connection (Logic schema '%1').
 			//
 			m_log->errALC5117(srcItem->guid(), srcItem->label(), signalItem->guid(), signalItem->label(), signalItem->schemaID());
 			return false;
@@ -2920,7 +2920,7 @@ namespace Builder
 
 		if (ualSignal->isCompatible(bus, busSignal, log()) == false)
 		{
-			// Uncompatible signals connection (Logic schema '%1').
+			// Incompatible signals connection (Logic schema '%1').
 			//
 			m_log->errALC5117(ualSignal->ualItemGuid(), ualSignal->appSignalID(), busComposerItem->guid(), busComposerItem->label(), busComposerItem->schemaID());
 			return false;
@@ -2980,7 +2980,7 @@ namespace Builder
 
 		if (ualSignal->isBus() != true || ualSignal->busTypeID() != busTypeID)
 		{
-			// Uncompatible signals connection (Logic schema '%1').
+			// Incompatible signals connection (Logic schema '%1').
 			//
 			m_log->errALC5117(ualSignal->ualItemGuid(), ualSignal->appSignalID(), busExtractorItem->guid(), busExtractorItem->label(), busExtractorItem->schemaID());
 			return false;
@@ -3199,7 +3199,7 @@ namespace Builder
 			if (linkedValiditySignal->isInput() == false ||
 				linkedValiditySignal->isDiscrete() == false)
 			{
-				// Linked validity signal %1 shoud have Discrete Input type (input signal %2).
+				// Linked validity signal %1 should have Discrete Input type (input signal %2).
 				//
 				m_log->errALC5156(linkedValiditySignal->appSignalID(), s->appSignalID());
 				result = false;
@@ -3992,8 +3992,8 @@ namespace Builder
 
 		// AFB's out bus type determination rules:
 		//
-		// 1) try determinte BusType by input UalSignals
-		// 2) try determine BusType by bus signal connected to output
+		// 1) try to determine BusType by input UalSignals
+		// 2) try to determine BusType by bus signal connected to output
 
 		determineBusTypeByInputs(ualAfb, outBusTypeID);
 
@@ -4051,7 +4051,7 @@ namespace Builder
 					continue;
 				}
 
-				// Uncompatible signals connection (Logic schema '%1').
+				// Incompatible signals connection (Logic schema '%1').
 				//
 				assert(false);				// this error must be detected earlier
 
@@ -5295,7 +5295,7 @@ namespace Builder
 			if (s->isAcquired() == true &&
 				s->isAnalog() == true &&
 				s->isBusChild() == true &&
-				s->isFrombusConversionRequired() == false &&	// if isFrombusConversionRequired() == true,
+				s->isFrombusConversionRequired() == false &&	// if isFromBusConversionRequired() == true,
 																// this signal acquired as Internal Analog (after frombus conversion)
 				s->isConst() == false &&
 				s->anyParentBusIsAcquired() == false)
@@ -5507,7 +5507,7 @@ namespace Builder
 		//  - enableTuning
 		//	+ used in UAL
 		//	+ bus child == false
-		//  + bus_child == true && FromBusConversionRequierd == true
+		//  + bus_child == true && FromBusConversionRequired == true
 		//	+ auto analog internal signals (auto generated in m_appSignals)
 
 		for(UalSignal* s : m_ualSignals)
@@ -6443,9 +6443,9 @@ namespace Builder
 
 		bool result = true;
 
-		// find AFB: scal_16ui_32fp, scal_16ui_32si, scal_32fp_16ui, scal_32si_16ui
+		// find AFB: scale_16ui_32fp, scale_16ui_32si, scale_32fp_16ui, scale_32si_16ui
 		//
-		const char* const fbScalCaption[] =
+		const char* const fbScaleCaption[] =
 		{
 
 			// for input signals conversion
@@ -6472,7 +6472,7 @@ namespace Builder
 		const char* const FB_SCALE_INPUT_SIGNAL_CAPTION = "i_data";
 		const char* const FB_SCALE_OUTPUT_SIGNAL_CAPTION = "o_result";
 
-		for(const char* const fbCaption : fbScalCaption)
+		for(const char* const fbCaption : fbScaleCaption)
 		{
 			bool fbFound = false;
 
@@ -7104,7 +7104,7 @@ namespace Builder
 		do
 		{
 			// add Tx signals from transmitters in txSignal lists of all Optical and Serial ports associated with current LM
-			// check that added regulat Tx signals exists in current LM
+			// check that added regular Tx signals exists in current LM
 			//
 			if (processTransmitters() == false) break;
 
@@ -8226,7 +8226,7 @@ namespace Builder
 
 			if (opCodes.contains(afbOpcode) == true)
 			{
-				auto component = components.at(afbOpcode);
+				const auto& component = components.at(afbOpcode);
 
 				cmd.readFuncBlockCompare(afbOpcode, 0,
 										component->versionOpIndex(),
@@ -11467,7 +11467,7 @@ namespace Builder
 
 		busFilling.getUnfilled(&unfilledAreas);
 
-		for(auto const p : unfilledAreas)
+		for (auto const& p : unfilledAreas)
 		{
 			int startAddr = p.first;
 			int sizeW = p.second;
@@ -15611,7 +15611,7 @@ namespace Builder
 	{
 		QStringList unusedSignals;
 
-		for(auto pair : m_chassisSignals)
+		for(const auto& pair : m_chassisSignals)
 		{
 			const AppSignal* s = pair.second;
 
@@ -17958,7 +17958,7 @@ namespace Builder
 		{
 			// initialization of m_chassisSignalsByEquipmentID
 			//
-			for(auto pair : m_chassisSignals)
+			for(const auto& pair : m_chassisSignals)
 			{
 				const AppSignal* appSignal = pair.second;
 
