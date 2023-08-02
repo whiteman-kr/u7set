@@ -342,7 +342,7 @@ namespace Builder
 			LOG_MESSAGE(m_context->m_log, tr("Suppressed warnings: %1").arg(suppressWarningsMessage));
 		}
 
-		m_context->m_log->setSupressIssues(suppressWarnings);
+		m_context->m_log->setSuppressIssues(suppressWarnings);
 
 		return ok;
 	}

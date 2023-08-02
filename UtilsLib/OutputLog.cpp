@@ -448,7 +448,7 @@ void OutputLog::writeEmptyLine()
 	return writeMessage("");
 }
 
-void OutputLog::setSupressIssues(std::vector<int> warnings)
+void OutputLog::setSuppressIssues(std::vector<int> warnings)
 {
 	m_suppressedIssues.clear();
 

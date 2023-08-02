@@ -57,7 +57,7 @@ public:
 public:
 	int m_no = 0;
 	QString m_message;
-	OutputMessageLevel m_level;
+	OutputMessageLevel m_level = OutputMessageLevel::Error;
 	QDateTime m_time;
 
 	QString m_file;
@@ -116,7 +116,7 @@ public:
     Q_INVOKABLE void writeDump(const std::vector<quint8> &data);
 	Q_INVOKABLE void writeEmptyLine();
 
-	void setSupressIssues(std::vector<int> warnings);
+	void setSuppressIssues(std::vector<int> warnings);
 	bool isIssueSuppressed(int issueCode) const;
 
 	bool isEmpty() const;

@@ -223,7 +223,7 @@ namespace Builder
 	///		%1 File name
 	///
 	/// Description:
-	///		Program can't create file, because file alredy exists.
+	///		Program can't create file, because file already exists.
 	///
 	void IssueLogger::errCMN0014(QString fileName)
 	{
@@ -361,7 +361,7 @@ namespace Builder
 	///
 	/// Description:
 	///		Build file already linked to specified configuration.xml file.
-	///		In most cases it is an internal software error and it shoud be reported to developers.
+	///		In most cases it is an internal software error and it should be reported to developers.
 	///
 	void IssueLogger::errCMN0021(QString fileName, QString cfgXmlFileName)
 	{
@@ -374,7 +374,7 @@ namespace Builder
 	///
 	/// IssueType: Warning
 	///
-	/// Title: Build output path %1. Standard writeble location will be used: %2
+	/// Title: Build output path %1. Standard writable location will be used: %2
 	///
 	/// Parameters:
 	///		%1 issue message
@@ -388,7 +388,7 @@ namespace Builder
 	{
 		LOG_WARNING0(IssueType::Common,
 				  22,
-				  QString(tr("Build output path %1. Standard writeble location will be used: %2")).arg(issue).arg(stdWritablePath));
+				  QString(tr("Build output path %1. Standard writable location will be used: %2")).arg(issue).arg(stdWritablePath));
 	}
 
 	/// IssueCode: CMN0023
@@ -425,7 +425,7 @@ namespace Builder
 	///
 	/// Description:
 	///		Error may occur if function gets wrong input parameters.
-	///		In most cases it is an internal software error and it shoud be reported to developers.
+	///		In most cases it is an internal software error and it should be reported to developers.
 	///
 	void IssueLogger::errINT1000(QString debugMessage)
 	{
@@ -445,8 +445,8 @@ namespace Builder
 	///		%1 Debug information
 	///
 	/// Description:
-	///		Error may occur if interanl exception occured. In most cases it is an internal software error
-	/// and it shoud be reported to developers.
+	///		Error may occur if internal exception occurred. In most cases it is an internal software error
+	/// and it should be reported to developers.
 	///
 	void IssueLogger::errINT1001(QString debugMessage)
 	{
@@ -667,7 +667,7 @@ namespace Builder
 	/// Parameters:
 	///
 	/// Description:
-	///		RPCT project property getting errror.
+	///		RPCT project property getting error.
 	///
 	void IssueLogger::errPDB2020()
 	{
@@ -889,7 +889,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Calculated SpreadTolerance ADC mismatch, signals %1 and %2 in module %3. Check High/LowEngineeringUints ranges, ADC range and SpreadTolerance value of signals.
+	/// Title: Calculated SpreadTolerance ADC mismatch, signals %1 and %2 in module %3. Check High/LowEngineeringUnits ranges, ADC range and SpreadTolerance value of signals.
 	///
 	/// Parameters:
 	///         %1 Signal 1 StrID
@@ -1052,7 +1052,7 @@ namespace Builder
 	///         %2 Object ID
 	///
 	/// Description:
-	///			Occurs if cant't find child object with certain suffix in parent object.
+	///			Occurs if cannot find child object with certain suffix in parent object.
 	///
 	void IssueLogger::errCFG3014(QString suffix, QString objectID)
 	{
@@ -1272,7 +1272,7 @@ namespace Builder
 	///         %2 Object ID
 	///
 	/// Description:
-	///			Occurs if cant't find child controller with certain suffix in parent object.
+	///			Occurs if cannot find child controller with certain suffix in parent object.
 	///
 	void IssueLogger::errCFG3025(QString suffix, QString objectID)
 	{
@@ -1379,7 +1379,7 @@ namespace Builder
 	///         %2 AppDataService equipmentID
 	///
 	/// Description:
-	///			Two LM's etehrnet adapters can't be connected to same AppDataService. Check LM's ethernet adapters settings.
+	///			Two LM's ethernet adapters can't be connected to same AppDataService. Check LM's ethernet adapters settings.
 	///
 	void IssueLogger::errCFG3030(QString lmID, QString appDataServiceID)
 	{
@@ -1494,7 +1494,7 @@ namespace Builder
 	///			%4 receiving equipmentID
 	///
 	/// Description:
-	///			Different subnet address in data source and data receving IP. Check specified addresses.
+	///			Different subnet address in data source and data receiving IP. Check specified addresses.
 	///
 	void IssueLogger::errCFG3043(	QString dataSourceIP,
 									QString dataSourceEquipmentID,
@@ -1563,7 +1563,7 @@ namespace Builder
 	/// 		%4 Object2 ID
 	///
 	/// Description:
-	///			Value of specified properties pair should't be equal.
+	///			Value of specified properties pair should not be equal.
 	///
 	void IssueLogger::errCFG3046(QString prop1, QString prop2,
 								 QString obj1, QString obj2)
@@ -1717,7 +1717,7 @@ namespace Builder
 	///			%4 Key high range
 	///
 	/// Description:
-	///			For ceratin types of LMs there are additional limitations to subsystem key value
+	///			For certain types of LMs there are additional limitations to subsystem key value
 	///
 	void IssueLogger::errCFG3060(QString subsystemId, int value, int max, int min)
 	{
@@ -1735,7 +1735,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Device %1 has preset version mismatch (%1.PresetVersion = %2, %3.PresetVersion = %4). To update presets select 'Update from Preset' in Equipmemt Editor.
+	/// Title: Device %1 has preset version mismatch (%1.PresetVersion = %2, %3.PresetVersion = %4). To update presets select 'Update from Preset' in Equipment Editor.
 	///
 	/// Parameters:
 	///         %1 EquipmentID
@@ -1744,13 +1744,13 @@ namespace Builder
 	///			%4 Actual preset version
 	///
 	/// Description:
-	///			Device has preset version which is not equal to actual preset version in presets. To resolve issue updating from preset is required, select 'Update from Preset' in Equipmemt Editor.
+	///			Device has preset version which is not equal to actual preset version in presets. To resolve issue updating from preset is required, select 'Update from Preset' in Equipment Editor.
 	///
 	void IssueLogger::errCFG3100(QString equipmentId, int devicePresetVersion, QString presetName, int presetVersion)
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3100,
-				  QString("Device %1 has preset version mismatch (%1.PresetVersion = %2, %3.PresetVersion = %4). To update presets select 'Update from Preset' in Equipmemt Editor.")
+				  QString("Device %1 has preset version mismatch (%1.PresetVersion = %2, %3.PresetVersion = %4). To update presets select 'Update from Preset' in Equipment Editor.")
 					.arg(equipmentId)
 					.arg(devicePresetVersion)
 					.arg(presetName)
@@ -1762,7 +1762,7 @@ namespace Builder
 	///
 	/// IssueType: Warning
 	///
-	/// Title: Device %1 has preset version mismatch (%1.PresetVersion = %2, %3.PresetVersion = %4). To update presets select 'Update from Preset' in Equipmemt Editor.
+	/// Title: Device %1 has preset version mismatch (%1.PresetVersion = %2, %3.PresetVersion = %4). To update presets select 'Update from Preset' in Equipment Editor.
 	///
 	/// Parameters:
 	///         %1 EquipmentID
@@ -1771,13 +1771,13 @@ namespace Builder
 	///			%4 Actual preset version
 	///
 	/// Description:
-	///			Device has preset version which is not equal to actual preset version in presets. To resolve issue updating from preset is required, select 'Update from Preset' in Equipmemt Editor.
+	///			Device has preset version which is not equal to actual preset version in presets. To resolve issue updating from preset is required, select 'Update from Preset' in Equipment Editor.
 	///
 	void IssueLogger::wrnCFG3101(QString equipmentId, int devicePresetVersion, QString presetName, int presetVersion)
 	{
 		LOG_WARNING0(IssueType::FscConfiguration,
 				  3101,
-				  QString("Device %1 has preset version mismatch (%1.PresetVersion = %2, %3.PresetVersion = %4). To update presets select 'Update from Preset' in Equipmemt Editor.")
+				  QString("Device %1 has preset version mismatch (%1.PresetVersion = %2, %3.PresetVersion = %4). To update presets select 'Update from Preset' in Equipment Editor.")
 					.arg(equipmentId)
 					.arg(devicePresetVersion)
 					.arg(presetName)
@@ -1789,7 +1789,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Property System\\LMNumber (%1) is not uinique in logic modules %2 and %3.
+	/// Title: Property System\\LMNumber (%1) is not unique in logic modules %2 and %3.
 	///
 	/// Parameters:
 	///         %1 LMNumber
@@ -1802,7 +1802,7 @@ namespace Builder
 	void IssueLogger::errCFG3103(int LMNumber, QString module1, QString module2)
 	{
 		LOG_ERROR(IssueType::FscConfiguration, 3103,
-				  tr("Property System\\LMNumber (%1) is not uinique in logic modules %2 and %3.").
+				  tr("Property System\\LMNumber (%1) is not unique in logic modules %2 and %3.").
 					arg(LMNumber).arg(module1).arg(module2));
 	}
 
@@ -1819,7 +1819,7 @@ namespace Builder
 	///			%4 Profile
 	///
 	/// Description:
-	///			Property TuningSimIP:port in TuningServicesmust be unique.
+	///			Property TuningSimIP:port in TuningServices must be unique.
 	///
 	void IssueLogger::errCFG3104(QString tunSimIpStr, QString obj1, QString obj2, QString profile)
 	{
@@ -2051,9 +2051,9 @@ namespace Builder
 	///		%3 Logic schema StrID
 	///
 	/// Description:
-	///		To proccess logic block it is required AFB description which in not found. Open schema to upfate AFBs.
+	///		To proccess logic block it is required AFB description which in not found. Open schema to update AFBs.
 	///
-	void IssueLogger::errALP4008(QString schema, QString schemaItem, QString schemaItemAfbVersion, QString latesAfbVersion, QUuid itemUuid)
+	void IssueLogger::errALP4008(QString schema, QString schemaItem, QString schemaItemAfbVersion, QString latestAfbVersion, QUuid itemUuid)
 	{
 		addItemsIssues(OutputMessageLevel::Error,
 					   4008,
@@ -2065,7 +2065,7 @@ namespace Builder
 				  tr("SchemaItem %1 has outdated AFB description version, item's AFB.version %2, the latest is %3 (LogicSchema %4).")
 				  .arg(schemaItem)
 				  .arg(schemaItemAfbVersion)
-				  .arg(latesAfbVersion)
+				  .arg(latestAfbVersion)
 				  .arg(schema));
 	}
 
@@ -2110,7 +2110,7 @@ namespace Builder
 	///		%3 Logic schema StrID
 	///
 	/// Description:
-	///		SchemaItem %1 has outdated UFB version, item's UFB.version %2, the latest is %3 (LogicSchema %4). Open schema to upfate AFBs.
+	///		SchemaItem %1 has outdated UFB version, item's UFB.version %2, the latest is %3 (LogicSchema %4). Open schema to update AFBs.
 	///
 	void IssueLogger::errALP4010(QString schema, QString schemaItem, int schemaItemUfbVersion, int latesUfbVersion, QUuid itemUuid)
 	{
@@ -2282,14 +2282,14 @@ namespace Builder
 	/// Description:
 	///		File LmDescriptionFile %1 is not found (Schema %2).
 	///
-	void IssueLogger::errALP4016(QString schema, QString lmDecriptionFile)
+	void IssueLogger::errALP4016(QString schema, QString lmDescriptionFile)
 	{
 		addSchemaIssue(OutputMessageLevel::Error, 4016, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4016,
 				  tr("File LmDescriptionFile %1 is not found (Schema %2).")
-					.arg(lmDecriptionFile)
+					.arg(lmDescriptionFile)
 					.arg(schema));
 	}
 
@@ -2307,7 +2307,7 @@ namespace Builder
 	/// Description:
 	///		AfbComponent with OpCode %1 is not found in file %2 (Schema %3).
 	///
-	void IssueLogger::errALP4017(QString schema, QString lmDecriptionFile, int opCode)
+	void IssueLogger::errALP4017(QString schema, QString lmDescriptionFile, int opCode)
 	{
 		addSchemaIssue(OutputMessageLevel::Error, 4017, schema);
 
@@ -2315,7 +2315,7 @@ namespace Builder
 				  4017,
 				  tr("AfbComponent with OpCode %1 is not found in file %2 (Schema %3).")
 					.arg(opCode)
-					.arg(lmDecriptionFile)
+					.arg(lmDescriptionFile)
 					.arg(schema));
 	}
 
@@ -2333,7 +2333,7 @@ namespace Builder
 	/// Description:
 	///		AfbComponent with OpCode %1 is not found in file %2 (Schema %3).
 	///
-	void IssueLogger::errALP4017(QString schema, QString lmDecriptionFile, int opCode, QUuid itemUuid)
+	void IssueLogger::errALP4017(QString schema, QString lmDescriptionFile, int opCode, QUuid itemUuid)
 	{
 		addItemsIssues(OutputMessageLevel::Error, 4017, itemUuid, schema);
 
@@ -2341,7 +2341,7 @@ namespace Builder
 				  4017,
 				  tr("AfbComponent with OpCode %1 is not found in file %2 (Schema %3).")
 					.arg(opCode)
-					.arg(lmDecriptionFile)
+					.arg(lmDescriptionFile)
 					.arg(schema));
 	}
 
@@ -2360,7 +2360,7 @@ namespace Builder
 	/// Description:
 	///		LogicSchema and assigned LogicModule must have the same value of LmDescriptionFile.
 	///
-	void IssueLogger::errALP4018(QString schema, QString equipmentId, QString schemaLmDecriptionFile1, QString moduleLmDecriptionFile2)
+	void IssueLogger::errALP4018(QString schema, QString equipmentId, QString schemaLmDescriptionFile1, QString moduleLmDescriptionFile2)
 	{
 		addSchemaIssue(OutputMessageLevel::Error, 4018, schema);
 
@@ -2369,8 +2369,8 @@ namespace Builder
 				  tr("LogicSchema (%1) and LogicModule (%2) have different LmDescriptionFile (%3 and %4).")
 					.arg(schema)
 					.arg(equipmentId)
-					.arg(schemaLmDecriptionFile1)
-					.arg(moduleLmDecriptionFile2));
+					.arg(schemaLmDescriptionFile1)
+					.arg(moduleLmDescriptionFile2));
 
 	}
 
@@ -2378,7 +2378,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: UFB Schema has disctinct LmDescriptionFile from LogicSchema, UFB Item %1, UFB Schema %2, LogicSchema %3, UFBSchema LmDescriptionFile %4, LogicSchema LmDescriptionFile %5.
+	/// Title: UFB Schema has distinct LmDescriptionFile from LogicSchema, UFB Item %1, UFB Schema %2, LogicSchema %3, UFBSchema LmDescriptionFile %4, LogicSchema LmDescriptionFile %5.
 	///
 	/// Parameters:
 	///		%1 Schema item description
@@ -2388,9 +2388,9 @@ namespace Builder
 	///		%5 LogicSchema LmDescriptionFile
 	///
 	/// Description:
-	///		UFB Schema has disctinct LmDescriptionFile from LogicSchema, UFB Item %1, UFB Schema %2, LogicSchema %3, UFBSchema LmDescriptionFile %4, LogicSchema LmDescriptionFile %5.
+	///		UFB Schema has distinct LmDescriptionFile from LogicSchema, UFB Item %1, UFB Schema %2, LogicSchema %3, UFBSchema LmDescriptionFile %4, LogicSchema LmDescriptionFile %5.
 	///
-	void IssueLogger::errALP4019(QString schema, QString schemaItem, QString ufbElement, QUuid itemUuid, QString UfbLmDecriptionFile, QString schemaLmDecriptionFile)
+	void IssueLogger::errALP4019(QString schema, QString schemaItem, QString ufbElement, QUuid itemUuid, QString ufbLmDescriptionFile, QString schemaLmDecriptionFile)
 	{
 		addItemsIssues(OutputMessageLevel::Error, 4019, itemUuid, schema);
 
@@ -2400,7 +2400,7 @@ namespace Builder
 				  .arg(schemaItem)
 				  .arg(ufbElement)
 				  .arg(schema)
-				  .arg(UfbLmDecriptionFile)
+				  .arg(ufbLmDescriptionFile)
 				  .arg(schemaLmDecriptionFile));
 	}
 
@@ -2408,19 +2408,19 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: There is no any input element in applictaion logic for Logic Module %1.
+	/// Title: There is no any input element in application logic for Logic Module %1.
 	///
 	/// Parameters:
 	///		%1 Logic module StrID
 	///
 	/// Description:
-	///		Imposible to set execution order for logic items in logic module as there is no any input element.
+	///		Impossible to set execution order for logic items in logic module as there is no any input element.
 	///
 	void IssueLogger::errALP4020(QString logicModule)
 	{
 		LOG_ERROR(IssueType::AlParsing,
 				  4020,
-				  tr("There is no any input element in applictaion logic for Logic Module %1.")
+				  tr("There is no any input element in application logic for Logic Module %1.")
 				  .arg(logicModule));
 	}
 
@@ -2645,7 +2645,7 @@ namespace Builder
 	///
 	/// Parameters:
 	///		%1 SchemaID
-	///		%2 Commennted item(s) count
+	///		%2 Commented item(s) count
 	///
 	/// Description:
 	///			Schema has one or more commented functional items.
@@ -2689,13 +2689,13 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: SchemaID %1 has recursive reference, property Join(Left/Top/Right/Bottom)SchemaID must be distincive from SchemaID.
+	/// Title: SchemaID %1 has recursive reference, property Join(Left/Top/Right/Bottom)SchemaID must be distinctive from SchemaID.
 	///
 	/// Parameters:
 	///		%1 Schema ID
 	///
 	/// Description:
-	///			SchemaID has recursive reference, property Join(Left/Top/Right/Bottom)SchemaID must be distincive from SchemaID.
+	///			SchemaID has recursive reference, property Join(Left/Top/Right/Bottom)SchemaID must be distinctive from SchemaID.
 	///
 	void IssueLogger::errALP4081(QString schema)
 	{
@@ -2703,7 +2703,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4081,
-				  tr("SchemaID %1 has recursive reference, property Join(Left/Top/Right/Bottom)SchemaID must be distincive from SchemaID.")
+				  tr("SchemaID %1 has recursive reference, property Join(Left/Top/Right/Bottom)SchemaID must be distinctive from SchemaID.")
 						.arg(schema));
 	}
 
@@ -2720,7 +2720,7 @@ namespace Builder
 	/// Description:
 	///			Join schemas with different units, both schemas must have the same unit..
 	///
-	void IssueLogger::errALP4082(QString schema, QString pannelSchemaId)
+	void IssueLogger::errALP4082(QString schema, QString panelSchemaId)
 	{
 		addSchemaIssue(OutputMessageLevel::Error, 4082, schema);
 
@@ -2728,21 +2728,21 @@ namespace Builder
 				  4082,
 				  tr("Join schemas with different units, schemas %1 and %2 must have the same unit.")
 						.arg(schema)
-						.arg(pannelSchemaId));
+						.arg(panelSchemaId));
 	}
 
 	/// IssueCode: ALP4130
 	///
 	/// IssueType: Error
 	///
-	/// Title: Singlechannel Logic Schema %1 cannot contain multichannel signal block (%2).
+	/// Title: Single-channel Logic Schema %1 cannot contain multichannel signal block (%2).
 	///
 	/// Parameters:
 	///		%1 Logic schema StrID
 	///		%2 Schema item description
 	///
 	/// Description:
-	///		Singlechannel Logic Schema %1 cannot contain multichannel signal blocks (%2). Only one signal can be assigned for
+	///		Single-channel Logic Schema %1 cannot contain multichannel signal blocks (%2). Only one signal can be assigned for
 	/// input/output/internal signal elements.
 	///
 	void IssueLogger::errALP4130(QString schema, QString schemaItem, QUuid itemUuid)
@@ -2751,7 +2751,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4130,
-				  tr("Singlechannel Logic Schema %1 cannot contain multichannel signal block (%2).")
+				  tr("Single-channel Logic Schema %1 cannot contain multichannel signal block (%2).")
 				  .arg(schema)
 				  .arg(schemaItem));
 
@@ -2787,13 +2787,13 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Schema contains mixed singlechannel and multichannel SignalItems in the branch (LogicSchema %1).
+	/// Title: Schema contains mixed single-channel and multichannel SignalItems in the branch (LogicSchema %1).
 	///
 	/// Parameters:
 	///		%1 Logic Schema ID
 	///
 	/// Description:
-	///		Schema contains mixed singlechannel and multichannel SignalItems in the branch (LogicSchema %1).
+	///		Schema contains mixed single-channel and multichannel SignalItems in the branch (LogicSchema %1).
 	/// All Inputs/Outputs/Interconnection Signal elements must be the same type.
 	///
 	void IssueLogger::errALP4132(QString schema, const std::vector<QUuid>& itemsUuids)
@@ -2802,7 +2802,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4132,
-				  tr("Schema contains mixed singlechannel and multichannel SignalItems in the branch (LogicSchema %1).")
+				  tr("Schema contains mixed single-channel and multichannel SignalItems in the branch (LogicSchema %1).")
 				  .arg(schema));
 	}
 
@@ -2952,7 +2952,7 @@ namespace Builder
 	/// Description:
 	///		Connection item (Transmitter or Receiver) has connection(s) which is not accessible in logic schema's associated LM(s).
 	///
-	void IssueLogger::errALP4150(QString schema, QString schemaItem, QString connectionId, QString equipmentsIds, QUuid itemUuid)
+	void IssueLogger::errALP4150(QString schema, QString schemaItem, QString connectionId, QString equipmentIds, QUuid itemUuid)
 	{
 		addItemsIssues(OutputMessageLevel::Error, 4150, itemUuid, schema);
 
@@ -2962,14 +2962,14 @@ namespace Builder
 						.arg(schemaItem)
 						.arg(connectionId)
 						.arg(schema)
-						.arg(equipmentsIds));
+						.arg(equipmentIds));
 	}
 
 	/// IssueCode: ALP4152
 	///
 	/// IssueType: Error
 	///
-	/// Title:		Connection in singlechannel schema usage must have one ConnectionID for multichannel case it must have the same number of ConnectionIDs as logic schema.
+	/// Title:		Connection in single-channel schema usage must have one ConnectionID for multichannel case it must have the same number of ConnectionIDs as logic schema.
 	/// must have the only AppSignalID per channel, LogicSchemaID: %1, Receiver Item: %2, ConnectionID: %3, EquipmentID %4.
 	///
 	/// Parameters:
@@ -2981,7 +2981,7 @@ namespace Builder
 	/// Description:
 	///		Receiver must have the only AppSignalID per channel.
 	///
-	void IssueLogger::errALP4152(QString schema, QString schemaItem, QString connectionId, QString equipmentsId, QUuid itemUuid)
+	void IssueLogger::errALP4152(QString schema, QString schemaItem, QString connectionId, QString equipmentId, QUuid itemUuid)
 	{
 		addItemsIssues(OutputMessageLevel::Error, 4152, itemUuid, schema);
 
@@ -2991,7 +2991,7 @@ namespace Builder
 						.arg(schema)
 						.arg(schemaItem)
 						.arg(connectionId)
-						.arg(equipmentsId));
+						.arg(equipmentId));
 	}
 
 	/// IssueCode: ALP4153
@@ -3050,13 +3050,13 @@ namespace Builder
 	/// Title:	Invalid SchemaItem param (%1) reference format ('%2'), expected format '$(obj.var)' or '$(var)', LogicSchema %3, SchemaItem %4.
 	///
 	/// Parameters:
-	///		%1 Inavlid property or param
+	///		%1 Invalid property or param
 	///		%2 Actual reference to variable
 	///		%3 LogicSchemaID
 	///		%4 SchemaItem
 	///
 	/// Description:
-	///		SchemaItem has property or parmeter with refernce to variable and it has invalid format. The valid format for variable is '$(obj.var)' or '$(var)'.
+	///		SchemaItem has property or parameter with reference to variable and it has invalid format. The valid format for variable is '$(obj.var)' or '$(var)'.
 	///
 	void IssueLogger::errALP4200(QString schema, QString schemaItem, QString varName, QString currentValue, QUuid itemUuid)
 	{
@@ -3083,7 +3083,7 @@ namespace Builder
 	///		%3 LogicSchemaID
 	///
 	/// Description:
-	///		SchemaItem in UFB schema has reference to SchmaItemUfb.property, so this reference and SchmaItemUfb.property have incompatibe types.
+	///		SchemaItem in UFB schema has reference to SchemaItemUfb.property, so this reference and SchemaItemUfb.property have incompatible types.
 	///
 	void IssueLogger::errALP4201(QString schema, QString schemaItemUfb, QString varName, QUuid itemUuid)
 	{
@@ -3109,7 +3109,7 @@ namespace Builder
 	///		%3 LogicSchemaID
 	///
 	/// Description:
-	///		SchemaItem in UFB schema has no propert, but some UFB items are referenced to this property.
+	///		SchemaItem in UFB schema has no property, but some UFB items are referenced to this property.
 	///
 	void IssueLogger::errALP4202(QString schema, QString schemaItemUfb, QString varName, QUuid itemUuid)
 	{
@@ -3130,7 +3130,7 @@ namespace Builder
 	/// Title: Property %1.%2 is empty, LogicSchema %3.
 	///
 	/// Parameters:
-	///		%1 SchemaItemm
+	///		%1 SchemaItem
 	///		%2 Property or param name
 	///		%3 LogicSchemaID
 	///
@@ -3158,7 +3158,7 @@ namespace Builder
 	/// Parameters:
 	///		%1 SchemaItem
 	///		%2 Property or param name
-	///		%3 Property valie
+	///		%3 Property value
 	///		%3 LogicSchemaID
 	///
 	/// Description:
@@ -3192,7 +3192,7 @@ namespace Builder
 	///		%2 Logic schema ID
 	///
 	/// Description:
-	///		Signal idendifier is not found in application signals.
+	///		Signal identifier is not found in application signals.
 	///
 	void IssueLogger::errALC5000(QString appSignalID, QUuid itemUuid, QString schemaID)
 	{
@@ -3265,7 +3265,7 @@ namespace Builder
 	///		%3 Application signal ID
 	///
 	/// Description:
-	///		Analog outpuf of AFB is connected to discrete signal
+	///		Analog output of AFB is connected to discrete signal
 	///
 	void IssueLogger::errALC5003(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid)
 	{
@@ -3280,7 +3280,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Output %1.%2 is connected to signal %3 with uncompatible data format.
+	/// Title: Output %1.%2 is connected to signal %3 with incompatible data format.
 	///
 	/// Parameters:
 	///		%1 AFB caption
@@ -3288,7 +3288,7 @@ namespace Builder
 	///		%3 Application signal ID
 	///
 	/// Description:
-	///		Outpuf of AFB is connected to signal with uncompatible data format.
+	///		Output of AFB is connected to signal with incompatible data format.
 	///
 	void IssueLogger::errALC5004(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid, QString schemaID)
 	{
@@ -3296,7 +3296,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5004,
-				  tr("Output %1.%2 is connected to signal %3 with uncompatible data format. (Logic schema %4)").
+				  tr("Output %1.%2 is connected to signal %3 with incompatible data format. (Logic schema %4)").
 						arg(afbCaption).arg(output).arg(appSignalID).arg(schemaID));
 	}
 
@@ -3304,7 +3304,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Output %1.%2 is connected to signal %3 with uncompatible data size.
+	/// Title: Output %1.%2 is connected to signal %3 with incompatible data size.
 	///
 	/// Parameters:
 	///		%1 AFB caption
@@ -3312,7 +3312,7 @@ namespace Builder
 	///		%3 Application signal ID
 	///
 	/// Description:
-	///		Outpuf of AFB is connected to signal with uncompatible data size.
+	///		Output of AFB is connected to signal with incompatible data size.
 	///
 	void IssueLogger::errALC5005(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid)
 	{
@@ -3320,7 +3320,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5005,
-				  tr("Output %1.%2 is connected to signal %3 with uncompatible data size.").arg(afbCaption).arg(output).arg(appSignalID));
+				  tr("Output %1.%2 is connected to signal %3 with incompatible data size.").arg(afbCaption).arg(output).arg(appSignalID));
 	}
 
 	/// IssueCode: ALC5006
@@ -3335,7 +3335,7 @@ namespace Builder
 	///		%3 Application signal ID
 	///
 	/// Description:
-	///		Discrete outpuf of AFB is connected to analog signal
+	///		Discrete output of AFB is connected to analog signal
 	///
 	void IssueLogger::errALC5006(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid)
 	{
@@ -3374,7 +3374,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signal %1 is connected to input %2.%3 with uncompatible data format.
+	/// Title: Signal %1 is connected to input %2.%3 with incompatible data format.
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -3383,7 +3383,7 @@ namespace Builder
 	///		%4 Logic schema ID
 	///
 	/// Description:
-	///		Outpuf of AFB is connected to signal with uncompatible data format.
+	///		Output of AFB is connected to signal with incompatible data format.
 	///
 	void IssueLogger::errALC5008(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid, const QString& schemaID)
 	{
@@ -3391,7 +3391,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5008,
-				  tr("Signal %1 is connected to input %2.%3 with uncompatible data format. (Logic schema %4)").
+				  tr("Signal %1 is connected to input %2.%3 with incompatible data format. (Logic schema %4)").
 					arg(appSignalID).arg(afbCaption).arg(input).arg(schemaID));
 	}
 
@@ -3400,7 +3400,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signal %1 is connected to input %2.%3 with uncompatible data size.
+	/// Title: Signal %1 is connected to input %2.%3 with incompatible data size.
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -3408,7 +3408,7 @@ namespace Builder
 	///		%3 AFB input
 	///
 	/// Description:
-	///		Outpuf of AFB is connected to signal with uncompatible data size.
+	///		Output of AFB is connected to signal with incompatible data size.
 	///
 	void IssueLogger::errALC5009(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid)
 	{
@@ -3416,7 +3416,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5009,
-				  tr("Signal %1 is connected to input %2.%3 with uncompatible data size.").arg(appSignalID).arg(afbCaption).arg(input));
+				  tr("Signal %1 is connected to input %2.%3 with incompatible data size.").arg(appSignalID).arg(afbCaption).arg(input));
 	}
 
 	/// IssueCode: ALC5010
@@ -3813,10 +3813,10 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Uncompatible constant type (Logic schema %1).
+	/// Title: Incompatible constant type (Logic schema %1).
 	///
 	/// Parameters:
-	///		%1 Logis schema ID
+	///		%1 LogicSchemaID
 	///
 	/// Description:
 	///		Constant is not compatible to destination.
@@ -3827,7 +3827,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5028,
-				  QString(tr("Uncompatible constant type (Logic schema %1).").arg(schemaID)));
+				  QString(tr("Incompatible constant type (Logic schema %1).").arg(schemaID)));
 	}
 
 	/// IssueCode: ALC5030
@@ -3864,7 +3864,7 @@ namespace Builder
 	///		%1 Application signal ID
 	///
 	/// Description:
-	///		The signal bind to uncorrect equpment. Set the correct value of signal's EquipmentID property.
+	///		The signal bind to incorrect equipment. Set the correct value of signal's EquipmentID property.
 	///
 	void IssueLogger::errALC5031(QString appSignalID)
 	{
@@ -3888,7 +3888,7 @@ namespace Builder
 	///		%4 value of OptoPortAppDataSize of the opto module
 	///
 	/// Description:
-	///		The signal bind to uncorrect equpment. Set the correct value of signal's EquipmentID property.
+	///		The signal bind to incorrect equipment. Set the correct value of signal's EquipmentID property.
 	///
 	void IssueLogger::errALC5032(int txDataSize, QString optoPortID, QString moduleID, int optoPortAppDataSize)
 	{
@@ -3906,7 +3906,7 @@ namespace Builder
 	///
 	/// Parameters:
 	///		%1 Application signal ID
-	///		%2 Chassis equipmet ID
+	///		%2 Chassis equipment ID
 	///
 	/// Description:
 	///		Can't find logic module associated with signal. Set the correct value of signal's EquipmentID property.
@@ -3955,7 +3955,7 @@ namespace Builder
 	///		%4 value of OptoPortAppDataSize of the opto module
 	///
 	/// Description:
-	///		The signal bind to uncorrect equpment. Set the correct value of signal's EquipmentID property.
+	///		The signal bind to incorrect equipment. Set the correct value of signal's EquipmentID property.
 	///
 	void IssueLogger::errALC5035(int rxDataSize, QString optoPortID, QString moduleID, int optoPortAppDataSize)
 	{
@@ -4094,7 +4094,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Manual settings TxStartAddr + TxWorsQuantity (%1 + %2 = X words) of opto port %3 exceed value of OcmTxDataSizeLimit of module %4 (%5 words).
+	/// Title: Manual settings TxStartAddr + TxWordsQuantity (%1 + %2 = X words) of opto port %3 exceed value of OcmTxDataSizeLimit of module %4 (%5 words).
 	///
 	/// Parameters:
 	///		%1 opto port txData start address
@@ -4110,7 +4110,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5041,
-				  QString(tr("Manual settings TxStartAddr + TxWorsQuantity (%1 + %2 = %3 words) of opto port %4 exceed value of OcmTxDataSizeLimit of module %5 (%6 words).")).
+				  QString(tr("Manual settings TxStartAddr + TxWordsQuantity (%1 + %2 = %3 words) of opto port %4 exceed value of OcmTxDataSizeLimit of module %5 (%6 words).")).
 							  arg(bufAddr).arg(txDataSize).arg(bufAddr + txDataSize).
 								arg(optoPortID).arg(moduleID).arg(optoPortAppDataSize));
 	}
@@ -4370,7 +4370,7 @@ namespace Builder
 	///		%4 application logic item Uuid
 	///
 	/// Description:
-	///		Value of first specified parameter must be greater then the value of second parameneter. Correct prameter's values.
+	///		Value of first specified parameter must be greater then the value of second parameter. Correct parameter's values.
 	///
 	void IssueLogger::errALC5052(QString fbCaption, QString param1, QString param2, QUuid itemUuid, QString schemaID, QString itemLabel)
 	{
@@ -4474,7 +4474,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Uncompatible data format of analog AFB Signal %1.%2.
+	/// Title:	   Incompatible data format of analog AFB Signal %1.%2.
 	///
 	/// Parameters:
 	///		%1 AFB caption
@@ -4490,7 +4490,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5057,
-				  QString(tr("Uncompatible data format of analog AFB signal %1.%2.")).
+				  QString(tr("Incompatible data format of analog AFB signal %1.%2.")).
 				  arg(afbCaption).arg(afbSignal));
 	}
 
@@ -4552,7 +4552,7 @@ namespace Builder
 	///		%1 Logic schema ID
 	///
 	/// Description:
-	///		Float constant is connected to discrete input. Change contant type to IntegerType.
+	///		Float constant is connected to discrete input. Change constant type to IntegerType.
 	///
 	void IssueLogger::errALC5060(QString schemaID, QUuid constantUuid)
 	{
@@ -4573,7 +4573,7 @@ namespace Builder
 	///		%1 Logic schema ID
 	///
 	/// Description:
-	///		Float constant is connected to 16-bit input. Change contant type to IntegerType.
+	///		Float constant is connected to 16-bit input. Change constant type to IntegerType.
 	///
 	void IssueLogger::errALC5061(QString schemaID, QUuid constantUuid)
 	{
@@ -4594,7 +4594,7 @@ namespace Builder
 	///		%1 Logic schema ID
 	///
 	/// Description:
-	///		Float constant is connected to SignedInt input. Change contant type to IntegerType.
+	///		Float constant is connected to SignedInt input. Change constant type to IntegerType.
 	///
 	void IssueLogger::errALC5062(QString schemaID, QUuid constantUuid)
 	{
@@ -4615,7 +4615,7 @@ namespace Builder
 	///		%1 Logic schema ID
 	///
 	/// Description:
-	///		Integer constant is connected to Float input. Change contant type to FloatType.
+	///		Integer constant is connected to Float input. Change constant type to FloatType.
 	///
 	void IssueLogger::errALC5063(QString schemaID, QUuid constantUuid)
 	{
@@ -4713,19 +4713,19 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   TuningHighBound property of tunable signal %1 must be greate than TuningLowBound
+	/// Title:	   TuningHighBound property of tunable signal %1 must be greater than TuningLowBound
 	///
 	/// Parameters:
 	///		%1 Application signal ID
 	///
 	/// Description:
-	///		TuningHighBound property of tunable signal must be greate than TuningLowBound. Check signal properties.
+	///		TuningHighBound property of tunable signal must be greater than TuningLowBound. Check signal properties.
 	///
 	void IssueLogger::errALC5068(QString appSignalID)
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5068,
-				  QString(tr("TuningHighBound property of tunable signal %1 must be greate than TuningLowBound")).
+				  QString(tr("TuningHighBound property of tunable signal %1 must be greater than TuningLowBound")).
 					arg(appSignalID));
 	}
 
@@ -4804,12 +4804,12 @@ namespace Builder
 	///
 	/// Parameters:
 	/// 	%1 AFB Poly CoefCount parameters value
-	///		%2 AFB Poly coeficient caption
+	///		%2 AFB Poly coefficient caption
 	/// 	%3 Logic schema ID
 	///
 	/// Description:
-	///		Value of CoefCount param of AFB Poly is less then number of coeficient, that is not equal to 0.
-	///		Check CoefCount value, or set specified coeficient to 0.
+	///		Value of CoefCount param of AFB Poly is less then number of coefficient, that is not equal to 0.
+	///		Check CoefCount value, or set specified coefficient to 0.
 	///
 	void IssueLogger::wrnALC5072(int coefCount, QString coefCaption, QUuid itemUuid, QString schemaID)
 	{
@@ -5038,7 +5038,7 @@ namespace Builder
 	///		%2 Serial connection ID
 	///
 	/// Description:
-	///		Receving data size of specified RS232/485 port is undefined. Use Manual Settings to determine Rx data size.
+	///		Receiving data size of specified RS232/485 port is undefined. Use Manual Settings to determine Rx data size.
 	///
 	void IssueLogger::errALC5085(QString portEquipmentID, QString connectionID)
 	{
@@ -5145,19 +5145,19 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Analog signal %1 aperture should be greate then 0.
+	/// Title:	   Analog signal %1 aperture should be greater then 0.
 	///
 	/// Parameters:
 	///		%1 Application signal ID
 	///
 	/// Description:
-	///		Analog signal aperture should be greate then 0. Check properties of specified signal.
+	///		Analog signal aperture should be greater then 0. Check properties of specified signal.
 	///
 	void IssueLogger::errALC5090(QString appSignalID)
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5090,
-				  QString(tr("Analog signal %1 aperture should be greate then 0.")).
+				  QString(tr("Analog signal %1 aperture should be greater then 0.")).
 					arg(appSignalID));
 	}
 
@@ -5294,7 +5294,7 @@ namespace Builder
 	///		%3 Bus type ID
 	///
 	/// Description:
-	///		Bus signals are overlaped. Check bus signal offsets.
+	///		Bus signals are overlapped. Check bus signal offsets.
 	///
 	void IssueLogger::errALC5097(QString signalID1, QString signalID2, QString busTypeID)
 	{
@@ -5574,13 +5574,13 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Output of type 'Bus' is occured in non-bus processing AFB (Logic schema %1).
+	/// Title:	   Output of type 'Bus' is occurred in non-bus processing AFB (Logic schema %1).
 	///
 	/// Parameters:
 	///		%1 Logic schema ID
 	///
 	/// Description:
-	///		Output of type 'Bus' is occured in non-bus processing AFB. Contact to RPCT developers.
+	///		Output of type 'Bus' is occurred in non-bus processing AFB. Contact to RPCT developers.
 	///
 	void IssueLogger::errALC5111(QUuid afbUuid, QString schemaID)
 	{
@@ -5588,7 +5588,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5111,
-				  QString(tr("Output of type 'Bus' is occured in non-bus processing AFB (Logic schema %1")).
+				  QString(tr("Output of type 'Bus' is occurred in non-bus processing AFB (Logic schema %1")).
 						arg(schemaID));
 	}
 
@@ -5666,13 +5666,13 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Uncompatible bus data format of UAL elements (Logic schema %1).
+	/// Title:	   Incompatible bus data format of UAL elements (Logic schema %1).
 	///
 	/// Parameters:
 	///		%1 Logic schema ID
 	///
 	/// Description:
-	///		Uncompatible bus data format of UAL elements.
+	///		Incompatible bus data format of UAL elements.
 	///
 	void IssueLogger::errALC5115(QUuid uuid1, QUuid uuid2, QString schemaID)
 	{
@@ -5681,7 +5681,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5115,
-				  QString(tr("Uncompatible bus data format of UAL elements (Logic schema %1).")).
+				  QString(tr("Incompatible bus data format of UAL elements (Logic schema %1).")).
 						arg(schemaID));
 	}
 
@@ -5712,13 +5712,13 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Uncompatible signals connection (Logic schema %1).
+	/// Title:	   Incompatible signals connection (Logic schema %1).
 	///
 	/// Parameters:
 	///		%1 Logic schema ID
 	///
 	/// Description:
-	///		Uncompatible signals connection. Check signals type and data format.
+	///		Incompatible signals connection. Check signals type and data format.
 	///
 	void IssueLogger::errALC5117(QUuid uuid1, QString label1, QUuid uuid2, QString label2, QString schemaID)
 	{
@@ -5727,7 +5727,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5117,
-				  QString(tr("Uncompatible signals connection (items %1 and %2) (Logic schema %3).")).
+				  QString(tr("Incompatible signals connection (items %1 and %2) (Logic schema %3).")).
 						arg(label1).arg(label2).arg(schemaID));
 	}
 
@@ -5758,7 +5758,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Type of Constant is uncompatible with type of linked schema items (Logic schema %1).
+	/// Title:	   Type of Constant is Incompatible with type of linked schema items (Logic schema %1).
 	///
 	/// Parameters:
 	///		%1 Logic schema ID
@@ -5772,7 +5772,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5119,
-				  QString(tr("Type of Constant is uncompatible with type of linked schema items (Logic schema %1).")).arg(schemaID));
+				  QString(tr("Type of Constant is Incompatible with type of linked schema items (Logic schema %1).")).arg(schemaID));
 	}
 
 	/// IssueCode: ALC5120
@@ -6054,7 +6054,7 @@ namespace Builder
 	/// Title:	   Can't resolve busses interdependencies: %1
 	///
 	/// Parameters:
-	///		%1 Buses with interdependensies list
+	///		%1 Buses with interdependencies list
 	///
 	/// Description:
 	///		 Specified busses have interdependencies that cannot be resolved.
@@ -6074,7 +6074,7 @@ namespace Builder
 	/// Title:	   Application signal with equipmentID %1 is not found (Logic schema %2, item %3).
 	///
 	/// Parameters:
-	///		%1 Application signal's equipmemtID
+	///		%1 Application signal's equipmentID
 	///		%2 Logic schema ID
 	///		%3 Schema item label
 	///
@@ -6151,7 +6151,7 @@ namespace Builder
 	///		%1 Application signal ID
 	///
 	/// Description:
-	///		The signal bind to uncorrect equipment. Set the correct value of signal's EquipmentID property.
+	///		The signal bind to incorrect equipment. Set the correct value of signal's EquipmentID property.
 	///
 	void IssueLogger::errALC5136(QString appSignalID)
 	{
@@ -6237,7 +6237,7 @@ namespace Builder
 	///		%1 Software EquipmentID
 	///
 	/// Description:
-	///		ConfigurationService IP-address for software is undefined. Check ConfigurationService ClientrequestIP property.
+	///		ConfigurationService IP-address for software is undefined. Check ConfigurationService ClientRequestIP property.
 	///
 	void IssueLogger::errALC5140(QString softwareID)
 	{
@@ -6573,7 +6573,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Linked validity signal %1 shoud have Discrete Input type (input signal %2).
+	/// Title:	   Linked validity signal %1 should have Discrete Input type (input signal %2).
 	///
 	/// Parameters:
 	///		%1 Validity signal AppSignalID
@@ -6586,7 +6586,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5156,
-				  QString(tr("Linked validity signal %1 shoud have Discrete Input type (input signal %2).")).
+				  QString(tr("Linked validity signal %1 should have Discrete Input type (input signal %2).")).
 								arg(validitySignalID).arg(inputSignalID));
 	}
 
@@ -6623,7 +6623,7 @@ namespace Builder
 	///		%4 application logic item Uuid
 	///
 	/// Description:
-	///		Value of first specified parameter must be greater or equal then the value of second parameneter. Correct prameter's values.
+	///		Value of first specified parameter must be greater or equal then the value of the second parameter. Correct parameter's values.
 	///
 	void IssueLogger::errALC5158(QString fbCaption, QString param1, QString param2, QUuid itemUuid, QString schemaID, QString itemLabel)
 	{
@@ -7169,7 +7169,7 @@ namespace Builder
 	///		%2 macro expanding error message
 	///
 	/// Description:
-	///		Error occurred during signal macro expanding. Check macrosses in specified signal.
+	///		Error occurred during signal macro expanding. Check macros in specified signal.
 	///
 	void IssueLogger::errALC5182(QString appSignalID, QString errMsg)
 	{
@@ -7190,7 +7190,7 @@ namespace Builder
 	///		%2 AppSignalID of second signal
 	///
 	/// Description:
-	///		Non unique CustomAppSignalID after macro expansion. Check macrosses in specified signals.
+	///		Non unique CustomAppSignalID after macro expansion. Check macros in specified signals.
 	///
 	void IssueLogger::errALC5183(QString appSignalID1, QString appSignalID2)
 	{
@@ -7256,7 +7256,7 @@ namespace Builder
 	///
 	/// Parameters:
 	///		%1 Application signalID
-	///		%2 Opto port equpment ID
+	///		%2 Opto port equipment ID
 	///
 	/// Description:
 	///		Signal specified in opto port raw data description is not found. Check ID of signal.
@@ -7280,7 +7280,7 @@ namespace Builder
 	///		%2 Opto port 2 ID
 	///
 	/// Description:
-	///		Tx data memory areas of specified opto ports are overlapped. Check manual settinggs of opto ports.
+	///		Tx data memory areas of specified opto ports are overlapped. Check manual settings of opto ports.
 	///
 	void IssueLogger::errALC5187(QString port1ID, QString port2ID)
 	{
@@ -7413,7 +7413,7 @@ namespace Builder
 	///		%3 Connection ID
 	///
 	/// Description:
-	///		Rx signal specified in port raw data description isn't assigned to reciever.
+	///		Rx signal specified in port raw data description isn't assigned to receiver.
 	///
 	void IssueLogger::wrnALC5193(QString appSignalID, QString portID, QString connectionID)
 	{
@@ -7434,7 +7434,7 @@ namespace Builder
 	///		%2 Opto port 2 ID
 	///
 	/// Description:
-	///		Tx data memory areas of specified opto ports are overlapped. Check manual settinggs of opto ports.
+	///		Tx data memory areas of specified opto ports are overlapped. Check manual settings of opto ports.
 	///
 	void IssueLogger::wrnALC5194(QString port1ID, QString port2ID)
 	{
@@ -7673,20 +7673,20 @@ namespace Builder
 	/// Title: Property Place is less then 0 (Equipment object %1).
 	///
 	/// Parameters:
-	///		%1 Equipmnet object StrID
+	///		%1 Equipment object StrID
 	///
 	/// Description:
 	///		Property Place for Chassis, Rack, Module, Controller, Signal, Workstation or Software cannot be less then 0.
 	///	By default in most cases property Place is -1 to make user to set the correct value.
 	///
-	void IssueLogger::errEQP6000(QString equipmemtId, QUuid equpmentUuid)
+	void IssueLogger::errEQP6000(QString equipmentId, QUuid equipmentUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, 6000, equpmentUuid);
+		addItemsIssues(OutputMessageLevel::Error, 6000, equipmentUuid);
 
 		LOG_ERROR(IssueType::Equipment,
 				  6000,
 				  tr("Property Place is less then 0 (Equipment object %1).")
-				  .arg(equipmemtId)
+				  .arg(equipmentId)
 				  );
 	}
 
@@ -7703,7 +7703,7 @@ namespace Builder
 	///		Error may occur if two or more equipment objects have the same EquipmentID.
 	///     All equipment objects must have unique EquipmentID.
 	///
-	void IssueLogger::errEQP6001(QString equipmemtId, QUuid equipmentUuid1, QUuid equipmentUuid2)
+	void IssueLogger::errEQP6001(QString equipmentId, QUuid equipmentUuid1, QUuid equipmentUuid2)
 	{
 		addItemsIssues(OutputMessageLevel::Error, 6001, equipmentUuid1);
 		addItemsIssues(OutputMessageLevel::Error, 6001, equipmentUuid2);
@@ -7711,7 +7711,7 @@ namespace Builder
 		LOG_ERROR(IssueType::Equipment,
 				  6001,
 				  tr("Two or more equipment objects have the same EquipmentID %1.")
-				  .arg(equipmemtId)
+				  .arg(equipmentId)
 				  );
 	}
 
@@ -7722,14 +7722,14 @@ namespace Builder
 	/// Title: Two or more equipment objects have the same Uuid %1 (Object1 %2, Object2 %3).
 	///
 	/// Parameters:
-	///		%1 Equipmnet objects Uuid
-	///		%2 Equipmnet object ID 1
-	///		%2 Equipmnet object ID 2
+	///		%1 Equipment objects Uuid
+	///		%2 Equipment object ID 1
+	///		%2 Equipment object ID 2
 	///
 	/// Description:
 	///		Error may occur if two or more equipment objects have the same Uuid.
-	/// All equipmnet objects must have unique Uuid. In some cases it can be an internal
-	/// software error and it shoud be reported to developers.
+	/// All equipment objects must have unique Uuid. In some cases it can be an internal
+	/// software error and it should be reported to developers.
 	///
 	void IssueLogger::errEQP6002(QUuid equipmentUuid, QString equipmentId1, QString equipmentId2)
 	{
@@ -7891,7 +7891,7 @@ namespace Builder
 	/// Title: Property Place must be 0 (Equipment object %1).
 	///
 	/// Parameters:
-	///		%1 Equipmnet object StrID
+	///		%1 Equipment object StrID
 	///
 	/// Description:
 	///		Property Place for Logic Module must be set to 0.
@@ -7920,12 +7920,12 @@ namespace Builder
 	/// Description:
 	///		Some device object is not found in the equipment set.
 	///
-	void IssueLogger::errEQP6010(QString equipmemtId)
+	void IssueLogger::errEQP6010(QString equipmentId)
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6010,
 				  tr("Device object %1 not found.")
-				  .arg(equipmemtId));
+				  .arg(equipmentId));
 	}
 
 	/// IssueCode: EQP6011
@@ -7941,12 +7941,12 @@ namespace Builder
 	/// Description:
 	///		Some device object is not found in the equipment set.
 	///
-	void IssueLogger::errEQP6011(QString equipmemtId, QString buildStep)
+	void IssueLogger::errEQP6011(QString equipmentId, QString buildStep)
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6011,
 				  tr("Device object %1 not found on %2.")
-				  .arg(equipmemtId)
+				  .arg(equipmentId)
 				  .arg(buildStep));
 	}
 
@@ -7983,7 +7983,7 @@ namespace Builder
 	///		%2 Error Message
 	///
 	/// Description:
-	///		Error occured during applying simulator profile to the equipmnet set.
+	///		Error occurred during applying simulator profile to the equipment set.
 	///
 	void IssueLogger::errEQP6030(QString profileName, QString errorMessage)
 	{
@@ -8002,10 +8002,10 @@ namespace Builder
 	/// Title: Unknown software type (Software object StrID %1).
 	///
 	/// Parameters:
-	///		%1 Equipmnet object StrID
+	///		%1 Equipment object StrID
 	///
 	/// Description:
-	///		Unknown software type. It is required to set proprety Type to the correct value.
+	///		Unknown software type. It is required to set property Type to the correct value.
 	///
 	void IssueLogger::errEQP6100(QString softwareObjectStrId, QUuid uuid)
 	{
@@ -8358,7 +8358,7 @@ namespace Builder
 	///		%1 Application signal ID
 	///
 	/// Description:
-	///		Wrong RLoad. It is required to set RLoad of mA. For convserion from V to mA.
+	///		Wrong RLoad. It is required to set RLoad of mA. For conversion from V to mA.
 	///
 	void IssueLogger::errEQP6115(QString appSignalID)
 	{
@@ -8385,15 +8385,15 @@ namespace Builder
 	/// Description:
 	///		Wrong electric low Limit.
 	///
-	void IssueLogger::errEQP6116(QString appSignalID, double wrongValue, double lowLimit, double highLinmit, QString unit, int precesion)
+	void IssueLogger::errEQP6116(QString appSignalID, double wrongValue, double lowLimit, double highLimit, QString unit, int precision)
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6116,
 				  tr("Signal %1 has wrong low electric limit: %2 %5. Electric limit: %3 .. %4 %5")
 				  .arg(appSignalID)
-				  .arg(QString::number(wrongValue, 'f', precesion))
-				  .arg(QString::number(lowLimit, 'f', precesion))
-				  .arg(QString::number(highLinmit, 'f', precesion))
+				  .arg(QString::number(wrongValue, 'f', precision))
+				  .arg(QString::number(lowLimit, 'f', precision))
+				  .arg(QString::number(highLimit, 'f', precision))
 				  .arg(unit)
 				  );
 	}
@@ -8414,15 +8414,15 @@ namespace Builder
 	/// Description:
 	///		Wrong electric high Limit.
 	///
-	void IssueLogger::errEQP6117(QString appSignalID, double wrongValue, double lowLimit, double highLinmit, QString unit, int precesion)
+	void IssueLogger::errEQP6117(QString appSignalID, double wrongValue, double lowLimit, double highLimit, QString unit, int precision)
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6117,
 				  tr("Signal %1 has wrong high electric limit: %2 %5. Electric limit: %3 .. %4 %5")
 				  .arg(appSignalID)
-				  .arg(QString::number(wrongValue, 'f', precesion))
-				  .arg(QString::number(lowLimit, 'f', precesion))
-				  .arg(QString::number(highLinmit, 'f', precesion))
+				  .arg(QString::number(wrongValue, 'f', precision))
+				  .arg(QString::number(lowLimit, 'f', precision))
+				  .arg(QString::number(highLimit, 'f', precision))
 				  .arg(unit)
 				  );
 	}
@@ -8562,19 +8562,19 @@ namespace Builder
 	/// Description:
 	///		Monitor cannot be used for tuning in Safety Project. To avoid error clear option in %1.TuningEnable or override behavior in menu Project->Project Properties...->Safety Project set to false.
 	///
-	void IssueLogger::errEQP6200(QString monotorId)
+	void IssueLogger::errEQP6200(QString monitorId)
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6200,
 				  tr("Monitor (%1) cannot be used for tuning in Safety Project. Clear option in %1.TuningEnable or override behavior in menu Project->Project Properties...->Safety Project.")
-				  .arg(monotorId));
+				  .arg(monitorId));
 	}
 
 	/// IssueCode: EQP6201
 	///
 	/// IssueType: Error
 	///
-	/// Title: uningService (%1) cannot be used for multi LM control in Safety Project. Turn On option %1.SingleLmControl or override behavior in menu Project->Project Properties...->Safety Project.
+	/// Title: TuningService (%1) cannot be used for multi LM control in Safety Project. Turn On option %1.SingleLmControl or override behavior in menu Project->Project Properties...->Safety Project.
 	///
 	/// Parameters:
 	///		%1 TuningService EquipmentID
