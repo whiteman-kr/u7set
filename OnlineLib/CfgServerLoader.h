@@ -73,7 +73,7 @@ private:
 	QString m_buildXmlPathFileName;
 
 	OnlineLib::BuildInfo m_buildInfo;
-	HashedVector<QString, OnlineLib::BuildFileInfo> m_buildFileInfo;		// fileName => buildFileInfo
+	std::map<QString, OnlineLib::BuildFileInfo> m_buildFileInfo;		// fileName => buildFileInfo
 
 	ErrorCode m_errorCode = ErrorCode::Ok;
 };
@@ -237,10 +237,10 @@ private:
 	int m_autoDownloadIndex = 0;
 
 	OnlineLib::BuildInfo m_buildInfo;
-	CfgFilesInfo m_cfgFilesInfo;
+	CfgFilesInfo m_cfgFilesInfo;					// can't remove HashedVector here because
+													// configuration.xml should be in m_cfgFilesInfo[0]!!!
 
 	bool m_hasValidSavedConfiguration = false;
-	CfgFilesInfo m_savedCfgFileInfo;
 
 	QWaitCondition m_fileReadyCondition;
 	QMutex m_getFileBlockedMutex;

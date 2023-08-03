@@ -137,7 +137,7 @@ void CfgServer::readBuildXml()
 
 		bfi.readFromXml(xmlReader);
 
-		m_buildFileInfo.insert(bfi.pathFileName, bfi);
+		m_buildFileInfo.emplace(bfi.pathFileName, bfi);
 	}
 
 	logMessage(QString("file %1 has been read").arg(m_buildXmlPathFileName));
