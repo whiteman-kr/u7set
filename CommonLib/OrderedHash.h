@@ -581,20 +581,17 @@ void PtrOrderedHash<KEY, VALUE>::reserve(qsizetype n)
 // work only with unique keys
 
 template <typename KEY, typename VALUE>
-class HashedVector : private QVector<VALUE>
+class HashedVector
 {
-private:
-	QHash<KEY, qsizetype> m_map;
-
 public:
 	bool contains(const KEY& key) const { return m_map.contains(key); }
 	void insert(const KEY& key, const VALUE& value);
 
-	typename QVector<VALUE>::iterator begin() { return QVector<VALUE>::begin(); }
-	typename QVector<VALUE>::const_iterator begin() const { return QVector<VALUE>::begin(); }
+	typename std::vector<VALUE>::iterator begin() { return m_vector.begin(); }
+	typename std::vector<VALUE>::const_iterator begin() const { return m_vector.cbegin(); }
 
-	typename QVector<VALUE>::iterator end() { return QVector<VALUE>::end(); }
-	typename QVector<VALUE>::const_iterator end() const { return QVector<VALUE>::end(); }
+	typename std::vector<VALUE>::iterator end() { return m_vector.end(); }
+	typename std::vector<VALUE>::const_iterator end() const { return m_vector.cend(); }
 
 	VALUE& operator[](qsizetype i);
 	const VALUE& operator[](qsizetype i) const;
@@ -605,24 +602,30 @@ public:
 	const VALUE value(const KEY& key) const;
 	const VALUE value(const KEY& key, const VALUE& defaultValue) const;
 
-	QList<KEY> keys() const { return m_map.keys(); }
-
 	qsizetype indexOf(const KEY& key) const
 	{
-		if (m_map.contains(key))
+		auto it = m_map.find(key);
+
+		if (it == m_map.end())
 		{
-			return m_map[key];
+			return -1;
 		}
 
-		return -1;
+		return it->second;
 	}
 
-	void clear() { m_map.clear(); QVector<VALUE>::clear(); }
+	void clear() { m_map.clear(); m_vector.clear(); }
 
-	bool isEmpty() const { return QVector<VALUE>::isEmpty(); }
+	bool isEmpty() const { return m_vector.empty(); }
 
-	qsizetype size() const { return QVector<VALUE>::size(); }
-	qsizetype count() const { return QVector<VALUE>::size(); }
+	qsizetype size() const { return m_vector.size(); }
+	qsizetype count() const { return m_vector.size(); }
+
+private:
+	std::vector<VALUE> m_vector;
+	std::map<KEY, qsizetype> m_map;		// key => index in m_vector
+
+	VALUE m_notValidValue;
 };
 
 
@@ -631,66 +634,85 @@ void HashedVector<KEY, VALUE>::insert(const KEY& key, const VALUE& value)
 {
 	if (contains(key) == true)
 	{
-		assert(false);		// duplicate key
+		Q_ASSERT(false);		// duplicate key
 		return;
 	}
 
-	this->append(value);
-	m_map.insert(key, this->size() - 1);
+	qsizetype index = m_vector.size();
+	m_vector.emplace_back(value);
+	m_map.emplace(key, index);
 }
 
 
 template <typename KEY, typename VALUE>
 VALUE& HashedVector<KEY, VALUE>::operator[](qsizetype i)
 {
-	assert(i >= 0 && i < count());
-	return QVector<VALUE>::operator [](i);
+	Q_ASSERT(i >= 0 && i < count());
+	return m_vector[i];
 }
 
 
 template <typename KEY, typename VALUE>
 const VALUE& HashedVector<KEY, VALUE>::operator[](qsizetype i) const
 {
-	assert(i >= 0 && i < count());
-	return QVector<VALUE>::operator [](i);
-}
+	Q_ASSERT(i >= 0 && i < count());
+	return m_vector[i];}
 
 
 template <typename KEY, typename VALUE>
 VALUE& HashedVector<KEY, VALUE>::operator[](const KEY& key)
 {
-	assert(m_map.contains(key) == true);
-	return (*this)[m_map.value(key)];
+	auto it = m_map.find(key);
+
+	if (it == m_map.end())
+	{
+		Q_ASSERT(false);
+		return m_notValidValue;
+	}
+
+	return m_vector[it->second];
 }
 
 
 template <typename KEY, typename VALUE>
 const VALUE& HashedVector<KEY, VALUE>::operator[](const KEY& key) const
 {
-	assert(m_map.contains(key) == true);
-	return (*this)[m_map[key]];
+	auto it = m_map.find(key);
+
+	if (it == m_map.end())
+	{
+		Q_ASSERT(false);
+		return m_notValidValue;
+	}
+
+	return m_vector[it->second];
 }
 
 
 template <typename KEY, typename VALUE>
 const VALUE HashedVector<KEY, VALUE>::value(const KEY& key) const
 {
-	qsizetype index = m_map.value(key, -1);
+	auto it = m_map.find(key);
 
-	assert(index != -1);
-	return (*this)[index];
+	if (it == m_map.end())
+	{
+		Q_ASSERT(false);
+		return m_notValidValue;
+	}
+
+	return m_vector[it->second];
 }
 
 
 template <typename KEY, typename VALUE>
 const VALUE HashedVector<KEY, VALUE>::value(const KEY& key, const VALUE& defaultValue) const
 {
-	qsizetype index = m_map.value(key, -1);
+	auto it = m_map.find(key);
 
-	if (index == -1)
+	if (it == m_map.end())
 	{
 		return defaultValue;
 	}
 
-	return (*this)[index];
+	return m_vector[it->second];
 }
